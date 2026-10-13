@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 0.5 · **Data:** 13/10/2026
-**Status:** 🚧 Em construção. Campanha mínima jogável (marcos 1–3); próximo: marco 4, arena em loopback
+**Versão do documento:** 0.6 · **Data:** 13/10/2026
+**Status:** 🚧 Em construção. Campanha mínima jogável (marcos 1–3); marco 4 em andamento (4A: regras da arena)
 
 > **Histórico**
+> - **0.6 (13/10/2026)**: marco 4A (modo Livre, ficha justa, orbes, fase de arena).
 > - **0.5 (13/10/2026)**: marco 3 concluído (IA, arquétipos, boss e encontros da fase 1).
 > - **0.4 (13/10/2026)**: marco 2 concluído; marco 3A (combate) em revisão; controles de combate.
 > - **0.3 (13/10/2026)**: marco 1 concluído; marco 2 em revisão; controles do jogo.
@@ -107,7 +108,7 @@ em `main`, e o merge publica automaticamente.
 | [x] | 1 | Motor TS estrito, passo fixo, PRNG, comandos, harness e CI | O mesmo núcleo roda no navegador e no Node, sem DOM, com as invariantes exercitadas |
 | [x] | 2 | Uma fase, movimento Dir8/cardinal, colisão, câmera e controles mobile | Dá para mover e atacar com dois dedos no celular e com o mouse em emulação |
 | [x] | 3 | Ataque básico, 4 habilidades, 3 arquétipos de IA e boss | Combate legível: crítico zero, defesa, interrupção e telegrafia corretos |
-| [ ] | 4 | Arena Livre em loopback, orçamento de ficha, NPCs, loot e reconciliação | Dois clientes lutam e coletam sem duplicar itens |
+| [ ] | 4 | Arena Livre em loopback, orçamento de ficha, NPCs, loot e reconciliação (4A regras ✓ · 4B rede) | Dois clientes lutam e coletam sem duplicar itens |
 | [ ] | 5 | Backend Colyseus/WSS, sala por código, patches e reconexão | Dois celulares em redes distintas; o criador sai e a sala continua; carga com 10 clientes |
 | [ ] | 6 | Recompensa/equipamento, save básico e editor mínimo | Criar um mapa no celular e completar o ciclo lutar → melhorar → lutar |
 | [ ] | 7 | Testes humanos, rede suportada/degradada e carga inicial | Critérios da §5.7 atendidos |

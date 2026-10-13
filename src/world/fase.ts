@@ -33,6 +33,26 @@ export interface InimigoPosicionado {
   hpBase?: number;
 }
 
+/**
+ * Objeto autorado (§2.1): coordenadas normalizadas 0–1, convertidas para célula por
+ * `coluna = min(largura − 1, floor(x × largura))`, e equivalente para a linha.
+ */
+export interface ObjetoPosicionadoJson {
+  tipo: 'orbe_hp' | 'orbe_recurso';
+  x: number;
+  y: number;
+  valor: number;
+  modo: 'abs' | 'pct';
+}
+
+export interface ObjetoPosicionado {
+  tipo: 'orbe_hp' | 'orbe_recurso';
+  x: number;
+  y: number;
+  valor: number;
+  modo: 'abs' | 'pct';
+}
+
 /** Formato da fase no JSON oficial e no editor (validado por `validarFase`). */
 export interface FaseJson {
   id: string;
@@ -42,6 +62,11 @@ export interface FaseJson {
   mapa: string[];
   spawns: SpawnJson[];
   inimigos?: InimigoPosicionado[];
+  objetos?: ObjetoPosicionadoJson[];
+}
+
+export function celulaNormalizada(v: number, tamanho: number): number {
+  return Math.min(tamanho - 1, Math.floor(v * tamanho));
 }
 
 export interface Fase {
@@ -52,8 +77,11 @@ export interface Fase {
   readonly altura: number;
   /** Tipo de cada célula, linha a linha (`y * largura + x`). */
   readonly celulas: Uint8Array;
+  readonly tipo: FaseJson['tipo'];
   readonly spawns: readonly Celula[];
   readonly inimigos: readonly InimigoPosicionado[];
+  /** Objetos já convertidos para células. */
+  readonly objetos: readonly ObjetoPosicionado[];
 }
 
 /** Converte uma fase já validada para a forma usada pela simulação. */
@@ -75,8 +103,14 @@ export function carregarFase(json: FaseJson): Fase {
     largura,
     altura,
     celulas,
+    tipo: json.tipo,
     spawns: json.spawns.map((s) => ({ x: s.x, y: s.y })),
     inimigos: (json.inimigos ?? []).map((i) => ({ ...i })),
+    objetos: (json.objetos ?? []).map((o) => ({
+      ...o,
+      x: celulaNormalizada(o.x, largura),
+      y: celulaNormalizada(o.y, altura),
+    })),
   };
 }
 

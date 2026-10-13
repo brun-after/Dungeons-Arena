@@ -80,6 +80,11 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
   bus.on('surgiu', (ev) => {
     hud.registrar(t('log.surgiu', { alvo: nome(ev.id) }));
   });
+  bus.on('coletou', (ev) => {
+    const quem = posicao(ev.id);
+    if (quem) numeros.mostrar(`+${ev.ganho}`, ev.tipo === 'orbe_hp' ? 'cura' : 'recurso', quem.x, quem.y, o.agora());
+    if (ev.id === idLocal) hud.registrar(t(ev.tipo === 'orbe_hp' ? 'log.orbeHp' : 'log.orbeRecurso', { ganho: ev.ganho }));
+  });
   bus.on('iaNotou', (ev) => {
     if (ev.alvoId === idLocal) hud.registrar(t('log.notou', { inimigo: nome(ev.id) }));
   });

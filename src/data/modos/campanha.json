@@ -1,6 +1,23 @@
 {
   "id": "campanha",
   "nome": "Campanha",
+  "descricao": "Progressão solo por fases, offline.",
+  "icone": "🗺",
+  "equipes": 1,
   "politicaRelacao": "por_equipe",
-  "fogoAmigo": false
+  "autoBalancear": false,
+  "fogoAmigo": false,
+  "fim": { "tipo": "nenhum", "alvo": null, "tempoLimiteS": null },
+  "respawn": { "ativo": true, "atrasoS": 1.2, "atrasoCrescenteS": 0, "local": "base_da_equipe", "protecaoS": 5 },
+  "entradaEmAndamento": true,
+  "maxJogadores": 1,
+  "espectadores": false,
+  "clamp": null,
+  "loot": { "politica": "compartilhado", "janelaParticipacaoS": 10 },
+  "limites": { "npcs": 200, "invocacoesPorJogador": 2, "avataresPorJogador": 1, "armadilhasPorJogador": 3, "projeteis": 100 },
+  "progressaoContaParaCampanha": false,
+  "fasesPermitidas": "qualquer",
+  "inimigosDeIA": "da_fase",
+  "objetosDeFase": true,
+  "spawnerDinamico": true
 }

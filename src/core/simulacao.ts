@@ -2,8 +2,8 @@
 // se está em rede. Recebe o contexto (fase, conteúdo, modo e balanceamento) e os comandos do
 // tick, e grava eventos numa lista de saída.
 //
-// Ordem por tick (§2.2). Congelamentos (5), gatilhos por célula (7) e periódicos de 1 Hz (9)
-// entram com objetos de fase e armadilhas.
+// Ordem por tick (§2.2). Congelamentos (5) e periódicos de 1 Hz (9) entram com baús, lojas e
+// armadilhas; dos gatilhos por célula (7), por enquanto só a coleta de objetos.
 //   1. aplicar comandos        2. IA                 3. combate
 //   4. efeitos e regeneração   5. congelamentos      6. movimento
 //   7. gatilhos por célula     8. mortes e respawns  9. periódicos de 1 Hz e spawner
@@ -16,6 +16,7 @@ import { processarIa } from '../entities/ia';
 import { processarMortes } from '../progression/morte';
 import { regenerarRecursos } from '../progression/recursos';
 import { definirDirecao, moverEntidades, planejarCaminho } from '../world/movimento';
+import { coletarObjetos } from '../world/objetos';
 import type { ComandoDoTick } from './comandos';
 import type { ContextoSimulacao } from './contexto';
 import { buscarEntidade, type EstadoJogo } from './estado';
@@ -38,6 +39,7 @@ export function simular(
   expirarEfeitos(estado.entidades, estado.tick);
   regenerarRecursos(estado, ctx);
   moverEntidades(estado, ctx, saida, dtMs);
+  coletarObjetos(estado, ctx, saida);
   processarMortes(estado, ctx, saida);
   estado.tick++;
 }

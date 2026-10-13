@@ -47,6 +47,7 @@ export default tseslint.config(
       'src/combat/**/*.ts',
       'src/modos/**/*.ts',
       'src/progression/**/*.ts',
+      'src/arena/**/*.ts',
       'server/**/*.ts',
       'shared/**/*.ts',
     ],
