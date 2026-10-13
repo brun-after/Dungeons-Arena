@@ -110,11 +110,12 @@ export function moverEntidades(
   dtMs: number,
 ): void {
   for (const e of ordemRotativa(estado.entidades, estado.tick)) {
-    integrar(e, estado, ctx, saida, dtMs);
+    integrarEntidade(e, estado, ctx, saida, dtMs);
   }
 }
 
-function integrar(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[], dtMs: number) {
+/** Integra o movimento de uma única entidade por um tick (usado também pela predição do cliente). */
+export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[], dtMs: number) {
   if (e.morto) return;
   const vel = velocidade(e.atributos.destreza, ctx.balance.movimento.velocidadeBaseMs);
   let restante = (dtMs / 1000) * vel;

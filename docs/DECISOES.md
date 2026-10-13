@@ -309,3 +309,15 @@ formato), o que facilita posicionar encontros à mão.
 restos) → orçamento, que conta **só os pontos acima de 10**. A redução tira 1 ponto do maior atributo por vez; o
 empate segue `ordemReducao` do modo. HP, mana e defesa são sempre recalculados da classe; o pedido do cliente
 nunca é aceito para eles.
+
+## D-033 · O cliente roda à frente e a sala agenda por `tickCliente` (v0.6, 13/10/2026)
+
+**Decisão.** O cliente mira `tickServidor + RTT/DT + 2` e carimba cada comando com o seu tick local. A sala aplica o
+comando em `clamp(tickCliente, tickAtual, tickAtual + 30)`. Assim o comando chega antes do tick previsto, e a
+predição bate com o servidor (p95 do erro medido = 0 célula com RTT de 30 a 250 ms). Atraso maior que o previsto
+aplica o comando no tick atual e vira correção.
+
+## D-034 · Comando rejeitado conta para o ack (v0.6, 13/10/2026)
+
+**Decisão.** Um comando rejeitado (taxa, fila, malformado) avança o `ultimoSeq` da sessão e é confirmado no próximo
+`ackSeq`. O cliente o descarta dos pendentes e a reconciliação corrige a predição. Isso evita reenvios infinitos.

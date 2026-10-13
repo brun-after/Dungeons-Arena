@@ -3,6 +3,7 @@
 
 import { t } from '../i18n';
 import type { Entidade } from '../entities/entidade';
+import type { DadosRede } from './diagnostico';
 
 const MAX_LINHAS_LOG = 6;
 
@@ -32,6 +33,7 @@ export class Hud {
   private readonly mana = barra('mana');
   private readonly numeros = document.createElement('span');
   private readonly d20 = document.createElement('span');
+  private readonly rede = document.createElement('span');
   private ultimo = '';
 
   constructor(raiz: HTMLElement) {
@@ -40,10 +42,13 @@ export class Hud {
     this.numeros.className = 'numeros-vida';
     this.d20.className = 'chip-d20';
     this.d20.hidden = true;
+    this.rede.className = 'chip-rede';
+    this.rede.hidden = true;
+    this.rede.setAttribute('role', 'status');
     const barras = document.createElement('div');
     barras.className = 'barras';
     barras.append(this.vida.raiz, this.mana.raiz);
-    this.status.append(barras, this.numeros, this.d20);
+    this.status.append(barras, this.numeros, this.d20, this.rede);
 
     this.log = document.createElement('ol');
     this.log.className = 'log-combate';
@@ -91,6 +96,15 @@ export class Hud {
     this.mana.raiz.setAttribute('aria-label', t('hud.mana', { atual: jogador.mana, maximo: jogador.manaMax }));
     this.numeros.textContent = `${jogador.hp}/${jogador.hpMax}`;
     this.morte.hidden = !jogador.morto;
+  }
+
+  /** Indicador de rede (§2.15): ping e qualidade, só na arena. */
+  mostrarRede(r: DadosRede): void {
+    const texto = r.conectado ? t('rede.ping', { ms: Math.round(r.rttMs) }) : t('rede.conectando');
+    if (this.rede.textContent === texto) return;
+    this.rede.hidden = false;
+    this.rede.textContent = texto;
+    this.rede.dataset.qualidade = !r.conectado ? 'ruim' : r.rttMs <= 150 ? 'boa' : r.rttMs <= 250 ? 'media' : 'ruim';
   }
 
   mostrarD20(valor: number): void {

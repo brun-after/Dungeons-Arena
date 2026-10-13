@@ -2,20 +2,9 @@
 // tick e mistura com a atual pelo `alpha` do laço. Nunca altera o estado da simulação.
 
 import type { EstadoJogo } from '../core/estado';
-import type { Entidade } from '../entities/entidade';
+import { posicaoNoPasso, type Entidade, type PontoVisual } from '../entities/entidade';
 
-export interface PontoVisual {
-  x: number;
-  y: number;
-}
-
-/** Posição contínua em células: origem do passo + fração do caminho até o destino. */
-export function posicaoNoPasso(e: Entidade): PontoVisual {
-  return {
-    x: e.x + (e.destinoX - e.x) * e.progressoPasso,
-    y: e.y + (e.destinoY - e.y) * e.progressoPasso,
-  };
-}
+export { posicaoNoPasso, type PontoVisual } from '../entities/entidade';
 
 /** Saltos maiores que isso (teleporte, correção) não são animados. */
 const SALTO_MAXIMO = 2;

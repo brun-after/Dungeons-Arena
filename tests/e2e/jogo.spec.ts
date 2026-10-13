@@ -52,9 +52,11 @@ test.describe('desktop', () => {
 
     const [x, y] = await ler(diag, 'celula');
     const [tx, ty] = await ler(diag, 'tela');
-    // Zoom inicial 1: uma célula = 48 px. Clica 3 células abaixo do jogador.
-    await page.mouse.click(tx, ty + 3 * 48);
-    await expect.poll(async () => ler(diag, 'celula'), { timeout: 15_000 }).toEqual([x, y + 3]);
+    // Zoom inicial 1: uma célula = 48 px. Clica 3 células acima do jogador: a linha 2 da sala
+    // inicial é livre (abaixo fica o boneco de treino, e clicar nele seleciona alvo em vez de andar).
+    expect(x).toBeLessThanOrEqual(11);
+    await page.mouse.click(tx, ty - 3 * 48);
+    await expect.poll(async () => ler(diag, 'celula'), { timeout: 15_000 }).toEqual([x, y - 3]);
     expect(erros).toEqual([]);
   });
 
@@ -97,6 +99,26 @@ test.describe('desktop', () => {
   test('controles de toque ficam escondidos no desktop', async ({ page }) => {
     await abrir(page);
     await expect(page.getByTestId('joystick')).toBeHidden();
+  });
+});
+
+test.describe('arena em loopback', () => {
+  test.skip(({ isMobile }) => isMobile, 'só desktop');
+
+  test('abre, o jogador anda com predição, o bot entra e o indicador de rede aparece', async ({ page }) => {
+    const erros: string[] = [];
+    page.on('pageerror', (e) => erros.push(e.message));
+    await page.goto('./?arena=loopback&latencia=40&jitter=10&diag=1');
+    const diag = page.locator('#diag');
+    await expect(diag).toHaveAttribute('data-rtt', /^\d+$/, { timeout: 20_000 });
+    // Você + o bot + os NPCs da arena.
+    await expect.poll(async () => Number(/entidades (\d+)/.exec((await diag.textContent()) ?? '')?.[1] ?? 0), { timeout: 20_000 }).toBeGreaterThanOrEqual(2);
+    const [x0] = await ler(diag, 'celula');
+    await page.keyboard.down('d');
+    await expect.poll(async () => (await ler(diag, 'celula'))[0], { timeout: 15_000 }).not.toBe(x0);
+    await page.keyboard.up('d');
+    await expect(page.locator('.chip-rede')).toBeVisible();
+    expect(erros).toEqual([]);
   });
 });
 

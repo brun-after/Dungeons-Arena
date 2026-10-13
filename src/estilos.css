@@ -354,6 +354,26 @@ body.toque .faixa-controles {
   font-variant-numeric: tabular-nums;
 }
 
+.chip-rede {
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid var(--borda);
+  font-variant-numeric: tabular-nums;
+}
+
+.chip-rede[data-qualidade='boa'] {
+  color: #2ecc71;
+}
+
+.chip-rede[data-qualidade='media'] {
+  color: #f39c12;
+}
+
+.chip-rede[data-qualidade='ruim'] {
+  color: #e74c3c;
+}
+
 .chip-d20[data-faixa='critico'] {
   color: var(--destaque);
 }
