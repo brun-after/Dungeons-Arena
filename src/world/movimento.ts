@@ -6,6 +6,7 @@ import type { Celula, Dir8 } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import type { EstadoJogo } from '../core/estado';
+import { movimentoBloqueado } from '../combat/efeitos';
 import { emPasso, type Entidade } from '../entities/entidade';
 import { celulaLivrePara, ordemRotativa } from './colisao';
 import { passavel } from './fase';
@@ -100,7 +101,8 @@ export function moverEntidades(
 }
 
 function integrar(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[], dtMs: number) {
-  const vel = velocidade(e.destreza, ctx.balance.movimento.velocidadeBaseMs);
+  if (e.morto) return;
+  const vel = velocidade(e.atributos.destreza, ctx.balance.movimento.velocidadeBaseMs);
   let restante = (dtMs / 1000) * vel;
 
   for (let guarda = 0; guarda < MAX_PASSOS_POR_TICK; guarda++) {
@@ -137,6 +139,8 @@ function podeEntrar(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: 
 }
 
 function escolherPasso(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao): PassoEscolhido | null {
+  // Quem conjura ou está atordoado não começa passo novo; o passo em curso termina (D-017).
+  if (e.acao || movimentoBloqueado(e, estado.tick)) return null;
   // Reabastece a fila curta a partir do caminho do irPara.
   const max = ctx.balance.movimento.filaMaxWaypoints;
   while (e.waypoints.length < max && e.caminho.length > 0) {

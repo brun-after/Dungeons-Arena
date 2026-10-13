@@ -3,14 +3,15 @@
 
 import type { ComandoDoTick, Dir8 } from '../../src/core/comandos';
 import type { ContextoSimulacao } from '../../src/core/contexto';
-import { criarEntidade, criarEstado, type EstadoJogo } from '../../src/core/estado';
+import { criarEstado, type EstadoJogo } from '../../src/core/estado';
 import { DT_MS } from '../../src/core/loop';
 import { aleatorio, criarRng, escolher, inteiro, type EstadoRng } from '../../src/core/rng';
 import { simular, type EventoSimulacao } from '../../src/core/simulacao';
 import { emPasso } from '../../src/entities/entidade';
+import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import { bloqueia, reservaCelula } from '../../src/world/colisao';
 import { passavel } from '../../src/world/fase';
-import { contexto, faseOficial01 } from '../apoio/fases';
+import { CONTEUDO, contexto, faseOficial01 } from '../apoio/fases';
 
 export interface Cenario {
   estado: EstadoJogo;
@@ -20,20 +21,26 @@ export interface Cenario {
 export interface OpcoesCenario {
   semente: number;
   inimigos?: number;
+  jogadores?: number;
   ctx?: ContextoSimulacao;
 }
 
-/** Cenário na fase oficial 1: um jogador no spawn e inimigos em células livres sorteadas pela semente. */
+const PRESETS_DO_CENARIO = ['goblin', 'esqueleto', 'orc', 'cultista', 'lobo'] as const;
+
+function classeAventureiro() {
+  const classe = CONTEUDO.classes.get('aventureiro');
+  if (!classe) throw new Error('classe aventureiro ausente');
+  return classe;
+}
+
+/** Cenário na fase oficial 1: jogadores perto do spawn e inimigos em células livres sorteadas pela semente. */
 export function criarCenario(opcoes: OpcoesCenario): Cenario {
   const ctx = opcoes.ctx ?? contexto(faseOficial01());
-  const { fase } = ctx;
+  const { fase, balance } = ctx;
   const estado = criarEstado({ semente: opcoes.semente, faseId: fase.id });
   const spawn = fase.spawns[0] ?? { x: 1, y: 1 };
-  estado.entidades.push(criarEntidade({ id: 'j1', tipo: 'jogador', x: spawn.x, y: spawn.y }));
-
-  const ocupadas = new Set([`${spawn.x},${spawn.y}`]);
-  const n = opcoes.inimigos ?? 12;
-  for (let i = 0; i < n; i++) {
+  const ocupadas = new Set<string>();
+  const celulaLivre = () => {
     let x: number;
     let y: number;
     do {
@@ -41,8 +48,22 @@ export function criarCenario(opcoes: OpcoesCenario): Cenario {
       y = inteiro(estado.rng, 0, fase.altura - 1);
     } while (!passavel(fase, x, y) || ocupadas.has(`${x},${y}`));
     ocupadas.add(`${x},${y}`);
-    const id = `i${String(i).padStart(3, '0')}`;
-    estado.entidades.push(criarEntidade({ id, tipo: 'inimigo', x, y, destreza: inteiro(estado.rng, 6, 20) }));
+    return { x, y };
+  };
+
+  for (let i = 0; i < (opcoes.jogadores ?? 1); i++) {
+    const c = i === 0 ? spawn : celulaLivre();
+    ocupadas.add(`${c.x},${c.y}`);
+    estado.entidades.push(criarJogador(classeAventureiro(), `j${i + 1}`, c.x, c.y, balance));
+  }
+  const n = opcoes.inimigos ?? 12;
+  for (let i = 0; i < n; i++) {
+    const c = celulaLivre();
+    const preset = CONTEUDO.presets.get(escolher(estado.rng, PRESETS_DO_CENARIO));
+    if (!preset) throw new Error('preset ausente');
+    const e = criarInimigo(preset, `i${String(i).padStart(3, '0')}`, c.x, c.y, balance);
+    e.atributos.destreza = inteiro(estado.rng, 6, 20);
+    estado.entidades.push(e);
   }
   return { estado, ctx };
 }
@@ -53,8 +74,8 @@ export type Produtor = (estado: Readonly<EstadoJogo>) => ComandoDoTick[];
 const DIRECOES: readonly (Dir8 | 'parado')[] = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO', 'parado'];
 
 /**
- * Bot determinístico: cada entidade age com 5% de chance por tick — troca de direção (70%)
- * ou pede `irPara` a uma célula próxima (30%). PRNG próprio, separado do de gameplay.
+ * Bot determinístico: cada entidade age com 5% de chance por tick — anda, pede `irPara`, ataca,
+ * usa habilidade ou seleciona alvo. PRNG próprio, separado do de gameplay.
  */
 export function criarBotAleatorio(semente: number): Produtor {
   const rng: EstadoRng = criarRng(semente);
@@ -62,10 +83,13 @@ export function criarBotAleatorio(semente: number): Produtor {
     const comandos: ComandoDoTick[] = [];
     for (const e of estado.entidades) {
       if (aleatorio(rng) >= 0.05) continue;
-      const cmd: ComandoDoTick['cmd'] =
-        aleatorio(rng) < 0.7
-          ? { t: 'mover', dir: escolher(rng, DIRECOES) }
-          : { t: 'irPara', x: e.x + inteiro(rng, -8, 8), y: e.y + inteiro(rng, -8, 8) };
+      const sorteio = aleatorio(rng);
+      let cmd: ComandoDoTick['cmd'];
+      if (sorteio < 0.5) cmd = { t: 'mover', dir: escolher(rng, DIRECOES) };
+      else if (sorteio < 0.7) cmd = { t: 'irPara', x: e.x + inteiro(rng, -8, 8), y: e.y + inteiro(rng, -8, 8) };
+      else if (sorteio < 0.85) cmd = { t: 'ataqueBasico' };
+      else if (sorteio < 0.95) cmd = { t: 'usarHabilidade', id: escolher(rng, [e.ataqueBasico, ...e.habilidades]) };
+      else cmd = { t: 'selecionarAlvo', alvo: escolher(rng, estado.entidades).id };
       comandos.push({ tick: estado.tick, entidadeId: e.id, cmd });
     }
     return comandos;
@@ -76,7 +100,10 @@ export function verificarInvariantes(estado: EstadoJogo, ctx: ContextoSimulacao)
   const erros: string[] = [];
   const { fase, balance } = ctx;
   procurarNaoFinitos(estado, 'estado', erros);
+  const ids = new Set<string>();
   for (const e of estado.entidades) {
+    if (ids.has(e.id)) erros.push(`id repetido ${e.id}`);
+    ids.add(e.id);
     if (!passavel(fase, e.x, e.y)) erros.push(`${e.id} em célula não passável (${e.x}, ${e.y})`);
     if (!passavel(fase, e.destinoX, e.destinoY)) erros.push(`${e.id} com destino não passável`);
     const distancia = Math.abs(e.destinoX - e.x) + Math.abs(e.destinoY - e.y);
@@ -84,15 +111,20 @@ export function verificarInvariantes(estado: EstadoJogo, ctx: ContextoSimulacao)
     if (e.progressoPasso < 0 || e.progressoPasso >= 1) erros.push(`${e.id} com progresso ${e.progressoPasso}`);
     if (!emPasso(e) && e.progressoPasso !== 0) erros.push(`${e.id} parado com progresso`);
     if (e.waypoints.length > balance.movimento.filaMaxWaypoints) erros.push(`${e.id} com fila longa`);
-    if (e.hp > e.hpMax) erros.push(`${e.id} com hp ${e.hp} > hpMax ${e.hpMax}`);
-    if (e.hp < 0) erros.push(`${e.id} com hp negativo`);
+    if (e.hp < 0 || e.hp > e.hpMax) erros.push(`${e.id} com hp ${e.hp} fora de [0, ${e.hpMax}]`);
+    if (e.mana < 0 || e.mana > e.manaMax) erros.push(`${e.id} com mana ${e.mana} fora de [0, ${e.manaMax}]`);
+    if (e.morto && e.acao) erros.push(`${e.id} morto conjurando`);
+    if (e.acao && e.acao.lancamentoTick < estado.tick) erros.push(`${e.id} com ação vencida pendurada`);
+  }
+  for (const p of estado.projeteis) {
+    if (!passavel(fase, Math.round(p.x), Math.round(p.y))) erros.push(`projétil ${p.id} fora do terreno`);
   }
   // Pares bloqueantes nunca dividem célula reservada (§2.3).
-  const lista = estado.entidades;
-  for (let i = 0; i < lista.length; i++) {
-    for (let j = i + 1; j < lista.length; j++) {
-      const a = lista[i];
-      const b = lista[j];
+  const vivos = estado.entidades.filter((e) => !e.morto);
+  for (let i = 0; i < vivos.length; i++) {
+    for (let j = i + 1; j < vivos.length; j++) {
+      const a = vivos[i];
+      const b = vivos[j];
       if (!a || !b || !bloqueia(a, b, balance.colisao)) continue;
       if (reservaCelula(b, a.x, a.y) || reservaCelula(b, a.destinoX, a.destinoY)) {
         erros.push(`${a.id} e ${b.id} dividem célula reservada`);
@@ -119,8 +151,13 @@ export function rodar(cenario: Cenario, ticks: number, produtor: Produtor): Even
   const { estado, ctx } = cenario;
   const eventos: EventoSimulacao[] = [];
   for (let i = 0; i < ticks; i++) {
+    const recargasAntes = { ...estado.recargas };
     simular(estado, ctx, produtor(estado), eventos, DT_MS);
     const erros = verificarInvariantes(estado, ctx);
+    // Recargas são monotônicas (§2.7): nenhuma expiração anda para trás.
+    for (const [chave, antes] of Object.entries(recargasAntes)) {
+      if ((estado.recargas[chave] ?? 0) < antes) erros.push(`recarga ${chave} regrediu`);
+    }
     if (erros.length > 0) {
       throw new Error(`invariante violada no tick ${estado.tick}: ${erros.join('; ')}`);
     }

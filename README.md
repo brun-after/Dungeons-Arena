@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 0.3 · **Data:** 13/10/2026
-**Status:** 🚧 Em construção, Etapa 2 (marco 2: fase, movimento, câmera e controles de toque)
+**Versão do documento:** 0.4 · **Data:** 13/10/2026
+**Status:** 🚧 Em construção, Etapa 2 (marco 3: combate pronto; IA dos inimigos a seguir)
 
 > **Histórico**
+> - **0.4 (13/10/2026)**: marco 2 concluído; marco 3A (combate) em revisão; controles de combate.
 > - **0.3 (13/10/2026)**: marco 1 concluído; marco 2 em revisão; controles do jogo.
 > - **0.2 (13/10/2026)**: nome do repositório, link do Pages, comandos da Etapa 1 e Etapa 0 concluída.
 > - **0.1 (12/10/2026)**: README inicial, com visão, hospedagem gratuita e roteiro de construção.
@@ -44,7 +45,9 @@ Requisitos locais: **Node.js 24 LTS**, **Git**; **Docker Desktop** só a partir 
 |---|---|---|
 | Mover | WASD ou setas (diagonal = duas teclas) | Joystick ou direcional (troca no cabeçalho) |
 | Ir até um ponto | Clique no mapa | Toque no mapa; segure para seguir o dedo |
-| Ataque básico | Espaço | Botão ⚔ (funciona junto com o joystick) |
+| Selecionar alvo | Clique no inimigo (`Esc` limpa) | Toque no inimigo |
+| Ataque básico | Espaço; com alvo selecionado no alcance, ataca sozinho | Botão ⚔ (funciona junto com o joystick) |
+| Habilidades | Teclas 1–4 | Roda de botões em volta do ⚔ |
 | Mover a câmera | Arrastar o mapa | Arrastar o mapa |
 | Zoom | Roda do mouse | Pinça com dois dedos |
 | Diagnóstico (fps, célula) | Abrir com `?diag=1` no fim do endereço | Idem |
@@ -82,7 +85,7 @@ em `main`, e o merge publica automaticamente.
 ### Etapas de infraestrutura
 
 - [x] **Etapa 0**: conta no GitHub, ferramentas instaladas, repositório criado com este README
-- [ ] **Etapa 1**: fundação do projeto, CI e deploy no GitHub Pages
+- [x] **Etapa 1**: fundação do projeto, CI e deploy no GitHub Pages
 - [ ] **Etapa 4**: VM Oracle, DuckDNS e segredos de deploy configurados
 
 ### Primeira versão jogável
@@ -90,8 +93,8 @@ em `main`, e o merge publica automaticamente.
 | ✓ | # | Entrega | Pronto quando |
 |---|---|---|---|
 | [x] | 1 | Motor TS estrito, passo fixo, PRNG, comandos, harness e CI | O mesmo núcleo roda no navegador e no Node, sem DOM, com as invariantes exercitadas |
-| [ ] | 2 | Uma fase, movimento Dir8/cardinal, colisão, câmera e controles mobile | Dá para mover e atacar com dois dedos no celular e com o mouse em emulação |
-| [ ] | 3 | Ataque básico, 4 habilidades, 3 arquétipos de IA e boss | Combate legível: crítico zero, defesa, interrupção e telegrafia corretos |
+| [x] | 2 | Uma fase, movimento Dir8/cardinal, colisão, câmera e controles mobile | Dá para mover e atacar com dois dedos no celular e com o mouse em emulação |
+| [ ] | 3 | Ataque básico, 4 habilidades, 3 arquétipos de IA e boss (3A combate ✓ · 3B IA) | Combate legível: crítico zero, defesa, interrupção e telegrafia corretos |
 | [ ] | 4 | Arena Livre em loopback, orçamento de ficha, NPCs, loot e reconciliação | Dois clientes lutam e coletam sem duplicar itens |
 | [ ] | 5 | Backend Colyseus/WSS, sala por código, patches e reconexão | Dois celulares em redes distintas; o criador sai e a sala continua; carga com 10 clientes |
 | [ ] | 6 | Recompensa/equipamento, save básico e editor mínimo | Criar um mapa no celular e completar o ciclo lutar → melhorar → lutar |

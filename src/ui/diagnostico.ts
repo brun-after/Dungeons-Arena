@@ -11,7 +11,8 @@ export interface DadosDiagnostico {
   celula: { x: number; y: number };
   tela: { x: number; y: number };
   entidades: number;
-  ataques: number;
+  impactos: number;
+  hp: number;
   zoom: number;
 }
 
@@ -54,6 +55,7 @@ export class Diagnostico {
     this.elemento.dataset.tick = String(d.tick);
     this.elemento.dataset.celula = `${d.celula.x},${d.celula.y}`;
     this.elemento.dataset.tela = `${Math.round(d.tela.x)},${Math.round(d.tela.y)}`;
-    this.elemento.dataset.ataques = String(d.ataques);
+    this.elemento.dataset.impactos = String(d.impactos);
+    this.elemento.dataset.hp = String(d.hp);
   }
 }

@@ -10,7 +10,7 @@ import { contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 function cenario(mapa: string[] = SALA_ABERTA, x = 5, y = 5, destreza = 10) {
   const fase: Fase = faseDeTexto(mapa);
   const estado = criarEstado({ semente: 1, faseId: fase.id });
-  estado.entidades.push(criarEntidade({ id: 'j', tipo: 'jogador', x, y, destreza }));
+  estado.entidades.push(criarEntidade({ id: 'j', tipo: 'jogador', x, y, atributos: { destreza } }));
   const ctx = contexto(fase);
   const eventos: EventoSimulacao[] = [];
   const jogador = () => {

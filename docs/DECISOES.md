@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.2 · **Data:** 13/10/2026
+**Versão:** 0.3 · **Data:** 13/10/2026
 
 > **Histórico**
+> - **0.3 (13/10/2026)**: decisões D-017 a D-023, tomadas no marco 3A (combate); D-016 superada.
 > - **0.2 (13/10/2026)**: decisões D-007 a D-016, tomadas no marco 2 (fase, movimento, câmera e controles).
 > - **0.1 (13/10/2026)**: decisões D-001 a D-006, tomadas na Etapa 1 (fundação).
 
@@ -165,8 +166,73 @@ pelo `click` sem ponteiro (`detail === 0`), então a ação nunca dispara duas v
 **Decisão.** O tipo de controle e o modo da câmera ficam no `localStorage`, com falha silenciosa, até o store
 `perfil` do IndexedDB (§3.5) entrar no marco 6.
 
-## D-016 · Cor dos marcadores por equipe, provisória (v0.2, 13/10/2026)
+## D-016 · Cor dos marcadores por equipe, provisória (v0.2, 13/10/2026) — superada na v0.3
 
 **Decisão.** Até existir `relacao()` (marco 3/4), os marcadores das entidades usam azul para o próprio jogador,
 verde para a mesma equipe e vermelho para as demais. Só a cor depende disso: nenhuma regra de jogo decide
 hostilidade pela equipe fora de `relacao()`.
+
+**v0.3:** a cor agora vem de `relacao(jogadorLocal, entidade, modo)`.
+
+---
+
+## D-017 · Quem conjura não começa passo novo (v0.3, 13/10/2026)
+
+**Contexto.** A §2.7 não diz se o personagem anda durante a conjuração.
+
+**Decisão.** Durante a conjuração, e enquanto estiver atordoado, a entidade não começa passos; o passo em
+curso termina. A direção mantida volta a valer quando a ação lança.
+
+**Consequência.** A conjuração vira um compromisso visível ("parou para conjurar"), o que reforça a
+telegrafia. Esquivar continua possível para o **alvo**, que anda livremente.
+
+## D-018 · Projétil reto e acerto pela célula ocupada (v0.3, 13/10/2026)
+
+**Contexto.** A §2.7 diz que o projétil lançado continua e colide durante a viagem, mas não define a trajetória.
+
+**Decisão.** O projétil mira a célula do alvo **no lançamento** e segue em linha reta, com sub-passos de 0,25
+célula. Ele acerta o primeiro hostil (pela relação do lançador) cuja célula ocupada coincide com a dele. A célula
+ocupada é a origem até 50% do passo e o destino depois. O projétil para em parede e expira meia célula depois
+do ponto mirado. Bônus de atributo e Carisma do lançador ficam congelados no projétil.
+
+**Consequência.** Sair da linha depois do lançamento esquiva; o projétil não persegue o alvo.
+
+## D-019 · Roda de habilidades simplificada (v0.3, 13/10/2026)
+
+**Contexto.** A §4.6 descreve uma roda com janela rotativa de 3 habilidades, botão central de definitiva,
+setas e modo expandido.
+
+**Decisão.** Com 4 habilidades, a roda mostra todas de uma vez: um quarto de círculo de botões de 44 px em volta
+do botão de ataque, com cortina de recarga e indicação de mana insuficiente. No desktop é uma fila com as
+teclas 1–4. A janela rotativa, a definitiva e o modo expandido entram quando houver mais habilidades que slots (10A).
+
+## D-020 · Habilidade substitui o ataque básico em conjuração (v0.3, 13/10/2026)
+
+**Contexto.** Com o ataque automático ligado, quase sempre há um ataque básico em conjuração, e as habilidades
+eram recusadas com "já está conjurando".
+
+**Decisão.** Pedir uma habilidade durante a conjuração do **ataque básico** cancela o básico (motivo
+`substituido`, sem devolver a recarga dele) e começa a habilidade. Uma habilidade em conjuração nunca é
+substituída por outra.
+
+## D-021 · Arquétipo e classe por preset; boneco de treino (v0.3, 13/10/2026)
+
+**Contexto.** A §2.5 sorteia 50/50 a classe corpo a corpo/conjurador por inimigo; a §2.6 pede arquétipos
+legíveis, apresentados um por vez.
+
+**Decisão.** Arquétipo, classe e ataque básico vêm do preset em `inimigos.json`, para que cada inimigo seja
+reconhecível pela silhueta e pelo comportamento. Foi criado o preset `boneco` (sem IA, 160 de HP base, sem XP)
+para o treino do marco 3A.
+
+## D-022 · Atributo do dano pela classe da entidade (v0.3, 13/10/2026)
+
+**Decisão.** Literal da §2.7: conjurador soma Inteligência; os demais, Força. Isso vale para o ataque básico e para
+as habilidades, inclusive as mágicas de uma classe corpo a corpo. A cura não soma atributo nesta versão.
+
+## D-023 · Testes ponta a ponta em série (v0.3, 13/10/2026)
+
+**Contexto.** O WebGL do navegador headless é por software. Com dois navegadores em paralelo, os quadros passavam
+de 250 ms e a simulação desacelerava de propósito (teto do laço, §2.2), estourando prazos fixos.
+
+**Decisão.** O Playwright roda com 1 worker. Os testes esperam por condição (jogador andou, câmera parou), sem
+prazos fixos curtos.

@@ -19,6 +19,11 @@
   box-sizing: border-box;
 }
 
+/* `hidden` sempre esconde, mesmo em elementos com display próprio. */
+[hidden] {
+  display: none !important;
+}
+
 /* Sem rolagem, sem puxar-para-recarregar, sem efeito elástico, sem seleção nem menu no toque longo (§4.8). */
 html,
 body {
@@ -140,19 +145,6 @@ body.toque .faixa-controles {
     grid-template-columns: 35% 30% 35%;
   }
 
-  /* Em retrato a coluna é estreita: interagir fica acima do ataque. */
-  .coluna.direita {
-    flex-direction: column;
-    align-items: flex-end;
-    justify-content: center;
-    gap: 8px;
-  }
-
-  .botao-acao.interagir {
-    width: 48px;
-    height: 48px;
-    margin-right: 14px;
-  }
 }
 
 .coluna {
@@ -166,10 +158,22 @@ body.toque .faixa-controles {
   padding-left: 16px;
 }
 
+.coluna.centro {
+  justify-content: center;
+  align-items: flex-end;
+  padding-bottom: 18px;
+}
+
+/* A coluna direita ancora o ataque e a roda de habilidades em volta dele (§4.6). */
 .coluna.direita {
-  justify-content: flex-end;
-  gap: 14px;
-  padding-right: 16px;
+  position: relative;
+  display: block;
+}
+
+.coluna.direita .botao-acao.ataque {
+  position: absolute;
+  right: 16px;
+  bottom: 18px;
 }
 
 /* Joystick (§4.3) */
@@ -277,6 +281,218 @@ body.toque .faixa-controles {
 .botao-acao.pressionado {
   transform: scale(0.9);
   background: var(--controle-ativo);
+}
+
+/* Status do jogador no cabeçalho (§2.15): barras de 60 px, 40 px abaixo de 480 px */
+.titulo-cabecalho {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.status-jogador {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+}
+
+.barras {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.barra {
+  width: 60px;
+  height: 8px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+}
+
+.barra.mana {
+  height: 4px;
+}
+
+.barra .preenchimento {
+  height: 100%;
+  background: #27ae60;
+  transition: width 120ms linear;
+}
+
+.barra.vida[data-faixa='medio'] .preenchimento {
+  background: #f39c12;
+}
+
+.barra.vida[data-faixa='baixo'] .preenchimento {
+  background: #e74c3c;
+}
+
+.barra.mana .preenchimento {
+  background: #5dade2;
+}
+
+@media (max-width: 479px) {
+  .barra {
+    width: 40px;
+  }
+}
+
+.numeros-vida {
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 2px #000;
+}
+
+.chip-d20 {
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid var(--borda);
+  font-variant-numeric: tabular-nums;
+}
+
+.chip-d20[data-faixa='critico'] {
+  color: var(--destaque);
+}
+
+.chip-d20[data-faixa='falha'] {
+  color: #8e8a99;
+}
+
+/* Registro de combate (§2.15): no desktop fica visível; no toque abre pelo botão 📜 */
+.log-combate {
+  position: absolute;
+  left: calc(12px + var(--seguro-esq));
+  bottom: calc(96px + var(--seguro-base));
+  max-width: min(360px, calc(100% - 24px));
+  margin: 0;
+  padding: 6px 10px;
+  list-style: none;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.45);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.log-combate:empty {
+  display: none;
+}
+
+body.toque .log-combate {
+  display: none;
+  top: calc(64px + var(--seguro-topo));
+  bottom: auto;
+}
+
+body.toque .log-combate.aberto {
+  display: block;
+}
+
+/* Aviso de morte */
+.aviso-morte {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 24px;
+  border-radius: 12px;
+  background: rgba(20, 18, 26, 0.9);
+  border: 1px solid #e74c3c;
+  text-align: center;
+}
+
+.aviso-morte strong {
+  font-size: 1.4rem;
+  color: #e74c3c;
+}
+
+/* Barra de habilidades: fila no desktop, roda em quarto de círculo no toque */
+.barra-habilidades {
+  position: absolute;
+  left: 50%;
+  bottom: calc(16px + var(--seguro-base));
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+.botao-habilidade {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border-radius: 10px;
+  border: 2px solid var(--borda);
+  background: rgba(31, 28, 40, 0.9);
+  color: var(--texto);
+  font-size: 1.4rem;
+  overflow: hidden;
+  touch-action: none;
+  cursor: pointer;
+}
+
+/* Recarga: cortina que desce conforme o tempo passa. */
+.botao-habilidade::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  transform-origin: top;
+  transform: scaleY(var(--recarga, 0));
+  pointer-events: none;
+}
+
+.botao-habilidade.sem-mana {
+  color: #5dade2;
+  opacity: 0.55;
+}
+
+.botao-habilidade .tecla {
+  position: absolute;
+  right: 4px;
+  bottom: 2px;
+  font-size: 0.65rem;
+  color: var(--texto-suave);
+}
+
+.botao-habilidade:focus-visible {
+  outline: 2px solid var(--destaque);
+  outline-offset: 2px;
+}
+
+body.toque .barra-habilidades {
+  /* Centro da roda = centro do botão de ataque (right 16 + 38, bottom 18 + 38). */
+  left: auto;
+  right: 54px;
+  bottom: 56px;
+  width: 0;
+  height: 0;
+  transform: none;
+  display: block;
+}
+
+body.toque .botao-habilidade {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 1.15rem;
+  transform: translate(-50%, -50%) rotate(var(--angulo)) translate(84px) rotate(calc(var(--angulo) * -1));
+}
+
+body.toque .botao-habilidade .tecla {
+  display: none;
 }
 
 /* Diagnóstico e avisos */

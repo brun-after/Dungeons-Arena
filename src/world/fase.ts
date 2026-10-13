@@ -23,6 +23,16 @@ export interface SpawnJson {
   equipe?: string;
 }
 
+/** Inimigo posicionado pela autoria (§2.1). */
+export interface InimigoPosicionado {
+  preset: string;
+  x: number;
+  y: number;
+  nivel?: number;
+  /** Override de HP base da instância (§2.5). */
+  hpBase?: number;
+}
+
 /** Formato da fase no JSON oficial e no editor (validado por `validarFase`). */
 export interface FaseJson {
   id: string;
@@ -31,6 +41,7 @@ export interface FaseJson {
   tipo: 'campanha' | 'arena' | 'ambas';
   mapa: string[];
   spawns: SpawnJson[];
+  inimigos?: InimigoPosicionado[];
 }
 
 export interface Fase {
@@ -42,6 +53,7 @@ export interface Fase {
   /** Tipo de cada célula, linha a linha (`y * largura + x`). */
   readonly celulas: Uint8Array;
   readonly spawns: readonly Celula[];
+  readonly inimigos: readonly InimigoPosicionado[];
 }
 
 /** Converte uma fase já validada para a forma usada pela simulação. */
@@ -64,6 +76,7 @@ export function carregarFase(json: FaseJson): Fase {
     altura,
     celulas,
     spawns: json.spawns.map((s) => ({ x: s.x, y: s.y })),
+    inimigos: (json.inimigos ?? []).map((i) => ({ ...i })),
   };
 }
 

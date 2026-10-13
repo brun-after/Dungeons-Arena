@@ -38,5 +38,10 @@
       "x": 5,
       "y": 5
     }
+  ],
+  "inimigos": [
+    { "preset": "boneco", "x": 18, "y": 5 },
+    { "preset": "boneco", "x": 22, "y": 3 },
+    { "preset": "boneco", "x": 26, "y": 7 }
   ]
 }
