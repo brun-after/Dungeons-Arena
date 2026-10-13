@@ -1,9 +1,10 @@
-# Enxame — RPG de ação em tempo real (nome provisório)
+# Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 0.1 · **Data:** 12/10/2026
-**Status:** 🚧 Em construção, Etapa 0 (preparação do repositório)
+**Versão do documento:** 0.2 · **Data:** 13/10/2026
+**Status:** 🚧 Em construção, Etapa 1 (fundação do motor, marco 1)
 
 > **Histórico**
+> - **0.2 (13/10/2026)**: nome do repositório, link do Pages, comandos da Etapa 1 e Etapa 0 concluída.
 > - **0.1 (12/10/2026)**: README inicial, com visão, hospedagem gratuita e roteiro de construção.
 
 RPG de ação top-down e isométrico para navegador. O jogador controla um personagem com ficha de RPG
@@ -17,8 +18,8 @@ dados resolve o dano sem parar o jogo.
 - **Editor de fases**: dentro do jogo, para criar, testar e compartilhar fases e aventuras.
 - **Mobile é plataforma primária**: controles de toque completos e multi-touch.
 
-A especificação completa fica em [`docs/PROMPT-PROJETO-v4.0.md`](docs/PROMPT-PROJETO-v4.0.md) (entra no
-repositório na Etapa 1). Divergências em relação a ela são registradas em [`docs/DECISOES.md`](docs/DECISOES.md).
+A especificação completa fica em [`docs/PROMPT-PROJETO-v4.0.md`](docs/PROMPT-PROJETO-v4.0.md).
+Divergências em relação a ela são registradas em [`docs/DECISOES.md`](docs/DECISOES.md).
 
 ---
 
@@ -26,8 +27,9 @@ repositório na Etapa 1). Divergências em relação a ela são registradas em [
 
 | Onde | Como | Disponível a partir de |
 |---|---|---|
-| **Navegador (nuvem)** | `https://<usuario>.github.io/<repositorio>/` | Etapa 1 (tela inicial); Etapa 2 (jogável) |
+| **Navegador (nuvem)** | <https://brun-after.github.io/Dungeons-Arena/> | Etapa 1 (tela inicial); Etapa 2 (jogável) |
 | **Local: cliente** | `npm install` e `npm run dev`, depois abrir `http://localhost:5173` | Etapa 1 |
+| **Local: verificação completa** | `npm run verificar` (typecheck, lint, testes e build) | Etapa 1 |
 | **Local: servidor da arena** | `npm run dev:server` (sobe em `ws://localhost:2567`) | Etapa 5 |
 | **Local: stack completa** | `docker compose up` (servidor, Redis e proxy) | Etapa 5 |
 | **Testes** | `npm test` (unidade e simulação), `npm run test:e2e` (Playwright) | Etapa 1 |
@@ -67,7 +69,7 @@ em `main`, e o merge publica automaticamente.
 
 ### Etapas de infraestrutura
 
-- [ ] **Etapa 0**: conta no GitHub, ferramentas instaladas, repositório criado com este README
+- [x] **Etapa 0**: conta no GitHub, ferramentas instaladas, repositório criado com este README
 - [ ] **Etapa 1**: fundação do projeto, CI e deploy no GitHub Pages
 - [ ] **Etapa 4**: VM Oracle, DuckDNS e segredos de deploy configurados
 
