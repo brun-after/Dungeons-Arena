@@ -14,7 +14,7 @@ services:
       PORT: '2567'
       REGIAO: ${REGIAO:-local}
     ports:
-      # Exposto só para uso local; na VM o firewall libera apenas 80/443 (o Caddy).
+      # Só em 127.0.0.1: no PC, para testes locais; na VM, só o Caddy (80/443) fica exposto à internet.
       - '127.0.0.1:2567:2567'
     restart: unless-stopped
 

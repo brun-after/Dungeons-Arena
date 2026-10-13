@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 0.8 · **Data:** 13/10/2026
-**Status:** 🚧 Em construção. Campanha mínima jogável (marcos 1–3), arena em loopback (marco 4) e servidor real pronto para implantar (marco 5A); falta a VM (Etapa 4) e o teste com dois celulares (5B)
+**Versão do documento:** 0.9 · **Data:** 13/10/2026
+**Status:** 🚧 Em construção. Campanha mínima jogável (marcos 1–3), arena em loopback (marco 4) e arena online no ar na AWS em São Paulo (marco 5A + Etapa 4); falta o teste com dois celulares em redes diferentes (5B)
 
 > **Histórico**
+> - **0.9 (13/10/2026)**: Etapa 4 concluída na AWS Lightsail São Paulo (D-038); hospedagem do servidor deixa de ser gratuita.
 > - **0.8 (13/10/2026)**: marco 5A (servidor Colyseus, sala por código, patches, reconexão, Docker, deploy); menu inicial.
 > - **0.7 (13/10/2026)**: marco 4 concluído; demonstração da arena em loopback.
 > - **0.6 (13/10/2026)**: marco 4A (modo Livre, ficha justa, orbes, fase de arena).
@@ -35,7 +36,7 @@ Divergências em relação a ela são registradas em [`docs/DECISOES.md`](docs/D
 |---|---|---|
 | **Navegador (nuvem)** | <https://brun-after.github.io/Dungeons-Arena/> — menu: campanha, arena online e treino | Etapa 1 (tela inicial); Etapa 2 (jogável) |
 | **Arena de treino** | <https://brun-after.github.io/Dungeons-Arena/?arena=loopback&latencia=80> — você contra um bot, com sala e rede simuladas na página (`latencia`, `jitter` e `perda` na URL) | Marco 4 |
-| **Arena online** | Menu → **Arena online** → *Criar sala* (mostra um código) ou *Entrar com código* | Marco 5 (depois da Etapa 4) |
+| **Arena online** | Menu → **Arena online** → *Criar sala* (mostra um código) ou *Entrar com código* | Marco 5 (no ar em `wss://dungeons-bruno.duckdns.org`) |
 | **Local: cliente** | `npm install` e `npm run dev`, depois abrir `http://localhost:5173` | Etapa 1 |
 | **Local: servidor da arena** | `npm run dev:server` (sobe em `ws://localhost:2567`); com ele rodando, a arena online de `localhost` já funciona | Marco 5 |
 | **Local: celular no mesmo Wi-Fi** | `npm run dev -- --host` e abrir no celular `http://IP-DO-PC:5173/?arena=online&servidor=ws://IP-DO-PC:2567` | Marco 5 |
@@ -74,19 +75,21 @@ Implantação do servidor na nuvem, passo a passo: [`docs/IMPLANTACAO.md`](docs/
 
 ---
 
-## Hospedagem 100% gratuita
+## Hospedagem
 
 | Peça | Serviço | Custo |
 |---|---|---|
 | Código, CI e revisão | GitHub (repositório público) + GitHub Actions | US$ 0 |
 | Cliente (campanha, editor, PWA) | GitHub Pages | US$ 0 |
-| Servidor da arena (Node.js + Colyseus) | VM ARM Oracle Cloud *Always Free* com Docker Compose | US$ 0 |
+| Servidor da arena (Node.js + Colyseus) | VM **AWS Lightsail** em São Paulo (2 vCPU / 1 GB) com Docker Compose | **US$ 7/mês**, pagos com créditos da AWS (D-038) |
 | Checkpoints da arena | Redis no mesmo Docker Compose (processo separado do servidor) | US$ 0 |
 | HTTPS / WSS | Caddy (certificado Let's Encrypt automático) + subdomínio DuckDNS | US$ 0 |
 | Imagem do servidor | GitHub Container Registry (GHCR) | US$ 0 |
 
 A campanha e o editor não dependem do servidor. Só a arena precisa dele.
-A conta Oracle tem alerta de orçamento configurado para avisar antes de qualquer cobrança.
+Só o servidor da arena tem custo; o resto é gratuito. O controle de gastos é pelos créditos e pelos alertas do AWS
+Budgets. A Oracle *Always Free* (sem custo, mas sem capacidade em São Paulo em 13/10/2026) e o Render (Virgínia,
+reserva manual) ficam como alternativas em [`docs/IMPLANTACAO.md`](docs/IMPLANTACAO.md).
 
 ---
 
@@ -106,7 +109,7 @@ em `main`, e o merge publica automaticamente.
 
 - [x] **Etapa 0**: conta no GitHub, ferramentas instaladas, repositório criado com este README
 - [x] **Etapa 1**: fundação do projeto, CI e deploy no GitHub Pages
-- [ ] **Etapa 4**: VM Oracle, DuckDNS e segredos de deploy configurados ([guia](docs/IMPLANTACAO.md))
+- [x] **Etapa 4**: VM (AWS Lightsail São Paulo), DuckDNS e segredos de deploy configurados ([guia](docs/IMPLANTACAO.md)); pendente: IP estático
 
 ### Primeira versão jogável
 
@@ -116,7 +119,7 @@ em `main`, e o merge publica automaticamente.
 | [x] | 2 | Uma fase, movimento Dir8/cardinal, colisão, câmera e controles mobile | Dá para mover e atacar com dois dedos no celular e com o mouse em emulação |
 | [x] | 3 | Ataque básico, 4 habilidades, 3 arquétipos de IA e boss | Combate legível: crítico zero, defesa, interrupção e telegrafia corretos |
 | [x] | 4 | Arena Livre em loopback, orçamento de ficha, NPCs, loot e reconciliação | Dois clientes lutam e coletam sem duplicar itens |
-| [ ] | 5 | Backend Colyseus/WSS, sala por código, patches e reconexão (5A código ✓ · 5B na VM) | Dois celulares em redes distintas; o criador sai e a sala continua; carga com 10 clientes |
+| [ ] | 5 | Backend Colyseus/WSS, sala por código, patches e reconexão (5A código ✓ · servidor no ar ✓ · falta o teste com dois celulares) | Dois celulares em redes distintas; o criador sai e a sala continua; carga com 10 clientes |
 | [ ] | 6 | Recompensa/equipamento, save básico e editor mínimo | Criar um mapa no celular e completar o ciclo lutar → melhorar → lutar |
 | [ ] | 7 | Testes humanos, rede suportada/degradada e carga inicial | Critérios da §5.7 atendidos |
 
