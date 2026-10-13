@@ -47,6 +47,28 @@ export interface Balance {
   xp: {
     decaimentoAntifarm: number;
   };
+  ia: RegrasIa;
+}
+
+/** Números da IA (§2.6). */
+export interface RegrasIa {
+  patrulhaAvaliacaoMs: number;
+  patrulhaPassoMs: number;
+  chanceAproximar: number;
+  chanceManter: number;
+  /** Opções mais curtas que a base, com a chance de cada uma (a base fica com o restante). */
+  hesitacao: { s: number; chance: number }[];
+  hesitacaoBaseS: number;
+  /** Cada ponto de Carisma acima do neutro multiplica as chances por este fator. */
+  fatorCarisma: number;
+  maxPassosPerseguicao: number;
+  recalcularDistancia: number;
+  maxFalhasCaminho: number;
+  desistirAposMs: number;
+  checagemDesistenciaMs: number;
+  chanceDesistir: number;
+  distanciaMinAtirador: number;
+  distanciaMaxAtirador: number;
 }
 
 export const BALANCE_PADRAO: Balance = balanceJson;

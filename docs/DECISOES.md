@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.3 · **Data:** 13/10/2026
+**Versão:** 0.4 · **Data:** 13/10/2026
 
 > **Histórico**
+> - **0.4 (13/10/2026)**: decisões D-024 a D-027, tomadas no marco 3B (IA); D-023 ampliada.
 > - **0.3 (13/10/2026)**: decisões D-017 a D-023, tomadas no marco 3A (combate); D-016 superada.
 > - **0.2 (13/10/2026)**: decisões D-007 a D-016, tomadas no marco 2 (fase, movimento, câmera e controles).
 > - **0.1 (13/10/2026)**: decisões D-001 a D-006, tomadas na Etapa 1 (fundação).
@@ -235,4 +236,37 @@ as habilidades, inclusive as mágicas de uma classe corpo a corpo. A cura não s
 de 250 ms e a simulação desacelerava de propósito (teto do laço, §2.2), estourando prazos fixos.
 
 **Decisão.** O Playwright roda com 1 worker. Os testes esperam por condição (jogador andou, câmera parou), sem
-prazos fixos curtos.
+prazos fixos curtos. **v0.4:** limite por teste de 90 s, porque andar até uma sala e lutar passa dos 30 s padrão.
+
+---
+
+## D-024 · Hesitação escalada pelo preset (v0.4, 13/10/2026)
+
+**Contexto.** A §2.5 dá a cada preset uma "Hesitação (s)" (goblin 5, boss 1), e a §2.6 dá uma tabela de
+2/5/7/10 s com 10 s de base. Lidas ao pé da letra, as duas competem.
+
+**Decisão.** A tabela da §2.6 sorteia a **forma** da hesitação para uma base de 10 s, com o fator de Carisma
+aplicado às chances. O preset define a **escala**: `tempo = sorteado × hesitacaoS / 10`. Um goblin hesita de 1 a 5 s;
+o boss, de 0,2 a 1 s.
+
+## D-025 · A IA age pelas funções internas, na etapa 2 do tick (v0.4, 13/10/2026)
+
+**Contexto.** A §3.3 lista a IA como produtora de comandos.
+
+**Decisão.** A IA roda dentro de `simular()` e chama as mesmas funções que os comandos usam (`iniciarAcao`,
+`planejarCaminho`, `pararMovimento`). Na prática equivale a emitir comandos, mas permite limites próprios, como
+o caminho de 150 passos da perseguição contra os 60 do toque. Clientes nunca enviam comandos para entidades de IA (§3.6).
+
+## D-026 · Atirador e controlador não atacam de perto (v0.4, 13/10/2026)
+
+**Decisão.** Com o alvo a menos de 3 células, o atirador e o controlador **recuam** para a vizinha que mais se
+afasta e só atacam de perto se estiverem encurralados. Sem isso, o arquétipo atirava à queima-roupa e ficava
+igual ao perseguidor (o teste da IA pegou isso).
+
+## D-027 · Respawn espera a célula de origem liberar (v0.4, 13/10/2026)
+
+**Contexto.** O harness de 10.000 ticks encontrou dois inimigos dividindo uma célula: um deles tinha renascido na
+origem enquanto outro estava parado ali.
+
+**Decisão.** O respawn só acontece com a célula de origem livre de quem bloqueia; senão, fica pendente e tenta de
+novo no tick seguinte.

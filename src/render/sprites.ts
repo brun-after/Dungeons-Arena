@@ -3,11 +3,11 @@
 // (a telegrafia, §2.15), anel de alvo e anel de atordoamento. Cor pela `relacao()` com o
 // jogador local (§2.13: "cor por equipe").
 
-import { Container, Graphics } from 'pixi.js';
+import { Container, Graphics, Text } from 'pixi.js';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import { movimentoBloqueado } from '../combat/efeitos';
-import type { Entidade } from '../entities/entidade';
+import type { Arquetipo, Entidade } from '../entities/entidade';
 import { relacao } from '../modos/relacao';
 import { CELULA_PX } from './camera-calculo';
 import type { Interpolador } from './interpolacao';
@@ -26,12 +26,49 @@ export function corDoHp(fracao: number): number {
   return 0xe74c3c;
 }
 
+/**
+ * Silhueta por arquétipo (§2.6): a ameaça se distingue pela forma, não só pela cor.
+ * Perseguidor = triângulo; atirador = losango; controlador = hexágono; boss = círculo com coroa;
+ * boneco = quadrado; jogador = círculo.
+ */
+function desenharSilhueta(g: Graphics, arquetipo: Arquetipo, cor: number): Graphics {
+  const contorno = { width: 2, color: 0x0d0b12 };
+  const r = RAIO;
+  switch (arquetipo) {
+    case 'perseguidor':
+      return g.poly([0, -r * 1.1, r, r * 0.8, -r, r * 0.8]).fill(cor).stroke(contorno);
+    case 'atirador':
+      return g.poly([0, -r * 1.1, r * 0.9, 0, 0, r * 1.1, -r * 0.9, 0]).fill(cor).stroke(contorno);
+    case 'controlador': {
+      const pontos: number[] = [];
+      for (let i = 0; i < 6; i++) pontos.push(Math.cos((Math.PI / 3) * i) * r, Math.sin((Math.PI / 3) * i) * r);
+      return g.poly(pontos).fill(cor).stroke(contorno);
+    }
+    case 'boss':
+      g.circle(0, 0, r).fill(cor).stroke(contorno);
+      return g.poly([-r * 0.6, -r * 0.7, -r * 0.35, -r * 1.25, 0, -r * 0.8, r * 0.35, -r * 1.25, r * 0.6, -r * 0.7]).fill(0xf1c40f).stroke(contorno);
+    case 'boneco':
+      return g.roundRect(-r, -r, r * 2, r * 2, 6).fill(cor).stroke(contorno);
+    case 'jogador':
+      return g.circle(0, 0, r).fill(cor).stroke(contorno);
+  }
+}
+
+/** "?" enquanto hesita; "!" por um segundo ao começar a perseguir. */
+function textoIndicador(e: Entidade, tick: number): string {
+  if (!e.ia || e.morto) return '';
+  if (e.ia.modo === 'hesitando') return '?';
+  if (e.ia.modo === 'perseguindo' && tick - e.ia.modoDesdeTick < 60) return '!';
+  return '';
+}
+
 interface Marcador {
   raiz: Container;
   corpo: Graphics;
   seta: Graphics;
   barras: Graphics;
   aneis: Graphics;
+  indicador: Text;
   angulo: number;
   ultimoX: number;
   ultimoY: number;
@@ -51,17 +88,20 @@ export class CamadaEntidades {
     const escala = e.arquetipo === 'boss' ? 1.35 : 1;
     const sombra = new Graphics().ellipse(0, RAIO * 0.9, RAIO * 0.9, RAIO * 0.35).fill({ color: 0x000000, alpha: 0.35 });
     const aneis = new Graphics();
-    const corpo = new Graphics();
-    const forma = e.arquetipo === 'boneco' ? 'quadrado' : 'circulo';
-    if (forma === 'quadrado') corpo.roundRect(-RAIO, -RAIO, RAIO * 2, RAIO * 2, 6).fill(cor).stroke({ width: 2, color: 0x0d0b12 });
-    else corpo.circle(0, 0, RAIO).fill(cor).stroke({ width: 2, color: 0x0d0b12 });
+    const corpo = desenharSilhueta(new Graphics(), e.arquetipo, cor);
     const seta = new Graphics().poly([RAIO * 0.35, -RAIO * 0.45, RAIO * 1.05, 0, RAIO * 0.35, RAIO * 0.45]).fill(0xece8f4);
     const barras = new Graphics();
+    const indicador = new Text({
+      text: '',
+      style: { fontFamily: 'system-ui, sans-serif', fontSize: 20, fontWeight: '800', fill: 0xf1c40f, stroke: { color: 0x000000, width: 4 } },
+    });
+    indicador.anchor.set(0.5, 1);
+    indicador.position.set(0, -RAIO * escala - 22);
     corpo.scale.set(escala);
     seta.scale.set(escala);
-    raiz.addChild(sombra, aneis, corpo, seta, barras);
+    raiz.addChild(sombra, aneis, corpo, seta, barras, indicador);
     this.camada.addChild(raiz);
-    return { raiz, corpo, seta, barras, aneis, angulo: 0, ultimoX: e.x, ultimoY: e.y, escala };
+    return { raiz, corpo, seta, barras, aneis, indicador, angulo: 0, ultimoX: e.x, ultimoY: e.y, escala };
   }
 
   desenhar(estado: EstadoJogo, ctx: ContextoSimulacao, interp: Interpolador, alpha: number): void {
@@ -92,6 +132,8 @@ export class CamadaEntidades {
       // Morto fica apagado; invisível (pós-morte) fica translúcido.
       m.raiz.alpha = e.morto ? 0.25 : e.invisivelAteTick > estado.tick ? 0.5 : 1;
 
+      const indicador = textoIndicador(e, estado.tick);
+      if (m.indicador.text !== indicador) m.indicador.text = indicador;
       this.desenharAneis(m, e, estado, local?.alvoSelecionado === e.id);
       this.desenharBarras(m, e, tickVisual, e.id === this.idLocal);
     }

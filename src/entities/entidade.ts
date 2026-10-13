@@ -2,6 +2,7 @@
 // Marco 3: atributos, recursos, efeitos, ação em curso e dados de morte e respawn.
 
 import type { Celula, Dir8, EntidadeId } from '../core/comandos';
+import { clonarRng, type EstadoRng } from '../core/rng';
 import type { TipoEfeito } from '../combat/efeitos';
 
 export type TipoEntidade = 'jogador' | 'inimigo' | 'invocacao' | 'avatar';
@@ -37,6 +38,32 @@ export interface AcaoEmCurso {
   inicioTick: number;
   lancamentoTick: number;
   impactoPrevistoTick: number;
+}
+
+export type ModoIa = 'patrulha' | 'hesitando' | 'perseguindo';
+
+/** Estado da IA (§2.6). Só dados, com PRNG próprio: reproduzível no harness. */
+export interface EstadoIa {
+  modo: ModoIa;
+  /** Tick em que o modo atual começou (para o "!" e o "?" da apresentação). */
+  modoDesdeTick: number;
+  alvoId: EntidadeId | null;
+  hesitacaoAteTick: number;
+  /** Alvos que já entraram no raio de detecção: a hesitação só é sorteada na primeira vez. */
+  detectados: EntidadeId[];
+  proximaAvaliacaoTick: number;
+  proximoPassoTick: number;
+  direcaoPatrulha: Dir8 | null;
+  /** Últimas 3 células visitadas na patrulha (antitravamento, §2.3). */
+  recentes: Celula[];
+  proximaChecagemDesistenciaTick: number;
+  falhasCaminho: number;
+  /** Célula do alvo quando o caminho foi calculado (cache do perseguidor, §2.3). */
+  alvoCacheX: number;
+  alvoCacheY: number;
+  proximoAtaqueTick: number;
+  ataquesFeitos: number;
+  rng: EstadoRng;
 }
 
 /** Quem causou dano e quando, para dividir XP entre participantes (§2.7, morte). */
@@ -101,6 +128,8 @@ export interface Entidade {
   /** Quantas vezes esta instância já morreu (antifarm, §2.12). */
   abates: number;
   participacao: Participacao[];
+  /** Criado no primeiro tick para entidades de IA; null para jogadores e bonecos. */
+  ia: EstadoIa | null;
 }
 
 export const ATRIBUTOS_NEUTROS: Readonly<Atributos> = {
@@ -182,6 +211,7 @@ export function criarEntidade(n: NovaEntidade): Entidade {
     xpBase: n.xpBase ?? 0,
     abates: 0,
     participacao: [],
+    ia: null,
   };
 }
 
@@ -206,5 +236,13 @@ export function clonarEntidade(e: Entidade): Entidade {
     efeitos: e.efeitos.map((f) => ({ ...f })),
     acao: e.acao ? { ...e.acao } : null,
     participacao: e.participacao.map((p) => ({ ...p })),
+    ia: e.ia
+      ? {
+          ...e.ia,
+          detectados: [...e.ia.detectados],
+          recentes: copiarCelulas(e.ia.recentes),
+          rng: clonarRng(e.ia.rng),
+        }
+      : null,
   };
 }

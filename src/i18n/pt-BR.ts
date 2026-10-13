@@ -31,6 +31,7 @@ export const ptBR = {
   'log.morreu': '{alvo} caiu',
   'log.xp': '+{xp} XP',
   'log.surgiu': '{alvo} voltou',
+  'log.notou': '{inimigo} notou você',
   'recusa.recarga': 'Ainda em recarga',
   'recusa.recurso': 'Mana insuficiente',
   'recusa.sem_alvo': 'Nenhum alvo no alcance',

@@ -2,8 +2,8 @@
 // se está em rede. Recebe o contexto (fase, conteúdo, modo e balanceamento) e os comandos do
 // tick, e grava eventos numa lista de saída.
 //
-// Ordem por tick (§2.2). A IA (2) entra no marco 3B; congelamentos (5), gatilhos por célula (7)
-// e periódicos de 1 Hz (9) entram com objetos de fase e armadilhas.
+// Ordem por tick (§2.2). Congelamentos (5), gatilhos por célula (7) e periódicos de 1 Hz (9)
+// entram com objetos de fase e armadilhas.
 //   1. aplicar comandos        2. IA                 3. combate
 //   4. efeitos e regeneração   5. congelamentos      6. movimento
 //   7. gatilhos por célula     8. mortes e respawns  9. periódicos de 1 Hz e spawner
@@ -12,6 +12,7 @@ import { alvoOfensivoValido, iniciarAcao, processarAcoes, processarAutoAtaque } 
 import { expirarEfeitos } from '../combat/efeitos';
 import { moverProjeteis } from '../combat/projeteis';
 import { vivo } from '../entities/entidade';
+import { processarIa } from '../entities/ia';
 import { processarMortes } from '../progression/morte';
 import { regenerarRecursos } from '../progression/recursos';
 import { definirDirecao, moverEntidades, planejarCaminho } from '../world/movimento';
@@ -30,6 +31,7 @@ export function simular(
   dtMs: number,
 ): void {
   aplicarComandos(estado, ctx, comandos, saida);
+  processarIa(estado, ctx, saida);
   processarAcoes(estado, ctx, saida);
   moverProjeteis(estado, ctx, saida, dtMs);
   processarAutoAtaque(estado, ctx, saida);

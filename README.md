@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 0.4 · **Data:** 13/10/2026
-**Status:** 🚧 Em construção, Etapa 2 (marco 3: combate pronto; IA dos inimigos a seguir)
+**Versão do documento:** 0.5 · **Data:** 13/10/2026
+**Status:** 🚧 Em construção. Campanha mínima jogável (marcos 1–3); próximo: marco 4, arena em loopback
 
 > **Histórico**
+> - **0.5 (13/10/2026)**: marco 3 concluído (IA, arquétipos, boss e encontros da fase 1).
 > - **0.4 (13/10/2026)**: marco 2 concluído; marco 3A (combate) em revisão; controles de combate.
 > - **0.3 (13/10/2026)**: marco 1 concluído; marco 2 em revisão; controles do jogo.
 > - **0.2 (13/10/2026)**: nome do repositório, link do Pages, comandos da Etapa 1 e Etapa 0 concluída.
@@ -46,11 +47,22 @@ Requisitos locais: **Node.js 24 LTS**, **Git**; **Docker Desktop** só a partir 
 | Mover | WASD ou setas (diagonal = duas teclas) | Joystick ou direcional (troca no cabeçalho) |
 | Ir até um ponto | Clique no mapa | Toque no mapa; segure para seguir o dedo |
 | Selecionar alvo | Clique no inimigo (`Esc` limpa) | Toque no inimigo |
-| Ataque básico | Espaço; com alvo selecionado no alcance, ataca sozinho | Botão ⚔ (funciona junto com o joystick) |
+| Ataque básico | Espaço; ataca sozinho o alvo selecionado ou quem estiver te perseguindo | Botão ⚔ (funciona junto com o joystick) |
 | Habilidades | Teclas 1–4 | Roda de botões em volta do ⚔ |
 | Mover a câmera | Arrastar o mapa | Arrastar o mapa |
 | Zoom | Roda do mouse | Pinça com dois dedos |
 | Diagnóstico (fps, célula) | Abrir com `?diag=1` no fim do endereço | Idem |
+
+### Os inimigos da fase 1
+
+| Forma | Arquétipo | Como luta |
+|---|---|---|
+| ▲ triângulo | Perseguidor (goblin, orc) | Corre até você e golpeia de perto |
+| ◆ losango | Atirador (esqueleto) | Mantém distância e atira flechas; recua se você encostar |
+| ⬢ hexágono | Controlador (cultista) | Marca uma área 3×3 no chão; saia antes de encher |
+| ● com coroa | Boss (demônio) | Alterna golpe forte e área |
+
+"?" sobre o inimigo: ele notou você e está hesitando. "!": começou a perseguir.
 
 ---
 
@@ -94,7 +106,7 @@ em `main`, e o merge publica automaticamente.
 |---|---|---|---|
 | [x] | 1 | Motor TS estrito, passo fixo, PRNG, comandos, harness e CI | O mesmo núcleo roda no navegador e no Node, sem DOM, com as invariantes exercitadas |
 | [x] | 2 | Uma fase, movimento Dir8/cardinal, colisão, câmera e controles mobile | Dá para mover e atacar com dois dedos no celular e com o mouse em emulação |
-| [ ] | 3 | Ataque básico, 4 habilidades, 3 arquétipos de IA e boss (3A combate ✓ · 3B IA) | Combate legível: crítico zero, defesa, interrupção e telegrafia corretos |
+| [x] | 3 | Ataque básico, 4 habilidades, 3 arquétipos de IA e boss | Combate legível: crítico zero, defesa, interrupção e telegrafia corretos |
 | [ ] | 4 | Arena Livre em loopback, orçamento de ficha, NPCs, loot e reconciliação | Dois clientes lutam e coletam sem duplicar itens |
 | [ ] | 5 | Backend Colyseus/WSS, sala por código, patches e reconexão | Dois celulares em redes distintas; o criador sai e a sala continua; carga com 10 clientes |
 | [ ] | 6 | Recompensa/equipamento, save básico e editor mínimo | Criar um mapa no celular e completar o ciclo lutar → melhorar → lutar |

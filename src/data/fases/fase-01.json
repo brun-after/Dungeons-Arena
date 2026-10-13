@@ -40,8 +40,13 @@
     }
   ],
   "inimigos": [
-    { "preset": "boneco", "x": 18, "y": 5 },
-    { "preset": "boneco", "x": 22, "y": 3 },
-    { "preset": "boneco", "x": 26, "y": 7 }
+    { "preset": "boneco", "x": 9, "y": 8 },
+    { "preset": "goblin", "x": 22, "y": 3 },
+    { "preset": "goblin", "x": 25, "y": 7 },
+    { "preset": "esqueleto", "x": 33, "y": 4 },
+    { "preset": "esqueleto", "x": 36, "y": 9 },
+    { "preset": "cultista", "x": 15, "y": 20 },
+    { "preset": "orc", "x": 5, "y": 23 },
+    { "preset": "boss", "x": 34, "y": 19 }
   ]
 }
