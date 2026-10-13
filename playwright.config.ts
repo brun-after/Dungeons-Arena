@@ -10,6 +10,8 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORTA}`,
     trace: 'retain-on-failure',
+    // O Service Worker do PWA não deve servir respostas em cache entre testes.
+    serviceWorkers: 'block',
   },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'] } },

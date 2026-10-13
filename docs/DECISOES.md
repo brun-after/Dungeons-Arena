@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.1 · **Data:** 13/10/2026
+**Versão:** 0.2 · **Data:** 13/10/2026
 
 > **Histórico**
+> - **0.2 (13/10/2026)**: decisões D-007 a D-016, tomadas no marco 2 (fase, movimento, câmera e controles).
 > - **0.1 (13/10/2026)**: decisões D-001 a D-006, tomadas na Etapa 1 (fundação).
 
 Registro de divergências e escolhas em relação a [`PROMPT-PROJETO-v4.0.md`](PROMPT-PROJETO-v4.0.md),
@@ -77,3 +78,95 @@ de passo entram no marco 2.
 
 **Consequência.** `src/core/simulacao.ts` já segue a ordem por tick da §2.2, com as demais etapas marcadas
 para os próximos marcos.
+
+---
+
+## D-007 · Terreno fora do estado, com contexto injetado (v0.2, 13/10/2026)
+
+**Contexto.** A fase é conteúdo imutável durante a partida, e o estado precisa ser barato de clonar,
+comparar e gravar em checkpoint (§3.6, §5.1).
+
+**Decisão.** `EstadoJogo` guarda só o `faseId`. O terreno e o balanceamento chegam a `simular()` por um
+`ContextoSimulacao` (`src/core/contexto.ts`). `src/world` e `src/entities` entram no `tsconfig.nucleo.json`
+e na regra de lint do núcleo.
+
+**Consequência.** O digest e o checkpoint não carregam a grade. Quando o editor ou a arena mudarem
+o terreno durante a sessão, a revisão da fase entra no estado.
+
+## D-008 · Células autoradas em texto (v0.2, 13/10/2026)
+
+**Contexto.** A §2.1 define `celulas: Celula[][]` sem fixar a forma no arquivo.
+
+**Decisão.** No JSON, o mapa é uma lista de linhas de texto: `#` parede, `.` piso, `S` saída e espaço
+para vazio. `carregarFase` converte para um `Uint8Array` plano. Spawns ficam numa lista à parte.
+
+**Consequência.** As fases ficam legíveis num diff. A peça visual por célula (§2.16) vira um campo
+adicional quando o tileset entrar (11A).
+
+## D-009 · Terreno em cores lisas até o tileset (v0.2, 13/10/2026)
+
+**Contexto.** A §2.16 pede um sprite por célula do atlas do tileset, que só chega no 11A.
+
+**Decisão.** Até lá, cada bloco de 16×16 células é um único `Graphics` desenhado uma vez por fase, com cores
+por tipo e variação de piso por hash da posição. O descarte por bloco fora da viewport já segue a spec.
+
+**Consequência.** Quando o tileset entrar, o desenho do bloco é trocado sem mudar a câmera nem o descarte.
+
+## D-010 · D-pad sem repetição e sem reposicionamento por enquanto (v0.2, 13/10/2026)
+
+**Contexto.** A §4.4 pede repetição a 180 ms e reposicionamento segurando o centro por 10 s.
+
+**Decisão.** A direção é estado mantido (§2.3), então a repetição não teria efeito e foi omitida. O dedo pode
+deslizar entre botões sem soltar. O reposicionamento fica para o marco 12 (HUD e acessibilidade).
+
+**Consequência.** O D-pad do marco 2 é fixo na faixa de controles.
+
+## D-011 · Regras finas de movimento (v0.2, 13/10/2026)
+
+**Contexto.** A §2.3 deixa alguns casos implícitos.
+
+**Decisão.**
+- A fila de 2 waypoints é reabastecida pelo caminho do `irPara`; o caminho parte do destino do passo em curso.
+- Entrada direcional cancela o caminho do `irPara`.
+- Só a **troca** de direção com menos de 50% do passo cancela o passo, e só quando a nova direção leva a
+  outra célula. Soltar a direção termina o passo em curso, para o personagem não ficar entre células.
+- Waypoint ocupado por entidade bloqueante: espera, mantendo o caminho. As 3 falhas que trocam de alvo
+  (§2.3, cache do perseguidor) valem para a IA no marco 3.
+
+## D-012 · Toque no mapa: segurar para seguir, arrastar para a câmera (v0.2, 13/10/2026)
+
+**Contexto.** A §4.8 pede "segurar recalcula o caminho conforme o dedo se move" e também "arrasto de câmera
+com zona morta", gestos que competem pelo mesmo dedo.
+
+**Decisão.** Toque curto sem arrastar vai até a célula. Segurar parado por 300 ms entra no modo seguir
+(o caminho é recalculado a cada célula sob o dedo). Mover além da zona morta antes disso arrasta a câmera.
+
+## D-013 · PWA com vite-plugin-pwa e Workbox (v0.2, 13/10/2026)
+
+**Contexto.** A §3.8 pede nome do cache derivado do hash do build, cache-first para assets e network-first
+para navegação.
+
+**Decisão.** O precache do Workbox versiona cada arquivo pela revisão (hash) e limpa caches antigos, o que
+cumpre o objetivo do nome derivado do hash. A navegação usa `NetworkFirst` com fallback para o
+`index.html` do precache, para a campanha abrir offline já na segunda visita.
+
+## D-014 · Botões de ação disparam no pointerdown (v0.2, 13/10/2026)
+
+**Contexto.** A §3.4 manda botões comuns usarem `click`. No celular, um segundo dedo tocando enquanto o
+primeiro segura o joystick nem sempre gera `click`, e mover e atacar ao mesmo tempo é requisito (§4.3, aceite 2).
+
+**Decisão.** Os botões de ação da faixa (ataque, interagir) disparam no `pointerdown`. O teclado aciona
+pelo `click` sem ponteiro (`detail === 0`), então a ação nunca dispara duas vezes. Os demais botões usam `click`.
+
+**Consequência.** Há teste ponta a ponta com dois toques simultâneos via CDP.
+
+## D-015 · Preferências no localStorage até o save (v0.2, 13/10/2026)
+
+**Decisão.** O tipo de controle e o modo da câmera ficam no `localStorage`, com falha silenciosa, até o store
+`perfil` do IndexedDB (§3.5) entrar no marco 6.
+
+## D-016 · Cor dos marcadores por equipe, provisória (v0.2, 13/10/2026)
+
+**Decisão.** Até existir `relacao()` (marco 3/4), os marcadores das entidades usam azul para o próprio jogador,
+verde para a mesma equipe e vermelho para as demais. Só a cor depende disso: nenhuma regra de jogo decide
+hostilidade pela equipe fora de `relacao()`.

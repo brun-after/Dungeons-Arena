@@ -1,6 +1,14 @@
 {
-  "versao": 1,
+  "versao": 2,
   "movimento": {
-    "velocidadeBaseMs": 400
+    "velocidadeBaseMs": 400,
+    "filaMaxWaypoints": 2
+  },
+  "navegacao": {
+    "maxPassosToque": 60
+  },
+  "colisao": {
+    "jogadorBloqueiaJogador": false,
+    "jogadorBloqueiaInimigo": false
   }
 }
