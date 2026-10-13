@@ -107,6 +107,18 @@ describe('validação de comandos (§3.6)', () => {
     expect(andou).toBeLessThanOrEqual(3);
   });
 
+  it('métricas da sala são acumuladas: não caem quando um jogador sai', () => {
+    const sala = novaSala();
+    const a = entrar(sala);
+    entrar(sala);
+    for (let i = 0; i < 30; i++) sala.tick(DT_MS);
+    const antes = sala.metricas().bytesEnviados;
+    expect(antes).toBeGreaterThan(0);
+    a.conexao.encerrar();
+    expect(sala.metricas().bytesEnviados).toBe(antes);
+    expect(sala.metricas().jogadores).toBe(1);
+  });
+
   it('o criador da sala não tem prioridade: orbe disputado vai para os dois ao longo dos ticks', () => {
     const vencedores = new Set<string>();
     for (let t = 0; t < 6; t++) {

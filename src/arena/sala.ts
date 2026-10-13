@@ -89,6 +89,8 @@ export class SalaArena {
   private readonly rngSessoes: EstadoRng;
   private readonly eventosDoTick: EventoSimulacao[] = [];
   private readonly patches = new GeradorDePatches();
+  private bytesTotais = 0;
+  private rejeicoesTotais = 0;
 
   constructor(
     readonly ctx: ContextoSimulacao,
@@ -103,24 +105,26 @@ export class SalaArena {
     return this.sessoes.size;
   }
 
+  /**
+   * Contadores acumulados da sala desde a criação. São monotônicos: quem sai não tira o que já
+   * foi enviado (a soma por sessão ficava negativa quando um jogador saía).
+   */
   metricas(): MetricasSala {
-    let bytesEnviados = 0;
-    let rejeicoes = 0;
-    for (const s of this.sessoes.values()) {
-      bytesEnviados += s.bytesEnviados;
-      rejeicoes += s.rejeicoes;
-    }
-    return { jogadores: this.sessoes.size, bytesEnviados, rejeicoes };
+    return { jogadores: this.sessoes.size, bytesEnviados: this.bytesTotais, rejeicoes: this.rejeicoesTotais };
   }
 
   conectar(enviarBruto: (texto: string) => void): Conexao {
     let sessao: Sessao | null = null;
     const enviar = (texto: string) => {
+      this.bytesTotais += texto.length;
       if (sessao) sessao.bytesEnviados += texto.length;
       enviarBruto(texto);
     };
     const responder = (msg: MensagemServidor) => {
-      if (sessao && msg.t === 'rejeitado') sessao.rejeicoes++;
+      if (msg.t === 'rejeitado') {
+        this.rejeicoesTotais++;
+        if (sessao) sessao.rejeicoes++;
+      }
       enviar(JSON.stringify(msg));
     };
     return {
