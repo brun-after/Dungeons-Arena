@@ -1,8 +1,9 @@
 # Implantação do servidor da arena
 
-**Versão:** 0.2 · **Data:** 13/10/2026
+**Versão:** 0.3 · **Data:** 13/10/2026
 
 > **Histórico**
+> - **0.3 (13/10/2026)**: IP estático `56.126.58.40` (`arena-sao-paulo-ip`) anexado; deploy tolera falha passageira de SSH.
 > - **0.2 (13/10/2026)**: a implantação atual passa a ser a **AWS Lightsail em São Paulo** (D-038). A Oracle não teve
 >   capacidade e fica como alternativa; o Render fica como reserva manual.
 > - **0.1 (13/10/2026)**: guia inicial da Etapa 4 (VM Oracle, DuckDNS, segredos) e do primeiro deploy.
@@ -26,7 +27,7 @@ sozinho pelo workflow **Implantar servidor**.
 | Endereço | `wss://dungeons-bruno.duckdns.org` (HTTPS/WSS com Let's Encrypt) |
 | Pasta na VM | `/opt/dungeons-arena` |
 | Portas públicas | 22 (SSH), 80 e 443. A porta 2567 do servidor fica presa a `127.0.0.1`: só o Caddy a alcança |
-| IP | **dinâmico** por enquanto (sem IP estático; veja "Pendências") |
+| IP | **estático** `56.126.58.40` (recurso `arena-sao-paulo-ip`), sem custo enquanto anexado à instância ([AWS](https://docs.aws.amazon.com/lightsail/latest/userguide/understanding-static-ip-addresses-in-amazon-lightsail.html)) |
 
 > **Custo.** O plano é **pago** (US$ 7/mês) e hoje é coberto pelos créditos da conta AWS. **Não** é hospedagem
 > gratuita permanente: quando os créditos acabarem, a cobrança vai para o cartão. Os limites gratuitos da Oracle (VM A1,
@@ -45,23 +46,19 @@ Os números são amostras de uma conexão; não são garantia de latência.
 ### Pendências
 
 1. **Teste com dois celulares em redes diferentes** (Wi-Fi e 4G): veja "Como testar a arena online".
-2. **IP estático.** O IP público do Lightsail muda se a instância for parada e iniciada (reiniciar não muda). Escolha
-   uma das opções:
-   - **Recomendado:** Lightsail → **Networking** → **Create static IP**, anexado a `arena-sao-paulo`. Pela tabela de
-     preços do Lightsail, o IP estático não tem custo enquanto está anexado a uma instância, e é cobrado se ficar
-     solto. Confira a página de preços antes de criar.
-     Depois de anexar, o IP muda uma última vez: atualize o DuckDNS e o segredo `VM_HOST` (procedimento abaixo).
-   - Sem IP estático: siga o procedimento "Se o IP mudar" toda vez que parar e iniciar a VM.
-3. **Custos e créditos.** Os créditos ficam em **Billing and Cost Management** → **Credits**. Lá dá para conferir o saldo e
+2. **Custos e créditos.** Os créditos ficam em **Billing and Cost Management** → **Credits**. Lá dá para conferir o saldo e
    a data de validade.
    Crie um alerta em **Budgets** → **Create budget** → **Cost budget**, com limite mensal de US$ 1 e avisos por e-mail
    em 80% e 100% do custo **real**. Inclua os créditos no cálculo se quiser ser avisado pelo gasto bruto. O alerta da
    Oracle não cobre a AWS.
-4. **Script de preparação.** A VM foi preparada com comandos manuais equivalentes. O script
+3. **Script de preparação.** A VM foi preparada com comandos manuais equivalentes. O script
    [`tools/deploy/preparar-vm.sh`](../tools/deploy/preparar-vm.sh) agora serve para AWS e Oracle e é idempotente. Rodá-lo
    na VM atual é opcional: ele confere o Docker, a pasta, o swap (útil com 1 GB de RAM) e as atualizações automáticas.
 
 ### Se o IP mudar
+
+Com o IP estático anexado, isso só acontece se ele for desanexado ou se a instância for recriada.
+Um IP estático solto (sem instância) passa a ser cobrado: desanexe só para anexar a outra instância.
 
 1. Lightsail → instância → anote o novo **Public IPv4**.
 2. DuckDNS → no subdomínio `dungeons-bruno`, coloque o novo IP em **current ip** → **update ip**.
@@ -90,7 +87,7 @@ Os números são amostras de uma conexão; não são garantia de latência.
    HTTP (80) já vêm abertos, e o HTTP é necessário para o Let's Encrypt.
    **Não** abra a 2567.
 4. **IP estático e DuckDNS**:
-   - crie e anexe o IP estático (Pendência 2);
+   - crie e anexe um IP estático (Lightsail → **Networking** → **Create static IP**), ou reanexe o atual;
    - no <https://www.duckdns.org>, aponte o subdomínio para esse IP.
 5. **Preparar a VM**: entre por SSH e rode o script.
 
