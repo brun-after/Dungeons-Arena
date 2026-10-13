@@ -1,125 +1,188 @@
-# Implantação do servidor da arena (Oracle Cloud Always Free)
+# Implantação do servidor da arena
 
-**Versão:** 0.1 · **Data:** 13/10/2026
+**Versão:** 0.2 · **Data:** 13/10/2026
 
 > **Histórico**
-> - **0.1 (13/10/2026)**: guia inicial da Etapa 4 (VM, DuckDNS, segredos) e do primeiro deploy.
+> - **0.2 (13/10/2026)**: a implantação atual passa a ser a **AWS Lightsail em São Paulo** (D-038). A Oracle não teve
+>   capacidade e fica como alternativa; o Render fica como reserva manual.
+> - **0.1 (13/10/2026)**: guia inicial da Etapa 4 (VM Oracle, DuckDNS, segredos) e do primeiro deploy.
 
-Este guia leva o servidor da arena para a nuvem **sem custo**: uma VM ARM no plano *Always Free* da Oracle, um
-endereço grátis no DuckDNS e certificado HTTPS automático (Caddy + Let's Encrypt). Depois de pronto, cada merge na
-`main` atualiza o servidor sozinho.
+O servidor da arena roda numa VM com Docker Compose (servidor, Redis e Caddy). O endereço vem do DuckDNS e o
+certificado HTTPS é automático (Caddy + Let's Encrypt). Depois de configurado, cada merge na `main` atualiza o servidor
+sozinho pelo workflow **Implantar servidor**.
 
-Tempo estimado: 1 a 2 horas, a maior parte esperando telas da Oracle.
-
-> **Segurança.** Senhas, chaves e tokens você digita **só** nos sites oficiais (Oracle, DuckDNS, GitHub). Nunca os
+> **Segurança.** Senhas, chaves e tokens você digita **só** nos sites oficiais (AWS, Oracle, DuckDNS, GitHub). Nunca os
 > cole no chat nem em arquivos do repositório.
 
 ---
 
-## Passo 1 — Conta Oracle Cloud
+## Implantação atual: AWS Lightsail (São Paulo)
 
-1. Acesse <https://www.oracle.com/cloud/free/> e clique em **Start for free**.
-2. **Home region**: escolha **Brazil East (São Paulo)**. Ela **não pode ser trocada depois** e é onde ficam os recursos grátis.
-3. O cartão é só para verificação: a Oracle faz uma retenção temporária de cerca de US$ 1 e devolve. Não aceite
-   nenhum "upgrade" para conta paga.
-4. Depois de entrar, crie o **alerta de orçamento**: menu ☰ → **Billing & Cost Management** → **Budgets** →
-   **Create Budget**. Use valor **1** (USD) e alerta em **1%**, com o seu e-mail. Assim, se algo sair do grátis, você
-   fica sabendo na hora.
-
-## Passo 2 — Chave SSH no seu Windows
-
-No PowerShell (fora do jogo, numa janela comum):
-
-```bash
-ssh-keygen -t ed25519 -f "$HOME\.ssh\dungeons_arena" -C "deploy-dungeons-arena"
-```
-
-Aperte Enter nas perguntas de senha (deixe vazia: o GitHub Actions vai usar essa chave).
-Isso cria dois arquivos em `C:\Users\<você>\.ssh\`:
-- `dungeons_arena.pub` → **pública**, vai para a Oracle;
-- `dungeons_arena` → **privada**, vai só para o segredo do GitHub (Passo 6). Não compartilhe.
-
-## Passo 3 — Criar a VM
-
-Menu ☰ → **Compute** → **Instances** → **Create instance**:
-
-| Campo | Valor |
+| Item | Valor |
 |---|---|
-| Name | `dungeons-arena` |
-| Image | **Canonical Ubuntu 24.04** |
-| Shape | **Ampere** → `VM.Standard.A1.Flex` com **2 OCPU** e **12 GB** de memória |
-| Networking | deixe criar a VCN padrão, com **Assign a public IPv4 address** marcado |
-| Add SSH keys | **Paste public keys** → cole o conteúdo de `dungeons_arena.pub` |
-| Boot volume | padrão (até 200 GB é grátis) |
+| Instância | `arena-sao-paulo`, Ubuntu 24.04, **amd64** (x86_64) |
+| Plano | 2 vCPU, **1 GB** de RAM, 40 GB SSD, **US$ 7/mês** |
+| Região / zona | `sa-east-1` / `sa-east-1a` |
+| Endereço | `wss://dungeons-bruno.duckdns.org` (HTTPS/WSS com Let's Encrypt) |
+| Pasta na VM | `/opt/dungeons-arena` |
+| Portas públicas | 22 (SSH), 80 e 443. A porta 2567 do servidor fica presa a `127.0.0.1`: só o Caddy a alcança |
+| IP | **dinâmico** por enquanto (sem IP estático; veja "Pendências") |
 
-Clique em **Create**. Quando ficar **Running**, anote o **Public IP address**.
+> **Custo.** O plano é **pago** (US$ 7/mês) e hoje é coberto pelos créditos da conta AWS. **Não** é hospedagem
+> gratuita permanente: quando os créditos acabarem, a cobrança vai para o cartão. Os limites gratuitos da Oracle (VM A1,
+> 10 TB de tráfego etc.) **não** valem aqui.
 
-> **"Out of capacity"?** É comum na região. Tente de novo em outro horário (cedo de manhã costuma funcionar) ou
-> com 1 OCPU / 6 GB. Se não der de jeito nenhum, me avise: o plano B grátis é o Render (o servidor dorme sem uso).
+### Validação feita em 13/10/2026
 
-## Passo 4 — Abrir as portas 80 e 443
+- `https://dungeons-bruno.duckdns.org/saude` responde `ok: true` e `regiao: sa-east-1`.
+- Dois clientes WSS por 10 s: RTT de cerca de 20 ms, zero rejeições e zero ressincronizações.
+- O criador saiu e a sala continuou ativa.
+- No navegador, o lobby mostrou ping de 22 ms; o jogo funcionou.
+- Os workflows **Implantar servidor** e **Publicar no GitHub Pages** concluíram com sucesso.
 
-1. Na página da instância, clique na **Subnet** → na **Security List** padrão → **Add Ingress Rules**.
-2. Adicione duas regras com **Source CIDR** `0.0.0.0/0`, **IP Protocol** TCP e **Destination Port** `80` e `443`.
+Os números são amostras de uma conexão; não são garantia de latência.
 
-(O firewall de dentro da VM é aberto pelo script do Passo 5.)
+### Pendências
 
-## Passo 5 — Endereço grátis (DuckDNS) e preparação da VM
+1. **Teste com dois celulares em redes diferentes** (Wi-Fi e 4G): veja "Como testar a arena online".
+2. **IP estático.** O IP público do Lightsail muda se a instância for parada e iniciada (reiniciar não muda). Escolha
+   uma das opções:
+   - **Recomendado:** Lightsail → **Networking** → **Create static IP**, anexado a `arena-sao-paulo`. Pela tabela de
+     preços do Lightsail, o IP estático não tem custo enquanto está anexado a uma instância, e é cobrado se ficar
+     solto. Confira a página de preços antes de criar.
+     Depois de anexar, o IP muda uma última vez: atualize o DuckDNS e o segredo `VM_HOST` (procedimento abaixo).
+   - Sem IP estático: siga o procedimento "Se o IP mudar" toda vez que parar e iniciar a VM.
+3. **Custos e créditos.** Os créditos ficam em **Billing and Cost Management** → **Credits**. Lá dá para conferir o saldo e
+   a data de validade.
+   Crie um alerta em **Budgets** → **Create budget** → **Cost budget**, com limite mensal de US$ 1 e avisos por e-mail
+   em 80% e 100% do custo **real**. Inclua os créditos no cálculo se quiser ser avisado pelo gasto bruto. O alerta da
+   Oracle não cobre a AWS.
+4. **Script de preparação.** A VM foi preparada com comandos manuais equivalentes. O script
+   [`tools/deploy/preparar-vm.sh`](../tools/deploy/preparar-vm.sh) agora serve para AWS e Oracle e é idempotente. Rodá-lo
+   na VM atual é opcional: ele confere o Docker, a pasta, o swap (útil com 1 GB de RAM) e as atualizações automáticas.
 
-1. Acesse <https://www.duckdns.org>, entre com GitHub ou Google, crie um subdomínio (ex.: `dungeons-bruno`) e, em
-   **current ip**, coloque o IP público da VM. Clique em **update ip**.
-   O endereço fica `dungeons-bruno.duckdns.org`.
-2. Entre na VM pelo PowerShell:
+### Se o IP mudar
+
+1. Lightsail → instância → anote o novo **Public IPv4**.
+2. DuckDNS → no subdomínio `dungeons-bruno`, coloque o novo IP em **current ip** → **update ip**.
+3. GitHub → **Settings** → **Secrets and variables** → **Actions** → edite `VM_HOST` com o novo IP.
+4. Espere alguns minutos e abra `https://dungeons-bruno.duckdns.org/saude`. Se o certificado reclamar, rode o workflow
+   **Implantar servidor** de novo (o Caddy renova sozinho quando o domínio volta a apontar para a VM).
+
+`ARENA_URL` não muda: o jogo usa o domínio, nunca o IP.
+
+### Como recriar do zero (outra instância Lightsail)
+
+1. **Chave SSH de deploy** no seu Windows (PowerShell). Deixe a senha vazia, porque o GitHub Actions usa essa chave:
+
+   ```bash
+   ssh-keygen -t ed25519 -f "$HOME\.ssh\dungeons_arena" -C "deploy-dungeons-arena"
+   ```
+
+   - `dungeons_arena.pub` é a chave **pública**, que vai para a VM.
+   - `dungeons_arena` é a chave **privada**, que vai só para o segredo `VM_SSH_KEY`.
+   - Use uma chave exclusiva para o deploy e revogue a anterior quando trocar.
+2. **Instância**: Lightsail → **Create instance**.
+   - Região **São Paulo** (`sa-east-1`), plataforma **Linux/Unix**, blueprint **OS Only → Ubuntu 24.04 LTS**.
+   - Use a chave do passo 1.
+   - Escolha o plano e dê o nome `arena-sao-paulo`.
+3. **Firewall**: na instância, abra **Networking** → **IPv4 Firewall** e adicione **HTTPS (TCP 443)**. O SSH (22) e o
+   HTTP (80) já vêm abertos, e o HTTP é necessário para o Let's Encrypt.
+   **Não** abra a 2567.
+4. **IP estático e DuckDNS**:
+   - crie e anexe o IP estático (Pendência 2);
+   - no <https://www.duckdns.org>, aponte o subdomínio para esse IP.
+5. **Preparar a VM**: entre por SSH e rode o script.
 
    ```bash
    ssh -i "$HOME\.ssh\dungeons_arena" ubuntu@IP_DA_VM
    ```
 
-3. Dentro da VM, rode o script de preparação do repositório (instala Docker, abre as portas, cria a pasta do servidor):
-
    ```bash
    curl -fsSL https://raw.githubusercontent.com/brun-after/Dungeons-Arena/main/tools/deploy/preparar-vm.sh | sudo bash
    ```
 
-   No fim ele mostra **OK**. Pode sair com `exit`.
+6. **GitHub**: configure os segredos e a variável da seção "Segredos e variável no GitHub" abaixo.
+7. **Deploy**: na aba **Actions**, abra **Implantar servidor** e clique em **Run workflow**. Depois rode **Publicar no
+   GitHub Pages**.
 
-## Passo 6 — Segredos e variável no GitHub
+---
+
+## Segredos e variável no GitHub
 
 No repositório: **Settings** → **Secrets and variables** → **Actions**.
 
-**Secrets** (aba *Secrets*, botão *New repository secret*):
+| Tipo | Nome | Valor |
+|---|---|---|
+| Secret | `VM_HOST` | IP público da VM |
+| Secret | `VM_USER` | `ubuntu` |
+| Secret | `VM_SSH_KEY` | conteúdo **inteiro** da chave **privada** de deploy |
+| Secret | `DOMINIO` | `dungeons-bruno.duckdns.org` |
+| Variable | `ARENA_URL` | `wss://dungeons-bruno.duckdns.org` |
 
-| Nome | Valor |
-|---|---|
-| `VM_HOST` | o IP público da VM |
-| `VM_USER` | `ubuntu` |
-| `VM_SSH_KEY` | o conteúdo **inteiro** do arquivo `dungeons_arena` (a chave **privada**) |
-| `DOMINIO` | o seu subdomínio, ex.: `dungeons-bruno.duckdns.org` |
+Sem `ARENA_URL`, o workflow de deploy fica desligado e o Pages publica o jogo sem arena online.
 
-**Variables** (aba *Variables*, botão *New repository variable*):
+## O que o deploy faz
 
-| Nome | Valor |
-|---|---|
-| `ARENA_URL` | `wss://dungeons-bruno.duckdns.org` (com o seu subdomínio) |
+O workflow [`deploy-servidor.yml`](../.github/workflows/deploy-servidor.yml) roda a cada merge na `main` ou
+manualmente:
 
-## Passo 7 — Primeiro deploy
+1. gera a imagem do servidor para **amd64 e arm64** (QEMU + Buildx) e publica no GitHub Container Registry. Assim a
+   mesma imagem serve à AWS (amd64) e à Oracle (arm64);
+2. entra na VM por SSH, grava o `.env` (`IMAGEM_SERVIDOR`, `DOMINIO`, `REGIAO=sa-east-1`) e sobe `servidor`, `redis` e
+   `caddy` com `docker compose --profile producao`;
+3. confere `https://DOMINIO/saude`.
 
-Aba **Actions** → workflow **Implantar servidor** → **Run workflow**. Ele:
-1. gera a imagem ARM do servidor e publica no GitHub Container Registry;
-2. entra na VM por SSH e sobe `servidor`, `redis` e `caddy` com Docker Compose;
-3. confere `https://SEU-DOMINIO/saude`.
-
-Quando ficar verde, abra `https://SEU-DOMINIO/saude` no navegador: deve aparecer `{"ok":true,...}`.
-Depois, rode o workflow **Publicar no GitHub Pages** (ou faça qualquer merge) para o jogo apontar para o servidor.
+> Se a VM mudar de região, ajuste `REGIAO` no workflow: é o texto que o lobby mostra antes de entrar.
 
 ## Como testar a arena online
 
 1. No celular, abra o jogo pelo Pages e escolha **Arena online** → **Criar sala**. Aparece um código de 6 letras.
 2. Em outro celular, **em outra rede** (um no Wi-Fi e outro no 4G), escolha **Entrar com código**.
 3. Joguem juntos; depois, quem criou a sala sai: o outro continua jogando.
+4. Opcional, do seu PC: rode o comando abaixo para registrar os números em `docs/BENCHMARKS.md`.
 
-## Custos e limites
+   ```bash
+   npm run carga -- --url wss://dungeons-bruno.duckdns.org --clientes 10 --segundos 60 --registrar
+   ```
 
-- VM A1 (até 4 OCPU / 24 GB no total da conta), 200 GB de disco e 10 TB/mês de tráfego: grátis no *Always Free*.
-- DuckDNS, Let's Encrypt, GitHub (repositório público, Actions e Container Registry): grátis.
-- O alerta de orçamento do Passo 1 avisa se algo sair do grátis.
+---
+
+## Alternativas
+
+### Oracle Cloud Always Free (plano original)
+
+Em 13/10/2026 a Oracle respondeu **"Out of capacity"** em São Paulo, com 2 OCPU / 12 GB e com 1 OCPU / 6 GB, e nenhuma VM
+foi criada. Se um dia houver capacidade, ela continua sendo a opção sem custo: a imagem já é publicada para arm64 e o
+script de preparação trata o firewall da Oracle.
+
+1. **Conta**: em <https://www.oracle.com/cloud/free/>, escolha a home region **Brazil East (São Paulo)**. Ela não pode ser
+   trocada depois. O cartão é só para verificação; não aceite "upgrade" para conta paga.
+2. **Alerta de orçamento**: **Billing & Cost Management** → **Budgets** → **Create Budget**, com valor 1 (USD) e alerta em
+   1%.
+3. **VM**: **Compute** → **Instances** → **Create instance**, com estas opções:
+   - imagem **Canonical Ubuntu 24.04**;
+   - shape `VM.Standard.A1.Flex` (**Ampere**, arm64) com 2 OCPU / 12 GB;
+   - IPv4 público;
+   - a chave pública de deploy.
+
+   Se aparecer "Out of capacity", tente outro horário ou 1 OCPU / 6 GB.
+4. **Portas**: **Subnet** → **Security List** → **Add Ingress Rules**, com TCP `80` e `443` e origem `0.0.0.0/0`. O
+   firewall interno da imagem Oracle é aberto pelo script.
+5. **DuckDNS, script, segredos e deploy**: siga os passos 4 a 7 de "Como recriar do zero". O usuário SSH também é `ubuntu`.
+   Ajuste `REGIAO` no workflow para `sa-saopaulo-1`.
+6. **Limites do Always Free** (valem só para a Oracle): VM A1 com até 4 OCPU / 24 GB somados na conta, 200 GB de disco e
+   10 TB/mês de tráfego.
+
+### Render (reserva manual)
+
+Há um serviço do servidor no Render, em Virgínia (EUA). Ele continua disponível, mas **não há failover automático**.
+Numa amostra de HTTPS com conexão reutilizada, a mediana foi de **176,9 ms** no Render contra **15,4 ms** na AWS em São
+Paulo, e por isso ele não é o principal.
+
+Para usá-lo numa emergência:
+
+1. troque a variável `ARENA_URL` para o endereço `wss://` do serviço no Render;
+2. rode **Publicar no GitHub Pages**.
+
+Para voltar, restaure `wss://dungeons-bruno.duckdns.org` e publique de novo.

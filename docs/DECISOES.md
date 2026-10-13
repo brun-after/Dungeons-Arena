@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.7 · **Data:** 13/10/2026
+**Versão:** 0.8 · **Data:** 13/10/2026
 
 > **Histórico**
+> - **0.8 (13/10/2026)**: D-038 (servidor da arena na AWS Lightsail em São Paulo); D-001 parcialmente superada.
 > - **0.7 (13/10/2026)**: decisões D-035 a D-037, tomadas no marco 5A (servidor real).
 > - **0.6 (13/10/2026)**: decisões D-033 e D-034, tomadas no marco 4B (loopback).
 > - **0.5 (13/10/2026)**: decisões D-028 a D-032, tomadas no marco 4A (regras da arena).
@@ -30,6 +31,9 @@ A §3.6 deixa TLS, endpoint e armazenamento para o deploy.
 
 **Consequência.** Uma única região de servidor. A arena precisa informar essa limitação aos jogadores
 (§3.6, "Justiça"). A conta Oracle mantém alerta de orçamento para evitar cobranças.
+
+> **Parcialmente superada por D-038 (v0.8).** O cliente continua no GitHub Pages. O servidor da arena foi para a AWS
+> Lightsail em São Paulo, porque a Oracle não teve capacidade. A Oracle fica como alternativa.
 
 ## D-002 · Pacote único na raiz (v0.1, 13/10/2026)
 
@@ -355,3 +359,30 @@ a métrica `tickP95Ms`/`tickP99Ms`, registrada a cada 10 s.
 
 **Medição local.** Tick isolado (10 jogadores conectados, sem rede): p95 1,1 ms, p99 2,4 ms. Com o gerador de carga
 na mesma máquina, o p95 variou de 8 a 30 ms por disputa de CPU; a medição oficial é na VM, com a carga vindo de fora.
+
+## D-038 · Servidor da arena na AWS Lightsail em São Paulo (v0.8, 13/10/2026)
+
+**Contexto.** D-001 previa uma VM Oracle *Always Free*. Na Etapa 4, a Oracle respondeu "Out of capacity" em São Paulo,
+tanto com 2 OCPU / 12 GB quanto com 1 OCPU / 6 GB, e nenhuma VM foi criada. Um serviço no Render (Virgínia) funcionou.
+Numa amostra de HTTPS com conexão reutilizada, a mediana foi de 176,9 ms no Render e de 15,4 ms numa VM AWS em São Paulo.
+A latência pesa na justiça da arena (§3.6).
+
+**Decisão.**
+- O servidor principal é uma instância **AWS Lightsail** `arena-sao-paulo` em `sa-east-1a`, com estas características:
+  - Ubuntu 24.04 **amd64**, 2 vCPU, 1 GB de RAM e 40 GB SSD;
+  - plano de **US$ 7/mês**, coberto pelos créditos da conta.
+- A stack não muda: Docker Compose com servidor, Redis e Caddy; HTTPS/WSS por Let's Encrypt; endereço
+  `dungeons-bruno.duckdns.org`.
+- A imagem do servidor passa a ser publicada para **amd64 e arm64** (QEMU + Buildx), para servir à AWS e à Oracle.
+- A região mostrada no lobby é `sa-east-1`.
+- A porta 2567 fica presa a `127.0.0.1`; só 80/443 (Caddy) são públicas.
+- **Oracle** continua como alternativa sem custo, documentada em `docs/IMPLANTACAO.md`. O **Render** fica como reserva
+  manual, **sem failover automático**: trocar exige mudar `ARENA_URL` e republicar o Pages.
+
+**Consequência.**
+- A arena **deixa de ser hospedagem gratuita permanente**: custa US$ 7/mês, hoje pagos com créditos. O controle de
+  custo é pelos créditos e pelos alertas do AWS Budgets. O alerta da Oracle não vale aqui, e os limites do *Always Free*
+  (tráfego, disco, OCPU) não se aplicam.
+- Enquanto não houver IP estático, parar e iniciar a VM muda o IP. Nesse caso é preciso atualizar o DuckDNS e o segredo
+  `VM_HOST`.
+- Com 1 GB de RAM, o script de preparação cria swap de 2 GB. A medição de carga oficial (marco 5B) é feita nesta VM.
