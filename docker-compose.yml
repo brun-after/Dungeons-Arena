@@ -15,7 +15,7 @@ services:
       REGIAO: ${REGIAO:-local}
     ports:
       # Exposto só para uso local; na VM o firewall libera apenas 80/443 (o Caddy).
-      - '2567:2567'
+      - '127.0.0.1:2567:2567'
     restart: unless-stopped
 
   # Armazenamento externo ao processo para os checkpoints da arena (§3.6, marco 9B).

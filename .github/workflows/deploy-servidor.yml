@@ -1,6 +1,6 @@
 name: Implantar servidor
 
-# Gera a imagem arm64 do servidor, publica no GitHub Container Registry e atualiza a VM por SSH.
+# Gera imagens amd64 e arm64 do servidor, publica no GitHub Container Registry e atualiza a VM por SSH.
 # Só roda quando a VM estiver configurada (variável ARENA_URL e segredos VM_*; docs/IMPLANTACAO.md).
 
 on:
@@ -21,11 +21,13 @@ env:
 
 jobs:
   imagem:
-    name: Imagem arm64
+    name: Imagem amd64 e arm64
     if: ${{ vars.ARENA_URL != '' }}
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -34,7 +36,7 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: .
-          platforms: linux/arm64
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             ${{ env.IMAGEM }}:${{ github.sha }}
@@ -71,7 +73,7 @@ jobs:
           ssh -i ~/.ssh/vm "$VM_USER@$VM_HOST" bash -s <<EOF
           set -euo pipefail
           cd /opt/dungeons-arena
-          printf 'IMAGEM_SERVIDOR=%s\nDOMINIO=%s\nREGIAO=%s\n' '${{ env.IMAGEM }}:${{ github.sha }}' '$DOMINIO' 'sa-saopaulo-1' > .env
+          printf 'IMAGEM_SERVIDOR=%s\nDOMINIO=%s\nREGIAO=%s\n' '${{ env.IMAGEM }}:${{ github.sha }}' '$DOMINIO' 'sa-east-1' > .env
           echo '$TOKEN' | docker login ghcr.io -u '${{ github.actor }}' --password-stdin
           docker compose --profile producao pull
           docker compose --profile producao up -d --remove-orphans
