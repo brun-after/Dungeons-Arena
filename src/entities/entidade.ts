@@ -215,6 +215,19 @@ export function criarEntidade(n: NovaEntidade): Entidade {
   };
 }
 
+export interface PontoVisual {
+  x: number;
+  y: number;
+}
+
+/** Posição contínua em células: origem do passo + fração do caminho até o destino. */
+export function posicaoNoPasso(e: Entidade): PontoVisual {
+  return {
+    x: e.x + (e.destinoX - e.x) * e.progressoPasso,
+    y: e.y + (e.destinoY - e.y) * e.progressoPasso,
+  };
+}
+
 export function emPasso(e: Entidade): boolean {
   return e.destinoX !== e.x || e.destinoY !== e.y;
 }

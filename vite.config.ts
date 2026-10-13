@@ -54,7 +54,7 @@ export default defineConfig({
     }),
   ],
   test: {
-    include: ['tests/unit/**/*.test.ts', 'tests/sim/**/*.test.ts'],
+    include: ['tests/unit/**/*.test.ts', 'tests/sim/**/*.test.ts', 'tests/net/**/*.test.ts'],
     environment: 'node',
   },
 });

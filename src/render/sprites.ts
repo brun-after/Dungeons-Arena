@@ -10,7 +10,7 @@ import { movimentoBloqueado } from '../combat/efeitos';
 import type { Arquetipo, Entidade } from '../entities/entidade';
 import { relacao } from '../modos/relacao';
 import { CELULA_PX } from './camera-calculo';
-import type { Interpolador } from './interpolacao';
+import type { PontoVisual } from './interpolacao';
 
 const COR_PROPRIO = 0x3498db;
 const COR_ALIADO = 0x27ae60;
@@ -104,7 +104,17 @@ export class CamadaEntidades {
     return { raiz, corpo, seta, barras, aneis, indicador, angulo: 0, ultimoX: e.x, ultimoY: e.y, escala };
   }
 
-  desenhar(estado: EstadoJogo, ctx: ContextoSimulacao, interp: Interpolador, alpha: number): void {
+  /**
+   * posicao diz onde desenhar cada entidade: na campanha, a interpolação entre ticks; na arena,
+   * a predição para o próprio jogador e a interpolação remota para os outros.
+   */
+  desenhar(
+    estado: EstadoJogo,
+    ctx: ContextoSimulacao,
+    posicao: (e: Entidade) => PontoVisual,
+    alpha: number,
+    aoRemover?: (id: string) => void,
+  ): void {
     const local = estado.entidades.find((e) => e.id === this.idLocal);
     const vistos = new Set<string>();
     const tickVisual = estado.tick + alpha;
@@ -125,7 +135,7 @@ export class CamadaEntidades {
       m.ultimoX = e.x;
       m.ultimoY = e.y;
 
-      const p = interp.posicao(e, alpha);
+      const p = posicao(e);
       m.raiz.position.set((p.x + 0.5) * CELULA_PX, (p.y + 0.5) * CELULA_PX);
       m.seta.rotation = m.angulo;
       m.seta.visible = e.arquetipo !== 'boneco';
@@ -142,7 +152,7 @@ export class CamadaEntidades {
       if (vistos.has(id)) continue;
       m.raiz.destroy({ children: true });
       this.marcadores.delete(id);
-      interp.esquecer(id);
+      aoRemover?.(id);
     }
     this.camada.children.sort((a, b) => a.position.y - b.position.y);
   }

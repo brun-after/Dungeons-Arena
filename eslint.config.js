@@ -48,6 +48,7 @@ export default tseslint.config(
       'src/modos/**/*.ts',
       'src/progression/**/*.ts',
       'src/arena/**/*.ts',
+      'src/net/**/*.ts',
       'server/**/*.ts',
       'shared/**/*.ts',
     ],

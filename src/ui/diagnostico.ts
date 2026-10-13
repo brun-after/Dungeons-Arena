@@ -6,6 +6,16 @@ import { t } from '../i18n';
 const QUADROS = 240;
 const INTERVALO_MS = 500;
 
+/** Indicador de rede da arena (§2.15): latência, correção e estado da conexão. */
+export interface DadosRede {
+  rttMs: number;
+  /** Latência simulada de ida, no loopback. */
+  latenciaSimuladaMs: number;
+  /** p95 do erro de correção (células) nas últimas reconciliações. */
+  erroP95: number;
+  conectado: boolean;
+}
+
 export interface DadosDiagnostico {
   tick: number;
   celula: { x: number; y: number };
@@ -14,6 +24,7 @@ export interface DadosDiagnostico {
   impactos: number;
   hp: number;
   zoom: number;
+  rede?: DadosRede;
 }
 
 export class Diagnostico {
@@ -51,7 +62,12 @@ export class Diagnostico {
     const d = dados();
     this.elemento.textContent =
       `fps ${(1000 / Math.max(1, media)).toFixed(0)} · p95 ${p95.toFixed(1)} ms · tick ${d.tick}` +
-      ` · célula ${d.celula.x},${d.celula.y} · entidades ${d.entidades} · zoom ${d.zoom.toFixed(2)}`;
+      ` · célula ${d.celula.x},${d.celula.y} · entidades ${d.entidades} · zoom ${d.zoom.toFixed(2)}` +
+      (d.rede ? ` · rtt ${d.rede.rttMs.toFixed(0)} ms · correção p95 ${d.rede.erroP95.toFixed(2)}` : '');
+    if (d.rede) {
+      this.elemento.dataset.rtt = d.rede.rttMs.toFixed(0);
+      this.elemento.dataset.erroP95 = d.rede.erroP95.toFixed(3);
+    }
     this.elemento.dataset.tick = String(d.tick);
     this.elemento.dataset.celula = `${d.celula.x},${d.celula.y}`;
     this.elemento.dataset.tela = `${Math.round(d.tela.x)},${Math.round(d.tela.y)}`;

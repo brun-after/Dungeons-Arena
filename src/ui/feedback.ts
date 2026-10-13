@@ -11,7 +11,8 @@ import type { Hud } from './hud';
 
 export interface OpcoesFeedback {
   bus: Barramento<EventosDaSimulacao>;
-  estado: EstadoJogo;
+  /** Função, porque na arena o estado é trocado a cada reconciliação. */
+  estado: () => EstadoJogo;
   idLocal: string;
   numeros: CamadaNumeros;
   hud: Hud;
@@ -24,11 +25,11 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
   const nomes = new Map<string, string>();
   const nome = (id: string | null) => {
     if (!id) return '?';
-    const e = estado.entidades.find((x) => x.id === id);
+    const e = estado().entidades.find((x) => x.id === id);
     if (e) nomes.set(id, e.id === idLocal ? 'Você' : e.nome);
     return nomes.get(id) ?? id;
   };
-  const posicao = (id: string) => estado.entidades.find((x) => x.id === id) ?? null;
+  const posicao = (id: string) => estado().entidades.find((x) => x.id === id) ?? null;
   let impactos = 0;
 
   bus.on('impacto', (ev) => {
@@ -93,6 +94,6 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
   });
 
   // Registra os nomes iniciais.
-  for (const e of estado.entidades) nome(e.id);
+  for (const e of estado().entidades) nome(e.id);
   return { impactos: () => impactos };
 }
