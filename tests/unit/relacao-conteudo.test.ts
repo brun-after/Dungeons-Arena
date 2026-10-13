@@ -5,12 +5,10 @@ import { FONTES_OFICIAIS, lerConteudo } from '../../src/core/conteudo';
 import type { ModoDeJogo } from '../../src/modos/modo';
 import { podeFerir, relacao } from '../../src/modos/relacao';
 
-const modo = (politicaRelacao: ModoDeJogo['politicaRelacao'], fogoAmigo = false): ModoDeJogo => ({
-  id: 'm',
-  nome: 'm',
-  politicaRelacao,
-  fogoAmigo,
-});
+const modo = (
+  politicaRelacao: ModoDeJogo['politicaRelacao'],
+  fogoAmigo = false,
+): Pick<ModoDeJogo, 'politicaRelacao' | 'fogoAmigo'> => ({ politicaRelacao, fogoAmigo });
 
 describe('relacao() (§2.5)', () => {
   const a = { id: 'a', equipe: 'azul' };
@@ -26,8 +24,20 @@ describe('relacao() (§2.5)', () => {
     expect(relacao(a, c, modo('por_equipe'))).toBe('hostil');
   });
 
-  it('todos hostis (Livre) e todos aliados (Horda) ignoram a equipe', () => {
-    expect(relacao(a, b, modo('todos_hostis'))).toBe('hostil');
+  it('todos hostis (Livre): hostil entre equipes; mesma equipe é o próprio jogador e subordinados (D-028)', () => {
+    const jogador1 = { id: 'p1', equipe: 'jogador:p1' };
+    const invocacaoDoP1 = { id: 'inv', equipe: 'jogador:p1' };
+    const jogador2 = { id: 'p2', equipe: 'jogador:p2' };
+    const npc1 = { id: 'n1', equipe: 'inimigos' };
+    const npc2 = { id: 'n2', equipe: 'inimigos' };
+    const livre = modo('todos_hostis');
+    expect(relacao(jogador1, jogador2, livre)).toBe('hostil');
+    expect(relacao(jogador1, invocacaoDoP1, livre)).toBe('aliado');
+    expect(relacao(npc1, npc2, livre)).toBe('aliado');
+    expect(relacao(npc1, jogador2, livre)).toBe('hostil');
+  });
+
+  it('todos aliados (Horda) ignora a equipe', () => {
     expect(relacao(a, c, modo('todos_aliados'))).toBe('aliado');
   });
 

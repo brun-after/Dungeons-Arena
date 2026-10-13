@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.4 · **Data:** 13/10/2026
+**Versão:** 0.5 · **Data:** 13/10/2026
 
 > **Histórico**
+> - **0.5 (13/10/2026)**: decisões D-028 a D-032, tomadas no marco 4A (regras da arena).
 > - **0.4 (13/10/2026)**: decisões D-024 a D-027, tomadas no marco 3B (IA); D-023 ampliada.
 > - **0.3 (13/10/2026)**: decisões D-017 a D-023, tomadas no marco 3A (combate); D-016 superada.
 > - **0.2 (13/10/2026)**: decisões D-007 a D-016, tomadas no marco 2 (fase, movimento, câmera e controles).
@@ -270,3 +271,41 @@ origem enquanto outro estava parado ali.
 
 **Decisão.** O respawn só acontece com a célula de origem livre de quem bloqueia; senão, fica pendente e tenta de
 novo no tick seguinte.
+
+## D-028 · Livre: cada jogador é a própria equipe (v0.5, 13/10/2026)
+
+**Contexto.** A §2.13 descreve o Livre como "todos hostis, exceto próprio jogador e subordinados". Lida ao pé da
+letra, "todos hostis" também faria os NPCs da fase brigarem entre si.
+
+**Decisão.** Ao entrar no Livre, cada jogador recebe a equipe `jogador:<id>`; invocações e avatares herdam a equipe
+do dono. Em `todos_hostis`, a relação é **hostil entre equipes diferentes** e aliada dentro da mesma equipe (o
+próprio jogador e seus subordinados). Os NPCs ficam todos na equipe `inimigos`: aliados entre si, hostis a todos
+os jogadores. A entrada e a relação continuam por funções de modo (`equipeDeEntrada`, `relacao`).
+
+## D-029 · Quem coleta orbes e quando (v0.5, 13/10/2026)
+
+**Decisão.** Só entidades controladas por jogador coletam; a IA nunca coleta. Um orbe que não teria efeito (vida
+ou mana cheia) não é consumido, para não ser desperdiçado nem "roubado" por quem não precisa. A coleta é uma
+transação no tick, na ordem rotativa: com dez coletores na mesma célula, só um leva.
+
+## D-030 · Revivescência da campanha vira respawn do modo (v0.5, 13/10/2026)
+
+**Decisão.** O atraso (1,2 s na campanha, 5 s no Livre), o local (`base_da_equipe` na campanha, `longe_do_inimigo`
+no Livre) e a proteção pós-reaparição (`protecaoS`: 5 s de invisibilidade na campanha, como na §2.12, e 2 s no Livre)
+vêm do descritor de modo. Os números saíram de `balance.morte`. A proteção de 2 s no Livre é escolha nossa:
+a spec não define proteção de reaparição na arena.
+
+## D-031 · Objetos em coordenadas normalizadas; inimigos em células (v0.5, 13/10/2026)
+
+**Decisão.** Objetos de fase seguem a §2.1: são autorados em 0–1 e convertidos por
+`coluna = min(largura − 1, floor(x × largura))`. Inimigos posicionados continuam em células inteiras (a spec não fixa o
+formato), o que facilita posicionar encontros à mão.
+
+## D-032 · Orçamento de atributos e desempate da redução (v0.5, 13/10/2026)
+
+**Contexto.** A §3.7 pede teto por atributo, teto total e orçamento, com "desempate/redução documentados em dados".
+
+**Decisão.** Ordem de aplicação: teto por atributo → teto da soma (no modo `escalar`, reescala por maiores
+restos) → orçamento, que conta **só os pontos acima de 10**. A redução tira 1 ponto do maior atributo por vez; o
+empate segue `ordemReducao` do modo. HP, mana e defesa são sempre recalculados da classe; o pedido do cliente
+nunca é aceito para eles.

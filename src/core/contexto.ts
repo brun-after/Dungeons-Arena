@@ -40,9 +40,12 @@ export interface Balance {
     inimigoS: number;
     bossS: number;
   };
-  morte: {
-    reviverMs: number;
-    invisivelMs: number;
+  /** Drops na primeira morte de um inimigo (§2.10). */
+  drops: {
+    chanceOrbeHp: number;
+    chanceOrbeRecurso: number;
+    orbeHpPct: number;
+    orbeRecursoPct: number;
   };
   xp: {
     decaimentoAntifarm: number;

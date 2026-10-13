@@ -9,6 +9,7 @@ import {
   passavel,
   type FaseJson,
   type InimigoPosicionado,
+  type ObjetoPosicionadoJson,
   type SpawnJson,
 } from './fase';
 
@@ -40,7 +41,7 @@ export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<st
   const erros: ErroFase[] = [];
   if (!ehObjeto(entrada)) return { ok: false, erros: [{ mensagem: 'a fase precisa ser um objeto' }] };
 
-  const { id, nome, ordem, tipo, mapa, spawns, inimigos } = entrada;
+  const { id, nome, ordem, tipo, mapa, spawns, inimigos, objetos } = entrada;
   if (typeof id !== 'string' || id.trim() === '') erros.push({ mensagem: 'id ausente' });
   if (typeof nome !== 'string' || nome.trim() === '') erros.push({ mensagem: 'nome ausente' });
   if (!ehInteiro(ordem)) erros.push({ mensagem: 'ordem precisa ser inteiro' });
@@ -51,6 +52,7 @@ export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<st
   const linhas = validarMapa(mapa, erros);
   const listaSpawns = validarSpawns(spawns, erros);
   const listaInimigos = validarInimigos(inimigos, erros, presetsConhecidos);
+  const listaObjetos = validarObjetos(objetos, erros);
   if (erros.length > 0 || !linhas || !listaSpawns) return { ok: false, erros };
 
   const json: FaseJson = {
@@ -61,9 +63,39 @@ export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<st
     mapa: linhas,
     spawns: listaSpawns,
     inimigos: listaInimigos,
+    objetos: listaObjetos,
   };
   validarJogabilidade(json, erros);
   return erros.length > 0 ? { ok: false, erros } : { ok: true, fase: json };
+}
+
+const TIPOS_OBJETO = ['orbe_hp', 'orbe_recurso'] as const;
+
+function validarObjetos(objetos: unknown, erros: ErroFase[]): ObjetoPosicionadoJson[] {
+  if (objetos === undefined) return [];
+  if (!Array.isArray(objetos)) {
+    erros.push({ mensagem: 'objetos precisa ser uma lista' });
+    return [];
+  }
+  const lista: ObjetoPosicionadoJson[] = [];
+  for (const o of objetos) {
+    const normalizado = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 1;
+    if (
+      !ehObjeto(o) ||
+      typeof o.tipo !== 'string' ||
+      !(TIPOS_OBJETO as readonly string[]).includes(o.tipo) ||
+      !normalizado(o.x) ||
+      !normalizado(o.y) ||
+      typeof o.valor !== 'number' ||
+      !(o.valor > 0) ||
+      (o.modo !== 'abs' && o.modo !== 'pct')
+    ) {
+      erros.push({ mensagem: 'objeto precisa de tipo válido, x e y entre 0 e 1, valor > 0 e modo abs|pct' });
+      continue;
+    }
+    lista.push({ tipo: o.tipo as ObjetoPosicionadoJson['tipo'], x: o.x, y: o.y, valor: o.valor, modo: o.modo });
+  }
+  return lista;
 }
 
 function validarInimigos(
@@ -150,6 +182,13 @@ function validarJogabilidade(json: FaseJson, erros: ErroFase[]): void {
     if (ocupadas.has(chave)) erros.push({ mensagem: 'dois inimigos na mesma célula', x: i.x, y: i.y });
     ocupadas.add(chave);
   }
+  const celulasDeObjeto = new Set<string>();
+  for (const o of fase.objetos) {
+    const chave = `${o.x},${o.y}`;
+    if (!passavel(fase, o.x, o.y)) erros.push({ mensagem: 'objeto em célula não passável', x: o.x, y: o.y });
+    if (celulasDeObjeto.has(chave)) erros.push({ mensagem: 'dois objetos na mesma célula', x: o.x, y: o.y });
+    celulasDeObjeto.add(chave);
+  }
   const primeiro = fase.spawns[0];
   if (!primeiro || erros.length > 0) return;
 
@@ -162,4 +201,28 @@ function validarJogabilidade(json: FaseJson, erros: ErroFase[]): void {
       }
     }
   });
+  if (fase.tipo !== 'campanha') validarArena(fase, alcance, erros);
+}
+
+/**
+ * Arena (§3.10): ao menos dois spawns, nenhum par adjacente, e todo spawn alcança o resto da fase
+ * (toda célula passável é alcançável a partir do primeiro spawn).
+ */
+function validarArena(fase: ReturnType<typeof carregarFase>, alcance: Uint8Array, erros: ErroFase[]): void {
+  if (fase.spawns.length < 2) erros.push({ mensagem: 'arena precisa de ao menos dois spawns' });
+  fase.spawns.forEach((a, i) => {
+    fase.spawns.slice(i + 1).forEach((b) => {
+      if (Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y)) <= 1) {
+        erros.push({ mensagem: 'spawns de arena não podem ser adjacentes', x: b.x, y: b.y });
+      }
+    });
+  });
+  for (let y = 0; y < fase.altura; y++) {
+    for (let x = 0; x < fase.largura; x++) {
+      if (passavel(fase, x, y) && alcance[y * fase.largura + x] !== 1) {
+        erros.push({ mensagem: 'célula da arena inalcançável a partir dos spawns', x, y });
+        return;
+      }
+    }
+  }
 }

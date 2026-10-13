@@ -9,13 +9,14 @@ const VIDA_MS = 900;
 const SUBIDA_PX = 34;
 export const ESCALONAMENTO_MS = 80;
 
-export type TipoNumero = 'dano' | 'critico' | 'falha' | 'cura' | 'esquiva';
+export type TipoNumero = 'dano' | 'critico' | 'falha' | 'cura' | 'recurso' | 'esquiva';
 
 const ESTILO: Readonly<Record<TipoNumero, { cor: number; tamanho: number }>> = {
   dano: { cor: 0xece8f4, tamanho: 18 },
   critico: { cor: 0xf39c12, tamanho: 24 },
   falha: { cor: 0x8e8a99, tamanho: 16 },
   cura: { cor: 0x2ecc71, tamanho: 18 },
+  recurso: { cor: 0x5dade2, tamanho: 18 },
   esquiva: { cor: 0x8e8a99, tamanho: 14 },
 };
 

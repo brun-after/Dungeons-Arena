@@ -29,6 +29,22 @@ export interface Projetil {
   carisma: number;
 }
 
+export type TipoObjeto = 'orbe_hp' | 'orbe_recurso';
+
+/**
+ * Objeto coletável no mundo (§2.1). `objetoId` é estável; a coleta é uma transação dentro do
+ * tick (§3.6): verifica, consome e transfere sem pausa entre os passos.
+ */
+export interface ObjetoNoMundo {
+  objetoId: string;
+  tipo: TipoObjeto;
+  x: number;
+  y: number;
+  valor: number;
+  modo: 'abs' | 'pct';
+  geracao: number;
+}
+
 /** Respawn agendado de um inimigo (§2.5): o id continua estável e a geração incrementa. */
 export interface RespawnPendente {
   id: EntidadeId;
@@ -50,6 +66,7 @@ export interface EstadoJogo {
   /** Expiração de recarga em tick, por `entidadeId_habilidadeId` (§2.7). */
   recargas: Record<string, number>;
   projeteis: Projetil[];
+  objetos: ObjetoNoMundo[];
   respawns: RespawnPendente[];
   /** Gerador de IDs de ação e de projétil, para não duplicar VFX/som (§3.6). */
   proximoId: number;
@@ -69,6 +86,7 @@ export function criarEstado(opcoes: OpcoesEstado): EstadoJogo {
     entidades: [],
     recargas: {},
     projeteis: [],
+    objetos: [],
     respawns: [],
     proximoId: 1,
   };
@@ -92,6 +110,7 @@ export function clonarEstado(estado: EstadoJogo): EstadoJogo {
     entidades: estado.entidades.map(clonarEntidade),
     recargas: { ...estado.recargas },
     projeteis: estado.projeteis.map((p) => ({ ...p })),
+    objetos: estado.objetos.map((o) => ({ ...o })),
     respawns: estado.respawns.map((r) => ({ ...r })),
     proximoId: estado.proximoId,
   };

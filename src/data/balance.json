@@ -1,5 +1,5 @@
 {
-  "versao": 4,
+  "versao": 5,
   "movimento": {
     "velocidadeBaseMs": 400,
     "filaMaxWaypoints": 2
@@ -36,9 +36,11 @@
     "inimigoS": 60,
     "bossS": 300
   },
-  "morte": {
-    "reviverMs": 1200,
-    "invisivelMs": 5000
+  "drops": {
+    "chanceOrbeHp": 0.1,
+    "chanceOrbeRecurso": 0.08,
+    "orbeHpPct": 25,
+    "orbeRecursoPct": 50
   },
   "xp": {
     "decaimentoAntifarm": 0.8

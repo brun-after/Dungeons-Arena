@@ -28,6 +28,7 @@ import { Camera } from './render/camera';
 import { CELULA_PX } from './render/camera-calculo';
 import { Interpolador } from './render/interpolacao';
 import { CamadaNumeros } from './render/numeros';
+import { CamadaObjetos } from './render/objetos';
 import { CamadaEntidades } from './render/sprites';
 import { criarPalco, type Palco } from './render/stage';
 import { CamadaTelegrafia } from './render/telegrafia';
@@ -100,6 +101,7 @@ export async function iniciarJogo(raiz: HTMLElement): Promise<void> {
   const terreno = criarTerreno(palco.terreno, fase);
   const sprites = new CamadaEntidades(palco.entidades, ID_JOGADOR);
   const telegrafia = new CamadaTelegrafia(palco.chao, palco.voo);
+  const objetos = new CamadaObjetos(palco.chao);
   const numeros = new CamadaNumeros(palco.efeitos, () => movimentoReduzido.matches);
   const interp = new Interpolador();
   const fila = criarFila();
@@ -228,6 +230,7 @@ export async function iniciarJogo(raiz: HTMLElement): Promise<void> {
       hud.atualizar(j);
       camera.aplicar(palco.mundo);
       terreno.atualizarVisibilidade(...camera.retanguloVisivel(palco.altura()));
+      objetos.desenhar(estado, agora, movimentoReduzido.matches);
       telegrafia.desenhar(estado, ctx, ID_JOGADOR, alpha);
       sprites.desenhar(estado, ctx, interp, alpha);
       numeros.atualizar(agora);

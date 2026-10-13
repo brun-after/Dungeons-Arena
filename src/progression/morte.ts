@@ -1,7 +1,7 @@
 // Mortes, XP, revivescência e respawn (§2.7 "Morte", §2.12) — etapa 8 do tick.
 // HP 0 é morte direta. Entidades de IA saem do mundo e voltam pelo respawn agendado, com o mesmo
-// id e a geração incrementada; jogadores na campanha revivem no spawn.
-// Marco 3: a perda de XP e ouro do jogador e os drops entram com a progressão e os itens (9A, 10A).
+// id e a geração incrementada; jogadores reaparecem pelas regras do modo (§2.13).
+// A perda de XP e ouro na campanha e os drops de item entram com a progressão e os itens (9A, 10A).
 
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type EstadoJogo } from '../core/estado';
@@ -9,8 +9,11 @@ import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import type { Entidade } from '../entities/entidade';
 import { criarInimigo } from '../entities/fabrica';
+import { aleatorio } from '../core/rng';
 import { podeFerir } from '../modos/relacao';
+import { atrasoDeRespawnTicks, localDeRespawn, podeRespawnar, protecaoDeRespawnTicks } from '../modos/regras';
 import { celulaLivrePara } from '../world/colisao';
+import { largarObjeto } from '../world/objetos';
 
 function zerarMovimento(e: Entidade): void {
   e.acao = null;
@@ -54,6 +57,7 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
 
     if (e.controlador === 'ia') {
       concederXp(estado, ctx, e, saida);
+      if (e.abates === 0) largarDrops(estado, ctx, e, saida);
       removidos.add(e.id);
       if (e.preset) {
         const segundos = e.arquetipo === 'boss' ? ctx.balance.respawn.bossS : ctx.balance.respawn.inimigoS;
@@ -68,8 +72,10 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
           noTick: estado.tick + ticksDe(segundos * 1000),
         });
       }
-    } else {
-      e.reviverEmTick = estado.tick + ticksDe(ctx.balance.morte.reviverMs);
+    } else if (podeRespawnar(ctx.modo)) {
+      // Jogador: reaparece pelas regras do modo (§2.13), sem penalidade de campanha na arena.
+      e.reviverEmTick = estado.tick + Math.max(1, atrasoDeRespawnTicks(ctx.modo, e.abates));
+      e.abates++;
     }
   }
   if (removidos.size > 0) estado.entidades = estado.entidades.filter((e) => !removidos.has(e.id));
@@ -78,20 +84,31 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
   processarRespawns(estado, ctx, saida);
 }
 
+/** Drops só na primeira morte (§2.10): orbe de HP e de recurso, sorteados pelo PRNG do estado. */
+function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
+  if (!ctx.modo.objetosDeFase) return;
+  const d = ctx.balance.drops;
+  if (aleatorio(estado.rng) < d.chanceOrbeHp) {
+    largarObjeto(estado, 'orbe_hp', e.x, e.y, d.orbeHpPct, 'pct', saida);
+  } else if (aleatorio(estado.rng) < d.chanceOrbeRecurso) {
+    largarObjeto(estado, 'orbe_recurso', e.x, e.y, d.orbeRecursoPct, 'pct', saida);
+  }
+}
+
 function reviverJogadores(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
-  const spawn = ctx.fase.spawns[0] ?? { x: 0, y: 0 };
   for (const e of estado.entidades) {
     if (!e.morto || e.reviverEmTick === 0 || estado.tick < e.reviverEmTick) continue;
+    const local = localDeRespawn(estado, ctx.fase, ctx.modo, e, estado.rng);
     e.morto = false;
     e.reviverEmTick = 0;
     e.hp = e.hpMax;
     e.efeitos = [];
     e.participacao = [];
-    e.x = spawn.x;
-    e.y = spawn.y;
+    e.x = local.x;
+    e.y = local.y;
     zerarMovimento(e);
-    // Invisível para inimigos por alguns segundos, para se reposicionar (§2.12).
-    e.invisivelAteTick = estado.tick + ticksDe(ctx.balance.morte.invisivelMs);
+    // Invisível para inimigos por alguns segundos, para se reposicionar (§2.12; duração do modo).
+    e.invisivelAteTick = estado.tick + protecaoDeRespawnTicks(ctx.modo);
     saida.push({ t: 'reviveu', tick: estado.tick, id: e.id });
   }
 }

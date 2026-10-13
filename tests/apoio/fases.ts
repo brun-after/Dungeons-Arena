@@ -1,4 +1,4 @@
-import { conteudoOficial, type Conteudo } from '../../src/core/conteudo';
+import { conteudoOficial, modoPorId, type Conteudo } from '../../src/core/conteudo';
 import { BALANCE_PADRAO, type Balance, type ContextoSimulacao } from '../../src/core/contexto';
 import fase01 from '../../src/data/fases/fase-01.json';
 import { carregarFase, type Fase } from '../../src/world/fase';
@@ -17,8 +17,8 @@ export function faseOficial01(): Fase {
   return carregarFase(r.fase);
 }
 
-export function contexto(fase: Fase, balance: Balance = BALANCE_PADRAO): ContextoSimulacao {
-  return { fase, balance, conteudo: CONTEUDO, modo: CONTEUDO.modoCampanha };
+export function contexto(fase: Fase, balance: Balance = BALANCE_PADRAO, modoId = 'campanha'): ContextoSimulacao {
+  return { fase, balance, conteudo: CONTEUDO, modo: modoPorId(CONTEUDO, modoId) };
 }
 
 /** Sala aberta 12×12 cercada de paredes, útil para testes de movimento e combate. */

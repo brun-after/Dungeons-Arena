@@ -3,6 +3,7 @@
 // Eventos visuais não são autoridade sobre HP: o estado basta para reconstruir a tela (§3.6).
 
 import type { EntidadeId } from './comandos';
+import type { TipoObjeto } from './estado';
 import type { TipoEfeito } from '../combat/efeitos';
 import type { StatusCaminho } from '../world/navegacao';
 
@@ -61,6 +62,8 @@ export type EventoSimulacao =
   | { t: 'iaNotou'; tick: number; id: EntidadeId; alvoId: EntidadeId; hesitacaoAteTick: number }
   | { t: 'iaPerseguindo'; tick: number; id: EntidadeId; alvoId: EntidadeId }
   | { t: 'iaDesistiu'; tick: number; id: EntidadeId; alvoId: EntidadeId }
+  | { t: 'objetoSurgiu'; tick: number; objetoId: string; tipo: TipoObjeto; x: number; y: number }
+  | { t: 'coletou'; tick: number; id: EntidadeId; objetoId: string; tipo: TipoObjeto; ganho: number }
   | { t: 'reviveu'; tick: number; id: EntidadeId }
   | { t: 'surgiu'; tick: number; id: EntidadeId };
 

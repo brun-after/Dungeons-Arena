@@ -6,5 +6,5 @@
     "lib": ["ES2023"],
     "types": []
   },
-  "include": ["src/core", "src/world", "src/entities", "src/combat", "src/modos", "src/progression", "src/data/**/*.json", "shared"]
+  "include": ["src/core", "src/world", "src/entities", "src/combat", "src/modos", "src/progression", "src/arena", "src/data/**/*.json", "shared"]
 }

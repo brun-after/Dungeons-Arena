@@ -12,20 +12,25 @@ export interface Lado {
   equipe: string;
 }
 
-export function relacao(a: Lado, b: Lado, modo: ModoDeJogo): Relacao {
+/**
+ * - `todos_hostis` (Livre): todos contra todos, exceto o próprio jogador e seus subordinados, que
+ *   compartilham a equipe dele; cada jogador entra com a própria equipe (D-028).
+ * - `por_equipe` (Equipes, campanha): mesma equipe é aliado.
+ * - `todos_aliados` (Horda): ninguém é hostil.
+ */
+export function relacao(a: Lado, b: Lado, modo: Pick<ModoDeJogo, 'politicaRelacao'>): Relacao {
   if (a.id === b.id) return 'proprio';
   switch (modo.politicaRelacao) {
-    case 'todos_hostis':
-      return 'hostil';
     case 'todos_aliados':
       return 'aliado';
+    case 'todos_hostis':
     case 'por_equipe':
       return a.equipe === b.equipe ? 'aliado' : 'hostil';
   }
 }
 
 /** Pode causar dano em `b`? Fogo amigo é parâmetro do modo (§2.5). */
-export function podeFerir(a: Lado, b: Lado, modo: ModoDeJogo): boolean {
+export function podeFerir(a: Lado, b: Lado, modo: Pick<ModoDeJogo, 'politicaRelacao' | 'fogoAmigo'>): boolean {
   const r = relacao(a, b, modo);
   return r === 'hostil' || (r === 'aliado' && modo.fogoAmigo);
 }
