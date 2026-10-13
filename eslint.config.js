@@ -40,7 +40,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['src/core/**/*.ts', 'server/**/*.ts', 'shared/**/*.ts'],
+    files: ['src/core/**/*.ts', 'src/world/**/*.ts', 'src/entities/**/*.ts', 'server/**/*.ts', 'shared/**/*.ts'],
     rules: {
       'no-restricted-imports': [
         'error',
@@ -56,7 +56,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['*.js'],
+    files: ['*.js', 'tools/**/*.mjs'],
     languageOptions: { globals: globals.node },
   },
 );

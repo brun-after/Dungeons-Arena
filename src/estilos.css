@@ -1,86 +1,324 @@
 :root {
   color-scheme: dark;
   --fundo: #14121a;
-  --painel: #1f1c28;
+  --painel: rgba(31, 28, 40, 0.85);
   --texto: #ece8f4;
   --texto-suave: #a59fb4;
   --destaque: #f39c12;
-  --borda: #34303f;
+  --borda: rgba(236, 232, 244, 0.25);
+  --controle: rgba(236, 232, 244, 0.1);
+  --controle-ativo: rgba(236, 232, 244, 0.3);
+  --altura-faixa: 160px;
+  --seguro-topo: env(safe-area-inset-top, 0px);
+  --seguro-base: env(safe-area-inset-bottom, 0px);
+  --seguro-esq: env(safe-area-inset-left, 0px);
+  --seguro-dir: env(safe-area-inset-right, 0px);
 }
 
 * {
   box-sizing: border-box;
 }
 
+/* Sem rolagem, sem puxar-para-recarregar, sem efeito elástico, sem seleção nem menu no toque longo (§4.8). */
 html,
 body {
   margin: 0;
-  min-height: 100%;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
   background: var(--fundo);
   color: var(--texto);
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   -webkit-text-size-adjust: 100%;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 #app {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
-    max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  position: fixed;
+  inset: 0;
 }
 
-h1 {
-  margin: 0 0 4px;
-  font-size: 2rem;
+.palco {
+  position: absolute;
+  inset: 0;
+}
+
+.palco canvas {
+  display: block;
+  touch-action: none;
+}
+
+.camada-ui {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.camada-ui button,
+.camada-ui .joystick,
+.camada-ui .dpad {
+  pointer-events: auto;
+}
+
+/* Cabeçalho */
+.cabecalho {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: calc(8px + var(--seguro-topo)) calc(12px + var(--seguro-dir)) 8px calc(12px + var(--seguro-esq));
+  background: linear-gradient(to bottom, rgba(20, 18, 26, 0.85), transparent);
+}
+
+.cabecalho h1 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
   color: var(--destaque);
+  text-shadow: 0 1px 2px #000;
 }
 
-h2 {
-  margin: 0 0 8px;
-  font-size: 1.1rem;
+.acoes-cabecalho {
+  display: flex;
+  gap: 6px;
 }
 
-.subtitulo {
-  margin: 0 0 16px;
-  color: var(--texto-suave);
-}
-
-.status {
-  display: inline-block;
-  margin: 0 0 24px;
-  padding: 4px 10px;
+.botao-cabecalho {
+  min-height: 36px;
+  padding: 6px 10px;
   border: 1px solid var(--borda);
-  border-radius: 999px;
-  font-size: 0.85rem;
+  border-radius: 8px;
+  background: var(--painel);
+  color: var(--texto);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  touch-action: manipulation;
 }
 
-.painel {
-  padding: 16px;
+.botao-cabecalho:focus-visible,
+.botao-acao:focus-visible {
+  outline: 2px solid var(--destaque);
+  outline-offset: 2px;
+}
+
+.so-toque {
+  display: none;
+}
+
+body.toque .so-toque {
+  display: inline-block;
+}
+
+/* Faixa de controles de toque (§4.8) */
+.faixa-controles {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(var(--altura-faixa) + var(--seguro-base));
+  padding: 0 var(--seguro-dir) var(--seguro-base) var(--seguro-esq);
+  display: none;
+  grid-template-columns: 38% 24% 38%;
+  align-items: center;
+}
+
+body.toque .faixa-controles {
+  display: grid;
+}
+
+@media (orientation: portrait) {
+  .faixa-controles {
+    grid-template-columns: 35% 30% 35%;
+  }
+
+  /* Em retrato a coluna é estreita: interagir fica acima do ataque. */
+  .coluna.direita {
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .botao-acao.interagir {
+    width: 48px;
+    height: 48px;
+    margin-right: 14px;
+  }
+}
+
+.coluna {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.coluna.esquerda {
+  justify-content: flex-start;
+  padding-left: 16px;
+}
+
+.coluna.direita {
+  justify-content: flex-end;
+  gap: 14px;
+  padding-right: 16px;
+}
+
+/* Joystick (§4.3) */
+.joystick {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--borda);
+  background: var(--controle);
+  touch-action: none;
+}
+
+.joystick-botao {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--controle-ativo);
+  border: 2px solid var(--borda);
+  transform: translate(-50%, -50%);
+  transition: transform 50ms linear;
+  pointer-events: none;
+}
+
+.joystick.ativo .joystick-botao {
+  background: rgba(52, 152, 219, 0.6);
+}
+
+/* D-pad (§4.4) */
+.dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 48px);
+  grid-template-rows: repeat(3, 48px);
+  gap: 3px;
+  touch-action: none;
+}
+
+.dpad-botao {
+  display: grid;
+  place-items: center;
+  background: var(--controle);
+  border: 1px solid var(--borda);
+  color: var(--texto);
+  font-size: 1.3rem;
+  transition:
+    transform 80ms linear,
+    background-color 80ms linear;
+}
+
+.dpad-botao.diagonal {
+  opacity: 0.6;
+  font-size: 0.95rem;
+}
+
+.dpad-botao[data-dir='NO'] {
+  border-top-left-radius: 14px;
+}
+.dpad-botao[data-dir='NE'] {
+  border-top-right-radius: 14px;
+}
+.dpad-botao[data-dir='SO'] {
+  border-bottom-left-radius: 14px;
+}
+.dpad-botao[data-dir='SE'] {
+  border-bottom-right-radius: 14px;
+}
+
+.dpad-botao.pressionado {
+  transform: scale(0.88);
+  background: rgba(52, 152, 219, 0.85);
+  opacity: 1;
+}
+
+/* Botões de ação */
+.botao-acao {
+  display: grid;
+  place-items: center;
+  flex: none;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid var(--borda);
+  background: var(--controle);
+  color: var(--texto);
+  font-size: 1.5rem;
+  touch-action: none;
+  transition: transform 80ms linear;
+}
+
+.botao-acao.ataque {
+  width: 76px;
+  height: 76px;
+  font-size: 2rem;
+  background: rgba(231, 76, 60, 0.25);
+}
+
+.botao-acao.interagir {
+  width: 56px;
+  height: 56px;
+}
+
+.botao-acao.pressionado {
+  transform: scale(0.9);
+  background: var(--controle-ativo);
+}
+
+/* Diagnóstico e avisos */
+.diagnostico {
+  position: absolute;
+  top: calc(56px + var(--seguro-topo));
+  left: calc(8px + var(--seguro-esq));
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.6);
+  font: 11px ui-monospace, 'Cascadia Code', Consolas, monospace;
+  pointer-events: none;
+}
+
+.aviso {
+  position: absolute;
+  top: calc(64px + var(--seguro-topo));
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100% - 32px);
+  padding: 10px 14px;
+  border-radius: 10px;
   background: var(--painel);
   border: 1px solid var(--borda);
-  border-radius: 12px;
-}
-
-.explicacao {
-  margin: 0 0 12px;
-  color: var(--texto-suave);
   font-size: 0.9rem;
+  text-align: center;
 }
 
-dl {
+.erro {
+  position: absolute;
+  inset: 0;
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 6px 16px;
-  margin: 0;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
+  color: var(--texto);
 }
 
-dt {
-  color: var(--texto-suave);
-}
-
-dd {
-  margin: 0;
-  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
-  font-variant-numeric: tabular-nums;
-  overflow-wrap: anywhere;
+@media (prefers-reduced-motion: reduce) {
+  .joystick-botao,
+  .dpad-botao,
+  .botao-acao {
+    transition: none;
+  }
 }

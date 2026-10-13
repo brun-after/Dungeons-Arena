@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 0.2 · **Data:** 13/10/2026
-**Status:** 🚧 Em construção, Etapa 1 (fundação do motor, marco 1)
+**Versão do documento:** 0.3 · **Data:** 13/10/2026
+**Status:** 🚧 Em construção, Etapa 2 (marco 2: fase, movimento, câmera e controles de toque)
 
 > **Histórico**
+> - **0.3 (13/10/2026)**: marco 1 concluído; marco 2 em revisão; controles do jogo.
 > - **0.2 (13/10/2026)**: nome do repositório, link do Pages, comandos da Etapa 1 e Etapa 0 concluída.
 > - **0.1 (12/10/2026)**: README inicial, com visão, hospedagem gratuita e roteiro de construção.
 
@@ -36,6 +37,17 @@ Divergências em relação a ela são registradas em [`docs/DECISOES.md`](docs/D
 | **Offline** | Depois da primeira visita, a campanha abre em modo avião (PWA) | Etapa 2 |
 
 Requisitos locais: **Node.js 24 LTS**, **Git**; **Docker Desktop** só a partir da Etapa 5.
+
+### Controles
+
+| Ação | Teclado e mouse | Toque |
+|---|---|---|
+| Mover | WASD ou setas (diagonal = duas teclas) | Joystick ou direcional (troca no cabeçalho) |
+| Ir até um ponto | Clique no mapa | Toque no mapa; segure para seguir o dedo |
+| Ataque básico | Espaço | Botão ⚔ (funciona junto com o joystick) |
+| Mover a câmera | Arrastar o mapa | Arrastar o mapa |
+| Zoom | Roda do mouse | Pinça com dois dedos |
+| Diagnóstico (fps, célula) | Abrir com `?diag=1` no fim do endereço | Idem |
 
 ---
 
@@ -77,7 +89,7 @@ em `main`, e o merge publica automaticamente.
 
 | ✓ | # | Entrega | Pronto quando |
 |---|---|---|---|
-| [ ] | 1 | Motor TS estrito, passo fixo, PRNG, comandos, harness e CI | O mesmo núcleo roda no navegador e no Node, sem DOM, com as invariantes exercitadas |
+| [x] | 1 | Motor TS estrito, passo fixo, PRNG, comandos, harness e CI | O mesmo núcleo roda no navegador e no Node, sem DOM, com as invariantes exercitadas |
 | [ ] | 2 | Uma fase, movimento Dir8/cardinal, colisão, câmera e controles mobile | Dá para mover e atacar com dois dedos no celular e com o mouse em emulação |
 | [ ] | 3 | Ataque básico, 4 habilidades, 3 arquétipos de IA e boss | Combate legível: crítico zero, defesa, interrupção e telegrafia corretos |
 | [ ] | 4 | Arena Livre em loopback, orçamento de ficha, NPCs, loot e reconciliação | Dois clientes lutam e coletam sem duplicar itens |

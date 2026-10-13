@@ -1,10 +1,10 @@
 {
-  // Núcleo puro da simulação (§1.3 pilar 5, §5.1): sem DOM e sem APIs do Node.
+  // Núcleo puro da simulação (§1.3 pilar 5, §5.1): core, world e entities, sem DOM e sem APIs do Node.
   // Se algum arquivo daqui usar window, document, performance, process etc., o typecheck falha.
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "lib": ["ES2023"],
     "types": []
   },
-  "include": ["src/core", "src/data/*.json", "shared"]
+  "include": ["src/core", "src/world", "src/entities", "src/data/**/*.json", "shared"]
 }
