@@ -9,6 +9,9 @@
   },
   "scripts": {
     "dev": "vite",
+    "dev:server": "tsx watch server/main.ts",
+    "servidor": "tsx server/main.ts",
+    "carga": "tsx tools/carga/carga.ts",
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.nucleo.json --noEmit",
@@ -16,14 +19,17 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "verificar": "npm run typecheck && npm run lint && npm test && npm run build"
+    "verificar": "npm run typecheck && npm run lint && npm test && npm run build",
+    "build:server": "esbuild server/main.ts --bundle --platform=node --target=node24 --format=esm --packages=external --sourcemap --outfile=dist-server/main.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@playwright/test": "1.64.0",
     "@types/node": "24.19.2",
+    "esbuild": "0.28.2",
     "eslint": "10.12.0",
     "globals": "17.13.0",
+    "tsx": "4.23.15",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.2",
     "vite": "8.3.4",
@@ -31,6 +37,9 @@
     "vitest": "5.0.4"
   },
   "dependencies": {
+    "@colyseus/core": "0.18.18",
+    "@colyseus/sdk": "0.18.5",
+    "@colyseus/ws-transport": "0.18.4",
     "pixi.js": "8.22.0"
   }
 }

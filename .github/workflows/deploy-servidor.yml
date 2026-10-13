@@ -1,0 +1,89 @@
+name: Implantar servidor
+
+# Gera a imagem arm64 do servidor, publica no GitHub Container Registry e atualiza a VM por SSH.
+# Só roda quando a VM estiver configurada (variável ARENA_URL e segredos VM_*; docs/IMPLANTACAO.md).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: implantar-servidor
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGEM: ghcr.io/${{ github.repository_owner }}/dungeons-arena-servidor
+
+jobs:
+  imagem:
+    name: Imagem arm64
+    if: ${{ vars.ARENA_URL != '' }}
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/arm64
+          push: true
+          tags: |
+            ${{ env.IMAGEM }}:${{ github.sha }}
+            ${{ env.IMAGEM }}:latest
+
+  implantar:
+    name: Atualizar a VM
+    needs: imagem
+    runs-on: ubuntu-latest
+    environment: producao
+    steps:
+      - uses: actions/checkout@v5
+      - name: Chave SSH
+        env:
+          VM_SSH_KEY: ${{ secrets.VM_SSH_KEY }}
+          VM_HOST: ${{ secrets.VM_HOST }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VM_SSH_KEY" > ~/.ssh/vm
+          chmod 600 ~/.ssh/vm
+          ssh-keyscan -H "$VM_HOST" >> ~/.ssh/known_hosts
+      - name: Enviar compose e Caddyfile
+        env:
+          VM_HOST: ${{ secrets.VM_HOST }}
+          VM_USER: ${{ secrets.VM_USER }}
+        run: scp -i ~/.ssh/vm docker-compose.yml Caddyfile "$VM_USER@$VM_HOST:/opt/dungeons-arena/"
+      - name: Subir a nova versão
+        env:
+          VM_HOST: ${{ secrets.VM_HOST }}
+          VM_USER: ${{ secrets.VM_USER }}
+          DOMINIO: ${{ secrets.DOMINIO }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ssh -i ~/.ssh/vm "$VM_USER@$VM_HOST" bash -s <<EOF
+          set -euo pipefail
+          cd /opt/dungeons-arena
+          printf 'IMAGEM_SERVIDOR=%s\nDOMINIO=%s\nREGIAO=%s\n' '${{ env.IMAGEM }}:${{ github.sha }}' '$DOMINIO' 'sa-saopaulo-1' > .env
+          echo '$TOKEN' | docker login ghcr.io -u '${{ github.actor }}' --password-stdin
+          docker compose --profile producao pull
+          docker compose --profile producao up -d --remove-orphans
+          docker image prune -f
+          EOF
+      - name: Conferir /saude
+        env:
+          DOMINIO: ${{ secrets.DOMINIO }}
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS "https://$DOMINIO/saude"; then echo; exit 0; fi
+            sleep 5
+          done
+          echo "O servidor não respondeu em https://$DOMINIO/saude" >&2
+          exit 1

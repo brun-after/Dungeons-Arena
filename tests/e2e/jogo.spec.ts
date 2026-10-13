@@ -3,7 +3,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 async function abrir(page: Page) {
   const erros: string[] = [];
   page.on('pageerror', (e) => erros.push(e.message));
-  await page.goto('./?diag=1');
+  await page.goto('./?jogo=campanha&diag=1');
   const diag = page.locator('#diag');
   await expect(diag).toHaveAttribute('data-celula', /^\d+,\d+$/);
   return { diag, erros };
@@ -45,18 +45,18 @@ test.describe('desktop', () => {
     const [x0] = await ler(diag, 'celula');
 
     // Segura D até o jogador andar (sem prazo fixo: o navegador de teste pode estar lento).
+    // Checa a cada 50 ms para soltar a tecla logo depois do primeiro passo.
     await page.keyboard.down('d');
-    await expect.poll(async () => (await ler(diag, 'celula'))[0], { timeout: 15_000 }).toBeGreaterThan(x0);
+    await expect.poll(async () => (await ler(diag, 'celula'))[0], { timeout: 15_000, intervals: [50] }).toBeGreaterThan(x0);
     await page.keyboard.up('d');
     await esperarParado(page, diag);
 
     const [x, y] = await ler(diag, 'celula');
     const [tx, ty] = await ler(diag, 'tela');
-    // Zoom inicial 1: uma célula = 48 px. Clica 3 células acima do jogador: a linha 2 da sala
-    // inicial é livre (abaixo fica o boneco de treino, e clicar nele seleciona alvo em vez de andar).
-    expect(x).toBeLessThanOrEqual(11);
-    await page.mouse.click(tx, ty - 3 * 48);
-    await expect.poll(async () => ler(diag, 'celula'), { timeout: 15_000 }).toEqual([x, y - 3]);
+    // Zoom inicial 1: uma célula = 48 px. Clica na célula (3,3) da sala inicial: livre (longe do
+    // boneco de treino, que seleciona alvo em vez de andar) e alcançável de onde o jogador estiver.
+    await page.mouse.click(tx + (3 - x) * 48, ty + (3 - y) * 48);
+    await expect.poll(async () => ler(diag, 'celula'), { timeout: 15_000 }).toEqual([3, 3]);
     expect(erros).toEqual([]);
   });
 
@@ -119,6 +119,53 @@ test.describe('arena em loopback', () => {
     await page.keyboard.up('d');
     await expect(page.locator('.chip-rede')).toBeVisible();
     expect(erros).toEqual([]);
+  });
+});
+
+test.describe('menu e arena online', () => {
+  test.skip(({ isMobile }) => isMobile, 'só desktop');
+
+  test('o menu leva à campanha, à arena online e ao treino', async ({ page }) => {
+    await page.goto('./');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Dungeons Arena');
+    for (const nome of ['Campanha', 'Arena online', 'Treino de arena (contra um bot)']) {
+      await expect(page.getByRole('link', { name: nome })).toBeVisible();
+    }
+  });
+
+  test('dois jogadores: um cria a sala, o outro entra pelo código e os dois se veem', async ({ browser }) => {
+    // Dois navegadores com WebGL por software: mais lento que os outros testes.
+    test.setTimeout(240_000);
+    const erros: string[] = [];
+    const criador = await browser.newPage();
+    const convidado = await browser.newPage();
+    for (const p of [criador, convidado]) p.on('pageerror', (e) => erros.push(e.message));
+
+    await criador.goto('./?arena=online&diag=1');
+    await expect(criador.locator('.status-servidor')).toContainText('ping', { timeout: 15_000 });
+    await criador.getByRole('button', { name: 'Criar sala' }).click();
+    const aviso = criador.locator('.aviso').filter({ hasText: 'Código da sala' });
+    await expect(aviso).toBeVisible({ timeout: 15_000 });
+    const codigo = /([A-Z0-9]{6})/.exec((await aviso.textContent()) ?? '')?.[1];
+    expect(codigo).toBeTruthy();
+
+    await convidado.goto('./?arena=online&diag=1');
+    await convidado.getByLabel('Código da sala').fill(codigo ?? '');
+    await convidado.getByRole('button', { name: 'Entrar' }).click();
+
+    // Os dois jogadores + NPCs da arena aparecem nos dois navegadores.
+    for (const p of [criador, convidado]) {
+      await expect(p.locator('#diag')).toHaveAttribute('data-rtt', /^\d+$/, { timeout: 20_000 });
+      await expect
+        .poll(async () => Number(/entidades (\d+)/.exec((await p.locator('#diag').textContent()) ?? '')?.[1] ?? 0), { timeout: 20_000 })
+        .toBeGreaterThanOrEqual(5);
+    }
+    // O criador sai: o convidado continua na sala.
+    await criador.close();
+    const tickAntes = Number(await convidado.locator('#diag').getAttribute('data-tick'));
+    await expect.poll(async () => Number(await convidado.locator('#diag').getAttribute('data-tick')), { timeout: 10_000 }).toBeGreaterThan(tickAntes + 30);
+    expect(erros).toEqual([]);
+    await convidado.close();
   });
 });
 

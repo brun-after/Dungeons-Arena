@@ -515,6 +515,99 @@ body.toque .botao-habilidade .tecla {
   display: none;
 }
 
+/* Menu inicial e lobby da arena */
+.tela-menu {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: calc(24px + var(--seguro-topo)) calc(16px + var(--seguro-dir)) calc(24px + var(--seguro-base)) calc(16px + var(--seguro-esq));
+  overflow-y: auto;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.tela-menu h1 {
+  margin: 0;
+  font-size: 2.2rem;
+  color: var(--destaque);
+  text-align: center;
+}
+
+.subtitulo-menu,
+.status-servidor {
+  margin: 0 0 8px;
+  color: var(--texto-suave);
+  text-align: center;
+}
+
+.botao-menu {
+  display: block;
+  width: min(320px, 100%);
+  min-height: 48px;
+  padding: 12px 16px;
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  background: var(--painel);
+  color: var(--texto);
+  font: inherit;
+  font-size: 1rem;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.botao-menu:focus-visible,
+.link-menu:focus-visible,
+.entrar-codigo input:focus-visible {
+  outline: 2px solid var(--destaque);
+  outline-offset: 2px;
+}
+
+.botao-menu:disabled {
+  opacity: 0.5;
+}
+
+.entrar-codigo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: min(320px, 100%);
+  margin-top: 8px;
+}
+
+.entrar-codigo input {
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  background: var(--fundo);
+  color: var(--texto);
+  font: 1.4rem ui-monospace, 'Cascadia Code', Consolas, monospace;
+  letter-spacing: 0.3em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.erro-lobby:empty {
+  display: none;
+}
+
+.erro-lobby {
+  margin: 0;
+  color: #e74c3c;
+}
+
+.link-menu {
+  margin-top: 8px;
+  color: var(--texto-suave);
+}
+
 /* Diagnóstico e avisos */
 .diagnostico {
   position: absolute;

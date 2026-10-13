@@ -16,7 +16,7 @@ jobs:
   verificar:
     name: Typecheck, lint, testes, build e smoke
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
 
@@ -45,6 +45,9 @@ jobs:
       - name: Smoke de ponta a ponta
         run: npm run test:e2e
 
+      - name: Servidor empacotado
+        run: npm run build:server
+
       - name: Relatório do Playwright em caso de falha
         if: failure()
         uses: actions/upload-artifact@v4
@@ -52,3 +55,21 @@ jobs:
           name: playwright-report
           path: test-results/
           retention-days: 7
+
+  imagem:
+    name: Imagem Docker do servidor
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Construir a imagem (sem publicar)
+        run: docker build -t dungeons-arena-servidor:ci .
+      - name: A imagem sobe e responde /saude
+        run: |
+          docker run -d --name servidor -p 2567:2567 -e REGIAO=ci dungeons-arena-servidor:ci
+          for i in $(seq 1 20); do
+            if curl -fsS http://localhost:2567/saude; then echo; exit 0; fi
+            sleep 1
+          done
+          docker logs servidor
+          exit 1

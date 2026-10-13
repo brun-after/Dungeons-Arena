@@ -9,6 +9,7 @@ import type { EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ehObjeto, type Objeto } from '../core/validar';
 import type { PreviaDeFicha } from './ficha-sessao';
+import type { PatchDeEstado } from './patches';
 
 /** Teto de uma mensagem de comando (§3.6). Medido em unidades de texto, o que é conservador. */
 export const MAX_BYTES_MENSAGEM = 16 * 1024;
@@ -18,7 +19,9 @@ const MAX_COORDENADA = 10_000;
 export type MensagemCliente =
   | { t: 'entrar'; nome: string; pedidoFicha: unknown; versaoConteudo: string }
   | { t: 'cmd'; pacote: ComandoEmpacotado }
-  | { t: 'ping'; id: number; enviadoMs: number };
+  | { t: 'ping'; id: number; enviadoMs: number }
+  /** O cliente perdeu a sequência de patches: pede o estado completo. */
+  | { t: 'ressincronizar' };
 
 export type MotivoRejeicao =
   | 'grande_demais'
@@ -45,6 +48,7 @@ export type MensagemServidor =
       estado: EstadoJogo;
     }
   | { t: 'estado'; tick: number; epocaSala: number; ackSeq: number; estado: EstadoJogo }
+  | { t: 'patch'; tick: number; epocaSala: number; ackSeq: number; patch: PatchDeEstado }
   | { t: 'eventos'; tick: number; eventos: EventoSimulacao[] }
   | { t: 'pong'; id: number; enviadoMs: number; tickServidor: number }
   | { t: 'rejeitado'; seq: number | null; motivo: MotivoRejeicao }
@@ -134,6 +138,8 @@ export function lerMensagemCliente(texto: string): LeituraCliente {
     }
     case 'ping':
       return inteiro(bruto.id) && finito(bruto.enviadoMs) ? { ok: true, msg: { t: 'ping', id: bruto.id, enviadoMs: bruto.enviadoMs } } : malformada();
+    case 'ressincronizar':
+      return { ok: true, msg: { t: 'ressincronizar' } };
     default:
       return malformada();
   }

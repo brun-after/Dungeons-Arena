@@ -1,8 +1,10 @@
 # Decisões de projeto
 
-**Versão:** 0.5 · **Data:** 13/10/2026
+**Versão:** 0.7 · **Data:** 13/10/2026
 
 > **Histórico**
+> - **0.7 (13/10/2026)**: decisões D-035 a D-037, tomadas no marco 5A (servidor real).
+> - **0.6 (13/10/2026)**: decisões D-033 e D-034, tomadas no marco 4B (loopback).
 > - **0.5 (13/10/2026)**: decisões D-028 a D-032, tomadas no marco 4A (regras da arena).
 > - **0.4 (13/10/2026)**: decisões D-024 a D-027, tomadas no marco 3B (IA); D-023 ampliada.
 > - **0.3 (13/10/2026)**: decisões D-017 a D-023, tomadas no marco 3A (combate); D-016 superada.
@@ -321,3 +323,35 @@ aplica o comando no tick atual e vira correção.
 
 **Decisão.** Um comando rejeitado (taxa, fila, malformado) avança o `ultimoSeq` da sessão e é confirmado no próximo
 `ackSeq`. O cliente o descarta dos pendentes e a reconciliação corrige a predição. Isso evita reenvios infinitos.
+
+## D-035 · Patches próprios sobre mensagens do Colyseus (v0.7, 13/10/2026)
+
+**Contexto.** A §3.6 recomenda que um adaptador copie o estado da simulação para o Schema do Colyseus, que então
+distribui os patches.
+
+**Decisão.** O Colyseus cuida de salas, matchmaking, WSS e reconexão. O estado vai como **patches nossos**
+(`src/arena/patches.ts`): snapshot completo na entrada, na reconexão e na ressincronização; depois, só as entidades
+novas e removidas e, das que continuam, **só os campos alterados**. Cada patch diz de qual tick parte; o cliente com
+furo de sequência pede o estado completo.
+
+**Motivos.** Uma só fonte de verdade (a simulação), sem uma segunda cópia em Schema; a mesma sala roda em loopback,
+nos testes e no servidor; o cliente continua recebendo o `EstadoJogo` que já sabe desenhar e prever.
+
+**Consequência.** Medido com 10 bots: ~20–25 KiB/s por cliente (meta ≤ 100 KiB/s). O corpo do patch é serializado
+uma vez por transmissão; por sessão muda só o `ackSeq`.
+
+## D-036 · O código da sala é o `roomId` (v0.7, 13/10/2026)
+
+**Decisão.** A sala nasce com um código de 6 caracteres sem ambiguidade (sem 0/O, 1/I/L; 31^6 ≈ 900 milhões de
+combinações), usado como o próprio `roomId` do Colyseus: entrar pelo código é um `joinById`. A busca
+`GET /salas/:codigo` tem limite de 20 tentativas por minuto por origem. A rota de matchmaking do Colyseus não tem
+esse limite; adivinhar um código entre centenas de milhões, com salas que duram minutos, não é viável.
+
+## D-037 · Passo fixo do servidor pelo Colyseus (v0.7, 13/10/2026)
+
+**Decisão.** O servidor usa o `setFixedTimestep` do Colyseus 0.18: 60 Hz com acumulador, poucos passos de
+recuperação e descarte do atraso (sem espiral), nunca `requestAnimationFrame` (§2.2). A duração de cada tick vai para
+a métrica `tickP95Ms`/`tickP99Ms`, registrada a cada 10 s.
+
+**Medição local.** Tick isolado (10 jogadores conectados, sem rede): p95 1,1 ms, p99 2,4 ms. Com o gerador de carga
+na mesma máquina, o p95 variou de 8 a 30 ms por disputa de CPU; a medição oficial é na VM, com a carga vindo de fora.

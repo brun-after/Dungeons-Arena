@@ -107,5 +107,8 @@ describe('carga em loopback', () => {
     });
     expect(amb.sala.jogadores).toBe(10);
     expect(amb.clientes.every((c) => c.conectado && c.rejeitados === 0)).toBe(true);
-  });
+    // Banda média por cliente (§5.6: ≤ 100 KiB/s recebidos), com patches.
+    const bytesPorClientePorSegundo = amb.sala.metricas().bytesEnviados / 10 / 60;
+    expect(bytesPorClientePorSegundo).toBeLessThan(100 * 1024);
+  }, 60_000);
 });

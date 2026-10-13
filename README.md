@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 0.7 · **Data:** 13/10/2026
-**Status:** 🚧 Em construção. Campanha mínima jogável (marcos 1–3) e arena em loopback (marco 4); próximo: servidor real (Etapa 4 e marco 5)
+**Versão do documento:** 0.8 · **Data:** 13/10/2026
+**Status:** 🚧 Em construção. Campanha mínima jogável (marcos 1–3), arena em loopback (marco 4) e servidor real pronto para implantar (marco 5A); falta a VM (Etapa 4) e o teste com dois celulares (5B)
 
 > **Histórico**
+> - **0.8 (13/10/2026)**: marco 5A (servidor Colyseus, sala por código, patches, reconexão, Docker, deploy); menu inicial.
 > - **0.7 (13/10/2026)**: marco 4 concluído; demonstração da arena em loopback.
 > - **0.6 (13/10/2026)**: marco 4A (modo Livre, ficha justa, orbes, fase de arena).
 > - **0.5 (13/10/2026)**: marco 3 concluído (IA, arquétipos, boss e encontros da fase 1).
@@ -32,16 +33,20 @@ Divergências em relação a ela são registradas em [`docs/DECISOES.md`](docs/D
 
 | Onde | Como | Disponível a partir de |
 |---|---|---|
-| **Navegador (nuvem)** | <https://brun-after.github.io/Dungeons-Arena/> | Etapa 1 (tela inicial); Etapa 2 (jogável) |
+| **Navegador (nuvem)** | <https://brun-after.github.io/Dungeons-Arena/> — menu: campanha, arena online e treino | Etapa 1 (tela inicial); Etapa 2 (jogável) |
+| **Arena de treino** | <https://brun-after.github.io/Dungeons-Arena/?arena=loopback&latencia=80> — você contra um bot, com sala e rede simuladas na página (`latencia`, `jitter` e `perda` na URL) | Marco 4 |
+| **Arena online** | Menu → **Arena online** → *Criar sala* (mostra um código) ou *Entrar com código* | Marco 5 (depois da Etapa 4) |
 | **Local: cliente** | `npm install` e `npm run dev`, depois abrir `http://localhost:5173` | Etapa 1 |
-| **Arena (demonstração)** | <https://brun-after.github.io/Dungeons-Arena/?arena=loopback&latencia=80> — você contra um bot, com sala e rede simuladas na página (`latencia`, `jitter` e `perda` na URL) | Marco 4 |
+| **Local: servidor da arena** | `npm run dev:server` (sobe em `ws://localhost:2567`); com ele rodando, a arena online de `localhost` já funciona | Marco 5 |
+| **Local: celular no mesmo Wi-Fi** | `npm run dev -- --host` e abrir no celular `http://IP-DO-PC:5173/?arena=online&servidor=ws://IP-DO-PC:2567` | Marco 5 |
+| **Local: stack completa** | `docker compose up --build` (servidor e Redis; o Caddy só na VM) | Marco 5 |
+| **Teste de carga** | `npm run carga -- --url ws://localhost:2567 --clientes 10 --segundos 60` | Marco 5 |
 | **Local: verificação completa** | `npm run verificar` (typecheck, lint, testes e build) | Etapa 1 |
-| **Local: servidor da arena** | `npm run dev:server` (sobe em `ws://localhost:2567`) | Etapa 5 |
-| **Local: stack completa** | `docker compose up` (servidor, Redis e proxy) | Etapa 5 |
-| **Testes** | `npm test` (unidade e simulação), `npm run test:e2e` (Playwright) | Etapa 1 |
+| **Testes** | `npm test` (unidade, simulação, rede e integração com o servidor), `npm run test:e2e` (Playwright) | Etapa 1 |
 | **Offline** | Depois da primeira visita, a campanha abre em modo avião (PWA) | Etapa 2 |
 
-Requisitos locais: **Node.js 24 LTS**, **Git**; **Docker Desktop** só a partir da Etapa 5.
+Requisitos locais: **Node.js 24 LTS**, **Git**; **Docker Desktop** é opcional (só para `docker compose`).
+Implantação do servidor na nuvem, passo a passo: [`docs/IMPLANTACAO.md`](docs/IMPLANTACAO.md).
 
 ### Controles
 
@@ -101,7 +106,7 @@ em `main`, e o merge publica automaticamente.
 
 - [x] **Etapa 0**: conta no GitHub, ferramentas instaladas, repositório criado com este README
 - [x] **Etapa 1**: fundação do projeto, CI e deploy no GitHub Pages
-- [ ] **Etapa 4**: VM Oracle, DuckDNS e segredos de deploy configurados
+- [ ] **Etapa 4**: VM Oracle, DuckDNS e segredos de deploy configurados ([guia](docs/IMPLANTACAO.md))
 
 ### Primeira versão jogável
 
@@ -111,7 +116,7 @@ em `main`, e o merge publica automaticamente.
 | [x] | 2 | Uma fase, movimento Dir8/cardinal, colisão, câmera e controles mobile | Dá para mover e atacar com dois dedos no celular e com o mouse em emulação |
 | [x] | 3 | Ataque básico, 4 habilidades, 3 arquétipos de IA e boss | Combate legível: crítico zero, defesa, interrupção e telegrafia corretos |
 | [x] | 4 | Arena Livre em loopback, orçamento de ficha, NPCs, loot e reconciliação | Dois clientes lutam e coletam sem duplicar itens |
-| [ ] | 5 | Backend Colyseus/WSS, sala por código, patches e reconexão | Dois celulares em redes distintas; o criador sai e a sala continua; carga com 10 clientes |
+| [ ] | 5 | Backend Colyseus/WSS, sala por código, patches e reconexão (5A código ✓ · 5B na VM) | Dois celulares em redes distintas; o criador sai e a sala continua; carga com 10 clientes |
 | [ ] | 6 | Recompensa/equipamento, save básico e editor mínimo | Criar um mapa no celular e completar o ciclo lutar → melhorar → lutar |
 | [ ] | 7 | Testes humanos, rede suportada/degradada e carga inicial | Critérios da §5.7 atendidos |
 
