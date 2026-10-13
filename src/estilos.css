@@ -1,0 +1,86 @@
+:root {
+  color-scheme: dark;
+  --fundo: #14121a;
+  --painel: #1f1c28;
+  --texto: #ece8f4;
+  --texto-suave: #a59fb4;
+  --destaque: #f39c12;
+  --borda: #34303f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+#app {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+    max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+}
+
+h1 {
+  margin: 0 0 4px;
+  font-size: 2rem;
+  color: var(--destaque);
+}
+
+h2 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+}
+
+.subtitulo {
+  margin: 0 0 16px;
+  color: var(--texto-suave);
+}
+
+.status {
+  display: inline-block;
+  margin: 0 0 24px;
+  padding: 4px 10px;
+  border: 1px solid var(--borda);
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
+.painel {
+  padding: 16px;
+  background: var(--painel);
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+}
+
+.explicacao {
+  margin: 0 0 12px;
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 16px;
+  margin: 0;
+}
+
+dt {
+  color: var(--texto-suave);
+}
+
+dd {
+  margin: 0;
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
