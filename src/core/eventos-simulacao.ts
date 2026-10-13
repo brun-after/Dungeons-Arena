@@ -58,6 +58,9 @@ export type EventoSimulacao =
   | { t: 'efeitoAplicado'; tick: number; alvoId: EntidadeId; origemId: EntidadeId; tipo: TipoEfeito; ateTick: number }
   | { t: 'morreu'; tick: number; id: EntidadeId; porId: EntidadeId | null }
   | { t: 'xpGanho'; tick: number; id: EntidadeId; xp: number }
+  | { t: 'iaNotou'; tick: number; id: EntidadeId; alvoId: EntidadeId; hesitacaoAteTick: number }
+  | { t: 'iaPerseguindo'; tick: number; id: EntidadeId; alvoId: EntidadeId }
+  | { t: 'iaDesistiu'; tick: number; id: EntidadeId; alvoId: EntidadeId }
   | { t: 'reviveu'; tick: number; id: EntidadeId }
   | { t: 'surgiu'; tick: number; id: EntidadeId };
 

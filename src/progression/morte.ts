@@ -10,6 +10,7 @@ import { ticksDe } from '../core/tempo';
 import type { Entidade } from '../entities/entidade';
 import { criarInimigo } from '../entities/fabrica';
 import { podeFerir } from '../modos/relacao';
+import { celulaLivrePara } from '../world/colisao';
 
 function zerarMovimento(e: Entidade): void {
   e.acao = null;
@@ -105,6 +106,11 @@ function processarRespawns(estado: EstadoJogo, ctx: ContextoSimulacao, saida: Ev
       continue;
     }
     const e = criarInimigo(preset, r.id, r.x, r.y, ctx.balance, { nivel: r.nivel });
+    // Origem ocupada por quem bloqueia: o respawn espera a célula liberar.
+    if (!celulaLivrePara(e, r.x, r.y, estado.entidades, ctx.balance.colisao)) {
+      pendentes.push(r);
+      continue;
+    }
     e.geracao = r.geracao;
     e.abates = r.abates;
     estado.entidades.push(e);

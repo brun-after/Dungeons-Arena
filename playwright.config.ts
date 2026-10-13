@@ -9,6 +9,8 @@ export default defineConfig({
   // O WebGL do navegador headless é por software: dois navegadores em paralelo disputam a CPU,
   // os quadros passam de 250 ms e a simulação desacelera de propósito (teto do laço). Em série.
   workers: 1,
+  // Andar até uma sala e lutar leva mais que os 30 s padrão no WebGL por software.
+  timeout: 90_000,
   expect: { timeout: 10_000 },
   reporter: process.env.CI ? 'github' : 'list',
   use: {

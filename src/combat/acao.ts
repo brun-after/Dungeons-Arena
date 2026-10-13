@@ -226,18 +226,24 @@ function lancar(
   }
 }
 
-/** Ataque básico automático (§2.7): a cada 250 ms, contra o alvo selecionado dentro do alcance. */
+/**
+ * Ataque básico automático (§2.7): a cada 250 ms, contra o alvo selecionado no alcance ou, sem
+ * seleção, contra o hostil mais próximo que esteja perseguindo o atacante.
+ */
 export function processarAutoAtaque(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
   if (estado.tick % Math.max(1, ticksDe(ctx.balance.combate.autoAtaqueMs)) !== 0) return;
   for (const ator of ordemRotativa(estado.entidades, estado.tick)) {
-    if (!ator.autoAtaque || !vivo(ator) || ator.acao || !ator.alvoSelecionado) continue;
+    if (!ator.autoAtaque || !vivo(ator) || ator.acao) continue;
     const hab = ctx.conteudo.habilidades.get(ator.ataqueBasico);
     if (!hab || recargaRestante(estado, ator.id, hab.id) > 0 || acaoBloqueada(ator, estado.tick, hab.tipoAtaque === 'magico')) {
       continue;
     }
-    const alvo = buscarEntidade(estado, ator.alvoSelecionado);
-    if (!alvo || !alvoOfensivoValido(estado, ctx, ator, alvo)) continue;
-    if (chebyshev(celulaOcupada(ator), celulaOcupada(alvo)) > hab.alcanceCelulas) continue;
-    iniciarAcao(estado, ctx, ator, hab.id, alvo.id, saida);
+    const selecionado = ator.alvoSelecionado ? buscarEntidade(estado, ator.alvoSelecionado) : undefined;
+    const noAlcance = (e: Entidade) => chebyshev(celulaOcupada(ator), celulaOcupada(e)) <= hab.alcanceCelulas;
+    const alvo =
+      selecionado && alvoOfensivoValido(estado, ctx, ator, selecionado) && noAlcance(selecionado)
+        ? selecionado
+        : autoAlvo(estado, ctx, ator, hab.alcanceCelulas, (e) => e.ia?.modo === 'perseguindo' && e.ia.alvoId === ator.id);
+    if (alvo) iniciarAcao(estado, ctx, ator, hab.id, alvo.id, saida);
   }
 }

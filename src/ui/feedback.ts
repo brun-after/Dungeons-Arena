@@ -80,6 +80,9 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
   bus.on('surgiu', (ev) => {
     hud.registrar(t('log.surgiu', { alvo: nome(ev.id) }));
   });
+  bus.on('iaNotou', (ev) => {
+    if (ev.alvoId === idLocal) hud.registrar(t('log.notou', { inimigo: nome(ev.id) }));
+  });
   bus.on('caminhoFalhou', (ev) => {
     if (ev.id === idLocal) vibrar([50, 30, 50]);
   });

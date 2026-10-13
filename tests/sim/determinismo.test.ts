@@ -15,6 +15,8 @@ describe('harness de simulação na fase oficial 1', () => {
     expect(contar('impacto')).toBeGreaterThan(50);
     expect(contar('acaoCancelada') + contar('esquivou')).toBeGreaterThan(0);
     expect(contar('morreu')).toBeGreaterThan(0);
+    expect(contar('iaNotou')).toBeGreaterThan(0);
+    expect(contar('iaPerseguindo')).toBeGreaterThan(0);
   });
 
   it('toda ação ofensiva iniciada dá ao menos 200 ms entre o início e o impacto previsto (§3.6)', () => {

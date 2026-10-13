@@ -77,16 +77,30 @@ export function planejarCaminho(
   ctx: ContextoSimulacao,
   tick: number,
   saida: EventoSimulacao[],
-): void {
+  maxPassos = ctx.balance.navegacao.maxPassosToque,
+): boolean {
   const origem = { x: e.destinoX, y: e.destinoY };
-  const resultado = caminho(ctx.fase, origem, destino, ctx.balance.navegacao.maxPassosToque);
+  const resultado = caminho(ctx.fase, origem, destino, maxPassos);
   if (resultado.status !== 'alcancado') {
     saida.push({ t: 'caminhoFalhou', tick, id: e.id, status: resultado.status });
-    return;
+    return false;
   }
   e.direcao = 'parado';
   e.caminho = resultado.passos;
   e.waypoints = [];
+  return true;
+}
+
+/** Para de andar: limpa caminho e direção. O passo em curso termina normalmente. */
+export function pararMovimento(e: Entidade): void {
+  e.direcao = 'parado';
+  e.caminho = [];
+  e.waypoints = [];
+}
+
+/** A entidade pode entrar na célula agora (terreno e reservas de outras entidades)? */
+export function celulaLivre(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: ContextoSimulacao): boolean {
+  return podeEntrar(e, x, y, estado, ctx);
 }
 
 export function moverEntidades(

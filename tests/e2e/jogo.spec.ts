@@ -60,15 +60,37 @@ test.describe('desktop', () => {
 
   test('combate: selecionar o boneco, atacar sozinho e lançar habilidade', async ({ page }) => {
     const { diag, erros } = await abrir(page);
-    // Anda até (16,5), duas células à esquerda do boneco em (18,5).
-    await page.mouse.click(16.5 * 48, 5.5 * 48);
-    await expect.poll(async () => ler(diag, 'celula'), { timeout: 20_000 }).toEqual([16, 5]);
+    // Anda até (7,8), duas células à esquerda do boneco de treino em (9,8).
+    await esperarParado(page, diag);
+    const [px, py] = await ler(diag, 'celula');
+    const [sx, sy] = await ler(diag, 'tela');
+    await page.mouse.click(sx + (7 - px) * 48, sy + (8 - py) * 48);
+    await expect.poll(async () => ler(diag, 'celula'), { timeout: 20_000 }).toEqual([7, 8]);
     await esperarParado(page, diag);
     const [tx, ty] = await ler(diag, 'tela');
     await page.mouse.click(tx + 2 * 48, ty);
     await expect.poll(async () => Number(await diag.getAttribute('data-impactos')), { timeout: 15_000 }).toBeGreaterThan(0);
     await page.keyboard.press('Digit1');
     await expect(page.locator('.log-combate li').first()).toBeVisible();
+    expect(erros).toEqual([]);
+  });
+
+  test('inimigos da sala B notam o jogador, perseguem e atacam', async ({ page }) => {
+    const { diag, erros } = await abrir(page);
+    // Vai até (16,3) e depois (19,3), perto dos goblins.
+    for (const [cx, cy] of [
+      [16, 3],
+      [19, 3],
+    ] as const) {
+      await esperarParado(page, diag);
+      const [px, py] = await ler(diag, 'celula');
+      const [tx, ty] = await ler(diag, 'tela');
+      await page.mouse.click(tx + (cx - px) * 48, ty + (cy - py) * 48);
+      await expect.poll(async () => ler(diag, 'celula'), { timeout: 20_000 }).toEqual([cx, cy]);
+    }
+    // O registro guarda as últimas linhas: "notou você" pode já ter saído quando a luta começa.
+    await expect(page.locator('.log-combate')).toContainText('Goblin', { timeout: 20_000 });
+    await expect.poll(async () => Number(await diag.getAttribute('data-hp')), { timeout: 30_000 }).toBeLessThan(100);
     expect(erros).toEqual([]);
   });
 
