@@ -1,0 +1,6 @@
+{
+  "id": "campanha",
+  "nome": "Campanha",
+  "politicaRelacao": "por_equipe",
+  "fogoAmigo": false
+}

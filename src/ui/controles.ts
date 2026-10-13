@@ -19,6 +19,8 @@ export interface OpcoesControles {
 
 export interface Controles {
   elemento: HTMLElement;
+  /** Coluna do botão de ataque, onde a roda de habilidades é montada. */
+  direita: HTMLElement;
   trocarTipo: (tipo: TipoControle) => void;
   desligar: () => void;
 }
@@ -59,10 +61,8 @@ export function criarControles(opcoes: OpcoesControles): Controles {
   centro.className = 'coluna centro';
   const direita = document.createElement('div');
   direita.className = 'coluna direita';
-  direita.append(
-    botaoAcao('controles.interagir', '✋', 'interagir', opcoes.aoInteragir),
-    botaoAcao('controles.ataque', '⚔', 'ataque', opcoes.aoAtacar),
-  );
+  centro.append(botaoAcao('controles.interagir', '✋', 'interagir', opcoes.aoInteragir));
+  direita.append(botaoAcao('controles.ataque', '⚔', 'ataque', opcoes.aoAtacar));
   faixa.append(esquerda, centro, direita);
 
   let desligarDirecional: (() => void) | null = null;
@@ -77,6 +77,7 @@ export function criarControles(opcoes: OpcoesControles): Controles {
 
   return {
     elemento: faixa,
+    direita,
     trocarTipo,
     desligar: () => {
       desligarDirecional?.();

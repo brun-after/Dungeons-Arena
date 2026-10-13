@@ -10,6 +10,10 @@ export interface OpcoesCabecalho {
   camera: ModoCamera;
   aoTrocarControle: () => TipoControle;
   aoTrocarCamera: () => ModoCamera;
+  /** Elementos sob o nome da fase (barras do jogador). */
+  status?: HTMLElement;
+  /** Botões extras à direita. */
+  acoesExtras?: HTMLElement[];
 }
 
 function botao(rotulo: string, aria: string, aoClicar: () => string): HTMLButtonElement {
@@ -40,9 +44,14 @@ export function criarCabecalho(opcoes: OpcoesCabecalho): HTMLElement {
   );
   trocarControle.classList.add('so-toque');
   acoes.append(
+    ...(opcoes.acoesExtras ?? []),
     trocarControle,
     botao(rotuloCamera(opcoes.camera), t('cabecalho.trocarCamera'), () => rotuloCamera(opcoes.aoTrocarCamera())),
   );
-  cabecalho.append(titulo, acoes);
+  const esquerda = document.createElement('div');
+  esquerda.className = 'titulo-cabecalho';
+  esquerda.append(titulo);
+  if (opcoes.status) esquerda.append(opcoes.status);
+  cabecalho.append(esquerda, acoes);
   return cabecalho;
 }

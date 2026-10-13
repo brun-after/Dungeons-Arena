@@ -1,52 +1,51 @@
 // Montagem da sessão de campanha no navegador: liga simulação, renderização, entrada e interface.
 // A simulação só recebe comandos pela fila; a apresentação só lê o estado e os eventos.
 
-import type { Comando } from './core/comandos';
+import { recargaRestante } from './combat/acao';
+import { celulaOcupada } from './combat/geometria';
+import type { Habilidade } from './combat/habilidades';
+import type { Celula, Comando } from './core/comandos';
 import { criarFila, enfileirar, retirarAte } from './core/comandos';
+import { conteudoOficial } from './core/conteudo';
 import { BALANCE_PADRAO, type ContextoSimulacao } from './core/contexto';
-import { criarEntidade, criarEstado } from './core/estado';
+import { criarEstado } from './core/estado';
 import { Barramento } from './core/events';
 import type { EventoSimulacao, EventosDaSimulacao } from './core/eventos-simulacao';
 import { hashTexto } from './core/rng';
 import { simular } from './core/simulacao';
+import { ticksDe } from './core/tempo';
 import fase01 from './data/fases/fase-01.json';
+import { criarJogador } from './entities/fabrica';
 import { t } from './i18n';
 import { ligarPonteiro } from './input/ponteiro';
 import { ligarTeclado } from './input/teclado';
-import { detectarToque, sinaisDoNavegador, vibrar } from './plataforma/dispositivo';
+import { podeFerir } from './modos/relacao';
+import { detectarToque, sinaisDoNavegador } from './plataforma/dispositivo';
 import { iniciarLaco } from './plataforma/laco-navegador';
 import { gravarPreferencias, lerPreferencias } from './plataforma/preferencias';
 import { prepararSessaoDeTela } from './plataforma/sessao-tela';
 import { Camera } from './render/camera';
 import { CELULA_PX } from './render/camera-calculo';
 import { Interpolador } from './render/interpolacao';
+import { CamadaNumeros } from './render/numeros';
 import { CamadaEntidades } from './render/sprites';
 import { criarPalco, type Palco } from './render/stage';
+import { CamadaTelegrafia } from './render/telegrafia';
 import { criarTerreno } from './render/terreno';
 import { mostrarAviso } from './ui/aviso';
 import { criarCabecalho } from './ui/cabecalho';
 import { criarControles, type Controles } from './ui/controles';
 import { Diagnostico } from './ui/diagnostico';
+import { ligarFeedback } from './ui/feedback';
+import { criarBarraHabilidades } from './ui/habilidades';
+import { Hud } from './ui/hud';
 import { carregarFase } from './world/fase';
 import { velocidade } from './world/movimento';
+import { povoarFase } from './world/populacao';
 import { validarFase } from './world/validacao-fase';
 
 const ID_JOGADOR = 'j1';
 const LEITURA_FAIXA_MS = 1000;
-
-function publicar(bus: Barramento<EventosDaSimulacao>, ev: EventoSimulacao): void {
-  switch (ev.t) {
-    case 'moveu':
-      bus.emitir('moveu', ev);
-      break;
-    case 'caminhoFalhou':
-      bus.emitir('caminhoFalhou', ev);
-      break;
-    case 'ataqueSolicitado':
-      bus.emitir('ataqueSolicitado', ev);
-      break;
-  }
-}
 
 function div(classe: string): HTMLDivElement {
   const el = document.createElement('div');
@@ -54,19 +53,31 @@ function div(classe: string): HTMLDivElement {
   return el;
 }
 
+function montarContexto(): ContextoSimulacao {
+  const conteudo = conteudoOficial();
+  const validacao = validarFase(fase01, new Set(conteudo.presets.keys()));
+  if (!validacao.ok) throw new Error(`fase oficial inválida: ${validacao.erros.map((e) => e.mensagem).join('; ')}`);
+  return { fase: carregarFase(validacao.fase), balance: BALANCE_PADRAO, conteudo, modo: conteudo.modoCampanha };
+}
+
 export async function iniciarJogo(raiz: HTMLElement): Promise<void> {
   const toque = detectarToque(sinaisDoNavegador());
   document.body.classList.toggle('toque', toque);
   const prefs = lerPreferencias();
+  const movimentoReduzido = matchMedia('(prefers-reduced-motion: reduce)');
 
-  const validacao = validarFase(fase01);
-  if (!validacao.ok) throw new Error(`fase oficial inválida: ${validacao.erros.map((e) => e.mensagem).join('; ')}`);
-  const fase = carregarFase(validacao.fase);
-  const ctx: ContextoSimulacao = { fase, balance: BALANCE_PADRAO };
+  const ctx = montarContexto();
+  const { fase, conteudo } = ctx;
   const estado = criarEstado({ semente: hashTexto(fase.id), faseId: fase.id });
   const spawn = fase.spawns[0] ?? { x: 1, y: 1 };
-  estado.entidades.push(criarEntidade({ id: ID_JOGADOR, tipo: 'jogador', x: spawn.x, y: spawn.y, jogadorId: 'local' }));
+  const classe = conteudo.classes.get('aventureiro');
+  if (!classe) throw new Error('classe inicial ausente');
+  estado.entidades.push(criarJogador(classe, ID_JOGADOR, spawn.x, spawn.y, ctx.balance));
+  povoarFase(estado, ctx);
   const jogador = () => estado.entidades.find((e) => e.id === ID_JOGADOR);
+  const habilidades = classe.habilidades
+    .map((id) => conteudo.habilidades.get(id))
+    .filter((h): h is Habilidade => h !== undefined);
 
   raiz.textContent = '';
   const host = div('palco');
@@ -88,11 +99,26 @@ export async function iniciarJogo(raiz: HTMLElement): Promise<void> {
   const camera = new Camera(fase.largura * CELULA_PX, fase.altura * CELULA_PX, prefs.camera, toque);
   const terreno = criarTerreno(palco.terreno, fase);
   const sprites = new CamadaEntidades(palco.entidades, ID_JOGADOR);
+  const telegrafia = new CamadaTelegrafia(palco.chao, palco.voo);
+  const numeros = new CamadaNumeros(palco.efeitos, () => movimentoReduzido.matches);
   const interp = new Interpolador();
   const fila = criarFila();
   const emitir = (cmd: Comando) => enfileirar(fila, { tick: estado.tick, entidadeId: ID_JOGADOR, cmd });
   const isometrico = () => false; // a visão isométrica entra no marco 13
+  const usarHabilidade = (id: string) => emitir({ t: 'usarHabilidade', id });
 
+  // Toque ou clique num hostil seleciona o alvo; em qualquer outra célula, vai até ela.
+  const aoTocarCelula = (c: Celula) => {
+    const local = jogador();
+    const hostil = estado.entidades.find((e) => {
+      const o = celulaOcupada(e);
+      return o.x === c.x && o.y === c.y && !!local && podeFerir(local, e, ctx.modo) && !e.morto;
+    });
+    emitir(hostil ? { t: 'selecionarAlvo', alvo: hostil.id } : { t: 'irPara', x: c.x, y: c.y });
+  };
+
+  const hud = new Hud(ui);
+  const barra = criarBarraHabilidades(habilidades, usarHabilidade);
   let controles: Controles | null = null;
   if (toque) {
     controles = criarControles({
@@ -102,13 +128,18 @@ export async function iniciarJogo(raiz: HTMLElement): Promise<void> {
       aoInteragir: () => emitir({ t: 'interagir' }),
       isometrico,
     });
+    controles.direita.append(barra.elemento);
     ui.append(controles.elemento);
+  } else {
+    ui.append(barra.elemento);
   }
   ui.append(
     criarCabecalho({
       nomeFase: fase.nome,
       controle: prefs.controle,
       camera: prefs.camera,
+      status: hud.status,
+      acoesExtras: [hud.botaoLog],
       aoTrocarControle: () => {
         prefs.controle = prefs.controle === 'joystick' ? 'dpad' : 'joystick';
         controles?.trocarTipo(prefs.controle);
@@ -155,22 +186,20 @@ export async function iniciarJogo(raiz: HTMLElement): Promise<void> {
   ligarTeclado({
     aoMudarDirecao: (dir) => emitir({ t: 'mover', dir }),
     aoAtacar: () => emitir({ t: 'ataqueBasico' }),
+    aoAtalho: (indice) => {
+      const h = habilidades[indice];
+      if (h) usarHabilidade(h.id);
+    },
+    aoCancelar: () => emitir({ t: 'selecionarAlvo', alvo: null }),
     isometrico,
   });
-  ligarPonteiro(palco.canvas, { camera, aoIrPara: (c) => emitir({ t: 'irPara', x: c.x, y: c.y }) });
+  ligarPonteiro(palco.canvas, { camera, aoIrPara: aoTocarCelula });
   palco.canvas.addEventListener('contextmenu', (ev) => {
     ev.preventDefault();
   });
 
   const bus = new Barramento<EventosDaSimulacao>();
-  let ataques = 0;
-  bus.on('caminhoFalhou', () => {
-    vibrar([50, 30, 50]);
-  });
-  bus.on('ataqueSolicitado', (ev) => {
-    ataques++;
-    sprites.pulsar(ev.id, performance.now());
-  });
+  const feedback = ligarFeedback({ bus, estado, idLocal: ID_JOGADOR, numeros, hud, agora: () => performance.now() });
 
   const eventos: EventoSimulacao[] = [];
   let ultimoQuadroMs = performance.now();
@@ -179,7 +208,7 @@ export async function iniciarJogo(raiz: HTMLElement): Promise<void> {
       interp.registrarAntesDoTick(estado);
       eventos.length = 0;
       simular(estado, ctx, retirarAte(fila, estado.tick), eventos, dtMs);
-      for (const ev of eventos) publicar(bus, ev);
+      for (const ev of eventos) bus.emitir(ev.t, ev);
     },
     renderizar: (alpha) => {
       const agora = performance.now();
@@ -190,11 +219,18 @@ export async function iniciarJogo(raiz: HTMLElement): Promise<void> {
       const j = jogador();
       if (j) {
         camera.seguirCelula({ x: j.x, y: j.y });
-        camera.atualizar(dtS, interp.posicao(j, alpha), velocidade(j.destreza, ctx.balance.movimento.velocidadeBaseMs));
+        camera.atualizar(dtS, interp.posicao(j, alpha), velocidade(j.atributos.destreza, ctx.balance.movimento.velocidadeBaseMs));
+        barra.atualizar((h) => ({
+          recarga: h.recargaMs > 0 ? recargaRestante(estado, j.id, h.id) / ticksDe(h.recargaMs) : 0,
+          semMana: j.mana < h.custoRecurso,
+        }));
       }
+      hud.atualizar(j);
       camera.aplicar(palco.mundo);
       terreno.atualizarVisibilidade(...camera.retanguloVisivel(palco.altura()));
-      sprites.desenhar(estado, interp, alpha, agora);
+      telegrafia.desenhar(estado, ctx, ID_JOGADOR, alpha);
+      sprites.desenhar(estado, ctx, interp, alpha);
+      numeros.atualizar(agora);
       palco.renderizar();
 
       diag?.quadro(agora, () => {
@@ -204,7 +240,8 @@ export async function iniciarJogo(raiz: HTMLElement): Promise<void> {
           celula: { x: j?.x ?? 0, y: j?.y ?? 0 },
           tela: camera.paraTela(p.x, p.y),
           entidades: estado.entidades.length,
-          ataques,
+          impactos: feedback.impactos(),
+          hp: j?.hp ?? 0,
           zoom: camera.zoom,
         };
       });

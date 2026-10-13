@@ -15,6 +15,7 @@ export type Comando =
   | { t: 'irPara'; x: number; y: number }
   | { t: 'usarHabilidade'; id: string; alvo?: EntidadeId | Celula }
   | { t: 'ataqueBasico'; alvo?: EntidadeId }
+  | { t: 'selecionarAlvo'; alvo: EntidadeId | null }
   | { t: 'usarItem'; invId: string }
   | { t: 'equipar'; invId: string; slot: string }
   | { t: 'interagir' };

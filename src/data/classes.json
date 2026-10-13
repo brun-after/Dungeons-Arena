@@ -1,0 +1,15 @@
+{
+  "versao": 1,
+  "classes": [
+    {
+      "id": "aventureiro",
+      "nome": "Aventureiro",
+      "hpBase": 60,
+      "defesa": 2,
+      "classe": "corpo_a_corpo",
+      "atributos": { "forca": 12, "destreza": 10, "constituicao": 10, "inteligencia": 12, "sabedoria": 10, "carisma": 10 },
+      "ataqueBasico": "ataque_basico",
+      "habilidades": ["seta_arcana", "explosao", "curar", "golpe_atordoante"]
+    }
+  ]
+}

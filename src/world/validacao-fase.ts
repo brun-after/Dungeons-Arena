@@ -3,7 +3,14 @@
 // nunca quebra o jogo. Marco 2: schema mínimo, spawn passável e spawn alcançando a saída.
 
 import { alcancaveis } from './navegacao';
-import { CARACTERE_CELULA, carregarFase, passavel, type FaseJson, type SpawnJson } from './fase';
+import {
+  CARACTERE_CELULA,
+  carregarFase,
+  passavel,
+  type FaseJson,
+  type InimigoPosicionado,
+  type SpawnJson,
+} from './fase';
 
 export interface ErroFase {
   mensagem: string;
@@ -25,11 +32,15 @@ function ehInteiro(v: unknown): v is number {
   return typeof v === 'number' && Number.isInteger(v);
 }
 
-export function validarFase(entrada: unknown): ResultadoValidacao {
+/**
+ * `presetsConhecidos`: quando informado, cada inimigo posicionado precisa referenciar um preset
+ * existente no catálogo (o editor e o CI passam o catálogo oficial).
+ */
+export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<string>): ResultadoValidacao {
   const erros: ErroFase[] = [];
   if (!ehObjeto(entrada)) return { ok: false, erros: [{ mensagem: 'a fase precisa ser um objeto' }] };
 
-  const { id, nome, ordem, tipo, mapa, spawns } = entrada;
+  const { id, nome, ordem, tipo, mapa, spawns, inimigos } = entrada;
   if (typeof id !== 'string' || id.trim() === '') erros.push({ mensagem: 'id ausente' });
   if (typeof nome !== 'string' || nome.trim() === '') erros.push({ mensagem: 'nome ausente' });
   if (!ehInteiro(ordem)) erros.push({ mensagem: 'ordem precisa ser inteiro' });
@@ -39,6 +50,7 @@ export function validarFase(entrada: unknown): ResultadoValidacao {
 
   const linhas = validarMapa(mapa, erros);
   const listaSpawns = validarSpawns(spawns, erros);
+  const listaInimigos = validarInimigos(inimigos, erros, presetsConhecidos);
   if (erros.length > 0 || !linhas || !listaSpawns) return { ok: false, erros };
 
   const json: FaseJson = {
@@ -48,9 +60,43 @@ export function validarFase(entrada: unknown): ResultadoValidacao {
     tipo: tipo as FaseJson['tipo'],
     mapa: linhas,
     spawns: listaSpawns,
+    inimigos: listaInimigos,
   };
   validarJogabilidade(json, erros);
   return erros.length > 0 ? { ok: false, erros } : { ok: true, fase: json };
+}
+
+function validarInimigos(
+  inimigos: unknown,
+  erros: ErroFase[],
+  presetsConhecidos: ReadonlySet<string> | undefined,
+): InimigoPosicionado[] {
+  if (inimigos === undefined) return [];
+  if (!Array.isArray(inimigos)) {
+    erros.push({ mensagem: 'inimigos precisa ser uma lista' });
+    return [];
+  }
+  const lista: InimigoPosicionado[] = [];
+  for (const i of inimigos) {
+    if (!ehObjeto(i) || typeof i.preset !== 'string' || !ehInteiro(i.x) || !ehInteiro(i.y)) {
+      erros.push({ mensagem: 'inimigo precisa de preset, x e y inteiros' });
+      continue;
+    }
+    if (presetsConhecidos && !presetsConhecidos.has(i.preset)) {
+      erros.push({ mensagem: `preset de inimigo desconhecido "${i.preset}"`, x: i.x, y: i.y });
+    }
+    const item: InimigoPosicionado = { preset: i.preset, x: i.x, y: i.y };
+    if (i.nivel !== undefined) {
+      if (ehInteiro(i.nivel) && i.nivel >= 1) item.nivel = i.nivel;
+      else erros.push({ mensagem: 'nível do inimigo inválido', x: i.x, y: i.y });
+    }
+    if (i.hpBase !== undefined) {
+      if (typeof i.hpBase === 'number' && i.hpBase >= 1) item.hpBase = i.hpBase;
+      else erros.push({ mensagem: 'hpBase do inimigo inválido', x: i.x, y: i.y });
+    }
+    lista.push(item);
+  }
+  return lista;
 }
 
 function validarMapa(mapa: unknown, erros: ErroFase[]): string[] | null {
@@ -95,6 +141,14 @@ function validarJogabilidade(json: FaseJson, erros: ErroFase[]): void {
   const fase = carregarFase(json);
   for (const s of fase.spawns) {
     if (!passavel(fase, s.x, s.y)) erros.push({ mensagem: 'spawn em célula não passável', x: s.x, y: s.y });
+  }
+  // Inimigos dentro dos limites, em célula passável e sem dois na mesma célula (§3.10).
+  const ocupadas = new Set<string>();
+  for (const i of fase.inimigos) {
+    const chave = `${i.x},${i.y}`;
+    if (!passavel(fase, i.x, i.y)) erros.push({ mensagem: 'inimigo em célula não passável', x: i.x, y: i.y });
+    if (ocupadas.has(chave)) erros.push({ mensagem: 'dois inimigos na mesma célula', x: i.x, y: i.y });
+    ocupadas.add(chave);
   }
   const primeiro = fase.spawns[0];
   if (!primeiro || erros.length > 0) return;

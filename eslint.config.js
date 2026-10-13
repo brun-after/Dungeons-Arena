@@ -40,7 +40,16 @@ export default tseslint.config(
     },
   },
   {
-    files: ['src/core/**/*.ts', 'src/world/**/*.ts', 'src/entities/**/*.ts', 'server/**/*.ts', 'shared/**/*.ts'],
+    files: [
+      'src/core/**/*.ts',
+      'src/world/**/*.ts',
+      'src/entities/**/*.ts',
+      'src/combat/**/*.ts',
+      'src/modos/**/*.ts',
+      'src/progression/**/*.ts',
+      'server/**/*.ts',
+      'shared/**/*.ts',
+    ],
     rules: {
       'no-restricted-imports': [
         'error',

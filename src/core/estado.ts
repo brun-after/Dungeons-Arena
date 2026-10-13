@@ -8,12 +8,51 @@ import { clonarRng, criarRng, type EstadoRng } from './rng';
 
 export { criarEntidade, clonarEntidade, type Entidade } from '../entities/entidade';
 
+/** Projétil em voo (§2.7, etapa 4). Continua mesmo se o lançador morrer ou for atordoado. */
+export interface Projetil {
+  id: number;
+  acaoId: number;
+  donoId: EntidadeId;
+  equipeDono: string;
+  habilidadeId: string;
+  /** Posição contínua em células (centro da célula = coordenada inteira). */
+  x: number;
+  y: number;
+  dirX: number;
+  dirY: number;
+  /** Distância que ainda pode percorrer, em células. */
+  restante: number;
+  /** Células por segundo. */
+  velocidade: number;
+  /** Bônus de atributo e Carisma do lançador congelados no lançamento. */
+  bonusAtributo: number;
+  carisma: number;
+}
+
+/** Respawn agendado de um inimigo (§2.5): o id continua estável e a geração incrementa. */
+export interface RespawnPendente {
+  id: EntidadeId;
+  preset: string;
+  x: number;
+  y: number;
+  nivel: number;
+  geracao: number;
+  abates: number;
+  noTick: number;
+}
+
 export interface EstadoJogo {
   versao: 1;
   faseId: string;
   tick: number;
   rng: EstadoRng;
   entidades: Entidade[];
+  /** Expiração de recarga em tick, por `entidadeId_habilidadeId` (§2.7). */
+  recargas: Record<string, number>;
+  projeteis: Projetil[];
+  respawns: RespawnPendente[];
+  /** Gerador de IDs de ação e de projétil, para não duplicar VFX/som (§3.6). */
+  proximoId: number;
 }
 
 export interface OpcoesEstado {
@@ -28,11 +67,19 @@ export function criarEstado(opcoes: OpcoesEstado): EstadoJogo {
     tick: 0,
     rng: criarRng(opcoes.semente),
     entidades: [],
+    recargas: {},
+    projeteis: [],
+    respawns: [],
+    proximoId: 1,
   };
 }
 
 export function buscarEntidade(estado: EstadoJogo, id: EntidadeId): Entidade | undefined {
   return estado.entidades.find((e) => e.id === id);
+}
+
+export function novoId(estado: EstadoJogo): number {
+  return estado.proximoId++;
 }
 
 // Clone explícito, campo a campo (§5.3 regra 4): nada de ida e volta por JSON em estado vivo.
@@ -43,5 +90,9 @@ export function clonarEstado(estado: EstadoJogo): EstadoJogo {
     tick: estado.tick,
     rng: clonarRng(estado.rng),
     entidades: estado.entidades.map(clonarEntidade),
+    recargas: { ...estado.recargas },
+    projeteis: estado.projeteis.map((p) => ({ ...p })),
+    respawns: estado.respawns.map((r) => ({ ...r })),
+    proximoId: estado.proximoId,
   };
 }

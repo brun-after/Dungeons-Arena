@@ -18,8 +18,14 @@ const EIXOS: Readonly<Record<string, readonly [number, number]>> = {
 export interface OpcoesTeclado {
   aoMudarDirecao: (dir: Dir8 | 'parado') => void;
   aoAtacar: () => void;
+  /** Teclas 1–9 e 0 (§2.10): índice 0 a 9. */
+  aoAtalho: (indice: number) => void;
+  /** `Esc` é contextual (§2.15): cancela a mira antes de pausar. */
+  aoCancelar: () => void;
   isometrico: () => boolean;
 }
+
+const ATALHOS = ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0'];
 
 /** Liga o teclado. Retorna a função que desliga. */
 export function ligarTeclado(opcoes: OpcoesTeclado): () => void {
@@ -54,6 +60,10 @@ export function ligarTeclado(opcoes: OpcoesTeclado): () => void {
     } else if (ev.code === 'Space' && !ev.repeat) {
       ev.preventDefault();
       opcoes.aoAtacar();
+    } else if (ATALHOS.includes(ev.code) && !ev.repeat) {
+      opcoes.aoAtalho(ATALHOS.indexOf(ev.code));
+    } else if (ev.code === 'Escape') {
+      opcoes.aoCancelar();
     }
   };
   const aoSoltar = (ev: KeyboardEvent) => {

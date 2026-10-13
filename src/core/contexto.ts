@@ -1,9 +1,12 @@
-// Contexto injetado em `simular()`: conteúdo imutável (fase) e números de balanceamento.
-// Fica fora do estado: não entra no digest nem no checkpoint, que guardam só o `faseId`.
+// Contexto injetado em `simular()`: conteúdo imutável (fase e catálogos), modo de jogo e números
+// de balanceamento. Fica fora do estado: não entra no digest nem no checkpoint (D-007).
 
 import balanceJson from '../data/balance.json';
+import type { FaixaCritico } from '../combat/critico';
+import type { ModoDeJogo } from '../modos/modo';
 import type { RegrasColisao } from '../world/colisao';
 import type { Fase } from '../world/fase';
+import type { Conteudo } from './conteudo';
 
 export interface Balance {
   versao: number;
@@ -18,6 +21,32 @@ export interface Balance {
     maxPassosToque: number;
   };
   colisao: RegrasColisao;
+  combate: {
+    multiplicadorAtributoPadrao: number;
+    autoAtaqueMs: number;
+    janelaParticipacaoS: number;
+    carismaNeutro: number;
+    critico: FaixaCritico[];
+  };
+  hp: {
+    hpAtributoMult: number;
+    dificuldadeMult: number;
+    fallback: number;
+  };
+  recursos: {
+    regenManaPorSegundo: number;
+  };
+  respawn: {
+    inimigoS: number;
+    bossS: number;
+  };
+  morte: {
+    reviverMs: number;
+    invisivelMs: number;
+  };
+  xp: {
+    decaimentoAntifarm: number;
+  };
 }
 
 export const BALANCE_PADRAO: Balance = balanceJson;
@@ -25,4 +54,6 @@ export const BALANCE_PADRAO: Balance = balanceJson;
 export interface ContextoSimulacao {
   readonly fase: Fase;
   readonly balance: Balance;
+  readonly conteudo: Conteudo;
+  readonly modo: ModoDeJogo;
 }

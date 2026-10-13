@@ -1,5 +1,5 @@
 {
-  "versao": 2,
+  "versao": 3,
   "movimento": {
     "velocidadeBaseMs": 400,
     "filaMaxWaypoints": 2
@@ -10,5 +10,37 @@
   "colisao": {
     "jogadorBloqueiaJogador": false,
     "jogadorBloqueiaInimigo": false
+  },
+  "combate": {
+    "multiplicadorAtributoPadrao": 0.5,
+    "autoAtaqueMs": 250,
+    "janelaParticipacaoS": 10,
+    "carismaNeutro": 10,
+    "critico": [
+      { "ate": 3, "mult": 0 },
+      { "ate": 12, "mult": 1 },
+      { "ate": 15, "mult": 1.2 },
+      { "ate": 19, "mult": 1.5 },
+      { "ate": 20, "mult": 2 }
+    ]
+  },
+  "hp": {
+    "hpAtributoMult": 4,
+    "dificuldadeMult": 1,
+    "fallback": 100
+  },
+  "recursos": {
+    "regenManaPorSegundo": 1
+  },
+  "respawn": {
+    "inimigoS": 60,
+    "bossS": 300
+  },
+  "morte": {
+    "reviverMs": 1200,
+    "invisivelMs": 5000
+  },
+  "xp": {
+    "decaimentoAntifarm": 0.8
   }
 }

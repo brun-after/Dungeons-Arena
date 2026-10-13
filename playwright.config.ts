@@ -6,6 +6,10 @@ export default defineConfig({
   testDir: 'tests/e2e',
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
+  // O WebGL do navegador headless é por software: dois navegadores em paralelo disputam a CPU,
+  // os quadros passam de 250 ms e a simulação desacelera de propósito (teto do laço). Em série.
+  workers: 1,
+  expect: { timeout: 10_000 },
   reporter: process.env.CI ? 'github' : 'list',
   use: {
     baseURL: `http://localhost:${PORTA}`,

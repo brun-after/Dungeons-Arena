@@ -15,6 +15,21 @@ async function ler(diag: Locator, atributo: 'celula' | 'tela'): Promise<[number,
   return [a, b];
 }
 
+/** Espera o jogador e a câmera pararem (célula e posição na tela iguais em duas leituras). */
+async function esperarParado(page: Page, diag: Locator) {
+  await expect
+    .poll(
+      async () => {
+        const antes = `${await diag.getAttribute('data-celula')}|${await diag.getAttribute('data-tela')}`;
+        await page.waitForTimeout(400);
+        const depois = `${await diag.getAttribute('data-celula')}|${await diag.getAttribute('data-tela')}`;
+        return antes === depois;
+      },
+      { timeout: 15_000 },
+    )
+    .toBe(true);
+}
+
 async function centro(locator: Locator) {
   const caixa = await locator.boundingBox();
   if (!caixa) throw new Error('elemento sem caixa');
@@ -29,17 +44,31 @@ test.describe('desktop', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Salões da entrada');
     const [x0] = await ler(diag, 'celula');
 
+    // Segura D até o jogador andar (sem prazo fixo: o navegador de teste pode estar lento).
     await page.keyboard.down('d');
-    await page.waitForTimeout(900);
+    await expect.poll(async () => (await ler(diag, 'celula'))[0], { timeout: 15_000 }).toBeGreaterThan(x0);
     await page.keyboard.up('d');
-    await expect.poll(async () => (await ler(diag, 'celula'))[0]).toBeGreaterThan(x0);
-    await page.waitForTimeout(500);
+    await esperarParado(page, diag);
 
     const [x, y] = await ler(diag, 'celula');
     const [tx, ty] = await ler(diag, 'tela');
     // Zoom inicial 1: uma célula = 48 px. Clica 3 células abaixo do jogador.
     await page.mouse.click(tx, ty + 3 * 48);
-    await expect.poll(async () => ler(diag, 'celula'), { timeout: 5_000 }).toEqual([x, y + 3]);
+    await expect.poll(async () => ler(diag, 'celula'), { timeout: 15_000 }).toEqual([x, y + 3]);
+    expect(erros).toEqual([]);
+  });
+
+  test('combate: selecionar o boneco, atacar sozinho e lançar habilidade', async ({ page }) => {
+    const { diag, erros } = await abrir(page);
+    // Anda até (16,5), duas células à esquerda do boneco em (18,5).
+    await page.mouse.click(16.5 * 48, 5.5 * 48);
+    await expect.poll(async () => ler(diag, 'celula'), { timeout: 20_000 }).toEqual([16, 5]);
+    await esperarParado(page, diag);
+    const [tx, ty] = await ler(diag, 'tela');
+    await page.mouse.click(tx + 2 * 48, ty);
+    await expect.poll(async () => Number(await diag.getAttribute('data-impactos')), { timeout: 15_000 }).toBeGreaterThan(0);
+    await page.keyboard.press('Digit1');
+    await expect(page.locator('.log-combate li').first()).toBeVisible();
     expect(erros).toEqual([]);
   });
 
@@ -59,32 +88,46 @@ test.describe('celular (emulação)', () => {
     await page.mouse.move(j.x, j.y);
     await page.mouse.down();
     await page.mouse.move(j.x + 45, j.y, { steps: 4 });
-    await page.waitForTimeout(900);
+    await expect.poll(async () => (await ler(diag, 'celula'))[0], { timeout: 15_000 }).toBeGreaterThan(x0);
     await page.mouse.up();
-    await expect.poll(async () => (await ler(diag, 'celula'))[0]).toBeGreaterThan(x0);
     expect(erros).toEqual([]);
   });
 
-  test('dois dedos: segurar o joystick e atacar ao mesmo tempo', async ({ page }) => {
+  test('dois dedos: segurar o joystick e usar habilidade ao mesmo tempo', async ({ page }) => {
     const { diag, erros } = await abrir(page);
     const [x0] = await ler(diag, 'celula');
     const j = await centro(page.getByTestId('joystick'));
-    const a = await centro(page.getByTestId('ataque'));
+    const h = await centro(page.getByTestId('habilidade-curar'));
     const cdp = await page.context().newCDPSession(page);
     const dedo1 = { x: j.x + 45, y: j.y, id: 1 };
 
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: j.x, y: j.y, id: 1 }] });
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [dedo1] });
     await page.waitForTimeout(300);
-    // Segundo dedo no ataque enquanto o primeiro continua no joystick.
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [dedo1, { x: a.x, y: a.y, id: 2 }] });
+    // Segundo dedo na roda de habilidades enquanto o primeiro continua no joystick.
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [dedo1, { x: h.x, y: h.y, id: 2 }] });
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [dedo1] });
-    await page.waitForTimeout(700);
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
 
-    await expect(diag).not.toHaveAttribute('data-ataques', '0');
-    expect((await ler(diag, 'celula'))[0]).toBeGreaterThan(x0);
+    // Com o primeiro dedo ainda no joystick: a cura gera um impacto (no próprio jogador) e o
+    // movimento continua depois da conjuração.
+    await expect(diag).not.toHaveAttribute('data-impactos', '0', { timeout: 15_000 });
+    await expect.poll(async () => (await ler(diag, 'celula'))[0], { timeout: 15_000 }).toBeGreaterThan(x0);
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     expect(erros).toEqual([]);
+  });
+
+  test('a roda de habilidades cabe na tela e não cobre o joystick', async ({ page }) => {
+    await abrir(page);
+    const viewport = page.viewportSize();
+    const joystick = await page.getByTestId('joystick').boundingBox();
+    for (const id of ['seta_arcana', 'explosao', 'curar', 'golpe_atordoante']) {
+      const caixa = await page.getByTestId(`habilidade-${id}`).boundingBox();
+      expect(caixa, id).not.toBeNull();
+      if (!caixa || !viewport || !joystick) continue;
+      expect(caixa.x).toBeGreaterThanOrEqual(0);
+      expect(caixa.x + caixa.width).toBeLessThanOrEqual(viewport.width);
+      expect(caixa.x).toBeGreaterThan(joystick.x + joystick.width);
+    }
   });
 
   test('a página não rola nem dá zoom', async ({ page }) => {

@@ -1,12 +1,49 @@
 // Entidade (§2.5). Só dados, para clonar, comparar no digest e gravar em checkpoint.
-// Marco 2: identidade, equipe, controlador, movimento e HP. Recursos, efeitos e recargas
-// entram com o combate (marco 3).
+// Marco 3: atributos, recursos, efeitos, ação em curso e dados de morte e respawn.
 
 import type { Celula, Dir8, EntidadeId } from '../core/comandos';
+import type { TipoEfeito } from '../combat/efeitos';
 
 export type TipoEntidade = 'jogador' | 'inimigo' | 'invocacao' | 'avatar';
 export type EquipeId = string;
 export type TipoControlador = 'local' | 'remoto' | 'ia';
+export type ClasseCombate = 'corpo_a_corpo' | 'conjurador';
+export type Arquetipo = 'jogador' | 'perseguidor' | 'atirador' | 'controlador' | 'boss' | 'boneco';
+
+export interface Atributos {
+  forca: number;
+  destreza: number;
+  constituicao: number;
+  inteligencia: number;
+  sabedoria: number;
+  carisma: number;
+}
+
+export interface EfeitoAtivo {
+  tipo: TipoEfeito;
+  /** Tick em que o efeito expira (§2.7: tempo em ticks, nunca relógio de parede). */
+  ateTick: number;
+  origemId: EntidadeId;
+}
+
+/** Ação em conjuração (§2.7, etapa 3). Ticks publicados para a telegrafia (§3.6). */
+export interface AcaoEmCurso {
+  acaoId: number;
+  habilidadeId: string;
+  alvoId: EntidadeId | null;
+  /** Célula mirada (área) ou célula do alvo no início. */
+  alvoX: number;
+  alvoY: number;
+  inicioTick: number;
+  lancamentoTick: number;
+  impactoPrevistoTick: number;
+}
+
+/** Quem causou dano e quando, para dividir XP entre participantes (§2.7, morte). */
+export interface Participacao {
+  id: EntidadeId;
+  tick: number;
+}
 
 export interface Entidade {
   id: EntidadeId;
@@ -27,21 +64,53 @@ export interface Entidade {
   destinoY: number;
   /** Fração do passo em curso, em [0, 1). */
   progressoPasso: number;
-  /** Direção mantida pela entrada (§2.3). */
   direcao: Dir8 | 'parado';
-  /** Alternância X/Y da diagonal: true = próximo passo diagonal vai em X. */
   proximoEixoX: boolean;
-  /** Fila curta de células a seguir (no máximo `filaMaxWaypoints`). */
   waypoints: Celula[];
-  /** Resto do caminho de um `irPara`, que reabastece a fila. */
   caminho: Celula[];
-  /** Avança por distância percorrida, não por tempo de parede (§2.3). */
   relogioAndar: number;
 
-  destreza: number;
+  atributos: Atributos;
+  classe: ClasseCombate;
+  defesa: number;
   hp: number;
   hpMax: number;
+  mana: number;
+  manaMax: number;
+  ataqueBasico: string;
+  habilidades: string[];
+  efeitos: EfeitoAtivo[];
+  acao: AcaoEmCurso | null;
+  alvoSelecionado: EntidadeId | null;
+  autoAtaque: boolean;
+  invisivelAteTick: number;
+  morto: boolean;
+  /** Tick em que o jogador revive; 0 quando não há revivescência pendente. */
+  reviverEmTick: number;
+
+  preset: string;
+  arquetipo: Arquetipo;
+  nivel: number;
+  /** Incrementa a cada respawn; o id continua estável (§3.6). */
+  geracao: number;
+  origemX: number;
+  origemY: number;
+  xp: number;
+  /** XP concedido ao morrer, antes do antifarm. */
+  xpBase: number;
+  /** Quantas vezes esta instância já morreu (antifarm, §2.12). */
+  abates: number;
+  participacao: Participacao[];
 }
+
+export const ATRIBUTOS_NEUTROS: Readonly<Atributos> = {
+  forca: 10,
+  destreza: 10,
+  constituicao: 10,
+  inteligencia: 10,
+  sabedoria: 10,
+  carisma: 10,
+};
 
 export interface NovaEntidade {
   id: EntidadeId;
@@ -52,18 +121,30 @@ export interface NovaEntidade {
   equipe?: EquipeId;
   controlador?: TipoControlador;
   jogadorId?: string;
-  destreza?: number;
+  atributos?: Partial<Atributos>;
+  classe?: ClasseCombate;
+  defesa?: number;
   hpMax?: number;
+  manaMax?: number;
+  ataqueBasico?: string;
+  habilidades?: string[];
+  autoAtaque?: boolean;
+  preset?: string;
+  arquetipo?: Arquetipo;
+  nivel?: number;
+  xpBase?: number;
 }
 
 export function criarEntidade(n: NovaEntidade): Entidade {
   const hpMax = n.hpMax ?? 100;
+  const manaMax = n.manaMax ?? 10;
+  const jogador = n.tipo === 'jogador';
   return {
     id: n.id,
     nome: n.nome ?? n.id,
     tipo: n.tipo,
-    equipe: n.equipe ?? (n.tipo === 'jogador' ? 'jogadores' : 'inimigos'),
-    controlador: n.controlador ?? (n.tipo === 'jogador' ? 'local' : 'ia'),
+    equipe: n.equipe ?? (jogador ? 'jogadores' : 'inimigos'),
+    controlador: n.controlador ?? (jogador ? 'local' : 'ia'),
     jogadorId: n.jogadorId ?? '',
     x: n.x,
     y: n.y,
@@ -75,9 +156,32 @@ export function criarEntidade(n: NovaEntidade): Entidade {
     waypoints: [],
     caminho: [],
     relogioAndar: 0,
-    destreza: n.destreza ?? 10,
+    atributos: { ...ATRIBUTOS_NEUTROS, ...n.atributos },
+    classe: n.classe ?? 'corpo_a_corpo',
+    defesa: n.defesa ?? 0,
     hp: hpMax,
     hpMax,
+    mana: manaMax,
+    manaMax,
+    ataqueBasico: n.ataqueBasico ?? 'ataque_basico',
+    habilidades: [...(n.habilidades ?? [])],
+    efeitos: [],
+    acao: null,
+    alvoSelecionado: null,
+    autoAtaque: n.autoAtaque ?? jogador,
+    invisivelAteTick: 0,
+    morto: false,
+    reviverEmTick: 0,
+    preset: n.preset ?? '',
+    arquetipo: n.arquetipo ?? (jogador ? 'jogador' : 'perseguidor'),
+    nivel: n.nivel ?? 1,
+    geracao: 0,
+    origemX: n.x,
+    origemY: n.y,
+    xp: 0,
+    xpBase: n.xpBase ?? 0,
+    abates: 0,
+    participacao: [],
   };
 }
 
@@ -85,29 +189,22 @@ export function emPasso(e: Entidade): boolean {
   return e.destinoX !== e.x || e.destinoY !== e.y;
 }
 
+export function vivo(e: Entidade): boolean {
+  return !e.morto && e.hp > 0;
+}
+
 const copiarCelulas = (lista: readonly Celula[]): Celula[] => lista.map((c) => ({ x: c.x, y: c.y }));
 
 // Clone explícito, campo a campo (§5.3 regra 4).
 export function clonarEntidade(e: Entidade): Entidade {
   return {
-    id: e.id,
-    nome: e.nome,
-    tipo: e.tipo,
-    equipe: e.equipe,
-    controlador: e.controlador,
-    jogadorId: e.jogadorId,
-    x: e.x,
-    y: e.y,
-    destinoX: e.destinoX,
-    destinoY: e.destinoY,
-    progressoPasso: e.progressoPasso,
-    direcao: e.direcao,
-    proximoEixoX: e.proximoEixoX,
+    ...e,
     waypoints: copiarCelulas(e.waypoints),
     caminho: copiarCelulas(e.caminho),
-    relogioAndar: e.relogioAndar,
-    destreza: e.destreza,
-    hp: e.hp,
-    hpMax: e.hpMax,
+    atributos: { ...e.atributos },
+    habilidades: [...e.habilidades],
+    efeitos: e.efeitos.map((f) => ({ ...f })),
+    acao: e.acao ? { ...e.acao } : null,
+    participacao: e.participacao.map((p) => ({ ...p })),
   };
 }
