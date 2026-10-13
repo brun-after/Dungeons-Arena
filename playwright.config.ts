@@ -24,10 +24,19 @@ export default defineConfig({
     // Mobile é plataforma primária (§1.3): o smoke também roda em emulação de celular.
     { name: 'celular', use: { ...devices['Pixel 7'] } },
   ],
-  webServer: {
-    command: `npm run build && npm run preview -- --port ${PORTA} --strictPort`,
-    url: `http://localhost:${PORTA}`,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  webServer: [
+    {
+      command: `npm run build && npm run preview -- --port ${PORTA} --strictPort`,
+      url: `http://localhost:${PORTA}`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+    {
+      // Servidor da arena para os testes online (o lobby em localhost usa ws://localhost:2567).
+      command: 'npm run servidor',
+      url: 'http://localhost:2567/saude',
+      reuseExistingServer: !process.env.CI,
+      timeout: 60_000,
+    },
+  ],
 });

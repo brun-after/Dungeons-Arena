@@ -54,7 +54,9 @@ export default defineConfig({
     }),
   ],
   test: {
-    include: ['tests/unit/**/*.test.ts', 'tests/sim/**/*.test.ts', 'tests/net/**/*.test.ts'],
+    include: ['tests/unit/**/*.test.ts', 'tests/sim/**/*.test.ts', 'tests/net/**/*.test.ts', 'tests/integracao/**/*.test.ts'],
     environment: 'node',
+    // Simulações de 10.000 ticks e cargas de rede rodam em paralelo e disputam CPU.
+    testTimeout: 60_000,
   },
 });

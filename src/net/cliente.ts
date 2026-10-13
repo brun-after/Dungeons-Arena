@@ -5,6 +5,7 @@
 //   3. a correção lógica é imediata; a apresentação converge suave (ou reposiciona se o erro é grande).
 // O cliente roda alguns ticks à frente do servidor, para que os comandos cheguem a tempo (D-033).
 
+import { aplicarPatch } from '../arena/patches';
 import { versaoDoConteudo, type MensagemServidor } from '../arena/protocolo';
 import type { Comando, ComandoEmpacotado } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -48,6 +49,8 @@ export class ClienteArena {
   readonly erros: number[] = [];
   readonly remotos = new BufferRemoto();
   rejeitados = 0;
+  ressincronizacoes = 0;
+  private aguardandoCompleto = false;
   /** Recebe os eventos transitórios da sala (dano, coleta, mortes) para a apresentação. */
   aoEventos: ((eventos: EventoSimulacao[]) => void) | null;
 
@@ -104,7 +107,19 @@ export class ClienteArena {
         break;
       case 'estado':
         if (msg.epocaSala !== this.epoca) return;
+        this.aguardandoCompleto = false;
         this.reconciliar(msg.tick, msg.ackSeq, msg.estado);
+        break;
+      case 'patch':
+        if (msg.epocaSala !== this.epoca || this.aguardandoCompleto) return;
+        // Furo na sequência (mensagem perdida ou base diferente): pede o estado completo.
+        if (!this.base || this.baseTick !== msg.patch.base) {
+          this.aguardandoCompleto = true;
+          this.ressincronizacoes++;
+          this.o.transporte.enviar(JSON.stringify({ t: 'ressincronizar' }));
+          return;
+        }
+        this.reconciliar(msg.tick, msg.ackSeq, aplicarPatch(this.base, msg.patch));
         break;
       case 'eventos':
         this.aoEventos?.(msg.eventos);

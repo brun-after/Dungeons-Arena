@@ -1,0 +1,49 @@
+# Stack da arena.
+#   Local (seu PC):  docker compose up --build        → ws://localhost:2567
+#   Produção (VM):   docker compose --profile producao up -d   (o deploy faz isso sozinho)
+# Variáveis (arquivo .env ao lado, criado pelo deploy na VM):
+#   IMAGEM_SERVIDOR  imagem publicada no GHCR (padrão: build local)
+#   DOMINIO          ex.: seu-nome.duckdns.org (só produção, para o HTTPS automático)
+#   REGIAO           mostrada no lobby antes de entrar
+
+services:
+  servidor:
+    image: ${IMAGEM_SERVIDOR:-dungeons-arena-servidor:local}
+    build: .
+    environment:
+      PORT: '2567'
+      REGIAO: ${REGIAO:-local}
+    ports:
+      # Exposto só para uso local; na VM o firewall libera apenas 80/443 (o Caddy).
+      - '2567:2567'
+    restart: unless-stopped
+
+  # Armazenamento externo ao processo para os checkpoints da arena (§3.6, marco 9B).
+  redis:
+    image: redis:7.4-alpine
+    command: ['redis-server', '--appendonly', 'yes']
+    volumes:
+      - redis-dados:/data
+    restart: unless-stopped
+
+  # HTTPS/WSS com certificado automático (Let's Encrypt) para o domínio do DuckDNS.
+  caddy:
+    image: caddy:2.10-alpine
+    profiles: ['producao']
+    environment:
+      DOMINIO: ${DOMINIO:-localhost}
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-dados:/data
+      - caddy-config:/config
+    depends_on:
+      - servidor
+    restart: unless-stopped
+
+volumes:
+  redis-dados:
+  caddy-dados:
+  caddy-config:

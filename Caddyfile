@@ -1,0 +1,5 @@
+# Proxy HTTPS/WSS na frente do servidor da arena. O Caddy obtém e renova o certificado sozinho.
+{$DOMINIO} {
+	encode zstd gzip
+	reverse_proxy servidor:2567
+}

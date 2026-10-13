@@ -22,3 +22,4 @@ As metas da §5.6 são critérios a validar; nada aqui foi medido até o marco 7
 | Data | Marco | Cena | Medida | Meta | Resultado | Observações |
 |---|---|---|---|---|---|---|
 | — | — | — | — | — | — | — |
+| 2026-10-13 | 5A | Arena Livre, 10 bots, 60 s, servidor local (Windows, mesmo PC do gerador de carga) | RTT p50/p95 · correção p95/p99 · banda média/máx | — · ≤ 0,25 · ≤ 100 KiB/s | 11/66 ms · 0/0,083 · 20,6/20,6 KiB/s | tick isolado p95 1,1 ms, p99 2,4 ms; com carga no mesmo PC, 8–30 ms (disputa de CPU) |

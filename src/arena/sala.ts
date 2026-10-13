@@ -16,6 +16,7 @@ import { ticksDe } from '../core/tempo';
 import { povoarFase } from '../world/populacao';
 import { entrarNaArena } from './entrada';
 import { estadoPublico } from './estado-publico';
+import { GeradorDePatches } from './patches';
 import { construirFichaDeSessao } from './ficha-sessao';
 import { lerMensagemCliente, type MensagemCliente, type MensagemServidor, type MotivoRejeicao } from './protocolo';
 
@@ -26,7 +27,7 @@ export const MAX_FILA_POR_SESSAO = 64;
 export const MAX_ADIANTAMENTO_TICKS = 30;
 export const EXPIRACAO_MOVIMENTO_MS = 500;
 export const RESERVA_RECONEXAO_MS = 30_000;
-/** Estado público a 20 Hz: a cada 3 ticks de 60 Hz (§3.6). */
+/** Estado público (completo ou patch) a 20 Hz: a cada 3 ticks de 60 Hz (§3.6). */
 export const TICKS_POR_ESTADO = 3;
 
 interface Sessao {
@@ -42,6 +43,10 @@ interface Sessao {
   naFila: number;
   conectada: boolean;
   desconectadaEmTick: number;
+  /** Próxima transmissão vai completa (entrada, reconexão, ressincronização). */
+  precisaCompleto: boolean;
+  bytesEnviados: number;
+  rejeicoes: number;
 }
 
 interface ComandoAgendado {
@@ -54,7 +59,18 @@ interface ComandoAgendado {
 
 export interface Conexao {
   receber: (texto: string) => void;
+  /** Queda: o personagem para e a sessão fica reservada por 30 s (§2.13). */
   fechar: () => void;
+  /** Reconexão dentro da reserva: volta a receber, começando por um estado completo. */
+  retomar: () => void;
+  /** Saída definitiva: a entidade sai do mundo agora. */
+  encerrar: () => void;
+}
+
+export interface MetricasSala {
+  jogadores: number;
+  bytesEnviados: number;
+  rejeicoes: number;
 }
 
 export interface OpcoesSala {
@@ -72,6 +88,7 @@ export class SalaArena {
   /** PRNG só para IDs de sessão: não consome a sequência da simulação. */
   private readonly rngSessoes: EstadoRng;
   private readonly eventosDoTick: EventoSimulacao[] = [];
+  private readonly patches = new GeradorDePatches();
 
   constructor(
     readonly ctx: ContextoSimulacao,
@@ -86,9 +103,24 @@ export class SalaArena {
     return this.sessoes.size;
   }
 
-  conectar(enviar: (texto: string) => void): Conexao {
+  metricas(): MetricasSala {
+    let bytesEnviados = 0;
+    let rejeicoes = 0;
+    for (const s of this.sessoes.values()) {
+      bytesEnviados += s.bytesEnviados;
+      rejeicoes += s.rejeicoes;
+    }
+    return { jogadores: this.sessoes.size, bytesEnviados, rejeicoes };
+  }
+
+  conectar(enviarBruto: (texto: string) => void): Conexao {
     let sessao: Sessao | null = null;
+    const enviar = (texto: string) => {
+      if (sessao) sessao.bytesEnviados += texto.length;
+      enviarBruto(texto);
+    };
     const responder = (msg: MensagemServidor) => {
+      if (sessao && msg.t === 'rejeitado') sessao.rejeicoes++;
       enviar(JSON.stringify(msg));
     };
     return {
@@ -111,6 +143,19 @@ export class SalaArena {
         this.agendar(sessao, { t: 'mover', dir: 'parado' }, this.estado.tick);
         sessao.direcao = 'parado';
       },
+      retomar: () => {
+        if (!sessao || !this.sessoes.has(sessao.sessaoId)) return;
+        sessao.conectada = true;
+        sessao.desconectadaEmTick = 0;
+        sessao.precisaCompleto = true;
+      },
+      encerrar: () => {
+        if (!sessao) return;
+        this.sessoes.delete(sessao.sessaoId);
+        const id = sessao.entidadeId;
+        this.estado.entidades = this.estado.entidades.filter((e) => e.id !== id);
+        sessao = null;
+      },
     };
   }
 
@@ -126,6 +171,9 @@ export class SalaArena {
         return null;
       case 'entrar':
         return this.entrar(msg, sessao, enviar, responder);
+      case 'ressincronizar':
+        if (sessao) sessao.precisaCompleto = true;
+        return null;
       case 'cmd': {
         const rejeitar = (motivo: MotivoRejeicao) => {
           responder({ t: 'rejeitado', seq: msg.pacote.seq, motivo });
@@ -199,6 +247,9 @@ export class SalaArena {
       naFila: 0,
       conectada: true,
       desconectadaEmTick: 0,
+      precisaCompleto: true,
+      bytesEnviados: 0,
+      rejeicoes: 0,
     };
     this.sessoes.set(nova.sessaoId, nova);
     responder({
@@ -251,12 +302,31 @@ export class SalaArena {
     if (this.eventosDoTick.length > 0) {
       this.transmitir({ t: 'eventos', tick: this.estado.tick, eventos: this.eventosDoTick });
     }
-    if (this.estado.tick % TICKS_POR_ESTADO === 0) {
-      const publico = estadoPublico(this.estado);
-      for (const s of this.sessoes.values()) {
-        if (!s.conectada) continue;
-        s.enviar(JSON.stringify({ t: 'estado', tick: this.estado.tick, epocaSala: this.epoca, ackSeq: s.ultimoSeq, estado: publico } satisfies MensagemServidor));
+    if (this.estado.tick % TICKS_POR_ESTADO === 0) this.transmitirEstado();
+  }
+
+  /**
+   * Estado a 20 Hz (§3.6): completo para quem acabou de entrar, reconectou ou pediu; patch para os
+   * demais. O patch é o mesmo para todos (parte da transmissão anterior); só o ack muda por sessão.
+   */
+  private transmitirEstado(): void {
+    const publico = estadoPublico(this.estado);
+    const patch = this.patches.gerar(publico);
+    const tick = this.estado.tick;
+    // Serializa o corpo uma vez só; por sessão muda apenas o ack (o maior custo do tick era repetir o JSON).
+    let textoPatch: string | null = null;
+    let textoEstado: string | null = null;
+    for (const s of this.sessoes.values()) {
+      if (!s.conectada) continue;
+      const cabecalho = `"tick":${tick},"epocaSala":${this.epoca},"ackSeq":${s.ultimoSeq}`;
+      if (s.precisaCompleto) {
+        textoEstado ??= JSON.stringify(publico);
+        s.enviar(`{"t":"estado",${cabecalho},"estado":${textoEstado}}`);
+      } else {
+        textoPatch ??= JSON.stringify(patch);
+        s.enviar(`{"t":"patch",${cabecalho},"patch":${textoPatch}}`);
       }
+      s.precisaCompleto = false;
     }
   }
 
