@@ -4,5 +4,5 @@
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "types": ["node", "vite/client", "vite-plugin-pwa/client"]
   },
-  "include": ["src", "shared", "server", "tools/carga", "tests", "vite.config.ts", "playwright.config.ts"]
+  "include": ["src", "shared", "server", "tools/carga", "tools/relatorios", "tests", "vite.config.ts", "playwright.config.ts"]
 }

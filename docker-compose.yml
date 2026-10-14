@@ -13,6 +13,9 @@ services:
     environment:
       PORT: '2567'
       REGIAO: ${REGIAO:-local}
+    volumes:
+      # Relatórios do teste com pessoas (marco 7A, D-044); sobrevive a novos deploys.
+      - servidor-dados:/dados
     ports:
       # Só em 127.0.0.1: no PC, para testes locais; na VM, só o Caddy (80/443) fica exposto à internet.
       - '127.0.0.1:2567:2567'
@@ -44,6 +47,7 @@ services:
     restart: unless-stopped
 
 volumes:
+  servidor-dados:
   redis-dados:
   caddy-dados:
   caddy-config:

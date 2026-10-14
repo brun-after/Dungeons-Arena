@@ -2,6 +2,7 @@
 // compartilhar) ou entrar com um código. Antes de entrar, mostra a região do servidor e o ping
 // medido (§3.6, "Justiça"). Textos sempre por textContent (§3.4).
 
+import { enderecoHttp } from '../plataforma/servidor';
 import { t } from '../i18n';
 import type { PedidoDeSala } from '../plataforma/transporte-colyseus';
 
@@ -20,9 +21,6 @@ function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, text
 }
 
 /** ws(s)://host → http(s)://host, para as rotas HTTP do servidor. */
-export function enderecoHttp(servidor: string): string {
-  return servidor.replace(/^ws/, 'http');
-}
 
 async function medirServidor(servidor: string): Promise<{ regiao: string; pingMs: number } | null> {
   try {

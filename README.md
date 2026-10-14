@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 1.0 · **Data:** 13/10/2026
-**Status:** 🚧 Em construção. Campanha com itens, nível e save (marcos 1–3 e 6), arena online no ar na AWS em São Paulo (marcos 4 e 5) e editor de fases mínimo (marco 6). Faltam as validações em aparelho real: dois celulares na arena (5) e criar uma fase no celular (6)
+**Versão do documento:** 1.1 · **Data:** 13/10/2026
+**Status:** 🚧 Em construção. Marcos 1–6 concluídos e validados em aparelho real: campanha com itens, nível e save, arena online na AWS em São Paulo e editor de fases mínimo. Marco 7 em andamento: o ecossistema do teste com pessoas está pronto; a sessão fica para depois
 
 > **Histórico**
+> - **1.1 (13/10/2026)**: marcos 5 e 6 validados no celular; marco 7A (teste com pessoas: medidas, questionário e envio anônimo).
 > - **1.0 (13/10/2026)**: marco 6 (itens, equipamento, nível, mochila, save em slots e editor de fases); como jogar e controles atualizados.
 > - **0.10 (13/10/2026)**: IP estático na VM da arena; carga contra a VM registrada.
 > - **0.9 (13/10/2026)**: Etapa 4 concluída na AWS Lightsail São Paulo (D-038); hospedagem do servidor deixa de ser gratuita.
@@ -45,6 +46,7 @@ Divergências em relação a ela são registradas em [`docs/DECISOES.md`](docs/D
 | **Local: stack completa** | `docker compose up --build` (servidor e Redis; o Caddy só na VM) | Marco 5 |
 | **Teste de carga** | `npm run carga -- --url ws://localhost:2567 --clientes 10 --segundos 60` | Marco 5 |
 | **Campanha e save** | Menu → **Campanha** → escolha um slot (1–3). Salva sozinho; **Menu** no cabeçalho salva e sai; **Exportar/Importar** levam o save para outro aparelho | Marco 6 |
+| **Teste com pessoas** | Link <https://brun-after.github.io/Dungeons-Arena/?pesquisa=1>; roteiro e resumo em [`docs/TESTES-HUMANOS.md`](docs/TESTES-HUMANOS.md) | Marco 7 |
 | **Editor de fases** | Menu → **Editor de fases** (ou `?editor`): crie, pinte, ponha inimigos, **Testar** com o seu personagem, **Exportar** o `.json`. Para jogar valendo: Campanha → slot vazio → escolha a fase | Marco 6 |
 | **Local: verificação completa** | `npm run verificar` (typecheck, lint, testes e build) | Etapa 1 |
 | **Testes** | `npm test` (unidade, simulação, rede e integração com o servidor), `npm run test:e2e` (Playwright) | Etapa 1 |
@@ -125,9 +127,9 @@ em `main`, e o merge publica automaticamente.
 | [x] | 2 | Uma fase, movimento Dir8/cardinal, colisão, câmera e controles mobile | Dá para mover e atacar com dois dedos no celular e com o mouse em emulação |
 | [x] | 3 | Ataque básico, 4 habilidades, 3 arquétipos de IA e boss | Combate legível: crítico zero, defesa, interrupção e telegrafia corretos |
 | [x] | 4 | Arena Livre em loopback, orçamento de ficha, NPCs, loot e reconciliação | Dois clientes lutam e coletam sem duplicar itens |
-| [ ] | 5 | Backend Colyseus/WSS, sala por código, patches e reconexão (5A código ✓ · servidor no ar ✓ · carga na VM ✓ · falta o teste com dois celulares) | Dois celulares em redes distintas; o criador sai e a sala continua; carga com 10 clientes |
-| [ ] | 6 | Recompensa/equipamento, save básico e editor mínimo (6A ✓ · 6B ✓ · 6C ✓ · falta validar no celular) | Criar um mapa no celular e completar o ciclo lutar → melhorar → lutar |
-| [ ] | 7 | Testes humanos, rede suportada/degradada e carga inicial | Critérios da §5.7 atendidos |
+| [x] | 5 | Backend Colyseus/WSS, sala por código, patches e reconexão | Dois celulares em redes distintas; o criador sai e a sala continua; carga com 10 clientes |
+| [x] | 6 | Recompensa/equipamento, save básico e editor mínimo | Criar um mapa no celular e completar o ciclo lutar → melhorar → lutar |
+| [ ] | 7 | Testes humanos, rede suportada/degradada e carga inicial (7A ecossistema do teste ✓ · 7B rede e carga · 7C sessão com pessoas, adiada) | Critérios da §5.7 atendidos |
 
 ### Expansão da campanha e do conteúdo
 

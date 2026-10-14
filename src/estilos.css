@@ -1056,6 +1056,76 @@ body.toque .botao-habilidade .tecla {
   margin-top: 6px;
 }
 
+.form-questionario {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-questionario p {
+  margin: 0;
+}
+
+.pergunta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 10px;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+}
+
+.pergunta legend {
+  padding: 0 4px;
+  font-weight: 600;
+}
+
+.pergunta svg {
+  border-radius: 6px;
+}
+
+.opcoes-pergunta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.opcoes-pergunta label,
+.consentimento {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+}
+
+.consentimento {
+  align-items: flex-start;
+  font-size: 0.85rem;
+}
+
+.consentimento input {
+  margin-top: 4px;
+}
+
+.form-questionario textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  background: var(--fundo);
+  color: var(--texto);
+  font: inherit;
+}
+
+.form-questionario .botao-menu {
+  width: 100%;
+}
+
+.botao-pesquisa {
+  border-color: var(--destaque);
+}
+
 .botao-mochila.com-pontos {
   border-color: var(--destaque);
   color: var(--destaque);

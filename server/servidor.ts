@@ -1,6 +1,7 @@
 // Servidor da arena (§3.1): Node + Colyseus sobre WebSocket. Rotas HTTP próprias:
 //   GET /saude          → { ok, versao, regiao, salas } para o Caddy, o deploy e o lobby (ping/região)
 //   GET /salas/:codigo  → existe ou não, com limite de tentativas por origem (§2.13)
+//   POST /relatorios    → relatório anônimo do teste com pessoas (marco 7A, D-044)
 // O matchmaking do Colyseus continua nas rotas padrão (/matchmake/...).
 
 import http from 'node:http';
@@ -9,6 +10,7 @@ import { WebSocketTransport } from '@colyseus/ws-transport';
 import { MAX_BYTES_MENSAGEM, versaoDoConteudo } from '../src/arena/protocolo';
 import { codigoValido, LimiteDeTentativas, normalizarCodigo } from './codigo-sala';
 import { registrarLog } from './metricas';
+import { receberRelatorio } from './relatorios';
 import { SalaLivreColyseus } from './salas/sala-livre';
 
 export interface OpcoesServidor {
@@ -16,6 +18,8 @@ export interface OpcoesServidor {
   regiao: string;
   /** Margem sobre o teto de 16 KiB por mensagem (envelope do Colyseus). */
   maxPayload?: number;
+  /** Pasta dos relatórios do teste com pessoas (volume `dados` no Docker). */
+  dirDados?: string;
 }
 
 const CABECALHOS_JSON = {
@@ -30,6 +34,7 @@ function resposta(status: number, corpo: unknown): Response {
 
 export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: number; encerrar: () => Promise<void> }> {
   const limite = new LimiteDeTentativas(20, 60_000);
+  const limiteRelatorios = new LimiteDeTentativas(10, 60_000);
   const httpServer = http.createServer();
 
   const saude = createEndpoint('/saude', { method: 'GET' }, async () => {
@@ -46,10 +51,27 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
     if (!sala) return resposta(404, { ok: false, motivo: 'nao_encontrada' });
     return resposta(200, { ok: true, codigo, jogadores: sala.clients, maxJogadores: sala.maxClients });
   });
+  const relatorios = createEndpoint('/relatorios', { method: 'POST', disableBody: true }, async (ctx) => {
+    const req = ctx.request;
+    if (!req) return resposta(400, { ok: false, motivo: 'sem_corpo' });
+    const tamanho = req.headers.get('content-length');
+    const r = await receberRelatorio(
+      { dir: o.dirDados ?? 'dados', limite: limiteRelatorios },
+      {
+        origem: req.headers.get('origin'),
+        chaveLimite: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'local',
+        tamanho: tamanho === null ? null : Number(tamanho),
+        texto: () => req.text(),
+      },
+      Date.now(),
+    );
+    if (r.status === 201) registrarLog('relatorio_recebido', {});
+    return resposta(r.status, r.status === 201 ? { ok: true } : { ok: false, motivo: r.motivo });
+  });
 
   const servidor = defineServer({
     rooms: { arena: defineRoom(SalaLivreColyseus) },
-    routes: createRouter({ saude, buscarSala }),
+    routes: createRouter({ saude, buscarSala, relatorios }),
     transport: new WebSocketTransport({ server: httpServer, maxPayload: o.maxPayload ?? MAX_BYTES_MENSAGEM + 4096 }),
     greet: false,
     gracefullyShutdown: false,

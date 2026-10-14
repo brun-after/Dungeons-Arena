@@ -10,6 +10,7 @@ O roteiro e o estado de cada marco ficam no [`README.md`](README.md).
 
 - `npm run dev`: cliente em `http://localhost:5173` (menu; `?jogo=campanha` slots, `&slot=N` joga no slot, `?arena=online`, `?arena=loopback`)
 - `npm run dev:server`: servidor da arena (Colyseus) em `ws://localhost:2567`; `npm run carga`: teste de carga
+- `npm run relatorios -- arquivo.jsonl`: resumo dos relatórios do teste com pessoas (`?pesquisa=1`, docs/TESTES-HUMANOS.md)
 - `npm run build:server`: servidor empacotado em `dist-server/main.mjs` (o Dockerfile usa este)
 - `npm run verificar`: typecheck + lint + testes + build (rode antes de abrir PR)
 - `npm test`: unidade e simulação (Vitest); `npm run test:e2e`: smoke (Playwright)

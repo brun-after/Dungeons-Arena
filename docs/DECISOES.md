@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.11 · **Data:** 13/10/2026
+**Versão:** 0.12 · **Data:** 13/10/2026
 
 > **Histórico**
+> - **0.12 (13/10/2026)**: D-044 (relatórios anônimos do teste com pessoas), marco 7A.
 > - **0.11 (13/10/2026)**: D-042 e D-043, tomadas no marco 6C (editor mínimo).
 > - **0.10 (13/10/2026)**: D-041 (save da campanha no IndexedDB), tomada no marco 6B; D-015 encerrada.
 > - **0.9 (13/10/2026)**: D-039 e D-040, tomadas no marco 6A (itens, equipamento e nível).
@@ -486,3 +487,26 @@ rascunho é guardado como está no store `aventuras`, inclusive inválido, para 
 exigem a fase sem erros.
 
 Avisos novos de `validarFase`: "fase sem inimigos" e "inimigo inalcançável a partir do spawn". Não bloqueiam.
+
+## D-044 · Relatórios do teste com pessoas: anônimos, com consentimento, na VM (v0.12, 13/10/2026)
+
+**Contexto.** A §5.7 pede medir tempo até a primeira luta, mortes, uso de habilidades, entendimento de drop e
+equipamento e retorno ao combate, com pelo menos 5 pessoas. Os testadores podem estar longe, e pedir que copiem e
+mandem arquivos perde dados.
+
+**Decisão.**
+- Só quem entra por `?pesquisa=1` é medido. É a campanha da fase 1, com personagem novo e sem save.
+- O coletor (`src/pesquisa/coletor.ts`) só lê eventos que a simulação já publica; nada muda no jogo.
+- "Terminar teste" abre um questionário: os 3 avisos desenhados como a telegrafia os mostra, entendimento dos itens e
+  comentário. O envio exige consentimento marcado.
+- `POST /relatorios` no servidor da arena:
+  - corpo `text/plain`, para evitar o *preflight* de CORS;
+  - validação pelo mesmo `lerRelatorio` do cliente, até 8 KiB e 10 envios/min por origem;
+  - origens do navegador restritas ao Pages e a `localhost`;
+  - cada envio vira uma linha em `/dados/relatorios.jsonl`, num volume Docker próprio.
+- **Anonimato por construção**: o relatório não tem nome, IP, user agent nem identificador. O servidor grava só o
+  relatório validado e a data. O comentário livre avisa para não escrever nome nem contato.
+- O resumo (`npm run relatorios`) confere os critérios da §5.7.
+
+**Consequência.** Os relatórios ficam só na VM, e baixá-los é um comando (docs/TESTES-HUMANOS.md). O teste em si fica
+para quando houver pessoas disponíveis. O marco 7 só fecha depois dele.

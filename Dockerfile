@@ -15,6 +15,9 @@ ENV NODE_ENV=production \
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 COPY --from=construcao /app/dist-server ./dist-server
+# Relatórios do teste com pessoas (marco 7A): o volume nomeado herda o dono desta pasta.
+RUN mkdir -p /dados && chown node:node /dados
+ENV DIR_DADOS=/dados
 USER node
 EXPOSE 2567
 HEALTHCHECK --interval=15s --timeout=3s --start-period=10s \

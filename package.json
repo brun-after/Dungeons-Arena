@@ -12,6 +12,7 @@
     "dev:server": "tsx watch server/main.ts",
     "servidor": "tsx server/main.ts",
     "carga": "tsx tools/carga/carga.ts",
+    "relatorios": "tsx tools/relatorios/resumo.ts",
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.nucleo.json --noEmit",

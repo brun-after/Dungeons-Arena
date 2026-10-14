@@ -5,6 +5,7 @@
 //   ?arena=loopback   treino de arena com sala e bot na página (marco 4)
 //   ?editor[=id]      editor de fases (marco 6C), sob demanda
 //   ?jogo=teste&fase=id   "Testar agora" do editor
+//   ?pesquisa=1       teste com pessoas (marco 7A): campanha medida, questionário e envio anônimo
 // O código da arena e do SDK de rede é carregado sob demanda (§3.8, code splitting).
 
 import './estilos.css';
@@ -33,6 +34,8 @@ function rotear(raiz: HTMLElement): void {
     });
   } else if (params.has('editor')) {
     void import('./editor/editor').then((m) => m.iniciarEditor(raiz, params.get('editor') || null));
+  } else if (params.get('pesquisa') === '1') {
+    void iniciarJogo(raiz, { slot: null, pesquisa: true });
   } else if (params.get('jogo') === 'teste' && params.get('fase')) {
     void iniciarJogo(raiz, { slot: null, teste: params.get('fase') ?? '' });
   } else if (params.get('jogo') === 'campanha') {
