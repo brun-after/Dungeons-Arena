@@ -96,14 +96,41 @@ function listaDeItens(v: unknown, campo: string, erros: ErroFase[], itens: Itens
   return [...v];
 }
 
-/** Baú, loja e loot (marco 9A). Devolve null quando o objeto não é de um desses tipos. */
+/** Armadilha de fase (marco 9A-2): dano fixo, efeito opcional de um componente, única ou com rearme. */
+function armadilhaDeFase(o: Record<string, unknown>, x: number, y: number, erros: ErroFase[]): ObjetoPosicionadoJson | 'erro' {
+  const valor = o.valor;
+  if (typeof valor !== 'number' || !Number.isFinite(valor) || valor < 0 || valor > 1000 || (o.modo !== 'unica' && o.modo !== 'rearme')) {
+    erros.push({ mensagem: 'armadilha precisa de valor entre 0 e 1000 e modo unica|rearme' });
+    return 'erro';
+  }
+  let efeito;
+  if (o.efeito !== undefined) {
+    const l = new Leitor('armadilha');
+    const efeitos = normalizarEfeito(o.efeito, l);
+    efeito = efeitos[0];
+    if (l.erros.length > 0 || efeitos.length !== 1 || !efeito) {
+      erros.push({ mensagem: `armadilha: efeito precisa ter um componente válido${l.erros[0] ? ` (${l.erros[0]})` : ''}` });
+      return 'erro';
+    }
+  }
+  if (o.modo === 'unica') return { tipo: 'armadilha', x, y, valor, modo: 'unica', ...(efeito && { efeito }) };
+  const rearme = o.rearmeMs;
+  if (!ehInteiro(rearme) || rearme < 100 || rearme > 600_000) {
+    erros.push({ mensagem: 'armadilha com rearme precisa de rearmeMs inteiro entre 100 e 600000' });
+    return 'erro';
+  }
+  return { tipo: 'armadilha', x, y, valor, modo: 'rearme', rearmeMs: rearme, ...(efeito && { efeito }) };
+}
+
+/** Baú, loja, loot (marco 9A) e armadilha (9A-2). Devolve null quando o objeto não é de um desses tipos. */
 function objetoDeEconomia(o: Record<string, unknown>, erros: ErroFase[], itens: ItensConhecidos | undefined): ObjetoPosicionadoJson | null | 'erro' {
-  if (o.tipo !== 'bau' && o.tipo !== 'loja' && o.tipo !== 'loot') return null;
+  if (o.tipo !== 'bau' && o.tipo !== 'loja' && o.tipo !== 'loot' && o.tipo !== 'armadilha') return null;
   if (!normalizado(o.x) || !normalizado(o.y)) {
     erros.push({ mensagem: `${o.tipo}: x e y precisam ficar entre 0 e 1` });
     return 'erro';
   }
   const { x, y } = o;
+  if (o.tipo === 'armadilha') return armadilhaDeFase(o, x, y, erros);
   if (o.tipo === 'loja') {
     const estoque = listaDeItens(o.estoque, 'estoque da loja', erros, itens);
     if (!estoque || estoque.length === 0) {

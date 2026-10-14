@@ -142,6 +142,24 @@
       "y": 0.7321,
       "itemId": "chave_ferro",
       "quantidade": 1
+    },
+    {
+      "tipo": "armadilha",
+      "x": 0.3625,
+      "y": 0.1964,
+      "valor": 6,
+      "modo": "unica"
+    },
+    {
+      "tipo": "armadilha",
+      "x": 0.1625,
+      "y": 0.4464,
+      "valor": 4,
+      "efeito": {
+        "atordoar": 800
+      },
+      "modo": "rearme",
+      "rearmeMs": 8000
     }
   ]
 }

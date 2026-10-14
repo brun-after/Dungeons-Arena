@@ -90,6 +90,25 @@ export interface Balance {
     /** Distância Chebyshev máxima para interagir. */
     alcanceInteracao: number;
   };
+  /** Spawner dinâmico (§2.1, marco 9A-2): a cada `intervaloS`, depois de `carenciaS`. */
+  spawner: {
+    carenciaS: number;
+    intervaloS: number;
+    /** Tentativas de célula por objeto, e a distância Chebyshev mínima de todo jogador. */
+    tentativas: number;
+    distanciaMinJogador: number;
+    bau: CategoriaSpawner;
+    loot: CategoriaSpawner;
+    orbe: CategoriaSpawner;
+    armadilha: CategoriaSpawner;
+    /** Chance relativa de cada orbe (§2.1: 40% vida, 30% recurso, 30% efeito). */
+    pesoOrbe: { hp: number; recurso: number; efeito: number };
+    /** Faixas fechadas [mínimo, máximo] do baú do spawner. */
+    itensBau: [number, number];
+    ouroBau: [number, number];
+    danoArmadilha: number;
+    armadilhaExpiraS: number;
+  };
   /** Limites do atributo efetivo (§2.10, equipamento derivado). */
   atributos: {
     minimo: number;
@@ -101,6 +120,12 @@ export interface Balance {
     pilhaMax: number;
   };
   ia: RegrasIa;
+}
+
+/** Quantos objetos de uma categoria o spawner mantém no mundo, e a chance por rodada. */
+export interface CategoriaSpawner {
+  max: number;
+  chance: number;
 }
 
 /** Números da IA (§2.6). */

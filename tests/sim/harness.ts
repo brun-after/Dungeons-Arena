@@ -13,6 +13,7 @@ import { NOMES_ATRIBUTOS } from '../../src/progression/itens';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import { bloqueia, reservaCelula } from '../../src/world/colisao';
 import { passavel } from '../../src/world/fase';
+import { contarDoSpawner } from '../../src/world/spawner';
 import { CONTEUDO, contexto, faseOficial01 } from '../apoio/fases';
 
 export interface Cenario {
@@ -163,7 +164,13 @@ export function verificarInvariantes(estado: EstadoJogo, ctx: ContextoSimulacao)
   }
   for (const [dono, n] of porDono) if (n > ctx.modo.limites.invocacoesPorJogador) erros.push(`${dono} com ${n} invocações`);
   const armadilhas = new Map<string, number>();
-  for (const a of estado.armadilhas) armadilhas.set(a.donoId, (armadilhas.get(a.donoId) ?? 0) + 1);
+  for (const a of estado.armadilhas) if (a.origem === 'habilidade') armadilhas.set(a.donoId, (armadilhas.get(a.donoId) ?? 0) + 1);
+  // Marco 9A-2: o spawner nunca passa do máximo de cada categoria; só armadilha com rearme fica inerte.
+  for (const c of ['bau', 'loot', 'orbe', 'armadilha'] as const) {
+    const n = contarDoSpawner(estado, c);
+    if (n > balance.spawner[c].max) erros.push(`spawner com ${n} de ${c}`);
+  }
+  for (const a of estado.armadilhas) if (a.inerteAteTick > estado.tick && a.rearmeTicks === 0) erros.push(`armadilha ${a.id} inerte sem rearme`);
   for (const [dono, n] of armadilhas) if (n > ctx.modo.limites.armadilhasPorJogador) erros.push(`${dono} com ${n} armadilhas`);
   for (const p of estado.projeteis) {
     if (!passavel(fase, Math.round(p.x), Math.round(p.y))) erros.push(`projétil ${p.id} fora do terreno`);

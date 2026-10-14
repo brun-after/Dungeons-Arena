@@ -50,8 +50,8 @@ export interface InimigoPosicionado {
  * `coluna = min(largura − 1, floor(x × largura))`, e equivalente para a linha.
  */
 export type TipoOrbeDeFase = 'orbe_hp' | 'orbe_recurso' | 'orbe_efeito';
-/** Marco 9A (14/10/2026): baú, loja e loot posicionados. */
-export type TipoObjetoDeFase = TipoOrbeDeFase | 'bau' | 'loja' | 'loot';
+/** Marco 9A (14/10/2026): baú, loja e loot posicionados; 9A-2: armadilha de fase. */
+export type TipoObjetoDeFase = TipoOrbeDeFase | 'bau' | 'loja' | 'loot' | 'armadilha';
 
 export type ObjetoPosicionadoJson =
   | {
@@ -66,7 +66,9 @@ export type ObjetoPosicionadoJson =
   /** `chave`: o item exigido (e consumido) para abrir; sem ela, o baú está destrancado. */
   | { tipo: 'bau'; x: number; y: number; loot: string[]; ouro: number; chave?: string }
   | { tipo: 'loja'; x: number; y: number; estoque: string[] }
-  | { tipo: 'loot'; x: number; y: number; itemId: string; quantidade: number };
+  | { tipo: 'loot'; x: number; y: number; itemId: string; quantidade: number }
+  /** Invisível; dano fixo (`valor`) e efeito opcional. `rearmeMs` só com `modo: 'rearme'`. */
+  | { tipo: 'armadilha'; x: number; y: number; valor: number; efeito?: EfeitoCanonico; modo: 'unica' | 'rearme'; rearmeMs?: number };
 
 /** Forma uniforme, já em células; os campos que o tipo não usa ficam neutros. */
 export interface ObjetoPosicionado {
@@ -82,6 +84,8 @@ export interface ObjetoPosicionado {
   chave: string | null;
   /** Item do loot (a quantidade vai em `valor`). */
   itemId: string | null;
+  /** Armadilha de fase: 0 = disparo único. */
+  rearmeMs: number;
 }
 
 function objetoCarregado(o: ObjetoPosicionadoJson, largura: number, altura: number): ObjetoPosicionado {
@@ -96,6 +100,7 @@ function objetoCarregado(o: ObjetoPosicionadoJson, largura: number, altura: numb
     ouro: 0,
     chave: null,
     itemId: null,
+    rearmeMs: 0,
   };
   switch (o.tipo) {
     case 'bau':
@@ -104,6 +109,8 @@ function objetoCarregado(o: ObjetoPosicionadoJson, largura: number, altura: numb
       return { ...base, itens: [...o.estoque] };
     case 'loot':
       return { ...base, valor: o.quantidade, itemId: o.itemId };
+    case 'armadilha':
+      return { ...base, valor: o.valor, efeito: o.efeito ? { ...o.efeito } : null, rearmeMs: o.modo === 'rearme' ? (o.rearmeMs ?? 0) : 0 };
     default:
       return { ...base, valor: o.valor, modo: o.modo, efeito: o.efeito ? { ...o.efeito } : null };
   }
