@@ -6,9 +6,12 @@
 // - Criador é cliente comum: sair não encerra a sala (§2.13). Sala vazia expira em 120 s.
 // - Queda: a sessão fica reservada por 30 s (allowReconnection); a entidade fica parada e vulnerável.
 // - Passo fixo de 60 Hz com acumulador do Colyseus (sem espiral, D-037).
+// - Marco 7B: a fase vem da opção `fase` ao criar; métricas vão também para a metadata da sala,
+//   que o `/saude` agrega (sem estado global).
 
 import { matchMaker, Room, type Client } from '@colyseus/core';
-import { contextoDaArena } from '../../src/arena/contexto-arena';
+import { contextoDaArena, faseDeArena } from '../../src/arena/contexto-arena';
+import { conteudoOficial, modoPorId } from '../../src/core/conteudo';
 import { versaoDoConteudo } from '../../src/arena/protocolo';
 import { SalaArena, RESERVA_RECONEXAO_MS, type Conexao } from '../../src/arena/sala';
 import { gerarCodigo } from '../codigo-sala';
@@ -27,8 +30,9 @@ export class SalaLivreColyseus extends Room {
   private readonly duracaoTick = new Janela(600);
   private bytesNaUltimaMedida = 0;
   private reconexoes = 0;
+  private fase = 'arena-01';
 
-  override async onCreate(): Promise<void> {
+  override async onCreate(opcoes: unknown): Promise<void> {
     // Código único: tenta de novo nas raríssimas colisões.
     for (let tentativa = 0; tentativa < 10; tentativa++) {
       const codigo = gerarCodigo();
@@ -38,7 +42,11 @@ export class SalaLivreColyseus extends Room {
         break;
       }
     }
-    const ctx = contextoDaArena();
+    const pedida = typeof opcoes === 'object' && opcoes !== null ? (opcoes as { fase?: unknown }).fase : undefined;
+    const fase = faseDeArena(modoPorId(conteudoOficial(), 'livre'), pedida);
+    this.fase = fase;
+    const ctx = contextoDaArena('livre', fase);
+    await this.setMetadata({ fase, tickP95Ms: 0, tickP99Ms: 0, jogadores: 0 });
     this.maxClients = ctx.modo.maxJogadores;
     this.sala = new SalaArena(ctx, { semente: Math.floor(Math.random() * 2 ** 31), versaoConteudo: versaoDoConteudo() });
 
@@ -58,7 +66,7 @@ export class SalaLivreColyseus extends Room {
     this.clock.setInterval(() => {
       this.expirarSeVazia();
     }, 1000);
-    registrarLog('sala_criada', { sala: this.roomId });
+    registrarLog('sala_criada', { sala: this.roomId, fase });
   }
 
   override onJoin(client: Client): void {
@@ -100,11 +108,15 @@ export class SalaLivreColyseus extends Room {
     const m = this.sala.metricas();
     const bytes = m.bytesEnviados - this.bytesNaUltimaMedida;
     this.bytesNaUltimaMedida = m.bytesEnviados;
+    const tickP95Ms = Number(this.duracaoTick.percentil(0.95).toFixed(3));
+    const tickP99Ms = Number(this.duracaoTick.percentil(0.99).toFixed(3));
+    // setMetadata substitui (não mescla): manda sempre o objeto inteiro, com a fase.
+    void this.setMetadata({ fase: this.fase, tickP95Ms, tickP99Ms, jogadores: m.jogadores });
     registrarLog('metricas_sala', {
       sala: this.roomId,
       jogadores: m.jogadores,
-      tickP95Ms: Number(this.duracaoTick.percentil(0.95).toFixed(3)),
-      tickP99Ms: Number(this.duracaoTick.percentil(0.99).toFixed(3)),
+      tickP95Ms,
+      tickP99Ms,
       bytesPorClientePorS: m.jogadores > 0 ? Math.round(bytes / m.jogadores / (INTERVALO_METRICAS_MS / 1000)) : 0,
       rejeicoes: m.rejeicoes,
       reconexoes: this.reconexoes,

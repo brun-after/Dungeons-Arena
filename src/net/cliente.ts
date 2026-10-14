@@ -20,7 +20,12 @@ import type { Transporte } from './transporte';
 
 /** Margem, em ticks, além do RTT, para o comando chegar antes do seu tick. */
 const MARGEM_TICKS = 2;
-const RENOVACAO_MOVIMENTO_TICKS = 3;
+/**
+ * Renovação do movimento mantido (a sala expira o mantido em 500 ms). 13/10/2026 (marco 7B): de 3
+ * para 6 ticks (100 ms). Com 3, eram 20 comandos/s só de renovação, e uma parada de retransmissão
+ * TCP no perfil degradado entregava tudo de uma vez, estourando o balde de 20 (D-047).
+ */
+const RENOVACAO_MOVIMENTO_TICKS = 6;
 const INTERVALO_PING_TICKS = ticksDe(2000);
 const ATRASO_REMOTOS_TICKS = ticksDe(100);
 const LIMITE_REPOSICIONAR = 2;
@@ -49,6 +54,8 @@ export class ClienteArena {
   readonly erros: number[] = [];
   readonly remotos = new BufferRemoto();
   rejeitados = 0;
+  /** Rejeições por motivo, para diagnóstico (carga e testes de rede, marco 7B). */
+  readonly motivosRejeicao: Record<string, number> = {};
   ressincronizacoes = 0;
   private aguardandoCompleto = false;
   /** Recebe os eventos transitórios da sala (dano, coleta, mortes) para a apresentação. */
@@ -131,6 +138,7 @@ export class ClienteArena {
       }
       case 'rejeitado':
         this.rejeitados++;
+        this.motivosRejeicao[msg.motivo] = (this.motivosRejeicao[msg.motivo] ?? 0) + 1;
         break;
       case 'erro':
         break;

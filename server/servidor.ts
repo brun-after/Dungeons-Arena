@@ -1,5 +1,6 @@
 // Servidor da arena (§3.1): Node + Colyseus sobre WebSocket. Rotas HTTP próprias:
-//   GET /saude          → { ok, versao, regiao, salas } para o Caddy, o deploy e o lobby (ping/região)
+//   GET /saude          → { ok, versao, regiao, salas, tick } para o Caddy, o deploy, o lobby e a carga
+//                         (tick = pior p95/p99 entre as salas, da metadata de cada uma; marco 7B)
 //   GET /salas/:codigo  → existe ou não, com limite de tentativas por origem (§2.13)
 //   POST /relatorios    → relatório anônimo do teste com pessoas (marco 7A, D-044)
 // O matchmaking do Colyseus continua nas rotas padrão (/matchmake/...).
@@ -39,7 +40,10 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
 
   const saude = createEndpoint('/saude', { method: 'GET' }, async () => {
     const salas = await matchMaker.query({});
-    return resposta(200, { ok: true, versao: versaoDoConteudo(), regiao: o.regiao, salas: salas.length });
+    const metricas = salas.map((s) => (s.metadata ?? {}) as { tickP95Ms?: number; tickP99Ms?: number });
+    const pior = (campo: 'tickP95Ms' | 'tickP99Ms') => Math.max(0, ...metricas.map((m) => m[campo] ?? 0));
+    const tick = salas.length > 0 ? { p95Ms: pior('tickP95Ms'), p99Ms: pior('tickP99Ms') } : null;
+    return resposta(200, { ok: true, versao: versaoDoConteudo(), regiao: o.regiao, salas: salas.length, tick });
   });
   const buscarSala = createEndpoint('/salas/:codigo', { method: 'GET' }, async (ctx) => {
     const origem = ctx.request?.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'local';
@@ -49,7 +53,8 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
     const salas = await matchMaker.query({ roomId: codigo });
     const sala = salas[0];
     if (!sala) return resposta(404, { ok: false, motivo: 'nao_encontrada' });
-    return resposta(200, { ok: true, codigo, jogadores: sala.clients, maxJogadores: sala.maxClients });
+    const fase = (sala.metadata as { fase?: string } | undefined)?.fase ?? null;
+    return resposta(200, { ok: true, codigo, fase, jogadores: sala.clients, maxJogadores: sala.maxClients });
   });
   const relatorios = createEndpoint('/relatorios', { method: 'POST', disableBody: true }, async (ctx) => {
     const req = ctx.request;

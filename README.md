@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 1.1 · **Data:** 13/10/2026
+**Versão do documento:** 1.2 · **Data:** 13/10/2026
 **Status:** 🚧 Em construção. Marcos 1–6 concluídos e validados em aparelho real: campanha com itens, nível e save, arena online na AWS em São Paulo e editor de fases mínimo. Marco 7 em andamento: o ecossistema do teste com pessoas está pronto; a sessão fica para depois
 
 > **Histórico**
+> - **1.2 (13/10/2026)**: marco 7B (perfis de rede sobre WSS, arena-02 como cena padrão, métricas do servidor no /saude, aviso de conexão instável).
 > - **1.1 (13/10/2026)**: marcos 5 e 6 validados no celular; marco 7A (teste com pessoas: medidas, questionário e envio anônimo).
 > - **1.0 (13/10/2026)**: marco 6 (itens, equipamento, nível, mochila, save em slots e editor de fases); como jogar e controles atualizados.
 > - **0.10 (13/10/2026)**: IP estático na VM da arena; carga contra a VM registrada.
@@ -44,7 +45,7 @@ Divergências em relação a ela são registradas em [`docs/DECISOES.md`](docs/D
 | **Local: servidor da arena** | `npm run dev:server` (sobe em `ws://localhost:2567`); com ele rodando, a arena online de `localhost` já funciona | Marco 5 |
 | **Local: celular no mesmo Wi-Fi** | `npm run dev -- --host` e abrir no celular `http://IP-DO-PC:5173/?arena=online&servidor=ws://IP-DO-PC:2567` | Marco 5 |
 | **Local: stack completa** | `docker compose up --build` (servidor e Redis; o Caddy só na VM) | Marco 5 |
-| **Teste de carga** | `npm run carga -- --url ws://localhost:2567 --clientes 10 --segundos 60` | Marco 5 |
+| **Teste de carga** | `npm run carga -- --url ws://localhost:2567 --clientes 10 --segundos 60`; com `--perfil suportado` ou `--perfil degradado` (rede simulada sobre o WSS real) e `--fase arena-02` (cena padrão 60×40) | Marcos 5 e 7 |
 | **Campanha e save** | Menu → **Campanha** → escolha um slot (1–3). Salva sozinho; **Menu** no cabeçalho salva e sai; **Exportar/Importar** levam o save para outro aparelho | Marco 6 |
 | **Teste com pessoas** | Link <https://brun-after.github.io/Dungeons-Arena/?pesquisa=1>; roteiro e resumo em [`docs/TESTES-HUMANOS.md`](docs/TESTES-HUMANOS.md) | Marco 7 |
 | **Editor de fases** | Menu → **Editor de fases** (ou `?editor`): crie, pinte, ponha inimigos, **Testar** com o seu personagem, **Exportar** o `.json`. Para jogar valendo: Campanha → slot vazio → escolha a fase | Marco 6 |
@@ -129,7 +130,7 @@ em `main`, e o merge publica automaticamente.
 | [x] | 4 | Arena Livre em loopback, orçamento de ficha, NPCs, loot e reconciliação | Dois clientes lutam e coletam sem duplicar itens |
 | [x] | 5 | Backend Colyseus/WSS, sala por código, patches e reconexão | Dois celulares em redes distintas; o criador sai e a sala continua; carga com 10 clientes |
 | [x] | 6 | Recompensa/equipamento, save básico e editor mínimo | Criar um mapa no celular e completar o ciclo lutar → melhorar → lutar |
-| [ ] | 7 | Testes humanos, rede suportada/degradada e carga inicial (7A ecossistema do teste ✓ · 7B rede e carga · 7C sessão com pessoas, adiada) | Critérios da §5.7 atendidos |
+| [ ] | 7 | Testes humanos, rede suportada/degradada e carga inicial (7A ecossistema do teste ✓ · 7B rede e carga ✓ · 7C sessão com pessoas, adiada) | Critérios da §5.7 atendidos |
 
 ### Expansão da campanha e do conteúdo
 
