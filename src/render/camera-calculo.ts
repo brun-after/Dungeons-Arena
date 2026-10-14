@@ -25,8 +25,16 @@ export function tamanhoCelulaTela(zoom: number): number {
   return Math.round(CELULA_PX * zoom);
 }
 
-export function limitarZoom(zoom: number): number {
-  return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoom));
+export interface LimitesZoom {
+  min: number;
+  max: number;
+}
+
+/** O jogo usa 0.3–3; o editor, 0.1–6 (§3.10). */
+export const LIMITES_JOGO: LimitesZoom = { min: ZOOM_MIN, max: ZOOM_MAX };
+
+export function limitarZoom(zoom: number, limites: LimitesZoom = LIMITES_JOGO): number {
+  return Math.min(limites.max, Math.max(limites.min, zoom));
 }
 
 /**
@@ -76,8 +84,9 @@ export function zoomAncorado(
   zoomNovo: number,
   ancoraX: number,
   ancoraY: number,
+  limites: LimitesZoom = LIMITES_JOGO,
 ): PosicaoCamera & { zoom: number } {
-  const zoom = limitarZoom(zoomNovo);
+  const zoom = limitarZoom(zoomNovo, limites);
   const mundoX = camera.x + ancoraX / zoomAtual;
   const mundoY = camera.y + ancoraY / zoomAtual;
   return { x: mundoX - ancoraX / zoom, y: mundoY - ancoraY / zoom, zoom };

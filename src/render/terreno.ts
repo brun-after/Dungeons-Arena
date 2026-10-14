@@ -54,11 +54,15 @@ function desenharCelula(g: Graphics, fase: Fase, x: number, y: number, tipo: Tip
 
 export interface Terreno {
   atualizarVisibilidade: (x0: number, y0: number, x1: number, y1: number) => void;
+  /** Editor (marco 6C): redesenha o bloco da célula e o de cima (a parede depende de quem está abaixo). */
+  redesenharCelula: (x: number, y: number) => void;
   destruir: () => void;
 }
 
 interface Bloco {
   g: Graphics;
+  bx: number;
+  by: number;
   x0: number;
   y0: number;
   x1: number;
@@ -67,19 +71,36 @@ interface Bloco {
 
 export function criarTerreno(camada: Container, fase: Fase): Terreno {
   const blocos: Bloco[] = [];
+  const desenharBloco = (b: Bloco) => {
+    b.g.clear();
+    const fimX = Math.min(fase.largura, b.bx + BLOCO_CELULAS);
+    const fimY = Math.min(fase.altura, b.by + BLOCO_CELULAS);
+    for (let y = b.by; y < fimY; y++) {
+      for (let x = b.bx; x < fimX; x++) desenharCelula(b.g, fase, x, y, tipoEm(fase, x, y));
+    }
+  };
+  const porLinha = Math.ceil(fase.largura / BLOCO_CELULAS);
   for (let by = 0; by < fase.altura; by += BLOCO_CELULAS) {
     for (let bx = 0; bx < fase.largura; bx += BLOCO_CELULAS) {
-      const g = new Graphics();
       const fimX = Math.min(fase.largura, bx + BLOCO_CELULAS);
       const fimY = Math.min(fase.altura, by + BLOCO_CELULAS);
-      for (let y = by; y < fimY; y++) {
-        for (let x = bx; x < fimX; x++) desenharCelula(g, fase, x, y, tipoEm(fase, x, y));
-      }
-      camada.addChild(g);
-      blocos.push({ g, x0: bx * CELULA_PX, y0: by * CELULA_PX, x1: fimX * CELULA_PX, y1: fimY * CELULA_PX });
+      const b: Bloco = { g: new Graphics(), bx, by, x0: bx * CELULA_PX, y0: by * CELULA_PX, x1: fimX * CELULA_PX, y1: fimY * CELULA_PX };
+      desenharBloco(b);
+      camada.addChild(b.g);
+      blocos.push(b);
     }
   }
+  const blocoDe = (x: number, y: number) =>
+    x < 0 || y < 0 || x >= fase.largura || y >= fase.altura
+      ? undefined
+      : blocos[Math.floor(y / BLOCO_CELULAS) * porLinha + Math.floor(x / BLOCO_CELULAS)];
   return {
+    redesenharCelula: (x, y) => {
+      const proprio = blocoDe(x, y);
+      const acima = blocoDe(x, y - 1);
+      if (proprio) desenharBloco(proprio);
+      if (acima && acima !== proprio) desenharBloco(acima);
+    },
     // Retângulo visível em px de mundo.
     atualizarVisibilidade: (x0, y0, x1, y1) => {
       for (const b of blocos) b.g.visible = b.x1 > x0 && b.x0 < x1 && b.y1 > y0 && b.y0 < y1;

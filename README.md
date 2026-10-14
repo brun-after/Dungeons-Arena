@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 0.10 · **Data:** 13/10/2026
-**Status:** 🚧 Em construção. Campanha mínima jogável (marcos 1–3), arena em loopback (marco 4) e arena online no ar na AWS em São Paulo (marco 5A + Etapa 4); falta o teste com dois celulares em redes diferentes (5B)
+**Versão do documento:** 1.0 · **Data:** 13/10/2026
+**Status:** 🚧 Em construção. Campanha com itens, nível e save (marcos 1–3 e 6), arena online no ar na AWS em São Paulo (marcos 4 e 5) e editor de fases mínimo (marco 6). Faltam as validações em aparelho real: dois celulares na arena (5) e criar uma fase no celular (6)
 
 > **Histórico**
+> - **1.0 (13/10/2026)**: marco 6 (itens, equipamento, nível, mochila, save em slots e editor de fases); como jogar e controles atualizados.
 > - **0.10 (13/10/2026)**: IP estático na VM da arena; carga contra a VM registrada.
 > - **0.9 (13/10/2026)**: Etapa 4 concluída na AWS Lightsail São Paulo (D-038); hospedagem do servidor deixa de ser gratuita.
 > - **0.8 (13/10/2026)**: marco 5A (servidor Colyseus, sala por código, patches, reconexão, Docker, deploy); menu inicial.
@@ -43,6 +44,8 @@ Divergências em relação a ela são registradas em [`docs/DECISOES.md`](docs/D
 | **Local: celular no mesmo Wi-Fi** | `npm run dev -- --host` e abrir no celular `http://IP-DO-PC:5173/?arena=online&servidor=ws://IP-DO-PC:2567` | Marco 5 |
 | **Local: stack completa** | `docker compose up --build` (servidor e Redis; o Caddy só na VM) | Marco 5 |
 | **Teste de carga** | `npm run carga -- --url ws://localhost:2567 --clientes 10 --segundos 60` | Marco 5 |
+| **Campanha e save** | Menu → **Campanha** → escolha um slot (1–3). Salva sozinho; **Menu** no cabeçalho salva e sai; **Exportar/Importar** levam o save para outro aparelho | Marco 6 |
+| **Editor de fases** | Menu → **Editor de fases** (ou `?editor`): crie, pinte, ponha inimigos, **Testar** com o seu personagem, **Exportar** o `.json`. Para jogar valendo: Campanha → slot vazio → escolha a fase | Marco 6 |
 | **Local: verificação completa** | `npm run verificar` (typecheck, lint, testes e build) | Etapa 1 |
 | **Testes** | `npm test` (unidade, simulação, rede e integração com o servidor), `npm run test:e2e` (Playwright) | Etapa 1 |
 | **Offline** | Depois da primeira visita, a campanha abre em modo avião (PWA) | Etapa 2 |
@@ -61,6 +64,8 @@ Implantação do servidor na nuvem, passo a passo: [`docs/IMPLANTACAO.md`](docs/
 | Habilidades | Teclas 1–4 | Roda de botões em volta do ⚔ |
 | Mover a câmera | Arrastar o mapa | Arrastar o mapa |
 | Zoom | Roda do mouse | Pinça com dois dedos |
+| Mochila e ficha | `I` (Esc fecha); equipar, usar e tirar por botão | 🎒 no cabeçalho; tocar a linha equipa ou usa |
+| Pontos de atributo | Mochila → aba **Ficha** → `+` | Idem |
 | Diagnóstico (fps, célula) | Abrir com `?diag=1` no fim do endereço | Idem |
 
 ### Os inimigos da fase 1
@@ -121,7 +126,7 @@ em `main`, e o merge publica automaticamente.
 | [x] | 3 | Ataque básico, 4 habilidades, 3 arquétipos de IA e boss | Combate legível: crítico zero, defesa, interrupção e telegrafia corretos |
 | [x] | 4 | Arena Livre em loopback, orçamento de ficha, NPCs, loot e reconciliação | Dois clientes lutam e coletam sem duplicar itens |
 | [ ] | 5 | Backend Colyseus/WSS, sala por código, patches e reconexão (5A código ✓ · servidor no ar ✓ · carga na VM ✓ · falta o teste com dois celulares) | Dois celulares em redes distintas; o criador sai e a sala continua; carga com 10 clientes |
-| [ ] | 6 | Recompensa/equipamento, save básico e editor mínimo | Criar um mapa no celular e completar o ciclo lutar → melhorar → lutar |
+| [ ] | 6 | Recompensa/equipamento, save básico e editor mínimo (6A ✓ · 6B ✓ · 6C ✓ · falta validar no celular) | Criar um mapa no celular e completar o ciclo lutar → melhorar → lutar |
 | [ ] | 7 | Testes humanos, rede suportada/degradada e carga inicial | Critérios da §5.7 atendidos |
 
 ### Expansão da campanha e do conteúdo

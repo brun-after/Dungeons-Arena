@@ -1,8 +1,10 @@
 # Decisões de projeto
 
-**Versão:** 0.9 · **Data:** 13/10/2026
+**Versão:** 0.11 · **Data:** 13/10/2026
 
 > **Histórico**
+> - **0.11 (13/10/2026)**: D-042 e D-043, tomadas no marco 6C (editor mínimo).
+> - **0.10 (13/10/2026)**: D-041 (save da campanha no IndexedDB), tomada no marco 6B; D-015 encerrada.
 > - **0.9 (13/10/2026)**: D-039 e D-040, tomadas no marco 6A (itens, equipamento e nível).
 > - **0.8 (13/10/2026)**: D-038 (servidor da arena na AWS Lightsail em São Paulo); D-001 parcialmente superada.
 > - **0.7 (13/10/2026)**: decisões D-035 a D-037, tomadas no marco 5A (servidor real).
@@ -174,6 +176,9 @@ pelo `click` sem ponteiro (`detail === 0`), então a ação nunca dispara duas v
 
 **Decisão.** O tipo de controle e o modo da câmera ficam no `localStorage`, com falha silenciosa, até o store
 `perfil` do IndexedDB (§3.5) entrar no marco 6.
+
+> **Encerrada na v0.10 (marco 6B).** As preferências estão no store `perfil` e são migradas do `localStorage` na
+> primeira abertura. Sem IndexedDB, o `localStorage` continua como reserva.
 
 ## D-016 · Cor dos marcadores por equipe, provisória (v0.2, 13/10/2026) — superada na v0.3
 
@@ -417,3 +422,67 @@ precisam ser publicados juntos. Isso já acontece no merge.
 (teclado ignorado, canvas e controles inertes), mas a simulação segue em tempo real: inimigos continuam agindo. É o
 comportamento esperado num jogo de ação e o mesmo que valerá na arena, onde não há pausa. O menu de pausa da campanha
 (§2.15) é outra tela e entra depois.
+
+## D-041 · Save da campanha: estado inteiro, IndexedDB sem biblioteca (v0.10, 13/10/2026)
+
+**Contexto.** A §3.5 pede vários slots, autosave, versão de schema com migrações, exportação/importação e gravação
+fora do tick, sem conta e sem nuvem.
+
+**Decisão.**
+- Cada slot (1–3) guarda o `EstadoJogo` **inteiro** da campanha (ficha, mochila, posição, inimigos, respawns, PRNG e
+  recargas), mais a referência da fase, o nome, as datas e estatísticas. O estado já é só dados e tem clone explícito,
+  então não há um segundo formato para manter em sincronia, e continuar dá exatamente o mesmo jogo (mesmo digest).
+- `src/save/esquema.ts` é puro: lê, migra degrau a degrau (`MIGRACOES[i]` leva da versão `i` para `i + 1`) e confere a
+  forma de tudo que vem do banco ou de arquivo antes de gravar. Versão futura, slot fora, fase desconhecida, estado sem
+  jogador ou número não finito são recusados com motivo.
+- IndexedDB por um wrapper de ~80 linhas (`plataforma/banco.ts`), sem biblioteca. O banco nasce com os cinco stores da
+  §3.5, para não precisar de migração de banco quando o editor (`aventuras`) e a arena chegarem.
+- Autosave fora do tick (`setTimeout` depois do quadro, com cópia por `clonarEstado`) e serializado (uma gravação por
+  vez; pedidos no mesmo instante viram um). Grava a cada 30 s, ao subir de nível, equipar, pegar item, derrotar
+  inimigo, reviver, ao suspender (`visibilitychange`), em `pagehide` e no botão "Menu".
+- Save ilegível nunca é sobrescrito: o slot aparece como inválido e o jogador decide excluir. Importação só em slot
+  vazio.
+- Sem IndexedDB (armazenamento bloqueado), a campanha roda sem salvar (`&slot=0`), com aviso.
+
+**Consequência.** Mudanças futuras no `EstadoJogo` ou na entidade precisam de um degrau em `MIGRACOES` e de um teste,
+senão saves antigos passam a ser recusados (e não corrompidos).
+
+## D-042 · "Testar agora" navega por URL e não grava (v0.11, 13/10/2026)
+
+**Contexto.** A §3.10 pede "Testar agora" com o personagem atual e atalho de volta ao editor. As telas do jogo
+ainda não têm desmontagem completa (cena, laço, ouvintes); trocar de tela é navegação de página, como no menu.
+
+**Decisão.**
+- "Testar" grava o rascunho, valida e abre `?jogo=teste&fase=<id>`. "✎ Editor" no cabeçalho volta para a edição.
+- O teste usa uma **cópia** do personagem do save jogado por último (mesma ficha, nível e mochila; vida e mana
+  cheias), ou um personagem novo se não houver save, e **não grava nada**. Para jogar a fase "valendo", o jogador
+  escolhe a fase ao abrir um jogo novo num slot (Campanha → slot vazio → Fase).
+- O histórico de desfazer fica na memória da tela e se perde ao sair. O rascunho em si é salvo (a cada 10 s, ao
+  suspender, ao testar e ao voltar).
+
+**Consequência.** Quando a desmontagem de cena existir (marco 11A, editor completo), o teste pode virar uma camada
+sobre o editor, mantendo o histórico.
+
+## D-043 · Escopo do editor mínimo (v0.11, 13/10/2026)
+
+**Decisão.** O marco 6 entrega, do editor da §3.10:
+- pincéis de piso, parede, vazio e saída;
+- início do jogador (único) e inimigos por preset;
+- borracha de spawn e inimigo;
+- desfazer/refazer por traço (pilha de 120);
+- zoom de 0.1 a 6 com pinça, roda e "ajustar";
+- modo navegação explícito;
+- validação com erro (vermelho) e aviso (amarelo) marcados na célula;
+- autosave do rascunho;
+- testar, exportar e importar `.json` e Minhas fases (criar, editar, testar, duplicar e excluir).
+
+Ficam para o 11A:
+- balde, retângulo, portas, objetos e tileset;
+- redimensionar, distribuir e aprendizado de estilo;
+- inspetor por toque longo e aventura com várias fases.
+
+O arquivo exportado é o mesmo schema das fases oficiais (`FaseJson`), validado por `validarFase` ao importar. Um
+rascunho é guardado como está no store `aventuras`, inclusive inválido, para nunca perder trabalho. Testar e exportar
+exigem a fase sem erros.
+
+Avisos novos de `validarFase`: "fase sem inimigos" e "inimigo inalcançável a partir do spawn". Não bloqueiam.

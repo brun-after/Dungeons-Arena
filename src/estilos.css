@@ -64,6 +64,7 @@ body {
 }
 
 .camada-ui button,
+.camada-ui a,
 .camada-ui .joystick,
 .camada-ui .dpad {
   pointer-events: auto;
@@ -851,6 +852,208 @@ body.toque .botao-habilidade .tecla {
 
 .linha-pontos[data-pontos='0'] {
   color: var(--texto-suave);
+}
+
+.cartao-slot {
+  width: min(420px, 100%);
+  padding: 12px 14px;
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  background: var(--painel);
+}
+
+.cartao-slot h2 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  color: var(--destaque);
+}
+
+.resumo-slot {
+  margin: 0 0 10px;
+  color: var(--texto-suave);
+}
+
+.acoes-slot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.acoes-slot .botao-menu {
+  width: auto;
+  flex: 1 1 140px;
+}
+
+.acoes-slot .botao-cabecalho {
+  min-height: 44px;
+}
+
+.botao-cabecalho.perigo {
+  border-color: #e74c3c;
+  color: #e74c3c;
+}
+
+/* Editor de fases (marco 6C, §4.13): barras com alvos de 44 px e área segura. */
+.editor {
+  position: absolute;
+  inset: 0;
+}
+
+.editor .palco canvas {
+  touch-action: none;
+}
+
+.barra-editor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--painel);
+  border-color: var(--borda);
+}
+
+.topo-editor {
+  top: 0;
+  padding: calc(6px + var(--seguro-topo)) calc(8px + var(--seguro-dir)) 6px calc(8px + var(--seguro-esq));
+  border-bottom: 1px solid var(--borda);
+}
+
+.base-editor {
+  bottom: 0;
+  padding: 6px calc(8px + var(--seguro-dir)) calc(6px + var(--seguro-base)) calc(8px + var(--seguro-esq));
+  border-top: 1px solid var(--borda);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.botao-editor {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 4px 10px;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  background: var(--controle);
+  color: var(--texto);
+  font: inherit;
+  font-size: 1.1rem;
+  text-decoration: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.botao-editor[aria-pressed='true'] {
+  border-color: var(--destaque);
+  background: rgba(243, 156, 18, 0.2);
+  color: var(--destaque);
+}
+
+.botao-editor:disabled {
+  opacity: 0.4;
+}
+
+.botao-editor:focus-visible,
+.nome-editor:focus-visible,
+.preset-editor:focus-visible {
+  outline: 2px solid var(--destaque);
+  outline-offset: 2px;
+}
+
+.nome-editor {
+  flex: 1 1 120px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 6px 10px;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  background: var(--fundo);
+  color: var(--texto);
+  font: inherit;
+}
+
+.preset-editor,
+.escolha-fase,
+.form-nova-fase select,
+.form-nova-fase input {
+  min-height: 44px;
+  padding: 6px 10px;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  background: var(--fundo);
+  color: var(--texto);
+  font: inherit;
+}
+
+.separador-editor {
+  flex: none;
+  width: 1px;
+  height: 32px;
+  background: var(--borda);
+}
+
+.status-editor {
+  flex: none;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: rgba(46, 204, 113, 0.2);
+  color: #2ecc71;
+}
+
+.status-editor[data-estado='erro'] {
+  background: rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
+}
+
+.status-editor[data-estado='aviso'] {
+  background: rgba(241, 196, 15, 0.2);
+  color: #f1c40f;
+}
+
+.problemas-editor {
+  position: absolute;
+  top: calc(64px + var(--seguro-topo));
+  left: calc(8px + var(--seguro-esq));
+  max-width: min(360px, calc(100% - 16px));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.problemas-editor button {
+  display: block;
+  width: 100%;
+  min-height: 32px;
+  margin-bottom: 4px;
+  padding: 4px 10px;
+  border: 1px solid #e74c3c;
+  border-radius: 8px;
+  background: var(--painel);
+  color: var(--texto);
+  font: inherit;
+  font-size: 0.8rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.problemas-editor .problema-aviso button {
+  border-color: #f1c40f;
+}
+
+.form-nova-fase {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-nova-fase .botao-menu {
+  width: 100%;
+  margin-top: 6px;
 }
 
 .botao-mochila.com-pontos {

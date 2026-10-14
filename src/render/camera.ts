@@ -14,6 +14,8 @@ import {
   telaParaCelula,
   velocidadeMaximaCamera,
   zoomAncorado,
+  LIMITES_JOGO,
+  type LimitesZoom,
   type Vista,
 } from './camera-calculo';
 
@@ -31,6 +33,7 @@ export class Camera {
     private readonly alturaMundo: number,
     public modo: ModoCamera,
     private readonly toque: boolean,
+    private readonly limites: LimitesZoom = LIMITES_JOGO,
   ) {}
 
   definirVista(vista: Vista): void {
@@ -102,7 +105,7 @@ export class Camera {
 
   /** Zoom ancorado num ponto da vista (px de tela). */
   zoomEm(novoZoom: number, ancoraX: number, ancoraY: number): void {
-    const r = zoomAncorado({ x: this.x, y: this.y }, this.zoom, novoZoom, ancoraX, ancoraY);
+    const r = zoomAncorado({ x: this.x, y: this.y }, this.zoom, novoZoom, ancoraX, ancoraY, this.limites);
     const dx = r.x - this.x;
     const dy = r.y - this.y;
     this.zoom = r.zoom;
