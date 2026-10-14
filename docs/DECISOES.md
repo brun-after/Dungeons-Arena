@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.14 · **Data:** 14/10/2026
+**Versão:** 0.15 · **Data:** 14/10/2026
 
 > **Histórico**
+> - **0.15 (14/10/2026)**: D-049 (efeitos de fluxo próprio), marco 8A-2.
 > - **0.14 (14/10/2026)**: D-048 (semântica dos efeitos do registro), marco 8A-1.
 > - **0.13 (13/10/2026)**: D-045 a D-047, marco 7B (rede degradada sobre WSS, cena padrão, renovação do movimento).
 > - **0.12 (13/10/2026)**: D-044 (relatórios anônimos do teste com pessoas), marco 7A.
@@ -611,3 +612,51 @@ que alguns tipos fazem exatamente, nem como acumulam.
 **Consequência.**
 - O save passa à versão 2, com o primeiro degrau real de migração (D-041).
 - A `versaoDoConteudo` muda, então servidor e Pages sobem juntos no merge.
+
+## D-049 · Efeitos de fluxo próprio no 8A (v0.15, 14/10/2026)
+
+**Contexto.** Os 6 tipos restantes da §2.8 precisam de estado próprio e tocam as §2.9 (invocações e dominação) e
+§2.11 (armadilhas), que o roteiro detalha no 10A.
+
+**Decisão.**
+- **Forma**: o efeito canônico ganhou `interno`, com um nível de aninhamento (o efeito carregado por atrasado, rastro
+  de efeito e armadilha), e `ref` (o preset do `invocar`). Os dois ficam em `null` quando não usados.
+- **Normalização idempotente**: normalizar a forma canônica de novo devolve o mesmo efeito, porque a fase é validada
+  mais de uma vez. Há teste para os 26 tipos.
+- **`efeito_atrasado`**: dispara o efeito carregado na entidade-alvo depois do prazo, se ela estiver viva.
+- **Rastros**:
+  - enquanto o status está ativo, cada célula em que a entidade fica vira rastro por 3 s (`balance.efeitos`);
+  - o hostil que entra leva o dano, ou o efeito carregado, uma vez por célula;
+  - os rastros vencidos saem a cada tick;
+  - `rastro_dano` é elegível ao orbe, com peso 2.
+- **Armadilha de habilidade**:
+  - armada uma vez no lançamento (`aoLancar`), na célula mirada;
+  - o primeiro hostil por `relacao()` que pisa leva o dano e o efeito carregado, e a armadilha some;
+  - expira pelo prazo;
+  - **fica fora do estado público**: a §2.11 diz que é invisível para quem não a colocou, e o estado público é igual
+    para todos até o canal privado do 8B. Na campanha, só o jogador que armou a vê. As armadilhas de fase entram no
+    9A/10A.
+- **`invocar`** (mínimo):
+  - cria aliados de um preset, na equipe do dono, vizinhos dele, com prazo;
+  - a IA normal faz a invocação caçar hostis por `relacao()`; sem alvo, ela segue o dono a 2 células;
+  - morre pelo prazo ou com a morte do dono;
+  - sem XP para quem a mata, sem drops e sem respawn.
+  - Os comportamentos (agressivo, assassino, protetor, curador, isca), os avatares e a rampa ficam no 10A.
+- **Dominação**:
+  - o efeito fica **no alvo** (§2.9);
+  - quem morre marcado volta com 50% do HP, na equipe de quem o marcou, como invocação dominada (velocidade ×1,3),
+    por 60 s;
+  - sobrevive à morte do dono;
+  - dominados não dominam (cascata limitada a 1).
+- **Limites do modo** (`invocacoesPorJogador`, `armadilhasPorJogador`): a ação é recusada antes de cobrar recurso e
+  recarga (motivo `limite`, §5.6). O harness confere os limites a cada tick.
+- **IA com habilidades**: inimigos com habilidades revezam golpe e habilidades em rodízio, e caem no golpe quando a da
+  vez está em recarga ou no limite.
+- **Conteúdo**:
+  - o boss invoca 2 goblins e o golpe dele atordoa com 1,5 s de atraso;
+  - o slime deixa gosma que prende;
+  - a aranha arma teia invisível.
+
+**Consequência.**
+- Save na versão 3 (degrau v2 → v3).
+- Rastros e efeitos atrasados entram nos patches da arena. A banda com 10 bots seguiu em 38 KiB/s.

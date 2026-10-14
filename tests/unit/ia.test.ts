@@ -173,7 +173,7 @@ describe('arquétipos', () => {
     expect(c.de('acaoIniciada')[0]).toMatchObject({ atorId: 'i0', habilidadeId: 'marca_de_area', alvoX: j.x, alvoY: j.y });
   });
 
-  it('boss alterna golpe e área', () => {
+  it('boss reveza golpe com as habilidades (área e invocação)', () => {
     const ctx = ctxCom(SALA_ABERTA, { boss: { hesitacaoS: 0.1 } });
     const c = cena(ctx, [5, 5], [['boss', 6, 5]]);
     const j = c.ent('j');
@@ -181,7 +181,7 @@ describe('arquétipos', () => {
     j.hp = j.hpMax = 100_000;
     c.rodar(ticksDe(15_000), () => c.de('acaoIniciada').length >= 4);
     const usadas = c.de('acaoIniciada').map((e) => e.habilidadeId);
-    expect(usadas.slice(0, 4)).toEqual(['golpe_demoniaco', 'marca_de_area', 'golpe_demoniaco', 'marca_de_area']);
+    expect(usadas.slice(0, 4)).toEqual(['golpe_demoniaco', 'marca_de_area', 'golpe_demoniaco', 'invocar_lacaios']);
   });
 
   it('o jogador ataca sozinho quem o persegue, sem selecionar alvo', () => {

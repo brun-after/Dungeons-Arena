@@ -4,7 +4,7 @@
 
 import type { Celula, Dir8, EntidadeId } from '../core/comandos';
 import { clonarRng, type EstadoRng } from '../core/rng';
-import type { TipoEfeito } from '../combat/registro-efeitos';
+import type { EfeitoCanonico, TipoEfeito } from '../combat/registro-efeitos';
 import type { Slot } from '../modos/modo';
 
 export type TipoEntidade = 'jogador' | 'inimigo' | 'invocacao' | 'avatar';
@@ -32,6 +32,16 @@ export interface EfeitoAtivo {
   pct: number;
   /** Próxima aplicação dos periódicos; 0 nos demais. */
   proximoTick: number;
+  /** Marco 8A-2: o efeito carregado (rastro de efeito) e a referência (preset); null nos demais. */
+  interno: EfeitoCanonico | null;
+  ref: string | null;
+}
+
+/** Invocação ou dominado (§2.9): de quem é, até quando, e se foi dominado (sobrevive ao dono). */
+export interface DadosInvocacao {
+  donoId: EntidadeId;
+  expiraTick: number;
+  dominado: boolean;
 }
 
 /** Ação em conjuração (§2.7, etapa 3). Ticks publicados para a telegrafia (§3.6). */
@@ -161,6 +171,8 @@ export interface Entidade {
   ia: EstadoIa | null;
   /** Só jogadores da campanha; null para NPCs e para a ficha de sessão da arena (§3.7). */
   bolsa: Bolsa | null;
+  /** Marco 8A-2: invocações e dominados; null nas demais entidades. */
+  invocacao: DadosInvocacao | null;
 }
 
 export const ATRIBUTOS_NEUTROS: Readonly<Atributos> = {
@@ -244,6 +256,7 @@ export function criarEntidade(n: NovaEntidade): Entidade {
     participacao: [],
     ia: null,
     bolsa: null,
+    invocacao: null,
   };
 }
 
@@ -292,7 +305,7 @@ export function clonarEntidade(e: Entidade): Entidade {
     caminho: copiarCelulas(e.caminho),
     atributos: { ...e.atributos },
     habilidades: [...e.habilidades],
-    efeitos: e.efeitos.map((f) => ({ ...f })),
+    efeitos: e.efeitos.map((f) => ({ ...f, interno: f.interno ? { ...f.interno } : null })),
     acao: e.acao ? { ...e.acao } : null,
     participacao: e.participacao.map((p) => ({ ...p })),
     ia: e.ia
@@ -304,5 +317,6 @@ export function clonarEntidade(e: Entidade): Entidade {
         }
       : null,
     bolsa: e.bolsa ? clonarBolsa(e.bolsa) : null,
+    invocacao: e.invocacao ? { ...e.invocacao } : null,
   };
 }

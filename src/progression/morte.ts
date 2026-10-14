@@ -16,6 +16,7 @@ import { podeFerir } from '../modos/relacao';
 import { atrasoDeRespawnTicks, localDeRespawn, podeRespawnar, protecaoDeRespawnTicks } from '../modos/regras';
 import { celulaLivrePara } from '../world/colisao';
 import { passavel } from '../world/fase';
+import { tentarDominar } from '../combat/efeitos-fluxo';
 import { sortearEfeitoDeOrbe } from '../combat/registro-efeitos';
 import { largarItem, largarObjeto, largarOrbeEfeito } from '../world/objetos';
 import { dropaveisDe, type Item } from './itens';
@@ -64,9 +65,15 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
 
     if (e.controlador === 'ia') {
       concederXp(estado, ctx, e, saida);
-      if (e.abates === 0) largarDrops(estado, ctx, e, saida);
+      // Invocações não soltam nada nem voltam (§2.9).
+      if (e.abates === 0 && !e.invocacao) largarDrops(estado, ctx, e, saida);
+      // Dominação (§2.9, marco 8A-2): volta do lado de quem a marcou, em vez de sair do mundo.
+      if (tentarDominar(estado, ctx, e, saida)) {
+        e.morto = false;
+        continue;
+      }
       removidos.add(e.id);
-      if (e.preset) {
+      if (e.preset && !e.invocacao) {
         const segundos = e.arquetipo === 'boss' ? ctx.balance.respawn.bossS : ctx.balance.respawn.inimigoS;
         estado.respawns.push({
           id: e.id,

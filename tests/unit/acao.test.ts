@@ -70,7 +70,7 @@ describe('ciclo de uma ação (§2.7)', () => {
     const a = arena();
     const manaAntes = a.ent('j').mana;
     a.tick([['j', { t: 'usarHabilidade', id: 'explosao', alvo: 'b' }]]);
-    a.ent('j').efeitos.push({ valor: 0, pct: 0, proximoTick: 0, tipo: 'atordoar', ateTick: a.estado.tick + 30, origemId: 'b' });
+    a.ent('j').efeitos.push({ valor: 0, pct: 0, proximoTick: 0, interno: null, ref: null, tipo: 'atordoar', ateTick: a.estado.tick + 30, origemId: 'b' });
     a.ticks(ticksDe(900) + 5);
     expect(a.de('acaoCancelada')).toMatchObject([{ motivo: 'interrompido' }]);
     expect(a.de('impacto')).toHaveLength(0);
@@ -80,7 +80,7 @@ describe('ciclo de uma ação (§2.7)', () => {
 
   it('silêncio bloqueia só ação mágica; a física continua', () => {
     const a = arena(1, 4);
-    a.ent('j').efeitos.push({ valor: 0, pct: 0, proximoTick: 0, tipo: 'silenciar', ateTick: 1_000, origemId: 'b' });
+    a.ent('j').efeitos.push({ valor: 0, pct: 0, proximoTick: 0, interno: null, ref: null, tipo: 'silenciar', ateTick: 1_000, origemId: 'b' });
     a.tick([['j', { t: 'usarHabilidade', id: 'seta_arcana', alvo: 'b' }]]);
     expect(a.de('acaoRecusada').at(-1)).toMatchObject({ motivo: 'bloqueado' });
     a.tick([['j', { t: 'ataqueBasico', alvo: 'b' }]]);

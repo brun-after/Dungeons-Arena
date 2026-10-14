@@ -33,6 +33,9 @@ function iaPublica(ia: EstadoIa): EstadoIa {
 export function estadoPublico(estado: EstadoJogo): EstadoJogo {
   const publico = clonarEstado(estado);
   publico.rng = { ...RNG_NEUTRO };
+  // Armadilhas são invisíveis para quem não as armou (§2.11); o estado público é igual para todos
+  // até o canal privado do 8B, então ficam de fora (D-049).
+  publico.armadilhas = [];
   for (const e of publico.entidades) {
     if (e.ia) e.ia = iaPublica(e.ia);
     e.bolsa = null;

@@ -9,7 +9,7 @@
 //   7. gatilhos por célula     8. mortes e respawns  9. periódicos de 1 Hz e spawner
 
 import { alvoOfensivoValido, iniciarAcao, processarAcoes, processarAutoAtaque } from '../combat/acao';
-import { processarEfeitos } from '../combat/efeitos';
+import { processarEfeitos, processarGatilhosDeEfeito } from '../combat/efeitos';
 import { moverProjeteis } from '../combat/projeteis';
 import { vivo } from '../entities/entidade';
 import { processarIa } from '../entities/ia';
@@ -41,6 +41,7 @@ export function simular(
   regenerarRecursos(estado, ctx);
   moverEntidades(estado, ctx, saida, dtMs);
   coletarObjetos(estado, ctx, saida);
+  processarGatilhosDeEfeito(estado, ctx, saida);
   processarMortes(estado, ctx, saida);
   estado.tick++;
 }

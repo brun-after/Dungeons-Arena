@@ -55,6 +55,42 @@ export interface ObjetoNoMundo {
   efeito: EfeitoCanonico | null;
 }
 
+/** Célula de rastro (§2.8): aplica dano ou efeito a quem é hostil ao dono e entra nela. */
+export interface Rastro {
+  x: number;
+  y: number;
+  donoId: EntidadeId;
+  equipeDono: string;
+  tipo: 'rastro_dano' | 'rastro_efeito';
+  valor: number;
+  interno: EfeitoCanonico | null;
+  ateTick: number;
+  /** Quem já foi atingido por esta célula (uma vez por célula). */
+  atingidos: EntidadeId[];
+}
+
+/** Armadilha de habilidade (§2.11): disparo único no primeiro hostil que pisar. */
+export interface Armadilha {
+  id: number;
+  donoId: EntidadeId;
+  equipeDono: string;
+  x: number;
+  y: number;
+  valor: number;
+  interno: EfeitoCanonico | null;
+  ateTick: number;
+}
+
+/** Efeito agendado para disparar numa entidade (§2.8, `efeito_atrasado`). */
+export interface Atrasado {
+  alvoId: EntidadeId;
+  origemId: EntidadeId;
+  origemX: number;
+  origemY: number;
+  disparaTick: number;
+  efeito: EfeitoCanonico;
+}
+
 /** Respawn agendado de um inimigo (§2.5): o id continua estável e a geração incrementa. */
 export interface RespawnPendente {
   id: EntidadeId;
@@ -78,6 +114,10 @@ export interface EstadoJogo {
   projeteis: Projetil[];
   objetos: ObjetoNoMundo[];
   respawns: RespawnPendente[];
+  /** Marco 8A-2: rastros, armadilhas e efeitos atrasados. */
+  rastros: Rastro[];
+  armadilhas: Armadilha[];
+  atrasados: Atrasado[];
   /** Gerador de IDs de ação e de projétil, para não duplicar VFX/som (§3.6). */
   proximoId: number;
 }
@@ -98,6 +138,9 @@ export function criarEstado(opcoes: OpcoesEstado): EstadoJogo {
     projeteis: [],
     objetos: [],
     respawns: [],
+    rastros: [],
+    armadilhas: [],
+    atrasados: [],
     proximoId: 1,
   };
 }
@@ -110,6 +153,8 @@ export function novoId(estado: EstadoJogo): number {
   return estado.proximoId++;
 }
 
+const copiaEfeito = (e: EfeitoCanonico | null): EfeitoCanonico | null => (e ? { ...e, interno: e.interno ? { ...e.interno } : null } : null);
+
 // Clone explícito, campo a campo (§5.3 regra 4): nada de ida e volta por JSON em estado vivo.
 export function clonarEstado(estado: EstadoJogo): EstadoJogo {
   return {
@@ -120,8 +165,11 @@ export function clonarEstado(estado: EstadoJogo): EstadoJogo {
     entidades: estado.entidades.map(clonarEntidade),
     recargas: { ...estado.recargas },
     projeteis: estado.projeteis.map((p) => ({ ...p, atingidos: [...p.atingidos] })),
-    objetos: estado.objetos.map((o) => ({ ...o, efeito: o.efeito ? { ...o.efeito } : null })),
+    objetos: estado.objetos.map((o) => ({ ...o, efeito: copiaEfeito(o.efeito) })),
     respawns: estado.respawns.map((r) => ({ ...r })),
+    rastros: estado.rastros.map((r) => ({ ...r, interno: copiaEfeito(r.interno), atingidos: [...r.atingidos] })),
+    armadilhas: estado.armadilhas.map((a) => ({ ...a, interno: copiaEfeito(a.interno) })),
+    atrasados: estado.atrasados.map((a) => ({ ...a, efeito: { ...a.efeito, interno: copiaEfeito(a.efeito.interno) } })),
     proximoId: estado.proximoId,
   };
 }

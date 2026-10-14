@@ -27,7 +27,8 @@ export interface OpcoesCenario {
   ctx?: ContextoSimulacao;
 }
 
-const PRESETS_DO_CENARIO = ['goblin', 'esqueleto', 'orc', 'cultista', 'lobo'] as const;
+// Marco 8A-2: aranha (armadilha), slime (rastro) e boss (invocação e efeito atrasado) entram no cenário.
+const PRESETS_DO_CENARIO = ['goblin', 'esqueleto', 'orc', 'cultista', 'lobo', 'aranha', 'slime', 'boss'] as const;
 
 function classeAventureiro() {
   const classe = CONTEUDO.classes.get('aventureiro');
@@ -129,6 +130,15 @@ export function verificarInvariantes(estado: EstadoJogo, ctx: ContextoSimulacao)
     if (e.morto && e.acao) erros.push(`${e.id} morto conjurando`);
     if (e.acao && e.acao.lancamentoTick < estado.tick) erros.push(`${e.id} com ação vencida pendurada`);
   }
+  // Marco 8A-2: invocações (não dominadas) e armadilhas dentro dos limites do modo, por dono.
+  const porDono = new Map<string, number>();
+  for (const e of estado.entidades) {
+    if (e.invocacao && !e.invocacao.dominado && e.hp > 0) porDono.set(e.invocacao.donoId, (porDono.get(e.invocacao.donoId) ?? 0) + 1);
+  }
+  for (const [dono, n] of porDono) if (n > ctx.modo.limites.invocacoesPorJogador) erros.push(`${dono} com ${n} invocações`);
+  const armadilhas = new Map<string, number>();
+  for (const a of estado.armadilhas) armadilhas.set(a.donoId, (armadilhas.get(a.donoId) ?? 0) + 1);
+  for (const [dono, n] of armadilhas) if (n > ctx.modo.limites.armadilhasPorJogador) erros.push(`${dono} com ${n} armadilhas`);
   for (const p of estado.projeteis) {
     if (!passavel(fase, Math.round(p.x), Math.round(p.y))) erros.push(`projétil ${p.id} fora do terreno`);
   }

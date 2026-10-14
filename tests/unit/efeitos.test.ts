@@ -55,8 +55,8 @@ function cenario(balance: Balance = BALANCE_PADRAO) {
 }
 
 describe('registro (§2.8)', () => {
-  it('tem os 20 tipos deste marco, com os pesos de orbe da spec', () => {
-    expect(TIPOS_EFEITO).toHaveLength(20);
+  it('tem os 26 tipos da spec, com os pesos de orbe', () => {
+    expect(TIPOS_EFEITO).toHaveLength(26);
     const pesos = Object.fromEntries(elegiveisParaOrbe().map((d) => [d.id, d.pesoOrbe]));
     expect(pesos).toEqual({
       cura_periodica: 20,
@@ -69,6 +69,7 @@ describe('registro (§2.8)', () => {
       imune_dano: 4,
       fantasma: 2,
       atravessar: 2,
+      rastro_dano: 2,
     });
   });
 
@@ -105,15 +106,15 @@ describe('normalização (§2.8)', () => {
     const r = normalizarEfeito({ atordoar: 1500, dano_periodico: 3, bonus_dano: { pct: 40 }, duracaoMs: 4000 }, l);
     expect(l.erros).toEqual([]);
     expect(r).toEqual([
-      { tipo: 'atordoar', duracaoMs: 1500, valor: 0, pct: 0, em: 'alvo' },
-      { tipo: 'dano_periodico', duracaoMs: 4000, valor: 3, pct: 0, em: 'alvo' },
-      { tipo: 'bonus_dano', duracaoMs: 4000, valor: 0, pct: 40, em: 'alvo' },
+      { tipo: 'atordoar', duracaoMs: 1500, valor: 0, pct: 0, em: 'alvo', interno: null, ref: null },
+      { tipo: 'dano_periodico', duracaoMs: 4000, valor: 3, pct: 0, em: 'alvo', interno: null, ref: null },
+      { tipo: 'bonus_dano', duracaoMs: 4000, valor: 0, pct: 40, em: 'alvo', interno: null, ref: null },
     ]);
   });
 
   it('forma canônica, padrão do registro e campo omitido valendo 0 quando outro foi dado', () => {
     const l = new Leitor('teste');
-    expect(normalizarEfeito({ tipo: 'cura', pct: 40 }, l)).toEqual([{ tipo: 'cura', duracaoMs: 0, valor: 0, pct: 40, em: 'alvo' }]);
+    expect(normalizarEfeito({ tipo: 'cura', pct: 40 }, l)).toEqual([{ tipo: 'cura', duracaoMs: 0, valor: 0, pct: 40, em: 'alvo', interno: null, ref: null }]);
     expect(normalizarEfeito({ cura_periodica: true }, l)).toEqual([construirEfeito('cura_periodica')]);
     expect(normalizarEfeito({ tipo: 'avanco', valor: 2, em: 'conjurador' }, l)[0]?.em).toBe('conjurador');
     expect(l.erros).toEqual([]);
@@ -312,7 +313,7 @@ describe('conteúdo que exercita os efeitos', () => {
     const efeitosDe = (id: string) => obter(CONTEUDO.habilidades.get(id), id).efeitos.map((e) => e.tipo);
     expect(efeitosDe('teia')).toEqual(['sem_movimento']);
     expect(efeitosDe('marca_de_area')).toEqual(['dano_periodico']);
-    expect(efeitosDe('golpe_viscoso')).toEqual(['modificar_dano']);
+    expect(efeitosDe('golpe_viscoso')).toEqual(['modificar_dano', 'rastro_efeito']);
     expect(efeitosDe('golpe_pesado')).toEqual(['empurrao']);
     expect(obter(CONTEUDO.habilidades.get('raio_vampirico'), 'raio').efeitos[0]).toMatchObject({ tipo: 'cura', em: 'conjurador' });
   });

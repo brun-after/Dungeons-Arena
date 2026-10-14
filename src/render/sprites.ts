@@ -160,6 +160,8 @@ export class CamadaEntidades {
   private desenharAneis(m: Marcador, e: Entidade, estado: EstadoJogo, selecionado: boolean): void {
     const g = m.aneis.clear();
     if (selecionado) g.circle(0, 0, RAIO * m.escala + 6).stroke({ width: 2, color: 0xf1c40f, alpha: 0.9 });
+    // Marco 8A-2: dominado (lutando do outro lado) ganha um anel roxo.
+    if (e.invocacao?.dominado) g.circle(0, 0, RAIO * m.escala + 3).stroke({ width: 2, color: 0x8e44ad, alpha: 0.95 });
     // Marco 8A: marcador do status mais importante (negativo antes de positivo), na cor do registro.
     const status = e.morto ? [] : efeitosAtivos(e, estado.tick).filter((d) => d.ehStatus);
     const principal = status.find((d) => !d.positivo) ?? status[0];

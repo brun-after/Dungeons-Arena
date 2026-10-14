@@ -9,6 +9,7 @@ import type { EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { vivo, type EfeitoAtivo, type Entidade } from '../entities/entidade';
+import { agendarAtrasado, armarArmadilha, excedeLimite, invocar, processarFluxo, processarGatilhos } from './efeitos-fluxo';
 import { avancar, empurrar, teleportar } from './efeitos-instantaneos';
 import { registrarParticipacao } from './participacao';
 import { REGISTRO_EFEITOS, type DefinicaoEfeito, type EfeitoCanonico } from './registro-efeitos';
@@ -142,6 +143,22 @@ export function aplicarEfeito(
     saida.push({ t: 'efeitoAplicado', tick, alvoId: alvo.id, origemId: origem.id, tipo: ef.tipo, ateTick: tick });
     return;
   }
+  // Marco 8A-2: fluxos próprios de um disparo (efeitos-fluxo.ts).
+  if (def.fluxo) {
+    switch (def.fluxo) {
+      case 'atrasado':
+        agendarAtrasado(estado, alvo, ef, origem);
+        break;
+      case 'armadilha':
+        if (!excedeLimite(estado, ctx, alvo, [ef])) armarArmadilha(estado, ctx, alvo, ef, mira, saida);
+        break;
+      case 'invocar':
+        if (!excedeLimite(estado, ctx, alvo, [ef])) invocar(estado, ctx, alvo, ef, saida);
+        break;
+    }
+    saida.push({ t: 'efeitoAplicado', tick, alvoId: alvo.id, origemId: origem.id, tipo: ef.tipo, ateTick: tick });
+    return;
+  }
   const ateTick = tick + ticksDe(ef.duracaoMs);
   const existente = alvo.efeitos.find((f) => f.tipo === ef.tipo);
   if (existente) {
@@ -149,9 +166,19 @@ export function aplicarEfeito(
     existente.valor = Math.max(existente.valor, ef.valor);
     existente.pct = Math.max(existente.pct, ef.pct);
     existente.origemId = origem.id;
+    if (ef.interno) existente.interno = { ...ef.interno };
   } else {
     const intervalo = ticksDe(ctx.balance.efeitos.intervaloPeriodicoMs);
-    alvo.efeitos.push({ tipo: ef.tipo, ateTick, origemId: origem.id, valor: ef.valor, pct: ef.pct, proximoTick: def.periodico ? tick + intervalo : 0 });
+    alvo.efeitos.push({
+      tipo: ef.tipo,
+      ateTick,
+      origemId: origem.id,
+      valor: ef.valor,
+      pct: ef.pct,
+      proximoTick: def.periodico ? tick + intervalo : 0,
+      interno: ef.interno ? { ...ef.interno } : null,
+      ref: ef.ref,
+    });
   }
   saida.push({ t: 'efeitoAplicado', tick, alvoId: alvo.id, origemId: origem.id, tipo: ef.tipo, ateTick });
 }
@@ -185,4 +212,19 @@ export function processarEfeitos(estado: EstadoJogo, ctx: ContextoSimulacao, sai
     }
     e.efeitos = e.efeitos.filter((f) => f.ateTick > tick);
   }
+  processarFluxo(estado, (alvo, ef, origem, mira) => {
+    aplicarEfeito(estado, ctx, alvo, ef, origem, mira, saida);
+  });
+}
+
+/** Etapa 7 (gatilhos por célula): rastros e armadilhas (marco 8A-2). */
+export function processarGatilhosDeEfeito(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
+  processarGatilhos(
+    estado,
+    ctx,
+    (alvo, ef, origem, mira) => {
+      aplicarEfeito(estado, ctx, alvo, ef, origem, mira, saida);
+    },
+    saida,
+  );
 }

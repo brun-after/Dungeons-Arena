@@ -201,7 +201,16 @@
       "politicaImpacto": "contato",
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
-      "efeitos": []
+      "efeitos": [
+        {
+          "efeito_atrasado": {
+            "duracaoMs": 1500,
+            "efeito": {
+              "atordoar": 800
+            }
+          }
+        }
+      ]
     },
     {
       "id": "teia",
@@ -248,6 +257,15 @@
           "modificar_dano": {
             "pct": 30,
             "duracaoMs": 4000
+          }
+        },
+        {
+          "rastro_efeito": {
+            "duracaoMs": 4000,
+            "em": "conjurador",
+            "efeito": {
+              "sem_movimento": 600
+            }
           }
         }
       ]
@@ -297,6 +315,62 @@
           "tipo": "cura",
           "valor": 2,
           "em": "conjurador"
+        }
+      ]
+    },
+    {
+      "tipoAtaque": "magico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "id": "invocar_lacaios",
+      "nome": "Chamar lacaios",
+      "icone": "☥",
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "recargaMs": 15000,
+      "conjuracaoMs": 900,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "efeitos": [
+        {
+          "invocar": {
+            "valor": 2,
+            "duracaoMs": 20000,
+            "ref": "goblin"
+          }
+        }
+      ]
+    },
+    {
+      "tipoAtaque": "magico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "id": "armar_teia",
+      "nome": "Armar teia",
+      "icone": "🕸",
+      "alcanceCelulas": 4,
+      "tipoArea": "quadrado",
+      "raioArea": 0,
+      "recargaMs": 8000,
+      "conjuracaoMs": 800,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "efeitos": [
+        {
+          "armadilha": {
+            "valor": 3,
+            "duracaoMs": 20000,
+            "efeito": {
+              "sem_movimento": 1500
+            }
+          }
         }
       ]
     }
