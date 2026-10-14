@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.9 · **Data:** 13/10/2026
+**Versão:** 0.10 · **Data:** 13/10/2026
 
 > **Histórico**
+> - **0.10 (13/10/2026)**: D-041 (save da campanha no IndexedDB), tomada no marco 6B; D-015 encerrada.
 > - **0.9 (13/10/2026)**: D-039 e D-040, tomadas no marco 6A (itens, equipamento e nível).
 > - **0.8 (13/10/2026)**: D-038 (servidor da arena na AWS Lightsail em São Paulo); D-001 parcialmente superada.
 > - **0.7 (13/10/2026)**: decisões D-035 a D-037, tomadas no marco 5A (servidor real).
@@ -174,6 +175,9 @@ pelo `click` sem ponteiro (`detail === 0`), então a ação nunca dispara duas v
 
 **Decisão.** O tipo de controle e o modo da câmera ficam no `localStorage`, com falha silenciosa, até o store
 `perfil` do IndexedDB (§3.5) entrar no marco 6.
+
+> **Encerrada na v0.10 (marco 6B).** As preferências estão no store `perfil` e são migradas do `localStorage` na
+> primeira abertura. Sem IndexedDB, o `localStorage` continua como reserva.
 
 ## D-016 · Cor dos marcadores por equipe, provisória (v0.2, 13/10/2026) — superada na v0.3
 
@@ -417,3 +421,27 @@ precisam ser publicados juntos. Isso já acontece no merge.
 (teclado ignorado, canvas e controles inertes), mas a simulação segue em tempo real: inimigos continuam agindo. É o
 comportamento esperado num jogo de ação e o mesmo que valerá na arena, onde não há pausa. O menu de pausa da campanha
 (§2.15) é outra tela e entra depois.
+
+## D-041 · Save da campanha: estado inteiro, IndexedDB sem biblioteca (v0.10, 13/10/2026)
+
+**Contexto.** A §3.5 pede vários slots, autosave, versão de schema com migrações, exportação/importação e gravação
+fora do tick, sem conta e sem nuvem.
+
+**Decisão.**
+- Cada slot (1–3) guarda o `EstadoJogo` **inteiro** da campanha (ficha, mochila, posição, inimigos, respawns, PRNG e
+  recargas), mais a referência da fase, o nome, as datas e estatísticas. O estado já é só dados e tem clone explícito,
+  então não há um segundo formato para manter em sincronia, e continuar dá exatamente o mesmo jogo (mesmo digest).
+- `src/save/esquema.ts` é puro: lê, migra degrau a degrau (`MIGRACOES[i]` leva da versão `i` para `i + 1`) e confere a
+  forma de tudo que vem do banco ou de arquivo antes de gravar. Versão futura, slot fora, fase desconhecida, estado sem
+  jogador ou número não finito são recusados com motivo.
+- IndexedDB por um wrapper de ~80 linhas (`plataforma/banco.ts`), sem biblioteca. O banco nasce com os cinco stores da
+  §3.5, para não precisar de migração de banco quando o editor (`aventuras`) e a arena chegarem.
+- Autosave fora do tick (`setTimeout` depois do quadro, com cópia por `clonarEstado`) e serializado (uma gravação por
+  vez; pedidos no mesmo instante viram um). Grava a cada 30 s, ao subir de nível, equipar, pegar item, derrotar
+  inimigo, reviver, ao suspender (`visibilitychange`), em `pagehide` e no botão "Menu".
+- Save ilegível nunca é sobrescrito: o slot aparece como inválido e o jogador decide excluir. Importação só em slot
+  vazio.
+- Sem IndexedDB (armazenamento bloqueado), a campanha roda sem salvar (`&slot=0`), com aviso.
+
+**Consequência.** Mudanças futuras no `EstadoJogo` ou na entidade precisam de um degrau em `MIGRACOES` e de um teste,
+senão saves antigos passam a ser recusados (e não corrompidos).

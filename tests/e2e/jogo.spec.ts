@@ -3,7 +3,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 async function abrir(page: Page) {
   const erros: string[] = [];
   page.on('pageerror', (e) => erros.push(e.message));
-  await page.goto('./?jogo=campanha&diag=1');
+  await page.goto('./?jogo=campanha&slot=1&diag=1');
   const diag = page.locator('#diag');
   await expect(diag).toHaveAttribute('data-celula', /^\d+,\d+$/);
   return { diag, erros };
@@ -113,6 +113,25 @@ test.describe('desktop', () => {
     await page.keyboard.down('d');
     await expect.poll(async () => (await ler(diag, 'celula'))[0], { timeout: 15_000, intervals: [50] }).not.toBe(x0);
     await page.keyboard.up('d');
+    expect(erros).toEqual([]);
+  });
+
+  test('save: equipar, sair pelo Menu, continuar do slot e exportar', async ({ page }) => {
+    const { diag, erros } = await abrir(page);
+    await page.keyboard.press('KeyI');
+    const mochila = page.getByRole('dialog', { name: 'Mochila' });
+    await mochila.getByRole('button', { name: 'Equipar: Espada curta' }).click();
+    await expect(diag).toHaveAttribute('data-equipados', '1');
+    await page.keyboard.press('Escape');
+    // "Menu" grava e volta para a tela de slots.
+    await page.getByRole('button', { name: 'Salvar e voltar aos slots' }).click();
+    const slot1 = page.locator('[data-slot="1"]');
+    await expect(slot1).toContainText('Nível 1 · Salões da entrada');
+    const download = page.waitForEvent('download');
+    await slot1.getByRole('button', { name: 'Exportar' }).click();
+    expect((await download).suggestedFilename()).toBe('dungeons-arena-slot1.json');
+    await page.goto('./?jogo=campanha&slot=1&diag=1');
+    await expect(page.locator('#diag')).toHaveAttribute('data-equipados', '1');
     expect(erros).toEqual([]);
   });
 

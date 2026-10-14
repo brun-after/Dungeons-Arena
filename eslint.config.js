@@ -49,6 +49,7 @@ export default tseslint.config(
       'src/progression/**/*.ts',
       'src/arena/**/*.ts',
       'src/net/**/*.ts',
+      'src/save/**/*.ts',
       'server/**/*.ts',
       'shared/**/*.ts',
     ],

@@ -1,5 +1,9 @@
-// Preferências locais do jogador. Até o save em IndexedDB (marco 6), ficam no localStorage,
-// sempre com falha silenciosa: aba privada ou armazenamento bloqueado não podem quebrar o jogo.
+// Preferências locais do jogador. Marco 6B (13/10/2026): passam do localStorage para o store
+// `perfil` do IndexedDB (§3.5, fecha a D-015). A leitura é síncrona, de um cache carregado no
+// início por `prepararPreferencias`. Sem IndexedDB, continuam no localStorage; sem nenhum dos
+// dois, valem só nesta sessão. Falha de armazenamento nunca quebra o jogo.
+
+import { gravarNoBanco, lerDoBanco } from './banco';
 
 export type TipoControle = 'joystick' | 'dpad';
 export type ModoCamera = 'janela' | 'centralizada';
@@ -9,26 +13,69 @@ export interface Preferencias {
   camera: ModoCamera;
 }
 
-const CHAVE = 'dungeons-arena:preferencias';
+const CHAVE_LOCAL = 'dungeons-arena:preferencias';
+const CHAVE_PERFIL = 'preferencias';
 const PADRAO: Preferencias = { controle: 'joystick', camera: 'janela' };
 
-export function lerPreferencias(): Preferencias {
+let cache: Preferencias = { ...PADRAO };
+let usarBanco = false;
+
+export function normalizarPreferencias(dados: unknown): Preferencias {
+  const d = typeof dados === 'object' && dados !== null ? (dados as Partial<Record<keyof Preferencias, unknown>>) : {};
+  return {
+    controle: d.controle === 'dpad' ? 'dpad' : 'joystick',
+    camera: d.camera === 'centralizada' ? 'centralizada' : 'janela',
+  };
+}
+
+function lerLocal(): Preferencias | null {
   try {
-    const bruto = localStorage.getItem(CHAVE);
-    if (!bruto) return { ...PADRAO };
-    const dados = JSON.parse(bruto) as Partial<Preferencias>;
-    return {
-      controle: dados.controle === 'dpad' ? 'dpad' : 'joystick',
-      camera: dados.camera === 'centralizada' ? 'centralizada' : 'janela',
-    };
+    const bruto = localStorage.getItem(CHAVE_LOCAL);
+    return bruto ? normalizarPreferencias(JSON.parse(bruto)) : null;
   } catch {
-    return { ...PADRAO };
+    return null;
   }
 }
 
-export function gravarPreferencias(p: Preferencias): void {
+/** Carrega o cache. Na primeira vez com IndexedDB, migra o que estava no localStorage. */
+export async function prepararPreferencias(): Promise<void> {
   try {
-    localStorage.setItem(CHAVE, JSON.stringify(p));
+    const registro = await lerDoBanco('perfil', CHAVE_PERFIL);
+    usarBanco = true;
+    if (registro !== undefined) {
+      cache = normalizarPreferencias((registro as { valor?: unknown }).valor);
+      return;
+    }
+    const antigas = lerLocal();
+    if (antigas) {
+      cache = antigas;
+      await gravarNoBanco('perfil', { chave: CHAVE_PERFIL, valor: antigas });
+      try {
+        localStorage.removeItem(CHAVE_LOCAL);
+      } catch {
+        // Sem localStorage: nada a limpar.
+      }
+    }
+  } catch {
+    usarBanco = false;
+    cache = lerLocal() ?? { ...PADRAO };
+  }
+}
+
+export function lerPreferencias(): Preferencias {
+  return { ...cache };
+}
+
+export function gravarPreferencias(p: Preferencias): void {
+  cache = { ...p };
+  if (usarBanco) {
+    gravarNoBanco('perfil', { chave: CHAVE_PERFIL, valor: cache }).catch(() => {
+      // Falhou: a preferência vale só nesta sessão.
+    });
+    return;
+  }
+  try {
+    localStorage.setItem(CHAVE_LOCAL, JSON.stringify(p));
   } catch {
     // Armazenamento indisponível: a preferência vale só nesta sessão.
   }

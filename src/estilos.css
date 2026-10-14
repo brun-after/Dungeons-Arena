@@ -853,6 +853,46 @@ body.toque .botao-habilidade .tecla {
   color: var(--texto-suave);
 }
 
+.cartao-slot {
+  width: min(420px, 100%);
+  padding: 12px 14px;
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  background: var(--painel);
+}
+
+.cartao-slot h2 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  color: var(--destaque);
+}
+
+.resumo-slot {
+  margin: 0 0 10px;
+  color: var(--texto-suave);
+}
+
+.acoes-slot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.acoes-slot .botao-menu {
+  width: auto;
+  flex: 1 1 140px;
+}
+
+.acoes-slot .botao-cabecalho {
+  min-height: 44px;
+}
+
+.botao-cabecalho.perigo {
+  border-color: #e74c3c;
+  color: #e74c3c;
+}
+
 .botao-mochila.com-pontos {
   border-color: var(--destaque);
   color: var(--destaque);

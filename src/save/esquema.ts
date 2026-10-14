@@ -1,0 +1,138 @@
+// Save da campanha (§3.5). Marco 6B (13/10/2026). Puro: sem IndexedDB, sem DOM (tsconfig.nucleo).
+// Um registro por slot guarda o `EstadoJogo` inteiro da campanha (D-041): ficha, mochila, fase,
+// posição, inimigos e respawns, PRNG e recargas. Gravar e ler é tarefa de `plataforma/saves.ts`.
+
+import type { EstadoJogo } from '../core/estado';
+import { ehObjeto, type Objeto } from '../core/validar';
+import type { Entidade } from '../entities/entidade';
+
+export const VERSAO_SCHEMA = 1;
+export const SLOTS = [1, 2, 3] as const;
+export const FORMATO_EXPORTACAO = 'dungeons-arena/save';
+
+/** De onde vem a fase: conteúdo oficial ou aventura criada no editor (6C). */
+export type RefFase = { tipo: 'oficial'; id: string } | { tipo: 'aventura'; id: string };
+
+export interface Estatisticas {
+  inimigosDerrotados: number;
+  mortes: number;
+}
+
+export interface RegistroProgresso {
+  versaoSchema: number;
+  slot: number;
+  criadoEm: number;
+  atualizadoEm: number;
+  faseRef: RefFase;
+  nomeFase: string;
+  estado: EstadoJogo;
+  estatisticas: Estatisticas;
+}
+
+export interface ResumoSlot {
+  slot: number;
+  nivel: number;
+  nomeFase: string;
+  atualizadoEm: number;
+}
+
+/** O jogador do save: a entidade com bolsa (a campanha tem um só). */
+export function jogadorDoSave(estado: EstadoJogo): Entidade | undefined {
+  return estado.entidades.find((e) => e.bolsa !== null);
+}
+
+export function resumoDoRegistro(r: RegistroProgresso): ResumoSlot {
+  return { slot: r.slot, nivel: jogadorDoSave(r.estado)?.nivel ?? 1, nomeFase: r.nomeFase, atualizadoEm: r.atualizadoEm };
+}
+
+export type ErroSave = 'formato' | 'versao_futura' | 'slot' | 'fase' | 'estado' | 'nao_finito';
+
+export type LeituraSave = { ok: true; registro: RegistroProgresso } | { ok: false; erro: ErroSave };
+
+/** Cada função leva um registro da versão `i` para a `i + 1`. Vazio enquanto só existe a v1. */
+export type Migracao = (r: Objeto) => Objeto;
+export const MIGRACOES: readonly Migracao[] = [];
+
+function temNaoFinito(v: unknown): boolean {
+  if (typeof v === 'number') return !Number.isFinite(v);
+  if (Array.isArray(v)) return v.some(temNaoFinito);
+  if (ehObjeto(v)) return Object.values(v).some(temNaoFinito);
+  return false;
+}
+
+function lerRefFase(v: unknown): RefFase | null {
+  if (!ehObjeto(v) || typeof v.id !== 'string' || v.id === '') return null;
+  if (v.tipo === 'oficial' || v.tipo === 'aventura') return { tipo: v.tipo, id: v.id };
+  return null;
+}
+
+/**
+ * Lê um registro vindo do banco ou de um arquivo importado: migra até a versão atual e confere a
+ * forma antes de qualquer gravação (§3.5). `alvo` e `migracoes` são parâmetros para o teste.
+ */
+export function lerRegistro(bruto: unknown, migracoes: readonly Migracao[] = MIGRACOES, alvo = VERSAO_SCHEMA): LeituraSave {
+  if (!ehObjeto(bruto) || typeof bruto.versaoSchema !== 'number' || !Number.isInteger(bruto.versaoSchema)) {
+    return { ok: false, erro: 'formato' };
+  }
+  if (bruto.versaoSchema > alvo) return { ok: false, erro: 'versao_futura' };
+  let r: Objeto = bruto;
+  for (let v = bruto.versaoSchema; v < alvo; v++) {
+    const migrar = migracoes[v];
+    if (!migrar) return { ok: false, erro: 'formato' };
+    r = { ...migrar(r), versaoSchema: v + 1 };
+  }
+  if (typeof r.slot !== 'number' || !(SLOTS as readonly number[]).includes(r.slot)) return { ok: false, erro: 'slot' };
+  const faseRef = lerRefFase(r.faseRef);
+  if (!faseRef) return { ok: false, erro: 'fase' };
+  const e = r.estado;
+  const estadoOk =
+    ehObjeto(e) &&
+    e.versao === 1 &&
+    typeof e.faseId === 'string' &&
+    typeof e.tick === 'number' &&
+    ehObjeto(e.rng) &&
+    Array.isArray(e.entidades) &&
+    e.entidades.some((x) => ehObjeto(x) && ehObjeto(x.bolsa)) &&
+    ehObjeto(e.recargas) &&
+    Array.isArray(e.projeteis) &&
+    Array.isArray(e.objetos) &&
+    Array.isArray(e.respawns) &&
+    typeof e.proximoId === 'number';
+  if (!estadoOk) return { ok: false, erro: 'estado' };
+  if (temNaoFinito(r)) return { ok: false, erro: 'nao_finito' };
+  const est = ehObjeto(r.estatisticas) ? r.estatisticas : {};
+  return {
+    ok: true,
+    registro: {
+      versaoSchema: alvo,
+      slot: r.slot,
+      criadoEm: typeof r.criadoEm === 'number' ? r.criadoEm : 0,
+      atualizadoEm: typeof r.atualizadoEm === 'number' ? r.atualizadoEm : 0,
+      faseRef,
+      nomeFase: typeof r.nomeFase === 'string' ? r.nomeFase : faseRef.id,
+      // A forma foi conferida acima; o conteúdo do estado é dado do próprio jogo (§3.5).
+      estado: e as unknown as EstadoJogo,
+      estatisticas: {
+        inimigosDerrotados: typeof est.inimigosDerrotados === 'number' ? est.inimigosDerrotados : 0,
+        mortes: typeof est.mortes === 'number' ? est.mortes : 0,
+      },
+    },
+  };
+}
+
+/** Arquivo `.json` para exportar (§3.5): formato identificado e versionado. */
+export function exportarRegistro(r: RegistroProgresso): string {
+  return JSON.stringify({ formato: FORMATO_EXPORTACAO, registro: r });
+}
+
+/** Lê um arquivo exportado; o slot de destino é escolhido por quem importa. */
+export function importarRegistro(texto: string, slot: number): LeituraSave {
+  let bruto: unknown;
+  try {
+    bruto = JSON.parse(texto);
+  } catch {
+    return { ok: false, erro: 'formato' };
+  }
+  if (!ehObjeto(bruto) || bruto.formato !== FORMATO_EXPORTACAO || !ehObjeto(bruto.registro)) return { ok: false, erro: 'formato' };
+  return lerRegistro({ ...bruto.registro, slot });
+}
