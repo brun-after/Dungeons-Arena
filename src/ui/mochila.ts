@@ -1,6 +1,8 @@
 // Mochila e ficha (§2.10, §2.12). Marco 6 (13/10/2026). Só lê o estado e emite comandos.
 // No toque, tocar a linha inteira equipa, usa ou desequipa e fecha o modal; no desktop, cada linha
 // tem o seu botão. A lista é redesenhada só quando a bolsa, o nível ou o XP mudam.
+// Marco 9A (14/10/2026): ouro, ordenação manual (▲▼, persistida no save) e a tecla de atalho de
+// cada consumível (5–9 e 0, D-050).
 
 import type { Comando } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -9,6 +11,7 @@ import { t, type ChaveTexto } from '../i18n';
 import { SLOTS_DE_EQUIPAMENTO, type Slot } from '../modos/modo';
 import { derivarFicha } from '../progression/derivados';
 import { NOMES_ATRIBUTOS, type Item } from '../progression/itens';
+import { consumiveisComAtalho } from '../progression/inventario';
 import { xpParaProximo } from '../progression/nivel';
 import { criarModal } from './modal';
 
@@ -18,6 +21,11 @@ export interface OpcoesMochila {
   emitir: (cmd: Comando) => void;
   toque: boolean;
   aoAbrir: () => void;
+}
+
+/** Tecla do n-ésimo atalho de consumível: 5, 6, 7, 8, 9 e 0. */
+export function teclaDoAtalho(n: number): string {
+  return String((n + 5) % 10);
 }
 
 export interface Mochila {
@@ -101,6 +109,8 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     textoAcao: string;
     bloqueio: string | null;
     vazio?: boolean;
+    ordem?: { subir: (() => void) | null; descer: (() => void) | null; invId: string };
+    atalho?: string;
   }): HTMLLIElement => {
     const li = el('li', opcoes.vazio ? 'linha-item vazio' : 'linha-item');
     const conteudo = el('span', 'conteudo-item');
@@ -109,7 +119,8 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     const textos = el('span', 'textos-item');
     const nome = el('span', `nome-item raridade-${opcoes.item?.raridade ?? 'comum'}`, opcoes.rotulo);
     textos.append(nome);
-    const detalhe = opcoes.bloqueio ?? (opcoes.item ? resumoDoItem(opcoes.item) : '');
+    const resumo = opcoes.item ? resumoDoItem(opcoes.item) : '';
+    const detalhe = opcoes.bloqueio ?? (opcoes.atalho ? [t('mochila.atalho', { tecla: opcoes.atalho }), resumo].filter(Boolean).join(' · ') : resumo);
     if (detalhe) textos.append(el('span', 'detalhe-item', detalhe));
     conteudo.append(icone, textos);
     if (opcoes.qtd > 1) conteudo.append(el('span', 'qtd-item', `×${opcoes.qtd}`));
@@ -128,6 +139,20 @@ export function criarMochila(o: OpcoesMochila): Mochila {
         li.append(b);
       }
     }
+    const ordem = opcoes.ordem;
+    if (ordem) {
+      const grupo = el('span', 'ordem-item');
+      for (const [texto, rotulo, fazer, sufixo] of [
+        ['▲', t('mochila.subir', { item: opcoes.rotulo }), ordem.subir, 'subir'],
+        ['▼', t('mochila.descer', { item: opcoes.rotulo }), ordem.descer, 'descer'],
+      ] as const) {
+        const b = botao(texto, `${sufixo}-${ordem.invId}`, () => fazer?.(), 'botao-cabecalho botao-ordem');
+        b.disabled = !fazer;
+        b.setAttribute('aria-label', rotulo);
+        grupo.append(b);
+      }
+      li.append(grupo);
+    }
     return li;
   };
 
@@ -135,12 +160,27 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     const bolsa = j.bolsa;
     if (!bolsa) return;
     // A mochila vem primeiro: é onde estão as ações; os slots ficam numa grade compacta.
+    const ouro = el('p', 'saldo-loja', t('loja.saldo', { ouro: bolsa.ouro }));
+    ouro.dataset.ouro = String(bolsa.ouro);
     corpo.append(
+      ouro,
       el('h3', 'subtitulo-modal', t('mochila.itens', { n: bolsa.mochila.length, max: ctx.balance.inventario.capacidade })),
     );
     if (bolsa.mochila.length === 0) corpo.append(el('p', 'vazio-modal', t('mochila.semItens')));
     const lista = el('ul', 'lista-itens');
-    for (const entrada of bolsa.mochila) lista.append(linhaDaMochila(j, entrada));
+    const atalhos = consumiveisComAtalho(bolsa, itens).map((i) => i.invId);
+    bolsa.mochila.forEach((entrada, indice) => {
+      const n = atalhos.indexOf(entrada.invId);
+      // A ordenação não fecha o modal (no toque também): é para arrumar várias linhas seguidas.
+      const mover = (posicao: number) => () => { emitir({ t: 'moverItem', invId: entrada.invId, posicao }); };
+      lista.append(
+        linhaDaMochila(j, entrada, {
+          subir: indice > 0 ? mover(indice - 1) : null,
+          descer: indice < bolsa.mochila.length - 1 ? mover(indice + 1) : null,
+          invId: entrada.invId,
+        }, n >= 0 ? teclaDoAtalho(n) : undefined),
+      );
+    });
     corpo.append(lista);
 
     corpo.append(el('h3', 'subtitulo-modal', t('mochila.equipado')));
@@ -165,7 +205,12 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     corpo.append(slots);
   };
 
-  const linhaDaMochila = (j: Entidade, entrada: ItemNaMochila): HTMLLIElement => {
+  const linhaDaMochila = (
+    j: Entidade,
+    entrada: ItemNaMochila,
+    ordem: { subir: (() => void) | null; descer: (() => void) | null; invId: string },
+    atalho: string | undefined,
+  ): HTMLLIElement => {
     const item = itens.get(entrada.itemId);
     const consumivel = item?.tipo === 'consumivel';
     const slot: Slot | null = item?.slotPadrao ?? null;
@@ -183,6 +228,8 @@ export function criarMochila(o: OpcoesMochila): Mochila {
       acao,
       textoAcao: consumivel ? t('mochila.usar') : t('mochila.equipar'),
       bloqueio,
+      ordem,
+      ...(atalho !== undefined && { atalho }),
     });
   };
 
@@ -270,7 +317,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     }
     botaoAbrir.hidden = false;
     const pontos = j.bolsa.pontosAtributo > 0;
-    const rotulo = `🎒 ${t('mochila.nivelCurto', { nivel: j.nivel })}${pontos ? ' •' : ''}`;
+    const rotulo = `🎒 ${t('mochila.nivelCurto', { nivel: j.nivel })} · ${t('mochila.ouro', { ouro: j.bolsa.ouro })}${pontos ? ' •' : ''}`;
     if (rotulo !== rotuloBotao) {
       rotuloBotao = rotulo;
       botaoAbrir.textContent = rotulo;

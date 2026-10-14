@@ -8,7 +8,7 @@ import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
-import { vivo, type EfeitoAtivo, type Entidade } from '../entities/entidade';
+import { congelada, vivo, type EfeitoAtivo, type Entidade } from '../entities/entidade';
 import { agendarAtrasado, armarArmadilha, excedeLimite, invocar, processarFluxo, processarGatilhos } from './efeitos-fluxo';
 import { avancar, empurrar, teleportar } from './efeitos-instantaneos';
 import { registrarParticipacao } from './participacao';
@@ -32,11 +32,13 @@ export function efeitosAtivos(e: Entidade, tick: number): DefinicaoEfeito[] {
 }
 
 export function movimentoBloqueado(e: Entidade, tick: number): boolean {
-  return efeitosAtivos(e, tick).some((d) => d.bloqueiaMovimento);
+  return congelada(e) || efeitosAtivos(e, tick).some((d) => d.bloqueiaMovimento);
 }
 
 /** A entidade pode começar (ou continuar) uma ação desse tipo? */
 export function acaoBloqueada(e: Entidade, tick: number, tipoAtaque: 'fisico' | 'magico'): boolean {
+  // Baú e loja congelam (marco 9A): nem ação nova nem a que estava em curso.
+  if (congelada(e)) return true;
   return efeitosAtivos(e, tick).some(
     (d) => d.bloqueiaAcoes === 'todas' || (tipoAtaque === 'magico' ? d.bloqueiaAcoes === 'magicas' : d.bloqueiaAcoes === 'fisicas'),
   );

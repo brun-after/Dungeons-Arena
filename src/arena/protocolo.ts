@@ -105,6 +105,15 @@ export function lerComando(v: unknown): Comando | null {
       return ehAtributo(v.atributo) ? { t: 'distribuirPonto', atributo: v.atributo } : null;
     case 'interagir':
       return { t: 'interagir' };
+    // Marco 9A: a arena não tem economia (sem bolsa), mas o protocolo aceita a forma e a simulação recusa.
+    case 'comprar':
+      return id(v.itemId) ? { t: 'comprar', itemId: v.itemId } : null;
+    case 'vender':
+      return id(v.invId) ? { t: 'vender', invId: v.invId } : null;
+    case 'fecharLoja':
+      return { t: 'fecharLoja' };
+    case 'moverItem':
+      return id(v.invId) && inteiro(v.posicao) && v.posicao >= 0 && v.posicao < 1000 ? { t: 'moverItem', invId: v.invId, posicao: v.posicao } : null;
     default:
       return null;
   }

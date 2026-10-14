@@ -1,5 +1,5 @@
 {
-  "versao": 8,
+  "versao": 9,
   "movimento": {
     "velocidadeBaseMs": 400,
     "filaMaxWaypoints": 2
@@ -45,6 +45,7 @@
     "chanceItemBoss": 1,
     "raridadeMinBoss": "raro",
     "chanceOrbeEfeito": 0.08,
+    "ouroPorXp": 0.6,
     "pesoRaridade": { "comum": 60, "incomum": 28, "raro": 10, "epico": 2, "lendario": 0 }
   },
   "xp": {
@@ -60,6 +61,15 @@
     "rastroCelulaMs": 3000,
     "dominacaoMs": 60000,
     "dominacaoHpPct": 50
+  },
+  "economia": {
+    "ouroInicial": 15,
+    "vendaPct": 50,
+    "janelaLojaMs": 5000,
+    "recargaLojaMs": 10000,
+    "bauCongelaMs": 3000,
+    "bauSomeMs": 5000,
+    "alcanceInteracao": 1
   },
   "atributos": {
     "minimo": 1,

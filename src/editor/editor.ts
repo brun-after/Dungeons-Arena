@@ -121,7 +121,7 @@ async function mostrarMinhasFases(raiz: HTMLElement, mensagem: string): Promise<
         status.textContent = t('editor.importarInvalido');
         return;
       }
-      const r = validarFase(json, new Set(conteudoOficial().presets.keys()));
+      const r = validarFase(json, new Set(conteudoOficial().presets.keys()), conteudoOficial().itens);
       if (!r.ok) {
         status.textContent = t('editor.importarComErro', { erro: r.erros[0]?.mensagem ?? '?' });
         return;

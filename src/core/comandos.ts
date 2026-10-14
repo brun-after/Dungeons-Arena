@@ -23,7 +23,12 @@ export type Comando =
   | { t: 'equipar'; invId: string; slot: Slot }
   | { t: 'desequipar'; slot: Slot }
   | { t: 'distribuirPonto'; atributo: keyof Atributos }
-  | { t: 'interagir' };
+  | { t: 'interagir' }
+  /** Marco 9A (14/10/2026): loja (com a janela aberta) e ordenação manual da mochila. */
+  | { t: 'comprar'; itemId: string }
+  | { t: 'vender'; invId: string }
+  | { t: 'fecharLoja' }
+  | { t: 'moverItem'; invId: string; posicao: number };
 
 /** Envelope de rede. O servidor deriva o jogador da sessão e atribui o tick de aplicação. */
 export interface ComandoEmpacotado {

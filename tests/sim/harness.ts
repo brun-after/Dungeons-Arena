@@ -84,11 +84,19 @@ const DIRECOES: readonly (Dir8 | 'parado')[] = ['N', 'NE', 'E', 'SE', 'S', 'SO',
 function comandoDeItem(rng: EstadoRng, e: Entidade): ComandoDoTick['cmd'] {
   const entrada = e.bolsa && e.bolsa.mochila.length > 0 ? escolher(rng, e.bolsa.mochila) : null;
   const sorteio = aleatorio(rng);
-  if (entrada && sorteio < 0.4) return { t: 'equipar', invId: entrada.invId, slot: escolher(rng, SLOTS_DE_EQUIPAMENTO) };
-  if (entrada && sorteio < 0.6) return { t: 'usarItem', invId: entrada.invId };
-  if (sorteio < 0.8) return { t: 'desequipar', slot: escolher(rng, SLOTS_DE_EQUIPAMENTO) };
-  return { t: 'distribuirPonto', atributo: escolher(rng, NOMES_ATRIBUTOS) };
+  if (entrada && sorteio < 0.25) return { t: 'equipar', invId: entrada.invId, slot: escolher(rng, SLOTS_DE_EQUIPAMENTO) };
+  if (entrada && sorteio < 0.35) return { t: 'usarItem', invId: entrada.invId };
+  if (sorteio < 0.45) return { t: 'desequipar', slot: escolher(rng, SLOTS_DE_EQUIPAMENTO) };
+  if (sorteio < 0.5) return { t: 'distribuirPonto', atributo: escolher(rng, NOMES_ATRIBUTOS) };
+  // Marco 9A: economia, válida ou não (loja fechada, sem ouro, item fora do estoque).
+  if (sorteio < 0.65) return { t: 'interagir' };
+  if (sorteio < 0.75) return { t: 'comprar', itemId: escolher(rng, ITENS) };
+  if (entrada && sorteio < 0.85) return { t: 'vender', invId: entrada.invId };
+  if (entrada && sorteio < 0.95) return { t: 'moverItem', invId: entrada.invId, posicao: inteiro(rng, 0, 25) };
+  return { t: 'fecharLoja' };
 }
+
+const ITENS = [...CONTEUDO.itens.keys()];
 
 export function criarBotAleatorio(semente: number): Produtor {
   const rng: EstadoRng = criarRng(semente);
@@ -129,6 +137,24 @@ export function verificarInvariantes(estado: EstadoJogo, ctx: ContextoSimulacao)
     if (e.mana < 0 || e.mana > e.manaMax) erros.push(`${e.id} com mana ${e.mana} fora de [0, ${e.manaMax}]`);
     if (e.morto && e.acao) erros.push(`${e.id} morto conjurando`);
     if (e.acao && e.acao.lancamentoTick < estado.tick) erros.push(`${e.id} com ação vencida pendurada`);
+    // Marco 9A: ouro inteiro e nunca negativo; nenhum item duplicado; morto não fica congelado.
+    if (e.bolsa) {
+      if (!Number.isInteger(e.bolsa.ouro) || e.bolsa.ouro < 0) erros.push(`${e.id} com ouro ${e.bolsa.ouro}`);
+      const inv = [...e.bolsa.mochila, ...Object.values(e.bolsa.equipamento).filter((i) => i !== null)].map((i) => i.invId);
+      if (new Set(inv).size !== inv.length) erros.push(`${e.id} com item duplicado`);
+      if (e.bolsa.mochila.length > balance.inventario.capacidade) erros.push(`${e.id} com mochila acima da capacidade`);
+      if (e.bolsa.mochila.some((i) => i.qtd < 1 || i.qtd > balance.inventario.pilhaMax)) erros.push(`${e.id} com pilha inválida`);
+    }
+    if (e.morto && e.interacao) erros.push(`${e.id} morto e congelado`);
+  }
+  const objetos = new Set<string>();
+  for (const o of estado.objetos) {
+    if (objetos.has(o.objetoId)) erros.push(`objeto repetido ${o.objetoId}`);
+    objetos.add(o.objetoId);
+    // Um abridor por vez, e só quem está de fato abrindo (§3.6).
+    if (o.abridorId !== null && estado.entidades.find((e) => e.id === o.abridorId)?.interacao?.objetoId !== o.objetoId) {
+      erros.push(`baú ${o.objetoId} reservado por quem não está abrindo`);
+    }
   }
   // Marco 8A-2: invocações (não dominadas) e armadilhas dentro dos limites do modo, por dono.
   const porDono = new Map<string, number>();

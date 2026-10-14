@@ -29,7 +29,16 @@ export type MotivoItem =
   | 'nao_consumivel'
   | 'sem_efeito'
   | 'sem_pontos'
-  | 'atributo_no_maximo';
+  | 'atributo_no_maximo'
+  /** Marco 9A: interação, loja e baú. */
+  | 'nada_perto'
+  | 'congelado'
+  | 'em_recarga'
+  | 'loja_fechada'
+  | 'fora_do_estoque'
+  | 'sem_ouro'
+  | 'nao_vendavel'
+  | 'trancado';
 
 export type MotivoCancelamento = 'morte' | 'interrompido' | 'alvo_invalido' | 'substituido';
 
@@ -89,6 +98,12 @@ export type EventoSimulacao =
   | { t: 'equipou'; tick: number; id: EntidadeId; itemId: string; slot: Slot }
   | { t: 'usouItem'; tick: number; id: EntidadeId; itemId: string; hp: number; mana: number }
   | { t: 'itemRecusado'; tick: number; id: EntidadeId; motivo: MotivoItem }
+  /** Marco 9A: baú e loja. `ateTick` é o fim do congelamento (anel de progresso, contagem da janela). */
+  | { t: 'interacaoIniciada'; tick: number; id: EntidadeId; objetoId: string; tipo: 'bau' | 'loja'; ateTick: number }
+  | { t: 'bauAberto'; tick: number; id: EntidadeId; objetoId: string; itens: string[]; ouro: number }
+  | { t: 'lojaFechada'; tick: number; id: EntidadeId; objetoId: string; recargaAteTick: number }
+  | { t: 'comprou'; tick: number; id: EntidadeId; itemId: string; preco: number }
+  | { t: 'vendeu'; tick: number; id: EntidadeId; itemId: string; preco: number }
   | { t: 'subiuNivel'; tick: number; id: EntidadeId; nivel: number }
   | { t: 'reviveu'; tick: number; id: EntidadeId }
   | { t: 'surgiu'; tick: number; id: EntidadeId };

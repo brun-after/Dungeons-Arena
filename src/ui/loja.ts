@@ -1,0 +1,163 @@
+// Modal da loja (§2.10). Marco 9A (14/10/2026). Só lê o estado e emite comandos: abre sozinho
+// quando a simulação abre a janela da loja para o jogador local e fecha quando ela acaba. Fechar
+// pelo modal (✕, Esc, toque no fundo) emite `fecharLoja`, que arma a recarga.
+
+import type { Comando } from '../core/comandos';
+import type { ContextoSimulacao } from '../core/contexto';
+import type { EstadoJogo, ObjetoNoMundo } from '../core/estado';
+import { DT_MS } from '../core/loop';
+import type { Entidade } from '../entities/entidade';
+import { t } from '../i18n';
+import { precoDeVenda, vendavel, type Item } from '../progression/itens';
+import { lojaAberta } from '../progression/loja';
+import { resumoDoItem } from './mochila';
+import { criarModal } from './modal';
+
+export interface OpcoesLoja {
+  ctx: ContextoSimulacao;
+  estado: () => EstadoJogo;
+  jogador: () => Entidade | undefined;
+  emitir: (cmd: Comando) => void;
+  /** Ao abrir: fecha outros modais e solta as teclas. */
+  aoAbrir: () => void;
+}
+
+export interface Loja {
+  aberta: () => boolean;
+  /** Chamado a cada quadro. */
+  atualizar: () => void;
+}
+
+function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, texto?: string): HTMLElementTagNameMap[K] {
+  const e = document.createElement(tag);
+  if (classe) e.className = classe;
+  if (texto !== undefined) e.textContent = texto;
+  return e;
+}
+
+export function criarLoja(o: OpcoesLoja): Loja {
+  const { ctx, emitir } = o;
+  const itens = ctx.conteudo.itens;
+  let assinatura = '';
+  // Fechado pela simulação (a janela acabou): não emite `fecharLoja` de novo.
+  let fechandoPeloEstado = false;
+  // Fechado pelo jogador: não reabre enquanto o `fecharLoja` não chega à simulação.
+  let janelaFechada = -1;
+  let janelaAtual = -1;
+
+  const modal = criarModal({
+    titulo: t('loja.titulo'),
+    rotuloFechar: t('loja.fechar'),
+    classe: 'mochila loja',
+    aoFechar: () => {
+      if (!fechandoPeloEstado) {
+        janelaFechada = janelaAtual;
+        emitir({ t: 'fecharLoja' });
+      }
+      fechandoPeloEstado = false;
+      assinatura = '';
+    },
+  });
+
+  const saldo = el('p', 'saldo-loja');
+  const tempo = el('p', 'tempo-loja');
+  tempo.setAttribute('aria-live', 'off');
+  const listas = el('div', 'conteudo-modal');
+  modal.corpo.append(saldo, tempo, listas);
+
+  const linha = (item: Item | undefined, rotulo: string, qtd: number, acao: { texto: string; chave: string; desligado: boolean; fazer: () => void } | null, nota?: string) => {
+    const li = el('li', 'linha-item');
+    const conteudo = el('span', 'conteudo-item');
+    const icone = el('span', 'icone-item', item?.icone ?? '·');
+    icone.setAttribute('aria-hidden', 'true');
+    const textos = el('span', 'textos-item');
+    textos.append(el('span', `nome-item raridade-${item?.raridade ?? 'comum'}`, rotulo));
+    const detalhe = nota ?? (item ? resumoDoItem(item) : '');
+    if (detalhe) textos.append(el('span', 'detalhe-item', detalhe));
+    conteudo.append(icone, textos);
+    if (qtd > 1) conteudo.append(el('span', 'qtd-item', `×${qtd}`));
+    li.append(conteudo);
+    if (acao) {
+      const b = el('button', 'botao-cabecalho', acao.texto);
+      b.type = 'button';
+      b.dataset.chave = acao.chave;
+      b.disabled = acao.desligado;
+      b.setAttribute('aria-label', `${acao.texto}: ${rotulo}`);
+      b.addEventListener('click', acao.fazer);
+      li.append(b);
+    }
+    return li;
+  };
+
+  const desenhar = (j: Entidade, loja: ObjetoNoMundo) => {
+    const bolsa = j.bolsa;
+    if (!bolsa) return;
+    assinatura = JSON.stringify([bolsa.mochila, bolsa.ouro, loja.objetoId]);
+    const focoAntes = document.activeElement instanceof HTMLElement ? document.activeElement.dataset.chave : undefined;
+    saldo.textContent = t('loja.saldo', { ouro: bolsa.ouro });
+    saldo.dataset.ouro = String(bolsa.ouro);
+    listas.textContent = '';
+
+    listas.append(el('h3', 'subtitulo-modal', t('loja.estoque')));
+    const estoque = el('ul', 'lista-itens estoque-loja');
+    for (const id of loja.itens) {
+      const item = itens.get(id);
+      if (!item) continue;
+      estoque.append(
+        linha(item, item.nome, 1, {
+          texto: t('loja.comprar', { preco: item.valorBase }),
+          chave: `comprar-${id}`,
+          desligado: bolsa.ouro < item.valorBase,
+          fazer: () => { emitir({ t: 'comprar', itemId: id }); },
+        }),
+      );
+    }
+    listas.append(estoque);
+
+    listas.append(el('h3', 'subtitulo-modal', t('loja.suaMochila')));
+    if (bolsa.mochila.length === 0) listas.append(el('p', 'vazio-modal', t('loja.semItens')));
+    const mochila = el('ul', 'lista-itens');
+    for (const entrada of bolsa.mochila) {
+      const item = itens.get(entrada.itemId);
+      const pode = item ? vendavel(item) : false;
+      const preco = item ? precoDeVenda(item, ctx.balance.economia.vendaPct) : 0;
+      mochila.append(
+        linha(
+          item,
+          item?.nome ?? entrada.itemId,
+          entrada.qtd,
+          pode ? { texto: t('loja.vender', { preco }), chave: `vender-${entrada.invId}`, desligado: false, fazer: () => { emitir({ t: 'vender', invId: entrada.invId }); } } : null,
+          pode ? undefined : t('loja.naoCompra'),
+        ),
+      );
+    }
+    listas.append(mochila);
+    if (focoAntes) modal.corpo.querySelector<HTMLElement>(`[data-chave="${CSS.escape(focoAntes)}"]`)?.focus();
+  };
+
+  const atualizar = () => {
+    const j = o.jogador();
+    const estado = o.estado();
+    const loja = j ? lojaAberta(estado, j) : null;
+    if (!j || !loja) {
+      if (modal.aberto()) {
+        fechandoPeloEstado = true;
+        modal.fechar();
+      }
+      return;
+    }
+    janelaAtual = j.interacao?.ateTick ?? -1;
+    if (!modal.aberto()) {
+      if (janelaAtual === janelaFechada) return;
+      o.aoAbrir();
+      modal.abrir();
+    }
+    const restanteS = Math.max(0, Math.ceil((((j.interacao?.ateTick ?? 0) - estado.tick) * DT_MS) / 1000));
+    const texto = t('loja.tempo', { s: restanteS });
+    if (tempo.textContent !== texto) tempo.textContent = texto;
+    const bolsa = j.bolsa;
+    if (bolsa && JSON.stringify([bolsa.mochila, bolsa.ouro, loja.objetoId]) !== assinatura) desenhar(j, loja);
+  };
+
+  return { aberta: modal.aberto, atualizar };
+}

@@ -6,7 +6,7 @@ import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { criarInimigo } from '../entities/fabrica';
-import { largarObjeto, largarOrbeEfeito } from './objetos';
+import { largarItem, largarObjeto, largarOrbeEfeito, novoObjeto } from './objetos';
 
 export function idDoInimigo(indice: number): string {
   return `i${String(indice).padStart(3, '0')}`;
@@ -23,10 +23,24 @@ export function povoarFase(estado: EstadoJogo, ctx: ContextoSimulacao, saida: Ev
   }
   if (ctx.modo.objetosDeFase) {
     ctx.fase.objetos.forEach((o, indice) => {
-      if (o.tipo === 'orbe_efeito') {
-        if (o.efeito) largarOrbeEfeito(estado, o.efeito, o.x, o.y, saida, `f:${indice}`);
-      } else {
-        largarObjeto(estado, o.tipo, o.x, o.y, o.valor, o.modo, saida, `f:${indice}`);
+      const objetoId = `f:${indice}`;
+      switch (o.tipo) {
+        case 'orbe_efeito':
+          if (o.efeito) largarOrbeEfeito(estado, o.efeito, o.x, o.y, saida, objetoId);
+          break;
+        case 'orbe_hp':
+        case 'orbe_recurso':
+          largarObjeto(estado, o.tipo, o.x, o.y, o.valor, o.modo, saida, objetoId);
+          break;
+        case 'loot':
+          if (o.itemId) largarItem(estado, o.itemId, o.x, o.y, saida, o.valor, objetoId);
+          break;
+        // Marco 9A: baú e loja. A validação garante uma célula por objeto.
+        case 'bau':
+        case 'loja':
+          estado.objetos.push(novoObjeto(objetoId, o.tipo, o.x, o.y, { itens: [...o.itens], ouro: o.ouro, chave: o.chave }));
+          saida.push({ t: 'objetoSurgiu', tick: estado.tick, objetoId, tipo: o.tipo, x: o.x, y: o.y });
+          break;
       }
     });
   }

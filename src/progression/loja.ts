@@ -1,0 +1,62 @@
+// Loja (§2.10). Marco 9A (14/10/2026). Compra pelo `valorBase` e venda a `vendaPct`, só com a
+// janela aberta (world/interacao.ts). Cada operação é uma transação no tick (§3.6): confere janela,
+// estoque, saldo e espaço; só então cobra e entrega. Saldo nunca fica negativo. O estoque é
+// ilimitado na v1 (D-050): a loja é o dreno de ouro, não um recurso disputado.
+
+import type { ContextoSimulacao } from '../core/contexto';
+import type { EstadoJogo, ObjetoNoMundo } from '../core/estado';
+import type { EventoSimulacao, MotivoItem } from '../core/eventos-simulacao';
+import type { Entidade } from '../entities/entidade';
+import { cabeNaMochila, guardarItem, recusarItem } from './inventario';
+import { precoDeVenda, vendavel } from './itens';
+
+/** A loja cuja janela está aberta para esta entidade, ou null. */
+export function lojaAberta(estado: EstadoJogo, e: Entidade): ObjetoNoMundo | null {
+  const i = e.interacao;
+  if (i?.tipo !== 'loja' || estado.tick >= i.ateTick) return null;
+  return estado.objetos.find((o) => o.objetoId === i.objetoId && o.tipo === 'loja') ?? null;
+}
+
+export function comprar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, itemId: string, saida: EventoSimulacao[]): void {
+  const motivo = tentarComprar(estado, ctx, e, itemId, saida);
+  if (motivo) recusarItem(e, motivo, estado.tick, saida);
+}
+
+function tentarComprar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, itemId: string, saida: EventoSimulacao[]): MotivoItem | null {
+  const bolsa = e.bolsa;
+  if (!bolsa) return 'sem_mochila';
+  const loja = lojaAberta(estado, e);
+  if (!loja) return 'loja_fechada';
+  if (!loja.itens.includes(itemId)) return 'fora_do_estoque';
+  const item = ctx.conteudo.itens.get(itemId);
+  if (!item) return 'nao_encontrado';
+  if (bolsa.ouro < item.valorBase) return 'sem_ouro';
+  if (!cabeNaMochila(bolsa, item, 1, ctx.balance.inventario)) return 'mochila_cheia';
+  bolsa.ouro -= item.valorBase;
+  guardarItem(bolsa, item, 1, ctx.balance.inventario);
+  saida.push({ t: 'comprou', tick: estado.tick, id: e.id, itemId, preco: item.valorBase });
+  return null;
+}
+
+/** Vende uma unidade de uma entrada da mochila (o equipado não está na mochila: não é vendável). */
+export function vender(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, invId: string, saida: EventoSimulacao[]): void {
+  const motivo = tentarVender(estado, ctx, e, invId, saida);
+  if (motivo) recusarItem(e, motivo, estado.tick, saida);
+}
+
+function tentarVender(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, invId: string, saida: EventoSimulacao[]): MotivoItem | null {
+  const bolsa = e.bolsa;
+  if (!bolsa) return 'sem_mochila';
+  if (!lojaAberta(estado, e)) return 'loja_fechada';
+  const indice = bolsa.mochila.findIndex((i) => i.invId === invId);
+  const entrada = bolsa.mochila[indice];
+  const item = entrada ? ctx.conteudo.itens.get(entrada.itemId) : undefined;
+  if (!entrada || !item) return 'nao_encontrado';
+  if (!vendavel(item)) return 'nao_vendavel';
+  const preco = precoDeVenda(item, ctx.balance.economia.vendaPct);
+  entrada.qtd--;
+  if (entrada.qtd <= 0) bolsa.mochila.splice(indice, 1);
+  bolsa.ouro += preco;
+  saida.push({ t: 'vendeu', tick: estado.tick, id: e.id, itemId: item.id, preco });
+  return null;
+}

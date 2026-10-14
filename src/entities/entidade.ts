@@ -109,6 +109,18 @@ export interface Bolsa {
   mochila: ItemNaMochila[];
   pontosAtributo: number;
   proximoInv: number;
+  /** Marco 9A: moeda única (§2.10). Nunca negativa. */
+  ouro: number;
+}
+
+/**
+ * Interação em curso com baú ou loja (§2.10, marco 9A): enquanto existir, a entidade está
+ * congelada (não anda nem age). Termina na etapa 5 do tick em `ateTick`, ao fechar ou ao morrer.
+ */
+export interface Interacao {
+  tipo: 'bau' | 'loja';
+  objetoId: string;
+  ateTick: number;
 }
 
 export interface Entidade {
@@ -173,6 +185,8 @@ export interface Entidade {
   bolsa: Bolsa | null;
   /** Marco 8A-2: invocações e dominados; null nas demais entidades. */
   invocacao: DadosInvocacao | null;
+  /** Marco 9A: baú ou loja aberta (congela); null quando livre. */
+  interacao: Interacao | null;
 }
 
 export const ATRIBUTOS_NEUTROS: Readonly<Atributos> = {
@@ -257,6 +271,7 @@ export function criarEntidade(n: NovaEntidade): Entidade {
     ia: null,
     bolsa: null,
     invocacao: null,
+    interacao: null,
   };
 }
 
@@ -279,6 +294,11 @@ export function emPasso(e: Entidade): boolean {
 
 export function vivo(e: Entidade): boolean {
   return !e.morto && e.hp > 0;
+}
+
+/** Congelada por baú ou loja (§2.2, etapa 5): não começa passo nem ação. */
+export function congelada(e: Entidade): boolean {
+  return e.interacao !== null;
 }
 
 const copiarCelulas = (lista: readonly Celula[]): Celula[] => lista.map((c) => ({ x: c.x, y: c.y }));
@@ -318,5 +338,6 @@ export function clonarEntidade(e: Entidade): Entidade {
       : null,
     bolsa: e.bolsa ? clonarBolsa(e.bolsa) : null,
     invocacao: e.invocacao ? { ...e.invocacao } : null,
+    interacao: e.interacao ? { ...e.interacao } : null,
   };
 }

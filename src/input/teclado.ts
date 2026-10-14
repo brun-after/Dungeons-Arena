@@ -25,6 +25,8 @@ export interface OpcoesTeclado {
   isometrico: () => boolean;
   /** Tecla `I`: abre a mochila (marco 6). */
   aoMochila?: () => void;
+  /** Tecla `E`: interage com baú ou loja (marco 9A). */
+  aoInteragir?: () => void;
   /** Com um modal aberto, as teclas não chegam ao jogo (marco 6). */
   bloqueado?: () => boolean;
 }
@@ -64,6 +66,8 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
     if (opcoes.bloqueado?.()) return;
     if (ev.code === 'KeyI' && !ev.repeat && opcoes.aoMochila) {
       opcoes.aoMochila();
+    } else if (ev.code === 'KeyE' && !ev.repeat && opcoes.aoInteragir) {
+      opcoes.aoInteragir();
     } else if (ev.code in EIXOS) {
       ev.preventDefault();
       if (!ev.repeat) {

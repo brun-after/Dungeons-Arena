@@ -13,7 +13,7 @@ import { validarFase } from '../../src/world/validacao-fase';
 import { CONTEUDO, contexto } from '../apoio/fases';
 
 export function ctxArena(): ContextoSimulacao {
-  const r = validarFase(arena01, new Set(CONTEUDO.presets.keys()));
+  const r = validarFase(arena01, new Set(CONTEUDO.presets.keys()), CONTEUDO.itens);
   if (!r.ok) throw new Error(`arena-01 inválida: ${JSON.stringify(r.erros)}`);
   return contexto(carregarFase(r.fase), BALANCE_PADRAO, 'livre');
 }

@@ -101,6 +101,47 @@
       "efeito": {
         "cura_periodica": true
       }
+    },
+    {
+      "tipo": "loja",
+      "x": 0.2125,
+      "y": 0.125,
+      "estoque": [
+        "pocao_vida",
+        "pocao_mana",
+        "adaga",
+        "capuz_couro",
+        "gibao",
+        "escudo_madeira"
+      ]
+    },
+    {
+      "tipo": "bau",
+      "x": 0.2875,
+      "y": 0.0893,
+      "loot": [
+        "pocao_vida",
+        "pocao_mana"
+      ],
+      "ouro": 25
+    },
+    {
+      "tipo": "bau",
+      "x": 0.9375,
+      "y": 0.4107,
+      "loot": [
+        "botas_rapidas",
+        "pocao_vida"
+      ],
+      "ouro": 40,
+      "chave": "chave_ferro"
+    },
+    {
+      "tipo": "loot",
+      "x": 0.2625,
+      "y": 0.7321,
+      "itemId": "chave_ferro",
+      "quantidade": 1
     }
   ]
 }

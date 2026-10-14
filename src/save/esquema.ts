@@ -6,7 +6,7 @@ import type { EstadoJogo } from '../core/estado';
 import { ehObjeto, type Objeto } from '../core/validar';
 import type { Entidade } from '../entities/entidade';
 
-export const VERSAO_SCHEMA = 3;
+export const VERSAO_SCHEMA = 4;
 export const SLOTS = [1, 2, 3] as const;
 export const FORMATO_EXPORTACAO = 'dungeons-arena/save';
 
@@ -88,8 +88,22 @@ function v2ParaV3(r: Objeto): Objeto {
   return { ...r, estado: { rastros: [], armadilhas: [], atrasados: [], ...e, entidades, objetos } };
 }
 
+/**
+ * v3 → v4 (marco 9A, 14/10/2026): a bolsa ganha ouro; a entidade, a interação com baú ou loja; os
+ * objetos, os campos de baú e loja. Campos novos com valor neutro.
+ */
+function v3ParaV4(r: Objeto): Objeto {
+  const e = r.estado;
+  if (!ehObjeto(e)) return r;
+  const entidades = lista(e.entidades).map((x) =>
+    ehObjeto(x) ? { interacao: null, ...x, bolsa: ehObjeto(x.bolsa) ? { ouro: 0, ...x.bolsa } : x.bolsa } : x,
+  );
+  const objetos = lista(e.objetos).map((o) => comCampos(o, { itens: [], ouro: 0, chave: null, abertoTick: 0, abridorId: null }));
+  return { ...r, estado: { ...e, entidades, objetos } };
+}
+
 /** `MIGRACOES[v]` leva um registro da versão `v` para a `v + 1`. Não existiu versão 0. */
-export const MIGRACOES: Readonly<Record<number, Migracao>> = { 1: v1ParaV2, 2: v2ParaV3 };
+export const MIGRACOES: Readonly<Record<number, Migracao>> = { 1: v1ParaV2, 2: v2ParaV3, 3: v3ParaV4 };
 
 function temNaoFinito(v: unknown): boolean {
   if (typeof v === 'number') return !Number.isFinite(v);

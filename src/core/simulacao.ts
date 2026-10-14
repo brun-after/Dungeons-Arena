@@ -2,8 +2,8 @@
 // se está em rede. Recebe o contexto (fase, conteúdo, modo e balanceamento) e os comandos do
 // tick, e grava eventos numa lista de saída.
 //
-// Ordem por tick (§2.2). Congelamentos (5) e periódicos de 1 Hz (9) entram com baús, lojas e
-// armadilhas; dos gatilhos por célula (7), por enquanto só a coleta de objetos.
+// Ordem por tick (§2.2). Marco 9A (14/10/2026): congelamentos de baú e loja (5); o spawner (9)
+// entra no 9A-2.
 //   1. aplicar comandos        2. IA                 3. combate
 //   4. efeitos e regeneração   5. congelamentos      6. movimento
 //   7. gatilhos por célula     8. mortes e respawns  9. periódicos de 1 Hz e spawner
@@ -13,10 +13,12 @@ import { processarEfeitos, processarGatilhosDeEfeito } from '../combat/efeitos';
 import { moverProjeteis } from '../combat/projeteis';
 import { vivo } from '../entities/entidade';
 import { processarIa } from '../entities/ia';
-import { desequipar, distribuirPonto, equipar, usarItem } from '../progression/inventario';
+import { desequipar, distribuirPonto, equipar, moverItem, usarItem } from '../progression/inventario';
+import { comprar, vender } from '../progression/loja';
 import { processarMortes } from '../progression/morte';
 import { regenerarRecursos } from '../progression/recursos';
 import { definirDirecao, moverEntidades, planejarCaminho } from '../world/movimento';
+import { fecharLoja, interagir, processarInteracoes } from '../world/interacao';
 import { coletarObjetos } from '../world/objetos';
 import type { ComandoDoTick } from './comandos';
 import type { ContextoSimulacao } from './contexto';
@@ -39,6 +41,7 @@ export function simular(
   processarAutoAtaque(estado, ctx, saida);
   processarEfeitos(estado, ctx, saida);
   regenerarRecursos(estado, ctx);
+  processarInteracoes(estado, ctx, saida);
   moverEntidades(estado, ctx, saida, dtMs);
   coletarObjetos(estado, ctx, saida);
   processarGatilhosDeEfeito(estado, ctx, saida);
@@ -86,8 +89,21 @@ function aplicarComandos(
       case 'distribuirPonto':
         distribuirPonto(ator, ctx, cmd.atributo, estado.tick, saida);
         break;
+      // Marco 9A (14/10/2026): baú, loja e ordenação da mochila.
       case 'interagir':
-        // Baús, lojas e portas entram no 9A.
+        interagir(estado, ctx, ator, saida);
+        break;
+      case 'comprar':
+        comprar(estado, ctx, ator, cmd.itemId, saida);
+        break;
+      case 'vender':
+        vender(estado, ctx, ator, cmd.invId, saida);
+        break;
+      case 'fecharLoja':
+        fecharLoja(estado, ctx, ator, saida);
+        break;
+      case 'moverItem':
+        moverItem(ator, cmd.invId, cmd.posicao, estado.tick, saida);
         break;
     }
   }

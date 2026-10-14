@@ -2,7 +2,7 @@
 // HP 0 é morte direta. Entidades de IA saem do mundo e voltam pelo respawn agendado, com o mesmo
 // id e a geração incrementada; jogadores reaparecem pelas regras do modo (§2.13).
 // Marco 6 (13/10/2026): XP sobe de nível e inimigos soltam itens. A perda de XP e ouro na morte
-// da campanha entra no 10A.
+// da campanha entra no 10A. Marco 9A (14/10/2026): ouro nos drops; morrer fecha baú e loja.
 
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type EstadoJogo } from '../core/estado';
@@ -15,10 +15,10 @@ import { RARIDADES } from '../modos/modo';
 import { podeFerir } from '../modos/relacao';
 import { atrasoDeRespawnTicks, localDeRespawn, podeRespawnar, protecaoDeRespawnTicks } from '../modos/regras';
 import { celulaLivrePara } from '../world/colisao';
-import { passavel } from '../world/fase';
 import { tentarDominar } from '../combat/efeitos-fluxo';
 import { sortearEfeitoDeOrbe } from '../combat/registro-efeitos';
-import { largarItem, largarObjeto, largarOrbeEfeito } from '../world/objetos';
+import { encerrarInteracao } from '../world/interacao';
+import { largarItem, largarObjeto, largarOrbeEfeito, largarOuro, largarPerto } from '../world/objetos';
 import { dropaveisDe, type Item } from './itens';
 import { aplicarSubidas } from './nivel';
 
@@ -61,6 +61,8 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
     );
     e.morto = true;
     zerarMovimento(e);
+    // Baú ou loja abertos se fecham: libera o congelamento e arma a recarga da loja (§2.12).
+    encerrarInteracao(estado, ctx, e, saida);
     saida.push({ t: 'morreu', tick: estado.tick, id: e.id, porId: porId?.id ?? null });
 
     if (e.controlador === 'ia') {
@@ -113,36 +115,18 @@ function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
   // Orbe de efeito (§2.10, marco 8A): sorteio independente; o efeito vem do registro, por peso.
   if (aleatorio(estado.rng) < d.chanceOrbeEfeito) {
     const efeito = sortearEfeitoDeOrbe(estado.rng);
-    if (efeito) largarPerto(estado, ctx, e, (x, y) => largarOrbeEfeito(estado, efeito, x, y, saida));
+    if (efeito) largarPerto(ctx, e.x, e.y, (x, y) => largarOrbeEfeito(estado, efeito, x, y, saida));
   }
   if (!ctx.modo.loot.itens) return;
+  // Ouro (marco 9A): só onde o modo solta itens, proporcional ao XP do inimigo.
+  const ouro = Math.round(e.xpBase * d.ouroPorXp * (0.5 + aleatorio(estado.rng)));
+  if (ouro > 0) largarPerto(ctx, e.x, e.y, (x, y) => largarOuro(estado, ouro, x, y, saida));
   const boss = e.arquetipo === 'boss';
   if (aleatorio(estado.rng) >= (boss ? d.chanceItemBoss : d.chanceItem)) return;
   const item = sortearItem(estado, ctx, boss);
   if (!item) return;
-  largarPerto(estado, ctx, e, (x, y) => largarItem(estado, item.id, x, y, saida));
+  largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, item.id, x, y, saida));
 }
-
-/** A célula do inimigo pode já ter um objeto: tenta as vizinhas, numa ordem fixa. */
-function largarPerto(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, largar: (x: number, y: number) => boolean): void {
-  for (const [dx, dy] of VIZINHANCA) {
-    const x = e.x + dx;
-    const y = e.y + dy;
-    if (passavel(ctx.fase, x, y) && largar(x, y)) return;
-  }
-}
-
-const VIZINHANCA: readonly (readonly [number, number])[] = [
-  [0, 0],
-  [0, -1],
-  [1, 0],
-  [0, 1],
-  [-1, 0],
-  [1, -1],
-  [1, 1],
-  [-1, 1],
-  [-1, -1],
-];
 
 /** Raridade por peso (o boss tem raridade mínima) e item uniforme entre os dessa raridade. */
 function sortearItem(estado: EstadoJogo, ctx: ContextoSimulacao, boss: boolean): Item | null {

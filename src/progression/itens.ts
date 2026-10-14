@@ -1,6 +1,7 @@
 // Catálogo de itens (§2.10), lido e validado de src/data/itens.json. Marco 6 (13/10/2026):
 // equipamento com bônus de atributo (absoluto ou percentual) e de defesa, e consumíveis com
 // efeitos. Marco 8A: os efeitos vêm do registro (§2.8), normalizados como os das habilidades.
+// Marco 9A (14/10/2026): tipo `chave` (abre baú trancado; nem equipa nem consome) e venda à loja.
 
 import type { Catalogo } from '../combat/habilidades';
 import { normalizarEfeitos } from '../combat/normalizar-efeito';
@@ -12,7 +13,7 @@ import { RARIDADES, SLOTS_DE_EQUIPAMENTO, type Raridade, type Slot } from '../mo
 export type NomeAtributo = keyof Atributos;
 export const NOMES_ATRIBUTOS = Object.keys(ATRIBUTOS_NEUTROS) as NomeAtributo[];
 
-export type TipoItem = 'equipamento' | 'consumivel';
+export type TipoItem = 'equipamento' | 'consumivel' | 'chave';
 
 export interface Bonus {
   modo: 'abs' | 'pct';
@@ -64,7 +65,7 @@ export function lerItens(json: unknown): { itens: Map<string, Item>; erros: stri
   for (const bruto of lista) {
     const l = new Leitor(`item ${ehObjeto(bruto) && typeof bruto.id === 'string' ? bruto.id : '?'}`);
     const o = l.objeto(bruto, 'item');
-    const tipo = l.opcao(o, 'tipo', ['equipamento', 'consumivel'] as const);
+    const tipo = l.opcao(o, 'tipo', ['equipamento', 'consumivel', 'chave'] as const);
     const item: Item = {
       id: l.texto(o, 'id'),
       nome: l.texto(o, 'nome'),
@@ -83,11 +84,22 @@ export function lerItens(json: unknown): { itens: Map<string, Item>; erros: stri
     if (tipo === 'equipamento' && item.slotPadrao === null) l.erro('equipamento precisa de slotPadrao');
     if (tipo === 'consumivel' && item.slotPadrao !== null) l.erro('consumível não tem slotPadrao');
     if (tipo === 'consumivel' && item.efeitos.length === 0) l.erro('consumível precisa de ao menos um efeito');
+    if (tipo === 'chave' && (item.slotPadrao !== null || item.efeitos.length > 0)) l.erro('chave não tem slotPadrao nem efeitos');
     if (itens.has(item.id)) l.erro('id repetido');
     erros.push(...l.erros);
     itens.set(item.id, item);
   }
   return { itens, erros };
+}
+
+/** A loja só compra o que tem valor (marco 9A): uma chave de valor 0 não é vendável. */
+export function vendavel(item: Item): boolean {
+  return item.valorBase > 0;
+}
+
+/** Preço que a loja paga por uma unidade: `floor(valorBase × vendaPct / 100)`. */
+export function precoDeVenda(item: Item, vendaPct: number): number {
+  return Math.floor((item.valorBase * vendaPct) / 100);
 }
 
 /** Itens que podem cair de uma raridade, na ordem do catálogo (determinística). */

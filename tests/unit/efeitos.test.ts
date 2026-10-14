@@ -298,7 +298,7 @@ describe('orbe de efeito', () => {
   });
 
   it('inimigo solta orbe de efeito num sorteio próprio', () => {
-    const balance = { ...BALANCE_PADRAO, drops: { ...BALANCE_PADRAO.drops, chanceOrbeHp: 0, chanceOrbeRecurso: 0, chanceItem: 0, chanceOrbeEfeito: 1 } };
+    const balance = { ...BALANCE_PADRAO, drops: { ...BALANCE_PADRAO.drops, chanceOrbeHp: 0, chanceOrbeRecurso: 0, chanceItem: 0, chanceOrbeEfeito: 1, ouroPorXp: 0 } };
     const c = cenario(balance);
     const goblin = criarInimigo(obter(CONTEUDO.presets.get('goblin'), 'goblin'), 'gob', 7, 7, balance);
     goblin.hp = 0;
