@@ -9,7 +9,7 @@ import { ATRIBUTOS_NEUTROS } from '../../src/entities/entidade';
 
 const TABELA = BALANCE_PADRAO.combate.critico;
 const REGRAS = BALANCE_PADRAO.combate;
-const fonte = (bonus = 0, carisma = 10): FonteDeDano => ({ id: 'a', equipe: 'x', bonusAtributo: bonus, carisma });
+const fonte = (bonus = 0, carisma = 10): FonteDeDano => ({ id: 'a', equipe: 'x', bonusAtributo: bonus, carisma, multDano: 1 });
 
 describe('fórmulas de dados (§2.7)', () => {
   it('interpreta multigrupo, constante e dados negativos', () => {

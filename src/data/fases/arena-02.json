@@ -201,6 +201,26 @@
       "y": 0.75,
       "valor": 50,
       "modo": "pct"
+    },
+    {
+      "tipo": "orbe_efeito",
+      "x": 0.2083,
+      "y": 0.2625,
+      "valor": 1,
+      "modo": "abs",
+      "efeito": {
+        "ab_multi_alvo": true
+      }
+    },
+    {
+      "tipo": "orbe_efeito",
+      "x": 0.7917,
+      "y": 0.7625,
+      "valor": 1,
+      "modo": "abs",
+      "efeito": {
+        "imune_dano": true
+      }
     }
   ]
 }

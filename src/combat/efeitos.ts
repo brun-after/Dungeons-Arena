@@ -1,56 +1,33 @@
-// Registro de efeitos (§2.8): fonte única de verdade, com um dispatcher só. Marco 3 registra
-// os efeitos de controle; os 26 tipos entram no 8A sem mudar quem aplica.
-// Registrar um tipo com `elegivelParaOrbe: true` o coloca automaticamente no sorteio do orbe.
+// Efeitos (§2.8): dispatcher único, consultas e processamento por tick. Marco 3 registrou os de
+// controle; marco 8A (13/10/2026) liga os 20 tipos do registro (registro-efeitos.ts, D-048).
+// Aplicar efeito acontece em um lugar só (`aplicarEfeito`); quem precisa saber se algo vale
+// (movimento, ações, dano, colisão, projéteis) pergunta por estas consultas, que leem o registro.
 
-import type { EntidadeId } from '../core/comandos';
+import type { Celula, EntidadeId } from '../core/comandos';
+import type { ContextoSimulacao } from '../core/contexto';
+import type { EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
-import type { Entidade } from '../entities/entidade';
+import { vivo, type EfeitoAtivo, type Entidade } from '../entities/entidade';
+import { avancar, empurrar, teleportar } from './efeitos-instantaneos';
+import { registrarParticipacao } from './participacao';
+import { REGISTRO_EFEITOS, type DefinicaoEfeito, type EfeitoCanonico } from './registro-efeitos';
 
-export const TIPOS_EFEITO = ['atordoar', 'silenciar'] as const;
-export type TipoEfeito = (typeof TIPOS_EFEITO)[number];
+export { REGISTRO_EFEITOS, TIPOS_EFEITO, type EfeitoCanonico, type TipoEfeito } from './registro-efeitos';
 
-export interface DefinicaoEfeito {
-  id: TipoEfeito;
-  icone: string;
-  cor: string;
-  ehStatus: boolean;
-  positivo: boolean;
-  elegivelParaOrbe: boolean;
-  pesoOrbe: number;
-  /** Impede começar passos. */
-  bloqueiaMovimento: boolean;
-  /** Quais ações não podem começar nem continuar. */
-  bloqueiaAcoes: 'todas' | 'magicas' | 'nenhuma';
+/** Quem originou o efeito e de onde (o empurrão afasta desta posição). */
+export interface OrigemDoEfeito {
+  id: EntidadeId;
+  x: number;
+  y: number;
 }
 
-export const REGISTRO_EFEITOS: Readonly<Record<TipoEfeito, DefinicaoEfeito>> = {
-  atordoar: {
-    id: 'atordoar',
-    icone: '✷',
-    cor: '#f1c40f',
-    ehStatus: true,
-    positivo: false,
-    elegivelParaOrbe: false,
-    pesoOrbe: 0,
-    bloqueiaMovimento: true,
-    bloqueiaAcoes: 'todas',
-  },
-  silenciar: {
-    id: 'silenciar',
-    icone: '🔇',
-    cor: '#9b59b6',
-    ehStatus: true,
-    positivo: false,
-    elegivelParaOrbe: false,
-    pesoOrbe: 0,
-    bloqueiaMovimento: false,
-    bloqueiaAcoes: 'magicas',
-  },
-};
+const ativos = (e: Entidade, tick: number): EfeitoAtivo[] => e.efeitos.filter((f) => f.ateTick > tick);
+const comDefinicao = (e: Entidade, tick: number): [EfeitoAtivo, DefinicaoEfeito][] =>
+  ativos(e, tick).map((f) => [f, REGISTRO_EFEITOS[f.tipo]]);
 
 export function efeitosAtivos(e: Entidade, tick: number): DefinicaoEfeito[] {
-  return e.efeitos.filter((f) => f.ateTick > tick).map((f) => REGISTRO_EFEITOS[f.tipo]);
+  return ativos(e, tick).map((f) => REGISTRO_EFEITOS[f.tipo]);
 }
 
 export function movimentoBloqueado(e: Entidade, tick: number): boolean {
@@ -58,37 +35,154 @@ export function movimentoBloqueado(e: Entidade, tick: number): boolean {
 }
 
 /** A entidade pode começar (ou continuar) uma ação desse tipo? */
-export function acaoBloqueada(e: Entidade, tick: number, magica: boolean): boolean {
-  return efeitosAtivos(e, tick).some((d) => d.bloqueiaAcoes === 'todas' || (magica && d.bloqueiaAcoes === 'magicas'));
+export function acaoBloqueada(e: Entidade, tick: number, tipoAtaque: 'fisico' | 'magico'): boolean {
+  return efeitosAtivos(e, tick).some(
+    (d) => d.bloqueiaAcoes === 'todas' || (tipoAtaque === 'magico' ? d.bloqueiaAcoes === 'magicas' : d.bloqueiaAcoes === 'fisicas'),
+  );
+}
+
+export function imuneADano(e: Entidade, tick: number): boolean {
+  return efeitosAtivos(e, tick).some((d) => d.imuneDano);
+}
+
+/** Multiplicador do dano causado: bônus somam, reduções somam, e os dois se multiplicam (D-048). */
+export function multiplicadorDanoCausado(e: Entidade, tick: number): number {
+  let mais = 0;
+  let menos = 0;
+  for (const [f, d] of comDefinicao(e, tick)) {
+    if (d.danoCausado > 0) mais += f.pct;
+    else if (d.danoCausado < 0) menos += f.pct;
+  }
+  return (1 + mais / 100) * Math.max(0, 1 - menos / 100);
+}
+
+export interface BonusAtaqueBasico {
+  dano: number;
+  recargaPct: number;
+  alcance: number;
+  alvosExtras: number;
+}
+
+/** Os quatro `ab_*` (§2.8): dano extra, recarga, alcance e alvos adicionais do ataque básico. */
+export function bonusAtaqueBasico(e: Entidade, tick: number): BonusAtaqueBasico {
+  const b: BonusAtaqueBasico = { dano: 0, recargaPct: 0, alcance: 0, alvosExtras: 0 };
+  for (const [f, d] of comDefinicao(e, tick)) {
+    if (d.ataqueBasico === 'dano') b.dano += f.valor;
+    else if (d.ataqueBasico === 'recarga') b.recargaPct += f.pct;
+    else if (d.ataqueBasico === 'alcance') b.alcance += f.valor;
+    else if (d.ataqueBasico === 'alvos') b.alvosExtras += f.valor;
+  }
+  b.recargaPct = Math.min(75, b.recargaPct);
+  return b;
+}
+
+export function projeteisAtravessam(e: Entidade, tick: number): boolean {
+  return efeitosAtivos(e, tick).some((d) => d.projeteisAtravessam);
+}
+
+function resultado(
+  saida: EventoSimulacao[],
+  tick: number,
+  alvo: Entidade,
+  origemId: EntidadeId,
+  ef: { tipo: EfeitoAtivo['tipo'] },
+  r: { dano?: number; cura?: number; mana?: number },
+): void {
+  saida.push({ t: 'efeitoResultado', tick, alvoId: alvo.id, origemId, tipo: ef.tipo, dano: r.dano ?? 0, cura: r.cura ?? 0, mana: r.mana ?? 0 });
+}
+
+/** Cura ou recurso de uma vez: `valor` fixo mais `pct` do máximo. */
+function restaurar(alvo: Entidade, recurso: 'cura' | 'recurso', valor: number, pct: number): number {
+  if (recurso === 'cura') {
+    const antes = alvo.hp;
+    alvo.hp = Math.min(alvo.hpMax, alvo.hp + Math.max(0, Math.round(valor + (alvo.hpMax * pct) / 100)));
+    return alvo.hp - antes;
+  }
+  const antes = alvo.mana;
+  alvo.mana = Math.min(alvo.manaMax, alvo.mana + Math.max(0, Math.round(valor + (alvo.manaMax * pct) / 100)));
+  return alvo.mana - antes;
 }
 
 /**
- * Dispatcher único (§2.8). Reaplicar o mesmo tipo estende a duração, nunca encurta.
- * A interrupção da ação em curso acontece no processamento de ações (combat/acao.ts),
- * que consulta `acaoBloqueada` a cada tick.
+ * Dispatcher único (§2.8). Instantâneos executam e não ficam no estado; os com duração entram em
+ * `efeitos` (reaplicar o mesmo tipo estende a duração e fica com o maior valor, nunca encurta).
+ * A interrupção da ação em curso acontece em combat/acao.ts, que consulta `acaoBloqueada`.
  */
 export function aplicarEfeito(
+  estado: EstadoJogo,
+  ctx: ContextoSimulacao,
   alvo: Entidade,
-  tipo: TipoEfeito,
-  duracaoMs: number,
-  origemId: EntidadeId,
-  tick: number,
+  ef: EfeitoCanonico,
+  origem: OrigemDoEfeito,
+  mira: Celula | null,
   saida: EventoSimulacao[],
 ): void {
-  const ateTick = tick + ticksDe(duracaoMs);
-  const existente = alvo.efeitos.find((f) => f.tipo === tipo);
+  if (!vivo(alvo)) return;
+  const def = REGISTRO_EFEITOS[ef.tipo];
+  const tick = estado.tick;
+  const instantaneo = def.instantaneo ?? (ef.duracaoMs <= 0 && (def.periodico === 'cura' || def.periodico === 'recurso') ? def.periodico : null);
+  if (instantaneo) {
+    switch (instantaneo) {
+      case 'cura':
+        resultado(saida, tick, alvo, origem.id, ef, { cura: restaurar(alvo, 'cura', ef.valor, ef.pct) });
+        break;
+      case 'recurso':
+        resultado(saida, tick, alvo, origem.id, ef, { mana: restaurar(alvo, 'recurso', ef.valor, ef.pct) });
+        break;
+      case 'teleporte':
+        teleportar(estado, ctx, alvo, mira);
+        break;
+      case 'avanco':
+        avancar(estado, ctx, alvo, mira, ef.valor);
+        break;
+      case 'empurrao':
+        empurrar(estado, ctx, alvo, origem, ef.valor);
+        break;
+    }
+    saida.push({ t: 'efeitoAplicado', tick, alvoId: alvo.id, origemId: origem.id, tipo: ef.tipo, ateTick: tick });
+    return;
+  }
+  const ateTick = tick + ticksDe(ef.duracaoMs);
+  const existente = alvo.efeitos.find((f) => f.tipo === ef.tipo);
   if (existente) {
     existente.ateTick = Math.max(existente.ateTick, ateTick);
-    existente.origemId = origemId;
+    existente.valor = Math.max(existente.valor, ef.valor);
+    existente.pct = Math.max(existente.pct, ef.pct);
+    existente.origemId = origem.id;
   } else {
-    alvo.efeitos.push({ tipo, ateTick, origemId });
+    const intervalo = ticksDe(ctx.balance.efeitos.intervaloPeriodicoMs);
+    alvo.efeitos.push({ tipo: ef.tipo, ateTick, origemId: origem.id, valor: ef.valor, pct: ef.pct, proximoTick: def.periodico ? tick + intervalo : 0 });
   }
-  saida.push({ t: 'efeitoAplicado', tick, alvoId: alvo.id, origemId, tipo, ateTick });
+  saida.push({ t: 'efeitoAplicado', tick, alvoId: alvo.id, origemId: origem.id, tipo: ef.tipo, ateTick });
 }
 
-/** Etapa 4 do tick: remove efeitos expirados. */
-export function expirarEfeitos(entidades: readonly Entidade[], tick: number): void {
-  for (const e of entidades) {
-    if (e.efeitos.length > 0) e.efeitos = e.efeitos.filter((f) => f.ateTick > tick);
+/**
+ * Etapa 4 do tick: periódicos (dano, cura, recurso a cada intervalo, inclusive no último tick
+ * da duração) e depois a expiração. Dano periódico respeita imunidade e conta participação (XP).
+ */
+export function processarEfeitos(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
+  const tick = estado.tick;
+  const intervalo = ticksDe(ctx.balance.efeitos.intervaloPeriodicoMs);
+  for (const e of estado.entidades) {
+    if (e.efeitos.length === 0) continue;
+    if (vivo(e)) {
+      for (const f of e.efeitos) {
+        const periodico = REGISTRO_EFEITOS[f.tipo].periodico;
+        if (!periodico || f.proximoTick === 0 || tick < f.proximoTick) continue;
+        f.proximoTick += intervalo;
+        if (periodico === 'dano') {
+          if (imuneADano(e, tick)) continue;
+          const dano = Math.min(e.hp, Math.max(0, Math.round(f.valor)));
+          e.hp -= dano;
+          if (dano > 0) registrarParticipacao(e, f.origemId, tick, ctx);
+          resultado(saida, tick, e, f.origemId, f, { dano });
+          if (e.hp <= 0) break;
+        } else {
+          const ganho = restaurar(e, periodico, f.valor, f.pct);
+          resultado(saida, tick, e, f.origemId, f, periodico === 'cura' ? { cura: ganho } : { mana: ganho });
+        }
+      }
+    }
+    e.efeitos = e.efeitos.filter((f) => f.ateTick > tick);
   }
 }

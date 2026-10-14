@@ -1,7 +1,11 @@
 // Colisão contra entidades (§2.3), resolvida na integração do movimento.
 // Cada entidade reserva a célula onde está e a célula de destino do passo em curso.
 
+import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import type { Entidade } from '../entities/entidade';
+
+/** `fantasma` (§2.8): presença do efeito; os expirados saem na etapa 4 de cada tick. */
+const semColisao = (e: Entidade) => e.efeitos.some((f) => REGISTRO_EFEITOS[f.tipo].semColisao);
 
 /** Regras de colisão do modo (§2.3, itens 8 e 9). Vêm de dados. */
 export interface RegrasColisao {
@@ -16,6 +20,7 @@ export interface RegrasColisao {
  */
 export function bloqueia(a: Entidade, b: Entidade, regras: RegrasColisao): boolean {
   if (a.id === b.id) return false; // 1
+  if (semColisao(a) || semColisao(b)) return false; // `fantasma` (§2.8, marco 8A)
   if ((a.tipo === 'jogador' && a.hp <= 0) || (b.tipo === 'jogador' && b.hp <= 0)) return false; // 3
   if (a.tipo === 'avatar' || b.tipo === 'avatar') return true; // 5
   const jogadores = Number(a.tipo === 'jogador') + Number(b.tipo === 'jogador');

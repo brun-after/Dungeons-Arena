@@ -1,8 +1,10 @@
 // Catálogo de itens (§2.10), lido e validado de src/data/itens.json. Marco 6 (13/10/2026):
-// equipamento com bônus de atributo (absoluto ou percentual) e de defesa, e consumíveis com os
-// efeitos `curar` e `restaurarMana`. O registro completo de efeitos entra no 8A.
+// equipamento com bônus de atributo (absoluto ou percentual) e de defesa, e consumíveis com
+// efeitos. Marco 8A: os efeitos vêm do registro (§2.8), normalizados como os das habilidades.
 
 import type { Catalogo } from '../combat/habilidades';
+import { normalizarEfeitos } from '../combat/normalizar-efeito';
+import type { EfeitoCanonico } from '../combat/registro-efeitos';
 import { ehObjeto, Leitor, type Objeto } from '../core/validar';
 import { ATRIBUTOS_NEUTROS, type Atributos } from '../entities/entidade';
 import { RARIDADES, SLOTS_DE_EQUIPAMENTO, type Raridade, type Slot } from '../modos/modo';
@@ -15,12 +17,6 @@ export type TipoItem = 'equipamento' | 'consumivel';
 export interface Bonus {
   modo: 'abs' | 'pct';
   valor: number;
-}
-
-export interface EfeitoItem {
-  tipo: 'curar' | 'restaurarMana';
-  valor: number;
-  modo: 'abs' | 'pct';
 }
 
 export interface Item {
@@ -36,7 +32,7 @@ export interface Item {
   nivelMinimo: number;
   bonusAtributos: Partial<Record<NomeAtributo, Bonus>>;
   bonusDefesa: number;
-  efeitos: EfeitoItem[];
+  efeitos: EfeitoCanonico[];
   dropavel: boolean;
 }
 
@@ -56,15 +52,8 @@ function lerBonus(l: Leitor, o: Objeto): Partial<Record<NomeAtributo, Bonus>> {
   return bonus;
 }
 
-function lerEfeitos(l: Leitor, o: Objeto): EfeitoItem[] {
-  return l.lista(o, 'efeitos').map((item) => {
-    const e = l.objeto(item, 'efeito');
-    return {
-      tipo: l.opcao(e, 'tipo', ['curar', 'restaurarMana'] as const),
-      valor: l.numero(e, 'valor', { min: 1 }),
-      modo: l.opcao(e, 'modo', ['abs', 'pct'] as const),
-    };
-  });
+function lerEfeitos(l: Leitor, o: Objeto): EfeitoCanonico[] {
+  return normalizarEfeitos(l.lista(o, 'efeitos'), l);
 }
 
 export function lerItens(json: unknown): { itens: Map<string, Item>; erros: string[] } {

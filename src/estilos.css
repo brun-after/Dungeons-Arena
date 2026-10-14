@@ -347,6 +347,31 @@ body.toque .faixa-controles {
   text-shadow: 0 1px 2px #000;
 }
 
+.chips-efeito {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.chips-efeito:empty {
+  display: none;
+}
+
+.chip-efeito {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 3px;
+  border: 2px solid;
+  border-radius: 6px;
+  background: var(--painel);
+  font-size: 0.8rem;
+}
+
+.chip-efeito.negativo {
+  background: rgba(192, 57, 43, 0.25);
+}
+
 .chip-d20 {
   padding: 1px 6px;
   border-radius: 999px;

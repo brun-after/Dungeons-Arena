@@ -5,8 +5,9 @@
 
 import { Container, Graphics } from 'pixi.js';
 import type { Celula } from '../core/comandos';
+import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import { conteudoOficial } from '../core/conteudo';
-import { t } from '../i18n';
+import { t, type ChaveTexto } from '../i18n';
 import { gravarAventura } from '../plataforma/aventuras';
 import { detectarToque, sinaisDoNavegador } from '../plataforma/dispositivo';
 import { Camera } from '../render/camera';
@@ -16,7 +17,17 @@ import { criarPalco } from '../render/stage';
 import { criarTerreno } from '../render/terreno';
 import { mostrarAviso } from '../ui/aviso';
 import { validarFase, type ErroFase, type ResultadoValidacao } from '../world/validacao-fase';
-import { aplicarFerramenta, comoFase, linhaDeCelulas, paraFaseJson, type Alteracao, type FaseEditavel, type Ferramenta } from './grade';
+import {
+  aplicarFerramenta,
+  chaveDoObjeto,
+  chavesDeOrbe,
+  comoFase,
+  linhaDeCelulas,
+  paraFaseJson,
+  type Alteracao,
+  type FaseEditavel,
+  type Ferramenta,
+} from './grade';
 import { Historico } from './historico';
 import { ligarToqueEditor } from './toque';
 
@@ -24,7 +35,7 @@ const AUTOSAVE_MS = 10_000;
 const LIMITES_EDITOR = { min: 0.1, max: 6 };
 const MAX_PROBLEMAS = 6;
 
-type IdFerramenta = 'piso' | 'parede' | 'vazio' | 'saida' | 'spawn' | 'inimigo' | 'remover';
+type IdFerramenta = 'piso' | 'parede' | 'vazio' | 'saida' | 'spawn' | 'inimigo' | 'objeto' | 'remover';
 
 const FERRAMENTAS: readonly { id: IdFerramenta; icone: string }[] = [
   { id: 'piso', icone: '▢' },
@@ -33,6 +44,7 @@ const FERRAMENTAS: readonly { id: IdFerramenta; icone: string }[] = [
   { id: 'saida', icone: '⇲' },
   { id: 'spawn', icone: '★' },
   { id: 'inimigo', icone: '▲' },
+  { id: 'objeto', icone: '◉' },
   { id: 'remover', icone: '✕' },
 ];
 
@@ -50,6 +62,24 @@ function botao(texto: string, rotulo: string, aoClicar: () => void): HTMLButtonE
   b.title = rotulo;
   b.addEventListener('click', aoClicar);
   return b;
+}
+
+const COR_ORBE: Readonly<Record<string, number>> = { orbe_hp: 0x2ecc71, orbe_recurso: 0x5dade2 };
+
+function tipoDoEfeito(chave: string): keyof typeof REGISTRO_EFEITOS | null {
+  const tipo = chave.startsWith('efeito:') ? chave.slice('efeito:'.length) : '';
+  return tipo in REGISTRO_EFEITOS ? (tipo as keyof typeof REGISTRO_EFEITOS) : null;
+}
+
+function corDoOrbe(chave: string): number {
+  const tipo = tipoDoEfeito(chave);
+  return tipo ? Number.parseInt(REGISTRO_EFEITOS[tipo].cor.slice(1), 16) : (COR_ORBE[chave] ?? 0xffffff);
+}
+
+function rotuloDoOrbe(chave: string): string {
+  const tipo = tipoDoEfeito(chave);
+  if (tipo) return t('editor.orbeDeEfeito', { efeito: t(`efeito.${tipo}` as ChaveTexto), icone: REGISTRO_EFEITOS[tipo].icone });
+  return t(chave === 'orbe_hp' ? 'editor.orbeVida' : 'editor.orbeMana');
 }
 
 export function nomeDeArquivo(nome: string): string {
@@ -125,6 +155,10 @@ export async function abrirTelaDeEdicao(raiz: HTMLElement, f: FaseEditavel): Pro
       const p = conteudo.presets.get(i.preset);
       colocar(i, desenharSilhueta(new Graphics(), p?.arquetipo ?? 'perseguidor', 0xe74c3c));
     }
+    // Marco 8A: orbes, na cor do jogo (vida, mana ou a cor do efeito no registro).
+    for (const o of f.objetos) {
+      colocar(o, new Graphics().circle(0, 0, 10).fill(corDoOrbe(chaveDoObjeto(o))).stroke({ width: 3, color: 0xffffff }));
+    }
   };
 
   const marcar = (lista: readonly ErroFase[], cor: number) => {
@@ -173,7 +207,9 @@ export async function abrirTelaDeEdicao(raiz: HTMLElement, f: FaseEditavel): Pro
     for (const a of alteracoes) {
       if (a.antes.tipo !== a.depois.tipo) terreno.redesenharCelula(a.x, a.y);
     }
-    if (alteracoes.some((a) => a.antes.spawn !== a.depois.spawn || a.antes.inimigo !== a.depois.inimigo)) desenharMarcadores();
+    if (alteracoes.some((a) => a.antes.spawn !== a.depois.spawn || a.antes.inimigo !== a.depois.inimigo || a.antes.objeto !== a.depois.objeto)) {
+      desenharMarcadores();
+    }
     pedirQuadro();
   };
 
@@ -236,9 +272,18 @@ export async function abrirTelaDeEdicao(raiz: HTMLElement, f: FaseEditavel): Pro
     seletorPreset.append(op);
   }
   seletorPreset.value = conteudo.presets.has('goblin') ? 'goblin' : (presets[0]?.id ?? '');
+  // Orbes: vida, mana e um por efeito elegível do registro (§2.8: o editor lê o registro).
+  const seletorOrbe = el('select', 'preset-editor');
+  seletorOrbe.setAttribute('aria-label', t('editor.orbe'));
+  for (const chave of chavesDeOrbe()) {
+    const op = el('option', undefined, rotuloDoOrbe(chave));
+    op.value = chave;
+    seletorOrbe.append(op);
+  }
   const atualizarFerramentas = () => {
     for (const [id, b] of botoesFerramenta) b.setAttribute('aria-pressed', String(!navegando && id === ferramenta));
     seletorPreset.hidden = ferramenta !== 'inimigo';
+    seletorOrbe.hidden = ferramenta !== 'objeto';
   };
   for (const { id, icone } of FERRAMENTAS) {
     const b = botao(icone, t(`editor.ferramenta.${id}` as const), () => {
@@ -251,7 +296,7 @@ export async function abrirTelaDeEdicao(raiz: HTMLElement, f: FaseEditavel): Pro
     botoesFerramenta.set(id, b);
     base.append(b);
   }
-  base.append(seletorPreset, el('span', 'separador-editor'));
+  base.append(seletorPreset, seletorOrbe, el('span', 'separador-editor'));
   const desfazer = botao('↶', t('editor.desfazer'), () => {
     redesenhar(historico.desfazerUm(f));
     validar();
@@ -292,6 +337,8 @@ export async function abrirTelaDeEdicao(raiz: HTMLElement, f: FaseEditavel): Pro
         return { t: 'spawn' };
       case 'inimigo':
         return { t: 'inimigo', preset: seletorPreset.value };
+      case 'objeto':
+        return { t: 'objeto', chave: seletorOrbe.value };
       case 'remover':
         return { t: 'remover' };
       default:

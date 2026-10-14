@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 1.2 · **Data:** 13/10/2026
+**Versão do documento:** 1.3 · **Data:** 14/10/2026
 **Status:** 🚧 Em construção. Marcos 1–6 concluídos e validados em aparelho real: campanha com itens, nível e save, arena online na AWS em São Paulo e editor de fases mínimo. Marco 7 em andamento: o ecossistema do teste com pessoas está pronto; a sessão fica para depois
 
 > **Histórico**
+> - **1.3 (14/10/2026)**: marco 8A-1 (registro de efeitos, dispatcher único, orbes de efeito, efeitos nos inimigos e no editor).
 > - **1.2 (13/10/2026)**: marco 7B (perfis de rede sobre WSS, arena-02 como cena padrão, métricas do servidor no /saude, aviso de conexão instável).
 > - **1.1 (13/10/2026)**: marcos 5 e 6 validados no celular; marco 7A (teste com pessoas: medidas, questionário e envio anônimo).
 > - **1.0 (13/10/2026)**: marco 6 (itens, equipamento, nível, mochila, save em slots e editor de fases); como jogar e controles atualizados.
@@ -136,7 +137,7 @@ em `main`, e o merge publica automaticamente.
 
 | ✓ | # | Entrega | Pronto quando |
 |---|---|---|---|
-| [ ] | 8A | 26 tipos de efeito, normalização e dispatcher | Todos os efeitos exercitados; o registro aparece no editor e nos orbes |
+| [ ] | 8A | 26 tipos de efeito, normalização e dispatcher (8A-1: 20 tipos ✓ · 8A-2: fluxo próprio) | Todos os efeitos exercitados; o registro aparece no editor e nos orbes |
 | [ ] | 9A | Inventário, 10 slots, economia, baús, loja, orbes e spawner | A ordem de equipar não altera o resultado; ciclo econômico íntegro |
 | [ ] | 10A | Progressão 1–20, morte, geração procedural, portas, invocações e avatares | Campanha completa, com save, migrações e modo offline |
 | [ ] | 11A | Editor completo no toque, tileset, validação e aprendizado de estilo | Aventura de 2 fases criada, testada, exportada e importada no celular |

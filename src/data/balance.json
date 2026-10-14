@@ -1,5 +1,5 @@
 {
-  "versao": 6,
+  "versao": 7,
   "movimento": {
     "velocidadeBaseMs": 400,
     "filaMaxWaypoints": 2
@@ -44,6 +44,7 @@
     "chanceItem": 0.1,
     "chanceItemBoss": 1,
     "raridadeMinBoss": "raro",
+    "chanceOrbeEfeito": 0.08,
     "pesoRaridade": { "comum": 60, "incomum": 28, "raro": 10, "epico": 2, "lendario": 0 }
   },
   "xp": {
@@ -53,6 +54,9 @@
     "nivelMax": 20,
     "pontosPorNivel": 3,
     "hpPorNivel": 5
+  },
+  "efeitos": {
+    "intervaloPeriodicoMs": 1000
   },
   "atributos": {
     "minimo": 1,

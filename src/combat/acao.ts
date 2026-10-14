@@ -13,7 +13,7 @@ import { podeFerir } from '../modos/relacao';
 import { bonusDeAtributo } from '../progression/ficha';
 import { ordemRotativa } from '../world/colisao';
 import type { FonteDeDano } from './dano';
-import { acaoBloqueada } from './efeitos';
+import { acaoBloqueada, bonusAtaqueBasico, multiplicadorDanoCausado } from './efeitos';
 import { celulaOcupada, chebyshev, dentroDoQuadrado } from './geometria';
 import { aplicarImpacto } from './golpe';
 import type { Habilidade } from './habilidades';
@@ -28,13 +28,19 @@ export function recargaRestante(estado: EstadoJogo, entidadeId: EntidadeId, habi
   return Math.max(0, (estado.recargas[chaveRecarga(entidadeId, habilidadeId)] ?? 0) - estado.tick);
 }
 
-export function fonteDe(e: Entidade, ctx: ContextoSimulacao): FonteDeDano {
+export function fonteDe(e: Entidade, ctx: ContextoSimulacao, tick: number): FonteDeDano {
   return {
     id: e.id,
     equipe: e.equipe,
     bonusAtributo: bonusDeAtributo(e.atributos, e.classe, ctx.balance.combate.multiplicadorAtributoPadrao),
     carisma: e.atributos.carisma,
+    multDano: multiplicadorDanoCausado(e, tick),
   };
+}
+
+/** Alcance com o `ab_alcance` quando é o ataque básico (§2.8, marco 8A). */
+export function alcanceDe(ator: Entidade, hab: Habilidade, tick: number): number {
+  return hab.alcanceCelulas + (hab.id === ator.ataqueBasico ? bonusAtaqueBasico(ator, tick).alcance : 0);
 }
 
 /** Alvo ofensivo válido: vivo, visível e passível de dano pela relação do modo (§2.5). */
@@ -94,7 +100,7 @@ export function iniciarAcao(
   // o automático nunca impede o jogador de usar habilidades.
   const substituiBasico = ator.acao?.habilidadeId === ator.ataqueBasico && habilidadeId !== ator.ataqueBasico;
   if (ator.acao && !substituiBasico) return recusar('ocupado');
-  if (acaoBloqueada(ator, estado.tick, hab.tipoAtaque === 'magico')) return recusar('bloqueado');
+  if (acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) return recusar('bloqueado');
   if (recargaRestante(estado, ator.id, hab.id) > 0) return recusar('recarga');
   if (ator.mana < hab.custoRecurso) return recusar('recurso');
 
@@ -110,14 +116,16 @@ export function iniciarAcao(
   }
   if (!alvo && !celula) return recusar('sem_alvo');
   const mira = celula ?? celulaOcupada(alvo as Entidade);
-  if (chebyshev(origem, mira) > hab.alcanceCelulas) return recusar('fora_de_alcance');
+  if (chebyshev(origem, mira) > alcanceDe(ator, hab, estado.tick)) return recusar('fora_de_alcance');
 
   if (substituiBasico) cancelar(ator, estado, 'substituido', saida);
   // Conjuração (§2.7, etapa 3): custo e recarga descontados aqui, com recarga monotônica.
   ator.mana -= hab.custoRecurso;
   if (hab.recargaMs > 0) {
     const chave = chaveRecarga(ator.id, hab.id);
-    estado.recargas[chave] = Math.max(estado.recargas[chave] ?? 0, estado.tick + ticksDe(hab.recargaMs));
+    // `ab_recarga` encurta a recarga do ataque básico (até 75%).
+    const reducao = hab.id === ator.ataqueBasico ? bonusAtaqueBasico(ator, estado.tick).recargaPct : 0;
+    estado.recargas[chave] = Math.max(estado.recargas[chave] ?? 0, estado.tick + ticksDe(hab.recargaMs * (1 - reducao / 100)));
   }
   const lancamentoTick = estado.tick + ticksDe(hab.conjuracaoMs);
   const viagem =
@@ -150,10 +158,10 @@ function escolherAlvo(
     const e = buscarEntidade(estado, id);
     if (e && alvoOfensivoValido(estado, ctx, ator, e)) {
       // O pedido explícito vale mesmo fora do alcance (a validação recusa); o selecionado só se alcançável.
-      if (id === pedido || chebyshev(celulaOcupada(ator), celulaOcupada(e)) <= hab.alcanceCelulas) return e;
+      if (id === pedido || chebyshev(celulaOcupada(ator), celulaOcupada(e)) <= alcanceDe(ator, hab, estado.tick)) return e;
     }
   }
-  return autoAlvo(estado, ctx, ator, hab.alcanceCelulas);
+  return autoAlvo(estado, ctx, ator, alcanceDe(ator, hab, estado.tick));
 }
 
 function cancelar(ator: Entidade, estado: EstadoJogo, motivo: MotivoCancelamento, saida: EventoSimulacao[]): void {
@@ -172,7 +180,7 @@ export function processarAcoes(estado: EstadoJogo, ctx: ContextoSimulacao, saida
       cancelar(ator, estado, 'morte', saida);
       continue;
     }
-    if (hab.interrupcao === 'interrompivel' && acaoBloqueada(ator, estado.tick, hab.tipoAtaque === 'magico')) {
+    if (hab.interrupcao === 'interrompivel' && acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) {
       cancelar(ator, estado, 'interrompido', saida);
       continue;
     }
@@ -197,25 +205,42 @@ function lancar(
   alvo: Entidade | null,
   saida: EventoSimulacao[],
 ): void {
-  const fonte = fonteDe(ator, ctx);
+  const fonte = fonteDe(ator, ctx, estado.tick);
+  const basico = hab.id === ator.ataqueBasico ? bonusAtaqueBasico(ator, estado.tick) : null;
+  const alcance = alcanceDe(ator, hab, estado.tick);
+  const base = { acaoId, fonte, hab, mira, ...(basico && basico.dano > 0 && { danoExtra: basico.dano }) };
   switch (hab.politicaImpacto) {
     case 'proprio':
-      aplicarImpacto(estado, ctx, ator, { acaoId, fonte, hab, indice: 0 }, saida);
+      aplicarImpacto(estado, ctx, ator, { ...base, indice: 0 }, saida);
       break;
-    case 'contato':
+    case 'contato': {
       if (!alvo) break;
-      if (chebyshev(celulaOcupada(ator), celulaOcupada(alvo)) <= hab.alcanceCelulas) {
-        aplicarImpacto(estado, ctx, alvo, { acaoId, fonte, hab, indice: 0 }, saida);
-      } else {
+      if (chebyshev(celulaOcupada(ator), celulaOcupada(alvo)) > alcance) {
         saida.push({ t: 'esquivou', tick: estado.tick, acaoId, atorId: ator.id, alvoId: alvo.id });
+        break;
+      }
+      aplicarImpacto(estado, ctx, alvo, { ...base, indice: 0 }, saida);
+      // `ab_multi_alvo` (§2.8): alvos adicionais no alcance, os mais próximos primeiro.
+      const extras = basico?.alvosExtras ?? 0;
+      if (extras > 0) {
+        const origem = celulaOcupada(ator);
+        const perto = (e: Entidade) => chebyshev(origem, celulaOcupada(e));
+        estado.entidades
+          .filter((e) => e.id !== alvo.id && alvoOfensivoValido(estado, ctx, ator, e) && perto(e) <= alcance)
+          .sort((a, b) => perto(a) - perto(b) || (a.id < b.id ? -1 : 1))
+          .slice(0, extras)
+          .forEach((e, i) => {
+            aplicarImpacto(estado, ctx, e, { ...base, indice: i + 1 }, saida);
+          });
       }
       break;
+    }
     case 'area': {
       const atingidos = estado.entidades
         .filter((e) => vivo(e) && podeFerir(ator, e, ctx.modo) && dentroDoQuadrado(celulaOcupada(e), mira, hab.raioArea))
         .sort((a, b) => (a.id < b.id ? -1 : 1));
       atingidos.forEach((e, indice) => {
-        aplicarImpacto(estado, ctx, e, { acaoId, fonte, hab, indice }, saida);
+        aplicarImpacto(estado, ctx, e, { ...base, indice }, saida);
       });
       break;
     }
@@ -235,15 +260,16 @@ export function processarAutoAtaque(estado: EstadoJogo, ctx: ContextoSimulacao, 
   for (const ator of ordemRotativa(estado.entidades, estado.tick)) {
     if (!ator.autoAtaque || !vivo(ator) || ator.acao) continue;
     const hab = ctx.conteudo.habilidades.get(ator.ataqueBasico);
-    if (!hab || recargaRestante(estado, ator.id, hab.id) > 0 || acaoBloqueada(ator, estado.tick, hab.tipoAtaque === 'magico')) {
+    if (!hab || recargaRestante(estado, ator.id, hab.id) > 0 || acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) {
       continue;
     }
     const selecionado = ator.alvoSelecionado ? buscarEntidade(estado, ator.alvoSelecionado) : undefined;
-    const noAlcance = (e: Entidade) => chebyshev(celulaOcupada(ator), celulaOcupada(e)) <= hab.alcanceCelulas;
+    const alcance = alcanceDe(ator, hab, estado.tick);
+    const noAlcance = (e: Entidade) => chebyshev(celulaOcupada(ator), celulaOcupada(e)) <= alcance;
     const alvo =
       selecionado && alvoOfensivoValido(estado, ctx, ator, selecionado) && noAlcance(selecionado)
         ? selecionado
-        : autoAlvo(estado, ctx, ator, hab.alcanceCelulas, (e) => e.ia?.modo === 'perseguindo' && e.ia.alvoId === ator.id);
+        : autoAlvo(estado, ctx, ator, alcance, (e) => e.ia?.modo === 'perseguindo' && e.ia.alvoId === ator.id);
     if (alvo) iniciarAcao(estado, ctx, ator, hab.id, alvo.id, saida);
   }
 }

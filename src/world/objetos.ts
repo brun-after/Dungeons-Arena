@@ -1,10 +1,12 @@
-// Objetos coletáveis (§2.1): orbes de HP e de recurso, posicionados pela fase ou largados por
-// inimigos, e itens (marco 6) largados por inimigos. A coleta acontece na etapa 7 do tick (gatilhos por célula alcançada) como uma
+// Objetos coletáveis (§2.1): orbes de HP, de recurso e de efeito (marco 8A), posicionados pela fase
+// ou largados por inimigos, e itens (marco 6) largados por inimigos. A coleta acontece na etapa 7 do tick (gatilhos por célula alcançada) como uma
 // transação: o primeiro coletor válido, na ordem rotativa do tick, consome o objeto, que sai do
 // mundo no mesmo tick. Dez jogadores na mesma célula no mesmo tick resultam em uma coleta (§3.6).
 
+import { aplicarEfeito } from '../combat/efeitos';
+import type { EfeitoCanonico } from '../combat/registro-efeitos';
 import type { ContextoSimulacao } from '../core/contexto';
-import type { EstadoJogo, ObjetoNoMundo, TipoObjeto } from '../core/estado';
+import type { EstadoJogo, ObjetoNoMundo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { vivo, type Entidade } from '../entities/entidade';
 import { guardarItem } from '../progression/inventario';
@@ -38,6 +40,14 @@ export function coletarObjetos(estado: EstadoJogo, ctx: ContextoSimulacao, saida
       saida.push({ t: 'coletou', tick: estado.tick, id: e.id, objetoId: o.objetoId, tipo: o.tipo, ganho: 1, itemId: item.id });
       continue;
     }
+    if (o.tipo === 'orbe_efeito') {
+      // Orbe de efeito: sempre serve; o efeito passa pelo dispatcher único (§2.8).
+      if (!o.efeito) continue;
+      consumidos.add(o.objetoId);
+      aplicarEfeito(estado, ctx, e, o.efeito, { id: e.id, x: e.x, y: e.y }, null, saida);
+      saida.push({ t: 'coletou', tick: estado.tick, id: e.id, objetoId: o.objetoId, tipo: o.tipo, ganho: 1, itemId: null });
+      continue;
+    }
     const ganho = ganhoDoObjeto(o, e);
     if (ganho <= 0) continue;
     consumidos.add(o.objetoId);
@@ -51,7 +61,7 @@ export function coletarObjetos(estado: EstadoJogo, ctx: ContextoSimulacao, saida
 /** Coloca um orbe no mundo, se a célula estiver livre de outro objeto. */
 export function largarObjeto(
   estado: EstadoJogo,
-  tipo: Exclude<TipoObjeto, 'item'>,
+  tipo: 'orbe_hp' | 'orbe_recurso',
   x: number,
   y: number,
   valor: number,
@@ -60,7 +70,7 @@ export function largarObjeto(
   objetoId = `d:${estado.proximoId++}`,
 ): boolean {
   if (estado.objetos.some((o) => o.x === x && o.y === y)) return false;
-  estado.objetos.push({ objetoId, tipo, x, y, valor, modo, geracao: 0, itemId: null });
+  estado.objetos.push({ objetoId, tipo, x, y, valor, modo, geracao: 0, itemId: null, efeito: null });
   saida.push({ t: 'objetoSurgiu', tick: estado.tick, objetoId, tipo, x, y });
   return true;
 }
@@ -69,7 +79,22 @@ export function largarObjeto(
 export function largarItem(estado: EstadoJogo, itemId: string, x: number, y: number, saida: EventoSimulacao[]): boolean {
   if (estado.objetos.some((o) => o.x === x && o.y === y)) return false;
   const objetoId = `d:${estado.proximoId++}`;
-  estado.objetos.push({ objetoId, tipo: 'item', x, y, valor: 1, modo: 'abs', geracao: 0, itemId });
+  estado.objetos.push({ objetoId, tipo: 'item', x, y, valor: 1, modo: 'abs', geracao: 0, itemId, efeito: null });
   saida.push({ t: 'objetoSurgiu', tick: estado.tick, objetoId, tipo: 'item', x, y });
+  return true;
+}
+
+/** Coloca um orbe de efeito no mundo (marco 8A), se a célula estiver livre de outro objeto. */
+export function largarOrbeEfeito(
+  estado: EstadoJogo,
+  efeito: EfeitoCanonico,
+  x: number,
+  y: number,
+  saida: EventoSimulacao[],
+  objetoId = `d:${estado.proximoId++}`,
+): boolean {
+  if (estado.objetos.some((o) => o.x === x && o.y === y)) return false;
+  estado.objetos.push({ objetoId, tipo: 'orbe_efeito', x, y, valor: 1, modo: 'abs', geracao: 0, itemId: null, efeito: { ...efeito } });
+  saida.push({ t: 'objetoSurgiu', tick: estado.tick, objetoId, tipo: 'orbe_efeito', x, y });
   return true;
 }

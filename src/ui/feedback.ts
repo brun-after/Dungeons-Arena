@@ -6,6 +6,7 @@ import type { Catalogo } from '../combat/habilidades';
 import type { EstadoJogo } from '../core/estado';
 import type { Barramento } from '../core/events';
 import type { EventosDaSimulacao } from '../core/eventos-simulacao';
+import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import { t, type ChaveTexto } from '../i18n';
 import { vibrar } from '../plataforma/dispositivo';
 import type { Item } from '../progression/itens';
@@ -74,8 +75,18 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
   bus.on('acaoCancelada', (ev) => {
     if (ev.motivo === 'interrompido') hud.registrar(t('log.interrompido', { ator: nome(ev.atorId) }));
   });
+  // Marco 8A: todo status aplicado em você ou por você entra no registro; números vêm do resultado.
   bus.on('efeitoAplicado', (ev) => {
-    if (ev.tipo === 'atordoar') hud.registrar(t('log.atordoado', { alvo: nome(ev.alvoId) }));
+    const d = REGISTRO_EFEITOS[ev.tipo];
+    if (!d.ehStatus || (ev.alvoId !== idLocal && ev.origemId !== idLocal)) return;
+    hud.registrar(t('log.efeito', { alvo: nome(ev.alvoId), efeito: t(`efeito.${ev.tipo}` as ChaveTexto) }));
+  });
+  bus.on('efeitoResultado', (ev) => {
+    const alvo = posicao(ev.alvoId);
+    if (!alvo) return;
+    if (ev.dano > 0) numeros.mostrar(String(ev.dano), 'dano', alvo.x, alvo.y, o.agora());
+    if (ev.cura > 0) numeros.mostrar(`+${ev.cura}`, 'cura', alvo.x, alvo.y, o.agora());
+    if (ev.mana > 0) numeros.mostrar(`+${ev.mana}`, 'recurso', alvo.x, alvo.y, o.agora(), ESCALONAMENTO_MS);
   });
   bus.on('morreu', (ev) => {
     hud.registrar(t('log.morreu', { alvo: nome(ev.id) }));
@@ -89,6 +100,10 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
   });
   const nomeItem = (id: string | null) => (id ? (o.itens.get(id)?.nome ?? id) : '?');
   bus.on('coletou', (ev) => {
+    if (ev.tipo === 'orbe_efeito') {
+      if (ev.id === idLocal) hud.registrar(t('log.orbeEfeito'));
+      return;
+    }
     if (ev.tipo === 'item') {
       if (ev.id !== idLocal) return;
       const texto = t('log.pegouItem', { item: nomeItem(ev.itemId) });
@@ -103,10 +118,8 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
   bus.on('equipou', (ev) => {
     if (ev.id === idLocal) hud.registrar(t('log.equipou', { item: nomeItem(ev.itemId) }));
   });
+  // Os números da poção vêm do `efeitoResultado` (mesmo dispatcher, marco 8A).
   bus.on('usouItem', (ev) => {
-    const quem = posicao(ev.id);
-    if (quem && ev.hp > 0) numeros.mostrar(`+${ev.hp}`, 'cura', quem.x, quem.y, o.agora());
-    if (quem && ev.mana > 0) numeros.mostrar(`+${ev.mana}`, 'recurso', quem.x, quem.y, o.agora(), ESCALONAMENTO_MS);
     if (ev.id === idLocal) hud.registrar(t('log.usou', { item: nomeItem(ev.itemId) }));
   });
   bus.on('itemRecusado', (ev) => {

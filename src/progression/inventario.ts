@@ -1,7 +1,10 @@
 // Mochila, equipamento e pontos de atributo (§2.10, §2.12). Marco 6 (13/10/2026).
 // Tudo chega por comando (§3.3); cada recusa sai como evento com motivo, para a interface explicar.
 
+import { aplicarEfeito } from '../combat/efeitos';
+import { REGISTRO_EFEITOS, type EfeitoCanonico } from '../combat/registro-efeitos';
 import type { Balance, ContextoSimulacao } from '../core/contexto';
+import type { EstadoJogo } from '../core/estado';
 import type { EventoSimulacao, MotivoItem } from '../core/eventos-simulacao';
 import type { Bolsa, Entidade, ItemNaMochila } from '../entities/entidade';
 import type { ClasseJogador } from '../entities/presets';
@@ -99,8 +102,21 @@ export function desequipar(e: Entidade, ctx: ContextoSimulacao, slot: Slot, tick
   relatar(e, r, tick, saida);
 }
 
-/** Consumível: aplica os efeitos e gasta uma unidade. Sem ganho algum, recusa sem gastar. */
-export function usarItem(e: Entidade, ctx: ContextoSimulacao, invId: string, tick: number, saida: EventoSimulacao[]): void {
+/** O efeito faria algo agora? Cura e recurso instantâneos não servem com a barra cheia. */
+function serviria(e: Entidade, ef: EfeitoCanonico): boolean {
+  const d = REGISTRO_EFEITOS[ef.tipo];
+  const restaura = d.instantaneo ?? (ef.duracaoMs <= 0 ? d.periodico : null);
+  if (restaura === 'cura') return e.hp < e.hpMax;
+  if (restaura === 'recurso') return e.mana < e.manaMax;
+  return true;
+}
+
+/**
+ * Consumível: aplica os efeitos pelo dispatcher único (§2.8, marco 8A) e gasta uma unidade. Se
+ * nenhum efeito serviria agora, recusa sem gastar.
+ */
+export function usarItem(estado: EstadoJogo, e: Entidade, ctx: ContextoSimulacao, invId: string, saida: EventoSimulacao[]): void {
+  const tick = estado.tick;
   const r = ((): Resultado => {
     const bolsa = e.bolsa;
     if (!bolsa) return recusa('sem_mochila');
@@ -109,18 +125,10 @@ export function usarItem(e: Entidade, ctx: ContextoSimulacao, invId: string, tic
     const item = entrada ? ctx.conteudo.itens.get(entrada.itemId) : undefined;
     if (!entrada || !item) return recusa('nao_encontrado');
     if (item.tipo !== 'consumivel') return recusa('nao_consumivel');
-    let hp = 0;
-    let mana = 0;
-    for (const ef of item.efeitos) {
-      const [atual, maximo] = ef.tipo === 'curar' ? [e.hp + hp, e.hpMax] : [e.mana + mana, e.manaMax];
-      const bruto = ef.modo === 'pct' ? Math.round((maximo * ef.valor) / 100) : ef.valor;
-      const ganho = Math.max(0, Math.min(maximo - atual, bruto));
-      if (ef.tipo === 'curar') hp += ganho;
-      else mana += ganho;
-    }
-    if (hp + mana === 0) return recusa('sem_efeito');
-    e.hp += hp;
-    e.mana += mana;
+    if (!item.efeitos.some((ef) => serviria(e, ef))) return recusa('sem_efeito');
+    const [hpAntes, manaAntes] = [e.hp, e.mana];
+    for (const ef of item.efeitos) aplicarEfeito(estado, ctx, e, ef, { id: e.id, x: e.x, y: e.y }, null, saida);
+    const [hp, mana] = [e.hp - hpAntes, e.mana - manaAntes];
     entrada.qtd--;
     if (entrada.qtd <= 0) bolsa.mochila.splice(indice, 1);
     saida.push({ t: 'usouItem', tick, id: e.id, itemId: item.id, hp, mana });
