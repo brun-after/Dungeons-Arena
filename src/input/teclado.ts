@@ -88,6 +88,8 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
     } else if (ATALHOS.includes(ev.code) && !ev.repeat) {
       opcoes.aoAtalho(ATALHOS.indexOf(ev.code));
     } else if (ev.code === 'Escape') {
+      // Marco 12: sem isto, a ação padrão deste mesmo Esc fecharia na hora a pausa que ele abre.
+      ev.preventDefault();
       opcoes.aoCancelar();
     }
   };

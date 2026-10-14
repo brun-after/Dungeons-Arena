@@ -160,6 +160,30 @@
       },
       "modo": "rearme",
       "rearmeMs": 8000
+    },
+    {
+      "tipo": "fonte_som",
+      "x": 0.0625,
+      "y": 0.2321,
+      "sfxId": "fogo",
+      "raio": 6,
+      "volume": 0.6
+    },
+    {
+      "tipo": "fonte_som",
+      "x": 0.5125,
+      "y": 0.3036,
+      "sfxId": "goteira",
+      "raio": 7,
+      "volume": 0.5
+    },
+    {
+      "tipo": "fonte_som",
+      "x": 0.1625,
+      "y": 0.5179,
+      "sfxId": "vento",
+      "raio": 5,
+      "volume": 0.4
     }
   ],
   "portaSaida": {

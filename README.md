@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 2.0 · **Data:** 14/10/2026
-**Status:** 🚧 Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Próximo: a convergência (12 → 15), em um PR por marco
+**Versão do documento:** 2.1 · **Data:** 14/10/2026
+**Status:** 🚧 Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência em andamento: 12 concluído; próximo, o 13
 
 > **Histórico**
+> - **2.1 (14/10/2026)**: marco 12 concluído (áudio sintetizado, minimapa, pausa, configurações, guia, efeitos visuais como dado, qualidade e acessibilidade).
 > - **2.0 (14/10/2026)**: roteiro reescrito para a convergência (12 → 15 antes de 11A e da arena), um PR por marco e as sugestões de capacidades adotadas (D-055).
 > - **1.9 (14/10/2026)**: marco 10A concluído (invocações completas, avatares e dominação; pergaminhos de invocação).
 > - **1.8 (14/10/2026)**: marco 10A-2 (fases geradas sem fim, penalidade de morte, descanso e regeneração por célula).
@@ -165,7 +166,7 @@ pessoas (7C) entra quando houver testadores.
 
 | ✓ | # | Entrega | Pronto quando |
 |---|---|---|---|
-| [ ] | 12 | **Áudio** sintetizado (música por contexto, efeitos, som posicional, passos); **interface** (minimapa, prompt de interação, pausa, configurações, guia, menu com fundo); **efeitos visuais** como dado por habilidade (partículas, presets de impacto, efeitos persistentes, luz, enquadrar dois); **qualidade** (presets, degradação automática, teto de DPR) e **acessibilidade** (escala de interface, teclado, contraste) | Ameaças legíveis; o mesmo digest com e sem efeitos; nunca mudo; movimento reduzido respeitado |
+| [x] | 12 | **Áudio** sintetizado (música por contexto, efeitos, som posicional, passos); **interface** (minimapa, prompt de interação, pausa, configurações, guia, menu com fundo); **efeitos visuais** como dado por habilidade (partículas, presets de impacto, efeitos persistentes, luz, enquadrar dois); **qualidade** (presets, degradação automática, teto de DPR) e **acessibilidade** (escala de interface, teclado, contraste) | Ameaças legíveis; o mesmo digest com e sem efeitos; nunca mudo; movimento reduzido respeitado |
 | [ ] | 13 | Visão **isométrica**; **modelos de criatura** gerados no build; **caminhada por fatias**; **personagem por imagem** (recorte, escala, substituto, legibilidade) | Alternar a visão preserva velocidade, alcance e regras; imagem inválida não quebra o jogo |
 | [ ] | 14 | Ferramenta de **balanceamento por simulação** (tempo para matar, curva das fases, fluxo de ouro, invocações, margem de aviso do corpo a corpo) e ajuste dos números da campanha e do Livre | Ritmo e janelas de reação validados na campanha e no Livre. *Fichas justas por modo de arena: depois do 10B* |
 | [ ] | 15 | Celular (área segura, orientação, redimensionamento), **PWA offline** testado, desempenho e memória (10 trocas de fase, cena de carga, `BENCHMARKS.md`) e servidor (limites, métricas, teste de 30 min na VM) | Offline e benchmarks verificados. *Recuperação de queda: depois do 9B; sessão real de 10 pessoas: no 11B* |

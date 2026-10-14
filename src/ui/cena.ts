@@ -1,6 +1,7 @@
 // Cena de jogo no navegador, compartilhada pela campanha e pela arena: palco, câmera, camadas do
 // mundo, HUD, controles, cabeçalho, entrada e feedback. Quem chama decide de onde vem o estado
 // (simulação local ou cliente de rede) e para onde vão os comandos.
+// Marco 12 (14/10/2026): áudio, efeitos, luz, minimapa, prompt, pausa e configurações (ui/apresentacao.ts).
 
 import { recargaRestante } from '../combat/acao';
 import { celulaOcupada } from '../combat/geometria';
@@ -18,7 +19,7 @@ import { ligarTeclado, type Teclado } from '../input/teclado';
 import { podeFerir } from '../modos/relacao';
 import { consumiveisComAtalho } from '../progression/inventario';
 import { detectarToque, sinaisDoNavegador } from '../plataforma/dispositivo';
-import { gravarPreferencias, lerPreferencias } from '../plataforma/preferencias';
+import { lerPreferencias } from '../plataforma/preferencias';
 import { prepararSessaoDeTela } from '../plataforma/sessao-tela';
 import { Camera } from '../render/camera';
 import { CELULA_PX } from '../render/camera-calculo';
@@ -35,7 +36,9 @@ import { mostrarAviso } from './aviso';
 import { criarCabecalho } from './cabecalho';
 import { criarControles, type Controles } from './controles';
 import { Diagnostico, type DadosRede } from './diagnostico';
+import { montarApresentacao } from './apresentacao';
 import { ligarFeedback } from './feedback';
+import type { AcaoDaPausa } from './pausa';
 import { criarLoja } from './loja';
 import { criarMochila } from './mochila';
 import { criarBarraHabilidades } from './habilidades';
@@ -55,6 +58,10 @@ export interface OpcoesCena {
   emitir: (cmd: Comando) => void;
   /** Botões extras no cabeçalho (ex.: "Menu" da campanha, que salva antes de sair). */
   acoesExtras?: HTMLElement[];
+  /** Marco 12: a pausa para a simulação (campanha) ou só abre o menu (arena). */
+  pausaOJogo?: boolean;
+  /** Ações extras no menu de pausa (ex.: "Salvar e sair"). */
+  acoesDaPausa?: AcaoDaPausa[];
 }
 
 export interface QuadroCena {
@@ -70,6 +77,8 @@ export interface Cena {
   bus: Barramento<EventosDaSimulacao>;
   hud: Hud;
   quadro: (q: QuadroCena) => void;
+  /** Marco 12: a simulação deve parar (campanha com a pausa aberta). */
+  pausado: () => boolean;
 }
 
 function div(classe: string): HTMLDivElement {
@@ -85,7 +94,6 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const toque = detectarToque(sinaisDoNavegador());
   document.body.classList.toggle('toque', toque);
   const prefs = lerPreferencias();
-  const movimentoReduzido = matchMedia('(prefers-reduced-motion: reduce)');
   const jogador = () => o.estado().entidades.find((e) => e.id === idLocal);
 
   o.raiz.textContent = '';
@@ -105,6 +113,28 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   prepararSessaoDeTela(toque);
 
   const camera = new Camera(fase.largura * CELULA_PX, fase.altura * CELULA_PX, prefs.camera, toque);
+  const bus = new Barramento<EventosDaSimulacao>();
+  let controles: Controles | null = null;
+  const ap = montarApresentacao({
+    ctx,
+    palco,
+    camera,
+    ui,
+    bus,
+    estado: o.estado,
+    idLocal,
+    habilidades: ctx.conteudo.habilidades,
+    toque,
+    pausaOJogo: o.pausaOJogo ?? false,
+    acoesDaPausa: o.acoesDaPausa ?? [],
+    aviso: (texto) => {
+      mostrarAviso(ui, texto);
+    },
+    aoMudarPreferencias: (p) => {
+      camera.modo = p.camera;
+      controles?.trocarTipo(p.controle);
+    },
+  });
   const terreno = criarTerreno(palco.terreno, fase);
   const sprites = new CamadaEntidades(palco.entidades, idLocal);
   const telegrafia = new CamadaTelegrafia(palco.chao, palco.voo);
@@ -114,7 +144,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   });
   const fluxo = new CamadaFluxo(palco.chao);
   const portas = new CamadaPortas(palco.chao, fase, ticksDe(ctx.balance.portas.janelaPortaBossMs));
-  const numeros = new CamadaNumeros(palco.efeitos, () => movimentoReduzido.matches);
+  const numeros = new CamadaNumeros(palco.efeitos, ap.movimentoReduzido);
   const isometrico = () => false; // a visão isométrica entra no marco 13
   const usarHabilidade = (id: string) => {
     emitir({ t: 'usarHabilidade', id });
@@ -161,7 +191,6 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     const entrada = bolsa ? consumiveisComAtalho(bolsa, ctx.conteudo.itens)[n] : undefined;
     if (entrada) emitir({ t: 'usarItem', invId: entrada.invId });
   };
-  let controles: Controles | null = null;
   if (toque) {
     controles = criarControles({
       tipo: prefs.controle,
@@ -184,22 +213,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   ui.append(
     criarCabecalho({
       nomeFase: fase.nome,
-      controle: prefs.controle,
-      camera: prefs.camera,
       status: hud.status,
-      acoesExtras: [mochila.botao, hud.botaoLog, ...(o.acoesExtras ?? [])],
-      aoTrocarControle: () => {
-        prefs.controle = prefs.controle === 'joystick' ? 'dpad' : 'joystick';
-        controles?.trocarTipo(prefs.controle);
-        gravarPreferencias(prefs);
-        return prefs.controle;
-      },
-      aoTrocarCamera: () => {
-        prefs.camera = prefs.camera === 'janela' ? 'centralizada' : 'janela';
-        camera.modo = prefs.camera;
-        gravarPreferencias(prefs);
-        return prefs.camera;
-      },
+      acoesExtras: [mochila.botao, hud.botaoLog, ap.botaoPausa, ...(o.acoesExtras ?? [])],
     }),
   );
   const diag = Diagnostico.ativo() ? new Diagnostico() : null;
@@ -256,19 +271,20 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     aoDispensar: () => {
       emitir({ t: 'dispensar' });
     },
+    // `Esc` contextual (§2.15): com alvo, cancela a mira; sem alvo, pausa (ou abre o menu, na arena).
     aoCancelar: () => {
-      emitir({ t: 'selecionarAlvo', alvo: null });
+      if (jogador()?.alvoSelecionado) emitir({ t: 'selecionarAlvo', alvo: null });
+      else ap.abrirPausa();
     },
     isometrico,
     aoMochila: mochila.alternar,
-    bloqueado: () => mochila.aberta() || loja.aberta(),
+    bloqueado: () => mochila.aberta() || loja.aberta() || ap.menuAberto(),
   });
   ligarPonteiro(palco.canvas, { camera, aoIrPara: aoTocarCelula });
   palco.canvas.addEventListener('contextmenu', (ev) => {
     ev.preventDefault();
   });
 
-  const bus = new Barramento<EventosDaSimulacao>();
   const feedback = ligarFeedback({
     bus,
     estado: o.estado,
@@ -286,7 +302,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   let celulaCentralizada = false;
   const quadro = (q: QuadroCena) => {
     const estado = o.estado();
-    const dtS = Math.min(0.1, (q.agoraMs - ultimoQuadroMs) / 1000);
+    const dtMs = q.agoraMs - ultimoQuadroMs;
+    const dtS = Math.min(0.1, dtMs / 1000);
     ultimoQuadroMs = q.agoraMs;
     lerFaixa(q.agoraMs);
 
@@ -308,14 +325,19 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     mochila.atualizar();
     loja.atualizar();
     if (q.rede) hud.mostrarRede(q.rede);
-    camera.aplicar(palco.mundo);
+    // Marco 12: efeitos, som, luz, minimapa e prompt; o congelamento de impacto só segura o desenho.
+    const congelado = ap.quadro(estado, q.agoraMs, dtMs, q.posicao);
+    ap.aplicarCamera(q.agoraMs);
     terreno.atualizarVisibilidade(...camera.retanguloVisivel(palco.altura()));
-    objetos.desenhar(estado, q.agoraMs, movimentoReduzido.matches);
-    portas.desenhar(estado, q.agoraMs, movimentoReduzido.matches);
+    const reduzido = ap.movimentoReduzido();
+    objetos.desenhar(estado, q.agoraMs, reduzido);
+    portas.desenhar(estado, q.agoraMs, reduzido);
     fluxo.desenhar(estado, idLocal);
-    telegrafia.desenhar(estado, ctx, idLocal, q.alpha);
-    sprites.desenhar(estado, ctx, q.posicao, q.alpha, q.aoRemover);
-    numeros.atualizar(q.agoraMs);
+    if (!congelado) {
+      telegrafia.desenhar(estado, ctx, idLocal, q.alpha);
+      sprites.desenhar(estado, ctx, q.posicao, q.alpha, q.aoRemover);
+      numeros.atualizar(q.agoraMs);
+    }
     palco.renderizar();
 
     diag?.quadro(q.agoraMs, () => {
@@ -334,5 +356,5 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       };
     });
   };
-  return { bus, hud, quadro };
+  return { bus, hud, quadro, pausado: ap.pausado };
 }

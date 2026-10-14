@@ -13,11 +13,15 @@ export interface Palco {
   terreno: Container;
   /** Telegrafia no chão (áreas e linhas de mira), abaixo das entidades. */
   chao: Container;
+  /** Marco 12: poços de luz (aditivos), entre o chão e as entidades. */
+  luz: Container;
   entidades: Container;
   /** Projéteis em voo. */
   voo: Container;
   /** Números de dano e efeitos de habilidade, acima de tudo no mundo. */
   efeitos: Container;
+  /** Marco 12: camada de tela (fora do mundo), para o flash dos presets de impacto. */
+  tela: Container;
   canvas: HTMLCanvasElement;
   largura: () => number;
   altura: () => number;
@@ -43,14 +47,17 @@ export async function criarPalco(host: HTMLElement): Promise<Palco> {
   host.append(app.canvas);
 
   const mundo = new Container({ label: 'mundo' });
-  // Ordem de camadas (§2.16): terreno → telegrafia → entidades → projéteis → efeitos.
+  // Ordem de camadas (§2.16): terreno → chão (rastros, armadilhas, portas, objetos, telegrafia) → luz →
+  // entidades → projéteis → efeitos (partículas e números). A tela (flash) fica fora do mundo.
   const terreno = new Container({ label: 'terreno' });
   const chao = new Container({ label: 'chao' });
+  const luz = new Container({ label: 'luz' });
   const entidades = new Container({ label: 'entidades' });
   const voo = new Container({ label: 'voo' });
   const efeitos = new Container({ label: 'efeitos' });
-  mundo.addChild(terreno, chao, entidades, voo, efeitos);
-  app.stage.addChild(mundo);
+  mundo.addChild(terreno, chao, luz, entidades, voo, efeitos);
+  const tela = new Container({ label: 'tela' });
+  app.stage.addChild(mundo, tela);
 
   const ouvintes: ((l: number, a: number) => void)[] = [];
   let espera: ReturnType<typeof setTimeout> | undefined;
@@ -73,9 +80,11 @@ export async function criarPalco(host: HTMLElement): Promise<Palco> {
     mundo,
     terreno,
     chao,
+    luz,
     entidades,
     voo,
     efeitos,
+    tela,
     canvas: app.canvas,
     // Em px CSS, independentes do DPR.
     largura: () => app.screen.width,

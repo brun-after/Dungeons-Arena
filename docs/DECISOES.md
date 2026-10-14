@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.21 · **Data:** 14/10/2026
+**Versão:** 0.22 · **Data:** 14/10/2026
 
 > **Histórico**
+> - **0.22 (14/10/2026)**: D-056 (áudio sintetizado, interface, efeitos como dado, qualidade e acessibilidade), marco 12.
 > - **0.21 (14/10/2026)**: D-055 (sugestões de capacidades, áudio e ordem da convergência).
 > - **0.20 (14/10/2026)**: D-054 (invocações completas, avatares e dominação), marco 10A-3.
 > - **0.19 (14/10/2026)**: D-053 (fases geradas, morte, descanso e regeneração por célula), marco 10A-2.
@@ -904,3 +905,61 @@ herança, cópia temporária do atlas na sala da arena). Ao mesmo tempo, decidim
 
 **Consequência.** O roteiro do README foi reescrito com esse escopo. Os "sinais de que está funcionando" da §7 das
 sugestões viram itens de verificação dos marcos 12, 13, 11A e 8B.
+
+## D-056 · Marco 12: áudio sintetizado, interface, efeitos como dado, qualidade e acessibilidade (v0.22, 14/10/2026)
+
+**Contexto.** O jogo não tinha som, minimapa, pausa, configurações, guia nem efeitos além dos marcadores. A D-055
+fixou a trilha sintetizada e os efeitos visuais descritos como dado.
+
+**Decisão.**
+- **Fronteira**: tudo o que é novo vive em `src/audio`, `src/render` e `src/ui`, só lê estado e eventos. Um teste
+  varre os imports do núcleo (nenhum `render`, `audio` ou `ui`) e outro confere que o digest é o mesmo com e sem o
+  bloco `visual` das habilidades.
+- **Áudio** (`src/audio`):
+  - todos os sons nascem de osciladores, ruído e envelopes (Web Audio); nenhum arquivo;
+  - o contexto só existe depois do primeiro gesto; sem Web Audio, o jogo segue mudo;
+  - limites da §2.14 (80 ms entre o mesmo som, 4 vozes por som, passos de 450 ms por entidade e 140 ms no total);
+  - som posicional linear até o silêncio a 20 células, com multiplicador 0,75;
+  - som por habilidade: o `visual.som` do conteúdo, depois o prefixo do id, depois o tipo de ataque;
+  - **música procedural**: um laço de 4 compassos por fase e clima, gerado de `hash(faseId)`, então a mesma fase
+    toca sempre a mesma música. A tônica é a mesma nos três climas, e trocar de clima é um fade de 800 ms;
+  - **clima**: combate quando um hostil persegue o jogador; chefe quando esse hostil é um boss. Só "desce" depois
+    de 4 s sem o sinal;
+  - **fontes sonoras da fase** (`fonte_som`: fogo, água, vento, goteira) são só apresentação e não entram no estado.
+- **Interface**:
+  - **minimapa** com as cores da §2.15;
+  - **prompt de interação**: a mesma escolha de `interagir`;
+  - **pausa**:
+    - `Esc` contextual: cancela a mira antes de pausar. O `Esc` que vai ao jogo chama `preventDefault`; senão, a ação
+      padrão do navegador fecharia na hora o diálogo que ele mesmo abriu;
+    - só a campanha pausa, e o laço descarta o tempo acumulado. Na arena, o menu abre e o mundo segue;
+  - **configurações persistidas**: qualidade, tremor e flash, volumes, mudo, modo de câmera, enquadrar dois,
+    controle, escala da interface e movimento reduzido. Os botões de câmera e controle saíram do cabeçalho;
+  - **guia**;
+  - **menu com fundo procedural**.
+- **Efeitos visuais**:
+  - `Habilidade.visual` é dado puro, com presets de partícula por momento (conjuração, viagem, impacto), cor,
+    câmera e som. Sem o bloco, `visualDe` deduz o visual da habilidade e do registro;
+  - partículas em sprites reaproveitados, com o PRNG visual (`Math.random`), nunca o da simulação;
+  - auras para os status ativos;
+  - presets de impacto (tremor, flash, soco de zoom e congelamento) até 3 por vez, com fila. O congelamento segura
+    só o desenho por ~60 ms;
+  - **floração** substituída por brilho aditivo, para não trazer `pixi-filters` como dependência;
+  - **luz** radial aditiva com a cintilação da §2.16, no jogador, nas portas, na loja, nos baús e no fogo;
+  - **enquadrar dois** (só campanha) com o alvo selecionado a até 8 células, respeitando 4 s depois de mexer na
+    câmera.
+- **Qualidade**:
+  - presets mínimo, baixo, médio e alto: partículas 0, 120, 300 e 600; luz a partir do médio; poeira só no alto;
+  - padrão: baixo no toque, alto no desktop;
+  - com "automática", desce um nível com média abaixo de 45 fps em duas verificações seguidas de 5 s e avisa;
+    nunca sobe sozinha. No painel de navegador do app em segundo plano (~30 fps) ela desce até o mínimo, como a
+    regra manda.
+- **Acessibilidade**:
+  - `--escala-ui` aplicada aos blocos da interface;
+  - movimento reduzido (sistema, sempre ou nunca) desliga tremor, flash, congelamento, soco de zoom e as animações
+    de CSS. As qualidades mínimo e baixo também desligam as animações de CSS.
+
+**Consequência.**
+- O `skills.json` ganhou o bloco `visual` nas 16 habilidades, o que muda a versão do conteúdo da arena: cliente e
+  servidor são publicados juntos.
+- Os números de fps e p95 por qualidade em aparelhos reais ficam para o marco 15 (benchmarks).

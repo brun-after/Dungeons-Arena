@@ -18,7 +18,11 @@
       "politicaImpacto": "contato",
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
-      "efeitos": []
+      "efeitos": [],
+      "visual": {
+        "impacto": "faiscas",
+        "som": "golpe"
+      }
     },
     {
       "id": "seta_arcana",
@@ -37,7 +41,14 @@
       "politicaImpacto": "projetil",
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 10,
-      "efeitos": []
+      "efeitos": [],
+      "visual": {
+        "cor": "#9b8cff",
+        "conjuracao": "brilho",
+        "viagem": "brilho",
+        "impacto": "brilho",
+        "som": "magia"
+      }
     },
     {
       "id": "explosao",
@@ -56,7 +67,14 @@
       "politicaImpacto": "area",
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
-      "efeitos": []
+      "efeitos": [],
+      "visual": {
+        "cor": "#ff8c42",
+        "conjuracao": "brasas",
+        "impacto": "explosao",
+        "camera": "forte",
+        "som": "explosao"
+      }
     },
     {
       "id": "curar",
@@ -75,7 +93,13 @@
       "politicaImpacto": "proprio",
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
-      "efeitos": []
+      "efeitos": [],
+      "visual": {
+        "cor": "#2ecc71",
+        "conjuracao": "brilho",
+        "impacto": "brilho",
+        "som": "cura"
+      }
     },
     {
       "id": "golpe_atordoante",
@@ -99,7 +123,13 @@
           "tipo": "atordoar",
           "duracaoMs": 1500
         }
-      ]
+      ],
+      "visual": {
+        "cor": "#f1c40f",
+        "impacto": "estrelas",
+        "camera": "leve",
+        "som": "golpe"
+      }
     },
     {
       "id": "golpe",
@@ -118,7 +148,11 @@
       "politicaImpacto": "contato",
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
-      "efeitos": []
+      "efeitos": [],
+      "visual": {
+        "impacto": "faiscas",
+        "som": "golpe"
+      }
     },
     {
       "id": "raio",
@@ -137,7 +171,13 @@
       "politicaImpacto": "projetil",
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 8,
-      "efeitos": []
+      "efeitos": [],
+      "visual": {
+        "cor": "#5dade2",
+        "conjuracao": "brilho",
+        "impacto": "raio",
+        "som": "magia"
+      }
     },
     {
       "id": "flecha",
@@ -156,7 +196,13 @@
       "politicaImpacto": "projetil",
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 8,
-      "efeitos": []
+      "efeitos": [],
+      "visual": {
+        "cor": "#d5c4a1",
+        "viagem": "rastro",
+        "impacto": "faiscas",
+        "som": "projetil"
+      }
     },
     {
       "id": "marca_de_area",
@@ -182,7 +228,14 @@
             "duracaoMs": 3000
           }
         }
-      ]
+      ],
+      "visual": {
+        "cor": "#c0392b",
+        "conjuracao": "brasas",
+        "impacto": "explosao",
+        "camera": "leve",
+        "som": "explosao"
+      }
     },
     {
       "id": "golpe_demoniaco",
@@ -210,7 +263,13 @@
             }
           }
         }
-      ]
+      ],
+      "visual": {
+        "cor": "#8e44ad",
+        "impacto": "faiscas",
+        "camera": "leve",
+        "som": "golpe"
+      }
     },
     {
       "id": "teia",
@@ -233,7 +292,13 @@
         {
           "sem_movimento": 1200
         }
-      ]
+      ],
+      "visual": {
+        "cor": "#bdc3c7",
+        "viagem": "rastro",
+        "impacto": "fumaca",
+        "som": "armadilha"
+      }
     },
     {
       "id": "golpe_viscoso",
@@ -268,7 +333,12 @@
             }
           }
         }
-      ]
+      ],
+      "visual": {
+        "cor": "#27ae60",
+        "impacto": "fumaca",
+        "som": "golpe"
+      }
     },
     {
       "id": "golpe_pesado",
@@ -291,7 +361,12 @@
         {
           "empurrao": 1
         }
-      ]
+      ],
+      "visual": {
+        "impacto": "faiscas",
+        "camera": "forte",
+        "som": "golpe"
+      }
     },
     {
       "id": "raio_vampirico",
@@ -316,7 +391,13 @@
           "valor": 2,
           "em": "conjurador"
         }
-      ]
+      ],
+      "visual": {
+        "cor": "#c0392b",
+        "conjuracao": "brilho",
+        "impacto": "raio",
+        "som": "magia"
+      }
     },
     {
       "tipoAtaque": "magico",
@@ -343,7 +424,12 @@
             "ref": "goblin"
           }
         }
-      ]
+      ],
+      "visual": {
+        "cor": "#1abc9c",
+        "conjuracao": "anel",
+        "som": "invocacao"
+      }
     },
     {
       "tipoAtaque": "magico",
@@ -372,7 +458,12 @@
             }
           }
         }
-      ]
+      ],
+      "visual": {
+        "cor": "#bdc3c7",
+        "conjuracao": "fumaca",
+        "som": "armadilha"
+      }
     }
   ]
 }

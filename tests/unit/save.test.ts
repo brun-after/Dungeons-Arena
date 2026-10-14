@@ -155,11 +155,11 @@ describe('preferências no perfil', () => {
       removeItem: (k: string) => void memoria.delete(k),
     } as unknown as Storage;
     await prepararPreferencias();
-    expect(lerPreferencias()).toEqual({ controle: 'dpad', camera: 'centralizada' });
+    expect(lerPreferencias()).toMatchObject({ controle: 'dpad', camera: 'centralizada' });
     expect(memoria.size).toBe(0);
     // Segunda carga: vem do banco, mesmo sem o localStorage.
     esquecerConexao();
     await prepararPreferencias();
-    expect(lerPreferencias()).toEqual({ controle: 'dpad', camera: 'centralizada' });
+    expect(lerPreferencias()).toMatchObject({ controle: 'dpad', camera: 'centralizada' });
   });
 });

@@ -1,5 +1,7 @@
 // Câmera (§2.4): adaptador que guarda o estado da câmera e aplica as funções puras de
 // camera-calculo.ts ao container do mundo. Dois modos: janela morta (padrão) e centralizada.
+// Marco 12 (14/10/2026): "enquadrar dois" (foco no ponto médio entre o jogador e o alvo, respeitando
+// 4 s depois de pinça, roda ou arrasto, §2.4) e o deslocamento dos presets de impacto no desenho.
 
 import type { Container } from 'pixi.js';
 import type { Celula } from '../core/comandos';
@@ -19,6 +21,9 @@ import {
   type Vista,
 } from './camera-calculo';
 
+/** Depois de mexer na câmera à mão, o "enquadrar dois" espera 4 s (§2.4). */
+export const JANELA_MANUAL_MS = 4000;
+
 export class Camera {
   x = 0;
   y = 0;
@@ -27,6 +32,9 @@ export class Camera {
   private alvoY = 0;
   private vista: Vista = { largura: 1, altura: 1 };
   private ultimaCelula: Celula | null = null;
+  /** Ponto (em células) a enquadrar no lugar do jogador; null = segue o jogador. */
+  private foco: { x: number; y: number } | null = null;
+  private ultimaManualMs = -Infinity;
 
   constructor(
     private readonly larguraMundo: number,
@@ -85,8 +93,24 @@ export class Camera {
     }
   }
 
+  /**
+   * Enquadrar dois (§2.4): pede o ponto médio entre o jogador e o alvo. Ignorado por 4 s depois de
+   * uma mexida manual na câmera. `null` volta a seguir só o jogador.
+   */
+  enquadrar(ponto: { x: number; y: number } | null, agoraMs: number): void {
+    this.foco = ponto && agoraMs - this.ultimaManualMs >= JANELA_MANUAL_MS ? ponto : null;
+  }
+
   /** Avança a suavização. `posicaoJogador` em células (posição de render). */
   atualizar(dtS: number, posicaoJogador: { x: number; y: number }, velocidadeJogador: number): void {
+    if (this.foco) {
+      this.alvoX = this.limitarX((this.foco.x + 0.5) * CELULA_PX - this.larguraVistaMundo / 2);
+      this.alvoY = this.limitarY((this.foco.y + 0.5) * CELULA_PX - this.alturaVistaMundo / 2);
+      const vMax = velocidadeMaximaCamera(velocidadeJogador);
+      this.x = aproximar(this.x, this.alvoX, vMax, dtS);
+      this.y = aproximar(this.y, this.alvoY, vMax, dtS);
+      return;
+    }
     if (this.modo === 'centralizada') {
       this.x = this.alvoX = this.limitarX((posicaoJogador.x + 0.5) * CELULA_PX - this.larguraVistaMundo / 2);
       this.y = this.alvoY = this.limitarY((posicaoJogador.y + 0.5) * CELULA_PX - this.alturaVistaMundo / 2);
@@ -99,12 +123,16 @@ export class Camera {
 
   /** Arrasto manual em px de tela. */
   arrastar(dxTela: number, dyTela: number): void {
+    this.ultimaManualMs = performance.now();
+    this.foco = null;
     this.x = this.alvoX = this.limitarX(this.x - dxTela / this.zoom);
     this.y = this.alvoY = this.limitarY(this.y - dyTela / this.zoom);
   }
 
   /** Zoom ancorado num ponto da vista (px de tela). */
   zoomEm(novoZoom: number, ancoraX: number, ancoraY: number): void {
+    this.ultimaManualMs = performance.now();
+    this.foco = null;
     const r = zoomAncorado({ x: this.x, y: this.y }, this.zoom, novoZoom, ancoraX, ancoraY, this.limites);
     const dx = r.x - this.x;
     const dy = r.y - this.y;
@@ -132,9 +160,16 @@ export class Camera {
     return [this.x, this.y, this.x + this.larguraVistaMundo, this.y + alturaTotalTela / this.zoom];
   }
 
-  aplicar(mundo: Container): void {
-    mundo.scale.set(this.zoom);
+  /** `impacto`: deslocamento (px de tela) e zoom extra dos presets de impacto; não muda o estado da câmera. */
+  aplicar(mundo: Container, impacto: { dx: number; dy: number; zoomExtra: number } = { dx: 0, dy: 0, zoomExtra: 0 }): void {
+    const zoom = this.zoom * (1 + impacto.zoomExtra);
+    // O soco de zoom é ancorado no centro da vista.
+    const cx = this.x + this.larguraVistaMundo / 2;
+    const cy = this.y + this.alturaVistaMundo / 2;
+    const x = cx - this.vista.largura / 2 / zoom;
+    const y = cy - this.vista.altura / 2 / zoom;
+    mundo.scale.set(zoom);
     // Guarda em float; arredonda só no desenho (§2.4).
-    mundo.position.set(Math.round(-this.x * this.zoom), Math.round(-this.y * this.zoom));
+    mundo.position.set(Math.round(-x * zoom + impacto.dx), Math.round(-y * zoom + impacto.dy));
   }
 }
