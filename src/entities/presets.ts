@@ -2,7 +2,8 @@
 // Preset visual (modelo) e arquétipo de IA são campos independentes (§2.6).
 
 import { ehObjeto, Leitor, type Objeto } from '../core/validar';
-import { ATRIBUTOS_NEUTROS, type Arquetipo, type Atributos, type ClasseCombate } from './entidade';
+import { formulaValida } from '../combat/dados';
+import { ATRIBUTOS_NEUTROS, type Arquetipo, type Atributos, type ClasseCombate, type ComportamentoInvocacao } from './entidade';
 
 const CLASSES: readonly ClasseCombate[] = ['corpo_a_corpo', 'conjurador'];
 const ARQUETIPOS: readonly Exclude<Arquetipo, 'jogador'>[] = ['perseguidor', 'atirador', 'controlador', 'boss', 'boneco'];
@@ -21,6 +22,37 @@ export interface PresetInimigo {
   ataqueBasico: string;
   habilidades: string[];
   intervaloAtaqueMs: number;
+  /** Marco 10A-3: presets feitos para serem invocados (§2.9); null nos inimigos comuns. */
+  invocacao: PresetInvocacao | null;
+}
+
+export interface PresetInvocacao {
+  comportamento: ComportamentoInvocacao;
+  /** Avatar: isca conjurada que sempre bloqueia, atrai os hostis e aguenta `golpes` (fórmula) golpes. */
+  avatar: boolean;
+  golpes: string | null;
+  /** Curador: quanto cura o dono e de quanto em quanto tempo. */
+  cura: { valor: number; recargaMs: number } | null;
+  /** Isca explosiva: dano em área quando cai. */
+  explosao: { raio: number; dano: number } | null;
+}
+
+const COMPORTAMENTOS: readonly ComportamentoInvocacao[] = ['agressivo', 'assassino', 'protetor', 'curador', 'isca'];
+
+function lerInvocacao(l: Leitor, v: unknown): PresetInvocacao | null {
+  if (v === undefined || v === null) return null;
+  const o = l.objeto(v, 'invocacao');
+  const golpes = o.golpes === undefined ? null : l.texto(o, 'golpes');
+  if (golpes !== null && !formulaValida(golpes)) l.erro(`invocacao.golpes: fórmula inválida "${golpes}"`);
+  const cura = o.cura === undefined ? null : l.objeto(o.cura, 'cura');
+  const explosao = o.explosao === undefined ? null : l.objeto(o.explosao, 'explosao');
+  return {
+    comportamento: l.opcao(o, 'comportamento', COMPORTAMENTOS),
+    avatar: o.avatar === undefined ? false : l.booleano(o, 'avatar'),
+    golpes,
+    cura: cura ? { valor: l.numero(cura, 'valor', { min: 1 }), recargaMs: l.numero(cura, 'recargaMs', { min: 0 }) } : null,
+    explosao: explosao ? { raio: l.numero(explosao, 'raio', { min: 0, max: 5, inteiro: true }), dano: l.numero(explosao, 'dano', { min: 0 }) } : null,
+  };
 }
 
 export interface ClasseJogador {
@@ -62,6 +94,7 @@ export function lerPresets(json: unknown): { presets: Map<string, PresetInimigo>
       ataqueBasico: l.texto(o, 'ataqueBasico'),
       habilidades: l.listaDeTextos(o, 'habilidades'),
       intervaloAtaqueMs: l.numero(o, 'intervaloAtaqueMs', { min: 0 }),
+      invocacao: lerInvocacao(l, o.invocacao),
     };
     if (presets.has(p.id)) l.erro('id repetido');
     erros.push(...l.erros);

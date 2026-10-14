@@ -2,6 +2,7 @@
 // Tudo chega por comando (§3.3); cada recusa sai como evento com motivo, para a interface explicar.
 
 import { aplicarEfeito } from '../combat/efeitos';
+import { excedeLimite } from '../combat/efeitos-fluxo';
 import { REGISTRO_EFEITOS, type EfeitoCanonico } from '../combat/registro-efeitos';
 import type { Balance, ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
@@ -155,6 +156,8 @@ export function usarItem(estado: EstadoJogo, e: Entidade, ctx: ContextoSimulacao
     const item = entrada ? ctx.conteudo.itens.get(entrada.itemId) : undefined;
     if (!entrada || !item) return recusa('nao_encontrado');
     if (item.tipo !== 'consumivel') return recusa('nao_consumivel');
+    // Marco 10A-3: pergaminho de invocação acima do limite do modo é recusado sem gastar (§5.6).
+    if (excedeLimite(estado, ctx, e, item.efeitos)) return recusa('limite');
     if (!item.efeitos.some((ef) => serviria(e, ef))) return recusa('sem_efeito');
     const [hpAntes, manaAntes] = [e.hp, e.mana];
     for (const ef of item.efeitos) aplicarEfeito(estado, ctx, e, ef, { id: e.id, x: e.x, y: e.y }, null, saida);

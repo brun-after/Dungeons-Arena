@@ -330,6 +330,121 @@
       "bonusDefesa": 0,
       "efeitos": [],
       "dropavel": false
+    },
+    {
+      "id": "pergaminho_lobo",
+      "nome": "Pergaminho do lobo",
+      "tipo": "consumivel",
+      "descricao": "Invoca um lobo espiritual que ataca o inimigo mais próximo (30 s).",
+      "icone": "📜",
+      "raridade": "incomum",
+      "valorBase": 30,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [
+        {
+          "invocar": {
+            "valor": 1,
+            "duracaoMs": 30000,
+            "ref": "lobo_espiritual"
+          }
+        }
+      ],
+      "dropavel": true
+    },
+    {
+      "id": "pergaminho_sombra",
+      "nome": "Pergaminho da sombra",
+      "tipo": "consumivel",
+      "descricao": "Invoca uma sombra que caça o inimigo mais fraco (25 s).",
+      "icone": "📜",
+      "raridade": "raro",
+      "valorBase": 45,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [
+        {
+          "invocar": {
+            "valor": 1,
+            "duracaoMs": 25000,
+            "ref": "sombra"
+          }
+        }
+      ],
+      "dropavel": true
+    },
+    {
+      "id": "pergaminho_sentinela",
+      "nome": "Pergaminho da sentinela",
+      "tipo": "consumivel",
+      "descricao": "Invoca uma sentinela que protege você (40 s).",
+      "icone": "📜",
+      "raridade": "incomum",
+      "valorBase": 35,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [
+        {
+          "invocar": {
+            "valor": 1,
+            "duracaoMs": 40000,
+            "ref": "sentinela"
+          }
+        }
+      ],
+      "dropavel": true
+    },
+    {
+      "id": "pergaminho_fada",
+      "nome": "Pergaminho da fada",
+      "tipo": "consumivel",
+      "descricao": "Invoca uma fada que cura você (30 s).",
+      "icone": "📜",
+      "raridade": "raro",
+      "valorBase": 50,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [
+        {
+          "invocar": {
+            "valor": 1,
+            "duracaoMs": 30000,
+            "ref": "fada"
+          }
+        }
+      ],
+      "dropavel": true
+    },
+    {
+      "id": "pergaminho_espantalho",
+      "nome": "Pergaminho do espantalho",
+      "tipo": "consumivel",
+      "descricao": "Conjura um espantalho que atrai os inimigos e explode ao cair (20 s).",
+      "icone": "📜",
+      "raridade": "incomum",
+      "valorBase": 25,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [
+        {
+          "invocar": {
+            "valor": 1,
+            "duracaoMs": 20000,
+            "ref": "espantalho"
+          }
+        }
+      ],
+      "dropavel": true
     }
   ]
 }

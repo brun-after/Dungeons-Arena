@@ -124,6 +124,17 @@ export interface Balance {
     recargaMs: number;
     janelaPortaBossMs: number;
   };
+  /** Invocações (§2.9, marco 10A-3): IA própria, rampa e cascata de dominação. */
+  invocacoes: {
+    passoMs: number;
+    raioEngajamento: number;
+    distanciaDono: number;
+    raioProtetor: number;
+    rampaPorMinutoPct: number;
+    rampaPorAbatePct: number;
+    rampaMaxPct: number;
+    cascataDominacao: number;
+  };
   /** Limites do atributo efetivo (§2.10, equipamento derivado). */
   atributos: {
     minimo: number;

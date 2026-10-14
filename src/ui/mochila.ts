@@ -6,6 +6,7 @@
 
 import type { Comando } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
+import type { EstadoJogo } from '../core/estado';
 import type { Entidade, ItemNaMochila } from '../entities/entidade';
 import { t, type ChaveTexto } from '../i18n';
 import { SLOTS_DE_EQUIPAMENTO, type Slot } from '../modos/modo';
@@ -20,6 +21,8 @@ export interface OpcoesMochila {
   ctx: ContextoSimulacao;
   jogador: () => Entidade | undefined;
   emitir: (cmd: Comando) => void;
+  /** Marco 10A-3: o estado, para saber se o jogador tem invocações (opcional). */
+  estado?: () => EstadoJogo;
   toque: boolean;
   aoAbrir: () => void;
 }
@@ -290,6 +293,12 @@ export function criarMochila(o: OpcoesMochila): Mochila {
         linha.append(botao(t(chave), `descanso-${tipo}`, () => { agir({ t: 'descansar', tipo }); modal.fechar(); }));
       }
       corpo.append(linha);
+    }
+    // Marco 10A-3: dispensar as invocações (só aparece com alguma viva).
+    const estado = o.estado?.();
+    if (estado?.entidades.some((x) => x.invocacao?.donoId === j.id && !x.invocacao.dominado && !x.morto)) {
+      corpo.append(el('h3', 'subtitulo-modal', t('ficha.invocacoes')));
+      corpo.append(botao(t('ficha.dispensar'), 'dispensar', () => { agir({ t: 'dispensar' }); modal.fechar(); }));
     }
   };
 

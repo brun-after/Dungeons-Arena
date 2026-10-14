@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 1.8 · **Data:** 14/10/2026
+**Versão do documento:** 1.9 · **Data:** 14/10/2026
 **Status:** 🚧 Em construção. Marcos 1–6 concluídos e validados em aparelho real: campanha com itens, nível e save, arena online na AWS em São Paulo e editor de fases mínimo. Marco 7 em andamento: o ecossistema do teste com pessoas está pronto; a sessão fica para depois
 
 > **Histórico**
+> - **1.9 (14/10/2026)**: marco 10A concluído (invocações completas, avatares e dominação; pergaminhos de invocação).
 > - **1.8 (14/10/2026)**: marco 10A-2 (fases geradas sem fim, penalidade de morte, descanso e regeneração por célula).
 > - **1.7 (14/10/2026)**: marco 10A-1 (portas, troca de fase e a fase 2, Catacumbas).
 > - **1.6 (14/10/2026)**: marco 9A concluído (spawner dinâmico e armadilhas de fase).
@@ -144,7 +145,7 @@ em `main`, e o merge publica automaticamente.
 |---|---|---|---|
 | [x] | 8A | 26 tipos de efeito, normalização e dispatcher | Todos os efeitos exercitados; o registro aparece no editor e nos orbes |
 | [x] | 9A | Inventário, 10 slots, economia, baús, loja, orbes e spawner | A ordem de equipar não altera o resultado; ciclo econômico íntegro |
-| [ ] | 10A | Progressão 1–20, morte, geração procedural, portas, invocações e avatares (10A-1: portas e fases ✓ · 10A-2: procedural, morte e descanso ✓ · 10A-3: invocações e avatares) | Campanha completa, com save, migrações e modo offline |
+| [x] | 10A | Progressão 1–20, morte, geração procedural, portas, invocações e avatares | Campanha completa, com save, migrações e modo offline |
 | [ ] | 11A | Editor completo no toque, tileset, validação e aprendizado de estilo | Aventura de 2 fases criada, testada, exportada e importada no celular |
 
 ### Expansão e operação da arena

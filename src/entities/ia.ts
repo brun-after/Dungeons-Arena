@@ -9,13 +9,14 @@ import { buscarEntidade, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { aleatorio, criarRng, escolher, hashTexto, type EstadoRng } from '../core/rng';
 import { ticksDe } from '../core/tempo';
-import { alvoOfensivoValido, iniciarAcao, recargaRestante } from '../combat/acao';
-import { excedeLimite, longeDoDono } from '../combat/efeitos-fluxo';
+import { alvoOfensivoValido, iniciarAcao, prioridadeDeAlvo, recargaRestante } from '../combat/acao';
+import { excedeLimite } from '../combat/efeitos-fluxo';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
 import { ordemRotativa } from '../world/colisao';
 import { passavel } from '../world/fase';
 import { celulaLivre, pararMovimento, planejarCaminho, VETOR_DIR } from '../world/movimento';
 import { emPasso, vivo, type Entidade, type EstadoIa, type ModoIa } from './entidade';
+import { processarInvocacao } from './ia-invocacao';
 import type { PresetInimigo } from './presets';
 
 const CARDINAIS: readonly Dir8[] = ['N', 'E', 'S', 'O'];
@@ -80,7 +81,10 @@ function detectar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, raio:
     if (outro.id === e.id || !alvoOfensivoValido(estado, ctx, e, outro)) continue;
     const d = manhattan(origem, celulaOcupada(outro));
     if (d > raio) continue;
-    if (!melhor || d < melhorDist || (d === melhorDist && (outro.hp < melhor.hp || (outro.hp === melhor.hp && outro.id < melhor.id)))) {
+    // Avatar hostil primeiro (§2.9, marco 10A-3); depois o mais próximo, menor HP e id.
+    const p = prioridadeDeAlvo(outro);
+    const pm = melhor ? prioridadeDeAlvo(melhor) : Infinity;
+    if (!melhor || p < pm || (p === pm && (d < melhorDist || (d === melhorDist && (outro.hp < melhor.hp || (outro.hp === melhor.hp && outro.id < melhor.id)))))) {
       melhor = outro;
       melhorDist = d;
     }
@@ -102,6 +106,11 @@ export function processarIa(estado: EstadoJogo, ctx: ContextoSimulacao, saida: E
     if (!preset) continue;
     e.ia ??= criarEstadoIa(estado, e, ctx.balance.ia);
     const ia = e.ia;
+    // Marco 10A-3: invocações e dominados têm IA própria (§2.9).
+    if (e.invocacao) {
+      processarInvocacao(estado, ctx, e, ia, preset, saida);
+      continue;
+    }
     switch (ia.modo) {
       case 'patrulha':
         if (!tentarDetectar(estado, ctx, e, ia, preset, saida)) patrulhar(estado, ctx, e, ia);
@@ -170,12 +179,6 @@ function hesitar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: Es
 
 function patrulhar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa): void {
   const regras = ctx.balance.ia;
-  // Invocação sem alvo segue o dono a até 2 células, em vez de patrulhar (§2.9, marco 8A-2).
-  if (e.invocacao) {
-    const dono = longeDoDono(estado, e);
-    if (dono && !emPasso(e) && e.caminho.length === 0) planejarCaminho(e, { x: dono.x, y: dono.y }, ctx, estado.tick, [], regras.maxPassosPerseguicao);
-    return;
-  }
   if (estado.tick >= ia.proximaAvaliacaoTick) {
     ia.proximaAvaliacaoTick = estado.tick + ticksDe(regras.patrulhaAvaliacaoMs);
     ia.direcaoPatrulha = escolherDirecaoPatrulha(estado, ctx, e, ia);

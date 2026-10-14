@@ -118,7 +118,12 @@ export function moverEntidades(
 /** Integra o movimento de uma única entidade por um tick (usado também pela predição do cliente). */
 export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[], dtMs: number) {
   if (e.morto) return;
-  const vel = velocidade(e.atributos.destreza, ctx.balance.movimento.velocidadeBaseMs, e.invocacao?.dominado ?? false);
+  // Marco 10A-3: invocação (não dominada) anda um passo a cada `passoMs` (§2.9, 380 ms).
+  const inv = e.invocacao;
+  const vel =
+    inv && !inv.dominado
+      ? 1000 / ctx.balance.invocacoes.passoMs
+      : velocidade(e.atributos.destreza, ctx.balance.movimento.velocidadeBaseMs, inv?.dominado ?? false);
   let restante = (dtMs / 1000) * vel;
 
   for (let guarda = 0; guarda < MAX_PASSOS_POR_TICK; guarda++) {

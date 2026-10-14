@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.19 · **Data:** 14/10/2026
+**Versão:** 0.20 · **Data:** 14/10/2026
 
 > **Histórico**
+> - **0.20 (14/10/2026)**: D-054 (invocações completas, avatares e dominação), marco 10A-3.
 > - **0.19 (14/10/2026)**: D-053 (fases geradas, morte, descanso e regeneração por célula), marco 10A-2.
 > - **0.18 (14/10/2026)**: D-052 (portas e troca de fase da campanha), marco 10A-1.
 > - **0.17 (14/10/2026)**: D-051 (spawner dinâmico e armadilha de fase), marco 9A-2.
@@ -815,3 +816,45 @@ define a penalidade de morte, o descanso e a regeneração por célula, sem fech
 **Consequência.**
 - Save na versão 7 (degrau sem conversão: a forma nova da referência e da interação só acrescenta) e balance v12.
 - O modo ganhou `sobrevivencia` (regeneração por célula, descanso e penalidade de morte).
+
+## D-054 · Invocações completas, avatares e dominação (v0.20, 14/10/2026)
+
+**Contexto.** O 8A-2 deixou o mínimo da §2.9 (D-049). Faltavam os comportamentos, a IA própria, a rampa, a dispensa,
+os avatares e a cascata configurável. A barra de habilidades da classe já ocupa as 4 teclas.
+
+**Decisão.**
+- **Dados**: o preset ganha um bloco `invocacao {comportamento, avatar?, golpes?, cura?, explosao?}`; a entidade
+  guarda comportamento, avatar, golpes restantes, abates, tick de criação e nível de dominação. Quem não vem de um
+  preset de invocação (lacaios do boss, dominados) é `agressivo`.
+- **IA própria** (`entities/ia-invocacao.ts`), no lugar da IA comum:
+  - raio de engajamento de 5 e ataque adjacente (Chebyshev ≤ 1) no ritmo do preset;
+  - sem alvo, segue o dono a 2 células;
+  - passo a cada 380 ms (dominados mantêm a velocidade ×1,3 sobre a da ficha);
+  - alvos sempre por `relacao()`: `agressivo` o mais próximo, `assassino` o de menor HP, `protetor` só quem ameaça
+    o dono (persegue ou feriu na janela de participação) a até 3 células dele, sem se afastar mais que isso;
+  - `curador` não ataca e cura o dono pelo dispatcher, com recarga própria;
+  - `isca` é imóvel;
+  - ao engajar, fica em `perseguindo`, e o descanso e a regeneração enxergam o perigo.
+- **Colisão**: invocação não bloqueia aliado da mesma equipe; o avatar continua bloqueando sempre.
+- **Avatar**:
+  - nasce com `tipo: 'avatar'` e arquétipo `boneco` (imóvel, fora da IA);
+  - os golpes vêm da fórmula do preset (`1d4`), pelo PRNG do estado;
+  - **todo dano maior que zero passa por `registrarParticipacao`**, então o golpe é contado ali, num ponto só;
+  - hostis o preferem como alvo (`prioridadeDeAlvo`, usada pela IA, pelo auto-alvo e pelas invocações): é regra de
+    escolha de alvo, não de hostilidade;
+  - conta no limite próprio `avataresPorJogador`.
+- **Isca explosiva**: ao cair, fere os hostis no raio com dano fixo.
+- **Rampa**: `1 + min(50%, 10% por minuto + 5% por abate)`, multiplicando o dano causado (`fonteDe`).
+- **Dispensa**: comando `dispensar` (tecla X e botão na ficha), sem XP para ninguém; dominados não são dispensados.
+- **Dominação**: a cascata é `balance.invocacoes.cascataDominacao`; com 1 (padrão), dominados não dominam.
+- **"Funil único de dano com redução plana"** (§2.9): as invocações recebem dano pelo mesmo funil de todo mundo, e a
+  redução plana é a defesa do preset. Não há um segundo funil.
+- **Conteúdo**: como a barra está cheia, o jogador invoca por **pergaminhos** (consumíveis com `invocar`): lobo
+  espiritual (agressivo), sombra (assassino), sentinela (protetor), fada (curadora) e espantalho (avatar explosivo).
+  - Vendidos na fase 2 e nas geradas, e também caem como drop.
+  - Pergaminho acima do limite é recusado antes de gastar (`limite`).
+  - Os presets de invocação ficam fora dos inimigos comuns do gerador.
+
+**Consequência.**
+- Save na versão 8 (degrau v7 → v8, inclusive nas fases visitadas) e balance v13.
+- Com o 10A-3, o marco 10A está concluído.

@@ -29,6 +29,8 @@ export interface OpcoesTeclado {
   aoInteragir?: () => void;
   /** Tecla `R`: descanso curto; com Shift, longo (marco 10A-2). */
   aoDescansar?: (longo: boolean) => void;
+  /** Tecla `X`: dispensa as invocações (marco 10A-3). */
+  aoDispensar?: () => void;
   /** Com um modal aberto, as teclas não chegam ao jogo (marco 6). */
   bloqueado?: () => boolean;
 }
@@ -72,6 +74,8 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
       opcoes.aoInteragir();
     } else if (ev.code === 'KeyR' && !ev.repeat && opcoes.aoDescansar) {
       opcoes.aoDescansar(ev.shiftKey);
+    } else if (ev.code === 'KeyX' && !ev.repeat && opcoes.aoDispensar) {
+      opcoes.aoDispensar();
     } else if (ev.code in EIXOS) {
       ev.preventDefault();
       if (!ev.repeat) {

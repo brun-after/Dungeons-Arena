@@ -41,7 +41,9 @@ export type MotivoItem =
   | 'trancado'
   /** Marco 10A-2: descanso com hostil perseguindo, ou num modo sem descanso. */
   | 'em_perigo'
-  | 'sem_descanso';
+  | 'sem_descanso'
+  /** Marco 10A-3: pergaminho de invocação acima do limite do modo (recusado antes de gastar). */
+  | 'limite';
 
 export type MotivoCancelamento = 'morte' | 'interrompido' | 'alvo_invalido' | 'substituido';
 
@@ -87,6 +89,10 @@ export type EventoSimulacao =
   /** Marco 8A-2: invocação, dominação e armadilhas. */
   | { t: 'invocou'; tick: number; donoId: EntidadeId; id: EntidadeId }
   | { t: 'dominou'; tick: number; donoId: EntidadeId; id: EntidadeId }
+  /** Marco 10A-3: cura do curador, explosão da isca e dispensa. */
+  | { t: 'invocacaoCurou'; tick: number; id: EntidadeId; donoId: EntidadeId; cura: number }
+  | { t: 'explodiu'; tick: number; id: EntidadeId; x: number; y: number; raio: number }
+  | { t: 'dispensou'; tick: number; id: EntidadeId; quantidade: number }
   | { t: 'armadilhaArmada'; tick: number; donoId: EntidadeId; armadilhaId: number; x: number; y: number }
   | { t: 'armadilhaDisparou'; tick: number; donoId: EntidadeId; armadilhaId: number; alvoId: EntidadeId }
   /** Marco 8A: o que um efeito periódico ou instantâneo fez (números na tela). */

@@ -112,6 +112,8 @@ export function lerComando(v: unknown): Comando | null {
       return id(v.invId) ? { t: 'vender', invId: v.invId } : null;
     case 'fecharLoja':
       return { t: 'fecharLoja' };
+    case 'dispensar':
+      return { t: 'dispensar' };
     case 'descansar':
       return v.tipo === 'curto' || v.tipo === 'longo' ? { t: 'descansar', tipo: v.tipo } : null;
     case 'moverItem':

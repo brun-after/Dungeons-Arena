@@ -325,6 +325,28 @@ test.describe('desktop', () => {
     expect(erros).toEqual([]);
   });
 
+  test('invocação: um pergaminho na mochila, usado pela tecla 6, chama o lobo espiritual', async ({ page }) => {
+    const { erros } = await abrir(page);
+    await page.getByRole('button', { name: 'Salvar e voltar aos slots' }).click();
+    const slot1 = page.locator('[data-slot="1"]');
+    await expect(slot1).toContainText('Salões da entrada');
+    const download = page.waitForEvent('download');
+    await slot1.getByRole('button', { name: 'Exportar' }).click();
+    type Ent = { bolsa: { mochila: { invId: string; itemId: string; qtd: number }[]; proximoInv: number } | null };
+    const arquivo = JSON.parse(await readFile(await (await download).path(), 'utf8')) as { registro: { estado: { entidades: Ent[] } } };
+    const bolsa = arquivo.registro.estado.entidades.find((e) => e.bolsa)?.bolsa;
+    if (!bolsa) throw new Error('save sem jogador');
+    bolsa.mochila.push({ invId: `i${bolsa.proximoInv++}`, itemId: 'pergaminho_lobo', qtd: 1 });
+    await page.locator('[data-slot="2"] input[type=file]').setInputFiles({ name: 'save.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(arquivo)) });
+    await expect(page.locator('[data-slot="2"]')).toContainText('Salões da entrada');
+    await page.goto('./?jogo=campanha&slot=2&diag=1');
+    await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
+    // Consumíveis na ordem da mochila: a poção é a tecla 5, o pergaminho a 6.
+    await page.keyboard.press('Digit6');
+    await expect(page.locator('.log-combate')).toContainText('invocou Lobo espiritual', { timeout: 10_000 });
+    expect(erros).toEqual([]);
+  });
+
   test('descanso: a tecla R descansa e o registro mostra o resultado', async ({ page }) => {
     const { erros } = await abrir(page);
     await page.keyboard.press('KeyR');

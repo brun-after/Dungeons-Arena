@@ -170,6 +170,106 @@
       "ataqueBasico": "golpe",
       "habilidades": [],
       "intervaloAtaqueMs": 5000
+    },
+    {
+      "id": "lobo_espiritual",
+      "nome": "Lobo espiritual",
+      "hpBase": 40,
+      "hesitacaoS": 0,
+      "deteccao": 5,
+      "xp": 0,
+      "modelo": "lobo",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 0,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 1400,
+      "invocacao": {
+        "comportamento": "agressivo"
+      }
+    },
+    {
+      "id": "sombra",
+      "nome": "Sombra",
+      "hpBase": 30,
+      "hesitacaoS": 0,
+      "deteccao": 5,
+      "xp": 0,
+      "modelo": "sombra",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 0,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 1200,
+      "invocacao": {
+        "comportamento": "assassino"
+      }
+    },
+    {
+      "id": "sentinela",
+      "nome": "Sentinela",
+      "hpBase": 70,
+      "hesitacaoS": 0,
+      "deteccao": 5,
+      "xp": 0,
+      "modelo": "sentinela",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 3,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 1800,
+      "invocacao": {
+        "comportamento": "protetor"
+      }
+    },
+    {
+      "id": "fada",
+      "nome": "Fada",
+      "hpBase": 25,
+      "hesitacaoS": 0,
+      "deteccao": 5,
+      "xp": 0,
+      "modelo": "fada",
+      "arquetipo": "controlador",
+      "classe": "corpo_a_corpo",
+      "defesa": 0,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 1600,
+      "invocacao": {
+        "comportamento": "curador",
+        "cura": {
+          "valor": 8,
+          "recargaMs": 4000
+        }
+      }
+    },
+    {
+      "id": "espantalho",
+      "nome": "Espantalho",
+      "hpBase": 9999,
+      "hesitacaoS": 0,
+      "deteccao": 5,
+      "xp": 0,
+      "modelo": "espantalho",
+      "arquetipo": "boneco",
+      "classe": "corpo_a_corpo",
+      "defesa": 0,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 1600,
+      "invocacao": {
+        "comportamento": "isca",
+        "avatar": true,
+        "golpes": "1d4",
+        "explosao": {
+          "raio": 1,
+          "dano": 15
+        }
+      }
     }
   ]
 }

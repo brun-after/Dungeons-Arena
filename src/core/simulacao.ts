@@ -10,6 +10,7 @@
 
 import { alvoOfensivoValido, iniciarAcao, processarAcoes, processarAutoAtaque } from '../combat/acao';
 import { processarEfeitos, processarGatilhosDeEfeito } from '../combat/efeitos';
+import { dispensarInvocacoes } from '../combat/invocacoes';
 import { moverProjeteis } from '../combat/projeteis';
 import { vivo } from '../entities/entidade';
 import { processarIa } from '../entities/ia';
@@ -114,6 +115,10 @@ function aplicarComandos(
       // Marco 10A-2: descanso (§2.12).
       case 'descansar':
         descansar(estado, ctx, ator, cmd.tipo, saida);
+        break;
+      // Marco 10A-3: dispensa das invocações (§2.9).
+      case 'dispensar':
+        dispensarInvocacoes(estado, ator, saida);
         break;
     }
   }
