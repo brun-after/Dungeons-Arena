@@ -1,5 +1,7 @@
 // Habilidades (§2.8). Habilidade nova é registro novo em src/data/skills.json, não cirurgia:
 // a lógica lê só estes campos e nunca depende do tempo de uma animação do cliente (§2.7).
+// Marco 12 (14/10/2026): `visual` descreve a aparência como dado (D-055/D-056). É só apresentação: a
+// simulação nunca o lê, e o jogo funciona igual sem ele.
 
 import { ehObjeto, Leitor } from '../core/validar';
 import { formulaValida } from './dados';
@@ -33,6 +35,41 @@ export interface Habilidade {
   velocidadeProjetil: number;
   /** Já normalizados (§2.8): uma entrada canônica por componente. */
   efeitos: EfeitoCanonico[];
+  /** Marco 12: aparência (só apresentação); null = deduzida dos efeitos (render/visual-habilidade.ts). */
+  visual: VisualHabilidade | null;
+}
+
+export const PRESETS_VISUAIS = ['faiscas', 'brilho', 'fumaca', 'anel', 'rastro', 'estrelas', 'brasas', 'explosao', 'raio'] as const;
+export type PresetVisual = (typeof PRESETS_VISUAIS)[number];
+
+/** Aparência de uma habilidade (§2.16, D-055): presets de partícula por momento da ação. */
+export interface VisualHabilidade {
+  cor: string | null;
+  conjuracao: PresetVisual | null;
+  viagem: PresetVisual | null;
+  impacto: PresetVisual | null;
+  camera: 'nenhum' | 'leve' | 'forte';
+  /** Id do som (audio/mapeamento.ts); validado lá, pois o catálogo de sons é da apresentação. */
+  som: string | null;
+}
+
+function lerVisual(l: Leitor, v: unknown): VisualHabilidade | null {
+  if (v === undefined || v === null) return null;
+  const o = l.objeto(v, 'visual');
+  const preset = (campo: string): PresetVisual | null => (o[campo] === undefined ? null : l.opcao(o, campo, PRESETS_VISUAIS));
+  const cor = o.cor === undefined ? null : l.texto(o, 'cor');
+  if (cor !== null && !/^#[0-9a-f]{6}$/i.test(cor)) l.erro(`visual.cor precisa ser #rrggbb ("${cor}")`);
+  for (const k of Object.keys(o)) {
+    if (!['cor', 'conjuracao', 'viagem', 'impacto', 'camera', 'som'].includes(k)) l.erro(`visual: campo desconhecido "${k}"`);
+  }
+  return {
+    cor,
+    conjuracao: preset('conjuracao'),
+    viagem: preset('viagem'),
+    impacto: preset('impacto'),
+    camera: o.camera === undefined ? 'nenhum' : l.opcao(o, 'camera', ['nenhum', 'leve', 'forte'] as const),
+    som: o.som === undefined ? null : l.texto(o, 'som'),
+  };
 }
 
 export type Catalogo<T> = ReadonlyMap<string, T>;
@@ -65,6 +102,7 @@ export function lerHabilidades(json: unknown): { habilidades: Map<string, Habili
       interrupcao: l.opcao(o, 'interrupcao', ['interrompivel', 'ininterrupta'] as const),
       velocidadeProjetil: l.numero(o, 'velocidadeProjetil', { min: 0, max: 60 }),
       efeitos: normalizarEfeitos(l.lista(o, 'efeitos'), l),
+      visual: lerVisual(l, o.visual),
     };
     if (h.formulaDano !== null && !formulaValida(h.formulaDano)) l.erro(`fórmula de dano inválida: ${h.formulaDano}`);
     if (h.formulaCura !== null && !formulaValida(h.formulaCura)) l.erro(`fórmula de cura inválida: ${h.formulaCura}`);

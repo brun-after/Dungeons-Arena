@@ -356,6 +356,83 @@ test.describe('desktop', () => {
     expect(erros).toEqual([]);
   });
 
+  // Marco 12: pausa, configurações, guia, minimapa, prompt, áudio e qualidade.
+  test('pausa: Esc pausa a campanha (o tick para) e Continuar retoma', async ({ page }) => {
+    const { diag, erros } = await abrir(page);
+    const tick = async () => Number(await diag.getAttribute('data-tick'));
+    await expect.poll(tick, { timeout: 15_000 }).toBeGreaterThan(30);
+    await page.keyboard.press('Escape');
+    const pausa = page.getByRole('dialog', { name: 'Jogo pausado' });
+    await expect(pausa).toBeVisible();
+    await expect(pausa.getByRole('button', { name: 'Continuar' })).toBeFocused();
+    await page.waitForTimeout(600);
+    const parado = await tick();
+    await page.waitForTimeout(1200);
+    expect(await tick()).toBe(parado);
+    await pausa.getByRole('button', { name: 'Continuar' }).click();
+    await expect(pausa).toBeHidden();
+    await expect.poll(tick, { timeout: 10_000 }).toBeGreaterThan(parado + 20);
+    expect(erros).toEqual([]);
+  });
+
+  test('configurações: qualidade e tamanho da interface persistem depois de recarregar', async ({ page }) => {
+    const { erros } = await abrir(page);
+    await page.getByRole('button', { name: 'Pausar (Esc)' }).click();
+    await page.getByRole('dialog', { name: 'Jogo pausado' }).getByRole('button', { name: 'Configurações' }).click();
+    const config = page.getByRole('dialog', { name: 'Configurações' });
+    await config.getByLabel('Qualidade').selectOption('minimo');
+    await config.getByLabel('Tamanho da interface (%)').fill('120');
+    await expect(page.locator('body')).toHaveAttribute('data-qualidade', 'minimo');
+    await config.getByRole('button', { name: 'Fechar as configurações' }).click();
+    await page.reload();
+    await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
+    await expect(page.locator('body')).toHaveAttribute('data-qualidade', 'minimo');
+    await expect(page.locator('body')).toHaveAttribute('data-particulas', '0');
+    expect(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--escala-ui').trim())).toBe('1.2');
+    expect(erros).toEqual([]);
+  });
+
+  test('guia: abre pela pausa, só com o teclado, e fecha com Esc', async ({ page }) => {
+    const { erros } = await abrir(page);
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog', { name: 'Jogo pausado' })).toBeVisible();
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('button', { name: 'Guia do jogador' })).toBeFocused();
+    await page.keyboard.press('Enter');
+    const guia = page.getByRole('dialog', { name: 'Guia do jogador' });
+    await expect(guia).toBeVisible();
+    await expect(guia).toContainText('Invocações');
+    await page.keyboard.press('Escape');
+    await expect(guia).toBeHidden();
+    expect(erros).toEqual([]);
+  });
+
+  test('minimapa aparece, e perto do baú o prompt mostra "E: abrir baú"', async ({ page }) => {
+    const { diag, erros } = await abrir(page);
+    await expect(page.locator('canvas.minimapa')).toBeVisible();
+    await expect(page.locator('canvas.minimapa')).toHaveAttribute('data-atualizado', /^\d+$/);
+    await irPara(page, diag, 10, 2);
+    await expect(page.locator('.prompt-interacao')).toHaveText('E: abrir baú');
+    expect(erros).toEqual([]);
+  });
+
+  test('áudio: liga no primeiro gesto; mudo nas configurações', async ({ page }) => {
+    const { erros } = await abrir(page);
+    await page.keyboard.press('KeyD');
+    await expect(page.locator('body')).toHaveAttribute('data-audio', 'ativo');
+    await page.getByRole('button', { name: 'Pausar (Esc)' }).click();
+    await page.getByRole('dialog', { name: 'Jogo pausado' }).getByRole('button', { name: 'Configurações' }).click();
+    await page.getByRole('dialog', { name: 'Configurações' }).getByLabel('Sem som').check();
+    await page.getByRole('dialog', { name: 'Configurações' }).getByRole('button', { name: 'Fechar as configurações' }).click();
+    await page.reload();
+    await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
+    await page.getByRole('button', { name: 'Pausar (Esc)' }).click();
+    await page.getByRole('dialog', { name: 'Jogo pausado' }).getByRole('button', { name: 'Configurações' }).click();
+    await expect(page.getByRole('dialog', { name: 'Configurações' }).getByLabel('Sem som')).toBeChecked();
+    expect(erros).toEqual([]);
+  });
+
   test('controles de toque ficam escondidos no desktop', async ({ page }) => {
     await abrir(page);
     await expect(page.getByTestId('joystick')).toBeHidden();
@@ -378,6 +455,18 @@ test.describe('arena em loopback', () => {
     await expect.poll(async () => (await ler(diag, 'celula'))[0], { timeout: 15_000 }).not.toBe(x0);
     await page.keyboard.up('d');
     await expect(page.locator('.chip-rede')).toBeVisible();
+    expect(erros).toEqual([]);
+  });
+  test('o menu da arena não pausa: o mundo segue com ele aberto', async ({ page }) => {
+    const erros: string[] = [];
+    page.on('pageerror', (e) => erros.push(e.message));
+    await page.goto('./?arena=loopback&diag=1');
+    const diag = page.locator('#diag');
+    await expect(diag).toHaveAttribute('data-rtt', /^\d+$/, { timeout: 20_000 });
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog', { name: 'Menu (a partida continua)' })).toBeVisible();
+    const t0 = Number(await diag.getAttribute('data-tick'));
+    await expect.poll(async () => Number(await diag.getAttribute('data-tick')), { timeout: 10_000 }).toBeGreaterThan(t0 + 20);
     expect(erros).toEqual([]);
   });
 });

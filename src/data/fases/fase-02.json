@@ -147,6 +147,38 @@
       },
       "modo": "rearme",
       "rearmeMs": 6000
+    },
+    {
+      "tipo": "fonte_som",
+      "x": 0.0625,
+      "y": 0.2167,
+      "sfxId": "fogo",
+      "raio": 6,
+      "volume": 0.6
+    },
+    {
+      "tipo": "fonte_som",
+      "x": 0.3125,
+      "y": 0.8833,
+      "sfxId": "agua",
+      "raio": 7,
+      "volume": 0.5
+    },
+    {
+      "tipo": "fonte_som",
+      "x": 0.7625,
+      "y": 0.1167,
+      "sfxId": "goteira",
+      "raio": 7,
+      "volume": 0.5
+    },
+    {
+      "tipo": "fonte_som",
+      "x": 0.1625,
+      "y": 0.4833,
+      "sfxId": "vento",
+      "raio": 5,
+      "volume": 0.4
     }
   ],
   "portaSaida": {

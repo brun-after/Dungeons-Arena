@@ -2,20 +2,58 @@
 // `perfil` do IndexedDB (§3.5, fecha a D-015). A leitura é síncrona, de um cache carregado no
 // início por `prepararPreferencias`. Sem IndexedDB, continuam no localStorage; sem nenhum dos
 // dois, valem só nesta sessão. Falha de armazenamento nunca quebra o jogo.
+// Marco 12 (14/10/2026): gráficos, áudio, câmera e acessibilidade, sempre normalizados (valor fora do
+// esperado volta ao padrão).
 
 import { gravarNoBanco, lerDoBanco } from './banco';
 
 export type TipoControle = 'joystick' | 'dpad';
 export type ModoCamera = 'janela' | 'centralizada';
+export type NivelQualidade = 'minimo' | 'baixo' | 'medio' | 'alto';
+/** `auto`: começa pelo padrão do aparelho e desce sozinho se o fps cair (§4.10). */
+export type EscolhaQualidade = 'auto' | NivelQualidade;
+export type MovimentoReduzido = 'sistema' | 'sempre' | 'nunca';
 
 export interface Preferencias {
   controle: TipoControle;
   camera: ModoCamera;
+  qualidade: EscolhaQualidade;
+  /** Tremor, flash, congelamento e soco de zoom (§2.4). */
+  efeitosDeTela: boolean;
+  /** Enquadrar atacante e alvo (§2.4, só campanha). */
+  enquadrarDois: boolean;
+  /** Volumes de 0 a 1 (§2.14: música 0,45 e efeitos 0,75 por padrão). */
+  volumeMusica: number;
+  volumeEfeitos: number;
+  mudo: boolean;
+  /** Escala da interface, de 0,8 a 1,5 (§5.4). */
+  escalaInterface: number;
+  movimentoReduzido: MovimentoReduzido;
 }
+
+export const QUALIDADES: readonly NivelQualidade[] = ['minimo', 'baixo', 'medio', 'alto'];
 
 const CHAVE_LOCAL = 'dungeons-arena:preferencias';
 const CHAVE_PERFIL = 'preferencias';
-const PADRAO: Preferencias = { controle: 'joystick', camera: 'janela' };
+export const PREFERENCIAS_PADRAO: Preferencias = {
+  controle: 'joystick',
+  camera: 'janela',
+  qualidade: 'auto',
+  efeitosDeTela: true,
+  enquadrarDois: true,
+  volumeMusica: 0.45,
+  volumeEfeitos: 0.75,
+  mudo: false,
+  escalaInterface: 1,
+  movimentoReduzido: 'sistema',
+};
+const PADRAO = PREFERENCIAS_PADRAO;
+
+const numeroEntre = (v: unknown, min: number, max: number, padrao: number): number =>
+  typeof v === 'number' && Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : padrao;
+const booleano = (v: unknown, padrao: boolean): boolean => (typeof v === 'boolean' ? v : padrao);
+const opcao = <T extends string>(v: unknown, validas: readonly T[], padrao: T): T =>
+  typeof v === 'string' && (validas as readonly string[]).includes(v) ? (v as T) : padrao;
 
 let cache: Preferencias = { ...PADRAO };
 let usarBanco = false;
@@ -25,6 +63,14 @@ export function normalizarPreferencias(dados: unknown): Preferencias {
   return {
     controle: d.controle === 'dpad' ? 'dpad' : 'joystick',
     camera: d.camera === 'centralizada' ? 'centralizada' : 'janela',
+    qualidade: opcao(d.qualidade, ['auto', ...QUALIDADES], PADRAO.qualidade),
+    efeitosDeTela: booleano(d.efeitosDeTela, PADRAO.efeitosDeTela),
+    enquadrarDois: booleano(d.enquadrarDois, PADRAO.enquadrarDois),
+    volumeMusica: numeroEntre(d.volumeMusica, 0, 1, PADRAO.volumeMusica),
+    volumeEfeitos: numeroEntre(d.volumeEfeitos, 0, 1, PADRAO.volumeEfeitos),
+    mudo: booleano(d.mudo, PADRAO.mudo),
+    escalaInterface: numeroEntre(d.escalaInterface, 0.8, 1.5, PADRAO.escalaInterface),
+    movimentoReduzido: opcao(d.movimentoReduzido, ['sistema', 'sempre', 'nunca'] as const, PADRAO.movimentoReduzido),
   };
 }
 

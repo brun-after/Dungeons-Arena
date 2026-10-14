@@ -36,6 +36,9 @@ export function povoarFase(estado: EstadoJogo, ctx: ContextoSimulacao, saida: Ev
         case 'loot':
           if (o.itemId) largarItem(estado, o.itemId, o.x, o.y, saida, o.valor, objetoId);
           break;
+        // Marco 12: a fonte sonora é só apresentação (ui/som.ts lê da fase); não entra no estado.
+        case 'fonte_som':
+          break;
         // Marco 9A: baú e loja. A validação garante uma célula por objeto.
         case 'bau':
         case 'loja':

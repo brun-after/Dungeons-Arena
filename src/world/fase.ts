@@ -50,8 +50,12 @@ export interface InimigoPosicionado {
  * `coluna = min(largura − 1, floor(x × largura))`, e equivalente para a linha.
  */
 export type TipoOrbeDeFase = 'orbe_hp' | 'orbe_recurso' | 'orbe_efeito';
-/** Marco 9A (14/10/2026): baú, loja e loot posicionados; 9A-2: armadilha de fase. */
-export type TipoObjetoDeFase = TipoOrbeDeFase | 'bau' | 'loja' | 'loot' | 'armadilha';
+/** Marco 9A (14/10/2026): baú, loja e loot posicionados; 9A-2: armadilha de fase; 12: fonte sonora. */
+export type TipoObjetoDeFase = TipoOrbeDeFase | 'bau' | 'loja' | 'loot' | 'armadilha' | 'fonte_som';
+
+/** Sons ambientes das fontes sonoras (§2.1, §2.14), sintetizados pelo jogo (D-056). */
+export const SONS_DE_FONTE = ['fogo', 'agua', 'vento', 'goteira'] as const;
+export type SomDeFonte = (typeof SONS_DE_FONTE)[number];
 
 export type ObjetoPosicionadoJson =
   | {
@@ -68,7 +72,9 @@ export type ObjetoPosicionadoJson =
   | { tipo: 'loja'; x: number; y: number; estoque: string[] }
   | { tipo: 'loot'; x: number; y: number; itemId: string; quantidade: number }
   /** Invisível; dano fixo (`valor`) e efeito opcional. `rearmeMs` só com `modo: 'rearme'`. */
-  | { tipo: 'armadilha'; x: number; y: number; valor: number; efeito?: EfeitoCanonico; modo: 'unica' | 'rearme'; rearmeMs?: number };
+  | { tipo: 'armadilha'; x: number; y: number; valor: number; efeito?: EfeitoCanonico; modo: 'unica' | 'rearme'; rearmeMs?: number }
+  /** Marco 12: fonte sonora em laço; só a apresentação a lê (não entra no estado da simulação). */
+  | { tipo: 'fonte_som'; x: number; y: number; sfxId: SomDeFonte; raio: number; volume: number };
 
 /** Forma uniforme, já em células; os campos que o tipo não usa ficam neutros. */
 export interface ObjetoPosicionado {
@@ -86,6 +92,9 @@ export interface ObjetoPosicionado {
   itemId: string | null;
   /** Armadilha de fase: 0 = disparo único. */
   rearmeMs: number;
+  /** Fonte sonora: o som (o volume vai em `valor` e o alcance em células em `raio`). */
+  som: SomDeFonte | null;
+  raio: number;
 }
 
 function objetoCarregado(o: ObjetoPosicionadoJson, largura: number, altura: number): ObjetoPosicionado {
@@ -101,6 +110,8 @@ function objetoCarregado(o: ObjetoPosicionadoJson, largura: number, altura: numb
     chave: null,
     itemId: null,
     rearmeMs: 0,
+    som: null,
+    raio: 0,
   };
   switch (o.tipo) {
     case 'bau':
@@ -111,6 +122,8 @@ function objetoCarregado(o: ObjetoPosicionadoJson, largura: number, altura: numb
       return { ...base, valor: o.quantidade, itemId: o.itemId };
     case 'armadilha':
       return { ...base, valor: o.valor, efeito: o.efeito ? { ...o.efeito } : null, rearmeMs: o.modo === 'rearme' ? (o.rearmeMs ?? 0) : 0 };
+    case 'fonte_som':
+      return { ...base, valor: o.volume, som: o.sfxId, raio: o.raio };
     default:
       return { ...base, valor: o.valor, modo: o.modo, efeito: o.efeito ? { ...o.efeito } : null };
   }

@@ -179,6 +179,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     sair.className = 'botao-cabecalho';
     sair.textContent = t('slots.menu');
     sair.setAttribute('aria-label', t('slots.salvarESair'));
+    sair.dataset.pausa = 'sim';
     const salvar = autosave;
     sair.addEventListener('click', () => {
       sair.disabled = true;
@@ -208,6 +209,11 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     estado: () => estado,
     emitir: (cmd: Comando) => enfileirar(fila, { tick: estado.tick, entidadeId: idJogador, cmd }),
     acoesExtras,
+    // Marco 12: a campanha pausa (§2.15); o menu de pausa também salva e sai.
+    pausaOJogo: true,
+    acoesDaPausa: acoesExtras
+      .filter((b): b is HTMLButtonElement => b instanceof HTMLButtonElement && b.dataset.pausa === 'sim')
+      .map((b) => ({ rotulo: t('pausa.salvarESair'), fazer: () => { b.click(); } })),
   });
   if (!cena) return;
   if (teste) mostrarAviso(raiz, t('editor.testeSemSave'), 4000);
@@ -314,6 +320,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
         },
       });
     },
+    pausado: cena.pausado,
   });
 }
 

@@ -13,6 +13,8 @@ import { lerPortasInternas, lerPortaSaida, validarPortasNaFase } from './validac
 import {
   CARACTERE_CELULA,
   carregarFase,
+  SONS_DE_FONTE,
+  type SomDeFonte,
   passavel,
   type FaseJson,
   type InimigoPosicionado,
@@ -105,6 +107,20 @@ function listaDeItens(v: unknown, campo: string, erros: ErroFase[], itens: Itens
   return [...v];
 }
 
+/** Fonte sonora (marco 12): som ambiente conhecido, alcance de 1 a 20 células e volume de 0 a 1. */
+function fonteSonora(o: Record<string, unknown>, x: number, y: number, erros: ErroFase[]): ObjetoPosicionadoJson | 'erro' {
+  const { sfxId, raio, volume } = o;
+  if (typeof sfxId !== 'string' || !(SONS_DE_FONTE as readonly string[]).includes(sfxId) || !ehInteiro(raio) || raio < 1 || raio > 20) {
+    erros.push({ mensagem: `fonte_som precisa de sfxId (${SONS_DE_FONTE.join(', ')}) e raio inteiro de 1 a 20` });
+    return 'erro';
+  }
+  if (typeof volume !== 'number' || !Number.isFinite(volume) || volume < 0 || volume > 1) {
+    erros.push({ mensagem: 'volume da fonte_som precisa ficar entre 0 e 1' });
+    return 'erro';
+  }
+  return { tipo: 'fonte_som', x, y, sfxId: sfxId as SomDeFonte, raio, volume };
+}
+
 /** Armadilha de fase (marco 9A-2): dano fixo, efeito opcional de um componente, única ou com rearme. */
 function armadilhaDeFase(o: Record<string, unknown>, x: number, y: number, erros: ErroFase[]): ObjetoPosicionadoJson | 'erro' {
   const valor = o.valor;
@@ -133,13 +149,14 @@ function armadilhaDeFase(o: Record<string, unknown>, x: number, y: number, erros
 
 /** Baú, loja, loot (marco 9A) e armadilha (9A-2). Devolve null quando o objeto não é de um desses tipos. */
 function objetoDeEconomia(o: Record<string, unknown>, erros: ErroFase[], itens: ItensConhecidos | undefined): ObjetoPosicionadoJson | null | 'erro' {
-  if (o.tipo !== 'bau' && o.tipo !== 'loja' && o.tipo !== 'loot' && o.tipo !== 'armadilha') return null;
+  if (o.tipo !== 'bau' && o.tipo !== 'loja' && o.tipo !== 'loot' && o.tipo !== 'armadilha' && o.tipo !== 'fonte_som') return null;
   if (!normalizado(o.x) || !normalizado(o.y)) {
     erros.push({ mensagem: `${o.tipo}: x e y precisam ficar entre 0 e 1` });
     return 'erro';
   }
   const { x, y } = o;
   if (o.tipo === 'armadilha') return armadilhaDeFase(o, x, y, erros);
+  if (o.tipo === 'fonte_som') return fonteSonora(o, x, y, erros);
   if (o.tipo === 'loja') {
     const estoque = listaDeItens(o.estoque, 'estoque da loja', erros, itens);
     if (!estoque || estoque.length === 0) {

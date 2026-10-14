@@ -2,6 +2,7 @@
 // funcionar com teclado, toque e leitores de tela, e para cada modo ter um endereço próprio.
 
 import { t } from '../i18n';
+import { criarFundoMenu } from './fundo-menu';
 
 export function mostrarMenu(raiz: HTMLElement): void {
   raiz.textContent = '';
@@ -14,7 +15,8 @@ export function mostrarMenu(raiz: HTMLElement): void {
   const subtitulo = document.createElement('p');
   subtitulo.className = 'subtitulo-menu';
   subtitulo.textContent = t('menu.subtitulo');
-  tela.append(titulo, subtitulo);
+  // Marco 12: plano de fundo procedural (masmorra com tochas).
+  tela.append(criarFundoMenu(), titulo, subtitulo);
 
   const opcoes: [string, string][] = [
     ['./?jogo=campanha', t('menu.campanha')],
