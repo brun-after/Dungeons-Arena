@@ -138,6 +138,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     ctx,
     jogador,
     emitir,
+    estado: o.estado,
     toque,
     aoAbrir: () => {
       teclado?.soltarTudo();
@@ -251,6 +252,9 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     },
     aoDescansar: (longo) => {
       emitir({ t: 'descansar', tipo: longo ? 'longo' : 'curto' });
+    },
+    aoDispensar: () => {
+      emitir({ t: 'dispensar' });
     },
     aoCancelar: () => {
       emitir({ t: 'selecionarAlvo', alvo: null });

@@ -31,9 +31,9 @@ export interface CatalogoGeracao {
   estoque: readonly string[];
 }
 
-/** Presets comuns (sem chefe nem boneco de treino) e o chefe, tirados do catálogo. */
+/** Presets comuns (sem chefe, boneco de treino nem invocações, marco 10A-3) e o chefe, tirados do catálogo. */
 export function catalogoDeGeracao(conteudo: Conteudo, estoque: readonly string[]): CatalogoGeracao {
-  const presets = [...conteudo.presets.values()];
+  const presets = [...conteudo.presets.values()].filter((p) => p.invocacao === null);
   const comuns = presets.filter((p) => p.arquetipo !== 'boss' && p.arquetipo !== 'boneco').map((p) => p.id);
   const boss = presets.find((p) => p.arquetipo === 'boss')?.id ?? comuns[0] ?? '';
   return { comuns, boss, estoque: [...estoque] };

@@ -7,7 +7,7 @@ import { ehObjeto, type Objeto } from '../core/validar';
 import type { Entidade } from '../entities/entidade';
 import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 7;
+export const VERSAO_SCHEMA = 8;
 export const SLOTS = [1, 2, 3] as const;
 export const FORMATO_EXPORTACAO = 'dungeons-arena/save';
 
@@ -144,8 +144,28 @@ function v5ParaV6(r: Objeto): Objeto {
  */
 const v6ParaV7: Migracao = (r) => r;
 
+/**
+ * v7 → v8 (marco 10A-3, 14/10/2026): a invocação ganhou comportamento, avatar, golpes, rampa e nível
+ * de dominação. Campos novos com valor neutro (dominados ficam no nível 1).
+ */
+function v7ParaV8(r: Objeto): Objeto {
+  const e = r.estado;
+  if (!ehObjeto(e)) return r;
+  const completar = (x: unknown): unknown => {
+    if (!ehObjeto(x) || !ehObjeto(x.invocacao)) return x;
+    const neutros = { comportamento: 'agressivo', avatar: false, golpesRestantes: 0, abates: 0, criadoTick: 0, nivelDominacao: x.invocacao.dominado === true ? 1 : 0 };
+    return { ...x, invocacao: { ...neutros, ...x.invocacao } };
+  };
+  const visitadas = ehObjeto(r.fasesVisitadas)
+    ? Object.fromEntries(
+        Object.entries(r.fasesVisitadas).map(([k, v]) => [k, ehObjeto(v) ? { ...v, entidades: lista(v.entidades).map(completar) } : v]),
+      )
+    : r.fasesVisitadas;
+  return { ...r, fasesVisitadas: visitadas, estado: { ...e, entidades: lista(e.entidades).map(completar) } };
+}
+
 /** `MIGRACOES[v]` leva um registro da versão `v` para a `v + 1`. Não existiu versão 0. */
-export const MIGRACOES: Readonly<Record<number, Migracao>> = { 1: v1ParaV2, 2: v2ParaV3, 3: v3ParaV4, 4: v4ParaV5, 5: v5ParaV6, 6: v6ParaV7 };
+export const MIGRACOES: Readonly<Record<number, Migracao>> = { 1: v1ParaV2, 2: v2ParaV3, 3: v3ParaV4, 4: v4ParaV5, 5: v5ParaV6, 6: v6ParaV7, 7: v7ParaV8 };
 
 function temNaoFinito(v: unknown): boolean {
   if (typeof v === 'number') return !Number.isFinite(v);

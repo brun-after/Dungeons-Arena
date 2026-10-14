@@ -162,6 +162,10 @@ export class CamadaEntidades {
     if (selecionado) g.circle(0, 0, RAIO * m.escala + 6).stroke({ width: 2, color: 0xf1c40f, alpha: 0.9 });
     // Marco 8A-2: dominado (lutando do outro lado) ganha um anel roxo.
     if (e.invocacao?.dominado) g.circle(0, 0, RAIO * m.escala + 3).stroke({ width: 2, color: 0x8e44ad, alpha: 0.95 });
+    // Marco 10A-3: invocação com anel verde-azulado; avatar mostra os golpes que ainda aguenta.
+    else if (e.invocacao) g.circle(0, 0, RAIO * m.escala + 3).stroke({ width: 1.5, color: 0x1abc9c, alpha: 0.9 });
+    const golpes = e.invocacao?.avatar ? e.invocacao.golpesRestantes : 0;
+    for (let i = 0; i < golpes; i++) g.rect(-golpes * 4 + i * 8 + 1, RAIO * m.escala + 4, 6, 6).fill(0xf1c40f).stroke({ width: 1, color: 0x000000 });
     // Marco 8A: marcador do status mais importante (negativo antes de positivo), na cor do registro.
     const status = e.morto ? [] : efeitosAtivos(e, estado.tick).filter((d) => d.ehStatus);
     const principal = status.find((d) => !d.positivo) ?? status[0];

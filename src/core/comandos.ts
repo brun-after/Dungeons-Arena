@@ -30,7 +30,9 @@ export type Comando =
   | { t: 'fecharLoja' }
   | { t: 'moverItem'; invId: string; posicao: number }
   /** Marco 10A-2: descanso (§2.12, só onde o modo permite). */
-  | { t: 'descansar'; tipo: 'curto' | 'longo' };
+  | { t: 'descansar'; tipo: 'curto' | 'longo' }
+  /** Marco 10A-3: dispensa as próprias invocações (§2.9). */
+  | { t: 'dispensar' };
 
 /** Envelope de rede. O servidor deriva o jogador da sessão e atribui o tick de aplicação. */
 export interface ComandoEmpacotado {

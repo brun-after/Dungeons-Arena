@@ -23,6 +23,8 @@ export function bloqueia(a: Entidade, b: Entidade, regras: RegrasColisao): boole
   if (semColisao(a) || semColisao(b)) return false; // `fantasma` (§2.8, marco 8A)
   if ((a.tipo === 'jogador' && a.hp <= 0) || (b.tipo === 'jogador' && b.hp <= 0)) return false; // 3
   if (a.tipo === 'avatar' || b.tipo === 'avatar') return true; // 5
+  // Marco 10A-3: invocação não bloqueia aliado da própria equipe (§2.9).
+  if ((a.invocacao || b.invocacao) && a.equipe === b.equipe) return false;
   const jogadores = Number(a.tipo === 'jogador') + Number(b.tipo === 'jogador');
   const inimigos = Number(a.tipo === 'inimigo') + Number(b.tipo === 'inimigo');
   if (jogadores === 2) return regras.jogadorBloqueiaJogador; // 8

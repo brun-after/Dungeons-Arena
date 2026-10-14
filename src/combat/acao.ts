@@ -18,6 +18,7 @@ import { excedeLimite } from './efeitos-fluxo';
 import { celulaOcupada, chebyshev, dentroDoQuadrado } from './geometria';
 import { aplicarImpacto } from './golpe';
 import type { Habilidade } from './habilidades';
+import { rampaDeInvocacao } from './invocacoes';
 import { lancarProjetil } from './projeteis';
 
 export function chaveRecarga(entidadeId: EntidadeId, habilidadeId: string): string {
@@ -35,7 +36,8 @@ export function fonteDe(e: Entidade, ctx: ContextoSimulacao, tick: number): Font
     equipe: e.equipe,
     bonusAtributo: bonusDeAtributo(e.atributos, e.classe, ctx.balance.combate.multiplicadorAtributoPadrao),
     carisma: e.atributos.carisma,
-    multDano: multiplicadorDanoCausado(e, tick),
+    // Marco 10A-3: a rampa da invocação multiplica junto com os efeitos (§2.9).
+    multDano: multiplicadorDanoCausado(e, tick) * rampaDeInvocacao(e, tick, ctx),
   };
 }
 
@@ -49,7 +51,12 @@ export function alvoOfensivoValido(estado: EstadoJogo, ctx: ContextoSimulacao, a
   return vivo(alvo) && alvo.invisivelAteTick <= estado.tick && podeFerir(ator, alvo, ctx.modo);
 }
 
-/** Auto-alvo (§4.7): hostil no alcance por Chebyshev; mais próximo, depois menor HP, depois id. */
+/** Avatar hostil vem antes de qualquer outro alvo (§2.9): é regra de alvo, não de hostilidade. */
+export function prioridadeDeAlvo(e: Entidade): number {
+  return e.invocacao?.avatar ? 0 : 1;
+}
+
+/** Auto-alvo (§4.7): hostil no alcance por Chebyshev; avatar primeiro, depois mais próximo, menor HP e id. */
 export function autoAlvo(
   estado: EstadoJogo,
   ctx: ContextoSimulacao,
@@ -64,8 +71,10 @@ export function autoAlvo(
     if (e.id === ator.id || !alvoOfensivoValido(estado, ctx, ator, e) || !filtro(e)) continue;
     const d = chebyshev(origem, celulaOcupada(e));
     if (d > alcance) continue;
+    const p = prioridadeDeAlvo(e);
+    const pm = melhor ? prioridadeDeAlvo(melhor) : Infinity;
     const melhorQue =
-      !melhor || d < melhorDist || (d === melhorDist && (e.hp < melhor.hp || (e.hp === melhor.hp && e.id < melhor.id)));
+      !melhor || p < pm || (p === pm && (d < melhorDist || (d === melhorDist && (e.hp < melhor.hp || (e.hp === melhor.hp && e.id < melhor.id)))));
     if (melhorQue) {
       melhor = e;
       melhorDist = d;

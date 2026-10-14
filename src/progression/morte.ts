@@ -15,6 +15,7 @@ import { podeFerir } from '../modos/relacao';
 import { atrasoDeRespawnTicks, localDeRespawn, penalidadeDeMorte, podeRespawnar, protecaoDeRespawnTicks } from '../modos/regras';
 import { celulaLivrePara } from '../world/colisao';
 import { tentarDominar } from '../combat/efeitos-fluxo';
+import { explodirSeIsca } from '../combat/invocacoes';
 import { sortearEfeitoDeOrbe } from '../combat/registro-efeitos';
 import { encerrarInteracao } from '../world/interacao';
 import { aoMorrerBoss } from '../world/portas';
@@ -66,6 +67,10 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
     saida.push({ t: 'morreu', tick: estado.tick, id: e.id, porId: porId?.id ?? null });
 
     if (e.controlador === 'ia') {
+      // Marco 10A-3: abate de invocação conta na rampa dela; a isca explosiva explode ao cair.
+      const matador = porId ? buscarEntidade(estado, porId.id) : undefined;
+      if (matador?.invocacao && !e.invocacao) matador.invocacao.abates++;
+      explodirSeIsca(estado, ctx, e, saida);
       concederXp(estado, ctx, e, saida);
       // Boss morto abre a passagem (§2.1, marco 10A-1).
       aoMorrerBoss(estado, ctx, e, saida);

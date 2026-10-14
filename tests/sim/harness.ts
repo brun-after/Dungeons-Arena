@@ -9,6 +9,7 @@ import { aleatorio, criarRng, escolher, inteiro, type EstadoRng } from '../../sr
 import { simular, type EventoSimulacao } from '../../src/core/simulacao';
 import { emPasso, type Entidade } from '../../src/entities/entidade';
 import { SLOTS_DE_EQUIPAMENTO } from '../../src/modos/modo';
+import { guardarItem } from '../../src/progression/inventario';
 import { NOMES_ATRIBUTOS } from '../../src/progression/itens';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import { bloqueia, reservaCelula } from '../../src/world/colisao';
@@ -58,7 +59,13 @@ export function criarCenario(opcoes: OpcoesCenario): Cenario {
   for (let i = 0; i < (opcoes.jogadores ?? 1); i++) {
     const c = i === 0 ? spawn : celulaLivre();
     ocupadas.add(`${c.x},${c.y}`);
-    estado.entidades.push(criarJogador(classeAventureiro(), `j${i + 1}`, c.x, c.y, balance));
+    const jogador = criarJogador(classeAventureiro(), `j${i + 1}`, c.x, c.y, balance);
+    // Marco 10A-3: pergaminhos de invocação, para o bot exercitar invocações e avatares.
+    for (const id of ['pergaminho_lobo', 'pergaminho_fada', 'pergaminho_espantalho']) {
+      const item = CONTEUDO.itens.get(id);
+      if (item && jogador.bolsa) guardarItem(jogador.bolsa, item, 3, balance.inventario);
+    }
+    estado.entidades.push(jogador);
   }
   const n = opcoes.inimigos ?? 12;
   for (let i = 0; i < n; i++) {
@@ -160,9 +167,15 @@ export function verificarInvariantes(estado: EstadoJogo, ctx: ContextoSimulacao)
   // Marco 8A-2: invocações (não dominadas) e armadilhas dentro dos limites do modo, por dono.
   const porDono = new Map<string, number>();
   for (const e of estado.entidades) {
-    if (e.invocacao && !e.invocacao.dominado && e.hp > 0) porDono.set(e.invocacao.donoId, (porDono.get(e.invocacao.donoId) ?? 0) + 1);
+    if (e.invocacao && !e.invocacao.dominado && !e.invocacao.avatar && e.hp > 0) porDono.set(e.invocacao.donoId, (porDono.get(e.invocacao.donoId) ?? 0) + 1);
   }
   for (const [dono, n] of porDono) if (n > ctx.modo.limites.invocacoesPorJogador) erros.push(`${dono} com ${n} invocações`);
+  // Marco 10A-3: avatares contam à parte; golpes do avatar nunca negativos.
+  for (const dono of new Set(estado.entidades.map((e) => e.invocacao?.donoId).filter((d): d is string => d !== undefined))) {
+    const n = estado.entidades.filter((e) => e.invocacao?.donoId === dono && e.invocacao.avatar && e.hp > 0).length;
+    if (n > ctx.modo.limites.avataresPorJogador) erros.push(`${dono} com ${n} avatares`);
+  }
+  for (const e of estado.entidades) if (e.invocacao && e.invocacao.golpesRestantes < 0) erros.push(`${e.id} com golpes negativos`);
   const armadilhas = new Map<string, number>();
   for (const a of estado.armadilhas) if (a.origem === 'habilidade') armadilhas.set(a.donoId, (armadilhas.get(a.donoId) ?? 0) + 1);
   // Marco 9A-2: o spawner nunca passa do máximo de cada categoria; só armadilha com rearme fica inerte.

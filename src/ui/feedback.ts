@@ -166,6 +166,17 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
   bus.on('lojaFechada', (ev) => {
     if (ev.id === idLocal) hud.registrar(t('log.lojaFechada'));
   });
+  // Marco 10A-3: invocações.
+  bus.on('invocacaoCurou', (ev) => {
+    if (ev.donoId !== idLocal || ev.cura <= 0) return;
+    hud.registrar(t('log.invocacaoCurou', { alvo: nome(ev.id), cura: ev.cura }));
+  });
+  bus.on('explodiu', (ev) => {
+    hud.registrar(t('log.explodiu', { alvo: nome(ev.id) }));
+  });
+  bus.on('dispensou', (ev) => {
+    if (ev.id === idLocal) hud.registrar(t('log.dispensou', { n: ev.quantidade }));
+  });
   // Marco 10A-2: descanso e penalidade de morte.
   bus.on('interacaoIniciada', (ev) => {
     if (ev.id === idLocal && ev.tipo === 'descanso') hud.registrar(t('log.descansando'));

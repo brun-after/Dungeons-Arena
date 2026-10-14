@@ -37,11 +37,23 @@ export interface EfeitoAtivo {
   ref: string | null;
 }
 
+/** Comportamento da invocação (§2.9, marco 10A-3). */
+export type ComportamentoInvocacao = 'agressivo' | 'assassino' | 'protetor' | 'curador' | 'isca';
+
 /** Invocação ou dominado (§2.9): de quem é, até quando, e se foi dominado (sobrevive ao dono). */
 export interface DadosInvocacao {
   donoId: EntidadeId;
   expiraTick: number;
   dominado: boolean;
+  /** Marco 10A-3: comportamento, avatar (isca que bloqueia e atrai), golpes que o avatar ainda aguenta. */
+  comportamento: ComportamentoInvocacao;
+  avatar: boolean;
+  golpesRestantes: number;
+  /** Rampa (§2.9): a invocação fica mais forte com o tempo e com os abates. */
+  abates: number;
+  criadoTick: number;
+  /** Cascata de dominação: 0 para invocações, 1 para dominados, 2 para quem um dominado dominou… */
+  nivelDominacao: number;
 }
 
 /** Ação em conjuração (§2.7, etapa 3). Ticks publicados para a telegrafia (§3.6). */

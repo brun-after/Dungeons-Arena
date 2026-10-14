@@ -1,5 +1,5 @@
 {
-  "versao": 12,
+  "versao": 13,
   "movimento": {
     "velocidadeBaseMs": 400,
     "filaMaxWaypoints": 2
@@ -97,6 +97,16 @@
   "portas": {
     "recargaMs": 800,
     "janelaPortaBossMs": 30000
+  },
+  "invocacoes": {
+    "passoMs": 380,
+    "raioEngajamento": 5,
+    "distanciaDono": 2,
+    "raioProtetor": 3,
+    "rampaPorMinutoPct": 10,
+    "rampaPorAbatePct": 5,
+    "rampaMaxPct": 50,
+    "cascataDominacao": 1
   },
   "atributos": {
     "minimo": 1,

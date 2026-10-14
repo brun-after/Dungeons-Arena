@@ -5,6 +5,8 @@
 //   invocar          → entidades `invocacao` da equipe do dono, com prazo e limite do modo;
 //   dominar_ao_matar → status no alvo; quem morre com ele volta do lado de quem o aplicou.
 // Tudo passa pelo dispatcher único (`aplicarEfeito`); aqui ficam o estado e os gatilhos por tick.
+// Marco 10A-3 (14/10/2026): comportamento e avatar vindos do preset, avatares contados à parte,
+// cascata de dominação em dados, dispensa e a explosão da isca (D-054).
 
 import type { Celula, EntidadeId } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -16,8 +18,9 @@ import { criarInimigo } from '../entities/fabrica';
 import { podeFerir } from '../modos/relacao';
 import { celulaLivrePara, ordemRotativa } from '../world/colisao';
 import { passavel } from '../world/fase';
-import { celulaOcupada, chebyshev } from './geometria';
+import { celulaOcupada } from './geometria';
 import { registrarParticipacao } from './participacao';
+import { rolar } from './dados';
 import { REGISTRO_EFEITOS, type EfeitoCanonico } from './registro-efeitos';
 
 export interface OrigemFluxo {
@@ -29,8 +32,13 @@ export interface OrigemFluxo {
 /** Dano direto (rastro, armadilha): sem rolagem, respeitando imunidade; conta participação. */
 export type AplicarDireto = (alvo: Entidade, ef: EfeitoCanonico, origem: OrigemFluxo, mira: Celula | null) => void;
 
+/** Invocações vivas (não dominadas e que não são avatar) de um dono. */
 export function contarInvocacoes(estado: EstadoJogo, donoId: EntidadeId): number {
-  return estado.entidades.filter((e) => vivo(e) && e.invocacao?.donoId === donoId && !e.invocacao.dominado).length;
+  return estado.entidades.filter((e) => vivo(e) && e.invocacao?.donoId === donoId && !e.invocacao.dominado && !e.invocacao.avatar).length;
+}
+
+export function contarAvatares(estado: EstadoJogo, donoId: EntidadeId): number {
+  return estado.entidades.filter((e) => vivo(e) && e.invocacao?.donoId === donoId && e.invocacao.avatar).length;
 }
 
 /** Só as de habilidade contam no limite do modo (as de fase e do spawner não têm dono jogador). */
@@ -42,13 +50,16 @@ export function contarArmadilhas(estado: EstadoJogo, donoId: EntidadeId): number
 export function excedeLimite(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, efeitos: readonly EfeitoCanonico[]): boolean {
   const lim = ctx.modo.limites;
   let invocacoes = contarInvocacoes(estado, ator.id);
+  let avatares = contarAvatares(estado, ator.id);
   let armadilhas = contarArmadilhas(estado, ator.id);
   for (const ef of efeitos) {
     const fluxo = REGISTRO_EFEITOS[ef.tipo].fluxo;
-    if (fluxo === 'invocar') invocacoes += Math.max(1, ef.valor);
+    const avatar = fluxo === 'invocar' && ef.ref !== null && ctx.conteudo.presets.get(ef.ref)?.invocacao?.avatar === true;
+    if (avatar) avatares += Math.max(1, ef.valor);
+    else if (fluxo === 'invocar') invocacoes += Math.max(1, ef.valor);
     if (fluxo === 'armadilha') armadilhas += 1;
   }
-  return invocacoes > lim.invocacoesPorJogador || armadilhas > lim.armadilhasPorJogador;
+  return invocacoes > lim.invocacoesPorJogador || avatares > lim.avataresPorJogador || armadilhas > lim.armadilhasPorJogador;
 }
 
 export function agendarAtrasado(estado: EstadoJogo, alvo: Entidade, ef: EfeitoCanonico, origem: OrigemFluxo): void {
@@ -112,9 +123,17 @@ export function invocar(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entida
   if (!preset) return;
   for (let i = 0; i < Math.max(1, ef.valor); i++) {
     const e = criarInimigo(preset, `v${estado.proximoId++}`, dono.x, dono.y, ctx.balance);
+    const p = preset.invocacao;
+    if (p?.avatar) e.tipo = 'avatar';
     const lugar = vizinhasLivres(estado, ctx, e, celulaOcupada(dono))[0];
     if (!lugar) return;
-    tornarInvocacao(e, dono, estado.tick + ticksDe(ef.duracaoMs), false);
+    tornarInvocacao(e, dono, estado.tick, estado.tick + ticksDe(ef.duracaoMs), 0, p?.avatar ? 'avatar' : 'invocacao');
+    if (e.invocacao && p) {
+      e.invocacao.comportamento = p.comportamento;
+      e.invocacao.avatar = p.avatar;
+      // Avatar (§2.9): golpesRestantes = rolar('1d4') (ou a fórmula do preset), pelo PRNG do estado.
+      if (p.golpes) e.invocacao.golpesRestantes = Math.max(1, rolar(estado.rng, p.golpes).total);
+    }
     e.x = e.destinoX = e.origemX = lugar.x;
     e.y = e.destinoY = e.origemY = lugar.y;
     estado.entidades.push(e);
@@ -122,25 +141,40 @@ export function invocar(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entida
   }
 }
 
-/** Invocação herda a equipe do dono (§2.9) e não dá XP nem drops a quem a derrota. */
-function tornarInvocacao(e: Entidade, dono: Entidade, expiraTick: number, dominado: boolean): void {
-  e.tipo = 'invocacao';
+/**
+ * Invocação herda a equipe do dono (§2.9) e não dá XP nem drops a quem a derrota. `nivelDominacao`
+ * 0 é invocação; ≥ 1, dominado. O comportamento padrão é `agressivo` (lacaios e dominados).
+ */
+function tornarInvocacao(e: Entidade, dono: Entidade, tick: number, expiraTick: number, nivelDominacao: number, tipo: 'invocacao' | 'avatar' = 'invocacao'): void {
+  e.tipo = tipo;
   e.equipe = dono.equipe;
   e.xpBase = 0;
-  e.invocacao = { donoId: dono.id, expiraTick, dominado };
+  e.invocacao = {
+    donoId: dono.id,
+    expiraTick,
+    dominado: nivelDominacao > 0,
+    comportamento: 'agressivo',
+    avatar: false,
+    golpesRestantes: 0,
+    abates: 0,
+    criadoTick: tick,
+    nivelDominacao,
+  };
 }
 
 /**
  * Dominação (§2.9): quem morre com `dominar_ao_matar` ativo volta na equipe de quem aplicou, com
- * parte do HP e por um tempo. Dominados não dominam (cascata limitada a 1). Devolve se dominou.
+ * parte do HP e por um tempo. A cascata é limitada por `balance.invocacoes.cascataDominacao`: com 1,
+ * dominados não dominam. Devolve se dominou.
  */
 export function tentarDominar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): boolean {
   if (e.controlador !== 'ia' || e.invocacao?.dominado) return false;
   const marca = e.efeitos.find((f) => REGISTRO_EFEITOS[f.tipo].domina && f.ateTick > estado.tick);
   const dono = marca ? buscarEntidade(estado, marca.origemId) : undefined;
-  if (!dono || !vivo(dono) || dono.invocacao?.dominado) return false;
+  const nivelDono = dono?.invocacao?.nivelDominacao ?? 0;
+  if (!dono || !vivo(dono) || nivelDono >= ctx.balance.invocacoes.cascataDominacao) return false;
   const regras = ctx.balance.efeitos;
-  tornarInvocacao(e, dono, estado.tick + ticksDe(regras.dominacaoMs), true);
+  tornarInvocacao(e, dono, estado.tick, estado.tick + ticksDe(regras.dominacaoMs), nivelDono + 1);
   e.hp = Math.max(1, Math.round((e.hpMax * regras.dominacaoHpPct) / 100));
   e.efeitos = [];
   e.participacao = [];
@@ -225,7 +259,7 @@ export function processarGatilhos(estado: EstadoJogo, ctx: ContextoSimulacao, ap
 }
 
 /** Dano fixo de rastro ou armadilha: respeita `imune_dano` e conta participação para o XP. */
-function causarDano(
+export function causarDano(
   estado: EstadoJogo,
   ctx: ContextoSimulacao,
   alvo: Entidade,
@@ -239,11 +273,4 @@ function causarDano(
   alvo.hp -= dano;
   if (dano > 0) registrarParticipacao(alvo, origemId, estado.tick, ctx);
   saida.push({ t: 'efeitoResultado', tick: estado.tick, alvoId: alvo.id, origemId, tipo, dano, cura: 0, mana: 0 });
-}
-
-/** A invocação está perto o bastante do dono? (a IA a faz seguir o dono a 2 células, §2.9). */
-export function longeDoDono(estado: EstadoJogo, e: Entidade): Entidade | null {
-  const dono = e.invocacao ? buscarEntidade(estado, e.invocacao.donoId) : undefined;
-  if (!dono || !vivo(dono)) return null;
-  return chebyshev(celulaOcupada(e), celulaOcupada(dono)) > 2 ? dono : null;
 }
