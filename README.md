@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 1.9 · **Data:** 14/10/2026
-**Status:** 🚧 Em construção. Marcos 1–6 concluídos e validados em aparelho real: campanha com itens, nível e save, arena online na AWS em São Paulo e editor de fases mínimo. Marco 7 em andamento: o ecossistema do teste com pessoas está pronto; a sessão fica para depois
+**Versão do documento:** 2.0 · **Data:** 14/10/2026
+**Status:** 🚧 Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Próximo: a convergência (12 → 15), em um PR por marco
 
 > **Histórico**
+> - **2.0 (14/10/2026)**: roteiro reescrito para a convergência (12 → 15 antes de 11A e da arena), um PR por marco e as sugestões de capacidades adotadas (D-055).
 > - **1.9 (14/10/2026)**: marco 10A concluído (invocações completas, avatares e dominação; pergaminhos de invocação).
 > - **1.8 (14/10/2026)**: marco 10A-2 (fases geradas sem fim, penalidade de morte, descanso e regeneração por célula).
 > - **1.7 (14/10/2026)**: marco 10A-1 (portas, troca de fase e a fase 2, Catacumbas).
@@ -118,8 +119,11 @@ Node.js + Colyseus no backend da arena · WSS · Vitest + Playwright.
 
 ## Roteiro
 
-Cada marco vira um Pull Request. O CI (typecheck, lint, testes, build e smoke) precisa passar antes do merge
-em `main`, e o merge publica automaticamente.
+Cada marco vira **um** Pull Request (a partir do 12, sem subdivisões). O CI (typecheck, lint, testes, build e
+smoke) precisa passar antes do merge em `main`, e o merge publica automaticamente.
+
+**Ordem atual** (D-055): **12 → 13 → 14 → 15**, depois **11A**, depois a arena (**8B → 9B → 10B → 11B**). A sessão com
+pessoas (7C) entra quando houver testadores.
 
 ### Etapas de infraestrutura
 
@@ -146,13 +150,13 @@ em `main`, e o merge publica automaticamente.
 | [x] | 8A | 26 tipos de efeito, normalização e dispatcher | Todos os efeitos exercitados; o registro aparece no editor e nos orbes |
 | [x] | 9A | Inventário, 10 slots, economia, baús, loja, orbes e spawner | A ordem de equipar não altera o resultado; ciclo econômico íntegro |
 | [x] | 10A | Progressão 1–20, morte, geração procedural, portas, invocações e avatares | Campanha completa, com save, migrações e modo offline |
-| [ ] | 11A | Editor completo no toque, tileset, validação e aprendizado de estilo | Aventura de 2 fases criada, testada, exportada e importada no celular |
+| [ ] | 11A | Editor completo no toque (baú, loja, armadilha, portas e loot), tileset por imagem, personagem por imagem, música importada pelo jogador, editor de efeitos com prévia, validação e aprendizado de estilo | Aventura de 2 fases criada, testada, exportada e importada no celular, levando imagens, músicas e efeitos |
 
 ### Expansão e operação da arena
 
 | ✓ | # | Entrega | Pronto quando |
 |---|---|---|---|
-| [ ] | 8B | Livre para 10 jogadores, replicação completa, limites e métricas | Estado público e privado correto; NPCs e objetos convergentes |
+| [ ] | 8B | Livre para 10 jogadores, replicação completa (estado privado), conteúdo temporário (personagens e tilesets próprios na sala), limites e métricas | Estado público e privado correto; NPCs e objetos convergentes; quatro jogadores com personagens diferentes se veem corretamente |
 | [ ] | 9B | Checkpoints externos, restauração e deduplicação | Queda do servidor recuperada ou encerrada com aviso, sem duplicação |
 | [ ] | 10B | Duelo, Equipes, Horda e Rei da colina | Regras em dados e testadas, sem condicionais espalhados |
 | [ ] | 11B | Justiça de telegrafia, perfis de rede e operação | Critérios da §5.6 cumpridos; sessão real com 10 pessoas |
@@ -161,10 +165,10 @@ em `main`, e o merge publica automaticamente.
 
 | ✓ | # | Entrega | Pronto quando |
 |---|---|---|---|
-| [ ] | 12 | Áudio, HUD, minimapa, guia, efeitos e acessibilidade | Ameaças legíveis; efeitos visuais não mudam o gameplay |
-| [ ] | 13 | Isométrico e caminhada por fatias | Alternar a visão preserva velocidade, alcance e regras |
-| [ ] | 14 | Rebalanceamento final por modo | Ritmo e janelas de reação validados |
-| [ ] | 15 | Endurecimento de mobile, PWA e backend | Offline, 30 minutos com 10 jogadores, benchmarks e recuperação verificados |
+| [ ] | 12 | **Áudio** sintetizado (música por contexto, efeitos, som posicional, passos); **interface** (minimapa, prompt de interação, pausa, configurações, guia, menu com fundo); **efeitos visuais** como dado por habilidade (partículas, presets de impacto, efeitos persistentes, luz, enquadrar dois); **qualidade** (presets, degradação automática, teto de DPR) e **acessibilidade** (escala de interface, teclado, contraste) | Ameaças legíveis; o mesmo digest com e sem efeitos; nunca mudo; movimento reduzido respeitado |
+| [ ] | 13 | Visão **isométrica**; **modelos de criatura** gerados no build; **caminhada por fatias**; **personagem por imagem** (recorte, escala, substituto, legibilidade) | Alternar a visão preserva velocidade, alcance e regras; imagem inválida não quebra o jogo |
+| [ ] | 14 | Ferramenta de **balanceamento por simulação** (tempo para matar, curva das fases, fluxo de ouro, invocações, margem de aviso do corpo a corpo) e ajuste dos números da campanha e do Livre | Ritmo e janelas de reação validados na campanha e no Livre. *Fichas justas por modo de arena: depois do 10B* |
+| [ ] | 15 | Celular (área segura, orientação, redimensionamento), **PWA offline** testado, desempenho e memória (10 trocas de fase, cena de carga, `BENCHMARKS.md`) e servidor (limites, métricas, teste de 30 min na VM) | Offline e benchmarks verificados. *Recuperação de queda: depois do 9B; sessão real de 10 pessoas: no 11B* |
 
 ---
 
