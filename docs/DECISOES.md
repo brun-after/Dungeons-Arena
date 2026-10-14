@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.20 · **Data:** 14/10/2026
+**Versão:** 0.21 · **Data:** 14/10/2026
 
 > **Histórico**
+> - **0.21 (14/10/2026)**: D-055 (sugestões de capacidades, áudio e ordem da convergência).
 > - **0.20 (14/10/2026)**: D-054 (invocações completas, avatares e dominação), marco 10A-3.
 > - **0.19 (14/10/2026)**: D-053 (fases geradas, morte, descanso e regeneração por célula), marco 10A-2.
 > - **0.18 (14/10/2026)**: D-052 (portas e troca de fase da campanha), marco 10A-1.
@@ -858,3 +859,48 @@ os avatares e a cascata configurável. A barra de habilidades da classe já ocup
 **Consequência.**
 - Save na versão 8 (degrau v7 → v8, inclusive nas fases visitadas) e balance v13.
 - Com o 10A-3, o marco 10A está concluído.
+
+## D-055 · Sugestões de capacidades, áudio e ordem da convergência (v0.21, 14/10/2026)
+
+**Contexto.** O projetista enviou [`SUGESTOES-CAPACIDADES.md`](SUGESTOES-CAPACIDADES.md) (v1.1): personagens e fases
+por imagem, trilha na nuvem e efeitos de habilidade em duas faces (visual e mecânica). O documento cita a spec v3.0;
+a v4.0, que seguimos, já incorpora parte das ideias (token próprio do jogador, caminhada por fatias, tileset com
+herança, cópia temporária do atlas na sala da arena). Ao mesmo tempo, decidimos fazer os marcos de convergência
+(12 a 15) antes de 11A e da trilha da arena.
+
+**Decisão.**
+- **Adotado como princípio**: o jogo é um motor; conteúdo trazido de fora (imagem, áudio, descrição de efeito) é
+  **dado, nunca programa**. Ele é validado, limitado e, se falhar, substituído por um padrão visível ou audível, com
+  aviso em linguagem simples. Nada vindo de fora quebra o jogo.
+- **Personagens por imagem** (adotado, marco 13): imagem única para jogador, inimigo ou invocação, animada pela
+  caminhada por fatias da §2.16. O jogo recorta a transparência, normaliza o tamanho (altura de 1,12 célula, origem
+  nos pés), limita dimensão e peso, troca imagem inválida por um marcador e mantém por cima os marcadores de equipe,
+  conjuração e estado. O envio pelo jogador entra no 11A; o compartilhamento na arena, no 8B.
+- **Fases por imagem** (adotado como tileset da §2.16, marco 11A): blocos com encaixe automático, herança entre fases
+  e prévia no editor, sem nunca esconder a diferença entre chão, parede e interativo. "Fundo único" e "colagem" ficam
+  fora da v1.
+- **Trilha sonora**:
+  - adotados: trilha por contexto (exploração, combate, chefe) com transição suave, **trilha padrão que nunca deixa o
+    jogo mudo**, música por fase escolhida por quem cria, com prévia, e créditos;
+  - **recusado: buscar áudio em endereços remotos**. Revela o jogador (IP) ao dono do endereço, quebra a campanha
+    offline (critério de aceite 5), esbarra em bloqueio de origem (CORS) dos hosts e complica direitos. A §2.14 e a
+    regra 11 da §5.3 continuam como estão;
+  - no lugar disso, **o jogador importa arquivos de áudio**: guardados no IndexedDB, exportados junto com a
+    aventura, com limite de tamanho e crédito (marco 11A);
+  - a **trilha padrão é sintetizada pelo próprio jogo** (Web Audio): sem arquivos, sem licença de terceiros e quase
+    sem peso (marco 12).
+- **Efeitos de habilidade**:
+  - a face mecânica já existe (D-048, D-049, D-054);
+  - a ligação entre as faces já é regra (a simulação não conhece a tela; a telegrafia usa os ticks da ação). O marco
+    12 ganha o teste "o mesmo digest com e sem efeitos visuais";
+  - **adotado no marco 12**: cada habilidade descreve o visual como dado (bloco `visual` com conjuração, viagem,
+    impacto e efeito persistente, montados de presets de partícula). Sem o bloco, o visual é deduzido dos efeitos do
+    registro, então todo efeito mecânico tem expressão visual. O editor de efeitos com prévia entra no 11A.
+- **Ordem e tamanho das entregas**: um PR por marco, sem subdivisões, na ordem **12 → 13 → 14 → 15**, depois **11A**
+  e a trilha da arena (**8B → 9B → 10B → 11B**), com o 7C quando houver pessoas.
+  - **14** e **15** entram agora no que é campanha, modo Livre, celular, PWA e desempenho.
+  - O que depende da arena (fichas justas por modo após o 10B, recuperação após o 9B, sessão real de 10 pessoas no
+    11B) fica registrado e é fechado quando a trilha da arena voltar.
+
+**Consequência.** O roteiro do README foi reescrito com esse escopo. Os "sinais de que está funcionando" da §7 das
+sugestões viram itens de verificação dos marcos 12, 13, 11A e 8B.
