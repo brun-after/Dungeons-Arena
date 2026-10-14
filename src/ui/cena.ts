@@ -22,6 +22,7 @@ import { prepararSessaoDeTela } from '../plataforma/sessao-tela';
 import { Camera } from '../render/camera';
 import { CELULA_PX } from '../render/camera-calculo';
 import { CamadaNumeros } from '../render/numeros';
+import { CamadaFluxo } from '../render/fluxo';
 import { CamadaObjetos } from '../render/objetos';
 import { CamadaEntidades } from '../render/sprites';
 import { criarPalco, type Palco } from '../render/stage';
@@ -103,6 +104,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const sprites = new CamadaEntidades(palco.entidades, idLocal);
   const telegrafia = new CamadaTelegrafia(palco.chao, palco.voo);
   const objetos = new CamadaObjetos(palco.chao, (id) => ctx.conteudo.itens.get(id)?.raridade);
+  const fluxo = new CamadaFluxo(palco.chao);
   const numeros = new CamadaNumeros(palco.efeitos, () => movimentoReduzido.matches);
   const isometrico = () => false; // a visão isométrica entra no marco 13
   const usarHabilidade = (id: string) => {
@@ -268,6 +270,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     camera.aplicar(palco.mundo);
     terreno.atualizarVisibilidade(...camera.retanguloVisivel(palco.altura()));
     objetos.desenhar(estado, q.agoraMs, movimentoReduzido.matches);
+    fluxo.desenhar(estado, idLocal);
     telegrafia.desenhar(estado, ctx, idLocal, q.alpha);
     sprites.desenhar(estado, ctx, q.posicao, q.alpha, q.aoRemover);
     numeros.atualizar(q.agoraMs);

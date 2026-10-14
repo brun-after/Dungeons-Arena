@@ -15,7 +15,9 @@ export type MotivoRecusa =
   | 'recarga'
   | 'recurso'
   | 'sem_alvo'
-  | 'fora_de_alcance';
+  | 'fora_de_alcance'
+  /** Marco 8A-2: limite de invocações ou armadilhas do modo, recusado antes de cobrar (§5.6). */
+  | 'limite';
 
 /** Recusas de mochila, equipamento e pontos (marco 6). */
 export type MotivoItem =
@@ -70,6 +72,11 @@ export type EventoSimulacao =
     }
   | { t: 'esquivou'; tick: number; acaoId: number; atorId: EntidadeId; alvoId: EntidadeId }
   | { t: 'efeitoAplicado'; tick: number; alvoId: EntidadeId; origemId: EntidadeId; tipo: TipoEfeito; ateTick: number }
+  /** Marco 8A-2: invocação, dominação e armadilhas. */
+  | { t: 'invocou'; tick: number; donoId: EntidadeId; id: EntidadeId }
+  | { t: 'dominou'; tick: number; donoId: EntidadeId; id: EntidadeId }
+  | { t: 'armadilhaArmada'; tick: number; donoId: EntidadeId; armadilhaId: number; x: number; y: number }
+  | { t: 'armadilhaDisparou'; tick: number; donoId: EntidadeId; armadilhaId: number; alvoId: EntidadeId }
   /** Marco 8A: o que um efeito periódico ou instantâneo fez (números na tela). */
   | { t: 'efeitoResultado'; tick: number; alvoId: EntidadeId; origemId: EntidadeId; tipo: TipoEfeito; dano: number; cura: number; mana: number }
   | { t: 'morreu'; tick: number; id: EntidadeId; porId: EntidadeId | null }

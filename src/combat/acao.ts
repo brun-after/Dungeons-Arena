@@ -13,7 +13,8 @@ import { podeFerir } from '../modos/relacao';
 import { bonusDeAtributo } from '../progression/ficha';
 import { ordemRotativa } from '../world/colisao';
 import type { FonteDeDano } from './dano';
-import { acaoBloqueada, bonusAtaqueBasico, multiplicadorDanoCausado } from './efeitos';
+import { acaoBloqueada, aplicarEfeito, bonusAtaqueBasico, multiplicadorDanoCausado, REGISTRO_EFEITOS } from './efeitos';
+import { excedeLimite } from './efeitos-fluxo';
 import { celulaOcupada, chebyshev, dentroDoQuadrado } from './geometria';
 import { aplicarImpacto } from './golpe';
 import type { Habilidade } from './habilidades';
@@ -103,6 +104,8 @@ export function iniciarAcao(
   if (acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) return recusar('bloqueado');
   if (recargaRestante(estado, ator.id, hab.id) > 0) return recusar('recarga');
   if (ator.mana < hab.custoRecurso) return recusar('recurso');
+  // Limites de invocação e armadilha do modo: recusa antes de cobrar (§5.6, marco 8A-2).
+  if (excedeLimite(estado, ctx, ator, hab.efeitos)) return recusar('limite');
 
   const origem = celulaOcupada(ator);
   let alvo: Entidade | null = null;
@@ -209,6 +212,10 @@ function lancar(
   const basico = hab.id === ator.ataqueBasico ? bonusAtaqueBasico(ator, estado.tick) : null;
   const alcance = alcanceDe(ator, hab, estado.tick);
   const base = { acaoId, fonte, hab, mira, ...(basico && basico.dano > 0 && { danoExtra: basico.dano }) };
+  // Efeitos de lançamento (armadilha, invocação): uma vez, sobre quem conjura, na célula mirada.
+  for (const ef of hab.efeitos) {
+    if (REGISTRO_EFEITOS[ef.tipo].aoLancar) aplicarEfeito(estado, ctx, ator, ef, { id: ator.id, x: ator.x, y: ator.y }, mira, saida);
+  }
   switch (hab.politicaImpacto) {
     case 'proprio':
       aplicarImpacto(estado, ctx, ator, { ...base, indice: 0 }, saida);

@@ -2,10 +2,10 @@
 // sala manda só o que mudou desde a última transmissão — entidades novas, removidas e, das que
 // continuam, **só os campos alterados**; as listas pequenas (objetos, projéteis, respawns,
 // recargas) quando mudam. Cada patch diz de qual tick parte (`base`); o cliente que não estiver
-// nesse tick pede o estado completo (D-035).
+// nesse tick pede o estado completo (D-035). Marco 8A-2: rastros e efeitos atrasados também.
 
 import type { Entidade } from '../entities/entidade';
-import type { EstadoJogo, ObjetoNoMundo, Projetil, RespawnPendente } from '../core/estado';
+import type { Atrasado, EstadoJogo, ObjetoNoMundo, Projetil, Rastro, RespawnPendente } from '../core/estado';
 
 export interface EntidadeAlterada {
   id: string;
@@ -21,6 +21,8 @@ export interface PatchDeEstado {
   objetos: ObjetoNoMundo[] | null;
   projeteis: Projetil[] | null;
   respawns: RespawnPendente[] | null;
+  rastros: Rastro[] | null;
+  atrasados: Atrasado[] | null;
   recargas: { alteradas: Record<string, number>; removidas: string[] } | null;
 }
 
@@ -38,6 +40,8 @@ export class GeradorDePatches {
   private objetos = '';
   private projeteis = '';
   private respawns = '';
+  private rastros = '';
+  private atrasados = '';
   private recargas: Record<string, number> = {};
   private tickAnterior = -1;
 
@@ -73,6 +77,8 @@ export class GeradorDePatches {
     const [objetos, textoObjetos] = lista(publico.objetos, this.objetos);
     const [projeteis, textoProjeteis] = lista(publico.projeteis, this.projeteis);
     const [respawns, textoRespawns] = lista(publico.respawns, this.respawns);
+    const [rastros, textoRastros] = lista(publico.rastros, this.rastros);
+    const [atrasados, textoAtrasados] = lista(publico.atrasados, this.atrasados);
 
     const recargasAlteradas: Record<string, number> = {};
     for (const [k, v] of Object.entries(publico.recargas)) if (this.recargas[k] !== v) recargasAlteradas[k] = v;
@@ -88,9 +94,13 @@ export class GeradorDePatches {
       objetos,
       projeteis,
       respawns,
+      rastros,
+      atrasados,
       recargas,
     };
     this.entidades = atuais;
+    this.rastros = textoRastros;
+    this.atrasados = textoAtrasados;
     this.objetos = textoObjetos;
     this.projeteis = textoProjeteis;
     this.respawns = textoRespawns;
@@ -127,6 +137,8 @@ export function aplicarPatch(base: EstadoJogo, patch: PatchDeEstado): EstadoJogo
     objetos: patch.objetos ?? base.objetos,
     projeteis: patch.projeteis ?? base.projeteis,
     respawns: patch.respawns ?? base.respawns,
+    rastros: patch.rastros ?? base.rastros,
+    atrasados: patch.atrasados ?? base.atrasados,
     recargas,
   };
 }

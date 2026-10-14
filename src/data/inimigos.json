@@ -118,7 +118,9 @@
       "classe": "conjurador",
       "defesa": 0,
       "ataqueBasico": "teia",
-      "habilidades": [],
+      "habilidades": [
+        "armar_teia"
+      ],
       "intervaloAtaqueMs": 3000
     },
     {
@@ -149,7 +151,8 @@
       "defesa": 3,
       "ataqueBasico": "golpe_demoniaco",
       "habilidades": [
-        "marca_de_area"
+        "marca_de_area",
+        "invocar_lacaios"
       ],
       "intervaloAtaqueMs": 1800
     },

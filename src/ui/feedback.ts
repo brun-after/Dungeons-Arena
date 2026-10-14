@@ -81,6 +81,16 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
     if (!d.ehStatus || (ev.alvoId !== idLocal && ev.origemId !== idLocal)) return;
     hud.registrar(t('log.efeito', { alvo: nome(ev.alvoId), efeito: t(`efeito.${ev.tipo}` as ChaveTexto) }));
   });
+  // Marco 8A-2: invocação, dominação e armadilha.
+  bus.on('invocou', (ev) => {
+    hud.registrar(t('log.invocou', { dono: nome(ev.donoId), alvo: nome(ev.id) }));
+  });
+  bus.on('dominou', (ev) => {
+    hud.registrar(t('log.dominou', { alvo: nome(ev.id), dono: nome(ev.donoId) }));
+  });
+  bus.on('armadilhaDisparou', (ev) => {
+    if (ev.alvoId === idLocal || ev.donoId === idLocal) hud.registrar(t('log.armadilha', { alvo: nome(ev.alvoId) }));
+  });
   bus.on('efeitoResultado', (ev) => {
     const alvo = posicao(ev.alvoId);
     if (!alvo) return;

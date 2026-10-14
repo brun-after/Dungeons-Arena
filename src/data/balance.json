@@ -1,5 +1,5 @@
 {
-  "versao": 7,
+  "versao": 8,
   "movimento": {
     "velocidadeBaseMs": 400,
     "filaMaxWaypoints": 2
@@ -56,7 +56,10 @@
     "hpPorNivel": 5
   },
   "efeitos": {
-    "intervaloPeriodicoMs": 1000
+    "intervaloPeriodicoMs": 1000,
+    "rastroCelulaMs": 3000,
+    "dominacaoMs": 60000,
+    "dominacaoHpPct": 50
   },
   "atributos": {
     "minimo": 1,

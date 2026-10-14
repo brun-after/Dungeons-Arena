@@ -9,7 +9,8 @@ import { buscarEntidade, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { aleatorio, criarRng, escolher, hashTexto, type EstadoRng } from '../core/rng';
 import { ticksDe } from '../core/tempo';
-import { alvoOfensivoValido, iniciarAcao } from '../combat/acao';
+import { alvoOfensivoValido, iniciarAcao, recargaRestante } from '../combat/acao';
+import { excedeLimite, longeDoDono } from '../combat/efeitos-fluxo';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
 import { ordemRotativa } from '../world/colisao';
 import { passavel } from '../world/fase';
@@ -169,6 +170,12 @@ function hesitar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: Es
 
 function patrulhar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa): void {
   const regras = ctx.balance.ia;
+  // Invocação sem alvo segue o dono a até 2 células, em vez de patrulhar (§2.9, marco 8A-2).
+  if (e.invocacao) {
+    const dono = longeDoDono(estado, e);
+    if (dono && !emPasso(e) && e.caminho.length === 0) planejarCaminho(e, { x: dono.x, y: dono.y }, ctx, estado.tick, [], regras.maxPassosPerseguicao);
+    return;
+  }
   if (estado.tick >= ia.proximaAvaliacaoTick) {
     ia.proximaAvaliacaoTick = estado.tick + ticksDe(regras.patrulhaAvaliacaoMs);
     ia.direcaoPatrulha = escolherDirecaoPatrulha(estado, ctx, e, ia);
@@ -214,11 +221,16 @@ function escolherDirecaoPatrulha(estado: EstadoJogo, ctx: ContextoSimulacao, e: 
 }
 
 /** Qual habilidade a IA usa agora: o boss alterna o golpe com a área (§2.6). */
-function habilidadeDaVez(e: Entidade, ia: EstadoIa): string {
-  if (e.arquetipo === 'boss' && e.habilidades.length > 0 && ia.ataquesFeitos % 2 === 1) {
-    return e.habilidades[0] ?? e.ataqueBasico;
-  }
-  return e.ataqueBasico;
+/**
+ * Revezamento (marco 8A-2): ataques ímpares usam as habilidades do preset em rodízio; se a da vez
+ * estiver em recarga ou estourar o limite do modo, usa o ataque básico (nunca trava tentando).
+ */
+function habilidadeDaVez(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa): string {
+  if (e.habilidades.length === 0 || ia.ataquesFeitos % 2 === 0) return e.ataqueBasico;
+  const id = e.habilidades[Math.floor(ia.ataquesFeitos / 2) % e.habilidades.length];
+  const hab = id ? ctx.conteudo.habilidades.get(id) : undefined;
+  if (!hab || recargaRestante(estado, e.id, hab.id) > 0 || excedeLimite(estado, ctx, e, hab.efeitos)) return e.ataqueBasico;
+  return hab.id;
 }
 
 function perseguir(
@@ -246,13 +258,16 @@ function perseguir(
     }
   }
 
-  const hab = ctx.conteudo.habilidades.get(habilidadeDaVez(e, ia));
-  if (!hab) return;
+  const hab = ctx.conteudo.habilidades.get(habilidadeDaVez(estado, ctx, e, ia));
+  const basico = ctx.conteudo.habilidades.get(e.ataqueBasico);
+  if (!hab || !basico) return;
+  // O deslocamento segue o alcance do ataque básico; habilidade em si mesmo vale de qualquer distância.
+  const alcanceAtaque = hab.politicaAlvo === 'proprio' ? Infinity : hab.alcanceCelulas;
   const origem = celulaOcupada(e);
   const celulaAlvo = celulaOcupada(alvo);
   const distancia = chebyshev(origem, celulaAlvo);
   const mantemDistancia = e.arquetipo === 'atirador' || e.arquetipo === 'controlador';
-  const distanciaMax = mantemDistancia ? Math.min(regras.distanciaMaxAtirador, hab.alcanceCelulas) : hab.alcanceCelulas;
+  const distanciaMax = mantemDistancia ? Math.min(regras.distanciaMaxAtirador, basico.alcanceCelulas) : basico.alcanceCelulas;
 
   // Atirador e controlador recuam antes de atacar; só atacam de perto se estiverem encurralados.
   let recuando = false;
@@ -264,7 +279,7 @@ function perseguir(
     pararMovimento(e);
   }
 
-  if (!recuando && distancia <= hab.alcanceCelulas && !e.acao && estado.tick >= ia.proximoAtaqueTick) {
+  if (!recuando && distancia <= alcanceAtaque && !e.acao && estado.tick >= ia.proximoAtaqueTick) {
     if (iniciarAcao(estado, ctx, e, hab.id, alvo.id, saida)) {
       ia.proximoAtaqueTick = estado.tick + ticksDe(preset.intervaloAtaqueMs);
       ia.ataquesFeitos++;

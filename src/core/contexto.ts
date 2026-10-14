@@ -67,6 +67,11 @@ export interface Balance {
   /** Efeitos (§2.8): dano, cura e recurso periódicos aplicam a cada intervalo. */
   efeitos: {
     intervaloPeriodicoMs: number;
+    /** Quanto dura cada célula de rastro (§2.8). */
+    rastroCelulaMs: number;
+    /** Dominação (§2.9): duração e HP com que o dominado volta. */
+    dominacaoMs: number;
+    dominacaoHpPct: number;
   };
   /** Limites do atributo efetivo (§2.10, equipamento derivado). */
   atributos: {

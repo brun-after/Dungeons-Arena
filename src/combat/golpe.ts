@@ -8,7 +8,7 @@ import { buscarEntidade } from '../core/estado';
 import { vivo, type Entidade } from '../entities/entidade';
 import { rolar } from './dados';
 import { resolverGolpe, type FonteDeDano } from './dano';
-import { aplicarEfeito, imuneADano } from './efeitos';
+import { aplicarEfeito, imuneADano, REGISTRO_EFEITOS } from './efeitos';
 import type { Habilidade } from './habilidades';
 import { registrarParticipacao } from './participacao';
 
@@ -84,6 +84,8 @@ export function aplicarImpacto(
   const conjurador = buscarEntidade(estado, fonte.id);
   const origem = { id: fonte.id, x: conjurador?.x ?? alvo.x, y: conjurador?.y ?? alvo.y };
   for (const efeito of hab.efeitos) {
+    // Armadilha e invocação saem uma vez no lançamento (acao.ts), não por alvo atingido.
+    if (REGISTRO_EFEITOS[efeito.tipo].aoLancar) continue;
     const sobre = efeito.em === 'conjurador' ? conjurador : alvo;
     if (sobre) aplicarEfeito(estado, ctx, sobre, efeito, origem, impacto.mira ?? { x: alvo.x, y: alvo.y }, saida);
   }

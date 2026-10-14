@@ -169,6 +169,39 @@ test.describe('desktop', () => {
     expect(erros).toEqual([]);
   });
 
+  test('invocação: o boss chama lacaios (fase montada no editor)', async ({ page }) => {
+    test.setTimeout(150_000);
+    const erros: string[] = [];
+    page.on('pageerror', (e) => erros.push(e.message));
+    await page.goto('./?editor');
+    await page.getByRole('button', { name: 'Criar e editar' }).click();
+    await expect(page.locator('.status-editor')).toHaveText('⚠ 1 aviso(s)');
+    const caixa = await page.locator('.editor canvas').boundingBox();
+    if (!caixa) throw new Error('canvas sem caixa');
+    // Mesmo enquadramento do "ajustar" do editor: fase 24×16 centrada, célula de 48 px × zoom.
+    const zoom = Math.min(caixa.width / (24 * 48), (caixa.height - 120) / (16 * 48)) * 0.95;
+    const tela = (x: number, y: number) => ({
+      x: caixa.x + caixa.width / 2 + ((x + 0.5) * 48 - 12 * 48) * zoom,
+      y: caixa.y + caixa.height / 2 + ((y + 0.5) * 48 - 8 * 48) * zoom,
+    });
+    await page.getByRole('button', { name: 'Início do jogador' }).click();
+    await page.mouse.click(tela(9, 8).x, tela(9, 8).y);
+    await page.getByRole('button', { name: 'Inimigo', exact: true }).click();
+    await page.getByLabel('Tipo de inimigo').selectOption('boss');
+    await page.mouse.click(tela(13, 8).x, tela(13, 8).y);
+    await expect(page.locator('.status-editor')).toHaveText('✓ pronta');
+    await page.getByRole('button', { name: 'Testar' }).click();
+    await expect(page).toHaveURL(/jogo=teste/);
+    await page.goto(`${page.url()}&diag=1`);
+    const diag = page.locator('#diag');
+    // Você + o boss + 2 lacaios.
+    await expect
+      .poll(async () => Number(/entidades (\d+)/.exec((await diag.textContent()) ?? '')?.[1] ?? 0), { timeout: 90_000 })
+      .toBeGreaterThanOrEqual(4);
+    await expect(page.locator('.log-combate')).toContainText('invocou');
+    expect(erros).toEqual([]);
+  });
+
   test('controles de toque ficam escondidos no desktop', async ({ page }) => {
     await abrir(page);
     await expect(page.getByTestId('joystick')).toBeHidden();

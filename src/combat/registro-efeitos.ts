@@ -3,6 +3,7 @@
 // padrões do `construir()` e os ganchos declarativos que o resto do jogo consulta. Não há
 // `if (tipo === ...)` espalhado: movimento, ações, dano, colisão e projéteis leem estes campos.
 // Registrar um tipo com `elegivelParaOrbe: true` o coloca sozinho no sorteio do orbe e no editor.
+// Marco 8A-2 (14/10/2026): os 6 de fluxo próprio (atrasado, rastros, invocar, dominar, armadilha).
 
 import { aleatorio, type EstadoRng } from '../core/rng';
 
@@ -30,6 +31,13 @@ export const TIPOS_EFEITO = [
   'teleporte',
   'avanco',
   'empurrao',
+  // fluxo próprio (marco 8A-2)
+  'efeito_atrasado',
+  'rastro_dano',
+  'rastro_efeito',
+  'invocar',
+  'dominar_ao_matar',
+  'armadilha',
 ] as const;
 export type TipoEfeito = (typeof TIPOS_EFEITO)[number];
 
@@ -47,7 +55,14 @@ export interface EfeitoCanonico {
   valor: number;
   pct: number;
   em: DestinoEfeito;
+  /** Efeito carregado (atrasado, rastro de efeito, armadilha); um nível só. */
+  interno: EfeitoCanonico | null;
+  /** Referência a conteúdo: o preset do `invocar`. */
+  ref: string | null;
 }
+
+/** Fluxos próprios de um disparo só: agendar, armar ou invocar (não ficam como status). */
+export type Fluxo = 'atrasado' | 'armadilha' | 'invocar';
 
 export type Periodico = 'dano' | 'cura' | 'recurso';
 export type Instantaneo = 'cura' | 'recurso' | 'teleporte' | 'avanco' | 'empurrao';
@@ -77,6 +92,15 @@ export interface DefinicaoEfeito {
   /** Periódico: aplica `valor` a cada intervalo. Com duração 0, vira instantâneo (cura/recurso). */
   periodico: Periodico | null;
   instantaneo: Instantaneo | null;
+  /** Marco 8A-2: fluxo próprio de um disparo; `aoLancar` aplica uma vez no lançamento da habilidade. */
+  fluxo: Fluxo | null;
+  aoLancar: boolean;
+  /** Enquanto ativo, a entidade deixa rastro de dano ou de efeito nas células por onde passa. */
+  rastro: 'dano' | 'efeito' | null;
+  /** Quem morre com este efeito ativo é dominado por quem o aplicou (§2.9). */
+  domina: boolean;
+  /** Campos extras exigidos na autoria. */
+  exige: readonly ('interno' | 'ref')[];
 }
 
 type Def = Omit<DefinicaoEfeito, 'id'>;
@@ -94,6 +118,11 @@ const BASE: Omit<Def, 'icone' | 'cor' | 'positivo' | 'padrao' | 'campos'> = {
   ataqueBasico: null,
   periodico: null,
   instantaneo: null,
+  fluxo: null,
+  aoLancar: false,
+  rastro: null,
+  domina: false,
+  exige: [],
 };
 
 const negativo = (icone: string, cor: string, campos: readonly CampoEfeito[], padrao: Def['padrao'], extra: Partial<Def>): Def => ({
@@ -152,6 +181,13 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   teleporte: instantaneo('⌖', '#9b59b6', [], { duracaoMs: 0, valor: 0, pct: 0 }, 'teleporte', true),
   avanco: instantaneo('»', '#34495e', ['valor'], { duracaoMs: 0, valor: 2, pct: 0 }, 'avanco', true),
   empurrao: instantaneo('⇥', '#7f8c8d', ['valor'], { duracaoMs: 0, valor: 2, pct: 0 }, 'empurrao', false),
+
+  efeito_atrasado: { ...BASE, icone: '⏳', cor: '#e67e22', positivo: false, ehStatus: false, campos: [], padrao: { duracaoMs: 1500, valor: 0, pct: 0 }, fluxo: 'atrasado', exige: ['interno'] },
+  rastro_dano: positivo('🔥', '#e74c3c', 2, ['valor'], { duracaoMs: 8000, valor: 3, pct: 0 }, { rastro: 'dano' }),
+  rastro_efeito: { ...BASE, icone: '〰', cor: '#27ae60', positivo: true, campos: [], padrao: { duracaoMs: 6000, valor: 0, pct: 0 }, rastro: 'efeito', exige: ['interno'] },
+  invocar: { ...BASE, icone: '☥', cor: '#16a085', positivo: true, ehStatus: false, campos: ['valor'], padrao: { duracaoMs: 20_000, valor: 1, pct: 0 }, fluxo: 'invocar', aoLancar: true, exige: ['ref'] },
+  dominar_ao_matar: negativo('♛', '#8e44ad', [], { duracaoMs: 8000, valor: 0, pct: 0 }, { domina: true }),
+  armadilha: { ...BASE, icone: '⚠', cor: '#d35400', positivo: true, ehStatus: false, campos: ['valor'], padrao: { duracaoMs: 30_000, valor: 8, pct: 0 }, fluxo: 'armadilha', aoLancar: true },
 };
 
 export const REGISTRO_EFEITOS: Readonly<Record<TipoEfeito, DefinicaoEfeito>> = Object.fromEntries(
@@ -171,6 +207,8 @@ export function construirEfeito(tipo: TipoEfeito, parcial: Partial<Omit<EfeitoCa
     valor: d.campos.includes('valor') ? (parcial.valor ?? d.padrao.valor) : 0,
     pct: d.campos.includes('pct') ? (parcial.pct ?? d.padrao.pct) : 0,
     em: parcial.em ?? 'alvo',
+    interno: parcial.interno ? { ...parcial.interno, interno: null } : null,
+    ref: parcial.ref ?? null,
   };
 }
 
