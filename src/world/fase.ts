@@ -148,6 +148,8 @@ export interface FaseJson {
   objetos?: ObjetoPosicionadoJson[];
   portaSaida?: PortaSaida;
   portasInternas?: PortaInterna[];
+  /** Marco 10A-2: matiz do terreno em graus (fases geradas giram 28° a cada fase, §2.1). */
+  matizGraus?: number;
 }
 
 export function celulaNormalizada(v: number, tamanho: number): number {
@@ -170,6 +172,7 @@ export interface Fase {
   /** Marco 10A-1: porta de saída (null = toda célula `S` é saída livre) e portas internas. */
   readonly portaSaida: PortaSaida | null;
   readonly portasInternas: readonly PortaInterna[];
+  readonly matizGraus: number;
 }
 
 /** Converte uma fase já validada para a forma usada pela simulação. */
@@ -197,6 +200,7 @@ export function carregarFase(json: FaseJson): Fase {
     objetos: (json.objetos ?? []).map((o) => objetoCarregado(o, largura, altura)),
     portaSaida: json.portaSaida ? { ...json.portaSaida } : null,
     portasInternas: (json.portasInternas ?? []).map((p) => ({ ...p, a: { ...p.a }, b: { ...p.b } })),
+    matizGraus: json.matizGraus ?? 0,
   };
 }
 

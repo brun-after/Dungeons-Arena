@@ -1,10 +1,10 @@
-// Regeneração contínua de recurso (§2.12), etapa 4 do tick. A regeneração por célula caminhada
-// entra com a progressão completa (10A).
+// Regeneração contínua de recurso (§2.12), etapa 4 do tick, e por célula caminhada (10A-2).
 
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import { ticksDe } from '../core/tempo';
-import { vivo } from '../entities/entidade';
+import { vivo, type Entidade } from '../entities/entidade';
+import { regeneraPorCelula } from '../modos/regras';
 
 export function regenerarRecursos(estado: EstadoJogo, ctx: ContextoSimulacao): void {
   // Ao fim de cada segundo completo de simulação (nunca no tick 0).
@@ -13,4 +13,21 @@ export function regenerarRecursos(estado: EstadoJogo, ctx: ContextoSimulacao): v
   for (const e of estado.entidades) {
     if (vivo(e) && e.mana < e.manaMax) e.mana = Math.min(e.manaMax, e.mana + ganho);
   }
+}
+
+/** Algum hostil vivo está perseguindo esta entidade (§2.12: bloqueia regeneração e descanso)? */
+export function perseguido(estado: EstadoJogo, e: Entidade): boolean {
+  return estado.entidades.some((x) => vivo(x) && x.ia?.modo === 'perseguindo' && x.ia.alvoId === e.id);
+}
+
+/**
+ * Marco 10A-2 (14/10/2026): 1 de vida e 1 de mana por célula caminhada (§2.12), só para jogadores,
+ * onde o modo liga, e bloqueada com hostil em perseguição. Chamada ao completar um passo.
+ */
+export function regenerarPorPasso(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade): void {
+  if (e.controlador === 'ia' || !vivo(e) || !regeneraPorCelula(ctx.modo)) return;
+  if ((e.hp >= e.hpMax && e.mana >= e.manaMax) || perseguido(estado, e)) return;
+  const r = ctx.balance.recursos;
+  e.hp = Math.min(e.hpMax, e.hp + r.regenHpPorCelula);
+  e.mana = Math.min(e.manaMax, e.mana + r.regenManaPorCelula);
 }

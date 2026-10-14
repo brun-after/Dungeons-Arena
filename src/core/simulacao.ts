@@ -13,6 +13,7 @@ import { processarEfeitos, processarGatilhosDeEfeito } from '../combat/efeitos';
 import { moverProjeteis } from '../combat/projeteis';
 import { vivo } from '../entities/entidade';
 import { processarIa } from '../entities/ia';
+import { descansar } from '../progression/descanso';
 import { desequipar, distribuirPonto, equipar, moverItem, usarItem } from '../progression/inventario';
 import { comprar, vender } from '../progression/loja';
 import { processarMortes } from '../progression/morte';
@@ -109,6 +110,10 @@ function aplicarComandos(
         break;
       case 'moverItem':
         moverItem(ator, cmd.invId, cmd.posicao, estado.tick, saida);
+        break;
+      // Marco 10A-2: descanso (§2.12).
+      case 'descansar':
+        descansar(estado, ctx, ator, cmd.tipo, saida);
         break;
     }
   }

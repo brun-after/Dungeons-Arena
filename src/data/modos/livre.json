@@ -34,5 +34,6 @@
   "inimigosDeIA": "da_fase",
   "objetosDeFase": true,
   "spawnerDinamico": true,
-  "portas": { "inimigosCruzamChance": 0.5 }
+  "portas": { "inimigosCruzamChance": 0.5 },
+  "sobrevivencia": { "regenPorCelula": false, "descanso": false, "penalidadeMorte": null }
 }

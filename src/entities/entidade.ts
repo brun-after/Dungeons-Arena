@@ -118,7 +118,8 @@ export interface Bolsa {
  * congelada (não anda nem age). Termina na etapa 5 do tick em `ateTick`, ao fechar ou ao morrer.
  */
 export interface Interacao {
-  tipo: 'bau' | 'loja';
+  /** Marco 10A-2: `descanso` (o `objetoId` é o tipo, `curto` ou `longo`). */
+  tipo: 'bau' | 'loja' | 'descanso';
   objetoId: string;
   ateTick: number;
 }

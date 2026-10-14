@@ -54,7 +54,9 @@ export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<st
   const avisos: ErroFase[] = [];
   if (!ehObjeto(entrada)) return { ok: false, erros: [{ mensagem: 'a fase precisa ser um objeto' }], avisos };
 
-  const { id, nome, ordem, tipo, mapa, spawns, inimigos, objetos, portaSaida, portasInternas } = entrada;
+  const { id, nome, ordem, tipo, mapa, spawns, inimigos, objetos, portaSaida, portasInternas, matizGraus } = entrada;
+  const matizOk = matizGraus === undefined || (typeof matizGraus === 'number' && Number.isFinite(matizGraus) && matizGraus >= 0 && matizGraus < 360);
+  if (!matizOk) erros.push({ mensagem: 'matizGraus precisa ficar entre 0 e 359' });
   if (typeof id !== 'string' || id.trim() === '') erros.push({ mensagem: 'id ausente' });
   if (typeof nome !== 'string' || nome.trim() === '') erros.push({ mensagem: 'nome ausente' });
   if (!ehInteiro(ordem)) erros.push({ mensagem: 'ordem precisa ser inteiro' });
@@ -81,6 +83,7 @@ export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<st
     objetos: listaObjetos,
     ...(saida && { portaSaida: saida }),
     ...(internas && { portasInternas: internas }),
+    ...(typeof matizGraus === 'number' && matizOk && { matizGraus }),
   };
   validarJogabilidade(json, erros, avisos);
   return erros.length > 0 ? { ok: false, erros, avisos } : { ok: true, fase: json, avisos };

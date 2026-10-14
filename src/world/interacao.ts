@@ -11,6 +11,7 @@ import { buscarEntidade, type EstadoJogo, type ObjetoNoMundo } from '../core/est
 import type { EventoSimulacao, MotivoItem } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import type { Entidade } from '../entities/entidade';
+import { processarDescanso } from '../progression/descanso';
 import { guardarItem, recusarItem } from '../progression/inventario';
 import { interagivel, largarItem, largarPerto } from './objetos';
 
@@ -97,6 +98,10 @@ export function encerrarInteracao(estado: EstadoJogo, ctx: ContextoSimulacao, e:
     fecharLoja(estado, ctx, e, saida);
     return;
   }
+  if (i.tipo === 'descanso') {
+    e.interacao = null;
+    return;
+  }
   const o = estado.objetos.find((x) => x.objetoId === i.objetoId);
   if (o?.abridorId === e.id) o.abridorId = null;
   e.interacao = null;
@@ -141,7 +146,9 @@ function entregarBau(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
 export function processarInteracoes(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
   for (const e of estado.entidades) {
     const i = e.interacao;
-    if (!i || estado.tick < i.ateTick) continue;
+    // O descanso confere a interrupção a cada tick, não só no fim (marco 10A-2).
+    if (i?.tipo === 'descanso') processarDescanso(estado, ctx, e, saida);
+    if (!i || i.tipo === 'descanso' || estado.tick < i.ateTick) continue;
     if (i.tipo === 'loja') fecharLoja(estado, ctx, e, saida);
     else entregarBau(estado, ctx, e, saida);
   }

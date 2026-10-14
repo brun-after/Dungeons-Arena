@@ -1,5 +1,6 @@
 // Terreno em blocos de 16×16 células (§2.16): cada bloco é desenhado uma vez por fase e
 // escondido quando sai da viewport. Até o tileset (marco 11A), as células são cores lisas (D-009).
+// Marco 10A-2 (14/10/2026): o matiz da fase (`matizGraus`) gira a paleta uma vez, ao criar o terreno.
 
 import { Container, Graphics } from 'pixi.js';
 import { tipoEm, type Fase, type TipoCelula } from '../world/fase';
@@ -14,6 +15,39 @@ const CORES_PISO = [0x3a3546, 0x3f3a4d, 0x36313f] as const;
 const COR_SAIDA = 0xc98a1a;
 const COR_SAIDA_MIOLO = 0xf3b442;
 
+interface Paleta {
+  parede: number;
+  paredeTopo: number;
+  junta: number;
+  piso: readonly [number, number, number];
+}
+
+/** Gira o matiz de uma cor (rotação no espaço RGB, matriz de matiz padrão); 0° devolve a mesma cor. */
+export function girarMatiz(cor: number, graus: number): number {
+  if (graus % 360 === 0) return cor;
+  const r = (cor >> 16) & 0xff;
+  const g = (cor >> 8) & 0xff;
+  const b = cor & 0xff;
+  const rad = (graus * Math.PI) / 180;
+  const c = Math.cos(rad);
+  const s = Math.sin(rad);
+  const canal = (v: number) => Math.max(0, Math.min(255, Math.round(v)));
+  const nr = r * (0.213 + c * 0.787 - s * 0.213) + g * (0.715 - c * 0.715 - s * 0.715) + b * (0.072 - c * 0.072 + s * 0.928);
+  const ng = r * (0.213 - c * 0.213 + s * 0.143) + g * (0.715 + c * 0.285 + s * 0.14) + b * (0.072 - c * 0.072 - s * 0.283);
+  const nb = r * (0.213 - c * 0.213 - s * 0.787) + g * (0.715 - c * 0.715 + s * 0.715) + b * (0.072 + c * 0.928 + s * 0.072);
+  return (canal(nr) << 16) | (canal(ng) << 8) | canal(nb);
+}
+
+function paletaDe(matiz: number): Paleta {
+  const gira = (cor: number) => girarMatiz(cor, matiz);
+  return {
+    parede: gira(COR_PAREDE),
+    paredeTopo: gira(COR_PAREDE_TOPO),
+    junta: gira(COR_JUNTA),
+    piso: [gira(CORES_PISO[0]), gira(CORES_PISO[1]), gira(CORES_PISO[2])],
+  };
+}
+
 /** Variação de piso por posição, com avalanche para não formar padrão diagonal (§2.16). */
 export function variacaoPiso(x: number, y: number): number {
   let h = Math.imul(x, 0x27d4eb2d) ^ Math.imul(y, 0x165667b1);
@@ -25,22 +59,22 @@ export function variacaoPiso(x: number, y: number): number {
   return (h >>> 0) / 4294967296;
 }
 
-function desenharCelula(g: Graphics, fase: Fase, x: number, y: number, tipo: TipoCelula): void {
+function desenharCelula(g: Graphics, fase: Fase, paleta: Paleta, x: number, y: number, tipo: TipoCelula): void {
   const px = x * CELULA_PX;
   const py = y * CELULA_PX;
   switch (tipo) {
     case 'piso': {
       const v = variacaoPiso(x, y);
-      const cor = v < 0.15 ? CORES_PISO[1] : v < 0.225 ? CORES_PISO[2] : CORES_PISO[0];
-      g.rect(px, py, CELULA_PX, CELULA_PX).fill(COR_JUNTA);
+      const cor = v < 0.15 ? paleta.piso[1] : v < 0.225 ? paleta.piso[2] : paleta.piso[0];
+      g.rect(px, py, CELULA_PX, CELULA_PX).fill(paleta.junta);
       g.rect(px + 1, py + 1, CELULA_PX - 2, CELULA_PX - 2).fill(cor);
       break;
     }
     case 'parede': {
-      g.rect(px, py, CELULA_PX, CELULA_PX).fill(COR_PAREDE);
+      g.rect(px, py, CELULA_PX, CELULA_PX).fill(paleta.parede);
       // Face superior mais clara quando há piso abaixo: dá leitura de altura à parede.
       const sobrePiso = tipoEm(fase, x, y + 1) === 'piso' || tipoEm(fase, x, y + 1) === 'saida';
-      if (sobrePiso) g.rect(px, py + CELULA_PX - 8, CELULA_PX, 8).fill(COR_PAREDE_TOPO);
+      if (sobrePiso) g.rect(px, py + CELULA_PX - 8, CELULA_PX, 8).fill(paleta.paredeTopo);
       break;
     }
     case 'saida':
@@ -71,12 +105,13 @@ interface Bloco {
 
 export function criarTerreno(camada: Container, fase: Fase): Terreno {
   const blocos: Bloco[] = [];
+  const paleta = paletaDe(fase.matizGraus);
   const desenharBloco = (b: Bloco) => {
     b.g.clear();
     const fimX = Math.min(fase.largura, b.bx + BLOCO_CELULAS);
     const fimY = Math.min(fase.altura, b.by + BLOCO_CELULAS);
     for (let y = b.by; y < fimY; y++) {
-      for (let x = b.bx; x < fimX; x++) desenharCelula(b.g, fase, x, y, tipoEm(fase, x, y));
+      for (let x = b.bx; x < fimX; x++) desenharCelula(b.g, fase, paleta, x, y, tipoEm(fase, x, y));
     }
   };
   const porLinha = Math.ceil(fase.largura / BLOCO_CELULAS);

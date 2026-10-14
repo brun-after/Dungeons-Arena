@@ -80,6 +80,33 @@ export interface ModoDeJogo {
   spawnerDinamico: boolean;
   /** Marco 10A-1: chance de um NPC atravessar uma porta interna ao pisar nela (§2.1, 50%). */
   portas: { inimigosCruzamChance: number };
+  /** Marco 10A-2 (§2.12): regeneração por célula, descanso e penalidade de morte (null = sem). */
+  sobrevivencia: {
+    regenPorCelula: boolean;
+    descanso: boolean;
+    penalidadeMorte: PenalidadeMorte | null;
+  };
+}
+
+export interface PenalidadeMorte {
+  xp: number;
+  /** Perder XP pode baixar o nível (revogando pontos); desligado na campanha padrão (§2.12). */
+  perdeNivel: boolean;
+  ouroPctMin: number;
+  ouroPctMax: number;
+}
+
+function lerPenalidade(l: Leitor, v: unknown): PenalidadeMorte | null {
+  if (v === null) return null;
+  const o = l.objeto(v, 'penalidadeMorte');
+  const p: PenalidadeMorte = {
+    xp: l.numero(o, 'xp', { min: 0, inteiro: true }),
+    perdeNivel: l.booleano(o, 'perdeNivel'),
+    ouroPctMin: l.numero(o, 'ouroPctMin', { min: 0, max: 100, inteiro: true }),
+    ouroPctMax: l.numero(o, 'ouroPctMax', { min: 0, max: 100, inteiro: true }),
+  };
+  if (p.ouroPctMin > p.ouroPctMax) l.erro('penalidadeMorte: ouroPctMin maior que ouroPctMax');
+  return p;
 }
 
 const ORDEM_PADRAO = Object.keys(ATRIBUTOS_NEUTROS) as (keyof Atributos)[];
@@ -118,6 +145,7 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
   const respawn = l.objeto(o.respawn, 'respawn');
   const loot = l.objeto(o.loot, 'loot');
   const limites = l.objeto(o.limites, 'limites');
+  const sobrevivencia = l.objeto(o.sobrevivencia, 'sobrevivencia');
   if (o.progressaoContaParaCampanha !== false) l.erro('progressaoContaParaCampanha precisa ser false na v1 (§3.7)');
 
   const modo: ModoDeJogo = {
@@ -163,6 +191,11 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
     objetosDeFase: l.booleano(o, 'objetosDeFase'),
     spawnerDinamico: l.booleano(o, 'spawnerDinamico'),
     portas: { inimigosCruzamChance: l.numero(l.objeto(o.portas, 'portas'), 'inimigosCruzamChance', { min: 0, max: 1 }) },
+    sobrevivencia: {
+      regenPorCelula: l.booleano(sobrevivencia, 'regenPorCelula'),
+      descanso: l.booleano(sobrevivencia, 'descanso'),
+      penalidadeMorte: lerPenalidade(l, sobrevivencia.penalidadeMorte),
+    },
   };
   if (modo.fim.tipo !== 'nenhum' && modo.fim.alvo === null && modo.fim.tempoLimiteS === null) {
     l.erro('fim com tipo diferente de "nenhum" precisa de alvo ou tempo limite');

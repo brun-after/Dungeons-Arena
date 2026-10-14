@@ -7,8 +7,21 @@ import { escolher, type EstadoRng } from '../core/rng';
 import { ticksDe } from '../core/tempo';
 import { vivo, type Entidade } from '../entities/entidade';
 import type { Fase } from '../world/fase';
-import type { ModoDeJogo } from './modo';
+import type { ModoDeJogo, PenalidadeMorte } from './modo';
 import { podeFerir } from './relacao';
+
+/** Marco 10A-2 (§2.12): o que a morte custa no modo (null = nada). */
+export function penalidadeDeMorte(modo: ModoDeJogo): PenalidadeMorte | null {
+  return modo.sobrevivencia.penalidadeMorte;
+}
+
+export function podeDescansar(modo: ModoDeJogo): boolean {
+  return modo.sobrevivencia.descanso;
+}
+
+export function regeneraPorCelula(modo: ModoDeJogo): boolean {
+  return modo.sobrevivencia.regenPorCelula;
+}
 
 export function podeRespawnar(modo: ModoDeJogo): boolean {
   return modo.respawn.ativo;

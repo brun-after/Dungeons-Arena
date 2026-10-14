@@ -28,11 +28,13 @@ import { carregarAventura } from './plataforma/aventuras';
 import { carregarSlot, criarAutosave, gravarRegistro, listarSlots, type Autosave } from './plataforma/saves';
 import { Interpolador } from './render/interpolacao';
 import { jogadorDoSave, VERSAO_SCHEMA, type Estatisticas, type RefFase, type RegistroProgresso } from './save/esquema';
+import { proximaFase } from './save/sequencia';
 import { avancarFase, personagemNoInicio } from './save/transicao';
 import { mostrarAviso } from './ui/aviso';
 import { montarCena } from './ui/cena';
 import { criarPesquisa } from './ui/pesquisa';
 import { carregarFase } from './world/fase';
+import { catalogoDeGeracao, gerarFase } from './world/gerador';
 import { povoarFase } from './world/populacao';
 import { validarFase } from './world/validacao-fase';
 
@@ -45,12 +47,7 @@ const FASE_INICIAL: RefFase = { tipo: 'oficial', id: 'fase-01' };
 /** Quanto a tela de transição fica antes de recarregar a sessão na fase nova. */
 const TRANSICAO_MS = 900;
 
-/** A fase seguinte na sequência da campanha, ou null no fim (o 10A-2 gera uma). */
-function proximaFase(ref: RefFase): RefFase | null {
-  if (ref.tipo !== 'oficial') return null;
-  const seguinte = campanha.fases[campanha.fases.indexOf(ref.id) + 1];
-  return seguinte ? { tipo: 'oficial', id: seguinte } : null;
-}
+
 
 export interface OpcoesJogo {
   /** Slot de save (1–3); null joga sem salvar. */
@@ -69,8 +66,10 @@ function montarContexto(conteudo: Conteudo, faseJson: unknown): ContextoSimulaca
   return { fase: carregarFase(validacao.fase), balance: BALANCE_PADRAO, conteudo, modo: conteudo.modoCampanha };
 }
 
-async function faseDaReferencia(ref: RefFase): Promise<unknown> {
+async function faseDaReferencia(ref: RefFase, conteudo: Conteudo): Promise<unknown> {
   if (ref.tipo === 'oficial') return FASES_OFICIAIS[ref.id];
+  // Marco 10A-2: a fase gerada nasce de novo dos parâmetros guardados (D-053).
+  if (ref.tipo === 'gerada') return gerarFase(ref.params, catalogoDeGeracao(conteudo, campanha.geradas.estoque));
   const aventura = await carregarAventura(ref.id).catch(() => null);
   return aventura ? paraFaseJson(aventura) : undefined;
 }
@@ -136,7 +135,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
   }
   const faseRef: RefFase = teste ? { tipo: 'aventura', id: teste } : (leitura?.faseRef ?? opcoes.faseNova ?? FASE_INICIAL);
   const voltarPara = teste ? `./?editor=${encodeURIComponent(teste)}` : './?jogo=campanha';
-  const faseJson = await faseDaReferencia(faseRef);
+  const faseJson = await faseDaReferencia(faseRef, conteudo);
   if (faseJson === undefined) {
     mostrarErro(raiz, t('slots.faseAusente'), voltarPara);
     return;
@@ -248,7 +247,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
       }, 1500);
       return;
     }
-    const proxima = proximaFase(faseRef);
+    const proxima = proximaFase(faseRef, campanha.fases, campanha.geradas, BALANCE_PADRAO.xp.nivelMax);
     if (!proxima) {
       mostrarAviso(raiz, t('fase.fimDaCampanha'), 6000);
       return;
@@ -257,7 +256,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
       mostrarAviso(raiz, t('fase.concluida'), 4000);
       return;
     }
-    const validacaoNova = validarFase(await faseDaReferencia(proxima), new Set(conteudo.presets.keys()), conteudo.itens);
+    const validacaoNova = validarFase(await faseDaReferencia(proxima, conteudo), new Set(conteudo.presets.keys()), conteudo.itens);
     if (!validacaoNova.ok) {
       mostrarAviso(raiz, t('slots.faseAusente'), 5000);
       return;

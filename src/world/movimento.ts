@@ -8,6 +8,7 @@ import type { EventoSimulacao } from '../core/eventos-simulacao';
 import type { EstadoJogo } from '../core/estado';
 import { movimentoBloqueado } from '../combat/efeitos';
 import { emPasso, type Entidade } from '../entities/entidade';
+import { regenerarPorPasso } from '../progression/recursos';
 import { celulaLivrePara, ordemRotativa } from './colisao';
 import { passavel } from './fase';
 import { caminho } from './navegacao';
@@ -146,6 +147,7 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
     e.y = e.destinoY;
     e.progressoPasso = 0;
     saida.push({ t: 'moveu', tick: estado.tick, id: e.id, x: e.x, y: e.y });
+    regenerarPorPasso(estado, ctx, e);
   }
 }
 

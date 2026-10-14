@@ -35,6 +35,7 @@ export class CamadaObjetos {
     camada: Container,
     private readonly raridadeDe: (itemId: string) => Raridade | undefined = () => undefined,
     private readonly ticksBau = 1,
+    private readonly ticksDescanso: Readonly<Record<'curto' | 'longo', number>> = { curto: 1, longo: 1 },
   ) {
     camada.addChild(this.g);
   }
@@ -65,6 +66,20 @@ export class CamadaObjetos {
       const progresso = Math.min(1, Math.max(0, 1 - (ateTick - estado.tick) / this.ticksBau));
       g.circle(cx, cy - 2, 24).stroke({ width: 4, color: 0x000000, alpha: 0.35 });
       if (progresso > 0) g.arc(cx, cy - 2, 24, -Math.PI / 2, -Math.PI / 2 + progresso * Math.PI * 2).stroke({ width: 4, color: 0xf1c40f });
+    }
+  }
+
+  /** Marco 10A-2: anel azul de progresso sobre quem descansa. */
+  private descansos(estado: EstadoJogo): void {
+    for (const e of estado.entidades) {
+      const i = e.interacao;
+      if (i?.tipo !== 'descanso') continue;
+      const total = i.objetoId === 'longo' ? this.ticksDescanso.longo : this.ticksDescanso.curto;
+      const progresso = Math.min(1, Math.max(0, 1 - (i.ateTick - estado.tick) / total));
+      const cx = (e.x + 0.5) * CELULA_PX;
+      const cy = (e.y + 0.5) * CELULA_PX;
+      this.g.circle(cx, cy, 26).stroke({ width: 4, color: 0x000000, alpha: 0.35 });
+      if (progresso > 0) this.g.arc(cx, cy, 26, -Math.PI / 2, -Math.PI / 2 + progresso * Math.PI * 2).stroke({ width: 4, color: 0x5dade2 });
     }
   }
 
@@ -115,6 +130,7 @@ export class CamadaObjetos {
       g.circle(cx, cy, 14 + pulso).fill({ color: COR_ORBE[o.tipo], alpha: 0.18 });
       g.circle(cx, cy, 8).fill(COR_ORBE[o.tipo]).stroke({ width: 2, color: 0xffffff, alpha: 0.8 });
     }
+    this.descansos(estado);
   }
 
   destruir(): void {

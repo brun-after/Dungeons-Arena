@@ -27,6 +27,8 @@ export interface OpcoesTeclado {
   aoMochila?: () => void;
   /** Tecla `E`: interage com baú ou loja (marco 9A). */
   aoInteragir?: () => void;
+  /** Tecla `R`: descanso curto; com Shift, longo (marco 10A-2). */
+  aoDescansar?: (longo: boolean) => void;
   /** Com um modal aberto, as teclas não chegam ao jogo (marco 6). */
   bloqueado?: () => boolean;
 }
@@ -68,6 +70,8 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
       opcoes.aoMochila();
     } else if (ev.code === 'KeyE' && !ev.repeat && opcoes.aoInteragir) {
       opcoes.aoInteragir();
+    } else if (ev.code === 'KeyR' && !ev.repeat && opcoes.aoDescansar) {
+      opcoes.aoDescansar(ev.shiftKey);
     } else if (ev.code in EIXOS) {
       ev.preventDefault();
       if (!ev.repeat) {
