@@ -42,6 +42,8 @@ export interface OpcoesAutosave {
   /** Chamado fora do tick: a cópia é tirada no momento da gravação. */
   estado: () => EstadoJogo;
   estatisticas: () => Estatisticas;
+  /** Marco 10A-1: as outras fases visitadas (fixas durante a sessão: trocar de fase recarrega). */
+  fasesVisitadas: Record<string, EstadoJogo>;
   aoFalhar?: (erro: unknown) => void;
 }
 
@@ -50,14 +52,18 @@ export interface Autosave {
   pedir: () => void;
   /** Grava agora (ao sair ou suspender) e devolve quando terminar. */
   agora: () => Promise<void>;
+  /** Para de gravar (a troca de fase já gravou o registro novo e vai recarregar a sessão). */
+  suspender: () => Promise<void>;
 }
 
 export function criarAutosave(o: OpcoesAutosave): Autosave {
   let gravando: Promise<void> | null = null;
   let pendente = false;
   let agendado = false;
+  let suspenso = false;
 
   const gravar = async (): Promise<void> => {
+    if (suspenso) return;
     if (gravando) {
       pendente = true;
       return gravando;
@@ -71,6 +77,7 @@ export function criarAutosave(o: OpcoesAutosave): Autosave {
       nomeFase: o.nomeFase,
       estado: clonarEstado(o.estado()),
       estatisticas: { ...o.estatisticas() },
+      fasesVisitadas: o.fasesVisitadas,
     };
     gravando = gravarRegistro(registro)
       .catch((erro: unknown) => o.aoFalhar?.(erro))
@@ -95,5 +102,10 @@ export function criarAutosave(o: OpcoesAutosave): Autosave {
       }, 0);
     },
     agora: gravar,
+    suspender: async () => {
+      suspenso = true;
+      // Espera a gravação em curso, para ela não chegar depois do registro da fase nova.
+      await gravando;
+    },
   };
 }

@@ -48,6 +48,11 @@ export function interagivel(o: ObjetoNoMundo): boolean {
   return o.tipo === 'bau' || o.tipo === 'loja';
 }
 
+/** Ninguém coleta: interagíveis e a porta temporária do boss (marco 10A-1, world/portas.ts). */
+function coletavel(o: ObjetoNoMundo): boolean {
+  return !interagivel(o) && o.tipo !== 'saida';
+}
+
 /** Quem coleta: entidades controladas por jogadores (local ou remoto), nunca a IA. */
 function coletor(e: Entidade): boolean {
   return e.controlador !== 'ia' && vivo(e);
@@ -58,7 +63,7 @@ export function coletarObjetos(estado: EstadoJogo, ctx: ContextoSimulacao, saida
   const consumidos = new Set<string>();
   for (const e of ordemRotativa(estado.entidades, estado.tick)) {
     if (!coletor(e)) continue;
-    const o = estado.objetos.find((x) => x.x === e.x && x.y === e.y && !consumidos.has(x.objetoId) && !interagivel(x));
+    const o = estado.objetos.find((x) => x.x === e.x && x.y === e.y && !consumidos.has(x.objetoId) && coletavel(x));
     if (!o) continue;
     // Transação: verificar → consumir → transferir → registrar, tudo neste tick.
     if (o.tipo === 'item') {

@@ -35,8 +35,11 @@ export interface Projetil {
   atingidos: EntidadeId[];
 }
 
-/** Marco 9A (14/10/2026): `bau`, `loja` (interagíveis) e `ouro` (coletado ao pisar). */
-export type TipoObjeto = 'orbe_hp' | 'orbe_recurso' | 'orbe_efeito' | 'item' | 'ouro' | 'bau' | 'loja';
+/**
+ * Marco 9A (14/10/2026): `bau`, `loja` (interagíveis) e `ouro` (coletado ao pisar). Marco 10A-1:
+ * `saida`, a porta temporária que surge onde o boss morre (§2.1).
+ */
+export type TipoObjeto = 'orbe_hp' | 'orbe_recurso' | 'orbe_efeito' | 'item' | 'ouro' | 'bau' | 'loja' | 'saida';
 
 /**
  * Objeto coletável no mundo (§2.1). `objetoId` é estável; a coleta é uma transação dentro do
@@ -145,6 +148,8 @@ export interface EstadoJogo {
   rastros: Rastro[];
   armadilhas: Armadilha[];
   atrasados: Atrasado[];
+  /** Marco 10A-1: a porta de saída trancada já foi aberta (boss morto ou chave usada) e fica aberta. */
+  saidaAberta: boolean;
   /** Gerador de IDs de ação e de projétil, para não duplicar VFX/som (§3.6). */
   proximoId: number;
 }
@@ -168,6 +173,7 @@ export function criarEstado(opcoes: OpcoesEstado): EstadoJogo {
     rastros: [],
     armadilhas: [],
     atrasados: [],
+    saidaAberta: false,
     proximoId: 1,
   };
 }
@@ -197,6 +203,7 @@ export function clonarEstado(estado: EstadoJogo): EstadoJogo {
     rastros: estado.rastros.map((r) => ({ ...r, interno: copiaEfeito(r.interno), atingidos: [...r.atingidos] })),
     armadilhas: estado.armadilhas.map((a) => ({ ...a, interno: copiaEfeito(a.interno) })),
     atrasados: estado.atrasados.map((a) => ({ ...a, efeito: { ...a.efeito, interno: copiaEfeito(a.efeito.interno) } })),
+    saidaAberta: estado.saidaAberta,
     proximoId: estado.proximoId,
   };
 }

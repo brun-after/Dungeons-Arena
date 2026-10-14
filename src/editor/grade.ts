@@ -106,6 +106,8 @@ export function comoFase(f: FaseEditavel): Fase {
     spawns: f.spawn ? [f.spawn] : [],
     inimigos: f.inimigos,
     objetos: [],
+    portaSaida: null,
+    portasInternas: [],
   };
 }
 

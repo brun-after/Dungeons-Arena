@@ -17,6 +17,7 @@ import { celulaLivrePara } from '../world/colisao';
 import { tentarDominar } from '../combat/efeitos-fluxo';
 import { sortearEfeitoDeOrbe } from '../combat/registro-efeitos';
 import { encerrarInteracao } from '../world/interacao';
+import { aoMorrerBoss } from '../world/portas';
 import { largarItem, largarObjeto, largarOrbeEfeito, largarOuro, largarPerto } from '../world/objetos';
 import { aplicarSubidas } from './nivel';
 import { sortearItem } from './sorteio';
@@ -66,6 +67,8 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
 
     if (e.controlador === 'ia') {
       concederXp(estado, ctx, e, saida);
+      // Boss morto abre a passagem (§2.1, marco 10A-1).
+      aoMorrerBoss(estado, ctx, e, saida);
       // Invocações não soltam nada nem voltam (§2.9).
       if (e.abates === 0 && !e.invocacao) largarDrops(estado, ctx, e, saida);
       // Dominação (§2.9, marco 8A-2): volta do lado de quem a marcou, em vez de sair do mundo.

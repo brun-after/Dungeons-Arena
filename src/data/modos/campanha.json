@@ -19,5 +19,6 @@
   "fasesPermitidas": "qualquer",
   "inimigosDeIA": "da_fase",
   "objetosDeFase": true,
-  "spawnerDinamico": true
+  "spawnerDinamico": true,
+  "portas": { "inimigosCruzamChance": 0.5 }
 }

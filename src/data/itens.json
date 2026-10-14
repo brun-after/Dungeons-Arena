@@ -315,6 +315,21 @@
       "bonusDefesa": 0,
       "efeitos": [],
       "dropavel": false
+    },
+    {
+      "id": "chave_cripta",
+      "nome": "Chave da cripta",
+      "tipo": "chave",
+      "descricao": "Abre a saída das catacumbas.",
+      "icone": "🗝",
+      "raridade": "raro",
+      "valorBase": 0,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false
     }
   ]
 }

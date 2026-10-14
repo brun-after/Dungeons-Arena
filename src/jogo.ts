@@ -5,25 +5,30 @@
 // suspender ou sair da página, e pelo botão "Menu".
 // Marco 6C: fases do editor. "Testar agora" (`teste`) joga a fase com uma cópia do personagem do
 // último save, sem gravar nada (D-042); um jogo novo também pode começar numa fase do jogador.
+// Marco 10A-1 (14/10/2026): chegar à saída aberta leva à próxima fase da campanha (data/campanha.json):
+// o registro novo é montado por `avancarFase` (pura), gravado, e a sessão recarrega a partir dele (D-052).
 
 import type { Habilidade } from './combat/habilidades';
 import type { Comando } from './core/comandos';
 import { criarFila, enfileirar, retirarAte } from './core/comandos';
 import { conteudoOficial, type Conteudo } from './core/conteudo';
 import { BALANCE_PADRAO, type ContextoSimulacao } from './core/contexto';
-import { clonarEntidade, criarEstado, type Entidade, type EstadoJogo } from './core/estado';
+import { clonarEstado, criarEstado, type Entidade, type EstadoJogo } from './core/estado';
 import type { EventoSimulacao } from './core/eventos-simulacao';
 import { hashTexto } from './core/rng';
 import { simular } from './core/simulacao';
+import campanha from './data/campanha.json';
 import fase01 from './data/fases/fase-01.json';
+import fase02 from './data/fases/fase-02.json';
 import { paraFaseJson } from './editor/grade';
 import { criarJogador } from './entities/fabrica';
 import { t } from './i18n';
 import { iniciarLaco } from './plataforma/laco-navegador';
 import { carregarAventura } from './plataforma/aventuras';
-import { carregarSlot, criarAutosave, listarSlots, type Autosave } from './plataforma/saves';
+import { carregarSlot, criarAutosave, gravarRegistro, listarSlots, type Autosave } from './plataforma/saves';
 import { Interpolador } from './render/interpolacao';
-import { jogadorDoSave, type Estatisticas, type RefFase } from './save/esquema';
+import { jogadorDoSave, VERSAO_SCHEMA, type Estatisticas, type RefFase, type RegistroProgresso } from './save/esquema';
+import { avancarFase, personagemNoInicio } from './save/transicao';
 import { mostrarAviso } from './ui/aviso';
 import { montarCena } from './ui/cena';
 import { criarPesquisa } from './ui/pesquisa';
@@ -35,8 +40,17 @@ const ID_JOGADOR = 'j1';
 const AUTOSAVE_MS = 30_000;
 
 /** Fases oficiais da campanha, por id (a referência gravada no save). */
-const FASES_OFICIAIS: Readonly<Record<string, unknown>> = { 'fase-01': fase01 };
+const FASES_OFICIAIS: Readonly<Record<string, unknown>> = { 'fase-01': fase01, 'fase-02': fase02 };
 const FASE_INICIAL: RefFase = { tipo: 'oficial', id: 'fase-01' };
+/** Quanto a tela de transição fica antes de recarregar a sessão na fase nova. */
+const TRANSICAO_MS = 900;
+
+/** A fase seguinte na sequência da campanha, ou null no fim (o 10A-2 gera uma). */
+function proximaFase(ref: RefFase): RefFase | null {
+  if (ref.tipo !== 'oficial') return null;
+  const seguinte = campanha.fases[campanha.fases.indexOf(ref.id) + 1];
+  return seguinte ? { tipo: 'oficial', id: seguinte } : null;
+}
 
 export interface OpcoesJogo {
   /** Slot de save (1–3); null joga sem salvar. */
@@ -61,44 +75,21 @@ async function faseDaReferencia(ref: RefFase): Promise<unknown> {
   return aventura ? paraFaseJson(aventura) : undefined;
 }
 
-/** Leva um personagem para o início de outra fase: mesma ficha e mochila, vida e mana cheias. */
-function personagemNoInicio(e: Entidade, x: number, y: number): Entidade {
-  const c = clonarEntidade(e);
-  Object.assign(c, {
-    id: ID_JOGADOR,
-    x,
-    y,
-    destinoX: x,
-    destinoY: y,
-    origemX: x,
-    origemY: y,
-    progressoPasso: 0,
-    direcao: 'parado',
-    waypoints: [],
-    caminho: [],
-    hp: c.hpMax,
-    mana: c.manaMax,
-    morto: false,
-    reviverEmTick: 0,
-    invisivelAteTick: 0,
-    efeitos: [],
-    acao: null,
-    alvoSelecionado: null,
-    participacao: [],
-  });
-  return c;
+/** A fase como o jogo a encontra pela primeira vez: inimigos e objetos, sem o jogador. */
+function estadoInicialDaFase(ctx: ContextoSimulacao): EstadoJogo {
+  const estado = criarEstado({ semente: hashTexto(ctx.fase.id), faseId: ctx.fase.id });
+  povoarFase(estado, ctx);
+  return estado;
 }
 
 function novoEstado(ctx: ContextoSimulacao, personagem: Entidade | null = null): EstadoJogo {
   const { fase, conteudo } = ctx;
-  const estado = criarEstado({ semente: hashTexto(fase.id), faseId: fase.id });
+  const estado = estadoInicialDaFase(ctx);
   const spawn = fase.spawns[0] ?? { x: 1, y: 1 };
   const classe = conteudo.classes.get('aventureiro');
   if (!classe) throw new Error('classe inicial ausente');
-  estado.entidades.push(
-    personagem ? personagemNoInicio(personagem, spawn.x, spawn.y) : criarJogador(classe, ID_JOGADOR, spawn.x, spawn.y, ctx.balance),
-  );
-  povoarFase(estado, ctx);
+  // O jogador entra antes dos inimigos (a ordem das entidades é a do save desde o 6B).
+  estado.entidades.unshift(personagem ? personagemNoInicio(personagem, spawn, ID_JOGADOR) : criarJogador(classe, ID_JOGADOR, spawn.x, spawn.y, ctx.balance));
   return estado;
 }
 
@@ -166,13 +157,16 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
 
   let autosave: Autosave | null = null;
   const acoesExtras: HTMLElement[] = [];
+  const criadoEm = leitura?.criadoEm ?? Date.now();
+  const fasesVisitadas = leitura?.fasesVisitadas ?? {};
   if (slot !== null) {
     let avisouFalha = false;
     autosave = criarAutosave({
       slot,
       faseRef,
       nomeFase: ctx.fase.nome,
-      criadoEm: leitura?.criadoEm ?? Date.now(),
+      criadoEm,
+      fasesVisitadas,
       estado: () => estado,
       estatisticas: () => estatisticas,
       aoFalhar: () => {
@@ -244,6 +238,63 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
       void a.agora();
     });
   }
+
+  // Marco 10A-1: saída aberta → próxima fase (D-052). Uma vez só por sessão.
+  const sairDaFase = async (): Promise<void> => {
+    if (teste) {
+      mostrarAviso(raiz, t('fase.concluidaTeste'), 3000);
+      setTimeout(() => {
+        location.href = voltarPara;
+      }, 1500);
+      return;
+    }
+    const proxima = proximaFase(faseRef);
+    if (!proxima) {
+      mostrarAviso(raiz, t('fase.fimDaCampanha'), 6000);
+      return;
+    }
+    if (slot === null || !autosave) {
+      mostrarAviso(raiz, t('fase.concluida'), 4000);
+      return;
+    }
+    const validacaoNova = validarFase(await faseDaReferencia(proxima), new Set(conteudo.presets.keys()), conteudo.itens);
+    if (!validacaoNova.ok) {
+      mostrarAviso(raiz, t('slots.faseAusente'), 5000);
+      return;
+    }
+    const ctxNovo = montarContexto(conteudo, validacaoNova.fase);
+    const atual: RegistroProgresso = {
+      versaoSchema: VERSAO_SCHEMA,
+      slot,
+      criadoEm,
+      atualizadoEm: Date.now(),
+      faseRef,
+      nomeFase: ctx.fase.nome,
+      estado: clonarEstado(estado),
+      estatisticas: { ...estatisticas },
+      fasesVisitadas,
+    };
+    const novo = avancarFase(
+      atual,
+      { ref: proxima, nome: ctxNovo.fase.nome, spawn: ctxNovo.fase.spawns[0] ?? { x: 1, y: 1 }, novoEstado: () => estadoInicialDaFase(ctxNovo) },
+      Date.now(),
+    );
+    await autosave.suspender();
+    await gravarRegistro(novo);
+    mostrarAviso(raiz, t('fase.entrando', { nome: ctxNovo.fase.nome }), TRANSICAO_MS + 2000);
+    // A mesma URL (preserva `diag` e afins): a sessão reabre o slot já na fase nova.
+    setTimeout(() => {
+      location.reload();
+    }, TRANSICAO_MS);
+  };
+  let saindo = false;
+  cena.bus.on('saidaAlcancada', (ev) => {
+    if (ev.id !== idJogador || saindo) return;
+    saindo = true;
+    sairDaFase().catch(() => {
+      mostrarAviso(raiz, t('slots.falhaGravar'), 5000);
+    });
+  });
 
   const interp = new Interpolador();
   const eventos: EventoSimulacao[] = [];

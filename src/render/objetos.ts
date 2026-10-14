@@ -103,6 +103,8 @@ export class CamadaObjetos {
         this.loja(cx, cy);
         continue;
       }
+      // A porta temporária do boss é desenhada com as outras portas (render/portas.ts).
+      if (o.tipo === 'saida') continue;
       if (o.tipo === 'orbe_efeito') {
         const cor = o.efeito ? Number.parseInt(REGISTRO_EFEITOS[o.efeito.tipo].cor.slice(1), 16) : 0xffffff;
         g.circle(cx, cy, 15 + pulso).fill({ color: cor, alpha: 0.22 });

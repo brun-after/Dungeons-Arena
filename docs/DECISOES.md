@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.17 · **Data:** 14/10/2026
+**Versão:** 0.18 · **Data:** 14/10/2026
 
 > **Histórico**
+> - **0.18 (14/10/2026)**: D-052 (portas e troca de fase da campanha), marco 10A-1.
 > - **0.17 (14/10/2026)**: D-051 (spawner dinâmico e armadilha de fase), marco 9A-2.
 > - **0.16 (14/10/2026)**: D-050 (economia: ouro, loja, baús, atalhos e ordenação), marco 9A-1.
 > - **0.15 (14/10/2026)**: D-049 (efeitos de fluxo próprio), marco 8A-2.
@@ -743,3 +744,35 @@ a armadilha de fase (invisível, única ou com rearme). Faltava dizer como conta
 **Consequência.**
 - Save na versão 5 (degrau v4 → v5) e balance v10.
 - O harness confere a cada tick os máximos do spawner; o teste de 10 mil ticks passa por duas rodadas dele.
+
+## D-052 · Portas e troca de fase da campanha (v0.18, 14/10/2026)
+
+**Contexto.** A §2.1 define portas internas de teleporte, porta de saída com tranca (`livre`, `chave`, `boss`), boss
+que abre a passagem e troca de fase que isola o estado. A campanha tinha uma fase só e a saída `S` não fazia nada.
+
+**Decisão.**
+- **Fase**: `portaSaida {x, y, tranca, chave?, bossIndice?}` (numa célula `S`; o boss é o índice na lista de
+  inimigos) e `portasInternas [{numero, nome, a, b}]`. Sem `portaSaida`, toda `S` é saída livre (as fases do editor
+  continuam funcionando sem nada novo).
+- **Gatilho por célula alcançada** (§2.3): porta só reage a quem **completou um passo** naquele tick (evento `moveu`);
+  ficar parado em cima não teleporta de volta nem repete o aviso. As portas vêm antes da coleta e das armadilhas.
+- **Porta interna**: leva ao outro extremo ou ao primeiro vizinho livre; recarga de 800 ms por entidade no mapa de
+  recargas (`porta:<id>`); NPCs cruzam com a chance do modo (`modo.portas.inimigosCruzamChance`, 0,5), sorteada pelo
+  PRNG da IA.
+- **Porta de saída**: só jogadores. A chave é consumida e a porta fica aberta (`estado.saidaAberta`); a de boss abre
+  quando o boss indicado morre e não fecha mais, mesmo que ele reapareça. Boss morto numa fase sem saída nenhuma deixa
+  uma porta temporária (objeto `saida`) onde caiu; ela pisca por 30 s e continua usável.
+- **Troca de fase**: a sequência da campanha está em `data/campanha.json`. Ao chegar à saída aberta, `jogo.ts` monta o
+  registro novo com `avancarFase` (pura, em `save/transicao.ts`), grava no slot e **recarrega a sessão**. Recarregar
+  isola tudo o que a §2.1 pede (timers, recursos gráficos, destino de navegação) sem uma segunda cena em memória.
+  - A fase deixada vai para `fasesVisitadas`, sem o jogador e as invocações dele; voltar a ela restaura o estado.
+  - O personagem leva ficha, mochila e ouro, com vida e mana cheias.
+  - No teste do editor, a saída conclui a fase e volta ao editor; no fim da lista, aparece "Fim da campanha (por
+    enquanto)" até o 10A-2 gerar fases.
+- **Conteúdo**: a fase 1 fecha a saída com o boss; a fase 2, "Catacumbas", tem loja, um atalho (porta interna), uma
+  armadilha com rearme e a saída trancada pela chave da cripta, guardada num baú. A `arena-02` passou para a ordem 101,
+  junto da `arena-01` (a ordem 2 é da campanha).
+
+**Consequência.**
+- Save na versão 6 (degrau v5 → v6: `saidaAberta` e `fasesVisitadas`) e balance v11.
+- O autosave é suspenso na troca, para a gravação da fase antiga não chegar depois da nova.
