@@ -274,9 +274,8 @@
       "bonusDefesa": 0,
       "efeitos": [
         {
-          "tipo": "curar",
-          "valor": 40,
-          "modo": "pct"
+          "tipo": "cura",
+          "pct": 40
         }
       ],
       "dropavel": true
@@ -295,9 +294,9 @@
       "bonusDefesa": 0,
       "efeitos": [
         {
-          "tipo": "restaurarMana",
-          "valor": 50,
-          "modo": "pct"
+          "tipo": "recuperar_recurso",
+          "pct": 50,
+          "duracaoMs": 0
         }
       ],
       "dropavel": true

@@ -13,6 +13,8 @@ export interface FonteDeDano {
   /** `floor(atributo × multiplicador)`, já calculado (§2.7, passo 5). */
   bonusAtributo: number;
   carisma: number;
+  /** Marco 8A: `bonus_dano` e `modificar_dano` do atacante, no momento do lançamento. */
+  multDano: number;
 }
 
 export interface RegrasDano {

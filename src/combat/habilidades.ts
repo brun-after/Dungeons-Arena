@@ -3,7 +3,8 @@
 
 import { ehObjeto, Leitor } from '../core/validar';
 import { formulaValida } from './dados';
-import { TIPOS_EFEITO, type TipoEfeito } from './efeitos';
+import { normalizarEfeitos } from './normalizar-efeito';
+import type { EfeitoCanonico } from './registro-efeitos';
 
 export type TipoAtaque = 'fisico' | 'magico';
 export type TipoArea = 'nenhuma' | 'quadrado';
@@ -11,11 +12,6 @@ export type PoliticaAlvo = 'hostil' | 'proprio';
 /** Como o impacto é resolvido (§2.7): contato e área consultam a geometria no tick do impacto. */
 export type PoliticaImpacto = 'contato' | 'projetil' | 'area' | 'proprio';
 export type Interrupcao = 'interrompivel' | 'ininterrupta';
-
-export interface EfeitoDeHabilidade {
-  tipo: TipoEfeito;
-  duracaoMs: number;
-}
 
 export interface Habilidade {
   id: string;
@@ -35,7 +31,8 @@ export interface Habilidade {
   interrupcao: Interrupcao;
   /** Células por segundo; só para `politicaImpacto: 'projetil'`. */
   velocidadeProjetil: number;
-  efeitos: EfeitoDeHabilidade[];
+  /** Já normalizados (§2.8): uma entrada canônica por componente. */
+  efeitos: EfeitoCanonico[];
 }
 
 export type Catalogo<T> = ReadonlyMap<string, T>;
@@ -67,10 +64,7 @@ export function lerHabilidades(json: unknown): { habilidades: Map<string, Habili
       politicaImpacto: l.opcao(o, 'politicaImpacto', ['contato', 'projetil', 'area', 'proprio'] as const),
       interrupcao: l.opcao(o, 'interrupcao', ['interrompivel', 'ininterrupta'] as const),
       velocidadeProjetil: l.numero(o, 'velocidadeProjetil', { min: 0, max: 60 }),
-      efeitos: l.lista(o, 'efeitos').map((e) => {
-        const oe = l.objeto(e, 'efeito');
-        return { tipo: l.opcao(oe, 'tipo', TIPOS_EFEITO), duracaoMs: l.numero(oe, 'duracaoMs', { min: 0 }) };
-      }),
+      efeitos: normalizarEfeitos(l.lista(o, 'efeitos'), l),
     };
     if (h.formulaDano !== null && !formulaValida(h.formulaDano)) l.erro(`fórmula de dano inválida: ${h.formulaDano}`);
     if (h.formulaCura !== null && !formulaValida(h.formulaCura)) l.erro(`fórmula de cura inválida: ${h.formulaCura}`);

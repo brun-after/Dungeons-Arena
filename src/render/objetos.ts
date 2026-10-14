@@ -1,7 +1,9 @@
 // Objetos coletáveis no chão (§2.16, camada "objetos"): orbes de HP (verde) e de recurso (azul),
-// com um pulso leve, e itens (marco 6) como losango na cor da raridade (§2.10). Só lê o estado.
+// com um pulso leve, orbes de efeito na cor do registro (marco 8A) e itens (marco 6) como losango
+// na cor da raridade (§2.10). Só lê o estado.
 
 import { Graphics, type Container } from 'pixi.js';
+import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import type { EstadoJogo } from '../core/estado';
 import type { Raridade } from '../modos/modo';
 import { CELULA_PX } from './camera-calculo';
@@ -42,6 +44,13 @@ export class CamadaObjetos {
         const r = 11;
         g.circle(cx, cy, 16 + pulso).fill({ color: cor, alpha: 0.2 });
         g.poly([cx, cy - r, cx + r, cy, cx, cy + r, cx - r, cy]).fill(cor).stroke({ width: 2, color: 0xffffff, alpha: 0.9 });
+        continue;
+      }
+      if (o.tipo === 'orbe_efeito') {
+        const cor = o.efeito ? Number.parseInt(REGISTRO_EFEITOS[o.efeito.tipo].cor.slice(1), 16) : 0xffffff;
+        g.circle(cx, cy, 15 + pulso).fill({ color: cor, alpha: 0.22 });
+        g.circle(cx, cy, 9).fill(cor).stroke({ width: 3, color: 0xffffff, alpha: 0.95 });
+        g.circle(cx, cy, 3).fill(0xffffff);
         continue;
       }
       g.circle(cx, cy, 14 + pulso).fill({ color: COR_ORBE[o.tipo], alpha: 0.18 });

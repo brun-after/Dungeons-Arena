@@ -10,6 +10,7 @@ import { vivo, type Entidade } from '../entities/entidade';
 import { podeFerir } from '../modos/relacao';
 import { passavel } from '../world/fase';
 import type { FonteDeDano } from './dano';
+import { projeteisAtravessam } from './efeitos';
 import { celulaOcupada } from './geometria';
 import { aplicarImpacto } from './golpe';
 import type { Habilidade } from './habilidades';
@@ -46,6 +47,9 @@ export function lancarProjetil(
     velocidade: hab.velocidadeProjetil,
     bonusAtributo: fonte.bonusAtributo,
     carisma: fonte.carisma,
+    multDano: fonte.multDano,
+    atravessa: projeteisAtravessam(ator, estado.tick),
+    atingidos: [],
   };
   estado.projeteis.push(p);
   saida.push({ t: 'projetilLancado', tick: estado.tick, projetilId: p.id, acaoId, donoId: ator.id, habilidadeId: hab.id });
@@ -55,7 +59,7 @@ function alvoNaCelula(estado: EstadoJogo, ctx: ContextoSimulacao, p: Projetil, c
   const dono = { id: p.donoId, equipe: p.equipeDono };
   let escolhido: Entidade | null = null;
   for (const e of estado.entidades) {
-    if (e.id === p.donoId || !vivo(e) || !podeFerir(dono, e, ctx.modo)) continue;
+    if (e.id === p.donoId || !vivo(e) || !podeFerir(dono, e, ctx.modo) || p.atingidos.includes(e.id)) continue;
     const c = celulaOcupada(e);
     if (c.x !== cx || c.y !== cy) continue;
     if (!escolhido || e.id < escolhido.id) escolhido = e;
@@ -79,8 +83,17 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
       const hab = ctx.conteudo.habilidades.get(p.habilidadeId);
       if (alvo && hab) {
         const dono = buscarEntidade(estado, p.donoId);
-        const fonte: FonteDeDano = { id: p.donoId, equipe: dono?.equipe ?? p.equipeDono, bonusAtributo: p.bonusAtributo, carisma: p.carisma };
-        aplicarImpacto(estado, ctx, alvo, { acaoId: p.acaoId, fonte, hab, indice: 0 }, saida);
+        const fonte: FonteDeDano = {
+          id: p.donoId,
+          equipe: dono?.equipe ?? p.equipeDono,
+          bonusAtributo: p.bonusAtributo,
+          carisma: p.carisma,
+          multDano: p.multDano,
+        };
+        aplicarImpacto(estado, ctx, alvo, { acaoId: p.acaoId, fonte, hab, indice: p.atingidos.length }, saida);
+        p.atingidos.push(alvo.id);
+        // `atravessar` (§2.8): segue em frente e pode acertar o próximo da linha.
+        if (p.atravessa) continue;
         fim = 'acertou';
         break;
       }

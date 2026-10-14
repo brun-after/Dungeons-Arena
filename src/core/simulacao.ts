@@ -9,7 +9,7 @@
 //   7. gatilhos por célula     8. mortes e respawns  9. periódicos de 1 Hz e spawner
 
 import { alvoOfensivoValido, iniciarAcao, processarAcoes, processarAutoAtaque } from '../combat/acao';
-import { expirarEfeitos } from '../combat/efeitos';
+import { processarEfeitos } from '../combat/efeitos';
 import { moverProjeteis } from '../combat/projeteis';
 import { vivo } from '../entities/entidade';
 import { processarIa } from '../entities/ia';
@@ -37,7 +37,7 @@ export function simular(
   processarAcoes(estado, ctx, saida);
   moverProjeteis(estado, ctx, saida, dtMs);
   processarAutoAtaque(estado, ctx, saida);
-  expirarEfeitos(estado.entidades, estado.tick);
+  processarEfeitos(estado, ctx, saida);
   regenerarRecursos(estado, ctx);
   moverEntidades(estado, ctx, saida, dtMs);
   coletarObjetos(estado, ctx, saida);
@@ -80,7 +80,7 @@ function aplicarComandos(
         desequipar(ator, ctx, cmd.slot, estado.tick, saida);
         break;
       case 'usarItem':
-        usarItem(ator, ctx, cmd.invId, estado.tick, saida);
+        usarItem(estado, ator, ctx, cmd.invId, saida);
         break;
       case 'distribuirPonto':
         distribuirPonto(ator, ctx, cmd.atributo, estado.tick, saida);

@@ -32,6 +32,8 @@ export function lerRegistroAventura(bruto: unknown): RegistroAventura | null {
     celulas: r.celulas,
     spawn: spawn as FaseEditavel['spawn'],
     inimigos: r.inimigos as FaseEditavel['inimigos'],
+    // Rascunhos de antes do marco 8A não têm orbes.
+    objetos: Array.isArray(r.objetos) ? (r.objetos as FaseEditavel['objetos']) : [],
     atualizadoEm: typeof r.atualizadoEm === 'number' ? r.atualizadoEm : 0,
   };
 }
@@ -57,6 +59,7 @@ export async function gravarAventura(f: FaseEditavel): Promise<void> {
     celulas: new Uint8Array(f.celulas),
     spawn: f.spawn ? { ...f.spawn } : null,
     inimigos: f.inimigos.map((i) => ({ ...i })),
+    objetos: f.objetos.map((o) => ({ ...o, efeito: o.efeito ? { ...o.efeito } : null })),
     atualizadoEm: Date.now(),
   };
   await gravarNoBanco('aventuras', registro);

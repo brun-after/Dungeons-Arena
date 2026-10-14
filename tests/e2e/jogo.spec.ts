@@ -157,6 +157,18 @@ test.describe('desktop', () => {
     expect(erros).toEqual([]);
   });
 
+  test('orbe de efeito: pisar no orbe da sala inicial mostra o efeito no HUD', async ({ page }) => {
+    const { diag, erros } = await abrir(page);
+    await esperarParado(page, diag);
+    const [px, py] = await ler(diag, 'celula');
+    const [tx, ty] = await ler(diag, 'tela');
+    // Orbe de "Fúria" (bonus_dano) em (3,8) na fase 1.
+    await page.mouse.click(tx + (3 - px) * 48, ty + (8 - py) * 48);
+    await expect(page.locator('.chip-efeito[data-efeito="bonus_dano"]')).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator('.log-combate')).toContainText('Orbe de efeito');
+    expect(erros).toEqual([]);
+  });
+
   test('controles de toque ficam escondidos no desktop', async ({ page }) => {
     await abrir(page);
     await expect(page.getByTestId('joystick')).toBeHidden();
@@ -299,6 +311,11 @@ test.describe('celular (emulação)', () => {
     await expect(page.getByRole('button', { name: 'Desfazer' })).toBeEnabled();
     await page.getByRole('button', { name: 'Inimigo', exact: true }).click();
     await page.mouse.click(cx, cy + 40);
+    await expect(status).toHaveText('✓ pronta');
+    // Marco 8A: orbe de efeito, escolhido na lista que vem do registro.
+    await page.getByRole('button', { name: 'Orbe', exact: true }).click();
+    await page.getByLabel('Tipo de orbe').selectOption('efeito:cura_periodica');
+    await page.mouse.click(cx + 60, cy + 40);
     await expect(status).toHaveText('✓ pronta');
     await page.getByRole('button', { name: 'Testar' }).click();
     await expect(page).toHaveURL(/jogo=teste/);

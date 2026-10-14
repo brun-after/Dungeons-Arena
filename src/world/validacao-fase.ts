@@ -3,6 +3,9 @@
 // nunca quebra o jogo. Marco 2: schema mínimo, spawn passável e spawn alcançando a saída.
 // Marco 6C (13/10/2026): avisos (não bloqueiam): fase sem inimigos e inimigo inalcançável.
 
+import { normalizarEfeito } from '../combat/normalizar-efeito';
+import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
+import { Leitor } from '../core/validar';
 import { alcancaveis } from './navegacao';
 import {
   CARACTERE_CELULA,
@@ -72,7 +75,7 @@ export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<st
   return erros.length > 0 ? { ok: false, erros, avisos } : { ok: true, fase: json, avisos };
 }
 
-const TIPOS_OBJETO = ['orbe_hp', 'orbe_recurso'] as const;
+const TIPOS_OBJETO = ['orbe_hp', 'orbe_recurso', 'orbe_efeito'] as const;
 
 function validarObjetos(objetos: unknown, erros: ErroFase[]): ObjetoPosicionadoJson[] {
   if (objetos === undefined) return [];
@@ -83,6 +86,18 @@ function validarObjetos(objetos: unknown, erros: ErroFase[]): ObjetoPosicionadoJ
   const lista: ObjetoPosicionadoJson[] = [];
   for (const o of objetos) {
     const normalizado = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 1;
+    // Orbe de efeito (marco 8A): o efeito é normalizado pelo registro e precisa ser elegível ao orbe.
+    if (ehObjeto(o) && o.tipo === 'orbe_efeito' && normalizado(o.x) && normalizado(o.y)) {
+      const l = new Leitor('orbe de efeito');
+      const efeitos = normalizarEfeito(o.efeito, l);
+      const efeito = efeitos[0];
+      if (l.erros.length > 0 || efeitos.length !== 1 || !efeito || !REGISTRO_EFEITOS[efeito.tipo].elegivelParaOrbe) {
+        erros.push({ mensagem: `orbe de efeito precisa de um efeito elegível ao orbe${l.erros[0] ? ` (${l.erros[0]})` : ''}` });
+        continue;
+      }
+      lista.push({ tipo: 'orbe_efeito', x: o.x, y: o.y, valor: 1, modo: 'abs', efeito });
+      continue;
+    }
     if (
       !ehObjeto(o) ||
       typeof o.tipo !== 'string' ||

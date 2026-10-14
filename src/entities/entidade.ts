@@ -4,7 +4,7 @@
 
 import type { Celula, Dir8, EntidadeId } from '../core/comandos';
 import { clonarRng, type EstadoRng } from '../core/rng';
-import type { TipoEfeito } from '../combat/efeitos';
+import type { TipoEfeito } from '../combat/registro-efeitos';
 import type { Slot } from '../modos/modo';
 
 export type TipoEntidade = 'jogador' | 'inimigo' | 'invocacao' | 'avatar';
@@ -27,6 +27,11 @@ export interface EfeitoAtivo {
   /** Tick em que o efeito expira (§2.7: tempo em ticks, nunca relógio de parede). */
   ateTick: number;
   origemId: EntidadeId;
+  /** Marco 8A: magnitude (campos do tipo no registro; 0 quando não usa). */
+  valor: number;
+  pct: number;
+  /** Próxima aplicação dos periódicos; 0 nos demais. */
+  proximoTick: number;
 }
 
 /** Ação em conjuração (§2.7, etapa 3). Ticks publicados para a telegrafia (§3.6). */

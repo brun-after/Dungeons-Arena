@@ -2,6 +2,7 @@
 // a `simular()` pelo contexto. Marco 2: só terreno e spawns; objetos e inimigos posicionados
 // entram nos marcos seguintes.
 
+import type { EfeitoCanonico } from '../combat/registro-efeitos';
 import type { Celula } from '../core/comandos';
 
 export type TipoCelula = 'parede' | 'piso' | 'saida' | 'vazio';
@@ -48,20 +49,25 @@ export interface InimigoPosicionado {
  * Objeto autorado (§2.1): coordenadas normalizadas 0–1, convertidas para célula por
  * `coluna = min(largura − 1, floor(x × largura))`, e equivalente para a linha.
  */
+export type TipoObjetoDeFase = 'orbe_hp' | 'orbe_recurso' | 'orbe_efeito';
+
 export interface ObjetoPosicionadoJson {
-  tipo: 'orbe_hp' | 'orbe_recurso';
+  tipo: TipoObjetoDeFase;
   x: number;
   y: number;
   valor: number;
   modo: 'abs' | 'pct';
+  /** Só no `orbe_efeito` (marco 8A): o efeito, já normalizado pela validação. */
+  efeito?: EfeitoCanonico;
 }
 
 export interface ObjetoPosicionado {
-  tipo: 'orbe_hp' | 'orbe_recurso';
+  tipo: TipoObjetoDeFase;
   x: number;
   y: number;
   valor: number;
   modo: 'abs' | 'pct';
+  efeito: EfeitoCanonico | null;
 }
 
 /** Formato da fase no JSON oficial e no editor (validado por `validarFase`). */
@@ -118,7 +124,10 @@ export function carregarFase(json: FaseJson): Fase {
     spawns: json.spawns.map((s) => ({ x: s.x, y: s.y })),
     inimigos: (json.inimigos ?? []).map((i) => ({ ...i })),
     objetos: (json.objetos ?? []).map((o) => ({
-      ...o,
+      tipo: o.tipo,
+      valor: o.valor,
+      modo: o.modo,
+      efeito: o.efeito ? { ...o.efeito } : null,
       x: celulaNormalizada(o.x, largura),
       y: celulaNormalizada(o.y, altura),
     })),

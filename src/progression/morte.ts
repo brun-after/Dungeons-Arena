@@ -16,7 +16,8 @@ import { podeFerir } from '../modos/relacao';
 import { atrasoDeRespawnTicks, localDeRespawn, podeRespawnar, protecaoDeRespawnTicks } from '../modos/regras';
 import { celulaLivrePara } from '../world/colisao';
 import { passavel } from '../world/fase';
-import { largarItem, largarObjeto } from '../world/objetos';
+import { sortearEfeitoDeOrbe } from '../combat/registro-efeitos';
+import { largarItem, largarObjeto, largarOrbeEfeito } from '../world/objetos';
 import { dropaveisDe, type Item } from './itens';
 import { aplicarSubidas } from './nivel';
 
@@ -102,16 +103,25 @@ function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
   } else if (aleatorio(estado.rng) < d.chanceOrbeRecurso) {
     largarObjeto(estado, 'orbe_recurso', e.x, e.y, d.orbeRecursoPct, 'pct', saida);
   }
+  // Orbe de efeito (§2.10, marco 8A): sorteio independente; o efeito vem do registro, por peso.
+  if (aleatorio(estado.rng) < d.chanceOrbeEfeito) {
+    const efeito = sortearEfeitoDeOrbe(estado.rng);
+    if (efeito) largarPerto(estado, ctx, e, (x, y) => largarOrbeEfeito(estado, efeito, x, y, saida));
+  }
   if (!ctx.modo.loot.itens) return;
   const boss = e.arquetipo === 'boss';
   if (aleatorio(estado.rng) >= (boss ? d.chanceItemBoss : d.chanceItem)) return;
   const item = sortearItem(estado, ctx, boss);
   if (!item) return;
-  // A célula do inimigo pode já ter o orbe: tenta as vizinhas, numa ordem fixa.
+  largarPerto(estado, ctx, e, (x, y) => largarItem(estado, item.id, x, y, saida));
+}
+
+/** A célula do inimigo pode já ter um objeto: tenta as vizinhas, numa ordem fixa. */
+function largarPerto(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, largar: (x: number, y: number) => boolean): void {
   for (const [dx, dy] of VIZINHANCA) {
     const x = e.x + dx;
     const y = e.y + dy;
-    if (passavel(ctx.fase, x, y) && largarItem(estado, item.id, x, y, saida)) return;
+    if (passavel(ctx.fase, x, y) && largar(x, y)) return;
   }
 }
 

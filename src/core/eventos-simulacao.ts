@@ -4,7 +4,7 @@
 
 import type { EntidadeId } from './comandos';
 import type { TipoObjeto } from './estado';
-import type { TipoEfeito } from '../combat/efeitos';
+import type { TipoEfeito } from '../combat/registro-efeitos';
 import type { Slot } from '../modos/modo';
 import type { StatusCaminho } from '../world/navegacao';
 
@@ -70,6 +70,8 @@ export type EventoSimulacao =
     }
   | { t: 'esquivou'; tick: number; acaoId: number; atorId: EntidadeId; alvoId: EntidadeId }
   | { t: 'efeitoAplicado'; tick: number; alvoId: EntidadeId; origemId: EntidadeId; tipo: TipoEfeito; ateTick: number }
+  /** Marco 8A: o que um efeito periódico ou instantâneo fez (números na tela). */
+  | { t: 'efeitoResultado'; tick: number; alvoId: EntidadeId; origemId: EntidadeId; tipo: TipoEfeito; dano: number; cura: number; mana: number }
   | { t: 'morreu'; tick: number; id: EntidadeId; porId: EntidadeId | null }
   | { t: 'xpGanho'; tick: number; id: EntidadeId; xp: number }
   | { t: 'iaNotou'; tick: number; id: EntidadeId; alvoId: EntidadeId; hesitacaoAteTick: number }

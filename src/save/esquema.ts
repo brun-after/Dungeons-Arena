@@ -6,7 +6,7 @@ import type { EstadoJogo } from '../core/estado';
 import { ehObjeto, type Objeto } from '../core/validar';
 import type { Entidade } from '../entities/entidade';
 
-export const VERSAO_SCHEMA = 1;
+export const VERSAO_SCHEMA = 2;
 export const SLOTS = [1, 2, 3] as const;
 export const FORMATO_EXPORTACAO = 'dungeons-arena/save';
 
@@ -51,7 +51,27 @@ export type LeituraSave = { ok: true; registro: RegistroProgresso } | { ok: fals
 
 /** Cada função leva um registro da versão `i` para a `i + 1`. Vazio enquanto só existe a v1. */
 export type Migracao = (r: Objeto) => Objeto;
-export const MIGRACOES: readonly Migracao[] = [];
+
+const lista = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
+const comCampos = (v: unknown, campos: Objeto): unknown => (ehObjeto(v) ? { ...campos, ...v } : v);
+
+/**
+ * v1 → v2 (marco 8A, 14/10/2026): efeitos ganharam magnitude e relógio de periódico; projéteis,
+ * multiplicador de dano e perfuração; objetos, o efeito do orbe. Campos novos com valor neutro.
+ */
+function v1ParaV2(r: Objeto): Objeto {
+  const e = r.estado;
+  if (!ehObjeto(e)) return r;
+  const entidades = lista(e.entidades).map((x) =>
+    ehObjeto(x) ? { ...x, efeitos: lista(x.efeitos).map((f) => comCampos(f, { valor: 0, pct: 0, proximoTick: 0 })) } : x,
+  );
+  const projeteis = lista(e.projeteis).map((p) => comCampos(p, { multDano: 1, atravessa: false, atingidos: [] }));
+  const objetos = lista(e.objetos).map((o) => comCampos(o, { efeito: null }));
+  return { ...r, estado: { ...e, entidades, projeteis, objetos } };
+}
+
+/** `MIGRACOES[v]` leva um registro da versão `v` para a `v + 1`. Não existiu versão 0. */
+export const MIGRACOES: Readonly<Record<number, Migracao>> = { 1: v1ParaV2 };
 
 function temNaoFinito(v: unknown): boolean {
   if (typeof v === 'number') return !Number.isFinite(v);
@@ -70,7 +90,7 @@ function lerRefFase(v: unknown): RefFase | null {
  * Lê um registro vindo do banco ou de um arquivo importado: migra até a versão atual e confere a
  * forma antes de qualquer gravação (§3.5). `alvo` e `migracoes` são parâmetros para o teste.
  */
-export function lerRegistro(bruto: unknown, migracoes: readonly Migracao[] = MIGRACOES, alvo = VERSAO_SCHEMA): LeituraSave {
+export function lerRegistro(bruto: unknown, migracoes: Readonly<Record<number, Migracao>> = MIGRACOES, alvo = VERSAO_SCHEMA): LeituraSave {
   if (!ehObjeto(bruto) || typeof bruto.versaoSchema !== 'number' || !Number.isInteger(bruto.versaoSchema)) {
     return { ok: false, erro: 'formato' };
   }

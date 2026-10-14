@@ -2,6 +2,7 @@
 // sem funções e sem referências cíclicas, para clonar, comparar (digest) e gravar em checkpoint.
 // O terreno da fase é conteúdo imutável e fica no contexto (D-007); aqui só o `faseId`.
 
+import type { EfeitoCanonico } from '../combat/registro-efeitos';
 import type { EntidadeId } from './comandos';
 import { clonarEntidade, type Entidade } from '../entities/entidade';
 import { clonarRng, criarRng, type EstadoRng } from './rng';
@@ -27,9 +28,14 @@ export interface Projetil {
   /** Bônus de atributo e Carisma do lançador congelados no lançamento. */
   bonusAtributo: number;
   carisma: number;
+  /** Marco 8A: multiplicador de dano e perfuração (`atravessar`) congelados no lançamento. */
+  multDano: number;
+  atravessa: boolean;
+  /** Quem já foi atingido (o projétil que atravessa não acerta o mesmo alvo duas vezes). */
+  atingidos: EntidadeId[];
 }
 
-export type TipoObjeto = 'orbe_hp' | 'orbe_recurso' | 'item';
+export type TipoObjeto = 'orbe_hp' | 'orbe_recurso' | 'orbe_efeito' | 'item';
 
 /**
  * Objeto coletável no mundo (§2.1). `objetoId` é estável; a coleta é uma transação dentro do
@@ -45,6 +51,8 @@ export interface ObjetoNoMundo {
   geracao: number;
   /** Só para `tipo: 'item'` (marco 6); null nos orbes. */
   itemId: string | null;
+  /** Só para `tipo: 'orbe_efeito'` (marco 8A); null nos demais. */
+  efeito: EfeitoCanonico | null;
 }
 
 /** Respawn agendado de um inimigo (§2.5): o id continua estável e a geração incrementa. */
@@ -111,8 +119,8 @@ export function clonarEstado(estado: EstadoJogo): EstadoJogo {
     rng: clonarRng(estado.rng),
     entidades: estado.entidades.map(clonarEntidade),
     recargas: { ...estado.recargas },
-    projeteis: estado.projeteis.map((p) => ({ ...p })),
-    objetos: estado.objetos.map((o) => ({ ...o })),
+    projeteis: estado.projeteis.map((p) => ({ ...p, atingidos: [...p.atingidos] })),
+    objetos: estado.objetos.map((o) => ({ ...o, efeito: o.efeito ? { ...o.efeito } : null })),
     respawns: estado.respawns.map((r) => ({ ...r })),
     proximoId: estado.proximoId,
   };

@@ -36,7 +36,7 @@ describe('grade do editor', () => {
     const alteracoes = aplicarFerramenta(f, { t: 'spawn' }, 0, 0);
     expect(alteracoes).toHaveLength(2);
     expect(f.spawn).toEqual({ x: 0, y: 0 });
-    expect(lerCelula(f, 0, 0)).toEqual({ tipo: 'piso', spawn: true, inimigo: null });
+    expect(lerCelula(f, 0, 0)).toEqual({ tipo: 'piso', spawn: true, inimigo: null, objeto: null });
     expect(lerCelula(f, 1, 1).spawn).toBe(false);
     expect(aplicarFerramenta(f, { t: 'terreno', tipo: 'parede' }, 0, 0)).toHaveLength(1);
     expect(f.spawn).toBeNull();

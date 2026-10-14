@@ -49,6 +49,8 @@ export interface Balance {
     /** Sorteio de item, independente do de orbe (§2.10); boss tem chance própria. */
     chanceItem: number;
     chanceItemBoss: number;
+    /** Orbe de efeito (§2.10, 8%), sorteado à parte; o efeito vem do registro, por peso. */
+    chanceOrbeEfeito: number;
     raridadeMinBoss: Raridade;
     pesoRaridade: Record<Raridade, number>;
   };
@@ -61,6 +63,10 @@ export interface Balance {
     pontosPorNivel: number;
     /** Aumento automático de HP base por nível acima do 1º. */
     hpPorNivel: number;
+  };
+  /** Efeitos (§2.8): dano, cura e recurso periódicos aplicam a cada intervalo. */
+  efeitos: {
+    intervaloPeriodicoMs: number;
   };
   /** Limites do atributo efetivo (§2.10, equipamento derivado). */
   atributos: {

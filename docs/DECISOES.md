@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.13 · **Data:** 13/10/2026
+**Versão:** 0.14 · **Data:** 14/10/2026
 
 > **Histórico**
+> - **0.14 (14/10/2026)**: D-048 (semântica dos efeitos do registro), marco 8A-1.
 > - **0.13 (13/10/2026)**: D-045 a D-047, marco 7B (rede degradada sobre WSS, cena padrão, renovação do movimento).
 > - **0.12 (13/10/2026)**: D-044 (relatórios anônimos do teste com pessoas), marco 7A.
 > - **0.11 (13/10/2026)**: D-042 e D-043, tomadas no marco 6C (editor mínimo).
@@ -558,3 +559,55 @@ ticks (20 comandos/s). Uma parada de retransmissão TCP entregava tudo de uma ve
 - Zero rejeições no degradado.
 - A banda enviada por cliente caiu de 2,9 para 1,7 KiB/s.
 - A correção no suportado continuou dentro da meta.
+
+## D-048 · Semântica dos efeitos do registro (v0.14, 14/10/2026)
+
+**Contexto.** A §2.8 lista os 26 tipos pelo nome e exige registro único, normalização e dispatcher único. Ela não diz o
+que alguns tipos fazem exatamente, nem como acumulam.
+
+**Decisão.** O 8A-1 liga 20 tipos. Os 6 de fluxo próprio entram no 8A-2.
+
+*Forma e regras gerais*
+- **Forma canônica**: `{ tipo, duracaoMs, valor, pct, em }`.
+  - Campos que o tipo não usa ficam em 0, para que digest, clone e patch não tenham campo ausente.
+  - `em: 'conjurador'` faz o efeito de uma habilidade cair sobre quem lançou (ex.: o raio vampírico cura o vampiro).
+- **Acumulação**: reaplicar o mesmo tipo estende a duração e fica com o maior `valor`/`pct`. Nunca encurta e não soma
+  pilhas.
+- **Periódicos** (dano, cura, recurso): aplicam `valor` a cada 1000 ms (`balance.efeitos`), inclusive no último tick
+  da duração. O dano periódico respeita `imune_dano` e conta participação para o XP.
+
+*Semântica de cada tipo*
+
+| Tipo | O que faz |
+|---|---|
+| `sem_movimento` | não anda, mas age |
+| `sem_ataque` | bloqueia ações **físicas** (par do `silenciar`, que bloqueia as mágicas) |
+| `modificar_dano` | −pct no dano **causado** |
+| `bonus_dano` | +pct no dano causado. Bônus e reduções somam entre si e se multiplicam: `(1 + Σ+) × (1 − Σ−)` |
+| `ab_dano` | soma ao bônus de atributo do ataque básico |
+| `ab_recarga` | encurta a recarga do ataque básico, até 75% |
+| `ab_alcance` | células a mais de alcance no ataque básico |
+| `ab_multi_alvo` | N alvos extras no alcance, os mais próximos primeiro |
+| `imune_dano` | zera todo dano, mas não a cura |
+| `fantasma` | não colide com entidades |
+| `atravessar` | os projéteis próprios perfuram, sem repetir alvo |
+| `cura` | instantâneo: `valor` fixo + `pct` do máximo |
+| `recuperar_recurso` | com duração, mana por intervalo; com duração 0, instantâneo, como a `cura` |
+| `teleporte` | para a célula mirada, se livre e passável |
+| `avanco` | até `valor` células em direção à mira, sem passar dela |
+| `empurrao` | até `valor` células para longe da origem, parando no primeiro obstáculo |
+
+*Autoria e uso*
+- **Normalização**: aceita a forma canônica ou o objeto combinado (`{ "atordoar": 1500, "dano_periodico": 3 }`). Campo
+  omitido usa o padrão do registro só quando nenhum campo do tipo foi dado (`{ "tipo": "cura", "pct": 40 }` cura 40%,
+  sem somar o valor padrão).
+- **Consumíveis**: passam pelo mesmo dispatcher (`curar` → `cura`, `restaurarMana` → `recuperar_recurso`).
+- **Orbe de efeito**: drop de 8%, num sorteio próprio. O sorteio e a lista do editor só leem o registro.
+- **Conteúdo**: aranha (teia → `sem_movimento`), cultista e boss (marca → `dano_periodico`), slime (golpe viscoso →
+  `modificar_dano`), orc (golpe pesado → `empurrao`) e vampiro (raio vampírico → `cura` em si).
+  - `teleporte`, `avanco` e o restante são exercitados nos testes e nos orbes.
+  - Ganham habilidades de jogador com as classes do 10A.
+
+**Consequência.**
+- O save passa à versão 2, com o primeiro degrau real de migração (D-041).
+- A `versaoDoConteudo` muda, então servidor e Pages sobem juntos no merge.

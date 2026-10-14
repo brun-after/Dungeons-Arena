@@ -94,7 +94,12 @@
       "politicaImpacto": "contato",
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
-      "efeitos": [{ "tipo": "atordoar", "duracaoMs": 1500 }]
+      "efeitos": [
+        {
+          "tipo": "atordoar",
+          "duracaoMs": 1500
+        }
+      ]
     },
     {
       "id": "golpe",
@@ -170,7 +175,14 @@
       "politicaImpacto": "area",
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
-      "efeitos": []
+      "efeitos": [
+        {
+          "dano_periodico": {
+            "valor": 2,
+            "duracaoMs": 3000
+          }
+        }
+      ]
     },
     {
       "id": "golpe_demoniaco",
@@ -190,6 +202,103 @@
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
       "efeitos": []
+    },
+    {
+      "id": "teia",
+      "nome": "Teia",
+      "icone": "🕸",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d4",
+      "formulaCura": null,
+      "alcanceCelulas": 4,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 504,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 7,
+      "efeitos": [
+        {
+          "sem_movimento": 1200
+        }
+      ]
+    },
+    {
+      "id": "golpe_viscoso",
+      "nome": "Golpe viscoso",
+      "icone": "◍",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d10",
+      "formulaCura": null,
+      "alcanceCelulas": 2,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 504,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "modificar_dano": {
+            "pct": 30,
+            "duracaoMs": 4000
+          }
+        }
+      ]
+    },
+    {
+      "id": "golpe_pesado",
+      "nome": "Golpe pesado",
+      "icone": "⇥",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d10",
+      "formulaCura": null,
+      "alcanceCelulas": 2,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 504,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "empurrao": 1
+        }
+      ]
+    },
+    {
+      "id": "raio_vampirico",
+      "nome": "Raio vampírico",
+      "icone": "🩸",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 4,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 504,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 8,
+      "efeitos": [
+        {
+          "tipo": "cura",
+          "valor": 2,
+          "em": "conjurador"
+        }
+      ]
     }
   ]
 }

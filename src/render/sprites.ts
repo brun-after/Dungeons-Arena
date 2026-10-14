@@ -6,7 +6,7 @@
 import { Container, Graphics, Text } from 'pixi.js';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
-import { movimentoBloqueado } from '../combat/efeitos';
+import { efeitosAtivos } from '../combat/efeitos';
 import type { Arquetipo, Entidade } from '../entities/entidade';
 import { relacao } from '../modos/relacao';
 import { CELULA_PX } from './camera-calculo';
@@ -160,8 +160,11 @@ export class CamadaEntidades {
   private desenharAneis(m: Marcador, e: Entidade, estado: EstadoJogo, selecionado: boolean): void {
     const g = m.aneis.clear();
     if (selecionado) g.circle(0, 0, RAIO * m.escala + 6).stroke({ width: 2, color: 0xf1c40f, alpha: 0.9 });
-    if (!e.morto && movimentoBloqueado(e, estado.tick)) {
-      g.circle(0, -RAIO * m.escala - 4, 5).fill(0xf1c40f).stroke({ width: 1, color: 0x000000 });
+    // Marco 8A: marcador do status mais importante (negativo antes de positivo), na cor do registro.
+    const status = e.morto ? [] : efeitosAtivos(e, estado.tick).filter((d) => d.ehStatus);
+    const principal = status.find((d) => !d.positivo) ?? status[0];
+    if (principal) {
+      g.circle(0, -RAIO * m.escala - 4, 5).fill(Number.parseInt(principal.cor.slice(1), 16)).stroke({ width: 1, color: 0x000000 });
     }
   }
 

@@ -4,12 +4,13 @@
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
-import { ticksDe } from '../core/tempo';
+import { buscarEntidade } from '../core/estado';
 import { vivo, type Entidade } from '../entities/entidade';
 import { rolar } from './dados';
 import { resolverGolpe, type FonteDeDano } from './dano';
-import { aplicarEfeito } from './efeitos';
+import { aplicarEfeito, imuneADano } from './efeitos';
 import type { Habilidade } from './habilidades';
+import { registrarParticipacao } from './participacao';
 
 export interface Impacto {
   acaoId: number;
@@ -17,6 +18,10 @@ export interface Impacto {
   hab: Habilidade;
   /** Ordem do alvo num impacto em área. */
   indice: number;
+  /** Célula mirada (teleporte e avanço usam). */
+  mira?: { x: number; y: number };
+  /** Bônus do ataque básico (`ab_dano`), somado à rolagem. */
+  danoExtra?: number;
 }
 
 export function aplicarImpacto(
@@ -37,7 +42,14 @@ export function aplicarImpacto(
   let imune = false;
 
   if (hab.formulaDano !== null) {
-    const r = resolverGolpe(estado.rng, hab.formulaDano, fonte, { defesa: alvo.defesa, imune: false }, ctx.balance.combate);
+    const r = resolverGolpe(
+      estado.rng,
+      hab.formulaDano,
+      { ...fonte, bonusAtributo: fonte.bonusAtributo + (impacto.danoExtra ?? 0) },
+      { defesa: alvo.defesa, imune: imuneADano(alvo, estado.tick) },
+      ctx.balance.combate,
+      fonte.multDano,
+    );
     ({ dano, d20, mult, falha, critico, imune } = r);
     alvo.hp = Math.max(0, alvo.hp - dano);
     if (dano > 0) registrarParticipacao(alvo, fonte.id, estado.tick, ctx);
@@ -68,13 +80,11 @@ export function aplicarImpacto(
 
   // Efeitos dependentes de acerto não se aplicam na falha crítica nem com imunidade (§2.7, passo 7).
   if (falha || imune) return;
+  // Dispatcher único (§2.8); `em: 'conjurador'` cai sobre quem lançou (ex.: avanço, roubo de vida).
+  const conjurador = buscarEntidade(estado, fonte.id);
+  const origem = { id: fonte.id, x: conjurador?.x ?? alvo.x, y: conjurador?.y ?? alvo.y };
   for (const efeito of hab.efeitos) {
-    aplicarEfeito(alvo, efeito.tipo, efeito.duracaoMs, fonte.id, estado.tick, saida);
+    const sobre = efeito.em === 'conjurador' ? conjurador : alvo;
+    if (sobre) aplicarEfeito(estado, ctx, sobre, efeito, origem, impacto.mira ?? { x: alvo.x, y: alvo.y }, saida);
   }
-}
-
-function registrarParticipacao(alvo: Entidade, fonteId: string, tick: number, ctx: ContextoSimulacao): void {
-  const janela = ticksDe(ctx.balance.combate.janelaParticipacaoS * 1000);
-  alvo.participacao = alvo.participacao.filter((p) => p.id !== fonteId && tick - p.tick <= janela);
-  alvo.participacao.push({ id: fonteId, tick });
 }
