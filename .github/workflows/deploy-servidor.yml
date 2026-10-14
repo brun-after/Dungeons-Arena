@@ -57,7 +57,14 @@ jobs:
           install -m 700 -d ~/.ssh
           printf '%s\n' "$VM_SSH_KEY" > ~/.ssh/vm
           chmod 600 ~/.ssh/vm
-          ssh-keyscan -H "$VM_HOST" >> ~/.ssh/known_hosts
+          # 13/10/2026: tenta algumas vezes; uma oscilação de rede (ou troca de IP) derrubou um deploy.
+          for i in 1 2 3 4 5; do
+            if ssh-keyscan -T 10 -H "$VM_HOST" >> ~/.ssh/known_hosts 2>/dev/null && [ -s ~/.ssh/known_hosts ]; then exit 0; fi
+            echo "ssh-keyscan falhou (tentativa $i); nova tentativa em 10 s" >&2
+            sleep 10
+          done
+          echo "A VM não respondeu ao SSH em $VM_HOST" >&2
+          exit 1
       - name: Enviar compose e Caddyfile
         env:
           VM_HOST: ${{ secrets.VM_HOST }}

@@ -111,9 +111,11 @@ const metas = [
 for (const [meta, ok] of metas) console.log(`${ok ? '✓' : '✗'} ${meta}`);
 
 if (values.registrar) {
+  // Decimais com vírgula, como o resto do documento.
+  const br = (n: number) => String(n).replace('.', ',');
   appendFileSync(
     new URL('../../docs/BENCHMARKS.md', import.meta.url),
-    `| ${resultado.data.slice(0, 10)} | 5 | Arena Livre, ${resultado.clientes} bots, ${resultado.segundos} s, ${url} | RTT p50/p95 · correção p95/p99 · banda média/máx | — / — · ≤ 0,25 · ≤ 100 KiB/s | ${resultado.rttP50Ms}/${resultado.rttP95Ms} ms · ${resultado.correcaoP95Celulas}/${resultado.correcaoP99Celulas} · ${resultado.bandaMediaKiBs}/${resultado.bandaMaxKiBs} KiB/s | rejeições ${resultado.rejeitados}, ressinc. ${resultado.ressincronizacoes} |\n`,
+    `| ${resultado.data.slice(0, 10)} | 5 | Arena Livre, ${resultado.clientes} bots, ${resultado.segundos} s, ${url} | RTT p50/p95 · correção p95/p99 · banda média/máx | — / — · ≤ 0,25 · ≤ 100 KiB/s | ${resultado.rttP50Ms}/${resultado.rttP95Ms} ms · ${br(resultado.correcaoP95Celulas)}/${br(resultado.correcaoP99Celulas)} · ${br(resultado.bandaMediaKiBs)}/${br(resultado.bandaMaxKiBs)} KiB/s | rejeições ${resultado.rejeitados}, ressinc. ${resultado.ressincronizacoes} |\n`,
   );
   console.log('Registrado em docs/BENCHMARKS.md');
 }
