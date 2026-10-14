@@ -3,6 +3,7 @@
 //   página, ligados por rede simulada (marco 4);
 // - online (`?arena=online`): lobby → servidor real por WSS (marco 5).
 
+import { enderecoDoServidor } from './plataforma/servidor';
 import { contextoDaArena } from './arena/contexto-arena';
 import { versaoDoConteudo } from './arena/protocolo';
 import { SalaArena } from './arena/sala';
@@ -139,13 +140,6 @@ export async function iniciarArenaLoopback(raiz: HTMLElement): Promise<void> {
 }
 
 /** Endereço do servidor: `?servidor=` (teste na rede local) → build (`VITE_ARENA_URL`) → localhost. */
-export function enderecoDoServidor(): string | null {
-  const daUrl = new URLSearchParams(location.search).get('servidor');
-  if (daUrl && /^wss?:\/\/[\w.-]+(:\d+)?$/.test(daUrl)) return daUrl;
-  const doBuild = import.meta.env.VITE_ARENA_URL as string | undefined;
-  if (doBuild) return doBuild;
-  return location.hostname === 'localhost' || location.hostname === '127.0.0.1' ? 'ws://localhost:2567' : null;
-}
 
 export function iniciarArenaOnline(raiz: HTMLElement): void {
   const servidor = enderecoDoServidor();

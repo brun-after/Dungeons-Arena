@@ -29,5 +29,11 @@ export function mostrarMenu(raiz: HTMLElement): void {
     a.textContent = rotulo;
     tela.append(a);
   }
+  // Marco 7A: entrada discreta para quem foi convidado a testar.
+  const pesquisa = document.createElement('a');
+  pesquisa.className = 'link-menu';
+  pesquisa.href = './?pesquisa=1';
+  pesquisa.textContent = t('menu.pesquisa');
+  tela.append(pesquisa);
   raiz.append(tela);
 }

@@ -13,3 +13,5 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 .claude/settings.local.json
+# Relatórios do teste com pessoas no servidor local (marco 7A)
+dados/

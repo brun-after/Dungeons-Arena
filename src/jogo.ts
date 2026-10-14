@@ -26,6 +26,7 @@ import { Interpolador } from './render/interpolacao';
 import { jogadorDoSave, type Estatisticas, type RefFase } from './save/esquema';
 import { mostrarAviso } from './ui/aviso';
 import { montarCena } from './ui/cena';
+import { criarPesquisa } from './ui/pesquisa';
 import { carregarFase } from './world/fase';
 import { povoarFase } from './world/populacao';
 import { validarFase } from './world/validacao-fase';
@@ -44,6 +45,8 @@ export interface OpcoesJogo {
   faseNova?: RefFase;
   /** "Testar agora" do editor: id da fase do jogador; nunca grava. */
   teste?: string;
+  /** Teste com pessoas (marco 7A): personagem novo na fase 1, sem save, com medidas e questionário. */
+  pesquisa?: boolean;
 }
 
 function montarContexto(conteudo: Conteudo, faseJson: unknown): ContextoSimulacao {
@@ -192,6 +195,8 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     });
     acoesExtras.push(sair);
   }
+  const pesquisa = opcoes.pesquisa ? criarPesquisa({ ctx, estado: () => estado, idJogador }) : null;
+  if (pesquisa) acoesExtras.push(pesquisa.botao);
   if (teste) {
     const voltar = document.createElement('a');
     voltar.className = 'botao-cabecalho';
@@ -213,6 +218,10 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
   });
   if (!cena) return;
   if (teste) mostrarAviso(raiz, t('editor.testeSemSave'), 4000);
+  if (pesquisa) {
+    pesquisa.ligar(cena.bus);
+    mostrarAviso(raiz, t('pesquisa.boasVindas'), 6000);
+  }
 
   if (autosave) {
     const a = autosave;

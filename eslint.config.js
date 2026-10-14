@@ -50,6 +50,7 @@ export default tseslint.config(
       'src/arena/**/*.ts',
       'src/net/**/*.ts',
       'src/save/**/*.ts',
+      'src/pesquisa/**/*.ts',
       'server/**/*.ts',
       'shared/**/*.ts',
     ],

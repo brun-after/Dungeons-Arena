@@ -135,6 +135,28 @@ test.describe('desktop', () => {
     expect(erros).toEqual([]);
   });
 
+  test('pesquisa: jogar, terminar o teste, responder e enviar o relatório anônimo', async ({ page }) => {
+    const erros: string[] = [];
+    page.on('pageerror', (e) => erros.push(e.message));
+    await page.goto('./?pesquisa=1&diag=1');
+    await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
+    await page.keyboard.press('Space');
+    await page.getByRole('button', { name: 'Terminar teste' }).click();
+    const dialogo = page.getByRole('dialog', { name: 'Como foi?' });
+    await dialogo.getByRole('button', { name: 'Enviar relatório' }).click();
+    await expect(dialogo.getByRole('alert')).toContainText('Responda');
+    for (const grupo of ['Quadrado vermelho', 'Linha vermelha', 'Bolinha vermelha']) {
+      await dialogo.getByRole('group', { name: new RegExp(grupo) }).getByLabel('Reconheci e tentei desviar').check();
+    }
+    await dialogo.getByRole('group', { name: /pegar e equipar/ }).getByLabel('Sim').check();
+    await dialogo.getByRole('button', { name: 'Enviar relatório' }).click();
+    await expect(dialogo.getByRole('alert')).toContainText('consentimento');
+    await dialogo.getByRole('checkbox').check();
+    await dialogo.getByRole('button', { name: 'Enviar relatório' }).click();
+    await expect(dialogo.getByRole('status')).toHaveText('Relatório enviado. Muito obrigado pela ajuda!');
+    expect(erros).toEqual([]);
+  });
+
   test('controles de toque ficam escondidos no desktop', async ({ page }) => {
     await abrir(page);
     await expect(page.getByTestId('joystick')).toBeHidden();
