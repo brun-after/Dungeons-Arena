@@ -6,7 +6,7 @@ import type { EstadoJogo } from '../core/estado';
 import { ehObjeto, type Objeto } from '../core/validar';
 import type { Entidade } from '../entities/entidade';
 
-export const VERSAO_SCHEMA = 5;
+export const VERSAO_SCHEMA = 6;
 export const SLOTS = [1, 2, 3] as const;
 export const FORMATO_EXPORTACAO = 'dungeons-arena/save';
 
@@ -27,6 +27,16 @@ export interface RegistroProgresso {
   nomeFase: string;
   estado: EstadoJogo;
   estatisticas: Estatisticas;
+  /**
+   * Marco 10A-1: estado das outras fases já visitadas (inimigos, objetos consumidos, respawns),
+   * sem o jogador, pela chave de `chaveDaFase` (§3.5). A fase atual fica em `estado`.
+   */
+  fasesVisitadas: Record<string, EstadoJogo>;
+}
+
+/** Chave estável de uma fase no save (`oficial:fase-01`, `aventura:<id>`). */
+export function chaveDaFase(ref: RefFase): string {
+  return `${ref.tipo}:${ref.id}`;
 }
 
 export interface ResumoSlot {
@@ -113,8 +123,16 @@ function v4ParaV5(r: Objeto): Objeto {
   return { ...r, estado: { ...e, armadilhas } };
 }
 
+/**
+ * v5 → v6 (marco 10A-1, 14/10/2026): o estado ganha `saidaAberta`; o registro, as fases visitadas.
+ */
+function v5ParaV6(r: Objeto): Objeto {
+  const e = r.estado;
+  return { fasesVisitadas: {}, ...r, estado: ehObjeto(e) ? { saidaAberta: false, ...e } : e };
+}
+
 /** `MIGRACOES[v]` leva um registro da versão `v` para a `v + 1`. Não existiu versão 0. */
-export const MIGRACOES: Readonly<Record<number, Migracao>> = { 1: v1ParaV2, 2: v2ParaV3, 3: v3ParaV4, 4: v4ParaV5 };
+export const MIGRACOES: Readonly<Record<number, Migracao>> = { 1: v1ParaV2, 2: v2ParaV3, 3: v3ParaV4, 4: v4ParaV5, 5: v5ParaV6 };
 
 function temNaoFinito(v: unknown): boolean {
   if (typeof v === 'number') return !Number.isFinite(v);
@@ -148,19 +166,21 @@ export function lerRegistro(bruto: unknown, migracoes: Readonly<Record<number, M
   const faseRef = lerRefFase(r.faseRef);
   if (!faseRef) return { ok: false, erro: 'fase' };
   const e = r.estado;
-  const estadoOk =
-    ehObjeto(e) &&
-    e.versao === 1 &&
-    typeof e.faseId === 'string' &&
-    typeof e.tick === 'number' &&
-    ehObjeto(e.rng) &&
-    Array.isArray(e.entidades) &&
-    e.entidades.some((x) => ehObjeto(x) && ehObjeto(x.bolsa)) &&
-    ehObjeto(e.recargas) &&
-    Array.isArray(e.projeteis) &&
-    Array.isArray(e.objetos) &&
-    Array.isArray(e.respawns) &&
-    typeof e.proximoId === 'number';
+  const forma = (x: unknown): x is Objeto =>
+    ehObjeto(x) &&
+    x.versao === 1 &&
+    typeof x.faseId === 'string' &&
+    typeof x.tick === 'number' &&
+    ehObjeto(x.rng) &&
+    Array.isArray(x.entidades) &&
+    ehObjeto(x.recargas) &&
+    Array.isArray(x.projeteis) &&
+    Array.isArray(x.objetos) &&
+    Array.isArray(x.respawns) &&
+    typeof x.proximoId === 'number';
+  const visitadas = ehObjeto(r.fasesVisitadas) ? r.fasesVisitadas : null;
+  if (!visitadas || !Object.values(visitadas).every(forma)) return { ok: false, erro: 'estado' };
+  const estadoOk = forma(e) && (e.entidades as unknown[]).some((x) => ehObjeto(x) && ehObjeto(x.bolsa));
   if (!estadoOk) return { ok: false, erro: 'estado' };
   if (temNaoFinito(r)) return { ok: false, erro: 'nao_finito' };
   const est = ehObjeto(r.estatisticas) ? r.estatisticas : {};
@@ -179,6 +199,8 @@ export function lerRegistro(bruto: unknown, migracoes: Readonly<Record<number, M
         inimigosDerrotados: typeof est.inimigosDerrotados === 'number' ? est.inimigosDerrotados : 0,
         mortes: typeof est.mortes === 'number' ? est.mortes : 0,
       },
+      // A forma de cada estado foi conferida acima (`forma`).
+      fasesVisitadas: visitadas as unknown as Record<string, EstadoJogo>,
     },
   };
 }

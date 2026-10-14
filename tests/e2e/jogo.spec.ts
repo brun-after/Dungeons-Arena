@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { expect, test, type Locator, type Page } from '@playwright/test';
 
 async function abrir(page: Page) {
@@ -246,6 +247,62 @@ test.describe('desktop', () => {
       .poll(async () => Number(/entidades (\d+)/.exec((await diag.textContent()) ?? '')?.[1] ?? 0), { timeout: 90_000 })
       .toBeGreaterThanOrEqual(4);
     await expect(page.locator('.log-combate')).toContainText('invocou');
+    expect(erros).toEqual([]);
+  });
+
+  // Marco 10A-1: porta de saída e troca de fase.
+  test('saída: numa fase do editor, pisar na saída conclui a fase e volta ao editor', async ({ page }) => {
+    const erros: string[] = [];
+    page.on('pageerror', (e) => erros.push(e.message));
+    await page.goto('./?editor');
+    await page.getByRole('button', { name: 'Criar e editar' }).click();
+    const caixa = await page.locator('.editor canvas').boundingBox();
+    if (!caixa) throw new Error('canvas sem caixa');
+    const zoom = Math.min(caixa.width / (24 * 48), (caixa.height - 120) / (16 * 48)) * 0.95;
+    const tela = (x: number, y: number) => ({
+      x: caixa.x + caixa.width / 2 + ((x + 0.5) * 48 - 12 * 48) * zoom,
+      y: caixa.y + caixa.height / 2 + ((y + 0.5) * 48 - 8 * 48) * zoom,
+    });
+    await page.getByRole('button', { name: 'Início do jogador' }).click();
+    await page.mouse.click(tela(9, 8).x, tela(9, 8).y);
+    await page.getByRole('button', { name: 'Saída', exact: true }).click();
+    await page.mouse.click(tela(11, 8).x, tela(11, 8).y);
+    await page.getByRole('button', { name: 'Testar' }).click();
+    await expect(page).toHaveURL(/jogo=teste/);
+    await page.goto(`${page.url()}&diag=1`);
+    await expect(page.locator('#diag')).toHaveAttribute('data-celula', '9,8');
+    await page.keyboard.down('d');
+    await expect(page.getByText('Fase concluída! Voltando ao editor…')).toBeVisible({ timeout: 20_000 });
+    await page.keyboard.up('d');
+    await expect(page).toHaveURL(/editor=/, { timeout: 10_000 });
+    expect(erros).toEqual([]);
+  });
+
+  test('campanha: com o boss derrotado, a saída da fase 1 leva às Catacumbas', async ({ page }) => {
+    test.setTimeout(150_000);
+    const { erros } = await abrir(page);
+    await page.getByRole('button', { name: 'Salvar e voltar aos slots' }).click();
+    const slot1 = page.locator('[data-slot="1"]');
+    await expect(slot1).toContainText('Salões da entrada');
+    const download = page.waitForEvent('download');
+    await slot1.getByRole('button', { name: 'Exportar' }).click();
+    const caminho = await (await download).path();
+    // Save preparado: boss fora do mundo, saída aberta e o jogador ao lado do S (36,24).
+    type Ent = { bolsa: unknown; preset: string; x: number; y: number };
+    const arquivo = JSON.parse(await readFile(caminho, 'utf8')) as { registro: { estado: { saidaAberta: boolean; entidades: Ent[] } } };
+    const estado = arquivo.registro.estado;
+    estado.saidaAberta = true;
+    estado.entidades = estado.entidades.filter((e) => e.bolsa || e.preset !== 'boss');
+    const j = estado.entidades.find((e) => e.bolsa);
+    Object.assign(j ?? {}, { x: 35, y: 24, destinoX: 35, destinoY: 24, origemX: 35, origemY: 24 });
+    await page.locator('[data-slot="2"] input[type=file]').setInputFiles({ name: 'save.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(arquivo)) });
+    await expect(page.locator('[data-slot="2"]')).toContainText('Salões da entrada');
+    await page.goto('./?jogo=campanha&slot=2&diag=1');
+    await expect(page.locator('#diag')).toHaveAttribute('data-celula', '35,24');
+    await page.keyboard.down('d');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Catacumbas', { timeout: 30_000 });
+    await page.keyboard.up('d');
+    await expect(page.locator('#diag')).toHaveAttribute('data-celula', '4,4');
     expect(erros).toEqual([]);
   });
 

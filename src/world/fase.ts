@@ -116,6 +116,26 @@ function objetoCarregado(o: ObjetoPosicionadoJson, largura: number, altura: numb
   }
 }
 
+/**
+ * Porta de saída (§2.1, marco 10A-1): numa célula `S`. Tranca `chave` exige (e consome) o item;
+ * `boss` abre quando o inimigo de índice `bossIndice` morre. Sem porta de saída, toda `S` é livre.
+ */
+export interface PortaSaida {
+  x: number;
+  y: number;
+  tranca: 'livre' | 'chave' | 'boss';
+  chave?: string;
+  bossIndice?: number;
+}
+
+/** Par de portas internas de teleporte na mesma fase (§2.1). */
+export interface PortaInterna {
+  numero: number;
+  nome: string;
+  a: Celula;
+  b: Celula;
+}
+
 /** Formato da fase no JSON oficial e no editor (validado por `validarFase`). */
 export interface FaseJson {
   id: string;
@@ -126,6 +146,8 @@ export interface FaseJson {
   spawns: SpawnJson[];
   inimigos?: InimigoPosicionado[];
   objetos?: ObjetoPosicionadoJson[];
+  portaSaida?: PortaSaida;
+  portasInternas?: PortaInterna[];
 }
 
 export function celulaNormalizada(v: number, tamanho: number): number {
@@ -145,6 +167,9 @@ export interface Fase {
   readonly inimigos: readonly InimigoPosicionado[];
   /** Objetos já convertidos para células. */
   readonly objetos: readonly ObjetoPosicionado[];
+  /** Marco 10A-1: porta de saída (null = toda célula `S` é saída livre) e portas internas. */
+  readonly portaSaida: PortaSaida | null;
+  readonly portasInternas: readonly PortaInterna[];
 }
 
 /** Converte uma fase já validada para a forma usada pela simulação. */
@@ -170,6 +195,8 @@ export function carregarFase(json: FaseJson): Fase {
     spawns: json.spawns.map((s) => ({ x: s.x, y: s.y })),
     inimigos: (json.inimigos ?? []).map((i) => ({ ...i })),
     objetos: (json.objetos ?? []).map((o) => objetoCarregado(o, largura, altura)),
+    portaSaida: json.portaSaida ? { ...json.portaSaida } : null,
+    portasInternas: (json.portasInternas ?? []).map((p) => ({ ...p, a: { ...p.a }, b: { ...p.b } })),
   };
 }
 

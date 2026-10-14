@@ -166,6 +166,21 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
   bus.on('lojaFechada', (ev) => {
     if (ev.id === idLocal) hud.registrar(t('log.lojaFechada'));
   });
+  // Marco 10A-1: portas.
+  bus.on('saidaTrancada', (ev) => {
+    if (ev.id !== idLocal) return;
+    const texto = t(ev.motivo === 'chave' ? 'log.saidaChave' : 'log.saidaBoss');
+    hud.registrar(texto);
+    o.aviso(texto);
+  });
+  bus.on('saidaDestrancada', () => {
+    const texto = t('log.saidaAberta');
+    hud.registrar(texto);
+    o.aviso(texto);
+  });
+  bus.on('teleportou', (ev) => {
+    if (ev.id === idLocal) hud.registrar(t('log.teleportou', { numero: ev.numero }));
+  });
   bus.on('subiuNivel', (ev) => {
     if (ev.id !== idLocal) return;
     vibrar([60, 40, 120]);

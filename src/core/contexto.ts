@@ -109,6 +109,11 @@ export interface Balance {
     danoArmadilha: number;
     armadilhaExpiraS: number;
   };
+  /** Portas (§2.1, marco 10A-1): recarga da porta interna e janela de destaque da porta do boss. */
+  portas: {
+    recargaMs: number;
+    janelaPortaBossMs: number;
+  };
   /** Limites do atributo efetivo (§2.10, equipamento derivado). */
   atributos: {
     minimo: number;

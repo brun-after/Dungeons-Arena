@@ -104,6 +104,11 @@ export type EventoSimulacao =
   | { t: 'lojaFechada'; tick: number; id: EntidadeId; objetoId: string; recargaAteTick: number }
   | { t: 'comprou'; tick: number; id: EntidadeId; itemId: string; preco: number }
   | { t: 'vendeu'; tick: number; id: EntidadeId; itemId: string; preco: number }
+  /** Marco 10A-1: portas internas e porta de saída. */
+  | { t: 'teleportou'; tick: number; id: EntidadeId; numero: number; x: number; y: number }
+  | { t: 'saidaAlcancada'; tick: number; id: EntidadeId }
+  | { t: 'saidaTrancada'; tick: number; id: EntidadeId; motivo: 'chave' | 'boss' }
+  | { t: 'saidaDestrancada'; tick: number; motivo: 'chave' | 'boss'; x: number; y: number }
   | { t: 'subiuNivel'; tick: number; id: EntidadeId; nivel: number }
   | { t: 'reviveu'; tick: number; id: EntidadeId }
   | { t: 'surgiu'; tick: number; id: EntidadeId };

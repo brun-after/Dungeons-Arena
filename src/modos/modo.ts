@@ -78,6 +78,8 @@ export interface ModoDeJogo {
   inimigosDeIA: 'nenhum' | 'da_fase' | 'ondas';
   objetosDeFase: boolean;
   spawnerDinamico: boolean;
+  /** Marco 10A-1: chance de um NPC atravessar uma porta interna ao pisar nela (§2.1, 50%). */
+  portas: { inimigosCruzamChance: number };
 }
 
 const ORDEM_PADRAO = Object.keys(ATRIBUTOS_NEUTROS) as (keyof Atributos)[];
@@ -160,6 +162,7 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
     inimigosDeIA: l.opcao(o, 'inimigosDeIA', ['nenhum', 'da_fase', 'ondas'] as const),
     objetosDeFase: l.booleano(o, 'objetosDeFase'),
     spawnerDinamico: l.booleano(o, 'spawnerDinamico'),
+    portas: { inimigosCruzamChance: l.numero(l.objeto(o.portas, 'portas'), 'inimigosCruzamChance', { min: 0, max: 1 }) },
   };
   if (modo.fim.tipo !== 'nenhum' && modo.fim.alvo === null && modo.fim.tempoLimiteS === null) {
     l.erro('fim com tipo diferente de "nenhum" precisa de alvo ou tempo limite');

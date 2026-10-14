@@ -3,11 +3,13 @@
 // nunca quebra o jogo. Marco 2: schema mínimo, spawn passável e spawn alcançando a saída.
 // Marco 6C (13/10/2026): avisos (não bloqueiam): fase sem inimigos e inimigo inalcançável.
 // Marco 9A (14/10/2026): baú, loja e loot, com os itens conferidos no catálogo quando informado.
+// Marco 10A-1 (14/10/2026): porta de saída e portas internas (validacao-portas.ts).
 
 import { normalizarEfeito } from '../combat/normalizar-efeito';
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import { Leitor } from '../core/validar';
 import { alcancaveis } from './navegacao';
+import { lerPortasInternas, lerPortaSaida, validarPortasNaFase } from './validacao-portas';
 import {
   CARACTERE_CELULA,
   carregarFase,
@@ -52,7 +54,7 @@ export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<st
   const avisos: ErroFase[] = [];
   if (!ehObjeto(entrada)) return { ok: false, erros: [{ mensagem: 'a fase precisa ser um objeto' }], avisos };
 
-  const { id, nome, ordem, tipo, mapa, spawns, inimigos, objetos } = entrada;
+  const { id, nome, ordem, tipo, mapa, spawns, inimigos, objetos, portaSaida, portasInternas } = entrada;
   if (typeof id !== 'string' || id.trim() === '') erros.push({ mensagem: 'id ausente' });
   if (typeof nome !== 'string' || nome.trim() === '') erros.push({ mensagem: 'nome ausente' });
   if (!ehInteiro(ordem)) erros.push({ mensagem: 'ordem precisa ser inteiro' });
@@ -64,6 +66,8 @@ export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<st
   const listaSpawns = validarSpawns(spawns, erros);
   const listaInimigos = validarInimigos(inimigos, erros, presetsConhecidos);
   const listaObjetos = validarObjetos(objetos, erros, itensConhecidos);
+  const saida = lerPortaSaida(portaSaida, erros, itensConhecidos);
+  const internas = lerPortasInternas(portasInternas, erros);
   if (erros.length > 0 || !linhas || !listaSpawns) return { ok: false, erros, avisos };
 
   const json: FaseJson = {
@@ -75,6 +79,8 @@ export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<st
     spawns: listaSpawns,
     inimigos: listaInimigos,
     objetos: listaObjetos,
+    ...(saida && { portaSaida: saida }),
+    ...(internas && { portasInternas: internas }),
   };
   validarJogabilidade(json, erros, avisos);
   return erros.length > 0 ? { ok: false, erros, avisos } : { ok: true, fase: json, avisos };
@@ -316,6 +322,7 @@ function validarJogabilidade(json: FaseJson, erros: ErroFase[], avisos: ErroFase
       }
     }
   });
+  validarPortasNaFase(fase, alcance, erros);
   if (fase.tipo !== 'campanha') validarArena(fase, alcance, erros);
 }
 

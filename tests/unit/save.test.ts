@@ -41,6 +41,7 @@ function registro(slot: number, estado = estadoJogado()): RegistroProgresso {
     faseRef: { tipo: 'oficial', id: 'fase-01' },
     nomeFase: ctx.fase.nome,
     estado,
+    fasesVisitadas: {},
     estatisticas: { inimigosDerrotados: 3, mortes: 1 },
   };
 }
@@ -117,6 +118,7 @@ describe('slots no IndexedDB', () => {
       faseRef: { tipo: 'oficial', id: 'fase-01' },
       nomeFase: 'x',
       criadoEm: 1,
+      fasesVisitadas: {},
       estado: () => {
         gravacoes++;
         return estado;

@@ -20,6 +20,7 @@ import { regenerarRecursos } from '../progression/recursos';
 import { definirDirecao, moverEntidades, planejarCaminho } from '../world/movimento';
 import { fecharLoja, interagir, processarInteracoes } from '../world/interacao';
 import { coletarObjetos } from '../world/objetos';
+import { processarPortas } from '../world/portas';
 import { processarSpawner } from '../world/spawner';
 import type { ComandoDoTick } from './comandos';
 import type { ContextoSimulacao } from './contexto';
@@ -44,6 +45,8 @@ export function simular(
   regenerarRecursos(estado, ctx);
   processarInteracoes(estado, ctx, saida);
   moverEntidades(estado, ctx, saida, dtMs);
+  // Gatilhos por célula alcançada (§2.3): portas antes da coleta e das armadilhas.
+  processarPortas(estado, ctx, saida);
   coletarObjetos(estado, ctx, saida);
   processarGatilhosDeEfeito(estado, ctx, saida);
   processarMortes(estado, ctx, saida);
