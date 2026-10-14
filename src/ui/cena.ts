@@ -47,6 +47,8 @@ export interface OpcoesCena {
   /** Estado atual a desenhar (a arena troca o objeto a cada reconciliação). */
   estado: () => EstadoJogo;
   emitir: (cmd: Comando) => void;
+  /** Botões extras no cabeçalho (ex.: "Menu" da campanha, que salva antes de sair). */
+  acoesExtras?: HTMLElement[];
 }
 
 export interface QuadroCena {
@@ -157,7 +159,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       controle: prefs.controle,
       camera: prefs.camera,
       status: hud.status,
-      acoesExtras: [mochila.botao, hud.botaoLog],
+      acoesExtras: [mochila.botao, hud.botaoLog, ...(o.acoesExtras ?? [])],
       aoTrocarControle: () => {
         prefs.controle = prefs.controle === 'joystick' ? 'dpad' : 'joystick';
         controles?.trocarTipo(prefs.controle);
