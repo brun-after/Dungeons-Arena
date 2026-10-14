@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.10 · **Data:** 13/10/2026
+**Versão:** 0.11 · **Data:** 13/10/2026
 
 > **Histórico**
+> - **0.11 (13/10/2026)**: D-042 e D-043, tomadas no marco 6C (editor mínimo).
 > - **0.10 (13/10/2026)**: D-041 (save da campanha no IndexedDB), tomada no marco 6B; D-015 encerrada.
 > - **0.9 (13/10/2026)**: D-039 e D-040, tomadas no marco 6A (itens, equipamento e nível).
 > - **0.8 (13/10/2026)**: D-038 (servidor da arena na AWS Lightsail em São Paulo); D-001 parcialmente superada.
@@ -445,3 +446,43 @@ fora do tick, sem conta e sem nuvem.
 
 **Consequência.** Mudanças futuras no `EstadoJogo` ou na entidade precisam de um degrau em `MIGRACOES` e de um teste,
 senão saves antigos passam a ser recusados (e não corrompidos).
+
+## D-042 · "Testar agora" navega por URL e não grava (v0.11, 13/10/2026)
+
+**Contexto.** A §3.10 pede "Testar agora" com o personagem atual e atalho de volta ao editor. As telas do jogo
+ainda não têm desmontagem completa (cena, laço, ouvintes); trocar de tela é navegação de página, como no menu.
+
+**Decisão.**
+- "Testar" grava o rascunho, valida e abre `?jogo=teste&fase=<id>`. "✎ Editor" no cabeçalho volta para a edição.
+- O teste usa uma **cópia** do personagem do save jogado por último (mesma ficha, nível e mochila; vida e mana
+  cheias), ou um personagem novo se não houver save, e **não grava nada**. Para jogar a fase "valendo", o jogador
+  escolhe a fase ao abrir um jogo novo num slot (Campanha → slot vazio → Fase).
+- O histórico de desfazer fica na memória da tela e se perde ao sair. O rascunho em si é salvo (a cada 10 s, ao
+  suspender, ao testar e ao voltar).
+
+**Consequência.** Quando a desmontagem de cena existir (marco 11A, editor completo), o teste pode virar uma camada
+sobre o editor, mantendo o histórico.
+
+## D-043 · Escopo do editor mínimo (v0.11, 13/10/2026)
+
+**Decisão.** O marco 6 entrega, do editor da §3.10:
+- pincéis de piso, parede, vazio e saída;
+- início do jogador (único) e inimigos por preset;
+- borracha de spawn e inimigo;
+- desfazer/refazer por traço (pilha de 120);
+- zoom de 0.1 a 6 com pinça, roda e "ajustar";
+- modo navegação explícito;
+- validação com erro (vermelho) e aviso (amarelo) marcados na célula;
+- autosave do rascunho;
+- testar, exportar e importar `.json` e Minhas fases (criar, editar, testar, duplicar e excluir).
+
+Ficam para o 11A:
+- balde, retângulo, portas, objetos e tileset;
+- redimensionar, distribuir e aprendizado de estilo;
+- inspetor por toque longo e aventura com várias fases.
+
+O arquivo exportado é o mesmo schema das fases oficiais (`FaseJson`), validado por `validarFase` ao importar. Um
+rascunho é guardado como está no store `aventuras`, inclusive inválido, para nunca perder trabalho. Testar e exportar
+exigem a fase sem erros.
+
+Avisos novos de `validarFase`: "fase sem inimigos" e "inimigo inalcançável a partir do spawn". Não bloqueiam.

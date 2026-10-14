@@ -167,7 +167,7 @@ test.describe('menu e arena online', () => {
   test('o menu leva à campanha, à arena online e ao treino', async ({ page }) => {
     await page.goto('./');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Dungeons Arena');
-    for (const nome of ['Campanha', 'Arena online', 'Treino de arena (contra um bot)']) {
+    for (const nome of ['Campanha', 'Arena online', 'Treino de arena (contra um bot)', 'Editor de fases']) {
       await expect(page.getByRole('link', { name: nome })).toBeVisible();
     }
   });
@@ -253,6 +253,37 @@ test.describe('celular (emulação)', () => {
     await mochila.getByRole('button', { name: 'Equipar: Espada curta' }).click();
     await expect(mochila).toBeHidden();
     await expect(diag).toHaveAttribute('data-equipados', '1');
+    expect(erros).toEqual([]);
+  });
+
+  test('editor: criar fase, pintar, pôr inimigo, testar e voltar ao editor', async ({ page }) => {
+    const erros: string[] = [];
+    page.on('pageerror', (e) => erros.push(e.message));
+    await page.goto('./?editor');
+    await page.getByLabel('Nome da fase').fill('Fase do teste');
+    await page.getByRole('button', { name: 'Criar e editar' }).click();
+    const status = page.locator('.status-editor');
+    await expect(status).toHaveText('⚠ 1 aviso(s)');
+    const canvas = page.locator('.editor canvas');
+    const caixa = await canvas.boundingBox();
+    if (!caixa) throw new Error('canvas sem caixa');
+    const cx = caixa.x + caixa.width / 2;
+    const cy = caixa.y + caixa.height / 2;
+    // Parede (ferramenta inicial): um traço arrastando o dedo.
+    await page.mouse.move(cx - 60, cy - 40);
+    await page.mouse.down();
+    await page.mouse.move(cx + 60, cy - 40, { steps: 8 });
+    await page.mouse.up();
+    await expect(page.getByRole('button', { name: 'Desfazer' })).toBeEnabled();
+    await page.getByRole('button', { name: 'Inimigo', exact: true }).click();
+    await page.mouse.click(cx, cy + 40);
+    await expect(status).toHaveText('✓ pronta');
+    await page.getByRole('button', { name: 'Testar' }).click();
+    await expect(page).toHaveURL(/jogo=teste/);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Fase do teste');
+    await page.getByRole('link', { name: 'Voltar ao editor' }).click();
+    await expect(page.locator('.nome-editor')).toHaveValue('Fase do teste');
+    await expect(status).toHaveText('✓ pronta');
     expect(erros).toEqual([]);
   });
 

@@ -3,6 +3,8 @@
 //   ?jogo=campanha    slots da campanha (marco 6B); com &slot=N, joga no slot N (0 = sem salvar)
 //   ?arena=online     lobby e arena no servidor real (marco 5)
 //   ?arena=loopback   treino de arena com sala e bot na página (marco 4)
+//   ?editor[=id]      editor de fases (marco 6C), sob demanda
+//   ?jogo=teste&fase=id   "Testar agora" do editor
 // O código da arena e do SDK de rede é carregado sob demanda (§3.8, code splitting).
 
 import './estilos.css';
@@ -29,10 +31,17 @@ function rotear(raiz: HTMLElement): void {
     void import('./arena-tela').then((m) => {
       m.iniciarArenaOnline(raiz);
     });
+  } else if (params.has('editor')) {
+    void import('./editor/editor').then((m) => m.iniciarEditor(raiz, params.get('editor') || null));
+  } else if (params.get('jogo') === 'teste' && params.get('fase')) {
+    void iniciarJogo(raiz, { slot: null, teste: params.get('fase') ?? '' });
   } else if (params.get('jogo') === 'campanha') {
     const slot = Number(params.get('slot'));
-    if (params.has('slot') && Number.isInteger(slot) && slot >= 0 && slot <= 3) void iniciarJogo(raiz, { slot: slot === 0 ? null : slot });
-    else void mostrarSlots(raiz);
+    const fase = params.get('fase');
+    const faseNova = fase?.startsWith('aventura:') ? { tipo: 'aventura' as const, id: fase.slice('aventura:'.length) } : undefined;
+    if (params.has('slot') && Number.isInteger(slot) && slot >= 0 && slot <= 3) {
+      void iniciarJogo(raiz, { slot: slot === 0 ? null : slot, ...(faseNova && { faseNova }) });
+    } else void mostrarSlots(raiz);
   } else {
     mostrarMenu(raiz);
   }

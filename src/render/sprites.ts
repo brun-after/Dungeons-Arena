@@ -31,7 +31,7 @@ export function corDoHp(fracao: number): number {
  * Perseguidor = triângulo; atirador = losango; controlador = hexágono; boss = círculo com coroa;
  * boneco = quadrado; jogador = círculo.
  */
-function desenharSilhueta(g: Graphics, arquetipo: Arquetipo, cor: number): Graphics {
+export function desenharSilhueta(g: Graphics, arquetipo: Arquetipo, cor: number): Graphics {
   const contorno = { width: 2, color: 0x0d0b12 };
   const r = RAIO;
   switch (arquetipo) {

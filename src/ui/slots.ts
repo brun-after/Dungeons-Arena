@@ -3,6 +3,7 @@
 // sobrescrever um save sem querer. Textos sempre por textContent.
 
 import { t } from '../i18n';
+import { listarAventuras, type RegistroAventura } from '../plataforma/aventuras';
 import { apagarSlot, carregarSlot, gravarRegistro, listarSlots, type EstadoSlot } from '../plataforma/saves';
 import { exportarRegistro, importarRegistro } from '../save/esquema';
 
@@ -63,6 +64,8 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
   const recarregar = () => {
     void mostrarSlots(raiz);
   };
+  // Marco 6C: um jogo novo pode começar numa fase criada no editor.
+  const aventuras: RegistroAventura[] = await listarAventuras().catch(() => []);
 
   for (const s of slots) {
     const cartao = el('article', 'cartao-slot');
@@ -87,7 +90,24 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
       );
     } else if (s.tipo === 'vazio') {
       cartao.append(el('p', 'resumo-slot', t('slots.vazio')));
-      acoes.append(link(`./?jogo=campanha&slot=${s.slot}`, t('slots.novo')));
+      const novo = link(`./?jogo=campanha&slot=${s.slot}`, t('slots.novo'));
+      acoes.append(novo);
+      if (aventuras.length > 0) {
+        const escolha = el('select', 'escolha-fase');
+        escolha.setAttribute('aria-label', t('slots.faseDoJogo', { n: s.slot }));
+        const oficial = el('option', undefined, t('slots.faseOficial'));
+        oficial.value = '';
+        escolha.append(oficial);
+        for (const a of aventuras) {
+          const op = el('option', undefined, a.nome);
+          op.value = `aventura:${a.id}`;
+          escolha.append(op);
+        }
+        escolha.addEventListener('change', () => {
+          novo.href = `./?jogo=campanha&slot=${s.slot}${escolha.value ? `&fase=${encodeURIComponent(escolha.value)}` : ''}`;
+        });
+        acoes.append(escolha);
+      }
       const arquivo = el('input');
       arquivo.type = 'file';
       arquivo.accept = 'application/json,.json';

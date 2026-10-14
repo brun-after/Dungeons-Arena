@@ -1,6 +1,7 @@
 // Validação de fase (§3.9, §3.10): a mesma função serve ao conteúdo oficial (teste no CI)
 // e, no futuro, ao editor e à importação. Conteúdo inválido é recusado com o erro na célula,
 // nunca quebra o jogo. Marco 2: schema mínimo, spawn passável e spawn alcançando a saída.
+// Marco 6C (13/10/2026): avisos (não bloqueiam): fase sem inimigos e inimigo inalcançável.
 
 import { alcancaveis } from './navegacao';
 import {
@@ -19,7 +20,8 @@ export interface ErroFase {
   y?: number;
 }
 
-export type ResultadoValidacao = { ok: true; fase: FaseJson } | { ok: false; erros: ErroFase[] };
+/** Erros bloqueiam salvar, testar e importar; avisos só alertam (§3.10). */
+export type ResultadoValidacao = { ok: true; fase: FaseJson; avisos: ErroFase[] } | { ok: false; erros: ErroFase[]; avisos: ErroFase[] };
 
 export const TAMANHO_MIN = 8;
 export const TAMANHO_MAX = 120;
@@ -39,7 +41,8 @@ function ehInteiro(v: unknown): v is number {
  */
 export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<string>): ResultadoValidacao {
   const erros: ErroFase[] = [];
-  if (!ehObjeto(entrada)) return { ok: false, erros: [{ mensagem: 'a fase precisa ser um objeto' }] };
+  const avisos: ErroFase[] = [];
+  if (!ehObjeto(entrada)) return { ok: false, erros: [{ mensagem: 'a fase precisa ser um objeto' }], avisos };
 
   const { id, nome, ordem, tipo, mapa, spawns, inimigos, objetos } = entrada;
   if (typeof id !== 'string' || id.trim() === '') erros.push({ mensagem: 'id ausente' });
@@ -53,7 +56,7 @@ export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<st
   const listaSpawns = validarSpawns(spawns, erros);
   const listaInimigos = validarInimigos(inimigos, erros, presetsConhecidos);
   const listaObjetos = validarObjetos(objetos, erros);
-  if (erros.length > 0 || !linhas || !listaSpawns) return { ok: false, erros };
+  if (erros.length > 0 || !linhas || !listaSpawns) return { ok: false, erros, avisos };
 
   const json: FaseJson = {
     id: id as string,
@@ -65,8 +68,8 @@ export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<st
     inimigos: listaInimigos,
     objetos: listaObjetos,
   };
-  validarJogabilidade(json, erros);
-  return erros.length > 0 ? { ok: false, erros } : { ok: true, fase: json };
+  validarJogabilidade(json, erros, avisos);
+  return erros.length > 0 ? { ok: false, erros, avisos } : { ok: true, fase: json, avisos };
 }
 
 const TIPOS_OBJETO = ['orbe_hp', 'orbe_recurso'] as const;
@@ -169,7 +172,7 @@ function validarSpawns(spawns: unknown, erros: ErroFase[]): SpawnJson[] | null {
   return lista;
 }
 
-function validarJogabilidade(json: FaseJson, erros: ErroFase[]): void {
+function validarJogabilidade(json: FaseJson, erros: ErroFase[], avisos: ErroFase[]): void {
   const fase = carregarFase(json);
   for (const s of fase.spawns) {
     if (!passavel(fase, s.x, s.y)) erros.push({ mensagem: 'spawn em célula não passável', x: s.x, y: s.y });
@@ -194,6 +197,10 @@ function validarJogabilidade(json: FaseJson, erros: ErroFase[]): void {
 
   // O spawn precisa alcançar todas as saídas (§3.10, jogabilidade).
   const alcance = alcancaveis(fase, primeiro);
+  if (fase.tipo !== 'arena' && fase.inimigos.length === 0) avisos.push({ mensagem: 'fase sem inimigos' });
+  for (const i of fase.inimigos) {
+    if (alcance[i.y * fase.largura + i.x] !== 1) avisos.push({ mensagem: 'inimigo inalcançável a partir do spawn', x: i.x, y: i.y });
+  }
   json.mapa.forEach((linha, y) => {
     for (let x = 0; x < linha.length; x++) {
       if (linha[x] === 'S' && alcance[y * fase.largura + x] !== 1) {

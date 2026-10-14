@@ -16,6 +16,17 @@ export const CARACTERE_CELULA: Readonly<Record<string, TipoCelula>> = {
 
 const CODIGO: Readonly<Record<TipoCelula, number>> = { parede: 0, piso: 1, saida: 2, vazio: 3 };
 const TIPO_POR_CODIGO: readonly TipoCelula[] = ['parede', 'piso', 'saida', 'vazio'];
+const CARACTERE_POR_TIPO: Readonly<Record<TipoCelula, string>> = { parede: '#', piso: '.', saida: 'S', vazio: ' ' };
+
+/** Código numérico de `Fase.celulas` (o editor escreve direto nele, marco 6C). */
+export function codigoDeTipo(tipo: TipoCelula): number {
+  return CODIGO[tipo];
+}
+
+/** Caractere do mapa em texto (exportação do editor). */
+export function caractereDeTipo(tipo: TipoCelula): string {
+  return CARACTERE_POR_TIPO[tipo];
+}
 
 export interface SpawnJson {
   x: number;

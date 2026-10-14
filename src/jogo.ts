@@ -3,21 +3,25 @@
 // Marco 6B (13/10/2026): a sessão nasce de um slot de save (ou de um jogo novo nele) e grava
 // sozinha (§3.5): a cada 30 s, ao subir de nível, equipar, pegar item, derrotar inimigo, ao
 // suspender ou sair da página, e pelo botão "Menu".
+// Marco 6C: fases do editor. "Testar agora" (`teste`) joga a fase com uma cópia do personagem do
+// último save, sem gravar nada (D-042); um jogo novo também pode começar numa fase do jogador.
 
 import type { Habilidade } from './combat/habilidades';
 import type { Comando } from './core/comandos';
 import { criarFila, enfileirar, retirarAte } from './core/comandos';
 import { conteudoOficial, type Conteudo } from './core/conteudo';
 import { BALANCE_PADRAO, type ContextoSimulacao } from './core/contexto';
-import { criarEstado, type EstadoJogo } from './core/estado';
+import { clonarEntidade, criarEstado, type Entidade, type EstadoJogo } from './core/estado';
 import type { EventoSimulacao } from './core/eventos-simulacao';
 import { hashTexto } from './core/rng';
 import { simular } from './core/simulacao';
 import fase01 from './data/fases/fase-01.json';
+import { paraFaseJson } from './editor/grade';
 import { criarJogador } from './entities/fabrica';
 import { t } from './i18n';
 import { iniciarLaco } from './plataforma/laco-navegador';
-import { carregarSlot, criarAutosave, type Autosave } from './plataforma/saves';
+import { carregarAventura } from './plataforma/aventuras';
+import { carregarSlot, criarAutosave, listarSlots, type Autosave } from './plataforma/saves';
 import { Interpolador } from './render/interpolacao';
 import { jogadorDoSave, type Estatisticas, type RefFase } from './save/esquema';
 import { mostrarAviso } from './ui/aviso';
@@ -36,6 +40,10 @@ const FASE_INICIAL: RefFase = { tipo: 'oficial', id: 'fase-01' };
 export interface OpcoesJogo {
   /** Slot de save (1–3); null joga sem salvar. */
   slot: number | null;
+  /** Fase de um jogo novo (o padrão é a primeira fase oficial). */
+  faseNova?: RefFase;
+  /** "Testar agora" do editor: id da fase do jogador; nunca grava. */
+  teste?: string;
 }
 
 function montarContexto(conteudo: Conteudo, faseJson: unknown): ContextoSimulacao {
@@ -44,23 +52,69 @@ function montarContexto(conteudo: Conteudo, faseJson: unknown): ContextoSimulaca
   return { fase: carregarFase(validacao.fase), balance: BALANCE_PADRAO, conteudo, modo: conteudo.modoCampanha };
 }
 
-function faseDaReferencia(ref: RefFase): unknown {
-  // Aventuras do editor entram no 6C.
-  return ref.tipo === 'oficial' ? FASES_OFICIAIS[ref.id] : undefined;
+async function faseDaReferencia(ref: RefFase): Promise<unknown> {
+  if (ref.tipo === 'oficial') return FASES_OFICIAIS[ref.id];
+  const aventura = await carregarAventura(ref.id).catch(() => null);
+  return aventura ? paraFaseJson(aventura) : undefined;
 }
 
-function novoEstado(ctx: ContextoSimulacao): EstadoJogo {
+/** Leva um personagem para o início de outra fase: mesma ficha e mochila, vida e mana cheias. */
+function personagemNoInicio(e: Entidade, x: number, y: number): Entidade {
+  const c = clonarEntidade(e);
+  Object.assign(c, {
+    id: ID_JOGADOR,
+    x,
+    y,
+    destinoX: x,
+    destinoY: y,
+    origemX: x,
+    origemY: y,
+    progressoPasso: 0,
+    direcao: 'parado',
+    waypoints: [],
+    caminho: [],
+    hp: c.hpMax,
+    mana: c.manaMax,
+    morto: false,
+    reviverEmTick: 0,
+    invisivelAteTick: 0,
+    efeitos: [],
+    acao: null,
+    alvoSelecionado: null,
+    participacao: [],
+  });
+  return c;
+}
+
+function novoEstado(ctx: ContextoSimulacao, personagem: Entidade | null = null): EstadoJogo {
   const { fase, conteudo } = ctx;
   const estado = criarEstado({ semente: hashTexto(fase.id), faseId: fase.id });
   const spawn = fase.spawns[0] ?? { x: 1, y: 1 };
   const classe = conteudo.classes.get('aventureiro');
   if (!classe) throw new Error('classe inicial ausente');
-  estado.entidades.push(criarJogador(classe, ID_JOGADOR, spawn.x, spawn.y, ctx.balance));
+  estado.entidades.push(
+    personagem ? personagemNoInicio(personagem, spawn.x, spawn.y) : criarJogador(classe, ID_JOGADOR, spawn.x, spawn.y, ctx.balance),
+  );
   povoarFase(estado, ctx);
   return estado;
 }
 
-function mostrarErro(raiz: HTMLElement, texto: string): void {
+/** O personagem do save jogado por último, para o teste do editor (ou null: personagem novo). */
+async function personagemAtual(): Promise<Entidade | null> {
+  try {
+    const slots = await listarSlots();
+    const recente = slots
+      .flatMap((s) => (s.tipo === 'ok' ? [s.resumo] : []))
+      .sort((a, b) => b.atualizadoEm - a.atualizadoEm)[0];
+    if (!recente) return null;
+    const r = await carregarSlot(recente.slot);
+    return r && r !== 'invalido' ? (jogadorDoSave(r.estado) ?? null) : null;
+  } catch {
+    return null;
+  }
+}
+
+function mostrarErro(raiz: HTMLElement, texto: string, voltarPara = './?jogo=campanha'): void {
   raiz.textContent = '';
   const tela = document.createElement('section');
   tela.className = 'tela-menu';
@@ -69,29 +123,37 @@ function mostrarErro(raiz: HTMLElement, texto: string): void {
   p.textContent = texto;
   const voltar = document.createElement('a');
   voltar.className = 'botao-menu';
-  voltar.href = './?jogo=campanha';
-  voltar.textContent = t('slots.voltar');
+  voltar.href = voltarPara;
+  voltar.textContent = t(voltarPara.includes('editor') ? 'editor.voltar' : 'slots.voltar');
   tela.append(p, voltar);
   raiz.append(tela);
 }
 
 export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promise<void> {
   const conteudo = conteudoOficial();
-  const { slot } = opcoes;
+  const { teste } = opcoes;
+  // O teste do editor nunca grava (D-042).
+  const slot = teste ? null : opcoes.slot;
   const leitura = slot === null ? null : await carregarSlot(slot).catch(() => null);
   if (leitura === 'invalido') {
     // Nunca sobrescreve um save que não conseguiu ler: o jogador decide na tela de slots.
     mostrarErro(raiz, t('slots.erroLeitura'));
     return;
   }
-  const faseRef = leitura?.faseRef ?? FASE_INICIAL;
-  const faseJson = faseDaReferencia(faseRef);
+  const faseRef: RefFase = teste ? { tipo: 'aventura', id: teste } : (leitura?.faseRef ?? opcoes.faseNova ?? FASE_INICIAL);
+  const voltarPara = teste ? `./?editor=${encodeURIComponent(teste)}` : './?jogo=campanha';
+  const faseJson = await faseDaReferencia(faseRef);
   if (faseJson === undefined) {
-    mostrarErro(raiz, t('slots.faseAusente'));
+    mostrarErro(raiz, t('slots.faseAusente'), voltarPara);
     return;
   }
-  const ctx = montarContexto(conteudo, faseJson);
-  const estado = leitura?.estado ?? novoEstado(ctx);
+  const validacao = validarFase(faseJson, new Set(conteudo.presets.keys()));
+  if (!validacao.ok) {
+    mostrarErro(raiz, t('editor.faseInvalida', { erro: validacao.erros[0]?.mensagem ?? '?' }), voltarPara);
+    return;
+  }
+  const ctx = montarContexto(conteudo, validacao.fase);
+  const estado = leitura?.estado ?? novoEstado(ctx, teste ? await personagemAtual() : null);
   const idJogador = jogadorDoSave(estado)?.id ?? ID_JOGADOR;
   const jogador = estado.entidades.find((e) => e.id === idJogador);
   const habilidades = (jogador?.habilidades ?? [])
@@ -130,6 +192,14 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     });
     acoesExtras.push(sair);
   }
+  if (teste) {
+    const voltar = document.createElement('a');
+    voltar.className = 'botao-cabecalho';
+    voltar.href = voltarPara;
+    voltar.textContent = t('editor.voltarCurto');
+    voltar.setAttribute('aria-label', t('editor.voltarAoEditor'));
+    acoesExtras.push(voltar);
+  }
 
   const fila = criarFila();
   const cena = await montarCena({
@@ -142,6 +212,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     acoesExtras,
   });
   if (!cena) return;
+  if (teste) mostrarAviso(raiz, t('editor.testeSemSave'), 4000);
 
   if (autosave) {
     const a = autosave;

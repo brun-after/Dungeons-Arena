@@ -20,6 +20,7 @@ export function mostrarMenu(raiz: HTMLElement): void {
     ['./?jogo=campanha', t('menu.campanha')],
     ['./?arena=online', t('menu.arenaOnline')],
     ['./?arena=loopback', t('menu.treino')],
+    ['./?editor', t('menu.editor')],
   ];
   for (const [href, rotulo] of opcoes) {
     const a = document.createElement('a');
