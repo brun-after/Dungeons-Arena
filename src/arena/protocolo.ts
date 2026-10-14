@@ -8,6 +8,8 @@ import { hash53, serializarCanonico } from '../core/digest';
 import type { EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ehObjeto, type Objeto } from '../core/validar';
+import { SLOTS_DE_EQUIPAMENTO, type Slot } from '../modos/modo';
+import { NOMES_ATRIBUTOS, type NomeAtributo } from '../progression/itens';
 import type { PreviaDeFicha } from './ficha-sessao';
 import type { PatchDeEstado } from './patches';
 
@@ -66,6 +68,9 @@ const inteiro = (v: unknown): v is number => finito(v) && Number.isInteger(v);
 const coordenada = (v: unknown): v is number => inteiro(v) && Math.abs(v) <= MAX_COORDENADA;
 const id = (v: unknown): v is string => typeof v === 'string' && v.length > 0 && v.length <= MAX_ID;
 
+const ehSlot = (v: unknown): v is Slot => typeof v === 'string' && (SLOTS_DE_EQUIPAMENTO as readonly string[]).includes(v);
+const ehAtributo = (v: unknown): v is NomeAtributo => typeof v === 'string' && (NOMES_ATRIBUTOS as readonly string[]).includes(v);
+
 function lerCelula(v: unknown): Celula | null {
   if (!ehObjeto(v) || !coordenada(v.x) || !coordenada(v.y)) return null;
   return { x: v.x, y: v.y };
@@ -93,7 +98,11 @@ export function lerComando(v: unknown): Comando | null {
     case 'usarItem':
       return id(v.invId) ? { t: 'usarItem', invId: v.invId } : null;
     case 'equipar':
-      return id(v.invId) && id(v.slot) ? { t: 'equipar', invId: v.invId, slot: v.slot } : null;
+      return id(v.invId) && ehSlot(v.slot) ? { t: 'equipar', invId: v.invId, slot: v.slot } : null;
+    case 'desequipar':
+      return ehSlot(v.slot) ? { t: 'desequipar', slot: v.slot } : null;
+    case 'distribuirPonto':
+      return ehAtributo(v.atributo) ? { t: 'distribuirPonto', atributo: v.atributo } : null;
     case 'interagir':
       return { t: 'interagir' };
     default:

@@ -3,12 +3,15 @@
 
 import classesJson from '../data/classes.json';
 import inimigosJson from '../data/inimigos.json';
+import itensJson from '../data/itens.json';
 import campanhaJson from '../data/modos/campanha.json';
 import livreJson from '../data/modos/livre.json';
 import skillsJson from '../data/skills.json';
 import { lerHabilidades, type Catalogo, type Habilidade } from '../combat/habilidades';
 import { lerClasses, lerPresets, type ClasseJogador, type PresetInimigo } from '../entities/presets';
-import { lerModo, type ModoDeJogo } from '../modos/modo';
+import { lerModo, RARIDADES, type ModoDeJogo } from '../modos/modo';
+import { lerItens, type Item } from '../progression/itens';
+import { BALANCE_PADRAO } from './contexto';
 
 export interface Conteudo {
   habilidades: Catalogo<Habilidade>;
@@ -16,12 +19,14 @@ export interface Conteudo {
   classes: Catalogo<ClasseJogador>;
   modos: Catalogo<ModoDeJogo>;
   modoCampanha: ModoDeJogo;
+  itens: Catalogo<Item>;
 }
 
 export interface FontesDeConteudo {
   skills: unknown;
   inimigos: unknown;
   classes: unknown;
+  itens: unknown;
   /** Arquivo → JSON de cada modo em src/data/modos. */
   modos: Readonly<Record<string, unknown>>;
 }
@@ -30,7 +35,8 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const h = lerHabilidades(fontes.skills);
   const p = lerPresets(fontes.inimigos);
   const c = lerClasses(fontes.classes);
-  const erros = [...h.erros, ...p.erros, ...c.erros];
+  const it = lerItens(fontes.itens);
+  const erros = [...h.erros, ...p.erros, ...c.erros, ...it.erros];
 
   const modos = new Map<string, ModoDeJogo>();
   for (const [arquivo, json] of Object.entries(fontes.modos)) {
@@ -46,7 +52,11 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
     for (const id of ids) if (!h.habilidades.has(id)) erros.push(`${dono}: habilidade desconhecida "${id}"`);
   };
   for (const preset of p.presets.values()) conferir(`preset ${preset.id}`, [preset.ataqueBasico, ...preset.habilidades]);
-  for (const classe of c.classes.values()) conferir(`classe ${classe.id}`, [classe.ataqueBasico, ...classe.habilidades]);
+  for (const classe of c.classes.values()) {
+    conferir(`classe ${classe.id}`, [classe.ataqueBasico, ...classe.habilidades]);
+    for (const { id } of classe.itensIniciais) if (!it.itens.has(id)) erros.push(`classe ${classe.id}: item inicial desconhecido "${id}"`);
+  }
+  if (!RARIDADES.includes(BALANCE_PADRAO.drops.raridadeMinBoss)) erros.push('balance.json: drops.raridadeMinBoss desconhecida');
   for (const modo of modos.values()) {
     const clamp = modo.clamp;
     if (clamp && clamp.habilidadesPermitidas !== 'qualquer') conferir(`modo ${modo.id}`, clamp.habilidadesPermitidas);
@@ -62,6 +72,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       classes: c.classes,
       modos,
       modoCampanha: modoCampanha ?? lerModo(campanhaJson, 'campanha').modo,
+      itens: it.itens,
     },
     erros,
   };
@@ -71,6 +82,7 @@ export const FONTES_OFICIAIS: FontesDeConteudo = {
   skills: skillsJson,
   inimigos: inimigosJson,
   classes: classesJson,
+  itens: itensJson,
   modos: { 'campanha.json': campanhaJson, 'livre.json': livreJson },
 };
 

@@ -13,7 +13,7 @@
   "maxJogadores": 1,
   "espectadores": false,
   "clamp": null,
-  "loot": { "politica": "compartilhado", "janelaParticipacaoS": 10 },
+  "loot": { "politica": "compartilhado", "janelaParticipacaoS": 10, "itens": true },
   "limites": { "npcs": 200, "invocacoesPorJogador": 2, "avataresPorJogador": 1, "armadilhasPorJogador": 3, "projeteis": 100 },
   "progressaoContaParaCampanha": false,
   "fasesPermitidas": "qualquer",

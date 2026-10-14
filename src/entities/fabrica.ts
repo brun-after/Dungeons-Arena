@@ -1,9 +1,10 @@
 // Criação de jogadores e inimigos a partir do conteúdo. HP e mana são sempre derivados das
-// bases validadas (§2.5, §3.7).
+// bases validadas (§2.5, §3.7). Marco 6: o jogador da campanha nasce com a bolsa (base + mochila).
 
 import type { Balance } from '../core/contexto';
 import type { EntidadeId } from '../core/comandos';
 import { hpMaximo, manaMaxima } from '../progression/ficha';
+import { criarBolsa } from '../progression/inventario';
 import { criarEntidade, type Entidade } from './entidade';
 import type { ClasseJogador, PresetInimigo } from './presets';
 
@@ -15,7 +16,7 @@ export function criarJogador(
   balance: Balance,
   jogadorId = 'local',
 ): Entidade {
-  return criarEntidade({
+  const e = criarEntidade({
     id,
     tipo: 'jogador',
     x,
@@ -31,6 +32,9 @@ export function criarJogador(
     habilidades: classe.habilidades,
     autoAtaque: true,
   });
+  // Sem nada equipado, a ficha derivada coincide com a da classe.
+  e.bolsa = criarBolsa(classe);
+  return e;
 }
 
 export interface OpcoesInimigo {

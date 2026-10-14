@@ -29,7 +29,7 @@ export interface Projetil {
   carisma: number;
 }
 
-export type TipoObjeto = 'orbe_hp' | 'orbe_recurso';
+export type TipoObjeto = 'orbe_hp' | 'orbe_recurso' | 'item';
 
 /**
  * Objeto coletável no mundo (§2.1). `objetoId` é estável; a coleta é uma transação dentro do
@@ -43,6 +43,8 @@ export interface ObjetoNoMundo {
   valor: number;
   modo: 'abs' | 'pct';
   geracao: number;
+  /** Só para `tipo: 'item'` (marco 6); null nos orbes. */
+  itemId: string | null;
 }
 
 /** Respawn agendado de um inimigo (§2.5): o id continua estável e a geração incrementa. */

@@ -1,7 +1,8 @@
 // Mortes, XP, revivescência e respawn (§2.7 "Morte", §2.12) — etapa 8 do tick.
 // HP 0 é morte direta. Entidades de IA saem do mundo e voltam pelo respawn agendado, com o mesmo
 // id e a geração incrementada; jogadores reaparecem pelas regras do modo (§2.13).
-// A perda de XP e ouro na campanha e os drops de item entram com a progressão e os itens (9A, 10A).
+// Marco 6 (13/10/2026): XP sobe de nível e inimigos soltam itens. A perda de XP e ouro na morte
+// da campanha entra no 10A.
 
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type EstadoJogo } from '../core/estado';
@@ -10,10 +11,14 @@ import { ticksDe } from '../core/tempo';
 import type { Entidade } from '../entities/entidade';
 import { criarInimigo } from '../entities/fabrica';
 import { aleatorio } from '../core/rng';
+import { RARIDADES } from '../modos/modo';
 import { podeFerir } from '../modos/relacao';
 import { atrasoDeRespawnTicks, localDeRespawn, podeRespawnar, protecaoDeRespawnTicks } from '../modos/regras';
 import { celulaLivrePara } from '../world/colisao';
-import { largarObjeto } from '../world/objetos';
+import { passavel } from '../world/fase';
+import { largarItem, largarObjeto } from '../world/objetos';
+import { dropaveisDe, type Item } from './itens';
+import { aplicarSubidas } from './nivel';
 
 function zerarMovimento(e: Entidade): void {
   e.acao = null;
@@ -40,6 +45,7 @@ function concederXp(estado: EstadoJogo, ctx: ContextoSimulacao, morto: Entidade,
   for (const p of participantes) {
     p.xp += cota;
     saida.push({ t: 'xpGanho', tick: estado.tick, id: p.id, xp: cota });
+    aplicarSubidas(p, ctx, estado.tick, saida);
   }
 }
 
@@ -84,7 +90,10 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
   processarRespawns(estado, ctx, saida);
 }
 
-/** Drops só na primeira morte (§2.10): orbe de HP e de recurso, sorteados pelo PRNG do estado. */
+/**
+ * Drops só na primeira morte (§2.10), sorteados pelo PRNG do estado: orbe de HP ou de recurso e,
+ * num sorteio independente, um item (marco 6, só onde o modo solta itens).
+ */
 function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
   if (!ctx.modo.objetosDeFase) return;
   const d = ctx.balance.drops;
@@ -93,6 +102,51 @@ function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
   } else if (aleatorio(estado.rng) < d.chanceOrbeRecurso) {
     largarObjeto(estado, 'orbe_recurso', e.x, e.y, d.orbeRecursoPct, 'pct', saida);
   }
+  if (!ctx.modo.loot.itens) return;
+  const boss = e.arquetipo === 'boss';
+  if (aleatorio(estado.rng) >= (boss ? d.chanceItemBoss : d.chanceItem)) return;
+  const item = sortearItem(estado, ctx, boss);
+  if (!item) return;
+  // A célula do inimigo pode já ter o orbe: tenta as vizinhas, numa ordem fixa.
+  for (const [dx, dy] of VIZINHANCA) {
+    const x = e.x + dx;
+    const y = e.y + dy;
+    if (passavel(ctx.fase, x, y) && largarItem(estado, item.id, x, y, saida)) return;
+  }
+}
+
+const VIZINHANCA: readonly (readonly [number, number])[] = [
+  [0, 0],
+  [0, -1],
+  [1, 0],
+  [0, 1],
+  [-1, 0],
+  [1, -1],
+  [1, 1],
+  [-1, 1],
+  [-1, -1],
+];
+
+/** Raridade por peso (o boss tem raridade mínima) e item uniforme entre os dessa raridade. */
+function sortearItem(estado: EstadoJogo, ctx: ContextoSimulacao, boss: boolean): Item | null {
+  const d = ctx.balance.drops;
+  const candidatas = RARIDADES.slice(boss ? RARIDADES.indexOf(d.raridadeMinBoss) : 0);
+  const total = candidatas.reduce((s, r) => s + d.pesoRaridade[r], 0);
+  if (total <= 0) return null;
+  let sorteio = aleatorio(estado.rng) * total;
+  let indice = 0;
+  for (const [i, r] of candidatas.entries()) {
+    indice = i;
+    sorteio -= d.pesoRaridade[r];
+    if (sorteio < 0) break;
+  }
+  // Sem item da raridade sorteada no catálogo, desce até achar.
+  for (let i = indice; i >= 0; i--) {
+    const raridade = candidatas[i];
+    const pool = raridade ? dropaveisDe(ctx.conteudo.itens, raridade) : [];
+    if (pool.length > 0) return pool[Math.floor(aleatorio(estado.rng) * pool.length)] ?? null;
+  }
+  return null;
 }
 
 function reviverJogadores(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {

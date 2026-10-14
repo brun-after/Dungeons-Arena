@@ -7,7 +7,9 @@ import { criarEstado, type EstadoJogo } from '../../src/core/estado';
 import { DT_MS } from '../../src/core/loop';
 import { aleatorio, criarRng, escolher, inteiro, type EstadoRng } from '../../src/core/rng';
 import { simular, type EventoSimulacao } from '../../src/core/simulacao';
-import { emPasso } from '../../src/entities/entidade';
+import { emPasso, type Entidade } from '../../src/entities/entidade';
+import { SLOTS_DE_EQUIPAMENTO } from '../../src/modos/modo';
+import { NOMES_ATRIBUTOS } from '../../src/progression/itens';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import { bloqueia, reservaCelula } from '../../src/world/colisao';
 import { passavel } from '../../src/world/fase';
@@ -77,6 +79,16 @@ const DIRECOES: readonly (Dir8 | 'parado')[] = ['N', 'NE', 'E', 'SE', 'S', 'SO',
  * Bot determinístico: cada entidade age com 5% de chance por tick — anda, pede `irPara`, ataca,
  * usa habilidade ou seleciona alvo. PRNG próprio, separado do de gameplay.
  */
+/** Marco 6: mochila e pontos, válidos ou não (slot errado, item que não existe mais). */
+function comandoDeItem(rng: EstadoRng, e: Entidade): ComandoDoTick['cmd'] {
+  const entrada = e.bolsa && e.bolsa.mochila.length > 0 ? escolher(rng, e.bolsa.mochila) : null;
+  const sorteio = aleatorio(rng);
+  if (entrada && sorteio < 0.4) return { t: 'equipar', invId: entrada.invId, slot: escolher(rng, SLOTS_DE_EQUIPAMENTO) };
+  if (entrada && sorteio < 0.6) return { t: 'usarItem', invId: entrada.invId };
+  if (sorteio < 0.8) return { t: 'desequipar', slot: escolher(rng, SLOTS_DE_EQUIPAMENTO) };
+  return { t: 'distribuirPonto', atributo: escolher(rng, NOMES_ATRIBUTOS) };
+}
+
 export function criarBotAleatorio(semente: number): Produtor {
   const rng: EstadoRng = criarRng(semente);
   return (estado) => {
@@ -89,7 +101,8 @@ export function criarBotAleatorio(semente: number): Produtor {
       else if (sorteio < 0.7) cmd = { t: 'irPara', x: e.x + inteiro(rng, -8, 8), y: e.y + inteiro(rng, -8, 8) };
       else if (sorteio < 0.85) cmd = { t: 'ataqueBasico' };
       else if (sorteio < 0.95) cmd = { t: 'usarHabilidade', id: escolher(rng, [e.ataqueBasico, ...e.habilidades]) };
-      else cmd = { t: 'selecionarAlvo', alvo: escolher(rng, estado.entidades).id };
+      else if (sorteio < 0.97) cmd = { t: 'selecionarAlvo', alvo: escolher(rng, estado.entidades).id };
+      else cmd = comandoDeItem(rng, e);
       comandos.push({ tick: estado.tick, entidadeId: e.id, cmd });
     }
     return comandos;

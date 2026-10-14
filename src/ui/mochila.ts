@@ -1,0 +1,292 @@
+// Mochila e ficha (§2.10, §2.12). Marco 6 (13/10/2026). Só lê o estado e emite comandos.
+// No toque, tocar a linha inteira equipa, usa ou desequipa e fecha o modal; no desktop, cada linha
+// tem o seu botão. A lista é redesenhada só quando a bolsa, o nível ou o XP mudam.
+
+import type { Comando } from '../core/comandos';
+import type { ContextoSimulacao } from '../core/contexto';
+import type { Entidade, ItemNaMochila } from '../entities/entidade';
+import { t, type ChaveTexto } from '../i18n';
+import { SLOTS_DE_EQUIPAMENTO, type Slot } from '../modos/modo';
+import { derivarFicha } from '../progression/derivados';
+import { NOMES_ATRIBUTOS, type Item } from '../progression/itens';
+import { xpParaProximo } from '../progression/nivel';
+import { criarModal } from './modal';
+
+export interface OpcoesMochila {
+  ctx: ContextoSimulacao;
+  jogador: () => Entidade | undefined;
+  emitir: (cmd: Comando) => void;
+  toque: boolean;
+  aoAbrir: () => void;
+}
+
+export interface Mochila {
+  botao: HTMLButtonElement;
+  alternar: () => void;
+  aberta: () => boolean;
+  /** Chamado a cada quadro: atualiza o botão e, com o modal aberto, o conteúdo. */
+  atualizar: () => void;
+}
+
+type Aba = 'itens' | 'ficha';
+
+function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, texto?: string): HTMLElementTagNameMap[K] {
+  const e = document.createElement(tag);
+  if (classe) e.className = classe;
+  if (texto !== undefined) e.textContent = texto;
+  return e;
+}
+
+function botao(texto: string, chave: string, aoClicar: () => void, classe = 'botao-cabecalho'): HTMLButtonElement {
+  const b = el('button', classe, texto);
+  b.type = 'button';
+  b.dataset.chave = chave;
+  b.addEventListener('click', aoClicar);
+  return b;
+}
+
+/** "FOR +2 · CON +10% · DEF +1" */
+export function resumoDoItem(item: Item): string {
+  const partes: string[] = [];
+  for (const nome of NOMES_ATRIBUTOS) {
+    const b = item.bonusAtributos[nome];
+    if (!b) continue;
+    const sinal = b.valor >= 0 ? '+' : '';
+    partes.push(`${t(`atributoCurto.${nome}` as ChaveTexto)} ${sinal}${b.valor}${b.modo === 'pct' ? '%' : ''}`);
+  }
+  if (item.bonusDefesa !== 0) partes.push(`${t('atributoCurto.defesa')} ${item.bonusDefesa > 0 ? '+' : ''}${item.bonusDefesa}`);
+  if (item.tipo === 'consumivel') partes.push(item.descricao);
+  return partes.join(' · ');
+}
+
+export function criarMochila(o: OpcoesMochila): Mochila {
+  const { ctx, emitir } = o;
+  const itens = ctx.conteudo.itens;
+  let aba: Aba = 'itens';
+  let assinatura = '';
+  let rotuloBotao = '';
+
+  const modal = criarModal({
+    titulo: t('mochila.titulo'),
+    rotuloFechar: t('mochila.fechar'),
+    classe: 'mochila',
+    aoAbrir: () => {
+      o.aoAbrir();
+      desenhar();
+    },
+  });
+  // `I` fecha de dentro do modal (a entrada de jogo fica bloqueada enquanto ele está aberto).
+  modal.dialogo.addEventListener('keydown', (ev) => {
+    if (ev.code === 'KeyI') modal.fechar();
+  });
+
+  const botaoAbrir = el('button', 'botao-cabecalho botao-mochila');
+  botaoAbrir.type = 'button';
+  botaoAbrir.addEventListener('click', () => {
+    modal.abrir();
+  });
+
+  // Ação de uma linha: no toque fecha o modal depois de emitir (§2.10).
+  const agir = (cmd: Comando) => {
+    emitir(cmd);
+    if (o.toque) modal.fechar();
+  };
+
+  const linhaItem = (opcoes: {
+    chave: string;
+    item: Item | undefined;
+    qtd: number;
+    rotulo: string;
+    acao: (() => void) | null;
+    textoAcao: string;
+    bloqueio: string | null;
+    vazio?: boolean;
+  }): HTMLLIElement => {
+    const li = el('li', opcoes.vazio ? 'linha-item vazio' : 'linha-item');
+    const conteudo = el('span', 'conteudo-item');
+    const icone = el('span', 'icone-item', opcoes.item?.icone ?? '·');
+    icone.setAttribute('aria-hidden', 'true');
+    const textos = el('span', 'textos-item');
+    const nome = el('span', `nome-item raridade-${opcoes.item?.raridade ?? 'comum'}`, opcoes.rotulo);
+    textos.append(nome);
+    const detalhe = opcoes.bloqueio ?? (opcoes.item ? resumoDoItem(opcoes.item) : '');
+    if (detalhe) textos.append(el('span', 'detalhe-item', detalhe));
+    conteudo.append(icone, textos);
+    if (opcoes.qtd > 1) conteudo.append(el('span', 'qtd-item', `×${opcoes.qtd}`));
+    const acao = opcoes.acao;
+    if (o.toque && acao && !opcoes.bloqueio) {
+      const b = botao('', opcoes.chave, acao, 'linha-toque');
+      b.setAttribute('aria-label', `${opcoes.textoAcao}: ${opcoes.rotulo}`);
+      b.append(conteudo);
+      li.append(b);
+    } else {
+      li.append(conteudo);
+      if (acao) {
+        const b = botao(opcoes.textoAcao, opcoes.chave, acao);
+        b.disabled = opcoes.bloqueio !== null;
+        b.setAttribute('aria-label', `${opcoes.textoAcao}: ${opcoes.rotulo}`);
+        li.append(b);
+      }
+    }
+    return li;
+  };
+
+  const desenharItens = (j: Entidade, corpo: HTMLElement) => {
+    const bolsa = j.bolsa;
+    if (!bolsa) return;
+    // A mochila vem primeiro: é onde estão as ações; os slots ficam numa grade compacta.
+    corpo.append(
+      el('h3', 'subtitulo-modal', t('mochila.itens', { n: bolsa.mochila.length, max: ctx.balance.inventario.capacidade })),
+    );
+    if (bolsa.mochila.length === 0) corpo.append(el('p', 'vazio-modal', t('mochila.semItens')));
+    const lista = el('ul', 'lista-itens');
+    for (const entrada of bolsa.mochila) lista.append(linhaDaMochila(j, entrada));
+    corpo.append(lista);
+
+    corpo.append(el('h3', 'subtitulo-modal', t('mochila.equipado')));
+    const slots = el('ul', 'lista-itens slots');
+    for (const slot of SLOTS_DE_EQUIPAMENTO) {
+      const entrada = bolsa.equipamento[slot];
+      const item = entrada ? itens.get(entrada.itemId) : undefined;
+      const nomeSlot = t(`slot.${slot}` as ChaveTexto);
+      slots.append(
+        linhaItem({
+          chave: `slot-${slot}`,
+          item,
+          qtd: 1,
+          rotulo: item ? `${nomeSlot}: ${item.nome}` : `${nomeSlot}: ${t('mochila.vazio')}`,
+          vazio: !item,
+          acao: item ? () => { agir({ t: 'desequipar', slot }); } : null,
+          textoAcao: t('mochila.desequipar'),
+          bloqueio: null,
+        }),
+      );
+    }
+    corpo.append(slots);
+  };
+
+  const linhaDaMochila = (j: Entidade, entrada: ItemNaMochila): HTMLLIElement => {
+    const item = itens.get(entrada.itemId);
+    const consumivel = item?.tipo === 'consumivel';
+    const slot: Slot | null = item?.slotPadrao ?? null;
+    const acao = consumivel
+      ? () => { agir({ t: 'usarItem', invId: entrada.invId }); }
+      : slot
+        ? () => { agir({ t: 'equipar', invId: entrada.invId, slot }); }
+        : null;
+    const bloqueio = item && j.nivel < item.nivelMinimo ? t('mochila.requerNivel', { nivel: item.nivelMinimo }) : null;
+    return linhaItem({
+      chave: `inv-${entrada.invId}`,
+      item,
+      qtd: entrada.qtd,
+      rotulo: item?.nome ?? entrada.itemId,
+      acao,
+      textoAcao: consumivel ? t('mochila.usar') : t('mochila.equipar'),
+      bloqueio,
+    });
+  };
+
+  const desenharFicha = (j: Entidade, corpo: HTMLElement) => {
+    const bolsa = j.bolsa;
+    if (!bolsa) return;
+    const proximo = xpParaProximo(j.nivel, ctx.balance.xp);
+    const nivelMax = j.nivel >= ctx.balance.xp.nivelMax;
+    corpo.append(
+      el('p', 'linha-nivel', nivelMax ? t('ficha.nivelMax', { nivel: j.nivel }) : t('ficha.nivel', { nivel: j.nivel, xp: j.xp, proximo })),
+    );
+    const pontos = el('p', 'linha-pontos', t('ficha.pontos', { n: bolsa.pontosAtributo }));
+    pontos.dataset.pontos = String(bolsa.pontosAtributo);
+    corpo.append(pontos);
+
+    // Base + bônus do equipamento = efetivo; o efetivo vem da mesma função da simulação.
+    const efetiva = derivarFicha(bolsa, j.nivel, ctx);
+    const tabela = el('table', 'tabela-ficha');
+    const cab = el('tr');
+    for (const chave of ['ficha.atributo', 'ficha.base', 'ficha.bonus', 'ficha.efetivo'] as const) cab.append(el('th', undefined, t(chave)));
+    cab.append(el('th'));
+    tabela.append(cab);
+    for (const nome of NOMES_ATRIBUTOS) {
+      const tr = el('tr');
+      const base = bolsa.atributosBase[nome];
+      const valor = efetiva.atributos[nome];
+      const diff = valor - base;
+      tr.append(
+        el('td', undefined, t(`atributo.${nome}` as ChaveTexto)),
+        el('td', undefined, String(base)),
+        el('td', diff > 0 ? 'bonus-positivo' : diff < 0 ? 'bonus-negativo' : undefined, diff === 0 ? '—' : `${diff > 0 ? '+' : ''}${diff}`),
+        el('td', 'efetivo', String(valor)),
+      );
+      const celulaMais = el('td');
+      if (bolsa.pontosAtributo > 0) {
+        const mais = botao('+', `ponto-${nome}`, () => { emitir({ t: 'distribuirPonto', atributo: nome }); });
+        mais.setAttribute('aria-label', t('ficha.aumentar', { atributo: t(`atributo.${nome}` as ChaveTexto) }));
+        celulaMais.append(mais);
+      }
+      tr.append(celulaMais);
+      tr.dataset.atributo = nome;
+      tr.dataset.efetivo = String(valor);
+      tabela.append(tr);
+    }
+    corpo.append(tabela);
+    corpo.append(
+      el('p', 'resumo-ficha', t('ficha.resumo', { defesa: efetiva.defesa, hp: efetiva.hpMax, mana: efetiva.manaMax })),
+    );
+  };
+
+  const desenhar = () => {
+    const j = o.jogador();
+    if (!j?.bolsa) return;
+    assinatura = JSON.stringify([j.bolsa, j.nivel, j.xp]);
+    const focoAntes = document.activeElement instanceof HTMLElement ? document.activeElement.dataset.chave : undefined;
+    const corpo = modal.corpo;
+    corpo.textContent = '';
+    const abas = el('div', 'abas-modal');
+    abas.setAttribute('role', 'group');
+    for (const [id, chave] of [
+      ['itens', 'mochila.abaItens'],
+      ['ficha', 'mochila.abaFicha'],
+    ] as const) {
+      const rotulo = id === 'ficha' && j.bolsa.pontosAtributo > 0 ? `${t(chave)} •` : t(chave);
+      const b = botao(rotulo, `aba-${id}`, () => {
+        aba = id;
+        desenhar();
+      });
+      b.setAttribute('aria-pressed', String(aba === id));
+      abas.append(b);
+    }
+    corpo.append(abas);
+    const conteudo = el('div', 'conteudo-modal');
+    if (aba === 'itens') desenharItens(j, conteudo);
+    else desenharFicha(j, conteudo);
+    corpo.append(conteudo);
+    if (focoAntes) corpo.querySelector<HTMLElement>(`[data-chave="${CSS.escape(focoAntes)}"]`)?.focus();
+  };
+
+  const atualizar = () => {
+    const j = o.jogador();
+    if (!j?.bolsa) {
+      botaoAbrir.hidden = true;
+      return;
+    }
+    botaoAbrir.hidden = false;
+    const pontos = j.bolsa.pontosAtributo > 0;
+    const rotulo = `🎒 ${t('mochila.nivelCurto', { nivel: j.nivel })}${pontos ? ' •' : ''}`;
+    if (rotulo !== rotuloBotao) {
+      rotuloBotao = rotulo;
+      botaoAbrir.textContent = rotulo;
+      botaoAbrir.setAttribute('aria-label', pontos ? t('mochila.abrirComPontos') : t('mochila.abrir'));
+      botaoAbrir.classList.toggle('com-pontos', pontos);
+    }
+    if (modal.aberto() && JSON.stringify([j.bolsa, j.nivel, j.xp]) !== assinatura) desenhar();
+  };
+
+  return {
+    botao: botaoAbrir,
+    alternar: () => {
+      if (modal.aberto()) modal.fechar();
+      else modal.abrir();
+    },
+    aberta: modal.aberto,
+    atualizar,
+  };
+}

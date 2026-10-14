@@ -1,5 +1,5 @@
 {
-  "versao": 5,
+  "versao": 6,
   "movimento": {
     "velocidadeBaseMs": 400,
     "filaMaxWaypoints": 2
@@ -40,10 +40,27 @@
     "chanceOrbeHp": 0.1,
     "chanceOrbeRecurso": 0.08,
     "orbeHpPct": 25,
-    "orbeRecursoPct": 50
+    "orbeRecursoPct": 50,
+    "chanceItem": 0.1,
+    "chanceItemBoss": 1,
+    "raridadeMinBoss": "raro",
+    "pesoRaridade": { "comum": 60, "incomum": 28, "raro": 10, "epico": 2, "lendario": 0 }
   },
   "xp": {
-    "decaimentoAntifarm": 0.8
+    "decaimentoAntifarm": 0.8,
+    "tabela": [30, 60, 100, 150, 220, 300, 400, 520, 660, 820],
+    "fallbackPorNivel": 100,
+    "nivelMax": 20,
+    "pontosPorNivel": 3,
+    "hpPorNivel": 5
+  },
+  "atributos": {
+    "minimo": 1,
+    "maximo": 30
+  },
+  "inventario": {
+    "capacidade": 20,
+    "pilhaMax": 10
   },
   "ia": {
     "patrulhaAvaliacaoMs": 2000,

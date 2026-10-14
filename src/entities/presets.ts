@@ -32,6 +32,8 @@ export interface ClasseJogador {
   atributos: Atributos;
   ataqueBasico: string;
   habilidades: string[];
+  /** Mochila inicial (marco 6): referências ao catálogo de itens. */
+  itensIniciais: { id: string; qtd: number }[];
 }
 
 function idDe(item: unknown): string {
@@ -94,6 +96,10 @@ export function lerClasses(json: unknown): { classes: Map<string, ClasseJogador>
       atributos: lerAtributos(l, o),
       ataqueBasico: l.texto(o, 'ataqueBasico'),
       habilidades: l.listaDeTextos(o, 'habilidades'),
+      itensIniciais: l.lista(o, 'itensIniciais').map((v) => {
+        const i = l.objeto(v, 'itensIniciais[]');
+        return { id: l.texto(i, 'id'), qtd: l.numero(i, 'qtd', { min: 1, max: 99, inteiro: true }) };
+      }),
     };
     if (classes.has(c.id)) l.erro('id repetido');
     erros.push(...l.erros);

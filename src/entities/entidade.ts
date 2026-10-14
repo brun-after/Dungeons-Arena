@@ -1,9 +1,11 @@
 // Entidade (§2.5). Só dados, para clonar, comparar no digest e gravar em checkpoint.
 // Marco 3: atributos, recursos, efeitos, ação em curso e dados de morte e respawn.
+// Marco 6 (13/10/2026): `bolsa` (base da ficha, equipamento e mochila) nos jogadores da campanha.
 
 import type { Celula, Dir8, EntidadeId } from '../core/comandos';
 import { clonarRng, type EstadoRng } from '../core/rng';
 import type { TipoEfeito } from '../combat/efeitos';
+import type { Slot } from '../modos/modo';
 
 export type TipoEntidade = 'jogador' | 'inimigo' | 'invocacao' | 'avatar';
 export type EquipeId = string;
@@ -72,6 +74,28 @@ export interface Participacao {
   tick: number;
 }
 
+/** Uma entrada da mochila. `invId` é estável enquanto o item existir (§2.10). */
+export interface ItemNaMochila {
+  invId: string;
+  itemId: string;
+  qtd: number;
+}
+
+/**
+ * Ficha de quem tem progressão (§2.10, §2.12): atributos-base e fontes de modificador. Os campos
+ * `atributos`, `defesa`, `hpMax` e `manaMax` da entidade são sempre derivados daqui
+ * (`recalcularFicha`), nunca guardados como deltas.
+ */
+export interface Bolsa {
+  atributosBase: Atributos;
+  defesaBase: number;
+  hpBase: number;
+  equipamento: Record<Slot, ItemNaMochila | null>;
+  mochila: ItemNaMochila[];
+  pontosAtributo: number;
+  proximoInv: number;
+}
+
 export interface Entidade {
   id: EntidadeId;
   nome: string;
@@ -130,6 +154,8 @@ export interface Entidade {
   participacao: Participacao[];
   /** Criado no primeiro tick para entidades de IA; null para jogadores e bonecos. */
   ia: EstadoIa | null;
+  /** Só jogadores da campanha; null para NPCs e para a ficha de sessão da arena (§3.7). */
+  bolsa: Bolsa | null;
 }
 
 export const ATRIBUTOS_NEUTROS: Readonly<Atributos> = {
@@ -212,6 +238,7 @@ export function criarEntidade(n: NovaEntidade): Entidade {
     abates: 0,
     participacao: [],
     ia: null,
+    bolsa: null,
   };
 }
 
@@ -238,6 +265,20 @@ export function vivo(e: Entidade): boolean {
 
 const copiarCelulas = (lista: readonly Celula[]): Celula[] => lista.map((c) => ({ x: c.x, y: c.y }));
 
+const copiarItem = (i: ItemNaMochila | null): ItemNaMochila | null => (i ? { ...i } : null);
+
+function clonarBolsa(b: Bolsa): Bolsa {
+  return {
+    ...b,
+    atributosBase: { ...b.atributosBase },
+    equipamento: Object.fromEntries(Object.entries(b.equipamento).map(([slot, i]) => [slot, copiarItem(i)])) as Record<
+      Slot,
+      ItemNaMochila | null
+    >,
+    mochila: b.mochila.map((i) => ({ ...i })),
+  };
+}
+
 // Clone explícito, campo a campo (§5.3 regra 4).
 export function clonarEntidade(e: Entidade): Entidade {
   return {
@@ -257,5 +298,6 @@ export function clonarEntidade(e: Entidade): Entidade {
           rng: clonarRng(e.ia.rng),
         }
       : null,
+    bolsa: e.bolsa ? clonarBolsa(e.bolsa) : null,
   };
 }

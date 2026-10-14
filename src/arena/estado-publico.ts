@@ -1,6 +1,6 @@
 // Estado público (§3.6): o que vai a todos os clientes. Fica só no servidor: o PRNG da simulação,
-// as decisões internas da IA (PRNG, memória, caches) e, quando existirem, inventários e conteúdo
-// oculto. O cliente recebe a mesma forma (EstadoJogo), com esses campos neutros.
+// as decisões internas da IA (PRNG, memória, caches), a bolsa (mochila e equipamento são privados,
+// marco 6) e, quando existir, conteúdo oculto. O cliente recebe a mesma forma (EstadoJogo), com esses campos neutros.
 
 import { clonarEstado, type EstadoJogo } from '../core/estado';
 import { digest } from '../core/digest';
@@ -33,7 +33,10 @@ function iaPublica(ia: EstadoIa): EstadoIa {
 export function estadoPublico(estado: EstadoJogo): EstadoJogo {
   const publico = clonarEstado(estado);
   publico.rng = { ...RNG_NEUTRO };
-  for (const e of publico.entidades) if (e.ia) e.ia = iaPublica(e.ia);
+  for (const e of publico.entidades) {
+    if (e.ia) e.ia = iaPublica(e.ia);
+    e.bolsa = null;
+  }
   return publico;
 }
 

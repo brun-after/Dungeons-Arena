@@ -1,0 +1,145 @@
+// Mochila, equipamento e pontos de atributo (§2.10, §2.12). Marco 6 (13/10/2026).
+// Tudo chega por comando (§3.3); cada recusa sai como evento com motivo, para a interface explicar.
+
+import type { Balance, ContextoSimulacao } from '../core/contexto';
+import type { EventoSimulacao, MotivoItem } from '../core/eventos-simulacao';
+import type { Bolsa, Entidade, ItemNaMochila } from '../entities/entidade';
+import type { ClasseJogador } from '../entities/presets';
+import { SLOTS_DE_EQUIPAMENTO, type Slot } from '../modos/modo';
+import { recalcularFicha } from './derivados';
+import { NOMES_ATRIBUTOS, type Item, type NomeAtributo } from './itens';
+
+export function criarBolsa(classe: ClasseJogador): Bolsa {
+  const bolsa: Bolsa = {
+    atributosBase: { ...classe.atributos },
+    defesaBase: classe.defesa,
+    hpBase: classe.hpBase,
+    equipamento: Object.fromEntries(SLOTS_DE_EQUIPAMENTO.map((s) => [s, null])) as Record<Slot, ItemNaMochila | null>,
+    mochila: [],
+    pontosAtributo: 0,
+    proximoInv: 1,
+  };
+  for (const { id, qtd } of classe.itensIniciais) bolsa.mochila.push({ invId: `i${bolsa.proximoInv++}`, itemId: id, qtd });
+  return bolsa;
+}
+
+/** Guarda `qtd` unidades: consumíveis empilham até `pilhaMax`; o resto ocupa novas entradas. */
+export function guardarItem(bolsa: Bolsa, item: Item, qtd: number, regras: Balance['inventario']): boolean {
+  if (!cabeNaMochila(bolsa, item, qtd, regras)) return false;
+  let restante = qtd;
+  if (item.tipo === 'consumivel') {
+    for (const entrada of bolsa.mochila) {
+      if (entrada.itemId !== item.id || restante === 0) continue;
+      const cabe = Math.min(restante, regras.pilhaMax - entrada.qtd);
+      entrada.qtd += cabe;
+      restante -= cabe;
+    }
+  }
+  const porEntrada = item.tipo === 'consumivel' ? regras.pilhaMax : 1;
+  while (restante > 0) {
+    const n = Math.min(restante, porEntrada);
+    bolsa.mochila.push({ invId: `i${bolsa.proximoInv++}`, itemId: item.id, qtd: n });
+    restante -= n;
+  }
+  return true;
+}
+
+export function cabeNaMochila(bolsa: Bolsa, item: Item, qtd: number, regras: Balance['inventario']): boolean {
+  const porEntrada = item.tipo === 'consumivel' ? regras.pilhaMax : 1;
+  const sobraEmPilhas =
+    item.tipo === 'consumivel'
+      ? bolsa.mochila.filter((i) => i.itemId === item.id).reduce((s, i) => s + (regras.pilhaMax - i.qtd), 0)
+      : 0;
+  const novasEntradas = Math.ceil(Math.max(0, qtd - sobraEmPilhas) / porEntrada);
+  return bolsa.mochila.length + novasEntradas <= regras.capacidade;
+}
+
+type Resultado = { ok: true } | { ok: false; motivo: MotivoItem };
+const recusa = (motivo: MotivoItem): Resultado => ({ ok: false, motivo });
+const OK: Resultado = { ok: true };
+
+function relatar(e: Entidade, r: Resultado, tick: number, saida: EventoSimulacao[]): void {
+  if (!r.ok) saida.push({ t: 'itemRecusado', tick, id: e.id, motivo: r.motivo });
+}
+
+export function equipar(e: Entidade, ctx: ContextoSimulacao, invId: string, slot: Slot, tick: number, saida: EventoSimulacao[]): void {
+  const r = ((): Resultado => {
+    const bolsa = e.bolsa;
+    if (!bolsa) return recusa('sem_mochila');
+    const indice = bolsa.mochila.findIndex((i) => i.invId === invId);
+    const entrada = bolsa.mochila[indice];
+    const item = entrada ? ctx.conteudo.itens.get(entrada.itemId) : undefined;
+    if (!entrada || !item) return recusa('nao_encontrado');
+    if (item.tipo !== 'equipamento' || item.slotPadrao !== slot) return recusa('slot_invalido');
+    if (e.nivel < item.nivelMinimo) return recusa('nivel_insuficiente');
+    // Tira da mochila e troca com o que estava no slot: a troca sempre cabe.
+    bolsa.mochila.splice(indice, 1);
+    const anterior = bolsa.equipamento[slot];
+    if (anterior) bolsa.mochila.push(anterior);
+    bolsa.equipamento[slot] = entrada;
+    recalcularFicha(e, ctx);
+    saida.push({ t: 'equipou', tick, id: e.id, itemId: item.id, slot });
+    return OK;
+  })();
+  relatar(e, r, tick, saida);
+}
+
+export function desequipar(e: Entidade, ctx: ContextoSimulacao, slot: Slot, tick: number, saida: EventoSimulacao[]): void {
+  const r = ((): Resultado => {
+    const bolsa = e.bolsa;
+    if (!bolsa) return recusa('sem_mochila');
+    const entrada = bolsa.equipamento[slot];
+    if (!entrada) return recusa('nao_encontrado');
+    if (bolsa.mochila.length >= ctx.balance.inventario.capacidade) return recusa('mochila_cheia');
+    bolsa.equipamento[slot] = null;
+    bolsa.mochila.push(entrada);
+    recalcularFicha(e, ctx);
+    return OK;
+  })();
+  relatar(e, r, tick, saida);
+}
+
+/** Consumível: aplica os efeitos e gasta uma unidade. Sem ganho algum, recusa sem gastar. */
+export function usarItem(e: Entidade, ctx: ContextoSimulacao, invId: string, tick: number, saida: EventoSimulacao[]): void {
+  const r = ((): Resultado => {
+    const bolsa = e.bolsa;
+    if (!bolsa) return recusa('sem_mochila');
+    const indice = bolsa.mochila.findIndex((i) => i.invId === invId);
+    const entrada = bolsa.mochila[indice];
+    const item = entrada ? ctx.conteudo.itens.get(entrada.itemId) : undefined;
+    if (!entrada || !item) return recusa('nao_encontrado');
+    if (item.tipo !== 'consumivel') return recusa('nao_consumivel');
+    let hp = 0;
+    let mana = 0;
+    for (const ef of item.efeitos) {
+      const [atual, maximo] = ef.tipo === 'curar' ? [e.hp + hp, e.hpMax] : [e.mana + mana, e.manaMax];
+      const bruto = ef.modo === 'pct' ? Math.round((maximo * ef.valor) / 100) : ef.valor;
+      const ganho = Math.max(0, Math.min(maximo - atual, bruto));
+      if (ef.tipo === 'curar') hp += ganho;
+      else mana += ganho;
+    }
+    if (hp + mana === 0) return recusa('sem_efeito');
+    e.hp += hp;
+    e.mana += mana;
+    entrada.qtd--;
+    if (entrada.qtd <= 0) bolsa.mochila.splice(indice, 1);
+    saida.push({ t: 'usouItem', tick, id: e.id, itemId: item.id, hp, mana });
+    return OK;
+  })();
+  relatar(e, r, tick, saida);
+}
+
+export function distribuirPonto(e: Entidade, ctx: ContextoSimulacao, atributo: NomeAtributo, tick: number, saida: EventoSimulacao[]): void {
+  const r = ((): Resultado => {
+    const bolsa = e.bolsa;
+    if (!bolsa) return recusa('sem_mochila');
+    if (!NOMES_ATRIBUTOS.includes(atributo)) return recusa('nao_encontrado');
+    if (bolsa.pontosAtributo <= 0) return recusa('sem_pontos');
+    if (bolsa.atributosBase[atributo] >= ctx.balance.atributos.maximo) return recusa('atributo_no_maximo');
+    bolsa.pontosAtributo--;
+    bolsa.atributosBase[atributo]++;
+    recalcularFicha(e, ctx);
+    return OK;
+  })();
+  relatar(e, r, tick, saida);
+}

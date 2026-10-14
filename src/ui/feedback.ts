@@ -1,11 +1,14 @@
 // Feedback de combate a partir dos eventos da simulação: números de dano, registro, último d20 e
 // vibração. Só reage a eventos já publicados; nunca muda o estado (§3.3).
+// Marco 6: coleta, uso e equipamento de itens, recusas da mochila e subida de nível.
 
+import type { Catalogo } from '../combat/habilidades';
 import type { EstadoJogo } from '../core/estado';
 import type { Barramento } from '../core/events';
 import type { EventosDaSimulacao } from '../core/eventos-simulacao';
 import { t, type ChaveTexto } from '../i18n';
 import { vibrar } from '../plataforma/dispositivo';
+import type { Item } from '../progression/itens';
 import { ESCALONAMENTO_MS, type CamadaNumeros } from '../render/numeros';
 import type { Hud } from './hud';
 
@@ -17,6 +20,9 @@ export interface OpcoesFeedback {
   numeros: CamadaNumeros;
   hud: Hud;
   agora: () => number;
+  itens: Catalogo<Item>;
+  /** Aviso curto e não bloqueante (toast). */
+  aviso: (texto: string) => void;
 }
 
 export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
@@ -81,10 +87,41 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
   bus.on('surgiu', (ev) => {
     hud.registrar(t('log.surgiu', { alvo: nome(ev.id) }));
   });
+  const nomeItem = (id: string | null) => (id ? (o.itens.get(id)?.nome ?? id) : '?');
   bus.on('coletou', (ev) => {
+    if (ev.tipo === 'item') {
+      if (ev.id !== idLocal) return;
+      const texto = t('log.pegouItem', { item: nomeItem(ev.itemId) });
+      hud.registrar(texto);
+      o.aviso(texto);
+      return;
+    }
     const quem = posicao(ev.id);
     if (quem) numeros.mostrar(`+${ev.ganho}`, ev.tipo === 'orbe_hp' ? 'cura' : 'recurso', quem.x, quem.y, o.agora());
     if (ev.id === idLocal) hud.registrar(t(ev.tipo === 'orbe_hp' ? 'log.orbeHp' : 'log.orbeRecurso', { ganho: ev.ganho }));
+  });
+  bus.on('equipou', (ev) => {
+    if (ev.id === idLocal) hud.registrar(t('log.equipou', { item: nomeItem(ev.itemId) }));
+  });
+  bus.on('usouItem', (ev) => {
+    const quem = posicao(ev.id);
+    if (quem && ev.hp > 0) numeros.mostrar(`+${ev.hp}`, 'cura', quem.x, quem.y, o.agora());
+    if (quem && ev.mana > 0) numeros.mostrar(`+${ev.mana}`, 'recurso', quem.x, quem.y, o.agora(), ESCALONAMENTO_MS);
+    if (ev.id === idLocal) hud.registrar(t('log.usou', { item: nomeItem(ev.itemId) }));
+  });
+  bus.on('itemRecusado', (ev) => {
+    if (ev.id !== idLocal) return;
+    vibrar([50, 30, 50]);
+    const texto = t(`item.${ev.motivo}` as const);
+    hud.registrar(texto);
+    o.aviso(texto);
+  });
+  bus.on('subiuNivel', (ev) => {
+    if (ev.id !== idLocal) return;
+    vibrar([60, 40, 120]);
+    const texto = t('aviso.nivel', { nivel: ev.nivel });
+    hud.registrar(texto);
+    o.aviso(texto);
   });
   bus.on('iaNotou', (ev) => {
     if (ev.alvoId === idLocal) hud.registrar(t('log.notou', { inimigo: nome(ev.id) }));

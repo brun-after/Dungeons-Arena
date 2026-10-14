@@ -23,12 +23,22 @@ export interface OpcoesTeclado {
   /** `Esc` é contextual (§2.15): cancela a mira antes de pausar. */
   aoCancelar: () => void;
   isometrico: () => boolean;
+  /** Tecla `I`: abre a mochila (marco 6). */
+  aoMochila?: () => void;
+  /** Com um modal aberto, as teclas não chegam ao jogo (marco 6). */
+  bloqueado?: () => boolean;
+}
+
+export interface Teclado {
+  desligar: () => void;
+  /** Solta as teclas mantidas (ao abrir um modal, por exemplo). */
+  soltarTudo: () => void;
 }
 
 const ATALHOS = ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0'];
 
-/** Liga o teclado. Retorna a função que desliga. */
-export function ligarTeclado(opcoes: OpcoesTeclado): () => void {
+/** Liga o teclado. */
+export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
   const pressionadas = new Set<string>();
   let atual: Dir8 | 'parado' = 'parado';
 
@@ -51,7 +61,10 @@ export function ligarTeclado(opcoes: OpcoesTeclado): () => void {
 
   const aoBaixar = (ev: KeyboardEvent) => {
     if (ev.target instanceof HTMLInputElement || ev.target instanceof HTMLTextAreaElement) return;
-    if (ev.code in EIXOS) {
+    if (opcoes.bloqueado?.()) return;
+    if (ev.code === 'KeyI' && !ev.repeat && opcoes.aoMochila) {
+      opcoes.aoMochila();
+    } else if (ev.code in EIXOS) {
       ev.preventDefault();
       if (!ev.repeat) {
         pressionadas.add(ev.code);
@@ -79,10 +92,13 @@ export function ligarTeclado(opcoes: OpcoesTeclado): () => void {
   window.addEventListener('keyup', aoSoltar);
   window.addEventListener('blur', soltarTudo);
   document.addEventListener('visibilitychange', soltarTudo);
-  return () => {
-    window.removeEventListener('keydown', aoBaixar);
-    window.removeEventListener('keyup', aoSoltar);
-    window.removeEventListener('blur', soltarTudo);
-    document.removeEventListener('visibilitychange', soltarTudo);
+  return {
+    desligar: () => {
+      window.removeEventListener('keydown', aoBaixar);
+      window.removeEventListener('keyup', aoSoltar);
+      window.removeEventListener('blur', soltarTudo);
+      document.removeEventListener('visibilitychange', soltarTudo);
+    },
+    soltarTudo,
   };
 }
