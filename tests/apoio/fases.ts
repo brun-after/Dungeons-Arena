@@ -12,7 +12,7 @@ export function faseDeTexto(mapa: string[], id = 'teste'): Fase {
 export const CONTEUDO: Conteudo = conteudoOficial();
 
 export function faseOficial01(): Fase {
-  const r = validarFase(fase01, new Set(CONTEUDO.presets.keys()));
+  const r = validarFase(fase01, new Set(CONTEUDO.presets.keys()), CONTEUDO.itens);
   if (!r.ok) throw new Error(`fase-01 inválida: ${JSON.stringify(r.erros)}`);
   return carregarFase(r.fase);
 }

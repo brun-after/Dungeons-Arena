@@ -2,6 +2,7 @@
 // e, no futuro, ao editor e à importação. Conteúdo inválido é recusado com o erro na célula,
 // nunca quebra o jogo. Marco 2: schema mínimo, spawn passável e spawn alcançando a saída.
 // Marco 6C (13/10/2026): avisos (não bloqueiam): fase sem inimigos e inimigo inalcançável.
+// Marco 9A (14/10/2026): baú, loja e loot, com os itens conferidos no catálogo quando informado.
 
 import { normalizarEfeito } from '../combat/normalizar-efeito';
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
@@ -38,11 +39,15 @@ function ehInteiro(v: unknown): v is number {
   return typeof v === 'number' && Number.isInteger(v);
 }
 
+/** O que a validação precisa saber de um item: se existe e de que tipo é (a chave do baú). */
+export type ItensConhecidos = ReadonlyMap<string, { readonly tipo: string }>;
+
 /**
  * `presetsConhecidos`: quando informado, cada inimigo posicionado precisa referenciar um preset
- * existente no catálogo (o editor e o CI passam o catálogo oficial).
+ * existente no catálogo (o editor e o CI passam o catálogo oficial). `itensConhecidos`: idem para
+ * os itens de baú, loja e loot; a chave do baú precisa ser um item do tipo `chave`.
  */
-export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<string>): ResultadoValidacao {
+export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<string>, itensConhecidos?: ItensConhecidos): ResultadoValidacao {
   const erros: ErroFase[] = [];
   const avisos: ErroFase[] = [];
   if (!ehObjeto(entrada)) return { ok: false, erros: [{ mensagem: 'a fase precisa ser um objeto' }], avisos };
@@ -58,7 +63,7 @@ export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<st
   const linhas = validarMapa(mapa, erros);
   const listaSpawns = validarSpawns(spawns, erros);
   const listaInimigos = validarInimigos(inimigos, erros, presetsConhecidos);
-  const listaObjetos = validarObjetos(objetos, erros);
+  const listaObjetos = validarObjetos(objetos, erros, itensConhecidos);
   if (erros.length > 0 || !linhas || !listaSpawns) return { ok: false, erros, avisos };
 
   const json: FaseJson = {
@@ -76,8 +81,64 @@ export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<st
 }
 
 const TIPOS_OBJETO = ['orbe_hp', 'orbe_recurso', 'orbe_efeito'] as const;
+const MAX_ITENS_OBJETO = 20;
+const MAX_OURO_OBJETO = 100_000;
 
-function validarObjetos(objetos: unknown, erros: ErroFase[]): ObjetoPosicionadoJson[] {
+const normalizado = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 1;
+
+/** Lista de ids de item (conteúdo do baú, estoque da loja), conferidos no catálogo se houver. */
+function listaDeItens(v: unknown, campo: string, erros: ErroFase[], itens: ItensConhecidos | undefined): string[] | null {
+  if (!Array.isArray(v) || v.length > MAX_ITENS_OBJETO || !v.every((i): i is string => typeof i === 'string' && i !== '')) {
+    erros.push({ mensagem: `${campo} precisa ser uma lista de até ${MAX_ITENS_OBJETO} ids de item` });
+    return null;
+  }
+  for (const id of v) if (itens && !itens.has(id)) erros.push({ mensagem: `${campo}: item desconhecido "${id}"` });
+  return [...v];
+}
+
+/** Baú, loja e loot (marco 9A). Devolve null quando o objeto não é de um desses tipos. */
+function objetoDeEconomia(o: Record<string, unknown>, erros: ErroFase[], itens: ItensConhecidos | undefined): ObjetoPosicionadoJson | null | 'erro' {
+  if (o.tipo !== 'bau' && o.tipo !== 'loja' && o.tipo !== 'loot') return null;
+  if (!normalizado(o.x) || !normalizado(o.y)) {
+    erros.push({ mensagem: `${o.tipo}: x e y precisam ficar entre 0 e 1` });
+    return 'erro';
+  }
+  const { x, y } = o;
+  if (o.tipo === 'loja') {
+    const estoque = listaDeItens(o.estoque, 'estoque da loja', erros, itens);
+    if (!estoque || estoque.length === 0) {
+      if (estoque) erros.push({ mensagem: 'a loja precisa de ao menos um item no estoque' });
+      return 'erro';
+    }
+    return { tipo: 'loja', x, y, estoque };
+  }
+  if (o.tipo === 'loot') {
+    const qtd = o.quantidade;
+    if (typeof o.itemId !== 'string' || !ehInteiro(qtd) || qtd < 1 || qtd > 99) {
+      erros.push({ mensagem: 'loot precisa de itemId e quantidade inteira entre 1 e 99' });
+      return 'erro';
+    }
+    if (itens && !itens.has(o.itemId)) erros.push({ mensagem: `loot: item desconhecido "${o.itemId}"` });
+    return { tipo: 'loot', x, y, itemId: o.itemId, quantidade: qtd };
+  }
+  const loot = listaDeItens(o.loot, 'loot do baú', erros, itens);
+  const ouro = o.ouro ?? 0;
+  if (!ehInteiro(ouro) || ouro < 0 || ouro > MAX_OURO_OBJETO) {
+    erros.push({ mensagem: 'ouro do baú precisa ser inteiro entre 0 e 100000' });
+    return 'erro';
+  }
+  if (!loot) return 'erro';
+  if (o.chave === undefined) return { tipo: 'bau', x, y, loot, ouro };
+  if (typeof o.chave !== 'string' || o.chave === '') {
+    erros.push({ mensagem: 'chave do baú precisa ser um id de item' });
+    return 'erro';
+  }
+  const chave = itens?.get(o.chave);
+  if (itens && chave?.tipo !== 'chave') erros.push({ mensagem: `chave do baú precisa ser um item do tipo chave ("${o.chave}")` });
+  return { tipo: 'bau', x, y, loot, ouro, chave: o.chave };
+}
+
+function validarObjetos(objetos: unknown, erros: ErroFase[], itens: ItensConhecidos | undefined): ObjetoPosicionadoJson[] {
   if (objetos === undefined) return [];
   if (!Array.isArray(objetos)) {
     erros.push({ mensagem: 'objetos precisa ser uma lista' });
@@ -85,7 +146,12 @@ function validarObjetos(objetos: unknown, erros: ErroFase[]): ObjetoPosicionadoJ
   }
   const lista: ObjetoPosicionadoJson[] = [];
   for (const o of objetos) {
-    const normalizado = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 1;
+    const economia = ehObjeto(o) ? objetoDeEconomia(o, erros, itens) : null;
+    if (economia === 'erro') continue;
+    if (economia) {
+      lista.push(economia);
+      continue;
+    }
     // Orbe de efeito (marco 8A): o efeito é normalizado pelo registro e precisa ser elegível ao orbe.
     if (ehObjeto(o) && o.tipo === 'orbe_efeito' && normalizado(o.x) && normalizado(o.y)) {
       const l = new Leitor('orbe de efeito');
@@ -111,7 +177,7 @@ function validarObjetos(objetos: unknown, erros: ErroFase[]): ObjetoPosicionadoJ
       erros.push({ mensagem: 'objeto precisa de tipo válido, x e y entre 0 e 1, valor > 0 e modo abs|pct' });
       continue;
     }
-    lista.push({ tipo: o.tipo as ObjetoPosicionadoJson['tipo'], x: o.x, y: o.y, valor: o.valor, modo: o.modo });
+    lista.push({ tipo: o.tipo as (typeof TIPOS_OBJETO)[number], x: o.x, y: o.y, valor: o.valor, modo: o.modo });
   }
   return lista;
 }

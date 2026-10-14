@@ -49,18 +49,26 @@ export interface InimigoPosicionado {
  * Objeto autorado (§2.1): coordenadas normalizadas 0–1, convertidas para célula por
  * `coluna = min(largura − 1, floor(x × largura))`, e equivalente para a linha.
  */
-export type TipoObjetoDeFase = 'orbe_hp' | 'orbe_recurso' | 'orbe_efeito';
+export type TipoOrbeDeFase = 'orbe_hp' | 'orbe_recurso' | 'orbe_efeito';
+/** Marco 9A (14/10/2026): baú, loja e loot posicionados. */
+export type TipoObjetoDeFase = TipoOrbeDeFase | 'bau' | 'loja' | 'loot';
 
-export interface ObjetoPosicionadoJson {
-  tipo: TipoObjetoDeFase;
-  x: number;
-  y: number;
-  valor: number;
-  modo: 'abs' | 'pct';
-  /** Só no `orbe_efeito` (marco 8A): o efeito, já normalizado pela validação. */
-  efeito?: EfeitoCanonico;
-}
+export type ObjetoPosicionadoJson =
+  | {
+      tipo: TipoOrbeDeFase;
+      x: number;
+      y: number;
+      valor: number;
+      modo: 'abs' | 'pct';
+      /** Só no `orbe_efeito` (marco 8A): o efeito, já normalizado pela validação. */
+      efeito?: EfeitoCanonico;
+    }
+  /** `chave`: o item exigido (e consumido) para abrir; sem ela, o baú está destrancado. */
+  | { tipo: 'bau'; x: number; y: number; loot: string[]; ouro: number; chave?: string }
+  | { tipo: 'loja'; x: number; y: number; estoque: string[] }
+  | { tipo: 'loot'; x: number; y: number; itemId: string; quantidade: number };
 
+/** Forma uniforme, já em células; os campos que o tipo não usa ficam neutros. */
 export interface ObjetoPosicionado {
   tipo: TipoObjetoDeFase;
   x: number;
@@ -68,6 +76,37 @@ export interface ObjetoPosicionado {
   valor: number;
   modo: 'abs' | 'pct';
   efeito: EfeitoCanonico | null;
+  /** Conteúdo do baú ou estoque da loja. */
+  itens: string[];
+  ouro: number;
+  chave: string | null;
+  /** Item do loot (a quantidade vai em `valor`). */
+  itemId: string | null;
+}
+
+function objetoCarregado(o: ObjetoPosicionadoJson, largura: number, altura: number): ObjetoPosicionado {
+  const base: ObjetoPosicionado = {
+    tipo: o.tipo,
+    x: celulaNormalizada(o.x, largura),
+    y: celulaNormalizada(o.y, altura),
+    valor: 1,
+    modo: 'abs',
+    efeito: null,
+    itens: [],
+    ouro: 0,
+    chave: null,
+    itemId: null,
+  };
+  switch (o.tipo) {
+    case 'bau':
+      return { ...base, itens: [...o.loot], ouro: o.ouro, chave: o.chave ?? null };
+    case 'loja':
+      return { ...base, itens: [...o.estoque] };
+    case 'loot':
+      return { ...base, valor: o.quantidade, itemId: o.itemId };
+    default:
+      return { ...base, valor: o.valor, modo: o.modo, efeito: o.efeito ? { ...o.efeito } : null };
+  }
 }
 
 /** Formato da fase no JSON oficial e no editor (validado por `validarFase`). */
@@ -123,14 +162,7 @@ export function carregarFase(json: FaseJson): Fase {
     tipo: json.tipo,
     spawns: json.spawns.map((s) => ({ x: s.x, y: s.y })),
     inimigos: (json.inimigos ?? []).map((i) => ({ ...i })),
-    objetos: (json.objetos ?? []).map((o) => ({
-      tipo: o.tipo,
-      valor: o.valor,
-      modo: o.modo,
-      efeito: o.efeito ? { ...o.efeito } : null,
-      x: celulaNormalizada(o.x, largura),
-      y: celulaNormalizada(o.y, altura),
-    })),
+    objetos: (json.objetos ?? []).map((o) => objetoCarregado(o, largura, altura)),
   };
 }
 

@@ -36,6 +36,12 @@ export function estadoPublico(estado: EstadoJogo): EstadoJogo {
   // Armadilhas são invisíveis para quem não as armou (§2.11); o estado público é igual para todos
   // até o canal privado do 8B, então ficam de fora (D-049).
   publico.armadilhas = [];
+  // Conteúdo de baú é só do servidor (§3.6, marco 9A): o que veio aparece no evento `bauAberto`.
+  for (const o of publico.objetos) {
+    if (o.tipo !== 'bau') continue;
+    o.itens = [];
+    o.ouro = 0;
+  }
   for (const e of publico.entidades) {
     if (e.ia) e.ia = iaPublica(e.ia);
     e.bolsa = null;

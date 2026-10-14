@@ -300,6 +300,21 @@
         }
       ],
       "dropavel": true
+    },
+    {
+      "id": "chave_ferro",
+      "nome": "Chave de ferro",
+      "tipo": "chave",
+      "descricao": "Abre um baú trancado.",
+      "icone": "🗝",
+      "raridade": "incomum",
+      "valorBase": 0,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false
     }
   ]
 }

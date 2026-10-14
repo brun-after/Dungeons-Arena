@@ -35,7 +35,8 @@ export interface Projetil {
   atingidos: EntidadeId[];
 }
 
-export type TipoObjeto = 'orbe_hp' | 'orbe_recurso' | 'orbe_efeito' | 'item';
+/** Marco 9A (14/10/2026): `bau`, `loja` (interagíveis) e `ouro` (coletado ao pisar). */
+export type TipoObjeto = 'orbe_hp' | 'orbe_recurso' | 'orbe_efeito' | 'item' | 'ouro' | 'bau' | 'loja';
 
 /**
  * Objeto coletável no mundo (§2.1). `objetoId` é estável; a coleta é uma transação dentro do
@@ -53,6 +54,19 @@ export interface ObjetoNoMundo {
   itemId: string | null;
   /** Só para `tipo: 'orbe_efeito'` (marco 8A); null nos demais. */
   efeito: EfeitoCanonico | null;
+  /**
+   * Marco 9A: conteúdo do baú ou estoque da loja (ids de item); vazio nos demais. No `item`, a
+   * quantidade é o `valor`; no `ouro`, o `valor` é a quantia.
+   */
+  itens: string[];
+  /** Ouro dentro do baú; 0 nos demais. */
+  ouro: number;
+  /** Item exigido (e consumido) para abrir o baú; null quando não está trancado. */
+  chave: string | null;
+  /** Tick em que o baú foi aberto (some depois de `bauSomeMs`); 0 enquanto fechado. */
+  abertoTick: number;
+  /** Quem está abrindo o baú agora: um abridor por vez (§3.6); null quando livre. */
+  abridorId: EntidadeId | null;
 }
 
 /** Célula de rastro (§2.8): aplica dano ou efeito a quem é hostil ao dono e entra nela. */
@@ -165,7 +179,7 @@ export function clonarEstado(estado: EstadoJogo): EstadoJogo {
     entidades: estado.entidades.map(clonarEntidade),
     recargas: { ...estado.recargas },
     projeteis: estado.projeteis.map((p) => ({ ...p, atingidos: [...p.atingidos] })),
-    objetos: estado.objetos.map((o) => ({ ...o, efeito: copiaEfeito(o.efeito) })),
+    objetos: estado.objetos.map((o) => ({ ...o, efeito: copiaEfeito(o.efeito), itens: [...o.itens] })),
     respawns: estado.respawns.map((r) => ({ ...r })),
     rastros: estado.rastros.map((r) => ({ ...r, interno: copiaEfeito(r.interno), atingidos: [...r.atingidos] })),
     armadilhas: estado.armadilhas.map((a) => ({ ...a, interno: copiaEfeito(a.interno) })),

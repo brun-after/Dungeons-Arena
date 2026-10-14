@@ -12,7 +12,7 @@ import { SLOTS_DE_EQUIPAMENTO, type Slot } from '../modos/modo';
 import { recalcularFicha } from './derivados';
 import { NOMES_ATRIBUTOS, type Item, type NomeAtributo } from './itens';
 
-export function criarBolsa(classe: ClasseJogador): Bolsa {
+export function criarBolsa(classe: ClasseJogador, ouroInicial = 0): Bolsa {
   const bolsa: Bolsa = {
     atributosBase: { ...classe.atributos },
     defesaBase: classe.defesa,
@@ -21,6 +21,7 @@ export function criarBolsa(classe: ClasseJogador): Bolsa {
     mochila: [],
     pontosAtributo: 0,
     proximoInv: 1,
+    ouro: ouroInicial,
   };
   for (const { id, qtd } of classe.itensIniciais) bolsa.mochila.push({ invId: `i${bolsa.proximoInv++}`, itemId: id, qtd });
   return bolsa;
@@ -62,7 +63,36 @@ const recusa = (motivo: MotivoItem): Resultado => ({ ok: false, motivo });
 const OK: Resultado = { ok: true };
 
 function relatar(e: Entidade, r: Resultado, tick: number, saida: EventoSimulacao[]): void {
-  if (!r.ok) saida.push({ t: 'itemRecusado', tick, id: e.id, motivo: r.motivo });
+  if (!r.ok) recusarItem(e, r.motivo, tick, saida);
+}
+
+/** Recusa com motivo, para a interface explicar (mochila, loja, baú). */
+export function recusarItem(e: Entidade, motivo: MotivoItem, tick: number, saida: EventoSimulacao[]): void {
+  saida.push({ t: 'itemRecusado', tick, id: e.id, motivo });
+}
+
+/** Atalhos de consumível (§2.10, D-050): as teclas 5–9 e 0, na ordem da mochila. */
+export const ATALHOS_DE_CONSUMIVEL = 6;
+
+/** As entradas que os atalhos usam: os primeiros consumíveis da mochila, na ordem dela. */
+export function consumiveisComAtalho(bolsa: Bolsa, itens: ReadonlyMap<string, Item>): ItemNaMochila[] {
+  return bolsa.mochila.filter((i) => itens.get(i.itemId)?.tipo === 'consumivel').slice(0, ATALHOS_DE_CONSUMIVEL);
+}
+
+/** Ordenação manual da mochila (§2.10, marco 9A): leva a entrada para `posicao` (limitada à lista). */
+export function moverItem(e: Entidade, invId: string, posicao: number, tick: number, saida: EventoSimulacao[]): void {
+  const r = ((): Resultado => {
+    const bolsa = e.bolsa;
+    if (!bolsa) return recusa('sem_mochila');
+    const indice = bolsa.mochila.findIndex((i) => i.invId === invId);
+    const entrada = bolsa.mochila[indice];
+    if (!entrada) return recusa('nao_encontrado');
+    const destino = Math.max(0, Math.min(bolsa.mochila.length - 1, Math.trunc(posicao)));
+    bolsa.mochila.splice(indice, 1);
+    bolsa.mochila.splice(destino, 0, entrada);
+    return OK;
+  })();
+  relatar(e, r, tick, saida);
 }
 
 export function equipar(e: Entidade, ctx: ContextoSimulacao, invId: string, slot: Slot, tick: number, saida: EventoSimulacao[]): void {

@@ -51,6 +51,8 @@ export interface Balance {
     chanceItemBoss: number;
     /** Orbe de efeito (§2.10, 8%), sorteado à parte; o efeito vem do registro, por peso. */
     chanceOrbeEfeito: number;
+    /** Ouro derrubado (marco 9A): `round(xp × ouroPorXp × [0,5; 1,5))`, só onde o modo solta itens. */
+    ouroPorXp: number;
     raridadeMinBoss: Raridade;
     pesoRaridade: Record<Raridade, number>;
   };
@@ -72,6 +74,21 @@ export interface Balance {
     /** Dominação (§2.9): duração e HP com que o dominado volta. */
     dominacaoMs: number;
     dominacaoHpPct: number;
+  };
+  /** Economia (§2.10, marco 9A): loja, baús e ouro. */
+  economia: {
+    /** Ouro de quem começa uma campanha. */
+    ouroInicial: number;
+    /** A loja compra por esta porcentagem do `valorBase` (arredondado para baixo). */
+    vendaPct: number;
+    /** Janela da loja (o jogador fica congelado) e a recarga armada ao fechar, por jogador e loja. */
+    janelaLojaMs: number;
+    recargaLojaMs: number;
+    /** Quanto o baú congela quem abre, e quanto ele fica no mundo depois de aberto. */
+    bauCongelaMs: number;
+    bauSomeMs: number;
+    /** Distância Chebyshev máxima para interagir. */
+    alcanceInteracao: number;
   };
   /** Limites do atributo efetivo (§2.10, equipamento derivado). */
   atributos: {

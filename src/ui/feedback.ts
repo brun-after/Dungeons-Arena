@@ -1,6 +1,7 @@
 // Feedback de combate a partir dos eventos da simulação: números de dano, registro, último d20 e
 // vibração. Só reage a eventos já publicados; nunca muda o estado (§3.3).
 // Marco 6: coleta, uso e equipamento de itens, recusas da mochila e subida de nível.
+// Marco 9A (14/10/2026): ouro, baú e loja.
 
 import type { Catalogo } from '../combat/habilidades';
 import type { EstadoJogo } from '../core/estado';
@@ -116,9 +117,15 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
     }
     if (ev.tipo === 'item') {
       if (ev.id !== idLocal) return;
-      const texto = t('log.pegouItem', { item: nomeItem(ev.itemId) });
+      const texto = t('log.pegouItem', { item: ev.ganho > 1 ? `${nomeItem(ev.itemId)} ×${ev.ganho}` : nomeItem(ev.itemId) });
       hud.registrar(texto);
       o.aviso(texto);
+      return;
+    }
+    if (ev.tipo === 'ouro') {
+      const quem = posicao(ev.id);
+      if (quem) numeros.mostrar(`+${ev.ganho}`, 'ouro', quem.x, quem.y, o.agora());
+      if (ev.id === idLocal) hud.registrar(t('log.ouro', { ouro: ev.ganho }));
       return;
     }
     const quem = posicao(ev.id);
@@ -138,6 +145,26 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
     const texto = t(`item.${ev.motivo}` as const);
     hud.registrar(texto);
     o.aviso(texto);
+  });
+  bus.on('interacaoIniciada', (ev) => {
+    if (ev.id === idLocal && ev.tipo === 'bau') hud.registrar(t('log.bauAbrindo'));
+  });
+  bus.on('bauAberto', (ev) => {
+    if (ev.id !== idLocal) return;
+    const partes = ev.itens.map(nomeItem);
+    if (ev.ouro > 0) partes.push(t('log.ouro', { ouro: ev.ouro }));
+    const texto = partes.length > 0 ? t('log.bauAberto', { itens: partes.join(', ') }) : t('log.bauVazio');
+    hud.registrar(texto);
+    o.aviso(texto);
+  });
+  bus.on('comprou', (ev) => {
+    if (ev.id === idLocal) hud.registrar(t('log.comprou', { item: nomeItem(ev.itemId), preco: ev.preco }));
+  });
+  bus.on('vendeu', (ev) => {
+    if (ev.id === idLocal) hud.registrar(t('log.vendeu', { item: nomeItem(ev.itemId), preco: ev.preco }));
+  });
+  bus.on('lojaFechada', (ev) => {
+    if (ev.id === idLocal) hud.registrar(t('log.lojaFechada'));
   });
   bus.on('subiuNivel', (ev) => {
     if (ev.id !== idLocal) return;

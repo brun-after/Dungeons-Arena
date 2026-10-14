@@ -874,6 +874,33 @@ body.toque .botao-habilidade .tecla {
 .resumo-ficha {
   margin: 4px 0;
 }
+/* Marco 9A (14/10/2026): ouro, loja e ordenação da mochila. */
+.saldo-loja {
+  margin: 4px 0;
+  font-weight: 600;
+  color: #f1c40f;
+}
+.tempo-loja {
+  margin: 0 0 6px;
+  color: var(--texto-suave);
+  font-variant-numeric: tabular-nums;
+}
+.ordem-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.linha-item .botao-cabecalho:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.linha-item .botao-ordem {
+  min-width: 32px;
+  min-height: 20px;
+  padding: 0 6px;
+  font-size: 11px;
+  line-height: 1;
+}
 
 .linha-pontos[data-pontos='0'] {
   color: var(--texto-suave);

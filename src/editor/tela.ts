@@ -102,7 +102,7 @@ export async function abrirTelaDeEdicao(raiz: HTMLElement, f: FaseEditavel): Pro
   let sujo = false;
   let ferramenta: IdFerramenta = 'parede';
   let navegando = false;
-  let validacao: ResultadoValidacao = validarFase(paraFaseJson(f), new Set(conteudo.presets.keys()));
+  let validacao: ResultadoValidacao = validarFase(paraFaseJson(f), new Set(conteudo.presets.keys()), conteudo.itens);
 
   raiz.textContent = '';
   const tela = el('div', 'editor');
@@ -171,7 +171,7 @@ export async function abrirTelaDeEdicao(raiz: HTMLElement, f: FaseEditavel): Pro
   const status = el('span', 'status-editor');
   status.setAttribute('role', 'status');
   const validar = () => {
-    validacao = validarFase(paraFaseJson(f), new Set(conteudo.presets.keys()));
+    validacao = validarFase(paraFaseJson(f), new Set(conteudo.presets.keys()), conteudo.itens);
     sobreposicao.clear();
     // Contorno da fase, para enxergar o limite ao pintar "vazio".
     sobreposicao.rect(0, 0, f.largura * CELULA_PX, f.altura * CELULA_PX).stroke({ width: 2, color: 0x6c6480, alpha: 0.8 });

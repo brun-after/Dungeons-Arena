@@ -14,7 +14,7 @@ import {
   type FaseJson,
   type InimigoPosicionado,
   type TipoCelula,
-  type TipoObjetoDeFase,
+  type TipoOrbeDeFase,
 } from '../world/fase';
 import { TAMANHO_MAX, TAMANHO_MIN } from '../world/validacao-fase';
 
@@ -33,7 +33,7 @@ export interface FaseEditavel {
 export interface ObjetoEditavel {
   x: number;
   y: number;
-  tipo: TipoObjetoDeFase;
+  tipo: TipoOrbeDeFase;
   efeito: EfeitoCanonico | null;
 }
 
@@ -48,7 +48,7 @@ export function chavesDeOrbe(): string[] {
   return ['orbe_hp', 'orbe_recurso', ...Object.values(REGISTRO_EFEITOS).filter((d) => d.elegivelParaOrbe).map((d) => `efeito:${d.id}`)];
 }
 
-export function chaveDoObjeto(o: { tipo: TipoObjetoDeFase; efeito: EfeitoCanonico | null }): string {
+export function chaveDoObjeto(o: { tipo: TipoOrbeDeFase; efeito: EfeitoCanonico | null }): string {
   return o.tipo === 'orbe_efeito' && o.efeito ? `efeito:${o.efeito.tipo}` : o.tipo;
 }
 
@@ -148,7 +148,12 @@ export function deFaseJson(json: FaseJson): FaseEditavel {
     celulas: new Uint8Array(fase.celulas),
     spawn: fase.spawns[0] ? { ...fase.spawns[0] } : null,
     inimigos: fase.inimigos.map((i) => ({ ...i })),
-    objetos: fase.objetos.map((o) => ({ x: o.x, y: o.y, tipo: o.tipo, efeito: o.efeito ? { ...o.efeito } : null })),
+    // O editor só posiciona orbes; baú, loja e loot (marco 9A) ficam fora da edição por enquanto (D-050).
+    objetos: fase.objetos.flatMap((o) =>
+      o.tipo === 'orbe_hp' || o.tipo === 'orbe_recurso' || o.tipo === 'orbe_efeito'
+        ? [{ x: o.x, y: o.y, tipo: o.tipo, efeito: o.efeito ? { ...o.efeito } : null }]
+        : [],
+    ),
   };
 }
 

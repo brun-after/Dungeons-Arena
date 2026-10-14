@@ -24,7 +24,7 @@ export function contextoDaArena(modoId = 'livre', faseId: string = FASE_ARENA_PA
   const conteudo = conteudoOficial();
   const modo = modoPorId(conteudo, modoId);
   const id = faseDeArena(modo, faseId);
-  const r = validarFase(FASES_DE_ARENA[id], new Set(conteudo.presets.keys()));
+  const r = validarFase(FASES_DE_ARENA[id], new Set(conteudo.presets.keys()), conteudo.itens);
   if (!r.ok) throw new Error(`fase de arena inválida: ${r.erros.map((e) => e.mensagem).join('; ')}`);
   return { fase: carregarFase(r.fase), balance: BALANCE_PADRAO, conteudo, modo };
 }

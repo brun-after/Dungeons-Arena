@@ -203,7 +203,7 @@ describe('nível e pontos (§2.12)', () => {
 describe('drops e coleta de itens', () => {
   const comItem = (chance: number): Balance => ({ ...BALANCE_PADRAO, drops: { ...BALANCE_PADRAO.drops, chanceOrbeHp: 1, chanceItem: chance } });
 
-  it('o item é sorteado à parte do orbe, cai ao lado dele e só na primeira morte', () => {
+  it('o item é sorteado à parte do orbe e do ouro, cai ao lado deles e só na primeira morte', () => {
     const c = cenario(comItem(1));
     const goblin = obter(CONTEUDO.presets.get('goblin'), 'goblin');
     const primeira = criarInimigo(goblin, 'g1', 6, 6, BALANCE_PADRAO);
@@ -216,7 +216,8 @@ describe('drops e coleta de itens', () => {
     const objetos = c.estado.objetos.map((o) => [o.tipo, o.x, o.y]);
     expect(objetos).toEqual([
       ['orbe_hp', 6, 6],
-      ['item', 6, 5],
+      ['ouro', 6, 5],
+      ['item', 7, 6],
     ]);
   });
 

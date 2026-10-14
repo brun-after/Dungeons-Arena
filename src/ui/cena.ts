@@ -16,6 +16,7 @@ import { t } from '../i18n';
 import { ligarPonteiro } from '../input/ponteiro';
 import { ligarTeclado, type Teclado } from '../input/teclado';
 import { podeFerir } from '../modos/relacao';
+import { consumiveisComAtalho } from '../progression/inventario';
 import { detectarToque, sinaisDoNavegador } from '../plataforma/dispositivo';
 import { gravarPreferencias, lerPreferencias } from '../plataforma/preferencias';
 import { prepararSessaoDeTela } from '../plataforma/sessao-tela';
@@ -34,11 +35,14 @@ import { criarCabecalho } from './cabecalho';
 import { criarControles, type Controles } from './controles';
 import { Diagnostico, type DadosRede } from './diagnostico';
 import { ligarFeedback } from './feedback';
+import { criarLoja } from './loja';
 import { criarMochila } from './mochila';
 import { criarBarraHabilidades } from './habilidades';
 import { Hud } from './hud';
 
 const LEITURA_FAIXA_MS = 1000;
+/** Teclas 1–4 são das habilidades; as seguintes, dos consumíveis (D-050). */
+const ATALHOS_DE_HABILIDADE = 4;
 
 export interface OpcoesCena {
   raiz: HTMLElement;
@@ -103,7 +107,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const terreno = criarTerreno(palco.terreno, fase);
   const sprites = new CamadaEntidades(palco.entidades, idLocal);
   const telegrafia = new CamadaTelegrafia(palco.chao, palco.voo);
-  const objetos = new CamadaObjetos(palco.chao, (id) => ctx.conteudo.itens.get(id)?.raridade);
+  const objetos = new CamadaObjetos(palco.chao, (id) => ctx.conteudo.itens.get(id)?.raridade, ticksDe(ctx.balance.economia.bauCongelaMs));
   const fluxo = new CamadaFluxo(palco.chao);
   const numeros = new CamadaNumeros(palco.efeitos, () => movimentoReduzido.matches);
   const isometrico = () => false; // a visão isométrica entra no marco 13
@@ -135,6 +139,22 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       emitir({ t: 'mover', dir: 'parado' });
     },
   });
+  // Marco 9A: a loja abre sozinha com a janela da simulação; a mochila fecha para dar lugar a ela.
+  const loja = criarLoja({
+    ctx,
+    estado: o.estado,
+    jogador,
+    emitir,
+    aoAbrir: () => {
+      if (mochila.aberta()) mochila.alternar();
+      teclado?.soltarTudo();
+    },
+  });
+  const usarAtalhoDeConsumivel = (n: number) => {
+    const bolsa = jogador()?.bolsa;
+    const entrada = bolsa ? consumiveisComAtalho(bolsa, ctx.conteudo.itens)[n] : undefined;
+    if (entrada) emitir({ t: 'usarItem', invId: entrada.invId });
+  };
   let controles: Controles | null = null;
   if (toque) {
     controles = criarControles({
@@ -212,16 +232,24 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     aoAtacar: () => {
       emitir({ t: 'ataqueBasico' });
     },
+    // 1–4: habilidades; 5–9 e 0: consumíveis na ordem da mochila (D-050).
     aoAtalho: (indice) => {
+      if (indice >= ATALHOS_DE_HABILIDADE) {
+        usarAtalhoDeConsumivel(indice - ATALHOS_DE_HABILIDADE);
+        return;
+      }
       const h = o.habilidades[indice];
       if (h) usarHabilidade(h.id);
+    },
+    aoInteragir: () => {
+      emitir({ t: 'interagir' });
     },
     aoCancelar: () => {
       emitir({ t: 'selecionarAlvo', alvo: null });
     },
     isometrico,
     aoMochila: mochila.alternar,
-    bloqueado: mochila.aberta,
+    bloqueado: () => mochila.aberta() || loja.aberta(),
   });
   ligarPonteiro(palco.canvas, { camera, aoIrPara: aoTocarCelula });
   palco.canvas.addEventListener('contextmenu', (ev) => {
@@ -266,6 +294,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     }
     hud.atualizar(j);
     mochila.atualizar();
+    loja.atualizar();
     if (q.rede) hud.mostrarRede(q.rede);
     camera.aplicar(palco.mundo);
     terreno.atualizarVisibilidade(...camera.retanguloVisivel(palco.altura()));

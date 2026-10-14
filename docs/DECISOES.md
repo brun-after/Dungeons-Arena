@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.15 · **Data:** 14/10/2026
+**Versão:** 0.16 · **Data:** 14/10/2026
 
 > **Histórico**
+> - **0.16 (14/10/2026)**: D-050 (economia: ouro, loja, baús, atalhos e ordenação), marco 9A-1.
 > - **0.15 (14/10/2026)**: D-049 (efeitos de fluxo próprio), marco 8A-2.
 > - **0.14 (14/10/2026)**: D-048 (semântica dos efeitos do registro), marco 8A-1.
 > - **0.13 (13/10/2026)**: D-045 a D-047, marco 7B (rede degradada sobre WSS, cena padrão, renovação do movimento).
@@ -660,3 +661,51 @@ que alguns tipos fazem exatamente, nem como acumulam.
 **Consequência.**
 - Save na versão 3 (degrau v2 → v3).
 - Rastros e efeitos atrasados entram nos patches da arena. A banda com 10 bots seguiu em 38 KiB/s.
+
+## D-050 · Economia do 9A: ouro, loja, baús, atalhos e ordenação (v0.16, 14/10/2026)
+
+**Contexto.** A §2.10 pede ouro como moeda única, loja, baús com chave, atalhos de consumível e ordenação manual da
+mochila. Algumas regras não estão fechadas na spec ou colidem com decisões anteriores.
+
+**Decisão.**
+- **Ouro**:
+  - fica na bolsa (`Bolsa.ouro`), inteiro e nunca negativo;
+  - quem começa a campanha tem `economia.ouroInicial` (15);
+  - inimigos derrubam ouro na primeira morte, `round(xp × ouroPorXp × [0,5; 1,5))`, como objeto coletado ao pisar;
+  - só cai ouro onde o modo solta itens (`loot.itens`); a arena continua sem economia (a ficha de sessão não tem
+    bolsa).
+- **Interação** (`interagir`, tecla `E` ou o botão ✋ no toque): o baú ou a loja mais próximos a Chebyshev ≤ 1;
+  empate pelo `objetoId`. Baú e loja são passáveis (ninguém precisa contorná-los) e não são coletados ao pisar.
+- **Congelamento**: enquanto a interação durar, o jogador não começa passo nem ação (as consultas de bloqueio
+  perguntam `congelada()`); o passo em curso termina, como no atordoamento (D-017). A simulação segue (D-040): dá
+  para apanhar com a loja aberta.
+- **Loja**:
+  - janela de 5 s; compra pelo `valorBase`, venda por `floor(valorBase × 50%)`, uma unidade por vez;
+  - o estoque é **ilimitado** na v1: a loja é o dreno de ouro, não um recurso disputado (a §3.6 permite declarar o
+    estoque em dados; fica para quando houver um caso);
+  - item com `valorBase` 0 (a chave) não é vendável; o equipado não está na mochila, então não se vende;
+  - fechar, acabar a janela ou morrer arma a recarga de 10 s por jogador e loja, no mesmo mapa monotônico das
+    recargas de habilidade (`loja:<objeto>:<entidade>`);
+  - o modal abre sozinho quando a simulação abre a janela e fecha quando ela acaba.
+- **Baú**:
+  - um abridor por vez (§3.6): `interagir` reserva o baú e congela por 3 s; a entrega acontece no fim, como
+    transação no tick (confere a reserva e a chave, consome a chave, guarda os itens e soma o ouro);
+  - o que não couber na mochila cai ao lado do jogador;
+  - morrer durante a abertura libera a reserva sem entregar; a chave só é gasta na entrega;
+  - aberto, fica vazio no mundo por 5 s e some;
+  - o conteúdo fica fora do estado público da arena; o que veio aparece no evento `bauAberto`.
+- **Loot posicionado**: o objeto `loot {itemId, quantidade}` da fase vira o mesmo objeto `item` dos drops, com a
+  quantidade no `valor`; só é coletado se a quantidade inteira couber.
+- **Item `chave`**: tipo novo, sem slot nem efeito e fora dos drops. A validação da fase exige que a chave do baú
+  seja um item desse tipo e que todo item de baú, loja e loot exista no catálogo.
+- **Atalhos de consumível**: a §2.10 pede 1–9 e 0, mas 1–4 já são das habilidades (D-039). Ficam **5, 6, 7, 8, 9 e
+  0** para os 6 primeiros consumíveis na ordem da mochila; a mochila mostra a tecla de cada um.
+- **Ordenação manual**: o comando `moverItem` leva a entrada a uma posição; a interface tem ▲▼ em cada linha (no
+  toque também, sem fechar o modal). A ordem é a do array da mochila, então já vai no save.
+- **Editor**: continua posicionando só orbes. Ao importar uma fase com baú, loja ou loot, esses objetos ficam fora
+  da edição; a ferramenta deles entra no 9A-2 ou no 11A.
+
+**Consequência.**
+- Save na versão 4 (degrau v3 → v4) e balance v9.
+- Os objetos ganharam campos uniformes (`itens`, `ouro`, `chave`, `abertoTick`, `abridorId`), neutros nos tipos que não
+  os usam.

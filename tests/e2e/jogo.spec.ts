@@ -169,6 +169,53 @@ test.describe('desktop', () => {
     expect(erros).toEqual([]);
   });
 
+  // Marco 9A: loja e baú da sala inicial da fase 1.
+  async function irPara(page: Page, diag: Locator, x: number, y: number) {
+    await esperarParado(page, diag);
+    const [px, py] = await ler(diag, 'celula');
+    const [tx, ty] = await ler(diag, 'tela');
+    await page.mouse.click(tx + (x - px) * 48, ty + (y - py) * 48);
+    await expect.poll(async () => ler(diag, 'celula'), { timeout: 15_000 }).toEqual([x, y]);
+  }
+
+  test('loja: comprar uma poção desconta o ouro; fechar arma a recarga; a tecla 5 usa a poção', async ({ page }) => {
+    const { diag, erros } = await abrir(page);
+    // Loja em (8,3); (7,3) fica ao lado.
+    await irPara(page, diag, 7, 3);
+    await page.keyboard.press('KeyE');
+    const loja = page.getByRole('dialog', { name: 'Loja' });
+    await expect(loja).toBeVisible();
+    await expect(loja.locator('.saldo-loja')).toHaveAttribute('data-ouro', '15');
+    await loja.getByRole('button', { name: 'Comprar (10): Poção de vida' }).click();
+    await expect(loja.locator('.saldo-loja')).toHaveAttribute('data-ouro', '5');
+    await expect(loja.getByRole('button', { name: 'Comprar (10): Poção de vida' })).toBeDisabled();
+    await loja.getByRole('button', { name: 'Fechar a loja' }).click();
+    await expect(loja).toBeHidden();
+    const log = page.locator('.log-combate');
+    await expect(log).toContainText('Comprou Poção de vida por 10 de ouro');
+    await page.keyboard.press('KeyE');
+    await expect(log).toContainText('A loja ainda não atende você de novo');
+    // Vida cheia: a poção do atalho 5 é recusada sem gastar (prova que a tecla chegou ao item).
+    await page.keyboard.press('Digit5');
+    await expect(log).toContainText('Não teria efeito agora');
+    expect(erros).toEqual([]);
+  });
+
+  test('baú: abrir o baú da sala inicial congela, entrega itens e ouro', async ({ page }) => {
+    const { diag, erros } = await abrir(page);
+    // Baú em (11,2); (10,2) fica ao lado.
+    await irPara(page, diag, 10, 2);
+    await page.keyboard.press('KeyE');
+    const log = page.locator('.log-combate');
+    await expect(log).toContainText('Abrindo o baú');
+    await expect(log).toContainText('Baú: Poção de vida, Poção de mana, +25 de ouro', { timeout: 10_000 });
+    await page.keyboard.press('KeyI');
+    const mochila = page.getByRole('dialog', { name: 'Mochila' });
+    await expect(mochila.locator('.saldo-loja')).toHaveAttribute('data-ouro', '40');
+    await expect(mochila.getByText('Poção de mana')).toBeVisible();
+    expect(erros).toEqual([]);
+  });
+
   test('invocação: o boss chama lacaios (fase montada no editor)', async ({ page }) => {
     test.setTimeout(150_000);
     const erros: string[] = [];

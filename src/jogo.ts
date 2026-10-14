@@ -50,7 +50,7 @@ export interface OpcoesJogo {
 }
 
 function montarContexto(conteudo: Conteudo, faseJson: unknown): ContextoSimulacao {
-  const validacao = validarFase(faseJson, new Set(conteudo.presets.keys()));
+  const validacao = validarFase(faseJson, new Set(conteudo.presets.keys()), conteudo.itens);
   if (!validacao.ok) throw new Error(`fase inválida: ${validacao.erros.map((e) => e.mensagem).join('; ')}`);
   return { fase: carregarFase(validacao.fase), balance: BALANCE_PADRAO, conteudo, modo: conteudo.modoCampanha };
 }
@@ -150,7 +150,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     mostrarErro(raiz, t('slots.faseAusente'), voltarPara);
     return;
   }
-  const validacao = validarFase(faseJson, new Set(conteudo.presets.keys()));
+  const validacao = validarFase(faseJson, new Set(conteudo.presets.keys()), conteudo.itens);
   if (!validacao.ok) {
     mostrarErro(raiz, t('editor.faseInvalida', { erro: validacao.erros[0]?.mensagem ?? '?' }), voltarPara);
     return;
