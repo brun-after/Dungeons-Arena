@@ -644,6 +644,220 @@ body.toque .botao-habilidade .tecla {
   color: var(--texto);
 }
 
+/* Modal (marco 6): <dialog> nativo, fora da camada de interface. */
+.modal {
+  width: min(560px, calc(100% - 24px));
+  max-height: calc(100% - 24px - var(--seguro-topo) - var(--seguro-base));
+  padding: 0;
+  border: 1px solid var(--borda);
+  border-radius: 14px;
+  background: var(--fundo);
+  color: var(--texto);
+  overflow: hidden;
+}
+
+.modal[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.modal-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--borda);
+}
+
+.modal-topo h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--destaque);
+}
+
+.modal-corpo {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 10px 12px calc(12px + var(--seguro-base));
+  overflow-y: auto;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.modal .botao-cabecalho {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.abas-modal {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.abas-modal [aria-pressed='true'] {
+  border-color: var(--destaque);
+  color: var(--destaque);
+}
+
+.subtitulo-modal {
+  margin: 10px 0 6px;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.vazio-modal {
+  margin: 0;
+  color: var(--texto-suave);
+}
+
+.lista-itens {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.linha-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 4px 6px;
+  border-radius: 10px;
+  background: var(--controle);
+}
+
+.linha-item .botao-cabecalho {
+  margin-left: auto;
+}
+
+.lista-itens.slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.linha-item.vazio {
+  opacity: 0.5;
+}
+
+.linha-toque {
+  display: flex;
+  flex: 1;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.conteudo-item {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.icone-item {
+  width: 28px;
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+.textos-item {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.detalhe-item {
+  font-size: 0.78rem;
+  color: var(--texto-suave);
+}
+
+.qtd-item {
+  margin-left: auto;
+  color: var(--texto-suave);
+}
+
+.nome-item.raridade-comum {
+  color: #b5b5b5;
+}
+
+.nome-item.raridade-incomum {
+  color: #2ecc71;
+}
+
+.nome-item.raridade-raro {
+  color: #5dade2;
+}
+
+.nome-item.raridade-epico {
+  color: #bb8fce;
+}
+
+.nome-item.raridade-lendario {
+  color: #f39c12;
+}
+
+.tabela-ficha {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.tabela-ficha th,
+.tabela-ficha td {
+  padding: 4px 6px;
+  text-align: left;
+}
+
+.tabela-ficha th {
+  color: var(--texto-suave);
+  font-weight: 500;
+}
+
+.tabela-ficha .efetivo {
+  font-weight: 700;
+}
+
+.bonus-positivo {
+  color: #2ecc71;
+}
+
+.bonus-negativo {
+  color: #e74c3c;
+}
+
+.linha-nivel,
+.linha-pontos,
+.resumo-ficha {
+  margin: 4px 0;
+}
+
+.linha-pontos[data-pontos='0'] {
+  color: var(--texto-suave);
+}
+
+.botao-mochila.com-pontos {
+  border-color: var(--destaque);
+  color: var(--destaque);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .joystick-botao,
   .dpad-botao,

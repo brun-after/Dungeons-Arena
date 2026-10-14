@@ -3,7 +3,7 @@
 
 import balanceJson from '../data/balance.json';
 import type { FaixaCritico } from '../combat/critico';
-import type { ModoDeJogo } from '../modos/modo';
+import type { ModoDeJogo, Raridade } from '../modos/modo';
 import type { RegrasColisao } from '../world/colisao';
 import type { Fase } from '../world/fase';
 import type { Conteudo } from './conteudo';
@@ -46,9 +46,31 @@ export interface Balance {
     chanceOrbeRecurso: number;
     orbeHpPct: number;
     orbeRecursoPct: number;
+    /** Sorteio de item, independente do de orbe (§2.10); boss tem chance própria. */
+    chanceItem: number;
+    chanceItemBoss: number;
+    raridadeMinBoss: Raridade;
+    pesoRaridade: Record<Raridade, number>;
   };
+  /** Progressão (§2.12). XP para passar do nível N: `tabela[N-1]` ou `N × fallbackPorNivel`. */
   xp: {
     decaimentoAntifarm: number;
+    tabela: number[];
+    fallbackPorNivel: number;
+    nivelMax: number;
+    pontosPorNivel: number;
+    /** Aumento automático de HP base por nível acima do 1º. */
+    hpPorNivel: number;
+  };
+  /** Limites do atributo efetivo (§2.10, equipamento derivado). */
+  atributos: {
+    minimo: number;
+    maximo: number;
+  };
+  inventario: {
+    /** Entradas na mochila; consumíveis iguais empilham até `pilhaMax`. */
+    capacidade: number;
+    pilhaMax: number;
   };
   ia: RegrasIa;
 }
@@ -74,7 +96,8 @@ export interface RegrasIa {
   distanciaMaxAtirador: number;
 }
 
-export const BALANCE_PADRAO: Balance = balanceJson;
+// O JSON importado tipa `raridadeMinBoss` como string; o leitor de conteúdo confere o valor nos testes.
+export const BALANCE_PADRAO: Balance = balanceJson as Balance;
 
 export interface ContextoSimulacao {
   readonly fase: Fase;

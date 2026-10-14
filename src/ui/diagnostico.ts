@@ -23,6 +23,9 @@ export interface DadosDiagnostico {
   entidades: number;
   impactos: number;
   hp: number;
+  /** Marco 6: nível e quantos slots têm item. */
+  nivel: number;
+  equipados: number;
   zoom: number;
   rede?: DadosRede;
 }
@@ -73,5 +76,7 @@ export class Diagnostico {
     this.elemento.dataset.tela = `${Math.round(d.tela.x)},${Math.round(d.tela.y)}`;
     this.elemento.dataset.impactos = String(d.impactos);
     this.elemento.dataset.hp = String(d.hp);
+    this.elemento.dataset.nivel = String(d.nivel);
+    this.elemento.dataset.equipados = String(d.equipados);
   }
 }

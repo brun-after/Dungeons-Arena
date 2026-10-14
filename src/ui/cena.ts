@@ -14,7 +14,7 @@ import { ticksDe } from '../core/tempo';
 import type { Entidade, PontoVisual } from '../entities/entidade';
 import { t } from '../i18n';
 import { ligarPonteiro } from '../input/ponteiro';
-import { ligarTeclado } from '../input/teclado';
+import { ligarTeclado, type Teclado } from '../input/teclado';
 import { podeFerir } from '../modos/relacao';
 import { detectarToque, sinaisDoNavegador } from '../plataforma/dispositivo';
 import { gravarPreferencias, lerPreferencias } from '../plataforma/preferencias';
@@ -33,6 +33,7 @@ import { criarCabecalho } from './cabecalho';
 import { criarControles, type Controles } from './controles';
 import { Diagnostico, type DadosRede } from './diagnostico';
 import { ligarFeedback } from './feedback';
+import { criarMochila } from './mochila';
 import { criarBarraHabilidades } from './habilidades';
 import { Hud } from './hud';
 
@@ -99,7 +100,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const terreno = criarTerreno(palco.terreno, fase);
   const sprites = new CamadaEntidades(palco.entidades, idLocal);
   const telegrafia = new CamadaTelegrafia(palco.chao, palco.voo);
-  const objetos = new CamadaObjetos(palco.chao);
+  const objetos = new CamadaObjetos(palco.chao, (id) => ctx.conteudo.itens.get(id)?.raridade);
   const numeros = new CamadaNumeros(palco.efeitos, () => movimentoReduzido.matches);
   const isometrico = () => false; // a visão isométrica entra no marco 13
   const usarHabilidade = (id: string) => {
@@ -118,6 +119,18 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
 
   const hud = new Hud(ui);
   const barra = criarBarraHabilidades(o.habilidades, usarHabilidade);
+  // Marco 6: mochila e ficha. Ao abrir, o jogador para; enquanto aberta, o teclado não chega ao jogo.
+  let teclado: Teclado | null = null;
+  const mochila = criarMochila({
+    ctx,
+    jogador,
+    emitir,
+    toque,
+    aoAbrir: () => {
+      teclado?.soltarTudo();
+      emitir({ t: 'mover', dir: 'parado' });
+    },
+  });
   let controles: Controles | null = null;
   if (toque) {
     controles = criarControles({
@@ -144,7 +157,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       controle: prefs.controle,
       camera: prefs.camera,
       status: hud.status,
-      acoesExtras: [hud.botaoLog],
+      acoesExtras: [mochila.botao, hud.botaoLog],
       aoTrocarControle: () => {
         prefs.controle = prefs.controle === 'joystick' ? 'dpad' : 'joystick';
         controles?.trocarTipo(prefs.controle);
@@ -188,7 +201,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   reenquadrar();
   palco.aoRedimensionar(reenquadrar);
 
-  ligarTeclado({
+  teclado = ligarTeclado({
     aoMudarDirecao: (dir) => {
       emitir({ t: 'mover', dir });
     },
@@ -203,6 +216,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       emitir({ t: 'selecionarAlvo', alvo: null });
     },
     isometrico,
+    aoMochila: mochila.alternar,
+    bloqueado: mochila.aberta,
   });
   ligarPonteiro(palco.canvas, { camera, aoIrPara: aoTocarCelula });
   palco.canvas.addEventListener('contextmenu', (ev) => {
@@ -210,7 +225,18 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   });
 
   const bus = new Barramento<EventosDaSimulacao>();
-  const feedback = ligarFeedback({ bus, estado: o.estado, idLocal, numeros, hud, agora: () => performance.now() });
+  const feedback = ligarFeedback({
+    bus,
+    estado: o.estado,
+    idLocal,
+    numeros,
+    hud,
+    agora: () => performance.now(),
+    itens: ctx.conteudo.itens,
+    aviso: (texto) => {
+      mostrarAviso(ui, texto);
+    },
+  });
 
   let ultimoQuadroMs = performance.now();
   let celulaCentralizada = false;
@@ -235,6 +261,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       }));
     }
     hud.atualizar(j);
+    mochila.atualizar();
     if (q.rede) hud.mostrarRede(q.rede);
     camera.aplicar(palco.mundo);
     terreno.atualizarVisibilidade(...camera.retanguloVisivel(palco.altura()));
@@ -253,6 +280,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
         entidades: estado.entidades.length,
         impactos: feedback.impactos(),
         hp: j?.hp ?? 0,
+        nivel: j?.nivel ?? 0,
+        equipados: j?.bolsa ? Object.values(j.bolsa.equipamento).filter((i) => i !== null).length : 0,
         zoom: camera.zoom,
         ...(q.rede && { rede: q.rede }),
       };

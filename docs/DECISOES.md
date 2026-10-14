@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.8 · **Data:** 13/10/2026
+**Versão:** 0.9 · **Data:** 13/10/2026
 
 > **Histórico**
+> - **0.9 (13/10/2026)**: D-039 e D-040, tomadas no marco 6A (itens, equipamento e nível).
 > - **0.8 (13/10/2026)**: D-038 (servidor da arena na AWS Lightsail em São Paulo); D-001 parcialmente superada.
 > - **0.7 (13/10/2026)**: decisões D-035 a D-037, tomadas no marco 5A (servidor real).
 > - **0.6 (13/10/2026)**: decisões D-033 e D-034, tomadas no marco 4B (loopback).
@@ -386,3 +387,33 @@ A latência pesa na justiça da arena (§3.6).
 - Enquanto não houver IP estático, parar e iniciar a VM muda o IP. Nesse caso é preciso atualizar o DuckDNS e o segredo
   `VM_HOST`.
 - Com 1 GB de RAM, o script de preparação cria swap de 2 GB. A medição de carga oficial (marco 5B) é feita nesta VM.
+
+## D-039 · Itens e nível no marco 6, só na campanha (v0.9, 13/10/2026)
+
+**Contexto.** O marco 6 pede o ciclo lutar → recompensa → melhorar → lutar. A §2.10 completa (ouro, loja, baús,
+atalhos de consumível) é do 9A e a progressão 1–20 com penalidade de morte é do 10A.
+
+**Decisão.**
+- Catálogo `src/data/itens.json` com 15 equipamentos (cobrindo os 10 slots) e 2 poções. Bônus de atributo absoluto ou
+  percentual, como na §2.10, mais o campo próprio `bonusDefesa`: a spec não diz como o equipamento dá defesa.
+- O jogador da campanha tem `bolsa`: atributos-base, equipamento, mochila e pontos. `atributos`, `defesa`, `hpMax` e
+  `manaMax` continuam na entidade como valores **efetivos**, sempre recalculados da base por `recalcularFicha`. Assim
+  dano, movimento e IA não mudaram.
+- XP por nível em tabela (`balance.xp.tabela`), com fallback `nível × 100`. Cada nível dá 3 pontos e +5 de HP base.
+  Os primeiros níveis são curtos (30, 60, 100 XP) para a fase 1 mostrar o ciclo.
+- Drop de item num sorteio independente do orbe (10%; boss 100%, raridade mínima "raro"), por peso de raridade.
+- A arena não ganha itens nem nível neste marco. O modo diz se solta itens (`loot.itens`), e o jogador da arena nasce
+  da ficha de sessão sem `bolsa`, então os comandos de item são recusados. A `bolsa` também nunca vai no estado
+  público: o inventário é privado (§3.6).
+- Ouro, loja, baús e atalhos 1–9/0 de consumível ficam para o 9A, porque as teclas 1–4 são hoje das habilidades. A
+  classe começa com uma espada (na mochila, para o jogador aprender a equipar) e duas poções.
+
+**Consequência.** `versaoDoConteudo` muda (o catálogo de itens entra nas fontes oficiais), então servidor e Pages
+precisam ser publicados juntos. Isso já acontece no merge.
+
+## D-040 · A mochila não pausa a simulação (v0.9, 13/10/2026)
+
+**Decisão.** A mochila é um `<dialog>` modal nativo. O jogador para ao abrir e a entrada de jogo fica bloqueada
+(teclado ignorado, canvas e controles inertes), mas a simulação segue em tempo real: inimigos continuam agindo. É o
+comportamento esperado num jogo de ação e o mesmo que valerá na arena, onde não há pausa. O menu de pausa da campanha
+(§2.15) é outra tela e entra depois.

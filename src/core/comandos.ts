@@ -1,6 +1,9 @@
 // Fila de comandos (§3.3). `simular()` nunca lê entrada diretamente: consome comandos
 // produzidos por entrada local, IA, rede ou bot de teste.
 
+import type { Atributos } from '../entities/entidade';
+import type { Slot } from '../modos/modo';
+
 export type EntidadeId = string;
 
 export interface Celula {
@@ -17,7 +20,9 @@ export type Comando =
   | { t: 'ataqueBasico'; alvo?: EntidadeId }
   | { t: 'selecionarAlvo'; alvo: EntidadeId | null }
   | { t: 'usarItem'; invId: string }
-  | { t: 'equipar'; invId: string; slot: string }
+  | { t: 'equipar'; invId: string; slot: Slot }
+  | { t: 'desequipar'; slot: Slot }
+  | { t: 'distribuirPonto'; atributo: keyof Atributos }
   | { t: 'interagir' };
 
 /** Envelope de rede. O servidor deriva o jogador da sessão e atribui o tick de aplicação. */

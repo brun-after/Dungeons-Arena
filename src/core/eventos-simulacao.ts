@@ -5,6 +5,7 @@
 import type { EntidadeId } from './comandos';
 import type { TipoObjeto } from './estado';
 import type { TipoEfeito } from '../combat/efeitos';
+import type { Slot } from '../modos/modo';
 import type { StatusCaminho } from '../world/navegacao';
 
 export type MotivoRecusa =
@@ -15,6 +16,18 @@ export type MotivoRecusa =
   | 'recurso'
   | 'sem_alvo'
   | 'fora_de_alcance';
+
+/** Recusas de mochila, equipamento e pontos (marco 6). */
+export type MotivoItem =
+  | 'sem_mochila'
+  | 'nao_encontrado'
+  | 'slot_invalido'
+  | 'nivel_insuficiente'
+  | 'mochila_cheia'
+  | 'nao_consumivel'
+  | 'sem_efeito'
+  | 'sem_pontos'
+  | 'atributo_no_maximo';
 
 export type MotivoCancelamento = 'morte' | 'interrompido' | 'alvo_invalido' | 'substituido';
 
@@ -63,7 +76,11 @@ export type EventoSimulacao =
   | { t: 'iaPerseguindo'; tick: number; id: EntidadeId; alvoId: EntidadeId }
   | { t: 'iaDesistiu'; tick: number; id: EntidadeId; alvoId: EntidadeId }
   | { t: 'objetoSurgiu'; tick: number; objetoId: string; tipo: TipoObjeto; x: number; y: number }
-  | { t: 'coletou'; tick: number; id: EntidadeId; objetoId: string; tipo: TipoObjeto; ganho: number }
+  | { t: 'coletou'; tick: number; id: EntidadeId; objetoId: string; tipo: TipoObjeto; ganho: number; itemId: string | null }
+  | { t: 'equipou'; tick: number; id: EntidadeId; itemId: string; slot: Slot }
+  | { t: 'usouItem'; tick: number; id: EntidadeId; itemId: string; hp: number; mana: number }
+  | { t: 'itemRecusado'; tick: number; id: EntidadeId; motivo: MotivoItem }
+  | { t: 'subiuNivel'; tick: number; id: EntidadeId; nivel: number }
   | { t: 'reviveu'; tick: number; id: EntidadeId }
   | { t: 'surgiu'; tick: number; id: EntidadeId };
 

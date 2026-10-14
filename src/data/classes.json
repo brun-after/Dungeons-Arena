@@ -9,7 +9,11 @@
       "classe": "corpo_a_corpo",
       "atributos": { "forca": 12, "destreza": 10, "constituicao": 10, "inteligencia": 12, "sabedoria": 10, "carisma": 10 },
       "ataqueBasico": "ataque_basico",
-      "habilidades": ["seta_arcana", "explosao", "curar", "golpe_atordoante"]
+      "habilidades": ["seta_arcana", "explosao", "curar", "golpe_atordoante"],
+      "itensIniciais": [
+        { "id": "espada_curta", "qtd": 1 },
+        { "id": "pocao_vida", "qtd": 2 }
+      ]
     }
   ]
 }

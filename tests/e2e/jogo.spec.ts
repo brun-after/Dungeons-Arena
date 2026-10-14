@@ -96,6 +96,26 @@ test.describe('desktop', () => {
     expect(erros).toEqual([]);
   });
 
+  test('mochila: equipar a espada inicial muda a ficha; Esc fecha e o jogo segue', async ({ page }) => {
+    const { diag, erros } = await abrir(page);
+    await page.keyboard.press('KeyI');
+    const mochila = page.getByRole('dialog', { name: 'Mochila' });
+    await expect(mochila).toBeVisible();
+    await mochila.getByRole('button', { name: 'Equipar: Espada curta' }).click();
+    await expect(mochila.getByText('Arma: Espada curta')).toBeVisible();
+    await expect(diag).toHaveAttribute('data-equipados', '1');
+    await mochila.getByRole('button', { name: 'Ficha' }).click();
+    await expect(mochila.locator('tr[data-atributo="forca"]')).toHaveAttribute('data-efetivo', '14');
+    await page.keyboard.press('Escape');
+    await expect(mochila).toBeHidden();
+    // Com o modal fechado, o teclado volta a mover o jogador.
+    const [x0] = await ler(diag, 'celula');
+    await page.keyboard.down('d');
+    await expect.poll(async () => (await ler(diag, 'celula'))[0], { timeout: 15_000, intervals: [50] }).not.toBe(x0);
+    await page.keyboard.up('d');
+    expect(erros).toEqual([]);
+  });
+
   test('controles de toque ficam escondidos no desktop', async ({ page }) => {
     await abrir(page);
     await expect(page.getByTestId('joystick')).toBeHidden();
@@ -204,6 +224,16 @@ test.describe('celular (emulação)', () => {
     await expect(diag).not.toHaveAttribute('data-impactos', '0', { timeout: 15_000 });
     await expect.poll(async () => (await ler(diag, 'celula'))[0], { timeout: 15_000 }).toBeGreaterThan(x0);
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    expect(erros).toEqual([]);
+  });
+
+  test('mochila no toque: tocar a linha equipa e fecha', async ({ page }) => {
+    const { diag, erros } = await abrir(page);
+    await page.getByRole('button', { name: /Abrir a mochila/ }).click();
+    const mochila = page.getByRole('dialog', { name: 'Mochila' });
+    await mochila.getByRole('button', { name: 'Equipar: Espada curta' }).click();
+    await expect(mochila).toBeHidden();
+    await expect(diag).toHaveAttribute('data-equipados', '1');
     expect(erros).toEqual([]);
   });
 

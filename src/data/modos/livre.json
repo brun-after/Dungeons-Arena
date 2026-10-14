@@ -27,7 +27,7 @@
     "ordemReducao": ["carisma", "sabedoria", "inteligencia", "destreza", "constituicao", "forca"],
     "presetClasse": null
   },
-  "loot": { "politica": "compartilhado", "janelaParticipacaoS": 15 },
+  "loot": { "politica": "compartilhado", "janelaParticipacaoS": 15, "itens": false },
   "limites": { "npcs": 60, "invocacoesPorJogador": 2, "avataresPorJogador": 1, "armadilhasPorJogador": 3, "projeteis": 100 },
   "progressaoContaParaCampanha": false,
   "fasesPermitidas": ["arena-01"],

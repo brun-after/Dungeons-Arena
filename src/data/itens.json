@@ -1,0 +1,306 @@
+{
+  "versao": 1,
+  "itens": [
+    {
+      "id": "espada_curta",
+      "nome": "Espada curta",
+      "tipo": "equipamento",
+      "descricao": "Lâmina simples e confiável.",
+      "icone": "⚔",
+      "raridade": "comum",
+      "valorBase": 20,
+      "slotPadrao": "arma_principal",
+      "nivelMinimo": 1,
+      "bonusAtributos": {
+        "forca": 2
+      },
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": true
+    },
+    {
+      "id": "cajado_aprendiz",
+      "nome": "Cajado de aprendiz",
+      "tipo": "equipamento",
+      "descricao": "Canaliza magia com mais facilidade.",
+      "icone": "🪄",
+      "raridade": "comum",
+      "valorBase": 20,
+      "slotPadrao": "arma_principal",
+      "nivelMinimo": 1,
+      "bonusAtributos": {
+        "inteligencia": 2
+      },
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": true
+    },
+    {
+      "id": "machado_orc",
+      "nome": "Machado de orc",
+      "tipo": "equipamento",
+      "descricao": "Pesado, mas devastador.",
+      "icone": "🪓",
+      "raridade": "incomum",
+      "valorBase": 45,
+      "slotPadrao": "arma_principal",
+      "nivelMinimo": 2,
+      "bonusAtributos": {
+        "forca": 4
+      },
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": true
+    },
+    {
+      "id": "adaga",
+      "nome": "Adaga",
+      "tipo": "equipamento",
+      "descricao": "Leve, para a mão livre.",
+      "icone": "🗡",
+      "raridade": "comum",
+      "valorBase": 15,
+      "slotPadrao": "arma_secundaria",
+      "nivelMinimo": 1,
+      "bonusAtributos": {
+        "destreza": 2
+      },
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": true
+    },
+    {
+      "id": "escudo_madeira",
+      "nome": "Escudo de madeira",
+      "tipo": "equipamento",
+      "descricao": "Segura um golpe ou dois.",
+      "icone": "🛡",
+      "raridade": "incomum",
+      "valorBase": 35,
+      "slotPadrao": "arma_secundaria",
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 2,
+      "efeitos": [],
+      "dropavel": true
+    },
+    {
+      "id": "capuz_couro",
+      "nome": "Capuz de couro",
+      "tipo": "equipamento",
+      "descricao": "Melhor que nada.",
+      "icone": "🪖",
+      "raridade": "comum",
+      "valorBase": 12,
+      "slotPadrao": "cabeca",
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 1,
+      "efeitos": [],
+      "dropavel": true
+    },
+    {
+      "id": "elmo_ferro",
+      "nome": "Elmo de ferro",
+      "tipo": "equipamento",
+      "descricao": "Protege e dá firmeza.",
+      "icone": "🪖",
+      "raridade": "incomum",
+      "valorBase": 40,
+      "slotPadrao": "cabeca",
+      "nivelMinimo": 2,
+      "bonusAtributos": {
+        "constituicao": 1
+      },
+      "bonusDefesa": 2,
+      "efeitos": [],
+      "dropavel": true
+    },
+    {
+      "id": "gibao",
+      "nome": "Gibão acolchoado",
+      "tipo": "equipamento",
+      "descricao": "Roupa de viagem reforçada.",
+      "icone": "🥋",
+      "raridade": "comum",
+      "valorBase": 18,
+      "slotPadrao": "corpo",
+      "nivelMinimo": 1,
+      "bonusAtributos": {
+        "constituicao": 1
+      },
+      "bonusDefesa": 1,
+      "efeitos": [],
+      "dropavel": true
+    },
+    {
+      "id": "cota_malha",
+      "nome": "Cota de malha",
+      "tipo": "equipamento",
+      "descricao": "Anéis de aço que aguentam muito.",
+      "icone": "🥋",
+      "raridade": "raro",
+      "valorBase": 90,
+      "slotPadrao": "corpo",
+      "nivelMinimo": 3,
+      "bonusAtributos": {
+        "constituicao": {
+          "modo": "pct",
+          "valor": 10
+        }
+      },
+      "bonusDefesa": 3,
+      "efeitos": [],
+      "dropavel": true
+    },
+    {
+      "id": "luvas_couro",
+      "nome": "Luvas de couro",
+      "tipo": "equipamento",
+      "descricao": "Pegada firme.",
+      "icone": "🧤",
+      "raridade": "comum",
+      "valorBase": 10,
+      "slotPadrao": "maos",
+      "nivelMinimo": 1,
+      "bonusAtributos": {
+        "destreza": 1
+      },
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": true
+    },
+    {
+      "id": "calcas_viajante",
+      "nome": "Calças de viajante",
+      "tipo": "equipamento",
+      "descricao": "Aguentam longas caminhadas.",
+      "icone": "👖",
+      "raridade": "comum",
+      "valorBase": 10,
+      "slotPadrao": "pernas",
+      "nivelMinimo": 1,
+      "bonusAtributos": {
+        "constituicao": 1
+      },
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": true
+    },
+    {
+      "id": "botas_rapidas",
+      "nome": "Botas ligeiras",
+      "tipo": "equipamento",
+      "descricao": "Passos mais rápidos.",
+      "icone": "👢",
+      "raridade": "incomum",
+      "valorBase": 40,
+      "slotPadrao": "pes",
+      "nivelMinimo": 1,
+      "bonusAtributos": {
+        "destreza": {
+          "modo": "pct",
+          "valor": 15
+        }
+      },
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": true
+    },
+    {
+      "id": "anel_sabio",
+      "nome": "Anel do sábio",
+      "tipo": "equipamento",
+      "descricao": "Clareia a mente.",
+      "icone": "💍",
+      "raridade": "raro",
+      "valorBase": 80,
+      "slotPadrao": "anel",
+      "nivelMinimo": 2,
+      "bonusAtributos": {
+        "sabedoria": 3,
+        "inteligencia": 1
+      },
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": true
+    },
+    {
+      "id": "amuleto_vigor",
+      "nome": "Amuleto do vigor",
+      "tipo": "equipamento",
+      "descricao": "Pulsa com força vital.",
+      "icone": "📿",
+      "raridade": "raro",
+      "valorBase": 80,
+      "slotPadrao": "amuleto",
+      "nivelMinimo": 2,
+      "bonusAtributos": {
+        "constituicao": 3
+      },
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": true
+    },
+    {
+      "id": "capa_sombria",
+      "nome": "Capa sombria",
+      "tipo": "equipamento",
+      "descricao": "Tecido que engole a luz.",
+      "icone": "🧣",
+      "raridade": "epico",
+      "valorBase": 150,
+      "slotPadrao": "capa",
+      "nivelMinimo": 4,
+      "bonusAtributos": {
+        "destreza": 2,
+        "carisma": 2
+      },
+      "bonusDefesa": 1,
+      "efeitos": [],
+      "dropavel": true
+    },
+    {
+      "id": "pocao_vida",
+      "nome": "Poção de vida",
+      "tipo": "consumivel",
+      "descricao": "Recupera 40% da vida.",
+      "icone": "🧪",
+      "raridade": "comum",
+      "valorBase": 10,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [
+        {
+          "tipo": "curar",
+          "valor": 40,
+          "modo": "pct"
+        }
+      ],
+      "dropavel": true
+    },
+    {
+      "id": "pocao_mana",
+      "nome": "Poção de mana",
+      "tipo": "consumivel",
+      "descricao": "Recupera 50% da mana.",
+      "icone": "🧪",
+      "raridade": "comum",
+      "valorBase": 10,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [
+        {
+          "tipo": "restaurarMana",
+          "valor": 50,
+          "modo": "pct"
+        }
+      ],
+      "dropavel": true
+    }
+  ]
+}

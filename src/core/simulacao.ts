@@ -13,6 +13,7 @@ import { expirarEfeitos } from '../combat/efeitos';
 import { moverProjeteis } from '../combat/projeteis';
 import { vivo } from '../entities/entidade';
 import { processarIa } from '../entities/ia';
+import { desequipar, distribuirPonto, equipar, usarItem } from '../progression/inventario';
 import { processarMortes } from '../progression/morte';
 import { regenerarRecursos } from '../progression/recursos';
 import { definirDirecao, moverEntidades, planejarCaminho } from '../world/movimento';
@@ -71,8 +72,21 @@ function aplicarComandos(
         ator.alvoSelecionado = alvo && alvoOfensivoValido(estado, ctx, ator, alvo) ? alvo.id : null;
         break;
       }
-      default:
-        // Itens e interação entram nos marcos 6 e 9A.
+      // Marco 6 (13/10/2026): mochila, equipamento e pontos de atributo.
+      case 'equipar':
+        equipar(ator, ctx, cmd.invId, cmd.slot, estado.tick, saida);
+        break;
+      case 'desequipar':
+        desequipar(ator, ctx, cmd.slot, estado.tick, saida);
+        break;
+      case 'usarItem':
+        usarItem(ator, ctx, cmd.invId, estado.tick, saida);
+        break;
+      case 'distribuirPonto':
+        distribuirPonto(ator, ctx, cmd.atributo, estado.tick, saida);
+        break;
+      case 'interagir':
+        // Baús, lojas e portas entram no 9A.
         break;
     }
   }

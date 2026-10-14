@@ -23,6 +23,7 @@ export const SLOTS_DE_EQUIPAMENTO = [
   'amuleto',
   'capa',
 ] as const;
+export type Slot = (typeof SLOTS_DE_EQUIPAMENTO)[number];
 
 /** Integridade da ficha no PvP (§3.7). */
 export interface ClampDeFicha {
@@ -68,7 +69,8 @@ export interface ModoDeJogo {
   espectadores: boolean;
   /** null = a ficha é usada como está (campanha). */
   clamp: ClampDeFicha | null;
-  loot: { politica: 'compartilhado' | 'individual'; janelaParticipacaoS: number };
+  /** `itens`: inimigos soltam itens de equipamento e consumíveis (marco 6: só a campanha, D-039). */
+  loot: { politica: 'compartilhado' | 'individual'; janelaParticipacaoS: number; itens: boolean };
   limites: { npcs: number; invocacoesPorJogador: number; avataresPorJogador: number; armadilhasPorJogador: number; projeteis: number };
   /** Sempre false na v1 (§3.7): o schema rejeita true. */
   progressaoContaParaCampanha: false;
@@ -144,6 +146,7 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
     loot: {
       politica: l.opcao(loot, 'politica', ['compartilhado', 'individual'] as const),
       janelaParticipacaoS: l.numero(loot, 'janelaParticipacaoS', { min: 0 }),
+      itens: l.booleano(loot, 'itens'),
     },
     limites: {
       npcs: l.numero(limites, 'npcs', { min: 0, inteiro: true }),
