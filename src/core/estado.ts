@@ -83,7 +83,13 @@ export interface Rastro {
   atingidos: EntidadeId[];
 }
 
-/** Armadilha de habilidade (§2.11): disparo único no primeiro hostil que pisar. */
+/** Dono e equipe das armadilhas de fase e do spawner (marco 9A-2): o disparo segue `relacao()`. */
+export const DONO_FASE = 'fase';
+
+/**
+ * Armadilha (§2.11): de habilidade (disparo único no primeiro hostil que pisar), de fase (conteúdo,
+ * permanente, única ou com rearme) ou do spawner (única, expira). Marco 9A-2 (14/10/2026).
+ */
 export interface Armadilha {
   id: number;
   donoId: EntidadeId;
@@ -93,6 +99,13 @@ export interface Armadilha {
   valor: number;
   interno: EfeitoCanonico | null;
   ateTick: number;
+  /** De onde veio: só as de habilidade contam no limite do jogador; o spawner conta as dele. */
+  origem: 'habilidade' | 'fase' | 'spawner';
+  /** Não expira por tempo (as da fase). */
+  permanente: boolean;
+  /** 0 = disparo único; senão, depois de disparar fica inerte por estes ticks e volta. */
+  rearmeTicks: number;
+  inerteAteTick: number;
 }
 
 /** Efeito agendado para disparar numa entidade (§2.8, `efeito_atrasado`). */

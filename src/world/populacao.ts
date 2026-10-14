@@ -3,7 +3,8 @@
 // objetos (§2.13).
 
 import type { ContextoSimulacao } from '../core/contexto';
-import type { EstadoJogo } from '../core/estado';
+import { DONO_FASE, type EstadoJogo } from '../core/estado';
+import { ticksDe } from '../core/tempo';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { criarInimigo } from '../entities/fabrica';
 import { largarItem, largarObjeto, largarOrbeEfeito, novoObjeto } from './objetos';
@@ -40,6 +41,23 @@ export function povoarFase(estado: EstadoJogo, ctx: ContextoSimulacao, saida: Ev
         case 'loja':
           estado.objetos.push(novoObjeto(objetoId, o.tipo, o.x, o.y, { itens: [...o.itens], ouro: o.ouro, chave: o.chave }));
           saida.push({ t: 'objetoSurgiu', tick: estado.tick, objetoId, tipo: o.tipo, x: o.x, y: o.y });
+          break;
+        // Marco 9A-2: armadilha de fase, invisível, permanente, de dono e equipe `fase` (D-051).
+        case 'armadilha':
+          estado.armadilhas.push({
+            id: estado.proximoId++,
+            donoId: DONO_FASE,
+            equipeDono: DONO_FASE,
+            x: o.x,
+            y: o.y,
+            valor: o.valor,
+            interno: o.efeito ? { ...o.efeito, interno: null } : null,
+            ateTick: 0,
+            origem: 'fase',
+            permanente: true,
+            rearmeTicks: ticksDe(o.rearmeMs),
+            inerteAteTick: 0,
+          });
           break;
       }
     });

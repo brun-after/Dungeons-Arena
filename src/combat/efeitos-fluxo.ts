@@ -33,8 +33,9 @@ export function contarInvocacoes(estado: EstadoJogo, donoId: EntidadeId): number
   return estado.entidades.filter((e) => vivo(e) && e.invocacao?.donoId === donoId && !e.invocacao.dominado).length;
 }
 
+/** Só as de habilidade contam no limite do modo (as de fase e do spawner não têm dono jogador). */
 export function contarArmadilhas(estado: EstadoJogo, donoId: EntidadeId): number {
-  return estado.armadilhas.filter((a) => a.donoId === donoId).length;
+  return estado.armadilhas.filter((a) => a.donoId === donoId && a.origem === 'habilidade').length;
 }
 
 /** Os limites do modo valem antes de cobrar recurso e recarga (§5.6): a ação é recusada inteira. */
@@ -82,6 +83,10 @@ export function armarArmadilha(
     valor: ef.valor,
     interno: ef.interno ? { ...ef.interno, interno: null } : null,
     ateTick: estado.tick + ticksDe(ef.duracaoMs),
+    origem: 'habilidade',
+    permanente: false,
+    rearmeTicks: 0,
+    inerteAteTick: 0,
   });
   saida.push({ t: 'armadilhaArmada', tick: estado.tick, donoId: dono.id, armadilhaId: id, x: c.x, y: c.y });
 }
@@ -166,7 +171,7 @@ export function processarFluxo(estado: EstadoJogo, aplicar: AplicarDireto): void
     if (tick >= inv.expiraTick || semDono) e.hp = 0;
   }
   if (estado.rastros.length > 0) estado.rastros = estado.rastros.filter((r) => r.ateTick > tick);
-  if (estado.armadilhas.length > 0) estado.armadilhas = estado.armadilhas.filter((a) => a.ateTick > tick);
+  if (estado.armadilhas.length > 0) estado.armadilhas = estado.armadilhas.filter((a) => a.permanente || a.ateTick > tick);
 }
 
 /**
@@ -205,10 +210,13 @@ export function processarGatilhos(estado: EstadoJogo, ctx: ContextoSimulacao, ap
   }
   const disparadas = new Set<number>();
   for (const a of estado.armadilhas) {
+    // Marco 9A-2: com rearme, a armadilha fica inerte depois de disparar.
+    if (a.inerteAteTick > tick) continue;
     const dono = { id: a.donoId, equipe: a.equipeDono };
     const alvo = ordem.find((e) => vivo(e) && e.x === a.x && e.y === a.y && podeFerir(dono, e, ctx.modo));
     if (!alvo) continue;
-    disparadas.add(a.id);
+    if (a.rearmeTicks > 0) a.inerteAteTick = tick + a.rearmeTicks;
+    else disparadas.add(a.id);
     causarDano(estado, ctx, alvo, a.valor, a.donoId, 'armadilha', saida);
     if (a.interno) aplicar(alvo, a.interno, { id: a.donoId, x: a.x, y: a.y }, null);
     saida.push({ t: 'armadilhaDisparou', tick, donoId: a.donoId, armadilhaId: a.id, alvoId: alvo.id });

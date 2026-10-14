@@ -20,6 +20,8 @@ describe('harness de simulação na fase oficial 1', () => {
     expect(contar('morreu')).toBeGreaterThan(0);
     expect(contar('iaNotou')).toBeGreaterThan(0);
     expect(contar('iaPerseguindo')).toBeGreaterThan(0);
+    // Marco 9A-2: 10.000 ticks passam por duas rodadas do spawner (20 s e 110 s).
+    expect(eventos.some((e) => (e.t === 'objetoSurgiu' && e.objetoId.startsWith('s:')) || (e.t === 'armadilhaArmada' && e.donoId === 'fase'))).toBe(true);
   });
 
   it('toda ação ofensiva iniciada dá ao menos 200 ms entre o início e o impacto previsto (§3.6)', () => {

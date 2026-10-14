@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.16 · **Data:** 14/10/2026
+**Versão:** 0.17 · **Data:** 14/10/2026
 
 > **Histórico**
+> - **0.17 (14/10/2026)**: D-051 (spawner dinâmico e armadilha de fase), marco 9A-2.
 > - **0.16 (14/10/2026)**: D-050 (economia: ouro, loja, baús, atalhos e ordenação), marco 9A-1.
 > - **0.15 (14/10/2026)**: D-049 (efeitos de fluxo próprio), marco 8A-2.
 > - **0.14 (14/10/2026)**: D-048 (semântica dos efeitos do registro), marco 8A-1.
@@ -709,3 +710,36 @@ mochila. Algumas regras não estão fechadas na spec ou colidem com decisões an
 - Save na versão 4 (degrau v3 → v4) e balance v9.
 - Os objetos ganharam campos uniformes (`itens`, `ouro`, `chave`, `abertoTick`, `abridorId`), neutros nos tipos que não
   os usam.
+
+## D-051 · Spawner dinâmico e armadilha de fase (v0.17, 14/10/2026)
+
+**Contexto.** A §2.1 define o spawner (categorias, máximos, chances, carência, intervalo e regra da célula) e a §2.11
+a armadilha de fase (invisível, única ou com rearme). Faltava dizer como contar, quem é o dono e o que cada objeto traz.
+
+**Decisão.**
+- **Spawner** (`world/spawner.ts`, etapa 9 do tick, só com `modo.spawnerDinamico`):
+  - não guarda estado: roda no fim da carência (20 s) e a cada intervalo (90 s), pelo tick;
+  - para cada categoria (baú, loot, orbe, armadilha, nessa ordem), se o que **ele mesmo** criou estiver abaixo do
+    máximo, sorteia a chance. Conta os objetos de id `s:` e as armadilhas de `origem: 'spawner'`; o conteúdo autorado
+    e os drops não ocupam vaga;
+  - a célula sai de até 40 sorteios: passável, sem entidade (posição ou destino), sem objeto ou armadilha, e a
+    Chebyshev ≥ 4 de todo jogador; se nenhuma servir, a categoria espera a próxima rodada;
+  - **baú** sempre destrancado, com 1 a 2 itens pelo mesmo sorteio de raridade dos drops (`progression/sorteio.ts`) e
+    10 a 30 de ouro; **loot** é um item desse sorteio; **orbe** é 40% vida, 30% mana (valores dos drops) e 30% efeito
+    (`sortearEfeitoDeOrbe`); **armadilha** dá 8 de dano, dispara uma vez e expira em 180 s;
+  - baú e loot só onde o modo solta itens (`loot.itens`): na arena (Livre), só orbes e armadilhas;
+  - números em `balance.spawner`; tudo pelo PRNG do estado.
+- **Armadilha de fase**:
+  - objeto `armadilha {valor, efeito?, modo: 'unica' | 'rearme', rearmeMs}` na fase; o efeito tem um componente;
+  - dono e equipe `fase` (`DONO_FASE`): o disparo segue `relacao()`, então pega jogadores **e inimigos** na campanha
+    e todo mundo na arena; não dá XP a ninguém;
+  - é permanente; com rearme, fica inerte pelo prazo depois de disparar e volta;
+  - a armadilha ganhou `origem`, `permanente`, `rearmeTicks` e `inerteAteTick`; só as de **habilidade** contam no
+    limite do jogador (`armadilhasPorJogador`);
+  - segue invisível: fora do estado público e sem desenho (a camada só mostra as do jogador local).
+- **Conteúdo**: na fase 1, uma armadilha única no corredor para a sala B e uma com rearme de 8 s e atordoamento curto
+  no corredor da sala de baixo.
+
+**Consequência.**
+- Save na versão 5 (degrau v4 → v5) e balance v10.
+- O harness confere a cada tick os máximos do spawner; o teste de 10 mil ticks passa por duas rodadas dele.

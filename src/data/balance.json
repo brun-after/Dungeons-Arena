@@ -1,5 +1,5 @@
 {
-  "versao": 9,
+  "versao": 10,
   "movimento": {
     "velocidadeBaseMs": 400,
     "filaMaxWaypoints": 2
@@ -70,6 +70,21 @@
     "bauCongelaMs": 3000,
     "bauSomeMs": 5000,
     "alcanceInteracao": 1
+  },
+  "spawner": {
+    "carenciaS": 20,
+    "intervaloS": 90,
+    "tentativas": 40,
+    "distanciaMinJogador": 4,
+    "bau": { "max": 3, "chance": 0.35 },
+    "loot": { "max": 4, "chance": 0.5 },
+    "orbe": { "max": 3, "chance": 0.3 },
+    "armadilha": { "max": 2, "chance": 0.3 },
+    "pesoOrbe": { "hp": 40, "recurso": 30, "efeito": 30 },
+    "itensBau": [1, 2],
+    "ouroBau": [10, 30],
+    "danoArmadilha": 8,
+    "armadilhaExpiraS": 180
   },
   "atributos": {
     "minimo": 1,

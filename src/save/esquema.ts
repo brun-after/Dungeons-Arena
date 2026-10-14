@@ -6,7 +6,7 @@ import type { EstadoJogo } from '../core/estado';
 import { ehObjeto, type Objeto } from '../core/validar';
 import type { Entidade } from '../entities/entidade';
 
-export const VERSAO_SCHEMA = 4;
+export const VERSAO_SCHEMA = 5;
 export const SLOTS = [1, 2, 3] as const;
 export const FORMATO_EXPORTACAO = 'dungeons-arena/save';
 
@@ -102,8 +102,19 @@ function v3ParaV4(r: Objeto): Objeto {
   return { ...r, estado: { ...e, entidades, objetos } };
 }
 
+/**
+ * v4 → v5 (marco 9A-2, 14/10/2026): armadilhas ganham origem, permanência e rearme (as gravadas
+ * antes só podiam ser de habilidade). Campos novos com valor neutro.
+ */
+function v4ParaV5(r: Objeto): Objeto {
+  const e = r.estado;
+  if (!ehObjeto(e)) return r;
+  const armadilhas = lista(e.armadilhas).map((a) => comCampos(a, { origem: 'habilidade', permanente: false, rearmeTicks: 0, inerteAteTick: 0 }));
+  return { ...r, estado: { ...e, armadilhas } };
+}
+
 /** `MIGRACOES[v]` leva um registro da versão `v` para a `v + 1`. Não existiu versão 0. */
-export const MIGRACOES: Readonly<Record<number, Migracao>> = { 1: v1ParaV2, 2: v2ParaV3, 3: v3ParaV4 };
+export const MIGRACOES: Readonly<Record<number, Migracao>> = { 1: v1ParaV2, 2: v2ParaV3, 3: v3ParaV4, 4: v4ParaV5 };
 
 function temNaoFinito(v: unknown): boolean {
   if (typeof v === 'number') return !Number.isFinite(v);
