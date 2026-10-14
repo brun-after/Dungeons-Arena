@@ -108,6 +108,7 @@ export function comoFase(f: FaseEditavel): Fase {
     objetos: [],
     portaSaida: null,
     portasInternas: [],
+    matizGraus: 0,
   };
 }
 

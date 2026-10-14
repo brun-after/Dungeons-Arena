@@ -20,5 +20,10 @@
   "inimigosDeIA": "da_fase",
   "objetosDeFase": true,
   "spawnerDinamico": true,
-  "portas": { "inimigosCruzamChance": 0.5 }
+  "portas": { "inimigosCruzamChance": 0.5 },
+  "sobrevivencia": {
+    "regenPorCelula": true,
+    "descanso": true,
+    "penalidadeMorte": { "xp": 50, "perdeNivel": false, "ouroPctMin": 10, "ouroPctMax": 50 }
+  }
 }

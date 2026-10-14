@@ -38,7 +38,10 @@ export type MotivoItem =
   | 'fora_do_estoque'
   | 'sem_ouro'
   | 'nao_vendavel'
-  | 'trancado';
+  | 'trancado'
+  /** Marco 10A-2: descanso com hostil perseguindo, ou num modo sem descanso. */
+  | 'em_perigo'
+  | 'sem_descanso';
 
 export type MotivoCancelamento = 'morte' | 'interrompido' | 'alvo_invalido' | 'substituido';
 
@@ -99,7 +102,11 @@ export type EventoSimulacao =
   | { t: 'usouItem'; tick: number; id: EntidadeId; itemId: string; hp: number; mana: number }
   | { t: 'itemRecusado'; tick: number; id: EntidadeId; motivo: MotivoItem }
   /** Marco 9A: baú e loja. `ateTick` é o fim do congelamento (anel de progresso, contagem da janela). */
-  | { t: 'interacaoIniciada'; tick: number; id: EntidadeId; objetoId: string; tipo: 'bau' | 'loja'; ateTick: number }
+  | { t: 'interacaoIniciada'; tick: number; id: EntidadeId; objetoId: string; tipo: 'bau' | 'loja' | 'descanso'; ateTick: number }
+  /** Marco 10A-2: descanso e penalidade de morte (§2.12). */
+  | { t: 'descansou'; tick: number; id: EntidadeId; tipo: 'curto' | 'longo'; hp: number; mana: number }
+  | { t: 'descansoInterrompido'; tick: number; id: EntidadeId }
+  | { t: 'penalidadeMorte'; tick: number; id: EntidadeId; xp: number; ouro: number; niveis: number }
   | { t: 'bauAberto'; tick: number; id: EntidadeId; objetoId: string; itens: string[]; ouro: number }
   | { t: 'lojaFechada'; tick: number; id: EntidadeId; objetoId: string; recargaAteTick: number }
   | { t: 'comprou'; tick: number; id: EntidadeId; itemId: string; preco: number }

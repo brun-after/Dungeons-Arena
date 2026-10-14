@@ -5,13 +5,20 @@
 import type { EstadoJogo } from '../core/estado';
 import { ehObjeto, type Objeto } from '../core/validar';
 import type { Entidade } from '../entities/entidade';
+import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 6;
+export const VERSAO_SCHEMA = 7;
 export const SLOTS = [1, 2, 3] as const;
 export const FORMATO_EXPORTACAO = 'dungeons-arena/save';
 
-/** De onde vem a fase: conteúdo oficial ou aventura criada no editor (6C). */
-export type RefFase = { tipo: 'oficial'; id: string } | { tipo: 'aventura'; id: string };
+/**
+ * De onde vem a fase: conteúdo oficial, aventura criada no editor (6C) ou fase gerada (10A-2), que
+ * guarda só os parâmetros e é gerada de novo ao abrir (D-053).
+ */
+export type RefFase =
+  | { tipo: 'oficial'; id: string }
+  | { tipo: 'aventura'; id: string }
+  | { tipo: 'gerada'; id: string; numero: number; params: ParametrosGeracao };
 
 export interface Estatisticas {
   inimigosDerrotados: number;
@@ -131,8 +138,14 @@ function v5ParaV6(r: Objeto): Objeto {
   return { fasesVisitadas: {}, ...r, estado: ehObjeto(e) ? { saidaAberta: false, ...e } : e };
 }
 
+/**
+ * v6 → v7 (marco 10A-2, 14/10/2026): a referência de fase ganhou a forma `gerada` e a interação, o
+ * descanso. Nada a converter: registros antigos já são válidos na forma nova.
+ */
+const v6ParaV7: Migracao = (r) => r;
+
 /** `MIGRACOES[v]` leva um registro da versão `v` para a `v + 1`. Não existiu versão 0. */
-export const MIGRACOES: Readonly<Record<number, Migracao>> = { 1: v1ParaV2, 2: v2ParaV3, 3: v3ParaV4, 4: v4ParaV5, 5: v5ParaV6 };
+export const MIGRACOES: Readonly<Record<number, Migracao>> = { 1: v1ParaV2, 2: v2ParaV3, 3: v3ParaV4, 4: v4ParaV5, 5: v5ParaV6, 6: v6ParaV7 };
 
 function temNaoFinito(v: unknown): boolean {
   if (typeof v === 'number') return !Number.isFinite(v);
@@ -141,9 +154,27 @@ function temNaoFinito(v: unknown): boolean {
   return false;
 }
 
+function lerParametros(v: unknown): ParametrosGeracao | null {
+  if (!ehObjeto(v)) return null;
+  const inteiro = (x: unknown, min: number, max: number): x is number => typeof x === 'number' && Number.isInteger(x) && x >= min && x <= max;
+  if (typeof v.id !== 'string' || typeof v.nome !== 'string') return null;
+  if (!inteiro(v.semente, 0, 2 ** 32) || !inteiro(v.salas, 1, 50) || !inteiro(v.nivelInimigos, 1, 20) || !inteiro(v.matizGraus, 0, 359)) return null;
+  const p: ParametrosGeracao = { id: v.id, nome: v.nome, semente: v.semente, salas: v.salas, nivelInimigos: v.nivelInimigos, matizGraus: v.matizGraus };
+  if (v.largura !== undefined || v.altura !== undefined) {
+    if (!inteiro(v.largura, 8, 120) || !inteiro(v.altura, 8, 120)) return null;
+    p.largura = v.largura;
+    p.altura = v.altura;
+  }
+  return p;
+}
+
 function lerRefFase(v: unknown): RefFase | null {
   if (!ehObjeto(v) || typeof v.id !== 'string' || v.id === '') return null;
   if (v.tipo === 'oficial' || v.tipo === 'aventura') return { tipo: v.tipo, id: v.id };
+  if (v.tipo === 'gerada' && typeof v.numero === 'number' && Number.isInteger(v.numero) && v.numero >= 1) {
+    const params = lerParametros(v.params);
+    return params ? { tipo: 'gerada', id: v.id, numero: v.numero, params } : null;
+  }
   return null;
 }
 

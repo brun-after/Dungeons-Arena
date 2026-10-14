@@ -1,5 +1,5 @@
 {
-  "versao": 11,
+  "versao": 12,
   "movimento": {
     "velocidadeBaseMs": 400,
     "filaMaxWaypoints": 2
@@ -30,7 +30,15 @@
     "fallback": 100
   },
   "recursos": {
-    "regenManaPorSegundo": 1
+    "regenManaPorSegundo": 1,
+    "regenHpPorCelula": 1,
+    "regenManaPorCelula": 1
+  },
+  "descanso": {
+    "curtoMs": 3000,
+    "longoMs": 10000,
+    "curtoHpPct": 50,
+    "curtoManaPct": 30
   },
   "respawn": {
     "inimigoS": 60,

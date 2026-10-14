@@ -278,7 +278,7 @@ test.describe('desktop', () => {
     expect(erros).toEqual([]);
   });
 
-  test('campanha: com o boss derrotado, a saída da fase 1 leva às Catacumbas', async ({ page }) => {
+  test('campanha: a saída da fase 1 leva às Catacumbas, e a das Catacumbas a uma fase gerada', async ({ page }) => {
     test.setTimeout(150_000);
     const { erros } = await abrir(page);
     await page.getByRole('button', { name: 'Salvar e voltar aos slots' }).click();
@@ -303,6 +303,34 @@ test.describe('desktop', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Catacumbas', { timeout: 30_000 });
     await page.keyboard.up('d');
     await expect(page.locator('#diag')).toHaveAttribute('data-celula', '4,4');
+
+    // Marco 10A-2: depois da última fase oficial vem uma gerada. Mesmo truque, agora nas Catacumbas.
+    await page.getByRole('button', { name: 'Salvar e voltar aos slots' }).click();
+    const slot2 = page.locator('[data-slot="2"]');
+    await expect(slot2).toContainText('Catacumbas');
+    const download2 = page.waitForEvent('download');
+    await slot2.getByRole('button', { name: 'Exportar' }).click();
+    const arquivo2 = JSON.parse(await readFile(await (await download2).path(), 'utf8')) as typeof arquivo;
+    const estado2 = arquivo2.registro.estado;
+    estado2.saidaAberta = true;
+    estado2.entidades = estado2.entidades.filter((e) => e.bolsa);
+    Object.assign(estado2.entidades[0] ?? {}, { x: 35, y: 26, destinoX: 35, destinoY: 26, origemX: 35, origemY: 26 });
+    await page.locator('[data-slot="3"] input[type=file]').setInputFiles({ name: 'save.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(arquivo2)) });
+    await expect(page.locator('[data-slot="3"]')).toContainText('Catacumbas');
+    await page.goto('./?jogo=campanha&slot=3&diag=1');
+    await expect(page.locator('#diag')).toHaveAttribute('data-celula', '35,26');
+    await page.keyboard.down('d');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Profundezas 1', { timeout: 30_000 });
+    await page.keyboard.up('d');
+    expect(erros).toEqual([]);
+  });
+
+  test('descanso: a tecla R descansa e o registro mostra o resultado', async ({ page }) => {
+    const { erros } = await abrir(page);
+    await page.keyboard.press('KeyR');
+    const log = page.locator('.log-combate');
+    await expect(log).toContainText('Descansando');
+    await expect(log).toContainText('Descanso: +', { timeout: 15_000 });
     expect(erros).toEqual([]);
   });
 

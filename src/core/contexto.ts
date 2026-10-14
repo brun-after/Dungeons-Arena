@@ -35,6 +35,16 @@ export interface Balance {
   };
   recursos: {
     regenManaPorSegundo: number;
+    /** Marco 10A-2: por célula caminhada (§2.12), onde o modo liga. */
+    regenHpPorCelula: number;
+    regenManaPorCelula: number;
+  };
+  /** Descanso (§2.12, marco 10A-2): duração do congelamento e o que o curto devolve. */
+  descanso: {
+    curtoMs: number;
+    longoMs: number;
+    curtoHpPct: number;
+    curtoManaPct: number;
   };
   respawn: {
     inimigoS: number;

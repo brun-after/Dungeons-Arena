@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.18 · **Data:** 14/10/2026
+**Versão:** 0.19 · **Data:** 14/10/2026
 
 > **Histórico**
+> - **0.19 (14/10/2026)**: D-053 (fases geradas, morte, descanso e regeneração por célula), marco 10A-2.
 > - **0.18 (14/10/2026)**: D-052 (portas e troca de fase da campanha), marco 10A-1.
 > - **0.17 (14/10/2026)**: D-051 (spawner dinâmico e armadilha de fase), marco 9A-2.
 > - **0.16 (14/10/2026)**: D-050 (economia: ouro, loja, baús, atalhos e ordenação), marco 9A-1.
@@ -776,3 +777,41 @@ que abre a passagem e troca de fase que isola o estado. A campanha tinha uma fas
 **Consequência.**
 - Save na versão 6 (degrau v5 → v6: `saidaAberta` e `fasesVisitadas`) e balance v11.
 - O autosave é suspenso na troca, para a gravação da fase antiga não chegar depois da nova.
+
+## D-053 · Fases geradas, morte, descanso e regeneração por célula (v0.19, 14/10/2026)
+
+**Contexto.** Depois das Catacumbas a campanha acabava. A §2.1 manda gerar a próxima fase quando não há uma, e a §2.12
+define a penalidade de morte, o descanso e a regeneração por célula, sem fechar todos os detalhes.
+
+**Decisão.**
+- **Gerador** (`world/gerador.ts`, puro e semeado), como na §2.1: salas de 4–10 × 3–8 em até `salas × 20`
+  tentativas com margem de 2, corredores em L, um par de portas internas a cada 10 salas (Chebyshev ≥ 20, relaxando
+  para 15 e 10), boss na última sala (com mais de 2 salas) e `1 + floor(rand × min(3, floor(l × a / 8)))` inimigos
+  comuns nas demais. Além disso:
+  - a primeira sala tem o início e uma **loja** (o estoque das geradas está em `data/campanha.json`);
+  - a saída fica na última sala, trancada pelo boss (livre quando não há boss);
+  - a sala do início não recebe inimigos;
+  - a saída passa pela mesma `validarFase` do conteúdo oficial (o teste confere 200 sementes).
+- **Sequência**: depois da última fase oficial vem "Profundezas 1", depois a 2, e assim por diante. Cada uma tem
+  `salas = anterior + rand(0..3)` (6 + rand na primeira, até 20), `nivelInimigos + 1` (4 na primeira, até 20) e
+  `matizGraus + 28`, sorteados pelo hash do id da fase atual. O tamanho é o preset padrão de 60 × 40.
+- **Save**: a referência `gerada` guarda só os parâmetros (`{id, numero, params}`); a fase é gerada de novo ao abrir.
+- **Matiz**: o terreno gira a paleta de cores uma vez por fase, em vez de um filtro por quadro (mais barato no
+  celular).
+- **Morte** (regra no modo, `sobrevivencia.penalidadeMorte`): na campanha, −50 XP e de 10% a 50% do ouro, sorteado
+  pelo PRNG do estado. O ouro perdido **some**. `perdeNivel` existe e está testado, mas fica desligado: o XP para em 0.
+  Com ele ligado, cada nível perdido revoga os pontos, primeiro os não distribuídos, depois os dos atributos-base
+  acima de 10. No Livre não há penalidade.
+- **Descanso** (comando `descansar`, tecla R ou Shift+R, botões na ficha), só onde o modo permite e sem hostil
+  perseguindo:
+  - congela como o baú;
+  - o curto leva 3 s e devolve 50% da vida e 30% da mana (a "estamina" da §2.12 é a mana até existir outro
+    recurso);
+  - o longo leva 10 s, enche tudo e antecipa o fim das recargas do jogador;
+  - se um hostil passa a perseguir, o descanso é interrompido sem recompensa.
+- **Regeneração por célula**: +1 de vida e +1 de mana por passo completo do jogador, bloqueada com hostil em
+  perseguição, só onde o modo liga (campanha).
+
+**Consequência.**
+- Save na versão 7 (degrau sem conversão: a forma nova da referência e da interação só acrescenta) e balance v12.
+- O modo ganhou `sobrevivencia` (regeneração por célula, descanso e penalidade de morte).

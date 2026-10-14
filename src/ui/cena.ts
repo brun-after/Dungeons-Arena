@@ -108,7 +108,10 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const terreno = criarTerreno(palco.terreno, fase);
   const sprites = new CamadaEntidades(palco.entidades, idLocal);
   const telegrafia = new CamadaTelegrafia(palco.chao, palco.voo);
-  const objetos = new CamadaObjetos(palco.chao, (id) => ctx.conteudo.itens.get(id)?.raridade, ticksDe(ctx.balance.economia.bauCongelaMs));
+  const objetos = new CamadaObjetos(palco.chao, (id) => ctx.conteudo.itens.get(id)?.raridade, ticksDe(ctx.balance.economia.bauCongelaMs), {
+    curto: ticksDe(ctx.balance.descanso.curtoMs),
+    longo: ticksDe(ctx.balance.descanso.longoMs),
+  });
   const fluxo = new CamadaFluxo(palco.chao);
   const portas = new CamadaPortas(palco.chao, fase, ticksDe(ctx.balance.portas.janelaPortaBossMs));
   const numeros = new CamadaNumeros(palco.efeitos, () => movimentoReduzido.matches);
@@ -245,6 +248,9 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     },
     aoInteragir: () => {
       emitir({ t: 'interagir' });
+    },
+    aoDescansar: (longo) => {
+      emitir({ t: 'descansar', tipo: longo ? 'longo' : 'curto' });
     },
     aoCancelar: () => {
       emitir({ t: 'selecionarAlvo', alvo: null });

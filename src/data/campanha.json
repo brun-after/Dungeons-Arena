@@ -1,4 +1,13 @@
 {
   "versao": 1,
-  "fases": ["fase-01", "fase-02"]
+  "fases": ["fase-01", "fase-02"],
+  "geradas": {
+    "nome": "Profundezas {n}",
+    "salasBase": 6,
+    "salasMax": 20,
+    "nivelBase": 4,
+    "largura": 60,
+    "altura": 40,
+    "estoque": ["pocao_vida", "pocao_mana", "escudo_madeira", "elmo_ferro", "cota_malha", "botas_rapidas"]
+  }
 }

@@ -10,16 +10,16 @@ import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import type { Entidade } from '../entities/entidade';
 import { criarInimigo } from '../entities/fabrica';
-import { aleatorio } from '../core/rng';
+import { aleatorio, inteiro } from '../core/rng';
 import { podeFerir } from '../modos/relacao';
-import { atrasoDeRespawnTicks, localDeRespawn, podeRespawnar, protecaoDeRespawnTicks } from '../modos/regras';
+import { atrasoDeRespawnTicks, localDeRespawn, penalidadeDeMorte, podeRespawnar, protecaoDeRespawnTicks } from '../modos/regras';
 import { celulaLivrePara } from '../world/colisao';
 import { tentarDominar } from '../combat/efeitos-fluxo';
 import { sortearEfeitoDeOrbe } from '../combat/registro-efeitos';
 import { encerrarInteracao } from '../world/interacao';
 import { aoMorrerBoss } from '../world/portas';
 import { largarItem, largarObjeto, largarOrbeEfeito, largarOuro, largarPerto } from '../world/objetos';
-import { aplicarSubidas } from './nivel';
+import { aplicarSubidas, perderXp } from './nivel';
 import { sortearItem } from './sorteio';
 
 function zerarMovimento(e: Entidade): void {
@@ -90,7 +90,11 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
           noTick: estado.tick + ticksDe(segundos * 1000),
         });
       }
-    } else if (podeRespawnar(ctx.modo)) {
+    } else {
+      // Marco 10A-2: a morte do jogador custa XP e ouro onde o modo manda (§2.12).
+      penalizar(estado, ctx, e, saida);
+    }
+    if (e.controlador !== 'ia' && podeRespawnar(ctx.modo)) {
       // Jogador: reaparece pelas regras do modo (§2.13), sem penalidade de campanha na arena.
       e.reviverEmTick = estado.tick + Math.max(1, atrasoDeRespawnTicks(ctx.modo, e.abates));
       e.abates++;
@@ -100,6 +104,18 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
 
   reviverJogadores(estado, ctx, saida);
   processarRespawns(estado, ctx, saida);
+}
+
+/** Penalidade de morte do modo: XP (com ou sem perder nível) e uma fração sorteada do ouro. */
+function penalizar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
+  const p = penalidadeDeMorte(ctx.modo);
+  if (!p || !e.bolsa) return;
+  const xpAntes = e.xp;
+  const niveis = perderXp(e, ctx, p.xp, p.perdeNivel);
+  const pct = inteiro(estado.rng, p.ouroPctMin, p.ouroPctMax);
+  const ouro = Math.floor((e.bolsa.ouro * pct) / 100);
+  e.bolsa.ouro -= ouro;
+  saida.push({ t: 'penalidadeMorte', tick: estado.tick, id: e.id, xp: niveis > 0 ? p.xp : xpAntes - e.xp, ouro, niveis });
 }
 
 /**

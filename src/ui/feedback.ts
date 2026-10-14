@@ -166,6 +166,31 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
   bus.on('lojaFechada', (ev) => {
     if (ev.id === idLocal) hud.registrar(t('log.lojaFechada'));
   });
+  // Marco 10A-2: descanso e penalidade de morte.
+  bus.on('interacaoIniciada', (ev) => {
+    if (ev.id === idLocal && ev.tipo === 'descanso') hud.registrar(t('log.descansando'));
+  });
+  bus.on('descansou', (ev) => {
+    if (ev.id !== idLocal) return;
+    const quem = posicao(ev.id);
+    if (quem && ev.hp > 0) numeros.mostrar(`+${ev.hp}`, 'cura', quem.x, quem.y, o.agora());
+    const texto = t('log.descansou', { hp: ev.hp, mana: ev.mana });
+    hud.registrar(texto);
+    o.aviso(texto);
+  });
+  bus.on('descansoInterrompido', (ev) => {
+    if (ev.id !== idLocal) return;
+    vibrar([50, 30, 50]);
+    const texto = t('log.descansoInterrompido');
+    hud.registrar(texto);
+    o.aviso(texto);
+  });
+  bus.on('penalidadeMorte', (ev) => {
+    if (ev.id !== idLocal) return;
+    const texto = ev.niveis > 0 ? t('log.penalidadeNivel', { xp: ev.xp, niveis: ev.niveis, ouro: ev.ouro }) : t('log.penalidade', { xp: ev.xp, ouro: ev.ouro });
+    hud.registrar(texto);
+    o.aviso(texto);
+  });
   // Marco 10A-1: portas.
   bus.on('saidaTrancada', (ev) => {
     if (ev.id !== idLocal) return;
