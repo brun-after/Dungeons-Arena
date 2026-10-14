@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.12 · **Data:** 13/10/2026
+**Versão:** 0.13 · **Data:** 13/10/2026
 
 > **Histórico**
+> - **0.13 (13/10/2026)**: D-045 a D-047, marco 7B (rede degradada sobre WSS, cena padrão, renovação do movimento).
 > - **0.12 (13/10/2026)**: D-044 (relatórios anônimos do teste com pessoas), marco 7A.
 > - **0.11 (13/10/2026)**: D-042 e D-043, tomadas no marco 6C (editor mínimo).
 > - **0.10 (13/10/2026)**: D-041 (save da campanha no IndexedDB), tomada no marco 6B; D-015 encerrada.
@@ -510,3 +511,50 @@ mandem arquivos perde dados.
 
 **Consequência.** Os relatórios ficam só na VM, e baixá-los é um comando (docs/TESTES-HUMANOS.md). O teste em si fica
 para quando houver pessoas disponíveis. O marco 7 só fecha depois dele.
+
+## D-045 · Perfis de rede sobre o WSS real por proxy TCP local (v0.13, 13/10/2026)
+
+**Contexto.** A §5.6 pede medir os perfis suportado (RTT 150 ms, jitter ±30, perda 1%) e degradado (250 ms, ±80, 3%)
+no transporte WSS real, incluindo o bloqueio por retransmissão do TCP. Até aqui só o loopback (`RedeLocal`)
+simulava isso.
+
+**Decisão.**
+- `tools/rede/proxy.ts`: proxy TCP em Node entre o cliente e um servidor `ws://`. Em cada sentido:
+  - atraso de metade do RTT ± metade do jitter, com saída sempre na ordem de chegada (fila FIFO com um único
+    temporizador; vários `setTimeout` com o mesmo vencimento podem trocar a ordem e corromper o WebSocket);
+  - "perda" vira retransmissão (RTO de 350 ms no suportado e 450 ms no degradado), que segura tudo o que vem atrás.
+- Perfis em dados: `tools/rede/perfis.json`.
+- `npm run carga -- --perfil suportado|degradado` põe o proxy na frente de um servidor local. O teste de integração
+  (`tests/integracao/rede-degradada.test.ts`) roda o mesmo caminho no CI.
+- Sobre o `wss://` remoto (VM), a rede é a real: lá vale a medição dos celulares (marco 5) e a carga de 30 min.
+
+**Consequência.** O RTT medido fica acima do nominal (por exemplo, 213 ms de p50 no suportado), porque inclui as
+paradas de retransmissão e o passo de 60 Hz. As metas de qualidade valem no suportado; no degradado conferimos
+integridade: sem rejeição, coleta única, estados iguais e reconexão.
+
+## D-046 · Cena padrão da §5.6: arena-02 (v0.13, 13/10/2026)
+
+**Decisão.**
+- `arena-02` ("Cripta grande") tem 60×40, 20 NPCs (sete presets), 6 spawns e 4 orbes. É a cena padrão de benchmark
+  da §5.6 e também uma arena jogável.
+- Quem cria a sala escolhe a arena no lobby (`fase` ao criar, validada contra `fasesPermitidas` do Livre).
+- Quem entra por código recebe a fase por `/salas/:codigo` e monta o mesmo contexto do servidor.
+- As métricas da sala (tick p95/p99, jogadores) vão para a metadata do Colyseus a cada 10 s, e o `/saude` devolve o
+  pior tick entre as salas. Como `setMetadata` substitui em vez de mesclar, o objeto vai sempre inteiro, com a fase.
+
+A cena de carga máxima da §5.6 (120×120, invocações, avatares e armadilhas) depende de sistemas dos marcos 8–10 e fica
+para o 11B.
+
+## D-047 · Renovação do movimento mantido a cada 100 ms (v0.13, 13/10/2026)
+
+**Contexto.** No perfil degradado, a carga mostrou rejeições por `taxa`. O cliente renovava a direção mantida a cada 3
+ticks (20 comandos/s). Uma parada de retransmissão TCP entregava tudo de uma vez, e o ajuste de relógio do cliente
+(até 2 ticks por quadro) dobrava a renovação, estourando o balde de 20 fichas.
+
+**Decisão.** A renovação passa a cada 6 ticks (100 ms), cinco vezes dentro da expiração de 500 ms da sala. O balde
+(60/s, rajada de 20) não muda: continua barrando inundação.
+
+**Consequência.**
+- Zero rejeições no degradado.
+- A banda enviada por cliente caiu de 2,9 para 1,7 KiB/s.
+- A correção no suportado continuou dentro da meta.

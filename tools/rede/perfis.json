@@ -1,0 +1,4 @@
+{
+  "suportado": { "rttMs": 150, "jitterMs": 30, "perda": 0.01, "retransmissaoMs": 350 },
+  "degradado": { "rttMs": 250, "jitterMs": 80, "perda": 0.03, "retransmissaoMs": 450 }
+}

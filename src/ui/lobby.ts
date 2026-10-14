@@ -20,8 +20,6 @@ function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, text
   return e;
 }
 
-/** ws(s)://host → http(s)://host, para as rotas HTTP do servidor. */
-
 async function medirServidor(servidor: string): Promise<{ regiao: string; pingMs: number } | null> {
   try {
     const inicio = performance.now();
@@ -57,6 +55,17 @@ export function mostrarLobby(o: OpcoesLobby): void {
     return;
   }
 
+  // Marco 7B: escolha da arena ao criar (quem entra por código recebe a da sala).
+  const arena = el('select', 'escolha-fase');
+  arena.setAttribute('aria-label', t('lobby.arena'));
+  for (const [id, chave] of [
+    ['arena-01', 'lobby.arena01'],
+    ['arena-02', 'lobby.arena02'],
+  ] as const) {
+    const op = el('option', undefined, t(chave));
+    op.value = id;
+    arena.append(op);
+  }
   const criar = el('button', 'botao-menu', t('lobby.criar'));
   criar.type = 'button';
   const formulario = el('form', 'entrar-codigo');
@@ -71,7 +80,7 @@ export function mostrarLobby(o: OpcoesLobby): void {
   const entrar = el('button', 'botao-menu', t('lobby.entrar'));
   entrar.type = 'submit';
   formulario.append(rotulo, campo, entrar);
-  tela.append(criar, formulario, erro, voltar);
+  tela.append(arena, criar, formulario, erro, voltar);
   o.raiz.append(tela);
 
   void medirServidor(o.servidor).then((m) => {
@@ -88,7 +97,7 @@ export function mostrarLobby(o: OpcoesLobby): void {
       criar.disabled = entrar.disabled = false;
     }
   };
-  criar.addEventListener('click', () => void escolher({ criar: true }));
+  criar.addEventListener('click', () => void escolher({ criar: true, fase: arena.value }));
   formulario.addEventListener('submit', (ev) => {
     ev.preventDefault();
     const codigo = campo.value.trim().toUpperCase();

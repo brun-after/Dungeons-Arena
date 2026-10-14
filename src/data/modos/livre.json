@@ -30,7 +30,7 @@
   "loot": { "politica": "compartilhado", "janelaParticipacaoS": 15, "itens": false },
   "limites": { "npcs": 60, "invocacoesPorJogador": 2, "avataresPorJogador": 1, "armadilhasPorJogador": 3, "projeteis": 100 },
   "progressaoContaParaCampanha": false,
-  "fasesPermitidas": ["arena-01"],
+  "fasesPermitidas": ["arena-01", "arena-02"],
   "inimigosDeIA": "da_fase",
   "objetosDeFase": true,
   "spawnerDinamico": true

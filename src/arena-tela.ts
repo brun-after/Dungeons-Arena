@@ -3,6 +3,7 @@
 //   página, ligados por rede simulada (marco 4);
 // - online (`?arena=online`): lobby → servidor real por WSS (marco 5).
 
+import { MonitorDeConexao } from './net/qualidade';
 import { enderecoDoServidor } from './plataforma/servidor';
 import { contextoDaArena } from './arena/contexto-arena';
 import { versaoDoConteudo } from './arena/protocolo';
@@ -69,6 +70,7 @@ async function rodarArena(o: OpcoesArena): Promise<{ avisar: (texto: string) => 
     mostrarAviso(o.raiz.querySelector<HTMLElement>('.camada-ui') ?? o.raiz, texto);
   };
   if (o.codigo) avisar(t('lobby.codigoDaSala', { codigo: o.codigo }));
+  const monitor = new MonitorDeConexao();
 
   iniciarLaco({
     simular: (dtMs) => {
@@ -77,6 +79,9 @@ async function rodarArena(o: OpcoesArena): Promise<{ avisar: (texto: string) => 
     },
     renderizar: (alpha) => {
       const id = eu.entidadeId ?? idLocal;
+      const conectado = eu.conectado && !!(eu.previsto && buscarEntidade(eu.previsto, id));
+      // Perfil degradado (§3.6): avisa, sem mudar as regras.
+      if (eu.entidadeId && monitor.atualizar(agoraMs(), eu.rttMs, conectado)) avisar(t('rede.instavel'));
       cena.quadro({
         alpha,
         agoraMs: agoraMs(),
@@ -85,7 +90,7 @@ async function rodarArena(o: OpcoesArena): Promise<{ avisar: (texto: string) => 
           rttMs: eu.rttMs,
           latenciaSimuladaMs: o.latenciaSimuladaMs,
           erroP95: p95(eu.erros.slice(-JANELA_ERROS)),
-          conectado: eu.conectado && !!(eu.previsto && buscarEntidade(eu.previsto, id)),
+          conectado,
         },
       });
     },
@@ -139,17 +144,17 @@ export async function iniciarArenaLoopback(raiz: HTMLElement): Promise<void> {
   });
 }
 
-/** Endereço do servidor: `?servidor=` (teste na rede local) → build (`VITE_ARENA_URL`) → localhost. */
 
 export function iniciarArenaOnline(raiz: HTMLElement): void {
   const servidor = enderecoDoServidor();
-  const ctx = contextoDaArena();
   const opcoes: OpcoesLobby = {
     raiz,
     servidor,
     aoEscolher: async (pedido: PedidoDeSala) => {
       if (!servidor) return;
       const conexao = await conectarArena(servidor, pedido);
+      // A fase vem da sala (escolhida por quem criou): o contexto precisa ser o mesmo do servidor.
+      const ctx = contextoDaArena('livre', conexao.fase);
       const eu = new ClienteArena({ ctx, transporte: conexao.transporte, nome: 'Você', pedidoFicha: { classeId: 'aventureiro' }, agoraMs });
       eu.entrar();
       // Espera o bemVindo, para saber qual entidade é você antes de montar a cena.

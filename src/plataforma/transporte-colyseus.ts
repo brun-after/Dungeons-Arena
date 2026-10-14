@@ -11,17 +11,28 @@ export interface ConexaoArena {
   transporte: Transporte;
   /** Código curto da sala, para compartilhar (é o roomId, D-036). */
   codigo: string;
+  /** Fase da sala (marco 7B): o cliente monta o contexto com ela. */
+  fase: string;
   /** Avisos de queda, volta e encerramento (§4.12: "reconectando, voltou, sala encerrada"). */
   aoMudar: (ouvinte: (estado: EstadoDaConexao) => void) => void;
   /** Só para testes: derruba a conexão como se a rede tivesse caído. */
   derrubar: () => void;
 }
 
-export type PedidoDeSala = { criar: true } | { codigo: string };
+export type PedidoDeSala = { criar: true; fase?: string } | { codigo: string };
+
+/** Fase de uma sala existente, pela rota `/salas/:codigo` (marco 7B). */
+async function faseDaSala(url: string, codigo: string): Promise<string> {
+  const r = await fetch(`${url.replace(/^ws/, 'http')}/salas/${encodeURIComponent(codigo)}`, { cache: 'no-store' });
+  if (!r.ok) throw new Error(`sala ${codigo}: ${r.status}`);
+  const corpo = (await r.json()) as { fase?: unknown };
+  return typeof corpo.fase === 'string' ? corpo.fase : 'arena-01';
+}
 
 export async function conectarArena(url: string, pedido: PedidoDeSala): Promise<ConexaoArena> {
   const cliente = new Client(url);
-  const sala: Room = 'criar' in pedido ? await cliente.create('arena') : await cliente.joinById(pedido.codigo);
+  const fase = 'criar' in pedido ? (pedido.fase ?? 'arena-01') : await faseDaSala(url, pedido.codigo);
+  const sala: Room = 'criar' in pedido ? await cliente.create('arena', { fase }) : await cliente.joinById(pedido.codigo);
   // Reconexão automática do SDK mesmo logo depois de entrar (o celular suspende a aba a qualquer hora).
   sala.reconnection.minUptime = 0;
 
@@ -49,6 +60,7 @@ export async function conectarArena(url: string, pedido: PedidoDeSala): Promise<
 
   return {
     codigo: sala.roomId,
+    fase,
     transporte: {
       enviar: (texto) => {
         sala.send('m', texto);
