@@ -4,7 +4,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 async function abrir(page: Page) {
   const erros: string[] = [];
   page.on('pageerror', (e) => erros.push(e.message));
-  await page.goto('./?jogo=campanha&slot=1&diag=1');
+  await page.goto('./?jogo=campanha&slot=1&diag=1&classe=aventureiro');
   const diag = page.locator('#diag');
   await expect(diag).toHaveAttribute('data-celula', /^\d+,\d+$/);
   return { diag, erros };
@@ -156,7 +156,7 @@ test.describe('desktop', () => {
     const download = page.waitForEvent('download');
     await slot1.getByRole('button', { name: 'Exportar' }).click();
     expect((await download).suggestedFilename()).toBe('dungeons-arena-slot1.json');
-    await page.goto('./?jogo=campanha&slot=1&diag=1');
+    await page.goto('./?jogo=campanha&slot=1&diag=1&classe=aventureiro');
     await expect(page.locator('#diag')).toHaveAttribute('data-equipados', '1');
     expect(erros).toEqual([]);
   });
@@ -527,6 +527,35 @@ test.describe('desktop', () => {
     const config2 = await abrirConfiguracoes(page);
     await config2.getByRole('button', { name: 'Voltar ao personagem padrão' }).click();
     await expect(page.locator('body')).toHaveAttribute('data-token', 'modelo');
+    expect(erros).toEqual([]);
+  });
+
+  test('habilidades: escolher o mago, pôr a barreira na tecla 1, lançar e ler o efeito no cartão', async ({ page }) => {
+    const erros: string[] = [];
+    page.on('pageerror', (e) => erros.push(e.message));
+    await page.goto('./?jogo=campanha&slot=1&diag=1');
+    await expect(page.getByRole('heading', { name: 'Escolha a classe' })).toBeVisible();
+    await page.getByRole('link', { name: 'Jogar de Mago' }).click();
+    await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
+    await expect(page.getByTestId('habilidade-bola_de_fogo')).toBeVisible();
+
+    await page.keyboard.press('KeyI');
+    const mochila = page.getByRole('dialog', { name: 'Mochila' });
+    await mochila.getByRole('button', { name: 'Habilidades' }).click();
+    await expect(mochila.locator('[data-habilidade="raio_em_cadeia"]')).toContainText('Salta para mais 2 alvo(s)');
+    await mochila.locator('[data-chave="tecla-para-barreira"]').click();
+    await mochila.locator('[data-chave="tecla-0"]').click();
+    await expect(mochila.locator('[data-tecla="1"]')).toContainText('Barreira');
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.barra-habilidades .botao-habilidade').first()).toHaveAttribute('data-testid', 'habilidade-barreira');
+
+    // Sem aliado por perto, a barreira cai no próprio mago: o escudo aparece com o anel de duração.
+    await page.keyboard.press('Digit1');
+    const chip = page.locator('.chip-efeito[data-efeito="escudo"]');
+    await expect(chip).toBeVisible({ timeout: 10_000 });
+    await expect(chip.locator('.restante')).toHaveText(/^\d/);
+    await chip.hover();
+    await expect(page.locator('.cartao-efeito')).toContainText('Escudo que absorve');
     expect(erros).toEqual([]);
   });
 

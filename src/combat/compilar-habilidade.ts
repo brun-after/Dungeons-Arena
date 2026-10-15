@@ -200,7 +200,8 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
   h.multDano = multDano;
   h.multCura = multCura;
   h.tags = etiquetasDe(h, b.tags);
-  h.chave = formatarChave({ id: b.id, rank, caminhos: caminhosValidos, mods: aplicados });
+  // Na chave só entram os modificadores de fora (equipamento): os da definição e dos caminhos já estão implícitos.
+  h.chave = formatarChave({ id: b.id, rank, caminhos: caminhosValidos, mods: op.mods.filter((m) => aplicados.includes(m)) });
   return h;
 }
 

@@ -163,7 +163,8 @@ export function iniciarAcao(
   const origem = celulaOcupada(ator);
   let alvo: Entidade | null = null;
   let celula: Celula | null = null;
-  if (hab.politicaAlvo === 'proprio' || hab.politicaAlvo === 'aliados') {
+  // Em volta de quem conjura (ao redor, aliados) não precisa de alvo: a área sai de onde ele está.
+  if (hab.politicaAlvo === 'proprio' || hab.politicaAlvo === 'aliados' || hab.tipoArea === 'ao_redor') {
     alvo = ator;
   } else if (typeof alvoPedido === 'object') {
     celula = alvoPedido;
