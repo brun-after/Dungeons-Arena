@@ -76,11 +76,14 @@ jobs:
           VM_USER: ${{ secrets.VM_USER }}
           DOMINIO: ${{ secrets.DOMINIO }}
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Marco 17 (D-063): a chave do certificado do personagem (só no GitHub e no .env da VM).
+          CHAVE_CERTIFICADO: ${{ secrets.CHAVE_CERTIFICADO }}
         run: |
           ssh -i ~/.ssh/vm "$VM_USER@$VM_HOST" bash -s <<EOF
           set -euo pipefail
           cd /opt/dungeons-arena
-          printf 'IMAGEM_SERVIDOR=%s\nDOMINIO=%s\nREGIAO=%s\n' '${{ env.IMAGEM }}:${{ github.sha }}' '$DOMINIO' 'sa-east-1' > .env
+          printf 'IMAGEM_SERVIDOR=%s\nDOMINIO=%s\nREGIAO=%s\nCHAVE_CERTIFICADO=%s\n' '${{ env.IMAGEM }}:${{ github.sha }}' '$DOMINIO' 'sa-east-1' '$CHAVE_CERTIFICADO' > .env
+          chmod 600 .env
           echo '$TOKEN' | docker login ghcr.io -u '${{ github.actor }}' --password-stdin
           docker compose --profile producao pull
           docker compose --profile producao up -d --remove-orphans

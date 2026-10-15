@@ -7,6 +7,7 @@
 
 import type { Certificado } from './integridade/certificado';
 import { certificarSlot, gravarCertificadoNoSlot } from './plataforma/certificacao';
+import { sincronizarSlot } from './plataforma/nuvem';
 import { MonitorDeConexao } from './net/qualidade';
 import { enderecoDoServidor } from './plataforma/servidor';
 import { contextoDaArena } from './arena/contexto-arena';
@@ -211,7 +212,12 @@ export function iniciarArenaOnline(raiz: HTMLElement): void {
       sair.addEventListener('click', () => {
         sair.disabled = true;
         void (async () => {
-          if (slot !== null) tela?.avisar(t((await guardarPersonagem(eu, slot)) ? 'arena.salvo' : 'arena.naoSalvo', { n: slot }));
+          if (slot !== null) {
+            const salvo = await guardarPersonagem(eu, slot);
+            tela?.avisar(t(salvo ? 'arena.salvo' : 'arena.naoSalvo', { n: slot }));
+            // Marco 17: sair da arena envia o slot para a nuvem (quando há conta; o certificado já veio da sala).
+            if (salvo) await sincronizarSlot(slot);
+          }
           conexao.transporte.fechar();
           setTimeout(() => {
             location.href = './?arena=online';
