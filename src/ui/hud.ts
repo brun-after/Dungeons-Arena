@@ -34,7 +34,6 @@ export class Hud {
   private readonly vida = barra('vida');
   private readonly mana = barra('mana');
   private readonly numeros = document.createElement('span');
-  private readonly d20 = document.createElement('span');
   private readonly rede = document.createElement('span');
   /** Marco 8A: ícones dos efeitos ativos, na cor do registro; marco 14: com duração e cartão. */
   private readonly efeitos = document.createElement('span');
@@ -45,8 +44,6 @@ export class Hud {
     this.status = document.createElement('div');
     this.status.className = 'status-jogador';
     this.numeros.className = 'numeros-vida';
-    this.d20.className = 'chip-d20';
-    this.d20.hidden = true;
     this.rede.className = 'chip-rede';
     this.rede.hidden = true;
     this.rede.setAttribute('role', 'status');
@@ -55,7 +52,7 @@ export class Hud {
     barras.append(this.vida.raiz, this.mana.raiz);
     this.efeitos.className = 'chips-efeito';
     this.efeitos.setAttribute('aria-label', t('hud.efeitos'));
-    this.status.append(barras, this.numeros, this.efeitos, this.d20, this.rede);
+    this.status.append(barras, this.numeros, this.efeitos, this.rede);
     this.chips = new ChipsEfeito(this.efeitos, nomeDe);
 
     this.log = document.createElement('ol');
@@ -114,13 +111,6 @@ export class Hud {
     this.rede.hidden = false;
     this.rede.textContent = texto;
     this.rede.dataset.qualidade = !r.conectado ? 'ruim' : r.rttMs <= 150 ? 'boa' : r.rttMs <= 250 ? 'media' : 'ruim';
-  }
-
-  mostrarD20(valor: number): void {
-    this.d20.hidden = false;
-    this.d20.textContent = `d20 ${valor}`;
-    this.d20.setAttribute('aria-label', t('hud.d20', { valor }));
-    this.d20.dataset.faixa = valor <= 3 ? 'falha' : valor >= 16 ? 'critico' : 'normal';
   }
 
   registrar(texto: string): void {

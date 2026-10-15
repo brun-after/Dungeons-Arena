@@ -559,6 +559,21 @@ test.describe('desktop', () => {
     expect(erros).toEqual([]);
   });
 
+  test('teclado numérico lança habilidades e o d20 aparece perto da barra', async ({ page }) => {
+    const erros: string[] = [];
+    page.on('pageerror', (e) => erros.push(e.message));
+    await page.goto('./?jogo=campanha&slot=1&diag=1&classe=mago');
+    await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
+    // Numpad4 = tecla 4 do mago (barreira): o escudo cai nele mesmo.
+    await page.keyboard.press('Numpad4');
+    await expect(page.locator('.chip-efeito[data-efeito="escudo"]')).toBeVisible({ timeout: 10_000 });
+    // O dardo básico no boneco rola o d20: o dado ao lado da barra mostra o número.
+    await page.keyboard.press('Space');
+    await expect(page.locator('.dado-d20')).toHaveAttribute('data-valor', /^\d+$/, { timeout: 10_000 });
+    await expect(page.locator('.chip-d20')).toHaveCount(0);
+    expect(erros).toEqual([]);
+  });
+
   test('controles de toque ficam escondidos no desktop', async ({ page }) => {
     await abrir(page);
     await expect(page.getByTestId('joystick')).toBeHidden();

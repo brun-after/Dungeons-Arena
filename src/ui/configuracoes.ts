@@ -103,6 +103,7 @@ export function criarConfiguracoes(o: { toque: boolean; aoMudar: (p: Preferencia
       campo(t('config.qualidade'), escolha('qualidade', p.qualidade, ['auto', 'minimo', 'baixo', 'medio', 'alto'] as const, 'qualidade', (v) => { mudar({ qualidade: v }); })),
       campo(t('config.efeitosDeTela'), marcador('efeitosDeTela', p.efeitosDeTela, (v) => { mudar({ efeitosDeTela: v }); })),
       campo(t('config.visao'), escolha('visao', p.visao, ['cima', 'iso'] as const, 'visao', (v) => { mudar({ visao: v }); })),
+      campo(t('config.areaExata'), marcador('areaExata', p.areaExata, (v) => { mudar({ areaExata: v }); })),
     );
     secao(t('config.aparencia'), ...aparencia(p));
     secao(

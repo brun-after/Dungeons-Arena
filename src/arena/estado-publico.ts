@@ -16,6 +16,7 @@ function iaPublica(ia: EstadoIa): EstadoIa {
     alvoId: ia.alvoId,
     hesitacaoAteTick: 0,
     detectados: [],
+    foraDaZonaTicks: 0,
     proximaAvaliacaoTick: 0,
     proximoPassoTick: 0,
     direcaoPatrulha: null,

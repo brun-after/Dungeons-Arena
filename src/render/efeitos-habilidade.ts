@@ -7,8 +7,12 @@
 // O tempo é o da simulação: o impacto que se vê é o que aconteceu.
 // Marco 14 (14/10/2026): a habilidade vem pela chave do evento (geradas e ranks); do rank 4 em diante o impacto
 // solta o dobro de partículas.
+// Ajuste de 15/10/2026 (D-060): a habilidade de área explode pela área no lançamento — o impacto do visual em
+// pontos espalhados pelas células e uma onda saindo do centro —, mesmo sem ninguém atingido. Cancelada, não explode.
 
+import { celulasDaForma } from '../combat/formas';
 import type { BuscaHabilidade } from '../combat/habilidades';
+import type { Fase } from '../world/fase';
 import { REGISTRO_EFEITOS, type TipoEfeito } from '../combat/registro-efeitos';
 import type { EstadoJogo } from '../core/estado';
 import type { Barramento } from '../core/events';
@@ -36,6 +40,8 @@ const AURA: Partial<Record<TipoEfeito, NomePreset>> = {
 const cor = (hex: string) => Number.parseInt(hex.slice(1), 16);
 
 export interface OpcoesEfeitos {
+  /** Ajuste de 15/10/2026: a fase, para as células da área (linha para na parede). */
+  fase: Fase;
   particulas: SistemaParticulas;
   impacto: ControladorImpacto;
   habilidades: BuscaHabilidade;
@@ -45,6 +51,8 @@ export interface OpcoesEfeitos {
 
 export class EfeitosDeHabilidade {
   private readonly conjurando = new Map<number, { atorId: string; chave: string; ateTick: number; ultimoMs: number }>();
+  /** Ações de área esperando o lançamento: de onde saem e onde caem. */
+  private readonly areas = new Map<number, { chave: string; origem: PontoVisual; mira: PontoVisual; ateTick: number }>();
   private readonly ultimoRastro = new Map<number, number>();
   private readonly ultimaAura = new Map<string, number>();
   private ultimaPoeira = 0;
@@ -60,6 +68,10 @@ export class EfeitosDeHabilidade {
     };
     bus.on('acaoIniciada', (ev) => {
       const h = this.o.habilidades(ev.chave);
+      const ator = pos(ev.atorId);
+      if (h?.politicaImpacto === 'area' && ator) {
+        this.areas.set(ev.acaoId, { chave: ev.chave, origem: ator, mira: { x: ev.alvoX, y: ev.alvoY }, ateTick: ev.lancamentoTick });
+      }
       if (!h || !visualDe(h).conjuracao) return;
       this.conjurando.set(ev.acaoId, { atorId: ev.atorId, chave: ev.chave, ateTick: ev.lancamentoTick, ultimoMs: 0 });
     });
@@ -81,6 +93,10 @@ export class EfeitosDeHabilidade {
       // Dano grande em você (≥ 20% da vida máxima): tremor e flash vermelhos.
       const local = estado().entidades.find((e) => e.id === this.o.idLocal);
       if (ev.alvoId === this.o.idLocal && local && ev.dano >= local.hpMax * 0.2) this.o.impacto.pedir('dano', agoraMs);
+    });
+    bus.on('acaoCancelada', (ev) => {
+      this.areas.delete(ev.acaoId);
+      this.conjurando.delete(ev.acaoId);
     });
     bus.on('explodiu', (ev) => {
       this.o.particulas.emitir('explosao', ev.x, ev.y, 0xff8c42);
@@ -120,6 +136,11 @@ export class EfeitosDeHabilidade {
       const v = h ? visualDe(h) : null;
       if (pos && v?.conjuracao) p.emitir(v.conjuracao, pos.x, pos.y, v.cor);
     }
+    for (const [acaoId, a] of this.areas) {
+      if (estado.tick < a.ateTick) continue;
+      this.areas.delete(acaoId);
+      this.explodirArea(a);
+    }
     for (const pr of estado.projeteis) {
       if (agoraMs - (this.ultimoRastro.get(pr.id) ?? 0) < INTERVALO_RASTRO_MS) continue;
       this.ultimoRastro.set(pr.id, agoraMs);
@@ -134,6 +155,24 @@ export class EfeitosDeHabilidade {
       const eu = this.posicoes.get(this.o.idLocal);
       if (eu) p.emitir('poeira', eu.x, eu.y, 0xd8cfb8);
     }
+  }
+
+  /** A explosão pela área: o impacto do visual e a onda no centro, e faíscas em até 6 células sorteadas. */
+  private explodirArea(a: { chave: string; origem: PontoVisual; mira: PontoVisual }): void {
+    const h = this.o.habilidades(a.chave);
+    if (!h) return;
+    const v = visualDe(h);
+    const celulas = celulasDaForma(h, { x: Math.round(a.origem.x), y: Math.round(a.origem.y) }, a.mira, this.o.fase);
+    if (celulas.length === 0) return;
+    const centro = {
+      x: celulas.reduce((s, c) => s + c.x, 0) / celulas.length,
+      y: celulas.reduce((s, c) => s + c.y, 0) / celulas.length,
+    };
+    // O impacto inteiro e a onda no centro; pela área, só faíscas (anéis em toda célula poluiriam).
+    this.o.particulas.emitir('onda', centro.x, centro.y, v.cor);
+    if (v.impacto && v.impacto !== 'raio') this.o.particulas.emitir(v.impacto, centro.x, centro.y, v.cor);
+    const sorteadas = [...celulas].sort(() => Math.random() - 0.5).slice(0, 6);
+    for (const c of sorteadas) this.o.particulas.emitir('faiscas', c.x + (Math.random() - 0.5) * 0.6, c.y + (Math.random() - 0.5) * 0.6, v.cor);
   }
 
   private auras(estado: EstadoJogo, agoraMs: number): void {

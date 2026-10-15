@@ -25,7 +25,8 @@ export interface Emissao {
   cor: number | null;
 }
 
-export type NomePreset = PresetVisual | 'poeira' | 'aura';
+/** `onda`: o anel que se espalha pela área no impacto (ajuste de 15/10/2026, D-060). */
+export type NomePreset = PresetVisual | 'poeira' | 'aura' | 'onda';
 
 const faiscas: Emissao = { textura: 'faisca', quantidade: 10, vidaMs: [200, 360], velocidade: [120, 260], direcao: 'livre', gravidade: 300, escala: [0.7, 0.2], alpha: [1, 0], aditivo: true, raio: 4, cor: null };
 const brilho: Emissao = { textura: 'brilho', quantidade: 8, vidaMs: [300, 520], velocidade: [20, 60], direcao: 'cima', gravidade: 0, escala: [0.8, 0.1], alpha: [0.9, 0], aditivo: true, raio: 10, cor: null };
@@ -44,4 +45,5 @@ export const PRESETS_PARTICULA: Readonly<Record<NomePreset, readonly Emissao[]>>
   raio: [{ ...brilho, quantidade: 14, vidaMs: [160, 260], velocidade: [0, 20], escala: [0.6, 0.2], raio: 3 }],
   poeira: [{ textura: 'ponto', quantidade: 1, vidaMs: [2500, 4000], velocidade: [3, 10], direcao: 'livre', gravidade: 0, escala: [0.25, 0.25], alpha: [0.25, 0], aditivo: false, raio: 220, cor: 0xd8cfb8 }],
   aura: [{ ...brilho, quantidade: 2, vidaMs: [400, 700], velocidade: [10, 25], escala: [0.5, 0.1], raio: 12 }],
+  onda: [{ ...anel, vidaMs: [330, 370], escala: [0.5, 6], alpha: [0.8, 0] }],
 };

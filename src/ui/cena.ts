@@ -46,6 +46,7 @@ import { ligarFeedback } from './feedback';
 import type { AcaoDaPausa } from './pausa';
 import { criarLoja } from './loja';
 import { criarMochila } from './mochila';
+import { DadoD20 } from './dado';
 import { criarBarraHabilidades } from './habilidades';
 import { Hud } from './hud';
 import { montarVisao, type ControleVisao } from './visao';
@@ -156,7 +157,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     usarTiras: () => ap.qualidade().tiras,
     reduzido: () => ap.movimentoReduzido(),
   });
-  const telegrafia = new CamadaTelegrafia(palco.chao, palco.voo, projecao);
+  const telegrafia = new CamadaTelegrafia(palco.chao, palco.voo, projecao, () => aparencia.areaExata);
   const objetos = new CamadaObjetos(
     palco.chao,
     (id) => ctx.conteudo.itens.get(id)?.raridade,
@@ -201,6 +202,9 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const hud = new Hud(ui, (id) => o.estado().entidades.find((e) => e.id === id)?.nome ?? null);
   const corDoElemento = (h: Habilidade) => (h.elemento ? (ctx.conteudo.elementos.get(h.elemento)?.cor ?? null) : null);
   const barra = criarBarraHabilidades(usarHabilidade, corDoElemento);
+  // Ajuste de 15/10/2026 (D-060): o d20 perto da barra (o chip do canto saiu).
+  const dado = new DadoD20();
+  ui.append(dado.elemento);
   // Marco 14: a barra é a do jogador (teclas 1–4), refeita quando muda (rank, caminho ou troca de tecla).
   let habilidadesDaBarra: Habilidade[] = [];
   let chaveDaBarra = '';
@@ -348,6 +352,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       mostrarAviso(ui, texto);
     },
     nomeDaHabilidade: (id) => resolverHabilidade(ctx, id)?.nome ?? id,
+    dado,
   });
 
   let ultimoQuadroMs = performance.now();
@@ -375,6 +380,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       }));
     }
     hud.atualizar(j, estado.tick);
+    dado.atualizar(q.agoraMs);
     mochila.atualizar();
     loja.atualizar();
     if (q.rede) hud.mostrarRede(q.rede);

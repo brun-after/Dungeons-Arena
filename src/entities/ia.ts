@@ -54,6 +54,7 @@ function criarEstadoIa(estado: EstadoJogo, e: Entidade, regras: RegrasIa): Estad
     alvoId: null,
     hesitacaoAteTick: 0,
     detectados: [],
+    foraDaZonaTicks: 0,
     proximaAvaliacaoTick: estado.tick,
     proximoPassoTick: estado.tick + desvio,
     direcaoPatrulha: null,
@@ -117,7 +118,7 @@ export function processarIa(estado: EstadoJogo, ctx: ContextoSimulacao, saida: E
         if (!tentarDetectar(estado, ctx, e, ia, preset, saida)) patrulhar(estado, ctx, e, ia);
         break;
       case 'hesitando':
-        hesitar(estado, ctx, e, ia, saida);
+        hesitar(estado, ctx, e, ia, preset, saida);
         break;
       case 'perseguindo':
         perseguir(estado, ctx, e, ia, preset, saida);
@@ -135,6 +136,9 @@ function voltarAPatrulhar(estado: EstadoJogo, e: Entidade, ia: EstadoIa): void {
 }
 
 function comecarPerseguicao(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa, alvoId: string, saida: EventoSimulacao[]): void {
+  // Ajuste de 15/10/2026: quem já foi perseguido volta a ser perseguido sem hesitar.
+  if (!ia.detectados.includes(alvoId)) ia.detectados.push(alvoId);
+  ia.foraDaZonaTicks = 0;
   mudarModo(ia, 'perseguindo', estado.tick);
   ia.alvoId = alvoId;
   ia.falhasCaminho = 0;
@@ -159,7 +163,7 @@ function tentarDetectar(
     comecarPerseguicao(estado, ctx, e, ia, alvo.id, saida);
     return true;
   }
-  ia.detectados.push(alvo.id);
+  ia.foraDaZonaTicks = 0;
   const segundos = sortearHesitacaoS(ia.rng, alvo.atributos.carisma, ctx.balance.combate.carismaNeutro, preset.hesitacaoS, ctx.balance.ia);
   mudarModo(ia, 'hesitando', estado.tick);
   ia.alvoId = alvo.id;
@@ -168,13 +172,32 @@ function tentarDetectar(
   return true;
 }
 
-function hesitar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa, saida: EventoSimulacao[]): void {
+/**
+ * Hesitação (§2.6). Ajuste de 15/10/2026 (D-060): é preciso **ficar** na zona de atenção. Dentro do raio, a contagem
+ * anda; fora, ela pausa e, passada a graça, o inimigo desiste e volta a patrulhar. Quem golpeia o inimigo durante o
+ * "?" é perseguido na hora.
+ */
+function hesitar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa, preset: PresetInimigo, saida: EventoSimulacao[]): void {
   const alvo = ia.alvoId ? buscarEntidade(estado, ia.alvoId) : undefined;
   // Desarmada se o alvo sumir, morrer ou ficar invisível (§2.6).
   if (!alvo || !alvoOfensivoValido(estado, ctx, e, alvo)) {
     voltarAPatrulhar(estado, e, ia);
     return;
   }
+  if (ultimaInteracao(e, alvo) >= ia.modoDesdeTick) {
+    comecarPerseguicao(estado, ctx, e, ia, alvo.id, saida);
+    return;
+  }
+  if (manhattan(celulaOcupada(e), celulaOcupada(alvo)) > preset.deteccao) {
+    ia.foraDaZonaTicks++;
+    ia.hesitacaoAteTick++;
+    if (ia.foraDaZonaTicks >= ticksDe(ctx.balance.ia.gracaForaDaZonaMs)) {
+      saida.push({ t: 'iaDesistiu', tick: estado.tick, id: e.id, alvoId: alvo.id });
+      voltarAPatrulhar(estado, e, ia);
+    }
+    return;
+  }
+  ia.foraDaZonaTicks = 0;
   if (estado.tick >= ia.hesitacaoAteTick) comecarPerseguicao(estado, ctx, e, ia, alvo.id, saida);
 }
 

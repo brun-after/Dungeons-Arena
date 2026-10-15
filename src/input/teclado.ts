@@ -43,7 +43,16 @@ export interface Teclado {
   soltarTudo: () => void;
 }
 
-const ATALHOS = ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0'];
+const ORDEM_ATALHOS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
+
+/**
+ * Índice do atalho (0–9) de uma tecla: os números de cima e, desde o ajuste de 15/10/2026, os do teclado numérico
+ * lateral (`Numpad1`–`Numpad0`). Outras teclas: −1.
+ */
+export function indiceDoAtalho(codigo: string): number {
+  const m = /^(?:Digit|Numpad)(\d)$/.exec(codigo);
+  return m?.[1] ? ORDEM_ATALHOS.indexOf(m[1]) : -1;
+}
 
 /** Liga o teclado. */
 export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
@@ -91,8 +100,8 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
     } else if (ev.code === 'Space' && !ev.repeat) {
       ev.preventDefault();
       opcoes.aoAtacar();
-    } else if (ATALHOS.includes(ev.code) && !ev.repeat) {
-      opcoes.aoAtalho(ATALHOS.indexOf(ev.code));
+    } else if (indiceDoAtalho(ev.code) >= 0 && !ev.repeat) {
+      opcoes.aoAtalho(indiceDoAtalho(ev.code));
     } else if (ev.code === 'Escape') {
       // Marco 12: sem isto, a ação padrão deste mesmo Esc fecharia na hora a pausa que ele abre.
       ev.preventDefault();

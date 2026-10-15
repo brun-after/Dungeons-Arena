@@ -75,6 +75,18 @@ function textoIndicador(e: Entidade, tick: number): string {
   return '';
 }
 
+/**
+ * Ajuste de 15/10/2026 (D-060): o "?" ganha força com o progresso da hesitação e fica apagado enquanto o alvo está
+ * fora da zona de atenção. Sem os dados (estado público da arena), aparece inteiro.
+ */
+export function forcaDoIndicador(e: Entidade, tick: number): number {
+  const ia = e.ia;
+  if (ia?.modo !== 'hesitando' || ia.hesitacaoAteTick <= ia.modoDesdeTick) return 1;
+  if (ia.foraDaZonaTicks > 0) return 0.3;
+  const progresso = Math.min(1, Math.max(0, (tick - ia.modoDesdeTick) / (ia.hesitacaoAteTick - ia.modoDesdeTick)));
+  return 0.45 + 0.55 * progresso;
+}
+
 /** Fase da caminhada por entidade, para criaturas iguais não andarem em uníssono. */
 function faseDe(id: string): number {
   let h = 0;
@@ -243,6 +255,7 @@ export class CamadaEntidades {
 
       const indicador = textoIndicador(e, estado.tick);
       if (m.indicador.text !== indicador) m.indicador.text = indicador;
+      m.indicador.alpha = forcaDoIndicador(e, estado.tick);
       m.indicador.position.set(0, m.topo - 16);
       this.desenharAneis(m, e, estado, local?.alvoSelecionado === e.id);
       this.desenharBarras(m, e, tickVisual, e.id === this.o.idLocal);

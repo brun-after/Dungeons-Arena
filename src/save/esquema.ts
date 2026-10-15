@@ -7,7 +7,7 @@ import { ehObjeto, type Objeto } from '../core/validar';
 import type { Entidade } from '../entities/entidade';
 import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 9;
+export const VERSAO_SCHEMA = 10;
 export const SLOTS = [1, 2, 3] as const;
 export const FORMATO_EXPORTACAO = 'dungeons-arena/save';
 
@@ -206,6 +206,19 @@ function v8ParaV9(r: Objeto): Objeto {
   return { ...r, fasesVisitadas: visitadas, estado: estado(r.estado) };
 }
 
+/**
+ * v9 → v10 (ajuste de 15/10/2026, D-060): a IA ganha `foraDaZonaTicks` (o tempo fora da zona durante o "?"), na
+ * fase atual e nas visitadas. Valor neutro: 0.
+ */
+function v9ParaV10(r: Objeto): Objeto {
+  const estado = (e: unknown): unknown =>
+    ehObjeto(e)
+      ? { ...e, entidades: lista(e.entidades).map((x) => (ehObjeto(x) && ehObjeto(x.ia) ? { ...x, ia: { foraDaZonaTicks: 0, ...x.ia } } : x)) }
+      : e;
+  const visitadas = ehObjeto(r.fasesVisitadas) ? Object.fromEntries(Object.entries(r.fasesVisitadas).map(([k, v]) => [k, estado(v)])) : r.fasesVisitadas;
+  return { ...r, fasesVisitadas: visitadas, estado: estado(r.estado) };
+}
+
 /** `MIGRACOES[v]` leva um registro da versão `v` para a `v + 1`. Não existiu versão 0. */
 export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   1: v1ParaV2,
@@ -216,6 +229,7 @@ export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   6: v6ParaV7,
   7: v7ParaV8,
   8: v8ParaV9,
+  9: v9ParaV10,
 };
 
 function temNaoFinito(v: unknown): boolean {
