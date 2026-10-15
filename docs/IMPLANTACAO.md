@@ -1,8 +1,9 @@
 # Implantação do servidor da arena
 
-**Versão:** 0.3 · **Data:** 13/10/2026
+**Versão:** 0.4 · **Data:** 15/10/2026
 
 > **Histórico**
+> - **0.4 (15/10/2026)**: marco 16 (D-062): limites de salas e de criação, `GET /metricas`, logs mais completos, limite de memória e rotação de log no compose, e o teste de 30 minutos.
 > - **0.3 (13/10/2026)**: IP estático `56.126.58.40` (`arena-sao-paulo-ip`) anexado; deploy tolera falha passageira de SSH.
 > - **0.2 (13/10/2026)**: a implantação atual passa a ser a **AWS Lightsail em São Paulo** (D-038). A Oracle não teve
 >   capacidade e fica como alternativa; o Render fica como reserva manual.
@@ -131,6 +132,45 @@ manualmente:
 3. confere `https://DOMINIO/saude`.
 
 > Se a VM mudar de região, ajuste `REGIAO` no workflow: é o texto que o lobby mostra antes de entrar.
+
+## Operação: limites, métricas e logs (marco 16)
+
+- **Limites** (variáveis do serviço `servidor` no `docker-compose.yml`):
+  - `MAX_SALAS` (padrão 6): salas abertas por processo; acima disso, criar recusa com "servidor cheio";
+  - `CRIACOES_POR_MINUTO` (padrão 6): salas que a mesma origem cria por minuto.
+- **Memória**: o contêiner tem `mem_limit: 700m` e o Node, `--max-old-space-size=512` (Dockerfile). Com isso, a VM de
+  1 GB não trava se algo crescer demais: o processo cai e o Docker o reinicia.
+- **Logs**: JSON por linha, com rotação de 10 MB × 3 por contêiner. Para ler na VM:
+
+  ```bash
+  docker compose logs --since 30m servidor
+  ```
+
+  O `metricas_sala` sai a cada 10 s, com jogadores, tick p95/p99, atraso do agendador, banda por cliente, fila,
+  entidades, rejeições, reconexões e memória.
+- **`GET /metricas`** (JSON agregado, sem dado pessoal):
+  - processo: RSS, heap, uptime e atraso do agendador p95/p99;
+  - cada sala: código, tipo, fase, jogadores, tick, banda, fila, entidades, rejeições e reconexões.
+
+  Para conferir do seu PC:
+
+  ```bash
+  curl https://dungeons-bruno.duckdns.org/metricas
+  ```
+
+### Teste de 30 minutos na VM
+
+Depois de cada deploy que mexe no servidor, rodar do PC: 10 bots na cena padrão por 30 minutos, com o `/metricas`
+amostrado a cada 10 s (tendência de memória e tick na série). O resultado vai para `docs/BENCHMARKS.md`.
+
+```bash
+npm run carga -- --url wss://dungeons-bruno.duckdns.org --fase arena-02 --clientes 10 --segundos 1800 --registrar --marco 16
+```
+
+Ressalvas do registro:
+- a VM tem 1 GB, e a referência da spec é 4 GB;
+- a carga sai de um PC doméstico;
+- a sessão real com 10 pessoas é no marco 11B.
 
 ## Como testar a arena online
 

@@ -1,0 +1,31 @@
+{
+  "id": "cooperativo",
+  "nome": "Campanha em grupo",
+  "descricao": "A campanha de quem criou o grupo, com até 6 personagens; a fase avança quando todos os vivos estão na saída.",
+  "icone": "🤝",
+  "equipes": 1,
+  "politicaRelacao": "por_equipe",
+  "autoBalancear": false,
+  "fogoAmigo": false,
+  "fim": { "tipo": "nenhum", "alvo": null, "tempoLimiteS": null },
+  "respawn": { "ativo": true, "atrasoS": 1.2, "atrasoCrescenteS": 0, "local": "base_da_equipe", "protecaoS": 5 },
+  "entradaEmAndamento": true,
+  "maxJogadores": 6,
+  "espectadores": false,
+  "clamp": null,
+  "loot": { "politica": "compartilhado", "janelaParticipacaoS": 10, "itens": true },
+  "limites": { "npcs": 200, "invocacoesPorJogador": 2, "avataresPorJogador": 1, "armadilhasPorJogador": 3, "projeteis": 100 },
+  "progressaoContaParaCampanha": false,
+  "fasesPermitidas": "qualquer",
+  "inimigosDeIA": "da_fase",
+  "objetosDeFase": true,
+  "spawnerDinamico": true,
+  "portas": { "inimigosCruzamChance": 0.5 },
+  "saida": "todos_vivos",
+  "comandosDeRede": ["mover", "irPara", "usarHabilidade", "ataqueBasico", "selecionarAlvo", "usarItem", "equipar", "desequipar", "distribuirPonto", "interagir", "comprar", "vender", "fecharLoja", "moverItem", "descansar", "dispensar", "subirRank", "equiparHabilidade", "definirDificuldade"],
+  "sobrevivencia": {
+    "regenPorCelula": true,
+    "descanso": true,
+    "penalidadeMorte": { "xp": 50, "perdeNivel": false, "ouroPctMin": 10, "ouroPctMax": 50 }
+  }
+}

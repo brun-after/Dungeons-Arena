@@ -13,40 +13,31 @@
 import type { Comando } from './core/comandos';
 import { criarFila, enfileirar, retirarAte } from './core/comandos';
 import { conteudoOficial, type Conteudo } from './core/conteudo';
-import { BALANCE_PADRAO, type ContextoSimulacao } from './core/contexto';
-import { clonarEstado, criarEstado, type Entidade, type EstadoJogo } from './core/estado';
+import type { ContextoSimulacao } from './core/contexto';
+import { clonarEstado, type Entidade, type EstadoJogo } from './core/estado';
 import type { EventoSimulacao } from './core/eventos-simulacao';
-import { hashTexto } from './core/rng';
 import { simular } from './core/simulacao';
-import campanha from './data/campanha.json';
-import fase01 from './data/fases/fase-01.json';
-import fase02 from './data/fases/fase-02.json';
 import { paraFaseJson } from './editor/grade';
 import { criarJogador } from './entities/fabrica';
 import { t } from './i18n';
+import type { Dificuldade } from './modos/dificuldade';
 import { iniciarLaco } from './plataforma/laco-navegador';
+import { sairDaTelaCheia } from './plataforma/sessao-tela';
 import { carregarAventura } from './plataforma/aventuras';
 import { carregarSlot, criarAutosave, gravarRegistro, listarSlots, type Autosave } from './plataforma/saves';
 import { Interpolador } from './render/interpolacao';
 import { jogadorDoSave, VERSAO_SCHEMA, type Estatisticas, type RefFase, type RegistroProgresso } from './save/esquema';
-import { proximaFase } from './save/sequencia';
+import { contextoDaFase, estadoInicialDaFase, FASE_INICIAL, faseOficialOuGerada, faseSeguinte } from './save/fases-campanha';
 import { avancarFase, personagemNoInicio } from './save/transicao';
 import { mostrarAviso } from './ui/aviso';
 import { montarCena } from './ui/cena';
 import { mostrarEscolhaDeClasse } from './ui/escolha-classe';
 import { criarPesquisa } from './ui/pesquisa';
-import { carregarFase } from './world/fase';
-import { catalogoDeGeracao, gerarFase } from './world/gerador';
-import { povoarFase } from './world/populacao';
 import { validarFase } from './world/validacao-fase';
 
 const ID_JOGADOR = 'j1';
 const CLASSE_PADRAO = 'aventureiro';
 const AUTOSAVE_MS = 30_000;
-
-/** Fases oficiais da campanha, por id (a referência gravada no save). */
-const FASES_OFICIAIS: Readonly<Record<string, unknown>> = { 'fase-01': fase01, 'fase-02': fase02 };
-const FASE_INICIAL: RefFase = { tipo: 'oficial', id: 'fase-01' };
 /** Quanto a tela de transição fica antes de recarregar a sessão na fase nova. */
 const TRANSICAO_MS = 900;
 
@@ -63,27 +54,21 @@ export interface OpcoesJogo {
   pesquisa?: boolean;
   /** Marco 14: a classe do personagem novo (sem ela, o jogo novo num slot mostra a escolha). */
   classe?: string;
+  /** Marco 15: a dificuldade escolhida na tela de slots (o personagem é o mesmo em qualquer uma). */
+  dificuldade?: Dificuldade;
 }
 
 function montarContexto(conteudo: Conteudo, faseJson: unknown): ContextoSimulacao {
-  const validacao = validarFase(faseJson, new Set(conteudo.presets.keys()), conteudo.itens);
-  if (!validacao.ok) throw new Error(`fase inválida: ${validacao.erros.map((e) => e.mensagem).join('; ')}`);
-  return { fase: carregarFase(validacao.fase), balance: BALANCE_PADRAO, conteudo, modo: conteudo.modoCampanha };
+  const r = contextoDaFase(conteudo, faseJson);
+  if (!r.ok) throw new Error(`fase inválida: ${r.erro}`);
+  return r.ctx;
 }
 
-async function faseDaReferencia(ref: RefFase, conteudo: Conteudo): Promise<unknown> {
-  if (ref.tipo === 'oficial') return FASES_OFICIAIS[ref.id];
-  // Marco 10A-2: a fase gerada nasce de novo dos parâmetros guardados (D-053).
-  if (ref.tipo === 'gerada') return gerarFase(ref.params, catalogoDeGeracao(conteudo, campanha.geradas.estoque));
+/** Marco 15: oficiais e geradas vêm de save/fases-campanha.ts; as aventuras do editor, do aparelho. */
+export async function faseDaReferencia(ref: RefFase, conteudo: Conteudo): Promise<unknown> {
+  if (ref.tipo !== 'aventura') return faseOficialOuGerada(ref, conteudo);
   const aventura = await carregarAventura(ref.id).catch(() => null);
   return aventura ? paraFaseJson(aventura) : undefined;
-}
-
-/** A fase como o jogo a encontra pela primeira vez: inimigos e objetos, sem o jogador. */
-function estadoInicialDaFase(ctx: ContextoSimulacao): EstadoJogo {
-  const estado = criarEstado({ semente: hashTexto(ctx.fase.id), faseId: ctx.fase.id });
-  povoarFase(estado, ctx);
-  return estado;
 }
 
 function novoEstado(ctx: ContextoSimulacao, personagem: Entidade | null = null, classeId = CLASSE_PADRAO): EstadoJogo {
@@ -141,7 +126,8 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
   // Marco 14: jogo novo num slot sem classe escolhida → a tela de escolha (o endereço volta com `&classe=`).
   if (slot !== null && !leitura && !opcoes.classe) {
     const fase = opcoes.faseNova?.tipo === 'aventura' ? `&fase=${encodeURIComponent(`aventura:${opcoes.faseNova.id}`)}` : '';
-    mostrarEscolhaDeClasse(raiz, conteudo, `./?jogo=campanha&slot=${slot}${fase}${location.search.includes('diag=1') ? '&diag=1' : ''}`);
+    const dificuldade = opcoes.dificuldade ? `&dificuldade=${opcoes.dificuldade}` : '';
+    mostrarEscolhaDeClasse(raiz, conteudo, `./?jogo=campanha&slot=${slot}${fase}${dificuldade}${location.search.includes('diag=1') ? '&diag=1' : ''}`);
     return;
   }
   const faseRef: RefFase = teste ? { tipo: 'aventura', id: teste } : (leitura?.faseRef ?? opcoes.faseNova ?? FASE_INICIAL);
@@ -190,6 +176,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     const salvar = autosave;
     sair.addEventListener('click', () => {
       sair.disabled = true;
+      sairDaTelaCheia();
       void salvar.agora().finally(() => {
         location.href = './?jogo=campanha';
       });
@@ -208,6 +195,11 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
   }
 
   const fila = criarFila();
+  // Marco 15: a dificuldade escolhida entra por comando (o estado só muda pela simulação).
+  const definirDificuldade = (nivel: Dificuldade) => {
+    enfileirar(fila, { tick: estado.tick, entidadeId: idJogador, cmd: { t: 'definirDificuldade', nivel } });
+  };
+  if (opcoes.dificuldade && opcoes.dificuldade !== estado.dificuldade) definirDificuldade(opcoes.dificuldade);
   const cena = await montarCena({
     raiz,
     ctx,
@@ -217,6 +209,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     acoesExtras,
     // Marco 12: a campanha pausa (§2.15); o menu de pausa também salva e sai.
     pausaOJogo: true,
+    dificuldade: { atual: () => estado.dificuldade, definir: definirDificuldade },
     acoesDaPausa: acoesExtras
       .filter((b): b is HTMLButtonElement => b instanceof HTMLButtonElement && b.dataset.pausa === 'sim')
       .map((b) => ({ rotulo: t('pausa.salvarESair'), fazer: () => { b.click(); } })),
@@ -259,7 +252,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
       }, 1500);
       return;
     }
-    const proxima = proximaFase(faseRef, campanha.fases, campanha.geradas, BALANCE_PADRAO.xp.nivelMax);
+    const proxima = faseSeguinte(faseRef);
     if (!proxima) {
       mostrarAviso(raiz, t('fase.fimDaCampanha'), 6000);
       return;

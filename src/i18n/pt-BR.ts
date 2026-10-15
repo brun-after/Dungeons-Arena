@@ -1,4 +1,5 @@
 // Dicionário pt-BR (§5.5): nenhum texto de interface fica fixo no código.
+import { textosGrupo } from './pt-BR-grupo';
 import { textosHabilidades } from './pt-BR-habilidades';
 
 export const ptBR = {
@@ -316,6 +317,8 @@ export const ptBR = {
   'lobby.codigoCurto': 'O código tem 6 letras ou números.',
   'lobby.erroCriar': 'Não foi possível criar a sala.',
   'lobby.erroEntrar': 'Sala não encontrada ou cheia.',
+  'lobby.servidorCheio': 'O servidor está com o máximo de salas agora. Entre numa sala existente pelo código ou tente em alguns minutos.',
+  'lobby.muitasSalas': 'Muitas salas criadas daqui em pouco tempo. Espere um minuto e tente de novo.',
   'lobby.codigoDaSala': 'Código da sala: {codigo} — compartilhe para chamar alguém',
   'conexao.conectado': 'Conexão restabelecida',
   'conexao.reconectando': 'Conexão perdida, reconectando…',
@@ -407,6 +410,8 @@ export const ptBR = {
   'slots.erroImportar.nao_finito': 'O save tem números inválidos.',
   // Marco 14 (14/10/2026): sistema de habilidades.
   ...textosHabilidades,
+  // Marco 15 (15/10/2026): campanha cooperativa.
+  ...textosGrupo,
 } as const;
 
 export type ChaveTexto = keyof typeof ptBR;

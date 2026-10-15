@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 2.5 · **Data:** 15/10/2026
-**Status:** 🚧 Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência em andamento: 12, 13 e 14 concluídos; próximo, o 15
+**Versão do documento:** 2.6 · **Data:** 15/10/2026
+**Status:** 🚧 Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento
 
 > **Histórico**
+> - **2.6 (15/10/2026)**: marcos 15 e 16 concluídos (dificuldade, campanha em grupo até 6, simulador de balanceamento e ritmo calibrado; celular, PWA offline testado, benchmarks do cliente, limites e métricas do servidor; D-061, D-062).
 > - **2.5 (15/10/2026)**: ajustes depois do marco 14 (andar conjurando por habilidade, tempo mínimo na zona de atenção, d20 visível, teclado numérico, área orgânica; D-060).
 > - **2.4 (15/10/2026)**: marco 14 concluído (classes, ranks e caminhos, elementos e sinergias, orçamento de poder, livros, habilidades geradas e efeitos legíveis; D-059).
 > - **2.3 (14/10/2026)**: marco 13 concluído (visão isométrica com a tecla V, modelos de criatura gerados no build, caminhada por fatias e personagem por imagem; D-058).
@@ -58,8 +59,12 @@ Divergências em relação a ela são registradas em [`docs/DECISOES.md`](docs/D
 | **Local: servidor da arena** | `npm run dev:server` (sobe em `ws://localhost:2567`); com ele rodando, a arena online de `localhost` já funciona | Marco 5 |
 | **Local: celular no mesmo Wi-Fi** | `npm run dev -- --host` e abrir no celular `http://IP-DO-PC:5173/?arena=online&servidor=ws://IP-DO-PC:2567` | Marco 5 |
 | **Local: stack completa** | `docker compose up --build` (servidor e Redis; o Caddy só na VM) | Marco 5 |
-| **Teste de carga** | `npm run carga -- --url ws://localhost:2567 --clientes 10 --segundos 60`; com `--perfil suportado` ou `--perfil degradado` (rede simulada sobre o WSS real) e `--fase arena-02` (cena padrão 60×40) | Marcos 5 e 7 |
+| **Teste de carga** | `npm run carga -- --url ws://localhost:2567 --clientes 10 --segundos 60`; com `--perfil suportado` ou `--perfil degradado` (rede simulada sobre o WSS real), `--fase arena-02` (cena padrão 60×40) e `--modo grupo` (campanha em grupo, até 6) | Marcos 5, 7 e 16 |
 | **Campanha e save** | Menu → **Campanha** → escolha um slot (1–3). Salva sozinho; **Menu** no cabeçalho salva e sai; **Exportar/Importar** levam o save para outro aparelho | Marco 6 |
+| **Dificuldade** | Na tela de slots, o seletor de cada slot (Fácil, Normal, Difícil, Pesadelo); na pausa, troca a qualquer momento. O personagem é o mesmo em qualquer uma | Marco 15 |
+| **Campanha em grupo** | Tela de slots → **Jogar em grupo** (no slot com personagem) mostra um código; os outros (até 6) digitam o código no próprio slot e **Entrar no grupo**. Cada um joga com o seu personagem, que volta para o slot dele; a fase avança quando todos os vivos estão na saída | Marco 15 |
+| **Balanceamento** | `npm run balancear` (tabela das metas do ritmo); `-- --registrar` grava [`docs/BALANCEAMENTO.md`](docs/BALANCEAMENTO.md) | Marco 15 |
+| **Benchmarks do cliente** | `?bench=carga` ou `?bench=padrao` no navegador (o resultado aparece na tela; `&qualidade=baixo` e `&segundos=60` opcionais); `npm run bench` roda tudo e grava em `docs/BENCHMARKS.md` | Marco 16 |
 | **Teste com pessoas** | Link <https://brun-after.github.io/Dungeons-Arena/?pesquisa=1>; roteiro e resumo em [`docs/TESTES-HUMANOS.md`](docs/TESTES-HUMANOS.md) | Marco 7 |
 | **Editor de fases** | Menu → **Editor de fases** (ou `?editor`): crie, pinte, ponha inimigos, **Testar** com o seu personagem, **Exportar** o `.json`. Para jogar valendo: Campanha → slot vazio → escolha a fase | Marco 6 |
 | **Local: verificação completa** | `npm run verificar` (typecheck, lint, testes e build) | Etapa 1 |
@@ -181,8 +186,8 @@ pessoas (7C) entra quando houver testadores.
 | [x] | 12 | **Áudio** sintetizado (música por contexto, efeitos, som posicional, passos); **interface** (minimapa, prompt de interação, pausa, configurações, guia, menu com fundo); **efeitos visuais** como dado por habilidade (partículas, presets de impacto, efeitos persistentes, luz, enquadrar dois); **qualidade** (presets, degradação automática, teto de DPR) e **acessibilidade** (escala de interface, teclado, contraste) | Ameaças legíveis; o mesmo digest com e sem efeitos; nunca mudo; movimento reduzido respeitado |
 | [x] | 13 | Visão **isométrica**; **modelos de criatura** gerados no build; **caminhada por fatias**; **personagem por imagem** (recorte, escala, substituto, legibilidade) | Alternar a visão preserva velocidade, alcance e regras; imagem inválida não quebra o jogo |
 | [x] | 14 | **Sistema de habilidades**: composição em camadas (efeito, forma, tempo, custo, tema, apresentação); formas linha, cone e ao redor; alvos aliado, todos os aliados e área livre; escudo, puxão e troca de lugar; **5 elementos** com estados e sinergias; interações em tabela (acúmulo, sinergia, resistência, teto); **orçamento de poder**; **ranks** por nível; **árvores de evolução** e modificadores; **classes** (guerreiro, mago, arqueiro) com afinidades; **livros de habilidade**; **habilidades geradas por semente** (inimigos e livros); **passivas**; barra escolhida e roda de habilidades; **efeitos legíveis** (duração, cartão e descrição gerada) | Uma habilidade nova nasce de dados e cabe no orçamento; o jogador entende o que está ativo e o que faz; inimigos das fases geradas com repertório próprio; mesmo digest com as mesmas sementes |
-| [ ] | 15 | Ferramenta de **balanceamento por simulação** (tempo para matar por classe, rank e evolução, curva das fases, fluxo de ouro, invocações, margem de aviso do corpo a corpo) e ajuste dos números da campanha e do Livre | Ritmo e janelas de reação validados na campanha e no Livre. *Fichas justas por modo de arena: depois do 10B* |
-| [ ] | 16 | Celular (área segura, orientação, redimensionamento), **PWA offline** testado, desempenho e memória (10 trocas de fase, cena de carga, `BENCHMARKS.md`) e servidor (limites, métricas, teste de 30 min na VM) | Offline e benchmarks verificados. *Recuperação de queda: depois do 9B; sessão real de 10 pessoas: no 11B* |
+| [x] | 15 | Ferramenta de **balanceamento por simulação** (tempo para matar por classe, rank e evolução, curva das fases, fluxo de ouro, invocações, margem de aviso do corpo a corpo) e ajuste dos números da campanha e do Livre; **dificuldade** em 4 níveis com o mesmo personagem; **campanha em grupo** online até 6, com escala pelo tamanho do grupo; inimigo cresce com o nível | Ritmo e janelas de reação validados na campanha e no Livre (69/69 metas). *Fichas justas por modo de arena: depois do 10B* |
+| [x] | 16 | Celular (área segura, orientação, redimensionamento), **PWA offline** testado, desempenho e memória (trocas de fase, cena de carga, `BENCHMARKS.md`) e servidor (limites, métricas, teste de 30 min na VM) | Offline e benchmarks verificados; o teste de 30 min na VM é registrado logo depois do deploy. *Recuperação de queda: depois do 9B; sessão real de 10 pessoas: no 11B* |
 
 ---
 

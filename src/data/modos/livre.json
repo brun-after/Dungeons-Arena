@@ -17,12 +17,13 @@
     "nivelMax": 10,
     "atributoMax": 16,
     "atributoTotalMax": 72,
-    "orcamentoAtributos": 12,
+    "orcamentoAtributos": 6,
     "raridadeMax": "raro",
     "slotsPermitidos": ["arma_principal", "arma_secundaria", "cabeca", "corpo", "maos", "pernas", "pes", "anel", "amuleto", "capa"],
     "habilidadesPermitidas": "qualquer",
     "slotsHabilidade": 4,
     "hpMaxAbsoluto": null,
+    "vidaPct": 120,
     "orcamentoEquipamento": 100,
     "ordemReducao": ["carisma", "sabedoria", "inteligencia", "destreza", "constituicao", "forca"],
     "presetClasse": null
@@ -35,5 +36,7 @@
   "objetosDeFase": true,
   "spawnerDinamico": true,
   "portas": { "inimigosCruzamChance": 0.5 },
+  "saida": "qualquer",
+  "comandosDeRede": ["mover", "irPara", "usarHabilidade", "ataqueBasico", "selecionarAlvo", "usarItem", "equipar", "desequipar", "distribuirPonto", "interagir", "comprar", "vender", "fecharLoja", "moverItem", "descansar", "dispensar"],
   "sobrevivencia": { "regenPorCelula": false, "descanso": false, "penalidadeMorte": null }
 }

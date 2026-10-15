@@ -55,6 +55,8 @@ export function avancarFase(r: RegistroProgresso, destino: DestinoDaTransicao, a
   const visitadas: Record<string, EstadoJogo> = Object.fromEntries(Object.entries(r.fasesVisitadas).filter(([k]) => k !== chaveDestino));
   visitadas[chaveDaFase(r.faseRef)] = deixada;
   const estado = guardada ? clonarEstado(guardada) : destino.novoEstado();
+  // Marco 15: a dificuldade escolhida vale na fase nova (e na revisitada).
+  estado.dificuldade = r.estado.dificuldade;
   estado.entidades.push(personagemNoInicio(jogador, destino.spawn));
   return { ...r, faseRef: destino.ref, nomeFase: destino.nome, estado, fasesVisitadas: visitadas, atualizadoEm: agora };
 }

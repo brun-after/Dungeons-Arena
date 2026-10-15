@@ -163,7 +163,7 @@
     {
       "id": "boss",
       "nome": "Demônio",
-      "hpBase": 140,
+      "hpBase": 290,
       "hesitacaoS": 1,
       "deteccao": 6,
       "xp": 50,
@@ -176,7 +176,7 @@
         "marca_de_area",
         "invocar_lacaios"
       ],
-      "intervaloAtaqueMs": 1800,
+      "intervaloAtaqueMs": 3400,
       "resistencias": {
         "fogo": 50,
         "psiquico": -25

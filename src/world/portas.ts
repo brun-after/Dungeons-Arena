@@ -81,6 +81,14 @@ function ehSaida(estado: EstadoJogo, ctx: ContextoSimulacao, x: number, y: numbe
   return tipoEm(ctx.fase, x, y) === 'saida' ? 'fase' : null;
 }
 
+/** Marco 15: a entidade está numa saída que já deixa passar (sem tranca, ou destrancada)? */
+export function naSaidaAberta(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade): boolean {
+  const tipo = ehSaida(estado, ctx, e.x, e.y);
+  if (!tipo) return false;
+  const p = ctx.fase.portaSaida;
+  return tipo === 'temporaria' || !p || p.tranca === 'livre' || estado.saidaAberta;
+}
+
 function tentarSair(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
   const tipo = ehSaida(estado, ctx, e.x, e.y);
   if (!tipo) return;

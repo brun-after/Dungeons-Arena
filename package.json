@@ -13,6 +13,8 @@
     "servidor": "tsx server/main.ts",
     "carga": "tsx tools/carga/carga.ts",
     "relatorios": "tsx tools/relatorios/resumo.ts",
+    "balancear": "tsx tools/balanceamento/balancear.ts",
+    "bench": "npm run build && tsx tools/bench/bench.ts",
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.nucleo.json --noEmit",

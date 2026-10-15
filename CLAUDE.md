@@ -1,6 +1,6 @@
 # Dungeons Arena: guia para quem trabalha no código
 
-**Versão:** 0.1 · **Data:** 13/10/2026
+**Versão:** 0.2 · **Data:** 15/10/2026
 
 A especificação normativa é [`docs/PROMPT-PROJETO-v4.0.md`](docs/PROMPT-PROJETO-v4.0.md). Leia a Parte 1
 antes de decisões técnicas. Divergências vão para [`docs/DECISOES.md`](docs/DECISOES.md), com justificativa.
@@ -8,9 +8,13 @@ O roteiro e o estado de cada marco ficam no [`README.md`](README.md).
 
 ## Comandos
 
-- `npm run dev`: cliente em `http://localhost:5173` (menu; `?jogo=campanha` slots, `&slot=N` joga no slot, `?arena=online`, `?arena=loopback`)
+- `npm run dev`: cliente em `http://localhost:5173` (menu; `?jogo=campanha` slots, `&slot=N` joga no slot, `?arena=online`, `?arena=loopback`,
+  `?jogo=grupo&slot=N&criar=1|&codigo=X` campanha em grupo, `?bench=carga|padrao|trocas` benchmarks)
 - `npm run dev:server`: servidor da arena (Colyseus) em `ws://localhost:2567`; `npm run carga`: teste de carga
-- `npm run carga -- --perfil suportado|degradado --fase arena-02`: carga com rede simulada (proxy em `tools/rede`)
+- `npm run carga -- --perfil suportado|degradado --fase arena-02`: carga com rede simulada (proxy em `tools/rede`);
+  `--modo grupo` mede a campanha cooperativa (até 6 bots)
+- `npm run balancear`: simulador de balanceamento contra `balance.metas` (`-- --registrar` grava docs/BALANCEAMENTO.md)
+- `npm run bench`: benchmarks do cliente no Chromium sem tela (`-- --registrar` grava docs/BENCHMARKS.md)
 - `npm run relatorios -- arquivo.jsonl`: resumo dos relatórios do teste com pessoas (`?pesquisa=1`, docs/TESTES-HUMANOS.md)
 - `npm run build:server`: servidor empacotado em `dist-server/main.mjs` (o Dockerfile usa este)
 - `npm run verificar`: typecheck + lint + testes + build (rode antes de abrir PR)

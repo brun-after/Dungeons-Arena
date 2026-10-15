@@ -12,6 +12,7 @@ import type { Entidade } from '../entities/entidade';
 import { criarInimigo } from '../entities/fabrica';
 import { aleatorio, inteiro, proximoU32 } from '../core/rng';
 import { idGerada } from '../combat/chave-habilidade';
+import { fatoresDoMundo, ladoDoJogador } from '../modos/dificuldade';
 import { podeFerir } from '../modos/relacao';
 import { atrasoDeRespawnTicks, localDeRespawn, penalidadeDeMorte, podeRespawnar, protecaoDeRespawnTicks } from '../modos/regras';
 import { celulaLivrePara } from '../world/colisao';
@@ -45,7 +46,9 @@ function concederXp(estado: EstadoJogo, ctx: ContextoSimulacao, morto: Entidade,
     .filter((e): e is Entidade => e !== undefined && podeFerir(e, morto, ctx.modo))
     .sort((a, b) => (a.id < b.id ? -1 : 1));
   if (participantes.length === 0) return;
-  const total = Math.max(1, Math.round(morto.xpBase * ctx.balance.xp.decaimentoAntifarm ** morto.abates));
+  // Marco 15: a recompensa da dificuldade e do grupo vale para quem derruba o mundo (não entre jogadores).
+  const recompensa = ladoDoJogador(estado, morto) ? 1 : fatoresDoMundo(estado, ctx).recompensa;
+  const total = Math.max(1, Math.round(morto.xpBase * ctx.balance.xp.decaimentoAntifarm ** morto.abates * recompensa));
   const cota = Math.max(1, Math.round(total / participantes.length));
   for (const p of participantes) {
     p.xp += cota;
@@ -146,7 +149,7 @@ function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
   }
   if (!ctx.modo.loot.itens) return;
   // Ouro (marco 9A): só onde o modo solta itens, proporcional ao XP do inimigo.
-  const ouro = Math.round(e.xpBase * d.ouroPorXp * (0.5 + aleatorio(estado.rng)));
+  const ouro = Math.round(e.xpBase * d.ouroPorXp * (0.5 + aleatorio(estado.rng)) * fatoresDoMundo(estado, ctx).recompensa);
   if (ouro > 0) largarPerto(ctx, e.x, e.y, (x, y) => largarOuro(estado, ouro, x, y, saida));
   // Marco 14: livro raro, com uma habilidade gerada pela semente no nível do inimigo (D-057).
   const livro = ctx.conteudo.itens.get(ID_LIVRO_RARO);

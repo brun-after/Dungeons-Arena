@@ -2,6 +2,8 @@
 //   PORT    porta HTTP/WebSocket (padrão 2567)
 //   REGIAO  região mostrada no lobby antes de entrar (§3.6, "Justiça")
 //   DIR_DADOS  pasta dos relatórios do teste com pessoas (padrão ./dados; /dados no Docker)
+//   MAX_SALAS  salas por processo (padrão 6; marco 16, D-062)
+//   CRIACOES_POR_MINUTO  salas que uma origem pode criar por minuto (padrão 6)
 
 import { iniciarServidor } from './servidor';
 import { registrarLog } from './metricas';
@@ -10,7 +12,14 @@ const porta = Number(process.env.PORT ?? 2567);
 const regiao = process.env.REGIAO ?? 'local';
 const dirDados = process.env.DIR_DADOS ?? 'dados';
 
-const { encerrar } = await iniciarServidor({ porta, regiao, dirDados });
+const numero = (v: string | undefined, padrao: number) => (v && Number.isFinite(Number(v)) && Number(v) > 0 ? Number(v) : padrao);
+const { encerrar } = await iniciarServidor({
+  porta,
+  regiao,
+  dirDados,
+  maxSalas: numero(process.env.MAX_SALAS, 6),
+  criacoesPorMinuto: numero(process.env.CRIACOES_POR_MINUTO, 6),
+});
 
 for (const sinal of ['SIGINT', 'SIGTERM'] as const) {
   process.on(sinal, () => {

@@ -2,6 +2,7 @@
 // barramento (events.ts) depois do tick; a simulação nunca chama a interface.
 // Eventos visuais não são autoridade sobre HP: o estado basta para reconstruir a tela (§3.6).
 
+import type { Dificuldade } from '../modos/dificuldade';
 import type { EntidadeId } from './comandos';
 import type { TipoObjeto } from './estado';
 import type { TipoEfeito } from '../combat/registro-efeitos';
@@ -108,6 +109,8 @@ export type EventoSimulacao =
   | { t: 'habilidadeMudou'; tick: number; id: EntidadeId; habilidadeId: string; rank: number; caminho: string | null }
   | { t: 'habilidadeRecusada'; tick: number; id: EntidadeId; habilidadeId: string; motivo: MotivoHabilidade }
   | { t: 'barraMudou'; tick: number; id: EntidadeId }
+  /** Marco 15: a dificuldade do mundo mudou. */
+  | { t: 'dificuldadeMudou'; tick: number; nivel: Dificuldade }
   | { t: 'efeitoAplicado'; tick: number; alvoId: EntidadeId; origemId: EntidadeId; tipo: TipoEfeito; ateTick: number }
   /** Marco 8A-2: invocação, dominação e armadilhas. */
   | { t: 'invocou'; tick: number; donoId: EntidadeId; id: EntidadeId }

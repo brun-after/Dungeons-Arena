@@ -11,6 +11,7 @@ import { aleatorio, criarRng, escolher, hashTexto, type EstadoRng } from '../cor
 import { ticksDe } from '../core/tempo';
 import { alvoOfensivoValido, iniciarAcao, prioridadeDeAlvo, recargaRestante } from '../combat/acao';
 import { resolverHabilidade } from '../combat/compilar-habilidade';
+import { fatoresDoMundo } from '../modos/dificuldade';
 import { excedeLimite } from '../combat/efeitos-fluxo';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
 import { ordemRotativa } from '../world/colisao';
@@ -164,7 +165,8 @@ function tentarDetectar(
     return true;
   }
   ia.foraDaZonaTicks = 0;
-  const segundos = sortearHesitacaoS(ia.rng, alvo.atributos.carisma, ctx.balance.combate.carismaNeutro, preset.hesitacaoS, ctx.balance.ia);
+  // Marco 15: a dificuldade encurta ou alonga o "?".
+  const segundos = sortearHesitacaoS(ia.rng, alvo.atributos.carisma, ctx.balance.combate.carismaNeutro, preset.hesitacaoS, ctx.balance.ia) * fatoresDoMundo(estado, ctx).hesitacao;
   mudarModo(ia, 'hesitando', estado.tick);
   ia.alvoId = alvo.id;
   ia.hesitacaoAteTick = estado.tick + ticksDe(segundos * 1000);

@@ -4,6 +4,7 @@
 // chance e procura uma célula: passável, sem entidade, objeto ou armadilha, e longe de todo jogador.
 // Tudo pelo PRNG do estado (determinístico). Baú e loot só onde o modo solta itens (`loot.itens`).
 
+import { fatoresDoMundo } from '../modos/dificuldade';
 import { sortearEfeitoDeOrbe } from '../combat/registro-efeitos';
 import type { Celula } from '../core/comandos';
 import type { CategoriaSpawner, ContextoSimulacao } from '../core/contexto';
@@ -118,7 +119,8 @@ export function processarSpawner(estado: EstadoJogo, ctx: ContextoSimulacao, sai
     // Baú e loot são economia: só onde o modo solta itens (a arena fica com orbes e armadilhas).
     if ((categoria === 'bau' || categoria === 'loot') && !ctx.modo.loot.itens) continue;
     const regra: CategoriaSpawner = ctx.balance.spawner[categoria];
-    if (contarDoSpawner(estado, categoria) >= regra.max) continue;
+    // Marco 15: o grupo maior mantém mais coisas no mundo.
+    if (contarDoSpawner(estado, categoria) >= Math.round(regra.max * fatoresDoMundo(estado, ctx).spawner)) continue;
     if (aleatorio(estado.rng) >= regra.chance) continue;
     const celula = sortearCelula(estado, ctx);
     if (celula) criar(estado, ctx, categoria, celula, saida);

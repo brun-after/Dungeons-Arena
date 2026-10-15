@@ -70,7 +70,7 @@ describe('ficha de sessão (§3.7)', () => {
     const a = construirFichaDeSessao(pedido, LIVRE, CONTEUDO, BALANCE_PADRAO).ficha.atributos;
     const b = construirFichaDeSessao(pedido, LIVRE, CONTEUDO, BALANCE_PADRAO).ficha.atributos;
     expect(a).toEqual(b);
-    expect(acimaDoNeutro(a)).toBe(12);
+    expect(acimaDoNeutro(a)).toBe(LIVRE.clamp?.orcamentoAtributos);
   });
 
   it('modo escalar reescala com arredondamento determinístico', () => {

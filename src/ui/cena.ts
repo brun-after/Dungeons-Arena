@@ -9,6 +9,7 @@
 import { recargaRestante } from '../combat/acao';
 import { celulaOcupada } from '../combat/geometria';
 import type { Habilidade } from '../combat/habilidades';
+import type { Dificuldade } from '../modos/dificuldade';
 import { resolverHabilidade } from '../combat/compilar-habilidade';
 import { habilidadeDoAtor } from '../combat/perfil';
 import type { Celula, Comando } from '../core/comandos';
@@ -68,6 +69,8 @@ export interface OpcoesCena {
   pausaOJogo?: boolean;
   /** Ações extras no menu de pausa (ex.: "Salvar e sair"). */
   acoesDaPausa?: AcaoDaPausa[];
+  /** Marco 15: quem pode trocar a dificuldade (campanha solo e anfitrião do grupo). */
+  dificuldade?: { atual: () => Dificuldade; definir: (d: Dificuldade) => void };
 }
 
 export interface QuadroCena {
@@ -85,6 +88,8 @@ export interface Cena {
   quadro: (q: QuadroCena) => void;
   /** Marco 12: a simulação deve parar (campanha com a pausa aberta). */
   pausado: () => boolean;
+  /** Marco 15: tira a cena da página (troca de fase no cooperativo, sem recarregar a conexão). */
+  desmontar: () => void;
 }
 
 function div(classe: string): HTMLDivElement {
@@ -104,6 +109,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const jogador = () => o.estado().entidades.find((e) => e.id === idLocal);
 
   o.raiz.textContent = '';
+  // Marco 16: os modais vão para o <body> (modal.ts); ao desmontar, saem os que esta cena criou.
+  const modaisDeAntes = new Set(document.querySelectorAll('dialog.modal'));
   const host = div('palco');
   const ui = div('camada-ui');
   o.raiz.append(host, ui);
@@ -117,7 +124,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     ui.append(erro);
     return null;
   }
-  prepararSessaoDeTela(toque);
+  const encerrarSessaoDeTela = prepararSessaoDeTela(toque);
 
   const camera = new Camera(criarProjecao(prefs.visao, fase.largura, fase.altura), prefs.camera, toque);
   let visao: ControleVisao | null = null;
@@ -135,6 +142,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     toque,
     pausaOJogo: o.pausaOJogo ?? false,
     acoesDaPausa: o.acoesDaPausa ?? [],
+    dificuldade: o.dificuldade,
     aviso: (texto) => {
       mostrarAviso(ui, texto);
     },
@@ -273,7 +281,9 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   );
   const diag = Diagnostico.ativo() ? new Diagnostico() : null;
   if (diag) ui.append(diag.elemento);
-  if (toque && innerHeight > innerWidth) mostrarAviso(ui, t('aviso.girar'));
+  // Marco 16: o aviso de girar aparece em toda troca para retrato (não só ao montar).
+  let retrato = innerHeight > innerWidth;
+  if (toque && retrato) mostrarAviso(ui, t('aviso.girar'));
 
   // A câmera desconta a faixa de controles (§2.4), lida no máximo uma vez por segundo.
   let alturaFaixa = 0;
@@ -298,7 +308,20 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   };
   lerFaixa(performance.now());
   reenquadrar();
-  palco.aoRedimensionar(reenquadrar);
+  let releitura: ReturnType<typeof setTimeout> | undefined;
+  palco.aoRedimensionar(() => {
+    reenquadrar();
+    const agora = innerHeight > innerWidth;
+    if (toque && agora && !retrato) mostrarAviso(ui, t('aviso.girar'));
+    retrato = agora;
+    // A faixa de controles muda de colunas ao girar: relê a altura 300 ms depois e enquadra de novo.
+    clearTimeout(releitura);
+    releitura = setTimeout(() => {
+      faixaLidaEm = -Infinity;
+      lerFaixa(performance.now());
+      reenquadrar();
+    }, 300);
+  });
 
   teclado = ligarTeclado({
     aoMudarDirecao: (dir) => {
@@ -410,10 +433,27 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
         hp: j?.hp ?? 0,
         nivel: j?.nivel ?? 0,
         equipados: j?.bolsa ? Object.values(j.bolsa.equipamento).filter((i) => i !== null).length : 0,
+        dificuldade: estado.dificuldade,
         zoom: camera.zoom,
         ...(q.rede && { rede: q.rede }),
       };
     });
   };
-  return { bus, hud, quadro, pausado: ap.pausado };
+  return {
+    bus,
+    hud,
+    quadro,
+    pausado: ap.pausado,
+    desmontar: () => {
+      clearTimeout(releitura);
+      teclado.desligar();
+      encerrarSessaoDeTela();
+      hud.destruir();
+      visao.destruir();
+      ap.encerrar();
+      for (const d of document.querySelectorAll('dialog.modal')) if (!modaisDeAntes.has(d)) d.remove();
+      palco.destruir();
+      o.raiz.textContent = '';
+    },
+  };
 }
