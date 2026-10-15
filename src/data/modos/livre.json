@@ -28,7 +28,7 @@
     "ordemReducao": ["carisma", "sabedoria", "inteligencia", "destreza", "constituicao", "forca"],
     "presetClasse": null
   },
-  "loot": { "politica": "compartilhado", "janelaParticipacaoS": 15, "itens": false },
+  "loot": { "politica": "compartilhado", "janelaParticipacaoS": 15, "itens": true, "economiaDoSpawner": false },
   "limites": { "npcs": 60, "invocacoesPorJogador": 2, "avataresPorJogador": 1, "armadilhasPorJogador": 3, "projeteis": 100 },
   "progressaoContaParaCampanha": false,
   "fasesPermitidas": ["arena-01", "arena-02"],
@@ -38,5 +38,12 @@
   "portas": { "inimigosCruzamChance": 0.5 },
   "saida": "qualquer",
   "comandosDeRede": ["mover", "irPara", "usarHabilidade", "ataqueBasico", "selecionarAlvo", "usarItem", "equipar", "desequipar", "distribuirPonto", "interagir", "comprar", "vender", "fecharLoja", "moverItem", "descansar", "dispensar"],
+  "faixas": [
+    { "id": "1-5", "min": 1, "max": 5 },
+    { "id": "6-10", "min": 6, "max": 10 },
+    { "id": "11-15", "min": 11, "max": 15 },
+    { "id": "16-20", "min": 16, "max": 20 }
+  ],
+  "recompensaJogador": { "xpPorNivel": 15, "tetoXpPorHora": 4000 },
   "sobrevivencia": { "regenPorCelula": false, "descanso": false, "penalidadeMorte": null }
 }

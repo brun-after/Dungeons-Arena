@@ -4,6 +4,7 @@
 // os certificados valem até o servidor reiniciar.
 
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
+import type { CertificacaoDaSala } from '../src/arena/sala';
 import { conferirPersonagem, pedidoDoPersonagem, type PedidoDePersonagem } from '../src/coop/personagem';
 import type { ContextoSimulacao } from '../src/core/contexto';
 import { ehObjeto } from '../src/core/validar';
@@ -38,6 +39,18 @@ export class Certificador {
     const esperado = Buffer.from(this.hmac(conteudoAssinado(c.retrato, c.emitidoEm)), 'hex');
     const recebido = Buffer.from(c.assinatura, 'hex');
     return esperado.length === recebido.length && timingSafeEqual(esperado, recebido);
+  }
+
+  /** Os ganchos que a sala da arena usa para conferir e emitir certificados (a chave fica aqui). */
+  paraSala(agora: () => number = Date.now): CertificacaoDaSala {
+    return {
+      conferir: (bruto) => {
+        const c = lerCertificado(bruto);
+        return this.valido(c) ? c : null;
+      },
+      assinar: (retrato, quando) => this.assinar(retrato, quando),
+      agora,
+    };
   }
 
   /** O personagem enviado é exatamente o do certificado válido? (a arena só aceita a ficha inteira assim) */

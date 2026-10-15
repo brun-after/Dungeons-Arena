@@ -9,11 +9,10 @@
 // A escala pelo tamanho do grupo é a da dificuldade (modos/dificuldade.ts), pelos personagens com bolsa presentes.
 
 import { versaoDoConteudo, type MensagemCliente, type MotivoRejeicao } from '../arena/protocolo';
-import { SalaArena, TICKS_POR_ESTADO, type EntradaDePersonagem, type OpcoesSala, type Sessao } from '../arena/sala';
+import { SalaArena, type EntradaDePersonagem, type OpcoesSala, type Sessao } from '../arena/sala';
 import type { Celula, Comando, EntidadeId } from '../core/comandos';
 import { modoPorId, type Conteudo } from '../core/conteudo';
 import type { ContextoSimulacao } from '../core/contexto';
-import { hash53, serializarCanonico } from '../core/digest';
 import { buscarEntidade, type EstadoJogo } from '../core/estado';
 import type { Entidade } from '../entities/entidade';
 import type { Dificuldade } from '../modos/dificuldade';
@@ -24,7 +23,7 @@ import { personagemNoInicio } from '../save/transicao';
 import { reservaCelula } from '../world/colisao';
 import { passavel } from '../world/fase';
 import { naSaidaAberta } from '../world/portas';
-import { conferirPersonagem } from './personagem';
+import { conferirPersonagem, previaDoPersonagem } from './personagem';
 
 export const MODO_COOPERATIVO = 'cooperativo';
 /** Até onde procurar uma célula livre em volta do ponto de entrada. */
@@ -81,8 +80,6 @@ export class SalaCampanha extends SalaArena {
   faseRef: RefFase;
   /** Sessão do anfitrião (null com a sala vazia). */
   private anfitriao: string | null = null;
-  /** Último canal privado mandado a cada sessão (texto), para só mandar quando muda. */
-  private readonly privados = new Map<string, string>();
   /** A época que cada sessão já conhece: quem voltou de uma queda depois da troca de fase recebe a `novaFase`. */
   private readonly epocaVista = new Map<string, number>();
   private fimAvisado = false;
@@ -109,25 +106,7 @@ export class SalaCampanha extends SalaArena {
     e.equipe = equipeDeEntrada(this.ctx.modo, jogadorId, this.estado);
     posicionar(e, celulaDeEntrada(this.estado, this.ctx, e, this.ctx.fase.spawns[0] ?? { x: 1, y: 1 }));
     this.estado.entidades.push(e);
-    const bolsa = e.bolsa;
-    return {
-      ok: true,
-      previa: {
-        ficha: {
-          classeId: bolsa?.classeId ?? '',
-          classe: e.classe,
-          atributos: { ...e.atributos },
-          habilidades: [...e.habilidades],
-          ataqueBasico: e.ataqueBasico,
-          nivel: e.nivel,
-          hpMax: e.hpMax,
-          manaMax: e.manaMax,
-          defesa: e.defesa,
-        },
-        alteracoes: r.alteracoes,
-        hashPolitica: hash53(serializarCanonico({ modo: this.ctx.modo.id, balance: this.ctx.balance.versao })),
-      },
-    };
+    return { ok: true, previa: previaDoPersonagem(e, r.alteracoes, this.ctx.modo.id, this.ctx.balance.versao) };
   }
 
   protected override aoEntrar(s: Sessao): void {
@@ -136,7 +115,6 @@ export class SalaCampanha extends SalaArena {
   }
 
   protected override aoRemoverSessao(s: Sessao): void {
-    this.privados.delete(s.sessaoId);
     this.epocaVista.delete(s.sessaoId);
     if (this.anfitriao !== s.sessaoId) return;
     // O mais antigo que ficou vira o anfitrião (a ordem do Map é a de entrada).
@@ -153,31 +131,18 @@ export class SalaCampanha extends SalaArena {
   protected override depoisDoTick(): void {
     this.conferirSaida();
     for (const s of this.sessoes.values()) {
-      if (!s.conectada) {
-        // Na volta, a sessão recebe tudo de novo.
-        this.privados.delete(s.sessaoId);
-        continue;
-      }
-      if (this.epocaVista.get(s.sessaoId) !== this.epoca) this.mandarNovaFase(s);
+      if (s.conectada && this.epocaVista.get(s.sessaoId) !== this.epoca) this.mandarNovaFase(s);
     }
-    if (this.estado.tick % TICKS_POR_ESTADO === 0) this.mandarPrivados();
   }
 
-  private mandarPrivados(): void {
+  protected override dadosDoAnfitriao(s: Sessao): { anfitriao: boolean; anfitriaoId: string | null } {
     const anfitriaoId = (this.anfitriao && this.sessoes.get(this.anfitriao)?.entidadeId) ?? null;
-    for (const s of this.sessoes.values()) {
-      if (!s.conectada) continue;
-      const bolsa = buscarEntidade(this.estado, s.entidadeId)?.bolsa ?? null;
-      const texto = JSON.stringify({ t: 'privado', bolsa, anfitriao: this.anfitriao === s.sessaoId, anfitriaoId });
-      if (this.privados.get(s.sessaoId) === texto) continue;
-      this.privados.set(s.sessaoId, texto);
-      s.enviar(texto);
-    }
+    return { anfitriao: this.anfitriao === s.sessaoId, anfitriaoId };
   }
 
   private mandarNovaFase(s: Sessao, publico?: EstadoJogo): void {
     this.epocaVista.set(s.sessaoId, this.epoca);
-    this.privados.delete(s.sessaoId);
+    this.esquecerPrivado(s);
     this.enviarPara(s, {
       t: 'novaFase',
       faseRef: this.faseRef,

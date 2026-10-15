@@ -2,6 +2,7 @@
 //   GET /saude          → { ok, versao, regiao, salas, tick } para o Caddy, o deploy, o lobby e a carga
 //                         (tick = pior p95/p99 entre as salas, da metadata de cada uma; marco 7B)
 //   GET /salas/:codigo  → existe ou não (tipo, fase), com limite de tentativas por origem (§2.13)
+//   GET /salas?faixa=X  → marco 17: até 10 salas da arena com vaga naquela faixa de nível
 //   POST /relatorios    → relatório anônimo do teste com pessoas (marco 7A, D-044)
 //   POST /certificar    → marco 17 (D-063): certifica o personagem (corpo `{personagem, anterior}`, texto JSON)
 //   GET /metricas       → marco 16 (D-062): processo (memória, uptime, atraso do agendador) e cada sala (tick,
@@ -95,6 +96,17 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
       maxJogadores: sala.maxClients,
     });
   });
+  // Marco 17: as salas da arena com vaga numa faixa (o lobby sugere as da faixa do personagem).
+  const listarSalas = createEndpoint('/salas', { method: 'GET' }, async (ctx) => {
+    const origem = ctx.request?.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'local';
+    if (!limite.permitir(origem, Date.now())) return resposta(429, { ok: false, motivo: 'muitas_tentativas' });
+    const faixa = new URL(ctx.request?.url ?? '/', 'http://local').searchParams.get('faixa') ?? 'aberta';
+    const salas = (await matchMaker.query({ name: 'arena' }))
+      .filter((s) => ((s.metadata ?? {}) as { faixa?: string }).faixa === faixa && s.clients < s.maxClients && !s.locked)
+      .slice(0, 10)
+      .map((s) => ({ codigo: s.roomId, fase: ((s.metadata ?? {}) as { fase?: string }).fase ?? null, jogadores: s.clients, maxJogadores: s.maxClients }));
+    return resposta(200, { ok: true, faixa, salas });
+  });
   const relatorios = createEndpoint('/relatorios', { method: 'POST', disableBody: true }, async (ctx) => {
     const req = ctx.request;
     if (!req) return resposta(400, { ok: false, motivo: 'sem_corpo' });
@@ -154,7 +166,7 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
 
   const servidor = defineServer({
     rooms: { arena: defineRoom(SalaLivreColyseus), campanha: defineRoom(SalaCampanhaColyseus) },
-    routes: createRouter({ saude, buscarSala, relatorios, metricas, certificar }),
+    routes: createRouter({ saude, buscarSala, listarSalas, relatorios, metricas, certificar }),
     transport: new WebSocketTransport({ server: httpServer, maxPayload: o.maxPayload ?? MAX_BYTES_MENSAGEM + 4096 }),
     greet: false,
     gracefullyShutdown: false,

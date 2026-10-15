@@ -7,7 +7,7 @@ import { escolher, type EstadoRng } from '../core/rng';
 import { ticksDe } from '../core/tempo';
 import { vivo, type Entidade } from '../entities/entidade';
 import type { Fase } from '../world/fase';
-import type { ModoDeJogo, PenalidadeMorte } from './modo';
+import type { FaixaDeNivel, ModoDeJogo, PenalidadeMorte } from './modo';
 import { podeFerir } from './relacao';
 
 /** Marco 10A-2 (§2.12): o que a morte custa no modo (null = nada). */
@@ -88,6 +88,16 @@ export function localDeRespawn(
       return melhor;
     }
   }
+}
+
+/** Marco 17: a faixa do modo com este id (null: sala aberta ou id desconhecido). */
+export function faixaPorId(modo: ModoDeJogo, id: unknown): FaixaDeNivel | null {
+  return modo.faixas.find((f) => f.id === id) ?? null;
+}
+
+/** Marco 17: a faixa em que o nível cai (null: o modo não tem faixas). */
+export function faixaDoNivel(modo: ModoDeJogo, nivel: number): FaixaDeNivel | null {
+  return modo.faixas.find((f) => nivel >= f.min && nivel <= f.max) ?? null;
 }
 
 /** Marco 15: a sala aceita este comando pela rede neste modo? (a lista é do dado do modo) */

@@ -5,12 +5,12 @@
 
 import { definicaoDe } from '../combat/compilar-habilidade';
 import type { ContextoSimulacao } from '../core/contexto';
-import { serializarCanonico } from '../core/digest';
+import { hash53, serializarCanonico } from '../core/digest';
 import { clonarEntidade, clonarEstado } from '../core/estado';
 import { ehObjeto, type Objeto } from '../core/validar';
 import { SLOTS_BARRA, type Bolsa, type Entidade, type HabilidadeConhecida, type ItemNaMochila } from '../entities/entidade';
 import { criarJogador } from '../entities/fabrica';
-import type { Alteracao } from '../arena/ficha-sessao';
+import type { Alteracao, PreviaDeFicha } from '../arena/ficha-sessao';
 import { SLOTS_DE_EQUIPAMENTO } from '../modos/modo';
 import { recalcularFicha } from '../progression/derivados';
 import { caminhosDoRank, nivelParaRank } from '../progression/habilidades-personagem';
@@ -191,6 +191,25 @@ export function conferirPersonagem(pedido: unknown, ctx: ContextoSimulacao, id: 
   const pedidoEquip = ehObjeto(b.equipamento) ? b.equipamento : {};
   registrar('equipamento', SLOTS_DE_EQUIPAMENTO.map((s) => resumo(pedidoEquip[s])), SLOTS_DE_EQUIPAMENTO.map((s) => resumo(bolsa.equipamento[s])));
   return { entidade: e, alteracoes };
+}
+
+/** A prévia que a sala devolve no `bemVindo` para quem entrou com o personagem (marco 15; arena no 17). */
+export function previaDoPersonagem(e: Entidade, alteracoes: Alteracao[], modoId: string, versaoBalance: number): PreviaDeFicha {
+  return {
+    ficha: {
+      classeId: e.bolsa?.classeId ?? '',
+      classe: e.classe,
+      atributos: { ...e.atributos },
+      habilidades: [...e.habilidades],
+      ataqueBasico: e.ataqueBasico,
+      nivel: e.nivel,
+      hpMax: e.hpMax,
+      manaMax: e.manaMax,
+      defesa: e.defesa,
+    },
+    alteracoes,
+    hashPolitica: hash53(serializarCanonico({ modo: modoId, balance: versaoBalance })),
+  };
 }
 
 /**
