@@ -497,7 +497,7 @@ body.movimento-reduzido .dado-d20.girando {
 
 body.toque .dado-d20 {
   left: auto;
-  right: calc(150px + var(--seguro-direita, 0px));
+  right: calc(150px + var(--seguro-dir));
   bottom: calc(150px + var(--seguro-base));
   width: 44px;
   height: 48px;
@@ -1563,4 +1563,85 @@ body.qualidade-baixo * {
   animation-duration: 0.001ms !important;
   animation-iteration-count: 1 !important;
   transition-duration: 0.001ms !important;
+}
+
+/* Marco 15 (15/10/2026): campanha cooperativa — painel do grupo (código, quem está, vida) e o grupo no slot. */
+.painel-grupo {
+  position: absolute;
+  top: calc(64px + var(--seguro-topo));
+  left: calc(8px + var(--seguro-esq));
+  max-width: min(220px, 45vw);
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.45);
+  font-size: 0.75rem;
+  pointer-events: none;
+  zoom: var(--escala-ui, 1);
+}
+.painel-grupo h2 {
+  margin: 0 0 4px;
+  font-size: 0.8rem;
+  color: var(--destaque);
+  letter-spacing: 0.08em;
+}
+.painel-grupo ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.membro-grupo {
+  display: grid;
+  grid-template-columns: 1fr 56px;
+  align-items: center;
+  gap: 6px;
+}
+.membro-grupo.voce .nome-membro {
+  font-weight: 700;
+}
+.nome-membro {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vida-membro {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+}
+.vida-membro > span {
+  display: block;
+  height: 100%;
+  background: #2ecc71;
+}
+.grupo-saida {
+  margin: 4px 0 0;
+  color: var(--destaque);
+}
+.grupo-slot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: end;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--borda);
+}
+.grupo-slot label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+}
+.grupo-slot input {
+  width: 9ch;
+  min-height: 44px;
+  font: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
 }

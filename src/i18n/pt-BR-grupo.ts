@@ -1,0 +1,33 @@
+// Textos da campanha cooperativa (marco 15, 15/10/2026, D-061). Entram no dicionário principal (pt-BR.ts) por
+// espalhamento, com as mesmas chaves tipadas.
+
+export const textosGrupo = {
+  'grupo.jogar': 'Jogar em grupo',
+  'grupo.jogarRotulo': 'Criar um grupo com o personagem do slot {n}',
+  'grupo.entrar': 'Entrar no grupo',
+  'grupo.codigo': 'Código do grupo',
+  'grupo.codigoDoSlot': 'Código do grupo para o personagem do slot {n}',
+  'grupo.codigoCurto': 'O código tem 6 letras ou números.',
+  'grupo.semServidor': 'O jogo em grupo precisa do servidor, que não está configurado nesta versão.',
+  'grupo.semPersonagem': 'Este slot ainda não tem personagem. Comece um jogo nele antes de jogar em grupo.',
+  'grupo.aventura': 'Fases do editor ficam só neste aparelho e não vão para o grupo. Leve o personagem para a campanha e crie o grupo de lá.',
+  'grupo.conectando': 'Conectando ao grupo…',
+  'grupo.naoEncontrado': 'Grupo não encontrado. Confira o código.',
+  'grupo.naoEGrupo': 'Este código é de uma arena, não de um grupo da campanha.',
+  'grupo.falha': 'Não foi possível entrar no grupo. Tente de novo em instantes.',
+  'grupo.erro.sala_cheia': 'O grupo está cheio (até 6 jogadores).',
+  'grupo.erro.versao_conteudo': 'O grupo está numa versão diferente do jogo. Atualize a página.',
+  'grupo.erro.personagem_invalido': 'O personagem deste slot não pôde ser usado.',
+  'grupo.erro.ja_entrou': 'Você já está neste grupo.',
+  'grupo.codigoAviso': 'Grupo {codigo}: passe o código para quem vai jogar com você (até 6).',
+  'grupo.fichaAjustada': 'O servidor ajustou a ficha ao nível do personagem: {campos}.',
+  'grupo.painel': 'Grupo {codigo}',
+  'grupo.painelRotulo': 'Seu grupo: código, quem está e a vida de cada um',
+  'grupo.anfitriao': 'anfitrião',
+  'grupo.caido': 'caído',
+  'grupo.naSaida': 'Na saída: {n} de {total}',
+  'grupo.soAnfitriao': 'Só quem criou o grupo troca a dificuldade.',
+  'grupo.sair': 'Sair',
+  'grupo.sairRotulo': 'Salvar o personagem e sair do grupo',
+  'grupo.salvo': 'Personagem salvo no slot {n}.',
+} as const;

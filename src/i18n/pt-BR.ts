@@ -1,4 +1,5 @@
 // Dicionário pt-BR (§5.5): nenhum texto de interface fica fixo no código.
+import { textosGrupo } from './pt-BR-grupo';
 import { textosHabilidades } from './pt-BR-habilidades';
 
 export const ptBR = {
@@ -407,6 +408,8 @@ export const ptBR = {
   'slots.erroImportar.nao_finito': 'O save tem números inválidos.',
   // Marco 14 (14/10/2026): sistema de habilidades.
   ...textosHabilidades,
+  // Marco 15 (15/10/2026): campanha cooperativa.
+  ...textosGrupo,
 } as const;
 
 export type ChaveTexto = keyof typeof ptBR;

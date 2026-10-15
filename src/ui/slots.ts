@@ -6,6 +6,7 @@ import { t, type ChaveTexto } from '../i18n';
 import { DIFICULDADES, type Dificuldade } from '../modos/dificuldade';
 import { listarAventuras, type RegistroAventura } from '../plataforma/aventuras';
 import { apagarSlot, carregarSlot, gravarRegistro, listarSlots, type EstadoSlot } from '../plataforma/saves';
+import { enderecoDoServidor } from '../plataforma/servidor';
 import { exportarRegistro, importarRegistro } from '../save/esquema';
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, texto?: string): HTMLElementTagNameMap[K] {
@@ -45,6 +46,47 @@ function seletorDeDificuldade(n: number, inicial: Dificuldade, aoMudar: (d: Difi
   });
   rotulo.append(escolha);
   return rotulo;
+}
+
+const CODIGO_GRUPO = /^[A-Z0-9]{6}$/;
+
+/**
+ * Marco 15: campanha cooperativa a partir do slot — criar o grupo (na fase e na dificuldade escolhidas) ou entrar num
+ * grupo pelo código. Só aparece com servidor configurado.
+ */
+function blocoDeGrupo(n: number, dificuldade: () => Dificuldade): { elemento: HTMLElement; atualizar: () => void } {
+  const bloco = el('div', 'grupo-slot');
+  const criar = link('#', t('grupo.jogar'));
+  criar.setAttribute('aria-label', t('grupo.jogarRotulo', { n }));
+  const atualizar = () => {
+    criar.href = `./?jogo=grupo&slot=${n}&criar=1&dificuldade=${dificuldade()}`;
+  };
+  atualizar();
+  const rotulo = el('label', undefined, t('grupo.codigo'));
+  const campo = el('input');
+  campo.type = 'text';
+  campo.maxLength = 6;
+  campo.autocomplete = 'off';
+  campo.spellcheck = false;
+  campo.setAttribute('aria-label', t('grupo.codigoDoSlot', { n }));
+  rotulo.append(campo);
+  const entrar = botao(t('grupo.entrar'), () => {
+    const codigo = campo.value.trim().toUpperCase();
+    if (!CODIGO_GRUPO.test(codigo)) {
+      campo.setCustomValidity(t('grupo.codigoCurto'));
+      campo.reportValidity();
+      return;
+    }
+    location.href = `./?jogo=grupo&slot=${n}&codigo=${codigo}`;
+  });
+  campo.addEventListener('input', () => {
+    campo.setCustomValidity('');
+  });
+  campo.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter') entrar.click();
+  });
+  bloco.append(criar, rotulo, entrar);
+  return { elemento: bloco, atualizar };
 }
 
 const dataHora = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
@@ -92,6 +134,7 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
     cartao.dataset.slot = String(s.slot);
     cartao.append(el('h2', undefined, t('slots.slot', { n: s.slot })));
     const acoes = el('div', 'acoes-slot');
+    let grupoDoCartao: HTMLElement | null = null;
     if (s.tipo === 'ok') {
       cartao.append(
         el(
@@ -102,12 +145,17 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
       );
       const continuar = link(`./?jogo=campanha&slot=${s.slot}&dificuldade=${s.resumo.dificuldade}`, t('slots.continuar'));
       acoes.append(continuar);
+      let escolhida: Dificuldade = s.resumo.dificuldade;
+      const grupo = enderecoDoServidor() ? blocoDeGrupo(s.slot, () => escolhida) : null;
       cartao.append(
         el('p', 'detalhe-slot', t('dificuldade.atual', { nome: t(`dificuldade.${s.resumo.dificuldade}` as ChaveTexto) })),
         seletorDeDificuldade(s.slot, s.resumo.dificuldade, (d) => {
+          escolhida = d;
           continuar.href = `./?jogo=campanha&slot=${s.slot}&dificuldade=${d}`;
+          grupo?.atualizar();
         }),
       );
+      if (grupo) grupoDoCartao = grupo.elemento;
       acoes.append(
         botao(t('slots.exportar'), () => {
           void carregarSlot(s.slot).then((r) => {
@@ -189,6 +237,7 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
       acoes.append(excluir);
     }
     cartao.append(acoes);
+    if (grupoDoCartao) cartao.append(grupoDoCartao);
     tela.append(cartao);
   }
   tela.append(status, link('./', t('menu.voltar'), 'link-menu'));

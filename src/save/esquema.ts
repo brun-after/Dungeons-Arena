@@ -264,7 +264,8 @@ function lerParametros(v: unknown): ParametrosGeracao | null {
   return p;
 }
 
-function lerRefFase(v: unknown): RefFase | null {
+/** Marco 15: exportada para a sala cooperativa ler a fase pedida pelo anfitrião (não confiável). */
+export function lerRefFase(v: unknown): RefFase | null {
   if (!ehObjeto(v) || typeof v.id !== 'string' || v.id === '') return null;
   if (v.tipo === 'oficial' || v.tipo === 'aventura') return { tipo: v.tipo, id: v.id };
   if (v.tipo === 'gerada' && typeof v.numero === 'number' && Number.isInteger(v.numero) && v.numero >= 1) {

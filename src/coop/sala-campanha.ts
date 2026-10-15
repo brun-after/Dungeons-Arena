@@ -164,10 +164,11 @@ export class SalaCampanha extends SalaArena {
   }
 
   private mandarPrivados(): void {
+    const anfitriaoId = (this.anfitriao && this.sessoes.get(this.anfitriao)?.entidadeId) ?? null;
     for (const s of this.sessoes.values()) {
       if (!s.conectada) continue;
       const bolsa = buscarEntidade(this.estado, s.entidadeId)?.bolsa ?? null;
-      const texto = JSON.stringify({ t: 'privado', bolsa, anfitriao: this.anfitriao === s.sessaoId });
+      const texto = JSON.stringify({ t: 'privado', bolsa, anfitriao: this.anfitriao === s.sessaoId, anfitriaoId });
       if (this.privados.get(s.sessaoId) === texto) continue;
       this.privados.set(s.sessaoId, texto);
       s.enviar(texto);

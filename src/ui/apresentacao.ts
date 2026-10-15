@@ -59,6 +59,8 @@ export interface Apresentacao {
   quadro: (estado: EstadoJogo, agoraMs: number, dtMs: number, posicao: (e: Entidade) => PontoVisual) => boolean;
   /** Depois de atualizar a câmera: aplica o tremor e o flash. */
   aplicarCamera: (agoraMs: number) => void;
+  /** Marco 15: desmonta (fecha o áudio e solta os ouvintes globais). */
+  encerrar: () => void;
 }
 
 export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
@@ -143,6 +145,9 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   };
 
   return {
+    encerrar: () => {
+      motor.destruir();
+    },
     botaoPausa: pausa.botao,
     abrirPausa: pausa.abrir,
     pausado: () => o.pausaOJogo && pausaAberta,

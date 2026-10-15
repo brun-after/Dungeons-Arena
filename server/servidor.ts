@@ -1,7 +1,7 @@
 // Servidor da arena (§3.1): Node + Colyseus sobre WebSocket. Rotas HTTP próprias:
 //   GET /saude          → { ok, versao, regiao, salas, tick } para o Caddy, o deploy, o lobby e a carga
 //                         (tick = pior p95/p99 entre as salas, da metadata de cada uma; marco 7B)
-//   GET /salas/:codigo  → existe ou não, com limite de tentativas por origem (§2.13)
+//   GET /salas/:codigo  → existe ou não (tipo, fase), com limite de tentativas por origem (§2.13)
 //   POST /relatorios    → relatório anônimo do teste com pessoas (marco 7A, D-044)
 // O matchmaking do Colyseus continua nas rotas padrão (/matchmake/...).
 
@@ -12,6 +12,7 @@ import { MAX_BYTES_MENSAGEM, versaoDoConteudo } from '../src/arena/protocolo';
 import { codigoValido, LimiteDeTentativas, normalizarCodigo } from './codigo-sala';
 import { registrarLog } from './metricas';
 import { receberRelatorio } from './relatorios';
+import { SalaCampanhaColyseus } from './salas/sala-campanha';
 import { SalaLivreColyseus } from './salas/sala-livre';
 
 export interface OpcoesServidor {
@@ -53,8 +54,17 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
     const salas = await matchMaker.query({ roomId: codigo });
     const sala = salas[0];
     if (!sala) return resposta(404, { ok: false, motivo: 'nao_encontrada' });
-    const fase = (sala.metadata as { fase?: string } | undefined)?.fase ?? null;
-    return resposta(200, { ok: true, codigo, fase, jogadores: sala.clients, maxJogadores: sala.maxClients });
+    const meta = (sala.metadata ?? {}) as { fase?: string; tipo?: string; faseRef?: unknown };
+    // Marco 15: o tipo (arena ou campanha) e, na campanha, a referência da fase, para o cliente montar o contexto.
+    return resposta(200, {
+      ok: true,
+      codigo,
+      tipo: meta.tipo ?? 'arena',
+      fase: meta.fase ?? null,
+      ...(meta.faseRef !== undefined && { faseRef: meta.faseRef }),
+      jogadores: sala.clients,
+      maxJogadores: sala.maxClients,
+    });
   });
   const relatorios = createEndpoint('/relatorios', { method: 'POST', disableBody: true }, async (ctx) => {
     const req = ctx.request;
@@ -75,7 +85,7 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
   });
 
   const servidor = defineServer({
-    rooms: { arena: defineRoom(SalaLivreColyseus) },
+    rooms: { arena: defineRoom(SalaLivreColyseus), campanha: defineRoom(SalaCampanhaColyseus) },
     routes: createRouter({ saude, buscarSala, relatorios }),
     transport: new WebSocketTransport({ server: httpServer, maxPayload: o.maxPayload ?? MAX_BYTES_MENSAGEM + 4096 }),
     greet: false,

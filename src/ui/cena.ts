@@ -88,6 +88,8 @@ export interface Cena {
   quadro: (q: QuadroCena) => void;
   /** Marco 12: a simulação deve parar (campanha com a pausa aberta). */
   pausado: () => boolean;
+  /** Marco 15: tira a cena da página (troca de fase no cooperativo, sem recarregar a conexão). */
+  desmontar: () => void;
 }
 
 function div(classe: string): HTMLDivElement {
@@ -120,7 +122,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     ui.append(erro);
     return null;
   }
-  prepararSessaoDeTela(toque);
+  const encerrarSessaoDeTela = prepararSessaoDeTela(toque);
 
   const camera = new Camera(criarProjecao(prefs.visao, fase.largura, fase.altura), prefs.camera, toque);
   let visao: ControleVisao | null = null;
@@ -420,5 +422,17 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       };
     });
   };
-  return { bus, hud, quadro, pausado: ap.pausado };
+  return {
+    bus,
+    hud,
+    quadro,
+    pausado: ap.pausado,
+    desmontar: () => {
+      teclado.desligar();
+      encerrarSessaoDeTela();
+      ap.encerrar();
+      palco.destruir();
+      o.raiz.textContent = '';
+    },
+  };
 }

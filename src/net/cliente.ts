@@ -71,12 +71,16 @@ export class ClienteArena {
   /** Marco 15 (cooperativo): a própria bolsa, pelo canal privado; e se esta sessão é a do anfitrião. */
   bolsaPropria: Bolsa | null = null;
   anfitriao = false;
+  /** A entidade do anfitrião (para o painel do grupo). */
+  anfitriaoId: string | null = null;
   ctx: ContextoSimulacao;
   aoPrivado: (() => void) | null = null;
   aoNovaFase: ((msg: NovaFase) => void) | null = null;
   aoFimDaCampanha: (() => void) | null = null;
   /** Recusas de entrada (sala cheia, personagem inválido...), para a tela explicar. */
   erro: string | null = null;
+  /** Marco 15: os campos da ficha que a sala ajustou na entrada. */
+  previaAlteracoes: string[] = [];
 
   private seq = 0;
   private pendentes: ComandoEmpacotado[] = [];
@@ -123,6 +127,7 @@ export class ClienteArena {
       case 'bemVindo':
         this.sessaoId = msg.sessaoId;
         this.entidadeId = msg.entidadeId;
+        this.previaAlteracoes = msg.previa.alteracoes.map((a) => a.campo);
         this.epoca = msg.epocaSala;
         this.adotarBase(msg.tick, msg.estado);
         this.tickLocal = msg.tick + MARGEM_TICKS;
@@ -151,6 +156,7 @@ export class ClienteArena {
       case 'privado':
         this.bolsaPropria = msg.bolsa;
         this.anfitriao = msg.anfitriao;
+        this.anfitriaoId = msg.anfitriaoId;
         this.porBolsa();
         this.aoPrivado?.();
         break;

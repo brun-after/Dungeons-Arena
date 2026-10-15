@@ -60,7 +60,7 @@ export type MensagemServidor =
   | { t: 'pong'; id: number; enviadoMs: number; tickServidor: number }
   | { t: 'rejeitado'; seq: number | null; motivo: MotivoRejeicao }
   /** Marco 15 (cooperativo): só para a própria sessão — a bolsa (mochila, equipamento, ouro, pontos, habilidades). */
-  | { t: 'privado'; bolsa: Bolsa | null; anfitriao: boolean }
+  | { t: 'privado'; bolsa: Bolsa | null; anfitriao: boolean; anfitriaoId: string | null }
   /** Marco 15 (cooperativo): o grupo chegou à saída; a sala montou a fase seguinte (época nova). */
   | { t: 'novaFase'; faseRef: RefFase; nome: string; epocaSala: number; tick: number; ackSeq: number; estado: EstadoJogo }
   /** Marco 15 (cooperativo): a saída da última fase não leva a lugar nenhum (só depois de uma aventura). */
