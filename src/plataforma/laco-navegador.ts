@@ -23,6 +23,7 @@ export function iniciarLaco(opcoes: OpcoesLaco): () => void {
   const acumulador = criarAcumulador();
   let quadro = 0;
   let ultimoAlpha = 0;
+  let parado = false;
 
   const aoQuadro = (): void => {
     if (opcoes.pausado?.()) {
@@ -32,11 +33,13 @@ export function iniciarLaco(opcoes: OpcoesLaco): () => void {
       ultimoAlpha = avancarLaco(acumulador, relogio.agoraMs(), opcoes.simular).alpha;
     }
     opcoes.renderizar(ultimoAlpha);
-    quadro = requestAnimationFrame(aoQuadro);
+    // Marco 16: parar de dentro do próprio quadro não agenda o seguinte.
+    if (!parado) quadro = requestAnimationFrame(aoQuadro);
   };
   quadro = requestAnimationFrame(aoQuadro);
 
   return () => {
+    parado = true;
     cancelAnimationFrame(quadro);
   };
 }

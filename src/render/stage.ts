@@ -77,7 +77,8 @@ export async function criarPalco(host: HTMLElement): Promise<Palco> {
     espera = setTimeout(() => {
       const l = Math.max(1, host.clientWidth);
       const a = Math.max(1, host.clientHeight);
-      app.renderer.resize(l, a);
+      // Marco 16 (15/10/2026): zoom do navegador e troca de monitor mudam o DPR; a resolução acompanha (teto 2).
+      app.renderer.resize(l, a, Math.min(window.devicePixelRatio || 1, TETO_DPR));
       for (const fn of ouvintes) fn(l, a);
     }, DEBOUNCE_RESIZE_MS);
   };

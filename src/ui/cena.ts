@@ -109,6 +109,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const jogador = () => o.estado().entidades.find((e) => e.id === idLocal);
 
   o.raiz.textContent = '';
+  // Marco 16: os modais vão para o <body> (modal.ts); ao desmontar, saem os que esta cena criou.
+  const modaisDeAntes = new Set(document.querySelectorAll('dialog.modal'));
   const host = div('palco');
   const ui = div('camada-ui');
   o.raiz.append(host, ui);
@@ -279,7 +281,9 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   );
   const diag = Diagnostico.ativo() ? new Diagnostico() : null;
   if (diag) ui.append(diag.elemento);
-  if (toque && innerHeight > innerWidth) mostrarAviso(ui, t('aviso.girar'));
+  // Marco 16: o aviso de girar aparece em toda troca para retrato (não só ao montar).
+  let retrato = innerHeight > innerWidth;
+  if (toque && retrato) mostrarAviso(ui, t('aviso.girar'));
 
   // A câmera desconta a faixa de controles (§2.4), lida no máximo uma vez por segundo.
   let alturaFaixa = 0;
@@ -304,7 +308,20 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   };
   lerFaixa(performance.now());
   reenquadrar();
-  palco.aoRedimensionar(reenquadrar);
+  let releitura: ReturnType<typeof setTimeout> | undefined;
+  palco.aoRedimensionar(() => {
+    reenquadrar();
+    const agora = innerHeight > innerWidth;
+    if (toque && agora && !retrato) mostrarAviso(ui, t('aviso.girar'));
+    retrato = agora;
+    // A faixa de controles muda de colunas ao girar: relê a altura 300 ms depois e enquadra de novo.
+    clearTimeout(releitura);
+    releitura = setTimeout(() => {
+      faixaLidaEm = -Infinity;
+      lerFaixa(performance.now());
+      reenquadrar();
+    }, 300);
+  });
 
   teclado = ligarTeclado({
     aoMudarDirecao: (dir) => {
@@ -428,9 +445,13 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     quadro,
     pausado: ap.pausado,
     desmontar: () => {
+      clearTimeout(releitura);
       teclado.desligar();
       encerrarSessaoDeTela();
+      hud.destruir();
+      visao.destruir();
       ap.encerrar();
+      for (const d of document.querySelectorAll('dialog.modal')) if (!modaisDeAntes.has(d)) d.remove();
       palco.destruir();
       o.raiz.textContent = '';
     },

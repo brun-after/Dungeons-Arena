@@ -34,9 +34,16 @@ export class ChipsEfeito {
     this.cartao.setAttribute('role', 'tooltip');
     this.cartao.hidden = true;
     lista.after(this.cartao);
-    document.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Escape' && this.aberto) this.fechar();
-    });
+    document.addEventListener('keydown', this.aoTecla);
+  }
+
+  private readonly aoTecla = (ev: KeyboardEvent) => {
+    if (ev.key === 'Escape' && this.aberto) this.fechar();
+  };
+
+  /** Marco 16: solta o ouvinte do documento (a cena desmontada não fica presa nele). */
+  destruir(): void {
+    document.removeEventListener('keydown', this.aoTecla);
   }
 
   private abrir(tipo: string): void {

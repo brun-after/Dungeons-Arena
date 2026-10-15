@@ -147,6 +147,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   return {
     encerrar: () => {
       motor.destruir();
+      sistema.removeEventListener('change', aplicarPreferencias);
     },
     botaoPausa: pausa.botao,
     abrirPausa: pausa.abrir,

@@ -18,6 +18,7 @@ import { MonitorDeConexao } from './net/qualidade';
 import { iniciarLaco, relogioDoNavegador } from './plataforma/laco-navegador';
 import { carregarSlot, gravarRegistro } from './plataforma/saves';
 import { enderecoDoServidor } from './plataforma/servidor';
+import { sairDaTelaCheia } from './plataforma/sessao-tela';
 import { conectarCampanha, type ConexaoCampanha } from './plataforma/transporte-colyseus';
 import { jogadorDoSave, type RefFase, type RegistroProgresso } from './save/esquema';
 import { contextoDaFase, estadoInicialDaFase, faseOficialOuGerada } from './save/fases-campanha';
@@ -159,6 +160,7 @@ export async function iniciarGrupo(raiz: HTMLElement, o: OpcoesGrupo): Promise<v
     sair.setAttribute('aria-label', t('grupo.sairRotulo'));
     sair.addEventListener('click', () => {
       sair.disabled = true;
+      sairDaTelaCheia();
       void gravar().finally(() => {
         conexao.transporte.fechar();
         location.href = './?jogo=campanha';

@@ -1,6 +1,19 @@
 // Sessão de jogo na tela (§4.9): tela cheia e trava de orientação no primeiro gesto (no toque),
 // Wake Lock enquanto a aba está visível. Tudo com falha silenciosa.
 
+/**
+ * Marco 16 (15/10/2026, §4.9): ao deixar o jogo pelo menu, solta a orientação e sai da tela cheia (a página seguinte é
+ * um menu, que gira à vontade). Falha em silêncio.
+ */
+export function sairDaTelaCheia(): void {
+  try {
+    screen.orientation.unlock();
+  } catch {
+    // Sem suporte: nada a soltar.
+  }
+  if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined);
+}
+
 export function prepararSessaoDeTela(toque: boolean): () => void {
   let trava: WakeLockSentinel | null = null;
 

@@ -4,7 +4,7 @@
 // Cada borda das tiras é arredondada de forma independente, para não acumular deriva (§2.16, fatiamento).
 
 import atlas from 'virtual:atlas-criaturas';
-import { Rectangle, Texture, type TextureSource } from 'pixi.js';
+import { CanvasSource, ImageSource, Rectangle, Texture, type TextureSource } from 'pixi.js';
 import { chaveQuadro } from './modelos/atlas';
 import type { Vista } from './modelos/svg';
 import { TIRAS } from './caminhada';
@@ -53,13 +53,24 @@ export interface BibliotecaCriaturas {
   fonte: (modelo: string, vista: Vista, quadro: number) => FonteToken | null;
 }
 
+/**
+ * Marco 16 (15/10/2026): o atlas é decodificado uma vez por página e compartilhado pelas cenas (a troca de fase do
+ * cooperativo monta outra cena); antes, cada cena decodificava de novo e o cache global do Pixi guardava todas.
+ */
+let biblioteca: Promise<BibliotecaCriaturas | null> | null = null;
+
 /** Decodifica o atlas. Se falhar, devolve null e a cena usa as silhuetas (substituto visível). */
-export async function carregarBiblioteca(): Promise<BibliotecaCriaturas | null> {
+export function carregarBiblioteca(): Promise<BibliotecaCriaturas | null> {
+  biblioteca ??= decodificarBiblioteca();
+  return biblioteca;
+}
+
+async function decodificarBiblioteca(): Promise<BibliotecaCriaturas | null> {
   try {
     const img = new Image();
     img.src = atlas.url;
     await img.decode();
-    const source = Texture.from(img).source;
+    const source = new ImageSource({ resource: img });
     const cache = new Map<string, FonteToken>();
     return {
       fonte: (modelo, vista, quadro) => {
@@ -80,7 +91,7 @@ export async function carregarBiblioteca(): Promise<BibliotecaCriaturas | null> 
 
 /** Token próprio: a imagem já recortada vira duas fontes (em pé, pelos pés; de cima, pelo centro). */
 export function fontesDoToken(imagem: HTMLCanvasElement): { emPe: FonteToken; cima: FonteToken; source: TextureSource } {
-  const source = Texture.from(imagem).source;
+  const source = new CanvasSource({ resource: imagem });
   const q = { x: 0, y: 0, l: imagem.width, a: imagem.height };
   return { emPe: fatiar(source, q, 0.5, 1), cima: fatiar(source, q, 0.5, 0.5), source };
 }

@@ -83,6 +83,11 @@ export class Hud {
 
     raiz.append(this.log, this.morte);
   }
+  /** Marco 16: desmonta o que prende a página (o ouvinte de teclado dos chips de efeito). */
+  destruir(): void {
+    this.chips.destruir();
+  }
+
 
   atualizar(jogador: Entidade | undefined, tick = 0): void {
     if (!jogador) return;

@@ -1,10 +1,13 @@
 // Diagnóstico (§4.10): fps médio e p95 num buffer circular de 240 quadros, atualizado a 2 Hz,
 // atrás da flag `?diag=1`. Também expõe dados em atributos para o teste ponta a ponta.
+// Marco 16 (15/10/2026, D-062): p99, pausas acima de 100 ms na janela e a memória do heap (quando o navegador expõe).
 
 import { t } from '../i18n';
 
 const QUADROS = 240;
 const INTERVALO_MS = 500;
+/** Quadro acima disto conta como pausa perceptível. */
+const PAUSA_MS = 100;
 
 /** Indicador de rede da arena (§2.15): latência, correção e estado da conexão. */
 export interface DadosRede {
@@ -64,9 +67,18 @@ export class Diagnostico {
     const amostra = Array.from(this.duracoes.subarray(0, this.preenchidos)).sort((a, b) => a - b);
     const media = amostra.reduce((s, v) => s + v, 0) / Math.max(1, amostra.length);
     const p95 = amostra[Math.floor(amostra.length * 0.95)] ?? 0;
+    const p99 = amostra[Math.floor(amostra.length * 0.99)] ?? 0;
+    const pausas = amostra.filter((v) => v > PAUSA_MS).length;
+    const memoria = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory;
+    const mb = memoria ? Math.round(memoria.usedJSHeapSize / 1024 / 1024) : null;
     const d = dados();
+    this.elemento.dataset.p99 = p99.toFixed(1);
+    this.elemento.dataset.pausas = String(pausas);
+    if (mb !== null) this.elemento.dataset.memoriaMb = String(mb);
     this.elemento.textContent =
-      `fps ${(1000 / Math.max(1, media)).toFixed(0)} · p95 ${p95.toFixed(1)} ms · tick ${d.tick}` +
+      `fps ${(1000 / Math.max(1, media)).toFixed(0)} · p95 ${p95.toFixed(1)} · p99 ${p99.toFixed(1)} ms · pausas ${pausas}` +
+      (mb !== null ? ` · ${mb} MB` : '') +
+      ` · tick ${d.tick}` +
       ` · célula ${d.celula.x},${d.celula.y} · entidades ${d.entidades} · zoom ${d.zoom.toFixed(2)}` +
       (d.rede ? ` · rtt ${d.rede.rttMs.toFixed(0)} ms · correção p95 ${d.rede.erroP95.toFixed(2)}` : '');
     if (d.rede) {

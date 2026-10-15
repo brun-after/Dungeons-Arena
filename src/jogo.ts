@@ -22,6 +22,7 @@ import { criarJogador } from './entities/fabrica';
 import { t } from './i18n';
 import type { Dificuldade } from './modos/dificuldade';
 import { iniciarLaco } from './plataforma/laco-navegador';
+import { sairDaTelaCheia } from './plataforma/sessao-tela';
 import { carregarAventura } from './plataforma/aventuras';
 import { carregarSlot, criarAutosave, gravarRegistro, listarSlots, type Autosave } from './plataforma/saves';
 import { Interpolador } from './render/interpolacao';
@@ -175,6 +176,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     const salvar = autosave;
     sair.addEventListener('click', () => {
       sair.disabled = true;
+      sairDaTelaCheia();
       void salvar.agora().finally(() => {
         location.href = './?jogo=campanha';
       });
