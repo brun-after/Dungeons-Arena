@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 2.1 · **Data:** 14/10/2026
+**Versão do documento:** 2.2 · **Data:** 14/10/2026
 **Status:** 🚧 Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência em andamento: 12 concluído; próximo, o 13
 
 > **Histórico**
+> - **2.2 (14/10/2026)**: novo marco 14, sistema de habilidades (composição, elementos, ranks, árvores, classes, livros, habilidades geradas e efeitos legíveis); rebalanceamento vira 15 e endurecimento, 16 (D-057).
 > - **2.1 (14/10/2026)**: marco 12 concluído (áudio sintetizado, minimapa, pausa, configurações, guia, efeitos visuais como dado, qualidade e acessibilidade).
 > - **2.0 (14/10/2026)**: roteiro reescrito para a convergência (12 → 15 antes de 11A e da arena), um PR por marco e as sugestões de capacidades adotadas (D-055).
 > - **1.9 (14/10/2026)**: marco 10A concluído (invocações completas, avatares e dominação; pergaminhos de invocação).
@@ -123,7 +124,7 @@ Node.js + Colyseus no backend da arena · WSS · Vitest + Playwright.
 Cada marco vira **um** Pull Request (a partir do 12, sem subdivisões). O CI (typecheck, lint, testes, build e
 smoke) precisa passar antes do merge em `main`, e o merge publica automaticamente.
 
-**Ordem atual** (D-055): **12 → 13 → 14 → 15**, depois **11A**, depois a arena (**8B → 9B → 10B → 11B**). A sessão com
+**Ordem atual** (D-055, D-057): **13 → 14 → 15 → 16**, depois **11A**, depois a arena (**8B → 9B → 10B → 11B**). A sessão com
 pessoas (7C) entra quando houver testadores.
 
 ### Etapas de infraestrutura
@@ -168,8 +169,9 @@ pessoas (7C) entra quando houver testadores.
 |---|---|---|---|
 | [x] | 12 | **Áudio** sintetizado (música por contexto, efeitos, som posicional, passos); **interface** (minimapa, prompt de interação, pausa, configurações, guia, menu com fundo); **efeitos visuais** como dado por habilidade (partículas, presets de impacto, efeitos persistentes, luz, enquadrar dois); **qualidade** (presets, degradação automática, teto de DPR) e **acessibilidade** (escala de interface, teclado, contraste) | Ameaças legíveis; o mesmo digest com e sem efeitos; nunca mudo; movimento reduzido respeitado |
 | [ ] | 13 | Visão **isométrica**; **modelos de criatura** gerados no build; **caminhada por fatias**; **personagem por imagem** (recorte, escala, substituto, legibilidade) | Alternar a visão preserva velocidade, alcance e regras; imagem inválida não quebra o jogo |
-| [ ] | 14 | Ferramenta de **balanceamento por simulação** (tempo para matar, curva das fases, fluxo de ouro, invocações, margem de aviso do corpo a corpo) e ajuste dos números da campanha e do Livre | Ritmo e janelas de reação validados na campanha e no Livre. *Fichas justas por modo de arena: depois do 10B* |
-| [ ] | 15 | Celular (área segura, orientação, redimensionamento), **PWA offline** testado, desempenho e memória (10 trocas de fase, cena de carga, `BENCHMARKS.md`) e servidor (limites, métricas, teste de 30 min na VM) | Offline e benchmarks verificados. *Recuperação de queda: depois do 9B; sessão real de 10 pessoas: no 11B* |
+| [ ] | 14 | **Sistema de habilidades**: composição em camadas (efeito, forma, tempo, custo, tema, apresentação); formas linha, cone e ao redor; alvos aliado, todos os aliados e área livre; escudo, puxão e troca de lugar; **5 elementos** com estados e sinergias; interações em tabela (acúmulo, sinergia, resistência, teto); **orçamento de poder**; **ranks** por nível; **árvores de evolução** e modificadores; **classes** (guerreiro, mago, arqueiro) com afinidades; **livros de habilidade**; **habilidades geradas por semente** (inimigos e livros); **passivas**; barra escolhida e roda de habilidades; **efeitos legíveis** (duração, cartão e descrição gerada) | Uma habilidade nova nasce de dados e cabe no orçamento; o jogador entende o que está ativo e o que faz; inimigos das fases geradas com repertório próprio; mesmo digest com as mesmas sementes |
+| [ ] | 15 | Ferramenta de **balanceamento por simulação** (tempo para matar por classe, rank e evolução, curva das fases, fluxo de ouro, invocações, margem de aviso do corpo a corpo) e ajuste dos números da campanha e do Livre | Ritmo e janelas de reação validados na campanha e no Livre. *Fichas justas por modo de arena: depois do 10B* |
+| [ ] | 16 | Celular (área segura, orientação, redimensionamento), **PWA offline** testado, desempenho e memória (10 trocas de fase, cena de carga, `BENCHMARKS.md`) e servidor (limites, métricas, teste de 30 min na VM) | Offline e benchmarks verificados. *Recuperação de queda: depois do 9B; sessão real de 10 pessoas: no 11B* |
 
 ---
 
