@@ -641,7 +641,7 @@ test.describe('menu e arena online', () => {
 
     await convidado.goto('./?arena=online&diag=1');
     await convidado.getByLabel('Código da sala').fill(codigo ?? '');
-    await convidado.getByRole('button', { name: 'Entrar' }).click();
+    await convidado.getByRole('button', { name: 'Entrar', exact: true }).click();
 
     // Os dois jogadores + NPCs da arena aparecem nos dois navegadores.
     for (const p of [criador, convidado]) {
