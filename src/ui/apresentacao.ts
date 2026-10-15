@@ -4,7 +4,7 @@
 // Nada aqui muda a simulação: tudo lê estado e eventos.
 
 import { MotorAudio } from '../audio/motor';
-import type { Catalogo, Habilidade } from '../combat/habilidades';
+import type { BuscaHabilidade } from '../combat/habilidades';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import type { Barramento } from '../core/events';
@@ -33,7 +33,8 @@ export interface OpcoesApresentacao {
   bus: Barramento<EventosDaSimulacao>;
   estado: () => EstadoJogo;
   idLocal: string;
-  habilidades: Catalogo<Habilidade>;
+  /** Marco 14: acha a habilidade pela chave do evento (rank, caminhos, geradas). */
+  habilidades: BuscaHabilidade;
   toque: boolean;
   /** Campanha: a pausa para a simulação. Arena: o menu abre e o mundo segue. */
   pausaOJogo: boolean;

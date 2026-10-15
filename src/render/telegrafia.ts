@@ -2,11 +2,15 @@
 // conjuração, onde vai cair — área com preenchimento que cresce até o impacto, linha de mira
 // para golpe e projétil — e o projétil fica visível durante a viagem. Só lê o estado.
 // Marco 13 (14/10/2026): a telegrafia do chão segue a matriz do plano; o projétil, em pé, é projetado.
+// Marco 14 (14/10/2026): a habilidade vem pela chave da ação; linha, cone e ao redor desenham as mesmas células
+// que a simulação atinge (combat/formas.ts); as de suporte ficam na cor própria.
 
 import { Graphics, type Container } from 'pixi.js';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import { DT_MS } from '../core/loop';
+import { resolverHabilidade } from '../combat/compilar-habilidade';
+import { celulasDaForma, deSuporte } from '../combat/formas';
 import { relacao } from '../modos/relacao';
 import { CELULA_PX } from './camera-calculo';
 import { centroDaCelula, type Projecao } from './projecao';
@@ -36,12 +40,20 @@ export class CamadaTelegrafia {
     for (const e of estado.entidades) {
       const a = e.acao;
       if (!a) continue;
-      const hab = ctx.conteudo.habilidades.get(a.habilidadeId);
+      const hab = resolverHabilidade(ctx, a.chave);
       if (!hab || hab.politicaImpacto === 'proprio') continue;
-      const cor = local && relacao(local, e, ctx.modo) === 'proprio' ? COR_PROPRIA : COR_HOSTIL;
+      const cor = deSuporte(hab) || (local && relacao(local, e, ctx.modo) === 'proprio') ? COR_PROPRIA : COR_HOSTIL;
       const fracao = Math.min(1, Math.max(0, (tickVisual - a.inicioTick) / Math.max(1, a.lancamentoTick - a.inicioTick)));
 
-      if (hab.politicaImpacto === 'area') {
+      if (hab.politicaImpacto === 'area' && hab.tipoArea !== 'quadrado') {
+        // Linha, cone e ao redor: célula a célula; o preenchimento engrossa até o impacto.
+        for (const c of celulasDaForma(hab, { x: e.x, y: e.y }, { x: a.alvoX, y: a.alvoY }, ctx.fase)) {
+          chao
+            .rect(c.x * CELULA_PX + 1, c.y * CELULA_PX + 1, CELULA_PX - 2, CELULA_PX - 2)
+            .fill({ color: cor, alpha: 0.12 + 0.22 * fracao })
+            .stroke({ width: 1.5, color: cor, alpha: 0.7 });
+        }
+      } else if (hab.politicaImpacto === 'area') {
         const r = hab.raioArea;
         const x = (a.alvoX - r) * CELULA_PX;
         const y = (a.alvoY - r) * CELULA_PX;

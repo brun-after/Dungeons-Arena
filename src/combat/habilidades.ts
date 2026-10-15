@@ -177,6 +177,9 @@ export function etiquetasDe(h: Pick<Habilidade, 'tipoAtaque' | 'politicaImpacto'
 
 export type Catalogo<T> = ReadonlyMap<string, T>;
 
+/** Marco 14: como a apresentação acha a habilidade de um evento (pela chave compilada ou pelo id). */
+export type BuscaHabilidade = (chave: string) => Habilidade | undefined;
+
 function lerEvolucoes(l: Leitor, v: unknown): Record<number, string[]> {
   if (v === undefined) return {};
   const o: Objeto = l.objeto(v, 'evolucoes');

@@ -568,6 +568,48 @@ body.toque .log-combate.aberto {
   outline-offset: 2px;
 }
 
+/* Marco 14: escolha de classe ao criar o personagem. */
+.cartoes-classe {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  width: min(960px, 100%);
+}
+
+.cartao-classe {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  background: var(--painel);
+}
+
+.cartao-classe h2 {
+  margin: 0;
+  color: var(--destaque);
+  font-size: 1.15rem;
+}
+
+.cartao-classe p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.cartao-classe .detalhe-classe {
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+
+.cartao-classe .botao-menu {
+  margin-top: auto;
+}
+
+.escolha-classe {
+  overflow-y: auto;
+}
+
 /* Marco 14: aba Habilidades da mochila. */
 .cartao-habilidade {
   flex-wrap: wrap;

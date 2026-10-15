@@ -73,7 +73,7 @@ export interface PedidoDeSom {
 export function sonsDoEvento(ev: EventoSimulacao, idLocal: string, habilidade: (id: string) => Habilidade | undefined): PedidoDeSom[] {
   switch (ev.t) {
     case 'acaoIniciada': {
-      const h = habilidade(ev.habilidadeId);
+      const h = habilidade(ev.chave);
       if (!h) return [];
       // O ataque básico só soa no impacto (evita dois sons por golpe); o resto anuncia a conjuração.
       if (h.politicaImpacto === 'contato' && h.conjuracaoMs < 600) return [];
@@ -85,7 +85,7 @@ export function sonsDoEvento(ev: EventoSimulacao, idLocal: string, habilidade: (
       if (ev.cura > 0 && ev.dano === 0) return [{ som: 'cura', origemId: ev.alvoId }];
       if (ev.d20 === 0) return [];
       if (ev.falha) return [{ som: 'falha', origemId: ev.alvoId }];
-      const h = habilidade(ev.habilidadeId);
+      const h = habilidade(ev.chave);
       const base: SomId = ev.critico ? 'critico' : h?.politicaImpacto === 'area' ? 'explosao' : 'acerto';
       return [{ som: base, origemId: ev.alvoId }];
     }

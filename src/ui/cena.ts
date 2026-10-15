@@ -9,6 +9,7 @@
 import { recargaRestante } from '../combat/acao';
 import { celulaOcupada } from '../combat/geometria';
 import type { Habilidade } from '../combat/habilidades';
+import { resolverHabilidade } from '../combat/compilar-habilidade';
 import { habilidadeDoAtor } from '../combat/perfil';
 import type { Celula, Comando } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -129,7 +130,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     bus,
     estado: o.estado,
     idLocal,
-    habilidades: ctx.conteudo.habilidades,
+    habilidades: (chave) => resolverHabilidade(ctx, chave),
     toque,
     pausaOJogo: o.pausaOJogo ?? false,
     acoesDaPausa: o.acoesDaPausa ?? [],
@@ -346,6 +347,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     aviso: (texto) => {
       mostrarAviso(ui, texto);
     },
+    nomeDaHabilidade: (id) => resolverHabilidade(ctx, id)?.nome ?? id,
   });
 
   let ultimoQuadroMs = performance.now();

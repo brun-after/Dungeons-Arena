@@ -13,6 +13,7 @@
 import { appendFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 import { contextoDaArena } from '../../src/arena/contexto-arena';
+import { resolverHabilidade } from '../../src/combat/compilar-habilidade';
 import type { EventoSimulacao } from '../../src/core/eventos-simulacao';
 import { DT_MS } from '../../src/core/loop';
 import { BotDeArena } from '../../src/net/bot';
@@ -94,7 +95,7 @@ async function conectar(pedido: { criar: true; fase: string } | { codigo: string
     for (const ev of eventos) {
       if (ev.t !== 'acaoIniciada') continue;
       const ator = cliente.base?.entidades.find((e) => e.id === ev.atorId);
-      const hab = ctx.conteudo.habilidades.get(ev.habilidadeId);
+      const hab = resolverHabilidade(ctx, ev.chave);
       if (ator?.controlador !== 'ia' || !hab || hab.politicaImpacto === 'proprio') continue;
       const lista = janelas.get(ev.habilidadeId) ?? [];
       lista.push((ev.impactoPrevistoTick - ev.tick) * DT_MS - cliente.rttMs);

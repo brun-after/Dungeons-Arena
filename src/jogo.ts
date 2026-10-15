@@ -7,6 +7,8 @@
 // último save, sem gravar nada (D-042); um jogo novo também pode começar numa fase do jogador.
 // Marco 10A-1 (14/10/2026): chegar à saída aberta leva à próxima fase da campanha (data/campanha.json):
 // o registro novo é montado por `avancarFase` (pura), gravado, e a sessão recarrega a partir dele (D-052).
+// Marco 14 (14/10/2026): o jogo novo num slot começa pela escolha de classe (ui/escolha-classe.ts); sem slot
+// (pesquisa, jogar sem salvar) e no teste do editor, o personagem é aventureiro.
 
 import type { Comando } from './core/comandos';
 import { criarFila, enfileirar, retirarAte } from './core/comandos';
@@ -31,6 +33,7 @@ import { proximaFase } from './save/sequencia';
 import { avancarFase, personagemNoInicio } from './save/transicao';
 import { mostrarAviso } from './ui/aviso';
 import { montarCena } from './ui/cena';
+import { mostrarEscolhaDeClasse } from './ui/escolha-classe';
 import { criarPesquisa } from './ui/pesquisa';
 import { carregarFase } from './world/fase';
 import { catalogoDeGeracao, gerarFase } from './world/gerador';
@@ -38,6 +41,7 @@ import { povoarFase } from './world/populacao';
 import { validarFase } from './world/validacao-fase';
 
 const ID_JOGADOR = 'j1';
+const CLASSE_PADRAO = 'aventureiro';
 const AUTOSAVE_MS = 30_000;
 
 /** Fases oficiais da campanha, por id (a referência gravada no save). */
@@ -57,6 +61,8 @@ export interface OpcoesJogo {
   teste?: string;
   /** Teste com pessoas (marco 7A): personagem novo na fase 1, sem save, com medidas e questionário. */
   pesquisa?: boolean;
+  /** Marco 14: a classe do personagem novo (sem ela, o jogo novo num slot mostra a escolha). */
+  classe?: string;
 }
 
 function montarContexto(conteudo: Conteudo, faseJson: unknown): ContextoSimulacao {
@@ -80,11 +86,11 @@ function estadoInicialDaFase(ctx: ContextoSimulacao): EstadoJogo {
   return estado;
 }
 
-function novoEstado(ctx: ContextoSimulacao, personagem: Entidade | null = null): EstadoJogo {
+function novoEstado(ctx: ContextoSimulacao, personagem: Entidade | null = null, classeId = CLASSE_PADRAO): EstadoJogo {
   const { fase, conteudo } = ctx;
   const estado = estadoInicialDaFase(ctx);
   const spawn = fase.spawns[0] ?? { x: 1, y: 1 };
-  const classe = conteudo.classes.get('aventureiro');
+  const classe = conteudo.classes.get(classeId) ?? conteudo.classes.get(CLASSE_PADRAO);
   if (!classe) throw new Error('classe inicial ausente');
   // O jogador entra antes dos inimigos (a ordem das entidades é a do save desde o 6B).
   estado.entidades.unshift(personagem ? personagemNoInicio(personagem, spawn, ID_JOGADOR) : criarJogador(classe, ID_JOGADOR, spawn.x, spawn.y, ctx.balance));
@@ -132,6 +138,12 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     mostrarErro(raiz, t('slots.erroLeitura'));
     return;
   }
+  // Marco 14: jogo novo num slot sem classe escolhida → a tela de escolha (o endereço volta com `&classe=`).
+  if (slot !== null && !leitura && !opcoes.classe) {
+    const fase = opcoes.faseNova?.tipo === 'aventura' ? `&fase=${encodeURIComponent(`aventura:${opcoes.faseNova.id}`)}` : '';
+    mostrarEscolhaDeClasse(raiz, conteudo, `./?jogo=campanha&slot=${slot}${fase}${location.search.includes('diag=1') ? '&diag=1' : ''}`);
+    return;
+  }
   const faseRef: RefFase = teste ? { tipo: 'aventura', id: teste } : (leitura?.faseRef ?? opcoes.faseNova ?? FASE_INICIAL);
   const voltarPara = teste ? `./?editor=${encodeURIComponent(teste)}` : './?jogo=campanha';
   const faseJson = await faseDaReferencia(faseRef, conteudo);
@@ -145,7 +157,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     return;
   }
   const ctx = montarContexto(conteudo, validacao.fase);
-  const estado = leitura?.estado ?? novoEstado(ctx, teste ? await personagemAtual() : null);
+  const estado = leitura?.estado ?? novoEstado(ctx, teste ? await personagemAtual() : null, opcoes.classe);
   const idJogador = jogadorDoSave(estado)?.id ?? ID_JOGADOR;
   const estatisticas: Estatisticas = { ...(leitura?.estatisticas ?? { inimigosDerrotados: 0, mortes: 0 }) };
 

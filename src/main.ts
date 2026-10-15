@@ -43,7 +43,8 @@ function rotear(raiz: HTMLElement): void {
     const fase = params.get('fase');
     const faseNova = fase?.startsWith('aventura:') ? { tipo: 'aventura' as const, id: fase.slice('aventura:'.length) } : undefined;
     if (params.has('slot') && Number.isInteger(slot) && slot >= 0 && slot <= 3) {
-      void iniciarJogo(raiz, { slot: slot === 0 ? null : slot, ...(faseNova && { faseNova }) });
+      const classe = params.get('classe');
+      void iniciarJogo(raiz, { slot: slot === 0 ? null : slot, ...(faseNova && { faseNova }), ...(classe && { classe }) });
     } else void mostrarSlots(raiz);
   } else {
     mostrarMenu(raiz);
