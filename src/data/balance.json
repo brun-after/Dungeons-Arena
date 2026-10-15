@@ -1,5 +1,5 @@
 {
-  "versao": 15,
+  "versao": 16,
   "movimento": {
     "velocidadeBaseMs": 400,
     "filaMaxWaypoints": 2
@@ -173,6 +173,13 @@
     "chanceSecundario": 0.4,
     "chanceLivroRaro": 0.04
   },
+  "dificuldades": {
+    "facil": { "vidaPct": 75, "danoPct": 70, "hesitacaoPct": 130, "avisoExtraMs": 150, "recompensaPct": 80 },
+    "normal": { "vidaPct": 100, "danoPct": 100, "hesitacaoPct": 100, "avisoExtraMs": 0, "recompensaPct": 100 },
+    "dificil": { "vidaPct": 130, "danoPct": 125, "hesitacaoPct": 80, "avisoExtraMs": 0, "recompensaPct": 125 },
+    "pesadelo": { "vidaPct": 170, "danoPct": 150, "hesitacaoPct": 60, "avisoExtraMs": 0, "recompensaPct": 160 }
+  },
+  "grupo": { "vidaPorJogadorPct": 60, "danoPorJogadorPct": 8, "recompensaPorJogadorPct": 10, "spawnerPorJogadorPct": 25 },
   "ia": {
     "gracaForaDaZonaMs": 1200,
     "patrulhaAvaliacaoMs": 2000,

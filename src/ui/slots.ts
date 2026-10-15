@@ -2,7 +2,8 @@
 // exportar, importar e excluir (com confirmação). Importar só em slot vazio, para nunca
 // sobrescrever um save sem querer. Textos sempre por textContent.
 
-import { t } from '../i18n';
+import { t, type ChaveTexto } from '../i18n';
+import { DIFICULDADES, type Dificuldade } from '../modos/dificuldade';
 import { listarAventuras, type RegistroAventura } from '../plataforma/aventuras';
 import { apagarSlot, carregarSlot, gravarRegistro, listarSlots, type EstadoSlot } from '../plataforma/saves';
 import { exportarRegistro, importarRegistro } from '../save/esquema';
@@ -25,6 +26,25 @@ function botao(texto: string, aoClicar: () => void, classe = 'botao-cabecalho'):
   b.type = 'button';
   b.addEventListener('click', aoClicar);
   return b;
+}
+
+/** Marco 15: o seletor de dificuldade do slot; muda o endereço do link (continuar ou jogo novo). */
+function seletorDeDificuldade(n: number, inicial: Dificuldade, aoMudar: (d: Dificuldade) => void): HTMLLabelElement {
+  const rotulo = el('label', 'linha-dificuldade', t('dificuldade.rotulo'));
+  const escolha = el('select', 'escolha-dificuldade');
+  escolha.setAttribute('aria-label', t('dificuldade.doSlot', { n }));
+  for (const d of DIFICULDADES) {
+    const op = el('option', undefined, t(`dificuldade.${d}` as ChaveTexto));
+    op.value = d;
+    op.selected = d === inicial;
+    escolha.append(op);
+  }
+  escolha.addEventListener('change', () => {
+    const valor = DIFICULDADES.find((d) => d === escolha.value);
+    if (valor) aoMudar(valor);
+  });
+  rotulo.append(escolha);
+  return rotulo;
 }
 
 const dataHora = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
@@ -80,7 +100,14 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
           t('slots.resumo', { nivel: s.resumo.nivel, fase: s.resumo.nomeFase, data: dataHora.format(s.resumo.atualizadoEm) }),
         ),
       );
-      acoes.append(link(`./?jogo=campanha&slot=${s.slot}`, t('slots.continuar')));
+      const continuar = link(`./?jogo=campanha&slot=${s.slot}&dificuldade=${s.resumo.dificuldade}`, t('slots.continuar'));
+      acoes.append(continuar);
+      cartao.append(
+        el('p', 'detalhe-slot', t('dificuldade.atual', { nome: t(`dificuldade.${s.resumo.dificuldade}` as ChaveTexto) })),
+        seletorDeDificuldade(s.slot, s.resumo.dificuldade, (d) => {
+          continuar.href = `./?jogo=campanha&slot=${s.slot}&dificuldade=${d}`;
+        }),
+      );
       acoes.append(
         botao(t('slots.exportar'), () => {
           void carregarSlot(s.slot).then((r) => {
@@ -90,8 +117,19 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
       );
     } else if (s.tipo === 'vazio') {
       cartao.append(el('p', 'resumo-slot', t('slots.vazio')));
-      const novo = link(`./?jogo=campanha&slot=${s.slot}`, t('slots.novo'));
+      let dificuldadeNova: Dificuldade = 'normal';
+      let faseNova = '';
+      const novo = link(`./?jogo=campanha&slot=${s.slot}&dificuldade=normal`, t('slots.novo'));
+      const atualizarNovo = () => {
+        novo.href = `./?jogo=campanha&slot=${s.slot}&dificuldade=${dificuldadeNova}${faseNova ? `&fase=${encodeURIComponent(faseNova)}` : ''}`;
+      };
       acoes.append(novo);
+      cartao.append(
+        seletorDeDificuldade(s.slot, 'normal', (d) => {
+          dificuldadeNova = d;
+          atualizarNovo();
+        }),
+      );
       if (aventuras.length > 0) {
         const escolha = el('select', 'escolha-fase');
         escolha.setAttribute('aria-label', t('slots.faseDoJogo', { n: s.slot }));
@@ -104,7 +142,8 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
           escolha.append(op);
         }
         escolha.addEventListener('change', () => {
-          novo.href = `./?jogo=campanha&slot=${s.slot}${escolha.value ? `&fase=${encodeURIComponent(escolha.value)}` : ''}`;
+          faseNova = escolha.value;
+          atualizarNovo();
         });
         acoes.append(escolha);
       }

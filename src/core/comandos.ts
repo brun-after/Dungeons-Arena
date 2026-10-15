@@ -1,6 +1,7 @@
 // Fila de comandos (§3.3). `simular()` nunca lê entrada diretamente: consome comandos
 // produzidos por entrada local, IA, rede ou bot de teste.
 
+import type { Dificuldade } from '../modos/dificuldade';
 import type { Atributos } from '../entities/entidade';
 import type { Slot } from '../modos/modo';
 
@@ -36,7 +37,9 @@ export type Comando =
   /** Marco 14: sobe o rank (ou aprende, do 0 para o 1); nos ranks de evolução, com o caminho escolhido. */
   | { t: 'subirRank'; id: string; caminho?: string }
   /** Marco 14: põe uma habilidade conhecida numa das 4 teclas (null limpa a tecla). */
-  | { t: 'equiparHabilidade'; id: string | null; slot: number };
+  | { t: 'equiparHabilidade'; id: string | null; slot: number }
+  /** Marco 15: troca a dificuldade do mundo (o personagem não muda). */
+  | { t: 'definirDificuldade'; nivel: Dificuldade };
 
 /** Envelope de rede. O servidor deriva o jogador da sessão e atribui o tick de aplicação. */
 export interface ComandoEmpacotado {

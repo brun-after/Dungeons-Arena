@@ -8,6 +8,7 @@
 //   ?pesquisa=1       teste com pessoas (marco 7A): campanha medida, questionário e envio anônimo
 // O código da arena e do SDK de rede é carregado sob demanda (§3.8, code splitting).
 
+import { ehDificuldade } from './modos/dificuldade';
 import './estilos.css';
 import { registerSW } from 'virtual:pwa-register';
 import { iniciarJogo } from './jogo';
@@ -44,7 +45,13 @@ function rotear(raiz: HTMLElement): void {
     const faseNova = fase?.startsWith('aventura:') ? { tipo: 'aventura' as const, id: fase.slice('aventura:'.length) } : undefined;
     if (params.has('slot') && Number.isInteger(slot) && slot >= 0 && slot <= 3) {
       const classe = params.get('classe');
-      void iniciarJogo(raiz, { slot: slot === 0 ? null : slot, ...(faseNova && { faseNova }), ...(classe && { classe }) });
+      const dificuldade = params.get('dificuldade');
+      void iniciarJogo(raiz, {
+        slot: slot === 0 ? null : slot,
+        ...(faseNova && { faseNova }),
+        ...(classe && { classe }),
+        ...(ehDificuldade(dificuldade) && { dificuldade }),
+      });
     } else void mostrarSlots(raiz);
   } else {
     mostrarMenu(raiz);

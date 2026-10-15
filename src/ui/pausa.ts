@@ -2,7 +2,8 @@
 // sessão (na campanha, "Salvar e sair"). Na campanha, a simulação para enquanto qualquer um destes
 // modais estiver aberto; na arena o mesmo menu abre e o mundo segue (a interface não pausa a arena).
 
-import { t } from '../i18n';
+import { t, type ChaveTexto } from '../i18n';
+import { DIFICULDADES, type Dificuldade } from '../modos/dificuldade';
 import type { Preferencias } from '../plataforma/preferencias';
 import { criarConfiguracoes } from './configuracoes';
 import { criarGuia } from './guia';
@@ -28,7 +29,12 @@ export function criarPausa(o: {
   acoes: readonly AcaoDaPausa[];
   aoMudarPreferencias: (p: Preferencias) => void;
   aoMudarEstado: (aberta: boolean) => void;
+  /** Marco 15: a dificuldade, quando quem joga pode trocar (campanha solo e anfitrião do grupo). */
+  dificuldade?: { atual: () => Dificuldade; definir: (d: Dificuldade) => void } | undefined;
 }): Pausa {
+  let abrirAntes = () => {
+    // Sem dificuldade nesta sessão.
+  };
   // `modal` é declarado adiante; estas funções só rodam depois de tudo montado.
   const algumAberto = (): boolean => modal.aberto() || config.modal.aberto() || guia.aberto();
   const avisar = () => {
@@ -75,6 +81,33 @@ export function criarPausa(o: {
     ...o.acoes.map((a, i) => botaoMenu(a.rotulo, a.fazer, `acao-${i}`)),
   );
   modal.corpo.append(lista);
+  // Marco 15: trocar a dificuldade a qualquer momento (o personagem continua o mesmo).
+  const dif = o.dificuldade;
+  if (dif) {
+    const linha = document.createElement('label');
+    linha.className = 'linha-config linha-dificuldade';
+    linha.textContent = t('dificuldade.rotulo');
+    const escolha = document.createElement('select');
+    escolha.dataset.chave = 'dificuldade';
+    for (const d of DIFICULDADES) {
+      const op = document.createElement('option');
+      op.value = d;
+      op.textContent = t(`dificuldade.${d}` as ChaveTexto);
+      escolha.append(op);
+    }
+    escolha.addEventListener('change', () => {
+      const valor = DIFICULDADES.find((d) => d === escolha.value);
+      if (valor) dif.definir(valor);
+    });
+    linha.append(escolha);
+    modal.corpo.append(linha);
+    const sincronizar = () => {
+      escolha.value = dif.atual();
+    };
+    modal.dialogo.addEventListener('toggle', sincronizar);
+    sincronizar();
+    abrirAntes = sincronizar;
+  }
 
   const botao = document.createElement('button');
   botao.type = 'button';
@@ -87,7 +120,10 @@ export function criarPausa(o: {
 
   return {
     botao,
-    abrir: modal.abrir,
+    abrir: () => {
+      abrirAntes();
+      modal.abrir();
+    },
     aberta: algumAberto,
     abrirConfiguracoes: () => {
       config.abrir();

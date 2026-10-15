@@ -26,6 +26,8 @@ export interface DadosDiagnostico {
   /** Marco 6: nível e quantos slots têm item. */
   nivel: number;
   equipados: number;
+  /** Marco 15: a dificuldade da sessão. */
+  dificuldade: string;
   zoom: number;
   rede?: DadosRede;
 }
@@ -78,5 +80,6 @@ export class Diagnostico {
     this.elemento.dataset.hp = String(d.hp);
     this.elemento.dataset.nivel = String(d.nivel);
     this.elemento.dataset.equipados = String(d.equipados);
+    this.elemento.dataset.dificuldade = d.dificuldade;
   }
 }

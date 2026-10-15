@@ -9,6 +9,7 @@
 import { recargaRestante } from '../combat/acao';
 import { celulaOcupada } from '../combat/geometria';
 import type { Habilidade } from '../combat/habilidades';
+import type { Dificuldade } from '../modos/dificuldade';
 import { resolverHabilidade } from '../combat/compilar-habilidade';
 import { habilidadeDoAtor } from '../combat/perfil';
 import type { Celula, Comando } from '../core/comandos';
@@ -68,6 +69,8 @@ export interface OpcoesCena {
   pausaOJogo?: boolean;
   /** Ações extras no menu de pausa (ex.: "Salvar e sair"). */
   acoesDaPausa?: AcaoDaPausa[];
+  /** Marco 15: quem pode trocar a dificuldade (campanha solo e anfitrião do grupo). */
+  dificuldade?: { atual: () => Dificuldade; definir: (d: Dificuldade) => void };
 }
 
 export interface QuadroCena {
@@ -135,6 +138,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     toque,
     pausaOJogo: o.pausaOJogo ?? false,
     acoesDaPausa: o.acoesDaPausa ?? [],
+    dificuldade: o.dificuldade,
     aviso: (texto) => {
       mostrarAviso(ui, texto);
     },
@@ -410,6 +414,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
         hp: j?.hp ?? 0,
         nivel: j?.nivel ?? 0,
         equipados: j?.bolsa ? Object.values(j.bolsa.equipamento).filter((i) => i !== null).length : 0,
+        dificuldade: estado.dificuldade,
         zoom: camera.zoom,
         ...(q.rede && { rede: q.rede }),
       };

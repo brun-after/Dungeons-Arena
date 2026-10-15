@@ -24,6 +24,7 @@ import fase02 from './data/fases/fase-02.json';
 import { paraFaseJson } from './editor/grade';
 import { criarJogador } from './entities/fabrica';
 import { t } from './i18n';
+import type { Dificuldade } from './modos/dificuldade';
 import { iniciarLaco } from './plataforma/laco-navegador';
 import { carregarAventura } from './plataforma/aventuras';
 import { carregarSlot, criarAutosave, gravarRegistro, listarSlots, type Autosave } from './plataforma/saves';
@@ -63,6 +64,8 @@ export interface OpcoesJogo {
   pesquisa?: boolean;
   /** Marco 14: a classe do personagem novo (sem ela, o jogo novo num slot mostra a escolha). */
   classe?: string;
+  /** Marco 15: a dificuldade escolhida na tela de slots (o personagem é o mesmo em qualquer uma). */
+  dificuldade?: Dificuldade;
 }
 
 function montarContexto(conteudo: Conteudo, faseJson: unknown): ContextoSimulacao {
@@ -141,7 +144,8 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
   // Marco 14: jogo novo num slot sem classe escolhida → a tela de escolha (o endereço volta com `&classe=`).
   if (slot !== null && !leitura && !opcoes.classe) {
     const fase = opcoes.faseNova?.tipo === 'aventura' ? `&fase=${encodeURIComponent(`aventura:${opcoes.faseNova.id}`)}` : '';
-    mostrarEscolhaDeClasse(raiz, conteudo, `./?jogo=campanha&slot=${slot}${fase}${location.search.includes('diag=1') ? '&diag=1' : ''}`);
+    const dificuldade = opcoes.dificuldade ? `&dificuldade=${opcoes.dificuldade}` : '';
+    mostrarEscolhaDeClasse(raiz, conteudo, `./?jogo=campanha&slot=${slot}${fase}${dificuldade}${location.search.includes('diag=1') ? '&diag=1' : ''}`);
     return;
   }
   const faseRef: RefFase = teste ? { tipo: 'aventura', id: teste } : (leitura?.faseRef ?? opcoes.faseNova ?? FASE_INICIAL);
@@ -208,6 +212,11 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
   }
 
   const fila = criarFila();
+  // Marco 15: a dificuldade escolhida entra por comando (o estado só muda pela simulação).
+  const definirDificuldade = (nivel: Dificuldade) => {
+    enfileirar(fila, { tick: estado.tick, entidadeId: idJogador, cmd: { t: 'definirDificuldade', nivel } });
+  };
+  if (opcoes.dificuldade && opcoes.dificuldade !== estado.dificuldade) definirDificuldade(opcoes.dificuldade);
   const cena = await montarCena({
     raiz,
     ctx,
@@ -217,6 +226,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     acoesExtras,
     // Marco 12: a campanha pausa (§2.15); o menu de pausa também salva e sai.
     pausaOJogo: true,
+    dificuldade: { atual: () => estado.dificuldade, definir: definirDificuldade },
     acoesDaPausa: acoesExtras
       .filter((b): b is HTMLButtonElement => b instanceof HTMLButtonElement && b.dataset.pausa === 'sim')
       .map((b) => ({ rotulo: t('pausa.salvarESair'), fazer: () => { b.click(); } })),

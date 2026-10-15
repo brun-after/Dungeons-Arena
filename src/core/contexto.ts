@@ -5,6 +5,7 @@ import balanceJson from '../data/balance.json';
 import type { RegrasHabilidades } from '../combat/compilar-habilidade';
 import type { FaixaCritico } from '../combat/critico';
 import type { RegrasOrcamento } from '../combat/orcamento';
+import type { Dificuldade, RegrasDificuldade, RegrasGrupo } from '../modos/dificuldade';
 import type { ModoDeJogo, Raridade } from '../modos/modo';
 import type { RegrasColisao } from '../world/colisao';
 import type { Fase } from '../world/fase';
@@ -159,6 +160,9 @@ export interface Balance {
     /** Chance de um livro raro (habilidade gerada) entre os itens sorteados. */
     chanceLivroRaro: number;
   };
+  /** Marco 15 (D-061): as alavancas de cada dificuldade e a escala pelo tamanho do grupo. */
+  dificuldades: Record<Dificuldade, RegrasDificuldade>;
+  grupo: RegrasGrupo;
   ia: RegrasIa;
 }
 

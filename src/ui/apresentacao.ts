@@ -10,6 +10,7 @@ import type { EstadoJogo } from '../core/estado';
 import type { Barramento } from '../core/events';
 import type { EventosDaSimulacao } from '../core/eventos-simulacao';
 import type { Entidade, PontoVisual } from '../entities/entidade';
+import type { Dificuldade } from '../modos/dificuldade';
 import { lerPreferencias, type NivelQualidade, type Preferencias } from '../plataforma/preferencias';
 import type { Camera } from '../render/camera';
 import { EfeitosDeHabilidade } from '../render/efeitos-habilidade';
@@ -40,6 +41,8 @@ export interface OpcoesApresentacao {
   pausaOJogo: boolean;
   acoesDaPausa: readonly AcaoDaPausa[];
   aviso: (texto: string) => void;
+  /** Marco 15: a dificuldade, quando a sessão deixa trocar. */
+  dificuldade?: { atual: () => Dificuldade; definir: (d: Dificuldade) => void } | undefined;
   /** Ao mudar câmera ou controle nas Configurações. */
   aoMudarPreferencias: (p: Preferencias) => void;
 }
@@ -95,6 +98,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   sistema.addEventListener('change', aplicarPreferencias);
 
   const pausa = criarPausa({
+    dificuldade: o.dificuldade,
     pausaOJogo: o.pausaOJogo,
     toque,
     acoes: o.acoesDaPausa,

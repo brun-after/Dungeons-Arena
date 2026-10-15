@@ -16,6 +16,7 @@ import { vivo } from '../entities/entidade';
 import { processarIa } from '../entities/ia';
 import { descansar } from '../progression/descanso';
 import { desequipar, distribuirPonto, equipar, moverItem, usarItem } from '../progression/inventario';
+import { ehDificuldade } from '../modos/dificuldade';
 import { equiparHabilidade, subirRank } from '../progression/habilidades-personagem';
 import { comprar, vender } from '../progression/loja';
 import { processarMortes } from '../progression/morte';
@@ -127,6 +128,13 @@ function aplicarComandos(
         break;
       case 'equiparHabilidade':
         equiparHabilidade(ator, ctx, cmd.id, cmd.slot, estado.tick, saida);
+        break;
+      // Marco 15: dificuldade (só quem tem ficha de campanha; a arena nem decodifica o comando).
+      case 'definirDificuldade':
+        if (ator.bolsa && ehDificuldade(cmd.nivel) && estado.dificuldade !== cmd.nivel) {
+          estado.dificuldade = cmd.nivel;
+          saida.push({ t: 'dificuldadeMudou', tick: estado.tick, nivel: cmd.nivel });
+        }
         break;
     }
   }
