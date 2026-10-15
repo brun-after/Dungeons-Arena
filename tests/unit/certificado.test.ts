@@ -60,8 +60,8 @@ describe('assinatura', () => {
   it('sem certificado anterior, só até o nível sem histórico', () => {
     const c = new Certificador('chave-de-teste-com-tamanho');
     const limite = BALANCE_PADRAO.integridade.nivelSemHistorico;
-    expect(c.certificar(personagem((p) => subir(p, limite - 1)), null, ctx, 1).ok).toBe(true);
-    expect(c.certificar(personagem((p) => subir(p, limite)), null, ctx, 1)).toEqual({ ok: false, motivo: 'sem_historico' });
+    expect(c.certificar(personagem((p) => { subir(p, limite - 1); }), null, ctx, 1).ok).toBe(true);
+    expect(c.certificar(personagem((p) => { subir(p, limite); }), null, ctx, 1)).toEqual({ ok: false, motivo: 'sem_historico' });
   });
 });
 
@@ -70,7 +70,7 @@ describe('crescimento plausível', () => {
     const c = new Certificador('chave-de-teste-com-tamanho');
     const r1 = c.certificar(personagem(), null, ctx, 0);
     if (!r1.ok) throw new Error(r1.motivo);
-    const forte = personagem((p) => subir(p, 6));
+    const forte = personagem((p) => { subir(p, 6); });
     expect(c.certificar(forte, r1.certificado, ctx, MIN)).toEqual({ ok: false, motivo: 'xp_demais' });
     const r2 = c.certificar(forte, r1.certificado, ctx, 3 * 60 * MIN);
     expect(r2.ok).toBe(true);
