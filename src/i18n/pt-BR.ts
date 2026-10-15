@@ -317,6 +317,8 @@ export const ptBR = {
   'lobby.codigoCurto': 'O código tem 6 letras ou números.',
   'lobby.erroCriar': 'Não foi possível criar a sala.',
   'lobby.erroEntrar': 'Sala não encontrada ou cheia.',
+  'lobby.servidorCheio': 'O servidor está com o máximo de salas agora. Entre numa sala existente pelo código ou tente em alguns minutos.',
+  'lobby.muitasSalas': 'Muitas salas criadas daqui em pouco tempo. Espere um minuto e tente de novo.',
   'lobby.codigoDaSala': 'Código da sala: {codigo} — compartilhe para chamar alguém',
   'conexao.conectado': 'Conexão restabelecida',
   'conexao.reconectando': 'Conexão perdida, reconectando…',

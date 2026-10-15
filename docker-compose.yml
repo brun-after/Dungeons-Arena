@@ -13,6 +13,16 @@ services:
     environment:
       PORT: '2567'
       REGIAO: ${REGIAO:-local}
+      # Marco 16 (D-062): salas por processo e criações por minuto por origem (a VM tem 1 GB).
+      MAX_SALAS: ${MAX_SALAS:-6}
+      CRIACOES_POR_MINUTO: ${CRIACOES_POR_MINUTO:-6}
+    # Marco 16: o servidor não leva a VM junto se algo crescer demais (o Node fica em 512 MB de heap, Dockerfile).
+    mem_limit: 700m
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
     volumes:
       # Relatórios do teste com pessoas (marco 7A, D-044); sobrevive a novos deploys.
       - servidor-dados:/dados
@@ -33,6 +43,11 @@ services:
   caddy:
     image: caddy:2.10-alpine
     profiles: ['producao']
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
     environment:
       DOMINIO: ${DOMINIO:-localhost}
     ports:

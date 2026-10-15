@@ -10,8 +10,10 @@ RUN npm run build:server
 
 FROM node:24-slim
 WORKDIR /app
+# Marco 16 (D-062): heap do Node em 512 MB, abaixo do limite de 700 MB do contêiner (docker-compose.yml).
 ENV NODE_ENV=production \
-    PORT=2567
+    PORT=2567 \
+    NODE_OPTIONS=--max-old-space-size=512
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 COPY --from=construcao /app/dist-server ./dist-server

@@ -8,10 +8,10 @@
 // - Passo fixo de 60 Hz com acumulador do Colyseus (sem espiral, D-037).
 // - Métricas vão também para a metadata da sala, que o `/saude` agrega (sem estado global).
 
-import { matchMaker, Room, type Client } from '@colyseus/core';
+import { matchMaker, Room, ServerError, type AuthContext, type Client } from '@colyseus/core';
 import { RESERVA_RECONEXAO_MS, type Conexao, type SalaArena } from '../../src/arena/sala';
-import { gerarCodigo } from '../codigo-sala';
-import { Janela, registrarLog } from '../metricas';
+import { gerarCodigo, LimiteDeTentativas } from '../codigo-sala';
+import { Janela, registrarLog, type AtrasoDoAgendador } from '../metricas';
 
 export const EXPIRACAO_SALA_VAZIA_MS = 120_000;
 const INTERVALO_METRICAS_MS = 10_000;
@@ -19,9 +19,39 @@ const INTERVALO_METRICAS_MS = 10_000;
 /** O que cada tipo de sala põe na metadata, além das métricas (fase, tipo...). */
 export type MetadataDaSala = Record<string, unknown>;
 
+/**
+ * Marco 16 (D-062): limites do processo, configurados uma vez na partida do servidor (servidor.ts). Na VM de 1 GB,
+ * 6 salas no máximo e 6 criações por minuto por origem; a recusa sai com motivo (`servidor_cheio`, `muitas_salas`).
+ */
+export interface LimitesDoServidor {
+  maxSalas: number;
+  criacao: LimiteDeTentativas;
+  agendador: AtrasoDoAgendador | null;
+}
+
 export abstract class SalaColyseusBase extends Room {
   override autoDispose = false;
   override maxMessagesPerSecond = 120;
+
+  static limites: LimitesDoServidor | null = null;
+
+  /** Roda no pedido HTTP de matchmaking: na criação, confere o limite de salas e a taxa por origem. */
+  static override async onAuth(_token: string, _opcoes: unknown, contexto: AuthContext): Promise<boolean> {
+    const limites = SalaColyseusBase.limites;
+    const pedido = contexto.req as { url?: unknown } | undefined;
+    const url = typeof pedido?.url === 'string' ? pedido.url : '';
+    if (!limites || !url.includes('/matchmake/create/')) return true;
+    const origem = contexto.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? contexto.ip ?? 'local';
+    if ((await matchMaker.query({})).length >= limites.maxSalas) {
+      registrarLog('sala_recusada', { motivo: 'servidor_cheio' });
+      throw new ServerError(503, 'servidor_cheio');
+    }
+    if (!limites.criacao.permitir(origem, Date.now())) {
+      registrarLog('sala_recusada', { motivo: 'muitas_salas' });
+      throw new ServerError(429, 'muitas_salas');
+    }
+    return true;
+  }
 
   protected sala!: SalaArena;
   private readonly conexoes = new Map<string, Conexao>();
@@ -105,9 +135,22 @@ export abstract class SalaColyseusBase extends Room {
     }
   }
 
-  /** setMetadata substitui (não mescla): manda sempre o objeto inteiro. */
+  private bytesPorClientePorS = 0;
+
+  /** setMetadata substitui (não mescla): manda sempre o objeto inteiro. É o que o `/saude` e o `/metricas` leem. */
   protected async atualizarMetadata(): Promise<void> {
-    await this.setMetadata({ ...this.metadataPropria(), tickP95Ms: this.tickP95Ms, tickP99Ms: this.tickP99Ms, jogadores: this.sala.jogadores });
+    const m = this.sala.metricas();
+    await this.setMetadata({
+      ...this.metadataPropria(),
+      tickP95Ms: this.tickP95Ms,
+      tickP99Ms: this.tickP99Ms,
+      jogadores: m.jogadores,
+      bytesPorClientePorS: this.bytesPorClientePorS,
+      entidades: m.entidades,
+      fila: m.fila,
+      rejeicoes: m.rejeicoes,
+      reconexoes: this.reconexoes,
+    });
   }
 
   private registrarMetricas(): void {
@@ -116,14 +159,19 @@ export abstract class SalaColyseusBase extends Room {
     this.bytesNaUltimaMedida = m.bytesEnviados;
     this.tickP95Ms = Number(this.duracaoTick.percentil(0.95).toFixed(3));
     this.tickP99Ms = Number(this.duracaoTick.percentil(0.99).toFixed(3));
+    this.bytesPorClientePorS = m.jogadores > 0 ? Math.round(bytes / m.jogadores / (INTERVALO_METRICAS_MS / 1000)) : 0;
     void this.atualizarMetadata();
+    const agendador = SalaColyseusBase.limites?.agendador;
     registrarLog('metricas_sala', {
       sala: this.roomId,
       ...this.metadataPropria(),
       jogadores: m.jogadores,
       tickP95Ms: this.tickP95Ms,
       tickP99Ms: this.tickP99Ms,
-      bytesPorClientePorS: m.jogadores > 0 ? Math.round(bytes / m.jogadores / (INTERVALO_METRICAS_MS / 1000)) : 0,
+      atrasoAgendadorP95Ms: agendador?.p95Ms() ?? null,
+      bytesPorClientePorS: this.bytesPorClientePorS,
+      entidades: m.entidades,
+      fila: m.fila,
       rejeicoes: m.rejeicoes,
       reconexoes: this.reconexoes,
       memoriaMb: Math.round(process.memoryUsage().rss / 1024 / 1024),

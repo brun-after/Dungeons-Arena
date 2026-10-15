@@ -99,7 +99,16 @@ export async function iniciarGrupo(raiz: HTMLElement, o: OpcoesGrupo): Promise<v
     );
   } catch (e) {
     const motivo = e instanceof Error ? e.message : '';
-    mostrarErro(raiz, t(motivo === 'nao_encontrada' ? 'grupo.naoEncontrado' : motivo === 'nao_e_grupo' ? 'grupo.naoEGrupo' : 'grupo.falha'));
+    const chave = motivo.includes('servidor_cheio')
+      ? 'lobby.servidorCheio'
+      : motivo.includes('muitas_salas')
+        ? 'lobby.muitasSalas'
+        : motivo === 'nao_encontrada'
+          ? 'grupo.naoEncontrado'
+          : motivo === 'nao_e_grupo'
+            ? 'grupo.naoEGrupo'
+            : 'grupo.falha';
+    mostrarErro(raiz, t(chave));
     return;
   }
   const ctxInicial = contextoDe(conexao.faseRef);

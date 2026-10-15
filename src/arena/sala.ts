@@ -75,6 +75,9 @@ export interface MetricasSala {
   jogadores: number;
   bytesEnviados: number;
   rejeicoes: number;
+  /** Marco 16: entidades no mundo e comandos na agenda (para o `/metricas`). */
+  entidades: number;
+  fila: number;
 }
 
 export interface OpcoesSala {
@@ -123,7 +126,13 @@ export class SalaArena {
    * foi enviado (a soma por sessão ficava negativa quando um jogador saía).
    */
   metricas(): MetricasSala {
-    return { jogadores: this.sessoes.size, bytesEnviados: this.bytesTotais, rejeicoes: this.rejeicoesTotais };
+    return {
+      jogadores: this.sessoes.size,
+      bytesEnviados: this.bytesTotais,
+      rejeicoes: this.rejeicoesTotais,
+      entidades: this.estado.entidades.length,
+      fila: this.agenda.length,
+    };
   }
 
   conectar(enviarBruto: (texto: string) => void): Conexao {

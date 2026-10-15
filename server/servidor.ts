@@ -3,6 +3,8 @@
 //                         (tick = pior p95/p99 entre as salas, da metadata de cada uma; marco 7B)
 //   GET /salas/:codigo  → existe ou não (tipo, fase), com limite de tentativas por origem (§2.13)
 //   POST /relatorios    → relatório anônimo do teste com pessoas (marco 7A, D-044)
+//   GET /metricas       → marco 16 (D-062): processo (memória, uptime, atraso do agendador) e cada sala (tick,
+//                         jogadores, banda, filas, entidades, rejeições, reconexões); agregado, sem dado pessoal
 // O matchmaking do Colyseus continua nas rotas padrão (/matchmake/...).
 
 import http from 'node:http';
@@ -10,7 +12,8 @@ import { createEndpoint, createRouter, defineRoom, defineServer, matchMaker } fr
 import { WebSocketTransport } from '@colyseus/ws-transport';
 import { MAX_BYTES_MENSAGEM, versaoDoConteudo } from '../src/arena/protocolo';
 import { codigoValido, LimiteDeTentativas, normalizarCodigo } from './codigo-sala';
-import { registrarLog } from './metricas';
+import { monitorarAgendador, registrarLog } from './metricas';
+import { SalaColyseusBase } from './salas/sala-base';
 import { receberRelatorio } from './relatorios';
 import { SalaCampanhaColyseus } from './salas/sala-campanha';
 import { SalaLivreColyseus } from './salas/sala-livre';
@@ -22,7 +25,13 @@ export interface OpcoesServidor {
   maxPayload?: number;
   /** Pasta dos relatórios do teste com pessoas (volume `dados` no Docker). */
   dirDados?: string;
+  /** Marco 16: salas por processo (padrão 6, a VM de 1 GB) e criações por minuto por origem (padrão 6). */
+  maxSalas?: number;
+  criacoesPorMinuto?: number;
 }
+
+const MB = 1024 * 1024;
+const arredondar = (v: number) => Math.round(v * 10) / 10;
 
 const CABECALHOS_JSON = {
   'content-type': 'application/json',
@@ -37,7 +46,14 @@ function resposta(status: number, corpo: unknown): Response {
 export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: number; encerrar: () => Promise<void> }> {
   const limite = new LimiteDeTentativas(20, 60_000);
   const limiteRelatorios = new LimiteDeTentativas(10, 60_000);
+  const agendador = monitorarAgendador();
+  SalaColyseusBase.limites = {
+    maxSalas: o.maxSalas ?? 6,
+    criacao: new LimiteDeTentativas(o.criacoesPorMinuto ?? 6, 60_000),
+    agendador,
+  };
   const httpServer = http.createServer();
+  const inicio = Date.now();
 
   const saude = createEndpoint('/saude', { method: 'GET' }, async () => {
     const salas = await matchMaker.query({});
@@ -84,9 +100,29 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
     return resposta(r.status, r.status === 201 ? { ok: true } : { ok: false, motivo: r.motivo });
   });
 
+  const metricas = createEndpoint('/metricas', { method: 'GET' }, async () => {
+    const salas = await matchMaker.query({});
+    const mem = process.memoryUsage();
+    return resposta(200, {
+      ok: true,
+      versao: versaoDoConteudo(),
+      processo: {
+        rssMb: arredondar(mem.rss / MB),
+        heapMb: arredondar(mem.heapUsed / MB),
+        uptimeS: Math.round((Date.now() - inicio) / 1000),
+        atrasoAgendadorP95Ms: agendador.p95Ms(),
+        atrasoAgendadorP99Ms: agendador.p99Ms(),
+      },
+      limites: { maxSalas: SalaColyseusBase.limites?.maxSalas ?? null },
+      salas: salas.length,
+      clientes: salas.reduce((s, x) => s + x.clients, 0),
+      porSala: salas.map((s) => ({ codigo: s.roomId, nome: s.name, clientes: s.clients, ...((s.metadata ?? {}) as Record<string, unknown>) })),
+    });
+  });
+
   const servidor = defineServer({
     rooms: { arena: defineRoom(SalaLivreColyseus), campanha: defineRoom(SalaCampanhaColyseus) },
-    routes: createRouter({ saude, buscarSala, relatorios }),
+    routes: createRouter({ saude, buscarSala, relatorios, metricas }),
     transport: new WebSocketTransport({ server: httpServer, maxPayload: o.maxPayload ?? MAX_BYTES_MENSAGEM + 4096 }),
     greet: false,
     gracefullyShutdown: false,
