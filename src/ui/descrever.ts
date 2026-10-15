@@ -96,6 +96,7 @@ export function descreverHabilidade(h: Habilidade, o: OpcoesDescricao = {}): str
   if (h.saltos) linhas.push(t('desc.saltos', { n: h.saltos.quantidade, pct: h.saltos.pct }));
   const custos = [h.custoRecurso > 0 ? t('desc.custo', { mana: h.custoRecurso }) : '', h.custoVida > 0 ? t('desc.custoVida', { vida: h.custoVida }) : ''].filter((x) => x !== '');
   linhas.push(custos.length > 0 ? custos.join(' · ') : t('desc.semCusto'));
+  linhas.push(t(`desc.mobilidade.${h.mobilidade}`));
   linhas.push(h.recargaMs > 0 ? t('desc.tempo', { conj: segundos(h.conjuracaoMs), recarga: segundos(h.recargaMs) }) : t('desc.tempoSemRecarga', { conj: segundos(h.conjuracaoMs) }));
   if (o.rankMax !== undefined) linhas.push(t('desc.rank', { rank: h.rank, max: o.rankMax }));
   const codigo = ehGerada(h.id) ? codigoDaGerada(h.id) : null;

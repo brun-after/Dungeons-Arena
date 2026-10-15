@@ -4,6 +4,9 @@
 // Marco 13 (14/10/2026): a telegrafia do chão segue a matriz do plano; o projétil, em pé, é projetado.
 // Marco 14 (14/10/2026): a habilidade vem pela chave da ação; linha, cone e ao redor desenham as mesmas células
 // que a simulação atinge (combat/formas.ts); as de suporte ficam na cor própria.
+// Ajuste de 15/10/2026 (D-060): a área deixa de ser a hitbox pintada. Vira uma mancha orgânica que cobre as células
+// (render/formas-visuais.ts): preenchimento suave na cor do elemento, borda na cor da equipe e o miolo crescendo até
+// o impacto. "Mostrar a área exata" (Configurações) desenha as células por cima.
 
 import { Graphics, type Container } from 'pixi.js';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -13,19 +16,26 @@ import { resolverHabilidade } from '../combat/compilar-habilidade';
 import { celulasDaForma, deSuporte } from '../combat/formas';
 import { relacao } from '../modos/relacao';
 import { CELULA_PX } from './camera-calculo';
+import { contornoDaArea, escalarContorno, type Contorno } from './formas-visuais';
 import { centroDaCelula, type Projecao } from './projecao';
 
 const COR_HOSTIL = 0xff5a3c;
 const COR_PROPRIA = 0x5dade2;
 
+const corDe = (hex: string) => Number.parseInt(hex.slice(1), 16);
+
 export class CamadaTelegrafia {
   private readonly chao = new Graphics();
   private readonly voo = new Graphics();
+  /** Contorno por ação (o mesmo do começo ao fim da conjuração). */
+  private readonly contornos = new Map<number, Contorno>();
 
   constructor(
     camadaChao: Container,
     camadaVoo: Container,
     private readonly projecao: () => Projecao,
+    /** Ajuste de 15/10/2026: desenhar também as células exatas da hitbox. */
+    private readonly areaExata: () => boolean = () => false,
   ) {
     camadaChao.addChild(this.chao);
     camadaVoo.addChild(this.voo);
@@ -37,6 +47,7 @@ export class CamadaTelegrafia {
     const local = estado.entidades.find((e) => e.id === idLocal);
     const tickVisual = estado.tick + alpha;
 
+    const vistas = new Set<number>();
     for (const e of estado.entidades) {
       const a = e.acao;
       if (!a) continue;
@@ -45,23 +56,30 @@ export class CamadaTelegrafia {
       const cor = deSuporte(hab) || (local && relacao(local, e, ctx.modo) === 'proprio') ? COR_PROPRIA : COR_HOSTIL;
       const fracao = Math.min(1, Math.max(0, (tickVisual - a.inicioTick) / Math.max(1, a.lancamentoTick - a.inicioTick)));
 
-      if (hab.politicaImpacto === 'area' && hab.tipoArea !== 'quadrado') {
-        // Linha, cone e ao redor: célula a célula; o preenchimento engrossa até o impacto.
-        for (const c of celulasDaForma(hab, { x: e.x, y: e.y }, { x: a.alvoX, y: a.alvoY }, ctx.fase)) {
-          chao
-            .rect(c.x * CELULA_PX + 1, c.y * CELULA_PX + 1, CELULA_PX - 2, CELULA_PX - 2)
-            .fill({ color: cor, alpha: 0.12 + 0.22 * fracao })
-            .stroke({ width: 1.5, color: cor, alpha: 0.7 });
+      if (hab.politicaImpacto === 'area') {
+        const celulas = celulasDaForma(hab, { x: e.x, y: e.y }, { x: a.alvoX, y: a.alvoY }, ctx.fase);
+        let contorno = this.contornos.get(a.acaoId);
+        if (!contorno) {
+          // Linha e cone saem de quem conjura (o miolo cresce a partir dele); as demais são redondas.
+          const origem = centroDaCelula(e.x, e.y);
+          const desenho = hab.tipoArea === 'linha' ? { tipo: 'faixa' as const, origem } : hab.tipoArea === 'cone' ? { tipo: 'leque' as const, origem } : { tipo: 'radial' as const };
+          contorno = contornoDaArea(celulas, a.acaoId, desenho);
+          this.contornos.set(a.acaoId, contorno);
         }
-      } else if (hab.politicaImpacto === 'area') {
-        const r = hab.raioArea;
-        const x = (a.alvoX - r) * CELULA_PX;
-        const y = (a.alvoY - r) * CELULA_PX;
-        const lado = (2 * r + 1) * CELULA_PX;
-        chao.rect(x, y, lado, lado).fill({ color: cor, alpha: 0.12 }).stroke({ width: 2, color: cor, alpha: 0.85 });
+        vistas.add(a.acaoId);
+        if (contorno.pontos.length === 0) continue;
+        const elemento = hab.elemento ? ctx.conteudo.elementos.get(hab.elemento)?.cor : undefined;
+        const fundo = elemento ? corDe(elemento) : cor;
+        // Preenchimento suave: camadas concêntricas mais densas no centro; a borda diz de quem é.
+        chao.poly(escalarContorno(contorno, 1)).fill({ color: fundo, alpha: 0.1 });
+        chao.poly(escalarContorno(contorno, 0.72)).fill({ color: fundo, alpha: 0.07 });
+        chao.poly(escalarContorno(contorno, 0.42)).fill({ color: fundo, alpha: 0.06 });
+        chao.poly(escalarContorno(contorno, 1)).stroke({ width: 2, color: cor, alpha: 0.75 });
         // O miolo cresce do centro até cobrir a área no tick do impacto: a contagem visível.
-        const miolo = lado * fracao;
-        chao.rect(x + (lado - miolo) / 2, y + (lado - miolo) / 2, miolo, miolo).fill({ color: cor, alpha: 0.28 });
+        if (fracao > 0) chao.poly(escalarContorno(contorno, fracao)).fill({ color: fundo, alpha: 0.22 });
+        if (this.areaExata()) {
+          for (const c of celulas) chao.rect(c.x * CELULA_PX + 2, c.y * CELULA_PX + 2, CELULA_PX - 4, CELULA_PX - 4).stroke({ width: 1, color: cor, alpha: 0.6 });
+        }
       } else {
         const ox = (e.x + 0.5) * CELULA_PX;
         const oy = (e.y + 0.5) * CELULA_PX;
@@ -72,6 +90,7 @@ export class CamadaTelegrafia {
       }
     }
 
+    for (const id of this.contornos.keys()) if (!vistas.has(id)) this.contornos.delete(id);
     const proj = this.projecao();
     // No isométrico o projétil voa um pouco acima do chão (na altura do peito).
     const altura = proj.visao === 'iso' ? CELULA_PX * 0.45 : 0;

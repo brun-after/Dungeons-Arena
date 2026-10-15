@@ -23,7 +23,8 @@
         "impacto": "faiscas",
         "som": "golpe"
       },
-      "basico": true
+      "basico": true,
+      "mobilidade": "livre"
     },
     {
       "id": "seta_arcana",
@@ -59,7 +60,8 @@
           "perfurante",
           "eco"
         ]
-      }
+      },
+      "mobilidade": "lenta"
     },
     {
       "id": "explosao",
@@ -131,7 +133,8 @@
           "controle",
           "eficiente"
         ]
-      }
+      },
+      "mobilidade": "lenta"
     },
     {
       "id": "golpe_atordoante",
@@ -531,7 +534,8 @@
         "impacto": "brilho",
         "som": "magia"
       },
-      "basico": true
+      "basico": true,
+      "mobilidade": "livre"
     },
     {
       "id": "tiro",
@@ -556,7 +560,8 @@
         "impacto": "faiscas",
         "som": "projetil"
       },
-      "basico": true
+      "basico": true,
+      "mobilidade": "livre"
     },
     {
       "id": "investida",
@@ -717,7 +722,8 @@
           "fortificado",
           "sanguessuga"
         ]
-      }
+      },
+      "mobilidade": "lenta"
     },
     {
       "id": "corrente",
@@ -970,7 +976,8 @@
           "fortificado",
           "longo_alcance"
         ]
-      }
+      },
+      "mobilidade": "lenta"
     },
     {
       "id": "nova_glacial",
@@ -1110,7 +1117,8 @@
           "eco",
           "eficiente"
         ]
-      }
+      },
+      "mobilidade": "lenta"
     },
     {
       "id": "chuva_de_flechas",
@@ -1181,7 +1189,8 @@
           "cadeia",
           "brutal"
         ]
-      }
+      },
+      "mobilidade": "lenta"
     },
     {
       "id": "tiro_em_leque",

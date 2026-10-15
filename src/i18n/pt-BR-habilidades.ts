@@ -74,6 +74,9 @@ export const textosHabilidades = {
   'desc.custoVida': 'Custa {vida} de vida',
   'desc.semCusto': 'Sem custo',
   'desc.perfura': 'Atravessa os alvos',
+  'desc.mobilidade.trava': 'Para enquanto conjura',
+  'desc.mobilidade.lenta': 'Anda devagar enquanto conjura',
+  'desc.mobilidade.livre': 'Anda enquanto conjura',
   'desc.saltos': 'Salta para mais {n} alvo(s) ({pct}% do dano)',
   'desc.rank': 'Rank {rank} de {max}',
   'desc.codigo': 'Código: {codigo}',
@@ -158,6 +161,12 @@ export const textosHabilidades = {
   'habilidades.motivo.caminho_invalido': 'Escolha um caminho',
   'habilidades.motivo.tecla_invalida': 'Tecla inválida',
   'habilidades.motivo.passiva': 'Passivas não vão para as teclas',
+
+  'config.areaExata': 'Mostrar a área exata (células)',
+
+  // O d20 perto da barra (ajuste de 15/10/2026).
+  'dado.critico': 'Crítico!',
+  'dado.falha': 'Falha',
 
   // HUD, cartão e avisos.
   'hud.restante': '{s} s',

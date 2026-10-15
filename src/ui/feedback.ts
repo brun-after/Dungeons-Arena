@@ -16,6 +16,7 @@ import { descreverEfeito, nomeDoEfeito } from './descrever';
 import { vibrar } from '../plataforma/dispositivo';
 import type { Item } from '../progression/itens';
 import { ESCALONAMENTO_MS, type CamadaNumeros } from '../render/numeros';
+import { faixaDoDado, type DadoD20 } from './dado';
 import type { Hud } from './hud';
 
 export interface OpcoesFeedback {
@@ -31,6 +32,8 @@ export interface OpcoesFeedback {
   aviso: (texto: string) => void;
   /** Marco 14: o nome de uma habilidade pelo id (catálogo ou gerada). */
   nomeDaHabilidade?: (id: string) => string;
+  /** Ajuste de 15/10/2026: o d20 perto da barra. */
+  dado?: DadoD20;
 }
 
 /** Intervalo mínimo entre dois avisos do mesmo efeito (marco 14). */
@@ -62,7 +65,12 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
       const tipo = ev.falha ? 'falha' : ev.critico ? 'critico' : 'dano';
       const texto = ev.critico ? `${ev.dano}!` : String(ev.dano);
       if (alvo) numeros.mostrar(texto, tipo, alvo.x, alvo.y, o.agora(), atraso);
-      if (ev.fonteId === idLocal) hud.mostrarD20(ev.d20);
+      // Ajuste de 15/10/2026 (D-060): o d20 perto da barra a cada rolagem sua; nos extremos que envolvem você, o
+      // d20 também aparece sobre o alvo.
+      if (ev.fonteId === idLocal) o.dado?.mostrar(ev.d20, o.agora());
+      const faixa = faixaDoDado(ev.d20);
+      const extremo = ev.d20 >= 16 ? 'bom' : faixa === 'falha' ? 'falha' : null;
+      if (extremo && envolveLocal && alvo) numeros.mostrarDado(ev.d20, extremo, alvo.x, alvo.y, o.agora());
       if (ev.alvoId === idLocal && ev.dano > 0) vibrar(30);
       if (envolveLocal) {
         const chave: ChaveTexto = ev.falha ? 'log.falha' : ev.critico ? 'log.critico' : 'log.acertou';

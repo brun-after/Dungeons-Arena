@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.26 · **Data:** 15/10/2026
+**Versão:** 0.27 · **Data:** 15/10/2026
 
 > **Histórico**
+> - **0.27 (15/10/2026)**: D-060 (ajustes de jogo depois do marco 14); a D-017 passa a ser por habilidade.
 > - **0.26 (15/10/2026)**: D-059 (sistema de habilidades), marco 14.
 > - **0.25 (14/10/2026)**: D-058 (visão isométrica, modelos de criatura, caminhada por fatias e personagem por imagem), marco 13.
 > - **0.24 (14/10/2026)**: D-056 ajustada (brilho do jogador, tremor e flash pela metade).
@@ -214,6 +215,9 @@ curso termina. A direção mantida volta a valer quando a ação lança.
 
 **Consequência.** A conjuração vira um compromisso visível ("parou para conjurar"), o que reforça a
 telegrafia. Esquivar continua possível para o **alvo**, que anda livremente.
+
+> **Revista pela D-060 (15/10/2026)**: travar passa a ser escolha de cada habilidade (`mobilidade`); os ataques
+> básicos do jogador andam livres.
 
 ## D-018 · Projétil reto e acerto pela célula ocupada (v0.3, 13/10/2026)
 
@@ -1247,3 +1251,68 @@ As escolhas do usuário ao planejar:
   - digest determinístico.
 - **e2e**: escolher o mago, pôr a barreira na tecla 1, lançar e ler o cartão.
 - **Números**: os de agora são ponto de partida; o rebalanceamento por simulação é o marco 15.
+
+## D-060 · Ajustes de jogo depois do marco 14 (v0.27, 15/10/2026)
+
+**Contexto.** Jogando o marco 14, o usuário apontou cinco pontos:
+1. conjurar travava o personagem sempre, inclusive no ataque básico;
+2. o inimigo perseguia mesmo quando o jogador já tinha saído da zona durante o "?";
+3. o d20 ficava escondido num chip pequeno, sem passar recompensa ou perda;
+4. o teclado numérico lateral não usava as habilidades;
+5. a área aparecia como quadrados pintados: a hitbox, não um efeito.
+
+**Decisão.**
+- **Mobilidade por habilidade** (revê a D-017).
+  - Cada habilidade diz `mobilidade`:
+    - `trava` (padrão): não começa passo novo;
+    - `lenta`: anda a 50% (`balance.habilidades.velocidadeConjurandoLenta`);
+    - `livre`: anda normalmente.
+  - Andar conjurando custa no orçamento: +7% (lenta) e +15% (livre) de poder (`balance.orcamento.mobilidade`).
+  - **Escolhas**:
+    - livres: os ataques básicos do jogador;
+    - lentas: as leves (seta arcana, flechas perfurante e venenosa, barreira, escudo de ferro, curar);
+    - travam: as demais, inclusive os ataques dos inimigos e as geradas, que são a janela de esquiva do jogador
+      que o marco 15 vai medir.
+  - A descrição gerada diz se a habilidade para, anda devagar ou anda.
+- **Tempo mínimo na zona de atenção** (desvio da §2.6).
+  - Durante o "?", a contagem da hesitação só anda com o alvo dentro do raio de detecção. Fora, ela pausa.
+  - Passados `balance.ia.gracaForaDaZonaMs` (1,2 s) fora, o inimigo desiste e volta a patrulhar.
+  - Quem golpeia o inimigo durante o "?" é perseguido na hora.
+  - `detectados` só guarda quem chegou a ser perseguido: sair durante o "?" e voltar leva a uma hesitação nova.
+  - O "?" ganha força com o progresso e fica apagado enquanto o alvo está fora.
+  - No estado público da arena, esses dados ficam neutros, e o "?" aparece inteiro.
+  - Save v10 (`ia.foraDaZonaTicks`).
+- **d20 visível, nos dois lugares**:
+  - **perto da barra** de habilidades: a cada rolagem sua, o dado gira (300 ms; parado com movimento reduzido)
+    na cor da faixa — falha vermelha, 13–19 dourada, 20 maior com "Crítico!" — e esmaece depois de 1,5 s sem
+    rolagem;
+  - **sobre o alvo, só nos extremos** (16+ e falha), quando a rolagem envolve você: um d20 desenhado sobe com um
+    pulo de escala por 0,8 s;
+  - o chip do canto saiu.
+- **Teclado numérico**: `Numpad1`–`Numpad0` valem como os números de cima (`indiceDoAtalho`).
+- **Área orgânica: o desenho não é a hitbox** (`render/formas-visuais.ts`).
+  - A simulação continua acertando por células. A telegrafia desenha uma forma que cobre o centro de toda célula
+    atingida (testado em todas as formas e raios):
+    - círculo nas áreas redondas (quadrado, ao redor);
+    - cápsula na linha;
+    - leque que sai de quem conjura no cone.
+  - A borda ondula de leve, por fases sorteadas pela ação.
+  - O preenchimento é suave, na cor do **elemento**; a borda, na cor da **equipe** (a leitura de ameaça não se
+    perde); o miolo cresce até o impacto.
+  - **No lançamento**, a área explode pela forma — a onda e o impacto no centro, faíscas em até 6 células —,
+    mesmo sem ninguém atingido. Cancelada, não explode.
+  - Configurações → Gráficos → "**Mostrar a área exata (células)**" (desligado por padrão) desenha as células
+    por cima.
+  - Primeira tentativa recusada: o contorno pela distância de suporte em cada direção virava um "8" na linha.
+    Usar o fecho convexo arredondado deixava as áreas quadradas com cara de quadrado.
+
+**Consequência.**
+- **12 testes de unidade novos**:
+  - mobilidade e o custo no orçamento;
+  - a atenção: ficar, sair, voltar e o golpe durante o "?";
+  - o teclado numérico;
+  - as faixas do dado;
+  - a cobertura e o determinismo da área;
+  - a preferência;
+  - save v9 → v10.
+- **1 e2e novo**: o teclado numérico lança a barreira e o d20 aparece perto da barra.

@@ -6,7 +6,9 @@ import type { Celula, Dir8 } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import type { EstadoJogo } from '../core/estado';
+import { resolverHabilidade } from '../combat/compilar-habilidade';
 import { lentidaoPct, movimentoBloqueado } from '../combat/efeitos';
+import type { Mobilidade } from '../combat/habilidades';
 import { emPasso, type Entidade } from '../entities/entidade';
 import { regenerarPorPasso } from '../progression/recursos';
 import { celulaLivrePara, ordemRotativa } from './colisao';
@@ -124,8 +126,9 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
     inv && !inv.dominado
       ? 1000 / ctx.balance.invocacoes.passoMs
       : velocidade(e.atributos.destreza, ctx.balance.movimento.velocidadeBaseMs, inv?.dominado ?? false);
-  // Marco 14: o frio (resfriado) deixa mais lento.
-  const lento = 1 - lentidaoPct(e, estado.tick) / 100;
+  // Marco 14: o frio (resfriado) deixa mais lento. Ajuste de 15/10/2026: conjurar uma habilidade `lenta` também.
+  const conjurando = mobilidadeDaAcao(e, ctx) === 'lenta' ? ctx.balance.habilidades.velocidadeConjurandoLenta : 1;
+  const lento = (1 - lentidaoPct(e, estado.tick) / 100) * conjurando;
   let restante = (dtMs / 1000) * vel * lento;
 
   for (let guarda = 0; guarda < MAX_PASSOS_POR_TICK; guarda++) {
@@ -158,13 +161,20 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
   }
 }
 
+/** Como a ação em curso deixa andar (sem ação: livre). */
+function mobilidadeDaAcao(e: Entidade, ctx: ContextoSimulacao): Mobilidade {
+  if (!e.acao) return 'livre';
+  return resolverHabilidade(ctx, e.acao.chave)?.mobilidade ?? 'trava';
+}
+
 function podeEntrar(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: ContextoSimulacao): boolean {
   return passavel(ctx.fase, x, y) && celulaLivrePara(e, x, y, estado.entidades, ctx.balance.colisao);
 }
 
 function escolherPasso(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao): PassoEscolhido | null {
   // Quem conjura ou está atordoado não começa passo novo; o passo em curso termina (D-017).
-  if (e.acao || movimentoBloqueado(e, estado.tick)) return null;
+  // Ajuste de 15/10/2026 (D-060): só a ação que `trava` impede passo novo (antes, qualquer uma, D-017).
+  if (mobilidadeDaAcao(e, ctx) === 'trava' || movimentoBloqueado(e, estado.tick)) return null;
   // Reabastece a fila curta a partir do caminho do irPara.
   const max = ctx.balance.movimento.filaMaxWaypoints;
   while (e.waypoints.length < max && e.caminho.length > 0) {

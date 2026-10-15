@@ -1,5 +1,5 @@
 {
-  "versao": 14,
+  "versao": 15,
   "movimento": {
     "velocidadeBaseMs": 400,
     "filaMaxWaypoints": 2
@@ -118,6 +118,7 @@
   },
   "habilidades": {
     "pontosPorNivel": 1,
+    "velocidadeConjurandoLenta": 0.5,
     "rankMax": 5,
     "ranksEvolucao": [3, 5],
     "ranks": [
@@ -132,6 +133,7 @@
     "base": 6,
     "porNivel": 0.7,
     "geradaPct": 85,
+    "mobilidade": { "lenta": 0.07, "livre": 0.15 },
     "fatorForma": {
       "contato": 1,
       "projetil": 1,
@@ -172,6 +174,7 @@
     "chanceLivroRaro": 0.04
   },
   "ia": {
+    "gracaForaDaZonaMs": 1200,
     "patrulhaAvaliacaoMs": 2000,
     "patrulhaPassoMs": 1500,
     "chanceAproximar": 0.1,

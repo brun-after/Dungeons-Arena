@@ -42,6 +42,8 @@ export interface RegrasRank {
 
 export interface RegrasHabilidades {
   pontosPorNivel: number;
+  /** Ajuste de 15/10/2026: fração da velocidade de quem conjura uma habilidade `lenta`. */
+  velocidadeConjurandoLenta: number;
   rankMax: number;
   ranksEvolucao: readonly number[];
   ranks: readonly RegrasRank[];

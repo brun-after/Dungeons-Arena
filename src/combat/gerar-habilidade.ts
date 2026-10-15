@@ -110,6 +110,7 @@ function gerar(id: string, ctx: ContextoHabilidades): DefinicaoHabilidade | null
     tags: [],
     nivelMinimo: 1,
     passiva: null,
+    mobilidade: 'trava',
     rank: 1,
     chave: id,
     multDano: 1,

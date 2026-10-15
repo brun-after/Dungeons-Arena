@@ -170,6 +170,8 @@ export interface CategoriaSpawner {
 
 /** Números da IA (§2.6). */
 export interface RegrasIa {
+  /** Ajuste de 15/10/2026 (D-060): quanto o alvo pode ficar fora da zona durante o "?" antes do inimigo desistir. */
+  gracaForaDaZonaMs: number;
   patrulhaAvaliacaoMs: number;
   patrulhaPassoMs: number;
   chanceAproximar: number;

@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 2.4 · **Data:** 15/10/2026
+**Versão do documento:** 2.5 · **Data:** 15/10/2026
 **Status:** 🚧 Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência em andamento: 12, 13 e 14 concluídos; próximo, o 15
 
 > **Histórico**
+> - **2.5 (15/10/2026)**: ajustes depois do marco 14 (andar conjurando por habilidade, tempo mínimo na zona de atenção, d20 visível, teclado numérico, área orgânica; D-060).
 > - **2.4 (15/10/2026)**: marco 14 concluído (classes, ranks e caminhos, elementos e sinergias, orçamento de poder, livros, habilidades geradas e efeitos legíveis; D-059).
 > - **2.3 (14/10/2026)**: marco 13 concluído (visão isométrica com a tecla V, modelos de criatura gerados no build, caminhada por fatias e personagem por imagem; D-058).
 > - **2.2 (14/10/2026)**: novo marco 14, sistema de habilidades (composição, elementos, ranks, árvores, classes, livros, habilidades geradas e efeitos legíveis); rebalanceamento vira 15 e endurecimento, 16 (D-057).
@@ -76,13 +77,14 @@ Implantação do servidor na nuvem, passo a passo: [`docs/IMPLANTACAO.md`](docs/
 | Ir até um ponto | Clique no mapa | Toque no mapa; segure para seguir o dedo |
 | Selecionar alvo | Clique no inimigo (`Esc` limpa) | Toque no inimigo |
 | Ataque básico | Espaço; ataca sozinho o alvo selecionado ou quem estiver te perseguindo | Botão ⚔ (funciona junto com o joystick) |
-| Habilidades | Teclas 1–4 | Roda de botões em volta do ⚔ |
+| Habilidades | Teclas 1–4 (também no teclado numérico) | Roda de botões em volta do ⚔ |
 | Mover a câmera | Arrastar o mapa | Arrastar o mapa |
 | Zoom | Roda do mouse | Pinça com dois dedos |
 | Visão (de cima ou isométrica) | `V`, ou Pausa → Configurações → Gráficos | Pausa → Configurações → Gráficos |
 | Seu personagem por imagem | Pausa → Configurações → Aparência | Idem |
 | Ranks, caminhos e teclas das habilidades | Mochila (`I`) → aba **Habilidades** | Idem |
 | O que um efeito faz | Passe o mouse (ou o foco) no ícone do efeito, ao lado da vida | Toque no ícone |
+| Ver as células exatas das áreas | Pausa → Configurações → Gráficos → Mostrar a área exata | Idem |
 | Mochila e ficha | `I` (Esc fecha); equipar, usar e tirar por botão | 🎒 no cabeçalho; tocar a linha equipa ou usa |
 | Pontos de atributo | Mochila → aba **Ficha** → `+` | Idem |
 | Diagnóstico (fps, célula) | Abrir com `?diag=1` no fim do endereço | Idem |

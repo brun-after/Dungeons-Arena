@@ -25,6 +25,8 @@ export interface RegrasOrcamento {
     aoRedorPorRaio: number;
     aliados: number;
   };
+  /** Ajuste de 15/10/2026: quanto andar conjurando encarece a habilidade (fração do poder). */
+  mobilidade: { lenta: number; livre: number };
   pesos: {
     controlePorS: number;
     travaPorS: number;
@@ -119,7 +121,8 @@ export function poderDaHabilidade(h: Habilidade, r: RegrasOrcamento): number {
   const tempo = 5 / (5 + recargaS);
   const conjuracao = 1 - Math.min(0.5, (h.conjuracaoMs / 1000) * 0.1);
   const custo = 1 + h.custoRecurso / 10 + h.custoVida / 15;
-  return ((dano + cura + efeitos) * tempo * conjuracao) / custo;
+  const mobilidade = 1 + (h.mobilidade === 'trava' ? 0 : r.mobilidade[h.mobilidade]);
+  return ((dano + cura + efeitos) * tempo * conjuracao * mobilidade) / custo;
 }
 
 /** Orçamento no nível: `(base + porNivel × (nível − 1)) × pct do modo`. */

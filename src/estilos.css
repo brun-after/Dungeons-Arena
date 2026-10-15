@@ -425,12 +425,82 @@ body.toque .faixa-controles {
   color: var(--texto-suave);
 }
 
-.chip-d20 {
-  padding: 1px 6px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.55);
-  border: 1px solid var(--borda);
+/* Ajuste de 15/10/2026 (D-060): o d20 perto da barra de habilidades. Gira a cada rolagem e esmaece parado. */
+.dado-d20 {
+  position: absolute;
+  left: calc(50% - 190px);
+  bottom: calc(18px + var(--seguro-base));
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 58px;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  background: #2a2633;
+  color: var(--texto);
   font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  transition: opacity 400ms ease;
+}
+
+.dado-d20 .numero-dado {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.dado-d20 .rotulo-dado {
+  position: absolute;
+  bottom: 6px;
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.dado-d20[data-faixa='bom'] {
+  background: #5a4510;
+  color: #f7d774;
+}
+
+.dado-d20[data-faixa='critico'] {
+  background: #8a6408;
+  color: #fff3c4;
+  transform: scale(1.15);
+}
+
+.dado-d20[data-faixa='falha'] {
+  background: #5b1f1f;
+  color: #ff9b8f;
+}
+
+.dado-d20.esmaecido {
+  opacity: 0.4;
+}
+
+.dado-d20.girando {
+  animation: girar-dado 300ms ease-out;
+}
+
+@keyframes girar-dado {
+  from {
+    rotate: -200deg;
+    scale: 0.7;
+  }
+  to {
+    rotate: 0deg;
+    scale: 1;
+  }
+}
+
+body.movimento-reduzido .dado-d20.girando {
+  animation: none;
+}
+
+body.toque .dado-d20 {
+  left: auto;
+  right: calc(150px + var(--seguro-direita, 0px));
+  bottom: calc(150px + var(--seguro-base));
+  width: 44px;
+  height: 48px;
 }
 
 .chip-rede {
@@ -451,14 +521,6 @@ body.toque .faixa-controles {
 
 .chip-rede[data-qualidade='ruim'] {
   color: #e74c3c;
-}
-
-.chip-d20[data-faixa='critico'] {
-  color: var(--destaque);
-}
-
-.chip-d20[data-faixa='falha'] {
-  color: #8e8a99;
 }
 
 /* Registro de combate (§2.15): no desktop fica visível; no toque abre pelo botão 📜 */

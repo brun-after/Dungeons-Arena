@@ -71,7 +71,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   const som = ligarSom({ motor, bus: o.bus, estado: o.estado, idLocal, habilidades: o.habilidades, fase: ctx.fase });
   const particulas = new SistemaParticulas(palco.efeitos, palco.app.renderer, () => camera.projecaoAtual);
   const impacto = new ControladorImpacto(() => prefs.efeitosDeTela && !reduzido() && qualidade().impacto);
-  const efeitos = new EfeitosDeHabilidade({ particulas, impacto, habilidades: o.habilidades, idLocal, qualidade });
+  const efeitos = new EfeitosDeHabilidade({ particulas, impacto, habilidades: o.habilidades, idLocal, qualidade, fase: ctx.fase });
   efeitos.ligar(o.bus, o.estado, () => performance.now());
   const luz = new CamadaLuz(palco.luz);
   const flash = new Graphics();

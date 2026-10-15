@@ -23,6 +23,13 @@ export type PoliticaAlvo = (typeof POLITICAS_ALVO)[number];
 export type PoliticaImpacto = 'contato' | 'projetil' | 'area' | 'proprio';
 export type Interrupcao = 'interrompivel' | 'ininterrupta';
 
+/**
+ * Ajuste de 15/10/2026 (D-060): o que quem conjura faz com as pernas. `trava` não começa passo novo (a D-017 de
+ * antes, o padrão); `lenta` anda mais devagar; `livre` anda normalmente. Andar conjurando custa no orçamento.
+ */
+export const MOBILIDADES = ['trava', 'lenta', 'livre'] as const;
+export type Mobilidade = (typeof MOBILIDADES)[number];
+
 /** Marco 14: modificadores de evolução e de equipamento (D-057). */
 export const MODIFICADORES = ['atravessar', 'encadear', 'ecoar', 'maior_e_mais_lenta'] as const;
 export type Modificador = (typeof MODIFICADORES)[number];
@@ -92,6 +99,8 @@ export interface Habilidade {
   saltos: Saltos | null;
   /** Só apresentação: o rank aumenta o efeito visual. */
   escalaVisual: number;
+  /** Ajuste de 15/10/2026: anda enquanto conjura? */
+  mobilidade: Mobilidade;
 }
 
 export const PRESETS_VISUAIS = ['faiscas', 'brilho', 'fumaca', 'anel', 'rastro', 'estrelas', 'brasas', 'explosao', 'raio'] as const;
@@ -223,6 +232,7 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
     tags: [],
     nivelMinimo: o.nivelMinimo === undefined ? 1 : l.numero(o, 'nivelMinimo', { min: 1, max: 20, inteiro: true }),
     passiva: lerPassiva(l, o.passiva),
+    mobilidade: o.mobilidade === undefined ? 'trava' : l.opcao(o, 'mobilidade', MOBILIDADES),
     rank: 1,
     chave: '',
     multDano: 1,
@@ -266,6 +276,7 @@ const CAMPOS_DEFINICAO = [
   'id', 'nome', 'icone', 'tipoAtaque', 'formulaDano', 'formulaCura', 'alcanceCelulas', 'tipoArea', 'raioArea',
   'custoRecurso', 'recargaMs', 'conjuracaoMs', 'politicaAlvo', 'politicaImpacto', 'interrupcao', 'velocidadeProjetil',
   'efeitos', 'visual', 'elemento', 'custoVida', 'tags', 'nivelMinimo', 'passiva', 'basico', 'evolucoes', 'mods',
+  'mobilidade',
 ];
 
 export function lerHabilidades(json: unknown): { definicoes: Map<string, DefinicaoHabilidade>; erros: string[] } {

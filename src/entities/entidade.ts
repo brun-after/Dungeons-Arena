@@ -84,8 +84,13 @@ export interface EstadoIa {
   modoDesdeTick: number;
   alvoId: EntidadeId | null;
   hesitacaoAteTick: number;
-  /** Alvos que já entraram no raio de detecção: a hesitação só é sorteada na primeira vez. */
+  /**
+   * Alvos que já foram perseguidos: ao voltar ao raio, a perseguição é imediata. Ajuste de 15/10/2026 (D-060):
+   * só entra quem chegou a ser perseguido (sair durante o "?" desarma a hesitação).
+   */
   detectados: EntidadeId[];
+  /** Ajuste de 15/10/2026: há quantos ticks o alvo da hesitação está fora da zona de atenção (0 = dentro). */
+  foraDaZonaTicks: number;
   proximaAvaliacaoTick: number;
   proximoPassoTick: number;
   direcaoPatrulha: Dir8 | null;
