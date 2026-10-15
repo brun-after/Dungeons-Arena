@@ -6,7 +6,7 @@ import type { Celula, Dir8 } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import type { EstadoJogo } from '../core/estado';
-import { movimentoBloqueado } from '../combat/efeitos';
+import { lentidaoPct, movimentoBloqueado } from '../combat/efeitos';
 import { emPasso, type Entidade } from '../entities/entidade';
 import { regenerarPorPasso } from '../progression/recursos';
 import { celulaLivrePara, ordemRotativa } from './colisao';
@@ -124,7 +124,9 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
     inv && !inv.dominado
       ? 1000 / ctx.balance.invocacoes.passoMs
       : velocidade(e.atributos.destreza, ctx.balance.movimento.velocidadeBaseMs, inv?.dominado ?? false);
-  let restante = (dtMs / 1000) * vel;
+  // Marco 14: o frio (resfriado) deixa mais lento.
+  const lento = 1 - lentidaoPct(e, estado.tick) / 100;
+  let restante = (dtMs / 1000) * vel * lento;
 
   for (let guarda = 0; guarda < MAX_PASSOS_POR_TICK; guarda++) {
     if (!emPasso(e)) {
@@ -143,11 +145,11 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
     const falta = 1 - e.progressoPasso;
     if (restante + EPS < falta) {
       e.progressoPasso += restante;
-      e.relogioAndar += (1000 * restante) / vel;
+      e.relogioAndar += (1000 * restante) / (vel * lento);
       return;
     }
     restante = Math.max(0, restante - falta);
-    e.relogioAndar += (1000 * falta) / vel;
+    e.relogioAndar += (1000 * falta) / (vel * lento);
     e.x = e.destinoX;
     e.y = e.destinoY;
     e.progressoPasso = 0;

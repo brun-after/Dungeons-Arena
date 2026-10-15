@@ -75,10 +75,11 @@ describe('áudio: mapeamento e música', () => {
     const hab = (id: string) => CONTEUDO.habilidades.get(id);
     expect(sonsDoEvento({ t: 'coletou', tick: 0, id: 'j', objetoId: 'o', tipo: 'ouro', ganho: 5, itemId: null }, 'j', hab)).toEqual([{ som: 'moeda', origemId: null }]);
     expect(sonsDoEvento({ t: 'coletou', tick: 0, id: 'k', objetoId: 'o', tipo: 'ouro', ganho: 5, itemId: null }, 'j', hab)).toEqual([]);
-    const impacto = { t: 'impacto', tick: 0, acaoId: 1, fonteId: 'j', alvoId: 'g', habilidadeId: 'golpe', dano: 5, cura: 0, d20: 15, mult: 1.2, falha: false, critico: false, imune: false, indice: 0 } as const;
-    expect(sonsDoEvento(impacto, 'j', hab)).toEqual([{ som: 'acerto', origemId: 'g' }]);
-    expect(sonsDoEvento({ ...impacto, critico: true }, 'j', hab)).toEqual([{ som: 'critico', origemId: 'g' }]);
-    expect(sonsDoEvento({ ...impacto, falha: true }, 'j', hab)).toEqual([{ som: 'falha', origemId: 'g' }]);
+    const impacto = { t: 'impacto', tick: 0, acaoId: 1, fonteId: 'j', alvoId: 'g', habilidadeId: 'golpe', chave: 'golpe', dano: 5, cura: 0, d20: 15, mult: 1.2, falha: false, critico: false, imune: false, indice: 0 } as const;
+    const comSinergias = { ...impacto, sinergias: [] as string[] };
+    expect(sonsDoEvento(comSinergias, 'j', hab)).toEqual([{ som: 'acerto', origemId: 'g' }]);
+    expect(sonsDoEvento({ ...comSinergias, critico: true }, 'j', hab)).toEqual([{ som: 'critico', origemId: 'g' }]);
+    expect(sonsDoEvento({ ...comSinergias, falha: true }, 'j', hab)).toEqual([{ som: 'falha', origemId: 'g' }]);
   });
 
   it('a mesma fase compõe a mesma música; climas e fases diferentes, músicas diferentes', () => {

@@ -2,15 +2,18 @@
 // controle; marco 8A (13/10/2026) liga os 20 tipos do registro (registro-efeitos.ts, D-048).
 // Aplicar efeito acontece em um lugar só (`aplicarEfeito`); quem precisa saber se algo vale
 // (movimento, ações, dano, colisão, projéteis) pergunta por estas consultas, que leem o registro.
+// Marco 14 (14/10/2026), D-059: acúmulo, oposições, transformações, teto e imunidades em dados (acumulo.ts);
+// lentidão, cura recebida, dano recebido e escudo; puxão, troca de lugar e dano direto.
 
 import type { Celula, EntidadeId } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
-import type { EstadoJogo } from '../core/estado';
+import { buscarEntidade, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { congelada, vivo, type EfeitoAtivo, type Entidade } from '../entities/entidade';
 import { agendarAtrasado, armarArmadilha, excedeLimite, invocar, processarFluxo, processarGatilhos } from './efeitos-fluxo';
-import { avancar, empurrar, teleportar } from './efeitos-instantaneos';
+import { registrarEfeitoAtivo } from './acumulo';
+import { avancar, empurrar, puxar, teleportar, trocarLugar } from './efeitos-instantaneos';
 import { registrarParticipacao } from './participacao';
 import { REGISTRO_EFEITOS, type DefinicaoEfeito, type EfeitoCanonico } from './registro-efeitos';
 
@@ -83,6 +86,49 @@ export function projeteisAtravessam(e: Entidade, tick: number): boolean {
   return efeitosAtivos(e, tick).some((d) => d.projeteisAtravessam);
 }
 
+/** Marco 14: lentidão somada (resfriado), em %, até 80. */
+export function lentidaoPct(e: Entidade, tick: number): number {
+  let soma = 0;
+  for (const [f, d] of comDefinicao(e, tick)) if (d.lentidao) soma += f.pct;
+  return Math.min(80, soma);
+}
+
+/** Marco 14: o veneno reduz toda cura recebida (golpe, efeito e periódico). */
+export function multiplicadorCuraRecebida(e: Entidade, tick: number): number {
+  let menos = 0;
+  for (const [f, d] of comDefinicao(e, tick)) if (d.curaRecebida < 0) menos += f.pct;
+  return Math.max(0, 1 - menos / 100);
+}
+
+/** Marco 14: exposto aumenta todo dano recebido. */
+export function multiplicadorDanoRecebido(e: Entidade, tick: number): number {
+  let mais = 0;
+  for (const [f, d] of comDefinicao(e, tick)) if (d.danoRecebido > 0) mais += f.pct;
+  return 1 + mais / 100;
+}
+
+/** Marco 14: o escudo absorve dano antes da vida e se gasta; devolve o dano que sobra. */
+export function absorverEscudo(e: Entidade, dano: number, tick: number): number {
+  let resto = dano;
+  for (const f of e.efeitos) {
+    if (resto <= 0) break;
+    if (f.ateTick <= tick || !REGISTRO_EFEITOS[f.tipo].escudo) continue;
+    const absorvido = Math.min(f.valor, resto);
+    f.valor -= absorvido;
+    resto -= absorvido;
+  }
+  e.efeitos = e.efeitos.filter((f) => !REGISTRO_EFEITOS[f.tipo].escudo || f.valor > 0);
+  return resto;
+}
+
+/** Dano que não passa pelo d20 (periódico e dano direto): exposto, escudo e o HP mínimo 0. */
+export function sofrerDano(e: Entidade, valor: number, tick: number): number {
+  const bruto = Math.max(0, Math.round(valor * multiplicadorDanoRecebido(e, tick)));
+  const dano = Math.min(e.hp, absorverEscudo(e, bruto, tick));
+  e.hp -= dano;
+  return dano;
+}
+
 function resultado(
   saida: EventoSimulacao[],
   tick: number,
@@ -94,11 +140,12 @@ function resultado(
   saida.push({ t: 'efeitoResultado', tick, alvoId: alvo.id, origemId, tipo: ef.tipo, dano: r.dano ?? 0, cura: r.cura ?? 0, mana: r.mana ?? 0 });
 }
 
-/** Cura ou recurso de uma vez: `valor` fixo mais `pct` do máximo. */
-function restaurar(alvo: Entidade, recurso: 'cura' | 'recurso', valor: number, pct: number): number {
+/** Cura ou recurso de uma vez: `valor` fixo mais `pct` do máximo. A cura passa pelo veneno (marco 14). */
+function restaurar(alvo: Entidade, recurso: 'cura' | 'recurso', valor: number, pct: number, tick: number): number {
   if (recurso === 'cura') {
     const antes = alvo.hp;
-    alvo.hp = Math.min(alvo.hpMax, alvo.hp + Math.max(0, Math.round(valor + (alvo.hpMax * pct) / 100)));
+    const cura = Math.round((valor + (alvo.hpMax * pct) / 100) * multiplicadorCuraRecebida(alvo, tick));
+    alvo.hp = Math.min(alvo.hpMax, alvo.hp + Math.max(0, cura));
     return alvo.hp - antes;
   }
   const antes = alvo.mana;
@@ -127,10 +174,10 @@ export function aplicarEfeito(
   if (instantaneo) {
     switch (instantaneo) {
       case 'cura':
-        resultado(saida, tick, alvo, origem.id, ef, { cura: restaurar(alvo, 'cura', ef.valor, ef.pct) });
+        resultado(saida, tick, alvo, origem.id, ef, { cura: restaurar(alvo, 'cura', ef.valor, ef.pct, tick) });
         break;
       case 'recurso':
-        resultado(saida, tick, alvo, origem.id, ef, { mana: restaurar(alvo, 'recurso', ef.valor, ef.pct) });
+        resultado(saida, tick, alvo, origem.id, ef, { mana: restaurar(alvo, 'recurso', ef.valor, ef.pct, tick) });
         break;
       case 'teleporte':
         teleportar(estado, ctx, alvo, mira);
@@ -141,6 +188,21 @@ export function aplicarEfeito(
       case 'empurrao':
         empurrar(estado, ctx, alvo, origem, ef.valor);
         break;
+      case 'puxao':
+        puxar(estado, ctx, alvo, origem, ef.valor);
+        break;
+      case 'trocar': {
+        const outro = buscarEntidade(estado, origem.id);
+        if (outro && vivo(outro)) trocarLugar(alvo, outro);
+        break;
+      }
+      case 'dano': {
+        if (imuneADano(alvo, tick)) break;
+        const dano = sofrerDano(alvo, ef.valor, tick);
+        if (dano > 0) registrarParticipacao(alvo, origem.id, tick, ctx);
+        resultado(saida, tick, alvo, origem.id, ef, { dano });
+        break;
+      }
     }
     saida.push({ t: 'efeitoAplicado', tick, alvoId: alvo.id, origemId: origem.id, tipo: ef.tipo, ateTick: tick });
     return;
@@ -161,28 +223,11 @@ export function aplicarEfeito(
     saida.push({ t: 'efeitoAplicado', tick, alvoId: alvo.id, origemId: origem.id, tipo: ef.tipo, ateTick: tick });
     return;
   }
-  const ateTick = tick + ticksDe(ef.duracaoMs);
-  const existente = alvo.efeitos.find((f) => f.tipo === ef.tipo);
-  if (existente) {
-    existente.ateTick = Math.max(existente.ateTick, ateTick);
-    existente.valor = Math.max(existente.valor, ef.valor);
-    existente.pct = Math.max(existente.pct, ef.pct);
-    existente.origemId = origem.id;
-    if (ef.interno) existente.interno = { ...ef.interno };
-  } else {
-    const intervalo = ticksDe(ctx.balance.efeitos.intervaloPeriodicoMs);
-    alvo.efeitos.push({
-      tipo: ef.tipo,
-      ateTick,
-      origemId: origem.id,
-      valor: ef.valor,
-      pct: ef.pct,
-      proximoTick: def.periodico ? tick + intervalo : 0,
-      interno: ef.interno ? { ...ef.interno } : null,
-      ref: ef.ref,
-    });
-  }
-  saida.push({ t: 'efeitoAplicado', tick, alvoId: alvo.id, origemId: origem.id, tipo: ef.tipo, ateTick });
+  // Marco 14: acúmulo, oposições, transformação, teto e imunidade vêm das interações (acumulo.ts).
+  const ativo = registrarEfeitoAtivo(ctx, alvo, ef, origem.id, tick, (vira) => {
+    aplicarEfeito(estado, ctx, alvo, vira, origem, mira, saida);
+  });
+  if (ativo) saida.push({ t: 'efeitoAplicado', tick, alvoId: alvo.id, origemId: origem.id, tipo: ef.tipo, ateTick: ativo.ateTick });
 }
 
 /**
@@ -201,13 +246,12 @@ export function processarEfeitos(estado: EstadoJogo, ctx: ContextoSimulacao, sai
         f.proximoTick += intervalo;
         if (periodico === 'dano') {
           if (imuneADano(e, tick)) continue;
-          const dano = Math.min(e.hp, Math.max(0, Math.round(f.valor)));
-          e.hp -= dano;
+          const dano = sofrerDano(e, f.valor, tick);
           if (dano > 0) registrarParticipacao(e, f.origemId, tick, ctx);
           resultado(saida, tick, e, f.origemId, f, { dano });
           if (e.hp <= 0) break;
         } else {
-          const ganho = restaurar(e, periodico, f.valor, f.pct);
+          const ganho = restaurar(e, periodico, f.valor, f.pct, tick);
           resultado(saida, tick, e, f.origemId, f, periodico === 'cura' ? { cura: ganho } : { mana: ganho });
         }
       }

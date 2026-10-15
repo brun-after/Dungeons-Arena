@@ -15,9 +15,9 @@ export function manaMaxima(sabedoria: number): number {
 
 /**
  * Bônus aditivo de atributo no dano (§2.7, passo 5): `floor(atributo × multiplicador)`.
- * Conjurador usa Inteligência; os demais, Força.
+ * Conjurador usa Inteligência; atirador (marco 14), Destreza; os demais, Força.
  */
 export function bonusDeAtributo(atributos: Atributos, classe: ClasseCombate, multiplicador: number): number {
-  const atributo = classe === 'conjurador' ? atributos.inteligencia : atributos.forca;
+  const atributo = classe === 'conjurador' ? atributos.inteligencia : classe === 'atirador' ? atributos.destreza : atributos.forca;
   return Math.floor(atributo * multiplicador);
 }

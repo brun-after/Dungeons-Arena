@@ -89,9 +89,9 @@ describe('equipamento derivado (§2.10)', () => {
     // Dois +15% somam 30%: round((10 + 1) × 1,30) = 14 (compondo seria 14,5 → 15).
     const botas = { ...item('botas_rapidas'), id: 'b2', slotPadrao: 'capa' as const };
     const ctx = { ...c.ctx, conteudo: { ...CONTEUDO, itens: new Map([...CONTEUDO.itens, ['b2', botas]]) } };
-    bolsa.equipamento.pes = { invId: 'a', itemId: 'botas_rapidas', qtd: 1 };
-    bolsa.equipamento.capa = { invId: 'b', itemId: 'b2', qtd: 1 };
-    bolsa.equipamento.maos = { invId: 'c', itemId: 'luvas_couro', qtd: 1 };
+    bolsa.equipamento.pes = { invId: 'a', itemId: 'botas_rapidas', qtd: 1, ref: null };
+    bolsa.equipamento.capa = { invId: 'b', itemId: 'b2', qtd: 1, ref: null };
+    bolsa.equipamento.maos = { invId: 'c', itemId: 'luvas_couro', qtd: 1, ref: null };
     expect(derivarFicha(bolsa, 1, ctx).atributos.destreza).toBe(14);
     bolsa.atributosBase.destreza = 29;
     expect(derivarFicha(bolsa, 1, ctx).atributos.destreza).toBe(BALANCE_PADRAO.atributos.maximo);

@@ -1,10 +1,13 @@
 // Projéteis (§2.7, etapa 4): ação pendente da simulação. Seguem em linha reta a partir do
 // lançamento; colidem durante a viagem com o primeiro hostil (pela relação do lançador),
 // param em parede e expiram ao passar do ponto mirado. Continuam se o lançador morrer.
+// Marco 14 (14/10/2026): resolvem a habilidade pela chave; `perfura` (modificador atravessar) e saltos no
+// primeiro acerto (encadear, raio sobre eletrizado).
 
 import type { Celula } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, novoId, type EstadoJogo, type Projetil } from '../core/estado';
+import { resolverHabilidade } from './compilar-habilidade';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { vivo, type Entidade } from '../entities/entidade';
 import { podeFerir } from '../modos/relacao';
@@ -14,6 +17,7 @@ import { projeteisAtravessam } from './efeitos';
 import { celulaOcupada } from './geometria';
 import { aplicarImpacto } from './golpe';
 import type { Habilidade } from './habilidades';
+import { quantidadeDeSaltos, saltar } from './saltos';
 
 /** Sub-passo máximo da integração, em células: nenhum alvo é atravessado sem teste. */
 const SUBPASSO = 0.25;
@@ -39,6 +43,7 @@ export function lancarProjetil(
     donoId: ator.id,
     equipeDono: ator.equipe,
     habilidadeId: hab.id,
+    chave: hab.chave,
     x: origem.x,
     y: origem.y,
     dirX: distancia > 0 ? dx / distancia : 0,
@@ -48,11 +53,12 @@ export function lancarProjetil(
     bonusAtributo: fonte.bonusAtributo,
     carisma: fonte.carisma,
     multDano: fonte.multDano,
-    atravessa: projeteisAtravessam(ator, estado.tick),
+    multCura: fonte.multCura,
+    atravessa: hab.perfura || projeteisAtravessam(ator, estado.tick),
     atingidos: [],
   };
   estado.projeteis.push(p);
-  saida.push({ t: 'projetilLancado', tick: estado.tick, projetilId: p.id, acaoId, donoId: ator.id, habilidadeId: hab.id });
+  saida.push({ t: 'projetilLancado', tick: estado.tick, projetilId: p.id, acaoId, donoId: ator.id, habilidadeId: hab.id, chave: hab.chave });
 }
 
 function alvoNaCelula(estado: EstadoJogo, ctx: ContextoSimulacao, p: Projetil, cx: number, cy: number): Entidade | null {
@@ -80,7 +86,7 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
         break;
       }
       const alvo = alvoNaCelula(estado, ctx, p, cx, cy);
-      const hab = ctx.conteudo.habilidades.get(p.habilidadeId);
+      const hab = resolverHabilidade(ctx, p.chave);
       if (alvo && hab) {
         const dono = buscarEntidade(estado, p.donoId);
         const fonte: FonteDeDano = {
@@ -89,9 +95,14 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
           bonusAtributo: p.bonusAtributo,
           carisma: p.carisma,
           multDano: p.multDano,
+          multCura: p.multCura,
         };
+        const primeiro = p.atingidos.length === 0;
+        const saltos = primeiro ? quantidadeDeSaltos(hab, alvo, estado.tick) : 0;
         aplicarImpacto(estado, ctx, alvo, { acaoId: p.acaoId, fonte, hab, indice: p.atingidos.length }, saida);
         p.atingidos.push(alvo.id);
+        // Marco 14: o primeiro acerto salta (os alvos do salto entram em `atingidos`).
+        if (saltos > 0) saltar(estado, ctx, { id: p.donoId, equipe: p.equipeDono }, hab, alvo, saltos, { acaoId: p.acaoId, fonte, hab }, p.atingidos, saida);
         // `atravessar` (§2.8): segue em frente e pode acertar o próximo da linha.
         if (p.atravessa) continue;
         fim = 'acertou';

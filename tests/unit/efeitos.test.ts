@@ -55,8 +55,8 @@ function cenario(balance: Balance = BALANCE_PADRAO) {
 }
 
 describe('registro (§2.8)', () => {
-  it('tem os 26 tipos da spec, com os pesos de orbe', () => {
-    expect(TIPOS_EFEITO).toHaveLength(26);
+  it('tem os 26 tipos da spec e os 10 do marco 14, com os pesos de orbe', () => {
+    expect(TIPOS_EFEITO).toHaveLength(36);
     const pesos = Object.fromEntries(elegiveisParaOrbe().map((d) => [d.id, d.pesoOrbe]));
     expect(pesos).toEqual({
       cura_periodica: 20,

@@ -56,6 +56,7 @@ export type EventoSimulacao =
       acaoId: number;
       atorId: EntidadeId;
       habilidadeId: string;
+      chave: string;
       alvoId: EntidadeId | null;
       alvoX: number;
       alvoY: number;
@@ -65,7 +66,7 @@ export type EventoSimulacao =
     }
   | { t: 'acaoRecusada'; tick: number; atorId: EntidadeId; habilidadeId: string; motivo: MotivoRecusa }
   | { t: 'acaoCancelada'; tick: number; acaoId: number; atorId: EntidadeId; motivo: MotivoCancelamento }
-  | { t: 'projetilLancado'; tick: number; projetilId: number; acaoId: number; donoId: EntidadeId; habilidadeId: string }
+  | { t: 'projetilLancado'; tick: number; projetilId: number; acaoId: number; donoId: EntidadeId; habilidadeId: string; chave: string }
   | { t: 'projetilFim'; tick: number; projetilId: number; motivo: 'acertou' | 'parede' | 'expirou' }
   | {
       t: 'impacto';
@@ -74,6 +75,8 @@ export type EventoSimulacao =
       fonteId: EntidadeId;
       alvoId: EntidadeId;
       habilidadeId: string;
+      /** Marco 14: a chave compilada (o visual escala com o rank). */
+      chave: string;
       dano: number;
       cura: number;
       d20: number;
@@ -83,6 +86,8 @@ export type EventoSimulacao =
       imune: boolean;
       /** Ordem do alvo no impacto em área, para escalonar os números (§2.7). */
       indice: number;
+      /** Marco 14: sinergias de elemento disparadas neste golpe (ids de interacoes.json). */
+      sinergias: string[];
     }
   | { t: 'esquivou'; tick: number; acaoId: number; atorId: EntidadeId; alvoId: EntidadeId }
   | { t: 'efeitoAplicado'; tick: number; alvoId: EntidadeId; origemId: EntidadeId; tipo: TipoEfeito; ateTick: number }

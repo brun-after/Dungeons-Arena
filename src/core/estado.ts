@@ -16,6 +16,8 @@ export interface Projetil {
   donoId: EntidadeId;
   equipeDono: string;
   habilidadeId: string;
+  /** Marco 14: a chave compilada; o projétil se resolve por ela mesmo se o conjurador morrer. */
+  chave: string;
   /** Posição contínua em células (centro da célula = coordenada inteira). */
   x: number;
   y: number;
@@ -30,6 +32,8 @@ export interface Projetil {
   carisma: number;
   /** Marco 8A: multiplicador de dano e perfuração (`atravessar`) congelados no lançamento. */
   multDano: number;
+  /** Marco 14: multiplicador de cura (rank, caminhos e perfil) congelado no lançamento. */
+  multCura: number;
   atravessa: boolean;
   /** Quem já foi atingido (o projétil que atravessa não acerta o mesmo alvo duas vezes). */
   atingidos: EntidadeId[];

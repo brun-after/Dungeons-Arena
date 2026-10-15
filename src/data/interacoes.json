@@ -1,0 +1,25 @@
+{
+  "versao": 1,
+  "tetoEfeitos": 8,
+  "acumulo": {
+    "resfriado": "soma",
+    "queimando": "renova",
+    "eletrizado": "renova",
+    "congelado": "ignora"
+  },
+  "transformacoes": [
+    { "de": "resfriado", "acumulos": 3, "vira": { "tipo": "congelado", "duracaoMs": 1500 } }
+  ],
+  "oposicoes": [
+    { "efeito": "queimando", "remove": ["resfriado", "congelado"] },
+    { "efeito": "resfriado", "remove": ["queimando"] },
+    { "efeito": "congelado", "remove": ["queimando"] }
+  ],
+  "sinergias": [
+    { "id": "derreter", "elemento": "fogo", "sobre": ["resfriado", "congelado"], "remove": ["resfriado", "congelado"], "danoExtraPct": 50, "aplicar": [] },
+    { "id": "combustao", "elemento": "fogo", "sobre": ["envenenado"], "remove": ["envenenado"], "danoExtraPct": 30, "aplicar": [] },
+    { "id": "estilhacar", "elemento": "raio", "sobre": ["congelado"], "remove": ["congelado"], "danoExtraPct": 75, "aplicar": [] },
+    { "id": "sobrecarga", "elemento": "psiquico", "sobre": ["eletrizado"], "remove": ["eletrizado"], "danoExtraPct": 0, "aplicar": [{ "tipo": "atordoar", "duracaoMs": 800 }] },
+    { "id": "corrosao", "elemento": "veneno", "sobre": ["exposto"], "remove": [], "danoExtraPct": 25, "aplicar": [{ "tipo": "modificar_dano", "pct": 20, "duracaoMs": 4000 }] }
+  ]
+}

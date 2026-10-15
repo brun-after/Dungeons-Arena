@@ -4,6 +4,9 @@
 // `if (tipo === ...)` espalhado: movimento, ações, dano, colisão e projéteis leem estes campos.
 // Registrar um tipo com `elegivelParaOrbe: true` o coloca sozinho no sorteio do orbe e no editor.
 // Marco 8A-2 (14/10/2026): os 6 de fluxo próprio (atrasado, rastros, invocar, dominar, armadilha).
+// Marco 14 (14/10/2026), D-059: os estados dos 5 elementos (queimando, resfriado, congelado, eletrizado,
+// envenenado, exposto), escudo, puxão, troca de lugar e dano direto; ganchos de lentidão, cura recebida,
+// dano recebido e escudo. Acúmulo, oposições e sinergias ficam em dados (interacoes.json, acumulo.ts).
 
 import { aleatorio, type EstadoRng } from '../core/rng';
 
@@ -38,6 +41,18 @@ export const TIPOS_EFEITO = [
   'invocar',
   'dominar_ao_matar',
   'armadilha',
+  // estados dos elementos (marco 14)
+  'queimando',
+  'resfriado',
+  'congelado',
+  'eletrizado',
+  'envenenado',
+  'exposto',
+  // marco 14: escudo e os instantâneos novos
+  'escudo',
+  'puxao',
+  'trocar_lugar',
+  'dano_direto',
 ] as const;
 export type TipoEfeito = (typeof TIPOS_EFEITO)[number];
 
@@ -65,7 +80,7 @@ export interface EfeitoCanonico {
 export type Fluxo = 'atrasado' | 'armadilha' | 'invocar';
 
 export type Periodico = 'dano' | 'cura' | 'recurso';
-export type Instantaneo = 'cura' | 'recurso' | 'teleporte' | 'avanco' | 'empurrao';
+export type Instantaneo = 'cura' | 'recurso' | 'teleporte' | 'avanco' | 'empurrao' | 'puxao' | 'trocar' | 'dano';
 export type BonusDeAtaqueBasico = 'dano' | 'recarga' | 'alcance' | 'alvos';
 
 export interface DefinicaoEfeito {
@@ -101,6 +116,14 @@ export interface DefinicaoEfeito {
   domina: boolean;
   /** Campos extras exigidos na autoria. */
   exige: readonly ('interno' | 'ref')[];
+  /** Marco 14: o `pct` reduz a velocidade de movimento (resfriado). */
+  lentidao: boolean;
+  /** Marco 14: −1 = o `pct` reduz a cura recebida (envenenado). */
+  curaRecebida: -1 | 0;
+  /** Marco 14: +1 = o `pct` aumenta o dano recebido (exposto). */
+  danoRecebido: 1 | 0;
+  /** Marco 14: o `valor` absorve dano antes da vida e se gasta. */
+  escudo: boolean;
 }
 
 type Def = Omit<DefinicaoEfeito, 'id'>;
@@ -123,6 +146,10 @@ const BASE: Omit<Def, 'icone' | 'cor' | 'positivo' | 'padrao' | 'campos'> = {
   rastro: null,
   domina: false,
   exige: [],
+  lentidao: false,
+  curaRecebida: 0,
+  danoRecebido: 0,
+  escudo: false,
 };
 
 const negativo = (icone: string, cor: string, campos: readonly CampoEfeito[], padrao: Def['padrao'], extra: Partial<Def>): Def => ({
@@ -188,6 +215,17 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   invocar: { ...BASE, icone: '☥', cor: '#16a085', positivo: true, ehStatus: false, campos: ['valor'], padrao: { duracaoMs: 20_000, valor: 1, pct: 0 }, fluxo: 'invocar', aoLancar: true, exige: ['ref'] },
   dominar_ao_matar: negativo('♛', '#8e44ad', [], { duracaoMs: 8000, valor: 0, pct: 0 }, { domina: true }),
   armadilha: { ...BASE, icone: '⚠', cor: '#d35400', positivo: true, ehStatus: false, campos: ['valor'], padrao: { duracaoMs: 30_000, valor: 8, pct: 0 }, fluxo: 'armadilha', aoLancar: true },
+
+  queimando: negativo('🔥', '#ff7b39', ['valor'], { duracaoMs: 3000, valor: 3, pct: 0 }, { periodico: 'dano' }),
+  resfriado: negativo('❄', '#74b9ff', ['pct'], { duracaoMs: 3000, valor: 0, pct: 30 }, { lentidao: true }),
+  congelado: negativo('🧊', '#a0d8ef', [], { duracaoMs: 1500, valor: 0, pct: 0 }, { bloqueiaMovimento: true, bloqueiaAcoes: 'todas' }),
+  eletrizado: negativo('⚡', '#f7dc6f', [], { duracaoMs: 2500, valor: 0, pct: 0 }, {}),
+  envenenado: negativo('🧪', '#58d68d', ['valor', 'pct'], { duracaoMs: 5000, valor: 2, pct: 50 }, { periodico: 'dano', curaRecebida: -1 }),
+  exposto: negativo('👁', '#d980fa', ['pct'], { duracaoMs: 4000, valor: 0, pct: 20 }, { danoRecebido: 1 }),
+  escudo: { ...BASE, icone: '🔰', cor: '#5dade2', positivo: true, campos: ['valor'], padrao: { duracaoMs: 8000, valor: 12, pct: 0 }, escudo: true },
+  puxao: instantaneo('⇤', '#7f8c8d', ['valor'], { duracaoMs: 0, valor: 2, pct: 0 }, 'puxao', false),
+  trocar_lugar: instantaneo('⇄', '#8e44ad', [], { duracaoMs: 0, valor: 0, pct: 0 }, 'trocar', true),
+  dano_direto: instantaneo('✦', '#e74c3c', ['valor'], { duracaoMs: 0, valor: 5, pct: 0 }, 'dano', false),
 };
 
 export const REGISTRO_EFEITOS: Readonly<Record<TipoEfeito, DefinicaoEfeito>> = Object.fromEntries(

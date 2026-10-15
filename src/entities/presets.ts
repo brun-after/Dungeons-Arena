@@ -1,11 +1,15 @@
 // Presets de inimigo (§2.5) e classes jogáveis, lidos e validados dos JSONs de conteúdo.
 // Preset visual (modelo) e arquétipo de IA são campos independentes (§2.6).
+// Marco 14 (14/10/2026): resistências por elemento e imunidades a efeitos nos presets.
 
 import { ehObjeto, Leitor, type Objeto } from '../core/validar';
 import { formulaValida } from '../combat/dados';
+import { ehElemento, type Elemento } from '../combat/elementos';
+import { lerPassiva, type Passiva } from '../combat/habilidades';
+import { ehTipoEfeito, type TipoEfeito } from '../combat/registro-efeitos';
 import { ATRIBUTOS_NEUTROS, type Arquetipo, type Atributos, type ClasseCombate, type ComportamentoInvocacao } from './entidade';
 
-const CLASSES: readonly ClasseCombate[] = ['corpo_a_corpo', 'conjurador'];
+const CLASSES: readonly ClasseCombate[] = ['corpo_a_corpo', 'conjurador', 'atirador'];
 const ARQUETIPOS: readonly Exclude<Arquetipo, 'jogador'>[] = ['perseguidor', 'atirador', 'controlador', 'boss', 'boneco'];
 
 export interface PresetInimigo {
@@ -24,6 +28,9 @@ export interface PresetInimigo {
   intervaloAtaqueMs: number;
   /** Marco 10A-3: presets feitos para serem invocados (§2.9); null nos inimigos comuns. */
   invocacao: PresetInvocacao | null;
+  /** Marco 14: resistência por elemento, em % (−100 a 100; 100 = imune), e tipos de efeito que não pegam. */
+  resistencias: Readonly<Partial<Record<Elemento, number>>>;
+  imunidades: readonly TipoEfeito[];
 }
 
 export interface PresetInvocacao {
@@ -66,6 +73,13 @@ export interface ClasseJogador {
   habilidades: string[];
   /** Mochila inicial (marco 6): referências ao catálogo de itens. */
   itensIniciais: { id: string; qtd: number }[];
+  /** Marco 14: afinidades por etiqueta (mudam como cada habilidade funciona para a classe). */
+  afinidades: Passiva[];
+  /** Marco 14: o que a classe pode aprender com pontos de habilidade (além das iniciais e dos livros). */
+  aprendiveis: string[];
+  /** Marco 14: o modelo de criatura (render) e a frase da tela de escolha (chave do i18n). */
+  modelo: string;
+  descricao: string;
 }
 
 function idDe(item: unknown): string {
@@ -95,12 +109,29 @@ export function lerPresets(json: unknown): { presets: Map<string, PresetInimigo>
       habilidades: l.listaDeTextos(o, 'habilidades'),
       intervaloAtaqueMs: l.numero(o, 'intervaloAtaqueMs', { min: 0 }),
       invocacao: lerInvocacao(l, o.invocacao),
+      resistencias: lerResistencias(l, o.resistencias),
+      imunidades: o.imunidades === undefined ? [] : l.listaDeTextos(o, 'imunidades').filter((t): t is TipoEfeito => {
+        if (ehTipoEfeito(t)) return true;
+        l.erro(`imunidades: tipo de efeito desconhecido "${t}"`);
+        return false;
+      }),
     };
     if (presets.has(p.id)) l.erro('id repetido');
     erros.push(...l.erros);
     presets.set(p.id, p);
   }
   return { presets, erros };
+}
+
+function lerResistencias(l: Leitor, v: unknown): Partial<Record<Elemento, number>> {
+  if (v === undefined) return {};
+  const o = l.objeto(v, 'resistencias');
+  const saida: Partial<Record<Elemento, number>> = {};
+  for (const chave of Object.keys(o)) {
+    if (ehElemento(chave)) saida[chave] = l.numero(o, chave, { min: -100, max: 100 });
+    else l.erro(`resistencias: elemento desconhecido "${chave}"`);
+  }
+  return saida;
 }
 
 function lerAtributos(l: Leitor, o: Objeto): Atributos {
@@ -133,6 +164,10 @@ export function lerClasses(json: unknown): { classes: Map<string, ClasseJogador>
         const i = l.objeto(v, 'itensIniciais[]');
         return { id: l.texto(i, 'id'), qtd: l.numero(i, 'qtd', { min: 1, max: 99, inteiro: true }) };
       }),
+      afinidades: o.afinidades === undefined ? [] : l.lista(o, 'afinidades').flatMap((a) => lerPassiva(l, a) ?? []),
+      aprendiveis: o.aprendiveis === undefined ? [] : l.listaDeTextos(o, 'aprendiveis'),
+      modelo: o.modelo === undefined ? 'aventureiro' : l.texto(o, 'modelo'),
+      descricao: o.descricao === undefined ? '' : l.texto(o, 'descricao'),
     };
     if (classes.has(c.id)) l.erro('id repetido');
     erros.push(...l.erros);

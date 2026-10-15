@@ -2,6 +2,10 @@
 // Custo e recarga são pagos no início da conjuração. Durante a conjuração a ação fica telegrafada
 // (ticks publicados no evento `acaoIniciada`) e pode ser interrompida sem devolver o custo.
 // Contato e área consultam a geometria no tick do impacto: sair do alcance ou da área esquiva.
+// Marco 14 (14/10/2026), D-059: a habilidade vem compilada pela chave do ator (rank, caminhos, modificadores;
+// perfil.ts) e a ação guarda a chave. Alvos de suporte (aliado, aliados), formas novas (linha, cone, ao redor;
+// formas.ts), custo em vida, saltos (saltos.ts) e o perfil da classe e das passivas (dano, alcance, custo,
+// recarga).
 
 import type { Celula, EntidadeId } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -9,17 +13,21 @@ import { buscarEntidade, novoId, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao, MotivoCancelamento, MotivoRecusa } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { vivo, type Entidade } from '../entities/entidade';
-import { podeFerir } from '../modos/relacao';
+import { podeAjudar, podeFerir } from '../modos/relacao';
 import { bonusDeAtributo } from '../progression/ficha';
 import { ordemRotativa } from '../world/colisao';
+import { resolverHabilidade } from './compilar-habilidade';
 import type { FonteDeDano } from './dano';
 import { acaoBloqueada, aplicarEfeito, bonusAtaqueBasico, multiplicadorDanoCausado, REGISTRO_EFEITOS } from './efeitos';
 import { excedeLimite } from './efeitos-fluxo';
-import { celulaOcupada, chebyshev, dentroDoQuadrado } from './geometria';
+import { alvosDaForma, celulasDaForma, deSuporte } from './formas';
+import { celulaOcupada, chebyshev } from './geometria';
 import { aplicarImpacto } from './golpe';
 import type { Habilidade } from './habilidades';
 import { rampaDeInvocacao } from './invocacoes';
+import { habilidadeDoAtor, perfilPara } from './perfil';
 import { lancarProjetil } from './projeteis';
+import { quantidadeDeSaltos, saltar } from './saltos';
 
 export function chaveRecarga(entidadeId: EntidadeId, habilidadeId: string): string {
   return `${entidadeId}_${habilidadeId}`;
@@ -38,17 +46,35 @@ export function fonteDe(e: Entidade, ctx: ContextoSimulacao, tick: number): Font
     carisma: e.atributos.carisma,
     // Marco 10A-3: a rampa da invocação multiplica junto com os efeitos (§2.9).
     multDano: multiplicadorDanoCausado(e, tick) * rampaDeInvocacao(e, tick, ctx),
+    multCura: 1,
   };
 }
 
-/** Alcance com o `ab_alcance` quando é o ataque básico (§2.8, marco 8A). */
-export function alcanceDe(ator: Entidade, hab: Habilidade, tick: number): number {
-  return hab.alcanceCelulas + (hab.id === ator.ataqueBasico ? bonusAtaqueBasico(ator, tick).alcance : 0);
+/** Marco 14: a fonte de uma habilidade: o rank e os caminhos (na compilação) e o perfil da classe e passivas. */
+export function fonteDaHabilidade(e: Entidade, ctx: ContextoSimulacao, tick: number, hab: Habilidade): FonteDeDano {
+  const f = fonteDe(e, ctx, tick);
+  const p = perfilPara(ctx, e, hab);
+  return { ...f, multDano: f.multDano * hab.multDano * (1 + p.danoPct / 100), multCura: hab.multCura * (1 + p.curaPct / 100) };
+}
+
+/** Alcance com o perfil (marco 14) e o `ab_alcance` quando é o ataque básico (§2.8, marco 8A). */
+export function alcanceDe(ctx: ContextoSimulacao, ator: Entidade, hab: Habilidade, tick: number): number {
+  const basico = hab.id === ator.ataqueBasico ? bonusAtaqueBasico(ator, tick).alcance : 0;
+  return Math.max(0, hab.alcanceCelulas + perfilPara(ctx, ator, hab).alcance + basico);
 }
 
 /** Alvo ofensivo válido: vivo, visível e passível de dano pela relação do modo (§2.5). */
 export function alvoOfensivoValido(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, alvo: Entidade): boolean {
   return vivo(alvo) && alvo.invisivelAteTick <= estado.tick && podeFerir(ator, alvo, ctx.modo);
+}
+
+/** Marco 14: alvo de suporte válido: vivo e o próprio ou aliado, pela relação do modo. */
+export function alvoDeSuporteValido(ctx: ContextoSimulacao, ator: Entidade, alvo: Entidade): boolean {
+  return vivo(alvo) && podeAjudar(ator, alvo, ctx.modo);
+}
+
+function alvoValido(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, alvo: Entidade, hab: Habilidade): boolean {
+  return deSuporte(hab) ? alvoDeSuporteValido(ctx, ator, alvo) : alvoOfensivoValido(estado, ctx, ator, alvo);
 }
 
 /** Avatar hostil vem antes de qualquer outro alvo (§2.9): é regra de alvo, não de hostilidade. */
@@ -83,6 +109,19 @@ export function autoAlvo(
   return melhor;
 }
 
+/** Marco 14: o aliado (ou o próprio) no alcance com a menor fração de vida; empate pelo id. */
+function aliadoMaisFerido(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, alcance: number): Entidade | null {
+  const origem = celulaOcupada(ator);
+  let melhor: Entidade | null = null;
+  for (const e of estado.entidades) {
+    if (!alvoDeSuporteValido(ctx, ator, e) || chebyshev(origem, celulaOcupada(e)) > alcance) continue;
+    const f = e.hp / Math.max(1, e.hpMax);
+    const fm = melhor ? melhor.hp / Math.max(1, melhor.hpMax) : Infinity;
+    if (!melhor || f < fm || (f === fm && e.id < melhor.id)) melhor = e;
+  }
+  return melhor;
+}
+
 function habilidadeDisponivel(ator: Entidade, id: string): boolean {
   return ator.ataqueBasico === id || ator.habilidades.includes(id);
 }
@@ -103,23 +142,28 @@ export function iniciarAcao(
     saida.push({ t: 'acaoRecusada', tick: estado.tick, atorId: ator.id, habilidadeId, motivo });
     return false;
   };
-  const hab = ctx.conteudo.habilidades.get(habilidadeId);
   if (!vivo(ator)) return false;
-  if (!hab || !habilidadeDisponivel(ator, habilidadeId)) return recusar('sem_habilidade');
+  const hab = habilidadeDisponivel(ator, habilidadeId) ? habilidadeDoAtor(ctx, ator, habilidadeId) : undefined;
+  // Passiva não se conjura (marco 14): vale enquanto conhecida.
+  if (!hab || hab.passiva) return recusar('sem_habilidade');
   // Pedir uma habilidade durante a conjuração do ataque básico substitui o básico (D-020):
   // o automático nunca impede o jogador de usar habilidades.
   const substituiBasico = ator.acao?.habilidadeId === ator.ataqueBasico && habilidadeId !== ator.ataqueBasico;
   if (ator.acao && !substituiBasico) return recusar('ocupado');
   if (acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) return recusar('bloqueado');
   if (recargaRestante(estado, ator.id, hab.id) > 0) return recusar('recarga');
-  if (ator.mana < hab.custoRecurso) return recusar('recurso');
+  const perfil = perfilPara(ctx, ator, hab);
+  const custoMana = Math.max(0, Math.round(hab.custoRecurso * (1 + perfil.custoPct / 100)));
+  const custoVida = Math.max(0, Math.round(hab.custoVida * (1 + perfil.custoPct / 100)));
+  // Custo em vida (marco 14): nunca mata quem conjura.
+  if (ator.mana < custoMana || (custoVida > 0 && ator.hp <= custoVida)) return recusar('recurso');
   // Limites de invocação e armadilha do modo: recusa antes de cobrar (§5.6, marco 8A-2).
   if (excedeLimite(estado, ctx, ator, hab.efeitos)) return recusar('limite');
 
   const origem = celulaOcupada(ator);
   let alvo: Entidade | null = null;
   let celula: Celula | null = null;
-  if (hab.politicaAlvo === 'proprio') {
+  if (hab.politicaAlvo === 'proprio' || hab.politicaAlvo === 'aliados') {
     alvo = ator;
   } else if (typeof alvoPedido === 'object') {
     celula = alvoPedido;
@@ -127,17 +171,20 @@ export function iniciarAcao(
     alvo = escolherAlvo(estado, ctx, ator, hab, alvoPedido);
   }
   if (!alvo && !celula) return recusar('sem_alvo');
-  const mira = celula ?? celulaOcupada(alvo as Entidade);
-  if (chebyshev(origem, mira) > alcanceDe(ator, hab, estado.tick)) return recusar('fora_de_alcance');
+  // Em volta de quem conjura (ao redor, aliados): a mira é a própria célula.
+  const mira = hab.tipoArea === 'ao_redor' ? origem : (celula ?? celulaOcupada(alvo as Entidade));
+  if (chebyshev(origem, mira) > alcanceDe(ctx, ator, hab, estado.tick)) return recusar('fora_de_alcance');
 
   if (substituiBasico) cancelar(ator, estado, 'substituido', saida);
   // Conjuração (§2.7, etapa 3): custo e recarga descontados aqui, com recarga monotônica.
-  ator.mana -= hab.custoRecurso;
+  ator.mana -= custoMana;
+  ator.hp -= custoVida;
   if (hab.recargaMs > 0) {
     const chave = chaveRecarga(ator.id, hab.id);
-    // `ab_recarga` encurta a recarga do ataque básico (até 75%).
+    // `ab_recarga` encurta a recarga do ataque básico (até 75%); o perfil, a de qualquer habilidade.
     const reducao = hab.id === ator.ataqueBasico ? bonusAtaqueBasico(ator, estado.tick).recargaPct : 0;
-    estado.recargas[chave] = Math.max(estado.recargas[chave] ?? 0, estado.tick + ticksDe(hab.recargaMs * (1 - reducao / 100)));
+    const ms = hab.recargaMs * (1 - reducao / 100) * (1 + perfil.recargaPct / 100);
+    estado.recargas[chave] = Math.max(estado.recargas[chave] ?? 0, estado.tick + ticksDe(ms));
   }
   const lancamentoTick = estado.tick + ticksDe(hab.conjuracaoMs);
   const viagem =
@@ -146,6 +193,7 @@ export function iniciarAcao(
   ator.acao = {
     acaoId: novoId(estado),
     habilidadeId: hab.id,
+    chave: hab.chave,
     alvoId,
     alvoX: mira.x,
     alvoY: mira.y,
@@ -164,16 +212,17 @@ function escolherAlvo(
   hab: Habilidade,
   pedido: EntidadeId | undefined,
 ): Entidade | null {
+  const alcance = alcanceDe(ctx, ator, hab, estado.tick);
   const candidatos = [pedido, ator.alvoSelecionado];
   for (const id of candidatos) {
     if (!id) continue;
     const e = buscarEntidade(estado, id);
-    if (e && alvoOfensivoValido(estado, ctx, ator, e)) {
+    if (e && alvoValido(estado, ctx, ator, e, hab)) {
       // O pedido explícito vale mesmo fora do alcance (a validação recusa); o selecionado só se alcançável.
-      if (id === pedido || chebyshev(celulaOcupada(ator), celulaOcupada(e)) <= alcanceDe(ator, hab, estado.tick)) return e;
+      if (id === pedido || chebyshev(celulaOcupada(ator), celulaOcupada(e)) <= alcance) return e;
     }
   }
-  return autoAlvo(estado, ctx, ator, alcanceDe(ator, hab, estado.tick));
+  return deSuporte(hab) ? aliadoMaisFerido(estado, ctx, ator, alcance) : autoAlvo(estado, ctx, ator, alcance);
 }
 
 function cancelar(ator: Entidade, estado: EstadoJogo, motivo: MotivoCancelamento, saida: EventoSimulacao[]): void {
@@ -187,7 +236,7 @@ export function processarAcoes(estado: EstadoJogo, ctx: ContextoSimulacao, saida
   for (const ator of ordemRotativa(estado.entidades, estado.tick)) {
     const a = ator.acao;
     if (!a) continue;
-    const hab = ctx.conteudo.habilidades.get(a.habilidadeId);
+    const hab = resolverHabilidade(ctx, a.chave);
     if (!hab || !vivo(ator)) {
       cancelar(ator, estado, 'morte', saida);
       continue;
@@ -197,7 +246,7 @@ export function processarAcoes(estado: EstadoJogo, ctx: ContextoSimulacao, saida
       continue;
     }
     const alvo = a.alvoId === null ? null : buscarEntidade(estado, a.alvoId);
-    if (a.alvoId !== null && a.alvoId !== ator.id && (!alvo || !alvoOfensivoValido(estado, ctx, ator, alvo))) {
+    if (a.alvoId !== null && a.alvoId !== ator.id && (!alvo || !alvoValido(estado, ctx, ator, alvo, hab))) {
       cancelar(ator, estado, 'alvo_invalido', saida);
       continue;
     }
@@ -217,9 +266,9 @@ function lancar(
   alvo: Entidade | null,
   saida: EventoSimulacao[],
 ): void {
-  const fonte = fonteDe(ator, ctx, estado.tick);
+  const fonte = fonteDaHabilidade(ator, ctx, estado.tick, hab);
   const basico = hab.id === ator.ataqueBasico ? bonusAtaqueBasico(ator, estado.tick) : null;
-  const alcance = alcanceDe(ator, hab, estado.tick);
+  const alcance = alcanceDe(ctx, ator, hab, estado.tick);
   const base = { acaoId, fonte, hab, mira, ...(basico && basico.dano > 0 && { danoExtra: basico.dano }) };
   // Efeitos de lançamento (armadilha, invocação): uma vez, sobre quem conjura, na célula mirada.
   for (const ef of hab.efeitos) {
@@ -235,7 +284,9 @@ function lancar(
         saida.push({ t: 'esquivou', tick: estado.tick, acaoId, atorId: ator.id, alvoId: alvo.id });
         break;
       }
+      const saltos = quantidadeDeSaltos(hab, alvo, estado.tick);
       aplicarImpacto(estado, ctx, alvo, { ...base, indice: 0 }, saida);
+      const atingidos = [alvo.id];
       // `ab_multi_alvo` (§2.8): alvos adicionais no alcance, os mais próximos primeiro.
       const extras = basico?.alvosExtras ?? 0;
       if (extras > 0) {
@@ -247,14 +298,14 @@ function lancar(
           .slice(0, extras)
           .forEach((e, i) => {
             aplicarImpacto(estado, ctx, e, { ...base, indice: i + 1 }, saida);
+            atingidos.push(e.id);
           });
       }
+      if (saltos > 0) saltar(estado, ctx, ator, hab, alvo, saltos, base, atingidos, saida);
       break;
     }
     case 'area': {
-      const atingidos = estado.entidades
-        .filter((e) => vivo(e) && podeFerir(ator, e, ctx.modo) && dentroDoQuadrado(celulaOcupada(e), mira, hab.raioArea))
-        .sort((a, b) => (a.id < b.id ? -1 : 1));
+      const atingidos = alvosDaForma(estado, ctx, ator, hab, celulasDaForma(hab, celulaOcupada(ator), mira, ctx.fase));
       atingidos.forEach((e, indice) => {
         aplicarImpacto(estado, ctx, e, { ...base, indice }, saida);
       });
@@ -275,12 +326,12 @@ export function processarAutoAtaque(estado: EstadoJogo, ctx: ContextoSimulacao, 
   if (estado.tick % Math.max(1, ticksDe(ctx.balance.combate.autoAtaqueMs)) !== 0) return;
   for (const ator of ordemRotativa(estado.entidades, estado.tick)) {
     if (!ator.autoAtaque || !vivo(ator) || ator.acao) continue;
-    const hab = ctx.conteudo.habilidades.get(ator.ataqueBasico);
+    const hab = habilidadeDoAtor(ctx, ator, ator.ataqueBasico);
     if (!hab || recargaRestante(estado, ator.id, hab.id) > 0 || acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) {
       continue;
     }
     const selecionado = ator.alvoSelecionado ? buscarEntidade(estado, ator.alvoSelecionado) : undefined;
-    const alcance = alcanceDe(ator, hab, estado.tick);
+    const alcance = alcanceDe(ctx, ator, hab, estado.tick);
     const noAlcance = (e: Entidade) => chebyshev(celulaOcupada(ator), celulaOcupada(e)) <= alcance;
     const alvo =
       selecionado && alvoOfensivoValido(estado, ctx, ator, selecionado) && noAlcance(selecionado)

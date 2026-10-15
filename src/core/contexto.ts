@@ -2,7 +2,9 @@
 // de balanceamento. Fica fora do estado: não entra no digest nem no checkpoint (D-007).
 
 import balanceJson from '../data/balance.json';
+import type { RegrasHabilidades } from '../combat/compilar-habilidade';
 import type { FaixaCritico } from '../combat/critico';
+import type { RegrasOrcamento } from '../combat/orcamento';
 import type { ModoDeJogo, Raridade } from '../modos/modo';
 import type { RegrasColisao } from '../world/colisao';
 import type { Fase } from '../world/fase';
@@ -145,6 +147,18 @@ export interface Balance {
     capacidade: number;
     pilhaMax: number;
   };
+  /** Marco 14 (D-059): ranks, barra e pontos de habilidade; orçamento de poder; habilidades geradas. */
+  habilidades: RegrasHabilidades;
+  orcamento: RegrasOrcamento;
+  geracao: {
+    chanceInimigo: number;
+    chancePorNivel: number;
+    chanceMax: number;
+    habilidadesBoss: number;
+    chanceSecundario: number;
+    /** Chance de um livro raro (habilidade gerada) entre os itens sorteados. */
+    chanceLivroRaro: number;
+  };
   ia: RegrasIa;
 }
 
@@ -175,8 +189,9 @@ export interface RegrasIa {
   distanciaMaxAtirador: number;
 }
 
-// O JSON importado tipa `raridadeMinBoss` como string; o leitor de conteúdo confere o valor nos testes.
-export const BALANCE_PADRAO: Balance = balanceJson as Balance;
+// O JSON importado tipa `raridadeMinBoss` como string e as tuplas como listas; o leitor de conteúdo e os testes
+// conferem os valores.
+export const BALANCE_PADRAO: Balance = balanceJson as unknown as Balance;
 
 export interface ContextoSimulacao {
   readonly fase: Fase;
