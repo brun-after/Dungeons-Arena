@@ -41,6 +41,29 @@ export type Comando =
   /** Marco 15: troca a dificuldade do mundo (o personagem não muda). */
   | { t: 'definirDificuldade'; nivel: Dificuldade };
 
+/** Marco 15: os tipos de comando, para os modos listarem quais aceitam pela rede (`comandosDeRede`). */
+export const TIPOS_DE_COMANDO: readonly Comando['t'][] = [
+  'mover',
+  'irPara',
+  'usarHabilidade',
+  'ataqueBasico',
+  'selecionarAlvo',
+  'usarItem',
+  'equipar',
+  'desequipar',
+  'distribuirPonto',
+  'interagir',
+  'comprar',
+  'vender',
+  'fecharLoja',
+  'moverItem',
+  'descansar',
+  'dispensar',
+  'subirRank',
+  'equiparHabilidade',
+  'definirDificuldade',
+];
+
 /** Envelope de rede. O servidor deriva o jogador da sessão e atribui o tick de aplicação. */
 export interface ComandoEmpacotado {
   sessaoId: string;

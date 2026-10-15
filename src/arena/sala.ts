@@ -5,20 +5,24 @@
 // é ignorado: deduplicação), há balde de fichas (60/s, burst 20) e fila limitada; o comando vale no
 // `tickCliente` se ainda não passou, senão no tick atual (D-033). Nenhum jogador acelera a simulação
 // mandando mais mensagens, e o criador da sala não tem prioridade nenhuma.
+// Marco 15 (15/10/2026): a campanha cooperativa (coop/sala-campanha.ts) estende esta sala pelos ganchos
+// `criarPersonagem`, `motivoParaRecusar`, `depoisDoTick`, `aoRemoverSessao` e `trocarMundo`; os comandos aceitos
+// pela rede vêm do modo (`comandosDeRede`).
 
-import type { Comando, ComandoDoTick, Dir8 } from '../core/comandos';
+import type { Comando, ComandoDoTick, Dir8, EntidadeId } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import { criarEstado, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { criarRng, proximoU32, type EstadoRng } from '../core/rng';
 import { simular } from '../core/simulacao';
 import { ticksDe } from '../core/tempo';
+import { comandoAceitoEmRede } from '../modos/regras';
 import { povoarFase } from '../world/populacao';
 import { entrarNaArena } from './entrada';
 import { estadoPublico } from './estado-publico';
 import { GeradorDePatches } from './patches';
-import { construirFichaDeSessao } from './ficha-sessao';
-import { lerMensagemCliente, type MensagemCliente, type MensagemServidor, type MotivoRejeicao } from './protocolo';
+import { construirFichaDeSessao, type PreviaDeFicha } from './ficha-sessao';
+import { lerMensagemCliente, type MensagemCliente, type MensagemServidor, type MotivoErro, type MotivoRejeicao } from './protocolo';
 
 export const COMANDOS_POR_SEGUNDO = 60;
 export const BURST_COMANDOS = 20;
@@ -30,7 +34,7 @@ export const RESERVA_RECONEXAO_MS = 30_000;
 /** Estado público (completo ou patch) a 20 Hz: a cada 3 ticks de 60 Hz (§3.6). */
 export const TICKS_POR_ESTADO = 3;
 
-interface Sessao {
+export interface Sessao {
   sessaoId: string;
   jogadorId: string;
   entidadeId: string;
@@ -78,27 +82,36 @@ export interface OpcoesSala {
   versaoConteudo: string;
 }
 
+/** O que o gancho de entrada devolve: a prévia da ficha, ou o motivo da recusa. */
+export type EntradaDePersonagem = { ok: true; previa: PreviaDeFicha } | { ok: false; motivo: MotivoErro };
+
 export class SalaArena {
-  readonly estado: EstadoJogo;
-  readonly epoca = 1;
-  private readonly sessoes = new Map<string, Sessao>();
+  /** Marco 15: a campanha cooperativa troca o mundo (e o contexto) a cada fase; a época sobe junto. */
+  estado: EstadoJogo;
+  epoca = 1;
+  protected readonly sessoes = new Map<string, Sessao>();
   private agenda: ComandoAgendado[] = [];
   private ordemChegada = 0;
   private proximoJogador = 1;
   /** PRNG só para IDs de sessão: não consome a sequência da simulação. */
   private readonly rngSessoes: EstadoRng;
   private readonly eventosDoTick: EventoSimulacao[] = [];
-  private readonly patches = new GeradorDePatches();
+  private patches = new GeradorDePatches();
   private bytesTotais = 0;
   private rejeicoesTotais = 0;
 
   constructor(
-    readonly ctx: ContextoSimulacao,
+    public ctx: ContextoSimulacao,
     private readonly opcoes: OpcoesSala,
+    estadoInicial?: EstadoJogo,
   ) {
-    this.estado = criarEstado({ semente: opcoes.semente, faseId: ctx.fase.id });
     this.rngSessoes = criarRng(opcoes.semente ^ 0x5e55a0);
-    povoarFase(this.estado, ctx);
+    if (estadoInicial) {
+      this.estado = estadoInicial;
+    } else {
+      this.estado = criarEstado({ semente: opcoes.semente, faseId: ctx.fase.id });
+      povoarFase(this.estado, ctx);
+    }
   }
 
   get jogadores(): number {
@@ -155,9 +168,7 @@ export class SalaArena {
       },
       encerrar: () => {
         if (!sessao) return;
-        this.sessoes.delete(sessao.sessaoId);
-        const id = sessao.entidadeId;
-        this.estado.entidades = this.estado.entidades.filter((e) => e.id !== id);
+        this.removerSessao(sessao);
         sessao = null;
       },
     };
@@ -198,6 +209,12 @@ export class SalaArena {
         // seq repetido ou antigo: já aplicado (ou rejeitado); não reaplica (deduplicação, §3.6).
         if (p.seq <= sessao.ultimoSeq) return null;
         sessao.ultimoSeq = p.seq;
+        // Marco 15: o modo diz o que a rede pode mandar (e a sala cooperativa, o que só o anfitrião pode).
+        const motivo = this.motivoParaRecusar(sessao, p.cmd);
+        if (motivo) {
+          rejeitar(motivo);
+          return null;
+        }
         this.recarregarFichas(sessao);
         if (sessao.fichas < 1) {
           rejeitar('taxa');
@@ -233,11 +250,16 @@ export class SalaArena {
       responder({ t: 'erro', motivo: 'sala_cheia' });
       return null;
     }
-    const n = this.proximoJogador++;
+    const n = this.proximoJogador;
     const jogadorId = `jogador-${n}`;
     const entidadeId = `p${n}`;
-    const previa = construirFichaDeSessao(msg.pedidoFicha, this.ctx.modo, this.ctx.conteudo, this.ctx.balance);
-    entrarNaArena(this.estado, this.ctx, jogadorId, entidadeId, previa.ficha, msg.nome || `Jogador ${n}`);
+    const entrada = this.criarPersonagem(msg, jogadorId, entidadeId, n);
+    if (!entrada.ok) {
+      responder({ t: 'erro', motivo: entrada.motivo });
+      return null;
+    }
+    this.proximoJogador++;
+    const { previa } = entrada;
     const nova: Sessao = {
       sessaoId: `s${proximoU32(this.rngSessoes).toString(36)}${proximoU32(this.rngSessoes).toString(36)}`,
       jogadorId,
@@ -256,6 +278,7 @@ export class SalaArena {
       rejeicoes: 0,
     };
     this.sessoes.set(nova.sessaoId, nova);
+    this.aoEntrar?.(nova);
     responder({
       t: 'bemVindo',
       sessaoId: nova.sessaoId,
@@ -268,6 +291,67 @@ export class SalaArena {
       estado: estadoPublico(this.estado),
     });
     return nova;
+  }
+
+  /** Gancho de entrada: cria a entidade do jogador no mundo. Na arena, pela ficha de sessão com o clamp do modo. */
+  protected criarPersonagem(msg: Extract<MensagemCliente, { t: 'entrar' }>, jogadorId: string, entidadeId: EntidadeId, n: number): EntradaDePersonagem {
+    const previa = construirFichaDeSessao(msg.pedidoFicha, this.ctx.modo, this.ctx.conteudo, this.ctx.balance);
+    entrarNaArena(this.estado, this.ctx, jogadorId, entidadeId, previa.ficha, msg.nome || `Jogador ${n}`);
+    return { ok: true, previa };
+  }
+
+  /** Gancho: a sessão acabou de entrar (já está em `sessoes`). */
+  protected aoEntrar?(s: Sessao): void;
+
+  /** Gancho: por que recusar o comando desta sessão (null = aceita). Na base, só o que o modo aceita pela rede. */
+  protected motivoParaRecusar(s: Sessao, cmd: Comando): MotivoRejeicao | null {
+    return comandoAceitoEmRede(this.ctx.modo, cmd) ? null : 'nao_permitido';
+  }
+
+  /** Gancho: depois de cada tick (a sala cooperativa manda o canal privado e confere a saída). */
+  protected depoisDoTick?(): void;
+
+  /** Gancho: a sessão saiu de vez (a entidade já saiu do mundo). */
+  protected aoRemoverSessao?(s: Sessao): void;
+
+  protected removerSessao(s: Sessao): void {
+    this.sessoes.delete(s.sessaoId);
+    this.estado.entidades = this.estado.entidades.filter((e) => e.id !== s.entidadeId);
+    this.aoRemoverSessao?.(s);
+  }
+
+  protected estadoPublicoAtual(): EstadoJogo {
+    return estadoPublico(this.estado);
+  }
+
+  protected enviarPara(s: Sessao, msg: MensagemServidor): void {
+    if (s.conectada) s.enviar(JSON.stringify(msg));
+  }
+
+  /**
+   * Marco 15: troca o mundo inteiro (fase nova da campanha cooperativa). A época sobe — comandos em trânsito da fase
+   * anterior são recusados — e a agenda esvazia. O gerador de patches parte do estado novo, que quem chama manda
+   * completo (`novaFase`).
+   */
+  protected trocarMundo(ctx: ContextoSimulacao, estado: EstadoJogo): EstadoJogo {
+    // O mundo novo tem o próprio relógio: os ticks guardados nas sessões andam junto (reserva, taxa, movimento).
+    const delta = estado.tick - this.estado.tick;
+    this.ctx = ctx;
+    this.estado = estado;
+    this.epoca++;
+    this.agenda = [];
+    for (const s of this.sessoes.values()) {
+      s.desconectadaEmTick += delta;
+      s.ultimaRecargaTick += delta;
+      s.ultimoMoverTick += delta;
+      s.naFila = 0;
+      s.direcao = 'parado';
+      s.precisaCompleto = false;
+    }
+    this.patches = new GeradorDePatches();
+    const publico = estadoPublico(estado);
+    this.patches.gerar(publico);
+    return publico;
   }
 
   /** Balde de fichas: 60 por segundo de simulação, até o burst (§3.6). */
@@ -307,6 +391,7 @@ export class SalaArena {
       this.transmitir({ t: 'eventos', tick: this.estado.tick, eventos: this.eventosDoTick });
     }
     if (this.estado.tick % TICKS_POR_ESTADO === 0) this.transmitirEstado();
+    this.depoisDoTick?.();
   }
 
   /**
@@ -349,8 +434,7 @@ export class SalaArena {
     const limite = ticksDe(RESERVA_RECONEXAO_MS);
     for (const s of [...this.sessoes.values()]) {
       if (s.conectada || this.estado.tick - s.desconectadaEmTick < limite) continue;
-      this.sessoes.delete(s.sessaoId);
-      this.estado.entidades = this.estado.entidades.filter((e) => e.id !== s.entidadeId);
+      this.removerSessao(s);
     }
   }
 

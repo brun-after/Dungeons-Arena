@@ -35,5 +35,7 @@
   "objetosDeFase": true,
   "spawnerDinamico": true,
   "portas": { "inimigosCruzamChance": 0.5 },
+  "saida": "qualquer",
+  "comandosDeRede": ["mover", "irPara", "usarHabilidade", "ataqueBasico", "selecionarAlvo", "usarItem", "equipar", "desequipar", "distribuirPonto", "interagir", "comprar", "vender", "fecharLoja", "moverItem", "descansar", "dispensar"],
   "sobrevivencia": { "regenPorCelula": false, "descanso": false, "penalidadeMorte": null }
 }

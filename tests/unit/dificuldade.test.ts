@@ -2,7 +2,6 @@
 // qualquer nível; a dificuldade só muda o mundo à volta dele.
 
 import { describe, expect, it } from 'vitest';
-import { lerComando } from '../../src/arena/protocolo';
 import type { Comando } from '../../src/core/comandos';
 import type { ContextoSimulacao } from '../../src/core/contexto';
 import { digest } from '../../src/core/digest';
@@ -11,9 +10,11 @@ import { DT_MS } from '../../src/core/loop';
 import { simular, type EventoSimulacao } from '../../src/core/simulacao';
 import type { Entidade } from '../../src/entities/entidade';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
+import { modoPorId } from '../../src/core/conteudo';
 import { fatorDoGolpe, fatoresDoMundo, tamanhoDoGrupo, type Dificuldade } from '../../src/modos/dificuldade';
+import { comandoAceitoEmRede } from '../../src/modos/regras';
 import { MIGRACOES } from '../../src/save/esquema';
-import { contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
+import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 
 function obter<T>(v: T | undefined | null, nome: string): T {
   if (v === undefined || v === null) throw new Error(`${nome} ausente`);
@@ -165,12 +166,14 @@ describe('o mesmo personagem em qualquer dificuldade', () => {
     expect(rodar()).toBe(rodar());
   });
 
-  it('quem não tem bolsa (arena) não troca a dificuldade, e o protocolo da arena recusa o comando', () => {
+  it('quem não tem bolsa (arena) não troca a dificuldade, e o modo Livre não aceita o comando pela rede', () => {
     const c = ctx();
     const s = cena(c, 'normal', [], [['goblin', 3, 3]]);
     s.tick([['i0', { t: 'definirDificuldade', nivel: 'pesadelo' }]]);
     expect(s.estado.dificuldade).toBe('normal');
-    expect(lerComando({ t: 'definirDificuldade', nivel: 'pesadelo' })).toBeNull();
+    const cmd = { t: 'definirDificuldade', nivel: 'pesadelo' } as const;
+    expect(comandoAceitoEmRede(modoPorId(CONTEUDO, 'livre'), cmd)).toBe(false);
+    expect(comandoAceitoEmRede(modoPorId(CONTEUDO, 'cooperativo'), cmd)).toBe(true);
   });
 });
 

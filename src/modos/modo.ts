@@ -2,12 +2,15 @@
 // `if (modo === 'x')` espalhado pelo código: são consultadas por funções pequenas
 // (relacao.ts, regras.ts, arena/ficha-sessao.ts).
 
+import { TIPOS_DE_COMANDO } from '../core/comandos';
 import { ehObjeto, Leitor, type Objeto } from '../core/validar';
 import { ATRIBUTOS_NEUTROS, type Atributos } from '../entities/entidade';
 
 export type PoliticaRelacao = 'todos_hostis' | 'todos_aliados' | 'por_equipe';
 export type TipoFim = 'nenhum' | 'abates' | 'pontos' | 'tempo' | 'ultimo_de_pe' | 'objetivo';
 export type LocalRespawn = 'base_da_equipe' | 'aleatorio' | 'longe_do_inimigo';
+/** Marco 15: quando a fase termina — qualquer jogador na saída, ou todos os vivos sobre ela (cooperativo). */
+export type RegraSaida = 'qualquer' | 'todos_vivos';
 export type Raridade = 'comum' | 'incomum' | 'raro' | 'epico' | 'lendario';
 
 export const RARIDADES: readonly Raridade[] = ['comum', 'incomum', 'raro', 'epico', 'lendario'];
@@ -80,6 +83,10 @@ export interface ModoDeJogo {
   spawnerDinamico: boolean;
   /** Marco 10A-1: chance de um NPC atravessar uma porta interna ao pisar nela (§2.1, 50%). */
   portas: { inimigosCruzamChance: number };
+  /** Marco 15: quem precisa estar na saída para a fase terminar. */
+  saida: RegraSaida;
+  /** Marco 15: os comandos que a sala aceita pela rede (o resto é recusado com `nao_permitido`). */
+  comandosDeRede: string[];
   /** Marco 10A-2 (§2.12): regeneração por célula, descanso e penalidade de morte (null = sem). */
   sobrevivencia: {
     regenPorCelula: boolean;
@@ -191,6 +198,8 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
     objetosDeFase: l.booleano(o, 'objetosDeFase'),
     spawnerDinamico: l.booleano(o, 'spawnerDinamico'),
     portas: { inimigosCruzamChance: l.numero(l.objeto(o.portas, 'portas'), 'inimigosCruzamChance', { min: 0, max: 1 }) },
+    saida: l.opcao(o, 'saida', ['qualquer', 'todos_vivos'] as const),
+    comandosDeRede: l.listaDeTextos(o, 'comandosDeRede'),
     sobrevivencia: {
       regenPorCelula: l.booleano(sobrevivencia, 'regenPorCelula'),
       descanso: l.booleano(sobrevivencia, 'descanso'),
@@ -199,6 +208,9 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
   };
   if (modo.fim.tipo !== 'nenhum' && modo.fim.alvo === null && modo.fim.tempoLimiteS === null) {
     l.erro('fim com tipo diferente de "nenhum" precisa de alvo ou tempo limite');
+  }
+  for (const c of modo.comandosDeRede) {
+    if (!(TIPOS_DE_COMANDO as readonly string[]).includes(c)) l.erro(`comandosDeRede: comando desconhecido "${c}"`);
   }
   if (ehObjeto(o.clamp) && modo.clamp?.modo === 'preset' && modo.clamp.presetClasse === null) {
     l.erro('clamp em modo preset precisa de presetClasse');

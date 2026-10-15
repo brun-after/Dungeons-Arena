@@ -72,6 +72,7 @@
   },
   "economia": {
     "ouroInicial": 15,
+    "ouroMax": 999999,
     "vendaPct": 50,
     "janelaLojaMs": 5000,
     "recargaLojaMs": 10000,

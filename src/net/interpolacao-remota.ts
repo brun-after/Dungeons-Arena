@@ -15,6 +15,11 @@ const MAX_SNAPSHOTS = 30;
 export class BufferRemoto {
   private readonly snapshots: Snapshot[] = [];
 
+  /** Marco 15: fase nova (o relógio do mundo recomeça). */
+  limpar(): void {
+    this.snapshots.length = 0;
+  }
+
   registrar(tick: number, estado: EstadoJogo): void {
     const ultimo = this.snapshots.at(-1);
     if (ultimo && tick <= ultimo.tick) return;

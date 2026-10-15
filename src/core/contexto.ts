@@ -92,6 +92,8 @@ export interface Balance {
   economia: {
     /** Ouro de quem começa uma campanha. */
     ouroInicial: number;
+    /** Marco 15: teto de ouro que a sala cooperativa aceita na ficha trazida do slot. */
+    ouroMax: number;
     /** A loja compra por esta porcentagem do `valorBase` (arredondado para baixo). */
     vendaPct: number;
     /** Janela da loja (o jogador fica congelado) e a recarga armada ao fechar, por jogador e loja. */

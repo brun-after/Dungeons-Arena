@@ -7,6 +7,9 @@ import { FONTES_OFICIAIS } from '../core/conteudo';
 import { hash53, serializarCanonico } from '../core/digest';
 import type { EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
+import type { Bolsa } from '../entities/entidade';
+import { ehDificuldade } from '../modos/dificuldade';
+import type { RefFase } from '../save/esquema';
 import { ehObjeto, type Objeto } from '../core/validar';
 import { SLOTS_DE_EQUIPAMENTO, type Slot } from '../modos/modo';
 import { NOMES_ATRIBUTOS, type NomeAtributo } from '../progression/itens';
@@ -33,9 +36,11 @@ export type MotivoRejeicao =
   | 'epoca'
   | 'taxa'
   | 'fila'
-  | 'nao_entrou';
+  | 'nao_entrou'
+  /** Marco 15: o modo não aceita este comando pela rede (ou só o anfitrião pode). */
+  | 'nao_permitido';
 
-export type MotivoErro = 'sala_cheia' | 'versao_conteudo' | 'ja_entrou';
+export type MotivoErro = 'sala_cheia' | 'versao_conteudo' | 'ja_entrou' | 'personagem_invalido';
 
 export type MensagemServidor =
   | {
@@ -54,6 +59,12 @@ export type MensagemServidor =
   | { t: 'eventos'; tick: number; eventos: EventoSimulacao[] }
   | { t: 'pong'; id: number; enviadoMs: number; tickServidor: number }
   | { t: 'rejeitado'; seq: number | null; motivo: MotivoRejeicao }
+  /** Marco 15 (cooperativo): só para a própria sessão — a bolsa (mochila, equipamento, ouro, pontos, habilidades). */
+  | { t: 'privado'; bolsa: Bolsa | null; anfitriao: boolean }
+  /** Marco 15 (cooperativo): o grupo chegou à saída; a sala montou a fase seguinte (época nova). */
+  | { t: 'novaFase'; faseRef: RefFase; nome: string; epocaSala: number; tick: number; ackSeq: number; estado: EstadoJogo }
+  /** Marco 15 (cooperativo): a saída da última fase não leva a lugar nenhum (só depois de uma aventura). */
+  | { t: 'fimDaCampanha' }
   | { t: 'erro'; motivo: MotivoErro };
 
 /** Versão do conteúdo oficial: cliente e sala precisam concordar (§3.6, "versão/hash"). */
@@ -118,6 +129,15 @@ export function lerComando(v: unknown): Comando | null {
       return v.tipo === 'curto' || v.tipo === 'longo' ? { t: 'descansar', tipo: v.tipo } : null;
     case 'moverItem':
       return id(v.invId) && inteiro(v.posicao) && v.posicao >= 0 && v.posicao < 1000 ? { t: 'moverItem', invId: v.invId, posicao: v.posicao } : null;
+    // Marco 15: os comandos de personagem; quem decide se valem é o modo da sala (`comandosDeRede`).
+    case 'subirRank':
+      if (!id(v.id)) return null;
+      if (v.caminho === undefined) return { t: 'subirRank', id: v.id };
+      return id(v.caminho) ? { t: 'subirRank', id: v.id, caminho: v.caminho } : null;
+    case 'equiparHabilidade':
+      return (v.id === null || id(v.id)) && inteiro(v.slot) && v.slot >= 0 && v.slot < 16 ? { t: 'equiparHabilidade', id: v.id, slot: v.slot } : null;
+    case 'definirDificuldade':
+      return ehDificuldade(v.nivel) ? { t: 'definirDificuldade', nivel: v.nivel } : null;
     default:
       return null;
   }

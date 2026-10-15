@@ -10,6 +10,7 @@ import interacoesJson from '../data/interacoes.json';
 import inimigosJson from '../data/inimigos.json';
 import itensJson from '../data/itens.json';
 import campanhaJson from '../data/modos/campanha.json';
+import cooperativoJson from '../data/modos/cooperativo.json';
 import livreJson from '../data/modos/livre.json';
 import skillsJson from '../data/skills.json';
 import { lerInteracoes, type Interacoes } from '../combat/acumulo';
@@ -150,7 +151,7 @@ export const FONTES_OFICIAIS: FontesDeConteudo = {
   elementos: elementosJson,
   interacoes: interacoesJson,
   caminhos: caminhosJson,
-  modos: { 'campanha.json': campanhaJson, 'livre.json': livreJson },
+  modos: { 'campanha.json': campanhaJson, 'cooperativo.json': cooperativoJson, 'livre.json': livreJson },
 };
 
 export function conteudoOficial(): Conteudo {
