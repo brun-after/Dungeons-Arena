@@ -2,6 +2,7 @@
 // sem funções e sem referências cíclicas, para clonar, comparar (digest) e gravar em checkpoint.
 // O terreno da fase é conteúdo imutável e fica no contexto (D-007); aqui só o `faseId`.
 
+import type { Dificuldade } from '../modos/dificuldade';
 import type { EfeitoCanonico } from '../combat/registro-efeitos';
 import type { EntidadeId } from './comandos';
 import { clonarEntidade, type Entidade } from '../entities/entidade';
@@ -160,6 +161,8 @@ export interface EstadoJogo {
   saidaAberta: boolean;
   /** Gerador de IDs de ação e de projétil, para não duplicar VFX/som (§3.6). */
   proximoId: number;
+  /** Marco 15 (D-061): a dificuldade do mundo; muda pelo comando `definirDificuldade`, nunca o personagem. */
+  dificuldade: Dificuldade;
 }
 
 export interface OpcoesEstado {
@@ -183,6 +186,7 @@ export function criarEstado(opcoes: OpcoesEstado): EstadoJogo {
     atrasados: [],
     saidaAberta: false,
     proximoId: 1,
+    dificuldade: 'normal',
   };
 }
 
@@ -213,5 +217,6 @@ export function clonarEstado(estado: EstadoJogo): EstadoJogo {
     atrasados: estado.atrasados.map((a) => ({ ...a, efeito: { ...a.efeito, interno: copiaEfeito(a.efeito.interno) } })),
     saidaAberta: estado.saidaAberta,
     proximoId: estado.proximoId,
+    dificuldade: estado.dificuldade,
   };
 }

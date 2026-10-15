@@ -12,6 +12,7 @@ import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { congelada, vivo, type EfeitoAtivo, type Entidade } from '../entities/entidade';
 import { agendarAtrasado, armarArmadilha, excedeLimite, invocar, processarFluxo, processarGatilhos } from './efeitos-fluxo';
+import { fatorDoGolpe } from '../modos/dificuldade';
 import { registrarEfeitoAtivo } from './acumulo';
 import { avancar, empurrar, puxar, teleportar, trocarLugar } from './efeitos-instantaneos';
 import { registrarParticipacao } from './participacao';
@@ -121,9 +122,12 @@ export function absorverEscudo(e: Entidade, dano: number, tick: number): number 
   return resto;
 }
 
-/** Dano que não passa pelo d20 (periódico e dano direto): exposto, escudo e o HP mínimo 0. */
-export function sofrerDano(e: Entidade, valor: number, tick: number): number {
-  const bruto = Math.max(0, Math.round(valor * multiplicadorDanoRecebido(e, tick)));
+/**
+ * Dano que não passa pelo d20 (periódico e dano direto): exposto, escudo e o HP mínimo 0. `fator`: dificuldade e
+ * grupo (marco 15), pelo lado de quem originou.
+ */
+export function sofrerDano(e: Entidade, valor: number, tick: number, fator = 1): number {
+  const bruto = Math.max(0, Math.round(valor * multiplicadorDanoRecebido(e, tick) * fator));
   const dano = Math.min(e.hp, absorverEscudo(e, bruto, tick));
   e.hp -= dano;
   return dano;
@@ -198,7 +202,8 @@ export function aplicarEfeito(
       }
       case 'dano': {
         if (imuneADano(alvo, tick)) break;
-        const dano = sofrerDano(alvo, ef.valor, tick);
+        const quem = buscarEntidade(estado, origem.id);
+        const dano = sofrerDano(alvo, ef.valor, tick, quem ? fatorDoGolpe(estado, ctx, quem, alvo) : 1);
         if (dano > 0) registrarParticipacao(alvo, origem.id, tick, ctx);
         resultado(saida, tick, alvo, origem.id, ef, { dano });
         break;
@@ -246,7 +251,8 @@ export function processarEfeitos(estado: EstadoJogo, ctx: ContextoSimulacao, sai
         f.proximoTick += intervalo;
         if (periodico === 'dano') {
           if (imuneADano(e, tick)) continue;
-          const dano = sofrerDano(e, f.valor, tick);
+          const quem = buscarEntidade(estado, f.origemId);
+          const dano = sofrerDano(e, f.valor, tick, quem ? fatorDoGolpe(estado, ctx, quem, e) : 1);
           if (dano > 0) registrarParticipacao(e, f.origemId, tick, ctx);
           resultado(saida, tick, e, f.origemId, f, { dano });
           if (e.hp <= 0) break;

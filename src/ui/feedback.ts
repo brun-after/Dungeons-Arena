@@ -118,6 +118,12 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
     if (!f) return;
     o.aviso(t('aviso.efeitoGanho', { nome: nomeDoEfeito(ev.tipo), desc: descreverEfeito({ ...f, duracaoMs: (f.ateTick - ev.tick) * DT_MS }) }));
   });
+  // Marco 15: a dificuldade mudou.
+  bus.on('dificuldadeMudou', (ev) => {
+    const texto = t('log.dificuldade', { nome: t(`dificuldade.${ev.nivel}` as ChaveTexto) });
+    hud.registrar(texto);
+    o.aviso(texto);
+  });
   // Marco 14: habilidades aprendidas e ranks novos.
   bus.on('habilidadeMudou', (ev) => {
     if (ev.id !== idLocal) return;

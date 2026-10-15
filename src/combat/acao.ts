@@ -13,6 +13,7 @@ import { buscarEntidade, novoId, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao, MotivoCancelamento, MotivoRecusa } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { vivo, type Entidade } from '../entities/entidade';
+import { fatoresDoMundo, ladoDoJogador } from '../modos/dificuldade';
 import { podeAjudar, podeFerir } from '../modos/relacao';
 import { bonusDeAtributo } from '../progression/ficha';
 import { ordemRotativa } from '../world/colisao';
@@ -187,7 +188,9 @@ export function iniciarAcao(
     const ms = hab.recargaMs * (1 - reducao / 100) * (1 + perfil.recargaPct / 100);
     estado.recargas[chave] = Math.max(estado.recargas[chave] ?? 0, estado.tick + ticksDe(ms));
   }
-  const lancamentoTick = estado.tick + ticksDe(hab.conjuracaoMs);
+  // Marco 15: na dificuldade fácil, os golpes de quem não é do lado do jogador avisam mais cedo.
+  const avisoExtra = ladoDoJogador(estado, ator) ? 0 : fatoresDoMundo(estado, ctx).avisoExtraMs;
+  const lancamentoTick = estado.tick + ticksDe(hab.conjuracaoMs + avisoExtra);
   const viagem =
     hab.politicaImpacto === 'projetil' ? ticksDe((Math.hypot(mira.x - origem.x, mira.y - origem.y) / hab.velocidadeProjetil) * 1000) : 0;
   const alvoId = hab.politicaImpacto === 'area' ? null : (alvo?.id ?? null);

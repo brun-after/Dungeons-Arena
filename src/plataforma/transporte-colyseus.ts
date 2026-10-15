@@ -3,7 +3,9 @@
 // mandado durante a queda; a deduplicação por `seq` da sala impede aplicar duas vezes.
 
 import { Client, type Room } from '@colyseus/sdk';
+import type { Dificuldade } from '../modos/dificuldade';
 import type { Transporte } from '../net/transporte';
+import { lerRefFase, type RefFase } from '../save/esquema';
 
 export type EstadoDaConexao = 'conectado' | 'reconectando' | 'encerrada';
 
@@ -21,18 +23,52 @@ export interface ConexaoArena {
 
 export type PedidoDeSala = { criar: true; fase?: string } | { codigo: string };
 
-/** Fase de uma sala existente, pela rota `/salas/:codigo` (marco 7B). */
-async function faseDaSala(url: string, codigo: string): Promise<string> {
+interface InfoDaSala {
+  tipo: string;
+  fase: string | null;
+  faseRef: RefFase | null;
+}
+
+/** Tipo e fase de uma sala existente, pela rota `/salas/:codigo` (marco 7B; o tipo e a referência, marco 15). */
+async function infoDaSala(url: string, codigo: string): Promise<InfoDaSala> {
   const r = await fetch(`${url.replace(/^ws/, 'http')}/salas/${encodeURIComponent(codigo)}`, { cache: 'no-store' });
-  if (!r.ok) throw new Error(`sala ${codigo}: ${r.status}`);
-  const corpo = (await r.json()) as { fase?: unknown };
-  return typeof corpo.fase === 'string' ? corpo.fase : 'arena-01';
+  if (!r.ok) throw new Error(r.status === 404 ? 'nao_encontrada' : `sala ${codigo}: ${r.status}`);
+  const corpo = (await r.json()) as { fase?: unknown; tipo?: unknown; faseRef?: unknown };
+  return {
+    tipo: typeof corpo.tipo === 'string' ? corpo.tipo : 'arena',
+    fase: typeof corpo.fase === 'string' ? corpo.fase : null,
+    faseRef: lerRefFase(corpo.faseRef),
+  };
 }
 
 export async function conectarArena(url: string, pedido: PedidoDeSala): Promise<ConexaoArena> {
   const cliente = new Client(url);
-  const fase = 'criar' in pedido ? (pedido.fase ?? 'arena-01') : await faseDaSala(url, pedido.codigo);
+  const fase = 'criar' in pedido ? (pedido.fase ?? 'arena-01') : ((await infoDaSala(url, pedido.codigo)).fase ?? 'arena-01');
   const sala: Room = 'criar' in pedido ? await cliente.create('arena', { fase }) : await cliente.joinById(pedido.codigo);
+  return { ...embrulhar(sala), fase };
+}
+
+/** Marco 15: criar o grupo (na fase e na dificuldade do anfitrião) ou entrar nele pelo código. */
+export type PedidoDeGrupo = { criar: { faseRef: RefFase; dificuldade: Dificuldade } } | { codigo: string };
+
+export interface ConexaoCampanha extends Omit<ConexaoArena, 'fase'> {
+  /** A fase em que o grupo está agora (depois, `novaFase` avisa as trocas). */
+  faseRef: RefFase;
+}
+
+export async function conectarCampanha(url: string, pedido: PedidoDeGrupo): Promise<ConexaoCampanha> {
+  const cliente = new Client(url);
+  if ('criar' in pedido) {
+    const sala = await cliente.create('campanha', pedido.criar);
+    return { ...embrulhar(sala), faseRef: pedido.criar.faseRef };
+  }
+  const info = await infoDaSala(url, pedido.codigo);
+  if (info.tipo !== 'campanha' || !info.faseRef) throw new Error('nao_e_grupo');
+  const sala = await cliente.joinById(pedido.codigo);
+  return { ...embrulhar(sala), faseRef: info.faseRef };
+}
+
+function embrulhar(sala: Room): Omit<ConexaoArena, 'fase'> {
   // Reconexão automática do SDK mesmo logo depois de entrar (o celular suspende a aba a qualquer hora).
   sala.reconnection.minUptime = 0;
 
@@ -60,7 +96,6 @@ export async function conectarArena(url: string, pedido: PedidoDeSala): Promise<
 
   return {
     codigo: sala.roomId,
-    fase,
     transporte: {
       enviar: (texto) => {
         sala.send('m', texto);

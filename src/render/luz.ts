@@ -2,7 +2,7 @@
 // cintilação `0,55 + sin(t/190)×0,07 + sin(t/47)×0,03` e raio de 3,2 células. Ilumina o jogador, as
 // portas, a loja, os baús e as fontes de fogo. Só nas qualidades médio e alto (§4.10).
 
-import { Container, Sprite, Texture } from 'pixi.js';
+import { CanvasSource, Container, Sprite, Texture } from 'pixi.js';
 import { CELULA_PX } from './camera-calculo';
 
 export interface PontoDeLuz {
@@ -31,7 +31,8 @@ function texturaRadial(): Texture {
     g.fillStyle = grad;
     g.fillRect(0, 0, LADO_TEXTURA, LADO_TEXTURA);
   }
-  return Texture.from(canvas);
+  // Marco 16: fonte explícita, fora do cache global do Pixi (`Texture.from` guardava uma por cena montada).
+  return new Texture({ source: new CanvasSource({ resource: canvas }) });
 }
 
 export function cintilacao(tMs: number, semente: number): number {

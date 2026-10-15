@@ -267,10 +267,10 @@ test.describe('desktop', () => {
     await expect(page).toHaveURL(/jogo=teste/);
     await page.goto(`${page.url()}&diag=1`);
     const diag = page.locator('#diag');
-    // Você + o boss + 2 lacaios.
+    // Você + o boss + 1 lacaio (marco 15: um por invocação, D-061).
     await expect
       .poll(async () => Number(/entidades (\d+)/.exec((await diag.textContent()) ?? '')?.[1] ?? 0), { timeout: 90_000 })
-      .toBeGreaterThanOrEqual(4);
+      .toBeGreaterThanOrEqual(3);
     await expect(page.locator('.log-combate')).toContainText('invocou');
     expect(erros).toEqual([]);
   });

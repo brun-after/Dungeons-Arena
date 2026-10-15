@@ -5,9 +5,10 @@
 import type { EstadoJogo } from '../core/estado';
 import { ehObjeto, type Objeto } from '../core/validar';
 import type { Entidade } from '../entities/entidade';
+import type { Dificuldade } from '../modos/dificuldade';
 import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 10;
+export const VERSAO_SCHEMA = 11;
 export const SLOTS = [1, 2, 3] as const;
 export const FORMATO_EXPORTACAO = 'dungeons-arena/save';
 
@@ -51,6 +52,8 @@ export interface ResumoSlot {
   nivel: number;
   nomeFase: string;
   atualizadoEm: number;
+  /** Marco 15: a dificuldade em que o slot foi jogado por último. */
+  dificuldade: Dificuldade;
 }
 
 /** O jogador do save: a entidade com bolsa (a campanha tem um só). */
@@ -59,7 +62,7 @@ export function jogadorDoSave(estado: EstadoJogo): Entidade | undefined {
 }
 
 export function resumoDoRegistro(r: RegistroProgresso): ResumoSlot {
-  return { slot: r.slot, nivel: jogadorDoSave(r.estado)?.nivel ?? 1, nomeFase: r.nomeFase, atualizadoEm: r.atualizadoEm };
+  return { slot: r.slot, nivel: jogadorDoSave(r.estado)?.nivel ?? 1, nomeFase: r.nomeFase, atualizadoEm: r.atualizadoEm, dificuldade: r.estado.dificuldade };
 }
 
 export type ErroSave = 'formato' | 'versao_futura' | 'slot' | 'fase' | 'estado' | 'nao_finito';
@@ -219,6 +222,13 @@ function v9ParaV10(r: Objeto): Objeto {
   return { ...r, fasesVisitadas: visitadas, estado: estado(r.estado) };
 }
 
+/** v10 → v11 (marco 15, 15/10/2026, D-061): a dificuldade do mundo, Normal, na fase atual e nas visitadas. */
+function v10ParaV11(r: Objeto): Objeto {
+  const estado = (e: unknown): unknown => (ehObjeto(e) ? { dificuldade: 'normal', ...e } : e);
+  const visitadas = ehObjeto(r.fasesVisitadas) ? Object.fromEntries(Object.entries(r.fasesVisitadas).map(([k, v]) => [k, estado(v)])) : r.fasesVisitadas;
+  return { ...r, fasesVisitadas: visitadas, estado: estado(r.estado) };
+}
+
 /** `MIGRACOES[v]` leva um registro da versão `v` para a `v + 1`. Não existiu versão 0. */
 export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   1: v1ParaV2,
@@ -230,6 +240,7 @@ export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   7: v7ParaV8,
   8: v8ParaV9,
   9: v9ParaV10,
+  10: v10ParaV11,
 };
 
 function temNaoFinito(v: unknown): boolean {
@@ -253,7 +264,8 @@ function lerParametros(v: unknown): ParametrosGeracao | null {
   return p;
 }
 
-function lerRefFase(v: unknown): RefFase | null {
+/** Marco 15: exportada para a sala cooperativa ler a fase pedida pelo anfitrião (não confiável). */
+export function lerRefFase(v: unknown): RefFase | null {
   if (!ehObjeto(v) || typeof v.id !== 'string' || v.id === '') return null;
   if (v.tipo === 'oficial' || v.tipo === 'aventura') return { tipo: v.tipo, id: v.id };
   if (v.tipo === 'gerada' && typeof v.numero === 'number' && Number.isInteger(v.numero) && v.numero >= 1) {

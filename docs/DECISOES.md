@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.27 · **Data:** 15/10/2026
+**Versão:** 0.28 · **Data:** 15/10/2026
 
 > **Histórico**
+> - **0.28 (15/10/2026)**: D-061 (dificuldade, campanha cooperativa e balanceamento por simulação, marco 15) e D-062 (endurecimento, marco 16).
 > - **0.27 (15/10/2026)**: D-060 (ajustes de jogo depois do marco 14); a D-017 passa a ser por habilidade.
 > - **0.26 (15/10/2026)**: D-059 (sistema de habilidades), marco 14.
 > - **0.25 (14/10/2026)**: D-058 (visão isométrica, modelos de criatura, caminhada por fatias e personagem por imagem), marco 13.
@@ -1316,3 +1317,158 @@ As escolhas do usuário ao planejar:
   - a preferência;
   - save v9 → v10.
 - **1 e2e novo**: o teclado numérico lança a barreira e o d20 aparece perto da barra.
+
+## D-061 · Dificuldade, campanha cooperativa e balanceamento por simulação (v0.28, 15/10/2026)
+
+**Contexto.** O marco 15 pedia uma ferramenta de balanceamento por simulação e o ajuste dos números. Ao revisar o
+plano, o usuário acrescentou dois pedidos:
+1. níveis de dificuldade, com o mesmo personagem jogando em qualquer um;
+2. a campanha jogável em grupo, até 6, com o balanceamento ajustado ao tamanho do grupo.
+
+O ritmo escolhido foi o **médio**:
+- um inimigo comum do mesmo nível cai em 3–5 golpes (4–7 s);
+- o jogador aguenta 6–8 golpes de um comum;
+- o chefe dura 25–40 s.
+
+**Decisão.**
+
+- **Dificuldade** (`balance.dificuldades`): Fácil, Normal, Difícil e Pesadelo. Cada nível mexe em seis alavancas:
+
+  | Nível | Vida dos inimigos | Dano dos inimigos | Hesitação | Aviso extra | Recompensa |
+  |---|---|---|---|---|---|
+  | Fácil | 75% | 70% | 130% | +150 ms | 80% |
+  | Normal | 100% | 100% | 100% | 0 | 100% |
+  | Difícil | 130% | 125% | 80% | 0 | 125% |
+  | Pesadelo | 170% | 150% | 60% | 0 | 160% |
+
+  - Valem pelo **lado do jogador**: a equipe de quem tem bolsa. Nada olha o `tipo` (§2.5), e a arena, sem bolsas,
+    fica neutra.
+  - "Vida" é aplicada como fator no dano recebido: o efeito vale na hora, sem reescalar ninguém.
+  - O nível entra no estado (`EstadoJogo.dificuldade`) e no digest. Muda pelo comando `definirDificuldade`, que não
+    toca no personagem.
+  - Na interface: escolha na tela de slots e troca na pausa. O slot lembra a última.
+  - Save v11.
+- **Campanha cooperativa** (modo `cooperativo` em dados: até 6, `saida: 'todos_vivos'`).
+  - **Online, por código**: a `SalaCampanha` estende a `SalaArena` por ganchos (entrada, recusa, depois do tick,
+    troca de mundo).
+  - **Personagem**: cada um traz o do próprio slot. A sala **confere a ficha** contra o nível e corta o que não
+    cabe, mostrando o que mudou:
+    - atributos-base e pontos (o excesso sai de onde passou da classe);
+    - ranks e caminhos;
+    - pontos de habilidade;
+    - itens, equipamento e ouro.
+  - O estado público continua sem bolsas; cada sessão recebe a **própria** pelo canal `privado`.
+  - Os comandos aceitos pela rede vêm do modo (`comandosDeRede`): a arena continua recusando os de personagem.
+  - Só o **anfitrião** troca a dificuldade.
+  - **Saída**: a fase avança quando todos os vivos e conectados estão na saída aberta. A sala monta a fase seguinte
+    (época nova) e leva os personagens com vida e mana cheias. O cliente desmonta e monta a cena sem derrubar a
+    conexão.
+  - **Progresso**: o personagem volta para o slot de cada um (`atualizarPersonagemNoSave`), a cada 30 s, ao subir de
+    nível, ao pegar item, ao trocar de fase e ao sair. O anfitrião também leva o avanço de fase.
+  - **Fases do editor** não vão para o grupo: elas ficam só no aparelho de quem as criou.
+- **Escala do grupo** (`balance.grupo`), pela mesma conta da dificuldade, com N = personagens presentes:
+  - vida dos inimigos +70% por jogador a mais;
+  - dano +8%;
+  - spawner +25%;
+  - recompensa +10%.
+- **Simulador** (`tools/balanceamento`, `npm run balancear`): roda o `simular()` de verdade, com um bot que joga como
+  uma pessoa razoável. Ele mira o mais próximo, usa a barra, sai das áreas telegrafadas, toma poção com a vida baixa
+  e se afasta do corpo a corpo quando ataca de longe. Cenários:
+  - comuns **em sequência**, em que recargas e mana seguem de uma luta para a outra (a abertura com tudo pronto não
+    decide a média);
+  - quanto o jogador aguenta;
+  - o chefe da fase 1 (nível 1, contra jogadores no nível 2, como na fase real), sozinho e em grupos de 2, 4 e 6;
+  - o degrau das dificuldades;
+  - o PvP do Livre;
+  - o aviso útil de toda habilidade inimiga;
+  - a fatia da invocação;
+  - XP por minuto.
+
+  As metas ficam em `balance.metas`. `--registrar` grava `docs/BALANCEAMENTO.md`, e `tests/sim/ritmo.test.ts`
+  protege as principais.
+- **Crescimento do inimigo por nível** (§2.5, `balance.inimigos`):
+  - Constituição +3 e Força +1 por nível desde o 2; Inteligência a partir do 3, Destreza do 7, Sabedoria do 10;
+  - vida pela fórmula, a 120%;
+  - XP +25% por nível.
+- **Números que mudaram** (de 31/65 para **69/69 metas**):
+  - bônus de atributo ×0,5 → ×1, os dois lados (o atributo passa a pesar como a rolagem);
+  - ataques básicos a cada 1,0 s → 1,5 s;
+  - corpo a corpo inimigo (`golpe`, `golpe_pesado`, `golpe_viscoso`): conjuração 504 → 600 ms;
+  - chefe:
+    - vida-base 140 → 290;
+    - ataque a cada 1,8 → 3,4 s;
+    - um lacaio por invocação (eram dois);
+  - guerreiro: vida-base 75 → 45 (a defesa continua a dele);
+  - arqueiro: `tiro` 1d6 → 1d8; `chuva_de_flechas` 2d4 → 2d6;
+  - Livre:
+    - orçamento de atributos 12 → 6;
+    - vida a 120% (`clamp.vidaPct`, campo novo do modo).
+
+  | Medida (mediana) | Antes | Depois | Meta |
+  |---|---|---|---|
+  | Comum do mesmo nível, nível 1 (golpes) | 6–8 | 4–5 | 3–5 |
+  | Comum do mesmo nível (tempo) | 1,8–4,5 s | 4,2–7 s | 4–7 s |
+  | Golpes que o jogador aguenta | 10–26 | 6–8 | 6–8 |
+  | Chefe sozinho | 14–16 s (mais forte que o jogador do nível) | 30–36 s | 25–40 s |
+  | PvP no Livre | 8–15 s | 6,5–9,8 s | 6–10 s |
+  | Aviso útil do corpo a corpo, perfil suportado | 227 ms | 323 ms | ≥ 250 ms |
+
+**Consequência.**
+- **O degrau das dificuldades é íngreme no chefe**: no Difícil e no Pesadelo, o bot sozinho no nível 2 perde para o
+  chefe da fase 1 (4 de 4). Isso é a intenção (pede mais nível ou um grupo), mas fica anotado para o teste com
+  pessoas.
+- **Ritmo**: cada classe cabe nas metas nos níveis 1, 5 e 10. O crescimento por nível mantém o ritmo estável (o
+  inimigo do mesmo nível cresce junto).
+- **Testes**:
+  - 11 de dificuldade;
+  - 10 de rede (loopback) e 2 de integração do cooperativo;
+  - 9 de ritmo e 2 de crescimento;
+  - e2e: dificuldade e grupo com dois navegadores.
+- **Carga do cooperativo**: 6 bots no perfil suportado, 9/9 metas (`npm run carga -- --modo grupo`).
+
+## D-062 · Endurecimento: celular, PWA offline, benchmarks do cliente e operação do servidor (v0.28, 15/10/2026)
+
+**Contexto.** O marco 16 fecha a convergência pela robustez:
+- celular (área segura, orientação, redimensionamento);
+- offline testado;
+- desempenho e memória medidos;
+- o servidor com limites e métricas para rodar 30 minutos na VM de 1 GB.
+
+**Decisão.**
+- **Celular**:
+  - o aviso de girar aparece em toda troca para retrato;
+  - o DPR é relido no redimensionamento (zoom, troca de monitor);
+  - a faixa de controles é relida 300 ms depois;
+  - sair do jogo solta a orientação e a tela cheia;
+  - corrigido `--seguro-direita` → `--seguro-dir` (a roda do d20 no toque ignorava a área segura).
+- **PWA offline**: projeto `offline` do Playwright, com o Service Worker liberado. Depois da primeira visita, sem
+  rede, a campanha abre, anda e salva; uma navegação desconhecida cai no `index.html` do precache.
+- **Benchmarks do cliente**:
+  - `?bench=carga`: 120×120, 60 NPCs, 10 avatares, 20 invocações, 30 armadilhas e 100 projéteis;
+  - `?bench=padrao`: 60×40;
+  - `?bench=trocas`: monta e desmonta a cena no mesmo documento.
+
+  O resultado aparece na página (no celular, basta abrir o endereço). `npm run bench` roda tudo no Chromium sem tela
+  e grava em `BENCHMARKS.md`. O `?diag=1` ganha p99, pausas e memória.
+- **Vazamento achado pelo benchmark**: cada troca de cena deixava 2,7 MB (crescimento monotônico). Havia três
+  causas:
+  - **ouvintes que prendiam a cena**: a preferência de movimento reduzido, os chips de efeito e o token da visão;
+  - **modais que ficavam no `<body>`**;
+  - **o atlas de criaturas** decodificado de novo a cada cena, no cache global do Pixi.
+
+  Agora o atlas é um só por página; a luz e o token usam fontes fora do cache; a cena solta tudo ao desmontar; e o
+  laço não reagenda quando para de dentro do quadro. O heap estabiliza: o último terço de 30 trocas fica +2,3% sobre
+  o do meio, e as primeiras trocas só enchem caches limitados.
+- **Servidor**:
+  - **limites**: salas por processo (`MAX_SALAS`, padrão 6) e criações por origem (`CRIACOES_POR_MINUTO`, padrão 6),
+    com recusa clara no lobby;
+  - **`GET /metricas`** (sem dado pessoal): RSS, heap, uptime e atraso do agendador do processo; por sala, tick
+    p95/p99, jogadores, banda, fila, entidades, rejeições e reconexões. O log de 10 s também traz esses dados;
+  - **compose**: `mem_limit` 700 MB e rotação de log (10 MB × 3); o Node com `--max-old-space-size=512`.
+- **Carga**: amostra o `/metricas` a cada 10 s (série do tick e da memória, com tendência em MB/min), mede o grupo
+  (`--modo grupo`) e grava o marco por `--marco`.
+
+**Consequência.**
+- O WebGL sem tela é por software: os quadros de `npm run bench` medem o pior caso de CPU, não um aparelho. Os
+  números de aparelho real entram quando alguém abrir `?bench=carga` no celular.
+- O teste de 30 min na VM roda depois do merge e do deploy, e vai num PR curto de documentação.

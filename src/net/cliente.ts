@@ -4,9 +4,13 @@
 //   2. ao receber estado + ackSeq: adota a base, descarta os confirmados e reaplica os pendentes;
 //   3. a correção lógica é imediata; a apresentação converge suave (ou reposiciona se o erro é grande).
 // O cliente roda alguns ticks à frente do servidor, para que os comandos cheguem a tempo (D-033).
+// Marco 15 (15/10/2026): na campanha cooperativa, o canal privado traz a própria bolsa (posta na entidade prevista,
+// para a mochila, a loja e a barra funcionarem como no solo) e `novaFase` troca o mundo e o contexto.
 
 import { aplicarPatch } from '../arena/patches';
 import { versaoDoConteudo, type MensagemServidor } from '../arena/protocolo';
+import type { Bolsa } from '../entities/entidade';
+import type { RefFase } from '../save/esquema';
 import type { Comando, ComandoEmpacotado } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, clonarEstado, type EstadoJogo } from '../core/estado';
@@ -39,7 +43,11 @@ export interface OpcoesCliente {
   pedidoFicha: unknown;
   agoraMs: () => number;
   aoEventos?: (eventos: EventoSimulacao[]) => void;
+  /** Marco 15: o contexto de uma fase da campanha (para a predição depois de `novaFase`). */
+  contextoDe?: (ref: RefFase) => ContextoSimulacao | null;
 }
+
+export type NovaFase = Extract<MensagemServidor, { t: 'novaFase' }>;
 
 export class ClienteArena {
   sessaoId: string | null = null;
@@ -60,6 +68,19 @@ export class ClienteArena {
   private aguardandoCompleto = false;
   /** Recebe os eventos transitórios da sala (dano, coleta, mortes) para a apresentação. */
   aoEventos: ((eventos: EventoSimulacao[]) => void) | null;
+  /** Marco 15 (cooperativo): a própria bolsa, pelo canal privado; e se esta sessão é a do anfitrião. */
+  bolsaPropria: Bolsa | null = null;
+  anfitriao = false;
+  /** A entidade do anfitrião (para o painel do grupo). */
+  anfitriaoId: string | null = null;
+  ctx: ContextoSimulacao;
+  aoPrivado: (() => void) | null = null;
+  aoNovaFase: ((msg: NovaFase) => void) | null = null;
+  aoFimDaCampanha: (() => void) | null = null;
+  /** Recusas de entrada (sala cheia, personagem inválido...), para a tela explicar. */
+  erro: string | null = null;
+  /** Marco 15: os campos da ficha que a sala ajustou na entrada. */
+  previaAlteracoes: string[] = [];
 
   private seq = 0;
   private pendentes: ComandoEmpacotado[] = [];
@@ -73,6 +94,7 @@ export class ClienteArena {
 
   constructor(private readonly o: OpcoesCliente) {
     this.aoEventos = o.aoEventos ?? null;
+    this.ctx = o.ctx;
     o.transporte.aoReceber((texto) => {
       this.receber(JSON.parse(texto) as MensagemServidor);
     });
@@ -105,12 +127,41 @@ export class ClienteArena {
       case 'bemVindo':
         this.sessaoId = msg.sessaoId;
         this.entidadeId = msg.entidadeId;
+        this.previaAlteracoes = msg.previa.alteracoes.map((a) => a.campo);
         this.epoca = msg.epocaSala;
         this.adotarBase(msg.tick, msg.estado);
         this.tickLocal = msg.tick + MARGEM_TICKS;
         this.alvoTickLocal = this.tickLocal;
         this.previsto = clonarEstado(msg.estado);
         this.reaplicar();
+        break;
+      case 'novaFase': {
+        // Mundo novo, relógio novo: nada da fase anterior vale (pendentes, histórico, interpolação).
+        const ctx = this.o.contextoDe?.(msg.faseRef);
+        if (ctx) this.ctx = ctx;
+        this.epoca = msg.epocaSala;
+        this.pendentes = [];
+        this.historico.clear();
+        this.remotos.limpar();
+        this.aguardandoCompleto = false;
+        this.deslocamento = { x: 0, y: 0 };
+        this.adotarBase(msg.tick, msg.estado);
+        this.tickLocal = msg.tick + MARGEM_TICKS;
+        this.alvoTickLocal = this.tickLocal;
+        this.previsto = clonarEstado(msg.estado);
+        this.reaplicar();
+        this.aoNovaFase?.(msg);
+        break;
+      }
+      case 'privado':
+        this.bolsaPropria = msg.bolsa;
+        this.anfitriao = msg.anfitriao;
+        this.anfitriaoId = msg.anfitriaoId;
+        this.porBolsa();
+        this.aoPrivado?.();
+        break;
+      case 'fimDaCampanha':
+        this.aoFimDaCampanha?.();
         break;
       case 'estado':
         if (msg.epocaSala !== this.epoca) return;
@@ -141,6 +192,7 @@ export class ClienteArena {
         this.motivosRejeicao[msg.motivo] = (this.motivosRejeicao[msg.motivo] ?? 0) + 1;
         break;
       case 'erro':
+        this.erro = msg.motivo;
         break;
     }
   }
@@ -184,6 +236,14 @@ export class ClienteArena {
     if (!this.previsto) return;
     this.previsto.tick = this.baseTick;
     while (this.previsto.tick < this.tickLocal) this.preverTick();
+    this.porBolsa();
+  }
+
+  /** O estado público vem sem bolsas: a própria volta pelo canal privado (só no cooperativo). */
+  private porBolsa(): void {
+    const id = this.entidadeId;
+    const e = this.bolsaPropria && this.previsto && id ? buscarEntidade(this.previsto, id) : undefined;
+    if (e) e.bolsa = this.bolsaPropria;
   }
 
   private preverTick(): void {
@@ -197,10 +257,10 @@ export class ClienteArena {
       for (const p of this.pendentes) {
         if (p.tickCliente !== k && !(k === this.baseTick && p.tickCliente < k)) continue;
         if (p.cmd.t === 'mover') definirDirecao(e, p.cmd.dir);
-        else if (p.cmd.t === 'irPara') planejarCaminho(e, { x: p.cmd.x, y: p.cmd.y }, this.o.ctx, k, this.descarte);
+        else if (p.cmd.t === 'irPara') planejarCaminho(e, { x: p.cmd.x, y: p.cmd.y }, this.ctx, k, this.descarte);
       }
       this.descarte.length = 0;
-      if (!e.morto) integrarEntidade(e, estado, this.o.ctx, this.descarte, DT_MS);
+      if (!e.morto) integrarEntidade(e, estado, this.ctx, this.descarte, DT_MS);
       this.descarte.length = 0;
     }
     estado.tick++;

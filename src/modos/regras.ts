@@ -1,7 +1,7 @@
 // Funções pequenas que consultam o modo (§2.13): respawn, local de reaparição, equipe de entrada e
 // fim de partida. Nenhuma regra de modo é escrita como `if (modo === 'x')`.
 
-import type { Celula, EntidadeId } from '../core/comandos';
+import type { Celula, Comando, EntidadeId } from '../core/comandos';
 import type { EstadoJogo } from '../core/estado';
 import { escolher, type EstadoRng } from '../core/rng';
 import { ticksDe } from '../core/tempo';
@@ -87,6 +87,26 @@ export function localDeRespawn(
       }
       return melhor;
     }
+  }
+}
+
+/** Marco 15: a sala aceita este comando pela rede neste modo? (a lista é do dado do modo) */
+export function comandoAceitoEmRede(modo: ModoDeJogo, cmd: Comando): boolean {
+  return modo.comandosDeRede.includes(cmd.t);
+}
+
+/**
+ * Marco 15: a fase terminou para o grupo? `naSaida` diz se a entidade está numa saída aberta. Com `qualquer`, basta
+ * um; com `todos_vivos`, todos os vivos precisam estar sobre ela (os mortos esperam o respawn fora da conta).
+ */
+export function faseConcluida(modo: ModoDeJogo, jogadores: readonly Entidade[], naSaida: (e: Entidade) => boolean): boolean {
+  const vivos = jogadores.filter((e) => vivo(e));
+  if (vivos.length === 0) return false;
+  switch (modo.saida) {
+    case 'qualquer':
+      return vivos.some(naSaida);
+    case 'todos_vivos':
+      return vivos.every(naSaida);
   }
 }
 

@@ -20,9 +20,11 @@ export default defineConfig({
     serviceWorkers: 'block',
   },
   projects: [
-    { name: 'desktop', use: { ...devices['Desktop Chrome'] } },
+    { name: 'desktop', use: { ...devices['Desktop Chrome'] }, testIgnore: /offline\.spec\.ts/ },
     // Mobile é plataforma primária (§1.3): o smoke também roda em emulação de celular.
-    { name: 'celular', use: { ...devices['Pixel 7'] } },
+    { name: 'celular', use: { ...devices['Pixel 7'] }, testIgnore: /offline\.spec\.ts/ },
+    // Marco 16 (D-062, §3.8): o PWA offline, com o Service Worker liberado só aqui.
+    { name: 'offline', use: { ...devices['Desktop Chrome'], serviceWorkers: 'allow' }, testMatch: /offline\.spec\.ts/ },
   ],
   webServer: [
     {

@@ -164,6 +164,16 @@ export const textosHabilidades = {
 
   'config.areaExata': 'Mostrar a área exata (células)',
 
+  // Dificuldade (marco 15).
+  'dificuldade.rotulo': 'Dificuldade',
+  'dificuldade.doSlot': 'Dificuldade do slot {n}',
+  'dificuldade.atual': 'Última dificuldade: {nome}',
+  'dificuldade.facil': 'Fácil',
+  'dificuldade.normal': 'Normal',
+  'dificuldade.dificil': 'Difícil',
+  'dificuldade.pesadelo': 'Pesadelo',
+  'log.dificuldade': 'Dificuldade: {nome}',
+
   // O d20 perto da barra (ajuste de 15/10/2026).
   'dado.critico': 'Crítico!',
   'dado.falha': 'Falha',

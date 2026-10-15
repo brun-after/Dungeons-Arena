@@ -12,6 +12,7 @@ import { rolar } from './dados';
 import { resolverGolpe, type FonteDeDano } from './dano';
 import { absorverEscudo, aplicarEfeito, imuneADano, multiplicadorCuraRecebida, multiplicadorDanoRecebido, REGISTRO_EFEITOS } from './efeitos';
 import { dispararSinergias, resistenciaPct, sinergiasAtivas } from './elementos';
+import { fatorDoGolpe } from '../modos/dificuldade';
 import type { Habilidade } from './habilidades';
 import { registrarParticipacao } from './participacao';
 
@@ -57,7 +58,8 @@ export function aplicarImpacto(
   const sinergias = hab.formulaDano !== null ? sinergiasAtivas(alvo, hab.elemento, ctx.conteudo.interacoes.sinergias, tick) : [];
 
   if (hab.formulaDano !== null) {
-    const recebido = multiplicadorRecebido(ctx, alvo, hab, tick, sinergias.reduce((s, x) => s + x.danoExtraPct, 0));
+    // Marco 15: a dificuldade e o tamanho do grupo pesam pelo lado de quem bate e de quem apanha.
+    const recebido = multiplicadorRecebido(ctx, alvo, hab, tick, sinergias.reduce((s, x) => s + x.danoExtraPct, 0)) * fatorDoGolpe(estado, ctx, fonte, alvo);
     const r = resolverGolpe(
       estado.rng,
       hab.formulaDano,

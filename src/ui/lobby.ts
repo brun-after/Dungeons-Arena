@@ -92,8 +92,16 @@ export function mostrarLobby(o: OpcoesLobby): void {
     erro.textContent = '';
     try {
       await o.aoEscolher(pedido);
-    } catch {
-      erro.textContent = 'criar' in pedido ? t('lobby.erroCriar') : t('lobby.erroEntrar');
+    } catch (e) {
+      const motivo = e instanceof Error ? e.message : '';
+      // Marco 16: o servidor diz por que não criou (limite de salas ou de criações por minuto).
+      erro.textContent = motivo.includes('servidor_cheio')
+        ? t('lobby.servidorCheio')
+        : motivo.includes('muitas_salas')
+          ? t('lobby.muitasSalas')
+          : 'criar' in pedido
+            ? t('lobby.erroCriar')
+            : t('lobby.erroEntrar');
       criar.disabled = entrar.disabled = false;
     }
   };

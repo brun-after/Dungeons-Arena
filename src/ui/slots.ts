@@ -2,9 +2,11 @@
 // exportar, importar e excluir (com confirmação). Importar só em slot vazio, para nunca
 // sobrescrever um save sem querer. Textos sempre por textContent.
 
-import { t } from '../i18n';
+import { t, type ChaveTexto } from '../i18n';
+import { DIFICULDADES, type Dificuldade } from '../modos/dificuldade';
 import { listarAventuras, type RegistroAventura } from '../plataforma/aventuras';
 import { apagarSlot, carregarSlot, gravarRegistro, listarSlots, type EstadoSlot } from '../plataforma/saves';
+import { enderecoDoServidor } from '../plataforma/servidor';
 import { exportarRegistro, importarRegistro } from '../save/esquema';
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, texto?: string): HTMLElementTagNameMap[K] {
@@ -25,6 +27,66 @@ function botao(texto: string, aoClicar: () => void, classe = 'botao-cabecalho'):
   b.type = 'button';
   b.addEventListener('click', aoClicar);
   return b;
+}
+
+/** Marco 15: o seletor de dificuldade do slot; muda o endereço do link (continuar ou jogo novo). */
+function seletorDeDificuldade(n: number, inicial: Dificuldade, aoMudar: (d: Dificuldade) => void): HTMLLabelElement {
+  const rotulo = el('label', 'linha-dificuldade', t('dificuldade.rotulo'));
+  const escolha = el('select', 'escolha-dificuldade');
+  escolha.setAttribute('aria-label', t('dificuldade.doSlot', { n }));
+  for (const d of DIFICULDADES) {
+    const op = el('option', undefined, t(`dificuldade.${d}` as ChaveTexto));
+    op.value = d;
+    op.selected = d === inicial;
+    escolha.append(op);
+  }
+  escolha.addEventListener('change', () => {
+    const valor = DIFICULDADES.find((d) => d === escolha.value);
+    if (valor) aoMudar(valor);
+  });
+  rotulo.append(escolha);
+  return rotulo;
+}
+
+const CODIGO_GRUPO = /^[A-Z0-9]{6}$/;
+
+/**
+ * Marco 15: campanha cooperativa a partir do slot — criar o grupo (na fase e na dificuldade escolhidas) ou entrar num
+ * grupo pelo código. Só aparece com servidor configurado.
+ */
+function blocoDeGrupo(n: number, dificuldade: () => Dificuldade): { elemento: HTMLElement; atualizar: () => void } {
+  const bloco = el('div', 'grupo-slot');
+  const criar = link('#', t('grupo.jogar'));
+  criar.setAttribute('aria-label', t('grupo.jogarRotulo', { n }));
+  const atualizar = () => {
+    criar.href = `./?jogo=grupo&slot=${n}&criar=1&dificuldade=${dificuldade()}`;
+  };
+  atualizar();
+  const rotulo = el('label', undefined, t('grupo.codigo'));
+  const campo = el('input');
+  campo.type = 'text';
+  campo.maxLength = 6;
+  campo.autocomplete = 'off';
+  campo.spellcheck = false;
+  campo.setAttribute('aria-label', t('grupo.codigoDoSlot', { n }));
+  rotulo.append(campo);
+  const entrar = botao(t('grupo.entrar'), () => {
+    const codigo = campo.value.trim().toUpperCase();
+    if (!CODIGO_GRUPO.test(codigo)) {
+      campo.setCustomValidity(t('grupo.codigoCurto'));
+      campo.reportValidity();
+      return;
+    }
+    location.href = `./?jogo=grupo&slot=${n}&codigo=${codigo}`;
+  });
+  campo.addEventListener('input', () => {
+    campo.setCustomValidity('');
+  });
+  campo.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter') entrar.click();
+  });
+  bloco.append(criar, rotulo, entrar);
+  return { elemento: bloco, atualizar };
 }
 
 const dataHora = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
@@ -72,6 +134,7 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
     cartao.dataset.slot = String(s.slot);
     cartao.append(el('h2', undefined, t('slots.slot', { n: s.slot })));
     const acoes = el('div', 'acoes-slot');
+    let grupoDoCartao: HTMLElement | null = null;
     if (s.tipo === 'ok') {
       cartao.append(
         el(
@@ -80,7 +143,19 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
           t('slots.resumo', { nivel: s.resumo.nivel, fase: s.resumo.nomeFase, data: dataHora.format(s.resumo.atualizadoEm) }),
         ),
       );
-      acoes.append(link(`./?jogo=campanha&slot=${s.slot}`, t('slots.continuar')));
+      const continuar = link(`./?jogo=campanha&slot=${s.slot}&dificuldade=${s.resumo.dificuldade}`, t('slots.continuar'));
+      acoes.append(continuar);
+      let escolhida: Dificuldade = s.resumo.dificuldade;
+      const grupo = enderecoDoServidor() ? blocoDeGrupo(s.slot, () => escolhida) : null;
+      cartao.append(
+        el('p', 'detalhe-slot', t('dificuldade.atual', { nome: t(`dificuldade.${s.resumo.dificuldade}` as ChaveTexto) })),
+        seletorDeDificuldade(s.slot, s.resumo.dificuldade, (d) => {
+          escolhida = d;
+          continuar.href = `./?jogo=campanha&slot=${s.slot}&dificuldade=${d}`;
+          grupo?.atualizar();
+        }),
+      );
+      if (grupo) grupoDoCartao = grupo.elemento;
       acoes.append(
         botao(t('slots.exportar'), () => {
           void carregarSlot(s.slot).then((r) => {
@@ -90,8 +165,19 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
       );
     } else if (s.tipo === 'vazio') {
       cartao.append(el('p', 'resumo-slot', t('slots.vazio')));
-      const novo = link(`./?jogo=campanha&slot=${s.slot}`, t('slots.novo'));
+      let dificuldadeNova: Dificuldade = 'normal';
+      let faseNova = '';
+      const novo = link(`./?jogo=campanha&slot=${s.slot}&dificuldade=normal`, t('slots.novo'));
+      const atualizarNovo = () => {
+        novo.href = `./?jogo=campanha&slot=${s.slot}&dificuldade=${dificuldadeNova}${faseNova ? `&fase=${encodeURIComponent(faseNova)}` : ''}`;
+      };
       acoes.append(novo);
+      cartao.append(
+        seletorDeDificuldade(s.slot, 'normal', (d) => {
+          dificuldadeNova = d;
+          atualizarNovo();
+        }),
+      );
       if (aventuras.length > 0) {
         const escolha = el('select', 'escolha-fase');
         escolha.setAttribute('aria-label', t('slots.faseDoJogo', { n: s.slot }));
@@ -104,7 +190,8 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
           escolha.append(op);
         }
         escolha.addEventListener('change', () => {
-          novo.href = `./?jogo=campanha&slot=${s.slot}${escolha.value ? `&fase=${encodeURIComponent(escolha.value)}` : ''}`;
+          faseNova = escolha.value;
+          atualizarNovo();
         });
         acoes.append(escolha);
       }
@@ -150,6 +237,7 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
       acoes.append(excluir);
     }
     cartao.append(acoes);
+    if (grupoDoCartao) cartao.append(grupoDoCartao);
     tela.append(cartao);
   }
   tela.append(status, link('./', t('menu.voltar'), 'link-menu'));

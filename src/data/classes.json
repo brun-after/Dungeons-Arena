@@ -46,7 +46,7 @@
     {
       "id": "guerreiro",
       "nome": "Guerreiro",
-      "hpBase": 75,
+      "hpBase": 45,
       "defesa": 3,
       "classe": "corpo_a_corpo",
       "atributos": {

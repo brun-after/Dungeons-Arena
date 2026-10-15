@@ -5,7 +5,7 @@ import type { Balance } from '../core/contexto';
 import type { EntidadeId } from '../core/comandos';
 import { hpMaximo, manaMaxima } from '../progression/ficha';
 import { criarBolsa } from '../progression/inventario';
-import { criarEntidade, type Entidade } from './entidade';
+import { ATRIBUTOS_NEUTROS, criarEntidade, type Atributos, type Entidade } from './entidade';
 import type { ClasseJogador, PresetInimigo } from './presets';
 
 export function criarJogador(
@@ -45,6 +45,13 @@ export interface OpcoesInimigo {
   habilidadesExtras?: readonly string[];
 }
 
+/** Marco 15 (§2.5, D-061): os atributos do inimigo no nível, a partir do neutro, pelo crescimento do balance. */
+export function atributosDoInimigo(nivel: number, balance: Balance): Atributos {
+  const a: Atributos = { ...ATRIBUTOS_NEUTROS };
+  for (const c of balance.inimigos.crescimento) a[c.atributo] += c.porNivel * Math.max(0, nivel - c.aPartirDoNivel + 1);
+  return a;
+}
+
 export function criarInimigo(
   preset: PresetInimigo,
   id: EntidadeId,
@@ -53,6 +60,8 @@ export function criarInimigo(
   balance: Balance,
   opcoes: OpcoesInimigo = {},
 ): Entidade {
+  const nivel = opcoes.nivel ?? 1;
+  const atributos = atributosDoInimigo(nivel, balance);
   const e = criarEntidade({
     id,
     tipo: 'inimigo',
@@ -61,15 +70,17 @@ export function criarInimigo(
     nome: preset.nome,
     classe: preset.classe,
     defesa: preset.defesa,
-    hpMax: hpMaximo(opcoes.hpBase ?? preset.hpBase, 10, balance.hp.hpAtributoMult, balance.hp.dificuldadeMult),
-    manaMax: manaMaxima(10),
+    atributos,
+    hpMax: Math.max(1, Math.round((hpMaximo(opcoes.hpBase ?? preset.hpBase, atributos.constituicao, balance.hp.hpAtributoMult, balance.hp.dificuldadeMult) * balance.inimigos.vidaPct) / 100)),
+    manaMax: manaMaxima(atributos.sabedoria),
     ataqueBasico: preset.ataqueBasico,
     habilidades: [...preset.habilidades, ...(opcoes.habilidadesExtras ?? [])],
     autoAtaque: false,
     preset: preset.id,
     arquetipo: preset.arquetipo,
-    nivel: opcoes.nivel ?? 1,
-    xpBase: preset.xp,
+    nivel,
+    // XP cresce com o nível (o mesmo goblin no nível 5 vale mais).
+    xpBase: Math.round(preset.xp * (1 + (balance.inimigos.xpPorNivelPct / 100) * (nivel - 1))),
   });
   return e;
 }

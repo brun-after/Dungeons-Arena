@@ -17,6 +17,9 @@ export interface PatchDeEstado {
   base: number;
   tick: number;
   proximoId: number;
+  /** Marco 15: campos pequenos do estado, sempre junto (a dificuldade e a saída aberta mudam o que se vê). */
+  dificuldade: EstadoJogo['dificuldade'];
+  saidaAberta: boolean;
   entidades: { novas: Entidade[]; alteradas: EntidadeAlterada[]; removidas: string[] };
   objetos: ObjetoNoMundo[] | null;
   projeteis: Projetil[] | null;
@@ -90,6 +93,8 @@ export class GeradorDePatches {
       base: this.tickAnterior,
       tick: publico.tick,
       proximoId: publico.proximoId,
+      dificuldade: publico.dificuldade,
+      saidaAberta: publico.saidaAberta,
       entidades: { novas, alteradas, removidas },
       objetos,
       projeteis,
@@ -133,6 +138,8 @@ export function aplicarPatch(base: EstadoJogo, patch: PatchDeEstado): EstadoJogo
     ...base,
     tick: patch.tick,
     proximoId: patch.proximoId,
+    dificuldade: patch.dificuldade,
+    saidaAberta: patch.saidaAberta,
     entidades,
     objetos: patch.objetos ?? base.objetos,
     projeteis: patch.projeteis ?? base.projeteis,
