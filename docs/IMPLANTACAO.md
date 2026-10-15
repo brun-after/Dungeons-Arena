@@ -1,8 +1,9 @@
 # Implantação do servidor da arena
 
-**Versão:** 0.4 · **Data:** 15/10/2026
+**Versão:** 0.5 · **Data:** 15/10/2026
 
 > **Histórico**
+> - **0.5 (15/10/2026)**: o teste de carga na VM passa a ter 10 minutos (decisão do usuário); a leitura dos logs por SSH depende da chave que a VM aceita.
 > - **0.4 (15/10/2026)**: marco 16 (D-062): limites de salas e de criação, `GET /metricas`, logs mais completos, limite de memória e rotação de log no compose, e o teste de 30 minutos.
 > - **0.3 (13/10/2026)**: IP estático `56.126.58.40` (`arena-sao-paulo-ip`) anexado; deploy tolera falha passageira de SSH.
 > - **0.2 (13/10/2026)**: a implantação atual passa a ser a **AWS Lightsail em São Paulo** (D-038). A Oracle não teve
@@ -158,14 +159,19 @@ manualmente:
   curl https://dungeons-bruno.duckdns.org/metricas
   ```
 
-### Teste de 30 minutos na VM
+### Teste de 10 minutos na VM
 
-Depois de cada deploy que mexe no servidor, rodar do PC: 10 bots na cena padrão por 30 minutos, com o `/metricas`
-amostrado a cada 10 s (tendência de memória e tick na série). O resultado vai para `docs/BENCHMARKS.md`.
+Depois de cada deploy que mexe no servidor, rodar do PC: 10 bots na cena padrão por 10 minutos, com o `/metricas`
+amostrado a cada 10 s (tendência de memória e tick na série). O resultado vai para `docs/BENCHMARKS.md`. Troque o
+número do marco no `--marco`.
 
 ```bash
-npm run carga -- --url wss://dungeons-bruno.duckdns.org --fase arena-02 --clientes 10 --segundos 1800 --registrar --marco 16
+npm run carga -- --url wss://dungeons-bruno.duckdns.org --fase arena-02 --clientes 10 --segundos 600 --registrar --marco 16
 ```
+
+Depois, confira no `/metricas` que o `uptimeS` é maior que a duração do teste (sem reinício) e o `rssMb` está longe dos
+700 MB. Os logs do contêiner (`docker compose logs --since 15m servidor`) pedem SSH com a chave que a VM aceita: em
+15/10/2026, a chave de deploy local (`dungeons_arena`) foi recusada para o usuário `ubuntu`.
 
 Ressalvas do registro:
 - a VM tem 1 GB, e a referência da spec é 4 GB;

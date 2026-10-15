@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.28 · **Data:** 15/10/2026
+**Versão:** 0.29 · **Data:** 15/10/2026
 
 > **Histórico**
+> - **0.29 (15/10/2026)**: D-062 com o resultado do teste na VM (10 min, por decisão do usuário).
 > - **0.28 (15/10/2026)**: D-061 (dificuldade, campanha cooperativa e balanceamento por simulação, marco 15) e D-062 (endurecimento, marco 16).
 > - **0.27 (15/10/2026)**: D-060 (ajustes de jogo depois do marco 14); a D-017 passa a ser por habilidade.
 > - **0.26 (15/10/2026)**: D-059 (sistema de habilidades), marco 14.
@@ -1471,4 +1472,8 @@ O ritmo escolhido foi o **médio**:
 **Consequência.**
 - O WebGL sem tela é por software: os quadros de `npm run bench` medem o pior caso de CPU, não um aparelho. Os
   números de aparelho real entram quando alguém abrir `?bench=carga` no celular.
-- O teste de 30 min na VM roda depois do merge e do deploy, e vai num PR curto de documentação.
+- O teste na VM roda depois do merge e do deploy, e vai num PR curto de documentação.
+
+> **Resultado (v0.29, 15/10/2026)**: o usuário reduziu o teste de 30 para **10 min**. Com 10 bots na arena-02 sobre o
+> `wss://` da VM: 10/10 metas; RTT 22/32 ms; tick p95/p99 1,4/1,7 ms (p95 máximo na série 2,8 ms); memória do
+> processo de 105 para 129 MB, com tendência de 0,66 MB/min; nenhum reinício; atraso do agendador p95 de 10,7 ms.
