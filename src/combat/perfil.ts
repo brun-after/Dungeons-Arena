@@ -5,7 +5,7 @@
 //   alcance, custo e recarga. São números de tempo de execução (não entram na chave).
 
 import type { ContextoSimulacao } from '../core/contexto';
-import type { Entidade } from '../entities/entidade';
+import type { Bolsa, Entidade } from '../entities/entidade';
 import { formatarChave } from './chave-habilidade';
 import { definicaoDe, resolverHabilidade } from './compilar-habilidade';
 import type { Habilidade, Modificador, Passiva } from './habilidades';
@@ -41,13 +41,11 @@ export function habilidadeDoAtor(ctx: ContextoPerfil, ator: Entidade, id: string
   return resolverHabilidade(ctx, chaveDoAtor(ctx, ator, id));
 }
 
-/** As passivas que o personagem conhece (compiladas no rank dele). */
-export function passivasDoAtor(ctx: ContextoPerfil, ator: Entidade): Passiva[] {
-  const bolsa = ator.bolsa;
-  if (!bolsa) return [];
+/** As passivas que o personagem conhece, escaladas pelo rank. */
+export function passivasDaBolsa(ctx: ContextoPerfil, bolsa: Bolsa): Passiva[] {
   const saida: Passiva[] = [];
   for (const c of bolsa.conhecidas) {
-    const p = habilidadeDoAtor(ctx, ator, c.id)?.passiva;
+    const p = definicaoDe(ctx, c.id)?.base.passiva;
     if (p) saida.push(escalarPassiva(p, c.rank, ctx));
   }
   return saida;
@@ -74,7 +72,7 @@ function escalarPassiva(p: Passiva, rank: number, ctx: ContextoPerfil): Passiva 
 export function perfilPara(ctx: ContextoPerfil, ator: Entidade, hab: Habilidade): PerfilHabilidade {
   const bolsa = ator.bolsa;
   if (!bolsa) return PERFIL_NEUTRO;
-  const fontes = [...(ctx.conteudo.classes.get(bolsa.classeId)?.afinidades ?? []), ...passivasDoAtor(ctx, ator)];
+  const fontes = [...(ctx.conteudo.classes.get(bolsa.classeId)?.afinidades ?? []), ...passivasDaBolsa(ctx, bolsa)];
   const p = { ...PERFIL_NEUTRO };
   for (const f of fontes) {
     if (f.tag !== null && !hab.tags.includes(f.tag)) continue;

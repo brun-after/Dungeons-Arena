@@ -11,6 +11,7 @@ import { SLOTS_BARRA, type Bolsa, type Entidade, type ItemNaMochila } from '../e
 import type { ClasseJogador } from '../entities/presets';
 import { SLOTS_DE_EQUIPAMENTO, type Slot } from '../modos/modo';
 import { recalcularFicha } from './derivados';
+import { aprenderPorLivro } from './habilidades-personagem';
 import { NOMES_ATRIBUTOS, type Item, type NomeAtributo } from './itens';
 
 export function criarBolsa(classe: ClasseJogador, ouroInicial = 0): Bolsa {
@@ -168,6 +169,15 @@ export function usarItem(estado: EstadoJogo, e: Entidade, ctx: ContextoSimulacao
     const entrada = bolsa.mochila[indice];
     const item = entrada ? ctx.conteudo.itens.get(entrada.itemId) : undefined;
     if (!entrada || !item) return recusa('nao_encontrado');
+    // Marco 14: o livro ensina a habilidade (a do catálogo, ou a gerada guardada no `ref`) e some.
+    if (item.tipo === 'livro') {
+      const ensina = item.ensina ?? entrada.ref;
+      if (!ensina || !aprenderPorLivro(e, ctx, ensina, tick, saida)) return recusa('ja_conhece');
+      entrada.qtd--;
+      if (entrada.qtd <= 0) bolsa.mochila.splice(indice, 1);
+      saida.push({ t: 'usouItem', tick, id: e.id, itemId: item.id, hp: 0, mana: 0 });
+      return OK;
+    }
     if (item.tipo !== 'consumivel') return recusa('nao_consumivel');
     // Marco 10A-3: pergaminho de invocação acima do limite do modo é recusado sem gastar (§5.6).
     if (excedeLimite(estado, ctx, e, item.efeitos)) return recusa('limite');

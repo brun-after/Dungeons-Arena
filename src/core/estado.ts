@@ -74,6 +74,8 @@ export interface ObjetoNoMundo {
   abertoTick: number;
   /** Quem está abrindo o baú agora: um abridor por vez (§3.6); null quando livre. */
   abridorId: EntidadeId | null;
+  /** Marco 14: o conteúdo do livro raro no chão (o id da habilidade gerada); null nos demais. */
+  ref: string | null;
 }
 
 /** Célula de rastro (§2.8): aplica dano ou efeito a quem é hostil ao dono e entra nela. */
@@ -135,6 +137,8 @@ export interface RespawnPendente {
   geracao: number;
   abates: number;
   noTick: number;
+  /** Marco 14: habilidades extras da instância (as geradas por semente), que voltam com o respawn. */
+  habilidades: string[];
 }
 
 export interface EstadoJogo {
@@ -203,7 +207,7 @@ export function clonarEstado(estado: EstadoJogo): EstadoJogo {
     recargas: { ...estado.recargas },
     projeteis: estado.projeteis.map((p) => ({ ...p, atingidos: [...p.atingidos] })),
     objetos: estado.objetos.map((o) => ({ ...o, efeito: copiaEfeito(o.efeito), itens: [...o.itens] })),
-    respawns: estado.respawns.map((r) => ({ ...r })),
+    respawns: estado.respawns.map((r) => ({ ...r, habilidades: [...r.habilidades] })),
     rastros: estado.rastros.map((r) => ({ ...r, interno: copiaEfeito(r.interno), atingidos: [...r.atingidos] })),
     armadilhas: estado.armadilhas.map((a) => ({ ...a, interno: copiaEfeito(a.interno) })),
     atrasados: estado.atrasados.map((a) => ({ ...a, efeito: { ...a.efeito, interno: copiaEfeito(a.efeito.interno) } })),

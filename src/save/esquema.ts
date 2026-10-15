@@ -7,7 +7,7 @@ import { ehObjeto, type Objeto } from '../core/validar';
 import type { Entidade } from '../entities/entidade';
 import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 8;
+export const VERSAO_SCHEMA = 9;
 export const SLOTS = [1, 2, 3] as const;
 export const FORMATO_EXPORTACAO = 'dungeons-arena/save';
 
@@ -164,8 +164,59 @@ function v7ParaV8(r: Objeto): Objeto {
   return { ...r, fasesVisitadas: visitadas, estado: { ...e, entidades: lista(e.entidades).map(completar) } };
 }
 
+/**
+ * v8 → v9 (marco 14, 14/10/2026), D-059: o personagem ganha classe, habilidades conhecidas (as atuais, no rank 1),
+ * a barra (as 4 primeiras) e os pontos de habilidade dos níveis já ganhos; a ação e o projétil, a chave
+ * compilada; os efeitos, início e acúmulos; mochila, equipamento e objetos, o `ref` do livro raro; os
+ * respawns, as habilidades extras. Vale para a fase atual e para as visitadas.
+ */
+function v8ParaV9(r: Objeto): Objeto {
+  const entidade = (x: unknown): unknown => {
+    if (!ehObjeto(x)) return x;
+    const efeitos = lista(x.efeitos).map((f) => comCampos(f, { inicioTick: 0, acumulos: 1 }));
+    const acao = ehObjeto(x.acao) ? { chave: x.acao.habilidadeId, ...x.acao } : x.acao;
+    const b = x.bolsa;
+    if (!ehObjeto(b)) return { ...x, efeitos, acao };
+    const habilidades = lista(x.habilidades).filter((h): h is string => typeof h === 'string');
+    const nivel = typeof x.nivel === 'number' && Number.isInteger(x.nivel) ? x.nivel : 1;
+    const comRef = (i: unknown) => comCampos(i, { ref: null });
+    const equipamento = ehObjeto(b.equipamento) ? Object.fromEntries(Object.entries(b.equipamento).map(([k, v]) => [k, v === null ? null : comRef(v)])) : b.equipamento;
+    const bolsa = {
+      classeId: 'aventureiro',
+      conhecidas: habilidades.map((id) => ({ id, rank: 1, caminhos: [] })),
+      barra: Array.from({ length: 4 }, (_, i) => habilidades[i] ?? null),
+      pontosHabilidade: Math.max(0, nivel - 1),
+      ...b,
+      mochila: lista(b.mochila).map(comRef),
+      equipamento,
+    };
+    return { ...x, efeitos, acao, bolsa };
+  };
+  const estado = (e: unknown): unknown => {
+    if (!ehObjeto(e)) return e;
+    return {
+      ...e,
+      entidades: lista(e.entidades).map(entidade),
+      projeteis: lista(e.projeteis).map((p) => (ehObjeto(p) ? { chave: p.habilidadeId, multCura: 1, ...p } : p)),
+      objetos: lista(e.objetos).map((o) => comCampos(o, { ref: null })),
+      respawns: lista(e.respawns).map((x) => comCampos(x, { habilidades: [] })),
+    };
+  };
+  const visitadas = ehObjeto(r.fasesVisitadas) ? Object.fromEntries(Object.entries(r.fasesVisitadas).map(([k, v]) => [k, estado(v)])) : r.fasesVisitadas;
+  return { ...r, fasesVisitadas: visitadas, estado: estado(r.estado) };
+}
+
 /** `MIGRACOES[v]` leva um registro da versão `v` para a `v + 1`. Não existiu versão 0. */
-export const MIGRACOES: Readonly<Record<number, Migracao>> = { 1: v1ParaV2, 2: v2ParaV3, 3: v3ParaV4, 4: v4ParaV5, 5: v5ParaV6, 6: v6ParaV7, 7: v7ParaV8 };
+export const MIGRACOES: Readonly<Record<number, Migracao>> = {
+  1: v1ParaV2,
+  2: v2ParaV3,
+  3: v3ParaV4,
+  4: v4ParaV5,
+  5: v5ParaV6,
+  6: v6ParaV7,
+  7: v7ParaV8,
+  8: v8ParaV9,
+};
 
 function temNaoFinito(v: unknown): boolean {
   if (typeof v === 'number') return !Number.isFinite(v);

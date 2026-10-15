@@ -131,3 +131,6 @@ export function precoDeVenda(item: Item, vendaPct: number): number {
 export function dropaveisDe(itens: Catalogo<Item>, raridade: Raridade): Item[] {
   return [...itens.values()].filter((i) => i.dropavel && i.raridade === raridade);
 }
+
+/** Marco 14: o livro raro do catálogo; o conteúdo (uma habilidade gerada) vem no `ref` (D-057). */
+export const ID_LIVRO_RARO = 'livro_raro';

@@ -10,7 +10,8 @@ import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import type { Entidade } from '../entities/entidade';
 import { criarInimigo } from '../entities/fabrica';
-import { aleatorio, inteiro } from '../core/rng';
+import { aleatorio, inteiro, proximoU32 } from '../core/rng';
+import { idGerada } from '../combat/chave-habilidade';
 import { podeFerir } from '../modos/relacao';
 import { atrasoDeRespawnTicks, localDeRespawn, penalidadeDeMorte, podeRespawnar, protecaoDeRespawnTicks } from '../modos/regras';
 import { celulaLivrePara } from '../world/colisao';
@@ -21,6 +22,7 @@ import { encerrarInteracao } from '../world/interacao';
 import { aoMorrerBoss } from '../world/portas';
 import { largarItem, largarObjeto, largarOrbeEfeito, largarOuro, largarPerto } from '../world/objetos';
 import { aplicarSubidas, perderXp } from './nivel';
+import { ID_LIVRO_RARO } from './itens';
 import { sortearItem } from './sorteio';
 
 function zerarMovimento(e: Entidade): void {
@@ -93,6 +95,8 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
           geracao: e.geracao + 1,
           abates: e.abates + 1,
           noTick: estado.tick + ticksDe(segundos * 1000),
+          // Marco 14: as habilidades geradas da instância voltam com ela.
+          habilidades: e.habilidades.filter((h) => !ctx.conteudo.presets.get(e.preset)?.habilidades.includes(h)),
         });
       }
     } else {
@@ -144,6 +148,12 @@ function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
   // Ouro (marco 9A): só onde o modo solta itens, proporcional ao XP do inimigo.
   const ouro = Math.round(e.xpBase * d.ouroPorXp * (0.5 + aleatorio(estado.rng)));
   if (ouro > 0) largarPerto(ctx, e.x, e.y, (x, y) => largarOuro(estado, ouro, x, y, saida));
+  // Marco 14: livro raro, com uma habilidade gerada pela semente no nível do inimigo (D-057).
+  const livro = ctx.conteudo.itens.get(ID_LIVRO_RARO);
+  if (livro && aleatorio(estado.rng) < ctx.balance.geracao.chanceLivroRaro) {
+    const ref = idGerada(proximoU32(estado.rng), e.nivel);
+    largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, livro.id, x, y, saida, 1, undefined, ref));
+  }
   const boss = e.arquetipo === 'boss';
   if (aleatorio(estado.rng) >= (boss ? d.chanceItemBoss : d.chanceItem)) return;
   const item = sortearItem(estado, ctx, boss);
@@ -178,7 +188,7 @@ function processarRespawns(estado: EstadoJogo, ctx: ContextoSimulacao, saida: Ev
       if (preset) pendentes.push(r);
       continue;
     }
-    const e = criarInimigo(preset, r.id, r.x, r.y, ctx.balance, { nivel: r.nivel });
+    const e = criarInimigo(preset, r.id, r.x, r.y, ctx.balance, { nivel: r.nivel, habilidadesExtras: r.habilidades });
     // Origem ocupada por quem bloqueia: o respawn espera a célula liberar.
     if (!celulaLivrePara(e, r.x, r.y, estado.entidades, ctx.balance.colisao)) {
       pendentes.push(r);

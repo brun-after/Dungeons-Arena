@@ -43,6 +43,8 @@ export interface InimigoPosicionado {
   nivel?: number;
   /** Override de HP base da instância (§2.5). */
   hpBase?: number;
+  /** Marco 14: habilidades a mais da instância (as geradas por semente nas fases geradas). */
+  habilidades?: string[];
 }
 
 /**
@@ -209,7 +211,7 @@ export function carregarFase(json: FaseJson): Fase {
     celulas,
     tipo: json.tipo,
     spawns: json.spawns.map((s) => ({ x: s.x, y: s.y })),
-    inimigos: (json.inimigos ?? []).map((i) => ({ ...i })),
+    inimigos: (json.inimigos ?? []).map((i) => ({ ...i, ...(i.habilidades && { habilidades: [...i.habilidades] }) })),
     objetos: (json.objetos ?? []).map((o) => objetoCarregado(o, largura, altura)),
     portaSaida: json.portaSaida ? { ...json.portaSaida } : null,
     portasInternas: (json.portasInternas ?? []).map((p) => ({ ...p, a: { ...p.a }, b: { ...p.b } })),

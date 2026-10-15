@@ -239,7 +239,7 @@ describe('morte e respawn', () => {
   it('respawn espera a célula de origem liberar quando outro inimigo está nela', () => {
     const a = arena(1, 4);
     a.estado.entidades = a.estado.entidades.filter((e) => e.id !== 'b');
-    a.estado.respawns.push({ id: 'b', preset: 'boneco', x: 6, y: 6, nivel: 1, geracao: 1, abates: 1, noTick: 0 });
+    a.estado.respawns.push({ id: 'b', preset: 'boneco', x: 6, y: 6, nivel: 1, geracao: 1, abates: 1, noTick: 0, habilidades: [] });
     const ocupante = criarInimigo(obter(CONTEUDO.presets.get('boneco'), 'boneco'), 'ocupante', 6, 6, ctx.balance);
     a.estado.entidades.push(ocupante);
     a.ticks(5);

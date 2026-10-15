@@ -105,6 +105,7 @@ export const ptBR = {
   'ficha.descansoCurto': 'Curto (3 s, tecla R)',
   'ficha.descansoLongo': 'Longo (10 s, Shift+R)',
   'item.limite': 'Limite de invocações atingido',
+  'item.ja_conhece': 'Você já conhece essa habilidade',
   'log.invocacaoCurou': '{alvo} curou você: +{cura}',
   'log.explodiu': '{alvo} explodiu!',
   'log.dispensou': 'Invocações dispensadas ({n})',

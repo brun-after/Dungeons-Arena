@@ -2,8 +2,11 @@
 //   efetivo = clamp(round((base + Σ fixos) × (1 + Σ percentuais / 100)), mínimo, máximo)
 // Percentuais somam entre si, sem compor; arredonda uma vez, no final. A ficha é sempre
 // recalculada da base: a ordem de equipar não muda o resultado e não há deltas guardados.
+// Marco 14 (14/10/2026): as passivas conhecidas somam vida, mana e defesa; as habilidades da entidade derivam da
+// barra (habilidades-personagem.ts).
 
 import type { Catalogo } from '../combat/habilidades';
+import { passivasDaBolsa } from '../combat/perfil';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { Atributos, Bolsa, Entidade } from '../entities/entidade';
 import { hpMaximo, manaMaxima } from './ficha';
@@ -47,13 +50,17 @@ export function derivarFicha(bolsa: Bolsa, nivel: number, ctx: ContextoSimulacao
       balance.atributos.maximo,
     );
   }
-  const defesa = Math.max(0, bolsa.defesaBase + equipados.reduce((s, i) => s + i.bonusDefesa, 0));
+  const passivas = passivasDaBolsa(ctx, bolsa);
+  const soma = (f: (p: (typeof passivas)[number]) => number) => passivas.reduce((s, p) => s + f(p), 0);
+  const defesa = Math.max(0, bolsa.defesaBase + equipados.reduce((s, i) => s + i.bonusDefesa, 0) + soma((p) => p.defesa));
   const hpBase = bolsa.hpBase + (nivel - 1) * balance.xp.hpPorNivel;
+  const hp = hpMaximo(hpBase, atributos.constituicao, balance.hp.hpAtributoMult, balance.hp.dificuldadeMult);
+  const mana = manaMaxima(atributos.sabedoria);
   return {
     atributos,
     defesa,
-    hpMax: hpMaximo(hpBase, atributos.constituicao, balance.hp.hpAtributoMult, balance.hp.dificuldadeMult),
-    manaMax: manaMaxima(atributos.sabedoria),
+    hpMax: Math.max(1, Math.round(hp * (1 + soma((p) => p.hpMaxPct) / 100))),
+    manaMax: Math.max(1, Math.round(mana * (1 + soma((p) => p.manaMaxPct) / 100))),
   };
 }
 
@@ -67,4 +74,6 @@ export function recalcularFicha(e: Entidade, ctx: ContextoSimulacao): void {
   e.manaMax = f.manaMax;
   e.hp = Math.min(e.hp, e.hpMax);
   e.mana = Math.min(e.mana, e.manaMax);
+  // Marco 14: as teclas 1–4 são as habilidades da entidade.
+  e.habilidades = e.bolsa.barra.filter((id): id is string => id !== null && e.bolsa?.conhecidas.some((c) => c.id === id) === true);
 }

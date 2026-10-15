@@ -18,7 +18,11 @@ export function povoarFase(estado: EstadoJogo, ctx: ContextoSimulacao, saida: Ev
     ctx.fase.inimigos.forEach((pos, indice) => {
       const preset = ctx.conteudo.presets.get(pos.preset);
       if (!preset) return;
-      const opcoes = { ...(pos.nivel !== undefined && { nivel: pos.nivel }), ...(pos.hpBase !== undefined && { hpBase: pos.hpBase }) };
+      const opcoes = {
+        ...(pos.nivel !== undefined && { nivel: pos.nivel }),
+        ...(pos.hpBase !== undefined && { hpBase: pos.hpBase }),
+        ...(pos.habilidades && { habilidadesExtras: pos.habilidades }),
+      };
       estado.entidades.push(criarInimigo(preset, idDoInimigo(indice), pos.x, pos.y, ctx.balance, opcoes));
     });
   }

@@ -7,10 +7,15 @@
 //   4. um par de portas internas a cada 10 salas, extremos a Chebyshev ≥ 20 (relaxa para 15 e 10);
 //   5. início e loja na primeira sala; boss na última (com mais de 2 salas) e a saída trancada por ele;
 //      nas demais, `1 + floor(rand × min(3, floor(l × a / 8)))` inimigos do nível pedido.
+//   6. marco 14 (14/10/2026), D-059: habilidades geradas por semente — o chefe ganha 2 e cada inimigo comum,
+//      com chance que cresce com o nível, 1. Num fluxo de PRNG **separado** (`semente:habilidades`): o mapa, os
+//      inimigos e os objetos das fases geradas já salvas não mudam.
 
+import { idGerada } from '../combat/chave-habilidade';
 import type { Celula } from '../core/comandos';
 import type { Conteudo } from '../core/conteudo';
-import { aleatorio, criarRng, escolher, inteiro, type EstadoRng } from '../core/rng';
+import { BALANCE_PADRAO, type Balance } from '../core/contexto';
+import { aleatorio, criarRng, escolher, hashTexto, inteiro, proximoU32, type EstadoRng } from '../core/rng';
 import type { FaseJson, InimigoPosicionado, ObjetoPosicionadoJson, PortaInterna } from './fase';
 
 export interface ParametrosGeracao {
@@ -29,14 +34,31 @@ export interface CatalogoGeracao {
   comuns: readonly string[];
   boss: string;
   estoque: readonly string[];
+  /** Marco 14: chances das habilidades geradas. */
+  geracao: Balance['geracao'];
 }
 
 /** Presets comuns (sem chefe, boneco de treino nem invocações, marco 10A-3) e o chefe, tirados do catálogo. */
-export function catalogoDeGeracao(conteudo: Conteudo, estoque: readonly string[]): CatalogoGeracao {
+export function catalogoDeGeracao(conteudo: Conteudo, estoque: readonly string[], geracao: Balance['geracao'] = BALANCE_PADRAO.geracao): CatalogoGeracao {
   const presets = [...conteudo.presets.values()].filter((p) => p.invocacao === null);
   const comuns = presets.filter((p) => p.arquetipo !== 'boss' && p.arquetipo !== 'boneco').map((p) => p.id);
   const boss = presets.find((p) => p.arquetipo === 'boss')?.id ?? comuns[0] ?? '';
-  return { comuns, boss, estoque: [...estoque] };
+  return { comuns, boss, estoque: [...estoque], geracao };
+}
+
+/** Chance de um inimigo comum ter uma habilidade gerada no nível (§D-057: cresce com a profundidade). */
+export function chanceDeHabilidade(nivel: number, g: Balance['geracao']): number {
+  return Math.min(g.chanceMax, g.chanceInimigo + g.chancePorNivel * nivel);
+}
+
+/** Habilidades geradas dos inimigos, num PRNG próprio (não mexe na sequência do mapa). */
+function distribuirHabilidades(inimigos: InimigoPosicionado[], catalogo: CatalogoGeracao, p: ParametrosGeracao): void {
+  const rng = criarRng(hashTexto(`${p.semente}:habilidades`));
+  const g = catalogo.geracao;
+  for (const ini of inimigos) {
+    const quantas = ini.preset === catalogo.boss ? g.habilidadesBoss : aleatorio(rng) < chanceDeHabilidade(p.nivelInimigos, g) ? 1 : 0;
+    if (quantas > 0) ini.habilidades = Array.from({ length: quantas }, () => idGerada(proximoU32(rng), p.nivelInimigos));
+  }
 }
 
 interface Sala {
@@ -151,6 +173,8 @@ export function gerarFase(p: ParametrosGeracao, catalogo: CatalogoGeracao): Fase
       inimigos.push({ preset: escolher(rng, catalogo.comuns), x: c.x, y: c.y, nivel: p.nivelInimigos });
     }
   }
+
+  distribuirHabilidades(inimigos, catalogo, p);
 
   const portasInternas: PortaInterna[] = [];
   for (let par = 0; par < Math.floor(salas.length / 10); par++) {

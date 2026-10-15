@@ -43,7 +43,21 @@ export type MotivoItem =
   | 'em_perigo'
   | 'sem_descanso'
   /** Marco 10A-3: pergaminho de invocação acima do limite do modo (recusado antes de gastar). */
-  | 'limite';
+  | 'limite'
+  /** Marco 14: livro de uma habilidade que o personagem já conhece. */
+  | 'ja_conhece';
+
+/** Marco 14: por que a habilidade não subiu de rank ou não foi para a barra. */
+export type MotivoHabilidade =
+  | 'sem_ficha'
+  | 'desconhecida'
+  | 'nao_aprendivel'
+  | 'rank_maximo'
+  | 'sem_pontos'
+  | 'nivel_baixo'
+  | 'caminho_invalido'
+  | 'tecla_invalida'
+  | 'passiva';
 
 export type MotivoCancelamento = 'morte' | 'interrompido' | 'alvo_invalido' | 'substituido';
 
@@ -90,6 +104,10 @@ export type EventoSimulacao =
       sinergias: string[];
     }
   | { t: 'esquivou'; tick: number; acaoId: number; atorId: EntidadeId; alvoId: EntidadeId }
+  /** Marco 14: habilidade aprendida ou com rank novo (e o caminho escolhido, nos ranks de evolução). */
+  | { t: 'habilidadeMudou'; tick: number; id: EntidadeId; habilidadeId: string; rank: number; caminho: string | null }
+  | { t: 'habilidadeRecusada'; tick: number; id: EntidadeId; habilidadeId: string; motivo: MotivoHabilidade }
+  | { t: 'barraMudou'; tick: number; id: EntidadeId }
   | { t: 'efeitoAplicado'; tick: number; alvoId: EntidadeId; origemId: EntidadeId; tipo: TipoEfeito; ateTick: number }
   /** Marco 8A-2: invocação, dominação e armadilhas. */
   | { t: 'invocou'; tick: number; donoId: EntidadeId; id: EntidadeId }
