@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.22 · **Data:** 14/10/2026
+**Versão:** 0.23 · **Data:** 14/10/2026
 
 > **Histórico**
+> - **0.23 (14/10/2026)**: D-057 (sistema de habilidades, novo marco 14; rebalanceamento vira 15 e endurecimento, 16).
 > - **0.22 (14/10/2026)**: D-056 (áudio sintetizado, interface, efeitos como dado, qualidade e acessibilidade), marco 12.
 > - **0.21 (14/10/2026)**: D-055 (sugestões de capacidades, áudio e ordem da convergência).
 > - **0.20 (14/10/2026)**: D-054 (invocações completas, avatares e dominação), marco 10A-3.
@@ -963,3 +964,68 @@ fixou a trilha sintetizada e os efeitos visuais descritos como dado.
 - O `skills.json` ganhou o bloco `visual` nas 16 habilidades, o que muda a versão do conteúdo da arena: cliente e
   servidor são publicados juntos.
 - Os números de fps e p95 por qualidade em aparelhos reais ficam para o marco 15 (benchmarks).
+
+## D-057 · Sistema de habilidades e a nova ordem da convergência (v0.23, 14/10/2026)
+
+**Contexto.** Jogando, o usuário sentiu duas faltas:
+- **Clareza dos efeitos**: o HUD mostra só o ícone, o nome aparece apenas ao passar o mouse e não há duração nem
+  descrição.
+- **Poucas habilidades**: uma classe com 4 habilidades fixas.
+
+Ele também trouxe o modelo do jogo anterior e ideias de composição
+([`SUGESTOES-HABILIDADES.md`](SUGESTOES-HABILIDADES.md)). Os 26 efeitos de lá são, na prática, o registro que já
+fizemos no 8A.
+
+**Decisão.**
+- **Novo marco 14, "Sistema de habilidades"**, num PR só (D-055). O rebalanceamento passa a ser o **15** e o
+  endurecimento, o **16**. A ordem fica **13 → 14 → 15 → 16**, depois 11A e a arena.
+- **Adotado no 14**:
+  - **Habilidade por composição**: camadas independentes de efeito, forma, tempo, custo, tema e apresentação, todas
+    em dados. O catálogo escrito à mão vira uma coleção de boas combinações.
+  - **Formas novas**: linha, cone e ao redor de si.
+  - **Alvos novos**: um aliado, todos os aliados e área livre.
+  - **Custos novos**: vida.
+  - **Efeitos pequenos que faltavam**: escudo (vida temporária), puxão e trocar de lugar.
+  - **5 elementos**, cada um com um estado e uma sinergia, em tabela de dados. Escolha inicial:
+    - fogo: queimando;
+    - gelo: resfriado, que acumula até congelar;
+    - raio: eletrizado, que salta entre alvos;
+    - veneno: envenenado, com menos cura recebida;
+    - psíquico: exposto, que recebe mais dano.
+
+    Os números e as sinergias exatas saem do plano do marco. O psíquico vem do modelo anterior, no lugar de
+    "sagrado".
+  - **Interações em tabela de dados**: regra de acúmulo por tipo, sinergias, oposições, resistências e imunidades por
+    preset, e teto de efeitos por entidade.
+  - **Orçamento de poder**: custo por peça e orçamento por habilidade, que depende do nível do personagem e do modo.
+    Vale para o catálogo, as evoluções, os livros e as habilidades geradas. Estende os orçamentos da ficha da arena
+    (§3.7).
+  - **Ranks e liberação por nível** (`nivelMinimo`, §2.8). O rank escala dano, efeitos adicionais e visual.
+  - **Árvores de evolução** (escolha entre 2 ou 3 caminhos) e **modificadores** (atravessar, ecoar, encadear, maior e
+    mais lenta), inclusive vindos de equipamento.
+  - **Classes novas** (guerreiro, mago e arqueiro, além do aventureiro), com afinidades por etiqueta que mudam como
+    cada habilidade funciona para o personagem.
+  - **Livros de habilidade** (item novo).
+  - **Habilidades geradas por semente**: o tema puxa forma, efeitos, visual e som, e o resultado passa pelo
+    orçamento. Dão repertório próprio aos inimigos das fases geradas e aos livros raros. O código curto da semente
+    serve para compartilhar (e, no 8B, para a arena).
+  - **Barra escolhida pelo jogador** (4 habilidades nas teclas 1–4) e a **roda de habilidades** no toque (§4.6).
+  - **Efeitos legíveis**:
+    - chips com anel de duração e segundos restantes;
+    - cartão com nome, o que faz (com os números) e a origem;
+    - aviso ao ganhar um efeito;
+    - **descrição gerada automaticamente** a partir das peças, para habilidades, efeitos, itens e livros;
+    - **gramática visual**: a cor diz o elemento, a forma diz a área.
+- **Habilidades reativas**: só **passivas** neste ciclo. Reação, interrupção, ação bônus, ação livre e os gatilhos
+  ficam fora: pesam na legibilidade em tempo real.
+- **Adaptado**: os conceitos de turno do modelo anterior viram tempo ("por turno" passa a "por segundo"; "N turnos"
+  passa a segundos).
+- **Recusado**:
+  - **crítico com texto livre**: já há a tabela do d20;
+  - **atravessar paredes**: conflita com a grade, a navegação e a colisão. Fica o "atravessar" atual, de projétil
+    através de alvos.
+- **Fora do 14, por depender da arena**: limites de rank, evolução e orçamento por modo de arena ("fichas justas") no
+  10B; a habilidade gerada trafegando por semente, no 8B.
+
+**Consequência.** O README ganhou o marco 14 novo e renumerou os seguintes. A criação de habilidades pelo jogador
+continua no editor (11A), sobre as mesmas peças e o mesmo orçamento.
