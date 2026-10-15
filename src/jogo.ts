@@ -8,7 +8,6 @@
 // Marco 10A-1 (14/10/2026): chegar à saída aberta leva à próxima fase da campanha (data/campanha.json):
 // o registro novo é montado por `avancarFase` (pura), gravado, e a sessão recarrega a partir dele (D-052).
 
-import type { Habilidade } from './combat/habilidades';
 import type { Comando } from './core/comandos';
 import { criarFila, enfileirar, retirarAte } from './core/comandos';
 import { conteudoOficial, type Conteudo } from './core/conteudo';
@@ -148,10 +147,6 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
   const ctx = montarContexto(conteudo, validacao.fase);
   const estado = leitura?.estado ?? novoEstado(ctx, teste ? await personagemAtual() : null);
   const idJogador = jogadorDoSave(estado)?.id ?? ID_JOGADOR;
-  const jogador = estado.entidades.find((e) => e.id === idJogador);
-  const habilidades = (jogador?.habilidades ?? [])
-    .map((id) => conteudo.habilidades.get(id))
-    .filter((h): h is Habilidade => h !== undefined);
   const estatisticas: Estatisticas = { ...(leitura?.estatisticas ?? { inimigosDerrotados: 0, mortes: 0 }) };
 
   let autosave: Autosave | null = null;
@@ -205,7 +200,6 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     raiz,
     ctx,
     idLocal: idJogador,
-    habilidades,
     estado: () => estado,
     emitir: (cmd: Comando) => enfileirar(fila, { tick: estado.tick, entidadeId: idJogador, cmd }),
     acoesExtras,

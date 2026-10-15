@@ -73,7 +73,7 @@ function embaralharParcial(rng: EstadoRng, lista: string[], n: number): string[]
 export function gerarDefinicao(id: string, ctx: ContextoHabilidades): DefinicaoHabilidade | null {
   if (!ehGerada(id)) return null;
   let porId = memoria.get(ctx.conteudo);
-  if (!porId) memoria.set(ctx.conteudo, (porId = new Map()));
+  if (!porId) memoria.set(ctx.conteudo, (porId = new Map<string, DefinicaoHabilidade | null>()));
   const pronto = porId.get(id);
   if (pronto !== undefined) return pronto;
   const def = gerar(id, ctx);

@@ -8,7 +8,6 @@ import { enderecoDoServidor } from './plataforma/servidor';
 import { contextoDaArena } from './arena/contexto-arena';
 import { versaoDoConteudo } from './arena/protocolo';
 import { SalaArena } from './arena/sala';
-import type { Habilidade } from './combat/habilidades';
 import type { ContextoSimulacao } from './core/contexto';
 import { buscarEntidade, criarEstado } from './core/estado';
 import { t } from './i18n';
@@ -47,15 +46,12 @@ async function rodarArena(o: OpcoesArena): Promise<{ avisar: (texto: string) => 
   const { ctx, eu } = o;
   // Antes do bemVindo, a cena desenha um estado vazio da fase.
   const vazio = criarEstado({ semente: 0, faseId: ctx.fase.id });
-  const classe = ctx.conteudo.classes.get('aventureiro');
-  const habilidades = (classe?.habilidades ?? []).map((id) => ctx.conteudo.habilidades.get(id)).filter((h): h is Habilidade => h !== undefined);
   const idLocal = eu.entidadeId ?? 'p1';
 
   const cena = await montarCena({
     raiz: o.raiz,
     ctx,
     idLocal,
-    habilidades,
     estado: () => eu.previsto ?? vazio,
     emitir: (cmd) => {
       eu.enviarComando(cmd);

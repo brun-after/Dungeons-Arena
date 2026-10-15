@@ -195,7 +195,7 @@ function lerEvolucoes(l: Leitor, v: unknown): Record<number, string[]> {
 export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
   const o = l.objeto(item, 'habilidade');
   const elemento = o.elemento === undefined || o.elemento === null ? null : ehElemento(o.elemento) ? o.elemento : null;
-  if (o.elemento !== undefined && o.elemento !== null && !elemento) l.erro(`elemento desconhecido "${String(o.elemento)}"`);
+  if (o.elemento !== undefined && o.elemento !== null && !elemento) l.erro(`elemento desconhecido "${JSON.stringify(o.elemento)}"`);
   const base: Habilidade = {
     id: l.texto(o, 'id'),
     nome: l.texto(o, 'nome'),

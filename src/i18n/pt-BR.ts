@@ -1,4 +1,6 @@
 // Dicionário pt-BR (§5.5): nenhum texto de interface fica fixo no código.
+import { textosHabilidades } from './pt-BR-habilidades';
+
 export const ptBR = {
   'app.titulo': 'Dungeons Arena',
   'app.carregando': 'Carregando…',
@@ -31,7 +33,7 @@ export const ptBR = {
   'log.efeito': '{alvo}: {efeito}',
   'log.orbeEfeito': 'Orbe de efeito!',
   'hud.efeitos': 'Efeitos ativos',
-  'efeito.dano_periodico': 'Envenenado',
+  'efeito.dano_periodico': 'Sangrando',
   'efeito.atordoar': 'Atordoado',
   'efeito.silenciar': 'Silenciado',
   'efeito.sem_movimento': 'Preso',
@@ -403,6 +405,8 @@ export const ptBR = {
   'slots.erroImportar.fase': 'O save aponta para uma fase inválida.',
   'slots.erroImportar.estado': 'O save está incompleto ou corrompido.',
   'slots.erroImportar.nao_finito': 'O save tem números inválidos.',
+  // Marco 14 (14/10/2026): sistema de habilidades.
+  ...textosHabilidades,
 } as const;
 
 export type ChaveTexto = keyof typeof ptBR;

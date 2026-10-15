@@ -68,7 +68,7 @@ export function lerCaminhos(json: unknown): { caminhos: Map<string, Caminho>; er
       return false;
     });
     const elemento = o.elemento === undefined ? null : ehElemento(o.elemento) ? o.elemento : null;
-    if (o.elemento !== undefined && !elemento) l.erro(`elemento desconhecido "${String(o.elemento)}"`);
+    if (o.elemento !== undefined && !elemento) l.erro(`elemento desconhecido "${JSON.stringify(o.elemento)}"`);
     const c: Caminho = {
       id: l.texto(o, 'id'),
       nome: l.texto(o, 'nome'),
@@ -217,9 +217,9 @@ const memoria = new WeakMap<object, WeakMap<object, Map<string, Habilidade | nul
 /** A habilidade compilada de uma chave (memoizada). Chave inválida ou id desconhecido: undefined. */
 export function resolverHabilidade(ctx: ContextoHabilidades, chave: string): Habilidade | undefined {
   let porRegras = memoria.get(ctx.conteudo);
-  if (!porRegras) memoria.set(ctx.conteudo, (porRegras = new WeakMap()));
+  if (!porRegras) memoria.set(ctx.conteudo, (porRegras = new WeakMap<object, Map<string, Habilidade | null>>()));
   let porChave = porRegras.get(ctx.balance.habilidades);
-  if (!porChave) porRegras.set(ctx.balance.habilidades, (porChave = new Map()));
+  if (!porChave) porRegras.set(ctx.balance.habilidades, (porChave = new Map<string, Habilidade | null>()));
   const pronto = porChave.get(chave);
   if (pronto !== undefined) return pronto ?? undefined;
   const partes = lerChave(chave);

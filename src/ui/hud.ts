@@ -1,9 +1,10 @@
 // HUD do jogador (§2.15): barras de vida e mana com cor por faixa, último d20 (ignorável),
 // registro de combate com aria-live e aviso de morte. Só reescreve o DOM quando o valor muda.
+// Marco 14 (14/10/2026): os efeitos ativos viram chips com anel de duração e cartão (chips-efeito.ts).
 
-import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
-import { t, type ChaveTexto } from '../i18n';
+import { t } from '../i18n';
 import type { Entidade } from '../entities/entidade';
+import { ChipsEfeito } from './chips-efeito';
 import type { DadosRede } from './diagnostico';
 
 const MAX_LINHAS_LOG = 6;
@@ -35,11 +36,12 @@ export class Hud {
   private readonly numeros = document.createElement('span');
   private readonly d20 = document.createElement('span');
   private readonly rede = document.createElement('span');
-  /** Marco 8A: ícones dos efeitos ativos, na cor do registro. */
+  /** Marco 8A: ícones dos efeitos ativos, na cor do registro; marco 14: com duração e cartão. */
   private readonly efeitos = document.createElement('span');
+  private readonly chips: ChipsEfeito;
   private ultimo = '';
 
-  constructor(raiz: HTMLElement) {
+  constructor(raiz: HTMLElement, nomeDe: (id: string) => string | null = () => null) {
     this.status = document.createElement('div');
     this.status.className = 'status-jogador';
     this.numeros.className = 'numeros-vida';
@@ -54,6 +56,7 @@ export class Hud {
     this.efeitos.className = 'chips-efeito';
     this.efeitos.setAttribute('aria-label', t('hud.efeitos'));
     this.status.append(barras, this.numeros, this.efeitos, this.d20, this.rede);
+    this.chips = new ChipsEfeito(this.efeitos, nomeDe);
 
     this.log = document.createElement('ol');
     this.log.className = 'log-combate';
@@ -84,25 +87,12 @@ export class Hud {
     raiz.append(this.log, this.morte);
   }
 
-  atualizar(jogador: Entidade | undefined): void {
+  atualizar(jogador: Entidade | undefined, tick = 0): void {
     if (!jogador) return;
-    const tipos = jogador.efeitos.map((f) => f.tipo);
-    const chave = `${jogador.hp}/${jogador.hpMax}/${jogador.mana}/${jogador.manaMax}/${jogador.morto}/${tipos.join(',')}`;
+    this.chips.atualizar(jogador, tick);
+    const chave = `${jogador.hp}/${jogador.hpMax}/${jogador.mana}/${jogador.manaMax}/${jogador.morto}`;
     if (chave === this.ultimo) return;
     this.ultimo = chave;
-    this.efeitos.textContent = '';
-    for (const tipo of tipos) {
-      const d = REGISTRO_EFEITOS[tipo];
-      const chip = document.createElement('span');
-      chip.className = d.positivo ? 'chip-efeito positivo' : 'chip-efeito negativo';
-      chip.style.borderColor = d.cor;
-      chip.textContent = d.icone;
-      const rotulo = t(`efeito.${tipo}` as ChaveTexto);
-      chip.title = rotulo;
-      chip.setAttribute('aria-label', rotulo);
-      chip.dataset.efeito = tipo;
-      this.efeitos.append(chip);
-    }
     const fracaoVida = jogador.hp / Math.max(1, jogador.hpMax);
     this.vida.preenchimento.style.width = `${fracaoVida * 100}%`;
     this.vida.raiz.dataset.faixa = classeDoHp(fracaoVida);

@@ -356,20 +356,73 @@ body.toque .faixa-controles {
   display: none;
 }
 
+/* Marco 14: o anel na cor do efeito esvazia com a duração (--resto de 1 a 0); os segundos ficam ao lado. */
 .chip-efeito {
-  display: inline-grid;
-  place-items: center;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 3px;
-  border: 2px solid;
-  border-radius: 6px;
-  background: var(--painel);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px 0 4px;
+  border: 0;
+  border-radius: 13px;
+  background: conic-gradient(var(--cor, #888) calc(var(--resto, 1) * 360deg), rgba(255, 255, 255, 0.12) 0);
+  color: var(--texto);
+  font: inherit;
   font-size: 0.8rem;
+  cursor: pointer;
+  pointer-events: auto;
 }
 
-.chip-efeito.negativo {
-  background: rgba(192, 57, 43, 0.25);
+.chip-efeito::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 11px;
+  background: var(--painel);
+}
+
+.chip-efeito.negativo::before {
+  background: #3a1d22;
+}
+
+.chip-efeito > span {
+  position: relative;
+}
+
+.chip-efeito .restante {
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--texto-suave);
+}
+
+.chip-efeito:focus-visible {
+  outline: 2px solid var(--destaque);
+  outline-offset: 2px;
+}
+
+.cartao-efeito {
+  position: absolute;
+  z-index: 30;
+  max-width: min(320px, 80vw);
+  margin-top: 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  background: var(--painel);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  pointer-events: none;
+}
+
+.cartao-efeito p {
+  margin: 4px 0 0;
+}
+
+.cartao-efeito .origem {
+  color: var(--texto-suave);
 }
 
 .chip-d20 {
@@ -513,6 +566,74 @@ body.toque .log-combate.aberto {
 .botao-habilidade:focus-visible {
   outline: 2px solid var(--destaque);
   outline-offset: 2px;
+}
+
+/* Marco 14: aba Habilidades da mochila. */
+.cartao-habilidade {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.cartao-habilidade .textos-item {
+  flex: 1 1 220px;
+}
+
+.descricao-habilidade {
+  margin: 4px 0 0;
+  padding-left: 16px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--texto-suave);
+}
+
+.acoes-habilidade {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  flex: 1 1 100%;
+}
+
+.acoes-habilidade .motivo {
+  flex: 1 1 auto;
+}
+
+.caminhos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+
+.cartao-caminho {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.cartao-caminho ul {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+}
+
+/* Marco 14: a cor do elemento na borda e os pontos do rank no canto. */
+.botao-habilidade {
+  border-color: var(--cor-elemento, var(--borda));
+}
+
+.botao-habilidade .rank {
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  font-size: 0.6rem;
+  letter-spacing: -1px;
+  color: var(--destaque);
 }
 
 body.toque .barra-habilidades {
