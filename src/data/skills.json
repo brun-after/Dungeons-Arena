@@ -1,5 +1,5 @@
 {
-  "versao": 1,
+  "versao": 2,
   "habilidades": [
     {
       "id": "ataque_basico",
@@ -22,7 +22,8 @@
       "visual": {
         "impacto": "faiscas",
         "som": "golpe"
-      }
+      },
+      "basico": true
     },
     {
       "id": "seta_arcana",
@@ -48,6 +49,16 @@
         "viagem": "brilho",
         "impacto": "brilho",
         "som": "magia"
+      },
+      "evolucoes": {
+        "3": [
+          "brutal",
+          "eficiente"
+        ],
+        "5": [
+          "perfurante",
+          "eco"
+        ]
       }
     },
     {
@@ -74,7 +85,18 @@
         "impacto": "explosao",
         "camera": "forte",
         "som": "explosao"
-      }
+      },
+      "evolucoes": {
+        "3": [
+          "amplo",
+          "eficiente"
+        ],
+        "5": [
+          "elemental_gelo",
+          "eco"
+        ]
+      },
+      "nivelMinimo": 1
     },
     {
       "id": "curar",
@@ -99,6 +121,16 @@
         "conjuracao": "brilho",
         "impacto": "brilho",
         "som": "cura"
+      },
+      "evolucoes": {
+        "3": [
+          "eficiente",
+          "fortificado"
+        ],
+        "5": [
+          "controle",
+          "eficiente"
+        ]
       }
     },
     {
@@ -129,6 +161,16 @@
         "impacto": "estrelas",
         "camera": "leve",
         "som": "golpe"
+      },
+      "evolucoes": {
+        "3": [
+          "controle",
+          "brutal"
+        ],
+        "5": [
+          "cadeia",
+          "eco"
+        ]
       }
     },
     {
@@ -463,6 +505,782 @@
         "cor": "#bdc3c7",
         "conjuracao": "fumaca",
         "som": "armadilha"
+      }
+    },
+    {
+      "id": "dardo_arcano",
+      "nome": "Dardo arcano",
+      "icone": "✧",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d6",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1000,
+      "conjuracaoMs": 504,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 14,
+      "efeitos": [],
+      "visual": {
+        "cor": "#9b8cff",
+        "viagem": "brilho",
+        "impacto": "brilho",
+        "som": "magia"
+      },
+      "basico": true
+    },
+    {
+      "id": "tiro",
+      "nome": "Tiro",
+      "icone": "➵",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d6",
+      "formulaCura": null,
+      "alcanceCelulas": 6,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1000,
+      "conjuracaoMs": 504,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 16,
+      "efeitos": [],
+      "visual": {
+        "cor": "#d4ac0d",
+        "impacto": "faiscas",
+        "som": "projetil"
+      },
+      "basico": true
+    },
+    {
+      "id": "investida",
+      "nome": "Investida",
+      "icone": "⇶",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 3,
+      "tipoArea": "linha",
+      "raioArea": 0,
+      "custoRecurso": 3,
+      "recargaMs": 7000,
+      "conjuracaoMs": 400,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "avanco",
+          "valor": 3,
+          "em": "conjurador"
+        }
+      ],
+      "visual": {
+        "cor": "#e67e22",
+        "impacto": "faiscas",
+        "camera": "leve",
+        "som": "golpe"
+      },
+      "tags": [
+        "movimento"
+      ],
+      "evolucoes": {
+        "3": [
+          "brutal",
+          "eficiente"
+        ],
+        "5": [
+          "eco",
+          "longo_alcance"
+        ]
+      }
+    },
+    {
+      "id": "redemoinho",
+      "nome": "Redemoinho",
+      "icone": "🌀",
+      "tipoAtaque": "fisico",
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "alcanceCelulas": 1,
+      "tipoArea": "ao_redor",
+      "raioArea": 1,
+      "custoRecurso": 0,
+      "recargaMs": 6000,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "visual": {
+        "cor": "#c0392b",
+        "impacto": "faiscas",
+        "camera": "leve",
+        "som": "golpe"
+      },
+      "custoVida": 4,
+      "evolucoes": {
+        "3": [
+          "amplo",
+          "brutal"
+        ],
+        "5": [
+          "sanguessuga",
+          "eficiente"
+        ]
+      }
+    },
+    {
+      "id": "grito_de_guerra",
+      "nome": "Grito de guerra",
+      "icone": "📣",
+      "tipoAtaque": "fisico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 2,
+      "tipoArea": "ao_redor",
+      "raioArea": 2,
+      "custoRecurso": 4,
+      "recargaMs": 15000,
+      "conjuracaoMs": 300,
+      "politicaAlvo": "aliados",
+      "politicaImpacto": "area",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "bonus_dano",
+          "pct": 20,
+          "duracaoMs": 8000
+        }
+      ],
+      "visual": {
+        "cor": "#f39c12",
+        "conjuracao": "anel",
+        "impacto": "estrelas",
+        "som": "nivel"
+      },
+      "evolucoes": {
+        "3": [
+          "controle",
+          "eficiente"
+        ],
+        "5": [
+          "fortificado",
+          "amplo"
+        ]
+      }
+    },
+    {
+      "id": "escudo_de_ferro",
+      "nome": "Escudo de ferro",
+      "icone": "🛡",
+      "tipoAtaque": "fisico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 3,
+      "recargaMs": 12000,
+      "conjuracaoMs": 200,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "escudo",
+          "valor": 15,
+          "duracaoMs": 8000
+        }
+      ],
+      "visual": {
+        "cor": "#95a5a6",
+        "impacto": "anel",
+        "som": "cura"
+      },
+      "evolucoes": {
+        "3": [
+          "controle",
+          "eficiente"
+        ],
+        "5": [
+          "fortificado",
+          "sanguessuga"
+        ]
+      }
+    },
+    {
+      "id": "corrente",
+      "nome": "Corrente",
+      "icone": "⛓",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d6",
+      "formulaCura": null,
+      "alcanceCelulas": 4,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 3,
+      "recargaMs": 8000,
+      "conjuracaoMs": 400,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "puxao",
+          "valor": 3
+        }
+      ],
+      "visual": {
+        "cor": "#7f8c8d",
+        "impacto": "faiscas",
+        "som": "golpe"
+      },
+      "evolucoes": {
+        "3": [
+          "brutal",
+          "controle"
+        ],
+        "5": [
+          "cadeia",
+          "eco"
+        ]
+      }
+    },
+    {
+      "id": "golpe_flamejante",
+      "nome": "Golpe flamejante",
+      "icone": "🔥",
+      "tipoAtaque": "fisico",
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "alcanceCelulas": 2,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 3,
+      "recargaMs": 5000,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "visual": {
+        "cor": "#ff7b39",
+        "conjuracao": "brasas",
+        "impacto": "explosao",
+        "camera": "leve",
+        "som": "golpe"
+      },
+      "elemento": "fogo",
+      "evolucoes": {
+        "3": [
+          "brutal",
+          "elemental_raio"
+        ],
+        "5": [
+          "eficiente",
+          "eco"
+        ]
+      }
+    },
+    {
+      "id": "pele_de_pedra",
+      "nome": "Pele de pedra",
+      "icone": "🪨",
+      "tipoAtaque": "fisico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "passiva": {
+        "hpMaxPct": 10,
+        "defesa": 2
+      }
+    },
+    {
+      "id": "bola_de_fogo",
+      "nome": "Bola de fogo",
+      "icone": "☄",
+      "tipoAtaque": "magico",
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "alcanceCelulas": 6,
+      "tipoArea": "quadrado",
+      "raioArea": 1,
+      "custoRecurso": 4,
+      "recargaMs": 6000,
+      "conjuracaoMs": 800,
+      "politicaAlvo": "celula",
+      "politicaImpacto": "area",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "visual": {
+        "cor": "#ff7b39",
+        "conjuracao": "brasas",
+        "impacto": "explosao",
+        "camera": "forte",
+        "som": "explosao"
+      },
+      "elemento": "fogo",
+      "evolucoes": {
+        "3": [
+          "amplo",
+          "eficiente"
+        ],
+        "5": [
+          "eco",
+          "brutal"
+        ]
+      }
+    },
+    {
+      "id": "lanca_de_gelo",
+      "nome": "Lança de gelo",
+      "icone": "❄",
+      "tipoAtaque": "magico",
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "linha",
+      "raioArea": 0,
+      "custoRecurso": 4,
+      "recargaMs": 5000,
+      "conjuracaoMs": 600,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "visual": {
+        "cor": "#74b9ff",
+        "conjuracao": "brilho",
+        "impacto": "anel",
+        "som": "magia"
+      },
+      "elemento": "gelo",
+      "evolucoes": {
+        "3": [
+          "brutal",
+          "controle"
+        ],
+        "5": [
+          "eco",
+          "longo_alcance"
+        ]
+      }
+    },
+    {
+      "id": "raio_em_cadeia",
+      "nome": "Raio em cadeia",
+      "icone": "⚡",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 6,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 5,
+      "recargaMs": 7000,
+      "conjuracaoMs": 700,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 16,
+      "efeitos": [],
+      "visual": {
+        "cor": "#f7dc6f",
+        "conjuracao": "faiscas",
+        "viagem": "faiscas",
+        "impacto": "raio",
+        "camera": "leve",
+        "som": "magia"
+      },
+      "elemento": "raio",
+      "mods": [
+        "encadear"
+      ],
+      "evolucoes": {
+        "3": [
+          "brutal",
+          "eficiente"
+        ],
+        "5": [
+          "eco",
+          "longo_alcance"
+        ]
+      }
+    },
+    {
+      "id": "barreira",
+      "nome": "Barreira",
+      "icone": "🔰",
+      "tipoAtaque": "magico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 4,
+      "recargaMs": 10000,
+      "conjuracaoMs": 300,
+      "politicaAlvo": "aliado",
+      "politicaImpacto": "contato",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "escudo",
+          "valor": 12,
+          "duracaoMs": 8000
+        }
+      ],
+      "visual": {
+        "cor": "#5dade2",
+        "impacto": "anel",
+        "som": "cura"
+      },
+      "evolucoes": {
+        "3": [
+          "controle",
+          "eficiente"
+        ],
+        "5": [
+          "fortificado",
+          "longo_alcance"
+        ]
+      }
+    },
+    {
+      "id": "nova_glacial",
+      "nome": "Nova glacial",
+      "icone": "✳",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 2,
+      "tipoArea": "ao_redor",
+      "raioArea": 2,
+      "custoRecurso": 5,
+      "recargaMs": 9000,
+      "conjuracaoMs": 600,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "visual": {
+        "cor": "#a0d8ef",
+        "conjuracao": "brilho",
+        "impacto": "anel",
+        "camera": "leve",
+        "som": "magia"
+      },
+      "elemento": "gelo",
+      "evolucoes": {
+        "3": [
+          "amplo",
+          "controle"
+        ],
+        "5": [
+          "brutal",
+          "eficiente"
+        ]
+      }
+    },
+    {
+      "id": "mente_partida",
+      "nome": "Mente partida",
+      "icone": "👁",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d6",
+      "formulaCura": null,
+      "alcanceCelulas": 6,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 4,
+      "recargaMs": 8000,
+      "conjuracaoMs": 600,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 12,
+      "efeitos": [
+        {
+          "tipo": "silenciar",
+          "duracaoMs": 1500
+        }
+      ],
+      "visual": {
+        "cor": "#d980fa",
+        "conjuracao": "estrelas",
+        "viagem": "brilho",
+        "impacto": "estrelas",
+        "som": "magia"
+      },
+      "elemento": "psiquico",
+      "evolucoes": {
+        "3": [
+          "controle",
+          "brutal"
+        ],
+        "5": [
+          "perfurante",
+          "eco"
+        ]
+      }
+    },
+    {
+      "id": "afinidade_elemental",
+      "nome": "Afinidade elemental",
+      "icone": "✺",
+      "tipoAtaque": "magico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "passiva": {
+        "tag": "elemental",
+        "danoPct": 15
+      }
+    },
+    {
+      "id": "flecha_perfurante",
+      "nome": "Flecha perfurante",
+      "icone": "➶",
+      "tipoAtaque": "fisico",
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "alcanceCelulas": 7,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 3,
+      "recargaMs": 5000,
+      "conjuracaoMs": 600,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 16,
+      "efeitos": [],
+      "visual": {
+        "cor": "#d4ac0d",
+        "viagem": "rastro",
+        "impacto": "faiscas",
+        "som": "projetil"
+      },
+      "mods": [
+        "atravessar"
+      ],
+      "evolucoes": {
+        "3": [
+          "brutal",
+          "longo_alcance"
+        ],
+        "5": [
+          "eco",
+          "eficiente"
+        ]
+      }
+    },
+    {
+      "id": "chuva_de_flechas",
+      "nome": "Chuva de flechas",
+      "icone": "☔",
+      "tipoAtaque": "fisico",
+      "formulaDano": "2d4",
+      "formulaCura": null,
+      "alcanceCelulas": 6,
+      "tipoArea": "quadrado",
+      "raioArea": 1,
+      "custoRecurso": 4,
+      "recargaMs": 7000,
+      "conjuracaoMs": 900,
+      "politicaAlvo": "celula",
+      "politicaImpacto": "area",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "visual": {
+        "cor": "#d4ac0d",
+        "impacto": "faiscas",
+        "camera": "leve",
+        "som": "projetil"
+      },
+      "evolucoes": {
+        "3": [
+          "amplo",
+          "eficiente"
+        ],
+        "5": [
+          "brutal",
+          "elemental_fogo"
+        ]
+      }
+    },
+    {
+      "id": "flecha_venenosa",
+      "nome": "Flecha venenosa",
+      "icone": "🏹",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d6",
+      "formulaCura": null,
+      "alcanceCelulas": 6,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 3,
+      "recargaMs": 6000,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 14,
+      "efeitos": [],
+      "visual": {
+        "cor": "#58d68d",
+        "viagem": "rastro",
+        "impacto": "fumaca",
+        "som": "projetil"
+      },
+      "elemento": "veneno",
+      "evolucoes": {
+        "3": [
+          "controle",
+          "perfurante"
+        ],
+        "5": [
+          "cadeia",
+          "brutal"
+        ]
+      }
+    },
+    {
+      "id": "tiro_em_leque",
+      "nome": "Tiro em leque",
+      "icone": "⋔",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 3,
+      "tipoArea": "cone",
+      "raioArea": 3,
+      "custoRecurso": 4,
+      "recargaMs": 6000,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "visual": {
+        "cor": "#d4ac0d",
+        "impacto": "faiscas",
+        "som": "projetil"
+      },
+      "evolucoes": {
+        "3": [
+          "brutal",
+          "controle"
+        ],
+        "5": [
+          "eficiente",
+          "elemental_gelo"
+        ]
+      }
+    },
+    {
+      "id": "troca_sombria",
+      "nome": "Troca sombria",
+      "icone": "⇄",
+      "tipoAtaque": "magico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 6,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 4,
+      "recargaMs": 12000,
+      "conjuracaoMs": 300,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "trocar_lugar"
+        },
+        {
+          "tipo": "sem_movimento",
+          "duracaoMs": 1000
+        }
+      ],
+      "visual": {
+        "cor": "#8e44ad",
+        "impacto": "fumaca",
+        "som": "magia"
+      },
+      "evolucoes": {
+        "3": [
+          "controle",
+          "eficiente"
+        ],
+        "5": [
+          "longo_alcance",
+          "fortificado"
+        ]
+      }
+    },
+    {
+      "id": "olho_de_aguia",
+      "nome": "Olho de águia",
+      "icone": "🦅",
+      "tipoAtaque": "fisico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "passiva": {
+        "tag": "projetil",
+        "alcance": 1,
+        "danoPct": 5
       }
     }
   ]

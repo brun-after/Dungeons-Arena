@@ -4,7 +4,7 @@
 //   2. os caminhos de evolução (caminhos.json) mexem em dano, custo, recarga, duração, alcance, raio, elemento,
 //      efeitos e modificadores;
 //   3. o elemento acrescenta o seu estado (elementos.json), se a habilidade ainda não o aplica;
-//   4. os modificadores: atravessar (projétil perfura), encadear (2 saltos), maior e mais lenta (raio +1,
+//   4. os modificadores: atravessar (projétil perfura), encadear (2 saltos de 50%), maior e mais lenta (raio +1,
 //      conjuração ×1,5, dano ×1,25) e ecoar (o golpe ecoa 600 ms depois com metade do dano).
 // Modificador que não combina com a habilidade é ignorado e não entra na chave compilada. A memória é por
 // conteúdo e regras de rank: como compilar é puro, ela não muda o digest.
@@ -147,7 +147,7 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
   let raio = b.raioArea;
   let elemento = b.elemento;
   const extras: EfeitoCanonico[] = [];
-  const mods = new Set<Modificador>(op.mods);
+  const mods = new Set<Modificador>([...def.mods, ...op.mods]);
   const caminhosValidos: string[] = [];
   for (const id of op.caminhos) {
     const c = fontes.caminhos.get(id);
@@ -186,7 +186,7 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
   const aplicados = [...mods].filter((m) => modificadorCabe(h, m)).sort();
   for (const m of aplicados) {
     if (m === 'atravessar') h.perfura = true;
-    if (m === 'encadear') h.saltos = { quantidade: 2, raio: 3, pct: 60 };
+    if (m === 'encadear') h.saltos = { quantidade: 2, raio: 3, pct: 50 };
     if (m === 'maior_e_mais_lenta') {
       h.raioArea = Math.min(5, h.raioArea + 1);
       h.conjuracaoMs = Math.round(h.conjuracaoMs * 1.5);

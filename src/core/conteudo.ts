@@ -14,7 +14,8 @@ import livreJson from '../data/modos/livre.json';
 import skillsJson from '../data/skills.json';
 import { lerInteracoes, type Interacoes } from '../combat/acumulo';
 import { lerElementos, type DefinicaoElemento, type Elemento } from '../combat/elementos';
-import { compilarHabilidade, lerCaminhos, type Caminho } from '../combat/compilar-habilidade';
+import { compilarHabilidade, lerCaminhos, type Caminho, type FontesCompilacao } from '../combat/compilar-habilidade';
+import { orcamentoNoNivel, poderDaHabilidade } from '../combat/orcamento';
 import { lerHabilidades, type Catalogo, type DefinicaoHabilidade, type Habilidade } from '../combat/habilidades';
 import { lerClasses, lerPresets, type ClasseJogador, type PresetInimigo } from '../entities/presets';
 import { lerModo, RARIDADES, type ModoDeJogo } from '../modos/modo';
@@ -82,10 +83,20 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   };
   for (const preset of p.presets.values()) conferir(`preset ${preset.id}`, [preset.ataqueBasico, ...preset.habilidades]);
   for (const classe of c.classes.values()) {
-    conferir(`classe ${classe.id}`, [classe.ataqueBasico, ...classe.habilidades]);
+    conferir(`classe ${classe.id}`, [classe.ataqueBasico, ...classe.habilidades, ...classe.aprendiveis]);
+    if (classe.habilidades.length > 4) erros.push(`classe ${classe.id}: no máximo 4 habilidades iniciais (as teclas 1–4)`);
     for (const { id } of classe.itensIniciais) if (!it.itens.has(id)) erros.push(`classe ${classe.id}: item inicial desconhecido "${id}"`);
   }
+  for (const item of it.itens.values()) if (item.ensina !== null) conferir(`item ${item.id}`, [item.ensina]);
   if (!RARIDADES.includes(BALANCE_PADRAO.drops.raridadeMinBoss)) erros.push('balance.json: drops.raridadeMinBoss desconhecida');
+  // Marco 14: o que o jogador alcança (classes e livros) cabe no orçamento de poder, em todo rank e caminho.
+  const jogaveis = new Set<string>();
+  for (const classe of c.classes.values()) for (const id of [...classe.habilidades, ...classe.aprendiveis]) jogaveis.add(id);
+  for (const item of it.itens.values()) if (item.ensina) jogaveis.add(item.ensina);
+  for (const id of jogaveis) {
+    const def = h.definicoes.get(id);
+    if (def && !def.basico) erros.push(...foraDoOrcamento(def, fontesCompilacao));
+  }
   for (const modo of modos.values()) {
     const clamp = modo.clamp;
     if (clamp && clamp.habilidadesPermitidas !== 'qualquer') conferir(`modo ${modo.id}`, clamp.habilidadesPermitidas);
@@ -109,6 +120,26 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
     },
     erros,
   };
+}
+
+/** Todas as combinações de rank e caminhos que passam do orçamento do nível mínimo do rank. */
+export function foraDoOrcamento(def: DefinicaoHabilidade, fontes: FontesCompilacao): string[] {
+  const regras = BALANCE_PADRAO.habilidades;
+  const erros: string[] = [];
+  let combinacoes: string[][] = [[]];
+  for (let rank = 1; rank <= regras.rankMax; rank++) {
+    const opcoes = regras.ranksEvolucao.includes(rank) ? (def.evolucoes[rank] ?? []) : [];
+    if (opcoes.length > 0) combinacoes = combinacoes.flatMap((c) => opcoes.map((o) => [...c, o]));
+    const nivel = Math.max(regras.ranks[rank - 1]?.nivelMinimo ?? 1, def.base.nivelMinimo);
+    const limite = orcamentoNoNivel(nivel, BALANCE_PADRAO.orcamento);
+    for (const caminhos of combinacoes) {
+      const poder = poderDaHabilidade(compilarHabilidade(def, { rank, caminhos, mods: [] }, fontes, regras), BALANCE_PADRAO.orcamento);
+      if (poder > limite + 1e-9) {
+        erros.push(`habilidade ${def.base.id}: rank ${rank} ${caminhos.join('+') || '(base)'} passa do orçamento (${poder.toFixed(2)} > ${limite.toFixed(2)})`);
+      }
+    }
+  }
+  return erros;
 }
 
 export const FONTES_OFICIAIS: FontesDeConteudo = {

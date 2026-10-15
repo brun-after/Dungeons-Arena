@@ -115,6 +115,8 @@ export interface DefinicaoHabilidade {
   basico: boolean;
   /** Caminhos de evolução por rank (3 e 5), escolha definitiva entre 2 ou 3. */
   evolucoes: Readonly<Record<number, readonly string[]>>;
+  /** Modificadores de nascença (ex.: o raio em cadeia sempre encadeia). */
+  mods: readonly Modificador[];
 }
 
 function lerVisual(l: Leitor, v: unknown): VisualHabilidade | null {
@@ -249,13 +251,18 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
     base,
     basico: o.basico === undefined ? false : l.booleano(o, 'basico'),
     evolucoes: lerEvolucoes(l, o.evolucoes),
+    mods: o.mods === undefined ? [] : l.listaDeTextos(o, 'mods').filter((m): m is Modificador => {
+      if ((MODIFICADORES as readonly string[]).includes(m)) return true;
+      l.erro(`modificador desconhecido "${m}"`);
+      return false;
+    }),
   };
 }
 
 const CAMPOS_DEFINICAO = [
   'id', 'nome', 'icone', 'tipoAtaque', 'formulaDano', 'formulaCura', 'alcanceCelulas', 'tipoArea', 'raioArea',
   'custoRecurso', 'recargaMs', 'conjuracaoMs', 'politicaAlvo', 'politicaImpacto', 'interrupcao', 'velocidadeProjetil',
-  'efeitos', 'visual', 'elemento', 'custoVida', 'tags', 'nivelMinimo', 'passiva', 'basico', 'evolucoes',
+  'efeitos', 'visual', 'elemento', 'custoVida', 'tags', 'nivelMinimo', 'passiva', 'basico', 'evolucoes', 'mods',
 ];
 
 export function lerHabilidades(json: unknown): { definicoes: Map<string, DefinicaoHabilidade>; erros: string[] } {

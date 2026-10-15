@@ -151,9 +151,11 @@ describe('preferências', () => {
 });
 
 describe('efeitos visuais como dado (D-055)', () => {
-  it('as 16 habilidades oficiais têm visual; sem o bloco, ele é deduzido', () => {
-    expect(CONTEUDO.habilidades.size).toBe(16);
+  it('as habilidades oficiais (fora as passivas) têm visual; sem o bloco, ele é deduzido', () => {
+    // Marco 14: 16 do marco 12 e 22 do sistema de habilidades.
+    expect(CONTEUDO.habilidades.size).toBe(38);
     for (const h of CONTEUDO.habilidades.values()) {
+      if (h.passiva) continue;
       expect(h.visual).not.toBeNull();
       const v = visualDe(h);
       expect(v.impacto ?? v.conjuracao).not.toBeNull();
