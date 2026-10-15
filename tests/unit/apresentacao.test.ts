@@ -14,7 +14,7 @@ import { digest } from '../../src/core/digest';
 import { criarEstado } from '../../src/core/estado';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import { normalizarPreferencias, PREFERENCIAS_PADRAO } from '../../src/plataforma/preferencias';
-import { ControladorImpacto, IMPACTOS_SIMULTANEOS } from '../../src/render/impacto';
+import { ControladorImpacto, IMPACTOS_SIMULTANEOS, RECEITAS } from '../../src/render/impacto';
 import { MonitorDeQualidade, PRESETS_QUALIDADE, qualidadePadrao } from '../../src/render/qualidade';
 import { visualDe } from '../../src/render/visual-habilidade';
 import { validarFase } from '../../src/world/validacao-fase';
@@ -172,6 +172,23 @@ describe('efeitos visuais como dado (D-055)', () => {
     expect(c.quadro(310).dx).not.toBe(0);
     ligado = false;
     expect(c.quadro(320)).toMatchObject({ dx: 0, dy: 0, flash: 0, congelado: false });
+  });
+});
+
+describe('intensidade dos efeitos de tela (ajuste de 14/10/2026)', () => {
+  it('tremor e flash pela metade: o forte treme até 4,5 px e pisca até 0,11', () => {
+    expect(RECEITAS).toMatchObject({ leve: { tremorPx: 2 }, forte: { tremorPx: 4.5, flash: 0.11 }, dano: { tremorPx: 2.5, flash: 0.09 } });
+    const c = new ControladorImpacto(() => true);
+    c.pedir('forte', 0);
+    let maxTremor = 0;
+    let maxFlash = 0;
+    for (let t = 0; t < 300; t += 5) {
+      const q = c.quadro(t);
+      maxTremor = Math.max(maxTremor, Math.abs(q.dx), Math.abs(q.dy));
+      maxFlash = Math.max(maxFlash, q.flash);
+    }
+    expect(maxTremor).toBeLessThanOrEqual(4.5);
+    expect(maxFlash).toBeLessThanOrEqual(0.11);
   });
 });
 

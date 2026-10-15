@@ -114,7 +114,8 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     const eu = estado.entidades.find((e) => e.id === idLocal);
     if (eu) {
       const p = posicao(eu);
-      pontos.push({ x: p.x, y: p.y, cor: 0xffd9a0, semente: 0 });
+      // Ajuste de 14/10/2026: o brilho em volta do jogador pela metade (feedback de jogo).
+      pontos.push({ x: p.x, y: p.y, cor: 0xffd9a0, semente: 0, intensidade: 0.5 });
     }
     for (const obj of estado.objetos) {
       if (obj.tipo === 'loja' || obj.tipo === 'bau' || obj.tipo === 'saida') pontos.push({ x: obj.x, y: obj.y, cor: 0xffc070, semente: obj.x * 31 + obj.y });
