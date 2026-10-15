@@ -15,6 +15,8 @@ export interface FonteDeDano {
   carisma: number;
   /** Marco 8A: `bonus_dano` e `modificar_dano` do atacante, no momento do lançamento. */
   multDano: number;
+  /** Marco 14: rank, caminhos e perfil multiplicam a cura da habilidade. */
+  multCura: number;
 }
 
 export interface RegrasDano {
@@ -36,6 +38,8 @@ export interface ResultadoGolpe {
 export interface AlvoDoGolpe {
   defesa: number;
   imune: boolean;
+  /** Marco 14: exposto, resistência ao elemento e sinergias (1 = neutro). */
+  multRecebido?: number;
 }
 
 export function resolverGolpe(
@@ -52,6 +56,6 @@ export function resolverGolpe(
   const base = { rolagem, d20, mult, critico: mult > 1 };
   if (mult === 0) return { ...base, dano: 0, falha: true, imune: false };
   if (alvo.imune) return { ...base, dano: 0, falha: false, imune: true };
-  const bruto = ((rolagem + fonte.bonusAtributo) * mult - alvo.defesa) * multiplicadorSaida;
+  const bruto = ((rolagem + fonte.bonusAtributo) * mult - alvo.defesa) * multiplicadorSaida * (alvo.multRecebido ?? 1);
   return { ...base, dano: Math.max(1, Math.round(bruto)), falha: false, imune: false };
 }

@@ -86,6 +86,22 @@ export const MODELOS = {
     quadros: 2,
     desenhar: bipede({ pele: 0xf0c8a0, roupa: 0x2e86c1, olho: 0x1b2631, perna: 15, tronco: 14, ombro: 8.5, quadril: 6.5, cabeca: 7, escudo: 0x8a6d3b, arma: 'espada' }),
   },
+  // Marco 14: as classes jogáveis (2 quadros por vista, §2.16).
+  guerreiro: {
+    estilo: 'marcha',
+    quadros: 2,
+    desenhar: bipede({ pele: 0xe8b98f, roupa: 0x7f8c8d, olho: 0x1b2631, perna: 15, tronco: 15, ombro: 10, quadril: 7, cabeca: 7, escudo: 0xb03a2e, arma: 'machado', capa: 0x922b21 }),
+  },
+  mago: {
+    estilo: 'deslizar',
+    quadros: 2,
+    desenhar: bipede({ pele: 0xf3d2b3, roupa: 0x2e4a8c, olho: 0x1b2631, perna: 17, tronco: 13, ombro: 7.5, quadril: 6, cabeca: 7, veste: true, chapeu: 0x24396b, arma: 'cajado' }),
+  },
+  arqueiro: {
+    estilo: 'passada',
+    quadros: 2,
+    desenhar: bipede({ pele: 0xd9a77a, roupa: 0x27632a, olho: 0x1b2631, perna: 15, tronco: 14, ombro: 8, quadril: 6, cabeca: 7, capuz: 0x1e5631, arma: 'arco' }),
+  },
 } as const satisfies Readonly<Record<string, DefinicaoModelo>>;
 
 export type NomeModelo = keyof typeof MODELOS;

@@ -41,6 +41,8 @@ export interface OpcoesInimigo {
   nivel?: number;
   /** Override de HP base da instância (§2.5: precede o da fase e o do preset). */
   hpBase?: number;
+  /** Marco 14: habilidades a mais da instância (as geradas por semente nas fases geradas). */
+  habilidadesExtras?: readonly string[];
 }
 
 export function criarInimigo(
@@ -62,7 +64,7 @@ export function criarInimigo(
     hpMax: hpMaximo(opcoes.hpBase ?? preset.hpBase, 10, balance.hp.hpAtributoMult, balance.hp.dificuldadeMult),
     manaMax: manaMaxima(10),
     ataqueBasico: preset.ataqueBasico,
-    habilidades: preset.habilidades,
+    habilidades: [...preset.habilidades, ...(opcoes.habilidadesExtras ?? [])],
     autoAtaque: false,
     preset: preset.id,
     arquetipo: preset.arquetipo,

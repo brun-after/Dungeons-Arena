@@ -239,8 +239,9 @@ describe('personagem por imagem', () => {
 describe('atlas dos modelos (gerado no build)', () => {
   const atlas = gerarAtlas();
 
-  it('todo modelo dos presets e o do jogador existem, nas duas vistas', () => {
-    const usados = new Set([...CONTEUDO.presets.values()].map((p) => p.modelo));
+  it('todo modelo dos presets, das classes e o do jogador existem, nas duas vistas', () => {
+    // Marco 14: os modelos das classes jogáveis também.
+    const usados = new Set([...[...CONTEUDO.presets.values()].map((p) => p.modelo), ...[...CONTEUDO.classes.values()].map((c) => c.modelo)]);
     for (const m of [...usados, MODELO_JOGADOR]) {
       expect(ehModelo(m), m).toBe(true);
       if (!ehModelo(m)) continue;

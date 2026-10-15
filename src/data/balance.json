@@ -1,5 +1,5 @@
 {
-  "versao": 13,
+  "versao": 14,
   "movimento": {
     "velocidadeBaseMs": 400,
     "filaMaxWaypoints": 2
@@ -115,6 +115,61 @@
   "inventario": {
     "capacidade": 20,
     "pilhaMax": 10
+  },
+  "habilidades": {
+    "pontosPorNivel": 1,
+    "rankMax": 5,
+    "ranksEvolucao": [3, 5],
+    "ranks": [
+      { "nivelMinimo": 1, "danoPct": 0, "efeitoPct": 0 },
+      { "nivelMinimo": 3, "danoPct": 15, "efeitoPct": 10 },
+      { "nivelMinimo": 6, "danoPct": 30, "efeitoPct": 20 },
+      { "nivelMinimo": 10, "danoPct": 50, "efeitoPct": 35 },
+      { "nivelMinimo": 15, "danoPct": 75, "efeitoPct": 50 }
+    ]
+  },
+  "orcamento": {
+    "base": 6,
+    "porNivel": 0.7,
+    "geradaPct": 85,
+    "fatorForma": {
+      "contato": 1,
+      "projetil": 1,
+      "perfura": 1.4,
+      "quadradoPorRaio": 0.6,
+      "linha": 1.4,
+      "cone": 1.2,
+      "conePorRaio": 0.2,
+      "aoRedorPorRaio": 0.5,
+      "aliados": 1.5
+    },
+    "pesos": {
+      "controlePorS": 6,
+      "travaPorS": 3,
+      "periodico": 0.5,
+      "escudo": 0.6,
+      "buffPorPctS": 0.02,
+      "deslocamentoPorCelula": 2,
+      "teleporte": 4,
+      "troca": 4,
+      "invocacao": 10,
+      "cura": 0.8,
+      "recurso": 0.5,
+      "imunePorS": 5,
+      "marca": 1,
+      "atrasado": 0.9,
+      "rastro": 3,
+      "dominar": 5,
+      "armadilha": 0.8
+    }
+  },
+  "geracao": {
+    "chanceInimigo": 0.3,
+    "chancePorNivel": 0.03,
+    "chanceMax": 0.75,
+    "habilidadesBoss": 2,
+    "chanceSecundario": 0.4,
+    "chanceLivroRaro": 0.04
   },
   "ia": {
     "patrulhaAvaliacaoMs": 2000,

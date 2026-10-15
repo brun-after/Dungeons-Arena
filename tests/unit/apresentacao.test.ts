@@ -75,10 +75,11 @@ describe('áudio: mapeamento e música', () => {
     const hab = (id: string) => CONTEUDO.habilidades.get(id);
     expect(sonsDoEvento({ t: 'coletou', tick: 0, id: 'j', objetoId: 'o', tipo: 'ouro', ganho: 5, itemId: null }, 'j', hab)).toEqual([{ som: 'moeda', origemId: null }]);
     expect(sonsDoEvento({ t: 'coletou', tick: 0, id: 'k', objetoId: 'o', tipo: 'ouro', ganho: 5, itemId: null }, 'j', hab)).toEqual([]);
-    const impacto = { t: 'impacto', tick: 0, acaoId: 1, fonteId: 'j', alvoId: 'g', habilidadeId: 'golpe', dano: 5, cura: 0, d20: 15, mult: 1.2, falha: false, critico: false, imune: false, indice: 0 } as const;
-    expect(sonsDoEvento(impacto, 'j', hab)).toEqual([{ som: 'acerto', origemId: 'g' }]);
-    expect(sonsDoEvento({ ...impacto, critico: true }, 'j', hab)).toEqual([{ som: 'critico', origemId: 'g' }]);
-    expect(sonsDoEvento({ ...impacto, falha: true }, 'j', hab)).toEqual([{ som: 'falha', origemId: 'g' }]);
+    const impacto = { t: 'impacto', tick: 0, acaoId: 1, fonteId: 'j', alvoId: 'g', habilidadeId: 'golpe', chave: 'golpe', dano: 5, cura: 0, d20: 15, mult: 1.2, falha: false, critico: false, imune: false, indice: 0 } as const;
+    const comSinergias = { ...impacto, sinergias: [] as string[] };
+    expect(sonsDoEvento(comSinergias, 'j', hab)).toEqual([{ som: 'acerto', origemId: 'g' }]);
+    expect(sonsDoEvento({ ...comSinergias, critico: true }, 'j', hab)).toEqual([{ som: 'critico', origemId: 'g' }]);
+    expect(sonsDoEvento({ ...comSinergias, falha: true }, 'j', hab)).toEqual([{ som: 'falha', origemId: 'g' }]);
   });
 
   it('a mesma fase compõe a mesma música; climas e fases diferentes, músicas diferentes', () => {
@@ -150,9 +151,11 @@ describe('preferências', () => {
 });
 
 describe('efeitos visuais como dado (D-055)', () => {
-  it('as 16 habilidades oficiais têm visual; sem o bloco, ele é deduzido', () => {
-    expect(CONTEUDO.habilidades.size).toBe(16);
+  it('as habilidades oficiais (fora as passivas) têm visual; sem o bloco, ele é deduzido', () => {
+    // Marco 14: 16 do marco 12 e 22 do sistema de habilidades.
+    expect(CONTEUDO.habilidades.size).toBe(38);
     for (const h of CONTEUDO.habilidades.values()) {
+      if (h.passiva) continue;
       expect(h.visual).not.toBeNull();
       const v = visualDe(h);
       expect(v.impacto ?? v.conjuracao).not.toBeNull();

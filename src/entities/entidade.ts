@@ -10,7 +10,8 @@ import type { Slot } from '../modos/modo';
 export type TipoEntidade = 'jogador' | 'inimigo' | 'invocacao' | 'avatar';
 export type EquipeId = string;
 export type TipoControlador = 'local' | 'remoto' | 'ia';
-export type ClasseCombate = 'corpo_a_corpo' | 'conjurador';
+/** Marco 14: `atirador` soma a Destreza ao dano (arqueiro). */
+export type ClasseCombate = 'corpo_a_corpo' | 'conjurador' | 'atirador';
 export type Arquetipo = 'jogador' | 'perseguidor' | 'atirador' | 'controlador' | 'boss' | 'boneco';
 
 export interface Atributos {
@@ -35,6 +36,9 @@ export interface EfeitoAtivo {
   /** Marco 8A-2: o efeito carregado (rastro de efeito) e a referência (preset); null nos demais. */
   interno: EfeitoCanonico | null;
   ref: string | null;
+  /** Marco 14: quando começou (o anel de duração do HUD) e quantos acúmulos tem (regra `soma`). */
+  inicioTick: number;
+  acumulos: number;
 }
 
 /** Comportamento da invocação (§2.9, marco 10A-3). */
@@ -60,6 +64,8 @@ export interface DadosInvocacao {
 export interface AcaoEmCurso {
   acaoId: number;
   habilidadeId: string;
+  /** Marco 14: a chave compilada (rank, caminhos e modificadores do momento da conjuração). */
+  chave: string;
   alvoId: EntidadeId | null;
   /** Célula mirada (área) ou célula do alvo no início. */
   alvoX: number;
@@ -106,6 +112,18 @@ export interface ItemNaMochila {
   invId: string;
   itemId: string;
   qtd: number;
+  /** Marco 14: o conteúdo do livro raro (o id da habilidade gerada); null nos demais. */
+  ref: string | null;
+}
+
+/** Marco 14: teclas 1–4 da barra de habilidades. */
+export const SLOTS_BARRA = 4;
+
+/** Marco 14: uma habilidade que o personagem conhece, no rank e com os caminhos escolhidos (definitivos). */
+export interface HabilidadeConhecida {
+  id: string;
+  rank: number;
+  caminhos: string[];
 }
 
 /**
@@ -123,6 +141,12 @@ export interface Bolsa {
   proximoInv: number;
   /** Marco 9A: moeda única (§2.10). Nunca negativa. */
   ouro: number;
+  /** Marco 14 (D-059): a classe escolhida ao criar o personagem (fixa). */
+  classeId: string;
+  conhecidas: HabilidadeConhecida[];
+  /** As 4 teclas (1–4): ids de habilidades conhecidas, ou null. `Entidade.habilidades` deriva daqui. */
+  barra: (string | null)[];
+  pontosHabilidade: number;
 }
 
 /**
@@ -327,6 +351,8 @@ function clonarBolsa(b: Bolsa): Bolsa {
       ItemNaMochila | null
     >,
     mochila: b.mochila.map((i) => ({ ...i })),
+    conhecidas: b.conhecidas.map((c) => ({ ...c, caminhos: [...c.caminhos] })),
+    barra: [...b.barra],
   };
 }
 

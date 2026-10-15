@@ -34,3 +34,9 @@ export function podeFerir(a: Lado, b: Lado, modo: Pick<ModoDeJogo, 'politicaRela
   const r = relacao(a, b, modo);
   return r === 'hostil' || (r === 'aliado' && modo.fogoAmigo);
 }
+
+/** Marco 14: pode ajudar `b` (curar, proteger, fortalecer)? O próprio e os aliados, pela relação do modo. */
+export function podeAjudar(a: Lado, b: Lado, modo: Pick<ModoDeJogo, 'politicaRelacao'>): boolean {
+  const r = relacao(a, b, modo);
+  return r === 'proprio' || r === 'aliado';
+}

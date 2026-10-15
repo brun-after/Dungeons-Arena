@@ -3,10 +3,14 @@
 // (simulação local ou cliente de rede) e para onde vão os comandos.
 // Marco 12 (14/10/2026): áudio, efeitos, luz, minimapa, prompt, pausa e configurações (ui/apresentacao.ts).
 // Marco 13 (14/10/2026): visão de cima ou isométrica (ui/visao.ts), modelos de criatura e token por imagem.
+// Marco 14 (14/10/2026): a barra de habilidades segue a barra escolhida do jogador (compilada pela chave dele)
+// e os efeitos do HUD ganham duração e cartão.
 
 import { recargaRestante } from '../combat/acao';
 import { celulaOcupada } from '../combat/geometria';
 import type { Habilidade } from '../combat/habilidades';
+import { resolverHabilidade } from '../combat/compilar-habilidade';
+import { habilidadeDoAtor } from '../combat/perfil';
 import type { Celula, Comando } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
@@ -54,7 +58,6 @@ export interface OpcoesCena {
   raiz: HTMLElement;
   ctx: ContextoSimulacao;
   idLocal: string;
-  habilidades: readonly Habilidade[];
   /** Estado atual a desenhar (a arena troca o objeto a cada reconciliação). */
   estado: () => EstadoJogo;
   emitir: (cmd: Comando) => void;
@@ -127,7 +130,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     bus,
     estado: o.estado,
     idLocal,
-    habilidades: ctx.conteudo.habilidades,
+    habilidades: (chave) => resolverHabilidade(ctx, chave),
     toque,
     pausaOJogo: o.pausaOJogo ?? false,
     acoesDaPausa: o.acoesDaPausa ?? [],
@@ -195,8 +198,20 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     emitir(hostil ? { t: 'selecionarAlvo', alvo: hostil.id } : { t: 'irPara', x: c.x, y: c.y });
   };
 
-  const hud = new Hud(ui);
-  const barra = criarBarraHabilidades(o.habilidades, usarHabilidade);
+  const hud = new Hud(ui, (id) => o.estado().entidades.find((e) => e.id === id)?.nome ?? null);
+  const corDoElemento = (h: Habilidade) => (h.elemento ? (ctx.conteudo.elementos.get(h.elemento)?.cor ?? null) : null);
+  const barra = criarBarraHabilidades(usarHabilidade, corDoElemento);
+  // Marco 14: a barra é a do jogador (teclas 1–4), refeita quando muda (rank, caminho ou troca de tecla).
+  let habilidadesDaBarra: Habilidade[] = [];
+  let chaveDaBarra = '';
+  const sincronizarBarra = (j: Entidade) => {
+    const habs = j.habilidades.map((id) => habilidadeDoAtor(ctx, j, id)).filter((h): h is Habilidade => h !== undefined);
+    const chave = habs.map((h) => h.chave).join('|');
+    if (chave === chaveDaBarra) return;
+    chaveDaBarra = chave;
+    habilidadesDaBarra = habs;
+    barra.definir(habs);
+  };
   // Marco 6: mochila e ficha. Ao abrir, o jogador para; enquanto aberta, o teclado não chega ao jogo.
   let teclado: Teclado | null = null;
   const mochila = criarMochila({
@@ -294,7 +309,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
         usarAtalhoDeConsumivel(indice - ATALHOS_DE_HABILIDADE);
         return;
       }
-      const h = o.habilidades[indice];
+      const h = habilidadesDaBarra[indice];
       if (h) usarHabilidade(h.id);
     },
     aoInteragir: () => {
@@ -332,6 +347,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     aviso: (texto) => {
       mostrarAviso(ui, texto);
     },
+    nomeDaHabilidade: (id) => resolverHabilidade(ctx, id)?.nome ?? id,
   });
 
   let ultimoQuadroMs = performance.now();
@@ -352,12 +368,13 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       }
       camera.seguirCelula({ x: j.x, y: j.y });
       camera.atualizar(dtS, q.posicao(j), velocidade(j.atributos.destreza, ctx.balance.movimento.velocidadeBaseMs));
+      sincronizarBarra(j);
       barra.atualizar((h) => ({
         recarga: h.recargaMs > 0 ? recargaRestante(estado, j.id, h.id) / ticksDe(h.recargaMs) : 0,
         semMana: j.mana < h.custoRecurso,
       }));
     }
-    hud.atualizar(j);
+    hud.atualizar(j, estado.tick);
     mochila.atualizar();
     loja.atualizar();
     if (q.rede) hud.mostrarRede(q.rede);

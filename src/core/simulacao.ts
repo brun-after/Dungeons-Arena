@@ -16,6 +16,7 @@ import { vivo } from '../entities/entidade';
 import { processarIa } from '../entities/ia';
 import { descansar } from '../progression/descanso';
 import { desequipar, distribuirPonto, equipar, moverItem, usarItem } from '../progression/inventario';
+import { equiparHabilidade, subirRank } from '../progression/habilidades-personagem';
 import { comprar, vender } from '../progression/loja';
 import { processarMortes } from '../progression/morte';
 import { regenerarRecursos } from '../progression/recursos';
@@ -119,6 +120,13 @@ function aplicarComandos(
       // Marco 10A-3: dispensa das invocações (§2.9).
       case 'dispensar':
         dispensarInvocacoes(estado, ator, saida);
+        break;
+      // Marco 14: ranks, caminhos e a barra de habilidades.
+      case 'subirRank':
+        subirRank(ator, ctx, cmd.id, cmd.caminho, estado.tick, saida);
+        break;
+      case 'equiparHabilidade':
+        equiparHabilidade(ator, ctx, cmd.id, cmd.slot, estado.tick, saida);
         break;
     }
   }

@@ -2,7 +2,7 @@
 // (com volume pela distância e pan pela posição em relação ao jogador); passos saem do `moveu`; a música
 // segue o clima (exploração, combate, chefe); as fontes sonoras da fase tocam em laço pelo alcance.
 
-import type { Catalogo, Habilidade } from '../combat/habilidades';
+import type { BuscaHabilidade } from '../combat/habilidades';
 import type { EstadoJogo } from '../core/estado';
 import type { Barramento } from '../core/events';
 import type { EventosDaSimulacao } from '../core/eventos-simulacao';
@@ -18,7 +18,7 @@ export interface OpcoesSom {
   bus: Barramento<EventosDaSimulacao>;
   estado: () => EstadoJogo;
   idLocal: string;
-  habilidades: Catalogo<Habilidade>;
+  habilidades: BuscaHabilidade;
   fase: Fase;
 }
 
@@ -39,7 +39,7 @@ export function ligarSom(o: OpcoesSom): { quadro: (ouvinte: PontoVisual | null, 
 
   // Um ouvinte genérico para todos os eventos: só traduz e toca.
   const aoEvento = (ev: Parameters<typeof sonsDoEvento>[0]) => {
-    for (const p of sonsDoEvento(ev, idLocal, (id) => o.habilidades.get(id))) tocarEm(p.som, p.origemId);
+    for (const p of sonsDoEvento(ev, idLocal, o.habilidades)) tocarEm(p.som, p.origemId);
   };
   for (const t of [
     'acaoIniciada',

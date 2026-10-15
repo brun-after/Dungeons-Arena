@@ -263,6 +263,12 @@ function validarInimigos(
       if (typeof i.hpBase === 'number' && i.hpBase >= 1) item.hpBase = i.hpBase;
       else erros.push({ mensagem: 'hpBase do inimigo inválido', x: i.x, y: i.y });
     }
+    // Marco 14: habilidades a mais da instância (ids do catálogo ou geradas, `g_…`).
+    if (i.habilidades !== undefined) {
+      const ids = Array.isArray(i.habilidades) ? i.habilidades : null;
+      if (ids?.every((h): h is string => typeof h === 'string' && /^[a-z0-9_]+$/.test(h)) && ids.length <= 4) item.habilidades = [...ids];
+      else erros.push({ mensagem: 'habilidades do inimigo inválidas', x: i.x, y: i.y });
+    }
     lista.push(item);
   }
   return lista;

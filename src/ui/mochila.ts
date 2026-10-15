@@ -3,6 +3,7 @@
 // tem o seu botão. A lista é redesenhada só quando a bolsa, o nível ou o XP mudam.
 // Marco 9A (14/10/2026): ouro, ordenação manual (▲▼, persistida no save) e a tecla de atalho de
 // cada consumível (5–9 e 0, D-050).
+// Marco 14 (14/10/2026): a aba Habilidades (ui/mochila-habilidades.ts) e os livros (usar ensina).
 
 import type { Comando } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -15,6 +16,8 @@ import { derivarFicha } from '../progression/derivados';
 import { NOMES_ATRIBUTOS, type Item } from '../progression/itens';
 import { consumiveisComAtalho } from '../progression/inventario';
 import { xpParaProximo } from '../progression/nivel';
+import { resolverHabilidade } from '../combat/compilar-habilidade';
+import { desenharHabilidades, type EstadoAbaHabilidades } from './mochila-habilidades';
 import { criarModal } from './modal';
 
 export interface OpcoesMochila {
@@ -40,7 +43,7 @@ export interface Mochila {
   atualizar: () => void;
 }
 
-type Aba = 'itens' | 'ficha';
+type Aba = 'itens' | 'ficha' | 'habilidades';
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, texto?: string): HTMLElementTagNameMap[K] {
   const e = document.createElement(tag);
@@ -67,7 +70,7 @@ export function resumoDoItem(item: Item): string {
     partes.push(`${t(`atributoCurto.${nome}` as ChaveTexto)} ${sinal}${b.valor}${b.modo === 'pct' ? '%' : ''}`);
   }
   if (item.bonusDefesa !== 0) partes.push(`${t('atributoCurto.defesa')} ${item.bonusDefesa > 0 ? '+' : ''}${item.bonusDefesa}`);
-  if (item.tipo === 'consumivel') partes.push(item.descricao);
+  if (item.tipo === 'consumivel' || item.tipo === 'livro') partes.push(item.descricao);
   return partes.join(' · ');
 }
 
@@ -76,6 +79,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
   const itens = ctx.conteudo.itens;
   let aba: Aba = 'itens';
   let assinatura = '';
+  const estadoHabilidades: EstadoAbaHabilidades = { escolhendo: null };
   let rotuloBotao = '';
 
   const modal = criarModal({
@@ -216,7 +220,8 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     atalho: string | undefined,
   ): HTMLLIElement => {
     const item = itens.get(entrada.itemId);
-    const consumivel = item?.tipo === 'consumivel';
+    // Marco 14: livro também se usa (ensina a habilidade).
+    const consumivel = item?.tipo === 'consumivel' || item?.tipo === 'livro';
     const slot: Slot | null = item?.slotPadrao ?? null;
     const acao = consumivel
       ? () => { agir({ t: 'usarItem', invId: entrada.invId }); }
@@ -224,11 +229,13 @@ export function criarMochila(o: OpcoesMochila): Mochila {
         ? () => { agir({ t: 'equipar', invId: entrada.invId, slot }); }
         : null;
     const bloqueio = item && j.nivel < item.nivelMinimo ? t('mochila.requerNivel', { nivel: item.nivelMinimo }) : null;
+    // O livro raro mostra a habilidade gerada que ensina.
+    const ensinada = entrada.ref ? resolverHabilidade(ctx, entrada.ref) : undefined;
     return linhaItem({
       chave: `inv-${entrada.invId}`,
       item,
       qtd: entrada.qtd,
-      rotulo: item?.nome ?? entrada.itemId,
+      rotulo: ensinada ? `${item?.nome ?? entrada.itemId}: ${ensinada.nome}` : (item?.nome ?? entrada.itemId),
       acao,
       textoAcao: consumivel ? t('mochila.usar') : t('mochila.equipar'),
       bloqueio,
@@ -314,8 +321,10 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     for (const [id, chave] of [
       ['itens', 'mochila.abaItens'],
       ['ficha', 'mochila.abaFicha'],
+      ['habilidades', 'habilidades.aba'],
     ] as const) {
-      const rotulo = id === 'ficha' && j.bolsa.pontosAtributo > 0 ? `${t(chave)} •` : t(chave);
+      const comPontos = (id === 'ficha' && j.bolsa.pontosAtributo > 0) || (id === 'habilidades' && j.bolsa.pontosHabilidade > 0);
+      const rotulo = comPontos ? `${t(chave)} •` : t(chave);
       const b = botao(rotulo, `aba-${id}`, () => {
         aba = id;
         desenhar();
@@ -326,7 +335,8 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     corpo.append(abas);
     const conteudo = el('div', 'conteudo-modal');
     if (aba === 'itens') desenharItens(j, conteudo);
-    else desenharFicha(j, conteudo);
+    else if (aba === 'ficha') desenharFicha(j, conteudo);
+    else desenharHabilidades(conteudo, j, ctx, emitir, estadoHabilidades, desenhar);
     corpo.append(conteudo);
     if (focoAntes) corpo.querySelector<HTMLElement>(`[data-chave="${CSS.escape(focoAntes)}"]`)?.focus();
   };
@@ -338,7 +348,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
       return;
     }
     botaoAbrir.hidden = false;
-    const pontos = j.bolsa.pontosAtributo > 0;
+    const pontos = j.bolsa.pontosAtributo > 0 || j.bolsa.pontosHabilidade > 0;
     const rotulo = `🎒 ${t('mochila.nivelCurto', { nivel: j.nivel })} · ${t('mochila.ouro', { ouro: j.bolsa.ouro })}${pontos ? ' •' : ''}`;
     if (rotulo !== rotuloBotao) {
       rotuloBotao = rotulo;

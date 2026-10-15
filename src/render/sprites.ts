@@ -161,7 +161,9 @@ export class CamadaEntidades {
     if (token) return { fonte: iso ? token.emPe : token.cima, estilo: 'passada', proprio: true };
     const biblioteca = this.o.biblioteca();
     if (!biblioteca) return null;
-    const nome = ctx.conteudo.presets.get(e.preset)?.modelo ?? (e.arquetipo === 'jogador' ? MODELO_JOGADOR : '');
+    // Marco 14: o jogador usa o modelo da classe (sem bolsa — arena — o aventureiro).
+    const classe = e.bolsa ? ctx.conteudo.classes.get(e.bolsa.classeId)?.modelo : undefined;
+    const nome = ctx.conteudo.presets.get(e.preset)?.modelo ?? (e.arquetipo === 'jogador' ? (classe ?? MODELO_JOGADOR) : '');
     if (!ehModelo(nome)) return null;
     const m = MODELOS[nome];
     const quadro = m.quadros > 1 && andando ? Math.floor(quadroMs / QUADRO_MS) % m.quadros : 0;

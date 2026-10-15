@@ -2,13 +2,17 @@
 // vibração. Só reage a eventos já publicados; nunca muda o estado (§3.3).
 // Marco 6: coleta, uso e equipamento de itens, recusas da mochila e subida de nível.
 // Marco 9A (14/10/2026): ouro, baú e loja.
+// Marco 14 (14/10/2026): sinergias de elemento (texto no alvo e no registro), aviso ao ganhar um efeito (o que
+// faz, no máximo um por tipo por segundo), habilidade aprendida ou com rank novo e recusas da aba Habilidades.
 
 import type { Catalogo } from '../combat/habilidades';
 import type { EstadoJogo } from '../core/estado';
 import type { Barramento } from '../core/events';
 import type { EventosDaSimulacao } from '../core/eventos-simulacao';
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
+import { DT_MS } from '../core/loop';
 import { t, type ChaveTexto } from '../i18n';
+import { descreverEfeito, nomeDoEfeito } from './descrever';
 import { vibrar } from '../plataforma/dispositivo';
 import type { Item } from '../progression/itens';
 import { ESCALONAMENTO_MS, type CamadaNumeros } from '../render/numeros';
@@ -25,7 +29,12 @@ export interface OpcoesFeedback {
   itens: Catalogo<Item>;
   /** Aviso curto e não bloqueante (toast). */
   aviso: (texto: string) => void;
+  /** Marco 14: o nome de uma habilidade pelo id (catálogo ou gerada). */
+  nomeDaHabilidade?: (id: string) => string;
 }
+
+/** Intervalo mínimo entre dois avisos do mesmo efeito (marco 14). */
+const AVISO_EFEITO_MS = 1000;
 
 export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
   const { bus, estado, idLocal, numeros, hud } = o;
@@ -61,6 +70,16 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
       }
     }
   });
+  // Marco 14: sinergia de elemento disparada — o nome sobe do alvo e entra no registro.
+  bus.on('impacto', (ev) => {
+    if (ev.sinergias.length === 0) return;
+    const alvo = posicao(ev.alvoId);
+    for (const s of ev.sinergias) {
+      const texto = t(`sinergia.${s}` as ChaveTexto);
+      if (alvo) numeros.mostrar(texto, 'critico', alvo.x, alvo.y, o.agora(), ESCALONAMENTO_MS);
+      if (ev.fonteId === idLocal || ev.alvoId === idLocal) hud.registrar(t('log.sinergia', { nome: texto, alvo: nome(ev.alvoId) }));
+    }
+  });
   bus.on('esquivou', (ev) => {
     const alvo = posicao(ev.alvoId);
     if (alvo) numeros.mostrar(t('numero.esquiva'), 'esquiva', alvo.x, alvo.y, o.agora());
@@ -77,10 +96,31 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
     if (ev.motivo === 'interrompido') hud.registrar(t('log.interrompido', { ator: nome(ev.atorId) }));
   });
   // Marco 8A: todo status aplicado em você ou por você entra no registro; números vêm do resultado.
+  const ultimoAviso = new Map<string, number>();
   bus.on('efeitoAplicado', (ev) => {
     const d = REGISTRO_EFEITOS[ev.tipo];
     if (!d.ehStatus || (ev.alvoId !== idLocal && ev.origemId !== idLocal)) return;
     hud.registrar(t('log.efeito', { alvo: nome(ev.alvoId), efeito: t(`efeito.${ev.tipo}` as ChaveTexto) }));
+    // Marco 14: em você, o aviso diz o que o efeito faz (com os números e o tempo que falta).
+    if (ev.alvoId !== idLocal) return;
+    const agora = o.agora();
+    if (agora - (ultimoAviso.get(ev.tipo) ?? -Infinity) < AVISO_EFEITO_MS) return;
+    ultimoAviso.set(ev.tipo, agora);
+    const f = estado().entidades.find((x) => x.id === idLocal)?.efeitos.find((x) => x.tipo === ev.tipo);
+    if (!f) return;
+    o.aviso(t('aviso.efeitoGanho', { nome: nomeDoEfeito(ev.tipo), desc: descreverEfeito({ ...f, duracaoMs: (f.ateTick - ev.tick) * DT_MS }) }));
+  });
+  // Marco 14: habilidades aprendidas e ranks novos.
+  bus.on('habilidadeMudou', (ev) => {
+    if (ev.id !== idLocal) return;
+    const nomeHab = o.nomeDaHabilidade?.(ev.habilidadeId) ?? ev.habilidadeId;
+    const texto = ev.rank === 1 ? t('log.habilidadeAprendida', { nome: nomeHab }) : t('log.habilidadeMudou', { nome: nomeHab, rank: ev.rank });
+    hud.registrar(texto);
+    o.aviso(texto);
+  });
+  bus.on('habilidadeRecusada', (ev) => {
+    if (ev.id !== idLocal) return;
+    hud.registrar(t(`habilidades.motivo.${ev.motivo}` as ChaveTexto, { nivel: '?' }));
   });
   // Marco 8A-2: invocação, dominação e armadilha.
   bus.on('invocou', (ev) => {

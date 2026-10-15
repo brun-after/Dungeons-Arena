@@ -32,7 +32,11 @@ export type Comando =
   /** Marco 10A-2: descanso (§2.12, só onde o modo permite). */
   | { t: 'descansar'; tipo: 'curto' | 'longo' }
   /** Marco 10A-3: dispensa as próprias invocações (§2.9). */
-  | { t: 'dispensar' };
+  | { t: 'dispensar' }
+  /** Marco 14: sobe o rank (ou aprende, do 0 para o 1); nos ranks de evolução, com o caminho escolhido. */
+  | { t: 'subirRank'; id: string; caminho?: string }
+  /** Marco 14: põe uma habilidade conhecida numa das 4 teclas (null limpa a tecla). */
+  | { t: 'equiparHabilidade'; id: string | null; slot: number };
 
 /** Envelope de rede. O servidor deriva o jogador da sessão e atribui o tick de aplicação. */
 export interface ComandoEmpacotado {

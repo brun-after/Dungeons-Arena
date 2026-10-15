@@ -39,6 +39,7 @@ export function novoObjeto(objetoId: string, tipo: TipoObjeto, x: number, y: num
     chave: null,
     abertoTick: 0,
     abridorId: null,
+    ref: null,
     ...campos,
   };
 }
@@ -69,7 +70,7 @@ export function coletarObjetos(estado: EstadoJogo, ctx: ContextoSimulacao, saida
     if (o.tipo === 'item') {
       // Item: só quem tem mochila com espaço para a quantidade toda; senão fica no chão (§2.10).
       const item = o.itemId ? ctx.conteudo.itens.get(o.itemId) : undefined;
-      if (!item || !e.bolsa || !guardarItem(e.bolsa, item, o.valor, ctx.balance.inventario)) continue;
+      if (!item || !e.bolsa || !guardarItem(e.bolsa, item, o.valor, ctx.balance.inventario, o.ref)) continue;
       consumidos.add(o.objetoId);
       saida.push({ t: 'coletou', tick: estado.tick, id: e.id, objetoId: o.objetoId, tipo: o.tipo, ganho: o.valor, itemId: item.id });
       continue;
@@ -148,9 +149,10 @@ export function largarItem(
   saida: EventoSimulacao[],
   qtd = 1,
   objetoId = `d:${estado.proximoId++}`,
+  ref: string | null = null,
 ): boolean {
   if (estado.objetos.some((o) => o.x === x && o.y === y)) return false;
-  estado.objetos.push(novoObjeto(objetoId, 'item', x, y, { valor: qtd, itemId }));
+  estado.objetos.push(novoObjeto(objetoId, 'item', x, y, { valor: qtd, itemId, ref }));
   saida.push({ t: 'objetoSurgiu', tick: estado.tick, objetoId, tipo: 'item', x, y });
   return true;
 }

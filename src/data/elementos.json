@@ -1,0 +1,50 @@
+{
+  "versao": 1,
+  "elementos": [
+    {
+      "id": "fogo",
+      "estado": { "tipo": "queimando", "duracaoMs": 3000, "valor": 3 },
+      "cor": "#ff7b39",
+      "icone": "🔥",
+      "formas": { "projetil": 3, "quadrado": 3, "linha": 2, "ao_redor": 1, "contato": 1, "cone": 2 },
+      "visual": { "conjuracao": "brasas", "viagem": "rastro", "impacto": "explosao", "som": "explosao" },
+      "nomes": { "nucleos": ["Brasa", "Chama", "Labareda", "Fornalha", "Centelha"], "qualidades": ["ardente", "rubra", "voraz", "do braseiro", "incandescente"] }
+    },
+    {
+      "id": "gelo",
+      "estado": { "tipo": "resfriado", "duracaoMs": 3000, "pct": 30 },
+      "cor": "#74b9ff",
+      "icone": "❄",
+      "formas": { "projetil": 3, "quadrado": 2, "linha": 3, "ao_redor": 2, "contato": 1, "cone": 2 },
+      "visual": { "conjuracao": "brilho", "viagem": "rastro", "impacto": "anel", "som": "magia" },
+      "nomes": { "nucleos": ["Geada", "Lança", "Nevasca", "Cristal", "Inverno"], "qualidades": ["gélida", "cortante", "do norte", "silenciosa", "pálida"] }
+    },
+    {
+      "id": "raio",
+      "estado": { "tipo": "eletrizado", "duracaoMs": 2500 },
+      "cor": "#f7dc6f",
+      "icone": "⚡",
+      "formas": { "projetil": 3, "quadrado": 1, "linha": 3, "ao_redor": 1, "contato": 2, "cone": 1 },
+      "visual": { "conjuracao": "faiscas", "viagem": "faiscas", "impacto": "raio", "som": "magia" },
+      "nomes": { "nucleos": ["Faísca", "Trovão", "Relâmpago", "Descarga", "Corisco"], "qualidades": ["estrondosa", "veloz", "da tempestade", "ofuscante", "errante"] }
+    },
+    {
+      "id": "veneno",
+      "estado": { "tipo": "envenenado", "duracaoMs": 5000, "valor": 2, "pct": 50 },
+      "cor": "#58d68d",
+      "icone": "🧪",
+      "formas": { "projetil": 3, "quadrado": 3, "linha": 1, "ao_redor": 2, "contato": 2, "cone": 2 },
+      "visual": { "conjuracao": "fumaca", "viagem": "rastro", "impacto": "fumaca", "som": "projetil" },
+      "nomes": { "nucleos": ["Peçonha", "Miasma", "Ferrão", "Toxina", "Musgo"], "qualidades": ["pútrida", "lenta", "do pântano", "amarga", "rastejante"] }
+    },
+    {
+      "id": "psiquico",
+      "estado": { "tipo": "exposto", "duracaoMs": 4000, "pct": 20 },
+      "cor": "#d980fa",
+      "icone": "👁",
+      "formas": { "projetil": 2, "quadrado": 2, "linha": 2, "ao_redor": 2, "contato": 2, "cone": 1 },
+      "visual": { "conjuracao": "estrelas", "viagem": "brilho", "impacto": "estrelas", "som": "magia" },
+      "nomes": { "nucleos": ["Eco", "Pesadelo", "Sussurro", "Vertigem", "Visão"], "qualidades": ["insana", "oculta", "da mente", "lancinante", "sem fim"] }
+    }
+  ]
+}

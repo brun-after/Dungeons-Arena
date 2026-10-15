@@ -10,6 +10,7 @@ import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { aleatorio, criarRng, escolher, hashTexto, type EstadoRng } from '../core/rng';
 import { ticksDe } from '../core/tempo';
 import { alvoOfensivoValido, iniciarAcao, prioridadeDeAlvo, recargaRestante } from '../combat/acao';
+import { resolverHabilidade } from '../combat/compilar-habilidade';
 import { excedeLimite } from '../combat/efeitos-fluxo';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
 import { ordemRotativa } from '../world/colisao';
@@ -231,7 +232,7 @@ function escolherDirecaoPatrulha(estado: EstadoJogo, ctx: ContextoSimulacao, e: 
 function habilidadeDaVez(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa): string {
   if (e.habilidades.length === 0 || ia.ataquesFeitos % 2 === 0) return e.ataqueBasico;
   const id = e.habilidades[Math.floor(ia.ataquesFeitos / 2) % e.habilidades.length];
-  const hab = id ? ctx.conteudo.habilidades.get(id) : undefined;
+  const hab = id ? resolverHabilidade(ctx, id) : undefined;
   if (!hab || recargaRestante(estado, e.id, hab.id) > 0 || excedeLimite(estado, ctx, e, hab.efeitos)) return e.ataqueBasico;
   return hab.id;
 }
@@ -261,8 +262,8 @@ function perseguir(
     }
   }
 
-  const hab = ctx.conteudo.habilidades.get(habilidadeDaVez(estado, ctx, e, ia));
-  const basico = ctx.conteudo.habilidades.get(e.ataqueBasico);
+  const hab = resolverHabilidade(ctx, habilidadeDaVez(estado, ctx, e, ia));
+  const basico = resolverHabilidade(ctx, e.ataqueBasico);
   if (!hab || !basico) return;
   // O deslocamento segue o alcance do ataque básico; habilidade em si mesmo vale de qualquer distância.
   const alcanceAtaque = hab.politicaAlvo === 'proprio' ? Infinity : hab.alcanceCelulas;

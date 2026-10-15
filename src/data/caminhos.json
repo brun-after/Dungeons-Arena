@@ -1,0 +1,20 @@
+{
+  "versao": 1,
+  "caminhos": [
+    { "id": "eco", "nome": "Eco", "icone": "◎", "mods": ["ecoar"] },
+    { "id": "cadeia", "nome": "Cadeia", "icone": "⛓", "mods": ["encadear"] },
+    { "id": "perfurante", "nome": "Perfurante", "icone": "➶", "mods": ["atravessar"] },
+    { "id": "amplo", "nome": "Amplo", "icone": "◯", "mods": ["maior_e_mais_lenta"] },
+    { "id": "brutal", "nome": "Brutal", "icone": "⚒", "danoPct": 25, "custoPct": 20 },
+    { "id": "eficiente", "nome": "Eficiente", "icone": "♻", "custoPct": -30, "recargaPct": -20 },
+    { "id": "controle", "nome": "Controle", "icone": "⏳", "duracaoPct": 50 },
+    { "id": "longo_alcance", "nome": "Longo alcance", "icone": "↔", "alcance": 2 },
+    { "id": "sanguessuga", "nome": "Sanguessuga", "icone": "🩸", "efeitos": [{ "tipo": "cura", "valor": 3, "em": "conjurador" }] },
+    { "id": "fortificado", "nome": "Fortificado", "icone": "🔰", "efeitos": [{ "tipo": "escudo", "valor": 6, "duracaoMs": 4000, "em": "conjurador" }] },
+    { "id": "elemental_fogo", "nome": "Chamas", "icone": "🔥", "elemento": "fogo", "danoPct": 5 },
+    { "id": "elemental_gelo", "nome": "Geada", "icone": "❄", "elemento": "gelo", "danoPct": 5 },
+    { "id": "elemental_raio", "nome": "Tempestade", "icone": "⚡", "elemento": "raio", "danoPct": 5 },
+    { "id": "elemental_veneno", "nome": "Peçonha", "icone": "🧪", "elemento": "veneno", "danoPct": 5 },
+    { "id": "elemental_psiquico", "nome": "Mente", "icone": "👁", "elemento": "psiquico", "danoPct": 5 }
+  ]
+}

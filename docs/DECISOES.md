@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.25 · **Data:** 14/10/2026
+**Versão:** 0.26 · **Data:** 15/10/2026
 
 > **Histórico**
+> - **0.26 (15/10/2026)**: D-059 (sistema de habilidades), marco 14.
 > - **0.25 (14/10/2026)**: D-058 (visão isométrica, modelos de criatura, caminhada por fatias e personagem por imagem), marco 13.
 > - **0.24 (14/10/2026)**: D-056 ajustada (brilho do jogador, tremor e flash pela metade).
 > - **0.23 (14/10/2026)**: D-057 (sistema de habilidades, novo marco 14; rebalanceamento vira 15 e endurecimento, 16).
@@ -1124,3 +1125,125 @@ Novos e2e:
 - a visão persiste;
 - imagem própria e imagem inválida;
 - joystick no isométrico.
+
+## D-059 · Marco 14: sistema de habilidades (v0.26, 15/10/2026)
+
+**Contexto.** A D-057 abriu o marco 14 com dois pedidos de quem jogou:
+- **efeitos legíveis**: o HUD só mostrava o ícone;
+- **mais habilidades**: havia uma classe com 4 habilidades fixas.
+
+As escolhas do usuário ao planejar:
+- **Classe**: escolhida ao criar o personagem, e fixa.
+- **Rank**: sobe com 1 ponto de habilidade por nível.
+- **Evolução**: escolha definitiva nos ranks 3 e 5.
+- **Habilidades geradas**: só nas fases geradas, crescendo com a profundidade, e em livros raros.
+
+**Decisão.**
+- **Habilidade compilada.**
+  - `Habilidade` continua sendo o que todo o pipeline lê (ação, projétil, golpe, IA, render e som).
+  - O skills.json (v2) traz a definição: as camadas, o elemento, as etiquetas, o nível mínimo, a passiva, os
+    modificadores de nascença e as evoluções.
+  - Uma **chave** autodescritiva — `id@rank/caminhos+mods` — vira a habilidade compilada por um compilador puro e
+    memoizado (`combat/compilar-habilidade.ts`). Como compilar é puro, a memória não muda o digest.
+  - A ação e o projétil guardam a chave: o projétil se resolve mesmo com o conjurador morto.
+  - Na chave só entram os modificadores de fora (equipamento); os da definição e dos caminhos estão implícitos.
+  - Quem não tem bolsa (inimigos e arena) usa o id puro: rank 1, sem caminhos nem afinidades.
+- **Formas e alvos** (`combat/formas.ts`), usados pela simulação e pela telegrafia:
+  - **linha**: Bresenham até o alcance, parando na parede;
+  - **cone**: 90°, por teste inteiro;
+  - **ao redor**: em volta de quem conjura, sem precisar de alvo;
+  - **suporte**: um aliado (ou o próprio, com o mais ferido como auto-alvo) e todos os aliados no raio, pela nova
+    `podeAjudar` (a partir da `relacao()`, nunca pelo tipo);
+  - custo em vida (nunca mata quem conjura) e saltos (encadear; raio sobre eletrizado ganha +1).
+- **Efeitos novos e interações em dados.**
+  - **10 tipos novos** no registro (26 → 36): queimando, resfriado, congelado, eletrizado, envenenado, exposto,
+    escudo, puxão, troca de lugar e dano direto.
+  - **Ganchos novos**: lentidão, cura recebida, dano recebido e escudo.
+  - **interacoes.json**: acúmulo por tipo (mais forte, renova, soma, ignora); resfriado ×3 → congelado; o fogo tira
+    o frio e o frio tira o fogo; teto de 8 efeitos.
+  - **5 sinergias**:
+
+    | Elemento sobre o estado | Sinergia |
+    |---|---|
+    | fogo sobre o frio | derreter, +50% |
+    | fogo sobre o veneno | combustão, +30% |
+    | raio sobre congelado | estilhaçar, +75% |
+    | psíquico sobre eletrizado | sobrecarga, atordoa 0,8 s |
+    | veneno sobre exposto | corrosão, +25% e enfraquece |
+
+  - A sinergia só consome o estado quando o golpe acerta.
+  - **elementos.json**: estado, cor, ícone, visual, som, pesos de forma e nomes.
+  - **Presets**: resistências por elemento (100 = imune) e imunidades a efeitos (o esqueleto não é envenenado).
+  - O rótulo de `dano_periodico` virou "Sangrando".
+- **Orçamento de poder** (`combat/orcamento.ts`).
+  - **Poder** = dano médio × forma × saltos, mais cura e o peso de cada efeito, descontados pela recarga, pela
+    conjuração e pelo custo.
+  - **Orçamento** = `(6 + 0,7 × (nível − 1)) × pct do modo`.
+  - **Na carga**, todo o alcançável pelo jogador (classes e livros) é conferido em todo rank e combinação de
+    caminhos, contra o nível mínimo do rank. Ao calibrar, quatro opções de caminho que passavam foram trocadas.
+  - **As geradas** usam 85% do orçamento.
+  - Os pesos ficam no balance.json (v14).
+- **Classes** (classes.json v2): aventureiro (o primeiro, padrão da arena), guerreiro, mago e arqueiro.
+
+  | Classe | Atributo | Afinidades |
+  |---|---|---|
+  | guerreiro | Força | +15% em corpo a corpo; −30% no custo de vida |
+  | mago | Inteligência | +15% em mágicas; +10% em elementais |
+  | arqueiro | Destreza (`ClasseCombate` nova, `atirador`) | +10% e +2 de alcance com projéteis |
+
+  - A **escolha de classe** aparece no jogo novo de um slot; sem slot e no teste do editor, aventureiro.
+  - **Modelos** das classes no atlas, com 2 quadros por vista.
+- **Progressão** (`progression/habilidades-personagem.ts`).
+  - `subirRank` gasta 1 ponto; do rank 0 para o 1, só o que a classe aprende.
+  - Ranks 1–5 nos níveis 1/3/6/10/15, com +0/15/30/50/75% de dano e +0/10/20/35/50% nos efeitos.
+  - Nos ranks 3 e 5, o caminho é obrigatório e definitivo.
+  - `equiparHabilidade` põe uma ativa numa das 4 teclas; `Entidade.habilidades` deriva da barra.
+  - **Passivas** (só passivas, D-057) somam vida, mana e defesa na ficha e bônus por etiqueta.
+  - Morrer devolve só os pontos não gastos.
+  - **Livros** (tipo de item novo) ensinam no rank 1 sem ponto e sem restrição de classe. O livro raro guarda a
+    habilidade gerada no `ref` da entrada da mochila e do objeto no chão.
+  - **Equipamento** pode dar modificadores por etiqueta (anel do eco, aljava perfurante).
+- **Habilidades geradas por semente** (`combat/gerar-habilidade.ts`).
+  - O id `g_<semente>_<nível>` vira a definição: o elemento puxa a forma, o estado, o visual, o som e o nome; os
+    dados sobem até o orçamento; há 40% de chance de um efeito secundário e 2 caminhos por degrau.
+  - Nas fases geradas, o chefe ganha 2 e os inimigos comuns ganham 1, com chance `min(75%, 30% + 3% × nível)`.
+  - Usam um **PRNG separado** (`semente:habilidades`), então o mapa das fases já salvas não muda (um teste guarda o
+    hash de antes).
+  - O respawn guarda as habilidades da instância.
+  - O código curto de compartilhar é a semente em base 36 com o nível.
+- **Efeitos legíveis e descrições geradas.**
+  - **Chips do HUD** (`ui/chips-efeito.ts`): anel que esvazia com a duração, os segundos e os acúmulos.
+  - **Cartão** ao tocar, focar ou passar o mouse: nome, o que faz com os números e de quem veio.
+  - **Aviso ao ganhar um efeito**, no máximo um por tipo por segundo.
+  - **Sinergias**: o nome sobe do alvo e entra no registro.
+  - **Descrições** (`ui/descrever.ts`): habilidades, efeitos, caminhos, passivas e livros se descrevem pelas peças.
+    Os textos ficam num dicionário à parte (`i18n/pt-BR-habilidades.ts`).
+- **Aba Habilidades da mochila**: os pontos; as teclas 1–4 (pôr e tirar); as conhecidas com o rank, a descrição e
+  "Subir rank" (desabilitado com o motivo, o mesmo da simulação); os caminhos como cartões; as passivas; o que
+  falta aprender.
+- **Barra e roda.**
+  - A barra é a escolhida pelo jogador, refeita quando muda, com a cor do elemento e os pontos do rank.
+  - **A janela rotativa de 3 da §4.6 ficou desnecessária**: com a barra escolhida, a roda nunca tem mais que 4
+    botões, e a lista completa está na aba Habilidades. Fecha a D-019 de outro jeito.
+- **Apresentação pela chave**: partículas, sons e telegrafia acham a habilidade pela chave do evento. Do rank 4 em
+  diante, o impacto solta o dobro de partículas.
+- **Save v9** (`MIGRACOES[8]`, também nas fases visitadas): o personagem vira aventureiro, com as habilidades
+  atuais no rank 1, a barra e os pontos dos níveis já ganhos; ação e projétil ganham a chave; efeitos, início e
+  acúmulos; itens e objetos, o `ref`; respawns, as habilidades.
+- **Arena: sem mudança de protocolo.** Os comandos novos ficam fora do `protocolo.ts` e são recusados. O
+  `hashPolitica` muda com as classes novas: cliente e servidor são publicados juntos. Os limites por modo ficam
+  para o 10B e a semente trafegando, para o 8B.
+
+**Consequência.**
+- **Testes de unidade** (36 novos):
+  - chave e compilador (as 16 habilidades de antes iguais no rank 1);
+  - orçamento;
+  - 300 sementes geradas cabendo no orçamento e cobrindo os 5 elementos e as 6 formas;
+  - formas, interações, efeitos novos e sinergias na simulação;
+  - progressão e livros;
+  - save v8 → v9;
+  - o hash das fases geradas de antes;
+  - descrições sem lacunas;
+  - digest determinístico.
+- **e2e**: escolher o mago, pôr a barreira na tecla 1, lançar e ler o cartão.
+- **Números**: os de agora são ponto de partida; o rebalanceamento por simulação é o marco 15.

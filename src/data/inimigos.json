@@ -1,5 +1,5 @@
 {
-  "versao": 1,
+  "versao": 2,
   "presets": [
     {
       "id": "goblin",
@@ -29,7 +29,14 @@
       "defesa": 1,
       "ataqueBasico": "flecha",
       "habilidades": [],
-      "intervaloAtaqueMs": 3000
+      "intervaloAtaqueMs": 3000,
+      "resistencias": {
+        "veneno": 100,
+        "gelo": 25
+      },
+      "imunidades": [
+        "envenenado"
+      ]
     },
     {
       "id": "orc",
@@ -59,7 +66,11 @@
       "defesa": 2,
       "ataqueBasico": "golpe",
       "habilidades": [],
-      "intervaloAtaqueMs": 5000
+      "intervaloAtaqueMs": 5000,
+      "resistencias": {
+        "veneno": 25,
+        "fogo": -25
+      }
     },
     {
       "id": "vampiro",
@@ -74,7 +85,11 @@
       "defesa": 1,
       "ataqueBasico": "raio_vampirico",
       "habilidades": [],
-      "intervaloAtaqueMs": 2500
+      "intervaloAtaqueMs": 2500,
+      "resistencias": {
+        "psiquico": 50,
+        "fogo": -25
+      }
     },
     {
       "id": "cultista",
@@ -89,7 +104,10 @@
       "defesa": 0,
       "ataqueBasico": "marca_de_area",
       "habilidades": [],
-      "intervaloAtaqueMs": 4000
+      "intervaloAtaqueMs": 4000,
+      "resistencias": {
+        "psiquico": 50
+      }
     },
     {
       "id": "lobo",
@@ -136,7 +154,11 @@
       "defesa": 0,
       "ataqueBasico": "golpe_viscoso",
       "habilidades": [],
-      "intervaloAtaqueMs": 4000
+      "intervaloAtaqueMs": 4000,
+      "resistencias": {
+        "fogo": -50,
+        "gelo": 50
+      }
     },
     {
       "id": "boss",
@@ -154,7 +176,11 @@
         "marca_de_area",
         "invocar_lacaios"
       ],
-      "intervaloAtaqueMs": 1800
+      "intervaloAtaqueMs": 1800,
+      "resistencias": {
+        "fogo": 50,
+        "psiquico": -25
+      }
     },
     {
       "id": "boneco",

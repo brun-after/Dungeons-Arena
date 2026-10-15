@@ -2,9 +2,17 @@
 // Um conjunto de proporções e acessórios vira as duas vistas: 3/4 em pé (pés em (32, 60)) e de cima
 // (centro em (32, 32), olhando para +x). O sombreamento é o escurecimento paramétrico da cor base.
 
-import { circulo, clarear, elipse, escurecer, linha, MEIO, olhos, PES_Y, poligono, retangulo, type Vista } from './svg.ts';
+import { circulo, clarear, elipse, escurecer, hex, linha, MEIO, olhos, PES_Y, poligono, retangulo, type Vista } from './svg.ts';
 
-export type Arma = 'espada' | 'cajado' | 'clava' | 'adaga' | 'machado' | 'foice';
+export type Arma = 'espada' | 'cajado' | 'clava' | 'adaga' | 'machado' | 'foice' | 'arco';
+
+/** Arco (marco 14, arqueiro): a madeira em curva e a corda reta. */
+function arco(x: 'cima' | '34', cx: number, cy: number): string {
+  if (x === '34') {
+    return `<path d="M ${cx} ${cy - 14} Q ${cx + 8} ${cy - 4} ${cx} ${cy + 6}" fill="none" stroke="${hex(0x7a5230)}" stroke-width="2.4" stroke-linecap="round"/>` + linha([cx, cy - 14, cx, cy + 6], 0xe5e1d8, 0.8);
+  }
+  return `<path d="M ${cx + 2} ${cy - 9} Q ${cx + 10} ${cy} ${cx + 2} ${cy + 9}" fill="none" stroke="${hex(0x7a5230)}" stroke-width="2.4" stroke-linecap="round"/>` + linha([cx + 2, cy - 9, cx + 2, cy + 9], 0xe5e1d8, 0.8);
+}
 
 export interface OpcoesBipede {
   /** Pele ou corpo. */
@@ -49,6 +57,8 @@ function arma34(tipo: Arma, x: number, y: number): string {
       return linha([x, y + 3, x, y - 16], 0x6e4b2a, 2.6) + poligono([x, y - 16, x + 7, y - 19, x + 7, y - 9, x, y - 12], 0xbdc3c7);
     case 'foice':
       return linha([x, y + 9, x, y - 24], 0x4a3a2a, 2.2) + poligono([x, y - 24, x + 11, y - 22, x + 3, y - 20], 0xbdc3c7);
+    case 'arco':
+      return arco('34', x, y - 4);
   }
 }
 
@@ -139,6 +149,7 @@ export function bipede34(o: OpcoesBipede, quadro: number): string {
 }
 
 function armaCima(tipo: Arma, x: number, y: number): string {
+  if (tipo === 'arco') return arco('cima', x, y);
   const comprimento = tipo === 'cajado' || tipo === 'foice' ? 18 : tipo === 'adaga' ? 7 : 13;
   const cor = tipo === 'cajado' || tipo === 'clava' || tipo === 'foice' ? 0x7a5230 : 0xd5dbe3;
   const ponta = tipo === 'cajado' ? circulo(x + comprimento, y, 2.6, 0x9b59b6) : tipo === 'machado' ? poligono([x + comprimento - 2, y, x + comprimento, y + 5, x + comprimento + 3, y], 0xbdc3c7) : '';

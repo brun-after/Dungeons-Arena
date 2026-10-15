@@ -1,5 +1,5 @@
 {
-  "versao": 1,
+  "versao": 2,
   "classes": [
     {
       "id": "aventureiro",
@@ -7,12 +7,180 @@
       "hpBase": 60,
       "defesa": 2,
       "classe": "corpo_a_corpo",
-      "atributos": { "forca": 12, "destreza": 10, "constituicao": 10, "inteligencia": 12, "sabedoria": 10, "carisma": 10 },
+      "atributos": {
+        "forca": 12,
+        "destreza": 10,
+        "constituicao": 10,
+        "inteligencia": 12,
+        "sabedoria": 10,
+        "carisma": 10
+      },
       "ataqueBasico": "ataque_basico",
-      "habilidades": ["seta_arcana", "explosao", "curar", "golpe_atordoante"],
+      "habilidades": [
+        "seta_arcana",
+        "explosao",
+        "curar",
+        "golpe_atordoante"
+      ],
       "itensIniciais": [
-        { "id": "espada_curta", "qtd": 1 },
-        { "id": "pocao_vida", "qtd": 2 }
+        {
+          "id": "espada_curta",
+          "qtd": 1
+        },
+        {
+          "id": "pocao_vida",
+          "qtd": 2
+        }
+      ],
+      "modelo": "aventureiro",
+      "descricao": "classe.aventureiro.descricao",
+      "afinidades": [],
+      "aprendiveis": [
+        "investida",
+        "bola_de_fogo",
+        "flecha_venenosa",
+        "barreira",
+        "pele_de_pedra"
+      ]
+    },
+    {
+      "id": "guerreiro",
+      "nome": "Guerreiro",
+      "hpBase": 75,
+      "defesa": 3,
+      "classe": "corpo_a_corpo",
+      "atributos": {
+        "forca": 14,
+        "destreza": 10,
+        "constituicao": 12,
+        "inteligencia": 8,
+        "sabedoria": 10,
+        "carisma": 10
+      },
+      "ataqueBasico": "ataque_basico",
+      "habilidades": [
+        "investida",
+        "redemoinho",
+        "grito_de_guerra",
+        "escudo_de_ferro"
+      ],
+      "aprendiveis": [
+        "corrente",
+        "golpe_flamejante",
+        "pele_de_pedra",
+        "golpe_atordoante"
+      ],
+      "afinidades": [
+        {
+          "tag": "contato",
+          "danoPct": 15
+        },
+        {
+          "tag": "custo_vida",
+          "custoPct": -30
+        }
+      ],
+      "modelo": "guerreiro",
+      "descricao": "classe.guerreiro.descricao",
+      "itensIniciais": [
+        {
+          "id": "espada_curta",
+          "qtd": 1
+        },
+        {
+          "id": "pocao_vida",
+          "qtd": 2
+        }
+      ]
+    },
+    {
+      "id": "mago",
+      "nome": "Mago",
+      "hpBase": 50,
+      "defesa": 1,
+      "classe": "conjurador",
+      "atributos": {
+        "forca": 8,
+        "destreza": 10,
+        "constituicao": 10,
+        "inteligencia": 14,
+        "sabedoria": 12,
+        "carisma": 10
+      },
+      "ataqueBasico": "dardo_arcano",
+      "habilidades": [
+        "bola_de_fogo",
+        "lanca_de_gelo",
+        "raio_em_cadeia",
+        "barreira"
+      ],
+      "aprendiveis": [
+        "nova_glacial",
+        "mente_partida",
+        "afinidade_elemental",
+        "curar",
+        "seta_arcana",
+        "explosao"
+      ],
+      "afinidades": [
+        {
+          "tag": "magico",
+          "danoPct": 15
+        },
+        {
+          "tag": "elemental",
+          "danoPct": 10
+        }
+      ],
+      "modelo": "mago",
+      "descricao": "classe.mago.descricao",
+      "itensIniciais": [
+        {
+          "id": "pocao_vida",
+          "qtd": 2
+        }
+      ]
+    },
+    {
+      "id": "arqueiro",
+      "nome": "Arqueiro",
+      "hpBase": 55,
+      "defesa": 2,
+      "classe": "atirador",
+      "atributos": {
+        "forca": 10,
+        "destreza": 14,
+        "constituicao": 10,
+        "inteligencia": 10,
+        "sabedoria": 10,
+        "carisma": 10
+      },
+      "ataqueBasico": "tiro",
+      "habilidades": [
+        "flecha_perfurante",
+        "chuva_de_flechas",
+        "flecha_venenosa",
+        "tiro_em_leque"
+      ],
+      "aprendiveis": [
+        "troca_sombria",
+        "olho_de_aguia",
+        "golpe_atordoante"
+      ],
+      "afinidades": [
+        {
+          "tag": "projetil",
+          "alcance": 2,
+          "danoPct": 10
+        }
+      ],
+      "modelo": "arqueiro",
+      "descricao": "classe.arqueiro.descricao",
+      "itensIniciais": [
+        {
+          "id": "pocao_vida",
+          "qtd": 2
+        }
       ]
     }
   ]

@@ -7,10 +7,11 @@ import { REGISTRO_EFEITOS, type EfeitoCanonico } from '../combat/registro-efeito
 import type { Balance, ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import type { EventoSimulacao, MotivoItem } from '../core/eventos-simulacao';
-import type { Bolsa, Entidade, ItemNaMochila } from '../entities/entidade';
+import { SLOTS_BARRA, type Bolsa, type Entidade, type ItemNaMochila } from '../entities/entidade';
 import type { ClasseJogador } from '../entities/presets';
 import { SLOTS_DE_EQUIPAMENTO, type Slot } from '../modos/modo';
 import { recalcularFicha } from './derivados';
+import { aprenderPorLivro } from './habilidades-personagem';
 import { NOMES_ATRIBUTOS, type Item, type NomeAtributo } from './itens';
 
 export function criarBolsa(classe: ClasseJogador, ouroInicial = 0): Bolsa {
@@ -23,34 +24,47 @@ export function criarBolsa(classe: ClasseJogador, ouroInicial = 0): Bolsa {
     pontosAtributo: 0,
     proximoInv: 1,
     ouro: ouroInicial,
+    // Marco 14: começa com as habilidades da classe no rank 1, as 4 primeiras na barra.
+    classeId: classe.id,
+    conhecidas: classe.habilidades.map((id) => ({ id, rank: 1, caminhos: [] })),
+    barra: Array.from({ length: SLOTS_BARRA }, (_, i) => classe.habilidades[i] ?? null),
+    pontosHabilidade: 0,
   };
-  for (const { id, qtd } of classe.itensIniciais) bolsa.mochila.push({ invId: `i${bolsa.proximoInv++}`, itemId: id, qtd });
+  for (const { id, qtd } of classe.itensIniciais) bolsa.mochila.push({ invId: `i${bolsa.proximoInv++}`, itemId: id, qtd, ref: null });
   return bolsa;
 }
 
-/** Guarda `qtd` unidades: consumíveis empilham até `pilhaMax`; o resto ocupa novas entradas. */
-export function guardarItem(bolsa: Bolsa, item: Item, qtd: number, regras: Balance['inventario']): boolean {
+/**
+ * Guarda `qtd` unidades: consumíveis empilham até `pilhaMax`; o resto ocupa novas entradas. Marco 14: `ref` é o
+ * conteúdo do livro raro; só empilha com o mesmo `ref`.
+ */
+export function guardarItem(bolsa: Bolsa, item: Item, qtd: number, regras: Balance['inventario'], ref: string | null = null): boolean {
   if (!cabeNaMochila(bolsa, item, qtd, regras)) return false;
   let restante = qtd;
-  if (item.tipo === 'consumivel') {
+  if (empilha(item)) {
     for (const entrada of bolsa.mochila) {
-      if (entrada.itemId !== item.id || restante === 0) continue;
+      if (entrada.itemId !== item.id || entrada.ref !== ref || restante === 0) continue;
       const cabe = Math.min(restante, regras.pilhaMax - entrada.qtd);
       entrada.qtd += cabe;
       restante -= cabe;
     }
   }
-  const porEntrada = item.tipo === 'consumivel' ? regras.pilhaMax : 1;
+  const porEntrada = empilha(item) ? regras.pilhaMax : 1;
   while (restante > 0) {
     const n = Math.min(restante, porEntrada);
-    bolsa.mochila.push({ invId: `i${bolsa.proximoInv++}`, itemId: item.id, qtd: n });
+    bolsa.mochila.push({ invId: `i${bolsa.proximoInv++}`, itemId: item.id, qtd: n, ref });
     restante -= n;
   }
   return true;
 }
 
+/** Consumíveis e livros empilham (marco 14: livros também). */
+export function empilha(item: Item): boolean {
+  return item.tipo === 'consumivel' || item.tipo === 'livro';
+}
+
 export function cabeNaMochila(bolsa: Bolsa, item: Item, qtd: number, regras: Balance['inventario']): boolean {
-  const porEntrada = item.tipo === 'consumivel' ? regras.pilhaMax : 1;
+  const porEntrada = empilha(item) ? regras.pilhaMax : 1;
   const sobraEmPilhas =
     item.tipo === 'consumivel'
       ? bolsa.mochila.filter((i) => i.itemId === item.id).reduce((s, i) => s + (regras.pilhaMax - i.qtd), 0)
@@ -155,6 +169,15 @@ export function usarItem(estado: EstadoJogo, e: Entidade, ctx: ContextoSimulacao
     const entrada = bolsa.mochila[indice];
     const item = entrada ? ctx.conteudo.itens.get(entrada.itemId) : undefined;
     if (!entrada || !item) return recusa('nao_encontrado');
+    // Marco 14: o livro ensina a habilidade (a do catálogo, ou a gerada guardada no `ref`) e some.
+    if (item.tipo === 'livro') {
+      const ensina = item.ensina ?? entrada.ref;
+      if (!ensina || !aprenderPorLivro(e, ctx, ensina, tick, saida)) return recusa('ja_conhece');
+      entrada.qtd--;
+      if (entrada.qtd <= 0) bolsa.mochila.splice(indice, 1);
+      saida.push({ t: 'usouItem', tick, id: e.id, itemId: item.id, hp: 0, mana: 0 });
+      return OK;
+    }
     if (item.tipo !== 'consumivel') return recusa('nao_consumivel');
     // Marco 10A-3: pergaminho de invocação acima do limite do modo é recusado sem gastar (§5.6).
     if (excedeLimite(estado, ctx, e, item.efeitos)) return recusa('limite');

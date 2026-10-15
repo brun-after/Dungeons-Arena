@@ -1,4 +1,5 @@
 // Efeitos instantâneos de deslocamento (§2.8): teleporte, avanço e empurrão. Marco 8A (13/10/2026).
+// Marco 14 (14/10/2026): puxão (para perto de quem puxa) e troca de lugar.
 // Todo destino é conferido com passabilidade e colisão: ninguém para dentro de parede nem em cima
 // de quem bloqueia (invariante do harness). Andam célula a célula em 8 direções e param no
 // primeiro obstáculo.
@@ -49,6 +50,21 @@ export function avancar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade,
   if (!mira) return false;
   const distancia = Math.max(Math.abs(mira.x - e.x), Math.abs(mira.y - e.y));
   return deslizar(estado, ctx, e, Math.sign(mira.x - e.x), Math.sign(mira.y - e.y), Math.min(celulas, distancia));
+}
+
+/** Puxa em direção à origem, parando ao lado dela (marco 14). */
+export function puxar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, origem: Celula, celulas: number): boolean {
+  const distancia = Math.max(Math.abs(origem.x - e.x), Math.abs(origem.y - e.y));
+  return deslizar(estado, ctx, e, Math.sign(origem.x - e.x), Math.sign(origem.y - e.y), Math.min(celulas, distancia - 1));
+}
+
+/** Troca de lugar (marco 14): as duas param no meio do passo e trocam de célula. */
+export function trocarLugar(a: Entidade, b: Entidade): boolean {
+  if (a.id === b.id) return false;
+  const { x, y } = a;
+  reposicionar(a, b.x, b.y);
+  reposicionar(b, x, y);
+  return true;
 }
 
 /** Empurra para longe da origem. Sem direção (mesma célula), não empurra. */

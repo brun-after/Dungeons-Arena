@@ -70,7 +70,7 @@ describe('ciclo de uma ação (§2.7)', () => {
     const a = arena();
     const manaAntes = a.ent('j').mana;
     a.tick([['j', { t: 'usarHabilidade', id: 'explosao', alvo: 'b' }]]);
-    a.ent('j').efeitos.push({ valor: 0, pct: 0, proximoTick: 0, interno: null, ref: null, tipo: 'atordoar', ateTick: a.estado.tick + 30, origemId: 'b' });
+    a.ent('j').efeitos.push({ valor: 0, pct: 0, proximoTick: 0, interno: null, ref: null, inicioTick: 0, acumulos: 1, tipo: 'atordoar', ateTick: a.estado.tick + 30, origemId: 'b' });
     a.ticks(ticksDe(900) + 5);
     expect(a.de('acaoCancelada')).toMatchObject([{ motivo: 'interrompido' }]);
     expect(a.de('impacto')).toHaveLength(0);
@@ -80,7 +80,7 @@ describe('ciclo de uma ação (§2.7)', () => {
 
   it('silêncio bloqueia só ação mágica; a física continua', () => {
     const a = arena(1, 4);
-    a.ent('j').efeitos.push({ valor: 0, pct: 0, proximoTick: 0, interno: null, ref: null, tipo: 'silenciar', ateTick: 1_000, origemId: 'b' });
+    a.ent('j').efeitos.push({ valor: 0, pct: 0, proximoTick: 0, interno: null, ref: null, inicioTick: 0, acumulos: 1, tipo: 'silenciar', ateTick: 1_000, origemId: 'b' });
     a.tick([['j', { t: 'usarHabilidade', id: 'seta_arcana', alvo: 'b' }]]);
     expect(a.de('acaoRecusada').at(-1)).toMatchObject({ motivo: 'bloqueado' });
     a.tick([['j', { t: 'ataqueBasico', alvo: 'b' }]]);
@@ -239,7 +239,7 @@ describe('morte e respawn', () => {
   it('respawn espera a célula de origem liberar quando outro inimigo está nela', () => {
     const a = arena(1, 4);
     a.estado.entidades = a.estado.entidades.filter((e) => e.id !== 'b');
-    a.estado.respawns.push({ id: 'b', preset: 'boneco', x: 6, y: 6, nivel: 1, geracao: 1, abates: 1, noTick: 0 });
+    a.estado.respawns.push({ id: 'b', preset: 'boneco', x: 6, y: 6, nivel: 1, geracao: 1, abates: 1, noTick: 0, habilidades: [] });
     const ocupante = criarInimigo(obter(CONTEUDO.presets.get('boneco'), 'boneco'), 'ocupante', 6, 6, ctx.balance);
     a.estado.entidades.push(ocupante);
     a.ticks(5);

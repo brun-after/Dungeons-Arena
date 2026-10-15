@@ -20,6 +20,8 @@ export function aplicarSubidas(e: Entidade, ctx: ContextoSimulacao, tick: number
     e.xp -= xpParaProximo(e.nivel, regras);
     e.nivel++;
     e.bolsa.pontosAtributo += regras.pontosPorNivel;
+    // Marco 14: cada nível dá pontos de habilidade (ranks e aprender).
+    e.bolsa.pontosHabilidade += ctx.balance.habilidades.pontosPorNivel;
     subiu = true;
     saida.push({ t: 'subiuNivel', tick, id: e.id, nivel: e.nivel });
   }
@@ -41,6 +43,8 @@ export function perderXp(e: Entidade, ctx: ContextoSimulacao, quanto: number, pe
     e.nivel--;
     e.xp += xpParaProximo(e.nivel, regras);
     niveis++;
+    // Marco 14: só os pontos de habilidade não gastos voltam (ranks e caminhos ficam).
+    e.bolsa.pontosHabilidade = Math.max(0, e.bolsa.pontosHabilidade - ctx.balance.habilidades.pontosPorNivel);
     let revogar = regras.pontosPorNivel;
     const livres = Math.min(revogar, e.bolsa.pontosAtributo);
     e.bolsa.pontosAtributo -= livres;
