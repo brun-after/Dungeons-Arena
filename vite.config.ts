@@ -1,5 +1,19 @@
+import type { Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { defineConfig } from 'vitest/config';
+import { moduloDoAtlas } from './src/render/modelos/atlas.ts';
+
+// Marco 13 (14/10/2026), D-058: atlas dos modelos de criatura gerado no build e no dev (§2.16).
+function atlasCriaturas(): Plugin {
+  const id = 'virtual:atlas-criaturas';
+  // O prefixo NUL marca o módulo como virtual para os outros plugins (convenção do Rollup).
+  const resolvido = String.fromCharCode(0) + id;
+  return {
+    name: 'atlas-criaturas',
+    resolveId: (fonte) => (fonte === id ? resolvido : undefined),
+    load: (fonte) => (fonte === resolvido ? moduloDoAtlas() : undefined),
+  };
+}
 
 export default defineConfig({
   // Caminhos relativos: o GitHub Pages publica em /Dungeons-Arena/ (§3.8).
@@ -9,6 +23,7 @@ export default defineConfig({
     sourcemap: true,
   },
   plugins: [
+    atlasCriaturas(),
     // PWA (§3.8): campanha jogável offline depois da primeira visita.
     VitePWA({
       registerType: 'autoUpdate',

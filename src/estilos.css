@@ -1276,6 +1276,45 @@ body.toque .prompt-interacao {
   width: 22px;
   height: 22px;
 }
+/* Marco 13 (14/10/2026): aparência do personagem nas Configurações. */
+.dica-config {
+  margin: 2px 0 6px;
+  font-size: 0.85em;
+  line-height: 1.4;
+  color: var(--texto-suave);
+}
+.dica-config:empty {
+  display: none;
+}
+.dica-config[data-resultado='ok'],
+.dica-config[data-resultado='removida'] {
+  color: var(--destaque);
+}
+.dica-config[data-resultado='formato'],
+.dica-config[data-resultado='grande'],
+.dica-config[data-resultado='dimensoes'],
+.dica-config[data-resultado='corrompida'],
+.dica-config[data-resultado='vazia'] {
+  color: #ff8a7a;
+}
+.linha-config input[type='file'] {
+  max-width: 60%;
+  min-height: 32px;
+}
+.botao-config {
+  min-height: 36px;
+  padding: 4px 12px;
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.botao-config:focus-visible {
+  outline: 2px solid var(--destaque);
+  outline-offset: 2px;
+}
 .texto-guia {
   margin: 4px 0 10px;
   line-height: 1.45;

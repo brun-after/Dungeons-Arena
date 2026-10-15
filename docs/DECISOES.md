@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.24 · **Data:** 14/10/2026
+**Versão:** 0.25 · **Data:** 14/10/2026
 
 > **Histórico**
+> - **0.25 (14/10/2026)**: D-058 (visão isométrica, modelos de criatura, caminhada por fatias e personagem por imagem), marco 13.
 > - **0.24 (14/10/2026)**: D-056 ajustada (brilho do jogador, tremor e flash pela metade).
 > - **0.23 (14/10/2026)**: D-057 (sistema de habilidades, novo marco 14; rebalanceamento vira 15 e endurecimento, 16).
 > - **0.22 (14/10/2026)**: D-056 (áudio sintetizado, interface, efeitos como dado, qualidade e acessibilidade), marco 12.
@@ -1033,3 +1034,93 @@ fizemos no 8A.
 
 **Consequência.** O README ganhou o marco 14 novo e renumerou os seguintes. A criação de habilidades pelo jogador
 continua no editor (11A), sobre as mesmas peças e o mesmo orçamento.
+
+## D-058 · Marco 13: visão isométrica, modelos de criatura, caminhada por fatias e personagem por imagem (v0.25, 14/10/2026)
+
+**Contexto.** A cena era só de cima, com silhuetas geométricas por arquétipo. A §2.16 pede a visão isométrica, os
+modelos de criatura gerados no build e a caminhada por fatias; a §4.5, a direção certa no isométrico; a D-055
+adotou o personagem por imagem.
+
+**Decisão.**
+- **A visão é só do cliente.** A simulação não sabe dela: a câmera, as camadas e a entrada mudam; os comandos, não.
+  Um teste joga a mesma semente pela entrada isométrica (remapeamento do teclado e projeção do toque) e confere o
+  mesmo digest.
+- **Projeção** (`render/projecao.ts`, pura): tudo é desenhado em "px de plano" (1 célula = 48 px).
+  - De cima, a projeção é a identidade.
+  - No isométrico, 2:1 clássica: `x = (px − py)/√2 + desloc`, `y = (px + py)/(2√2)`, com o deslocamento que leva
+    o mundo projetado a começar em 0.
+  - A câmera opera no mundo projetado, com a mesma janela morta, zoom e limites. O toque vira célula por
+    `desprojetar`, e o descarte do terreno usa a caixa dos cantos da vista desprojetados.
+  - Trocar a visão mantém no centro o mesmo ponto da fase.
+- **Duas camadas** (§2.16, "transform de container"):
+  - o **chão** (terreno, telegrafia de área, objetos planos, portas, rastros e luz) fica num container `plano` com
+    a matriz da projeção, e entra de graça no isométrico;
+  - o que fica **em pé** (entidades, projéteis, partículas, números, baú e loja) é posicionado por `projetar`,
+    alinhado à tela, e ordenado por `zIndex` igual ao Y projetado.
+- **Paredes em prisma** (`render/paredes-iso.ts`):
+  - só a parede que encosta num piso ou numa saída vira prisma, com 0,6 célula de altura;
+  - a rocha de dentro continua plana e escura, como na visão de cima: senão a fase vira um mar de topos que se
+    confunde com o piso (visto ao jogar);
+  - as faces da frente ficam no tom do topo da fase e o topo, escuro;
+  - um `Graphics` por diagonal (x + y), na camada das entidades, com o `zIndex` da diagonal: quem passa atrás da
+    parede fica atrás dela. Uma fase 60×40 dá cerca de 100 objetos.
+- **Modelos de criatura** (`render/modelos/`):
+  - funções puras que devolvem SVG a partir de uma cor, com o sombreamento por escurecimento paramétrico;
+  - um gerador de bípedes (proporções e acessórios) e três feras (lobo, aranha, slime);
+  - 15 modelos: os 11 da spec, os 4 das invocações (sombra, sentinela, fada, espantalho) e o do jogador
+    (aventureiro, com 2 quadros por vista);
+  - **vistas**: a 3/4 em pé tem origem nos pés e é usada no isométrico; a de cima tem origem no centro, olha para
+    +x, gira para o olhar e é usada na visão de cima.
+- **Atlas no build**:
+  - um plugin do Vite (`virtual:atlas-criaturas`) roda os modelos no Node e entrega um SVG único como data URL,
+    mais o JSON dos quadros;
+  - cada quadro tem 144 px (18 × 8), para as tiras caírem em pixels inteiros;
+  - o navegador só decodifica a imagem; nada é rasterizado pelo código do jogo;
+  - o atlas soma cerca de 18 kB (gzip) ao pacote e funciona offline;
+  - os imports dessa pasta levam a extensão `.ts`, porque o `vite.config.ts` os carrega no Node
+    (`allowImportingTsExtensions`).
+- **Caminhada por fatias** (`render/caminhada.ts`, pura; `render/rig-token.ts`):
+  - **18 tiras**, com os parâmetros da tabela da §2.16;
+  - **motor bípede** (passada e marcha): abaixo do corte, duas colunas em fase oposta; acima, contrabalanço, com a
+    faixa da arma amortecida;
+  - **outros estilos**: quique, flutuar (que paira mesmo parado) e deslizar (a bainha como pêndulo);
+  - **parado e ataque** usam o motor genérico: respiração; no ataque, empurrão de 0,20 × largura e esticamento de
+    1,06 em 400 ms, a partir do lançamento;
+  - **atalho de qualidade**: nas qualidades mínimo e baixo, um desenho só (`tiras: false` no preset);
+  - movimento reduzido deixa a pose parada.
+- **Personagem por imagem** (`render/token-imagem.ts`; `plataforma/token.ts`):
+  - **limites**: PNG, WebP, JPEG ou GIF; até 2 MB e 1024 × 1024 px;
+  - **preparo**: decodifica com `createImageBitmap` dentro de `try`; recorta a transparência pela caixa dos pixels
+    visíveis (alfa ≥ 8); a altura vira 1,12 célula, com origem nos pés;
+  - **recusa**: cada motivo tem uma frase simples, e o jogo segue com o modelo padrão;
+  - **armazenamento**: a imagem fica no store `perfil` do IndexedDB, só neste aparelho e só para o seu
+    personagem;
+  - **ajustes em Configurações → Aparência**: o sentido (para onde a imagem olha) e o tamanho neste aparelho
+    (80–130%);
+  - **na visão de cima**, a imagem fica em pé, pelo centro, e espelha pelo sentido do movimento;
+  - **fora deste marco**: inimigos, aventuras e o compartilhamento na arena (11A e 8B).
+- **Legibilidade sobre qualquer desenho**:
+  - o anel de equipe, pela `relacao()`, fica sob os pés; vira elipse no isométrico;
+  - a barra de vida, a de conjuração, o status, os anéis de alvo e de invocação e o "?"/"!" acompanham o topo do
+    desenho;
+  - a silhueta por arquétipo continua como substituto quando o modelo não existe ou o atlas não carrega.
+- **Escolha da visão**:
+  - em Configurações → Gráficos → "Visão", ou pela tecla `V`, que grava a mesma preferência;
+  - a troca é instantânea: câmera, matriz do chão, paredes e tokens se refazem;
+  - as teclas mantidas são remapeadas na hora.
+- **O editor continua só de cima.**
+
+**Consequência.** Novos testes de unidade (21):
+- projeção: ida e volta em 60×40, limites e matriz;
+- câmera: clique e troca de visão;
+- profundidade e paredes de borda;
+- motores de caminhada;
+- recorte e recusas do token;
+- completude do atlas;
+- o mesmo digest nas duas visões.
+
+Novos e2e:
+- alternar pela tecla `V` e andar e clicar no isométrico;
+- a visão persiste;
+- imagem própria e imagem inválida;
+- joystick no isométrico.

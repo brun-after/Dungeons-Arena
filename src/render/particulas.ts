@@ -2,9 +2,11 @@
 // fumaça, anel, estrela, faísca) e sprites reaproveitados num pool. Vivem em coordenadas de mundo, então
 // acompanham câmera e zoom. O teto vem da qualidade (§4.10): no mínimo, nenhuma partícula. Usa um PRNG
 // visual próprio (Math.random): nunca consome a sequência da simulação (§2.1).
+// Marco 13 (14/10/2026): a origem é projetada (de cima ou isométrica); a partícula voa no espaço da tela.
 
 import { Container, Graphics, Sprite, type Renderer, type Texture } from 'pixi.js';
 import { CELULA_PX } from './camera-calculo';
+import { centroDaCelula, type Projecao } from './projecao';
 import { PRESETS_PARTICULA, type Emissao, type NomePreset, type TexturaParticula } from './presets-particula';
 
 interface Viva {
@@ -54,7 +56,11 @@ export class SistemaParticulas {
   /** Teto de partículas vivas, da qualidade atual. */
   limite = 300;
 
-  constructor(pai: Container, renderer: Renderer) {
+  constructor(
+    pai: Container,
+    renderer: Renderer,
+    private readonly projecao: () => Projecao,
+  ) {
     pai.addChild(this.camada);
     for (const tipo of ['ponto', 'brilho', 'fumaca', 'anel', 'estrela', 'faisca'] as const) {
       const g = desenharTextura(new Graphics(), tipo);
@@ -75,12 +81,20 @@ export class SistemaParticulas {
   }
 
   private emitirUma(e: Emissao, x: number, y: number, cor: number, ate?: { x: number; y: number }): void {
-    const cx = (x + 0.5) * CELULA_PX;
-    const cy = (y + 0.5) * CELULA_PX;
+    const proj = this.projecao();
+    // No isométrico, os efeitos saem do meio do corpo, não do chão.
+    const elevacao = proj.visao === 'iso' ? CELULA_PX * 0.4 : 0;
+    const centro = (cx: number, cy: number) => {
+      const c = centroDaCelula(cx, cy);
+      const p = proj.projetar(c.x, c.y);
+      return { x: p.x, y: p.y - elevacao };
+    };
+    const a = centro(x, y);
+    const b = ate ? centro(ate.x, ate.y) : a;
     for (let i = 0; i < e.quantidade && this.vivas.length < this.limite; i++) {
       const t = ate ? Math.random() : 0;
-      const ox = ate ? cx + ((ate.x + 0.5) * CELULA_PX - cx) * t : cx;
-      const oy = ate ? cy + ((ate.y + 0.5) * CELULA_PX - cy) * t : cy;
+      const ox = a.x + (b.x - a.x) * t;
+      const oy = a.y + (b.y - a.y) * t;
       const angulo = e.direcao === 'cima' ? -Math.PI / 2 + entre(-0.7, 0.7) : entre(0, Math.PI * 2);
       const v = entre(e.velocidade[0], e.velocidade[1]);
       const sprite = this.livres.pop() ?? new Sprite();

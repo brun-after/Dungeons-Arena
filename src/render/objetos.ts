@@ -3,12 +3,15 @@
 // na cor da raridade (§2.10). Só lê o estado.
 // Marco 9A (14/10/2026): ouro (moedas), baú (cadeado se trancado, anel de progresso enquanto abre,
 // tampa aberta até sumir) e loja (barraca com toldo).
+// Marco 13 (14/10/2026), D-058: no isométrico, baú e loja ficam em pé (na camada das entidades, com
+// profundidade); o resto continua no chão, sob a matriz do plano.
 
 import { Graphics, type Container } from 'pixi.js';
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import type { EstadoJogo, ObjetoNoMundo } from '../core/estado';
 import type { Raridade } from '../modos/modo';
 import { CELULA_PX } from './camera-calculo';
+import { centroDaCelula, type Projecao } from './projecao';
 
 const COR_ORBE: Readonly<Record<'orbe_hp' | 'orbe_recurso', number>> = {
   orbe_hp: 0x2ecc71,
@@ -24,8 +27,16 @@ export const COR_RARIDADE: Readonly<Record<Raridade, number>> = {
   lendario: 0xf39c12,
 };
 
+/** Onde desenhar os objetos altos no isométrico. */
+export interface OpcoesEmPe {
+  camada: Container;
+  projecao: () => Projecao;
+}
+
 export class CamadaObjetos {
   private readonly g = new Graphics();
+  /** Baús e lojas em pé, um Graphics por objeto (só no isométrico). */
+  private readonly altos = new Map<string, Graphics>();
 
   /**
    * `raridadeDe` traduz o item do chão para a cor; item desconhecido aparece como comum.
@@ -36,12 +47,12 @@ export class CamadaObjetos {
     private readonly raridadeDe: (itemId: string) => Raridade | undefined = () => undefined,
     private readonly ticksBau = 1,
     private readonly ticksDescanso: Readonly<Record<'curto' | 'longo', number>> = { curto: 1, longo: 1 },
+    private readonly emPe: OpcoesEmPe | null = null,
   ) {
     camada.addChild(this.g);
   }
 
-  private bau(estado: EstadoJogo, o: ObjetoNoMundo, cx: number, cy: number): void {
-    const g = this.g;
+  private bau(g: Graphics, estado: EstadoJogo, o: ObjetoNoMundo, cx: number, cy: number): void {
     const aberto = o.abertoTick > 0;
     const alpha = aberto ? 0.55 : 1;
     g.roundRect(cx - 15, cy - 8, 30, 20, 3).fill({ color: 0x8b5a2b, alpha }).stroke({ width: 2, color: 0x3b2410, alpha });
@@ -83,8 +94,7 @@ export class CamadaObjetos {
     }
   }
 
-  private loja(cx: number, cy: number): void {
-    const g = this.g;
+  private loja(g: Graphics, cx: number, cy: number): void {
     g.rect(cx - 14, cy - 4, 28, 16).fill(0x6e4b2a).stroke({ width: 2, color: 0x3b2410 });
     // Toldo listrado.
     for (let i = 0; i < 4; i++) g.rect(cx - 16 + i * 8, cy - 14, 8, 10).fill(i % 2 === 0 ? 0xc0392b : 0xecf0f1);
@@ -95,9 +105,17 @@ export class CamadaObjetos {
   desenhar(estado: EstadoJogo, agoraMs: number, movimentoReduzido: boolean): void {
     const g = this.g.clear();
     const pulso = movimentoReduzido ? 0 : Math.sin(agoraMs / 260) * 2;
+    const proj = this.emPe?.projecao();
+    const iso = proj?.visao === 'iso';
+    const vistos = new Set<string>();
     for (const o of estado.objetos) {
       const cx = (o.x + 0.5) * CELULA_PX;
       const cy = (o.y + 0.5) * CELULA_PX;
+      if (iso && this.emPe && (o.tipo === 'bau' || o.tipo === 'loja')) {
+        vistos.add(o.objetoId);
+        this.desenharEmPe(o, estado, proj, this.emPe.camada);
+        continue;
+      }
       if (o.tipo === 'item') {
         const cor = COR_RARIDADE[(o.itemId && this.raridadeDe(o.itemId)) || 'comum'];
         const r = 11;
@@ -111,11 +129,11 @@ export class CamadaObjetos {
         continue;
       }
       if (o.tipo === 'bau') {
-        this.bau(estado, o, cx, cy);
+        this.bau(g, estado, o, cx, cy);
         continue;
       }
       if (o.tipo === 'loja') {
-        this.loja(cx, cy);
+        this.loja(g, cx, cy);
         continue;
       }
       // A porta temporária do boss é desenhada com as outras portas (render/portas.ts).
@@ -131,9 +149,38 @@ export class CamadaObjetos {
       g.circle(cx, cy, 8).fill(COR_ORBE[o.tipo]).stroke({ width: 2, color: 0xffffff, alpha: 0.8 });
     }
     this.descansos(estado);
+    for (const [id, alto] of this.altos) {
+      if (vistos.has(id)) continue;
+      alto.destroy();
+      this.altos.delete(id);
+    }
+  }
+
+  private desenharEmPe(o: ObjetoNoMundo, estado: EstadoJogo, proj: Projecao, camada: Container): void {
+    let alto = this.altos.get(o.objetoId);
+    if (!alto) {
+      alto = new Graphics();
+      camada.addChild(alto);
+      this.altos.set(o.objetoId, alto);
+    }
+    const c = centroDaCelula(o.x, o.y);
+    const p = proj.projetar(c.x, c.y);
+    alto.position.set(p.x, p.y);
+    alto.zIndex = p.y;
+    alto.clear().ellipse(0, 0, 18, 8).fill({ color: 0x000000, alpha: 0.3 });
+    // Desenhado acima da origem (os pés do objeto ficam no centro da célula).
+    if (o.tipo === 'bau') this.bau(alto, estado, o, 0, -10);
+    else this.loja(alto, 0, -12);
+  }
+
+  /** Troca de visão: os objetos em pé voltam para o chão (ou o contrário) no próximo quadro. */
+  reiniciarVisual(): void {
+    for (const alto of this.altos.values()) alto.destroy();
+    this.altos.clear();
   }
 
   destruir(): void {
+    this.reiniciarVisual();
     this.g.destroy();
   }
 }

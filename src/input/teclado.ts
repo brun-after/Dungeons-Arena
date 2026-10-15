@@ -31,6 +31,8 @@ export interface OpcoesTeclado {
   aoDescansar?: (longo: boolean) => void;
   /** Tecla `X`: dispensa as invocações (marco 10A-3). */
   aoDispensar?: () => void;
+  /** Tecla `V`: alterna a visão (de cima ↔ isométrica, marco 13). */
+  aoAlternarVisao?: () => void;
   /** Com um modal aberto, as teclas não chegam ao jogo (marco 6). */
   bloqueado?: () => boolean;
 }
@@ -76,6 +78,10 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
       opcoes.aoDescansar(ev.shiftKey);
     } else if (ev.code === 'KeyX' && !ev.repeat && opcoes.aoDispensar) {
       opcoes.aoDispensar();
+    } else if (ev.code === 'KeyV' && !ev.repeat && opcoes.aoAlternarVisao) {
+      opcoes.aoAlternarVisao();
+      // As teclas mantidas passam a valer na visão nova (o remapeamento muda).
+      recalcular();
     } else if (ev.code in EIXOS) {
       ev.preventDefault();
       if (!ev.repeat) {

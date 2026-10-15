@@ -2,6 +2,7 @@
 // mundo, HUD, controles, cabeçalho, entrada e feedback. Quem chama decide de onde vem o estado
 // (simulação local ou cliente de rede) e para onde vão os comandos.
 // Marco 12 (14/10/2026): áudio, efeitos, luz, minimapa, prompt, pausa e configurações (ui/apresentacao.ts).
+// Marco 13 (14/10/2026): visão de cima ou isométrica (ui/visao.ts), modelos de criatura e token por imagem.
 
 import { recargaRestante } from '../combat/acao';
 import { celulaOcupada } from '../combat/geometria';
@@ -19,10 +20,10 @@ import { ligarTeclado, type Teclado } from '../input/teclado';
 import { podeFerir } from '../modos/relacao';
 import { consumiveisComAtalho } from '../progression/inventario';
 import { detectarToque, sinaisDoNavegador } from '../plataforma/dispositivo';
-import { lerPreferencias } from '../plataforma/preferencias';
+import { gravarPreferencias, lerPreferencias, type Preferencias } from '../plataforma/preferencias';
 import { prepararSessaoDeTela } from '../plataforma/sessao-tela';
 import { Camera } from '../render/camera';
-import { CELULA_PX } from '../render/camera-calculo';
+import { criarProjecao } from '../render/projecao';
 import { CamadaNumeros } from '../render/numeros';
 import { CamadaFluxo } from '../render/fluxo';
 import { CamadaObjetos } from '../render/objetos';
@@ -43,6 +44,7 @@ import { criarLoja } from './loja';
 import { criarMochila } from './mochila';
 import { criarBarraHabilidades } from './habilidades';
 import { Hud } from './hud';
+import { montarVisao, type ControleVisao } from './visao';
 
 const LEITURA_FAIXA_MS = 1000;
 /** Teclas 1–4 são das habilidades; as seguintes, dos consumíveis (D-050). */
@@ -94,6 +96,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const toque = detectarToque(sinaisDoNavegador());
   document.body.classList.toggle('toque', toque);
   const prefs = lerPreferencias();
+  let aparencia: Preferencias = prefs;
   const jogador = () => o.estado().entidades.find((e) => e.id === idLocal);
 
   o.raiz.textContent = '';
@@ -112,7 +115,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   }
   prepararSessaoDeTela(toque);
 
-  const camera = new Camera(fase.largura * CELULA_PX, fase.altura * CELULA_PX, prefs.camera, toque);
+  const camera = new Camera(criarProjecao(prefs.visao, fase.largura, fase.altura), prefs.camera, toque);
+  let visao: ControleVisao | null = null;
   const bus = new Barramento<EventosDaSimulacao>();
   let controles: Controles | null = null;
   const ap = montarApresentacao({
@@ -133,19 +137,50 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     aoMudarPreferencias: (p) => {
       camera.modo = p.camera;
       controles?.trocarTipo(p.controle);
+      if (p.sentidoToken !== aparencia.sentidoToken || p.tamanhoToken !== aparencia.tamanhoToken) sprites.reiniciarVisual();
+      aparencia = p;
+      visao?.definir(p.visao);
     },
   });
   const terreno = criarTerreno(palco.terreno, fase);
-  const sprites = new CamadaEntidades(palco.entidades, idLocal);
-  const telegrafia = new CamadaTelegrafia(palco.chao, palco.voo);
-  const objetos = new CamadaObjetos(palco.chao, (id) => ctx.conteudo.itens.get(id)?.raridade, ticksDe(ctx.balance.economia.bauCongelaMs), {
-    curto: ticksDe(ctx.balance.descanso.curtoMs),
-    longo: ticksDe(ctx.balance.descanso.longoMs),
+  const projecao = () => camera.projecaoAtual;
+  const sprites = new CamadaEntidades(palco.entidades, {
+    idLocal,
+    projecao,
+    biblioteca: () => visao?.biblioteca() ?? null,
+    tokenProprio: () => visao?.tokenProprio() ?? null,
+    aparencia: () => ({ tamanho: aparencia.tamanhoToken, imagemOlhaEsquerda: aparencia.sentidoToken === 'esquerda' }),
+    usarTiras: () => ap.qualidade().tiras,
+    reduzido: () => ap.movimentoReduzido(),
   });
+  const telegrafia = new CamadaTelegrafia(palco.chao, palco.voo, projecao);
+  const objetos = new CamadaObjetos(
+    palco.chao,
+    (id) => ctx.conteudo.itens.get(id)?.raridade,
+    ticksDe(ctx.balance.economia.bauCongelaMs),
+    { curto: ticksDe(ctx.balance.descanso.curtoMs), longo: ticksDe(ctx.balance.descanso.longoMs) },
+    { camada: palco.entidades, projecao },
+  );
   const fluxo = new CamadaFluxo(palco.chao);
   const portas = new CamadaPortas(palco.chao, fase, ticksDe(ctx.balance.portas.janelaPortaBossMs));
-  const numeros = new CamadaNumeros(palco.efeitos, ap.movimentoReduzido);
-  const isometrico = () => false; // a visão isométrica entra no marco 13
+  const numeros = new CamadaNumeros(palco.efeitos, ap.movimentoReduzido, projecao);
+  visao = await montarVisao({
+    palco,
+    camera,
+    fase,
+    aoTrocar: () => {
+      sprites.reiniciarVisual();
+      objetos.reiniciarVisual();
+    },
+  });
+  const isometrico = () => camera.projecaoAtual.visao === 'iso';
+  // Tecla V: alterna e guarda a escolha (a mesma das Configurações).
+  const alternarVisao = () => {
+    const nova = isometrico() ? 'cima' : 'iso';
+    aparencia = { ...lerPreferencias(), visao: nova };
+    gravarPreferencias(aparencia);
+    visao.definir(nova);
+  };
   const usarHabilidade = (id: string) => {
     emitir({ t: 'usarHabilidade', id });
   };
@@ -271,6 +306,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     aoDispensar: () => {
       emitir({ t: 'dispensar' });
     },
+    aoAlternarVisao: alternarVisao,
     // `Esc` contextual (§2.15): com alvo, cancela a mira; sem alvo, pausa (ou abre o menu, na arena).
     aoCancelar: () => {
       if (jogador()?.alvoSelecionado) emitir({ t: 'selecionarAlvo', alvo: null });
@@ -335,7 +371,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     fluxo.desenhar(estado, idLocal);
     if (!congelado) {
       telegrafia.desenhar(estado, ctx, idLocal, q.alpha);
-      sprites.desenhar(estado, ctx, q.posicao, q.alpha, q.aoRemover);
+      sprites.desenhar(estado, ctx, q.posicao, q.alpha, q.agoraMs, q.aoRemover);
       numeros.atualizar(q.agoraMs);
     }
     palco.renderizar();

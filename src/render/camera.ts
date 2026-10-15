@@ -2,24 +2,25 @@
 // camera-calculo.ts ao container do mundo. Dois modos: janela morta (padrão) e centralizada.
 // Marco 12 (14/10/2026): "enquadrar dois" (foco no ponto médio entre o jogador e o alvo, respeitando
 // 4 s depois de pinça, roda ou arrasto, §2.4) e o deslocamento dos presets de impacto no desenho.
+// Marco 13 (14/10/2026), D-058: a câmera opera no mundo projetado (`Projecao`); de cima, a projeção é a
+// identidade e tudo fica como antes. O toque vira célula por `desprojetar`, nas duas visões.
 
 import type { Container } from 'pixi.js';
 import type { Celula } from '../core/comandos';
 import type { ModoCamera } from '../plataforma/preferencias';
 import {
   aproximar,
-  CELULA_PX,
   janelaMortaEixo,
   limitarEixo,
   MARGEM_DESKTOP,
   MARGEM_TOQUE,
-  telaParaCelula,
   velocidadeMaximaCamera,
   zoomAncorado,
   LIMITES_JOGO,
   type LimitesZoom,
   type Vista,
 } from './camera-calculo';
+import { celulaSobProjetado, centroDaCelula, type Projecao } from './projecao';
 
 /** Depois de mexer na câmera à mão, o "enquadrar dois" espera 4 s (§2.4). */
 export const JANELA_MANUAL_MS = 4000;
@@ -37,12 +38,24 @@ export class Camera {
   private ultimaManualMs = -Infinity;
 
   constructor(
-    private readonly larguraMundo: number,
-    private readonly alturaMundo: number,
+    private projecao: Projecao,
     public modo: ModoCamera,
     private readonly toque: boolean,
     private readonly limites: LimitesZoom = LIMITES_JOGO,
   ) {}
+
+  get projecaoAtual(): Projecao {
+    return this.projecao;
+  }
+
+  /** Troca a visão (de cima ↔ isométrica) mantendo o mesmo ponto da fase no centro da vista. */
+  definirProjecao(p: Projecao): void {
+    const centro = this.projecao.desprojetar(this.x + this.larguraVistaMundo / 2, this.y + this.alturaVistaMundo / 2);
+    this.projecao = p;
+    const novo = p.projetar(centro.x, centro.y);
+    this.x = this.alvoX = this.limitarX(novo.x - this.larguraVistaMundo / 2);
+    this.y = this.alvoY = this.limitarY(novo.y - this.alturaVistaMundo / 2);
+  }
 
   definirVista(vista: Vista): void {
     this.vista = { largura: Math.max(1, vista.largura), altura: Math.max(1, vista.altura) };
@@ -65,32 +78,45 @@ export class Camera {
   }
 
   private limitarX(x: number): number {
-    return limitarEixo(x, this.larguraMundo, this.larguraVistaMundo);
+    return limitarEixo(x, this.projecao.largura, this.larguraVistaMundo);
   }
 
   private limitarY(y: number): number {
-    return limitarEixo(y, this.alturaMundo, this.alturaVistaMundo);
+    return limitarEixo(y, this.projecao.altura, this.alturaVistaMundo);
+  }
+
+  /** Centro de uma posição (em células) no mundo projetado. */
+  private centro(cx: number, cy: number): { x: number; y: number } {
+    const c = centroDaCelula(cx, cy);
+    return this.projecao.projetar(c.x, c.y);
+  }
+
+  private origemPara(cx: number, cy: number): { x: number; y: number } {
+    const c = this.centro(cx, cy);
+    return { x: this.limitarX(c.x - this.larguraVistaMundo / 2), y: this.limitarY(c.y - this.alturaVistaMundo / 2) };
   }
 
   /** Centraliza imediatamente numa célula (entrada na fase). */
   centralizar(c: Celula): void {
-    this.x = this.alvoX = this.limitarX((c.x + 0.5) * CELULA_PX - this.larguraVistaMundo / 2);
-    this.y = this.alvoY = this.limitarY((c.y + 0.5) * CELULA_PX - this.alturaVistaMundo / 2);
+    const o = this.origemPara(c.x, c.y);
+    this.x = this.alvoX = o.x;
+    this.y = this.alvoY = o.y;
     this.ultimaCelula = { x: c.x, y: c.y };
   }
 
-  /** Janela morta: disparada pela mudança de célula lógica, recalculando só o eixo que mudou. */
+  /**
+   * Janela morta: disparada pela mudança de célula lógica, recalculando só o eixo da tela que mudou
+   * (de cima, o eixo da grade; no isométrico, um passo na grade mexe nos dois eixos da tela).
+   */
   seguirCelula(c: Celula): void {
     const anterior = this.ultimaCelula;
     this.ultimaCelula = { x: c.x, y: c.y };
     if (this.modo !== 'janela' || !anterior) return;
     const margem = this.toque ? MARGEM_TOQUE : MARGEM_DESKTOP;
-    if (anterior.x !== c.x) {
-      this.alvoX = this.limitarX(janelaMortaEixo(this.alvoX, (c.x + 0.5) * CELULA_PX, this.larguraVistaMundo, margem));
-    }
-    if (anterior.y !== c.y) {
-      this.alvoY = this.limitarY(janelaMortaEixo(this.alvoY, (c.y + 0.5) * CELULA_PX, this.alturaVistaMundo, margem));
-    }
+    const antes = this.centro(anterior.x, anterior.y);
+    const agora = this.centro(c.x, c.y);
+    if (antes.x !== agora.x) this.alvoX = this.limitarX(janelaMortaEixo(this.alvoX, agora.x, this.larguraVistaMundo, margem));
+    if (antes.y !== agora.y) this.alvoY = this.limitarY(janelaMortaEixo(this.alvoY, agora.y, this.alturaVistaMundo, margem));
   }
 
   /**
@@ -104,16 +130,18 @@ export class Camera {
   /** Avança a suavização. `posicaoJogador` em células (posição de render). */
   atualizar(dtS: number, posicaoJogador: { x: number; y: number }, velocidadeJogador: number): void {
     if (this.foco) {
-      this.alvoX = this.limitarX((this.foco.x + 0.5) * CELULA_PX - this.larguraVistaMundo / 2);
-      this.alvoY = this.limitarY((this.foco.y + 0.5) * CELULA_PX - this.alturaVistaMundo / 2);
+      const o = this.origemPara(this.foco.x, this.foco.y);
+      this.alvoX = o.x;
+      this.alvoY = o.y;
       const vMax = velocidadeMaximaCamera(velocidadeJogador);
       this.x = aproximar(this.x, this.alvoX, vMax, dtS);
       this.y = aproximar(this.y, this.alvoY, vMax, dtS);
       return;
     }
     if (this.modo === 'centralizada') {
-      this.x = this.alvoX = this.limitarX((posicaoJogador.x + 0.5) * CELULA_PX - this.larguraVistaMundo / 2);
-      this.y = this.alvoY = this.limitarY((posicaoJogador.y + 0.5) * CELULA_PX - this.alturaVistaMundo / 2);
+      const o = this.origemPara(posicaoJogador.x, posicaoJogador.y);
+      this.x = this.alvoX = o.x;
+      this.y = this.alvoY = o.y;
       return;
     }
     const vMax = velocidadeMaximaCamera(velocidadeJogador);
@@ -144,20 +172,31 @@ export class Camera {
   }
 
   celulaSob(sx: number, sy: number): Celula {
-    return telaParaCelula({ x: this.x, y: this.y }, this.zoom, sx, sy);
+    return celulaSobProjetado(this.projecao, this.x + sx / this.zoom, this.y + sy / this.zoom);
   }
 
   /** Centro de uma posição (em células) em px de tela. */
   paraTela(cx: number, cy: number): { x: number; y: number } {
-    return {
-      x: ((cx + 0.5) * CELULA_PX - this.x) * this.zoom,
-      y: ((cy + 0.5) * CELULA_PX - this.y) * this.zoom,
-    };
+    const c = this.centro(cx, cy);
+    return { x: (c.x - this.x) * this.zoom, y: (c.y - this.y) * this.zoom };
   }
 
-  /** Retângulo visível em px de mundo (para o descarte de blocos do terreno). */
+  /**
+   * Retângulo visível em px de plano (para o descarte de blocos do terreno). No isométrico, a caixa
+   * que envolve os quatro cantos da vista desprojetados.
+   */
   retanguloVisivel(alturaTotalTela: number): [number, number, number, number] {
-    return [this.x, this.y, this.x + this.larguraVistaMundo, this.y + alturaTotalTela / this.zoom];
+    const x1 = this.x + this.larguraVistaMundo;
+    const y1 = this.y + alturaTotalTela / this.zoom;
+    const cantos = [
+      this.projecao.desprojetar(this.x, this.y),
+      this.projecao.desprojetar(x1, this.y),
+      this.projecao.desprojetar(this.x, y1),
+      this.projecao.desprojetar(x1, y1),
+    ];
+    const xs = cantos.map((c) => c.x);
+    const ys = cantos.map((c) => c.y);
+    return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
   }
 
   /** `impacto`: deslocamento (px de tela) e zoom extra dos presets de impacto; não muda o estado da câmera. */
