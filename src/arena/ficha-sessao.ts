@@ -128,6 +128,8 @@ export function construirFichaDeSessao(pedido: unknown, modo: ModoDeJogo, conteu
 
   // HP, mana e defesa: sempre derivados; nada do cliente é aceito (§2.5, §3.7).
   let hpMax = hpMaximo(classe.hpBase, atributos.constituicao, balance.hp.hpAtributoMult, balance.hp.dificuldadeMult);
+  // Marco 15: a vida do modo (o Livre dura mais, D-061).
+  if (c) hpMax = Math.max(1, Math.round((hpMax * c.vidaPct) / 100));
   if (c?.hpMaxAbsoluto) hpMax = Math.min(hpMax, c.hpMaxAbsoluto);
   if (p.hpMax !== undefined) registrar('hpMax', p.hpMax, hpMax);
 

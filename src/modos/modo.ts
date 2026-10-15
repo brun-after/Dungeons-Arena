@@ -42,6 +42,8 @@ export interface ClampDeFicha {
   habilidadesPermitidas: string[] | 'qualquer';
   slotsHabilidade: number;
   hpMaxAbsoluto: number | null;
+  /** Marco 15 (D-061): a vida no modo, em % da derivada (o PvP dura mais sem mexer no dano). */
+  vidaPct: number;
   orcamentoEquipamento: number;
   /** Desempate da redução: o primeiro da lista perde ponto antes (§3.7, "documentado em dados"). */
   ordemReducao: (keyof Atributos)[];
@@ -139,6 +141,7 @@ function lerClamp(l: Leitor, valor: unknown): ClampDeFicha | null {
     habilidadesPermitidas: lerListaOuQualquer(l, o, 'habilidadesPermitidas'),
     slotsHabilidade: l.numero(o, 'slotsHabilidade', { min: 0, max: 12, inteiro: true }),
     hpMaxAbsoluto: o.hpMaxAbsoluto === null ? null : l.numero(o, 'hpMaxAbsoluto', { min: 1 }),
+    vidaPct: l.numero(o, 'vidaPct', { min: 10, max: 1000 }),
     orcamentoEquipamento: l.numero(o, 'orcamentoEquipamento', { min: 0 }),
     ordemReducao: ordemValida ? (ordem as (keyof Atributos)[]) : [...ORDEM_PADRAO],
     presetClasse: o.presetClasse === null ? null : l.texto(o, 'presetClasse'),

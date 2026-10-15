@@ -9,6 +9,7 @@ import type { Dificuldade, RegrasDificuldade, RegrasGrupo } from '../modos/dific
 import type { ModoDeJogo, Raridade } from '../modos/modo';
 import type { RegrasColisao } from '../world/colisao';
 import type { Fase } from '../world/fase';
+import type { Atributos } from '../entities/entidade';
 import type { Conteudo } from './conteudo';
 
 export interface Balance {
@@ -163,8 +164,30 @@ export interface Balance {
     chanceLivroRaro: number;
   };
   /** Marco 15 (D-061): as alavancas de cada dificuldade e a escala pelo tamanho do grupo. */
+  /** Marco 15 (D-061): as metas do ritmo, conferidas pelo simulador (tools/balanceamento) e pelo teste "ritmo". */
+  metas: {
+    /** Os presets que contam como "inimigo comum". */
+    comuns: string[];
+    comum: { golpesMin: number; golpesMax: number; tempoMinS: number; tempoMaxS: number };
+    aguenta: { golpesMin: number; golpesMax: number };
+    chefe: { tempoMinS: number; tempoMaxS: number; nivelJogador: number; nivelChefe: number };
+    pvpLivre: { tempoMinS: number; tempoMaxS: number; nivel: number };
+    avisoUtilMinMs: number;
+    grupo: { tempoMinPctDoSolo: number; tempoMaxPctDoSolo: number };
+    invocacao: { fatiaMinPct: number; fatiaMaxPct: number };
+  };
   dificuldades: Record<Dificuldade, RegrasDificuldade>;
   grupo: RegrasGrupo;
+  /**
+   * Marco 15 (§2.5, D-061): o inimigo cresce com o nível — cada atributo ganha `porNivel` a cada nível a partir de
+   * `aPartirDoNivel` (vida pela Constituição, dano pelo atributo da classe); o XP cresce `xpPorNivelPct` por nível.
+   */
+  inimigos: {
+    crescimento: { atributo: keyof Atributos; porNivel: number; aPartirDoNivel: number }[];
+    xpPorNivelPct: number;
+    /** A vida de todo inimigo, em % da fórmula (§2.5): o ajuste fino do ritmo sem mexer em cada preset. */
+    vidaPct: number;
+  };
   ia: RegrasIa;
 }
 

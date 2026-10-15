@@ -12,7 +12,7 @@
     "jogadorBloqueiaInimigo": false
   },
   "combate": {
-    "multiplicadorAtributoPadrao": 0.5,
+    "multiplicadorAtributoPadrao": 1,
     "autoAtaqueMs": 250,
     "janelaParticipacaoS": 10,
     "carismaNeutro": 10,
@@ -174,13 +174,34 @@
     "chanceSecundario": 0.4,
     "chanceLivroRaro": 0.04
   },
+  "metas": {
+    "comuns": ["goblin", "esqueleto", "lobo", "cultista", "slime", "aranha"],
+    "comum": { "golpesMin": 3, "golpesMax": 5, "tempoMinS": 4, "tempoMaxS": 7 },
+    "aguenta": { "golpesMin": 6, "golpesMax": 8 },
+    "chefe": { "tempoMinS": 25, "tempoMaxS": 40, "nivelJogador": 2, "nivelChefe": 1 },
+    "pvpLivre": { "tempoMinS": 6, "tempoMaxS": 10, "nivel": 10 },
+    "avisoUtilMinMs": 250,
+    "grupo": { "tempoMinPctDoSolo": 40, "tempoMaxPctDoSolo": 110 },
+    "invocacao": { "fatiaMinPct": 15, "fatiaMaxPct": 35 }
+  },
   "dificuldades": {
     "facil": { "vidaPct": 75, "danoPct": 70, "hesitacaoPct": 130, "avisoExtraMs": 150, "recompensaPct": 80 },
     "normal": { "vidaPct": 100, "danoPct": 100, "hesitacaoPct": 100, "avisoExtraMs": 0, "recompensaPct": 100 },
     "dificil": { "vidaPct": 130, "danoPct": 125, "hesitacaoPct": 80, "avisoExtraMs": 0, "recompensaPct": 125 },
     "pesadelo": { "vidaPct": 170, "danoPct": 150, "hesitacaoPct": 60, "avisoExtraMs": 0, "recompensaPct": 160 }
   },
-  "grupo": { "vidaPorJogadorPct": 60, "danoPorJogadorPct": 8, "recompensaPorJogadorPct": 10, "spawnerPorJogadorPct": 25 },
+  "grupo": { "vidaPorJogadorPct": 70, "danoPorJogadorPct": 8, "recompensaPorJogadorPct": 10, "spawnerPorJogadorPct": 25 },
+  "inimigos": {
+    "crescimento": [
+      { "atributo": "constituicao", "porNivel": 3, "aPartirDoNivel": 2 },
+      { "atributo": "forca", "porNivel": 1, "aPartirDoNivel": 2 },
+      { "atributo": "inteligencia", "porNivel": 1, "aPartirDoNivel": 3 },
+      { "atributo": "destreza", "porNivel": 1, "aPartirDoNivel": 7 },
+      { "atributo": "sabedoria", "porNivel": 1, "aPartirDoNivel": 10 }
+    ],
+    "xpPorNivelPct": 25,
+    "vidaPct": 120
+  },
   "ia": {
     "gracaForaDaZonaMs": 1200,
     "patrulhaAvaliacaoMs": 2000,
