@@ -193,6 +193,26 @@ export function conferirPersonagem(pedido: unknown, ctx: ContextoSimulacao, id: 
   return { entidade: e, alteracoes };
 }
 
+/**
+ * Marco 17 (D-063): o personagem que voltou da arena, como o servidor o certificou, gravado no slot. A bolsa é a do
+ * retrato (a mesma que a assinatura cobre), a ficha é derivada de novo e a fase do slot fica como estava.
+ */
+export function aplicarRetratoNoSave(r: RegistroProgresso, retrato: PedidoDePersonagem, ctx: ContextoSimulacao, agora: number): RegistroProgresso {
+  const atual = jogadorDoSave(r.estado);
+  if (!atual) return r;
+  const estado = clonarEstado(r.estado);
+  const j = estado.entidades.find((e) => e.id === atual.id);
+  if (!j) return r;
+  // Clone explícito da bolsa do retrato (pela cópia de entidade, que copia a bolsa campo a campo).
+  j.bolsa = clonarEntidade({ ...j, bolsa: retrato.bolsa }).bolsa;
+  j.nivel = retrato.nivel;
+  j.xp = retrato.xp;
+  recalcularFicha(j, ctx);
+  j.hp = j.hpMax;
+  j.mana = j.manaMax;
+  return { ...r, estado, atualizadoEm: agora };
+}
+
 /** A prévia que a sala devolve no `bemVindo` para quem entrou com o personagem (marco 15; arena no 17). */
 export function previaDoPersonagem(e: Entidade, alteracoes: Alteracao[], modoId: string, versaoBalance: number): PreviaDeFicha {
   return {

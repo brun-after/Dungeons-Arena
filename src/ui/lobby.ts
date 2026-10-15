@@ -1,16 +1,48 @@
 // Lobby da arena online (§2.13, "Ciclo de uma sala"): criar sala (recebe um código para
 // compartilhar) ou entrar com um código. Antes de entrar, mostra a região do servidor e o ping
 // medido (§3.6, "Justiça"). Textos sempre por textContent (§3.4).
+// Marco 17 (15/10/2026, D-063): escolhe o personagem (um slot da campanha, ou a ficha de treino) e mostra as salas
+// da faixa de nível dele; a sala nova nasce com essa faixa.
 
+import { conteudoOficial, modoPorId } from '../core/conteudo';
+import { t, type ChaveTexto } from '../i18n';
+import { faixaDoNivel } from '../modos/regras';
+import { listarSlots } from '../plataforma/saves';
 import { enderecoHttp } from '../plataforma/servidor';
-import { t } from '../i18n';
 import type { PedidoDeSala } from '../plataforma/transporte-colyseus';
 
 export interface OpcoesLobby {
   raiz: HTMLElement;
   /** Endereço WSS do servidor; null quando o build não tem servidor configurado. */
   servidor: string | null;
-  aoEscolher: (pedido: PedidoDeSala) => Promise<void>;
+  /** `slot`: o personagem da campanha que entra (null: ficha de treino, sem recompensas). */
+  aoEscolher: (pedido: PedidoDeSala, slot: number | null) => Promise<void>;
+}
+
+interface SalaListada {
+  codigo: string;
+  jogadores: number;
+  maxJogadores: number;
+}
+
+async function salasDaFaixa(servidor: string, faixa: string): Promise<SalaListada[]> {
+  try {
+    const r = await fetch(`${enderecoHttp(servidor)}/salas?faixa=${encodeURIComponent(faixa)}`, { cache: 'no-store' });
+    const corpo = (await r.json()) as { salas?: unknown };
+    return Array.isArray(corpo.salas) ? (corpo.salas as SalaListada[]).filter((s) => typeof s.codigo === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+/** O texto de um erro de entrada (servidor cheio, certificado recusado, fora da faixa...). */
+function textoDoErro(motivo: string, criando: boolean): string {
+  if (motivo.includes('servidor_cheio')) return t('lobby.servidorCheio');
+  if (motivo.includes('muitas_salas')) return t('lobby.muitasSalas');
+  if (motivo.includes('fora_da_faixa')) return t('lobby.foraDaFaixa');
+  const certificado = /certificado:(\w+)/.exec(motivo)?.[1];
+  if (certificado) return t(`lobby.certificado.${certificado}` as ChaveTexto);
+  return criando ? t('lobby.erroCriar') : t('lobby.erroEntrar');
 }
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, texto?: string): HTMLElementTagNameMap[K] {
@@ -80,32 +112,78 @@ export function mostrarLobby(o: OpcoesLobby): void {
   const entrar = el('button', 'botao-menu', t('lobby.entrar'));
   entrar.type = 'submit';
   formulario.append(rotulo, campo, entrar);
-  tela.append(arena, criar, formulario, erro, voltar);
+
+  // Marco 17: o personagem que entra e as salas da faixa dele.
+  const modo = modoPorId(conteudoOficial(), 'livre');
+  const rotuloPersonagem = el('label', 'linha-config', t('lobby.personagem'));
+  const personagem = el('select', 'escolha-personagem');
+  rotuloPersonagem.append(personagem);
+  const treino = el('option', undefined, t('lobby.fichaTreino'));
+  treino.value = '';
+  personagem.append(treino);
+  const niveis = new Map<string, number>();
+  const blocoSalas = el('section', 'salas-da-faixa');
+  const tituloSalas = el('h2');
+  const listaSalas = el('ul');
+  blocoSalas.append(tituloSalas, listaSalas);
+  tela.append(rotuloPersonagem, arena, criar, formulario, blocoSalas, erro, voltar);
   o.raiz.append(tela);
 
-  void medirServidor(o.servidor).then((m) => {
+  const slotEscolhido = (): number | null => (personagem.value ? Number(personagem.value) : null);
+  const faixaEscolhida = (): string => {
+    const nivel = niveis.get(personagem.value);
+    return nivel === undefined ? 'aberta' : (faixaDoNivel(modo, nivel)?.id ?? 'aberta');
+  };
+
+  const servidor = o.servidor;
+  void medirServidor(servidor).then((m) => {
     status.textContent = m ? t('lobby.servidor', { regiao: m.regiao, ping: m.pingMs }) : t('lobby.foraDoAr');
   });
 
   const escolher = async (pedido: PedidoDeSala) => {
     criar.disabled = entrar.disabled = true;
-    erro.textContent = '';
+    erro.textContent = slotEscolhido() !== null ? t('lobby.conferindo') : '';
     try {
-      await o.aoEscolher(pedido);
+      await o.aoEscolher(pedido, slotEscolhido());
     } catch (e) {
-      const motivo = e instanceof Error ? e.message : '';
-      // Marco 16: o servidor diz por que não criou (limite de salas ou de criações por minuto).
-      erro.textContent = motivo.includes('servidor_cheio')
-        ? t('lobby.servidorCheio')
-        : motivo.includes('muitas_salas')
-          ? t('lobby.muitasSalas')
-          : 'criar' in pedido
-            ? t('lobby.erroCriar')
-            : t('lobby.erroEntrar');
+      // Marcos 16 e 17: o servidor diz por que não deu (limite de salas, certificado, faixa).
+      erro.textContent = textoDoErro(e instanceof Error ? e.message : '', 'criar' in pedido);
       criar.disabled = entrar.disabled = false;
     }
   };
-  criar.addEventListener('click', () => void escolher({ criar: true, fase: arena.value }));
+
+  const atualizarSalas = async () => {
+    const faixa = faixaEscolhida();
+    tituloSalas.textContent = faixa === 'aberta' ? t('lobby.salasAbertas') : t('lobby.salasDaFaixa', { faixa });
+    listaSalas.textContent = '';
+    const salas = await salasDaFaixa(servidor, faixa);
+    if (salas.length === 0) listaSalas.append(el('li', 'detalhe-slot', t('lobby.semSalas')));
+    for (const s of salas) {
+      const item = el('li');
+      const botao = el('button', 'botao-cabecalho', t('lobby.entrarNaSala', { codigo: s.codigo, n: s.jogadores, max: s.maxJogadores }));
+      botao.type = 'button';
+      botao.addEventListener('click', () => void escolher({ codigo: s.codigo }));
+      item.append(botao);
+      listaSalas.append(item);
+    }
+  };
+  personagem.addEventListener('change', () => void atualizarSalas());
+  void listarSlots()
+    .catch(() => [])
+    .then((slots) => {
+      for (const s of slots) {
+        if (s.tipo !== 'ok') continue;
+        const op = el('option', undefined, t('lobby.slotPersonagem', { n: s.slot, nivel: s.resumo.nivel }));
+        op.value = String(s.slot);
+        niveis.set(op.value, s.resumo.nivel);
+        personagem.append(op);
+      }
+      // O primeiro slot com personagem já vem escolhido: a arena é para usar o personagem da campanha.
+      const primeiro = [...niveis.keys()][0];
+      if (primeiro) personagem.value = primeiro;
+      void atualizarSalas();
+    });
+  criar.addEventListener('click', () => void escolher({ criar: true, fase: arena.value, faixa: faixaEscolhida() }));
   formulario.addEventListener('submit', (ev) => {
     ev.preventDefault();
     const codigo = campo.value.trim().toUpperCase();
