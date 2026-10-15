@@ -15,10 +15,11 @@ interface Receita {
   zoom: number;
 }
 
-const RECEITAS: Readonly<Record<TipoImpacto, Receita>> = {
-  leve: { tremorPx: 4, duracaoMs: 150, congelaMs: 0, flash: 0, corFlash: 0xffffff, zoom: 0 },
-  forte: { tremorPx: 9, duracaoMs: 300, congelaMs: 60, flash: 0.22, corFlash: 0xffffff, zoom: 0.04 },
-  dano: { tremorPx: 5, duracaoMs: 200, congelaMs: 0, flash: 0.18, corFlash: 0xe74c3c, zoom: 0 },
+// Ajuste de 14/10/2026: tremor e flash pela metade (feedback de jogo; D-056).
+export const RECEITAS: Readonly<Record<TipoImpacto, Receita>> = {
+  leve: { tremorPx: 2, duracaoMs: 150, congelaMs: 0, flash: 0, corFlash: 0xffffff, zoom: 0 },
+  forte: { tremorPx: 4.5, duracaoMs: 300, congelaMs: 60, flash: 0.11, corFlash: 0xffffff, zoom: 0.04 },
+  dano: { tremorPx: 2.5, duracaoMs: 200, congelaMs: 0, flash: 0.09, corFlash: 0xe74c3c, zoom: 0 },
 };
 
 export const IMPACTOS_SIMULTANEOS = 3;

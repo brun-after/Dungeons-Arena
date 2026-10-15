@@ -11,6 +11,8 @@ export interface PontoDeLuz {
   cor: number;
   /** Desloca a fase da cintilação, para as luzes não piscarem juntas. */
   semente: number;
+  /** Multiplica o brilho (1 = normal). A do jogador é 0,5 desde o ajuste de 14/10/2026. */
+  intensidade?: number;
 }
 
 const RAIO_CELULAS = 3.2;
@@ -63,7 +65,7 @@ export class CamadaLuz {
       s.tint = p.cor;
       s.position.set((p.x + 0.5) * CELULA_PX, (p.y + 0.5) * CELULA_PX);
       s.scale.set(escala);
-      s.alpha = movimentoReduzido ? 0.55 : cintilacao(agoraMs, p.semente);
+      s.alpha = (movimentoReduzido ? 0.55 : cintilacao(agoraMs, p.semente)) * (p.intensidade ?? 1);
     });
     for (let i = pontos.length; i < this.sprites.length; i++) {
       const s = this.sprites[i];

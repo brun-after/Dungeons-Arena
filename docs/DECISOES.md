@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.23 · **Data:** 14/10/2026
+**Versão:** 0.24 · **Data:** 14/10/2026
 
 > **Histórico**
+> - **0.24 (14/10/2026)**: D-056 ajustada (brilho do jogador, tremor e flash pela metade).
 > - **0.23 (14/10/2026)**: D-057 (sistema de habilidades, novo marco 14; rebalanceamento vira 15 e endurecimento, 16).
 > - **0.22 (14/10/2026)**: D-056 (áudio sintetizado, interface, efeitos como dado, qualidade e acessibilidade), marco 12.
 > - **0.21 (14/10/2026)**: D-055 (sugestões de capacidades, áudio e ordem da convergência).
@@ -955,6 +956,9 @@ fixou a trilha sintetizada e os efeitos visuais descritos como dado.
   - com "automática", desce um nível com média abaixo de 45 fps em duas verificações seguidas de 5 s e avisa;
     nunca sobe sozinha. No painel de navegador do app em segundo plano (~30 fps) ela desce até o mínimo, como a
     regra manda.
+- **Ajuste depois de jogar** (v0.24): o brilho em volta do jogador caiu pela metade (`intensidade` 0,5 só nessa luz),
+  e o tremor e o flash também (leve 2 px; forte 4,5 px e flash 0,11; dano 2,5 px e flash 0,09). Duração,
+  congelamento e soco de zoom ficaram iguais.
 - **Acessibilidade**:
   - `--escala-ui` aplicada aos blocos da interface;
   - movimento reduzido (sistema, sempre ou nunca) desliga tremor, flash, congelamento, soco de zoom e as animações
