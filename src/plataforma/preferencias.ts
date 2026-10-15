@@ -4,6 +4,8 @@
 // dois, valem só nesta sessão. Falha de armazenamento nunca quebra o jogo.
 // Marco 12 (14/10/2026): gráficos, áudio, câmera e acessibilidade, sempre normalizados (valor fora do
 // esperado volta ao padrão).
+// Marco 13 (14/10/2026): visão (de cima ou isométrica) e a aparência do personagem por imagem (sentido e
+// tamanho neste aparelho, D-058). A imagem em si fica no store `perfil` (plataforma/token.ts).
 
 import { gravarNoBanco, lerDoBanco } from './banco';
 
@@ -13,6 +15,9 @@ export type NivelQualidade = 'minimo' | 'baixo' | 'medio' | 'alto';
 /** `auto`: começa pelo padrão do aparelho e desce sozinho se o fps cair (§4.10). */
 export type EscolhaQualidade = 'auto' | NivelQualidade;
 export type MovimentoReduzido = 'sistema' | 'sempre' | 'nunca';
+export type VisaoJogo = 'cima' | 'iso';
+/** Para onde a imagem do personagem olha no arquivo original. */
+export type SentidoToken = 'direita' | 'esquerda';
 
 export interface Preferencias {
   controle: TipoControle;
@@ -29,6 +34,10 @@ export interface Preferencias {
   /** Escala da interface, de 0,8 a 1,5 (§5.4). */
   escalaInterface: number;
   movimentoReduzido: MovimentoReduzido;
+  visao: VisaoJogo;
+  sentidoToken: SentidoToken;
+  /** Tamanho do personagem neste aparelho, de 0,8 a 1,3 (§2.16). */
+  tamanhoToken: number;
 }
 
 export const QUALIDADES: readonly NivelQualidade[] = ['minimo', 'baixo', 'medio', 'alto'];
@@ -46,6 +55,9 @@ export const PREFERENCIAS_PADRAO: Preferencias = {
   mudo: false,
   escalaInterface: 1,
   movimentoReduzido: 'sistema',
+  visao: 'cima',
+  sentidoToken: 'direita',
+  tamanhoToken: 1,
 };
 const PADRAO = PREFERENCIAS_PADRAO;
 
@@ -71,6 +83,9 @@ export function normalizarPreferencias(dados: unknown): Preferencias {
     mudo: booleano(d.mudo, PADRAO.mudo),
     escalaInterface: numeroEntre(d.escalaInterface, 0.8, 1.5, PADRAO.escalaInterface),
     movimentoReduzido: opcao(d.movimentoReduzido, ['sistema', 'sempre', 'nunca'] as const, PADRAO.movimentoReduzido),
+    visao: opcao(d.visao, ['cima', 'iso'] as const, PADRAO.visao),
+    sentidoToken: opcao(d.sentidoToken, ['direita', 'esquerda'] as const, PADRAO.sentidoToken),
+    tamanhoToken: numeroEntre(d.tamanhoToken, 0.8, 1.3, PADRAO.tamanhoToken),
   };
 }
 

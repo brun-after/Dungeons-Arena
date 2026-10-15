@@ -13,6 +13,7 @@ import { detectarToque, sinaisDoNavegador } from '../plataforma/dispositivo';
 import { Camera } from '../render/camera';
 import { CELULA_PX } from '../render/camera-calculo';
 import { desenharSilhueta } from '../render/sprites';
+import { criarProjecao } from '../render/projecao';
 import { criarPalco } from '../render/stage';
 import { criarTerreno } from '../render/terreno';
 import { mostrarAviso } from '../ui/aviso';
@@ -124,7 +125,8 @@ export async function abrirTelaDeEdicao(raiz: HTMLElement, f: FaseEditavel): Pro
     tela.append(erro);
     return;
   }
-  const camera = new Camera(f.largura * CELULA_PX, f.altura * CELULA_PX, 'janela', toque, LIMITES_EDITOR);
+  // O editor fica só de cima (D-058).
+  const camera = new Camera(criarProjecao('cima', f.largura, f.altura), 'janela', toque, LIMITES_EDITOR);
   const terreno = criarTerreno(palco.terreno, fase);
   const marcadores = new Container();
   palco.entidades.addChild(marcadores);

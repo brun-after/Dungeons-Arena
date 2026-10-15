@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 2.2 · **Data:** 14/10/2026
-**Status:** 🚧 Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência em andamento: 12 concluído; próximo, o 13
+**Versão do documento:** 2.3 · **Data:** 14/10/2026
+**Status:** 🚧 Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência em andamento: 12 e 13 concluídos; próximo, o 14
 
 > **Histórico**
+> - **2.3 (14/10/2026)**: marco 13 concluído (visão isométrica com a tecla V, modelos de criatura gerados no build, caminhada por fatias e personagem por imagem; D-058).
 > - **2.2 (14/10/2026)**: novo marco 14, sistema de habilidades (composição, elementos, ranks, árvores, classes, livros, habilidades geradas e efeitos legíveis); rebalanceamento vira 15 e endurecimento, 16 (D-057).
 > - **2.1 (14/10/2026)**: marco 12 concluído (áudio sintetizado, minimapa, pausa, configurações, guia, efeitos visuais como dado, qualidade e acessibilidade).
 > - **2.0 (14/10/2026)**: roteiro reescrito para a convergência (12 → 15 antes de 11A e da arena), um PR por marco e as sugestões de capacidades adotadas (D-055).
@@ -77,18 +78,23 @@ Implantação do servidor na nuvem, passo a passo: [`docs/IMPLANTACAO.md`](docs/
 | Habilidades | Teclas 1–4 | Roda de botões em volta do ⚔ |
 | Mover a câmera | Arrastar o mapa | Arrastar o mapa |
 | Zoom | Roda do mouse | Pinça com dois dedos |
+| Visão (de cima ou isométrica) | `V`, ou Pausa → Configurações → Gráficos | Pausa → Configurações → Gráficos |
+| Seu personagem por imagem | Pausa → Configurações → Aparência | Idem |
 | Mochila e ficha | `I` (Esc fecha); equipar, usar e tirar por botão | 🎒 no cabeçalho; tocar a linha equipa ou usa |
 | Pontos de atributo | Mochila → aba **Ficha** → `+` | Idem |
 | Diagnóstico (fps, célula) | Abrir com `?diag=1` no fim do endereço | Idem |
 
 ### Os inimigos da fase 1
 
-| Forma | Arquétipo | Como luta |
+Cada inimigo tem o seu modelo (desde o marco 13); o anel sob os pés mostra a equipe. Se um modelo faltar, aparece a
+forma do arquétipo.
+
+| Modelo (forma substituta) | Arquétipo | Como luta |
 |---|---|---|
-| ▲ triângulo | Perseguidor (goblin, orc) | Corre até você e golpeia de perto |
-| ◆ losango | Atirador (esqueleto) | Mantém distância e atira flechas; recua se você encostar |
-| ⬢ hexágono | Controlador (cultista) | Marca uma área 3×3 no chão; saia antes de encher |
-| ● com coroa | Boss (demônio) | Alterna golpe forte e área |
+| Goblin, orc (▲ triângulo) | Perseguidor | Corre até você e golpeia de perto |
+| Esqueleto (◆ losango) | Atirador | Mantém distância e atira flechas; recua se você encostar |
+| Cultista (⬢ hexágono) | Controlador | Marca uma área 3×3 no chão; saia antes de encher |
+| Demônio (● com coroa) | Boss | Alterna golpe forte e área |
 
 "?" sobre o inimigo: ele notou você e está hesitando. "!": começou a perseguir.
 
@@ -124,7 +130,7 @@ Node.js + Colyseus no backend da arena · WSS · Vitest + Playwright.
 Cada marco vira **um** Pull Request (a partir do 12, sem subdivisões). O CI (typecheck, lint, testes, build e
 smoke) precisa passar antes do merge em `main`, e o merge publica automaticamente.
 
-**Ordem atual** (D-055, D-057): **13 → 14 → 15 → 16**, depois **11A**, depois a arena (**8B → 9B → 10B → 11B**). A sessão com
+**Ordem atual** (D-055, D-057): **14 → 15 → 16**, depois **11A**, depois a arena (**8B → 9B → 10B → 11B**). A sessão com
 pessoas (7C) entra quando houver testadores.
 
 ### Etapas de infraestrutura
@@ -168,7 +174,7 @@ pessoas (7C) entra quando houver testadores.
 | ✓ | # | Entrega | Pronto quando |
 |---|---|---|---|
 | [x] | 12 | **Áudio** sintetizado (música por contexto, efeitos, som posicional, passos); **interface** (minimapa, prompt de interação, pausa, configurações, guia, menu com fundo); **efeitos visuais** como dado por habilidade (partículas, presets de impacto, efeitos persistentes, luz, enquadrar dois); **qualidade** (presets, degradação automática, teto de DPR) e **acessibilidade** (escala de interface, teclado, contraste) | Ameaças legíveis; o mesmo digest com e sem efeitos; nunca mudo; movimento reduzido respeitado |
-| [ ] | 13 | Visão **isométrica**; **modelos de criatura** gerados no build; **caminhada por fatias**; **personagem por imagem** (recorte, escala, substituto, legibilidade) | Alternar a visão preserva velocidade, alcance e regras; imagem inválida não quebra o jogo |
+| [x] | 13 | Visão **isométrica**; **modelos de criatura** gerados no build; **caminhada por fatias**; **personagem por imagem** (recorte, escala, substituto, legibilidade) | Alternar a visão preserva velocidade, alcance e regras; imagem inválida não quebra o jogo |
 | [ ] | 14 | **Sistema de habilidades**: composição em camadas (efeito, forma, tempo, custo, tema, apresentação); formas linha, cone e ao redor; alvos aliado, todos os aliados e área livre; escudo, puxão e troca de lugar; **5 elementos** com estados e sinergias; interações em tabela (acúmulo, sinergia, resistência, teto); **orçamento de poder**; **ranks** por nível; **árvores de evolução** e modificadores; **classes** (guerreiro, mago, arqueiro) com afinidades; **livros de habilidade**; **habilidades geradas por semente** (inimigos e livros); **passivas**; barra escolhida e roda de habilidades; **efeitos legíveis** (duração, cartão e descrição gerada) | Uma habilidade nova nasce de dados e cabe no orçamento; o jogador entende o que está ativo e o que faz; inimigos das fases geradas com repertório próprio; mesmo digest com as mesmas sementes |
 | [ ] | 15 | Ferramenta de **balanceamento por simulação** (tempo para matar por classe, rank e evolução, curva das fases, fluxo de ouro, invocações, margem de aviso do corpo a corpo) e ajuste dos números da campanha e do Livre | Ritmo e janelas de reação validados na campanha e no Livre. *Fichas justas por modo de arena: depois do 10B* |
 | [ ] | 16 | Celular (área segura, orientação, redimensionamento), **PWA offline** testado, desempenho e memória (10 trocas de fase, cena de carga, `BENCHMARKS.md`) e servidor (limites, métricas, teste de 30 min na VM) | Offline e benchmarks verificados. *Recuperação de queda: depois do 9B; sessão real de 10 pessoas: no 11B* |

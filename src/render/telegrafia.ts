@@ -1,6 +1,7 @@
 // Telegrafia no chão e projéteis (§1.3 pilar 2, §2.6): toda ação ofensiva mostra, durante a
 // conjuração, onde vai cair — área com preenchimento que cresce até o impacto, linha de mira
 // para golpe e projétil — e o projétil fica visível durante a viagem. Só lê o estado.
+// Marco 13 (14/10/2026): a telegrafia do chão segue a matriz do plano; o projétil, em pé, é projetado.
 
 import { Graphics, type Container } from 'pixi.js';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -8,6 +9,7 @@ import type { EstadoJogo } from '../core/estado';
 import { DT_MS } from '../core/loop';
 import { relacao } from '../modos/relacao';
 import { CELULA_PX } from './camera-calculo';
+import { centroDaCelula, type Projecao } from './projecao';
 
 const COR_HOSTIL = 0xff5a3c;
 const COR_PROPRIA = 0x5dade2;
@@ -16,7 +18,11 @@ export class CamadaTelegrafia {
   private readonly chao = new Graphics();
   private readonly voo = new Graphics();
 
-  constructor(camadaChao: Container, camadaVoo: Container) {
+  constructor(
+    camadaChao: Container,
+    camadaVoo: Container,
+    private readonly projecao: () => Projecao,
+  ) {
     camadaChao.addChild(this.chao);
     camadaVoo.addChild(this.voo);
   }
@@ -54,18 +60,21 @@ export class CamadaTelegrafia {
       }
     }
 
+    const proj = this.projecao();
+    // No isométrico o projétil voa um pouco acima do chão (na altura do peito).
+    const altura = proj.visao === 'iso' ? CELULA_PX * 0.45 : 0;
     for (const p of estado.projeteis) {
       const avanco = (p.velocidade * alpha * DT_MS) / 1000;
-      const x = (p.x + p.dirX * avanco + 0.5) * CELULA_PX;
-      const y = (p.y + p.dirY * avanco + 0.5) * CELULA_PX;
+      const c = centroDaCelula(p.x + p.dirX * avanco, p.y + p.dirY * avanco);
+      const { x, y: yChao } = proj.projetar(c.x, c.y);
+      const y = yChao - altura;
+      const atras = proj.projetar(c.x - p.dirX * CELULA_PX * 0.6, c.y - p.dirY * CELULA_PX * 0.6);
       const dono = estado.entidades.find((e) => e.id === p.donoId);
       const cor = dono && local && relacao(local, dono, ctx.modo) === 'proprio' ? COR_PROPRIA : COR_HOSTIL;
       // Rastro curto atrás do projétil para mostrar a trajetória.
-      voo
-        .moveTo(x - p.dirX * CELULA_PX * 0.6, y - p.dirY * CELULA_PX * 0.6)
-        .lineTo(x, y)
-        .stroke({ width: 3, color: cor, alpha: 0.5 });
+      voo.moveTo(atras.x, atras.y - altura).lineTo(x, y).stroke({ width: 3, color: cor, alpha: 0.5 });
       voo.circle(x, y, 6).fill(cor).stroke({ width: 2, color: 0xffffff, alpha: 0.8 });
+      if (altura > 0) voo.ellipse(x, yChao, 5, 2.5).fill({ color: 0x000000, alpha: 0.3 });
     }
   }
 

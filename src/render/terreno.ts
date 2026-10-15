@@ -15,7 +15,7 @@ const CORES_PISO = [0x3a3546, 0x3f3a4d, 0x36313f] as const;
 const COR_SAIDA = 0xc98a1a;
 const COR_SAIDA_MIOLO = 0xf3b442;
 
-interface Paleta {
+export interface Paleta {
   parede: number;
   paredeTopo: number;
   junta: number;
@@ -38,7 +38,7 @@ export function girarMatiz(cor: number, graus: number): number {
   return (canal(nr) << 16) | (canal(ng) << 8) | canal(nb);
 }
 
-function paletaDe(matiz: number): Paleta {
+export function paletaDe(matiz: number): Paleta {
   const gira = (cor: number) => girarMatiz(cor, matiz);
   return {
     parede: gira(COR_PAREDE),

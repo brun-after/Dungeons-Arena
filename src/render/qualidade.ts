@@ -2,6 +2,7 @@
 // testáveis sem navegador. Os efeitos só leem o preset; a simulação nunca sabe da qualidade.
 //   mínimo → sem partículas, luz, poeira, presets de impacto nem auras;
 //   baixo  → poucas partículas, sem luz nem poeira;
+//   (mínimo e baixo usam um desenho só por token, sem as 18 tiras: o atalho de sprite, marco 13)
 //   médio  → partículas, luz e presets de impacto;
 //   alto   → tudo, inclusive poeira.
 // Degradação (com a escolha "automática"): buffer circular de 240 quadros, verificação a cada 5 s;
@@ -20,13 +21,15 @@ export interface PresetQualidade {
   auras: boolean;
   /** Animações decorativas de CSS (menu, pulsos de botão). */
   animacoesCss: boolean;
+  /** Caminhada por 18 tiras (§2.16); sem ela, um desenho só por token (atalho de sprite, marco 13). */
+  tiras: boolean;
 }
 
 export const PRESETS_QUALIDADE: Readonly<Record<NivelQualidade, PresetQualidade>> = {
-  minimo: { particulas: 0, luz: false, poeira: false, impacto: false, auras: false, animacoesCss: false },
-  baixo: { particulas: 120, luz: false, poeira: false, impacto: true, auras: true, animacoesCss: false },
-  medio: { particulas: 300, luz: true, poeira: false, impacto: true, auras: true, animacoesCss: true },
-  alto: { particulas: 600, luz: true, poeira: true, impacto: true, auras: true, animacoesCss: true },
+  minimo: { particulas: 0, luz: false, poeira: false, impacto: false, auras: false, animacoesCss: false, tiras: false },
+  baixo: { particulas: 120, luz: false, poeira: false, impacto: true, auras: true, animacoesCss: false, tiras: false },
+  medio: { particulas: 300, luz: true, poeira: false, impacto: true, auras: true, animacoesCss: true, tiras: true },
+  alto: { particulas: 600, luz: true, poeira: true, impacto: true, auras: true, animacoesCss: true, tiras: true },
 };
 
 const ORDEM: readonly NivelQualidade[] = ['minimo', 'baixo', 'medio', 'alto'];

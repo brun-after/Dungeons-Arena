@@ -1,7 +1,11 @@
 // Palco PixiJS (§2.16, §4.9, §4.10): WebGL, DPR com teto 2, sem ticker próprio (o laço do jogo
 // chama `renderizar`), redimensionamento por ResizeObserver com debounce de 150 ms.
+// Marco 13 (14/10/2026), D-058: o que é plano (terreno, chão, luz) fica num container `plano`, que recebe a
+// matriz da projeção; o que fica em pé (entidades, paredes em prisma, projéteis, efeitos) é posicionado
+// já projetado e alinhado à tela. As entidades se ordenam por `zIndex` (profundidade).
 
-import { Application, Container } from 'pixi.js';
+import { Application, Container, Matrix } from 'pixi.js';
+import type { Matriz } from './projecao';
 
 export const TETO_DPR = 2;
 const DEBOUNCE_RESIZE_MS = 150;
@@ -10,11 +14,14 @@ export interface Palco {
   app: Application;
   /** Recebe o transform da câmera; tudo do mundo fica aqui dentro. */
   mundo: Container;
+  /** Marco 13: o chão inteiro (terreno, chão e luz), com a matriz da projeção. */
+  plano: Container;
   terreno: Container;
   /** Telegrafia no chão (áreas e linhas de mira), abaixo das entidades. */
   chao: Container;
   /** Marco 12: poços de luz (aditivos), entre o chão e as entidades. */
   luz: Container;
+  /** Em pé: entidades e, no isométrico, as paredes em prisma; ordenadas por `zIndex`. */
   entidades: Container;
   /** Projéteis em voo. */
   voo: Container;
@@ -27,6 +34,8 @@ export interface Palco {
   altura: () => number;
   aoRedimensionar: (fn: (largura: number, altura: number) => void) => void;
   renderizar: () => void;
+  /** Marco 13: aplica a matriz da projeção ao chão. */
+  definirMatrizPlano: (m: Matriz) => void;
   destruir: () => void;
 }
 
@@ -52,10 +61,12 @@ export async function criarPalco(host: HTMLElement): Promise<Palco> {
   const terreno = new Container({ label: 'terreno' });
   const chao = new Container({ label: 'chao' });
   const luz = new Container({ label: 'luz' });
-  const entidades = new Container({ label: 'entidades' });
+  const plano = new Container({ label: 'plano' });
+  plano.addChild(terreno, chao, luz);
+  const entidades = new Container({ label: 'entidades', sortableChildren: true });
   const voo = new Container({ label: 'voo' });
   const efeitos = new Container({ label: 'efeitos' });
-  mundo.addChild(terreno, chao, luz, entidades, voo, efeitos);
+  mundo.addChild(plano, entidades, voo, efeitos);
   const tela = new Container({ label: 'tela' });
   app.stage.addChild(mundo, tela);
 
@@ -78,6 +89,7 @@ export async function criarPalco(host: HTMLElement): Promise<Palco> {
   return {
     app,
     mundo,
+    plano,
     terreno,
     chao,
     luz,
@@ -92,6 +104,9 @@ export async function criarPalco(host: HTMLElement): Promise<Palco> {
     aoRedimensionar: (fn) => ouvintes.push(fn),
     renderizar: () => {
       app.render();
+    },
+    definirMatrizPlano: (m) => {
+      plano.setFromMatrix(new Matrix(m.a, m.b, m.c, m.d, m.tx, m.ty));
     },
     destruir: () => {
       clearTimeout(espera);

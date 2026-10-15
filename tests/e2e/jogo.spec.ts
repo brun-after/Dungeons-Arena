@@ -31,6 +31,31 @@ async function esperarParado(page: Page, diag: Locator) {
     .toBe(true);
 }
 
+/** Marco 13: PNG de teste desenhado no próprio navegador (fundo transparente e um boneco opaco no meio). */
+async function pngDeTeste(page: Page): Promise<Buffer> {
+  const dados = await page.evaluate(() => {
+    const c = document.createElement('canvas');
+    c.width = 64;
+    c.height = 96;
+    const g = c.getContext('2d');
+    if (g) {
+      g.fillStyle = '#e67e22';
+      g.fillRect(20, 10, 24, 76);
+      g.beginPath();
+      g.arc(32, 16, 10, 0, Math.PI * 2);
+      g.fill();
+    }
+    return c.toDataURL('image/png').split(',')[1] ?? '';
+  });
+  return Buffer.from(dados, 'base64');
+}
+
+async function abrirConfiguracoes(page: Page): Promise<Locator> {
+  await page.getByRole('button', { name: 'Pausar (Esc)' }).click();
+  await page.getByRole('dialog', { name: 'Jogo pausado' }).getByRole('button', { name: 'Configurações' }).click();
+  return page.getByRole('dialog', { name: 'Configurações' });
+}
+
 async function centro(locator: Locator) {
   const caixa = await locator.boundingBox();
   if (!caixa) throw new Error('elemento sem caixa');
@@ -433,6 +458,78 @@ test.describe('desktop', () => {
     expect(erros).toEqual([]);
   });
 
+  test('isométrico: a tecla V alterna; o teclado anda pela tela e o clique leva até a célula', async ({ page }) => {
+    const { diag, erros } = await abrir(page);
+    await page.keyboard.press('KeyV');
+    await expect(page.locator('body')).toHaveAttribute('data-visao', 'iso');
+    // D é "para a direita na tela": no isométrico, NE na grade (x cresce, y não cresce).
+    const [x0, y0] = await ler(diag, 'celula');
+    await page.keyboard.down('d');
+    await expect.poll(async () => (await ler(diag, 'celula'))[0], { timeout: 15_000, intervals: [50] }).toBeGreaterThan(x0);
+    await page.keyboard.up('d');
+    expect((await ler(diag, 'celula'))[1]).toBeLessThanOrEqual(y0);
+    await esperarParado(page, diag);
+
+    // Zoom 1: a célula (3, 3) fica no losango projetado, a partir do centro do jogador na tela.
+    const [x, y] = await ler(diag, 'celula');
+    const [tx, ty] = await ler(diag, 'tela');
+    const k = 48 * Math.SQRT1_2;
+    const dx = 3 - x;
+    const dy = 3 - y;
+    await page.mouse.click(tx + (dx - dy) * k, ty + ((dx + dy) * k) / 2);
+    await expect.poll(async () => ler(diag, 'celula'), { timeout: 15_000 }).toEqual([3, 3]);
+
+    await page.keyboard.press('KeyV');
+    await expect(page.locator('body')).toHaveAttribute('data-visao', 'cima');
+    expect(erros).toEqual([]);
+  });
+
+  test('configurações: a visão isométrica persiste depois de recarregar', async ({ page }) => {
+    const { erros } = await abrir(page);
+    const config = await abrirConfiguracoes(page);
+    await config.getByLabel('Visão').selectOption('iso');
+    await expect(page.locator('body')).toHaveAttribute('data-visao', 'iso');
+    await config.getByRole('button', { name: 'Fechar as configurações' }).click();
+    await page.reload();
+    await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
+    await expect(page.locator('body')).toHaveAttribute('data-visao', 'iso');
+    expect(erros).toEqual([]);
+  });
+
+  test('aparência: imagem inválida avisa e mantém o padrão; uma imagem própria vira o personagem', async ({ page }) => {
+    const { erros } = await abrir(page);
+    await expect(page.locator('body')).toHaveAttribute('data-token', 'modelo');
+    const config = await abrirConfiguracoes(page);
+    const arquivo = config.getByLabel('Usar uma imagem minha');
+    const situacao = config.locator('[data-config="situacaoImagem"]');
+
+    await arquivo.setInputFiles({ name: 'quebrada.png', mimeType: 'image/png', buffer: Buffer.from('isto não é uma imagem') });
+    await expect(situacao).toHaveAttribute('data-resultado', 'corrompida');
+    await expect(situacao).toContainText('Não foi possível abrir essa imagem');
+    await expect(page.locator('body')).toHaveAttribute('data-token', 'modelo');
+
+    await arquivo.setInputFiles({ name: 'texto.txt', mimeType: 'text/plain', buffer: Buffer.from('oi') });
+    await expect(situacao).toHaveAttribute('data-resultado', 'formato');
+
+    await arquivo.setInputFiles({ name: 'heroi.png', mimeType: 'image/png', buffer: await pngDeTeste(page) });
+    await expect(situacao).toHaveAttribute('data-resultado', 'ok');
+    await expect(page.locator('body')).toHaveAttribute('data-token', 'imagem');
+    await config.getByLabel('Tamanho do personagem neste aparelho (%)').fill('120');
+
+    // Fica no aparelho: depois de recarregar, nas duas visões.
+    await config.getByRole('button', { name: 'Fechar as configurações' }).click();
+    await page.reload();
+    await expect(page.locator('body')).toHaveAttribute('data-token', 'imagem');
+    await page.keyboard.press('KeyV');
+    await expect(page.locator('body')).toHaveAttribute('data-visao', 'iso');
+    await expect(page.locator('body')).toHaveAttribute('data-token', 'imagem');
+
+    const config2 = await abrirConfiguracoes(page);
+    await config2.getByRole('button', { name: 'Voltar ao personagem padrão' }).click();
+    await expect(page.locator('body')).toHaveAttribute('data-token', 'modelo');
+    expect(erros).toEqual([]);
+  });
+
   test('controles de toque ficam escondidos no desktop', async ({ page }) => {
     await abrir(page);
     await expect(page.getByTestId('joystick')).toBeHidden();
@@ -614,6 +711,21 @@ test.describe('celular (emulação)', () => {
       expect(caixa.x + caixa.width).toBeLessThanOrEqual(viewport.width);
       expect(caixa.x).toBeGreaterThan(joystick.x + joystick.width);
     }
+  });
+
+  test('no isométrico, o joystick para a direita anda para a direita na tela', async ({ page }) => {
+    const { diag, erros } = await abrir(page);
+    await page.keyboard.press('KeyV');
+    await expect(page.locator('body')).toHaveAttribute('data-visao', 'iso');
+    const [x0, y0] = await ler(diag, 'celula');
+    const j = await centro(page.getByTestId('joystick'));
+    await page.mouse.move(j.x, j.y);
+    await page.mouse.down();
+    await page.mouse.move(j.x + 45, j.y, { steps: 4 });
+    await expect.poll(async () => (await ler(diag, 'celula'))[0], { timeout: 15_000 }).toBeGreaterThan(x0);
+    await page.mouse.up();
+    expect((await ler(diag, 'celula'))[1]).toBeLessThanOrEqual(y0);
+    expect(erros).toEqual([]);
   });
 
   test('a página não rola nem dá zoom', async ({ page }) => {
