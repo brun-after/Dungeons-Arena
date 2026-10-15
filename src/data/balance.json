@@ -191,6 +191,17 @@
     "pesadelo": { "vidaPct": 170, "danoPct": 150, "hesitacaoPct": 60, "avisoExtraMs": 0, "recompensaPct": 160 }
   },
   "grupo": { "vidaPorJogadorPct": 70, "danoPorJogadorPct": 8, "recompensaPorJogadorPct": 10, "spawnerPorJogadorPct": 25 },
+  "integridade": {
+    "nivelSemHistorico": 5,
+    "xpPorMinutoBase": 120,
+    "xpPorMinutoPorNivelPct": 25,
+    "folgaXp": 300,
+    "ouroPorMinuto": 200,
+    "folgaOuro": 300,
+    "itensPorMinuto": 0.5,
+    "folgaItens": 10,
+    "minutosMaxPorCertificado": 480
+  },
   "inimigos": {
     "crescimento": [
       { "atributo": "constituicao", "porNivel": 3, "aPartirDoNivel": 2 },

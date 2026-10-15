@@ -145,6 +145,10 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
   const ctx = montarContexto(conteudo, validacao.fase);
   const estado = leitura?.estado ?? novoEstado(ctx, teste ? await personagemAtual() : null, opcoes.classe);
   const idJogador = jogadorDoSave(estado)?.id ?? ID_JOGADOR;
+  // Marco 17 (D-063): todo personagem ganha uma identidade (o certificado da arena se prende a ela).
+  const bolsaDoJogador = jogadorDoSave(estado)?.bolsa;
+  if (bolsaDoJogador && !bolsaDoJogador.personagemId) bolsaDoJogador.personagemId = crypto.randomUUID();
+  const certificado = leitura?.certificado ?? null;
   const estatisticas: Estatisticas = { ...(leitura?.estatisticas ?? { inimigosDerrotados: 0, mortes: 0 }) };
 
   let autosave: Autosave | null = null;
@@ -159,6 +163,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
       nomeFase: ctx.fase.nome,
       criadoEm,
       fasesVisitadas,
+      certificado: () => certificado,
       estado: () => estado,
       estatisticas: () => estatisticas,
       aoFalhar: () => {
@@ -277,6 +282,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
       estado: clonarEstado(estado),
       estatisticas: { ...estatisticas },
       fasesVisitadas,
+      certificado,
     };
     const novo = avancarFase(
       atual,

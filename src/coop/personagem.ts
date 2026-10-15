@@ -166,6 +166,8 @@ export function conferirPersonagem(pedido: unknown, ctx: ContextoSimulacao, id: 
   conferirAtributos(b, bolsa, e.nivel, ctx, classe.atributos);
   conferirHabilidades(b, bolsa, e.nivel, ctx);
   conferirItens(b, bolsa, e.nivel, ctx);
+  // Marco 17: a identidade do personagem passa adiante (o certificado se prende a ela).
+  bolsa.personagemId = typeof b.personagemId === 'string' && /^[0-9a-zA-Z-]{8,64}$/.test(b.personagemId) ? b.personagemId : '';
   recalcularFicha(e, ctx);
   e.hp = e.hpMax;
   e.mana = e.manaMax;

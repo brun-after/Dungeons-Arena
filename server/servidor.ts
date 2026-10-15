@@ -3,6 +3,7 @@
 //                         (tick = pior p95/p99 entre as salas, da metadata de cada uma; marco 7B)
 //   GET /salas/:codigo  → existe ou não (tipo, fase), com limite de tentativas por origem (§2.13)
 //   POST /relatorios    → relatório anônimo do teste com pessoas (marco 7A, D-044)
+//   POST /certificar    → marco 17 (D-063): certifica o personagem (corpo `{personagem, anterior}`, texto JSON)
 //   GET /metricas       → marco 16 (D-062): processo (memória, uptime, atraso do agendador) e cada sala (tick,
 //                         jogadores, banda, filas, entidades, rejeições, reconexões); agregado, sem dado pessoal
 // O matchmaking do Colyseus continua nas rotas padrão (/matchmake/...).
@@ -14,6 +15,8 @@ import { MAX_BYTES_MENSAGEM, versaoDoConteudo } from '../src/arena/protocolo';
 import { codigoValido, LimiteDeTentativas, normalizarCodigo } from './codigo-sala';
 import { monitorarAgendador, registrarLog } from './metricas';
 import { SalaColyseusBase } from './salas/sala-base';
+import { Certificador } from './certificacao';
+import { contextoDaArena } from '../src/arena/contexto-arena';
 import { receberRelatorio } from './relatorios';
 import { SalaCampanhaColyseus } from './salas/sala-campanha';
 import { SalaLivreColyseus } from './salas/sala-livre';
@@ -28,7 +31,12 @@ export interface OpcoesServidor {
   /** Marco 16: salas por processo (padrão 6, a VM de 1 GB) e criações por minuto por origem (padrão 6). */
   maxSalas?: number;
   criacoesPorMinuto?: number;
+  /** Marco 17: chave do certificado do personagem (sem ela, uma chave sorteada por processo). */
+  chaveCertificado?: string | undefined;
 }
+
+/** Teto do corpo do `/certificar` (um personagem com a mochila cheia cabe com folga). */
+const MAX_CORPO_CERTIFICADO = 64 * 1024;
 
 const MB = 1024 * 1024;
 const arredondar = (v: number) => Math.round(v * 10) / 10;
@@ -47,10 +55,15 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
   const limite = new LimiteDeTentativas(20, 60_000);
   const limiteRelatorios = new LimiteDeTentativas(10, 60_000);
   const agendador = monitorarAgendador();
+  const certificador = new Certificador(o.chaveCertificado);
+  if (!Certificador.configurada(o.chaveCertificado)) registrarLog('certificado_chave_temporaria', {});
+  const limiteCertificacao = new LimiteDeTentativas(30, 60_000);
+  const ctxCertificacao = contextoDaArena();
   SalaColyseusBase.limites = {
     maxSalas: o.maxSalas ?? 6,
     criacao: new LimiteDeTentativas(o.criacoesPorMinuto ?? 6, 60_000),
     agendador,
+    certificador,
   };
   const httpServer = http.createServer();
   const inicio = Date.now();
@@ -100,6 +113,25 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
     return resposta(r.status, r.status === 201 ? { ok: true } : { ok: false, motivo: r.motivo });
   });
 
+  const certificar = createEndpoint('/certificar', { method: 'POST', disableBody: true }, async (ctx) => {
+    const req = ctx.request;
+    if (!req) return resposta(400, { ok: false, motivo: 'sem_corpo' });
+    const origem = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'local';
+    if (!limiteCertificacao.permitir(origem, Date.now())) return resposta(429, { ok: false, motivo: 'muitas_tentativas' });
+    const texto = await req.text();
+    if (texto.length > MAX_CORPO_CERTIFICADO) return resposta(413, { ok: false, motivo: 'grande_demais' });
+    let corpo: unknown;
+    try {
+      corpo = JSON.parse(texto);
+    } catch {
+      return resposta(400, { ok: false, motivo: 'json_invalido' });
+    }
+    const c = (corpo ?? {}) as { personagem?: unknown; anterior?: unknown };
+    const r = certificador.certificar(c.personagem, c.anterior, ctxCertificacao, Date.now());
+    registrarLog('certificacao', { ok: r.ok, ...(!r.ok && { motivo: r.motivo }) });
+    return resposta(r.ok ? 200 : 422, r);
+  });
+
   const metricas = createEndpoint('/metricas', { method: 'GET' }, async () => {
     const salas = await matchMaker.query({});
     const mem = process.memoryUsage();
@@ -122,7 +154,7 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
 
   const servidor = defineServer({
     rooms: { arena: defineRoom(SalaLivreColyseus), campanha: defineRoom(SalaCampanhaColyseus) },
-    routes: createRouter({ saude, buscarSala, relatorios, metricas }),
+    routes: createRouter({ saude, buscarSala, relatorios, metricas, certificar }),
     transport: new WebSocketTransport({ server: httpServer, maxPayload: o.maxPayload ?? MAX_BYTES_MENSAGEM + 4096 }),
     greet: false,
     gracefullyShutdown: false,

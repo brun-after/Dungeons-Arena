@@ -42,6 +42,7 @@ function registro(slot: number, estado = estadoJogado()): RegistroProgresso {
     nomeFase: ctx.fase.nome,
     estado,
     fasesVisitadas: {},
+    certificado: null,
     estatisticas: { inimigosDerrotados: 3, mortes: 1 },
   };
 }

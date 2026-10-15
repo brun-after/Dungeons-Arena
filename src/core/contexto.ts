@@ -182,6 +182,21 @@ export interface Balance {
    * Marco 15 (§2.5, D-061): o inimigo cresce com o nível — cada atributo ganha `porNivel` a cada nível a partir de
    * `aPartirDoNivel` (vida pela Constituição, dano pelo atributo da classe); o XP cresce `xpPorNivelPct` por nível.
    */
+  /**
+   * Marco 17 (D-063): tetos de crescimento entre dois certificados do personagem (por minuto de jogo, com folga) e
+   * o nível até onde um personagem sem certificado anterior é aceito.
+   */
+  integridade: {
+    nivelSemHistorico: number;
+    xpPorMinutoBase: number;
+    xpPorMinutoPorNivelPct: number;
+    folgaXp: number;
+    ouroPorMinuto: number;
+    folgaOuro: number;
+    itensPorMinuto: number;
+    folgaItens: number;
+    minutosMaxPorCertificado: number;
+  };
   inimigos: {
     crescimento: { atributo: keyof Atributos; porNivel: number; aPartirDoNivel: number }[];
     xpPorNivelPct: number;
