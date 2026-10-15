@@ -6,9 +6,9 @@
 > `src/data/balance.json → metas`; o teste `tests/sim/ritmo.test.ts` protege as principais. Os números que mudaram
 > e o antes e depois da calibragem estão na D-061 (docs/DECISOES.md).
 
-Sementes: 8 por cenário (1000, 8919, 16838, 24757, 32676, 40595, 48514, 56433). Balance versão 16.
+Sementes: 8 por cenário (1000, 8919, 16838, 24757, 32676, 40595, 48514, 56433). Balance versão 17.
 
-## Resultado: 69/69 metas aprovadas
+## Resultado: 77/77 metas aprovadas
 
 
 ## Tabelas
@@ -27,8 +27,8 @@ Sementes: 8 por cenário (1000, 8919, 16838, 24757, 32676, 40595, 48514, 56433).
 | mago | 5 | 5 | 5,3 s | 0 |
 | mago | 10 | 4 | 4,2 s | 0 |
 | arqueiro | 1 | 5 | 5,1 s | 0 |
-| arqueiro | 5 | 5 | 5,2 s | 0 |
-| arqueiro | 10 | 5 | 4,8 s | 0 |
+| arqueiro | 5 | 5 | 4,9 s | 0 |
+| arqueiro | 10 | 5 | 4,6 s | 0 |
 
 ### Quanto o jogador aguenta de um comum (mediana)
 
@@ -99,6 +99,15 @@ Sementes: 8 por cenário (1000, 8919, 16838, 24757, 32676, 40595, 48514, 56433).
 | flecha | esqueleto | 700 ms | 548 ms | 348 ms |
 | marca_de_area | cultista, boss | 1200 ms | 923 ms | 723 ms |
 
+### Builds na arena (ficha inteira, nível 8)
+
+| Classe | Focada vence a dispersa | Equipado (raro) vence o sem equipamento |
+|---|---|---|
+| aventureiro | 62,5% | 68,8% |
+| guerreiro | 100% | 100% |
+| mago | 75% | 81,3% |
+| arqueiro | 62,5% | 81,3% |
+
 ### Economia (nível 5, comuns em sequência)
 
 | Classe | XP por minuto | Ouro por minuto (estimado) |
@@ -106,6 +115,6 @@ Sementes: 8 por cenário (1000, 8919, 16838, 24757, 32676, 40595, 48514, 56433).
 | aventureiro | 138,9 | 83,3 |
 | guerreiro | 148,1 | 88,9 |
 | mago | 182,4 | 109,5 |
-| arqueiro | 188,1 | 112,8 |
+| arqueiro | 220,6 | 132,4 |
 | invocação | 20% do dano | — |
 

@@ -1,6 +1,7 @@
 // Sorteio de item por raridade (§2.10), usado pelos drops e pelo spawner (marco 9A-2, 14/10/2026).
 // Pelo PRNG do estado: determinístico e reproduzível no harness.
 
+import { sortearItemGerado } from './gerar-item';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import { aleatorio } from '../core/rng';
@@ -8,8 +9,18 @@ import { RARIDADES } from '../modos/modo';
 import { dropaveisDe, type Item } from './itens';
 
 /** Raridade por peso (o boss tem raridade mínima) e item uniforme entre os dessa raridade. */
-export function sortearItem(estado: EstadoJogo, ctx: ContextoSimulacao, boss: boolean): Item | null {
+/**
+ * Marco 17 (D-063): parte dos drops de equipamento é gerada no nível de quem caiu (`chanceGerado`), com as raridades
+ * altas mais prováveis quanto maior o nível; o resto vem do catálogo fixo, como antes.
+ */
+export function sortearItem(estado: EstadoJogo, ctx: ContextoSimulacao, boss: boolean, nivel = 1): Item | null {
   const d = ctx.balance.drops;
+  const g = ctx.balance.itensGerados;
+  if (aleatorio(estado.rng) < g.chanceGerado) {
+    const id = sortearItemGerado(estado.rng, nivel, ctx.conteudo.itensBase, g, boss ? d.raridadeMinBoss : 'comum');
+    const gerado = id ? ctx.conteudo.itens.get(id) : undefined;
+    if (gerado) return gerado;
+  }
   const candidatas = RARIDADES.slice(boss ? RARIDADES.indexOf(d.raridadeMinBoss) : 0);
   const total = candidatas.reduce((s, r) => s + d.pesoRaridade[r], 0);
   if (total <= 0) return null;

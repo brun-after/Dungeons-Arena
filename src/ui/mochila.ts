@@ -13,6 +13,10 @@ import { t, type ChaveTexto } from '../i18n';
 import { SLOTS_DE_EQUIPAMENTO, type Slot } from '../modos/modo';
 import { podeDescansar } from '../modos/regras';
 import { derivarFicha } from '../progression/derivados';
+import { descontoNaLojaPct, reducaoRecargaBasicoPct, vidaPorCelula } from '../progression/efeitos-atributo';
+import { bonusDeAtributo } from '../progression/ficha';
+import { faixaDaFormula } from '../combat/dados';
+import { habilidadeDoAtor } from '../combat/perfil';
 import { NOMES_ATRIBUTOS, type Item } from '../progression/itens';
 import { consumiveisComAtalho } from '../progression/inventario';
 import { xpParaProximo } from '../progression/nivel';
@@ -289,6 +293,29 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     corpo.append(
       el('p', 'resumo-ficha', t('ficha.resumo', { defesa: efetiva.defesa, hp: efetiva.hpMax, mana: efetiva.manaMax })),
     );
+    // Marco 17 (D-063): o que os atributos dão, para o jogador ver o efeito do que escolheu.
+    const basico = habilidadeDoAtor(ctx, j, j.ataqueBasico);
+    if (basico?.formulaDano) {
+      const faixa = faixaDaFormula(basico.formulaDano);
+      const bonus = bonusDeAtributo(efetiva.atributos, j.classe, ctx.balance.combate.multiplicadorAtributoPadrao);
+      const recarga = (basico.recargaMs * (1 - reducaoRecargaBasicoPct(efetiva.atributos, ctx.balance) / 100)) / 1000;
+      const manaPorSegundo =
+        ctx.balance.recursos.regenManaPorSegundo * (1 + (Math.max(0, efetiva.atributos.sabedoria - 10) * ctx.balance.atributos.efeitos.regenManaPorSabedoriaPct) / 100);
+      const derivados = el(
+        'p',
+        'derivados-ficha',
+        t('ficha.derivados', {
+          min: faixa.min + bonus,
+          max: faixa.max + bonus,
+          recarga: recarga.toFixed(2).replace('.', ','),
+          mana: manaPorSegundo.toFixed(1).replace('.', ','),
+          vida: vidaPorCelula(efetiva.atributos, ctx.balance),
+          desconto: descontoNaLojaPct(efetiva.atributos, ctx.balance),
+        }),
+      );
+      derivados.dataset.danoMax = String(faixa.max + bonus);
+      corpo.append(derivados);
+    }
     // Marco 10A-2: descanso (§2.12), só onde o modo permite.
     if (podeDescansar(ctx.modo)) {
       corpo.append(el('h3', 'subtitulo-modal', t('ficha.descanso')));

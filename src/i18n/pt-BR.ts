@@ -241,6 +241,7 @@ export const ptBR = {
   'ficha.efetivo': 'Total',
   'ficha.aumentar': 'Aumentar {atributo}',
   'ficha.resumo': 'Defesa {defesa} · Vida máx. {hp} · Mana máx. {mana}',
+  'ficha.derivados': 'Golpe básico {min}–{max} de dano, a cada {recarga} s · Mana {mana}/s · Vida por passo {vida} · Desconto na loja {desconto}%',
   'atributo.forca': 'Força',
   'atributo.destreza': 'Destreza',
   'atributo.constituicao': 'Constituição',

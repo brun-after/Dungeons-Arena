@@ -1,0 +1,26 @@
+{
+  "versao": 1,
+  "raridades": {
+    "comum": { "m": "comum", "f": "comum" },
+    "incomum": { "m": "reforçado", "f": "reforçada" },
+    "raro": { "m": "raro", "f": "rara" },
+    "epico": { "m": "épico", "f": "épica" },
+    "lendario": { "m": "lendário", "f": "lendária" }
+  },
+  "bases": [
+    { "base": "espada", "nome": "Espada", "genero": "f", "slot": "arma_principal", "icone": "⚔", "defesa": 0, "atributos": [["forca", "constituicao"]] },
+    { "base": "machado", "nome": "Machado", "genero": "m", "slot": "arma_principal", "icone": "🪓", "defesa": 0, "atributos": [["forca"]] },
+    { "base": "cajado", "nome": "Cajado", "genero": "m", "slot": "arma_principal", "icone": "🪄", "defesa": 0, "atributos": [["inteligencia", "sabedoria"]] },
+    { "base": "arco", "nome": "Arco", "genero": "m", "slot": "arma_principal", "icone": "🏹", "defesa": 0, "atributos": [["destreza"]] },
+    { "base": "escudo", "nome": "Escudo", "genero": "m", "slot": "arma_secundaria", "icone": "🛡", "defesa": 2, "atributos": [["constituicao"]] },
+    { "base": "tomo", "nome": "Tomo", "genero": "m", "slot": "arma_secundaria", "icone": "📕", "defesa": 0, "atributos": [["sabedoria", "inteligencia"]] },
+    { "base": "elmo", "nome": "Elmo", "genero": "m", "slot": "cabeca", "icone": "🪖", "defesa": 1, "atributos": [["constituicao"], ["sabedoria"]] },
+    { "base": "peitoral", "nome": "Peitoral", "genero": "m", "slot": "corpo", "icone": "🥋", "defesa": 2, "atributos": [["constituicao", "forca"]] },
+    { "base": "luvas", "nome": "Luvas", "genero": "f", "slot": "maos", "icone": "🧤", "defesa": 0, "atributos": [["destreza", "forca"], ["destreza", "inteligencia"]] },
+    { "base": "calcas", "nome": "Calças", "genero": "f", "slot": "pernas", "icone": "👖", "defesa": 1, "atributos": [["constituicao"]] },
+    { "base": "botas", "nome": "Botas", "genero": "f", "slot": "pes", "icone": "👢", "defesa": 0, "atributos": [["destreza"]] },
+    { "base": "anel", "nome": "Anel", "genero": "m", "slot": "anel", "icone": "💍", "defesa": 0, "atributos": [["sabedoria", "inteligencia"], ["forca", "constituicao"], ["destreza", "carisma"]] },
+    { "base": "amuleto", "nome": "Amuleto", "genero": "m", "slot": "amuleto", "icone": "📿", "defesa": 0, "atributos": [["constituicao", "sabedoria"], ["carisma", "inteligencia"]] },
+    { "base": "capa", "nome": "Capa", "genero": "f", "slot": "capa", "icone": "🧣", "defesa": 1, "atributos": [["destreza", "carisma"]] }
+  ]
+}

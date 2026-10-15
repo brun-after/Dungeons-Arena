@@ -10,6 +10,7 @@ import type { ModoDeJogo, Raridade } from '../modos/modo';
 import type { RegrasColisao } from '../world/colisao';
 import type { Fase } from '../world/fase';
 import type { Atributos } from '../entities/entidade';
+import type { RegrasItensGerados } from '../progression/gerar-item';
 import type { Conteudo } from './conteudo';
 
 export interface Balance {
@@ -145,6 +146,15 @@ export interface Balance {
   atributos: {
     minimo: number;
     maximo: number;
+    /** Marco 17 (D-063): o que cada ponto acima de 10 faz (progression/efeitos-atributo.ts). */
+    efeitos: {
+      regenManaPorSabedoriaPct: number;
+      recargaBasicoPorDestrezaPct: number;
+      recargaBasicoMaxPct: number;
+      regenPorCelulaPorConstituicaoPct: number;
+      descontoPorCarismaPct: number;
+      descontoMaxPct: number;
+    };
   };
   inventario: {
     /** Entradas na mochila; consumíveis iguais empilham até `pilhaMax`. */
@@ -175,6 +185,8 @@ export interface Balance {
     avisoUtilMinMs: number;
     grupo: { tempoMinPctDoSolo: number; tempoMaxPctDoSolo: number };
     invocacao: { fatiaMinPct: number; fatiaMaxPct: number };
+    /** Marco 17: na arena com a ficha inteira, a build focada e o equipado vencem a maioria dos duelos. */
+    build: { nivel: number; vitoriasMinPct: number };
   };
   dificuldades: Record<Dificuldade, RegrasDificuldade>;
   grupo: RegrasGrupo;
@@ -186,6 +198,8 @@ export interface Balance {
    * Marco 17 (D-063): tetos de crescimento entre dois certificados do personagem (por minuto de jogo, com folga) e
    * o nível até onde um personagem sem certificado anterior é aceito.
    */
+  /** Marco 17 (D-063): equipamento gerado por semente (progression/gerar-item.ts). */
+  itensGerados: RegrasItensGerados;
   integridade: {
     nivelSemHistorico: number;
     xpPorMinutoBase: number;

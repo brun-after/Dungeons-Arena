@@ -9,6 +9,7 @@ import { DT_MS } from '../core/loop';
 import type { Entidade } from '../entities/entidade';
 import { t } from '../i18n';
 import { precoDeVenda, vendavel, type Item } from '../progression/itens';
+import { precoDeCompra } from '../progression/efeitos-atributo';
 import { lojaAberta } from '../progression/loja';
 import { resumoDoItem } from './mochila';
 import { criarModal } from './modal';
@@ -103,11 +104,13 @@ export function criarLoja(o: OpcoesLoja): Loja {
     for (const id of loja.itens) {
       const item = itens.get(id);
       if (!item) continue;
+      // Marco 17: o preço já com o desconto do Carisma.
+      const preco = precoDeCompra(item.valorBase, j.atributos, o.ctx.balance);
       estoque.append(
         linha(item, item.nome, 1, {
-          texto: t('loja.comprar', { preco: item.valorBase }),
+          texto: t('loja.comprar', { preco }),
           chave: `comprar-${id}`,
-          desligado: bolsa.ouro < item.valorBase,
+          desligado: bolsa.ouro < preco,
           fazer: () => { emitir({ t: 'comprar', itemId: id }); },
         }),
       );

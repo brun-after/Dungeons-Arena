@@ -165,7 +165,7 @@ function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
   }
   const boss = e.arquetipo === 'boss';
   if (aleatorio(estado.rng) >= (boss ? d.chanceItemBoss : d.chanceItem)) return;
-  const item = sortearItem(estado, ctx, boss);
+  const item = sortearItem(estado, ctx, boss, e.nivel);
   if (!item) return;
   largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, item.id, x, y, saida));
 }

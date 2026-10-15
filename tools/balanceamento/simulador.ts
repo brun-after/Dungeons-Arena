@@ -10,6 +10,9 @@ import type { EventoSimulacao } from '../../src/core/eventos-simulacao';
 import { vivo, type Entidade } from '../../src/entities/entidade';
 import type { Dificuldade } from '../../src/modos/dificuldade';
 import { guardarItem } from '../../src/progression/inventario';
+import { recalcularFicha } from '../../src/progression/derivados';
+import { idItemGerado } from '../../src/progression/gerar-item';
+import type { Raridade } from '../../src/modos/modo';
 import perfis from '../rede/perfis.json';
 import { BotDeDuelo, CONTEUDO, contextoDoCenario, inimigo, jogadorTipico, mundo, TICKS_POR_S } from './cenarios';
 
@@ -232,4 +235,70 @@ export function xpPorMinuto(classe: string, nivel: number, semente: number, comu
     tempo += segundos(m.estado.tick);
   });
   return tempo > 0 ? (xp * 60) / tempo : 0;
+}
+
+/**
+ * Marco 17 (D-063): duelo na arena com a ficha inteira (dois personagens da mesma classe e nível). `montarA` e
+ * `montarB` ajustam cada um (build, equipamento). Devolve se o A venceu.
+ */
+export function dueloDeFichas(classe: string, nivel: number, semente: number, montarA: (e: Entidade, ctx: ContextoSimulacao) => void, montarB: (e: Entidade, ctx: ContextoSimulacao) => void): boolean {
+  const ctx = contextoDoCenario('livre');
+  const a = jogadorTipico(ctx, classe, nivel, 'a', 6, 9);
+  const b = jogadorTipico(ctx, classe, nivel, 'b', 11, 9);
+  a.equipe = 'equipe-a';
+  b.equipe = 'equipe-b';
+  montarA(a, ctx);
+  montarB(b, ctx);
+  for (const e of [a, b]) {
+    e.hp = e.hpMax;
+    e.mana = e.manaMax;
+  }
+  const m = mundo(ctx, semente, [a, b]);
+  m.bots.push(new BotDeDuelo('a'), new BotDeDuelo('b'));
+  m.rodar(LIMITE_S * TICKS_POR_S, () => m.eventos.some((e) => e.t === 'morreu'));
+  const morte = primeiro(m.eventos, (e) => e.t === 'morreu');
+  return morte?.t === 'morreu' && morte.id === 'b';
+}
+
+/** A build dispersa: os pontos dos níveis espalhados por igual nos seis atributos (em vez do principal e da Constituição). */
+export function dispersar(e: Entidade, ctx: ContextoSimulacao): void {
+  const bolsa = e.bolsa;
+  const classe = bolsa ? CONTEUDO.classes.get(bolsa.classeId) : undefined;
+  if (!bolsa || !classe) return;
+  const pontos = (e.nivel - 1) * ctx.balance.xp.pontosPorNivel;
+  bolsa.atributosBase = { ...classe.atributos };
+  const nomes = Object.keys(bolsa.atributosBase) as (keyof typeof bolsa.atributosBase)[];
+  for (let i = 0; i < pontos; i++) {
+    const n = nomes[i % nomes.length];
+    if (n) bolsa.atributosBase[n]++;
+  }
+  recalcularFicha(e, ctx);
+}
+
+const ARMA_DA_CLASSE: Readonly<Record<string, string>> = { guerreiro: 'espada', aventureiro: 'espada', mago: 'cajado', arqueiro: 'arco' };
+
+/** Equipa arma, peitoral e elmo gerados do nível do personagem, na raridade pedida. */
+export function equipar(raridade: Raridade): (e: Entidade, ctx: ContextoSimulacao) => void {
+  return (e, ctx) => {
+    const bolsa = e.bolsa;
+    if (!bolsa) return;
+    for (const base of [ARMA_DA_CLASSE[bolsa.classeId] ?? 'espada', 'peitoral', 'elmo']) {
+      const item = ctx.conteudo.itens.get(idItemGerado(base, e.nivel, raridade, 7));
+      if (item?.slotPadrao) bolsa.equipamento[item.slotPadrao] = { invId: `g-${base}`, itemId: item.id, qtd: 1, ref: null };
+    }
+    recalcularFicha(e, ctx);
+  };
+}
+
+/** Sem nada equipado (nem o equipamento inicial). */
+export function desequipar(e: Entidade, ctx: ContextoSimulacao): void {
+  const bolsa = e.bolsa;
+  if (!bolsa) return;
+  for (const slot of Object.keys(bolsa.equipamento) as (keyof typeof bolsa.equipamento)[]) bolsa.equipamento[slot] = null;
+  recalcularFicha(e, ctx);
+}
+
+/** O personagem como o simulador o monta (sem ajuste). */
+export function semAjuste(): void {
+  // A ficha típica do nível, como está.
 }

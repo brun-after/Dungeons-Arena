@@ -5,13 +5,15 @@ import type { EstadoJogo } from '../core/estado';
 import { ticksDe } from '../core/tempo';
 import { vivo, type Entidade } from '../entities/entidade';
 import { regeneraPorCelula } from '../modos/regras';
+import { manaPorSegundo, vidaPorCelula } from './efeitos-atributo';
 
 export function regenerarRecursos(estado: EstadoJogo, ctx: ContextoSimulacao): void {
   // Ao fim de cada segundo completo de simulação (nunca no tick 0).
   if ((estado.tick + 1) % ticksDe(1000) !== 0) return;
-  const ganho = ctx.balance.recursos.regenManaPorSegundo;
+  // Marco 17: a Sabedoria acima de 10 regenera mais (em mana inteira, distribuída pelos segundos).
+  const segundo = (estado.tick + 1) / ticksDe(1000);
   for (const e of estado.entidades) {
-    if (vivo(e) && e.mana < e.manaMax) e.mana = Math.min(e.manaMax, e.mana + ganho);
+    if (vivo(e) && e.mana < e.manaMax) e.mana = Math.min(e.manaMax, e.mana + manaPorSegundo(e.atributos, segundo, ctx.balance));
   }
 }
 
@@ -28,6 +30,7 @@ export function regenerarPorPasso(estado: EstadoJogo, ctx: ContextoSimulacao, e:
   if (e.controlador === 'ia' || !vivo(e) || !regeneraPorCelula(ctx.modo)) return;
   if ((e.hp >= e.hpMax && e.mana >= e.manaMax) || perseguido(estado, e)) return;
   const r = ctx.balance.recursos;
-  e.hp = Math.min(e.hpMax, e.hp + r.regenHpPorCelula);
+  // Marco 17: a Constituição acima de 10 dá mais vida por célula.
+  e.hp = Math.min(e.hpMax, e.hp + vidaPorCelula(e.atributos, ctx.balance));
   e.mana = Math.min(e.manaMax, e.mana + r.regenManaPorCelula);
 }
