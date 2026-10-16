@@ -105,7 +105,9 @@ export function lerComando(v: unknown): Comando | null {
       if (v.alvo === undefined) return { t: 'ataqueBasico' };
       return id(v.alvo) ? { t: 'ataqueBasico', alvo: v.alvo } : null;
     case 'selecionarAlvo':
-      return v.alvo === null || id(v.alvo) ? { t: 'selecionarAlvo', alvo: v.alvo } : null;
+      if (v.alvo !== null && !id(v.alvo)) return null;
+      if (v.travar === undefined) return { t: 'selecionarAlvo', alvo: v.alvo };
+      return typeof v.travar === 'boolean' ? { t: 'selecionarAlvo', alvo: v.alvo, travar: v.travar } : null;
     case 'usarItem':
       return id(v.invId) ? { t: 'usarItem', invId: v.invId } : null;
     case 'equipar':

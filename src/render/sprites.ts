@@ -257,7 +257,7 @@ export class CamadaEntidades {
       if (m.indicador.text !== indicador) m.indicador.text = indicador;
       m.indicador.alpha = forcaDoIndicador(e, estado.tick);
       m.indicador.position.set(0, m.topo - 16);
-      this.desenharAneis(m, e, estado, local?.alvoSelecionado === e.id);
+      this.desenharAneis(m, e, estado, local?.alvoSelecionado === e.id ? (local.alvoTravado ? 'travado' : 'auto') : null);
       this.desenharBarras(m, e, tickVisual, e.id === this.o.idLocal);
     }
 
@@ -338,11 +338,22 @@ export class CamadaEntidades {
       .stroke({ width: 3, color: m.cor, alpha: 0.9 });
   }
 
-  private desenharAneis(m: Marcador, e: Entidade, estado: EstadoJogo, selecionado: boolean): void {
+  private desenharAneis(m: Marcador, e: Entidade, estado: EstadoJogo, selecao: 'auto' | 'travado' | null): void {
     const g = m.aneis.clear();
     const k = m.achatamento;
     const anel = (r: number) => g.ellipse(0, 0, r, r * k);
-    if (selecionado) anel(RAIO * 1.15 * m.escala + 6).stroke({ width: 2, color: 0xf1c40f, alpha: 0.9 });
+    // Ajuste de 15/10/2026 (D-065): automático, o anel amarelo fino; travado, laranja-avermelhado e grosso, com as
+    // quatro marcas da mira.
+    const raioSel = RAIO * 1.15 * m.escala + 6;
+    if (selecao === 'auto') anel(raioSel).stroke({ width: 2, color: 0xf1c40f, alpha: 0.9 });
+    else if (selecao === 'travado') {
+      anel(raioSel).stroke({ width: 3, color: 0xff7043, alpha: 0.95 });
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+        const x = dx * raioSel;
+        const y = dy * raioSel * k;
+        g.moveTo(x + dx * 3, y + dy * 3).lineTo(x + dx * 9, y + dy * 9).stroke({ width: 3, color: 0xff7043, alpha: 0.95 });
+      }
+    }
     // Marco 8A-2: dominado (lutando do outro lado) ganha um anel roxo.
     if (e.invocacao?.dominado) anel(RAIO * 1.15 * m.escala + 3).stroke({ width: 2, color: 0x8e44ad, alpha: 0.95 });
     // Marco 10A-3: invocação com anel verde-azulado; avatar mostra os golpes que ainda aguenta.

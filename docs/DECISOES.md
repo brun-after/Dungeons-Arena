@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.29 · **Data:** 15/10/2026
+**Versão:** 0.31 · **Data:** 15/10/2026
 
 > **Histórico**
+> - **0.31 (15/10/2026)**: D-065 (alvo automático que acompanha e alvo travado). Pula a 0.30, que é a do PR do marco 17.
 > - **0.29 (15/10/2026)**: D-062 com o resultado do teste na VM (10 min, por decisão do usuário).
 > - **0.28 (15/10/2026)**: D-061 (dificuldade, campanha cooperativa e balanceamento por simulação, marco 15) e D-062 (endurecimento, marco 16).
 > - **0.27 (15/10/2026)**: D-060 (ajustes de jogo depois do marco 14); a D-017 passa a ser por habilidade.
@@ -1477,3 +1478,50 @@ O ritmo escolhido foi o **médio**:
 > **Resultado (v0.29, 15/10/2026)**: o usuário reduziu o teste de 30 para **10 min**. Com 10 bots na arena-02 sobre o
 > `wss://` da VM: 10/10 metas; RTT 22/32 ms; tick p95/p99 1,4/1,7 ms (p95 máximo na série 2,8 ms); memória do
 > processo de 105 para 129 MB, com tendência de 0,66 MB/min; nenhum reinício; atraso do agendador p95 de 10,7 ms.
+
+## D-065 · Alvo automático que acompanha e alvo travado (v0.31, 15/10/2026)
+
+**Contexto.** O usuário relatou que a seleção de alvo parecia aleatória e trocava sozinha no combate. As causas eram
+quatro:
+- **Quase nunca havia seleção.** Só o clique ou o toque num inimigo selecionava; no teclado, nunca.
+- **Sem seleção, cada golpe recalculava o alvo.** O auto-ataque (a cada 250 ms) e as habilidades sem alvo chamavam
+  o auto-alvo de novo, e o "mais próximo" mudava enquanto os inimigos se mexiam.
+- **Com seleção, o golpe ia para outro em silêncio.** Com o selecionado fora do alcance, o golpe acertava outro e o
+  anel continuava no primeiro.
+- **O alvo morto continuava selecionado.**
+
+**Decisão.**
+- **Automático (destravado).**
+  - O primeiro golpe sem seleção escolhe pelo auto-alvo (§4.7), e esse alvo **fica selecionado**.
+  - Os golpes seguintes continuam nele enquanto estiver no alcance.
+  - Se ele sair do alcance, o golpe vai para outro e a seleção acompanha. O anel mostra sempre quem você acerta.
+- **Travado.** É o padrão da escolha manual: clique ou toque num inimigo, ou a tecla de troca.
+  - O alvo nunca muda sozinho.
+  - **Fora do alcance**: o auto-ataque espera; a habilidade sem alvo explícito mira nele e é recusada por alcance.
+  - **Invisível**: espera.
+- **Morte ou sumiço do alvo**: desfaz a seleção e a trava; o próximo golpe escolhe de novo.
+- **Estado**:
+  - `Entidade.alvoTravado` (ausente em saves antigos = destravado; o save não muda de versão);
+  - o comando `selecionarAlvo` ganha `travar?` (padrão `true` com alvo; `false` destrava sem perder o alvo).
+- **Troca manual** (`proximoHostil`, puro):
+  - percorre os hostis válidos por `relacao()` até `balance.combate.raioTrocaAlvo` (10 células);
+  - ordem: avatar primeiro, depois distância Chebyshev e id; dá a volta na lista.
+- **Controles**:
+
+  | Ação | Teclado e mouse | Toque |
+  |---|---|---|
+  | Trocar de alvo | `Q` (`Shift+Q` volta) | Tocar no 🎯 |
+  | Travar ou destravar | `T`, ou clicar de novo no alvo travado | Segurar o 🎯 (~450 ms) |
+  | Limpar o alvo | `Esc`, antes de pausar | — |
+
+- **Divergência da §4.7**: "setas alternam alvo" virou `Q` / `Shift+Q`, porque as setas movem o personagem. `Tab`
+  ficou de fora para não quebrar a navegação por foco.
+- **Interface**:
+  - anel amarelo fino no automático;
+  - anel laranja grosso com as quatro marcas da mira no travado;
+  - quadro do alvo no alto da tela, com nome, nível, vida e 🔒, anunciado ao leitor de tela só na troca e na trava.
+
+**Consequência.**
+- A regra vale igual na campanha, no cooperativo e na arena: é do núcleo, por comandos, com a mesma predição.
+- O `BotDeDuelo` do simulador passa a travar quando seleciona, que é o que ele já queria; as metas seguem 100%.
+

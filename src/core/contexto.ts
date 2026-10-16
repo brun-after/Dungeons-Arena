@@ -28,6 +28,8 @@ export interface Balance {
   combate: {
     multiplicadorAtributoPadrao: number;
     autoAtaqueMs: number;
+    /** Ajuste de 15/10/2026 (D-065): até quantas células a troca manual de alvo procura. */
+    raioTrocaAlvo: number;
     janelaParticipacaoS: number;
     carismaNeutro: number;
     critico: FaixaCritico[];

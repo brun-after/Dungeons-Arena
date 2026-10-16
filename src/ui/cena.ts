@@ -6,7 +6,7 @@
 // Marco 14 (14/10/2026): a barra de habilidades segue a barra escolhida do jogador (compilada pela chave dele)
 // e os efeitos do HUD ganham duração e cartão.
 
-import { recargaRestante } from '../combat/acao';
+import { proximoHostil, recargaRestante } from '../combat/acao';
 import { celulaOcupada } from '../combat/geometria';
 import type { Habilidade } from '../combat/habilidades';
 import type { Dificuldade } from '../modos/dificuldade';
@@ -50,6 +50,7 @@ import { criarMochila } from './mochila';
 import { DadoD20 } from './dado';
 import { criarBarraHabilidades } from './habilidades';
 import { Hud } from './hud';
+import { QuadroAlvo } from './quadro-alvo';
 import { montarVisao, type ControleVisao } from './visao';
 
 const LEITURA_FAIXA_MS = 1000;
@@ -197,14 +198,29 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     emitir({ t: 'usarHabilidade', id });
   };
 
-  // Toque ou clique num hostil seleciona o alvo; em qualquer outra célula, vai até ela.
+  // Toque ou clique num hostil seleciona e trava o alvo (no travado, destrava: D-065); em outra célula, vai até ela.
   const aoTocarCelula = (c: Celula) => {
     const local = jogador();
     const hostil = o.estado().entidades.find((e) => {
       const oc = celulaOcupada(e);
       return oc.x === c.x && oc.y === c.y && !!local && podeFerir(local, e, ctx.modo) && !e.morto;
     });
-    emitir(hostil ? { t: 'selecionarAlvo', alvo: hostil.id } : { t: 'irPara', x: c.x, y: c.y });
+    if (!hostil) emitir({ t: 'irPara', x: c.x, y: c.y });
+    else if (local?.alvoSelecionado === hostil.id && local.alvoTravado) emitir({ t: 'selecionarAlvo', alvo: hostil.id, travar: false });
+    else emitir({ t: 'selecionarAlvo', alvo: hostil.id });
+  };
+  // Ajuste de 15/10/2026 (D-065): Q / 🎯 trocam para o hostil seguinte (e travam); T / segurar o 🎯 trava ou destrava.
+  const trocarAlvo = (sentido: 1 | -1) => {
+    const local = jogador();
+    if (!local) return;
+    const proximo = proximoHostil(o.estado(), ctx, local, local.alvoSelecionado, sentido, ctx.balance.combate.raioTrocaAlvo);
+    if (proximo) emitir({ t: 'selecionarAlvo', alvo: proximo.id });
+  };
+  const travarAlvo = () => {
+    const local = jogador();
+    const atual = local?.alvoSelecionado ? o.estado().entidades.find((e) => e.id === local.alvoSelecionado && !e.morto) : undefined;
+    if (local && atual) emitir({ t: 'selecionarAlvo', alvo: atual.id, travar: !local.alvoTravado });
+    else trocarAlvo(1);
   };
 
   const hud = new Hud(ui, (id) => o.estado().entidades.find((e) => e.id === id)?.nome ?? null);
@@ -213,6 +229,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   // Ajuste de 15/10/2026 (D-060): o d20 perto da barra (o chip do canto saiu).
   const dado = new DadoD20();
   ui.append(dado.elemento);
+  const quadroAlvo = new QuadroAlvo();
+  ui.append(quadroAlvo.elemento);
   // Marco 14: a barra é a do jogador (teclas 1–4), refeita quando muda (rank, caminho ou troca de tecla).
   let habilidadesDaBarra: Habilidade[] = [];
   let chaveDaBarra = '';
@@ -265,6 +283,10 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       aoInteragir: () => {
         emitir({ t: 'interagir' });
       },
+      aoTrocarAlvo: () => {
+        trocarAlvo(1);
+      },
+      aoTravarAlvo: travarAlvo,
       isometrico,
     });
     controles.direita.append(barra.elemento);
@@ -349,6 +371,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       emitir({ t: 'dispensar' });
     },
     aoAlternarVisao: alternarVisao,
+    aoTrocarAlvo: trocarAlvo,
+    aoTravarAlvo: travarAlvo,
     // `Esc` contextual (§2.15): com alvo, cancela a mira; sem alvo, pausa (ou abre o menu, na arena).
     aoCancelar: () => {
       if (jogador()?.alvoSelecionado) emitir({ t: 'selecionarAlvo', alvo: null });
@@ -403,6 +427,9 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       }));
     }
     hud.atualizar(j, estado.tick);
+    const alvo = j?.alvoSelecionado ? estado.entidades.find((e) => e.id === j.alvoSelecionado) : undefined;
+    quadroAlvo.atualizar(j, alvo);
+    controles?.marcarTrava(!!alvo && j?.alvoTravado === true);
     dado.atualizar(q.agoraMs);
     mochila.atualizar();
     loja.atualizar();

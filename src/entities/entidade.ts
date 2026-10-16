@@ -202,6 +202,8 @@ export interface Entidade {
   efeitos: EfeitoAtivo[];
   acao: AcaoEmCurso | null;
   alvoSelecionado: EntidadeId | null;
+  /** Ajuste de 15/10/2026 (D-065): travado, o alvo só muda por escolha do jogador. Ausente em saves antigos = false. */
+  alvoTravado: boolean;
   autoAtaque: boolean;
   invisivelAteTick: number;
   morto: boolean;
@@ -296,6 +298,7 @@ export function criarEntidade(n: NovaEntidade): Entidade {
     efeitos: [],
     acao: null,
     alvoSelecionado: null,
+    alvoTravado: false,
     autoAtaque: n.autoAtaque ?? jogador,
     invisivelAteTick: 0,
     morto: false,
