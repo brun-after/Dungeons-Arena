@@ -18,6 +18,7 @@ import { MonitorDeConexao } from './net/qualidade';
 import { iniciarLaco, relogioDoNavegador } from './plataforma/laco-navegador';
 import { carregarSlot, gravarRegistro } from './plataforma/saves';
 import { enderecoDoServidor } from './plataforma/servidor';
+import { sincronizarSlot } from './plataforma/nuvem';
 import { sairDaTelaCheia } from './plataforma/sessao-tela';
 import { conectarCampanha, type ConexaoCampanha } from './plataforma/transporte-colyseus';
 import { jogadorDoSave, type RefFase, type RegistroProgresso } from './save/esquema';
@@ -170,10 +171,12 @@ export async function iniciarGrupo(raiz: HTMLElement, o: OpcoesGrupo): Promise<v
     sair.addEventListener('click', () => {
       sair.disabled = true;
       sairDaTelaCheia();
-      void gravar().finally(() => {
-        conexao.transporte.fechar();
-        location.href = './?jogo=campanha';
-      });
+      void gravar()
+        .then(() => sincronizarSlot(o.slot))
+        .finally(() => {
+          conexao.transporte.fechar();
+          location.href = './?jogo=campanha';
+        });
     });
     const painel = criarPainelGrupo(conexao.codigo);
     cena = await montarCena({

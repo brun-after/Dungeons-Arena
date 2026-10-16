@@ -1,6 +1,6 @@
 # Dungeons Arena: guia para quem trabalha no código
 
-**Versão:** 0.2 · **Data:** 15/10/2026
+**Versão:** 0.3 · **Data:** 15/10/2026
 
 A especificação normativa é [`docs/PROMPT-PROJETO-v4.0.md`](docs/PROMPT-PROJETO-v4.0.md). Leia a Parte 1
 antes de decisões técnicas. Divergências vão para [`docs/DECISOES.md`](docs/DECISOES.md), com justificativa.
@@ -12,7 +12,9 @@ O roteiro e o estado de cada marco ficam no [`README.md`](README.md).
   `?jogo=grupo&slot=N&criar=1|&codigo=X` campanha em grupo, `?bench=carga|padrao|trocas` benchmarks)
 - `npm run dev:server`: servidor da arena (Colyseus) em `ws://localhost:2567`; `npm run carga`: teste de carga
 - `npm run carga -- --perfil suportado|degradado --fase arena-02`: carga com rede simulada (proxy em `tools/rede`);
-  `--modo grupo` mede a campanha cooperativa (até 6 bots)
+  `--modo grupo` mede a campanha cooperativa (até 6 bots); `--ficha certificada` entra com fichas certificadas (marco 17)
+- Nuvem: `?nuvem=falsa` usa a nuvem em memória (testes); a de verdade (Supabase) vem de `VITE_SUPABASE_URL` e
+  `VITE_SUPABASE_ANON_KEY` no build. O certificado do personagem é assinado só pelo servidor (`CHAVE_CERTIFICADO`)
 - `npm run balancear`: simulador de balanceamento contra `balance.metas` (`-- --registrar` grava docs/BALANCEAMENTO.md)
 - `npm run bench`: benchmarks do cliente no Chromium sem tela (`-- --registrar` grava docs/BENCHMARKS.md)
 - `npm run relatorios -- arquivo.jsonl`: resumo dos relatórios do teste com pessoas (`?pesquisa=1`, docs/TESTES-HUMANOS.md)

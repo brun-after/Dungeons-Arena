@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 2.7 · **Data:** 15/10/2026
-**Status:** 🚧 Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento
+**Versão do documento:** 2.8 · **Data:** 15/10/2026
+**Status:** 🚧 Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena
 
 > **Histórico**
+> - **2.8 (15/10/2026)**: marco 17 (conta Google e progresso na nuvem, certificado do personagem, a campanha na arena com faixas e recompensas, equipamento gerado por nível e atributos com mais efeito; D-063) e o 11A redefinido (D-064).
 > - **2.7 (15/10/2026)**: marco 16 fechado com o teste de 10 min na VM (10/10 metas, memória estável, sem reinício).
 > - **2.6 (15/10/2026)**: marcos 15 e 16 concluídos (dificuldade, campanha em grupo até 6, simulador de balanceamento e ritmo calibrado; celular, PWA offline testado, benchmarks do cliente, limites e métricas do servidor; D-061, D-062).
 > - **2.5 (15/10/2026)**: ajustes depois do marco 14 (andar conjurando por habilidade, tempo mínimo na zona de atenção, d20 visível, teclado numérico, área orgânica; D-060).
@@ -64,6 +65,8 @@ Divergências em relação a ela são registradas em [`docs/DECISOES.md`](docs/D
 | **Campanha e save** | Menu → **Campanha** → escolha um slot (1–3). Salva sozinho; **Menu** no cabeçalho salva e sai; **Exportar/Importar** levam o save para outro aparelho | Marco 6 |
 | **Dificuldade** | Na tela de slots, o seletor de cada slot (Fácil, Normal, Difícil, Pesadelo); na pausa, troca a qualquer momento. O personagem é o mesmo em qualquer uma | Marco 15 |
 | **Campanha em grupo** | Tela de slots → **Jogar em grupo** (no slot com personagem) mostra um código; os outros (até 6) digitam o código no próprio slot e **Entrar no grupo**. Cada um joga com o seu personagem, que volta para o slot dele; a fase avança quando todos os vivos estão na saída | Marco 15 |
+| **Conta e nuvem** | Tela de slots → **Entrar com Google**; em cada slot, **Enviar para a nuvem** e **Baixar da nuvem**. Jogar sem conta continua igual; salvar pelo menu e sair do grupo ou da arena enviam sozinhos quando há conta | Marco 17 |
+| **Arena com o seu personagem** | Menu → **Arena online** → escolha o slot (o primeiro já vem escolhido) → criar sala ou entrar numa sala da sua faixa. O servidor confere o personagem; ele entra inteiro, ganha XP, ouro e itens, e **Salvar e sair** grava no slot | Marco 17 |
 | **Balanceamento** | `npm run balancear` (tabela das metas do ritmo); `-- --registrar` grava [`docs/BALANCEAMENTO.md`](docs/BALANCEAMENTO.md) | Marco 15 |
 | **Benchmarks do cliente** | `?bench=carga` ou `?bench=padrao` no navegador (o resultado aparece na tela; `&qualidade=baixo` e `&segundos=60` opcionais); `npm run bench` roda tudo e grava em `docs/BENCHMARKS.md` | Marco 16 |
 | **Teste com pessoas** | Link <https://brun-after.github.io/Dungeons-Arena/?pesquisa=1>; roteiro e resumo em [`docs/TESTES-HUMANOS.md`](docs/TESTES-HUMANOS.md) | Marco 7 |
@@ -169,7 +172,7 @@ pessoas (7C) entra quando houver testadores.
 | [x] | 8A | 26 tipos de efeito, normalização e dispatcher | Todos os efeitos exercitados; o registro aparece no editor e nos orbes |
 | [x] | 9A | Inventário, 10 slots, economia, baús, loja, orbes e spawner | A ordem de equipar não altera o resultado; ciclo econômico íntegro |
 | [x] | 10A | Progressão 1–20, morte, geração procedural, portas, invocações e avatares | Campanha completa, com save, migrações e modo offline |
-| [ ] | 11A | Editor completo no toque (baú, loja, armadilha, portas e loot), tileset por imagem, personagem por imagem, música importada pelo jogador, editor de efeitos com prévia, validação e aprendizado de estilo | Aventura de 2 fases criada, testada, exportada e importada no celular, levando imagens, músicas e efeitos |
+| [ ] | 11A | Editor completo no toque (baú, loja, armadilha, portas e loot), aventura de 2+ fases, tileset por imagem, aprendizado de estilo por aparelho, a aparência das habilidades refinada e trilhas variadas entre casual e dark fantasy (D-064) | Aventura de 2 fases criada e testada no celular |
 
 ### Expansão e operação da arena
 
@@ -188,6 +191,7 @@ pessoas (7C) entra quando houver testadores.
 | [x] | 13 | Visão **isométrica**; **modelos de criatura** gerados no build; **caminhada por fatias**; **personagem por imagem** (recorte, escala, substituto, legibilidade) | Alternar a visão preserva velocidade, alcance e regras; imagem inválida não quebra o jogo |
 | [x] | 14 | **Sistema de habilidades**: composição em camadas (efeito, forma, tempo, custo, tema, apresentação); formas linha, cone e ao redor; alvos aliado, todos os aliados e área livre; escudo, puxão e troca de lugar; **5 elementos** com estados e sinergias; interações em tabela (acúmulo, sinergia, resistência, teto); **orçamento de poder**; **ranks** por nível; **árvores de evolução** e modificadores; **classes** (guerreiro, mago, arqueiro) com afinidades; **livros de habilidade**; **habilidades geradas por semente** (inimigos e livros); **passivas**; barra escolhida e roda de habilidades; **efeitos legíveis** (duração, cartão e descrição gerada) | Uma habilidade nova nasce de dados e cabe no orçamento; o jogador entende o que está ativo e o que faz; inimigos das fases geradas com repertório próprio; mesmo digest com as mesmas sementes |
 | [x] | 15 | Ferramenta de **balanceamento por simulação** (tempo para matar por classe, rank e evolução, curva das fases, fluxo de ouro, invocações, margem de aviso do corpo a corpo) e ajuste dos números da campanha e do Livre; **dificuldade** em 4 níveis com o mesmo personagem; **campanha em grupo** online até 6, com escala pelo tamanho do grupo; inimigo cresce com o nível | Ritmo e janelas de reação validados na campanha e no Livre (69/69 metas). *Fichas justas por modo de arena: depois do 10B* |
+| [x] | 17 | **Conta Google** e **progresso na nuvem** (Supabase econômico), **certificado do personagem** (editar o arquivo não upa), **o personagem da campanha na arena** com faixas de nível e recompensas (XP, ouro e itens, com antifarm), **equipamento gerado por nível** e **atributos com mais efeito** | Quem upou bem vence na arena (simulador); arquivo editado entra como ficha de treino; jogar local não depende da nuvem |
 | [x] | 16 | Celular (área segura, orientação, redimensionamento), **PWA offline** testado, desempenho e memória (trocas de fase, cena de carga, `BENCHMARKS.md`) e servidor (limites, métricas, teste de 10 min na VM) | Offline e benchmarks verificados; teste de 10 min na VM com 10 bots: 10/10 metas, memória estável e sem reinício. *Recuperação de queda: depois do 9B; sessão real de 10 pessoas: no 11B* |
 
 ---

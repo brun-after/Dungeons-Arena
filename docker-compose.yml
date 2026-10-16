@@ -16,6 +16,8 @@ services:
       # Marco 16 (D-062): salas por processo e criações por minuto por origem (a VM tem 1 GB).
       MAX_SALAS: ${MAX_SALAS:-6}
       CRIACOES_POR_MINUTO: ${CRIACOES_POR_MINUTO:-6}
+      # Marco 17 (D-063): chave do certificado do personagem (vem do .env que o deploy grava; nunca no repositório).
+      CHAVE_CERTIFICADO: ${CHAVE_CERTIFICADO:-}
     # Marco 16: o servidor não leva a VM junto se algo crescer demais (o Node fica em 512 MB de heap, Dockerfile).
     mem_limit: 700m
     logging:

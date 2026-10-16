@@ -297,6 +297,7 @@ describe('o progresso volta para o slot de cada um', () => {
       estado,
       estatisticas: { inimigosDerrotados: 0, mortes: 0 },
       fasesVisitadas: {},
+      certificado: null,
     };
     const conferido = obter(conferirPersonagem(pedidoDoPersonagem(doSlot), ctx, 'p1', 'jogador-1'), 'conferido');
     const doGrupo = conferido.entidade;

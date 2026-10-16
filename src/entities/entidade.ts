@@ -152,6 +152,11 @@ export interface Bolsa {
   /** As 4 teclas (1–4): ids de habilidades conhecidas, ou null. `Entidade.habilidades` deriva daqui. */
   barra: (string | null)[];
   pontosHabilidade: number;
+  /**
+   * Marco 17 (D-063): identidade do personagem (UUID), dada pelo cliente ao criar; vazia nos saves antigos até o
+   * jogo dar uma. O certificado da arena se prende a ela.
+   */
+  personagemId: string;
 }
 
 /**

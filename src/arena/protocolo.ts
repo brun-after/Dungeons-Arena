@@ -8,6 +8,7 @@ import { hash53, serializarCanonico } from '../core/digest';
 import type { EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import type { Bolsa } from '../entities/entidade';
+import type { Certificado } from '../integridade/certificado';
 import { ehDificuldade } from '../modos/dificuldade';
 import type { RefFase } from '../save/esquema';
 import { ehObjeto, type Objeto } from '../core/validar';
@@ -26,7 +27,9 @@ export type MensagemCliente =
   | { t: 'cmd'; pacote: ComandoEmpacotado }
   | { t: 'ping'; id: number; enviadoMs: number }
   /** O cliente perdeu a sequência de patches: pede o estado completo. */
-  | { t: 'ressincronizar' };
+  | { t: 'ressincronizar' }
+  /** Marco 17: pede o personagem atual, certificado (só para quem entrou com a ficha inteira). */
+  | { t: 'pedirCertificado' };
 
 export type MotivoRejeicao =
   | 'grande_demais'
@@ -40,7 +43,7 @@ export type MotivoRejeicao =
   /** Marco 15: o modo não aceita este comando pela rede (ou só o anfitrião pode). */
   | 'nao_permitido';
 
-export type MotivoErro = 'sala_cheia' | 'versao_conteudo' | 'ja_entrou' | 'personagem_invalido';
+export type MotivoErro = 'sala_cheia' | 'versao_conteudo' | 'ja_entrou' | 'personagem_invalido' | 'fora_da_faixa';
 
 export type MensagemServidor =
   | {
@@ -65,6 +68,8 @@ export type MensagemServidor =
   | { t: 'novaFase'; faseRef: RefFase; nome: string; epocaSala: number; tick: number; ackSeq: number; estado: EstadoJogo }
   /** Marco 15 (cooperativo): a saída da última fase não leva a lugar nenhum (só depois de uma aventura). */
   | { t: 'fimDaCampanha' }
+  /** Marco 17: o personagem como está na sala, certificado pelo servidor (null: a sessão entrou com ficha de treino). */
+  | { t: 'certificado'; certificado: Certificado | null }
   | { t: 'erro'; motivo: MotivoErro };
 
 /** Versão do conteúdo oficial: cliente e sala precisam concordar (§3.6, "versão/hash"). */
@@ -182,6 +187,8 @@ export function lerMensagemCliente(texto: string): LeituraCliente {
       return inteiro(bruto.id) && finito(bruto.enviadoMs) ? { ok: true, msg: { t: 'ping', id: bruto.id, enviadoMs: bruto.enviadoMs } } : malformada();
     case 'ressincronizar':
       return { ok: true, msg: { t: 'ressincronizar' } };
+    case 'pedirCertificado':
+      return { ok: true, msg: { t: 'pedirCertificado' } };
     default:
       return malformada();
   }

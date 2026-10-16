@@ -30,6 +30,9 @@ jobs:
         env:
           # Endereço público do servidor da arena (docs/IMPLANTACAO.md, passo 6). Sem ele, o lobby avisa.
           VITE_ARENA_URL: ${{ vars.ARENA_URL }}
+          # Marco 17 (D-063): a nuvem (Supabase). Os dois são públicos (o RLS protege); sem eles, não há nuvem.
+          VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4

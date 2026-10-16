@@ -231,13 +231,13 @@ describe('drops e coleta de itens', () => {
     expect(['raro', 'epico', 'lendario']).toContain(item(obter(drop.itemId, 'itemId')).raridade);
   });
 
-  it('no modo Livre não cai item', () => {
+  it('marco 17: no modo Livre também cai item (a arena dá itens nos abates)', () => {
     const c = cenario(comItem(1), 'livre');
     const g = criarInimigo(obter(CONTEUDO.presets.get('goblin'), 'goblin'), 'g', 6, 6, BALANCE_PADRAO);
     g.hp = 0;
     c.estado.entidades.push(g);
     c.tick();
-    expect(c.estado.objetos.some((o) => o.tipo === 'item')).toBe(false);
+    expect(c.estado.objetos.some((o) => o.tipo === 'item')).toBe(true);
   });
 
   it('pisar no item guarda na mochila; com a mochila cheia, o item fica no chão', () => {

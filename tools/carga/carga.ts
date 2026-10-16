@@ -13,7 +13,12 @@
 // `/metricas` amostrado a cada 10 s (série do tick e da memória, com a tendência) e `--marco` no registro.
 //
 //   npm run carga -- --modo grupo --clientes 6 --perfil suportado --segundos 300
+// Marco 17 (D-063): `--ficha certificada` faz cada bot certificar um personagem novo (POST /certificar) e entrar na
+// arena com a ficha inteira (bolsa, canal privado e recompensas), numa sala da faixa 1-5.
+//
+//   npm run carga -- --ficha certificada --perfil suportado --fase arena-02 --segundos 300
 
+import { randomUUID } from 'node:crypto';
 import { appendFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 import { contextoDaArena } from '../../src/arena/contexto-arena';
@@ -27,6 +32,7 @@ import { MODO_COOPERATIVO } from '../../src/coop/sala-campanha';
 import { conteudoOficial, modoPorId } from '../../src/core/conteudo';
 import { BALANCE_PADRAO, type ContextoSimulacao } from '../../src/core/contexto';
 import { criarJogador } from '../../src/entities/fabrica';
+import { pedirCertificado } from '../../src/plataforma/certificacao';
 import { conectarArena, conectarCampanha, type ConexaoArena } from '../../src/plataforma/transporte-colyseus';
 import type { RefFase } from '../../src/save/esquema';
 import { contextoDaFase, FASE_INICIAL, faseOficialOuGerada } from '../../src/save/fases-campanha';
@@ -41,11 +47,13 @@ const { values } = parseArgs({
     fase: { type: 'string', default: 'arena-01' },
     registrar: { type: 'boolean', default: false },
     modo: { type: 'string', default: 'arena' },
+    ficha: { type: 'string', default: 'treino' },
     marco: { type: 'string', default: '16' },
   },
 });
 const urlServidor = values.url;
 const grupo = values.modo === 'grupo';
+const certificada = !grupo && values.ficha === 'certificada';
 const quantidade = Math.max(1, Math.min(grupo ? 6 : 10, Number(values.clientes)));
 const segundos = Math.max(5, Number(values.segundos));
 const fase = values.fase;
@@ -93,10 +101,21 @@ function pedidoDoBot(i: number): unknown {
   const classe = conteudo.classes.get(CLASSES_DO_GRUPO[i % CLASSES_DO_GRUPO.length] ?? 'aventureiro');
   return grupo && classe ? pedidoDoPersonagem(criarJogador(classe, 'j1', 1, 1, BALANCE_PADRAO)) : { classeId: 'aventureiro' };
 }
+
+/** Marco 17: um personagem novo da classe do bot, certificado pelo servidor (a arena o recebe inteiro). */
+async function fichaCertificada(i: number): Promise<unknown> {
+  const classe = conteudo.classes.get(CLASSES_DO_GRUPO[i % CLASSES_DO_GRUPO.length] ?? 'aventureiro');
+  const personagem = classe ? pedidoDoPersonagem(criarJogador(classe, 'j1', 1, 1, BALANCE_PADRAO)) : null;
+  if (!personagem) throw new Error('classe');
+  personagem.bolsa.personagemId = randomUUID();
+  const r = await pedirCertificado(urlServidor, personagem, null);
+  if (!r.ok) throw new Error(`certificado recusado: ${r.motivo}`);
+  return { certificado: r.certificado };
+}
 /** Janela útil de aviso por habilidade (ms): tempo até o impacto menos o RTT (o evento chega e o comando volta). */
 const janelas = new Map<string, number[]>();
 
-async function conectar(pedido: { criar: true; fase: string } | { codigo: string }, i: number): Promise<Participante> {
+async function conectar(pedido: { criar: true; fase: string; faixa?: string } | { codigo: string }, i: number): Promise<Participante> {
   const conexao = grupo
     ? await conectarCampanha(url, 'criar' in pedido ? { criar: { faseRef: FASE_INICIAL, dificuldade: 'normal' } } : pedido)
     : await conectarArena(url, pedido);
@@ -120,7 +139,7 @@ async function conectar(pedido: { criar: true; fase: string } | { codigo: string
     ctx,
     transporte,
     nome: `Bot ${i + 1}`,
-    pedidoFicha: pedidoDoBot(i),
+    pedidoFicha: certificada ? await fichaCertificada(i) : pedidoDoBot(i),
     agoraMs: () => performance.now(),
     ...(grupo && { contextoDe: contextoDoGrupo }),
   });
@@ -141,9 +160,9 @@ async function conectar(pedido: { criar: true; fase: string } | { codigo: string
   return p;
 }
 
-const cena = grupo ? `campanha em grupo (${FASE_INICIAL.id})` : fase;
+const cena = grupo ? `campanha em grupo (${FASE_INICIAL.id})` : certificada ? `${fase}, fichas certificadas` : fase;
 console.log(`Carga: ${quantidade} clientes em ${urlServidor}${perfilNome ? ` (perfil ${perfilNome})` : ''}, ${cena}, por ${segundos} s`);
-const primeiro = await conectar({ criar: true, fase }, 0);
+const primeiro = await conectar(certificada ? { criar: true, fase, faixa: '1-5' } : { criar: true, fase }, 0);
 const codigo = primeiro.conexao.codigo;
 const participantes = [primeiro];
 for (let i = 1; i < quantidade; i++) participantes.push(await conectar({ codigo }, i));

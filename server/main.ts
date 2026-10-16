@@ -4,6 +4,7 @@
 //   DIR_DADOS  pasta dos relatórios do teste com pessoas (padrão ./dados; /dados no Docker)
 //   MAX_SALAS  salas por processo (padrão 6; marco 16, D-062)
 //   CRIACOES_POR_MINUTO  salas que uma origem pode criar por minuto (padrão 6)
+//   CHAVE_CERTIFICADO  chave do certificado do personagem (marco 17; segredo do GitHub, nunca no repositório)
 
 import { iniciarServidor } from './servidor';
 import { registrarLog } from './metricas';
@@ -19,6 +20,7 @@ const { encerrar } = await iniciarServidor({
   dirDados,
   maxSalas: numero(process.env.MAX_SALAS, 6),
   criacoesPorMinuto: numero(process.env.CRIACOES_POR_MINUTO, 6),
+  chaveCertificado: process.env.CHAVE_CERTIFICADO,
 });
 
 for (const sinal of ['SIGINT', 'SIGTERM'] as const) {

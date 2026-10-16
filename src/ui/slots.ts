@@ -7,6 +7,7 @@ import { DIFICULDADES, type Dificuldade } from '../modos/dificuldade';
 import { listarAventuras, type RegistroAventura } from '../plataforma/aventuras';
 import { apagarSlot, carregarSlot, gravarRegistro, listarSlots, type EstadoSlot } from '../plataforma/saves';
 import { enderecoDoServidor } from '../plataforma/servidor';
+import { ligarNuvemNosSlots } from './nuvem-slots';
 import { exportarRegistro, importarRegistro } from '../save/esquema';
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, texto?: string): HTMLElementTagNameMap[K] {
@@ -129,8 +130,11 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
   // Marco 6C: um jogo novo pode começar numa fase criada no editor.
   const aventuras: RegistroAventura[] = await listarAventuras().catch(() => []);
 
+  // Marco 17: os cartões, para a nuvem pôr "Enviar" e "Baixar" em cada um.
+  const cartoes = new Map<number, HTMLElement>();
   for (const s of slots) {
     const cartao = el('article', 'cartao-slot');
+    cartoes.set(s.slot, cartao);
     cartao.dataset.slot = String(s.slot);
     cartao.append(el('h2', undefined, t('slots.slot', { n: s.slot })));
     const acoes = el('div', 'acoes-slot');
@@ -241,4 +245,5 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
     tela.append(cartao);
   }
   tela.append(status, link('./', t('menu.voltar'), 'link-menu'));
+  void ligarNuvemNosSlots({ depoisDe: titulo, cartoes, locais: new Set(slots.filter((s) => s.tipo === 'ok').map((s) => s.slot)), status, recarregar });
 }

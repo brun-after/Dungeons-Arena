@@ -13,7 +13,7 @@
   "maxJogadores": 6,
   "espectadores": false,
   "clamp": null,
-  "loot": { "politica": "compartilhado", "janelaParticipacaoS": 10, "itens": true },
+  "loot": { "politica": "compartilhado", "janelaParticipacaoS": 10, "itens": true, "economiaDoSpawner": true },
   "limites": { "npcs": 200, "invocacoesPorJogador": 2, "avataresPorJogador": 1, "armadilhasPorJogador": 3, "projeteis": 100 },
   "progressaoContaParaCampanha": false,
   "fasesPermitidas": "qualquer",
@@ -23,6 +23,8 @@
   "portas": { "inimigosCruzamChance": 0.5 },
   "saida": "todos_vivos",
   "comandosDeRede": ["mover", "irPara", "usarHabilidade", "ataqueBasico", "selecionarAlvo", "usarItem", "equipar", "desequipar", "distribuirPonto", "interagir", "comprar", "vender", "fecharLoja", "moverItem", "descansar", "dispensar", "subirRank", "equiparHabilidade", "definirDificuldade"],
+  "faixas": [],
+  "recompensaJogador": null,
   "sobrevivencia": {
     "regenPorCelula": true,
     "descanso": true,

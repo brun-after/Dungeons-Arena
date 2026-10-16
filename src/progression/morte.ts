@@ -105,6 +105,12 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
     } else {
       // Marco 10A-2: a morte do jogador custa XP e ouro onde o modo manda (§2.12).
       penalizar(estado, ctx, e, saida);
+      // Marco 17 (D-063): onde o modo recompensa abater jogadores (a arena com a ficha inteira), quem derrubou ganha XP
+      // (com o decaimento por abates, contra o farm) e, na primeira queda, o drop.
+      if (ctx.modo.recompensaJogador && e.xpBase > 0) {
+        concederXp(estado, ctx, e, saida);
+        if (e.abates === 0) largarDrops(estado, ctx, e, saida);
+      }
     }
     if (e.controlador !== 'ia' && podeRespawnar(ctx.modo)) {
       // Jogador: reaparece pelas regras do modo (§2.13), sem penalidade de campanha na arena.
@@ -159,7 +165,7 @@ function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
   }
   const boss = e.arquetipo === 'boss';
   if (aleatorio(estado.rng) >= (boss ? d.chanceItemBoss : d.chanceItem)) return;
-  const item = sortearItem(estado, ctx, boss);
+  const item = sortearItem(estado, ctx, boss, e.nivel);
   if (!item) return;
   largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, item.id, x, y, saida));
 }

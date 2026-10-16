@@ -2,7 +2,7 @@
 // (`spawnerDinamico`). Roda depois da carência e a cada intervalo, sem estado próprio: o tick basta.
 // Para cada categoria, em ordem fixa, se o que ele mesmo criou ainda não chegou ao máximo, sorteia a
 // chance e procura uma célula: passável, sem entidade, objeto ou armadilha, e longe de todo jogador.
-// Tudo pelo PRNG do estado (determinístico). Baú e loot só onde o modo solta itens (`loot.itens`).
+// Tudo pelo PRNG do estado (determinístico). Baú e loot só onde o modo pede (`loot.economiaDoSpawner`).
 
 import { fatoresDoMundo } from '../modos/dificuldade';
 import { sortearEfeitoDeOrbe } from '../combat/registro-efeitos';
@@ -116,8 +116,8 @@ function criar(estado: EstadoJogo, ctx: ContextoSimulacao, categoria: Categoria,
 export function processarSpawner(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
   if (!ctx.modo.spawnerDinamico || !rodadaDoSpawner(estado.tick, ctx)) return;
   for (const categoria of CATEGORIAS) {
-    // Baú e loot são economia: só onde o modo solta itens (a arena fica com orbes e armadilhas).
-    if ((categoria === 'bau' || categoria === 'loot') && !ctx.modo.loot.itens) continue;
+    // Baú e loot são economia do mundo: só onde o modo pede (marco 17: a arena tem itens só dos abates).
+    if ((categoria === 'bau' || categoria === 'loot') && !ctx.modo.loot.economiaDoSpawner) continue;
     const regra: CategoriaSpawner = ctx.balance.spawner[categoria];
     // Marco 15: o grupo maior mantém mais coisas no mundo.
     if (contarDoSpawner(estado, categoria) >= Math.round(regra.max * fatoresDoMundo(estado, ctx).spawner)) continue;

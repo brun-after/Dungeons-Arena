@@ -16,7 +16,11 @@ import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { criarRng, proximoU32, type EstadoRng } from '../core/rng';
 import { simular } from '../core/simulacao';
 import { ticksDe } from '../core/tempo';
-import { comandoAceitoEmRede } from '../modos/regras';
+import { conferirPersonagem, pedidoDoPersonagem, previaDoPersonagem, type PedidoDePersonagem } from '../coop/personagem';
+import { ehObjeto } from '../core/validar';
+import { xpTotal, type Certificado } from '../integridade/certificado';
+import type { FaixaDeNivel } from '../modos/modo';
+import { comandoAceitoEmRede, equipeDeEntrada, localDeRespawn } from '../modos/regras';
 import { povoarFase } from '../world/populacao';
 import { entrarNaArena } from './entrada';
 import { estadoPublico } from './estado-publico';
@@ -51,6 +55,12 @@ export interface Sessao {
   precisaCompleto: boolean;
   bytesEnviados: number;
   rejeicoes: number;
+  /** Marco 17: entrou com o personagem certificado (ficha inteira, bolsa e recompensas). */
+  certificada: boolean;
+  /** Marco 17: XP total e tick na entrada (teto de XP por hora) e se já passou do teto. */
+  xpNaEntrada: number;
+  entradaTick: number;
+  semRecompensa: boolean;
 }
 
 interface ComandoAgendado {
@@ -80,13 +90,25 @@ export interface MetricasSala {
   fila: number;
 }
 
+/** Marco 17: a assinatura dos certificados (só o servidor tem a chave; os testes usam uma falsa). */
+export interface CertificacaoDaSala {
+  /** O certificado bruto, se a assinatura confere (senão, null). */
+  conferir: (bruto: unknown) => Certificado | null;
+  assinar: (retrato: PedidoDePersonagem, agora: number) => Certificado;
+  /** Relógio de parede do servidor (o certificado guarda quando foi emitido). */
+  agora: () => number;
+}
+
 export interface OpcoesSala {
   semente: number;
   versaoConteudo: string;
+  /** Marco 17: faixa de nível da sala (null: aberta). */
+  faixa?: FaixaDeNivel | null;
+  certificacao?: CertificacaoDaSala | undefined;
 }
 
 /** O que o gancho de entrada devolve: a prévia da ficha, ou o motivo da recusa. */
-export type EntradaDePersonagem = { ok: true; previa: PreviaDeFicha } | { ok: false; motivo: MotivoErro };
+export type EntradaDePersonagem = { ok: true; previa: PreviaDeFicha; certificada?: boolean } | { ok: false; motivo: MotivoErro };
 
 export class SalaArena {
   /** Marco 15: a campanha cooperativa troca o mundo (e o contexto) a cada fase; a época sobe junto. */
@@ -100,6 +122,8 @@ export class SalaArena {
   private readonly rngSessoes: EstadoRng;
   private readonly eventosDoTick: EventoSimulacao[] = [];
   private patches = new GeradorDePatches();
+  /** Último canal privado mandado a cada sessão (texto), para só mandar quando muda. */
+  private readonly privados = new Map<string, string>();
   private bytesTotais = 0;
   private rejeicoesTotais = 0;
 
@@ -198,6 +222,9 @@ export class SalaArena {
       case 'ressincronizar':
         if (sessao) sessao.precisaCompleto = true;
         return null;
+      case 'pedirCertificado':
+        responder({ t: 'certificado', certificado: sessao ? this.certificadoDe(sessao) : null });
+        return null;
       case 'cmd': {
         const rejeitar = (motivo: MotivoRejeicao) => {
           responder({ t: 'rejeitado', seq: msg.pacote.seq, motivo });
@@ -269,6 +296,7 @@ export class SalaArena {
     }
     this.proximoJogador++;
     const { previa } = entrada;
+    const entidadeNova = this.estado.entidades.find((e) => e.id === entidadeId);
     const nova: Sessao = {
       sessaoId: `s${proximoU32(this.rngSessoes).toString(36)}${proximoU32(this.rngSessoes).toString(36)}`,
       jogadorId,
@@ -285,6 +313,10 @@ export class SalaArena {
       precisaCompleto: true,
       bytesEnviados: 0,
       rejeicoes: 0,
+      certificada: entrada.certificada === true,
+      xpNaEntrada: entidadeNova ? xpTotal(entidadeNova.nivel, entidadeNova.xp, this.ctx.balance.xp) : 0,
+      entradaTick: this.estado.tick,
+      semRecompensa: false,
     };
     this.sessoes.set(nova.sessaoId, nova);
     this.aoEntrar?.(nova);
@@ -302,11 +334,87 @@ export class SalaArena {
     return nova;
   }
 
-  /** Gancho de entrada: cria a entidade do jogador no mundo. Na arena, pela ficha de sessão com o clamp do modo. */
+  /**
+   * Gancho de entrada: cria a entidade do jogador no mundo. Marco 17: com um certificado válido, o personagem entra
+   * inteiro (bolsa, nível, itens) e ganha recompensas; sem ele, a ficha de treino com o clamp do modo. Nos dois, o
+   * nível precisa caber na faixa da sala.
+   */
   protected criarPersonagem(msg: Extract<MensagemCliente, { t: 'entrar' }>, jogadorId: string, entidadeId: EntidadeId, n: number): EntradaDePersonagem {
+    const faixa = this.opcoes.faixa ?? null;
+    const cabe = (nivel: number) => !faixa || (nivel >= faixa.min && nivel <= faixa.max);
+    const pedido = ehObjeto(msg.pedidoFicha) ? msg.pedidoFicha : {};
+    const certificado = this.opcoes.certificacao?.conferir(pedido.certificado) ?? null;
+    const conferido = certificado ? conferirPersonagem(certificado.retrato, this.ctx, entidadeId, jogadorId) : null;
+    if (conferido && conferido.alteracoes.length === 0) {
+      const e = conferido.entidade;
+      if (!cabe(e.nivel)) return { ok: false, motivo: 'fora_da_faixa' };
+      e.controlador = 'remoto';
+      e.equipe = equipeDeEntrada(this.ctx.modo, jogadorId, this.estado);
+      e.xpBase = Math.round((this.ctx.modo.recompensaJogador?.xpPorNivel ?? 0) * e.nivel);
+      const local = localDeRespawn(this.estado, this.ctx.fase, this.ctx.modo, e, this.estado.rng);
+      Object.assign(e, { x: local.x, y: local.y, destinoX: local.x, destinoY: local.y, origemX: local.x, origemY: local.y });
+      this.estado.entidades.push(e);
+      return { ok: true, previa: previaDoPersonagem(e, [], this.ctx.modo.id, this.ctx.balance.versao), certificada: true };
+    }
     const previa = construirFichaDeSessao(msg.pedidoFicha, this.ctx.modo, this.ctx.conteudo, this.ctx.balance);
+    if (!cabe(previa.ficha.nivel)) return { ok: false, motivo: 'fora_da_faixa' };
     entrarNaArena(this.estado, this.ctx, jogadorId, entidadeId, previa.ficha, msg.nome || `Jogador ${n}`);
     return { ok: true, previa };
+  }
+
+  /** Marco 17: o personagem da sessão, certificado agora (só para quem entrou com a ficha inteira). */
+  private certificadoDe(s: Sessao): Certificado | null {
+    const cert = this.opcoes.certificacao;
+    const e = this.estado.entidades.find((x) => x.id === s.entidadeId);
+    const retrato = e && s.certificada && cert ? pedidoDoPersonagem(e) : null;
+    return retrato && cert ? cert.assinar(retrato, cert.agora()) : null;
+  }
+
+  /** Gancho: quem é o anfitrião (só a campanha em grupo tem). Vai no canal privado. */
+  protected dadosDoAnfitriao?(s: Sessao): { anfitriao: boolean; anfitriaoId: string | null };
+
+  /** O canal privado volta a ser mandado inteiro (fase nova, reconexão). */
+  protected esquecerPrivado(s: Sessao): void {
+    this.privados.delete(s.sessaoId);
+  }
+
+  /** Marco 15 (subiu para a base no 17): cada sessão com bolsa recebe só a própria, quando muda. */
+  private mandarPrivados(): void {
+    for (const s of this.sessoes.values()) {
+      if (!s.conectada) {
+        // Na volta, a sessão recebe tudo de novo.
+        this.privados.delete(s.sessaoId);
+        continue;
+      }
+      const bolsa = this.estado.entidades.find((e) => e.id === s.entidadeId)?.bolsa ?? null;
+      if (!bolsa) continue;
+      const texto = JSON.stringify({ t: 'privado', bolsa, ...(this.dadosDoAnfitriao?.(s) ?? { anfitriao: false, anfitriaoId: null }) });
+      if (this.privados.get(s.sessaoId) === texto) continue;
+      this.privados.set(s.sessaoId, texto);
+      s.enviar(texto);
+    }
+  }
+
+  /**
+   * Marco 17: o teto de XP por hora de quem entrou com a ficha inteira. Passou dele, a sessão sai da participação
+   * de todo golpe (não ganha XP nem drop de abate) até sair da sala.
+   */
+  private aplicarTetoDeRecompensa(): void {
+    const teto = this.ctx.modo.recompensaJogador?.tetoXpPorHora;
+    if (!teto) return;
+    for (const s of this.sessoes.values()) {
+      if (!s.certificada) continue;
+      if (!s.semRecompensa && this.estado.tick % ticksDe(1000) === 0) {
+        const e = this.estado.entidades.find((x) => x.id === s.entidadeId);
+        const horas = (this.estado.tick - s.entradaTick) / ticksDe(3_600_000);
+        // Dez minutos de folga no começo, para a primeira luta não esbarrar no teto.
+        if (e && xpTotal(e.nivel, e.xp, this.ctx.balance.xp) - s.xpNaEntrada > teto * (horas + 1 / 6)) s.semRecompensa = true;
+      }
+      if (!s.semRecompensa) continue;
+      for (const e of this.estado.entidades) {
+        if (e.participacao.some((p) => p.id === s.entidadeId)) e.participacao = e.participacao.filter((p) => p.id !== s.entidadeId);
+      }
+    }
   }
 
   /** Gancho: a sessão acabou de entrar (já está em `sessoes`). */
@@ -325,6 +433,7 @@ export class SalaArena {
 
   protected removerSessao(s: Sessao): void {
     this.sessoes.delete(s.sessaoId);
+    this.privados.delete(s.sessaoId);
     this.estado.entidades = this.estado.entidades.filter((e) => e.id !== s.entidadeId);
     this.aoRemoverSessao?.(s);
   }
@@ -395,12 +504,14 @@ export class SalaArena {
     }
 
     this.eventosDoTick.length = 0;
+    this.aplicarTetoDeRecompensa();
     simular(this.estado, this.ctx, comandos, this.eventosDoTick, dtMs);
     if (this.eventosDoTick.length > 0) {
       this.transmitir({ t: 'eventos', tick: this.estado.tick, eventos: this.eventosDoTick });
     }
     if (this.estado.tick % TICKS_POR_ESTADO === 0) this.transmitirEstado();
     this.depoisDoTick?.();
+    if (this.estado.tick % TICKS_POR_ESTADO === 0) this.mandarPrivados();
   }
 
   /**

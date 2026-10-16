@@ -3,6 +3,7 @@
 // estoque, saldo e espaço; só então cobra e entrega. Saldo nunca fica negativo. O estoque é
 // ilimitado na v1 (D-050): a loja é o dreno de ouro, não um recurso disputado.
 
+import { precoDeCompra } from './efeitos-atributo';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo, ObjetoNoMundo } from '../core/estado';
 import type { EventoSimulacao, MotivoItem } from '../core/eventos-simulacao';
@@ -30,11 +31,13 @@ function tentarComprar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, 
   if (!loja.itens.includes(itemId)) return 'fora_do_estoque';
   const item = ctx.conteudo.itens.get(itemId);
   if (!item) return 'nao_encontrado';
-  if (bolsa.ouro < item.valorBase) return 'sem_ouro';
+  // Marco 17: o Carisma acima de 10 dá desconto.
+  const preco = precoDeCompra(item.valorBase, e.atributos, ctx.balance);
+  if (bolsa.ouro < preco) return 'sem_ouro';
   if (!cabeNaMochila(bolsa, item, 1, ctx.balance.inventario)) return 'mochila_cheia';
-  bolsa.ouro -= item.valorBase;
+  bolsa.ouro -= preco;
   guardarItem(bolsa, item, 1, ctx.balance.inventario);
-  saida.push({ t: 'comprou', tick: estado.tick, id: e.id, itemId, preco: item.valorBase });
+  saida.push({ t: 'comprou', tick: estado.tick, id: e.id, itemId, preco });
   return null;
 }
 

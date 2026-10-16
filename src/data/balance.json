@@ -1,5 +1,5 @@
 {
-  "versao": 16,
+  "versao": 17,
   "movimento": {
     "velocidadeBaseMs": 400,
     "filaMaxWaypoints": 2
@@ -111,7 +111,15 @@
   },
   "atributos": {
     "minimo": 1,
-    "maximo": 30
+    "maximo": 30,
+    "efeitos": {
+      "regenManaPorSabedoriaPct": 3,
+      "recargaBasicoPorDestrezaPct": 1.5,
+      "recargaBasicoMaxPct": 30,
+      "regenPorCelulaPorConstituicaoPct": 8,
+      "descontoPorCarismaPct": 2,
+      "descontoMaxPct": 30
+    }
   },
   "inventario": {
     "capacidade": 20,
@@ -182,7 +190,8 @@
     "pvpLivre": { "tempoMinS": 6, "tempoMaxS": 10, "nivel": 10 },
     "avisoUtilMinMs": 250,
     "grupo": { "tempoMinPctDoSolo": 40, "tempoMaxPctDoSolo": 110 },
-    "invocacao": { "fatiaMinPct": 15, "fatiaMaxPct": 35 }
+    "invocacao": { "fatiaMinPct": 15, "fatiaMaxPct": 35 },
+    "build": { "nivel": 8, "vitoriasMinPct": 60 }
   },
   "dificuldades": {
     "facil": { "vidaPct": 75, "danoPct": 70, "hesitacaoPct": 130, "avisoExtraMs": 150, "recompensaPct": 80 },
@@ -191,6 +200,28 @@
     "pesadelo": { "vidaPct": 170, "danoPct": 150, "hesitacaoPct": 60, "avisoExtraMs": 0, "recompensaPct": 160 }
   },
   "grupo": { "vidaPorJogadorPct": 70, "danoPorJogadorPct": 8, "recompensaPorJogadorPct": 10, "spawnerPorJogadorPct": 25 },
+  "itensGerados": {
+    "pontosBase": 1,
+    "pontosPorNivel": 0.3,
+    "defesaPorNivel": 0.1,
+    "valorPorPonto": 12,
+    "chanceGerado": 0.7,
+    "multiplicador": { "comum": 1, "incomum": 1.4, "raro": 1.9, "epico": 2.5, "lendario": 3.3 },
+    "pesoRaridade": { "comum": 50, "incomum": 30, "raro": 14, "epico": 5, "lendario": 1 },
+    "raridadePorNivelPct": 8,
+    "nivelMax": 20
+  },
+  "integridade": {
+    "nivelSemHistorico": 5,
+    "xpPorMinutoBase": 120,
+    "xpPorMinutoPorNivelPct": 25,
+    "folgaXp": 300,
+    "ouroPorMinuto": 200,
+    "folgaOuro": 300,
+    "itensPorMinuto": 0.5,
+    "folgaItens": 10,
+    "minutosMaxPorCertificado": 480
+  },
   "inimigos": {
     "crescimento": [
       { "atributo": "constituicao", "porNivel": 3, "aPartirDoNivel": 2 },

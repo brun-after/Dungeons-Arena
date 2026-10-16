@@ -5,10 +5,11 @@
 import type { EstadoJogo } from '../core/estado';
 import { ehObjeto, type Objeto } from '../core/validar';
 import type { Entidade } from '../entities/entidade';
+import { lerCertificado, type Certificado } from '../integridade/certificado';
 import type { Dificuldade } from '../modos/dificuldade';
 import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 11;
+export const VERSAO_SCHEMA = 12;
 export const SLOTS = [1, 2, 3] as const;
 export const FORMATO_EXPORTACAO = 'dungeons-arena/save';
 
@@ -40,6 +41,8 @@ export interface RegistroProgresso {
    * sem o jogador, pela chave de `chaveDaFase` (§3.5). A fase atual fica em `estado`.
    */
   fasesVisitadas: Record<string, EstadoJogo>;
+  /** Marco 17 (D-063): o último certificado do servidor para o personagem deste slot (pode estar desatualizado). */
+  certificado: Certificado | null;
 }
 
 /** Chave estável de uma fase no save (`oficial:fase-01`, `aventura:<id>`). */
@@ -229,6 +232,18 @@ function v10ParaV11(r: Objeto): Objeto {
   return { ...r, fasesVisitadas: visitadas, estado: estado(r.estado) };
 }
 
+/**
+ * v11 → v12 (marco 17, 15/10/2026, D-063): a bolsa ganha `personagemId` (vazio; o jogo dá um ao abrir) e o registro,
+ * o certificado do servidor (nulo até a primeira certificação).
+ */
+function v11ParaV12(r: Objeto): Objeto {
+  const estado = (e: unknown): unknown =>
+    ehObjeto(e)
+      ? { ...e, entidades: lista(e.entidades).map((x) => (ehObjeto(x) && ehObjeto(x.bolsa) ? { ...x, bolsa: { personagemId: '', ...x.bolsa } } : x)) }
+      : e;
+  return { certificado: null, ...r, estado: estado(r.estado) };
+}
+
 /** `MIGRACOES[v]` leva um registro da versão `v` para a `v + 1`. Não existiu versão 0. */
 export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   1: v1ParaV2,
@@ -241,6 +256,7 @@ export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   8: v8ParaV9,
   9: v9ParaV10,
   10: v10ParaV11,
+  11: v11ParaV12,
 };
 
 function temNaoFinito(v: unknown): boolean {
@@ -329,6 +345,7 @@ export function lerRegistro(bruto: unknown, migracoes: Readonly<Record<number, M
       },
       // A forma de cada estado foi conferida acima (`forma`).
       fasesVisitadas: visitadas as unknown as Record<string, EstadoJogo>,
+      certificado: lerCertificado(r.certificado),
     },
   };
 }

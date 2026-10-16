@@ -22,6 +22,7 @@ import { criarJogador } from './entities/fabrica';
 import { t } from './i18n';
 import type { Dificuldade } from './modos/dificuldade';
 import { iniciarLaco } from './plataforma/laco-navegador';
+import { sincronizarSlot } from './plataforma/nuvem';
 import { sairDaTelaCheia } from './plataforma/sessao-tela';
 import { carregarAventura } from './plataforma/aventuras';
 import { carregarSlot, criarAutosave, gravarRegistro, listarSlots, type Autosave } from './plataforma/saves';
@@ -145,6 +146,10 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
   const ctx = montarContexto(conteudo, validacao.fase);
   const estado = leitura?.estado ?? novoEstado(ctx, teste ? await personagemAtual() : null, opcoes.classe);
   const idJogador = jogadorDoSave(estado)?.id ?? ID_JOGADOR;
+  // Marco 17 (D-063): todo personagem ganha uma identidade (o certificado da arena se prende a ela).
+  const bolsaDoJogador = jogadorDoSave(estado)?.bolsa;
+  if (bolsaDoJogador && !bolsaDoJogador.personagemId) bolsaDoJogador.personagemId = crypto.randomUUID();
+  const certificado = leitura?.certificado ?? null;
   const estatisticas: Estatisticas = { ...(leitura?.estatisticas ?? { inimigosDerrotados: 0, mortes: 0 }) };
 
   let autosave: Autosave | null = null;
@@ -159,6 +164,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
       nomeFase: ctx.fase.nome,
       criadoEm,
       fasesVisitadas,
+      certificado: () => certificado,
       estado: () => estado,
       estatisticas: () => estatisticas,
       aoFalhar: () => {
@@ -177,9 +183,13 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     sair.addEventListener('click', () => {
       sair.disabled = true;
       sairDaTelaCheia();
-      void salvar.agora().finally(() => {
-        location.href = './?jogo=campanha';
-      });
+      // Marco 17: salvar pelo menu também certifica e envia para a nuvem (quando dá; nunca segura a saída).
+      void salvar
+        .agora()
+        .then(() => sincronizarSlot(slot))
+        .finally(() => {
+          location.href = './?jogo=campanha';
+        });
     });
     acoesExtras.push(sair);
   }
@@ -277,6 +287,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
       estado: clonarEstado(estado),
       estatisticas: { ...estatisticas },
       fasesVisitadas,
+      certificado,
     };
     const novo = avancarFase(
       atual,
