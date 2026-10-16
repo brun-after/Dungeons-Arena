@@ -159,9 +159,12 @@ body.toque .faixa-controles {
   padding-left: 16px;
 }
 
+/* Ajuste de 15/10/2026 (D-065): o 🎯 fica em cima do ✋, longe da roda de habilidades. */
 .coluna.centro {
-  justify-content: center;
-  align-items: flex-end;
+  flex-direction: column-reverse;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
   padding-bottom: 18px;
 }
 
@@ -277,6 +280,16 @@ body.toque .faixa-controles {
 .botao-acao.interagir {
   width: 56px;
   height: 56px;
+}
+
+.botao-acao.alvo {
+  width: 48px;
+  height: 48px;
+  font-size: 1.3rem;
+}
+
+.botao-acao.alvo[data-travado='true'] {
+  border-color: #ff7043;
 }
 
 .botao-acao.pressionado {
@@ -521,6 +534,54 @@ body.toque .dado-d20 {
 
 .chip-rede[data-qualidade='ruim'] {
   color: #e74c3c;
+}
+
+/* Quadro do alvo (ajuste de 15/10/2026, D-065): nome, nível, vida e o cadeado, abaixo do cabeçalho */
+.quadro-alvo {
+  position: absolute;
+  top: calc(52px + var(--seguro-topo));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: calc(100% - 32px);
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--borda);
+  font-size: 0.75rem;
+  pointer-events: none;
+}
+
+@media (max-width: 479px) {
+  .quadro-alvo {
+    top: calc(84px + var(--seguro-topo));
+  }
+}
+
+.quadro-alvo[data-travado='true'] {
+  border-color: #ff7043;
+}
+
+.quadro-alvo .nome-alvo {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.quadro-alvo .barra {
+  width: 80px;
+  flex: none;
+}
+
+.so-leitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /* Registro de combate (§2.15): no desktop fica visível; no toque abre pelo botão 📜 */

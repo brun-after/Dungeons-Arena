@@ -83,6 +83,7 @@ function aplicarComandos(
       case 'selecionarAlvo': {
         const alvo = cmd.alvo === null ? undefined : buscarEntidade(estado, cmd.alvo);
         ator.alvoSelecionado = alvo && alvoOfensivoValido(estado, ctx, ator, alvo) ? alvo.id : null;
+        ator.alvoTravado = ator.alvoSelecionado !== null && cmd.travar !== false;
         break;
       }
       // Marco 6 (13/10/2026): mochila, equipamento e pontos de atributo.

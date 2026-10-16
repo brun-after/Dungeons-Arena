@@ -219,16 +219,20 @@ function escolherAlvo(
   pedido: EntidadeId | undefined,
 ): Entidade | null {
   const alcance = alcanceDe(ctx, ator, hab, estado.tick);
-  const candidatos = [pedido, ator.alvoSelecionado];
-  for (const id of candidatos) {
-    if (!id) continue;
-    const e = buscarEntidade(estado, id);
-    if (e && alvoValido(estado, ctx, ator, e, hab)) {
-      // O pedido explícito vale mesmo fora do alcance (a validação recusa); o selecionado só se alcançável.
-      if (id === pedido || chebyshev(celulaOcupada(ator), celulaOcupada(e)) <= alcance) return e;
-    }
+  if (pedido) {
+    // O pedido explícito vale mesmo fora do alcance (a validação recusa).
+    const e = buscarEntidade(estado, pedido);
+    if (e && alvoValido(estado, ctx, ator, e, hab)) return e;
   }
-  return deSuporte(hab) ? aliadoMaisFerido(estado, ctx, ator, alcance) : autoAlvo(estado, ctx, ator, alcance);
+  if (deSuporte(hab)) return aliadoMaisFerido(estado, ctx, ator, alcance);
+  // Ajuste de 15/10/2026 (D-065): travado, a habilidade vai no travado mesmo fora do alcance (a validação recusa),
+  // nunca em outro; destravado, o hostil escolhido pelo auto-alvo passa a ser o selecionado (o anel acompanha).
+  const atual = alvoAtual(estado, ctx, ator);
+  if (atual && (ator.alvoTravado || chebyshev(celulaOcupada(ator), celulaOcupada(atual)) <= alcance)) return atual;
+  if (ator.alvoTravado && ator.alvoSelecionado) return null;
+  const novo = autoAlvo(estado, ctx, ator, alcance);
+  if (novo) ator.alvoSelecionado = novo.id;
+  return novo;
 }
 
 function cancelar(ator: Entidade, estado: EstadoJogo, motivo: MotivoCancelamento, saida: EventoSimulacao[]): void {
@@ -327,6 +331,8 @@ function lancar(
 /**
  * Ataque básico automático (§2.7): a cada 250 ms, contra o alvo selecionado no alcance ou, sem
  * seleção, contra o hostil mais próximo que esteja perseguindo o atacante.
+ * Ajuste de 15/10/2026 (D-065): o alvo escolhido fica selecionado (não troca a cada golpe); travado, só ele —
+ * fora do alcance, o automático espera em vez de bater em outro.
  */
 export function processarAutoAtaque(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
   if (estado.tick % Math.max(1, ticksDe(ctx.balance.combate.autoAtaqueMs)) !== 0) return;
@@ -336,13 +342,55 @@ export function processarAutoAtaque(estado: EstadoJogo, ctx: ContextoSimulacao, 
     if (!hab || recargaRestante(estado, ator.id, hab.id) > 0 || acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) {
       continue;
     }
-    const selecionado = ator.alvoSelecionado ? buscarEntidade(estado, ator.alvoSelecionado) : undefined;
     const alcance = alcanceDe(ctx, ator, hab, estado.tick);
-    const noAlcance = (e: Entidade) => chebyshev(celulaOcupada(ator), celulaOcupada(e)) <= alcance;
-    const alvo =
-      selecionado && alvoOfensivoValido(estado, ctx, ator, selecionado) && noAlcance(selecionado)
-        ? selecionado
-        : autoAlvo(estado, ctx, ator, alcance, (e) => e.ia?.modo === 'perseguindo' && e.ia.alvoId === ator.id);
-    if (alvo) iniciarAcao(estado, ctx, ator, hab.id, alvo.id, saida);
+    const atual = alvoAtual(estado, ctx, ator);
+    const noAlcance = !!atual && chebyshev(celulaOcupada(ator), celulaOcupada(atual)) <= alcance;
+    if (ator.alvoTravado && ator.alvoSelecionado) {
+      if (atual && noAlcance) iniciarAcao(estado, ctx, ator, hab.id, atual.id, saida);
+      continue;
+    }
+    const alvo = atual && noAlcance ? atual : autoAlvo(estado, ctx, ator, alcance, (e) => e.ia?.modo === 'perseguindo' && e.ia.alvoId === ator.id);
+    if (!alvo) continue;
+    ator.alvoSelecionado = alvo.id;
+    iniciarAcao(estado, ctx, ator, hab.id, alvo.id, saida);
   }
+}
+
+/**
+ * Ajuste de 15/10/2026 (D-065): o alvo selecionado, se ainda dá para atacá-lo. Morto ou fora do estado, a seleção e a
+ * trava se desfazem; invisível, a seleção fica (travado, quem ataca espera a furtividade acabar).
+ */
+export function alvoAtual(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade): Entidade | null {
+  if (!ator.alvoSelecionado) return null;
+  const e = buscarEntidade(estado, ator.alvoSelecionado);
+  if (!e || !vivo(e) || !podeFerir(ator, e, ctx.modo)) {
+    ator.alvoSelecionado = null;
+    ator.alvoTravado = false;
+    return null;
+  }
+  return alvoOfensivoValido(estado, ctx, ator, e) ? e : null;
+}
+
+/**
+ * Ajuste de 15/10/2026 (D-065): o hostil seguinte (ou o anterior) ao atual para a troca manual de alvo — os válidos
+ * por `relacao()` até `raio` células, avatar primeiro, depois por distância e id; dá a volta na lista.
+ */
+export function proximoHostil(
+  estado: EstadoJogo,
+  ctx: ContextoSimulacao,
+  ator: Entidade,
+  atualId: EntidadeId | null,
+  sentido: 1 | -1,
+  raio: number,
+): Entidade | null {
+  const origem = celulaOcupada(ator);
+  const lista = estado.entidades
+    .filter((e) => e.id !== ator.id && alvoOfensivoValido(estado, ctx, ator, e) && chebyshev(origem, celulaOcupada(e)) <= raio)
+    .map((e) => ({ e, p: prioridadeDeAlvo(e), d: chebyshev(origem, celulaOcupada(e)) }))
+    .sort((a, b) => a.p - b.p || a.d - b.d || (a.e.id < b.e.id ? -1 : a.e.id > b.e.id ? 1 : 0))
+    .map((x) => x.e);
+  if (lista.length === 0) return null;
+  const i = atualId ? lista.findIndex((e) => e.id === atualId) : -1;
+  if (i < 0) return sentido === 1 ? (lista[0] ?? null) : (lista[lista.length - 1] ?? null);
+  return lista[(i + sentido + lista.length) % lista.length] ?? null;
 }

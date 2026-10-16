@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 2.8 · **Data:** 15/10/2026
+**Versão do documento:** 2.9 · **Data:** 16/10/2026
 **Status:** 🚧 Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena
 
 > **Histórico**
+> - **2.9 (15/10/2026)**: alvo que não troca sozinho, troca com `Q` ou 🎯 e trava com `T`, clique ou toque longo (D-065).
 > - **2.8 (15/10/2026)**: marco 17 (conta Google e progresso na nuvem, certificado do personagem, a campanha na arena com faixas e recompensas, equipamento gerado por nível e atributos com mais efeito; D-063) e o 11A redefinido (D-064).
 > - **2.7 (15/10/2026)**: marco 16 fechado com o teste de 10 min na VM (10/10 metas, memória estável, sem reinício).
 > - **2.6 (15/10/2026)**: marcos 15 e 16 concluídos (dificuldade, campanha em grupo até 6, simulador de balanceamento e ritmo calibrado; celular, PWA offline testado, benchmarks do cliente, limites e métricas do servidor; D-061, D-062).
@@ -84,8 +85,9 @@ Implantação do servidor na nuvem, passo a passo: [`docs/IMPLANTACAO.md`](docs/
 |---|---|---|
 | Mover | WASD ou setas (diagonal = duas teclas) | Joystick ou direcional (troca no cabeçalho) |
 | Ir até um ponto | Clique no mapa | Toque no mapa; segure para seguir o dedo |
-| Selecionar alvo | Clique no inimigo (`Esc` limpa) | Toque no inimigo |
-| Ataque básico | Espaço; ataca sozinho o alvo selecionado ou quem estiver te perseguindo | Botão ⚔ (funciona junto com o joystick) |
+| Selecionar e travar alvo | Clique no inimigo (de novo no travado, destrava; `Esc` limpa) | Toque no inimigo |
+| Trocar de alvo | `Q` (`Shift+Q` volta); `T` trava ou destrava | 🎯: tocar troca, segurar trava ou destrava |
+| Ataque básico | Espaço; ataca sozinho o alvo selecionado (travado, só ele) ou quem estiver te perseguindo | Botão ⚔ (funciona junto com o joystick) |
 | Habilidades | Teclas 1–4 (também no teclado numérico) | Roda de botões em volta do ⚔ |
 | Mover a câmera | Arrastar o mapa | Arrastar o mapa |
 | Zoom | Roda do mouse | Pinça com dois dedos |

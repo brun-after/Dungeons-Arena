@@ -19,7 +19,8 @@ export type Comando =
   | { t: 'irPara'; x: number; y: number }
   | { t: 'usarHabilidade'; id: string; alvo?: EntidadeId | Celula }
   | { t: 'ataqueBasico'; alvo?: EntidadeId }
-  | { t: 'selecionarAlvo'; alvo: EntidadeId | null }
+  // Ajuste de 15/10/2026 (D-065): `travar` (padrão true com alvo): a escolha manual trava; false destrava.
+  | { t: 'selecionarAlvo'; alvo: EntidadeId | null; travar?: boolean }
   | { t: 'usarItem'; invId: string }
   | { t: 'equipar'; invId: string; slot: Slot }
   | { t: 'desequipar'; slot: Slot }

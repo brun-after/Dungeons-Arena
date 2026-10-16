@@ -30,6 +30,7 @@ export function personagemNoInicio(e: Entidade, c: Celula, id = e.id): Entidade 
     efeitos: [],
     acao: null,
     alvoSelecionado: null,
+    alvoTravado: false,
     participacao: [],
     interacao: null,
   });

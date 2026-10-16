@@ -180,6 +180,7 @@ export function tentarDominar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
   e.participacao = [];
   e.acao = null;
   e.alvoSelecionado = null;
+  e.alvoTravado = false;
   // A IA recomeça do zero, agora do outro lado.
   e.ia = null;
   saida.push({ t: 'dominou', tick: estado.tick, donoId: dono.id, id: e.id });

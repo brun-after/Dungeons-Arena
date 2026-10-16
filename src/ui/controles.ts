@@ -14,6 +14,9 @@ export interface OpcoesControles {
   aoMudarDirecao: (dir: Dir8 | 'parado') => void;
   aoAtacar: () => void;
   aoInteragir: () => void;
+  /** Ajuste de 15/10/2026 (D-065): tocar no 🎯 troca de alvo; segurar trava ou destrava. */
+  aoTrocarAlvo: () => void;
+  aoTravarAlvo: () => void;
   isometrico: () => boolean;
 }
 
@@ -22,6 +25,8 @@ export interface Controles {
   /** Coluna do botão de ataque, onde a roda de habilidades é montada. */
   direita: HTMLElement;
   trocarTipo: (tipo: TipoControle) => void;
+  /** Mostra no 🎯 se o alvo está travado. */
+  marcarTrava: (travado: boolean) => void;
   desligar: () => void;
 }
 
@@ -49,6 +54,42 @@ function botaoAcao(rotulo: ChaveTexto, simbolo: string, classe: string, acao: ()
   return botao;
 }
 
+const SEGURAR_MS = 450;
+
+/** Ajuste de 15/10/2026 (D-065): o 🎯 — toque curto troca de alvo; segurar ~450 ms trava ou destrava. */
+function botaoAlvo(aoTocar: () => void, aoSegurar: () => void): HTMLButtonElement {
+  const botao = document.createElement('button');
+  botao.type = 'button';
+  botao.className = 'botao-acao alvo';
+  botao.textContent = '🎯';
+  botao.setAttribute('aria-label', t('controles.trocarAlvo'));
+  botao.dataset.testid = 'alvo';
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  const parar = () => {
+    if (timer !== null) clearTimeout(timer);
+    timer = null;
+    botao.classList.remove('pressionado');
+  };
+  botao.addEventListener('pointerdown', (ev) => {
+    ev.preventDefault();
+    botao.classList.add('pressionado');
+    timer = setTimeout(() => {
+      timer = null;
+      aoSegurar();
+    }, SEGURAR_MS);
+  });
+  botao.addEventListener('pointerup', () => {
+    if (timer !== null) aoTocar();
+    parar();
+  });
+  botao.addEventListener('pointercancel', parar);
+  botao.addEventListener('pointerleave', parar);
+  botao.addEventListener('click', (ev) => {
+    if (ev.detail === 0) aoTocar();
+  });
+  return botao;
+}
+
 export function criarControles(opcoes: OpcoesControles): Controles {
   const faixa = document.createElement('div');
   faixa.className = 'faixa-controles';
@@ -61,7 +102,8 @@ export function criarControles(opcoes: OpcoesControles): Controles {
   centro.className = 'coluna centro';
   const direita = document.createElement('div');
   direita.className = 'coluna direita';
-  centro.append(botaoAcao('controles.interagir', '✋', 'interagir', opcoes.aoInteragir));
+  const alvo = botaoAlvo(opcoes.aoTrocarAlvo, opcoes.aoTravarAlvo);
+  centro.append(botaoAcao('controles.interagir', '✋', 'interagir', opcoes.aoInteragir), alvo);
   direita.append(botaoAcao('controles.ataque', '⚔', 'ataque', opcoes.aoAtacar));
   faixa.append(esquerda, centro, direita);
 
@@ -79,6 +121,9 @@ export function criarControles(opcoes: OpcoesControles): Controles {
     elemento: faixa,
     direita,
     trocarTipo,
+    marcarTrava: (travado) => {
+      if (alvo.dataset.travado !== String(travado)) alvo.dataset.travado = String(travado);
+    },
     desligar: () => {
       desligarDirecional?.();
       faixa.remove();

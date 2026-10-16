@@ -1,5 +1,5 @@
 {
-  "versao": 17,
+  "versao": 18,
   "movimento": {
     "velocidadeBaseMs": 400,
     "filaMaxWaypoints": 2
@@ -14,6 +14,7 @@
   "combate": {
     "multiplicadorAtributoPadrao": 1,
     "autoAtaqueMs": 250,
+    "raioTrocaAlvo": 10,
     "janelaParticipacaoS": 10,
     "carismaNeutro": 10,
     "critico": [
