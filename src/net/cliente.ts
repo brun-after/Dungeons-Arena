@@ -10,6 +10,7 @@
 import { aplicarPatch } from '../arena/patches';
 import { versaoDoConteudo, type MensagemServidor } from '../arena/protocolo';
 import type { Bolsa } from '../entities/entidade';
+import type { Certificado } from '../integridade/certificado';
 import type { RefFase } from '../save/esquema';
 import type { Comando, ComandoEmpacotado } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -77,6 +78,8 @@ export class ClienteArena {
   aoPrivado: (() => void) | null = null;
   aoNovaFase: ((msg: NovaFase) => void) | null = null;
   aoFimDaCampanha: (() => void) | null = null;
+  /** Marco 17: o personagem certificado pela sala, em resposta a `pedirCertificado` (null: ficha de treino). */
+  aoCertificado: ((c: Certificado | null) => void) | null = null;
   /** Recusas de entrada (sala cheia, personagem inválido...), para a tela explicar. */
   erro: string | null = null;
   /** Marco 15: os campos da ficha que a sala ajustou na entrada. */
@@ -116,6 +119,11 @@ export class ClienteArena {
     this.pendentes.push(pacote);
     if (cmd.t === 'mover') this.direcaoMantida = cmd.dir === 'parado' ? null : cmd;
     this.o.transporte.enviar(JSON.stringify({ t: 'cmd', pacote }));
+  }
+
+  /** Marco 17: pede à sala o personagem como está agora, certificado (resposta em `aoCertificado`). */
+  pedirCertificado(): void {
+    this.o.transporte.enviar(JSON.stringify({ t: 'pedirCertificado' }));
   }
 
   private ping(): void {
@@ -162,6 +170,9 @@ export class ClienteArena {
         break;
       case 'fimDaCampanha':
         this.aoFimDaCampanha?.();
+        break;
+      case 'certificado':
+        this.aoCertificado?.(msg.certificado);
         break;
       case 'estado':
         if (msg.epocaSala !== this.epoca) return;

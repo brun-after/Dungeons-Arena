@@ -11,6 +11,7 @@
 import { matchMaker, Room, ServerError, type AuthContext, type Client } from '@colyseus/core';
 import { RESERVA_RECONEXAO_MS, type Conexao, type SalaArena } from '../../src/arena/sala';
 import { gerarCodigo, LimiteDeTentativas } from '../codigo-sala';
+import type { Certificador } from '../certificacao';
 import { Janela, registrarLog, type AtrasoDoAgendador } from '../metricas';
 
 export const EXPIRACAO_SALA_VAZIA_MS = 120_000;
@@ -27,6 +28,8 @@ export interface LimitesDoServidor {
   maxSalas: number;
   criacao: LimiteDeTentativas;
   agendador: AtrasoDoAgendador | null;
+  /** Marco 17: confere e assina os certificados do personagem (a chave só existe no servidor). */
+  certificador: Certificador | null;
 }
 
 export abstract class SalaColyseusBase extends Room {

@@ -29,6 +29,7 @@ export function criarBolsa(classe: ClasseJogador, ouroInicial = 0): Bolsa {
     conhecidas: classe.habilidades.map((id) => ({ id, rank: 1, caminhos: [] })),
     barra: Array.from({ length: SLOTS_BARRA }, (_, i) => classe.habilidades[i] ?? null),
     pontosHabilidade: 0,
+    personagemId: '',
   };
   for (const { id, qtd } of classe.itensIniciais) bolsa.mochila.push({ invId: `i${bolsa.proximoInv++}`, itemId: id, qtd, ref: null });
   return bolsa;

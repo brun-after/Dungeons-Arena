@@ -4,6 +4,7 @@
 
 import { clonarEstado, type EstadoJogo } from '../core/estado';
 import { lerRegistro, resumoDoRegistro, SLOTS, VERSAO_SCHEMA, type Estatisticas, type RefFase, type RegistroProgresso, type ResumoSlot } from '../save/esquema';
+import type { Certificado } from '../integridade/certificado';
 import { apagarDoBanco, gravarNoBanco, lerDoBanco, listarDoBanco } from './banco';
 
 export type EstadoSlot = { slot: number; tipo: 'vazio' } | { slot: number; tipo: 'ok'; resumo: ResumoSlot } | { slot: number; tipo: 'invalido' };
@@ -44,6 +45,8 @@ export interface OpcoesAutosave {
   estatisticas: () => Estatisticas;
   /** Marco 10A-1: as outras fases visitadas (fixas durante a sessão: trocar de fase recarrega). */
   fasesVisitadas: Record<string, EstadoJogo>;
+  /** Marco 17: o certificado do personagem (o último que o servidor deu; a gravação o mantém). */
+  certificado?: () => Certificado | null;
   aoFalhar?: (erro: unknown) => void;
 }
 
@@ -78,6 +81,7 @@ export function criarAutosave(o: OpcoesAutosave): Autosave {
       estado: clonarEstado(o.estado()),
       estatisticas: { ...o.estatisticas() },
       fasesVisitadas: o.fasesVisitadas,
+      certificado: o.certificado?.() ?? null,
     };
     gravando = gravarRegistro(registro)
       .catch((erro: unknown) => o.aoFalhar?.(erro))

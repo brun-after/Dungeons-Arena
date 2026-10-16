@@ -1,8 +1,9 @@
 # Implantação do servidor da arena
 
-**Versão:** 0.5 · **Data:** 15/10/2026
+**Versão:** 0.6 · **Data:** 15/10/2026
 
 > **Histórico**
+> - **0.6 (15/10/2026)**: marco 17 (D-063): `CHAVE_CERTIFICADO`, a conta Google no Supabase e as variáveis do Pages.
 > - **0.5 (15/10/2026)**: o teste de carga na VM passa a ter 10 minutos (decisão do usuário); a leitura dos logs por SSH depende da chave que a VM aceita.
 > - **0.4 (15/10/2026)**: marco 16 (D-062): limites de salas e de criação, `GET /metricas`, logs mais completos, limite de memória e rotação de log no compose, e o teste de 30 minutos.
 > - **0.3 (13/10/2026)**: IP estático `56.126.58.40` (`arena-sao-paulo-ip`) anexado; deploy tolera falha passageira de SSH.
@@ -118,8 +119,47 @@ No repositório: **Settings** → **Secrets and variables** → **Actions**.
 | Secret | `VM_SSH_KEY` | conteúdo **inteiro** da chave **privada** de deploy |
 | Secret | `DOMINIO` | `dungeons-bruno.duckdns.org` |
 | Variable | `ARENA_URL` | `wss://dungeons-bruno.duckdns.org` |
+| Secret | `CHAVE_CERTIFICADO` | texto aleatório de 48 letras e números (marco 17); veja abaixo |
+| Variable | `SUPABASE_URL` | o endereço do projeto Supabase (`https://….supabase.co`), público |
+| Variable | `SUPABASE_ANON_KEY` | a chave anônima (publishable) do projeto, pública: o RLS protege |
 
 Sem `ARENA_URL`, o workflow de deploy fica desligado e o Pages publica o jogo sem arena online.
+
+### Chave do certificado do personagem (marco 17)
+
+O servidor assina o personagem com ela; sem ela, cada reinício troca a chave e os certificados antigos deixam de valer
+(o jogador só precisa entrar na arena de novo; o slot não perde nada). Gere no PowerShell e cole **direto** no GitHub
+(não cole no chat nem em arquivo):
+
+```powershell
+-join ((48..57) + (65..90) + (97..122) | Get-Random -Count 48 | ForEach-Object { [char]$_ }) | Set-Clipboard
+```
+
+Depois: **Settings** → **Secrets and variables** → **Actions** → **New repository secret** → `CHAVE_CERTIFICADO`, e
+cole. O próximo deploy grava no `.env` da VM.
+
+### Conta Google e nuvem (Supabase, marco 17)
+
+Tudo nos sites oficiais; nada de segredo no chat:
+1. **Supabase**:
+   - em <https://supabase.com>, crie um projeto na região **São Paulo** (plano grátis);
+   - em **Project Settings → API**, copie a **Project URL** e a **anon / publishable key**;
+   - coloque as duas nas variáveis `SUPABASE_URL` e `SUPABASE_ANON_KEY` do GitHub.
+2. **Google Cloud**:
+   - em <https://console.cloud.google.com>, crie um **ID do cliente OAuth** do tipo **Aplicativo da Web**;
+   - em **URIs de redirecionamento autorizados**, coloque a URL de callback que o Supabase mostra em
+     **Authentication → Providers → Google**.
+3. **Supabase → Authentication → Providers → Google**:
+   - ligue o provedor;
+   - cole o **ID do cliente** e a **chave secreta** do Google (só aí, no painel do Supabase);
+   - deixe o captcha desligado.
+4. **Supabase → Authentication → URL Configuration**:
+   - **Site URL**: `https://brun-after.github.io/Dungeons-Arena/`;
+   - **Redirect URLs**: esse mesmo endereço e `http://localhost:5173/`.
+5. **A tabela `saves`**: aplique `supabase/migrations/20261015120000_saves.sql`, de uma destas formas:
+   - pelo **SQL Editor** do painel (cole e rode);
+   - pelo conector do Supabase nesta conversa, se você autorizar.
+6. **Publicar**: rode de novo o workflow do Pages (ou faça um merge) para o build levar as variáveis.
 
 ## O que o deploy faz
 

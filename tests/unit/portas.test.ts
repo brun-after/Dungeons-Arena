@@ -181,6 +181,7 @@ describe('troca de fase (avancarFase)', () => {
       estado,
       estatisticas: { inimigosDerrotados: 0, mortes: 0 },
       fasesVisitadas: {},
+      certificado: null,
     };
     return { r, ctx };
   }

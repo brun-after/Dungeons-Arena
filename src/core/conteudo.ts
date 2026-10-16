@@ -9,6 +9,7 @@ import elementosJson from '../data/elementos.json';
 import interacoesJson from '../data/interacoes.json';
 import inimigosJson from '../data/inimigos.json';
 import itensJson from '../data/itens.json';
+import itensBaseJson from '../data/itens-base.json';
 import campanhaJson from '../data/modos/campanha.json';
 import cooperativoJson from '../data/modos/cooperativo.json';
 import livreJson from '../data/modos/livre.json';
@@ -20,6 +21,7 @@ import { orcamentoNoNivel, poderDaHabilidade } from '../combat/orcamento';
 import { lerHabilidades, type Catalogo, type DefinicaoHabilidade, type Habilidade } from '../combat/habilidades';
 import { lerClasses, lerPresets, type ClasseJogador, type PresetInimigo } from '../entities/presets';
 import { lerModo, RARIDADES, type ModoDeJogo } from '../modos/modo';
+import { CatalogoDeItens, lerBasesDeItem, type BasesDeItem } from '../progression/gerar-item';
 import { lerItens, type Item } from '../progression/itens';
 import { BALANCE_PADRAO } from './contexto';
 
@@ -34,6 +36,8 @@ export interface Conteudo {
   modos: Catalogo<ModoDeJogo>;
   modoCampanha: ModoDeJogo;
   itens: Catalogo<Item>;
+  /** Marco 17: as bases do equipamento gerado por semente (o catálogo de itens resolve os ids `gi_`). */
+  itensBase: BasesDeItem;
   /** Marco 14: os 5 elementos e as regras de acúmulo, oposição, transformação e sinergia. */
   elementos: ReadonlyMap<Elemento, DefinicaoElemento>;
   interacoes: Interacoes;
@@ -44,6 +48,8 @@ export interface FontesDeConteudo {
   inimigos: unknown;
   classes: unknown;
   itens: unknown;
+  /** Marco 17: data/itens-base.json. */
+  itensBase: unknown;
   elementos: unknown;
   interacoes: unknown;
   caminhos: unknown;
@@ -56,10 +62,11 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const p = lerPresets(fontes.inimigos);
   const c = lerClasses(fontes.classes);
   const it = lerItens(fontes.itens);
+  const ib = lerBasesDeItem(fontes.itensBase);
   const el = lerElementos(fontes.elementos);
   const ia = lerInteracoes(fontes.interacoes);
   const cm = lerCaminhos(fontes.caminhos);
-  const erros = [...h.erros, ...p.erros, ...c.erros, ...it.erros, ...el.erros, ...ia.erros, ...cm.erros];
+  const erros = [...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros];
   const fontesCompilacao = { caminhos: cm.caminhos, elementos: el.elementos };
   const habilidades = new Map<string, Habilidade>();
   for (const [id, def] of h.definicoes) {
@@ -115,7 +122,8 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       classes: c.classes,
       modos,
       modoCampanha: modoCampanha ?? lerModo(campanhaJson, 'campanha').modo,
-      itens: it.itens,
+      itens: new CatalogoDeItens(it.itens, ib.bases, BALANCE_PADRAO.itensGerados),
+      itensBase: ib.bases,
       elementos: el.elementos,
       interacoes: ia.interacoes,
     },
@@ -148,6 +156,7 @@ export const FONTES_OFICIAIS: FontesDeConteudo = {
   inimigos: inimigosJson,
   classes: classesJson,
   itens: itensJson,
+  itensBase: itensBaseJson,
   elementos: elementosJson,
   interacoes: interacoesJson,
   caminhos: caminhosJson,

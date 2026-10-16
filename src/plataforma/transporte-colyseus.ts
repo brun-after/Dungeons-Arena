@@ -21,7 +21,8 @@ export interface ConexaoArena {
   derrubar: () => void;
 }
 
-export type PedidoDeSala = { criar: true; fase?: string } | { codigo: string };
+/** Marco 17: ao criar, a faixa de nível da sala (sem ela, aberta). */
+export type PedidoDeSala = { criar: true; fase?: string; faixa?: string } | { codigo: string };
 
 interface InfoDaSala {
   tipo: string;
@@ -44,7 +45,7 @@ async function infoDaSala(url: string, codigo: string): Promise<InfoDaSala> {
 export async function conectarArena(url: string, pedido: PedidoDeSala): Promise<ConexaoArena> {
   const cliente = new Client(url);
   const fase = 'criar' in pedido ? (pedido.fase ?? 'arena-01') : ((await infoDaSala(url, pedido.codigo)).fase ?? 'arena-01');
-  const sala: Room = 'criar' in pedido ? await cliente.create('arena', { fase }) : await cliente.joinById(pedido.codigo);
+  const sala: Room = 'criar' in pedido ? await cliente.create('arena', { fase, faixa: pedido.faixa ?? 'aberta' }) : await cliente.joinById(pedido.codigo);
   return { ...embrulhar(sala), fase };
 }
 

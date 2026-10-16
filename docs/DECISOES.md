@@ -1,9 +1,10 @@
 # Decisões de projeto
 
-**Versão:** 0.31 · **Data:** 15/10/2026
+**Versão:** 0.31 · **Data:** 16/10/2026
 
 > **Histórico**
-> - **0.31 (15/10/2026)**: D-065 (alvo automático que acompanha e alvo travado). Pula a 0.30, que é a do PR do marco 17.
+> - **0.31 (15/10/2026)**: D-065 (alvo automático que acompanha e alvo travado).
+> - **0.30 (15/10/2026)**: D-063 (conta, nuvem, certificado do personagem, a campanha na arena e mais peso em upar; marco 17) e D-064 (o 11A redefinido).
 > - **0.29 (15/10/2026)**: D-062 com o resultado do teste na VM (10 min, por decisão do usuário).
 > - **0.28 (15/10/2026)**: D-061 (dificuldade, campanha cooperativa e balanceamento por simulação, marco 15) e D-062 (endurecimento, marco 16).
 > - **0.27 (15/10/2026)**: D-060 (ajustes de jogo depois do marco 14); a D-017 passa a ser por habilidade.
@@ -1478,6 +1479,103 @@ O ritmo escolhido foi o **médio**:
 > **Resultado (v0.29, 15/10/2026)**: o usuário reduziu o teste de 30 para **10 min**. Com 10 bots na arena-02 sobre o
 > `wss://` da VM: 10/10 metas; RTT 22/32 ms; tick p95/p99 1,4/1,7 ms (p95 máximo na série 2,8 ms); memória do
 > processo de 105 para 129 MB, com tendência de 0,66 MB/min; nenhum reinício; atraso do agendador p95 de 10,7 ms.
+
+## D-063 · Conta, nuvem, certificado do personagem e a campanha na arena (v0.30, 15/10/2026)
+
+**Contexto.** Ao planejar o 11A, o usuário pediu:
+- conta (só Google) para manter o progresso entre máquinas;
+- o personagem da campanha jogando na arena, e a arena ajudando na evolução, com ênfase em upar atributos,
+  habilidades e itens: quem upou bem chega forte, e vice-versa.
+
+**Restrições do usuário**:
+- **Supabase econômico** (plano grátis):
+  - uma leitura e escrita só nos pontos de saída;
+  - sem realtime nem recaptcha.
+- **Jogar local não depende da nuvem**: a arena usa o save local.
+- **Nuvem ↔ local** por enviar e baixar.
+- **Editar o arquivo não pode upar o personagem.**
+
+**Decisão.**
+- **Certificado do personagem** (`integridade/certificado.ts`, `server/certificacao.ts`):
+  - **Assinatura**: o servidor da AWS assina com HMAC-SHA256 o retrato do personagem (nível, XP e bolsa) com a
+    hora. A chave (`CHAVE_CERTIFICADO`) só existe no GitHub e no `.env` da VM.
+  - **`POST /certificar`**:
+    - confere a ficha pelo nível, sem cortes;
+    - com o certificado anterior, confere o crescimento contra o tempo real (XP, ouro e itens por minuto, com folga;
+      `balance.integridade`; teto de 8 h entre dois);
+    - sem anterior, aceita até o nível 5.
+  - **Identidade**: o personagem ganha um `personagemId`. Save v12 (identidade na bolsa e certificado no registro).
+  - **Arquivo editado**: muda o retrato. O personagem segue jogável local e no grupo, mas a arena o recebe como
+    ficha de treino.
+  - **Limite reconhecido**: alguém que espere horas e edite dentro do teto por minuto passa. O certificado impede o
+    "editar o arquivo e virar nível 20", não um bot jogando por horas.
+- **Arena com o personagem**:
+  - **Entrada**: com o certificado válido, o personagem entra inteiro pelo caminho do cooperativo (conferência,
+    bolsa e canal privado, que subiu para a `SalaArena`). Sem ele, a ficha de treino recortada de sempre.
+  - **Faixas de nível** em dados (`livre.json`: 1–5, 6–10, 11–15, 16–20; sem faixa, sala aberta):
+    - a sala nasce na faixa de quem cria;
+    - entrar fora dela é recusado;
+    - `GET /salas?faixa=` sugere as salas com vaga.
+  - **Recompensa** (`recompensaJogador`):
+    - abater um jogador dá XP pelo nível dele, com o decaimento por abates (antifarm por vítima);
+    - na primeira queda, ouro e item; o item gerado é do nível da vítima (mais forte, melhor);
+    - teto de XP por hora por sessão;
+    - a arena solta itens dos abates; baú e loot do spawner continuam fora dela (`economiaDoSpawner`).
+  - **Saída**: "Salvar e sair" e a gravação a cada 2 minutos pedem à sala o personagem certificado e o gravam no slot.
+- **Nuvem** (`plataforma/nuvem.ts`, Supabase só no cliente, carregado sob demanda):
+  - login Google, sem realtime;
+  - a lista (slot e resumo) é lida uma vez por aba, e o registro inteiro só ao baixar, conferido como um arquivo
+    importado;
+  - escrita em "Enviar para a nuvem" e nos pontos combinados: salvar pelo menu, sair do grupo, sair da arena;
+  - tabela `saves` com RLS por conta e teto de tamanho (`supabase/migrations`);
+  - a chave anônima é pública (o RLS protege);
+  - a arena nunca confia no que está na nuvem, só no certificado.
+- **Upar pesa mais**:
+  - **Equipamento gerado por semente** (`gi_<base>_<nível>_<raridade>_<semente>`, `data/itens-base.json`,
+    `balance.itensGerados`): 70% do equipamento que cai é gerado no nível de quem morreu, com raridades altas mais
+    prováveis por nível. O catálogo resolve esses ids sob demanda.
+  - **Atributos com efeito novo** (`balance.atributos.efeitos`):
+
+    | Atributo | Efeito novo |
+    |---|---|
+    | Sabedoria | Regeneração de mana (3% por ponto acima de 10) |
+    | Destreza | Recarga do básico (1,5% por ponto, até 30%) |
+    | Constituição | Vida por passo |
+    | Carisma | Desconto na loja (2% por ponto, até 30%) |
+
+  - **Ficha**: mostra o dano do golpe, a recarga, a mana por segundo, a vida por passo e o desconto.
+
+**Consequência.**
+- **Simulador**: a build focada vence a dispersa e o personagem equipado vence o sem equipamento, na arena com a
+  ficha inteira, em toda classe (62–100%; 77/77 metas). As metas do 15 continuam valendo.
+- **Carga** com fichas certificadas (10 bots, perfil suportado): 9/9 metas.
+- **Testes**:
+  - 7 do certificado e 6 da arena com o personagem (loopback);
+  - 2 de integração com o servidor real;
+  - 2 da nuvem e do retrato no slot;
+  - 6 dos itens gerados e dos atributos;
+  - e2e: a arena com o personagem do slot e a nuvem falsa.
+- **Passos do usuário** (nos sites oficiais):
+  - projeto Supabase com o Google ligado e o cliente OAuth do Google;
+  - as variáveis `SUPABASE_URL` e `SUPABASE_ANON_KEY` e o segredo `CHAVE_CERTIFICADO` no GitHub;
+  - a migração da tabela.
+
+## D-064 · O 11A redefinido (v0.30, 15/10/2026)
+
+**Decisão do usuário.**
+- **Fica para depois**:
+  - editor de habilidades;
+  - importação de música pelo jogador;
+  - exportação da aventura.
+- **O 11A passa a ser**:
+  - editor completo no toque;
+  - aventura de 2 fases ou mais;
+  - tileset por imagem;
+  - aprendizado de estilo **por aparelho e opcional**;
+  - a aparência das habilidades que já existem, refinada pela fantasia de cada uma;
+  - trilhas sintetizadas mais variadas, transitando entre um polo casual e um dark fantasy.
+
+**Ordem.** O 11A vem depois do 17. O aceite "exportar e importar a aventura" sai do 11A.
 
 ## D-065 · Alvo automático que acompanha e alvo travado (v0.31, 15/10/2026)
 

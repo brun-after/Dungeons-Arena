@@ -9,6 +9,19 @@ import { ATRIBUTOS_NEUTROS, type Atributos } from '../entities/entidade';
 export type PoliticaRelacao = 'todos_hostis' | 'todos_aliados' | 'por_equipe';
 export type TipoFim = 'nenhum' | 'abates' | 'pontos' | 'tempo' | 'ultimo_de_pe' | 'objetivo';
 export type LocalRespawn = 'base_da_equipe' | 'aleatorio' | 'longe_do_inimigo';
+/** Marco 17 (D-063): faixa de nível de uma sala da arena (quem entra com a ficha inteira precisa caber nela). */
+export interface FaixaDeNivel {
+  id: string;
+  min: number;
+  max: number;
+}
+
+/** Marco 17: o que derrotar um jogador com a ficha inteira vale, e o teto de XP por hora de cada um. */
+export interface RecompensaDeJogador {
+  xpPorNivel: number;
+  tetoXpPorHora: number;
+}
+
 /** Marco 15: quando a fase termina — qualquer jogador na saída, ou todos os vivos sobre ela (cooperativo). */
 export type RegraSaida = 'qualquer' | 'todos_vivos';
 export type Raridade = 'comum' | 'incomum' | 'raro' | 'epico' | 'lendario';
@@ -75,7 +88,13 @@ export interface ModoDeJogo {
   /** null = a ficha é usada como está (campanha). */
   clamp: ClampDeFicha | null;
   /** `itens`: inimigos soltam itens de equipamento e consumíveis (marco 6: só a campanha, D-039). */
-  loot: { politica: 'compartilhado' | 'individual'; janelaParticipacaoS: number; itens: boolean };
+  loot: {
+    politica: 'compartilhado' | 'individual';
+    janelaParticipacaoS: number;
+    itens: boolean;
+    /** Marco 17: o spawner põe baú e loot no mundo (a arena tem itens só dos abates). */
+    economiaDoSpawner: boolean;
+  };
   limites: { npcs: number; invocacoesPorJogador: number; avataresPorJogador: number; armadilhasPorJogador: number; projeteis: number };
   /** Sempre false na v1 (§3.7): o schema rejeita true. */
   progressaoContaParaCampanha: false;
@@ -89,6 +108,10 @@ export interface ModoDeJogo {
   saida: RegraSaida;
   /** Marco 15: os comandos que a sala aceita pela rede (o resto é recusado com `nao_permitido`). */
   comandosDeRede: string[];
+  /** Marco 17: faixas de nível das salas (vazio: sem faixa). */
+  faixas: FaixaDeNivel[];
+  /** Marco 17: recompensa por jogador derrotado (null: só NPCs dão XP). */
+  recompensaJogador: RecompensaDeJogador | null;
   /** Marco 10A-2 (§2.12): regeneração por célula, descanso e penalidade de morte (null = sem). */
   sobrevivencia: {
     regenPorCelula: boolean;
@@ -187,6 +210,7 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
       politica: l.opcao(loot, 'politica', ['compartilhado', 'individual'] as const),
       janelaParticipacaoS: l.numero(loot, 'janelaParticipacaoS', { min: 0 }),
       itens: l.booleano(loot, 'itens'),
+      economiaDoSpawner: l.booleano(loot, 'economiaDoSpawner'),
     },
     limites: {
       npcs: l.numero(limites, 'npcs', { min: 0, inteiro: true }),
@@ -203,6 +227,17 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
     portas: { inimigosCruzamChance: l.numero(l.objeto(o.portas, 'portas'), 'inimigosCruzamChance', { min: 0, max: 1 }) },
     saida: l.opcao(o, 'saida', ['qualquer', 'todos_vivos'] as const),
     comandosDeRede: l.listaDeTextos(o, 'comandosDeRede'),
+    faixas: (Array.isArray(o.faixas) ? o.faixas : []).map((f) => {
+      const x = l.objeto(f, 'faixa');
+      return { id: l.texto(x, 'id'), min: l.numero(x, 'min', { min: 1, max: 20, inteiro: true }), max: l.numero(x, 'max', { min: 1, max: 20, inteiro: true }) };
+    }),
+    recompensaJogador:
+      o.recompensaJogador === null || o.recompensaJogador === undefined
+        ? null
+        : (() => {
+            const x = l.objeto(o.recompensaJogador, 'recompensaJogador');
+            return { xpPorNivel: l.numero(x, 'xpPorNivel', { min: 0 }), tetoXpPorHora: l.numero(x, 'tetoXpPorHora', { min: 0 }) };
+          })(),
     sobrevivencia: {
       regenPorCelula: l.booleano(sobrevivencia, 'regenPorCelula'),
       descanso: l.booleano(sobrevivencia, 'descanso'),

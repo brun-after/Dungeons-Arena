@@ -1735,3 +1735,30 @@ body.qualidade-baixo * {
   right: 8px;
   z-index: 50;
 }
+
+/* Marco 17 (15/10/2026): a nuvem na tela de slots. */
+.bloco-nuvem,
+.nuvem-slot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  width: min(420px, 100%);
+}
+.nuvem-slot {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--borda);
+}
+.salas-da-faixa ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.salas-da-faixa h2 {
+  margin: 8px 0 4px;
+  font-size: 0.95rem;
+}

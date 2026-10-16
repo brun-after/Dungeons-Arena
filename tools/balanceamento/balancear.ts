@@ -5,7 +5,7 @@
 import { writeFileSync } from 'node:fs';
 import { BALANCE_PADRAO } from '../../src/core/contexto';
 import { DIFICULDADES } from '../../src/modos/dificuldade';
-import { CLASSES, aguenta, avisos, chefe, fatiaDaInvocacao, mediana, pvpLivre, sequencia, xpPorMinuto } from './simulador';
+import { CLASSES, aguenta, avisos, chefe, desequipar, dispersar, dueloDeFichas, equipar, fatiaDaInvocacao, mediana, pvpLivre, semAjuste, sequencia, xpPorMinuto } from './simulador';
 
 const args = process.argv.slice(2);
 const valor = (nome: string, padrao: number) => {
@@ -15,6 +15,8 @@ const valor = (nome: string, padrao: number) => {
 };
 const SEMENTES = Array.from({ length: valor('sementes', 8) }, (_, i) => 1000 + i * 7919);
 const NIVEIS = [1, 5, 10];
+/** Os duelos de build decidem por vitória: o dobro de sementes, para o d20 não decidir sozinho. */
+const SEMENTES_DUELO = Array.from({ length: SEMENTES.length * 2 }, (_, i) => 3000 + i * 7919);
 const metas = BALANCE_PADRAO.metas;
 const r1 = (v: number) => Math.round(v * 10) / 10;
 const br = (v: number) => String(r1(v)).replace('.', ',');
@@ -141,6 +143,19 @@ const corpoAviso = avisos().map((a) => {
   return [a.habilidade, a.presets.join(', '), `${a.conjuracaoMs} ms`, `${a.suportadoMs} ms`, `${a.degradadoMs} ms`];
 });
 tabela('Aviso útil das habilidades inimigas (p95 aproximado da rede)', ['Habilidade', 'Quem usa', 'Conjuração', 'Suportado (150 ms)', 'Degradado (250 ms)'], corpoAviso);
+
+// 7. Marco 17: quem upou bem chega forte (arena com a ficha inteira, mesma classe e nível).
+const corpoBuild: string[][] = [];
+for (const classe of CLASSES) {
+  const pct = (montarA: Parameters<typeof dueloDeFichas>[3], montarB: Parameters<typeof dueloDeFichas>[4]) =>
+    (100 * SEMENTES_DUELO.filter((s) => dueloDeFichas(classe, metas.build.nivel, s, montarA, montarB)).length) / SEMENTES_DUELO.length;
+  const focada = pct(semAjuste, dispersar);
+  const equipado = pct(equipar('raro'), desequipar);
+  conferir(`build: ${classe} focada vence a dispersa`, focada, metas.build.vitoriasMinPct, 100, '%');
+  conferir(`build: ${classe} equipado vence o sem equipamento`, equipado, metas.build.vitoriasMinPct, 100, '%');
+  corpoBuild.push([classe, `${br(focada)}%`, `${br(equipado)}%`]);
+}
+tabela(`Builds na arena (ficha inteira, nível ${metas.build.nivel})`, ['Classe', 'Focada vence a dispersa', 'Equipado (raro) vence o sem equipamento'], corpoBuild);
 
 // 7. Invocação e economia (informativos e a fatia da invocação).
 const fatia = mediana(SEMENTES.map((s) => fatiaDaInvocacao(5, s)));

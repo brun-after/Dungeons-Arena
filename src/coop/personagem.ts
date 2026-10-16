@@ -5,12 +5,12 @@
 
 import { definicaoDe } from '../combat/compilar-habilidade';
 import type { ContextoSimulacao } from '../core/contexto';
-import { serializarCanonico } from '../core/digest';
+import { hash53, serializarCanonico } from '../core/digest';
 import { clonarEntidade, clonarEstado } from '../core/estado';
 import { ehObjeto, type Objeto } from '../core/validar';
 import { SLOTS_BARRA, type Bolsa, type Entidade, type HabilidadeConhecida, type ItemNaMochila } from '../entities/entidade';
 import { criarJogador } from '../entities/fabrica';
-import type { Alteracao } from '../arena/ficha-sessao';
+import type { Alteracao, PreviaDeFicha } from '../arena/ficha-sessao';
 import { SLOTS_DE_EQUIPAMENTO } from '../modos/modo';
 import { recalcularFicha } from '../progression/derivados';
 import { caminhosDoRank, nivelParaRank } from '../progression/habilidades-personagem';
@@ -166,6 +166,8 @@ export function conferirPersonagem(pedido: unknown, ctx: ContextoSimulacao, id: 
   conferirAtributos(b, bolsa, e.nivel, ctx, classe.atributos);
   conferirHabilidades(b, bolsa, e.nivel, ctx);
   conferirItens(b, bolsa, e.nivel, ctx);
+  // Marco 17: a identidade do personagem passa adiante (o certificado se prende a ela).
+  bolsa.personagemId = typeof b.personagemId === 'string' && /^[0-9a-zA-Z-]{8,64}$/.test(b.personagemId) ? b.personagemId : '';
   recalcularFicha(e, ctx);
   e.hp = e.hpMax;
   e.mana = e.manaMax;
@@ -189,6 +191,45 @@ export function conferirPersonagem(pedido: unknown, ctx: ContextoSimulacao, id: 
   const pedidoEquip = ehObjeto(b.equipamento) ? b.equipamento : {};
   registrar('equipamento', SLOTS_DE_EQUIPAMENTO.map((s) => resumo(pedidoEquip[s])), SLOTS_DE_EQUIPAMENTO.map((s) => resumo(bolsa.equipamento[s])));
   return { entidade: e, alteracoes };
+}
+
+/**
+ * Marco 17 (D-063): o personagem que voltou da arena, como o servidor o certificou, gravado no slot. A bolsa é a do
+ * retrato (a mesma que a assinatura cobre), a ficha é derivada de novo e a fase do slot fica como estava.
+ */
+export function aplicarRetratoNoSave(r: RegistroProgresso, retrato: PedidoDePersonagem, ctx: ContextoSimulacao, agora: number): RegistroProgresso {
+  const atual = jogadorDoSave(r.estado);
+  if (!atual) return r;
+  const estado = clonarEstado(r.estado);
+  const j = estado.entidades.find((e) => e.id === atual.id);
+  if (!j) return r;
+  // Clone explícito da bolsa do retrato (pela cópia de entidade, que copia a bolsa campo a campo).
+  j.bolsa = clonarEntidade({ ...j, bolsa: retrato.bolsa }).bolsa;
+  j.nivel = retrato.nivel;
+  j.xp = retrato.xp;
+  recalcularFicha(j, ctx);
+  j.hp = j.hpMax;
+  j.mana = j.manaMax;
+  return { ...r, estado, atualizadoEm: agora };
+}
+
+/** A prévia que a sala devolve no `bemVindo` para quem entrou com o personagem (marco 15; arena no 17). */
+export function previaDoPersonagem(e: Entidade, alteracoes: Alteracao[], modoId: string, versaoBalance: number): PreviaDeFicha {
+  return {
+    ficha: {
+      classeId: e.bolsa?.classeId ?? '',
+      classe: e.classe,
+      atributos: { ...e.atributos },
+      habilidades: [...e.habilidades],
+      ataqueBasico: e.ataqueBasico,
+      nivel: e.nivel,
+      hpMax: e.hpMax,
+      manaMax: e.manaMax,
+      defesa: e.defesa,
+    },
+    alteracoes,
+    hashPolitica: hash53(serializarCanonico({ modo: modoId, balance: versaoBalance })),
+  };
 }
 
 /**

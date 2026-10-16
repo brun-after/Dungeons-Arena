@@ -7,6 +7,7 @@
 // formas.ts), custo em vida, saltos (saltos.ts) e o perfil da classe e das passivas (dano, alcance, custo,
 // recarga).
 
+import { reducaoRecargaBasicoPct } from '../progression/efeitos-atributo';
 import type { Celula, EntidadeId } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, novoId, type EstadoJogo } from '../core/estado';
@@ -184,7 +185,8 @@ export function iniciarAcao(
   if (hab.recargaMs > 0) {
     const chave = chaveRecarga(ator.id, hab.id);
     // `ab_recarga` encurta a recarga do ataque básico (até 75%); o perfil, a de qualquer habilidade.
-    const reducao = hab.id === ator.ataqueBasico ? bonusAtaqueBasico(ator, estado.tick).recargaPct : 0;
+    // Marco 17: a Destreza acima de 10 também encurta o básico (somada ao `ab_recarga`, dentro do mesmo teto).
+    const reducao = hab.id === ator.ataqueBasico ? Math.min(75, bonusAtaqueBasico(ator, estado.tick).recargaPct + reducaoRecargaBasicoPct(ator.atributos, ctx.balance)) : 0;
     const ms = hab.recargaMs * (1 - reducao / 100) * (1 + perfil.recargaPct / 100);
     estado.recargas[chave] = Math.max(estado.recargas[chave] ?? 0, estado.tick + ticksDe(ms));
   }
