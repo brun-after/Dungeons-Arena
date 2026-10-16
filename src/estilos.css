@@ -835,6 +835,9 @@ body.toque .botao-habilidade .tecla {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  /* Ajuste de 16/10/2026: com o conteúdo mais alto que a janela (slots com a nuvem), o centro "seguro" encosta no
+     topo e rola, em vez de jogar o título e o "Entrar com Google" para fora da tela, onde nem a rolagem chega. */
+  justify-content: safe center;
   gap: 12px;
   padding: calc(24px + var(--seguro-topo)) calc(16px + var(--seguro-dir)) calc(24px + var(--seguro-base)) calc(16px + var(--seguro-esq));
   overflow-y: auto;
