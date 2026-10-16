@@ -1,0 +1,5 @@
+# Ajuste de 16/10/2026: a integração do Supabase com o GitHub aplica as migrações de `supabase/migrations` a cada
+# merge na `main` ("Deploy to production"). Em produção ela só usa as migrações (e Edge Functions e buckets, que o
+# jogo não tem); o login Google e as URLs de retorno ficam no painel (docs/IMPLANTACAO.md).
+# `project_id` é só um rótulo local do CLI, não o ref do projeto.
+project_id = "dungeons-arena"

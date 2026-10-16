@@ -1,8 +1,9 @@
 # Implantação do servidor da arena
 
-**Versão:** 0.6 · **Data:** 15/10/2026
+**Versão:** 0.7 · **Data:** 16/10/2026
 
 > **Histórico**
+> - **0.7 (16/10/2026)**: a tabela `saves` passa a ser aplicada pela integração do Supabase com o GitHub (`supabase/config.toml`).
 > - **0.6 (15/10/2026)**: marco 17 (D-063): `CHAVE_CERTIFICADO`, a conta Google no Supabase e as variáveis do Pages.
 > - **0.5 (15/10/2026)**: o teste de carga na VM passa a ter 10 minutos (decisão do usuário); a leitura dos logs por SSH depende da chave que a VM aceita.
 > - **0.4 (15/10/2026)**: marco 16 (D-062): limites de salas e de criação, `GET /metricas`, logs mais completos, limite de memória e rotação de log no compose, e o teste de 30 minutos.
@@ -156,9 +157,15 @@ Tudo nos sites oficiais; nada de segredo no chat:
 4. **Supabase → Authentication → URL Configuration**:
    - **Site URL**: `https://brun-after.github.io/Dungeons-Arena/`;
    - **Redirect URLs**: esse mesmo endereço e `http://localhost:5173/`.
-5. **A tabela `saves`**: aplique `supabase/migrations/20261015120000_saves.sql`, de uma destas formas:
-   - pelo **SQL Editor** do painel (cole e rode);
-   - pelo conector do Supabase nesta conversa, se você autorizar.
+5. **A tabela `saves`**, pela integração com o GitHub:
+   - **Project Settings → Integrations → GitHub**: autorize, escolha `brun-after/Dungeons-Arena`, working directory
+     `.`, production branch `main` e ligue **Deploy to production**;
+   - a cada merge na `main`, a integração aplica as migrações novas de `supabase/migrations` (o
+     `supabase/config.toml` existe só para ela; o login e as URLs continuam no painel);
+   - confira o check do Supabase no commit da `main` e, em **Table Editor**, a tabela `saves` com o RLS ligado e as 4
+     políticas;
+   - plano B: colar o SQL da migração no **SQL Editor**. Nesse caso ela fica fora do histórico de migrações, e a
+     integração tentaria aplicá-la de novo no próximo merge (e falharia nas políticas, que já existiriam).
 6. **Publicar**: rode de novo o workflow do Pages (ou faça um merge) para o build levar as variáveis.
 
 ## O que o deploy faz
