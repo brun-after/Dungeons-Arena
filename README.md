@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.3 · **Data:** 17/10/2026
+**Versão do documento:** 3.4 · **Data:** 17/10/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena
 
 > **Histórico**
+> - **3.4 (17/10/2026)**: avisos e alvo em faixa comum junto ao topo no celular, texto compacto e barra do alvo com a mesma medida da vida do jogador, sem sobreposição (D-072).
 > - **3.3 (17/10/2026)**: NPCs inimigos recuperam 50% da vida perdida ao abater; chefes regeneram fora de combate; especialização ofensiva e ritmo recalibrados; descobertas por pseudônimo e contagem no lobby; e2e do estudo de habilidades (D-071).
 > - **3.2 (17/10/2026)**: marco 18 "Grimório" (atributos novos, estudo de habilidades B/A/S, revide da IA, Sabedoria nas armadilhas, 3 elementos e 8 reações novas, 20 itens base com 4 formas e 120 variações, ganchos, conjuntos, ressonâncias, combos, marcos de nível, buff × habilidade, fusões, missões, origens raras, forja, eventos de fase e o diário de descobertas; D-068 a D-070).
 > - **3.1 (17/10/2026)**: ajustes depois do 11A (sem descanso e mais orbes de vida, halo no lugar da linha, consumíveis à direita e minimapa à esquerda, equipamento no token, buff ofensivo armado, refúgio de 45 s, loja sem prazo, barra de skills maior com seletor rápido, flechas de verdade, ícones próprios no lugar dos emojis, paisagem e tela cheia no celular; D-067).

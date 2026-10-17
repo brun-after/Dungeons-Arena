@@ -40,7 +40,7 @@ import { CamadaTelegrafia } from '../render/telegrafia';
 import { criarTerreno } from '../render/terreno';
 import type { TexturasTileset } from '../render/tileset-textura';
 import { velocidade } from '../world/movimento';
-import { mostrarAviso } from './aviso';
+import { faixaSuperior, mostrarAviso } from './aviso';
 import { criarCabecalho } from './cabecalho';
 import { criarBarraConsumiveis } from './consumiveis';
 import { criarControles, type Controles } from './controles';
@@ -262,7 +262,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const dado = new DadoD20();
   ui.append(dado.elemento);
   const quadroAlvo = new QuadroAlvo();
-  ui.append(quadroAlvo.elemento);
+  faixaSuperior(ui).append(quadroAlvo.elemento);
   // Marco 14: a barra é a do jogador (teclas 1–4), refeita quando muda (rank, caminho ou troca de tecla).
   let habilidadesDaBarra: Habilidade[] = [];
   let chaveDaBarra = '';
