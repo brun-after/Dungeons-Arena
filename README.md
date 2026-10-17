@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.1 · **Data:** 17/10/2026
+**Versão do documento:** 3.2 · **Data:** 17/10/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena
 
 > **Histórico**
+> - **3.2 (17/10/2026)**: marco 18 "Grimório" (atributos novos, estudo de habilidades B/A/S, revide da IA, Sabedoria nas armadilhas, 3 elementos e 8 reações novas, 20 itens base com 4 formas e 120 variações, ganchos, conjuntos, ressonâncias, combos, marcos de nível, buff × habilidade, fusões, missões, origens raras, forja, eventos de fase e o diário de descobertas; D-068 a D-070).
 > - **3.1 (17/10/2026)**: ajustes depois do 11A (sem descanso e mais orbes de vida, halo no lugar da linha, consumíveis à direita e minimapa à esquerda, equipamento no token, buff ofensivo armado, refúgio de 45 s, loja sem prazo, barra de skills maior com seletor rápido, flechas de verdade, ícones próprios no lugar dos emojis, paisagem e tela cheia no celular; D-067).
 > - **3.0 (16/10/2026)**: marco 11A (editor completo no toque, aventuras de até 12 fases, tileset por imagem, estilo por aparelho, visuais das habilidades em partículas e trilhas casual ↔ dark; D-066).
 > - **2.9 (15/10/2026)**: alvo que não troca sozinho, troca com `Q` ou 🎯 e trava com `T`, clique ou toque longo (D-065).
@@ -93,6 +94,11 @@ Implantação do servidor na nuvem, passo a passo: [`docs/IMPLANTACAO.md`](docs/
 | Habilidades | Teclas 1–4 (também no teclado numérico) | Roda de botões em volta do ataque |
 | Pôr uma habilidade na tecla | Clique direito no botão da barra (ou `+` na tecla livre); na mochila, os botões 1–4 de cada carta | Segure o botão da roda |
 | Consumíveis (poções e pergaminhos) | Coluna à direita: clique, ou as teclas 5–9 e 0 | Lista à direita, no alto: toque |
+| Aprender uma habilidade (estudo) | Mochila → **Habilidades** → **Estudar**; **Acelerar** gasta 1 ponto e tira 1/3 do tempo | Idem |
+| O que cada atributo faz | Mochila → **Ficha** → o **?** ao lado do atributo | Idem (toque) |
+| Desarmar armadilha revelada | `E` ao lado dela (a Sabedoria decide) | Botão de interagir |
+| Diário de descobertas e missões | Mochila → **Diário** | Idem |
+| Forja | Na loja, seção **Forja** | Idem |
 | Mover a câmera | Arrastar o mapa | Arrastar o mapa |
 | Zoom | Roda do mouse | Pinça com dois dedos |
 | Visão (de cima ou isométrica) | `V`, ou Pausa → Configurações → Gráficos | Pausa → Configurações → Gráficos |
@@ -198,6 +204,7 @@ pessoas (7C) entra quando houver testadores.
 | [x] | 14 | **Sistema de habilidades**: composição em camadas (efeito, forma, tempo, custo, tema, apresentação); formas linha, cone e ao redor; alvos aliado, todos os aliados e área livre; escudo, puxão e troca de lugar; **5 elementos** com estados e sinergias; interações em tabela (acúmulo, sinergia, resistência, teto); **orçamento de poder**; **ranks** por nível; **árvores de evolução** e modificadores; **classes** (guerreiro, mago, arqueiro) com afinidades; **livros de habilidade**; **habilidades geradas por semente** (inimigos e livros); **passivas**; barra escolhida e roda de habilidades; **efeitos legíveis** (duração, cartão e descrição gerada) | Uma habilidade nova nasce de dados e cabe no orçamento; o jogador entende o que está ativo e o que faz; inimigos das fases geradas com repertório próprio; mesmo digest com as mesmas sementes |
 | [x] | 15 | Ferramenta de **balanceamento por simulação** (tempo para matar por classe, rank e evolução, curva das fases, fluxo de ouro, invocações, margem de aviso do corpo a corpo) e ajuste dos números da campanha e do Livre; **dificuldade** em 4 níveis com o mesmo personagem; **campanha em grupo** online até 6, com escala pelo tamanho do grupo; inimigo cresce com o nível | Ritmo e janelas de reação validados na campanha e no Livre (69/69 metas). *Fichas justas por modo de arena: depois do 10B* |
 | [x] | 17 | **Conta Google** e **progresso na nuvem** (Supabase econômico), **certificado do personagem** (editar o arquivo não upa), **o personagem da campanha na arena** com faixas de nível e recompensas (XP, ouro e itens, com antifarm), **equipamento gerado por nível** e **atributos com mais efeito** | Quem upou bem vence na arena (simulador); arquivo editado entra como ficha de treino; jogar local não depende da nuvem |
+| [x] | 18 | **Grimório**: Força e Inteligência dividem o dano bruto e a Inteligência fortalece efeitos, reações e combos; Destreza é ritmo (arqueiro até 50% no básico); Sabedoria revela e desarma armadilhas; **estudo** para aprender (Rank B/A/S, acelerável); **revide** imediato da IA; **terra, sombra e sagrado** com 8 reações novas; **20 itens base × 4 formas** (Comum, Épica, Lendária, Última) com 10 afinidades elementais = 120 variações; **ganchos**, **conjuntos**, **ressonâncias** de atributo, **combos**, **marcos de nível**, **buff × habilidade** e **fusões**; **missões**, **origens raras**, **forja**, **eventos de fase** e **diário de descobertas** (primeira descoberta do servidor na nuvem) (D-068, D-069, D-070) | Tudo em dados e testado; metas do simulador aprovadas; guia e dica rápida dos atributos |
 | [x] | 16 | Celular (área segura, orientação, redimensionamento), **PWA offline** testado, desempenho e memória (trocas de fase, cena de carga, `BENCHMARKS.md`) e servidor (limites, métricas, teste de 10 min na VM) | Offline e benchmarks verificados; teste de 10 min na VM com 10 bots: 10/10 metas, memória estável e sem reinício. *Recuperação de queda: depois do 9B; sessão real de 10 pessoas: no 11B* |
 
 ---

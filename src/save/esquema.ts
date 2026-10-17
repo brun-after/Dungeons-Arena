@@ -60,6 +60,8 @@ export interface ResumoSlot {
   atualizadoEm: number;
   /** Marco 15: a dificuldade em que o slot foi jogado por último. */
   dificuldade: Dificuldade;
+  /** Marco 18 (D-070): quantas entradas o diário do personagem tem. */
+  descobertas: number;
 }
 
 /** O jogador do save: a entidade com bolsa (a campanha tem um só). */
@@ -68,7 +70,15 @@ export function jogadorDoSave(estado: EstadoJogo): Entidade | undefined {
 }
 
 export function resumoDoRegistro(r: RegistroProgresso): ResumoSlot {
-  return { slot: r.slot, nivel: jogadorDoSave(r.estado)?.nivel ?? 1, nomeFase: r.nomeFase, atualizadoEm: r.atualizadoEm, dificuldade: r.estado.dificuldade };
+  const jogador = jogadorDoSave(r.estado);
+  return {
+    slot: r.slot,
+    nivel: jogador?.nivel ?? 1,
+    nomeFase: r.nomeFase,
+    atualizadoEm: r.atualizadoEm,
+    dificuldade: r.estado.dificuldade,
+    descobertas: jogador?.bolsa?.diario.length ?? 0,
+  };
 }
 
 export type ErroSave = 'formato' | 'versao_futura' | 'slot' | 'fase' | 'estado' | 'nao_finito';

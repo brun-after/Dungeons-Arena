@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.33 · **Data:** 17/10/2026
+**Versão:** 0.34 · **Data:** 17/10/2026
 
 > **Histórico**
+> - **0.34 (17/10/2026)**: D-068 (atributos, estudo, revide e armadilhas), D-069 (itens base com formas, ganchos, conjuntos e elementos novos) e D-070 (combos, marcos, fusões, missões, origens, forja, eventos de fase e diário).
 > - **0.33 (17/10/2026)**: D-067 (ajustes depois do 11A: sem descanso, buff armado, refúgio, loja sem prazo, equipamento no token, flechas, ícones próprios, paisagem).
 > - **0.32 (16/10/2026)**: D-066 (marco 11A: editor completo, aventura de várias fases, tileset, estilo por aparelho, visuais em partículas e trilhas casual ↔ dark).
 > - **0.31 (15/10/2026)**: D-065 (alvo automático que acompanha e alvo travado).
@@ -1732,3 +1733,87 @@ O aceite: uma aventura de 2 fases criada e testada no celular.
 
 **Consequência.** A campanha perde a cura garantida do descanso e passa a depender de orbes e da regeneração ao
 andar. A spec (§2.10 e a tabela de modos) continua citando o descanso; esta decisão prevalece.
+
+## D-068 · Marco 18: atributos, estudo de habilidades, revide da IA e armadilhas (v0.34, 17/10/2026)
+
+**Contexto.** O grimório de interações mostrou que o atributo de dano vinha da classe (a Seta arcana do aventureiro
+escalava com Força) e que rank, atributo e IA eram lineares. O usuário ajustou a proposta e pediu tudo num PR.
+
+**Decisão.**
+- **Dano.** A rolagem bruta é multiplicada por `1 + ((FOR−10) + (INT−10)) / 2 × 7%` (piso 0,5), para todo mundo. O
+  bônus fixo somado segue o atributo da habilidade (`escalaCom`; físico usa Força, mágico usa Inteligência), não a
+  classe. Divergência da §2.7 (passo 5), a pedido.
+- **Inteligência** também dá a **potência** (`1 + (INT−10) × 3%`, entre 0,7 e 1,6): duração dos status e valor dos
+  efeitos numéricos das habilidades, o dano extra das reações e o bônus dos combos. O `pct` (lentidão etc.) e os fluxos
+  (armadilha, invocação) não mudam.
+- **Destreza** não dá dano. Dá velocidade (como antes) e recarga do ataque básico: 1,5% por ponto até 30% nas
+  classes, 2,5% por ponto até 50% no arqueiro (`classes.json → destreza`).
+- **Sabedoria** revela armadilhas alheias: um teste por segundo em cada armadilha no raio `2 + (SAB−10)/3`, com chance
+  `5% + 3%/ponto` (teto 60%). A revelada pode ser desarmada com `interagir` (1,5 s parado; `40% + 5%/ponto`, teto
+  95%); falhar dispara a armadilha; acertar dá 5 de XP. Regra de modo (`sobrevivencia.revelarArmadilhas`).
+- **Estudo.** Aprender (por ponto ou por livro) começa um estudo: Rank **B** 15 min, **A** 30 min, **S** 1 h,
+  menos 2% por ponto de INT acima de 10 (até 40%). Só anda com a simulação rodando (pausa e jogo fechado não
+  contam; regra `sobrevivencia.estudoAvanca`, desligada na arena). Um por vez. `acelerarEstudo` gasta 1 ponto e tira
+  1/3 do total (3 = instantâneo). Subir de nível continua instantâneo. Na interface, o grau aparece como
+  **"Rank B/A/S"** e a progressão 1–5 passou a se chamar **"Nível"**.
+- **Revide.** Todo inimigo atacado persegue o agressor no mesmo tick, saindo da patrulha ou do "?", e troca para o
+  último que bateu (`balance.ia.revide`).
+- **Ressonâncias** (data/ressonancias.json): 6 com um atributo em 16+ e 6 com um par em 14+; viram ganchos (D-069).
+- **Calibração**: arqueiro FOR 14/DES 13, aventureiro FOR 13/INT 13, chefe com 12% menos vida (o revide o deixou mais
+  perigoso). O simulador usa as builds típicas novas (aventureiro FOR+INT, arqueiro FOR+DES).
+
+**Consequência.** Builds híbridos fazem sentido; o mago continua o mais forte em efeitos; o arqueiro troca dano por
+ritmo. Saves vão para a v14.
+
+## D-069 · Marco 18: itens base com formas, ganchos, conjuntos e elementos novos (v0.34, 17/10/2026)
+
+**Decisão.**
+- **Itens base** (`data/itens-formas.json`, ids `ib_<base>_<forma>_<elemento|n>_<nível>_<semente>`): 20 bases ×
+  4 formas (Comum, Épica, Lendária, Última — raridades comum, épico, lendário e a nova `ultima`), cada forma com nome,
+  poder e aparência próprios; 10 afinidades elementais desiguais (cajado 3; espada e arco 2; adaga, maça e escudo 1;
+  as outras nenhuma), cada uma nas 4 formas: **120 variações**. Os drops gerados passam a sair daqui; os `gi_` do
+  marco 17 continuam resolvendo. A Última não cai: vem da forja, de missões e de origens raras. Arquivo separado do
+  `itens-base.json` (que segue para os `gi_`), em vez de uma versão 2 dele.
+- **Ganchos** (`progression/ganchos.ts`): um formato só — quando (ao acertar, no crítico, ao abater, ao levar golpe, ao
+  gastar o refúgio, ao usar habilidade, passivo), se (etiqueta, habilidade, elemento, tipo de ataque, estado do alvo
+  antes do golpe, chance) e o quê (aplicar efeito, em volta, no próximo hostil, purificar, herdar o elemento da última
+  magia, curar %, mana, ou passivos como inamovível, resistências, renascer). Lendárias e Últimas trazem os seus; o
+  elemento do item vira gancho (arma: o golpe físico aplica o estado; outras peças: quem acerta o portador leva o
+  estado).
+- **Conjuntos** (`data/conjuntos.json`): Vigília do caçador e Juramento de ferro, com bônus de 2 e 3 peças (ganchos e
+  modificadores de habilidade).
+- **Elementos novos**: terra (enraizado), sombra (marcado: o próximo golpe causa mais e o estado sai), sagrado
+  (consagrado: quem acerta se cura); estados novos molhado e atolado. O Derreter deixa o alvo molhado. 8 reações
+  novas: vapor, eletrocutar (salta entre molhados), lama, fossilizar, eclipse (nos dois sentidos), peste, purgar (cura
+  quem lança) e pânico. O gerador de habilidades segue nos 5 elementos de antes (as habilidades geradas dos saves não
+  mudam).
+- **Aparência**: brilho do elemento na ponta da arma, gema por forma, halo da Última no token e aura de partículas
+  para Lendária e Última; molduras na interface.
+
+## D-070 · Marco 18: combos, marcos, buff × habilidade, fusões, missões, origens, forja, eventos e diário (v0.34, 17/10/2026)
+
+**Decisão.**
+- **Combos** (`data/combos.json`, 8): a habilidade B até `janelaMs` depois da A ganha dano (escalado pela potência),
+  d20 mínimo e efeitos (no alvo, em volta ou na mira).
+- **Marcos de nível** (`marcos` em skills.json): o nível 2 dá um toque e o 4 uma assinatura, aplicados como caminhos
+  fixos e dentro do orçamento de poder (os que passavam foram trocados por alcance ou efeitos menores).
+- **Buff × habilidade** (`data/interacoes-buff.json`, 5): com o buff ativo, a habilidade ganha o bônus (mesmo
+  mecanismo dos combos).
+- **Fusões** (4): habilidades de grau S com `fusao: [a, b]`; pedem a Runa de fusão (missão), as duas no nível máximo e
+  são uma por personagem (a runa sai ao começar o estudo).
+- **Missões** (`data/missoes.json`, 4) contadas pelos eventos do tick, com recompensa única; **origens raras**
+  (`data/origens.json`, 4) sorteadas na queda, com condição e chance própria (2% a 20%); **forja**
+  (`data/forja.json`) na loja aberta; **eventos de fase** (lua sangrenta 3%, mercador errante 10%, sala secreta 8%)
+  sorteados pela semente depois dos campos de antes, com sorteio de posição à parte (a fase sem evento sai igual).
+- **Diário**: cada entrada (reação, combo, ressonância, marco, fusão, variação de item, conjunto, regra de buff,
+  missão, origem, evento) entra na ficha na primeira vez (`descoberta`); a aba mostra silhuetas para o resto. A
+  **primeira descoberta do servidor** vai para a tabela `descobertas` do Supabase (só inserção, RLS, chave primária
+  por entrada; guarda **só o primeiro nome** da conta) e só é chamada quando o diário ganha uma entrada nova.
+  Registro comunitário, não autoritativo. A pausa mostra a semente da fase.
+- **Mudanças do grimório na implementação**: o Resíduo expõe os atingidos em vez de deixar o estado no chão; a Mente
+  dupla dá +15% de potência em vez de ecoar efeitos; o Ricochete aplica dano no hostil mais perto em vez de um
+  projétil novo; o Estandarte e outros combos usam efeitos de área em vez de mudar o alcance da habilidade. Mais simples
+  de manter em dados, com o mesmo sentido.
+
+**Consequência.** O conteúdo cresce por JSON validado pelo `Leitor`; a próxima leva (60 bases, ~400 itens) não exige
+código novo. Saves v14.

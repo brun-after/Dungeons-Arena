@@ -131,7 +131,8 @@ test.describe('desktop', () => {
     await expect(mochila.getByText('Arma: Espada curta')).toBeVisible();
     await expect(diag).toHaveAttribute('data-equipados', '1');
     await mochila.getByRole('button', { name: 'Ficha' }).click();
-    await expect(mochila.locator('tr[data-atributo="forca"]')).toHaveAttribute('data-efetivo', '14');
+    // Marco 18: o aventureiro começa com Força 13 (+2 da espada).
+    await expect(mochila.locator('tr[data-atributo="forca"]')).toHaveAttribute('data-efetivo', '15');
     await page.keyboard.press('Escape');
     await expect(mochila).toBeHidden();
     // Com o modal fechado, o teclado volta a mover o jogador.
@@ -139,6 +140,26 @@ test.describe('desktop', () => {
     await page.keyboard.down('d');
     await expect.poll(async () => (await ler(diag, 'celula'))[0], { timeout: 15_000, intervals: [50] }).not.toBe(x0);
     await page.keyboard.up('d');
+    expect(erros).toEqual([]);
+  });
+
+  // Marco 18 (D-068, D-070): o "?" de cada atributo explica com os números do personagem; o diário lista o que falta.
+  test('ficha: a dica rápida do atributo e a aba Diário', async ({ page }) => {
+    const { erros } = await abrir(page);
+    await page.keyboard.press('KeyI');
+    const mochila = page.getByRole('dialog', { name: 'Mochila' });
+    await mochila.getByRole('button', { name: 'Ficha' }).click();
+    await mochila.locator('[data-chave="dica-inteligencia"]').click();
+    const dica = mochila.locator('.dica-atributo');
+    await expect(dica).toBeVisible();
+    await expect(dica).toContainText('Potência dos efeitos');
+    await expect(dica).toContainText('Estudo de habilidades');
+    await mochila.locator('[data-chave="dica-sabedoria"]').click();
+    await expect(dica).toContainText('Armadilhas');
+    await mochila.getByRole('button', { name: 'Diário' }).click();
+    await expect(mochila.getByText(/Descobertas: \d+ de \d+/)).toBeVisible();
+    await expect(mochila.locator('.missao')).toHaveCount(4);
+    await expect(mochila.locator('.grupo-diario[data-tipo="reacao"] summary')).toContainText('Reações');
     expect(erros).toEqual([]);
   });
 

@@ -503,7 +503,7 @@ export const ptBR = {
   'editor.faseInvalida': 'Esta fase tem erro: {erro}',
   'editor.testeSemSave': 'Teste: o progresso nesta fase não é salvo.',
   'slots.slot': 'Slot {n}',
-  'slots.resumo': 'Nível {nivel} · {fase} · {data}',
+  'slots.resumo': 'Nível {nivel} · {fase} · {descobertas} descobertas · {data}',
   'slots.vazio': 'Vazio',
   'slots.invalido': 'Este save não pôde ser lido. Você pode excluí-lo.',
   'slots.continuar': 'Continuar',
