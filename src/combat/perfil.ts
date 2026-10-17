@@ -59,6 +59,8 @@ function escalarPassiva(p: Passiva, rank: number, ctx: ContextoPerfil): Passiva 
   const r = ctx.balance.habilidades.ranks[rank - 1] ?? ctx.balance.habilidades.ranks.at(-1);
   const k = 1 + (r?.efeitoPct ?? 0) / 100;
   return {
+    tenacidadePct: (p.tenacidadePct ?? 0) * k,
+    fluxoEscudoPct: (p.fluxoEscudoPct ?? 0) * k,
     tag: p.tag,
     danoPct: p.danoPct * k,
     curaPct: p.curaPct * k,

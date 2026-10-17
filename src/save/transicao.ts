@@ -1,3 +1,4 @@
+import { novaMemoria } from '../combat/estado-tatico';
 // Troca de fase da campanha (§2.1 "Transições", §3.5). Marco 10A-1 (14/10/2026), D-052.
 // Pura: recebe o registro atual e devolve o da fase nova. A fase que fica para trás é guardada sem
 // o jogador (e sem as invocações dele) em `fasesVisitadas`; a de destino volta de lá, se já foi
@@ -34,6 +35,8 @@ export function personagemNoInicio(e: Entidade, c: Celula, id = e.id): Entidade 
     participacao: [],
     interacao: null,
   });
+  if (p.tatica) p.tatica = novaMemoria();
+  p.ultimaHabilidade = null;
   return p;
 }
 
@@ -51,6 +54,7 @@ export function avancarFase(r: RegistroProgresso, destino: DestinoDaTransicao, a
   const deixada = clonarEstado(r.estado);
   deixada.entidades = deixada.entidades.filter((e) => e.id !== jogador.id && e.invocacao?.donoId !== jogador.id);
   deixada.projeteis = [];
+  if (deixada.camposTaticos) deixada.camposTaticos = deixada.camposTaticos.filter((c) => c.donoId !== jogador.id);
   const chaveDestino = chaveDaFase(destino.ref);
   const guardada = r.fasesVisitadas[chaveDestino];
   const visitadas: Record<string, EstadoJogo> = Object.fromEntries(Object.entries(r.fasesVisitadas).filter(([k]) => k !== chaveDestino));

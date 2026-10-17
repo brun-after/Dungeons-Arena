@@ -1,5 +1,5 @@
 {
-  "versao": 22,
+  "versao": 23,
   "progressaoItens": { "tomoPrecoBase": 10000, "aceleracaoIncomumChancePct": 30, "aceleracaoRaraChancePct": 10, "essenciaChancePct": 2, "essenciaBossChancePct": 20 },
   "movimento": {
     "velocidadeBaseMs": 400,
@@ -281,5 +281,36 @@
     "chanceDesistir": 0.1,
     "distanciaMinAtirador": 3,
     "distanciaMaxAtirador": 5
+  },
+  "tatica": {
+    "janelaEtapaMs": 3000,
+    "janelaTotalMs": 6000,
+    "tetoCampos": 4,
+    "escudoMaxHpPct": 50,
+    "fluxoIntervaloMs": 2000,
+    "fluxoDuracaoMs": 3000,
+    "fluxoTeto": 8,
+    "consumoTeto": 20,
+    "consumoPct": 50,
+    "colisaoDano": 4,
+    "colisaoAtordoarMs": 400,
+    "tenacidadeMaxPct": 40,
+    "removiveis": [
+      "queimando",
+      "envenenado",
+      "sangrando",
+      "resfriado",
+      "atolado",
+      "exposto",
+      "marcado",
+      "silenciar",
+      "modificar_dano"
+    ],
+    "respostaPct": 20,
+    "respostaMs": 3000,
+    "aparoJanelaMaxMs": 2000,
+    "veuJanelaMaxMs": 4000,
+    "muralhaMaxMs": 8000,
+    "campoMaxMs": 10000
   }
 }

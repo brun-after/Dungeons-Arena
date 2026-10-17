@@ -1,3 +1,4 @@
+import { muralhaEm } from '../combat/tatica';
 // Movimento célula a célula com integração por distância (§2.2, §2.3).
 // Cada passo é cardinal: reserva o destino, avança `progressoPasso` pela velocidade e, ao
 // completar, a posição lógica vira o destino. Um tick pode consumir vários passos.
@@ -168,7 +169,7 @@ function mobilidadeDaAcao(e: Entidade, ctx: ContextoSimulacao): Mobilidade {
 }
 
 function podeEntrar(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: ContextoSimulacao): boolean {
-  return passavel(ctx.fase, x, y) && celulaLivrePara(e, x, y, estado.entidades, ctx.balance.colisao);
+  return !muralhaEm(estado, x, y) && passavel(ctx.fase, x, y) && celulaLivrePara(e, x, y, estado.entidades, ctx.balance.colisao);
 }
 
 function escolherPasso(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao): PassoEscolhido | null {

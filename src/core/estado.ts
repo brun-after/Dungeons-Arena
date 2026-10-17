@@ -1,3 +1,4 @@
+import type { CampoTatico } from '../combat/estado-tatico';
 // Estado raiz da simulação (§3.3). Um único objeto tipado, só com dados: sem classes,
 // sem funções e sem referências cíclicas, para clonar, comparar (digest) e gravar em checkpoint.
 // O terreno da fase é conteúdo imutável e fica no contexto (D-007); aqui só o `faseId`.
@@ -12,6 +13,7 @@ export { criarEntidade, clonarEntidade, type Entidade } from '../entities/entida
 
 /** Projétil em voo (§2.7, etapa 4). Continua mesmo se o lançador morrer ou for atordoado. */
 export interface Projetil {
+  saltosExtrasCombo?: number;
   id: number;
   acaoId: number;
   donoId: EntidadeId;
@@ -149,6 +151,7 @@ export interface RespawnPendente {
 }
 
 export interface EstadoJogo {
+  camposTaticos?: CampoTatico[];
   versao: 1;
   faseId: string;
   tick: number;
@@ -209,6 +212,7 @@ const copiaEfeito = (e: EfeitoCanonico | null): EfeitoCanonico | null => (e ? { 
 // Clone explícito, campo a campo (§5.3 regra 4): nada de ida e volta por JSON em estado vivo.
 export function clonarEstado(estado: EstadoJogo): EstadoJogo {
   return {
+    ...(estado.camposTaticos ? { camposTaticos: estado.camposTaticos.map((c) => ({ ...c, efeito: copiaEfeito(c.efeito) })) } : {}),
     versao: estado.versao,
     faseId: estado.faseId,
     tick: estado.tick,

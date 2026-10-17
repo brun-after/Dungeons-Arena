@@ -1,3 +1,7 @@
+import { comboDoImpacto, confirmarImpactoTatico } from './sequencias';
+import { defenderGolpe, fluxoRestaurador } from './tatica';
+import { comCombo } from './combos';
+import { ticksDe } from '../core/tempo';
 // Aplicação de um impacto num alvo (§2.7, passo 10): dano com HP mínimo 0, cura limitada ao
 // máximo, efeitos só quando acerta, e registro de participação para dividir XP.
 // Marco 14 (14/10/2026), D-059: o elemento consulta as sinergias com os estados do alvo (dano extra, remoção e
@@ -41,7 +45,7 @@ export function comPotencia(ef: EfeitoCanonico, potencia: number): EfeitoCanonic
   if (potencia === 1) return ef;
   const def = REGISTRO_EFEITOS[ef.tipo];
   if (def.fluxo !== null) return ef;
-  const numerico = def.periodico !== null || def.escudo || def.instantaneo === 'cura' || def.instantaneo === 'dano';
+  const numerico = def.periodico !== null || def.escudo || def.instantaneo === 'cura' || def.instantaneo === 'dano' || def.instantaneo === 'campo_cura' || def.instantaneo === 'campo_veneno';
   return {
     ...ef,
     duracaoMs: ef.duracaoMs > 0 ? Math.round(ef.duracaoMs * potencia) : 0,
@@ -74,7 +78,15 @@ export function aplicarImpacto(
   saida: EventoSimulacao[],
 ): void {
   if (!vivo(alvo)) return;
-  const { hab, fonte } = impacto;
+  const { hab } = impacto;
+  const atacante = buscarEntidade(estado, impacto.fonte.id);
+  const combo = atacante ? comboDoImpacto(estado, ctx, atacante, hab, impacto.acaoId, alvo) : null;
+  let fonte = comCombo(impacto.fonte, combo ? { danoPct: combo.danoPct, d20Minimo: combo.d20Minimo } : null);
+  const aparo = atacante?.tatica?.aparou;
+  const resposta = !atacante?.tatica?.respostaConsumida && !!aparo && estado.tick - aparo.tick <= ticksDe(ctx.balance.tatica.respostaMs) && hab.tipoAtaque === 'fisico' && hab.politicaImpacto === 'contato';
+  if (resposta && combo?.recompensa !== 'sangramento_forte' && combo?.recompensa !== 'consumir_sangramento') {
+    fonte = { ...fonte, multDano: fonte.multDano * (1 + ctx.balance.tatica.respostaPct / 100) };
+  }
   const tick = estado.tick;
   let dano = 0;
   let cura = 0;
@@ -84,7 +96,7 @@ export function aplicarImpacto(
   let critico = false;
   let imune = false;
   const conjurador = buscarEntidade(estado, fonte.id);
-  const origem = { id: fonte.id, x: conjurador?.x ?? alvo.x, y: conjurador?.y ?? alvo.y };
+  const origem = { acaoId: impacto.acaoId, id: fonte.id, x: conjurador?.x ?? alvo.x, y: conjurador?.y ?? alvo.y };
   const mira = impacto.mira ?? { x: alvo.x, y: alvo.y };
   const sinergias = hab.formulaDano !== null ? sinergiasAtivas(alvo, hab.elemento, ctx.conteudo.interacoes.sinergias, tick) : [];
   // Marco 18: os estados do alvo antes do golpe (os ganchos "se o alvo estava…" olham estes).
@@ -105,7 +117,9 @@ export function aplicarImpacto(
     );
     ({ d20, mult, falha, critico, imune } = r);
     // Marco 14: o escudo absorve antes da vida.
-    dano = absorverEscudo(alvo, r.dano, tick);
+    const defesa = !r.falha && !r.imune && atacante ? defenderGolpe(estado, ctx, alvo, atacante, hab.tipoAtaque === 'fisico', saida) : { esquivou: false, fator: 1 };
+    if (defesa.esquivou) { falha = true; saida.push({ t: 'esquivou', tick, acaoId: impacto.acaoId, atorId: fonte.id, alvoId: alvo.id }); }
+    dano = absorverEscudo(alvo, defesa.esquivou ? 0 : Math.round(r.dano * defesa.fator), tick);
     alvo.hp = Math.max(0, alvo.hp - dano);
     if (dano > 0) {
       registrarParticipacao(alvo, fonte.id, tick, ctx);
@@ -175,6 +189,11 @@ export function aplicarImpacto(
     if (REGISTRO_EFEITOS[efeito.tipo].aoLancar) continue;
     const sobre = efeito.em === 'conjurador' ? conjurador : alvo;
     if (sobre) aplicarEfeito(estado, ctx, sobre, comPotencia(efeito, fonte.potencia), origem, mira, saida);
+  }
+  if (conjurador) {
+    if (resposta && conjurador.tatica) { conjurador.tatica.respostaConsumida = true; conjurador.efeitos = conjurador.efeitos.filter((f) => f.tipo !== 'resposta_aparo'); }
+    fluxoRestaurador(estado, ctx, conjurador, alvo, cura, saida);
+    confirmarImpactoTatico(estado, ctx, conjurador, alvo, hab, impacto.acaoId, cura, disparadas, saida);
   }
   // Marco 18 (D-069): ganchos de quem acerta (no acerto e no crítico) e de quem leva o golpe.
   if (hab.formulaDano !== null && conjurador && conjurador !== alvo) {

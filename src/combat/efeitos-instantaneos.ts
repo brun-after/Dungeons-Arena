@@ -1,3 +1,4 @@
+import { muralhaEm } from './tatica';
 // Efeitos instantâneos de deslocamento (§2.8): teleporte, avanço e empurrão. Marco 8A (13/10/2026).
 // Marco 14 (14/10/2026): puxão (para perto de quem puxa) e troca de lugar.
 // Todo destino é conferido com passabilidade e colisão: ninguém para dentro de parede nem em cima
@@ -12,7 +13,7 @@ import { celulaLivrePara } from '../world/colisao';
 import { passavel } from '../world/fase';
 
 function livre(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, x: number, y: number): boolean {
-  return passavel(ctx.fase, x, y) && celulaLivrePara(e, x, y, estado.entidades, ctx.balance.colisao);
+  return !muralhaEm(estado, x, y) && passavel(ctx.fase, x, y) && celulaLivrePara(e, x, y, estado.entidades, ctx.balance.colisao);
 }
 
 /** Coloca a entidade numa célula, parada: o passo em curso e o caminho planejado são descartados. */

@@ -80,7 +80,8 @@ export class CamadaTelegrafia {
     for (const e of estado.entidades) {
       const a = e.acao;
       if (!a) continue;
-      const hab = resolverHabilidade(ctx, a.chave);
+      const base = resolverHabilidade(ctx, a.chave);
+      const hab = base && a.raioCombo ? { ...base, raioArea: a.raioCombo } : base;
       if (!hab || hab.politicaImpacto === 'proprio') continue;
       const cor = deSuporte(hab) || (local && relacao(local, e, ctx.modo) === 'proprio') ? COR_PROPRIA : COR_HOSTIL;
       const fracao = Math.min(1, Math.max(0, (tickVisual - a.inicioTick) / Math.max(1, a.lancamentoTick - a.inicioTick)));

@@ -24,7 +24,7 @@ const corDeTexto = (hex: string) => Number.parseInt(hex.slice(1), 16);
 
 export function visualDe(h: Habilidade): VisualResolvido {
   const v = h.visual;
-  const curaPropria = h.formulaCura !== null && h.politicaImpacto === 'proprio';
+  const curaPropria = h.formulaCura !== null;
   const corEfeito = h.efeitos[0] ? corDeTexto(REGISTRO_EFEITOS[h.efeitos[0].tipo].cor) : null;
   const corDeduzida = curaPropria ? COR_CURA : (corEfeito ?? (h.tipoAtaque === 'magico' ? COR_MAGICO : COR_FISICO));
   const deduzido: VisualResolvido = {
