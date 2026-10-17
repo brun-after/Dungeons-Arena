@@ -151,5 +151,8 @@ export const textosEditor = {
   'tileset.escolherPeca': 'Peça do pincel',
   'tileset.automatico': 'Automática (o autotiling escolhe)',
 
+  'guia.editor.titulo': 'Editor de aventuras',
+  'guia.editor.texto':
+    'No menu, Editor de fases cria aventuras de até 12 fases: a saída de cada uma leva à seguinte. Pincel, balde e retângulo pintam o terreno; baú, loja, item, armadilha e som vêm em Objeto; a porta interna liga dois toques. Toque longo em qualquer coisa abre o inspetor (conteúdo do baú, nível do inimigo, tranca da saída). Em Fases você troca de fase, gera uma nova e escolhe o tileset (uma imagem 4×4 ou 5×5). Quanto mais você edita, mais as fases geradas podem seguir o seu estilo (opção nas Configurações).',
   'config.estiloNasGeradas': 'Fases geradas no meu estilo (aprendido no editor)',
 } as const;

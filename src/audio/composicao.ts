@@ -93,6 +93,8 @@ const TIMBRES: readonly Timbres[] = [
   { melodia: 'sawtooth', corte: 750, sustentacao: 3, pad: 'sawtooth', volumePad: 0.08, drone: true },
 ];
 
+const TIMBRE_MEIO: Timbres = { melodia: 'triangle', corte: 1800, sustentacao: 1.8, pad: 'triangle', volumePad: 0.06, drone: false };
+
 function nota(escala: readonly number[], raiz: number, grau: number): number {
   const oitava = Math.floor(grau / escala.length);
   const indice = ((grau % escala.length) + escala.length) % escala.length;
@@ -112,7 +114,7 @@ export function compor(faseId: string, clima: Clima, faixa = 2): Composicao {
   const [min, max] = ANDAMENTO[clima];
   // Casual mais ligeiro, dark mais arrastado (o combate continua mais rápido que a exploração).
   const bpm = Math.round(inteiro(rng, min, max) * (1.08 - 0.04 * f));
-  const timbres = TIMBRES[f] ?? (TIMBRES[2] as Timbres);
+  const timbres: Timbres = TIMBRES[f] ?? TIMBRE_MEIO;
   const progressao = [0, inteiro(rng, 2, 5), inteiro(rng, 3, 6), inteiro(rng, 1, 4)];
   // Seção B: a mesma progressão, com o último acorde trocado (cadência diferente).
   const acordes = [...progressao, progressao[0] ?? 0, progressao[1] ?? 3, progressao[2] ?? 4, inteiro(rng, 4, 6)];
