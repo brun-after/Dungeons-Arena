@@ -13,7 +13,9 @@ import { t, type ChaveTexto } from '../i18n';
 import { SLOTS_DE_EQUIPAMENTO, type Slot } from '../modos/modo';
 import { DT_MS } from '../core/loop';
 import { derivarFicha } from '../progression/derivados';
-import { descontoNaLojaPct, perfilDestreza, reducaoRecargaBasicoPct, vidaPorCelula } from '../progression/efeitos-atributo';
+import { descontoNaLojaPct, multiplicadorDeRolagem, perfilDestreza, reducaoRecargaBasicoPct, vidaPorCelula } from '../progression/efeitos-atributo';
+import { ressonanciasDe } from '../progression/ressonancias';
+import { criarDicaAtributo, linhasDaDica, type DicaAtributo } from './dica-atributo';
 import { bonusDeAtributo } from '../progression/ficha';
 import { faixaDaFormula } from '../combat/dados';
 import { habilidadeDoAtor } from '../combat/perfil';
@@ -22,6 +24,7 @@ import { consumiveisComAtalho } from '../progression/inventario';
 import { xpParaProximo } from '../progression/nivel';
 import { resolverHabilidade } from '../combat/compilar-habilidade';
 import { desenharHabilidades, type EstadoAbaHabilidades } from './mochila-habilidades';
+import { desenharDiario } from './mochila-diario';
 import { duracaoLegivel } from './tempo';
 import { criarModal } from './modal';
 import { icone } from './icones';
@@ -49,7 +52,7 @@ export interface Mochila {
   atualizar: () => void;
 }
 
-type Aba = 'itens' | 'ficha' | 'habilidades';
+type Aba = 'itens' | 'ficha' | 'habilidades' | 'diario';
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, texto?: string): HTMLElementTagNameMap[K] {
   const e = document.createElement(tag);
@@ -66,6 +69,18 @@ function botao(texto: string, chave: string, aoClicar: () => void, classe = 'bot
   return b;
 }
 
+/**
+ * Marco 18 (D-069): a moldura do ícone segue a forma (gema na Épica, brilho na Lendária, coroa na Última) e a cor do
+ * elemento, se houver.
+ */
+export function molduraDoItem(item: Item | undefined): string {
+  if (!item) return 'icone-item';
+  const classes = ['icone-item'];
+  if (item.forma) classes.push(`forma-${item.forma}`);
+  if (item.elemento) classes.push(`elemento-${item.elemento}`);
+  return classes.join(' ');
+}
+
 /** "FOR +2 · CON +10% · DEF +1" */
 export function resumoDoItem(item: Item): string {
   const partes: string[] = [];
@@ -76,7 +91,10 @@ export function resumoDoItem(item: Item): string {
     partes.push(`${t(`atributoCurto.${nome}` as ChaveTexto)} ${sinal}${b.valor}${b.modo === 'pct' ? '%' : ''}`);
   }
   if (item.bonusDefesa !== 0) partes.push(`${t('atributoCurto.defesa')} ${item.bonusDefesa > 0 ? '+' : ''}${item.bonusDefesa}`);
-  if (item.tipo === 'consumivel' || item.tipo === 'livro') partes.push(item.descricao);
+  if (item.tipo === 'consumivel' || item.tipo === 'livro' || item.tipo === 'chave') partes.push(item.descricao);
+  // Marco 18 (D-069): a forma e o que a Lendária/Última faz.
+  if (item.forma) partes.unshift(t(`forma.${item.forma}` as ChaveTexto));
+  if (item.forma && item.descricao) partes.push(item.descricao);
   return partes.join(' · ');
 }
 
@@ -84,6 +102,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
   const { ctx, emitir } = o;
   const itens = ctx.conteudo.itens;
   let aba: Aba = 'itens';
+  let dica: DicaAtributo | null = null;
   let assinatura = '';
   const estadoHabilidades: EstadoAbaHabilidades = { escolhendo: null };
   let rotuloBotao = '';
@@ -131,7 +150,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     const li = el('li', opcoes.vazio ? 'linha-item vazio' : 'linha-item');
     const conteudo = el('span', 'conteudo-item');
     // D-067: o ícone do item é SVG do conjunto (o campo `icone` é um id).
-    const iconeItem = el('span', 'icone-item');
+    const iconeItem = el('span', molduraDoItem(opcoes.item));
     iconeItem.append(icone(opcoes.item?.icone ?? 'circulo'));
     iconeItem.setAttribute('aria-hidden', 'true');
     const textos = el('span', 'textos-item');
@@ -269,6 +288,10 @@ export function criarMochila(o: OpcoesMochila): Mochila {
 
     // Base + bônus do equipamento = efetivo; o efetivo vem da mesma função da simulação.
     const efetiva = derivarFicha(bolsa, j.nivel, ctx);
+    // Marco 18 (D-068): o "?" de cada atributo abre a dica rápida com os números do personagem.
+    dica?.destruir();
+    dica = criarDicaAtributo(modal.corpo);
+    const dicaAtual = dica;
     const tabela = el('table', 'tabela-ficha');
     const cab = el('tr');
     for (const chave of ['ficha.atributo', 'ficha.base', 'ficha.bonus', 'ficha.efetivo'] as const) cab.append(el('th', undefined, t(chave)));
@@ -279,8 +302,10 @@ export function criarMochila(o: OpcoesMochila): Mochila {
       const base = bolsa.atributosBase[nome];
       const valor = efetiva.atributos[nome];
       const diff = valor - base;
+      const nomeAtributo = el('td', 'nome-atributo', t(`atributo.${nome}` as ChaveTexto));
+      nomeAtributo.append(' ', dicaAtual.botao(nome, () => linhasDaDica(nome, efetiva.atributos, ctx, j, efetiva.hpMax, efetiva.manaMax)));
       tr.append(
-        el('td', undefined, t(`atributo.${nome}` as ChaveTexto)),
+        nomeAtributo,
         el('td', undefined, String(base)),
         el('td', diff > 0 ? 'bonus-positivo' : diff < 0 ? 'bonus-negativo' : undefined, diff === 0 ? '—' : `${diff > 0 ? '+' : ''}${diff}`),
         el('td', 'efetivo', String(valor)),
@@ -300,10 +325,26 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     corpo.append(
       el('p', 'resumo-ficha', t('ficha.resumo', { defesa: efetiva.defesa, hp: efetiva.hpMax, mana: efetiva.manaMax })),
     );
+    // Marco 18 (D-068): as ressonâncias que os atributos despertaram (as outras ficam para o diário).
+    const ativas = ressonanciasDe(ctx.conteudo.ressonancias, efetiva.atributos);
+    if (ativas.length > 0) {
+      corpo.append(el('h3', 'subtitulo-modal', t('ficha.ressonancias')));
+      const lista = el('ul', 'lista-ressonancias');
+      for (const r of ativas) {
+        const li = el('li');
+        li.append(el('strong', undefined, r.nome), ` ${r.texto}`);
+        li.dataset.ressonancia = r.id;
+        lista.append(li);
+      }
+      corpo.append(lista);
+    }
     // Marco 17 (D-063): o que os atributos dão, para o jogador ver o efeito do que escolheu.
     const basico = habilidadeDoAtor(ctx, j, j.ataqueBasico);
     if (basico?.formulaDano) {
-      const faixa = faixaDaFormula(basico.formulaDano);
+      // Marco 18: a rolagem já com o multiplicador de Força e Inteligência.
+      const faixaBruta = faixaDaFormula(basico.formulaDano);
+      const mult = multiplicadorDeRolagem(efetiva.atributos, ctx.balance);
+      const faixa = { min: Math.round(faixaBruta.min * mult), max: Math.round(faixaBruta.max * mult) };
       const bonus = bonusDeAtributo(efetiva.atributos, basico.escalaCom, ctx.balance.combate.multiplicadorAtributoPadrao);
       const recarga = (basico.recargaMs * (1 - reducaoRecargaBasicoPct(efetiva.atributos, ctx.balance, perfilDestreza(ctx, j)) / 100)) / 1000;
       const manaPorSegundo =
@@ -344,6 +385,9 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     assinatura = assinaturaDe(j);
     const focoAntes = document.activeElement instanceof HTMLElement ? document.activeElement.dataset.chave : undefined;
     const corpo = modal.corpo;
+    // A dica dos atributos é da aba Ficha: sai a cada redesenho (a ficha cria outra).
+    dica?.destruir();
+    dica = null;
     corpo.textContent = '';
     const abas = el('div', 'abas-modal');
     abas.setAttribute('role', 'group');
@@ -351,6 +395,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
       ['itens', 'mochila.abaItens'],
       ['ficha', 'mochila.abaFicha'],
       ['habilidades', 'habilidades.aba'],
+      ['diario', 'diario.aba'],
     ] as const) {
       const comPontos = (id === 'ficha' && j.bolsa.pontosAtributo > 0) || (id === 'habilidades' && j.bolsa.pontosHabilidade > 0);
       const rotulo = comPontos ? `${t(chave)} •` : t(chave);
@@ -365,7 +410,8 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     const conteudo = el('div', 'conteudo-modal');
     if (aba === 'itens') desenharItens(j, conteudo);
     else if (aba === 'ficha') desenharFicha(j, conteudo);
-    else desenharHabilidades(conteudo, j, ctx, emitir, estadoHabilidades, desenhar);
+    else if (aba === 'habilidades') desenharHabilidades(conteudo, j, ctx, emitir, estadoHabilidades, desenhar);
+    else desenharDiario(conteudo, j, ctx);
     corpo.append(conteudo);
     if (focoAntes) corpo.querySelector<HTMLElement>(`[data-chave="${CSS.escape(focoAntes)}"]`)?.focus();
   };

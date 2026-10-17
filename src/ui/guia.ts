@@ -4,7 +4,7 @@ import { t, type ChaveTexto } from '../i18n';
 import { criarModal, type Modal } from './modal';
 
 // Marco 11A: a seção do editor (aventuras, ferramentas e tileset).
-const SECOES = ['controles', 'combate', 'itens', 'vida', 'portas', 'invocacoes', 'arena', 'editor'] as const;
+const SECOES = ['controles', 'combate', 'atributos', 'habilidades', 'itens', 'descobertas', 'vida', 'portas', 'invocacoes', 'arena', 'editor'] as const;
 
 export function criarGuia(aoFechar?: () => void): Modal {
   const modal = criarModal({ titulo: t('guia.titulo'), rotuloFechar: t('guia.fechar'), classe: 'guia', ...(aoFechar && { aoFechar }) });

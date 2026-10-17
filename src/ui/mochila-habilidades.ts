@@ -17,7 +17,8 @@ import type { MotivoHabilidade } from '../core/eventos-simulacao';
 import { SLOTS_BARRA, type Entidade } from '../entities/entidade';
 import { t, type ChaveTexto } from '../i18n';
 import { DT_MS } from '../core/loop';
-import { aprendiveisDa, caminhosDoRank, motivoParaNaoSubir, nivelParaRank, ticksDeEstudo } from '../progression/habilidades-personagem';
+import { aprendiveisDa, caminhosDoRank, fusoesVisiveis, motivoParaNaoSubir, nivelParaRank, ticksDeEstudo } from '../progression/habilidades-personagem';
+import { definicaoDe } from '../combat/compilar-habilidade';
 import { duracaoLegivel } from './tempo';
 import { descreverCaminho, descreverHabilidade } from './descrever';
 import { icone } from './icones';
@@ -120,6 +121,17 @@ export function desenharHabilidades(
     const desc = el('ul', 'descricao-habilidade');
     for (const linha of linhas) desc.append(el('li', undefined, linha));
     textos.append(desc);
+    // Marco 18 (D-068): os marcos de nível (o do 2 e o do 4); os já alcançados aparecem acesos.
+    const marcos = definicaoDe(ctx, id)?.marcos ?? {};
+    const listaMarcos = Object.entries(marcos);
+    if (listaMarcos.length > 0) {
+      const ul = el('ul', 'marcos-habilidade');
+      for (const [n, m] of listaMarcos) {
+        const li = el('li', (conhecida?.rank ?? 0) >= Number(n) ? 'marco alcancado' : 'marco', t('habilidades.marco', { n, texto: m.texto }));
+        ul.append(li);
+      }
+      textos.append(ul);
+    }
     if (conhecida && conhecida.caminhos.length > 0) {
       const nomes = conhecida.caminhos.map((c) => ctx.conteudo.caminhos.get(c)?.nome ?? c).join(', ');
       textos.append(el('p', 'detalhe-item', t('habilidades.caminhosEscolhidos', { lista: nomes })));
@@ -192,4 +204,7 @@ export function desenharHabilidades(
   secao(t('habilidades.passivas'), passivas.map((c) => cartao(c.id, c)));
   const novas = aprendiveisDa(ctx, bolsa).filter((id) => !bolsa.conhecidas.some((c) => c.id === id));
   secao(t('habilidades.aprendiveis'), novas.map((id) => cartao(id, null)));
+  // Marco 18 (camada 7): as fusões aparecem quando as duas partes são conhecidas.
+  const fusoes = fusoesVisiveis(ctx, bolsa).filter((id) => !bolsa.conhecidas.some((c) => c.id === id));
+  secao(t('habilidades.fusoes'), fusoes.map((id) => cartao(id, null)));
 }

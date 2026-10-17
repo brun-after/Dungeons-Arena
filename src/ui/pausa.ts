@@ -32,6 +32,8 @@ export function criarPausa(o: {
   aoMudarEstado: (aberta: boolean) => void;
   /** Marco 15: a dificuldade, quando quem joga pode trocar (campanha solo e anfitrião do grupo). */
   dificuldade?: { atual: () => Dificuldade; definir: (d: Dificuldade) => void } | undefined;
+  /** Marco 18 (D-070): a fase e a semente dela (para trocar dicas: "a semente 4F2A tem mercador errante"). */
+  fase?: { nome: string; semente: string } | undefined;
 }): Pausa {
   let abrirAntes = () => {
     // Sem dificuldade nesta sessão.
@@ -82,6 +84,12 @@ export function criarPausa(o: {
     ...o.acoes.map((a, i) => botaoMenu(a.rotulo, a.fazer, `acao-${i}`)),
   );
   modal.corpo.append(lista);
+  if (o.fase) {
+    const linha = document.createElement('p');
+    linha.className = 'semente-fase';
+    linha.textContent = t('pausa.semente', { fase: o.fase.nome, semente: o.fase.semente });
+    modal.corpo.append(linha);
+  }
   // Marco 15: trocar a dificuldade a qualquer momento (o personagem continua o mesmo).
   const dif = o.dificuldade;
   if (dif) {

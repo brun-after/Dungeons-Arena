@@ -47,6 +47,8 @@ import { criarControles, type Controles } from './controles';
 import { Diagnostico, type DadosRede } from './diagnostico';
 import { montarApresentacao } from './apresentacao';
 import { ligarFeedback } from './feedback';
+import { ligarFeedbackGrimorio } from './feedback-grimorio';
+import { nuvemDoBuild } from '../plataforma/nuvem';
 import type { AcaoDaPausa } from './pausa';
 import { criarLoja } from './loja';
 import { criarMochila } from './mochila';
@@ -78,6 +80,8 @@ export interface OpcoesCena {
   dificuldade?: { atual: () => Dificuldade; definir: (d: Dificuldade) => void };
   /** Marco 11A (D-066): o tileset do jogador já carregado (só nas aventuras do editor). */
   tileset?: TexturasTileset | null;
+  /** Marco 18: registrar a primeira descoberta do servidor na nuvem (a arena e os testes desligam). */
+  nuvemDescobertas?: boolean;
 }
 
 export interface QuadroCena {
@@ -436,6 +440,20 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     },
     nomeDaHabilidade: (id) => resolverHabilidade(ctx, id)?.nome ?? id,
     dado,
+  });
+  // Marco 18 (D-068 a D-070): combos, ressonâncias, missões, origens raras, forja e descobertas.
+  ligarFeedbackGrimorio({
+    bus,
+    ctx,
+    idLocal,
+    hud,
+    numeros,
+    agora: () => performance.now(),
+    posicao: (id) => o.estado().entidades.find((x) => x.id === id) ?? null,
+    aviso: (texto) => {
+      mostrarAviso(ui, texto);
+    },
+    nuvem: o.nuvemDescobertas === false ? null : nuvemDoBuild(),
   });
 
   let ultimoQuadroMs = performance.now();

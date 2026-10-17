@@ -211,5 +211,18 @@ export class EfeitosDeHabilidade {
       const pos = this.posicoes.get(e.id);
       if (pos) this.o.particulas.emitir(AURA[primeiro.tipo] ?? 'aura', pos.x, pos.y, cor(REGISTRO_EFEITOS[primeiro.tipo].cor));
     }
+    // Marco 18 (D-069): quem veste Lendária solta fagulhas âmbar; a Última, uma aura carmim (partículas, nunca forma).
+    for (const e of estado.entidades) {
+      const forma = e.aparencia?.formaMaxima;
+      if (e.morto || (forma !== 'lendaria' && forma !== 'ultima')) continue;
+      const chave = `forma:${e.id}`;
+      if (agoraMs - (this.ultimaAura.get(chave) ?? 0) < (forma === 'ultima' ? INTERVALO_AURA_MS : INTERVALO_AURA_MS * 2)) continue;
+      this.ultimaAura.set(chave, agoraMs);
+      const pos = this.posicoes.get(e.id);
+      if (pos) this.o.particulas.emitir('aura_forma', pos.x, pos.y, forma === 'ultima' ? COR_ULTIMA : COR_LENDARIA);
+    }
   }
 }
+
+const COR_LENDARIA = 0xf39c12;
+const COR_ULTIMA = 0xff4d6d;
