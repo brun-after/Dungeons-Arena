@@ -228,7 +228,11 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     else trocarAlvo(1);
   };
 
-  const hud = new Hud(ui, (id) => o.estado().entidades.find((e) => e.id === id)?.nome ?? null);
+  const dadosHabilidade = (id: string) => {
+    const h = resolverHabilidade(ctx, id);
+    return h ? { nome: h.nome, icone: h.icone } : null;
+  };
+  const hud = new Hud(ui, (id) => o.estado().entidades.find((e) => e.id === id)?.nome ?? null, dadosHabilidade);
   const corDoElemento = (h: Habilidade) => (h.elemento ? (ctx.conteudo.elementos.get(h.elemento)?.cor ?? null) : null);
   // D-067: o seletor rápido põe uma habilidade ativa conhecida na tecla do botão (clique direito ou toque longo).
   const seletor = criarSeletorBarra(ui, (slot, id) => { emitir({ t: 'equiparHabilidade', id, slot }); });
@@ -414,6 +418,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
 
   const feedback = ligarFeedback({
     bus,
+    nomeHabilidade: (id) => dadosHabilidade(id)?.nome ?? id,
     estado: o.estado,
     idLocal,
     numeros,

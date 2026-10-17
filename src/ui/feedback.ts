@@ -12,6 +12,7 @@ import type { EventosDaSimulacao } from '../core/eventos-simulacao';
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import { DT_MS } from '../core/loop';
 import { t, type ChaveTexto } from '../i18n';
+import { duracaoLegivel } from './tempo';
 import { descreverEfeito, nomeDoEfeito } from './descrever';
 import { vibrar } from '../plataforma/dispositivo';
 import type { Item } from '../progression/itens';
@@ -30,6 +31,8 @@ export interface OpcoesFeedback {
   itens: Catalogo<Item>;
   /** Aviso curto e não bloqueante (toast). */
   aviso: (texto: string) => void;
+  /** Marco 18: nome de uma habilidade pelo id (o registro do estudo). */
+  nomeHabilidade?: (id: string) => string;
   /** Marco 14: o nome de uma habilidade pelo id (catálogo ou gerada). */
   nomeDaHabilidade?: (id: string) => string;
   /** Ajuste de 15/10/2026: o d20 perto da barra. */
@@ -203,6 +206,20 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
   bus.on('interacaoIniciada', (ev) => {
     if (ev.id === idLocal && ev.tipo === 'bau') hud.registrar(t('log.bauAbrindo'));
     if (ev.id === idLocal && ev.tipo === 'desarme') hud.registrar(t('log.desarmando'));
+  });
+  // Marco 18 (D-068): o estudo de habilidades.
+  const nomeHab = (id: string) => o.nomeHabilidade?.(id) ?? id;
+  bus.on('estudoIniciado', (ev) => {
+    if (ev.id === idLocal) hud.registrar(t('log.estudoIniciado', { nome: nomeHab(ev.habilidadeId), tempo: duracaoLegivel(ev.totalTicks * DT_MS) }));
+  });
+  bus.on('estudoAcelerado', (ev) => {
+    if (ev.id === idLocal && ev.restanteTicks > 0) hud.registrar(t('log.estudoAcelerado', { tempo: duracaoLegivel(ev.restanteTicks * DT_MS) }));
+  });
+  bus.on('estudoConcluido', (ev) => {
+    if (ev.id !== idLocal) return;
+    const texto = t('log.estudoConcluido', { nome: nomeHab(ev.habilidadeId) });
+    hud.registrar(texto);
+    o.aviso(texto);
   });
   // Marco 18 (D-068): a Sabedoria revela e desarma armadilhas.
   bus.on('armadilhaRevelada', (ev) => {

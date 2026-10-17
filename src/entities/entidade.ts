@@ -159,6 +159,17 @@ export interface Bolsa {
    * jogo dar uma. O certificado da arena se prende a ela.
    */
   personagemId: string;
+  /** Marco 18 (17/10/2026, D-068): a habilidade sendo estudada (aprender não é instantâneo); null = nenhuma. */
+  estudo: Estudo | null;
+}
+
+/** Marco 18 (D-068): estudo de uma habilidade nova. Só anda com o jogo rodando (um tick por tick de simulação). */
+export interface Estudo {
+  id: string;
+  totalTicks: number;
+  restanteTicks: number;
+  /** Pontos gastos para acelerar (cada um tira 1/3 do total). */
+  aceleracoes: number;
 }
 
 /**
@@ -392,6 +403,7 @@ function clonarBolsa(b: Bolsa): Bolsa {
     mochila: b.mochila.map((i) => ({ ...i })),
     conhecidas: b.conhecidas.map((c) => ({ ...c, caminhos: [...c.caminhos] })),
     barra: [...b.barra],
+    estudo: b.estudo ? { ...b.estudo } : null,
   };
 }
 

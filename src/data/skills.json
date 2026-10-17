@@ -3,6 +3,7 @@
   "habilidades": [
     {
       "id": "ataque_basico",
+      "grau": "B",
       "nome": "Golpe",
       "icone": "espada",
       "tipoAtaque": "fisico",
@@ -28,6 +29,7 @@
     },
     {
       "id": "seta_arcana",
+      "grau": "B",
       "nome": "Seta arcana",
       "icone": "runa",
       "tipoAtaque": "magico",
@@ -65,6 +67,7 @@
     },
     {
       "id": "explosao",
+      "grau": "A",
       "nome": "Explosão",
       "icone": "explosao",
       "tipoAtaque": "magico",
@@ -102,6 +105,7 @@
     },
     {
       "id": "curar",
+      "grau": "B",
       "nome": "Curar",
       "icone": "cura",
       "tipoAtaque": "magico",
@@ -138,6 +142,7 @@
     },
     {
       "id": "golpe_atordoante",
+      "grau": "B",
       "nome": "Golpe atordoante",
       "icone": "atordoar",
       "tipoAtaque": "fisico",
@@ -178,6 +183,7 @@
     },
     {
       "id": "golpe",
+      "grau": "B",
       "nome": "Golpe",
       "icone": "espada",
       "tipoAtaque": "fisico",
@@ -201,6 +207,7 @@
     },
     {
       "id": "raio",
+      "grau": "B",
       "nome": "Raio",
       "icone": "raio",
       "tipoAtaque": "magico",
@@ -226,6 +233,7 @@
     },
     {
       "id": "flecha",
+      "grau": "B",
       "nome": "Flecha",
       "icone": "flecha",
       "tipoAtaque": "fisico",
@@ -251,6 +259,7 @@
     },
     {
       "id": "marca_de_area",
+      "grau": "B",
       "nome": "Marca sombria",
       "icone": "alvo",
       "tipoAtaque": "magico",
@@ -284,6 +293,7 @@
     },
     {
       "id": "golpe_demoniaco",
+      "grau": "B",
       "nome": "Golpe demoníaco",
       "icone": "caveira",
       "tipoAtaque": "fisico",
@@ -318,6 +328,7 @@
     },
     {
       "id": "teia",
+      "grau": "B",
       "nome": "Teia",
       "icone": "teia",
       "tipoAtaque": "magico",
@@ -348,6 +359,7 @@
     },
     {
       "id": "golpe_viscoso",
+      "grau": "B",
       "nome": "Golpe viscoso",
       "icone": "gota",
       "tipoAtaque": "fisico",
@@ -388,6 +400,7 @@
     },
     {
       "id": "golpe_pesado",
+      "grau": "B",
       "nome": "Golpe pesado",
       "icone": "martelo",
       "tipoAtaque": "fisico",
@@ -416,6 +429,7 @@
     },
     {
       "id": "raio_vampirico",
+      "grau": "A",
       "nome": "Raio vampírico",
       "icone": "sangue",
       "tipoAtaque": "magico",
@@ -453,6 +467,7 @@
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
       "id": "invocar_lacaios",
+      "grau": "A",
       "nome": "Chamar lacaios",
       "icone": "invocar",
       "alcanceCelulas": 0,
@@ -485,6 +500,7 @@
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
       "id": "armar_teia",
+      "grau": "B",
       "nome": "Armar teia",
       "icone": "teia",
       "alcanceCelulas": 4,
@@ -513,6 +529,7 @@
     },
     {
       "id": "dardo_arcano",
+      "grau": "B",
       "nome": "Dardo arcano",
       "icone": "faisca",
       "tipoAtaque": "magico",
@@ -540,6 +557,7 @@
     },
     {
       "id": "tiro",
+      "grau": "B",
       "nome": "Tiro",
       "icone": "flecha",
       "tipoAtaque": "fisico",
@@ -567,6 +585,7 @@
     },
     {
       "id": "investida",
+      "grau": "B",
       "nome": "Investida",
       "icone": "investida",
       "tipoAtaque": "fisico",
@@ -611,6 +630,7 @@
     },
     {
       "id": "redemoinho",
+      "grau": "A",
       "nome": "Redemoinho",
       "icone": "redemoinho",
       "tipoAtaque": "fisico",
@@ -647,6 +667,7 @@
     },
     {
       "id": "grito_de_guerra",
+      "grau": "A",
       "nome": "Grito de guerra",
       "icone": "grito",
       "tipoAtaque": "fisico",
@@ -688,6 +709,7 @@
     },
     {
       "id": "escudo_de_ferro",
+      "grau": "B",
       "nome": "Escudo de ferro",
       "icone": "escudo",
       "tipoAtaque": "fisico",
@@ -729,6 +751,7 @@
     },
     {
       "id": "corrente",
+      "grau": "A",
       "nome": "Corrente",
       "icone": "corrente",
       "tipoAtaque": "fisico",
@@ -768,6 +791,7 @@
     },
     {
       "id": "golpe_flamejante",
+      "grau": "A",
       "nome": "Golpe flamejante",
       "icone": "fogo",
       "tipoAtaque": "fisico",
@@ -805,6 +829,7 @@
     },
     {
       "id": "pele_de_pedra",
+      "grau": "A",
       "nome": "Pele de pedra",
       "icone": "pedra",
       "tipoAtaque": "fisico",
@@ -828,6 +853,7 @@
     },
     {
       "id": "bola_de_fogo",
+      "grau": "A",
       "nome": "Bola de fogo",
       "icone": "cometa",
       "tipoAtaque": "magico",
@@ -866,6 +892,7 @@
     },
     {
       "id": "lanca_de_gelo",
+      "grau": "A",
       "nome": "Lança de gelo",
       "icone": "gelo",
       "tipoAtaque": "magico",
@@ -903,6 +930,7 @@
     },
     {
       "id": "raio_em_cadeia",
+      "grau": "S",
       "nome": "Raio em cadeia",
       "icone": "raio",
       "tipoAtaque": "magico",
@@ -944,6 +972,7 @@
     },
     {
       "id": "barreira",
+      "grau": "B",
       "nome": "Barreira",
       "icone": "barreira",
       "tipoAtaque": "magico",
@@ -985,6 +1014,7 @@
     },
     {
       "id": "nova_glacial",
+      "grau": "S",
       "nome": "Nova glacial",
       "icone": "nova",
       "tipoAtaque": "magico",
@@ -1022,6 +1052,7 @@
     },
     {
       "id": "mente_partida",
+      "grau": "S",
       "nome": "Mente partida",
       "icone": "olho",
       "tipoAtaque": "magico",
@@ -1064,6 +1095,7 @@
     },
     {
       "id": "afinidade_elemental",
+      "grau": "S",
       "nome": "Afinidade elemental",
       "icone": "estrela",
       "tipoAtaque": "magico",
@@ -1087,6 +1119,7 @@
     },
     {
       "id": "flecha_perfurante",
+      "grau": "B",
       "nome": "Flecha perfurante",
       "icone": "flecha",
       "tipoAtaque": "fisico",
@@ -1126,6 +1159,7 @@
     },
     {
       "id": "chuva_de_flechas",
+      "grau": "A",
       "nome": "Chuva de flechas",
       "icone": "chuva",
       "tipoAtaque": "fisico",
@@ -1161,6 +1195,7 @@
     },
     {
       "id": "flecha_venenosa",
+      "grau": "A",
       "nome": "Flecha venenosa",
       "icone": "veneno",
       "tipoAtaque": "fisico",
@@ -1198,6 +1233,7 @@
     },
     {
       "id": "tiro_em_leque",
+      "grau": "A",
       "nome": "Tiro em leque",
       "icone": "leque",
       "tipoAtaque": "fisico",
@@ -1232,6 +1268,7 @@
     },
     {
       "id": "troca_sombria",
+      "grau": "S",
       "nome": "Troca sombria",
       "icone": "troca",
       "tipoAtaque": "magico",
@@ -1274,6 +1311,7 @@
     },
     {
       "id": "olho_de_aguia",
+      "grau": "S",
       "nome": "Olho de águia",
       "icone": "asa",
       "tipoAtaque": "fisico",

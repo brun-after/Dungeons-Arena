@@ -2113,3 +2113,32 @@ body.toque .botao-consumivel .qtd {
   0%, 30% { transform: rotate(0deg); }
   60%, 100% { transform: rotate(-90deg); }
 }
+
+/* Marco 18 (17/10/2026, D-068): o grau da habilidade ("Rank B/A/S") e o estudo em andamento. */
+.grau-habilidade {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 6px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  vertical-align: 0.15em;
+}
+.grau-habilidade.grau-B {
+  color: #c89b6a;
+}
+.grau-habilidade.grau-A {
+  color: #8fb4e8;
+}
+.grau-habilidade.grau-S {
+  color: var(--destaque);
+}
+.estudo-restante {
+  font-variant-numeric: tabular-nums;
+}
+.chip-pendente.estudo {
+  --cor: #b69cff;
+  border-style: solid;
+}

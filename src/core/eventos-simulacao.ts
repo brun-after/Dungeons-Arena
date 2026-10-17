@@ -45,7 +45,9 @@ export type MotivoItem =
   /** Marco 10A-3: pergaminho de invocação acima do limite do modo (recusado antes de gastar). */
   | 'limite'
   /** Marco 14: livro de uma habilidade que o personagem já conhece. */
-  | 'ja_conhece';
+  | 'ja_conhece'
+  /** Marco 18 (D-068): já há um estudo em andamento (o livro não é gasto). */
+  | 'estudando';
 
 /** Marco 14: por que a habilidade não subiu de rank ou não foi para a barra. */
 export type MotivoHabilidade =
@@ -57,7 +59,11 @@ export type MotivoHabilidade =
   | 'nivel_baixo'
   | 'caminho_invalido'
   | 'tecla_invalida'
-  | 'passiva';
+  | 'passiva'
+  /** Marco 18 (D-068): já estuda outra habilidade; ou não há estudo para acelerar, ou acabaram as acelerações. */
+  | 'estudando'
+  | 'sem_estudo'
+  | 'aceleracoes_esgotadas';
 
 export type MotivoCancelamento = 'morte' | 'interrompido' | 'alvo_invalido' | 'substituido';
 
@@ -107,6 +113,10 @@ export type EventoSimulacao =
   /** Marco 14: habilidade aprendida ou com rank novo (e o caminho escolhido, nos ranks de evolução). */
   | { t: 'habilidadeMudou'; tick: number; id: EntidadeId; habilidadeId: string; rank: number; caminho: string | null }
   | { t: 'habilidadeRecusada'; tick: number; id: EntidadeId; habilidadeId: string; motivo: MotivoHabilidade }
+  // Marco 18 (D-068): o estudo de uma habilidade nova.
+  | { t: 'estudoIniciado'; tick: number; id: EntidadeId; habilidadeId: string; totalTicks: number }
+  | { t: 'estudoAcelerado'; tick: number; id: EntidadeId; habilidadeId: string; restanteTicks: number }
+  | { t: 'estudoConcluido'; tick: number; id: EntidadeId; habilidadeId: string }
   | { t: 'barraMudou'; tick: number; id: EntidadeId }
   /** Marco 15: a dificuldade do mundo mudou. */
   | { t: 'dificuldadeMudou'; tick: number; nivel: Dificuldade }

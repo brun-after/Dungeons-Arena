@@ -294,7 +294,7 @@ function v14Entidade(x: Objeto): Objeto {
 
 /** Marco 18: os campos novos da ficha (preenchidos ao longo do marco). */
 function v14Bolsa(b: Objeto): Objeto {
-  return { ...b };
+  return { estudo: null, ...b };
 }
 
 /** `MIGRACOES[v]` leva um registro da versão `v` para a `v + 1`. Não existiu versão 0. */

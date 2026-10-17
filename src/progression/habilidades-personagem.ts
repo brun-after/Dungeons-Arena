@@ -11,6 +11,10 @@ import type { ContextoSimulacao } from '../core/contexto';
 import type { EventoSimulacao, MotivoHabilidade } from '../core/eventos-simulacao';
 import { SLOTS_BARRA, type Bolsa, type Entidade } from '../entities/entidade';
 import { recalcularFicha } from './derivados';
+import { reducaoEstudoPct } from './efeitos-atributo';
+import type { EstadoJogo } from '../core/estado';
+import { ticksDe } from '../core/tempo';
+import { estudoAvanca } from '../modos/regras';
 
 /** As habilidades ativas na barra, na ordem das teclas (só as conhecidas). */
 export function habilidadesDaBarra(bolsa: Bolsa): string[] {
@@ -43,6 +47,8 @@ export function motivoParaNaoSubir(ctx: ContextoSimulacao, e: Entidade, id: stri
   if (!def) return 'desconhecida';
   const conhecida = bolsa.conhecidas.find((c) => c.id === id);
   if (!conhecida && !aprendiveisDa(ctx, bolsa).includes(id)) return 'nao_aprendivel';
+  // Marco 18 (D-068): um estudo por vez (e a própria habilidade em estudo não se aprende de novo).
+  if (!conhecida && bolsa.estudo) return 'estudando';
   const novo = (conhecida?.rank ?? 0) + 1;
   if (novo > ctx.balance.habilidades.rankMax) return 'rank_maximo';
   if (bolsa.pontosHabilidade <= 0) return 'sem_pontos';
@@ -71,12 +77,18 @@ export function subirRank(e: Entidade, ctx: ContextoSimulacao, id: string, camin
     saida.push({ t: 'habilidadeRecusada', tick, id: e.id, habilidadeId: id, motivo: motivo ?? 'sem_ficha' });
     return false;
   }
-  bolsa.pontosHabilidade--;
-  let conhecida = bolsa.conhecidas.find((c) => c.id === id);
+  const conhecida = bolsa.conhecidas.find((c) => c.id === id);
   if (!conhecida) {
-    conhecida = { id, rank: 0, caminhos: [] };
-    bolsa.conhecidas.push(conhecida);
+    // Marco 18 (D-068): aprender não é instantâneo — gasta o ponto e começa o estudo (um por vez).
+    if (bolsa.estudo) {
+      saida.push({ t: 'habilidadeRecusada', tick, id: e.id, habilidadeId: id, motivo: 'estudando' });
+      return false;
+    }
+    bolsa.pontosHabilidade--;
+    iniciarEstudo(e, ctx, id, tick, saida);
+    return true;
   }
+  bolsa.pontosHabilidade--;
   conhecida.rank++;
   const escolhido = caminhosDoRank(ctx, id, conhecida.rank).length > 0 && caminho !== undefined ? caminho : null;
   if (escolhido) conhecida.caminhos.push(escolhido);
@@ -107,13 +119,78 @@ export function equiparHabilidade(e: Entidade, ctx: ContextoSimulacao, id: strin
   return true;
 }
 
-/** Livro (marco 14): ensina no rank 1, sem ponto e sem a restrição de classe. Devolve se aprendeu. */
-export function aprenderPorLivro(e: Entidade, ctx: ContextoSimulacao, id: string, tick: number, saida: EventoSimulacao[]): boolean {
+/**
+ * Livro (marco 14): ensina no rank 1, sem ponto e sem a restrição de classe. Marco 18 (D-068): o livro também começa
+ * um estudo (e é recusado sem gastar se já houver outro, ou se a habilidade já é conhecida ou está em estudo).
+ */
+export function aprenderPorLivro(e: Entidade, ctx: ContextoSimulacao, id: string, tick: number, saida: EventoSimulacao[]): 'ok' | 'ja_conhece' | 'estudando' {
   const bolsa = e.bolsa;
-  if (!bolsa || !definicaoDe(ctx, id) || bolsa.conhecidas.some((c) => c.id === id)) return false;
-  bolsa.conhecidas.push({ id, rank: 1, caminhos: [] });
-  ocuparTeclaLivre(ctx, bolsa, id);
-  atualizar(e, ctx);
-  saida.push({ t: 'habilidadeMudou', tick, id: e.id, habilidadeId: id, rank: 1, caminho: null });
+  if (!bolsa || !definicaoDe(ctx, id) || bolsa.conhecidas.some((c) => c.id === id) || bolsa.estudo?.id === id) return 'ja_conhece';
+  if (bolsa.estudo) return 'estudando';
+  iniciarEstudo(e, ctx, id, tick, saida);
+  return 'ok';
+}
+
+/** Marco 18 (D-068): o tempo de estudo de uma habilidade para quem estuda, em ticks (grau e Inteligência). */
+export function ticksDeEstudo(ctx: ContextoSimulacao, e: Entidade, id: string): number {
+  const grau = definicaoDe(ctx, id)?.base.grau ?? 'B';
+  const regras = ctx.balance.habilidades.estudo;
+  return Math.max(1, ticksDe(regras[grau] * (1 - reducaoEstudoPct(e.atributos, ctx.balance) / 100)));
+}
+
+function iniciarEstudo(e: Entidade, ctx: ContextoSimulacao, id: string, tick: number, saida: EventoSimulacao[]): void {
+  const bolsa = e.bolsa;
+  if (!bolsa) return;
+  const totalTicks = ticksDeEstudo(ctx, e, id);
+  bolsa.estudo = { id, totalTicks, restanteTicks: totalTicks, aceleracoes: 0 };
+  saida.push({ t: 'estudoIniciado', tick, id: e.id, habilidadeId: id, totalTicks });
+}
+
+/** Fim do estudo: a habilidade entra no rank 1 (e numa tecla livre, se for ativa). */
+function concluirEstudo(e: Entidade, ctx: ContextoSimulacao, tick: number, saida: EventoSimulacao[]): void {
+  const bolsa = e.bolsa;
+  const estudo = bolsa?.estudo;
+  if (!bolsa || !estudo) return;
+  bolsa.estudo = null;
+  if (!bolsa.conhecidas.some((c) => c.id === estudo.id)) {
+    bolsa.conhecidas.push({ id: estudo.id, rank: 1, caminhos: [] });
+    ocuparTeclaLivre(ctx, bolsa, estudo.id);
+    atualizar(e, ctx);
+    saida.push({ t: 'habilidadeMudou', tick, id: e.id, habilidadeId: estudo.id, rank: 1, caminho: null });
+  }
+  saida.push({ t: 'estudoConcluido', tick, id: e.id, habilidadeId: estudo.id });
+}
+
+/**
+ * Comando `acelerarEstudo` (D-068): gasta 1 ponto de habilidade e tira 1/3 do tempo **total** do que falta; até
+ * `estudo.aceleracoes` vezes (3 = instantâneo). Chegando a zero, conclui na hora.
+ */
+export function acelerarEstudo(e: Entidade, ctx: ContextoSimulacao, tick: number, saida: EventoSimulacao[]): boolean {
+  const bolsa = e.bolsa;
+  const estudo = bolsa?.estudo;
+  const recusar = (motivo: MotivoHabilidade) => {
+    saida.push({ t: 'habilidadeRecusada', tick, id: e.id, habilidadeId: estudo?.id ?? '', motivo });
+    return false;
+  };
+  if (!bolsa) return recusar('sem_ficha');
+  if (!estudo) return recusar('sem_estudo');
+  if (estudo.aceleracoes >= ctx.balance.habilidades.estudo.aceleracoes) return recusar('aceleracoes_esgotadas');
+  if (bolsa.pontosHabilidade <= 0) return recusar('sem_pontos');
+  bolsa.pontosHabilidade--;
+  estudo.aceleracoes++;
+  estudo.restanteTicks = Math.max(0, estudo.restanteTicks - Math.ceil(estudo.totalTicks / ctx.balance.habilidades.estudo.aceleracoes));
+  saida.push({ t: 'estudoAcelerado', tick, id: e.id, habilidadeId: estudo.id, restanteTicks: estudo.restanteTicks });
+  if (estudo.restanteTicks <= 0) concluirEstudo(e, ctx, tick, saida);
   return true;
+}
+
+/** Etapa do tick (D-068): o estudo anda um tick por tick de jogo, nos modos em que vale. */
+export function avancarEstudos(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
+  if (!estudoAvanca(ctx.modo)) return;
+  for (const e of estado.entidades) {
+    const estudo = e.bolsa?.estudo;
+    if (!estudo) continue;
+    estudo.restanteTicks--;
+    if (estudo.restanteTicks <= 0) concluirEstudo(e, ctx, estado.tick, saida);
+  }
 }

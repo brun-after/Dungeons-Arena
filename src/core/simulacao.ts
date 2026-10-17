@@ -17,7 +17,7 @@ import { vivo } from '../entities/entidade';
 import { processarIa } from '../entities/ia';
 import { desequipar, distribuirPonto, equipar, moverItem, usarItem } from '../progression/inventario';
 import { ehDificuldade } from '../modos/dificuldade';
-import { equiparHabilidade, subirRank } from '../progression/habilidades-personagem';
+import { acelerarEstudo, avancarEstudos, equiparHabilidade, subirRank } from '../progression/habilidades-personagem';
 import { comprar, vender } from '../progression/loja';
 import { processarMortes } from '../progression/morte';
 import { regenerarRecursos } from '../progression/recursos';
@@ -49,8 +49,9 @@ export function simular(
   processarEfeitos(estado, ctx, saida);
   regenerarRecursos(estado, ctx);
   processarInteracoes(estado, ctx, saida, (a, alvo) => { dispararArmadilhaEm(estado, ctx, a, alvo, saida); });
-  // Marco 18 (D-068): a Sabedoria procura armadilhas.
+  // Marco 18 (D-068): a Sabedoria procura armadilhas; o estudo de habilidades anda com o jogo.
   revelarArmadilhas(estado, ctx, saida);
+  avancarEstudos(estado, ctx, saida);
   moverEntidades(estado, ctx, saida, dtMs);
   // Gatilhos por célula alcançada (§2.3): portas antes da coleta e das armadilhas.
   processarPortas(estado, ctx, saida);
@@ -131,6 +132,9 @@ function aplicarComandos(
       // Marco 14: ranks, caminhos e a barra de habilidades.
       case 'subirRank':
         subirRank(ator, ctx, cmd.id, cmd.caminho, estado.tick, saida);
+        break;
+      case 'acelerarEstudo':
+        acelerarEstudo(ator, ctx, estado.tick, saida);
         break;
       case 'equiparHabilidade':
         equiparHabilidade(ator, ctx, cmd.id, cmd.slot, estado.tick, saida);

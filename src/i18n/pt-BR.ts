@@ -121,6 +121,7 @@ export const ptBR = {
   'log.penalidadeNivel': 'Você perdeu {xp} XP, {niveis} nível(is) e {ouro} de ouro',
   'item.limite': 'Limite de invocações atingido',
   'item.ja_conhece': 'Você já conhece essa habilidade',
+  'item.estudando': 'Termine o estudo atual antes de ler outro livro',
   'log.invocacaoCurou': '{alvo} curou você: +{cura}',
   'log.explodiu': '{alvo} explodiu!',
   'log.dispensou': 'Invocações dispensadas ({n})',

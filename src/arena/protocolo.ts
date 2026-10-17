@@ -141,6 +141,8 @@ export function lerComando(v: unknown): Comando | null {
       if (!id(v.id)) return null;
       if (v.caminho === undefined) return { t: 'subirRank', id: v.id };
       return id(v.caminho) ? { t: 'subirRank', id: v.id, caminho: v.caminho } : null;
+    case 'acelerarEstudo':
+      return { t: 'acelerarEstudo' };
     case 'equiparHabilidade':
       return (v.id === null || id(v.id)) && inteiro(v.slot) && v.slot >= 0 && v.slot < 16 ? { t: 'equiparHabilidade', id: v.id, slot: v.slot } : null;
     case 'definirDificuldade':

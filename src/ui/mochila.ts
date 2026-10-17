@@ -11,6 +11,7 @@ import type { EstadoJogo } from '../core/estado';
 import type { Entidade, ItemNaMochila } from '../entities/entidade';
 import { t, type ChaveTexto } from '../i18n';
 import { SLOTS_DE_EQUIPAMENTO, type Slot } from '../modos/modo';
+import { DT_MS } from '../core/loop';
 import { derivarFicha } from '../progression/derivados';
 import { descontoNaLojaPct, perfilDestreza, reducaoRecargaBasicoPct, vidaPorCelula } from '../progression/efeitos-atributo';
 import { bonusDeAtributo } from '../progression/ficha';
@@ -21,6 +22,7 @@ import { consumiveisComAtalho } from '../progression/inventario';
 import { xpParaProximo } from '../progression/nivel';
 import { resolverHabilidade } from '../combat/compilar-habilidade';
 import { desenharHabilidades, type EstadoAbaHabilidades } from './mochila-habilidades';
+import { duracaoLegivel } from './tempo';
 import { criarModal } from './modal';
 import { icone } from './icones';
 
@@ -329,10 +331,17 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     }
   };
 
+  /** A assinatura do que muda a mochila (o estudo entra sem o tempo que falta, que corre a cada tick). */
+  const assinaturaDe = (j: Entidade): string => {
+    const b = j.bolsa;
+    const estudo = b?.estudo ? { id: b.estudo.id, aceleracoes: b.estudo.aceleracoes } : null;
+    return JSON.stringify([b ? { ...b, estudo } : null, j.nivel, j.xp]);
+  };
+
   const desenhar = () => {
     const j = o.jogador();
     if (!j?.bolsa) return;
-    assinatura = JSON.stringify([j.bolsa, j.nivel, j.xp]);
+    assinatura = assinaturaDe(j);
     const focoAntes = document.activeElement instanceof HTMLElement ? document.activeElement.dataset.chave : undefined;
     const corpo = modal.corpo;
     corpo.textContent = '';
@@ -381,7 +390,14 @@ export function criarMochila(o: OpcoesMochila): Mochila {
       botaoAbrir.setAttribute('aria-label', pontos ? t('mochila.abrirComPontos') : t('mochila.abrir'));
       botaoAbrir.classList.toggle('com-pontos', pontos);
     }
-    if (modal.aberto() && JSON.stringify([j.bolsa, j.nivel, j.xp]) !== assinatura) desenhar();
+    if (modal.aberto() && assinaturaDe(j) !== assinatura) desenhar();
+    // Marco 18: o que falta do estudo corre sem redesenhar a aba.
+    const estudo = j.bolsa.estudo;
+    const falta = estudo && modal.aberto() ? modal.corpo.querySelector<HTMLElement>(`[data-estudo-restante="${CSS.escape(estudo.id)}"]`) : null;
+    if (falta && estudo) {
+      const texto = t('habilidades.estudando', { tempo: duracaoLegivel(estudo.restanteTicks * DT_MS) });
+      if (falta.textContent !== texto) falta.textContent = texto;
+    }
   };
 
   return {

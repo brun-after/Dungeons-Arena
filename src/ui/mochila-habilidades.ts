@@ -3,6 +3,8 @@
 // - as conhecidas, com o rank, o que fazem (descrição gerada) e "Subir rank" — nos ranks de evolução, os
 //   caminhos aparecem como cartões e a escolha é definitiva;
 // - as passivas e o que a classe ainda pode aprender. Botão desabilitado diz o motivo (o mesmo da simulação).
+// Marco 18 (17/10/2026, D-068): cada carta mostra o grau ("Rank B/A/S"); aprender vira estudar (com o tempo já
+// encurtado pela Inteligência), e a carta em estudo mostra o que falta e o botão de acelerar (1 ponto, −1/3 do total).
 // Ajuste de 16/10/2026 (D-067): pôr na tecla ficou direto — as 4 teclas são blocos com o ícone no topo e cada
 // carta de habilidade ativa tem os botões 1 2 3 4 (a tecla atual marcada; tocar nela de novo tira).
 
@@ -14,7 +16,9 @@ import type { ContextoSimulacao } from '../core/contexto';
 import type { MotivoHabilidade } from '../core/eventos-simulacao';
 import { SLOTS_BARRA, type Entidade } from '../entities/entidade';
 import { t, type ChaveTexto } from '../i18n';
-import { aprendiveisDa, caminhosDoRank, motivoParaNaoSubir, nivelParaRank } from '../progression/habilidades-personagem';
+import { DT_MS } from '../core/loop';
+import { aprendiveisDa, caminhosDoRank, motivoParaNaoSubir, nivelParaRank, ticksDeEstudo } from '../progression/habilidades-personagem';
+import { duracaoLegivel } from './tempo';
 import { descreverCaminho, descreverHabilidade } from './descrever';
 import { icone } from './icones';
 
@@ -107,6 +111,9 @@ export function desenharHabilidades(
     const titulo = el('strong', 'nome-item');
     titulo.append(icone(h.icone), ` ${h.nome}`);
     if (cor) titulo.style.color = cor;
+    const grau = el('span', `grau-habilidade grau-${h.grau}`, t('habilidades.grau', { grau: h.grau }));
+    grau.title = t('habilidades.grauDica', { grau: h.grau, min: Math.round((ticksDeEstudo(ctx, j, id) * DT_MS) / 60000) });
+    titulo.append(' ', grau);
     textos.append(titulo);
     const perfil = perfilPara(ctx, j, h);
     const linhas = descreverHabilidade(h, { rankMax, perfilDanoPct: perfil.danoPct });
@@ -143,8 +150,20 @@ export function desenharHabilidades(
           grade.append(cartaoCaminho);
         }
         acoes.append(grade);
+      } else if (!conhecida && bolsa.estudo?.id === id) {
+        // Em estudo: o que falta (atualizado pela mochila a cada quadro) e o botão de acelerar.
+        const falta = el('span', 'detalhe-item estudo-restante');
+        falta.dataset.estudoRestante = id;
+        falta.textContent = t('habilidades.estudando', { tempo: duracaoLegivel(bolsa.estudo.restanteTicks * DT_MS) });
+        acoes.append(falta);
+        const fatia = Math.ceil(bolsa.estudo.totalTicks / ctx.balance.habilidades.estudo.aceleracoes) * DT_MS;
+        const acelerar = botao(t('habilidades.acelerar', { tempo: duracaoLegivel(fatia) }), `acelerar-${id}`, () => { emitir({ t: 'acelerarEstudo' }); });
+        acelerar.disabled = bolsa.pontosHabilidade <= 0 || bolsa.estudo.aceleracoes >= ctx.balance.habilidades.estudo.aceleracoes;
+        acoes.append(acelerar);
       } else {
-        const rotulo = conhecida ? t('habilidades.subir', { rank: proximo }) : t('habilidades.aprender');
+        const rotulo = conhecida
+          ? t('habilidades.subir', { rank: proximo })
+          : t('habilidades.estudar', { tempo: duracaoLegivel(ticksDeEstudo(ctx, j, id) * DT_MS) });
         const b = botao(rotulo, `subir-${id}`, () => { emitir({ t: 'subirRank', id }); });
         b.disabled = motivo !== null;
         if (motivo) {
