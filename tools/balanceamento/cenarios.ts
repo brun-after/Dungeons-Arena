@@ -21,7 +21,8 @@ import { BotDeDuelo } from '../../src/bench/bot-duelo';
 export { BotDeDuelo };
 
 export const CONTEUDO: Conteudo = conteudoOficial();
-export const TICKS_POR_S = 1000 / DT_MS;
+// DT_MS é 1000/60: arredonda a frequência inteira para 600 ticks não virarem 10,000000000000002 s.
+export const TICKS_POR_S = Math.round(1000 / DT_MS);
 
 /** Sala aberta (largura × altura), cercada de paredes. */
 function salaAberta(largura: number, altura: number) {

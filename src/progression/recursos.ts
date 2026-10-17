@@ -14,6 +14,14 @@ export function regenerarRecursos(estado: EstadoJogo, ctx: ContextoSimulacao): v
   const segundo = (estado.tick + 1) / ticksDe(1000);
   for (const e of estado.entidades) {
     if (vivo(e) && e.mana < e.manaMax) e.mana = Math.min(e.manaMax, e.mana + manaPorSegundo(e.atributos, segundo, ctx.balance));
+    // D-071 (17/10/2026): o chefe se recupera após a retirada, nunca durante perseguição ou dano periódico.
+    if (!vivo(e) || e.controlador !== 'ia' || e.arquetipo !== 'boss' || e.invocacao || e.hp >= e.hpMax) continue;
+    const espera = ticksDe(ctx.balance.recursos.regenBossEsperaMs);
+    if (e.acao || (e.ia && (e.ia.modo !== 'patrulha' || estado.tick - e.ia.modoDesdeTick < espera))) continue;
+    const recente = (tick: number) => estado.tick - tick < espera;
+    if (e.participacao.some((p) => recente(p.tick)) || perseguido(estado, e)) continue;
+    if (estado.entidades.some((outro) => outro.participacao.some((p) => p.id === e.id && recente(p.tick)))) continue;
+    e.hp = Math.min(e.hpMax, e.hp + Math.max(1, Math.round(e.hpMax * ctx.balance.recursos.regenBossPorSegundoPct / 100)));
   }
 }
 

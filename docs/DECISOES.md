@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.34 · **Data:** 17/10/2026
+**Versão:** 0.35 · **Data:** 17/10/2026
 
 > **Histórico**
+> - **0.35 (17/10/2026)**: D-071 (recuperação dos inimigos, especialização ofensiva, ritmo, descobertas públicas por pseudônimo e cobertura do estudo).
 > - **0.34 (17/10/2026)**: D-068 (atributos, estudo, revide e armadilhas), D-069 (itens base com formas, ganchos, conjuntos e elementos novos) e D-070 (combos, marcos, fusões, missões, origens, forja, eventos de fase e diário).
 > - **0.33 (17/10/2026)**: D-067 (ajustes depois do 11A: sem descanso, buff armado, refúgio, loja sem prazo, equipamento no token, flechas, ícones próprios, paisagem).
 > - **0.32 (16/10/2026)**: D-066 (marco 11A: editor completo, aventura de várias fases, tileset, estilo por aparelho, visuais em partículas e trilhas casual ↔ dark).
@@ -1817,3 +1818,43 @@ ritmo. Saves vão para a v14.
 
 **Consequência.** O conteúdo cresce por JSON validado pelo `Leitor`; a próxima leva (60 bases, ~400 itens) não exige
 código novo. Saves v14.
+
+## D-071 · Recuperação dos inimigos, especialização e descobertas públicas (v0.35, 17/10/2026)
+
+**Contexto.** O simulador completo deixava sete metas fora do alvo: mago rápido demais, arqueiro de nível 5 lento e
+pouco retorno para builds focadas. O usuário pediu também recuperação dos inimigos e o fechamento das pendências
+de descobertas, estudo e lobby.
+
+**Decisão.**
+- **Abate:** NPC inimigo vivo recupera imediatamente 50% da vida que falta, arredondada para vida inteira e limitada
+  ao máximo. Vale também para chefes e invocações hostis; aliados do jogador não recebem essa vantagem. A cura só
+  acontece na morte confirmada (renascer por item não conta), uma vez, com evento visual de cura. A ordem real dos
+  golpes desempata o autor do abate no mesmo tick; mortes simultâneas não ressuscitam quem matou.
+- **Retirada do chefe:** após cinco segundos fora de combate, regenera 5% da vida máxima por segundo. Perseguição,
+  investigação, conjuração, dano recebido ou causado recentemente impedem a recuperação. O relógio é o tick da
+  simulação, respeitando pausa. Números em balance.json; sem estado novo nos saves.
+- **Especialização ofensiva:** a rolagem continua dividida entre FOR e INT, a 7% por ponto. Personagens com ficha
+  somam +2 de dano por ponto de FOR ou INT acima de 16, até +20 no total, nas habilidades que escalam com esses
+  atributos. Isso recompensa foco e permite o híbrido FOR+INT do aventureiro; DES não passa a causar dano.
+  O crescimento automático de NPCs não recebe esse bônus. Ficha e dicas mostram a mesma fórmula do combate.
+- **Ritmo:** arqueiro inicia com FOR 15; mago com vida-base 55 e afinidades de dano mágico/elemental em 0%; guerreiro
+  com afinidade de contato em −5%. Dardo arcano e três magias elementais ganham 25% de conjuração. Comuns ganham
+  mais Constituição por nível, e o chefe passa a 281 de vida-base. São ajustes conjuntos, mantendo as metas anteriores.
+- **Evidência:** 77/77 metas no simulador completo. Mago leva 4,1 s no nível 5 e 5,2 s no 10; arqueiro no nível 5 leva
+  cinco golpes. Foco vence dispersão em 68,8% no aventureiro, 75% no guerreiro, 100% no mago e 68,8% no arqueiro
+  (16 sementes por classe, nível 8). A conversão de ticks para segundos usa 60 inteiro, evitando que 10 s sejam
+  comparados como 10,000000000000002 s. O CI passa a executar também o simulador completo.
+- **Descobertas:** substituímos o primeiro nome Google por um pseudônimo estável, gerado no banco. Uma migração
+  posterior limpa nomes existentes e força o pseudônimo inclusive em clientes antigos. Leitura pública pela view
+  descobertas_publicas expõe apenas entrada, pseudônimo e data; a tabela restringe leitura à própria conta.
+  A RPC registrar_descoberta obtém a conta da sessão, registra a primeira descoberta e retorna autoria sem divulgar
+  UUID de outra conta. O cliente envia somente a entrada. A migração precisa ser aplicada antes do novo cliente;
+  nenhuma alteração manual no banco de produção foi feita nesta tarefa.
+- **Cobertura e interface:** e2e de estudo cria um save pelo fluxo público, importa um personagem com pontos e
+  verifica início, persistência, aceleração, aprendizado e equipamento. A contagem de descobertas aparece também
+  no seletor de personagem do lobby da arena. Testes de unidade cobrem recuperação e o contrato da RPC.
+
+**Consequência.** Retiradas dão tempo ao chefe para se recuperar e mortes recuperam inimigos imediatamente.
+A distribuição de atributos passa a ter retorno ofensivo próprio, sem acelerar globalmente a rolagem. Os créditos
+públicos deixam de publicar o nome da conta Google. As porcentagens de builds descrevem as sementes do relatório,
+não uma garantia para toda combinação de equipamento ou habilidade.

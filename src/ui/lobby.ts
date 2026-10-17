@@ -173,7 +173,7 @@ export function mostrarLobby(o: OpcoesLobby): void {
     .then((slots) => {
       for (const s of slots) {
         if (s.tipo !== 'ok') continue;
-        const op = el('option', undefined, t('lobby.slotPersonagem', { n: s.slot, nivel: s.resumo.nivel }));
+        const op = el('option', undefined, t('lobby.slotPersonagem', { n: s.slot, nivel: s.resumo.nivel, descobertas: s.resumo.descobertas }));
         op.value = String(s.slot);
         niveis.set(op.value, s.resumo.nivel);
         personagem.append(op);
