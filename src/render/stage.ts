@@ -56,8 +56,8 @@ export async function criarPalco(host: HTMLElement): Promise<Palco> {
   host.append(app.canvas);
 
   const mundo = new Container({ label: 'mundo' });
-  // Ordem de camadas (§2.16): terreno → chão (rastros, armadilhas, portas, objetos, telegrafia) → luz →
-  // entidades → projéteis → efeitos (partículas e números). A tela (flash) fica fora do mundo.
+  // Ordem de camadas (§2.16): terreno -> chão (rastros, armadilhas, portas, objetos, telegrafia) -> luz ->
+  // entidades -> projéteis -> efeitos (partículas e números). A tela (flash) fica fora do mundo.
   const terreno = new Container({ label: 'terreno' });
   const chao = new Container({ label: 'chao' });
   const luz = new Container({ label: 'luz' });

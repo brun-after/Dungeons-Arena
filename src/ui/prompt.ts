@@ -20,7 +20,8 @@ export function criarPrompt(ctx: ContextoSimulacao, idLocal: string, toque: bool
   el.setAttribute('role', 'status');
   el.hidden = true;
   let ultimo = -Infinity;
-  const tecla = (letra: string) => (toque ? '✋' : letra);
+  // D-067: no toque, a palavra (o botão de interagir tem o ícone da mão).
+  const tecla = (letra: string) => (toque ? t('prompt.toque') : letra);
 
   const texto = (estado: EstadoJogo): string => {
     const eu = estado.entidades.find((e) => e.id === idLocal);

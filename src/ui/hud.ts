@@ -5,6 +5,7 @@
 import { t } from '../i18n';
 import type { Entidade } from '../entities/entidade';
 import { ChipsEfeito } from './chips-efeito';
+import { icone } from './icones';
 import type { DadosRede } from './diagnostico';
 
 const MAX_LINHAS_LOG = 6;
@@ -63,7 +64,7 @@ export class Hud {
     this.botaoLog = document.createElement('button');
     this.botaoLog.type = 'button';
     this.botaoLog.className = 'botao-cabecalho so-toque';
-    this.botaoLog.textContent = '📜';
+    this.botaoLog.append(icone('registro'));
     this.botaoLog.setAttribute('aria-label', t('hud.abrirLog'));
     this.botaoLog.setAttribute('aria-expanded', 'false');
     this.botaoLog.addEventListener('click', () => {

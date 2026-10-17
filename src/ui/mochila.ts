@@ -1,7 +1,7 @@
 // Mochila e ficha (§2.10, §2.12). Marco 6 (13/10/2026). Só lê o estado e emite comandos.
 // No toque, tocar a linha inteira equipa, usa ou desequipa e fecha o modal; no desktop, cada linha
 // tem o seu botão. A lista é redesenhada só quando a bolsa, o nível ou o XP mudam.
-// Marco 9A (14/10/2026): ouro, ordenação manual (▲▼, persistida no save) e a tecla de atalho de
+// Marco 9A (14/10/2026): ouro, ordenação manual (subir e descer, persistida no save) e a tecla de atalho de
 // cada consumível (5–9 e 0, D-050).
 // Marco 14 (14/10/2026): a aba Habilidades (ui/mochila-habilidades.ts) e os livros (usar ensina).
 
@@ -22,6 +22,7 @@ import { xpParaProximo } from '../progression/nivel';
 import { resolverHabilidade } from '../combat/compilar-habilidade';
 import { desenharHabilidades, type EstadoAbaHabilidades } from './mochila-habilidades';
 import { criarModal } from './modal';
+import { icone } from './icones';
 
 export interface OpcoesMochila {
   ctx: ContextoSimulacao;
@@ -125,15 +126,17 @@ export function criarMochila(o: OpcoesMochila): Mochila {
   }): HTMLLIElement => {
     const li = el('li', opcoes.vazio ? 'linha-item vazio' : 'linha-item');
     const conteudo = el('span', 'conteudo-item');
-    const icone = el('span', 'icone-item', opcoes.item?.icone ?? '·');
-    icone.setAttribute('aria-hidden', 'true');
+    // D-067: o ícone do item é SVG do conjunto (o campo `icone` é um id).
+    const iconeItem = el('span', 'icone-item');
+    iconeItem.append(icone(opcoes.item?.icone ?? 'circulo'));
+    iconeItem.setAttribute('aria-hidden', 'true');
     const textos = el('span', 'textos-item');
     const nome = el('span', `nome-item raridade-${opcoes.item?.raridade ?? 'comum'}`, opcoes.rotulo);
     textos.append(nome);
     const resumo = opcoes.item ? resumoDoItem(opcoes.item) : '';
     const detalhe = opcoes.bloqueio ?? (opcoes.atalho ? [t('mochila.atalho', { tecla: opcoes.atalho }), resumo].filter(Boolean).join(' · ') : resumo);
     if (detalhe) textos.append(el('span', 'detalhe-item', detalhe));
-    conteudo.append(icone, textos);
+    conteudo.append(iconeItem, textos);
     if (opcoes.qtd > 1) conteudo.append(el('span', 'qtd-item', `×${opcoes.qtd}`));
     const acao = opcoes.acao;
     if (o.toque && acao && !opcoes.bloqueio) {
@@ -154,10 +157,11 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     if (ordem) {
       const grupo = el('span', 'ordem-item');
       for (const [texto, rotulo, fazer, sufixo] of [
-        ['▲', t('mochila.subir', { item: opcoes.rotulo }), ordem.subir, 'subir'],
-        ['▼', t('mochila.descer', { item: opcoes.rotulo }), ordem.descer, 'descer'],
+        ['seta_cima', t('mochila.subir', { item: opcoes.rotulo }), ordem.subir, 'subir'],
+        ['seta_baixo', t('mochila.descer', { item: opcoes.rotulo }), ordem.descer, 'descer'],
       ] as const) {
-        const b = botao(texto, `${sufixo}-${ordem.invId}`, () => fazer?.(), 'botao-cabecalho botao-ordem');
+        const b = botao('', `${sufixo}-${ordem.invId}`, () => fazer?.(), 'botao-cabecalho botao-ordem');
+        b.append(icone(texto));
         b.disabled = !fazer;
         b.setAttribute('aria-label', rotulo);
         grupo.append(b);
@@ -363,10 +367,15 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     }
     botaoAbrir.hidden = false;
     const pontos = j.bolsa.pontosAtributo > 0 || j.bolsa.pontosHabilidade > 0;
-    const rotulo = `🎒 ${t('mochila.nivelCurto', { nivel: j.nivel })} · ${t('mochila.ouro', { ouro: j.bolsa.ouro })}${pontos ? ' •' : ''}`;
+    const rotulo = `${t('mochila.nivelCurto', { nivel: j.nivel })} · ${t('mochila.ouro', { ouro: j.bolsa.ouro })}${pontos ? ' •' : ''}`;
     if (rotulo !== rotuloBotao) {
       rotuloBotao = rotulo;
-      botaoAbrir.textContent = rotulo;
+      // Ajuste de 16/10/2026 (D-067): ícones da mochila e do ouro no lugar dos emojis.
+      const texto = document.createElement('span');
+      texto.textContent = `${t('mochila.nivelCurto', { nivel: j.nivel })} · `;
+      const ouro = document.createElement('span');
+      ouro.textContent = `${t('mochila.ouro', { ouro: j.bolsa.ouro })}${pontos ? ' •' : ''}`;
+      botaoAbrir.replaceChildren(icone('mochila'), texto, icone('ouro', 'icone icone-ouro'), ouro);
       botaoAbrir.setAttribute('aria-label', pontos ? t('mochila.abrirComPontos') : t('mochila.abrir'));
       botaoAbrir.classList.toggle('com-pontos', pontos);
     }

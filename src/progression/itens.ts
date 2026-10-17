@@ -91,7 +91,7 @@ export function lerItens(json: unknown): { itens: Map<string, Item>; erros: stri
       nome: l.texto(o, 'nome'),
       tipo,
       descricao: l.texto(o, 'descricao'),
-      icone: l.texto(o, 'icone'),
+      icone: l.icone(o, 'icone'),
       raridade: l.opcao(o, 'raridade', RARIDADES),
       valorBase: l.numero(o, 'valorBase', { min: 0, inteiro: true }),
       slotPadrao: o.slotPadrao === null ? null : l.opcao(o, 'slotPadrao', SLOTS_DE_EQUIPAMENTO),

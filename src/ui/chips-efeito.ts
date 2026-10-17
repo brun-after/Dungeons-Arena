@@ -8,6 +8,7 @@ import { DT_MS } from '../core/loop';
 import type { EfeitoAtivo, Entidade } from '../entities/entidade';
 import { t } from '../i18n';
 import { descreverEfeito, nomeDoEfeito, segundos } from './descrever';
+import { icone } from './icones';
 
 interface Chip {
   botao: HTMLButtonElement;
@@ -66,7 +67,7 @@ export class ChipsEfeito {
     }
     this.cartao.textContent = '';
     const titulo = document.createElement('strong');
-    titulo.textContent = `${REGISTRO_EFEITOS[f.tipo].icone} ${nomeDoEfeito(f.tipo)}`;
+    titulo.append(icone(REGISTRO_EFEITOS[f.tipo].icone), ` ${nomeDoEfeito(f.tipo)}`);
     const desc = document.createElement('p');
     desc.textContent = this.descricao(f);
     this.cartao.append(titulo, desc);
@@ -96,12 +97,12 @@ export class ChipsEfeito {
     botao.dataset.efeito = tipo;
     botao.setAttribute('aria-describedby', this.cartao.id);
     botao.setAttribute('aria-expanded', 'false');
-    const icone = document.createElement('span');
-    icone.className = 'icone';
-    icone.textContent = d.icone;
+    const simbolo = document.createElement('span');
+    simbolo.className = 'icone';
+    simbolo.append(icone(d.icone));
     const restante = document.createElement('span');
     restante.className = 'restante';
-    botao.append(icone, restante);
+    botao.append(simbolo, restante);
     botao.addEventListener('click', () => {
       if (this.aberto === tipo) this.fechar();
       else this.abrir(tipo);

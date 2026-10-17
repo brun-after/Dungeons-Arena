@@ -488,7 +488,7 @@ export class SalaArena {
     }
   }
 
-  /** Um tick de 60 Hz: comandos vencidos → simulação → eventos; estado público a 20 Hz. */
+  /** Um tick de 60 Hz: comandos vencidos -> simulação -> eventos; estado público a 20 Hz. */
   tick(dtMs: number): void {
     this.expirarMovimentoMantido();
     this.removerDesconectados();

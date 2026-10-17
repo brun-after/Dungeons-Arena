@@ -4,6 +4,7 @@
 import type { Entidade } from '../entities/entidade';
 import { t } from '../i18n';
 import { classeDoHp } from './hud';
+import { icone } from './icones';
 
 export class QuadroAlvo {
   readonly elemento = document.createElement('div');
@@ -20,7 +21,7 @@ export class QuadroAlvo {
     this.elemento.hidden = true;
     this.nome.className = 'nome-alvo';
     this.cadeado.className = 'cadeado-alvo';
-    this.cadeado.textContent = '🔒';
+    this.cadeado.append(icone('cadeado'));
     this.cadeado.setAttribute('aria-hidden', 'true');
     this.vida.className = 'barra vida';
     this.vida.setAttribute('aria-hidden', 'true');

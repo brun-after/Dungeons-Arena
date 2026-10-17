@@ -29,7 +29,7 @@ export function mostrarEscolhaDeClasse(raiz: HTMLElement, conteudo: Conteudo, ba
     if (c.descricao) cartao.append(el('p', undefined, t(c.descricao as ChaveTexto)));
     const iniciais = c.habilidades.map((id) => {
       const h = conteudo.habilidades.get(id);
-      return h ? `${h.icone} ${h.nome}` : id;
+      return h ? h.nome : id;
     });
     cartao.append(el('p', 'detalhe-classe', t('escolhaClasse.iniciais', { lista: iniciais.join(', ') })));
     const afinidades = c.afinidades.flatMap((a) => descreverBonus(a));

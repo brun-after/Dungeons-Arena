@@ -1,10 +1,10 @@
 // Gestos no mapa (§4.8):
-// - toque/clique curto sem arrastar → ir até a célula;
-// - segurar parado por 300 ms → seguir o dedo, recalculando o caminho a cada célula (D-012);
-// - arrastar além da zona morta (3 px no toque, 6 px no mouse) → mover a câmera; acima de 4 px
+// - toque/clique curto sem arrastar -> ir até a célula;
+// - segurar parado por 300 ms -> seguir o dedo, recalculando o caminho a cada célula (D-012);
+// - arrastar além da zona morta (3 px no toque, 6 px no mouse) -> mover a câmera; acima de 4 px
 //   o clique é suprimido;
-// - dois dedos → pinça de zoom ancorada no ponto médio, com arrasto;
-// - roda do mouse → zoom ±0.1 ancorado no cursor.
+// - dois dedos -> pinça de zoom ancorada no ponto médio, com arrasto;
+// - roda do mouse -> zoom ±0.1 ancorado no cursor.
 
 import type { Celula } from '../core/comandos';
 import type { Camera } from '../render/camera';

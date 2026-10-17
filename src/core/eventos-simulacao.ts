@@ -155,5 +155,5 @@ export type EventoSimulacao =
   | { t: 'reviveu'; tick: number; id: EntidadeId }
   | { t: 'surgiu'; tick: number; id: EntidadeId };
 
-/** Mapa evento → payload para o `Barramento`. */
+/** Mapa evento -> payload para o `Barramento`. */
 export type EventosDaSimulacao = { [E in EventoSimulacao as E['t']]: E };

@@ -257,7 +257,7 @@ test.describe('desktop', () => {
     page.on('pageerror', (e) => erros.push(e.message));
     await page.goto('./?editor');
     await page.getByRole('button', { name: 'Criar e editar' }).click();
-    await expect(page.locator('.status-editor')).toHaveText('⚠ 1 aviso(s)');
+    await expect(page.locator('.status-editor')).toHaveText('1 aviso(s)');
     const caixa = await page.locator('.editor canvas').boundingBox();
     if (!caixa) throw new Error('canvas sem caixa');
     // Mesmo enquadramento do "ajustar" do editor: fase 24×16 centrada, célula de 48 px × zoom.
@@ -271,7 +271,7 @@ test.describe('desktop', () => {
     await page.getByRole('button', { name: 'Inimigo', exact: true }).click();
     await page.getByLabel('Tipo de inimigo').selectOption('boss');
     await page.mouse.click(tela(13, 8).x, tela(13, 8).y);
-    await expect(page.locator('.status-editor')).toHaveText('✓ pronta');
+    await expect(page.locator('.status-editor')).toHaveText('pronta');
     await page.getByRole('button', { name: 'Testar esta fase' }).click();
     await expect(page).toHaveURL(/jogo=teste/);
     await page.goto(`${page.url()}&diag=1`);
@@ -543,8 +543,8 @@ test.describe('desktop', () => {
     const mochila = page.getByRole('dialog', { name: 'Mochila' });
     await mochila.getByRole('button', { name: 'Habilidades' }).click();
     await expect(mochila.locator('[data-habilidade="raio_em_cadeia"]')).toContainText('Salta para mais 2 alvo(s)');
-    await mochila.locator('[data-chave="tecla-para-barreira"]').click();
-    await mochila.locator('[data-chave="tecla-0"]').click();
+    // Ajuste de 16/10/2026 (D-067): o botão 1 da carta põe direto na tecla 1.
+    await mochila.locator('[data-chave="tecla-barreira-0"]').click();
     await expect(mochila.locator('[data-tecla="1"]')).toContainText('Barreira');
     await page.keyboard.press('Escape');
     await expect(page.locator('.barra-habilidades .botao-habilidade').first()).toHaveAttribute('data-testid', 'habilidade-barreira');
@@ -714,7 +714,7 @@ test.describe('celular (emulação)', () => {
     await page.getByLabel('Nome da aventura').fill('Aventura do teste');
     await page.getByRole('button', { name: 'Criar e editar' }).click();
     const status = page.locator('.status-editor');
-    await expect(status).toHaveText('⚠ 1 aviso(s)');
+    await expect(status).toHaveText('1 aviso(s)');
     const canvas = page.locator('.editor canvas');
     const caixa = await canvas.boundingBox();
     if (!caixa) throw new Error('canvas sem caixa');
@@ -728,18 +728,18 @@ test.describe('celular (emulação)', () => {
     await expect(page.getByRole('button', { name: 'Desfazer' })).toBeEnabled();
     await page.getByRole('button', { name: 'Inimigo', exact: true }).click();
     await page.mouse.click(cx, cy + 40);
-    await expect(status).toHaveText('✓ pronta');
+    await expect(status).toHaveText('pronta');
     // Marco 8A: orbe de efeito, escolhido na lista que vem do registro.
     await page.getByRole('button', { name: /^Objeto/ }).click();
     await page.getByLabel('Tipo de objeto').selectOption('efeito:cura_periodica');
     await page.mouse.click(cx + 60, cy + 40);
-    await expect(status).toHaveText('✓ pronta');
+    await expect(status).toHaveText('pronta');
     await page.getByRole('button', { name: 'Testar esta fase' }).click();
     await expect(page).toHaveURL(/jogo=teste/);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Fase 1');
     await page.getByRole('link', { name: 'Voltar ao editor' }).click();
     await expect(page.locator('.nome-editor')).toHaveValue('Aventura do teste');
-    await expect(status).toHaveText('✓ pronta');
+    await expect(status).toHaveText('pronta');
     expect(erros).toEqual([]);
   });
 

@@ -1,5 +1,5 @@
 // Inteligência artificial (§2.6) — etapa 2 do tick, só na simulação (no servidor, na arena).
-// Três estados contínuos: patrulha → hesitação → perseguição. A IA age pelas mesmas funções
+// Três estados contínuos: patrulha -> hesitação -> perseguição. A IA age pelas mesmas funções
 // internas que os comandos usam (iniciarAcao, planejarCaminho), nunca por atalho (D-025).
 // Alvo, detecção e dano passam sempre por `relacao()` (via alvoOfensivoValido).
 

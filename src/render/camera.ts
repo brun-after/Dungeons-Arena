@@ -48,7 +48,7 @@ export class Camera {
     return this.projecao;
   }
 
-  /** Troca a visão (de cima ↔ isométrica) mantendo o mesmo ponto da fase no centro da vista. */
+  /** Troca a visão (de cima <-> isométrica) mantendo o mesmo ponto da fase no centro da vista. */
   definirProjecao(p: Projecao): void {
     const centro = this.projecao.desprojetar(this.x + this.larguraVistaMundo / 2, this.y + this.alturaVistaMundo / 2);
     this.projecao = p;

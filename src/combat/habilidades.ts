@@ -234,7 +234,7 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
   const base: Habilidade = {
     id: l.texto(o, 'id'),
     nome: l.texto(o, 'nome'),
-    icone: l.texto(o, 'icone'),
+    icone: l.icone(o, 'icone'),
     tipoAtaque: l.opcao(o, 'tipoAtaque', ['fisico', 'magico'] as const),
     formulaDano: l.textoOuNulo(o, 'formulaDano'),
     formulaCura: l.textoOuNulo(o, 'formulaCura'),

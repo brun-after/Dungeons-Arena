@@ -49,7 +49,7 @@ export const GRUPOS_DE_FUNCAO: Readonly<Record<'funcoes' | 'pisos' | 'paredes', 
 /** `"coluna,linha"` no atlas. */
 export type CelulaAtlas = `${number},${number}`;
 
-/** Vínculos chave → célula do atlas: as funções do layout e chaves livres do jogador. */
+/** Vínculos chave -> célula do atlas: as funções do layout e chaves livres do jogador. */
 export type Vinculos = Record<string, CelulaAtlas>;
 
 export function vinculosCanonicos(grade: GradeAtlas): Vinculos {
@@ -86,7 +86,7 @@ export function matrizD4(t: number): readonly [number, number, number, number] {
   const espelho = t >= 4 ? -1 : 1;
   const cos = [1, 0, -1, 0][rot] ?? 1;
   const sen = [0, 1, 0, -1][rot] ?? 0;
-  // Espelho horizontal primeiro (x → −x), depois a rotação horária (no espaço de tela, y para baixo).
+  // Espelho horizontal primeiro (x -> −x), depois a rotação horária (no espaço de tela, y para baixo).
   return [cos * espelho, sen * espelho, -sen, cos];
 }
 
@@ -268,7 +268,7 @@ export function lerCamposDeTileset(
   }
   if (pecas === undefined) return r;
   if (typeof pecas !== 'object' || pecas === null || Array.isArray(pecas)) {
-    erros.push({ mensagem: 'pecas precisa ser um objeto índice → peça' });
+    erros.push({ mensagem: 'pecas precisa ser um objeto de índice para peça' });
     return r;
   }
   const entradas = Object.entries(pecas);

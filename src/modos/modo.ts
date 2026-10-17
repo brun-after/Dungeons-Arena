@@ -184,7 +184,7 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
     id: l.texto(o, 'id'),
     nome: l.texto(o, 'nome'),
     descricao: l.texto(o, 'descricao'),
-    icone: l.texto(o, 'icone'),
+    icone: l.icone(o, 'icone'),
     equipes: l.numero(o, 'equipes', { min: 1, max: 10, inteiro: true }),
     politicaRelacao: l.opcao(o, 'politicaRelacao', ['todos_hostis', 'todos_aliados', 'por_equipe'] as const),
     autoBalancear: l.booleano(o, 'autoBalancear'),

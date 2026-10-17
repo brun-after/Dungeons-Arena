@@ -1,8 +1,8 @@
 // Projeção da visão (§2.16, §4.5). Marco 13 (14/10/2026), D-058. Pura e testável.
 // Tudo é desenhado em "px de plano" (a fase vista de cima: 1 célula = 48 px). A projeção leva o plano
 // para o "mundo da tela", onde a câmera trabalha:
-//   de cima     → identidade;
-//   isométrica  → 2:1 clássica: x = (px − py)·k + deslocamento, y = (px + py)·k/2, com k = 1/√2,
+//   de cima     -> identidade;
+//   isométrica  -> 2:1 clássica: x = (px − py)·k + deslocamento, y = (px + py)·k/2, com k = 1/√2,
 //                 deslocada para o mundo projetado começar em 0 (a câmera limita em [0, tamanho]).
 // A mesma matriz vai para o container do chão (transform de container, nunca de DOM); o que fica em pé
 // (entidades, projéteis, partículas, números) é posicionado por `projetar` e fica alinhado à tela.
@@ -27,9 +27,9 @@ export interface Projecao {
   /** Tamanho do mundo projetado, em px. */
   largura: number;
   altura: number;
-  /** px de plano → px do mundo projetado. */
+  /** px de plano -> px do mundo projetado. */
   projetar: (x: number, y: number) => { x: number; y: number };
-  /** px do mundo projetado → px de plano. */
+  /** px do mundo projetado -> px de plano. */
   desprojetar: (x: number, y: number) => { x: number; y: number };
 }
 

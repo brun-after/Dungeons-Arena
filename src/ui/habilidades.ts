@@ -7,6 +7,7 @@
 
 import type { Habilidade } from '../combat/habilidades';
 import { t } from '../i18n';
+import { icone } from './icones';
 
 export interface EstadoBotao {
   /** Fração da recarga que ainda falta, em [0, 1]. */
@@ -40,13 +41,13 @@ export function criarBarraHabilidades(aoUsar: (id: string) => void, corDo: (h: H
       const cor = corDo(h);
       if (cor) b.style.setProperty('--cor-elemento', cor);
       b.setAttribute('aria-label', t('controles.habilidade', { nome: h.nome, tecla: i + 1 }));
-      const icone = document.createElement('span');
-      icone.className = 'icone';
-      icone.textContent = h.icone;
+      const simbolo = document.createElement('span');
+      simbolo.className = 'icone';
+      simbolo.append(icone(h.icone));
       const tecla = document.createElement('span');
       tecla.className = 'tecla';
       tecla.textContent = String(i + 1);
-      b.append(icone, tecla);
+      b.append(simbolo, tecla);
       if (h.rank > 1) {
         const rank = document.createElement('span');
         rank.className = 'rank';

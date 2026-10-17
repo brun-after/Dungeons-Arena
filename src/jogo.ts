@@ -146,7 +146,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     mostrarErro(raiz, t('slots.erroLeitura'));
     return;
   }
-  // Marco 14: jogo novo num slot sem classe escolhida → a tela de escolha (o endereço volta com `&classe=`).
+  // Marco 14: jogo novo num slot sem classe escolhida -> a tela de escolha (o endereço volta com `&classe=`).
   if (slot !== null && !leitura && !opcoes.classe) {
     const fase = opcoes.faseNova?.tipo === 'aventura' ? `&fase=${encodeURIComponent(`aventura:${opcoes.faseNova.id}`)}` : '';
     const dificuldade = opcoes.dificuldade ? `&dificuldade=${opcoes.dificuldade}` : '';
@@ -281,7 +281,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     });
   }
 
-  // Marco 10A-1: saída aberta → próxima fase (D-052). Uma vez só por sessão.
+  // Marco 10A-1: saída aberta -> próxima fase (D-052). Uma vez só por sessão.
   const sairDaFase = async (): Promise<void> => {
     const totalDeFases = await fasesDaAventura(faseRef);
     if (teste) {

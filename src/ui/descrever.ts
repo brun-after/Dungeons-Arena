@@ -11,7 +11,7 @@ import type { Habilidade, Passiva } from '../combat/habilidades';
 import type { EfeitoCanonico, TipoEfeito } from '../combat/registro-efeitos';
 import { t, type ChaveTexto } from '../i18n';
 
-/** Segundos com vírgula, sem casas inúteis: 1500 → "1,5"; 3000 → "3". */
+/** Segundos com vírgula, sem casas inúteis: 1500 -> "1,5"; 3000 -> "3". */
 export function segundos(ms: number): string {
   const s = Math.round(ms / 100) / 10;
   return String(s).replace('.', ',');

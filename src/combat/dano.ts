@@ -1,5 +1,5 @@
 // Cálculo de dano (§2.7), passos 4 a 9:
-//   rolagem → + atributo → crítico (d20) → − defesa plana → buffs de saída → arredonda uma vez,
+//   rolagem -> + atributo -> crítico (d20) -> − defesa plana -> buffs de saída -> arredonda uma vez,
 //   com dano acertado ≥ 1. Falha crítica (×0) e imunidade dão zero e nunca viram dano 1.
 // Bloqueios, alvo e área (passos 1–3) e a aplicação (passo 10) ficam em acao.ts e golpe.ts.
 

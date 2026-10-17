@@ -1,4 +1,4 @@
-// Atlas dos modelos de criatura, gerado no build (§2.16: "vetor → textura + JSON"). Marco 13 (14/10/2026),
+// Atlas dos modelos de criatura, gerado no build (§2.16: "vetor -> textura + JSON"). Marco 13 (14/10/2026),
 // D-058. Função pura: monta um SVG único com todos os quadros numa grade e o JSON com a posição e a origem
 // de cada um. O plugin do Vite (`virtual:atlas-criaturas`, em vite.config.ts) chama isto no Node e embute o
 // resultado como data URL; o jogo só decodifica a imagem, sem rasterizar vetor em tempo de execução.

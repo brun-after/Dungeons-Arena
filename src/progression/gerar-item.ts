@@ -67,7 +67,7 @@ export function lerBasesDeItem(json: unknown): { bases: BasesDeItem; erros: stri
       nome: l.texto(b, 'nome'),
       genero: l.opcao(b, 'genero', ['m', 'f'] as const),
       slot: l.opcao(b, 'slot', SLOTS_DE_EQUIPAMENTO),
-      icone: l.texto(b, 'icone'),
+      icone: l.icone(b, 'icone'),
       defesa: l.numero(b, 'defesa', { min: 0, max: 20, inteiro: true }),
       atributos,
     });

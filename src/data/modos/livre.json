@@ -2,7 +2,7 @@
   "id": "livre",
   "nome": "Livre",
   "descricao": "Entra e sai quando quiser, sem partida e sem placar: a dungeon, com gente dentro.",
-  "icone": "⭐",
+  "icone": "estrela",
   "equipes": 1,
   "politicaRelacao": "todos_hostis",
   "autoBalancear": false,

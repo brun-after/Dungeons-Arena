@@ -1,6 +1,6 @@
 // Visual de uma habilidade (§2.16, D-055/D-056). Marco 12 (14/10/2026). Puro: usa o bloco `visual` do
-// conteúdo quando existe; senão, deduz da própria habilidade e dos efeitos do registro (físico →
-// faíscas; mágico → brilho na cor do primeiro efeito; área → anel e explosão; cura → brilho verde).
+// conteúdo quando existe; senão, deduz da própria habilidade e dos efeitos do registro (físico ->
+// faíscas; mágico -> brilho na cor do primeiro efeito; área -> anel e explosão; cura -> brilho verde).
 // Assim toda habilidade, inclusive as criadas por quem joga, tem expressão visual.
 
 import type { Habilidade, PresetVisual } from '../combat/habilidades';

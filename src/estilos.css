@@ -159,7 +159,7 @@ body.toque .faixa-controles {
   padding-left: 16px;
 }
 
-/* Ajuste de 15/10/2026 (D-065): o 🎯 fica em cima do ✋, longe da roda de habilidades. */
+/* Ajuste de 15/10/2026 (D-065): o botão de alvo fica em cima do de interagir, longe da roda de habilidades. */
 .coluna.centro {
   flex-direction: column-reverse;
   justify-content: flex-start;
@@ -584,7 +584,7 @@ body.toque .dado-d20 {
   white-space: nowrap;
 }
 
-/* Registro de combate (§2.15): no desktop fica visível; no toque abre pelo botão 📜 */
+/* Registro de combate (§2.15): no desktop fica visível; no toque abre pelo botão de registro */
 .log-combate {
   position: absolute;
   left: calc(12px + var(--seguro-esq));
@@ -1764,4 +1764,113 @@ body.qualidade-baixo * {
 .salas-da-faixa h2 {
   margin: 8px 0 4px;
   font-size: 0.95rem;
+}
+
+/* Ícones próprios (ajuste de 16/10/2026, D-067): SVG do conjunto (data/icones.ts), na cor do texto. Nada de emoji. */
+svg.icone {
+  display: inline-block;
+  flex: none;
+  width: 1.2em;
+  height: 1.2em;
+  vertical-align: -0.22em;
+}
+
+.botao-acao svg.icone {
+  width: 52%;
+  height: 52%;
+}
+
+.botao-habilidade .icone svg.icone {
+  width: 1.35em;
+  height: 1.35em;
+}
+
+.icone-item svg.icone {
+  width: 1.4em;
+  height: 1.4em;
+}
+
+.rotulo-icone {
+  margin-left: 6px;
+}
+
+.icone-ouro {
+  color: #f1c40f;
+}
+
+/* As teclas de habilidade na mochila: blocos com o ícone; e os botões 1 2 3 4 de cada carta. */
+.teclas-habilidade {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.bloco-tecla {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  background: var(--controle);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.bloco-tecla.vazio {
+  opacity: 0.6;
+}
+
+.bloco-tecla svg.icone {
+  width: 26px;
+  height: 26px;
+}
+
+.bloco-tecla .icone-vazio {
+  width: 26px;
+  height: 26px;
+  border: 2px dashed var(--borda);
+  border-radius: 6px;
+}
+
+.numero-tecla {
+  font-weight: 700;
+  color: var(--destaque);
+}
+
+.nome-tecla {
+  overflow: hidden;
+  max-width: 100%;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.bloco-tecla .botao-cabecalho {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-height: 0;
+  padding: 2px;
+}
+
+.teclas-da-carta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.botao-tecla {
+  min-width: 36px;
+  min-height: 36px;
+}
+
+.botao-tecla[aria-pressed='true'] {
+  border-color: var(--destaque);
+  background: rgba(243, 156, 18, 0.25);
+  color: var(--destaque);
 }

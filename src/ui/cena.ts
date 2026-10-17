@@ -212,7 +212,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     else if (local?.alvoSelecionado === hostil.id && local.alvoTravado) emitir({ t: 'selecionarAlvo', alvo: hostil.id, travar: false });
     else emitir({ t: 'selecionarAlvo', alvo: hostil.id });
   };
-  // Ajuste de 15/10/2026 (D-065): Q / 🎯 trocam para o hostil seguinte (e travam); T / segurar o 🎯 trava ou destrava.
+  // Ajuste de 15/10/2026 (D-065): Q / botão de alvo trocam para o hostil seguinte (e travam); T / segurar o botão trava ou destrava.
   const trocarAlvo = (sentido: 1 | -1) => {
     const local = jogador();
     if (!local) return;

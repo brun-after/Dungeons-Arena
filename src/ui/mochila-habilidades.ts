@@ -3,6 +3,8 @@
 // - as conhecidas, com o rank, o que fazem (descrição gerada) e "Subir rank" — nos ranks de evolução, os
 //   caminhos aparecem como cartões e a escolha é definitiva;
 // - as passivas e o que a classe ainda pode aprender. Botão desabilitado diz o motivo (o mesmo da simulação).
+// Ajuste de 16/10/2026 (D-067): pôr na tecla ficou direto — as 4 teclas são blocos com o ícone no topo e cada
+// carta de habilidade ativa tem os botões 1 2 3 4 (a tecla atual marcada; tocar nela de novo tira).
 
 import { resolverHabilidade } from '../combat/compilar-habilidade';
 import type { Habilidade } from '../combat/habilidades';
@@ -14,9 +16,10 @@ import { SLOTS_BARRA, type Entidade } from '../entities/entidade';
 import { t, type ChaveTexto } from '../i18n';
 import { aprendiveisDa, caminhosDoRank, motivoParaNaoSubir, nivelParaRank } from '../progression/habilidades-personagem';
 import { descreverCaminho, descreverHabilidade } from './descrever';
+import { icone } from './icones';
 
 export interface EstadoAbaHabilidades {
-  /** Habilidade escolhida para ir a uma tecla (o próximo toque numa tecla a coloca). */
+  /** Mantido para a mochila (D-067: a escolha agora é direta, pelos botões 1 2 3 4 da carta). */
   escolhendo: string | null;
 }
 
@@ -55,33 +58,44 @@ export function desenharHabilidades(
   pontos.dataset.pontosHabilidade = String(bolsa.pontosHabilidade);
   corpo.append(pontos);
 
-  // As 4 teclas.
+  // As 4 teclas: blocos com o ícone e o nome; "tirar" esvazia a tecla.
   corpo.append(el('h3', 'subtitulo-modal', t('habilidades.barra')));
-  const teclas = el('ul', 'lista-itens teclas-habilidade');
+  const teclas = el('ul', 'teclas-habilidade');
   for (let slot = 0; slot < SLOTS_BARRA; slot++) {
     const id = bolsa.barra[slot] ?? null;
     const h = id ? compilada(id) : undefined;
-    const li = el('li', 'linha-item');
+    const li = el('li', h ? 'bloco-tecla' : 'bloco-tecla vazio');
     li.dataset.tecla = String(slot + 1);
-    const rotulo = h ? `${t('habilidades.tecla', { n: slot + 1 })}: ${h.icone} ${h.nome}` : t('habilidades.teclaVazia', { n: slot + 1 });
-    li.append(el('span', 'conteudo-item', rotulo));
-    const escolhendo = ui.escolhendo;
-    if (escolhendo !== null) {
-      const nome = compilada(escolhendo)?.nome ?? escolhendo;
-      li.append(
-        botao(t('habilidades.tecla', { n: slot + 1 }), `tecla-${slot}`, () => {
-          emitir({ t: 'equiparHabilidade', id: escolhendo, slot });
-          ui.escolhendo = null;
-          redesenhar();
-        }),
-      );
-      li.title = t('habilidades.escolhaTecla', { nome });
-    } else if (id) {
-      li.append(botao(t('habilidades.limpar'), `limpar-${slot}`, () => { emitir({ t: 'equiparHabilidade', id: null, slot }); }));
+    li.append(el('span', 'numero-tecla', String(slot + 1)), h ? icone(h.icone) : el('span', 'icone-vazio'), el('span', 'nome-tecla', h ? h.nome : t('habilidades.livre')));
+    li.setAttribute('aria-label', h ? t('habilidades.tecla', { n: slot + 1 }) + `: ${h.nome}` : t('habilidades.teclaVazia', { n: slot + 1 }));
+    if (id) {
+      const tirar = botao('', `limpar-${slot}`, () => { emitir({ t: 'equiparHabilidade', id: null, slot }); });
+      tirar.append(icone('fechar'));
+      tirar.setAttribute('aria-label', t('habilidades.tirarDaTecla', { n: slot + 1 }));
+      li.append(tirar);
     }
     teclas.append(li);
   }
   corpo.append(teclas);
+  /** Os botões 1 2 3 4 de uma habilidade ativa conhecida: põe na tecla; na tecla em que já está, tira. */
+  const botoesDeTecla = (id: string, nome: string): HTMLElement => {
+    const grupo = el('div', 'teclas-da-carta');
+    grupo.setAttribute('role', 'group');
+    grupo.setAttribute('aria-label', t('habilidades.porNaTeclaDe', { nome }));
+    grupo.append(el('span', 'detalhe-item', t('habilidades.porNaTecla')));
+    for (let slot = 0; slot < SLOTS_BARRA; slot++) {
+      const ja = bolsa.barra[slot] === id;
+      const b = botao(String(slot + 1), `tecla-${id}-${slot}`, () => {
+        emitir({ t: 'equiparHabilidade', id: ja ? null : id, slot });
+        redesenhar();
+      });
+      b.classList.add('botao-tecla');
+      b.setAttribute('aria-pressed', String(ja));
+      b.setAttribute('aria-label', ja ? t('habilidades.tirarDaTecla', { n: slot + 1 }) : t('habilidades.porEmTecla', { n: slot + 1, nome }));
+      grupo.append(b);
+    }
+    return grupo;
+  };
 
   const cartao = (id: string, conhecida: { rank: number; caminhos: string[] } | null): HTMLLIElement | null => {
     const h = conhecida ? compilada(id) : resolverHabilidade(ctx, id);
@@ -90,7 +104,8 @@ export function desenharHabilidades(
     li.dataset.habilidade = id;
     const textos = el('div', 'textos-item');
     const cor = h.elemento ? ctx.conteudo.elementos.get(h.elemento)?.cor : undefined;
-    const titulo = el('strong', 'nome-item', `${h.icone} ${h.nome}`);
+    const titulo = el('strong', 'nome-item');
+    titulo.append(icone(h.icone), ` ${h.nome}`);
     if (cor) titulo.style.color = cor;
     textos.append(titulo);
     const perfil = perfilPara(ctx, j, h);
@@ -118,7 +133,9 @@ export function desenharHabilidades(
           const c = ctx.conteudo.caminhos.get(cid);
           if (!c) continue;
           const cartaoCaminho = el('div', 'cartao-caminho');
-          cartaoCaminho.append(el('strong', undefined, `${c.icone} ${c.nome}`));
+          const nomeCaminho = el('strong');
+          nomeCaminho.append(icone(c.icone), ` ${c.nome}`);
+          cartaoCaminho.append(nomeCaminho);
           const lista = el('ul');
           for (const linha of descreverCaminho(c)) lista.append(el('li', undefined, linha));
           cartaoCaminho.append(lista);
@@ -137,12 +154,7 @@ export function desenharHabilidades(
         acoes.append(b);
       }
     }
-    if (conhecida && !h.passiva && ui.escolhendo === null) {
-      acoes.append(botao(t('habilidades.porNaTecla'), `tecla-para-${id}`, () => {
-        ui.escolhendo = id;
-        redesenhar();
-      }));
-    }
+    if (conhecida && !h.passiva) acoes.append(botoesDeTecla(id, h.nome));
     li.append(acoes);
     return li;
   };

@@ -29,7 +29,7 @@ export interface OpcoesTeclado {
   aoInteragir?: () => void;
   /** Tecla `X`: dispensa as invocações (marco 10A-3). */
   aoDispensar?: () => void;
-  /** Tecla `V`: alterna a visão (de cima ↔ isométrica, marco 13). */
+  /** Tecla `V`: alterna a visão (de cima <-> isométrica, marco 13). */
   aoAlternarVisao?: () => void;
   /** Ajuste de 15/10/2026 (D-065): `Q` troca para o próximo alvo; com Shift, o anterior. */
   aoTrocarAlvo?: (sentido: 1 | -1) => void;

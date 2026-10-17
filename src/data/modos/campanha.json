@@ -2,7 +2,7 @@
   "id": "campanha",
   "nome": "Campanha",
   "descricao": "Progressão solo por fases, offline.",
-  "icone": "🗺",
+  "icone": "mapa",
   "equipes": 1,
   "politicaRelacao": "por_equipe",
   "autoBalancear": false,

@@ -79,7 +79,7 @@ export function ligarSom(o: OpcoesSom): { quadro: (ouvinte: PontoVisual | null, 
     quadro: (pos, agoraMs) => {
       ouvinte = pos;
       const clima = contexto.atualizar(climaDoEstado(o.estado(), idLocal), agoraMs);
-      // Marco 11A (D-066): a sombra (casual ↔ dark) pela profundidade, a dificuldade e o clima, deslizando.
+      // Marco 11A (D-066): a sombra (casual <-> dark) pela profundidade, a dificuldade e o clima, deslizando.
       const sombra = sombraMusical.atualizar(sombraDaCena(clima, profundidade, o.estado().dificuldade), agoraMs);
       motor.definirMusica(o.fase.id, clima, sombra);
       for (const f of fontes) {

@@ -1,5 +1,5 @@
 // Tilesets do jogador no store `tilesets` (§3.5, §3.10). Marco 11A (16/10/2026), D-066: a imagem do atlas (Blob,
-// PNG/JPEG/WebP até 2 MB e 2048 px), a grade (4 ou 5), a separação entre células e os vínculos chave → célula. Fica
+// PNG/JPEG/WebP até 2 MB e 2048 px), a grade (4 ou 5), a separação entre células e os vínculos chave -> célula. Fica
 // só neste aparelho; a arena não recebe atlas.
 
 import { RE_CHAVE_PECA, type CelulaAtlas, type GradeAtlas, type Vinculos } from '../world/tileset';

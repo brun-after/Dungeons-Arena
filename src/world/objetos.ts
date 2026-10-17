@@ -67,7 +67,7 @@ export function coletarObjetos(estado: EstadoJogo, ctx: ContextoSimulacao, saida
     if (!coletor(e)) continue;
     const o = estado.objetos.find((x) => x.x === e.x && x.y === e.y && !consumidos.has(x.objetoId) && coletavel(x));
     if (!o) continue;
-    // Transação: verificar → consumir → transferir → registrar, tudo neste tick.
+    // Transação: verificar -> consumir -> transferir -> registrar, tudo neste tick.
     if (o.tipo === 'item') {
       // Item: só quem tem mochila com espaço para a quantidade toda; senão fica no chão (§2.10).
       const item = o.itemId ? ctx.conteudo.itens.get(o.itemId) : undefined;

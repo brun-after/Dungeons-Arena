@@ -1,10 +1,10 @@
 // Qualidade gráfica (§4.10). Marco 12 (14/10/2026), D-056. Puro: presets e a degradação automática,
 // testáveis sem navegador. Os efeitos só leem o preset; a simulação nunca sabe da qualidade.
-//   mínimo → sem partículas, luz, poeira, presets de impacto nem auras;
-//   baixo  → poucas partículas, sem luz nem poeira;
+//   mínimo -> sem partículas, luz, poeira, presets de impacto nem auras;
+//   baixo  -> poucas partículas, sem luz nem poeira;
 //   (mínimo e baixo usam um desenho só por token, sem as 18 tiras: o atalho de sprite, marco 13)
-//   médio  → partículas, luz e presets de impacto;
-//   alto   → tudo, inclusive poeira.
+//   médio  -> partículas, luz e presets de impacto;
+//   alto   -> tudo, inclusive poeira.
 // Degradação (com a escolha "automática"): buffer circular de 240 quadros, verificação a cada 5 s;
 // média abaixo de 45 fps em duas verificações seguidas desce um nível. Nunca sobe sozinha.
 

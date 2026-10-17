@@ -8,6 +8,7 @@ import type { Preferencias } from '../plataforma/preferencias';
 import { criarConfiguracoes } from './configuracoes';
 import { criarGuia } from './guia';
 import { criarModal } from './modal';
+import { icone } from './icones';
 
 export interface AcaoDaPausa {
   rotulo: string;
@@ -112,7 +113,7 @@ export function criarPausa(o: {
   const botao = document.createElement('button');
   botao.type = 'button';
   botao.className = 'botao-cabecalho botao-pausa';
-  botao.textContent = '⏸';
+  botao.append(icone('pausa'));
   botao.setAttribute('aria-label', t(o.pausaOJogo ? 'pausa.abrir' : 'pausa.abrirArena'));
   botao.addEventListener('click', () => {
     modal.abrir();

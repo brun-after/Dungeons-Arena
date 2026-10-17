@@ -12,6 +12,7 @@ import { catalogoDeGeracao, gerarFase } from '../world/gerador';
 import { adicionarFase, duplicarFase, faseEmBranco, MAX_FASES_AVENTURA, moverFase, novoIdDeFase, removerFase, type Aventura } from './aventura';
 import { deFaseJson, type FaseEditavel } from './grade';
 import { abrirGerenciadorDeTilesets } from './tileset-ui';
+import { comIcone } from '../ui/icones';
 
 export interface OpcoesPainelFases {
   aventura: Aventura;
@@ -33,7 +34,10 @@ function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, text
 }
 
 function botao(texto: string, rotulo: string, aoClicar: () => void, classe = 'botao-cabecalho'): HTMLButtonElement {
-  const b = el('button', classe, texto);
+  const b = el('button', classe);
+  // D-067: "seta_cima", "seta_baixo", "copiar" e "fechar" viram ícone; o resto é texto.
+  if (texto === 'seta_cima' || texto === 'seta_baixo' || texto === 'fases' || texto === 'fechar') comIcone(b, texto);
+  else b.textContent = texto;
   b.type = 'button';
   b.setAttribute('aria-label', rotulo);
   b.addEventListener('click', aoClicar);
@@ -78,16 +82,16 @@ export function abrirPainelDeFases(o: OpcoesPainelFases): void {
     const mover = (sentido: -1 | 1) => {
       if (moverFase(a, i, sentido)) o.irPara(i === indice ? i + sentido : indice === i + sentido ? i : indice);
     };
-    if (i > 0) li.append(botao('↑', t('fases.subir', { n: i + 1 }), () => { mover(-1); }));
-    if (i < a.fases.length - 1) li.append(botao('↓', t('fases.descer', { n: i + 1 }), () => { mover(1); }));
+    if (i > 0) li.append(botao('seta_cima', t('fases.subir', { n: i + 1 }), () => { mover(-1); }));
+    if (i < a.fases.length - 1) li.append(botao('seta_baixo', t('fases.descer', { n: i + 1 }), () => { mover(1); }));
     li.append(
-      botao('⧉', t('fases.duplicar', { n: i + 1 }), () => {
+      botao('fases', t('fases.duplicar', { n: i + 1 }), () => {
         if (duplicarFase(a, i, t('editor.copiaDe', { nome: f.nome }), sorteio)) o.irPara(i + 1);
       }),
     );
     if (a.fases.length > 1) {
       let confirmando = false;
-      const excluir = botao('✕', t('fases.excluir', { n: i + 1 }), () => {
+      const excluir = botao('fechar', t('fases.excluir', { n: i + 1 }), () => {
         if (!confirmando) {
           confirmando = true;
           excluir.textContent = t('slots.confirmarExcluir');

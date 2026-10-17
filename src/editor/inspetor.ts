@@ -7,6 +7,7 @@ import { REGISTRO_EFEITOS, construirEfeito, ehTipoEfeito } from '../combat/regis
 import type { Celula } from '../core/comandos';
 import type { Conteudo } from '../core/conteudo';
 import { t, type ChaveTexto } from '../i18n';
+import { icone } from '../ui/icones';
 import { criarModal } from '../ui/modal';
 import { SONS_DE_FONTE, type PortaSaida } from '../world/fase';
 import { marcarChefe } from './ferramentas';
@@ -73,7 +74,8 @@ function listaDeItens(itens: readonly (readonly [string, string])[], atual: read
     caixa.textContent = '';
     lista.forEach((id, i) => {
       const linha = el('div', 'linha-inspetor');
-      const tirar = el('button', 'botao-cabecalho', '✕');
+      const tirar = el('button', 'botao-cabecalho');
+      tirar.append(icone('fechar'));
       tirar.type = 'button';
       tirar.setAttribute('aria-label', t('inspetor.tirarItem', { item: nomeDe(id) }));
       tirar.addEventListener('click', () => {
