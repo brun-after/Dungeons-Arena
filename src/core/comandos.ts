@@ -39,6 +39,8 @@ export type Comando =
   | { t: 'subirRank'; id: string; caminho?: string }
   /** Marco 18 (D-068): gasta 1 ponto de habilidade para tirar 1/3 do tempo total do estudo. */
   | { t: 'acelerarEstudo' }
+  /** Marco 18 (D-070): forja na loja aberta (`invId` é a peça Lendária quando a receita ascende). */
+  | { t: 'forjar'; receita: string; invId?: string }
   /** Marco 14: põe uma habilidade conhecida numa das 4 teclas (null limpa a tecla). */
   | { t: 'equiparHabilidade'; id: string | null; slot: number }
   /** Marco 15: troca a dificuldade do mundo (o personagem não muda). */
@@ -64,6 +66,7 @@ export const TIPOS_DE_COMANDO: readonly Comando['t'][] = [
   'dispensar',
   'subirRank',
   'acelerarEstudo',
+  'forjar',
   'equiparHabilidade',
   'definirDificuldade',
 ];

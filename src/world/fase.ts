@@ -169,6 +169,8 @@ export interface FaseJson {
   tileset?: { atlasId: string } | null;
   /** Marco 11A: peças escolhidas à mão, por índice de célula (`y·largura + x`) -> `chave@t` (§2.16). */
   pecas?: Record<string, string>;
+  /** Marco 18 (D-070): eventos da fase gerada (lua sangrenta, mercador errante, sala secreta). */
+  eventos?: string[];
 }
 
 export function celulaNormalizada(v: number, tamanho: number): number {
@@ -195,6 +197,8 @@ export interface Fase {
   /** Marco 11A: o atlas da fase (já com a herança resolvida por quem carrega) e as peças à mão. */
   readonly tilesetId: string | null;
   readonly pecas: Readonly<Record<number, string>>;
+  /** Marco 18 (D-070): os eventos da fase (o diário anota; a interface mostra). */
+  readonly eventos: readonly string[];
 }
 
 /** Converte uma fase já validada para a forma usada pela simulação. */
@@ -225,6 +229,7 @@ export function carregarFase(json: FaseJson): Fase {
     matizGraus: json.matizGraus ?? 0,
     tilesetId: json.tileset?.atlasId ?? null,
     pecas: { ...json.pecas },
+    eventos: [...(json.eventos ?? [])],
   };
 }
 

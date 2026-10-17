@@ -47,7 +47,9 @@ export type MotivoItem =
   /** Marco 14: livro de uma habilidade que o personagem já conhece. */
   | 'ja_conhece'
   /** Marco 18 (D-068): já há um estudo em andamento (o livro não é gasto). */
-  | 'estudando';
+  | 'estudando'
+  /** Marco 18 (D-070): a forja pede material que falta. */
+  | 'sem_material';
 
 /** Marco 14: por que a habilidade não subiu de rank ou não foi para a barra. */
 export type MotivoHabilidade =
@@ -125,6 +127,11 @@ export type EventoSimulacao =
   | { t: 'ressonanciaAtiva'; tick: number; id: EntidadeId; ressonancia: string }
   | { t: 'comboFeito'; tick: number; id: EntidadeId; combo: string; alvoId: EntidadeId | null }
   | { t: 'buffInteragiu'; tick: number; id: EntidadeId; regra: string }
+  // Marco 18 (D-070): missões, origens raras, forja e o diário.
+  | { t: 'missaoConcluida'; tick: number; id: EntidadeId; missao: string; itemId: string }
+  | { t: 'origemRara'; tick: number; id: EntidadeId; origem: string; itemId: string }
+  | { t: 'forjou'; tick: number; id: EntidadeId; receita: string; itemId: string }
+  | { t: 'descoberta'; tick: number; id: EntidadeId; entrada: string }
   | { t: 'renasceu'; tick: number; id: EntidadeId; hp: number }
   | { t: 'barraMudou'; tick: number; id: EntidadeId }
   /** Marco 15: a dificuldade do mundo mudou. */

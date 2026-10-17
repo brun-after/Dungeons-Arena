@@ -1,0 +1,25 @@
+{
+  "versao": 1,
+  "receitas": [
+    {
+      "id": "anel_do_eco",
+      "nome": "Anel do eco",
+      "texto": "Cinco fragmentos de eco viram o Anel do eco.",
+      "entrada": [
+        { "item": "fragmento_eco", "qtd": 5 }
+      ],
+      "ouro": 50,
+      "saida": { "tipo": "item", "item": "anel_do_eco" }
+    },
+    {
+      "id": "ultima_forma",
+      "nome": "Última forma",
+      "texto": "Uma peça Lendária sobe para a Última forma: 3 fragmentos de eco e 400 de ouro.",
+      "entrada": [
+        { "item": "fragmento_eco", "qtd": 3 }
+      ],
+      "ouro": 400,
+      "saida": { "tipo": "ascender" }
+    }
+  ]
+}

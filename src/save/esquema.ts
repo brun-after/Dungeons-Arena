@@ -290,12 +290,12 @@ function v13ParaV14(r: Objeto): Objeto {
 /** Marco 18: os campos novos da entidade (preenchidos ao longo do marco). */
 function v14Entidade(x: Objeto): Objeto {
   const aparencia = ehObjeto(x.aparencia) ? { formaArma: null, elementoArma: null, formaMaxima: null, ...x.aparencia } : x.aparencia;
-  return { ressonancias: [], ultimoGolpe: null, ultimaHabilidade: null, renascerFase: '', ...x, aparencia };
+  return { ressonancias: [], ultimoGolpe: null, ultimaHabilidade: null, renascerFase: '', ultimaSinergia: null, ...x, aparencia };
 }
 
 /** Marco 18: os campos novos da ficha (preenchidos ao longo do marco). */
 function v14Bolsa(b: Objeto): Objeto {
-  return { estudo: null, ...b };
+  return { estudo: null, missoes: {}, missoesConcluidas: [], diario: [], ...b };
 }
 
 /** `MIGRACOES[v]` leva um registro da versão `v` para a `v + 1`. Não existiu versão 0. */
@@ -332,6 +332,11 @@ function lerParametros(v: unknown): ParametrosGeracao | null {
     if (!inteiro(v.largura, 8, 120) || !inteiro(v.altura, 8, 120)) return null;
     p.largura = v.largura;
     p.altura = v.altura;
+  }
+  // Marco 18 (D-070): os eventos da fase gerada.
+  if (v.eventos !== undefined) {
+    if (!Array.isArray(v.eventos) || v.eventos.length > 5 || !v.eventos.every((x): x is string => typeof x === 'string' && /^[a-z_]{1,30}$/.test(x))) return null;
+    p.eventos = [...v.eventos];
   }
   // Marco 11A (D-066): as regras de estilo que geraram a fase (até 64, na forma compacta).
   if (v.estilo !== undefined) {

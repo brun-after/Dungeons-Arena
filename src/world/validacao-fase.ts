@@ -57,7 +57,7 @@ export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<st
   const avisos: ErroFase[] = [];
   if (!ehObjeto(entrada)) return { ok: false, erros: [{ mensagem: 'a fase precisa ser um objeto' }], avisos };
 
-  const { id, nome, ordem, tipo, mapa, spawns, inimigos, objetos, portaSaida, portasInternas, matizGraus, tileset, pecas } = entrada;
+  const { id, nome, ordem, tipo, mapa, spawns, inimigos, objetos, portaSaida, portasInternas, matizGraus, tileset, pecas, eventos } = entrada;
   const matizOk = matizGraus === undefined || (typeof matizGraus === 'number' && Number.isFinite(matizGraus) && matizGraus >= 0 && matizGraus < 360);
   if (!matizOk) erros.push({ mensagem: 'matizGraus precisa ficar entre 0 e 359' });
   if (typeof id !== 'string' || id.trim() === '') erros.push({ mensagem: 'id ausente' });
@@ -90,6 +90,8 @@ export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<st
     ...(internas && { portasInternas: internas }),
     ...(typeof matizGraus === 'number' && matizOk && { matizGraus }),
     ...visual,
+    // Marco 18: os eventos da fase gerada (só textos curtos conhecidos).
+    ...(Array.isArray(eventos) && { eventos: eventos.filter((x): x is string => typeof x === 'string' && /^[a-z_]{1,30}$/.test(x)) }),
   };
   validarJogabilidade(json, erros, avisos);
   return erros.length > 0 ? { ok: false, erros, avisos } : { ok: true, fase: json, avisos };

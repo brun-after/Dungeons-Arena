@@ -25,6 +25,9 @@ import { definirDirecao, moverEntidades, planejarCaminho } from '../world/movime
 import { fecharLoja, interagir, processarInteracoes } from '../world/interacao';
 import { revelarArmadilhas } from '../world/armadilhas-ocultas';
 import { atualizarRessonancias } from '../progression/ressonancias';
+import { forjar } from '../progression/forja';
+import { processarMissoes } from '../progression/missoes';
+import { registrarDescobertas } from '../progression/diario';
 import { coletarObjetos } from '../world/objetos';
 import { processarPortas } from '../world/portas';
 import { processarSpawner } from '../world/spawner';
@@ -42,6 +45,8 @@ export function simular(
   saida: EventoSimulacao[],
   dtMs: number,
 ): void {
+  // Marco 18: o que este tick emitir (missões e diário leem só os eventos dele).
+  const inicio = saida.length;
   aplicarComandos(estado, ctx, comandos, saida);
   processarIa(estado, ctx, saida);
   processarAcoes(estado, ctx, saida);
@@ -62,7 +67,10 @@ export function simular(
   atualizarAparencias(estado, ctx);
   atualizarRessonancias(estado, ctx, saida);
   processarGatilhosDeEfeito(estado, ctx, saida);
-  processarMortes(estado, ctx, saida);
+  const abates = processarMortes(estado, ctx, saida);
+  // Marco 18 (D-070): missões e o diário de descobertas.
+  processarMissoes(estado, ctx, saida.slice(inicio), abates, saida);
+  registrarDescobertas(estado, ctx, saida.slice(inicio), saida);
   processarSpawner(estado, ctx, saida);
   estado.tick++;
 }
@@ -137,6 +145,9 @@ function aplicarComandos(
         break;
       case 'acelerarEstudo':
         acelerarEstudo(ator, ctx, estado.tick, saida);
+        break;
+      case 'forjar':
+        forjar(estado, ctx, ator, cmd.receita, cmd.invId ?? null, saida);
         break;
       case 'equiparHabilidade':
         equiparHabilidade(ator, ctx, cmd.id, cmd.slot, estado.tick, saida);

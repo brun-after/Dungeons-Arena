@@ -1580,6 +1580,37 @@
         "camera": "leve",
         "som": "golpe"
       }
+    },
+    {
+      "id": "chuva_de_estrelas",
+      "grau": "S",
+      "nome": "Chuva de estrelas",
+      "icone": "estrela",
+      "tipoAtaque": "magico",
+      "formulaDano": "3d6",
+      "formulaCura": null,
+      "alcanceCelulas": 6,
+      "tipoArea": "quadrado",
+      "raioArea": 1,
+      "custoRecurso": 6,
+      "recargaMs": 9000,
+      "conjuracaoMs": 700,
+      "politicaAlvo": "celula",
+      "politicaImpacto": "area",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "elemento": "sagrado",
+      "tags": [
+        "flechas"
+      ],
+      "visual": {
+        "cor": "#f7e9a0",
+        "conjuracao": "sagrado",
+        "impacto": "chuva",
+        "camera": "leve",
+        "som": "magia"
+      }
     }
   ]
 }

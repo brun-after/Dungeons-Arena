@@ -121,6 +121,7 @@ export function aplicarImpacto(
   }
 
   const disparadas = falha || imune ? [] : sinergias.map((s) => s.id);
+  if (disparadas.length > 0) alvo.ultimaSinergia = disparadas[0] ?? null;
   saida.push({
     t: 'impacto',
     tick,

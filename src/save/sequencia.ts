@@ -3,7 +3,7 @@
 // forma determinística pela fase atual: `salas = anterior + rand(0..3)`, `nivelInimigos + 1` e
 // `matizGraus + 28`. O save guarda só esses parâmetros; a fase é gerada de novo ao abrir.
 
-import { criarRng, hashTexto, inteiro } from '../core/rng';
+import { aleatorio, criarRng, hashTexto, inteiro } from '../core/rng';
 import type { RefFase } from './esquema';
 
 export interface RegrasGeradas {
@@ -13,6 +13,8 @@ export interface RegrasGeradas {
   nivelBase: number;
   largura: number;
   altura: number;
+  /** Marco 18 (D-070): chance (%) de cada evento de fase (lua sangrenta, mercador errante, sala secreta). */
+  eventos?: Readonly<Record<string, number>>;
 }
 
 /**
@@ -41,6 +43,10 @@ export function proximaFase(
   const numero = (anterior?.numero ?? 0) + 1;
   const id = `gerada-${numero}`;
   const salas = Math.min(g.salasMax, (anterior?.params.salas ?? g.salasBase) + inteiro(rng, 0, 3));
+  // Marco 18 (D-070): eventos de fase, sorteados depois (as fases de antes continuam iguais).
+  const eventos = Object.entries(g.eventos ?? {})
+    .filter(([, pct]) => aleatorio(rng) * 100 < pct)
+    .map(([id]) => id);
   return {
     tipo: 'gerada',
     id,
@@ -56,6 +62,7 @@ export function proximaFase(
       altura: g.altura,
       // Marco 11A: as regras de estilo do aparelho (opcional), guardadas para a fase sair igual ao reabrir.
       ...(estilo.length > 0 && { estilo: [...estilo] }),
+      ...(eventos.length > 0 && { eventos }),
     },
   };
 }

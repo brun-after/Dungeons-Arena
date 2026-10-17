@@ -122,6 +122,7 @@ export const ptBR = {
   'item.limite': 'Limite de invocações atingido',
   'item.ja_conhece': 'Você já conhece essa habilidade',
   'item.estudando': 'Termine o estudo atual antes de ler outro livro',
+  'item.sem_material': 'Faltam materiais para esta receita',
   'log.invocacaoCurou': '{alvo} curou você: +{cura}',
   'log.explodiu': '{alvo} explodiu!',
   'log.dispensou': 'Invocações dispensadas ({n})',

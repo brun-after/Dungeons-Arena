@@ -9,6 +9,7 @@
     "salasBase": 6,
     "salasMax": 20,
     "nivelBase": 4,
+    "eventos": { "lua_sangrenta": 3, "mercador_errante": 10, "sala_secreta": 8 },
     "largura": 60,
     "altura": 40,
     "estoque": [

@@ -1,0 +1,38 @@
+{
+  "versao": 1,
+  "missoes": [
+    {
+      "id": "ceu_limpo",
+      "nome": "Céu limpo",
+      "texto": "Numa mesma fase, derrote 30 esqueletos com flechas sem levar dano.",
+      "conta": { "evento": "abate", "preset": "esqueleto", "tag": "flechas" },
+      "meta": 30,
+      "zeraAo": ["dano_recebido", "fase_nova"],
+      "recompensa": { "id": "livro_chuva_de_estrelas" }
+    },
+    {
+      "id": "duas_escolas",
+      "nome": "Mestre de duas escolas",
+      "texto": "Leve ao nível máximo uma habilidade da sua classe e outra de fora dela (aprendida por livro).",
+      "conta": { "evento": "duasEscolas" },
+      "meta": 1,
+      "recompensa": { "id": "runa_de_fusao" }
+    },
+    {
+      "id": "tempestade_em_poca",
+      "nome": "Tempestade em poça",
+      "texto": "Eletrocute inimigos molhados 5 vezes.",
+      "conta": { "evento": "sinergia", "sinergia": "eletrocutar" },
+      "meta": 5,
+      "recompensa": { "base": "manoplas", "forma": "lendaria" }
+    },
+    {
+      "id": "guardiao_refugio",
+      "nome": "Guardião do refúgio",
+      "texto": "Gaste a carga de refúgio 10 vezes.",
+      "conta": { "evento": "refugio" },
+      "meta": 10,
+      "recompensa": { "base": "manto", "forma": "lendaria" }
+    }
+  ]
+}

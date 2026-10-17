@@ -31,6 +31,9 @@ export function criarBolsa(classe: ClasseJogador, ouroInicial = 0): Bolsa {
     pontosHabilidade: 0,
     personagemId: '',
     estudo: null,
+    missoes: {},
+    missoesConcluidas: [],
+    diario: [],
   };
   for (const { id, qtd } of classe.itensIniciais) bolsa.mochila.push({ invId: `i${bolsa.proximoInv++}`, itemId: id, qtd, ref: null });
   return bolsa;
@@ -60,9 +63,9 @@ export function guardarItem(bolsa: Bolsa, item: Item, qtd: number, regras: Balan
   return true;
 }
 
-/** Consumíveis e livros empilham (marco 14: livros também). */
+/** Consumíveis e livros empilham (marco 14: livros também; marco 18: chaves e materiais da forja também). */
 export function empilha(item: Item): boolean {
-  return item.tipo === 'consumivel' || item.tipo === 'livro';
+  return item.tipo === 'consumivel' || item.tipo === 'livro' || item.tipo === 'chave';
 }
 
 export function cabeNaMochila(bolsa: Bolsa, item: Item, qtd: number, regras: Balance['inventario']): boolean {

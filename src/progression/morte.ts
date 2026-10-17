@@ -4,7 +4,7 @@
 // Marco 6 (13/10/2026): XP sobe de nível e inimigos soltam itens. A perda de XP e ouro na morte
 // da campanha entra no 10A. Marco 9A (14/10/2026): ouro nos drops; morrer fecha baú e loja.
 
-import { resolverHabilidade } from '../combat/compilar-habilidade';
+import { abateDe, sortearOrigensRaras, type Abate } from './missoes';
 import { dispararGanchosDe, passivosDe } from './ganchos-do-portador';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type EstadoJogo } from '../core/estado';
@@ -60,7 +60,8 @@ function concederXp(estado: EstadoJogo, ctx: ContextoSimulacao, morto: Entidade,
   }
 }
 
-export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
+export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): Abate[] {
+  const abates: Abate[] = [];
   const removidos = new Set<string>();
   for (const e of estado.entidades) {
     if (e.morto || e.hp > 0) continue;
@@ -86,8 +87,11 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
     // Marco 18: os ganchos "ao abater" de quem derrubou (com a habilidade do último golpe, se foi dele).
     const quemAbateu = porId ? buscarEntidade(estado, porId.id) : undefined;
     if (quemAbateu) {
-      const golpe = e.ultimoGolpe?.fonteId === quemAbateu.id ? resolverHabilidade(ctx, e.ultimoGolpe.chave) : undefined;
-      dispararGanchosDe(estado, ctx, quemAbateu, 'aoMatar', { outro: e, hab: golpe ?? null }, saida);
+      const abate = abateDe(ctx, quemAbateu, e);
+      abates.push(abate);
+      dispararGanchosDe(estado, ctx, quemAbateu, 'aoMatar', { outro: e, hab: abate.golpe ?? null }, saida);
+      // Marco 18 (D-070): os drops que só existem nesta situação.
+      sortearOrigensRaras(estado, ctx, abate, saida);
     }
 
     if (e.controlador === 'ia') {
@@ -141,6 +145,7 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
 
   reviverJogadores(estado, ctx, saida);
   processarRespawns(estado, ctx, saida);
+  return abates;
 }
 
 /** Penalidade de morte do modo: XP (com ou sem perder nível) e uma fração sorteada do ouro. */

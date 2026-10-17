@@ -161,6 +161,11 @@ export interface Bolsa {
   personagemId: string;
   /** Marco 18 (17/10/2026, D-068): a habilidade sendo estudada (aprender não é instantâneo); null = nenhuma. */
   estudo: Estudo | null;
+  /** Marco 18 (D-070): a contagem de cada missão (as que zeram por fase usam `id@fase`) e as concluídas. */
+  missoes: Record<string, number>;
+  missoesConcluidas: string[];
+  /** Marco 18 (D-070): as entradas do diário de descobertas. */
+  diario: string[];
 }
 
 /** Marco 18 (D-068): estudo de uma habilidade nova. Só anda com o jogo rodando (um tick por tick de simulação). */
@@ -263,6 +268,8 @@ export interface Entidade {
   ultimaHabilidade: { id: string; chave: string; tick: number; alvoId: EntidadeId | null } | null;
   /** Marco 18 (D-069): a fase em que o renascer do item já foi usado ('' = disponível). */
   renascerFase: string;
+  /** Marco 18 (D-070): a última reação que a entidade sofreu (as origens raras olham ao cair). */
+  ultimaSinergia: string | null;
 }
 
 export interface BuffArmado {
@@ -376,6 +383,7 @@ export function criarEntidade(n: NovaEntidade): Entidade {
     ultimoGolpe: null,
     ultimaHabilidade: null,
     renascerFase: '',
+    ultimaSinergia: null,
   };
 }
 
@@ -421,6 +429,9 @@ function clonarBolsa(b: Bolsa): Bolsa {
     conhecidas: b.conhecidas.map((c) => ({ ...c, caminhos: [...c.caminhos] })),
     barra: [...b.barra],
     estudo: b.estudo ? { ...b.estudo } : null,
+    missoes: { ...b.missoes },
+    missoesConcluidas: [...b.missoesConcluidas],
+    diario: [...b.diario],
   };
 }
 
