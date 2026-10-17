@@ -41,6 +41,10 @@ export interface Balance {
     fallback: number;
   };
   recursos: {
+    /** D-071 (17/10/2026): recuperação dos NPCs hostis e repouso dos chefes. */
+    curaNpcAoAbaterPct: number;
+    regenBossPorSegundoPct: number;
+    regenBossEsperaMs: number;
     regenManaPorSegundo: number;
     /** Marco 10A-2: por célula caminhada (§2.12), onde o modo liga. */
     regenHpPorCelula: number;
@@ -156,6 +160,9 @@ export interface Balance {
       descontoMaxPct: number;
       /** Marco 18 (D-068): a rolagem escala com FOR e INT (meio a meio) e a INT dá a potência dos efeitos. */
       rolagemPorPontoPct: number;
+      especializacaoInicio: number;
+      especializacaoPorPonto: number;
+      especializacaoMax: number;
       rolagemMin: number;
       efeitoPorIntPct: number;
       potenciaMin: number;

@@ -13,7 +13,7 @@ import { t, type ChaveTexto } from '../i18n';
 import { SLOTS_DE_EQUIPAMENTO, type Slot } from '../modos/modo';
 import { DT_MS } from '../core/loop';
 import { derivarFicha } from '../progression/derivados';
-import { descontoNaLojaPct, multiplicadorDeRolagem, perfilDestreza, reducaoRecargaBasicoPct, vidaPorCelula } from '../progression/efeitos-atributo';
+import { bonusDeEspecializacao, descontoNaLojaPct, multiplicadorDeRolagem, perfilDestreza, reducaoRecargaBasicoPct, vidaPorCelula } from '../progression/efeitos-atributo';
 import { ressonanciasDe } from '../progression/ressonancias';
 import { criarDicaAtributo, linhasDaDica, type DicaAtributo } from './dica-atributo';
 import { bonusDeAtributo } from '../progression/ficha';
@@ -345,7 +345,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
       const faixaBruta = faixaDaFormula(basico.formulaDano);
       const mult = multiplicadorDeRolagem(efetiva.atributos, ctx.balance);
       const faixa = { min: Math.round(faixaBruta.min * mult), max: Math.round(faixaBruta.max * mult) };
-      const bonus = bonusDeAtributo(efetiva.atributos, basico.escalaCom, ctx.balance.combate.multiplicadorAtributoPadrao);
+      const bonus = bonusDeAtributo(efetiva.atributos, basico.escalaCom, ctx.balance.combate.multiplicadorAtributoPadrao) + bonusDeEspecializacao(efetiva.atributos, basico.escalaCom, ctx.balance);
       const recarga = (basico.recargaMs * (1 - reducaoRecargaBasicoPct(efetiva.atributos, ctx.balance, perfilDestreza(ctx, j)) / 100)) / 1000;
       const manaPorSegundo =
         ctx.balance.recursos.regenManaPorSegundo * (1 + (Math.max(0, efetiva.atributos.sabedoria - 10) * ctx.balance.atributos.efeitos.regenManaPorSabedoriaPct) / 100);

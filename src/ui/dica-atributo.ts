@@ -8,6 +8,7 @@ import type { ContextoSimulacao } from '../core/contexto';
 import type { Atributos, Entidade } from '../entities/entidade';
 import { t, type ChaveTexto } from '../i18n';
 import {
+  bonusDeEspecializacao,
   chanceDeDesarmarPct,
   chanceDeRevelarPct,
   descontoNaLojaPct,
@@ -30,7 +31,7 @@ export function linhasDaDica(nome: NomeAtributo, a: Atributos, ctx: ContextoSimu
   const rolagem = fmt(multiplicadorDeRolagem(a, b), 2);
   switch (nome) {
     case 'forca':
-      return [t('dica.forca.1', { rolagem }), t('dica.forca.2', { bonus: a.forca })];
+      return [t('dica.forca.1', { rolagem }), t('dica.forca.2', { bonus: a.forca + bonusDeEspecializacao(a, 'forca', b) }), t('dica.especializacao', { inicio: b.atributos.efeitos.especializacaoInicio, ponto: b.atributos.efeitos.especializacaoPorPonto, max: b.atributos.efeitos.especializacaoMax })];
     case 'destreza': {
       const perfil = perfilDestreza(ctx, j);
       return [
@@ -43,7 +44,8 @@ export function linhasDaDica(nome: NomeAtributo, a: Atributos, ctx: ContextoSimu
       return [t('dica.constituicao.1', { hp: hpMax }), t('dica.constituicao.2', { vida: vidaPorCelula(a, b) })];
     case 'inteligencia':
       return [
-        t('dica.inteligencia.1', { rolagem, bonus: a.inteligencia }),
+        t('dica.inteligencia.1', { rolagem, bonus: a.inteligencia + bonusDeEspecializacao(a, 'inteligencia', b) }),
+        t('dica.especializacao', { inicio: b.atributos.efeitos.especializacaoInicio, ponto: b.atributos.efeitos.especializacaoPorPonto, max: b.atributos.efeitos.especializacaoMax }),
         t('dica.inteligencia.2', { potencia: fmt(potenciaDeEfeito(a, b), 2) }),
         t('dica.inteligencia.3', { pct: fmt(reducaoEstudoPct(a, b), 0) }),
       ];

@@ -10,7 +10,7 @@ import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
-import type { Entidade } from '../entities/entidade';
+import { vivo, type Entidade } from '../entities/entidade';
 import { criarInimigo } from '../entities/fabrica';
 import { aleatorio, inteiro, proximoU32 } from '../core/rng';
 import { idGerada } from '../combat/chave-habilidade';
@@ -76,7 +76,8 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
       }
     }
     const porId = e.participacao.reduce<{ id: string; tick: number } | null>(
-      (ultimo, p) => (!ultimo || p.tick > ultimo.tick || (p.tick === ultimo.tick && p.id < ultimo.id) ? p : ultimo),
+      // A participação é inserida na ordem dos golpes: o último do mesmo tick dá o abate.
+      (ultimo, p) => (!ultimo || p.tick >= ultimo.tick ? p : ultimo),
       null,
     );
     e.morto = true;
@@ -87,6 +88,13 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
     // Marco 18: os ganchos "ao abater" de quem derrubou (com a habilidade do último golpe, se foi dele).
     const quemAbateu = porId ? buscarEntidade(estado, porId.id) : undefined;
     if (quemAbateu) {
+      // D-071 (17/10/2026): metade da vida que falta, uma vez por morte confirmada.
+      // Aliados do jogador não ganham a cura de inimigo; mortes simultâneas não ressuscitam o matador.
+      if (quemAbateu.controlador === 'ia' && !ladoDoJogador(estado, quemAbateu) && vivo(quemAbateu) && podeFerir(quemAbateu, e, ctx.modo)) {
+        const cura = Math.round((quemAbateu.hpMax - quemAbateu.hp) * ctx.balance.recursos.curaNpcAoAbaterPct / 100);
+        quemAbateu.hp = Math.min(quemAbateu.hpMax, quemAbateu.hp + cura);
+        if (cura > 0) saida.push({ t: 'efeitoResultado', tick: estado.tick, alvoId: quemAbateu.id, origemId: quemAbateu.id, tipo: 'cura', dano: 0, cura, mana: 0 });
+      }
       const abate = abateDe(ctx, quemAbateu, e);
       abates.push(abate);
       dispararGanchosDe(estado, ctx, quemAbateu, 'aoMatar', { outro: e, hab: abate.golpe ?? null }, saida);

@@ -1,5 +1,5 @@
 {
-  "versao": 18,
+  "versao": 19,
   "movimento": {
     "velocidadeBaseMs": 400,
     "filaMaxWaypoints": 2
@@ -31,6 +31,9 @@
     "fallback": 100
   },
   "recursos": {
+    "curaNpcAoAbaterPct": 50,
+    "regenBossPorSegundoPct": 5,
+    "regenBossEsperaMs": 5000,
     "regenManaPorSegundo": 1,
     "regenHpPorCelula": 1,
     "regenManaPorCelula": 1
@@ -117,6 +120,9 @@
       "descontoPorCarismaPct": 2,
       "descontoMaxPct": 30,
       "rolagemPorPontoPct": 7,
+      "especializacaoInicio": 16,
+      "especializacaoPorPonto": 2,
+      "especializacaoMax": 20,
       "rolagemMin": 0.5,
       "efeitoPorIntPct": 3,
       "potenciaMin": 0.7,
@@ -228,7 +234,8 @@
   },
   "inimigos": {
     "crescimento": [
-      { "atributo": "constituicao", "porNivel": 3, "aPartirDoNivel": 2 },
+      { "atributo": "constituicao", "porNivel": 4, "aPartirDoNivel": 2 },
+      { "atributo": "constituicao", "porNivel": 2, "aPartirDoNivel": 6 },
       { "atributo": "forca", "porNivel": 1, "aPartirDoNivel": 2 },
       { "atributo": "inteligencia", "porNivel": 1, "aPartirDoNivel": 3 },
       { "atributo": "destreza", "porNivel": 1, "aPartirDoNivel": 7 },

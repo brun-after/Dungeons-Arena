@@ -36,6 +36,9 @@ jobs:
       - name: Testes de unidade e simulação
         run: npm test
 
+      - name: Metas do simulador completo de balanceamento
+        run: npm run balancear
+
       - name: Build
         run: npm run build
 

@@ -37,7 +37,7 @@ export interface Nuvem {
   baixar: (slot: number) => Promise<RegistroProgresso | null>;
   /**
    * Marco 18 (D-070): tenta registrar a primeira descoberta do servidor e devolve quem chegou primeiro (null: sem
-   * conta ou sem rede). Só o primeiro nome da conta vai para a tabela.
+   * conta ou sem rede). O servidor atribui um pseudônimo; o nome Google não é publicado.
    */
   registrarDescoberta: (entrada: string) => Promise<PrimeiraDescoberta | null>;
 }
@@ -47,11 +47,6 @@ export interface PrimeiraDescoberta {
   nome: string;
   em: number;
   minha: boolean;
-}
-
-/** O primeiro nome (o que vai para a tabela pública de descobertas). */
-export function primeiroNome(nome: string): string {
-  return (nome.trim().split(/\s+/)[0] ?? '').slice(0, 40) || 'Alguém';
 }
 
 const CHAVE_LISTA = 'dungeons-arena:nuvem-lista';
@@ -143,17 +138,16 @@ export function criarNuvemSupabase(url: string, chaveAnonima: string): Nuvem {
     registrarDescoberta: async (entrada) => {
       const sessao = (await (await cliente).auth.getSession()).data.session;
       if (!sessao) return null;
-      const meta = sessao.user.user_metadata as { full_name?: unknown; name?: unknown };
-      const nome = primeiroNome(typeof meta.full_name === 'string' ? meta.full_name : typeof meta.name === 'string' ? meta.name : '');
-      // A primeira ganha: o conflito da chave é ignorado e a leitura diz quem ficou com ela.
-      await (await cliente).from('descobertas').upsert({ entrada, user_id: sessao.user.id, nome }, { onConflict: 'entrada', ignoreDuplicates: true });
-      const { data, error } = await (await cliente).from('descobertas').select('nome, criado_em, user_id').eq('entrada', entrada).maybeSingle();
-      if (error || !data) return null;
-      const linha = data as { nome?: unknown; criado_em?: unknown; user_id?: unknown };
+      // D-071: registro e leitura atômicos; a resposta não expõe o identificador da conta do descobridor.
+      const resposta = await (await cliente).rpc('registrar_descoberta', { p_entrada: entrada });
+      const data: unknown = resposta.data;
+      const error = resposta.error;
+      if (error || !Array.isArray(data) || !data[0]) return null;
+      const linha = data[0] as { nome?: unknown; criado_em?: unknown; minha?: unknown };
       return {
         nome: typeof linha.nome === 'string' ? linha.nome : 'Alguém',
         em: typeof linha.criado_em === 'string' ? Date.parse(linha.criado_em) : Date.now(),
-        minha: linha.user_id === sessao.user.id,
+        minha: linha.minha === true,
       };
     },
   };

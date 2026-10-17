@@ -21,6 +21,7 @@ test.describe('arena com o personagem e a nuvem', () => {
     await page.goto('./?arena=online&diag=1');
     const escolha = page.locator('.escolha-personagem');
     await expect(escolha).toHaveValue('1');
+    await expect(escolha.locator('option:checked')).toContainText(/\d+ descobertas/);
     await expect(page.locator('.salas-da-faixa h2')).toHaveText('Salas da faixa 1-5');
     await page.getByRole('button', { name: 'Criar sala' }).click();
     await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/, { timeout: 20_000 });

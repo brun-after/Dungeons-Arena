@@ -14,6 +14,7 @@ import { registrarParticipacao } from '../../src/combat/participacao';
 import { ATRIBUTOS_NEUTROS, type Entidade } from '../../src/entities/entidade';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import {
+  bonusDeEspecializacao,
   chanceDeDesarmarPct,
   chanceDeRevelarPct,
   multiplicadorDeRolagem,
@@ -33,6 +34,15 @@ function obter<T>(v: T | undefined, nome: string): T {
 }
 
 describe('dano e potência (D-068)', () => {
+  it('a especialização recompensa concentração ofensiva, inclusive híbrida, e respeita o teto', () => {
+    const especializada = atr({ forca: 22, inteligencia: 10 });
+    const dispersa = atr({ forca: 16, inteligencia: 16 });
+    expect(multiplicadorDeRolagem(especializada, b)).toBe(multiplicadorDeRolagem(dispersa, b));
+    expect(bonusDeEspecializacao(especializada, 'forca', b)).toBeGreaterThan(bonusDeEspecializacao(dispersa, 'forca', b));
+    expect(bonusDeEspecializacao(especializada, 'destreza', b)).toBe(0);
+    expect(bonusDeEspecializacao(atr({ forca: 19, inteligencia: 19 }), 'inteligencia', b)).toBe(bonusDeEspecializacao(especializada, 'forca', b));
+    expect(bonusDeEspecializacao(atr({ forca: 30 }), 'forca', b)).toBe(b.atributos.efeitos.especializacaoMax);
+  });
   it('a rolagem escala com FOR e INT, metade de cada', () => {
     const k = b.atributos.efeitos.rolagemPorPontoPct / 100;
     expect(multiplicadorDeRolagem(atr({}), b)).toBe(1);

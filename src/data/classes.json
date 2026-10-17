@@ -73,7 +73,7 @@
       "afinidades": [
         {
           "tag": "contato",
-          "danoPct": 15
+          "danoPct": -5
         },
         {
           "tag": "custo_vida",
@@ -96,7 +96,7 @@
     {
       "id": "mago",
       "nome": "Mago",
-      "hpBase": 50,
+      "hpBase": 55,
       "defesa": 1,
       "classe": "conjurador",
       "atributos": {
@@ -125,11 +125,11 @@
       "afinidades": [
         {
           "tag": "magico",
-          "danoPct": 15
+          "danoPct": 0
         },
         {
           "tag": "elemental",
-          "danoPct": 10
+          "danoPct": 0
         }
       ],
       "modelo": "mago",
@@ -148,7 +148,7 @@
       "defesa": 2,
       "classe": "atirador",
       "atributos": {
-        "forca": 14,
+        "forca": 15,
         "destreza": 13,
         "constituicao": 10,
         "inteligencia": 10,

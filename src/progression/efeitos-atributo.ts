@@ -14,6 +14,14 @@ import type { PerfilDestreza } from '../entities/presets';
 
 const acimaDe10 = (v: number) => Math.max(0, v - 10);
 
+/** D-071 (17/10/2026): pontos ofensivos acima do patamar de ressonância, incluindo builds híbridas FOR/INT. */
+export function bonusDeEspecializacao(atributos: Atributos, atributo: keyof Atributos, b: Balance): number {
+  const e = b.atributos.efeitos;
+  if (atributo !== 'forca' && atributo !== 'inteligencia') return 0;
+  const pontos = Math.max(0, atributos.forca - e.especializacaoInicio) + Math.max(0, atributos.inteligencia - e.especializacaoInicio);
+  return Math.min(e.especializacaoMax, Math.floor(pontos * e.especializacaoPorPonto));
+}
+
 /** Mana regenerada no segundo `segundo` (contado desde o tick 0): a base mais a parte inteira do bônus da Sabedoria. */
 export function manaPorSegundo(atributos: Atributos, segundo: number, b: Balance): number {
   const base = b.recursos.regenManaPorSegundo;
