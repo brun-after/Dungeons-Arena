@@ -396,7 +396,7 @@ export async function abrirTelaDeEdicao(raiz: HTMLElement, aventura: Aventura, i
   const nivel = el('input', 'preset-editor nivel-editor');
   nivel.type = 'number';
   nivel.min = '1';
-  nivel.max = '20';
+  nivel.max = '30';
   nivel.value = '1';
   nivel.setAttribute('aria-label', t('editor.nivelInimigo'));
   const seletorObjeto = el('select', 'preset-editor');
@@ -519,7 +519,7 @@ export async function abrirTelaDeEdicao(raiz: HTMLElement, aventura: Aventura, i
       case 'spawn':
         return { t: 'spawn' };
       case 'inimigo': {
-        const n = Math.max(1, Math.min(20, Math.round(Number(nivel.value) || 1)));
+        const n = Math.max(1, Math.min(30, Math.round(Number(nivel.value) || 1)));
         return { t: 'inimigo', preset: seletorPreset.value, ...(n > 1 && { nivel: n }) };
       }
       case 'objeto': {

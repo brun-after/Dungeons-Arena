@@ -167,6 +167,7 @@ export interface VisualHabilidade {
 
 /** Marco 14: o que o skills.json descreve. A base é a habilidade no rank 1, sem caminhos. */
 export interface DefinicaoHabilidade {
+  familiaEvolucao?: string;
   base: Habilidade;
   /** Ataque básico e afins: fora do orçamento de poder. */
   basico: boolean;
@@ -323,7 +324,7 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
     elemento,
     custoVida: o.custoVida === undefined ? 0 : l.numero(o, 'custoVida', { min: 0, max: 100, inteiro: true }),
     tags: [],
-    nivelMinimo: o.nivelMinimo === undefined ? 1 : l.numero(o, 'nivelMinimo', { min: 1, max: 20, inteiro: true }),
+    nivelMinimo: o.nivelMinimo === undefined ? 1 : l.numero(o, 'nivelMinimo', { min: 1, max: 30, inteiro: true }),
     passiva: lerPassiva(l, o.passiva),
     mobilidade: o.mobilidade === undefined ? 'trava' : l.opcao(o, 'mobilidade', MOBILIDADES),
     escalaCom: 'forca',
@@ -358,6 +359,7 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
   }
   return {
     base,
+    ...(o.familiaEvolucao !== undefined ? { familiaEvolucao: l.texto(o, 'familiaEvolucao') } : {}),
     basico: o.basico === undefined ? false : l.booleano(o, 'basico'),
     evolucoes: lerEvolucoes(l, o.evolucoes),
     mods: o.mods === undefined ? [] : l.listaDeTextos(o, 'mods').filter((m): m is Modificador => {
@@ -374,7 +376,7 @@ const CAMPOS_DEFINICAO = [
   'id', 'nome', 'icone', 'tipoAtaque', 'formulaDano', 'formulaCura', 'alcanceCelulas', 'tipoArea', 'raioArea',
   'custoRecurso', 'recargaMs', 'conjuracaoMs', 'politicaAlvo', 'politicaImpacto', 'interrupcao', 'velocidadeProjetil',
   'efeitos', 'visual', 'elemento', 'custoVida', 'tags', 'nivelMinimo', 'passiva', 'basico', 'evolucoes', 'mods',
-  'mobilidade', 'escalaCom', 'grau', 'marcos', 'fusao',
+  'mobilidade', 'escalaCom', 'grau', 'marcos', 'fusao', 'familiaEvolucao',
 ];
 
 /** Marco 18 (D-068): sem `escalaCom`, o físico escala com Força e o mágico com Inteligência. */

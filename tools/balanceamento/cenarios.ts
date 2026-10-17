@@ -72,6 +72,18 @@ export function jogadorTipico(ctx: ContextoSimulacao, classeId: string, nivel: n
     bolsa.atributosBase[a] += Math.floor(noPrincipal / principais.length) + (i < noPrincipal % principais.length ? 1 : 0);
   });
   bolsa.atributosBase.constituicao += pontos - noPrincipal;
+  // D-075: redistribui excedentes do teto como o jogador pode fazer na ficha, sem desperdiçar pontos.
+  let excedentes = 0;
+  for (const nome of Object.keys(bolsa.atributosBase) as (keyof Atributos)[]) {
+    excedentes += Math.max(0, bolsa.atributosBase[nome] - ctx.balance.atributos.maximo);
+    bolsa.atributosBase[nome] = Math.min(ctx.balance.atributos.maximo, bolsa.atributosBase[nome]);
+  }
+  for (const nome of ['constituicao', 'sabedoria', 'destreza', 'inteligencia', 'forca', 'carisma'] as const) {
+    const dar = Math.min(excedentes, ctx.balance.atributos.maximo - bolsa.atributosBase[nome]);
+    bolsa.atributosBase[nome] += dar;
+    excedentes -= dar;
+  }
+
   let pontosHab = (nivel - 1) * ctx.balance.habilidades.pontosPorNivel;
   for (let volta = 0; pontosHab > 0 && volta < 10; volta++) {
     for (const c of bolsa.conhecidas) {

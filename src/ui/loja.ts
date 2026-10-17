@@ -8,8 +8,8 @@ import type { EstadoJogo, ObjetoNoMundo } from '../core/estado';
 import type { Entidade } from '../entities/entidade';
 import { t } from '../i18n';
 import { precoDeVenda, vendavel, type Item } from '../progression/itens';
-import { precoDeCompra } from '../progression/efeitos-atributo';
-import { lojaAberta } from '../progression/loja';
+import { precoDoItem } from '../progression/itens-progressao';
+import { estoqueDaLoja, lojaAberta } from '../progression/loja';
 import { molduraDoItem, resumoDoItem } from './mochila';
 import { motivoParaNaoForjar } from '../progression/forja';
 import { criarModal } from './modal';
@@ -94,7 +94,7 @@ export function criarLoja(o: OpcoesLoja): Loja {
   const desenhar = (j: Entidade, loja: ObjetoNoMundo) => {
     const bolsa = j.bolsa;
     if (!bolsa) return;
-    assinatura = JSON.stringify([bolsa.mochila, bolsa.ouro, loja.objetoId]);
+    assinatura = JSON.stringify([bolsa.mochila, bolsa.ouro, bolsa.tomosComprados, loja.objetoId]);
     const focoAntes = document.activeElement instanceof HTMLElement ? document.activeElement.dataset.chave : undefined;
     saldo.textContent = t('loja.saldo', { ouro: bolsa.ouro });
     saldo.dataset.ouro = String(bolsa.ouro);
@@ -102,11 +102,11 @@ export function criarLoja(o: OpcoesLoja): Loja {
 
     listas.append(el('h3', 'subtitulo-modal', t('loja.estoque')));
     const estoque = el('ul', 'lista-itens estoque-loja');
-    for (const id of loja.itens) {
+    for (const id of estoqueDaLoja(o.estado(), o.ctx, loja)) {
       const item = itens.get(id);
       if (!item) continue;
       // Marco 17: o preço já com o desconto do Carisma.
-      const preco = precoDeCompra(item.valorBase, j.atributos, o.ctx.balance);
+      const preco = precoDoItem(item, j, o.ctx);
       estoque.append(
         linha(item, item.nome, 1, {
           texto: t('loja.comprar', { preco }),
@@ -196,7 +196,7 @@ export function criarLoja(o: OpcoesLoja): Loja {
       modal.abrir();
     }
     const bolsa = j.bolsa;
-    if (bolsa && JSON.stringify([bolsa.mochila, bolsa.ouro, loja.objetoId]) !== assinatura) desenhar(j, loja);
+    if (bolsa && JSON.stringify([bolsa.mochila, bolsa.ouro, bolsa.tomosComprados, loja.objetoId]) !== assinatura) desenhar(j, loja);
   };
 
   return { aberta: modal.aberto, atualizar };

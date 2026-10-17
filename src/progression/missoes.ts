@@ -101,7 +101,7 @@ export function lerOrigens(json: unknown): { origens: Map<string, OrigemRara>; e
       chancePct: l.numero(o, 'chancePct', { min: 0.1, max: 100 }),
       se: {
         chefe: se.chefe === undefined ? null : l.booleano(se, 'chefe'),
-        nivelMin: se.nivelMin === undefined ? 1 : l.numero(se, 'nivelMin', { min: 1, max: 20, inteiro: true }),
+        nivelMin: se.nivelMin === undefined ? 1 : l.numero(se, 'nivelMin', { min: 1, max: 30, inteiro: true }),
         elementoDoGolpe: ehElemento(el) ? el : null,
         sinergia: se.sinergia === undefined ? null : l.texto(se, 'sinergia'),
         fase: se.fase === undefined ? null : l.texto(se, 'fase'),
@@ -117,7 +117,7 @@ export function lerOrigens(json: unknown): { origens: Map<string, OrigemRara>; e
 export function idDaRecompensa(r: ItemDeRecompensa, nivel: number, semente: string): string {
   if ('id' in r) return r.id;
   const rng = criarRng(hashTexto(semente));
-  return idItemBase(r.base, r.forma, r.elemento, Math.max(1, Math.min(20, nivel)), inteiro(rng, 0, 0x7fffffff));
+  return idItemBase(r.base, r.forma, r.elemento, Math.max(1, Math.min(30, nivel)), inteiro(rng, 0, 0x7fffffff));
 }
 
 /** Entrega o item na mochila; sem espaço, cai ao lado. */

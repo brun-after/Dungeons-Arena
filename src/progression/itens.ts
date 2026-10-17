@@ -18,6 +18,8 @@ import type { FormaItem } from './gerar-item-base';
 export type NomeAtributo = keyof Atributos;
 export const NOMES_ATRIBUTOS = Object.keys(ATRIBUTOS_NEUTROS) as NomeAtributo[];
 
+export type ProgressaoItem = { tipo: 'aceleracao'; unidades12: number } | { tipo: 'ponto' } | { tipo: 'rank'; familia: string };
+
 export type TipoItem = 'equipamento' | 'consumivel' | 'chave' | 'livro';
 
 /** Marco 14: modificador que o equipamento dá às habilidades com a etiqueta (null = todas). */
@@ -56,6 +58,7 @@ export interface Item {
   elemento: Elemento | null;
   /** Marco 18: os ganchos que o item dá a quem o veste (data/itens-formas.json, ou `ganchos` em itens.json). */
   ganchos: Gancho[];
+  progressao?: ProgressaoItem;
 }
 
 function lerModificadores(l: Leitor, o: Objeto): ModificadorDeItem[] {
@@ -105,7 +108,7 @@ export function lerItens(json: unknown): { itens: Map<string, Item>; erros: stri
       raridade: l.opcao(o, 'raridade', RARIDADES),
       valorBase: l.numero(o, 'valorBase', { min: 0, inteiro: true }),
       slotPadrao: o.slotPadrao === null ? null : l.opcao(o, 'slotPadrao', SLOTS_DE_EQUIPAMENTO),
-      nivelMinimo: l.numero(o, 'nivelMinimo', { min: 1, max: 20, inteiro: true }),
+      nivelMinimo: l.numero(o, 'nivelMinimo', { min: 1, max: 30, inteiro: true }),
       bonusAtributos: lerBonus(l, o),
       bonusDefesa: l.numero(o, 'bonusDefesa', { min: -20, max: 50, inteiro: true }),
       efeitos: o.efeitos === undefined && tipo === 'livro' ? [] : lerEfeitos(l, o),
@@ -117,9 +120,16 @@ export function lerItens(json: unknown): { itens: Map<string, Item>; erros: stri
       elemento: null,
       ganchos: lerGanchos(l, o.ganchos),
     };
+    if (o.progressao !== undefined) {
+      const p = l.objeto(o.progressao, 'progressao');
+      const t = l.opcao(p, 'tipo', ['aceleracao', 'ponto', 'rank'] as const);
+      item.progressao = t === 'aceleracao' ? { tipo: t, unidades12: l.numero(p, 'unidades12', { min: 1, max: 12, inteiro: true }) }
+        : t === 'rank' ? { tipo: t, familia: l.texto(p, 'familia') } : { tipo: t };
+      if (tipo !== 'consumivel') l.erro('progressão exige consumível');
+    }
     if (tipo === 'equipamento' && item.slotPadrao === null) l.erro('equipamento precisa de slotPadrao');
     if (tipo === 'consumivel' && item.slotPadrao !== null) l.erro('consumível não tem slotPadrao');
-    if (tipo === 'consumivel' && item.efeitos.length === 0) l.erro('consumível precisa de ao menos um efeito');
+    if (tipo === 'consumivel' && item.efeitos.length === 0 && !item.progressao) l.erro('consumível precisa de ao menos um efeito');
     if (tipo === 'chave' && (item.slotPadrao !== null || item.efeitos.length > 0)) l.erro('chave não tem slotPadrao nem efeitos');
     if (tipo === 'livro' && (item.slotPadrao !== null || item.efeitos.length > 0)) l.erro('livro não tem slotPadrao nem efeitos');
     if (tipo !== 'livro' && item.ensina !== null) l.erro('só livro ensina');

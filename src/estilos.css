@@ -160,10 +160,10 @@ body.toque .faixa-controles {
   padding-left: 16px;
 }
 
-/* 17/10/2026: interação e alvo em fileira, à direita, antes da roda de habilidades. */
+/* D-076 (17/10/2026): dobra a folga horizontal para a skill à esquerda da roda: 7,5 para 15 px. */
 .coluna.centro {
   position: absolute;
-  right: calc(184px + var(--seguro-dir));
+  right: calc(191.5px + var(--seguro-dir));
   bottom: calc(18px + var(--seguro-base));
   height: 56px;
   flex-direction: row;
@@ -172,7 +172,7 @@ body.toque .faixa-controles {
 
 @media (max-width: 480px) and (orientation: portrait) {
   .coluna.centro {
-    right: calc(16px + var(--seguro-dir));
+    right: calc(23.5px + var(--seguro-dir));
     bottom: calc(190px + var(--seguro-base));
   }
 }

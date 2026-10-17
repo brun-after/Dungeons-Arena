@@ -3,7 +3,9 @@
 // estoque, saldo e espaço; só então cobra e entrega. Saldo nunca fica negativo. O estoque é
 // ilimitado na v1 (D-050): a loja é o dreno de ouro, não um recurso disputado.
 
-import { precoDeCompra } from './efeitos-atributo';
+import { precoDoItem } from './itens-progressao';
+import { hashTexto } from '../core/rng';
+import { estudoAvanca } from '../modos/regras';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo, ObjetoNoMundo } from '../core/estado';
 import type { EventoSimulacao, MotivoItem } from '../core/eventos-simulacao';
@@ -18,6 +20,17 @@ export function lojaAberta(estado: EstadoJogo, e: Entidade): ObjetoNoMundo | nul
   return estado.objetos.find((o) => o.objetoId === i.objetoId && o.tipo === 'loja') ?? null;
 }
 
+/** D-075: oferta estável inclusive em lojas de saves antigos; não consome o RNG do combate. */
+export function estoqueDaLoja(estado: EstadoJogo, ctx: ContextoSimulacao, loja: ObjetoNoMundo): string[] {
+  if (!estudoAvanca(ctx.modo)) return loja.itens;
+  const s = `${estado.faseId}/${loja.objetoId}/${loja.x}/${loja.y}`;
+  const r = ctx.balance.progressaoItens;
+  const extras = ['aceleracao_mente_comum', 'tomo_potencial'];
+  if (hashTexto(`${s}/incomum`) % 100 < r.aceleracaoIncomumChancePct) extras.push('aceleracao_mente_incomum');
+  if (hashTexto(`${s}/rara`) % 100 < r.aceleracaoRaraChancePct) extras.push('aceleracao_mente_rara');
+  return [...new Set([...loja.itens, ...extras])];
+}
+
 export function comprar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, itemId: string, saida: EventoSimulacao[]): void {
   const motivo = tentarComprar(estado, ctx, e, itemId, saida);
   if (motivo) recusarItem(e, motivo, estado.tick, saida);
@@ -28,15 +41,16 @@ function tentarComprar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, 
   if (!bolsa) return 'sem_mochila';
   const loja = lojaAberta(estado, e);
   if (!loja) return 'loja_fechada';
-  if (!loja.itens.includes(itemId)) return 'fora_do_estoque';
+  if (!estoqueDaLoja(estado, ctx, loja).includes(itemId)) return 'fora_do_estoque';
   const item = ctx.conteudo.itens.get(itemId);
   if (!item) return 'nao_encontrado';
   // Marco 17: o Carisma acima de 10 dá desconto.
-  const preco = precoDeCompra(item.valorBase, e.atributos, ctx.balance);
+  const preco = precoDoItem(item, e, ctx);
   if (bolsa.ouro < preco) return 'sem_ouro';
   if (!cabeNaMochila(bolsa, item, 1, ctx.balance.inventario)) return 'mochila_cheia';
   bolsa.ouro -= preco;
   guardarItem(bolsa, item, 1, ctx.balance.inventario);
+  if (item.progressao?.tipo === 'ponto') bolsa.tomosComprados = (bolsa.tomosComprados ?? 0) + 1;
   saida.push({ t: 'comprou', tick: estado.tick, id: e.id, itemId, preco });
   return null;
 }

@@ -1,5 +1,5 @@
 {
-  "versao": 1,
+  "versao": 2,
   "receitas": [
     {
       "id": "anel_do_eco",
@@ -20,6 +20,358 @@
       ],
       "ouro": 400,
       "saida": { "tipo": "ascender" }
+    },
+    {
+      "id": "essencia_fogo",
+      "nome": "Essência de fogo",
+      "texto": "Converte outra essência para esta família.",
+      "entrada": [
+        {
+          "item": "essencia_arcana",
+          "qtd": 2
+        }
+      ],
+      "ouro": 500,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_fogo"
+      }
+    },
+    {
+      "id": "essencia_gelo",
+      "nome": "Essência de gelo",
+      "texto": "Converte outra essência para esta família.",
+      "entrada": [
+        {
+          "item": "essencia_arcana",
+          "qtd": 2
+        }
+      ],
+      "ouro": 500,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_gelo"
+      }
+    },
+    {
+      "id": "essencia_raio",
+      "nome": "Essência de raio",
+      "texto": "Converte outra essência para esta família.",
+      "entrada": [
+        {
+          "item": "essencia_arcana",
+          "qtd": 2
+        }
+      ],
+      "ouro": 500,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_raio"
+      }
+    },
+    {
+      "id": "essencia_veneno",
+      "nome": "Essência de veneno",
+      "texto": "Converte outra essência para esta família.",
+      "entrada": [
+        {
+          "item": "essencia_arcana",
+          "qtd": 2
+        }
+      ],
+      "ouro": 500,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_veneno"
+      }
+    },
+    {
+      "id": "essencia_terra",
+      "nome": "Essência de terra",
+      "texto": "Converte outra essência para esta família.",
+      "entrada": [
+        {
+          "item": "essencia_arcana",
+          "qtd": 2
+        }
+      ],
+      "ouro": 500,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_terra"
+      }
+    },
+    {
+      "id": "essencia_sombra",
+      "nome": "Essência de sombra",
+      "texto": "Converte outra essência para esta família.",
+      "entrada": [
+        {
+          "item": "essencia_arcana",
+          "qtd": 2
+        }
+      ],
+      "ouro": 500,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_sombra"
+      }
+    },
+    {
+      "id": "essencia_sagrado",
+      "nome": "Essência de luz sagrada",
+      "texto": "Converte outra essência para esta família.",
+      "entrada": [
+        {
+          "item": "essencia_arcana",
+          "qtd": 2
+        }
+      ],
+      "ouro": 500,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_sagrado"
+      }
+    },
+    {
+      "id": "essencia_psiquico",
+      "nome": "Essência de mente",
+      "texto": "Converte outra essência para esta família.",
+      "entrada": [
+        {
+          "item": "essencia_arcana",
+          "qtd": 2
+        }
+      ],
+      "ouro": 500,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_psiquico"
+      }
+    },
+    {
+      "id": "essencia_tecnica",
+      "nome": "Essência de técnicas marciais",
+      "texto": "Converte outra essência para esta família.",
+      "entrada": [
+        {
+          "item": "essencia_arcana",
+          "qtd": 2
+        }
+      ],
+      "ouro": 500,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_tecnica"
+      }
+    },
+    {
+      "id": "essencia_arcana",
+      "nome": "Essência de magia arcana",
+      "texto": "Converte outra essência para esta família.",
+      "entrada": [
+        {
+          "item": "essencia_tecnica",
+          "qtd": 2
+        }
+      ],
+      "ouro": 500,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_arcana"
+      }
+    },
+    {
+      "id": "essencia_suporte",
+      "nome": "Essência de suporte",
+      "texto": "Converte outra essência para esta família.",
+      "entrada": [
+        {
+          "item": "essencia_arcana",
+          "qtd": 2
+        }
+      ],
+      "ouro": 500,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_suporte"
+      }
+    },
+    {
+      "id": "essencia_fusao",
+      "nome": "Essência de fusão",
+      "texto": "Converte outra essência para esta família.",
+      "entrada": [
+        {
+          "item": "essencia_arcana",
+          "qtd": 2
+        }
+      ],
+      "ouro": 500,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_fusao"
+      }
+    },
+    {
+      "id": "converter_fogo",
+      "nome": "Converter essência de fogo",
+      "texto": "Duas essências desta família viram uma essência arcana.",
+      "entrada": [
+        {
+          "item": "essencia_fogo",
+          "qtd": 2
+        }
+      ],
+      "ouro": 0,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_arcana"
+      }
+    },
+    {
+      "id": "converter_gelo",
+      "nome": "Converter essência de gelo",
+      "texto": "Duas essências desta família viram uma essência arcana.",
+      "entrada": [
+        {
+          "item": "essencia_gelo",
+          "qtd": 2
+        }
+      ],
+      "ouro": 0,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_arcana"
+      }
+    },
+    {
+      "id": "converter_raio",
+      "nome": "Converter essência de raio",
+      "texto": "Duas essências desta família viram uma essência arcana.",
+      "entrada": [
+        {
+          "item": "essencia_raio",
+          "qtd": 2
+        }
+      ],
+      "ouro": 0,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_arcana"
+      }
+    },
+    {
+      "id": "converter_veneno",
+      "nome": "Converter essência de veneno",
+      "texto": "Duas essências desta família viram uma essência arcana.",
+      "entrada": [
+        {
+          "item": "essencia_veneno",
+          "qtd": 2
+        }
+      ],
+      "ouro": 0,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_arcana"
+      }
+    },
+    {
+      "id": "converter_terra",
+      "nome": "Converter essência de terra",
+      "texto": "Duas essências desta família viram uma essência arcana.",
+      "entrada": [
+        {
+          "item": "essencia_terra",
+          "qtd": 2
+        }
+      ],
+      "ouro": 0,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_arcana"
+      }
+    },
+    {
+      "id": "converter_sombra",
+      "nome": "Converter essência de sombra",
+      "texto": "Duas essências desta família viram uma essência arcana.",
+      "entrada": [
+        {
+          "item": "essencia_sombra",
+          "qtd": 2
+        }
+      ],
+      "ouro": 0,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_arcana"
+      }
+    },
+    {
+      "id": "converter_sagrado",
+      "nome": "Converter essência de luz sagrada",
+      "texto": "Duas essências desta família viram uma essência arcana.",
+      "entrada": [
+        {
+          "item": "essencia_sagrado",
+          "qtd": 2
+        }
+      ],
+      "ouro": 0,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_arcana"
+      }
+    },
+    {
+      "id": "converter_psiquico",
+      "nome": "Converter essência de mente",
+      "texto": "Duas essências desta família viram uma essência arcana.",
+      "entrada": [
+        {
+          "item": "essencia_psiquico",
+          "qtd": 2
+        }
+      ],
+      "ouro": 0,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_arcana"
+      }
+    },
+    {
+      "id": "converter_suporte",
+      "nome": "Converter essência de suporte",
+      "texto": "Duas essências desta família viram uma essência arcana.",
+      "entrada": [
+        {
+          "item": "essencia_suporte",
+          "qtd": 2
+        }
+      ],
+      "ouro": 0,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_arcana"
+      }
+    },
+    {
+      "id": "converter_fusao",
+      "nome": "Converter essência de fusão",
+      "texto": "Duas essências desta família viram uma essência arcana.",
+      "entrada": [
+        {
+          "item": "essencia_fusao",
+          "qtd": 2
+        }
+      ],
+      "ouro": 0,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_arcana"
+      }
     }
   ]
 }

@@ -141,7 +141,7 @@ function aplicarComandos(
         break;
       // Marco 14: ranks, caminhos e a barra de habilidades.
       case 'subirRank':
-        subirRank(ator, ctx, cmd.id, cmd.caminho, estado.tick, saida);
+        subirRank(ator, ctx, cmd.id, cmd.caminho, estado.tick, saida, cmd.invId, cmd.rankEsperado);
         break;
       case 'acelerarEstudo':
         acelerarEstudo(ator, ctx, estado.tick, saida);

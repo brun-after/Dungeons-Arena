@@ -5,7 +5,7 @@
 import { writeFileSync } from 'node:fs';
 import { BALANCE_PADRAO } from '../../src/core/contexto';
 import { DIFICULDADES } from '../../src/modos/dificuldade';
-import { CLASSES, aguenta, avisos, chefe, desequipar, dispersar, dueloDeFichas, equipar, fatiaDaInvocacao, mediana, pvpLivre, semAjuste, sequencia, xpPorMinuto } from './simulador';
+import { CLASSES, aguenta, avisos, chefe, desequipar, dispersar, dueloDeFichas, equipar, fatiaDaInvocacao, mediana, economiaPorMinuto, pvpLivre, semAjuste, sequencia, xpPorMinuto } from './simulador';
 
 const args = process.argv.slice(2);
 const valor = (nome: string, padrao: number) => {
@@ -166,6 +166,26 @@ const corpoXp = CLASSES.map((c) => {
 });
 tabela('Economia (nível 5, comuns em sequência)', ['Classe', 'XP por minuto', 'Ouro por minuto (estimado)'], [...corpoXp, ['invocação', `${br(fatia)}% do dano`, '—']]);
 
+// D-075 (17/10/2026): faixa avançada informativa; compara builds e mede XP/min com combate real.
+const corpoAvancado: string[][] = [];
+const corpoXpAvancado: string[][] = [];
+const corpoOuroAvancado: string[][] = [];
+for (const classe of CLASSES) for (const nivel of [20, 25, 30]) {
+  const focada: Parameters<typeof sequencia>[5] = (e, ctx) => { equipar('raro')(e, ctx); };
+  const dispersa: Parameters<typeof sequencia>[5] = (e, ctx) => { dispersar(e, ctx); equipar('raro')(e, ctx); };
+  for (const [nome, montar] of [['focada', focada], ['dispersa', dispersa]] as const) {
+    const r = SEMENTES.slice(0, 2).flatMap((s) => sequencia(classe, nivel, metas.comuns, s, 'normal', montar));
+    corpoAvancado.push([classe, String(nivel), nome, br(mediana(r.map((x) => x.tempoS))), `${r.filter((x) => x.venceu).length}/${r.length}`]);
+  }
+  const economia = DIFICULDADES.map((d) => economiaPorMinuto(classe, nivel, SEMENTES[0] ?? 1000, metas.comuns, d, focada));
+  corpoXpAvancado.push([classe, String(nivel), ...economia.map((e) => br(e.xp))]);
+  corpoOuroAvancado.push([classe, String(nivel), ...economia.map((e) => br(e.ouro)), ...[economia[1], economia[3]].map((e) => e && e.ouro > 0 ? br(BALANCE_PADRAO.progressaoItens.tomoPrecoBase / e.ouro) : '—')]);
+}
+tabela('Faixa avançada (equipamento raro, Normal, duas sementes; informativo)', ['Classe', 'Nível', 'Build', 'Tempo no comum (s)', 'Vitórias'], corpoAvancado);
+tabela('XP por minuto na faixa avançada (build focada, equipamento raro; nível 30 é o teto)', ['Classe', 'Nível', 'Fácil', 'Normal', 'Difícil', 'Pesadelo'], corpoXpAvancado);
+
+tabela('Ouro por minuto e custo do primeiro tomo (sem desconto; só ouro direto, sem venda de loot)', ['Classe', 'Nível', 'Fácil', 'Normal', 'Difícil', 'Pesadelo', 'Tomo no Normal (min)', 'Tomo no Pesadelo (min)'], corpoOuroAvancado);
+
 // Saída.
 const aprovados = criterios.filter((c) => c.ok).length;
 for (const l of linhas) console.log(l);
@@ -177,11 +197,11 @@ if (args.includes('--registrar')) {
   const doc = [
     '# Balanceamento',
     '',
-    `**Versão:** 1.0 · **Data:** ${data}`,
+    `**Versão:** 1.3 · **Data:** ${data}`,
     '',
     '> Gerado por `npm run balancear -- --registrar` (tools/balanceamento, D-061). As metas ficam em',
     '> `src/data/balance.json → metas`; o teste `tests/sim/ritmo.test.ts` protege as principais. Os números que mudaram',
-    '> e o antes e depois da calibragem estão na D-061 (docs/DECISOES.md).',
+    '> e o antes e depois das calibragens estão em docs/DECISOES.md (D-061, D-071, D-074, D-075 e D-076).',
     '',
     `Sementes: ${SEMENTES.length} por cenário (${SEMENTES.join(', ')}). Balance versão ${BALANCE_PADRAO.versao}.`,
     '',

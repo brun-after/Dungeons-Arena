@@ -53,6 +53,9 @@ export type MotivoItem =
 
 /** Marco 14: por que a habilidade não subiu de rank ou não foi para a barra. */
 export type MotivoHabilidade =
+  | 'usar_acelerador'
+  | 'essencia_incompativel'
+  | 'rank_desatualizado'
   | 'sem_ficha'
   | 'desconhecida'
   | 'nao_aprendivel'

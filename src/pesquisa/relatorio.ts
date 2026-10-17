@@ -74,7 +74,7 @@ export function lerRelatorio(bruto: unknown): RelatorioPesquisa | null {
     !opcional(m.tempoAtePrimeiraLutaS) ||
     !opcional(m.equipouEmS) ||
     ![m.mortes, m.abates, m.ataquesBasicos, m.itensColetados].every((v) => inteiro(v)) ||
-    !inteiro(m.nivelFinal, 20) ||
+    !inteiro(m.nivelFinal, 30) ||
     ![m.distribuiuPontos, m.voltouALutarDepoisDeMelhorar, m.viuBoss, m.bossDerrotado].every((v) => typeof v === 'boolean') ||
     !ehObjeto(habilidades) ||
     Object.keys(habilidades).length > 32 ||

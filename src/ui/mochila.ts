@@ -1,5 +1,5 @@
 // Mochila e ficha (§2.10, §2.12). Marco 6 (13/10/2026). Só lê o estado e emite comandos.
-// No toque, tocar a linha inteira equipa, usa ou desequipa e fecha o modal; no desktop, cada linha
+// No toque, tocar a linha inteira equipa, usa ou desequipa; equipar e desequipar mantêm o modal aberto. No desktop, cada linha
 // tem o seu botão. A lista é redesenhada só quando a bolsa, o nível ou o XP mudam.
 // Marco 9A (14/10/2026): ouro, ordenação manual (subir e descer, persistida no save) e a tecla de atalho de
 // cada consumível (5–9 e 0, D-050).
@@ -12,6 +12,7 @@ import type { Entidade, ItemNaMochila } from '../entities/entidade';
 import { t, type ChaveTexto } from '../i18n';
 import { SLOTS_DE_EQUIPAMENTO, type Slot } from '../modos/modo';
 import { DT_MS } from '../core/loop';
+import { ticksRestantesDoEstudo } from '../progression/habilidades-personagem';
 import { derivarFicha } from '../progression/derivados';
 import { bonusDeEspecializacao, descontoNaLojaPct, multiplicadorDeRolagem, perfilDestreza, reducaoRecargaBasicoPct, vidaPorCelula } from '../progression/efeitos-atributo';
 import { ressonanciasDe } from '../progression/ressonancias';
@@ -129,10 +130,10 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     modal.abrir();
   });
 
-  // Ação de uma linha: no toque fecha o modal depois de emitir (§2.10).
+  // D-076 (17/10/2026): trocar equipamentos não fecha a mochila, permitindo organizar vários slots.
   const agir = (cmd: Comando) => {
     emitir(cmd);
-    if (o.toque) modal.fechar();
+    if (o.toque && cmd.t !== 'equipar' && cmd.t !== 'desequipar') modal.fechar();
   };
 
   const linhaItem = (opcoes: {
@@ -254,7 +255,13 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     const consumivel = item?.tipo === 'consumivel' || item?.tipo === 'livro';
     const slot: Slot | null = item?.slotPadrao ?? null;
     const acao = consumivel
-      ? () => { agir({ t: 'usarItem', invId: entrada.invId }); }
+      ? () => {
+        if (item.progressao?.tipo === 'rank') {
+          estadoHabilidades.essenciaInvId = entrada.invId;
+          aba = 'habilidades';
+          desenhar();
+        } else agir({ t: 'usarItem', invId: entrada.invId });
+      }
       : slot
         ? () => { agir({ t: 'equipar', invId: entrada.invId, slot }); }
         : null;
@@ -278,6 +285,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     const bolsa = j.bolsa;
     if (!bolsa) return;
     const proximo = xpParaProximo(j.nivel, ctx.balance.xp);
+    if (bolsa.xpLegado) corpo.append(el('p', 'detalhe-item', t('progressao.xpLegado', { n: bolsa.xpLegado })));
     const nivelMax = j.nivel >= ctx.balance.xp.nivelMax;
     corpo.append(
       el('p', 'linha-nivel', nivelMax ? t('ficha.nivelMax', { nivel: j.nivel }) : t('ficha.nivel', { nivel: j.nivel, xp: j.xp, proximo })),
@@ -375,7 +383,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
   /** A assinatura do que muda a mochila (o estudo entra sem o tempo que falta, que corre a cada tick). */
   const assinaturaDe = (j: Entidade): string => {
     const b = j.bolsa;
-    const estudo = b?.estudo ? { id: b.estudo.id, aceleracoes: b.estudo.aceleracoes } : null;
+    const estudo = b?.estudo ? { id: b.estudo.id, velocidade12: b.estudo.velocidade12 } : null;
     return JSON.stringify([b ? { ...b, estudo } : null, j.nivel, j.xp]);
   };
 
@@ -401,6 +409,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
       const rotulo = comPontos ? `${t(chave)} •` : t(chave);
       const b = botao(rotulo, `aba-${id}`, () => {
         aba = id;
+        estadoHabilidades.essenciaInvId = null;
         desenhar();
       });
       b.setAttribute('aria-pressed', String(aba === id));
@@ -441,7 +450,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     const estudo = j.bolsa.estudo;
     const falta = estudo && modal.aberto() ? modal.corpo.querySelector<HTMLElement>(`[data-estudo-restante="${CSS.escape(estudo.id)}"]`) : null;
     if (falta && estudo) {
-      const texto = t('habilidades.estudando', { tempo: duracaoLegivel(estudo.restanteTicks * DT_MS) });
+      const texto = t('habilidades.estudando', { tempo: duracaoLegivel(ticksRestantesDoEstudo(estudo) * DT_MS) });
       if (falta.textContent !== texto) falta.textContent = texto;
     }
   };

@@ -60,9 +60,11 @@ const ENTRE_LUTAS_S = 2;
  * tudo pronto não decide a média). Entre uma luta e outra, um descanso curto: vida cheia e +30% de mana.
  * Devolve uma medida por luta (golpes do jogador e tempo da primeira ação até a morte do inimigo).
  */
-export function sequencia(classe: string, nivel: number, presets: readonly string[], semente: number, dificuldade: Dificuldade = 'normal'): ResultadoDuelo[] {
+export function sequencia(classe: string, nivel: number, presets: readonly string[], semente: number, dificuldade: Dificuldade = 'normal', ajustar?: (e: Entidade, ctx: ContextoSimulacao) => void): ResultadoDuelo[] {
   const ctx = contextoDoCenario();
   const j = jogadorTipico(ctx, classe, nivel);
+  ajustar?.(j, ctx);
+  j.hp = j.hpMax; j.mana = j.manaMax;
   const m = mundo(ctx, semente, [j], dificuldade);
   m.bots.push(new BotDeDuelo('j1'));
   const resultados: ResultadoDuelo[] = [];
@@ -224,18 +226,24 @@ export function avisos(ctx: ContextoSimulacao = contextoDoCenario()): AvisoDeHab
 }
 
 /** XP por minuto do jogador típico contra uma fila de inimigos comuns do mesmo nível (um de cada vez). */
-export function xpPorMinuto(classe: string, nivel: number, semente: number, comuns: readonly string[]): number {
+export function economiaPorMinuto(classe: string, nivel: number, semente: number, comuns: readonly string[], dificuldade: Dificuldade = 'normal', ajustar?: (e: Entidade, ctx: ContextoSimulacao) => void): { xp: number; ouro: number } {
   let xp = 0;
+  let ouro = 0;
   let tempo = 0;
   comuns.forEach((preset, i) => {
-    const ctx = contextoDoCenario();
-    const m = mundo(ctx, semente + i, [jogadorTipico(ctx, classe, nivel), inimigo(ctx, preset, nivel)]);
+    const cenario = contextoDoCenario();
+    const ctx = { ...cenario, modo: { ...cenario.modo, objetosDeFase: true } };
+    const j = jogadorTipico(ctx, classe, nivel);
+    ajustar?.(j, ctx);
+    j.hp = j.hpMax; j.mana = j.manaMax;
+    const m = mundo(ctx, semente + i, [j, inimigo(ctx, preset, nivel)], dificuldade);
     m.bots.push(new BotDeDuelo('j1'));
     m.rodar(LIMITE_S * TICKS_POR_S, () => m.eventos.some((e) => e.t === 'morreu'));
     for (const e of m.eventos) if (e.t === 'xpGanho' && e.id === 'j1') xp += e.xp;
+    ouro += m.estado.objetos.filter((o) => o.tipo === 'ouro').reduce((total, o) => total + o.valor, 0);
     tempo += segundos(m.estado.tick);
   });
-  return tempo > 0 ? (xp * 60) / tempo : 0;
+  return { xp: tempo > 0 ? xp * 60 / tempo : 0, ouro: tempo > 0 ? ouro * 60 / tempo : 0 };
 }
 
 /**
@@ -302,4 +310,9 @@ export function desequipar(e: Entidade, ctx: ContextoSimulacao): void {
 /** O personagem como o simulador o monta (sem ajuste). */
 export function semAjuste(): void {
   // A ficha típica do nível, como está.
+}
+
+/** Compatibilidade com o relatório histórico. */
+export function xpPorMinuto(...args: Parameters<typeof economiaPorMinuto>): number {
+  return economiaPorMinuto(...args).xp;
 }

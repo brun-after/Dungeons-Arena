@@ -250,14 +250,14 @@ function aplicarEventos(
     return null;
   };
   const objetos = (json.objetos ??= []);
-  if (eventos.includes('lua_sangrenta')) for (const i of json.inimigos ?? []) i.nivel = Math.min(20, (i.nivel ?? p.nivelInimigos) + 3);
+  if (eventos.includes('lua_sangrenta')) for (const i of json.inimigos ?? []) i.nivel = Math.min(BALANCE_PADRAO.xp.nivelMax, (i.nivel ?? p.nivelInimigos) + 3);
   if (eventos.includes('mercador_errante')) {
     const c = celulaLivre();
     const base = catalogo.bases.length > 0 ? escolher(rng, catalogo.bases) : null;
     if (c) {
       ocupar(c);
       const livros = catalogo.livrosRaros.length > 0 ? [...new Set([escolher(rng, catalogo.livrosRaros), escolher(rng, catalogo.livrosRaros)])] : [];
-      const peca = base ? [idItemBase(base, 'lendaria', null, Math.min(20, p.nivelInimigos), inteiro(rng, 0, 0x7fffffff))] : [];
+      const peca = base ? [idItemBase(base, 'lendaria', null, Math.min(BALANCE_PADRAO.xp.nivelMax, p.nivelInimigos), inteiro(rng, 0, 0x7fffffff))] : [];
       objetos.push({ tipo: 'loja', x: normalizado(c.x, largura), y: normalizado(c.y, altura), estoque: [...livros, ...peca, 'pocao_vida'] });
     }
   }
@@ -266,7 +266,7 @@ function aplicarEventos(
     const base = catalogo.basesDeConjunto.length > 0 ? escolher(rng, catalogo.basesDeConjunto) : null;
     if (c && base) {
       ocupar(c);
-      const peca = idItemBase(base, 'epica', null, Math.min(20, p.nivelInimigos), inteiro(rng, 0, 0x7fffffff));
+      const peca = idItemBase(base, 'epica', null, Math.min(BALANCE_PADRAO.xp.nivelMax, p.nivelInimigos), inteiro(rng, 0, 0x7fffffff));
       objetos.push({ tipo: 'bau', x: normalizado(c.x, largura), y: normalizado(c.y, altura), loot: [peca], ouro: 60, chave: 'chave_cripta' });
     }
   }

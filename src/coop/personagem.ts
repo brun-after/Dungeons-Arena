@@ -13,10 +13,11 @@ import { criarJogador } from '../entities/fabrica';
 import type { Alteracao, PreviaDeFicha } from '../arena/ficha-sessao';
 import { SLOTS_DE_EQUIPAMENTO } from '../modos/modo';
 import { recalcularFicha } from '../progression/derivados';
-import { caminhosDoRank, nivelParaRank } from '../progression/habilidades-personagem';
+import { caminhosDoRank, nivelParaRank, ticksDeEstudo } from '../progression/habilidades-personagem';
 import { empilha } from '../progression/inventario';
 import { NOMES_ATRIBUTOS } from '../progression/itens';
 import { xpParaProximo } from '../progression/nivel';
+import { ticksDe } from '../core/tempo';
 import { jogadorDoSave, type RegistroProgresso } from '../save/esquema';
 
 const MAX_NOME = 24;
@@ -78,8 +79,10 @@ function conferirConhecida(v: unknown, nivel: number, ctx: ContextoSimulacao): H
   const caminhos: string[] = [];
   for (const r of ctx.balance.habilidades.ranksEvolucao) {
     if (r > rank) break;
+    const opcoes = caminhosDoRank(ctx, id, r);
+    if (opcoes.length === 0) continue;
     const escolhido = pedidos[caminhos.length];
-    if (escolhido === undefined || !caminhosDoRank(ctx, id, r).includes(escolhido)) {
+    if (escolhido === undefined || !opcoes.includes(escolhido)) {
       rank = r - 1;
       break;
     }
@@ -101,7 +104,7 @@ function conferirHabilidades(b: Objeto, bolsa: Bolsa, nivel: number, ctx: Contex
   bolsa.conhecidas = conhecidas;
   bolsa.pontosHabilidade = Math.max(0, inteiro(b.pontosHabilidade) ?? 0);
   // Cada rank acima do 1 custou um ponto; o 1 pode ter vindo de livro (sem ponto) ou da classe.
-  const orcamento = (nivel - 1) * ctx.balance.habilidades.pontosPorNivel;
+  const orcamento = (nivel - 1) * ctx.balance.habilidades.pontosPorNivel + (bolsa.pontosPorItens ?? 0) + (bolsa.ranksPorItens ?? 0);
   let excesso = conhecidas.reduce((s, c) => s + c.rank - 1, 0) + bolsa.pontosHabilidade - orcamento;
   const livres = Math.min(Math.max(0, excesso), bolsa.pontosHabilidade);
   bolsa.pontosHabilidade -= livres;
@@ -164,11 +167,23 @@ export function conferirPersonagem(pedido: unknown, ctx: ContextoSimulacao, id: 
   e.nivel = limitar(inteiro(pedido.nivel) ?? 1, 1, ctx.balance.xp.nivelMax);
   e.xp = limitar(inteiro(pedido.xp) ?? 0, 0, xpParaProximo(e.nivel, ctx.balance.xp) - 1);
   conferirAtributos(b, bolsa, e.nivel, ctx, classe.atributos);
+  for (const campo of ['tomosComprados', 'pontosPorItens', 'ranksPorItens', 'xpLegado'] as const) {
+    if (b[campo] !== undefined) bolsa[campo] = limitar(inteiro(b[campo]) ?? 0, 0, 1_000_000);
+  }
+  if (bolsa.pontosPorItens !== undefined) bolsa.pontosPorItens = Math.min(bolsa.pontosPorItens, bolsa.tomosComprados ?? 0);
+  if (b.xpFracao !== undefined) bolsa.xpFracao = typeof b.xpFracao === 'number' && Number.isFinite(b.xpFracao) && b.xpFracao >= 0 && b.xpFracao < 1 ? b.xpFracao : 0;
   conferirHabilidades(b, bolsa, e.nivel, ctx);
   conferirItens(b, bolsa, e.nivel, ctx);
   // Marco 17: a identidade do personagem passa adiante (o certificado se prende a ela).
   bolsa.personagemId = typeof b.personagemId === 'string' && /^[0-9a-zA-Z-]{8,64}$/.test(b.personagemId) ? b.personagemId : '';
   recalcularFicha(e, ctx);
+  const estudoPedido = b.estudo;
+  if (ehObjeto(estudoPedido) && typeof estudoPedido.id === 'string' && definicaoDe(ctx, estudoPedido.id) && !bolsa.conhecidas.some((c) => c.id === estudoPedido.id)) {
+    const totalTicks = limitar(inteiro(estudoPedido.totalTicks) ?? ticksDeEstudo(ctx, e, estudoPedido.id), 1,
+      ticksDe(Math.max(ctx.balance.habilidades.estudo.B, ctx.balance.habilidades.estudo.A, ctx.balance.habilidades.estudo.S)));
+    bolsa.estudo = { id: estudoPedido.id, totalTicks, restanteTicks: limitar(inteiro(estudoPedido.restanteTicks) ?? totalTicks, 1, totalTicks), aceleracoes: 0,
+      velocidade12: limitar(inteiro(estudoPedido.velocidade12) ?? 12, 12, 12_000_000), fracao12: limitar(inteiro(estudoPedido.fracao12) ?? 0, 0, 11) };
+  }
   e.hp = e.hpMax;
   e.mana = e.manaMax;
 
@@ -185,6 +200,9 @@ export function conferirPersonagem(pedido: unknown, ctx: ContextoSimulacao, id: 
   registrar('conhecidas', b.conhecidas, bolsa.conhecidas);
   registrar('pontosHabilidade', b.pontosHabilidade, bolsa.pontosHabilidade);
   registrar('ouro', b.ouro, bolsa.ouro);
+  for (const campo of ['tomosComprados', 'pontosPorItens', 'ranksPorItens', 'xpFracao', 'xpLegado'] as const) {
+    if (b[campo] !== undefined) registrar(campo, b[campo], bolsa[campo] ?? 0);
+  }
   // Itens: compara só o que importa (id e quantidade), não os invIds renumerados.
   const resumo = (v: unknown) => (ehObjeto(v) && typeof v.itemId === 'string' ? `${v.itemId}×${String(inteiro(v.qtd) ?? 1)}` : null);
   registrar('mochila', lista(b.mochila).map(resumo), bolsa.mochila.map(resumo));
