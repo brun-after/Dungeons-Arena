@@ -85,10 +85,23 @@ export function avaliarCrescimento(
   let vendidos = 0;
   for (const [id, q] of depois) novos += Math.max(0, q - (antes.get(id) ?? 0));
   for (const [id, q] of antes) vendidos += Math.max(0, q - (depois.get(id) ?? 0)) * valorDeVenda(id);
+  const campos = ['tomosComprados', 'pontosPorItens', 'ranksPorItens'] as const;
+  for (const campo of campos) if ((novo.bolsa[campo] ?? 0) < (anterior.bolsa[campo] ?? 0)) return { ok: false, motivo: 'itens_demais' };
+  const pontosNovos = (novo.bolsa.pontosPorItens ?? 0) - (anterior.bolsa.pontosPorItens ?? 0);
+  const ranksNovos = (novo.bolsa.ranksPorItens ?? 0) - (anterior.bolsa.ranksPorItens ?? 0);
+  if (pontosNovos + ranksNovos > r.itensPorMinuto * minutos + r.folgaItens) return { ok: false, motivo: 'itens_demais' };
   if (novos > r.itensPorMinuto * minutos + r.folgaItens) return { ok: false, motivo: 'itens_demais' };
 
   const ganhoOuro = novo.bolsa.ouro - anterior.bolsa.ouro;
   if (ganhoOuro > r.ouroPorMinuto * minutos + r.folgaOuro + vendidos) return { ok: false, motivo: 'ouro_demais' };
+  // D-075: o contador que amplia o orçamento de habilidades também precisa caber na economia observável.
+  const antesTomos = anterior.bolsa.tomosComprados ?? 0;
+  const compras = (novo.bolsa.tomosComprados ?? 0) - antesTomos;
+  const precos = balance.progressaoItens;
+  const custoBase = compras * precos.tomoPrecoBase;
+  const custoMinimo = custoBase * (1 - balance.atributos.efeitos.descontoMaxPct / 100);
+  const disponivel = anterior.bolsa.ouro + r.ouroPorMinuto * minutos + r.folgaOuro + vendidos - novo.bolsa.ouro;
+  if (custoMinimo > disponivel) return { ok: false, motivo: 'itens_demais' };
   return { ok: true };
 }
 

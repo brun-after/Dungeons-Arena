@@ -1,5 +1,5 @@
 {
-  "versao": 2,
+  "versao": 3,
   "itens": [
     {
       "id": "espada_curta",
@@ -908,6 +908,309 @@
       "bonusDefesa": 0,
       "dropavel": false,
       "ensina": "chuva_de_estrelas"
+    },
+    {
+      "id": "aceleracao_mente_comum",
+      "nome": "Aceleração da mente comum",
+      "tipo": "consumivel",
+      "descricao": "Aumenta a velocidade do estudo atual em +25% até sua conclusão. Bônus cumulativo; exige estudo em andamento.",
+      "icone": "livro",
+      "raridade": "comum",
+      "valorBase": 150,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false,
+      "progressao": {
+        "tipo": "aceleracao",
+        "unidades12": 3
+      }
+    },
+    {
+      "id": "aceleracao_mente_incomum",
+      "nome": "Aceleração da mente incomum",
+      "tipo": "consumivel",
+      "descricao": "Aumenta a velocidade do estudo atual em +33⅓% até sua conclusão. Bônus cumulativo; exige estudo em andamento.",
+      "icone": "livro",
+      "raridade": "incomum",
+      "valorBase": 200,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false,
+      "progressao": {
+        "tipo": "aceleracao",
+        "unidades12": 4
+      }
+    },
+    {
+      "id": "aceleracao_mente_rara",
+      "nome": "Aceleração da mente rara",
+      "tipo": "consumivel",
+      "descricao": "Aumenta a velocidade do estudo atual em +50% até sua conclusão. Bônus cumulativo; exige estudo em andamento.",
+      "icone": "livro",
+      "raridade": "raro",
+      "valorBase": 300,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false,
+      "progressao": {
+        "tipo": "aceleracao",
+        "unidades12": 6
+      }
+    },
+    {
+      "id": "tomo_potencial",
+      "nome": "Tomo do potencial",
+      "tipo": "consumivel",
+      "descricao": "Concede 1 ponto de habilidade. Preço-base fixo de 10.000 ouro, sujeito ao desconto de Carisma.",
+      "icone": "livro",
+      "raridade": "epico",
+      "valorBase": 10000,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false,
+      "progressao": {
+        "tipo": "ponto"
+      }
+    },
+    {
+      "id": "essencia_fogo",
+      "nome": "Essência de fogo",
+      "tipo": "consumivel",
+      "descricao": "Sobe um rank de uma habilidade conhecida da família fogo. Respeita nível mínimo e escolha de evolução. Substitui um ponto de habilidade.",
+      "icone": "livro",
+      "raridade": "raro",
+      "valorBase": 2000,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false,
+      "progressao": {
+        "tipo": "rank",
+        "familia": "fogo"
+      }
+    },
+    {
+      "id": "essencia_gelo",
+      "nome": "Essência de gelo",
+      "tipo": "consumivel",
+      "descricao": "Sobe um rank de uma habilidade conhecida da família gelo. Respeita nível mínimo e escolha de evolução. Substitui um ponto de habilidade.",
+      "icone": "livro",
+      "raridade": "raro",
+      "valorBase": 2000,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false,
+      "progressao": {
+        "tipo": "rank",
+        "familia": "gelo"
+      }
+    },
+    {
+      "id": "essencia_raio",
+      "nome": "Essência de raio",
+      "tipo": "consumivel",
+      "descricao": "Sobe um rank de uma habilidade conhecida da família raio. Respeita nível mínimo e escolha de evolução. Substitui um ponto de habilidade.",
+      "icone": "livro",
+      "raridade": "raro",
+      "valorBase": 2000,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false,
+      "progressao": {
+        "tipo": "rank",
+        "familia": "raio"
+      }
+    },
+    {
+      "id": "essencia_veneno",
+      "nome": "Essência de veneno",
+      "tipo": "consumivel",
+      "descricao": "Sobe um rank de uma habilidade conhecida da família veneno. Respeita nível mínimo e escolha de evolução. Substitui um ponto de habilidade.",
+      "icone": "livro",
+      "raridade": "raro",
+      "valorBase": 2000,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false,
+      "progressao": {
+        "tipo": "rank",
+        "familia": "veneno"
+      }
+    },
+    {
+      "id": "essencia_terra",
+      "nome": "Essência de terra",
+      "tipo": "consumivel",
+      "descricao": "Sobe um rank de uma habilidade conhecida da família terra. Respeita nível mínimo e escolha de evolução. Substitui um ponto de habilidade.",
+      "icone": "livro",
+      "raridade": "raro",
+      "valorBase": 2000,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false,
+      "progressao": {
+        "tipo": "rank",
+        "familia": "terra"
+      }
+    },
+    {
+      "id": "essencia_sombra",
+      "nome": "Essência de sombra",
+      "tipo": "consumivel",
+      "descricao": "Sobe um rank de uma habilidade conhecida da família sombra. Respeita nível mínimo e escolha de evolução. Substitui um ponto de habilidade.",
+      "icone": "livro",
+      "raridade": "raro",
+      "valorBase": 2000,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false,
+      "progressao": {
+        "tipo": "rank",
+        "familia": "sombra"
+      }
+    },
+    {
+      "id": "essencia_sagrado",
+      "nome": "Essência de luz sagrada",
+      "tipo": "consumivel",
+      "descricao": "Sobe um rank de uma habilidade conhecida da família luz sagrada. Respeita nível mínimo e escolha de evolução. Substitui um ponto de habilidade.",
+      "icone": "livro",
+      "raridade": "raro",
+      "valorBase": 2000,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false,
+      "progressao": {
+        "tipo": "rank",
+        "familia": "sagrado"
+      }
+    },
+    {
+      "id": "essencia_psiquico",
+      "nome": "Essência de mente",
+      "tipo": "consumivel",
+      "descricao": "Sobe um rank de uma habilidade conhecida da família mente. Respeita nível mínimo e escolha de evolução. Substitui um ponto de habilidade.",
+      "icone": "livro",
+      "raridade": "raro",
+      "valorBase": 2000,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false,
+      "progressao": {
+        "tipo": "rank",
+        "familia": "psiquico"
+      }
+    },
+    {
+      "id": "essencia_tecnica",
+      "nome": "Essência de técnicas marciais",
+      "tipo": "consumivel",
+      "descricao": "Sobe um rank de uma habilidade conhecida da família técnicas marciais. Respeita nível mínimo e escolha de evolução. Substitui um ponto de habilidade.",
+      "icone": "livro",
+      "raridade": "raro",
+      "valorBase": 2000,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false,
+      "progressao": {
+        "tipo": "rank",
+        "familia": "tecnica"
+      }
+    },
+    {
+      "id": "essencia_arcana",
+      "nome": "Essência de magia arcana",
+      "tipo": "consumivel",
+      "descricao": "Sobe um rank de uma habilidade conhecida da família magia arcana. Respeita nível mínimo e escolha de evolução. Substitui um ponto de habilidade.",
+      "icone": "livro",
+      "raridade": "raro",
+      "valorBase": 2000,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false,
+      "progressao": {
+        "tipo": "rank",
+        "familia": "arcana"
+      }
+    },
+    {
+      "id": "essencia_suporte",
+      "nome": "Essência de suporte",
+      "tipo": "consumivel",
+      "descricao": "Sobe um rank de uma habilidade conhecida da família suporte. Respeita nível mínimo e escolha de evolução. Substitui um ponto de habilidade.",
+      "icone": "livro",
+      "raridade": "raro",
+      "valorBase": 2000,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false,
+      "progressao": {
+        "tipo": "rank",
+        "familia": "suporte"
+      }
+    },
+    {
+      "id": "essencia_fusao",
+      "nome": "Essência de fusão",
+      "tipo": "consumivel",
+      "descricao": "Sobe um rank de uma habilidade conhecida da família fusão. Respeita nível mínimo e escolha de evolução. Substitui um ponto de habilidade.",
+      "icone": "livro",
+      "raridade": "raro",
+      "valorBase": 2000,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false,
+      "progressao": {
+        "tipo": "rank",
+        "familia": "fusao"
+      }
     }
   ]
 }

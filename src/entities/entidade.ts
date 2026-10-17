@@ -154,6 +154,12 @@ export interface Bolsa {
   /** As 4 teclas (1–4): ids de habilidades conhecidas, ou null. `Entidade.habilidades` deriva daqui. */
   barra: (string | null)[];
   pontosHabilidade: number;
+  /** D-075 (17/10/2026): origens permanentes dos ganhos por consumíveis e saldo fracionário de XP. */
+  tomosComprados?: number;
+  pontosPorItens?: number;
+  ranksPorItens?: number;
+  xpFracao?: number;
+  xpLegado?: number;
   /**
    * Marco 17 (D-063): identidade do personagem (UUID), dada pelo cliente ao criar; vazia nos saves antigos até o
    * jogo dar uma. O certificado da arena se prende a ela.
@@ -173,8 +179,11 @@ export interface Estudo {
   id: string;
   totalTicks: number;
   restanteTicks: number;
-  /** Pontos gastos para acelerar (cada um tira 1/3 do total). */
+  /** Legado: apenas migração/reembolso dos pontos antigos. */
   aceleracoes: number;
+  /** D-075: velocidade em doze avos e resto do progresso, sem arredondar cada tick. */
+  velocidade12?: number;
+  fracao12?: number;
 }
 
 /**

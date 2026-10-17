@@ -139,8 +139,10 @@ export function lerComando(v: unknown): Comando | null {
     // Marco 15: os comandos de personagem; quem decide se valem é o modo da sala (`comandosDeRede`).
     case 'subirRank':
       if (!id(v.id)) return null;
-      if (v.caminho === undefined) return { t: 'subirRank', id: v.id };
-      return id(v.caminho) ? { t: 'subirRank', id: v.id, caminho: v.caminho } : null;
+      if (v.caminho !== undefined && !id(v.caminho)) return null;
+      if (v.invId !== undefined && !id(v.invId)) return null;
+      if (v.rankEsperado !== undefined && (typeof v.rankEsperado !== 'number' || !Number.isInteger(v.rankEsperado) || v.rankEsperado < 1 || v.rankEsperado > 5)) return null;
+      return { t: 'subirRank', id: v.id, ...(typeof v.caminho === 'string' ? { caminho: v.caminho } : {}), ...(typeof v.invId === 'string' ? { invId: v.invId } : {}), ...(typeof v.rankEsperado === 'number' ? { rankEsperado: v.rankEsperado } : {}) };
     case 'acelerarEstudo':
       return { t: 'acelerarEstudo' };
     case 'forjar':

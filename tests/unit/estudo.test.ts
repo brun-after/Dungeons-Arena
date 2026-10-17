@@ -1,6 +1,6 @@
 // Marco 18 (17/10/2026, D-068): aprender uma habilidade é um estudo. O tempo vem do grau (B 15 min, A 30 min, S 1 h),
 // a Inteligência encurta, só anda com o jogo rodando (tick de simulação, nos modos em que vale), um por vez, e cada
-// ponto extra tira 1/3 do total.
+// D-075: a aceleração por ponto foi retirada; os consumíveis aumentam a velocidade.
 
 import { describe, expect, it } from 'vitest';
 import { buscarEntidade, criarEstado } from '../../src/core/estado';
@@ -61,22 +61,16 @@ describe('estudo de habilidades', () => {
     expect(c.eventos.some((e) => e.t === 'estudoConcluido')).toBe(true);
   });
 
-  it('cada ponto extra tira 1/3 do total (não do que falta); 3 terminam na hora; o quarto é recusado', () => {
+  it('comando legado não acelera nem gasta pontos', () => {
     const c = cena();
     c.bolsa.pontosHabilidade = 5;
     c.tick({ t: 'subirRank', id: 'mente_partida' });
     const estudo = obter(c.bolsa.estudo ?? undefined, 'estudo');
-    const total = estudo.totalTicks;
-    for (let i = 0; i < 10; i++) c.tick();
+    const antes = estudo.restanteTicks;
     c.tick({ t: 'acelerarEstudo' });
-    // O tick do pedido e os 10 seguintes contam, e o da aceleração também.
-    expect(estudo.restanteTicks).toBe(total - 12 - Math.ceil(total / 3));
-    c.tick({ t: 'acelerarEstudo' });
-    c.tick({ t: 'acelerarEstudo' });
-    expect(c.bolsa.estudo).toBeNull();
-    expect(c.bolsa.pontosHabilidade).toBe(1);
-    c.tick({ t: 'acelerarEstudo' });
-    expect(c.eventos.at(-1)).toMatchObject({ t: 'habilidadeRecusada', motivo: 'sem_estudo' });
+    expect(estudo.restanteTicks).toBe(antes - 1);
+    expect(c.bolsa.pontosHabilidade).toBe(4);
+    expect(c.eventos.at(-1)).toMatchObject({ t: 'habilidadeRecusada', motivo: 'usar_acelerador' });
   });
 
   it('na arena (modo sem estudo) a contagem não anda', () => {

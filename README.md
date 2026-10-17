@@ -1,9 +1,12 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.5 · **Data:** 17/10/2026
+**Versão do documento:** 3.8 · **Data:** 17/10/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena
 
 > **Histórico**
+> - **3.8 (17/10/2026)**: interação e alvo mais à esquerda, ponto de habilidade com preço-base fixo de 10.000 ouro e mochila aberta ao trocar equipamentos (D-076).
+> - **3.7 (17/10/2026)**: limite 30, XP avançado por dificuldade, Aceleração da mente cumulativa, Tomo do potencial e essências de evolução por família (D-075; saves v15).
+> - **3.6 (17/10/2026)**: afinidade de custo mágico do aventureiro e do mago recalibrada para a mana reduzida; 77/77 metas de balanceamento aprovadas (D-074).
 > - **3.5 (17/10/2026)**: regeneração de mana reduzida pela metade, interação e alvo em fileira à direita no toque e nomes curtos nos consumíveis dos dois dispositivos (D-073).
 > - **3.4 (17/10/2026)**: avisos e alvo em faixa comum junto ao topo no celular, texto compacto e barra do alvo com a mesma medida da vida do jogador, sem sobreposição (D-072).
 > - **3.3 (17/10/2026)**: NPCs inimigos recuperam 50% da vida perdida ao abater; chefes regeneram fora de combate; especialização ofensiva e ritmo recalibrados; descobertas por pseudônimo e contagem no lobby; e2e do estudo de habilidades (D-071).

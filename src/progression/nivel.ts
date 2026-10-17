@@ -12,6 +12,18 @@ export function xpParaProximo(nivel: number, xp: Balance['xp']): number {
   return xp.tabela[nivel - 1] ?? nivel * xp.fallbackPorNivel;
 }
 
+/** D-075: acumula frações para que penalidade e antifarm não virem sempre 1 XP por abate. */
+export function concederXpDeProgressao(e: Entidade, ctx: ContextoSimulacao, valor: number, tick: number, saida: EventoSimulacao[]): void {
+  const total = Math.max(0, valor) + (e.bolsa?.xpFracao ?? 0);
+  const inteiro = Math.floor(total + 1e-9);
+  if (e.bolsa) e.bolsa.xpFracao = Math.max(0, total - inteiro);
+  if (inteiro > 0) {
+    e.xp += inteiro;
+    saida.push({ t: 'xpGanho', tick, id: e.id, xp: inteiro });
+    aplicarSubidas(e, ctx, tick, saida);
+  }
+}
+
 export function aplicarSubidas(e: Entidade, ctx: ContextoSimulacao, tick: number, saida: EventoSimulacao[]): void {
   if (!e.bolsa) return;
   const regras = ctx.balance.xp;

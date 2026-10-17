@@ -4,6 +4,7 @@
 
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import { DT_MS } from '../core/loop';
+import { ticksRestantesDoEstudo } from '../progression/habilidades-personagem';
 import type { Entidade } from '../entities/entidade';
 import { t } from '../i18n';
 import { icone } from './icones';
@@ -25,7 +26,7 @@ export class BuffsPendentes {
     if (!e) return;
     const armados = e.buffsArmados.map((b) => ({ tipo: b.efeito.tipo, s: Math.max(0, Math.ceil(((b.ateTick - tick) * DT_MS) / 1000)) }));
     const estudo = e.bolsa?.estudo ?? null;
-    const restante = estudo ? relogio(estudo.restanteTicks * DT_MS) : '';
+    const restante = estudo ? relogio(ticksRestantesDoEstudo(estudo) * DT_MS) : '';
     const chave = `${armados.map((a) => `${a.tipo}:${a.s}`).join(',')}|${e.refugio}|${estudo?.id ?? ''}:${restante}`;
     if (chave === this.ultimo) return;
     this.ultimo = chave;

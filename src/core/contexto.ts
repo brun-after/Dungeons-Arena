@@ -14,6 +14,7 @@ import type { RegrasItensGerados } from '../progression/gerar-item';
 import type { Conteudo } from './conteudo';
 
 export interface Balance {
+  progressaoItens: { tomoPrecoBase: number; aceleracaoIncomumChancePct: number; aceleracaoRaraChancePct: number; essenciaChancePct: number; essenciaBossChancePct: number };
   versao: number;
   movimento: {
     /** Milissegundos por célula na destreza 10 (§2.3). */
@@ -79,6 +80,7 @@ export interface Balance {
     pontosPorNivel: number;
     /** Aumento automático de HP base por nível acima do 1º. */
     hpPorNivel: number;
+    faixaAvancada: { nivelInicio: number; percentuais: Record<Dificuldade, number> };
   };
   /** Efeitos (§2.8): dano, cura e recurso periódicos aplicam a cada intervalo. */
   efeitos: {

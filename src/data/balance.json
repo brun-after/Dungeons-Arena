@@ -1,5 +1,6 @@
 {
-  "versao": 19,
+  "versao": 22,
+  "progressaoItens": { "tomoPrecoBase": 10000, "aceleracaoIncomumChancePct": 30, "aceleracaoRaraChancePct": 10, "essenciaChancePct": 2, "essenciaBossChancePct": 20 },
   "movimento": {
     "velocidadeBaseMs": 400,
     "filaMaxWaypoints": 2
@@ -58,9 +59,10 @@
     "decaimentoAntifarm": 0.8,
     "tabela": [30, 60, 100, 150, 220, 300, 400, 520, 660, 820],
     "fallbackPorNivel": 100,
-    "nivelMax": 20,
+    "nivelMax": 30,
     "pontosPorNivel": 3,
-    "hpPorNivel": 5
+    "hpPorNivel": 5,
+    "faixaAvancada": { "nivelInicio": 20, "percentuais": { "facil": 5, "normal": 10, "dificil": 35, "pesadelo": 170 } }
   },
   "efeitos": {
     "intervaloPeriodicoMs": 1000,
@@ -135,7 +137,7 @@
   },
   "habilidades": {
     "pontosPorNivel": 1,
-    "estudo": { "B": 900000, "A": 1800000, "S": 3600000, "reducaoPorIntPct": 2, "reducaoMaxPct": 40, "aceleracoes": 3 },
+    "estudo": { "B": 900000, "A": 1800000, "S": 3600000, "reducaoPorIntPct": 2, "reducaoMaxPct": 40 },
     "velocidadeConjurandoLenta": 0.5,
     "rankMax": 5,
     "ranksEvolucao": [3, 5],
@@ -219,7 +221,7 @@
     "pesoRaridade": { "comum": 50, "incomum": 30, "raro": 14, "epico": 5, "lendario": 1, "ultima": 0 },
     "chanceElemental": 0.3,
     "raridadePorNivelPct": 8,
-    "nivelMax": 20
+    "nivelMax": 30
   },
   "integridade": {
     "nivelSemHistorico": 5,

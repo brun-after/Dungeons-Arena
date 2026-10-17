@@ -1,8 +1,11 @@
 # Decisões de projeto
 
-**Versão:** 0.37 · **Data:** 17/10/2026
+**Versão:** 0.40 · **Data:** 17/10/2026
 
 > **Histórico**
+> - **0.40 (17/10/2026)**: D-076 (controles afastados das skills, tomo a preço fixo e troca de equipamentos sem fechar a mochila).
+> - **0.39 (17/10/2026)**: D-075 (progressão até 30 e consumíveis de aprendizagem e evolução).
+> - **0.38 (17/10/2026)**: D-074 (eficiência mágica do aventureiro e do mago após a redução de mana; 77/77 metas).
 > - **0.37 (17/10/2026)**: D-073 (mana reduzida em 50%, controles à direita e consumíveis legíveis).
 > - **0.36 (17/10/2026)**: D-072 (HUD compacto no topo do celular; avisos e alvo sem sobreposição).
 > - **0.35 (17/10/2026)**: D-071 (recuperação dos inimigos, especialização ofensiva, ritmo, descobertas públicas por pseudônimo e cobertura do estudo).
@@ -1897,3 +1900,113 @@ aventureiro nível 5 leva 8,5 s contra comum (meta 4–7 s); mago nível 5 leva 
 mago solo vence o chefe em 25% dos cenários (meta 50–100%). O teste de ritmo do aventureiro
 nível 5 também falha no teto de 8 s. Essas metas e testes permanecem ativos, sem recalibrar
 classes fora do pedido. Uma eventual recalibração exige uma decisão de balanceamento separada.
+
+## D-074 · Eficiência mágica após a redução de mana (v0.38, 17/10/2026)
+
+**Contexto.** A D-073 reduziu a regeneração de mana pela metade. O simulador completo confirmou 74/77 metas:
+o aventureiro nível 5 levava 8,5 s contra comuns, o mago nível 5 levava 3,7 s e o mago solo vencia o chefe em
+apenas 2/8 sementes. O usuário pediu o rebalanceamento após esse commit.
+
+**Decisão.** Aventureiro e mago recebem afinidade de −20% no custo das habilidades com a etiqueta `magico`,
+em classes.json. A afinidade usa o mecanismo existente, com arredondamento inteiro do custo final: não
+significa que todo feitiço ficará exatamente 20% mais barato. Vale para habilidades iniciais e aprendidas com
+essa etiqueta, incluindo suporte. A regeneração segue em 0,5 mana/s e 0,5 por célula, com o mesmo bônus de
+Sabedoria da D-073. Atributos, vida, dano, tempos de conjuração, metas e cenários do simulador são preservados.
+Balance passa à versão 20, e o catálogo de classes à versão 3.
+
+**Evidência.** Nas mesmas oito sementes do relatório completo:
+
+| Critério | Após D-073 | Após D-074 | Meta |
+|---|---|---|---|
+| Comum: aventureiro nível 5 | 8,5 s | 5,6 s | 4–7 s |
+| Comum: mago nível 5 | 3,7 s | 4,1 s | 4–7 s |
+| Chefe: vitórias do mago solo | 25% (2/8) | 75% (6/8) | 50–100% |
+
+O mago leva 38,2 s nas vitórias contra o chefe (meta 25–40 s). O menor custo muda a sequência de conjurações,
+recargas e rolagens, por isso mais eficiência de mana não implica uma luta mais curta em toda amostra.
+O conjunto completo aprova 77/77 metas, incluindo PvP Livre, grupos, builds, resistência e avisos inimigos.
+As porcentagens descrevem as sementes fixas, sem garantir toda combinação possível de ficha e habilidade.
+
+**Consequência.** A recuperação de mana continua menor, com eficiência mágica própria das duas classes que
+regrediram. O relatório docs/BALANCEAMENTO.md passa a registrar os resultados da versão 20.
+
+
+## D-075 · Nível 30 e consumíveis de aprendizagem e evolução (v0.39, 17/10/2026)
+
+**Pedido.** Aplicar docs/PLANO-PROGRESSAO.md, aprovado pelo usuário: retirar o gasto de pontos para
+acelerar estudo, criar aceleração cumulativa por item, aumentar o limite para 30, orientar a progressão
+21–30 a Pesadelo e acrescentar compra de pontos e evolução de habilidades por família.
+
+**Decisão.**
+- Aceleração da mente comum/incomum/rara soma +25%, +33⅓% e +50% à velocidade do estudo atual,
+  até ele terminar. Preços-base 150/200/300 ouro. Dois raros dão 2×; um de cada dá 25/12×.
+  Não corta trabalho instantaneamente nem gasta pontos. Avanço em ticks, com fração em doze avos,
+  respeitando pausa e os modos. Consumir sem estudo é recusado. Inteligência e equipamentos continuam
+  definindo a quantidade inicial de trabalho. A próxima habilidade começa em 1×.
+- Todas as lojas de modos com estudo oferecem o comum e o Tomo do potencial; incomum/raro aparecem
+  adicionalmente com chances de 30%/10%. A oferta deriva da identidade e posição da loja/fase, sem
+  alterar o RNG de combate, e permanece igual ao reabrir e carregar. Inclui lojas antigas e mercadores.
+- Tomo do potencial dá +1 ponto livre. Custa 15.000 ouro inicialmente e +15.000 por compra anterior
+  daquele personagem, antes do desconto normal de Carisma. O contador cresce na compra, inclusive
+  se a unidade for guardada. Saldo e espaço são conferidos antes de cobrar.
+- Essências sobem um rank de habilidade conhecida substituindo um ponto, mantendo requisitos,
+  máximo 5 e escolha de caminho nos ranks 3/5. A família original é explícita no catálogo;
+  habilidades geradas usam a base imutável. Evoluções elementais não mudam a família. Oito elementos,
+  técnica marcial, magia arcana, suporte e fusão cobrem o conteúdo e as passivas. Na mochila, usar
+  abre a seleção de habilidades; na aba Habilidades, ponto e essência são pagamentos distintos.
+  Consumo só acontece após uma evolução válida. A confirmação leva o rank esperado para evitar
+  que um clique repetido confirme uma segunda evolução sem revisão.
+- Essências têm drops temáticos independentes do RNG principal: 2% no primeiro abate de comuns e
+  20% no primeiro abate de chefes; o chefe fornece essência de fusão. A forja permite converter
+  duas essências em uma arcana, e duas arcanas mais 500 ouro em outra família (técnica→arcana
+  também custa 500). As probabilidades não entram no pool normal de poções/equipamentos.
+- Nível máximo 30, mantendo +3 atributos/+1 habilidade/+5 vida base por nível. Atributos efetivos
+  continuam limitados a 30; habilidades a rank 5; barra a quatro. Equipamento gerado, fases,
+  editor, validações e importação passam a aceitar 30; limites próprios da arena são preservados.
+- A partir do nível 20 (subida para 21), XP por dificuldade corresponde a 5%/10%/35%/170% da
+  referência Normal anterior, para Fácil/Normal/Difícil/Pesadelo. Substitui somente o fator de XP,
+  mantendo grupo e antifarm; não reduz ouro nem loot. A fração é acumulada por personagem e não
+  vira um mínimo artificial de 1 XP. Grupos mistos aplicam a faixa por destinatário. A curva
+  necessária segue o fallback nível × 100; a progressão até 20 fica preservada.
+- O plano começava Pesadelo em 100%. A medição de XP/min com equipamento raro mostrou que isso
+  ficava abaixo da referência Normal sem penalidade, devido ao combate mais demorado. A calibragem
+  para 170% compensa aproximadamente essa duração. Não é garantia de tempo idêntico para toda build.
+- Saves v15: reembolso dos pontos comprovados nas acelerações do estudo ativo, preservando o trabalho
+  restante; velocidade nova neutra. Estudos concluídos não têm histórico para reembolso retroativo.
+  Todo XP acumulado por quem estava no antigo teto 20 fica em `xpLegado`, visível na ficha, sem
+  desaparecer nem provocar níveis automáticos. Contadores de itens e frações persistem no save.
+- A conferência cooperativa conserva progressão financiada por itens; a certificação verifica seus
+  incrementos junto dos limites de aquisição e do custo mínimo dos tomos. Passivas sem caminhos
+  de evolução não são mais indevidamente cortadas ao rank 2 na conferência.
+
+**Validação e alcance.** O relatório completo conserva as 77 metas históricas e acrescenta cenários
+informativos nos níveis 20, 25 e 30, builds focadas/dispersas com equipamento raro, XP e ouro por minuto.
+O simulador passa a redistribuir pontos que excediam 30 no atributo principal, sem desperdiçá-los.
+Os cenários avançados usam bots e poucas sementes; não validam toda combinação de habilidades e
+itens nem garantem que toda build focada supere toda build híbrida. Renda de venda de loot é adicional
+à tabela de ouro direto e pode encurtar o tempo de compra dos tomos.
+
+**Consequência.** Pontos deixam de comprar espera menor. Aprender novas habilidades, desenvolver ranks
+por família e comprar pontos adicionais passam a competir com loot, ouro e equipamento. Valores e
+probabilidades permanecem nos dados para novas passadas de calibragem.
+
+
+## D-076 · Espaço dos controles, preço fixo e organização da mochila (v0.40, 17/10/2026)
+
+**Pedido.** Antes de commitar, mover interação e alvo para a esquerda em mais 100% da distância
+atual até a skill, cobrar 10.000 ouro fixos pelo ponto de habilidade e manter o menu aberto ao equipar.
+
+**Decisão.**
+- A folga horizontal entre o alvo e a primeira skill em paisagem passa de 7,5 para 15 px: a fileira
+  inteira se desloca 7,5 px para a esquerda, sem alterar altura ou distância entre os dois botões.
+  Em retrato estreito, a fileira recebe o mesmo deslocamento horizontal e conserva a posição acima da roda.
+- O Tomo do potencial passa a custar 10.000 ouro de base em todas as compras. O desconto normal de
+  Carisma continua aplicável. Retirada a regra e a configuração de encarecimento; o contador de compras
+  permanece apenas para registrar a origem dos ganhos e conferir a progressão, não para calcular preço.
+  Preço, descrição, certificação econômica e projeções de custo no relatório seguem a regra nova.
+- Equipar e desequipar não fecham a mochila no toque, permitindo organizar vários slots em sequência.
+  O desktop já mantinha a janela aberta. Os consumíveis conservam o comportamento de uso existente.
+
+**Validação.** Testes de compra repetida e certificação; e2e de preço e troca de dois equipamentos,
+incluindo desequipar, em desktop e celular. O e2e de controles verifica o deslocamento e a ausência de
+sobreposição em paisagem e retrato.

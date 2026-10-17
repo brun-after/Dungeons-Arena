@@ -6,6 +6,7 @@
 // - livros ensinam no rank 1, sem gastar ponto.
 // `Entidade.habilidades` é sempre derivada da barra (`habilidadesDaBarra`), como a ficha deriva da bolsa.
 
+import { familiaDaHabilidade } from './itens-progressao';
 import { definicaoDe } from '../combat/compilar-habilidade';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EventoSimulacao, MotivoHabilidade } from '../core/eventos-simulacao';
@@ -61,7 +62,7 @@ export function caminhosDoRank(ctx: ContextoSimulacao, id: string, rank: number)
 }
 
 /** Por que não dá para subir (ou aprender) agora; null = pode. `caminho` só é conferido quando dado. */
-export function motivoParaNaoSubir(ctx: ContextoSimulacao, e: Entidade, id: string, caminho?: string): MotivoHabilidade | null {
+export function motivoParaNaoSubir(ctx: ContextoSimulacao, e: Entidade, id: string, caminho?: string, invId?: string): MotivoHabilidade | null {
   const bolsa = e.bolsa;
   if (!bolsa) return 'sem_ficha';
   const def = definicaoDe(ctx, id);
@@ -76,7 +77,11 @@ export function motivoParaNaoSubir(ctx: ContextoSimulacao, e: Entidade, id: stri
   if (!conhecida && bolsa.estudo) return 'estudando';
   const novo = (conhecida?.rank ?? 0) + 1;
   if (novo > ctx.balance.habilidades.rankMax) return 'rank_maximo';
-  if (bolsa.pontosHabilidade <= 0) return 'sem_pontos';
+  if (invId !== undefined) {
+    const entrada = bolsa.mochila.find((i) => i.invId === invId && i.qtd > 0);
+    const item = entrada ? ctx.conteudo.itens.get(entrada.itemId) : undefined;
+    if (!conhecida || item?.progressao?.tipo !== 'rank' || item.progressao.familia !== familiaDaHabilidade(ctx, id)) return 'essencia_incompativel';
+  } else if (bolsa.pontosHabilidade <= 0) return 'sem_pontos';
   if (e.nivel < nivelParaRank(ctx, id, novo)) return 'nivel_baixo';
   const opcoes = caminhosDoRank(ctx, id, novo);
   if (caminho !== undefined && opcoes.length > 0 && !opcoes.includes(caminho)) return 'caminho_invalido';
@@ -95,8 +100,8 @@ function atualizar(e: Entidade, ctx: ContextoSimulacao): void {
   recalcularFicha(e, ctx);
 }
 
-export function subirRank(e: Entidade, ctx: ContextoSimulacao, id: string, caminho: string | undefined, tick: number, saida: EventoSimulacao[]): boolean {
-  const motivo = motivoParaNaoSubir(ctx, e, id, caminho);
+export function subirRank(e: Entidade, ctx: ContextoSimulacao, id: string, caminho: string | undefined, tick: number, saida: EventoSimulacao[], invId?: string, rankEsperado?: number): boolean {
+  const motivo = rankEsperado !== undefined && rankEsperado !== (e.bolsa?.conhecidas.find((c) => c.id === id)?.rank ?? 0) + 1 ? 'rank_desatualizado' : motivoParaNaoSubir(ctx, e, id, caminho, invId);
   const bolsa = e.bolsa;
   if (motivo || !bolsa) {
     saida.push({ t: 'habilidadeRecusada', tick, id: e.id, habilidadeId: id, motivo: motivo ?? 'sem_ficha' });
@@ -122,7 +127,14 @@ export function subirRank(e: Entidade, ctx: ContextoSimulacao, id: string, camin
     iniciarEstudo(e, ctx, id, tick, saida);
     return true;
   }
-  bolsa.pontosHabilidade--;
+  if (invId !== undefined) {
+    const entrada = bolsa.mochila.find((i) => i.invId === invId);
+    if (!entrada) return false;
+    entrada.qtd--;
+    bolsa.mochila = bolsa.mochila.filter((i) => i.qtd > 0);
+    bolsa.ranksPorItens = (bolsa.ranksPorItens ?? 0) + 1;
+    saida.push({ t: 'usouItem', tick, id: e.id, itemId: entrada.itemId, hp: 0, mana: 0 });
+  } else bolsa.pontosHabilidade--;
   conhecida.rank++;
   const escolhido = caminhosDoRank(ctx, id, conhecida.rank).length > 0 && caminho !== undefined ? caminho : null;
   if (escolhido) conhecida.caminhos.push(escolhido);
@@ -178,7 +190,7 @@ function iniciarEstudo(e: Entidade, ctx: ContextoSimulacao, id: string, tick: nu
   const bolsa = e.bolsa;
   if (!bolsa) return;
   const totalTicks = ticksDeEstudo(ctx, e, id);
-  bolsa.estudo = { id, totalTicks, restanteTicks: totalTicks, aceleracoes: 0 };
+  bolsa.estudo = { id, totalTicks, restanteTicks: totalTicks, aceleracoes: 0, velocidade12: 12, fracao12: 0 };
   saida.push({ t: 'estudoIniciado', tick, id: e.id, habilidadeId: id, totalTicks });
 }
 
@@ -197,28 +209,14 @@ function concluirEstudo(e: Entidade, ctx: ContextoSimulacao, tick: number, saida
   saida.push({ t: 'estudoConcluido', tick, id: e.id, habilidadeId: estudo.id });
 }
 
-/**
- * Comando `acelerarEstudo` (D-068): gasta 1 ponto de habilidade e tira 1/3 do tempo **total** do que falta; até
- * `estudo.aceleracoes` vezes (3 = instantâneo). Chegando a zero, conclui na hora.
- */
-export function acelerarEstudo(e: Entidade, ctx: ContextoSimulacao, tick: number, saida: EventoSimulacao[]): boolean {
-  const bolsa = e.bolsa;
-  const estudo = bolsa?.estudo;
-  const recusar = (motivo: MotivoHabilidade) => {
-    saida.push({ t: 'habilidadeRecusada', tick, id: e.id, habilidadeId: estudo?.id ?? '', motivo });
-    return false;
-  };
-  if (!bolsa) return recusar('sem_ficha');
-  if (!estudo) return recusar('sem_estudo');
-  if (estudo.aceleracoes >= ctx.balance.habilidades.estudo.aceleracoes) return recusar('aceleracoes_esgotadas');
-  if (bolsa.pontosHabilidade <= 0) return recusar('sem_pontos');
-  bolsa.pontosHabilidade--;
-  estudo.aceleracoes++;
-  estudo.restanteTicks = Math.max(0, estudo.restanteTicks - Math.ceil(estudo.totalTicks / ctx.balance.habilidades.estudo.aceleracoes));
-  saida.push({ t: 'estudoAcelerado', tick, id: e.id, habilidadeId: estudo.id, restanteTicks: estudo.restanteTicks });
-  if (estudo.restanteTicks <= 0) concluirEstudo(e, ctx, tick, saida);
-  return true;
+/** D-075 (17/10/2026): clientes antigos não podem mais gastar pontos para acelerar. */
+export function acelerarEstudo(e: Entidade, _ctx: ContextoSimulacao, tick: number, saida: EventoSimulacao[]): boolean {
+  saida.push({ t: 'habilidadeRecusada', tick, id: e.id, habilidadeId: e.bolsa?.estudo?.id ?? '', motivo: 'usar_acelerador' });
+  return false;
 }
+
+export const velocidadeDoEstudo = (estudo: NonNullable<Entidade['bolsa']>['estudo']): number => (estudo?.velocidade12 ?? 12) / 12;
+export const ticksRestantesDoEstudo = (estudo: NonNullable<Entidade['bolsa']>['estudo']): number => estudo ? Math.ceil((estudo.restanteTicks * 12 - (estudo.fracao12 ?? 0)) / (estudo.velocidade12 ?? 12)) : 0;
 
 /** Etapa do tick (D-068): o estudo anda um tick por tick de jogo, nos modos em que vale. */
 export function avancarEstudos(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
@@ -226,7 +224,9 @@ export function avancarEstudos(estado: EstadoJogo, ctx: ContextoSimulacao, saida
   for (const e of estado.entidades) {
     const estudo = e.bolsa?.estudo;
     if (!estudo) continue;
-    estudo.restanteTicks--;
+    const progresso = (estudo.fracao12 ?? 0) + (estudo.velocidade12 ?? 12);
+    estudo.restanteTicks -= Math.floor(progresso / 12);
+    estudo.fracao12 = progresso % 12;
     if (estudo.restanteTicks <= 0) concluirEstudo(e, ctx, estado.tick, saida);
   }
 }

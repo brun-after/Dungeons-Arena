@@ -37,7 +37,7 @@ export function criarBarraConsumiveis(ctx: ContextoSimulacao, emitir: (c: Comand
   let ultimo = '';
 
   const atualizar = (j: Entidade | undefined) => {
-    const lista = (j?.bolsa?.mochila ?? []).filter((i) => ctx.conteudo.itens.get(i.itemId)?.tipo === 'consumivel');
+    const lista = (j?.bolsa?.mochila ?? []).filter((i) => ctx.conteudo.itens.get(i.itemId)?.tipo === 'consumivel' && !ctx.conteudo.itens.get(i.itemId)?.progressao);
     const chave = lista.map((i) => `${i.invId}:${i.itemId}:${i.qtd}`).join(',') + `:${j?.hpMax}:${j?.manaMax}`;
     if (chave === ultimo) return;
     ultimo = chave;

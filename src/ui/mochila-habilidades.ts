@@ -4,7 +4,7 @@
 //   caminhos aparecem como cartões e a escolha é definitiva;
 // - as passivas e o que a classe ainda pode aprender. Botão desabilitado diz o motivo (o mesmo da simulação).
 // Marco 18 (17/10/2026, D-068): cada carta mostra o grau ("Rank B/A/S"); aprender vira estudar (com o tempo já
-// encurtado pela Inteligência), e a carta em estudo mostra o que falta e o botão de acelerar (1 ponto, −1/3 do total).
+// encurtado pela Inteligência). D-075: mostra velocidade e tempo restante; evolução aceita pontos ou essências.
 // Ajuste de 16/10/2026 (D-067): pôr na tecla ficou direto — as 4 teclas são blocos com o ícone no topo e cada
 // carta de habilidade ativa tem os botões 1 2 3 4 (a tecla atual marcada; tocar nela de novo tira).
 
@@ -17,8 +17,9 @@ import type { MotivoHabilidade } from '../core/eventos-simulacao';
 import { SLOTS_BARRA, type Entidade } from '../entities/entidade';
 import { t, type ChaveTexto } from '../i18n';
 import { DT_MS } from '../core/loop';
-import { aprendiveisDa, caminhosDoRank, fusoesVisiveis, motivoParaNaoSubir, nivelParaRank, ticksDeEstudo } from '../progression/habilidades-personagem';
+import { aprendiveisDa, caminhosDoRank, fusoesVisiveis, motivoParaNaoSubir, nivelParaRank, ticksDeEstudo, ticksRestantesDoEstudo, velocidadeDoEstudo } from '../progression/habilidades-personagem';
 import { definicaoDe } from '../combat/compilar-habilidade';
+import { familiaDaHabilidade } from '../progression/itens-progressao';
 import { duracaoLegivel } from './tempo';
 import { descreverCaminho, descreverHabilidade } from './descrever';
 import { icone } from './icones';
@@ -26,6 +27,7 @@ import { icone } from './icones';
 export interface EstadoAbaHabilidades {
   /** Mantido para a mochila (D-067: a escolha agora é direta, pelos botões 1 2 3 4 da carta). */
   escolhendo: string | null;
+  essenciaInvId?: string | null;
 }
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, texto?: string): HTMLElementTagNameMap[K] {
@@ -62,6 +64,12 @@ export function desenharHabilidades(
   const pontos = el('p', 'linha-pontos', t('habilidades.pontos', { n: bolsa.pontosHabilidade }));
   pontos.dataset.pontosHabilidade = String(bolsa.pontosHabilidade);
   corpo.append(pontos);
+  const essenciaSelecionada = ui.essenciaInvId ? bolsa.mochila.find((i) => i.invId === ui.essenciaInvId) : undefined;
+  const familiaSelecionada = essenciaSelecionada ? ctx.conteudo.itens.get(essenciaSelecionada.itemId)?.progressao : undefined;
+  if (ui.essenciaInvId) {
+    corpo.append(el('p', 'detalhe-item', t('progressao.selecionarHabilidade')));
+    corpo.append(botao(t('progressao.cancelar'), 'cancelar-essencia', () => { ui.essenciaInvId = null; redesenhar(); }));
+  }
 
   // As 4 teclas: blocos com o ícone e o nome; "tirar" esvazia a tecla.
   corpo.append(el('h3', 'subtitulo-modal', t('habilidades.barra')));
@@ -141,48 +149,48 @@ export function desenharHabilidades(
     const acoes = el('div', 'acoes-habilidade');
     const proximo = (conhecida?.rank ?? 0) + 1;
     const opcoes = caminhosDoRank(ctx, id, proximo);
-    const motivo = motivoParaNaoSubir(ctx, j, id);
-    const precisaCaminho = motivo === 'caminho_invalido' && opcoes.length > 0;
-    if (proximo <= rankMax) {
-      if (precisaCaminho) {
-        // Rank de evolução: um cartão por caminho, escolha definitiva.
-        acoes.append(el('p', 'detalhe-item', t('habilidades.caminhos', { rank: proximo })));
-        const grade = el('div', 'caminhos');
-        for (const cid of opcoes) {
-          const c = ctx.conteudo.caminhos.get(cid);
-          if (!c) continue;
-          const cartaoCaminho = el('div', 'cartao-caminho');
-          const nomeCaminho = el('strong');
-          nomeCaminho.append(icone(c.icone), ` ${c.nome}`);
-          cartaoCaminho.append(nomeCaminho);
-          const lista = el('ul');
-          for (const linha of descreverCaminho(c)) lista.append(el('li', undefined, linha));
-          cartaoCaminho.append(lista);
-          cartaoCaminho.append(botao(t('habilidades.escolherCaminho', { nome: c.nome }), `caminho-${id}-${cid}`, () => { emitir({ t: 'subirRank', id, caminho: cid }); }));
-          grade.append(cartaoCaminho);
+    if (!conhecida && bolsa.estudo?.id === id) {
+      const falta = el('span', 'detalhe-item estudo-restante');
+      falta.dataset.estudoRestante = id;
+      falta.textContent = t('habilidades.estudando', { tempo: duracaoLegivel(ticksRestantesDoEstudo(bolsa.estudo) * DT_MS) });
+      acoes.append(falta, el('span', 'detalhe-item', t('progressao.velocidadeEstudo', { n: Math.round(velocidadeDoEstudo(bolsa.estudo) * 100) / 100 })));
+    } else if (proximo <= rankMax) {
+      const essencias = conhecida ? bolsa.mochila.filter((i) => {
+        const p = ctx.conteudo.itens.get(i.itemId)?.progressao;
+        return i.qtd > 0 && p?.tipo === 'rank' && p.familia === familiaDaHabilidade(ctx, id) && (!ui.essenciaInvId || ui.essenciaInvId === i.invId);
+      }) : [];
+      const pagamentos: (string | undefined)[] = ui.essenciaInvId ? essencias.map((i) => i.invId) : [undefined, ...essencias.map((i) => i.invId)];
+      for (const invId of pagamentos) {
+        const entrada = invId ? bolsa.mochila.find((i) => i.invId === invId) : undefined;
+        const rotulo = entrada ? t('progressao.usarEssencia', { nome: ctx.conteudo.itens.get(entrada.itemId)?.nome ?? '', rank: proximo })
+          : conhecida ? t('progressao.usarPonto', { rank: proximo }) : t('habilidades.estudar', { tempo: duracaoLegivel(ticksDeEstudo(ctx, j, id) * DT_MS) });
+        const emitirSubida = (caminho?: string) => {
+          emitir({ t: 'subirRank', id, rankEsperado: proximo, ...(caminho ? { caminho } : {}), ...(invId ? { invId } : {}) });
+          ui.essenciaInvId = null;
+        };
+        const motivo = motivoParaNaoSubir(ctx, j, id, undefined, invId);
+        if (motivo === 'caminho_invalido' && opcoes.length > 0) {
+          acoes.append(el('p', 'detalhe-item', rotulo), el('p', 'detalhe-item', t('habilidades.caminhos', { rank: proximo })));
+          const grade = el('div', 'caminhos');
+          for (const cid of opcoes) {
+            const c = ctx.conteudo.caminhos.get(cid);
+            if (!c) continue;
+            const cartaoCaminho = el('div', 'cartao-caminho');
+            const nomeCaminho = el('strong');
+            nomeCaminho.append(icone(c.icone), ` ${c.nome}`);
+            cartaoCaminho.append(nomeCaminho);
+            const lista = el('ul');
+            for (const linha of descreverCaminho(c)) lista.append(el('li', undefined, linha));
+            cartaoCaminho.append(lista, botao(t('habilidades.escolherCaminho', { nome: c.nome }), `caminho-${id}-${cid}${invId ? '-' + invId : ''}`, () => { emitirSubida(cid); }));
+            grade.append(cartaoCaminho);
+          }
+          acoes.append(grade);
+        } else {
+          const b = botao(rotulo, `subir-${id}${invId ? '-' + invId : ''}`, () => { emitirSubida(); });
+          b.disabled = motivo !== null;
+          if (motivo) { b.title = textoDoMotivo(motivo, ctx, id, proximo); acoes.append(el('span', 'detalhe-item motivo', b.title)); }
+          acoes.append(b);
         }
-        acoes.append(grade);
-      } else if (!conhecida && bolsa.estudo?.id === id) {
-        // Em estudo: o que falta (atualizado pela mochila a cada quadro) e o botão de acelerar.
-        const falta = el('span', 'detalhe-item estudo-restante');
-        falta.dataset.estudoRestante = id;
-        falta.textContent = t('habilidades.estudando', { tempo: duracaoLegivel(bolsa.estudo.restanteTicks * DT_MS) });
-        acoes.append(falta);
-        const fatia = Math.ceil(bolsa.estudo.totalTicks / ctx.balance.habilidades.estudo.aceleracoes) * DT_MS;
-        const acelerar = botao(t('habilidades.acelerar', { tempo: duracaoLegivel(fatia) }), `acelerar-${id}`, () => { emitir({ t: 'acelerarEstudo' }); });
-        acelerar.disabled = bolsa.pontosHabilidade <= 0 || bolsa.estudo.aceleracoes >= ctx.balance.habilidades.estudo.aceleracoes;
-        acoes.append(acelerar);
-      } else {
-        const rotulo = conhecida
-          ? t('habilidades.subir', { rank: proximo })
-          : t('habilidades.estudar', { tempo: duracaoLegivel(ticksDeEstudo(ctx, j, id) * DT_MS) });
-        const b = botao(rotulo, `subir-${id}`, () => { emitir({ t: 'subirRank', id }); });
-        b.disabled = motivo !== null;
-        if (motivo) {
-          b.title = textoDoMotivo(motivo, ctx, id, proximo);
-          acoes.append(el('span', 'detalhe-item motivo', b.title));
-        }
-        acoes.append(b);
       }
     }
     if (conhecida && !h.passiva) acoes.append(botoesDeTecla(id, h.nome));
@@ -190,8 +198,10 @@ export function desenharHabilidades(
     return li;
   };
 
-  const ativas = bolsa.conhecidas.filter((c) => !resolverHabilidade(ctx, c.id)?.passiva);
-  const passivas = bolsa.conhecidas.filter((c) => resolverHabilidade(ctx, c.id)?.passiva);
+  const conhecidasVisiveis = bolsa.conhecidas.filter((c) => !ui.essenciaInvId || (familiaSelecionada?.tipo === 'rank' && familiaDaHabilidade(ctx, c.id) === familiaSelecionada.familia));
+  if (ui.essenciaInvId && conhecidasVisiveis.length === 0) corpo.append(el('p', 'detalhe-item', t('progressao.semCompativeis')));
+  const ativas = conhecidasVisiveis.filter((c) => !resolverHabilidade(ctx, c.id)?.passiva);
+  const passivas = conhecidasVisiveis.filter((c) => resolverHabilidade(ctx, c.id)?.passiva);
   const secao = (titulo: string, itens: (HTMLLIElement | null)[]) => {
     const presentes = itens.filter((x): x is HTMLLIElement => x !== null);
     if (presentes.length === 0) return;
@@ -202,9 +212,9 @@ export function desenharHabilidades(
   };
   secao(t('habilidades.conhecidas'), ativas.map((c) => cartao(c.id, c)));
   secao(t('habilidades.passivas'), passivas.map((c) => cartao(c.id, c)));
-  const novas = aprendiveisDa(ctx, bolsa).filter((id) => !bolsa.conhecidas.some((c) => c.id === id));
+  const novas = (ui.essenciaInvId ? [] : aprendiveisDa(ctx, bolsa)).filter((id) => !bolsa.conhecidas.some((c) => c.id === id));
   secao(t('habilidades.aprendiveis'), novas.map((id) => cartao(id, null)));
   // Marco 18 (camada 7): as fusões aparecem quando as duas partes são conhecidas.
-  const fusoes = fusoesVisiveis(ctx, bolsa).filter((id) => !bolsa.conhecidas.some((c) => c.id === id));
+  const fusoes = (ui.essenciaInvId ? [] : fusoesVisiveis(ctx, bolsa)).filter((id) => !bolsa.conhecidas.some((c) => c.id === id));
   secao(t('habilidades.fusoes'), fusoes.map((id) => cartao(id, null)));
 }

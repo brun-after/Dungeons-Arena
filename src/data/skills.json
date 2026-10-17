@@ -1,8 +1,9 @@
 {
-  "versao": 2,
+  "versao": 3,
   "habilidades": [
     {
       "id": "ataque_basico",
+      "familiaEvolucao": "tecnica",
       "grau": "B",
       "nome": "Golpe",
       "icone": "espada",
@@ -29,6 +30,7 @@
     },
     {
       "id": "seta_arcana",
+      "familiaEvolucao": "arcana",
       "grau": "B",
       "nome": "Seta arcana",
       "icone": "runa",
@@ -72,6 +74,7 @@
     },
     {
       "id": "explosao",
+      "familiaEvolucao": "arcana",
       "grau": "A",
       "nome": "Explosão",
       "icone": "explosao",
@@ -114,6 +117,7 @@
     },
     {
       "id": "curar",
+      "familiaEvolucao": "suporte",
       "grau": "B",
       "nome": "Curar",
       "icone": "cura",
@@ -155,6 +159,7 @@
     },
     {
       "id": "golpe_atordoante",
+      "familiaEvolucao": "tecnica",
       "grau": "B",
       "nome": "Golpe atordoante",
       "icone": "atordoar",
@@ -200,6 +205,7 @@
     },
     {
       "id": "golpe",
+      "familiaEvolucao": "tecnica",
       "grau": "B",
       "nome": "Golpe",
       "icone": "espada",
@@ -224,6 +230,7 @@
     },
     {
       "id": "raio",
+      "familiaEvolucao": "arcana",
       "grau": "B",
       "nome": "Raio",
       "icone": "raio",
@@ -250,6 +257,7 @@
     },
     {
       "id": "flecha",
+      "familiaEvolucao": "tecnica",
       "grau": "B",
       "nome": "Flecha",
       "icone": "flecha",
@@ -277,6 +285,7 @@
     },
     {
       "id": "marca_de_area",
+      "familiaEvolucao": "arcana",
       "grau": "B",
       "nome": "Marca sombria",
       "icone": "alvo",
@@ -311,6 +320,7 @@
     },
     {
       "id": "golpe_demoniaco",
+      "familiaEvolucao": "tecnica",
       "grau": "B",
       "nome": "Golpe demoníaco",
       "icone": "caveira",
@@ -346,6 +356,7 @@
     },
     {
       "id": "teia",
+      "familiaEvolucao": "arcana",
       "grau": "B",
       "nome": "Teia",
       "icone": "teia",
@@ -377,6 +388,7 @@
     },
     {
       "id": "golpe_viscoso",
+      "familiaEvolucao": "tecnica",
       "grau": "B",
       "nome": "Golpe viscoso",
       "icone": "gota",
@@ -418,6 +430,7 @@
     },
     {
       "id": "golpe_pesado",
+      "familiaEvolucao": "tecnica",
       "grau": "B",
       "nome": "Golpe pesado",
       "icone": "martelo",
@@ -447,6 +460,7 @@
     },
     {
       "id": "raio_vampirico",
+      "familiaEvolucao": "arcana",
       "grau": "A",
       "nome": "Raio vampírico",
       "icone": "sangue",
@@ -485,6 +499,7 @@
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
       "id": "invocar_lacaios",
+      "familiaEvolucao": "suporte",
       "grau": "A",
       "nome": "Chamar lacaios",
       "icone": "invocar",
@@ -518,6 +533,7 @@
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
       "id": "armar_teia",
+      "familiaEvolucao": "suporte",
       "grau": "B",
       "nome": "Armar teia",
       "icone": "teia",
@@ -547,6 +563,7 @@
     },
     {
       "id": "dardo_arcano",
+      "familiaEvolucao": "arcana",
       "grau": "B",
       "nome": "Dardo arcano",
       "icone": "faisca",
@@ -575,6 +592,7 @@
     },
     {
       "id": "tiro",
+      "familiaEvolucao": "tecnica",
       "grau": "B",
       "nome": "Tiro",
       "icone": "flecha",
@@ -604,6 +622,7 @@
     },
     {
       "id": "investida",
+      "familiaEvolucao": "tecnica",
       "grau": "B",
       "nome": "Investida",
       "icone": "investida",
@@ -654,6 +673,7 @@
     },
     {
       "id": "redemoinho",
+      "familiaEvolucao": "tecnica",
       "grau": "A",
       "nome": "Redemoinho",
       "icone": "redemoinho",
@@ -695,6 +715,7 @@
     },
     {
       "id": "grito_de_guerra",
+      "familiaEvolucao": "suporte",
       "grau": "A",
       "nome": "Grito de guerra",
       "icone": "grito",
@@ -741,6 +762,7 @@
     },
     {
       "id": "escudo_de_ferro",
+      "familiaEvolucao": "suporte",
       "grau": "B",
       "nome": "Escudo de ferro",
       "icone": "escudo",
@@ -787,6 +809,7 @@
     },
     {
       "id": "corrente",
+      "familiaEvolucao": "tecnica",
       "grau": "A",
       "nome": "Corrente",
       "icone": "corrente",
@@ -831,6 +854,7 @@
     },
     {
       "id": "golpe_flamejante",
+      "familiaEvolucao": "fogo",
       "grau": "A",
       "nome": "Golpe flamejante",
       "icone": "fogo",
@@ -873,6 +897,7 @@
     },
     {
       "id": "pele_de_pedra",
+      "familiaEvolucao": "suporte",
       "grau": "A",
       "nome": "Pele de pedra",
       "icone": "pedra",
@@ -897,6 +922,7 @@
     },
     {
       "id": "bola_de_fogo",
+      "familiaEvolucao": "fogo",
       "grau": "A",
       "nome": "Bola de fogo",
       "icone": "cometa",
@@ -940,6 +966,7 @@
     },
     {
       "id": "lanca_de_gelo",
+      "familiaEvolucao": "gelo",
       "grau": "A",
       "nome": "Lança de gelo",
       "icone": "gelo",
@@ -982,6 +1009,7 @@
     },
     {
       "id": "raio_em_cadeia",
+      "familiaEvolucao": "raio",
       "grau": "S",
       "nome": "Raio em cadeia",
       "icone": "raio",
@@ -1028,6 +1056,7 @@
     },
     {
       "id": "barreira",
+      "familiaEvolucao": "suporte",
       "grau": "B",
       "nome": "Barreira",
       "icone": "barreira",
@@ -1074,6 +1103,7 @@
     },
     {
       "id": "nova_glacial",
+      "familiaEvolucao": "gelo",
       "grau": "S",
       "nome": "Nova glacial",
       "icone": "nova",
@@ -1116,6 +1146,7 @@
     },
     {
       "id": "mente_partida",
+      "familiaEvolucao": "psiquico",
       "grau": "S",
       "nome": "Mente partida",
       "icone": "olho",
@@ -1163,6 +1194,7 @@
     },
     {
       "id": "afinidade_elemental",
+      "familiaEvolucao": "suporte",
       "grau": "S",
       "nome": "Afinidade elemental",
       "icone": "estrela",
@@ -1187,6 +1219,7 @@
     },
     {
       "id": "flecha_perfurante",
+      "familiaEvolucao": "tecnica",
       "grau": "B",
       "nome": "Flecha perfurante",
       "icone": "flecha",
@@ -1232,6 +1265,7 @@
     },
     {
       "id": "chuva_de_flechas",
+      "familiaEvolucao": "tecnica",
       "grau": "A",
       "nome": "Chuva de flechas",
       "icone": "chuva",
@@ -1273,6 +1307,7 @@
     },
     {
       "id": "flecha_venenosa",
+      "familiaEvolucao": "veneno",
       "grau": "A",
       "nome": "Flecha venenosa",
       "icone": "veneno",
@@ -1316,6 +1351,7 @@
     },
     {
       "id": "tiro_em_leque",
+      "familiaEvolucao": "tecnica",
       "grau": "A",
       "nome": "Tiro em leque",
       "icone": "leque",
@@ -1356,6 +1392,7 @@
     },
     {
       "id": "troca_sombria",
+      "familiaEvolucao": "suporte",
       "grau": "S",
       "nome": "Troca sombria",
       "icone": "troca",
@@ -1404,6 +1441,7 @@
     },
     {
       "id": "olho_de_aguia",
+      "familiaEvolucao": "suporte",
       "grau": "S",
       "nome": "Olho de águia",
       "icone": "asa",
@@ -1429,6 +1467,7 @@
     },
     {
       "id": "flecha_arcana",
+      "familiaEvolucao": "fusao",
       "grau": "S",
       "nome": "Flecha arcana",
       "icone": "flecha",
@@ -1473,6 +1512,7 @@
     },
     {
       "id": "lanca_tempestuosa",
+      "familiaEvolucao": "fusao",
       "grau": "S",
       "nome": "Lança tempestuosa",
       "icone": "raio",
@@ -1511,6 +1551,7 @@
     },
     {
       "id": "ciclone_flamejante",
+      "familiaEvolucao": "fusao",
       "grau": "S",
       "nome": "Ciclone flamejante",
       "icone": "redemoinho",
@@ -1543,6 +1584,7 @@
     },
     {
       "id": "cadeia_sombria",
+      "familiaEvolucao": "fusao",
       "grau": "S",
       "nome": "Cadeia sombria",
       "icone": "corrente",
@@ -1583,6 +1625,7 @@
     },
     {
       "id": "chuva_de_estrelas",
+      "familiaEvolucao": "sagrado",
       "grau": "S",
       "nome": "Chuva de estrelas",
       "icone": "estrela",

@@ -4,6 +4,16 @@ import { textosGrupo } from './pt-BR-grupo';
 import { textosHabilidades } from './pt-BR-habilidades';
 
 export const ptBR = {
+  'progressao.selecionarHabilidade': 'Escolha uma habilidade compatível e o caminho de evolução, quando necessário.',
+  'progressao.xpLegado': 'XP preservado do antigo limite de nível: {n}. Não aplicado automaticamente à nova progressão.',
+  'progressao.cancelar': 'Cancelar seleção',
+  'progressao.semCompativeis': 'Nenhuma habilidade conhecida é compatível com esta essência.',
+  'progressao.velocidadeEstudo': 'Velocidade do estudo: {n}×. Use Aceleração da mente na mochila para aumentar.',
+  'progressao.usarEssencia': 'Rank {rank} com {nome}',
+  'progressao.usarPonto': 'Rank {rank} com 1 ponto',
+  'habilidades.motivo.usar_acelerador': 'Use Aceleração da mente na mochila; acelerar não gasta mais pontos.',
+  'habilidades.motivo.essencia_incompativel': 'A essência não é compatível com esta habilidade conhecida.',
+  'habilidades.motivo.rank_desatualizado': 'O rank mudou. Confira a habilidade novamente.',
   'app.titulo': 'Dungeons Arena',
   'app.carregando': 'Carregando…',
   'erro.graficos': 'Não foi possível iniciar os gráficos (WebGL). Tente atualizar o navegador ou usar outro.',

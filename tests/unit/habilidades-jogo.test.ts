@@ -244,9 +244,10 @@ describe('progressão de habilidades', () => {
     c.tick([['j', { t: 'subirRank', id: 'investida' }]]);
     expect(c.eventos.at(-1)).toMatchObject({ t: 'habilidadeRecusada', motivo: 'nao_aprendivel' });
     c.tick([['j', { t: 'subirRank', id: 'nova_glacial' }]]);
-    // Marco 18: aprender começa um estudo; 3 pontos de aceleração terminam na hora.
+    // D-075: este teste de barra conclui o trabalho restante; aceleração por item é coberta separadamente.
     expect(bolsa.estudo?.id).toBe('nova_glacial');
-    for (let i = 0; i < 3; i++) c.tick([['j', { t: 'acelerarEstudo' }]]);
+    if (bolsa.estudo) bolsa.estudo.restanteTicks = 1;
+    c.tick();
     expect(bolsa.estudo).toBeNull();
     expect(bolsa.conhecidas.some((x) => x.id === 'nova_glacial')).toBe(true);
     c.tick([['j', { t: 'equiparHabilidade', id: 'nova_glacial', slot: 0 }]]);
@@ -276,7 +277,7 @@ describe('progressão de habilidades', () => {
     guardarItem(bolsa, raro, 1, c.ctx.balance.inventario, gerada);
     const inv = (itemId: string) => obter(bolsa.mochila.find((i) => i.itemId === itemId), itemId).invId;
     bolsa.pontosHabilidade = 6;
-    const terminar = () => { for (let i = 0; i < 3; i++) c.tick([['j', { t: 'acelerarEstudo' }]]); };
+    const terminar = () => { if (bolsa.estudo) bolsa.estudo.restanteTicks = 1; c.tick(); };
     c.tick([['j', { t: 'usarItem', invId: inv('livro_bola_de_fogo') }]]);
     // Marco 18: com um estudo em andamento, o outro livro é recusado sem gastar.
     c.tick([['j', { t: 'usarItem', invId: inv('livro_raro') }]]);

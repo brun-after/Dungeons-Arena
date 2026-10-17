@@ -11,6 +11,7 @@ import { SLOTS_BARRA, type Bolsa, type Entidade, type ItemNaMochila } from '../e
 import type { ClasseJogador } from '../entities/presets';
 import { SLOTS_DE_EQUIPAMENTO, type Slot } from '../modos/modo';
 import { recalcularFicha } from './derivados';
+import { aplicarItemDeProgressao } from './itens-progressao';
 import { aprenderPorLivro } from './habilidades-personagem';
 import { NOMES_ATRIBUTOS, type Item, type NomeAtributo } from './itens';
 
@@ -96,7 +97,7 @@ export const ATALHOS_DE_CONSUMIVEL = 6;
 
 /** As entradas que os atalhos usam: os primeiros consumíveis da mochila, na ordem dela. */
 export function consumiveisComAtalho(bolsa: Bolsa, itens: ReadonlyMap<string, Item>): ItemNaMochila[] {
-  return bolsa.mochila.filter((i) => itens.get(i.itemId)?.tipo === 'consumivel').slice(0, ATALHOS_DE_CONSUMIVEL);
+  return bolsa.mochila.filter((i) => itens.get(i.itemId)?.tipo === 'consumivel' && !itens.get(i.itemId)?.progressao).slice(0, ATALHOS_DE_CONSUMIVEL);
 }
 
 /** Ordenação manual da mochila (§2.10, marco 9A): leva a entrada para `posicao` (limitada à lista). */
@@ -187,6 +188,13 @@ export function usarItem(estado: EstadoJogo, e: Entidade, ctx: ContextoSimulacao
       return OK;
     }
     if (item.tipo !== 'consumivel') return recusa('nao_consumivel');
+    if (item.progressao) {
+      if (!aplicarItemDeProgressao(e, ctx, item)) return recusa('sem_efeito');
+      entrada.qtd--;
+      if (entrada.qtd <= 0) bolsa.mochila.splice(indice, 1);
+      saida.push({ t: 'usouItem', tick, id: e.id, itemId: item.id, hp: 0, mana: 0 });
+      return OK;
+    }
     // Marco 10A-3: pergaminho de invocação acima do limite do modo é recusado sem gastar (§5.6).
     if (excedeLimite(estado, ctx, e, item.efeitos)) return recusa('limite');
     if (!item.efeitos.some((ef) => serviria(e, ef))) return recusa('sem_efeito');

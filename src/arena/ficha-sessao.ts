@@ -123,7 +123,7 @@ export function construirFichaDeSessao(pedido: unknown, modo: ModoDeJogo, conteu
   const habilidades = c?.modo === 'preset' ? legais.slice(0, slots) : [...new Set(pedidasHab)].filter((h) => legais.includes(h)).slice(0, slots);
   registrar('habilidades', p.habilidades ?? legais, habilidades);
 
-  const nivel = Math.min(c?.nivelMax ?? 20, Math.max(1, numeroOu(p.nivel, 1)));
+  const nivel = Math.min(c?.nivelMax ?? balance.xp.nivelMax, Math.max(1, numeroOu(p.nivel, 1)));
   registrar('nivel', p.nivel ?? 1, nivel);
 
   // HP, mana e defesa: sempre derivados; nada do cliente é aceito (§2.5, §3.7).

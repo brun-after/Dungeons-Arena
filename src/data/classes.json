@@ -1,5 +1,5 @@
 {
-  "versao": 2,
+  "versao": 3,
   "classes": [
     {
       "id": "aventureiro",
@@ -34,7 +34,12 @@
       ],
       "modelo": "aventureiro",
       "descricao": "classe.aventureiro.descricao",
-      "afinidades": [],
+      "afinidades": [
+        {
+          "tag": "magico",
+          "custoPct": -20
+        }
+      ],
       "aprendiveis": [
         "investida",
         "bola_de_fogo",
@@ -125,7 +130,8 @@
       "afinidades": [
         {
           "tag": "magico",
-          "danoPct": 0
+          "danoPct": 0,
+          "custoPct": -20
         },
         {
           "tag": "elemental",

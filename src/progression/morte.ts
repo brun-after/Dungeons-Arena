@@ -12,7 +12,7 @@ import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { vivo, type Entidade } from '../entities/entidade';
 import { criarInimigo } from '../entities/fabrica';
-import { aleatorio, inteiro, proximoU32 } from '../core/rng';
+import { aleatorio, inteiro, proximoU32, criarRng, hashTexto } from '../core/rng';
 import { idGerada } from '../combat/chave-habilidade';
 import { fatoresDoMundo, ladoDoJogador } from '../modos/dificuldade';
 import { podeFerir } from '../modos/relacao';
@@ -25,8 +25,9 @@ import { sortearEfeitoDeOrbe } from '../combat/registro-efeitos';
 import { encerrarInteracao } from '../world/interacao';
 import { aoMorrerBoss } from '../world/portas';
 import { largarItem, largarObjeto, largarOrbeEfeito, largarOuro, largarPerto } from '../world/objetos';
-import { aplicarSubidas, perderXp } from './nivel';
+import { concederXpDeProgressao, perderXp } from './nivel';
 import { ID_LIVRO_RARO } from './itens';
+import { familiaDaHabilidade } from './itens-progressao';
 import { sortearItem } from './sorteio';
 
 function zerarMovimento(e: Entidade): void {
@@ -54,9 +55,13 @@ function concederXp(estado: EstadoJogo, ctx: ContextoSimulacao, morto: Entidade,
   const total = Math.max(1, Math.round(morto.xpBase * ctx.balance.xp.decaimentoAntifarm ** morto.abates * recompensa));
   const cota = Math.max(1, Math.round(total / participantes.length));
   for (const p of participantes) {
-    p.xp += cota;
-    saida.push({ t: 'xpGanho', tick: estado.tick, id: p.id, xp: cota });
-    aplicarSubidas(p, ctx, estado.tick, saida);
+    const faixa = ctx.balance.xp.faixaAvancada;
+    const fator = p.nivel >= faixa.nivelInicio && ctx.modo.sobrevivencia.estudoAvanca
+      ? faixa.percentuais[estado.dificuldade] / ctx.balance.dificuldades[estado.dificuldade].recompensaPct : 1;
+    // Na faixa avançada, usa a cota antes do arredondamento e do mínimo de 1 XP.
+    const bruto = p.nivel >= faixa.nivelInicio && ctx.modo.sobrevivencia.estudoAvanca
+      ? morto.xpBase * ctx.balance.xp.decaimentoAntifarm ** morto.abates * recompensa / participantes.length : cota;
+    concederXpDeProgressao(p, ctx, bruto * fator, estado.tick, saida);
   }
 }
 
@@ -196,6 +201,15 @@ function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
     largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, livro.id, x, y, saida, 1, undefined, ref));
   }
   const boss = e.arquetipo === 'boss';
+  // D-075: essências temáticas têm sorteio independente, sem deslocar o RNG do combate e do loot existente.
+  const rngEssencia = criarRng(hashTexto(`${estado.faseId}/${e.id}/${e.nivel}/essencia`));
+  const chance = boss ? ctx.balance.progressaoItens.essenciaBossChancePct : ctx.balance.progressaoItens.essenciaChancePct;
+  if (ctx.modo.sobrevivencia.estudoAvanca && aleatorio(rngEssencia) * 100 < chance) {
+    const familias = [...new Set([e.ataqueBasico, ...e.habilidades].map((h) => familiaDaHabilidade(ctx, h)).filter(Boolean))];
+    const familia = boss ? 'fusao' : familias[inteiro(rngEssencia, 0, Math.max(0, familias.length - 1))] ?? 'arcana';
+    const essencia = ctx.conteudo.itens.get(`essencia_${familia}`);
+    if (essencia) largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, essencia.id, x, y, saida));
+  }
   if (aleatorio(estado.rng) >= (boss ? d.chanceItemBoss : d.chanceItem)) return;
   const item = sortearItem(estado, ctx, boss, e.nivel);
   if (!item) return;

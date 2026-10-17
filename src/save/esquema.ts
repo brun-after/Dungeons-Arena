@@ -10,7 +10,7 @@ import type { Dificuldade } from '../modos/dificuldade';
 import { MAX_REGRAS, RE_REGRA_ESTILO } from '../world/estilo';
 import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 14;
+export const VERSAO_SCHEMA = 15;
 export const SLOTS = [1, 2, 3] as const;
 export const FORMATO_EXPORTACAO = 'dungeons-arena/save';
 
@@ -308,6 +308,25 @@ function v14Bolsa(b: Objeto): Objeto {
   return { estudo: null, missoes: {}, missoesConcluidas: [], diario: [], ...b };
 }
 
+/** D-075 (17/10/2026): reembolso comprovável do estudo e arquivo do XP no antigo teto. */
+function v14ParaV15(r: Objeto): Objeto {
+  const entidade = (v: unknown): unknown => {
+    if (!ehObjeto(v) || !ehObjeto(v.bolsa)) return v;
+    const b = v.bolsa;
+    const antigo = ehObjeto(b.estudo) ? b.estudo : null;
+    const reembolso = antigo && typeof antigo.aceleracoes === 'number' ? Math.max(0, Math.min(3, Math.floor(antigo.aceleracoes))) : 0;
+    const estudo = antigo ? { ...antigo, aceleracoes: 0, velocidade12: 12, fracao12: 0 } : null;
+    const legado = v.nivel === 20 && typeof v.xp === 'number' ? Math.max(0, v.xp) : 0;
+    return { ...v, ...(legado > 0 ? { xp: 0 } : {}), bolsa: {
+      ...b, estudo, pontosHabilidade: (typeof b.pontosHabilidade === 'number' ? b.pontosHabilidade : 0) + reembolso,
+      tomosComprados: 0, pontosPorItens: 0, ranksPorItens: 0, xpFracao: 0, xpLegado: legado,
+    } };
+  };
+  const estado = (e: unknown): unknown => ehObjeto(e) ? { ...e, entidades: lista(e.entidades).map(entidade) } : e;
+  const fasesVisitadas = ehObjeto(r.fasesVisitadas) ? Object.fromEntries(Object.entries(r.fasesVisitadas).map(([k, v]) => [k, estado(v)])) : r.fasesVisitadas;
+  return { ...r, estado: estado(r.estado), fasesVisitadas };
+}
+
 /** `MIGRACOES[v]` leva um registro da versão `v` para a `v + 1`. Não existiu versão 0. */
 export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   1: v1ParaV2,
@@ -323,6 +342,7 @@ export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   11: v11ParaV12,
   12: v12ParaV13,
   13: v13ParaV14,
+  14: v14ParaV15,
 };
 
 function temNaoFinito(v: unknown): boolean {
@@ -336,7 +356,7 @@ function lerParametros(v: unknown): ParametrosGeracao | null {
   if (!ehObjeto(v)) return null;
   const inteiro = (x: unknown, min: number, max: number): x is number => typeof x === 'number' && Number.isInteger(x) && x >= min && x <= max;
   if (typeof v.id !== 'string' || typeof v.nome !== 'string') return null;
-  if (!inteiro(v.semente, 0, 2 ** 32) || !inteiro(v.salas, 1, 50) || !inteiro(v.nivelInimigos, 1, 20) || !inteiro(v.matizGraus, 0, 359)) return null;
+  if (!inteiro(v.semente, 0, 2 ** 32) || !inteiro(v.salas, 1, 50) || !inteiro(v.nivelInimigos, 1, 30) || !inteiro(v.matizGraus, 0, 359)) return null;
   const p: ParametrosGeracao = { id: v.id, nome: v.nome, semente: v.semente, salas: v.salas, nivelInimigos: v.nivelInimigos, matizGraus: v.matizGraus };
   if (v.largura !== undefined || v.altura !== undefined) {
     if (!inteiro(v.largura, 8, 120) || !inteiro(v.altura, 8, 120)) return null;
