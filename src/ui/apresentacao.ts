@@ -48,6 +48,8 @@ export interface OpcoesApresentacao {
 }
 
 export interface Apresentacao {
+  /** Marco 11A: as partículas, para a telegrafia e os rastros também serem partícula. */
+  particulas: SistemaParticulas;
   botaoPausa: HTMLButtonElement;
   abrirPausa: () => void;
   pausado: () => boolean;
@@ -147,6 +149,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   };
 
   return {
+    particulas,
     encerrar: () => {
       motor.destruir();
       sistema.removeEventListener('change', aplicarPreferencias);

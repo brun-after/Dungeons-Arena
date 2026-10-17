@@ -28,6 +28,7 @@ const INTERVALO_CONJURACAO_MS = 120;
 const INTERVALO_RASTRO_MS = 30;
 const INTERVALO_AURA_MS = 320;
 const INTERVALO_POEIRA_MS = 220;
+const INTERVALO_CHAO_MS = 160;
 
 /** Aura por tipo de status; os demais usam `aura` na cor do registro. */
 const AURA: Partial<Record<TipoEfeito, NomePreset>> = {
@@ -56,6 +57,7 @@ export class EfeitosDeHabilidade {
   private readonly ultimoRastro = new Map<number, number>();
   private readonly ultimaAura = new Map<string, number>();
   private ultimaPoeira = 0;
+  private ultimoChao = 0;
   /** Posições em células conhecidas no quadro anterior (para eventos de quem já saiu do mundo). */
   private readonly posicoes = new Map<string, PontoVisual>();
 
@@ -151,6 +153,11 @@ export class EfeitosDeHabilidade {
     }
     if (this.ultimoRastro.size > 64) this.ultimoRastro.clear();
     if (q.auras) this.auras(estado, agoraMs);
+    // Marco 11A: os rastros no chão são partícula na cor do efeito (não quadrados pintados).
+    if (agoraMs - this.ultimoChao >= INTERVALO_CHAO_MS) {
+      this.ultimoChao = agoraMs;
+      for (const r of estado.rastros) p.emitir('chao', r.x, r.y, cor(REGISTRO_EFEITOS[r.tipo].cor));
+    }
     if (q.poeira && agoraMs - this.ultimaPoeira > INTERVALO_POEIRA_MS) {
       this.ultimaPoeira = agoraMs;
       const eu = this.posicoes.get(this.o.idLocal);
@@ -169,11 +176,21 @@ export class EfeitosDeHabilidade {
       x: celulas.reduce((s, c) => s + c.x, 0) / celulas.length,
       y: celulas.reduce((s, c) => s + c.y, 0) / celulas.length,
     };
-    // O impacto inteiro e a onda no centro; pela área, só faíscas (anéis em toda célula poluiriam).
-    this.o.particulas.emitir('onda', centro.x, centro.y, v.cor);
-    if (v.impacto && v.impacto !== 'raio' && v.impacto !== 'relampago') this.o.particulas.emitir(v.impacto, centro.x, centro.y, v.cor);
-    const sorteadas = [...celulas].sort(() => Math.random() - 0.5).slice(0, 6);
-    for (const c of sorteadas) this.o.particulas.emitir('faiscas', c.x + (Math.random() - 0.5) * 0.6, c.y + (Math.random() - 0.5) * 0.6, v.cor);
+    const p = this.o.particulas;
+    const impacto = v.impacto && v.impacto !== 'raio' && v.impacto !== 'relampago' ? v.impacto : null;
+    // Marco 11A (D-066): a forma do ataque em partículas.
+    if (h.tipoArea === 'linha') {
+      // Feixe: o impacto corre de quem conjura até a ponta da linha, mais faíscas pelo caminho.
+      const ponta = celulas.reduce((m, c) => (Math.hypot(c.x - a.origem.x, c.y - a.origem.y) > Math.hypot(m.x - a.origem.x, m.y - a.origem.y) ? c : m), celulas[0] ?? a.origem);
+      p.emitir(impacto ?? 'relampago', a.origem.x, a.origem.y, v.cor, ponta);
+      p.emitir('faiscas', a.origem.x, a.origem.y, v.cor, ponta);
+    } else {
+      // Rajada pela área: o impacto em até 5 células espalhadas, faíscas no resto; a onda só nas redondas.
+      if (h.tipoArea !== 'cone') p.emitir('onda', centro.x, centro.y, v.cor);
+      const sorteadas = [...celulas].sort(() => Math.random() - 0.5);
+      for (const c of sorteadas.slice(0, 5)) p.emitir(impacto ?? 'faiscas', c.x + (Math.random() - 0.5) * 0.5, c.y + (Math.random() - 0.5) * 0.5, v.cor);
+      for (const c of sorteadas.slice(5, 11)) p.emitir('faiscas', c.x + (Math.random() - 0.5) * 0.6, c.y + (Math.random() - 0.5) * 0.6, v.cor);
+    }
   }
 
   private auras(estado: EstadoJogo, agoraMs: number): void {

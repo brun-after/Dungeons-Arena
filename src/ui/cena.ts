@@ -169,7 +169,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     usarTiras: () => ap.qualidade().tiras,
     reduzido: () => ap.movimentoReduzido(),
   });
-  const telegrafia = new CamadaTelegrafia(palco.chao, palco.voo, projecao, () => aparencia.areaExata);
+  const telegrafia = new CamadaTelegrafia(palco.chao, palco.voo, projecao, () => aparencia.areaExata, ap.particulas);
   const objetos = new CamadaObjetos(
     palco.chao,
     (id) => ctx.conteudo.itens.get(id)?.raridade,
@@ -177,7 +177,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     { curto: ticksDe(ctx.balance.descanso.curtoMs), longo: ticksDe(ctx.balance.descanso.longoMs) },
     { camada: palco.entidades, projecao },
   );
-  const fluxo = new CamadaFluxo(palco.chao);
+  const fluxo = new CamadaFluxo(palco.chao, () => ap.particulas.limite > 0);
   const portas = new CamadaPortas(palco.chao, fase, ticksDe(ctx.balance.portas.janelaPortaBossMs));
   const numeros = new CamadaNumeros(palco.efeitos, ap.movimentoReduzido, projecao);
   visao = await montarVisao({

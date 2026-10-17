@@ -40,8 +40,12 @@ export interface Emissao {
   arrasto?: number;
 }
 
-/** `onda` (a explosão pela área, D-060), `poeira` e `aura` são internos; os demais, os das habilidades. */
-export type NomePreset = PresetVisual | 'poeira' | 'aura' | 'onda';
+/**
+ * `onda` (a explosão pela área, D-060), `poeira` e `aura` são internos; os demais, os das habilidades. Marco 11A: a
+ * forma do ataque também é partícula — `telegrafo` (o miolo da área enchendo), `borda` (o contorno, na cor de quem
+ * ataca), `mira` (a linha do golpe e do projétil), `projetil` (o núcleo que voa) e `chao` (os rastros no chão).
+ */
+export type NomePreset = PresetVisual | 'poeira' | 'aura' | 'onda' | 'telegrafo' | 'borda' | 'mira' | 'projetil' | 'chao';
 
 const faiscas: Emissao = { textura: 'faisca', quantidade: 12, vidaMs: [180, 340], velocidade: [140, 300], direcao: 'livre', gravidade: 320, escala: [0.8, 0.2], alpha: [1, 0], aditivo: true, raio: 4, cor: null, arrasto: 0.6 };
 const brilho: Emissao = { textura: 'brilho', quantidade: 10, vidaMs: [300, 520], velocidade: [20, 60], direcao: 'cima', gravidade: 0, escala: [0.9, 0.1], alpha: [0.9, 0], aditivo: true, raio: 10, cor: null };
@@ -112,6 +116,14 @@ export const PRESETS_PARTICULA: Readonly<Record<NomePreset, readonly Emissao[]>>
   ],
   poeira: [{ textura: 'ponto', quantidade: 1, vidaMs: [2500, 4000], velocidade: [3, 10], direcao: 'livre', gravidade: 0, escala: [0.25, 0.25], alpha: [0.25, 0], aditivo: false, raio: 220, cor: 0xd8cfb8 }],
   aura: [{ ...brilho, quantidade: 3, vidaMs: [400, 700], velocidade: [10, 25], escala: [0.5, 0.1], raio: 12 }],
+  telegrafo: [{ textura: 'brilho', quantidade: 1, vidaMs: [420, 680], velocidade: [4, 14], direcao: 'cima', gravidade: 0, escala: [0.7, 0.25], alpha: [0.55, 0], aditivo: true, raio: 16, cor: null }],
+  borda: [{ textura: 'ponto', quantidade: 1, vidaMs: [260, 420], velocidade: [0, 6], direcao: 'livre', gravidade: 0, escala: [0.45, 0.15], alpha: [0.95, 0], aditivo: true, raio: 14, cor: null }],
+  mira: [{ textura: 'ponto', quantidade: 5, vidaMs: [220, 340], velocidade: [0, 8], direcao: 'livre', gravidade: 0, escala: [0.35, 0.1], alpha: [0.8, 0], aditivo: true, raio: 2, cor: null }],
+  projetil: [
+    { textura: 'brilho', quantidade: 2, vidaMs: [90, 150], velocidade: [0, 12], direcao: 'livre', gravidade: 0, escala: [1, 0.3], alpha: [1, 0], aditivo: true, raio: 2, cor: null },
+    { textura: 'ponto', quantidade: 1, vidaMs: [60, 90], velocidade: [0, 0], direcao: 'livre', gravidade: 0, escala: [0.45, 0.3], alpha: [1, 0], aditivo: true, raio: 0, cor: 0xffffff },
+  ],
+  chao: [{ textura: 'ponto', quantidade: 2, vidaMs: [500, 800], velocidade: [6, 18], direcao: 'cima', gravidade: -10, escala: [0.45, 0.1], alpha: [0.7, 0], aditivo: true, raio: 18, cor: null }],
   onda: [
     { ...anelDeLuz, quantidade: 36, velocidade: [200, 260], vidaMs: [340, 420], escala: [0.8, 0.3] },
     { ...anelDeLuz, textura: 'ponto', quantidade: 20, velocidade: [120, 160], vidaMs: [300, 380], escala: [0.5, 0.1] },
