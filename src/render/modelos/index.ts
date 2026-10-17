@@ -4,7 +4,7 @@
 // Roda no Node, no build (plugin do atlas): nada de DOM aqui.
 
 import type { EstiloCaminhada } from '../caminhada.ts';
-import { bipede } from './bipede.ts';
+import { bipede, type OpcoesBipede } from './bipede.ts';
 import { aranha, lobo, slime } from './feras.ts';
 import type { Vista } from './svg.ts';
 
@@ -16,6 +16,25 @@ export interface DefinicaoModelo {
 }
 
 const OLHO = 0xf5e663;
+
+/**
+ * Ajuste de 16/10/2026 (D-067): os modelos das classes jogáveis vêm sem arma e sem escudo; o que o jogador
+ * equipa é desenhado por cima (render/adornos.ts, com modelos/adornos.ts), e as proporções ficam aqui para isso.
+ */
+export const OPCOES_JOGAVEIS = {
+  aventureiro: { pele: 0xf0c8a0, roupa: 0x2e86c1, olho: 0x1b2631, perna: 15, tronco: 14, ombro: 8.5, quadril: 6.5, cabeca: 7 },
+  guerreiro: { pele: 0xe8b98f, roupa: 0x7f8c8d, olho: 0x1b2631, perna: 15, tronco: 15, ombro: 10, quadril: 7, cabeca: 7, capa: 0x922b21 },
+  mago: { pele: 0xf3d2b3, roupa: 0x2e4a8c, olho: 0x1b2631, perna: 17, tronco: 13, ombro: 7.5, quadril: 6, cabeca: 7, veste: true, chapeu: 0x24396b },
+  arqueiro: { pele: 0xd9a77a, roupa: 0x27632a, olho: 0x1b2631, perna: 15, tronco: 14, ombro: 8, quadril: 6, cabeca: 7, capuz: 0x1e5631 },
+} as const satisfies Readonly<Record<string, OpcoesBipede>>;
+
+/** D-067: a arma da classe, desenhada enquanto a mão está vazia (as habilidades da classe não pedem item). */
+export const ARMA_DE_CLASSE: Readonly<Record<keyof typeof OPCOES_JOGAVEIS, { arma: string; secundaria: string | null }>> = {
+  aventureiro: { arma: 'espada', secundaria: 'escudo' },
+  guerreiro: { arma: 'machado', secundaria: 'escudo' },
+  mago: { arma: 'cajado', secundaria: null },
+  arqueiro: { arma: 'arco', secundaria: null },
+};
 
 export const MODELOS = {
   goblin: {
@@ -84,23 +103,23 @@ export const MODELOS = {
   aventureiro: {
     estilo: 'passada',
     quadros: 2,
-    desenhar: bipede({ pele: 0xf0c8a0, roupa: 0x2e86c1, olho: 0x1b2631, perna: 15, tronco: 14, ombro: 8.5, quadril: 6.5, cabeca: 7, escudo: 0x8a6d3b, arma: 'espada' }),
+    desenhar: bipede(OPCOES_JOGAVEIS.aventureiro),
   },
   // Marco 14: as classes jogáveis (2 quadros por vista, §2.16).
   guerreiro: {
     estilo: 'marcha',
     quadros: 2,
-    desenhar: bipede({ pele: 0xe8b98f, roupa: 0x7f8c8d, olho: 0x1b2631, perna: 15, tronco: 15, ombro: 10, quadril: 7, cabeca: 7, escudo: 0xb03a2e, arma: 'machado', capa: 0x922b21 }),
+    desenhar: bipede(OPCOES_JOGAVEIS.guerreiro),
   },
   mago: {
     estilo: 'deslizar',
     quadros: 2,
-    desenhar: bipede({ pele: 0xf3d2b3, roupa: 0x2e4a8c, olho: 0x1b2631, perna: 17, tronco: 13, ombro: 7.5, quadril: 6, cabeca: 7, veste: true, chapeu: 0x24396b, arma: 'cajado' }),
+    desenhar: bipede(OPCOES_JOGAVEIS.mago),
   },
   arqueiro: {
     estilo: 'passada',
     quadros: 2,
-    desenhar: bipede({ pele: 0xd9a77a, roupa: 0x27632a, olho: 0x1b2631, perna: 15, tronco: 14, ombro: 8, quadril: 6, cabeca: 7, capuz: 0x1e5631, arma: 'arco' }),
+    desenhar: bipede(OPCOES_JOGAVEIS.arqueiro),
   },
 } as const satisfies Readonly<Record<string, DefinicaoModelo>>;
 

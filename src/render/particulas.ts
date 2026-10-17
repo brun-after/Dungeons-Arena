@@ -51,7 +51,7 @@ function desenharTextura(g: Graphics, tipo: TexturaParticula, ox: number): void 
       for (let r = 15; r >= 3; r--) g.circle(cx + Math.sin(r) * 1.5, cy + Math.cos(r) * 1.5, r).fill({ color: 0xffffff, alpha: 0.06 });
       return;
     case 'anel':
-      g.circle(cx, cy, 12).stroke({ width: 2.5, color: 0xffffff });
+      g.circle(cx, cy, 12).stroke({ width: 2, color: 0xffffff });
       return;
     case 'estrela': {
       const pontos: number[] = [];
@@ -80,9 +80,9 @@ function desenharTextura(g: Graphics, tipo: TexturaParticula, ox: number): void 
       g.circle(cx, cy, 3).fill(0xffffff);
       return;
     case 'runa':
-      g.circle(cx, cy, 12).stroke({ width: 1.5, color: 0xffffff, alpha: 0.7 });
+      g.circle(cx, cy, 12).stroke({ width: 2, color: 0xffffff, alpha: 0.7 });
       g.moveTo(cx - 6, cy - 8).lineTo(cx + 6, cy - 8).lineTo(cx - 4, cy + 8).lineTo(cx + 6, cy + 8).stroke({ width: 2, color: 0xffffff });
-      g.moveTo(cx, cy - 11).lineTo(cx, cy + 11).stroke({ width: 1.5, color: 0xffffff });
+      g.moveTo(cx, cy - 11).lineTo(cx, cy + 11).stroke({ width: 2, color: 0xffffff });
       return;
     case 'bolha':
       g.circle(cx, cy, 11).fill({ color: 0xffffff, alpha: 0.18 }).stroke({ width: 2, color: 0xffffff });
@@ -98,6 +98,23 @@ function desenharTextura(g: Graphics, tipo: TexturaParticula, ox: number): void 
     case 'chama':
       g.circle(cx, cy + 5, 8).fill(0xffffff);
       g.poly([cx - 8, cy + 4, cx - 2, cy - 6, cx, cy - 15, cx + 3, cy - 5, cx + 8, cy + 4]).fill(0xffffff);
+      return;
+    case 'flecha':
+      // Ajuste de 16/10/2026 (D-067): apontando para cima (−y), como a faísca — haste fina, ponta e penas.
+      g.moveTo(cx, cy - 10).lineTo(cx, cy + 13).stroke({ width: 2, color: 0xb9a382 });
+      g.poly([cx, cy - 15, cx + 3.5, cy - 8, cx - 3.5, cy - 8]).fill(0xffffff);
+      g.poly([cx, cy + 8, cx + 4, cy + 14, cx + 4, cy + 10, cx, cy + 5]).fill({ color: 0xffffff, alpha: 0.85 });
+      g.poly([cx, cy + 8, cx - 4, cy + 14, cx - 4, cy + 10, cx, cy + 5]).fill({ color: 0xffffff, alpha: 0.85 });
+      return;
+    case 'teia':
+      for (let i = 0; i < 4; i++) {
+        const a = (Math.PI / 4) * i;
+        g.moveTo(cx - Math.cos(a) * 13, cy - Math.sin(a) * 13)
+          .lineTo(cx + Math.cos(a) * 13, cy + Math.sin(a) * 13)
+          .stroke({ width: 1.5, color: 0xffffff });
+      }
+      g.circle(cx, cy, 5).stroke({ width: 1.5, color: 0xffffff });
+      g.circle(cx, cy, 10).stroke({ width: 1.5, color: 0xffffff, alpha: 0.8 });
       return;
   }
 }
@@ -144,13 +161,16 @@ export class SistemaParticulas {
     return this.vivas.length;
   }
 
-  /** Emite um preset em (x, y) de célula; com `ate`, espalha ao longo do segmento (raio, relâmpago, rastro). */
-  emitir(nome: NomePreset, x: number, y: number, cor: number, ate?: { x: number; y: number }): void {
+  /**
+   * Emite um preset em (x, y) de célula; com `ate`, espalha ao longo do segmento (raio, relâmpago, rastro) — ou, nas
+   * emissões em cone, aponta para lá. `dir` (em células) é a direção do voo, para as emissões `orientada` (D-067).
+   */
+  emitir(nome: NomePreset, x: number, y: number, cor: number, ate?: { x: number; y: number }, dir?: { x: number; y: number }): void {
     if (this.limite <= 0) return;
-    for (const e of PRESETS_PARTICULA[nome]) this.emitirUma(e, x, y, cor, ate);
+    for (const e of PRESETS_PARTICULA[nome]) this.emitirUma(e, x, y, cor, ate, dir);
   }
 
-  private emitirUma(e: Emissao, x: number, y: number, cor: number, ate?: { x: number; y: number }): void {
+  private emitirUma(e: Emissao, x: number, y: number, cor: number, ate?: { x: number; y: number }, dir?: { x: number; y: number }): void {
     const proj = this.projecao();
     // No isométrico, os efeitos saem do meio do corpo, não do chão.
     const elevacao = proj.visao === 'iso' ? CELULA_PX * 0.4 : 0;
@@ -161,8 +181,12 @@ export class SistemaParticulas {
     };
     const a = centro(x, y);
     const b = ate ? centro(ate.x, ate.y) : a;
+    // D-067: a direção do voo na tela (projetada), para as emissões orientadas.
+    const d = dir ? centro(x + dir.x, y + dir.y) : null;
+    const anguloVoo = d ? Math.atan2(d.y - a.y, d.x - a.x) : null;
     const quantidade = this.reduzido ? Math.ceil(e.quantidade / 2) : e.quantidade;
-    const forma = ate ? 'linha' : (e.forma ?? 'ponto');
+    // O cone vale com `ate` (aponta para lá); as outras formas com `ate` correm ao longo do segmento.
+    const forma = e.forma === 'cone' ? 'cone' : ate ? 'linha' : (e.forma ?? 'ponto');
     const textura = this.texturas.get(e.textura);
     if (!textura) return;
     for (let i = 0; i < quantidade && this.vivas.length < this.limite; i++) {
@@ -183,17 +207,21 @@ export class SistemaParticulas {
         }
         ox += entre(-e.raio, e.raio);
         oy += entre(-e.raio, e.raio);
+        const abertura = e.abertura ?? (forma === 'cone' ? 0.5 : e.direcao === 'baixo' ? 0.5 : 0.7);
         angulo =
           forma === 'cone'
-            ? Math.atan2(b.y - a.y, b.x - a.x) + entre(-0.5, 0.5)
-            : e.direcao === 'cima'
-              ? -Math.PI / 2 + entre(-0.7, 0.7)
-              : e.direcao === 'baixo'
-                ? Math.PI / 2 + entre(-0.5, 0.5)
-                : e.direcao === 'fora'
-                  ? Math.atan2(oy - a.y, ox - a.x)
-                  : entre(0, Math.PI * 2);
+            ? Math.atan2(b.y - a.y, b.x - a.x) + entre(-abertura, abertura)
+            : e.direcao === 'orientada'
+              ? (anguloVoo ?? entre(0, Math.PI * 2)) + entre(-(e.abertura ?? 0), e.abertura ?? 0)
+              : e.direcao === 'cima'
+                ? -Math.PI / 2 + entre(-abertura, abertura)
+                : e.direcao === 'baixo'
+                  ? Math.PI / 2 + entre(-abertura, abertura)
+                  : e.direcao === 'fora'
+                    ? Math.atan2(oy - a.y, ox - a.x)
+                    : entre(0, Math.PI * 2);
       }
+      oy -= e.alturaInicial ?? 0;
       const v = entre(e.velocidade[0], e.velocidade[1]);
       const p = this.livres.pop() ?? new Particle({ texture: textura, anchorX: 0.5, anchorY: 0.5 });
       p.texture = textura;
@@ -201,8 +229,9 @@ export class SistemaParticulas {
       p.y = oy;
       p.scaleX = e.escala[0];
       p.scaleY = e.escala[0];
-      // Faísca, lasca e gota apontam para onde voam.
-      p.rotation = e.textura === 'faisca' || e.textura === 'lasca' || e.textura === 'gota' ? angulo + Math.PI / 2 : e.textura === 'corte' ? entre(-0.6, 0.6) : entre(0, Math.PI * 2);
+      // Faísca, lasca, gota e flecha apontam para onde voam (a orientada, para a direção pedida, mesmo parada).
+      const aponta = e.textura === 'faisca' || e.textura === 'lasca' || e.textura === 'gota' || e.textura === 'flecha';
+      p.rotation = aponta || e.direcao === 'orientada' ? angulo + Math.PI / 2 : e.textura === 'corte' ? entre(-0.6, 0.6) : entre(0, Math.PI * 2);
       const corInicial = e.cor ?? cor;
       p.tint = corInicial;
       p.alpha = e.alpha[0];

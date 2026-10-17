@@ -8,7 +8,9 @@
 
 import type { PresetVisual } from '../combat/habilidades';
 
-export const TEXTURAS_PARTICULA = ['ponto', 'brilho', 'fumaca', 'anel', 'estrela', 'faisca', 'gota', 'floco', 'runa', 'bolha', 'lasca', 'corte', 'chama'] as const;
+// Ajuste de 16/10/2026 (D-067): `flecha` (haste, ponta e penas) e `teia`; a direção `orientada` (para onde o
+// projétil voa) e a `alturaInicial` (a chuva nasce no alto e cai); presets esteira, farpas, chuva e leque.
+export const TEXTURAS_PARTICULA = ['ponto', 'brilho', 'fumaca', 'anel', 'estrela', 'faisca', 'gota', 'floco', 'runa', 'bolha', 'lasca', 'corte', 'chama', 'flecha', 'teia'] as const;
 export type TexturaParticula = (typeof TEXTURAS_PARTICULA)[number];
 
 /** Onde as partículas nascem: no ponto (com `raio` de espalhamento), num anel, ao longo do segmento, num cone, ou em espiral. */
@@ -20,8 +22,11 @@ export interface Emissao {
   vidaMs: readonly [number, number];
   /** Velocidade em px de mundo por segundo. */
   velocidade: readonly [number, number];
-  /** `livre`: qualquer direção; `cima`/`baixo`: leque; `fora`: para longe do centro (anel e espiral). */
-  direcao: 'livre' | 'cima' | 'baixo' | 'fora';
+  /**
+   * `livre`: qualquer direção; `cima`/`baixo`: leque; `fora`: para longe do centro (anel e espiral); `orientada`: a
+   * direção pedida na emissão (a do projétil), ou para trás dela com velocidade negativa.
+   */
+  direcao: 'livre' | 'cima' | 'baixo' | 'fora' | 'orientada';
   /** px/s² (positivo puxa para baixo na tela). */
   gravidade: number;
   escala: readonly [number, number];
@@ -38,6 +43,10 @@ export interface Emissao {
   giro?: readonly [number, number];
   /** Freio por segundo (0 a 1): 0,8 perde 80% da velocidade em 1 s. */
   arrasto?: number;
+  /** D-067: nasce esta altura (px) acima da origem — a flecha da chuva cai até o chão. */
+  alturaInicial?: number;
+  /** D-067: espalhamento da direção em rad (padrão: 0,5 no cone, 0 na orientada). */
+  abertura?: number;
 }
 
 /**
@@ -45,12 +54,14 @@ export interface Emissao {
  * forma do ataque também é partícula — `telegrafo` (o miolo da área enchendo), `borda` (o contorno, na cor de quem
  * ataca), `mira` (a linha do golpe e do projétil), `projetil` (o núcleo que voa) e `chao` (os rastros no chão).
  */
-export type NomePreset = PresetVisual | 'poeira' | 'aura' | 'onda' | 'telegrafo' | 'borda' | 'mira' | 'projetil' | 'chao';
+export type NomePreset = PresetVisual | 'poeira' | 'aura' | 'onda' | 'telegrafo' | 'borda' | 'mira' | 'projetil' | 'chao' | 'projetil_flecha' | 'projetil_teia';
 
 const faiscas: Emissao = { textura: 'faisca', quantidade: 12, vidaMs: [180, 340], velocidade: [140, 300], direcao: 'livre', gravidade: 320, escala: [0.8, 0.2], alpha: [1, 0], aditivo: true, raio: 4, cor: null, arrasto: 0.6 };
 const brilho: Emissao = { textura: 'brilho', quantidade: 10, vidaMs: [300, 520], velocidade: [20, 60], direcao: 'cima', gravidade: 0, escala: [0.9, 0.1], alpha: [0.9, 0], aditivo: true, raio: 10, cor: null };
 const fumaca: Emissao = { textura: 'fumaca', quantidade: 7, vidaMs: [600, 1000], velocidade: [10, 30], direcao: 'cima', gravidade: -10, escala: [0.5, 1.5], alpha: [0.45, 0], aditivo: false, raio: 8, cor: 0x777777, arrasto: 0.4 };
 /** O "anel" em partículas: pontos de luz saindo em círculo. */
+/** D-067: o corpo da flecha, na cor da madeira e do ferro (a cor da habilidade fica na esteira). */
+const COR_FLECHA = 0xeadfc8;
 const anelDeLuz: Emissao = { textura: 'brilho', quantidade: 18, vidaMs: [320, 420], velocidade: [70, 90], direcao: 'fora', gravidade: 0, escala: [0.7, 0.2], alpha: [1, 0], aditivo: true, raio: 10, cor: null, forma: 'anel', arrasto: 0.5 };
 
 export const PRESETS_PARTICULA: Readonly<Record<NomePreset, readonly Emissao[]>> = {
@@ -124,6 +135,28 @@ export const PRESETS_PARTICULA: Readonly<Record<NomePreset, readonly Emissao[]>>
     { textura: 'ponto', quantidade: 1, vidaMs: [60, 90], velocidade: [0, 0], direcao: 'livre', gravidade: 0, escala: [0.45, 0.3], alpha: [1, 0], aditivo: true, raio: 0, cor: 0xffffff },
   ],
   chao: [{ textura: 'ponto', quantidade: 2, vidaMs: [500, 800], velocidade: [6, 18], direcao: 'cima', gravidade: -10, escala: [0.45, 0.1], alpha: [0.7, 0], aditivo: true, raio: 18, cor: null }],
+  // --- Ajuste de 16/10/2026 (D-067): flechas.
+  /** O traço fino que fica atrás da flecha, alinhado com o voo (no lugar das bolinhas de brilho). */
+  esteira: [{ textura: 'faisca', quantidade: 2, vidaMs: [140, 220], velocidade: [-30, -10], direcao: 'orientada', gravidade: 0, escala: [0.55, 0.15], alpha: [0.6, 0], aditivo: true, raio: 1, cor: null }],
+  /** O acerto da flecha: lascas de madeira e um pouco de pó, sem brilho. */
+  farpas: [
+    { textura: 'lasca', quantidade: 6, vidaMs: [220, 380], velocidade: [60, 140], direcao: 'livre', gravidade: 420, escala: [0.45, 0.25], alpha: [1, 0], aditivo: false, raio: 3, cor: 0xb08d5a, giro: [-8, 8], arrasto: 0.4 },
+    { textura: 'fumaca', quantidade: 3, vidaMs: [300, 500], velocidade: [8, 20], direcao: 'cima', gravidade: 0, escala: [0.35, 0.7], alpha: [0.35, 0], aditivo: false, raio: 4, cor: 0xb8a98a },
+  ],
+  /** A chuva: flechas que nascem no alto e caem retas na célula, com pó no chão. */
+  chuva: [
+    { textura: 'flecha', quantidade: 4, vidaMs: [170, 210], velocidade: [330, 380], direcao: 'baixo', abertura: 0.08, gravidade: 0, escala: [0.8, 0.8], alpha: [1, 0.9], aditivo: false, raio: 9, cor: COR_FLECHA, alturaInicial: 64 },
+    { textura: 'fumaca', quantidade: 3, vidaMs: [380, 600], velocidade: [10, 26], direcao: 'cima', gravidade: 0, escala: [0.3, 0.8], alpha: [0.4, 0], aditivo: false, raio: 9, cor: 0xb8a98a },
+  ],
+  /** O leque: flechas saindo em cone de quem atira, na direção da mira. */
+  leque: [
+    { textura: 'flecha', quantidade: 7, vidaMs: [200, 260], velocidade: [380, 440], direcao: 'livre', abertura: 0.55, gravidade: 0, escala: [0.75, 0.75], alpha: [1, 0.7], aditivo: false, raio: 2, cor: COR_FLECHA, forma: 'cone' },
+    { textura: 'faisca', quantidade: 7, vidaMs: [160, 220], velocidade: [300, 380], direcao: 'livre', abertura: 0.55, gravidade: 0, escala: [0.45, 0.15], alpha: [0.5, 0], aditivo: true, raio: 2, cor: null, forma: 'cone' },
+  ],
+  /** O corpo da flecha em voo: uma flecha orientada (reemitida a cada quadro, por isso a vida curta). */
+  projetil_flecha: [{ textura: 'flecha', quantidade: 1, vidaMs: [40, 50], velocidade: [0, 0], direcao: 'orientada', gravidade: 0, escala: [0.8, 0.8], alpha: [1, 0.85], aditivo: false, raio: 0, cor: COR_FLECHA }],
+  /** O corpo da teia em voo: a rede girando devagar. */
+  projetil_teia: [{ textura: 'teia', quantidade: 1, vidaMs: [40, 50], velocidade: [0, 0], direcao: 'orientada', gravidade: 0, escala: [0.75, 0.75], alpha: [0.95, 0.8], aditivo: false, raio: 0, cor: 0xe5e8ea }],
   onda: [
     { ...anelDeLuz, quantidade: 36, velocidade: [200, 260], vidaMs: [340, 420], escala: [0.8, 0.3] },
     { ...anelDeLuz, textura: 'ponto', quantidade: 20, velocidade: [120, 160], vidaMs: [300, 380], escala: [0.5, 0.1] },

@@ -5,7 +5,6 @@
 import type { Comando } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo, ObjetoNoMundo } from '../core/estado';
-import { DT_MS } from '../core/loop';
 import type { Entidade } from '../entities/entidade';
 import { t } from '../i18n';
 import { precoDeVenda, vendavel, type Item } from '../progression/itens';
@@ -62,10 +61,9 @@ export function criarLoja(o: OpcoesLoja): Loja {
   });
 
   const saldo = el('p', 'saldo-loja');
-  const tempo = el('p', 'tempo-loja');
-  tempo.setAttribute('aria-live', 'off');
   const listas = el('div', 'conteudo-modal');
-  modal.corpo.append(saldo, tempo, listas);
+  // D-067: a loja não tem prazo (fecha pelo jogador ou se um inimigo começar a perseguir).
+  modal.corpo.append(saldo, listas);
 
   const linha = (item: Item | undefined, rotulo: string, qtd: number, acao: { texto: string; chave: string; desligado: boolean; fazer: () => void } | null, nota?: string) => {
     const li = el('li', 'linha-item');
@@ -157,9 +155,6 @@ export function criarLoja(o: OpcoesLoja): Loja {
       o.aoAbrir();
       modal.abrir();
     }
-    const restanteS = Math.max(0, Math.ceil((((j.interacao?.ateTick ?? 0) - estado.tick) * DT_MS) / 1000));
-    const texto = t('loja.tempo', { s: restanteS });
-    if (tempo.textContent !== texto) tempo.textContent = texto;
     const bolsa = j.bolsa;
     if (bolsa && JSON.stringify([bolsa.mochila, bolsa.ouro, loja.objetoId]) !== assinatura) desenhar(j, loja);
   };

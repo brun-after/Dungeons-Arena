@@ -41,6 +41,7 @@ import type { TexturasTileset } from '../render/tileset-textura';
 import { velocidade } from '../world/movimento';
 import { mostrarAviso } from './aviso';
 import { criarCabecalho } from './cabecalho';
+import { criarBarraConsumiveis } from './consumiveis';
 import { criarControles, type Controles } from './controles';
 import { Diagnostico, type DadosRede } from './diagnostico';
 import { montarApresentacao } from './apresentacao';
@@ -50,6 +51,7 @@ import { criarLoja } from './loja';
 import { criarMochila } from './mochila';
 import { DadoD20 } from './dado';
 import { criarBarraHabilidades } from './habilidades';
+import { criarSeletorBarra } from './seletor-barra';
 import { Hud } from './hud';
 import { QuadroAlvo } from './quadro-alvo';
 import { montarVisao, type ControleVisao } from './visao';
@@ -228,7 +230,20 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
 
   const hud = new Hud(ui, (id) => o.estado().entidades.find((e) => e.id === id)?.nome ?? null);
   const corDoElemento = (h: Habilidade) => (h.elemento ? (ctx.conteudo.elementos.get(h.elemento)?.cor ?? null) : null);
-  const barra = criarBarraHabilidades(usarHabilidade, corDoElemento);
+  // D-067: o seletor rápido põe uma habilidade ativa conhecida na tecla do botão (clique direito ou toque longo).
+  const seletor = criarSeletorBarra(ui, (slot, id) => { emitir({ t: 'equiparHabilidade', id, slot }); });
+  const pedirTroca = (id: string | null, ancora: HTMLElement) => {
+    const bolsa = jogador()?.bolsa;
+    if (!bolsa) return;
+    const slot = id ? bolsa.barra.indexOf(id) : bolsa.barra.indexOf(null);
+    if (slot < 0) return;
+    const opcoes = bolsa.conhecidas
+      .map((c) => resolverHabilidade(ctx, c.id))
+      .filter((h): h is Habilidade => !!h && !h.passiva)
+      .map((h) => ({ id: h.id, nome: h.nome, icone: h.icone }));
+    seletor.abrir(slot, id, opcoes, ancora);
+  };
+  const barra = criarBarraHabilidades(usarHabilidade, corDoElemento, pedirTroca);
   // Ajuste de 15/10/2026 (D-060): o d20 perto da barra (o chip do canto saiu).
   const dado = new DadoD20();
   ui.append(dado.elemento);
@@ -239,11 +254,18 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   let chaveDaBarra = '';
   const sincronizarBarra = (j: Entidade) => {
     const habs = j.habilidades.map((id) => habilidadeDoAtor(ctx, j, id)).filter((h): h is Habilidade => h !== undefined);
-    const chave = habs.map((h) => h.chave).join('|');
+    const bolsa = j.bolsa;
+    const ativa = (id: string) => {
+      const h = resolverHabilidade(ctx, id);
+      return !!h && !h.passiva;
+    };
+    // D-067: o "+" aparece com tecla livre e alguma ativa conhecida fora da barra.
+    const livre = !!bolsa?.barra.includes(null) && bolsa.conhecidas.some((c) => !bolsa.barra.includes(c.id) && ativa(c.id));
+    const chave = `${habs.map((h) => h.chave).join('|')}/${livre}`;
     if (chave === chaveDaBarra) return;
     chaveDaBarra = chave;
     habilidadesDaBarra = habs;
-    barra.definir(habs);
+    barra.definir(habs, livre);
   };
   // Marco 6: mochila e ficha. Ao abrir, o jogador para; enquanto aberta, o teclado não chega ao jogo.
   let teclado: Teclado | null = null;
@@ -269,6 +291,9 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       teclado?.soltarTudo();
     },
   });
+  // D-067: poções e pergaminhos à direita, sem abrir a mochila.
+  const consumiveis = criarBarraConsumiveis(ctx, emitir, toque);
+  ui.append(consumiveis.elemento);
   const usarAtalhoDeConsumivel = (n: number) => {
     const bolsa = jogador()?.bolsa;
     const entrada = bolsa ? consumiveisComAtalho(bolsa, ctx.conteudo.itens)[n] : undefined;
@@ -380,7 +405,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     },
     isometrico,
     aoMochila: mochila.alternar,
-    bloqueado: () => mochila.aberta() || loja.aberta() || ap.menuAberto(),
+    bloqueado: () => mochila.aberta() || loja.aberta() || ap.menuAberto() || seletor.aberto(),
   });
   ligarPonteiro(palco.canvas, { camera, aoIrPara: aoTocarCelula });
   palco.canvas.addEventListener('contextmenu', (ev) => {
@@ -433,6 +458,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     dado.atualizar(q.agoraMs);
     mochila.atualizar();
     loja.atualizar();
+    consumiveis.atualizar(j);
     if (q.rede) hud.mostrarRede(q.rede);
     // Marco 12: efeitos, som, luz, minimapa e prompt; o congelamento de impacto só segura o desenho.
     const congelado = ap.quadro(estado, q.agoraMs, dtMs, q.posicao);

@@ -649,10 +649,11 @@ body.toque .log-combate.aberto {
   position: relative;
   display: grid;
   place-items: center;
-  width: 52px;
-  height: 52px;
+  /* Ajuste de 16/10/2026 (D-067): 15% maior (era 52 px). */
+  width: 60px;
+  height: 60px;
   padding: 0;
-  border-radius: 10px;
+  border-radius: 11px;
   border: 2px solid var(--borda);
   background: rgba(31, 28, 40, 0.9);
   color: var(--texto);
@@ -816,11 +817,12 @@ body.toque .botao-habilidade {
   position: absolute;
   left: 0;
   top: 0;
-  width: 44px;
-  height: 44px;
+  /* Ajuste de 16/10/2026 (D-067): 15% maior (era 44 px, raio 84 px). */
+  width: 51px;
+  height: 51px;
   border-radius: 50%;
-  font-size: 1.15rem;
-  transform: translate(-50%, -50%) rotate(var(--angulo)) translate(84px) rotate(calc(var(--angulo) * -1));
+  font-size: 1.3rem;
+  transform: translate(-50%, -50%) rotate(var(--angulo)) translate(97px) rotate(calc(var(--angulo) * -1));
 }
 
 body.toque .botao-habilidade .tecla {
@@ -1873,4 +1875,241 @@ svg.icone {
   border-color: var(--destaque);
   background: rgba(243, 156, 18, 0.25);
   color: var(--destaque);
+}
+
+/* Ajuste de 16/10/2026 (D-067): buffs pendentes no status (ofensivo armado e a carga de refúgio). */
+.buffs-pendentes {
+  display: inline-flex;
+  gap: 3px;
+}
+.buffs-pendentes:empty {
+  display: none;
+}
+.chip-pendente {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 26px;
+  padding: 0 6px 0 4px;
+  border-radius: 13px;
+  border: 2px dashed var(--cor, #e0b84f);
+  background: var(--painel);
+  color: var(--cor, #e0b84f);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+}
+.chip-pendente svg.icone {
+  width: 16px;
+  height: 16px;
+}
+.chip-pendente svg.icone.mini {
+  width: 11px;
+  height: 11px;
+  opacity: 0.85;
+}
+.chip-pendente .restante {
+  color: var(--texto-suave);
+}
+.chip-pendente.refugio {
+  --cor: #c9d6e8;
+  border-style: solid;
+  box-shadow: 0 0 6px rgba(201, 214, 232, 0.55);
+}
+
+/* Ajuste de 16/10/2026 (D-067): minimapa à esquerda, logo abaixo do status (antes ficava à direita). */
+.minimapa {
+  right: auto;
+  left: calc(8px + var(--seguro-esq));
+}
+body.toque .log-combate {
+  top: calc(162px + var(--seguro-topo));
+}
+
+/* Ajuste de 16/10/2026 (D-067): barra de consumíveis à direita. No PC, uma coluna centrada com a tecla de cada
+   item; no toque, uma lista rolável translúcida no alto, onde ficava o minimapa. */
+.barra-consumiveis {
+  position: absolute;
+  right: calc(8px + var(--seguro-dir));
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 60vh;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  zoom: var(--escala-ui, 1);
+  pointer-events: auto;
+  scrollbar-width: thin;
+}
+.barra-consumiveis:empty {
+  display: none;
+}
+.botao-consumivel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  background: rgba(20, 18, 26, 0.75);
+  color: var(--texto);
+  cursor: pointer;
+}
+.botao-consumivel:hover,
+.botao-consumivel:focus-visible {
+  border-color: var(--destaque);
+  outline: none;
+}
+.botao-consumivel:active {
+  transform: scale(0.94);
+}
+.botao-consumivel svg.icone {
+  width: 24px;
+  height: 24px;
+}
+.botao-consumivel .qtd {
+  position: absolute;
+  right: 3px;
+  bottom: 1px;
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 2px #000;
+}
+.botao-consumivel .tecla {
+  position: absolute;
+  left: 3px;
+  top: 1px;
+  font-size: 0.62rem;
+  color: var(--texto-suave);
+}
+body.toque .barra-consumiveis {
+  top: calc(64px + var(--seguro-topo));
+  transform: none;
+  max-height: min(42vh, 220px);
+  width: 132px;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 8px;
+  background: rgba(10, 9, 14, 0.35);
+  opacity: 0.7;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+body.toque .barra-consumiveis:focus-within,
+body.toque .barra-consumiveis:active {
+  opacity: 0.95;
+}
+body.toque .botao-consumivel {
+  width: 100%;
+  height: 40px;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 0 6px;
+}
+body.toque .botao-consumivel .nome {
+  overflow: hidden;
+  font-size: 0.72rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+body.toque .botao-consumivel .qtd {
+  position: static;
+  margin-left: auto;
+}
+
+/* Ajuste de 16/10/2026 (D-067): botão "+" da tecla livre e o seletor rápido da barra. */
+.botao-habilidade.vazio {
+  border-style: dashed;
+  color: var(--texto-suave);
+  background: rgba(31, 28, 40, 0.55);
+}
+.seletor-barra {
+  position: absolute;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 180px;
+  max-width: min(260px, calc(100% - 16px));
+  max-height: 50vh;
+  padding: 8px;
+  overflow-y: auto;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  background: var(--painel);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+  zoom: var(--escala-ui, 1);
+  pointer-events: auto;
+}
+.seletor-barra[hidden] {
+  display: none;
+}
+.titulo-seletor {
+  margin: 0 0 2px;
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+}
+.opcao-seletor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--texto);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.opcao-seletor:hover,
+.opcao-seletor:focus-visible {
+  border-color: var(--destaque);
+  outline: none;
+}
+.opcao-seletor[aria-checked='true'] {
+  border-color: var(--destaque);
+  background: rgba(224, 184, 79, 0.12);
+}
+
+/* Ajuste de 16/10/2026 (D-067): em retrato, no toque, o aviso cobre o jogo pedindo para girar o aparelho. */
+.aviso-girar {
+  display: none;
+}
+@media (orientation: portrait) {
+  .aviso-girar {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 24px;
+    background: var(--fundo, #0f0d14);
+    color: var(--texto);
+    text-align: center;
+  }
+}
+.aviso-girar svg.icone.grande {
+  width: 72px;
+  height: 72px;
+  color: var(--destaque);
+}
+@media (orientation: portrait) and (prefers-reduced-motion: no-preference) {
+  .aviso-girar svg.icone.grande {
+    animation: girar-aparelho 2.4s ease-in-out infinite;
+  }
+}
+@keyframes girar-aparelho {
+  0%, 30% { transform: rotate(0deg); }
+  60%, 100% { transform: rotate(-90deg); }
 }

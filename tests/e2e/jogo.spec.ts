@@ -183,15 +183,17 @@ test.describe('desktop', () => {
     expect(erros).toEqual([]);
   });
 
-  test('orbe de efeito: pisar no orbe da sala inicial mostra o efeito no HUD', async ({ page }) => {
+  // Ajuste de 16/10/2026 (D-067): o ofensivo chega armado (chip com o prazo) e só começa em combate.
+  test('orbe de efeito: pisar no orbe da sala inicial arma o buff no HUD', async ({ page }) => {
     const { diag, erros } = await abrir(page);
     await esperarParado(page, diag);
     const [px, py] = await ler(diag, 'celula');
     const [tx, ty] = await ler(diag, 'tela');
     // Orbe de "Fúria" (bonus_dano) em (3,8) na fase 1.
     await page.mouse.click(tx + (3 - px) * 48, ty + (8 - py) * 48);
-    await expect(page.locator('.chip-efeito[data-efeito="bonus_dano"]')).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator('.chip-pendente[data-armado="bonus_dano"]')).toBeVisible({ timeout: 20_000 });
     await expect(page.locator('.log-combate')).toContainText('Orbe de efeito');
+    await expect(page.locator('.log-combate')).toContainText('armado');
     expect(erros).toEqual([]);
   });
 

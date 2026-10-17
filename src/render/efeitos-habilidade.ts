@@ -87,7 +87,8 @@ export class EfeitosDeHabilidade {
       for (let i = 0; i < vezes; i++) {
         // Raio e relâmpago correm da fonte ao alvo (marco 11A: o relâmpago é o raio com ramificação).
         if ((v.impacto === 'raio' || v.impacto === 'relampago') && fonte) this.o.particulas.emitir(v.impacto, fonte.x, fonte.y, v.cor, alvo);
-        else if (v.impacto && (ev.dano > 0 || ev.cura > 0 || ev.d20 === 0)) this.o.particulas.emitir(v.impacto, alvo.x, alvo.y, v.cor);
+        // D-067: chuva e leque já desenham as flechas pela área; no alvo, as farpas do acerto.
+        else if (v.impacto && (ev.dano > 0 || ev.cura > 0 || ev.d20 === 0)) this.o.particulas.emitir(v.impacto === 'chuva' || v.impacto === 'leque' ? 'farpas' : v.impacto, alvo.x, alvo.y, v.cor);
       }
       if (ev.indice > 0) return;
       const agoraMs = agora();
@@ -149,7 +150,7 @@ export class EfeitosDeHabilidade {
       this.ultimoRastro.set(pr.id, agoraMs);
       const h = this.o.habilidades(pr.chave);
       const v = h ? visualDe(h) : null;
-      if (v?.viagem) p.emitir(v.viagem, pr.x, pr.y, v.cor);
+      if (v?.viagem) p.emitir(v.viagem, pr.x, pr.y, v.cor, undefined, { x: pr.dirX, y: pr.dirY });
     }
     if (this.ultimoRastro.size > 64) this.ultimoRastro.clear();
     if (q.auras) this.auras(estado, agoraMs);
@@ -184,6 +185,13 @@ export class EfeitosDeHabilidade {
       const ponta = celulas.reduce((m, c) => (Math.hypot(c.x - a.origem.x, c.y - a.origem.y) > Math.hypot(m.x - a.origem.x, m.y - a.origem.y) ? c : m), celulas[0] ?? a.origem);
       p.emitir(impacto ?? 'relampago', a.origem.x, a.origem.y, v.cor, ponta);
       p.emitir('faiscas', a.origem.x, a.origem.y, v.cor, ponta);
+    } else if (impacto === 'chuva') {
+      // Ajuste de 16/10/2026 (D-067): a chuva de flechas cai em até 10 células da área, sem onda nem faíscas.
+      const sorteadas = [...celulas].sort(() => Math.random() - 0.5);
+      for (const c of sorteadas.slice(0, 10)) p.emitir('chuva', c.x + (Math.random() - 0.5) * 0.4, c.y + (Math.random() - 0.5) * 0.4, v.cor);
+    } else if (impacto === 'leque') {
+      // D-067: o leque sai de quem atira, em cone para o meio da área.
+      p.emitir('leque', a.origem.x, a.origem.y, v.cor, centro);
     } else {
       // Rajada pela área: o impacto em até 5 células espalhadas, faíscas no resto; a onda só nas redondas.
       if (h.tipoArea !== 'cone') p.emitir('onda', centro.x, centro.y, v.cor);

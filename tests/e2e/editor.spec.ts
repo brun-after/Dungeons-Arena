@@ -121,7 +121,7 @@ test('desktop: um tileset enviado como imagem vira o terreno da fase', async ({ 
   await novo.getByRole('button', { name: 'Salvar tileset' }).click();
   await expect(page.getByTestId('fases-editor')).toBeVisible();
   await page.getByTestId('fases-editor').click();
-  await expect(page.getByRole('button', { name: 'Tileset desta fase' })).toHaveText('▦ Tileset próprio…');
+  await expect(page.getByRole('button', { name: 'Tileset desta fase' })).toHaveText('Tileset próprio…');
   await page.keyboard.press('Escape');
   // O jogo carrega o atlas no teste da fase.
   await page.getByRole('button', { name: 'Testar esta fase' }).click();

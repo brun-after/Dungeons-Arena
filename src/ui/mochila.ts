@@ -91,6 +91,8 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     rotuloFechar: t('mochila.fechar'),
     classe: 'mochila',
     aoAbrir: () => {
+      // D-067: abrir a mochila gasta a carga de refúgio (imune por 45 s), se houver.
+      emitir({ t: 'abrirMenu' });
       o.aoAbrir();
       desenhar();
     },

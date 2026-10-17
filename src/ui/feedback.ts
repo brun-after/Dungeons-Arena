@@ -218,7 +218,24 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
     if (ev.id === idLocal) hud.registrar(t('log.vendeu', { item: nomeItem(ev.itemId), preco: ev.preco }));
   });
   bus.on('lojaFechada', (ev) => {
-    if (ev.id === idLocal) hud.registrar(t('log.lojaFechada'));
+    if (ev.id !== idLocal) return;
+    hud.registrar(t(ev.perigo ? 'log.lojaFechadaPerigo' : 'log.lojaFechada'));
+    if (ev.perigo) o.aviso(t('log.lojaFechadaPerigo'));
+  });
+  // Ajuste de 16/10/2026 (D-067): buffs ofensivos armados e a carga de refúgio.
+  bus.on('buffArmado', (ev) => {
+    if (ev.id === idLocal) hud.registrar(t('log.buffArmado', { efeito: t(`efeito.${ev.tipo}` as ChaveTexto) }));
+  });
+  bus.on('buffAtivado', (ev) => {
+    if (ev.id === idLocal) hud.registrar(t('log.buffAtivado', { efeito: t(`efeito.${ev.tipo}` as ChaveTexto) }));
+  });
+  bus.on('buffExpirou', (ev) => {
+    if (ev.id === idLocal) hud.registrar(t('log.buffExpirou', { efeito: t(`efeito.${ev.tipo}` as ChaveTexto) }));
+  });
+  bus.on('refugioUsado', (ev) => {
+    if (ev.id !== idLocal) return;
+    hud.registrar(t('log.refugioUsado'));
+    o.aviso(t('log.refugioUsado'));
   });
   // Marco 10A-3: invocações.
   bus.on('invocacaoCurou', (ev) => {

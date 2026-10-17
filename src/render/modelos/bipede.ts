@@ -4,7 +4,7 @@
 
 import { circulo, clarear, elipse, escurecer, hex, linha, MEIO, olhos, PES_Y, poligono, retangulo, type Vista } from './svg.ts';
 
-export type Arma = 'espada' | 'cajado' | 'clava' | 'adaga' | 'machado' | 'foice' | 'arco';
+export type Arma = 'espada' | 'cajado' | 'clava' | 'adaga' | 'machado' | 'foice' | 'arco' | 'lanca';
 
 /** Arco (marco 14, arqueiro): a madeira em curva e a corda reta. */
 function arco(x: 'cima' | '34', cx: number, cy: number): string {
@@ -43,7 +43,7 @@ export interface OpcoesBipede {
   elevacao?: number;
 }
 
-function arma34(tipo: Arma, x: number, y: number): string {
+export function arma34(tipo: Arma, x: number, y: number): string {
   switch (tipo) {
     case 'espada':
       return linha([x, y + 2, x, y - 17], 0xd5dbe3, 2.6) + retangulo(x - 3.5, y - 1, 7, 2.2, 0x8a6d3b, 0.8, false);
@@ -59,6 +59,8 @@ function arma34(tipo: Arma, x: number, y: number): string {
       return linha([x, y + 9, x, y - 24], 0x4a3a2a, 2.2) + poligono([x, y - 24, x + 11, y - 22, x + 3, y - 20], 0xbdc3c7);
     case 'arco':
       return arco('34', x, y - 4);
+    case 'lanca':
+      return linha([x, y + 10, x, y - 26], 0x7a5230, 2.2) + poligono([x - 2.4, y - 25, x, y - 32, x + 2.4, y - 25], 0xd5dbe3);
   }
 }
 
@@ -148,11 +150,11 @@ export function bipede34(o: OpcoesBipede, quadro: number): string {
   return partes.join('');
 }
 
-function armaCima(tipo: Arma, x: number, y: number): string {
+export function armaCima(tipo: Arma, x: number, y: number): string {
   if (tipo === 'arco') return arco('cima', x, y);
-  const comprimento = tipo === 'cajado' || tipo === 'foice' ? 18 : tipo === 'adaga' ? 7 : 13;
-  const cor = tipo === 'cajado' || tipo === 'clava' || tipo === 'foice' ? 0x7a5230 : 0xd5dbe3;
-  const ponta = tipo === 'cajado' ? circulo(x + comprimento, y, 2.6, 0x9b59b6) : tipo === 'machado' ? poligono([x + comprimento - 2, y, x + comprimento, y + 5, x + comprimento + 3, y], 0xbdc3c7) : '';
+  const comprimento = tipo === 'cajado' || tipo === 'foice' || tipo === 'lanca' ? 18 : tipo === 'adaga' ? 7 : 13;
+  const cor = tipo === 'cajado' || tipo === 'clava' || tipo === 'foice' || tipo === 'lanca' ? 0x7a5230 : 0xd5dbe3;
+  const ponta = tipo === 'cajado' ? circulo(x + comprimento, y, 2.6, 0x9b59b6) : tipo === 'lanca' ? poligono([x + comprimento, y - 2.2, x + comprimento + 6, y, x + comprimento, y + 2.2], 0xd5dbe3) : tipo === 'machado' ? poligono([x + comprimento - 2, y, x + comprimento, y + 5, x + comprimento + 3, y], 0xbdc3c7) : '';
   return linha([x, y, x + comprimento, y], cor, tipo === 'clava' ? 3.2 : 2.4) + ponta;
 }
 

@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.0 · **Data:** 16/10/2026
-**Status:** 🚧 Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena
+**Versão do documento:** 3.1 · **Data:** 17/10/2026
+**Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena
 
 > **Histórico**
+> - **3.1 (17/10/2026)**: ajustes depois do 11A (sem descanso e mais orbes de vida, halo no lugar da linha, consumíveis à direita e minimapa à esquerda, equipamento no token, buff ofensivo armado, refúgio de 45 s, loja sem prazo, barra de skills maior com seletor rápido, flechas de verdade, ícones próprios no lugar dos emojis, paisagem e tela cheia no celular; D-067).
 > - **3.0 (16/10/2026)**: marco 11A (editor completo no toque, aventuras de até 12 fases, tileset por imagem, estilo por aparelho, visuais das habilidades em partículas e trilhas casual ↔ dark; D-066).
 > - **2.9 (15/10/2026)**: alvo que não troca sozinho, troca com `Q` ou 🎯 e trava com `T`, clique ou toque longo (D-065).
 > - **2.8 (15/10/2026)**: marco 17 (conta Google e progresso na nuvem, certificado do personagem, a campanha na arena com faixas e recompensas, equipamento gerado por nível e atributos com mais efeito; D-063) e o 11A redefinido (D-064).
@@ -72,7 +73,7 @@ Divergências em relação a ela são registradas em [`docs/DECISOES.md`](docs/D
 | **Balanceamento** | `npm run balancear` (tabela das metas do ritmo); `-- --registrar` grava [`docs/BALANCEAMENTO.md`](docs/BALANCEAMENTO.md) | Marco 15 |
 | **Benchmarks do cliente** | `?bench=carga` ou `?bench=padrao` no navegador (o resultado aparece na tela; `&qualidade=baixo` e `&segundos=60` opcionais); `npm run bench` roda tudo e grava em `docs/BENCHMARKS.md` | Marco 16 |
 | **Teste com pessoas** | Link <https://brun-after.github.io/Dungeons-Arena/?pesquisa=1>; roteiro e resumo em [`docs/TESTES-HUMANOS.md`](docs/TESTES-HUMANOS.md) | Marco 7 |
-| **Editor de aventuras** | Menu → **Editor de fases** (ou `?editor`): aventuras de até 12 fases; pincel, balde e retângulo; baú, loja, item, armadilha, som, inimigo com nível, porta interna e saída com tranca; toque longo abre o inspetor; **Fases** troca, gera (também "no meu estilo") e escolhe o tileset (imagem 4×4 ou 5×5); **▶** testa a fase e **▶▶** a aventura inteira; **⇩** exporta a fase. Para jogar valendo: Campanha → slot vazio → escolha a aventura | Marcos 6 e 11A |
+| **Editor de aventuras** | Menu → **Editor de fases** (ou `?editor`): aventuras de até 12 fases; pincel, balde e retângulo; baú, loja, item, armadilha, som, inimigo com nível, porta interna e saída com tranca; toque longo abre o inspetor; **Fases** troca, gera (também "no meu estilo") e escolhe o tileset (imagem 4×4 ou 5×5); **Testar** testa a fase e **Testar a aventura**, a aventura inteira; **Exportar** baixa a fase. Para jogar valendo: Campanha → slot vazio → escolha a aventura | Marcos 6 e 11A |
 | **Local: verificação completa** | `npm run verificar` (typecheck, lint, testes e build) | Etapa 1 |
 | **Testes** | `npm test` (unidade, simulação, rede e integração com o servidor), `npm run test:e2e` (Playwright) | Etapa 1 |
 | **Offline** | Depois da primeira visita, a campanha abre em modo avião (PWA) | Etapa 2 |
@@ -87,9 +88,11 @@ Implantação do servidor na nuvem, passo a passo: [`docs/IMPLANTACAO.md`](docs/
 | Mover | WASD ou setas (diagonal = duas teclas) | Joystick ou direcional (troca no cabeçalho) |
 | Ir até um ponto | Clique no mapa | Toque no mapa; segure para seguir o dedo |
 | Selecionar e travar alvo | Clique no inimigo (de novo no travado, destrava; `Esc` limpa) | Toque no inimigo |
-| Trocar de alvo | `Q` (`Shift+Q` volta); `T` trava ou destrava | 🎯: tocar troca, segurar trava ou destrava |
-| Ataque básico | Espaço; ataca sozinho o alvo selecionado (travado, só ele) ou quem estiver te perseguindo | Botão ⚔ (funciona junto com o joystick) |
-| Habilidades | Teclas 1–4 (também no teclado numérico) | Roda de botões em volta do ⚔ |
+| Trocar de alvo | `Q` (`Shift+Q` volta); `T` trava ou destrava | Botão de alvo: tocar troca, segurar trava ou destrava |
+| Ataque básico | Espaço; ataca sozinho o alvo selecionado (travado, só ele) ou quem estiver te perseguindo | Botão de ataque (funciona junto com o joystick) |
+| Habilidades | Teclas 1–4 (também no teclado numérico) | Roda de botões em volta do ataque |
+| Pôr uma habilidade na tecla | Clique direito no botão da barra (ou `+` na tecla livre); na mochila, os botões 1–4 de cada carta | Segure o botão da roda |
+| Consumíveis (poções e pergaminhos) | Coluna à direita: clique, ou as teclas 5–9 e 0 | Lista à direita, no alto: toque |
 | Mover a câmera | Arrastar o mapa | Arrastar o mapa |
 | Zoom | Roda do mouse | Pinça com dois dedos |
 | Visão (de cima ou isométrica) | `V`, ou Pausa → Configurações → Gráficos | Pausa → Configurações → Gráficos |
@@ -97,7 +100,7 @@ Implantação do servidor na nuvem, passo a passo: [`docs/IMPLANTACAO.md`](docs/
 | Ranks, caminhos e teclas das habilidades | Mochila (`I`) → aba **Habilidades** | Idem |
 | O que um efeito faz | Passe o mouse (ou o foco) no ícone do efeito, ao lado da vida | Toque no ícone |
 | Ver as células exatas das áreas | Pausa → Configurações → Gráficos → Mostrar a área exata | Idem |
-| Mochila e ficha | `I` (Esc fecha); equipar, usar e tirar por botão | 🎒 no cabeçalho; tocar a linha equipa ou usa |
+| Mochila e ficha | `I` (Esc fecha); equipar, usar e tirar por botão | Botão da mochila no cabeçalho; tocar a linha equipa ou usa |
 | Pontos de atributo | Mochila → aba **Ficha** → `+` | Idem |
 | Diagnóstico (fps, célula) | Abrir com `?diag=1` no fim do endereço | Idem |
 

@@ -244,8 +244,8 @@
       "efeitos": [],
       "visual": {
         "cor": "#d5c4a1",
-        "viagem": "rastro",
-        "impacto": "faiscas",
+        "viagem": "esteira",
+        "impacto": "farpas",
         "som": "projetil"
       }
     },
@@ -339,8 +339,9 @@
         }
       ],
       "visual": {
+        "projetil": "teia",
         "cor": "#bdc3c7",
-        "viagem": "rastro",
+        "viagem": "esteira",
         "impacto": "fumaca",
         "som": "armadilha"
       }
@@ -556,8 +557,9 @@
       "velocidadeProjetil": 16,
       "efeitos": [],
       "visual": {
+        "viagem": "esteira",
         "cor": "#d4ac0d",
-        "impacto": "faiscas",
+        "impacto": "farpas",
         "som": "projetil"
       },
       "basico": true,
@@ -1103,8 +1105,8 @@
       "efeitos": [],
       "visual": {
         "cor": "#d4ac0d",
-        "viagem": "rastro",
-        "impacto": "faiscas",
+        "viagem": "esteira",
+        "impacto": "farpas",
         "som": "projetil"
       },
       "mods": [
@@ -1142,7 +1144,7 @@
       "efeitos": [],
       "visual": {
         "cor": "#d4ac0d",
-        "impacto": "faiscas",
+        "impacto": "chuva",
         "camera": "leve",
         "som": "projetil"
       },
@@ -1177,7 +1179,7 @@
       "efeitos": [],
       "visual": {
         "cor": "#58d68d",
-        "viagem": "rastro",
+        "viagem": "esteira",
         "impacto": "bolhas",
         "som": "projetil"
       },
@@ -1214,7 +1216,7 @@
       "efeitos": [],
       "visual": {
         "cor": "#d4ac0d",
-        "impacto": "faiscas",
+        "impacto": "leque",
         "som": "projetil"
       },
       "evolucoes": {

@@ -140,7 +140,7 @@ export class CamadaTelegrafia {
           vistas.add(a.acaoId);
           continue;
         }
-        chao.moveTo(ox, oy).lineTo(tx, ty).stroke({ width: 2 + 2 * fracao, color: cor, alpha: 0.35 + 0.4 * fracao });
+        chao.moveTo(ox, oy).lineTo(tx, ty).stroke({ width: 2, color: cor, alpha: 0.35 + 0.5 * fracao });
       }
     }
 
@@ -158,15 +158,26 @@ export class CamadaTelegrafia {
       const atras = proj.projetar(c.x - p.dirX * CELULA_PX * 0.6, c.y - p.dirY * CELULA_PX * 0.6);
       const dono = estado.entidades.find((e) => e.id === p.donoId);
       const cor = dono && local && relacao(local, dono, ctx.modo) === 'proprio' ? COR_PROPRIA : COR_HOSTIL;
+      // Ajuste de 16/10/2026 (D-067): o corpo segue a forma do projétil — flecha orientada, teia ou o núcleo de luz.
+      const hab = resolverHabilidade(ctx, p.chave);
+      const visual = hab ? visualDe(hab) : null;
+      const forma = visual?.projetil ?? 'orbe';
       if (particulas) {
-        // O projétil é um núcleo de luz na cor da habilidade (o rastro vem dos efeitos de habilidade).
-        const hab = resolverHabilidade(ctx, p.chave);
-        particulas.emitir('projetil', p.x + p.dirX * avanco, p.y + p.dirY * avanco, (hab ? visualDe(hab).cor : null) ?? cor);
+        const preset = forma === 'flecha' ? 'projetil_flecha' : forma === 'teia' ? 'projetil_teia' : 'projetil';
+        particulas.emitir(preset, p.x + p.dirX * avanco, p.y + p.dirY * avanco, visual?.cor ?? cor, undefined, { x: p.dirX, y: p.dirY });
         continue;
       }
-      // Rastro curto atrás do projétil para mostrar a trajetória.
-      voo.moveTo(atras.x, atras.y - altura).lineTo(x, y).stroke({ width: 3, color: cor, alpha: 0.5 });
-      voo.circle(x, y, 6).fill(cor).stroke({ width: 2, color: 0xffffff, alpha: 0.8 });
+      // Sem partículas: o rastro curto atrás mostra a trajetória (2 px, como os outros traços de reserva).
+      voo.moveTo(atras.x, atras.y - altura).lineTo(x, y).stroke({ width: 2, color: cor, alpha: 0.5 });
+      if (forma === 'flecha') {
+        const ang = Math.atan2(y - (atras.y - altura), x - atras.x);
+        const ponta = (d: number, a: number) => ({ x: x + Math.cos(ang + a) * d, y: y + Math.sin(ang + a) * d });
+        const e = ponta(6, Math.PI - 0.5);
+        const dd = ponta(6, Math.PI + 0.5);
+        voo.moveTo(e.x, e.y).lineTo(x, y).lineTo(dd.x, dd.y).stroke({ width: 2, color: 0xffffff, alpha: 0.9 });
+      } else {
+        voo.circle(x, y, 6).fill(cor).stroke({ width: 2, color: 0xffffff, alpha: 0.8 });
+      }
       if (altura > 0) voo.ellipse(x, yChao, 5, 2.5).fill({ color: 0x000000, alpha: 0.3 });
     }
   }

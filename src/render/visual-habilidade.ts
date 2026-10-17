@@ -3,7 +3,7 @@
 // faíscas; mágico -> brilho na cor do primeiro efeito; área -> anel e explosão; cura -> brilho verde).
 // Assim toda habilidade, inclusive as criadas por quem joga, tem expressão visual.
 
-import type { Habilidade, PresetVisual } from '../combat/habilidades';
+import type { FormaProjetil, Habilidade, PresetVisual } from '../combat/habilidades';
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 
 export interface VisualResolvido {
@@ -12,6 +12,8 @@ export interface VisualResolvido {
   viagem: PresetVisual | null;
   impacto: PresetVisual | null;
   camera: 'nenhum' | 'leve' | 'forte';
+  /** D-067: o corpo do projétil em voo. */
+  projetil: FormaProjetil;
 }
 
 const COR_FISICO = 0xffd27a;
@@ -28,9 +30,11 @@ export function visualDe(h: Habilidade): VisualResolvido {
   const deduzido: VisualResolvido = {
     cor: corDeduzida,
     conjuracao: h.tipoAtaque === 'magico' || curaPropria ? 'brilho' : null,
-    viagem: h.politicaImpacto === 'projetil' ? (h.tipoAtaque === 'magico' ? 'brilho' : 'rastro') : null,
-    impacto: curaPropria ? 'brilho' : h.politicaImpacto === 'area' ? 'explosao' : h.tipoAtaque === 'magico' ? 'brilho' : 'faiscas',
+    // D-067: o projétil físico é flecha, com esteira fina (não o brilho das magias).
+    viagem: h.politicaImpacto === 'projetil' ? (h.tipoAtaque === 'magico' ? 'brilho' : 'esteira') : null,
+    impacto: curaPropria ? 'brilho' : h.politicaImpacto === 'area' ? 'explosao' : h.tipoAtaque === 'magico' ? 'brilho' : h.politicaImpacto === 'projetil' ? 'farpas' : 'faiscas',
     camera: h.politicaImpacto === 'area' ? 'leve' : 'nenhum',
+    projetil: h.tipoAtaque === 'magico' ? 'orbe' : 'flecha',
   };
   if (!v) return deduzido;
   return {
@@ -39,5 +43,6 @@ export function visualDe(h: Habilidade): VisualResolvido {
     viagem: v.viagem ?? deduzido.viagem,
     impacto: v.impacto ?? deduzido.impacto,
     camera: v.camera,
+    projetil: v.projetil ?? deduzido.projetil,
   };
 }
