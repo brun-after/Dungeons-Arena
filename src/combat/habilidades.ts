@@ -103,7 +103,30 @@ export interface Habilidade {
   mobilidade: Mobilidade;
 }
 
-export const PRESETS_VISUAIS = ['faiscas', 'brilho', 'fumaca', 'anel', 'rastro', 'estrelas', 'brasas', 'explosao', 'raio'] as const;
+// Marco 11A (D-066): um preset por fantasia (corte, runas, cristais, bolhas, sombra, sangue, sagrado, pedra, vento,
+// chamas e relâmpago), além dos do marco 12.
+export const PRESETS_VISUAIS = [
+  'faiscas',
+  'brilho',
+  'fumaca',
+  'anel',
+  'rastro',
+  'estrelas',
+  'brasas',
+  'explosao',
+  'raio',
+  'corte',
+  'runas',
+  'cristais',
+  'bolhas',
+  'sombra',
+  'sangue',
+  'sagrado',
+  'pedra',
+  'vento',
+  'chamas',
+  'relampago',
+] as const;
 export type PresetVisual = (typeof PRESETS_VISUAIS)[number];
 
 /** Aparência de uma habilidade (§2.16, D-055): presets de partícula por momento da ação. */

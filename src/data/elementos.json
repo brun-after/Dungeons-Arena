@@ -7,7 +7,7 @@
       "cor": "#ff7b39",
       "icone": "🔥",
       "formas": { "projetil": 3, "quadrado": 3, "linha": 2, "ao_redor": 1, "contato": 1, "cone": 2 },
-      "visual": { "conjuracao": "brasas", "viagem": "rastro", "impacto": "explosao", "som": "explosao" },
+      "visual": { "conjuracao": "chamas", "viagem": "brasas", "impacto": "explosao", "som": "explosao" },
       "nomes": { "nucleos": ["Brasa", "Chama", "Labareda", "Fornalha", "Centelha"], "qualidades": ["ardente", "rubra", "voraz", "do braseiro", "incandescente"] }
     },
     {
@@ -16,7 +16,7 @@
       "cor": "#74b9ff",
       "icone": "❄",
       "formas": { "projetil": 3, "quadrado": 2, "linha": 3, "ao_redor": 2, "contato": 1, "cone": 2 },
-      "visual": { "conjuracao": "brilho", "viagem": "rastro", "impacto": "anel", "som": "magia" },
+      "visual": { "conjuracao": "brilho", "viagem": "rastro", "impacto": "cristais", "som": "magia" },
       "nomes": { "nucleos": ["Geada", "Lança", "Nevasca", "Cristal", "Inverno"], "qualidades": ["gélida", "cortante", "do norte", "silenciosa", "pálida"] }
     },
     {
@@ -25,7 +25,7 @@
       "cor": "#f7dc6f",
       "icone": "⚡",
       "formas": { "projetil": 3, "quadrado": 1, "linha": 3, "ao_redor": 1, "contato": 2, "cone": 1 },
-      "visual": { "conjuracao": "faiscas", "viagem": "faiscas", "impacto": "raio", "som": "magia" },
+      "visual": { "conjuracao": "faiscas", "viagem": "faiscas", "impacto": "relampago", "som": "magia" },
       "nomes": { "nucleos": ["Faísca", "Trovão", "Relâmpago", "Descarga", "Corisco"], "qualidades": ["estrondosa", "veloz", "da tempestade", "ofuscante", "errante"] }
     },
     {
@@ -34,7 +34,7 @@
       "cor": "#58d68d",
       "icone": "🧪",
       "formas": { "projetil": 3, "quadrado": 3, "linha": 1, "ao_redor": 2, "contato": 2, "cone": 2 },
-      "visual": { "conjuracao": "fumaca", "viagem": "rastro", "impacto": "fumaca", "som": "projetil" },
+      "visual": { "conjuracao": "bolhas", "viagem": "rastro", "impacto": "bolhas", "som": "projetil" },
       "nomes": { "nucleos": ["Peçonha", "Miasma", "Ferrão", "Toxina", "Musgo"], "qualidades": ["pútrida", "lenta", "do pântano", "amarga", "rastejante"] }
     },
     {
@@ -43,7 +43,7 @@
       "cor": "#d980fa",
       "icone": "👁",
       "formas": { "projetil": 2, "quadrado": 2, "linha": 2, "ao_redor": 2, "contato": 2, "cone": 1 },
-      "visual": { "conjuracao": "estrelas", "viagem": "brilho", "impacto": "estrelas", "som": "magia" },
+      "visual": { "conjuracao": "runas", "viagem": "rastro", "impacto": "estrelas", "som": "magia" },
       "nomes": { "nucleos": ["Eco", "Pesadelo", "Sussurro", "Vertigem", "Visão"], "qualidades": ["insana", "oculta", "da mente", "lancinante", "sem fim"] }
     }
   ]

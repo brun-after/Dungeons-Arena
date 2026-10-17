@@ -20,7 +20,7 @@
       "velocidadeProjetil": 0,
       "efeitos": [],
       "visual": {
-        "impacto": "faiscas",
+        "impacto": "corte",
         "som": "golpe"
       },
       "basico": true,
@@ -46,9 +46,9 @@
       "efeitos": [],
       "visual": {
         "cor": "#9b8cff",
-        "conjuracao": "brilho",
-        "viagem": "brilho",
-        "impacto": "brilho",
+        "conjuracao": "runas",
+        "viagem": "rastro",
+        "impacto": "runas",
         "som": "magia"
       },
       "evolucoes": {
@@ -83,7 +83,7 @@
       "efeitos": [],
       "visual": {
         "cor": "#ff8c42",
-        "conjuracao": "brasas",
+        "conjuracao": "chamas",
         "impacto": "explosao",
         "camera": "forte",
         "som": "explosao"
@@ -120,8 +120,8 @@
       "efeitos": [],
       "visual": {
         "cor": "#2ecc71",
-        "conjuracao": "brilho",
-        "impacto": "brilho",
+        "conjuracao": "sagrado",
+        "impacto": "sagrado",
         "som": "cura"
       },
       "evolucoes": {
@@ -195,7 +195,7 @@
       "velocidadeProjetil": 0,
       "efeitos": [],
       "visual": {
-        "impacto": "faiscas",
+        "impacto": "corte",
         "som": "golpe"
       }
     },
@@ -220,7 +220,7 @@
       "visual": {
         "cor": "#5dade2",
         "conjuracao": "brilho",
-        "impacto": "raio",
+        "impacto": "relampago",
         "som": "magia"
       }
     },
@@ -276,7 +276,7 @@
       ],
       "visual": {
         "cor": "#c0392b",
-        "conjuracao": "brasas",
+        "conjuracao": "chamas",
         "impacto": "explosao",
         "camera": "leve",
         "som": "explosao"
@@ -311,7 +311,7 @@
       ],
       "visual": {
         "cor": "#8e44ad",
-        "impacto": "faiscas",
+        "impacto": "sombra",
         "camera": "leve",
         "som": "golpe"
       }
@@ -381,7 +381,7 @@
       ],
       "visual": {
         "cor": "#27ae60",
-        "impacto": "fumaca",
+        "impacto": "bolhas",
         "som": "golpe"
       }
     },
@@ -408,7 +408,7 @@
         }
       ],
       "visual": {
-        "impacto": "faiscas",
+        "impacto": "pedra",
         "camera": "forte",
         "som": "golpe"
       }
@@ -439,8 +439,8 @@
       ],
       "visual": {
         "cor": "#c0392b",
-        "conjuracao": "brilho",
-        "impacto": "raio",
+        "conjuracao": "sombra",
+        "impacto": "sangue",
         "som": "magia"
       }
     },
@@ -530,8 +530,8 @@
       "efeitos": [],
       "visual": {
         "cor": "#9b8cff",
-        "viagem": "brilho",
-        "impacto": "brilho",
+        "viagem": "rastro",
+        "impacto": "runas",
         "som": "magia"
       },
       "basico": true,
@@ -589,7 +589,7 @@
       ],
       "visual": {
         "cor": "#e67e22",
-        "impacto": "faiscas",
+        "impacto": "pedra",
         "camera": "leve",
         "som": "golpe"
       },
@@ -627,7 +627,7 @@
       "efeitos": [],
       "visual": {
         "cor": "#c0392b",
-        "impacto": "faiscas",
+        "impacto": "vento",
         "camera": "leve",
         "som": "golpe"
       },
@@ -750,7 +750,7 @@
       ],
       "visual": {
         "cor": "#7f8c8d",
-        "impacto": "faiscas",
+        "impacto": "corte",
         "som": "golpe"
       },
       "evolucoes": {
@@ -784,8 +784,8 @@
       "efeitos": [],
       "visual": {
         "cor": "#ff7b39",
-        "conjuracao": "brasas",
-        "impacto": "explosao",
+        "conjuracao": "chamas",
+        "impacto": "chamas",
         "camera": "leve",
         "som": "golpe"
       },
@@ -844,7 +844,8 @@
       "efeitos": [],
       "visual": {
         "cor": "#ff7b39",
-        "conjuracao": "brasas",
+        "conjuracao": "chamas",
+        "viagem": "brasas",
         "impacto": "explosao",
         "camera": "forte",
         "som": "explosao"
@@ -881,8 +882,9 @@
       "efeitos": [],
       "visual": {
         "cor": "#74b9ff",
-        "conjuracao": "brilho",
-        "impacto": "anel",
+        "conjuracao": "cristais",
+        "viagem": "rastro",
+        "impacto": "cristais",
         "som": "magia"
       },
       "elemento": "gelo",
@@ -919,7 +921,7 @@
         "cor": "#f7dc6f",
         "conjuracao": "faiscas",
         "viagem": "faiscas",
-        "impacto": "raio",
+        "impacto": "relampago",
         "camera": "leve",
         "som": "magia"
       },
@@ -964,7 +966,7 @@
       ],
       "visual": {
         "cor": "#5dade2",
-        "impacto": "anel",
+        "impacto": "runas",
         "som": "cura"
       },
       "evolucoes": {
@@ -1000,7 +1002,7 @@
       "visual": {
         "cor": "#a0d8ef",
         "conjuracao": "brilho",
-        "impacto": "anel",
+        "impacto": "cristais",
         "camera": "leve",
         "som": "magia"
       },
@@ -1041,7 +1043,7 @@
       ],
       "visual": {
         "cor": "#d980fa",
-        "conjuracao": "estrelas",
+        "conjuracao": "runas",
         "viagem": "brilho",
         "impacto": "estrelas",
         "som": "magia"
@@ -1176,7 +1178,7 @@
       "visual": {
         "cor": "#58d68d",
         "viagem": "rastro",
-        "impacto": "fumaca",
+        "impacto": "bolhas",
         "som": "projetil"
       },
       "elemento": "veneno",
@@ -1254,7 +1256,7 @@
       ],
       "visual": {
         "cor": "#8e44ad",
-        "impacto": "fumaca",
+        "impacto": "sombra",
         "som": "magia"
       },
       "evolucoes": {

@@ -25,7 +25,7 @@ import type { PresetQualidade } from './qualidade';
 import { visualDe } from './visual-habilidade';
 
 const INTERVALO_CONJURACAO_MS = 120;
-const INTERVALO_RASTRO_MS = 50;
+const INTERVALO_RASTRO_MS = 30;
 const INTERVALO_AURA_MS = 320;
 const INTERVALO_POEIRA_MS = 220;
 
@@ -83,7 +83,8 @@ export class EfeitosDeHabilidade {
       const fonte = pos(ev.fonteId);
       const vezes = h.escalaVisual >= 1.4 ? 2 : 1;
       for (let i = 0; i < vezes; i++) {
-        if (v.impacto === 'raio' && fonte) this.o.particulas.emitir('raio', fonte.x, fonte.y, v.cor, alvo);
+        // Raio e relâmpago correm da fonte ao alvo (marco 11A: o relâmpago é o raio com ramificação).
+        if ((v.impacto === 'raio' || v.impacto === 'relampago') && fonte) this.o.particulas.emitir(v.impacto, fonte.x, fonte.y, v.cor, alvo);
         else if (v.impacto && (ev.dano > 0 || ev.cura > 0 || ev.d20 === 0)) this.o.particulas.emitir(v.impacto, alvo.x, alvo.y, v.cor);
       }
       if (ev.indice > 0) return;
@@ -170,7 +171,7 @@ export class EfeitosDeHabilidade {
     };
     // O impacto inteiro e a onda no centro; pela área, só faíscas (anéis em toda célula poluiriam).
     this.o.particulas.emitir('onda', centro.x, centro.y, v.cor);
-    if (v.impacto && v.impacto !== 'raio') this.o.particulas.emitir(v.impacto, centro.x, centro.y, v.cor);
+    if (v.impacto && v.impacto !== 'raio' && v.impacto !== 'relampago') this.o.particulas.emitir(v.impacto, centro.x, centro.y, v.cor);
     const sorteadas = [...celulas].sort(() => Math.random() - 0.5).slice(0, 6);
     for (const c of sorteadas) this.o.particulas.emitir('faiscas', c.x + (Math.random() - 0.5) * 0.6, c.y + (Math.random() - 0.5) * 0.6, v.cor);
   }
