@@ -5,17 +5,23 @@
 //   fade de 800 ms entre dois sequenciadores. Pausar suspende o contexto e retoma do ponto.
 // - Pausa sozinho quando a aba some (visibilitychange) e retoma ao voltar, se o jogo não estiver pausado.
 // - Qualquer falha deixa o jogo mudo e seguindo: nunca derruba a partida.
+// Marco 11A (16/10/2026, D-066): a música tem uma "sombra" (0 casual … 1 dark). A faixa (5 degraus) escolhe a
+// composição; dentro da faixa, a sombra mexe ao vivo no passa-baixa e na ambiência (eco), sem recompor. Trocar de
+// laço espera o fim do compasso e cruza em 1,5 s. Pad, arpejo e melodia filtrada pelos timbres da faixa.
 
-import { compor, frequencia, PASSOS_POR_LACO, type Composicao } from './composicao';
+import { compor, faixaDaSombra, frequencia, PASSOS_POR_COMPASSO, PASSOS_POR_LACO, type Composicao } from './composicao';
 import type { Clima } from './contexto-musical';
 import { LimitadorDeSom, variacaoDeTom } from './limitador';
 import type { SomId } from './mapeamento';
-import { criarAmbiente, DURACAO_MS, tocarBumbo, tocarCaixa, tocarChimbal, tocarEfeito, tocarNota, type SomAmbiente } from './sintetizador';
+import { criarAmbiente, DURACAO_MS, tocarBumbo, tocarCaixa, tocarChimbal, tocarEfeito, tocarNota, tocarNotaFiltrada, tocarPad, type SomAmbiente } from './sintetizador';
 
 const OLHAR_A_FRENTE_S = 0.12;
 const INTERVALO_AGENDA_MS = 25;
-const FADE_CLIMA_S = 0.8;
+const FADE_CLIMA_S = 1.5;
 const FADE_INICIO_S = 0.4;
+/** Eco da ambiência: atraso e realimentação. */
+const ECO_S = 0.32;
+const ECO_REALIMENTACAO = 0.32;
 
 export interface VolumesAudio {
   musica: number;
@@ -26,6 +32,9 @@ export interface VolumesAudio {
 interface Sequenciador {
   ganho: GainNode;
   timer: ReturnType<typeof setInterval>;
+  /** Para a troca no fim do compasso: em que passo está e quando cai o próximo. */
+  estado: { passo: number; proximoS: number };
+  duracaoPassoS: number;
 }
 
 interface Fonte {
@@ -38,9 +47,13 @@ export class MotorAudio {
   private ctx: AudioContext | null = null;
   private mestre: GainNode | null = null;
   private musica: GainNode | null = null;
+  /** Marco 11A: entrada da música (antes do filtro), o passa-baixa da sombra e o ganho da ambiência. */
+  private entradaMusica: GainNode | null = null;
+  private filtroMusica: BiquadFilterNode | null = null;
+  private ambiencia: GainNode | null = null;
   private efeitos: GainNode | null = null;
   private atual: { chave: string; seq: Sequenciador } | null = null;
-  private pedidoMusica: { faseId: string; clima: Clima } | null = null;
+  private pedidoMusica: { faseId: string; clima: Clima; sombra: number } | null = null;
   private readonly limitador = new LimitadorDeSom();
   private readonly fontes = new Map<string, Fonte>();
   private pausadoPeloJogo = false;
@@ -76,10 +89,28 @@ export class MotorAudio {
       this.efeitos = ctx.createGain();
       this.musica.connect(this.mestre);
       this.efeitos.connect(this.mestre);
+      // Música: entrada → passa-baixa → música; e um envio de eco (ambiência) que volta antes do filtro.
+      this.entradaMusica = ctx.createGain();
+      this.filtroMusica = ctx.createBiquadFilter();
+      this.filtroMusica.type = 'lowpass';
+      this.filtroMusica.frequency.value = 6000;
+      this.entradaMusica.connect(this.filtroMusica);
+      this.filtroMusica.connect(this.musica);
+      const eco = ctx.createDelay(1);
+      eco.delayTime.value = ECO_S;
+      const realimentacao = ctx.createGain();
+      realimentacao.gain.value = ECO_REALIMENTACAO;
+      this.ambiencia = ctx.createGain();
+      this.ambiencia.gain.value = 0.15;
+      this.entradaMusica.connect(eco);
+      eco.connect(realimentacao);
+      realimentacao.connect(eco);
+      eco.connect(this.ambiencia);
+      this.ambiencia.connect(this.filtroMusica);
       this.aplicarVolumes();
       void ctx.resume().catch(() => undefined);
       document.body.dataset.audio = 'ativo';
-      if (this.pedidoMusica) this.definirMusica(this.pedidoMusica.faseId, this.pedidoMusica.clima);
+      if (this.pedidoMusica) this.definirMusica(this.pedidoMusica.faseId, this.pedidoMusica.clima, this.pedidoMusica.sombra);
       if (this.pausadoPeloJogo) void ctx.suspend().catch(() => undefined);
     } catch {
       // Sem Web Audio: o jogo segue mudo.
@@ -129,49 +160,69 @@ export class MotorAudio {
     this.tocar('passo', volume, pan);
   }
 
-  /** Música da fase no clima pedido; a troca de clima é um fade de 800 ms. */
-  definirMusica(faseId: string, clima: Clima): void {
-    this.pedidoMusica = { faseId, clima };
+  /**
+   * Música da fase no clima e na sombra pedidos (marco 11A). A sombra mexe ao vivo no filtro e no eco; quando muda a
+   * faixa (ou o clima), o laço novo entra no fim do compasso do atual, cruzando em 1,5 s.
+   */
+  definirMusica(faseId: string, clima: Clima, sombra = 0.5): void {
+    this.pedidoMusica = { faseId, clima, sombra };
     const ctx = this.ctx;
-    if (!ctx || !this.musica) return;
-    const chave = `${faseId}:${clima}`;
+    if (!ctx || !this.entradaMusica) return;
+    const s = Math.max(0, Math.min(1, sombra));
+    this.filtroMusica?.frequency.setTargetAtTime(7000 - 5200 * s, ctx.currentTime, 0.8);
+    this.ambiencia?.gain.setTargetAtTime(0.1 + 0.3 * s, ctx.currentTime, 0.8);
+    const faixa = faixaDaSombra(s);
+    const chave = `${faseId}:${clima}:${faixa}`;
     if (this.atual?.chave === chave) return;
     const anterior = this.atual;
-    const seq = this.criarSequenciador(ctx, this.musica, compor(faseId, clima));
-    seq.ganho.gain.setValueAtTime(0.0001, ctx.currentTime);
-    seq.ganho.gain.exponentialRampToValueAtTime(1, ctx.currentTime + FADE_CLIMA_S);
+    // O começo do próximo compasso do laço atual (ou já, se não há música).
+    let inicio = ctx.currentTime + 0.05;
+    if (anterior) {
+      const { estado, duracaoPassoS } = anterior.seq;
+      const faltam = (PASSOS_POR_COMPASSO - (estado.passo % PASSOS_POR_COMPASSO)) % PASSOS_POR_COMPASSO;
+      inicio = Math.max(inicio, estado.proximoS + faltam * duracaoPassoS);
+    }
+    const seq = this.criarSequenciador(ctx, this.entradaMusica, compor(faseId, clima, faixa), inicio);
+    seq.ganho.gain.setValueAtTime(0.0001, inicio);
+    seq.ganho.gain.exponentialRampToValueAtTime(1, inicio + FADE_CLIMA_S);
     this.atual = { chave, seq };
     if (anterior) {
-      anterior.seq.ganho.gain.setTargetAtTime(0.0001, ctx.currentTime, FADE_CLIMA_S / 4);
-      setTimeout(() => {
-        clearInterval(anterior.seq.timer);
-        anterior.seq.ganho.disconnect();
-      }, FADE_CLIMA_S * 1000 + 100);
+      anterior.seq.ganho.gain.setTargetAtTime(0.0001, inicio, FADE_CLIMA_S / 4);
+      setTimeout(
+        () => {
+          clearInterval(anterior.seq.timer);
+          anterior.seq.ganho.disconnect();
+        },
+        (inicio - ctx.currentTime + FADE_CLIMA_S) * 1000 + 200,
+      );
     }
   }
 
-  private criarSequenciador(ctx: AudioContext, destino: AudioNode, composicao: Composicao): Sequenciador {
+  private criarSequenciador(ctx: AudioContext, destino: AudioNode, composicao: Composicao, inicio: number): Sequenciador {
     const ganho = ctx.createGain();
     ganho.connect(destino);
-    const seq = { passo: 0, proximoS: ctx.currentTime + 0.05 };
+    const estado = { passo: 0, proximoS: inicio };
     const duracaoPassoS = 60 / composicao.bpm / 4;
+    const tim = composicao.timbres;
     const timer = setInterval(() => {
       if (ctx.state !== 'running') return;
-      while (seq.proximoS < ctx.currentTime + OLHAR_A_FRENTE_S) {
-        const p = composicao.passos[seq.passo];
-        const t = Math.max(seq.proximoS, ctx.currentTime);
+      while (estado.proximoS < ctx.currentTime + OLHAR_A_FRENTE_S) {
+        const p = composicao.passos[estado.passo];
+        const t = Math.max(estado.proximoS, ctx.currentTime);
         if (p) {
-          if (p.melodia !== null) tocarNota(ctx, ganho, t, frequencia(p.melodia), duracaoPassoS * 1.8, 'triangle', 0.12);
-          if (p.baixo !== null) tocarNota(ctx, ganho, t, frequencia(p.baixo), duracaoPassoS * 3, 'sine', 0.22);
+          if (p.melodia !== null) tocarNotaFiltrada(ctx, ganho, t, frequencia(p.melodia), duracaoPassoS * tim.sustentacao, tim.melodia, 0.1, tim.corte);
+          if (p.baixo !== null) tocarNota(ctx, ganho, t, frequencia(p.baixo), duracaoPassoS * (tim.drone ? PASSOS_POR_COMPASSO : 3), 'sine', 0.2);
+          if (p.pad) tocarPad(ctx, ganho, t, p.pad.map(frequencia), duracaoPassoS * PASSOS_POR_COMPASSO, tim.pad, tim.volumePad);
+          if (p.arpejo !== null) tocarNotaFiltrada(ctx, ganho, t, frequencia(p.arpejo), duracaoPassoS * 1.5, 'triangle', 0.05, 3000);
           if (p.bumbo) tocarBumbo(ctx, ganho, t);
           if (p.caixa) tocarCaixa(ctx, ganho, t);
           if (p.chimbal) tocarChimbal(ctx, ganho, t);
         }
-        seq.passo = (seq.passo + 1) % PASSOS_POR_LACO;
-        seq.proximoS += duracaoPassoS;
+        estado.passo = (estado.passo + 1) % PASSOS_POR_LACO;
+        estado.proximoS += duracaoPassoS;
       }
     }, INTERVALO_AGENDA_MS);
-    return { ganho, timer };
+    return { ganho, timer, estado, duracaoPassoS };
   }
 
   /** Fontes sonoras da fase (§2.14): cria uma vez; o volume e o pan vêm de `atualizarFonte`. */

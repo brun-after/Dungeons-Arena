@@ -6,7 +6,7 @@ import type { BuscaHabilidade } from '../combat/habilidades';
 import type { EstadoJogo } from '../core/estado';
 import type { Barramento } from '../core/events';
 import type { EventosDaSimulacao } from '../core/eventos-simulacao';
-import { climaDoEstado, ContextoMusical } from '../audio/contexto-musical';
+import { climaDoEstado, ContextoMusical, profundidadeDaFase, sombraDaCena, SombraMusical } from '../audio/contexto-musical';
 import { distancia, panPorPosicao, volumePorDistancia } from '../audio/espacial';
 import { sonsDoEvento } from '../audio/mapeamento';
 import type { MotorAudio } from '../audio/motor';
@@ -26,6 +26,8 @@ export function ligarSom(o: OpcoesSom): { quadro: (ouvinte: PontoVisual | null, 
   const { motor, idLocal } = o;
   let ouvinte: PontoVisual | null = null;
   const contexto = new ContextoMusical();
+  const sombraMusical = new SombraMusical();
+  const profundidade = profundidadeDaFase(o.fase);
 
   const tocarEm = (som: Parameters<MotorAudio['tocar']>[0], origemId: string | null) => {
     if (origemId === null || origemId === idLocal || !ouvinte) {
@@ -77,7 +79,10 @@ export function ligarSom(o: OpcoesSom): { quadro: (ouvinte: PontoVisual | null, 
   return {
     quadro: (pos, agoraMs) => {
       ouvinte = pos;
-      motor.definirMusica(o.fase.id, contexto.atualizar(climaDoEstado(o.estado(), idLocal), agoraMs));
+      const clima = contexto.atualizar(climaDoEstado(o.estado(), idLocal), agoraMs);
+      // Marco 11A (D-066): a sombra (casual ↔ dark) pela profundidade, a dificuldade e o clima, deslizando.
+      const sombra = sombraMusical.atualizar(sombraDaCena(clima, profundidade, o.estado().dificuldade), agoraMs);
+      motor.definirMusica(o.fase.id, clima, sombra);
       for (const f of fontes) {
         motor.definirFonte(f.id, f.som);
         const d = pos ? distancia(f.obj.x, f.obj.y, pos.x, pos.y) : Infinity;
