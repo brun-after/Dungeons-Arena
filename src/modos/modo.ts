@@ -116,6 +116,10 @@ export interface ModoDeJogo {
   sobrevivencia: {
     regenPorCelula: boolean;
     penalidadeMorte: PenalidadeMorte | null;
+    /** Marco 18 (D-068): a Sabedoria revela e desarma armadilhas (a arena não mostra armadilhas). */
+    revelarArmadilhas: boolean;
+    /** Marco 18 (D-068): o estudo de habilidades anda nesta modalidade (a arena usa a ficha certificada, sem estudo). */
+    estudoAvanca: boolean;
   };
 }
 
@@ -240,6 +244,8 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
     sobrevivencia: {
       regenPorCelula: l.booleano(sobrevivencia, 'regenPorCelula'),
       penalidadeMorte: lerPenalidade(l, sobrevivencia.penalidadeMorte),
+      revelarArmadilhas: sobrevivencia.revelarArmadilhas === undefined ? false : l.booleano(sobrevivencia, 'revelarArmadilhas'),
+      estudoAvanca: sobrevivencia.estudoAvanca === undefined ? false : l.booleano(sobrevivencia, 'estudoAvanca'),
     },
   };
   if (modo.fim.tipo !== 'nenhum' && modo.fim.alvo === null && modo.fim.tempoLimiteS === null) {

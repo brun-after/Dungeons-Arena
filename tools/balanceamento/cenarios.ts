@@ -9,7 +9,7 @@ import { BALANCE_PADRAO, type Balance, type ContextoSimulacao } from '../../src/
 import { criarEstado, type EstadoJogo } from '../../src/core/estado';
 import { DT_MS } from '../../src/core/loop';
 import { simular, type EventoSimulacao } from '../../src/core/simulacao';
-import type { Entidade } from '../../src/entities/entidade';
+import type { Atributos, Entidade } from '../../src/entities/entidade';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import type { Dificuldade } from '../../src/modos/dificuldade';
 import type { ModoDeJogo } from '../../src/modos/modo';
@@ -42,8 +42,16 @@ export function contextoDoCenario(modoId = 'campanha', balance: Balance = BALANC
   return { fase: salaAberta(24, 18), balance, conteudo: CONTEUDO, modo: modoDoCenario(modoId) };
 }
 
-/** Atributo principal de cada classe de combate (o que o bot põe primeiro ao subir). */
-const PRINCIPAL = { corpo_a_corpo: 'forca', conjurador: 'inteligencia', atirador: 'destreza' } as const;
+/**
+ * Onde o jogador típico põe os pontos de cada classe (marco 18, D-068: a rolagem escala com Força e Inteligência; a
+ * Destreza do arqueiro é cadência, não dano). Os pontos do "principal" se dividem por igual entre os da lista.
+ */
+export const ATRIBUTOS_TIPICOS: Readonly<Record<string, readonly (keyof Atributos)[]>> = {
+  aventureiro: ['forca', 'inteligencia'],
+  guerreiro: ['forca'],
+  mago: ['inteligencia'],
+  arqueiro: ['forca', 'destreza'],
+};
 
 /**
  * A ficha típica do nível: os pontos de atributo vão 2 no principal e 1 na constituição por nível; os de habilidade
@@ -57,9 +65,11 @@ export function jogadorTipico(ctx: ContextoSimulacao, classeId: string, nivel: n
   if (!bolsa) throw new Error('sem bolsa');
   e.nivel = nivel;
   const pontos = (nivel - 1) * ctx.balance.xp.pontosPorNivel;
-  const principal = PRINCIPAL[classe.classe];
+  const principais = ATRIBUTOS_TIPICOS[classe.id] ?? ['forca'];
   const noPrincipal = Math.round((pontos * 2) / 3);
-  bolsa.atributosBase[principal] += noPrincipal;
+  principais.forEach((a, i) => {
+    bolsa.atributosBase[a] += Math.floor(noPrincipal / principais.length) + (i < noPrincipal % principais.length ? 1 : 0);
+  });
   bolsa.atributosBase.constituicao += pontos - noPrincipal;
   let pontosHab = (nivel - 1) * ctx.balance.habilidades.pontosPorNivel;
   for (let volta = 0; pontosHab > 0 && volta < 10; volta++) {

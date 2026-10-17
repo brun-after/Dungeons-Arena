@@ -27,6 +27,7 @@ function iaPublica(ia: EstadoIa): EstadoIa {
     alvoCacheY: -1,
     proximoAtaqueTick: 0,
     ataquesFeitos: 0,
+    ultimaAgressaoVista: 0,
     rng: { ...RNG_NEUTRO },
   };
 }

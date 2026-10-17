@@ -7,11 +7,11 @@
 
 import type { Celula, EntidadeId } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
-import { buscarEntidade, type EstadoJogo } from '../core/estado';
+import { buscarEntidade, type Armadilha, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { congelada, vivo, type EfeitoAtivo, type Entidade } from '../entities/entidade';
-import { agendarAtrasado, armarArmadilha, excedeLimite, invocar, processarFluxo, processarGatilhos } from './efeitos-fluxo';
+import { agendarAtrasado, armarArmadilha, dispararArmadilha, excedeLimite, invocar, processarFluxo, processarGatilhos } from './efeitos-fluxo';
 import { fatorDoGolpe } from '../modos/dificuldade';
 import { registrarEfeitoAtivo } from './acumulo';
 import { avancar, empurrar, puxar, teleportar, trocarLugar } from './efeitos-instantaneos';
@@ -270,6 +270,12 @@ export function processarEfeitos(estado: EstadoJogo, ctx: ContextoSimulacao, sai
 }
 
 /** Etapa 7 (gatilhos por célula): rastros e armadilhas (marco 8A-2). */
+/** Marco 18: a falha no desarme dispara a armadilha em quem tentou (e a tira, se não rearma). */
+export function dispararArmadilhaEm(estado: EstadoJogo, ctx: ContextoSimulacao, a: Armadilha, alvo: Entidade, saida: EventoSimulacao[]): void {
+  const some = dispararArmadilha(estado, ctx, a, alvo, (x, ef, origem, mira) => { aplicarEfeito(estado, ctx, x, ef, origem, mira, saida); }, saida);
+  if (some) estado.armadilhas = estado.armadilhas.filter((x) => x.id !== a.id);
+}
+
 export function processarGatilhosDeEfeito(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
   processarGatilhos(
     estado,

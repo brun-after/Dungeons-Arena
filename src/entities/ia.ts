@@ -66,6 +66,7 @@ function criarEstadoIa(estado: EstadoJogo, e: Entidade, regras: RegrasIa): Estad
     alvoCacheY: -1,
     proximoAtaqueTick: 0,
     ataquesFeitos: 0,
+    ultimaAgressaoVista: estado.tick,
     rng: criarRng(hashTexto(`${estado.faseId}:${e.id}:${e.geracao}`)),
   };
 }
@@ -114,6 +115,7 @@ export function processarIa(estado: EstadoJogo, ctx: ContextoSimulacao, saida: E
       processarInvocacao(estado, ctx, e, ia, preset, saida);
       continue;
     }
+    revidar(estado, ctx, e, ia, saida);
     switch (ia.modo) {
       case 'patrulha':
         if (!tentarDetectar(estado, ctx, e, ia, preset, saida)) patrulhar(estado, ctx, e, ia);
@@ -126,6 +128,23 @@ export function processarIa(estado: EstadoJogo, ctx: ContextoSimulacao, saida: E
         break;
     }
   }
+}
+
+/**
+ * Marco 18 (17/10/2026): revide imediato. Quem leva um golpe persegue o agressor na hora — sem hesitação, saindo da
+ * patrulha ou do "?" — e troca de alvo se outro bater depois. Lê a participação (quem deu dano e quando) e só olha os
+ * golpes mais novos que o último já revidado. Regra em `balance.ia.revide`.
+ */
+function revidar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa, saida: EventoSimulacao[]): void {
+  if (!ctx.balance.ia.revide) return;
+  let ultimo: { id: string; tick: number } | null = null;
+  for (const p of e.participacao) if (p.tick > ia.ultimaAgressaoVista && (!ultimo || p.tick > ultimo.tick)) ultimo = p;
+  if (!ultimo) return;
+  ia.ultimaAgressaoVista = ultimo.tick;
+  if (ia.modo === 'perseguindo' && ia.alvoId === ultimo.id) return;
+  const agressor = buscarEntidade(estado, ultimo.id);
+  if (!agressor || !alvoOfensivoValido(estado, ctx, e, agressor)) return;
+  comecarPerseguicao(estado, ctx, e, ia, agressor.id, saida);
 }
 
 function voltarAPatrulhar(estado: EstadoJogo, e: Entidade, ia: EstadoIa): void {

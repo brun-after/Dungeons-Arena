@@ -202,6 +202,19 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
   });
   bus.on('interacaoIniciada', (ev) => {
     if (ev.id === idLocal && ev.tipo === 'bau') hud.registrar(t('log.bauAbrindo'));
+    if (ev.id === idLocal && ev.tipo === 'desarme') hud.registrar(t('log.desarmando'));
+  });
+  // Marco 18 (D-068): a Sabedoria revela e desarma armadilhas.
+  bus.on('armadilhaRevelada', (ev) => {
+    if (ev.id !== idLocal) return;
+    hud.registrar(t('log.armadilhaRevelada'));
+    o.aviso(t('log.armadilhaRevelada'));
+  });
+  bus.on('armadilhaDesarmada', (ev) => {
+    if (ev.id !== idLocal) return;
+    const texto = t(ev.sucesso ? 'log.armadilhaDesarmada' : 'log.armadilhaFalhou');
+    hud.registrar(texto);
+    o.aviso(texto);
   });
   bus.on('bauAberto', (ev) => {
     if (ev.id !== idLocal) return;

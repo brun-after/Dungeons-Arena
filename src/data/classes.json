@@ -8,10 +8,10 @@
       "defesa": 2,
       "classe": "corpo_a_corpo",
       "atributos": {
-        "forca": 12,
+        "forca": 13,
         "destreza": 10,
         "constituicao": 10,
-        "inteligencia": 12,
+        "inteligencia": 13,
         "sabedoria": 10,
         "carisma": 10
       },
@@ -148,8 +148,8 @@
       "defesa": 2,
       "classe": "atirador",
       "atributos": {
-        "forca": 10,
-        "destreza": 14,
+        "forca": 14,
+        "destreza": 13,
         "constituicao": 10,
         "inteligencia": 10,
         "sabedoria": 10,
@@ -175,6 +175,7 @@
         }
       ],
       "modelo": "arqueiro",
+      "destreza": { "recargaBasicoPorPontoPct": 2.5, "recargaBasicoMaxPct": 50 },
       "descricao": "classe.arqueiro.descricao",
       "itensIniciais": [
         {

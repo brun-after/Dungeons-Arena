@@ -178,7 +178,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     ticksDe(ctx.balance.economia.bauCongelaMs),
     { camada: palco.entidades, projecao },
   );
-  const fluxo = new CamadaFluxo(palco.chao, () => ap.particulas.limite > 0);
+  const fluxo = new CamadaFluxo(palco.chao, () => ap.particulas.limite > 0, () => ticksDe(ctx.balance.armadilhas.desarmeMs));
   const portas = new CamadaPortas(palco.chao, fase, ticksDe(ctx.balance.portas.janelaPortaBossMs));
   const numeros = new CamadaNumeros(palco.efeitos, ap.movimentoReduzido, projecao);
   visao = await montarVisao({

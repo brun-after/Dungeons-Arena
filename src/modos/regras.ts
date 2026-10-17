@@ -19,6 +19,16 @@ export function regeneraPorCelula(modo: ModoDeJogo): boolean {
   return modo.sobrevivencia.regenPorCelula;
 }
 
+/** Marco 18 (D-068): a Sabedoria revela e desarma armadilhas neste modo? */
+export function revelaArmadilhas(modo: ModoDeJogo): boolean {
+  return modo.sobrevivencia.revelarArmadilhas;
+}
+
+/** Marco 18 (D-068): o estudo de habilidades anda neste modo? */
+export function estudoAvanca(modo: ModoDeJogo): boolean {
+  return modo.sobrevivencia.estudoAvanca;
+}
+
 export function podeRespawnar(modo: ModoDeJogo): boolean {
   return modo.respawn.ativo;
 }

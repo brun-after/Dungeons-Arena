@@ -5,6 +5,7 @@
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import { t } from '../i18n';
+import { armadilhaParaDesarmar } from '../world/armadilhas-ocultas';
 import { alvoDeInteracao, recargaLojaRestante } from '../world/interacao';
 
 const INTERVALO_MS = 200;
@@ -31,6 +32,8 @@ export function criarPrompt(ctx: ContextoSimulacao, idLocal: string, toque: bool
       return recargaLojaRestante(estado, o.objetoId, eu.id) > 0 ? t('prompt.lojaRecarga') : t('prompt.loja', { tecla: tecla('E') });
     }
     if (o?.tipo === 'bau') return t(o.chave ? 'prompt.bauTrancado' : 'prompt.bau', { tecla: tecla('E') });
+    // Marco 18 (D-068): armadilha revelada ao alcance.
+    if (!o && armadilhaParaDesarmar(estado, ctx, eu)) return t('prompt.desarmar', { tecla: tecla('E') });
     const s = ctx.fase.portaSaida;
     if (s && s.x === eu.x && s.y === eu.y && s.tranca !== 'livre' && !estado.saidaAberta) {
       return t(s.tranca === 'chave' ? 'prompt.saidaChave' : 'prompt.saidaBoss');

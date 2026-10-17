@@ -12,7 +12,7 @@ import type { Entidade, ItemNaMochila } from '../entities/entidade';
 import { t, type ChaveTexto } from '../i18n';
 import { SLOTS_DE_EQUIPAMENTO, type Slot } from '../modos/modo';
 import { derivarFicha } from '../progression/derivados';
-import { descontoNaLojaPct, reducaoRecargaBasicoPct, vidaPorCelula } from '../progression/efeitos-atributo';
+import { descontoNaLojaPct, perfilDestreza, reducaoRecargaBasicoPct, vidaPorCelula } from '../progression/efeitos-atributo';
 import { bonusDeAtributo } from '../progression/ficha';
 import { faixaDaFormula } from '../combat/dados';
 import { habilidadeDoAtor } from '../combat/perfil';
@@ -302,8 +302,8 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     const basico = habilidadeDoAtor(ctx, j, j.ataqueBasico);
     if (basico?.formulaDano) {
       const faixa = faixaDaFormula(basico.formulaDano);
-      const bonus = bonusDeAtributo(efetiva.atributos, j.classe, ctx.balance.combate.multiplicadorAtributoPadrao);
-      const recarga = (basico.recargaMs * (1 - reducaoRecargaBasicoPct(efetiva.atributos, ctx.balance) / 100)) / 1000;
+      const bonus = bonusDeAtributo(efetiva.atributos, basico.escalaCom, ctx.balance.combate.multiplicadorAtributoPadrao);
+      const recarga = (basico.recargaMs * (1 - reducaoRecargaBasicoPct(efetiva.atributos, ctx.balance, perfilDestreza(ctx, j)) / 100)) / 1000;
       const manaPorSegundo =
         ctx.balance.recursos.regenManaPorSegundo * (1 + (Math.max(0, efetiva.atributos.sabedoria - 10) * ctx.balance.atributos.efeitos.regenManaPorSabedoriaPct) / 100);
       const derivados = el(

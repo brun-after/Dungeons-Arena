@@ -9,7 +9,7 @@ import { ATRIBUTOS_NEUTROS } from '../../src/entities/entidade';
 
 const TABELA = BALANCE_PADRAO.combate.critico;
 const REGRAS = BALANCE_PADRAO.combate;
-const fonte = (bonus = 0, carisma = 10): FonteDeDano => ({ id: 'a', equipe: 'x', bonusAtributo: bonus, carisma, multDano: 1, multCura: 1 });
+const fonte = (bonus = 0, carisma = 10): FonteDeDano => ({ id: 'a', equipe: 'x', bonusAtributo: bonus, carisma, multRolagem: 1, potencia: 1, multDano: 1, multCura: 1 });
 
 describe('fórmulas de dados (§2.7)', () => {
   it('interpreta multigrupo, constante e dados negativos', () => {
@@ -115,9 +115,9 @@ describe('ficha (§2.5, §2.12)', () => {
     expect(manaMaxima(0)).toBe(1);
   });
 
-  it('bônus de atributo: conjurador usa Inteligência; os demais, Força', () => {
+  it('bônus de atributo: o atributo da habilidade (marco 18)', () => {
     const a = { ...ATRIBUTOS_NEUTROS, forca: 14, inteligencia: 9 };
-    expect(bonusDeAtributo(a, 'corpo_a_corpo', 0.5)).toBe(7);
-    expect(bonusDeAtributo(a, 'conjurador', 0.5)).toBe(4);
+    expect(bonusDeAtributo(a, 'forca', 0.5)).toBe(7);
+    expect(bonusDeAtributo(a, 'inteligencia', 0.5)).toBe(4);
   });
 });

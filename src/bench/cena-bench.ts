@@ -125,6 +125,7 @@ export function montarCenaBench(tipo: TipoBench, conteudo: Conteudo): CenaBench 
       permanente: true,
       rearmeTicks: 120,
       inerteAteTick: 0,
+      reveladaPara: [],
     });
   }
   return { ctx, estado, bots, iniciais, idLocal: 'j1' };
@@ -146,7 +147,7 @@ export function completarProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, a
     if (!ator) return;
     const angulo = aleatorio(rng) * Math.PI * 2;
     const mira = { x: Math.round(ator.x + Math.cos(angulo) * 8), y: Math.round(ator.y + Math.sin(angulo) * 8) };
-    const fonte = { id: ator.id, equipe: ator.equipe, bonusAtributo: 0, carisma: 10, multDano: 1, multCura: 1 };
+    const fonte = { id: ator.id, equipe: ator.equipe, bonusAtributo: 0, carisma: 10, multRolagem: 1, potencia: 1, multDano: 1, multCura: 1 };
     lancarProjetil(estado, ator, hab, novoId(estado), fonte, mira, saida);
   }
 }

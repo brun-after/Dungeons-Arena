@@ -47,6 +47,8 @@ export interface RegrasHabilidades {
   rankMax: number;
   ranksEvolucao: readonly number[];
   ranks: readonly RegrasRank[];
+  /** Marco 18 (D-068): tempo de estudo por grau (ms), a redução pela Inteligência e quantas acelerações cabem. */
+  estudo: { B: number; A: number; S: number; reducaoPorIntPct: number; reducaoMaxPct: number; aceleracoes: number };
 }
 
 /** O que a compilação consulta do conteúdo. */

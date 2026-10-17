@@ -45,5 +45,5 @@
     { "id": "16-20", "min": 16, "max": 20 }
   ],
   "recompensaJogador": { "xpPorNivel": 15, "tetoXpPorHora": 4000 },
-  "sobrevivencia": { "regenPorCelula": false, "penalidadeMorte": null }
+  "sobrevivencia": { "regenPorCelula": false, "penalidadeMorte": null, "revelarArmadilhas": false, "estudoAvanca": false }
 }

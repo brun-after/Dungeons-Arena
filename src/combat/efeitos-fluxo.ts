@@ -10,7 +10,7 @@
 
 import type { Celula, EntidadeId } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
-import { buscarEntidade, type EstadoJogo } from '../core/estado';
+import { buscarEntidade, type Armadilha, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { vivo, type Entidade } from '../entities/entidade';
@@ -98,6 +98,7 @@ export function armarArmadilha(
     permanente: false,
     rearmeTicks: 0,
     inerteAteTick: 0,
+    reveladaPara: [],
   });
   saida.push({ t: 'armadilhaArmada', tick: estado.tick, donoId: dono.id, armadilhaId: id, x: c.x, y: c.y });
 }
@@ -250,13 +251,23 @@ export function processarGatilhos(estado: EstadoJogo, ctx: ContextoSimulacao, ap
     const dono = { id: a.donoId, equipe: a.equipeDono };
     const alvo = ordem.find((e) => vivo(e) && e.x === a.x && e.y === a.y && podeFerir(dono, e, ctx.modo));
     if (!alvo) continue;
-    if (a.rearmeTicks > 0) a.inerteAteTick = tick + a.rearmeTicks;
-    else disparadas.add(a.id);
-    causarDano(estado, ctx, alvo, a.valor, a.donoId, 'armadilha', saida);
-    if (a.interno) aplicar(alvo, a.interno, { id: a.donoId, x: a.x, y: a.y }, null);
-    saida.push({ t: 'armadilhaDisparou', tick, donoId: a.donoId, armadilhaId: a.id, alvoId: alvo.id });
+    if (dispararArmadilha(estado, ctx, a, alvo, aplicar, saida)) disparadas.add(a.id);
   }
   if (disparadas.size > 0) estado.armadilhas = estado.armadilhas.filter((a) => !disparadas.has(a.id));
+}
+
+/**
+ * Dispara a armadilha em `alvo` (dano, efeito interno e evento). Com rearme fica inerte; sem, devolve true para quem
+ * chamou tirá-la. Marco 18: também usado na falha do desarme (world/armadilhas-ocultas.ts).
+ */
+export function dispararArmadilha(estado: EstadoJogo, ctx: ContextoSimulacao, a: Armadilha, alvo: Entidade, aplicar: AplicarDireto, saida: EventoSimulacao[]): boolean {
+  const tick = estado.tick;
+  const some = a.rearmeTicks <= 0;
+  if (!some) a.inerteAteTick = tick + a.rearmeTicks;
+  causarDano(estado, ctx, alvo, a.valor, a.donoId, 'armadilha', saida);
+  if (a.interno) aplicar(alvo, a.interno, { id: a.donoId, x: a.x, y: a.y }, null);
+  saida.push({ t: 'armadilhaDisparou', tick, donoId: a.donoId, armadilhaId: a.id, alvoId: alvo.id });
+  return some;
 }
 
 /** Dano fixo de rastro ou armadilha: respeita `imune_dano` e conta participação para o XP. */

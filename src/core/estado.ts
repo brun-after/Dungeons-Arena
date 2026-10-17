@@ -31,6 +31,9 @@ export interface Projetil {
   /** Bônus de atributo e Carisma do lançador congelados no lançamento. */
   bonusAtributo: number;
   carisma: number;
+  /** Marco 18 (D-068): multiplicador da rolagem (Força e Inteligência) e potência dos efeitos, no lançamento. */
+  multRolagem: number;
+  potencia: number;
   /** Marco 8A: multiplicador de dano e perfuração (`atravessar`) congelados no lançamento. */
   multDano: number;
   /** Marco 14: multiplicador de cura (rank, caminhos e perfil) congelado no lançamento. */
@@ -117,6 +120,8 @@ export interface Armadilha {
   /** 0 = disparo único; senão, depois de disparar fica inerte por estes ticks e volta. */
   rearmeTicks: number;
   inerteAteTick: number;
+  /** Marco 18 (D-068): quem já a vê (revelada pela Sabedoria; o dono sempre vê a dele). */
+  reveladaPara: EntidadeId[];
 }
 
 /** Efeito agendado para disparar numa entidade (§2.8, `efeito_atrasado`). */

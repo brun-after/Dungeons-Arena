@@ -103,6 +103,8 @@ export interface EstadoIa {
   alvoCacheY: number;
   proximoAtaqueTick: number;
   ataquesFeitos: number;
+  /** Marco 18 (17/10/2026): o tick do último golpe recebido que já virou revide (os mais novos ainda não). */
+  ultimaAgressaoVista: number;
   rng: EstadoRng;
 }
 
@@ -164,7 +166,8 @@ export interface Bolsa {
  * congelada (não anda nem age). Termina na etapa 5 do tick em `ateTick`, ao fechar ou ao morrer.
  */
 export interface Interacao {
-  tipo: 'bau' | 'loja';
+  /** Marco 18: `desarme` de armadilha revelada (o `objetoId` é o id da armadilha em texto). */
+  tipo: 'bau' | 'loja' | 'desarme';
   objetoId: string;
   ateTick: number;
 }

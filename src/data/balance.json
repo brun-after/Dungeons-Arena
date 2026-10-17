@@ -115,7 +115,12 @@
       "recargaBasicoMaxPct": 30,
       "regenPorCelulaPorConstituicaoPct": 8,
       "descontoPorCarismaPct": 2,
-      "descontoMaxPct": 30
+      "descontoMaxPct": 30,
+      "rolagemPorPontoPct": 7,
+      "rolagemMin": 0.5,
+      "efeitoPorIntPct": 3,
+      "potenciaMin": 0.7,
+      "potenciaMax": 1.6
     }
   },
   "inventario": {
@@ -124,6 +129,7 @@
   },
   "habilidades": {
     "pontosPorNivel": 1,
+    "estudo": { "B": 900000, "A": 1800000, "S": 3600000, "reducaoPorIntPct": 2, "reducaoMaxPct": 40, "aceleracoes": 3 },
     "velocidadeConjurandoLenta": 0.5,
     "rankMax": 5,
     "ranksEvolucao": [3, 5],
@@ -230,7 +236,21 @@
     "xpPorNivelPct": 25,
     "vidaPct": 120
   },
+  "armadilhas": {
+    "revelarIntervaloMs": 1000,
+    "raioBase": 2,
+    "raioPorPontos": 3,
+    "chanceBasePct": 5,
+    "chancePorPontoPct": 3,
+    "chanceMaxPct": 60,
+    "desarmeBasePct": 40,
+    "desarmePorPontoPct": 5,
+    "desarmeMaxPct": 95,
+    "desarmeMs": 1500,
+    "xpDesarme": 5
+  },
   "ia": {
+    "revide": true,
     "gracaForaDaZonaMs": 1200,
     "patrulhaAvaliacaoMs": 2000,
     "patrulhaPassoMs": 1500,

@@ -11,6 +11,7 @@ import { ehObjeto, Leitor, type Objeto } from '../core/validar';
 import { formulaValida } from './dados';
 import { ehElemento, type Elemento } from './elementos';
 import { normalizarEfeitos } from './normalizar-efeito';
+import type { Atributos } from '../entities/entidade';
 import type { EfeitoCanonico } from './registro-efeitos';
 
 export type TipoAtaque = 'fisico' | 'magico';
@@ -28,6 +29,14 @@ export type Interrupcao = 'interrompivel' | 'ininterrupta';
  * antes, o padrão); `lenta` anda mais devagar; `livre` anda normalmente. Andar conjurando custa no orçamento.
  */
 export const MOBILIDADES = ['trava', 'lenta', 'livre'] as const;
+
+/** Marco 18 (17/10/2026, D-068): o grau da habilidade (B, A, S) — decide o tempo de estudo para aprender. */
+export const GRAUS = ['B', 'A', 'S'] as const;
+export type Grau = (typeof GRAUS)[number];
+
+/** Marco 18 (D-068): o atributo do bônus fixo de dano. Sem `escalaCom`, físico usa Força e mágico, Inteligência. */
+export type AtributoDeEscala = keyof Atributos;
+const ATRIBUTOS_DE_ESCALA: readonly AtributoDeEscala[] = ['forca', 'destreza', 'constituicao', 'inteligencia', 'sabedoria', 'carisma'];
 export type Mobilidade = (typeof MOBILIDADES)[number];
 
 /** Marco 14: modificadores de evolução e de equipamento (D-057). */
@@ -101,6 +110,10 @@ export interface Habilidade {
   escalaVisual: number;
   /** Ajuste de 15/10/2026: anda enquanto conjura? */
   mobilidade: Mobilidade;
+  /** Marco 18 (D-068): o atributo do bônus fixo de dano. */
+  escalaCom: AtributoDeEscala;
+  /** Marco 18 (D-068): grau B, A ou S (tempo de estudo para aprender). */
+  grau: Grau;
 }
 
 // Marco 11A (D-066): um preset por fantasia (corte, runas, cristais, bolhas, sombra, sangue, sagrado, pedra, vento,
@@ -269,6 +282,8 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
     nivelMinimo: o.nivelMinimo === undefined ? 1 : l.numero(o, 'nivelMinimo', { min: 1, max: 20, inteiro: true }),
     passiva: lerPassiva(l, o.passiva),
     mobilidade: o.mobilidade === undefined ? 'trava' : l.opcao(o, 'mobilidade', MOBILIDADES),
+    escalaCom: 'forca',
+    grau: o.grau === undefined ? 'B' : l.opcao(o, 'grau', GRAUS),
     rank: 1,
     chave: '',
     multDano: 1,
@@ -277,6 +292,7 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
     saltos: null,
     escalaVisual: 1,
   };
+  base.escalaCom = o.escalaCom === undefined ? escalaPadrao(base.tipoAtaque) : l.opcao(o, 'escalaCom', ATRIBUTOS_DE_ESCALA);
   base.tags = etiquetasDe(base, o.tags === undefined ? [] : l.listaDeTextos(o, 'tags'));
   base.chave = base.id;
   const h = base;
@@ -312,8 +328,13 @@ const CAMPOS_DEFINICAO = [
   'id', 'nome', 'icone', 'tipoAtaque', 'formulaDano', 'formulaCura', 'alcanceCelulas', 'tipoArea', 'raioArea',
   'custoRecurso', 'recargaMs', 'conjuracaoMs', 'politicaAlvo', 'politicaImpacto', 'interrupcao', 'velocidadeProjetil',
   'efeitos', 'visual', 'elemento', 'custoVida', 'tags', 'nivelMinimo', 'passiva', 'basico', 'evolucoes', 'mods',
-  'mobilidade',
+  'mobilidade', 'escalaCom', 'grau', 'marcos', 'fusao',
 ];
+
+/** Marco 18 (D-068): sem `escalaCom`, o físico escala com Força e o mágico com Inteligência. */
+export function escalaPadrao(tipo: TipoAtaque): AtributoDeEscala {
+  return tipo === 'magico' ? 'inteligencia' : 'forca';
+}
 
 export function lerHabilidades(json: unknown): { definicoes: Map<string, DefinicaoHabilidade>; erros: string[] } {
   const definicoes = new Map<string, DefinicaoHabilidade>();

@@ -27,6 +27,8 @@
   "recompensaJogador": null,
   "sobrevivencia": {
     "regenPorCelula": true,
+    "revelarArmadilhas": true,
+    "estudoAvanca": true,
     "penalidadeMorte": { "xp": 50, "perdeNivel": false, "ouroPctMin": 10, "ouroPctMax": 50 }
   }
 }

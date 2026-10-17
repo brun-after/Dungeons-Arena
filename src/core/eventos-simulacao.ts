@@ -120,6 +120,9 @@ export type EventoSimulacao =
   | { t: 'dispensou'; tick: number; id: EntidadeId; quantidade: number }
   | { t: 'armadilhaArmada'; tick: number; donoId: EntidadeId; armadilhaId: number; x: number; y: number }
   | { t: 'armadilhaDisparou'; tick: number; donoId: EntidadeId; armadilhaId: number; alvoId: EntidadeId }
+  // Marco 18 (D-068): a Sabedoria revela e desarma armadilhas.
+  | { t: 'armadilhaRevelada'; tick: number; id: EntidadeId; armadilhaId: number; x: number; y: number }
+  | { t: 'armadilhaDesarmada'; tick: number; id: EntidadeId; armadilhaId: number; sucesso: boolean }
   /** Marco 8A: o que um efeito periódico ou instantâneo fez (números na tela). */
   | { t: 'efeitoResultado'; tick: number; alvoId: EntidadeId; origemId: EntidadeId; tipo: TipoEfeito; dano: number; cura: number; mana: number }
   | { t: 'morreu'; tick: number; id: EntidadeId; porId: EntidadeId | null }
@@ -133,7 +136,7 @@ export type EventoSimulacao =
   | { t: 'usouItem'; tick: number; id: EntidadeId; itemId: string; hp: number; mana: number }
   | { t: 'itemRecusado'; tick: number; id: EntidadeId; motivo: MotivoItem }
   /** Marco 9A: baú e loja. `ateTick` é o fim do congelamento (anel de progresso, contagem da janela). */
-  | { t: 'interacaoIniciada'; tick: number; id: EntidadeId; objetoId: string; tipo: 'bau' | 'loja'; ateTick: number }
+  | { t: 'interacaoIniciada'; tick: number; id: EntidadeId; objetoId: string; tipo: 'bau' | 'loja' | 'desarme'; ateTick: number }
   /** Marco 10A-2: penalidade de morte (§2.12). */
   | { t: 'penalidadeMorte'; tick: number; id: EntidadeId; xp: number; ouro: number; niveis: number }
   | { t: 'bauAberto'; tick: number; id: EntidadeId; objetoId: string; itens: string[]; ouro: number }

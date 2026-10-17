@@ -10,7 +10,7 @@
 
 import { atualizarAparencias, processarBuffsArmados, usarRefugio } from '../progression/buffs';
 import { alvoOfensivoValido, iniciarAcao, processarAcoes, processarAutoAtaque } from '../combat/acao';
-import { processarEfeitos, processarGatilhosDeEfeito } from '../combat/efeitos';
+import { dispararArmadilhaEm, processarEfeitos, processarGatilhosDeEfeito } from '../combat/efeitos';
 import { dispensarInvocacoes } from '../combat/invocacoes';
 import { moverProjeteis } from '../combat/projeteis';
 import { vivo } from '../entities/entidade';
@@ -23,6 +23,7 @@ import { processarMortes } from '../progression/morte';
 import { regenerarRecursos } from '../progression/recursos';
 import { definirDirecao, moverEntidades, planejarCaminho } from '../world/movimento';
 import { fecharLoja, interagir, processarInteracoes } from '../world/interacao';
+import { revelarArmadilhas } from '../world/armadilhas-ocultas';
 import { coletarObjetos } from '../world/objetos';
 import { processarPortas } from '../world/portas';
 import { processarSpawner } from '../world/spawner';
@@ -47,7 +48,9 @@ export function simular(
   processarAutoAtaque(estado, ctx, saida);
   processarEfeitos(estado, ctx, saida);
   regenerarRecursos(estado, ctx);
-  processarInteracoes(estado, ctx, saida);
+  processarInteracoes(estado, ctx, saida, (a, alvo) => { dispararArmadilhaEm(estado, ctx, a, alvo, saida); });
+  // Marco 18 (D-068): a Sabedoria procura armadilhas.
+  revelarArmadilhas(estado, ctx, saida);
   moverEntidades(estado, ctx, saida, dtMs);
   // Gatilhos por célula alcançada (§2.3): portas antes da coleta e das armadilhas.
   processarPortas(estado, ctx, saida);

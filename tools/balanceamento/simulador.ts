@@ -14,7 +14,7 @@ import { recalcularFicha } from '../../src/progression/derivados';
 import { idItemGerado } from '../../src/progression/gerar-item';
 import type { Raridade } from '../../src/modos/modo';
 import perfis from '../rede/perfis.json';
-import { BotDeDuelo, CONTEUDO, contextoDoCenario, inimigo, jogadorTipico, mundo, TICKS_POR_S } from './cenarios';
+import { ATRIBUTOS_TIPICOS, BotDeDuelo, CONTEUDO, contextoDoCenario, inimigo, jogadorTipico, mundo, TICKS_POR_S } from './cenarios';
 
 export const CLASSES = ['aventureiro', 'guerreiro', 'mago', 'arqueiro'] as const;
 const LIMITE_S = 120;
@@ -143,8 +143,9 @@ export function pvpLivre(classe: string, semente: number, nivel: number): { temp
   const ctx = contextoDoCenario('livre');
   const c = CONTEUDO.classes.get(classe);
   if (!c) throw new Error(classe);
-  const principal = c.classe === 'conjurador' ? 'inteligencia' : c.classe === 'atirador' ? 'destreza' : 'forca';
-  const atributos = { ...c.atributos, [principal]: c.atributos[principal] + 8, constituicao: c.atributos.constituicao + 6 };
+  const principais = ATRIBUTOS_TIPICOS[classe] ?? ['forca'];
+  const atributos = { ...c.atributos, constituicao: c.atributos.constituicao + 6 };
+  for (const a of principais) atributos[a] += 8 / principais.length;
   const ficha = construirFichaDeSessao({ classeId: classe, nivel, atributos }, ctx.modo, ctx.conteudo, ctx.balance).ficha;
   const m = mundo(ctx, semente, []);
   const a = entrarNaArena(m.estado, ctx, 'jogador-1', 'j1', ficha, 'A');

@@ -11,6 +11,7 @@ import { vivo, type Entidade } from '../entities/entidade';
 import { rolar } from './dados';
 import { resolverGolpe, type FonteDeDano } from './dano';
 import { absorverEscudo, aplicarEfeito, imuneADano, multiplicadorCuraRecebida, multiplicadorDanoRecebido, REGISTRO_EFEITOS } from './efeitos';
+import type { EfeitoCanonico } from './registro-efeitos';
 import { dispararSinergias, resistenciaPct, sinergiasAtivas } from './elementos';
 import { fatorDoGolpe } from '../modos/dificuldade';
 import type { Habilidade } from './habilidades';
@@ -26,6 +27,23 @@ export interface Impacto {
   mira?: { x: number; y: number };
   /** Bônus do ataque básico (`ab_dano`), somado à rolagem. */
   danoExtra?: number;
+}
+
+/**
+ * Marco 18 (17/10/2026, D-068): a Inteligência de quem lança (`potencia`) fortalece o efeito — a duração dos status e
+ * o valor de quem é número de verdade (periódico, escudo, cura e dano instantâneos). Fluxos (armadilha, invocação,
+ * atrasado) e deslocamentos ficam como são; o `pct` também (lentidão e afins não passam do que o efeito descreve).
+ */
+export function comPotencia(ef: EfeitoCanonico, potencia: number): EfeitoCanonico {
+  if (potencia === 1) return ef;
+  const def = REGISTRO_EFEITOS[ef.tipo];
+  if (def.fluxo !== null) return ef;
+  const numerico = def.periodico !== null || def.escudo || def.instantaneo === 'cura' || def.instantaneo === 'dano';
+  return {
+    ...ef,
+    duracaoMs: ef.duracaoMs > 0 ? Math.round(ef.duracaoMs * potencia) : 0,
+    valor: numerico ? Math.max(1, Math.round(ef.valor * potencia)) : ef.valor,
+  };
 }
 
 /** Multiplicador do dano recebido: exposto, resistência ao elemento e as sinergias. 0 = imune ao elemento. */
@@ -59,7 +77,9 @@ export function aplicarImpacto(
 
   if (hab.formulaDano !== null) {
     // Marco 15: a dificuldade e o tamanho do grupo pesam pelo lado de quem bate e de quem apanha.
-    const recebido = multiplicadorRecebido(ctx, alvo, hab, tick, sinergias.reduce((s, x) => s + x.danoExtraPct, 0)) * fatorDoGolpe(estado, ctx, fonte, alvo);
+    // Marco 18: o dano extra das sinergias cresce com a potência (Inteligência) de quem lança.
+    const extraPct = sinergias.reduce((s, x) => s + x.danoExtraPct, 0) * fonte.potencia;
+    const recebido = multiplicadorRecebido(ctx, alvo, hab, tick, extraPct) * fatorDoGolpe(estado, ctx, fonte, alvo);
     const r = resolverGolpe(
       estado.rng,
       hab.formulaDano,
@@ -106,13 +126,13 @@ export function aplicarImpacto(
   if (falha || imune) return;
   // Sinergias (marco 14): o estado consumido sai e os efeitos da sinergia entram, antes dos da habilidade.
   dispararSinergias(alvo, sinergias, (ef) => {
-    aplicarEfeito(estado, ctx, alvo, ef, origem, mira, saida);
+    aplicarEfeito(estado, ctx, alvo, comPotencia(ef, fonte.potencia), origem, mira, saida);
   });
   // Dispatcher único (§2.8); `em: 'conjurador'` cai sobre quem lançou (ex.: avanço, roubo de vida).
   for (const efeito of hab.efeitos) {
     // Armadilha e invocação saem uma vez no lançamento (acao.ts), não por alvo atingido.
     if (REGISTRO_EFEITOS[efeito.tipo].aoLancar) continue;
     const sobre = efeito.em === 'conjurador' ? conjurador : alvo;
-    if (sobre) aplicarEfeito(estado, ctx, sobre, efeito, origem, mira, saida);
+    if (sobre) aplicarEfeito(estado, ctx, sobre, comPotencia(efeito, fonte.potencia), origem, mira, saida);
   }
 }

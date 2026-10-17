@@ -118,6 +118,8 @@ function gerar(id: string, ctx: ContextoHabilidades): DefinicaoHabilidade | null
     perfura: false,
     saltos: null,
     escalaVisual: 1,
+    escalaCom: 'inteligencia',
+    grau: 'A',
   };
   base.tags = etiquetasDe(base, ['gerada']);
   // Os dados sobem enquanto o rank 1 couber no orçamento das geradas no nível; se nem 1 dado couber, cai o

@@ -111,6 +111,7 @@ function criar(estado: EstadoJogo, ctx: ContextoSimulacao, categoria: Categoria,
         permanente: false,
         rearmeTicks: 0,
         inerteAteTick: 0,
+        reveladaPara: [],
       });
       saida.push({ t: 'armadilhaArmada', tick: estado.tick, donoId: DONO_FASE, armadilhaId: id, x: c.x, y: c.y });
       return;
