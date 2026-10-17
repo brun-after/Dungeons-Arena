@@ -240,10 +240,14 @@ describe('progressão de habilidades', () => {
     const c = cenario('mago');
     const j = c.ent('j');
     const bolsa = obter(j.bolsa, 'bolsa');
-    bolsa.pontosHabilidade = 3;
+    bolsa.pontosHabilidade = 6;
     c.tick([['j', { t: 'subirRank', id: 'investida' }]]);
     expect(c.eventos.at(-1)).toMatchObject({ t: 'habilidadeRecusada', motivo: 'nao_aprendivel' });
     c.tick([['j', { t: 'subirRank', id: 'nova_glacial' }]]);
+    // Marco 18: aprender começa um estudo; 3 pontos de aceleração terminam na hora.
+    expect(bolsa.estudo?.id).toBe('nova_glacial');
+    for (let i = 0; i < 3; i++) c.tick([['j', { t: 'acelerarEstudo' }]]);
+    expect(bolsa.estudo).toBeNull();
     expect(bolsa.conhecidas.some((x) => x.id === 'nova_glacial')).toBe(true);
     c.tick([['j', { t: 'equiparHabilidade', id: 'nova_glacial', slot: 0 }]]);
     expect(j.habilidades[0]).toBe('nova_glacial');
@@ -271,8 +275,15 @@ describe('progressão de habilidades', () => {
     guardarItem(bolsa, livro, 2, c.ctx.balance.inventario);
     guardarItem(bolsa, raro, 1, c.ctx.balance.inventario, gerada);
     const inv = (itemId: string) => obter(bolsa.mochila.find((i) => i.itemId === itemId), itemId).invId;
+    bolsa.pontosHabilidade = 6;
+    const terminar = () => { for (let i = 0; i < 3; i++) c.tick([['j', { t: 'acelerarEstudo' }]]); };
     c.tick([['j', { t: 'usarItem', invId: inv('livro_bola_de_fogo') }]]);
+    // Marco 18: com um estudo em andamento, o outro livro é recusado sem gastar.
     c.tick([['j', { t: 'usarItem', invId: inv('livro_raro') }]]);
+    expect(c.eventos.at(-1)).toMatchObject({ t: 'itemRecusado', motivo: 'estudando' });
+    terminar();
+    c.tick([['j', { t: 'usarItem', invId: inv('livro_raro') }]]);
+    terminar();
     expect(bolsa.conhecidas.map((x) => x.id)).toEqual(expect.arrayContaining(['bola_de_fogo', gerada]));
     c.tick([['j', { t: 'usarItem', invId: inv('livro_bola_de_fogo') }]]);
     expect(c.eventos.at(-1)).toMatchObject({ t: 'itemRecusado', motivo: 'ja_conhece' });

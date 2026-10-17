@@ -62,6 +62,12 @@ function lerInvocacao(l: Leitor, v: unknown): PresetInvocacao | null {
   };
 }
 
+/** Marco 18 (D-068): o quanto a Destreza rende na recarga do básico (o arqueiro rende mais que o padrão). */
+export interface PerfilDestreza {
+  recargaBasicoPorPontoPct: number;
+  recargaBasicoMaxPct: number;
+}
+
 export interface ClasseJogador {
   id: string;
   nome: string;
@@ -80,6 +86,8 @@ export interface ClasseJogador {
   /** Marco 14: o modelo de criatura (render) e a frase da tela de escolha (chave do i18n). */
   modelo: string;
   descricao: string;
+  /** Marco 18 (D-068): o quanto a Destreza rende na recarga do básico (o arqueiro rende mais); null = o padrão. */
+  destreza: PerfilDestreza | null;
 }
 
 function idDe(item: unknown): string {
@@ -143,6 +151,14 @@ function lerAtributos(l: Leitor, o: Objeto): Atributos {
   return saida;
 }
 
+function lerPerfilDestreza(l: Leitor, v: unknown): PerfilDestreza {
+  const o = l.objeto(v, 'destreza');
+  return {
+    recargaBasicoPorPontoPct: l.numero(o, 'recargaBasicoPorPontoPct', { min: 0, max: 10 }),
+    recargaBasicoMaxPct: l.numero(o, 'recargaBasicoMaxPct', { min: 0, max: 75 }),
+  };
+}
+
 export function lerClasses(json: unknown): { classes: Map<string, ClasseJogador>; erros: string[] } {
   const raiz = new Leitor('classes.json');
   const lista = raiz.lista(raiz.objeto(json, 'raiz'), 'classes');
@@ -168,6 +184,7 @@ export function lerClasses(json: unknown): { classes: Map<string, ClasseJogador>
       aprendiveis: o.aprendiveis === undefined ? [] : l.listaDeTextos(o, 'aprendiveis'),
       modelo: o.modelo === undefined ? 'aventureiro' : l.texto(o, 'modelo'),
       descricao: o.descricao === undefined ? '' : l.texto(o, 'descricao'),
+      destreza: o.destreza === undefined ? null : lerPerfilDestreza(l, o.destreza),
     };
     if (classes.has(c.id)) l.erro('id repetido');
     erros.push(...l.erros);

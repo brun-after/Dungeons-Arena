@@ -7,19 +7,26 @@ import { DT_MS } from '../core/loop';
 import type { Entidade } from '../entities/entidade';
 import { t } from '../i18n';
 import { icone } from './icones';
+import { relogio } from './tempo';
 
 export class BuffsPendentes {
   readonly elemento = document.createElement('span');
   private ultimo = '';
 
-  constructor() {
+  constructor(
+    /** Marco 18: nome e ícone de uma habilidade (para o chip do estudo). */
+    private readonly nomeDe: (id: string) => string = (id) => id,
+    private readonly iconeDe: (id: string) => string = () => 'livro',
+  ) {
     this.elemento.className = 'buffs-pendentes';
   }
 
   atualizar(e: Entidade | undefined, tick: number): void {
     if (!e) return;
     const armados = e.buffsArmados.map((b) => ({ tipo: b.efeito.tipo, s: Math.max(0, Math.ceil(((b.ateTick - tick) * DT_MS) / 1000)) }));
-    const chave = `${armados.map((a) => `${a.tipo}:${a.s}`).join(',')}|${e.refugio}`;
+    const estudo = e.bolsa?.estudo ?? null;
+    const restante = estudo ? relogio(estudo.restanteTicks * DT_MS) : '';
+    const chave = `${armados.map((a) => `${a.tipo}:${a.s}`).join(',')}|${e.refugio}|${estudo?.id ?? ''}:${restante}`;
     if (chave === this.ultimo) return;
     this.ultimo = chave;
     this.elemento.textContent = '';
@@ -36,6 +43,21 @@ export class BuffsPendentes {
       s.className = 'restante';
       s.textContent = String(a.s);
       chip.append(icone(d.icone), icone('armado', 'icone mini'), s);
+      this.elemento.append(chip);
+    }
+    // Marco 18 (D-068): o estudo em andamento, com o relógio.
+    if (estudo) {
+      const chip = document.createElement('span');
+      chip.className = 'chip-pendente estudo';
+      chip.dataset.estudo = estudo.id;
+      const nome = this.nomeDe(estudo.id);
+      chip.title = t('habilidades.estudoNoHud', { nome, tempo: restante });
+      chip.setAttribute('role', 'img');
+      chip.setAttribute('aria-label', chip.title);
+      const s = document.createElement('span');
+      s.className = 'restante';
+      s.textContent = restante;
+      chip.append(icone(this.iconeDe(estudo.id)), icone('livro', 'icone mini'), s);
       this.elemento.append(chip);
     }
     if (e.refugio) {

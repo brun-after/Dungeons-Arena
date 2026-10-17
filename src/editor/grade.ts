@@ -162,6 +162,7 @@ export function comoFase(f: FaseEditavel): Fase {
     matizGraus: f.matizGraus,
     tilesetId: f.tilesetId,
     pecas: f.pecas,
+    eventos: [],
   };
 }
 

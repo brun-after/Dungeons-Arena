@@ -13,6 +13,7 @@
 //   7. marco 11A (16/10/2026), D-066: com `estilo` (regras do perfil do jogador, guardadas nos parâmetros), uma
 //      passada de `aplicarEstilo` no fim, num PRNG próprio; sem `estilo`, a fase é a mesma de antes.
 
+import { idItemBase } from '../progression/gerar-item-base';
 import { idGerada } from '../combat/chave-habilidade';
 import type { Celula } from '../core/comandos';
 import type { Conteudo } from '../core/conteudo';
@@ -32,6 +33,8 @@ export interface ParametrosGeracao {
   altura?: number;
   /** Marco 11A: regras de estilo (`[PFD]{8}[01]`), opcionais, só neste aparelho (aprendizado por aparelho). */
   estilo?: string[];
+  /** Marco 18 (D-070): eventos da fase (lua sangrenta, mercador errante, sala secreta). */
+  eventos?: string[];
 }
 
 /** O que o gerador precisa do catálogo: presets comuns e de chefe, e o estoque da loja. */
@@ -41,6 +44,10 @@ export interface CatalogoGeracao {
   estoque: readonly string[];
   /** Marco 14: chances das habilidades geradas. */
   geracao: Balance['geracao'];
+  /** Marco 18 (D-070): os livros de grau S (o mercador errante) e as bases (a peça Lendária e a de conjunto). */
+  livrosRaros: readonly string[];
+  bases: readonly string[];
+  basesDeConjunto: readonly string[];
 }
 
 /** Presets comuns (sem chefe, boneco de treino nem invocações, marco 10A-3) e o chefe, tirados do catálogo. */
@@ -48,7 +55,12 @@ export function catalogoDeGeracao(conteudo: Conteudo, estoque: readonly string[]
   const presets = [...conteudo.presets.values()].filter((p) => p.invocacao === null);
   const comuns = presets.filter((p) => p.arquetipo !== 'boss' && p.arquetipo !== 'boneco').map((p) => p.id);
   const boss = presets.find((p) => p.arquetipo === 'boss')?.id ?? comuns[0] ?? '';
-  return { comuns, boss, estoque: [...estoque], geracao };
+  const livrosRaros = [...conteudo.itens.values()]
+    .filter((i) => i.tipo === 'livro' && i.dropavel && i.ensina !== null && conteudo.definicoes.get(i.ensina)?.base.grau === 'S')
+    .map((i) => i.id);
+  const bases = [...conteudo.itensComFormas.bases.keys()];
+  const basesDeConjunto = [...new Set([...conteudo.conjuntos.values()].flatMap((c) => c.pecas))];
+  return { comuns, boss, estoque: [...estoque], geracao, livrosRaros, bases, basesDeConjunto };
 }
 
 /** Chance de um inimigo comum ter uma habilidade gerada no nível (§D-057: cresce com a profundidade). */
@@ -203,7 +215,61 @@ export function gerarFase(p: ParametrosGeracao, catalogo: CatalogoGeracao): Fase
     ...(portasInternas.length > 0 && { portasInternas }),
     matizGraus: p.matizGraus,
   };
+  aplicarEventos(json, p, catalogo, salas, livre, ocupar);
   return p.estilo && p.estilo.length > 0 ? aplicarEstilo(json, p.estilo, p.semente) : json;
+}
+
+/**
+ * Marco 18 (D-070): os eventos da fase, com um sorteio à parte (a fase sem evento sai igual a antes).
+ * - Lua sangrenta: os inimigos sobem 3 níveis (mais perigo, drops melhores) e o nome avisa;
+ * - Mercador errante: uma loja a mais, numa sala do meio, com livros de grau S e uma peça Lendária;
+ * - Sala secreta: um baú trancado pela chave da cripta, com uma peça de conjunto (forma Épica).
+ */
+function aplicarEventos(
+  json: FaseJson,
+  p: ParametrosGeracao,
+  catalogo: CatalogoGeracao,
+  salas: readonly Sala[],
+  livre: (c: Celula) => boolean,
+  ocupar: (c: Celula) => void,
+): void {
+  const eventos = p.eventos ?? [];
+  if (eventos.length === 0) return;
+  const rng = criarRng((p.semente ^ 0x5eed18) >>> 0);
+  const { largura, altura } = dimensoes(p);
+  const nome = (id: string) => ({ lua_sangrenta: 'Lua sangrenta', mercador_errante: 'Mercador errante', sala_secreta: 'Sala secreta' })[id] ?? id;
+  json.eventos = [...eventos];
+  json.nome = `${json.nome} · ${eventos.map(nome).join(' · ')}`;
+  const celulaLivre = (): Celula | null => {
+    for (let t = 0; t < 80; t++) {
+      const s = salas[inteiro(rng, Math.min(1, salas.length - 1), salas.length - 1)];
+      if (!s) return null;
+      const c = { x: inteiro(rng, s.x, s.x + s.l - 1), y: inteiro(rng, s.y, s.y + s.a - 1) };
+      if (livre(c)) return c;
+    }
+    return null;
+  };
+  const objetos = (json.objetos ??= []);
+  if (eventos.includes('lua_sangrenta')) for (const i of json.inimigos ?? []) i.nivel = Math.min(20, (i.nivel ?? p.nivelInimigos) + 3);
+  if (eventos.includes('mercador_errante')) {
+    const c = celulaLivre();
+    const base = catalogo.bases.length > 0 ? escolher(rng, catalogo.bases) : null;
+    if (c) {
+      ocupar(c);
+      const livros = catalogo.livrosRaros.length > 0 ? [...new Set([escolher(rng, catalogo.livrosRaros), escolher(rng, catalogo.livrosRaros)])] : [];
+      const peca = base ? [idItemBase(base, 'lendaria', null, Math.min(20, p.nivelInimigos), inteiro(rng, 0, 0x7fffffff))] : [];
+      objetos.push({ tipo: 'loja', x: normalizado(c.x, largura), y: normalizado(c.y, altura), estoque: [...livros, ...peca, 'pocao_vida'] });
+    }
+  }
+  if (eventos.includes('sala_secreta')) {
+    const c = celulaLivre();
+    const base = catalogo.basesDeConjunto.length > 0 ? escolher(rng, catalogo.basesDeConjunto) : null;
+    if (c && base) {
+      ocupar(c);
+      const peca = idItemBase(base, 'epica', null, Math.min(20, p.nivelInimigos), inteiro(rng, 0, 0x7fffffff));
+      objetos.push({ tipo: 'bau', x: normalizado(c.x, largura), y: normalizado(c.y, altura), loot: [peca], ouro: 60, chave: 'chave_cripta' });
+    }
+  }
 }
 
 function sortearParDePortas(rng: EstadoRng, salas: readonly Sala[], celulaNaSala: (s: Sala) => Celula | null): { a: Celula; b: Celula } | null {

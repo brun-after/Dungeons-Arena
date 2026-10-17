@@ -41,10 +41,16 @@ export class Hud {
   private readonly efeitos = document.createElement('span');
   private readonly chips: ChipsEfeito;
   /** D-067: buffs ofensivos armados e a carga de refúgio. */
-  private readonly pendentes = new BuffsPendentes();
+  private readonly pendentes: BuffsPendentes;
   private ultimo = '';
 
-  constructor(raiz: HTMLElement, nomeDe: (id: string) => string | null = () => null) {
+  constructor(
+    raiz: HTMLElement,
+    nomeDe: (id: string) => string | null = () => null,
+    /** Marco 18: nome e ícone de uma habilidade (o chip do estudo). */
+    habilidade: (id: string) => { nome: string; icone: string } | null = () => null,
+  ) {
+    this.pendentes = new BuffsPendentes((id) => habilidade(id)?.nome ?? id, (id) => habilidade(id)?.icone ?? 'livro');
     this.status = document.createElement('div');
     this.status.className = 'status-jogador';
     this.numeros.className = 'numeros-vida';

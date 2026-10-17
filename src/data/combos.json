@@ -1,0 +1,95 @@
+{
+  "versao": 1,
+  "combos": [
+    {
+      "id": "moedor",
+      "nome": "Moedor",
+      "antes": "corrente",
+      "depois": "redemoinho",
+      "janelaMs": 1500,
+      "mesmoAlvo": false,
+      "texto": "Corrente e depois Redemoinho: +40% de dano e atordoa quem está perto por 0,5 s.",
+      "danoPct": 40,
+      "emVolta": { "raio": 1, "efeitos": [{ "tipo": "atordoar", "duracaoMs": 500 }] }
+    },
+    {
+      "id": "estandarte",
+      "nome": "Carga do estandarte",
+      "antes": "investida",
+      "depois": "grito_de_guerra",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Investida e depois Grito de guerra: +30% de dano e os hostis a até 3 células ficam sem golpes físicos por 0,8 s.",
+      "danoPct": 30,
+      "emVolta": { "raio": 3, "efeitos": [{ "tipo": "sem_ataque", "duracaoMs": 800 }] }
+    },
+    {
+      "id": "chuva_acida",
+      "nome": "Chuva ácida",
+      "antes": "flecha_venenosa",
+      "depois": "chuva_de_flechas",
+      "janelaMs": 2500,
+      "mesmoAlvo": false,
+      "texto": "Flecha venenosa e depois Chuva de flechas: a área mirada fica envenenada.",
+      "danoPct": 15,
+      "naMira": { "raio": 1, "efeitos": [{ "tipo": "envenenado", "duracaoMs": 5000, "valor": 2, "pct": 50 }] }
+    },
+    {
+      "id": "condutor",
+      "nome": "Condutor congelado",
+      "antes": "lanca_de_gelo",
+      "depois": "raio_em_cadeia",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Lança de gelo e depois Raio em cadeia: +30% de dano e o alvo fica eletrizado (o raio salta mais).",
+      "danoPct": 30,
+      "noAlvo": [
+        { "tipo": "eletrizado", "duracaoMs": 2500 }
+      ]
+    },
+    {
+      "id": "emboscada",
+      "nome": "Emboscada",
+      "antes": "troca_sombria",
+      "depois": "golpe_atordoante",
+      "janelaMs": 2000,
+      "texto": "Troca sombria e depois Golpe atordoante: o d20 vira 20 (crítico garantido).",
+      "d20Minimo": 20
+    },
+    {
+      "id": "escudo_de_geada",
+      "nome": "Escudo de geada",
+      "antes": "barreira",
+      "depois": "nova_glacial",
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "texto": "Barreira e depois Nova glacial: +25% de dano e os hostis a até 2 células ficam resfriados.",
+      "danoPct": 25,
+      "emVolta": { "raio": 2, "efeitos": [{ "tipo": "resfriado", "duracaoMs": 3000, "pct": 30 }] }
+    },
+    {
+      "id": "colapso",
+      "nome": "Colapso",
+      "antes": "mente_partida",
+      "depois": "explosao",
+      "janelaMs": 2500,
+      "mesmoAlvo": false,
+      "texto": "Mente partida e depois Explosão: +35% de dano e a área mirada fica exposta.",
+      "danoPct": 35,
+      "naMira": { "raio": 1, "efeitos": [{ "tipo": "exposto", "duracaoMs": 3000, "pct": 20 }] }
+    },
+    {
+      "id": "saraivada",
+      "nome": "Saraivada",
+      "antes": "tiro_em_leque",
+      "depois": "flecha_perfurante",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Tiro em leque e depois Flecha perfurante: +40% de dano e o alvo fica exposto.",
+      "danoPct": 40,
+      "noAlvo": [
+        { "tipo": "exposto", "duracaoMs": 3000, "pct": 20 }
+      ]
+    }
+  ]
+}

@@ -8,6 +8,9 @@ import type { EstadoJogo } from '../core/estado';
 import { CELULA_PX } from './camera-calculo';
 
 const cor = (hex: string) => Number.parseInt(hex.slice(1), 16);
+/** Marco 18: armadilha alheia revelada pela Sabedoria, e o anel do desarme. */
+const COR_REVELADA = 0xe74c3c;
+const COR_DESARME = 0xf1c40f;
 
 export class CamadaFluxo {
   private readonly g = new Graphics();
@@ -16,6 +19,8 @@ export class CamadaFluxo {
   constructor(
     camada: Container,
     private readonly comParticulas: () => boolean = () => false,
+    /** Marco 18: duração do desarme em ticks (para o anel de progresso). */
+    private readonly ticksDesarme: () => number = () => 90,
   ) {
     camada.addChild(this.g);
   }
@@ -25,11 +30,14 @@ export class CamadaFluxo {
     for (const r of this.comParticulas() ? [] : estado.rastros) {
       g.rect(r.x * CELULA_PX + 4, r.y * CELULA_PX + 4, CELULA_PX - 8, CELULA_PX - 8).fill({ color: cor(REGISTRO_EFEITOS[r.tipo].cor), alpha: 0.28 });
     }
-    // Armadilha: cantos marcados, só para quem armou.
+    // Armadilha: cantos marcados, só para quem armou — e, desde o marco 18 (D-068), para quem a revelou com a
+    // Sabedoria (em vermelho, com o "x" no meio). O desarme em curso mostra o progresso num anel.
     const p = CELULA_PX;
     const c = 10;
+    const local = estado.entidades.find((e) => e.id === idLocal);
     for (const a of estado.armadilhas) {
-      if (a.donoId !== idLocal) continue;
+      const minha = a.donoId === idLocal;
+      if (!minha && !a.reveladaPara.includes(idLocal)) continue;
       const x = a.x * p + 3;
       const y = a.y * p + 3;
       const l = p - 6;
@@ -37,7 +45,22 @@ export class CamadaFluxo {
       g.moveTo(x + l - c, y).lineTo(x + l, y).lineTo(x + l, y + c);
       g.moveTo(x + l, y + l - c).lineTo(x + l, y + l).lineTo(x + l - c, y + l);
       g.moveTo(x + c, y + l).lineTo(x, y + l).lineTo(x, y + l - c);
-      g.stroke({ width: 3, color: cor(REGISTRO_EFEITOS.armadilha.cor), alpha: 0.9 });
+      g.stroke({ width: 3, color: minha ? cor(REGISTRO_EFEITOS.armadilha.cor) : COR_REVELADA, alpha: 0.9 });
+      if (minha) continue;
+      const m = p / 2;
+      g.moveTo(x - 3 + m - 7, y - 3 + m - 7).lineTo(x - 3 + m + 7, y - 3 + m + 7);
+      g.moveTo(x - 3 + m + 7, y - 3 + m - 7).lineTo(x - 3 + m - 7, y - 3 + m + 7);
+      g.stroke({ width: 3, color: COR_REVELADA, alpha: 0.75 });
+      const i = local?.interacao;
+      if (i?.tipo === 'desarme' && i.objetoId === String(a.id)) {
+        const total = Math.max(1, this.ticksDesarme());
+        const fracao = Math.max(0, Math.min(1, 1 - (i.ateTick - estado.tick) / total));
+        const cx = (a.x + 0.5) * p;
+        const cy = (a.y + 0.5) * p;
+        const inicio = -Math.PI / 2;
+        g.moveTo(cx + Math.cos(inicio) * p * 0.48, cy + Math.sin(inicio) * p * 0.48);
+        g.arc(cx, cy, p * 0.48, inicio, inicio + Math.PI * 2 * fracao).stroke({ width: 3, color: COR_DESARME, alpha: 0.95 });
+      }
     }
     for (const a of estado.atrasados) {
       const alvo = estado.entidades.find((e) => e.id === a.alvoId);

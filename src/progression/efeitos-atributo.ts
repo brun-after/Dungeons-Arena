@@ -5,9 +5,12 @@
 // - Constituição: mais vida por célula caminhada;
 // - Carisma: desconto na loja (com teto).
 // Puro: quem aplica é o tick (recursos.ts, acao.ts) e a loja.
+// Marco 18 (17/10/2026, D-068): Força e Inteligência dividem o multiplicador da rolagem; a Inteligência também dá a
+// potência dos efeitos, reações e combos e encurta o estudo; a Destreza do arqueiro rende mais na recarga do básico.
 
-import type { Balance } from '../core/contexto';
-import type { Atributos } from '../entities/entidade';
+import type { Balance, ContextoSimulacao } from '../core/contexto';
+import type { Atributos, Entidade } from '../entities/entidade';
+import type { PerfilDestreza } from '../entities/presets';
 
 const acimaDe10 = (v: number) => Math.max(0, v - 10);
 
@@ -18,10 +21,37 @@ export function manaPorSegundo(atributos: Atributos, segundo: number, b: Balance
   return base + Math.floor(segundo * bonus) - Math.floor((segundo - 1) * bonus);
 }
 
-/** Redução da recarga do ataque básico pela Destreza, em % (até o teto). */
-export function reducaoRecargaBasicoPct(atributos: Atributos, b: Balance): number {
+/** Marco 18 (D-068): o perfil de Destreza da classe de quem tem ficha (null = o padrão do balance). */
+export function perfilDestreza(ctx: ContextoSimulacao, e: Entidade): PerfilDestreza | null {
+  const classe = e.bolsa ? ctx.conteudo.classes.get(e.bolsa.classeId) : undefined;
+  return classe?.destreza ?? null;
+}
+
+/** Redução da recarga do ataque básico pela Destreza, em % (até o teto; marco 18: o teto vem da classe). */
+export function reducaoRecargaBasicoPct(atributos: Atributos, b: Balance, perfil?: PerfilDestreza | null): number {
   const e = b.atributos.efeitos;
-  return Math.min(e.recargaBasicoMaxPct, acimaDe10(atributos.destreza) * e.recargaBasicoPorDestrezaPct);
+  const porPonto = perfil?.recargaBasicoPorPontoPct ?? e.recargaBasicoPorDestrezaPct;
+  const teto = perfil?.recargaBasicoMaxPct ?? e.recargaBasicoMaxPct;
+  return Math.min(teto, acimaDe10(atributos.destreza) * porPonto);
+}
+
+/** Marco 18 (D-068): a rolagem bruta × `1 + ((FOR−10) + (INT−10)) / 2 × k` (com piso), igual para todo mundo. */
+export function multiplicadorDeRolagem(atributos: Atributos, b: Balance): number {
+  const e = b.atributos.efeitos;
+  const pontos = (atributos.forca - 10 + (atributos.inteligencia - 10)) / 2;
+  return Math.max(e.rolagemMin, 1 + (pontos * e.rolagemPorPontoPct) / 100);
+}
+
+/** Marco 18 (D-068): potência dos efeitos, reações e combos pela Inteligência (com piso e teto). */
+export function potenciaDeEfeito(atributos: Atributos, b: Balance): number {
+  const e = b.atributos.efeitos;
+  return Math.min(e.potenciaMax, Math.max(e.potenciaMin, 1 + ((atributos.inteligencia - 10) * e.efeitoPorIntPct) / 100));
+}
+
+/** Marco 18 (D-068): redução do tempo de estudo pela Inteligência, em % (até o teto). */
+export function reducaoEstudoPct(atributos: Atributos, b: Balance): number {
+  const e = b.habilidades.estudo;
+  return Math.min(e.reducaoMaxPct, acimaDe10(atributos.inteligencia) * e.reducaoPorIntPct);
 }
 
 /** Vida por célula caminhada, com o bônus da Constituição. */
@@ -39,4 +69,22 @@ export function descontoNaLojaPct(atributos: Atributos, b: Balance): number {
 /** O preço de compra para quem compra (nunca menos de 1). */
 export function precoDeCompra(valorBase: number, atributos: Atributos, b: Balance): number {
   return Math.max(1, Math.round(valorBase * (1 - descontoNaLojaPct(atributos, b) / 100)));
+}
+
+/** Marco 18 (D-068): raio (células) em que a Sabedoria procura armadilhas. */
+export function raioDeRevelar(atributos: Atributos, b: Balance): number {
+  const a = b.armadilhas;
+  return a.raioBase + Math.floor(acimaDe10(atributos.sabedoria) / Math.max(1, a.raioPorPontos));
+}
+
+/** Marco 18 (D-068): chance (%) de revelar cada armadilha no raio, por teste; abaixo de 10 de Sabedoria, menos. */
+export function chanceDeRevelarPct(atributos: Atributos, b: Balance): number {
+  const a = b.armadilhas;
+  return Math.min(a.chanceMaxPct, Math.max(0, a.chanceBasePct + (atributos.sabedoria - 10) * a.chancePorPontoPct));
+}
+
+/** Marco 18 (D-068): chance (%) de desarmar uma armadilha revelada. */
+export function chanceDeDesarmarPct(atributos: Atributos, b: Balance): number {
+  const a = b.armadilhas;
+  return Math.min(a.desarmeMaxPct, Math.max(5, a.desarmeBasePct + (atributos.sabedoria - 10) * a.desarmePorPontoPct));
 }

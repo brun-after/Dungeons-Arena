@@ -3,6 +3,7 @@
 // preferências (qualidade, escala da interface, movimento reduzido) e decide se o jogo está pausado.
 // Nada aqui muda a simulação: tudo lê estado e eventos.
 
+import { hashTexto } from '../core/rng';
 import { MotorAudio } from '../audio/motor';
 import type { BuscaHabilidade } from '../combat/habilidades';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -105,6 +106,8 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
 
   const pausa = criarPausa({
     dificuldade: o.dificuldade,
+    // Marco 18: a fase gerada mostra a semente (vem do id; as oficiais mostram o próprio id).
+    fase: { nome: ctx.fase.nome, semente: (hashTexto(ctx.fase.id) >>> 0).toString(36).toUpperCase().slice(0, 6) },
     pausaOJogo: o.pausaOJogo,
     toque,
     acoes: o.acoesDaPausa,

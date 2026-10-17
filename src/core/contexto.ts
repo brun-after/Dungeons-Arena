@@ -154,7 +154,28 @@ export interface Balance {
       regenPorCelulaPorConstituicaoPct: number;
       descontoPorCarismaPct: number;
       descontoMaxPct: number;
+      /** Marco 18 (D-068): a rolagem escala com FOR e INT (meio a meio) e a INT dá a potência dos efeitos. */
+      rolagemPorPontoPct: number;
+      rolagemMin: number;
+      efeitoPorIntPct: number;
+      potenciaMin: number;
+      potenciaMax: number;
     };
+  };
+  /** Marco 18 (D-068): a Sabedoria revela (raio e chance por teste) e desarma armadilhas. */
+  armadilhas: {
+    revelarIntervaloMs: number;
+    raioBase: number;
+    /** +1 de raio a cada tantos pontos acima de 10. */
+    raioPorPontos: number;
+    chanceBasePct: number;
+    chancePorPontoPct: number;
+    chanceMaxPct: number;
+    desarmeBasePct: number;
+    desarmePorPontoPct: number;
+    desarmeMaxPct: number;
+    desarmeMs: number;
+    xpDesarme: number;
   };
   inventario: {
     /** Entradas na mochila; consumíveis iguais empilham até `pilhaMax`. */
@@ -228,6 +249,8 @@ export interface CategoriaSpawner {
 
 /** Números da IA (§2.6). */
 export interface RegrasIa {
+  /** Marco 18: quem leva golpe persegue o agressor na hora (e troca para o último que bateu). */
+  revide: boolean;
   /** Ajuste de 15/10/2026 (D-060): quanto o alvo pode ficar fora da zona durante o "?" antes do inimigo desistir. */
   gracaForaDaZonaMs: number;
   patrulhaAvaliacaoMs: number;

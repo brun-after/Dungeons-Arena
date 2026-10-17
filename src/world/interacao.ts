@@ -9,11 +9,12 @@ import { usarRefugio } from '../progression/buffs';
 import { perseguido } from '../progression/recursos';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
 import type { ContextoSimulacao } from '../core/contexto';
-import { buscarEntidade, type EstadoJogo, type ObjetoNoMundo } from '../core/estado';
+import { buscarEntidade, type Armadilha, type EstadoJogo, type ObjetoNoMundo } from '../core/estado';
 import type { EventoSimulacao, MotivoItem } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import type { Entidade } from '../entities/entidade';
 import { guardarItem, recusarItem } from '../progression/inventario';
+import { armadilhaParaDesarmar, concluirDesarme } from './armadilhas-ocultas';
 import { interagivel, largarItem, largarPerto } from './objetos';
 
 /** Recarga da loja por jogador e loja, no mesmo mapa monotônico das habilidades. */
@@ -63,7 +64,18 @@ function tentarInteragir(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade
   if (!e.bolsa) return 'sem_mochila';
   if (e.interacao) return 'congelado';
   const o = alvoDeInteracao(estado, ctx, e);
-  if (!o) return 'nada_perto';
+  if (!o) {
+    // Marco 18 (D-068): sem baú nem loja perto, uma armadilha revelada pode ser desarmada.
+    const a = armadilhaParaDesarmar(estado, ctx, e);
+    if (!a) return 'nada_perto';
+    const ateTick = tick + ticksDe(ctx.balance.armadilhas.desarmeMs);
+    e.interacao = { tipo: 'desarme', objetoId: String(a.id), ateTick };
+    e.direcao = 'parado';
+    e.caminho = [];
+    e.waypoints = [];
+    saida.push({ t: 'interacaoIniciada', tick, id: e.id, objetoId: String(a.id), tipo: 'desarme', ateTick });
+    return null;
+  }
   const eco = ctx.balance.economia;
   let ateTick: number;
   if (o.tipo === 'loja') {
@@ -147,7 +159,12 @@ function entregarBau(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
 }
 
 /** Etapa 5 do tick: fim dos congelamentos, reservas órfãs e baús abertos que somem. */
-export function processarInteracoes(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
+export function processarInteracoes(
+  estado: EstadoJogo,
+  ctx: ContextoSimulacao,
+  saida: EventoSimulacao[],
+  disparar: (a: Armadilha, alvo: Entidade) => void = () => undefined,
+): void {
   for (const e of estado.entidades) {
     const i = e.interacao;
     // D-067: a loja fecha se um hostil começar a perseguir (e só por isso, ou pelo jogador).
@@ -157,6 +174,7 @@ export function processarInteracoes(estado: EstadoJogo, ctx: ContextoSimulacao, 
     }
     if (!i || estado.tick < i.ateTick) continue;
     if (i.tipo === 'loja') fecharLoja(estado, ctx, e, saida);
+    else if (i.tipo === 'desarme') concluirDesarme(estado, ctx, e, Number(i.objetoId), disparar, saida);
     else entregarBau(estado, ctx, e, saida);
   }
   if (!estado.objetos.some((o) => o.tipo === 'bau')) return;

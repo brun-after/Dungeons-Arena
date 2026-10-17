@@ -45,6 +45,33 @@
       "formas": { "projetil": 2, "quadrado": 2, "linha": 2, "ao_redor": 2, "contato": 2, "cone": 1 },
       "visual": { "conjuracao": "runas", "viagem": "rastro", "impacto": "estrelas", "som": "magia" },
       "nomes": { "nucleos": ["Eco", "Pesadelo", "Sussurro", "Vertigem", "Visão"], "qualidades": ["insana", "oculta", "da mente", "lancinante", "sem fim"] }
+    },
+    {
+      "id": "terra",
+      "estado": { "tipo": "enraizado", "duracaoMs": 1000 },
+      "cor": "#a1887f",
+      "icone": "pedra",
+      "formas": { "projetil": 1, "quadrado": 3, "linha": 2, "ao_redor": 3, "contato": 3, "cone": 1 },
+      "visual": { "conjuracao": "pedra", "viagem": "fumaca", "impacto": "pedra", "som": "golpe" },
+      "nomes": { "nucleos": ["Rocha", "Raiz", "Tremor", "Basalto", "Argila"], "qualidades": ["telúrica", "pesada", "do fundo", "imóvel", "antiga"] }
+    },
+    {
+      "id": "sombra",
+      "estado": { "tipo": "marcado", "duracaoMs": 4000, "pct": 25 },
+      "cor": "#6c3483",
+      "icone": "fantasma",
+      "formas": { "projetil": 3, "quadrado": 1, "linha": 2, "ao_redor": 2, "contato": 3, "cone": 1 },
+      "visual": { "conjuracao": "sombra", "viagem": "fumaca", "impacto": "sombra", "som": "magia" },
+      "nomes": { "nucleos": ["Sombra", "Véu", "Breu", "Eclipse", "Penumbra"], "qualidades": ["oculta", "silenciosa", "da noite", "sem rosto", "faminta"] }
+    },
+    {
+      "id": "sagrado",
+      "estado": { "tipo": "consagrado", "duracaoMs": 4000, "valor": 2 },
+      "cor": "#f7e9a0",
+      "icone": "estrela",
+      "formas": { "projetil": 2, "quadrado": 2, "linha": 2, "ao_redor": 3, "contato": 2, "cone": 1 },
+      "visual": { "conjuracao": "sagrado", "viagem": "brilho", "impacto": "sagrado", "som": "cura" },
+      "nomes": { "nucleos": ["Luz", "Aurora", "Graça", "Juramento", "Halo"], "qualidades": ["sagrada", "radiante", "do alvorecer", "pura", "serena"] }
     }
   ]
 }

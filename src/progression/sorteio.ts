@@ -1,7 +1,7 @@
 // Sorteio de item por raridade (§2.10), usado pelos drops e pelo spawner (marco 9A-2, 14/10/2026).
 // Pelo PRNG do estado: determinístico e reproduzível no harness.
 
-import { sortearItemGerado } from './gerar-item';
+import { formaMinimaDe, sortearItemBase } from './gerar-item-base';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import { aleatorio } from '../core/rng';
@@ -10,6 +10,7 @@ import { dropaveisDe, type Item } from './itens';
 
 /** Raridade por peso (o boss tem raridade mínima) e item uniforme entre os dessa raridade. */
 /**
+ * Marco 18 (D-069): a parte gerada sai dos itens base com forma (base, forma e, às vezes, elemento).
  * Marco 17 (D-063): parte dos drops de equipamento é gerada no nível de quem caiu (`chanceGerado`), com as raridades
  * altas mais prováveis quanto maior o nível; o resto vem do catálogo fixo, como antes.
  */
@@ -17,7 +18,8 @@ export function sortearItem(estado: EstadoJogo, ctx: ContextoSimulacao, boss: bo
   const d = ctx.balance.drops;
   const g = ctx.balance.itensGerados;
   if (aleatorio(estado.rng) < g.chanceGerado) {
-    const id = sortearItemGerado(estado.rng, nivel, ctx.conteudo.itensBase, g, boss ? d.raridadeMinBoss : 'comum');
+    // Marco 18 (D-069): o equipamento gerado agora é dos itens base com forma (os `gi_` antigos só resolvem).
+    const id = sortearItemBase(estado.rng, nivel, ctx.conteudo.itensComFormas, g, g.chanceElemental, formaMinimaDe(boss ? d.raridadeMinBoss : 'comum'));
     const gerado = id ? ctx.conteudo.itens.get(id) : undefined;
     if (gerado) return gerado;
   }

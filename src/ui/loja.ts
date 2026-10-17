@@ -10,7 +10,8 @@ import { t } from '../i18n';
 import { precoDeVenda, vendavel, type Item } from '../progression/itens';
 import { precoDeCompra } from '../progression/efeitos-atributo';
 import { lojaAberta } from '../progression/loja';
-import { resumoDoItem } from './mochila';
+import { molduraDoItem, resumoDoItem } from './mochila';
+import { motivoParaNaoForjar } from '../progression/forja';
 import { criarModal } from './modal';
 import { icone } from './icones';
 
@@ -68,7 +69,7 @@ export function criarLoja(o: OpcoesLoja): Loja {
   const linha = (item: Item | undefined, rotulo: string, qtd: number, acao: { texto: string; chave: string; desligado: boolean; fazer: () => void } | null, nota?: string) => {
     const li = el('li', 'linha-item');
     const conteudo = el('span', 'conteudo-item');
-    const iconeItem = el('span', 'icone-item');
+    const iconeItem = el('span', molduraDoItem(item));
     iconeItem.append(icone(item?.icone ?? 'circulo'));
     iconeItem.setAttribute('aria-hidden', 'true');
     const textos = el('span', 'textos-item');
@@ -135,7 +136,46 @@ export function criarLoja(o: OpcoesLoja): Loja {
       );
     }
     listas.append(mochila);
+    desenharForja(j);
     if (focoAntes) modal.corpo.querySelector<HTMLElement>(`[data-chave="${CSS.escape(focoAntes)}"]`)?.focus();
+  };
+
+  /**
+   * Marco 18 (D-070): a forja. As receitas de item aparecem com os materiais; a de ascender lista as peças Lendárias da
+   * mochila, uma linha para cada.
+   */
+  const desenharForja = (j: Entidade) => {
+    const bolsa = j.bolsa;
+    if (!bolsa || ctx.conteudo.forja.size === 0) return;
+    listas.append(el('h3', 'subtitulo-modal', t('loja.forja')));
+    const ul = el('ul', 'lista-itens forja-loja');
+    for (const r of ctx.conteudo.forja.values()) {
+      const materiais = r.entrada.map((x) => `${itens.get(x.item)?.nome ?? x.item} ×${x.qtd}`).concat(r.ouro > 0 ? [t('loja.forjaOuro', { ouro: r.ouro })] : []).join(' · ');
+      if (r.saida.tipo === 'item') {
+        const item = itens.get(r.saida.item);
+        const motivo = motivoParaNaoForjar(ctx, j, r, null);
+        ul.append(linha(item, r.nome, 1, { texto: t('loja.forjar'), chave: `forjar-${r.id}`, desligado: motivo !== null, fazer: () => { emitir({ t: 'forjar', receita: r.id }); } }, `${r.texto} (${materiais})`));
+        continue;
+      }
+      const lendarias = bolsa.mochila.filter((i) => itens.get(i.itemId)?.forma === 'lendaria');
+      if (lendarias.length === 0) {
+        ul.append(linha(undefined, r.nome, 1, null, `${r.texto} (${materiais}) · ${t('loja.forjaSemLendaria')}`));
+        continue;
+      }
+      for (const entrada of lendarias) {
+        const item = itens.get(entrada.itemId);
+        const motivo = motivoParaNaoForjar(ctx, j, r, entrada.invId);
+        ul.append(
+          linha(item, `${r.nome}: ${item?.nome ?? entrada.itemId}`, 1, {
+            texto: t('loja.forjar'),
+            chave: `forjar-${r.id}-${entrada.invId}`,
+            desligado: motivo !== null,
+            fazer: () => { emitir({ t: 'forjar', receita: r.id, invId: entrada.invId }); },
+          }, `${r.texto} (${materiais})`),
+        );
+      }
+    }
+    listas.append(ul);
   };
 
   const atualizar = () => {

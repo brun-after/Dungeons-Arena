@@ -103,6 +103,8 @@ export interface EstadoIa {
   alvoCacheY: number;
   proximoAtaqueTick: number;
   ataquesFeitos: number;
+  /** Marco 18 (17/10/2026): o tick do último golpe recebido que já virou revide (os mais novos ainda não). */
+  ultimaAgressaoVista: number;
   rng: EstadoRng;
 }
 
@@ -157,6 +159,22 @@ export interface Bolsa {
    * jogo dar uma. O certificado da arena se prende a ela.
    */
   personagemId: string;
+  /** Marco 18 (17/10/2026, D-068): a habilidade sendo estudada (aprender não é instantâneo); null = nenhuma. */
+  estudo: Estudo | null;
+  /** Marco 18 (D-070): a contagem de cada missão (as que zeram por fase usam `id@fase`) e as concluídas. */
+  missoes: Record<string, number>;
+  missoesConcluidas: string[];
+  /** Marco 18 (D-070): as entradas do diário de descobertas. */
+  diario: string[];
+}
+
+/** Marco 18 (D-068): estudo de uma habilidade nova. Só anda com o jogo rodando (um tick por tick de simulação). */
+export interface Estudo {
+  id: string;
+  totalTicks: number;
+  restanteTicks: number;
+  /** Pontos gastos para acelerar (cada um tira 1/3 do total). */
+  aceleracoes: number;
 }
 
 /**
@@ -164,7 +182,8 @@ export interface Bolsa {
  * congelada (não anda nem age). Termina na etapa 5 do tick em `ateTick`, ao fechar ou ao morrer.
  */
 export interface Interacao {
-  tipo: 'bau' | 'loja';
+  /** Marco 18: `desarme` de armadilha revelada (o `objetoId` é o id da armadilha em texto). */
+  tipo: 'bau' | 'loja' | 'desarme';
   objetoId: string;
   ateTick: number;
 }
@@ -241,6 +260,16 @@ export interface Entidade {
   refugio: boolean;
   /** D-067: o que está equipado, para o token (público: a arena mostra para todos). */
   aparencia: AparenciaEquipada | null;
+  /** Marco 18 (D-068): as ressonâncias de atributo ativas (ids). */
+  ressonancias: string[];
+  /** Marco 18: o último golpe com dano que a entidade levou (quem e com qual habilidade) — o "ao abater" lê. */
+  ultimoGolpe: { fonteId: EntidadeId; chave: string } | null;
+  /** Marco 18: a última habilidade que usou (combos e a Lâmina rúnica). */
+  ultimaHabilidade: { id: string; chave: string; tick: number; alvoId: EntidadeId | null } | null;
+  /** Marco 18 (D-069): a fase em que o renascer do item já foi usado ('' = disponível). */
+  renascerFase: string;
+  /** Marco 18 (D-070): a última reação que a entidade sofreu (as origens raras olham ao cair). */
+  ultimaSinergia: string | null;
 }
 
 export interface BuffArmado {
@@ -256,6 +285,11 @@ export interface AparenciaEquipada {
   cabeca: string | null;
   corpo: string | null;
   capa: string | null;
+  /** Marco 18 (D-069): a forma da arma (null = sem forma) e o elemento dela. */
+  formaArma: string | null;
+  elementoArma: string | null;
+  /** Marco 18: a forma mais alta entre as peças vestidas (o brilho e a aura do token). */
+  formaMaxima: string | null;
 }
 
 export const ATRIBUTOS_NEUTROS: Readonly<Atributos> = {
@@ -345,6 +379,11 @@ export function criarEntidade(n: NovaEntidade): Entidade {
     buffsArmados: [],
     refugio: false,
     aparencia: null,
+    ressonancias: [],
+    ultimoGolpe: null,
+    ultimaHabilidade: null,
+    renascerFase: '',
+    ultimaSinergia: null,
   };
 }
 
@@ -389,6 +428,10 @@ function clonarBolsa(b: Bolsa): Bolsa {
     mochila: b.mochila.map((i) => ({ ...i })),
     conhecidas: b.conhecidas.map((c) => ({ ...c, caminhos: [...c.caminhos] })),
     barra: [...b.barra],
+    estudo: b.estudo ? { ...b.estudo } : null,
+    missoes: { ...b.missoes },
+    missoesConcluidas: [...b.missoesConcluidas],
+    diario: [...b.diario],
   };
 }
 
@@ -416,5 +459,8 @@ export function clonarEntidade(e: Entidade): Entidade {
     interacao: e.interacao ? { ...e.interacao } : null,
     buffsArmados: e.buffsArmados.map((b) => ({ ateTick: b.ateTick, efeito: { ...b.efeito, interno: b.efeito.interno ? { ...b.efeito.interno } : null } })),
     aparencia: e.aparencia ? { ...e.aparencia } : null,
+    ressonancias: [...e.ressonancias],
+    ultimoGolpe: e.ultimoGolpe ? { ...e.ultimoGolpe } : null,
+    ultimaHabilidade: e.ultimaHabilidade ? { ...e.ultimaHabilidade } : null,
   };
 }

@@ -11,6 +11,8 @@ import { aleatorio, criarRng, inteiro, type EstadoRng } from '../core/rng';
 import { Leitor } from '../core/validar';
 import { RARIDADES, SLOTS_DE_EQUIPAMENTO, type Raridade, type Slot } from '../modos/modo';
 import { NOMES_ATRIBUTOS, type Bonus, type Item, type NomeAtributo } from './itens';
+import type { DefinicaoElemento, Elemento } from '../combat/elementos';
+import { ehIdItemBase, gerarItemBase, type ItensComFormas } from './gerar-item-base';
 
 export interface BaseDeItem {
   base: string;
@@ -41,6 +43,8 @@ export interface RegrasItensGerados {
   /** Quanto cada nível do inimigo aumenta o peso das raridades acima de comum (%). */
   raridadePorNivelPct: number;
   nivelMax: number;
+  /** Marco 18 (D-069): chance de um item com forma sair na versão elemental (quando a base tem afinidade). */
+  chanceElemental: number;
 }
 
 export function lerBasesDeItem(json: unknown): { bases: BasesDeItem; erros: string[] } {
@@ -126,6 +130,10 @@ export function gerarItem(id: string, bases: BasesDeItem, regras: RegrasItensGer
     dropavel: false,
     ensina: null,
     modificadores: [],
+    base: null,
+    forma: null,
+    elemento: null,
+    ganchos: [],
   };
 }
 
@@ -158,6 +166,9 @@ export class CatalogoDeItens extends Map<string, Item> {
     fixos: ReadonlyMap<string, Item>,
     private readonly bases: BasesDeItem,
     private readonly regras: RegrasItensGerados,
+    /** Marco 18 (D-069): os itens com forma (`ib_`) e os elementos (o gancho elemental). */
+    private readonly comFormas: ItensComFormas | null = null,
+    private readonly elementos: ReadonlyMap<Elemento, DefinicaoElemento> = new Map(),
   ) {
     super(fixos);
     this.gerados = new Map();
@@ -167,10 +178,12 @@ export class CatalogoDeItens extends Map<string, Item> {
 
   override get(id: string): Item | undefined {
     const fixo = super.get(id);
-    if (fixo || !id.startsWith(PREFIXO)) return fixo;
+    if (fixo) return fixo;
+    const comForma = ehIdItemBase(id);
+    if (!comForma && !id.startsWith(PREFIXO)) return undefined;
     const pronto = this.gerados.get(id);
     if (pronto) return pronto;
-    const item = gerarItem(id, this.bases, this.regras);
+    const item = comForma ? (this.comFormas ? gerarItemBase(id, this.comFormas, this.regras, this.elementos) : null) : gerarItem(id, this.bases, this.regras);
     if (item) this.gerados.set(id, item);
     return item ?? undefined;
   }
@@ -185,6 +198,11 @@ export class CatalogoDeItens extends Map<string, Item> {
 
   get regrasDeItem(): RegrasItensGerados {
     return this.regras;
+  }
+
+  /** Marco 18: os itens com forma (null num catálogo montado à mão). */
+  get itensComFormas(): ItensComFormas | null {
+    return this.comFormas;
   }
 }
 

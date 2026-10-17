@@ -863,6 +863,51 @@
           "mod": "atravessar"
         }
       ]
+    },
+    {
+      "id": "runa_de_fusao",
+      "nome": "Runa de fusão",
+      "tipo": "chave",
+      "descricao": "Une duas habilidades no nível máximo numa só (uma fusão por personagem).",
+      "icone": "runa",
+      "raridade": "lendario",
+      "valorBase": 0,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false
+    },
+    {
+      "id": "fragmento_eco",
+      "nome": "Fragmento de eco",
+      "tipo": "chave",
+      "descricao": "Material da forja: guarda um instante do eco de um golpe.",
+      "icone": "eco",
+      "raridade": "raro",
+      "valorBase": 30,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false
+    },
+    {
+      "id": "livro_chuva_de_estrelas",
+      "nome": "Livro: Chuva de estrelas",
+      "tipo": "livro",
+      "descricao": "Ensina a Chuva de estrelas (habilidade secreta).",
+      "icone": "livro",
+      "raridade": "lendario",
+      "valorBase": 0,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "dropavel": false,
+      "ensina": "chuva_de_estrelas"
     }
   ]
 }

@@ -7,7 +7,7 @@
 // formas.ts), custo em vida, saltos (saltos.ts) e o perfil da classe e das passivas (dano, alcance, custo,
 // recarga).
 
-import { reducaoRecargaBasicoPct } from '../progression/efeitos-atributo';
+import { multiplicadorDeRolagem, perfilDestreza, potenciaDeEfeito, reducaoRecargaBasicoPct } from '../progression/efeitos-atributo';
 import type { Celula, EntidadeId } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, novoId, type EstadoJogo } from '../core/estado';
@@ -30,6 +30,8 @@ import { rampaDeInvocacao } from './invocacoes';
 import { habilidadeDoAtor, perfilPara } from './perfil';
 import { lancarProjetil } from './projeteis';
 import { quantidadeDeSaltos, saltar } from './saltos';
+import { dispararGanchosDe, passivosDe } from '../progression/ganchos-do-portador';
+import { comCombo, fazerCombo } from './combos';
 
 export function chaveRecarga(entidadeId: EntidadeId, habilidadeId: string): string {
   return `${entidadeId}_${habilidadeId}`;
@@ -40,11 +42,15 @@ export function recargaRestante(estado: EstadoJogo, entidadeId: EntidadeId, habi
   return Math.max(0, (estado.recargas[chaveRecarga(entidadeId, habilidadeId)] ?? 0) - estado.tick);
 }
 
-export function fonteDe(e: Entidade, ctx: ContextoSimulacao, tick: number): FonteDeDano {
+export function fonteDe(e: Entidade, ctx: ContextoSimulacao, tick: number, hab: Habilidade): FonteDeDano {
   return {
     id: e.id,
     equipe: e.equipe,
-    bonusAtributo: bonusDeAtributo(e.atributos, e.classe, ctx.balance.combate.multiplicadorAtributoPadrao),
+    // Marco 18 (D-068): o bônus fixo segue o atributo da habilidade; a rolagem escala com Força e Inteligência.
+    bonusAtributo: bonusDeAtributo(e.atributos, hab.escalaCom, ctx.balance.combate.multiplicadorAtributoPadrao),
+    multRolagem: multiplicadorDeRolagem(e.atributos, ctx.balance),
+    // Marco 18: a Inteligência e os passivos (Mente dupla) dão a potência dos efeitos.
+    potencia: potenciaDeEfeito(e.atributos, ctx.balance) * (1 + passivosDe(ctx, e).potenciaPct / 100),
     carisma: e.atributos.carisma,
     // Marco 10A-3: a rampa da invocação multiplica junto com os efeitos (§2.9).
     multDano: multiplicadorDanoCausado(e, tick) * rampaDeInvocacao(e, tick, ctx),
@@ -54,7 +60,7 @@ export function fonteDe(e: Entidade, ctx: ContextoSimulacao, tick: number): Font
 
 /** Marco 14: a fonte de uma habilidade: o rank e os caminhos (na compilação) e o perfil da classe e passivas. */
 export function fonteDaHabilidade(e: Entidade, ctx: ContextoSimulacao, tick: number, hab: Habilidade): FonteDeDano {
-  const f = fonteDe(e, ctx, tick);
+  const f = fonteDe(e, ctx, tick, hab);
   const p = perfilPara(ctx, e, hab);
   return { ...f, multDano: f.multDano * hab.multDano * (1 + p.danoPct / 100), multCura: hab.multCura * (1 + p.curaPct / 100) };
 }
@@ -186,7 +192,8 @@ export function iniciarAcao(
     const chave = chaveRecarga(ator.id, hab.id);
     // `ab_recarga` encurta a recarga do ataque básico (até 75%); o perfil, a de qualquer habilidade.
     // Marco 17: a Destreza acima de 10 também encurta o básico (somada ao `ab_recarga`, dentro do mesmo teto).
-    const reducao = hab.id === ator.ataqueBasico ? Math.min(75, bonusAtaqueBasico(ator, estado.tick).recargaPct + reducaoRecargaBasicoPct(ator.atributos, ctx.balance)) : 0;
+    // Marco 18: o teto passa a 75% só somando buff; a Destreza do arqueiro chega a 50% sozinha.
+    const reducao = hab.id === ator.ataqueBasico ? Math.min(75, bonusAtaqueBasico(ator, estado.tick).recargaPct + reducaoRecargaBasicoPct(ator.atributos, ctx.balance, perfilDestreza(ctx, ator))) : 0;
     const ms = hab.recargaMs * (1 - reducao / 100) * (1 + perfil.recargaPct / 100);
     estado.recargas[chave] = Math.max(estado.recargas[chave] ?? 0, estado.tick + ticksDe(ms));
   }
@@ -276,7 +283,11 @@ function lancar(
   alvo: Entidade | null,
   saida: EventoSimulacao[],
 ): void {
-  const fonte = fonteDaHabilidade(ator, ctx, estado.tick, hab);
+  // Marco 18 (D-068, D-069): o combo (a habilidade anterior em até a janela) fortalece esta; os ganchos "ao usar"
+  // disparam; e esta vira a última.
+  const fonte = comCombo(fonteDaHabilidade(ator, ctx, estado.tick, hab), fazerCombo(estado, ctx, ator, hab, alvo, mira, saida));
+  dispararGanchosDe(estado, ctx, ator, 'aoUsarHabilidade', { outro: alvo, hab }, saida);
+  ator.ultimaHabilidade = { id: hab.id, chave: hab.chave, tick: estado.tick, alvoId: alvo?.id ?? null };
   const basico = hab.id === ator.ataqueBasico ? bonusAtaqueBasico(ator, estado.tick) : null;
   const alcance = alcanceDe(ctx, ator, hab, estado.tick);
   const base = { acaoId, fonte, hab, mira, ...(basico && basico.dano > 0 && { danoExtra: basico.dano }) };

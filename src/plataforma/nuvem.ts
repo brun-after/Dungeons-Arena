@@ -35,6 +35,23 @@ export interface Nuvem {
   enviar: (r: RegistroProgresso) => Promise<void>;
   /** O registro do slot, migrado e conferido como um arquivo importado (null: não há). */
   baixar: (slot: number) => Promise<RegistroProgresso | null>;
+  /**
+   * Marco 18 (D-070): tenta registrar a primeira descoberta do servidor e devolve quem chegou primeiro (null: sem
+   * conta ou sem rede). Só o primeiro nome da conta vai para a tabela.
+   */
+  registrarDescoberta: (entrada: string) => Promise<PrimeiraDescoberta | null>;
+}
+
+/** Quem descobriu primeiro uma entrada do diário (e se foi esta conta). */
+export interface PrimeiraDescoberta {
+  nome: string;
+  em: number;
+  minha: boolean;
+}
+
+/** O primeiro nome (o que vai para a tabela pública de descobertas). */
+export function primeiroNome(nome: string): string {
+  return (nome.trim().split(/\s+/)[0] ?? '').slice(0, 40) || 'Alguém';
 }
 
 const CHAVE_LISTA = 'dungeons-arena:nuvem-lista';
@@ -123,6 +140,22 @@ export function criarNuvemSupabase(url: string, chaveAnonima: string): Nuvem {
       const leitura = lerRegistro(bruto);
       return leitura.ok ? leitura.registro : null;
     },
+    registrarDescoberta: async (entrada) => {
+      const sessao = (await (await cliente).auth.getSession()).data.session;
+      if (!sessao) return null;
+      const meta = sessao.user.user_metadata as { full_name?: unknown; name?: unknown };
+      const nome = primeiroNome(typeof meta.full_name === 'string' ? meta.full_name : typeof meta.name === 'string' ? meta.name : '');
+      // A primeira ganha: o conflito da chave é ignorado e a leitura diz quem ficou com ela.
+      await (await cliente).from('descobertas').upsert({ entrada, user_id: sessao.user.id, nome }, { onConflict: 'entrada', ignoreDuplicates: true });
+      const { data, error } = await (await cliente).from('descobertas').select('nome, criado_em, user_id').eq('entrada', entrada).maybeSingle();
+      if (error || !data) return null;
+      const linha = data as { nome?: unknown; criado_em?: unknown; user_id?: unknown };
+      return {
+        nome: typeof linha.nome === 'string' ? linha.nome : 'Alguém',
+        em: typeof linha.criado_em === 'string' ? Date.parse(linha.criado_em) : Date.now(),
+        minha: linha.user_id === sessao.user.id,
+      };
+    },
   };
 }
 
@@ -167,6 +200,22 @@ export function criarNuvemFalsa(): Nuvem {
       const bruto = ler().saves[String(slot)];
       const l = bruto ? lerRegistro(bruto) : null;
       return Promise.resolve(l?.ok ? l.registro : null);
+    },
+    registrarDescoberta: (entrada) => {
+      if (!ler().logado) return Promise.resolve(null);
+      const CHAVE_DESC = 'dungeons-arena:nuvem-falsa-descobertas';
+      const todas = ((): Record<string, { nome: string; em: number }> => {
+        try {
+          return JSON.parse(sessionStorage.getItem(CHAVE_DESC) ?? '{}') as Record<string, { nome: string; em: number }>;
+        } catch {
+          return {};
+        }
+      })();
+      const ja = todas[entrada];
+      if (ja) return Promise.resolve({ ...ja, minha: ja.nome === 'Pessoa' });
+      const nova = { nome: 'Pessoa', em: Date.now() };
+      sessionStorage.setItem(CHAVE_DESC, JSON.stringify({ ...todas, [entrada]: nova }));
+      return Promise.resolve({ ...nova, minha: true });
     },
   };
 }

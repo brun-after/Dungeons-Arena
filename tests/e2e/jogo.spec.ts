@@ -131,7 +131,8 @@ test.describe('desktop', () => {
     await expect(mochila.getByText('Arma: Espada curta')).toBeVisible();
     await expect(diag).toHaveAttribute('data-equipados', '1');
     await mochila.getByRole('button', { name: 'Ficha' }).click();
-    await expect(mochila.locator('tr[data-atributo="forca"]')).toHaveAttribute('data-efetivo', '14');
+    // Marco 18: o aventureiro começa com Força 13 (+2 da espada).
+    await expect(mochila.locator('tr[data-atributo="forca"]')).toHaveAttribute('data-efetivo', '15');
     await page.keyboard.press('Escape');
     await expect(mochila).toBeHidden();
     // Com o modal fechado, o teclado volta a mover o jogador.

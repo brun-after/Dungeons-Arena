@@ -28,6 +28,7 @@ export const COR_RARIDADE: Readonly<Record<Raridade, number>> = {
   raro: 0x3498db,
   epico: 0x9b59b6,
   lendario: 0xf39c12,
+  ultima: 0xff4d6d,
 };
 
 /** Onde desenhar os objetos altos no isométrico. */

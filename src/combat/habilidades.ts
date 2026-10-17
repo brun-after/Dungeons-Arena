@@ -11,6 +11,7 @@ import { ehObjeto, Leitor, type Objeto } from '../core/validar';
 import { formulaValida } from './dados';
 import { ehElemento, type Elemento } from './elementos';
 import { normalizarEfeitos } from './normalizar-efeito';
+import type { Atributos } from '../entities/entidade';
 import type { EfeitoCanonico } from './registro-efeitos';
 
 export type TipoAtaque = 'fisico' | 'magico';
@@ -28,6 +29,14 @@ export type Interrupcao = 'interrompivel' | 'ininterrupta';
  * antes, o padrão); `lenta` anda mais devagar; `livre` anda normalmente. Andar conjurando custa no orçamento.
  */
 export const MOBILIDADES = ['trava', 'lenta', 'livre'] as const;
+
+/** Marco 18 (17/10/2026, D-068): o grau da habilidade (B, A, S) — decide o tempo de estudo para aprender. */
+export const GRAUS = ['B', 'A', 'S'] as const;
+export type Grau = (typeof GRAUS)[number];
+
+/** Marco 18 (D-068): o atributo do bônus fixo de dano. Sem `escalaCom`, físico usa Força e mágico, Inteligência. */
+export type AtributoDeEscala = keyof Atributos;
+const ATRIBUTOS_DE_ESCALA: readonly AtributoDeEscala[] = ['forca', 'destreza', 'constituicao', 'inteligencia', 'sabedoria', 'carisma'];
 export type Mobilidade = (typeof MOBILIDADES)[number];
 
 /** Marco 14: modificadores de evolução e de equipamento (D-057). */
@@ -101,6 +110,10 @@ export interface Habilidade {
   escalaVisual: number;
   /** Ajuste de 15/10/2026: anda enquanto conjura? */
   mobilidade: Mobilidade;
+  /** Marco 18 (D-068): o atributo do bônus fixo de dano. */
+  escalaCom: AtributoDeEscala;
+  /** Marco 18 (D-068): grau B, A ou S (tempo de estudo para aprender). */
+  grau: Grau;
 }
 
 // Marco 11A (D-066): um preset por fantasia (corte, runas, cristais, bolhas, sombra, sangue, sagrado, pedra, vento,
@@ -161,6 +174,50 @@ export interface DefinicaoHabilidade {
   evolucoes: Readonly<Record<number, readonly string[]>>;
   /** Modificadores de nascença (ex.: o raio em cadeia sempre encadeia). */
   mods: readonly Modificador[];
+  /**
+   * Marco 18 (17/10/2026, D-068, camada 2): o que cada nível muda além do número — o toque do nível 2 e a assinatura
+   * do nível 4. Valem sozinhos ao chegar no nível, como um caminho sem escolha.
+   */
+  marcos: Readonly<Record<number, MarcoDeNivel>>;
+  /** Marco 18 (camada 7): a fusão nasce de duas habilidades no nível máximo (null = não é fusão). */
+  fusao: readonly string[] | null;
+}
+
+/** Marco 18: um marco de nível — os mesmos ajustes de um caminho, com o texto que a carta mostra. */
+export interface MarcoDeNivel {
+  texto: string;
+  danoPct: number;
+  custoPct: number;
+  recargaPct: number;
+  duracaoPct: number;
+  alcance: number;
+  raio: number;
+  efeitos: readonly EfeitoCanonico[];
+  mods: readonly Modificador[];
+}
+
+function lerMarcos(l: Leitor, v: unknown): Record<number, MarcoDeNivel> {
+  if (v === undefined) return {};
+  const o: Objeto = l.objeto(v, 'marcos');
+  const saida: Record<number, MarcoDeNivel> = {};
+  for (const k of Object.keys(o)) {
+    const nivel = Number(k);
+    if (!Number.isInteger(nivel) || nivel < 2 || nivel > 9) l.erro(`marcos: nível inválido "${k}"`);
+    const m = l.objeto(o[k], `marcos.${k}`);
+    const n = (campo: string, min: number, max: number) => (m[campo] === undefined ? 0 : l.numero(m, campo, { min, max }));
+    saida[nivel] = {
+      texto: l.texto(m, 'texto'),
+      danoPct: n('danoPct', -50, 100),
+      custoPct: n('custoPct', -90, 100),
+      recargaPct: n('recargaPct', -90, 100),
+      duracaoPct: n('duracaoPct', -50, 200),
+      alcance: n('alcance', -3, 3),
+      raio: n('raio', -1, 2),
+      efeitos: m.efeitos === undefined ? [] : normalizarEfeitos(l.lista(m, 'efeitos'), l),
+      mods: m.mods === undefined ? [] : l.listaDeTextos(m, 'mods').filter((x): x is Modificador => (MODIFICADORES as readonly string[]).includes(x)),
+    };
+  }
+  return saida;
 }
 
 function lerVisual(l: Leitor, v: unknown): VisualHabilidade | null {
@@ -269,6 +326,8 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
     nivelMinimo: o.nivelMinimo === undefined ? 1 : l.numero(o, 'nivelMinimo', { min: 1, max: 20, inteiro: true }),
     passiva: lerPassiva(l, o.passiva),
     mobilidade: o.mobilidade === undefined ? 'trava' : l.opcao(o, 'mobilidade', MOBILIDADES),
+    escalaCom: 'forca',
+    grau: o.grau === undefined ? 'B' : l.opcao(o, 'grau', GRAUS),
     rank: 1,
     chave: '',
     multDano: 1,
@@ -277,6 +336,7 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
     saltos: null,
     escalaVisual: 1,
   };
+  base.escalaCom = o.escalaCom === undefined ? escalaPadrao(base.tipoAtaque) : l.opcao(o, 'escalaCom', ATRIBUTOS_DE_ESCALA);
   base.tags = etiquetasDe(base, o.tags === undefined ? [] : l.listaDeTextos(o, 'tags'));
   base.chave = base.id;
   const h = base;
@@ -305,6 +365,8 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
       l.erro(`modificador desconhecido "${m}"`);
       return false;
     }),
+    marcos: lerMarcos(l, o.marcos),
+    fusao: o.fusao === undefined ? null : l.listaDeTextos(o, 'fusao'),
   };
 }
 
@@ -312,8 +374,13 @@ const CAMPOS_DEFINICAO = [
   'id', 'nome', 'icone', 'tipoAtaque', 'formulaDano', 'formulaCura', 'alcanceCelulas', 'tipoArea', 'raioArea',
   'custoRecurso', 'recargaMs', 'conjuracaoMs', 'politicaAlvo', 'politicaImpacto', 'interrupcao', 'velocidadeProjetil',
   'efeitos', 'visual', 'elemento', 'custoVida', 'tags', 'nivelMinimo', 'passiva', 'basico', 'evolucoes', 'mods',
-  'mobilidade',
+  'mobilidade', 'escalaCom', 'grau', 'marcos', 'fusao',
 ];
+
+/** Marco 18 (D-068): sem `escalaCom`, o físico escala com Força e o mágico com Inteligência. */
+export function escalaPadrao(tipo: TipoAtaque): AtributoDeEscala {
+  return tipo === 'magico' ? 'inteligencia' : 'forca';
+}
 
 export function lerHabilidades(json: unknown): { definicoes: Map<string, DefinicaoHabilidade>; erros: string[] } {
   const definicoes = new Map<string, DefinicaoHabilidade>();

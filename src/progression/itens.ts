@@ -11,6 +11,9 @@ import type { EfeitoCanonico } from '../combat/registro-efeitos';
 import { ehObjeto, Leitor, type Objeto } from '../core/validar';
 import { ATRIBUTOS_NEUTROS, type Atributos } from '../entities/entidade';
 import { RARIDADES, SLOTS_DE_EQUIPAMENTO, type Raridade, type Slot } from '../modos/modo';
+import type { Elemento } from '../combat/elementos';
+import { lerGanchos, type Gancho } from './ganchos';
+import type { FormaItem } from './gerar-item-base';
 
 export type NomeAtributo = keyof Atributos;
 export const NOMES_ATRIBUTOS = Object.keys(ATRIBUTOS_NEUTROS) as NomeAtributo[];
@@ -46,6 +49,13 @@ export interface Item {
   /** Marco 14: a habilidade que o livro ensina (null no livro raro e nos outros tipos). */
   ensina: string | null;
   modificadores: ModificadorDeItem[];
+  /** Marco 18 (D-069): a base e a forma dos itens com forma (`ib_`); null nos fixos e nos `gi_`. */
+  base: string | null;
+  forma: FormaItem | null;
+  /** Marco 18: o elemento do item (afinidade da base); null = neutro. */
+  elemento: Elemento | null;
+  /** Marco 18: os ganchos que o item dá a quem o veste (data/itens-formas.json, ou `ganchos` em itens.json). */
+  ganchos: Gancho[];
 }
 
 function lerModificadores(l: Leitor, o: Objeto): ModificadorDeItem[] {
@@ -102,6 +112,10 @@ export function lerItens(json: unknown): { itens: Map<string, Item>; erros: stri
       dropavel: l.booleano(o, 'dropavel'),
       ensina: o.ensina === undefined || o.ensina === null ? null : l.texto(o, 'ensina'),
       modificadores: lerModificadores(l, o),
+      base: null,
+      forma: null,
+      elemento: null,
+      ganchos: lerGanchos(l, o.ganchos),
     };
     if (tipo === 'equipamento' && item.slotPadrao === null) l.erro('equipamento precisa de slotPadrao');
     if (tipo === 'consumivel' && item.slotPadrao !== null) l.erro('consumível não tem slotPadrao');
@@ -110,6 +124,7 @@ export function lerItens(json: unknown): { itens: Map<string, Item>; erros: stri
     if (tipo === 'livro' && (item.slotPadrao !== null || item.efeitos.length > 0)) l.erro('livro não tem slotPadrao nem efeitos');
     if (tipo !== 'livro' && item.ensina !== null) l.erro('só livro ensina');
     if (tipo !== 'equipamento' && item.modificadores.length > 0) l.erro('só equipamento dá modificadores');
+    if (tipo !== 'equipamento' && item.ganchos.length > 0) l.erro('só equipamento dá ganchos');
     if (itens.has(item.id)) l.erro('id repetido');
     erros.push(...l.erros);
     itens.set(item.id, item);

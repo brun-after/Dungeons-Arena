@@ -9,6 +9,7 @@ import type { Bolsa, Entidade } from '../entities/entidade';
 import { formatarChave } from './chave-habilidade';
 import { definicaoDe, resolverHabilidade } from './compilar-habilidade';
 import type { Habilidade, Modificador, Passiva } from './habilidades';
+import { modificadoresDosConjuntos } from '../progression/ganchos-do-portador';
 
 export type ContextoPerfil = Pick<ContextoSimulacao, 'conteudo' | 'balance'>;
 
@@ -33,6 +34,8 @@ export function chaveDoAtor(ctx: ContextoPerfil, ator: Entidade, id: string): st
     const item = entrada ? ctx.conteudo.itens.get(entrada.itemId) : undefined;
     for (const m of item?.modificadores ?? []) if (m.tag === null || tags.includes(m.tag)) mods.push(m.mod);
   }
+  // Marco 18 (D-069): os conjuntos completos também dão modificadores (a Vigília do caçador faz as flechas ecoarem).
+  for (const m of modificadoresDosConjuntos(ctx, bolsa)) if ((m.tag === null || tags.includes(m.tag)) && !mods.includes(m.mod)) mods.push(m.mod);
   return formatarChave({ id, rank: conhecida?.rank ?? 1, caminhos: conhecida?.caminhos ?? [], mods });
 }
 

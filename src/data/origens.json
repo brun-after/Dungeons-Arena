@@ -1,0 +1,30 @@
+{
+  "versao": 1,
+  "origens": [
+    {
+      "id": "pena_de_fenix",
+      "nome": "Pena de fênix",
+      "texto": "Do chefe de uma fase de nível 10 ou mais, derrubado por fogo.",
+      "item": { "base": "amuleto", "forma": "ultima" },
+      "chancePct": 5,
+      "se": { "chefe": true, "nivelMin": 10, "elementoDoGolpe": "fogo" }
+    },
+    {
+      "id": "inverno_eterno",
+      "nome": "Inverno eterno",
+      "texto": "De quem cai por Estilhaçar nas Catacumbas.",
+      "item": { "base": "cajado", "forma": "lendaria", "elemento": "gelo" },
+      "chancePct": 2,
+      "se": { "sinergia": "estilhacar", "fase": "fase-02" }
+    },
+    { "id": "fragmento_de_eco", "nome": "Fragmento de eco", "texto": "De quem cai por um golpe com Eco.", "item": { "id": "fragmento_eco" }, "chancePct": 20, "se": { "comEco": true } },
+    {
+      "id": "furia_contida",
+      "nome": "Fúria contida",
+      "texto": "Do chefe derrubado com um buff ofensivo ativo.",
+      "item": { "base": "amuleto", "forma": "lendaria" },
+      "chancePct": 15,
+      "se": { "chefe": true, "comBuffOfensivo": true }
+    }
+  ]
+}

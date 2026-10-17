@@ -144,7 +144,7 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
         el(
           'p',
           'resumo-slot',
-          t('slots.resumo', { nivel: s.resumo.nivel, fase: s.resumo.nomeFase, data: dataHora.format(s.resumo.atualizadoEm) }),
+          t('slots.resumo', { nivel: s.resumo.nivel, fase: s.resumo.nomeFase, data: dataHora.format(s.resumo.atualizadoEm), descobertas: s.resumo.descobertas }),
         ),
       );
       const continuar = link(`./?jogo=campanha&slot=${s.slot}&dificuldade=${s.resumo.dificuldade}`, t('slots.continuar'));

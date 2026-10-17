@@ -10,6 +10,14 @@ import interacoesJson from '../data/interacoes.json';
 import inimigosJson from '../data/inimigos.json';
 import itensJson from '../data/itens.json';
 import itensBaseJson from '../data/itens-base.json';
+import itensFormasJson from '../data/itens-formas.json';
+import conjuntosJson from '../data/conjuntos.json';
+import ressonanciasJson from '../data/ressonancias.json';
+import combosJson from '../data/combos.json';
+import interacoesBuffJson from '../data/interacoes-buff.json';
+import missoesJson from '../data/missoes.json';
+import origensJson from '../data/origens.json';
+import forjaJson from '../data/forja.json';
 import campanhaJson from '../data/modos/campanha.json';
 import cooperativoJson from '../data/modos/cooperativo.json';
 import livreJson from '../data/modos/livre.json';
@@ -22,6 +30,12 @@ import { lerHabilidades, type Catalogo, type DefinicaoHabilidade, type Habilidad
 import { lerClasses, lerPresets, type ClasseJogador, type PresetInimigo } from '../entities/presets';
 import { lerModo, RARIDADES, type ModoDeJogo } from '../modos/modo';
 import { CatalogoDeItens, lerBasesDeItem, type BasesDeItem } from '../progression/gerar-item';
+import { lerItensComFormas, type ItensComFormas } from '../progression/gerar-item-base';
+import { lerConjuntos, type Conjunto } from '../progression/conjuntos';
+import { lerRessonancias, type Ressonancia } from '../progression/ressonancias';
+import { lerCombos, lerRegrasDeBuff, type Combo, type RegraDeBuff } from '../combat/combos';
+import { lerMissoes, lerOrigens, type Missao, type OrigemRara } from '../progression/missoes';
+import { lerForja, type ReceitaDeForja } from '../progression/forja';
 import { lerItens, type Item } from '../progression/itens';
 import { BALANCE_PADRAO } from './contexto';
 
@@ -41,6 +55,19 @@ export interface Conteudo {
   /** Marco 14: os 5 elementos e as regras de acúmulo, oposição, transformação e sinergia. */
   elementos: ReadonlyMap<Elemento, DefinicaoElemento>;
   interacoes: Interacoes;
+  /** Marco 18 (D-069): os itens base com formas (o catálogo resolve os ids `ib_`) e os conjuntos. */
+  itensComFormas: ItensComFormas;
+  conjuntos: Catalogo<Conjunto>;
+  /** Marco 18 (D-068): as ressonâncias de atributo. */
+  ressonancias: Catalogo<Ressonancia>;
+  /** Marco 18 (D-068): os combos de sequência. */
+  combos: Catalogo<Combo>;
+  /** Marco 18 (camada 6): as regras de buff × habilidade. */
+  regrasDeBuff: Catalogo<RegraDeBuff>;
+  /** Marco 18 (D-070): missões, origens raras e as receitas da forja. */
+  missoes: Catalogo<Missao>;
+  origens: Catalogo<OrigemRara>;
+  forja: Catalogo<ReceitaDeForja>;
 }
 
 export interface FontesDeConteudo {
@@ -53,6 +80,15 @@ export interface FontesDeConteudo {
   elementos: unknown;
   interacoes: unknown;
   caminhos: unknown;
+  /** Marco 18: data/itens-formas.json e data/conjuntos.json. */
+  itensFormas: unknown;
+  conjuntos: unknown;
+  ressonancias: unknown;
+  combos: unknown;
+  interacoesBuff: unknown;
+  missoes: unknown;
+  origens: unknown;
+  forja: unknown;
   /** Arquivo -> JSON de cada modo em src/data/modos. */
   modos: Readonly<Record<string, unknown>>;
 }
@@ -66,7 +102,18 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const el = lerElementos(fontes.elementos);
   const ia = lerInteracoes(fontes.interacoes);
   const cm = lerCaminhos(fontes.caminhos);
-  const erros = [...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros];
+  const fo = lerItensComFormas(fontes.itensFormas);
+  const cj = lerConjuntos(fontes.conjuntos);
+  const rs = lerRessonancias(fontes.ressonancias);
+  const cb = lerCombos(fontes.combos);
+  const rb = lerRegrasDeBuff(fontes.interacoesBuff);
+  const mi = lerMissoes(fontes.missoes);
+  const og = lerOrigens(fontes.origens);
+  const fj = lerForja(fontes.forja);
+  const erros = [...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...rs.erros, ...cb.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
+  for (const conj of cj.conjuntos.values()) {
+    for (const peca of conj.pecas) if (!fo.dados.bases.has(peca)) erros.push(`conjunto ${conj.id}: base desconhecida "${peca}"`);
+  }
   const fontesCompilacao = { caminhos: cm.caminhos, elementos: el.elementos };
   const habilidades = new Map<string, Habilidade>();
   for (const [id, def] of h.definicoes) {
@@ -96,6 +143,19 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
     for (const { id } of classe.itensIniciais) if (!it.itens.has(id)) erros.push(`classe ${classe.id}: item inicial desconhecido "${id}"`);
   }
   for (const item of it.itens.values()) if (item.ensina !== null) conferir(`item ${item.id}`, [item.ensina]);
+  for (const combo of cb.combos.values()) conferir(`combo ${combo.id}`, [combo.antes, combo.depois]);
+  for (const r of fj.receitas.values()) {
+    for (const x of r.entrada) if (!it.itens.has(x.item)) erros.push(`forja ${r.id}: item desconhecido "${x.item}"`);
+    if (r.saida.tipo === 'item' && !it.itens.has(r.saida.item)) erros.push(`forja ${r.id}: item desconhecido "${r.saida.item}"`);
+  }
+  for (const m of mi.missoes.values()) {
+    const rec = m.recompensa;
+    if ('id' in rec ? !it.itens.has(rec.id) : !fo.dados.bases.has(rec.base)) erros.push(`missão ${m.id}: recompensa desconhecida`);
+  }
+  for (const o of og.origens.values()) {
+    const item = o.item;
+    if ('id' in item ? !it.itens.has(item.id) : !fo.dados.bases.has(item.base)) erros.push(`origem ${o.id}: item desconhecido`);
+  }
   if (!RARIDADES.includes(BALANCE_PADRAO.drops.raridadeMinBoss)) erros.push('balance.json: drops.raridadeMinBoss desconhecida');
   // Marco 14: o que o jogador alcança (classes e livros) cabe no orçamento de poder, em todo rank e caminho.
   const jogaveis = new Set<string>();
@@ -122,10 +182,18 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       classes: c.classes,
       modos,
       modoCampanha: modoCampanha ?? lerModo(campanhaJson, 'campanha').modo,
-      itens: new CatalogoDeItens(it.itens, ib.bases, BALANCE_PADRAO.itensGerados),
+      itens: new CatalogoDeItens(it.itens, ib.bases, BALANCE_PADRAO.itensGerados, fo.dados, el.elementos),
       itensBase: ib.bases,
       elementos: el.elementos,
       interacoes: ia.interacoes,
+      itensComFormas: fo.dados,
+      conjuntos: cj.conjuntos,
+      ressonancias: rs.ressonancias,
+      combos: cb.combos,
+      regrasDeBuff: rb.regras,
+      missoes: mi.missoes,
+      origens: og.origens,
+      forja: fj.receitas,
     },
     erros,
   };
@@ -160,6 +228,14 @@ export const FONTES_OFICIAIS: FontesDeConteudo = {
   elementos: elementosJson,
   interacoes: interacoesJson,
   caminhos: caminhosJson,
+  itensFormas: itensFormasJson,
+  conjuntos: conjuntosJson,
+  ressonancias: ressonanciasJson,
+  combos: combosJson,
+  interacoesBuff: interacoesBuffJson,
+  missoes: missoesJson,
+  origens: origensJson,
+  forja: forjaJson,
   modos: { 'campanha.json': campanhaJson, 'cooperativo.json': cooperativoJson, 'livre.json': livreJson },
 };
 

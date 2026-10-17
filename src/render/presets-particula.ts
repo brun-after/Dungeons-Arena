@@ -54,7 +54,7 @@ export interface Emissao {
  * forma do ataque também é partícula — `telegrafo` (o miolo da área enchendo), `borda` (o contorno, na cor de quem
  * ataca), `mira` (a linha do golpe e do projétil), `projetil` (o núcleo que voa) e `chao` (os rastros no chão).
  */
-export type NomePreset = PresetVisual | 'poeira' | 'aura' | 'onda' | 'telegrafo' | 'borda' | 'mira' | 'projetil' | 'chao' | 'projetil_flecha' | 'projetil_teia';
+export type NomePreset = PresetVisual | 'poeira' | 'aura' | 'onda' | 'telegrafo' | 'borda' | 'mira' | 'projetil' | 'chao' | 'projetil_flecha' | 'projetil_teia' | 'aura_forma';
 
 const faiscas: Emissao = { textura: 'faisca', quantidade: 12, vidaMs: [180, 340], velocidade: [140, 300], direcao: 'livre', gravidade: 320, escala: [0.8, 0.2], alpha: [1, 0], aditivo: true, raio: 4, cor: null, arrasto: 0.6 };
 const brilho: Emissao = { textura: 'brilho', quantidade: 10, vidaMs: [300, 520], velocidade: [20, 60], direcao: 'cima', gravidade: 0, escala: [0.9, 0.1], alpha: [0.9, 0], aditivo: true, raio: 10, cor: null };
@@ -157,6 +157,11 @@ export const PRESETS_PARTICULA: Readonly<Record<NomePreset, readonly Emissao[]>>
   projetil_flecha: [{ textura: 'flecha', quantidade: 1, vidaMs: [40, 50], velocidade: [0, 0], direcao: 'orientada', gravidade: 0, escala: [0.8, 0.8], alpha: [1, 0.85], aditivo: false, raio: 0, cor: COR_FLECHA }],
   /** O corpo da teia em voo: a rede girando devagar. */
   projetil_teia: [{ textura: 'teia', quantidade: 1, vidaMs: [40, 50], velocidade: [0, 0], direcao: 'orientada', gravidade: 0, escala: [0.75, 0.75], alpha: [0.95, 0.8], aditivo: false, raio: 0, cor: 0xe5e8ea }],
+  /** Marco 18 (D-069): a aura leve de quem veste Lendária ou Última (na cor da forma). */
+  aura_forma: [
+    { textura: 'brilho', quantidade: 2, vidaMs: [500, 800], velocidade: [10, 28], direcao: 'cima', gravidade: -10, escala: [0.45, 0.05], alpha: [0.8, 0], aditivo: true, raio: 12, cor: null },
+    { textura: 'estrela', quantidade: 1, vidaMs: [500, 700], velocidade: [6, 16], direcao: 'cima', gravidade: 0, escala: [0.35, 0.1], alpha: [0.9, 0], aditivo: true, raio: 10, cor: null, giro: [-2, 2] },
+  ],
   onda: [
     { ...anelDeLuz, quantidade: 36, velocidade: [200, 260], vidaMs: [340, 420], escala: [0.8, 0.3] },
     { ...anelDeLuz, textura: 'ponto', quantidade: 20, velocidade: [120, 160], vidaMs: [300, 380], escala: [0.5, 0.1] },

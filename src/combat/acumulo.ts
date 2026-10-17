@@ -85,6 +85,9 @@ export function lerInteracoes(json: unknown): { interacoes: Interacoes; erros: s
         remove: tiposDe(l, so, 'remove'),
         danoExtraPct: l.numero(so, 'danoExtraPct', { min: 0, max: 500 }),
         aplicar: normalizarEfeitos(l.lista(so, 'aplicar'), l),
+        raio: so.raio === undefined ? 0 : l.numero(so, 'raio', { min: 0, max: 6, inteiro: true }),
+        soComEstado: so.soComEstado === undefined ? null : (tiposDe(l, { x: [so.soComEstado] }, 'x')[0] ?? null),
+        curarFonte: so.curarFonte === undefined ? 0 : l.numero(so, 'curarFonte', { min: 0, max: 100, inteiro: true }),
       },
     ];
   });

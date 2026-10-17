@@ -4,6 +4,8 @@
 // Marco 6 (13/10/2026): XP sobe de nível e inimigos soltam itens. A perda de XP e ouro na morte
 // da campanha entra no 10A. Marco 9A (14/10/2026): ouro nos drops; morrer fecha baú e loja.
 
+import { abateDe, sortearOrigensRaras, type Abate } from './missoes';
+import { dispararGanchosDe, passivosDe } from './ganchos-do-portador';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
@@ -58,10 +60,21 @@ function concederXp(estado: EstadoJogo, ctx: ContextoSimulacao, morto: Entidade,
   }
 }
 
-export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
+export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): Abate[] {
+  const abates: Abate[] = [];
   const removidos = new Set<string>();
   for (const e of estado.entidades) {
     if (e.morto || e.hp > 0) continue;
+    // Marco 18 (D-069): o item que renasce (uma vez por fase) devolve a vida em vez de deixar cair.
+    if (e.bolsa && e.renascerFase !== estado.faseId) {
+      const pct = passivosDe(ctx, e).renascerPct;
+      if (pct > 0) {
+        e.renascerFase = estado.faseId;
+        e.hp = Math.max(1, Math.round((e.hpMax * pct) / 100));
+        saida.push({ t: 'renasceu', tick: estado.tick, id: e.id, hp: e.hp });
+        continue;
+      }
+    }
     const porId = e.participacao.reduce<{ id: string; tick: number } | null>(
       (ultimo, p) => (!ultimo || p.tick > ultimo.tick || (p.tick === ultimo.tick && p.id < ultimo.id) ? p : ultimo),
       null,
@@ -71,6 +84,15 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
     // Baú ou loja abertos se fecham: libera o congelamento e arma a recarga da loja (§2.12).
     encerrarInteracao(estado, ctx, e, saida);
     saida.push({ t: 'morreu', tick: estado.tick, id: e.id, porId: porId?.id ?? null });
+    // Marco 18: os ganchos "ao abater" de quem derrubou (com a habilidade do último golpe, se foi dele).
+    const quemAbateu = porId ? buscarEntidade(estado, porId.id) : undefined;
+    if (quemAbateu) {
+      const abate = abateDe(ctx, quemAbateu, e);
+      abates.push(abate);
+      dispararGanchosDe(estado, ctx, quemAbateu, 'aoMatar', { outro: e, hab: abate.golpe ?? null }, saida);
+      // Marco 18 (D-070): os drops que só existem nesta situação.
+      sortearOrigensRaras(estado, ctx, abate, saida);
+    }
 
     if (e.controlador === 'ia') {
       // Marco 10A-3: abate de invocação conta na rampa dela; a isca explosiva explode ao cair.
@@ -123,6 +145,7 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
 
   reviverJogadores(estado, ctx, saida);
   processarRespawns(estado, ctx, saida);
+  return abates;
 }
 
 /** Penalidade de morte do modo: XP (com ou sem perder nível) e uma fração sorteada do ouro. */

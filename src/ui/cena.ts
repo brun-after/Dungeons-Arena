@@ -29,6 +29,7 @@ import { gravarPreferencias, lerPreferencias, type Preferencias } from '../plata
 import { prepararSessaoDeTela } from '../plataforma/sessao-tela';
 import { Camera } from '../render/camera';
 import { criarProjecao } from '../render/projecao';
+import { definirCoresDosElementos } from '../render/adornos';
 import { CamadaNumeros } from '../render/numeros';
 import { CamadaFluxo } from '../render/fluxo';
 import { CamadaObjetos } from '../render/objetos';
@@ -46,6 +47,8 @@ import { criarControles, type Controles } from './controles';
 import { Diagnostico, type DadosRede } from './diagnostico';
 import { montarApresentacao } from './apresentacao';
 import { ligarFeedback } from './feedback';
+import { ligarFeedbackGrimorio } from './feedback-grimorio';
+import { nuvemDoBuild } from '../plataforma/nuvem';
 import type { AcaoDaPausa } from './pausa';
 import { criarLoja } from './loja';
 import { criarMochila } from './mochila';
@@ -77,6 +80,8 @@ export interface OpcoesCena {
   dificuldade?: { atual: () => Dificuldade; definir: (d: Dificuldade) => void };
   /** Marco 11A (D-066): o tileset do jogador já carregado (só nas aventuras do editor). */
   tileset?: TexturasTileset | null;
+  /** Marco 18: registrar a primeira descoberta do servidor na nuvem (a arena e os testes desligam). */
+  nuvemDescobertas?: boolean;
 }
 
 export interface QuadroCena {
@@ -178,7 +183,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     ticksDe(ctx.balance.economia.bauCongelaMs),
     { camada: palco.entidades, projecao },
   );
-  const fluxo = new CamadaFluxo(palco.chao, () => ap.particulas.limite > 0);
+  const fluxo = new CamadaFluxo(palco.chao, () => ap.particulas.limite > 0, () => ticksDe(ctx.balance.armadilhas.desarmeMs));
   const portas = new CamadaPortas(palco.chao, fase, ticksDe(ctx.balance.portas.janelaPortaBossMs));
   const numeros = new CamadaNumeros(palco.efeitos, ap.movimentoReduzido, projecao);
   visao = await montarVisao({
@@ -228,7 +233,16 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     else trocarAlvo(1);
   };
 
-  const hud = new Hud(ui, (id) => o.estado().entidades.find((e) => e.id === id)?.nome ?? null);
+  const dadosHabilidade = (id: string) => {
+    const h = resolverHabilidade(ctx, id);
+    return h ? { nome: h.nome, icone: h.icone } : null;
+  };
+  // Marco 18: as cores dos elementos para o brilho da arma elemental no token.
+  definirCoresDosElementos((el) => {
+    const cor = ctx.conteudo.elementos.get(el as never)?.cor;
+    return cor ? Number.parseInt(cor.slice(1), 16) : null;
+  });
+  const hud = new Hud(ui, (id) => o.estado().entidades.find((e) => e.id === id)?.nome ?? null, dadosHabilidade);
   const corDoElemento = (h: Habilidade) => (h.elemento ? (ctx.conteudo.elementos.get(h.elemento)?.cor ?? null) : null);
   // D-067: o seletor rápido põe uma habilidade ativa conhecida na tecla do botão (clique direito ou toque longo).
   const seletor = criarSeletorBarra(ui, (slot, id) => { emitir({ t: 'equiparHabilidade', id, slot }); });
@@ -414,6 +428,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
 
   const feedback = ligarFeedback({
     bus,
+    nomeHabilidade: (id) => dadosHabilidade(id)?.nome ?? id,
     estado: o.estado,
     idLocal,
     numeros,
@@ -425,6 +440,20 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     },
     nomeDaHabilidade: (id) => resolverHabilidade(ctx, id)?.nome ?? id,
     dado,
+  });
+  // Marco 18 (D-068 a D-070): combos, ressonâncias, missões, origens raras, forja e descobertas.
+  ligarFeedbackGrimorio({
+    bus,
+    ctx,
+    idLocal,
+    hud,
+    numeros,
+    agora: () => performance.now(),
+    posicao: (id) => o.estado().entidades.find((x) => x.id === id) ?? null,
+    aviso: (texto) => {
+      mostrarAviso(ui, texto);
+    },
+    nuvem: o.nuvemDescobertas === false ? null : nuvemDoBuild(),
   });
 
   let ultimoQuadroMs = performance.now();

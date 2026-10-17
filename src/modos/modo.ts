@@ -24,9 +24,10 @@ export interface RecompensaDeJogador {
 
 /** Marco 15: quando a fase termina — qualquer jogador na saída, ou todos os vivos sobre ela (cooperativo). */
 export type RegraSaida = 'qualquer' | 'todos_vivos';
-export type Raridade = 'comum' | 'incomum' | 'raro' | 'epico' | 'lendario';
+/** Marco 18 (D-069): `ultima` é a Última forma dos itens base (não cai: vem da forja e de missões). */
+export type Raridade = 'comum' | 'incomum' | 'raro' | 'epico' | 'lendario' | 'ultima';
 
-export const RARIDADES: readonly Raridade[] = ['comum', 'incomum', 'raro', 'epico', 'lendario'];
+export const RARIDADES: readonly Raridade[] = ['comum', 'incomum', 'raro', 'epico', 'lendario', 'ultima'];
 export const SLOTS_DE_EQUIPAMENTO = [
   'arma_principal',
   'arma_secundaria',
@@ -116,6 +117,10 @@ export interface ModoDeJogo {
   sobrevivencia: {
     regenPorCelula: boolean;
     penalidadeMorte: PenalidadeMorte | null;
+    /** Marco 18 (D-068): a Sabedoria revela e desarma armadilhas (a arena não mostra armadilhas). */
+    revelarArmadilhas: boolean;
+    /** Marco 18 (D-068): o estudo de habilidades anda nesta modalidade (a arena usa a ficha certificada, sem estudo). */
+    estudoAvanca: boolean;
   };
 }
 
@@ -240,6 +245,8 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
     sobrevivencia: {
       regenPorCelula: l.booleano(sobrevivencia, 'regenPorCelula'),
       penalidadeMorte: lerPenalidade(l, sobrevivencia.penalidadeMorte),
+      revelarArmadilhas: sobrevivencia.revelarArmadilhas === undefined ? false : l.booleano(sobrevivencia, 'revelarArmadilhas'),
+      estudoAvanca: sobrevivencia.estudoAvanca === undefined ? false : l.booleano(sobrevivencia, 'estudoAvanca'),
     },
   };
   if (modo.fim.tipo !== 'nenhum' && modo.fim.alvo === null && modo.fim.tempoLimiteS === null) {

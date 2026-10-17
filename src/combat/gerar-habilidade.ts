@@ -7,7 +7,7 @@
 import { criarRng, escolher, inteiro, aleatorio, type EstadoRng } from '../core/rng';
 import { ehGerada, lerIdGerada } from './chave-habilidade';
 import { compilarHabilidade, modificadorCabe, type ContextoHabilidades } from './compilar-habilidade';
-import { ELEMENTOS, FORMAS, type DefinicaoElemento, type Forma } from './elementos';
+import { ELEMENTOS_DO_GERADOR, FORMAS, type DefinicaoElemento, type Forma } from './elementos';
 import { etiquetasDe, type DefinicaoHabilidade, type Habilidade, type Modificador } from './habilidades';
 import { orcamentoNoNivel, poderDaHabilidade } from './orcamento';
 import { construirEfeito, type EfeitoCanonico } from './registro-efeitos';
@@ -85,7 +85,7 @@ function gerar(id: string, ctx: ContextoHabilidades): DefinicaoHabilidade | null
   const g = lerIdGerada(id);
   if (!g) return null;
   const rng = criarRng(g.semente);
-  const el = ctx.conteudo.elementos.get(escolher(rng, ELEMENTOS));
+  const el = ctx.conteudo.elementos.get(escolher(rng, ELEMENTOS_DO_GERADOR));
   if (!el) return null;
   const forma = sortearForma(rng, el);
   const campos = camposDaForma(rng, forma);
@@ -118,12 +118,14 @@ function gerar(id: string, ctx: ContextoHabilidades): DefinicaoHabilidade | null
     perfura: false,
     saltos: null,
     escalaVisual: 1,
+    escalaCom: 'inteligencia',
+    grau: 'A',
   };
   base.tags = etiquetasDe(base, ['gerada']);
   // Os dados sobem enquanto o rank 1 couber no orçamento das geradas no nível; se nem 1 dado couber, cai o
   // efeito secundário e depois os dados diminuem.
   const limite = orcamentoNoNivel(g.nivel, ctx.balance.orcamento, ctx.balance.orcamento.geradaPct);
-  const poder = (h: Habilidade) => poderDaHabilidade(compilarHabilidade({ base: h, basico: false, evolucoes: {}, mods: [] }, { rank: 1, caminhos: [], mods: [] }, ctx.conteudo, ctx.balance.habilidades), ctx.balance.orcamento);
+  const poder = (h: Habilidade) => poderDaHabilidade(compilarHabilidade({ base: h, basico: false, evolucoes: {}, mods: [], marcos: {}, fusao: null }, { rank: 1, caminhos: [], mods: [] }, ctx.conteudo, ctx.balance.habilidades), ctx.balance.orcamento);
   let quantos = 1;
   const comDados = (n: number, f: number): Habilidade => ({ ...base, formulaDano: `${n}d${f}` });
   while (quantos < 12 && poder(comDados(quantos + 1, faces)) <= limite) quantos++;
@@ -136,5 +138,5 @@ function gerar(id: string, ctx: ContextoHabilidades): DefinicaoHabilidade | null
   const caminhos = caminhosPossiveis(h);
   const tres = embaralharParcial(rng, caminhos, 2);
   const cinco = embaralharParcial(rng, caminhos.filter((c) => !tres.includes(c)), 2);
-  return { base: h, basico: false, evolucoes: { 3: tres, 5: cinco }, mods: [] };
+  return { base: h, basico: false, evolucoes: { 3: tres, 5: cinco }, mods: [], marcos: {}, fusao: null };
 }

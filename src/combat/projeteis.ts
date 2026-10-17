@@ -52,6 +52,8 @@ export function lancarProjetil(
     velocidade: hab.velocidadeProjetil,
     bonusAtributo: fonte.bonusAtributo,
     carisma: fonte.carisma,
+    multRolagem: fonte.multRolagem,
+    potencia: fonte.potencia,
     multDano: fonte.multDano,
     multCura: fonte.multCura,
     atravessa: hab.perfura || projeteisAtravessam(ator, estado.tick),
@@ -94,6 +96,8 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
           equipe: dono?.equipe ?? p.equipeDono,
           bonusAtributo: p.bonusAtributo,
           carisma: p.carisma,
+          multRolagem: p.multRolagem,
+          potencia: p.potencia,
           multDano: p.multDano,
           multCura: p.multCura,
         };

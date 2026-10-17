@@ -30,6 +30,10 @@ export function criarBolsa(classe: ClasseJogador, ouroInicial = 0): Bolsa {
     barra: Array.from({ length: SLOTS_BARRA }, (_, i) => classe.habilidades[i] ?? null),
     pontosHabilidade: 0,
     personagemId: '',
+    estudo: null,
+    missoes: {},
+    missoesConcluidas: [],
+    diario: [],
   };
   for (const { id, qtd } of classe.itensIniciais) bolsa.mochila.push({ invId: `i${bolsa.proximoInv++}`, itemId: id, qtd, ref: null });
   return bolsa;
@@ -59,9 +63,9 @@ export function guardarItem(bolsa: Bolsa, item: Item, qtd: number, regras: Balan
   return true;
 }
 
-/** Consumíveis e livros empilham (marco 14: livros também). */
+/** Consumíveis e livros empilham (marco 14: livros também; marco 18: chaves e materiais da forja também). */
 export function empilha(item: Item): boolean {
-  return item.tipo === 'consumivel' || item.tipo === 'livro';
+  return item.tipo === 'consumivel' || item.tipo === 'livro' || item.tipo === 'chave';
 }
 
 export function cabeNaMochila(bolsa: Bolsa, item: Item, qtd: number, regras: Balance['inventario']): boolean {
@@ -173,7 +177,10 @@ export function usarItem(estado: EstadoJogo, e: Entidade, ctx: ContextoSimulacao
     // Marco 14: o livro ensina a habilidade (a do catálogo, ou a gerada guardada no `ref`) e some.
     if (item.tipo === 'livro') {
       const ensina = item.ensina ?? entrada.ref;
-      if (!ensina || !aprenderPorLivro(e, ctx, ensina, tick, saida)) return recusa('ja_conhece');
+      if (!ensina) return recusa('ja_conhece');
+      // Marco 18 (D-068): o livro começa um estudo; com outro em andamento, é recusado sem gastar.
+      const r = aprenderPorLivro(e, ctx, ensina, tick, saida);
+      if (r !== 'ok') return recusa(r);
       entrada.qtd--;
       if (entrada.qtd <= 0) bolsa.mochila.splice(indice, 1);
       saida.push({ t: 'usouItem', tick, id: e.id, itemId: item.id, hp: 0, mana: 0 });

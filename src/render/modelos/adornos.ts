@@ -13,6 +13,31 @@ export interface VisualEquipamento {
   cabeca: number | null;
   corpo: number | null;
   capa: number | null;
+  /** Marco 18 (D-069): a cor do elemento da arma (o fio brilha nela) e a forma (gema, brilho, aura). */
+  corElemento: number | null;
+  forma: string | null;
+  formaMaxima: string | null;
+}
+
+/** A cor da gema por forma (Épica violeta, Lendária âmbar, Última carmim). */
+const GEMA: Readonly<Record<string, number>> = { epica: 0x9b59b6, lendaria: 0xf39c12, ultima: 0xff4d6d };
+
+/** O brilho na ponta da arma (elemento) e a gema no punho (forma), com a mesma espessura dos traços do modelo. */
+function realceDaArma(v: VisualEquipamento, x: number, y: number, pontaY: number): string {
+  const partes: string[] = [];
+  if (v.corElemento !== null) {
+    partes.push(`<circle cx="${x}" cy="${pontaY}" r="4.2" fill="${hex(v.corElemento)}" fill-opacity="0.35"/>`);
+    partes.push(circulo(x, pontaY, 1.8, clarear(v.corElemento, 0.3), false));
+  }
+  const gema = v.forma ? GEMA[v.forma] : undefined;
+  if (gema !== undefined) partes.push(circulo(x, y - 2.5, 1.5, gema));
+  return partes.join('');
+}
+
+/** Atrás do corpo: na forma Última, um halo na cor dela. */
+function auraDaForma(v: VisualEquipamento, cx: number, cy: number, rx: number, ry: number): string {
+  if (v.formaMaxima !== 'ultima') return '';
+  return `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${hex(0xff4d6d)}" fill-opacity="0.16" stroke="${hex(0xff4d6d)}" stroke-opacity="0.45" stroke-width="1.2"/>`;
 }
 
 const ARMAS: ReadonlySet<string> = new Set<Arma>(['espada', 'cajado', 'clava', 'adaga', 'machado', 'foice', 'arco', 'lanca']);
@@ -57,7 +82,8 @@ function adornos34(o: OpcoesBipede, v: VisualEquipamento): CamadasAdorno {
   }
   if (secundaria) frente.push(circulo(maoE.x, maoE.y, 2.2, o.pele));
   const arma = comoArma(v.arma);
-  if (arma) frente.push(arma34(arma, maoD.x, maoD.y), circulo(maoD.x, maoD.y, 2.2, escurecer(o.pele, 0.15)));
+  if (arma) frente.push(arma34(arma, maoD.x, maoD.y), realceDaArma(v, maoD.x, maoD.y, maoD.y - 16), circulo(maoD.x, maoD.y, 2.2, escurecer(o.pele, 0.15)));
+  atras.unshift(auraDaForma(v, MEIO, (cabecaY + base) / 2, o.ombro + 8, (base - cabecaY) / 2 + 6));
   return { atras: atras.join(''), frente: frente.join('') };
 }
 
@@ -76,7 +102,8 @@ function adornosCima(o: OpcoesBipede, v: VisualEquipamento): CamadasAdorno {
   }
   if (v.secundaria) frente.push(circulo(maoE.x, maoE.y, 2.4, o.pele));
   const arma = comoArma(v.arma);
-  if (arma) frente.push(armaCima(arma, maoD.x, maoD.y), circulo(maoD.x, maoD.y, 2.4, escurecer(o.pele, 0.15)));
+  if (arma) frente.push(armaCima(arma, maoD.x, maoD.y), realceDaArma(v, maoD.x + 14, maoD.y, maoD.y), circulo(maoD.x, maoD.y, 2.4, escurecer(o.pele, 0.15)));
+  atras.unshift(auraDaForma(v, c, c, o.ombro + 7, o.ombro + 7));
   if (v.cabeca !== null) {
     const r = o.cabeca * 0.95;
     frente.push(circulo(c + 1, c, r + 0.6, escurecer(v.cabeca, 0.2)), circulo(c + 1.5, c, r * 0.45, clarear(v.cabeca, 0.3), false));
