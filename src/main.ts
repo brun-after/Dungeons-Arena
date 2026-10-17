@@ -39,11 +39,19 @@ function rotear(raiz: HTMLElement): void {
     // Marco 16: benchmarks do cliente (sob demanda, fora do pacote principal).
     void import('./bench-tela').then((m) => m.iniciarBench(raiz, params));
   } else if (params.has('editor')) {
-    void import('./editor/editor').then((m) => m.iniciarEditor(raiz, params.get('editor') || null));
+    const indice = Number(params.get('fase') ?? 0);
+    void import('./editor/editor').then((m) => m.iniciarEditor(raiz, params.get('editor') || null, Number.isInteger(indice) ? indice : 0));
   } else if (params.get('pesquisa') === '1') {
     void iniciarJogo(raiz, { slot: null, pesquisa: true });
   } else if (params.get('jogo') === 'teste' && params.get('fase')) {
-    void iniciarJogo(raiz, { slot: null, teste: params.get('fase') ?? '' });
+    // Marco 11A: `indice` (a fase da aventura) e `seguir` (testar a aventura inteira).
+    const indice = Number(params.get('indice') ?? 0);
+    void iniciarJogo(raiz, {
+      slot: null,
+      teste: params.get('fase') ?? '',
+      testeIndice: Number.isInteger(indice) && indice >= 0 && indice < 12 ? indice : 0,
+      testeSeguir: params.get('seguir') === '1',
+    });
   } else if (params.get('jogo') === 'grupo') {
     // Marco 15: campanha cooperativa (o código de rede vem sob demanda, como o da arena).
     const slot = Number(params.get('slot'));

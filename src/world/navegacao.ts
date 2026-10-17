@@ -87,3 +87,26 @@ export function alcancaveis(fase: Fase, origem: Celula): Uint8Array {
   }
   return marcadas;
 }
+
+/**
+ * Marco 11A (16/10/2026): o alcance atravessando as portas internas (§2.1) — chegar a um extremo leva ao outro.
+ * A validação do editor usa este, para uma fase dividida por portas não acusar saída inalcançável.
+ */
+export function alcancaveisComPortas(fase: Fase, origem: Celula): Uint8Array {
+  const marcadas = alcancaveis(fase, origem);
+  const pares = fase.portasInternas.filter((p) => passavel(fase, p.a.x, p.a.y) && passavel(fase, p.b.x, p.b.y));
+  for (let mudou = true; mudou; ) {
+    mudou = false;
+    for (const p of pares) {
+      const ia = p.a.y * fase.largura + p.a.x;
+      const ib = p.b.y * fase.largura + p.b.x;
+      const [de, para] = marcadas[ia] === 1 && marcadas[ib] !== 1 ? [ia, p.b] : marcadas[ib] === 1 && marcadas[ia] !== 1 ? [ib, p.a] : [-1, null];
+      if (de < 0 || !para) continue;
+      const novas = alcancaveis(fase, para);
+      for (let i = 0; i < novas.length; i++) if (novas[i] === 1) marcadas[i] = 1;
+      mudou = true;
+    }
+  }
+  return marcadas;
+}
+

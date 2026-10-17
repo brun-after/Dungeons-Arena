@@ -37,6 +37,7 @@ import { CamadaEntidades } from '../render/sprites';
 import { criarPalco, type Palco } from '../render/stage';
 import { CamadaTelegrafia } from '../render/telegrafia';
 import { criarTerreno } from '../render/terreno';
+import type { TexturasTileset } from '../render/tileset-textura';
 import { velocidade } from '../world/movimento';
 import { mostrarAviso } from './aviso';
 import { criarCabecalho } from './cabecalho';
@@ -72,6 +73,8 @@ export interface OpcoesCena {
   acoesDaPausa?: AcaoDaPausa[];
   /** Marco 15: quem pode trocar a dificuldade (campanha solo e anfitrião do grupo). */
   dificuldade?: { atual: () => Dificuldade; definir: (d: Dificuldade) => void };
+  /** Marco 11A (D-066): o tileset do jogador já carregado (só nas aventuras do editor). */
+  tileset?: TexturasTileset | null;
 }
 
 export interface QuadroCena {
@@ -155,7 +158,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       visao?.definir(p.visao);
     },
   });
-  const terreno = criarTerreno(palco.terreno, fase);
+  const terreno = criarTerreno(palco.terreno, fase, o.tileset ?? null);
   const projecao = () => camera.projecaoAtual;
   const sprites = new CamadaEntidades(palco.entidades, {
     idLocal,
@@ -181,6 +184,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     palco,
     camera,
     fase,
+    corParede: o.tileset?.corParede ?? null,
     aoTrocar: () => {
       sprites.reiniciarVisual();
       objetos.reiniciarVisual();

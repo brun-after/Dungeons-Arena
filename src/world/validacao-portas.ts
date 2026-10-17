@@ -66,12 +66,26 @@ export function lerPortasInternas(v: unknown, erros: ErroFase[]): PortaInterna[]
 }
 
 /** Regras que dependem do terreno, dos inimigos e do alcance a partir do spawn. */
-export function validarPortasNaFase(fase: Fase, alcance: Uint8Array, erros: ErroFase[]): void {
+export function validarPortasNaFase(fase: Fase, alcance: Uint8Array, erros: ErroFase[], avisos: ErroFase[] = []): void {
   const s = fase.portaSaida;
   if (s) {
     if (tipoEm(fase, s.x, s.y) !== 'saida') erros.push({ mensagem: 'a porta de saída precisa ficar numa célula S', x: s.x, y: s.y });
-    if (s.tranca === 'boss' && (s.bossIndice === undefined || !fase.inimigos[s.bossIndice])) {
+    const boss = s.tranca === 'boss' && s.bossIndice !== undefined ? fase.inimigos[s.bossIndice] : undefined;
+    if (s.tranca === 'boss' && !boss) {
       erros.push({ mensagem: 'bossIndice da saída não aponta um inimigo da fase', x: s.x, y: s.y });
+    }
+    // Marco 11A (16/10/2026): a tranca precisa ter solução — o chefe alcançável (erro); a chave num baú, loot ou loja
+    // alcançável (aviso: ela também pode vir na mochila, de uma fase anterior da aventura).
+    const alcancada = (c: Celula) => alcance[c.y * fase.largura + c.x] === 1;
+    if (boss && !alcancada(boss)) erros.push({ mensagem: 'o chefe que abre a saída está inalcançável', x: boss.x, y: boss.y });
+    if (s.tranca === 'chave' && s.chave) {
+      const chave = s.chave;
+      const temChave = fase.objetos.some(
+        (o) =>
+          alcancada(o) &&
+          (((o.tipo === 'bau' || o.tipo === 'loja') && o.chave !== chave && o.itens.includes(chave)) || (o.tipo === 'loot' && o.itemId === chave)),
+      );
+      if (!temChave) avisos.push({ mensagem: 'a chave da saída não está em nenhum baú, loot ou loja alcançável desta fase', x: s.x, y: s.y });
     }
   }
   const extremos = new Set<string>();

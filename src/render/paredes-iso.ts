@@ -33,12 +33,13 @@ export interface ParedesIso {
   destruir: () => void;
 }
 
-export function criarParedesIso(camada: Container, fase: Fase, p: Projecao): ParedesIso {
-  const paleta = paletaDe(fase.matizGraus);
-  const topo = escurecer(paleta.paredeTopo, 0.45);
-  const esquerda = paleta.paredeTopo;
-  const direita = escurecer(paleta.paredeTopo, 0.25);
-  const contorno = { width: 1, color: escurecer(paleta.paredeTopo, 0.7), alpha: 0.8 };
+/** Marco 11A: `corParede` (a cor média da parede do tileset do jogador) substitui a paleta da fase. */
+export function criarParedesIso(camada: Container, fase: Fase, p: Projecao, corParede: number | null = null): ParedesIso {
+  const base = corParede ?? paletaDe(fase.matizGraus).paredeTopo;
+  const topo = escurecer(base, 0.45);
+  const esquerda = base;
+  const direita = escurecer(base, 0.25);
+  const contorno = { width: 1, color: escurecer(base, 0.7), alpha: 0.8 };
   const h = ALTURA_PAREDE_PX;
   const canto = (x: number, y: number) => p.projetar(x * CELULA_PX, y * CELULA_PX);
   const graficos: Graphics[] = [];

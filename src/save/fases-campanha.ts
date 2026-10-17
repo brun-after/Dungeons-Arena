@@ -44,7 +44,7 @@ export function estadoInicialDaFase(ctx: ContextoSimulacao): EstadoJogo {
   return estado;
 }
 
-/** A fase seguinte da campanha (oficial, depois as geradas); null depois de uma aventura. */
-export function faseSeguinte(ref: RefFase): RefFase | null {
-  return proximaFase(ref, campanha.fases, campanha.geradas, BALANCE_PADRAO.xp.nivelMax);
+/** A fase seguinte da campanha (oficial, depois as geradas); na aventura, a próxima da lista (ou null no fim). */
+export function faseSeguinte(ref: RefFase, fasesDaAventura = 1, estilo: readonly string[] = []): RefFase | null {
+  return proximaFase(ref, campanha.fases, campanha.geradas, BALANCE_PADRAO.xp.nivelMax, fasesDaAventura, estilo);
 }

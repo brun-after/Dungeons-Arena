@@ -1,4 +1,5 @@
 // Dicionário pt-BR (§5.5): nenhum texto de interface fica fixo no código.
+import { textosEditor } from './pt-BR-editor';
 import { textosGrupo } from './pt-BR-grupo';
 import { textosHabilidades } from './pt-BR-habilidades';
 
@@ -201,6 +202,7 @@ export const ptBR = {
   'fase.entrando': 'Entrando em: {nome}',
   'fase.concluida': 'Fase concluída!',
   'fase.concluidaTeste': 'Fase concluída! Voltando ao editor…',
+  'fase.proximaTeste': 'Fase concluída! Indo para a próxima fase da aventura…',
   'fase.fimDaCampanha': 'Aventura concluída. Parabéns!',
   'log.saidaChave': 'A saída está trancada: precisa da chave',
   'log.saidaBoss': 'Derrote o chefe para abrir a saída',
@@ -361,17 +363,17 @@ export const ptBR = {
   'slots.faseOficial': 'Fase: Salões da entrada',
   'slots.faseDoJogo': 'Fase do jogo novo no slot {n}',
   'editor.minhasFases': 'Minhas fases',
-  'editor.explicacao': 'Crie uma fase, teste com o seu personagem e compartilhe o arquivo.',
+  'editor.explicacao': 'Crie uma aventura de uma ou mais fases e teste com o seu personagem. Ela fica neste aparelho; uma fase pode ser exportada como arquivo.',
   'editor.novaFase': 'Nova fase',
   'editor.nome': 'Nome da fase',
-  'editor.nomePadrao': 'Minha fase',
+  'editor.nomePadrao': 'Minha aventura',
   'editor.semNome': 'Sem nome',
   'editor.tamanho': 'Tamanho',
   'editor.tamanho.pequena': 'Pequena ({largura}×{altura})',
   'editor.tamanho.media': 'Média ({largura}×{altura})',
   'editor.tamanho.grande': 'Grande ({largura}×{altura})',
   'editor.criar': 'Criar e editar',
-  'editor.importar': 'Importar fase (.json)',
+  'editor.importar': 'Importar fase (.json) como aventura',
   'editor.importarInvalido': 'Arquivo inválido: não é JSON.',
   'editor.importarComErro': 'A fase importada tem erro: {erro}',
   'editor.resumo': '{largura}×{altura} · {inimigos} inimigos · {data}',
@@ -388,9 +390,9 @@ export const ptBR = {
   'editor.ferramenta.saida': 'Saída',
   'editor.ferramenta.spawn': 'Início do jogador',
   'editor.ferramenta.inimigo': 'Inimigo',
-  'editor.ferramenta.remover': 'Remover inimigo, orbe ou início',
+  'editor.ferramenta.remover': 'Remover inimigo, objeto, início ou peça',
   'editor.preset': 'Tipo de inimigo',
-  'editor.ferramenta.objeto': 'Orbe',
+  'editor.ferramenta.objeto': 'Objeto (baú, loja, item, armadilha, som ou orbe)',
   'editor.orbe': 'Tipo de orbe',
   'editor.orbeVida': 'Orbe de vida',
   'editor.orbeMana': 'Orbe de mana',
@@ -438,6 +440,7 @@ export const ptBR = {
   ...textosHabilidades,
   // Marco 15 (15/10/2026): campanha cooperativa.
   ...textosGrupo,
+  ...textosEditor,
 } as const;
 
 export type ChaveTexto = keyof typeof ptBR;

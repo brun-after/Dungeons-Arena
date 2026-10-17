@@ -7,6 +7,7 @@ import { ehObjeto, type Objeto } from '../core/validar';
 import type { Entidade } from '../entities/entidade';
 import { lerCertificado, type Certificado } from '../integridade/certificado';
 import type { Dificuldade } from '../modos/dificuldade';
+import { MAX_REGRAS, RE_REGRA_ESTILO } from '../world/estilo';
 import type { ParametrosGeracao } from '../world/gerador';
 
 export const VERSAO_SCHEMA = 12;
@@ -19,7 +20,8 @@ export const FORMATO_EXPORTACAO = 'dungeons-arena/save';
  */
 export type RefFase =
   | { tipo: 'oficial'; id: string }
-  | { tipo: 'aventura'; id: string }
+  /** Marco 11A (D-066): `indice` é a fase da aventura (ausente = a primeira, como antes do 11A). */
+  | { tipo: 'aventura'; id: string; indice?: number }
   | { tipo: 'gerada'; id: string; numero: number; params: ParametrosGeracao };
 
 export interface Estatisticas {
@@ -47,7 +49,8 @@ export interface RegistroProgresso {
 
 /** Chave estável de uma fase no save (`oficial:fase-01`, `aventura:<id>`). */
 export function chaveDaFase(ref: RefFase): string {
-  return `${ref.tipo}:${ref.id}`;
+  // A primeira fase da aventura mantém a chave de antes do 11A (`aventura:<id>`).
+  return ref.tipo === 'aventura' && ref.indice ? `aventura:${ref.id}#${ref.indice}` : `${ref.tipo}:${ref.id}`;
 }
 
 export interface ResumoSlot {
@@ -277,13 +280,22 @@ function lerParametros(v: unknown): ParametrosGeracao | null {
     p.largura = v.largura;
     p.altura = v.altura;
   }
+  // Marco 11A (D-066): as regras de estilo que geraram a fase (até 64, na forma compacta).
+  if (v.estilo !== undefined) {
+    if (!Array.isArray(v.estilo) || v.estilo.length > MAX_REGRAS || !v.estilo.every((r): r is string => typeof r === 'string' && RE_REGRA_ESTILO.test(r))) return null;
+    p.estilo = [...v.estilo];
+  }
   return p;
 }
 
 /** Marco 15: exportada para a sala cooperativa ler a fase pedida pelo anfitrião (não confiável). */
 export function lerRefFase(v: unknown): RefFase | null {
   if (!ehObjeto(v) || typeof v.id !== 'string' || v.id === '') return null;
-  if (v.tipo === 'oficial' || v.tipo === 'aventura') return { tipo: v.tipo, id: v.id };
+  if (v.tipo === 'oficial') return { tipo: v.tipo, id: v.id };
+  if (v.tipo === 'aventura') {
+    if (v.indice === undefined || v.indice === 0) return { tipo: 'aventura', id: v.id };
+    return typeof v.indice === 'number' && Number.isInteger(v.indice) && v.indice > 0 && v.indice < 12 ? { tipo: 'aventura', id: v.id, indice: v.indice } : null;
+  }
   if (v.tipo === 'gerada' && typeof v.numero === 'number' && Number.isInteger(v.numero) && v.numero >= 1) {
     const params = lerParametros(v.params);
     return params ? { tipo: 'gerada', id: v.id, numero: v.numero, params } : null;

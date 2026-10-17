@@ -9,6 +9,8 @@
 // o registro novo é montado por `avancarFase` (pura), gravado, e a sessão recarrega a partir dele (D-052).
 // Marco 14 (14/10/2026): o jogo novo num slot começa pela escolha de classe (ui/escolha-classe.ts); sem slot
 // (pesquisa, jogar sem salvar) e no teste do editor, o personagem é aventureiro.
+// Marco 11A (16/10/2026, D-066): a aventura do editor tem várias fases. O teste joga uma fase (`indice`) ou a aventura
+// inteira em sequência (`seguir`); no slot, a saída leva à fase seguinte da aventura.
 
 import type { Comando } from './core/comandos';
 import { criarFila, enfileirar, retirarAte } from './core/comandos';
@@ -17,7 +19,7 @@ import type { ContextoSimulacao } from './core/contexto';
 import { clonarEstado, type Entidade, type EstadoJogo } from './core/estado';
 import type { EventoSimulacao } from './core/eventos-simulacao';
 import { simular } from './core/simulacao';
-import { paraFaseJson } from './editor/grade';
+import { faseJsonDaAventura } from './editor/aventura';
 import { criarJogador } from './entities/fabrica';
 import { t } from './i18n';
 import type { Dificuldade } from './modos/dificuldade';
@@ -25,6 +27,10 @@ import { iniciarLaco } from './plataforma/laco-navegador';
 import { sincronizarSlot } from './plataforma/nuvem';
 import { sairDaTelaCheia } from './plataforma/sessao-tela';
 import { carregarAventura } from './plataforma/aventuras';
+import { carregarTileset } from './plataforma/tilesets';
+import { regrasDoAparelho } from './plataforma/estilo';
+import { lerPreferencias } from './plataforma/preferencias';
+import { carregarTexturasTileset, type TexturasTileset } from './render/tileset-textura';
 import { carregarSlot, criarAutosave, gravarRegistro, listarSlots, type Autosave } from './plataforma/saves';
 import { Interpolador } from './render/interpolacao';
 import { jogadorDoSave, VERSAO_SCHEMA, type Estatisticas, type RefFase, type RegistroProgresso } from './save/esquema';
@@ -49,8 +55,11 @@ export interface OpcoesJogo {
   slot: number | null;
   /** Fase de um jogo novo (o padrão é a primeira fase oficial). */
   faseNova?: RefFase;
-  /** "Testar agora" do editor: id da fase do jogador; nunca grava. */
+  /** "Testar agora" do editor: id da aventura do jogador; nunca grava. */
   teste?: string;
+  /** Marco 11A: a fase da aventura no teste e se a saída segue para a próxima (testar a aventura inteira). */
+  testeIndice?: number;
+  testeSeguir?: boolean;
   /** Teste com pessoas (marco 7A): personagem novo na fase 1, sem save, com medidas e questionário. */
   pesquisa?: boolean;
   /** Marco 14: a classe do personagem novo (sem ela, o jogo novo num slot mostra a escolha). */
@@ -69,7 +78,20 @@ function montarContexto(conteudo: Conteudo, faseJson: unknown): ContextoSimulaca
 export async function faseDaReferencia(ref: RefFase, conteudo: Conteudo): Promise<unknown> {
   if (ref.tipo !== 'aventura') return faseOficialOuGerada(ref, conteudo);
   const aventura = await carregarAventura(ref.id).catch(() => null);
-  return aventura ? paraFaseJson(aventura) : undefined;
+  return aventura ? (faseJsonDaAventura(aventura, ref.indice ?? 0) ?? undefined) : undefined;
+}
+
+/** Marco 11A: as texturas do atlas do jogador; sem o atlas (apagado, outro aparelho), o terreno usa as cores. */
+async function carregarTexturasDoAtlas(id: string): Promise<TexturasTileset | null> {
+  const registro = await carregarTileset(id);
+  return registro ? carregarTexturasTileset(registro) : null;
+}
+
+/** Marco 11A: quantas fases tem a aventura (1 para o resto: a sequência da campanha não usa). */
+async function fasesDaAventura(ref: RefFase): Promise<number> {
+  if (ref.tipo !== 'aventura') return 1;
+  const aventura = await carregarAventura(ref.id).catch(() => null);
+  return aventura?.fases.length ?? 1;
 }
 
 function novoEstado(ctx: ContextoSimulacao, personagem: Entidade | null = null, classeId = CLASSE_PADRAO): EstadoJogo {
@@ -131,8 +153,11 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     mostrarEscolhaDeClasse(raiz, conteudo, `./?jogo=campanha&slot=${slot}${fase}${dificuldade}${location.search.includes('diag=1') ? '&diag=1' : ''}`);
     return;
   }
-  const faseRef: RefFase = teste ? { tipo: 'aventura', id: teste } : (leitura?.faseRef ?? opcoes.faseNova ?? FASE_INICIAL);
-  const voltarPara = teste ? `./?editor=${encodeURIComponent(teste)}` : './?jogo=campanha';
+  const indiceTeste = opcoes.testeIndice ?? 0;
+  const faseRef: RefFase = teste
+    ? { tipo: 'aventura', id: teste, ...(indiceTeste > 0 && { indice: indiceTeste }) }
+    : (leitura?.faseRef ?? opcoes.faseNova ?? FASE_INICIAL);
+  const voltarPara = teste ? `./?editor=${encodeURIComponent(teste)}&fase=${indiceTeste}` : './?jogo=campanha';
   const faseJson = await faseDaReferencia(faseRef, conteudo);
   if (faseJson === undefined) {
     mostrarErro(raiz, t('slots.faseAusente'), voltarPara);
@@ -210,9 +235,12 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     enfileirar(fila, { tick: estado.tick, entidadeId: idJogador, cmd: { t: 'definirDificuldade', nivel } });
   };
   if (opcoes.dificuldade && opcoes.dificuldade !== estado.dificuldade) definirDificuldade(opcoes.dificuldade);
+  // Marco 11A (D-066): o tileset do jogador (só nas aventuras do editor; a herança já veio resolvida na fase).
+  const tileset = ctx.fase.tilesetId ? await carregarTexturasDoAtlas(ctx.fase.tilesetId) : null;
   const cena = await montarCena({
     raiz,
     ctx,
+    tileset,
     idLocal: idJogador,
     estado: () => estado,
     emitir: (cmd: Comando) => enfileirar(fila, { tick: estado.tick, entidadeId: idJogador, cmd }),
@@ -255,14 +283,22 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
 
   // Marco 10A-1: saída aberta → próxima fase (D-052). Uma vez só por sessão.
   const sairDaFase = async (): Promise<void> => {
+    const totalDeFases = await fasesDaAventura(faseRef);
     if (teste) {
-      mostrarAviso(raiz, t('fase.concluidaTeste'), 3000);
+      // Testando a aventura inteira: a saída leva à fase seguinte (sem save); na última, volta ao editor.
+      const seguinte = opcoes.testeSeguir && indiceTeste + 1 < totalDeFases ? indiceTeste + 1 : null;
+      mostrarAviso(raiz, t(seguinte === null ? 'fase.concluidaTeste' : 'fase.proximaTeste'), 3000);
       setTimeout(() => {
-        location.href = voltarPara;
+        location.href =
+          seguinte === null
+            ? voltarPara
+            : `./?jogo=teste&fase=${encodeURIComponent(teste)}&indice=${seguinte}&seguir=1${location.search.includes('diag=1') ? '&diag=1' : ''}`;
       }, 1500);
       return;
     }
-    const proxima = faseSeguinte(faseRef);
+    // Marco 11A (D-066): com "Fases geradas no meu estilo" ligado, as regras do aparelho vão nos parâmetros da gerada.
+    const estilo = lerPreferencias().estiloNasGeradas ? await regrasDoAparelho() : [];
+    const proxima = faseSeguinte(faseRef, totalDeFases, estilo);
     if (!proxima) {
       mostrarAviso(raiz, t('fase.fimDaCampanha'), 6000);
       return;

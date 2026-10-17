@@ -8,7 +8,8 @@
 import { normalizarEfeito } from '../combat/normalizar-efeito';
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import { Leitor } from '../core/validar';
-import { alcancaveis } from './navegacao';
+import { alcancaveisComPortas } from './navegacao';
+import { lerCamposDeTileset } from './tileset';
 import { lerPortasInternas, lerPortaSaida, validarPortasNaFase } from './validacao-portas';
 import {
   CARACTERE_CELULA,
@@ -56,7 +57,7 @@ export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<st
   const avisos: ErroFase[] = [];
   if (!ehObjeto(entrada)) return { ok: false, erros: [{ mensagem: 'a fase precisa ser um objeto' }], avisos };
 
-  const { id, nome, ordem, tipo, mapa, spawns, inimigos, objetos, portaSaida, portasInternas, matizGraus } = entrada;
+  const { id, nome, ordem, tipo, mapa, spawns, inimigos, objetos, portaSaida, portasInternas, matizGraus, tileset, pecas } = entrada;
   const matizOk = matizGraus === undefined || (typeof matizGraus === 'number' && Number.isFinite(matizGraus) && matizGraus >= 0 && matizGraus < 360);
   if (!matizOk) erros.push({ mensagem: 'matizGraus precisa ficar entre 0 e 359' });
   if (typeof id !== 'string' || id.trim() === '') erros.push({ mensagem: 'id ausente' });
@@ -72,6 +73,8 @@ export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<st
   const listaObjetos = validarObjetos(objetos, erros, itensConhecidos);
   const saida = lerPortaSaida(portaSaida, erros, itensConhecidos);
   const internas = lerPortasInternas(portasInternas, erros);
+  // Marco 11A (D-066): o atlas e as peças à mão.
+  const visual = lerCamposDeTileset(tileset, pecas, (linhas?.length ?? 0) * (linhas?.[0]?.length ?? 0), erros);
   if (erros.length > 0 || !linhas || !listaSpawns) return { ok: false, erros, avisos };
 
   const json: FaseJson = {
@@ -86,6 +89,7 @@ export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<st
     ...(saida && { portaSaida: saida }),
     ...(internas && { portasInternas: internas }),
     ...(typeof matizGraus === 'number' && matizOk && { matizGraus }),
+    ...visual,
   };
   validarJogabilidade(json, erros, avisos);
   return erros.length > 0 ? { ok: false, erros, avisos } : { ok: true, fase: json, avisos };
@@ -335,8 +339,8 @@ function validarJogabilidade(json: FaseJson, erros: ErroFase[], avisos: ErroFase
   const primeiro = fase.spawns[0];
   if (!primeiro || erros.length > 0) return;
 
-  // O spawn precisa alcançar todas as saídas (§3.10, jogabilidade).
-  const alcance = alcancaveis(fase, primeiro);
+  // O spawn precisa alcançar todas as saídas (§3.10, jogabilidade). Marco 11A: atravessando as portas internas.
+  const alcance = alcancaveisComPortas(fase, primeiro);
   if (fase.tipo !== 'arena' && fase.inimigos.length === 0) avisos.push({ mensagem: 'fase sem inimigos' });
   for (const i of fase.inimigos) {
     if (alcance[i.y * fase.largura + i.x] !== 1) avisos.push({ mensagem: 'inimigo inalcançável a partir do spawn', x: i.x, y: i.y });
@@ -348,7 +352,7 @@ function validarJogabilidade(json: FaseJson, erros: ErroFase[], avisos: ErroFase
       }
     }
   });
-  validarPortasNaFase(fase, alcance, erros);
+  validarPortasNaFase(fase, alcance, erros, avisos);
   if (fase.tipo !== 'campanha') validarArena(fase, alcance, erros);
 }
 

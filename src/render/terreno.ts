@@ -1,10 +1,14 @@
 // Terreno em blocos de 16×16 células (§2.16): cada bloco é desenhado uma vez por fase e
 // escondido quando sai da viewport. Até o tileset (marco 11A), as células são cores lisas (D-009).
 // Marco 10A-2 (14/10/2026): o matiz da fase (`matizGraus`) gira a paleta uma vez, ao criar o terreno.
+// Marco 11A (16/10/2026, D-066): com o tileset do jogador, cada bloco vira um Container de sprites (peça do
+// autotiling ou a escolhida à mão, NEAREST); sem tileset, as cores lisas de sempre. O matiz não tinge o tileset.
 
-import { Container, Graphics } from 'pixi.js';
+import { Container, Graphics, Sprite } from 'pixi.js';
 import { tipoEm, type Fase, type TipoCelula } from '../world/fase';
+import { pecaDaCelula } from '../world/tileset';
 import { CELULA_PX } from './camera-calculo';
+import type { TexturasTileset } from './tileset-textura';
 
 export const BLOCO_CELULAS = 16;
 
@@ -94,6 +98,8 @@ export interface Terreno {
 }
 
 interface Bloco {
+  /** Container do bloco: as cores lisas (Graphics) e, com tileset, os sprites por cima. */
+  c: Container;
   g: Graphics;
   bx: number;
   by: number;
@@ -103,15 +109,30 @@ interface Bloco {
   y1: number;
 }
 
-export function criarTerreno(camada: Container, fase: Fase): Terreno {
+export function criarTerreno(camada: Container, fase: Fase, tileset: TexturasTileset | null = null): Terreno {
   const blocos: Bloco[] = [];
   const paleta = paletaDe(fase.matizGraus);
   const desenharBloco = (b: Bloco) => {
     b.g.clear();
+    for (const filho of b.c.removeChildren(1)) filho.destroy();
     const fimX = Math.min(fase.largura, b.bx + BLOCO_CELULAS);
     const fimY = Math.min(fase.altura, b.by + BLOCO_CELULAS);
     for (let y = b.by; y < fimY; y++) {
-      for (let x = b.bx; x < fimX; x++) desenharCelula(b.g, fase, paleta, x, y, tipoEm(fase, x, y));
+      for (let x = b.bx; x < fimX; x++) {
+        const tipo = tipoEm(fase, x, y);
+        const peca = tileset ? pecaDaCelula(fase, x, y, 0) : null;
+        const textura = peca && tileset ? tileset.textura(peca) : null;
+        if (!textura) {
+          // Sem tileset (ou sem a peça no atlas): a cor lisa; parede funda com tileset fica no escuro.
+          if (!tileset || tipo === 'piso' || tipo === 'saida') desenharCelula(b.g, fase, paleta, x, y, tipo);
+          continue;
+        }
+        const s = new Sprite(textura);
+        s.position.set(x * CELULA_PX, y * CELULA_PX);
+        s.width = CELULA_PX;
+        s.height = CELULA_PX;
+        b.c.addChild(s);
+      }
     }
   };
   const porLinha = Math.ceil(fase.largura / BLOCO_CELULAS);
@@ -119,9 +140,12 @@ export function criarTerreno(camada: Container, fase: Fase): Terreno {
     for (let bx = 0; bx < fase.largura; bx += BLOCO_CELULAS) {
       const fimX = Math.min(fase.largura, bx + BLOCO_CELULAS);
       const fimY = Math.min(fase.altura, by + BLOCO_CELULAS);
-      const b: Bloco = { g: new Graphics(), bx, by, x0: bx * CELULA_PX, y0: by * CELULA_PX, x1: fimX * CELULA_PX, y1: fimY * CELULA_PX };
+      const c = new Container();
+      const g = new Graphics();
+      c.addChild(g);
+      const b: Bloco = { c, g, bx, by, x0: bx * CELULA_PX, y0: by * CELULA_PX, x1: fimX * CELULA_PX, y1: fimY * CELULA_PX };
       desenharBloco(b);
-      camada.addChild(b.g);
+      camada.addChild(c);
       blocos.push(b);
     }
   }
@@ -131,17 +155,20 @@ export function criarTerreno(camada: Container, fase: Fase): Terreno {
       : blocos[Math.floor(y / BLOCO_CELULAS) * porLinha + Math.floor(x / BLOCO_CELULAS)];
   return {
     redesenharCelula: (x, y) => {
-      const proprio = blocoDe(x, y);
-      const acima = blocoDe(x, y - 1);
-      if (proprio) desenharBloco(proprio);
-      if (acima && acima !== proprio) desenharBloco(acima);
+      // O autotiling olha os 8 vizinhos: redesenha os blocos da vizinhança 3×3 (sem repetir).
+      const tocados = new Set<Bloco>();
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const b = blocoDe(x + dx, y + dy);
+        if (b) tocados.add(b);
+      }
+      for (const b of tocados) desenharBloco(b);
     },
     // Retângulo visível em px de mundo.
     atualizarVisibilidade: (x0, y0, x1, y1) => {
-      for (const b of blocos) b.g.visible = b.x1 > x0 && b.x0 < x1 && b.y1 > y0 && b.y0 < y1;
+      for (const b of blocos) b.c.visible = b.x1 > x0 && b.x0 < x1 && b.y1 > y0 && b.y0 < y1;
     },
     destruir: () => {
-      for (const b of blocos) b.g.destroy();
+      for (const b of blocos) b.c.destroy({ children: true });
       blocos.length = 0;
     },
   };
