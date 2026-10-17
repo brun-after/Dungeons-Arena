@@ -114,7 +114,7 @@ export function criarTerreno(camada: Container, fase: Fase, tileset: TexturasTil
   const paleta = paletaDe(fase.matizGraus);
   const desenharBloco = (b: Bloco) => {
     b.g.clear();
-    for (const filho of b.c.removeChildren(1)) filho.destroy();
+    if (b.c.children.length > 1) for (const filho of b.c.removeChildren(1)) filho.destroy();
     const fimX = Math.min(fase.largura, b.bx + BLOCO_CELULAS);
     const fimY = Math.min(fase.altura, b.by + BLOCO_CELULAS);
     for (let y = b.by; y < fimY; y++) {
