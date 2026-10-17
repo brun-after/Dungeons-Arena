@@ -8,6 +8,7 @@ import { DT_MS } from '../../src/core/loop';
 import { simular, type EventoSimulacao } from '../../src/core/simulacao';
 import type { Entidade } from '../../src/entities/entidade';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
+import { regenerarPorPasso } from '../../src/progression/recursos';
 import { perderXp } from '../../src/progression/nivel';
 import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 
@@ -94,7 +95,18 @@ describe('penalidade de morte (§2.12)', () => {
 });
 
 describe('regeneração por célula caminhada (§2.12)', () => {
-  it('cada passo dá +1 de vida e +1 de mana; com hostil perseguindo, nada; no Livre, nada', () => {
+  it('dois passos recuperam uma mana e duas vidas sem regeneração por tempo', () => {
+    const c = cenario();
+    const j = c.j();
+    j.hp = 10;
+    j.mana = 0;
+    regenerarPorPasso(c.estado, c.ctx, j);
+    expect(j.mana).toBe(0.5);
+    regenerarPorPasso(c.estado, c.ctx, j);
+    expect(j.mana).toBe(1);
+    expect(j.hp).toBe(12);
+  });
+  it('cada passo dá +1 de vida e +0,5 de mana; com hostil perseguindo, nada; no Livre, nada', () => {
     const c = cenario();
     const j = c.j();
     j.hp = 10;
@@ -105,7 +117,7 @@ describe('regeneração por célula caminhada (§2.12)', () => {
     expect(passos).toBe(3);
     expect(j.hp).toBe(10 + passos);
     // A mana também sobe pela regeneração por segundo; aqui só confere que subiu ao menos o dos passos.
-    expect(j.mana).toBeGreaterThanOrEqual(passos);
+    expect(j.mana).toBeGreaterThanOrEqual(passos * 0.5);
 
     const p = cenario();
     p.perseguidor();

@@ -26,7 +26,9 @@ export function bonusDeEspecializacao(atributos: Atributos, atributo: keyof Atri
 export function manaPorSegundo(atributos: Atributos, segundo: number, b: Balance): number {
   const base = b.recursos.regenManaPorSegundo;
   const bonus = (base * acimaDe10(atributos.sabedoria) * b.atributos.efeitos.regenManaPorSabedoriaPct) / 100;
-  return base + Math.floor(segundo * bonus) - Math.floor((segundo - 1) * bonus);
+  // 17/10/2026: distribui também a base fracionária, mantendo mana inteira por segundo.
+  const total = base + bonus;
+  return Math.floor(segundo * total) - Math.floor((segundo - 1) * total);
 }
 
 /** Marco 18 (D-068): o perfil de Destreza da classe de quem tem ficha (null = o padrão do balance). */

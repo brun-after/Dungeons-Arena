@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.36 · **Data:** 17/10/2026
+**Versão:** 0.37 · **Data:** 17/10/2026
 
 > **Histórico**
+> - **0.37 (17/10/2026)**: D-073 (mana reduzida em 50%, controles à direita e consumíveis legíveis).
 > - **0.36 (17/10/2026)**: D-072 (HUD compacto no topo do celular; avisos e alvo sem sobreposição).
 > - **0.35 (17/10/2026)**: D-071 (recuperação dos inimigos, especialização ofensiva, ritmo, descobertas públicas por pseudônimo e cobertura do estudo).
 > - **0.34 (17/10/2026)**: D-068 (atributos, estudo, revide e armadilhas), D-069 (itens base com formas, ganchos, conjuntos e elementos novos) e D-070 (combos, marcos, fusões, missões, origens, forja, eventos de fase e diário).
@@ -1873,3 +1874,26 @@ Chamadas de aviso vindas da campanha e da arena encontram a mesma faixa; ela nã
 
 **Validação.** E2e com aviso real da campanha e alvo selecionado, em 915×412 e 568×320, além de área segura de 40 px
 e escala de interface de 150%, verificando posição, ausência de sobreposição e igualdade das barras.
+
+
+## D-073 · Mana, controles e nomes dos consumíveis (v0.37, 17/10/2026)
+
+**Pedido.** Reduzir a regeneração de mana em 50%, mover interação e alvo para uma fileira à direita
+no celular e identificar poções e pergaminhos pelos nomes curtos também no computador.
+
+**Decisão.** A base passa de 1 para 0,5 mana/s e de 1 para 0,5 por célula. O bônus de Sabedoria,
+proporcional à base, também cai pela metade. A regeneração por tempo distribui pontos inteiros
+pelos segundos; por passo, admite meia mana, sem arredondar cada passo. Vida, potência das poções,
+custos e atributos das classes são preservados. Os controles ficam à esquerda da roda de habilidades
+em paisagem e acima dela à direita em telas estreitas de retrato.
+
+Os atalhos mostram “Espantalho”, “Lobo”, “Sombra”, “Sentinela” ou “Fada”; as poções mostram
+“Vida +N” ou “Mana +N”. N é a recuperação nominal arredondada conforme o máximo do personagem,
+antes de modificadores de cura ou do limite de recurso faltante. O estoque aparece separado como ×N;
+o nome completo e a tecla continuam acessíveis no botão.
+
+**Impacto conhecido.** Com a redução solicitada, o simulador completo aprova 74/77 metas:
+aventureiro nível 5 leva 8,5 s contra comum (meta 4–7 s); mago nível 5 leva 3,7 s (meta 4–7 s);
+mago solo vence o chefe em 25% dos cenários (meta 50–100%). O teste de ritmo do aventureiro
+nível 5 também falha no teto de 8 s. Essas metas e testes permanecem ativos, sem recalibrar
+classes fora do pedido. Uma eventual recalibração exige uma decisão de balanceamento separada.
