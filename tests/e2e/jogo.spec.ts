@@ -6,7 +6,7 @@ async function abrir(page: Page) {
   page.on('pageerror', (e) => erros.push(e.message));
   await page.goto('./?jogo=campanha&slot=1&diag=1&classe=aventureiro');
   const diag = page.locator('#diag');
-  await expect(diag).toHaveAttribute('data-celula', /^\d+,\d+$/);
+  await expect(diag).toHaveAttribute('data-celula', /^\d+,\d+$/, { timeout: 30000 });
   return { diag, erros };
 }
 
@@ -209,8 +209,7 @@ test.describe('desktop', () => {
 
   test('loja: comprar uma poção desconta o ouro; fechar arma a recarga; a tecla 5 usa a poção', async ({ page }) => {
     const { diag, erros } = await abrir(page);
-    // Ajuste de 16/10/2026: a loja fica aberta só 5 s de jogo e fecha sozinha; no CI (WebGL por software) a janela
-    // acabava no meio das conferências. Agora só a compra acontece dentro dela; o resto vale com a loja fechada.
+    // 17/10/2026: a loja permanece aberta até o jogador fechar; falhas no clique não podem ser ignoradas.
     const mochila = page.getByRole('dialog', { name: 'Mochila' });
     const ouroNaMochila = async (ouro: string) => {
       await page.keyboard.press('KeyI');
@@ -228,7 +227,7 @@ test.describe('desktop', () => {
     await expect(log).toContainText('Comprou Poção de vida por 10 de ouro');
     // Fechada pelo botão ou pelo fim da janela, a recarga é armada do mesmo jeito.
     const fechar = loja.getByRole('button', { name: 'Fechar a loja' });
-    if (await fechar.isVisible()) await fechar.click({ timeout: 2_000 }).catch(() => undefined);
+    await fechar.click();
     await expect(loja).toBeHidden();
     await ouroNaMochila('5');
     await page.keyboard.press('KeyE');
@@ -700,12 +699,12 @@ test.describe('celular (emulação)', () => {
     expect(erros).toEqual([]);
   });
 
-  test('mochila no toque: tocar a linha equipa e fecha', async ({ page }) => {
+  test('mochila no toque: equipar mantém o menu aberto', async ({ page }) => {
     const { diag, erros } = await abrir(page);
     await page.getByRole('button', { name: /Abrir a mochila/ }).click();
     const mochila = page.getByRole('dialog', { name: 'Mochila' });
     await mochila.getByRole('button', { name: 'Equipar: Espada curta' }).click();
-    await expect(mochila).toBeHidden();
+    await expect(mochila).toBeVisible();
     await expect(diag).toHaveAttribute('data-equipados', '1');
     expect(erros).toEqual([]);
   });

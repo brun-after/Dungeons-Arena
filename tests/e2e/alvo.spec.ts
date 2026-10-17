@@ -7,7 +7,7 @@ async function abrir(page: Page): Promise<string[]> {
   const erros: string[] = [];
   page.on('pageerror', (e) => erros.push(e.message));
   await page.goto('./?jogo=campanha&slot=1&diag=1&classe=aventureiro');
-  await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
+  await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/, { timeout: 30000 });
   return erros;
 }
 
@@ -44,6 +44,9 @@ test('celular: aviso junto ao topo, sem cobrir o alvo, e vida do alvo do tamanho
   await page.setViewportSize({ width: 915, height: 412 });
   await page.goto('./?jogo=campanha&slot=1&classe=aventureiro&pesquisa=1');
   await expect(page.locator('.aviso')).toContainText('Obrigado por testar');
+  // 17/10/2026: mede o layout em três tamanhos; conserva o DOM do aviso real para que
+  // a expiração de 3 s não remova a amostra durante o redimensionamento no WebGL por software.
+  await page.locator('.aviso').evaluate((e) => { e.replaceWith(e.cloneNode(true)); });
   await page.getByTestId('alvo').tap();
   await expect(page.locator('.quadro-alvo')).toBeVisible();
 

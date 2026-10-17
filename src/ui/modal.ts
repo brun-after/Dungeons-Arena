@@ -38,9 +38,20 @@ export function criarModal(o: OpcoesModal): Modal {
   fechar.className = 'botao-cabecalho modal-fechar';
   fechar.append(icone('fechar'));
   fechar.setAttribute('aria-label', o.rotuloFechar);
-  fechar.addEventListener('click', () => {
+  // 17/10/2026: avisa antes do próximo quadro; o evento nativo close é assíncrono e a loja
+  // podia reabrir antes de registrar que a janela foi fechada pelo jogador.
+  let notificado = true;
+  const notificar = () => {
+    if (notificado) return;
+    notificado = true;
+    o.aoFechar?.();
+  };
+  const fecharModal = () => {
+    if (!dialogo.open) return;
     dialogo.close();
-  });
+    notificar();
+  };
+  fechar.addEventListener('click', fecharModal);
   topo.append(titulo, fechar);
 
   const corpo = document.createElement('div');
@@ -51,21 +62,21 @@ export function criarModal(o: OpcoesModal): Modal {
 
   // Toque no fundo escurecido fecha.
   dialogo.addEventListener('click', (ev) => {
-    if (ev.target === dialogo) dialogo.close();
+    if (ev.target === dialogo) fecharModal();
   });
-  dialogo.addEventListener('close', () => o.aoFechar?.());
+  dialogo.addEventListener('close', () => { if (!dialogo.open) notificar(); });
+  dialogo.addEventListener('cancel', (ev) => { ev.preventDefault(); fecharModal(); });
 
   return {
     dialogo,
     corpo,
     abrir: () => {
       if (dialogo.open) return;
+      notificado = false;
       dialogo.showModal();
       o.aoAbrir?.();
     },
-    fechar: () => {
-      dialogo.close();
-    },
+    fechar: fecharModal,
     aberto: () => dialogo.open,
   };
 }
