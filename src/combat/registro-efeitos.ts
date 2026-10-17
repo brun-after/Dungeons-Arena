@@ -59,6 +59,7 @@ export const TIPOS_EFEITO = [
   'puxao',
   'trocar_lugar',
   'dano_direto',
+  'sangrando', 'aparando', 'resposta_aparo', 'veu_noturno', 'purificar', 'passo_sombrio', 'muralha_pedra', 'campo_cura', 'campo_veneno',
 ] as const;
 export type TipoEfeito = (typeof TIPOS_EFEITO)[number];
 
@@ -86,7 +87,7 @@ export interface EfeitoCanonico {
 export type Fluxo = 'atrasado' | 'armadilha' | 'invocar';
 
 export type Periodico = 'dano' | 'cura' | 'recurso';
-export type Instantaneo = 'cura' | 'recurso' | 'teleporte' | 'avanco' | 'empurrao' | 'puxao' | 'trocar' | 'dano';
+export type Instantaneo = 'purificar' | 'passo_sombrio' | 'muralha_pedra' | 'campo_cura' | 'campo_veneno' | 'cura' | 'recurso' | 'teleporte' | 'avanco' | 'empurrao' | 'puxao' | 'trocar' | 'dano';
 export type BonusDeAtaqueBasico = 'dano' | 'recarga' | 'alcance' | 'alvos';
 
 export interface DefinicaoEfeito {
@@ -198,6 +199,15 @@ const instantaneo = (icone: string, cor: string, campos: readonly CampoEfeito[],
 });
 
 const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
+  sangrando: negativo('espada', '#ae3445', ['valor'], { duracaoMs: 4000, valor: 2, pct: 0 }, { periodico: 'dano' }),
+  aparando: { ...BASE, icone: 'escudo', cor: '#b6cee0', positivo: true, campos: ['pct'], padrao: { duracaoMs: 1500, valor: 0, pct: 65 } },
+  resposta_aparo: { ...BASE, icone: 'espada', cor: '#e0d0a8', positivo: true, campos: ['pct'], padrao: { duracaoMs: 3000, valor: 0, pct: 20 } },
+  veu_noturno: { ...BASE, icone: 'fantasma', cor: '#8d75b9', positivo: true, campos: ['pct'], padrao: { duracaoMs: 3000, valor: 0, pct: 35 } },
+  purificar: instantaneo('cura', '#e5fff6', [], { duracaoMs: 0, valor: 0, pct: 0 }, 'purificar', true),
+  passo_sombrio: instantaneo('teleporte', '#685186', ['valor'], { duracaoMs: 0, valor: 3, pct: 0 }, 'passo_sombrio', true),
+  muralha_pedra: instantaneo('pedra', '#a1887f', ['valor'], { duracaoMs: 5000, valor: 1, pct: 0 }, 'muralha_pedra', true),
+  campo_cura: instantaneo('cura', '#6cdbac', ['valor'], { duracaoMs: 6000, valor: 3, pct: 0 }, 'campo_cura', true),
+  campo_veneno: instantaneo('veneno', '#69ad67', ['valor'], { duracaoMs: 5000, valor: 2, pct: 0 }, 'campo_veneno', false),
   dano_periodico: negativo('caveira', '#8e44ad', ['valor'], { duracaoMs: 4000, valor: 2, pct: 0 }, { periodico: 'dano' }),
   atordoar: negativo('atordoar', '#f1c40f', [], { duracaoMs: 1500, valor: 0, pct: 0 }, { bloqueiaMovimento: true, bloqueiaAcoes: 'todas' }),
   silenciar: negativo('silencio', '#9b59b6', [], { duracaoMs: 3000, valor: 0, pct: 0 }, { bloqueiaAcoes: 'magicas' }),

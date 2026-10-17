@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.40 · **Data:** 17/10/2026
+**Versão:** 0.41 · **Data:** 17/10/2026
 
 > **Histórico**
+> - **0.41 (17/10/2026)**: D-077 (17 skills, 35 combos confirmados por resultado, visuais e correção do smoke).
 > - **0.40 (17/10/2026)**: D-076 (controles afastados das skills, tomo a preço fixo e troca de equipamentos sem fechar a mochila).
 > - **0.39 (17/10/2026)**: D-075 (progressão até 30 e consumíveis de aprendizagem e evolução).
 > - **0.38 (17/10/2026)**: D-074 (eficiência mágica do aventureiro e do mago após a redução de mana; 77/77 metas).
@@ -2010,3 +2011,16 @@ atual até a skill, cobrar 10.000 ouro fixos pelo ponto de habilidade e manter o
 **Validação.** Testes de compra repetida e certificação; e2e de preço e troca de dois equipamentos,
 incluindo desequipar, em desktop e celular. O e2e de controles verifica o deslocamento e a ausência de
 sobreposição em paisagem e retrato.
+
+
+## D-077 — Skills táticas, combos duplos/triplos e fechamento de modais (17/10/2026)
+
+**Contexto.** A expansão aprovada exige 17 novas skills, 17 combos duplos adicionais e dez triplos, mais apresentação própria para os oito existentes. O reconhecedor anterior só olhava a skill anterior no lançamento, sem saber se acertou, aparou ou purificou. O smoke enviado também exigia que equipar fechasse a mochila e engolia falhas ao fechar a loja.
+
+**Decisão.** Catálogo de 60 skills e 35 combos. Memória limitada a três ações por personagem, com acertos e fatos correlacionados pelo ID da ação. O triplo válido tem prioridade na finalização, sem remover recompensas anteriores. Reações elementais existentes são preservadas. Conteúdo, limites e números ficam em dados. Livros e essências integram a progressão; Curar e Barreira aceitam aliado e uso próprio. Detalhes, lista completa e limites em [EXPANSAO-SKILLS-COMBOS.md](EXPANSAO-SKILLS-COMBOS.md).
+
+Campos de cura, veneno e muralha pertencem à simulação, com clone explícito e replicação por patches. O save passa a v16, aceitando estados antigos sem os campos opcionais. Morte e mudança de fase limpam preparação. A apresentação usa composições vetoriais identificáveis por forma e movimento, inclusive em qualidade mínima, sem alterar o estado de gameplay. O histórico só é mantido quando o repertório permite um combo, reduzindo custo em enxames.
+
+O modal informa o fechamento sincronamente, pois o evento nativo close chega depois e permitia à loja reabrir no quadro seguinte. Esc e fundo usam o mesmo caminho. O smoke de equipamento passa a exigir mochila aberta; o da loja exige clique efetivo, sem capturar e ignorar erro.
+
+**Validação.** Sequências completas dos 35 combos, recusas condicionais, campos, limites, passivas, clone e patches; galeria Pixi em navegador; fluxo de combo e descoberta persistida. Relatório exploratório de quatro builds em cinco níveis e quatro dificuldades, além das metas históricas. O CI completo continua obrigatório antes de merge.

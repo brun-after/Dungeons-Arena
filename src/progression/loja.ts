@@ -28,6 +28,9 @@ export function estoqueDaLoja(estado: EstadoJogo, ctx: ContextoSimulacao, loja: 
   const extras = ['aceleracao_mente_comum', 'tomo_potencial'];
   if (hashTexto(`${s}/incomum`) % 100 < r.aceleracaoIncomumChancePct) extras.push('aceleracao_mente_incomum');
   if (hashTexto(`${s}/rara`) % 100 < r.aceleracaoRaraChancePct) extras.push('aceleracao_mente_rara');
+  const livros = [...ctx.conteudo.itens.values()].filter((i) => i.ensina && ctx.conteudo.habilidades.get(i.ensina)?.tags.includes('expansao19'));
+  livros.sort((a, b) => hashTexto(`${s}/${a.id}`) - hashTexto(`${s}/${b.id}`));
+  extras.push(...livros.slice(0, 3).map((i) => i.id));
   return [...new Set([...loja.itens, ...extras])];
 }
 

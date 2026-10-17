@@ -1,3 +1,4 @@
+import type { CampoTatico } from '../combat/estado-tatico';
 // Patches de estado (§3.6): depois do snapshot completo (entrada, reconexão, ressincronização), a
 // sala manda só o que mudou desde a última transmissão — entidades novas, removidas e, das que
 // continuam, **só os campos alterados**; as listas pequenas (objetos, projéteis, respawns,
@@ -13,6 +14,7 @@ export interface EntidadeAlterada {
 }
 
 export interface PatchDeEstado {
+  camposTaticos?: CampoTatico[] | null;
   /** Tick do estado de onde o patch parte. */
   base: number;
   tick: number;
@@ -45,6 +47,7 @@ export class GeradorDePatches {
   private respawns = '';
   private rastros = '';
   private atrasados = '';
+  private camposTaticos = '';
   private recargas: Record<string, number> = {};
   private tickAnterior = -1;
 
@@ -77,6 +80,8 @@ export class GeradorDePatches {
       const texto = JSON.stringify(valor);
       return [texto === anterior ? null : valor, texto];
     };
+    const textoCampos = JSON.stringify(publico.camposTaticos ?? null);
+    const camposTaticos = textoCampos === this.camposTaticos ? undefined : publico.camposTaticos ?? null;
     const [objetos, textoObjetos] = lista(publico.objetos, this.objetos);
     const [projeteis, textoProjeteis] = lista(publico.projeteis, this.projeteis);
     const [respawns, textoRespawns] = lista(publico.respawns, this.respawns);
@@ -90,6 +95,7 @@ export class GeradorDePatches {
       Object.keys(recargasAlteradas).length > 0 || recargasRemovidas.length > 0 ? { alteradas: recargasAlteradas, removidas: recargasRemovidas } : null;
 
     const patch: PatchDeEstado = {
+      ...(camposTaticos !== undefined ? { camposTaticos } : {}),
       base: this.tickAnterior,
       tick: publico.tick,
       proximoId: publico.proximoId,
@@ -103,6 +109,7 @@ export class GeradorDePatches {
       atrasados,
       recargas,
     };
+    this.camposTaticos = textoCampos;
     this.entidades = atuais;
     this.rastros = textoRastros;
     this.atrasados = textoAtrasados;
@@ -134,8 +141,9 @@ export function aplicarPatch(base: EstadoJogo, patch: PatchDeEstado): EstadoJogo
     recargas = Object.fromEntries(Object.entries(base.recargas).filter(([k]) => !removidas.has(k)));
     Object.assign(recargas, patch.recargas.alteradas);
   }
-  return {
+  const resultado: EstadoJogo = {
     ...base,
+    ...(patch.camposTaticos ? { camposTaticos: patch.camposTaticos } : {}),
     tick: patch.tick,
     proximoId: patch.proximoId,
     dificuldade: patch.dificuldade,
@@ -148,4 +156,6 @@ export function aplicarPatch(base: EstadoJogo, patch: PatchDeEstado): EstadoJogo
     atrasados: patch.atrasados ?? base.atrasados,
     recargas,
   };
+  if (patch.camposTaticos === null) delete resultado.camposTaticos;
+  return resultado;
 }

@@ -1,3 +1,5 @@
+import { executarTatica, fato, muralhaEm, fluxoRestaurador } from './tatica';
+import { passivasDaBolsa } from './perfil';
 // Efeitos (§2.8): dispatcher único, consultas e processamento por tick. Marco 3 registrou os de
 // controle; marco 8A (13/10/2026) liga os 20 tipos do registro (registro-efeitos.ts, D-048).
 // Aplicar efeito acontece em um lugar só (`aplicarEfeito`); quem precisa saber se algo vale
@@ -23,6 +25,7 @@ export { REGISTRO_EFEITOS, TIPOS_EFEITO, type EfeitoCanonico, type TipoEfeito } 
 
 /** Quem originou o efeito e de onde (o empurrão afasta desta posição). */
 export interface OrigemDoEfeito {
+  acaoId?: number;
   id: EntidadeId;
   x: number;
   y: number;
@@ -175,17 +178,31 @@ export function aplicarEfeito(
   if (!vivo(alvo)) return;
   const def = REGISTRO_EFEITOS[ef.tipo];
   const tick = estado.tick;
+  if (ef.tipo === 'aparando') ef = { ...ef, duracaoMs: Math.min(ef.duracaoMs, ctx.balance.tatica.aparoJanelaMaxMs) };
+  if (ef.tipo === 'veu_noturno') ef = { ...ef, duracaoMs: Math.min(ef.duracaoMs, ctx.balance.tatica.veuJanelaMaxMs) };
+  if (alvo.bolsa && (def.bloqueiaMovimento || def.bloqueiaAcoes !== 'nenhuma')) {
+    const pct = Math.min(ctx.balance.tatica.tenacidadeMaxPct, passivasDaBolsa(ctx, alvo.bolsa).reduce((s, p) => s + (p.tenacidadePct ?? 0), 0));
+    if (pct > 0) ef = { ...ef, duracaoMs: Math.round(ef.duracaoMs * (1 - pct / 100)) };
+  }
   // Marco 18 (ressonância Muralha): escudos recebidos duram e absorvem mais.
   if (def.escudo && alvo.bolsa) {
     const k = 1 + passivosDe(ctx, alvo).escudoPct / 100;
     if (k !== 1) ef = { ...ef, valor: Math.round(ef.valor * k), duracaoMs: Math.round(ef.duracaoMs * k) };
   }
+  if (def.escudo) ef = { ...ef, valor: Math.min(ef.valor, Math.max(1, Math.floor(alvo.hpMax * ctx.balance.tatica.escudoMaxHpPct / 100))) };
   const instantaneo = def.instantaneo ?? (ef.duracaoMs <= 0 && (def.periodico === 'cura' || def.periodico === 'recurso') ? def.periodico : null);
   if (instantaneo) {
     switch (instantaneo) {
-      case 'cura':
-        resultado(saida, tick, alvo, origem.id, ef, { cura: restaurar(alvo, 'cura', ef.valor, ef.pct, tick) });
+      case 'purificar': case 'passo_sombrio': case 'muralha_pedra': case 'campo_cura': case 'campo_veneno':
+        executarTatica(estado, ctx, alvo, ef, origem, mira);
         break;
+      case 'cura': {
+        const cura = restaurar(alvo, 'cura', ef.valor, ef.pct, tick);
+        resultado(saida, tick, alvo, origem.id, ef, { cura });
+        const ator = buscarEntidade(estado, origem.id);
+        if (ator) fluxoRestaurador(estado, ctx, ator, alvo, cura, saida);
+        break;
+      }
       case 'recurso':
         resultado(saida, tick, alvo, origem.id, ef, { mana: restaurar(alvo, 'recurso', ef.valor, ef.pct, tick) });
         break;
@@ -193,18 +210,25 @@ export function aplicarEfeito(
         teleportar(estado, ctx, alvo, mira);
         break;
       case 'avanco':
-        avancar(estado, ctx, alvo, mira, ef.valor);
+        if (avancar(estado, ctx, alvo, mira, ef.valor)) fato(alvo, 'deslocou', undefined, origem.acaoId);
         break;
       case 'empurrao':
         // Marco 18: quem é inamovível (ressonância, grevas, escudo Último) não sai do lugar.
-        if (!passivosDe(ctx, alvo).inamovivel) empurrar(estado, ctx, alvo, origem, ef.valor);
+        if (!passivosDe(ctx, alvo).inamovivel) {
+          const dx = Math.sign(alvo.x - origem.x), dy = Math.sign(alvo.y - origem.y);
+          empurrar(estado, ctx, alvo, origem, ef.valor);
+          if ((dx || dy) && muralhaEm(estado, alvo.x + dx, alvo.y + dy)) {
+            const ator = buscarEntidade(estado, origem.id);
+            if (ator) fato(ator, 'colidiu', alvo.id, origem.acaoId);
+          }
+        }
         break;
       case 'puxao':
-        if (!passivosDe(ctx, alvo).inamovivel) puxar(estado, ctx, alvo, origem, ef.valor);
+        if (!passivosDe(ctx, alvo).inamovivel && puxar(estado, ctx, alvo, origem, ef.valor)) { const ator = buscarEntidade(estado, origem.id); if (ator) fato(ator, 'puxou', alvo.id, origem.acaoId); }
         break;
       case 'trocar': {
         const outro = buscarEntidade(estado, origem.id);
-        if (outro && vivo(outro)) trocarLugar(alvo, outro);
+        if (outro && vivo(outro) && trocarLugar(alvo, outro)) fato(outro, 'trocou', undefined, origem.acaoId);
         break;
       }
       case 'dano': {
@@ -266,6 +290,8 @@ export function processarEfeitos(estado: EstadoJogo, ctx: ContextoSimulacao, sai
         } else {
           const ganho = restaurar(e, periodico, f.valor, f.pct, tick);
           resultado(saida, tick, e, f.origemId, f, periodico === 'cura' ? { cura: ganho } : { mana: ganho });
+          const ator = buscarEntidade(estado, f.origemId);
+          if (periodico === 'cura' && ator) fluxoRestaurador(estado, ctx, ator, e, ganho, saida);
         }
       }
     }

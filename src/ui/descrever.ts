@@ -51,6 +51,7 @@ const media = (formula: string) => {
 function linhaDaForma(h: Habilidade): string {
   if (h.politicaAlvo === 'aliado') return t('desc.forma.aliado', { alcance: h.alcanceCelulas });
   if (h.politicaAlvo === 'aliados') return t('desc.forma.aliados', { raio: h.raioArea });
+  if (h.politicaAlvo === 'celula' && h.politicaImpacto === 'proprio') return t('desc.forma.celula', { alcance: h.alcanceCelulas });
   if (h.politicaImpacto === 'proprio') return t('desc.forma.proprio');
   if (h.politicaImpacto === 'area' && h.tipoArea !== 'nenhuma') {
     return t(`desc.forma.${h.tipoArea}` as ChaveTexto, { alcance: h.alcanceCelulas, raio: h.raioArea, lado: 2 * h.raioArea + 1 });
@@ -61,7 +62,7 @@ function linhaDaForma(h: Habilidade): string {
 /** Bônus de passiva, afinidade ou caminho, um por linha. */
 export function descreverBonus(b: Partial<Passiva> & { duracaoPct?: number; raio?: number }): string[] {
   const linhas: string[] = [];
-  const campos = ['danoPct', 'curaPct', 'alcance', 'custoPct', 'recargaPct', 'duracaoPct', 'raio', 'hpMaxPct', 'manaMaxPct', 'defesa'] as const;
+  const campos = ['danoPct', 'curaPct', 'alcance', 'custoPct', 'recargaPct', 'duracaoPct', 'raio', 'hpMaxPct', 'manaMaxPct', 'defesa', 'tenacidadePct', 'fluxoEscudoPct'] as const;
   for (const c of campos) {
     const v = b[c];
     if (v === undefined || v === 0) continue;

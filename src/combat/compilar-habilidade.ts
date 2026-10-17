@@ -104,7 +104,7 @@ const mediaDe = (formula: string | null) => {
 /** Efeitos cujo `valor` é força (dano, cura, escudo): o rank escala; contagens e distâncias não. */
 function valorEscala(ef: EfeitoCanonico): boolean {
   const d = REGISTRO_EFEITOS[ef.tipo];
-  return d.periodico !== null || d.escudo || d.instantaneo === 'cura' || d.instantaneo === 'recurso' || d.instantaneo === 'dano' || d.ataqueBasico === 'dano' || d.rastro === 'dano' || d.fluxo === 'armadilha';
+  return d.periodico !== null || d.escudo || d.instantaneo === 'cura' || d.instantaneo === 'recurso' || d.instantaneo === 'dano' || d.instantaneo === 'campo_cura' || d.instantaneo === 'campo_veneno' || d.ataqueBasico === 'dano' || d.rastro === 'dano' || d.fluxo === 'armadilha';
 }
 
 function escalar(ef: EfeitoCanonico, valor: number, duracao: number): EfeitoCanonico {
@@ -200,6 +200,8 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
     saltos: null,
     escalaVisual: 1 + 0.15 * (rank - 1),
   };
+  // Marco 19 (17/10/2026): a distância real do passo acompanha alcance de rank e caminho.
+  for (const efeito of h.efeitos) if (efeito.tipo === 'passo_sombrio') efeito.valor = h.alcanceCelulas;
   const aplicados = [...mods].filter((m) => modificadorCabe(h, m)).sort();
   for (const m of aplicados) {
     if (m === 'atravessar') h.perfura = true;

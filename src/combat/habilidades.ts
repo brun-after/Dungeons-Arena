@@ -56,6 +56,8 @@ export interface Saltos {
  * habilidade às que têm a etiqueta (null = todas); os de ficha valem sempre.
  */
 export interface Passiva {
+  tenacidadePct?: number;
+  fluxoEscudoPct?: number;
   tag: string | null;
   danoPct: number;
   curaPct: number;
@@ -106,6 +108,7 @@ export interface Habilidade {
   /** Projétil que atravessa os alvos (modificador `atravessar`). */
   perfura: boolean;
   saltos: Saltos | null;
+  saltosExtrasCombo?: number;
   /** Só apresentação: o rank aumenta o efeito visual. */
   escalaVisual: number;
   /** Ajuste de 15/10/2026: anda enquanto conjura? */
@@ -241,7 +244,7 @@ function lerVisual(l: Leitor, v: unknown): VisualHabilidade | null {
   };
 }
 
-const CAMPOS_PASSIVA = ['tag', 'danoPct', 'curaPct', 'alcance', 'custoPct', 'recargaPct', 'hpMaxPct', 'manaMaxPct', 'defesa'];
+const CAMPOS_PASSIVA = ['tag', 'danoPct', 'curaPct', 'alcance', 'custoPct', 'recargaPct', 'hpMaxPct', 'manaMaxPct', 'defesa', 'tenacidadePct', 'fluxoEscudoPct'];
 
 export function lerPassiva(l: Leitor, v: unknown): Passiva | null {
   if (v === undefined || v === null) return null;
@@ -249,6 +252,8 @@ export function lerPassiva(l: Leitor, v: unknown): Passiva | null {
   for (const k of Object.keys(o)) if (!CAMPOS_PASSIVA.includes(k)) l.erro(`passiva: campo desconhecido "${k}"`);
   const n = (campo: string, min: number, max: number) => (o[campo] === undefined ? 0 : l.numero(o, campo, { min, max }));
   return {
+    tenacidadePct: n('tenacidadePct', 0, 50),
+    fluxoEscudoPct: n('fluxoEscudoPct', 0, 50),
     tag: o.tag === undefined ? null : l.texto(o, 'tag'),
     danoPct: n('danoPct', -100, 300),
     curaPct: n('curaPct', -100, 300),
@@ -347,7 +352,7 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
   if (h.politicaImpacto === 'projetil' && h.velocidadeProjetil <= 0) l.erro('projétil precisa de velocidade');
   if (h.politicaImpacto === 'area' && h.tipoArea === 'nenhuma') l.erro('impacto em área precisa de tipoArea');
   if (h.politicaImpacto !== 'area' && h.tipoArea !== 'nenhuma') l.erro(`tipoArea "${h.tipoArea}" só vale com impacto em área`);
-  if ((h.politicaAlvo === 'proprio') !== (h.politicaImpacto === 'proprio')) {
+  if ((h.politicaAlvo === 'proprio') !== (h.politicaImpacto === 'proprio') && !(h.politicaImpacto === 'proprio' && h.politicaAlvo === 'celula' && h.efeitos.length > 0 && h.efeitos.every((e) => ['muralha_pedra', 'passo_sombrio', 'campo_cura', 'campo_veneno'].includes(e.tipo))) && !(h.politicaImpacto === 'area' && h.tipoArea === 'ao_redor' && h.politicaAlvo === 'proprio')) {
     l.erro('politicaAlvo e politicaImpacto "proprio" andam juntos');
   }
   if (h.politicaAlvo === 'aliados' && h.tipoArea !== 'ao_redor') l.erro('alvo "aliados" é em volta de quem conjura (tipoArea "ao_redor")');
