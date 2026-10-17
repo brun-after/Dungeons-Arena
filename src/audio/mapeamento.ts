@@ -118,9 +118,8 @@ export function sonsDoEvento(ev: EventoSimulacao, idLocal: string, habilidade: (
       return [{ som: 'invocacao', origemId: ev.id }];
     case 'explodiu':
       return [{ som: 'explosao', origemId: ev.id }];
-    case 'descansou':
     case 'invocacaoCurou':
-      return [{ som: 'cura', origemId: ev.t === 'descansou' ? ev.id : ev.donoId }];
+      return [{ som: 'cura', origemId: ev.donoId }];
     default:
       return [];
   }

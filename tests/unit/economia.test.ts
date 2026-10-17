@@ -11,7 +11,7 @@ import { DT_MS } from '../../src/core/loop';
 import { simular, type EventoSimulacao } from '../../src/core/simulacao';
 import { ticksDe } from '../../src/core/tempo';
 import type { Entidade } from '../../src/entities/entidade';
-import { criarJogador } from '../../src/entities/fabrica';
+import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import { consumiveisComAtalho, guardarItem } from '../../src/progression/inventario';
 import type { Item } from '../../src/progression/itens';
 import { lerRegistro, VERSAO_SCHEMA } from '../../src/save/esquema';
@@ -26,7 +26,6 @@ function obter<T>(v: T | undefined | null, nome: string): T {
 }
 
 const item = (id: string): Item => obter(CONTEUDO.itens.get(id), id);
-const JANELA = ticksDe(BALANCE_PADRAO.economia.janelaLojaMs);
 const RECARGA = ticksDe(BALANCE_PADRAO.economia.recargaLojaMs);
 const CONGELA_BAU = ticksDe(BALANCE_PADRAO.economia.bauCongelaMs);
 const SOME_BAU = ticksDe(BALANCE_PADRAO.economia.bauSomeMs);
@@ -67,7 +66,7 @@ const bau = (campos: Partial<ObjetoNoMundo> = {}, x = 4, y = 5) =>
   novoObjeto('bau1', 'bau', x, y, { itens: ['adaga', 'pocao_mana'], ouro: 30, ...campos });
 
 describe('loja (§2.10)', () => {
-  it('interagir ao lado abre a janela de 5 s e congela o jogador', () => {
+  it('interagir ao lado abre a loja e congela o jogador', () => {
     const c = cenario();
     c.objeto(loja());
     c.tick({ t: 'interagir' });
@@ -169,17 +168,33 @@ describe('loja (§2.10)', () => {
     expect(c.e().interacao?.tipo).toBe('loja');
   });
 
-  it('a janela acaba sozinha em 5 s e também arma a recarga', () => {
+  // Ajuste de 16/10/2026 (D-067): a loja não fecha sozinha; não abre e fecha com perseguição.
+  it('a loja não fecha sozinha (o jogador gasta o tempo que quiser)', () => {
     const c = cenario();
     c.objeto(loja());
     c.tick({ t: 'interagir' });
-    c.avancar(JANELA);
-    expect(c.e().interacao).toBeNull();
-    expect(c.de('lojaFechada')).toHaveLength(1);
-    c.tick({ t: 'comprar', itemId: 'pocao_vida' });
-    expect(c.recusas()).toEqual(['loja_fechada']);
+    c.avancar(ticksDe(60_000));
+    expect(c.e().interacao).toMatchObject({ tipo: 'loja' });
+    expect(c.de('lojaFechada')).toHaveLength(0);
+  });
+
+  it('sendo perseguido, a loja recusa; se a perseguição começa com ela aberta, fecha', () => {
+    const c = cenario();
+    c.objeto(loja());
+    const g = criarInimigo(obter(CONTEUDO.presets.get('goblin'), 'goblin'), 'g', 9, 9, c.ctx.balance);
+    c.estado.entidades.push(g);
+    c.tick();
+    const ia = obter(g.ia, 'ia');
+    Object.assign(ia, { modo: 'perseguindo', alvoId: 'j' });
     c.tick({ t: 'interagir' });
-    expect(c.recusas()).toEqual(['loja_fechada', 'em_recarga']);
+    expect(c.recusas()).toEqual(['em_perigo']);
+    Object.assign(ia, { modo: 'parado', alvoId: null });
+    c.tick({ t: 'interagir' });
+    expect(c.e().interacao).toMatchObject({ tipo: 'loja' });
+    Object.assign(ia, { modo: 'perseguindo', alvoId: 'j' });
+    c.tick();
+    expect(c.e().interacao).toBeNull();
+    expect(c.de('lojaFechada')).toMatchObject([{ perigo: true }]);
   });
 
   it('morrer com a loja aberta fecha e arma a recarga (§2.12)', () => {

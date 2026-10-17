@@ -11,7 +11,6 @@ import type { EstadoJogo } from '../core/estado';
 import type { Entidade, ItemNaMochila } from '../entities/entidade';
 import { t, type ChaveTexto } from '../i18n';
 import { SLOTS_DE_EQUIPAMENTO, type Slot } from '../modos/modo';
-import { podeDescansar } from '../modos/regras';
 import { derivarFicha } from '../progression/derivados';
 import { descontoNaLojaPct, reducaoRecargaBasicoPct, vidaPorCelula } from '../progression/efeitos-atributo';
 import { bonusDeAtributo } from '../progression/ficha';
@@ -315,18 +314,6 @@ export function criarMochila(o: OpcoesMochila): Mochila {
       );
       derivados.dataset.danoMax = String(faixa.max + bonus);
       corpo.append(derivados);
-    }
-    // Marco 10A-2: descanso (§2.12), só onde o modo permite.
-    if (podeDescansar(ctx.modo)) {
-      corpo.append(el('h3', 'subtitulo-modal', t('ficha.descanso')));
-      const linha = el('p', 'linha-descanso');
-      for (const [tipo, chave] of [
-        ['curto', 'ficha.descansoCurto'],
-        ['longo', 'ficha.descansoLongo'],
-      ] as const) {
-        linha.append(botao(t(chave), `descanso-${tipo}`, () => { agir({ t: 'descansar', tipo }); modal.fechar(); }));
-      }
-      corpo.append(linha);
     }
     // Marco 10A-3: dispensar as invocações (só aparece com alguma viva).
     const estado = o.estado?.();

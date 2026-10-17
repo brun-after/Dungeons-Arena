@@ -46,13 +46,6 @@ export interface Balance {
     regenHpPorCelula: number;
     regenManaPorCelula: number;
   };
-  /** Descanso (§2.12, marco 10A-2): duração do congelamento e o que o curto devolve. */
-  descanso: {
-    curtoMs: number;
-    longoMs: number;
-    curtoHpPct: number;
-    curtoManaPct: number;
-  };
   respawn: {
     inimigoS: number;
     bossS: number;
@@ -91,6 +84,10 @@ export interface Balance {
     /** Dominação (§2.9): duração e HP com que o dominado volta. */
     dominacaoMs: number;
     dominacaoHpPct: number;
+    /** D-067: prazo para o buff ofensivo armado começar (em combate). */
+    prazoArmadoMs: number;
+    /** D-067: imunidade do refúgio ao abrir a mochila ou a loja. */
+    refugioMs: number;
   };
   /** Economia (§2.10, marco 9A): loja, baús e ouro. */
   economia: {
@@ -101,7 +98,6 @@ export interface Balance {
     /** A loja compra por esta porcentagem do `valorBase` (arredondado para baixo). */
     vendaPct: number;
     /** Janela da loja (o jogador fica congelado) e a recarga armada ao fechar, por jogador e loja. */
-    janelaLojaMs: number;
     recargaLojaMs: number;
     /** Quanto o baú congela quem abre, e quanto ele fica no mundo depois de aberto. */
     bauCongelaMs: number;
@@ -120,6 +116,8 @@ export interface Balance {
     loot: CategoriaSpawner;
     orbe: CategoriaSpawner;
     armadilha: CategoriaSpawner;
+    /** D-067: o orbe de refúgio (um só por vez, contando o que o jogador carrega). */
+    refugio: CategoriaSpawner;
     /** Chance relativa de cada orbe (§2.1: 40% vida, 30% recurso, 30% efeito). */
     pesoOrbe: { hp: number; recurso: number; efeito: number };
     /** Faixas fechadas [mínimo, máximo] do baú do spawner. */

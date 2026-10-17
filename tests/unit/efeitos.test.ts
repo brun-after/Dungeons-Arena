@@ -289,12 +289,16 @@ describe('instantâneos', () => {
 });
 
 describe('orbe de efeito', () => {
-  it('pisar no orbe aplica o efeito pelo dispatcher', () => {
+  it('pisar no orbe aplica o efeito pelo dispatcher (o ofensivo chega armado, D-067)', () => {
     const c = cenario();
+    largarOrbeEfeito(c.estado, construirEfeito('cura_periodica'), 3, 5, c.eventos);
+    c.tick();
+    expect(c.ent('j').efeitos.map((f) => f.tipo)).toEqual(['cura_periodica']);
+    expect(c.estado.objetos).toHaveLength(0);
     largarOrbeEfeito(c.estado, construirEfeito('bonus_dano'), 3, 5, c.eventos);
     c.tick();
-    expect(c.ent('j').efeitos.map((f) => f.tipo)).toEqual(['bonus_dano']);
-    expect(c.estado.objetos).toHaveLength(0);
+    expect(c.ent('j').efeitos.map((f) => f.tipo)).toEqual(['cura_periodica']);
+    expect(c.ent('j').buffsArmados.map((b) => b.efeito.tipo)).toEqual(['bonus_dano']);
   });
 
   it('inimigo solta orbe de efeito num sorteio próprio', () => {

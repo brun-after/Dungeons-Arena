@@ -35,18 +35,12 @@
     "regenHpPorCelula": 1,
     "regenManaPorCelula": 1
   },
-  "descanso": {
-    "curtoMs": 3000,
-    "longoMs": 10000,
-    "curtoHpPct": 50,
-    "curtoManaPct": 30
-  },
   "respawn": {
     "inimigoS": 60,
     "bossS": 300
   },
   "drops": {
-    "chanceOrbeHp": 0.1,
+    "chanceOrbeHp": 0.15,
     "chanceOrbeRecurso": 0.08,
     "orbeHpPct": 25,
     "orbeRecursoPct": 50,
@@ -69,13 +63,14 @@
     "intervaloPeriodicoMs": 1000,
     "rastroCelulaMs": 3000,
     "dominacaoMs": 60000,
-    "dominacaoHpPct": 50
+    "dominacaoHpPct": 50,
+    "prazoArmadoMs": 20000,
+    "refugioMs": 45000
   },
   "economia": {
     "ouroInicial": 15,
     "ouroMax": 999999,
     "vendaPct": 50,
-    "janelaLojaMs": 5000,
     "recargaLojaMs": 10000,
     "bauCongelaMs": 3000,
     "bauSomeMs": 5000,
@@ -88,9 +83,10 @@
     "distanciaMinJogador": 4,
     "bau": { "max": 3, "chance": 0.35 },
     "loot": { "max": 4, "chance": 0.5 },
-    "orbe": { "max": 3, "chance": 0.3 },
+    "orbe": { "max": 3, "chance": 0.4 },
+    "refugio": { "max": 1, "chance": 0.35 },
     "armadilha": { "max": 2, "chance": 0.3 },
-    "pesoOrbe": { "hp": 40, "recurso": 30, "efeito": 30 },
+    "pesoOrbe": { "hp": 55, "recurso": 25, "efeito": 25 },
     "itensBau": [1, 2],
     "ouroBau": [10, 30],
     "danoArmadilha": 8,

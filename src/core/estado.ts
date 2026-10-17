@@ -44,7 +44,8 @@ export interface Projetil {
  * Marco 9A (14/10/2026): `bau`, `loja` (interagíveis) e `ouro` (coletado ao pisar). Marco 10A-1:
  * `saida`, a porta temporária que surge onde o boss morre (§2.1).
  */
-export type TipoObjeto = 'orbe_hp' | 'orbe_recurso' | 'orbe_efeito' | 'item' | 'ouro' | 'bau' | 'loja' | 'saida';
+/** Ajuste de 16/10/2026 (D-067): `orbe_refugio`, a carga de imunidade ao abrir a mochila ou a loja. */
+export type TipoObjeto = 'orbe_hp' | 'orbe_recurso' | 'orbe_efeito' | 'orbe_refugio' | 'item' | 'ouro' | 'bau' | 'loja' | 'saida';
 
 /**
  * Objeto coletável no mundo (§2.1). `objetoId` é estável; a coleta é uma transação dentro do

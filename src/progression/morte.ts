@@ -16,6 +16,7 @@ import { fatoresDoMundo, ladoDoJogador } from '../modos/dificuldade';
 import { podeFerir } from '../modos/relacao';
 import { atrasoDeRespawnTicks, localDeRespawn, penalidadeDeMorte, podeRespawnar, protecaoDeRespawnTicks } from '../modos/regras';
 import { celulaLivrePara } from '../world/colisao';
+import { passavel } from '../world/fase';
 import { tentarDominar } from '../combat/efeitos-fluxo';
 import { explodirSeIsca } from '../combat/invocacoes';
 import { sortearEfeitoDeOrbe } from '../combat/registro-efeitos';
@@ -170,13 +171,31 @@ function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
   largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, item.id, x, y, saida));
 }
 
+function celulaLivreParaRenascer(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, c: { x: number; y: number }): { x: number; y: number } {
+  const outras = estado.entidades.filter((x) => x !== e && !x.morto);
+  for (let r = 0; r <= 4; r++) {
+    for (let dy = -r; dy <= r; dy++) {
+      for (let dx = -r; dx <= r; dx++) {
+        if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+        const x = c.x + dx;
+        const y = c.y + dy;
+        if (passavel(ctx.fase, x, y) && celulaLivrePara(e, x, y, outras, ctx.balance.colisao)) return { x, y };
+      }
+    }
+  }
+  return c;
+}
+
 function reviverJogadores(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
   for (const e of estado.entidades) {
     if (!e.morto || e.reviverEmTick === 0 || estado.tick < e.reviverEmTick) continue;
-    const local = localDeRespawn(estado, ctx.fase, ctx.modo, e, estado.rng);
+    const preferido = localDeRespawn(estado, ctx.fase, ctx.modo, e, estado.rng);
     e.morto = false;
+    // Ajuste de 16/10/2026: renascer numa célula que alguém ocupa ou está entrando juntava os dois; a mais próxima
+    // livre (até 4 células, em anéis) resolve.
     e.reviverEmTick = 0;
     e.hp = e.hpMax;
+    const local = celulaLivreParaRenascer(estado, ctx, e, preferido);
     e.efeitos = [];
     e.participacao = [];
     e.x = local.x;

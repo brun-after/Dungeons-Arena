@@ -10,7 +10,7 @@ import type { Dificuldade } from '../modos/dificuldade';
 import { MAX_REGRAS, RE_REGRA_ESTILO } from '../world/estilo';
 import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 12;
+export const VERSAO_SCHEMA = 13;
 export const SLOTS = [1, 2, 3] as const;
 export const FORMATO_EXPORTACAO = 'dungeons-arena/save';
 
@@ -247,6 +247,21 @@ function v11ParaV12(r: Objeto): Objeto {
   return { certificado: null, ...r, estado: estado(r.estado) };
 }
 
+/**
+ * v12 → v13 (ajuste de 16/10/2026, D-067): o descanso saiu (a interação de descanso vira nada) e as entidades ganham
+ * os buffs armados, a carga de refúgio e a aparência (calculada de novo no primeiro tick).
+ */
+function v12ParaV13(r: Objeto): Objeto {
+  const entidade = (x: unknown): unknown => {
+    if (!ehObjeto(x)) return x;
+    const interacao = ehObjeto(x.interacao) && x.interacao.tipo === 'descanso' ? null : x.interacao;
+    return { buffsArmados: [], refugio: false, aparencia: null, ...x, interacao };
+  };
+  const estado = (e: unknown): unknown => (ehObjeto(e) ? { ...e, entidades: lista(e.entidades).map(entidade) } : e);
+  const visitadas = ehObjeto(r.fasesVisitadas) ? Object.fromEntries(Object.entries(r.fasesVisitadas).map(([k, v]) => [k, estado(v)])) : r.fasesVisitadas;
+  return { ...r, estado: estado(r.estado), fasesVisitadas: visitadas };
+}
+
 /** `MIGRACOES[v]` leva um registro da versão `v` para a `v + 1`. Não existiu versão 0. */
 export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   1: v1ParaV2,
@@ -260,6 +275,7 @@ export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   9: v9ParaV10,
   10: v10ParaV11,
   11: v11ParaV12,
+  12: v12ParaV13,
 };
 
 function temNaoFinito(v: unknown): boolean {

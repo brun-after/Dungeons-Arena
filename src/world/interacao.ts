@@ -5,13 +5,14 @@
 // arma a recarga dela para aquele jogador; morrer fecha e também arma (§2.12).
 // Baú compartilhado tem um abridor por vez (§3.6): a reserva sai com a entrega, a morte ou a saída.
 
+import { usarRefugio } from '../progression/buffs';
+import { perseguido } from '../progression/recursos';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type EstadoJogo, type ObjetoNoMundo } from '../core/estado';
 import type { EventoSimulacao, MotivoItem } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import type { Entidade } from '../entities/entidade';
-import { processarDescanso } from '../progression/descanso';
 import { guardarItem, recusarItem } from '../progression/inventario';
 import { interagivel, largarItem, largarPerto } from './objetos';
 
@@ -48,6 +49,9 @@ export function alvoDeInteracao(estado: EstadoJogo, ctx: ContextoSimulacao, e: E
 
 const temItem = (e: Entidade, itemId: string): boolean => e.bolsa?.mochila.some((i) => i.itemId === itemId) ?? false;
 
+/** D-067: a janela da loja não tem prazo (fecha pelo jogador ou pela perseguição). */
+export const LOJA_SEM_PRAZO = 2 ** 31 - 1;
+
 /** Comando `interagir`: abre o baú (reserva + congelamento) ou a janela da loja. */
 export function interagir(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
   const motivo = tentarInteragir(estado, ctx, e, saida);
@@ -64,7 +68,9 @@ function tentarInteragir(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade
   let ateTick: number;
   if (o.tipo === 'loja') {
     if (recargaLojaRestante(estado, o.objetoId, e.id) > 0) return 'em_recarga';
-    ateTick = tick + ticksDe(eco.janelaLojaMs);
+    // Ajuste de 16/10/2026 (D-067): a loja não atende sendo perseguido, e não fecha sozinha (sem prazo).
+    if (perseguido(estado, e)) return 'em_perigo';
+    ateTick = LOJA_SEM_PRAZO;
   } else {
     if (o.chave && !temItem(e, o.chave)) return 'trancado';
     o.abridorId = e.id;
@@ -77,17 +83,19 @@ function tentarInteragir(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade
   e.caminho = [];
   e.waypoints = [];
   saida.push({ t: 'interacaoIniciada', tick, id: e.id, objetoId: o.objetoId, tipo, ateTick });
+  // D-067: abrir a loja gasta a carga de refúgio (imune enquanto compra).
+  if (tipo === 'loja') usarRefugio(estado, ctx, e, saida);
   return null;
 }
 
 /** Fecha a janela da loja e arma a recarga (fechar, acabar o tempo ou morrer, §2.10). */
-export function fecharLoja(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
+export function fecharLoja(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[], perigo = false): void {
   const i = e.interacao;
   if (i?.tipo !== 'loja') return;
   const recargaAteTick = estado.tick + ticksDe(ctx.balance.economia.recargaLojaMs);
   estado.recargas[chaveRecargaLoja(i.objetoId, e.id)] = recargaAteTick;
   e.interacao = null;
-  saida.push({ t: 'lojaFechada', tick: estado.tick, id: e.id, objetoId: i.objetoId, recargaAteTick });
+  saida.push({ t: 'lojaFechada', tick: estado.tick, id: e.id, objetoId: i.objetoId, recargaAteTick, ...(perigo && { perigo }) });
 }
 
 /** Morte ou saída: a loja fecha armando a recarga; o baú libera a reserva sem entregar. */
@@ -96,10 +104,6 @@ export function encerrarInteracao(estado: EstadoJogo, ctx: ContextoSimulacao, e:
   if (!i) return;
   if (i.tipo === 'loja') {
     fecharLoja(estado, ctx, e, saida);
-    return;
-  }
-  if (i.tipo === 'descanso') {
-    e.interacao = null;
     return;
   }
   const o = estado.objetos.find((x) => x.objetoId === i.objetoId);
@@ -146,9 +150,12 @@ function entregarBau(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
 export function processarInteracoes(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
   for (const e of estado.entidades) {
     const i = e.interacao;
-    // O descanso confere a interrupção a cada tick, não só no fim (marco 10A-2).
-    if (i?.tipo === 'descanso') processarDescanso(estado, ctx, e, saida);
-    if (!i || i.tipo === 'descanso' || estado.tick < i.ateTick) continue;
+    // D-067: a loja fecha se um hostil começar a perseguir (e só por isso, ou pelo jogador).
+    if (i?.tipo === 'loja' && perseguido(estado, e)) {
+      fecharLoja(estado, ctx, e, saida, true);
+      continue;
+    }
+    if (!i || estado.tick < i.ateTick) continue;
     if (i.tipo === 'loja') fecharLoja(estado, ctx, e, saida);
     else entregarBau(estado, ctx, e, saida);
   }

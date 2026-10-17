@@ -5,8 +5,11 @@
 // tampa aberta até sumir) e loja (barraca com toldo).
 // Marco 13 (14/10/2026), D-058: no isométrico, baú e loja ficam em pé (na camada das entidades, com
 // profundidade); o resto continua no chão, sob a matriz do plano.
+// Ajuste de 16/10/2026 (D-067): sem anel de progresso (o `arc` sem `moveTo` puxava uma linha de outro objeto até o
+// baú). No lugar, um halo suave pulsando no baú ou na loja em uso, como um brilho de CSS; no baú, ele fica mais
+// forte conforme abre. O anel do descanso saiu com o descanso.
 
-import { Graphics, type Container } from 'pixi.js';
+import { CanvasSource, Graphics, Sprite, Texture, type Container } from 'pixi.js';
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import type { EstadoJogo, ObjetoNoMundo } from '../core/estado';
 import type { Raridade } from '../modos/modo';
@@ -37,19 +40,72 @@ export class CamadaObjetos {
   private readonly g = new Graphics();
   /** Baús e lojas em pé, um Graphics por objeto (só no isométrico). */
   private readonly altos = new Map<string, Graphics>();
+  /** Halo do objeto em uso (baú abrindo, loja aberta), um sprite por objeto. */
+  private readonly halos = new Map<string, Sprite>();
+  private readonly camadaHalo: Container;
+  private texturaHalo: Texture | null = null;
 
   /**
    * `raridadeDe` traduz o item do chão para a cor; item desconhecido aparece como comum.
-   * `ticksBau`: quanto dura a abertura do baú, para o anel de progresso.
+   * `ticksBau`: quanto dura a abertura do baú, para a força do halo.
    */
   constructor(
     camada: Container,
     private readonly raridadeDe: (itemId: string) => Raridade | undefined = () => undefined,
     private readonly ticksBau = 1,
-    private readonly ticksDescanso: Readonly<Record<'curto' | 'longo', number>> = { curto: 1, longo: 1 },
     private readonly emPe: OpcoesEmPe | null = null,
   ) {
+    this.camadaHalo = camada;
     camada.addChild(this.g);
+  }
+
+  /** Gradiente radial (como um box-shadow de CSS), gerado uma vez. */
+  private halo(): Texture {
+    if (this.texturaHalo) return this.texturaHalo;
+    const c = document.createElement('canvas');
+    c.width = 128;
+    c.height = 128;
+    const ctx = c.getContext('2d');
+    if (ctx) {
+      const grad = ctx.createRadialGradient(64, 64, 6, 64, 64, 64);
+      grad.addColorStop(0, 'rgba(255, 236, 190, 0.95)');
+      grad.addColorStop(0.35, 'rgba(255, 200, 110, 0.55)');
+      grad.addColorStop(1, 'rgba(255, 170, 60, 0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 128, 128);
+    }
+    this.texturaHalo = new Texture({ source: new CanvasSource({ resource: c }) });
+    return this.texturaHalo;
+  }
+
+  /** Halos dos objetos em uso; os que pararam de ser usados somem. */
+  private halos_(estado: EstadoJogo, agoraMs: number, reduzido: boolean): void {
+    const ativos = new Set<string>();
+    for (const e of estado.entidades) {
+      const i = e.interacao;
+      if (!i) continue;
+      const o = estado.objetos.find((x) => x.objetoId === i.objetoId);
+      if (!o) continue;
+      ativos.add(o.objetoId);
+      let s = this.halos.get(o.objetoId);
+      if (!s) {
+        s = new Sprite(this.halo());
+        s.anchor.set(0.5);
+        s.blendMode = 'add';
+        this.camadaHalo.addChildAt(s, 0);
+        this.halos.set(o.objetoId, s);
+      }
+      const progresso = o.tipo === 'bau' ? Math.min(1, Math.max(0, 1 - (i.ateTick - estado.tick) / this.ticksBau)) : 1;
+      const pulso = reduzido ? 0 : Math.sin(agoraMs / 220) * 0.08;
+      s.position.set((o.x + 0.5) * CELULA_PX, (o.y + 0.5) * CELULA_PX);
+      s.scale.set((CELULA_PX * 2.2) / 128 * (1 + pulso));
+      s.alpha = 0.35 + 0.55 * progresso;
+    }
+    for (const [id, s] of this.halos) {
+      if (ativos.has(id)) continue;
+      s.destroy();
+      this.halos.delete(id);
+    }
   }
 
   private bau(g: Graphics, estado: EstadoJogo, o: ObjetoNoMundo, cx: number, cy: number): void {
@@ -69,28 +125,6 @@ export class CamadaObjetos {
       g.circle(cx, cy + 2, 1.6).fill(0xd4ac0d);
     } else {
       g.rect(cx - 2, cy - 4, 4, 5).fill(0xd4ac0d);
-    }
-    // Anel de progresso enquanto alguém abre (3 s, §2.10).
-    const abridor = o.abridorId ? estado.entidades.find((e) => e.id === o.abridorId) : undefined;
-    const ateTick = abridor?.interacao?.objetoId === o.objetoId ? abridor.interacao.ateTick : 0;
-    if (ateTick > 0) {
-      const progresso = Math.min(1, Math.max(0, 1 - (ateTick - estado.tick) / this.ticksBau));
-      g.circle(cx, cy - 2, 24).stroke({ width: 4, color: 0x000000, alpha: 0.35 });
-      if (progresso > 0) g.arc(cx, cy - 2, 24, -Math.PI / 2, -Math.PI / 2 + progresso * Math.PI * 2).stroke({ width: 4, color: 0xf1c40f });
-    }
-  }
-
-  /** Marco 10A-2: anel azul de progresso sobre quem descansa. */
-  private descansos(estado: EstadoJogo): void {
-    for (const e of estado.entidades) {
-      const i = e.interacao;
-      if (i?.tipo !== 'descanso') continue;
-      const total = i.objetoId === 'longo' ? this.ticksDescanso.longo : this.ticksDescanso.curto;
-      const progresso = Math.min(1, Math.max(0, 1 - (i.ateTick - estado.tick) / total));
-      const cx = (e.x + 0.5) * CELULA_PX;
-      const cy = (e.y + 0.5) * CELULA_PX;
-      this.g.circle(cx, cy, 26).stroke({ width: 4, color: 0x000000, alpha: 0.35 });
-      if (progresso > 0) this.g.arc(cx, cy, 26, -Math.PI / 2, -Math.PI / 2 + progresso * Math.PI * 2).stroke({ width: 4, color: 0x5dade2 });
     }
   }
 
@@ -145,10 +179,17 @@ export class CamadaObjetos {
         g.circle(cx, cy, 3).fill(0xffffff);
         continue;
       }
+      if (o.tipo === 'orbe_refugio') {
+        // D-067: o refúgio, prateado, com um losango no miolo (a carga de imunidade).
+        g.circle(cx, cy, 16 + pulso).fill({ color: 0xd6eaf8, alpha: 0.22 });
+        g.circle(cx, cy, 9).fill(0x85c1e9).stroke({ width: 2, color: 0xffffff, alpha: 0.95 });
+        g.poly([cx, cy - 5, cx + 4, cy, cx, cy + 5, cx - 4, cy]).fill(0xffffff);
+        continue;
+      }
       g.circle(cx, cy, 14 + pulso).fill({ color: COR_ORBE[o.tipo], alpha: 0.18 });
       g.circle(cx, cy, 8).fill(COR_ORBE[o.tipo]).stroke({ width: 2, color: 0xffffff, alpha: 0.8 });
     }
-    this.descansos(estado);
+    this.halos_(estado, agoraMs, movimentoReduzido);
     for (const [id, alto] of this.altos) {
       if (vistos.has(id)) continue;
       alto.destroy();
@@ -181,6 +222,9 @@ export class CamadaObjetos {
 
   destruir(): void {
     this.reiniciarVisual();
+    for (const s of this.halos.values()) s.destroy();
+    this.halos.clear();
+    this.texturaHalo?.destroy(true);
     this.g.destroy();
   }
 }

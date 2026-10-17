@@ -15,10 +15,6 @@ export function penalidadeDeMorte(modo: ModoDeJogo): PenalidadeMorte | null {
   return modo.sobrevivencia.penalidadeMorte;
 }
 
-export function podeDescansar(modo: ModoDeJogo): boolean {
-  return modo.sobrevivencia.descanso;
-}
-
 export function regeneraPorCelula(modo: ModoDeJogo): boolean {
   return modo.sobrevivencia.regenPorCelula;
 }

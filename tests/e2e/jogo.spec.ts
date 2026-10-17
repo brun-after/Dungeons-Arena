@@ -381,15 +381,6 @@ test.describe('desktop', () => {
     expect(erros).toEqual([]);
   });
 
-  test('descanso: a tecla R descansa e o registro mostra o resultado', async ({ page }) => {
-    const { erros } = await abrir(page);
-    await page.keyboard.press('KeyR');
-    const log = page.locator('.log-combate');
-    await expect(log).toContainText('Descansando');
-    await expect(log).toContainText('Descanso: +', { timeout: 15_000 });
-    expect(erros).toEqual([]);
-  });
-
   // Marco 12: pausa, configurações, guia, minimapa, prompt, áudio e qualidade.
   test('pausa: Esc pausa a campanha (o tick para) e Continuar retoma', async ({ page }) => {
     const { diag, erros } = await abrir(page);

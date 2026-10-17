@@ -164,8 +164,7 @@ export interface Bolsa {
  * congelada (não anda nem age). Termina na etapa 5 do tick em `ateTick`, ao fechar ou ao morrer.
  */
 export interface Interacao {
-  /** Marco 10A-2: `descanso` (o `objetoId` é o tipo, `curto` ou `longo`). */
-  tipo: 'bau' | 'loja' | 'descanso';
+  tipo: 'bau' | 'loja';
   objetoId: string;
   ateTick: number;
 }
@@ -236,6 +235,27 @@ export interface Entidade {
   invocacao: DadosInvocacao | null;
   /** Marco 9A: baú ou loja aberta (congela); null quando livre. */
   interacao: Interacao | null;
+  /** Ajuste de 16/10/2026 (D-067): buffs ofensivos pegos, esperando o combate para começar. */
+  buffsArmados: BuffArmado[];
+  /** D-067: carga de refúgio (imune por 45 s ao abrir a mochila ou a loja). */
+  refugio: boolean;
+  /** D-067: o que está equipado, para o token (público: a arena mostra para todos). */
+  aparencia: AparenciaEquipada | null;
+}
+
+export interface BuffArmado {
+  efeito: EfeitoCanonico;
+  /** Fim do prazo para entrar em combate. */
+  ateTick: number;
+}
+
+/** Aparência pelo equipamento: a base da arma e da mão secundária; nas peças, a raridade (ou null). */
+export interface AparenciaEquipada {
+  arma: string | null;
+  secundaria: string | null;
+  cabeca: string | null;
+  corpo: string | null;
+  capa: string | null;
 }
 
 export const ATRIBUTOS_NEUTROS: Readonly<Atributos> = {
@@ -322,6 +342,9 @@ export function criarEntidade(n: NovaEntidade): Entidade {
     bolsa: null,
     invocacao: null,
     interacao: null,
+    buffsArmados: [],
+    refugio: false,
+    aparencia: null,
   };
 }
 
@@ -391,5 +414,7 @@ export function clonarEntidade(e: Entidade): Entidade {
     bolsa: e.bolsa ? clonarBolsa(e.bolsa) : null,
     invocacao: e.invocacao ? { ...e.invocacao } : null,
     interacao: e.interacao ? { ...e.interacao } : null,
+    buffsArmados: e.buffsArmados.map((b) => ({ ateTick: b.ateTick, efeito: { ...b.efeito, interno: b.efeito.interno ? { ...b.efeito.interno } : null } })),
+    aparencia: e.aparencia ? { ...e.aparencia } : null,
   };
 }

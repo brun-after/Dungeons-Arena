@@ -174,7 +174,6 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     palco.chao,
     (id) => ctx.conteudo.itens.get(id)?.raridade,
     ticksDe(ctx.balance.economia.bauCongelaMs),
-    { curto: ticksDe(ctx.balance.descanso.curtoMs), longo: ticksDe(ctx.balance.descanso.longoMs) },
     { camada: palco.entidades, projecao },
   );
   const fluxo = new CamadaFluxo(palco.chao, () => ap.particulas.limite > 0);
@@ -367,9 +366,6 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     },
     aoInteragir: () => {
       emitir({ t: 'interagir' });
-    },
-    aoDescansar: (longo) => {
-      emitir({ t: 'descansar', tipo: longo ? 'longo' : 'curto' });
     },
     aoDispensar: () => {
       emitir({ t: 'dispensar' });

@@ -8,13 +8,13 @@
 //   4. efeitos e regeneração   5. congelamentos      6. movimento
 //   7. gatilhos por célula     8. mortes e respawns  9. periódicos de 1 Hz e spawner
 
+import { atualizarAparencias, processarBuffsArmados, usarRefugio } from '../progression/buffs';
 import { alvoOfensivoValido, iniciarAcao, processarAcoes, processarAutoAtaque } from '../combat/acao';
 import { processarEfeitos, processarGatilhosDeEfeito } from '../combat/efeitos';
 import { dispensarInvocacoes } from '../combat/invocacoes';
 import { moverProjeteis } from '../combat/projeteis';
 import { vivo } from '../entities/entidade';
 import { processarIa } from '../entities/ia';
-import { descansar } from '../progression/descanso';
 import { desequipar, distribuirPonto, equipar, moverItem, usarItem } from '../progression/inventario';
 import { ehDificuldade } from '../modos/dificuldade';
 import { equiparHabilidade, subirRank } from '../progression/habilidades-personagem';
@@ -52,6 +52,9 @@ export function simular(
   // Gatilhos por célula alcançada (§2.3): portas antes da coleta e das armadilhas.
   processarPortas(estado, ctx, saida);
   coletarObjetos(estado, ctx, saida);
+  // Ajuste de 16/10/2026 (D-067): buffs armados começam em combate; a aparência segue o equipamento.
+  processarBuffsArmados(estado, ctx, saida);
+  atualizarAparencias(estado, ctx);
   processarGatilhosDeEfeito(estado, ctx, saida);
   processarMortes(estado, ctx, saida);
   processarSpawner(estado, ctx, saida);
@@ -100,6 +103,9 @@ function aplicarComandos(
         distribuirPonto(ator, ctx, cmd.atributo, estado.tick, saida);
         break;
       // Marco 9A (14/10/2026): baú, loja e ordenação da mochila.
+      case 'abrirMenu':
+        usarRefugio(estado, ctx, ator, saida);
+        break;
       case 'interagir':
         interagir(estado, ctx, ator, saida);
         break;
@@ -114,10 +120,6 @@ function aplicarComandos(
         break;
       case 'moverItem':
         moverItem(ator, cmd.invId, cmd.posicao, estado.tick, saida);
-        break;
-      // Marco 10A-2: descanso (§2.12).
-      case 'descansar':
-        descansar(estado, ctx, ator, cmd.tipo, saida);
         break;
       // Marco 10A-3: dispensa das invocações (§2.9).
       case 'dispensar':

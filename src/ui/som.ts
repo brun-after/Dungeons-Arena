@@ -63,7 +63,6 @@ export function ligarSom(o: OpcoesSom): { quadro: (ouvinte: PontoVisual | null, 
     'invocou',
     'dominou',
     'explodiu',
-    'descansou',
     'invocacaoCurou',
   ] as const) {
     o.bus.on(t, aoEvento);

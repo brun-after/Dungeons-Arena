@@ -19,8 +19,8 @@ import { largarItem, largarObjeto, largarOrbeEfeito, novoObjeto } from './objeto
 /** Prefixo dos objetos do spawner: é assim que ele conta os seus. */
 export const PREFIXO_SPAWNER = 's:';
 
-type Categoria = 'bau' | 'loot' | 'orbe' | 'armadilha';
-const CATEGORIAS: readonly Categoria[] = ['bau', 'loot', 'orbe', 'armadilha'];
+type Categoria = 'bau' | 'loot' | 'orbe' | 'armadilha' | 'refugio';
+const CATEGORIAS: readonly Categoria[] = ['bau', 'loot', 'orbe', 'armadilha', 'refugio'];
 
 /** O spawner roda neste tick? Primeira rodada no fim da carência, depois a cada intervalo. */
 export function rodadaDoSpawner(tick: number, ctx: ContextoSimulacao): boolean {
@@ -36,6 +36,7 @@ export function contarDoSpawner(estado: EstadoJogo, categoria: Categoria): numbe
     bau: ['bau'],
     loot: ['item'],
     orbe: ['orbe_hp', 'orbe_recurso', 'orbe_efeito'],
+    refugio: ['orbe_refugio'],
   };
   return estado.objetos.filter((o) => o.objetoId.startsWith(PREFIXO_SPAWNER) && tipos[categoria].includes(o.tipo)).length;
 }
@@ -90,6 +91,11 @@ function criar(estado: EstadoJogo, ctx: ContextoSimulacao, categoria: Categoria,
       }
       return;
     }
+    case 'refugio': {
+      estado.objetos.push(novoObjeto(objetoId, 'orbe_refugio', c.x, c.y));
+      saida.push({ t: 'objetoSurgiu', tick: estado.tick, objetoId, tipo: 'orbe_refugio', x: c.x, y: c.y });
+      return;
+    }
     case 'armadilha': {
       const id = estado.proximoId++;
       estado.armadilhas.push({
@@ -121,6 +127,8 @@ export function processarSpawner(estado: EstadoJogo, ctx: ContextoSimulacao, sai
     const regra: CategoriaSpawner = ctx.balance.spawner[categoria];
     // Marco 15: o grupo maior mantém mais coisas no mundo.
     if (contarDoSpawner(estado, categoria) >= Math.round(regra.max * fatoresDoMundo(estado, ctx).spawner)) continue;
+    // D-067: um refúgio por vez, contando o do mapa (de qualquer origem) e o que alguém carrega.
+    if (categoria === 'refugio' && (estado.objetos.some((o) => o.tipo === 'orbe_refugio') || estado.entidades.some((e) => e.refugio))) continue;
     if (aleatorio(estado.rng) >= regra.chance) continue;
     const celula = sortearCelula(estado, ctx);
     if (celula) criar(estado, ctx, categoria, celula, saida);
