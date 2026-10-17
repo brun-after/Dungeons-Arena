@@ -125,7 +125,7 @@ function gerar(id: string, ctx: ContextoHabilidades): DefinicaoHabilidade | null
   // Os dados sobem enquanto o rank 1 couber no orçamento das geradas no nível; se nem 1 dado couber, cai o
   // efeito secundário e depois os dados diminuem.
   const limite = orcamentoNoNivel(g.nivel, ctx.balance.orcamento, ctx.balance.orcamento.geradaPct);
-  const poder = (h: Habilidade) => poderDaHabilidade(compilarHabilidade({ base: h, basico: false, evolucoes: {}, mods: [] }, { rank: 1, caminhos: [], mods: [] }, ctx.conteudo, ctx.balance.habilidades), ctx.balance.orcamento);
+  const poder = (h: Habilidade) => poderDaHabilidade(compilarHabilidade({ base: h, basico: false, evolucoes: {}, mods: [], marcos: {}, fusao: null }, { rank: 1, caminhos: [], mods: [] }, ctx.conteudo, ctx.balance.habilidades), ctx.balance.orcamento);
   let quantos = 1;
   const comDados = (n: number, f: number): Habilidade => ({ ...base, formulaDano: `${n}d${f}` });
   while (quantos < 12 && poder(comDados(quantos + 1, faces)) <= limite) quantos++;
@@ -138,5 +138,5 @@ function gerar(id: string, ctx: ContextoHabilidades): DefinicaoHabilidade | null
   const caminhos = caminhosPossiveis(h);
   const tres = embaralharParcial(rng, caminhos, 2);
   const cinco = embaralharParcial(rng, caminhos.filter((c) => !tres.includes(c)), 2);
-  return { base: h, basico: false, evolucoes: { 3: tres, 5: cinco }, mods: [] };
+  return { base: h, basico: false, evolucoes: { 3: tres, 5: cinco }, mods: [], marcos: {}, fusao: null };
 }

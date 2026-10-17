@@ -53,6 +53,10 @@
         "impacto": "runas",
         "som": "magia"
       },
+      "marcos": {
+        "2": { "texto": "+1 de alcance", "alcance": 1 },
+        "4": { "texto": "+1 de alcance (somando o do nível 2)", "alcance": 1 }
+      },
       "evolucoes": {
         "3": [
           "brutal",
@@ -92,6 +96,10 @@
         "camera": "forte",
         "som": "explosao"
       },
+      "marcos": {
+        "2": { "texto": "+1 de alcance", "alcance": 1 },
+        "4": { "texto": "Os atingidos ficam atolados (−15%) por 1,5 s", "efeitos": [{ "tipo": "atolado", "duracaoMs": 1500, "pct": 15 }] }
+      },
       "evolucoes": {
         "3": [
           "amplo",
@@ -128,6 +136,10 @@
         "conjuracao": "sagrado",
         "impacto": "sagrado",
         "som": "cura"
+      },
+      "marcos": {
+        "2": { "texto": "Também cura 2 por segundo por 3 s", "efeitos": [{ "tipo": "cura_periodica", "duracaoMs": 3000, "valor": 2 }] },
+        "4": { "texto": "Custa 30% menos mana", "custoPct": -30 }
       },
       "evolucoes": {
         "3": [
@@ -170,6 +182,10 @@
         "impacto": "estrelas",
         "camera": "leve",
         "som": "golpe"
+      },
+      "marcos": {
+        "2": { "texto": "Atordoamento 25% mais longo", "duracaoPct": 25 },
+        "4": { "texto": "Expõe o alvo (+20%) por 3 s", "efeitos": [{ "tipo": "exposto", "duracaoMs": 3000, "pct": 20 }] }
       },
       "evolucoes": {
         "3": [
@@ -620,6 +636,10 @@
       "tags": [
         "movimento"
       ],
+      "marcos": {
+        "2": { "texto": "+1 de alcance", "alcance": 1 },
+        "4": { "texto": "Derruba quem atravessa: atordoa 0,4 s", "efeitos": [{ "tipo": "atordoar", "duracaoMs": 400 }] }
+      },
       "evolucoes": {
         "3": [
           "brutal",
@@ -658,6 +678,10 @@
         "som": "golpe"
       },
       "custoVida": 4,
+      "marcos": {
+        "2": { "texto": "Puxa 1 célula para o centro", "efeitos": [{ "tipo": "puxao", "valor": 1 }] },
+        "4": { "texto": "Os atingidos ficam atolados (−10%) por 1 s", "efeitos": [{ "tipo": "atolado", "duracaoMs": 1000, "pct": 10 }] }
+      },
       "evolucoes": {
         "3": [
           "amplo",
@@ -700,6 +724,10 @@
         "impacto": "estrelas",
         "som": "nivel"
       },
+      "marcos": {
+        "2": { "texto": "O bônus dura 25% mais", "duracaoPct": 25 },
+        "4": { "texto": "Os inimigos atingidos ficam sem golpes físicos por 1 s", "efeitos": [{ "tipo": "sem_ataque", "duracaoMs": 1000 }] }
+      },
       "evolucoes": {
         "3": [
           "controle",
@@ -740,6 +768,10 @@
         "cor": "#95a5a6",
         "impacto": "anel",
         "som": "cura"
+      },
+      "marcos": {
+        "2": { "texto": "O escudo dura 20% mais", "duracaoPct": 20 },
+        "4": { "texto": "Também cura 4", "efeitos": [{ "tipo": "cura", "valor": 4 }] }
       },
       "evolucoes": {
         "3": [
@@ -782,6 +814,10 @@
         "impacto": "corte",
         "som": "golpe"
       },
+      "marcos": {
+        "2": { "texto": "+1 de alcance", "alcance": 1 },
+        "4": { "texto": "Quem é puxado fica atordoado 0,5 s", "efeitos": [{ "tipo": "atordoar", "duracaoMs": 500 }] }
+      },
       "evolucoes": {
         "3": [
           "brutal",
@@ -820,6 +856,10 @@
         "som": "golpe"
       },
       "elemento": "fogo",
+      "marcos": {
+        "2": { "texto": "A queimadura dura 30% mais", "duracaoPct": 30 },
+        "4": { "texto": "O fogo abre a guarda: expõe (+15%) por 3 s", "efeitos": [{ "tipo": "exposto", "duracaoMs": 3000, "pct": 15 }] }
+      },
       "evolucoes": {
         "3": [
           "brutal",
@@ -883,6 +923,10 @@
         "som": "explosao"
       },
       "elemento": "fogo",
+      "marcos": {
+        "2": { "texto": "+1 de alcance", "alcance": 1 },
+        "4": { "texto": "A explosão empurra os atingidos 1 célula", "efeitos": [{ "tipo": "empurrao", "valor": 1 }] }
+      },
       "evolucoes": {
         "3": [
           "amplo",
@@ -921,6 +965,10 @@
         "som": "magia"
       },
       "elemento": "gelo",
+      "marcos": {
+        "2": { "texto": "+1 de alcance", "alcance": 1 },
+        "4": { "texto": "Enraíza os atingidos por 1 s", "efeitos": [{ "tipo": "enraizado", "duracaoMs": 1000 }] }
+      },
       "evolucoes": {
         "3": [
           "brutal",
@@ -963,6 +1011,10 @@
       "mods": [
         "encadear"
       ],
+      "marcos": {
+        "2": { "texto": "+1 de alcance", "alcance": 1 },
+        "4": { "texto": "Eletriza por 4 s (o próximo raio salta mais)", "efeitos": [{ "tipo": "eletrizado", "duracaoMs": 4000 }] }
+      },
       "evolucoes": {
         "3": [
           "brutal",
@@ -1004,6 +1056,10 @@
         "impacto": "runas",
         "som": "cura"
       },
+      "marcos": {
+        "2": { "texto": "A barreira dura 25% mais", "duracaoPct": 25 },
+        "4": { "texto": "Também cura 4", "efeitos": [{ "tipo": "cura", "valor": 4 }] }
+      },
       "evolucoes": {
         "3": [
           "controle",
@@ -1043,6 +1099,10 @@
         "som": "magia"
       },
       "elemento": "gelo",
+      "marcos": {
+        "2": { "texto": "O frio dura 25% mais", "duracaoPct": 25 },
+        "4": { "texto": "+1 de raio", "raio": 1 }
+      },
       "evolucoes": {
         "3": [
           "amplo",
@@ -1086,6 +1146,10 @@
         "som": "magia"
       },
       "elemento": "psiquico",
+      "marcos": {
+        "2": { "texto": "O silêncio dura 25% mais", "duracaoPct": 25 },
+        "4": { "texto": "Marca o alvo: o próximo golpe nele causa +25%", "efeitos": [{ "tipo": "marcado", "duracaoMs": 4000, "pct": 25 }] }
+      },
       "evolucoes": {
         "3": [
           "controle",
@@ -1150,6 +1214,10 @@
       "mods": [
         "atravessar"
       ],
+      "marcos": {
+        "2": { "texto": "+1 de alcance", "alcance": 1 },
+        "4": { "texto": "Expõe os atingidos (+10%) por 2 s", "efeitos": [{ "tipo": "exposto", "duracaoMs": 2000, "pct": 10 }] }
+      },
       "evolucoes": {
         "3": [
           "brutal",
@@ -1187,6 +1255,10 @@
         "impacto": "chuva",
         "camera": "leve",
         "som": "projetil"
+      },
+      "marcos": {
+        "2": { "texto": "Custa 20% menos mana", "custoPct": -20 },
+        "4": { "texto": "Flechas cravadas: os atingidos ficam atolados (−30%) por 2 s", "efeitos": [{ "tipo": "atolado", "duracaoMs": 2000, "pct": 30 }] }
       },
       "evolucoes": {
         "3": [
@@ -1226,6 +1298,10 @@
         "som": "projetil"
       },
       "elemento": "veneno",
+      "marcos": {
+        "2": { "texto": "O veneno dura 30% mais", "duracaoPct": 30 },
+        "4": { "texto": "Veneno paralisante: atola (−25%) por 2 s", "efeitos": [{ "tipo": "atolado", "duracaoMs": 2000, "pct": 25 }] }
+      },
       "evolucoes": {
         "3": [
           "controle",
@@ -1262,6 +1338,10 @@
         "cor": "#d4ac0d",
         "impacto": "leque",
         "som": "projetil"
+      },
+      "marcos": {
+        "2": { "texto": "Recarga 15% menor", "recargaPct": -15 },
+        "4": { "texto": "Empurra os atingidos 1 célula", "efeitos": [{ "tipo": "empurrao", "valor": 1 }] }
       },
       "evolucoes": {
         "3": [
@@ -1306,6 +1386,10 @@
         "impacto": "sombra",
         "som": "magia"
       },
+      "marcos": {
+        "2": { "texto": "O alvo fica preso 30% mais", "duracaoPct": 30 },
+        "4": { "texto": "Marca o alvo: o próximo golpe nele causa +25%", "efeitos": [{ "tipo": "marcado", "duracaoMs": 4000, "pct": 25 }] }
+      },
       "evolucoes": {
         "3": [
           "controle",
@@ -1341,6 +1425,160 @@
         "tag": "projetil",
         "alcance": 1,
         "danoPct": 5
+      }
+    },
+    {
+      "id": "flecha_arcana",
+      "grau": "S",
+      "nome": "Flecha arcana",
+      "icone": "flecha",
+      "tipoAtaque": "magico",
+      "formulaDano": "2d8",
+      "formulaCura": null,
+      "alcanceCelulas": 8,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 4,
+      "recargaMs": 3500,
+      "conjuracaoMs": 400,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 18,
+      "efeitos": [
+        {
+          "tipo": "exposto",
+          "duracaoMs": 2000,
+          "pct": 10
+        }
+      ],
+      "mods": [
+        "atravessar"
+      ],
+      "fusao": [
+        "seta_arcana",
+        "flecha_perfurante"
+      ],
+      "tags": [
+        "flechas"
+      ],
+      "visual": {
+        "cor": "#9b8cff",
+        "conjuracao": "runas",
+        "viagem": "esteira",
+        "impacto": "runas",
+        "projetil": "flecha",
+        "som": "magia"
+      }
+    },
+    {
+      "id": "lanca_tempestuosa",
+      "grau": "S",
+      "nome": "Lança tempestuosa",
+      "icone": "raio",
+      "tipoAtaque": "magico",
+      "formulaDano": "3d6",
+      "formulaCura": null,
+      "alcanceCelulas": 6,
+      "tipoArea": "linha",
+      "raioArea": 0,
+      "custoRecurso": 6,
+      "recargaMs": 7000,
+      "conjuracaoMs": 700,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "resfriado",
+          "duracaoMs": 3000,
+          "pct": 30
+        }
+      ],
+      "elemento": "raio",
+      "fusao": [
+        "lanca_de_gelo",
+        "raio_em_cadeia"
+      ],
+      "visual": {
+        "cor": "#a0d8ef",
+        "conjuracao": "cristais",
+        "impacto": "relampago",
+        "camera": "leve",
+        "som": "magia"
+      }
+    },
+    {
+      "id": "ciclone_flamejante",
+      "grau": "S",
+      "nome": "Ciclone flamejante",
+      "icone": "redemoinho",
+      "tipoAtaque": "fisico",
+      "formulaDano": "2d8",
+      "formulaCura": null,
+      "alcanceCelulas": 0,
+      "tipoArea": "ao_redor",
+      "raioArea": 2,
+      "custoRecurso": 6,
+      "recargaMs": 8000,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "elemento": "fogo",
+      "fusao": [
+        "redemoinho",
+        "golpe_flamejante"
+      ],
+      "visual": {
+        "cor": "#ff7b39",
+        "conjuracao": "chamas",
+        "impacto": "chamas",
+        "camera": "forte",
+        "som": "golpe"
+      }
+    },
+    {
+      "id": "cadeia_sombria",
+      "grau": "S",
+      "nome": "Cadeia sombria",
+      "icone": "corrente",
+      "tipoAtaque": "fisico",
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 5,
+      "recargaMs": 9000,
+      "conjuracaoMs": 400,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "puxao",
+          "valor": 4
+        },
+        {
+          "tipo": "sem_movimento",
+          "duracaoMs": 1500
+        }
+      ],
+      "elemento": "sombra",
+      "fusao": [
+        "corrente",
+        "troca_sombria"
+      ],
+      "visual": {
+        "cor": "#6c3483",
+        "impacto": "sombra",
+        "camera": "leve",
+        "som": "golpe"
       }
     }
   ]

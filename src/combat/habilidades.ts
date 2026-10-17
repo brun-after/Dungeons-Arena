@@ -174,6 +174,50 @@ export interface DefinicaoHabilidade {
   evolucoes: Readonly<Record<number, readonly string[]>>;
   /** Modificadores de nascença (ex.: o raio em cadeia sempre encadeia). */
   mods: readonly Modificador[];
+  /**
+   * Marco 18 (17/10/2026, D-068, camada 2): o que cada nível muda além do número — o toque do nível 2 e a assinatura
+   * do nível 4. Valem sozinhos ao chegar no nível, como um caminho sem escolha.
+   */
+  marcos: Readonly<Record<number, MarcoDeNivel>>;
+  /** Marco 18 (camada 7): a fusão nasce de duas habilidades no nível máximo (null = não é fusão). */
+  fusao: readonly string[] | null;
+}
+
+/** Marco 18: um marco de nível — os mesmos ajustes de um caminho, com o texto que a carta mostra. */
+export interface MarcoDeNivel {
+  texto: string;
+  danoPct: number;
+  custoPct: number;
+  recargaPct: number;
+  duracaoPct: number;
+  alcance: number;
+  raio: number;
+  efeitos: readonly EfeitoCanonico[];
+  mods: readonly Modificador[];
+}
+
+function lerMarcos(l: Leitor, v: unknown): Record<number, MarcoDeNivel> {
+  if (v === undefined) return {};
+  const o: Objeto = l.objeto(v, 'marcos');
+  const saida: Record<number, MarcoDeNivel> = {};
+  for (const k of Object.keys(o)) {
+    const nivel = Number(k);
+    if (!Number.isInteger(nivel) || nivel < 2 || nivel > 9) l.erro(`marcos: nível inválido "${k}"`);
+    const m = l.objeto(o[k], `marcos.${k}`);
+    const n = (campo: string, min: number, max: number) => (m[campo] === undefined ? 0 : l.numero(m, campo, { min, max }));
+    saida[nivel] = {
+      texto: l.texto(m, 'texto'),
+      danoPct: n('danoPct', -50, 100),
+      custoPct: n('custoPct', -90, 100),
+      recargaPct: n('recargaPct', -90, 100),
+      duracaoPct: n('duracaoPct', -50, 200),
+      alcance: n('alcance', -3, 3),
+      raio: n('raio', -1, 2),
+      efeitos: m.efeitos === undefined ? [] : normalizarEfeitos(l.lista(m, 'efeitos'), l),
+      mods: m.mods === undefined ? [] : l.listaDeTextos(m, 'mods').filter((x): x is Modificador => (MODIFICADORES as readonly string[]).includes(x)),
+    };
+  }
+  return saida;
 }
 
 function lerVisual(l: Leitor, v: unknown): VisualHabilidade | null {
@@ -321,6 +365,8 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
       l.erro(`modificador desconhecido "${m}"`);
       return false;
     }),
+    marcos: lerMarcos(l, o.marcos),
+    fusao: o.fusao === undefined ? null : l.listaDeTextos(o, 'fusao'),
   };
 }
 

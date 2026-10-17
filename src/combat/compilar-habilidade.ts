@@ -152,6 +152,19 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
   let elemento = b.elemento;
   const extras: EfeitoCanonico[] = [];
   const mods = new Set<Modificador>([...def.mods, ...op.mods]);
+  // Marco 18 (D-068): os marcos dos níveis alcançados (o toque do 2, a assinatura do 4) valem como caminhos fixos.
+  for (const [nivel, m] of Object.entries(def.marcos)) {
+    if (Number(nivel) > rank) continue;
+    multDano *= 1 + m.danoPct / 100;
+    multCura *= 1 + m.danoPct / 100;
+    custo *= 1 + m.custoPct / 100;
+    recarga *= 1 + m.recargaPct / 100;
+    duracao *= 1 + m.duracaoPct / 100;
+    alcance += m.alcance;
+    if (b.politicaImpacto === 'area') raio += m.raio;
+    extras.push(...m.efeitos);
+    for (const x of m.mods) mods.add(x);
+  }
   const caminhosValidos: string[] = [];
   for (const id of op.caminhos) {
     const c = fontes.caminhos.get(id);

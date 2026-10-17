@@ -1,0 +1,41 @@
+{
+  "versao": 1,
+  "regras": [
+    {
+      "id": "furia_em_area",
+      "nome": "Fúria espalhada",
+      "buff": "bonus_dano",
+      "tag": "area",
+      "texto": "Com Fúria ativa, habilidades de área causam +15% e expõem quem está na mira (+10%).",
+      "danoPct": 15,
+      "naMira": { "raio": 1, "efeitos": [{ "tipo": "exposto", "duracaoMs": 2000, "pct": 10 }] }
+    },
+    {
+      "id": "corrente_atravessa",
+      "nome": "Corrente longa",
+      "buff": "atravessar",
+      "habilidade": "corrente",
+      "texto": "Com Atravessar ativo, a Corrente puxa também quem está perto do alvo.",
+      "naMira": { "raio": 2, "efeitos": [{ "tipo": "puxao", "valor": 2 }] }
+    },
+    {
+      "id": "cura_no_refugio",
+      "nome": "Santuário",
+      "buff": "imune_dano",
+      "habilidade": "curar",
+      "texto": "Imune (o refúgio, por exemplo), o Curar também dá escudo de 8.",
+      "noProprio": [
+        { "tipo": "escudo", "duracaoMs": 6000, "valor": 8 }
+      ]
+    },
+    {
+      "id": "investida_em_brasa",
+      "nome": "Trilha em brasa",
+      "buff": "rastro_dano",
+      "habilidade": "investida",
+      "texto": "Com Rastro de dano ativo, a Investida queima quem está no fim da linha.",
+      "naMira": { "raio": 1, "efeitos": [{ "tipo": "queimando", "duracaoMs": 3000, "valor": 3 }] }
+    },
+    { "id": "ritmo", "nome": "Ritmo", "buff": "ab_recarga", "tag": "contato", "texto": "Com o buff de recarga ativo, golpes de contato causam +10%.", "danoPct": 10 }
+  ]
+}

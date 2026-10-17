@@ -28,6 +28,26 @@ export function aprendiveisDa(ctx: ContextoSimulacao, bolsa: Bolsa): string[] {
   return classe ? [...new Set([...classe.habilidades, ...classe.aprendiveis])] : [];
 }
 
+/** Marco 18: a runa de fusão (item de missão) que destrava uma fusão. */
+export const ID_RUNA_DE_FUSAO = 'runa_de_fusao';
+
+/** Por que a fusão ainda não pode ser aprendida (null = pode). */
+export function motivoDaFusao(ctx: ContextoSimulacao, bolsa: Bolsa, partes: readonly string[]): MotivoHabilidade | null {
+  const jaTemFusao = bolsa.conhecidas.some((c) => definicaoDe(ctx, c.id)?.fusao) || (bolsa.estudo ? !!definicaoDe(ctx, bolsa.estudo.id)?.fusao : false);
+  if (jaTemFusao) return 'fusao_unica';
+  const max = ctx.balance.habilidades.rankMax;
+  if (!partes.every((p) => bolsa.conhecidas.some((c) => c.id === p && c.rank >= max))) return 'fusao_niveis';
+  if (!bolsa.mochila.some((i) => i.itemId === ID_RUNA_DE_FUSAO)) return 'fusao_runa';
+  return null;
+}
+
+/** As fusões que o personagem pode ver (as duas partes conhecidas). */
+export function fusoesVisiveis(ctx: ContextoSimulacao, bolsa: Bolsa): string[] {
+  return [...ctx.conteudo.definicoes.values()]
+    .filter((d) => d.fusao && d.fusao.every((p) => bolsa.conhecidas.some((c) => c.id === p)))
+    .map((d) => d.base.id);
+}
+
 /** Nível mínimo para ter a habilidade no rank (o maior entre o do rank e o da definição). */
 export function nivelParaRank(ctx: ContextoSimulacao, id: string, rank: number): number {
   const doRank = ctx.balance.habilidades.ranks[rank - 1]?.nivelMinimo ?? Infinity;
@@ -47,7 +67,11 @@ export function motivoParaNaoSubir(ctx: ContextoSimulacao, e: Entidade, id: stri
   const def = definicaoDe(ctx, id);
   if (!def) return 'desconhecida';
   const conhecida = bolsa.conhecidas.find((c) => c.id === id);
-  if (!conhecida && !aprendiveisDa(ctx, bolsa).includes(id)) return 'nao_aprendivel';
+  // Marco 18 (D-068, camada 7): a fusão pede a runa, as duas habilidades no nível máximo e nenhuma outra fusão.
+  if (!conhecida && def.fusao) {
+    const motivoFusao = motivoDaFusao(ctx, bolsa, def.fusao);
+    if (motivoFusao) return motivoFusao;
+  } else if (!conhecida && !aprendiveisDa(ctx, bolsa).includes(id)) return 'nao_aprendivel';
   // Marco 18 (D-068): um estudo por vez (e a própria habilidade em estudo não se aprende de novo).
   if (!conhecida && bolsa.estudo) return 'estudando';
   const novo = (conhecida?.rank ?? 0) + 1;
@@ -86,6 +110,15 @@ export function subirRank(e: Entidade, ctx: ContextoSimulacao, id: string, camin
       return false;
     }
     bolsa.pontosHabilidade--;
+    // A fusão gasta a runa ao começar o estudo.
+    if (definicaoDe(ctx, id)?.fusao) {
+      const i = bolsa.mochila.findIndex((x) => x.itemId === ID_RUNA_DE_FUSAO);
+      const runa = bolsa.mochila[i];
+      if (runa) {
+        runa.qtd--;
+        if (runa.qtd <= 0) bolsa.mochila.splice(i, 1);
+      }
+    }
     iniciarEstudo(e, ctx, id, tick, saida);
     return true;
   }

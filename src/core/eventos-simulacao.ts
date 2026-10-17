@@ -63,7 +63,11 @@ export type MotivoHabilidade =
   /** Marco 18 (D-068): já estuda outra habilidade; ou não há estudo para acelerar, ou acabaram as acelerações. */
   | 'estudando'
   | 'sem_estudo'
-  | 'aceleracoes_esgotadas';
+  | 'aceleracoes_esgotadas'
+  /** Marco 18 (camada 7): fusão sem a runa, sem as duas no nível máximo, ou já tendo outra. */
+  | 'fusao_runa'
+  | 'fusao_niveis'
+  | 'fusao_unica';
 
 export type MotivoCancelamento = 'morte' | 'interrompido' | 'alvo_invalido' | 'substituido';
 
@@ -120,6 +124,7 @@ export type EventoSimulacao =
   // Marco 18 (D-068, D-069): ressonância nova, combo feito e o renascer do item.
   | { t: 'ressonanciaAtiva'; tick: number; id: EntidadeId; ressonancia: string }
   | { t: 'comboFeito'; tick: number; id: EntidadeId; combo: string; alvoId: EntidadeId | null }
+  | { t: 'buffInteragiu'; tick: number; id: EntidadeId; regra: string }
   | { t: 'renasceu'; tick: number; id: EntidadeId; hp: number }
   | { t: 'barraMudou'; tick: number; id: EntidadeId }
   /** Marco 15: a dificuldade do mundo mudou. */

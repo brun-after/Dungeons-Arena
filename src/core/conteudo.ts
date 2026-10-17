@@ -14,6 +14,7 @@ import itensFormasJson from '../data/itens-formas.json';
 import conjuntosJson from '../data/conjuntos.json';
 import ressonanciasJson from '../data/ressonancias.json';
 import combosJson from '../data/combos.json';
+import interacoesBuffJson from '../data/interacoes-buff.json';
 import campanhaJson from '../data/modos/campanha.json';
 import cooperativoJson from '../data/modos/cooperativo.json';
 import livreJson from '../data/modos/livre.json';
@@ -29,7 +30,7 @@ import { CatalogoDeItens, lerBasesDeItem, type BasesDeItem } from '../progressio
 import { lerItensComFormas, type ItensComFormas } from '../progression/gerar-item-base';
 import { lerConjuntos, type Conjunto } from '../progression/conjuntos';
 import { lerRessonancias, type Ressonancia } from '../progression/ressonancias';
-import { lerCombos, type Combo } from '../combat/combos';
+import { lerCombos, lerRegrasDeBuff, type Combo, type RegraDeBuff } from '../combat/combos';
 import { lerItens, type Item } from '../progression/itens';
 import { BALANCE_PADRAO } from './contexto';
 
@@ -56,6 +57,8 @@ export interface Conteudo {
   ressonancias: Catalogo<Ressonancia>;
   /** Marco 18 (D-068): os combos de sequência. */
   combos: Catalogo<Combo>;
+  /** Marco 18 (camada 6): as regras de buff × habilidade. */
+  regrasDeBuff: Catalogo<RegraDeBuff>;
 }
 
 export interface FontesDeConteudo {
@@ -73,6 +76,7 @@ export interface FontesDeConteudo {
   conjuntos: unknown;
   ressonancias: unknown;
   combos: unknown;
+  interacoesBuff: unknown;
   /** Arquivo -> JSON de cada modo em src/data/modos. */
   modos: Readonly<Record<string, unknown>>;
 }
@@ -90,7 +94,8 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const cj = lerConjuntos(fontes.conjuntos);
   const rs = lerRessonancias(fontes.ressonancias);
   const cb = lerCombos(fontes.combos);
-  const erros = [...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...rs.erros, ...cb.erros];
+  const rb = lerRegrasDeBuff(fontes.interacoesBuff);
+  const erros = [...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...rs.erros, ...cb.erros, ...rb.erros];
   for (const conj of cj.conjuntos.values()) {
     for (const peca of conj.pecas) if (!fo.dados.bases.has(peca)) erros.push(`conjunto ${conj.id}: base desconhecida "${peca}"`);
   }
@@ -158,6 +163,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       conjuntos: cj.conjuntos,
       ressonancias: rs.ressonancias,
       combos: cb.combos,
+      regrasDeBuff: rb.regras,
     },
     erros,
   };
@@ -196,6 +202,7 @@ export const FONTES_OFICIAIS: FontesDeConteudo = {
   conjuntos: conjuntosJson,
   ressonancias: ressonanciasJson,
   combos: combosJson,
+  interacoesBuff: interacoesBuffJson,
   modos: { 'campanha.json': campanhaJson, 'cooperativo.json': cooperativoJson, 'livre.json': livreJson },
 };
 
