@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.35 · **Data:** 17/10/2026
+**Versão:** 0.36 · **Data:** 17/10/2026
 
 > **Histórico**
+> - **0.36 (17/10/2026)**: D-072 (HUD compacto no topo do celular; avisos e alvo sem sobreposição).
 > - **0.35 (17/10/2026)**: D-071 (recuperação dos inimigos, especialização ofensiva, ritmo, descobertas públicas por pseudônimo e cobertura do estudo).
 > - **0.34 (17/10/2026)**: D-068 (atributos, estudo, revide e armadilhas), D-069 (itens base com formas, ganchos, conjuntos e elementos novos) e D-070 (combos, marcos, fusões, missões, origens, forja, eventos de fase e diário).
 > - **0.33 (17/10/2026)**: D-067 (ajustes depois do 11A: sem descanso, buff armado, refúgio, loja sem prazo, equipamento no token, flechas, ícones próprios, paisagem).
@@ -1858,3 +1859,17 @@ de descobertas, estudo e lobby.
 A distribuição de atributos passa a ter retorno ofensivo próprio, sem acelerar globalmente a rolagem. Os créditos
 públicos deixam de publicar o nome da conta Google. As porcentagens de builds descrevem as sementes do relatório,
 não uma garantia para toda combinação de equipamento ou habilidade.
+
+## D-072 · Avisos e alvo compactos no topo do celular (v0.36, 17/10/2026)
+
+**Contexto.** Os avisos cobriam a área de combate no celular e podiam se sobrepor ao quadro do inimigo selecionado.
+O usuário pediu ambos junto à borda superior, avisos com a fonte do nome do alvo e a vida do alvo menor.
+
+**Decisão.** Avisos e alvo compartilham uma faixa em fluxo vertical: aviso primeiro, alvo depois, com espaço entre
+eles mesmo quando o texto quebra em mais linhas. No toque, a faixa fica a 4 px da borda superior segura. Os dois
+usam fonte de 0,75 rem. Só o aviso mais recente permanece visível, mantendo seu prazo normal e o anúncio acessível.
+A barra do alvo usa a mesma largura e altura visíveis da vida do jogador, inclusive com a escala da interface.
+Chamadas de aviso vindas da campanha e da arena encontram a mesma faixa; ela não captura toques.
+
+**Validação.** E2e com aviso real da campanha e alvo selecionado, em 915×412 e 568×320, além de área segura de 40 px
+e escala de interface de 150%, verificando posição, ausência de sobreposição e igualdade das barras.

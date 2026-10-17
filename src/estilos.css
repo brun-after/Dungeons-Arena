@@ -9,6 +9,7 @@
   --controle: rgba(236, 232, 244, 0.1);
   --controle-ativo: rgba(236, 232, 244, 0.3);
   --altura-faixa: 160px;
+  --largura-barra-vida: 60px;
   --seguro-topo: env(safe-area-inset-top, 0px);
   --seguro-base: env(safe-area-inset-bottom, 0px);
   --seguro-esq: env(safe-area-inset-left, 0px);
@@ -319,7 +320,7 @@ body.toque .faixa-controles {
 }
 
 .barra {
-  width: 60px;
+  width: var(--largura-barra-vida);
   height: 8px;
   border-radius: 3px;
   background: rgba(0, 0, 0, 0.6);
@@ -350,8 +351,8 @@ body.toque .faixa-controles {
 }
 
 @media (max-width: 479px) {
-  .barra {
-    width: 40px;
+  :root {
+    --largura-barra-vida: 40px;
   }
 }
 
@@ -536,26 +537,45 @@ body.toque .dado-d20 {
   color: #e74c3c;
 }
 
-/* Quadro do alvo (ajuste de 15/10/2026, D-065): nome, nível, vida e o cadeado, abaixo do cabeçalho */
-.quadro-alvo {
+/* Ajuste de 17/10/2026: aviso e alvo no mesmo fluxo; no celular, junto à borda segura do topo. */
+.mensagens-topo {
   position: absolute;
+  z-index: 1;
   top: calc(52px + var(--seguro-topo));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: min(440px, calc(100% - 24px - var(--seguro-esq) - var(--seguro-dir)));
+  font-size: 0.75rem;
+  line-height: 1.25;
+  pointer-events: none;
+}
+
+body.toque .mensagens-topo {
+  top: calc(4px + var(--seguro-topo));
+  width: 44%;
+}
+
+/* Nome, nível, vida e cadeado, sempre abaixo do aviso quando ambos estão visíveis. */
+.quadro-alvo {
+  order: 1;
+  display: flex;
   align-items: center;
   gap: 6px;
-  max-width: calc(100% - 32px);
+  max-width: 100%;
   padding: 3px 10px;
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.6);
   border: 1px solid var(--borda);
-  font-size: 0.75rem;
+  font-size: inherit;
   pointer-events: none;
 }
 
 @media (max-width: 479px) {
-  .quadro-alvo {
+  body:not(.toque) .mensagens-topo {
     top: calc(84px + var(--seguro-topo));
   }
 }
@@ -571,7 +591,9 @@ body.toque .dado-d20 {
 }
 
 .quadro-alvo .barra {
-  width: 80px;
+  /* O cabeçalho respeita a escala escolhida; a barra do alvo acompanha a mesma medida visível. */
+  width: calc(var(--largura-barra-vida) * var(--escala-ui, 1));
+  height: calc(8px * var(--escala-ui, 1));
   flex: none;
 }
 
@@ -938,16 +960,13 @@ body.toque .botao-habilidade .tecla {
 }
 
 .aviso {
-  position: absolute;
-  top: calc(64px + var(--seguro-topo));
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: calc(100% - 32px);
-  padding: 10px 14px;
-  border-radius: 10px;
+  max-width: 100%;
+  padding: 3px 8px;
+  border-radius: 6px;
   background: var(--painel);
   border: 1px solid var(--borda);
-  font-size: 0.9rem;
+  font-size: inherit;
+  overflow-wrap: anywhere;
   text-align: center;
 }
 
