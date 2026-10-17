@@ -7,6 +7,9 @@
 // Ajuste de 15/10/2026 (D-060): a área deixa de ser a hitbox pintada. Vira uma mancha orgânica que cobre as células
 // (render/formas-visuais.ts): preenchimento suave na cor do elemento, borda na cor da equipe e o miolo crescendo até
 // o impacto. "Mostrar a área exata" (Configurações) desenha as células por cima.
+// Marco 11A (16/10/2026, D-066): com partículas ligadas, nada de forma plana — a área enche de luz na cor do elemento
+// (mais densa conforme o impacto chega), o contorno é feito de pontos na cor de quem ataca, a mira é um fio de
+// partículas e o projétil é um núcleo de luz. As formas desenhadas ficam só para a qualidade sem partículas.
 
 import { Graphics, type Container } from 'pixi.js';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -17,7 +20,22 @@ import { celulasDaForma, deSuporte } from '../combat/formas';
 import { relacao } from '../modos/relacao';
 import { CELULA_PX } from './camera-calculo';
 import { contornoDaArea, escalarContorno, type Contorno } from './formas-visuais';
+import type { SistemaParticulas } from './particulas';
 import { centroDaCelula, type Projecao } from './projecao';
+import { visualDe } from './visual-habilidade';
+import type { Celula } from '../core/comandos';
+
+/** De quanto em quanto tempo cada ação solta as partículas da telegrafia. */
+const INTERVALO_TELEGRAFO_MS = 70;
+const INTERVALO_MIRA_MS = 90;
+
+const sortear = <T>(lista: readonly T[]): T | undefined => lista[Math.floor(Math.random() * lista.length)];
+
+/** As células da área que tocam uma de fora (o contorno, em células). */
+function bordaDe(celulas: readonly Celula[]): Celula[] {
+  const dentro = new Set(celulas.map((c) => `${c.x},${c.y}`));
+  return celulas.filter((c) => !dentro.has(`${c.x + 1},${c.y}`) || !dentro.has(`${c.x - 1},${c.y}`) || !dentro.has(`${c.x},${c.y + 1}`) || !dentro.has(`${c.x},${c.y - 1}`));
+}
 
 const COR_HOSTIL = 0xff5a3c;
 const COR_PROPRIA = 0x5dade2;
@@ -29,6 +47,8 @@ export class CamadaTelegrafia {
   private readonly voo = new Graphics();
   /** Contorno por ação (o mesmo do começo ao fim da conjuração). */
   private readonly contornos = new Map<number, Contorno>();
+  /** Marco 11A: última emissão de partículas por ação (telegrafia em partículas). */
+  private readonly ultimaEmissao = new Map<number, number>();
 
   constructor(
     camadaChao: Container,
@@ -36,6 +56,8 @@ export class CamadaTelegrafia {
     private readonly projecao: () => Projecao,
     /** Ajuste de 15/10/2026: desenhar também as células exatas da hitbox. */
     private readonly areaExata: () => boolean = () => false,
+    /** Marco 11A: com partículas (qualidade acima do mínimo), a forma do ataque é toda partícula. */
+    private readonly particulas: SistemaParticulas | null = null,
   ) {
     camadaChao.addChild(this.chao);
     camadaVoo.addChild(this.voo);
@@ -46,6 +68,13 @@ export class CamadaTelegrafia {
     const voo = this.voo.clear();
     const local = estado.entidades.find((e) => e.id === idLocal);
     const tickVisual = estado.tick + alpha;
+    const agora = performance.now();
+    const p = this.particulas && this.particulas.limite > 0 ? this.particulas : null;
+    const vez = (id: number, intervalo: number) => {
+      if (agora - (this.ultimaEmissao.get(id) ?? -Infinity) < intervalo) return false;
+      this.ultimaEmissao.set(id, agora);
+      return true;
+    };
 
     const vistas = new Set<number>();
     for (const e of estado.entidades) {
@@ -69,7 +98,26 @@ export class CamadaTelegrafia {
         vistas.add(a.acaoId);
         if (contorno.pontos.length === 0) continue;
         const elemento = hab.elemento ? ctx.conteudo.elementos.get(hab.elemento)?.cor : undefined;
-        const fundo = elemento ? corDe(elemento) : cor;
+        const fundo = elemento ? corDe(elemento) : visualDe(hab).cor;
+        if (p) {
+          // A área em partículas: o miolo enche conforme o impacto chega; a borda, em pontos na cor de quem ataca.
+          if (vez(a.acaoId, INTERVALO_TELEGRAFO_MS)) {
+            const miolo = Math.min(celulas.length, 2 + Math.round(10 * fracao));
+            for (let i = 0; i < miolo; i++) {
+              const c = sortear(celulas);
+              if (c) p.emitir('telegrafo', c.x, c.y, fundo);
+            }
+            const borda = bordaDe(celulas);
+            for (let i = 0; i < Math.min(borda.length, 3 + Math.round(3 * fracao)); i++) {
+              const c = sortear(borda);
+              if (c) p.emitir('borda', c.x, c.y, cor);
+            }
+          }
+          if (this.areaExata()) {
+            for (const c of celulas) chao.rect(c.x * CELULA_PX + 2, c.y * CELULA_PX + 2, CELULA_PX - 4, CELULA_PX - 4).stroke({ width: 1, color: cor, alpha: 0.6 });
+          }
+          continue;
+        }
         // Preenchimento suave: camadas concêntricas mais densas no centro; a borda diz de quem é.
         chao.poly(escalarContorno(contorno, 1)).fill({ color: fundo, alpha: 0.1 });
         chao.poly(escalarContorno(contorno, 0.72)).fill({ color: fundo, alpha: 0.07 });
@@ -86,14 +134,22 @@ export class CamadaTelegrafia {
         const alvo = a.alvoId ? estado.entidades.find((x) => x.id === a.alvoId) : undefined;
         const tx = ((alvo?.x ?? a.alvoX) + 0.5) * CELULA_PX;
         const ty = ((alvo?.y ?? a.alvoY) + 0.5) * CELULA_PX;
+        if (p) {
+          // A mira em partículas: um fio de pontos de quem ataca até o alvo.
+          if (vez(a.acaoId, INTERVALO_MIRA_MS)) p.emitir('mira', e.x, e.y, cor, { x: alvo?.x ?? a.alvoX, y: alvo?.y ?? a.alvoY });
+          vistas.add(a.acaoId);
+          continue;
+        }
         chao.moveTo(ox, oy).lineTo(tx, ty).stroke({ width: 2 + 2 * fracao, color: cor, alpha: 0.35 + 0.4 * fracao });
       }
     }
 
     for (const id of this.contornos.keys()) if (!vistas.has(id)) this.contornos.delete(id);
+    for (const id of this.ultimaEmissao.keys()) if (!vistas.has(id)) this.ultimaEmissao.delete(id);
     const proj = this.projecao();
     // No isométrico o projétil voa um pouco acima do chão (na altura do peito).
     const altura = proj.visao === 'iso' ? CELULA_PX * 0.45 : 0;
+    const particulas = this.particulas && this.particulas.limite > 0 ? this.particulas : null;
     for (const p of estado.projeteis) {
       const avanco = (p.velocidade * alpha * DT_MS) / 1000;
       const c = centroDaCelula(p.x + p.dirX * avanco, p.y + p.dirY * avanco);
@@ -102,6 +158,12 @@ export class CamadaTelegrafia {
       const atras = proj.projetar(c.x - p.dirX * CELULA_PX * 0.6, c.y - p.dirY * CELULA_PX * 0.6);
       const dono = estado.entidades.find((e) => e.id === p.donoId);
       const cor = dono && local && relacao(local, dono, ctx.modo) === 'proprio' ? COR_PROPRIA : COR_HOSTIL;
+      if (particulas) {
+        // O projétil é um núcleo de luz na cor da habilidade (o rastro vem dos efeitos de habilidade).
+        const hab = resolverHabilidade(ctx, p.chave);
+        particulas.emitir('projetil', p.x + p.dirX * avanco, p.y + p.dirY * avanco, (hab ? visualDe(hab).cor : null) ?? cor);
+        continue;
+      }
       // Rastro curto atrás do projétil para mostrar a trajetória.
       voo.moveTo(atras.x, atras.y - altura).lineTo(x, y).stroke({ width: 3, color: cor, alpha: 0.5 });
       voo.circle(x, y, 6).fill(cor).stroke({ width: 2, color: 0xffffff, alpha: 0.8 });

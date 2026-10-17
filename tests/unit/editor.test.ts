@@ -36,7 +36,7 @@ describe('grade do editor', () => {
     const alteracoes = aplicarFerramenta(f, { t: 'spawn' }, 0, 0);
     expect(alteracoes).toHaveLength(2);
     expect(f.spawn).toEqual({ x: 0, y: 0 });
-    expect(lerCelula(f, 0, 0)).toEqual({ tipo: 'piso', spawn: true, inimigo: null, objeto: null });
+    expect(lerCelula(f, 0, 0)).toEqual({ tipo: 'piso', spawn: true, inimigo: null, objeto: null, peca: null });
     expect(lerCelula(f, 1, 1).spawn).toBe(false);
     expect(aplicarFerramenta(f, { t: 'terreno', tipo: 'parede' }, 0, 0)).toHaveLength(1);
     expect(f.spawn).toBeNull();
@@ -111,7 +111,7 @@ describe('histórico por traço', () => {
     const h = new Historico();
     for (let i = 0; i < 130; i++) traco(f, h, [[1 + (i % 18), 1 + Math.floor(i / 18)]], { t: 'terreno', tipo: 'parede' });
     let desfeitos = 0;
-    while (h.desfazerUm(f).length > 0) desfeitos++;
+    while (h.desfazerUm(f).t !== 'nada') desfeitos++;
     expect(desfeitos).toBe(120);
     h.refazerUm(f);
     traco(f, h, [[10, 10]], { t: 'terreno', tipo: 'saida' });
@@ -128,10 +128,10 @@ describe('fases do jogador no IndexedDB', () => {
   it('grava o rascunho (mesmo inválido), lista, carrega e apaga', async () => {
     const f = nova();
     f.spawn = null;
-    await gravarAventura(f);
+    await gravarAventura({ id: 't', nome: 'Teste', fases: [f] });
     expect((await listarAventuras()).map((a) => a.id)).toEqual(['t']);
     const lida = await carregarAventura('t');
-    expect(lida && paraFaseJson(lida)).toEqual(paraFaseJson(f));
+    expect(lida?.fases[0] && paraFaseJson(lida.fases[0])).toEqual(paraFaseJson(f));
     await apagarAventura('t');
     expect(await carregarAventura('t')).toBeNull();
   });

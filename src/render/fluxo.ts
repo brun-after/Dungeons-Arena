@@ -12,13 +12,17 @@ const cor = (hex: string) => Number.parseInt(hex.slice(1), 16);
 export class CamadaFluxo {
   private readonly g = new Graphics();
 
-  constructor(camada: Container) {
+  /** Marco 11A (D-066): com partículas, os rastros são partícula (efeitos-habilidade.ts) e não quadrados. */
+  constructor(
+    camada: Container,
+    private readonly comParticulas: () => boolean = () => false,
+  ) {
     camada.addChild(this.g);
   }
 
   desenhar(estado: EstadoJogo, idLocal: string): void {
     const g = this.g.clear();
-    for (const r of estado.rastros) {
+    for (const r of this.comParticulas() ? [] : estado.rastros) {
       g.rect(r.x * CELULA_PX + 4, r.y * CELULA_PX + 4, CELULA_PX - 8, CELULA_PX - 8).fill({ color: cor(REGISTRO_EFEITOS[r.tipo].cor), alpha: 0.28 });
     }
     // Armadilha: cantos marcados, só para quem armou.

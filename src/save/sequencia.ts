@@ -15,9 +15,22 @@ export interface RegrasGeradas {
   altura: number;
 }
 
-/** A fase seguinte; null quando não há (uma aventura do editor termina nela mesma). */
-export function proximaFase(ref: RefFase, fases: readonly string[], g: RegrasGeradas, nivelMax: number): RefFase | null {
-  if (ref.tipo === 'aventura') return null;
+/**
+ * A fase seguinte; null quando não há. Marco 11A: a aventura do editor segue pela lista de fases dela
+ * (`fasesDaAventura` é quantas tem) e termina na última.
+ */
+export function proximaFase(
+  ref: RefFase,
+  fases: readonly string[],
+  g: RegrasGeradas,
+  nivelMax: number,
+  fasesDaAventura = 1,
+  estilo: readonly string[] = [],
+): RefFase | null {
+  if (ref.tipo === 'aventura') {
+    const indice = (ref.indice ?? 0) + 1;
+    return indice < fasesDaAventura ? { tipo: 'aventura', id: ref.id, indice } : null;
+  }
   if (ref.tipo === 'oficial') {
     const indice = fases.indexOf(ref.id);
     const seguinte = indice >= 0 ? fases[indice + 1] : undefined;
@@ -41,6 +54,8 @@ export function proximaFase(ref: RefFase, fases: readonly string[], g: RegrasGer
       matizGraus: ((anterior?.params.matizGraus ?? 0) + 28) % 360,
       largura: g.largura,
       altura: g.altura,
+      // Marco 11A: as regras de estilo do aparelho (opcional), guardadas para a fase sair igual ao reabrir.
+      ...(estilo.length > 0 && { estilo: [...estilo] }),
     },
   };
 }

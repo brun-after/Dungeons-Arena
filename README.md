@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 2.9 · **Data:** 16/10/2026
+**Versão do documento:** 3.0 · **Data:** 16/10/2026
 **Status:** 🚧 Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena
 
 > **Histórico**
+> - **3.0 (16/10/2026)**: marco 11A (editor completo no toque, aventuras de até 12 fases, tileset por imagem, estilo por aparelho, visuais das habilidades em partículas e trilhas casual ↔ dark; D-066).
 > - **2.9 (15/10/2026)**: alvo que não troca sozinho, troca com `Q` ou 🎯 e trava com `T`, clique ou toque longo (D-065).
 > - **2.8 (15/10/2026)**: marco 17 (conta Google e progresso na nuvem, certificado do personagem, a campanha na arena com faixas e recompensas, equipamento gerado por nível e atributos com mais efeito; D-063) e o 11A redefinido (D-064).
 > - **2.7 (15/10/2026)**: marco 16 fechado com o teste de 10 min na VM (10/10 metas, memória estável, sem reinício).
@@ -71,7 +72,7 @@ Divergências em relação a ela são registradas em [`docs/DECISOES.md`](docs/D
 | **Balanceamento** | `npm run balancear` (tabela das metas do ritmo); `-- --registrar` grava [`docs/BALANCEAMENTO.md`](docs/BALANCEAMENTO.md) | Marco 15 |
 | **Benchmarks do cliente** | `?bench=carga` ou `?bench=padrao` no navegador (o resultado aparece na tela; `&qualidade=baixo` e `&segundos=60` opcionais); `npm run bench` roda tudo e grava em `docs/BENCHMARKS.md` | Marco 16 |
 | **Teste com pessoas** | Link <https://brun-after.github.io/Dungeons-Arena/?pesquisa=1>; roteiro e resumo em [`docs/TESTES-HUMANOS.md`](docs/TESTES-HUMANOS.md) | Marco 7 |
-| **Editor de fases** | Menu → **Editor de fases** (ou `?editor`): crie, pinte, ponha inimigos, **Testar** com o seu personagem, **Exportar** o `.json`. Para jogar valendo: Campanha → slot vazio → escolha a fase | Marco 6 |
+| **Editor de aventuras** | Menu → **Editor de fases** (ou `?editor`): aventuras de até 12 fases; pincel, balde e retângulo; baú, loja, item, armadilha, som, inimigo com nível, porta interna e saída com tranca; toque longo abre o inspetor; **Fases** troca, gera (também "no meu estilo") e escolhe o tileset (imagem 4×4 ou 5×5); **▶** testa a fase e **▶▶** a aventura inteira; **⇩** exporta a fase. Para jogar valendo: Campanha → slot vazio → escolha a aventura | Marcos 6 e 11A |
 | **Local: verificação completa** | `npm run verificar` (typecheck, lint, testes e build) | Etapa 1 |
 | **Testes** | `npm test` (unidade, simulação, rede e integração com o servidor), `npm run test:e2e` (Playwright) | Etapa 1 |
 | **Offline** | Depois da primeira visita, a campanha abre em modo avião (PWA) | Etapa 2 |
@@ -146,7 +147,7 @@ Node.js + Colyseus no backend da arena · WSS · Vitest + Playwright.
 Cada marco vira **um** Pull Request (a partir do 12, sem subdivisões). O CI (typecheck, lint, testes, build e
 smoke) precisa passar antes do merge em `main`, e o merge publica automaticamente.
 
-**Ordem atual** (D-055, D-057): **15 → 16**, depois **11A**, depois a arena (**8B → 9B → 10B → 11B**). A sessão com
+**Ordem atual** (D-055, D-057, D-064): 15, 16, 17 e 11A concluídos; agora a arena (**8B → 9B → 10B → 11B**). A sessão com
 pessoas (7C) entra quando houver testadores.
 
 ### Etapas de infraestrutura
@@ -174,7 +175,7 @@ pessoas (7C) entra quando houver testadores.
 | [x] | 8A | 26 tipos de efeito, normalização e dispatcher | Todos os efeitos exercitados; o registro aparece no editor e nos orbes |
 | [x] | 9A | Inventário, 10 slots, economia, baús, loja, orbes e spawner | A ordem de equipar não altera o resultado; ciclo econômico íntegro |
 | [x] | 10A | Progressão 1–20, morte, geração procedural, portas, invocações e avatares | Campanha completa, com save, migrações e modo offline |
-| [ ] | 11A | Editor completo no toque (baú, loja, armadilha, portas e loot), aventura de 2+ fases, tileset por imagem, aprendizado de estilo por aparelho, a aparência das habilidades refinada e trilhas variadas entre casual e dark fantasy (D-064) | Aventura de 2 fases criada e testada no celular |
+| [x] | 11A | Editor completo no toque (baú, loja, armadilha, portas e loot), aventura de 2+ fases, tileset por imagem, aprendizado de estilo por aparelho, a aparência das habilidades refinada e trilhas variadas entre casual e dark fantasy (D-064) | Aventura de 2 fases criada e testada no celular |
 
 ### Expansão e operação da arena
 

@@ -17,6 +17,8 @@ export interface OpcoesVisao {
   palco: Palco;
   camera: Camera;
   fase: Fase;
+  /** Marco 11A: a cor da parede do tileset do jogador (os prismas do isométrico); null usa a paleta da fase. */
+  corParede?: number | null;
   /** Depois de trocar a visão ou o token: as camadas refazem o que depende disso. */
   aoTrocar: () => void;
 }
@@ -42,7 +44,7 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
     const p = camera.projecaoAtual;
     palco.definirMatrizPlano(p.matriz);
     paredes?.destruir();
-    paredes = p.visao === 'iso' ? criarParedesIso(palco.entidades, fase, p) : null;
+    paredes = p.visao === 'iso' ? criarParedesIso(palco.entidades, fase, p, o.corParede ?? null) : null;
     document.body.dataset.visao = p.visao;
   };
   aplicar();

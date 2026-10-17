@@ -10,12 +10,15 @@
 //   6. marco 14 (14/10/2026), D-059: habilidades geradas por semente — o chefe ganha 2 e cada inimigo comum,
 //      com chance que cresce com o nível, 1. Num fluxo de PRNG **separado** (`semente:habilidades`): o mapa, os
 //      inimigos e os objetos das fases geradas já salvas não mudam.
+//   7. marco 11A (16/10/2026), D-066: com `estilo` (regras do perfil do jogador, guardadas nos parâmetros), uma
+//      passada de `aplicarEstilo` no fim, num PRNG próprio; sem `estilo`, a fase é a mesma de antes.
 
 import { idGerada } from '../combat/chave-habilidade';
 import type { Celula } from '../core/comandos';
 import type { Conteudo } from '../core/conteudo';
 import { BALANCE_PADRAO, type Balance } from '../core/contexto';
 import { aleatorio, criarRng, escolher, hashTexto, inteiro, proximoU32, type EstadoRng } from '../core/rng';
+import { aplicarEstilo } from './estilo';
 import type { FaseJson, InimigoPosicionado, ObjetoPosicionadoJson, PortaInterna } from './fase';
 
 export interface ParametrosGeracao {
@@ -27,6 +30,8 @@ export interface ParametrosGeracao {
   matizGraus: number;
   largura?: number;
   altura?: number;
+  /** Marco 11A: regras de estilo (`[PFD]{8}[01]`), opcionais, só neste aparelho (aprendizado por aparelho). */
+  estilo?: string[];
 }
 
 /** O que o gerador precisa do catálogo: presets comuns e de chefe, e o estoque da loja. */
@@ -185,7 +190,7 @@ export function gerarFase(p: ParametrosGeracao, catalogo: CatalogoGeracao): Fase
     portasInternas.push({ numero: par + 1, nome: `Passagem ${par + 1}`, a: achado.a, b: achado.b });
   }
 
-  return {
+  const json: FaseJson = {
     id: p.id,
     nome: p.nome,
     ordem: 1000,
@@ -198,6 +203,7 @@ export function gerarFase(p: ParametrosGeracao, catalogo: CatalogoGeracao): Fase
     ...(portasInternas.length > 0 && { portasInternas }),
     matizGraus: p.matizGraus,
   };
+  return p.estilo && p.estilo.length > 0 ? aplicarEstilo(json, p.estilo, p.semente) : json;
 }
 
 function sortearParDePortas(rng: EstadoRng, salas: readonly Sala[], celulaNaSala: (s: Sala) => Celula | null): { a: Celula; b: Celula } | null {

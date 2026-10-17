@@ -40,6 +40,8 @@ export interface Preferencias {
   tamanhoToken: number;
   /** Ajuste de 15/10/2026 (D-060): desenhar as células exatas das áreas por cima da mancha. */
   areaExata: boolean;
+  /** Marco 11A (D-066): as fases geradas seguem o estilo aprendido no editor deste aparelho (opcional). */
+  estiloNasGeradas: boolean;
 }
 
 export const QUALIDADES: readonly NivelQualidade[] = ['minimo', 'baixo', 'medio', 'alto'];
@@ -61,6 +63,7 @@ export const PREFERENCIAS_PADRAO: Preferencias = {
   sentidoToken: 'direita',
   tamanhoToken: 1,
   areaExata: false,
+  estiloNasGeradas: false,
 };
 const PADRAO = PREFERENCIAS_PADRAO;
 
@@ -90,6 +93,7 @@ export function normalizarPreferencias(dados: unknown): Preferencias {
     sentidoToken: opcao(d.sentidoToken, ['direita', 'esquerda'] as const, PADRAO.sentidoToken),
     tamanhoToken: numeroEntre(d.tamanhoToken, 0.8, 1.3, PADRAO.tamanhoToken),
     areaExata: booleano(d.areaExata, PADRAO.areaExata),
+    estiloNasGeradas: booleano(d.estiloNasGeradas, PADRAO.estiloNasGeradas),
   };
 }
 

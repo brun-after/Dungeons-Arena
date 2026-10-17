@@ -48,6 +48,8 @@ export interface OpcoesApresentacao {
 }
 
 export interface Apresentacao {
+  /** Marco 11A: as partículas, para a telegrafia e os rastros também serem partícula. */
+  particulas: SistemaParticulas;
   botaoPausa: HTMLButtonElement;
   abrirPausa: () => void;
   pausado: () => boolean;
@@ -94,6 +96,8 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     document.body.dataset.qualidade = nivel();
     motor.definirVolumes({ musica: prefs.volumeMusica, efeitos: prefs.volumeEfeitos, mudo: prefs.mudo });
     particulas.limite = qualidade().particulas;
+    // Marco 11A: movimento reduzido também reduz as partículas (metade, sem giro).
+    particulas.reduzido = reduzido();
     if (particulas.limite === 0) particulas.limpar();
   };
   aplicarPreferencias();
@@ -145,6 +149,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   };
 
   return {
+    particulas,
     encerrar: () => {
       motor.destruir();
       sistema.removeEventListener('change', aplicarPreferencias);

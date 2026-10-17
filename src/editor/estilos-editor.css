@@ -1,0 +1,129 @@
+/* Editor completo (marco 11A, 16/10/2026, D-066): grupos de ferramentas, opções da ferramenta acima da barra,
+   inspetor, painel de fases e tileset. Carregado só com o editor (chunk próprio). Alvos de 44 px (§4.13). */
+
+.grupo-editor {
+  display: inline-flex;
+  flex: none;
+  gap: 6px;
+}
+
+.opcoes-editor {
+  position: absolute;
+  left: calc(8px + var(--seguro-esq));
+  right: calc(8px + var(--seguro-dir));
+  bottom: calc(66px + var(--seguro-base));
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  pointer-events: none;
+}
+
+.opcoes-editor > * {
+  pointer-events: auto;
+}
+
+.opcoes-editor[hidden] {
+  display: none;
+}
+
+.nivel-editor {
+  width: 72px;
+}
+
+.modal-inspetor .modal-corpo,
+.modal-fases .modal-corpo,
+.modal-tileset .modal-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-inspetor h3,
+.modal-fases h3,
+.modal-tileset h3 {
+  margin: 6px 0 0;
+  font-size: 0.95rem;
+}
+
+.campo-inspetor {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.campo-inspetor input[type='checkbox'] {
+  width: 24px;
+  height: 24px;
+}
+
+.lista-inspetor,
+.lista-tilesets {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.linha-inspetor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+.lista-fases {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lista-fases li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+}
+
+.lista-fases li.fase-atual {
+  border-color: var(--destaque);
+}
+
+.nome-fase-lista {
+  flex: 1 1 140px;
+}
+
+.previa-tileset {
+  display: grid;
+  gap: 4px;
+}
+
+.celula-tileset {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 44px;
+  padding: 4px;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  background: var(--controle);
+  color: var(--texto);
+  font: inherit;
+  font-size: 0.65rem;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.miniatura-peca {
+  width: 44px;
+  height: 44px;
+  image-rendering: pixelated;
+}

@@ -3,14 +3,18 @@
 // acompanham câmera e zoom. O teto vem da qualidade (§4.10): no mínimo, nenhuma partícula. Usa um PRNG
 // visual próprio (Math.random): nunca consome a sequência da simulação (§2.1).
 // Marco 13 (14/10/2026): a origem é projetada (de cima ou isométrica); a partícula voa no espaço da tela.
+// Marco 11A (16/10/2026, D-066): ParticleContainer do Pixi (dois: aditivo e normal) com todas as texturas num atlas
+// só, gerado uma vez — muito mais partículas pelo mesmo custo. Formas de emissão, cor ao longo da vida, giro e
+// arrasto. Com movimento reduzido, metade das partículas e nada de giro.
 
-import { Container, Graphics, Sprite, type Renderer, type Texture } from 'pixi.js';
+import { Container, Graphics, Particle, ParticleContainer, Rectangle, Texture, type Renderer } from 'pixi.js';
 import { CELULA_PX } from './camera-calculo';
 import { centroDaCelula, type Projecao } from './projecao';
-import { PRESETS_PARTICULA, type Emissao, type NomePreset, type TexturaParticula } from './presets-particula';
+import { PRESETS_PARTICULA, TEXTURAS_PARTICULA, type Emissao, type NomePreset, type TexturaParticula } from './presets-particula';
 
 interface Viva {
-  sprite: Sprite;
+  p: Particle;
+  aditiva: boolean;
   vx: number;
   vy: number;
   gravidade: number;
@@ -18,43 +22,98 @@ interface Viva {
   vidaMs: number;
   escala: readonly [number, number];
   alpha: readonly [number, number];
+  cor: number;
+  corFinal: number | null;
+  giro: number;
+  arrasto: number;
 }
 
+const LADO = 32;
 const entre = (a: number, b: number) => a + Math.random() * (b - a);
 
-function desenharTextura(g: Graphics, tipo: TexturaParticula): Graphics {
+function misturar(a: number, b: number, f: number): number {
+  const c = (s: number) => Math.round(((a >> s) & 0xff) + (((b >> s) & 0xff) - ((a >> s) & 0xff)) * f);
+  return (c(16) << 16) | (c(8) << 8) | c(0);
+}
+
+/** Desenha cada textura numa célula de 32 px (centro em 16,16). */
+function desenharTextura(g: Graphics, tipo: TexturaParticula, ox: number): void {
+  const cx = ox + 16;
+  const cy = 16;
   switch (tipo) {
     case 'ponto':
-      return g.circle(8, 8, 4).fill(0xffffff);
+      g.circle(cx, cy, 6).fill(0xffffff);
+      return;
     case 'brilho':
-      for (let r = 8; r >= 1; r--) g.circle(8, 8, r).fill({ color: 0xffffff, alpha: 0.12 });
-      return g;
+      for (let r = 15; r >= 1; r--) g.circle(cx, cy, r).fill({ color: 0xffffff, alpha: 0.07 + (15 - r) * 0.004 });
+      return;
     case 'fumaca':
-      for (let r = 8; r >= 2; r--) g.circle(8, 8, r).fill({ color: 0xffffff, alpha: 0.08 });
-      return g;
+      for (let r = 15; r >= 3; r--) g.circle(cx + Math.sin(r) * 1.5, cy + Math.cos(r) * 1.5, r).fill({ color: 0xffffff, alpha: 0.06 });
+      return;
     case 'anel':
-      return g.circle(8, 8, 6.5).stroke({ width: 1.5, color: 0xffffff });
+      g.circle(cx, cy, 12).stroke({ width: 2.5, color: 0xffffff });
+      return;
     case 'estrela': {
       const pontos: number[] = [];
       for (let i = 0; i < 10; i++) {
-        const r = i % 2 === 0 ? 7 : 3;
+        const r = i % 2 === 0 ? 14 : 6;
         const a = (Math.PI / 5) * i - Math.PI / 2;
-        pontos.push(8 + Math.cos(a) * r, 8 + Math.sin(a) * r);
+        pontos.push(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
       }
-      return g.poly(pontos).fill(0xffffff);
+      g.poly(pontos).fill(0xffffff);
+      return;
     }
     case 'faisca':
-      return g.rect(7, 2, 2, 12).fill(0xffffff);
+      g.poly([cx, cy - 15, cx + 2, cy, cx, cy + 15, cx - 2, cy]).fill(0xffffff);
+      return;
+    case 'gota':
+      g.circle(cx, cy + 4, 7).fill(0xffffff);
+      g.poly([cx - 6, cy + 1, cx, cy - 13, cx + 6, cy + 1]).fill(0xffffff);
+      return;
+    case 'floco':
+      for (let i = 0; i < 6; i++) {
+        const a = (Math.PI / 3) * i;
+        g.moveTo(cx, cy)
+          .lineTo(cx + Math.cos(a) * 13, cy + Math.sin(a) * 13)
+          .stroke({ width: 2, color: 0xffffff });
+      }
+      g.circle(cx, cy, 3).fill(0xffffff);
+      return;
+    case 'runa':
+      g.circle(cx, cy, 12).stroke({ width: 1.5, color: 0xffffff, alpha: 0.7 });
+      g.moveTo(cx - 6, cy - 8).lineTo(cx + 6, cy - 8).lineTo(cx - 4, cy + 8).lineTo(cx + 6, cy + 8).stroke({ width: 2, color: 0xffffff });
+      g.moveTo(cx, cy - 11).lineTo(cx, cy + 11).stroke({ width: 1.5, color: 0xffffff });
+      return;
+    case 'bolha':
+      g.circle(cx, cy, 11).fill({ color: 0xffffff, alpha: 0.18 }).stroke({ width: 2, color: 0xffffff });
+      g.circle(cx - 4, cy - 4, 3).fill(0xffffff);
+      return;
+    case 'lasca':
+      g.poly([cx, cy - 14, cx + 6, cy + 2, cx - 1, cy + 14, cx - 6, cy]).fill(0xffffff);
+      return;
+    case 'corte':
+      // Arco de golpe: a meia-lua afinando nas pontas.
+      g.arc(cx, cy + 6, 14, Math.PI * 1.1, Math.PI * 1.9).arc(cx, cy + 10, 11, Math.PI * 1.9, Math.PI * 1.1, true).fill(0xffffff);
+      return;
+    case 'chama':
+      g.circle(cx, cy + 5, 8).fill(0xffffff);
+      g.poly([cx - 8, cy + 4, cx - 2, cy - 6, cx, cy - 15, cx + 3, cy - 5, cx + 8, cy + 4]).fill(0xffffff);
+      return;
   }
 }
 
 export class SistemaParticulas {
   private readonly camada = new Container({ label: 'particulas' });
+  private readonly normal: ParticleContainer;
+  private readonly aditiva: ParticleContainer;
+  private readonly atlas: Texture;
   private readonly texturas = new Map<TexturaParticula, Texture>();
   private readonly vivas: Viva[] = [];
-  private readonly livres: Sprite[] = [];
+  private readonly livres: Particle[] = [];
   /** Teto de partículas vivas, da qualidade atual. */
   limite = 300;
+  /** Movimento reduzido: metade das partículas e sem giro. */
+  reduzido = false;
 
   constructor(
     pai: Container,
@@ -62,11 +121,22 @@ export class SistemaParticulas {
     private readonly projecao: () => Projecao,
   ) {
     pai.addChild(this.camada);
-    for (const tipo of ['ponto', 'brilho', 'fumaca', 'anel', 'estrela', 'faisca'] as const) {
-      const g = desenharTextura(new Graphics(), tipo);
-      this.texturas.set(tipo, renderer.generateTexture({ target: g, resolution: 2 }));
-      g.destroy();
-    }
+    const g = new Graphics();
+    TEXTURAS_PARTICULA.forEach((tipo, i) => {
+      desenharTextura(g, tipo, i * LADO);
+    });
+    // Um retângulo invisível garante a largura toda do atlas.
+    g.rect(0, 0, TEXTURAS_PARTICULA.length * LADO, LADO).fill({ color: 0x000000, alpha: 0 });
+    this.atlas = renderer.generateTexture({ target: g, resolution: 2, frame: new Rectangle(0, 0, TEXTURAS_PARTICULA.length * LADO, LADO) });
+    g.destroy();
+    TEXTURAS_PARTICULA.forEach((tipo, i) => {
+      this.texturas.set(tipo, new Texture({ source: this.atlas.source, frame: new Rectangle(i * LADO, 0, LADO, LADO) }));
+    });
+    const dinamicas = { position: true, rotation: true, color: true, vertex: true, uvs: true };
+    this.normal = new ParticleContainer({ texture: this.atlas, dynamicProperties: dinamicas });
+    this.aditiva = new ParticleContainer({ texture: this.atlas, dynamicProperties: dinamicas });
+    this.aditiva.blendMode = 'add';
+    this.camada.addChild(this.normal, this.aditiva);
   }
 
   /** Quantas estão vivas (para o teto e para o diagnóstico/e2e). */
@@ -74,7 +144,7 @@ export class SistemaParticulas {
     return this.vivas.length;
   }
 
-  /** Emite um preset em (x, y) de célula; com `ate`, espalha ao longo do segmento (raio). */
+  /** Emite um preset em (x, y) de célula; com `ate`, espalha ao longo do segmento (raio, relâmpago, rastro). */
   emitir(nome: NomePreset, x: number, y: number, cor: number, ate?: { x: number; y: number }): void {
     if (this.limite <= 0) return;
     for (const e of PRESETS_PARTICULA[nome]) this.emitirUma(e, x, y, cor, ate);
@@ -91,63 +161,116 @@ export class SistemaParticulas {
     };
     const a = centro(x, y);
     const b = ate ? centro(ate.x, ate.y) : a;
-    for (let i = 0; i < e.quantidade && this.vivas.length < this.limite; i++) {
-      const t = ate ? Math.random() : 0;
-      const ox = a.x + (b.x - a.x) * t;
-      const oy = a.y + (b.y - a.y) * t;
-      const angulo = e.direcao === 'cima' ? -Math.PI / 2 + entre(-0.7, 0.7) : entre(0, Math.PI * 2);
+    const quantidade = this.reduzido ? Math.ceil(e.quantidade / 2) : e.quantidade;
+    const forma = ate ? 'linha' : (e.forma ?? 'ponto');
+    const textura = this.texturas.get(e.textura);
+    if (!textura) return;
+    for (let i = 0; i < quantidade && this.vivas.length < this.limite; i++) {
+      let ox = a.x;
+      let oy = a.y;
+      let angulo: number;
+      if (forma === 'anel' || forma === 'espiral') {
+        const t = (i / quantidade) * Math.PI * 2 + entre(-0.1, 0.1);
+        ox += Math.cos(t) * e.raio;
+        oy += Math.sin(t) * e.raio;
+        // Espiral: a velocidade sai tangente (o redemoinho gira em volta do centro).
+        angulo = forma === 'espiral' ? t + Math.PI / 2 : t;
+      } else {
+        if (forma === 'linha') {
+          const t = Math.random();
+          ox += (b.x - a.x) * t;
+          oy += (b.y - a.y) * t;
+        }
+        ox += entre(-e.raio, e.raio);
+        oy += entre(-e.raio, e.raio);
+        angulo =
+          forma === 'cone'
+            ? Math.atan2(b.y - a.y, b.x - a.x) + entre(-0.5, 0.5)
+            : e.direcao === 'cima'
+              ? -Math.PI / 2 + entre(-0.7, 0.7)
+              : e.direcao === 'baixo'
+                ? Math.PI / 2 + entre(-0.5, 0.5)
+                : e.direcao === 'fora'
+                  ? Math.atan2(oy - a.y, ox - a.x)
+                  : entre(0, Math.PI * 2);
+      }
       const v = entre(e.velocidade[0], e.velocidade[1]);
-      const sprite = this.livres.pop() ?? new Sprite();
-      sprite.texture = this.texturas.get(e.textura) ?? sprite.texture;
-      sprite.anchor.set(0.5);
-      sprite.tint = e.cor ?? cor;
-      sprite.blendMode = e.aditivo ? 'add' : 'normal';
-      sprite.position.set(ox + entre(-e.raio, e.raio), oy + entre(-e.raio, e.raio));
-      sprite.rotation = e.textura === 'faisca' ? angulo + Math.PI / 2 : entre(0, Math.PI * 2);
-      sprite.scale.set(e.escala[0]);
-      sprite.alpha = e.alpha[0];
-      sprite.visible = true;
-      this.camada.addChild(sprite);
-      this.vivas.push({ sprite, vx: Math.cos(angulo) * v, vy: Math.sin(angulo) * v, gravidade: e.gravidade, idadeMs: 0, vidaMs: entre(e.vidaMs[0], e.vidaMs[1]), escala: e.escala, alpha: e.alpha });
+      const p = this.livres.pop() ?? new Particle({ texture: textura, anchorX: 0.5, anchorY: 0.5 });
+      p.texture = textura;
+      p.x = ox;
+      p.y = oy;
+      p.scaleX = e.escala[0];
+      p.scaleY = e.escala[0];
+      // Faísca, lasca e gota apontam para onde voam.
+      p.rotation = e.textura === 'faisca' || e.textura === 'lasca' || e.textura === 'gota' ? angulo + Math.PI / 2 : e.textura === 'corte' ? entre(-0.6, 0.6) : entre(0, Math.PI * 2);
+      const corInicial = e.cor ?? cor;
+      p.tint = corInicial;
+      p.alpha = e.alpha[0];
+      (e.aditivo ? this.aditiva : this.normal).addParticle(p);
+      this.vivas.push({
+        p,
+        aditiva: e.aditivo,
+        vx: Math.cos(angulo) * v,
+        vy: Math.sin(angulo) * v,
+        gravidade: e.gravidade,
+        idadeMs: 0,
+        vidaMs: entre(e.vidaMs[0], e.vidaMs[1]),
+        escala: e.escala,
+        alpha: e.alpha,
+        cor: corInicial,
+        corFinal: e.corFinal ?? null,
+        giro: e.giro && !this.reduzido ? entre(e.giro[0], e.giro[1]) : 0,
+        arrasto: e.arrasto ?? 0,
+      });
     }
+  }
+
+  private soltar(v: Viva): void {
+    (v.aditiva ? this.aditiva : this.normal).removeParticle(v.p);
+    this.livres.push(v.p);
   }
 
   atualizar(dtMs: number): void {
     const dt = dtMs / 1000;
     for (let i = this.vivas.length - 1; i >= 0; i--) {
-      const p = this.vivas[i];
-      if (!p) continue;
-      p.idadeMs += dtMs;
-      if (p.idadeMs >= p.vidaMs) {
-        p.sprite.visible = false;
-        this.camada.removeChild(p.sprite);
-        this.livres.push(p.sprite);
+      const v = this.vivas[i];
+      if (!v) continue;
+      v.idadeMs += dtMs;
+      if (v.idadeMs >= v.vidaMs) {
+        this.soltar(v);
         this.vivas.splice(i, 1);
         continue;
       }
-      const f = p.idadeMs / p.vidaMs;
-      p.vy += p.gravidade * dt;
-      p.sprite.x += p.vx * dt;
-      p.sprite.y += p.vy * dt;
-      p.sprite.scale.set(p.escala[0] + (p.escala[1] - p.escala[0]) * f);
-      p.sprite.alpha = p.alpha[0] + (p.alpha[1] - p.alpha[0]) * f;
+      const f = v.idadeMs / v.vidaMs;
+      if (v.arrasto > 0) {
+        const freio = Math.max(0, 1 - v.arrasto * dt);
+        v.vx *= freio;
+        v.vy *= freio;
+      }
+      v.vy += v.gravidade * dt;
+      const p = v.p;
+      p.x += v.vx * dt;
+      p.y += v.vy * dt;
+      const s = v.escala[0] + (v.escala[1] - v.escala[0]) * f;
+      p.scaleX = s;
+      p.scaleY = s;
+      p.alpha = v.alpha[0] + (v.alpha[1] - v.alpha[0]) * f;
+      if (v.giro !== 0) p.rotation += v.giro * dt;
+      if (v.corFinal !== null) p.tint = misturar(v.cor, v.corFinal, f);
     }
   }
 
   /** Some com todas as partículas (qualidade "mínimo" ou troca de fase). */
   limpar(): void {
-    for (const p of this.vivas) {
-      p.sprite.visible = false;
-      this.camada.removeChild(p.sprite);
-      this.livres.push(p.sprite);
-    }
+    for (const v of this.vivas) this.soltar(v);
     this.vivas.length = 0;
   }
 
   destruir(): void {
     this.limpar();
-    for (const s of this.livres) s.destroy();
-    for (const t of this.texturas.values()) t.destroy(true);
-    this.camada.destroy();
+    this.livres.length = 0;
+    for (const t of this.texturas.values()) t.destroy(false);
+    this.atlas.destroy(true);
+    this.camada.destroy({ children: true });
   }
 }

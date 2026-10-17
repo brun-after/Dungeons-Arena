@@ -37,6 +37,7 @@ import { CamadaEntidades } from '../render/sprites';
 import { criarPalco, type Palco } from '../render/stage';
 import { CamadaTelegrafia } from '../render/telegrafia';
 import { criarTerreno } from '../render/terreno';
+import type { TexturasTileset } from '../render/tileset-textura';
 import { velocidade } from '../world/movimento';
 import { mostrarAviso } from './aviso';
 import { criarCabecalho } from './cabecalho';
@@ -72,6 +73,8 @@ export interface OpcoesCena {
   acoesDaPausa?: AcaoDaPausa[];
   /** Marco 15: quem pode trocar a dificuldade (campanha solo e anfitrião do grupo). */
   dificuldade?: { atual: () => Dificuldade; definir: (d: Dificuldade) => void };
+  /** Marco 11A (D-066): o tileset do jogador já carregado (só nas aventuras do editor). */
+  tileset?: TexturasTileset | null;
 }
 
 export interface QuadroCena {
@@ -155,7 +158,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       visao?.definir(p.visao);
     },
   });
-  const terreno = criarTerreno(palco.terreno, fase);
+  const terreno = criarTerreno(palco.terreno, fase, o.tileset ?? null);
   const projecao = () => camera.projecaoAtual;
   const sprites = new CamadaEntidades(palco.entidades, {
     idLocal,
@@ -166,7 +169,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     usarTiras: () => ap.qualidade().tiras,
     reduzido: () => ap.movimentoReduzido(),
   });
-  const telegrafia = new CamadaTelegrafia(palco.chao, palco.voo, projecao, () => aparencia.areaExata);
+  const telegrafia = new CamadaTelegrafia(palco.chao, palco.voo, projecao, () => aparencia.areaExata, ap.particulas);
   const objetos = new CamadaObjetos(
     palco.chao,
     (id) => ctx.conteudo.itens.get(id)?.raridade,
@@ -174,13 +177,14 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     { curto: ticksDe(ctx.balance.descanso.curtoMs), longo: ticksDe(ctx.balance.descanso.longoMs) },
     { camada: palco.entidades, projecao },
   );
-  const fluxo = new CamadaFluxo(palco.chao);
+  const fluxo = new CamadaFluxo(palco.chao, () => ap.particulas.limite > 0);
   const portas = new CamadaPortas(palco.chao, fase, ticksDe(ctx.balance.portas.janelaPortaBossMs));
   const numeros = new CamadaNumeros(palco.efeitos, ap.movimentoReduzido, projecao);
   visao = await montarVisao({
     palco,
     camera,
     fase,
+    corParede: o.tileset?.corParede ?? null,
     aoTrocar: () => {
       sprites.reiniciarVisual();
       objetos.reiniciarVisual();

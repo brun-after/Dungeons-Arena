@@ -165,6 +165,10 @@ export interface FaseJson {
   portasInternas?: PortaInterna[];
   /** Marco 10A-2: matiz do terreno em graus (fases geradas giram 28° a cada fase, §2.1). */
   matizGraus?: number;
+  /** Marco 11A (D-066): o atlas do jogador (store `tilesets`); null ou ausente herda (§2.16). */
+  tileset?: { atlasId: string } | null;
+  /** Marco 11A: peças escolhidas à mão, por índice de célula (`y·largura + x`) → `chave@t` (§2.16). */
+  pecas?: Record<string, string>;
 }
 
 export function celulaNormalizada(v: number, tamanho: number): number {
@@ -188,6 +192,9 @@ export interface Fase {
   readonly portaSaida: PortaSaida | null;
   readonly portasInternas: readonly PortaInterna[];
   readonly matizGraus: number;
+  /** Marco 11A: o atlas da fase (já com a herança resolvida por quem carrega) e as peças à mão. */
+  readonly tilesetId: string | null;
+  readonly pecas: Readonly<Record<number, string>>;
 }
 
 /** Converte uma fase já validada para a forma usada pela simulação. */
@@ -216,6 +223,8 @@ export function carregarFase(json: FaseJson): Fase {
     portaSaida: json.portaSaida ? { ...json.portaSaida } : null,
     portasInternas: (json.portasInternas ?? []).map((p) => ({ ...p, a: { ...p.a }, b: { ...p.b } })),
     matizGraus: json.matizGraus ?? 0,
+    tilesetId: json.tileset?.atlasId ?? null,
+    pecas: { ...json.pecas },
   };
 }
 

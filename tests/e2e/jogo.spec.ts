@@ -272,7 +272,7 @@ test.describe('desktop', () => {
     await page.getByLabel('Tipo de inimigo').selectOption('boss');
     await page.mouse.click(tela(13, 8).x, tela(13, 8).y);
     await expect(page.locator('.status-editor')).toHaveText('✓ pronta');
-    await page.getByRole('button', { name: 'Testar' }).click();
+    await page.getByRole('button', { name: 'Testar esta fase' }).click();
     await expect(page).toHaveURL(/jogo=teste/);
     await page.goto(`${page.url()}&diag=1`);
     const diag = page.locator('#diag');
@@ -301,7 +301,7 @@ test.describe('desktop', () => {
     await page.mouse.click(tela(9, 8).x, tela(9, 8).y);
     await page.getByRole('button', { name: 'Saída', exact: true }).click();
     await page.mouse.click(tela(11, 8).x, tela(11, 8).y);
-    await page.getByRole('button', { name: 'Testar' }).click();
+    await page.getByRole('button', { name: 'Testar esta fase' }).click();
     await expect(page).toHaveURL(/jogo=teste/);
     await page.goto(`${page.url()}&diag=1`);
     await expect(page.locator('#diag')).toHaveAttribute('data-celula', '9,8');
@@ -720,7 +720,7 @@ test.describe('celular (emulação)', () => {
     const erros: string[] = [];
     page.on('pageerror', (e) => erros.push(e.message));
     await page.goto('./?editor');
-    await page.getByLabel('Nome da fase').fill('Fase do teste');
+    await page.getByLabel('Nome da aventura').fill('Aventura do teste');
     await page.getByRole('button', { name: 'Criar e editar' }).click();
     const status = page.locator('.status-editor');
     await expect(status).toHaveText('⚠ 1 aviso(s)');
@@ -739,15 +739,15 @@ test.describe('celular (emulação)', () => {
     await page.mouse.click(cx, cy + 40);
     await expect(status).toHaveText('✓ pronta');
     // Marco 8A: orbe de efeito, escolhido na lista que vem do registro.
-    await page.getByRole('button', { name: 'Orbe', exact: true }).click();
-    await page.getByLabel('Tipo de orbe').selectOption('efeito:cura_periodica');
+    await page.getByRole('button', { name: /^Objeto/ }).click();
+    await page.getByLabel('Tipo de objeto').selectOption('efeito:cura_periodica');
     await page.mouse.click(cx + 60, cy + 40);
     await expect(status).toHaveText('✓ pronta');
-    await page.getByRole('button', { name: 'Testar' }).click();
+    await page.getByRole('button', { name: 'Testar esta fase' }).click();
     await expect(page).toHaveURL(/jogo=teste/);
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Fase do teste');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Fase 1');
     await page.getByRole('link', { name: 'Voltar ao editor' }).click();
-    await expect(page.locator('.nome-editor')).toHaveValue('Fase do teste');
+    await expect(page.locator('.nome-editor')).toHaveValue('Aventura do teste');
     await expect(status).toHaveText('✓ pronta');
     expect(erros).toEqual([]);
   });

@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.31 · **Data:** 16/10/2026
+**Versão:** 0.32 · **Data:** 16/10/2026
 
 > **Histórico**
+> - **0.32 (16/10/2026)**: D-066 (marco 11A: editor completo, aventura de várias fases, tileset, estilo por aparelho, visuais em partículas e trilhas casual ↔ dark).
 > - **0.31 (15/10/2026)**: D-065 (alvo automático que acompanha e alvo travado).
 > - **0.30 (15/10/2026)**: D-063 (conta, nuvem, certificado do personagem, a campanha na arena e mais peso em upar; marco 17) e D-064 (o 11A redefinido).
 > - **0.29 (15/10/2026)**: D-062 com o resultado do teste na VM (10 min, por decisão do usuário).
@@ -1622,4 +1623,64 @@ quatro:
 **Consequência.**
 - A regra vale igual na campanha, no cooperativo e na arena: é do núcleo, por comandos, com a mesma predição.
 - O `BotDeDuelo` do simulador passa a travar quando seleciona, que é o que ele já queria; as metas seguem 100%.
+
+## D-066 · Marco 11A: editor completo, aventuras, tileset, estilo, visuais e trilhas (v0.32, 16/10/2026)
+
+**Contexto.** O 11A redefinido (D-064) pede:
+- editor completo no toque;
+- aventura de 2 fases ou mais;
+- tileset por imagem;
+- aprendizado de estilo por aparelho, opcional;
+- a aparência das habilidades pela fantasia de cada uma;
+- trilhas variadas entre casual e dark fantasy.
+
+O aceite: uma aventura de 2 fases criada e testada no celular.
+
+**Decisões.**
+- **Editor.**
+  - A fase editável cobre tudo o que o `FaseJson` tem, e a ida e volta não perde nada (testada com as duas fases
+    oficiais).
+  - O chefe da saída é marcado pela célula (o índice muda quando a lista de inimigos muda) e vira `bossIndice` ao
+    exportar.
+  - Ferramentas puras: balde (4-conexo, teto de 20.000 células, recusa inteiro), retângulo, redimensionar (8 a 120,
+    ancorado no canto superior esquerdo, conta o que saiu), portas em par, distribuir.
+  - O histórico ganhou retratos de fase (redimensionar, portas, tranca, matiz, tileset) além das células.
+  - O inspetor abre com a ferramenta própria ou com **toque longo de 450 ms** com qualquer ferramenta.
+- **Aventura.**
+  - Registro v2 com até 12 fases. O rascunho antigo (uma fase solta, orbes do 8A) é lido como aventura de uma fase.
+  - A referência no save ganhou `indice` opcional (ausente = 0). **O save não mudou de versão**: a chave `aventura:<id>`
+    da primeira fase é a mesma de antes.
+  - Testar a fase, ou a aventura inteira em sequência (`seguir`).
+- **Tileset.**
+  - Layout canônico 4×4/5×5 da §2.16, D4 por multiplicação de matrizes, autotiling e variação do piso pelos limiares.
+  - Fatiamento com cada borda arredondada à parte e herança entre as fases da aventura.
+  - Texturas NEAREST materializadas por transformação.
+  - Divergência: parede cercada de piso usa `parede_int` (a §2.16 diz `piso_1`, o que esconderia uma célula sólida).
+  - A parede funda (sem piso em volta) fica no escuro.
+  - A matiz da fase não tinge o tileset; no isométrico, os prismas usam a cor média da peça de parede.
+  - A arena não recebe atlas.
+- **Estilo.**
+  - Assinatura de 8 letras: `P` (piso), `F` (fechado: parede ou vazio) e `D` (porta: saída ou porta interna), na ordem
+    N, NE, E, SE, S, SO, O, NO.
+  - Média móvel com alpha 0,4; as totalmente cercadas ficam de fora.
+  - Regras fortes: ≥ 0,75 ou ≤ 0,25, com 4 amostras ou mais, até 64.
+  - As regras entram nos `ParametrosGeracao` (o save as guarda: a mesma fase sai igual ao reabrir).
+  - `aplicarEstilo` usa um PRNG próprio e desfaz a passada se o alcance quebrar.
+  - Desligado por padrão; liga-se nas Configurações ou com "Gerada no meu estilo" no editor.
+- **Visuais.** A pedido do usuário, mais partículas e nenhuma forma plana.
+  - Sistema de partículas no `ParticleContainer` do Pixi 8, com um atlas de texturas.
+  - Presets por fantasia: corte, runas, cristais, bolhas, sombra, sangue, sagrado, pedra, vento, chamas e relâmpago.
+  - A própria forma do ataque também virou partícula: miolo e borda da área, mira, projétil, feixe em linha, rajada
+    pela área e rastros no chão.
+  - As formas desenhadas só aparecem na qualidade sem partículas (o aviso do ataque nunca some).
+  - Movimento reduzido: metade das partículas e sem giro.
+- **Trilhas.**
+  - A sombra (0 a 1) vem da profundidade, da dificuldade (fácil −0,1, difícil +0,15, pesadelo +0,25) e do clima
+    (combate +0,2, chefe +0,35), e desliza com constante de 3 s.
+  - Ela é quantizada em 5 faixas: modos, andamento e timbres, com pad, arpejo e seções A/B.
+  - A troca de laço espera o fim do compasso e cruza em 1,5 s; dentro da faixa, filtro e eco seguem a sombra ao vivo.
+
+**Consequência.**
+- O editor é um chunk à parte (~39 KB); as fases oficiais e o save não mudaram de formato.
+- A exportação da aventura inteira continua fora (D-064); exporta-se uma fase.
 

@@ -166,6 +166,48 @@ export function tocarNota(ctx: BaseAudioContext, destino: AudioNode, quando: num
   osc({ ctx, destino, t0: quando, tom: 1 }, tipo, freq, freq, duracao, pico);
 }
 
+/** Marco 11A: nota com passa-baixa (casual brilhante, dark abafado). */
+export function tocarNotaFiltrada(ctx: BaseAudioContext, destino: AudioNode, quando: number, freq: number, duracao: number, tipo: OscillatorType, pico: number, corte: number): void {
+  const filtro = ctx.createBiquadFilter();
+  filtro.type = 'lowpass';
+  filtro.frequency.setValueAtTime(corte, quando);
+  filtro.Q.value = 0.7;
+  filtro.connect(destino);
+  osc({ ctx, destino: filtro, t0: quando, tom: 1 }, tipo, freq, freq, duracao, pico);
+  setTimeout(() => {
+    filtro.disconnect();
+  }, (quando - ctx.currentTime + duracao + 0.2) * 1000);
+}
+
+/** Marco 11A: pad — dois osciladores levemente desafinados por nota, com ataque e soltura lentos. */
+export function tocarPad(ctx: BaseAudioContext, destino: AudioNode, quando: number, freqs: readonly number[], duracao: number, tipo: OscillatorType, pico: number): void {
+  const ganho = ctx.createGain();
+  const filtro = ctx.createBiquadFilter();
+  filtro.type = 'lowpass';
+  filtro.frequency.value = 1400;
+  ganho.connect(filtro);
+  filtro.connect(destino);
+  const ataque = Math.min(0.6, duracao / 3);
+  ganho.gain.setValueAtTime(0.0001, quando);
+  ganho.gain.exponentialRampToValueAtTime(pico, quando + ataque);
+  ganho.gain.setValueAtTime(pico, quando + duracao - ataque);
+  ganho.gain.exponentialRampToValueAtTime(0.0001, quando + duracao);
+  for (const f of freqs) {
+    for (const desafino of [-6, 6]) {
+      const o = ctx.createOscillator();
+      o.type = tipo;
+      o.frequency.value = f;
+      o.detune.value = desafino;
+      o.connect(ganho);
+      o.start(quando);
+      o.stop(quando + duracao + 0.05);
+    }
+  }
+  setTimeout(() => {
+    filtro.disconnect();
+  }, (quando - ctx.currentTime + duracao + 0.3) * 1000);
+}
+
 export function tocarBumbo(ctx: BaseAudioContext, destino: AudioNode, quando: number): void {
   osc({ ctx, destino, t0: quando, tom: 1 }, 'sine', 150, 45, 0.18, 0.7);
 }
