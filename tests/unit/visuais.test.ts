@@ -74,9 +74,13 @@ describe('flechas e equipamento no token', () => {
 
   it('os adornos desenham a arma, o escudo, o elmo e a capa pedidos, e nada sem equipamento', () => {
     const o = OPCOES_JOGAVEIS.guerreiro;
-    const nada = { arma: null, secundaria: null, cabeca: null, corpo: null, capa: null };
+    const nada = { arma: null, secundaria: null, cabeca: null, corpo: null, capa: null, corElemento: null, forma: null, formaMaxima: null };
     expect(adornosDoBipede(o, '34', nada)).toEqual({ atras: '', frente: '' });
-    const cheio = adornosDoBipede(o, '34', { arma: 'arco', secundaria: 'escudo', cabeca: 0x3498db, corpo: 0x9b59b6, capa: 0xf39c12 });
+    const cheio = adornosDoBipede(o, '34', { ...nada, arma: 'arco', secundaria: 'escudo', cabeca: 0x3498db, corpo: 0x9b59b6, capa: 0xf39c12 });
+    // Marco 18: a arma elemental brilha na ponta, a forma põe a gema e a Última ganha o halo atrás.
+    const ultima = adornosDoBipede(o, '34', { ...nada, arma: 'espada', corElemento: 0xff7b39, forma: 'ultima', formaMaxima: 'ultima' });
+    expect(ultima.frente).toContain('fill-opacity');
+    expect(ultima.atras).toContain('<ellipse');
     expect(cheio.atras).toContain('#'); // a capa
     expect(cheio.frente).toContain('<path'); // o arco (e o elmo)
     expect(cheio.frente).toContain('<ellipse'); // o escudo

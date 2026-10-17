@@ -48,6 +48,12 @@ export const TIPOS_EFEITO = [
   'eletrizado',
   'envenenado',
   'exposto',
+  // marco 18 (D-068): estados de terra, sombra e sagrado, e os das reações novas
+  'enraizado',
+  'marcado',
+  'consagrado',
+  'molhado',
+  'atolado',
   // marco 14: escudo e os instantâneos novos
   'escudo',
   'puxao',
@@ -124,6 +130,10 @@ export interface DefinicaoEfeito {
   danoRecebido: 1 | 0;
   /** Marco 14: o `valor` absorve dano antes da vida e se gasta. */
   escudo: boolean;
+  /** Marco 18 (D-068): sai no primeiro golpe que o alvo leva (marcado). */
+  someAoLevarGolpe: boolean;
+  /** Marco 18 (D-068): quem acerta o alvo se cura `valor` (consagrado). */
+  curaQuemAcerta: boolean;
 }
 
 type Def = Omit<DefinicaoEfeito, 'id'>;
@@ -150,6 +160,8 @@ const BASE: Omit<Def, 'icone' | 'cor' | 'positivo' | 'padrao' | 'campos'> = {
   curaRecebida: 0,
   danoRecebido: 0,
   escudo: false,
+  someAoLevarGolpe: false,
+  curaQuemAcerta: false,
 };
 
 const negativo = (icone: string, cor: string, campos: readonly CampoEfeito[], padrao: Def['padrao'], extra: Partial<Def>): Def => ({
@@ -222,6 +234,11 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   eletrizado: negativo('raio', '#f7dc6f', [], { duracaoMs: 2500, valor: 0, pct: 0 }, {}),
   envenenado: negativo('veneno', '#58d68d', ['valor', 'pct'], { duracaoMs: 5000, valor: 2, pct: 50 }, { periodico: 'dano', curaRecebida: -1 }),
   exposto: negativo('olho', '#d980fa', ['pct'], { duracaoMs: 4000, valor: 0, pct: 20 }, { danoRecebido: 1 }),
+  enraizado: negativo('pedra', '#8d6e63', [], { duracaoMs: 1000, valor: 0, pct: 0 }, { bloqueiaMovimento: true }),
+  marcado: negativo('alvo', '#8e44ad', ['pct'], { duracaoMs: 4000, valor: 0, pct: 25 }, { danoRecebido: 1, someAoLevarGolpe: true }),
+  consagrado: negativo('estrela', '#f7e9a0', ['valor'], { duracaoMs: 4000, valor: 2, pct: 0 }, { curaQuemAcerta: true }),
+  molhado: negativo('gota', '#5dade2', [], { duracaoMs: 5000, valor: 0, pct: 0 }, {}),
+  atolado: negativo('gota', '#7d6b4f', ['pct'], { duracaoMs: 4000, valor: 0, pct: 50 }, { lentidao: true }),
   escudo: { ...BASE, icone: 'barreira', cor: '#5dade2', positivo: true, campos: ['valor'], padrao: { duracaoMs: 8000, valor: 12, pct: 0 }, escudo: true },
   puxao: instantaneo('puxar', '#7f8c8d', ['valor'], { duracaoMs: 0, valor: 2, pct: 0 }, 'puxao', false),
   trocar_lugar: instantaneo('troca', '#8e44ad', [], { duracaoMs: 0, valor: 0, pct: 0 }, 'trocar', true),

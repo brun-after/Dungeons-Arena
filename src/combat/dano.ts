@@ -17,6 +17,8 @@ export interface FonteDeDano {
   multRolagem: number;
   /** Marco 18 (D-068): a Inteligência fortalece os efeitos, as reações e os combos (1 = neutro). */
   potencia: number;
+  /** Marco 18: o combo pode garantir um d20 mínimo (20 = crítico garantido). */
+  d20Minimo?: number;
   carisma: number;
   /** Marco 8A: `bonus_dano` e `modificar_dano` do atacante, no momento do lançamento. */
   multDano: number;
@@ -56,7 +58,7 @@ export function resolverGolpe(
   multiplicadorSaida = 1,
 ): ResultadoGolpe {
   const rolagem = rolar(rng, formula).total;
-  const d20 = rolarD20(rng, fonte.carisma, regras.carismaNeutro);
+  const d20 = Math.max(fonte.d20Minimo ?? 0, rolarD20(rng, fonte.carisma, regras.carismaNeutro));
   const mult = multiplicadorD20(d20, regras.critico);
   const base = { rolagem, d20, mult, critico: mult > 1 };
   if (mult === 0) return { ...base, dano: 0, falha: true, imune: false };

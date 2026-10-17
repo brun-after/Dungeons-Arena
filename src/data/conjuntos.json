@@ -1,0 +1,52 @@
+{
+  "versao": 1,
+  "conjuntos": [
+    {
+      "id": "vigilia_cacador",
+      "nome": "Vigília do caçador",
+      "pecas": ["capuz", "capa", "aljava"],
+      "formaMin": "epica",
+      "bonus": {
+        "2": {
+          "texto": "Flechas expõem o alvo (30%).",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "tag": "flechas", "chancePct": 30 },
+              "efeito": { "aplicar": { "tipo": "exposto", "duracaoMs": 3000, "pct": 20 }, "em": "alvo" }
+            }
+          ]
+        },
+        "3": { "texto": "Toda habilidade de flecha ecoa (a chuva cai duas vezes).", "modificadores": [{ "tag": "flechas", "mod": "ecoar" }] }
+      }
+    },
+    {
+      "id": "juramento_ferro",
+      "nome": "Juramento de ferro",
+      "pecas": ["elmo", "peitoral", "escudo"],
+      "formaMin": "epica",
+      "bonus": {
+        "2": {
+          "texto": "Ao levar golpe (20%), escudo de 5 por 4 s.",
+          "ganchos": [
+            {
+              "quando": "aoReceberGolpe",
+              "se": { "chancePct": 20 },
+              "efeito": { "aplicar": { "tipo": "escudo", "duracaoMs": 4000, "valor": 5 }, "em": "portador" }
+            }
+          ]
+        },
+        "3": {
+          "texto": "O Grito de guerra também dá escudo de 8.",
+          "ganchos": [
+            {
+              "quando": "aoUsarHabilidade",
+              "se": { "habilidade": "grito_de_guerra" },
+              "efeito": { "aplicar": { "tipo": "escudo", "duracaoMs": 6000, "valor": 8 }, "em": "portador" }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

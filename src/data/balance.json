@@ -49,7 +49,7 @@
     "raridadeMinBoss": "raro",
     "chanceOrbeEfeito": 0.08,
     "ouroPorXp": 0.6,
-    "pesoRaridade": { "comum": 60, "incomum": 28, "raro": 10, "epico": 2, "lendario": 0 }
+    "pesoRaridade": { "comum": 60, "incomum": 28, "raro": 10, "epico": 2, "lendario": 0, "ultima": 0 }
   },
   "xp": {
     "decaimentoAntifarm": 0.8,
@@ -209,8 +209,9 @@
     "defesaPorNivel": 0.1,
     "valorPorPonto": 12,
     "chanceGerado": 0.7,
-    "multiplicador": { "comum": 1, "incomum": 1.4, "raro": 1.9, "epico": 2.5, "lendario": 3.3 },
-    "pesoRaridade": { "comum": 50, "incomum": 30, "raro": 14, "epico": 5, "lendario": 1 },
+    "multiplicador": { "comum": 1, "incomum": 1.4, "raro": 1.9, "epico": 2.5, "lendario": 3.3, "ultima": 4.4 },
+    "pesoRaridade": { "comum": 50, "incomum": 30, "raro": 14, "epico": 5, "lendario": 1, "ultima": 0 },
+    "chanceElemental": 0.3,
     "raridadePorNivelPct": 8,
     "nivelMax": 20
   },

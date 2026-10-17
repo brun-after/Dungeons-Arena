@@ -11,7 +11,10 @@ import { vivo, type Entidade } from '../entities/entidade';
 import { rolar } from './dados';
 import { resolverGolpe, type FonteDeDano } from './dano';
 import { absorverEscudo, aplicarEfeito, imuneADano, multiplicadorCuraRecebida, multiplicadorDanoRecebido, REGISTRO_EFEITOS } from './efeitos';
-import type { EfeitoCanonico } from './registro-efeitos';
+import { construirEfeito, type EfeitoCanonico } from './registro-efeitos';
+import { chebyshev } from './geometria';
+import { podeAjudar, podeFerir } from '../modos/relacao';
+import { dispararGanchosDe, passivosDe } from '../progression/ganchos-do-portador';
 import { dispararSinergias, resistenciaPct, sinergiasAtivas } from './elementos';
 import { fatorDoGolpe } from '../modos/dificuldade';
 import type { Habilidade } from './habilidades';
@@ -47,10 +50,20 @@ export function comPotencia(ef: EfeitoCanonico, potencia: number): EfeitoCanonic
 }
 
 /** Multiplicador do dano recebido: exposto, resistência ao elemento e as sinergias. 0 = imune ao elemento. */
-function multiplicadorRecebido(ctx: ContextoSimulacao, alvo: Entidade, hab: Habilidade, tick: number, sinergiaPct: number): number {
+function multiplicadorRecebido(estado: EstadoJogo, ctx: ContextoSimulacao, alvo: Entidade, hab: Habilidade, tick: number, sinergiaPct: number): number {
   const resistencia = resistenciaPct(ctx, alvo, hab.elemento);
   if (resistencia >= 100) return 0;
-  return multiplicadorDanoRecebido(alvo, tick) * (1 - resistencia / 100) * (1 + sinergiaPct / 100);
+  return multiplicadorDanoRecebido(alvo, tick) * (1 - resistencia / 100) * (1 + sinergiaPct / 100) * (1 - auraDeDefesaPct(estado, ctx, alvo) / 100);
+}
+
+/** Marco 18 (ressonância Bastião): o maior "aliados perto levam menos dano" entre os aliados a até 3 células. */
+function auraDeDefesaPct(estado: EstadoJogo, ctx: ContextoSimulacao, alvo: Entidade): number {
+  let melhor = 0;
+  for (const outro of estado.entidades) {
+    if (outro === alvo || !outro.bolsa || !vivo(outro) || chebyshev(outro, alvo) > 3 || !podeAjudar(outro, alvo, ctx.modo)) continue;
+    melhor = Math.max(melhor, passivosDe(ctx, outro).auraDefesaPct);
+  }
+  return Math.min(50, melhor);
 }
 
 export function aplicarImpacto(
@@ -74,12 +87,14 @@ export function aplicarImpacto(
   const origem = { id: fonte.id, x: conjurador?.x ?? alvo.x, y: conjurador?.y ?? alvo.y };
   const mira = impacto.mira ?? { x: alvo.x, y: alvo.y };
   const sinergias = hab.formulaDano !== null ? sinergiasAtivas(alvo, hab.elemento, ctx.conteudo.interacoes.sinergias, tick) : [];
+  // Marco 18: os estados do alvo antes do golpe (os ganchos "se o alvo estava…" olham estes).
+  const estadosAntes = alvo.efeitos.filter((f) => f.ateTick > tick).map((f) => f.tipo);
 
   if (hab.formulaDano !== null) {
     // Marco 15: a dificuldade e o tamanho do grupo pesam pelo lado de quem bate e de quem apanha.
     // Marco 18: o dano extra das sinergias cresce com a potência (Inteligência) de quem lança.
     const extraPct = sinergias.reduce((s, x) => s + x.danoExtraPct, 0) * fonte.potencia;
-    const recebido = multiplicadorRecebido(ctx, alvo, hab, tick, extraPct) * fatorDoGolpe(estado, ctx, fonte, alvo);
+    const recebido = multiplicadorRecebido(estado, ctx, alvo, hab, tick, extraPct) * fatorDoGolpe(estado, ctx, fonte, alvo);
     const r = resolverGolpe(
       estado.rng,
       hab.formulaDano,
@@ -92,7 +107,10 @@ export function aplicarImpacto(
     // Marco 14: o escudo absorve antes da vida.
     dano = absorverEscudo(alvo, r.dano, tick);
     alvo.hp = Math.max(0, alvo.hp - dano);
-    if (dano > 0) registrarParticipacao(alvo, fonte.id, tick, ctx);
+    if (dano > 0) {
+      registrarParticipacao(alvo, fonte.id, tick, ctx);
+      alvo.ultimoGolpe = { fonteId: fonte.id, chave: hab.chave };
+    }
   }
   if (hab.formulaCura !== null) {
     const bruta = rolar(estado.rng, hab.formulaCura).total;
@@ -128,11 +146,39 @@ export function aplicarImpacto(
   dispararSinergias(alvo, sinergias, (ef) => {
     aplicarEfeito(estado, ctx, alvo, comPotencia(ef, fonte.potencia), origem, mira, saida);
   });
+  // Marco 18 (D-068): reações em área (vapor, lama, peste; o eletrocutar só nos molhados) e a cura de quem lançou.
+  for (const s of sinergias) {
+    if (s.raio > 0) {
+      for (const outro of estado.entidades) {
+        if (outro === alvo || !vivo(outro) || chebyshev(outro, alvo) > s.raio || !podeFerir(fonte, outro, ctx.modo)) continue;
+        if (s.soComEstado && !outro.efeitos.some((f) => f.tipo === s.soComEstado && f.ateTick > tick)) continue;
+        if (s.soComEstado) outro.efeitos = outro.efeitos.filter((f) => !s.remove.includes(f.tipo));
+        for (const ef of s.aplicar) aplicarEfeito(estado, ctx, outro, comPotencia(ef, fonte.potencia), origem, { x: outro.x, y: outro.y }, saida);
+      }
+    }
+    if (s.curarFonte > 0 && conjurador && vivo(conjurador)) {
+      aplicarEfeito(estado, ctx, conjurador, construirEfeito('cura', { valor: Math.round(s.curarFonte * fonte.potencia) }), origem, null, saida);
+    }
+  }
+  // Marco 18: o marcado sai no golpe; o consagrado cura quem acerta.
+  if (dano > 0) {
+    const consagrado = alvo.efeitos.find((f) => f.ateTick > tick && REGISTRO_EFEITOS[f.tipo].curaQuemAcerta);
+    if (consagrado && conjurador && vivo(conjurador) && conjurador !== alvo) {
+      aplicarEfeito(estado, ctx, conjurador, construirEfeito('cura', { valor: consagrado.valor }), origem, null, saida);
+    }
+    alvo.efeitos = alvo.efeitos.filter((f) => !REGISTRO_EFEITOS[f.tipo].someAoLevarGolpe);
+  }
   // Dispatcher único (§2.8); `em: 'conjurador'` cai sobre quem lançou (ex.: avanço, roubo de vida).
   for (const efeito of hab.efeitos) {
     // Armadilha e invocação saem uma vez no lançamento (acao.ts), não por alvo atingido.
     if (REGISTRO_EFEITOS[efeito.tipo].aoLancar) continue;
     const sobre = efeito.em === 'conjurador' ? conjurador : alvo;
     if (sobre) aplicarEfeito(estado, ctx, sobre, comPotencia(efeito, fonte.potencia), origem, mira, saida);
+  }
+  // Marco 18 (D-069): ganchos de quem acerta (no acerto e no crítico) e de quem leva o golpe.
+  if (hab.formulaDano !== null && conjurador && conjurador !== alvo) {
+    dispararGanchosDe(estado, ctx, conjurador, 'aoAcertar', { outro: alvo, hab, estadosDoOutro: estadosAntes }, saida);
+    if (critico) dispararGanchosDe(estado, ctx, conjurador, 'aoCritico', { outro: alvo, hab, estadosDoOutro: estadosAntes }, saida);
+    if (dano > 0) dispararGanchosDe(estado, ctx, alvo, 'aoReceberGolpe', { outro: conjurador, hab }, saida);
   }
 }

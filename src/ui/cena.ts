@@ -29,6 +29,7 @@ import { gravarPreferencias, lerPreferencias, type Preferencias } from '../plata
 import { prepararSessaoDeTela } from '../plataforma/sessao-tela';
 import { Camera } from '../render/camera';
 import { criarProjecao } from '../render/projecao';
+import { definirCoresDosElementos } from '../render/adornos';
 import { CamadaNumeros } from '../render/numeros';
 import { CamadaFluxo } from '../render/fluxo';
 import { CamadaObjetos } from '../render/objetos';
@@ -232,6 +233,11 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     const h = resolverHabilidade(ctx, id);
     return h ? { nome: h.nome, icone: h.icone } : null;
   };
+  // Marco 18: as cores dos elementos para o brilho da arma elemental no token.
+  definirCoresDosElementos((el) => {
+    const cor = ctx.conteudo.elementos.get(el as never)?.cor;
+    return cor ? Number.parseInt(cor.slice(1), 16) : null;
+  });
   const hud = new Hud(ui, (id) => o.estado().entidades.find((e) => e.id === id)?.nome ?? null, dadosHabilidade);
   const corDoElemento = (h: Habilidade) => (h.elemento ? (ctx.conteudo.elementos.get(h.elemento)?.cor ?? null) : null);
   // D-067: o seletor rápido põe uma habilidade ativa conhecida na tecla do botão (clique direito ou toque longo).

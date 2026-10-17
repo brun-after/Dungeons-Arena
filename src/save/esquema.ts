@@ -289,7 +289,8 @@ function v13ParaV14(r: Objeto): Objeto {
 
 /** Marco 18: os campos novos da entidade (preenchidos ao longo do marco). */
 function v14Entidade(x: Objeto): Objeto {
-  return { ...x };
+  const aparencia = ehObjeto(x.aparencia) ? { formaArma: null, elementoArma: null, formaMaxima: null, ...x.aparencia } : x.aparencia;
+  return { ressonancias: [], ultimoGolpe: null, ultimaHabilidade: null, renascerFase: '', ...x, aparencia };
 }
 
 /** Marco 18: os campos novos da ficha (preenchidos ao longo do marco). */

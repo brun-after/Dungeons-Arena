@@ -117,6 +117,10 @@ export type EventoSimulacao =
   | { t: 'estudoIniciado'; tick: number; id: EntidadeId; habilidadeId: string; totalTicks: number }
   | { t: 'estudoAcelerado'; tick: number; id: EntidadeId; habilidadeId: string; restanteTicks: number }
   | { t: 'estudoConcluido'; tick: number; id: EntidadeId; habilidadeId: string }
+  // Marco 18 (D-068, D-069): ressonância nova, combo feito e o renascer do item.
+  | { t: 'ressonanciaAtiva'; tick: number; id: EntidadeId; ressonancia: string }
+  | { t: 'comboFeito'; tick: number; id: EntidadeId; combo: string; alvoId: EntidadeId | null }
+  | { t: 'renasceu'; tick: number; id: EntidadeId; hp: number }
   | { t: 'barraMudou'; tick: number; id: EntidadeId }
   /** Marco 15: a dificuldade do mundo mudou. */
   | { t: 'dificuldadeMudou'; tick: number; nivel: Dificuldade }

@@ -60,7 +60,8 @@
         ],
         "5": [
           "perfurante",
-          "eco"
+          "eco",
+          "elemental_sagrado"
         ]
       },
       "mobilidade": "lenta"
@@ -250,6 +251,7 @@
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 8,
       "efeitos": [],
+      "tags": ["flechas"],
       "visual": {
         "cor": "#d5c4a1",
         "viagem": "esteira",
@@ -574,6 +576,7 @@
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 16,
       "efeitos": [],
+      "tags": ["flechas"],
       "visual": {
         "viagem": "esteira",
         "cor": "#d4ac0d",
@@ -624,7 +627,8 @@
         ],
         "5": [
           "eco",
-          "longo_alcance"
+          "longo_alcance",
+          "elemental_terra"
         ]
       }
     },
@@ -1136,6 +1140,7 @@
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 16,
       "efeitos": [],
+      "tags": ["flechas"],
       "visual": {
         "cor": "#d4ac0d",
         "viagem": "esteira",
@@ -1176,6 +1181,7 @@
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
       "efeitos": [],
+      "tags": ["flechas"],
       "visual": {
         "cor": "#d4ac0d",
         "impacto": "chuva",
@@ -1212,6 +1218,7 @@
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 14,
       "efeitos": [],
+      "tags": ["flechas"],
       "visual": {
         "cor": "#58d68d",
         "viagem": "esteira",
@@ -1250,6 +1257,7 @@
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
       "efeitos": [],
+      "tags": ["flechas"],
       "visual": {
         "cor": "#d4ac0d",
         "impacto": "leque",
@@ -1305,7 +1313,8 @@
         ],
         "5": [
           "longo_alcance",
-          "fortificado"
+          "fortificado",
+          "elemental_sombra"
         ]
       }
     },

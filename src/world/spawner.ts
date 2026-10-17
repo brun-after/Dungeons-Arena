@@ -4,6 +4,7 @@
 // chance e procura uma célula: passável, sem entidade, objeto ou armadilha, e longe de todo jogador.
 // Tudo pelo PRNG do estado (determinístico). Baú e loot só onde o modo pede (`loot.economiaDoSpawner`).
 
+import { passivosDe } from '../progression/ganchos-do-portador';
 import { fatoresDoMundo } from '../modos/dificuldade';
 import { sortearEfeitoDeOrbe } from '../combat/registro-efeitos';
 import type { Celula } from '../core/comandos';
@@ -119,6 +120,10 @@ function criar(estado: EstadoJogo, ctx: ContextoSimulacao, categoria: Categoria,
   }
 }
 
+function maiorRefugioMaisPct(estado: EstadoJogo, ctx: ContextoSimulacao): number {
+  return estado.entidades.reduce((m, e) => (e.bolsa ? Math.max(m, passivosDe(ctx, e).refugioMaisPct) : m), 0);
+}
+
 /** Etapa 9 do tick. */
 export function processarSpawner(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
   if (!ctx.modo.spawnerDinamico || !rodadaDoSpawner(estado.tick, ctx)) return;
@@ -130,7 +135,9 @@ export function processarSpawner(estado: EstadoJogo, ctx: ContextoSimulacao, sai
     if (contarDoSpawner(estado, categoria) >= Math.round(regra.max * fatoresDoMundo(estado, ctx).spawner)) continue;
     // D-067: um refúgio por vez, contando o do mapa (de qualquer origem) e o que alguém carrega.
     if (categoria === 'refugio' && (estado.objetos.some((o) => o.tipo === 'orbe_refugio') || estado.entidades.some((e) => e.refugio))) continue;
-    if (aleatorio(estado.rng) >= regra.chance) continue;
+    // Marco 18 (D-069): o Manto Último faz o refúgio aparecer mais (vale o maior bônus entre quem joga).
+    const chance = categoria === 'refugio' ? regra.chance * (1 + maiorRefugioMaisPct(estado, ctx) / 100) : regra.chance;
+    if (aleatorio(estado.rng) >= chance) continue;
     const celula = sortearCelula(estado, ctx);
     if (celula) criar(estado, ctx, categoria, celula, saida);
   }

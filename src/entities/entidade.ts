@@ -255,6 +255,14 @@ export interface Entidade {
   refugio: boolean;
   /** D-067: o que está equipado, para o token (público: a arena mostra para todos). */
   aparencia: AparenciaEquipada | null;
+  /** Marco 18 (D-068): as ressonâncias de atributo ativas (ids). */
+  ressonancias: string[];
+  /** Marco 18: o último golpe com dano que a entidade levou (quem e com qual habilidade) — o "ao abater" lê. */
+  ultimoGolpe: { fonteId: EntidadeId; chave: string } | null;
+  /** Marco 18: a última habilidade que usou (combos e a Lâmina rúnica). */
+  ultimaHabilidade: { id: string; chave: string; tick: number; alvoId: EntidadeId | null } | null;
+  /** Marco 18 (D-069): a fase em que o renascer do item já foi usado ('' = disponível). */
+  renascerFase: string;
 }
 
 export interface BuffArmado {
@@ -270,6 +278,11 @@ export interface AparenciaEquipada {
   cabeca: string | null;
   corpo: string | null;
   capa: string | null;
+  /** Marco 18 (D-069): a forma da arma (null = sem forma) e o elemento dela. */
+  formaArma: string | null;
+  elementoArma: string | null;
+  /** Marco 18: a forma mais alta entre as peças vestidas (o brilho e a aura do token). */
+  formaMaxima: string | null;
 }
 
 export const ATRIBUTOS_NEUTROS: Readonly<Atributos> = {
@@ -359,6 +372,10 @@ export function criarEntidade(n: NovaEntidade): Entidade {
     buffsArmados: [],
     refugio: false,
     aparencia: null,
+    ressonancias: [],
+    ultimoGolpe: null,
+    ultimaHabilidade: null,
+    renascerFase: '',
   };
 }
 
@@ -431,5 +448,8 @@ export function clonarEntidade(e: Entidade): Entidade {
     interacao: e.interacao ? { ...e.interacao } : null,
     buffsArmados: e.buffsArmados.map((b) => ({ ateTick: b.ateTick, efeito: { ...b.efeito, interno: b.efeito.interno ? { ...b.efeito.interno } : null } })),
     aparencia: e.aparencia ? { ...e.aparencia } : null,
+    ressonancias: [...e.ressonancias],
+    ultimoGolpe: e.ultimoGolpe ? { ...e.ultimoGolpe } : null,
+    ultimaHabilidade: e.ultimaHabilidade ? { ...e.ultimaHabilidade } : null,
   };
 }

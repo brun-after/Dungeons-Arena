@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { codigoDaGerada, formatarChave, idGerada, lerChave, lerIdGerada } from '../../src/combat/chave-habilidade';
 import { definicaoDe, resolverHabilidade } from '../../src/combat/compilar-habilidade';
-import { ELEMENTOS } from '../../src/combat/elementos';
+import { ELEMENTOS_DO_GERADOR } from '../../src/combat/elementos';
 import { bresenham, celulasDaForma, celulasDaLinha, celulasDoCone } from '../../src/combat/formas';
 import type { Habilidade } from '../../src/combat/habilidades';
 import { orcamentoNoNivel, poderDaHabilidade } from '../../src/combat/orcamento';
@@ -130,7 +130,7 @@ describe('habilidades geradas por semente', () => {
     }
   });
 
-  it('cobre os 5 elementos e as 6 formas, com nome e visual do tema', () => {
+  it('cobre os 5 elementos do gerador e as 6 formas, com nome e visual do tema', () => {
     const elementos = new Set<string>();
     const formas = new Set<string>();
     for (const s of sementes) {
@@ -140,7 +140,8 @@ describe('habilidades geradas por semente', () => {
       expect(h.nome.length).toBeGreaterThan(3);
       expect(h.visual?.cor).toBe(CONTEUDO.elementos.get(h.elemento ?? 'fogo')?.cor);
     }
-    expect([...elementos].sort()).toEqual([...ELEMENTOS].sort());
+    // Marco 18: o gerador fica nos 5 elementos do marco 14 (as habilidades geradas dos saves não mudam).
+    expect([...elementos].sort()).toEqual([...ELEMENTOS_DO_GERADOR].sort());
     expect([...formas].sort()).toEqual(['ao_redor', 'cone', 'contato', 'linha', 'projetil', 'quadrado']);
   });
 

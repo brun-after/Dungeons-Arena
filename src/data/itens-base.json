@@ -5,7 +5,8 @@
     "incomum": { "m": "reforçado", "f": "reforçada" },
     "raro": { "m": "raro", "f": "rara" },
     "epico": { "m": "épico", "f": "épica" },
-    "lendario": { "m": "lendário", "f": "lendária" }
+    "lendario": { "m": "lendário", "f": "lendária" },
+    "ultima": { "m": "supremo", "f": "suprema" }
   },
   "bases": [
     { "base": "espada", "nome": "Espada", "genero": "f", "slot": "arma_principal", "icone": "espada", "defesa": 0, "atributos": [["forca", "constituicao"]] },

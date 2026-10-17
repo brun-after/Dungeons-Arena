@@ -30,6 +30,8 @@ import { rampaDeInvocacao } from './invocacoes';
 import { habilidadeDoAtor, perfilPara } from './perfil';
 import { lancarProjetil } from './projeteis';
 import { quantidadeDeSaltos, saltar } from './saltos';
+import { dispararGanchosDe, passivosDe } from '../progression/ganchos-do-portador';
+import { comCombo, fazerCombo } from './combos';
 
 export function chaveRecarga(entidadeId: EntidadeId, habilidadeId: string): string {
   return `${entidadeId}_${habilidadeId}`;
@@ -47,7 +49,8 @@ export function fonteDe(e: Entidade, ctx: ContextoSimulacao, tick: number, hab: 
     // Marco 18 (D-068): o bônus fixo segue o atributo da habilidade; a rolagem escala com Força e Inteligência.
     bonusAtributo: bonusDeAtributo(e.atributos, hab.escalaCom, ctx.balance.combate.multiplicadorAtributoPadrao),
     multRolagem: multiplicadorDeRolagem(e.atributos, ctx.balance),
-    potencia: potenciaDeEfeito(e.atributos, ctx.balance),
+    // Marco 18: a Inteligência e os passivos (Mente dupla) dão a potência dos efeitos.
+    potencia: potenciaDeEfeito(e.atributos, ctx.balance) * (1 + passivosDe(ctx, e).potenciaPct / 100),
     carisma: e.atributos.carisma,
     // Marco 10A-3: a rampa da invocação multiplica junto com os efeitos (§2.9).
     multDano: multiplicadorDanoCausado(e, tick) * rampaDeInvocacao(e, tick, ctx),
@@ -280,7 +283,11 @@ function lancar(
   alvo: Entidade | null,
   saida: EventoSimulacao[],
 ): void {
-  const fonte = fonteDaHabilidade(ator, ctx, estado.tick, hab);
+  // Marco 18 (D-068, D-069): o combo (a habilidade anterior em até a janela) fortalece esta; os ganchos "ao usar"
+  // disparam; e esta vira a última.
+  const fonte = comCombo(fonteDaHabilidade(ator, ctx, estado.tick, hab), fazerCombo(estado, ctx, ator, hab, alvo, mira, saida));
+  dispararGanchosDe(estado, ctx, ator, 'aoUsarHabilidade', { outro: alvo, hab }, saida);
+  ator.ultimaHabilidade = { id: hab.id, chave: hab.chave, tick: estado.tick, alvoId: alvo?.id ?? null };
   const basico = hab.id === ator.ataqueBasico ? bonusAtaqueBasico(ator, estado.tick) : null;
   const alcance = alcanceDe(ctx, ator, hab, estado.tick);
   const base = { acaoId, fonte, hab, mira, ...(basico && basico.dano > 0 && { danoExtra: basico.dano }) };

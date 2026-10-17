@@ -15,6 +15,9 @@
     { "id": "elemental_gelo", "nome": "Geada", "icone": "gelo", "elemento": "gelo", "danoPct": 5 },
     { "id": "elemental_raio", "nome": "Tempestade", "icone": "raio", "elemento": "raio", "danoPct": 5 },
     { "id": "elemental_veneno", "nome": "Peçonha", "icone": "veneno", "elemento": "veneno", "danoPct": 5 },
-    { "id": "elemental_psiquico", "nome": "Mente", "icone": "olho", "elemento": "psiquico", "danoPct": 5 }
+    { "id": "elemental_psiquico", "nome": "Mente", "icone": "olho", "elemento": "psiquico", "danoPct": 5 },
+    { "id": "elemental_terra", "nome": "Rocha", "icone": "pedra", "elemento": "terra", "danoPct": 5 },
+    { "id": "elemental_sombra", "nome": "Breu", "icone": "fantasma", "elemento": "sombra", "danoPct": 5 },
+    { "id": "elemental_sagrado", "nome": "Luz", "icone": "estrela", "elemento": "sagrado", "danoPct": 5 }
   ]
 }

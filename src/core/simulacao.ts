@@ -24,6 +24,7 @@ import { regenerarRecursos } from '../progression/recursos';
 import { definirDirecao, moverEntidades, planejarCaminho } from '../world/movimento';
 import { fecharLoja, interagir, processarInteracoes } from '../world/interacao';
 import { revelarArmadilhas } from '../world/armadilhas-ocultas';
+import { atualizarRessonancias } from '../progression/ressonancias';
 import { coletarObjetos } from '../world/objetos';
 import { processarPortas } from '../world/portas';
 import { processarSpawner } from '../world/spawner';
@@ -59,6 +60,7 @@ export function simular(
   // Ajuste de 16/10/2026 (D-067): buffs armados começam em combate; a aparência segue o equipamento.
   processarBuffsArmados(estado, ctx, saida);
   atualizarAparencias(estado, ctx);
+  atualizarRessonancias(estado, ctx, saida);
   processarGatilhosDeEfeito(estado, ctx, saida);
   processarMortes(estado, ctx, saida);
   processarSpawner(estado, ctx, saida);

@@ -8,6 +8,7 @@
 import type { Celula, EntidadeId } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type Armadilha, type EstadoJogo } from '../core/estado';
+import { passivosDe } from '../progression/ganchos-do-portador';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { congelada, vivo, type EfeitoAtivo, type Entidade } from '../entities/entidade';
@@ -174,6 +175,11 @@ export function aplicarEfeito(
   if (!vivo(alvo)) return;
   const def = REGISTRO_EFEITOS[ef.tipo];
   const tick = estado.tick;
+  // Marco 18 (ressonância Muralha): escudos recebidos duram e absorvem mais.
+  if (def.escudo && alvo.bolsa) {
+    const k = 1 + passivosDe(ctx, alvo).escudoPct / 100;
+    if (k !== 1) ef = { ...ef, valor: Math.round(ef.valor * k), duracaoMs: Math.round(ef.duracaoMs * k) };
+  }
   const instantaneo = def.instantaneo ?? (ef.duracaoMs <= 0 && (def.periodico === 'cura' || def.periodico === 'recurso') ? def.periodico : null);
   if (instantaneo) {
     switch (instantaneo) {
@@ -190,10 +196,11 @@ export function aplicarEfeito(
         avancar(estado, ctx, alvo, mira, ef.valor);
         break;
       case 'empurrao':
-        empurrar(estado, ctx, alvo, origem, ef.valor);
+        // Marco 18: quem é inamovível (ressonância, grevas, escudo Último) não sai do lugar.
+        if (!passivosDe(ctx, alvo).inamovivel) empurrar(estado, ctx, alvo, origem, ef.valor);
         break;
       case 'puxao':
-        puxar(estado, ctx, alvo, origem, ef.valor);
+        if (!passivosDe(ctx, alvo).inamovivel) puxar(estado, ctx, alvo, origem, ef.valor);
         break;
       case 'trocar': {
         const outro = buscarEntidade(estado, origem.id);

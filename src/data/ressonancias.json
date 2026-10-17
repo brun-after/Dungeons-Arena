@@ -1,0 +1,125 @@
+{
+  "versao": 1,
+  "ressonancias": [
+    {
+      "id": "impacto",
+      "nome": "Impacto",
+      "exige": { "forca": 16 },
+      "texto": "Golpe corpo a corpo crítico empurra 1 célula.",
+      "ganchos": [
+        { "quando": "aoCritico", "se": { "tag": "contato", "tipoAtaque": "fisico" }, "efeito": { "aplicar": { "tipo": "empurrao", "valor": 1 } } }
+      ]
+    },
+    {
+      "id": "ricochete",
+      "nome": "Ricochete",
+      "exige": { "destreza": 16 },
+      "texto": "Projétil físico que abate salta para o hostil mais perto (6 de dano).",
+      "ganchos": [
+        {
+          "quando": "aoMatar",
+          "se": { "tag": "projetil", "tipoAtaque": "fisico" },
+          "efeito": { "aplicarNoProximo": { "tipo": "dano_direto", "valor": 6 }, "raio": 3 }
+        }
+      ]
+    },
+    {
+      "id": "muralha",
+      "nome": "Muralha",
+      "exige": { "constituicao": 16 },
+      "texto": "Escudos recebidos duram e absorvem 50% mais.",
+      "ganchos": [
+        { "quando": "passivo", "efeito": { "escudoPct": 50 } }
+      ]
+    },
+    {
+      "id": "residuo",
+      "nome": "Resíduo",
+      "exige": { "inteligencia": 16 },
+      "texto": "Magias de área deixam os atingidos expostos (+10% de dano recebido) por 3 s.",
+      "ganchos": [
+        {
+          "quando": "aoAcertar",
+          "se": { "tag": "area", "tipoAtaque": "magico" },
+          "efeito": { "aplicar": { "tipo": "exposto", "duracaoMs": 3000, "pct": 10 } }
+        }
+      ]
+    },
+    {
+      "id": "purificar",
+      "nome": "Purificar",
+      "exige": { "sabedoria": 16 },
+      "texto": "Usar uma cura tira 1 efeito negativo de você.",
+      "ganchos": [
+        { "quando": "aoUsarHabilidade", "se": { "tag": "cura" }, "efeito": { "purificar": 1 } }
+      ]
+    },
+    {
+      "id": "presenca",
+      "nome": "Presença",
+      "exige": { "carisma": 16 },
+      "texto": "No crítico, os hostis a até 2 células hesitam (sem golpes físicos) por 1 s.",
+      "ganchos": [
+        { "quando": "aoCritico", "efeito": { "aplicarEmVolta": { "tipo": "sem_ataque", "duracaoMs": 1000 }, "raio": 2 } }
+      ]
+    },
+    {
+      "id": "lamina_runica",
+      "nome": "Lâmina rúnica",
+      "exige": { "forca": 14, "inteligencia": 14 },
+      "texto": "Golpes físicos de contato aplicam o elemento da sua última magia (até 5 s depois).",
+      "ganchos": [
+        { "quando": "aoAcertar", "se": { "tag": "contato", "tipoAtaque": "fisico" }, "efeito": { "herdarElemento": 5000 } }
+      ]
+    },
+    {
+      "id": "olhar_sereno",
+      "nome": "Olhar sereno",
+      "exige": { "destreza": 14, "sabedoria": 14 },
+      "texto": "Crítico de projétil devolve 2 de mana.",
+      "ganchos": [
+        { "quando": "aoCritico", "se": { "tag": "projetil" }, "efeito": { "mana": 2 } }
+      ]
+    },
+    {
+      "id": "bastiao",
+      "nome": "Bastião",
+      "exige": { "constituicao": 14, "carisma": 14 },
+      "texto": "Aliados a até 3 células levam 10% menos dano.",
+      "ganchos": [
+        { "quando": "passivo", "efeito": { "auraDefesaPct": 10 } }
+      ]
+    },
+    {
+      "id": "inamovivel",
+      "nome": "Inamovível",
+      "exige": { "forca": 14, "constituicao": 14 },
+      "texto": "Imune a empurrão e puxão.",
+      "ganchos": [
+        { "quando": "passivo", "efeito": { "inamovivel": true } }
+      ]
+    },
+    {
+      "id": "mente_dupla",
+      "nome": "Mente dupla",
+      "exige": { "inteligencia": 14, "sabedoria": 14 },
+      "texto": "Seus efeitos ficam 15% mais fortes (soma à potência da Inteligência).",
+      "ganchos": [
+        { "quando": "passivo", "efeito": { "potenciaPct": 15 } }
+      ]
+    },
+    {
+      "id": "trapaceiro",
+      "nome": "Trapaceiro",
+      "exige": { "destreza": 14, "carisma": 14 },
+      "texto": "A Troca sombria deixa um espantalho como isca por 6 s.",
+      "ganchos": [
+        {
+          "quando": "aoUsarHabilidade",
+          "se": { "habilidade": "troca_sombria" },
+          "efeito": { "aplicar": { "tipo": "invocar", "valor": 1, "duracaoMs": 6000, "ref": "espantalho" }, "em": "portador" }
+        }
+      ]
+    }
+  ]
+}

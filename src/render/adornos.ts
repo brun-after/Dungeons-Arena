@@ -35,16 +35,24 @@ function textura(conteudo: string): Promise<Texture | null> {
   );
 }
 
+/** Cor (número) de um elemento, pelo conteúdo oficial carregado na cena (injetada; null = sem cor). */
+let corDoElemento: (elemento: string) => number | null = () => null;
+
+/** A cena informa as cores dos elementos (do conteúdo), para o brilho da arma elemental. */
+export function definirCoresDosElementos(f: (elemento: string) => number | null): void {
+  corDoElemento = f;
+}
+
 /** As texturas do equipamento para o modelo e a vista (null: o modelo não é de classe ou nada a mostrar ainda). */
 export function texturasDoAdorno(modelo: string, vista: Vista, aparencia: AparenciaEquipada | null): TexturasAdorno | null {
   if (!Object.hasOwn(OPCOES_JOGAVEIS, modelo)) return null;
   const classe = modelo as keyof typeof OPCOES_JOGAVEIS;
-  const vazio = { arma: null, secundaria: null, cabeca: null, corpo: null, capa: null };
+  const vazio: AparenciaEquipada = { arma: null, secundaria: null, cabeca: null, corpo: null, capa: null, formaArma: null, elementoArma: null, formaMaxima: null };
   const eq = aparencia ?? vazio;
   // Mãos vazias: a arma da classe (e o escudo dela, se a mão secundária também estiver livre).
   const padrao = ARMA_DE_CLASSE[classe];
   const ap = eq.arma ? eq : { ...eq, arma: padrao.arma, secundaria: eq.secundaria ?? padrao.secundaria };
-  const chave = `${modelo}|${vista}|${ap.arma}|${ap.secundaria}|${ap.cabeca}|${ap.corpo}|${ap.capa}`;
+  const chave = `${modelo}|${vista}|${ap.arma}|${ap.secundaria}|${ap.cabeca}|${ap.corpo}|${ap.capa}|${ap.formaArma}|${ap.elementoArma}|${ap.formaMaxima}`;
   const pronto = cache.get(chave);
   if (pronto === 'carregando') return VAZIO;
   if (pronto) return pronto;
@@ -60,6 +68,9 @@ export function texturasDoAdorno(modelo: string, vista: Vista, aparencia: Aparen
     cabeca: corDe(ap.cabeca),
     corpo: corDe(ap.corpo),
     capa: corDe(ap.capa),
+    corElemento: ap.elementoArma ? (corDoElemento(ap.elementoArma) ?? null) : null,
+    forma: eq.arma ? ap.formaArma : null,
+    formaMaxima: ap.formaMaxima,
   });
   void Promise.all([textura(camadas.atras), textura(camadas.frente)]).then(([atras, frente]) => {
     cache.set(chave, { atras, frente });

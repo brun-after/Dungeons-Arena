@@ -9,9 +9,16 @@ import type { Entidade } from '../entities/entidade';
 import { normalizarEfeito } from './normalizar-efeito';
 import { PRESETS_VISUAIS, type PresetVisual } from './habilidades';
 import type { EfeitoCanonico, TipoEfeito } from './registro-efeitos';
+import { passivosDe } from '../progression/ganchos-do-portador';
 
-export const ELEMENTOS = ['fogo', 'gelo', 'raio', 'veneno', 'psiquico'] as const;
+export const ELEMENTOS = ['fogo', 'gelo', 'raio', 'veneno', 'psiquico', 'terra', 'sombra', 'sagrado'] as const;
 export type Elemento = (typeof ELEMENTOS)[number];
+
+/**
+ * Marco 18 (17/10/2026, D-068): os elementos que o gerador de habilidades sorteia continuam os 5 do marco 14 — as
+ * habilidades geradas nascem da semente, e uma lista maior mudaria as que já estão nos saves.
+ */
+export const ELEMENTOS_DO_GERADOR: readonly Elemento[] = ['fogo', 'gelo', 'raio', 'veneno', 'psiquico'];
 
 /** Formas que o gerador sorteia (§D-057): o elemento dá o peso de cada uma. */
 export const FORMAS = ['contato', 'projetil', 'quadrado', 'linha', 'cone', 'ao_redor'] as const;
@@ -71,7 +78,10 @@ export function lerElementos(json: unknown): { elementos: Map<Elemento, Definica
 /** Resistência do alvo ao elemento, em % (−100 a 100; 100 = imune), pelo preset. */
 export function resistenciaPct(ctx: ContextoSimulacao, alvo: Entidade, elemento: Elemento | null): number {
   if (!elemento) return 0;
-  return ctx.conteudo.presets.get(alvo.preset)?.resistencias[elemento] ?? 0;
+  const doPreset = ctx.conteudo.presets.get(alvo.preset)?.resistencias[elemento] ?? 0;
+  // Marco 18 (D-069): o equipamento resiste a todo elemento ou a um só.
+  const doEquipamento = alvo.bolsa ? passivosDe(ctx, alvo).resistencias.filter((r) => r.elemento === null || r.elemento === elemento).reduce((s, r) => s + r.pct, 0) : 0;
+  return Math.min(90, doPreset + doEquipamento);
 }
 
 export interface Sinergia {
@@ -81,6 +91,12 @@ export interface Sinergia {
   remove: readonly TipoEfeito[];
   danoExtraPct: number;
   aplicar: readonly EfeitoCanonico[];
+  /** Marco 18 (D-068): o `aplicar` também cai nos hostis a até `raio` células do alvo (0 = só o alvo)… */
+  raio: number;
+  /** …e, com `soComEstado`, só nos que têm aquele estado (o eletrocutar salta entre os molhados). */
+  soComEstado: TipoEfeito | null;
+  /** Marco 18: cura quem lançou (purgar). */
+  curarFonte: number;
 }
 
 /** As sinergias que o elemento dispara sobre os estados ativos do alvo (o dano extra vale no mesmo golpe). */

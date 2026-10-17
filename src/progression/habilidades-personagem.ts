@@ -12,6 +12,7 @@ import type { EventoSimulacao, MotivoHabilidade } from '../core/eventos-simulaca
 import { SLOTS_BARRA, type Bolsa, type Entidade } from '../entities/entidade';
 import { recalcularFicha } from './derivados';
 import { reducaoEstudoPct } from './efeitos-atributo';
+import { passivosDe } from './ganchos-do-portador';
 import type { EstadoJogo } from '../core/estado';
 import { ticksDe } from '../core/tempo';
 import { estudoAvanca } from '../modos/regras';
@@ -135,7 +136,9 @@ export function aprenderPorLivro(e: Entidade, ctx: ContextoSimulacao, id: string
 export function ticksDeEstudo(ctx: ContextoSimulacao, e: Entidade, id: string): number {
   const grau = definicaoDe(ctx, id)?.base.grau ?? 'B';
   const regras = ctx.balance.habilidades.estudo;
-  return Math.max(1, ticksDe(regras[grau] * (1 - reducaoEstudoPct(e.atributos, ctx.balance) / 100)));
+  // Marco 18: a Inteligência e o Tomo Último encurtam (o total nunca passa de 80% de desconto).
+  const desconto = Math.min(80, reducaoEstudoPct(e.atributos, ctx.balance) + passivosDe(ctx, e).estudoPct);
+  return Math.max(1, ticksDe(regras[grau] * (1 - desconto / 100)));
 }
 
 function iniciarEstudo(e: Entidade, ctx: ContextoSimulacao, id: string, tick: number, saida: EventoSimulacao[]): void {

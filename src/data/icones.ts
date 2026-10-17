@@ -25,6 +25,13 @@ export const ICONES = {
   pergaminho: '<path d="M6 4h11a2 2 0 0 1 0 4h-1v10a2 2 0 0 1-2 2H5a2 2 0 0 1 0-4h1Z"/><path d="M9 9h4M9 12h4"/>',
   livro: '<path d="M4 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4Z"/><path d="M20 4h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6Z"/>',
   aljava: '<path d="M8 21 6 8h8l-2 13Z"/><path d="M8 8 11 2M11 8l3-5M14 8l3-4"/>',
+  // Marco 18 (D-069): as bases novas dos itens com forma.
+  maca: '<path d="M6 21 14 13"/><circle cx="16.5" cy="10.5" r="4"/><path d="M16.5 4.5v2M22.5 10.5h-2M20.7 6.3l-1.4 1.4"/>',
+  lanca: '<path d="M4 20 16 8"/><path d="m14 6 6-3-3 6Z"/><path d="M6 15l3 3"/>',
+  manopla: '<path d="M6 21v-8l-1-5 3-1 1 3V5h2v5V4h2v6V5h2v5l2-2 2 1-3 6v6Z"/><path d="M6 17h10"/>',
+  grevas: '<path d="M7 3h4v12l1 6H5l1-6Z"/><path d="M13 3h4v12l1 6h-7"/><path d="M7 9h4M13 9h4"/>',
+  capuz: '<path d="M5 20c0-9 3-16 7-16s7 7 7 16"/><path d="M8.5 20c0-5 1.5-9 3.5-9s3.5 4 3.5 9"/>',
+  manto: '<path d="M7 3h10l3 18H4Z"/><path d="M12 3v18"/><path d="M9 3c0 2.5 1.2 4 3 4s3-1.5 3-4"/>',
   // --- Elementos
   fogo: '<path d="M12 21c4 0 6.5-2.5 6.5-6 0-4-3-6-4.5-10-1 3-3 4-4 6-1-1-1.5-2-1.5-3C6.5 10 5.5 12 5.5 15c0 3.5 2.5 6 6.5 6Z"/>',
   gelo: '<path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7"/><path d="m9.5 4 2.5 2 2.5-2M9.5 20l2.5-2 2.5 2"/>',

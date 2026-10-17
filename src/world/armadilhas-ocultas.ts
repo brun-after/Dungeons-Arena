@@ -15,6 +15,7 @@ import { revelaArmadilhas } from '../modos/regras';
 import { podeFerir } from '../modos/relacao';
 import { chanceDeDesarmarPct, chanceDeRevelarPct, raioDeRevelar } from '../progression/efeitos-atributo';
 import { aplicarSubidas } from '../progression/nivel';
+import { passivosDe } from '../progression/ganchos-do-portador';
 
 /** A armadilha é perigosa para `e` (do dono hostil) — só essas contam para revelar e desarmar. */
 function ameaca(ctx: ContextoSimulacao, a: Armadilha, e: Entidade): boolean {
@@ -29,7 +30,8 @@ export function revelarArmadilhas(estado: EstadoJogo, ctx: ContextoSimulacao, sa
   for (const e of estado.entidades) {
     if (!e.bolsa || !vivo(e)) continue;
     const raio = raioDeRevelar(e.atributos, ctx.balance);
-    const chance = chanceDeRevelarPct(e.atributos, ctx.balance) / 100;
+    // Marco 18 (D-069): o Elmo Lendário revela mais.
+    const chance = Math.min(1, (chanceDeRevelarPct(e.atributos, ctx.balance) * (1 + passivosDe(ctx, e).revelarPct / 100)) / 100);
     const origem = celulaOcupada(e);
     for (const a of estado.armadilhas) {
       if (a.reveladaPara.includes(e.id) || chebyshev(origem, a) > raio || !ameaca(ctx, a, e)) continue;
@@ -70,7 +72,7 @@ export function concluirDesarme(
   e.interacao = null;
   const a = estado.armadilhas.find((x) => x.id === armadilhaId);
   if (!a || !vivo(e)) return;
-  const sucesso = aleatorio(estado.rng) < chanceDeDesarmarPct(e.atributos, ctx.balance) / 100;
+  const sucesso = aleatorio(estado.rng) < Math.min(0.99, (chanceDeDesarmarPct(e.atributos, ctx.balance) + passivosDe(ctx, e).desarmarPct) / 100);
   saida.push({ t: 'armadilhaDesarmada', tick: estado.tick, id: e.id, armadilhaId: a.id, sucesso });
   if (!sucesso) {
     disparar(a, e);

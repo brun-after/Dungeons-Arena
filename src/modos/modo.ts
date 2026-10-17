@@ -24,9 +24,10 @@ export interface RecompensaDeJogador {
 
 /** Marco 15: quando a fase termina — qualquer jogador na saída, ou todos os vivos sobre ela (cooperativo). */
 export type RegraSaida = 'qualquer' | 'todos_vivos';
-export type Raridade = 'comum' | 'incomum' | 'raro' | 'epico' | 'lendario';
+/** Marco 18 (D-069): `ultima` é a Última forma dos itens base (não cai: vem da forja e de missões). */
+export type Raridade = 'comum' | 'incomum' | 'raro' | 'epico' | 'lendario' | 'ultima';
 
-export const RARIDADES: readonly Raridade[] = ['comum', 'incomum', 'raro', 'epico', 'lendario'];
+export const RARIDADES: readonly Raridade[] = ['comum', 'incomum', 'raro', 'epico', 'lendario', 'ultima'];
 export const SLOTS_DE_EQUIPAMENTO = [
   'arma_principal',
   'arma_secundaria',
