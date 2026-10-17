@@ -1,9 +1,9 @@
 // Efeitos de fluxo próprio (§2.8, §2.9, §2.11). Marco 8A-2 (14/10/2026), D-049.
-//   efeito_atrasado  → estado.atrasados, dispara o efeito carregado no alvo depois do prazo;
-//   rastro_*         → status na entidade; cada célula por onde ela passa vira rastro (estado.rastros);
-//   armadilha        → estado.armadilhas, disparo único no primeiro hostil (por `relacao()`);
-//   invocar          → entidades `invocacao` da equipe do dono, com prazo e limite do modo;
-//   dominar_ao_matar → status no alvo; quem morre com ele volta do lado de quem o aplicou.
+//   efeito_atrasado  -> estado.atrasados, dispara o efeito carregado no alvo depois do prazo;
+//   rastro_*         -> status na entidade; cada célula por onde ela passa vira rastro (estado.rastros);
+//   armadilha        -> estado.armadilhas, disparo único no primeiro hostil (por `relacao()`);
+//   invocar          -> entidades `invocacao` da equipe do dono, com prazo e limite do modo;
+//   dominar_ao_matar -> status no alvo; quem morre com ele volta do lado de quem o aplicou.
 // Tudo passa pelo dispatcher único (`aplicarEfeito`); aqui ficam o estado e os gatilhos por tick.
 // Marco 10A-3 (14/10/2026): comportamento e avatar vindos do preset, avatares contados à parte,
 // cascata de dominação em dados, dispensa e a explosão da isca (D-054).

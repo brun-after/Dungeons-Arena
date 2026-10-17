@@ -6,7 +6,6 @@ import { BALANCE_PADRAO, type ContextoSimulacao } from '../../src/core/contexto'
 import { buscarEntidade, criarEstado } from '../../src/core/estado';
 import { DT_MS } from '../../src/core/loop';
 import { simular, type EventoSimulacao } from '../../src/core/simulacao';
-import { ticksDe } from '../../src/core/tempo';
 import type { Entidade } from '../../src/entities/entidade';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import { perderXp } from '../../src/progression/nivel';
@@ -91,63 +90,6 @@ describe('penalidade de morte (§2.12)', () => {
     c.tick();
     expect([c.j().xp, bolsa.ouro]).toEqual([80, 100]);
     expect(c.de('penalidadeMorte')).toHaveLength(0);
-  });
-});
-
-describe('descanso (§2.12)', () => {
-  it('curto: congela 3 s e devolve 50% da vida e 30% da mana', () => {
-    const c = cenario();
-    const j = c.j();
-    j.hp = 1;
-    j.mana = 0;
-    c.tick({ t: 'descansar', tipo: 'curto' });
-    expect(j.interacao?.tipo).toBe('descanso');
-    c.tick({ t: 'mover', dir: 'E' });
-    c.avancar(ticksDe(3000));
-    expect([j.x, j.y]).toEqual([3, 5]);
-    expect(j.interacao).toBeNull();
-    expect(c.de('descansou')).toMatchObject([{ tipo: 'curto' }]);
-    expect(j.hp).toBeGreaterThanOrEqual(1 + Math.round(j.hpMax / 2));
-    expect(j.mana).toBeGreaterThanOrEqual(Math.round(j.manaMax * 0.3));
-  });
-
-  it('longo: enche tudo e zera as recargas do jogador', () => {
-    const c = cenario();
-    const j = c.j();
-    j.hp = 1;
-    j.mana = 0;
-    c.estado.recargas['j_bola_de_fogo'] = 99_999;
-    c.estado.recargas['outro_golpe'] = 99_999;
-    c.tick({ t: 'descansar', tipo: 'longo' });
-    c.avancar(ticksDe(10_000));
-    expect([j.hp, j.mana]).toEqual([j.hpMax, j.manaMax]);
-    expect(c.estado.recargas['j_bola_de_fogo']).toBeLessThanOrEqual(c.estado.tick);
-    expect(c.estado.recargas['outro_golpe']).toBe(99_999);
-  });
-
-  it('com hostil perseguindo é recusado; se a perseguição começa no meio, é interrompido sem recompensa', () => {
-    const c = cenario();
-    const g = c.perseguidor();
-    c.tick({ t: 'descansar', tipo: 'curto' });
-    expect(c.recusas()).toEqual(['em_perigo']);
-    obter(g.ia, 'ia').modo = 'patrulha';
-    obter(g.ia, 'ia').alvoId = null;
-    g.hp = 0;
-    c.tick();
-    c.j().hp = 10;
-    c.tick({ t: 'descansar', tipo: 'curto' });
-    expect(c.j().interacao?.tipo).toBe('descanso');
-    c.perseguidor();
-    c.tick();
-    expect(c.de('descansoInterrompido')).toHaveLength(1);
-    expect(c.j().interacao).toBeNull();
-    expect(c.de('descansou')).toHaveLength(0);
-  });
-
-  it('no modo Livre não há descanso', () => {
-    const c = cenario('livre');
-    c.tick({ t: 'descansar', tipo: 'longo' });
-    expect(c.recusas()).toEqual(['sem_descanso']);
   });
 });
 

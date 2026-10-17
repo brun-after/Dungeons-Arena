@@ -1,20 +1,20 @@
 {
   "versao": 1,
   "caminhos": [
-    { "id": "eco", "nome": "Eco", "icone": "◎", "mods": ["ecoar"] },
-    { "id": "cadeia", "nome": "Cadeia", "icone": "⛓", "mods": ["encadear"] },
-    { "id": "perfurante", "nome": "Perfurante", "icone": "➶", "mods": ["atravessar"] },
-    { "id": "amplo", "nome": "Amplo", "icone": "◯", "mods": ["maior_e_mais_lenta"] },
-    { "id": "brutal", "nome": "Brutal", "icone": "⚒", "danoPct": 25, "custoPct": 20 },
-    { "id": "eficiente", "nome": "Eficiente", "icone": "♻", "custoPct": -30, "recargaPct": -20 },
-    { "id": "controle", "nome": "Controle", "icone": "⏳", "duracaoPct": 50 },
-    { "id": "longo_alcance", "nome": "Longo alcance", "icone": "↔", "alcance": 2 },
-    { "id": "sanguessuga", "nome": "Sanguessuga", "icone": "🩸", "efeitos": [{ "tipo": "cura", "valor": 3, "em": "conjurador" }] },
-    { "id": "fortificado", "nome": "Fortificado", "icone": "🔰", "efeitos": [{ "tipo": "escudo", "valor": 6, "duracaoMs": 4000, "em": "conjurador" }] },
-    { "id": "elemental_fogo", "nome": "Chamas", "icone": "🔥", "elemento": "fogo", "danoPct": 5 },
-    { "id": "elemental_gelo", "nome": "Geada", "icone": "❄", "elemento": "gelo", "danoPct": 5 },
-    { "id": "elemental_raio", "nome": "Tempestade", "icone": "⚡", "elemento": "raio", "danoPct": 5 },
-    { "id": "elemental_veneno", "nome": "Peçonha", "icone": "🧪", "elemento": "veneno", "danoPct": 5 },
-    { "id": "elemental_psiquico", "nome": "Mente", "icone": "👁", "elemento": "psiquico", "danoPct": 5 }
+    { "id": "eco", "nome": "Eco", "icone": "eco", "mods": ["ecoar"] },
+    { "id": "cadeia", "nome": "Cadeia", "icone": "corrente", "mods": ["encadear"] },
+    { "id": "perfurante", "nome": "Perfurante", "icone": "flecha", "mods": ["atravessar"] },
+    { "id": "amplo", "nome": "Amplo", "icone": "circulo", "mods": ["maior_e_mais_lenta"] },
+    { "id": "brutal", "nome": "Brutal", "icone": "martelo", "danoPct": 25, "custoPct": 20 },
+    { "id": "eficiente", "nome": "Eficiente", "icone": "ciclo", "custoPct": -30, "recargaPct": -20 },
+    { "id": "controle", "nome": "Controle", "icone": "ampulheta", "duracaoPct": 50 },
+    { "id": "longo_alcance", "nome": "Longo alcance", "icone": "longo", "alcance": 2 },
+    { "id": "sanguessuga", "nome": "Sanguessuga", "icone": "sangue", "efeitos": [{ "tipo": "cura", "valor": 3, "em": "conjurador" }] },
+    { "id": "fortificado", "nome": "Fortificado", "icone": "barreira", "efeitos": [{ "tipo": "escudo", "valor": 6, "duracaoMs": 4000, "em": "conjurador" }] },
+    { "id": "elemental_fogo", "nome": "Chamas", "icone": "fogo", "elemento": "fogo", "danoPct": 5 },
+    { "id": "elemental_gelo", "nome": "Geada", "icone": "gelo", "elemento": "gelo", "danoPct": 5 },
+    { "id": "elemental_raio", "nome": "Tempestade", "icone": "raio", "elemento": "raio", "danoPct": 5 },
+    { "id": "elemental_veneno", "nome": "Peçonha", "icone": "veneno", "elemento": "veneno", "danoPct": 5 },
+    { "id": "elemental_psiquico", "nome": "Mente", "icone": "olho", "elemento": "psiquico", "danoPct": 5 }
   ]
 }

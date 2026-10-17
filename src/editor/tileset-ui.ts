@@ -1,7 +1,7 @@
 // Painel de tileset do editor (§3.10). Marco 11A (16/10/2026), D-066:
 // - gerenciar: os atlas guardados neste aparelho (usar nesta fase, excluir) e enviar um novo;
 // - novo atlas: imagem (PNG/JPEG/WebP até 2 MB, quadrada), grade 4 ou 5, separação, prévia fatiada e o vínculo
-//   peça ↔ função tocando a célula (seletor agrupado: Funções / Pisos / Paredes e cantos / Personalizadas, com aviso
+//   peça <-> função tocando a célula (seletor agrupado: Funções / Pisos / Paredes e cantos / Personalizadas, com aviso
 //   de chave repetida). Tudo em rascunho até "Salvar tileset";
 // - seletor de peça para o pincel;
 // - "Copiar prompt para IA": o texto para gerar um atlas fora do jogo (nenhuma IA roda aqui).
@@ -16,6 +16,7 @@ import {
   novoIdDeTileset,
   type RegistroTileset,
 } from '../plataforma/tilesets';
+import { icone } from '../ui/icones';
 import { criarModal } from '../ui/modal';
 import { fatiar, GRUPOS_DE_FUNCAO, RE_CHAVE_PECA, vinculosCanonicos, type CelulaAtlas, type GradeAtlas, type RecorteAtlas, type Vinculos } from '../world/tileset';
 
@@ -325,13 +326,13 @@ export function abrirGerenciadorDeTilesets(o: OpcoesGerenciador): void {
       for (const ts of tilesets) {
         const linha = el('div', 'linha-inspetor');
         linha.dataset.tileset = ts.id;
-        const usar = botao(ts.id === o.atual ? `✓ ${ts.nome}` : ts.nome, () => {
+        const usar = botao(ts.id === o.atual ? `${ts.nome} (em uso)` : ts.nome, () => {
           o.aoEscolher(ts.id);
           m.fechar();
         });
         usar.setAttribute('aria-pressed', String(ts.id === o.atual));
         let confirmando = false;
-        const excluir = botao('✕', () => {
+        const excluir = botao('', () => {
           if (!confirmando) {
             confirmando = true;
             excluir.textContent = t('tileset.confirmarExcluir');
@@ -341,6 +342,7 @@ export function abrirGerenciadorDeTilesets(o: OpcoesGerenciador): void {
             linha.remove();
           });
         });
+        excluir.append(icone('fechar'));
         excluir.setAttribute('aria-label', t('tileset.excluir', { nome: ts.nome }));
         linha.append(usar, el('span', 'detalhe-slot', `${ts.grade}×${ts.grade}`), excluir);
         lista.append(linha);

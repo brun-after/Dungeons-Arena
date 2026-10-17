@@ -17,7 +17,7 @@ export function regenerarRecursos(estado: EstadoJogo, ctx: ContextoSimulacao): v
   }
 }
 
-/** Algum hostil vivo está perseguindo esta entidade (§2.12: bloqueia regeneração e descanso)? */
+/** Algum hostil vivo está perseguindo esta entidade (§2.12: bloqueia a regeneração e a loja)? */
 export function perseguido(estado: EstadoJogo, e: Entidade): boolean {
   return estado.entidades.some((x) => vivo(x) && x.ia?.modo === 'perseguindo' && x.ia.alvoId === e.id);
 }

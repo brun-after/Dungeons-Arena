@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.32 · **Data:** 16/10/2026
+**Versão:** 0.33 · **Data:** 17/10/2026
 
 > **Histórico**
+> - **0.33 (17/10/2026)**: D-067 (ajustes depois do 11A: sem descanso, buff armado, refúgio, loja sem prazo, equipamento no token, flechas, ícones próprios, paisagem).
 > - **0.32 (16/10/2026)**: D-066 (marco 11A: editor completo, aventura de várias fases, tileset, estilo por aparelho, visuais em partículas e trilhas casual ↔ dark).
 > - **0.31 (15/10/2026)**: D-065 (alvo automático que acompanha e alvo travado).
 > - **0.30 (15/10/2026)**: D-063 (conta, nuvem, certificado do personagem, a campanha na arena e mais peso em upar; marco 17) e D-064 (o 11A redefinido).
@@ -1684,3 +1685,50 @@ O aceite: uma aventura de 2 fases criada e testada no celular.
 - O editor é um chunk à parte (~39 KB); as fases oficiais e o save não mudaram de formato.
 - A exportação da aventura inteira continua fora (D-064); exporta-se uma fase.
 
+## D-067 · Ajustes depois do 11A: sem descanso, buffs armados, refúgio, loja sem prazo e ícones próprios (v0.33, 17/10/2026)
+
+**Contexto.** Jogando a versão com o 11A, o usuário pediu uma lista de ajustes, entregues num PR só e com checklist.
+
+**Decisão.**
+- **Sem descanso.** O comando `descansar`, a interação, a tecla `R`, os botões e o `balance.descanso` saíram
+  (divergência da §2.10 e da tabela de modos da spec, a pedido). Para compensar, mais orbes de vida: o spawner sorteia
+  orbe com chance 0,4 (era 0,3), o peso do de vida é 55 (era 40) e o drop de orbe de vida é 0,15 (era 0,10). O
+  `npm run balancear` confere as metas.
+- **Halo no lugar da linha.** A "linha amarela" ao interagir era o anel de progresso do baú desenhado com `arc()` sem
+  `moveTo()`: o Pixi ligava o fim do desenho anterior ao início do arco. O anel saiu; no lugar, um halo (sprite com
+  gradiente radial, aditivo) pulsa no objeto enquanto a interação dura. O mesmo defeito em `render/fluxo.ts` foi
+  corrigido.
+- **Buff ofensivo armado.** Orbes de efeito ofensivo (`bonus_dano`, `ab_dano`, `ab_recarga`, `ab_alcance`,
+  `ab_multi_alvo`, `atravessar`, `rastro_dano`) não começam na hora: ficam em `Entidade.buffsArmados` por
+  `efeitos.prazoArmadoMs` (20 s). **Em combate** é ser perseguido por um hostil ou ter causado ou levado dano nos
+  últimos 3 s; nesse momento o efeito entra e a duração conta dali. Sem combate no prazo, some (`buffExpirou`). O HUD
+  mostra o chip tracejado com os segundos.
+- **Refúgio.** Objeto `orbe_refugio`, categoria própria no spawner: no máximo um por vez, contando o do mapa e a carga
+  de qualquer jogador; não ocupa vaga dos outros orbes. Pegar guarda a carga (`Entidade.refugio`, ícone no HUD). Abrir
+  a mochila (comando novo `abrirMenu`) ou a loja gasta a carga e dá `imune_dano` por `efeitos.refugioMs` (45 s).
+- **Loja sem prazo.** A janela não tem `ateTick` (fica aberta o tempo que o jogador quiser), mas só abre sem
+  perseguição (`em_perigo`) e fecha se a perseguição começar com ela aberta (`lojaFechada` com `perigo`).
+- **Equipamento no token.** `Entidade.aparencia` (pública; a arena a vê mesmo sem a bolsa) guarda a base da arma de
+  cada mão e a raridade do elmo, da armadura e da capa. Os modelos das classes jogáveis saíram do atlas sem arma nem
+  escudo; `render/adornos.ts` desenha o equipamento em duas camadas (capa atrás; armadura, elmo e armas na frente),
+  geradas do SVG com o mesmo contorno e os mesmos traços dos modelos, dentro do corpo do rig (seguem pose, passo e
+  giro). Com a mão vazia, aparece a arma da classe (as habilidades da classe não pedem item).
+- **Consumíveis à mão.** Barra à direita: no PC, uma coluna com as teclas 5–9 e 0; no toque, uma lista rolável e
+  translúcida no alto. O minimapa foi para a esquerda, abaixo do status.
+- **Barra de habilidades.** Botões 15% maiores (60 px; 51 px no toque, com a roda em 97 px). Para pôr uma habilidade
+  na tecla: os botões 1–4 em cada carta da aba Habilidades, e o seletor rápido na própria barra (clique direito, toque
+  longo ou o `+` da tecla livre).
+- **Flechas de verdade.** `visual.projetil` (`orbe`, `flecha` ou `teia`; o físico deduz flecha, o mágico orbe). O
+  corpo do projétil é uma partícula orientada pelo voo (texturas novas `flecha` e `teia`); a esteira fina e orientada
+  substitui as bolinhas de brilho; `farpas` (lascas e pó) é o acerto da flecha; a `chuva` cai do alto nas células da
+  área, sem onda nem faíscas; o `leque` sai em cone de quem atira. Os traços de reserva e das texturas ficaram em 2 px.
+- **Ícones próprios.** Nenhum emoji no sistema: um conjunto de ícones SVG (24 × 24, traço de 2 px, pontas
+  arredondadas, cor herdada) em `data/icones.ts`. Os campos `icone` dos dados são ids validados contra o conjunto; o
+  canvas usa texturas geradas do mesmo SVG. Um teste varre `src/` e o `index.html`.
+- **Celular.** O manifesto pede paisagem; a tela cheia e a trava de orientação são pedidas a cada toque enquanto não
+  pegarem; em retrato, um aviso cobre o jogo pedindo para girar (o iOS não permite travar).
+- **Save v13.** A migração `v12ParaV13` limpa uma interação de descanso e inicia `buffsArmados`, `refugio` e
+  `aparencia`.
+
+**Consequência.** A campanha perde a cura garantida do descanso e passa a depender de orbes e da regeneração ao
+andar. A spec (§2.10 e a tabela de modos) continua citando o descanso; esta decisão prevalece.

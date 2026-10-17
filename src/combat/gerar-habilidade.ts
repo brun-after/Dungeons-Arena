@@ -104,7 +104,7 @@ function gerar(id: string, ctx: ContextoHabilidades): DefinicaoHabilidade | null
     politicaAlvo: 'hostil',
     interrupcao: 'interrompivel',
     efeitos,
-    visual: { cor: el.cor, conjuracao: el.visual.conjuracao, viagem: forma === 'projetil' ? el.visual.viagem : null, impacto: el.visual.impacto, camera: 'leve', som: el.visual.som },
+    visual: { cor: el.cor, conjuracao: el.visual.conjuracao, viagem: forma === 'projetil' ? el.visual.viagem : null, impacto: el.visual.impacto, camera: 'leve', projetil: null, som: el.visual.som },
     elemento: el.id,
     custoVida: 0,
     tags: [],

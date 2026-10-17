@@ -1,12 +1,10 @@
 // Prompt de interação contextual (§2.15). Marco 12 (14/10/2026). Só lê o estado, a cada 200 ms: o baú ou a
-// loja ao alcance (a mesma escolha de `interagir`, world/interacao.ts), a saída trancada sob os pés e,
-// sem nada disso e sem ninguém perseguindo, o lembrete do descanso. No toque, mostra o ✋ em vez do E.
+// loja ao alcance (a mesma escolha de `interagir`, world/interacao.ts) e a saída trancada sob os pés.
+// Ajuste de 16/10/2026 (D-067): o lembrete do descanso saiu com o descanso.
 
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import { t } from '../i18n';
-import { podeDescansar } from '../modos/regras';
-import { perseguido } from '../progression/recursos';
 import { alvoDeInteracao, recargaLojaRestante } from '../world/interacao';
 
 const INTERVALO_MS = 200;
@@ -22,7 +20,8 @@ export function criarPrompt(ctx: ContextoSimulacao, idLocal: string, toque: bool
   el.setAttribute('role', 'status');
   el.hidden = true;
   let ultimo = -Infinity;
-  const tecla = (letra: string) => (toque ? '✋' : letra);
+  // D-067: no toque, a palavra (o botão de interagir tem o ícone da mão).
+  const tecla = (letra: string) => (toque ? t('prompt.toque') : letra);
 
   const texto = (estado: EstadoJogo): string => {
     const eu = estado.entidades.find((e) => e.id === idLocal);
@@ -36,7 +35,6 @@ export function criarPrompt(ctx: ContextoSimulacao, idLocal: string, toque: bool
     if (s && s.x === eu.x && s.y === eu.y && s.tranca !== 'livre' && !estado.saidaAberta) {
       return t(s.tranca === 'chave' ? 'prompt.saidaChave' : 'prompt.saidaBoss');
     }
-    if (podeDescansar(ctx.modo) && !toque && eu.hp < eu.hpMax * 0.5 && !perseguido(estado, eu)) return t('prompt.descansar');
     return '';
   };
 

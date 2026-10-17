@@ -16,6 +16,7 @@ import { CELULA_PX } from './camera-calculo';
 import type { PontoVisual } from './interpolacao';
 import { ehModelo, MODELO_JOGADOR, MODELOS } from './modelos';
 import { centroDaCelula, type Projecao } from './projecao';
+import { texturasDoAdorno } from './adornos';
 import { RigToken } from './rig-token';
 import type { BibliotecaCriaturas, FonteToken } from './texturas-criaturas';
 
@@ -167,10 +168,10 @@ export class CamadaEntidades {
   }
 
   /** Modelo e fonte de desenho da entidade na visão atual (null: silhueta). */
-  private fonteDe(e: Entidade, ctx: ContextoSimulacao, iso: boolean, quadroMs: number, andando: boolean): { fonte: FonteToken; estilo: EstiloCaminhada; proprio: boolean } | null {
+  private fonteDe(e: Entidade, ctx: ContextoSimulacao, iso: boolean, quadroMs: number, andando: boolean): { fonte: FonteToken; estilo: EstiloCaminhada; proprio: boolean; modelo: string } | null {
     const vista = iso ? '34' : 'cima';
     const token = e.id === this.o.idLocal ? this.o.tokenProprio() : null;
-    if (token) return { fonte: iso ? token.emPe : token.cima, estilo: 'passada', proprio: true };
+    if (token) return { fonte: iso ? token.emPe : token.cima, estilo: 'passada', proprio: true, modelo: '' };
     const biblioteca = this.o.biblioteca();
     if (!biblioteca) return null;
     // Marco 14: o jogador usa o modelo da classe (sem bolsa — arena — o aventureiro).
@@ -180,7 +181,7 @@ export class CamadaEntidades {
     const m = MODELOS[nome];
     const quadro = m.quadros > 1 && andando ? Math.floor(quadroMs / QUADRO_MS) % m.quadros : 0;
     const fonte = biblioteca.fonte(nome, vista, quadro);
-    return fonte ? { fonte, estilo: m.estilo, proprio: false } : null;
+    return fonte ? { fonte, estilo: m.estilo, proprio: false, modelo: nome } : null;
   }
 
   /**
@@ -272,7 +273,7 @@ export class CamadaEntidades {
   private desenharCorpo(
     m: Marcador,
     e: Entidade,
-    escolha: { fonte: FonteToken; estilo: EstiloCaminhada; proprio: boolean } | null,
+    escolha: { fonte: FonteToken; estilo: EstiloCaminhada; proprio: boolean; modelo: string } | null,
     q: {
       iso: boolean;
       usarTiras: boolean;
@@ -318,6 +319,9 @@ export class CamadaEntidades {
       direcao: q.direcao,
       usarTiras: q.iso && q.usarTiras,
     });
+    // D-067: o equipamento aparece no token (modelos de classe; a imagem própria fica como o jogador a fez).
+    const adorno = escolha.proprio ? null : texturasDoAdorno(escolha.modelo, q.iso ? '34' : 'cima', e.aparencia);
+    m.rig.adornar(adorno?.atras ?? null, adorno?.frente ?? null);
     const f = escolha.fonte;
     m.topo = gira ? -alturaPx * 0.42 : f.ancoraY === 1 ? -alturaPx : -alturaPx * f.ancoraY * 0.9;
   }

@@ -3,7 +3,7 @@
 // pernas; aplica a pose de render/caminhada.ts. A origem (0, 0) é a âncora da fonte: os pés na vista em pé,
 // o centro na vista de cima.
 
-import { Container, Sprite } from 'pixi.js';
+import { Container, Sprite, type Texture } from 'pixi.js';
 import { TIRAS, type Pose } from './caminhada';
 import type { FonteToken } from './texturas-criaturas';
 
@@ -24,13 +24,16 @@ export class RigToken {
   readonly raiz = new Container({ label: 'token' });
   private readonly corpo = new Container();
   private readonly inteiro = new Sprite();
+  /** D-067: o equipamento (capa atrás; armadura, elmo e armas na frente), no tamanho do quadro. */
+  private readonly adornoAtras = new Sprite();
+  private readonly adornoFrente = new Sprite();
   private readonly tiras: Sprite[] = [];
   private readonly colunas: [Sprite, Sprite][] = [];
   private fonte: FonteToken;
 
   constructor(fonte: FonteToken) {
     this.fonte = fonte;
-    this.corpo.addChild(this.inteiro);
+    this.corpo.addChild(this.adornoAtras, this.inteiro);
     for (let i = 0; i < TIRAS; i++) {
       const s = new Sprite();
       const e = new Sprite();
@@ -39,6 +42,8 @@ export class RigToken {
       this.colunas.push([e, d]);
       this.corpo.addChild(s, e, d);
     }
+    this.corpo.addChild(this.adornoFrente);
+    this.adornoAtras.visible = this.adornoFrente.visible = false;
     this.raiz.addChild(this.corpo);
     this.trocarFonte(fonte);
   }
@@ -53,6 +58,8 @@ export class RigToken {
     const oy = -f.ancoraY * f.altura;
     this.inteiro.texture = f.inteiro;
     this.inteiro.position.set(ox, oy);
+    this.adornoAtras.position.set(ox, oy);
+    this.adornoFrente.position.set(ox, oy);
     for (let i = 0; i < TIRAS; i++) {
       const y = oy + (f.bordas[i] ?? 0);
       const s = this.tiras[i];
@@ -97,6 +104,14 @@ export class RigToken {
         s.position.set(ox + t.dx * f.largura, y + t.dy * f.altura);
       }
     }
+  }
+
+  /** D-067: as texturas do equipamento (null esconde a camada). */
+  adornar(atras: Texture | null, frente: Texture | null): void {
+    this.adornoAtras.visible = !!atras;
+    if (atras && this.adornoAtras.texture !== atras) this.adornoAtras.texture = atras;
+    this.adornoFrente.visible = !!frente;
+    if (frente && this.adornoFrente.texture !== frente) this.adornoFrente.texture = frente;
   }
 
   destruir(): void {

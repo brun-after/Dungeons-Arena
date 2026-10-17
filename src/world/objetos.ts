@@ -5,6 +5,7 @@
 // Marco 9A (14/10/2026): ouro (vai para a bolsa), loot com quantidade e os interagíveis (baú e loja),
 // que não são coletados ao pisar: abrem pelo comando `interagir` (world/interacao.ts).
 
+import { armarBuff, EFEITOS_OFENSIVOS } from '../progression/buffs';
 import { aplicarEfeito } from '../combat/efeitos';
 import type { EfeitoCanonico } from '../combat/registro-efeitos';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -66,7 +67,7 @@ export function coletarObjetos(estado: EstadoJogo, ctx: ContextoSimulacao, saida
     if (!coletor(e)) continue;
     const o = estado.objetos.find((x) => x.x === e.x && x.y === e.y && !consumidos.has(x.objetoId) && coletavel(x));
     if (!o) continue;
-    // Transação: verificar → consumir → transferir → registrar, tudo neste tick.
+    // Transação: verificar -> consumir -> transferir -> registrar, tudo neste tick.
     if (o.tipo === 'item') {
       // Item: só quem tem mochila com espaço para a quantidade toda; senão fica no chão (§2.10).
       const item = o.itemId ? ctx.conteudo.itens.get(o.itemId) : undefined;
@@ -83,11 +84,20 @@ export function coletarObjetos(estado: EstadoJogo, ctx: ContextoSimulacao, saida
       saida.push({ t: 'coletou', tick: estado.tick, id: e.id, objetoId: o.objetoId, tipo: o.tipo, ganho: o.valor, itemId: null });
       continue;
     }
+    if (o.tipo === 'orbe_refugio') {
+      // D-067: uma carga só; quem já tem deixa no chão.
+      if (e.refugio || !e.bolsa) continue;
+      consumidos.add(o.objetoId);
+      e.refugio = true;
+      saida.push({ t: 'coletou', tick: estado.tick, id: e.id, objetoId: o.objetoId, tipo: o.tipo, ganho: 1, itemId: null });
+      continue;
+    }
     if (o.tipo === 'orbe_efeito') {
-      // Orbe de efeito: sempre serve; o efeito passa pelo dispatcher único (§2.8).
+      // Orbe de efeito: sempre serve; o efeito passa pelo dispatcher único (§2.8). D-067: o ofensivo chega armado.
       if (!o.efeito) continue;
       consumidos.add(o.objetoId);
-      aplicarEfeito(estado, ctx, e, o.efeito, { id: e.id, x: e.x, y: e.y }, null, saida);
+      if (EFEITOS_OFENSIVOS.has(o.efeito.tipo)) armarBuff(estado, ctx, e, o.efeito, saida);
+      else aplicarEfeito(estado, ctx, e, o.efeito, { id: e.id, x: e.x, y: e.y }, null, saida);
       saida.push({ t: 'coletou', tick: estado.tick, id: e.id, objetoId: o.objetoId, tipo: o.tipo, ganho: 1, itemId: null });
       continue;
     }

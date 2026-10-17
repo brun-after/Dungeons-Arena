@@ -3,23 +3,45 @@
 // internas (anel violeta com o número do par) e a tranca da porta de saída. Redesenha tudo de uma vez: o editor só
 // chama quando algo muda.
 
-import { Container, Graphics, Text } from 'pixi.js';
+import { Container, Graphics, Sprite, Text } from 'pixi.js';
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import type { Conteudo } from '../core/conteudo';
 import type { Celula } from '../core/comandos';
 import { CELULA_PX } from '../render/camera-calculo';
+import { carregarTexturasDeIcones, texturaDoIcone } from '../render/icones-textura';
 import { desenharSilhueta } from '../render/sprites';
 import { chaveDoObjeto, type FaseEditavel } from './grade';
 
 const COR_ORBE: Readonly<Record<string, number>> = { orbe_hp: 0x2ecc71, orbe_recurso: 0x5dade2 };
 
+// Ajuste de 16/10/2026 (D-067): ícones do conjunto (texturas geradas do SVG), nada de emoji.
 const ICONE: Readonly<Record<string, string>> = {
-  bau: '🧰',
-  loja: '🛒',
-  loot: '🎁',
-  armadilha: '⚠️',
-  fonte_som: '🔊',
+  bau: 'bau',
+  loja: 'loja',
+  loot: 'mochila',
+  armadilha: 'aviso',
+  fonte_som: 'som',
 };
+
+/** Carrega as texturas dos ícones dos marcadores (chamar antes do primeiro desenho). */
+export async function prepararMarcadores(): Promise<void> {
+  await carregarTexturasDeIcones([...Object.values(ICONE), 'cadeado', 'coroa']);
+}
+
+/** Um ícone com fundo escuro redondo (legível sobre qualquer piso). */
+function simbolo(id: string, tamanho: number): Container {
+  const c = new Container();
+  c.addChild(new Graphics().circle(0, 0, tamanho * 0.62).fill({ color: 0x0d0b12, alpha: 0.75 }));
+  const tex = texturaDoIcone(id);
+  if (tex) {
+    const s = new Sprite(tex);
+    s.anchor.set(0.5);
+    s.width = tamanho;
+    s.height = tamanho;
+    c.addChild(s);
+  }
+  return c;
+}
 
 export function corDoOrbe(chave: string): number {
   const tipo = chave.startsWith('efeito:') ? chave.slice('efeito:'.length) : '';
@@ -58,7 +80,7 @@ export class MarcadoresEditor {
       }
     }
     const s = f.portaSaida;
-    if (s && s.tranca !== 'livre') colocar(s, texto(s.tranca === 'chave' ? '🔒' : '👑', 20));
+    if (s && s.tranca !== 'livre') colocar(s, simbolo(s.tranca === 'chave' ? 'cadeado' : 'coroa', 22));
     if (f.spawn) colocar(f.spawn, desenharSilhueta(new Graphics(), 'jogador', 0x3498db));
     const chefe = s?.tranca === 'boss' ? s.chefe : undefined;
     for (const i of f.inimigos) {
@@ -71,7 +93,7 @@ export class MarcadoresEditor {
         marcador.addChild(n);
       }
       if (chefe?.x === i.x && chefe.y === i.y) {
-        const coroa = texto('👑', 14);
+        const coroa = simbolo('coroa', 16);
         coroa.position.set(0, -24);
         marcador.addChild(coroa);
       }
@@ -79,7 +101,7 @@ export class MarcadoresEditor {
     }
     for (const o of f.objetos) {
       const icone = ICONE[o.tipo];
-      if (icone) colocar(o, texto(icone, 22));
+      if (icone) colocar(o, simbolo(icone, 24));
       else colocar(o, new Graphics().circle(0, 0, 10).fill(corDoOrbe(chaveDoObjeto(o))).stroke({ width: 3, color: 0xffffff }));
     }
   }

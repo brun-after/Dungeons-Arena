@@ -2,7 +2,7 @@
   "id": "livre",
   "nome": "Livre",
   "descricao": "Entra e sai quando quiser, sem partida e sem placar: a dungeon, com gente dentro.",
-  "icone": "⭐",
+  "icone": "estrela",
   "equipes": 1,
   "politicaRelacao": "todos_hostis",
   "autoBalancear": false,
@@ -37,7 +37,7 @@
   "spawnerDinamico": true,
   "portas": { "inimigosCruzamChance": 0.5 },
   "saida": "qualquer",
-  "comandosDeRede": ["mover", "irPara", "usarHabilidade", "ataqueBasico", "selecionarAlvo", "usarItem", "equipar", "desequipar", "distribuirPonto", "interagir", "comprar", "vender", "fecharLoja", "moverItem", "descansar", "dispensar"],
+  "comandosDeRede": ["mover", "irPara", "usarHabilidade", "ataqueBasico", "selecionarAlvo", "usarItem", "equipar", "desequipar", "distribuirPonto", "interagir", "abrirMenu", "comprar", "vender", "fecharLoja", "moverItem", "dispensar"],
   "faixas": [
     { "id": "1-5", "min": 1, "max": 5 },
     { "id": "6-10", "min": 6, "max": 10 },
@@ -45,5 +45,5 @@
     { "id": "16-20", "min": 16, "max": 20 }
   ],
   "recompensaJogador": { "xpPorNivel": 15, "tetoXpPorHora": 4000 },
-  "sobrevivencia": { "regenPorCelula": false, "descanso": false, "penalidadeMorte": null }
+  "sobrevivencia": { "regenPorCelula": false, "penalidadeMorte": null }
 }

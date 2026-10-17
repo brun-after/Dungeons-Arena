@@ -1,11 +1,10 @@
 // Modal da loja (§2.10). Marco 9A (14/10/2026). Só lê o estado e emite comandos: abre sozinho
 // quando a simulação abre a janela da loja para o jogador local e fecha quando ela acaba. Fechar
-// pelo modal (✕, Esc, toque no fundo) emite `fecharLoja`, que arma a recarga.
+// pelo modal (botão fechar, Esc, toque no fundo) emite `fecharLoja`, que arma a recarga.
 
 import type { Comando } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo, ObjetoNoMundo } from '../core/estado';
-import { DT_MS } from '../core/loop';
 import type { Entidade } from '../entities/entidade';
 import { t } from '../i18n';
 import { precoDeVenda, vendavel, type Item } from '../progression/itens';
@@ -13,6 +12,7 @@ import { precoDeCompra } from '../progression/efeitos-atributo';
 import { lojaAberta } from '../progression/loja';
 import { resumoDoItem } from './mochila';
 import { criarModal } from './modal';
+import { icone } from './icones';
 
 export interface OpcoesLoja {
   ctx: ContextoSimulacao;
@@ -61,21 +61,21 @@ export function criarLoja(o: OpcoesLoja): Loja {
   });
 
   const saldo = el('p', 'saldo-loja');
-  const tempo = el('p', 'tempo-loja');
-  tempo.setAttribute('aria-live', 'off');
   const listas = el('div', 'conteudo-modal');
-  modal.corpo.append(saldo, tempo, listas);
+  // D-067: a loja não tem prazo (fecha pelo jogador ou se um inimigo começar a perseguir).
+  modal.corpo.append(saldo, listas);
 
   const linha = (item: Item | undefined, rotulo: string, qtd: number, acao: { texto: string; chave: string; desligado: boolean; fazer: () => void } | null, nota?: string) => {
     const li = el('li', 'linha-item');
     const conteudo = el('span', 'conteudo-item');
-    const icone = el('span', 'icone-item', item?.icone ?? '·');
-    icone.setAttribute('aria-hidden', 'true');
+    const iconeItem = el('span', 'icone-item');
+    iconeItem.append(icone(item?.icone ?? 'circulo'));
+    iconeItem.setAttribute('aria-hidden', 'true');
     const textos = el('span', 'textos-item');
     textos.append(el('span', `nome-item raridade-${item?.raridade ?? 'comum'}`, rotulo));
     const detalhe = nota ?? (item ? resumoDoItem(item) : '');
     if (detalhe) textos.append(el('span', 'detalhe-item', detalhe));
-    conteudo.append(icone, textos);
+    conteudo.append(iconeItem, textos);
     if (qtd > 1) conteudo.append(el('span', 'qtd-item', `×${qtd}`));
     li.append(conteudo);
     if (acao) {
@@ -155,9 +155,6 @@ export function criarLoja(o: OpcoesLoja): Loja {
       o.aoAbrir();
       modal.abrir();
     }
-    const restanteS = Math.max(0, Math.ceil((((j.interacao?.ateTick ?? 0) - estado.tick) * DT_MS) / 1000));
-    const texto = t('loja.tempo', { s: restanteS });
-    if (tempo.textContent !== texto) tempo.textContent = texto;
     const bolsa = j.bolsa;
     if (bolsa && JSON.stringify([bolsa.mochila, bolsa.ouro, loja.objetoId]) !== assinatura) desenhar(j, loja);
   };

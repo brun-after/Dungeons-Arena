@@ -37,7 +37,8 @@ export default defineConfig({
         start_url: './',
         scope: './',
         display: 'standalone',
-        orientation: 'any',
+        // Ajuste de 16/10/2026 (D-067): o jogo instalado abre deitado.
+        orientation: 'landscape',
         background_color: '#14121a',
         theme_color: '#14121a',
         icons: [

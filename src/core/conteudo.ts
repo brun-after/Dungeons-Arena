@@ -53,7 +53,7 @@ export interface FontesDeConteudo {
   elementos: unknown;
   interacoes: unknown;
   caminhos: unknown;
-  /** Arquivo → JSON de cada modo em src/data/modos. */
+  /** Arquivo -> JSON de cada modo em src/data/modos. */
   modos: Readonly<Record<string, unknown>>;
 }
 

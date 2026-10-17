@@ -112,10 +112,9 @@ export interface ModoDeJogo {
   faixas: FaixaDeNivel[];
   /** Marco 17: recompensa por jogador derrotado (null: só NPCs dão XP). */
   recompensaJogador: RecompensaDeJogador | null;
-  /** Marco 10A-2 (§2.12): regeneração por célula, descanso e penalidade de morte (null = sem). */
+  /** Marco 10A-2 (§2.12): regeneração por célula e penalidade de morte (null = sem). O descanso saiu (D-067). */
   sobrevivencia: {
     regenPorCelula: boolean;
-    descanso: boolean;
     penalidadeMorte: PenalidadeMorte | null;
   };
 }
@@ -185,7 +184,7 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
     id: l.texto(o, 'id'),
     nome: l.texto(o, 'nome'),
     descricao: l.texto(o, 'descricao'),
-    icone: l.texto(o, 'icone'),
+    icone: l.icone(o, 'icone'),
     equipes: l.numero(o, 'equipes', { min: 1, max: 10, inteiro: true }),
     politicaRelacao: l.opcao(o, 'politicaRelacao', ['todos_hostis', 'todos_aliados', 'por_equipe'] as const),
     autoBalancear: l.booleano(o, 'autoBalancear'),
@@ -240,7 +239,6 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
           })(),
     sobrevivencia: {
       regenPorCelula: l.booleano(sobrevivencia, 'regenPorCelula'),
-      descanso: l.booleano(sobrevivencia, 'descanso'),
       penalidadeMorte: lerPenalidade(l, sobrevivencia.penalidadeMorte),
     },
   };

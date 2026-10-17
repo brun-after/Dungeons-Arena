@@ -40,9 +40,8 @@ export type MotivoItem =
   | 'sem_ouro'
   | 'nao_vendavel'
   | 'trancado'
-  /** Marco 10A-2: descanso com hostil perseguindo, ou num modo sem descanso. */
+  /** Ajuste de 16/10/2026 (D-067): loja com hostil perseguindo (o descanso saiu do jogo). */
   | 'em_perigo'
-  | 'sem_descanso'
   /** Marco 10A-3: pergaminho de invocação acima do limite do modo (recusado antes de gastar). */
   | 'limite'
   /** Marco 14: livro de uma habilidade que o personagem já conhece. */
@@ -134,13 +133,17 @@ export type EventoSimulacao =
   | { t: 'usouItem'; tick: number; id: EntidadeId; itemId: string; hp: number; mana: number }
   | { t: 'itemRecusado'; tick: number; id: EntidadeId; motivo: MotivoItem }
   /** Marco 9A: baú e loja. `ateTick` é o fim do congelamento (anel de progresso, contagem da janela). */
-  | { t: 'interacaoIniciada'; tick: number; id: EntidadeId; objetoId: string; tipo: 'bau' | 'loja' | 'descanso'; ateTick: number }
-  /** Marco 10A-2: descanso e penalidade de morte (§2.12). */
-  | { t: 'descansou'; tick: number; id: EntidadeId; tipo: 'curto' | 'longo'; hp: number; mana: number }
-  | { t: 'descansoInterrompido'; tick: number; id: EntidadeId }
+  | { t: 'interacaoIniciada'; tick: number; id: EntidadeId; objetoId: string; tipo: 'bau' | 'loja'; ateTick: number }
+  /** Marco 10A-2: penalidade de morte (§2.12). */
   | { t: 'penalidadeMorte'; tick: number; id: EntidadeId; xp: number; ouro: number; niveis: number }
   | { t: 'bauAberto'; tick: number; id: EntidadeId; objetoId: string; itens: string[]; ouro: number }
-  | { t: 'lojaFechada'; tick: number; id: EntidadeId; objetoId: string; recargaAteTick: number }
+  /** D-067: `perigo` quando fechou porque um hostil começou a perseguir. */
+  | { t: 'lojaFechada'; tick: number; id: EntidadeId; objetoId: string; recargaAteTick: number; perigo?: boolean }
+  /** Ajuste de 16/10/2026 (D-067): buff ofensivo armado, ativado em combate ou vencido sem combate; refúgio usado. */
+  | { t: 'buffArmado'; tick: number; id: EntidadeId; tipo: TipoEfeito; ateTick: number }
+  | { t: 'buffAtivado'; tick: number; id: EntidadeId; tipo: TipoEfeito }
+  | { t: 'buffExpirou'; tick: number; id: EntidadeId; tipo: TipoEfeito }
+  | { t: 'refugioUsado'; tick: number; id: EntidadeId; ateTick: number }
   | { t: 'comprou'; tick: number; id: EntidadeId; itemId: string; preco: number }
   | { t: 'vendeu'; tick: number; id: EntidadeId; itemId: string; preco: number }
   /** Marco 10A-1: portas internas e porta de saída. */
@@ -152,5 +155,5 @@ export type EventoSimulacao =
   | { t: 'reviveu'; tick: number; id: EntidadeId }
   | { t: 'surgiu'; tick: number; id: EntidadeId };
 
-/** Mapa evento → payload para o `Barramento`. */
+/** Mapa evento -> payload para o `Barramento`. */
 export type EventosDaSimulacao = { [E in EventoSimulacao as E['t']]: E };

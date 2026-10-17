@@ -1,4 +1,4 @@
-// O ciclo de uma ação (§2.7): intenção → validação → conjuração → viagem → impacto.
+// O ciclo de uma ação (§2.7): intenção -> validação -> conjuração -> viagem -> impacto.
 // Custo e recarga são pagos no início da conjuração. Durante a conjuração a ação fica telegrafada
 // (ticks publicados no evento `acaoIniciada`) e pode ser interrompida sem devolver o custo.
 // Contato e área consultam a geometria no tick do impacto: sair do alcance ou da área esquiva.

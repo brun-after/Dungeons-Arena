@@ -45,7 +45,7 @@ const VETOR: Readonly<Record<Dir8, readonly [number, number]>> = {
 };
 
 /**
- * Remapeamento tela → grade (§4.5). No isométrico, "para cima" na tela é NO na grade:
+ * Remapeamento tela -> grade (§4.5). No isométrico, "para cima" na tela é NO na grade:
  * grade = (tx + ty, −tx + ty), com sinais normalizados. Fora do isométrico é identidade.
  */
 export function remapearParaGrade(dir: Dir8 | 'parado', isometrico: boolean): Dir8 | 'parado' {

@@ -32,7 +32,7 @@ export function ehSom(v: unknown): v is SomId {
   return typeof v === 'string' && (SONS as readonly string[]).includes(v);
 }
 
-/** Prefixo do id da habilidade → som (fallback por prefixo, §2.14). */
+/** Prefixo do id da habilidade -> som (fallback por prefixo, §2.14). */
 const PREFIXOS: readonly (readonly [string, SomId])[] = [
   ['golpe', 'golpe'],
   ['ataque', 'golpe'],
@@ -118,9 +118,8 @@ export function sonsDoEvento(ev: EventoSimulacao, idLocal: string, habilidade: (
       return [{ som: 'invocacao', origemId: ev.id }];
     case 'explodiu':
       return [{ som: 'explosao', origemId: ev.id }];
-    case 'descansou':
     case 'invocacaoCurou':
-      return [{ som: 'cura', origemId: ev.t === 'descansou' ? ev.id : ev.donoId }];
+      return [{ som: 'cura', origemId: ev.donoId }];
     default:
       return [];
   }

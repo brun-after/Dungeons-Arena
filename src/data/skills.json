@@ -4,7 +4,7 @@
     {
       "id": "ataque_basico",
       "nome": "Golpe",
-      "icone": "⚔",
+      "icone": "espada",
       "tipoAtaque": "fisico",
       "formulaDano": "1d10",
       "formulaCura": null,
@@ -29,7 +29,7 @@
     {
       "id": "seta_arcana",
       "nome": "Seta arcana",
-      "icone": "✦",
+      "icone": "runa",
       "tipoAtaque": "magico",
       "formulaDano": "2d6",
       "formulaCura": null,
@@ -66,7 +66,7 @@
     {
       "id": "explosao",
       "nome": "Explosão",
-      "icone": "✺",
+      "icone": "explosao",
       "tipoAtaque": "magico",
       "formulaDano": "2d8",
       "formulaCura": null,
@@ -103,7 +103,7 @@
     {
       "id": "curar",
       "nome": "Curar",
-      "icone": "✚",
+      "icone": "cura",
       "tipoAtaque": "magico",
       "formulaDano": null,
       "formulaCura": "2d6+2",
@@ -139,7 +139,7 @@
     {
       "id": "golpe_atordoante",
       "nome": "Golpe atordoante",
-      "icone": "✷",
+      "icone": "atordoar",
       "tipoAtaque": "fisico",
       "formulaDano": "1d4",
       "formulaCura": null,
@@ -179,7 +179,7 @@
     {
       "id": "golpe",
       "nome": "Golpe",
-      "icone": "⚔",
+      "icone": "espada",
       "tipoAtaque": "fisico",
       "formulaDano": "1d10",
       "formulaCura": null,
@@ -202,7 +202,7 @@
     {
       "id": "raio",
       "nome": "Raio",
-      "icone": "ϟ",
+      "icone": "raio",
       "tipoAtaque": "magico",
       "formulaDano": "1d8",
       "formulaCura": null,
@@ -227,7 +227,7 @@
     {
       "id": "flecha",
       "nome": "Flecha",
-      "icone": "➶",
+      "icone": "flecha",
       "tipoAtaque": "fisico",
       "formulaDano": "1d8",
       "formulaCura": null,
@@ -244,15 +244,15 @@
       "efeitos": [],
       "visual": {
         "cor": "#d5c4a1",
-        "viagem": "rastro",
-        "impacto": "faiscas",
+        "viagem": "esteira",
+        "impacto": "farpas",
         "som": "projetil"
       }
     },
     {
       "id": "marca_de_area",
       "nome": "Marca sombria",
-      "icone": "◈",
+      "icone": "alvo",
       "tipoAtaque": "magico",
       "formulaDano": "2d6",
       "formulaCura": null,
@@ -285,7 +285,7 @@
     {
       "id": "golpe_demoniaco",
       "nome": "Golpe demoníaco",
-      "icone": "⚔",
+      "icone": "caveira",
       "tipoAtaque": "fisico",
       "formulaDano": "2d8",
       "formulaCura": null,
@@ -319,7 +319,7 @@
     {
       "id": "teia",
       "nome": "Teia",
-      "icone": "🕸",
+      "icone": "teia",
       "tipoAtaque": "magico",
       "formulaDano": "1d4",
       "formulaCura": null,
@@ -339,8 +339,9 @@
         }
       ],
       "visual": {
+        "projetil": "teia",
         "cor": "#bdc3c7",
-        "viagem": "rastro",
+        "viagem": "esteira",
         "impacto": "fumaca",
         "som": "armadilha"
       }
@@ -348,7 +349,7 @@
     {
       "id": "golpe_viscoso",
       "nome": "Golpe viscoso",
-      "icone": "◍",
+      "icone": "gota",
       "tipoAtaque": "fisico",
       "formulaDano": "1d10",
       "formulaCura": null,
@@ -388,7 +389,7 @@
     {
       "id": "golpe_pesado",
       "nome": "Golpe pesado",
-      "icone": "⇥",
+      "icone": "martelo",
       "tipoAtaque": "fisico",
       "formulaDano": "1d10",
       "formulaCura": null,
@@ -416,7 +417,7 @@
     {
       "id": "raio_vampirico",
       "nome": "Raio vampírico",
-      "icone": "🩸",
+      "icone": "sangue",
       "tipoAtaque": "magico",
       "formulaDano": "1d8",
       "formulaCura": null,
@@ -453,7 +454,7 @@
       "velocidadeProjetil": 0,
       "id": "invocar_lacaios",
       "nome": "Chamar lacaios",
-      "icone": "☥",
+      "icone": "invocar",
       "alcanceCelulas": 0,
       "tipoArea": "nenhuma",
       "raioArea": 0,
@@ -485,7 +486,7 @@
       "velocidadeProjetil": 0,
       "id": "armar_teia",
       "nome": "Armar teia",
-      "icone": "🕸",
+      "icone": "teia",
       "alcanceCelulas": 4,
       "tipoArea": "quadrado",
       "raioArea": 0,
@@ -513,7 +514,7 @@
     {
       "id": "dardo_arcano",
       "nome": "Dardo arcano",
-      "icone": "✧",
+      "icone": "faisca",
       "tipoAtaque": "magico",
       "formulaDano": "1d6",
       "formulaCura": null,
@@ -540,7 +541,7 @@
     {
       "id": "tiro",
       "nome": "Tiro",
-      "icone": "➵",
+      "icone": "flecha",
       "tipoAtaque": "fisico",
       "formulaDano": "1d8",
       "formulaCura": null,
@@ -556,8 +557,9 @@
       "velocidadeProjetil": 16,
       "efeitos": [],
       "visual": {
+        "viagem": "esteira",
         "cor": "#d4ac0d",
-        "impacto": "faiscas",
+        "impacto": "farpas",
         "som": "projetil"
       },
       "basico": true,
@@ -566,7 +568,7 @@
     {
       "id": "investida",
       "nome": "Investida",
-      "icone": "⇶",
+      "icone": "investida",
       "tipoAtaque": "fisico",
       "formulaDano": "1d8",
       "formulaCura": null,
@@ -610,7 +612,7 @@
     {
       "id": "redemoinho",
       "nome": "Redemoinho",
-      "icone": "🌀",
+      "icone": "redemoinho",
       "tipoAtaque": "fisico",
       "formulaDano": "2d6",
       "formulaCura": null,
@@ -646,7 +648,7 @@
     {
       "id": "grito_de_guerra",
       "nome": "Grito de guerra",
-      "icone": "📣",
+      "icone": "grito",
       "tipoAtaque": "fisico",
       "formulaDano": null,
       "formulaCura": null,
@@ -687,7 +689,7 @@
     {
       "id": "escudo_de_ferro",
       "nome": "Escudo de ferro",
-      "icone": "🛡",
+      "icone": "escudo",
       "tipoAtaque": "fisico",
       "formulaDano": null,
       "formulaCura": null,
@@ -728,7 +730,7 @@
     {
       "id": "corrente",
       "nome": "Corrente",
-      "icone": "⛓",
+      "icone": "corrente",
       "tipoAtaque": "fisico",
       "formulaDano": "1d6",
       "formulaCura": null,
@@ -767,7 +769,7 @@
     {
       "id": "golpe_flamejante",
       "nome": "Golpe flamejante",
-      "icone": "🔥",
+      "icone": "fogo",
       "tipoAtaque": "fisico",
       "formulaDano": "2d6",
       "formulaCura": null,
@@ -804,7 +806,7 @@
     {
       "id": "pele_de_pedra",
       "nome": "Pele de pedra",
-      "icone": "🪨",
+      "icone": "pedra",
       "tipoAtaque": "fisico",
       "formulaDano": null,
       "formulaCura": null,
@@ -827,7 +829,7 @@
     {
       "id": "bola_de_fogo",
       "nome": "Bola de fogo",
-      "icone": "☄",
+      "icone": "cometa",
       "tipoAtaque": "magico",
       "formulaDano": "2d6",
       "formulaCura": null,
@@ -865,7 +867,7 @@
     {
       "id": "lanca_de_gelo",
       "nome": "Lança de gelo",
-      "icone": "❄",
+      "icone": "gelo",
       "tipoAtaque": "magico",
       "formulaDano": "2d6",
       "formulaCura": null,
@@ -902,7 +904,7 @@
     {
       "id": "raio_em_cadeia",
       "nome": "Raio em cadeia",
-      "icone": "⚡",
+      "icone": "raio",
       "tipoAtaque": "magico",
       "formulaDano": "1d8",
       "formulaCura": null,
@@ -943,7 +945,7 @@
     {
       "id": "barreira",
       "nome": "Barreira",
-      "icone": "🔰",
+      "icone": "barreira",
       "tipoAtaque": "magico",
       "formulaDano": null,
       "formulaCura": null,
@@ -984,7 +986,7 @@
     {
       "id": "nova_glacial",
       "nome": "Nova glacial",
-      "icone": "✳",
+      "icone": "nova",
       "tipoAtaque": "magico",
       "formulaDano": "1d8",
       "formulaCura": null,
@@ -1021,7 +1023,7 @@
     {
       "id": "mente_partida",
       "nome": "Mente partida",
-      "icone": "👁",
+      "icone": "olho",
       "tipoAtaque": "magico",
       "formulaDano": "1d6",
       "formulaCura": null,
@@ -1063,7 +1065,7 @@
     {
       "id": "afinidade_elemental",
       "nome": "Afinidade elemental",
-      "icone": "✺",
+      "icone": "estrela",
       "tipoAtaque": "magico",
       "formulaDano": null,
       "formulaCura": null,
@@ -1086,7 +1088,7 @@
     {
       "id": "flecha_perfurante",
       "nome": "Flecha perfurante",
-      "icone": "➶",
+      "icone": "flecha",
       "tipoAtaque": "fisico",
       "formulaDano": "2d6",
       "formulaCura": null,
@@ -1103,8 +1105,8 @@
       "efeitos": [],
       "visual": {
         "cor": "#d4ac0d",
-        "viagem": "rastro",
-        "impacto": "faiscas",
+        "viagem": "esteira",
+        "impacto": "farpas",
         "som": "projetil"
       },
       "mods": [
@@ -1125,7 +1127,7 @@
     {
       "id": "chuva_de_flechas",
       "nome": "Chuva de flechas",
-      "icone": "☔",
+      "icone": "chuva",
       "tipoAtaque": "fisico",
       "formulaDano": "2d6",
       "formulaCura": null,
@@ -1142,7 +1144,7 @@
       "efeitos": [],
       "visual": {
         "cor": "#d4ac0d",
-        "impacto": "faiscas",
+        "impacto": "chuva",
         "camera": "leve",
         "som": "projetil"
       },
@@ -1160,7 +1162,7 @@
     {
       "id": "flecha_venenosa",
       "nome": "Flecha venenosa",
-      "icone": "🏹",
+      "icone": "veneno",
       "tipoAtaque": "fisico",
       "formulaDano": "1d6",
       "formulaCura": null,
@@ -1177,7 +1179,7 @@
       "efeitos": [],
       "visual": {
         "cor": "#58d68d",
-        "viagem": "rastro",
+        "viagem": "esteira",
         "impacto": "bolhas",
         "som": "projetil"
       },
@@ -1197,7 +1199,7 @@
     {
       "id": "tiro_em_leque",
       "nome": "Tiro em leque",
-      "icone": "⋔",
+      "icone": "leque",
       "tipoAtaque": "fisico",
       "formulaDano": "1d8",
       "formulaCura": null,
@@ -1214,7 +1216,7 @@
       "efeitos": [],
       "visual": {
         "cor": "#d4ac0d",
-        "impacto": "faiscas",
+        "impacto": "leque",
         "som": "projetil"
       },
       "evolucoes": {
@@ -1231,7 +1233,7 @@
     {
       "id": "troca_sombria",
       "nome": "Troca sombria",
-      "icone": "⇄",
+      "icone": "troca",
       "tipoAtaque": "magico",
       "formulaDano": null,
       "formulaCura": null,
@@ -1273,7 +1275,7 @@
     {
       "id": "olho_de_aguia",
       "nome": "Olho de águia",
-      "icone": "🦅",
+      "icone": "asa",
       "tipoAtaque": "fisico",
       "formulaDano": null,
       "formulaCura": null,

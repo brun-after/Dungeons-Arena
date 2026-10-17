@@ -1,7 +1,7 @@
 // Interações entre efeitos (D-057, D-059). Marco 14 (14/10/2026). Tudo vem de src/data/interacoes.json:
 // - acúmulo por tipo: `mais_forte` (o padrão da D-048: maior duração e maior valor), `renova` (recomeça com o
 //   novo), `soma` (conta acúmulos e soma o valor) e `ignora` (quem já tem fica como está);
-// - transformações: N acúmulos viram outro efeito (resfriado ×3 → congelado);
+// - transformações: N acúmulos viram outro efeito (resfriado ×3 -> congelado);
 // - oposições: aplicar um efeito tira os opostos (queimando tira o frio, e o frio tira o fogo);
 // - teto de efeitos por entidade: passando dele, sai o que acaba primeiro;
 // - imunidades por preset: o efeito nem entra.

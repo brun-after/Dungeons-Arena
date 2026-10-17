@@ -27,11 +27,9 @@ export interface OpcoesTeclado {
   aoMochila?: () => void;
   /** Tecla `E`: interage com baú ou loja (marco 9A). */
   aoInteragir?: () => void;
-  /** Tecla `R`: descanso curto; com Shift, longo (marco 10A-2). */
-  aoDescansar?: (longo: boolean) => void;
   /** Tecla `X`: dispensa as invocações (marco 10A-3). */
   aoDispensar?: () => void;
-  /** Tecla `V`: alterna a visão (de cima ↔ isométrica, marco 13). */
+  /** Tecla `V`: alterna a visão (de cima <-> isométrica, marco 13). */
   aoAlternarVisao?: () => void;
   /** Ajuste de 15/10/2026 (D-065): `Q` troca para o próximo alvo; com Shift, o anterior. */
   aoTrocarAlvo?: (sentido: 1 | -1) => void;
@@ -87,8 +85,6 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
       opcoes.aoMochila();
     } else if (ev.code === 'KeyE' && !ev.repeat && opcoes.aoInteragir) {
       opcoes.aoInteragir();
-    } else if (ev.code === 'KeyR' && !ev.repeat && opcoes.aoDescansar) {
-      opcoes.aoDescansar(ev.shiftKey);
     } else if (ev.code === 'KeyX' && !ev.repeat && opcoes.aoDispensar) {
       opcoes.aoDispensar();
     } else if (ev.code === 'KeyQ' && !ev.repeat && opcoes.aoTrocarAlvo) {

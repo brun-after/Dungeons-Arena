@@ -218,7 +218,24 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
     if (ev.id === idLocal) hud.registrar(t('log.vendeu', { item: nomeItem(ev.itemId), preco: ev.preco }));
   });
   bus.on('lojaFechada', (ev) => {
-    if (ev.id === idLocal) hud.registrar(t('log.lojaFechada'));
+    if (ev.id !== idLocal) return;
+    hud.registrar(t(ev.perigo ? 'log.lojaFechadaPerigo' : 'log.lojaFechada'));
+    if (ev.perigo) o.aviso(t('log.lojaFechadaPerigo'));
+  });
+  // Ajuste de 16/10/2026 (D-067): buffs ofensivos armados e a carga de refúgio.
+  bus.on('buffArmado', (ev) => {
+    if (ev.id === idLocal) hud.registrar(t('log.buffArmado', { efeito: t(`efeito.${ev.tipo}` as ChaveTexto) }));
+  });
+  bus.on('buffAtivado', (ev) => {
+    if (ev.id === idLocal) hud.registrar(t('log.buffAtivado', { efeito: t(`efeito.${ev.tipo}` as ChaveTexto) }));
+  });
+  bus.on('buffExpirou', (ev) => {
+    if (ev.id === idLocal) hud.registrar(t('log.buffExpirou', { efeito: t(`efeito.${ev.tipo}` as ChaveTexto) }));
+  });
+  bus.on('refugioUsado', (ev) => {
+    if (ev.id !== idLocal) return;
+    hud.registrar(t('log.refugioUsado'));
+    o.aviso(t('log.refugioUsado'));
   });
   // Marco 10A-3: invocações.
   bus.on('invocacaoCurou', (ev) => {
@@ -231,25 +248,7 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
   bus.on('dispensou', (ev) => {
     if (ev.id === idLocal) hud.registrar(t('log.dispensou', { n: ev.quantidade }));
   });
-  // Marco 10A-2: descanso e penalidade de morte.
-  bus.on('interacaoIniciada', (ev) => {
-    if (ev.id === idLocal && ev.tipo === 'descanso') hud.registrar(t('log.descansando'));
-  });
-  bus.on('descansou', (ev) => {
-    if (ev.id !== idLocal) return;
-    const quem = posicao(ev.id);
-    if (quem && ev.hp > 0) numeros.mostrar(`+${ev.hp}`, 'cura', quem.x, quem.y, o.agora());
-    const texto = t('log.descansou', { hp: ev.hp, mana: ev.mana });
-    hud.registrar(texto);
-    o.aviso(texto);
-  });
-  bus.on('descansoInterrompido', (ev) => {
-    if (ev.id !== idLocal) return;
-    vibrar([50, 30, 50]);
-    const texto = t('log.descansoInterrompido');
-    hud.registrar(texto);
-    o.aviso(texto);
-  });
+  // Marco 10A-2: penalidade de morte.
   bus.on('penalidadeMorte', (ev) => {
     if (ev.id !== idLocal) return;
     const texto = ev.niveis > 0 ? t('log.penalidadeNivel', { xp: ev.xp, niveis: ev.niveis, ouro: ev.ouro }) : t('log.penalidade', { xp: ev.xp, ouro: ev.ouro });

@@ -163,7 +163,7 @@ export async function iniciarBench(raiz: HTMLElement, params: URLSearchParams): 
       [
         `Benchmark ${r.cena} · qualidade ${r.qualidade} · ${String(r.segundos)} s · ${String(r.largura)}×${String(r.altura)} @${String(r.dpr)}`,
         `fps ${String(r.fps)} · p50 ${String(r.p50Ms)} ms · p95 ${String(r.p95Ms)} ms · p99 ${String(r.p99Ms)} ms · pausas > 100 ms: ${String(r.pausas)}`,
-        `memória ${String(r.memoriaInicialMb ?? '—')} → ${String(r.memoriaFinalMb ?? '—')} MB`,
+        `memória ${String(r.memoriaInicialMb ?? '—')} até ${String(r.memoriaFinalMb ?? '—')} MB`,
         `pico: ${String(pico.npcs)} NPCs, ${String(pico.invocacoes)} invocações, ${String(pico.avatares)} avatares, ${String(pico.armadilhas)} armadilhas, ${String(pico.projeteis)} projéteis`,
       ],
       r,

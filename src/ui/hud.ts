@@ -5,6 +5,8 @@
 import { t } from '../i18n';
 import type { Entidade } from '../entities/entidade';
 import { ChipsEfeito } from './chips-efeito';
+import { BuffsPendentes } from './buffs-pendentes';
+import { icone } from './icones';
 import type { DadosRede } from './diagnostico';
 
 const MAX_LINHAS_LOG = 6;
@@ -38,6 +40,8 @@ export class Hud {
   /** Marco 8A: ícones dos efeitos ativos, na cor do registro; marco 14: com duração e cartão. */
   private readonly efeitos = document.createElement('span');
   private readonly chips: ChipsEfeito;
+  /** D-067: buffs ofensivos armados e a carga de refúgio. */
+  private readonly pendentes = new BuffsPendentes();
   private ultimo = '';
 
   constructor(raiz: HTMLElement, nomeDe: (id: string) => string | null = () => null) {
@@ -52,7 +56,7 @@ export class Hud {
     barras.append(this.vida.raiz, this.mana.raiz);
     this.efeitos.className = 'chips-efeito';
     this.efeitos.setAttribute('aria-label', t('hud.efeitos'));
-    this.status.append(barras, this.numeros, this.efeitos, this.rede);
+    this.status.append(barras, this.numeros, this.efeitos, this.pendentes.elemento, this.rede);
     this.chips = new ChipsEfeito(this.efeitos, nomeDe);
 
     this.log = document.createElement('ol');
@@ -63,7 +67,7 @@ export class Hud {
     this.botaoLog = document.createElement('button');
     this.botaoLog.type = 'button';
     this.botaoLog.className = 'botao-cabecalho so-toque';
-    this.botaoLog.textContent = '📜';
+    this.botaoLog.append(icone('registro'));
     this.botaoLog.setAttribute('aria-label', t('hud.abrirLog'));
     this.botaoLog.setAttribute('aria-expanded', 'false');
     this.botaoLog.addEventListener('click', () => {
@@ -92,6 +96,7 @@ export class Hud {
   atualizar(jogador: Entidade | undefined, tick = 0): void {
     if (!jogador) return;
     this.chips.atualizar(jogador, tick);
+    this.pendentes.atualizar(jogador, tick);
     const chave = `${jogador.hp}/${jogador.hpMax}/${jogador.mana}/${jogador.manaMax}/${jogador.morto}`;
     if (chave === this.ultimo) return;
     this.ultimo = chave;

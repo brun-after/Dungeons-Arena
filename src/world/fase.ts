@@ -167,7 +167,7 @@ export interface FaseJson {
   matizGraus?: number;
   /** Marco 11A (D-066): o atlas do jogador (store `tilesets`); null ou ausente herda (§2.16). */
   tileset?: { atlasId: string } | null;
-  /** Marco 11A: peças escolhidas à mão, por índice de célula (`y·largura + x`) → `chave@t` (§2.16). */
+  /** Marco 11A: peças escolhidas à mão, por índice de célula (`y·largura + x`) -> `chave@t` (§2.16). */
   pecas?: Record<string, string>;
 }
 

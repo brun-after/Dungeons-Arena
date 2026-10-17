@@ -126,8 +126,18 @@ export const PRESETS_VISUAIS = [
   'vento',
   'chamas',
   'relampago',
+  // Ajuste de 16/10/2026 (D-067): flechas de verdade — a esteira fina e orientada, as farpas do acerto, a chuva caindo
+  // e o leque de flechas.
+  'esteira',
+  'farpas',
+  'chuva',
+  'leque',
 ] as const;
 export type PresetVisual = (typeof PRESETS_VISUAIS)[number];
+
+/** Ajuste de 16/10/2026 (D-067): o corpo do projétil em voo (o físico deduz `flecha`; o mágico, `orbe`). */
+export const FORMAS_PROJETIL = ['orbe', 'flecha', 'teia'] as const;
+export type FormaProjetil = (typeof FORMAS_PROJETIL)[number];
 
 /** Aparência de uma habilidade (§2.16, D-055): presets de partícula por momento da ação. */
 export interface VisualHabilidade {
@@ -136,6 +146,8 @@ export interface VisualHabilidade {
   viagem: PresetVisual | null;
   impacto: PresetVisual | null;
   camera: 'nenhum' | 'leve' | 'forte';
+  /** D-067: o corpo do projétil (null = deduz pelo tipo de ataque). */
+  projetil: FormaProjetil | null;
   /** Id do som (audio/mapeamento.ts); validado lá, pois o catálogo de sons é da apresentação. */
   som: string | null;
 }
@@ -158,7 +170,7 @@ function lerVisual(l: Leitor, v: unknown): VisualHabilidade | null {
   const cor = o.cor === undefined ? null : l.texto(o, 'cor');
   if (cor !== null && !/^#[0-9a-f]{6}$/i.test(cor)) l.erro(`visual.cor precisa ser #rrggbb ("${cor}")`);
   for (const k of Object.keys(o)) {
-    if (!['cor', 'conjuracao', 'viagem', 'impacto', 'camera', 'som'].includes(k)) l.erro(`visual: campo desconhecido "${k}"`);
+    if (!['cor', 'conjuracao', 'viagem', 'impacto', 'camera', 'som', 'projetil'].includes(k)) l.erro(`visual: campo desconhecido "${k}"`);
   }
   return {
     cor,
@@ -166,6 +178,7 @@ function lerVisual(l: Leitor, v: unknown): VisualHabilidade | null {
     viagem: preset('viagem'),
     impacto: preset('impacto'),
     camera: o.camera === undefined ? 'nenhum' : l.opcao(o, 'camera', ['nenhum', 'leve', 'forte'] as const),
+    projetil: o.projetil === undefined ? null : l.opcao(o, 'projetil', FORMAS_PROJETIL),
     som: o.som === undefined ? null : l.texto(o, 'som'),
   };
 }
@@ -234,7 +247,7 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
   const base: Habilidade = {
     id: l.texto(o, 'id'),
     nome: l.texto(o, 'nome'),
-    icone: l.texto(o, 'icone'),
+    icone: l.icone(o, 'icone'),
     tipoAtaque: l.opcao(o, 'tipoAtaque', ['fisico', 'magico'] as const),
     formulaDano: l.textoOuNulo(o, 'formulaDano'),
     formulaCura: l.textoOuNulo(o, 'formulaCura'),

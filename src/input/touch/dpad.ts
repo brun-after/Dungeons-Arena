@@ -6,17 +6,19 @@ import type { Dir8 } from '../../core/comandos';
 import { t } from '../../i18n';
 import { vibrar } from '../../plataforma/dispositivo';
 import { remapearParaGrade } from '../direcao';
+import { icone } from '../../ui/icones';
 
 const GRADE: readonly (Dir8 | null)[] = ['NO', 'N', 'NE', 'O', null, 'E', 'SO', 'S', 'SE'];
+// Ajuste de 16/10/2026 (D-067): setas do conjunto de ícones.
 const SETA: Readonly<Record<Dir8, string>> = {
-  NO: '↖',
-  N: '↑',
-  NE: '↗',
-  O: '←',
-  E: '→',
-  SO: '↙',
-  S: '↓',
-  SE: '↘',
+  NO: 'seta_no',
+  N: 'seta_cima',
+  NE: 'seta_ne',
+  O: 'seta_esquerda',
+  E: 'seta_direita',
+  SO: 'seta_so',
+  S: 'seta_baixo',
+  SE: 'seta_se',
 };
 
 export interface OpcoesDpad {
@@ -41,7 +43,7 @@ export function criarDpad(opcoes: OpcoesDpad): Dpad {
     if (dir) {
       celula.className = `dpad-botao ${dir.length === 2 ? 'diagonal' : 'cardinal'}`;
       celula.dataset.dir = dir;
-      celula.textContent = SETA[dir];
+      celula.append(icone(SETA[dir]));
     } else {
       celula.className = 'dpad-centro';
     }

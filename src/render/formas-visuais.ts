@@ -26,7 +26,7 @@ export interface Contorno {
   pontos: Ponto[];
 }
 
-/** Hash inteiro → [0, 1), para as fases da ondulação. */
+/** Hash inteiro -> [0, 1), para as fases da ondulação. */
 function aleatorioDe(semente: number, i: number): number {
   let h = Math.imul(semente ^ 0x9e3779b9, 0x85ebca6b) ^ Math.imul(i + 1, 0xc2b2ae35);
   h ^= h >>> 13;

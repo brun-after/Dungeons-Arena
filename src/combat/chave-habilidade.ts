@@ -1,7 +1,7 @@
 // Chave de habilidade (D-059). Marco 14 (14/10/2026). Pura.
 // A chave descreve sozinha tudo o que muda a habilidade compilada: `id@rank/caminho,caminho+mod,mod`.
-//   `bola_de_fogo`                         → rank 1, sem caminhos nem modificadores (inimigos e arena);
-//   `bola_de_fogo@4/eco,brutal+atravessar` → rank 4, caminhos escolhidos e modificador do equipamento.
+//   `bola_de_fogo`                         -> rank 1, sem caminhos nem modificadores (inimigos e arena);
+//   `bola_de_fogo@4/eco,brutal+atravessar` -> rank 4, caminhos escolhidos e modificador do equipamento.
 // A ação e o projétil guardam a chave: o projétil se resolve mesmo depois que o conjurador morre.
 // Habilidades geradas por semente têm id `g_<semente base 36>_<nível>`; o código curto de compartilhar é a
 // semente em maiúsculas.

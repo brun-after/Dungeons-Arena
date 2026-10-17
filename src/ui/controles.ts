@@ -8,13 +8,14 @@ import { t, type ChaveTexto } from '../i18n';
 import { criarDpad } from '../input/touch/dpad';
 import { criarJoystick } from '../input/touch/joystick';
 import type { TipoControle } from '../plataforma/preferencias';
+import { icone } from './icones';
 
 export interface OpcoesControles {
   tipo: TipoControle;
   aoMudarDirecao: (dir: Dir8 | 'parado') => void;
   aoAtacar: () => void;
   aoInteragir: () => void;
-  /** Ajuste de 15/10/2026 (D-065): tocar no 🎯 troca de alvo; segurar trava ou destrava. */
+  /** Ajuste de 15/10/2026 (D-065): tocar no botão de alvo troca de alvo; segurar trava ou destrava. */
   aoTrocarAlvo: () => void;
   aoTravarAlvo: () => void;
   isometrico: () => boolean;
@@ -25,16 +26,17 @@ export interface Controles {
   /** Coluna do botão de ataque, onde a roda de habilidades é montada. */
   direita: HTMLElement;
   trocarTipo: (tipo: TipoControle) => void;
-  /** Mostra no 🎯 se o alvo está travado. */
+  /** Mostra no botão de alvo se o alvo está travado. */
   marcarTrava: (travado: boolean) => void;
   desligar: () => void;
 }
 
 function botaoAcao(rotulo: ChaveTexto, simbolo: string, classe: string, acao: () => void): HTMLButtonElement {
+  // Ajuste de 16/10/2026 (D-067): `simbolo` é um id de ícone (nada de emoji).
   const botao = document.createElement('button');
   botao.type = 'button';
   botao.className = `botao-acao ${classe}`;
-  botao.textContent = simbolo;
+  botao.append(icone(simbolo));
   botao.setAttribute('aria-label', t(rotulo));
   botao.dataset.testid = classe;
   botao.addEventListener('pointerdown', (ev) => {
@@ -56,12 +58,12 @@ function botaoAcao(rotulo: ChaveTexto, simbolo: string, classe: string, acao: ()
 
 const SEGURAR_MS = 450;
 
-/** Ajuste de 15/10/2026 (D-065): o 🎯 — toque curto troca de alvo; segurar ~450 ms trava ou destrava. */
+/** Ajuste de 15/10/2026 (D-065): o botão de alvo — toque curto troca de alvo; segurar ~450 ms trava ou destrava. */
 function botaoAlvo(aoTocar: () => void, aoSegurar: () => void): HTMLButtonElement {
   const botao = document.createElement('button');
   botao.type = 'button';
   botao.className = 'botao-acao alvo';
-  botao.textContent = '🎯';
+  botao.append(icone('alvo'));
   botao.setAttribute('aria-label', t('controles.trocarAlvo'));
   botao.dataset.testid = 'alvo';
   let timer: ReturnType<typeof setTimeout> | null = null;
@@ -103,8 +105,8 @@ export function criarControles(opcoes: OpcoesControles): Controles {
   const direita = document.createElement('div');
   direita.className = 'coluna direita';
   const alvo = botaoAlvo(opcoes.aoTrocarAlvo, opcoes.aoTravarAlvo);
-  centro.append(botaoAcao('controles.interagir', '✋', 'interagir', opcoes.aoInteragir), alvo);
-  direita.append(botaoAcao('controles.ataque', '⚔', 'ataque', opcoes.aoAtacar));
+  centro.append(botaoAcao('controles.interagir', 'interagir', 'interagir', opcoes.aoInteragir), alvo);
+  direita.append(botaoAcao('controles.ataque', 'ataque', 'ataque', opcoes.aoAtacar));
   faixa.append(esquerda, centro, direita);
 
   let desligarDirecional: (() => void) | null = null;

@@ -2,7 +2,7 @@
   "id": "cooperativo",
   "nome": "Campanha em grupo",
   "descricao": "A campanha de quem criou o grupo, com até 6 personagens; a fase avança quando todos os vivos estão na saída.",
-  "icone": "🤝",
+  "icone": "grupo",
   "equipes": 1,
   "politicaRelacao": "por_equipe",
   "autoBalancear": false,
@@ -22,12 +22,11 @@
   "spawnerDinamico": true,
   "portas": { "inimigosCruzamChance": 0.5 },
   "saida": "todos_vivos",
-  "comandosDeRede": ["mover", "irPara", "usarHabilidade", "ataqueBasico", "selecionarAlvo", "usarItem", "equipar", "desequipar", "distribuirPonto", "interagir", "comprar", "vender", "fecharLoja", "moverItem", "descansar", "dispensar", "subirRank", "equiparHabilidade", "definirDificuldade"],
+  "comandosDeRede": ["mover", "irPara", "usarHabilidade", "ataqueBasico", "selecionarAlvo", "usarItem", "equipar", "desequipar", "distribuirPonto", "interagir", "abrirMenu", "comprar", "vender", "fecharLoja", "moverItem", "dispensar", "subirRank", "equiparHabilidade", "definirDificuldade"],
   "faixas": [],
   "recompensaJogador": null,
   "sobrevivencia": {
     "regenPorCelula": true,
-    "descanso": true,
     "penalidadeMorte": { "xp": 50, "perdeNivel": false, "ouroPctMin": 10, "ouroPctMax": 50 }
   }
 }

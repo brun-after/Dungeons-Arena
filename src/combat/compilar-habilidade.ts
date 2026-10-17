@@ -74,7 +74,7 @@ export function lerCaminhos(json: unknown): { caminhos: Map<string, Caminho>; er
     const c: Caminho = {
       id: l.texto(o, 'id'),
       nome: l.texto(o, 'nome'),
-      icone: l.texto(o, 'icone'),
+      icone: l.icone(o, 'icone'),
       mods,
       danoPct: n('danoPct', -90, 300),
       custoPct: n('custoPct', -90, 300),

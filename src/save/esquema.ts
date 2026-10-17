@@ -10,7 +10,7 @@ import type { Dificuldade } from '../modos/dificuldade';
 import { MAX_REGRAS, RE_REGRA_ESTILO } from '../world/estilo';
 import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 12;
+export const VERSAO_SCHEMA = 13;
 export const SLOTS = [1, 2, 3] as const;
 export const FORMATO_EXPORTACAO = 'dungeons-arena/save';
 
@@ -82,7 +82,7 @@ const lista = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
 const comCampos = (v: unknown, campos: Objeto): unknown => (ehObjeto(v) ? { ...campos, ...v } : v);
 
 /**
- * v1 → v2 (marco 8A, 14/10/2026): efeitos ganharam magnitude e relógio de periódico; projéteis,
+ * v1 -> v2 (marco 8A, 14/10/2026): efeitos ganharam magnitude e relógio de periódico; projéteis,
  * multiplicador de dano e perfuração; objetos, o efeito do orbe. Campos novos com valor neutro.
  */
 function v1ParaV2(r: Objeto): Objeto {
@@ -97,7 +97,7 @@ function v1ParaV2(r: Objeto): Objeto {
 }
 
 /**
- * v2 → v3 (marco 8A-2, 14/10/2026): efeitos carregam `interno` e `ref`; entidades, `invocacao`;
+ * v2 -> v3 (marco 8A-2, 14/10/2026): efeitos carregam `interno` e `ref`; entidades, `invocacao`;
  * o estado ganha rastros, armadilhas e efeitos atrasados.
  */
 function v2ParaV3(r: Objeto): Objeto {
@@ -115,7 +115,7 @@ function v2ParaV3(r: Objeto): Objeto {
 }
 
 /**
- * v3 → v4 (marco 9A, 14/10/2026): a bolsa ganha ouro; a entidade, a interação com baú ou loja; os
+ * v3 -> v4 (marco 9A, 14/10/2026): a bolsa ganha ouro; a entidade, a interação com baú ou loja; os
  * objetos, os campos de baú e loja. Campos novos com valor neutro.
  */
 function v3ParaV4(r: Objeto): Objeto {
@@ -129,7 +129,7 @@ function v3ParaV4(r: Objeto): Objeto {
 }
 
 /**
- * v4 → v5 (marco 9A-2, 14/10/2026): armadilhas ganham origem, permanência e rearme (as gravadas
+ * v4 -> v5 (marco 9A-2, 14/10/2026): armadilhas ganham origem, permanência e rearme (as gravadas
  * antes só podiam ser de habilidade). Campos novos com valor neutro.
  */
 function v4ParaV5(r: Objeto): Objeto {
@@ -140,7 +140,7 @@ function v4ParaV5(r: Objeto): Objeto {
 }
 
 /**
- * v5 → v6 (marco 10A-1, 14/10/2026): o estado ganha `saidaAberta`; o registro, as fases visitadas.
+ * v5 -> v6 (marco 10A-1, 14/10/2026): o estado ganha `saidaAberta`; o registro, as fases visitadas.
  */
 function v5ParaV6(r: Objeto): Objeto {
   const e = r.estado;
@@ -148,13 +148,13 @@ function v5ParaV6(r: Objeto): Objeto {
 }
 
 /**
- * v6 → v7 (marco 10A-2, 14/10/2026): a referência de fase ganhou a forma `gerada` e a interação, o
+ * v6 -> v7 (marco 10A-2, 14/10/2026): a referência de fase ganhou a forma `gerada` e a interação, o
  * descanso. Nada a converter: registros antigos já são válidos na forma nova.
  */
 const v6ParaV7: Migracao = (r) => r;
 
 /**
- * v7 → v8 (marco 10A-3, 14/10/2026): a invocação ganhou comportamento, avatar, golpes, rampa e nível
+ * v7 -> v8 (marco 10A-3, 14/10/2026): a invocação ganhou comportamento, avatar, golpes, rampa e nível
  * de dominação. Campos novos com valor neutro (dominados ficam no nível 1).
  */
 function v7ParaV8(r: Objeto): Objeto {
@@ -174,7 +174,7 @@ function v7ParaV8(r: Objeto): Objeto {
 }
 
 /**
- * v8 → v9 (marco 14, 14/10/2026), D-059: o personagem ganha classe, habilidades conhecidas (as atuais, no rank 1),
+ * v8 -> v9 (marco 14, 14/10/2026), D-059: o personagem ganha classe, habilidades conhecidas (as atuais, no rank 1),
  * a barra (as 4 primeiras) e os pontos de habilidade dos níveis já ganhos; a ação e o projétil, a chave
  * compilada; os efeitos, início e acúmulos; mochila, equipamento e objetos, o `ref` do livro raro; os
  * respawns, as habilidades extras. Vale para a fase atual e para as visitadas.
@@ -216,7 +216,7 @@ function v8ParaV9(r: Objeto): Objeto {
 }
 
 /**
- * v9 → v10 (ajuste de 15/10/2026, D-060): a IA ganha `foraDaZonaTicks` (o tempo fora da zona durante o "?"), na
+ * v9 -> v10 (ajuste de 15/10/2026, D-060): a IA ganha `foraDaZonaTicks` (o tempo fora da zona durante o "?"), na
  * fase atual e nas visitadas. Valor neutro: 0.
  */
 function v9ParaV10(r: Objeto): Objeto {
@@ -228,7 +228,7 @@ function v9ParaV10(r: Objeto): Objeto {
   return { ...r, fasesVisitadas: visitadas, estado: estado(r.estado) };
 }
 
-/** v10 → v11 (marco 15, 15/10/2026, D-061): a dificuldade do mundo, Normal, na fase atual e nas visitadas. */
+/** v10 -> v11 (marco 15, 15/10/2026, D-061): a dificuldade do mundo, Normal, na fase atual e nas visitadas. */
 function v10ParaV11(r: Objeto): Objeto {
   const estado = (e: unknown): unknown => (ehObjeto(e) ? { dificuldade: 'normal', ...e } : e);
   const visitadas = ehObjeto(r.fasesVisitadas) ? Object.fromEntries(Object.entries(r.fasesVisitadas).map(([k, v]) => [k, estado(v)])) : r.fasesVisitadas;
@@ -236,7 +236,7 @@ function v10ParaV11(r: Objeto): Objeto {
 }
 
 /**
- * v11 → v12 (marco 17, 15/10/2026, D-063): a bolsa ganha `personagemId` (vazio; o jogo dá um ao abrir) e o registro,
+ * v11 -> v12 (marco 17, 15/10/2026, D-063): a bolsa ganha `personagemId` (vazio; o jogo dá um ao abrir) e o registro,
  * o certificado do servidor (nulo até a primeira certificação).
  */
 function v11ParaV12(r: Objeto): Objeto {
@@ -245,6 +245,21 @@ function v11ParaV12(r: Objeto): Objeto {
       ? { ...e, entidades: lista(e.entidades).map((x) => (ehObjeto(x) && ehObjeto(x.bolsa) ? { ...x, bolsa: { personagemId: '', ...x.bolsa } } : x)) }
       : e;
   return { certificado: null, ...r, estado: estado(r.estado) };
+}
+
+/**
+ * v12 -> v13 (ajuste de 16/10/2026, D-067): o descanso saiu (a interação de descanso vira nada) e as entidades ganham
+ * os buffs armados, a carga de refúgio e a aparência (calculada de novo no primeiro tick).
+ */
+function v12ParaV13(r: Objeto): Objeto {
+  const entidade = (x: unknown): unknown => {
+    if (!ehObjeto(x)) return x;
+    const interacao = ehObjeto(x.interacao) && x.interacao.tipo === 'descanso' ? null : x.interacao;
+    return { buffsArmados: [], refugio: false, aparencia: null, ...x, interacao };
+  };
+  const estado = (e: unknown): unknown => (ehObjeto(e) ? { ...e, entidades: lista(e.entidades).map(entidade) } : e);
+  const visitadas = ehObjeto(r.fasesVisitadas) ? Object.fromEntries(Object.entries(r.fasesVisitadas).map(([k, v]) => [k, estado(v)])) : r.fasesVisitadas;
+  return { ...r, estado: estado(r.estado), fasesVisitadas: visitadas };
 }
 
 /** `MIGRACOES[v]` leva um registro da versão `v` para a `v + 1`. Não existiu versão 0. */
@@ -260,6 +275,7 @@ export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   9: v9ParaV10,
   10: v10ParaV11,
   11: v11ParaV12,
+  12: v12ParaV13,
 };
 
 function temNaoFinito(v: unknown): boolean {

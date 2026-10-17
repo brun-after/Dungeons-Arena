@@ -1,7 +1,7 @@
 // Telas da arena no navegador. As duas variantes usam o mesmo `rodarArena`:
 // - loopback (`?arena=loopback&latencia=80&jitter=20&perda=0.01`): sala, você e um bot na mesma
 //   página, ligados por rede simulada (marco 4);
-// - online (`?arena=online`): lobby → servidor real por WSS (marco 5).
+// - online (`?arena=online`): lobby -> servidor real por WSS (marco 5).
 // Marco 17 (15/10/2026, D-063): online, o personagem de um slot entra inteiro com o certificado do servidor; ao sair
 // (e a cada 2 min), o personagem certificado volta para o slot com o que a arena deu.
 

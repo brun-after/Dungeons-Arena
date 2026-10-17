@@ -1,6 +1,6 @@
 // Motor de áudio (§2.14, §4.11). Marco 12 (14/10/2026), D-056. O único lugar que toca Web Audio.
 // - O contexto só nasce no primeiro gesto (click, touchstart, keydown), com fade de 400 ms.
-// - Ganhos: mestre → música (0,45) e efeitos (0,75), ajustáveis nas Configurações, com mudo.
+// - Ganhos: mestre -> música (0,45) e efeitos (0,75), ajustáveis nas Configurações, com mudo.
 // - Música: sequenciador com olhar à frente (agenda 120 ms adiante a cada 25 ms); trocar de clima é um
 //   fade de 800 ms entre dois sequenciadores. Pausar suspende o contexto e retoma do ponto.
 // - Pausa sozinho quando a aba some (visibilitychange) e retoma ao voltar, se o jogo não estiver pausado.
@@ -89,7 +89,7 @@ export class MotorAudio {
       this.efeitos = ctx.createGain();
       this.musica.connect(this.mestre);
       this.efeitos.connect(this.mestre);
-      // Música: entrada → passa-baixa → música; e um envio de eco (ambiência) que volta antes do filtro.
+      // Música: entrada -> passa-baixa -> música; e um envio de eco (ambiência) que volta antes do filtro.
       this.entradaMusica = ctx.createGain();
       this.filtroMusica = ctx.createBiquadFilter();
       this.filtroMusica.type = 'lowpass';

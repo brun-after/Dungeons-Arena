@@ -2,11 +2,11 @@
 // para quem tem `invocacao`. Alvos sempre por `relacao()` (alvoOfensivoValido), com o avatar hostil
 // primeiro. Raio de engajamento de 5 células; ataca adjacente (Chebyshev ≤ 1); sem alvo, segue o
 // dono a 2 células. Comportamentos:
-//   agressivo → o hostil mais próximo;  assassino → o de menor HP;
-//   protetor  → só quem ameaça o dono, a até 3 células dele, sem se afastar mais que isso do dono;
-//   curador   → não ataca: cura o dono pelo dispatcher, com recarga própria;
-//   isca      → imóvel.
-// Ao engajar, a invocação fica em `perseguindo` (o descanso e a regeneração enxergam o perigo).
+//   agressivo -> o hostil mais próximo;  assassino -> o de menor HP;
+//   protetor  -> só quem ameaça o dono, a até 3 células dele, sem se afastar mais que isso do dono;
+//   curador   -> não ataca: cura o dono pelo dispatcher, com recarga própria;
+//   isca      -> imóvel.
+// Ao engajar, a invocação fica em `perseguindo` (a regeneração enxerga o perigo).
 
 import { alvoOfensivoValido, iniciarAcao, prioridadeDeAlvo } from '../combat/acao';
 import { aplicarEfeito } from '../combat/efeitos';

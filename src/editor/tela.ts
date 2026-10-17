@@ -24,6 +24,7 @@ import { criarPalco } from '../render/stage';
 import { criarTerreno, type Terreno } from '../render/terreno';
 import { carregarTexturasTileset, type TexturasTileset } from '../render/tileset-textura';
 import { mostrarAviso } from '../ui/aviso';
+import { comIcone } from '../ui/icones';
 import { pecasAusentes, tilesetHerdado, textoDaPeca, comporD4, type Peca } from '../world/tileset';
 import { type ErroFase, type ResultadoValidacao } from '../world/validacao-fase';
 import { faseJsonDaAventura, validarAventura, type Aventura } from './aventura';
@@ -31,7 +32,7 @@ import { adicionarPortaInterna, celulasDoRetangulo, distribuir, preencher, redim
 import { aplicarFerramenta, chavesDeOrbe, clonarFaseEditavel, comoFase, linhaDeCelulas, orbeDaChave, type Alteracao, type ConteudoCelula, type FaseEditavel, type Ferramenta, type ModeloDeObjeto } from './grade';
 import { Historico, type Efeito } from './historico';
 import { abrirInspetor } from './inspetor';
-import { MarcadoresEditor } from './marcadores';
+import { MarcadoresEditor, prepararMarcadores } from './marcadores';
 import { abrirPainelDeFases } from './painel-fases';
 import { abrirSeletorDePeca } from './tileset-ui';
 import { ligarToqueEditor } from './toque';
@@ -48,30 +49,30 @@ const GRUPOS: readonly { grupo: 'terreno' | 'coisas' | 'tileset'; itens: readonl
   {
     grupo: 'terreno',
     itens: [
-      { id: 'piso', icone: '▢' },
-      { id: 'parede', icone: '■' },
-      { id: 'vazio', icone: '░' },
-      { id: 'saida', icone: '⇲' },
+      { id: 'piso', icone: 'quadrado_vazio' },
+      { id: 'parede', icone: 'quadrado_cheio' },
+      { id: 'vazio', icone: 'pontilhado' },
+      { id: 'saida', icone: 'porta' },
     ],
   },
   {
     grupo: 'coisas',
     itens: [
-      { id: 'spawn', icone: '★' },
-      { id: 'inimigo', icone: '▲' },
-      { id: 'objeto', icone: '◉' },
-      { id: 'porta', icone: '◎' },
-      { id: 'selecionar', icone: '🔍' },
-      { id: 'remover', icone: '✕' },
+      { id: 'spawn', icone: 'estrela' },
+      { id: 'inimigo', icone: 'inimigo' },
+      { id: 'objeto', icone: 'objeto' },
+      { id: 'porta', icone: 'portal' },
+      { id: 'selecionar', icone: 'lupa' },
+      { id: 'remover', icone: 'fechar' },
     ],
   },
-  { grupo: 'tileset', itens: [{ id: 'peca', icone: '▦' }] },
+  { grupo: 'tileset', itens: [{ id: 'peca', icone: 'peca' }] },
 ];
 
 const MODOS: readonly { id: Modo; icone: string }[] = [
-  { id: 'pincel', icone: '✎' },
-  { id: 'balde', icone: '🪣' },
-  { id: 'retangulo', icone: '▭' },
+  { id: 'pincel', icone: 'pincel' },
+  { id: 'balde', icone: 'balde' },
+  { id: 'retangulo', icone: 'retangulo' },
 ];
 
 /** Objetos além dos orbes que a ferramenta coloca, com o conteúdo padrão (o inspetor ajusta depois). */
@@ -90,8 +91,10 @@ function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, text
   return e;
 }
 
-function botao(texto: string, rotulo: string, aoClicar: () => void): HTMLButtonElement {
-  const b = el('button', 'botao-editor', texto);
+/** Ajuste de 16/10/2026 (D-067): botão com ícone do conjunto (`idIcone`) e, opcionalmente, um texto ao lado. */
+function botao(idIcone: string, rotulo: string, aoClicar: () => void, texto?: string): HTMLButtonElement {
+  const b = el('button', 'botao-editor');
+  comIcone(b, idIcone, texto);
   b.type = 'button';
   b.setAttribute('aria-label', rotulo);
   b.title = rotulo;
@@ -103,7 +106,7 @@ function rotuloDoOrbe(chave: string): string {
   const tipo = chave.startsWith('efeito:') ? chave.slice('efeito:'.length) : '';
   if (tipo in REGISTRO_EFEITOS) {
     const d = REGISTRO_EFEITOS[tipo as keyof typeof REGISTRO_EFEITOS];
-    return t('editor.orbeDeEfeito', { efeito: t(`efeito.${d.id}` as ChaveTexto), icone: d.icone });
+    return t('editor.orbeDeEfeito', { efeito: t(`efeito.${d.id}` as ChaveTexto) });
   }
   return t(chave === 'orbe_hp' ? 'editor.orbeVida' : 'editor.orbeMana');
 }
@@ -167,6 +170,7 @@ export async function abrirTelaDeEdicao(raiz: HTMLElement, aventura: Aventura, i
   // O editor fica só de cima (D-058).
   const camera = new Camera(criarProjecao('cima', f.largura, f.altura), 'janela', toque, LIMITES_EDITOR);
   let terreno: Terreno = criarTerreno(palco.terreno, comoFase(f), texturas);
+  await prepararMarcadores();
   const marcadores = new MarcadoresEditor(conteudo);
   palco.entidades.addChild(marcadores.raiz);
   const sobreposicao = new Graphics();
@@ -209,7 +213,7 @@ export async function abrirTelaDeEdicao(raiz: HTMLElement, aventura: Aventura, i
     const avisos = [...validacao.avisos, ...(registroAtlas ? pecasAusentes(comoFase(f), registroAtlas.vinculos).map((c) => ({ mensagem: t('editor.pecaAusente'), ...c })) : [])];
     marcar(avisos, 0xf1c40f);
     marcar(erros, 0xe74c3c);
-    status.textContent = erros.length > 0 ? t('editor.erros', { n: erros.length }) : avisos.length > 0 ? t('editor.avisos', { n: avisos.length }) : t('editor.valida');
+    comIcone(status, erros.length > 0 ? 'fechar' : avisos.length > 0 ? 'aviso' : 'ok', erros.length > 0 ? t('editor.erros', { n: erros.length }) : avisos.length > 0 ? t('editor.avisos', { n: avisos.length }) : t('editor.valida'));
     status.dataset.estado = erros.length > 0 ? 'erro' : avisos.length > 0 ? 'aviso' : 'ok';
     problemas.textContent = '';
     for (const [lista, classe] of [
@@ -304,7 +308,8 @@ export async function abrirTelaDeEdicao(raiz: HTMLElement, aventura: Aventura, i
   };
 
   // --- Barra superior: voltar, nome da aventura, fases, estado, testar, testar aventura, exportar.
-  const voltar = el('a', 'botao-editor', '←');
+  const voltar = el('a', 'botao-editor');
+  comIcone(voltar, 'voltar');
   voltar.href = './?editor';
   voltar.setAttribute('aria-label', t('editor.voltar'));
   voltar.addEventListener('click', (ev) => {
@@ -321,7 +326,7 @@ export async function abrirTelaDeEdicao(raiz: HTMLElement, aventura: Aventura, i
     aventura.nome = nome.value.trim() || t('editor.semNome');
     sujo = true;
   });
-  const fases = botao(`📄 ${indice + 1}/${aventura.fases.length}`, t('editor.fasesRotulo', { atual: indice + 1, total: aventura.fases.length, nome: f.nome }), () => {
+  const fases = botao('fases', t('editor.fasesRotulo', { atual: indice + 1, total: aventura.fases.length, nome: f.nome }), () => {
     abrirPainelDeFases({
       aventura,
       indice,
@@ -338,7 +343,7 @@ export async function abrirTelaDeEdicao(raiz: HTMLElement, aventura: Aventura, i
         return r.removidos;
       },
     });
-  });
+  }, `${indice + 1}/${aventura.fases.length}`);
   fases.dataset.testid = 'fases-editor';
   const testarEm = (seguir: boolean) => {
     validar();
@@ -352,13 +357,13 @@ export async function abrirTelaDeEdicao(raiz: HTMLElement, aventura: Aventura, i
       location.href = `./?jogo=teste&fase=${encodeURIComponent(aventura.id)}&indice=${de}${seguir ? '&seguir=1' : ''}`;
     });
   };
-  const testar = botao(`▶ ${t('editor.testar')}`, t('editor.testarFase'), () => {
+  const testar = botao('tocar', t('editor.testarFase'), () => {
     testarEm(false);
-  });
-  const testarAventura = botao('▶▶', t('editor.testarAventura'), () => {
+  }, t('editor.testar'));
+  const testarAventura = botao('tocar_dois', t('editor.testarAventura'), () => {
     testarEm(true);
   });
-  const exportar = botao('⇩', t('editor.exportar'), () => {
+  const exportar = botao('baixar', t('editor.exportar'), () => {
     validar();
     const json = faseJsonDaAventura(aventura, indice);
     if (!validacao.ok || !json) {
@@ -409,7 +414,7 @@ export async function abrirTelaDeEdicao(raiz: HTMLElement, aventura: Aventura, i
     grupoOrbes.append(op);
   }
   seletorObjeto.append(grupoOrbes);
-  const escolherPeca = botao('▦?', t('editor.escolherPeca'), () => {
+  const escolherPeca = botao('peca', t('editor.escolherPeca'), () => {
     if (!registroAtlas) {
       mostrarAviso(tela, t('editor.semTileset'));
       return;
@@ -419,15 +424,15 @@ export async function abrirTelaDeEdicao(raiz: HTMLElement, aventura: Aventura, i
       atualizarFerramentas();
     });
   });
-  const girar = botao('⟳', t('editor.girarPeca'), () => {
+  const girar = botao('girar', t('editor.girarPeca'), () => {
     if (peca) peca = { ...peca, t: comporD4(peca.t, 1) };
     atualizarFerramentas();
   });
-  const espelhar = botao('⇋', t('editor.espelharPeca'), () => {
+  const espelhar = botao('espelhar', t('editor.espelharPeca'), () => {
     if (peca) peca = { ...peca, t: comporD4(peca.t, 4) };
     atualizarFerramentas();
   });
-  const distribuirB = botao('✦', t('editor.distribuir'), () => {
+  const distribuirB = botao('faisca', t('editor.distribuir'), () => {
     historico.iniciarTraco();
     const alteracoes = distribuir(f);
     historico.registrar(alteracoes);
@@ -444,7 +449,7 @@ export async function abrirTelaDeEdicao(raiz: HTMLElement, aventura: Aventura, i
     seletorObjeto.hidden = ferramenta !== 'objeto';
     const comPeca = ferramenta === 'peca';
     for (const b of [escolherPeca, girar, espelhar, distribuirB]) b.hidden = !comPeca;
-    escolherPeca.textContent = peca ? `▦ ${textoDaPeca(peca)}` : `▦ ${t('editor.pecaAutomatica')}`;
+    comIcone(escolherPeca, 'peca', peca ? textoDaPeca(peca) : t('editor.pecaAutomatica'));
     opcoes.hidden = !['inimigo', 'objeto', 'peca'].includes(ferramenta);
     if (ferramenta !== 'porta' && portaPendente) {
       portaPendente = null;
@@ -479,10 +484,10 @@ export async function abrirTelaDeEdicao(raiz: HTMLElement, aventura: Aventura, i
     base.append(g);
   }
   base.append(el('span', 'separador-editor'));
-  const desfazer = botao('↶', t('editor.desfazer'), () => {
+  const desfazer = botao('desfazer', t('editor.desfazer'), () => {
     aplicarEfeito(historico.desfazerUm(f));
   });
-  const refazer = botao('↷', t('editor.refazer'), () => {
+  const refazer = botao('refazer', t('editor.refazer'), () => {
     aplicarEfeito(historico.refazerUm(f));
   });
   const atualizarHistorico = () => {
@@ -496,7 +501,7 @@ export async function abrirTelaDeEdicao(raiz: HTMLElement, aventura: Aventura, i
     camera.centralizar({ x: Math.floor(f.largura / 2), y: Math.floor(f.altura / 2) });
     pedirQuadro();
   };
-  const navegar = botao('✋', t('editor.navegar'), () => {
+  const navegar = botao('mao', t('editor.navegar'), () => {
     navegando = !navegando;
     atualizarNavegar();
     atualizarFerramentas();
@@ -504,7 +509,7 @@ export async function abrirTelaDeEdicao(raiz: HTMLElement, aventura: Aventura, i
   const atualizarNavegar = () => {
     navegar.setAttribute('aria-pressed', String(navegando));
   };
-  base.append(desfazer, refazer, botao('⤢', t('editor.ajustar'), ajustar), navegar);
+  base.append(desfazer, refazer, botao('ajustar', t('editor.ajustar'), ajustar), navegar);
   atualizarFerramentas();
   atualizarNavegar();
   atualizarHistorico();

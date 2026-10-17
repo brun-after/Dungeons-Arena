@@ -52,7 +52,7 @@ export function lerElementos(json: unknown): { elementos: Map<Elemento, Definica
       id: elemento,
       estado: estado ?? { tipo: 'queimando', duracaoMs: 0, valor: 0, pct: 0, em: 'alvo', interno: null, ref: null },
       cor: l.texto(o, 'cor'),
-      icone: l.texto(o, 'icone'),
+      icone: l.icone(o, 'icone'),
       formas,
       visual: { conjuracao: preset('conjuracao'), viagem: preset('viagem'), impacto: preset('impacto'), som: l.texto(v, 'som') },
       nomes: { nucleos: l.listaDeTextos(n, 'nucleos'), qualidades: l.listaDeTextos(n, 'qualidades') },

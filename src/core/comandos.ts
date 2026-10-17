@@ -26,13 +26,13 @@ export type Comando =
   | { t: 'desequipar'; slot: Slot }
   | { t: 'distribuirPonto'; atributo: keyof Atributos }
   | { t: 'interagir' }
+  /** Ajuste de 16/10/2026 (D-067): abriu a mochila (gasta a carga de refúgio, se houver). */
+  | { t: 'abrirMenu' }
   /** Marco 9A (14/10/2026): loja (com a janela aberta) e ordenação manual da mochila. */
   | { t: 'comprar'; itemId: string }
   | { t: 'vender'; invId: string }
   | { t: 'fecharLoja' }
   | { t: 'moverItem'; invId: string; posicao: number }
-  /** Marco 10A-2: descanso (§2.12, só onde o modo permite). */
-  | { t: 'descansar'; tipo: 'curto' | 'longo' }
   /** Marco 10A-3: dispensa as próprias invocações (§2.9). */
   | { t: 'dispensar' }
   /** Marco 14: sobe o rank (ou aprende, do 0 para o 1); nos ranks de evolução, com o caminho escolhido. */
@@ -54,11 +54,11 @@ export const TIPOS_DE_COMANDO: readonly Comando['t'][] = [
   'desequipar',
   'distribuirPonto',
   'interagir',
+  'abrirMenu',
   'comprar',
   'vender',
   'fecharLoja',
   'moverItem',
-  'descansar',
   'dispensar',
   'subirRank',
   'equiparHabilidade',

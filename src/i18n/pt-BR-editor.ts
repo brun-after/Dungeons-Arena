@@ -18,7 +18,7 @@ export const textosEditor = {
   'editor.girarPeca': 'Girar a peça 90°',
   'editor.espelharPeca': 'Espelhar a peça',
   'editor.distribuir': 'Distribuir: o autotiling volta a escolher as peças (portas, saídas e início ficam)',
-  'editor.semTileset': 'Esta fase não tem tileset. Escolha um em Fases → Tileset.',
+  'editor.semTileset': 'Esta fase não tem tileset. Escolha um em Fases, Tileset desta fase.',
   'editor.pecaAusente': 'peça que o tileset não tem',
   'editor.nadaAqui': 'Nada para inspecionar nesta célula.',
   'editor.nomePorta': 'Passagem {n}',
@@ -57,8 +57,8 @@ export const textosEditor = {
   'fases.redimensionada': 'Tamanho alterado.',
   'fases.removidos': 'Tamanho alterado; {n} coisa(s) fora da área saíram.',
   'fases.tileset': 'Tileset desta fase',
-  'fases.tilesetProprio': '▦ Tileset próprio…',
-  'fases.tilesetHerdado': '▦ Tileset herdado…',
+  'fases.tilesetProprio': 'Tileset próprio…',
+  'fases.tilesetHerdado': 'Tileset herdado…',
 
   'inspetor.titulo': 'Célula ({x}, {y})',
   'inspetor.fechar': 'Fechar o inspetor',
@@ -118,7 +118,7 @@ export const textosEditor = {
   'tileset.excluir': 'Excluir o tileset {nome}',
   'tileset.confirmarExcluir': 'Confirmar',
   'tileset.copiarPrompt': 'Copiar prompt para IA',
-  'tileset.promptCopiado': 'Prompt copiado ✓',
+  'tileset.promptCopiado': 'Prompt copiado',
   'tileset.promptFalhou': 'Não deu para copiar',
   'tileset.prompt':
     'Crie um atlas de tileset em pixel art, vista de cima, para uma masmorra de RPG: imagem quadrada de 512×512 px, grade 4×4 sem espaço entre as células, fundo opaco. Ordem das células, linha a linha: canto superior esquerdo da parede, parede de cima, canto superior direito, piso 1; parede da esquerda, piso 2, parede da direita, piso com detalhe; canto inferior esquerdo, parede de baixo, canto inferior direito, baú; porta, piso 3, pilar de parede, portal de saída. As paredes devem ter a face voltada para o piso e encaixar umas nas outras.',

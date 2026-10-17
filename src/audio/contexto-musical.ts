@@ -1,6 +1,6 @@
 // Contexto musical (§2.14). Marco 12 (14/10/2026), D-056. Puro: exploração, combate ou chefe, a partir
 // do estado. Combate: algum hostil vivo perseguindo o jogador; chefe: esse hostil é um boss. A música
-// só "desce" (chefe → combate → exploração) depois de 4 s sem o sinal, para não piscar entre faixas.
+// só "desce" (chefe -> combate -> exploração) depois de 4 s sem o sinal, para não piscar entre faixas.
 // Marco 11A (16/10/2026, D-066): a "sombra" da música, de 0 (casual) a 1 (dark fantasy), pela profundidade da fase,
 // pela dificuldade e pelo clima; ela desliza devagar (sem saltos) e o motor a usa para a faixa e o timbre.
 

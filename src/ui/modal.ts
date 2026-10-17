@@ -2,6 +2,8 @@
 // deixa o resto da página inerte (canvas e controles de toque não recebem toques), fecha com Esc e
 // devolve o foco a quem abriu. A simulação continua rodando (D-040); quem abre bloqueia a entrada.
 
+import { icone } from './icones';
+
 export interface Modal {
   dialogo: HTMLDialogElement;
   corpo: HTMLDivElement;
@@ -34,7 +36,7 @@ export function criarModal(o: OpcoesModal): Modal {
   const fechar = document.createElement('button');
   fechar.type = 'button';
   fechar.className = 'botao-cabecalho modal-fechar';
-  fechar.textContent = '✕';
+  fechar.append(icone('fechar'));
   fechar.setAttribute('aria-label', o.rotuloFechar);
   fechar.addEventListener('click', () => {
     dialogo.close();

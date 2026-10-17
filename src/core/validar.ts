@@ -1,6 +1,7 @@
 // Leitura validada de JSON de conteúdo (§3.9). Cada leitura registra o erro e devolve um valor
 // neutro, para que uma única passada junte todos os problemas de um arquivo.
 
+import { ehIcone } from '../data/icones';
 export type Objeto = Record<string, unknown>;
 
 export function ehObjeto(v: unknown): v is Objeto {
@@ -27,6 +28,14 @@ export class Leitor {
     if (typeof v === 'string' && v.trim() !== '') return v;
     this.erro(`${campo} precisa ser texto não vazio`);
     return '';
+  }
+
+  /** Ajuste de 16/10/2026 (D-067): um id do conjunto de ícones (data/icones.ts); nada de emoji. */
+  icone(o: Objeto, campo: string): string {
+    const v = o[campo];
+    if (ehIcone(v)) return v;
+    this.erro(`${campo} precisa ser um ícone conhecido ("${String(v)}")`);
+    return 'circulo';
   }
 
   textoOuNulo(o: Objeto, campo: string): string | null {

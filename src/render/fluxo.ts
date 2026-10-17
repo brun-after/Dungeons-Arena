@@ -46,7 +46,10 @@ export class CamadaFluxo {
       const cx = (alvo.x + 0.5) * p;
       const cy = (alvo.y + 0.5) * p;
       g.circle(cx, cy, p * 0.45).stroke({ width: 2, color: cor(REGISTRO_EFEITOS.efeito_atrasado.cor), alpha: 0.4 });
-      g.arc(cx, cy, p * 0.45, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * fracao).stroke({ width: 4, color: cor(REGISTRO_EFEITOS.efeito_atrasado.cor) });
+      // Ajuste de 16/10/2026: moveTo antes do arco (sem ele, o Pixi liga o ponto anterior ao arco com uma linha).
+      const inicio = -Math.PI / 2;
+      g.moveTo(cx + Math.cos(inicio) * p * 0.45, cy + Math.sin(inicio) * p * 0.45);
+      g.arc(cx, cy, p * 0.45, inicio, inicio + Math.PI * 2 * fracao).stroke({ width: 4, color: cor(REGISTRO_EFEITOS.efeito_atrasado.cor) });
     }
   }
 

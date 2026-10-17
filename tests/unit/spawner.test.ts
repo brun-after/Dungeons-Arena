@@ -66,11 +66,12 @@ describe('spawner dinâmico (§2.1)', () => {
     expect(criados(c.estado)).toBe(0);
     c.rodar(CARENCIA);
     const primeira = criados(c.estado);
-    expect(primeira).toBe(4);
+    // Ajuste de 16/10/2026 (D-067): + o refúgio (um só por vez, então não volta na segunda rodada).
+    expect(primeira).toBe(5);
     c.rodar(CARENCIA + INTERVALO - 1);
     expect(criados(c.estado)).toBe(primeira);
     c.rodar(CARENCIA + INTERVALO);
-    expect(criados(c.estado)).toBe(8);
+    expect(criados(c.estado)).toBe(9);
   });
 
   it('nunca passa do máximo de cada categoria', () => {

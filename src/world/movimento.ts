@@ -31,7 +31,7 @@ const MAX_PASSOS_POR_TICK = 8;
 /** Absorve o erro de ponto flutuante ao somar frações de célula (D-005). */
 const EPS = 1e-9;
 
-/** Velocidade em células por segundo (§2.3). Destreza 10 → 2,5; destreza 20 → 3,75. */
+/** Velocidade em células por segundo (§2.3). Destreza 10 -> 2,5; destreza 20 -> 3,75. */
 export function velocidade(destreza: number, velocidadeBaseMs: number, dominado = false): number {
   let mult = Math.max(0.2, 1 + ((destreza - 10) * 5) / 100);
   if (dominado) mult *= 1.3;
