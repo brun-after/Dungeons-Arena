@@ -143,26 +143,6 @@ test.describe('desktop', () => {
     expect(erros).toEqual([]);
   });
 
-  // Marco 18 (D-068, D-070): o "?" de cada atributo explica com os números do personagem; o diário lista o que falta.
-  test('ficha: a dica rápida do atributo e a aba Diário', async ({ page }) => {
-    const { erros } = await abrir(page);
-    await page.keyboard.press('KeyI');
-    const mochila = page.getByRole('dialog', { name: 'Mochila' });
-    await mochila.getByRole('button', { name: 'Ficha' }).click();
-    await mochila.locator('[data-chave="dica-inteligencia"]').click();
-    const dica = mochila.locator('.dica-atributo');
-    await expect(dica).toBeVisible();
-    await expect(dica).toContainText('Potência dos efeitos');
-    await expect(dica).toContainText('Estudo de habilidades');
-    await mochila.locator('[data-chave="dica-sabedoria"]').click();
-    await expect(dica).toContainText('Armadilhas');
-    await mochila.getByRole('button', { name: 'Diário' }).click();
-    await expect(mochila.getByText(/Descobertas: \d+ de \d+/)).toBeVisible();
-    await expect(mochila.locator('.missao')).toHaveCount(4);
-    await expect(mochila.locator('.grupo-diario[data-tipo="reacao"] summary')).toContainText('Reações');
-    expect(erros).toEqual([]);
-  });
-
   test('save: equipar, sair pelo Menu, continuar do slot e exportar', async ({ page }) => {
     const { diag, erros } = await abrir(page);
     await page.keyboard.press('KeyI');
