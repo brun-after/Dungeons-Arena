@@ -77,7 +77,7 @@ Na terceira etapa, um triplo válido tem prioridade sobre o duplo que terminaria
 ## Efeitos e limites
 
 - Muralhas: até três segmentos por lançamento, bloqueiam movimento e projéteis, não ocupam reservas, spawns, portas ou objetos e não podem separar uma região acessível. Até 8 s de duração.
-- Círculo e Névoa: raio 1, pulsos com relação de equipe, duração máxima de 10 s, até quatro campos de cada tipo por personagem. Névoa renova veneno sem empilhar cópias; o pântano só renova lentidão em quem permanece dentro.
+- Círculo e Névoa: raio 1, pulsos com relação de equipe, duração máxima de 10 s, até quatro campos de cada tipo por personagem. Névoa renova veneno sem empilhar cópias; o pântano só renova lentidão em quem permanece dentro. Renovar um estado já visível não repete o aviso a cada tick.
 - Aparo: próximo golpe físico direto, redução limitada, janela máxima de 2 s. A resposta normal dura 3 s e é consumida no primeiro acerto físico próximo; Resposta dilacerante a substitui por sangramento. Magia e periódicos não são aparados.
 - Véu: esquiva de golpes físicos diretos; ataque ofensivo encerra, janela máxima de 4 s. Passo se desloca por células válidas, sem atravessar obstáculos, com distância real acompanhando o alcance compilado.
 - Purificação: remove um estado da lista explícita de removíveis; nenhum combo recompensa uma tentativa sem remoção.
@@ -95,6 +95,6 @@ Equipar no toque mantém a mochila aberta, e o teste antigo foi atualizado para 
 
 ## Verificação
 
-Testes exercitam os 35 combos com os efeitos reais e recusam preparação incompleta, alvo incorreto, ordem, interrupção e expiração. Há casos de colisão, campos, cura efetiva, limites, clone e patches. A galeria de navegador renderiza os 35 efeitos em apresentação normal, movimento reduzido e qualidade mínima. O CI disponibiliza as capturas no artefato galeria-combos por sete dias. O fluxo de combate ponta a ponta usa Estaca, Névoa e Abalo e verifica a descoberta persistida.
+Testes exercitam os 35 combos com os efeitos reais e recusam preparação incompleta, alvo incorreto, ordem, interrupção e expiração. Há casos de colisão, campos, cura efetiva, limites, clone e patches. A galeria de navegador renderiza os 35 efeitos em apresentação normal, movimento reduzido e qualidade mínima. O CI disponibiliza as capturas no artefato galeria-combos por sete dias. O fluxo de combate ponta a ponta usa Estaca, Névoa e Abalo e verifica a descoberta persistida. Seu relógio é controlado pelo Playwright para que o custo de automação e captura não consuma as janelas reais de gameplay.
 
 O relatório BALANCEAMENTO-EXPANSAO.md traz 160 lutas de quatro builds nos níveis 5/10/20/25/30 e quatro dificuldades. É uma amostra exploratória contra goblins, não uma certificação de todas as builds, chefes ou PvP. As 77 metas históricas continuam obrigatórias.

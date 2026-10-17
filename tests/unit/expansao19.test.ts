@@ -247,3 +247,16 @@ describe('evoluções úteis das skills novas', () => {
         expect(passo.efeitos.some((e) => e.tipo === 'passo_sombrio' && e.valor === 7)).toBe(true);
     });
 });
+
+
+describe('avisos de zonas persistentes', () => {
+    it('renova a lentidão sem repetir avisos em todo tick', () => {
+        const c = cena(); c.usar('estaca_de_pedra'); c.usar('nevoa_venenosa');
+        processarPantanos(c.estado, c.ctx, c.eventos);
+        const antes = c.eventos.filter((e) => e.t === 'efeitoAplicado' && e.tipo === 'atolado').length;
+        const ate = obter(c.a.efeitos.find((e) => e.tipo === 'atolado')).ateTick;
+        for (let i = 0; i < 10; i++) { c.estado.tick++; processarPantanos(c.estado, c.ctx, c.eventos); }
+        expect(c.eventos.filter((e) => e.t === 'efeitoAplicado' && e.tipo === 'atolado')).toHaveLength(antes);
+        expect(obter(c.a.efeitos.find((e) => e.tipo === 'atolado')).ateTick).toBeGreaterThan(ate);
+    });
+});

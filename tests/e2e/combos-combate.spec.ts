@@ -6,6 +6,7 @@ import type { RegistroProgresso } from '../../src/save/esquema';
 test('Estaca, Névoa e Abalo concluem Prisão pestilenta e o diário persiste', async ({ page, isMobile }) => {
   test.setTimeout(180000);
   const erros: string[] = []; page.on('pageerror', (e) => erros.push(e.message));
+  await page.clock.install({ time: new Date() });
   await page.goto('./?jogo=campanha&slot=1&diag=1&classe=mago');
   await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/, { timeout: 30000 });
   await page.getByRole('button', { name: 'Salvar e voltar aos slots' }).click();
@@ -29,12 +30,18 @@ test('Estaca, Névoa e Abalo concluem Prisão pestilenta e o diário persiste', 
   await page.locator('[data-slot="2"] input[type="file"]').setInputFiles({ name:'combo.json', mimeType:'application/json', buffer:Buffer.from(JSON.stringify(salvo)) });
   await page.goto('./?jogo=campanha&slot=2&diag=1');
   await expect(page.getByTestId('habilidade-estaca_de_pedra')).toBeVisible({ timeout:30000 });
+  // A automação e as capturas do WebGL lento não consomem a janela de gameplay.
+  await page.clock.pauseAt(new Date(Date.now() + 1000));
   await page.getByTestId('habilidade-estaca_de_pedra').click();
+  await page.clock.runFor(800);
   await expect(page.locator('.indicador-combo')).toContainText('Névoa venenosa', { timeout:20000 });
   await page.getByTestId('habilidade-nevoa_venenosa').click();
+  await page.clock.runFor(800);
   await expect(page.locator('.indicador-combo')).toContainText('Abalo sísmico', { timeout:20000 });
   await page.getByTestId('habilidade-abalo_sismico').click();
+  await page.clock.runFor(800);
   await expect(page.locator('.log-combate')).toContainText('Prisão pestilenta', { timeout:20000 });
+  await page.clock.resume();
   if (isMobile) await page.getByRole('button', { name:/Abrir a mochila/ }).click(); else await page.keyboard.press('KeyI');
   const mochila = page.getByRole('dialog', { name:'Mochila' });
   await mochila.getByRole('button', { name:/Habilidades/ }).click();

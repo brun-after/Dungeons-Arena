@@ -212,7 +212,10 @@ export function processarPantanos(estado: EstadoJogo, ctx: ContextoSimulacao, sa
     if (!campo.pantano || campo.ateTick <= estado.tick) continue;
     const ator = buscarEntidade(estado, campo.donoId);
     if (!ator || !vivo(ator)) continue;
-    for (const e of estado.entidades) if (vivo(e) && podeFerir(ator, e, ctx.modo) && chebyshev(campo, e) <= campo.raio) aplicarEfeito(estado, ctx, e, construirEfeito('atolado', { duracaoMs: r.lentidaoMs, pct: r.lentidaoPct }), ator, e, saida);
+    for (const e of estado.entidades) {
+      if (!vivo(e) || !podeFerir(ator, e, ctx.modo) || chebyshev(campo, e) > campo.raio) continue;
+      aplicarEfeito(estado, ctx, e, construirEfeito('atolado', { duracaoMs: r.lentidaoMs, pct: r.lentidaoPct }), ator, e, saida, !ativo(e, 'atolado', estado.tick));
+    }
   }
 }
 

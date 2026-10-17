@@ -174,6 +174,8 @@ export function aplicarEfeito(
   origem: OrigemDoEfeito,
   mira: Celula | null,
   saida: EventoSimulacao[],
+  /** Marco 19 (17/10/2026): zonas renovam um estado já visível sem repetir aviso a cada tick. */
+  notificar = true,
 ): void {
   if (!vivo(alvo)) return;
   const def = REGISTRO_EFEITOS[ef.tipo];
@@ -263,7 +265,7 @@ export function aplicarEfeito(
   const ativo = registrarEfeitoAtivo(ctx, alvo, ef, origem.id, tick, (vira) => {
     aplicarEfeito(estado, ctx, alvo, vira, origem, mira, saida);
   });
-  if (ativo) saida.push({ t: 'efeitoAplicado', tick, alvoId: alvo.id, origemId: origem.id, tipo: ef.tipo, ateTick: ativo.ateTick });
+  if (ativo && notificar) saida.push({ t: 'efeitoAplicado', tick, alvoId: alvo.id, origemId: origem.id, tipo: ef.tipo, ateTick: ativo.ateTick });
 }
 
 /**
