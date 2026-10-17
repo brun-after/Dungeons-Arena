@@ -79,7 +79,9 @@ describe('efeitos dos atributos', () => {
   it('Sabedoria regenera mais mana, sempre em mana inteira', () => {
     const b = BALANCE_PADRAO;
     const em60 = (sab: number) => Array.from({ length: 60 }, (_, i) => manaPorSegundo(com('sabedoria', sab), i + 1, b));
-    expect(em60(10).every((m) => m === b.recursos.regenManaPorSegundo)).toBe(true);
+    expect(em60(10).every(Number.isInteger)).toBe(true);
+    expect(em60(10).reduce((s, m) => s + m, 0)).toBe(30);
+    expect(em60(30).reduce((s, m) => s + m, 0)).toBe(48);
     const sabio = em60(30);
     expect(sabio.every((m) => Number.isInteger(m))).toBe(true);
     expect(sabio.reduce((s, m) => s + m, 0)).toBeGreaterThan(60 * b.recursos.regenManaPorSegundo);

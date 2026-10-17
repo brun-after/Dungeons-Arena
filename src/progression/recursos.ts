@@ -31,7 +31,7 @@ export function perseguido(estado: EstadoJogo, e: Entidade): boolean {
 }
 
 /**
- * Marco 10A-2 (14/10/2026): 1 de vida e 1 de mana por célula caminhada (§2.12), só para jogadores,
+ * Marco 10A-2 (14/10/2026): 1 de vida e 0,5 de mana por célula caminhada (ajuste de 17/10/2026) (§2.12), só para jogadores,
  * onde o modo liga, e bloqueada com hostil em perseguição. Chamada ao completar um passo.
  */
 export function regenerarPorPasso(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade): void {

@@ -34,9 +34,9 @@
     "curaNpcAoAbaterPct": 50,
     "regenBossPorSegundoPct": 5,
     "regenBossEsperaMs": 5000,
-    "regenManaPorSegundo": 1,
+    "regenManaPorSegundo": 0.5,
     "regenHpPorCelula": 1,
-    "regenManaPorCelula": 1
+    "regenManaPorCelula": 0.5
   },
   "respawn": {
     "inimigoS": 60,

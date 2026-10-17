@@ -6,11 +6,24 @@ import type { Comando } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { Entidade } from '../entities/entidade';
 import { t } from '../i18n';
+import type { Item } from '../progression/itens';
 import { ATALHOS_DE_CONSUMIVEL } from '../progression/inventario';
 import { icone } from './icones';
 
 /** A tecla de cada posição da barra (as mesmas do teclado: 5–9 e 0). */
 const TECLAS = ['5', '6', '7', '8', '9', '0'];
+
+/** 17/10/2026: rótulo curto nos dois dispositivos; recuperação nominal, antes de modificadores. */
+export function nomeCurtoConsumivel(item: Item, jogador: Pick<Entidade, 'hpMax' | 'manaMax'>): string {
+  const recurso = item.efeitos.find((e) => e.tipo === 'cura' || (e.tipo === 'recuperar_recurso' && e.duracaoMs === 0));
+  if (recurso) {
+    const vida = recurso.tipo === 'cura';
+    const valor = Math.round(recurso.valor + (vida ? jogador.hpMax : jogador.manaMax) * recurso.pct / 100);
+    return t(vida ? 'consumiveis.vida' : 'consumiveis.mana', { valor });
+  }
+  const nome = item.nome.replace(/^Pergaminho (?:do|da|de) /i, '');
+  return nome.charAt(0).toLocaleUpperCase('pt-BR') + nome.slice(1);
+}
 
 export interface BarraConsumiveis {
   readonly elemento: HTMLElement;
@@ -25,7 +38,7 @@ export function criarBarraConsumiveis(ctx: ContextoSimulacao, emitir: (c: Comand
 
   const atualizar = (j: Entidade | undefined) => {
     const lista = (j?.bolsa?.mochila ?? []).filter((i) => ctx.conteudo.itens.get(i.itemId)?.tipo === 'consumivel');
-    const chave = lista.map((i) => `${i.invId}:${i.qtd}`).join(',');
+    const chave = lista.map((i) => `${i.invId}:${i.itemId}:${i.qtd}`).join(',') + `:${j?.hpMax}:${j?.manaMax}`;
     if (chave === ultimo) return;
     ultimo = chave;
     elemento.textContent = '';
@@ -42,16 +55,16 @@ export function criarBarraConsumiveis(ctx: ContextoSimulacao, emitir: (c: Comand
       b.title = rotulo;
       b.setAttribute('aria-label', rotulo);
       b.append(icone(item.icone));
-      if (toque) {
+      if (j) {
         const nome = document.createElement('span');
         nome.className = 'nome';
-        nome.textContent = item.nome;
+        nome.textContent = nomeCurtoConsumivel(item, j);
         b.append(nome);
       }
       if (entrada.qtd > 1) {
         const q = document.createElement('span');
         q.className = 'qtd';
-        q.textContent = String(entrada.qtd);
+        q.textContent = `×${entrada.qtd}`;
         b.append(q);
       }
       if (tecla) {

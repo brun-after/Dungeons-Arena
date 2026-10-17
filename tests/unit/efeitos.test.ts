@@ -174,8 +174,8 @@ describe('efeitos com duração', () => {
     c.aplicar('j', 'recuperar_recurso', { duracaoMs: 2000, valor: 3 });
     c.ticks(ticksDe(2000) + 1);
     expect(c.ent('j').hp).toBe(20);
-    // A regeneração natural de mana (1/s) também corre: 2 s × (3 + 1).
-    expect(c.ent('j').mana).toBe(8);
+    // 17/10/2026: regeneração natural de 0,5/s: 2 × 3 do efeito + 1 natural.
+    expect(c.ent('j').mana).toBe(7);
     expect(c.eventos.filter((e) => e.t === 'efeitoResultado').length).toBe(4);
   });
 

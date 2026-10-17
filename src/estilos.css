@@ -160,17 +160,26 @@ body.toque .faixa-controles {
   padding-left: 16px;
 }
 
-/* Ajuste de 15/10/2026 (D-065): o botão de alvo fica em cima do de interagir, longe da roda de habilidades. */
+/* 17/10/2026: interação e alvo em fileira, à direita, antes da roda de habilidades. */
 .coluna.centro {
-  flex-direction: column-reverse;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 10px;
-  padding-bottom: 18px;
+  position: absolute;
+  right: calc(184px + var(--seguro-dir));
+  bottom: calc(18px + var(--seguro-base));
+  height: 56px;
+  flex-direction: row;
+  gap: 8px;
+}
+
+@media (max-width: 480px) and (orientation: portrait) {
+  .coluna.centro {
+    right: calc(16px + var(--seguro-dir));
+    bottom: calc(190px + var(--seguro-base));
+  }
 }
 
 /* A coluna direita ancora o ataque e a roda de habilidades em volta dele (§4.6). */
 .coluna.direita {
+  grid-column: 3;
   position: relative;
   display: block;
 }
@@ -1971,9 +1980,10 @@ body.toque .log-combate {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
+  width: 156px;
   height: 44px;
-  padding: 0;
+  gap: 6px;
+  padding: 0 8px 0 16px;
   border: 1px solid var(--borda);
   border-radius: 8px;
   background: rgba(20, 18, 26, 0.75);
@@ -1989,6 +1999,7 @@ body.toque .log-combate {
   transform: scale(0.94);
 }
 .botao-consumivel svg.icone {
+  flex-shrink: 0;
   width: 24px;
   height: 24px;
 }
@@ -2011,7 +2022,7 @@ body.toque .barra-consumiveis {
   top: calc(64px + var(--seguro-topo));
   transform: none;
   max-height: min(42vh, 220px);
-  width: 132px;
+  width: 156px;
   gap: 4px;
   padding: 4px;
   border-radius: 8px;
@@ -2031,13 +2042,13 @@ body.toque .botao-consumivel {
   gap: 6px;
   padding: 0 6px;
 }
-body.toque .botao-consumivel .nome {
+.botao-consumivel .nome {
   overflow: hidden;
   font-size: 0.72rem;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-body.toque .botao-consumivel .qtd {
+.botao-consumivel .qtd {
   position: static;
   margin-left: auto;
 }

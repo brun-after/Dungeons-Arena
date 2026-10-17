@@ -124,6 +124,8 @@ export const ptBR = {
   'log.refugioUsado': 'Refúgio: imune por 45 s',
   'hud.buffArmado': 'Buff armado: {s} s para entrar em combate',
   'tela.gireOAparelho': 'Gire o aparelho: o jogo é na horizontal',
+  'consumiveis.vida': 'Vida +{valor}',
+  'consumiveis.mana': 'Mana +{valor}',
   'consumiveis.rotulo': 'Consumíveis',
   'consumiveis.usar': 'Usar {nome}',
   'consumiveis.usarComTecla': 'Usar {nome} (tecla {tecla})',
