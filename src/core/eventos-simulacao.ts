@@ -90,6 +90,9 @@ export type EventoSimulacao =
       atorId: EntidadeId;
       habilidadeId: string;
       chave: string;
+      /** Diagnóstico de balanceamento (18/10/2026): custos efetivamente cobrados, após afinidades. */
+      custoMana?: number;
+      custoVida?: number;
       alvoId: EntidadeId | null;
       alvoX: number;
       alvoY: number;
@@ -111,6 +114,10 @@ export type EventoSimulacao =
       /** Marco 14: a chave compilada (o visual escala com o rank). */
       chave: string;
       dano: number;
+      /** HP efetivamente retirado, sem excesso letal; dano mantém o valor histórico. */
+      danoEfetivo?: number;
+      /** Absorção de escudo neste impacto, após esquiva/aparo. */
+      absorvidoEscudo?: number;
       cura: number;
       d20: number;
       mult: number;

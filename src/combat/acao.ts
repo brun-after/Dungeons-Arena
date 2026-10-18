@@ -225,7 +225,8 @@ export function iniciarAcao(
     const previa = prepararSequencia(estado, ctx, clonarEntidade(ator), hab, ator.acao.acaoId, alvo, mira);
     if (previa.raioArea !== hab.raioArea) ator.acao.raioCombo = previa.raioArea;
   }
-  saida.push({ t: 'acaoIniciada', tick: estado.tick, atorId: ator.id, ...ator.acao });
+  // Diagnóstico (18/10/2026): registra o custo real, inclusive de ações canceladas depois da cobrança.
+  saida.push({ t: 'acaoIniciada', tick: estado.tick, atorId: ator.id, ...ator.acao, custoMana, custoVida });
   return true;
 }
 

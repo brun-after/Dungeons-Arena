@@ -8,6 +8,11 @@ import { DIFICULDADES } from '../../src/modos/dificuldade';
 import { CLASSES, aguenta, avisos, chefe, desequipar, dispersar, dueloDeFichas, equipar, fatiaDaInvocacao, mediana, economiaPorMinuto, pvpLivre, semAjuste, sequencia, xpPorMinuto } from './simulador';
 
 const args = process.argv.slice(2);
+// Diagnóstico ampliado (18/10/2026): preserva o contrato e as metas do relatório histórico.
+if (args.includes('--diagnostico')) {
+  const { executarDiagnostico } = await import('./diagnostico-cli');
+  executarDiagnostico(args);
+} else {
 const valor = (nome: string, padrao: number) => {
   const i = args.indexOf(`--${nome}`);
   const v = i >= 0 ? Number(args[i + 1]) : NaN;
@@ -217,3 +222,5 @@ if (args.includes('--registrar')) {
   console.log('Gravado em docs/BALANCEAMENTO.md');
 }
 if (aprovados < criterios.length) process.exitCode = 1;
+
+}

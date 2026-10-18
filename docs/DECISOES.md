@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.43 · **Data:** 17/10/2026
+**Versão:** 0.44 · **Data:** 18/10/2026
 
 > **Histórico**
+> - **0.44 (18/10/2026)**: D-082 (diagnóstico de balanceamento com contabilidade de combate e intervenções por fator).
 > - **0.43 (17/10/2026)**: D-079 (dinamismo das fases preservando salas e corredores, retorno, ambientes, Engenho e enxames limitados).
 > - **0.42 (18/10/2026)**: D-078 (Investida livre e sustentação do guerreiro pelo básico).
 > - **0.41 (17/10/2026)**: D-077 (17 skills, 35 combos confirmados por resultado, visuais e correção do smoke).
@@ -2083,3 +2084,13 @@ Os drops usam os SVGs dos itens da mochila, convertidos em texturas compartilhad
 O Necromante tem um servo passivo que retorna após cair, reanima seus abates e os de suas invocações, e pode criar um eco temporário de um aliado que morreu perto. O eco é independente do jogador, que revive normalmente. Reanimados usam atributos e dano próprios em vez de copiar poderes de chefes; todos respeitam os limites do dono e do modo. Dízimo vital consome vida efetiva de uma invocação própria para curar o dono.
 
 Por orientação do usuário, Sombra e Trevas são um único elemento: Trevas substitui a identidade elemental anterior sem invalidar itens ou caminhos salvos. O schema 19 migra os campos elementais antigos, incluindo saves v18 dos enxames; IDs legados permanecem estáveis. As regras, habilidades, combos e a compatibilidade estão em [Necromante e Trevas](NECROMANTE.md).
+
+## D-082 — Diagnóstico explicativo de balanceamento (18/10/2026)
+
+O pedido é investigar os fatores da vantagem entre classes, além de aprovar metas de tempo e golpes. O comando histórico e suas metas permanecem; `--diagnostico` mede as cinco classes oficiais em duelos, pressão simultânea, atrito sem recuperação artificial e chefe, separados por nível e dificuldade. O relatório mostra dano efetivo, cura por fonte, custos reais, escudos, invocações, exposição e desgaste por onda.
+
+Os eventos de início de ação passam a informar os custos já cobrados; impactos informam dano efetivo e absorção de escudo. São campos adicionais de observação: não mudam resolução de combate, custos, rolagens ou balance.json. Resumos de poções e curadores não duplicam os efeitos que os originaram. Descendentes hostis invocados pelo chefe contam no dano recebido.
+
+Experimentos retiram um fator de cada vez nas mesmas condições iniciais: cura do básico quando presente, poções, barra ou defesa plana. O relatório distingue observação de contribuição experimental, mortes de limites de tempo e tempo de vitória de tempo até morrer. Não há atribuição causal aditiva nem ajuste automático; oito sementes e uma build típica não certificam equilíbrio geral. Fontes, condições, intervalos e amostras JSON permitem auditoria. Uso e limitações em [Como investigar o balanceamento](DIAGNOSTICO-BALANCEAMENTO.md).
+
+O diagnóstico completo integra `npm run verificar`, o comando `balancear:completo` e a CI de PRs/main. A validação de integridade rejeita amostras incompletas, custos/curas inconsistentes e intervenções sem controle; o resultado entre classes permanece exploratório. O artefato da CI contém somente dados produzidos pela execução corrente. Mortes simultâneas não concluem a onda de diagnóstico.

@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.12 · **Data:** 18/10/2026
+**Versão do documento:** 3.13 · **Data:** 18/10/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena
 
 > **Histórico**
+> - **3.13 (18/10/2026)**: diagnóstico de balanceamento por classe, cura/custos, invocações, desgaste por onda e intervenções pareadas (D-082). Uso em [Como investigar o balanceamento](docs/DIAGNOSTICO-BALANCEAMENTO.md).
 > - **3.12 (18/10/2026)**: Necromante, servo passivo, reanimados, ecos aliados e Dízimo vital; Sombra unificada em Trevas, novos combos e saves v18 (D-081). Detalhes em [Necromante e Trevas](docs/NECROMANTE.md).
 > - **3.11 (17/10/2026)**: fases vivas: piso nativo contínuo, retorno com revisita, áreas elementais, armadilhas mais perigosas e Engenho; enxames ocasionais em levas limitadas, mapas maiores e espirais (D-079). Detalhes em [Fases vivas](docs/FASES-VIVAS.md).
 > - **3.10 (18/10/2026)**: Investida em movimento, preservando o destino clicado, e cura do guerreiro por dano efetivo do ataque básico (D-078).
@@ -81,11 +82,12 @@ Divergências em relação a ela são registradas em [`docs/DECISOES.md`](docs/D
 | **Campanha em grupo** | Tela de slots → **Jogar em grupo** (no slot com personagem) mostra um código; os outros (até 6) digitam o código no próprio slot e **Entrar no grupo**. Cada um joga com o seu personagem, que volta para o slot dele; a fase avança quando todos os vivos estão na saída | Marco 15 |
 | **Conta e nuvem** | Tela de slots → **Entrar com Google**; em cada slot, **Enviar para a nuvem** e **Baixar da nuvem**. Jogar sem conta continua igual; salvar pelo menu e sair do grupo ou da arena enviam sozinhos quando há conta | Marco 17 |
 | **Arena com o seu personagem** | Menu → **Arena online** → escolha o slot (o primeiro já vem escolhido) → criar sala ou entrar numa sala da sua faixa. O servidor confere o personagem; ele entra inteiro, ganha XP, ouro e itens, e **Salvar e sair** grava no slot | Marco 17 |
+| **Diagnóstico de balanceamento** | `npm run balancear:diagnostico -- --registrar` (cinco classes, fontes, custos, desgaste e experimentos; executado também na CI); [guia e opções](docs/DIAGNOSTICO-BALANCEAMENTO.md) | D-082 |
 | **Balanceamento** | `npm run balancear` (tabela das metas do ritmo); `-- --registrar` grava [`docs/BALANCEAMENTO.md`](docs/BALANCEAMENTO.md) | Marco 15 |
 | **Benchmarks do cliente** | `?bench=carga` ou `?bench=padrao` no navegador (o resultado aparece na tela; `&qualidade=baixo` e `&segundos=60` opcionais); `npm run bench` roda tudo e grava em `docs/BENCHMARKS.md` | Marco 16 |
 | **Teste com pessoas** | Link <https://brun-after.github.io/Dungeons-Arena/?pesquisa=1>; roteiro e resumo em [`docs/TESTES-HUMANOS.md`](docs/TESTES-HUMANOS.md) | Marco 7 |
 | **Editor de aventuras** | Menu → **Editor de fases** (ou `?editor`): aventuras de até 12 fases; pincel, balde e retângulo; baú, loja, item, armadilha, som, inimigo com nível, porta interna e saída com tranca; toque longo abre o inspetor; **Fases** troca, gera (também "no meu estilo") e escolhe o tileset (imagem 4×4 ou 5×5); **Testar** testa a fase e **Testar a aventura**, a aventura inteira; **Exportar** baixa a fase. Para jogar valendo: Campanha → slot vazio → escolha a aventura | Marcos 6 e 11A |
-| **Local: verificação completa** | `npm run verificar` (typecheck, lint, testes e build) | Etapa 1 |
+| **Local: verificação completa** | `npm run verificar` (typecheck, lint, testes, build e balanceamento completo) | Etapa 1 |
 | **Testes** | `npm test` (unidade, simulação, rede e integração com o servidor), `npm run test:e2e` (Playwright) | Etapa 1 |
 | **Offline** | Depois da primeira visita, a campanha abre em modo avião (PWA) | Etapa 2 |
 

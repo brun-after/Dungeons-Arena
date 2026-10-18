@@ -90,6 +90,7 @@ export function aplicarImpacto(
   const tick = estado.tick;
   const hpAntes = alvo.hp;
   let dano = 0;
+  let absorvidoEscudo = 0;
   let cura = 0;
   let d20 = 0;
   let mult = 1;
@@ -120,7 +121,9 @@ export function aplicarImpacto(
     // Marco 14: o escudo absorve antes da vida.
     const defesa = !r.falha && !r.imune && atacante ? defenderGolpe(estado, ctx, alvo, atacante, hab.tipoAtaque === 'fisico', saida) : { esquivou: false, fator: 1 };
     if (defesa.esquivou) { falha = true; saida.push({ t: 'esquivou', tick, acaoId: impacto.acaoId, atorId: fonte.id, alvoId: alvo.id }); }
-    dano = absorverEscudo(alvo, defesa.esquivou ? 0 : Math.round(r.dano * defesa.fator), tick);
+    const antesDoEscudo = defesa.esquivou ? 0 : Math.round(r.dano * defesa.fator);
+    dano = absorverEscudo(alvo, antesDoEscudo, tick);
+    absorvidoEscudo = antesDoEscudo - dano;
     alvo.hp = Math.max(0, alvo.hp - dano);
     if (dano > 0) {
       registrarParticipacao(alvo, fonte.id, tick, ctx);
@@ -146,6 +149,9 @@ export function aplicarImpacto(
     habilidadeId: hab.id,
     chave: hab.chave,
     dano,
+    // Diagnóstico (18/10/2026): não altera dano nem RNG; separa excesso letal e escudo.
+    danoEfetivo: Math.min(hpAntes, dano),
+    absorvidoEscudo,
     cura,
     d20,
     mult,
