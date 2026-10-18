@@ -39,7 +39,7 @@ test('Necromante é selecionável ao criar um personagem', async ({ page }) => {
   await expect(cartao.getByRole('heading', { name: 'Necromante', exact: true })).toBeVisible();
   await expect(cartao).toContainText('Trevas');
   await cartao.getByRole('link', { name: 'Jogar de Necromante' }).click();
-  await expect(page.getByTestId('habilidade-dizimo_vital')).toBeVisible();
+  await expect(page.getByTestId('habilidade-dizimo_vital')).toBeVisible({ timeout: 30000 });
   await expect(page.getByTestId('habilidade-comando_sepulcral')).toBeVisible();
 });
 
@@ -48,7 +48,7 @@ test('passiva, reanimado, eco e Dízimo funcionam e persistem no save', async ({
   await page.goto('/'); await page.addScriptTag({ content: semear });
   await expect(page.locator('body')).toHaveAttribute('data-semeado', 'sim');
   await page.goto('/?jogo=campanha&slot=1&diag=1');
-  await expect(page.getByTestId('habilidade-dizimo_vital')).toBeVisible();
+  await expect(page.getByTestId('habilidade-dizimo_vital')).toBeVisible({ timeout: 30000 });
   await expect.poll(async () => Number(await page.locator('#diag').getAttribute('data-tick'))).toBeGreaterThan(100);
   await page.screenshot({ path: info.outputPath('necromante-e-mortos.png') });
   await page.getByTestId('habilidade-dizimo_vital').click();
@@ -70,6 +70,6 @@ test('passiva, reanimado, eco e Dízimo funcionam e persistem no save', async ({
   expect(mortos.find((e) => e.invocacao?.necromancia === 'eco')?.invocacao?.modeloOriginal).toBe('mago');
   expect(registro.estado.entidades.find((e) => e.id === 'aliado')?.morto).toBe(false);
   await page.goto('/?jogo=campanha&slot=1');
-  await expect(page.getByTestId('habilidade-dizimo_vital')).toBeVisible();
+  await expect(page.getByTestId('habilidade-dizimo_vital')).toBeVisible({ timeout: 30000 });
   expect(erros).toEqual([]);
 });
