@@ -30,11 +30,15 @@ function margem(a: AreaAmbiente, x: number, y: number): number[] {
 export function desenharAmbiente(g: Graphics, fase: Fase, x: number, y: number): void {
   const p = CELULA_PX;
   for (const a of fase.ambientes ?? []) {
-    if (!dentroDaArea(a, x, y)) continue;
+    // Inclui as células tocadas pela margem, mesmo quando o centro delas está fora do efeito.
+    // Assim a poça tem contorno contínuo e não revela uma cruz de blocos.
+    if ((x - a.x) ** 2 + (y - a.y) ** 2 > (a.raio + 1) ** 2) continue;
     const cor = CORES_AMBIENTE[a.tipo];
     const cx = (x + 0.5) * p, cy = (y + 0.5) * p;
     const borda = margem(a, x, y);
-    if (borda.length >= 6) g.poly(borda).fill({ color: cor, alpha: 0.28 });
+    if (borda.length < 6) continue;
+    g.poly(borda).fill({ color: cor, alpha: 0.28 });
+    if (!dentroDaArea(a, x, y)) continue;
     if (a.tipo === 'agua') {
       g.moveTo(cx - 9, cy - 3).quadraticCurveTo(cx - 2, cy - 6, cx + 7, cy - 3).stroke({ width: 1.5, color: 0x93d6df, alpha: 0.48 });
     } else if (a.tipo === 'brasas') {

@@ -24,7 +24,7 @@ Saves antigos continuam abrindo, com migração sem alteração do estado para o
 
 ## Variações ocasionais
 
-Nas novas profundezas, o evento **Enxame** tem chance de 12% por fase. Os inimigos adicionais ficam numa reserva de índices, sem entidade, IA ou sprite até entrarem em jogo. A cada segundo, entram até seis, longe da posição imediata dos jogadores, respeitando o teto de 40 entidades de IA vivas. O teto também vale para os respawns. A reserva persiste nas revisitas e nos saves.
+Nas novas profundezas, o evento **Enxame** tem chance de 12% por fase. Os inimigos adicionais ficam numa reserva de índices, sem entidade, IA ou sprite até entrarem em jogo. A cada segundo, entram até seis, longe da posição imediata dos jogadores; a entrada e os respawns param quando há 40 entidades de IA vivas. Invocações continuam respeitando seus próprios limites. A reserva persiste nas revisitas e nos saves.
 
 A cada sete profundezas, o mapa pode ter 84×56 células. A cada onze, aparece uma espiral com corredor de três células e paredes entre voltas, também em 84×56. As demais geradas continuam em 60×40, com salas e corredores em L. Enxame, tamanho e formato são independentes.
 
