@@ -3,6 +3,32 @@
 // dicionário principal (pt-BR.ts) por espalhamento, com as mesmas chaves tipadas.
 
 export const textosHabilidades = {
+  "efeito.sangrando": "Sangrando",
+  "efeito.aparando": "Em aparo",
+  "efeito.resposta_aparo": "Resposta de aparo",
+  "efeito.veu_noturno": "Véu noturno",
+  "efeito.purificar": "Purificação",
+  "efeito.passo_sombrio": "Passo sombrio",
+  "efeito.muralha_pedra": "Muralha de pedra",
+  "efeito.campo_cura": "Círculo de amparo",
+  "efeito.campo_veneno": "Névoa venenosa",
+  "desc.efeito.sangrando": "Sangramento: {valor} por segundo por {s} s",
+  "desc.efeito.aparando": "Reduz em {pct}% o próximo golpe físico direto durante {s} s e prepara resposta",
+  "desc.efeito.resposta_aparo": "Fortalece a próxima resposta física em {pct}%",
+  "desc.efeito.veu_noturno": "{pct}% de esquiva contra golpes físicos diretos por {s} s; atacar encerra o véu",
+  "desc.efeito.purificar": "Remove um efeito negativo removível",
+  "desc.efeito.passo_sombrio": "Desloca até {valor} células sem atravessar obstáculos",
+  "desc.efeito.muralha_pedra": "Ergue até três segmentos de pedra por {s} s sem fechar caminhos",
+  "desc.efeito.campo_cura": "Área de raio 1 que cura {valor} por pulso durante {s} s",
+  "desc.efeito.campo_veneno": "Névoa de raio 1 que reaplica veneno de {valor} por pulso durante {s} s",
+  "desc.bonus.tenacidadePct": "Reduz em {v}% a duração de controles (limite de 40%)",
+  "desc.bonus.fluxoEscudoPct": "Cura efetiva concede {v}% em escudo, até 8, uma vez a cada 2 s",
+  "desc.forma.celula": "Mira uma célula a até {alcance} células",
+  "combos.titulo": "Combos da sua build",
+  "combos.sequencia": "Sequência: {skills}",
+  "combos.preparado": "{nome}: etapa {etapa}/{total}. Próxima: {skill}",
+  "combos.nenhum": "Aprenda as habilidades de uma sequência para consultar seus combos aqui.",
+
   // Estados e efeitos novos do registro.
   'efeito.queimando': 'Queimando',
   'efeito.resfriado': 'Resfriado',
@@ -148,7 +174,7 @@ export const textosHabilidades = {
 
   // Classes e a escolha ao criar o personagem.
   'classe.aventureiro.descricao': 'Um pouco de tudo: golpe, magia e cura. Aprende de qualquer escola.',
-  'classe.guerreiro.descricao': 'Corpo a corpo e resistência. Golpes mais fortes de perto e paga menos vida nas técnicas de sangue.',
+  'classe.guerreiro.descricao': 'Corpo a corpo e resistência. Recupera 10% do dano efetivo do ataque básico como vida e paga menos vida nas técnicas de sangue.',
   'classe.mago.descricao': 'Magias de elemento: fogo, gelo e raio. Frágil, mas o dano mágico e elemental é maior.',
   'classe.arqueiro.descricao': 'Projéteis de longe, veneno e posicionamento. Mais alcance e dano com projéteis.',
   'escolhaClasse.titulo': 'Escolha a classe',

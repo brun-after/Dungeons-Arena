@@ -53,7 +53,7 @@ export interface OpcoesEfeitos {
 export class EfeitosDeHabilidade {
   private readonly conjurando = new Map<number, { atorId: string; chave: string; ateTick: number; ultimoMs: number }>();
   /** Ações de área esperando o lançamento: de onde saem e onde caem. */
-  private readonly areas = new Map<number, { chave: string; origem: PontoVisual; mira: PontoVisual; ateTick: number }>();
+  private readonly areas = new Map<number, { chave: string; origem: PontoVisual; mira: PontoVisual; raioCombo?: number; ateTick: number }>();
   private readonly ultimoRastro = new Map<number, number>();
   private readonly ultimaAura = new Map<string, number>();
   private ultimaPoeira = 0;
@@ -72,7 +72,7 @@ export class EfeitosDeHabilidade {
       const h = this.o.habilidades(ev.chave);
       const ator = pos(ev.atorId);
       if (h?.politicaImpacto === 'area' && ator) {
-        this.areas.set(ev.acaoId, { chave: ev.chave, origem: ator, mira: { x: ev.alvoX, y: ev.alvoY }, ateTick: ev.lancamentoTick });
+        this.areas.set(ev.acaoId, { chave: ev.chave, origem: ator, mira: { x: ev.alvoX, y: ev.alvoY }, ...(ev.raioCombo ? { raioCombo: ev.raioCombo } : {}), ateTick: ev.lancamentoTick });
       }
       if (!h || !visualDe(h).conjuracao) return;
       this.conjurando.set(ev.acaoId, { atorId: ev.atorId, chave: ev.chave, ateTick: ev.lancamentoTick, ultimoMs: 0 });
@@ -167,8 +167,9 @@ export class EfeitosDeHabilidade {
   }
 
   /** A explosão pela área: o impacto do visual e a onda no centro, e faíscas em até 6 células sorteadas. */
-  private explodirArea(a: { chave: string; origem: PontoVisual; mira: PontoVisual }): void {
-    const h = this.o.habilidades(a.chave);
+  private explodirArea(a: { chave: string; origem: PontoVisual; mira: PontoVisual; raioCombo?: number }): void {
+    const base = this.o.habilidades(a.chave);
+    const h = base && a.raioCombo ? { ...base, raioArea: a.raioCombo } : base;
     if (!h) return;
     const v = visualDe(h);
     const celulas = celulasDaForma(h, { x: Math.round(a.origem.x), y: Math.round(a.origem.y) }, a.mira, this.o.fase);

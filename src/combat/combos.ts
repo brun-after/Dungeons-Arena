@@ -42,6 +42,9 @@ export interface RegraDeBuff extends BonusDeLancamento {
 export interface Combo extends BonusDeLancamento {
   id: string;
   nome: string;
+  sequencia: string[];
+  condicoes: string[];
+  recompensa: string | null;
   antes: string;
   depois: string;
   janelaMs: number;
@@ -95,11 +98,16 @@ export function lerCombos(json: unknown): { combos: Map<string, Combo>; erros: s
     const o = l.objeto(bruto, 'combo');
     const id = l.texto(o, 'id');
     if (combos.has(id)) l.erro(`combo "${id}" repetido`);
+    const sequencia = o.sequencia === undefined ? [l.texto(o, 'antes'), l.texto(o, 'depois')] : l.listaDeTextos(o, 'sequencia');
+    if (sequencia.length < 2 || sequencia.length > 3 || new Set(sequencia).size !== sequencia.length) l.erro(`${id}: sequência exige duas ou três skills distintas`);
     combos.set(id, {
       id,
       nome: l.texto(o, 'nome'),
-      antes: l.texto(o, 'antes'),
-      depois: l.texto(o, 'depois'),
+      sequencia,
+      condicoes: o.condicoes === undefined ? [] : l.listaDeTextos(o, 'condicoes'),
+      recompensa: o.recompensa === undefined ? null : l.texto(o, 'recompensa'),
+      antes: o.antes === undefined ? sequencia[0] ?? '' : l.texto(o, 'antes'),
+      depois: o.depois === undefined ? sequencia.at(-1) ?? '' : l.texto(o, 'depois'),
       janelaMs: l.numero(o, 'janelaMs', { min: 200, max: 10_000 }),
       mesmoAlvo: o.mesmoAlvo === undefined ? true : l.booleano(o, 'mesmoAlvo'),
       texto: l.texto(o, 'texto'),
@@ -127,6 +135,7 @@ export function fazerCombo(
   alvo: Entidade | null,
   mira: Celula,
   saida: EventoSimulacao[],
+  reconhecerSequencia = true,
 ): EfeitoDoCombo | null {
   let total: EfeitoDoCombo | null = null;
   const somar = (b: BonusDeLancamento) => {
@@ -135,7 +144,7 @@ export function fazerCombo(
   };
   const u = ator.ultimaHabilidade;
   const combo = u ? [...ctx.conteudo.combos.values()].find((c) => c.antes === u.id && c.depois === hab.id) : undefined;
-  if (u && combo && estado.tick - u.tick <= ticksDe(combo.janelaMs) && !(combo.mesmoAlvo && alvo && u.alvoId && u.alvoId !== alvo.id)) {
+  if (reconhecerSequencia && u && combo && estado.tick - u.tick <= ticksDe(combo.janelaMs) && !(combo.mesmoAlvo && alvo && u.alvoId && u.alvoId !== alvo.id)) {
     somar(combo);
     saida.push({ t: 'comboFeito', tick: estado.tick, id: ator.id, combo: combo.id, alvoId: alvo?.id ?? null });
   }

@@ -1,3 +1,5 @@
+import { processarPantanos } from '../combat/sequencias';
+import { processarCampos } from '../combat/tatica';
 // `simular(dt)`: um tick da simulação (§2.2). Não toca DOM nem a camada gráfica e não sabe
 // se está em rede. Recebe o contexto (fase, conteúdo, modo e balanceamento) e os comandos do
 // tick, e grava eventos numa lista de saída.
@@ -53,6 +55,8 @@ export function simular(
   moverProjeteis(estado, ctx, saida, dtMs);
   processarAutoAtaque(estado, ctx, saida);
   processarEfeitos(estado, ctx, saida);
+  processarCampos(estado, ctx, saida);
+  processarPantanos(estado, ctx, saida);
   regenerarRecursos(estado, ctx);
   processarInteracoes(estado, ctx, saida, (a, alvo) => { dispararArmadilhaEm(estado, ctx, a, alvo, saida); });
   // Marco 18 (D-068): a Sabedoria procura armadilhas; o estudo de habilidades anda com o jogo.

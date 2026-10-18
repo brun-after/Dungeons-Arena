@@ -1,95 +1,1114 @@
 {
-  "versao": 1,
+  "versao": 2,
   "combos": [
     {
       "id": "moedor",
       "nome": "Moedor",
-      "antes": "corrente",
-      "depois": "redemoinho",
       "janelaMs": 1500,
       "mesmoAlvo": false,
       "texto": "Corrente e depois Redemoinho: +40% de dano e atordoa quem está perto por 0,5 s.",
       "danoPct": 40,
-      "emVolta": { "raio": 1, "efeitos": [{ "tipo": "atordoar", "duracaoMs": 500 }] }
+      "emVolta": {
+        "raio": 1,
+        "efeitos": [
+          {
+            "tipo": "atordoar",
+            "duracaoMs": 500
+          }
+        ]
+      },
+      "sequencia": [
+        "corrente",
+        "redemoinho"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#a9b4c6",
+        "formas": [
+          "espiral",
+          "laminas"
+        ],
+        "movimento": "girar",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "ator"
+        ]
+      }
     },
     {
       "id": "estandarte",
       "nome": "Carga do estandarte",
-      "antes": "investida",
-      "depois": "grito_de_guerra",
       "janelaMs": 2000,
       "mesmoAlvo": false,
-      "texto": "Investida e depois Grito de guerra: +30% de dano e os hostis a até 3 células ficam sem golpes físicos por 0,8 s.",
-      "danoPct": 30,
-      "emVolta": { "raio": 3, "efeitos": [{ "tipo": "sem_ataque", "duracaoMs": 800 }] }
+      "texto": "Após deslocar com Investida, Grito de guerra suprime ataques físicos próximos e dá +30% de dano por 4 s.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 3,
+        "efeitos": [
+          {
+            "tipo": "sem_ataque",
+            "duracaoMs": 800
+          }
+        ]
+      },
+      "sequencia": [
+        "investida",
+        "grito_de_guerra"
+      ],
+      "condicoes": [
+        "deslocou"
+      ],
+      "noProprio": [
+        {
+          "tipo": "bonus_dano",
+          "duracaoMs": 4000,
+          "pct": 30
+        }
+      ],
+      "visual": {
+        "cor": "#e4bb72",
+        "formas": [
+          "estandarte",
+          "onda"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "ator"
+        ]
+      }
     },
     {
       "id": "chuva_acida",
       "nome": "Chuva ácida",
-      "antes": "flecha_venenosa",
-      "depois": "chuva_de_flechas",
       "janelaMs": 2500,
       "mesmoAlvo": false,
       "texto": "Flecha venenosa e depois Chuva de flechas: a área mirada fica envenenada.",
       "danoPct": 15,
-      "naMira": { "raio": 1, "efeitos": [{ "tipo": "envenenado", "duracaoMs": 5000, "valor": 2, "pct": 50 }] }
+      "naMira": {
+        "raio": 1,
+        "efeitos": [
+          {
+            "tipo": "envenenado",
+            "duracaoMs": 5000,
+            "valor": 2,
+            "pct": 50
+          }
+        ]
+      },
+      "sequencia": [
+        "flecha_venenosa",
+        "chuva_de_flechas"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#7bcf77",
+        "formas": [
+          "flechas",
+          "gotas"
+        ],
+        "movimento": "cair",
+        "duracaoMs": 800,
+        "destinos": [
+          "mira",
+          "mira"
+        ]
+      }
     },
     {
       "id": "condutor",
       "nome": "Condutor congelado",
-      "antes": "lanca_de_gelo",
-      "depois": "raio_em_cadeia",
       "janelaMs": 2000,
       "mesmoAlvo": false,
       "texto": "Lança de gelo e depois Raio em cadeia: +30% de dano e o alvo fica eletrizado (o raio salta mais).",
       "danoPct": 30,
       "noAlvo": [
-        { "tipo": "eletrizado", "duracaoMs": 2500 }
-      ]
+        {
+          "tipo": "eletrizado",
+          "duracaoMs": 2500
+        }
+      ],
+      "sequencia": [
+        "lanca_de_gelo",
+        "raio_em_cadeia"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#8acbff",
+        "formas": [
+          "cristais",
+          "raios"
+        ],
+        "movimento": "pulsar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
     },
     {
       "id": "emboscada",
       "nome": "Emboscada",
-      "antes": "troca_sombria",
-      "depois": "golpe_atordoante",
       "janelaMs": 2000,
       "texto": "Troca sombria e depois Golpe atordoante: o d20 vira 20 (crítico garantido).",
-      "d20Minimo": 20
+      "d20Minimo": 20,
+      "sequencia": [
+        "troca_sombria",
+        "golpe_atordoante"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#c0a1f0",
+        "formas": [
+          "silhuetas",
+          "corte"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
     },
     {
       "id": "escudo_de_geada",
       "nome": "Escudo de geada",
-      "antes": "barreira",
-      "depois": "nova_glacial",
       "janelaMs": 3000,
       "mesmoAlvo": false,
       "texto": "Barreira e depois Nova glacial: +25% de dano e os hostis a até 2 células ficam resfriados.",
       "danoPct": 25,
-      "emVolta": { "raio": 2, "efeitos": [{ "tipo": "resfriado", "duracaoMs": 3000, "pct": 30 }] }
+      "emVolta": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "resfriado",
+            "duracaoMs": 3000,
+            "pct": 30
+          }
+        ]
+      },
+      "sequencia": [
+        "barreira",
+        "nova_glacial"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#a9e4ff",
+        "formas": [
+          "hexagonos",
+          "coroa"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "ator"
+        ]
+      }
     },
     {
       "id": "colapso",
       "nome": "Colapso",
-      "antes": "mente_partida",
-      "depois": "explosao",
       "janelaMs": 2500,
       "mesmoAlvo": false,
       "texto": "Mente partida e depois Explosão: +35% de dano e a área mirada fica exposta.",
       "danoPct": 35,
-      "naMira": { "raio": 1, "efeitos": [{ "tipo": "exposto", "duracaoMs": 3000, "pct": 20 }] }
+      "naMira": {
+        "raio": 1,
+        "efeitos": [
+          {
+            "tipo": "exposto",
+            "duracaoMs": 3000,
+            "pct": 20
+          }
+        ]
+      },
+      "sequencia": [
+        "mente_partida",
+        "explosao"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#cf86f3",
+        "formas": [
+          "orbita",
+          "fissuras"
+        ],
+        "movimento": "contrair",
+        "duracaoMs": 800,
+        "destinos": [
+          "mira",
+          "mira"
+        ]
+      }
     },
     {
       "id": "saraivada",
       "nome": "Saraivada",
-      "antes": "tiro_em_leque",
-      "depois": "flecha_perfurante",
       "janelaMs": 2000,
       "mesmoAlvo": false,
       "texto": "Tiro em leque e depois Flecha perfurante: +40% de dano e o alvo fica exposto.",
       "danoPct": 40,
       "noAlvo": [
-        { "tipo": "exposto", "duracaoMs": 3000, "pct": 20 }
-      ]
+        {
+          "tipo": "exposto",
+          "duracaoMs": 3000,
+          "pct": 20
+        }
+      ],
+      "sequencia": [
+        "tiro_em_leque",
+        "flecha_perfurante"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#e0c28a",
+        "formas": [
+          "leque",
+          "prisma"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 800,
+        "destinos": [
+          "origem",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "contra_ataque_ferro",
+      "nome": "Contra-ataque de ferro",
+      "sequencia": [
+        "escudo_de_ferro",
+        "golpe_atordoante"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "escudo"
+      ],
+      "danoPct": 25,
+      "texto": "Acertar com o escudo ativo reforça a proteção em 6 e fortalece o golpe.",
+      "recompensa": "reforcar_escudo",
+      "visual": {
+        "cor": "#b6cee0",
+        "formas": [
+          "lascas",
+          "escudo"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "ariete_flamejante",
+      "nome": "Aríete flamejante",
+      "sequencia": [
+        "investida",
+        "golpe_flamejante"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "mesmo_alvo",
+        "deslocou"
+      ],
+      "danoPct": 20,
+      "texto": "Acertar o mesmo alvo após avançar prolonga a queimadura em 2 s.",
+      "recompensa": "queima_longa",
+      "visual": {
+        "cor": "#ff9b4f",
+        "formas": [
+          "chifres",
+          "chamas"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 800,
+        "destinos": [
+          "origem",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "fornalha",
+      "nome": "Fornalha",
+      "sequencia": [
+        "corrente",
+        "bola_de_fogo"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "puxou"
+      ],
+      "danoPct": 0,
+      "texto": "Acertar o inimigo puxado espalha queimadura curta a até 1 célula.",
+      "recompensa": "queima_area",
+      "visual": {
+        "cor": "#ed784a",
+        "formas": [
+          "elos",
+          "fornalha"
+        ],
+        "movimento": "contrair",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "ruptura",
+      "nome": "Ruptura",
+      "sequencia": [
+        "golpe_atordoante",
+        "flecha_perfurante"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "mesmo_alvo",
+        "atordoado"
+      ],
+      "danoPct": 25,
+      "texto": "A flecha fortalece o acerto no mesmo alvo ainda atordoado.",
+      "visual": {
+        "cor": "#f0d6b1",
+        "formas": [
+          "fissuras",
+          "flecha"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "retirada_glacial",
+      "nome": "Retirada glacial",
+      "sequencia": [
+        "nova_glacial",
+        "troca_sombria"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "trocou"
+      ],
+      "danoPct": 0,
+      "texto": "Após a nova atingir inimigos, concluir a troca concede escudo de 8 por 3 s.",
+      "recompensa": "escudo_curto",
+      "visual": {
+        "cor": "#a9dafa",
+        "formas": [
+          "casulo",
+          "fumaca"
+        ],
+        "movimento": "pulsar",
+        "duracaoMs": 800,
+        "destinos": [
+          "origem",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "refugio_restaurador",
+      "nome": "Refúgio restaurador",
+      "sequencia": [
+        "barreira",
+        "curar"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "mesmo_alvo",
+        "escudo",
+        "curou"
+      ],
+      "danoPct": 0,
+      "texto": "Curar efetivamente o mesmo destinatário protegido concede escudo de 6 por 3 s.",
+      "recompensa": "escudo_alvo",
+      "visual": {
+        "cor": "#8bdfb4",
+        "formas": [
+          "escudo",
+          "costura"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "disparo_encantado",
+      "nome": "Disparo encantado",
+      "sequencia": [
+        "seta_arcana",
+        "flecha_perfurante"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "mesmo_alvo"
+      ],
+      "danoPct": 20,
+      "texto": "Acertar as duas habilidades no mesmo alvo fortalece a flecha.",
+      "visual": {
+        "cor": "#bf9fff",
+        "formas": [
+          "runas",
+          "flecha"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 800,
+        "destinos": [
+          "origem",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "convergencia_astral",
+      "nome": "Convergência astral",
+      "sequencia": [
+        "mente_partida",
+        "chuva_de_estrelas"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "mesmo_alvo"
+      ],
+      "danoPct": 0,
+      "texto": "Acertar o mesmo alvo prolonga sua exposição em 2 s, sem ampliar silêncio.",
+      "recompensa": "exposicao",
+      "visual": {
+        "cor": "#e2b5ff",
+        "formas": [
+          "constelacao",
+          "anel"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "pantano_aprisionante",
+      "nome": "Pântano aprisionante",
+      "sequencia": [
+        "estaca_de_pedra",
+        "nevoa_venenosa"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "enraizou",
+        "nevoa_alvo"
+      ],
+      "danoPct": 0,
+      "texto": "A névoa sobre o alvo enraizado aplica lentidão apenas enquanto ocupada.",
+      "recompensa": "pantano",
+      "visual": {
+        "cor": "#90b56b",
+        "formas": [
+          "raizes",
+          "bolhas"
+        ],
+        "movimento": "pulsar",
+        "duracaoMs": 800,
+        "destinos": [
+          "mira",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "cerco_de_pedra",
+      "nome": "Cerco de pedra",
+      "sequencia": [
+        "muralha_de_pedra",
+        "onda_de_repulsao"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "muralha",
+        "colidiu"
+      ],
+      "danoPct": 0,
+      "texto": "Colidir contra a muralha causa dano de colisão e atordoa brevemente.",
+      "recompensa": "colisao",
+      "visual": {
+        "cor": "#c5a781",
+        "formas": [
+          "muralha",
+          "pressao"
+        ],
+        "movimento": "contrair",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "epicentro",
+      "nome": "Epicentro",
+      "sequencia": [
+        "investida",
+        "abalo_sismico"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "deslocou"
+      ],
+      "danoPct": 0,
+      "texto": "Após deslocar com Investida, o abalo ganha 1 célula de raio.",
+      "recompensa": "area_maior",
+      "visual": {
+        "cor": "#d8ae78",
+        "formas": [
+          "fissuras",
+          "aneis"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "emboscada_noturna",
+      "nome": "Emboscada noturna",
+      "sequencia": [
+        "passo_sombrio",
+        "punhal_das_sombras"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "deslocou"
+      ],
+      "danoPct": 20,
+      "texto": "Acertar após o passo prolonga a Marca em 2 s e fortalece o punhal.",
+      "recompensa": "marca_longa",
+      "visual": {
+        "cor": "#a98bd2",
+        "formas": [
+          "silhuetas",
+          "punhal"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 800,
+        "destinos": [
+          "origem",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "retorno_sombras",
+      "nome": "Retorno das sombras",
+      "sequencia": [
+        "veu_da_noite",
+        "corte_dilacerante"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "esquivou"
+      ],
+      "danoPct": 0,
+      "texto": "Após esquivar durante o véu, o corte prolonga seu sangramento em 2 s.",
+      "recompensa": "sangramento_longo",
+      "visual": {
+        "cor": "#c68caa",
+        "formas": [
+          "fumaca",
+          "corte"
+        ],
+        "movimento": "girar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "resposta_dilacerante",
+      "nome": "Resposta dilacerante",
+      "sequencia": [
+        "postura_de_aparo",
+        "corte_dilacerante"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "aparou"
+      ],
+      "danoPct": 0,
+      "texto": "Aparar o atacante prepara sangramento +1 por pulso, substituindo a resposta normal do aparo.",
+      "recompensa": "sangramento_forte",
+      "visual": {
+        "cor": "#e8a0a3",
+        "formas": [
+          "faiscas",
+          "serrilha"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 800,
+        "destinos": [
+          "origem",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "santuario_purificado",
+      "nome": "Santuário purificado",
+      "sequencia": [
+        "circulo_de_amparo",
+        "purificacao"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "purificou",
+        "no_circulo"
+      ],
+      "danoPct": 0,
+      "texto": "Remover um efeito no próprio círculo concede escudo de 5 aos aliados nele.",
+      "recompensa": "escudo_grupo",
+      "visual": {
+        "cor": "#b5f3db",
+        "formas": [
+          "gotas",
+          "domo"
+        ],
+        "movimento": "subir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "veredito_radiante",
+      "nome": "Veredito radiante",
+      "sequencia": [
+        "lanca_radiante",
+        "flecha_perfurante"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "mesmo_alvo",
+        "consagrado"
+      ],
+      "danoPct": 20,
+      "texto": "Acertar o mesmo alvo ainda consagrado prolonga o estado em 2 s.",
+      "recompensa": "consagracao_longa",
+      "visual": {
+        "cor": "#f5dea0",
+        "formas": [
+          "selo",
+          "flecha"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "disseminacao_toxica",
+      "nome": "Disseminação tóxica",
+      "sequencia": [
+        "dardo_toxico",
+        "tiro_em_leque"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "envenenou"
+      ],
+      "danoPct": 0,
+      "texto": "O leque espalha veneno fraco por 2 s sem substituir um veneno mais forte.",
+      "recompensa": "veneno_curto",
+      "visual": {
+        "cor": "#77d498",
+        "formas": [
+          "gota",
+          "leque"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "prisao_pestilenta",
+      "nome": "Prisão pestilenta",
+      "sequencia": [
+        "estaca_de_pedra",
+        "nevoa_venenosa",
+        "abalo_sismico"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "enraizou",
+        "alvo_na_nevoa"
+      ],
+      "danoPct": 0,
+      "texto": "O abalo espalha veneno curto e prolonga lentidão a partir do alvo preparado ainda na névoa.",
+      "recompensa": "peste",
+      "visual": {
+        "cor": "#a8bd65",
+        "formas": [
+          "jaula",
+          "esporos"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 1100,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "execucao_eclipse",
+      "nome": "Execução do eclipse",
+      "sequencia": [
+        "passo_sombrio",
+        "punhal_das_sombras",
+        "lanca_radiante"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "deslocou",
+        "mesmo_alvo",
+        "eclipse"
+      ],
+      "danoPct": 0,
+      "texto": "Confirmar Eclipse após o passo e o punhal concede escudo de 8, sem multiplicar a reação.",
+      "recompensa": "escudo_curto",
+      "visual": {
+        "cor": "#e5c98c",
+        "formas": [
+          "eclipse",
+          "escudo"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 1100,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "fortaleza_viva",
+      "nome": "Fortaleza viva",
+      "sequencia": [
+        "muralha_de_pedra",
+        "circulo_de_amparo",
+        "purificacao"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "muralha",
+        "purificou",
+        "no_circulo",
+        "circulo_muralha"
+      ],
+      "danoPct": 0,
+      "texto": "Purificar dentro do círculo junto da muralha concede escudo coletivo uma vez.",
+      "recompensa": "escudo_grupo",
+      "visual": {
+        "cor": "#8cddb2",
+        "formas": [
+          "muralha",
+          "domo"
+        ],
+        "movimento": "subir",
+        "duracaoMs": 1100,
+        "destinos": [
+          "mira",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "danca_duelista",
+      "nome": "Dança do duelista",
+      "sequencia": [
+        "postura_de_aparo",
+        "corte_dilacerante",
+        "investida"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "aparou",
+        "mesmo_alvo",
+        "sangrando"
+      ],
+      "danoPct": 0,
+      "texto": "Após aparar e cortar o atacante, a investida consome o sangramento para dano limitado.",
+      "recompensa": "consumir_sangramento",
+      "visual": {
+        "cor": "#e8aaa7",
+        "formas": [
+          "triangulo",
+          "serrilha"
+        ],
+        "movimento": "girar",
+        "duracaoMs": 1100,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "forja_guerra",
+      "nome": "Forja de guerra",
+      "sequencia": [
+        "escudo_de_ferro",
+        "corrente",
+        "golpe_flamejante"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "escudo",
+        "puxou"
+      ],
+      "danoPct": 0,
+      "texto": "Acertar o alvo puxado reforça o escudo e espalha queimadura curta.",
+      "recompensa": "forja",
+      "visual": {
+        "cor": "#f3a35e",
+        "formas": [
+          "elos",
+          "escudo"
+        ],
+        "movimento": "pulsar",
+        "duracaoMs": 1100,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "tempestade_confinada",
+      "nome": "Tempestade confinada",
+      "sequencia": [
+        "muralha_de_pedra",
+        "onda_de_repulsao",
+        "raio_em_cadeia"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "muralha",
+        "colidiu_anterior",
+        "mesmo_alvo"
+      ],
+      "danoPct": 0,
+      "texto": "Acertar o alvo que colidiu permite um salto elétrico adicional sem repetir alvos.",
+      "recompensa": "salto_extra",
+      "visual": {
+        "cor": "#f3d98c",
+        "formas": [
+          "muralha",
+          "raios"
+        ],
+        "movimento": "pulsar",
+        "duracaoMs": 1100,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "cacada_implacavel",
+      "nome": "Caçada implacável",
+      "sequencia": [
+        "dardo_toxico",
+        "tiro_em_leque",
+        "flecha_perfurante"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "mesmo_alvo",
+        "envenenado"
+      ],
+      "danoPct": 0,
+      "texto": "Três acertos no mesmo alvo consomem seu veneno para dano adicional limitado.",
+      "recompensa": "consumir_veneno",
+      "visual": {
+        "cor": "#9bda86",
+        "formas": [
+          "filamentos",
+          "prisma"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 1100,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "inverno_marcha",
+      "nome": "Inverno em marcha",
+      "sequencia": [
+        "barreira",
+        "nova_glacial",
+        "investida"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "escudo"
+      ],
+      "danoPct": 0,
+      "texto": "Com a barreira ativa e a nova confirmada, a investida deixa rastro de lentidão sem dano periódico.",
+      "recompensa": "rastro_gelo",
+      "visual": {
+        "cor": "#a4deeb",
+        "formas": [
+          "proa",
+          "cristais"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 1100,
+        "destinos": [
+          "ator",
+          "origem"
+        ]
+      }
+    },
+    {
+      "id": "convergencia_arcana",
+      "nome": "Convergência arcana",
+      "sequencia": [
+        "seta_arcana",
+        "mente_partida",
+        "explosao"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "mesmo_alvo"
+      ],
+      "danoPct": 0,
+      "texto": "Dois acertos no mesmo alvo preparam uma explosão com 1 célula adicional de raio.",
+      "recompensa": "area_maior",
+      "visual": {
+        "cor": "#cbb4ff",
+        "formas": [
+          "tres_aneis",
+          "runas"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 1100,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "resgate_sombras",
+      "nome": "Resgate entre sombras",
+      "sequencia": [
+        "veu_da_noite",
+        "passo_sombrio",
+        "curar"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "esquivou",
+        "deslocou",
+        "outro_aliado",
+        "curou"
+      ],
+      "danoPct": 0,
+      "texto": "Após esquivar e deslocar, curar efetivamente outro aliado concede escudo de 6.",
+      "recompensa": "escudo_alvo",
+      "visual": {
+        "cor": "#c8d7ed",
+        "formas": [
+          "fio",
+          "abrigo"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 1100,
+        "destinos": [
+          "origem",
+          "alvo"
+        ]
+      }
     }
-  ]
+  ],
+  "recompensas": {
+    "reforcarEscudo": 6,
+    "escudoCurto": 8,
+    "escudoAlvo": 6,
+    "escudoGrupo": 5,
+    "escudoDuracaoMs": 3000,
+    "prolongarMs": 2000,
+    "sangramentoExtra": 1,
+    "raioArea": 1,
+    "venenoValor": 1,
+    "venenoDuracaoMs": 2000,
+    "queimaValor": 2,
+    "queimaDuracaoMs": 2000,
+    "lentidaoPct": 25,
+    "lentidaoMs": 1100,
+    "rastroMs": 3000
+  }
 }

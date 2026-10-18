@@ -1,3 +1,4 @@
+import { novaMemoria } from '../combat/estado-tatico';
 // Mortes, XP, revivescência e respawn (§2.7 "Morte", §2.12) — etapa 8 do tick.
 // HP 0 é morte direta. Entidades de IA saem do mundo e voltam pelo respawn agendado, com o mesmo
 // id e a geração incrementada; jogadores reaparecem pelas regras do modo (§2.13).
@@ -86,6 +87,7 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
       null,
     );
     e.morto = true;
+    if (e.tatica) e.tatica = novaMemoria();
     zerarMovimento(e);
     // Baú ou loja abertos se fecham: libera o congelamento e arma a recarga da loja (§2.12).
     encerrarInteracao(estado, ctx, e, saida);

@@ -80,6 +80,13 @@ describe('andar enquanto conjura (mobilidade por habilidade)', () => {
     expect(poderDaHabilidade({ ...base, mobilidade: 'livre' }, r)).toBeCloseTo(poderDaHabilidade(base, r) * 1.15, 9);
     expect(poderDaHabilidade({ ...base, mobilidade: 'lenta' }, r)).toBeCloseTo(poderDaHabilidade(base, r) * 1.07, 9);
   });
+
+  it('Investida permite andar normalmente durante os 350 ms de preparação', () => {
+    expect(hab('investida').mobilidade).toBe('livre');
+    const semAcao = andouConjurando('guerreiro', null, 15);
+    expect(andouConjurando('guerreiro', 'investida', 15)).toBeCloseTo(semAcao, 6);
+    expect(semAcao).toBeGreaterThan(0);
+  });
 });
 
 describe('atenção do inimigo: tempo mínimo na zona', () => {

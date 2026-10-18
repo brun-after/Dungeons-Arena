@@ -1,3 +1,5 @@
+import { clonarEntidade } from '../entities/entidade';
+import { prepararSequencia, participaDeCombo } from './sequencias';
 // O ciclo de uma ação (§2.7): intenção -> validação -> conjuração -> viagem -> impacto.
 // Custo e recarga são pagos no início da conjuração. Durante a conjuração a ação fica telegrafada
 // (ticks publicados no evento `acaoIniciada`) e pode ser interrompida sem devolver o custo.
@@ -214,6 +216,10 @@ export function iniciarAcao(
     lancamentoTick,
     impactoPrevistoTick: lancamentoTick + viagem,
   };
+  if (hab.id !== ator.ataqueBasico && participaDeCombo(ctx, ator, hab.id)) {
+    const previa = prepararSequencia(estado, ctx, clonarEntidade(ator), hab, ator.acao.acaoId, alvo, mira);
+    if (previa.raioArea !== hab.raioArea) ator.acao.raioCombo = previa.raioArea;
+  }
   saida.push({ t: 'acaoIniciada', tick: estado.tick, atorId: ator.id, ...ator.acao });
   return true;
 }
@@ -277,15 +283,17 @@ function lancar(
   estado: EstadoJogo,
   ctx: ContextoSimulacao,
   ator: Entidade,
-  hab: Habilidade,
+  habilidadeBase: Habilidade,
   acaoId: number,
   mira: Celula,
   alvo: Entidade | null,
   saida: EventoSimulacao[],
 ): void {
+  const hab = prepararSequencia(estado, ctx, ator, habilidadeBase, acaoId, alvo, mira);
+  if (hab.formulaDano) ator.efeitos = ator.efeitos.filter((f) => f.tipo !== 'veu_noturno');
   // Marco 18 (D-068, D-069): o combo (a habilidade anterior em até a janela) fortalece esta; os ganchos "ao usar"
   // disparam; e esta vira a última.
-  const fonte = comCombo(fonteDaHabilidade(ator, ctx, estado.tick, hab), fazerCombo(estado, ctx, ator, hab, alvo, mira, saida));
+  const fonte = comCombo(fonteDaHabilidade(ator, ctx, estado.tick, hab), fazerCombo(estado, ctx, ator, hab, alvo, mira, saida, false));
   dispararGanchosDe(estado, ctx, ator, 'aoUsarHabilidade', { outro: alvo, hab }, saida);
   ator.ultimaHabilidade = { id: hab.id, chave: hab.chave, tick: estado.tick, alvoId: alvo?.id ?? null };
   const basico = hab.id === ator.ataqueBasico ? bonusAtaqueBasico(ator, estado.tick) : null;

@@ -143,7 +143,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
     for (const { id } of classe.itensIniciais) if (!it.itens.has(id)) erros.push(`classe ${classe.id}: item inicial desconhecido "${id}"`);
   }
   for (const item of it.itens.values()) if (item.ensina !== null) conferir(`item ${item.id}`, [item.ensina]);
-  for (const combo of cb.combos.values()) conferir(`combo ${combo.id}`, [combo.antes, combo.depois]);
+  for (const combo of cb.combos.values()) conferir(`combo ${combo.id}`, combo.sequencia);
   for (const r of fj.receitas.values()) {
     for (const x of r.entrada) if (!it.itens.has(x.item)) erros.push(`forja ${r.id}: item desconhecido "${x.item}"`);
     if (r.saida.tipo === 'item' && !it.itens.has(r.saida.item)) erros.push(`forja ${r.id}: item desconhecido "${r.saida.item}"`);

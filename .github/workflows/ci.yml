@@ -51,6 +51,15 @@ jobs:
       - name: Servidor empacotado
         run: npm run build:server
 
+      - name: Galeria visual dos 35 combos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: galeria-combos
+          path: test-results/combos-visuais-*/combos-*.png
+          if-no-files-found: ignore
+          retention-days: 7
+
       - name: Relatório do Playwright em caso de falha
         if: failure()
         uses: actions/upload-artifact@v4

@@ -1,3 +1,6 @@
+import { faixaSuperior } from './aviso';
+import { IndicadorCombo } from './combos';
+import { CamadaCombosTaticos } from '../render/combos-taticos';
 // Apresentação do marco 12 (14/10/2026), D-056: junta numa peça só o que a cena ganhou — áudio, partículas,
 // presets de impacto, luz, minimapa, prompt de interação, pausa, configurações e guia —, aplica as
 // preferências (qualidade, escala da interface, movimento reduzido) e decide se o jogo está pausado.
@@ -81,13 +84,17 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   const impacto = new ControladorImpacto(() => prefs.efeitosDeTela && !reduzido() && qualidade().impacto);
   const efeitos = new EfeitosDeHabilidade({ particulas, impacto, habilidades: o.habilidades, idLocal, qualidade, fase: ctx.fase });
   efeitos.ligar(o.bus, o.estado, () => performance.now());
+  const combos = new CamadaCombosTaticos(palco.efeitos, () => camera.projecaoAtual, reduzido, () => qualidade().particulas === 0, 24, particulas);
+  combos.ligar(o.bus, o.estado, () => performance.now());
   const luz = new CamadaLuz(palco.luz);
   const flash = new Graphics();
   palco.tela.addChild(flash);
 
   const minimapa = criarMinimapa(ctx, idLocal, toque);
   const prompt = criarPrompt(ctx, idLocal, toque);
+  const indicadorCombo = new IndicadorCombo();
   o.ui.append(minimapa.elemento, prompt.elemento);
+  faixaSuperior(o.ui).append(indicadorCombo.elemento);
 
   let pausaAberta = false;
   const aplicarPreferencias = () => {
@@ -154,6 +161,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   return {
     particulas,
     encerrar: () => {
+      combos.destruir();
       motor.destruir();
       sistema.removeEventListener('change', aplicarPreferencias);
     },
@@ -172,10 +180,12 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
         }
       }
       const eu = estado.entidades.find((e) => e.id === idLocal);
+      indicadorCombo.atualizar(estado, ctx, eu);
       const pos = eu ? posicao(eu) : null;
       som.quadro(pos, agoraMs);
       camera.enquadrar(focoDoQuadro(estado, posicao), agoraMs);
       efeitos.quadro(estado, agoraMs, posicao);
+      combos.desenhar(estado, agoraMs);
       particulas.atualizar(Math.min(100, dtMs));
       luz.desenhar(pontosDeLuz(estado, posicao), agoraMs, qualidade().luz, reduzido());
       minimapa.atualizar(estado, agoraMs);

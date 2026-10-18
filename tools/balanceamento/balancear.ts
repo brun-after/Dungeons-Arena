@@ -197,11 +197,11 @@ if (args.includes('--registrar')) {
   const doc = [
     '# Balanceamento',
     '',
-    `**Versão:** 1.3 · **Data:** ${data}`,
+    `**Versão:** 1.4 · **Data:** ${data}`,
     '',
     '> Gerado por `npm run balancear -- --registrar` (tools/balanceamento, D-061). As metas ficam em',
     '> `src/data/balance.json → metas`; o teste `tests/sim/ritmo.test.ts` protege as principais. Os números que mudaram',
-    '> e o antes e depois das calibragens estão em docs/DECISOES.md (D-061, D-071, D-074, D-075 e D-076).',
+    '> e o antes e depois das calibragens estão em docs/DECISOES.md (D-061, D-071, D-074, D-075, D-076 e D-078).',
     '',
     `Sementes: ${SEMENTES.length} por cenário (${SEMENTES.join(', ')}). Balance versão ${BALANCE_PADRAO.versao}.`,
     '',

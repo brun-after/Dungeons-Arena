@@ -1,3 +1,4 @@
+import { catalogoCombos } from './combos';
 // Aba "Habilidades" da mochila (D-057, D-059). Marco 14 (14/10/2026). Só lê o estado e emite comandos.
 // - Pontos de habilidade (1 por nível) e as 4 teclas (pôr e tirar habilidades);
 // - as conhecidas, com o rank, o que fazem (descrição gerada) e "Subir rank" — nos ranks de evolução, os
@@ -89,7 +90,7 @@ export function desenharHabilidades(
     }
     teclas.append(li);
   }
-  corpo.append(teclas);
+  corpo.append(teclas, catalogoCombos(ctx, j));
   /** Os botões 1 2 3 4 de uma habilidade ativa conhecida: põe na tecla; na tecla em que já está, tira. */
   const botoesDeTecla = (id: string, nome: string): HTMLElement => {
     const grupo = el('div', 'teclas-da-carta');

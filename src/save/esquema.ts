@@ -10,7 +10,7 @@ import type { Dificuldade } from '../modos/dificuldade';
 import { MAX_REGRAS, RE_REGRA_ESTILO } from '../world/estilo';
 import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 15;
+export const VERSAO_SCHEMA = 16;
 export const SLOTS = [1, 2, 3] as const;
 export const FORMATO_EXPORTACAO = 'dungeons-arena/save';
 
@@ -343,6 +343,8 @@ export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   12: v12ParaV13,
   13: v13ParaV14,
   14: v14ParaV15,
+  // Marco 19 (17/10/2026): campos e memória tática são opcionais nos estados antigos.
+  15: (r) => r,
 };
 
 function temNaoFinito(v: unknown): boolean {

@@ -1,3 +1,4 @@
+import { muralhaEm } from './tatica';
 // Projéteis (§2.7, etapa 4): ação pendente da simulação. Seguem em linha reta a partir do
 // lançamento; colidem durante a viagem com o primeiro hostil (pela relação do lançador),
 // param em parede e expiram ao passar do ponto mirado. Continuam se o lançador morrer.
@@ -38,6 +39,7 @@ export function lancarProjetil(
   const dy = mira.y - origem.y;
   const distancia = Math.hypot(dx, dy);
   const p: Projetil = {
+    ...(hab.saltosExtrasCombo ? { saltosExtrasCombo: hab.saltosExtrasCombo } : {}),
     id: novoId(estado),
     acaoId,
     donoId: ator.id,
@@ -83,12 +85,13 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
     for (;;) {
       const cx = Math.round(p.x);
       const cy = Math.round(p.y);
-      if (!passavel(ctx.fase, cx, cy)) {
+      if (!passavel(ctx.fase, cx, cy) || muralhaEm(estado, cx, cy)) {
         fim = 'parede';
         break;
       }
       const alvo = alvoNaCelula(estado, ctx, p, cx, cy);
-      const hab = resolverHabilidade(ctx, p.chave);
+      const base = resolverHabilidade(ctx, p.chave);
+      const hab = base && p.saltosExtrasCombo ? { ...base, saltos: { quantidade: (base.saltos?.quantidade ?? 0) + p.saltosExtrasCombo, raio: base.saltos?.raio ?? 3, pct: base.saltos?.pct ?? 60 } } : base;
       if (alvo && hab) {
         const dono = buscarEntidade(estado, p.donoId);
         const fonte: FonteDeDano = {

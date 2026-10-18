@@ -1,3 +1,4 @@
+import type { MemoriaTatica } from '../combat/estado-tatico';
 // Entidade (§2.5). Só dados, para clonar, comparar no digest e gravar em checkpoint.
 // Marco 3: atributos, recursos, efeitos, ação em curso e dados de morte e respawn.
 // Marco 6 (13/10/2026): `bolsa` (base da ficha, equipamento e mochila) nos jogadores da campanha.
@@ -62,6 +63,7 @@ export interface DadosInvocacao {
 
 /** Ação em conjuração (§2.7, etapa 3). Ticks publicados para a telegrafia (§3.6). */
 export interface AcaoEmCurso {
+  raioCombo?: number;
   acaoId: number;
   habilidadeId: string;
   /** Marco 14: a chave compilada (rank, caminhos e modificadores do momento da conjuração). */
@@ -274,6 +276,7 @@ export interface Entidade {
   /** Marco 18: o último golpe com dano que a entidade levou (quem e com qual habilidade) — o "ao abater" lê. */
   ultimoGolpe: { fonteId: EntidadeId; chave: string } | null;
   /** Marco 18: a última habilidade que usou (combos e a Lâmina rúnica). */
+  tatica?: MemoriaTatica;
   ultimaHabilidade: { id: string; chave: string; tick: number; alvoId: EntidadeId | null } | null;
   /** Marco 18 (D-069): a fase em que o renascer do item já foi usado ('' = disponível). */
   renascerFase: string;
@@ -470,6 +473,7 @@ export function clonarEntidade(e: Entidade): Entidade {
     aparencia: e.aparencia ? { ...e.aparencia } : null,
     ressonancias: [...e.ressonancias],
     ultimoGolpe: e.ultimoGolpe ? { ...e.ultimoGolpe } : null,
+    ...(e.tatica ? { tatica: { ...e.tatica, aparou: e.tatica.aparou ? { ...e.tatica.aparou } : null, etapas: e.tatica.etapas.map((a) => ({ ...a, alvos: [...a.alvos], fatos: [...a.fatos], concluidos: [...a.concluidos] })) } } : {}),
     ultimaHabilidade: e.ultimaHabilidade ? { ...e.ultimaHabilidade } : null,
   };
 }

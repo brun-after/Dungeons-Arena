@@ -1,8 +1,10 @@
 # Decisões de projeto
 
-**Versão:** 0.40 · **Data:** 17/10/2026
+**Versão:** 0.42 · **Data:** 18/10/2026
 
 > **Histórico**
+> - **0.42 (18/10/2026)**: D-078 (Investida livre e sustentação do guerreiro pelo básico).
+> - **0.41 (17/10/2026)**: D-077 (17 skills, 35 combos confirmados por resultado, visuais e correção do smoke).
 > - **0.40 (17/10/2026)**: D-076 (controles afastados das skills, tomo a preço fixo e troca de equipamentos sem fechar a mochila).
 > - **0.39 (17/10/2026)**: D-075 (progressão até 30 e consumíveis de aprendizagem e evolução).
 > - **0.38 (17/10/2026)**: D-074 (eficiência mágica do aventureiro e do mago após a redução de mana; 77/77 metas).
@@ -2010,3 +2012,51 @@ atual até a skill, cobrar 10.000 ouro fixos pelo ponto de habilidade e manter o
 **Validação.** Testes de compra repetida e certificação; e2e de preço e troca de dois equipamentos,
 incluindo desequipar, em desktop e celular. O e2e de controles verifica o deslocamento e a ausência de
 sobreposição em paisagem e retrato.
+
+
+## D-077 — Skills táticas, combos duplos/triplos e fechamento de modais (17/10/2026)
+
+**Contexto.** A expansão aprovada exige 17 novas skills, 17 combos duplos adicionais e dez triplos, mais apresentação própria para os oito existentes. O reconhecedor anterior só olhava a skill anterior no lançamento, sem saber se acertou, aparou ou purificou. O smoke enviado também exigia que equipar fechasse a mochila e engolia falhas ao fechar a loja.
+
+**Decisão.** Catálogo de 60 skills e 35 combos. Memória limitada a três ações por personagem, com acertos e fatos correlacionados pelo ID da ação. O triplo válido tem prioridade na finalização, sem remover recompensas anteriores. Reações elementais existentes são preservadas. Conteúdo, limites e números ficam em dados. Livros e essências integram a progressão; Curar e Barreira aceitam aliado e uso próprio. Detalhes, lista completa e limites em [EXPANSAO-SKILLS-COMBOS.md](EXPANSAO-SKILLS-COMBOS.md).
+
+Campos de cura, veneno e muralha pertencem à simulação, com clone explícito e replicação por patches. O save passa a v16, aceitando estados antigos sem os campos opcionais. Morte e mudança de fase limpam preparação. A apresentação usa composições vetoriais identificáveis por forma e movimento, inclusive em qualidade mínima, sem alterar o estado de gameplay. O histórico só é mantido quando o repertório permite um combo, reduzindo custo em enxames.
+
+O modal informa o fechamento sincronamente, pois o evento nativo close chega depois e permitia à loja reabrir no quadro seguinte. Esc e fundo usam o mesmo caminho. O smoke de equipamento passa a exigir mochila aberta; o da loja exige clique efetivo, sem capturar e ignorar erro.
+
+**Validação.** Sequências completas dos 35 combos, recusas condicionais, campos, limites, passivas, clone e patches; galeria Pixi em navegador; fluxo de combo e descoberta persistida. Relatório exploratório de quatro builds em cinco níveis e quatro dificuldades, além das metas históricas. O CI completo continua obrigatório antes de merge.
+
+## D-078 · Investida em movimento e sustentação do guerreiro (v0.42, 18/10/2026)
+
+**Pedido.** Usar Investida sem parar o personagem e melhorar a sobrevivência do guerreiro,
+recuperando um pouco de vida com base no dano do ataque básico.
+
+**Decisão.** Investida usa mobilidade `livre`, mantendo a preparação visível de 350 ms (antes, 400 ms),
+o custo, a recarga e a interrupção. O avanço voluntário conserva a direção de movimento;
+se havia destino por clique/toque, recalcula o caminho a partir da nova posição. Parede,
+colisão e muralha continuam impedindo avanço, e deslocamentos forçados mantêm suas regras.
+
+O guerreiro recupera 10% do HP efetivamente retirado pelo ataque básico, após defesa,
+mitigação e escudo, limitado ao HP que o alvo tinha. O valor passa pelo dispatcher de cura,
+com arredondamento normal, redução por veneno e limite de vida máxima. Não há cura mínima
+garantida: golpes pequenos podem arredondar para zero. Falha, imunidade, absorção completa,
+aliados, skills, dano periódico e excesso letal não geram recuperação. Vale também no básico
+automático e na arena com personagem de campanha; fichas de sessão sem bolsa continuam
+sem os benefícios de classe da progressão. Cada alvo extra só conta o HP realmente retirado dele.
+
+A porcentagem fica em `balance.recursos.curaBasicoPorClassePct`, sem estado novo nem migração
+de save. Balance passa à versão 24, skills à versão 5. A descrição da classe informa o benefício.
+Os testes protegem cálculo efetivo, limites, veneno, exclusividade e continuidade de movimento.
+
+**Calibragem.** Com movimento livre e os 400 ms anteriores, o duelo espelhado do guerreiro
+passou a mediana de 14,3 s nas oito sementes; desligar a cura nesse cenário não mudou o
+resultado (a ficha de sessão não tem bolsa). A preparação de 350 ms levou a 9,6 s, mantendo
+as metas existentes de PvP (6–10 s), o custo e a recarga. As 77/77 metas passam sem alterar
+seus limites; o relatório BALANCEAMENTO.md v1.4 registra os resultados de balance v24.
+
+Uma sondagem adicional comparou cura desligada/10% com a mesma Investida de 350 ms: 80 lutas,
+níveis 5/10/20/25/30, quatro dificuldades e sementes 1000/8919, guerreiro típico contra orc
+do mesmo nível. O bot usava o básico e sua defesa normal (incluindo poções), sem skills da
+barra. No nível 5, a vida média restante passou de 62% para 70%; no 30, vitórias de 5/8 para
+6/8. Nos outros níveis, as vitórias ficaram iguais e a vida média restante aumentou.
+É uma amostra exploratória de uma configuração, não uma certificação de todas as builds.
