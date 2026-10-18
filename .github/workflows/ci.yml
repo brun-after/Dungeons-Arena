@@ -39,6 +39,21 @@ jobs:
       - name: Metas do simulador completo de balanceamento
         run: npm run balancear
 
+      - name: Diagnóstico completo de balanceamento (cinco classes e intervenções)
+        run: |
+          mkdir -p "$RUNNER_TEMP/balanceamento"
+          npm run balancear:diagnostico -- --registrar --json "$RUNNER_TEMP/balanceamento/amostras.json" > "$RUNNER_TEMP/balanceamento/relatorio.log"
+          cp docs/BALANCEAMENTO-DIAGNOSTICO.md "$RUNNER_TEMP/balanceamento/relatorio.md"
+
+      - name: Relatórios e amostras do balanceamento
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagnostico-balanceamento
+          path: ${{ runner.temp }}/balanceamento/
+          if-no-files-found: warn
+          retention-days: 7
+
       - name: Build
         run: npm run build
 

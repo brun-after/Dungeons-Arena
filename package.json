@@ -14,6 +14,8 @@
     "carga": "tsx tools/carga/carga.ts",
     "relatorios": "tsx tools/relatorios/resumo.ts",
     "balancear": "tsx tools/balanceamento/balancear.ts",
+    "balancear:diagnostico": "tsx tools/balanceamento/balancear.ts --diagnostico",
+    "balancear:completo": "npm run balancear && npm run balancear:diagnostico",
     "bench": "npm run build && tsx tools/bench/bench.ts",
     "build": "vite build",
     "preview": "vite preview",
@@ -22,7 +24,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "verificar": "npm run typecheck && npm run lint && npm test && npm run build",
+    "verificar": "npm run typecheck && npm run lint && npm test && npm run build && npm run balancear:completo",
     "build:server": "esbuild server/main.ts --bundle --platform=node --target=node24 --format=esm --packages=external --sourcemap --outfile=dist-server/main.mjs",
     "bench:fases": "tsx tools/bench/fases-vivas.ts"
   },
