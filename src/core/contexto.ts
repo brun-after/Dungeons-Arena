@@ -43,6 +43,8 @@ export interface Balance {
     fallback: number;
   };
   recursos: {
+    /** D-078 (17/10/2026): cura proporcional ao HP retirado pelo básico, por classe. */
+    curaBasicoPorClassePct: Record<string, number>;
     /** D-071 (17/10/2026): recuperação dos NPCs hostis e repouso dos chefes. */
     curaNpcAoAbaterPct: number;
     regenBossPorSegundoPct: number;

@@ -88,6 +88,7 @@ export function aplicarImpacto(
     fonte = { ...fonte, multDano: fonte.multDano * (1 + ctx.balance.tatica.respostaPct / 100) };
   }
   const tick = estado.tick;
+  const hpAntes = alvo.hp;
   let dano = 0;
   let cura = 0;
   let d20 = 0;
@@ -157,6 +158,11 @@ export function aplicarImpacto(
 
   // Efeitos dependentes de acerto não se aplicam na falha crítica nem com imunidade (§2.7, passo 7).
   if (falha || imune) return;
+  // D-078 (17/10/2026): só o básico recupera vida, sobre dano efetivo após defesa/escudo e sem excesso letal.
+  const curaBasicoPct = conjurador?.bolsa ? (ctx.balance.recursos.curaBasicoPorClassePct[conjurador.bolsa.classeId] ?? 0) : 0;
+  if (conjurador && vivo(conjurador) && conjurador !== alvo && hab.id === conjurador.ataqueBasico && dano > 0 && curaBasicoPct > 0 && podeFerir(conjurador, alvo, ctx.modo)) {
+    aplicarEfeito(estado, ctx, conjurador, construirEfeito('cura', { valor: Math.min(hpAntes, dano) * curaBasicoPct / 100 }), origem, null, saida);
+  }
   // Sinergias (marco 14): o estado consumido sai e os efeitos da sinergia entram, antes dos da habilidade.
   dispararSinergias(alvo, sinergias, (ef) => {
     aplicarEfeito(estado, ctx, alvo, comPotencia(ef, fonte.potencia), origem, mira, saida);

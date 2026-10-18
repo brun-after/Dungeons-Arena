@@ -1,5 +1,5 @@
 {
-  "versao": 4,
+  "versao": 5,
   "habilidades": [
     {
       "id": "ataque_basico",
@@ -634,6 +634,7 @@
     },
     {
       "id": "investida",
+      "mobilidade": "livre",
       "familiaEvolucao": "tecnica",
       "grau": "B",
       "nome": "Investida",
@@ -646,7 +647,7 @@
       "raioArea": 0,
       "custoRecurso": 3,
       "recargaMs": 7000,
-      "conjuracaoMs": 400,
+      "conjuracaoMs": 350,
       "politicaAlvo": "hostil",
       "politicaImpacto": "area",
       "interrupcao": "interrompivel",

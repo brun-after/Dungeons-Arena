@@ -174,7 +174,7 @@ export const textosHabilidades = {
 
   // Classes e a escolha ao criar o personagem.
   'classe.aventureiro.descricao': 'Um pouco de tudo: golpe, magia e cura. Aprende de qualquer escola.',
-  'classe.guerreiro.descricao': 'Corpo a corpo e resistência. Golpes mais fortes de perto e paga menos vida nas técnicas de sangue.',
+  'classe.guerreiro.descricao': 'Corpo a corpo e resistência. Recupera 10% do dano efetivo do ataque básico como vida e paga menos vida nas técnicas de sangue.',
   'classe.mago.descricao': 'Magias de elemento: fogo, gelo e raio. Frágil, mas o dano mágico e elemental é maior.',
   'classe.arqueiro.descricao': 'Projéteis de longe, veneno e posicionamento. Mais alcance e dano com projéteis.',
   'escolhaClasse.titulo': 'Escolha a classe',

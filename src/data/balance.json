@@ -1,5 +1,5 @@
 {
-  "versao": 23,
+  "versao": 24,
   "progressaoItens": { "tomoPrecoBase": 10000, "aceleracaoIncomumChancePct": 30, "aceleracaoRaraChancePct": 10, "essenciaChancePct": 2, "essenciaBossChancePct": 20 },
   "movimento": {
     "velocidadeBaseMs": 400,
@@ -32,6 +32,7 @@
     "fallback": 100
   },
   "recursos": {
+    "curaBasicoPorClassePct": { "guerreiro": 10 },
     "curaNpcAoAbaterPct": 50,
     "regenBossPorSegundoPct": 5,
     "regenBossEsperaMs": 5000,

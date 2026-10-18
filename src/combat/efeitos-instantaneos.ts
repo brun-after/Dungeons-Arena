@@ -11,6 +11,7 @@ import type { EstadoJogo } from '../core/estado';
 import type { Entidade } from '../entities/entidade';
 import { celulaLivrePara } from '../world/colisao';
 import { passavel } from '../world/fase';
+import { caminho } from '../world/navegacao';
 
 function livre(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, x: number, y: number): boolean {
   return !muralhaEm(estado, x, y) && passavel(ctx.fase, x, y) && celulaLivrePara(e, x, y, estado.entidades, ctx.balance.colisao);
@@ -49,8 +50,12 @@ export function teleportar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entida
 /** Avança em direção à célula mirada, sem passar dela. */
 export function avancar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, mira: Celula | null, celulas: number): boolean {
   if (!mira) return false;
+  // D-078 (17/10/2026): o avanço voluntário mantém a intenção de ir até o ponto clicado.
+  const destino = e.caminho.at(-1) ?? e.waypoints.at(-1) ?? (e.progressoPasso > 0 && e.direcao === 'parado' ? { x: e.destinoX, y: e.destinoY } : null);
   const distancia = Math.max(Math.abs(mira.x - e.x), Math.abs(mira.y - e.y));
-  return deslizar(estado, ctx, e, Math.sign(mira.x - e.x), Math.sign(mira.y - e.y), Math.min(celulas, distancia));
+  const andou = deslizar(estado, ctx, e, Math.sign(mira.x - e.x), Math.sign(mira.y - e.y), Math.min(celulas, distancia));
+  if (andou && destino) e.caminho = caminho(ctx.fase, e, destino, ctx.balance.navegacao.maxPassosToque).passos;
+  return andou;
 }
 
 /** Puxa em direção à origem, parando ao lado dela (marco 14). */
