@@ -5,7 +5,7 @@
 import type { Celula, Comando, ComandoEmpacotado, Dir8 } from '../core/comandos';
 import { FONTES_OFICIAIS } from '../core/conteudo';
 import { hash53, serializarCanonico } from '../core/digest';
-import type { EstadoJogo } from '../core/estado';
+import type { Armadilha, EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import type { Bolsa } from '../entities/entidade';
 import type { Certificado } from '../integridade/certificado';
@@ -63,7 +63,7 @@ export type MensagemServidor =
   | { t: 'pong'; id: number; enviadoMs: number; tickServidor: number }
   | { t: 'rejeitado'; seq: number | null; motivo: MotivoRejeicao }
   /** Marco 15 (cooperativo): só para a própria sessão — a bolsa (mochila, equipamento, ouro, pontos, habilidades). */
-  | { t: 'privado'; bolsa: Bolsa | null; anfitriao: boolean; anfitriaoId: string | null }
+  | { t: 'privado'; bolsa: Bolsa | null; anfitriao: boolean; anfitriaoId: string | null; armadilhas?: Armadilha[] }
   /** Marco 15 (cooperativo): o grupo chegou à saída; a sala montou a fase seguinte (época nova). */
   | { t: 'novaFase'; faseRef: RefFase; nome: string; epocaSala: number; tick: number; ackSeq: number; estado: EstadoJogo }
   /** Marco 15 (cooperativo): a saída da última fase não leva a lugar nenhum (só depois de uma aventura). */

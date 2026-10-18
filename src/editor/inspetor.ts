@@ -109,6 +109,7 @@ function camposDoObjeto(o: ModeloDeObjeto, conteudo: Conteudo, acoes: AcoesInspe
     .filter((d) => d.elegivelParaOrbe)
     .map((d) => [d.id, t(`efeito.${d.id}` as ChaveTexto)] as const);
   switch (o.tipo) {
+    case 'santuario': return [];
     case 'orbe_hp':
     case 'orbe_recurso':
     case 'orbe_efeito': {

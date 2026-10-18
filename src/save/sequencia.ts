@@ -13,6 +13,8 @@ export interface RegrasGeradas {
   nivelBase: number;
   largura: number;
   altura: number;
+  /** D-079 (17/10/2026): variações ocasionais, sem substituir o gerador comum. */
+  variacoes?: { grandeACada: number; espiralACada: number; largura: number; altura: number };
   /** Marco 18 (D-070): chance (%) de cada evento de fase (lua sangrenta, mercador errante, sala secreta). */
   eventos?: Readonly<Record<string, number>>;
 }
@@ -41,6 +43,9 @@ export function proximaFase(
   const anterior = ref.tipo === 'gerada' ? ref : null;
   const rng = criarRng(hashTexto(ref.id));
   const numero = (anterior?.numero ?? 0) + 1;
+  const v = g.variacoes;
+  const espiral = v !== undefined && numero % v.espiralACada === 0;
+  const grande = v !== undefined && (espiral || numero % v.grandeACada === 0);
   const id = `gerada-${numero}`;
   const salas = Math.min(g.salasMax, (anterior?.params.salas ?? g.salasBase) + inteiro(rng, 0, 3));
   // Marco 18 (D-070): eventos de fase, sorteados depois (as fases de antes continuam iguais).
@@ -58,8 +63,10 @@ export function proximaFase(
       salas,
       nivelInimigos: Math.min(nivelMax, anterior ? anterior.params.nivelInimigos + 1 : g.nivelBase),
       matizGraus: ((anterior?.params.matizGraus ?? 0) + 28) % 360,
-      largura: g.largura,
-      altura: g.altura,
+      largura: grande ? v.largura : g.largura,
+      altura: grande ? v.altura : g.altura,
+      ambientesVivos: true,
+      formato: espiral ? 'espiral' : 'salas',
       // Marco 11A: as regras de estilo do aparelho (opcional), guardadas para a fase sair igual ao reabrir.
       ...(estilo.length > 0 && { estilo: [...estilo] }),
       ...(eventos.length > 0 && { eventos }),

@@ -19,6 +19,7 @@ import type { Celula } from '../core/comandos';
 import type { Conteudo } from '../core/conteudo';
 import { BALANCE_PADRAO, type Balance } from '../core/contexto';
 import { aleatorio, criarRng, escolher, hashTexto, inteiro, proximoU32, type EstadoRng } from '../core/rng';
+import { enriquecerFase, salasEmEspiral } from './geracao-viva';
 import { aplicarEstilo } from './estilo';
 import type { FaseJson, InimigoPosicionado, ObjetoPosicionadoJson, PortaInterna } from './fase';
 
@@ -35,6 +36,8 @@ export interface ParametrosGeracao {
   estilo?: string[];
   /** Marco 18 (D-070): eventos da fase (lua sangrenta, mercador errante, sala secreta). */
   eventos?: string[];
+  ambientesVivos?: boolean;
+  formato?: 'salas' | 'espiral';
 }
 
 /** O que o gerador precisa do catálogo: presets comuns e de chefe, e o estoque da loja. */
@@ -125,10 +128,10 @@ export function gerarFase(p: ParametrosGeracao, catalogo: CatalogoGeracao): Fase
     if (linha && x > 0 && y > 0 && x < largura - 1 && y < altura - 1) linha[x] = '.';
   };
 
-  const salas = posicionarSalas(rng, Math.max(1, p.salas), largura, altura);
+  const salas = p.formato === 'espiral' ? salasEmEspiral(largura, altura, p.salas, cavar) : posicionarSalas(rng, Math.max(1, p.salas), largura, altura);
   for (const s of salas) for (let y = s.y; y < s.y + s.a; y++) for (let x = s.x; x < s.x + s.l; x++) cavar(x, y);
   // Corredores em L: horizontal e vertical, em ordem sorteada.
-  for (let i = 1; i < salas.length; i++) {
+  for (let i = 1; p.formato !== 'espiral' && i < salas.length; i++) {
     const de = centro(salas[i - 1] as Sala);
     const para = centro(salas[i] as Sala);
     const horizontalPrimeiro = inteiro(rng, 0, 1) === 0;
@@ -216,6 +219,7 @@ export function gerarFase(p: ParametrosGeracao, catalogo: CatalogoGeracao): Fase
     matizGraus: p.matizGraus,
   };
   aplicarEventos(json, p, catalogo, salas, livre, ocupar);
+  if (p.ambientesVivos) enriquecerFase(json, p, catalogo, salas, livre, ocupar);
   return p.estilo && p.estilo.length > 0 ? aplicarEstilo(json, p.estilo, p.semente) : json;
 }
 

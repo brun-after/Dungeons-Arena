@@ -388,7 +388,11 @@ export class SalaArena {
       }
       const bolsa = this.estado.entidades.find((e) => e.id === s.entidadeId)?.bolsa ?? null;
       if (!bolsa) continue;
-      const texto = JSON.stringify({ t: 'privado', bolsa, ...(this.dadosDoAnfitriao?.(s) ?? { anfitriao: false, anfitriaoId: null }) });
+      // 17/10/2026: na campanha, só as descobertas ou aliadas; o público continua sem armadilhas.
+      const equipe = this.estado.entidades.find((e) => e.id === s.entidadeId)?.equipe;
+      const armadilhas = this.ctx.modo.sobrevivencia.revelarArmadilhas
+        ? this.estado.armadilhas.filter((a) => a.donoId === s.entidadeId || a.equipeDono === equipe || a.reveladaPara.includes(s.entidadeId)) : undefined;
+      const texto = JSON.stringify({ t: 'privado', bolsa, ...(armadilhas && { armadilhas }), ...(this.dadosDoAnfitriao?.(s) ?? { anfitriao: false, anfitriaoId: null }) });
       if (this.privados.get(s.sessaoId) === texto) continue;
       this.privados.set(s.sessaoId, texto);
       s.enviar(texto);

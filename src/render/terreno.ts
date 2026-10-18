@@ -5,6 +5,7 @@
 // autotiling ou a escolhida à mão, NEAREST); sem tileset, as cores lisas de sempre. O matiz não tinge o tileset.
 
 import { Container, Graphics, Sprite } from 'pixi.js';
+import { desenharAmbiente } from './ambiente';
 import { tipoEm, type Fase, type TipoCelula } from '../world/fase';
 import { pecaDaCelula } from '../world/tileset';
 import { CELULA_PX } from './camera-calculo';
@@ -69,16 +70,35 @@ function desenharCelula(g: Graphics, fase: Fase, paleta: Paleta, x: number, y: n
   switch (tipo) {
     case 'piso': {
       const v = variacaoPiso(x, y);
-      const cor = v < 0.15 ? paleta.piso[1] : v < 0.225 ? paleta.piso[2] : paleta.piso[0];
-      g.rect(px, py, CELULA_PX, CELULA_PX).fill(paleta.junta);
-      g.rect(px + 1, py + 1, CELULA_PX - 2, CELULA_PX - 2).fill(cor);
+      // 17/10/2026: base contínua, sem juntas por célula nem mudanças quadradas de cor.
+      g.rect(px, py, CELULA_PX, CELULA_PX).fill(paleta.piso[0]);
+      const p = CELULA_PX;
+      // Marcas esparsas e irregulares: pedra gasta, cascalho, musgo e fissuras curtas.
+      if (v < 0.17) {
+        const dx = p * (0.25 + variacaoPiso(x + 71, y) * 0.5);
+        const dy = p * (0.25 + variacaoPiso(x, y + 37) * 0.5);
+        g.ellipse(px + dx, py + dy, p * 0.22, p * 0.12).fill({ color: paleta.piso[2], alpha: 0.35 });
+        if (v < 0.045) {
+          g.moveTo(px + dx - 6, py + dy + 2).lineTo(px + dx, py + dy - 3).lineTo(px + dx + 5, py + dy);
+          g.stroke({ width: 1.3, color: paleta.junta, alpha: 0.6 });
+        } else {
+          g.circle(px + dx, py + dy, 1.4).fill({ color: paleta.piso[1], alpha: 0.7 });
+          g.circle(px + dx + 4, py + dy - 3, 0.8).fill({ color: paleta.paredeTopo, alpha: 0.5 });
+        }
+      }
+      // Só as bordas reais da sala têm sombra; o piso continua aberto entre células adjacentes.
+      if (tipoEm(fase, x, y - 1) === 'parede') g.rect(px, py, p, 7).fill({ color: 0x0c0c13, alpha: 0.22 });
+      if (tipoEm(fase, x - 1, y) === 'parede') g.rect(px, py, 5, p).fill({ color: 0x0c0c13, alpha: 0.16 });
       break;
     }
     case 'parede': {
       g.rect(px, py, CELULA_PX, CELULA_PX).fill(paleta.parede);
       // Face superior mais clara quando há piso abaixo: dá leitura de altura à parede.
       const sobrePiso = tipoEm(fase, x, y + 1) === 'piso' || tipoEm(fase, x, y + 1) === 'saida';
-      if (sobrePiso) g.rect(px, py + CELULA_PX - 8, CELULA_PX, 8).fill(paleta.paredeTopo);
+      if (sobrePiso) {
+        g.rect(px, py + CELULA_PX - 8, CELULA_PX, 8).fill(paleta.paredeTopo);
+        g.rect(px, py + CELULA_PX - 8, CELULA_PX, 2).fill({ color: 0xc3b5c6, alpha: 0.15 });
+      }
       break;
     }
     case 'saida':
@@ -133,6 +153,15 @@ export function criarTerreno(camada: Container, fase: Fase, tileset: TexturasTil
         s.height = CELULA_PX;
         b.c.addChild(s);
       }
+    }
+    // 17/10/2026: o perigo fica sobre o atlas também; uma textura própria não pode escondê-lo.
+    if (fase.ambientes?.length) {
+      const ambientes = new Graphics();
+      for (let y = b.by; y < fimY; y++) for (let x = b.bx; x < fimX; x++) {
+        const tipo = tipoEm(fase, x, y);
+        if (tipo === 'piso' || tipo === 'saida') desenharAmbiente(ambientes, fase, x, y);
+      }
+      b.c.addChild(ambientes);
     }
   };
   const porLinha = Math.ceil(fase.largura / BLOCO_CELULAS);

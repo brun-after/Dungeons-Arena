@@ -33,9 +33,10 @@ import { lerPreferencias } from './plataforma/preferencias';
 import { carregarTexturasTileset, type TexturasTileset } from './render/tileset-textura';
 import { carregarSlot, criarAutosave, gravarRegistro, listarSlots, type Autosave } from './plataforma/saves';
 import { Interpolador } from './render/interpolacao';
-import { jogadorDoSave, VERSAO_SCHEMA, type Estatisticas, type RefFase, type RegistroProgresso } from './save/esquema';
+import { chaveDaFase, jogadorDoSave, VERSAO_SCHEMA, type Estatisticas, type RefFase, type RegistroProgresso } from './save/esquema';
 import { contextoDaFase, estadoInicialDaFase, FASE_INICIAL, faseOficialOuGerada, faseSeguinte } from './save/fases-campanha';
 import { avancarFase, personagemNoInicio } from './save/transicao';
+import { chegadaNaFase, comRetorno, faseAnterior, referenciaConhecida } from './save/retorno';
 import { mostrarAviso } from './ui/aviso';
 import { montarCena } from './ui/cena';
 import { mostrarEscolhaDeClasse } from './ui/escolha-classe';
@@ -168,7 +169,8 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     mostrarErro(raiz, t('editor.faseInvalida', { erro: validacao.erros[0]?.mensagem ?? '?' }), voltarPara);
     return;
   }
-  const ctx = montarContexto(conteudo, validacao.fase);
+  const contextoBase = montarContexto(conteudo, validacao.fase);
+  const ctx = { ...contextoBase, fase: comRetorno(contextoBase.fase, faseRef) };
   const estado = leitura?.estado ?? novoEstado(ctx, teste ? await personagemAtual() : null, opcoes.classe);
   const idJogador = jogadorDoSave(estado)?.id ?? ID_JOGADOR;
   // Marco 17 (D-063): todo personagem ganha uma identidade (o certificado da arena se prende a ela).
@@ -181,6 +183,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
   const acoesExtras: HTMLElement[] = [];
   const criadoEm = leitura?.criadoEm ?? Date.now();
   const fasesVisitadas = leitura?.fasesVisitadas ?? {};
+  const referenciasFases = leitura?.referenciasFases ?? {};
   if (slot !== null) {
     let avisouFalha = false;
     autosave = criarAutosave({
@@ -189,6 +192,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
       nomeFase: ctx.fase.nome,
       criadoEm,
       fasesVisitadas,
+      referenciasFases,
       certificado: () => certificado,
       estado: () => estado,
       estatisticas: () => estatisticas,
@@ -282,11 +286,11 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
   }
 
   // Marco 10A-1: saída aberta -> próxima fase (D-052). Uma vez só por sessão.
-  const sairDaFase = async (): Promise<void> => {
+  const sairDaFase = async (retorno = false): Promise<void> => {
     const totalDeFases = await fasesDaAventura(faseRef);
     if (teste) {
       // Testando a aventura inteira: a saída leva à fase seguinte (sem save); na última, volta ao editor.
-      const seguinte = opcoes.testeSeguir && indiceTeste + 1 < totalDeFases ? indiceTeste + 1 : null;
+      const seguinte = retorno && indiceTeste > 0 ? indiceTeste - 1 : opcoes.testeSeguir && indiceTeste + 1 < totalDeFases ? indiceTeste + 1 : null;
       mostrarAviso(raiz, t(seguinte === null ? 'fase.concluidaTeste' : 'fase.proximaTeste'), 3000);
       setTimeout(() => {
         location.href =
@@ -298,17 +302,21 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     }
     // Marco 11A (D-066): com "Fases geradas no meu estilo" ligado, as regras do aparelho vão nos parâmetros da gerada.
     const estilo = lerPreferencias().estiloNasGeradas ? await regrasDoAparelho() : [];
-    const proxima = faseSeguinte(faseRef, totalDeFases, estilo);
+    const candidata = retorno ? faseAnterior(faseRef, referenciasFases) : faseSeguinte(faseRef, totalDeFases, estilo);
+    const proxima = candidata ? referenciaConhecida(candidata, referenciasFases) : null;
     if (!proxima) {
+      saindo = false;
       mostrarAviso(raiz, t('fase.fimDaCampanha'), 6000);
       return;
     }
     if (slot === null || !autosave) {
+      saindo = false;
       mostrarAviso(raiz, t('fase.concluida'), 4000);
       return;
     }
     const validacaoNova = validarFase(await faseDaReferencia(proxima, conteudo), new Set(conteudo.presets.keys()), conteudo.itens);
     if (!validacaoNova.ok) {
+      saindo = false;
       mostrarAviso(raiz, t('slots.faseAusente'), 5000);
       return;
     }
@@ -323,11 +331,12 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
       estado: clonarEstado(estado),
       estatisticas: { ...estatisticas },
       fasesVisitadas,
+      referenciasFases,
       certificado,
     };
     const novo = avancarFase(
       atual,
-      { ref: proxima, nome: ctxNovo.fase.nome, spawn: ctxNovo.fase.spawns[0] ?? { x: 1, y: 1 }, novoEstado: () => estadoInicialDaFase(ctxNovo) },
+      { ref: proxima, nome: ctxNovo.fase.nome, spawn: retorno ? chegadaNaFase(comRetorno(ctxNovo.fase, proxima), true, fasesVisitadas[chaveDaFase(proxima)]) : ctxNovo.fase.spawns[0] ?? { x: 1, y: 1 }, novoEstado: () => estadoInicialDaFase(ctxNovo), preservarRecursos: retorno },
       Date.now(),
     );
     await autosave.suspender();
@@ -342,7 +351,8 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
   cena.bus.on('saidaAlcancada', (ev) => {
     if (ev.id !== idJogador || saindo) return;
     saindo = true;
-    sairDaFase().catch(() => {
+    sairDaFase(ev.retorno).catch(() => {
+      saindo = false;
       mostrarAviso(raiz, t('slots.falhaGravar'), 5000);
     });
   });

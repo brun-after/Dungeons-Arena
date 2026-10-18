@@ -114,6 +114,7 @@ export function aplicarEstilo(json: FaseJson, regras: readonly string[], semente
   fase.spawns.forEach(marcar);
   fase.inimigos.forEach(marcar);
   fase.objetos.forEach(marcar);
+  fase.ambientes?.forEach(marcar);
   fase.portasInternas.forEach((p) => {
     marcar(p.a);
     marcar(p.b);
@@ -154,5 +155,5 @@ function alcanceInteiro(fase: Fase): boolean {
   for (let i = 0; i < fase.celulas.length; i++) {
     if (tipoEm(fase, i % fase.largura, Math.floor(i / fase.largura)) === 'saida' && alcance[i] !== 1) return false;
   }
-  return fase.inimigos.every(ok) && fase.objetos.every(ok) && fase.portasInternas.every((p) => ok(p.a) && ok(p.b));
+  return fase.inimigos.every(ok) && fase.objetos.every(ok) && (fase.ambientes ?? []).every(ok) && fase.portasInternas.every((p) => ok(p.a) && ok(p.b));
 }

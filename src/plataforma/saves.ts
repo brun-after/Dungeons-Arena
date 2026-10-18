@@ -45,6 +45,7 @@ export interface OpcoesAutosave {
   estatisticas: () => Estatisticas;
   /** Marco 10A-1: as outras fases visitadas (fixas durante a sessão: trocar de fase recarrega). */
   fasesVisitadas: Record<string, EstadoJogo>;
+  referenciasFases?: Record<string, RefFase>;
   /** Marco 17: o certificado do personagem (o último que o servidor deu; a gravação o mantém). */
   certificado?: () => Certificado | null;
   aoFalhar?: (erro: unknown) => void;
@@ -81,6 +82,7 @@ export function criarAutosave(o: OpcoesAutosave): Autosave {
       estado: clonarEstado(o.estado()),
       estatisticas: { ...o.estatisticas() },
       fasesVisitadas: o.fasesVisitadas,
+      ...(o.referenciasFases && { referenciasFases: o.referenciasFases }),
       certificado: o.certificado?.() ?? null,
     };
     gravando = gravarRegistro(registro)

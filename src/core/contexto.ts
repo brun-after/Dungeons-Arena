@@ -175,6 +175,12 @@ export interface Balance {
     };
   };
   /** Marco 18 (D-068): a Sabedoria revela (raio e chance por teste) e desarma armadilhas. */
+  ambiente: {
+    intervaloMs: number; engenhoMs: number; queimadura: number; veneno: number; duracaoMs: number;
+    danoArmadilhaBase: number; danoArmadilhaPorNivel: number; danoArmadilhaMax: number; rearmeMs: number;
+    sangramento: number; sangramentoMs: number; enxameReservaMax: number; enxamePorSala: number;
+    enxameAtivos: number; enxameLeva: number; enxameInicio: number; enxameRaio: number; enxameDistanciaSegura: number;
+  };
   armadilhas: {
     revelarIntervaloMs: number;
     raioBase: number;

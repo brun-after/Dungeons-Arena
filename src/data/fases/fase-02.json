@@ -141,7 +141,7 @@
       "tipo": "armadilha",
       "x": 0.4375,
       "y": 0.75,
-      "valor": 6,
+      "valor": 18,
       "efeito": {
         "sem_movimento": 600
       },
@@ -179,6 +179,11 @@
       "sfxId": "vento",
       "raio": 5,
       "volume": 0.4
+    },
+    {
+      "tipo": "santuario",
+      "x": 0.0875,
+      "y": 0.25
     }
   ],
   "portaSaida": {
@@ -199,6 +204,26 @@
         "x": 23,
         "y": 18
       }
+    }
+  ],
+  "ambientes": [
+    {
+      "tipo": "agua",
+      "x": 25,
+      "y": 9,
+      "raio": 1
+    },
+    {
+      "tipo": "miasma",
+      "x": 8,
+      "y": 24,
+      "raio": 1
+    },
+    {
+      "tipo": "brasas",
+      "x": 35,
+      "y": 19,
+      "raio": 1
     }
   ]
 }

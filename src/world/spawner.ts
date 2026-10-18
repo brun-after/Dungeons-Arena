@@ -87,7 +87,7 @@ function criar(estado: EstadoJogo, ctx: ContextoSimulacao, categoria: Categoria,
       if (sorteio < p.hp) largarObjeto(estado, 'orbe_hp', c.x, c.y, d.orbeHpPct, 'pct', saida, objetoId);
       else if (sorteio < p.hp + p.recurso) largarObjeto(estado, 'orbe_recurso', c.x, c.y, d.orbeRecursoPct, 'pct', saida, objetoId);
       else {
-        const efeito = sortearEfeitoDeOrbe(estado.rng);
+        const efeito = sortearEfeitoDeOrbe(estado.rng, undefined, ctx.modo.sobrevivencia.revelarArmadilhas);
         if (efeito) largarOrbeEfeito(estado, efeito, c.x, c.y, saida, objetoId);
       }
       return;
@@ -105,7 +105,7 @@ function criar(estado: EstadoJogo, ctx: ContextoSimulacao, categoria: Categoria,
         equipeDono: DONO_FASE,
         x: c.x,
         y: c.y,
-        valor: s.danoArmadilha,
+        valor: ctx.modo.sobrevivencia.revelarArmadilhas ? Math.max(s.danoArmadilha, ctx.balance.ambiente.danoArmadilhaBase) : s.danoArmadilha,
         interno: null,
         ateTick: estado.tick + ticksDe(s.armadilhaExpiraS * 1000),
         origem: 'spawner',

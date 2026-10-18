@@ -179,6 +179,41 @@ describe('canal privado e anfitrião', () => {
 });
 
 describe('a saída do grupo', () => {
+  it('retorno exige todos os vivos e restaura o mundo; voltar não cura nem recria baús', () => {
+    const s = sala(), a = entrar(s), b = entrar(s);
+    s.estado.objetos = [];
+    s.estado.saidaAberta = true;
+    expect(s.avancar()).toBe(true);
+    expect(s.faseRef.id).toBe('fase-02');
+    const volta = obter(s.ctx.fase.portaRetorno, 'retorno');
+    a.entidade().hp = 30;
+    for (const e of [a.entidade()]) Object.assign(e, { x: volta.x, y: volta.y, destinoX: volta.x, destinoY: volta.y });
+    rodar(s, 1);
+    expect(s.faseRef.id).toBe('fase-02');
+    Object.assign(b.entidade(), { x: volta.x, y: volta.y, destinoX: volta.x, destinoY: volta.y });
+    rodar(s, 1);
+    expect(s.faseRef.id).toBe('fase-01');
+    expect(s.estado.objetos).toEqual([]);
+    expect(s.estado.saidaAberta).toBe(true);
+    expect(a.entidade().hp).toBeLessThan(a.entidade().hpMax);
+  });
+
+  it('abrir grupo na segunda fase não dispara o retorno automaticamente', () => {
+    const r = criarSalaCampanha(CONTEUDO, { semente: 3, faseRef: { tipo: 'oficial', id: 'fase-02' }, dificuldade: 'normal' });
+    if (!r.ok) throw Error(r.erro);
+    entrar(r.sala);
+    rodar(r.sala, 3);
+    expect(r.sala.faseRef.id).toBe('fase-02');
+  });
+
+  it('canal privado só traz armadilhas reveladas ou aliadas', () => {
+    const s = sala(), a = entrar(s), b = entrar(s);
+    const armadilha = obter(s.estado.armadilhas[0], 'armadilha');
+    armadilha.reveladaPara.push(a.entidade().id);
+    rodar(s, 3);
+    expect(a.de('privado').at(-1)?.armadilhas?.map((x) => x.id)).toContain(armadilha.id);
+    expect(b.de('privado').at(-1)?.armadilhas?.map((x) => x.id)).not.toContain(armadilha.id);
+  });
   it('só avança com todos os vivos na saída aberta; leva os personagens, com vida cheia, para a fase seguinte', () => {
     const s = sala();
     const a = entrar(s, personagem('guerreiro', (e) => (e.nivel = 3)));

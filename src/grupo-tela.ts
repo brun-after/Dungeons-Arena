@@ -24,6 +24,7 @@ import { conectarCampanha, type ConexaoCampanha } from './plataforma/transporte-
 import { jogadorDoSave, type RefFase, type RegistroProgresso } from './save/esquema';
 import { contextoDaFase, estadoInicialDaFase, faseOficialOuGerada } from './save/fases-campanha';
 import { avancarFase } from './save/transicao';
+import { comRetorno } from './save/retorno';
 import { mostrarAviso } from './ui/aviso';
 import { montarCena, type Cena } from './ui/cena';
 import { criarPainelGrupo } from './ui/grupo';
@@ -60,7 +61,7 @@ const modo = modoPorId(conteudo, MODO_COOPERATIVO);
 
 function contextoDe(ref: RefFase): ContextoSimulacao | null {
   const r = contextoDaFase(conteudo, faseOficialOuGerada(ref, conteudo), modo);
-  return r.ok ? r.ctx : null;
+  return r.ok ? { ...r.ctx, fase: comRetorno(r.ctx.fase, ref) } : null;
 }
 
 /** Espera o bemVindo (ou a recusa) da sala. */

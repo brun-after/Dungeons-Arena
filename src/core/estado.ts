@@ -50,7 +50,7 @@ export interface Projetil {
  * `saida`, a porta temporária que surge onde o boss morre (§2.1).
  */
 /** Ajuste de 16/10/2026 (D-067): `orbe_refugio`, a carga de imunidade ao abrir a mochila ou a loja. */
-export type TipoObjeto = 'orbe_hp' | 'orbe_recurso' | 'orbe_efeito' | 'orbe_refugio' | 'item' | 'ouro' | 'bau' | 'loja' | 'saida';
+export type TipoObjeto = 'orbe_hp' | 'orbe_recurso' | 'orbe_efeito' | 'orbe_refugio' | 'item' | 'ouro' | 'bau' | 'loja' | 'saida' | 'santuario';
 
 /**
  * Objeto coletável no mundo (§2.1). `objetoId` é estável; a coleta é uma transação dentro do
@@ -165,6 +165,8 @@ export interface EstadoJogo {
   /** Marco 8A-2: rastros, armadilhas e efeitos atrasados. */
   rastros: Rastro[];
   armadilhas: Armadilha[];
+  /** 17/10/2026: índices de inimigos ainda inertes nas fases de enxame. */
+  reservaEnxame?: number[];
   atrasados: Atrasado[];
   /** Marco 10A-1: a porta de saída trancada já foi aberta (boss morto ou chave usada) e fica aberta. */
   saidaAberta: boolean;
@@ -223,7 +225,8 @@ export function clonarEstado(estado: EstadoJogo): EstadoJogo {
     objetos: estado.objetos.map((o) => ({ ...o, efeito: copiaEfeito(o.efeito), itens: [...o.itens] })),
     respawns: estado.respawns.map((r) => ({ ...r, habilidades: [...r.habilidades] })),
     rastros: estado.rastros.map((r) => ({ ...r, interno: copiaEfeito(r.interno), atingidos: [...r.atingidos] })),
-    armadilhas: estado.armadilhas.map((a) => ({ ...a, interno: copiaEfeito(a.interno) })),
+    ...(estado.reservaEnxame && { reservaEnxame: [...estado.reservaEnxame] }),
+    armadilhas: estado.armadilhas.map((a) => ({ ...a, reveladaPara: [...a.reveladaPara], interno: copiaEfeito(a.interno) })),
     atrasados: estado.atrasados.map((a) => ({ ...a, efeito: { ...a.efeito, interno: copiaEfeito(a.efeito.interno) } })),
     saidaAberta: estado.saidaAberta,
     proximoId: estado.proximoId,

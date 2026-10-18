@@ -47,7 +47,7 @@ export function novoObjeto(objetoId: string, tipo: TipoObjeto, x: number, y: num
 
 /** Baú e loja abrem por `interagir`; o resto é coletado ao pisar. */
 export function interagivel(o: ObjetoNoMundo): boolean {
-  return o.tipo === 'bau' || o.tipo === 'loja';
+  return o.tipo === 'bau' || o.tipo === 'loja' || o.tipo === 'santuario';
 }
 
 /** Ninguém coleta: interagíveis e a porta temporária do boss (marco 10A-1, world/portas.ts). */

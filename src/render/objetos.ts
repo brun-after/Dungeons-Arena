@@ -172,6 +172,14 @@ export class CamadaObjetos {
         continue;
       }
       // A porta temporária do boss é desenhada com as outras portas (render/portas.ts).
+      if (o.tipo === 'santuario') {
+        const aceso = o.abertoTick === 0;
+        const cor = aceso ? 0x50e3c2 : 0x586464;
+        this.g.ellipse(cx, cy + 9, 19, 9).fill({ color: cor, alpha: 0.15 });
+        this.g.roundRect(cx - 12, cy + 4, 24, 12, 3).fill(0x3b4d50).stroke({ width: 2, color: cor });
+        this.g.poly([cx, cy - 19, cx + 9, cy - 5, cx, cy + 6, cx - 9, cy - 5]).fill(cor).stroke({ width: 2, color: 0xc6eee3 });
+        continue;
+      }
       if (o.tipo === 'saida') continue;
       if (o.tipo === 'orbe_efeito') {
         const cor = o.efeito ? Number.parseInt(REGISTRO_EFEITOS[o.efeito.tipo].cor.slice(1), 16) : 0xffffff;

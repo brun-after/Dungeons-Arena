@@ -5,6 +5,8 @@
 // arma a recarga dela para aquele jogador; morrer fecha e também arma (§2.12).
 // Baú compartilhado tem um abridor por vez (§3.6): a reserva sai com a entrega, a morte ou a saída.
 
+import { aplicarEfeito } from '../combat/efeitos';
+import { construirEfeito } from '../combat/registro-efeitos';
 import { usarRefugio } from '../progression/buffs';
 import { perseguido } from '../progression/recursos';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
@@ -40,7 +42,10 @@ export function alvoDeInteracao(estado: EstadoJogo, ctx: ContextoSimulacao, e: E
     if (!interagivel(o) || !disponivel(o)) continue;
     const d = chebyshev(origem, o);
     if (d > ctx.balance.economia.alcanceInteracao) continue;
-    if (d < melhorDist || (d === melhorDist && melhor && o.objetoId < melhor.objetoId)) {
+    // D-079: em empate, um santuário novo não toma a interação de um baú/loja existente.
+    const prioridade = o.tipo === 'santuario' ? 1 : 0;
+    const prioridadeAtual = melhor?.tipo === 'santuario' ? 1 : 0;
+    if (d < melhorDist || (d === melhorDist && melhor && (prioridade < prioridadeAtual || prioridade === prioridadeAtual && o.objetoId < melhor.objetoId))) {
       melhor = o;
       melhorDist = d;
     }
@@ -68,12 +73,25 @@ function tentarInteragir(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade
     // Marco 18 (D-068): sem baú nem loja perto, uma armadilha revelada pode ser desarmada.
     const a = armadilhaParaDesarmar(estado, ctx, e);
     if (!a) return 'nada_perto';
+    // 17/10/2026: Engenho converte somente armadilhas descobertas, preservando o valor da Sabedoria.
+    if (e.efeitos.some((f) => f.tipo === 'engenho' && f.ateTick > tick)) {
+      a.donoId = e.id;
+      a.equipeDono = e.equipe;
+      a.reveladaPara = [...new Set([...a.reveladaPara, e.id])];
+      saida.push({ t: 'armadilhaArmada', tick, donoId: e.id, armadilhaId: a.id, x: a.x, y: a.y });
+      return null;
+    }
     const ateTick = tick + ticksDe(ctx.balance.armadilhas.desarmeMs);
     e.interacao = { tipo: 'desarme', objetoId: String(a.id), ateTick };
     e.direcao = 'parado';
     e.caminho = [];
     e.waypoints = [];
     saida.push({ t: 'interacaoIniciada', tick, id: e.id, objetoId: String(a.id), tipo: 'desarme', ateTick });
+    return null;
+  }
+  if (o.tipo === 'santuario') {
+    o.abertoTick = tick + 1;
+    aplicarEfeito(estado, ctx, e, construirEfeito('engenho', { duracaoMs: ctx.balance.ambiente.engenhoMs }), { id: e.id, x: o.x, y: o.y }, null, saida);
     return null;
   }
   const eco = ctx.balance.economia;

@@ -31,14 +31,18 @@ export function criarPrompt(ctx: ContextoSimulacao, idLocal: string, toque: bool
     if (o?.tipo === 'loja') {
       return recargaLojaRestante(estado, o.objetoId, eu.id) > 0 ? t('prompt.lojaRecarga') : t('prompt.loja', { tecla: tecla('E') });
     }
+    if (o?.tipo === 'santuario') return t('prompt.santuario', { tecla: tecla('E') });
     if (o?.tipo === 'bau') return t(o.chave ? 'prompt.bauTrancado' : 'prompt.bau', { tecla: tecla('E') });
     // Marco 18 (D-068): armadilha revelada ao alcance.
-    if (!o && armadilhaParaDesarmar(estado, ctx, eu)) return t('prompt.desarmar', { tecla: tecla('E') });
+    if (!o && armadilhaParaDesarmar(estado, ctx, eu)) return t(eu.efeitos.some((f) => f.tipo === 'engenho' && f.ateTick > estado.tick) ? 'prompt.converter' : 'prompt.desarmar', { tecla: tecla('E') });
+    const volta = ctx.fase.portaRetorno;
+    if (volta && Math.max(Math.abs(volta.x - eu.x), Math.abs(volta.y - eu.y)) <= 1) return t('prompt.retorno');
     const s = ctx.fase.portaSaida;
     if (s && s.x === eu.x && s.y === eu.y && s.tranca !== 'livre' && !estado.saidaAberta) {
       return t(s.tranca === 'chave' ? 'prompt.saidaChave' : 'prompt.saidaBoss');
     }
-    return '';
+    const ambiente = ctx.fase.ambientes?.find((a) => (a.x - eu.x) ** 2 + (a.y - eu.y) ** 2 <= a.raio ** 2);
+    return ambiente ? t(`prompt.${ambiente.tipo}`) : '';
   };
 
   return {

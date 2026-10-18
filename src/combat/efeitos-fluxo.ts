@@ -266,7 +266,7 @@ export function dispararArmadilha(estado: EstadoJogo, ctx: ContextoSimulacao, a:
   if (!some) a.inerteAteTick = tick + a.rearmeTicks;
   causarDano(estado, ctx, alvo, a.valor, a.donoId, 'armadilha', saida);
   if (a.interno) aplicar(alvo, a.interno, { id: a.donoId, x: a.x, y: a.y }, null);
-  saida.push({ t: 'armadilhaDisparou', tick, donoId: a.donoId, armadilhaId: a.id, alvoId: alvo.id });
+  saida.push({ t: 'armadilhaDisparou', tick, donoId: a.donoId, armadilhaId: a.id, alvoId: alvo.id, x: a.x, y: a.y });
   return some;
 }
 

@@ -147,14 +147,14 @@
       "tipo": "armadilha",
       "x": 0.3625,
       "y": 0.1964,
-      "valor": 6,
+      "valor": 18,
       "modo": "unica"
     },
     {
       "tipo": "armadilha",
       "x": 0.1625,
       "y": 0.4464,
-      "valor": 4,
+      "valor": 18,
       "efeito": {
         "atordoar": 800
       },
@@ -184,6 +184,11 @@
       "sfxId": "vento",
       "raio": 5,
       "volume": 0.4
+    },
+    {
+      "tipo": "santuario",
+      "x": 0.0875,
+      "y": 0.26785714285714285
     }
   ],
   "portaSaida": {
@@ -191,5 +196,19 @@
     "y": 24,
     "tranca": "boss",
     "bossIndice": 7
-  }
+  },
+  "ambientes": [
+    {
+      "tipo": "agua",
+      "x": 18,
+      "y": 7,
+      "raio": 1
+    },
+    {
+      "tipo": "brasas",
+      "x": 24,
+      "y": 18,
+      "raio": 1
+    }
+  ]
 }

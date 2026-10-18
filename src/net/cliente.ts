@@ -14,7 +14,7 @@ import type { Certificado } from '../integridade/certificado';
 import type { RefFase } from '../save/esquema';
 import type { Comando, ComandoEmpacotado } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
-import { buscarEntidade, clonarEstado, type EstadoJogo } from '../core/estado';
+import { buscarEntidade, clonarEstado, type Armadilha, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { DT_MS } from '../core/loop';
 import { ticksDe } from '../core/tempo';
@@ -71,6 +71,7 @@ export class ClienteArena {
   aoEventos: ((eventos: EventoSimulacao[]) => void) | null;
   /** Marco 15 (cooperativo): a própria bolsa, pelo canal privado; e se esta sessão é a do anfitrião. */
   bolsaPropria: Bolsa | null = null;
+  private armadilhasProprias: Armadilha[] | null = null;
   anfitriao = false;
   /** A entidade do anfitrião (para o painel do grupo). */
   anfitriaoId: string | null = null;
@@ -144,6 +145,7 @@ export class ClienteArena {
         this.reaplicar();
         break;
       case 'novaFase': {
+        this.armadilhasProprias = null;
         // Mundo novo, relógio novo: nada da fase anterior vale (pendentes, histórico, interpolação).
         const ctx = this.o.contextoDe?.(msg.faseRef);
         if (ctx) this.ctx = ctx;
@@ -162,6 +164,7 @@ export class ClienteArena {
         break;
       }
       case 'privado':
+        this.armadilhasProprias = msg.armadilhas ?? null;
         this.bolsaPropria = msg.bolsa;
         this.anfitriao = msg.anfitriao;
         this.anfitriaoId = msg.anfitriaoId;
@@ -252,6 +255,7 @@ export class ClienteArena {
 
   /** O estado público vem sem bolsas: a própria volta pelo canal privado (só no cooperativo). */
   private porBolsa(): void {
+    if (this.previsto && this.armadilhasProprias) this.previsto.armadilhas = this.armadilhasProprias.map((a) => ({ ...a, reveladaPara: [...a.reveladaPara] }));
     const id = this.entidadeId;
     const e = this.bolsaPropria && this.previsto && id ? buscarEntidade(this.previsto, id) : undefined;
     if (e) e.bolsa = this.bolsaPropria;

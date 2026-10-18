@@ -21,6 +21,7 @@ const ICONE: Readonly<Record<string, string>> = {
   loot: 'mochila',
   armadilha: 'aviso',
   fonte_som: 'som',
+  santuario: 'runa',
 };
 
 /** Carrega as texturas dos ícones dos marcadores (chamar antes do primeiro desenho). */

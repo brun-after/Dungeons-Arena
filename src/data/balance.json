@@ -313,5 +313,25 @@
     "veuJanelaMaxMs": 4000,
     "muralhaMaxMs": 8000,
     "campoMaxMs": 10000
+  },
+  "ambiente": {
+    "intervaloMs": 1000,
+    "engenhoMs": 20000,
+    "queimadura": 4,
+    "veneno": 3,
+    "duracaoMs": 1800,
+    "danoArmadilhaBase": 18,
+    "danoArmadilhaPorNivel": 2,
+    "danoArmadilhaMax": 90,
+    "rearmeMs": 4500,
+    "sangramento": 2,
+    "sangramentoMs": 3000,
+    "enxameReservaMax": 120,
+    "enxamePorSala": 12,
+    "enxameAtivos": 40,
+    "enxameLeva": 6,
+    "enxameInicio": 24,
+    "enxameRaio": 18,
+    "enxameDistanciaSegura": 5
   }
 }

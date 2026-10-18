@@ -90,6 +90,11 @@ export function naSaidaAberta(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
 }
 
 function tentarSair(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
+  const retorno = ctx.fase.portaRetorno;
+  if (retorno && e.x === retorno.x && e.y === retorno.y) {
+    saida.push({ t: 'saidaAlcancada', tick: estado.tick, id: e.id, retorno: true });
+    return;
+  }
   const tipo = ehSaida(estado, ctx, e.x, e.y);
   if (!tipo) return;
   const p = ctx.fase.portaSaida;

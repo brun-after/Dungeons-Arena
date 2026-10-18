@@ -43,6 +43,8 @@ export interface RegistroProgresso {
    * sem o jogador, pela chave de `chaveDaFase` (§3.5). A fase atual fica em `estado`.
    */
   fasesVisitadas: Record<string, EstadoJogo>;
+  /** 17/10/2026: parâmetros exatos das fases visitadas, inclusive estilo e geração antiga. */
+  referenciasFases?: Record<string, RefFase>;
   /** Marco 17 (D-063): o último certificado do servidor para o personagem deste slot (pode estar desatualizado). */
   certificado: Certificado | null;
 }
@@ -359,12 +361,16 @@ function lerParametros(v: unknown): ParametrosGeracao | null {
   const inteiro = (x: unknown, min: number, max: number): x is number => typeof x === 'number' && Number.isInteger(x) && x >= min && x <= max;
   if (typeof v.id !== 'string' || typeof v.nome !== 'string') return null;
   if (!inteiro(v.semente, 0, 2 ** 32) || !inteiro(v.salas, 1, 50) || !inteiro(v.nivelInimigos, 1, 30) || !inteiro(v.matizGraus, 0, 359)) return null;
+  if (v.ambientesVivos !== undefined && typeof v.ambientesVivos !== 'boolean') return null;
+  if (v.formato !== undefined && v.formato !== 'salas' && v.formato !== 'espiral') return null;
   const p: ParametrosGeracao = { id: v.id, nome: v.nome, semente: v.semente, salas: v.salas, nivelInimigos: v.nivelInimigos, matizGraus: v.matizGraus };
   if (v.largura !== undefined || v.altura !== undefined) {
     if (!inteiro(v.largura, 8, 120) || !inteiro(v.altura, 8, 120)) return null;
     p.largura = v.largura;
     p.altura = v.altura;
   }
+  if (v.ambientesVivos !== undefined) p.ambientesVivos = v.ambientesVivos;
+  if (v.formato === 'salas' || v.formato === 'espiral') p.formato = v.formato;
   // Marco 18 (D-070): os eventos da fase gerada.
   if (v.eventos !== undefined) {
     if (!Array.isArray(v.eventos) || v.eventos.length > 5 || !v.eventos.every((x): x is string => typeof x === 'string' && /^[a-z_]{1,30}$/.test(x))) return null;
@@ -448,6 +454,10 @@ export function lerRegistro(bruto: unknown, migracoes: Readonly<Record<number, M
       // A forma de cada estado foi conferida acima (`forma`).
       fasesVisitadas: visitadas as unknown as Record<string, EstadoJogo>,
       certificado: lerCertificado(r.certificado),
+      ...(ehObjeto(r.referenciasFases) && { referenciasFases: Object.fromEntries(Object.entries(r.referenciasFases).flatMap(([k, v]) => {
+        const ref = lerRefFase(v);
+        return ref && chaveDaFase(ref) === k ? [[k, ref]] : [];
+      })) }),
     },
   };
 }

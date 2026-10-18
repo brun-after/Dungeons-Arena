@@ -46,6 +46,7 @@ export interface DestinoDaTransicao {
   spawn: Celula;
   /** Estado inicial da fase (inimigos e objetos), sem jogador; só é chamado se ela não foi visitada. */
   novoEstado: () => EstadoJogo;
+  preservarRecursos?: boolean;
 }
 
 export function avancarFase(r: RegistroProgresso, destino: DestinoDaTransicao, agora: number): RegistroProgresso {
@@ -62,6 +63,12 @@ export function avancarFase(r: RegistroProgresso, destino: DestinoDaTransicao, a
   const estado = guardada ? clonarEstado(guardada) : destino.novoEstado();
   // Marco 15: a dificuldade escolhida vale na fase nova (e na revisitada).
   estado.dificuldade = r.estado.dificuldade;
-  estado.entidades.push(personagemNoInicio(jogador, destino.spawn));
-  return { ...r, faseRef: destino.ref, nomeFase: destino.nome, estado, fasesVisitadas: visitadas, atualizadoEm: agora };
+  const personagem = personagemNoInicio(jogador, destino.spawn);
+  // 17/10/2026: só a primeira passagem mantém a recuperação antiga; ir e voltar não cura.
+  if (guardada || destino.preservarRecursos) {
+    personagem.hp = Math.min(personagem.hpMax, jogador.hp);
+    personagem.mana = Math.min(personagem.manaMax, jogador.mana);
+  }
+  estado.entidades.push(personagem);
+  return { ...r, faseRef: destino.ref, nomeFase: destino.nome, estado, fasesVisitadas: visitadas, referenciasFases: { ...r.referenciasFases, [chaveDaFase(r.faseRef)]: r.faseRef, [chaveDestino]: destino.ref }, atualizadoEm: agora };
 }

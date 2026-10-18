@@ -52,6 +52,13 @@ export class CamadaPortas {
         g.circle(cx, cy, 17).fill({ color: 0x8e44ad, alpha: 0.25 }).stroke({ width: 3, color: 0xbb8fce, alpha: 0.6 + 0.4 * pulso });
       }
     }
+    const volta = this.fase.portaRetorno;
+    if (volta) {
+      const cx = (volta.x + 0.5) * P;
+      const cy = (volta.y + 0.5) * P;
+      this.porta(cx, cy, 0x65d7ee, false, pulso * 0.5);
+      g.moveTo(cx + 5, cy - 5).lineTo(cx - 4, cy).lineTo(cx + 5, cy + 5).stroke({ width: 3, color: 0xc8f6ff });
+    }
     const s = this.fase.portaSaida;
     if (s) {
       const trancada = s.tranca !== 'livre' && !estado.saidaAberta;

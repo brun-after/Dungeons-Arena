@@ -1,3 +1,5 @@
+import { processarAmbientes } from '../world/ambientes';
+import { processarEnxame } from '../world/enxame';
 import { processarPantanos } from '../combat/sequencias';
 import { processarCampos } from '../combat/tatica';
 // `simular(dt)`: um tick da simulação (§2.2). Não toca DOM nem a camada gráfica e não sabe
@@ -70,11 +72,13 @@ export function simular(
   processarBuffsArmados(estado, ctx, saida);
   atualizarAparencias(estado, ctx);
   atualizarRessonancias(estado, ctx, saida);
+  processarAmbientes(estado, ctx, saida, inicio);
   processarGatilhosDeEfeito(estado, ctx, saida);
   const abates = processarMortes(estado, ctx, saida);
   // Marco 18 (D-070): missões e o diário de descobertas.
   processarMissoes(estado, ctx, saida.slice(inicio), abates, saida);
   registrarDescobertas(estado, ctx, saida.slice(inicio), saida);
+  processarEnxame(estado, ctx);
   processarSpawner(estado, ctx, saida);
   estado.tick++;
 }
