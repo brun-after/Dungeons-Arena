@@ -1,3 +1,4 @@
+import { lerHistoricoXp, unirHistoricosXp } from '../progression/xp-antifarm';
 // O personagem que cada um traz do próprio slot para a campanha cooperativa (marco 15, 15/10/2026, D-061). Puro.
 // O save é do aparelho e não prova nada (§3.7): a sala recria o personagem pela classe e aceita do pedido só o que
 // cabe no nível — atributos-base e pontos, habilidades, ranks e caminhos, itens e ouro. O que não cabe é cortado,
@@ -172,6 +173,7 @@ export function conferirPersonagem(pedido: unknown, ctx: ContextoSimulacao, id: 
   }
   if (bolsa.pontosPorItens !== undefined) bolsa.pontosPorItens = Math.min(bolsa.pontosPorItens, bolsa.tomosComprados ?? 0);
   if (b.xpFracao !== undefined) bolsa.xpFracao = typeof b.xpFracao === 'number' && Number.isFinite(b.xpFracao) && b.xpFracao >= 0 && b.xpFracao < 1 ? b.xpFracao : 0;
+  if (b.xpPorFase !== undefined) bolsa.xpPorFase = lerHistoricoXp(b.xpPorFase);
   conferirHabilidades(b, bolsa, e.nivel, ctx);
   conferirItens(b, bolsa, e.nivel, ctx);
   // Marco 17: a identidade do personagem passa adiante (o certificado se prende a ela).
@@ -222,7 +224,9 @@ export function aplicarRetratoNoSave(r: RegistroProgresso, retrato: PedidoDePers
   const j = estado.entidades.find((e) => e.id === atual.id);
   if (!j) return r;
   // Clone explícito da bolsa do retrato (pela cópia de entidade, que copia a bolsa campo a campo).
+  const historico = unirHistoricosXp(j.bolsa?.xpPorFase, retrato.bolsa.xpPorFase);
   j.bolsa = clonarEntidade({ ...j, bolsa: retrato.bolsa }).bolsa;
+  if (j.bolsa && Object.keys(historico).length) j.bolsa.xpPorFase = historico;
   j.nivel = retrato.nivel;
   j.xp = retrato.xp;
   recalcularFicha(j, ctx);
@@ -263,7 +267,9 @@ export function atualizarPersonagemNoSave(r: RegistroProgresso, personagem: Enti
   const copia = clonarEntidade(personagem);
   j.nivel = copia.nivel;
   j.xp = copia.xp;
+  const historico = unirHistoricosXp(j.bolsa?.xpPorFase, copia.bolsa?.xpPorFase);
   j.bolsa = copia.bolsa;
+  if (j.bolsa && Object.keys(historico).length) j.bolsa.xpPorFase = historico;
   recalcularFicha(j, ctx);
   j.hp = j.hpMax;
   j.mana = j.manaMax;

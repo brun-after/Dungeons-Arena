@@ -64,6 +64,7 @@ export const ptBR = {
   'efeito.imune_dano': 'Imune a dano',
   'efeito.engenho': 'Engenho de armadilhas',
   'desc.efeito.engenho': 'Por {s} s, interagir com uma armadilha revelada a converte para sua equipe; mantém dano e rearme e não fere aliados',
+  'efeito.acelerado': 'Passos velozes',
   'efeito.fantasma': 'Fantasma',
   'efeito.atravessar': 'Projéteis perfurantes',
   'efeito.cura': 'Cura',

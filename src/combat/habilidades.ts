@@ -254,7 +254,7 @@ export function lerPassiva(l: Leitor, v: unknown): Passiva | null {
   return {
     tenacidadePct: n('tenacidadePct', 0, 50),
     fluxoEscudoPct: n('fluxoEscudoPct', 0, 50),
-    tag: o.tag === undefined ? null : l.texto(o, 'tag'),
+    tag: o.tag == null ? null : l.texto(o, 'tag'),
     danoPct: n('danoPct', -100, 300),
     curaPct: n('curaPct', -100, 300),
     alcance: n('alcance', -5, 5),

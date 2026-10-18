@@ -31,7 +31,7 @@ export function itensEquipados(bolsa: Bolsa, itens: Catalogo<Item>): Item[] {
 }
 
 /** Ficha efetiva de quem tem `bolsa`, só a partir da base, do nível e do equipamento. */
-export function derivarFicha(bolsa: Bolsa, nivel: number, ctx: ContextoSimulacao): FichaDerivada {
+export function derivarFicha(bolsa: Bolsa, nivel: number, ctx: Pick<ContextoSimulacao, 'balance' | 'conteudo'>): FichaDerivada {
   const { balance } = ctx;
   const equipados = itensEquipados(bolsa, ctx.conteudo.itens);
   const atributos = { ...bolsa.atributosBase };
@@ -65,7 +65,7 @@ export function derivarFicha(bolsa: Bolsa, nivel: number, ctx: ContextoSimulacao
 }
 
 /** Reaplica a ficha derivada na entidade. HP e mana atuais só são cortados no novo máximo. */
-export function recalcularFicha(e: Entidade, ctx: ContextoSimulacao): void {
+export function recalcularFicha(e: Entidade, ctx: Pick<ContextoSimulacao, 'balance' | 'conteudo'>): void {
   if (!e.bolsa) return;
   const f = derivarFicha(e.bolsa, e.nivel, ctx);
   e.atributos = f.atributos;

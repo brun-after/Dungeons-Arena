@@ -28,6 +28,7 @@ export const TIPOS_EFEITO = [
   'ab_multi_alvo',
   'imune_dano',
   'fantasma',
+  'acelerado',
   'atravessar',
   'engenho',
   // instantâneos
@@ -129,6 +130,7 @@ export interface DefinicaoEfeito {
   exige: readonly ('interno' | 'ref')[];
   /** Marco 14: o `pct` reduz a velocidade de movimento (resfriado). */
   lentidao: boolean;
+  velocidade: boolean;
   /** Marco 14: −1 = o `pct` reduz a cura recebida (envenenado). */
   curaRecebida: -1 | 0;
   /** Marco 14: +1 = o `pct` aumenta o dano recebido (exposto). */
@@ -162,6 +164,7 @@ const BASE: Omit<Def, 'icone' | 'cor' | 'positivo' | 'padrao' | 'campos'> = {
   domina: false,
   exige: [],
   lentidao: false,
+  velocidade: false,
   curaRecebida: 0,
   danoRecebido: 0,
   escudo: false,
@@ -227,6 +230,7 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   ab_alcance: positivo('longo', '#2980b9', 8, ['valor'], { duracaoMs: 15_000, valor: 1, pct: 0 }, { ataqueBasico: 'alcance' }),
   ab_multi_alvo: positivo('multi', '#e67e22', 6, ['valor'], { duracaoMs: 15_000, valor: 1, pct: 0 }, { ataqueBasico: 'alvos' }),
   imune_dano: positivo('escudo', '#f1c40f', 4, [], { duracaoMs: 3000, valor: 0, pct: 0 }, { imuneDano: true }),
+  acelerado: { ...BASE, icone: 'botas', cor: '#74d9ca', positivo: true, campos: ['pct'], padrao: { duracaoMs: 3000, valor: 0, pct: 30 }, velocidade: true },
   fantasma: positivo('fantasma', '#bdc3c7', 2, [], { duracaoMs: 8000, valor: 0, pct: 0 }, { semColisao: true }),
   engenho: positivo('aviso', '#50e3c2', 4, [], { duracaoMs: 20000, valor: 0, pct: 0 }, {}),
   atravessar: positivo('flecha', '#1abc9c', 2, [], { duracaoMs: 12_000, valor: 0, pct: 0 }, { projeteisAtravessam: true }),

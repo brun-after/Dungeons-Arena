@@ -1,8 +1,11 @@
 # Decisões de projeto
 
-**Versão:** 0.44 · **Data:** 18/10/2026
+**Versão:** 0.47 · **Data:** 18/10/2026
 
 > **Histórico**
+> - **0.47 (18/10/2026)**: D-085 (piso absoluto de 1 XP por abate no novo antifarm, preservando a penalidade por morte).
+> - **0.46 (18/10/2026)**: D-084 (XP com fadiga permanente independente, piso de 5%, reforços do Guerreiro entre 16–20 e somente Botas do vento).
+> - **0.45 (18/10/2026)**: D-083 (ajustes das cinco classes, antifarm persistente por fase e velocidade ao cruzar hostis).
 > - **0.44 (18/10/2026)**: D-082 (diagnóstico de balanceamento com contabilidade de combate e intervenções por fator).
 > - **0.43 (17/10/2026)**: D-079 (dinamismo das fases preservando salas e corredores, retorno, ambientes, Engenho e enxames limitados).
 > - **0.42 (18/10/2026)**: D-078 (Investida livre e sustentação do guerreiro pelo básico).
@@ -2094,3 +2097,25 @@ Os eventos de início de ação passam a informar os custos já cobrados; impact
 Experimentos retiram um fator de cada vez nas mesmas condições iniciais: cura do básico quando presente, poções, barra ou defesa plana. O relatório distingue observação de contribuição experimental, mortes de limites de tempo e tempo de vitória de tempo até morrer. Não há atribuição causal aditiva nem ajuste automático; oito sementes e uma build típica não certificam equilíbrio geral. Fontes, condições, intervalos e amostras JSON permitem auditoria. Uso e limitações em [Como investigar o balanceamento](DIAGNOSTICO-BALANCEAMENTO.md).
 
 O diagnóstico completo integra `npm run verificar`, o comando `balancear:completo` e a CI de PRs/main. A validação de integridade rejeita amostras incompletas, custos/curas inconsistentes e intervenções sem controle; o resultado entre classes permanece exploratório. O artefato da CI contém somente dados produzidos pela execução corrente. Mortes simultâneas não concluem a onda de diagnóstico.
+
+
+## D-083 — Ajustes de classes, antifarm por fase e botas (18/10/2026)
+
+Aplicar o pacote de classes solicitado no anexo, com curvas e passivas no motor comum e textos no dicionário. A afinidade geral aceita `tag: null` explícita. A janela inicial do Necromante começa na primeira agressão hostil de cada visita à fase, sem renovar por onda, morte ou respawn. Fórmulas e semântica de encontro em [AJUSTES-CLASSES-XP.md](AJUSTES-CLASSES-XP.md).
+
+A primeira rodada do balance 26 teve 73/77 metas legadas aprovadas com oito sementes: quatro tempos de combate menores que a faixa mínima, consequência dos buffs pedidos. Os resultados exploratórios daquela rodada estão identificados como históricos na documentação.
+
+## D-084 — Correções de XP, reforços do Guerreiro e bota específica (18/10/2026)
+
+O pedido corrigido define `XP_final = XP_base × max(0,05; 0,5^(d/10) × 0,5^(A_fase/H))` para diferença positiva; sem diferença, o ganho é integral e A não aumenta. A conta somente XP base obtido com diferença positiva, aumenta depois do ganho e nunca é reduzido por morte, transição ou retorno de retrato antigo. Cada fase tem seu contador independente. H é o XP de um nível da fase, fixado no primeiro ganho penalizado. Remover o antigo decaimento por respawn da campanha para respeitar o piso. Balance 27 e save 21 registram os novos parâmetros e migram os valores existentes sem apagá-los; o histórico legado não permite reconstruir XP base exato.
+
+Somente movimento adicional e aura remota do Guerreiro escalam do nível 16 ao 20: +3% a +15% de velocidade e 20% a 100% da potência do pulso remoto. As demais curvas permanecem. Antes do 16 não há esses dois benefícios; a aura local continua existindo.
+
+Alterar somente Botas do vento, forma lendária, para +30% de velocidade por três segundos ao cruzar hostis. Preservar integralmente as demais botas, inclusive Fantasma e cura por abate de Passo do vendaval. Regras e validação em [AJUSTES-CLASSES-XP.md](AJUSTES-CLASSES-XP.md).
+
+
+## D-085 — Piso absoluto de 1 XP no antifarm (18/10/2026)
+
+Substituir o piso percentual de D-084 por `XP_final = max(1; XP_base × 0,5^(d/10) × 0,5^(A_fase/H))` quando `d > 0`. O acumulado continua recebendo XP base após cada recompensa, inclusive no piso. Recompensas base zero não criam XP; com `d ≤ 0`, o ganho continua integral e não altera A. H, permanência por fase e as demais curvas não mudam. Balance 28 registra `xpMinimo: 1`.
+
+O piso vale somente para XP ganho ao abater inimigos. A penalidade de morte do jogador continua subtraindo até 50 XP acumulados e de 10% a 50% do ouro na campanha e no cooperativo, sem apagar o desgaste da fase. A redução antiga pela repetição da mesma criatura continua substituída pelo novo contador da fase.

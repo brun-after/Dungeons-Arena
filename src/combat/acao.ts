@@ -341,8 +341,9 @@ function lancar(
     }
     case 'area': {
       const atingidos = alvosDaForma(estado, ctx, ator, hab, celulasDaForma(hab, celulaOcupada(ator), mira, ctx.fase));
+      const principal = [...atingidos].sort((a, b) => chebyshev(celulaOcupada(a), mira) - chebyshev(celulaOcupada(b), mira) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))[0];
       atingidos.forEach((e, indice) => {
-        aplicarImpacto(estado, ctx, e, { ...base, indice }, saida);
+        aplicarImpacto(estado, ctx, e, { ...base, indice, secundario: e !== principal }, saida);
       });
       break;
     }

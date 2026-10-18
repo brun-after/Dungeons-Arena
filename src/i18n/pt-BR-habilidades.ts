@@ -3,7 +3,7 @@
 // dicionário principal (pt-BR.ts) por espalhamento, com as mesmas chaves tipadas.
 
 export const textosHabilidades = {
-  'classe.necromante.descricao': 'Um servo morto-vivo retorna passivamente após 8 s. Seus abates reanimam inimigos por 25 s; aliados que caem perto deixam ecos independentes. Até 4 invocações. Drene seus mortos para sobreviver. Afinidade com Trevas.',
+  'classe.necromante.descricao': 'Um servo morto-vivo retorna passivamente após 8 s. Seus abates reanimam inimigos por 25 s; aliados que caem perto deixam ecos independentes. Até 4 invocações. Drene seus mortos para sobreviver. Mortos fortalecidos, dano próprio reduzido e proteção contra grupos nos primeiros 5 s de combate.',
   'efeito.definhando': 'Definhando',
   'desc.efeito.definhando': 'Reduz dano causado e cura recebida em {pct}% por {s} s',
   'efeito.drenar_invocacao': 'Dízimo vital',
@@ -73,6 +73,7 @@ export const textosHabilidades = {
   'desc.efeito.ab_alcance': 'Ataque básico com +{valor} de alcance por {s} s',
   'desc.efeito.ab_multi_alvo': 'Ataque básico acerta +{valor} alvo(s) por {s} s',
   'desc.efeito.imune_dano': 'Imune a dano por {s} s',
+  'desc.efeito.acelerado': '+{pct}% de velocidade de movimento por {s} s',
   'desc.efeito.fantasma': 'Atravessa criaturas por {s} s',
   'desc.efeito.atravessar': 'Projéteis atravessam os alvos por {s} s',
   'desc.efeito.cura': 'Cura {quanto} de vida',
@@ -185,10 +186,10 @@ export const textosHabilidades = {
   'sinergia.panico': 'Pânico!',
 
   // Classes e a escolha ao criar o personagem.
-  'classe.aventureiro.descricao': 'Um pouco de tudo: golpe, magia e cura. Aprende de qualquer escola.',
-  'classe.guerreiro.descricao': 'Corpo a corpo e resistência. Recupera 10% do dano efetivo do ataque básico como vida e paga menos vida nas técnicas de sangue.',
-  'classe.mago.descricao': 'Magias de elemento: fogo, gelo e raio. Frágil, mas o dano mágico e elemental é maior.',
-  'classe.arqueiro.descricao': 'Projéteis de longe, veneno e posicionamento. Mais alcance e dano com projéteis.',
+  'classe.aventureiro.descricao': 'Um pouco de tudo: golpe, magia e cura. Aprende de qualquer escola. Seta Arcana e Explosão causam 5% menos dano a partir do nível 20.',
+  'classe.guerreiro.descricao': 'Corpo a corpo e resistência. Recupera 10% do dano efetivo do ataque básico como vida. Seus golpes pulsam uma aura que fere inimigos e cura. Do nível 16 ao 20, ganha progressivamente até 15% de velocidade e a potência completa dos pulsos à distância e paga menos vida nas técnicas de sangue.',
+  'classe.mago.descricao': 'Magias de elemento: fogo, gelo e raio. Dano mágico +35% no início e a partir do nível 20; +25% entre os níveis 5 e 15, com transições graduais.',
+  'classe.arqueiro.descricao': 'Projéteis de longe, veneno e posicionamento. Mais alcance e dano com projéteis. Chuva de Flechas e Tiro em Leque causam +15% nos alvos secundários.',
   'escolhaClasse.titulo': 'Escolha a classe',
   'escolhaClasse.aviso': 'A classe não muda depois. As habilidades das outras escolas ainda chegam por livros.',
   'escolhaClasse.iniciais': 'Começa com: {lista}',

@@ -77,7 +77,19 @@ function escalarPassiva(p: Passiva, rank: number, ctx: ContextoPerfil): Passiva 
 export function perfilPara(ctx: ContextoPerfil, ator: Entidade, hab: Habilidade): PerfilHabilidade {
   const bolsa = ator.bolsa;
   if (!bolsa) return PERFIL_NEUTRO;
-  const fontes = [...(ctx.conteudo.classes.get(bolsa.classeId)?.afinidades ?? []), ...passivasDaBolsa(ctx, bolsa)];
+  const regras = ctx.balance.ajustesClasses;
+  const nivel = Math.min(ctx.balance.xp.nivelMax, Math.max(1, ator.nivel));
+  const afinidades = (ctx.conteudo.classes.get(bolsa.classeId)?.afinidades ?? []).map((f) => {
+    if (bolsa.classeId === 'guerreiro' && f.tag === 'contato') return { ...f, danoPct: regras.guerreiro.contatoMaxPct * Math.min(1, (nivel - 1) / (regras.guerreiro.contatoNivel - 1)) };
+    if (bolsa.classeId === 'mago' && f.tag === 'magico') {
+      const m = regras.mago;
+      const danoPct = nivel < m.nivelIntermediario ? m.inicialPct + (m.intermediarioPct - m.inicialPct) * (nivel - 1) / (m.nivelIntermediario - 1)
+        : nivel <= m.fimIntermediario ? m.intermediarioPct : m.intermediarioPct + (m.inicialPct - m.intermediarioPct) * Math.min(1, (nivel - m.fimIntermediario) / (m.nivelFinal - m.fimIntermediario));
+      return { ...f, danoPct };
+    }
+    return f;
+  });
+  const fontes = [...afinidades, ...passivasDaBolsa(ctx, bolsa)];
   const p = { ...PERFIL_NEUTRO };
   for (const f of fontes) {
     if (f.tag !== null && !hab.tags.includes(f.tag)) continue;
