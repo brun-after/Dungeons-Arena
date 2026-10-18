@@ -34,7 +34,7 @@ import { carregarTexturasTileset, type TexturasTileset } from './render/tileset-
 import { carregarSlot, criarAutosave, gravarRegistro, listarSlots, type Autosave } from './plataforma/saves';
 import { Interpolador } from './render/interpolacao';
 import { chaveDaFase, jogadorDoSave, VERSAO_SCHEMA, type Estatisticas, type RefFase, type RegistroProgresso } from './save/esquema';
-import { contextoDaFase, estadoInicialDaFase, FASE_INICIAL, faseOficialOuGerada, faseSeguinte } from './save/fases-campanha';
+import { concluirEnxame, contextoDaFase, estadoInicialDaFase, FASE_INICIAL, faseOficialOuGerada, faseSeguinte } from './save/fases-campanha';
 import { avancarFase, personagemNoInicio } from './save/transicao';
 import { chegadaNaFase, comRetorno, faseAnterior, referenciaConhecida } from './save/retorno';
 import { mostrarAviso } from './ui/aviso';
@@ -334,6 +334,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
       referenciasFases,
       certificado,
     };
+    if (!retorno) atual.faseRef = concluirEnxame(faseRef, atual.estado, conteudo);
     const novo = avancarFase(
       atual,
       { ref: proxima, nome: ctxNovo.fase.nome, spawn: retorno ? chegadaNaFase(comRetorno(ctxNovo.fase, proxima), true, fasesVisitadas[chaveDaFase(proxima)]) : ctxNovo.fase.spawns[0] ?? { x: 1, y: 1 }, novoEstado: () => estadoInicialDaFase(ctxNovo), preservarRecursos: retorno },

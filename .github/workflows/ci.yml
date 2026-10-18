@@ -51,7 +51,7 @@ jobs:
       - name: Servidor empacotado
         run: npm run build:server
 
-      - name: Galeria visual dos 35 combos
+      - name: Galeria visual dos combos
         if: always()
         uses: actions/upload-artifact@v4
         with:

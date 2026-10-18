@@ -5,8 +5,10 @@ import type { RegistroProgresso } from '../../src/save/esquema';
 import { novoObjeto } from '../../src/world/objetos';
 
 test('loja mantém tomo a preço fixo e mochila permanece aberta ao trocar equipamentos', async ({ page, isMobile }) => {
+  // Duas reaberturas esperam a recarga em tempo de simulação no WebGL por software.
+  test.slow();
   await page.goto('./?jogo=campanha&slot=1&diag=1&classe=mago');
-  await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
+  await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/, { timeout: 30000 });
   await page.getByRole('button', { name: 'Salvar e voltar aos slots' }).click();
   const download = page.waitForEvent('download');
   await page.locator('[data-slot="1"]').getByRole('button', { name: 'Exportar' }).click();
@@ -22,8 +24,10 @@ test('loja mantém tomo a preço fixo e mochila permanece aberta ao trocar equip
   salvo.registro.estado.entidades = [j];
   salvo.registro.estado.objetos = [novoObjeto('loja-progresso', 'loja', j.x, j.y)];
   await page.locator('[data-slot="2"] input[type="file"]').setInputFiles({ name: 'loja.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(salvo)) });
+  // O change grava no IndexedDB e redesenha o slot de forma assíncrona.
+  await expect(page.locator('[data-slot="2"]').getByRole('link', { name: 'Continuar', exact: true })).toBeVisible();
   await page.goto('./?jogo=campanha&slot=2&diag=1');
-  await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
+  await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/, { timeout: 30000 });
   if (isMobile) await page.getByTestId('interagir').click();
   else await page.keyboard.press('KeyE');
   const loja = page.getByRole('dialog', { name: 'Loja' });
@@ -43,7 +47,7 @@ test('loja mantém tomo a preço fixo e mochila permanece aberta ao trocar equip
       if (isMobile) await page.getByTestId('interagir').click();
       else await page.keyboard.press('KeyE');
       await expect(loja).toBeVisible({ timeout: 500 });
-    }).toPass({ intervals: [1000], timeout: 30000 });
+    }).toPass({ intervals: [1000], timeout: 60000 });
     await expect(loja.locator('[data-chave="comprar-tomo_potencial"]')).toBeVisible();
     if (!isMobile && abertura === 0) await page.keyboard.press('Escape');
     else await loja.getByRole('button', { name: 'Fechar a loja' }).click();

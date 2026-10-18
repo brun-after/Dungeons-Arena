@@ -1,6 +1,7 @@
-// Marco 19 (17/10/2026): renderiza as 35 composições reais no Pixi, inclusive com movimento reduzido.
+// Renderiza todo o catálogo real no Pixi, inclusive com movimento reduzido.
 import { test, expect } from '@playwright/test';
 import { build } from 'esbuild';
+import dados from '../../src/data/combos.json' with { type: 'json' };
 
 let roteiro = '';
 test.beforeAll(async () => {
@@ -12,10 +13,10 @@ test.beforeAll(async () => {
     import { criarProjecao } from './src/render/projecao';
     import dados from './src/data/combos.json';
     (async () => {
-      const app = new Application(); await app.init({ width: 1000, height: 1400, background: '#13101a', antialias: true });
+      const app = new Application(); await app.init({ width: 1000, height: Math.ceil(dados.combos.length / 5) * 192 + 100, background: '#13101a', antialias: true });
       document.body.append(app.canvas);
       const bus = new Barramento(); const estado = criarEstado({ semente: 1, faseId: 'visual' });
-      const camada = new CamadaCombosTaticos(app.stage, () => criarProjecao('cima', 22, 30), () => document.body.dataset.reduzido === 'sim', () => document.body.dataset.simples === 'sim', 35);
+      const camada = new CamadaCombosTaticos(app.stage, () => criarProjecao('cima', 22, 30), () => document.body.dataset.reduzido === 'sim', () => document.body.dataset.simples === 'sim', dados.combos.length);
       camada.ligar(bus, () => estado, () => 0);
       dados.combos.forEach((c, i) => {
         const x = 1.5 + i % 5 * 4, y = 1.7 + Math.floor(i / 5) * 4;
@@ -31,14 +32,14 @@ test.beforeAll(async () => {
   roteiro = r.outputFiles[0]?.text ?? '';
 });
 
-test('35 combos têm desenhos válidos no navegador', async ({ page }, info) => {
+test('todos os combos têm desenhos válidos no navegador', async ({ page }, info) => {
   test.setTimeout(120000);
   const erros: string[] = []; page.on('pageerror', (e) => erros.push(e.message));
-  await page.setViewportSize({ width: 1020, height: 1450 });
+  await page.setViewportSize({ width: 1020, height: Math.ceil(dados.combos.length / 5) * 192 + 150 });
   await page.goto('/');
   await page.setContent('<html><body style="margin:0;background:#13101a"></body></html>');
   await page.addScriptTag({ content: roteiro });
-  await expect(page.locator('body')).toHaveAttribute('data-combos', '35');
+  await expect(page.locator('body')).toHaveAttribute('data-combos', String(dados.combos.length));
   await expect(page.locator('canvas')).toBeVisible();
   for (const modo of ['normal', 'reduzido', 'minimo']) {
     await page.evaluate((m) => { document.body.dataset.reduzido = m === 'reduzido' ? 'sim' : 'nao'; document.body.dataset.simples = m === 'minimo' ? 'sim' : 'nao'; }, modo);
