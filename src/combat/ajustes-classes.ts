@@ -30,6 +30,13 @@ export function protecaoInicial(estado: EstadoJogo, ctx: ContextoSimulacao, alvo
   for (const e of [fonte, alvo]) {
     if (!e.encontro || e.encontro.faseId !== estado.faseId) e.encontro = { faseId: estado.faseId, inicioTick: estado.tick };
   }
+  if (classeDe(alvo) === 'guerreiro' && !alvo.invocacao) {
+    const g = ctx.balance.ajustesClasses.guerreiro;
+    const hostis = estado.entidades.filter(e => vivo(e) && podeFerir(e, alvo, ctx.modo) && chebyshev(celulaOcupada(e), celulaOcupada(alvo)) <= g.grupoRaio).length;
+    const faixa = Math.min(1, Math.max(0, (alvo.nivel - 1) / (g.grupoNivelPleno - 1)));
+    const progresso = 1 - (1 - faixa) ** g.contatoExpoente;
+    return hostis >= 2 ? 1 - g.grupoReducaoMaxPct / 100 * progresso : 1;
+  }
   if (classeDe(alvo) !== 'necromante' || alvo.invocacao) return 1;
   const r = ctx.balance.ajustesClasses.necromante;
   if (estado.tick - (alvo.encontro?.inicioTick ?? estado.tick) >= ticksDe(r.protecaoMs)) return 1;

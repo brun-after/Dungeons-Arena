@@ -293,6 +293,8 @@ export interface Entidade {
   encontro?: { faseId: string; inicioTick: number };
   auraFracoes?: Record<string, number>;
   auraCuraFracao?: number;
+  /** 18/10/2026: acertos efetivos consecutivos do Dardo no mesmo alvo e vida. */
+  concentracaoArcana?: { alvoId: string; geracao: number; abates: number; acertos: number; ultimoTick: number };
 }
 
 export interface BuffArmado {
@@ -464,6 +466,7 @@ export function clonarEntidade(e: Entidade): Entidade {
   return {
     ...e,
     ...(e.encontro ? { encontro: { ...e.encontro } } : {}),
+    ...(e.concentracaoArcana ? { concentracaoArcana: { ...e.concentracaoArcana } } : {}),
     ...(e.auraFracoes ? { auraFracoes: { ...e.auraFracoes } } : {}),
     waypoints: copiarCelulas(e.waypoints),
     caminho: copiarCelulas(e.caminho),

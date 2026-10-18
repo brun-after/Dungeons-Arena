@@ -1,14 +1,14 @@
 # Classes, experiência e Botas do vento
 
-**Versão:** 1.2 · **Data:** 18/10/2026 · **Balance:** 28 · **Save:** 21
+**Versão:** 1.3 · **Data:** 18/10/2026 · **Balance:** 29 · **Save:** 21
 
 Implementação baseada no arquivo `AJUSTES-CLASSES-A-PARTIR-DA-MAIN.md` fornecido pelo usuário, mais os pedidos de reduzir o farm de criaturas inferiores e substituir o efeito redundante das botas. Os percentuais históricos do anexo não certificam este pacote de produção.
 
 ## Classes
 
-- **Guerreiro:** afinidade de contato absoluta de 0% a 15% entre os níveis 1 e 10; multiplicador adicional de dano de 1 até 1,10 entre os níveis 10 e 30, também nos efeitos atribuídos ao próprio Guerreiro. A aura varia de 1% a 5%, alcança duas células por Chebyshev e cura 20% do dano efetivo causado. Defesa, escudo, imunidade, frações por destinatário e cura fracionária são resolvidos sem novos críticos, acertos, reflexos ou pulsos recursivos. A cura de 10% do básico continua separada.
+- **Guerreiro:** afinidade de contato absoluta de 0% a 15% entre os níveis 1 e 10, com curva quadrática (aproximadamente 2,96% no nível 5). Contra dois ou mais hostis vivos em até duas células, recebe redução de dano progressiva de 0% no nível 1 até 15% no 10, usando a curva complementar `1 − (1 − progresso)²`; multiplicador adicional de dano de 1 até 1,10 entre os níveis 10 e 30, também nos efeitos atribuídos ao próprio Guerreiro. A aura varia de 1% a 5%, alcança duas células por Chebyshev e cura 20% do dano efetivo causado. Defesa, escudo, imunidade, frações por destinatário e cura fracionária são resolvidos sem novos críticos, acertos, reflexos ou pulsos recursivos. A cura de 10% do básico continua separada.
 - **Reforços do Guerreiro entre 16 e 20:** no integrador compartilhado por servidor e predição, o movimento ganha +3%, +6%, +9%, +12% e +15% nos níveis 16, 17, 18, 19 e 20. A partir do 20 mantém +15%. Impactos de projéteis e áreas remotas quadradas geram somente o pulso centrado no atingido, com 20%, 40%, 60%, 80% e 100% da potência nesses mesmos níveis; antes do 16, não geram esse pulso remoto. A escala multiplica a potência antes da defesa dos destinatários. Cones, linhas, áreas locais e periódicos mantêm a aura local e sua curva original de 1% a 5%. Cada impacto remoto gera somente um pulso, inclusive se matar o alvo; ele não gera outro junto ao Guerreiro.
-- **Mago:** afinidade mágica de 35% no nível 1, interpolação até 25% no 5, manutenção até o 15 e interpolação até 35% no 20. Afinidade elemental e custos preservados.
+- **Mago:** afinidade mágica de 35% no nível 1, interpolação até 25% no 5, manutenção até o 15 e interpolação até 35% no 20. Afinidade elemental e custos preservados. O Dardo Arcano começa em ×0,65 até o nível 10 e recupera linearmente ×1 no 20. Acertos que retiram HP do mesmo alvo recuperam gradualmente o dano normal em quatro acertos; a partir do quinto, o multiplicador é ×1,25. A concentração expira após 12 segundos sem acerto efetivo e reinicia ao trocar de alvo, vida do alvo, morrer ou mudar de fase. Escudos completos, falhas e imunidade não carregam concentração.
 - **Aventureiro:** Seta Arcana e Explosão causam ×0,95 de dano direto a partir do nível 20, sem alterar as definições compartilhadas ou os efeitos derivados.
 - **Arqueiro:** Chuva de Flechas e Tiro em Leque causam ×1,15 nos alvos secundários. O principal é escolhido antes da resolução pela distância de Chebyshev da célula ocupada à mira, com desempate por ID; a ordem dos impactos é preservada.
 - **Necromante:** HP base 32, afinidade geral de dano −75 pontos somada às demais (Trevas permanece +10%), mortos específicos em 180%. Invocações genéricas mantêm seus valores. Proteção inicial contra dois/três ou mais hostis vivos de 10%/20%, antes do arredondamento e escudo, também nos periódicos hostis; custos próprios e dano autoinfligido são excluídos.
@@ -120,3 +120,7 @@ Casos de regressão validam os exemplos de XP fornecidos, H congelado, increment
 - Typecheck, lint e builds do cliente e servidor aprovados.
 - Metas legadas novamente em **73/77**, com as mesmas quatro durações abaixo do mínimo: Guerreiro 5 (3,8 s), Mago 1 (3,7 s), Mago 5 (3,4 s), Mago 10 (3,8 s). Metas não foram alteradas; a PR permanece em rascunho com essa limitação explícita.
 - Smoke E2E não reexecutado: Chromium do Playwright indisponível neste ambiente. As 896 simulações focadas e a grade histórica acima pertencem às versões de balance identificadas, não foram reexecutadas para a troca isolada do piso de XP.
+
+## Validação da progressão — balance 29
+
+As 77 metas originais foram aprovadas com oito sementes, sem alterar seus limites. A nova progressão troca parte do pico inicial por resistência contra grupos no Guerreiro e concentração contra alvos duradouros no Mago. As grades anteriores abaixo/acima documentadas permanecem históricas; o resultado das metas não certifica equilíbrio em todos os cenários.

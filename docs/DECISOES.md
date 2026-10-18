@@ -1,6 +1,6 @@
 # Decisões de projeto
 
-**Versão:** 0.47 · **Data:** 18/10/2026
+**Versão:** 0.48 · **Data:** 18/10/2026
 
 > **Histórico**
 > - **0.47 (18/10/2026)**: D-085 (piso absoluto de 1 XP por abate no novo antifarm, preservando a penalidade por morte).
@@ -2119,3 +2119,7 @@ Alterar somente Botas do vento, forma lendária, para +30% de velocidade por tr�
 Substituir o piso percentual de D-084 por `XP_final = max(1; XP_base × 0,5^(d/10) × 0,5^(A_fase/H))` quando `d > 0`. O acumulado continua recebendo XP base após cada recompensa, inclusive no piso. Recompensas base zero não criam XP; com `d ≤ 0`, o ganho continua integral e não altera A. H, permanência por fase e as demais curvas não mudam. Balance 28 registra `xpMinimo: 1`.
 
 O piso vale somente para XP ganho ao abater inimigos. A penalidade de morte do jogador continua subtraindo até 50 XP acumulados e de 10% a 50% do ouro na campanha e no cooperativo, sem apagar o desgaste da fase. A redução antiga pela repetição da mesma criatura continua substituída pelo novo contador da fase.
+
+## D-086 — Progressão do Guerreiro e concentração do Mago (18/10/2026)
+
+Preservar as metas originais e ajustar a progressão dos personagens. O contato do Guerreiro cresce quadraticamente até +15% no nível 10, compensado por resistência progressiva contra grupos próximos. O Dardo Arcano tem abertura reduzida nos primeiros níveis, recuperada entre 10 e 20, e concentração por acertos efetivos no mesmo alvo, com potência adicional somente após quatro acertos. Parâmetros no balance 29; regras em [AJUSTES-CLASSES-XP.md](AJUSTES-CLASSES-XP.md). As 77 metas originais passaram com oito sementes.

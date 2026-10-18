@@ -80,7 +80,7 @@ export function perfilPara(ctx: ContextoPerfil, ator: Entidade, hab: Habilidade)
   const regras = ctx.balance.ajustesClasses;
   const nivel = Math.min(ctx.balance.xp.nivelMax, Math.max(1, ator.nivel));
   const afinidades = (ctx.conteudo.classes.get(bolsa.classeId)?.afinidades ?? []).map((f) => {
-    if (bolsa.classeId === 'guerreiro' && f.tag === 'contato') return { ...f, danoPct: regras.guerreiro.contatoMaxPct * Math.min(1, (nivel - 1) / (regras.guerreiro.contatoNivel - 1)) };
+    if (bolsa.classeId === 'guerreiro' && f.tag === 'contato') return { ...f, danoPct: regras.guerreiro.contatoMaxPct * Math.min(1, (nivel - 1) / (regras.guerreiro.contatoNivel - 1)) ** regras.guerreiro.contatoExpoente };
     if (bolsa.classeId === 'mago' && f.tag === 'magico') {
       const m = regras.mago;
       const danoPct = nivel < m.nivelIntermediario ? m.inicialPct + (m.intermediarioPct - m.inicialPct) * (nivel - 1) / (m.nivelIntermediario - 1)

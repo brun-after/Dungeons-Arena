@@ -187,8 +187,8 @@ export const textosHabilidades = {
 
   // Classes e a escolha ao criar o personagem.
   'classe.aventureiro.descricao': 'Um pouco de tudo: golpe, magia e cura. Aprende de qualquer escola. Seta Arcana e Explosão causam 5% menos dano a partir do nível 20.',
-  'classe.guerreiro.descricao': 'Corpo a corpo e resistência. Recupera 10% do dano efetivo do ataque básico como vida. Seus golpes pulsam uma aura que fere inimigos e cura. Do nível 16 ao 20, ganha progressivamente até 15% de velocidade e a potência completa dos pulsos à distância e paga menos vida nas técnicas de sangue.',
-  'classe.mago.descricao': 'Magias de elemento: fogo, gelo e raio. Dano mágico +35% no início e a partir do nível 20; +25% entre os níveis 5 e 15, com transições graduais.',
+  'classe.guerreiro.descricao': 'Corpo a corpo e resistência. O bônus de contato cresce até o nível 10; diante de dois ou mais inimigos próximos, ganha resistência progressiva até 15%. Recupera 10% do dano efetivo do ataque básico como vida. Seus golpes pulsam uma aura que fere inimigos e cura. Do nível 16 ao 20, ganha progressivamente até 15% de velocidade e a potência completa dos pulsos à distância e paga menos vida nas técnicas de sangue.',
+  'classe.mago.descricao': 'Magias de elemento: fogo, gelo e raio. Dano mágico +35% no início e a partir do nível 20; +25% entre os níveis 5 e 15, com transições graduais. O Dardo Arcano recupera seu poder inicial entre os níveis 10 e 20 e concentra poder com acertos no mesmo alvo, chegando a +25% após quatro acertos. A concentração expira após 12 segundos sem acertar.',
   'classe.arqueiro.descricao': 'Projéteis de longe, veneno e posicionamento. Mais alcance e dano com projéteis. Chuva de Flechas e Tiro em Leque causam +15% nos alvos secundários.',
   'escolhaClasse.titulo': 'Escolha a classe',
   'escolhaClasse.aviso': 'A classe não muda depois. As habilidades das outras escolas ainda chegam por livros.',

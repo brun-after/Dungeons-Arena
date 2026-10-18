@@ -1,3 +1,4 @@
+import { multiplicadorDardo, registrarDardo } from './concentracao-arcana';
 import { entregaRemota, extraGuerreiro, multiplicadorDireto, protecaoInicial, pulsarAura } from './ajustes-classes';
 import { comboDoImpacto, confirmarImpactoTatico } from './sequencias';
 import { defenderGolpe, fluxoRestaurador } from './tatica';
@@ -117,7 +118,7 @@ export function aplicarImpacto(
       { ...fonte, bonusAtributo: fonte.bonusAtributo + (impacto.danoExtra ?? 0) },
       { defesa: alvo.defesa, imune: imuneADano(alvo, tick) || recebido === 0, multRecebido: recebido },
       ctx.balance.combate,
-      fonte.multDano * (atacante ? extraGuerreiro(ctx, atacante, alvo) * multiplicadorDireto(ctx, atacante, hab, impacto.secundario ?? false) : 1),
+      fonte.multDano * (atacante ? extraGuerreiro(ctx, atacante, alvo) * multiplicadorDireto(ctx, atacante, hab, impacto.secundario ?? false) * multiplicadorDardo(ctx, atacante, alvo, hab, tick) : 1),
     );
     ({ d20, mult, falha, critico, imune } = r);
     // Marco 14: o escudo absorve antes da vida.
@@ -130,6 +131,7 @@ export function aplicarImpacto(
     if (dano > 0) {
       registrarParticipacao(alvo, fonte.id, tick, ctx);
       alvo.ultimoGolpe = { fonteId: fonte.id, chave: hab.chave };
+      if (atacante) registrarDardo(ctx, atacante, alvo, hab, tick, Math.min(hpAntes, dano));
     }
   }
   if (hab.formulaCura !== null) {

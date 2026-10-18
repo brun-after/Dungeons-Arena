@@ -96,6 +96,7 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
       null,
     );
     e.morto = true;
+    delete e.concentracaoArcana;
     if (e.tatica) e.tatica = novaMemoria();
     zerarMovimento(e);
     // Baú ou loja abertos se fecham: libera o congelamento e arma a recarga da loja (§2.12).

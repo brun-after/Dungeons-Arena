@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { multiplicadorDardo, registrarDardo } from '../../src/combat/concentracao-arcana';
 import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 import { criarJogador } from '../../src/entities/fabrica';
 import { criarEntidade } from '../../src/entities/entidade';
@@ -39,7 +40,7 @@ describe('ajustes das classes (18/10/2026)', () => {
   });
   it.each([1,5,10,15,20,25,30])('Guerreiro nível %i: contato absoluto e multiplicador separado', nivel => {
     const c = cena('guerreiro', nivel);
-    expect(perfilPara(c.ctx, c.j, c.hab('ataque_basico')).danoPct).toBeCloseTo(15 * Math.min(1, (nivel - 1) / 9));
+    expect(perfilPara(c.ctx, c.j, c.hab('ataque_basico')).danoPct).toBeCloseTo(15 * Math.min(1, (nivel - 1) / 9) ** 2);
     expect(extraGuerreiro(c.ctx, c.j, c.alvo)).toBeCloseTo(1 + .1 * Math.max(0, nivel - 10) / 20);
   });
   it('aura acumula frações por alvo, cura com fração e não gera recursão', () => {
@@ -347,5 +348,50 @@ describe('botas ao cruzar inimigos e saves legados', () => {
     expect(j.bolsa?.hpBase).toBe(32); expect(j.hpMax).toBe(72); expect(j.hp).toBe(72);
     expect(j.bolsa?.xpPorFase).toEqual({});
     expect(c.j.bolsa?.hpBase).toBe(42);
+  });
+});
+
+
+describe('progressão de contato e concentração arcana', () => {
+  it('Guerreiro ganha resistência progressiva somente contra grupos próximos', () => {
+    const c = cena('guerreiro', 5);
+    expect(protecaoInicial(c.estado, c.ctx, c.j, c.alvo)).toBe(1);
+    const outro = criarEntidade({ id: 'b', tipo: 'inimigo', x: 3, y: 4, hpMax: 100 });
+    c.estado.entidades.push(outro);
+    expect(protecaoInicial(c.estado, c.ctx, c.j, c.alvo)).toBeCloseTo(1 - .15 * (1 - (5/9)**2));
+    c.j.nivel = 10;
+    expect(protecaoInicial(c.estado, c.ctx, c.j, c.alvo)).toBe(.85);
+    outro.x = 10;
+    expect(protecaoInicial(c.estado, c.ctx, c.j, c.alvo)).toBe(1);
+    expect(protecaoInicial(c.estado, c.ctx, c.j, c.j)).toBe(1);
+  });
+  it('Dardo concentra com dano efetivo, atinge o teto e recupera a abertura por nível', () => {
+    const c = cena('mago', 5), h = c.hab('dardo_arcano');
+    expect(multiplicadorDardo(c.ctx, c.j, c.alvo, h, 0)).toBe(.65);
+    registrarDardo(c.ctx, c.j, c.alvo, h, 0, 0);
+    expect(c.j.concentracaoArcana).toBeUndefined();
+    for (let i = 0; i < 4; i++) registrarDardo(c.ctx, c.j, c.alvo, h, i, 1);
+    expect(multiplicadorDardo(c.ctx, c.j, c.alvo, h, 4)).toBe(1.25);
+    expect(obter(clonarEstado(c.estado).entidades[0]).concentracaoArcana).toEqual(c.j.concentracaoArcana);
+    expect(obter(clonarEstado(c.estado).entidades[0]).concentracaoArcana).not.toBe(c.j.concentracaoArcana);
+    delete c.j.concentracaoArcana;
+    c.j.nivel = 15;
+    expect(multiplicadorDardo(c.ctx, c.j, c.alvo, h, 0)).toBeCloseTo(.825);
+    c.j.nivel = 20;
+    expect(multiplicadorDardo(c.ctx, c.j, c.alvo, h, 0)).toBe(1);
+  });
+  it('concentração expira e não atravessa alvo ou nova vida', () => {
+    const c = cena('mago', 5), h = c.hab('dardo_arcano');
+    registrarDardo(c.ctx, c.j, c.alvo, h, 0, 1);
+    expect(multiplicadorDardo(c.ctx, c.j, c.alvo, h, ticksDe(12000) + 1)).toBe(.65);
+    c.alvo.geracao++;
+    expect(multiplicadorDardo(c.ctx, c.j, c.alvo, h, 1)).toBe(.65);
+    registrarDardo(c.ctx, c.j, c.alvo, h, 1, 1);
+    c.alvo.abates++;
+    expect(multiplicadorDardo(c.ctx, c.j, c.alvo, h, 2)).toBe(.65);
+    const outro = criarEntidade({ id: 'b', tipo: 'inimigo', x: 3, y: 4, hpMax: 100 });
+    registrarDardo(c.ctx, c.j, outro, h, 2, 1);
+    expect(multiplicadorDardo(c.ctx, c.j, c.alvo, h, 3)).toBe(.65);
+    expect(c.j.concentracaoArcana?.acertos).toBe(1);
   });
 });
