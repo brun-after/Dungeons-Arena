@@ -65,6 +65,89 @@ const loja = (x = 4, y = 5, estoque = ['pocao_vida', 'escudo_madeira']) => novoO
 const bau = (campos: Partial<ObjetoNoMundo> = {}, x = 4, y = 5) =>
   novoObjeto('bau1', 'bau', x, y, { itens: ['adaga', 'pocao_mana'], ouro: 30, ...campos });
 
+describe('itens compartilhados no chão', () => {
+  it('solta uma unidade, não recolhe parado e transfere uma vez ao aliado', () => {
+    const c = cenario([['j', 3, 5], ['aliado', 4, 5]]);
+    const entrada = obter(c.bolsa().mochila.find((i) => i.itemId === 'pocao_vida'), 'poção');
+    const antes = entrada.qtd;
+    c.tick({ t: 'soltarItem', invId: entrada.invId, qtd: 1 });
+    c.avancar(100);
+    expect(entrada.qtd).toBe(antes - 1);
+    expect(c.estado.objetos).toHaveLength(1);
+    const qtdAliado = obter(c.bolsa('aliado').mochila.find((i) => i.itemId === 'pocao_vida'), 'poção aliada').qtd;
+    c.e('aliado').x = 3;
+    c.tick();
+    c.avancar(5);
+    expect(c.estado.objetos).toHaveLength(0);
+    expect(c.bolsa('aliado').mochila.find((i) => i.itemId === 'pocao_vida')?.qtd).toBe(qtdAliado + 1);
+  });
+
+  it('permite recuperar a própria pilha após sair e voltar, preservando o ref', () => {
+    const c = cenario();
+    const invId = c.dar('livro_raro', 2);
+    const entrada = obter(c.bolsa().mochila.find((i) => i.invId === invId), 'livro');
+    entrada.ref = 'seta_arcana';
+    const qtd = entrada.qtd;
+    c.tick({ t: 'soltarItem', invId: entrada.invId, qtd });
+    expect(c.bolsa().mochila.some((i) => i.invId === entrada.invId)).toBe(false);
+    expect(c.estado.objetos[0]).toMatchObject({ valor: qtd, ref: entrada.ref, aguardaSaidaDe: 'j' });
+    c.e().x = 4;
+    c.tick();
+    c.e().x = 3;
+    c.tick();
+    expect(c.estado.objetos).toHaveLength(0);
+    expect(c.bolsa().mochila.find((i) => i.ref === entrada.ref)?.qtd).toBe(qtd);
+  });
+
+  it('recusa quantidade inválida, entrada de outro jogador e replay sem duplicar', () => {
+    const c = cenario([['j', 3, 5], ['aliado', 4, 5]]);
+    const invId = c.dar('adaga');
+    const antes = JSON.stringify(c.bolsa());
+    for (const qtd of [0, -1, 0.5, NaN, 2]) c.tick({ t: 'soltarItem', invId, qtd });
+    c.tickCom([['aliado', { t: 'soltarItem', invId, qtd: 1 }]]);
+    expect(JSON.stringify(c.bolsa())).toBe(antes);
+    expect(c.estado.objetos).toHaveLength(0);
+    c.tick({ t: 'soltarItem', invId, qtd: 1 }, { t: 'soltarItem', invId, qtd: 1 });
+    expect(c.estado.objetos).toHaveLength(1);
+  });
+
+  it('sem espaço no chão não retira nada; mochila cheia do aliado mantém o drop', () => {
+    const c = cenario([['j', 3, 5], ['aliado', 4, 5]]);
+    const invId = c.dar('adaga');
+    for (let x = 2; x <= 4; x++) for (let y = 4; y <= 6; y++) c.objeto(novoObjeto(`ocupado-${x}-${y}`, 'loja', x, y));
+    const antes = JSON.stringify(c.bolsa());
+    c.tick({ t: 'soltarItem', invId, qtd: 1 });
+    expect(JSON.stringify(c.bolsa())).toBe(antes);
+    expect(c.recusas()).toContain('sem_espaco_no_chao');
+    c.estado.objetos = [];
+    c.tick({ t: 'soltarItem', invId, qtd: 1 });
+    while (c.bolsa('aliado').mochila.length < c.ctx.balance.inventario.capacidade) guardarItem(c.bolsa('aliado'), item('adaga'), 1, c.ctx.balance.inventario);
+    c.e('aliado').x = 3;
+    c.tick();
+    expect(c.estado.objetos).toHaveLength(1);
+  });
+
+  it('protocolo valida a quantidade e os modos de campanha aceitam o comando', () => {
+    expect(lerComando({ t: 'soltarItem', invId: 'i1', qtd: 2, itemId: 'forjado' })).toEqual({ t: 'soltarItem', invId: 'i1', qtd: 2 });
+    for (const qtd of [-1, 0, 1.5, NaN, Infinity, 1001, '1']) expect(lerComando({ t: 'soltarItem', invId: 'i1', qtd })).toBeNull();
+    for (const modo of ['campanha', 'cooperativo', 'livre']) expect(CONTEUDO.modos.get(modo)?.comandosDeRede).toContain('soltarItem');
+  });
+
+  it('sair andando não recolhe o próprio drop na metade do passo', () => {
+    const c = cenario();
+    const invId = c.dar('adaga');
+    c.tick({ t: 'soltarItem', invId, qtd: 1 }, { t: 'irPara', x: 3, y: 3 });
+    c.avancar(90);
+    expect(c.e().y).toBe(3);
+    expect(c.estado.objetos).toHaveLength(1);
+    expect(c.bolsa().mochila.some((i) => i.itemId === 'adaga')).toBe(false);
+    c.tick({ t: 'irPara', x: 3, y: 5 });
+    c.avancar(90);
+    expect(c.estado.objetos).toHaveLength(0);
+    expect(c.bolsa().mochila.some((i) => i.itemId === 'adaga')).toBe(true);
+  });
+});
+
 describe('loja (§2.10)', () => {
   it('interagir ao lado abre a loja e congela o jogador', () => {
     const c = cenario();

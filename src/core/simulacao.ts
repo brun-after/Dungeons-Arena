@@ -23,6 +23,7 @@ import { desequipar, distribuirPonto, equipar, moverItem, usarItem } from '../pr
 import { ehDificuldade } from '../modos/dificuldade';
 import { acelerarEstudo, avancarEstudos, equiparHabilidade, subirRank } from '../progression/habilidades-personagem';
 import { comprar, vender } from '../progression/loja';
+import { soltarItem } from '../progression/soltar-item';
 import { processarMortes } from '../progression/morte';
 import { regenerarRecursos } from '../progression/recursos';
 import { definirDirecao, moverEntidades, planejarCaminho } from '../world/movimento';
@@ -120,6 +121,9 @@ function aplicarComandos(
         break;
       case 'usarItem':
         usarItem(estado, ator, ctx, cmd.invId, saida);
+        break;
+      case 'soltarItem':
+        soltarItem(estado, ctx, ator, cmd.invId, cmd.qtd, saida);
         break;
       case 'distribuirPonto':
         distribuirPonto(ator, ctx, cmd.atributo, estado.tick, saida);

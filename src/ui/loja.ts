@@ -183,6 +183,8 @@ export function criarLoja(o: OpcoesLoja): Loja {
     const estado = o.estado();
     const loja = j ? lojaAberta(estado, j) : null;
     if (!j || !loja) {
+      // ateTick é sempre LOJA_SEM_PRAZO; a confirmação libera a próxima abertura.
+      janelaFechada = -1;
       if (modal.aberto()) {
         fechandoPeloEstado = true;
         modal.fechar();

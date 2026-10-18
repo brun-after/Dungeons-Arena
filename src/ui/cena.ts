@@ -33,6 +33,7 @@ import { definirCoresDosElementos } from '../render/adornos';
 import { CamadaNumeros } from '../render/numeros';
 import { CamadaFluxo } from '../render/fluxo';
 import { CamadaObjetos } from '../render/objetos';
+import { carregarTexturasDeIcones } from '../render/icones-textura';
 import { CamadaPortas } from '../render/portas';
 import { CamadaEntidades } from '../render/sprites';
 import { criarPalco, type Palco } from '../render/stage';
@@ -177,11 +178,13 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     reduzido: () => ap.movimentoReduzido(),
   });
   const telegrafia = new CamadaTelegrafia(palco.chao, palco.voo, projecao, () => aparencia.areaExata, ap.particulas);
+  await carregarTexturasDeIcones([...new Set([...ctx.conteudo.itens.values()].map((i) => i.icone)), 'pergaminho']);
   const objetos = new CamadaObjetos(
     palco.chao,
     (id) => ctx.conteudo.itens.get(id)?.raridade,
     ticksDe(ctx.balance.economia.bauCongelaMs),
     { camada: palco.entidades, projecao },
+    (id) => ctx.conteudo.itens.get(id)?.icone,
   );
   const fluxo = new CamadaFluxo(palco.chao, () => ap.particulas.limite > 0, () => ticksDe(ctx.balance.armadilhas.desarmeMs));
   bus.on('armadilhaDisparou', (ev) => {

@@ -83,6 +83,8 @@ export interface ObjetoNoMundo {
   abridorId: EntidadeId | null;
   /** Marco 14: o conteúdo do livro raro no chão (o id da habilidade gerada); null nos demais. */
   ref: string | null;
+  /** Quem soltou precisa sair da célula antes de recolher; aliados podem pegar imediatamente. */
+  aguardaSaidaDe?: EntidadeId;
 }
 
 /** Célula de rastro (§2.8): aplica dano ou efeito a quem é hostil ao dono e entra nela. */
