@@ -189,6 +189,55 @@
           "qtd": 2
         }
       ]
+    },
+    {
+      "id": "necromante",
+      "nome": "Necromante",
+      "hpBase": 42,
+      "defesa": 1,
+      "classe": "conjurador",
+      "atributos": {
+        "forca": 8,
+        "destreza": 10,
+        "constituicao": 10,
+        "inteligencia": 14,
+        "sabedoria": 12,
+        "carisma": 12
+      },
+      "ataqueBasico": "toque_funesto",
+      "habilidades": [
+        "dardo_funesto",
+        "dizimo_vital",
+        "garras_do_ossuario",
+        "comando_sepulcral"
+      ],
+      "itensIniciais": [
+        {
+          "id": "cajado_aprendiz",
+          "qtd": 1
+        },
+        {
+          "id": "pocao_vida",
+          "qtd": 2
+        }
+      ],
+      "modelo": "necromante",
+      "descricao": "classe.necromante.descricao",
+      "afinidades": [
+        {
+          "tag": "trevas",
+          "danoPct": 10,
+          "custoPct": -20
+        }
+      ],
+      "aprendiveis": [
+        "ceifa_de_almas",
+        "mortalha_funebre",
+        "flecha_venenosa",
+        "bola_de_fogo",
+        "lanca_radiante",
+        "barreira"
+      ]
     }
   ]
 }

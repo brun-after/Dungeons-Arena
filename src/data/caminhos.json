@@ -17,7 +17,7 @@
     { "id": "elemental_veneno", "nome": "Peçonha", "icone": "veneno", "elemento": "veneno", "danoPct": 5 },
     { "id": "elemental_psiquico", "nome": "Mente", "icone": "olho", "elemento": "psiquico", "danoPct": 5 },
     { "id": "elemental_terra", "nome": "Rocha", "icone": "pedra", "elemento": "terra", "danoPct": 5 },
-    { "id": "elemental_sombra", "nome": "Breu", "icone": "fantasma", "elemento": "sombra", "danoPct": 5 },
+    { "id": "elemental_sombra", "nome": "Breu", "icone": "fantasma", "elemento": "trevas", "danoPct": 5 },
     { "id": "elemental_sagrado", "nome": "Luz", "icone": "estrela", "elemento": "sagrado", "danoPct": 5 },
     {"id": "aparador", "nome": "Aparador", "icone": "escudo", "efeitos": [{"tipo": "aparando", "duracaoMs": 1800, "pct": 75, "em": "conjurador"}]},
     {"id": "evasivo", "nome": "Evasivo", "icone": "fantasma", "efeitos": [{"tipo": "veu_noturno", "duracaoMs": 3000, "pct": 45, "em": "conjurador"}]},

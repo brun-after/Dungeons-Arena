@@ -1624,7 +1624,7 @@
           "duracaoMs": 1500
         }
       ],
-      "elemento": "sombra",
+      "elemento": "trevas",
       "fusao": [
         "corrente",
         "troca_sombria"
@@ -1950,7 +1950,7 @@
       "tags": [
         "expansao19"
       ],
-      "elemento": "sombra"
+      "elemento": "trevas"
     },
     {
       "id": "veu_da_noite",
@@ -2605,6 +2605,392 @@
       ],
       "passiva": {
         "fluxoEscudoPct": 25
+      }
+    },
+    {
+      "id": "toque_funesto",
+      "familiaEvolucao": "sombra",
+      "grau": "B",
+      "nome": "Toque funesto",
+      "icone": "caveira",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d6",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1600,
+      "conjuracaoMs": 450,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 11,
+      "efeitos": [],
+      "visual": {
+        "cor": "#8b68d9",
+        "conjuracao": "sombra",
+        "impacto": "sombra",
+        "som": "magia"
+      },
+      "mobilidade": "lenta",
+      "nivelMinimo": 1,
+      "tags": [
+        "necromancia"
+      ],
+      "elemento": "trevas",
+      "basico": true
+    },
+    {
+      "id": "dardo_funesto",
+      "familiaEvolucao": "sombra",
+      "grau": "B",
+      "nome": "Dardo funesto",
+      "icone": "runa",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 6,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 3,
+      "recargaMs": 3500,
+      "conjuracaoMs": 400,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 12,
+      "efeitos": [
+        {
+          "tipo": "definhando",
+          "duracaoMs": 4000,
+          "pct": 20
+        }
+      ],
+      "visual": {
+        "cor": "#8b68d9",
+        "conjuracao": "sombra",
+        "impacto": "sombra",
+        "som": "magia"
+      },
+      "mobilidade": "lenta",
+      "nivelMinimo": 1,
+      "tags": [
+        "necromancia"
+      ],
+      "marcos": {
+        "2": {
+          "texto": "Custa 15% menos mana",
+          "custoPct": -15
+        },
+        "4": {
+          "texto": "Recarga 15% menor",
+          "recargaPct": -15
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "eficiente",
+          "controle"
+        ],
+        "5": [
+          "fortificado",
+          "longo_alcance"
+        ]
+      },
+      "elemento": "trevas"
+    },
+    {
+      "id": "dizimo_vital",
+      "familiaEvolucao": "sombra",
+      "grau": "B",
+      "nome": "Dízimo vital",
+      "icone": "cura",
+      "tipoAtaque": "magico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 6,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 3,
+      "recargaMs": 9000,
+      "conjuracaoMs": 400,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "drenar_invocacao",
+          "valor": 18
+        }
+      ],
+      "visual": {
+        "cor": "#7ee0bb",
+        "conjuracao": "sombra",
+        "impacto": "sagrado",
+        "som": "cura"
+      },
+      "mobilidade": "lenta",
+      "nivelMinimo": 1,
+      "tags": [
+        "necromancia"
+      ],
+      "marcos": {
+        "2": {
+          "texto": "Custa 15% menos mana",
+          "custoPct": -15
+        },
+        "4": {
+          "texto": "Recarga 15% menor",
+          "recargaPct": -15
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "eficiente",
+          "fortificado"
+        ],
+        "5": [
+          "sanguessuga",
+          "evasivo"
+        ]
+      }
+    },
+    {
+      "id": "garras_do_ossuario",
+      "familiaEvolucao": "sombra",
+      "grau": "B",
+      "nome": "Garras do ossuário",
+      "icone": "pedra",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d6",
+      "formulaCura": null,
+      "alcanceCelulas": 6,
+      "tipoArea": "quadrado",
+      "raioArea": 1,
+      "custoRecurso": 4,
+      "recargaMs": 7000,
+      "conjuracaoMs": 400,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "enraizado",
+          "duracaoMs": 1600
+        }
+      ],
+      "visual": {
+        "cor": "#b8a4dd",
+        "conjuracao": "sombra",
+        "impacto": "pedra",
+        "som": "golpe"
+      },
+      "mobilidade": "lenta",
+      "nivelMinimo": 1,
+      "tags": [
+        "necromancia"
+      ],
+      "marcos": {
+        "2": {
+          "texto": "Custa 15% menos mana",
+          "custoPct": -15
+        },
+        "4": {
+          "texto": "Recarga 15% menor",
+          "recargaPct": -15
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "eficiente",
+          "controle"
+        ],
+        "5": [
+          "fortificado",
+          "longo_alcance"
+        ]
+      },
+      "elemento": "trevas"
+    },
+    {
+      "id": "comando_sepulcral",
+      "familiaEvolucao": "sombra",
+      "grau": "B",
+      "nome": "Comando sepulcral",
+      "icone": "coroa",
+      "tipoAtaque": "magico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 6,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 4,
+      "recargaMs": 12000,
+      "conjuracaoMs": 400,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "comandar_mortos",
+          "pct": 25,
+          "duracaoMs": 6000
+        }
+      ],
+      "visual": {
+        "cor": "#8b68d9",
+        "conjuracao": "sombra",
+        "impacto": "sombra",
+        "som": "magia"
+      },
+      "mobilidade": "lenta",
+      "nivelMinimo": 1,
+      "tags": [
+        "necromancia"
+      ],
+      "marcos": {
+        "2": {
+          "texto": "Custa 15% menos mana",
+          "custoPct": -15
+        },
+        "4": {
+          "texto": "Recarga 15% menor",
+          "recargaPct": -15
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "eficiente",
+          "controle"
+        ],
+        "5": [
+          "fortificado",
+          "evasivo"
+        ]
+      }
+    },
+    {
+      "id": "ceifa_de_almas",
+      "familiaEvolucao": "sombra",
+      "grau": "B",
+      "nome": "Ceifa de almas",
+      "icone": "espada",
+      "tipoAtaque": "magico",
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "alcanceCelulas": 4,
+      "tipoArea": "cone",
+      "raioArea": 0,
+      "custoRecurso": 6,
+      "recargaMs": 10000,
+      "conjuracaoMs": 400,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "puxao",
+          "valor": 1
+        }
+      ],
+      "visual": {
+        "cor": "#8b68d9",
+        "conjuracao": "sombra",
+        "impacto": "sombra",
+        "som": "magia"
+      },
+      "mobilidade": "lenta",
+      "nivelMinimo": 5,
+      "tags": [
+        "necromancia"
+      ],
+      "marcos": {
+        "2": {
+          "texto": "Custa 15% menos mana",
+          "custoPct": -15
+        },
+        "4": {
+          "texto": "Recarga 15% menor",
+          "recargaPct": -15
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "eficiente",
+          "controle"
+        ],
+        "5": [
+          "fortificado",
+          "longo_alcance"
+        ]
+      },
+      "elemento": "trevas"
+    },
+    {
+      "id": "mortalha_funebre",
+      "familiaEvolucao": "sombra",
+      "grau": "B",
+      "nome": "Mortalha fúnebre",
+      "icone": "fantasma",
+      "tipoAtaque": "magico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 6,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 5,
+      "recargaMs": 14000,
+      "conjuracaoMs": 400,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "escudo",
+          "valor": 10,
+          "duracaoMs": 6000
+        },
+        {
+          "tipo": "fantasma",
+          "duracaoMs": 2000
+        }
+      ],
+      "visual": {
+        "cor": "#8b68d9",
+        "conjuracao": "sombra",
+        "impacto": "sombra",
+        "som": "magia"
+      },
+      "mobilidade": "lenta",
+      "nivelMinimo": 3,
+      "tags": [
+        "necromancia"
+      ],
+      "marcos": {
+        "2": {
+          "texto": "Custa 15% menos mana",
+          "custoPct": -15
+        },
+        "4": {
+          "texto": "Recarga 15% menor",
+          "recargaPct": -15
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "eficiente",
+          "controle"
+        ],
+        "5": [
+          "sanguessuga",
+          "evasivo"
+        ]
       }
     }
   ]

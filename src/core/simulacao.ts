@@ -31,6 +31,7 @@ import { fecharLoja, interagir, processarInteracoes } from '../world/interacao';
 import { revelarArmadilhas } from '../world/armadilhas-ocultas';
 import { atualizarRessonancias } from '../progression/ressonancias';
 import { forjar } from '../progression/forja';
+import { processarServosNecromantes } from '../combat/necromancia';
 import { processarMissoes } from '../progression/missoes';
 import { registrarDescobertas } from '../progression/diario';
 import { coletarObjetos } from '../world/objetos';
@@ -52,6 +53,7 @@ export function simular(
 ): void {
   // Marco 18: o que este tick emitir (missões e diário leem só os eventos dele).
   const inicio = saida.length;
+  processarServosNecromantes(estado, ctx, saida);
   aplicarComandos(estado, ctx, comandos, saida);
   processarIa(estado, ctx, saida);
   processarAcoes(estado, ctx, saida);

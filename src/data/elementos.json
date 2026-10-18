@@ -56,7 +56,7 @@
       "nomes": { "nucleos": ["Rocha", "Raiz", "Tremor", "Basalto", "Argila"], "qualidades": ["telúrica", "pesada", "do fundo", "imóvel", "antiga"] }
     },
     {
-      "id": "sombra",
+      "id": "trevas",
       "estado": { "tipo": "marcado", "duracaoMs": 4000, "pct": 25 },
       "cor": "#6c3483",
       "icone": "fantasma",

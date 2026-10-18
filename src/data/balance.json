@@ -1,5 +1,6 @@
 {
-  "versao": 24,
+  "necromancia": { "danoPct": 50, "servosExtras": 2, "retornoServoMs": 8000, "duracaoMortoMs": 25000, "raioColheita": 6, "ecoRecargaMs": 30000, "vidaBase": 24, "vidaPorNivel": 3, "vidaServoPct": 80, "alcanceRitual": 6 },
+  "versao": 25,
   "progressaoItens": { "tomoPrecoBase": 10000, "aceleracaoIncomumChancePct": 30, "aceleracaoRaraChancePct": 10, "essenciaChancePct": 2, "essenciaBossChancePct": 20 },
   "movimento": {
     "velocidadeBaseMs": 400,
@@ -296,7 +297,7 @@
     "colisaoDano": 4,
     "colisaoAtordoarMs": 400,
     "tenacidadeMaxPct": 40,
-    "removiveis": [
+    "removiveis": ["definhando",
       "queimando",
       "envenenado",
       "sangrando",

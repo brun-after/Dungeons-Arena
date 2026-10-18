@@ -13,7 +13,7 @@
     "veneno": { "m": "peçonhento", "f": "peçonhenta" },
     "psiquico": { "m": "onírico", "f": "onírica" },
     "terra": { "m": "telúrico", "f": "telúrica" },
-    "sombra": { "m": "sombrio", "f": "sombria" },
+    "trevas": { "m": "das trevas", "f": "das trevas" },
     "sagrado": { "m": "sagrado", "f": "sagrada" }
   },
   "bases": [
@@ -90,7 +90,7 @@
       "atributos": [
         ["destreza", "forca"]
       ],
-      "elementos": ["veneno"],
+      "elementos": ["veneno", "trevas"],
       "formas": {
         "comum": { "nome": "Adaga", "genero": "f" },
         "epica": { "nome": "Presa da víbora", "genero": "f" },
@@ -134,7 +134,7 @@
       "atributos": [
         ["inteligencia", "sabedoria"]
       ],
-      "elementos": ["fogo", "gelo", "raio"],
+      "elementos": ["fogo", "gelo", "raio", "trevas"],
       "formas": {
         "comum": { "nome": "Cajado", "genero": "m" },
         "epica": { "nome": "Báculo do sábio", "genero": "m" },
@@ -331,7 +331,7 @@
       "atributos": [
         ["sabedoria", "inteligencia"]
       ],
-      "elementos": [],
+      "elementos": ["trevas"],
       "formas": {
         "comum": { "nome": "Tomo", "genero": "m" },
         "epica": { "nome": "Grimório do aprendiz", "genero": "m" },
@@ -503,7 +503,7 @@
       "atributos": [
         ["sabedoria", "inteligencia"]
       ],
-      "elementos": [],
+      "elementos": ["trevas"],
       "formas": {
         "comum": { "nome": "Manto", "genero": "m" },
         "epica": { "nome": "Manto do peregrino", "genero": "m" },
@@ -642,7 +642,7 @@
         ["forca", "constituicao"],
         ["destreza", "carisma"]
       ],
-      "elementos": [],
+      "elementos": ["trevas"],
       "formas": {
         "comum": { "nome": "Anel", "genero": "m" },
         "epica": { "nome": "Anel do sábio", "genero": "m" },
@@ -724,7 +724,7 @@
         "ultima": {
           "nome": "Manto da meia-noite",
           "genero": "m",
-          "texto": "Ao levar golpe (15%), imune por 1 s; golpes marcam o agressor (sombra).",
+          "texto": "Ao levar golpe (15%), imune por 1 s; golpes marcam o agressor (trevas).",
           "ganchos": [
             {
               "quando": "aoReceberGolpe",

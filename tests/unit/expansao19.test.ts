@@ -1,4 +1,5 @@
 import { resolverHabilidade } from '../../src/combat/compilar-habilidade';
+import { invocar } from '../../src/combat/efeitos-fluxo';
 // Marco 19 (17/10/2026): sequências completas com efeitos reais, obstáculos, falhas e persistência.
 import { describe, expect, it } from 'vitest';
 import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
@@ -48,6 +49,10 @@ describe('35 combos de resultados confirmados', () => {
     it.each(ids)('%s pode ser concluído com a sequência e preparação reais', (id) => {
         const c = cena();
         const combo = obter(CONTEUDO.combos.get(id));
+        if (id === 'tributo_da_legiao') {
+            c.j.hp -= 30;
+            invocar(c.estado, c.ctx, c.j, construirEfeito('invocar', { ref: 'servo_ossuario', valor: 1, duracaoMs: 25000 }), c.eventos);
+        }
         for (const skill of combo.sequencia) {
             if (skill === 'curar' || skill === 'purificacao')
                 c.j.hp = Math.min(c.j.hp, c.j.hpMax - 30);
@@ -164,9 +169,9 @@ describe('skills táticas', () => {
         expect(aplicarPatch(antes, g.gerar(c.estado)).camposTaticos).toEqual([]);
     });
     it('os 35 visuais diferem em geometria e movimento, mesmo ignorando as cores', () => {
-        expect(VISUAIS_COMBO.size).toBe(35);
+        expect(VISUAIS_COMBO.size).toBe(CONTEUDO.combos.size);
         const assinaturas = [...VISUAIS_COMBO.values()].map((v) => JSON.stringify([v.formas, v.movimento]));
-        expect(new Set(assinaturas).size).toBe(35);
+        expect(new Set(assinaturas).size).toBe(CONTEUDO.combos.size);
     });
 });
 describe('passivas e limites da expansão', () => {

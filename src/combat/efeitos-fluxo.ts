@@ -41,6 +41,12 @@ export function contarAvatares(estado: EstadoJogo, donoId: EntidadeId): number {
   return estado.entidades.filter((e) => vivo(e) && e.invocacao?.donoId === donoId && e.invocacao.avatar).length;
 }
 
+/** O Necromante tem dois espaços próprios adicionais; todos os seus mortos contam no mesmo teto. */
+export function limiteDeInvocacoes(ctx: ContextoSimulacao, dono: Entidade): number {
+  const necromante = (dono.classeId ?? dono.bolsa?.classeId) === 'necromante';
+  return ctx.modo.limites.invocacoesPorJogador + (necromante ? ctx.balance.necromancia.servosExtras : 0);
+}
+
 /** Só as de habilidade contam no limite do modo (as de fase e do spawner não têm dono jogador). */
 export function contarArmadilhas(estado: EstadoJogo, donoId: EntidadeId): number {
   return estado.armadilhas.filter((a) => a.donoId === donoId && a.origem === 'habilidade').length;
@@ -59,7 +65,7 @@ export function excedeLimite(estado: EstadoJogo, ctx: ContextoSimulacao, ator: E
     else if (fluxo === 'invocar') invocacoes += Math.max(1, ef.valor);
     if (fluxo === 'armadilha') armadilhas += 1;
   }
-  return invocacoes > lim.invocacoesPorJogador || avatares > lim.avataresPorJogador || armadilhas > lim.armadilhasPorJogador;
+  return invocacoes > limiteDeInvocacoes(ctx, ator) || avatares > lim.avataresPorJogador || armadilhas > lim.armadilhasPorJogador;
 }
 
 export function agendarAtrasado(estado: EstadoJogo, alvo: Entidade, ef: EfeitoCanonico, origem: OrigemFluxo): void {

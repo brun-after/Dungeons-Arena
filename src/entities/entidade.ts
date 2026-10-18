@@ -59,6 +59,9 @@ export interface DadosInvocacao {
   criadoTick: number;
   /** Cascata de dominação: 0 para invocações, 1 para dominados, 2 para quem um dominado dominou… */
   nivelDominacao: number;
+  /** Mortos do Necromante têm atributos próprios; o modelo só guarda a semelhança visual. */
+  necromancia?: 'servo' | 'reanimado' | 'eco';
+  modeloOriginal?: string;
 }
 
 /** Ação em conjuração (§2.7, etapa 3). Ticks publicados para a telegrafia (§3.6). */
@@ -245,6 +248,8 @@ export interface Entidade {
   reviverEmTick: number;
 
   preset: string;
+  /** Identidade de classe pública, inclusive em fichas de treino sem bolsa. Opcional em saves antigos. */
+  classeId?: string;
   arquetipo: Arquetipo;
   nivel: number;
   /** Incrementa a cada respawn; o id continua estável (§3.6). */

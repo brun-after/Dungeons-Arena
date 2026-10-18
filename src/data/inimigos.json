@@ -296,6 +296,28 @@
           "dano": 15
         }
       }
+    },
+    {
+      "id": "servo_ossuario",
+      "nome": "Servo do ossuário",
+      "hpBase": 24,
+      "hesitacaoS": 0,
+      "deteccao": 5,
+      "xp": 0,
+      "modelo": "esqueleto",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 0,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 1500,
+      "resistencias": {
+        "trevas": 30,
+        "sagrado": -20
+      },
+      "invocacao": {
+        "comportamento": "agressivo"
+      }
     }
   ]
 }
