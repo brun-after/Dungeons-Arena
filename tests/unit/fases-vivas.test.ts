@@ -8,7 +8,8 @@ import { clonarEstado, criarEstado } from '../../src/core/estado';
 import type { EventoSimulacao } from '../../src/core/eventos-simulacao';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import { chaveDaFase, lerRegistro, VERSAO_SCHEMA, type RefFase, type RegistroProgresso } from '../../src/save/esquema';
-import { faseSeguinte, estadoInicialDaFase, contextoDaFase, faseOficialOuGerada } from '../../src/save/fases-campanha';
+import { concluirEnxame, faseSeguinte, estadoInicialDaFase, contextoDaFase, faseOficialOuGerada } from '../../src/save/fases-campanha';
+import { processarMortes } from '../../src/progression/morte';
 import { chegadaNaFase, comRetorno, faseAnterior, referenciaConhecida } from '../../src/save/retorno';
 import { avancarFase } from '../../src/save/transicao';
 import { processarAmbientes } from '../../src/world/ambientes';
@@ -190,6 +191,79 @@ describe('perigo, Sabedoria e Engenho', () => {
 });
 
 describe('enxame limitado', () => {
+  it('encerrar o enxame preserva terreno, ambientes e objetos mesmo com estilo do aparelho', () => {
+    for (let s = 1; s <= 12; s++) {
+      const p = parametros(s, { eventos: ['enxame', 'mercador_errante', 'sala_secreta'], estilo: ['PPPPPPPP0', 'FFFFFFFF1'] });
+      const original = gerarFase(p, catalogo);
+      const revisita = gerarFase({ ...p, eventos: ['mercador_errante', 'sala_secreta'], enxameConcluido: true }, catalogo);
+      expect(revisita.mapa).toEqual(original.mapa);
+      expect(revisita.objetos).toEqual(original.objetos);
+      expect(revisita.ambientes).toEqual(original.ambientes);
+      expect(revisita.eventos).toEqual(['mercador_errante', 'sala_secreta']);
+      expect(revisita.nome).not.toContain('Enxame');
+      expect(revisita.inimigos?.length).toBeLessThan(original.inimigos?.length ?? 0);
+      expect(original.inimigos?.slice(0, revisita.inimigos?.length)).toEqual(revisita.inimigos);
+    }
+  });
+
+  it('inimigos e bosses não renascem no enxame, inclusive com respawns de saves antigos', () => {
+    for (const preset of ['goblin', 'boss_cripta']) {
+      const c = cenario({ eventos: ['enxame'] });
+      const p = preset === 'goblin' ? obter(CONTEUDO.presets.get(preset)) : obter([...CONTEUDO.presets.values()].find((e) => e.arquetipo === 'boss'));
+      const e = criarInimigo(p, 'morto', 6, 6, c.ctx.balance);
+      c.estado.entidades.push(e);
+      e.hp = 0;
+      c.estado.respawns.push({ id: 'antigo', preset: p.id, x: 7, y: 7, nivel: 1, geracao: 1, abates: 1, noTick: 0, habilidades: [] });
+      processarMortes(c.estado, c.ctx, c.eventos);
+      expect(c.estado.respawns).toEqual([]);
+      expect(c.estado.entidades.map((e) => e.id)).not.toContain('morto');
+      expect(c.estado.entidades.map((e) => e.id)).not.toContain('antigo');
+      c.estado.tick = 100000;
+      processarMortes(c.estado, c.ctx, c.eventos);
+      expect(c.estado.entidades).toEqual([c.j]);
+      // A regra de reviver do jogador continua valendo.
+      c.j.hp = 0;
+      processarMortes(c.estado, c.ctx, c.eventos);
+      expect(c.j.reviverEmTick).toBeGreaterThan(c.estado.tick);
+    }
+  });
+
+  it('concluir e revisitar após exportar/importar remove só o enxame e conserva o mundo', () => {
+    const p = parametros(41, { id: 'gerada-1', salas: 20, eventos: ['enxame', 'lua_sangrenta'] });
+    const ref: RefFase = { tipo: 'gerada', id: p.id, numero: 1, params: p };
+    const leitura = contextoDaFase(CONTEUDO, faseOficialOuGerada(ref, CONTEUDO));
+    if (!leitura.ok) throw Error(leitura.erro);
+    const estado = estadoInicialDaFase(leitura.ctx);
+    const j = criarJogador(obter(CONTEUDO.classes.get('aventureiro')), 'j', 2, 2, leitura.ctx.balance);
+    estado.entidades.push(j);
+    const morto = obter(estado.entidades.find((e) => e.controlador === 'ia'));
+    estado.entidades = estado.entidades.filter((e) => e.id !== morto.id);
+    estado.objetos = [];
+    estado.saidaAberta = true;
+    const normal = concluirEnxame(ref, estado, CONTEUDO);
+    expect(ref.params.eventos).toContain('enxame');
+    if (normal.tipo !== 'gerada') throw Error('gerada');
+    expect(normal.params.eventos).toEqual(['lua_sangrenta']);
+    const normalJson = faseOficialOuGerada(normal, CONTEUDO) as FaseJson;
+    expect(normalJson.mapa).toEqual((faseOficialOuGerada(ref, CONTEUDO) as FaseJson).mapa);
+    expect(estado.entidades.filter((e) => e.controlador === 'ia')).toHaveLength((normalJson.inimigos?.length ?? 0) - 1);
+    expect(estado.entidades.some((e) => e.id === morto.id)).toBe(false);
+    expect(estado.reservaEnxame).toBeUndefined();
+    const r: RegistroProgresso = { versaoSchema: VERSAO_SCHEMA, slot: 1, criadoEm: 0, atualizadoEm: 0, faseRef: normal,
+      nomeFase: 'Normal', estado, estatisticas: { mortes: 0, inimigosDerrotados: 1 }, fasesVisitadas: {}, certificado: null };
+    const b = obter(faseSeguinte(normal));
+    const ida = avancarFase(r, { ref: b, nome: 'B', spawn: { x: 2, y: 2 }, novoEstado: () => criarEstado({ semente: 1, faseId: b.id }) }, 1);
+    const lido = lerRegistro(JSON.parse(JSON.stringify(ida)));
+    if (!lido.ok) throw Error('save inválido');
+    const anterior = obter(faseAnterior(b, lido.registro.referenciasFases));
+    expect(anterior).toEqual(normal);
+    const volta = avancarFase(lido.registro, { ref: anterior, nome: 'Normal', spawn: { x: 3, y: 3 }, novoEstado: () => { throw Error('não recriar'); } }, 2);
+    expect(volta.estado.objetos).toEqual([]);
+    expect(volta.estado.saidaAberta).toBe(true);
+    expect(volta.estado.reservaEnxame).toBeUndefined();
+    expect(volta.estado.entidades.some((e) => e.id === morto.id)).toBe(false);
+  });
+
   it('reservas não simulam IA; nascem em levas, respeitam o teto e sobrevivem à cópia do save', () => {
     const p = parametros(41, { salas: 20, eventos: ['enxame'] });
     const ref: RefFase = { tipo: 'gerada', id: p.id, numero: 1, params: p };

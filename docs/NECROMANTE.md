@@ -40,7 +40,7 @@ Trevas substitui a antiga identidade elemental `sombra`, mantendo Marca, Eclipse
 
 O elemento participa das etiquetas de afinidade, caminhos, resistências, armas e equipamentos gerados, cores, descrições e reações. Cinco bases recebem afinidade de Trevas: cajado, adaga, tomo, manto e anel. IDs de habilidades, essências e caminhos antigos permanecem estáveis. Um nome de habilidade como Punhal das sombras continua sendo apenas o nome temático da habilidade, cujo elemento é Trevas.
 
-O schema 18 migra referências elementais nos saves atuais e nas fases visitadas. Itens antigos com `sombra` em seu ID continuam resolvendo como o mesmo item, agora de Trevas. A lista histórica dos cinco elementos do gerador de skills por semente permanece estável para não alterar os livros raros já salvos. Trevas tem skills autoradas e livros próprios, como os elementos mais recentes já tinham.
+O schema 19 migra referências elementais nos saves atuais e nas fases visitadas. Itens antigos com `sombra` em seu ID continuam resolvendo como o mesmo item, agora de Trevas. A lista histórica dos cinco elementos do gerador de skills por semente permanece estável para não alterar os livros raros já salvos. Trevas tem skills autoradas e livros próprios, como os elementos mais recentes já tinham.
 
 ## Validação
 

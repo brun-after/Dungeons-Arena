@@ -36,6 +36,8 @@ export interface ParametrosGeracao {
   estilo?: string[];
   /** Marco 18 (D-070): eventos da fase (lua sangrenta, mercador errante, sala secreta). */
   eventos?: string[];
+  /** Reproduz o terreno original do enxame antes de retirar sua população extra na revisita. */
+  enxameConcluido?: boolean;
   ambientesVivos?: boolean;
   formato?: 'salas' | 'espiral';
 }
@@ -218,9 +220,17 @@ export function gerarFase(p: ParametrosGeracao, catalogo: CatalogoGeracao): Fase
     ...(portasInternas.length > 0 && { portasInternas }),
     matizGraus: p.matizGraus,
   };
-  aplicarEventos(json, p, catalogo, salas, livre, ocupar);
-  if (p.ambientesVivos) enriquecerFase(json, p, catalogo, salas, livre, ocupar);
-  return p.estilo && p.estilo.length > 0 ? aplicarEstilo(json, p.estilo, p.semente) : json;
+  const geracao = p.enxameConcluido ? { ...p, eventos: [...(p.eventos ?? []), 'enxame'] } : p;
+  aplicarEventos(json, geracao, catalogo, salas, livre, ocupar);
+  const populacaoNormal = inimigos.length;
+  if (p.ambientesVivos) enriquecerFase(json, geracao, catalogo, salas, livre, ocupar);
+  const final = p.estilo && p.estilo.length > 0 ? aplicarEstilo(json, p.estilo, p.semente) : json;
+  if (p.enxameConcluido) {
+    final.inimigos = (final.inimigos ?? []).slice(0, populacaoNormal);
+    final.eventos = (final.eventos ?? []).filter((e) => e !== 'enxame');
+    final.nome = final.nome.replace(' · Enxame', '');
+  }
+  return final;
 }
 
 /**

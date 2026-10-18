@@ -14,7 +14,7 @@ import { resolverHabilidade } from '../../src/combat/compilar-habilidade';
 import { prepararSequencia } from '../../src/combat/sequencias';
 import { aplicarImpacto } from '../../src/combat/golpe';
 import { perfilPara } from '../../src/combat/perfil';
-import { MIGRACOES, VERSAO_SCHEMA } from '../../src/save/esquema';
+import { lerRegistro, MIGRACOES, VERSAO_SCHEMA } from '../../src/save/esquema';
 import { lerIdItemBase } from '../../src/progression/gerar-item-base';
 import { estadoPublico } from '../../src/arena/estado-publico';
 import { GeradorDePatches, aplicarPatch } from '../../src/arena/patches';
@@ -165,6 +165,24 @@ describe('rituais, combos e Trevas', () => {
     c.aplicar(c.j, 'definhando', { pct: 20, duracaoMs: 4000 });
     expect(multiplicadorDanoCausado(c.j, 0)).toBe(0.8); expect(multiplicadorCuraRecebida(c.j, 0)).toBe(0.8);
   });
+  it.each([17, 18])('save v%i migra para Trevas sem reativar enxames concluídos', (versaoSchema) => {
+    const c = cena();
+    const estado = { ...c.estado, entidades: [{ ...c.j, aparencia: { elementoArma: 'sombra' } }] };
+    const faseRef = { tipo: 'gerada', id: 'gerada-1', numero: 1, params: {
+      id: 'gerada-1', nome: 'Profundezas', semente: 41, salas: 12, nivelInimigos: 5, matizGraus: 28,
+      largura: 60, altura: 40, ambientesVivos: true, eventos: [], enxameConcluido: true,
+    } };
+    const lido = lerRegistro({ versaoSchema, slot: 1, faseRef, estado,
+      fasesVisitadas: { 'oficial:fase-02': estado }, referenciasFases: { 'gerada:gerada-1': faseRef }, certificado: null });
+    expect(lido.ok).toBe(true);
+    if (!lido.ok) return;
+    expect(lido.registro.versaoSchema).toBe(19);
+    expect(lido.registro.estado.entidades[0]?.aparencia?.elementoArma).toBe('trevas');
+    expect(lido.registro.fasesVisitadas['oficial:fase-02']?.entidades[0]?.aparencia?.elementoArma).toBe('trevas');
+    expect(lido.registro.faseRef).toEqual(faseRef);
+    expect(lido.registro.referenciasFases?.['gerada:gerada-1']).toEqual(faseRef);
+  });
+
   it('saves/patches conservam mortos e a migração converte o elemento antigo sem trocar IDs', () => {
     const c = cena(); c.passiva(); c.matar(c.npc(), c.j);
     const clone = clonarEstado(c.estado); expect(clone.entidades).toEqual(c.estado.entidades);
@@ -173,11 +191,11 @@ describe('rituais, combos e Trevas', () => {
     obter(c.meus()[0]).hp--; const novo = estadoPublico(c.estado);
     expect(aplicarPatch(publico, obter(gerador.gerar(novo)))).toEqual(novo);
     const antigo = { estado: { entidades: [{ aparencia: { elementoArma: 'sombra' } }] }, fasesVisitadas: { a: { fonte: { elemento: 'sombra' } } }, itemId: 'ib_cajado_comum_sombra_1_1', certificado: { dados: { elemento: 'sombra' }, assinatura: 'preservada' } };
-    const migrado = obter(MIGRACOES[17])(antigo);
+    const migrado = obter(MIGRACOES[18])(antigo);
     expect(JSON.stringify(migrado)).toContain('"elementoArma":"trevas"'); expect(JSON.stringify(migrado)).toContain('"elemento":"trevas"');
     expect(migrado.itemId).toBe(antigo.itemId);
     expect(migrado.certificado).toEqual(antigo.certificado);
-    expect(lerIdItemBase(antigo.itemId)?.elemento).toBe('trevas'); expect(VERSAO_SCHEMA).toBe(18);
+    expect(lerIdItemBase(antigo.itemId)?.elemento).toBe('trevas'); expect(VERSAO_SCHEMA).toBe(19);
     expect(CONTEUDO.itens.get(antigo.itemId)).toMatchObject({ id: antigo.itemId, elemento: 'trevas' });
   });
 });

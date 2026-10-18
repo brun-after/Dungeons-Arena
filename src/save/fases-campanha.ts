@@ -12,7 +12,7 @@ import fase02 from '../data/fases/fase-02.json';
 import type { ModoDeJogo } from '../modos/modo';
 import { carregarFase } from '../world/fase';
 import { catalogoDeGeracao, gerarFase } from '../world/gerador';
-import { povoarFase } from '../world/populacao';
+import { idDoInimigo, povoarFase } from '../world/populacao';
 import { validarFase } from '../world/validacao-fase';
 import type { RefFase } from './esquema';
 import { proximaFase } from './sequencia';
@@ -42,6 +42,22 @@ export function estadoInicialDaFase(ctx: ContextoSimulacao): EstadoJogo {
   const estado = criarEstado({ semente: hashTexto(ctx.fase.id), faseId: ctx.fase.id });
   povoarFase(estado, ctx);
   return estado;
+}
+
+/** Ao atravessar a saída, guarda só a população normal e retira o evento das revisitas. */
+export function concluirEnxame(ref: RefFase, estado: EstadoJogo, conteudo: Conteudo): RefFase {
+  if (ref.tipo !== 'gerada' || !ref.params.eventos?.includes('enxame')) return ref;
+  const normal: RefFase = { ...ref, params: { ...ref.params, eventos: ref.params.eventos.filter((e) => e !== 'enxame'), enxameConcluido: true } };
+  const leitura = contextoDaFase(conteudo, faseOficialOuGerada(normal, conteudo));
+  if (!leitura.ok) throw new Error(`fase inválida: ${leitura.erro}`);
+  const ids = new Set(leitura.ctx.fase.inimigos.map((_, i) => idDoInimigo(i)));
+  estado.entidades = estado.entidades.filter((e) => e.controlador !== 'ia' || ids.has(e.id));
+  // Os inimigos normais ainda na reserva não morreram: passam a fazer parte da população ativa.
+  const reservados = new Set((estado.reservaEnxame ?? []).map(idDoInimigo));
+  estado.entidades.push(...estadoInicialDaFase(leitura.ctx).entidades.filter((e) => reservados.has(e.id)));
+  estado.respawns = [];
+  delete estado.reservaEnxame;
+  return normal;
 }
 
 /** A fase seguinte da campanha (oficial, depois as geradas); na aventura, a próxima da lista (ou null no fim). */
