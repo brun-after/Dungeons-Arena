@@ -14,6 +14,12 @@ const COR_DESARME = 0xf1c40f;
 
 export class CamadaFluxo {
   private readonly g = new Graphics();
+  private readonly disparos: { x: number; y: number; tick: number }[] = [];
+
+  disparou(x: number, y: number, tick: number): void {
+    if (this.disparos.length >= 24) this.disparos.shift();
+    this.disparos.push({ x, y, tick });
+  }
 
   /** Marco 11A (D-066): com partículas, os rastros são partícula (efeitos-habilidade.ts) e não quadrados. */
   constructor(
@@ -25,8 +31,21 @@ export class CamadaFluxo {
     camada.addChild(this.g);
   }
 
-  desenhar(estado: EstadoJogo, idLocal: string): void {
+  desenhar(estado: EstadoJogo, idLocal: string, reduzido = false): void {
     const g = this.g.clear();
+    while (this.disparos[0] && estado.tick - this.disparos[0].tick > 54) this.disparos.shift();
+    for (const d of this.disparos) {
+      const idade = Math.max(0, estado.tick - d.tick) / 54;
+      const cx = (d.x + 0.5) * CELULA_PX, cy = (d.y + 0.5) * CELULA_PX;
+      const raio = CELULA_PX * (reduzido ? 0.56 : 0.32 + idade * 0.5);
+      g.circle(cx, cy, raio).fill({ color: 0xff5c2c, alpha: (1 - idade) * 0.3 });
+      g.circle(cx, cy, raio).stroke({ width: 4, color: 0xffc86b, alpha: 1 - idade });
+      for (let i = 0; i < 6; i++) {
+        const angulo = Math.PI * i / 3;
+        const x = cx + Math.cos(angulo) * 12, y = cy + Math.sin(angulo) * 12;
+        g.poly([x - 4, y + 5, x, y - 10, x + 4, y + 5]).fill({ color: 0xffe4b8, alpha: 1 - idade });
+      }
+    }
     for (const r of this.comParticulas() ? [] : estado.rastros) {
       g.rect(r.x * CELULA_PX + 4, r.y * CELULA_PX + 4, CELULA_PX - 8, CELULA_PX - 8).fill({ color: cor(REGISTRO_EFEITOS[r.tipo].cor), alpha: 0.28 });
     }
@@ -36,8 +55,12 @@ export class CamadaFluxo {
     const c = 10;
     const local = estado.entidades.find((e) => e.id === idLocal);
     for (const a of estado.armadilhas) {
-      const minha = a.donoId === idLocal;
+      const minha = a.donoId === idLocal || (local !== undefined && a.equipeDono === local.equipe);
       if (!minha && !a.reveladaPara.includes(idLocal)) continue;
+      const inerte = a.inerteAteTick > estado.tick;
+      const cx = (a.x + 0.5) * p, cy = (a.y + 0.5) * p;
+      g.circle(cx, cy, p * 0.38).fill({ color: minha ? 0x50e3c2 : COR_REVELADA, alpha: inerte ? 0.05 : 0.16 });
+      g.circle(cx, cy, p * 0.28).stroke({ width: 1.5, color: inerte ? 0x7c858c : minha ? 0x50e3c2 : 0xffa36c, alpha: 0.7 });
       const x = a.x * p + 3;
       const y = a.y * p + 3;
       const l = p - 6;
@@ -45,7 +68,7 @@ export class CamadaFluxo {
       g.moveTo(x + l - c, y).lineTo(x + l, y).lineTo(x + l, y + c);
       g.moveTo(x + l, y + l - c).lineTo(x + l, y + l).lineTo(x + l - c, y + l);
       g.moveTo(x + c, y + l).lineTo(x, y + l).lineTo(x, y + l - c);
-      g.stroke({ width: 3, color: minha ? cor(REGISTRO_EFEITOS.armadilha.cor) : COR_REVELADA, alpha: 0.9 });
+      g.stroke({ width: 3, color: minha ? 0x50e3c2 : COR_REVELADA, alpha: 0.9 });
       if (minha) continue;
       const m = p / 2;
       g.moveTo(x - 3 + m - 7, y - 3 + m - 7).lineTo(x - 3 + m + 7, y - 3 + m + 7);

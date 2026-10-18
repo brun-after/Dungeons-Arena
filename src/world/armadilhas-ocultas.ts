@@ -49,7 +49,7 @@ export function armadilhaParaDesarmar(estado: EstadoJogo, ctx: ContextoSimulacao
   let melhor: Armadilha | null = null;
   let melhorDist = Infinity;
   for (const a of estado.armadilhas) {
-    if (!a.reveladaPara.includes(e.id)) continue;
+    if (!a.reveladaPara.includes(e.id) || !ameaca(ctx, a, e)) continue;
     const d = chebyshev(origem, a);
     if (d > ctx.balance.economia.alcanceInteracao) continue;
     if (d < melhorDist || (d === melhorDist && melhor && a.id < melhor.id)) {

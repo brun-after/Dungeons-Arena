@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.42 · **Data:** 18/10/2026
+**Versão:** 0.43 · **Data:** 17/10/2026
 
 > **Histórico**
+> - **0.43 (17/10/2026)**: D-079 (dinamismo das fases preservando salas e corredores, retorno, ambientes, Engenho e enxames limitados).
 > - **0.42 (18/10/2026)**: D-078 (Investida livre e sustentação do guerreiro pelo básico).
 > - **0.41 (17/10/2026)**: D-077 (17 skills, 35 combos confirmados por resultado, visuais e correção do smoke).
 > - **0.40 (17/10/2026)**: D-076 (controles afastados das skills, tomo a preço fixo e troca de equipamentos sem fechar a mochila).
@@ -2060,3 +2061,11 @@ do mesmo nível. O bot usava o básico e sua defesa normal (incluindo poções),
 barra. No nível 5, a vida média restante passou de 62% para 70%; no 30, vitórias de 5/8 para
 6/8. Nos outros níveis, as vitórias ficaram iguais e a vida média restante aumentou.
 É uma amostra exploratória de uma configuração, não uma certificação de todas as builds.
+
+## D-079 — Fases vivas e retorno sem substituir o ritmo atual (17/10/2026)
+
+Por pedido do usuário, as salas e os corredores em L permanecem predominantes. O piso nativo não desenha juntas entre células. A campanha ganha retorno à fase anterior, com estado preservado e referências exatas no save; revisitar não cura. Na cooperação, todos os vivos precisam chegar à mesma porta.
+
+Água, brasas e miasma usam o dispatcher e as reações existentes. As armadilhas ficam mais perigosas nas fases novas e seu disparo permanece visível até na qualidade mínima. Engenho permite converter armadilhas já percebidas, mantendo o valor da Sabedoria e do desarme normal. O canal privado da campanha leva apenas as armadilhas reveladas ou aliadas.
+
+Enxame é um evento de 12%, com reservas sem IA, levas de até seis e teto de 40 ativos, também nos respawns. Mapas 84×56 surgem a cada sete profundezas; espirais, a cada onze. Parâmetros novos são guardados na referência e não alteram a geração das fases antigas. Compatibilidade, controles e medições estão em [Fases vivas](FASES-VIVAS.md).

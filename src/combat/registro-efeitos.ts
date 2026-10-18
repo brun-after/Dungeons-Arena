@@ -29,6 +29,7 @@ export const TIPOS_EFEITO = [
   'imune_dano',
   'fantasma',
   'atravessar',
+  'engenho',
   // instantâneos
   'cura',
   'teleporte',
@@ -224,6 +225,7 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   ab_multi_alvo: positivo('multi', '#e67e22', 6, ['valor'], { duracaoMs: 15_000, valor: 1, pct: 0 }, { ataqueBasico: 'alvos' }),
   imune_dano: positivo('escudo', '#f1c40f', 4, [], { duracaoMs: 3000, valor: 0, pct: 0 }, { imuneDano: true }),
   fantasma: positivo('fantasma', '#bdc3c7', 2, [], { duracaoMs: 8000, valor: 0, pct: 0 }, { semColisao: true }),
+  engenho: positivo('aviso', '#50e3c2', 4, [], { duracaoMs: 20000, valor: 0, pct: 0 }, {}),
   atravessar: positivo('flecha', '#1abc9c', 2, [], { duracaoMs: 12_000, valor: 0, pct: 0 }, { projeteisAtravessam: true }),
 
   cura: instantaneo('cura', '#2ecc71', ['valor', 'pct'], { duracaoMs: 0, valor: 10, pct: 0 }, 'cura', true),
@@ -286,8 +288,9 @@ export function elegiveisParaOrbe(registro: Readonly<Record<string, DefinicaoEfe
  * Sorteio do orbe de efeito (§2.10): um elegível por peso, com os padrões do `construir()`. Só lê
  * o registro: um tipo novo elegível entra aqui sem tocar em mais nada (§2.8).
  */
-export function sortearEfeitoDeOrbe(rng: EstadoRng, registro: Readonly<Record<string, DefinicaoEfeito>> = REGISTRO_EFEITOS): EfeitoCanonico | null {
-  const elegiveis = elegiveisParaOrbe(registro);
+export function sortearEfeitoDeOrbe(rng: EstadoRng, registro: Readonly<Record<string, DefinicaoEfeito>> = REGISTRO_EFEITOS, revelarArmadilhas = true): EfeitoCanonico | null {
+  // D-079 (17/10/2026): Engenho só é oferecido onde armadilhas podem ser percebidas/interagidas.
+  const elegiveis = elegiveisParaOrbe(registro).filter((d) => revelarArmadilhas || d.id !== 'engenho');
   const total = elegiveis.reduce((s, d) => s + d.pesoOrbe, 0);
   if (total <= 0) return null;
   let sorteio = aleatorio(rng) * total;

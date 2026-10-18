@@ -149,7 +149,7 @@ export type EventoSimulacao =
   | { t: 'explodiu'; tick: number; id: EntidadeId; x: number; y: number; raio: number }
   | { t: 'dispensou'; tick: number; id: EntidadeId; quantidade: number }
   | { t: 'armadilhaArmada'; tick: number; donoId: EntidadeId; armadilhaId: number; x: number; y: number }
-  | { t: 'armadilhaDisparou'; tick: number; donoId: EntidadeId; armadilhaId: number; alvoId: EntidadeId }
+  | { t: 'armadilhaDisparou'; tick: number; donoId: EntidadeId; armadilhaId: number; alvoId: EntidadeId; x?: number; y?: number }
   // Marco 18 (D-068): a Sabedoria revela e desarma armadilhas.
   | { t: 'armadilhaRevelada'; tick: number; id: EntidadeId; armadilhaId: number; x: number; y: number }
   | { t: 'armadilhaDesarmada'; tick: number; id: EntidadeId; armadilhaId: number; sucesso: boolean }
@@ -181,7 +181,7 @@ export type EventoSimulacao =
   | { t: 'vendeu'; tick: number; id: EntidadeId; itemId: string; preco: number }
   /** Marco 10A-1: portas internas e porta de saída. */
   | { t: 'teleportou'; tick: number; id: EntidadeId; numero: number; x: number; y: number }
-  | { t: 'saidaAlcancada'; tick: number; id: EntidadeId }
+  | { t: 'saidaAlcancada'; tick: number; id: EntidadeId; retorno?: boolean }
   | { t: 'saidaTrancada'; tick: number; id: EntidadeId; motivo: 'chave' | 'boss' }
   | { t: 'saidaDestrancada'; tick: number; motivo: 'chave' | 'boss'; x: number; y: number }
   | { t: 'subiuNivel'; tick: number; id: EntidadeId; nivel: number }

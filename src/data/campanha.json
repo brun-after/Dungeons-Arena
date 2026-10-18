@@ -9,7 +9,12 @@
     "salasBase": 6,
     "salasMax": 20,
     "nivelBase": 4,
-    "eventos": { "lua_sangrenta": 3, "mercador_errante": 10, "sala_secreta": 8 },
+    "eventos": {
+      "lua_sangrenta": 3,
+      "mercador_errante": 10,
+      "sala_secreta": 8,
+      "enxame": 12
+    },
     "largura": 60,
     "altura": 40,
     "estoque": [
@@ -24,6 +29,12 @@
       "pergaminho_sentinela",
       "pergaminho_fada",
       "pergaminho_espantalho"
-    ]
+    ],
+    "variacoes": {
+      "grandeACada": 7,
+      "espiralACada": 11,
+      "largura": 84,
+      "altura": 56
+    }
   }
 }

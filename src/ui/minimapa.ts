@@ -81,6 +81,8 @@ export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: bo
       g.imageSmoothingEnabled = false;
       g.drawImage(fundo, ox, oy, fase.largura * escala, fase.altura * escala);
       // Portas e saída: pontos fixos, para a orientação.
+      const volta = fase.portaRetorno;
+      if (volta) ponto(volta.x, volta.y, 2.5, '#65d7ee');
       for (const p of fase.portasInternas) {
         ponto(p.a.x, p.a.y, 1.5, '#bb8fce');
         ponto(p.b.x, p.b.y, 1.5, '#bb8fce');

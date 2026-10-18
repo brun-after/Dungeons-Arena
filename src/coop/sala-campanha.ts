@@ -13,11 +13,12 @@ import { SalaArena, type EntradaDePersonagem, type OpcoesSala, type Sessao } fro
 import type { Celula, Comando, EntidadeId } from '../core/comandos';
 import { modoPorId, type Conteudo } from '../core/conteudo';
 import type { ContextoSimulacao } from '../core/contexto';
-import { buscarEntidade, type EstadoJogo } from '../core/estado';
+import { buscarEntidade, clonarEstado, type EstadoJogo } from '../core/estado';
 import type { Entidade } from '../entities/entidade';
 import type { Dificuldade } from '../modos/dificuldade';
 import { equipeDeEntrada, faseConcluida } from '../modos/regras';
-import type { RefFase } from '../save/esquema';
+import { chaveDaFase, type RefFase } from '../save/esquema';
+import { chegadaNaFase, comRetorno, faseAnterior, referenciaConhecida } from '../save/retorno';
 import { contextoDaFase, estadoInicialDaFase, faseOficialOuGerada, faseSeguinte } from '../save/fases-campanha';
 import { personagemNoInicio } from '../save/transicao';
 import { reservaCelula } from '../world/colisao';
@@ -83,9 +84,11 @@ export class SalaCampanha extends SalaArena {
   /** A época que cada sessão já conhece: quem voltou de uma queda depois da troca de fase recebe a `novaFase`. */
   private readonly epocaVista = new Map<string, number>();
   private fimAvisado = false;
+  private readonly mundos = new Map<string, EstadoJogo>();
+  private readonly referencias: Record<string, RefFase> = {};
 
   constructor(ctx: ContextoSimulacao, opcoes: OpcoesSala, estado: EstadoJogo, faseRef: RefFase) {
-    super(ctx, opcoes, estado);
+    super({ ...ctx, fase: comRetorno(ctx.fase, faseRef) }, opcoes, estado);
     this.faseRef = faseRef;
   }
 
@@ -104,7 +107,8 @@ export class SalaCampanha extends SalaArena {
     const e = r.entidade;
     e.controlador = 'remoto';
     e.equipe = equipeDeEntrada(this.ctx.modo, jogadorId, this.estado);
-    posicionar(e, celulaDeEntrada(this.estado, this.ctx, e, this.ctx.fase.spawns[0] ?? { x: 1, y: 1 }));
+    const entrada = this.ctx.fase.portaRetorno ? chegadaNaFase(this.ctx.fase, false) : this.ctx.fase.spawns[0] ?? { x: 1, y: 1 };
+    posicionar(e, celulaDeEntrada(this.estado, this.ctx, e, entrada));
     this.estado.entidades.push(e);
     return { ok: true, previa: previaDoPersonagem(e, r.alteracoes, this.ctx.modo.id, this.ctx.balance.versao) };
   }
@@ -166,13 +170,19 @@ export class SalaCampanha extends SalaArena {
 
   private conferirSaida(): void {
     const jogadores = this.jogadoresPresentes();
+    const volta = this.ctx.fase.portaRetorno;
+    if (volta && faseConcluida(this.ctx.modo, jogadores, (e) => e.x === volta.x && e.y === volta.y)) {
+      this.avancar(true);
+      return;
+    }
     if (!faseConcluida(this.ctx.modo, jogadores, (e) => naSaidaAberta(this.estado, this.ctx, e))) return;
     this.avancar();
   }
 
   /** Monta a fase seguinte e leva todos (inclusive quem está na reserva de reconexão). */
-  avancar(): boolean {
-    const proxima = faseSeguinte(this.faseRef);
+  avancar(retorno = false): boolean {
+    const candidata = retorno ? faseAnterior(this.faseRef, this.referencias) : faseSeguinte(this.faseRef);
+    const proxima = candidata ? referenciaConhecida(candidata, this.referencias) : null;
     const r = proxima ? contextoDaFase(this.ctx.conteudo, faseOficialOuGerada(proxima, this.ctx.conteudo), this.ctx.modo) : null;
     if (!proxima || !r?.ok) {
       if (!this.fimAvisado) {
@@ -181,19 +191,30 @@ export class SalaCampanha extends SalaArena {
       }
       return false;
     }
-    const estado = estadoInicialDaFase(r.ctx);
+    const deixado = clonarEstado(this.estado);
+    const idsJogadores = new Set([...this.sessoes.values()].map((s) => s.entidadeId));
+    deixado.entidades = deixado.entidades.filter((e) => e.controlador === 'ia' && !e.invocacao);
+    deixado.projeteis = [];
+    if (deixado.camposTaticos) deixado.camposTaticos = deixado.camposTaticos.filter((c) => !idsJogadores.has(c.donoId));
+    this.mundos.set(chaveDaFase(this.faseRef), deixado);
+    this.referencias[chaveDaFase(this.faseRef)] = this.faseRef;
+    this.referencias[chaveDaFase(proxima)] = proxima;
+    const anterior = this.mundos.get(chaveDaFase(proxima));
+    const estado = anterior ? clonarEstado(anterior) : estadoInicialDaFase(r.ctx);
     estado.dificuldade = this.estado.dificuldade;
-    const spawn = r.ctx.fase.spawns[0] ?? { x: 1, y: 1 };
+    const spawn = chegadaNaFase(r.ctx.fase, retorno);
     for (const s of this.sessoes.values()) {
       const e = buscarEntidade(this.estado, s.entidadeId);
       if (!e) continue;
       const novo = personagemNoInicio(e, spawn);
+      // Revisitar não vira fonte de cura instantânea ao alternar duas portas.
+      if ((retorno || anterior) && !e.morto && e.hp > 0) { novo.hp = Math.min(novo.hpMax, e.hp); novo.mana = Math.min(novo.manaMax, e.mana); }
       posicionar(novo, celulaDeEntrada(estado, r.ctx, novo, spawn));
       estado.entidades.push(novo);
     }
     this.faseRef = proxima;
     this.fimAvisado = false;
-    const publico = this.trocarMundo(r.ctx, estado);
+    const publico = this.trocarMundo({ ...r.ctx, fase: comRetorno(r.ctx.fase, proxima) }, estado);
     for (const s of this.sessoes.values()) if (s.conectada) this.mandarNovaFase(s, publico);
     return true;
   }

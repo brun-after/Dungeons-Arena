@@ -102,6 +102,13 @@ export class EfeitosDeHabilidade {
       this.areas.delete(ev.acaoId);
       this.conjurando.delete(ev.acaoId);
     });
+    bus.on('armadilhaDisparou', (ev) => {
+      const p = ev.x !== undefined && ev.y !== undefined ? { x: ev.x, y: ev.y } : pos(ev.alvoId);
+      if (!p) return;
+      this.o.particulas.emitir('explosao', p.x, p.y, 0xff6437);
+      this.o.particulas.emitir('estrelas', p.x, p.y, 0xffdf87);
+      if (ev.alvoId === this.o.idLocal) this.o.impacto.pedir('forte', agora());
+    });
     bus.on('explodiu', (ev) => {
       this.o.particulas.emitir('explosao', ev.x, ev.y, 0xff8c42);
       this.o.impacto.pedir('forte', agora());

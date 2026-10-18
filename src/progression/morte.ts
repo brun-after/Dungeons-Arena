@@ -189,7 +189,7 @@ function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
   }
   // Orbe de efeito (§2.10, marco 8A): sorteio independente; o efeito vem do registro, por peso.
   if (aleatorio(estado.rng) < d.chanceOrbeEfeito) {
-    const efeito = sortearEfeitoDeOrbe(estado.rng);
+    const efeito = sortearEfeitoDeOrbe(estado.rng, undefined, ctx.modo.sobrevivencia.revelarArmadilhas);
     if (efeito) largarPerto(ctx, e.x, e.y, (x, y) => largarOrbeEfeito(estado, efeito, x, y, saida));
   }
   if (!ctx.modo.loot.itens) return;
@@ -258,6 +258,11 @@ function processarRespawns(estado: EstadoJogo, ctx: ContextoSimulacao, saida: Ev
   if (estado.respawns.length === 0) return;
   const pendentes = [];
   for (const r of estado.respawns) {
+    // 17/10/2026: o teto do enxame vale também para os inimigos que renascem.
+    if (ctx.fase.eventos.includes('enxame') && estado.entidades.filter((e) => e.controlador === 'ia' && vivo(e)).length >= ctx.balance.ambiente.enxameAtivos) {
+      pendentes.push(r);
+      continue;
+    }
     const preset = ctx.conteudo.presets.get(r.preset);
     if (estado.tick < r.noTick || !preset) {
       if (preset) pendentes.push(r);

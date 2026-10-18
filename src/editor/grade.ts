@@ -7,6 +7,7 @@
 // matiz, tileset e peças à mão — e a ida e volta pelo JSON não perde nada.
 
 import { construirEfeito, ehTipoEfeito, REGISTRO_EFEITOS, type EfeitoCanonico } from '../combat/registro-efeitos';
+import type { AreaAmbiente } from '../world/ambiente-tipos';
 import type { Celula } from '../core/comandos';
 import { serializarCanonico } from '../core/digest';
 import {
@@ -51,6 +52,8 @@ export interface FaseEditavel {
   portaSaida: SaidaEditavel | null;
   portasInternas: PortaInterna[];
   matizGraus: number;
+  ambientes?: AreaAmbiente[];
+  eventos?: string[];
   /** O atlas desta fase; null herda (§2.16). */
   tilesetId: string | null;
   /** Peças à mão por índice de célula (`chave@t`). */
@@ -98,6 +101,8 @@ export function clonarFaseEditavel(f: FaseEditavel): FaseEditavel {
   return {
     ...f,
     celulas: new Uint8Array(f.celulas),
+    ...(f.ambientes && { ambientes: f.ambientes.map((a) => ({ ...a })) }),
+    ...(f.eventos && { eventos: [...f.eventos] }),
     spawn: f.spawn ? { ...f.spawn } : null,
     inimigos: f.inimigos.map(clonarInimigo),
     objetos: f.objetos.map((o) => clonarObjeto(o)),
@@ -162,7 +167,8 @@ export function comoFase(f: FaseEditavel): Fase {
     matizGraus: f.matizGraus,
     tilesetId: f.tilesetId,
     pecas: f.pecas,
-    eventos: [],
+    eventos: [...(f.eventos ?? [])],
+    ambientes: f.ambientes ?? [],
   };
 }
 
@@ -201,6 +207,8 @@ export function paraFaseJson(f: FaseEditavel, ordem = 1): FaseJson {
     // Coordenadas normalizadas no centro da célula: voltam exatamente para a mesma célula.
     objetos: f.objetos.map((o) => ({ ...clonarObjeto(o), x: (o.x + 0.5) / f.largura, y: (o.y + 0.5) / f.altura })),
     ...(saida && { portaSaida: saida }),
+    ...(f.ambientes?.length && { ambientes: f.ambientes.map((a) => ({ ...a })) }),
+    ...(f.eventos?.length && { eventos: [...f.eventos] }),
     ...(f.portasInternas.length > 0 && { portasInternas: f.portasInternas.map((p) => ({ ...p, a: { ...p.a }, b: { ...p.b } })) }),
     ...(f.matizGraus !== 0 && { matizGraus: f.matizGraus }),
     ...(f.tilesetId && { tileset: { atlasId: f.tilesetId } }),
@@ -232,6 +240,8 @@ export function deFaseJson(json: FaseJson): FaseEditavel {
     matizGraus: fase.matizGraus,
     tilesetId: fase.tilesetId,
     pecas: { ...json.pecas },
+    ambientes: (json.ambientes ?? []).map((a) => ({ ...a })),
+    eventos: [...(json.eventos ?? [])],
   };
 }
 

@@ -23,7 +23,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "verificar": "npm run typecheck && npm run lint && npm test && npm run build",
-    "build:server": "esbuild server/main.ts --bundle --platform=node --target=node24 --format=esm --packages=external --sourcemap --outfile=dist-server/main.mjs"
+    "build:server": "esbuild server/main.ts --bundle --platform=node --target=node24 --format=esm --packages=external --sourcemap --outfile=dist-server/main.mjs",
+    "bench:fases": "tsx tools/bench/fases-vivas.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

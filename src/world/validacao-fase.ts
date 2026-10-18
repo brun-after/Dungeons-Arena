@@ -5,6 +5,7 @@
 // Marco 9A (14/10/2026): baú, loja e loot, com os itens conferidos no catálogo quando informado.
 // Marco 10A-1 (14/10/2026): porta de saída e portas internas (validacao-portas.ts).
 
+import { lerAmbientes } from './validacao-ambientes';
 import { normalizarEfeito } from '../combat/normalizar-efeito';
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import { Leitor } from '../core/validar';
@@ -77,7 +78,9 @@ export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<st
   const visual = lerCamposDeTileset(tileset, pecas, (linhas?.length ?? 0) * (linhas?.[0]?.length ?? 0), erros);
   if (erros.length > 0 || !linhas || !listaSpawns) return { ok: false, erros, avisos };
 
+  const ambientes = lerAmbientes(entrada.ambientes, linhas, erros);
   const json: FaseJson = {
+    ...(ambientes.length > 0 && { ambientes }),
     id: id as string,
     nome: nome as string,
     ordem: ordem as number,
@@ -155,12 +158,13 @@ function armadilhaDeFase(o: Record<string, unknown>, x: number, y: number, erros
 
 /** Baú, loja, loot (marco 9A) e armadilha (9A-2). Devolve null quando o objeto não é de um desses tipos. */
 function objetoDeEconomia(o: Record<string, unknown>, erros: ErroFase[], itens: ItensConhecidos | undefined): ObjetoPosicionadoJson | null | 'erro' {
-  if (o.tipo !== 'bau' && o.tipo !== 'loja' && o.tipo !== 'loot' && o.tipo !== 'armadilha' && o.tipo !== 'fonte_som') return null;
+  if (o.tipo !== 'bau' && o.tipo !== 'loja' && o.tipo !== 'loot' && o.tipo !== 'armadilha' && o.tipo !== 'fonte_som' && o.tipo !== 'santuario') return null;
   if (!normalizado(o.x) || !normalizado(o.y)) {
     erros.push({ mensagem: `${o.tipo}: x e y precisam ficar entre 0 e 1` });
     return 'erro';
   }
   const { x, y } = o;
+  if (o.tipo === 'santuario') return { tipo: 'santuario', x, y };
   if (o.tipo === 'armadilha') return armadilhaDeFase(o, x, y, erros);
   if (o.tipo === 'fonte_som') return fonteSonora(o, x, y, erros);
   if (o.tipo === 'loja') {

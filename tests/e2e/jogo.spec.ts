@@ -356,7 +356,7 @@ test.describe('desktop', () => {
     await page.goto('./?jogo=campanha&slot=3&diag=1');
     await expect(page.locator('#diag')).toHaveAttribute('data-celula', '35,26');
     await page.keyboard.down('d');
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Profundezas 1', { timeout: 30_000 });
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(/^Profundezas 1(?: · .+)?$/, { timeout: 30_000 });
     await page.keyboard.up('d');
     expect(erros).toEqual([]);
   });

@@ -102,6 +102,7 @@ export function redimensionar(f: FaseEditavel, largura: number, altura: number):
   }
   nova.inimigos = filtrar(nova.inimigos, dentroNovo);
   nova.objetos = filtrar(nova.objetos, dentroNovo);
+  if (nova.ambientes) nova.ambientes = filtrar(nova.ambientes, dentroNovo);
   nova.portasInternas = filtrar(nova.portasInternas, (p) => dentroNovo(p.a) && dentroNovo(p.b));
   if (nova.portaSaida && !dentroNovo(nova.portaSaida)) {
     nova.portaSaida = null;

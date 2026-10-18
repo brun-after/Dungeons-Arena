@@ -3,6 +3,7 @@
 // entram nos marcos seguintes.
 
 import type { EfeitoCanonico } from '../combat/registro-efeitos';
+import type { AreaAmbiente } from './ambiente-tipos';
 import type { Celula } from '../core/comandos';
 
 export type TipoCelula = 'parede' | 'piso' | 'saida' | 'vazio';
@@ -53,13 +54,14 @@ export interface InimigoPosicionado {
  */
 export type TipoOrbeDeFase = 'orbe_hp' | 'orbe_recurso' | 'orbe_efeito';
 /** Marco 9A (14/10/2026): baú, loja e loot posicionados; 9A-2: armadilha de fase; 12: fonte sonora. */
-export type TipoObjetoDeFase = TipoOrbeDeFase | 'bau' | 'loja' | 'loot' | 'armadilha' | 'fonte_som';
+export type TipoObjetoDeFase = TipoOrbeDeFase | 'bau' | 'loja' | 'loot' | 'armadilha' | 'fonte_som' | 'santuario';
 
 /** Sons ambientes das fontes sonoras (§2.1, §2.14), sintetizados pelo jogo (D-056). */
 export const SONS_DE_FONTE = ['fogo', 'agua', 'vento', 'goteira'] as const;
 export type SomDeFonte = (typeof SONS_DE_FONTE)[number];
 
 export type ObjetoPosicionadoJson =
+  | { tipo: 'santuario'; x: number; y: number }
   | {
       tipo: TipoOrbeDeFase;
       x: number;
@@ -116,6 +118,7 @@ function objetoCarregado(o: ObjetoPosicionadoJson, largura: number, altura: numb
     raio: 0,
   };
   switch (o.tipo) {
+    case 'santuario': return base;
     case 'bau':
       return { ...base, itens: [...o.loot], ouro: o.ouro, chave: o.chave ?? null };
     case 'loja':
@@ -171,6 +174,7 @@ export interface FaseJson {
   pecas?: Record<string, string>;
   /** Marco 18 (D-070): eventos da fase gerada (lua sangrenta, mercador errante, sala secreta). */
   eventos?: string[];
+  ambientes?: AreaAmbiente[];
 }
 
 export function celulaNormalizada(v: number, tamanho: number): number {
@@ -191,6 +195,7 @@ export interface Fase {
   /** Objetos já convertidos para células. */
   readonly objetos: readonly ObjetoPosicionado[];
   /** Marco 10A-1: porta de saída (null = toda célula `S` é saída livre) e portas internas. */
+  readonly portaRetorno?: Celula;
   readonly portaSaida: PortaSaida | null;
   readonly portasInternas: readonly PortaInterna[];
   readonly matizGraus: number;
@@ -199,6 +204,7 @@ export interface Fase {
   readonly pecas: Readonly<Record<number, string>>;
   /** Marco 18 (D-070): os eventos da fase (o diário anota; a interface mostra). */
   readonly eventos: readonly string[];
+  readonly ambientes?: readonly AreaAmbiente[];
 }
 
 /** Converte uma fase já validada para a forma usada pela simulação. */
@@ -230,6 +236,7 @@ export function carregarFase(json: FaseJson): Fase {
     tilesetId: json.tileset?.atlasId ?? null,
     pecas: { ...json.pecas },
     eventos: [...(json.eventos ?? [])],
+    ambientes: (json.ambientes ?? []).map((a) => ({ ...a })),
   };
 }
 

@@ -184,6 +184,9 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     { camada: palco.entidades, projecao },
   );
   const fluxo = new CamadaFluxo(palco.chao, () => ap.particulas.limite > 0, () => ticksDe(ctx.balance.armadilhas.desarmeMs));
+  bus.on('armadilhaDisparou', (ev) => {
+    if (ev.x !== undefined && ev.y !== undefined) fluxo.disparou(ev.x, ev.y, ev.tick);
+  });
   const portas = new CamadaPortas(palco.chao, fase, ticksDe(ctx.balance.portas.janelaPortaBossMs));
   const numeros = new CamadaNumeros(palco.efeitos, ap.movimentoReduzido, projecao);
   visao = await montarVisao({
@@ -496,7 +499,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     const reduzido = ap.movimentoReduzido();
     objetos.desenhar(estado, q.agoraMs, reduzido);
     portas.desenhar(estado, q.agoraMs, reduzido);
-    fluxo.desenhar(estado, idLocal);
+    fluxo.desenhar(estado, idLocal, ap.movimentoReduzido());
     if (!congelado) {
       telegrafia.desenhar(estado, ctx, idLocal, q.alpha);
       sprites.desenhar(estado, ctx, q.posicao, q.alpha, q.agoraMs, q.aoRemover);

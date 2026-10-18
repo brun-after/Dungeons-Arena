@@ -18,6 +18,10 @@ export function povoarFase(estado: EstadoJogo, ctx: ContextoSimulacao, saida: Ev
     ctx.fase.inimigos.forEach((pos, indice) => {
       const preset = ctx.conteudo.presets.get(pos.preset);
       if (!preset) return;
+      if (ctx.fase.eventos.includes('enxame') && indice >= ctx.balance.ambiente.enxameInicio && preset.arquetipo !== 'boss') {
+        (estado.reservaEnxame ??= []).push(indice);
+        return;
+      }
       const opcoes = {
         ...(pos.nivel !== undefined && { nivel: pos.nivel }),
         ...(pos.hpBase !== undefined && { hpBase: pos.hpBase }),
@@ -44,6 +48,7 @@ export function povoarFase(estado: EstadoJogo, ctx: ContextoSimulacao, saida: Ev
         case 'fonte_som':
           break;
         // Marco 9A: baú e loja. A validação garante uma célula por objeto.
+        case 'santuario':
         case 'bau':
         case 'loja':
           estado.objetos.push(novoObjeto(objetoId, o.tipo, o.x, o.y, { itens: [...o.itens], ouro: o.ouro, chave: o.chave }));
