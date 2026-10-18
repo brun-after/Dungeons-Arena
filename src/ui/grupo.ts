@@ -1,5 +1,5 @@
 // Painel do grupo na campanha cooperativa (marco 15, 15/10/2026, D-061): o código para chamar mais gente, quem está
-// jogando (o anfitrião marcado), a vida de cada aliado em barras pequenas e quantos vivos já estão na saída.
+// jogando (o anfitrião marcado) e quantos vivos já estão na saída. Sem barras de vida sobre o minimapa.
 // "Jogador" aqui é quem é controlado por uma pessoa (`jogadorId`); não decide hostilidade (§2.5).
 
 import type { EstadoJogo } from '../core/estado';
@@ -37,7 +37,7 @@ export function criarPainelGrupo(codigo: string): PainelGrupo {
       const naPorta = vivos.filter(naSaida).length;
       saida.hidden = naPorta === 0;
       saida.textContent = t('grupo.naSaida', { n: naPorta, total: vivos.length });
-      const nova = jogadores.map((e) => `${e.id}:${e.nome}:${e.hp}/${e.hpMax}:${String(e.morto)}:${String(e.id === anfitriao)}`).join('|');
+      const nova = jogadores.map((e) => `${e.id}:${e.nome}:${String(e.morto)}:${String(e.id === anfitriao)}`).join('|');
       if (nova === assinatura) return;
       assinatura = nova;
       lista.textContent = '';
@@ -49,17 +49,7 @@ export function criarPainelGrupo(codigo: string): PainelGrupo {
         const nome = document.createElement('span');
         nome.className = 'nome-membro';
         nome.textContent = e.id === anfitriao ? `${e.nome} (${t('grupo.anfitriao')})` : e.nome;
-        const barra = document.createElement('span');
-        barra.className = 'vida-membro';
-        barra.setAttribute('role', 'meter');
-        barra.setAttribute('aria-valuemin', '0');
-        barra.setAttribute('aria-valuemax', String(e.hpMax));
-        barra.setAttribute('aria-valuenow', String(Math.max(0, e.hp)));
-        barra.setAttribute('aria-label', `${e.nome}: ${String(Math.max(0, e.hp))}/${String(e.hpMax)}`);
-        const cheio = document.createElement('span');
-        cheio.style.width = `${String(Math.round((100 * Math.max(0, e.hp)) / Math.max(1, e.hpMax)))}%`;
-        barra.append(cheio);
-        item.append(nome, barra);
+        item.append(nome);
         if (e.morto) item.append(` ${t('grupo.caido')}`);
         lista.append(item);
       }

@@ -1660,10 +1660,10 @@ body.qualidade-baixo * {
   transition-duration: 0.001ms !important;
 }
 
-/* Marco 15 (15/10/2026): campanha cooperativa — painel do grupo (código, quem está, vida) e o grupo no slot. */
+/* Campanha cooperativa: código e nomes abaixo do minimapa, sem barras de vida extras. */
 .painel-grupo {
   position: absolute;
-  top: calc(64px + var(--seguro-topo));
+  top: calc(192px + var(--seguro-topo));
   left: calc(8px + var(--seguro-esq));
   max-width: min(220px, 45vw);
   padding: 6px 8px;
@@ -1672,6 +1672,9 @@ body.qualidade-baixo * {
   font-size: 0.75rem;
   pointer-events: none;
   zoom: var(--escala-ui, 1);
+}
+body.toque .painel-grupo {
+  top: calc(162px + var(--seguro-topo));
 }
 .painel-grupo h2 {
   margin: 0 0 4px;
@@ -1688,8 +1691,7 @@ body.qualidade-baixo * {
   gap: 3px;
 }
 .membro-grupo {
-  display: grid;
-  grid-template-columns: 1fr 56px;
+  display: flex;
   align-items: center;
   gap: 6px;
 }
@@ -1700,18 +1702,6 @@ body.qualidade-baixo * {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.vida-membro {
-  display: block;
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.15);
-  overflow: hidden;
-}
-.vida-membro > span {
-  display: block;
-  height: 100%;
-  background: #2ecc71;
 }
 .grupo-saida {
   margin: 4px 0 0;

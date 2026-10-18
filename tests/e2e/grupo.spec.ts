@@ -35,6 +35,12 @@ test.describe('campanha em grupo', () => {
     for (const p of [anfitriao, convidado]) {
       await expect(p.locator('.painel-grupo .membro-grupo')).toHaveCount(2, { timeout: 15_000 });
       await expect(p.locator('.painel-grupo')).toContainText('anfitrião');
+      await expect(p.locator('.painel-grupo [role="meter"]')).toHaveCount(0);
+      const mapa = await p.locator('.minimapa').boundingBox();
+      const painel = await p.locator('.painel-grupo').boundingBox();
+      expect(mapa).not.toBeNull();
+      expect(painel).not.toBeNull();
+      if (mapa && painel) expect(painel.y).toBeGreaterThanOrEqual(mapa.y + mapa.height);
     }
 
     // A mochila do convidado é a dele (mago: as habilidades da classe).
