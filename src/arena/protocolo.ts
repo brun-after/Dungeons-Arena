@@ -115,6 +115,8 @@ export function lerComando(v: unknown): Comando | null {
       return typeof v.travar === 'boolean' ? { t: 'selecionarAlvo', alvo: v.alvo, travar: v.travar } : null;
     case 'usarItem':
       return id(v.invId) ? { t: 'usarItem', invId: v.invId } : null;
+    case 'soltarItem':
+      return id(v.invId) && inteiro(v.qtd) && v.qtd > 0 && v.qtd <= 1000 ? { t: 'soltarItem', invId: v.invId, qtd: v.qtd } : null;
     case 'equipar':
       return id(v.invId) && ehSlot(v.slot) ? { t: 'equipar', invId: v.invId, slot: v.slot } : null;
     case 'desequipar':

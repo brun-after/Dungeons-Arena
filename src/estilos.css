@@ -1075,6 +1075,7 @@ body.toque .botao-habilidade .tecla {
 
 .linha-item {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   min-height: 44px;

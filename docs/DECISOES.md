@@ -2069,3 +2069,11 @@ Por pedido do usuário, as salas e os corredores em L permanecem predominantes. 
 Água, brasas e miasma usam o dispatcher e as reações existentes. As armadilhas ficam mais perigosas nas fases novas e seu disparo permanece visível até na qualidade mínima. Engenho permite converter armadilhas já percebidas, mantendo o valor da Sabedoria e do desarme normal. O canal privado da campanha leva apenas as armadilhas reveladas ou aliadas.
 
 Enxame é um evento de 12%, com reservas sem IA, levas de até seis e teto de 40 ativos, também nos respawns. Mapas 84×56 surgem a cada sete profundezas; espirais, a cada onze. Parâmetros novos são guardados na referência e não alteram a geração das fases antigas. Compatibilidade, controles e medições estão em [Fases vivas](FASES-VIVAS.md).
+
+## D-080 — Reabrir lojas e compartilhar itens pelo chão (17/10/2026)
+
+A interface libera uma nova abertura quando o estado confirma o fechamento da loja. O prazo sem limite é constante e não pode identificar sessões diferentes: compará-lo sem limpar a marca escondia as próximas janelas e deixava o jogador preso na interação.
+
+A mochila oferece Soltar 1 e Soltar pilha nos modos com objetos de fase. O comando é validado pelo servidor; só retira itens depois de encontrar chão passável sem outro objeto. Mantém quantidade, itemId e ref de livros. Equipamentos precisam ser desequipados primeiro. O dono não recolhe enquanto permanecer sobre o drop; sair da célula libera sua coleta, e aliados podem pegar imediatamente. Itens no chão persistem pelo mesmo estado das fases e saves.
+
+Os drops usam os SVGs dos itens da mochila, convertidos em texturas compartilhadas. Há halo de raridade e contador para pilhas; no isométrico o desenho fica em pé, com profundidade. Sprites são removidos na coleta e na troca de visão, sem destruir as texturas compartilhadas.

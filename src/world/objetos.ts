@@ -63,9 +63,15 @@ function coletor(e: Entidade): boolean {
 export function coletarObjetos(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
   if (estado.objetos.length === 0 || !ctx.modo.objetosDeFase) return;
   const consumidos = new Set<string>();
+  for (const o of estado.objetos) {
+    if (!o.aguardaSaidaDe) continue;
+    const dono = estado.entidades.find((e) => e.id === o.aguardaSaidaDe);
+    // A coleta usa x/y (passo concluído), não a reserva de combate que muda no meio do passo.
+    if (!dono || dono.x !== o.x || dono.y !== o.y) delete o.aguardaSaidaDe;
+  }
   for (const e of ordemRotativa(estado.entidades, estado.tick)) {
     if (!coletor(e)) continue;
-    const o = estado.objetos.find((x) => x.x === e.x && x.y === e.y && !consumidos.has(x.objetoId) && coletavel(x));
+    const o = estado.objetos.find((x) => x.x === e.x && x.y === e.y && x.aguardaSaidaDe !== e.id && !consumidos.has(x.objetoId) && coletavel(x));
     if (!o) continue;
     // Transação: verificar -> consumir -> transferir -> registrar, tudo neste tick.
     if (o.tipo === 'item') {

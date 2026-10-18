@@ -191,6 +191,17 @@ export function criarMochila(o: OpcoesMochila): Mochila {
         grupo.append(b);
       }
       li.append(grupo);
+      if (ctx.modo.objetosDeFase) {
+        const soltar = (qtd: number) => { emitir({ t: 'soltarItem', invId: ordem.invId, qtd }); };
+        const b = botao(t('mochila.soltar'), `soltar-${ordem.invId}`, () => { soltar(1); });
+        b.setAttribute('aria-label', `${t('mochila.soltar')}: ${opcoes.rotulo}`);
+        li.append(b);
+        if (opcoes.qtd > 1) {
+          const pilha = botao(t('mochila.soltarPilha'), `soltar-pilha-${ordem.invId}`, () => { soltar(opcoes.qtd); });
+          pilha.setAttribute('aria-label', `${t('mochila.soltarPilha')}: ${opcoes.rotulo}`);
+          li.append(pilha);
+        }
+      }
     }
     return li;
   };
@@ -206,6 +217,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
       el('h3', 'subtitulo-modal', t('mochila.itens', { n: bolsa.mochila.length, max: ctx.balance.inventario.capacidade })),
     );
     if (bolsa.mochila.length === 0) corpo.append(el('p', 'vazio-modal', t('mochila.semItens')));
+    if (ctx.modo.objetosDeFase && bolsa.mochila.length > 0) corpo.append(el('p', 'detalhe-item', t('mochila.dicaSoltar')));
     const lista = el('ul', 'lista-itens');
     const atalhos = consumiveisComAtalho(bolsa, itens).map((i) => i.invId);
     bolsa.mochila.forEach((entrada, indice) => {

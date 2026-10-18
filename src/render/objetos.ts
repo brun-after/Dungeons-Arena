@@ -1,6 +1,6 @@
 // Objetos coletáveis no chão (§2.16, camada "objetos"): orbes de HP (verde) e de recurso (azul),
-// com um pulso leve, orbes de efeito na cor do registro (marco 8A) e itens (marco 6) como losango
-// na cor da raridade (§2.10). Só lê o estado.
+// com um pulso leve, orbes de efeito na cor do registro (marco 8A) e itens com o desenho da mochila,
+// quantidade e halo na cor da raridade (§2.10). Só lê o estado.
 // Marco 9A (14/10/2026): ouro (moedas), baú (cadeado se trancado, anel de progresso enquanto abre,
 // tampa aberta até sumir) e loja (barraca com toldo).
 // Marco 13 (14/10/2026), D-058: no isométrico, baú e loja ficam em pé (na camada das entidades, com
@@ -9,12 +9,13 @@
 // baú). No lugar, um halo suave pulsando no baú ou na loja em uso, como um brilho de CSS; no baú, ele fica mais
 // forte conforme abre. O anel do descanso saiu com o descanso.
 
-import { CanvasSource, Graphics, Sprite, Texture, type Container } from 'pixi.js';
+import { CanvasSource, Container, Graphics, Sprite, Text, Texture } from 'pixi.js';
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import type { EstadoJogo, ObjetoNoMundo } from '../core/estado';
 import type { Raridade } from '../modos/modo';
 import { CELULA_PX } from './camera-calculo';
 import { centroDaCelula, type Projecao } from './projecao';
+import { texturaDoIcone } from './icones-textura';
 
 const COR_ORBE: Readonly<Record<'orbe_hp' | 'orbe_recurso', number>> = {
   orbe_hp: 0x2ecc71,
@@ -45,6 +46,7 @@ export class CamadaObjetos {
   private readonly halos = new Map<string, Sprite>();
   private readonly camadaHalo: Container;
   private texturaHalo: Texture | null = null;
+  private readonly itens = new Map<string, { visual: Container; quantidade: Text }>();
 
   /**
    * `raridadeDe` traduz o item do chão para a cor; item desconhecido aparece como comum.
@@ -55,6 +57,7 @@ export class CamadaObjetos {
     private readonly raridadeDe: (itemId: string) => Raridade | undefined = () => undefined,
     private readonly ticksBau = 1,
     private readonly emPe: OpcoesEmPe | null = null,
+    private readonly iconeDe: (itemId: string) => string | undefined = () => undefined,
   ) {
     this.camadaHalo = camada;
     camada.addChild(this.g);
@@ -153,9 +156,9 @@ export class CamadaObjetos {
       }
       if (o.tipo === 'item') {
         const cor = COR_RARIDADE[(o.itemId && this.raridadeDe(o.itemId)) || 'comum'];
-        const r = 11;
         g.circle(cx, cy, 16 + pulso).fill({ color: cor, alpha: 0.2 });
-        g.poly([cx, cy - r, cx + r, cy, cx, cy + r, cx - r, cy]).fill(cor).stroke({ width: 2, color: 0xffffff, alpha: 0.9 });
+        vistos.add(o.objetoId);
+        this.desenharItem(o, cx, cy, iso ? proj : undefined);
         continue;
       }
       if (o.tipo === 'ouro') {
@@ -204,6 +207,41 @@ export class CamadaObjetos {
       alto.destroy();
       this.altos.delete(id);
     }
+    for (const [id, item] of this.itens) {
+      if (vistos.has(id)) continue;
+      item.visual.destroy({ children: true });
+      this.itens.delete(id);
+    }
+  }
+
+  /** Usa o mesmo desenho da mochila; no isométrico ele fica legível, sem achatar com o piso. */
+  private desenharItem(o: ObjetoNoMundo, cx: number, cy: number, proj?: Projecao): void {
+    const textura = texturaDoIcone((o.itemId && this.iconeDe(o.itemId)) || 'pergaminho');
+    if (!textura) return;
+    let item = this.itens.get(o.objetoId);
+    if (!item) {
+      const visual = new Container();
+      const sombra = new Sprite(textura);
+      sombra.anchor.set(0.5);
+      sombra.width = sombra.height = 30;
+      sombra.tint = 0x10151c;
+      sombra.position.set(1.5, 1.5);
+      const desenho = new Sprite(textura);
+      desenho.anchor.set(0.5);
+      desenho.width = desenho.height = 28;
+      desenho.tint = 0xffedca;
+      const quantidade = new Text({ text: '', style: { fontSize: 12, fontWeight: 'bold', fill: 0xffffff, stroke: { color: 0x10151c, width: 3 } } });
+      quantidade.position.set(8, 5);
+      visual.addChild(sombra, desenho, quantidade);
+      item = { visual, quantidade };
+      this.itens.set(o.objetoId, item);
+    }
+    const camada = proj && this.emPe ? this.emPe.camada : this.camadaHalo;
+    if (item.visual.parent !== camada) camada.addChild(item.visual);
+    const p = proj ? proj.projetar(cx, cy) : { x: cx, y: cy };
+    item.visual.position.set(p.x, p.y - (proj ? 9 : 0));
+    item.visual.zIndex = p.y;
+    item.quantidade.text = o.valor > 1 ? `×${o.valor}` : '';
   }
 
   private desenharEmPe(o: ObjetoNoMundo, estado: EstadoJogo, proj: Projecao, camada: Container): void {
@@ -227,6 +265,8 @@ export class CamadaObjetos {
   reiniciarVisual(): void {
     for (const alto of this.altos.values()) alto.destroy();
     this.altos.clear();
+    for (const item of this.itens.values()) item.visual.destroy({ children: true });
+    this.itens.clear();
   }
 
   destruir(): void {

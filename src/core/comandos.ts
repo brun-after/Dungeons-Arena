@@ -22,6 +22,7 @@ export type Comando =
   // Ajuste de 15/10/2026 (D-065): `travar` (padrão true com alvo): a escolha manual trava; false destrava.
   | { t: 'selecionarAlvo'; alvo: EntidadeId | null; travar?: boolean }
   | { t: 'usarItem'; invId: string }
+  | { t: 'soltarItem'; invId: string; qtd: number }
   | { t: 'equipar'; invId: string; slot: Slot }
   | { t: 'desequipar'; slot: Slot }
   | { t: 'distribuirPonto'; atributo: keyof Atributos }
@@ -54,6 +55,7 @@ export const TIPOS_DE_COMANDO: readonly Comando['t'][] = [
   'ataqueBasico',
   'selecionarAlvo',
   'usarItem',
+  'soltarItem',
   'equipar',
   'desequipar',
   'distribuirPonto',

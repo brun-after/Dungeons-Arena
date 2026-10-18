@@ -49,7 +49,8 @@ export type MotivoItem =
   /** Marco 18 (D-068): já há um estudo em andamento (o livro não é gasto). */
   | 'estudando'
   /** Marco 18 (D-070): a forja pede material que falta. */
-  | 'sem_material';
+  | 'sem_material'
+  | 'sem_espaco_no_chao';
 
 /** Marco 14: por que a habilidade não subiu de rank ou não foi para a barra. */
 export type MotivoHabilidade =
