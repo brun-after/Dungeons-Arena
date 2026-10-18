@@ -1092,6 +1092,123 @@
           "alvo"
         ]
       }
+    },
+    {
+      "id": "sepultura_aberta",
+      "nome": "Sepultura aberta",
+      "sequencia": [
+        "dardo_funesto",
+        "garras_do_ossuario"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "mesmo_alvo",
+        "definhando"
+      ],
+      "danoPct": 25,
+      "visual": {
+        "cor": "#9e86d8",
+        "formas": [
+          "jaula",
+          "silhuetas"
+        ],
+        "movimento": "contrair",
+        "duracaoMs": 850,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      },
+      "texto": "Dardo funesto e Garras do ossuário no mesmo alvo definhando: +25% de dano nas garras."
+    },
+    {
+      "id": "tributo_da_legiao",
+      "nome": "Tributo da legião",
+      "sequencia": [
+        "comando_sepulcral",
+        "dizimo_vital"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "comandou",
+        "drenou"
+      ],
+      "danoPct": 0,
+      "visual": {
+        "cor": "#9e86d8",
+        "formas": [
+          "escudo",
+          "gota"
+        ],
+        "movimento": "subir",
+        "duracaoMs": 850,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      },
+      "recompensa": "escudo_curto",
+      "texto": "Comande uma invocação e drene vida efetivamente: ganha escudo de 8 por 3 s."
+    },
+    {
+      "id": "crematorio",
+      "nome": "Crematório",
+      "sequencia": [
+        "garras_do_ossuario",
+        "bola_de_fogo"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "mesmo_alvo",
+        "enraizado"
+      ],
+      "danoPct": 20,
+      "visual": {
+        "cor": "#9e86d8",
+        "formas": [
+          "chifres",
+          "raizes"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 850,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      },
+      "texto": "Bola de fogo no mesmo alvo ainda enraizado pelas garras causa +20% de dano."
+    },
+    {
+      "id": "absolvicao_funesta",
+      "nome": "Absolvição funesta",
+      "sequencia": [
+        "dardo_funesto",
+        "lanca_radiante"
+      ],
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "condicoes": [
+        "mesmo_alvo",
+        "definhando"
+      ],
+      "danoPct": 15,
+      "visual": {
+        "cor": "#9e86d8",
+        "formas": [
+          "eclipse",
+          "constelacao"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 850,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      },
+      "texto": "Lança radiante no mesmo alvo definhando pelo dardo causa +15% de dano além das reações de Trevas e luz."
     }
   ],
   "recompensas": {

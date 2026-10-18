@@ -53,6 +53,7 @@ const SEMPRE: Balance = {
     loot: { ...BALANCE_PADRAO.spawner.loot, chance: 1 },
     orbe: { ...BALANCE_PADRAO.spawner.orbe, chance: 1 },
     armadilha: { ...BALANCE_PADRAO.spawner.armadilha, chance: 1 },
+    refugio: { ...BALANCE_PADRAO.spawner.refugio, chance: 1 },
   },
 };
 

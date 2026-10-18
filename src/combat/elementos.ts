@@ -11,7 +11,7 @@ import { PRESETS_VISUAIS, type PresetVisual } from './habilidades';
 import type { EfeitoCanonico, TipoEfeito } from './registro-efeitos';
 import { passivosDe } from '../progression/ganchos-do-portador';
 
-export const ELEMENTOS = ['fogo', 'gelo', 'raio', 'veneno', 'psiquico', 'terra', 'sombra', 'sagrado'] as const;
+export const ELEMENTOS = ['fogo', 'gelo', 'raio', 'veneno', 'psiquico', 'terra', 'trevas', 'sagrado'] as const;
 export type Elemento = (typeof ELEMENTOS)[number];
 
 /**

@@ -2077,3 +2077,9 @@ A interface libera uma nova abertura quando o estado confirma o fechamento da lo
 A mochila oferece Soltar 1 e Soltar pilha nos modos com objetos de fase. O comando é validado pelo servidor; só retira itens depois de encontrar chão passável sem outro objeto. Mantém quantidade, itemId e ref de livros. Equipamentos precisam ser desequipados primeiro. O dono não recolhe enquanto permanecer sobre o drop; sair da célula libera sua coleta, e aliados podem pegar imediatamente. Itens no chão persistem pelo mesmo estado das fases e saves.
 
 Os drops usam os SVGs dos itens da mochila, convertidos em texturas compartilhadas. Há halo de raridade e contador para pilhas; no isométrico o desenho fica em pé, com profundidade. Sprites são removidos na coleta e na troca de visão, sem destruir as texturas compartilhadas.
+
+## D-081 — Necromante e unificação de Sombra em Trevas (18/10/2026)
+
+O Necromante tem um servo passivo que retorna após cair, reanima seus abates e os de suas invocações, e pode criar um eco temporário de um aliado que morreu perto. O eco é independente do jogador, que revive normalmente. Reanimados usam atributos e dano próprios em vez de copiar poderes de chefes; todos respeitam os limites do dono e do modo. Dízimo vital consome vida efetiva de uma invocação própria para curar o dono.
+
+Por orientação do usuário, Sombra e Trevas são um único elemento: Trevas substitui a identidade elemental anterior sem invalidar itens ou caminhos salvos. O schema 19 migra os campos elementais antigos, incluindo saves v18 dos enxames; IDs legados permanecem estáveis. As regras, habilidades, combos e a compatibilidade estão em [Necromante e Trevas](NECROMANTE.md).

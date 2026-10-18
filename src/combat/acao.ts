@@ -34,6 +34,7 @@ import { lancarProjetil } from './projeteis';
 import { quantidadeDeSaltos, saltar } from './saltos';
 import { dispararGanchosDe, passivosDe } from '../progression/ganchos-do-portador';
 import { comCombo, fazerCombo } from './combos';
+import { invocacaoParaDrenar } from './necromancia';
 
 export function chaveRecarga(entidadeId: EntidadeId, habilidadeId: string): string {
   return `${entidadeId}_${habilidadeId}`;
@@ -182,6 +183,10 @@ export function iniciarAcao(
     alvo = escolherAlvo(estado, ctx, ator, hab, alvoPedido);
   }
   if (!alvo && !celula) return recusar('sem_alvo');
+  if (hab.efeitos.some((ef) => ef.tipo === 'drenar_invocacao')) {
+    if (ator.hp >= ator.hpMax) return recusar('vida_cheia');
+    if (!invocacaoParaDrenar(estado, ctx, ator)) return recusar('sem_invocacao');
+  }
   // Em volta de quem conjura (ao redor, aliados): a mira é a própria célula.
   const mira = hab.tipoArea === 'ao_redor' ? origem : (celula ?? celulaOcupada(alvo as Entidade));
   if (chebyshev(origem, mira) > alcanceDe(ctx, ator, hab, estado.tick)) return recusar('fora_de_alcance');

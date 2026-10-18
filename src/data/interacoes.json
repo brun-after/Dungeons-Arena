@@ -9,7 +9,8 @@
     "molhado": "renova",
     "marcado": "renova",
     "consagrado": "renova",
-    "enraizado": "ignora"
+    "enraizado": "ignora",
+    "definhando": "renova"
   },
   "transformacoes": [
     { "de": "resfriado", "acumulos": 3, "vira": { "tipo": "congelado", "duracaoMs": 1500 } }
@@ -30,10 +31,13 @@
     { "id": "eletrocutar", "elemento": "raio", "sobre": ["molhado"], "remove": ["molhado"], "danoExtraPct": 40, "aplicar": [{ "tipo": "atordoar", "duracaoMs": 600 }, { "tipo": "dano_direto", "valor": 4 }], "raio": 3, "soComEstado": "molhado" },
     { "id": "lama", "elemento": "terra", "sobre": ["molhado"], "remove": ["molhado"], "danoExtraPct": 10, "aplicar": [{ "tipo": "atolado", "duracaoMs": 4000, "pct": 50 }], "raio": 1 },
     { "id": "fossilizar", "elemento": "terra", "sobre": ["congelado"], "remove": ["congelado"], "danoExtraPct": 0, "aplicar": [{ "tipo": "atordoar", "duracaoMs": 2000 }, { "tipo": "efeito_atrasado", "duracaoMs": 2000, "interno": { "tipo": "dano_direto", "valor": 14 } }] },
-    { "id": "eclipse", "elemento": "sombra", "sobre": ["consagrado"], "remove": ["consagrado"], "danoExtraPct": 60, "aplicar": [{ "tipo": "silenciar", "duracaoMs": 2000 }] },
+    { "id": "eclipse", "elemento": "trevas", "sobre": ["consagrado"], "remove": ["consagrado"], "danoExtraPct": 60, "aplicar": [{ "tipo": "silenciar", "duracaoMs": 2000 }] },
     { "id": "eclipse_luz", "elemento": "sagrado", "sobre": ["marcado"], "remove": ["marcado"], "danoExtraPct": 60, "aplicar": [{ "tipo": "silenciar", "duracaoMs": 2000 }] },
     { "id": "peste", "elemento": "veneno", "sobre": ["marcado"], "remove": ["marcado"], "danoExtraPct": 15, "aplicar": [{ "tipo": "envenenado", "duracaoMs": 5000, "valor": 2, "pct": 50 }], "raio": 2 },
     { "id": "purgar", "elemento": "sagrado", "sobre": ["envenenado", "queimando"], "remove": ["envenenado", "queimando"], "danoExtraPct": 10, "aplicar": [], "curarFonte": 6 },
-    { "id": "panico", "elemento": "psiquico", "sobre": ["marcado"], "remove": ["marcado"], "danoExtraPct": 0, "aplicar": [{ "tipo": "empurrao", "valor": 3 }, { "tipo": "sem_ataque", "duracaoMs": 2000 }] }
+    { "id": "panico", "elemento": "psiquico", "sobre": ["marcado"], "remove": ["marcado"], "danoExtraPct": 0, "aplicar": [{ "tipo": "empurrao", "valor": 3 }, { "tipo": "sem_ataque", "duracaoMs": 2000 }] },
+    {"id":"putrefacao","elemento":"trevas","sobre":["envenenado"],"remove":["envenenado"],"danoExtraPct":25,"aplicar":[{"tipo":"definhando","duracaoMs":5000,"pct":25}]},
+    {"id":"pira_funebre","elemento":"fogo","sobre":["definhando"],"remove":["definhando"],"danoExtraPct":25,"aplicar":[{"tipo":"queimando","duracaoMs":3000,"valor":2}]},
+    {"id":"absolvicao","elemento":"sagrado","sobre":["definhando"],"remove":["definhando"],"danoExtraPct":20,"aplicar":[],"curarFonte":4}
   ]
 }

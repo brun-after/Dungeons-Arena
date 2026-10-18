@@ -36,6 +36,7 @@ export function entrarNaArena(
     nivel: ficha.nivel,
   });
   const local = localDeRespawn(estado, ctx.fase, ctx.modo, e, estado.rng);
+  e.classeId = ficha.classeId;
   e.x = e.destinoX = e.origemX = local.x;
   e.y = e.destinoY = e.origemY = local.y;
   estado.entidades.push(e);

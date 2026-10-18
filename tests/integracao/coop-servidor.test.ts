@@ -74,7 +74,7 @@ async function esperar(condicao: () => boolean, ms = 5000): Promise<void> {
 
 describe('campanha cooperativa no servidor real', () => {
   it('o anfitrião cria, o convidado entra pelo código; cada um vê o outro e só a própria bolsa', async () => {
-    const a = await membro({ criar: { faseRef: FASE_INICIAL, dificuldade: 'dificil' } }, 'guerreiro');
+    const a = await membro({ criar: { faseRef: FASE_INICIAL, dificuldade: 'dificil' } }, 'necromante');
     const info = (await (await fetch(`http://localhost:${porta}/salas/${a.conexao.codigo}`)).json()) as Record<string, unknown>;
     expect(info).toMatchObject({ tipo: 'campanha', fase: 'oficial:fase-01', faseRef: FASE_INICIAL, maxJogadores: 6 });
     const b = await membro({ codigo: a.conexao.codigo }, 'mago');
@@ -82,7 +82,8 @@ describe('campanha cooperativa no servidor real', () => {
     await jogar(500, [a.cliente, b.cliente]);
     expect(a.cliente.anfitriao).toBe(true);
     expect(b.cliente.anfitriao).toBe(false);
-    expect(a.cliente.bolsaPropria?.classeId).toBe('guerreiro');
+    expect(a.cliente.bolsaPropria?.classeId).toBe('necromante');
+    expect(b.cliente.previsto?.entidades.some((e) => e.invocacao?.donoId === a.cliente.entidadeId && e.invocacao.necromancia === 'servo')).toBe(true);
     expect(b.cliente.bolsaPropria?.classeId).toBe('mago');
     const outroEmA = a.cliente.previsto && b.cliente.entidadeId ? buscarEntidade(a.cliente.previsto, b.cliente.entidadeId) : undefined;
     expect(outroEmA?.bolsa).toBeNull();

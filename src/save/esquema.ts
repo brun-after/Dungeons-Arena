@@ -10,7 +10,7 @@ import type { Dificuldade } from '../modos/dificuldade';
 import { MAX_REGRAS, RE_REGRA_ESTILO } from '../world/estilo';
 import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 18;
+export const VERSAO_SCHEMA = 19;
 export const SLOTS = [1, 2, 3] as const;
 export const FORMATO_EXPORTACAO = 'dungeons-arena/save';
 
@@ -352,6 +352,16 @@ export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   16: (r) => r,
   // O marcador opcional preserva o terreno estilizado ao encerrar um enxame.
   17: (r) => r,
+  // Trevas unifica o antigo elemento Sombra, inclusive nos saves v18 publicados com os enxames.
+  18: (r) => {
+    const migrar = (v: unknown): unknown => {
+      if (Array.isArray(v)) return v.map(migrar);
+      if (!ehObjeto(v)) return v;
+      return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, (k === 'elemento' || k === 'elementoArma') && x === 'sombra' ? 'trevas' : migrar(x)]));
+    };
+    // Não altera certificados assinados nem outros metadados do registro.
+    return { ...r, estado: migrar(r.estado), fasesVisitadas: migrar(r.fasesVisitadas) };
+  },
 };
 
 function temNaoFinito(v: unknown): boolean {

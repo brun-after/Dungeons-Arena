@@ -51,6 +51,7 @@ export const ATRIBUTOS_TIPICOS: Readonly<Record<string, readonly (keyof Atributo
   aventureiro: ['forca', 'inteligencia'],
   guerreiro: ['forca'],
   mago: ['inteligencia'],
+  necromante: ['inteligencia'],
   arqueiro: ['forca', 'destreza'],
 };
 

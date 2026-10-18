@@ -142,7 +142,8 @@ export function lerIdItemBase(id: string): { base: string; forma: FormaItem; ele
   const m = /^ib_([a-z]+)_([a-z]+)_([a-z]+)_(\d{1,2})_([0-9a-z]{1,7})$/.exec(id);
   if (!m?.[1] || !m[2] || !m[3] || !m[4] || !m[5]) return null;
   const forma = m[2];
-  const elemento = m[3] === 'n' ? null : m[3];
+  // IDs antigos continuam identificando o mesmo item, agora no elemento unificado Trevas.
+  const elemento = m[3] === 'n' ? null : m[3] === 'sombra' ? 'trevas' : m[3];
   if (!ehForma(forma) || (elemento !== null && !ehElemento(elemento))) return null;
   const semente = parseInt(m[5], 36);
   if (!Number.isFinite(semente)) return null;

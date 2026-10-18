@@ -34,6 +34,7 @@ export function criarJogador(
   });
   // Sem nada equipado, a ficha derivada coincide com a da classe.
   e.bolsa = criarBolsa(classe, balance.economia.ouroInicial);
+  e.classeId = classe.id;
   return e;
 }
 

@@ -22,6 +22,7 @@ const OLHO = 0xf5e663;
  * equipa é desenhado por cima (render/adornos.ts, com modelos/adornos.ts), e as proporções ficam aqui para isso.
  */
 export const OPCOES_JOGAVEIS = {
+  necromante: { pele: 0xb7c7bb, roupa: 0x302439, olho: 0x7ee0bb, perna: 17, tronco: 14, ombro: 8, quadril: 6, cabeca: 6.5, veste: true, capuz: 0x261d32, capa: 0x49345e },
   aventureiro: { pele: 0xf0c8a0, roupa: 0x2e86c1, olho: 0x1b2631, perna: 15, tronco: 14, ombro: 8.5, quadril: 6.5, cabeca: 7 },
   guerreiro: { pele: 0xe8b98f, roupa: 0x7f8c8d, olho: 0x1b2631, perna: 15, tronco: 15, ombro: 10, quadril: 7, cabeca: 7, capa: 0x922b21 },
   mago: { pele: 0xf3d2b3, roupa: 0x2e4a8c, olho: 0x1b2631, perna: 17, tronco: 13, ombro: 7.5, quadril: 6, cabeca: 7, veste: true, chapeu: 0x24396b },
@@ -30,6 +31,7 @@ export const OPCOES_JOGAVEIS = {
 
 /** D-067: a arma da classe, desenhada enquanto a mão está vazia (as habilidades da classe não pedem item). */
 export const ARMA_DE_CLASSE: Readonly<Record<keyof typeof OPCOES_JOGAVEIS, { arma: string; secundaria: string | null }>> = {
+  necromante: { arma: 'cajado', secundaria: null },
   aventureiro: { arma: 'espada', secundaria: 'escudo' },
   guerreiro: { arma: 'machado', secundaria: 'escudo' },
   mago: { arma: 'cajado', secundaria: null },
@@ -37,6 +39,7 @@ export const ARMA_DE_CLASSE: Readonly<Record<keyof typeof OPCOES_JOGAVEIS, { arm
 };
 
 export const MODELOS = {
+  necromante: { estilo: 'deslizar', quadros: 2, desenhar: bipede(OPCOES_JOGAVEIS.necromante) },
   goblin: {
     estilo: 'passada',
     quadros: 1,

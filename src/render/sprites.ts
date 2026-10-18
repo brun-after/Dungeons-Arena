@@ -175,8 +175,8 @@ export class CamadaEntidades {
     const biblioteca = this.o.biblioteca();
     if (!biblioteca) return null;
     // Marco 14: o jogador usa o modelo da classe (sem bolsa — arena — o aventureiro).
-    const classe = e.bolsa ? ctx.conteudo.classes.get(e.bolsa.classeId)?.modelo : undefined;
-    const nome = ctx.conteudo.presets.get(e.preset)?.modelo ?? (e.arquetipo === 'jogador' ? (classe ?? MODELO_JOGADOR) : '');
+    const classe = ctx.conteudo.classes.get(e.classeId ?? e.bolsa?.classeId ?? '')?.modelo;
+    const nome = e.invocacao?.modeloOriginal ?? ctx.conteudo.presets.get(e.preset)?.modelo ?? (e.arquetipo === 'jogador' ? (classe ?? MODELO_JOGADOR) : '');
     if (!ehModelo(nome)) return null;
     const m = MODELOS[nome];
     const quadro = m.quadros > 1 && andando ? Math.floor(quadroMs / QUADRO_MS) % m.quadros : 0;
@@ -243,7 +243,7 @@ export class CamadaEntidades {
       const norma = Math.hypot(dtx, dty) || 1;
       if (Math.abs(dtx) > 0.01) m.sentido = dtx > 0 ? 1 : -1;
       // Morto fica apagado; invisível (pós-morte) fica translúcido.
-      m.raiz.alpha = e.morto ? 0.25 : e.invisivelAteTick > estado.tick ? 0.5 : 1;
+      m.raiz.alpha = e.morto ? 0.25 : e.invisivelAteTick > estado.tick ? 0.5 : e.invocacao?.necromancia === 'eco' ? 0.7 : 1;
 
       const andando = agoraMs < m.andandoAteMs && !e.morto;
       const escolha = this.fonteDe(e, ctx, iso, agoraMs, andando);

@@ -1,5 +1,6 @@
 import { executarTatica, fato, muralhaEm, fluxoRestaurador } from './tatica';
 import { passivasDaBolsa } from './perfil';
+import { executarRitual } from './necromancia';
 // Efeitos (§2.8): dispatcher único, consultas e processamento por tick. Marco 3 registrou os de
 // controle; marco 8A (13/10/2026) liga os 20 tipos do registro (registro-efeitos.ts, D-048).
 // Aplicar efeito acontece em um lugar só (`aplicarEfeito`); quem precisa saber se algo vale
@@ -195,6 +196,11 @@ export function aplicarEfeito(
   const instantaneo = def.instantaneo ?? (ef.duracaoMs <= 0 && (def.periodico === 'cura' || def.periodico === 'recurso') ? def.periodico : null);
   if (instantaneo) {
     switch (instantaneo) {
+      case 'drenar_invocacao': case 'comandar_mortos':
+        executarRitual(estado, ctx, alvo, ef, origem.acaoId, multiplicadorCuraRecebida(alvo, tick), (destino, efeito) => {
+          aplicarEfeito(estado, ctx, destino, efeito, origem, mira, saida);
+        }, saida);
+        break;
       case 'purificar': case 'passo_sombrio': case 'muralha_pedra': case 'campo_cura': case 'campo_veneno':
         executarTatica(estado, ctx, alvo, ef, origem, mira);
         break;

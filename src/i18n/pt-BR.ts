@@ -392,6 +392,8 @@ export const ptBR = {
   'recusa.recarga': 'Ainda em recarga',
   'recusa.recurso': 'Mana insuficiente',
   'recusa.sem_alvo': 'Nenhum alvo no alcance',
+  'recusa.vida_cheia': 'Sua vida já está cheia',
+  'recusa.sem_invocacao': 'Nenhuma invocação sua no alcance do ritual',
   'recusa.fora_de_alcance': 'Alvo fora de alcance',
   'recusa.bloqueado': 'Você não pode agir agora',
   'recusa.ocupado': 'Já está conjurando',

@@ -82,6 +82,10 @@ export function pesoDoEfeito(ef: EfeitoCanonico, r: RegrasOrcamento): number {
   if (d.fluxo === 'invocar') return p.invocacao * Math.max(1, ef.valor);
   if (d.fluxo === 'armadilha') return ef.valor * p.armadilha;
   switch (d.instantaneo) {
+    case 'drenar_invocacao':
+      return ef.valor * p.cura;
+    case 'comandar_mortos':
+      return (ef.pct + 20) * s * p.buffPorPctS * 4;
     case 'cura':
       return ef.valor * p.cura + ef.pct * 0.3 * p.cura;
     case 'recurso':

@@ -11,6 +11,8 @@ import type { StatusCaminho } from '../world/navegacao';
 
 export type MotivoRecusa =
   | 'sem_habilidade'
+  | 'vida_cheia'
+  | 'sem_invocacao'
   | 'ocupado'
   | 'bloqueado'
   | 'recarga'

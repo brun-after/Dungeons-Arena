@@ -55,6 +55,9 @@ export const TIPOS_EFEITO = [
   'consagrado',
   'molhado',
   'atolado',
+  'definhando',
+  'drenar_invocacao',
+  'comandar_mortos',
   // marco 14: escudo e os instantâneos novos
   'escudo',
   'puxao',
@@ -88,7 +91,7 @@ export interface EfeitoCanonico {
 export type Fluxo = 'atrasado' | 'armadilha' | 'invocar';
 
 export type Periodico = 'dano' | 'cura' | 'recurso';
-export type Instantaneo = 'purificar' | 'passo_sombrio' | 'muralha_pedra' | 'campo_cura' | 'campo_veneno' | 'cura' | 'recurso' | 'teleporte' | 'avanco' | 'empurrao' | 'puxao' | 'trocar' | 'dano';
+export type Instantaneo = 'drenar_invocacao' | 'comandar_mortos' | 'purificar' | 'passo_sombrio' | 'muralha_pedra' | 'campo_cura' | 'campo_veneno' | 'cura' | 'recurso' | 'teleporte' | 'avanco' | 'empurrao' | 'puxao' | 'trocar' | 'dano';
 export type BonusDeAtaqueBasico = 'dano' | 'recarga' | 'alcance' | 'alvos';
 
 export interface DefinicaoEfeito {
@@ -251,6 +254,9 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   consagrado: negativo('estrela', '#f7e9a0', ['valor'], { duracaoMs: 4000, valor: 2, pct: 0 }, { curaQuemAcerta: true }),
   molhado: negativo('gota', '#5dade2', [], { duracaoMs: 5000, valor: 0, pct: 0 }, {}),
   atolado: negativo('gota', '#7d6b4f', ['pct'], { duracaoMs: 4000, valor: 0, pct: 50 }, { lentidao: true }),
+  definhando: negativo('caveira', '#8b68d9', ['pct'], { duracaoMs: 4000, valor: 0, pct: 20 }, { danoCausado: -1, curaRecebida: -1 }),
+  drenar_invocacao: instantaneo('caveira', '#7ee0bb', ['valor'], { duracaoMs: 0, valor: 18, pct: 0 }, 'drenar_invocacao', true),
+  comandar_mortos: instantaneo('caveira', '#8b68d9', ['pct'], { duracaoMs: 6000, valor: 0, pct: 25 }, 'comandar_mortos', true),
   escudo: { ...BASE, icone: 'barreira', cor: '#5dade2', positivo: true, campos: ['valor'], padrao: { duracaoMs: 8000, valor: 12, pct: 0 }, escudo: true },
   puxao: instantaneo('puxar', '#7f8c8d', ['valor'], { duracaoMs: 0, valor: 2, pct: 0 }, 'puxao', false),
   trocar_lugar: instantaneo('troca', '#8e44ad', [], { duracaoMs: 0, valor: 0, pct: 0 }, 'trocar', true),

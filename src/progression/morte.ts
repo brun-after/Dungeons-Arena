@@ -1,4 +1,5 @@
 import { novaMemoria } from '../combat/estado-tatico';
+import { colherMorto } from '../combat/necromancia';
 // Mortes, XP, revivescência e respawn (§2.7 "Morte", §2.12) — etapa 8 do tick.
 // HP 0 é morte direta. Entidades de IA saem do mundo e voltam pelo respawn agendado, com o mesmo
 // id e a geração incrementada; jogadores reaparecem pelas regras do modo (§2.13).
@@ -47,8 +48,12 @@ function concederXp(estado: EstadoJogo, ctx: ContextoSimulacao, morto: Entidade,
   const janela = ticksDe(ctx.balance.combate.janelaParticipacaoS * 1000);
   const participantes = morto.participacao
     .filter((p) => estado.tick - p.tick <= janela)
-    .map((p) => buscarEntidade(estado, p.id))
+    .map((p) => {
+      const participante = buscarEntidade(estado, p.id);
+      return participante?.invocacao?.necromancia ? buscarEntidade(estado, participante.invocacao.donoId) : participante;
+    })
     .filter((e): e is Entidade => e !== undefined && podeFerir(e, morto, ctx.modo))
+    .filter((e, i, todos) => todos.findIndex((x) => x.id === e.id) === i)
     .sort((a, b) => (a.id < b.id ? -1 : 1));
   if (participantes.length === 0) return;
   // Marco 15: a recompensa da dificuldade e do grupo vale para quem derruba o mundo (não entre jogadores).
@@ -94,6 +99,7 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
     saida.push({ t: 'morreu', tick: estado.tick, id: e.id, porId: porId?.id ?? null });
     // Marco 18: os ganchos "ao abater" de quem derrubou (com a habilidade do último golpe, se foi dele).
     const quemAbateu = porId ? buscarEntidade(estado, porId.id) : undefined;
+    if (e.controlador !== 'ia' || e.invocacao) colherMorto(estado, ctx, e, quemAbateu, saida);
     if (quemAbateu) {
       // D-071 (17/10/2026): metade da vida que falta, uma vez por morte confirmada.
       // Aliados do jogador não ganham a cura de inimigo; mortes simultâneas não ressuscitam o matador.
@@ -124,6 +130,8 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
         e.morto = false;
         continue;
       }
+      // Dominação já transforma o original: a passiva não cria uma segunda cópia da mesma morte.
+      if (!e.invocacao) colherMorto(estado, ctx, e, quemAbateu, saida);
       removidos.add(e.id);
       if (e.preset && !e.invocacao && !ctx.fase.eventos.includes('enxame')) {
         const segundos = e.arquetipo === 'boss' ? ctx.balance.respawn.bossS : ctx.balance.respawn.inimigoS;

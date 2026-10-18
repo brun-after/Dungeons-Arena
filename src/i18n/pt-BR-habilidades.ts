@@ -3,6 +3,18 @@
 // dicionário principal (pt-BR.ts) por espalhamento, com as mesmas chaves tipadas.
 
 export const textosHabilidades = {
+  'classe.necromante.descricao': 'Um servo morto-vivo retorna passivamente após 8 s. Seus abates reanimam inimigos por 25 s; aliados que caem perto deixam ecos independentes. Até 4 invocações. Drene seus mortos para sobreviver. Afinidade com Trevas.',
+  'efeito.definhando': 'Definhando',
+  'desc.efeito.definhando': 'Reduz dano causado e cura recebida em {pct}% por {s} s',
+  'efeito.drenar_invocacao': 'Dízimo vital',
+  'desc.efeito.drenar_invocacao': 'Consome até {valor} de vida da invocação própria mais próxima, a até 6 células, para curar você; nunca drena um aliado jogador',
+  'efeito.comandar_mortos': 'Comando sepulcral',
+  'desc.efeito.comandar_mortos': 'Suas invocações a até 6 células ganham +{pct}% de dano e 20% de redução da recarga do básico por {s} s',
+  'sinergia.putrefacao': 'Putrefação!',
+  'sinergia.pira_funebre': 'Pira fúnebre!',
+  'sinergia.absolvicao': 'Absolvição!',
+  'tag.trevas': 'Trevas',
+  'tag.necromancia': 'necromancia',
   "efeito.sangrando": "Sangrando",
   "efeito.aparando": "Em aparo",
   "efeito.resposta_aparo": "Resposta de aparo",
@@ -151,7 +163,7 @@ export const textosHabilidades = {
   'elemento.veneno': 'Veneno',
   'elemento.psiquico': 'Psíquico',
   'elemento.terra': 'Terra',
-  'elemento.sombra': 'Sombra',
+  'elemento.trevas': 'Trevas',
   'elemento.sagrado': 'Sagrado',
   'mod.atravessar': 'Atravessa os alvos',
   'mod.encadear': 'Salta para mais 2 alvos',

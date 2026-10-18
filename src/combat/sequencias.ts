@@ -50,6 +50,10 @@ function condicoes(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, a
       case 'consagrado': if (!alvo || !ativo(alvo, 'consagrado', tick)) return false; break;
       case 'envenenado': if (!alvo || !ativo(alvo, 'envenenado', tick)) return false; break;
       case 'sangrando': if (!alvo || !ativo(alvo, 'sangrando', tick)) return false; break;
+      case 'definhando': if (!alvo || (!ativo(alvo, 'definhando', tick) && !(final && sinergias.includes('absolvicao')))) return false; break;
+      case 'enraizado': if (!alvo || !ativo(alvo, 'enraizado', tick)) return false; break;
+      case 'comandou': if (!prev.some((p) => p.fatos.some((f) => f.startsWith('comandou:')))) return false; break;
+      case 'drenou': if (final && !etapa.fatos.some((f) => f.startsWith('drenou:'))) return false; break;
       case 'envenenou': if (!prev.some((p) => p.alvos.some((id) => { const e = buscarEntidade(estado, id); return e && ativo(e, 'envenenado', tick); }))) return false; break;
       case 'enraizou': if (!contemFato(prev, 'enraizou')) return false; break;
       case 'muralha': if (!campos.some((x) => x.tipo === 'muralha')) return false; break;
