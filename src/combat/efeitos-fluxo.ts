@@ -1,3 +1,4 @@
+import { extraGuerreiro, protecaoInicial, pulsarAura } from './ajustes-classes';
 // Efeitos de fluxo próprio (§2.8, §2.9, §2.11). Marco 8A-2 (14/10/2026), D-049.
 //   efeito_atrasado  -> estado.atrasados, dispara o efeito carregado no alvo depois do prazo;
 //   rastro_*         -> status na entidade; cada célula por onde ela passa vira rastro (estado.rastros);
@@ -287,8 +288,11 @@ export function causarDano(
   saida: EventoSimulacao[],
 ): void {
   const imune = alvo.efeitos.some((f) => f.ateTick > estado.tick && REGISTRO_EFEITOS[f.tipo].imuneDano);
-  const dano = imune ? 0 : Math.min(alvo.hp, Math.max(0, Math.round(valor)));
+  const quem = buscarEntidade(estado, origemId);
+  const fator = (quem ? extraGuerreiro(ctx, quem, alvo) : 1) * protecaoInicial(estado, ctx, alvo, quem);
+  const dano = imune ? 0 : Math.min(alvo.hp, Math.max(0, Math.round(valor * fator)));
   alvo.hp -= dano;
+  if (quem) pulsarAura(estado, ctx, quem, alvo, dano, saida);
   if (dano > 0) registrarParticipacao(alvo, origemId, estado.tick, ctx);
   saida.push({ t: 'efeitoResultado', tick: estado.tick, alvoId: alvo.id, origemId, tipo, dano, cura: 0, mana: 0 });
 }

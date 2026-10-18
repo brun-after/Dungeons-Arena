@@ -1,3 +1,4 @@
+import { aplicaAntifarmDeFase, xpDeCriatura } from './xp-antifarm';
 import { novaMemoria } from '../combat/estado-tatico';
 import { colherMorto } from '../combat/necromancia';
 // Mortes, XP, revivescência e respawn (§2.7 "Morte", §2.12) — etapa 8 do tick.
@@ -65,9 +66,12 @@ function concederXp(estado: EstadoJogo, ctx: ContextoSimulacao, morto: Entidade,
     const fator = p.nivel >= faixa.nivelInicio && ctx.modo.sobrevivencia.estudoAvanca
       ? faixa.percentuais[estado.dificuldade] / ctx.balance.dificuldades[estado.dificuldade].recompensaPct : 1;
     // Na faixa avançada, usa a cota antes do arredondamento e do mínimo de 1 XP.
-    const bruto = p.nivel >= faixa.nivelInicio && ctx.modo.sobrevivencia.estudoAvanca
-      ? morto.xpBase * ctx.balance.xp.decaimentoAntifarm ** morto.abates * recompensa / participantes.length : cota;
-    concederXpDeProgressao(p, ctx, bruto * fator, estado.tick, saida);
+    // A campanha usa apenas o novo desgaste permanente: o antigo decaimento por respawn
+    // é substituído pelo contador da fase; o piso incide somente no XP recebido por abate.
+    const bruto = aplicaAntifarmDeFase(ctx, p, morto) ? morto.xpBase * recompensa / participantes.length
+      : p.nivel >= faixa.nivelInicio && ctx.modo.sobrevivencia.estudoAvanca
+        ? morto.xpBase * ctx.balance.xp.decaimentoAntifarm ** morto.abates * recompensa / participantes.length : cota;
+    concederXpDeProgressao(p, ctx, xpDeCriatura(estado, ctx, p, morto, bruto * fator), estado.tick, saida);
   }
 }
 
@@ -92,6 +96,7 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
       null,
     );
     e.morto = true;
+    delete e.concentracaoArcana;
     if (e.tatica) e.tatica = novaMemoria();
     zerarMovimento(e);
     // Baú ou loja abertos se fecham: libera o congelamento e arma a recarga da loja (§2.12).

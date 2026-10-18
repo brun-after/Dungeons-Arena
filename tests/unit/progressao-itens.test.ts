@@ -152,6 +152,7 @@ describe('nível 30 e faixa avançada', () => {
     c.j.nivel = nivel;
     c.estado.dificuldade = dificuldade;
     const i = criarInimigo(obter(CONTEUDO.presets.get('goblin')), 'i', 5, 5, c.ctx.balance);
+    i.nivel = nivel; // Isola a faixa avançada: criaturas inferiores têm antifarm próprio.
     i.hp = 0; i.xpBase = xp; i.abates = abates;
     i.participacao = [{ id: c.j.id, tick: 0 }];
     c.estado.entidades.push(i);
@@ -167,11 +168,11 @@ describe('nível 30 e faixa avançada', () => {
     const a = abate(19, 'normal'), b = abate(20, 'normal');
     expect(b.estado.objetos.filter((o) => o.tipo === 'ouro')).toEqual(a.estado.objetos.filter((o) => o.tipo === 'ouro'));
   });
-  it('antifarm não se transforma no mínimo de 1 XP', () => {
+  it('recompensa fracionária preserva a cota sem a antiga penalidade de respawn', () => {
     const c = abate(20, 'normal', 1, 10);
     expect(c.j.xp).toBe(0);
     expect(c.b.xpFracao).toBeGreaterThan(0);
-    expect(c.b.xpFracao).toBeLessThan(0.1);
+    expect(c.b.xpFracao).toBeCloseTo(0.1);
   });
   it('um grupo misto aplica a faixa a cada participante, sem reduzir a cota do personagem baixo', () => {
     const c = cena();
@@ -179,6 +180,7 @@ describe('nível 30 e faixa avançada', () => {
     const baixo = criarJogador(obter(CONTEUDO.classes.get('mago')), 'baixo', 4, 3, c.ctx.balance);
     baixo.nivel = 19;
     const i = criarInimigo(obter(CONTEUDO.presets.get('goblin')), 'i', 5, 5, c.ctx.balance);
+    i.nivel = 20;
     i.hp = 0; i.xpBase = 100;
     i.participacao = [{ id: c.j.id, tick: 0 }, { id: baixo.id, tick: 0 }];
     c.estado.entidades.push(baixo, i);

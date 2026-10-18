@@ -1,3 +1,4 @@
+import { extraGuerreiro, protecaoInicial, pulsarAura } from './ajustes-classes';
 import { executarTatica, fato, muralhaEm, fluxoRestaurador } from './tatica';
 import { passivasDaBolsa } from './perfil';
 import { executarRitual } from './necromancia';
@@ -242,7 +243,8 @@ export function aplicarEfeito(
       case 'dano': {
         if (imuneADano(alvo, tick)) break;
         const quem = buscarEntidade(estado, origem.id);
-        const dano = sofrerDano(alvo, ef.valor, tick, quem ? fatorDoGolpe(estado, ctx, quem, alvo) : 1);
+        const dano = sofrerDano(alvo, ef.valor, tick, (quem ? fatorDoGolpe(estado, ctx, quem, alvo) * extraGuerreiro(ctx, quem, alvo) : 1) * protecaoInicial(estado, ctx, alvo, quem));
+        if (quem) pulsarAura(estado, ctx, quem, alvo, dano, saida);
         if (dano > 0) registrarParticipacao(alvo, origem.id, tick, ctx);
         resultado(saida, tick, alvo, origem.id, ef, { dano });
         break;
@@ -291,7 +293,8 @@ export function processarEfeitos(estado: EstadoJogo, ctx: ContextoSimulacao, sai
         if (periodico === 'dano') {
           if (imuneADano(e, tick)) continue;
           const quem = buscarEntidade(estado, f.origemId);
-          const dano = sofrerDano(e, f.valor, tick, quem ? fatorDoGolpe(estado, ctx, quem, e) : 1);
+          const dano = sofrerDano(e, f.valor, tick, (quem ? fatorDoGolpe(estado, ctx, quem, e) * extraGuerreiro(ctx, quem, e) : 1) * protecaoInicial(estado, ctx, e, quem));
+          if (quem) pulsarAura(estado, ctx, quem, e, dano, saida);
           if (dano > 0) registrarParticipacao(e, f.origemId, tick, ctx);
           resultado(saida, tick, e, f.origemId, f, { dano });
           if (e.hp <= 0) break;

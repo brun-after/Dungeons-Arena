@@ -161,7 +161,7 @@ describe('rituais, combos e Trevas', () => {
     expect(obter(CONTEUDO.habilidades.get('punhal_das_sombras')).elemento).toBe('trevas');
     expect(obter(CONTEUDO.interacoes.sinergias.find((s) => s.id === 'eclipse')).elemento).toBe('trevas');
     const h = obter(resolverHabilidade(c.ctx, 'dardo_funesto'));
-    expect(perfilPara(c.ctx, c.j, h)).toMatchObject({ danoPct: 10, custoPct: -20 });
+    expect(perfilPara(c.ctx, c.j, h)).toMatchObject({ danoPct: -65, custoPct: -20 });
     c.aplicar(c.j, 'definhando', { pct: 20, duracaoMs: 4000 });
     expect(multiplicadorDanoCausado(c.j, 0)).toBe(0.8); expect(multiplicadorCuraRecebida(c.j, 0)).toBe(0.8);
   });
@@ -176,7 +176,7 @@ describe('rituais, combos e Trevas', () => {
       fasesVisitadas: { 'oficial:fase-02': estado }, referenciasFases: { 'gerada:gerada-1': faseRef }, certificado: null });
     expect(lido.ok).toBe(true);
     if (!lido.ok) return;
-    expect(lido.registro.versaoSchema).toBe(19);
+    expect(lido.registro.versaoSchema).toBe(21);
     expect(lido.registro.estado.entidades[0]?.aparencia?.elementoArma).toBe('trevas');
     expect(lido.registro.fasesVisitadas['oficial:fase-02']?.entidades[0]?.aparencia?.elementoArma).toBe('trevas');
     expect(lido.registro.faseRef).toEqual(faseRef);
@@ -195,7 +195,7 @@ describe('rituais, combos e Trevas', () => {
     expect(JSON.stringify(migrado)).toContain('"elementoArma":"trevas"'); expect(JSON.stringify(migrado)).toContain('"elemento":"trevas"');
     expect(migrado.itemId).toBe(antigo.itemId);
     expect(migrado.certificado).toEqual(antigo.certificado);
-    expect(lerIdItemBase(antigo.itemId)?.elemento).toBe('trevas'); expect(VERSAO_SCHEMA).toBe(19);
+    expect(lerIdItemBase(antigo.itemId)?.elemento).toBe('trevas'); expect(VERSAO_SCHEMA).toBe(21);
     expect(CONTEUDO.itens.get(antigo.itemId)).toMatchObject({ id: antigo.itemId, elemento: 'trevas' });
   });
 });

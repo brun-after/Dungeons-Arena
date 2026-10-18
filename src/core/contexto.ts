@@ -14,6 +14,14 @@ import type { RegrasItensGerados } from '../progression/gerar-item';
 import type { Conteudo } from './conteudo';
 
 export interface Balance {
+  /** Ajustes de classes (18/10/2026): curvas e passivas de produção. */
+  ajustesClasses: {
+    guerreiro: { contatoMaxPct: number; contatoNivel: number; contatoExpoente: number; grupoReducaoMaxPct: number; grupoNivelPleno: number; grupoRaio: number; extraInicioNivel: number; extraMaxPct: number; auraMinPct: number; auraMaxPct: number; auraRaio: number; auraCuraPct: number; reforcosInicioNivel: number; reforcosPlenosNivel: number; movimentoMult: number };
+    mago: { inicialPct: number; intermediarioPct: number; nivelIntermediario: number; fimIntermediario: number; nivelFinal: number; dardoInicioMult: number; dardoRecuperacaoNivel: number; dardoPlenoNivel: number; concentracaoAcertos: number; concentracaoJanelaMs: number; concentracaoExtraPct: number };
+    aventureiro: { nivelCorte: number; danoMult: number };
+    arqueiro: { secundariosMult: number };
+    necromante: { protecaoMs: number; doisPct: number; grupoPct: number };
+  };
   necromancia: { danoPct: number; servosExtras: number; retornoServoMs: number; duracaoMortoMs: number; raioColheita: number; ecoRecargaMs: number; vidaBase: number; vidaPorNivel: number; vidaServoPct: number; alcanceRitual: number };
   tatica: { respostaPct: number; respostaMs: number; aparoJanelaMaxMs: number; veuJanelaMaxMs: number; muralhaMaxMs: number; campoMaxMs: number; janelaEtapaMs: number; janelaTotalMs: number; tetoCampos: number; escudoMaxHpPct: number; fluxoIntervaloMs: number; fluxoDuracaoMs: number; fluxoTeto: number; consumoTeto: number; consumoPct: number; colisaoDano: number; colisaoAtordoarMs: number; tenacidadeMaxPct: number; removiveis: string[] };
   progressaoItens: { tomoPrecoBase: number; aceleracaoIncomumChancePct: number; aceleracaoRaraChancePct: number; essenciaChancePct: number; essenciaBossChancePct: number };
@@ -78,6 +86,7 @@ export interface Balance {
   /** Progressão (§2.12). XP para passar do nível N: `tabela[N-1]` ou `N × fallbackPorNivel`. */
   xp: {
     decaimentoAntifarm: number;
+    criaturasInferiores: { niveisPorMeiaVida: number; xpMinimo: number };
     tabela: number[];
     fallbackPorNivel: number;
     nivelMax: number;

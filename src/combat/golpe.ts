@@ -1,3 +1,5 @@
+import { multiplicadorDardo, registrarDardo } from './concentracao-arcana';
+import { entregaRemota, extraGuerreiro, multiplicadorDireto, protecaoInicial, pulsarAura } from './ajustes-classes';
 import { comboDoImpacto, confirmarImpactoTatico } from './sequencias';
 import { defenderGolpe, fluxoRestaurador } from './tatica';
 import { comCombo } from './combos';
@@ -30,6 +32,7 @@ export interface Impacto {
   hab: Habilidade;
   /** Ordem do alvo num impacto em área. */
   indice: number;
+  secundario?: boolean;
   /** Célula mirada (teleporte e avanço usam). */
   mira?: { x: number; y: number };
   /** Bônus do ataque básico (`ab_dano`), somado à rolagem. */
@@ -108,14 +111,14 @@ export function aplicarImpacto(
     // Marco 15: a dificuldade e o tamanho do grupo pesam pelo lado de quem bate e de quem apanha.
     // Marco 18: o dano extra das sinergias cresce com a potência (Inteligência) de quem lança.
     const extraPct = sinergias.reduce((s, x) => s + x.danoExtraPct, 0) * fonte.potencia;
-    const recebido = multiplicadorRecebido(estado, ctx, alvo, hab, tick, extraPct) * fatorDoGolpe(estado, ctx, fonte, alvo);
+    const recebido = multiplicadorRecebido(estado, ctx, alvo, hab, tick, extraPct) * fatorDoGolpe(estado, ctx, fonte, alvo) * protecaoInicial(estado, ctx, alvo, atacante);
     const r = resolverGolpe(
       estado.rng,
       hab.formulaDano,
       { ...fonte, bonusAtributo: fonte.bonusAtributo + (impacto.danoExtra ?? 0) },
       { defesa: alvo.defesa, imune: imuneADano(alvo, tick) || recebido === 0, multRecebido: recebido },
       ctx.balance.combate,
-      fonte.multDano,
+      fonte.multDano * (atacante ? extraGuerreiro(ctx, atacante, alvo) * multiplicadorDireto(ctx, atacante, hab, impacto.secundario ?? false) * multiplicadorDardo(ctx, atacante, alvo, hab, tick) : 1),
     );
     ({ d20, mult, falha, critico, imune } = r);
     // Marco 14: o escudo absorve antes da vida.
@@ -128,6 +131,7 @@ export function aplicarImpacto(
     if (dano > 0) {
       registrarParticipacao(alvo, fonte.id, tick, ctx);
       alvo.ultimoGolpe = { fonteId: fonte.id, chave: hab.chave };
+      if (atacante) registrarDardo(ctx, atacante, alvo, hab, tick, Math.min(hpAntes, dano));
     }
   }
   if (hab.formulaCura !== null) {
@@ -169,6 +173,7 @@ export function aplicarImpacto(
   if (conjurador && vivo(conjurador) && conjurador !== alvo && hab.id === conjurador.ataqueBasico && dano > 0 && curaBasicoPct > 0 && podeFerir(conjurador, alvo, ctx.modo)) {
     aplicarEfeito(estado, ctx, conjurador, construirEfeito('cura', { valor: Math.min(hpAntes, dano) * curaBasicoPct / 100 }), origem, null, saida);
   }
+  if (conjurador) pulsarAura(estado, ctx, conjurador, alvo, Math.min(hpAntes, dano), saida, entregaRemota(hab));
   // Sinergias (marco 14): o estado consumido sai e os efeitos da sinergia entram, antes dos da habilidade.
   dispararSinergias(alvo, sinergias, (ef) => {
     aplicarEfeito(estado, ctx, alvo, comPotencia(ef, fonte.potencia), origem, mira, saida);

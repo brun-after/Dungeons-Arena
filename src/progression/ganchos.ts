@@ -15,7 +15,7 @@ import { aleatorio } from '../core/rng';
 import { Leitor, type Objeto } from '../core/validar';
 import { vivo, type Entidade } from '../entities/entidade';
 
-export const MOMENTOS_GANCHO = ['aoAcertar', 'aoCritico', 'aoMatar', 'aoReceberGolpe', 'aoGastarRefugio', 'aoUsarHabilidade', 'passivo'] as const;
+export const MOMENTOS_GANCHO = ['aoAcertar', 'aoCritico', 'aoMatar', 'aoReceberGolpe', 'aoGastarRefugio', 'aoUsarHabilidade', 'aoCruzarInimigo', 'passivo'] as const;
 export type MomentoGancho = (typeof MOMENTOS_GANCHO)[number];
 
 export interface CondicaoGancho {

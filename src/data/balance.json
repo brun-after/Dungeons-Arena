@@ -1,6 +1,50 @@
 {
-  "necromancia": { "danoPct": 50, "servosExtras": 2, "retornoServoMs": 8000, "duracaoMortoMs": 25000, "raioColheita": 6, "ecoRecargaMs": 30000, "vidaBase": 24, "vidaPorNivel": 3, "vidaServoPct": 80, "alcanceRitual": 6 },
-  "versao": 25,
+  "necromancia": { "danoPct": 180, "servosExtras": 2, "retornoServoMs": 8000, "duracaoMortoMs": 25000, "raioColheita": 6, "ecoRecargaMs": 30000, "vidaBase": 24, "vidaPorNivel": 3, "vidaServoPct": 80, "alcanceRitual": 6 },
+  "versao": 29,
+  "ajustesClasses": {
+    "guerreiro": {
+      "contatoMaxPct": 15,
+      "contatoNivel": 10,
+      "contatoExpoente": 2,
+      "grupoReducaoMaxPct": 15,
+      "grupoNivelPleno": 10,
+      "grupoRaio": 2,
+      "extraInicioNivel": 10,
+      "extraMaxPct": 10,
+      "auraMinPct": 1,
+      "auraMaxPct": 5,
+      "auraRaio": 2,
+      "auraCuraPct": 20,
+      "reforcosInicioNivel": 16,
+      "reforcosPlenosNivel": 20,
+      "movimentoMult": 1.15
+    },
+    "mago": {
+      "inicialPct": 35,
+      "intermediarioPct": 25,
+      "nivelIntermediario": 5,
+      "fimIntermediario": 15,
+      "nivelFinal": 20,
+      "dardoInicioMult": 0.65,
+      "dardoRecuperacaoNivel": 10,
+      "dardoPlenoNivel": 20,
+      "concentracaoAcertos": 4,
+      "concentracaoJanelaMs": 12000,
+      "concentracaoExtraPct": 25
+    },
+    "aventureiro": {
+      "nivelCorte": 20,
+      "danoMult": 0.95
+    },
+    "arqueiro": {
+      "secundariosMult": 1.15
+    },
+    "necromante": {
+      "protecaoMs": 5000,
+      "doisPct": 10,
+      "grupoPct": 20
+    }
+  },
   "progressaoItens": { "tomoPrecoBase": 10000, "aceleracaoIncomumChancePct": 30, "aceleracaoRaraChancePct": 10, "essenciaChancePct": 2, "essenciaBossChancePct": 20 },
   "movimento": {
     "velocidadeBaseMs": 400,
@@ -58,6 +102,7 @@
     "pesoRaridade": { "comum": 60, "incomum": 28, "raro": 10, "epico": 2, "lendario": 0, "ultima": 0 }
   },
   "xp": {
+    "criaturasInferiores": { "niveisPorMeiaVida": 10, "xpMinimo": 1 },
     "decaimentoAntifarm": 0.8,
     "tabela": [30, 60, 100, 150, 220, 300, 400, 520, 660, 820],
     "fallbackPorNivel": 100,

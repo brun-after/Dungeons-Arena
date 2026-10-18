@@ -165,6 +165,8 @@ export interface Bolsa {
   ranksPorItens?: number;
   xpFracao?: number;
   xpLegado?: number;
+  /** 18/10/2026: XP de abates por fase, persistente e sem reembolso na morte. */
+  xpPorFase?: Record<string, { xpBaseAcumulado: number; meiaVidaXp?: number }>;
   /**
    * Marco 17 (D-063): identidade do personagem (UUID), dada pelo cliente ao criar; vazia nos saves antigos até o
    * jogo dar uma. O certificado da arena se prende a ela.
@@ -287,6 +289,12 @@ export interface Entidade {
   renascerFase: string;
   /** Marco 18 (D-070): a última reação que a entidade sofreu (as origens raras olham ao cair). */
   ultimaSinergia: string | null;
+  /** 18/10/2026: um encontro por visita à fase, iniciado na primeira agressão hostil. */
+  encontro?: { faseId: string; inicioTick: number };
+  auraFracoes?: Record<string, number>;
+  auraCuraFracao?: number;
+  /** 18/10/2026: acertos efetivos consecutivos do Dardo no mesmo alvo e vida. */
+  concentracaoArcana?: { alvoId: string; geracao: number; abates: number; acertos: number; ultimoTick: number };
 }
 
 export interface BuffArmado {
@@ -438,6 +446,7 @@ function clonarBolsa(b: Bolsa): Bolsa {
   return {
     ...b,
     atributosBase: { ...b.atributosBase },
+    ...(b.xpPorFase ? { xpPorFase: Object.fromEntries(Object.entries(b.xpPorFase).map(([id, r]) => [id, { ...r }])) } : {}),
     equipamento: Object.fromEntries(Object.entries(b.equipamento).map(([slot, i]) => [slot, copiarItem(i)])) as Record<
       Slot,
       ItemNaMochila | null
@@ -456,6 +465,9 @@ function clonarBolsa(b: Bolsa): Bolsa {
 export function clonarEntidade(e: Entidade): Entidade {
   return {
     ...e,
+    ...(e.encontro ? { encontro: { ...e.encontro } } : {}),
+    ...(e.concentracaoArcana ? { concentracaoArcana: { ...e.concentracaoArcana } } : {}),
+    ...(e.auraFracoes ? { auraFracoes: { ...e.auraFracoes } } : {}),
     waypoints: copiarCelulas(e.waypoints),
     caminho: copiarCelulas(e.caminho),
     atributos: { ...e.atributos },

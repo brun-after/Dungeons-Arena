@@ -1,5 +1,5 @@
 {
-  "versao": 3,
+  "versao": 4,
   "classes": [
     {
       "id": "aventureiro",
@@ -78,7 +78,7 @@
       "afinidades": [
         {
           "tag": "contato",
-          "danoPct": -5
+          "danoPct": 0
         },
         {
           "tag": "custo_vida",
@@ -130,7 +130,7 @@
       "afinidades": [
         {
           "tag": "magico",
-          "danoPct": 0,
+          "danoPct": 35,
           "custoPct": -20
         },
         {
@@ -193,7 +193,7 @@
     {
       "id": "necromante",
       "nome": "Necromante",
-      "hpBase": 42,
+      "hpBase": 32,
       "defesa": 1,
       "classe": "conjurador",
       "atributos": {
@@ -228,6 +228,10 @@
           "tag": "trevas",
           "danoPct": 10,
           "custoPct": -20
+        },
+        {
+          "tag": null,
+          "danoPct": -75
         }
       ],
       "aprendiveis": [

@@ -1,5 +1,5 @@
 {
-  "versao": 1,
+  "versao": 2,
   "formas": {
     "comum": { "raridade": "comum", "poder": 1.0, "peso": 72, "elementalPct": 15, "visual": "simples" },
     "epica": { "raridade": "epico", "poder": 2.2, "peso": 24, "elementalPct": 25, "visual": "gema" },
@@ -616,9 +616,9 @@
         "lendaria": {
           "nome": "Botas do vento",
           "genero": "f",
-          "texto": "Abater deixa atravessar criaturas por 3 s.",
+          "texto": "Cruzar a célula de um inimigo dá +30% de velocidade por 3 s.",
           "ganchos": [
-            { "quando": "aoMatar", "efeito": { "aplicar": { "tipo": "fantasma", "duracaoMs": 3000 }, "em": "portador" } }
+            { "quando": "aoCruzarInimigo", "efeito": { "aplicar": { "tipo": "acelerado", "duracaoMs": 3000, "pct": 30 }, "em": "portador" } }
           ]
         },
         "ultima": {

@@ -1,3 +1,8 @@
+import { classeDe, progressoReforcosGuerreiro } from '../combat/ajustes-classes';
+import { celulaOcupada } from '../combat/geometria';
+import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
+import { podeFerir } from '../modos/relacao';
+import { dispararGanchosDe } from '../progression/ganchos-do-portador';
 import { muralhaEm } from '../combat/tatica';
 // Movimento célula a célula com integração por distância (§2.2, §2.3).
 // Cada passo é cardinal: reserva o destino, avança `progressoPasso` pela velocidade e, ao
@@ -129,7 +134,10 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
       : velocidade(e.atributos.destreza, ctx.balance.movimento.velocidadeBaseMs, inv?.dominado ?? false);
   // Marco 14: o frio (resfriado) deixa mais lento. Ajuste de 15/10/2026: conjurar uma habilidade `lenta` também.
   const conjurando = mobilidadeDaAcao(e, ctx) === 'lenta' ? ctx.balance.habilidades.velocidadeConjurandoLenta : 1;
-  const lento = (1 - lentidaoPct(e, estado.tick) / 100) * conjurando;
+  const r = ctx.balance.ajustesClasses.guerreiro;
+  const classe = classeDe(e) === 'guerreiro' && !inv ? 1 + (r.movimentoMult - 1) * progressoReforcosGuerreiro(ctx, e.nivel) : 1;
+  const bonus = e.efeitos.reduce((pct, f) => f.ateTick > estado.tick && REGISTRO_EFEITOS[f.tipo].velocidade ? Math.max(pct, f.pct) : pct, 0);
+  const lento = (1 - lentidaoPct(e, estado.tick) / 100) * conjurando * classe * (1 + bonus / 100);
   let restante = (dtMs / 1000) * vel * lento;
 
   for (let guarda = 0; guarda < MAX_PASSOS_POR_TICK; guarda++) {
@@ -146,9 +154,11 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
       e.progressoPasso = 0;
     }
 
+    const antes = celulaOcupada(e);
     const falta = 1 - e.progressoPasso;
     if (restante + EPS < falta) {
       e.progressoPasso += restante;
+      cruzarCelula(e, antes, estado, ctx, saida);
       e.relogioAndar += (1000 * restante) / (vel * lento);
       return;
     }
@@ -157,6 +167,7 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
     e.x = e.destinoX;
     e.y = e.destinoY;
     e.progressoPasso = 0;
+    cruzarCelula(e, antes, estado, ctx, saida);
     saida.push({ t: 'moveu', tick: estado.tick, id: e.id, x: e.x, y: e.y });
     regenerarPorPasso(estado, ctx, e);
   }
@@ -214,4 +225,17 @@ function passoDirecional(e: Entidade, dir: Dir8, estado: EstadoJogo, ctx: Contex
   if (podeEntrar(e, primeiro.x, primeiro.y, estado, ctx)) return { celula: primeiro, proximoEixoX: !e.proximoEixoX };
   if (podeEntrar(e, segundo.x, segundo.y, estado, ctx)) return { celula: segundo, proximoEixoX: e.proximoEixoX };
   return null;
+}
+
+/** 18/10/2026: dispara ao mudar de célula ocupada, inclusive se o inimigo cruzar o portador parado. */
+function cruzarCelula(e: Entidade, antes: Celula, estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
+  const agora = celulaOcupada(e);
+  if (antes.x === agora.x && antes.y === agora.y) return;
+  for (const outro of estado.entidades) {
+    if (outro === e || outro.morto || outro.hp <= 0) continue;
+    const c = celulaOcupada(outro);
+    if (c.x !== agora.x || c.y !== agora.y) continue;
+    if (e.bolsa && podeFerir(e, outro, ctx.modo)) dispararGanchosDe(estado, ctx, e, 'aoCruzarInimigo', { outro }, saida);
+    if (outro.bolsa && podeFerir(outro, e, ctx.modo)) dispararGanchosDe(estado, ctx, outro, 'aoCruzarInimigo', { outro: e }, saida);
+  }
 }
