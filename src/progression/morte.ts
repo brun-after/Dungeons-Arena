@@ -125,7 +125,7 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
         continue;
       }
       removidos.add(e.id);
-      if (e.preset && !e.invocacao) {
+      if (e.preset && !e.invocacao && !ctx.fase.eventos.includes('enxame')) {
         const segundos = e.arquetipo === 'boss' ? ctx.balance.respawn.bossS : ctx.balance.respawn.inimigoS;
         estado.respawns.push({
           id: e.id,
@@ -255,14 +255,14 @@ function reviverJogadores(estado: EstadoJogo, ctx: ContextoSimulacao, saida: Eve
 }
 
 function processarRespawns(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
+  // Inclui agendamentos de saves anteriores: enxames têm uma população finita.
+  if (ctx.fase.eventos.includes('enxame')) {
+    estado.respawns = [];
+    return;
+  }
   if (estado.respawns.length === 0) return;
   const pendentes = [];
   for (const r of estado.respawns) {
-    // 17/10/2026: o teto do enxame vale também para os inimigos que renascem.
-    if (ctx.fase.eventos.includes('enxame') && estado.entidades.filter((e) => e.controlador === 'ia' && vivo(e)).length >= ctx.balance.ambiente.enxameAtivos) {
-      pendentes.push(r);
-      continue;
-    }
     const preset = ctx.conteudo.presets.get(r.preset);
     if (estado.tick < r.noTick || !preset) {
       if (preset) pendentes.push(r);

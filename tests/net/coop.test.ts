@@ -179,6 +179,33 @@ describe('canal privado e anfitrião', () => {
 });
 
 describe('a saída do grupo', () => {
+  it('recuar preserva o enxame; avançar o encerra também nas revisitas do grupo', () => {
+    const r = criarSalaCampanha(CONTEUDO, { semente: 3, dificuldade: 'normal', faseRef: {
+      tipo: 'gerada', id: 'gerada-1', numero: 1, params: { id: 'gerada-1', nome: 'Enxame', semente: 41,
+        salas: 20, nivelInimigos: 5, matizGraus: 28, largura: 60, altura: 40, ambientesVivos: true, eventos: ['enxame'] },
+    } });
+    if (!r.ok) throw Error(r.erro);
+    const s = r.sala;
+    entrar(s);
+    expect(s.estado.reservaEnxame?.length).toBeGreaterThan(0);
+    s.estado.objetos = [];
+    const terreno = s.ctx.fase.celulas;
+    expect(s.avancar(true)).toBe(true);
+    expect(s.avancar()).toBe(true);
+    expect(s.ctx.fase.eventos).toContain('enxame');
+    expect(s.estado.reservaEnxame?.length).toBeGreaterThan(0);
+    expect(s.avancar()).toBe(true);
+    expect(s.avancar(true)).toBe(true);
+    expect(s.ctx.fase.eventos).not.toContain('enxame');
+    expect(s.ctx.fase.celulas).toEqual(terreno);
+    expect(s.estado.reservaEnxame).toBeUndefined();
+    expect(s.estado.objetos).toEqual([]);
+    expect(s.estado.entidades.filter((e) => e.controlador === 'ia').length).toBeLessThanOrEqual(s.ctx.fase.inimigos.length);
+    expect(s.avancar()).toBe(true);
+    expect(s.avancar(true)).toBe(true);
+    expect(s.ctx.fase.eventos).not.toContain('enxame');
+  });
+
   it('retorno exige todos os vivos e restaura o mundo; voltar não cura nem recria baús', () => {
     const s = sala(), a = entrar(s), b = entrar(s);
     s.estado.objetos = [];

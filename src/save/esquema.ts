@@ -10,7 +10,7 @@ import type { Dificuldade } from '../modos/dificuldade';
 import { MAX_REGRAS, RE_REGRA_ESTILO } from '../world/estilo';
 import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 17;
+export const VERSAO_SCHEMA = 18;
 export const SLOTS = [1, 2, 3] as const;
 export const FORMATO_EXPORTACAO = 'dungeons-arena/save';
 
@@ -350,6 +350,8 @@ export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   // D-079 (17/10/2026): os campos novos são opcionais. A versão impede clientes antigos de
   // descartarem formato/ambientesVivos e regenerarem outro mapa sobre um estado de espiral salvo.
   16: (r) => r,
+  // O marcador opcional preserva o terreno estilizado ao encerrar um enxame.
+  17: (r) => r,
 };
 
 function temNaoFinito(v: unknown): boolean {
@@ -365,6 +367,7 @@ function lerParametros(v: unknown): ParametrosGeracao | null {
   if (typeof v.id !== 'string' || typeof v.nome !== 'string') return null;
   if (!inteiro(v.semente, 0, 2 ** 32) || !inteiro(v.salas, 1, 50) || !inteiro(v.nivelInimigos, 1, 30) || !inteiro(v.matizGraus, 0, 359)) return null;
   if (v.ambientesVivos !== undefined && typeof v.ambientesVivos !== 'boolean') return null;
+  if (v.enxameConcluido !== undefined && typeof v.enxameConcluido !== 'boolean') return null;
   if (v.formato !== undefined && v.formato !== 'salas' && v.formato !== 'espiral') return null;
   const p: ParametrosGeracao = { id: v.id, nome: v.nome, semente: v.semente, salas: v.salas, nivelInimigos: v.nivelInimigos, matizGraus: v.matizGraus };
   if (v.largura !== undefined || v.altura !== undefined) {
@@ -373,6 +376,7 @@ function lerParametros(v: unknown): ParametrosGeracao | null {
     p.altura = v.altura;
   }
   if (v.ambientesVivos !== undefined) p.ambientesVivos = v.ambientesVivos;
+  if (v.enxameConcluido !== undefined) p.enxameConcluido = v.enxameConcluido;
   if (v.formato === 'salas' || v.formato === 'espiral') p.formato = v.formato;
   // Marco 18 (D-070): os eventos da fase gerada.
   if (v.eventos !== undefined) {

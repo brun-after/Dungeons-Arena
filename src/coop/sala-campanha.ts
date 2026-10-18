@@ -19,7 +19,7 @@ import type { Dificuldade } from '../modos/dificuldade';
 import { equipeDeEntrada, faseConcluida } from '../modos/regras';
 import { chaveDaFase, type RefFase } from '../save/esquema';
 import { chegadaNaFase, comRetorno, faseAnterior, referenciaConhecida } from '../save/retorno';
-import { contextoDaFase, estadoInicialDaFase, faseOficialOuGerada, faseSeguinte } from '../save/fases-campanha';
+import { concluirEnxame, contextoDaFase, estadoInicialDaFase, faseOficialOuGerada, faseSeguinte } from '../save/fases-campanha';
 import { personagemNoInicio } from '../save/transicao';
 import { reservaCelula } from '../world/colisao';
 import { passavel } from '../world/fase';
@@ -192,12 +192,13 @@ export class SalaCampanha extends SalaArena {
       return false;
     }
     const deixado = clonarEstado(this.estado);
+    const refDeixada = retorno ? this.faseRef : concluirEnxame(this.faseRef, deixado, this.ctx.conteudo);
     const idsJogadores = new Set([...this.sessoes.values()].map((s) => s.entidadeId));
     deixado.entidades = deixado.entidades.filter((e) => e.controlador === 'ia' && !e.invocacao);
     deixado.projeteis = [];
     if (deixado.camposTaticos) deixado.camposTaticos = deixado.camposTaticos.filter((c) => !idsJogadores.has(c.donoId));
     this.mundos.set(chaveDaFase(this.faseRef), deixado);
-    this.referencias[chaveDaFase(this.faseRef)] = this.faseRef;
+    this.referencias[chaveDaFase(this.faseRef)] = refDeixada;
     this.referencias[chaveDaFase(proxima)] = proxima;
     const anterior = this.mundos.get(chaveDaFase(proxima));
     const estado = anterior ? clonarEstado(anterior) : estadoInicialDaFase(r.ctx);
