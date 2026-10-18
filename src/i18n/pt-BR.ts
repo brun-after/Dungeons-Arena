@@ -164,7 +164,7 @@ export const ptBR = {
   'prompt.retorno': 'Porta azul: voltar à fase anterior',
   'prompt.santuario': '{tecla}: ativar santuário de Engenho (20 s)',
   'inspetor.tipo.santuario': 'Santuário de Engenho',
-  'prompt.agua': 'Água: conduz raios e interage com terra e gelo',
+  'prompt.agua': 'Água: reações com raios, terra e fogo',
   'prompt.brasas': 'Brasas: queimam quem atravessa',
   'prompt.miasma': 'Miasma: envenena quem atravessa',
   'prompt.desarmar': '{tecla}: desarmar armadilha',

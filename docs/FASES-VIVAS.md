@@ -10,7 +10,7 @@ A partir da segunda fase, uma porta azul no ponto de entrada leva à anterior. O
 
 O save conserva as referências exatas das fases visitadas, incluindo semente, dimensões, formato e regras de estilo. Baús consumidos, inimigos, recargas e reservas de enxame são restaurados. A primeira passagem mantém a recuperação de recursos já existente; retornar ou revisitar não recupera vida nem mana. Personagens mortos do grupo continuam sendo revividos ao trocar de fase, como antes.
 
-Saves antigos continuam abrindo. A geometria de geradas antigas permanece a mesma, pois os novos parâmetros só entram nas próximas referências criadas. Sem histórico de referências, o retorno às geradas anteriores recompõe a sequência determinística antiga usando o estilo disponível na referência atual; um estilo diferente usado naquela fase antiga não pode ser recuperado de saves que nunca o registraram. Estados já salvos conservam seus objetos e valores de armadilha; o novo conteúdo aparece ao iniciar uma fase ainda não visitada.
+Saves antigos continuam abrindo, com migração sem alteração do estado para o schema 17. A versão nova impede clientes antigos de descartarem parâmetros de uma espiral salva. A geometria de geradas antigas permanece a mesma, pois os novos parâmetros só entram nas próximas referências criadas. Sem histórico de referências, o retorno às geradas anteriores recompõe a sequência determinística antiga usando o estilo disponível na referência atual; um estilo diferente usado naquela fase antiga não pode ser recuperado de saves que nunca o registraram. Estados já salvos conservam seus objetos e valores de armadilha; o novo conteúdo aparece ao iniciar uma fase ainda não visitada.
 
 ## Terreno e armadilhas
 

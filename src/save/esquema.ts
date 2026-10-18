@@ -10,7 +10,7 @@ import type { Dificuldade } from '../modos/dificuldade';
 import { MAX_REGRAS, RE_REGRA_ESTILO } from '../world/estilo';
 import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 16;
+export const VERSAO_SCHEMA = 17;
 export const SLOTS = [1, 2, 3] as const;
 export const FORMATO_EXPORTACAO = 'dungeons-arena/save';
 
@@ -347,6 +347,9 @@ export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   14: v14ParaV15,
   // Marco 19 (17/10/2026): campos e memória tática são opcionais nos estados antigos.
   15: (r) => r,
+  // D-079 (17/10/2026): os campos novos são opcionais. A versão impede clientes antigos de
+  // descartarem formato/ambientesVivos e regenerarem outro mapa sobre um estado de espiral salvo.
+  16: (r) => r,
 };
 
 function temNaoFinito(v: unknown): boolean {
