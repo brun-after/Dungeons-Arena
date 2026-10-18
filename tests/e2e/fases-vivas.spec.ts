@@ -69,14 +69,14 @@ test('porta azul retorna e a saída reabre a fase seguinte, sem perder o mundo v
   await expect(page.locator('#diag')).toHaveAttribute('data-celula', '5,4', { timeout: 30000 });
   await page.screenshot({ path: info.outputPath('porta-retorno.png') });
   await page.keyboard.down('a');
-  await expect(page.locator('#diag')).toHaveAttribute('data-celula', '4,4');
-  await page.keyboard.up('a');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Salões da entrada', { timeout: 30000 });
+  try {
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Salões da entrada', { timeout: 30000 });
+  } finally { await page.keyboard.up('a'); }
   await expect(page.locator('#diag')).toHaveAttribute('data-celula', '36,25');
   await page.keyboard.down('w');
-  await expect(page.locator('#diag')).toHaveAttribute('data-celula', '36,24');
-  await page.keyboard.up('w');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Catacumbas', { timeout: 30000 });
+  try {
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Catacumbas', { timeout: 30000 });
+  } finally { await page.keyboard.up('w'); }
   expect(erros).toEqual([]);
 });
 

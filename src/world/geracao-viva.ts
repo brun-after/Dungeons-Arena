@@ -65,7 +65,6 @@ export function enriquecerFase(f: FaseJson, p: ParametrosGeracao, catalogo: Cata
     }
   }
   if (!p.eventos?.includes('enxame')) return;
-  f.nome += ' · Enxame';
   const inimigos = f.inimigos ??= [];
   // Reservas são dados inertes até o jogador se aproximar: limite real na simulação, sem sprites falsos.
   for (const s of salas.slice(1, -1)) for (let i = 0; i < b.enxamePorSala && inimigos.length < b.enxameReservaMax; i++) {

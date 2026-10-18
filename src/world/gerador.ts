@@ -241,7 +241,7 @@ function aplicarEventos(
   if (eventos.length === 0) return;
   const rng = criarRng((p.semente ^ 0x5eed18) >>> 0);
   const { largura, altura } = dimensoes(p);
-  const nome = (id: string) => ({ lua_sangrenta: 'Lua sangrenta', mercador_errante: 'Mercador errante', sala_secreta: 'Sala secreta' })[id] ?? id;
+  const nome = (id: string) => ({ lua_sangrenta: 'Lua sangrenta', mercador_errante: 'Mercador errante', sala_secreta: 'Sala secreta', enxame: 'Enxame' })[id] ?? id;
   json.eventos = [...eventos];
   json.nome = `${json.nome} · ${eventos.map(nome).join(' · ')}`;
   const celulaLivre = (): Celula | null => {
