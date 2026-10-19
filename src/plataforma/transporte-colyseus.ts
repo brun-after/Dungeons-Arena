@@ -11,6 +11,8 @@ export type EstadoDaConexao = 'conectado' | 'reconectando' | 'encerrada';
 
 export interface ConexaoArena {
   transporte: Transporte;
+  /** Aguarda a confirmação de saída antes de liberar o servidor ou proxy. */
+  encerrar: () => Promise<void>;
   /** Código curto da sala, para compartilhar (é o roomId, D-036). */
   codigo: string;
   /** Fase da sala (marco 7B): o cliente monta o contexto com ela. */
@@ -95,7 +97,14 @@ function embrulhar(sala: Room): Omit<ConexaoArena, 'fase'> {
     avisar('encerrada');
   });
 
+  // 19/10/2026: saída voluntária não reconecta se a rede cair durante o fechamento.
+  const encerrar = () => {
+    sala.reconnection.enabled = false;
+    return sala.leave(true).then(() => {});
+  };
+
   return {
+    encerrar,
     codigo: sala.roomId,
     transporte: {
       enviar: (texto) => {
@@ -106,7 +115,7 @@ function embrulhar(sala: Room): Omit<ConexaoArena, 'fase'> {
         for (const texto of pendentes.splice(0)) fn(texto);
       },
       fechar: () => {
-        void sala.leave(true);
+        void encerrar();
       },
     },
     aoMudar: (fn) => {

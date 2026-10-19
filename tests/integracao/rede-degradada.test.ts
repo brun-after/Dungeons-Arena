@@ -68,9 +68,10 @@ async function rodada(perfil: 'suportado' | 'degradado', quantos: number, segund
   }, DT_MS);
   return {
     bots,
-    parar: () => {
+    parar: async () => {
       clearInterval(assentar);
-      for (const b of bots) b.conexao.transporte.fechar();
+      // 19/10/2026: aguarda a saída pelo proxy antes de destruir os sockets no teardown.
+      await Promise.all(bots.map((b) => b.conexao.encerrar()));
     },
   };
 }
@@ -105,7 +106,7 @@ describe('rede degradada sobre o WSS real (§5.6)', () => {
       const sala = (await (await fetch(`http://127.0.0.1:${porta}/salas/${a.conexao.codigo}`)).json()) as { fase: string };
       expect(sala.fase).toBe('arena-01');
     } finally {
-      parar();
+      await parar();
     }
   });
 
@@ -117,7 +118,7 @@ describe('rede degradada sobre o WSS real (§5.6)', () => {
       expect(p99).toBeLessThanOrEqual(1);
       expect(bots.every((b) => b.cliente.rejeitados === 0)).toBe(true);
     } finally {
-      parar();
+      await parar();
     }
   });
 
@@ -128,11 +129,11 @@ describe('rede degradada sobre o WSS real (§5.6)', () => {
       expect(sala.fase).toBe('arena-02');
       const entrou = await conectarArena(`ws://127.0.0.1:${porta}`, { codigo: conexao.codigo });
       expect(entrou.fase).toBe('arena-02');
-      entrou.transporte.fechar();
+      await entrou.encerrar();
       const saude = (await (await fetch(`http://127.0.0.1:${porta}/saude`)).json()) as { tick: { p95Ms: number } | null };
       expect(saude.tick).not.toBeNull();
     } finally {
-      conexao.transporte.fechar();
+      await conexao.encerrar();
     }
   });
 });
