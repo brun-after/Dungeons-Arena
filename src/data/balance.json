@@ -1,6 +1,6 @@
 {
-  "necromancia": { "danoPct": 180, "servosExtras": 2, "retornoServoMs": 8000, "duracaoMortoMs": 25000, "raioColheita": 6, "ecoRecargaMs": 30000, "vidaBase": 24, "vidaPorNivel": 3, "vidaServoPct": 80, "alcanceRitual": 6 },
-  "versao": 29,
+  "necromancia": { "danoPct": 180, "servosExtras": 2, "retornoServoMs": 8000, "duracaoMortoMs": 25000, "raioColheita": 6, "ecoRecargaMs": 30000, "vidaBase": 24, "vidaPorNivel": 3, "vidaServoPct": 100, "alcanceRitual": 6 },
+  "versao": 30,
   "ajustesClasses": {
     "guerreiro": {
       "contatoMaxPct": 15,
