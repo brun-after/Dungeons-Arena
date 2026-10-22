@@ -5,6 +5,7 @@ import { CamadaCombosTaticos } from '../render/combos-taticos';
 // presets de impacto, luz, minimapa, prompt de interação, pausa, configurações e guia —, aplica as
 // preferências (qualidade, escala da interface, movimento reduzido) e decide se o jogo está pausado.
 // Nada aqui muda a simulação: tudo lê estado e eventos.
+// Marco 20 (21/10/2026, D-087): o modo de desempenho (teto de fps, escala da resolução e o medidor) também mora aqui.
 
 import { hashTexto } from '../core/rng';
 import { MotorAudio } from '../audio/motor';
@@ -21,10 +22,12 @@ import { EfeitosDeHabilidade } from '../render/efeitos-habilidade';
 import { ControladorImpacto } from '../render/impacto';
 import { CamadaLuz, type PontoDeLuz } from '../render/luz';
 import { SistemaParticulas } from '../render/particulas';
+import { escalaDaResolucao, fpsAlvo, PuladorDeQuadros } from '../render/desempenho';
 import { MonitorDeQualidade, PRESETS_QUALIDADE, qualidadePadrao, type PresetQualidade } from '../render/qualidade';
 import type { Palco } from '../render/stage';
 import { Graphics } from 'pixi.js';
 import { t } from '../i18n';
+import { Medidor } from './medidor';
 import { criarMinimapa } from './minimapa';
 import { criarPausa, type AcaoDaPausa } from './pausa';
 import { criarPrompt } from './prompt';
@@ -61,6 +64,8 @@ export interface Apresentacao {
   menuAberto: () => boolean;
   movimentoReduzido: () => boolean;
   qualidade: () => PresetQualidade;
+  /** Marco 20: o laço desenha este quadro? (teto de fps). */
+  quadroPermitido: (agoraMs: number) => boolean;
   /** Antes de aplicar a câmera: atualiza efeitos, som, minimapa e prompt; devolve se o desenho congela. */
   quadro: (estado: EstadoJogo, agoraMs: number, dtMs: number, posicao: (e: Entidade) => PontoVisual) => boolean;
   /** Depois de atualizar a câmera: aplica o tremor e o flash. */
@@ -77,6 +82,9 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   const monitor = new MonitorDeQualidade(prefs.qualidade === 'auto' ? qualidadePadrao(toque) : prefs.qualidade);
   const nivel = (): NivelQualidade => (prefs.qualidade === 'auto' ? monitor.nivel : prefs.qualidade);
   const qualidade = () => PRESETS_QUALIDADE[nivel()];
+  const alvoFps = () => fpsAlvo(prefs.fps, nivel());
+  const pulador = new PuladorDeQuadros();
+  const medidor = new Medidor();
 
   const motor = new MotorAudio({ musica: prefs.volumeMusica, efeitos: prefs.volumeEfeitos, mudo: prefs.mudo });
   const som = ligarSom({ motor, bus: o.bus, estado: o.estado, idLocal, habilidades: o.habilidades, fase: ctx.fase });
@@ -93,7 +101,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   const minimapa = criarMinimapa(ctx, idLocal, toque);
   const prompt = criarPrompt(ctx, idLocal, toque);
   const indicadorCombo = new IndicadorCombo();
-  o.ui.append(minimapa.elemento, prompt.elemento);
+  o.ui.append(minimapa.elemento, prompt.elemento, medidor.elemento);
   faixaSuperior(o.ui).append(indicadorCombo.elemento);
 
   let pausaAberta = false;
@@ -107,6 +115,8 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     // Marco 11A: movimento reduzido também reduz as partículas (metade, sem giro).
     particulas.reduzido = reduzido();
     if (particulas.limite === 0) particulas.limpar();
+    palco.definirEscala(escalaDaResolucao(prefs.resolucao, toque));
+    medidor.mostrar(prefs.medidor);
   };
   aplicarPreferencias();
   sistema.addEventListener('change', aplicarPreferencias);
@@ -171,9 +181,11 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     menuAberto: pausa.aberta,
     movimentoReduzido: reduzido,
     qualidade,
+    quadroPermitido: (agoraMs) => pulador.deveDesenhar(agoraMs, alvoFps()),
     quadro: (estado, agoraMs, dtMs, posicao) => {
+      medidor.registrar(dtMs, agoraMs);
       if (prefs.qualidade === 'auto') {
-        const caiu = monitor.registrar(dtMs, agoraMs);
+        const caiu = monitor.registrar(dtMs, agoraMs, alvoFps());
         if (caiu) {
           aplicarPreferencias();
           o.aviso(t('aviso.qualidadeReduzida'));

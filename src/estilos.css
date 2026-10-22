@@ -956,6 +956,87 @@ body.toque .botao-habilidade .tecla {
   color: var(--texto-suave);
 }
 
+/* Marco 20 (21/10/2026, D-087): servidor da rede local no menu e medidor de desempenho. */
+.servidor-menu {
+  position: relative;
+  width: min(420px, 100%);
+  margin-top: 4px;
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
+
+.servidor-menu summary {
+  cursor: pointer;
+  text-align: center;
+}
+
+.servidor-menu[open] {
+  padding: 10px 12px;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  background: var(--painel);
+}
+
+.servidor-menu label {
+  display: block;
+  margin-top: 6px;
+  color: var(--texto);
+}
+
+.servidor-menu input {
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px;
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  background: var(--controle);
+  color: var(--texto);
+  font: inherit;
+}
+
+.botoes-servidor {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.botao-servidor {
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  background: var(--controle);
+  color: var(--texto);
+  font: inherit;
+  cursor: pointer;
+}
+
+.botao-servidor:hover,
+.botao-servidor:focus-visible {
+  background: var(--controle-ativo);
+}
+
+.estado-servidor {
+  margin: 8px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.medidor-desempenho {
+  position: absolute;
+  bottom: calc(6px + var(--seguro-base));
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.6);
+  font: 11px ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
 /* Diagnóstico e avisos */
 .diagnostico {
   position: absolute;

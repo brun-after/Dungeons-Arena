@@ -101,6 +101,7 @@ async function rodarArena(o: OpcoesArena): Promise<{ avisar: (texto: string) => 
         },
       });
     },
+    quadroPermitido: cena.quadroPermitido,
   });
   return { avisar };
 }

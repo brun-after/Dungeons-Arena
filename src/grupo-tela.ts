@@ -228,6 +228,7 @@ export async function iniciarGrupo(raiz: HTMLElement, o: OpcoesGrupo): Promise<v
           rede: { rttMs: eu.rttMs, latenciaSimuladaMs: 0, erroP95: 0, conectado },
         });
       },
+      quadroPermitido: c.quadroPermitido,
     });
   };
 

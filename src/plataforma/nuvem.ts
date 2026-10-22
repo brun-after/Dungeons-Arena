@@ -9,9 +9,11 @@
 //
 // A chave anônima do Supabase é pública (o RLS da tabela `saves` só deixa cada conta ler e gravar o que é dela).
 
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { jogadorDoSave, lerRegistro, resumoDoRegistro, type RegistroProgresso } from '../save/esquema';
 import { certificarSlot } from './certificacao';
 import { carregarSlot } from './saves';
+import { ehAppNativo } from './nativo';
 import { enderecoDoServidor } from './servidor';
 
 export interface SaveNaNuvem {
@@ -82,6 +84,31 @@ function listaComEnvio(lista: SaveNaNuvem[] | null, r: RegistroProgresso): SaveN
 }
 
 /** Supabase (Google, sem realtime). As variáveis vêm do build do Pages; sem elas, não há nuvem. */
+/** Marco 20 (D-087): a volta do login Google para o app Android (intent-filter no AndroidManifest). */
+export const VOLTA_DO_LOGIN_NO_APP = 'io.github.brunafter.dungeonsarena://login';
+
+/**
+ * Login no app Android: o Google abre no navegador do sistema (o WebView não pode fazer OAuth) e volta pelo deep link
+ * com o código do PKCE, trocado aqui pela sessão. Depois, a tela dos slots recarrega já com a conta.
+ */
+async function entrarNoApp(c: SupabaseClient): Promise<void> {
+  const { data, error } = await c.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: VOLTA_DO_LOGIN_NO_APP, skipBrowserRedirect: true } });
+  if (error) throw new Error(error.message);
+  const [{ App }, { Browser }] = await Promise.all([import('@capacitor/app'), import('@capacitor/browser')]);
+  const ouvinte = await App.addListener('appUrlOpen', ({ url }) => {
+    if (!url.startsWith(VOLTA_DO_LOGIN_NO_APP)) return;
+    void ouvinte.remove();
+    void Browser.close().catch(() => undefined);
+    const codigo = new URL(url).searchParams.get('code');
+    void (codigo ? c.auth.exchangeCodeForSession(codigo) : Promise.resolve())
+      .catch(() => undefined)
+      .then(() => {
+        location.href = './?jogo=campanha';
+      });
+  });
+  await Browser.open({ url: data.url });
+}
+
 export function criarNuvemSupabase(url: string, chaveAnonima: string): Nuvem {
   const cliente = import('@supabase/supabase-js').then(({ createClient }) =>
     createClient(url, chaveAnonima, { auth: { persistSession: true, detectSessionInUrl: true, flowType: 'pkce' } }),
@@ -96,6 +123,10 @@ export function criarNuvemSupabase(url: string, chaveAnonima: string): Nuvem {
       return { nome };
     },
     entrar: async () => {
+      if (ehAppNativo()) {
+        await entrarNoApp(await cliente);
+        return;
+      }
       const volta = `${location.origin}${location.pathname}?jogo=campanha`;
       await (await cliente).auth.signInWithOAuth({ provider: 'google', options: { redirectTo: volta } });
     },

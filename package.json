@@ -26,9 +26,12 @@
     "test:e2e": "playwright test",
     "verificar": "npm run typecheck && npm run lint && npm test && npm run build && npm run balancear:completo",
     "build:server": "esbuild server/main.ts --bundle --platform=node --target=node24 --format=esm --packages=external --sourcemap --outfile=dist-server/main.mjs",
-    "bench:fases": "tsx tools/bench/fases-vivas.ts"
+    "bench:fases": "tsx tools/bench/fases-vivas.ts",
+    "build:android": "vite build --mode android && cap sync android",
+    "android:apk": "npm run build:android && cd android && gradlew assembleDebug"
   },
   "devDependencies": {
+    "@capacitor/cli": "8.5.2",
     "@eslint/js": "10.0.1",
     "@playwright/test": "1.64.0",
     "@types/node": "24.19.2",
@@ -44,6 +47,11 @@
     "vitest": "5.0.4"
   },
   "dependencies": {
+    "@capacitor/android": "8.5.2",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/browser": "8.0.5",
+    "@capacitor/core": "8.5.2",
+    "@capacitor/haptics": "8.0.2",
     "@colyseus/core": "0.18.18",
     "@colyseus/sdk": "0.18.5",
     "@colyseus/ws-transport": "0.18.4",

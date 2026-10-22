@@ -4,6 +4,7 @@
 // (não só no primeiro), e em retrato um aviso cobre o jogo pedindo para girar o aparelho (o iOS não deixa travar).
 
 import { t } from '../i18n';
+import { ehAppNativo } from './nativo';
 import { icone } from '../ui/icones';
 
 /**
@@ -11,6 +12,7 @@ import { icone } from '../ui/icones';
  * um menu, que gira à vontade). Falha em silêncio.
  */
 export function sairDaTelaCheia(): void {
+  if (ehAppNativo()) return;
   try {
     screen.orientation.unlock();
   } catch {
@@ -20,6 +22,8 @@ export function sairDaTelaCheia(): void {
 }
 
 export function prepararSessaoDeTela(toque: boolean): () => void {
+  // Marco 20 (D-087): no app Android, a tela cheia, a paisagem e a tela acesa vêm do próprio app.
+  if (ehAppNativo()) return () => undefined;
   let trava: WakeLockSentinel | null = null;
 
   const pedirWakeLock = async () => {

@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.48 · **Data:** 18/10/2026
+**Versão:** 0.49 · **Data:** 22/10/2026
 
 > **Histórico**
+> - **0.49 (22/10/2026)**: D-087 (marco 20: app Android pelo Capacitor, APK no CI, login por deep link e modo de desempenho).
 > - **0.47 (18/10/2026)**: D-085 (piso absoluto de 1 XP por abate no novo antifarm, preservando a penalidade por morte).
 > - **0.46 (18/10/2026)**: D-084 (XP com fadiga permanente independente, piso de 5%, reforços do Guerreiro entre 16–20 e somente Botas do vento).
 > - **0.45 (18/10/2026)**: D-083 (ajustes das cinco classes, antifarm persistente por fase e velocidade ao cruzar hostis).
@@ -2123,3 +2124,39 @@ O piso vale somente para XP ganho ao abater inimigos. A penalidade de morte do j
 ## D-086 — Progressão do Guerreiro e concentração do Mago (18/10/2026)
 
 Preservar as metas originais e ajustar a progressão dos personagens. O contato do Guerreiro cresce quadraticamente até +15% no nível 10, compensado por resistência progressiva contra grupos próximos. O Dardo Arcano tem abertura reduzida nos primeiros níveis, recuperada entre 10 e 20, e concentração por acertos efetivos no mesmo alvo, com potência adicional somente após quatro acertos. Parâmetros no balance 29; regras em [AJUSTES-CLASSES-XP.md](AJUSTES-CLASSES-XP.md). As 77 metas originais passaram com oito sementes.
+
+## D-087 — App Android e modo de desempenho (marco 20, 22/10/2026)
+
+**Contexto.** No navegador do celular o jogo às vezes trava, e o usuário quis uma versão instalável que não fosse a
+PWA, para ganhar desempenho.
+
+**Decisão.**
+- **Capacitor, não reescrita.** O app é o mesmo cliente web dentro de um APK (Capacitor 8). Uma reescrita nativa
+  (Godot/Unity) refaria simulação, render, rede e interface e criaria dois clientes para um servidor só. O motor
+  continua sendo o Chromium do Android: o ganho vem do que o navegador não deixa fazer e do modo de desempenho, não do
+  empacotamento.
+- **Nativo no app:** modo imersivo (as barras do sistema voltam com um deslize), tela sempre acesa e paisagem fixa no
+  `AndroidManifest`, na `MainActivity` (sem plugins para isso). Vibração pelo Haptics. O voltar do Android fecha o
+  modal aberto, abre a pausa na partida ou volta uma página; ir para o segundo plano abre a pausa. Os arquivos ficam no
+  APK: `--mode android` tira a PWA, o service worker e os sourcemaps. Os plugins são importados sob demanda, só no app;
+  a detecção (`window.Capacitor`) é síncrona.
+- **Rede local:** a página do app é `http://localhost` (contexto seguro, com IndexedDB e o crypto da conta), o que
+  deixa falar por `ws://` com um servidor da rede local. O servidor público segue por `wss://`. Como o app não tem barra
+  de endereço, o menu ganha o campo **Servidor**. A ordem passa a ser `?servidor=`, depois o escolhido no aparelho,
+  depois o do build; dentro do app, o "localhost" não vira `ws://localhost:2567`.
+- **Login Google:** o OAuth abre no navegador do sistema e volta pelo esquema `io.github.brunafter.dungeonsarena://login`
+  com o código do PKCE, trocado pela sessão no app. Essa URL precisa estar nas Redirect URLs do Supabase (ação do
+  dono do projeto no painel).
+- **Modo de desempenho** (vale também no navegador):
+  - teto de fps: automático, 60 ou 30. O automático cai para 30 quando a qualidade automática chega ao mínimo. O laço
+    pula o quadro inteiro e a simulação continua em ticks;
+  - escala da resolução sobre o DPR: automática (0,75 no toque, 1 no desktop), alta, média ou baixa;
+  - medidor opcional com fps, p95 e travadas acima de 100 ms;
+  - a degradação automática de qualidade passa a descer também com travadas (p95 dos quadros acima de 50 ms), não só
+    com média abaixo de 45 fps; com teto de 30, o limite da média acompanha o teto.
+- **Distribuição:** o workflow `android.yml` compila o APK de depuração (Java 21, `assembleDebug`) em PRs que mexem
+  no cliente e quando pedido à mão, e o deixa como artefato. Assinatura de loja (keystore nos secrets) e Play Store
+  ficam para depois. Android Studio no PC é opcional (`npm run android:apk`, instalação por USB, profiler).
+
+**Pendente:** medir num Android real com o medidor e registrar em `BENCHMARKS.md`; com os números, atacar os
+gargalos que aparecerem.

@@ -5,6 +5,7 @@
 // já projetado e alinhado à tela. As entidades se ordenam por `zIndex` (profundidade).
 
 import { Application, Container, Matrix } from 'pixi.js';
+import { resolucaoDoPalco } from './desempenho';
 import type { Matriz } from './projecao';
 
 export const TETO_DPR = 2;
@@ -34,6 +35,8 @@ export interface Palco {
   altura: () => number;
   aoRedimensionar: (fn: (largura: number, altura: number) => void) => void;
   renderizar: () => void;
+  /** Marco 20: escala da resolução sobre o DPR (1 = nítido; 0,5 = metade dos pixels por lado). */
+  definirEscala: (escala: number) => void;
   /** Marco 13: aplica a matriz da projeção ao chão. */
   definirMatrizPlano: (m: Matriz) => void;
   destruir: () => void;
@@ -70,6 +73,8 @@ export async function criarPalco(host: HTMLElement): Promise<Palco> {
   const tela = new Container({ label: 'tela' });
   app.stage.addChild(mundo, tela);
 
+  let escala = 1;
+  const resolucao = () => resolucaoDoPalco(window.devicePixelRatio, TETO_DPR, escala);
   const ouvintes: ((l: number, a: number) => void)[] = [];
   let espera: ReturnType<typeof setTimeout> | undefined;
   const redimensionar = () => {
@@ -78,7 +83,7 @@ export async function criarPalco(host: HTMLElement): Promise<Palco> {
       const l = Math.max(1, host.clientWidth);
       const a = Math.max(1, host.clientHeight);
       // Marco 16 (15/10/2026): zoom do navegador e troca de monitor mudam o DPR; a resolução acompanha (teto 2).
-      app.renderer.resize(l, a, Math.min(window.devicePixelRatio || 1, TETO_DPR));
+      app.renderer.resize(l, a, resolucao());
       for (const fn of ouvintes) fn(l, a);
     }, DEBOUNCE_RESIZE_MS);
   };
@@ -105,6 +110,11 @@ export async function criarPalco(host: HTMLElement): Promise<Palco> {
     aoRedimensionar: (fn) => ouvintes.push(fn),
     renderizar: () => {
       app.render();
+    },
+    definirEscala: (e) => {
+      if (e === escala) return;
+      escala = e;
+      app.renderer.resize(app.screen.width, app.screen.height, resolucao());
     },
     definirMatrizPlano: (m) => {
       plano.setFromMatrix(new Matrix(m.a, m.b, m.c, m.d, m.tx, m.ty));

@@ -100,6 +100,8 @@ export interface Cena {
   quadro: (q: QuadroCena) => void;
   /** Marco 12: a simulação deve parar (campanha com a pausa aberta). */
   pausado: () => boolean;
+  /** Marco 20: teto de fps escolhido nas Configurações (para o laço). */
+  quadroPermitido: (agoraMs: number) => boolean;
   /** Marco 15: tira a cena da página (troca de fase no cooperativo, sem recarregar a conexão). */
   desmontar: () => void;
 }
@@ -532,6 +534,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     hud,
     quadro,
     pausado: ap.pausado,
+    quadroPermitido: ap.quadroPermitido,
     desmontar: () => {
       clearTimeout(releitura);
       teclado.desligar();

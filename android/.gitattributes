@@ -1,0 +1,3 @@
+# Marco 20: o gradlew.bat precisa de CRLF; o gradlew (sh), de LF.
+*.bat text eol=crlf
+gradlew text eol=lf

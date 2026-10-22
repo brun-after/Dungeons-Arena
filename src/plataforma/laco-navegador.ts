@@ -15,6 +15,8 @@ export interface OpcoesLaco {
   renderizar: (alpha: number) => void;
   relogio?: Relogio;
   pausado?: () => boolean;
+  /** Marco 20: teto de fps; quando devolve false, este quadro do navegador é pulado inteiro (simula no próximo). */
+  quadroPermitido?: (agoraMs: number) => boolean;
 }
 
 /** Inicia o laço. Retorna a função que o interrompe. */
@@ -26,6 +28,10 @@ export function iniciarLaco(opcoes: OpcoesLaco): () => void {
   let parado = false;
 
   const aoQuadro = (): void => {
+    if (opcoes.quadroPermitido && !opcoes.quadroPermitido(relogio.agoraMs())) {
+      if (!parado) quadro = requestAnimationFrame(aoQuadro);
+      return;
+    }
     if (opcoes.pausado?.()) {
       acumulador.anteriorMs = null;
       acumulador.acumuladoMs = 0;

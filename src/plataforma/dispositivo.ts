@@ -1,6 +1,8 @@
 // Detecção de toque (§4.2): uma função só, combinando sinais. "UA móvel ou tela pequena" exclui
 // laptops com touchscreen. Nada depende de navigator.platform nem de window.orientation.
 
+import { ehAppNativo, vibrarNativo } from './nativo';
+
 export interface SinaisDispositivo {
   temToque: boolean;
   ponteiroGrosso: boolean;
@@ -23,8 +25,12 @@ export function sinaisDoNavegador(): SinaisDispositivo {
   };
 }
 
-/** Vibração com falha silenciosa (§4.8). */
+/** Vibração com falha silenciosa (§4.8). Marco 20: no app Android, pelo motor do aparelho. */
 export function vibrar(padrao: number | number[]): void {
+  if (ehAppNativo()) {
+    vibrarNativo(padrao);
+    return;
+  }
   try {
     navigator.vibrate(padrao);
   } catch {

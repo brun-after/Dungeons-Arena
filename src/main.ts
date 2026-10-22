@@ -1,4 +1,4 @@
-// Ponto de entrada do cliente: registra o Service Worker no bootstrap (§3.8) e escolhe a tela pela URL:
+// Ponto de entrada do cliente: registra o Service Worker no bootstrap (§3.8; no app Android, não há) e escolhe a tela pela URL:
 //   (nada)            menu inicial
 //   ?jogo=campanha    slots da campanha (marco 6B); com &slot=N, joga no slot N (0 = sem salvar)
 //   ?jogo=grupo&slot=N&criar=1 | &codigo=XXXXXX   campanha cooperativa (marco 15)
@@ -14,11 +14,14 @@ import { ehDificuldade } from './modos/dificuldade';
 import './estilos.css';
 import { registerSW } from 'virtual:pwa-register';
 import { iniciarJogo } from './jogo';
+import { ligarAppNativo } from './plataforma/nativo';
 import { prepararPreferencias } from './plataforma/preferencias';
 import { mostrarMenu } from './ui/menu';
 import { mostrarSlots } from './ui/slots';
 
 registerSW({ immediate: true });
+// Marco 20: no app Android, o botão voltar e o segundo plano (fora do app, não faz nada).
+void ligarAppNativo();
 
 const raiz = document.getElementById('app');
 // Preferências vêm do IndexedDB (marco 6B): carregadas antes de qualquer tela.

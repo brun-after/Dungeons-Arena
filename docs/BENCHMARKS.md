@@ -1,8 +1,9 @@
 # Benchmarks
 
-**Versão:** 0.6 · **Data:** 15/10/2026
+**Versão:** 0.7 · **Data:** 22/10/2026
 
 > **Histórico**
+> - **0.7 (22/10/2026)**: marco 20 (D-087): o app Android e o medidor de desempenho (Configurações → Gráficos) para medir no aparelho; a linha do Android real fica pendente até a medição no celular do usuário.
 > - **0.6 (15/10/2026)**: marco 16, teste de 10 min na VM (AWS Lightsail São Paulo, 1 GB) com 10 bots na arena-02: 10/10 metas, memória estável e sem reinício (o usuário reduziu o teste de 30 para 10 min).
 > - **0.5 (15/10/2026)**: marco 16 (D-062): benchmarks do cliente (`?bench=carga`, `?bench=padrao` e as trocas de fase, `npm run bench`), carga com a série do `/metricas` e a carga do grupo (campanha cooperativa, 6 bots). Ressalva: o WebGL do Chromium sem tela é por software (pior caso de CPU, não um aparelho).
 > - **0.4 (14/10/2026)**: marco 7B, cena padrão arena-02 nos perfis suportado e degradado sobre WSS (proxy local, D-045).
@@ -17,7 +18,7 @@ As metas da §5.6 são critérios a validar; nada aqui foi medido até o marco 7
 
 | Plataforma | Aparelho de referência | Aparelho real usado | SO / navegador | Resolução / DPR |
 |---|---|---|---|---|
-| Android | Galaxy A54, 8 GB, Chrome estável | — | — | — |
+| Android | Galaxy A54, 8 GB, Chrome estável | — (pendente: medir com o app do marco 20 e o medidor) | — | — |
 | iOS | iPhone 12, 4 GB, Safari estável | — | — | — |
 | Desktop | 4 núcleos, 8 GB, GPU integrada, 1920×1080 | — | — | — |
 | Servidor | 2 vCPU, 4 GB, uma sala | AWS Lightsail `arena-sao-paulo`, sa-east-1a (2 vCPU / 1 GB, amd64) | Ubuntu 24.04 / Node 24 (Docker) | — |
