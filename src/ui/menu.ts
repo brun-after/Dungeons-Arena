@@ -3,6 +3,7 @@
 
 import { t } from '../i18n';
 import { criarFundoMenu } from './fundo-menu';
+import { criarCampoServidor } from './servidor-menu';
 
 export function mostrarMenu(raiz: HTMLElement): void {
   raiz.textContent = '';
@@ -37,5 +38,7 @@ export function mostrarMenu(raiz: HTMLElement): void {
   pesquisa.href = './?pesquisa=1';
   pesquisa.textContent = t('menu.pesquisa');
   tela.append(pesquisa);
+  // Marco 20: servidor da rede local escolhido neste aparelho (o app Android não tem barra de endereço).
+  tela.append(criarCampoServidor());
   raiz.append(tela);
 }

@@ -15,16 +15,21 @@ function atlasCriaturas(): Plugin {
   };
 }
 
-export default defineConfig({
+// Marco 20 (21/10/2026, D-087): `--mode android` gera o cliente do app (Capacitor), sem PWA nem service worker; os
+// arquivos já vão dentro do APK.
+export default defineConfig(({ mode }) => ({
   // Caminhos relativos: o GitHub Pages publica em /Dungeons-Arena/ (§3.8).
   base: './',
   build: {
     target: 'es2023',
-    sourcemap: true,
+    sourcemap: mode !== 'android',
   },
+  // No app, o registro do service worker vira uma função vazia.
+  resolve: { alias: mode === 'android' ? { 'virtual:pwa-register': '/src/plataforma/sem-pwa.ts' } : {} },
   plugins: [
     atlasCriaturas(),
     // PWA (§3.8): campanha jogável offline depois da primeira visita.
+    mode !== 'android' &&
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false,
@@ -75,4 +80,4 @@ export default defineConfig({
     // Simulações de 10.000 ticks e cargas de rede rodam em paralelo e disputam CPU.
     testTimeout: 60_000,
   },
-});
+}));

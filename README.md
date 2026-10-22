@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.13 · **Data:** 18/10/2026
+**Versão do documento:** 3.14 · **Data:** 22/10/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena
 
 > **Histórico**
+> - **3.14 (22/10/2026)**: marco 20: app Android (APK pelo Capacitor, compilado no CI), campo do servidor da rede local no menu e modo de desempenho (teto de fps, resolução, medidor e degradação por travadas) (D-087).
 > - **3.13 (18/10/2026)**: diagnóstico de balanceamento por classe, cura/custos, invocações, desgaste por onda e intervenções pareadas (D-082). Uso em [Como investigar o balanceamento](docs/DIAGNOSTICO-BALANCEAMENTO.md).
 > - **3.12 (18/10/2026)**: Necromante, servo passivo, reanimados, ecos aliados e Dízimo vital; Sombra unificada em Trevas, novos combos e saves v18 (D-081). Detalhes em [Necromante e Trevas](docs/NECROMANTE.md).
 > - **3.11 (17/10/2026)**: fases vivas: piso nativo contínuo, retorno com revisita, áreas elementais, armadilhas mais perigosas e Engenho; enxames ocasionais em levas limitadas, mapas maiores e espirais (D-079). Detalhes em [Fases vivas](docs/FASES-VIVAS.md).
@@ -90,6 +91,9 @@ Divergências em relação a ela são registradas em [`docs/DECISOES.md`](docs/D
 | **Local: verificação completa** | `npm run verificar` (typecheck, lint, testes, build e balanceamento completo) | Etapa 1 |
 | **Testes** | `npm test` (unidade, simulação, rede e integração com o servidor), `npm run test:e2e` (Playwright) | Etapa 1 |
 | **Offline** | Depois da primeira visita, a campanha abre em modo avião (PWA) | Etapa 2 |
+| **App Android** | GitHub → **Actions** → **App Android (APK)** → a execução mais recente → baixe `dungeons-arena-apk` no celular e instale (permita "instalar apps desconhecidos"). Abre deitado, em tela cheia e sem depender do site; o jogo inteiro está no APK. Com Android Studio no PC: `npm run android:apk` | Marco 20 |
+| **Servidor da rede local** | Menu → **Servidor** → digite `ws://IP-DO-PC:2567` → **Usar este servidor** (fica salvo no aparelho; **Voltar ao oficial** limpa). Serve no app e no navegador | Marco 20 |
+| **Desempenho** | Pausa → **Configurações** → **Gráficos**: *Quadros por segundo* (30 economiza bateria), *Resolução* (baixa é mais leve) e o *medidor de desempenho* (fps, p95 e travadas) | Marco 20 |
 
 Requisitos locais: **Node.js 24 LTS**, **Git**; **Docker Desktop** é opcional (só para `docker compose`).
 Implantação do servidor na nuvem, passo a passo: [`docs/IMPLANTACAO.md`](docs/IMPLANTACAO.md).
@@ -217,6 +221,7 @@ pessoas (7C) entra quando houver testadores.
 | [x] | 15 | Ferramenta de **balanceamento por simulação** (tempo para matar por classe, rank e evolução, curva das fases, fluxo de ouro, invocações, margem de aviso do corpo a corpo) e ajuste dos números da campanha e do Livre; **dificuldade** em 4 níveis com o mesmo personagem; **campanha em grupo** online até 6, com escala pelo tamanho do grupo; inimigo cresce com o nível | Ritmo e janelas de reação validados na campanha e no Livre (69/69 metas). *Fichas justas por modo de arena: depois do 10B* |
 | [x] | 17 | **Conta Google** e **progresso na nuvem** (Supabase econômico), **certificado do personagem** (editar o arquivo não upa), **o personagem da campanha na arena** com faixas de nível e recompensas (XP, ouro e itens, com antifarm), **equipamento gerado por nível** e **atributos com mais efeito** | Quem upou bem vence na arena (simulador); arquivo editado entra como ficha de treino; jogar local não depende da nuvem |
 | [x] | 18 | **Grimório**: Força e Inteligência dividem o dano bruto e a Inteligência fortalece efeitos, reações e combos; Destreza é ritmo (arqueiro até 50% no básico); Sabedoria revela e desarma armadilhas; **estudo** para aprender (Rank B/A/S, acelerável); **revide** imediato da IA; **terra, sombra e sagrado** com 8 reações novas; **20 itens base × 4 formas** (Comum, Épica, Lendária, Última) com 10 afinidades elementais = 120 variações; **ganchos**, **conjuntos**, **ressonâncias** de atributo, **combos**, **marcos de nível**, **buff × habilidade** e **fusões**; **missões**, **origens raras**, **forja**, **eventos de fase** e **diário de descobertas** (primeira descoberta do servidor na nuvem) (D-068, D-069, D-070) | Tudo em dados e testado; metas do simulador aprovadas; guia e dica rápida dos atributos |
+| [ ] | 20 | **App Android** (Capacitor, APK compilado no CI, modo imersivo, tela acesa, voltar do Android, login Google por deep link), **servidor da rede local** no menu e **modo de desempenho** (teto de fps, escala da resolução, medidor, degradação por travadas) (D-087) | APK instalado num Android real; arena na rede local e login funcionando; números do medidor em `BENCHMARKS.md` |
 | [x] | 16 | Celular (área segura, orientação, redimensionamento), **PWA offline** testado, desempenho e memória (trocas de fase, cena de carga, `BENCHMARKS.md`) e servidor (limites, métricas, teste de 10 min na VM) | Offline e benchmarks verificados; teste de 10 min na VM com 10 bots: 10/10 metas, memória estável e sem reinício. *Recuperação de queda: depois do 9B; sessão real de 10 pessoas: no 11B* |
 
 ---

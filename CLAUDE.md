@@ -1,6 +1,6 @@
 # Dungeons Arena: guia para quem trabalha no código
 
-**Versão:** 0.3 · **Data:** 15/10/2026
+**Versão:** 0.4 · **Data:** 22/10/2026
 
 A especificação normativa é [`docs/PROMPT-PROJETO-v4.0.md`](docs/PROMPT-PROJETO-v4.0.md). Leia a Parte 1
 antes de decisões técnicas. Divergências vão para [`docs/DECISOES.md`](docs/DECISOES.md), com justificativa.
@@ -19,6 +19,8 @@ O roteiro e o estado de cada marco ficam no [`README.md`](README.md).
 - `npm run bench`: benchmarks do cliente no Chromium sem tela (`-- --registrar` grava docs/BENCHMARKS.md)
 - `npm run relatorios -- arquivo.jsonl`: resumo dos relatórios do teste com pessoas (`?pesquisa=1`, docs/TESTES-HUMANOS.md)
 - `npm run build:server`: servidor empacotado em `dist-server/main.mjs` (o Dockerfile usa este)
+- `npm run build:android`: cliente do app Android (`--mode android`, sem PWA) e `cap sync`; `npm run android:apk`
+  compila o APK de depuração (precisa do Android Studio). O CI gera o APK em `.github/workflows/android.yml` (marco 20)
 - `npm run verificar`: typecheck + lint + testes + build (rode antes de abrir PR)
 - `npm test`: unidade e simulação (Vitest); `npm run test:e2e`: smoke (Playwright)
 

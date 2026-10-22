@@ -378,6 +378,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
       });
     },
     pausado: cena.pausado,
+    quadroPermitido: cena.quadroPermitido,
   });
 }
 
