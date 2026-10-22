@@ -108,7 +108,8 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
     if (quemAbateu) {
       // D-071 (17/10/2026): metade da vida que falta, uma vez por morte confirmada.
       // Aliados do jogador não ganham a cura de inimigo; mortes simultâneas não ressuscitam o matador.
-      if (quemAbateu.controlador === 'ia' && !ladoDoJogador(estado, quemAbateu) && vivo(quemAbateu) && podeFerir(quemAbateu, e, ctx.modo)) {
+      // Ajuste de 21/10/2026: derrubar invocações (pergaminhos, criaturas do Necromante) não cura.
+      if (quemAbateu.controlador === 'ia' && !e.invocacao && !ladoDoJogador(estado, quemAbateu) && vivo(quemAbateu) && podeFerir(quemAbateu, e, ctx.modo)) {
         const cura = Math.round((quemAbateu.hpMax - quemAbateu.hp) * ctx.balance.recursos.curaNpcAoAbaterPct / 100);
         quemAbateu.hp = Math.min(quemAbateu.hpMax, quemAbateu.hp + cura);
         if (cura > 0) saida.push({ t: 'efeitoResultado', tick: estado.tick, alvoId: quemAbateu.id, origemId: quemAbateu.id, tipo: 'cura', dano: 0, cura, mana: 0 });

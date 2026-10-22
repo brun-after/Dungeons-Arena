@@ -78,6 +78,24 @@ describe('recuperação por abate', () => {
     expect(c.npc.hp).toBe(20);
   });
 
+  // Ajuste de 21/10/2026: derrubar invocações (pergaminho ou Necromante) não cura o NPC.
+  it.each([undefined, 'servo'] as const)('derrubar invocação (necromancia %s) não cura', (necromancia) => {
+    const c = cena('boss');
+    const modelo = CONTEUDO.presets.get('goblin');
+    if (!modelo) throw new Error('conteúdo ausente');
+    const invocada = criarInimigo(modelo, 'invocada', 9, 9, c.ctx.balance);
+    invocada.equipe = c.j.equipe;
+    invocada.invocacao = {
+      donoId: c.j.id, expiraTick: 99_999, dominado: false, comportamento: 'agressivo', avatar: false, golpesRestantes: 0,
+      abates: 0, criadoTick: 0, nivelDominacao: 0, ...(necromancia && { necromancia }),
+    };
+    invocada.hp = 0;
+    c.estado.entidades.push(invocada);
+    registrarParticipacao(invocada, c.npc.id, 0, c.ctx);
+    processarMortes(c.estado, c.ctx, []);
+    expect(c.npc.hp).toBe(20);
+  });
+
   it('não ultrapassa a vida máxima e arredonda a metade de vida ímpar', () => {
     const c = cena();
     c.npc.hp = 99;
