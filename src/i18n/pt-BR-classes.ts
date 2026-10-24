@@ -71,4 +71,10 @@ export const textosClasses = {
   'tag.sagrado': 'sagradas',
   'tag.falcao': 'do falcão',
   'tag.ultimate': 'de ultimate',
+  // Barra de 6, livros e ranks (D-094)
+  'item.outra_classe': 'Este livro é de skill de outra classe',
+  'habilidades.motivo.tecla_errada': 'As teclas 1 e 2 são das skills de classe; 3 a 6, das gerais',
+  'habilidades.motivo.nao_liberada': 'Ache o livro desta skill para poder aprendê-la',
+  'habilidades.motivo.de_classe': 'Skill de classe: vem do livro da classe e sobe com o nível',
+  'feedback.habilidadeLiberada': 'Livro lido: {nome} liberada. Aprenda com um ponto de habilidade.',
 } as const;

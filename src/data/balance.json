@@ -1,6 +1,6 @@
 {
   "necromancia": { "danoPct": 75, "servosExtras": 8, "retornoServoMs": 8000, "duracaoMortoMs": 20000, "raioColheita": 6, "ecoRecargaMs": 30000, "vidaBase": 24, "vidaPorNivel": 3, "vidaServoPct": 100, "alcanceRitual": 6, "distanciaRetorno": 10, "atributoPorInt": 1, "perdaPorQuantidade": 0.8 },
-  "versao": 35,
+  "versao": 36,
   "ajustesClasses": {
     "guerreiro": {
       "contatoMaxPct": 15,
@@ -40,6 +40,7 @@
     "aventureiro": {
       "nivelCorte": 20,
       "danoMult": 0.95,
+      "falcaoDanoMult": 1.5,
       "falcaoPassoMs": 200,
       "falcao": { "distanciaAlvo": 3, "raioPasseio": 3, "raioColeta": 7, "passeioMs": 1200, "raioCombate": 8 }
     },
@@ -82,6 +83,7 @@
   },
   "ultimate": { "max": 100, "ganhos": { "habilidade": 3, "basico": 0.6, "cura": 1.5, "abate": 8, "combo": 6 } },
   "estados": { "esquivaMaxPct": 50, "cegoMaxPct": 60, "contragolpeAtordoarMs": 1000, "contragolpeFuria": 20 },
+  "passivasGerais": { "maxAtivas": 3 },
   "hp": {
     "hpAtributoMult": 4,
     "dificuldadeMult": 1,

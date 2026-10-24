@@ -237,6 +237,10 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number; conf
   bus.on('estudoIniciado', (ev) => {
     if (ev.id === idLocal) hud.registrar(t('log.estudoIniciado', { nome: nomeHab(ev.habilidadeId), tempo: duracaoLegivel(ev.totalTicks * DT_MS) }));
   });
+  // Marco 24 (D-094): o livro de uma geral só libera; aprender custa um ponto.
+  bus.on('habilidadeLiberada', (ev) => {
+    if (ev.id === idLocal) hud.registrar(t('feedback.habilidadeLiberada', { nome: nomeHab(ev.habilidadeId) }));
+  });
   bus.on('estudoAcelerado', (ev) => {
     if (ev.id === idLocal && ev.restanteTicks > 0) hud.registrar(t('log.estudoAcelerado', { tempo: duracaoLegivel(ev.restanteTicks * DT_MS) }));
   });

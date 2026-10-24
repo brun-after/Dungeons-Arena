@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
+import { comKit, CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import { clonarEstado, criarEstado } from '../../src/core/estado';
 import type { EventoSimulacao } from '../../src/core/eventos-simulacao';
@@ -171,9 +171,11 @@ describe('rituais, combos e Trevas', () => {
     processarMortes(c.estado, c.ctx, c.eventos);
     expect(c.meus()).toHaveLength(0); expect(c.estado.recargas[chaveServo(c.j.id)]).toBe(c.estado.tick + ticksDe(8000));
   });
-  it('os dois combos do kit inicial dependem de acerto e de dreno efetivo', () => {
+  it('os dois combos do kit de antes dependem de acerto e de dreno efetivo', () => {
     for (const id of ['sepultura_aberta', 'tributo_da_legiao']) {
       const c = cena(); c.passiva(); const alvo = c.npc(); alvo.hp = alvo.hpMax = 10000; c.j.hp -= 20;
+      // Marco 24: as quatro skills do kit de antes (garras e comando agora vêm de livro).
+      comKit(c.j, ['dardo_funesto', 'dizimo_vital', 'garras_do_ossuario', 'comando_sepulcral']);
       let acao = 1;
       for (const skill of obter(CONTEUDO.combos.get(id)).sequencia) {
         const base = obter(resolverHabilidade(c.ctx, skill));
@@ -225,7 +227,7 @@ describe('rituais, combos e Trevas', () => {
     expect(JSON.stringify(migrado)).toContain('"elementoArma":"trevas"'); expect(JSON.stringify(migrado)).toContain('"elemento":"trevas"');
     expect(migrado.itemId).toBe(antigo.itemId);
     expect(migrado.certificado).toEqual(antigo.certificado);
-    expect(lerIdItemBase(antigo.itemId)?.elemento).toBe('trevas'); expect(VERSAO_SCHEMA).toBe(23);
+    expect(lerIdItemBase(antigo.itemId)?.elemento).toBe('trevas'); expect(VERSAO_SCHEMA).toBe(24);
     expect(CONTEUDO.itens.get(antigo.itemId)).toMatchObject({ id: antigo.itemId, elemento: 'trevas' });
   });
 });

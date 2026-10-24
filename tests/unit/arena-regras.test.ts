@@ -44,7 +44,7 @@ describe('ficha de sessão (§3.7)', () => {
     const pedido = {
       classeId: 'aventureiro',
       atributos: Object.fromEntries(ATRIBUTOS.map((k) => [k, 99])),
-      habilidades: ['golpe_demoniaco', 'seta_arcana', 'seta_arcana', 'inexistente'],
+      habilidades: ['golpe_demoniaco', 'mergulho', 'mergulho', 'inexistente'],
       nivel: 50,
       hpMax: 9999,
     };
@@ -53,7 +53,7 @@ describe('ficha de sessão (§3.7)', () => {
     for (const k of ATRIBUTOS) expect(ficha.atributos[k]).toBeLessThanOrEqual(clamp.atributoMax);
     expect(soma(ficha.atributos)).toBeLessThanOrEqual(clamp.atributoTotalMax);
     expect(acimaDoNeutro(ficha.atributos)).toBeLessThanOrEqual(clamp.orcamentoAtributos);
-    expect(ficha.habilidades).toEqual(['seta_arcana']);
+    expect(ficha.habilidades).toEqual(['mergulho']);
     expect(ficha.nivel).toBe(clamp.nivelMax);
     expect(ficha.hpMax).toBeLessThan(9999);
     expect(alteracoes.map((a) => a.campo)).toEqual(expect.arrayContaining(['hpMax', 'nivel', 'habilidades', 'atributos.forca']));

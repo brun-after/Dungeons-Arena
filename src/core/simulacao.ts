@@ -123,8 +123,13 @@ function aplicarComandos(
         const alvo = cmd.alvo === null ? undefined : buscarEntidade(estado, cmd.alvo);
         ator.alvoSelecionado = alvo && alvoOfensivoValido(estado, ctx, ator, alvo) ? alvo.id : null;
         ator.alvoTravado = ator.alvoSelecionado !== null && cmd.travar !== false;
+        // Marco 24 (D-097): escolher um alvo de propósito religa o básico (que o Parar ataque desliga).
+        if (ator.alvoTravado) ator.autoAtaque = true;
         break;
       }
+      case 'autoAtaque':
+        ator.autoAtaque = cmd.ligado;
+        break;
       // Marco 6 (13/10/2026): mochila, equipamento e pontos de atributo.
       case 'equipar':
         equipar(ator, ctx, cmd.invId, cmd.slot, estado.tick, saida);

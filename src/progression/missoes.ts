@@ -188,7 +188,7 @@ function semChaves(o: Record<string, number>, tirar: (k: string) => boolean): Re
 function duasEscolas(ctx: ContextoSimulacao, bolsa: Bolsa): boolean {
   const classe = ctx.conteudo.classes.get(bolsa.classeId);
   if (!classe) return false;
-  const daClasse = new Set([...classe.habilidades, ...classe.aprendiveis]);
+  const daClasse = new Set(classe.exclusivas);
   const max = bolsa.conhecidas.filter((c) => c.rank >= ctx.balance.habilidades.rankMax);
   return max.some((c) => daClasse.has(c.id)) && max.some((c) => !daClasse.has(c.id));
 }

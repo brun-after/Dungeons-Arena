@@ -163,7 +163,7 @@
     {
       "id": "boss",
       "nome": "Demônio",
-      "hpBase": 281,
+      "hpBase": 310,
       "hesitacaoS": 1,
       "deteccao": 6,
       "xp": 50,

@@ -30,7 +30,7 @@ import { personagemNoInicio } from '../../src/save/transicao';
 import { largarObjeto, largarOrbeEfeito, largarOuro, coletarObjetos } from '../../src/world/objetos';
 import { construirEfeito } from '../../src/combat/registro-efeitos';
 import { chebyshev } from '../../src/combat/geometria';
-import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
+import { comKit, CONTEUDO, contexto, faseDeTexto, KIT_GERAL, SALA_ABERTA } from '../apoio/fases';
 
 const ctx = contexto(faseDeTexto(SALA_ABERTA));
 
@@ -43,6 +43,8 @@ function obter<T>(v: T | undefined | null, nome = 'valor'): T {
 function arena(classe: string, bonecoX = 5) {
   const estado = criarEstado({ semente: 3, faseId: 'teste' });
   const j = criarJogador(obter(CONTEUDO.classes.get(classe), classe), 'j', 3, 5, ctx.balance);
+  // Marco 24: o Aventureiro dos testes leva também o kit geral de antes (a Seta arcana sai do falcão).
+  if (classe === 'aventureiro') comKit(j, [...KIT_GERAL, ...j.habilidades]);
   j.autoAtaque = false;
   const boneco = criarInimigo(obter(CONTEUDO.presets.get('boneco'), 'boneco'), 'b', bonecoX, 5, ctx.balance);
   estado.entidades.push(j, boneco);

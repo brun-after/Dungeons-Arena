@@ -21,7 +21,7 @@ import { contornoDaArea, dentroDoPoligono } from '../../src/render/formas-visuai
 import { centroDaCelula } from '../../src/render/projecao';
 import { MIGRACOES } from '../../src/save/esquema';
 import { faixaDoDado } from '../../src/ui/dado';
-import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
+import { comKit, CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 
 function obter<T>(v: T | undefined | null, nome: string): T {
   if (v === undefined || v === null) throw new Error(`${nome} ausente`);
@@ -32,7 +32,9 @@ const hab = (chave: string): Habilidade => obter(resolverHabilidade(CTX, chave),
 
 function cena(ctx: ContextoSimulacao, classe: string, jogador: [number, number], inimigos: [string, number, number][]) {
   const estado = criarEstado({ semente: 4, faseId: 'teste' });
-  estado.entidades.push(criarJogador(obter(ctx.conteudo.classes.get(classe), classe), 'j', jogador[0], jogador[1], ctx.balance));
+  // Marco 24: o Aventureiro dos testes leva o kit geral de antes (seta, explosão, curar, golpe atordoante).
+  const j = criarJogador(obter(ctx.conteudo.classes.get(classe), classe), 'j', jogador[0], jogador[1], ctx.balance);
+  estado.entidades.push(classe === 'aventureiro' ? comKit(j) : j);
   inimigos.forEach(([preset, x, y], i) => estado.entidades.push(criarInimigo(obter(ctx.conteudo.presets.get(preset), preset), `i${i}`, x, y, ctx.balance)));
   const eventos: EventoSimulacao[] = [];
   const ent = (id: string): Entidade => obter(buscarEntidade(estado, id), id);

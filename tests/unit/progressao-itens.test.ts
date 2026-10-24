@@ -35,7 +35,7 @@ function cena() {
 describe('consumíveis de progressão', () => {
   it('aceleração soma graus, preserva frações e não conclui tempo instantaneamente', () => {
     const c = cena();
-    c.b.estudo = { id: 'nova_glacial', totalTicks: 100, restanteTicks: 100, aceleracoes: 0 };
+    c.b.estudo = { id: 'pedregulho', totalTicks: 100, restanteTicks: 100, aceleracoes: 0 };
     c.b.pontosHabilidade = 7;
     for (const grau of ['comum', 'incomum', 'rara']) usarItem(c.estado, c.j, c.ctx, c.dar(`aceleracao_mente_${grau}`), c.eventos);
     expect(c.b.estudo.velocidade12).toBe(25);
@@ -50,9 +50,10 @@ describe('consumíveis de progressão', () => {
     expect(copia.bolsa?.estudo).not.toBe(c.b.estudo);
     for (let n = 0; n < 36; n++) avancarEstudos(c.estado, c.ctx, c.eventos);
     expect(c.b.estudo).toBeNull();
-    expect(c.b.conhecidas.some((h) => h.id === 'nova_glacial')).toBe(true);
+    expect(c.b.conhecidas.some((h) => h.id === 'pedregulho')).toBe(true);
     c.b.pontosHabilidade = 1;
-    subirRank(c.j, c.ctx, 'mente_partida', undefined, 0, c.eventos);
+    c.b.liberadas = ['seta_arcana'];
+    subirRank(c.j, c.ctx, 'seta_arcana', undefined, 0, c.eventos);
     expect(c.b.estudo.velocidade12).toBe(12);
   });
 

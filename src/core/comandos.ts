@@ -42,10 +42,12 @@ export type Comando =
   | { t: 'acelerarEstudo' }
   /** Marco 18 (D-070): forja na loja aberta (`invId` é a peça Lendária quando a receita ascende). */
   | { t: 'forjar'; receita: string; invId?: string }
-  /** Marco 14: põe uma habilidade conhecida numa das 4 teclas (null limpa a tecla). */
+  /** Marco 14: põe uma habilidade conhecida numa das teclas (null limpa a tecla). Marco 24: 6 teclas, 1–2 de classe. */
   | { t: 'equiparHabilidade'; id: string | null; slot: number }
   /** Marco 15: troca a dificuldade do mundo (o personagem não muda). */
-  | { t: 'definirDificuldade'; nivel: Dificuldade };
+  | { t: 'definirDificuldade'; nivel: Dificuldade }
+  /** Marco 24 (D-097): liga ou desliga o ataque básico automático (o botão Parar ataque e a tecla F). */
+  | { t: 'autoAtaque'; ligado: boolean };
 
 /** Marco 15: os tipos de comando, para os modos listarem quais aceitam pela rede (`comandosDeRede`). */
 export const TIPOS_DE_COMANDO: readonly Comando['t'][] = [
@@ -71,6 +73,7 @@ export const TIPOS_DE_COMANDO: readonly Comando['t'][] = [
   'forjar',
   'equiparHabilidade',
   'definirDificuldade',
+  'autoAtaque',
 ];
 
 /** Envelope de rede. O servidor deriva o jogador da sessão e atribui o tick de aplicação. */

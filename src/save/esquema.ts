@@ -12,10 +12,11 @@ import type { Entidade } from '../entities/entidade';
 import { lerCertificado, type Certificado } from '../integridade/certificado';
 import type { Dificuldade } from '../modos/dificuldade';
 import { basicoDoPersonagem } from '../progression/armas';
+import { migrarSkillsDeClasse } from './migracao-24';
 import { MAX_REGRAS, RE_REGRA_ESTILO } from '../world/estilo';
 import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 23;
+export const VERSAO_SCHEMA = 24;
 // Marco 23 (24/10/2026, D-092): dez slots de personagem por jogador (eram três).
 export const MAX_SLOTS = 10;
 export const SLOTS: readonly number[] = Array.from({ length: MAX_SLOTS }, (_, i) => i + 1);
@@ -388,6 +389,8 @@ export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   // e regenerar a fase sem os pilares sobre um estado salvo com eles. D-093: quem já segurava uma arma de outra
   // família passa a usar o básico dela.
   22: (r) => migrarBasicoDaArma(r),
+  // Marco 24 (24/10/2026, D-094): skills de classe sem ponto, barra de 6, gerais liberadas e o Guerreiro v1.2.
+  23: (r) => migrarSkillsDeClasse(r),
 };
 
 /** D-093: o ataque básico de cada personagem pela arma na mão (só lê a classe e a arma principal). */

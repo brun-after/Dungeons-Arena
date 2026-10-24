@@ -46,25 +46,30 @@ describe('estudo de habilidades', () => {
   it('aprender gasta o ponto e estuda; um por vez; termina sozinho com o jogo rodando', () => {
     const c = cena();
     c.bolsa.pontosHabilidade = 2;
-    c.tick({ t: 'subirRank', id: 'nova_glacial' });
+    // Marco 24 (D-094): só as gerais liberadas por livro se aprendem com ponto.
+    c.tick({ t: 'subirRank', id: 'pedregulho' });
+    expect(c.eventos.at(-1)).toMatchObject({ t: 'habilidadeRecusada', motivo: 'nao_liberada' });
+    c.bolsa.liberadas = ['pedregulho', 'seta_arcana'];
+    c.tick({ t: 'subirRank', id: 'pedregulho' });
     expect(c.bolsa.pontosHabilidade).toBe(1);
-    expect(c.bolsa.estudo?.id).toBe('nova_glacial');
-    expect(c.bolsa.conhecidas.some((x) => x.id === 'nova_glacial')).toBe(false);
-    c.tick({ t: 'subirRank', id: 'mente_partida' });
+    expect(c.bolsa.estudo?.id).toBe('pedregulho');
+    expect(c.bolsa.conhecidas.some((x) => x.id === 'pedregulho')).toBe(false);
+    c.tick({ t: 'subirRank', id: 'seta_arcana' });
     expect(c.eventos.at(-1)).toMatchObject({ t: 'habilidadeRecusada', motivo: 'estudando' });
     // Encurta o estudo para o teste: o que importa é a contagem por tick.
     const estudo = obter(c.bolsa.estudo ?? undefined, 'estudo');
     estudo.restanteTicks = 5;
     for (let i = 0; i < 5; i++) c.tick();
     expect(c.bolsa.estudo).toBeNull();
-    expect(c.bolsa.conhecidas.some((x) => x.id === 'nova_glacial')).toBe(true);
+    expect(c.bolsa.conhecidas.some((x) => x.id === 'pedregulho')).toBe(true);
     expect(c.eventos.some((e) => e.t === 'estudoConcluido')).toBe(true);
   });
 
   it('comando legado não acelera nem gasta pontos', () => {
     const c = cena();
     c.bolsa.pontosHabilidade = 5;
-    c.tick({ t: 'subirRank', id: 'mente_partida' });
+    c.bolsa.liberadas = ['seta_arcana'];
+    c.tick({ t: 'subirRank', id: 'seta_arcana' });
     const estudo = obter(c.bolsa.estudo ?? undefined, 'estudo');
     const antes = estudo.restanteTicks;
     c.tick({ t: 'acelerarEstudo' });

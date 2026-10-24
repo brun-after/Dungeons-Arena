@@ -50,6 +50,8 @@ export type MotivoItem =
   | 'ja_conhece'
   /** Marco 18 (D-068): já há um estudo em andamento (o livro não é gasto). */
   | 'estudando'
+  /** Marco 24 (D-094): livro de skill de outra classe. */
+  | 'outra_classe'
   /** Marco 18 (D-070): a forja pede material que falta. */
   | 'sem_material'
   | 'sem_espaco_no_chao';
@@ -75,7 +77,12 @@ export type MotivoHabilidade =
   /** Marco 18 (camada 7): fusão sem a runa, sem as duas no nível máximo, ou já tendo outra. */
   | 'fusao_runa'
   | 'fusao_niveis'
-  | 'fusao_unica';
+  | 'fusao_unica'
+  /** Marco 24 (D-094): a tecla nÃ£o aceita esse tipo (1â€“2 sÃ³ de classe, 3â€“6 sÃ³ gerais); a geral ainda nÃ£o foi liberada
+   *  por livro; a skill de classe nÃ£o se aprende nem sobe com ponto (vem do livro e do nÃ­vel). */
+  | 'tecla_errada'
+  | 'nao_liberada'
+  | 'de_classe';
 
 export type MotivoCancelamento = 'morte' | 'interrompido' | 'alvo_invalido' | 'substituido';
 
@@ -139,6 +146,8 @@ export type EventoSimulacao =
   | { t: 'habilidadeRecusada'; tick: number; id: EntidadeId; habilidadeId: string; motivo: MotivoHabilidade }
   // Marco 18 (D-068): o estudo de uma habilidade nova.
   | { t: 'estudoIniciado'; tick: number; id: EntidadeId; habilidadeId: string; totalTicks: number }
+  /** Marco 24 (D-094): o livro de uma geral a liberou (aprender custa um ponto). */
+  | { t: 'habilidadeLiberada'; tick: number; id: EntidadeId; habilidadeId: string }
   | { t: 'estudoAcelerado'; tick: number; id: EntidadeId; habilidadeId: string; restanteTicks: number }
   | { t: 'estudoConcluido'; tick: number; id: EntidadeId; habilidadeId: string }
   // Marco 18 (D-068, D-069): ressonância nova, combo feito e o renascer do item.

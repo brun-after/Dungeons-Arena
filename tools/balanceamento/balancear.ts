@@ -153,7 +153,7 @@ tabela('Aviso útil das habilidades inimigas (p95 aproximado da rede)', ['Habili
 const corpoBuild: string[][] = [];
 for (const classe of CLASSES) {
   const pct = (montarA: Parameters<typeof dueloDeFichas>[3], montarB: Parameters<typeof dueloDeFichas>[4]) =>
-    (100 * SEMENTES_DUELO.filter((s) => dueloDeFichas(classe, metas.build.nivel, s, montarA, montarB)).length) / SEMENTES_DUELO.length;
+    (100 * SEMENTES_DUELO.reduce((soma, s) => soma + dueloDeFichas(classe, metas.build.nivel, s, montarA, montarB), 0)) / SEMENTES_DUELO.length;
   const focada = pct(semAjuste, dispersar);
   const equipado = pct(equipar('raro'), desequipar);
   conferir(`build: ${classe} focada vence a dispersa`, focada, metas.build.vitoriasMinPct, 100, '%');

@@ -76,13 +76,12 @@ export interface ClasseJogador {
   classe: ClasseCombate;
   atributos: Atributos;
   ataqueBasico: string;
+  /** Marco 24 (D-094): o kit inicial — as 2 iniciais e a geral inicial (derivado de `iniciais` e `geralInicial`). */
   habilidades: string[];
   /** Mochila inicial (marco 6): referências ao catálogo de itens. */
   itensIniciais: { id: string; qtd: number }[];
   /** Marco 14: afinidades por etiqueta (mudam como cada habilidade funciona para a classe). */
   afinidades: Passiva[];
-  /** Marco 14: o que a classe pode aprender com pontos de habilidade (além das iniciais e dos livros). */
-  aprendiveis: string[];
   /** Marco 14: o modelo de criatura (render) e a frase da tela de escolha (chave do i18n). */
   modelo: string;
   descricao: string;
@@ -179,13 +178,12 @@ export function lerClasses(json: unknown): { classes: Map<string, ClasseJogador>
       classe: l.opcao(o, 'classe', CLASSES),
       atributos: lerAtributos(l, o),
       ataqueBasico: l.texto(o, 'ataqueBasico'),
-      habilidades: l.listaDeTextos(o, 'habilidades'),
+      habilidades: [],
       itensIniciais: l.lista(o, 'itensIniciais').map((v) => {
         const i = l.objeto(v, 'itensIniciais[]');
         return { id: l.texto(i, 'id'), qtd: l.numero(i, 'qtd', { min: 1, max: 99, inteiro: true }) };
       }),
       afinidades: o.afinidades === undefined ? [] : l.lista(o, 'afinidades').flatMap((a) => lerPassiva(l, a) ?? []),
-      aprendiveis: o.aprendiveis === undefined ? [] : l.listaDeTextos(o, 'aprendiveis'),
       modelo: o.modelo === undefined ? 'aventureiro' : l.texto(o, 'modelo'),
       descricao: o.descricao === undefined ? '' : l.texto(o, 'descricao'),
       destreza: o.destreza === undefined ? null : lerPerfilDestreza(l, o.destreza),
@@ -194,6 +192,7 @@ export function lerClasses(json: unknown): { classes: Map<string, ClasseJogador>
       geralInicial: o.geralInicial === undefined ? null : l.texto(o, 'geralInicial'),
     };
     if (c.iniciais.some((id) => !c.exclusivas.includes(id))) l.erro('as iniciais precisam estar entre as exclusivas');
+    c.habilidades = [...c.iniciais, ...(c.geralInicial ? [c.geralInicial] : [])];
     if (classes.has(c.id)) l.erro('id repetido');
     erros.push(...l.erros);
     classes.set(c.id, c);

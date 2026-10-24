@@ -16,12 +16,6 @@
         "carisma": 10
       },
       "ataqueBasico": "ataque_basico",
-      "habilidades": [
-        "seta_arcana",
-        "explosao",
-        "curar",
-        "golpe_atordoante"
-      ],
       "itensIniciais": [
         {
           "id": "espada_curta",
@@ -39,13 +33,6 @@
           "tag": "magico",
           "custoPct": -20
         }
-      ],
-      "aprendiveis": [
-        "investida",
-        "bola_de_fogo",
-        "flecha_venenosa",
-        "barreira",
-        "pele_de_pedra"
       ],
       "exclusivas": [
         "mergulho",
@@ -78,18 +65,6 @@
         "carisma": 10
       },
       "ataqueBasico": "ataque_basico",
-      "habilidades": [
-        "investida",
-        "redemoinho",
-        "brado",
-        "investida_de_escudo"
-      ],
-      "aprendiveis": [
-        "corrente",
-        "lamina_em_brasa",
-        "pele_de_pedra",
-        "golpe_atordoante"
-      ],
       "afinidades": [
         {
           "tag": "contato",
@@ -143,20 +118,6 @@
         "carisma": 10
       },
       "ataqueBasico": "dardo_arcano",
-      "habilidades": [
-        "bola_de_fogo",
-        "lanca_de_gelo",
-        "raio_em_cadeia",
-        "barreira"
-      ],
-      "aprendiveis": [
-        "nova_glacial",
-        "mente_partida",
-        "afinidade_elemental",
-        "curar",
-        "seta_arcana",
-        "explosao"
-      ],
       "afinidades": [
         {
           "tag": "magico",
@@ -207,17 +168,6 @@
         "carisma": 10
       },
       "ataqueBasico": "tiro",
-      "habilidades": [
-        "flecha_perfurante",
-        "chuva_de_flechas",
-        "flecha_venenosa",
-        "tiro_em_leque"
-      ],
-      "aprendiveis": [
-        "troca_sombria",
-        "olho_de_aguia",
-        "golpe_atordoante"
-      ],
       "afinidades": [
         {
           "tag": "projetil",
@@ -268,12 +218,6 @@
         "carisma": 12
       },
       "ataqueBasico": "toque_funesto",
-      "habilidades": [
-        "dardo_funesto",
-        "dizimo_vital",
-        "garras_do_ossuario",
-        "comando_sepulcral"
-      ],
       "itensIniciais": [
         {
           "id": "cajado_aprendiz",
@@ -296,14 +240,6 @@
           "tag": null,
           "danoPct": -75
         }
-      ],
-      "aprendiveis": [
-        "ceifa_de_almas",
-        "mortalha_funebre",
-        "flecha_venenosa",
-        "bola_de_fogo",
-        "lanca_radiante",
-        "barreira"
       ],
       "exclusivas": [
         "dardo_funesto",

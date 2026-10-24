@@ -108,16 +108,17 @@ escrever('ultimates.json', {
 });
 
 // ---------------- classes.json ----------------
-// As listas novas (exclusivas, iniciais, geralInicial) entram agora; o kit de hoje (`habilidades`, `aprendiveis`) só troca
-// de id (as renomeadas do Guerreiro) até a barra de 6 (marco 24, etapa 4), que passa a ler só as listas novas.
+// As listas novas (exclusivas, iniciais, geralInicial) substituem o kit antigo (`habilidades`, `aprendiveis`): o kit
+// inicial é derivado delas no jogo (entities/presets.ts).
 const classesAntes = ler('classes.json');
-const classes = classesAntes.classes.map((k) => {
+const classes = classesAntes.classes.map((antes) => {
+  const k = { ...antes };
+  delete k.habilidades;
+  delete k.aprendiveis;
   const cat = catalogo.classes.find((c) => c.id === k.id);
   if (!cat) return k;
   return {
     ...k,
-    habilidades: k.habilidades.map(renomear),
-    aprendiveis: (k.aprendiveis ?? []).map(renomear),
     exclusivas: cat.skills,
     iniciais: cat.iniciais,
     geralInicial: cat.geralInicial,

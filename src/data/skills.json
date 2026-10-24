@@ -2824,18 +2824,18 @@
       "nome": "Toque funesto",
       "icone": "caveira",
       "tipoAtaque": "magico",
-      "formulaDano": "1d6",
+      "formulaDano": "1d6+1",
       "formulaCura": null,
       "alcanceCelulas": 5,
       "tipoArea": "nenhuma",
       "raioArea": 0,
       "custoRecurso": 0,
-      "recargaMs": 1600,
+      "recargaMs": 1400,
       "conjuracaoMs": 450,
       "politicaAlvo": "hostil",
       "politicaImpacto": "projetil",
       "interrupcao": "interrompivel",
-      "velocidadeProjetil": 11,
+      "velocidadeProjetil": 16,
       "efeitos": [],
       "visual": {
         "cor": "#8b68d9",
@@ -2869,7 +2869,7 @@
       "politicaAlvo": "hostil",
       "politicaImpacto": "projetil",
       "interrupcao": "interrompivel",
-      "velocidadeProjetil": 12,
+      "velocidadeProjetil": 16,
       "efeitos": [
         {
           "tipo": "definhando",
@@ -4426,10 +4426,10 @@
       }
     },
     {
-      "formulaDano": "2d6",
+      "formulaDano": "2d6+4",
       "formulaCura": null,
       "custoRecurso": 3,
-      "recargaMs": 5000,
+      "recargaMs": 4000,
       "conjuracaoMs": 300,
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
@@ -4483,8 +4483,8 @@
           "eficiente"
         ],
         "5": [
-          "cadeia",
-          "eco"
+          "eco",
+          "longo_alcance"
         ]
       }
     },

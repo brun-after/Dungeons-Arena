@@ -15,6 +15,7 @@ import type { Alteracao, PreviaDeFicha } from '../arena/ficha-sessao';
 import { SLOTS_DE_EQUIPAMENTO } from '../modos/modo';
 import { recalcularFicha } from '../progression/derivados';
 import { caminhosDoRank, nivelParaRank, ticksDeEstudo } from '../progression/habilidades-personagem';
+import { ehDaClasse, ehDeAlgumaClasse, teclaRecusa } from '../progression/habilidades-classe';
 import { empilha } from '../progression/inventario';
 import { NOMES_ATRIBUTOS } from '../progression/itens';
 import { xpParaProximo } from '../progression/nivel';
@@ -98,20 +99,22 @@ function conferirHabilidades(b: Objeto, bolsa: Bolsa, nivel: number, ctx: Contex
   const conhecidas: HabilidadeConhecida[] = [];
   for (const v of lista(b.conhecidas)) {
     const c = conferirConhecida(v, nivel, ctx);
-    if (!c || vistas.has(c.id)) continue;
+    // Marco 24 (D-094): skill exclusiva de outra classe não entra.
+    if (!c || vistas.has(c.id) || (ehDeAlgumaClasse(ctx, c.id) && !ehDaClasse(ctx, bolsa, c.id))) continue;
     vistas.add(c.id);
     conhecidas.push(c);
   }
   bolsa.conhecidas = conhecidas;
   bolsa.pontosHabilidade = Math.max(0, inteiro(b.pontosHabilidade) ?? 0);
-  // Cada rank acima do 1 custou um ponto; o 1 pode ter vindo de livro (sem ponto) ou da classe.
+  // Cada rank acima do 1 de uma geral custou um ponto; o 1 pode ter vindo de livro (antes do marco 24) ou da classe.
+  // Marco 24 (D-094): as skills de classe sobem com o nível e não entram na conta.
   const orcamento = (nivel - 1) * ctx.balance.habilidades.pontosPorNivel + (bolsa.pontosPorItens ?? 0) + (bolsa.ranksPorItens ?? 0);
-  let excesso = conhecidas.reduce((s, c) => s + c.rank - 1, 0) + bolsa.pontosHabilidade - orcamento;
+  let excesso = conhecidas.reduce((s, c) => s + (ehDaClasse(ctx, bolsa, c.id) ? 0 : c.rank - 1), 0) + bolsa.pontosHabilidade - orcamento;
   const livres = Math.min(Math.max(0, excesso), bolsa.pontosHabilidade);
   bolsa.pontosHabilidade -= livres;
   excesso -= livres;
   for (let guarda = 0; excesso > 0 && guarda < 10_000; guarda++) {
-    const maior = conhecidas.reduce<HabilidadeConhecida | null>((m, c) => (c.rank > 1 && (!m || c.rank > m.rank) ? c : m), null);
+    const maior = conhecidas.reduce<HabilidadeConhecida | null>((m, c) => (c.rank > 1 && !ehDaClasse(ctx, bolsa, c.id) && (!m || c.rank > m.rank) ? c : m), null);
     if (!maior) break;
     maior.rank--;
     maior.caminhos = maior.caminhos.slice(0, ctx.balance.habilidades.ranksEvolucao.filter((r) => r <= maior.rank).length);
@@ -120,8 +123,11 @@ function conferirHabilidades(b: Objeto, bolsa: Bolsa, nivel: number, ctx: Contex
   const barra = lista(b.barra);
   bolsa.barra = Array.from({ length: SLOTS_BARRA }, (_, i) => {
     const id = barra[i];
-    return typeof id === 'string' && vistas.has(id) && !definicaoDe(ctx, id)?.base.passiva ? id : null;
+    return typeof id === 'string' && vistas.has(id) && teclaRecusa(ctx, bolsa, i, id) === null ? id : null;
   });
+  // Marco 24: as gerais liberadas (só ids que existem e não são de classe) e até 3 passivas gerais conhecidas ligadas.
+  bolsa.liberadas = [...new Set(lista(b.liberadas).filter((id): id is string => typeof id === 'string' && !!definicaoDe(ctx, id) && !ehDeAlgumaClasse(ctx, id)))];
+  bolsa.passivasAtivas = [...new Set(lista(b.passivasAtivas).filter((id): id is string => typeof id === 'string' && vistas.has(id) && !!definicaoDe(ctx, id)?.base.passiva))].slice(0, ctx.balance.passivasGerais.maxAtivas);
   bolsa.barra = bolsa.barra.map((id, i) => (id !== null && bolsa.barra.indexOf(id) !== i ? null : id));
 }
 

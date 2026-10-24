@@ -24,7 +24,7 @@ import { descreverEfeito, descreverHabilidade } from '../../src/ui/descrever';
 import { catalogoDeGeracao, gerarFase } from '../../src/world/gerador';
 import { t, type ChaveTexto } from '../../src/i18n';
 import { resolverHabilidade } from '../../src/combat/compilar-habilidade';
-import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
+import { comKit, CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 
 function obter<T>(v: T | undefined | null, nome: string): T {
   if (v === undefined || v === null) throw new Error(`${nome} ausente`);
@@ -182,6 +182,7 @@ describe('elementos e sinergias no golpe', () => {
 
   it('suporte: o Brado fortalece quem conjura (e os aliados), não os inimigos', () => {
     const c = cenario('guerreiro');
+    comKit(c.ent('j'), ['brado']);
     c.tick([['j', { t: 'usarHabilidade', id: 'brado' }]]);
     c.ticks(40);
     expect(c.tem('j', 'bonus_dano')).toBe(true);
@@ -236,28 +237,38 @@ describe('progressão de habilidades', () => {
     expect(c.eventos.at(-1)).toMatchObject({ t: 'habilidadeRecusada', motivo: 'nivel_baixo' });
   });
 
-  it('aprender só o que a classe aprende; a barra troca de tecla e as habilidades da entidade seguem', () => {
+  it('marco 24: classe sem ponto, geral por livro e ponto; teclas 1–2 de classe e 3–6 gerais', () => {
     const c = cenario('mago');
     const j = c.ent('j');
     const bolsa = obter(j.bolsa, 'bolsa');
     bolsa.pontosHabilidade = 6;
-    c.tick([['j', { t: 'subirRank', id: 'investida' }]]);
+    expect(bolsa.barra.slice(0, 2)).toEqual(['lanca_de_gelo', 'raio_em_cadeia']);
+    // Skill de outra classe não se aprende; a da própria vem do livro; a geral pede o livro antes do ponto.
+    c.tick([['j', { t: 'subirRank', id: 'redemoinho' }]]);
     expect(c.eventos.at(-1)).toMatchObject({ t: 'habilidadeRecusada', motivo: 'nao_aprendivel' });
     c.tick([['j', { t: 'subirRank', id: 'nova_glacial' }]]);
+    expect(c.eventos.at(-1)).toMatchObject({ t: 'habilidadeRecusada', motivo: 'de_classe' });
+    c.tick([['j', { t: 'subirRank', id: 'seta_arcana' }]]);
+    expect(c.eventos.at(-1)).toMatchObject({ t: 'habilidadeRecusada', motivo: 'nao_liberada' });
+    bolsa.liberadas = ['seta_arcana'];
+    c.tick([['j', { t: 'subirRank', id: 'seta_arcana' }]]);
     // D-075: este teste de barra conclui o trabalho restante; aceleração por item é coberta separadamente.
-    expect(bolsa.estudo?.id).toBe('nova_glacial');
+    expect(bolsa.estudo?.id).toBe('seta_arcana');
+    expect(bolsa.pontosHabilidade).toBe(5);
     if (bolsa.estudo) bolsa.estudo.restanteTicks = 1;
     c.tick();
     expect(bolsa.estudo).toBeNull();
-    expect(bolsa.conhecidas.some((x) => x.id === 'nova_glacial')).toBe(true);
-    c.tick([['j', { t: 'equiparHabilidade', id: 'nova_glacial', slot: 0 }]]);
-    expect(j.habilidades[0]).toBe('nova_glacial');
-    c.tick([['j', { t: 'equiparHabilidade', id: 'bola_de_fogo', slot: 1 }]]);
-    expect(bolsa.barra.slice(0, 2)).toEqual(['nova_glacial', 'bola_de_fogo']);
-    c.tick([['j', { t: 'equiparHabilidade', id: 'nova_glacial', slot: 1 }]]);
-    expect(bolsa.barra.slice(0, 2)).toEqual(['bola_de_fogo', 'nova_glacial']);
-    c.tick([['j', { t: 'equiparHabilidade', id: null, slot: 3 }]]);
-    expect(j.habilidades).toHaveLength(3);
+    expect(bolsa.barra.indexOf('seta_arcana')).toBeGreaterThanOrEqual(2);
+    // A geral não entra nas teclas de classe, e a de classe não sai delas; dentro do mesmo tipo, troca de lugar.
+    c.tick([['j', { t: 'equiparHabilidade', id: 'seta_arcana', slot: 0 }]]);
+    expect(c.eventos.at(-1)).toMatchObject({ t: 'habilidadeRecusada', motivo: 'tecla_errada' });
+    c.tick([['j', { t: 'equiparHabilidade', id: 'lanca_de_gelo', slot: 4 }]]);
+    expect(c.eventos.at(-1)).toMatchObject({ t: 'habilidadeRecusada', motivo: 'tecla_errada' });
+    c.tick([['j', { t: 'equiparHabilidade', id: 'lanca_de_gelo', slot: 1 }]]);
+    expect(bolsa.barra.slice(0, 2)).toEqual(['raio_em_cadeia', 'lanca_de_gelo']);
+    expect(j.habilidades.slice(0, 2)).toEqual(['raio_em_cadeia', 'lanca_de_gelo']);
+    c.tick([['j', { t: 'equiparHabilidade', id: 'seta_arcana', slot: 5 }]]);
+    expect(bolsa.barra[5]).toBe('seta_arcana');
     // Passiva conhecida melhora a ficha e não vai para a tecla.
     bolsa.conhecidas.push({ id: 'pele_de_pedra', rank: 1, caminhos: [] });
     const antes = j.hpMax;
@@ -267,27 +278,49 @@ describe('progressão de habilidades', () => {
     expect(c.eventos.at(-1)).toMatchObject({ t: 'habilidadeRecusada', motivo: 'passiva' });
   });
 
-  it('livros: o do catálogo ensina; o raro ensina a habilidade gerada do ref; repetido é recusado', () => {
+  it('marco 24: a skill de classe sobe com o nível, sem ponto, e espera o caminho no rank de evolução', () => {
+    const c = cenario('mago');
+    const j = c.ent('j');
+    const bolsa = obter(j.bolsa, 'bolsa');
+    for (let n = 1; n < 12; n++) j.xp += xpParaProximo(n, c.ctx.balance.xp);
+    aplicarSubidas(j, c.ctx, 0, c.eventos);
+    const lanca = obter(bolsa.conhecidas.find((x) => x.id === 'lanca_de_gelo'), 'lança');
+    const evolucao = obter(c.ctx.balance.habilidades.ranksEvolucao[0], 'rank de evolução');
+    expect(lanca.rank).toBe(evolucao - 1);
+    const pontos = bolsa.pontosHabilidade;
+    const caminho = obter(CONTEUDO.definicoes.get('lanca_de_gelo')?.evolucoes[evolucao]?.[0], 'caminho');
+    c.tick([['j', { t: 'subirRank', id: 'lanca_de_gelo', caminho }]]);
+    expect(lanca.rank).toBeGreaterThanOrEqual(evolucao);
+    expect(lanca.caminhos).toEqual([caminho]);
+    expect(bolsa.pontosHabilidade).toBe(pontos);
+  });
+
+  it('livros: o geral (e o raro) libera; o de classe ensina na hora e só para a dona; repetido é recusado', () => {
     const c = cenario('arqueiro');
     const bolsa = obter(c.ent('j').bolsa, 'bolsa');
-    const livro = obter(CONTEUDO.itens.get('livro_bola_de_fogo'), 'livro');
     const raro = obter(CONTEUDO.itens.get('livro_raro'), 'livro raro');
     const gerada = idGerada(4242, 3);
-    guardarItem(bolsa, livro, 2, c.ctx.balance.inventario);
+    for (const id of ['livro_bola_de_fogo', 'livro_rolamento', 'livro_redemoinho']) guardarItem(bolsa, obter(CONTEUDO.itens.get(id), id), 2, c.ctx.balance.inventario);
     guardarItem(bolsa, raro, 1, c.ctx.balance.inventario, gerada);
     const inv = (itemId: string) => obter(bolsa.mochila.find((i) => i.itemId === itemId), itemId).invId;
     bolsa.pontosHabilidade = 6;
     const terminar = () => { if (bolsa.estudo) bolsa.estudo.restanteTicks = 1; c.tick(); };
     c.tick([['j', { t: 'usarItem', invId: inv('livro_bola_de_fogo') }]]);
-    // Marco 18: com um estudo em andamento, o outro livro é recusado sem gastar.
     c.tick([['j', { t: 'usarItem', invId: inv('livro_raro') }]]);
-    expect(c.eventos.at(-1)).toMatchObject({ t: 'itemRecusado', motivo: 'estudando' });
-    terminar();
-    c.tick([['j', { t: 'usarItem', invId: inv('livro_raro') }]]);
-    terminar();
-    expect(bolsa.conhecidas.map((x) => x.id)).toEqual(expect.arrayContaining(['bola_de_fogo', gerada]));
+    expect(bolsa.liberadas).toEqual(['bola_de_fogo', gerada]);
+    expect(bolsa.conhecidas.some((x) => x.id === 'bola_de_fogo')).toBe(false);
     c.tick([['j', { t: 'usarItem', invId: inv('livro_bola_de_fogo') }]]);
     expect(c.eventos.at(-1)).toMatchObject({ t: 'itemRecusado', motivo: 'ja_conhece' });
+    // Liberada, aprende com ponto (e o estudo de sempre).
+    c.tick([['j', { t: 'subirRank', id: 'bola_de_fogo' }]]);
+    terminar();
+    expect(bolsa.conhecidas.some((x) => x.id === 'bola_de_fogo')).toBe(true);
+    // O livro de classe ensina na hora; o de outra classe é recusado sem gastar.
+    c.tick([['j', { t: 'usarItem', invId: inv('livro_rolamento') }]]);
+    expect(bolsa.conhecidas.find((x) => x.id === 'rolamento')).toMatchObject({ rank: 1 });
+    c.tick([['j', { t: 'usarItem', invId: inv('livro_redemoinho') }]]);
+    expect(c.eventos.at(-1)).toMatchObject({ t: 'itemRecusado', motivo: 'outra_classe' });
+    expect(bolsa.mochila.find((i) => i.itemId === 'livro_redemoinho')?.qtd).toBe(2);
   });
 
   it('morrer devolve só os pontos não gastos', () => {
@@ -306,7 +339,7 @@ describe('progressão de habilidades', () => {
 describe('save v9', () => {
   it('o personagem v8 vira aventureiro com as habilidades no rank 1, a barra e os pontos dos níveis', () => {
     const c = cenario();
-    const j = structuredClone(c.ent('j')) as unknown as Record<string, unknown>;
+    const j = structuredClone(comKit(c.ent('j'))) as unknown as Record<string, unknown>;
     const bolsa = { ...(j.bolsa as Record<string, unknown>) };
     for (const k of ['classeId', 'conhecidas', 'barra', 'pontosHabilidade']) Reflect.deleteProperty(bolsa, k);
     bolsa.mochila = (bolsa.mochila as Record<string, unknown>[]).map((i) => {

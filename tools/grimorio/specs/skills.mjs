@@ -246,11 +246,11 @@ const necromante = [
 const falcao = (o) => ({ familiaEvolucao: 'tecnica', tipoAtaque: 'fisico', escalaCom: 'destreza', tags: ['falcao'], ...o });
 const aventureiro = [
   ativa('mergulho', 'Mergulho', falcao({
-    grau: 'B', icone: 'asa', formulaDano: '2d6', ...forma.toque(8), custoRecurso: 3, recargaMs: 5000, conjuracaoMs: 300,
+    grau: 'B', icone: 'asa', formulaDano: '2d6+4', ...forma.toque(8), custoRecurso: 3, recargaMs: 4000, conjuracaoMs: 300,
     efeitos: [ef.atordoa(0.3)],
     visual: visual('#7fbde8', 'farpas', { viagem: 'vento', som: 'golpe' }),
     marcos: marcos({ texto: '+1 de alcance', alcance: 1 }, { texto: 'Expõe o alvo (+10%)', efeitos: [ef.expoe(10, 3)] }),
-    evolucoes: ev(['brutal', 'eficiente'], ['cadeia', 'eco']),
+    evolucoes: ev(['brutal', 'eficiente'], ['eco', 'longo_alcance']),
   })),
   ativa('grito_do_falcao', 'Grito do falcão', falcao({
     grau: 'B', icone: 'grito', ...forma.toque(8), custoRecurso: 2, recargaMs: 9000, conjuracaoMs: 200,

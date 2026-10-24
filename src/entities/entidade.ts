@@ -138,8 +138,9 @@ export interface ItemNaMochila {
   ref: string | null;
 }
 
-/** Marco 14: teclas 1–4 da barra de habilidades. */
-export const SLOTS_BARRA = 4;
+/** Marco 24 (24/10/2026, D-094): a barra tem 6 teclas — 1 e 2 só de classe, 3 a 6 só gerais (eram 4 livres). */
+export const SLOTS_BARRA = 6;
+export const SLOTS_CLASSE = 2;
 
 /** Marco 14: uma habilidade que o personagem conhece, no rank e com os caminhos escolhidos (definitivos). */
 export interface HabilidadeConhecida {
@@ -166,9 +167,13 @@ export interface Bolsa {
   /** Marco 14 (D-059): a classe escolhida ao criar o personagem (fixa). */
   classeId: string;
   conhecidas: HabilidadeConhecida[];
-  /** As 4 teclas (1–4): ids de habilidades conhecidas, ou null. `Entidade.habilidades` deriva daqui. */
+  /** As 6 teclas (1–2 de classe, 3–6 gerais): ids de habilidades conhecidas, ou null. `Entidade.habilidades` deriva daqui. */
   barra: (string | null)[];
   pontosHabilidade: number;
+  /** Marco 24 (D-094): as gerais que um livro liberou; aprender uma delas custa um ponto. */
+  liberadas?: string[];
+  /** Marco 24 (D-095): as passivas gerais ligadas (até 3), trocadas só fora de combate. */
+  passivasAtivas?: string[];
   /** D-075 (17/10/2026): origens permanentes dos ganhos por consumíveis e saldo fracionário de XP. */
   tomosComprados?: number;
   pontosPorItens?: number;

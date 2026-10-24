@@ -167,8 +167,8 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   };
   for (const preset of p.presets.values()) conferir(`preset ${preset.id}`, [preset.ataqueBasico, ...preset.habilidades]);
   for (const classe of c.classes.values()) {
-    conferir(`classe ${classe.id}`, [classe.ataqueBasico, ...classe.habilidades, ...classe.aprendiveis]);
-    if (classe.habilidades.length > 4) erros.push(`classe ${classe.id}: no máximo 4 habilidades iniciais (as teclas 1–4)`);
+    conferir(`classe ${classe.id}`, [classe.ataqueBasico, ...classe.habilidades, ...classe.exclusivas]);
+    if (classe.iniciais.length !== 2) erros.push(`classe ${classe.id}: são 2 skills de classe iniciais (as teclas 1 e 2)`);
     for (const { id } of classe.itensIniciais) if (!it.itens.has(id)) erros.push(`classe ${classe.id}: item inicial desconhecido "${id}"`);
   }
   for (const item of it.itens.values()) if (item.ensina !== null) conferir(`item ${item.id}`, [item.ensina]);
@@ -192,7 +192,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   if (!RARIDADES.includes(BALANCE_PADRAO.drops.raridadeMinBoss)) erros.push('balance.json: drops.raridadeMinBoss desconhecida');
   // Marco 14: o que o jogador alcança (classes e livros) cabe no orçamento de poder, em todo rank e caminho.
   const jogaveis = new Set<string>();
-  for (const classe of c.classes.values()) for (const id of [...classe.habilidades, ...classe.aprendiveis]) jogaveis.add(id);
+  for (const classe of c.classes.values()) for (const id of [...classe.habilidades, ...classe.exclusivas]) jogaveis.add(id);
   for (const item of it.itens.values()) if (item.ensina) jogaveis.add(item.ensina);
   for (const id of jogaveis) {
     const def = h.definicoes.get(id);
