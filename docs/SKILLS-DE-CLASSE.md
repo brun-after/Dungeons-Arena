@@ -85,7 +85,7 @@ Linguagem visual das ultimates: Pausa de 40 a 60 ms em todo golpe forte, rastro 
 - arcana: A aura alcança +1 célula.
 - suporte: No Frenesi, curas e escudos gerais que você lança também dobram.
 - fogo: A aura queima.
-- veneno: Cada hostil envenenado perto conta em dobro para a resistência contra grupos.
+- veneno: Cada hostil envenenado perto conta em dobro para a resistência contra grupos, fora do Frenesi.
 - terra: No Frenesi, você não sofre empurrão nem puxão.
 - sombra: Encher a fúria deixa o próximo golpe como ataque pelas costas.
 - sagrado: A cura da aura também alcança aliados a até 2 células (25%).
@@ -94,7 +94,7 @@ Linguagem visual das ultimates: Pausa de 40 a 60 ms em todo golpe forte, rastro 
 **Vertentes** (2 + 2):
 
 - **Paladino** (sagrado + suporte): No Frenesi, a aura cura os aliados com a mesma força com que cura você.
-- **Berserker** (fogo + tecnica): No Frenesi, a aura vira chamas, e cada hostil queimando perto enche a fúria.
+- **Berserker** (fogo + tecnica): No Frenesi, a aura vira chamas, e cada hostil queimando perto prolonga o Frenesi em 0,5 s, até +3 s.
 - **Carcereiro** (terra + psiquico): Os desafiados ficam enraizados por 0,5 s ao chegar a 1 célula de você.
 
 ### Mago
@@ -408,7 +408,7 @@ Linguagem visual das ultimates: Céu aberto: a sombra do falcão cruza a tela, e
 | Aurora | gelo + luz | As magias resfriam os hostis e dão 3 de escudo aos aliados a até 2 células. |
 | Magnetita | raio + terra | As magias puxam 1 célula, em direção ao alvo, os eletrizados próximos. |
 | Neurotoxina | raio + veneno | O envenenado eletrizado fica atordoado por 0,3 s a cada pulso, no máximo uma vez a cada 2 s. |
-| Relâmpago negro | raio + trevas | Os raios saltam entre marcados e drenam 5% do dano em vida. |
+| Relâmpago negro | raio + trevas | Os raios saltam entre os que estão definhando e drenam 5% do dano em vida. |
 | Fulgor | raio + luz | Os raios cegam (30% de erro) e curam os aliados que atravessam. |
 | Chama negra | fogo + trevas | A queimadura impede a cura do alvo. |
 | Chama sagrada | fogo + luz | A queimadura consagra: quem acerta o alvo se cura. |
