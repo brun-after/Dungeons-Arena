@@ -1,4 +1,5 @@
 // Quadro do alvo (ajuste de 15/10/2026, D-065): nome, nível, vida e o cadeado quando travado, no alto da tela.
+// Marco 23 (24/10/2026, D-092): o alvo afim mostra o que absorve e a que é fraco.
 // Some sem alvo. Só reescreve o DOM quando algo muda; o leitor de tela ouve a troca de alvo e a trava, não cada dano.
 
 import type { Entidade } from '../entities/entidade';
@@ -15,8 +16,9 @@ export class QuadroAlvo {
   /** Texto anunciado (alvo e trava); muda só quando um dos dois muda. */
   private readonly anuncio = document.createElement('span');
   private ultimo = '';
+  private readonly afinidade = document.createElement('span');
 
-  constructor() {
+  constructor(private readonly descreverAfinidade: (alvo: Entidade) => string | null = () => null) {
     this.elemento.className = 'quadro-alvo';
     this.elemento.hidden = true;
     this.nome.className = 'nome-alvo';
@@ -29,7 +31,8 @@ export class QuadroAlvo {
     this.vida.append(this.preenchimento);
     this.anuncio.className = 'so-leitor';
     this.anuncio.setAttribute('aria-live', 'polite');
-    this.elemento.append(this.cadeado, this.nome, this.vida, this.anuncio);
+    this.afinidade.className = 'afinidade-alvo';
+    this.elemento.append(this.cadeado, this.nome, this.vida, this.afinidade, this.anuncio);
   }
 
   atualizar(jogador: Entidade | undefined, alvo: Entidade | undefined): void {
@@ -44,6 +47,10 @@ export class QuadroAlvo {
     if (!visivel) return;
     const texto = t('hud.alvo', { nome: alvo.nome, nivel: alvo.nivel });
     this.nome.textContent = texto;
+    const afinidade = this.descreverAfinidade(alvo);
+    this.afinidade.hidden = !afinidade;
+    this.afinidade.textContent = afinidade ?? '';
+    if (alvo.afinidade) this.afinidade.dataset.elemento = alvo.afinidade.elemento;
     this.cadeado.hidden = !travado;
     const fracao = alvo.hp / Math.max(1, alvo.hpMax);
     this.preenchimento.style.width = `${fracao * 100}%`;

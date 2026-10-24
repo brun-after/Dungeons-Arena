@@ -9,6 +9,7 @@ import type { Catalogo } from '../combat/habilidades';
 import { passivasDaBolsa } from '../combat/perfil';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { Atributos, Bolsa, Entidade } from '../entities/entidade';
+import { basicoDoPersonagem } from './armas';
 import { hpMaximo, manaMaxima } from './ficha';
 import { NOMES_ATRIBUTOS, type Item } from './itens';
 
@@ -76,4 +77,6 @@ export function recalcularFicha(e: Entidade, ctx: Pick<ContextoSimulacao, 'balan
   e.mana = Math.min(e.mana, e.manaMax);
   // Marco 14: as teclas 1–4 são as habilidades da entidade.
   e.habilidades = e.bolsa.barra.filter((id): id is string => id !== null && e.bolsa?.conhecidas.some((c) => c.id === id) === true);
+  // Marco 23 (D-093): a arma de outra família troca o ataque básico (progression/armas.ts).
+  e.ataqueBasico = basicoDoPersonagem(ctx, e);
 }

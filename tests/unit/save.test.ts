@@ -63,7 +63,7 @@ describe('registro de save (puro)', () => {
     expect(importarRegistro('{"nao":"save"}', 1)).toEqual({ ok: false, erro: 'formato' });
     expect(importarRegistro('não é json', 1)).toEqual({ ok: false, erro: 'formato' });
     expect(lerRegistro({ ...r, versaoSchema: VERSAO_SCHEMA + 1 })).toEqual({ ok: false, erro: 'versao_futura' });
-    expect(lerRegistro({ ...r, slot: 9 })).toEqual({ ok: false, erro: 'slot' });
+    expect(lerRegistro({ ...r, slot: 11 })).toEqual({ ok: false, erro: 'slot' });
     expect(lerRegistro({ ...r, faseRef: { tipo: 'outra', id: 'x' } })).toEqual({ ok: false, erro: 'fase' });
     const semJogador = { ...r.estado, entidades: r.estado.entidades.filter((e) => e.bolsa === null) };
     expect(lerRegistro({ ...r, estado: semJogador })).toEqual({ ok: false, erro: 'estado' });
@@ -97,7 +97,7 @@ describe('slots no IndexedDB', () => {
     const r = registro(2);
     await gravarRegistro(r);
     const slots = await listarSlots();
-    expect(slots.map((s) => s.tipo)).toEqual(['vazio', 'ok', 'vazio']);
+    expect(slots.map((s) => s.tipo)).toEqual(['vazio', 'ok', ...Array<string>(8).fill('vazio')]);
     expect(slots[1]).toMatchObject({ tipo: 'ok', resumo: { slot: 2, nivel: r.estado.entidades.find((e) => e.bolsa)?.nivel, nomeFase: ctx.fase.nome } });
     const lido = await carregarSlot(2);
     expect(lido !== null && lido !== 'invalido' && digest(lido.estado)).toBe(digest(r.estado));

@@ -39,6 +39,8 @@ import { CamadaPortas } from '../render/portas';
 import { CamadaEntidades } from '../render/sprites';
 import { criarPalco, type Palco } from '../render/stage';
 import { CamadaTelegrafia } from '../render/telegrafia';
+import { descreverAfinidade, dicaDoClima } from './descrever-elemento';
+import { temaDaFase } from '../combat/clima';
 import { criarTerreno } from '../render/terreno';
 import type { TexturasTileset } from '../render/tileset-textura';
 import { velocidade } from '../world/movimento';
@@ -170,7 +172,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       visao?.definir(p.visao);
     },
   });
-  const terreno = criarTerreno(palco.terreno, fase, o.tileset ?? null);
+  const terreno = criarTerreno(palco.terreno, fase, o.tileset ?? null, temaDaFase(ctx));
   const projecao = () => camera.projecaoAtual;
   const sprites = new CamadaEntidades(palco.entidades, {
     idLocal,
@@ -180,6 +182,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     aparencia: () => ({ tamanho: aparencia.tamanhoToken, imagemOlhaEsquerda: aparencia.sentidoToken === 'esquerda' }),
     usarTiras: () => ap.qualidade().tiras,
     reduzido: () => ap.movimentoReduzido(),
+    corElemento: (el) => Number.parseInt((ctx.conteudo.elementos.get(el)?.cor ?? '#ffffff').slice(1), 16),
   });
   const telegrafia = new CamadaTelegrafia(palco.chao, palco.voo, projecao, () => aparencia.areaExata, ap.particulas);
   await carregarTexturasDeIcones([...new Set([...ctx.conteudo.itens.values()].map((i) => i.icone)), 'pergaminho']);
@@ -200,7 +203,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     palco,
     camera,
     fase,
-    corParede: o.tileset?.corParede ?? null,
+    corParede: o.tileset?.corParede ?? temaDaFase(ctx)?.paleta.paredeTopo ?? null,
     aoTrocar: () => {
       sprites.reiniciarVisual();
       objetos.reiniciarVisual();
@@ -271,7 +274,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   // Ajuste de 15/10/2026 (D-060): o d20 perto da barra (o chip do canto saiu).
   const dado = new DadoD20();
   ui.append(dado.elemento);
-  const quadroAlvo = new QuadroAlvo();
+  const quadroAlvo = new QuadroAlvo((alvo) => descreverAfinidade(ctx, alvo));
   faixaSuperior(ui).append(quadroAlvo.elemento);
   // Marco 14: a barra é a do jogador (teclas 1–4), refeita quando muda (rank, caminho ou troca de tecla).
   let habilidadesDaBarra: Habilidade[] = [];
@@ -450,7 +453,15 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     },
     nomeDaHabilidade: (id) => resolverHabilidade(ctx, id)?.nome ?? id,
     dado,
+    opostoDe: (el) => ctx.conteudo.afinidades.elementos.get(el)?.oposto,
   });
+  // Marco 23 (D-092): o chip do tema e, ao entrar, o aviso do clima.
+  const tema = temaDaFase(ctx);
+  if (tema) {
+    const dica = dicaDoClima(ctx);
+    hud.mostrarTema(tema.nome, dica, tema.elemento);
+    hud.registrar(dica ? t('log.temaClima', { nome: tema.nome, dica }) : t('log.tema', { nome: tema.nome }));
+  }
   // Marco 18 (D-068 a D-070): combos, ressonâncias, missões, origens raras, forja e descobertas.
   ligarFeedbackGrimorio({
     bus,
@@ -493,6 +504,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       }));
     }
     hud.atualizar(j, estado.tick, identidadeDaClasse(ctx, j, estado.tick));
+    feedback.conferirBasico();
     const alvo = j?.alvoSelecionado ? estado.entidades.find((e) => e.id === j.alvoSelecionado) : undefined;
     quadroAlvo.atualizar(j, alvo);
     controles?.marcarTrava(!!alvo && j?.alvoTravado === true);

@@ -3,9 +3,14 @@
 // Marco 10A-2 (14/10/2026): o matiz da fase (`matizGraus`) gira a paleta uma vez, ao criar o terreno.
 // Marco 11A (16/10/2026, D-066): com o tileset do jogador, cada bloco vira um Container de sprites (peça do
 // autotiling ou a escolhida à mão, NEAREST); sem tileset, as cores lisas de sempre. O matiz não tinge o tileset.
+// Marco 23 (24/10/2026, D-092): na fase com tema, a paleta é a do tema (sem matiz), e cada bloco ganha os enfeites e
+// os pilares do tema (render/decoracao.ts), também sobre o tileset.
 
 import { Container, Graphics, Sprite } from 'pixi.js';
 import { desenharAmbiente } from './ambiente';
+import { desenharDecoracao, desenharPilar } from './decoracao';
+import { decoracoesDaFase, ehPilar, hashCelula, type Decoracao } from '../world/decoracao';
+import type { Tema } from '../world/temas';
 import { tipoEm, type Fase, type TipoCelula } from '../world/fase';
 import { pecaDaCelula } from '../world/tileset';
 import { CELULA_PX } from './camera-calculo';
@@ -64,7 +69,7 @@ export function variacaoPiso(x: number, y: number): number {
   return (h >>> 0) / 4294967296;
 }
 
-function desenharCelula(g: Graphics, fase: Fase, paleta: Paleta, x: number, y: number, tipo: TipoCelula): void {
+function desenharCelula(g: Graphics, fase: Fase, paleta: Paleta, x: number, y: number, tipo: TipoCelula, comTema = false): void {
   const px = x * CELULA_PX;
   const py = y * CELULA_PX;
   switch (tipo) {
@@ -98,6 +103,14 @@ function desenharCelula(g: Graphics, fase: Fase, paleta: Paleta, x: number, y: n
       if (sobrePiso) {
         g.rect(px, py + CELULA_PX - 8, CELULA_PX, 8).fill(paleta.paredeTopo);
         g.rect(px, py + CELULA_PX - 8, CELULA_PX, 2).fill({ color: 0xc3b5c6, alpha: 0.15 });
+        // Marco 23 (D-092): na fase com tema, a face da parede ganha blocos na cor das juntas do tema.
+        if (comTema) {
+          const desvio = (y % 2) * (CELULA_PX / 4);
+          g.rect(px, py + CELULA_PX - 24, CELULA_PX, 16).fill({ color: paleta.paredeTopo, alpha: 0.35 });
+          g.rect(px, py + CELULA_PX - 17, CELULA_PX, 1.5).fill({ color: paleta.junta, alpha: 0.9 });
+          for (const bx of [desvio, desvio + CELULA_PX / 2]) g.rect(px + bx, py + CELULA_PX - 24, 1.5, 7).fill({ color: paleta.junta, alpha: 0.9 });
+          for (const bx of [desvio + CELULA_PX / 4, desvio + (3 * CELULA_PX) / 4]) if (bx < CELULA_PX) g.rect(px + bx, py + CELULA_PX - 16, 1.5, 8).fill({ color: paleta.junta, alpha: 0.9 });
+        }
       }
       break;
     }
@@ -129,9 +142,18 @@ interface Bloco {
   y1: number;
 }
 
-export function criarTerreno(camada: Container, fase: Fase, tileset: TexturasTileset | null = null): Terreno {
+export function criarTerreno(camada: Container, fase: Fase, tileset: TexturasTileset | null = null, tema: Tema | null = null): Terreno {
   const blocos: Bloco[] = [];
-  const paleta = paletaDe(fase.matizGraus);
+  const paleta: Paleta = tema ? tema.paleta : paletaDe(fase.matizGraus);
+  // Os enfeites, por bloco (calculados uma vez; o editor não tem tema).
+  const enfeites = new Map<number, Decoracao[]>();
+  const porLinhaBlocos = Math.ceil(fase.largura / BLOCO_CELULAS);
+  for (const d of decoracoesDaFase(fase, tema)) {
+    const chave = Math.floor(d.y / BLOCO_CELULAS) * porLinhaBlocos + Math.floor(d.x / BLOCO_CELULAS);
+    const lista = enfeites.get(chave) ?? [];
+    lista.push(d);
+    enfeites.set(chave, lista);
+  }
   const desenharBloco = (b: Bloco) => {
     b.g.clear();
     if (b.c.children.length > 1) for (const filho of b.c.removeChildren(1)) filho.destroy();
@@ -144,7 +166,7 @@ export function criarTerreno(camada: Container, fase: Fase, tileset: TexturasTil
         const textura = peca && tileset ? tileset.textura(peca) : null;
         if (!textura) {
           // Sem tileset (ou sem a peça no atlas): a cor lisa; parede funda com tileset fica no escuro.
-          if (!tileset || tipo === 'piso' || tipo === 'saida') desenharCelula(b.g, fase, paleta, x, y, tipo);
+          if (!tileset || tipo === 'piso' || tipo === 'saida') desenharCelula(b.g, fase, paleta, x, y, tipo, tema !== null);
           continue;
         }
         const s = new Sprite(textura);
@@ -153,6 +175,14 @@ export function criarTerreno(camada: Container, fase: Fase, tileset: TexturasTil
         s.height = CELULA_PX;
         b.c.addChild(s);
       }
+    }
+    if (tema) {
+      const enfeite = new Graphics();
+      for (let y = b.by; y < fimY; y++) for (let x = b.bx; x < fimX; x++) {
+        if (ehPilar(fase, x, y)) desenharPilar(enfeite, tema.pilar, x, y, tema.paleta, hashCelula(x, y, 4));
+      }
+      for (const d of enfeites.get((b.by / BLOCO_CELULAS) * porLinhaBlocos + b.bx / BLOCO_CELULAS) ?? []) desenharDecoracao(enfeite, d, tema.paleta);
+      b.c.addChild(enfeite);
     }
     // 17/10/2026: o perigo fica sobre o atlas também; uma textura própria não pode escondê-lo.
     if (fase.ambientes?.length) {

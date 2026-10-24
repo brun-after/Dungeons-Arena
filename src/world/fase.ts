@@ -2,6 +2,7 @@
 // a `simular()` pelo contexto. Marco 2: só terreno e spawns; objetos e inimigos posicionados
 // entram nos marcos seguintes.
 
+import type { Afinidade } from '../combat/afinidade';
 import type { EfeitoCanonico } from '../combat/registro-efeitos';
 import type { AreaAmbiente } from './ambiente-tipos';
 import type { Celula } from '../core/comandos';
@@ -46,6 +47,8 @@ export interface InimigoPosicionado {
   hpBase?: number;
   /** Marco 14: habilidades a mais da instância (as geradas por semente nas fases geradas). */
   habilidades?: string[];
+  /** Marco 23 (D-092): a afinidade elemental da instância (sorteada pelo tema da fase gerada). */
+  afinidade?: Afinidade;
 }
 
 /**
@@ -175,6 +178,8 @@ export interface FaseJson {
   /** Marco 18 (D-070): eventos da fase gerada (lua sangrenta, mercador errante, sala secreta). */
   eventos?: string[];
   ambientes?: AreaAmbiente[];
+  /** Marco 23 (D-092): o tema (data/temas.json): aparência, enfeites e, no tema elemental, o clima. */
+  tema?: string;
 }
 
 export function celulaNormalizada(v: number, tamanho: number): number {
@@ -205,6 +210,8 @@ export interface Fase {
   /** Marco 18 (D-070): os eventos da fase (o diário anota; a interface mostra). */
   readonly eventos: readonly string[];
   readonly ambientes?: readonly AreaAmbiente[];
+  /** Marco 23 (D-092): o tema da fase, ou null (as fases de antes e as da arena). */
+  readonly tema: string | null;
 }
 
 /** Converte uma fase já validada para a forma usada pela simulação. */
@@ -228,7 +235,7 @@ export function carregarFase(json: FaseJson): Fase {
     celulas,
     tipo: json.tipo,
     spawns: json.spawns.map((s) => ({ x: s.x, y: s.y })),
-    inimigos: (json.inimigos ?? []).map((i) => ({ ...i, ...(i.habilidades && { habilidades: [...i.habilidades] }) })),
+    inimigos: (json.inimigos ?? []).map((i) => ({ ...i, ...(i.habilidades && { habilidades: [...i.habilidades] }), ...(i.afinidade && { afinidade: { ...i.afinidade } }) })),
     objetos: (json.objetos ?? []).map((o) => objetoCarregado(o, largura, altura)),
     portaSaida: json.portaSaida ? { ...json.portaSaida } : null,
     portasInternas: (json.portasInternas ?? []).map((p) => ({ ...p, a: { ...p.a }, b: { ...p.b } })),
@@ -237,6 +244,7 @@ export function carregarFase(json: FaseJson): Fase {
     pecas: { ...json.pecas },
     eventos: [...(json.eventos ?? [])],
     ambientes: (json.ambientes ?? []).map((a) => ({ ...a })),
+    tema: json.tema ?? null,
   };
 }
 

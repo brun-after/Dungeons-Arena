@@ -10,6 +10,8 @@ test.describe('dificuldade', () => {
     page.on('pageerror', (e) => erros.push(e.message));
     await page.goto('./?jogo=campanha');
     const slot1 = page.locator('[data-slot="1"]');
+    // Marco 23 (D-092): no slot vazio, a dificuldade fica nas opções do jogo novo.
+    await slot1.getByText('Dificuldade e fase').click();
     await slot1.getByLabel('Dificuldade do slot 1').selectOption('dificil');
     const href = await slot1.getByRole('link', { name: 'Novo jogo' }).getAttribute('href');
     expect(href).toContain('dificuldade=dificil');

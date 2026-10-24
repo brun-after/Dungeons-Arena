@@ -12,6 +12,8 @@
 // Marco 22 (23/10/2026, D-089): identidade das classes em partículas. As habilidades do Aventureiro saem do falcão
 // (penas no lançamento); o Mago encarnado solta a aura do elemento; o Arqueiro com a Mira firme cheia brilha, e o tiro
 // carregado deixa um rastro dourado.
+// Marco 23 (24/10/2026, D-092): o ar do tema da fase (neve, cinzas, folhas…, da qualidade média para cima) e a aura do
+// elemento nos inimigos afins.
 
 import { celulasDaForma } from '../combat/formas';
 import type { BuscaHabilidade } from '../combat/habilidades';
@@ -25,6 +27,8 @@ import { encarnacaoDe } from '../combat/encarnacao';
 import type { ControladorImpacto } from './impacto';
 import type { SistemaParticulas } from './particulas';
 import type { NomePreset } from './presets-particula';
+import type { ParticulaClima } from '../world/temas';
+import type { Elemento } from '../combat/elementos';
 import type { PresetQualidade } from './qualidade';
 import { visualDe } from './visual-habilidade';
 
@@ -35,6 +39,8 @@ const INTERVALO_AURA_MS = 320;
 const INTERVALO_TRILHA_MS = 70;
 const INTERVALO_RESPIRO_MS = 1400;
 const INTERVALO_POEIRA_MS = 220;
+const INTERVALO_CLIMA_MS = 140;
+const INTERVALO_AFINIDADE_MS = 420;
 const INTERVALO_CHAO_MS = 160;
 
 /** Aura por tipo de status; os demais usam `aura` na cor do registro. */
@@ -66,6 +72,9 @@ export interface OpcoesEfeitos {
   qualidade: () => PresetQualidade;
   /** Marco 22 (D-089): a Mira firme do Arqueiro está cheia (o brilho na mão)? */
   miraCheia?: (e: Entidade, tick: number) => boolean;
+  /** Marco 23 (D-092): as partículas do ar do tema da fase e a cor de cada elemento (a aura dos afins). */
+  clima?: ParticulaClima | null;
+  corElemento?: (e: Elemento) => number;
 }
 
 export class EfeitosDeHabilidade {
@@ -229,10 +238,14 @@ export class EfeitosDeHabilidade {
       this.ultimoChao = agoraMs;
       for (const r of estado.rastros) p.emitir('chao', r.x, r.y, cor(REGISTRO_EFEITOS[r.tipo].cor));
     }
-    if (q.poeira && agoraMs - this.ultimaPoeira > INTERVALO_POEIRA_MS) {
-      this.ultimaPoeira = agoraMs;
-      const eu = this.posicoes.get(this.o.idLocal);
-      if (eu) p.emitir('poeira', eu.x, eu.y, 0xd8cfb8);
+    const clima = this.o.clima;
+    if (clima ? q.auras : q.poeira) {
+      if (agoraMs - this.ultimaPoeira > (clima ? INTERVALO_CLIMA_MS : INTERVALO_POEIRA_MS)) {
+        this.ultimaPoeira = agoraMs;
+        const eu = this.posicoes.get(this.o.idLocal);
+        if (eu && clima) p.emitir(`clima_${clima}`, eu.x, eu.y, 0xffffff, undefined, { x: 1, y: 0.25 });
+        else if (eu) p.emitir('poeira', eu.x, eu.y, 0xd8cfb8);
+      }
     }
   }
 
@@ -310,6 +323,16 @@ export class EfeitosDeHabilidade {
       if (agoraMs - (this.ultimaAura.get(chave) ?? 0) < INTERVALO_AURA_MS) continue;
       this.ultimaAura.set(chave, agoraMs);
       this.o.particulas.emitir('brilho', pos.x, pos.y, COR_MIRA);
+    }
+    // Marco 23 (D-092): o inimigo afim solta o elemento dele.
+    for (const e of estado.entidades) {
+      const a = e.afinidade;
+      if (e.morto || !a || !this.o.corElemento) continue;
+      const chave = `afinidade:${e.id}`;
+      if (agoraMs - (this.ultimaAura.get(chave) ?? 0) < INTERVALO_AFINIDADE_MS) continue;
+      this.ultimaAura.set(chave, agoraMs);
+      const pos = this.posicoes.get(e.id);
+      if (pos) this.o.particulas.emitir(a.extrema ? 'aura_afinidade_extrema' : 'aura_afinidade', pos.x, pos.y, this.o.corElemento(a.elemento));
     }
     // Marco 18 (D-069): quem veste Lendária solta fagulhas âmbar; a Última, uma aura carmim (partículas, nunca forma).
     for (const e of estado.entidades) {

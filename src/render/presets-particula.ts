@@ -10,6 +10,8 @@ import type { PresetVisual } from '../combat/habilidades';
 
 // Ajuste de 16/10/2026 (D-067): `flecha` (haste, ponta e penas) e `teia`; a direção `orientada` (para onde o
 // projétil voa) e a `alturaInicial` (a chuva nasce no alto e cai); presets esteira, farpas, chuva e leque.
+import type { ParticulaClima } from '../world/temas';
+
 export const TEXTURAS_PARTICULA = ['ponto', 'brilho', 'fumaca', 'anel', 'estrela', 'faisca', 'gota', 'floco', 'runa', 'bolha', 'lasca', 'corte', 'chama', 'flecha', 'teia'] as const;
 export type TexturaParticula = (typeof TEXTURAS_PARTICULA)[number];
 
@@ -54,7 +56,10 @@ export interface Emissao {
  * forma do ataque também é partícula — `telegrafo` (o miolo da área enchendo), `borda` (o contorno, na cor de quem
  * ataca), `mira` (a linha do golpe e do projétil), `projetil` (o núcleo que voa) e `chao` (os rastros no chão).
  */
-export type NomePreset = PresetVisual | 'poeira' | 'aura' | 'onda' | 'telegrafo' | 'borda' | 'mira' | 'projetil' | 'chao' | 'projetil_flecha' | 'projetil_teia' | 'aura_forma' | 'trilha_elemental' | 'aura_sutil' | 'esteira_carregada';
+export type NomePreset = PresetVisual | 'poeira' | 'aura' | 'onda' | 'telegrafo' | 'borda' | 'mira' | 'projetil' | 'chao' | 'projetil_flecha' | 'projetil_teia' | 'aura_forma' | 'trilha_elemental' | 'aura_sutil' | 'esteira_carregada' | NomeClima | 'aura_afinidade' | 'aura_afinidade_extrema';
+
+/** Marco 23 (D-092): as partículas do ar de cada tema (render/efeitos-habilidade.ts, perto do jogador). */
+export type NomeClima = `clima_${ParticulaClima}`;
 
 const faiscas: Emissao = { textura: 'faisca', quantidade: 12, vidaMs: [180, 340], velocidade: [140, 300], direcao: 'livre', gravidade: 320, escala: [0.8, 0.2], alpha: [1, 0], aditivo: true, raio: 4, cor: null, arrasto: 0.6 };
 const brilho: Emissao = { textura: 'brilho', quantidade: 10, vidaMs: [300, 520], velocidade: [20, 60], direcao: 'cima', gravidade: 0, escala: [0.9, 0.1], alpha: [0.9, 0], aditivo: true, raio: 10, cor: null };
@@ -177,6 +182,24 @@ export const PRESETS_PARTICULA: Readonly<Record<NomePreset, readonly Emissao[]>>
   /** O corpo da teia em voo: a rede girando devagar. */
   projetil_teia: [{ textura: 'teia', quantidade: 1, vidaMs: [40, 50], velocidade: [0, 0], direcao: 'orientada', gravidade: 0, escala: [0.75, 0.75], alpha: [0.95, 0.8], aditivo: false, raio: 0, cor: 0xe5e8ea }],
   /** Marco 18 (D-069): a aura leve de quem veste Lendária ou Última (na cor da forma). */
+  // Marco 23 (D-092): o ar de cada tema, uma partícula por emissão espalhada em volta do jogador (raio grande).
+  clima_poeira: [{ textura: 'ponto', quantidade: 1, vidaMs: [2500, 4000], velocidade: [3, 10], direcao: 'livre', gravidade: 0, escala: [0.25, 0.25], alpha: [0.25, 0], aditivo: false, raio: 260, cor: 0xd8cfb8 }],
+  clima_folhas: [{ textura: 'lasca', quantidade: 1, vidaMs: [3000, 4500], velocidade: [10, 24], direcao: 'baixo', gravidade: 6, escala: [0.5, 0.4], alpha: [0.7, 0], aditivo: false, raio: 280, cor: 0x7aa04a, corFinal: 0xc08a3a, giro: [-2, 2] }],
+  clima_brilhos: [{ textura: 'brilho', quantidade: 1, vidaMs: [1800, 2800], velocidade: [4, 12], direcao: 'cima', gravidade: -4, escala: [0.35, 0.05], alpha: [0.6, 0], aditivo: true, raio: 260, cor: null }],
+  clima_bolhas: [{ textura: 'bolha', quantidade: 1, vidaMs: [1500, 2500], velocidade: [6, 14], direcao: 'cima', gravidade: -10, escala: [0.25, 0.4], alpha: [0.5, 0], aditivo: false, raio: 240, cor: 0x9ad08a }],
+  clima_cinzas: [{ textura: 'ponto', quantidade: 2, vidaMs: [2500, 4000], velocidade: [6, 18], direcao: 'baixo', gravidade: 4, escala: [0.3, 0.2], alpha: [0.55, 0], aditivo: false, raio: 280, cor: 0x7a7470, corFinal: 0xff7a3a }],
+  clima_faiscas: [{ textura: 'faisca', quantidade: 1, vidaMs: [500, 900], velocidade: [20, 60], direcao: 'cima', gravidade: 40, escala: [0.4, 0.1], alpha: [0.9, 0], aditivo: true, raio: 260, cor: 0xffd070, arrasto: 0.5 }],
+  clima_areia: [{ textura: 'ponto', quantidade: 2, vidaMs: [1500, 2500], velocidade: [40, 70], direcao: 'orientada', gravidade: 0, escala: [0.25, 0.15], alpha: [0.45, 0], aditivo: false, raio: 280, cor: 0xe0c08a }],
+  clima_neve: [{ textura: 'floco', quantidade: 2, vidaMs: [3500, 5000], velocidade: [8, 20], direcao: 'baixo', gravidade: 5, escala: [0.35, 0.25], alpha: [0.85, 0], aditivo: false, raio: 300, cor: 0xffffff, giro: [-1, 1] }],
+  clima_vagalumes: [{ textura: 'brilho', quantidade: 1, vidaMs: [2000, 3200], velocidade: [6, 16], direcao: 'livre', gravidade: 0, escala: [0.3, 0.05], alpha: [0.9, 0], aditivo: true, raio: 260, cor: 0xd8f070 }],
+  clima_esporos: [{ textura: 'ponto', quantidade: 1, vidaMs: [3000, 4500], velocidade: [3, 9], direcao: 'cima', gravidade: -3, escala: [0.3, 0.3], alpha: [0.6, 0], aditivo: true, raio: 260, cor: 0xc89aff }],
+  clima_sombras: [{ textura: 'fumaca', quantidade: 1, vidaMs: [2500, 3800], velocidade: [4, 10], direcao: 'cima', gravidade: -2, escala: [0.6, 1.4], alpha: [0.25, 0], aditivo: false, raio: 260, cor: 0x2a1840 }],
+  // Marco 23: o inimigo afim solta o elemento (o extremo, mais forte e com estrelas).
+  aura_afinidade: [{ textura: 'brilho', quantidade: 2, vidaMs: [500, 800], velocidade: [8, 22], direcao: 'cima', gravidade: -8, escala: [0.45, 0.05], alpha: [0.7, 0], aditivo: true, raio: 12, cor: null }],
+  aura_afinidade_extrema: [
+    { textura: 'brilho', quantidade: 3, vidaMs: [600, 900], velocidade: [12, 30], direcao: 'cima', gravidade: -10, escala: [0.6, 0.05], alpha: [0.85, 0], aditivo: true, raio: 16, cor: null },
+    { textura: 'anel', quantidade: 1, vidaMs: [700, 900], velocidade: [0, 2], direcao: 'livre', gravidade: 0, escala: [0.4, 1.1], alpha: [0.5, 0], aditivo: true, raio: 0, cor: null },
+  ],
   aura_forma: [
     { textura: 'brilho', quantidade: 2, vidaMs: [500, 800], velocidade: [10, 28], direcao: 'cima', gravidade: -10, escala: [0.45, 0.05], alpha: [0.8, 0], aditivo: true, raio: 12, cor: null },
     { textura: 'estrela', quantidade: 1, vidaMs: [500, 700], velocidade: [6, 16], direcao: 'cima', gravidade: 0, escala: [0.35, 0.1], alpha: [0.9, 0], aditivo: true, raio: 10, cor: null, giro: [-2, 2] },

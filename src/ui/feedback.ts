@@ -5,6 +5,7 @@
 // Marco 14 (14/10/2026): sinergias de elemento (texto no alvo e no registro), aviso ao ganhar um efeito (o que
 // faz, no máximo um por tipo por segundo), habilidade aprendida ou com rank novo e recusas da aba Habilidades.
 
+import type { Elemento } from '../combat/elementos';
 import type { Catalogo } from '../combat/habilidades';
 import type { EstadoJogo } from '../core/estado';
 import type { Barramento } from '../core/events';
@@ -37,12 +38,14 @@ export interface OpcoesFeedback {
   nomeDaHabilidade?: (id: string) => string;
   /** Ajuste de 15/10/2026: o d20 perto da barra. */
   dado?: DadoD20;
+  /** Marco 23 (D-092): o elemento oposto (a fraqueza) de cada afinidade, para a dica. */
+  opostoDe?: (e: Elemento) => Elemento | undefined;
 }
 
 /** Intervalo mínimo entre dois avisos do mesmo efeito (marco 14). */
 const AVISO_EFEITO_MS = 1000;
 
-export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
+export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number; conferirBasico: () => void } {
   const { bus, estado, idLocal, numeros, hud } = o;
   // Nomes guardados ao ver a entidade, para o registro não perder quem já saiu do mundo.
   const nomes = new Map<string, string>();
@@ -54,12 +57,23 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
   };
   const posicao = (id: string) => estado().entidades.find((x) => x.id === id) ?? null;
   let impactos = 0;
+  // Marco 23 (D-092): a primeira absorção de cada elemento vira um aviso com a dica do oposto.
+  const absorcoesAvisadas = new Set<string>();
 
   bus.on('impacto', (ev) => {
     impactos++;
     const alvo = posicao(ev.alvoId);
     const envolveLocal = ev.fonteId === idLocal || ev.alvoId === idLocal;
     const atraso = ev.indice * ESCALONAMENTO_MS;
+    const af = alvo?.afinidade;
+    if (ev.absorveu && af) {
+      numeros.mostrar(t('numeros.absorveu'), 'cura', alvo.x, alvo.y - 0.4, o.agora(), atraso);
+      if (ev.fonteId === idLocal && !absorcoesAvisadas.has(af.elemento)) {
+        absorcoesAvisadas.add(af.elemento);
+        const oposto = o.opostoDe?.(af.elemento);
+        o.aviso(t('aviso.absorveu', { alvo: nome(ev.alvoId), elemento: t(`elemento.${af.elemento}`), oposto: oposto ? t(`elemento.${oposto}`) : '—' }));
+      }
+    }
     if (ev.cura > 0) {
       if (alvo) numeros.mostrar(`+${ev.cura}`, 'cura', alvo.x, alvo.y, o.agora(), atraso);
       if (envolveLocal) hud.registrar(t('log.curou', { alvo: nome(ev.alvoId), cura: ev.cura }));
@@ -67,7 +81,7 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
     if (ev.d20 > 0) {
       const tipo = ev.falha ? 'falha' : ev.critico ? 'critico' : 'dano';
       const texto = ev.critico ? `${ev.dano}!` : String(ev.dano);
-      if (alvo) numeros.mostrar(texto, tipo, alvo.x, alvo.y, o.agora(), atraso);
+      if (alvo && !ev.absorveu) numeros.mostrar(texto, tipo, alvo.x, alvo.y, o.agora(), atraso);
       // Ajuste de 15/10/2026 (D-060): o d20 perto da barra a cada rolagem sua; nos extremos que envolvem você, o
       // d20 também aparece sobre o alvo.
       if (ev.fonteId === idLocal) o.dado?.mostrar(ev.d20, o.agora());
@@ -189,6 +203,17 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
     if (quem) numeros.mostrar(`+${ev.ganho}`, ev.tipo === 'orbe_hp' ? 'cura' : 'recurso', quem.x, quem.y, o.agora());
     if (ev.id === idLocal) hud.registrar(t(ev.tipo === 'orbe_hp' ? 'log.orbeHp' : 'log.orbeRecurso', { ganho: ev.ganho }));
   });
+  // Marco 23 (D-093): o básico muda com a arma (de outra família, o da arma; de volta, o da classe). Conferido a cada
+  // quadro (desequipar não tem evento próprio): só avisa quando muda.
+  let basicoAntes = estado().entidades.find((e) => e.id === idLocal)?.ataqueBasico;
+  const avisarBasico = () => {
+    const eu = estado().entidades.find((e) => e.id === idLocal);
+    if (!eu || eu.ataqueBasico === basicoAntes) return;
+    basicoAntes = eu.ataqueBasico;
+    const texto = t('log.basicoDaArma', { nome: o.nomeDaHabilidade?.(eu.ataqueBasico) ?? eu.ataqueBasico });
+    hud.registrar(texto);
+    o.aviso(texto);
+  };
   bus.on('equipou', (ev) => {
     if (ev.id === idLocal) hud.registrar(t('log.equipou', { item: nomeItem(ev.itemId) }));
   });
@@ -316,5 +341,5 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number } {
 
   // Registra os nomes iniciais.
   for (const e of estado().entidades) nome(e.id);
-  return { impactos: () => impactos };
+  return { impactos: () => impactos, conferirBasico: avisarBasico };
 }

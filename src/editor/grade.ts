@@ -54,6 +54,8 @@ export interface FaseEditavel {
   matizGraus: number;
   ambientes?: AreaAmbiente[];
   eventos?: string[];
+  /** Marco 23 (D-092): o tema vai e volta pelo editor. */
+  tema?: string;
   /** O atlas desta fase; null herda (§2.16). */
   tilesetId: string | null;
   /** Peças à mão por índice de célula (`chave@t`). */
@@ -94,7 +96,7 @@ export function clonarObjeto<T extends ModeloDeObjeto>(o: T): T {
   return c as T;
 }
 
-const clonarInimigo = (i: InimigoPosicionado): InimigoPosicionado => ({ ...i, ...(i.habilidades && { habilidades: [...i.habilidades] }) });
+const clonarInimigo = (i: InimigoPosicionado): InimigoPosicionado => ({ ...i, ...(i.habilidades && { habilidades: [...i.habilidades] }), ...(i.afinidade && { afinidade: { ...i.afinidade } }) });
 
 /** Clone explícito da fase inteira (retrato do histórico, gravação). */
 export function clonarFaseEditavel(f: FaseEditavel): FaseEditavel {
@@ -103,6 +105,7 @@ export function clonarFaseEditavel(f: FaseEditavel): FaseEditavel {
     celulas: new Uint8Array(f.celulas),
     ...(f.ambientes && { ambientes: f.ambientes.map((a) => ({ ...a })) }),
     ...(f.eventos && { eventos: [...f.eventos] }),
+    ...(f.tema && { tema: f.tema }),
     spawn: f.spawn ? { ...f.spawn } : null,
     inimigos: f.inimigos.map(clonarInimigo),
     objetos: f.objetos.map((o) => clonarObjeto(o)),
@@ -168,6 +171,7 @@ export function comoFase(f: FaseEditavel): Fase {
     tilesetId: f.tilesetId,
     pecas: f.pecas,
     eventos: [...(f.eventos ?? [])],
+    tema: f.tema ?? null,
     ambientes: f.ambientes ?? [],
   };
 }
@@ -209,6 +213,7 @@ export function paraFaseJson(f: FaseEditavel, ordem = 1): FaseJson {
     ...(saida && { portaSaida: saida }),
     ...(f.ambientes?.length && { ambientes: f.ambientes.map((a) => ({ ...a })) }),
     ...(f.eventos?.length && { eventos: [...f.eventos] }),
+    ...(f.tema && { tema: f.tema }),
     ...(f.portasInternas.length > 0 && { portasInternas: f.portasInternas.map((p) => ({ ...p, a: { ...p.a }, b: { ...p.b } })) }),
     ...(f.matizGraus !== 0 && { matizGraus: f.matizGraus }),
     ...(f.tilesetId && { tileset: { atlasId: f.tilesetId } }),
@@ -242,6 +247,7 @@ export function deFaseJson(json: FaseJson): FaseEditavel {
     pecas: { ...json.pecas },
     ambientes: (json.ambientes ?? []).map((a) => ({ ...a })),
     eventos: [...(json.eventos ?? [])],
+    ...(json.tema && { tema: json.tema }),
   };
 }
 

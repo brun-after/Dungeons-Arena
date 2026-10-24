@@ -12,6 +12,9 @@
 //      inimigos e os objetos das fases geradas já salvas não mudam.
 //   7. marco 11A (16/10/2026), D-066: com `estilo` (regras do perfil do jogador, guardadas nos parâmetros), uma
 //      passada de `aplicarEstilo` no fim, num PRNG próprio; sem `estilo`, a fase é a mesma de antes.
+//   8. marco 23 (24/10/2026), D-092: com `tema`, os inimigos comuns saem dos pesos do tema, uma parte nasce com
+//      afinidade elemental (o chefe do tema elemental, sempre, na variante extrema), as áreas de terreno seguem o
+//      tema e as salas grandes ganham pilares. Tudo em PRNGs próprios; sem `tema`, a fase é a mesma de antes.
 
 import { idItemBase } from '../progression/gerar-item-base';
 import { idGerada } from '../combat/chave-habilidade';
@@ -20,6 +23,8 @@ import type { Conteudo } from '../core/conteudo';
 import { BALANCE_PADRAO, type Balance } from '../core/contexto';
 import { aleatorio, criarRng, escolher, hashTexto, inteiro, proximoU32, type EstadoRng } from '../core/rng';
 import { enriquecerFase, salasEmEspiral } from './geracao-viva';
+import { erguerPilares } from './decoracao';
+import { porPeso, type Tema } from './temas';
 import { aplicarEstilo } from './estilo';
 import type { FaseJson, InimigoPosicionado, ObjetoPosicionadoJson, PortaInterna } from './fase';
 
@@ -40,6 +45,8 @@ export interface ParametrosGeracao {
   enxameConcluido?: boolean;
   ambientesVivos?: boolean;
   formato?: 'salas' | 'espiral';
+  /** Marco 23 (D-092): o tema da fase (data/temas.json); ausente nas fases geradas antes dele. */
+  tema?: string;
 }
 
 /** O que o gerador precisa do catálogo: presets comuns e de chefe, e o estoque da loja. */
@@ -53,6 +60,9 @@ export interface CatalogoGeracao {
   livrosRaros: readonly string[];
   bases: readonly string[];
   basesDeConjunto: readonly string[];
+  /** Marco 23 (D-092): os temas, e a chance da variante extrema entre os afins. */
+  temas: ReadonlyMap<string, Tema>;
+  chanceExtrema: number;
 }
 
 /** Presets comuns (sem chefe, boneco de treino nem invocações, marco 10A-3) e o chefe, tirados do catálogo. */
@@ -65,12 +75,30 @@ export function catalogoDeGeracao(conteudo: Conteudo, estoque: readonly string[]
     .map((i) => i.id);
   const bases = [...conteudo.itensComFormas.bases.keys()];
   const basesDeConjunto = [...new Set([...conteudo.conjuntos.values()].flatMap((c) => c.pecas))];
-  return { comuns, boss, estoque: [...estoque], geracao, livrosRaros, bases, basesDeConjunto };
+  return { comuns, boss, estoque: [...estoque], geracao, livrosRaros, bases, basesDeConjunto, temas: conteudo.temas, chanceExtrema: BALANCE_PADRAO.afinidade.chanceExtrema };
 }
 
 /** Chance de um inimigo comum ter uma habilidade gerada no nível (§D-057: cresce com a profundidade). */
 export function chanceDeHabilidade(nivel: number, g: Balance['geracao']): number {
   return Math.min(g.chanceMax, g.chanceInimigo + g.chancePorNivel * nivel);
+}
+
+/**
+ * Marco 23 (D-092): os inimigos da fase com tema. Os comuns trocam de preset pelos pesos do tema (a posição e o
+ * nível ficam), e uma parte (`chanceElemental`) nasce afim a um dos elementos do tema; o chefe do tema elemental
+ * nasce afim ao elemento dele, na variante extrema. Num PRNG próprio (`semente:tema`).
+ */
+function temperarInimigos(inimigos: InimigoPosicionado[], tema: Tema, catalogo: CatalogoGeracao, p: ParametrosGeracao): void {
+  const rng = criarRng(hashTexto(`${p.semente}:tema`));
+  for (const ini of inimigos) {
+    if (ini.preset === catalogo.boss) {
+      if (tema.elemento) ini.afinidade = { elemento: tema.elemento, extrema: true };
+      continue;
+    }
+    ini.preset = porPeso(tema.inimigos, aleatorio(rng)) ?? ini.preset;
+    if (tema.elementosInimigos.length === 0 || aleatorio(rng) >= tema.chanceElemental) continue;
+    ini.afinidade = { elemento: escolher(rng, tema.elementosInimigos), extrema: aleatorio(rng) < catalogo.chanceExtrema };
+  }
 }
 
 /** Habilidades geradas dos inimigos, num PRNG próprio (não mexe na sequência do mapa). */
@@ -196,6 +224,8 @@ export function gerarFase(p: ParametrosGeracao, catalogo: CatalogoGeracao): Fase
     }
   }
 
+  const tema = p.tema ? catalogo.temas.get(p.tema) : undefined;
+  if (tema) temperarInimigos(inimigos, tema, catalogo, p);
   distribuirHabilidades(inimigos, catalogo, p);
 
   const portasInternas: PortaInterna[] = [];
@@ -224,6 +254,11 @@ export function gerarFase(p: ParametrosGeracao, catalogo: CatalogoGeracao): Fase
   aplicarEventos(json, geracao, catalogo, salas, livre, ocupar);
   const populacaoNormal = inimigos.length;
   if (p.ambientesVivos) enriquecerFase(json, geracao, catalogo, salas, livre, ocupar);
+  if (tema) {
+    json.tema = tema.id;
+    if (p.formato !== 'espiral') erguerPilares(grade, salas, (c) => !livre(c), criarRng(hashTexto(`${p.semente}:pilares`)));
+    json.mapa = grade.map((l) => l.join(''));
+  }
   const final = p.estilo && p.estilo.length > 0 ? aplicarEstilo(json, p.estilo, p.semente) : json;
   if (p.enxameConcluido) {
     final.inimigos = (final.inimigos ?? []).slice(0, populacaoNormal);

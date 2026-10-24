@@ -225,7 +225,7 @@ describe('rituais, combos e Trevas', () => {
     expect(JSON.stringify(migrado)).toContain('"elementoArma":"trevas"'); expect(JSON.stringify(migrado)).toContain('"elemento":"trevas"');
     expect(migrado.itemId).toBe(antigo.itemId);
     expect(migrado.certificado).toEqual(antigo.certificado);
-    expect(lerIdItemBase(antigo.itemId)?.elemento).toBe('trevas'); expect(VERSAO_SCHEMA).toBe(22);
+    expect(lerIdItemBase(antigo.itemId)?.elemento).toBe('trevas'); expect(VERSAO_SCHEMA).toBe(23);
     expect(CONTEUDO.itens.get(antigo.itemId)).toMatchObject({ id: antigo.itemId, elemento: 'trevas' });
   });
 });

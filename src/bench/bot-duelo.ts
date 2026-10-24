@@ -4,6 +4,7 @@
 // vida baixa e, atacando de longe, se afasta de quem só bate de perto. Usado pelo simulador de balanceamento
 // (tools/balanceamento) e pelas cenas de benchmark (?bench=). Puro: devolve comandos.
 
+import { resistenciaPct } from '../combat/elementos';
 import { alcanceDe, recargaRestante } from '../combat/acao';
 import { celulasDaForma } from '../combat/formas';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
@@ -98,7 +99,7 @@ export class BotDeDuelo {
     }
     // Habilidades: a primeira pronta da barra que alcança (só quando não está no meio de outra que não seja o básico).
     if (this.usaHabilidades && (!eu.acao || eu.acao.habilidadeId === eu.ataqueBasico)) {
-      for (const id of this.ordemDaBarra(estado, ctx, eu)) {
+      for (const id of this.ordemDaBarra(estado, ctx, eu, alvo)) {
         const h = habilidadeDoAtor(ctx, eu, id);
         if (!h || h.passiva || recargaRestante(estado, eu.id, h.id) > 0 || eu.mana < h.custoRecurso) continue;
         // Marco 22 (D-090): os rituais do Necromante. O Comando vai quando há mortos perto e um hostil no alcance
@@ -111,6 +112,8 @@ export class BotDeDuelo {
         }
         const ofensiva = h.politicaAlvo === 'hostil' || h.politicaAlvo === 'celula' || h.tipoArea === 'ao_redor';
         const alcance = alcanceDe(ctx, eu, h, estado.tick);
+        // Marco 23 (D-092): nunca o elemento que o alvo absorve ou a que é imune (o afim se curaria).
+        if (ofensiva && h.formulaDano && resistenciaPct(ctx, alvo, h.elemento) >= 100) continue;
         if (ofensiva && distancia > Math.max(1, h.tipoArea === 'ao_redor' ? h.raioArea : alcance)) continue;
         // Suporte (cura, escudo) só com a vida pela metade.
         if (!ofensiva && eu.hp > eu.hpMax / 2) continue;
@@ -130,11 +133,19 @@ export class BotDeDuelo {
     return cmds;
   }
 
-  /** Com a vida pela metade, o Dízimo que drena vem antes das outras (como faz quem precisa se curar). */
-  private ordemDaBarra(estado: EstadoJogo, ctx: ContextoSimulacao, eu: Entidade): readonly string[] {
-    if (eu.hp > eu.hpMax / 2) return eu.habilidades;
+  /**
+   * Com a vida pela metade, o Dízimo que drena vem antes das outras (como faz quem precisa se curar). Marco 23 (D-092):
+   * as ofensivas vão na ordem da resistência do alvo (a fraqueza dele primeiro).
+   */
+  private ordemDaBarra(estado: EstadoJogo, ctx: ContextoSimulacao, eu: Entidade, alvo: Entidade): readonly string[] {
+    const resistencia = (id: string) => {
+      const h = habilidadeDoAtor(ctx, eu, id);
+      return h?.formulaDano ? resistenciaPct(ctx, alvo, h.elemento) : 0;
+    };
+    const barra = alvo.afinidade ? [...eu.habilidades].sort((a, b) => resistencia(a) - resistencia(b)) : eu.habilidades;
+    if (eu.hp > eu.hpMax / 2) return barra;
     const drena = (id: string) => !!habilidadeDoAtor(ctx, eu, id)?.efeitos.some((ef) => ef.tipo === 'drenar_invocacao') && !dizimoErgue(estado, ctx, eu);
-    return [...eu.habilidades.filter(drena), ...eu.habilidades.filter((id) => !drena(id))];
+    return [...barra.filter(drena), ...barra.filter((id) => !drena(id))];
   }
 
   /** null: não é ritual; true/false: usar agora ou não. */

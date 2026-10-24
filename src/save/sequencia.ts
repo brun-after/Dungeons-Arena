@@ -2,6 +2,9 @@
 // oficiais (data/campanha.json), cada saída leva a uma fase gerada nova, com parâmetros sorteados de
 // forma determinística pela fase atual: `salas = anterior + rand(0..3)`, `nivelInimigos + 1` e
 // `matizGraus + 28`. O save guarda só esses parâmetros; a fase é gerada de novo ao abrir.
+// Marco 23 (24/10/2026, D-092): cada fase gerada nova ganha um tema; a cada `elementalACada` fases, um elemental, e
+// nas outras, um neutro, sem repetir o tema da fase anterior. Sorteio num PRNG próprio (`id:tema`): os demais
+// parâmetros saem iguais aos de antes.
 
 import { aleatorio, criarRng, hashTexto, inteiro } from '../core/rng';
 import type { RefFase } from './esquema';
@@ -17,6 +20,19 @@ export interface RegrasGeradas {
   variacoes?: { grandeACada: number; espiralACada: number; largura: number; altura: number };
   /** Marco 18 (D-070): chance (%) de cada evento de fase (lua sangrenta, mercador errante, sala secreta). */
   eventos?: Readonly<Record<string, number>>;
+  /** Marco 23 (D-092): os temas das fases geradas (ids de data/temas.json). */
+  temas?: { elementalACada: number; neutros: readonly string[]; elementais: readonly string[] };
+}
+
+/** O tema da fase gerada `numero` (null sem temas nas regras). */
+export function temaDaGerada(g: RegrasGeradas, id: string, numero: number, anterior: string | undefined): string | null {
+  const t = g.temas;
+  if (!t) return null;
+  const grupo = numero % t.elementalACada === 0 ? t.elementais : t.neutros;
+  const opcoes = grupo.filter((x) => x !== anterior);
+  const lista = opcoes.length > 0 ? opcoes : grupo;
+  const rng = criarRng(hashTexto(`${id}:tema`));
+  return lista[inteiro(rng, 0, lista.length - 1)] ?? null;
 }
 
 /**
@@ -52,6 +68,7 @@ export function proximaFase(
   const eventos = Object.entries(g.eventos ?? {})
     .filter(([, pct]) => aleatorio(rng) * 100 < pct)
     .map(([id]) => id);
+  const tema = temaDaGerada(g, id, numero, anterior?.params.tema);
   return {
     tipo: 'gerada',
     id,
@@ -70,6 +87,7 @@ export function proximaFase(
       // Marco 11A: as regras de estilo do aparelho (opcional), guardadas para a fase sair igual ao reabrir.
       ...(estilo.length > 0 && { estilo: [...estilo] }),
       ...(eventos.length > 0 && { eventos }),
+      ...(tema && { tema }),
     },
   };
 }

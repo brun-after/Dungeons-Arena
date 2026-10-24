@@ -197,7 +197,34 @@ export interface Balance {
     danoArmadilhaBase: number; danoArmadilhaPorNivel: number; danoArmadilhaMax: number; rearmeMs: number;
     sangramento: number; sangramentoMs: number; enxameReservaMax: number; enxamePorSala: number;
     enxameAtivos: number; enxameLeva: number; enxameInicio: number; enxameRaio: number; enxameDistanciaSegura: number;
+    /** Marco 23 (D-092): as áreas novas (gelo fino, lama, névoa sombria, luz sagrada). */
+    resfriadoPct: number; atoladoPct: number; definhandoPct: number; curaSagrada: number;
   };
+  /** Marco 23 (24/10/2026, D-092): o clima da fase de tema elemental (combat/clima.ts). */
+  clima: {
+    /** O elemento do tema bate mais forte, e o estado que ele aplica dura mais… */
+    reforcoPct: number;
+    duracaoEstadoPct: number;
+    /** …e o oposto dele bate mais fraco. */
+    opressaoPct: number;
+    /** A cada `pulsoMs`, o clima pesa nos personagens sem resistência de `resistenciaImunePct` ao elemento. */
+    pulsoMs: number;
+    resistenciaImunePct: number;
+    pulsos: Partial<Record<string, { tipo: string; valor: number; pct: number; duracaoMs: number }>>;
+  };
+  /** Marco 23 (D-092): inimigos com afinidade elemental (absorvem o próprio elemento, fracos ao oposto). */
+  afinidade: {
+    absorcaoPct: number;
+    fraquezaPct: number;
+    extremaFraquezaPct: number;
+    chanceExtrema: number;
+    vidaExtremaPct: number;
+    /** O afim vale mais XP (o extremo, mais ainda). */
+    xpPct: number;
+    xpExtremaPct: number;
+  };
+  /** Marco 23 (D-093): o básico emprestado da arma de outra família (progression/armas.ts). */
+  armas: { danoForaDaClassePct: number };
   armadilhas: {
     revelarIntervaloMs: number;
     raioBase: number;

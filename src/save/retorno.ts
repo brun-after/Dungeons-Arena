@@ -34,6 +34,8 @@ export function faseAnterior(ref: RefFase, conhecidas: Readonly<Record<string, R
       proxima.params.altura = 40;
     }
     if (ref.params.estilo) proxima.params.estilo = [...ref.params.estilo];
+    // Marco 23 (D-092): saves de antes dos temas reconstroem a fase sem tema.
+    if (!ref.params.tema) delete proxima.params.tema;
     anterior = proxima;
   }
   return anterior;

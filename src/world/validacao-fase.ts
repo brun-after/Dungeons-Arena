@@ -8,6 +8,7 @@
 import { lerAmbientes } from './validacao-ambientes';
 import { normalizarEfeito } from '../combat/normalizar-efeito';
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
+import { ELEMENTOS, type Elemento } from '../combat/elementos';
 import { Leitor } from '../core/validar';
 import { alcancaveisComPortas } from './navegacao';
 import { lerCamposDeTileset } from './tileset';
@@ -58,7 +59,9 @@ export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<st
   const avisos: ErroFase[] = [];
   if (!ehObjeto(entrada)) return { ok: false, erros: [{ mensagem: 'a fase precisa ser um objeto' }], avisos };
 
-  const { id, nome, ordem, tipo, mapa, spawns, inimigos, objetos, portaSaida, portasInternas, matizGraus, tileset, pecas, eventos } = entrada;
+  const { id, nome, ordem, tipo, mapa, spawns, inimigos, objetos, portaSaida, portasInternas, matizGraus, tileset, pecas, eventos, tema } = entrada;
+  // Marco 23 (D-092): o tema é um id curto; o desconhecido (catálogo de outra versão) só some do desenho.
+  if (tema !== undefined && (typeof tema !== 'string' || !/^[a-z_]{1,30}$/.test(tema))) erros.push({ mensagem: 'tema inválido' });
   const matizOk = matizGraus === undefined || (typeof matizGraus === 'number' && Number.isFinite(matizGraus) && matizGraus >= 0 && matizGraus < 360);
   if (!matizOk) erros.push({ mensagem: 'matizGraus precisa ficar entre 0 e 359' });
   if (typeof id !== 'string' || id.trim() === '') erros.push({ mensagem: 'id ausente' });
@@ -95,6 +98,7 @@ export function validarFase(entrada: unknown, presetsConhecidos?: ReadonlySet<st
     ...visual,
     // Marco 18: os eventos da fase gerada (só textos curtos conhecidos).
     ...(Array.isArray(eventos) && { eventos: eventos.filter((x): x is string => typeof x === 'string' && /^[a-z_]{1,30}$/.test(x)) }),
+    ...(typeof tema === 'string' && { tema }),
   };
   validarJogabilidade(json, erros, avisos);
   return erros.length > 0 ? { ok: false, erros, avisos } : { ok: true, fase: json, avisos };
@@ -278,6 +282,13 @@ function validarInimigos(
       const ids = Array.isArray(i.habilidades) ? i.habilidades : null;
       if (ids?.every((h): h is string => typeof h === 'string' && /^[a-z0-9_]+$/.test(h)) && ids.length <= 4) item.habilidades = [...ids];
       else erros.push({ mensagem: 'habilidades do inimigo inválidas', x: i.x, y: i.y });
+    }
+    // Marco 23 (D-092): a afinidade elemental da instância.
+    if (i.afinidade !== undefined) {
+      const a = i.afinidade;
+      if (ehObjeto(a) && typeof a.elemento === 'string' && (ELEMENTOS as readonly string[]).includes(a.elemento) && typeof a.extrema === 'boolean') {
+        item.afinidade = { elemento: a.elemento as Elemento, extrema: a.extrema };
+      } else erros.push({ mensagem: 'afinidade do inimigo inválida', x: i.x, y: i.y });
     }
     lista.push(item);
   }

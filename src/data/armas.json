@@ -1,0 +1,24 @@
+{
+  "versao": 1,
+  "familias": {
+    "espada": "lamina",
+    "machado": "lamina",
+    "adaga": "lamina",
+    "clava": "lamina",
+    "lanca": "lamina",
+    "cajado": "cajado",
+    "arco": "arco"
+  },
+  "basicoDaFamilia": {
+    "lamina": "ataque_basico",
+    "cajado": "dardo_arcano",
+    "arco": "tiro"
+  },
+  "naturalDaClasse": {
+    "aventureiro": "lamina",
+    "guerreiro": "lamina",
+    "mago": "cajado",
+    "arqueiro": "arco",
+    "necromante": "cajado"
+  }
+}

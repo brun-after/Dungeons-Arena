@@ -30,6 +30,11 @@
       "pergaminho_fada",
       "pergaminho_espantalho"
     ],
+    "temas": {
+      "elementalACada": 3,
+      "neutros": ["masmorra", "castelo", "catacumbas", "ruinas", "biblioteca", "mina", "esgotos"],
+      "elementais": ["vulcao", "forja", "deserto", "caverna_gelo", "tundra", "pico_tempestade", "laboratorio", "pantano", "floresta_fungica", "floresta_antiga", "canion_cristal", "cripta_profana", "templo_celestial"]
+    },
     "variacoes": {
       "grandeACada": 7,
       "espiralACada": 11,

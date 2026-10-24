@@ -5,7 +5,7 @@ import { ticksDe } from '../core/tempo';
 import { vivo } from '../entities/entidade';
 import { criarInimigo } from '../entities/fabrica';
 import { reservaCelula } from './colisao';
-import { idDoInimigo } from './populacao';
+import { idDoInimigo, opcoesDoPosicionado } from './populacao';
 export function processarEnxame(estado: EstadoJogo, ctx: ContextoSimulacao): void {
   const fila = estado.reservaEnxame;
   const b = ctx.balance.ambiente;
@@ -22,11 +22,7 @@ export function processarEnxame(estado: EstadoJogo, ctx: ContextoSimulacao): voi
     if (distancia < b.enxameDistanciaSegura || distancia > b.enxameRaio || estado.entidades.some((e) => vivo(e) && reservaCelula(e, pos.x, pos.y))) return true;
     const preset = ctx.conteudo.presets.get(pos.preset);
     if (!preset) return false;
-    estado.entidades.push(criarInimigo(preset, idDoInimigo(indice), pos.x, pos.y, ctx.balance, {
-      ...(pos.nivel !== undefined && { nivel: pos.nivel }),
-      ...(pos.hpBase !== undefined && { hpBase: pos.hpBase }),
-      ...(pos.habilidades && { habilidadesExtras: pos.habilidades }),
-    }));
+    estado.entidades.push(criarInimigo(preset, idDoInimigo(indice), pos.x, pos.y, ctx.balance, opcoesDoPosicionado(ctx, preset, pos)));
     vagas--;
     return false;
   });
