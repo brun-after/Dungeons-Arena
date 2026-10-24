@@ -37,11 +37,11 @@
           ]
         },
         "3": {
-          "texto": "O Grito de guerra também dá escudo de 8.",
+          "texto": "O Brado também dá escudo de 8.",
           "ganchos": [
             {
               "quando": "aoUsarHabilidade",
-              "se": { "habilidade": "grito_de_guerra" },
+              "se": { "habilidade": "brado" },
               "efeito": { "aplicar": { "tipo": "escudo", "duracaoMs": 6000, "valor": 8 }, "em": "portador" }
             }
           ]

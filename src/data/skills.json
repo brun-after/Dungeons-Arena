@@ -1,5 +1,5 @@
 {
-  "versao": 5,
+  "versao": 6,
   "habilidades": [
     {
       "id": "ataque_basico",
@@ -56,8 +56,14 @@
         "som": "magia"
       },
       "marcos": {
-        "2": { "texto": "+1 de alcance", "alcance": 1 },
-        "4": { "texto": "+1 de alcance (somando o do nível 2)", "alcance": 1 }
+        "2": {
+          "texto": "+1 de alcance",
+          "alcance": 1
+        },
+        "4": {
+          "texto": "+1 de alcance (somando o do nível 2)",
+          "alcance": 1
+        }
       },
       "evolucoes": {
         "3": [
@@ -70,7 +76,8 @@
           "elemental_sagrado"
         ]
       },
-      "mobilidade": "lenta"
+      "mobilidade": "lenta",
+      "familiaGeral": "arcana"
     },
     {
       "id": "explosao",
@@ -100,8 +107,20 @@
         "som": "explosao"
       },
       "marcos": {
-        "2": { "texto": "+1 de alcance", "alcance": 1 },
-        "4": { "texto": "Os atingidos ficam atolados (−15%) por 1,5 s", "efeitos": [{ "tipo": "atolado", "duracaoMs": 1500, "pct": 15 }] }
+        "2": {
+          "texto": "+1 de alcance",
+          "alcance": 1
+        },
+        "4": {
+          "texto": "Os atingidos ficam atolados (−15%) por 1,5 s",
+          "efeitos": [
+            {
+              "tipo": "atolado",
+              "duracaoMs": 1500,
+              "pct": 15
+            }
+          ]
+        }
       },
       "evolucoes": {
         "3": [
@@ -113,7 +132,8 @@
           "eco"
         ]
       },
-      "nivelMinimo": 1
+      "nivelMinimo": 1,
+      "familiaGeral": "arcana"
     },
     {
       "id": "curar",
@@ -167,7 +187,8 @@
           "eficiente"
         ]
       },
-      "mobilidade": "lenta"
+      "mobilidade": "lenta",
+      "familiaGeral": "suporte"
     },
     {
       "id": "golpe_atordoante",
@@ -201,8 +222,20 @@
         "som": "golpe"
       },
       "marcos": {
-        "2": { "texto": "Atordoamento 25% mais longo", "duracaoPct": 25 },
-        "4": { "texto": "Expõe o alvo (+20%) por 3 s", "efeitos": [{ "tipo": "exposto", "duracaoMs": 3000, "pct": 20 }] }
+        "2": {
+          "texto": "Atordoamento 25% mais longo",
+          "duracaoPct": 25
+        },
+        "4": {
+          "texto": "Expõe o alvo (+20%) por 3 s",
+          "efeitos": [
+            {
+              "tipo": "exposto",
+              "duracaoMs": 3000,
+              "pct": 20
+            }
+          ]
+        }
       },
       "evolucoes": {
         "3": [
@@ -213,7 +246,8 @@
           "cadeia",
           "eco"
         ]
-      }
+      },
+      "familiaGeral": "tecnica"
     },
     {
       "id": "golpe",
@@ -287,7 +321,9 @@
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 8,
       "efeitos": [],
-      "tags": ["flechas"],
+      "tags": [
+        "flechas"
+      ],
       "visual": {
         "cor": "#d5c4a1",
         "viagem": "esteira",
@@ -622,7 +658,9 @@
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 16,
       "efeitos": [],
-      "tags": ["flechas"],
+      "tags": [
+        "flechas"
+      ],
       "visual": {
         "viagem": "esteira",
         "cor": "#d4ac0d",
@@ -669,8 +707,19 @@
         "movimento"
       ],
       "marcos": {
-        "2": { "texto": "+1 de alcance", "alcance": 1 },
-        "4": { "texto": "Derruba quem atravessa: atordoa 0,4 s", "efeitos": [{ "tipo": "atordoar", "duracaoMs": 400 }] }
+        "2": {
+          "texto": "+1 de alcance",
+          "alcance": 1
+        },
+        "4": {
+          "texto": "Derruba quem atravessa: atordoa 0,4 s",
+          "efeitos": [
+            {
+              "tipo": "atordoar",
+              "duracaoMs": 400
+            }
+          ]
+        }
       },
       "evolucoes": {
         "3": [
@@ -682,38 +731,65 @@
           "longo_alcance",
           "elemental_terra"
         ]
-      }
+      },
+      "familiaGeral": "tecnica"
     },
     {
-      "id": "redemoinho",
-      "familiaEvolucao": "tecnica",
-      "grau": "A",
-      "nome": "Redemoinho",
-      "icone": "redemoinho",
-      "tipoAtaque": "fisico",
       "formulaDano": "2d6",
       "formulaCura": null,
-      "alcanceCelulas": 1,
-      "tipoArea": "ao_redor",
-      "raioArea": 1,
       "custoRecurso": 0,
       "recargaMs": 6000,
       "conjuracaoMs": 500,
-      "politicaAlvo": "hostil",
-      "politicaImpacto": "area",
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
-      "efeitos": [],
+      "efeitos": [
+        {
+          "tipo": "escudo_acumulado",
+          "valor": 2,
+          "pct": 10,
+          "duracaoMs": 5000,
+          "em": "conjurador"
+        }
+      ],
+      "id": "redemoinho",
+      "nome": "Redemoinho",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "tecnica",
+      "icone": "redemoinho",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 1,
+      "alcanceCelulas": 1,
+      "custoVida": 4,
       "visual": {
         "cor": "#c0392b",
         "impacto": "vento",
         "camera": "leve",
         "som": "golpe"
       },
-      "custoVida": 4,
       "marcos": {
-        "2": { "texto": "Puxa 1 célula para o centro", "efeitos": [{ "tipo": "puxao", "valor": 1 }] },
-        "4": { "texto": "Os atingidos ficam atolados (−10%) por 1 s", "efeitos": [{ "tipo": "atolado", "duracaoMs": 1000, "pct": 10 }] }
+        "2": {
+          "texto": "Puxa 1 célula para o centro",
+          "efeitos": [
+            {
+              "tipo": "puxao",
+              "valor": 1
+            }
+          ]
+        },
+        "4": {
+          "texto": "Os atingidos ficam atolados (−10%) por 1 s",
+          "efeitos": [
+            {
+              "tipo": "atolado",
+              "pct": 10,
+              "duracaoMs": 1000
+            }
+          ]
+        }
       },
       "evolucoes": {
         "3": [
@@ -724,135 +800,71 @@
           "sanguessuga",
           "eficiente"
         ]
+      },
+      "variantes": {
+        "frenesi": {
+          "texto": "+1 de raio, e puxa 1 célula para dentro",
+          "raio": 1,
+          "alcance": 1,
+          "efeitos": [
+            {
+              "tipo": "puxao",
+              "valor": 1
+            }
+          ]
+        }
       }
     },
     {
-      "id": "grito_de_guerra",
-      "familiaEvolucao": "suporte",
-      "grau": "A",
-      "nome": "Grito de guerra",
-      "icone": "grito",
-      "tipoAtaque": "fisico",
-      "formulaDano": null,
-      "formulaCura": null,
-      "alcanceCelulas": 2,
-      "tipoArea": "ao_redor",
-      "raioArea": 2,
-      "custoRecurso": 4,
-      "recargaMs": 15000,
-      "conjuracaoMs": 300,
-      "politicaAlvo": "aliados",
-      "politicaImpacto": "area",
-      "interrupcao": "interrompivel",
-      "velocidadeProjetil": 0,
-      "efeitos": [
-        {
-          "tipo": "bonus_dano",
-          "pct": 20,
-          "duracaoMs": 8000
-        }
-      ],
-      "visual": {
-        "cor": "#f39c12",
-        "conjuracao": "anel",
-        "impacto": "estrelas",
-        "som": "nivel"
-      },
-      "marcos": {
-        "2": { "texto": "O bônus dura 25% mais", "duracaoPct": 25 },
-        "4": { "texto": "Os inimigos atingidos ficam sem golpes físicos por 1 s", "efeitos": [{ "tipo": "sem_ataque", "duracaoMs": 1000 }] }
-      },
-      "evolucoes": {
-        "3": [
-          "controle",
-          "eficiente"
-        ],
-        "5": [
-          "fortificado",
-          "amplo"
-        ]
-      }
-    },
-    {
-      "id": "escudo_de_ferro",
-      "familiaEvolucao": "suporte",
-      "grau": "B",
-      "nome": "Escudo de ferro",
-      "icone": "escudo",
-      "tipoAtaque": "fisico",
-      "formulaDano": null,
-      "formulaCura": null,
-      "alcanceCelulas": 0,
-      "tipoArea": "nenhuma",
-      "raioArea": 0,
-      "custoRecurso": 3,
-      "recargaMs": 12000,
-      "conjuracaoMs": 200,
-      "politicaAlvo": "proprio",
-      "politicaImpacto": "proprio",
-      "interrupcao": "interrompivel",
-      "velocidadeProjetil": 0,
-      "efeitos": [
-        {
-          "tipo": "escudo",
-          "valor": 15,
-          "duracaoMs": 8000
-        }
-      ],
-      "visual": {
-        "cor": "#95a5a6",
-        "impacto": "anel",
-        "som": "cura"
-      },
-      "marcos": {
-        "2": { "texto": "O escudo dura 20% mais", "duracaoPct": 20 },
-        "4": { "texto": "Também cura 4", "efeitos": [{ "tipo": "cura", "valor": 4 }] }
-      },
-      "evolucoes": {
-        "3": [
-          "controle",
-          "eficiente"
-        ],
-        "5": [
-          "fortificado",
-          "sanguessuga"
-        ]
-      },
-      "mobilidade": "lenta"
-    },
-    {
-      "id": "corrente",
-      "familiaEvolucao": "tecnica",
-      "grau": "A",
-      "nome": "Corrente",
-      "icone": "corrente",
-      "tipoAtaque": "fisico",
       "formulaDano": "1d6",
       "formulaCura": null,
-      "alcanceCelulas": 4,
-      "tipoArea": "nenhuma",
-      "raioArea": 0,
       "custoRecurso": 3,
       "recargaMs": 8000,
       "conjuracaoMs": 400,
-      "politicaAlvo": "hostil",
-      "politicaImpacto": "contato",
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
       "efeitos": [
         {
           "tipo": "puxao",
           "valor": 3
+        },
+        {
+          "tipo": "critico_garantido",
+          "duracaoMs": 3000,
+          "em": "conjurador"
         }
       ],
+      "id": "corrente",
+      "nome": "Corrente",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "tecnica",
+      "icone": "corrente",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 4,
       "visual": {
         "cor": "#7f8c8d",
         "impacto": "corte",
         "som": "golpe"
       },
       "marcos": {
-        "2": { "texto": "+1 de alcance", "alcance": 1 },
-        "4": { "texto": "Quem é puxado fica atordoado 0,5 s", "efeitos": [{ "tipo": "atordoar", "duracaoMs": 500 }] }
+        "2": {
+          "texto": "+1 de alcance",
+          "alcance": 1
+        },
+        "4": {
+          "texto": "Quem é puxado fica atordoado 0,5 s",
+          "efeitos": [
+            {
+              "tipo": "atordoar",
+              "duracaoMs": 500
+            }
+          ]
+        }
       },
       "evolucoes": {
         "3": [
@@ -863,54 +875,19 @@
           "cadeia",
           "eco"
         ]
-      }
-    },
-    {
-      "id": "golpe_flamejante",
-      "familiaEvolucao": "fogo",
-      "grau": "A",
-      "nome": "Golpe flamejante",
-      "icone": "fogo",
-      "tipoAtaque": "fisico",
-      "formulaDano": "2d6",
-      "formulaCura": null,
-      "alcanceCelulas": 2,
-      "tipoArea": "nenhuma",
-      "raioArea": 0,
-      "custoRecurso": 3,
-      "recargaMs": 5000,
-      "conjuracaoMs": 500,
-      "politicaAlvo": "hostil",
-      "politicaImpacto": "contato",
-      "interrupcao": "interrompivel",
-      "velocidadeProjetil": 0,
-      "efeitos": [],
-      "visual": {
-        "cor": "#ff7b39",
-        "conjuracao": "chamas",
-        "impacto": "chamas",
-        "camera": "leve",
-        "som": "golpe"
       },
-      "elemento": "fogo",
-      "marcos": {
-        "2": { "texto": "A queimadura dura 30% mais", "duracaoPct": 30 },
-        "4": { "texto": "O fogo abre a guarda: expõe (+15%) por 3 s", "efeitos": [{ "tipo": "exposto", "duracaoMs": 3000, "pct": 15 }] }
-      },
-      "evolucoes": {
-        "3": [
-          "brutal",
-          "elemental_raio"
-        ],
-        "5": [
-          "eficiente",
-          "eco"
-        ]
+      "variantes": {
+        "frenesi": {
+          "texto": "Puxa também os hostis a até 1 célula do alvo",
+          "mods": [
+            "encadear"
+          ]
+        }
       }
     },
     {
       "id": "pele_de_pedra",
-      "familiaEvolucao": "suporte",
+      "familiaEvolucao": "terra",
       "grau": "A",
       "nome": "Pele de pedra",
       "icone": "pedra",
@@ -930,8 +907,10 @@
       "efeitos": [],
       "passiva": {
         "hpMaxPct": 10,
-        "defesa": 2
-      }
+        "defesa": 2,
+        "tipo": "defensiva"
+      },
+      "familiaGeral": "terra"
     },
     {
       "id": "bola_de_fogo",
@@ -963,8 +942,19 @@
       },
       "elemento": "fogo",
       "marcos": {
-        "2": { "texto": "+1 de alcance", "alcance": 1 },
-        "4": { "texto": "A explosão empurra os atingidos 1 célula", "efeitos": [{ "tipo": "empurrao", "valor": 1 }] }
+        "2": {
+          "texto": "+1 de alcance",
+          "alcance": 1
+        },
+        "4": {
+          "texto": "A explosão empurra os atingidos 1 célula",
+          "efeitos": [
+            {
+              "tipo": "empurrao",
+              "valor": 1
+            }
+          ]
+        }
       },
       "evolucoes": {
         "3": [
@@ -975,7 +965,8 @@
           "eco",
           "brutal"
         ]
-      }
+      },
+      "familiaGeral": "fogo"
     },
     {
       "id": "lanca_de_gelo",
@@ -1006,8 +997,19 @@
       },
       "elemento": "gelo",
       "marcos": {
-        "2": { "texto": "+1 de alcance", "alcance": 1 },
-        "4": { "texto": "Enraíza os atingidos por 1 s", "efeitos": [{ "tipo": "enraizado", "duracaoMs": 1000 }] }
+        "2": {
+          "texto": "+1 de alcance",
+          "alcance": 1
+        },
+        "4": {
+          "texto": "Enraíza os atingidos por 1 s",
+          "efeitos": [
+            {
+              "tipo": "enraizado",
+              "duracaoMs": 1000
+            }
+          ]
+        }
       },
       "evolucoes": {
         "3": [
@@ -1053,8 +1055,19 @@
         "encadear"
       ],
       "marcos": {
-        "2": { "texto": "+1 de alcance", "alcance": 1 },
-        "4": { "texto": "Eletriza por 4 s (o próximo raio salta mais)", "efeitos": [{ "tipo": "eletrizado", "duracaoMs": 4000 }] }
+        "2": {
+          "texto": "+1 de alcance",
+          "alcance": 1
+        },
+        "4": {
+          "texto": "Eletriza por 4 s (o próximo raio salta mais)",
+          "efeitos": [
+            {
+              "tipo": "eletrizado",
+              "duracaoMs": 4000
+            }
+          ]
+        }
       },
       "evolucoes": {
         "3": [
@@ -1099,8 +1112,19 @@
         "som": "cura"
       },
       "marcos": {
-        "2": { "texto": "A barreira dura 25% mais", "duracaoPct": 25 },
-        "4": { "texto": "Também cura 4", "efeitos": [{ "tipo": "cura", "valor": 4 }] }
+        "2": {
+          "texto": "A barreira dura 25% mais",
+          "duracaoPct": 25
+        },
+        "4": {
+          "texto": "Também cura 4",
+          "efeitos": [
+            {
+              "tipo": "cura",
+              "valor": 4
+            }
+          ]
+        }
       },
       "evolucoes": {
         "3": [
@@ -1112,7 +1136,8 @@
           "longo_alcance"
         ]
       },
-      "mobilidade": "lenta"
+      "mobilidade": "lenta",
+      "familiaGeral": "suporte"
     },
     {
       "id": "nova_glacial",
@@ -1143,8 +1168,14 @@
       },
       "elemento": "gelo",
       "marcos": {
-        "2": { "texto": "O frio dura 25% mais", "duracaoPct": 25 },
-        "4": { "texto": "+1 de raio", "raio": 1 }
+        "2": {
+          "texto": "O frio dura 25% mais",
+          "duracaoPct": 25
+        },
+        "4": {
+          "texto": "+1 de raio",
+          "raio": 1
+        }
       },
       "evolucoes": {
         "3": [
@@ -1191,8 +1222,20 @@
       },
       "elemento": "psiquico",
       "marcos": {
-        "2": { "texto": "O silêncio dura 25% mais", "duracaoPct": 25 },
-        "4": { "texto": "Marca o alvo: o próximo golpe nele causa +25%", "efeitos": [{ "tipo": "marcado", "duracaoMs": 4000, "pct": 25 }] }
+        "2": {
+          "texto": "O silêncio dura 25% mais",
+          "duracaoPct": 25
+        },
+        "4": {
+          "texto": "Marca o alvo: o próximo golpe nele causa +25%",
+          "efeitos": [
+            {
+              "tipo": "marcado",
+              "duracaoMs": 4000,
+              "pct": 25
+            }
+          ]
+        }
       },
       "evolucoes": {
         "3": [
@@ -1206,28 +1249,66 @@
       }
     },
     {
-      "id": "afinidade_elemental",
-      "familiaEvolucao": "suporte",
-      "grau": "S",
-      "nome": "Afinidade elemental",
-      "icone": "estrela",
-      "tipoAtaque": "magico",
       "formulaDano": null,
       "formulaCura": null,
-      "alcanceCelulas": 0,
-      "tipoArea": "nenhuma",
-      "raioArea": 0,
-      "custoRecurso": 0,
-      "recargaMs": 0,
-      "conjuracaoMs": 500,
-      "politicaAlvo": "proprio",
-      "politicaImpacto": "proprio",
+      "custoRecurso": 4,
+      "recargaMs": 16000,
+      "conjuracaoMs": 300,
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
-      "efeitos": [],
-      "passiva": {
-        "tag": "elemental",
-        "danoPct": 15
+      "efeitos": [
+        {
+          "tipo": "bonus_dano",
+          "pct": 20,
+          "duracaoMs": 8000
+        }
+      ],
+      "id": "afinidade_elemental",
+      "nome": "Afinidade elemental",
+      "grau": "S",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "estrela",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 0,
+      "tags": [
+        "elemental"
+      ],
+      "visual": {
+        "cor": "#c39bd3",
+        "impacto": "estrelas",
+        "conjuracao": "runas",
+        "som": "magia"
+      },
+      "marcos": {
+        "2": {
+          "texto": "Dura 25% mais",
+          "duracaoPct": 25
+        },
+        "4": {
+          "texto": "Também devolve 4 de mana",
+          "efeitos": [
+            {
+              "tipo": "recuperar_recurso",
+              "valor": 4,
+              "duracaoMs": 0
+            }
+          ]
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "eficiente",
+          "controle"
+        ],
+        "5": [
+          "fortificado",
+          "eco"
+        ]
       }
     },
     {
@@ -1250,7 +1331,9 @@
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 16,
       "efeitos": [],
-      "tags": ["flechas"],
+      "tags": [
+        "flechas"
+      ],
       "visual": {
         "cor": "#d4ac0d",
         "viagem": "esteira",
@@ -1261,8 +1344,20 @@
         "atravessar"
       ],
       "marcos": {
-        "2": { "texto": "+1 de alcance", "alcance": 1 },
-        "4": { "texto": "Expõe os atingidos (+10%) por 2 s", "efeitos": [{ "tipo": "exposto", "duracaoMs": 2000, "pct": 10 }] }
+        "2": {
+          "texto": "+1 de alcance",
+          "alcance": 1
+        },
+        "4": {
+          "texto": "Expõe os atingidos (+10%) por 2 s",
+          "efeitos": [
+            {
+              "tipo": "exposto",
+              "duracaoMs": 2000,
+              "pct": 10
+            }
+          ]
+        }
       },
       "evolucoes": {
         "3": [
@@ -1296,7 +1391,9 @@
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
       "efeitos": [],
-      "tags": ["flechas"],
+      "tags": [
+        "flechas"
+      ],
       "visual": {
         "cor": "#d4ac0d",
         "impacto": "chuva",
@@ -1304,8 +1401,20 @@
         "som": "projetil"
       },
       "marcos": {
-        "2": { "texto": "Custa 20% menos mana", "custoPct": -20 },
-        "4": { "texto": "Flechas cravadas: os atingidos ficam atolados (−30%) por 2 s", "efeitos": [{ "tipo": "atolado", "duracaoMs": 2000, "pct": 30 }] }
+        "2": {
+          "texto": "Custa 20% menos mana",
+          "custoPct": -20
+        },
+        "4": {
+          "texto": "Flechas cravadas: os atingidos ficam atolados (−30%) por 2 s",
+          "efeitos": [
+            {
+              "tipo": "atolado",
+              "duracaoMs": 2000,
+              "pct": 30
+            }
+          ]
+        }
       },
       "evolucoes": {
         "3": [
@@ -1327,7 +1436,7 @@
       "tipoAtaque": "fisico",
       "formulaDano": "1d6",
       "formulaCura": null,
-      "alcanceCelulas": 6,
+      "alcanceCelulas": 8,
       "tipoArea": "nenhuma",
       "raioArea": 0,
       "custoRecurso": 3,
@@ -1337,8 +1446,17 @@
       "politicaImpacto": "projetil",
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 14,
-      "efeitos": [],
-      "tags": ["flechas"],
+      "efeitos": [
+        {
+          "tipo": "envenenado",
+          "valor": 1,
+          "pct": 30,
+          "duracaoMs": 6000
+        }
+      ],
+      "tags": [
+        "flechas"
+      ],
       "visual": {
         "cor": "#58d68d",
         "viagem": "esteira",
@@ -1347,8 +1465,20 @@
       },
       "elemento": "veneno",
       "marcos": {
-        "2": { "texto": "O veneno dura 30% mais", "duracaoPct": 30 },
-        "4": { "texto": "Veneno paralisante: atola (−25%) por 2 s", "efeitos": [{ "tipo": "atolado", "duracaoMs": 2000, "pct": 25 }] }
+        "2": {
+          "texto": "O veneno dura 30% mais",
+          "duracaoPct": 30
+        },
+        "4": {
+          "texto": "Veneno paralisante: atola (−25%) por 2 s",
+          "efeitos": [
+            {
+              "tipo": "atolado",
+              "duracaoMs": 2000,
+              "pct": 25
+            }
+          ]
+        }
       },
       "evolucoes": {
         "3": [
@@ -1360,7 +1490,8 @@
           "brutal"
         ]
       },
-      "mobilidade": "lenta"
+      "mobilidade": "lenta",
+      "familiaGeral": "veneno"
     },
     {
       "id": "tiro_em_leque",
@@ -1382,15 +1513,28 @@
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
       "efeitos": [],
-      "tags": ["flechas"],
+      "tags": [
+        "flechas"
+      ],
       "visual": {
         "cor": "#d4ac0d",
         "impacto": "leque",
         "som": "projetil"
       },
       "marcos": {
-        "2": { "texto": "Recarga 15% menor", "recargaPct": -15 },
-        "4": { "texto": "Empurra os atingidos 1 célula", "efeitos": [{ "tipo": "empurrao", "valor": 1 }] }
+        "2": {
+          "texto": "Recarga 15% menor",
+          "recargaPct": -15
+        },
+        "4": {
+          "texto": "Empurra os atingidos 1 célula",
+          "efeitos": [
+            {
+              "tipo": "empurrao",
+              "valor": 1
+            }
+          ]
+        }
       },
       "evolucoes": {
         "3": [
@@ -1405,7 +1549,7 @@
     },
     {
       "id": "troca_sombria",
-      "familiaEvolucao": "suporte",
+      "familiaEvolucao": "sombra",
       "grau": "S",
       "nome": "Troca sombria",
       "icone": "troca",
@@ -1437,8 +1581,20 @@
         "som": "magia"
       },
       "marcos": {
-        "2": { "texto": "O alvo fica preso 30% mais", "duracaoPct": 30 },
-        "4": { "texto": "Marca o alvo: o próximo golpe nele causa +25%", "efeitos": [{ "tipo": "marcado", "duracaoMs": 4000, "pct": 25 }] }
+        "2": {
+          "texto": "O alvo fica preso 30% mais",
+          "duracaoPct": 30
+        },
+        "4": {
+          "texto": "Marca o alvo: o próximo golpe nele causa +25%",
+          "efeitos": [
+            {
+              "tipo": "marcado",
+              "duracaoMs": 4000,
+              "pct": 25
+            }
+          ]
+        }
       },
       "evolucoes": {
         "3": [
@@ -1450,32 +1606,65 @@
           "fortificado",
           "elemental_sombra"
         ]
-      }
+      },
+      "familiaGeral": "sombra"
     },
     {
-      "id": "olho_de_aguia",
-      "familiaEvolucao": "suporte",
-      "grau": "S",
-      "nome": "Olho de águia",
-      "icone": "asa",
-      "tipoAtaque": "fisico",
       "formulaDano": null,
       "formulaCura": null,
-      "alcanceCelulas": 0,
-      "tipoArea": "nenhuma",
-      "raioArea": 0,
-      "custoRecurso": 0,
-      "recargaMs": 0,
-      "conjuracaoMs": 500,
-      "politicaAlvo": "proprio",
-      "politicaImpacto": "proprio",
+      "custoRecurso": 3,
+      "recargaMs": 18000,
+      "conjuracaoMs": 200,
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
-      "efeitos": [],
-      "passiva": {
-        "tag": "projetil",
-        "alcance": 1,
-        "danoPct": 5
+      "efeitos": [
+        {
+          "tipo": "ab_recarga",
+          "pct": 30,
+          "duracaoMs": 6000
+        },
+        {
+          "tipo": "critico_garantido",
+          "duracaoMs": 6000
+        }
+      ],
+      "id": "olho_de_aguia",
+      "nome": "Olho de águia",
+      "grau": "S",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "asa",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 0,
+      "visual": {
+        "cor": "#d4ac0d",
+        "impacto": "estrelas",
+        "conjuracao": "brilho",
+        "som": "nivel"
+      },
+      "marcos": {
+        "2": {
+          "texto": "Dura 25% mais",
+          "duracaoPct": 25
+        },
+        "4": {
+          "texto": "Recarga 15% menor",
+          "recargaPct": -15
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "eficiente",
+          "controle"
+        ],
+        "5": [
+          "fortificado",
+          "eco"
+        ]
       }
     },
     {
@@ -1585,7 +1774,7 @@
       "elemento": "fogo",
       "fusao": [
         "redemoinho",
-        "golpe_flamejante"
+        "lamina_em_brasa"
       ],
       "visual": {
         "cor": "#ff7b39",
@@ -1666,7 +1855,8 @@
         "impacto": "chuva",
         "camera": "leve",
         "som": "magia"
-      }
+      },
+      "familiaGeral": "sagrado"
     },
     {
       "id": "estaca_de_pedra",
@@ -1724,7 +1914,8 @@
       "tags": [
         "expansao19"
       ],
-      "elemento": "terra"
+      "elemento": "terra",
+      "familiaGeral": "terra"
     },
     {
       "id": "abalo_sismico",
@@ -1783,7 +1974,8 @@
       "tags": [
         "expansao19"
       ],
-      "elemento": "terra"
+      "elemento": "terra",
+      "familiaGeral": "terra"
     },
     {
       "id": "muralha_de_pedra",
@@ -1840,7 +2032,8 @@
       "nivelMinimo": 8,
       "tags": [
         "expansao19"
-      ]
+      ],
+      "familiaGeral": "terra"
     },
     {
       "id": "passo_sombrio",
@@ -1897,7 +2090,8 @@
       "nivelMinimo": 3,
       "tags": [
         "expansao19"
-      ]
+      ],
+      "familiaGeral": "sombra"
     },
     {
       "id": "punhal_das_sombras",
@@ -1950,7 +2144,8 @@
       "tags": [
         "expansao19"
       ],
-      "elemento": "trevas"
+      "elemento": "trevas",
+      "familiaGeral": "sombra"
     },
     {
       "id": "veu_da_noite",
@@ -2008,7 +2203,8 @@
       "nivelMinimo": 3,
       "tags": [
         "expansao19"
-      ]
+      ],
+      "familiaGeral": "sombra"
     },
     {
       "id": "lanca_radiante",
@@ -2061,7 +2257,8 @@
       "tags": [
         "expansao19"
       ],
-      "elemento": "sagrado"
+      "elemento": "sagrado",
+      "familiaGeral": "sagrado"
     },
     {
       "id": "circulo_de_amparo",
@@ -2119,7 +2316,8 @@
       "nivelMinimo": 8,
       "tags": [
         "expansao19"
-      ]
+      ],
+      "familiaGeral": "sagrado"
     },
     {
       "id": "purificacao",
@@ -2175,7 +2373,8 @@
       "nivelMinimo": 3,
       "tags": [
         "expansao19"
-      ]
+      ],
+      "familiaGeral": "suporte"
     },
     {
       "id": "dardo_toxico",
@@ -2186,7 +2385,7 @@
       "tipoAtaque": "magico",
       "formulaDano": "1d4",
       "formulaCura": null,
-      "alcanceCelulas": 5,
+      "alcanceCelulas": 4,
       "tipoArea": "nenhuma",
       "raioArea": 0,
       "custoRecurso": 2,
@@ -2199,9 +2398,9 @@
       "efeitos": [
         {
           "tipo": "envenenado",
-          "duracaoMs": 6000,
-          "valor": 2,
-          "pct": 30
+          "valor": 3,
+          "pct": 50,
+          "duracaoMs": 3000
         }
       ],
       "visual": {
@@ -2235,7 +2434,8 @@
       "tags": [
         "expansao19"
       ],
-      "elemento": "veneno"
+      "elemento": "veneno",
+      "familiaGeral": "veneno"
     },
     {
       "id": "nevoa_venenosa",
@@ -2293,7 +2493,8 @@
       "nivelMinimo": 8,
       "tags": [
         "expansao19"
-      ]
+      ],
+      "familiaGeral": "veneno"
     },
     {
       "id": "corte_dilacerante",
@@ -2351,7 +2552,8 @@
       "nivelMinimo": 3,
       "tags": [
         "expansao19"
-      ]
+      ],
+      "familiaGeral": "tecnica"
     },
     {
       "id": "postura_de_aparo",
@@ -2409,7 +2611,8 @@
       "nivelMinimo": 3,
       "tags": [
         "expansao19"
-      ]
+      ],
+      "familiaGeral": "tecnica"
     },
     {
       "id": "onda_de_repulsao",
@@ -2466,7 +2669,8 @@
       "nivelMinimo": 3,
       "tags": [
         "expansao19"
-      ]
+      ],
+      "familiaGeral": "psiquico"
     },
     {
       "id": "tenacidade",
@@ -2511,8 +2715,10 @@
         "expansao19"
       ],
       "passiva": {
-        "tenacidadePct": 15
-      }
+        "tenacidadePct": 15,
+        "tipo": "defensiva"
+      },
+      "familiaGeral": "suporte"
     },
     {
       "id": "disciplina_marcial",
@@ -2558,8 +2764,10 @@
       ],
       "passiva": {
         "tag": "fisico",
-        "custoPct": -10
-      }
+        "custoPct": -10,
+        "tipo": "ofensiva"
+      },
+      "familiaGeral": "tecnica"
     },
     {
       "id": "fluxo_restaurador",
@@ -2604,8 +2812,10 @@
         "expansao19"
       ],
       "passiva": {
-        "fluxoEscudoPct": 25
-      }
+        "fluxoEscudoPct": 25,
+        "tipo": "ofensiva"
+      },
+      "familiaGeral": "suporte"
     },
     {
       "id": "toque_funesto",
@@ -2816,50 +3026,50 @@
       "elemento": "trevas"
     },
     {
-      "id": "comando_sepulcral",
-      "familiaEvolucao": "sombra",
-      "grau": "B",
-      "nome": "Comando sepulcral",
-      "icone": "coroa",
-      "tipoAtaque": "magico",
       "formulaDano": null,
       "formulaCura": null,
-      "alcanceCelulas": 6,
-      "tipoArea": "nenhuma",
-      "raioArea": 0,
       "custoRecurso": 4,
       "recargaMs": 12000,
       "conjuracaoMs": 400,
-      "politicaAlvo": "proprio",
-      "politicaImpacto": "proprio",
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
       "efeitos": [
         {
           "tipo": "comandar_mortos",
-          "pct": 25,
-          "duracaoMs": 6000
+          "pct": 30,
+          "duracaoMs": 4000
         }
       ],
-      "visual": {
-        "cor": "#8b68d9",
-        "conjuracao": "sombra",
-        "impacto": "sombra",
-        "som": "magia"
-      },
-      "mobilidade": "lenta",
+      "id": "comando_sepulcral",
+      "nome": "Comando sepulcral",
+      "grau": "B",
       "nivelMinimo": 1,
+      "familiaEvolucao": "sombra",
+      "icone": "coroa",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 0,
+      "mobilidade": "lenta",
       "tags": [
         "necromancia"
       ],
+      "visual": {
+        "cor": "#8b68d9",
+        "impacto": "sombra",
+        "conjuracao": "sombra",
+        "som": "magia"
+      },
       "marcos": {
         "2": {
           "texto": "Custa 15% menos mana",
           "custoPct": -15
         },
         "4": {
-          "texto": "Recarga 15% menor",
-          "recargaPct": -15
+          "texto": "Dura 25% mais",
+          "duracaoPct": 25
         }
       },
       "evolucoes": {
@@ -2869,7 +3079,7 @@
         ],
         "5": [
           "fortificado",
-          "evasivo"
+          "amplo"
         ]
       }
     },
@@ -2992,6 +3202,2958 @@
           "evasivo"
         ]
       }
+    },
+    {
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "custoRecurso": 3,
+      "recargaMs": 8000,
+      "conjuracaoMs": 250,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "avanco",
+          "valor": 2,
+          "em": "conjurador"
+        },
+        {
+          "tipo": "empurrao",
+          "valor": 1
+        },
+        {
+          "tipo": "escudo_acumulado",
+          "valor": 4,
+          "pct": 16,
+          "duracaoMs": 6000,
+          "em": "conjurador"
+        },
+        {
+          "tipo": "intercepta",
+          "valor": 3,
+          "duracaoMs": 600,
+          "em": "conjurador"
+        }
+      ],
+      "id": "investida_de_escudo",
+      "nome": "Investida de escudo",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "tecnica",
+      "icone": "escudo",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "linha",
+      "raioArea": 0,
+      "alcanceCelulas": 2,
+      "mobilidade": "livre",
+      "visual": {
+        "cor": "#95a5a6",
+        "impacto": "faiscas",
+        "conjuracao": "cristais",
+        "camera": "leve",
+        "som": "golpe"
+      },
+      "tags": [
+        "movimento"
+      ],
+      "marcos": {
+        "2": {
+          "texto": "O escudo dura 20% mais",
+          "duracaoPct": 20
+        },
+        "4": {
+          "texto": "Também cura 4",
+          "efeitos": [
+            {
+              "tipo": "cura",
+              "valor": 4,
+              "em": "conjurador"
+            }
+          ]
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "controle",
+          "eficiente"
+        ],
+        "5": [
+          "fortificado",
+          "brutal"
+        ]
+      },
+      "variantes": {
+        "frenesi": {
+          "texto": "Avança 4 células, e quem é atingido fica atordoado por 0,5 s",
+          "alcance": 2,
+          "trocar": [
+            {
+              "tipo": "avanco",
+              "valor": 4,
+              "em": "conjurador"
+            }
+          ],
+          "efeitos": [
+            {
+              "tipo": "atordoar",
+              "duracaoMs": 500
+            }
+          ]
+        }
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 4,
+      "recargaMs": 15000,
+      "conjuracaoMs": 300,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "bonus_dano",
+          "pct": 20,
+          "duracaoMs": 8000
+        },
+        {
+          "tipo": "fase",
+          "ref": "brado_onda",
+          "duracaoMs": 0
+        }
+      ],
+      "id": "brado",
+      "nome": "Brado",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "grito",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "aliados",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 2,
+      "alcanceCelulas": 2,
+      "visual": {
+        "cor": "#f39c12",
+        "impacto": "estrelas",
+        "conjuracao": "anel",
+        "som": "nivel"
+      },
+      "marcos": {
+        "2": {
+          "texto": "O bônus dura 25% mais",
+          "duracaoPct": 25
+        },
+        "4": {
+          "texto": "Os hostis atingidos ficam sem golpes físicos por 1 s",
+          "efeitos": [
+            {
+              "tipo": "sem_ataque",
+              "duracaoMs": 1000
+            }
+          ]
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "controle",
+          "eficiente"
+        ],
+        "5": [
+          "fortificado",
+          "amplo"
+        ]
+      },
+      "variantes": {
+        "frenesi": {
+          "texto": "A onda empurra 2 células e tira lentidão e medo dos aliados",
+          "efeitos": [
+            {
+              "tipo": "libertar"
+            }
+          ],
+          "trocar": [
+            {
+              "tipo": "fase",
+              "ref": "brado_onda_frenesi",
+              "duracaoMs": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "formulaDano": "1d4",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "empurrao",
+          "valor": 1
+        }
+      ],
+      "id": "brado_onda",
+      "nome": "Brado (onda)",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "grito",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 2,
+      "alcanceCelulas": 2,
+      "interna": true,
+      "visual": {
+        "cor": "#f39c12",
+        "impacto": "anel",
+        "som": "golpe"
+      }
+    },
+    {
+      "formulaDano": "1d4",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "empurrao",
+          "valor": 2
+        }
+      ],
+      "id": "brado_onda_frenesi",
+      "nome": "Brado (onda no Frenesi)",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "grito",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 2,
+      "alcanceCelulas": 2,
+      "interna": true,
+      "visual": {
+        "cor": "#ff6a00",
+        "impacto": "anel",
+        "som": "golpe"
+      }
+    },
+    {
+      "formulaDano": "1d10",
+      "formulaCura": null,
+      "custoRecurso": 3,
+      "recargaMs": 6000,
+      "conjuracaoMs": 500,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "id": "lamina_em_brasa",
+      "nome": "Lâmina em brasa",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "fogo",
+      "icone": "fogo",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "cone",
+      "raioArea": 3,
+      "alcanceCelulas": 3,
+      "elemento": "fogo",
+      "visual": {
+        "cor": "#ff7b39",
+        "impacto": "chamas",
+        "conjuracao": "brasas",
+        "camera": "leve",
+        "som": "golpe"
+      },
+      "marcos": {
+        "2": {
+          "texto": "A queimadura dura 30% mais",
+          "duracaoPct": 30
+        },
+        "4": {
+          "texto": "O fogo abre a guarda: expõe (+15%) por 3 s",
+          "efeitos": [
+            {
+              "tipo": "exposto",
+              "pct": 15,
+              "duracaoMs": 3000
+            }
+          ]
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "brutal",
+          "elemental_raio"
+        ],
+        "5": [
+          "eficiente",
+          "eco"
+        ]
+      },
+      "variantes": {
+        "furia_alta": {
+          "texto": "Arco maior, e o chão fica em brasa por 2 s",
+          "raio": 1,
+          "alcance": 1,
+          "efeitos": [
+            {
+              "tipo": "rastro_dano",
+              "valor": 3,
+              "duracaoMs": 2000,
+              "em": "conjurador"
+            }
+          ]
+        },
+        "frenesi": {
+          "texto": "Sai sem tempo de carga",
+          "conjuracaoPct": -100
+        }
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 3,
+      "recargaMs": 12000,
+      "conjuracaoMs": 200,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "desafiado",
+          "pct": 15,
+          "duracaoMs": 3000
+        },
+        {
+          "tipo": "furia",
+          "valor": 6,
+          "em": "conjurador"
+        }
+      ],
+      "id": "desafio",
+      "nome": "Desafio",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "psiquico",
+      "icone": "grito",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 3,
+      "alcanceCelulas": 3,
+      "visual": {
+        "cor": "#e74c3c",
+        "impacto": "anel",
+        "conjuracao": "sangue",
+        "som": "nivel"
+      },
+      "marcos": {
+        "2": {
+          "texto": "O desafio dura 1 s a mais",
+          "duracaoPct": 30
+        },
+        "4": {
+          "texto": "Os desafiados ficam expostos (+10%)",
+          "efeitos": [
+            {
+              "tipo": "exposto",
+              "pct": 10,
+              "duracaoMs": 3000
+            }
+          ]
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "controle",
+          "amplo"
+        ],
+        "5": [
+          "eficiente",
+          "fortificado"
+        ]
+      },
+      "variantes": {
+        "frenesi": {
+          "texto": "Alcance de 5 células, e o bônus sobe para +25%",
+          "raio": 2,
+          "alcance": 2,
+          "trocar": [
+            {
+              "tipo": "desafiado",
+              "pct": 25,
+              "duracaoMs": 3000
+            }
+          ]
+        }
+      }
+    },
+    {
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "custoRecurso": 4,
+      "recargaMs": 10000,
+      "conjuracaoMs": 400,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "atordoar",
+          "duracaoMs": 500
+        }
+      ],
+      "id": "salto_esmagador",
+      "nome": "Salto esmagador",
+      "grau": "S",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "terra",
+      "icone": "investida",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "celula",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 1,
+      "alcanceCelulas": 4,
+      "mobilidade": "livre",
+      "visual": {
+        "cor": "#a1887f",
+        "impacto": "pedra",
+        "camera": "forte",
+        "som": "explosao"
+      },
+      "tags": [
+        "movimento"
+      ],
+      "marcos": {
+        "2": {
+          "texto": "+1 de alcance",
+          "alcance": 1
+        },
+        "4": {
+          "texto": "+1 de raio",
+          "raio": 1
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "brutal",
+          "amplo"
+        ],
+        "5": [
+          "controle",
+          "elemental_terra"
+        ]
+      },
+      "variantes": {
+        "frenesi": {
+          "texto": "Atordoa por 1 s",
+          "trocar": [
+            {
+              "tipo": "atordoar",
+              "duracaoMs": 1000
+            }
+          ]
+        }
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 2,
+      "recargaMs": 7000,
+      "conjuracaoMs": 100,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "contragolpe",
+          "ref": "contragolpe_arco",
+          "duracaoMs": 1500
+        }
+      ],
+      "id": "contragolpe",
+      "nome": "Contragolpe",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "tecnica",
+      "icone": "escudo",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 0,
+      "mobilidade": "lenta",
+      "visual": {
+        "cor": "#f0f3f4",
+        "impacto": "anel",
+        "som": "golpe"
+      },
+      "marcos": {
+        "2": {
+          "texto": "A postura dura 30% mais",
+          "duracaoPct": 30
+        },
+        "4": {
+          "texto": "A resposta deixa o atacante exposto (+15%)",
+          "efeitos": []
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "eficiente",
+          "controle"
+        ],
+        "5": [
+          "fortificado",
+          "brutal"
+        ]
+      },
+      "variantes": {
+        "frenesi": {
+          "texto": "O arco vira 360°",
+          "trocar": [
+            {
+              "tipo": "contragolpe",
+              "ref": "contragolpe_giro",
+              "duracaoMs": 1500
+            }
+          ]
+        }
+      }
+    },
+    {
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "id": "contragolpe_arco",
+      "nome": "Contragolpe (arco)",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "tecnica",
+      "icone": "espada",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "cone",
+      "raioArea": 2,
+      "alcanceCelulas": 2,
+      "interna": true,
+      "visual": {
+        "cor": "#e74c3c",
+        "impacto": "corte",
+        "som": "golpe"
+      }
+    },
+    {
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "id": "contragolpe_giro",
+      "nome": "Contragolpe (giro)",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "tecnica",
+      "icone": "redemoinho",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 2,
+      "alcanceCelulas": 2,
+      "interna": true,
+      "visual": {
+        "cor": "#e74c3c",
+        "impacto": "vento",
+        "som": "golpe"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 10000,
+      "conjuracaoMs": 150,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "sobrecarga",
+          "pct": 40,
+          "duracaoMs": 10000
+        }
+      ],
+      "id": "sobrecarga_arcana",
+      "nome": "Sobrecarga arcana",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "arcana",
+      "icone": "raio",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 0,
+      "custoVida": 6,
+      "visual": {
+        "cor": "#a569bd",
+        "impacto": "runas",
+        "conjuracao": "relampago",
+        "som": "magia"
+      },
+      "marcos": {
+        "2": {
+          "texto": "Recarga 15% menor",
+          "recargaPct": -15
+        },
+        "4": {
+          "texto": "A magia sobrecarregada também é crítica",
+          "efeitos": [
+            {
+              "tipo": "critico_garantido",
+              "duracaoMs": 10000
+            }
+          ]
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "eficiente",
+          "brutal"
+        ],
+        "5": [
+          "controle",
+          "eco"
+        ]
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 3,
+      "recargaMs": 8000,
+      "conjuracaoMs": 100,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "passo_sombrio",
+          "valor": 4
+        },
+        {
+          "tipo": "fase",
+          "ref": "piscar_eco",
+          "duracaoMs": 0,
+          "em": "conjurador"
+        }
+      ],
+      "id": "piscar",
+      "nome": "Piscar",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "arcana",
+      "icone": "teleporte",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "celula",
+      "politicaImpacto": "proprio",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 4,
+      "tags": [
+        "movimento"
+      ],
+      "visual": {
+        "cor": "#9b8cff",
+        "impacto": "runas",
+        "conjuracao": "brilho",
+        "som": "magia"
+      },
+      "marcos": {
+        "2": {
+          "texto": "+1 de alcance",
+          "alcance": 1
+        },
+        "4": {
+          "texto": "Recarga 20% menor",
+          "recargaPct": -20
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "eficiente",
+          "longo_alcance"
+        ],
+        "5": [
+          "controle",
+          "eco"
+        ]
+      }
+    },
+    {
+      "formulaDano": "1d6",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "id": "piscar_eco",
+      "nome": "Eco do Piscar",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "arcana",
+      "icone": "explosao",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "celula",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 1,
+      "alcanceCelulas": 30,
+      "interna": true,
+      "visual": {
+        "cor": "#9b8cff",
+        "impacto": "explosao",
+        "som": "explosao"
+      },
+      "variantes": {
+        "enc_fogo": {
+          "texto": "O eco é de fogo",
+          "elemento": "fogo"
+        },
+        "enc_gelo": {
+          "texto": "O eco é de gelo",
+          "elemento": "gelo"
+        },
+        "enc_raio": {
+          "texto": "O eco é de raio",
+          "elemento": "raio"
+        },
+        "enc_terra": {
+          "texto": "O eco é de terra",
+          "elemento": "terra"
+        },
+        "enc_veneno": {
+          "texto": "O eco é de veneno",
+          "elemento": "veneno"
+        },
+        "enc_trevas": {
+          "texto": "O eco é de trevas",
+          "elemento": "trevas"
+        },
+        "enc_sagrado": {
+          "texto": "O eco é de sagrado",
+          "elemento": "sagrado"
+        }
+      }
+    },
+    {
+      "formulaDano": "2d8",
+      "formulaCura": null,
+      "custoRecurso": 5,
+      "recargaMs": 9000,
+      "conjuracaoMs": 1100,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "id": "orbe_instavel",
+      "nome": "Orbe instável",
+      "grau": "S",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "arcana",
+      "icone": "cometa",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "celula",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 1,
+      "alcanceCelulas": 6,
+      "visual": {
+        "cor": "#b38cff",
+        "impacto": "explosao",
+        "conjuracao": "runas",
+        "viagem": "brilho",
+        "camera": "leve",
+        "som": "explosao"
+      },
+      "marcos": {
+        "2": {
+          "texto": "+1 de alcance",
+          "alcance": 1
+        },
+        "4": {
+          "texto": "+1 de raio",
+          "raio": 1
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "amplo",
+          "brutal"
+        ],
+        "5": [
+          "eficiente",
+          "eco"
+        ]
+      },
+      "variantes": {
+        "enc_fogo": {
+          "texto": "Carrega o elemento fogo",
+          "elemento": "fogo"
+        },
+        "enc_gelo": {
+          "texto": "Carrega o elemento gelo",
+          "elemento": "gelo"
+        },
+        "enc_raio": {
+          "texto": "Carrega o elemento raio",
+          "elemento": "raio"
+        },
+        "enc_terra": {
+          "texto": "Carrega o elemento terra",
+          "elemento": "terra"
+        },
+        "enc_veneno": {
+          "texto": "Carrega o elemento veneno",
+          "elemento": "veneno"
+        },
+        "enc_trevas": {
+          "texto": "Carrega o elemento trevas",
+          "elemento": "trevas"
+        },
+        "enc_sagrado": {
+          "texto": "Carrega o elemento sagrado",
+          "elemento": "sagrado"
+        }
+      }
+    },
+    {
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "custoRecurso": 4,
+      "recargaMs": 7000,
+      "conjuracaoMs": 600,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "empurrao",
+          "valor": 1
+        }
+      ],
+      "id": "flecha_explosiva",
+      "nome": "Flecha explosiva",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "escalaCom": "destreza",
+      "familiaEvolucao": "fogo",
+      "icone": "explosao",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "celula",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 1,
+      "alcanceCelulas": 7,
+      "tags": [
+        "flechas"
+      ],
+      "visual": {
+        "cor": "#e67e22",
+        "impacto": "explosao",
+        "viagem": "esteira",
+        "camera": "leve",
+        "som": "explosao"
+      },
+      "marcos": {
+        "2": {
+          "texto": "+1 de alcance",
+          "alcance": 1
+        },
+        "4": {
+          "texto": "Queima os atingidos",
+          "efeitos": [
+            {
+              "tipo": "queimando",
+              "valor": 2,
+              "duracaoMs": 3000
+            }
+          ]
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "amplo",
+          "brutal"
+        ],
+        "5": [
+          "elemental_fogo",
+          "eco"
+        ]
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 2,
+      "recargaMs": 7000,
+      "conjuracaoMs": 0,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "passo_sombrio",
+          "valor": 3
+        },
+        {
+          "tipo": "critico_garantido",
+          "duracaoMs": 3000,
+          "em": "conjurador"
+        }
+      ],
+      "id": "rolamento",
+      "nome": "Rolamento",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "sombra",
+      "icone": "botas",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "celula",
+      "politicaImpacto": "proprio",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 3,
+      "mobilidade": "livre",
+      "tags": [
+        "movimento"
+      ],
+      "visual": {
+        "cor": "#c9b37c",
+        "impacto": "vento",
+        "som": "golpe"
+      },
+      "marcos": {
+        "2": {
+          "texto": "Recarga 15% menor",
+          "recargaPct": -15
+        },
+        "4": {
+          "texto": "Esquiva 30% por 1 s",
+          "efeitos": [
+            {
+              "tipo": "esquiva",
+              "pct": 30,
+              "duracaoMs": 1000,
+              "em": "conjurador"
+            }
+          ]
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "eficiente",
+          "longo_alcance"
+        ],
+        "5": [
+          "controle",
+          "fortificado"
+        ]
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 2,
+      "recargaMs": 9000,
+      "conjuracaoMs": 200,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "marca_cacador",
+          "pct": 20,
+          "duracaoMs": 8000
+        }
+      ],
+      "id": "marca_do_cacador",
+      "nome": "Marca do caçador",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "tecnica",
+      "icone": "alvo",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 9,
+      "visual": {
+        "cor": "#d4ac0d",
+        "impacto": "brilho",
+        "som": "projetil"
+      },
+      "marcos": {
+        "2": {
+          "texto": "Dura 25% mais",
+          "duracaoPct": 25
+        },
+        "4": {
+          "texto": "Também expõe (+10%)",
+          "efeitos": [
+            {
+              "tipo": "exposto",
+              "pct": 10,
+              "duracaoMs": 4000
+            }
+          ]
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "controle",
+          "eficiente"
+        ],
+        "5": [
+          "longo_alcance",
+          "eco"
+        ]
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 3,
+      "recargaMs": 9000,
+      "conjuracaoMs": 400,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "armadilha",
+          "valor": 6,
+          "duracaoMs": 30000,
+          "efeito": {
+            "enraizado": 1500
+          }
+        }
+      ],
+      "id": "armadilha_de_caca",
+      "nome": "Armadilha de caça",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "tecnica",
+      "icone": "aviso",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "celula",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 0,
+      "alcanceCelulas": 4,
+      "visual": {
+        "cor": "#b9770e",
+        "impacto": "farpas",
+        "som": "golpe"
+      },
+      "marcos": {
+        "2": {
+          "texto": "Dura 25% mais",
+          "duracaoPct": 25
+        },
+        "4": {
+          "texto": "Recarga 15% menor",
+          "recargaPct": -15
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "controle",
+          "eficiente"
+        ],
+        "5": [
+          "brutal",
+          "eco"
+        ]
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 4,
+      "recargaMs": 9000,
+      "conjuracaoMs": 400,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "detonar_invocacao",
+          "valor": 2,
+          "pct": 60
+        }
+      ],
+      "id": "explosao_cadaverica",
+      "nome": "Explosão cadavérica",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "sombra",
+      "icone": "caveira",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 6,
+      "tags": [
+        "necromancia"
+      ],
+      "elemento": "trevas",
+      "visual": {
+        "cor": "#7d3c98",
+        "impacto": "explosao",
+        "conjuracao": "sombra",
+        "camera": "leve",
+        "som": "explosao"
+      },
+      "marcos": {
+        "2": {
+          "texto": "A explosão definha",
+          "efeitos": [
+            {
+              "tipo": "definhando",
+              "pct": 15,
+              "duracaoMs": 3000
+            }
+          ]
+        },
+        "4": {
+          "texto": "Recarga 20% menor",
+          "recargaPct": -20
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "brutal",
+          "amplo"
+        ],
+        "5": [
+          "eficiente",
+          "eco"
+        ]
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 6,
+      "recargaMs": 20000,
+      "conjuracaoMs": 700,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "invocar_temporario",
+          "ref": "esqueleto_profano",
+          "valor": 2,
+          "duracaoMs": 12000
+        }
+      ],
+      "id": "levante_profano",
+      "nome": "Levante profano",
+      "grau": "S",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "sombra",
+      "icone": "invocar",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 0,
+      "tags": [
+        "necromancia"
+      ],
+      "visual": {
+        "cor": "#8b68d9",
+        "impacto": "sombra",
+        "conjuracao": "runas",
+        "som": "magia"
+      },
+      "marcos": {
+        "2": {
+          "texto": "Os esqueletos duram 25% mais",
+          "duracaoPct": 25
+        },
+        "4": {
+          "texto": "Recarga 15% menor",
+          "recargaPct": -15
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "eficiente",
+          "controle"
+        ],
+        "5": [
+          "fortificado",
+          "eco"
+        ]
+      }
+    },
+    {
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "custoRecurso": 3,
+      "recargaMs": 5000,
+      "conjuracaoMs": 300,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "atordoar",
+          "duracaoMs": 300
+        }
+      ],
+      "id": "mergulho",
+      "nome": "Mergulho",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "escalaCom": "destreza",
+      "familiaEvolucao": "tecnica",
+      "tipoAtaque": "fisico",
+      "tags": [
+        "falcao"
+      ],
+      "icone": "asa",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 8,
+      "visual": {
+        "cor": "#7fbde8",
+        "impacto": "farpas",
+        "viagem": "vento",
+        "som": "golpe"
+      },
+      "marcos": {
+        "2": {
+          "texto": "+1 de alcance",
+          "alcance": 1
+        },
+        "4": {
+          "texto": "Expõe o alvo (+10%)",
+          "efeitos": [
+            {
+              "tipo": "exposto",
+              "pct": 10,
+              "duracaoMs": 3000
+            }
+          ]
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "brutal",
+          "eficiente"
+        ],
+        "5": [
+          "cadeia",
+          "eco"
+        ]
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 2,
+      "recargaMs": 9000,
+      "conjuracaoMs": 200,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "exposto",
+          "pct": 15,
+          "duracaoMs": 5000
+        }
+      ],
+      "id": "grito_do_falcao",
+      "nome": "Grito do falcão",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "escalaCom": "destreza",
+      "familiaEvolucao": "tecnica",
+      "tipoAtaque": "fisico",
+      "tags": [
+        "falcao"
+      ],
+      "icone": "grito",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 8,
+      "visual": {
+        "cor": "#aed6f1",
+        "impacto": "anel",
+        "som": "nivel"
+      },
+      "marcos": {
+        "2": {
+          "texto": "Dura 25% mais",
+          "duracaoPct": 25
+        },
+        "4": {
+          "texto": "Também deixa lento (−20%)",
+          "efeitos": [
+            {
+              "tipo": "resfriado",
+              "pct": 20,
+              "duracaoMs": 2000
+            }
+          ]
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "controle",
+          "eficiente"
+        ],
+        "5": [
+          "amplo",
+          "eco"
+        ]
+      }
+    },
+    {
+      "formulaDano": "1d6",
+      "formulaCura": null,
+      "custoRecurso": 3,
+      "recargaMs": 9000,
+      "conjuracaoMs": 300,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "cego",
+          "pct": 50,
+          "duracaoMs": 3000
+        }
+      ],
+      "id": "garras_cegantes",
+      "nome": "Garras cegantes",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "escalaCom": "destreza",
+      "familiaEvolucao": "tecnica",
+      "tipoAtaque": "fisico",
+      "tags": [
+        "falcao"
+      ],
+      "icone": "mao",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 8,
+      "visual": {
+        "cor": "#5b5b6e",
+        "impacto": "corte",
+        "som": "golpe"
+      },
+      "marcos": {
+        "2": {
+          "texto": "Dura 25% mais",
+          "duracaoPct": 25
+        },
+        "4": {
+          "texto": "Faz sangrar",
+          "efeitos": [
+            {
+              "tipo": "sangrando",
+              "valor": 2,
+              "duracaoMs": 3000
+            }
+          ]
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "controle",
+          "brutal"
+        ],
+        "5": [
+          "eficiente",
+          "eco"
+        ]
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 3,
+      "recargaMs": 14000,
+      "conjuracaoMs": 200,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "intercepta",
+          "valor": 5,
+          "duracaoMs": 5000
+        }
+      ],
+      "id": "vigia",
+      "nome": "Vigia",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "escalaCom": "destreza",
+      "familiaEvolucao": "suporte",
+      "tipoAtaque": "fisico",
+      "tags": [
+        "falcao"
+      ],
+      "icone": "escudo",
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 0,
+      "visual": {
+        "cor": "#7fbde8",
+        "impacto": "vento",
+        "conjuracao": "anel",
+        "som": "cura"
+      },
+      "marcos": {
+        "2": {
+          "texto": "Dura 20% mais",
+          "duracaoPct": 20
+        },
+        "4": {
+          "texto": "Também dá 6 de escudo",
+          "efeitos": [
+            {
+              "tipo": "escudo",
+              "valor": 6,
+              "duracaoMs": 5000
+            }
+          ]
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "eficiente",
+          "controle"
+        ],
+        "5": [
+          "fortificado",
+          "eco"
+        ]
+      }
+    },
+    {
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "custoRecurso": 4,
+      "recargaMs": 7000,
+      "conjuracaoMs": 400,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "id": "rasante",
+      "nome": "Rasante",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "escalaCom": "destreza",
+      "familiaEvolucao": "tecnica",
+      "tipoAtaque": "fisico",
+      "tags": [
+        "falcao"
+      ],
+      "icone": "investida",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "linha",
+      "raioArea": 0,
+      "alcanceCelulas": 6,
+      "visual": {
+        "cor": "#7fbde8",
+        "impacto": "vento",
+        "camera": "leve",
+        "som": "golpe"
+      },
+      "marcos": {
+        "2": {
+          "texto": "+1 de alcance",
+          "alcance": 1
+        },
+        "4": {
+          "texto": "Faz sangrar",
+          "efeitos": [
+            {
+              "tipo": "sangrando",
+              "valor": 2,
+              "duracaoMs": 3000
+            }
+          ]
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "brutal",
+          "eficiente"
+        ],
+        "5": [
+          "longo_alcance",
+          "eco"
+        ]
+      }
+    },
+    {
+      "formulaDano": "1d6",
+      "formulaCura": null,
+      "custoRecurso": 5,
+      "recargaMs": 10000,
+      "conjuracaoMs": 500,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "resfriado",
+          "pct": 30,
+          "duracaoMs": 2000
+        },
+        {
+          "tipo": "sangrando",
+          "valor": 1,
+          "duracaoMs": 3000
+        }
+      ],
+      "id": "tempestade_de_penas",
+      "nome": "Tempestade de penas",
+      "grau": "S",
+      "nivelMinimo": 1,
+      "escalaCom": "destreza",
+      "familiaEvolucao": "tecnica",
+      "tipoAtaque": "fisico",
+      "tags": [
+        "falcao"
+      ],
+      "icone": "redemoinho",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 1,
+      "alcanceCelulas": 8,
+      "visual": {
+        "cor": "#d6eaf8",
+        "impacto": "vento",
+        "conjuracao": "leque",
+        "camera": "leve",
+        "som": "golpe"
+      },
+      "marcos": {
+        "2": {
+          "texto": "+1 de raio",
+          "raio": 1
+        },
+        "4": {
+          "texto": "Dura 25% mais",
+          "duracaoPct": 25
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "amplo",
+          "controle"
+        ],
+        "5": [
+          "eficiente",
+          "eco"
+        ]
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": "2d6",
+      "custoRecurso": 3,
+      "recargaMs": 12000,
+      "conjuracaoMs": 200,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "zerar_recarga",
+          "ref": "mergulho",
+          "em": "conjurador"
+        }
+      ],
+      "id": "retorno_ao_punho",
+      "nome": "Retorno ao punho",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "escalaCom": "destreza",
+      "familiaEvolucao": "suporte",
+      "tipoAtaque": "fisico",
+      "tags": [
+        "falcao"
+      ],
+      "icone": "cura",
+      "politicaAlvo": "aliado",
+      "politicaImpacto": "contato",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 6,
+      "visual": {
+        "cor": "#a9dfbf",
+        "impacto": "sagrado",
+        "som": "cura"
+      },
+      "marcos": {
+        "2": {
+          "texto": "Cura 20% mais",
+          "danoPct": 20
+        },
+        "4": {
+          "texto": "Também dá 4 de escudo",
+          "efeitos": [
+            {
+              "tipo": "escudo",
+              "valor": 4,
+              "duracaoMs": 4000
+            }
+          ]
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "eficiente",
+          "fortificado"
+        ],
+        "5": [
+          "controle",
+          "eco"
+        ]
+      }
+    },
+    {
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "custoRecurso": 4,
+      "recargaMs": 8000,
+      "conjuracaoMs": 300,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "fase",
+          "ref": "presa_dupla_falcao",
+          "duracaoMs": 200
+        }
+      ],
+      "id": "presa_dupla",
+      "nome": "Presa dupla",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "escalaCom": "destreza",
+      "familiaEvolucao": "tecnica",
+      "tipoAtaque": "fisico",
+      "tags": [
+        "falcao"
+      ],
+      "icone": "espada",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 2,
+      "visual": {
+        "cor": "#7fbde8",
+        "impacto": "corte",
+        "som": "golpe"
+      },
+      "marcos": {
+        "2": {
+          "texto": "Recarga 15% menor",
+          "recargaPct": -15
+        },
+        "4": {
+          "texto": "Faz sangrar",
+          "efeitos": [
+            {
+              "tipo": "sangrando",
+              "valor": 2,
+              "duracaoMs": 3000
+            }
+          ]
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "brutal",
+          "eficiente"
+        ],
+        "5": [
+          "sanguessuga",
+          "eco"
+        ]
+      }
+    },
+    {
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "id": "presa_dupla_falcao",
+      "nome": "Presa dupla (falcão)",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "escalaCom": "destreza",
+      "familiaEvolucao": "tecnica",
+      "tipoAtaque": "fisico",
+      "tags": [
+        "falcao"
+      ],
+      "icone": "asa",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 30,
+      "interna": true,
+      "visual": {
+        "cor": "#7fbde8",
+        "impacto": "farpas",
+        "som": "golpe"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 4,
+      "recargaMs": 10000,
+      "conjuracaoMs": 500,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "dissipar",
+          "valor": 2
+        }
+      ],
+      "id": "dissipar",
+      "nome": "Dissipar",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "arcana",
+      "icone": "runa",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 1,
+      "alcanceCelulas": 6,
+      "visual": {
+        "cor": "#aed6f1",
+        "impacto": "runas",
+        "som": "magia"
+      },
+      "marcos": {
+        "2": {
+          "texto": "+1 de alcance",
+          "alcance": 1
+        },
+        "4": {
+          "texto": "Tira 1 efeito a mais",
+          "efeitos": [
+            {
+              "tipo": "dissipar",
+              "valor": 1
+            }
+          ]
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "amplo",
+          "eficiente"
+        ],
+        "5": [
+          "longo_alcance",
+          "eco"
+        ]
+      },
+      "familiaGeral": "arcana"
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 5,
+      "recargaMs": 16000,
+      "conjuracaoMs": 500,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "bonus_dano",
+          "pct": 20,
+          "duracaoMs": 6000
+        },
+        {
+          "tipo": "ab_recarga",
+          "pct": 20,
+          "duracaoMs": 6000
+        }
+      ],
+      "id": "runa_amplificadora",
+      "nome": "Runa amplificadora",
+      "grau": "S",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "arcana",
+      "icone": "runa",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "aliados",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 2,
+      "alcanceCelulas": 2,
+      "tags": [
+        "magico"
+      ],
+      "visual": {
+        "cor": "#9b8cff",
+        "impacto": "runas",
+        "conjuracao": "runas",
+        "som": "magia"
+      },
+      "marcos": {
+        "2": {
+          "texto": "Dura 25% mais",
+          "duracaoPct": 25
+        },
+        "4": {
+          "texto": "Também devolve 2 de mana",
+          "efeitos": [
+            {
+              "tipo": "recuperar_recurso",
+              "valor": 2,
+              "duracaoMs": 0
+            }
+          ]
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "amplo",
+          "eficiente"
+        ],
+        "5": [
+          "fortificado",
+          "controle"
+        ]
+      },
+      "familiaGeral": "arcana"
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 3,
+      "recargaMs": 12000,
+      "conjuracaoMs": 200,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "acelerado",
+          "pct": 30,
+          "duracaoMs": 3000
+        },
+        {
+          "tipo": "libertar"
+        }
+      ],
+      "id": "impulso",
+      "nome": "Impulso",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "botas",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "aliados",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 3,
+      "alcanceCelulas": 3,
+      "visual": {
+        "cor": "#76d7c4",
+        "impacto": "vento",
+        "som": "cura"
+      },
+      "marcos": {
+        "2": {
+          "texto": "Dura 25% mais",
+          "duracaoPct": 25
+        },
+        "4": {
+          "texto": "+1 de raio",
+          "raio": 1
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "amplo",
+          "eficiente"
+        ],
+        "5": [
+          "controle",
+          "fortificado"
+        ]
+      },
+      "familiaGeral": "suporte"
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 4,
+      "recargaMs": 9000,
+      "conjuracaoMs": 150,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "rastro_dano",
+          "valor": 3,
+          "duracaoMs": 3000,
+          "em": "conjurador"
+        },
+        {
+          "tipo": "passo_sombrio",
+          "valor": 4
+        }
+      ],
+      "id": "rastro_igneo",
+      "nome": "Rastro ígneo",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "fogo",
+      "icone": "fogo",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "celula",
+      "politicaImpacto": "proprio",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 4,
+      "elemento": "fogo",
+      "tags": [
+        "movimento"
+      ],
+      "visual": {
+        "cor": "#ff7b39",
+        "impacto": "chamas",
+        "som": "magia"
+      },
+      "marcos": {
+        "2": {
+          "texto": "O rastro dura 30% mais",
+          "duracaoPct": 30
+        },
+        "4": {
+          "texto": "Recarga 15% menor",
+          "recargaPct": -15
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "eficiente",
+          "longo_alcance"
+        ],
+        "5": [
+          "controle",
+          "eco"
+        ]
+      },
+      "familiaGeral": "fogo"
+    },
+    {
+      "formulaDano": "1d6",
+      "formulaCura": null,
+      "custoRecurso": 5,
+      "recargaMs": 12000,
+      "conjuracaoMs": 400,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "empurrao",
+          "valor": 1
+        },
+        {
+          "tipo": "fase",
+          "ref": "anel_de_chamas_pulso",
+          "duracaoMs": 1000,
+          "em": "conjurador"
+        },
+        {
+          "tipo": "fase",
+          "ref": "anel_de_chamas_pulso",
+          "duracaoMs": 2000,
+          "em": "conjurador"
+        },
+        {
+          "tipo": "fase",
+          "ref": "anel_de_chamas_pulso",
+          "duracaoMs": 3000,
+          "em": "conjurador"
+        }
+      ],
+      "id": "anel_de_chamas",
+      "nome": "Anel de chamas",
+      "grau": "S",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "fogo",
+      "icone": "nova",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 2,
+      "alcanceCelulas": 2,
+      "elemento": "fogo",
+      "visual": {
+        "cor": "#ff5722",
+        "impacto": "chamas",
+        "conjuracao": "brasas",
+        "camera": "leve",
+        "som": "explosao"
+      },
+      "marcos": {
+        "2": {
+          "texto": "Dura 25% mais",
+          "duracaoPct": 25
+        },
+        "4": {
+          "texto": "+1 de raio",
+          "raio": 1
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "amplo",
+          "controle"
+        ],
+        "5": [
+          "brutal",
+          "eficiente"
+        ]
+      },
+      "familiaGeral": "fogo"
+    },
+    {
+      "formulaDano": "1d4",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "empurrao",
+          "valor": 1
+        }
+      ],
+      "id": "anel_de_chamas_pulso",
+      "nome": "Anel de chamas (pulso)",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "fogo",
+      "icone": "nova",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 2,
+      "alcanceCelulas": 2,
+      "elemento": "fogo",
+      "interna": true,
+      "visual": {
+        "cor": "#ff5722",
+        "impacto": "chamas",
+        "som": "magia"
+      }
+    },
+    {
+      "formulaDano": "1d6",
+      "formulaCura": null,
+      "custoRecurso": 4,
+      "recargaMs": 8000,
+      "conjuracaoMs": 500,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "consumir",
+          "ref": "queimando",
+          "pct": 50
+        },
+        {
+          "tipo": "queimando",
+          "valor": 2,
+          "duracaoMs": 2000
+        }
+      ],
+      "id": "incinerar",
+      "nome": "Incinerar",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "fogo",
+      "icone": "fogo",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 6,
+      "elemento": "fogo",
+      "visual": {
+        "cor": "#ff3d00",
+        "impacto": "explosao",
+        "conjuracao": "chamas",
+        "som": "explosao"
+      },
+      "marcos": {
+        "2": {
+          "texto": "+1 de alcance",
+          "alcance": 1
+        },
+        "4": {
+          "texto": "Consome com mais força",
+          "danoPct": 20
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "brutal",
+          "eficiente"
+        ],
+        "5": [
+          "longo_alcance",
+          "eco"
+        ]
+      },
+      "familiaGeral": "fogo"
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 3,
+      "recargaMs": 12000,
+      "conjuracaoMs": 200,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "reflexo",
+          "duracaoMs": 5000,
+          "efeito": {
+            "envenenado": {
+              "valor": 2,
+              "pct": 50,
+              "duracaoMs": 4000
+            }
+          }
+        }
+      ],
+      "id": "seiva_corrosiva",
+      "nome": "Seiva corrosiva",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "veneno",
+      "icone": "veneno",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 0,
+      "visual": {
+        "cor": "#58d68d",
+        "impacto": "bolhas",
+        "som": "magia"
+      },
+      "marcos": {
+        "2": {
+          "texto": "Dura 25% mais",
+          "duracaoPct": 25
+        },
+        "4": {
+          "texto": "Também dá 6 de escudo",
+          "efeitos": [
+            {
+              "tipo": "escudo",
+              "valor": 6,
+              "duracaoMs": 5000
+            }
+          ]
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "eficiente",
+          "fortificado"
+        ],
+        "5": [
+          "controle",
+          "eco"
+        ]
+      },
+      "familiaGeral": "veneno"
+    },
+    {
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "custoRecurso": 4,
+      "recargaMs": 7000,
+      "conjuracaoMs": 600,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "empurrao",
+          "valor": 1
+        }
+      ],
+      "id": "pedregulho",
+      "nome": "Pedregulho",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "terra",
+      "icone": "pedra",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "linha",
+      "raioArea": 0,
+      "alcanceCelulas": 5,
+      "elemento": "terra",
+      "visual": {
+        "cor": "#a1887f",
+        "impacto": "pedra",
+        "camera": "leve",
+        "som": "golpe"
+      },
+      "marcos": {
+        "2": {
+          "texto": "+1 de alcance",
+          "alcance": 1
+        },
+        "4": {
+          "texto": "Atola os atingidos",
+          "efeitos": [
+            {
+              "tipo": "atolado",
+              "pct": 20,
+              "duracaoMs": 2000
+            }
+          ]
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "brutal",
+          "eficiente"
+        ],
+        "5": [
+          "longo_alcance",
+          "eco"
+        ]
+      },
+      "familiaGeral": "terra"
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 4,
+      "recargaMs": 12000,
+      "conjuracaoMs": 200,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "cura_periodica",
+          "valor": 3,
+          "duracaoMs": 4000
+        },
+        {
+          "tipo": "avanco",
+          "valor": 5,
+          "em": "conjurador"
+        }
+      ],
+      "id": "asas_da_aurora",
+      "nome": "Asas da aurora",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "sagrado",
+      "icone": "asa",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "aliado",
+      "politicaImpacto": "contato",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 5,
+      "elemento": "sagrado",
+      "tags": [
+        "movimento"
+      ],
+      "visual": {
+        "cor": "#f7e9a0",
+        "impacto": "sagrado",
+        "som": "cura"
+      },
+      "marcos": {
+        "2": {
+          "texto": "Cura 25% mais",
+          "duracaoPct": 25
+        },
+        "4": {
+          "texto": "Também dá 6 de escudo",
+          "efeitos": [
+            {
+              "tipo": "escudo",
+              "valor": 6,
+              "duracaoMs": 4000
+            }
+          ]
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "eficiente",
+          "longo_alcance"
+        ],
+        "5": [
+          "fortificado",
+          "eco"
+        ]
+      },
+      "familiaGeral": "sagrado"
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 2,
+      "recargaMs": 3000,
+      "conjuracaoMs": 300,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 18,
+      "efeitos": [
+        {
+          "tipo": "dano_direto",
+          "valor": 6
+        }
+      ],
+      "id": "agulha_mental",
+      "nome": "Agulha mental",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "psiquico",
+      "icone": "olho",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 7,
+      "elemento": "psiquico",
+      "visual": {
+        "cor": "#d980fa",
+        "impacto": "estrelas",
+        "viagem": "brilho",
+        "som": "magia"
+      },
+      "marcos": {
+        "2": {
+          "texto": "+1 de alcance",
+          "alcance": 1
+        },
+        "4": {
+          "texto": "Recarga 15% menor",
+          "recargaPct": -15
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "brutal",
+          "eficiente"
+        ],
+        "5": [
+          "cadeia",
+          "eco"
+        ]
+      },
+      "familiaGeral": "psiquico"
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 4,
+      "recargaMs": 10000,
+      "conjuracaoMs": 300,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "arremessar",
+          "valor": 3,
+          "efeito": {
+            "atordoar": 500
+          }
+        }
+      ],
+      "id": "telecinese",
+      "nome": "Telecinese",
+      "grau": "S",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "psiquico",
+      "icone": "puxar",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 6,
+      "elemento": "psiquico",
+      "visual": {
+        "cor": "#d980fa",
+        "impacto": "runas",
+        "som": "magia"
+      },
+      "marcos": {
+        "2": {
+          "texto": "+1 de alcance",
+          "alcance": 1
+        },
+        "4": {
+          "texto": "Atordoa mais",
+          "duracaoPct": 30
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "controle",
+          "eficiente"
+        ],
+        "5": [
+          "longo_alcance",
+          "eco"
+        ]
+      },
+      "familiaGeral": "psiquico"
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 3,
+      "recargaMs": 12000,
+      "conjuracaoMs": 150,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "presagio",
+          "duracaoMs": 4000
+        }
+      ],
+      "id": "pressagio",
+      "nome": "Presságio",
+      "grau": "A",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "psiquico",
+      "icone": "olho",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 0,
+      "visual": {
+        "cor": "#bb8fce",
+        "impacto": "estrelas",
+        "som": "magia"
+      },
+      "marcos": {
+        "2": {
+          "texto": "Dura 25% mais",
+          "duracaoPct": 25
+        },
+        "4": {
+          "texto": "Recarga 15% menor",
+          "recargaPct": -15
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "eficiente",
+          "controle"
+        ],
+        "5": [
+          "fortificado",
+          "eco"
+        ]
+      },
+      "familiaGeral": "psiquico"
+    },
+    {
+      "id": "couraca_treinada",
+      "nome": "Couraça treinada",
+      "familiaEvolucao": "tecnica",
+      "grau": "A",
+      "icone": "peitoral",
+      "tipoAtaque": "fisico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "passiva": {
+        "tipo": "defensiva",
+        "reducaoFisicoPct": 10
+      },
+      "familiaGeral": "tecnica"
+    },
+    {
+      "id": "manto_runico",
+      "nome": "Manto rúnico",
+      "familiaEvolucao": "arcana",
+      "grau": "A",
+      "icone": "manto",
+      "tipoAtaque": "fisico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "passiva": {
+        "tipo": "defensiva",
+        "reducaoMagicoPct": 15
+      },
+      "familiaGeral": "arcana"
+    },
+    {
+      "id": "foco_arcano",
+      "nome": "Foco arcano",
+      "familiaEvolucao": "arcana",
+      "grau": "A",
+      "icone": "runa",
+      "tipoAtaque": "fisico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "passiva": {
+        "tipo": "ofensiva",
+        "tag": "magico",
+        "danoPct": 10,
+        "recargaPct": -5
+      },
+      "familiaGeral": "arcana"
+    },
+    {
+      "id": "sangue_quente",
+      "nome": "Sangue quente",
+      "familiaEvolucao": "fogo",
+      "grau": "A",
+      "icone": "fogo",
+      "tipoAtaque": "fisico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "passiva": {
+        "tipo": "defensiva",
+        "resistencias": {
+          "fogo": 25
+        },
+        "duracaoRecebidaPct": {
+          "resfriado": -20,
+          "atolado": -20
+        }
+      },
+      "familiaGeral": "fogo"
+    },
+    {
+      "id": "brasa_interior",
+      "nome": "Brasa interior",
+      "familiaEvolucao": "fogo",
+      "grau": "A",
+      "icone": "fogo",
+      "tipoAtaque": "fisico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "passiva": {
+        "tipo": "ofensiva",
+        "aoAcertar": {
+          "chancePct": 10,
+          "efeito": {
+            "tipo": "queimando",
+            "valor": 2,
+            "duracaoMs": 3000
+          }
+        }
+      },
+      "familiaGeral": "fogo"
+    },
+    {
+      "id": "imunidade_adquirida",
+      "nome": "Imunidade adquirida",
+      "familiaEvolucao": "veneno",
+      "grau": "A",
+      "icone": "veneno",
+      "tipoAtaque": "fisico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "passiva": {
+        "tipo": "defensiva",
+        "resistencias": {
+          "veneno": 50
+        },
+        "duracaoRecebidaPct": {
+          "definhando": -20,
+          "envenenado": -20
+        }
+      },
+      "familiaGeral": "veneno"
+    },
+    {
+      "id": "toxinas_potentes",
+      "nome": "Toxinas potentes",
+      "familiaEvolucao": "veneno",
+      "grau": "A",
+      "icone": "veneno",
+      "tipoAtaque": "fisico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "passiva": {
+        "tipo": "ofensiva",
+        "reforcoEstado": {
+          "tipo": "envenenado",
+          "valorPct": 20,
+          "duracaoMs": 1000
+        }
+      },
+      "familiaGeral": "veneno"
+    },
+    {
+      "id": "peso_da_rocha",
+      "nome": "Peso da rocha",
+      "familiaEvolucao": "terra",
+      "grau": "A",
+      "icone": "pedra",
+      "tipoAtaque": "fisico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "passiva": {
+        "tipo": "ofensiva",
+        "danoContraEstados": {
+          "estados": [
+            "enraizado",
+            "atordoar",
+            "sem_movimento"
+          ],
+          "pct": 15
+        }
+      },
+      "familiaGeral": "terra"
+    },
+    {
+      "id": "silhueta_esquiva",
+      "nome": "Silhueta esquiva",
+      "familiaEvolucao": "sombra",
+      "grau": "A",
+      "icone": "fantasma",
+      "tipoAtaque": "fisico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "passiva": {
+        "tipo": "defensiva",
+        "esquivaPct": 8,
+        "esquivaInvisivelPct": 15
+      },
+      "familiaGeral": "sombra"
+    },
+    {
+      "id": "golpe_traicoeiro",
+      "nome": "Golpe traiçoeiro",
+      "familiaEvolucao": "sombra",
+      "grau": "A",
+      "icone": "adaga",
+      "tipoAtaque": "fisico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "passiva": {
+        "tipo": "ofensiva",
+        "costasPct": 20
+      },
+      "familiaGeral": "sombra"
+    },
+    {
+      "id": "graca",
+      "nome": "Graça",
+      "familiaEvolucao": "sagrado",
+      "grau": "A",
+      "icone": "estrela",
+      "tipoAtaque": "fisico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "passiva": {
+        "tipo": "defensiva",
+        "resistencias": {
+          "trevas": 25
+        },
+        "curaRecebidaPct": 10
+      },
+      "familiaGeral": "sagrado"
+    },
+    {
+      "id": "zelo",
+      "nome": "Zelo",
+      "familiaEvolucao": "sagrado",
+      "grau": "A",
+      "icone": "estrela",
+      "tipoAtaque": "fisico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "passiva": {
+        "tipo": "ofensiva",
+        "tag": "sagrado",
+        "danoPct": 15,
+        "resistenciaIgnoradaPct": 10
+      },
+      "familiaGeral": "sagrado"
+    },
+    {
+      "id": "mente_blindada",
+      "nome": "Mente blindada",
+      "familiaEvolucao": "psiquico",
+      "grau": "A",
+      "icone": "olho",
+      "tipoAtaque": "fisico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "passiva": {
+        "tipo": "defensiva",
+        "imunes": [
+          "aterrorizado",
+          "confuso"
+        ],
+        "duracaoRecebidaPct": {
+          "silenciar": -30
+        }
+      },
+      "familiaGeral": "psiquico"
+    },
+    {
+      "id": "pressao_mental",
+      "nome": "Pressão mental",
+      "familiaEvolucao": "psiquico",
+      "grau": "A",
+      "icone": "olho",
+      "tipoAtaque": "fisico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "passiva": {
+        "tipo": "ofensiva",
+        "danoContraEstados": {
+          "estados": [
+            "atordoar",
+            "congelado",
+            "enraizado",
+            "sem_movimento",
+            "silenciar",
+            "aterrorizado",
+            "confuso",
+            "sem_ataque"
+          ],
+          "pct": 15
+        }
+      },
+      "familiaGeral": "psiquico"
     }
   ]
 }

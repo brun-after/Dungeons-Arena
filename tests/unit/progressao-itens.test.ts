@@ -187,7 +187,7 @@ describe('nível 30 e faixa avançada', () => {
     processarMortes(c.estado, c.ctx, c.eventos);
     // Marco 24 (D-097): o último a bater (baixo) abate e leva tudo; o aliado perto leva 75%, cada um na sua faixa.
     expect(baixo.xp).toBe(110);
-    expect(c.j.xp + c.b.xpFracao!).toBeCloseTo(8.25);
+    expect(c.j.xp + (c.b.xpFracao ?? 0)).toBeCloseTo(8.25);
   });
   it('geração de equipamento aceita o novo nível máximo', () => {
     const c = cena();

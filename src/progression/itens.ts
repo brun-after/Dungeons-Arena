@@ -50,6 +50,8 @@ export interface Item {
   dropavel: boolean;
   /** Marco 14: a habilidade que o livro ensina (null no livro raro e nos outros tipos). */
   ensina: string | null;
+  /** Marco 24 (D-094): o livro de skill de classe só serve para esta classe. */
+  classe?: string;
   modificadores: ModificadorDeItem[];
   /** Marco 18 (D-069): a base e a forma dos itens com forma (`ib_`); null nos fixos e nos `gi_`. */
   base: string | null;
@@ -114,6 +116,7 @@ export function lerItens(json: unknown): { itens: Map<string, Item>; erros: stri
       efeitos: o.efeitos === undefined && tipo === 'livro' ? [] : lerEfeitos(l, o),
       dropavel: l.booleano(o, 'dropavel'),
       ensina: o.ensina === undefined || o.ensina === null ? null : l.texto(o, 'ensina'),
+      ...(o.classe !== undefined ? { classe: l.texto(o, 'classe') } : {}),
       modificadores: lerModificadores(l, o),
       base: null,
       forma: null,

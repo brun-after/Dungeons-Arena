@@ -2,24 +2,9 @@
 // desenho das skills de classe, ultimates, sintonia, passivas gerais, combos e ressonâncias. Este script avalia os
 // dados da página e gera docs/SKILLS-DE-CLASSE.md e o catálogo (catalogo.json) que os testes usam para conferir que
 // os dados do jogo seguem o desenho. Uso: node tools/grimorio/gerar-doc.mjs
-import { readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const aqui = dirname(fileURLToPath(import.meta.url));
-const raiz = join(aqui, '..', '..');
-const html = readFileSync(join(aqui, 'grimorio-das-classes.html'), 'utf8');
-const linhas = html.split('\n');
-const ini = linhas.findIndex((l) => l.startsWith('  var D = '));
-const fim = linhas.findIndex((l) => l.startsWith('  var S = D.skills;'));
-if (ini < 0 || fim < 0) throw new Error('Grimório sem o bloco de dados esperado');
-// O bloco de dados é JavaScript puro (sem DOM): monta D e aplica as versões 1.1 e 1.2.
-const D = new Function(`${linhas.slice(ini, fim).join('\n')}\nreturn D;`)();
-const versao = /versão (\d+\.\d+)/.exec(html)?.[1] ?? '?';
-
-/** O id que o código usa (a v1.2 renomeou algumas skills do Guerreiro). */
-const idCodigo = (id) => (id === '@ultimate' ? id : (D.skills[id]?.idNovo ?? id));
-const nome = (id) => (id === '@ultimate' ? 'Ultimate' : (D.skills[id]?.nome ?? id));
+import { writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { aqui, D, html, idCodigo, nome, raiz, versao } from './grimorio.mjs';
 
 const catalogo = {
   versao,

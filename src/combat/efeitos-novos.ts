@@ -101,6 +101,10 @@ export function aplicarInstantaneoNovo(
     case 'furia':
       acumularFuria(ctx, alvo, tick, ef.valor);
       break;
+    case 'executar':
+      // Abaixo de `pct` da vida, o alvo cai (sem imunidade).
+      if (!imuneADano(alvo, tick) && alvo.hp * 100 <= alvo.hpMax * ef.pct) ferir(estado, ctx, alvo, alvo.hp, origem.id, ef.tipo, saida);
+      break;
     case 'carga_ultimate':
       somarCarga(ctx, alvo, ef.valor, tick, saida);
       break;

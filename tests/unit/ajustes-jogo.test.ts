@@ -175,7 +175,7 @@ describe('área orgânica (o desenho não é a hitbox)', () => {
     ['tiro_em_leque', { x: 12, y: 11 }],
     ['redemoinho', { x: 9, y: 9 }],
     ['nova_glacial', { x: 9, y: 9 }],
-    ['grito_de_guerra', { x: 9, y: 9 }],
+    ['brado', { x: 9, y: 9 }],
   ];
 
   it('o contorno cobre o centro de toda célula atingida, em toda forma e raio', () => {

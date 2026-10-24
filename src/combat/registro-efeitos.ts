@@ -72,7 +72,7 @@ export const TIPOS_EFEITO = [
   // marco 24
   'cego', 'aterrorizado', 'confuso', 'desafiado', 'marca_cacador', 'frenesi', 'esquiva', 'intercepta', 'contragolpe', 'presagio',
   'critico_garantido', 'sobrecarga', 'escudo_acumulado', 'invisivel', 'dissipar', 'consumir', 'detonar_invocacao', 'arremessar',
-  'zerar_recarga', 'libertar', 'furia', 'carga_ultimate', 'fase', 'invocar_temporario',
+  'zerar_recarga', 'libertar', 'furia', 'carga_ultimate', 'fase', 'invocar_temporario', 'reflexo', 'executar',
 ] as const;
 export type TipoEfeito = (typeof TIPOS_EFEITO)[number];
 
@@ -101,7 +101,7 @@ export type Fluxo = 'atrasado' | 'armadilha' | 'invocar' | 'fase';
 
 export type Periodico = 'dano' | 'cura' | 'recurso';
 export type Instantaneo = 'drenar_invocacao' | 'comandar_mortos' | 'purificar' | 'passo_sombrio' | 'muralha_pedra' | 'campo_cura' | 'campo_veneno' | 'cura' | 'recurso' | 'teleporte' | 'avanco' | 'empurrao' | 'puxao' | 'trocar' | 'dano'
-  | 'invisivel' | 'dissipar' | 'consumir' | 'detonar' | 'arremessar' | 'zerar_recarga' | 'libertar' | 'furia' | 'carga_ultimate';
+  | 'invisivel' | 'dissipar' | 'consumir' | 'detonar' | 'arremessar' | 'zerar_recarga' | 'libertar' | 'furia' | 'carga_ultimate' | 'executar';
 export type BonusDeAtaqueBasico = 'dano' | 'recarga' | 'alcance' | 'alvos';
 
 export interface DefinicaoEfeito {
@@ -168,6 +168,8 @@ export interface DefinicaoEfeito {
   someAoLancar: 'magico' | 'fisico' | null;
   /** Marco 24: o `valor` soma ao que já existe, até o `pct` (o escudo de cada acerto). */
   somaAteTeto: boolean;
+  /** Marco 24: quem golpeia o portador de perto recebe o efeito carregado (Seiva corrosiva, Égide flamejante). */
+  reflexo: boolean;
 }
 
 type Def = Omit<DefinicaoEfeito, 'id'>;
@@ -206,6 +208,7 @@ const BASE: Omit<Def, 'icone' | 'cor' | 'positivo' | 'padrao' | 'campos'> = {
   criticoGarantido: false,
   someAoLancar: null,
   somaAteTeto: false,
+  reflexo: false,
 };
 
 const negativo = (icone: string, cor: string, campos: readonly CampoEfeito[], padrao: Def['padrao'], extra: Partial<Def>): Def => ({
@@ -325,6 +328,8 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   furia: instantaneo('fogo', '#e74c3c', ['valor'], { duracaoMs: 0, valor: 10, pct: 0 }, 'furia', true),
   carga_ultimate: instantaneo('estrela', '#f5b041', ['valor'], { duracaoMs: 0, valor: 5, pct: 0 }, 'carga_ultimate', true),
   fase: { ...BASE, icone: 'ampulheta', cor: '#f5b041', positivo: true, ehStatus: false, campos: [], padrao: { duracaoMs: 0, valor: 0, pct: 0 }, fluxo: 'fase', aoLancar: true, exige: ['ref'] },
+  reflexo: { ...BASE, icone: 'escudo', cor: '#58d68d', positivo: true, campos: [], padrao: { duracaoMs: 5000, valor: 0, pct: 0 }, reflexo: true, exige: ['interno'] },
+  executar: instantaneo('caveira', '#c0392b', ['pct'], { duracaoMs: 0, valor: 0, pct: 20 }, 'executar', false),
   invocar_temporario: { ...BASE, icone: 'invocar', cor: '#48c9b0', positivo: true, ehStatus: false, campos: ['valor'], padrao: { duracaoMs: 12_000, valor: 1, pct: 0 }, fluxo: 'invocar', aoLancar: true, exige: ['ref'] },
 };
 

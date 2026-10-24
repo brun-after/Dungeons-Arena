@@ -241,6 +241,10 @@ export function aplicarImpacto(
       aplicarEfeito(estado, ctx, conjurador, construirEfeito('cura', { valor: consagrado.valor }), origem, null, saida);
     }
     alvo.efeitos = alvo.efeitos.filter((f) => !REGISTRO_EFEITOS[f.tipo].someAoLevarGolpe);
+    // Marco 24: o reflexo do alvo cai em quem golpeou de perto.
+    if (conjurador && conjurador !== alvo && hab.politicaImpacto === 'contato') {
+      for (const f of alvo.efeitos) if (f.ateTick > tick && f.interno && REGISTRO_EFEITOS[f.tipo].reflexo) aplicarEfeito(estado, ctx, conjurador, f.interno, { id: alvo.id, x: alvo.x, y: alvo.y }, null, saida);
+    }
     // Marco 24 (D-095): as passivas de quem bate que aplicam estado por chance.
     if (conjurador && conjurador !== alvo) for (const ef of estadosAoAcertar(estado, ctx, conjurador)) aplicarEfeito(estado, ctx, alvo, ef, origem, mira, saida);
   }

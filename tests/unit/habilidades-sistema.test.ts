@@ -182,6 +182,6 @@ describe('formas de área', () => {
     const celulas = celulasDaForma(redemoinho, { x: 5, y: 5 }, { x: 5, y: 5 }, fase);
     expect(celulas).toHaveLength(8);
     expect(celulas.some((c) => c.x === 5 && c.y === 5)).toBe(false);
-    expect(celulasDaForma(hab('grito_de_guerra'), { x: 5, y: 5 }, { x: 5, y: 5 }, fase).some((c) => c.x === 5 && c.y === 5)).toBe(true);
+    expect(celulasDaForma(hab('brado'), { x: 5, y: 5 }, { x: 5, y: 5 }, fase).some((c) => c.x === 5 && c.y === 5)).toBe(true);
   });
 });

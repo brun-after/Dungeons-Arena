@@ -29,7 +29,7 @@ import { celulaOcupada, chebyshev } from './geometria';
 import { aplicarImpacto } from './golpe';
 import type { Habilidade } from './habilidades';
 import { rampaDeInvocacao } from './invocacoes';
-import { habilidadeDoAtor, perfilPara } from './perfil';
+import { chaveDoAtor, habilidadeDoAtor, perfilPara } from './perfil';
 import { lancarProjetil } from './projeteis';
 import { celulaDoCompanheiro } from './companheiro';
 import { encarnar } from './encarnacao';
@@ -364,7 +364,8 @@ function lancar(
   for (const ef of hab.efeitos) {
     if (!REGISTRO_EFEITOS[ef.tipo].aoLancar) continue;
     // Marco 24: a fase guarda o alvo da ação (o resto do lançamento cai em quem conjura, na célula mirada).
-    if (REGISTRO_EFEITOS[ef.tipo].fluxo === 'fase' && ef.ref) agendarFase(estado, ator, ef.ref, alvo ?? mira, ef.duracaoMs);
+    // `em: conjurador` guarda a célula de onde quem lançou saiu (o eco do Piscar); a fase herda as variantes de agora.
+    if (REGISTRO_EFEITOS[ef.tipo].fluxo === 'fase' && ef.ref) agendarFase(estado, ator, chaveDoAtor(ctx, ator, ef.ref, estado.tick), ef.em === 'conjurador' ? celulaOcupada(ator) : (alvo ?? mira), ef.duracaoMs);
     else aplicarEfeito(estado, ctx, ator, ef, { id: ator.id, x: ator.x, y: ator.y }, mira, saida);
   }
   switch (hab.politicaImpacto) {

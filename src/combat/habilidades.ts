@@ -230,6 +230,8 @@ export interface DefinicaoHabilidade {
   variantes: Readonly<Partial<Record<Variante, AjusteDeVariante>>>;
   /** Marco 24: habilidade interna (fase de ultimate, resposta do Contragolpe): não vai para barra, livro nem orçamento. */
   interna: boolean;
+  /** Marco 24 (D-095): a família da sintonia de uma skill geral (tecnica, arcana, suporte, fogo, …). */
+  familiaGeral?: string;
 }
 
 /** Marco 18: um marco de nível — os mesmos ajustes de um caminho, com o texto que a carta mostra. */
@@ -425,6 +427,9 @@ function lerEvolucoes(l: Leitor, v: unknown): Record<number, string[]> {
   return saida;
 }
 
+/** Efeitos que agem na célula mirada (o resto de uma skill de célula cai em quem lança; marco 24: Piscar, Rolamento). */
+const DA_CELULA: readonly string[] = ['muralha_pedra', 'passo_sombrio', 'campo_cura', 'campo_veneno'];
+
 /** Lê uma definição (catálogo ou gerada); erros vão para o `Leitor`. */
 export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
   const o = l.objeto(item, 'habilidade');
@@ -439,7 +444,7 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
     formulaCura: l.textoOuNulo(o, 'formulaCura'),
     alcanceCelulas: l.numero(o, 'alcanceCelulas', { min: 0, max: 30, inteiro: true }),
     tipoArea: l.opcao(o, 'tipoArea', TIPOS_AREA),
-    raioArea: l.numero(o, 'raioArea', { min: 0, max: 5, inteiro: true }),
+    raioArea: l.numero(o, 'raioArea', { min: 0, max: 8, inteiro: true }),
     custoRecurso: l.numero(o, 'custoRecurso', { min: 0, inteiro: true }),
     recargaMs: l.numero(o, 'recargaMs', { min: 0 }),
     conjuracaoMs: l.numero(o, 'conjuracaoMs', { min: 0 }),
@@ -475,7 +480,7 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
   if (h.politicaImpacto === 'projetil' && h.velocidadeProjetil <= 0) l.erro('projétil precisa de velocidade');
   if (h.politicaImpacto === 'area' && h.tipoArea === 'nenhuma') l.erro('impacto em área precisa de tipoArea');
   if (h.politicaImpacto !== 'area' && h.tipoArea !== 'nenhuma') l.erro(`tipoArea "${h.tipoArea}" só vale com impacto em área`);
-  if ((h.politicaAlvo === 'proprio') !== (h.politicaImpacto === 'proprio') && !(h.politicaImpacto === 'proprio' && h.politicaAlvo === 'celula' && h.efeitos.length > 0 && h.efeitos.every((e) => ['muralha_pedra', 'passo_sombrio', 'campo_cura', 'campo_veneno'].includes(e.tipo))) && !(h.politicaImpacto === 'area' && h.tipoArea === 'ao_redor' && h.politicaAlvo === 'proprio')) {
+  if ((h.politicaAlvo === 'proprio') !== (h.politicaImpacto === 'proprio') && !(h.politicaImpacto === 'proprio' && h.politicaAlvo === 'celula' && h.efeitos.some((e) => DA_CELULA.includes(e.tipo)) && h.efeitos.every((e) => DA_CELULA.includes(e.tipo) || e.em === 'conjurador')) && !(h.politicaImpacto === 'area' && h.tipoArea === 'ao_redor' && h.politicaAlvo === 'proprio')) {
     l.erro('politicaAlvo e politicaImpacto "proprio" andam juntos');
   }
   if (h.politicaAlvo === 'aliados' && h.tipoArea !== 'ao_redor') l.erro('alvo "aliados" é em volta de quem conjura (tipoArea "ao_redor")');
@@ -499,6 +504,7 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
     fusao: o.fusao === undefined ? null : l.listaDeTextos(o, 'fusao'),
     variantes: lerVariantes(l, o.variantes),
     interna: o.interna === undefined ? false : l.booleano(o, 'interna'),
+    ...(o.familiaGeral !== undefined ? { familiaGeral: l.texto(o, 'familiaGeral') } : {}),
   };
 }
 

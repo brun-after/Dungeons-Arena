@@ -180,9 +180,9 @@ describe('elementos e sinergias no golpe', () => {
     expect(atingidos.has('j')).toBe(false);
   });
 
-  it('suporte: grito de guerra fortalece quem conjura (e os aliados), não os inimigos', () => {
+  it('suporte: o Brado fortalece quem conjura (e os aliados), não os inimigos', () => {
     const c = cenario('guerreiro');
-    c.tick([['j', { t: 'usarHabilidade', id: 'grito_de_guerra' }]]);
+    c.tick([['j', { t: 'usarHabilidade', id: 'brado' }]]);
     c.ticks(40);
     expect(c.tem('j', 'bonus_dano')).toBe(true);
     expect(c.tem('a', 'bonus_dano')).toBe(false);
