@@ -22,12 +22,14 @@ export interface Balance {
       /** Marco 21 (D-088): parte da vida que falta recuperada ao derrubar um hostil (não invocação). */
       curaAoAbaterPct: number;
       furia: { max: number; porBasico: number; carenciaMs: number; perdaPorS: number; curaMult: number }; reforcosInicioNivel: number; reforcosPlenosNivel: number; movimentoMult: number };
-    mago: { inicialPct: number; intermediarioPct: number; nivelIntermediario: number; fimIntermediario: number; nivelFinal: number; dardoInicioMult: number; dardoRecuperacaoNivel: number; dardoPlenoNivel: number; concentracaoAcertos: number; concentracaoJanelaMs: number; concentracaoExtraPct: number };
-    aventureiro: { nivelCorte: number; danoMult: number };
-    arqueiro: { secundariosMult: number };
+    mago: { inicialPct: number; intermediarioPct: number; nivelIntermediario: number; fimIntermediario: number; nivelFinal: number; dardoInicioMult: number; dardoRecuperacaoNivel: number; dardoPlenoNivel: number; concentracaoAcertos: number; concentracaoJanelaMs: number; concentracaoExtraPct: number;
+      /** Marco 22 (D-089): encarnação elemental. */
+      encarnacao: { fogoDanoPct: number; fogoIntervaloMs: number; fogoRaio: number; fogoQueimaValor: number; fogoQueimaMs: number; geloReducaoPct: number; geloResfriarMs: number; raioVelocidadePct: number } };
+    aventureiro: { nivelCorte: number; danoMult: number; /** Marco 22 (D-089): passo do falcão. */ falcaoPassoMs: number };
+    arqueiro: { secundariosMult: number; /** Marco 22 (D-089): Mira firme. */ mira: { cargaMs: number; reducaoPorDestrezaPct: number; reducaoMaxPct: number; d20Minimo: number } };
     necromante: { protecaoMs: number; doisPct: number; grupoPct: number };
   };
-  necromancia: { danoPct: number; servosExtras: number; retornoServoMs: number; duracaoMortoMs: number; raioColheita: number; ecoRecargaMs: number; vidaBase: number; vidaPorNivel: number; vidaServoPct: number; alcanceRitual: number };
+  necromancia: { danoPct: number; servosExtras: number; retornoServoMs: number; duracaoMortoMs: number; raioColheita: number; ecoRecargaMs: number; vidaBase: number; vidaPorNivel: number; vidaServoPct: number; alcanceRitual: number; /** Marco 22 (D-090). */ distanciaRetorno: number; atributoPorInt: number; perdaPorQuantidade: number };
   tatica: { respostaPct: number; respostaMs: number; aparoJanelaMaxMs: number; veuJanelaMaxMs: number; muralhaMaxMs: number; campoMaxMs: number; janelaEtapaMs: number; janelaTotalMs: number; tetoCampos: number; escudoMaxHpPct: number; fluxoIntervaloMs: number; fluxoDuracaoMs: number; fluxoTeto: number; consumoTeto: number; consumoPct: number; colisaoDano: number; colisaoAtordoarMs: number; tenacidadeMaxPct: number; removiveis: string[] };
   progressaoItens: { tomoPrecoBase: number; aceleracaoIncomumChancePct: number; aceleracaoRaraChancePct: number; essenciaChancePct: number; essenciaBossChancePct: number };
   versao: number;

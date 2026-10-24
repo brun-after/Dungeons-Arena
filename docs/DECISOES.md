@@ -1,8 +1,10 @@
 # Decisões de projeto
 
-**Versão:** 0.50 · **Data:** 23/10/2026
+**Versão:** 0.52 · **Data:** 23/10/2026
 
 > **Histórico**
+> - **0.52 (23/10/2026)**: D-090 (marco 22: Necromante no simulador, exército de até 10 mortos, retorno dos distantes e Dízimo que ergue).
+> - **0.51 (23/10/2026)**: D-089 (marco 22: falcão do Aventureiro, encarnação elemental do Mago e Mira firme do Arqueiro).
 > - **0.50 (23/10/2026)**: D-088 (marco 21: Guerreiro mais forte com fúria, chave fixa do APK e aviso de atualização no app).
 > - **0.49 (22/10/2026)**: D-087 (marco 20: app Android pelo Capacitor, APK no CI, login por deep link e modo de desempenho).
 > - **0.47 (18/10/2026)**: D-085 (piso absoluto de 1 XP por abate no novo antifarm, preservando a penalidade por morte).
@@ -2197,4 +2199,86 @@ instalar por cima, obrigando a desinstalar e perder os saves locais.
   sozinho: a pessoa toca em instalar. A Play Store fica como opção futura.
 - **Transição:** o APK de depuração já instalado não aceita o primeiro APK com a chave fixa. É preciso desinstalá-lo
   uma vez; antes, convém enviar o slot para a nuvem.
+
+## D-089 — Identidade do Aventureiro, do Mago e do Arqueiro (marco 22, 23/10/2026)
+
+**Contexto.** O Guerreiro (fúria, aura, cura ao abater) e o Necromante (servos) têm mecânicas marcantes. As outras três
+classes só tinham ajustes numéricos. O usuário escolheu uma mecânica para cada uma.
+
+**Decisão: Aventureiro, falcão companheiro.**
+- Um falcão permanente (preset `falcao_companheiro`, comportamento `companheiro`) nasce ao lado do dono em cada fase e
+  quando ele volta. Tem vaga própria: não conta no limite de invocações e não é dispensado.
+- **Mesma vida:** o falcão pode ser atingido, e o golpe nele cai no Aventureiro, com as defesas, os escudos e as
+  proteções do dono (senão bater no pássaro contornaria tudo isso). Uma área que pegue os dois atinge o dono uma vez
+  só. O dano periódico que o falcão leva sai da vida do dono, com a autoria. A cada tick, antes das mortes, o falcão
+  volta a mostrar a vida do dono; dono caído, o falcão cai junto.
+- **Não ataca:** sem ataque básico, voa até o alvo selecionado do dono e o segue. O básico sai do Aventureiro.
+- **As habilidades saem do falcão:** projéteis e áreas partem da célula dele (`origemDaHabilidade`). O alcance continua
+  medido a partir do Aventureiro, para a habilidade não ser recusada só porque o falcão voou para o outro lado. Usar
+  uma habilidade ofensiva marca o alvo do dono, e o falcão persegue o mesmo. Na IA inimiga, o falcão é o último alvo
+  da fila.
+- **Explorador:** revela armadilhas com a Sabedoria do dono e recolhe o ouro em que pousa (só ouro). O minimapa passa a
+  mostrar o falcão, os baús fechados e as armadilhas reveladas.
+
+**Decisão: Mago, encarnação elemental.** O Mago assume o elemento da última magia ofensiva de fogo, gelo ou raio. As de
+outros elementos não trocam, e a encarnação zera na troca de fase.
+- **Fogo:** +5% no dano mágico, e a cada 1 s queima (fraco, 2 s) os hostis a 1 célula.
+- **Gelo:** recebe 10% menos dano, e quem o golpeia corpo a corpo fica resfriado por 2 s.
+- **Raio:** +15% de velocidade, e as magias com projétil ou que já saltam ganham um salto.
+
+**Decisão: Arqueiro, Mira firme.** Uma barra enche em 6 s sem levar dano; cada ponto de Destreza acima de 10 encurta
+2%, até 25%. Cheia, o próximo disparo de projétil (o `tiro` ou uma habilidade) sai carregado: crítico garantido
+(d20 mínimo 16, x1,5, ou x2 quando sai 20; o `d20Minimo` agora viaja no projétil), atravessa todos na linha e vai até
+o alcance máximo. Levar dano ou
+disparar o tiro carregado zera a barra. Como a fúria, o valor é calculado na leitura a partir de um tick guardado.
+
+**Apresentação.** A barra da fúria passa a ser a barra da classe e serve também à Mira firme. A encarnação aparece como
+chip ao lado da vida. Tudo é feito com partículas: penas no falcão quando lança, a aura do elemento no Mago, o brilho
+do Arqueiro com a barra cheia e o rastro dourado do tiro carregado. Os textos ficam no dicionário, com uma seção nova
+no guia ("O jeito de cada classe").
+
+**Regras.** Os números ficam em `balance.ajustesClasses` (balance 32: `aventureiro.falcaoPassoMs`,
+`mago.encarnacao`, `arqueiro.mira`). A classe é lida pela bolsa ou, na rede, pelo `classeId`, então tudo vale na arena
+e no grupo. Nada novo vai para o save: `encarnacao` e `mira` zeram na fase.
+
+**Calibragem.** Com os números da proposta (fogo +15%, Mira em 4 s com d20 20), o simulador ficou em 72/77: o Mago
+caiu para 3,4 s no comum dos níveis 1 e 5 (piso 3,5 s), o Arqueiro para 3,4 s no comum do 10 e 18,8 s no chefe (piso
+25 s), e o Aventureiro focado venceu só 56% dos duelos contra o disperso (meta 60%). No duelo, o bot batia no falcão,
+que é o hostil mais perto, e o golpe usava as defesas do pássaro; o redirecionamento ao dono resolveu (87,5%). O
+Arqueiro já estava perto do piso do chefe (27,6 s sem a Mira), e todo combate começa com a barra cheia, por isso os
+números baixaram: fogo +5%, Mira em 6 s com d20 mínimo 16. As metas não mudaram: 77/77.
+
+## D-090 — Necromante no simulador, exército de mortos e Dízimo que ergue (marco 22, 23/10/2026)
+
+**Contexto.** Ao conferir se o simulador levava em conta as invocações do Necromante, apareceram três falhas. Os mortos
+eram simulados e o dano deles contabilizado, mas o Necromante não estava nas metas (só no diagnóstico). O bot nunca usava
+o Comando sepulcral nem o Dízimo vital. E várias medidas terminavam na primeira morte, que podia ser a de um servo.
+
+**Decisão: o simulador.**
+- O Necromante entra na lista de classes das metas (94 critérios).
+- **Medidas atentas às invocações:** o PvP, o duelo de builds e a economia acabam na queda de um personagem, não de uma
+  invocação. A luta começa na primeira ação do time (o servo costuma abrir antes do dono). O "aguenta" mede o corpo do
+  personagem, sem o servo.
+- **Bot:** usa o Comando quando há mortos perto e um hostil ao alcance deles. Usa o Dízimo para erguer quando não há
+  morto ao alcance e para drenar com a vida pela metade (antes das outras habilidades). Como uma pessoa, foca o jogador
+  que invoca, não as invocações dele. Os adds de um chefe continuam valendo como qualquer hostil.
+
+**Decisão: o Necromante.** Medido de verdade, ele matava um comum em 2,1 s (piso 3,5 s), vencia o chefe em 18,8 s (piso
+25 s), aguentava 5 golpes sem o servo (meta 6 a 8), e a build focada vencia só 25% dos duelos (a Inteligência quase não
+servia à classe). O usuário pediu que os mortos durem pelo menos 20 s, que o limite passe de 4 para 10 e que o dano de
+cada um caia com a quantidade. Ficou assim (balance 33):
+- reanimados e ecos duram 20 s (eram 25 s); limite de 10 invocações (2 do modo + 8 da classe);
+- o dano dos mortos vai de 180% para 75%, multiplicado por `quantidade ^ -0,8` (com 10 de pé, cada um bate 16% do que bateria sozinho, e o exército inteiro, 1,6 vez);
+- cada ponto de Inteligência acima de 10 dá +1 de Força e de Inteligência aos mortos erguidos (a build focada rende);
+- vida base de 32 para 50 (save 22 migra os personagens com 32).
+
+Resultado: comum em 4 a 4,5 s, chefe em 28,8 s, aguenta 6 a 7 golpes, PvP em 7,3 s, focada vence 68,8%. As 94 metas
+passam. As metas não mudaram.
+
+**Decisão: duas mecânicas pedidas.**
+- **Retorno:** o morto a mais de 10 células (`necromancia.distanciaRetorno`) do Necromante volta para uma célula livre
+  ao lado dele, com fumaça na saída e sombra na chegada.
+- **Dízimo que ergue:** sem um morto ao alcance do ritual, o Dízimo vital ergue um: o servo, se ele caiu (e o retorno de
+  8 s é liberado), ou um reanimado. Nesse modo não pede vida faltando; sem vaga, é recusado. O botão troca o ícone para o
+  de invocar e ganha uma dica.
 

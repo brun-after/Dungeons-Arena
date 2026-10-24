@@ -193,7 +193,7 @@
     {
       "id": "necromante",
       "nome": "Necromante",
-      "hpBase": 32,
+      "hpBase": 50,
       "defesa": 1,
       "classe": "conjurador",
       "atributos": {

@@ -70,9 +70,18 @@ export function coletarObjetos(estado: EstadoJogo, ctx: ContextoSimulacao, saida
     if (!dono || dono.x !== o.x || dono.y !== o.y) delete o.aguardaSaidaDe;
   }
   for (const e of ordemRotativa(estado.entidades, estado.tick)) {
-    if (!coletor(e)) continue;
+    // Marco 22 (D-089): o falcão do Aventureiro recolhe o ouro em que pousa, para a bolsa do dono (só ouro).
+    const dono = e.invocacao?.companheiro && vivo(e) ? estado.entidades.find((x) => x.id === e.invocacao?.donoId) : undefined;
+    if (!coletor(e) && !dono) continue;
     const o = estado.objetos.find((x) => x.x === e.x && x.y === e.y && x.aguardaSaidaDe !== e.id && !consumidos.has(x.objetoId) && coletavel(x));
     if (!o) continue;
+    if (dono) {
+      if (o.tipo !== 'ouro' || !dono.bolsa || !vivo(dono)) continue;
+      consumidos.add(o.objetoId);
+      dono.bolsa.ouro += o.valor;
+      saida.push({ t: 'coletou', tick: estado.tick, id: dono.id, objetoId: o.objetoId, tipo: o.tipo, ganho: o.valor, itemId: null });
+      continue;
+    }
     // Transação: verificar -> consumir -> transferir -> registrar, tudo neste tick.
     if (o.tipo === 'item') {
       // Item: só quem tem mochila com espaço para a quantidade toda; senão fica no chão (§2.10).

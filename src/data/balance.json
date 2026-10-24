@@ -1,6 +1,6 @@
 {
-  "necromancia": { "danoPct": 180, "servosExtras": 2, "retornoServoMs": 8000, "duracaoMortoMs": 25000, "raioColheita": 6, "ecoRecargaMs": 30000, "vidaBase": 24, "vidaPorNivel": 3, "vidaServoPct": 100, "alcanceRitual": 6 },
-  "versao": 31,
+  "necromancia": { "danoPct": 75, "servosExtras": 8, "retornoServoMs": 8000, "duracaoMortoMs": 20000, "raioColheita": 6, "ecoRecargaMs": 30000, "vidaBase": 24, "vidaPorNivel": 3, "vidaServoPct": 100, "alcanceRitual": 6, "distanciaRetorno": 10, "atributoPorInt": 1, "perdaPorQuantidade": 0.8 },
+  "versao": 33,
   "ajustesClasses": {
     "guerreiro": {
       "contatoMaxPct": 15,
@@ -34,14 +34,17 @@
       "dardoPlenoNivel": 20,
       "concentracaoAcertos": 4,
       "concentracaoJanelaMs": 12000,
-      "concentracaoExtraPct": 25
+      "concentracaoExtraPct": 25,
+      "encarnacao": { "fogoDanoPct": 5, "fogoIntervaloMs": 1000, "fogoRaio": 1, "fogoQueimaValor": 2, "fogoQueimaMs": 2000, "geloReducaoPct": 10, "geloResfriarMs": 2000, "raioVelocidadePct": 15 }
     },
     "aventureiro": {
       "nivelCorte": 20,
-      "danoMult": 0.95
+      "danoMult": 0.95,
+      "falcaoPassoMs": 200
     },
     "arqueiro": {
-      "secundariosMult": 1.15
+      "secundariosMult": 1.15,
+      "mira": { "cargaMs": 6000, "reducaoPorDestrezaPct": 2, "reducaoMaxPct": 25, "d20Minimo": 16 }
     },
     "necromante": {
       "protecaoMs": 5000,

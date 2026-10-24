@@ -145,6 +145,11 @@ export type EventoSimulacao =
   | { t: 'missaoConcluida'; tick: number; id: EntidadeId; missao: string; itemId: string }
   | { t: 'origemRara'; tick: number; id: EntidadeId; origem: string; itemId: string }
   | { t: 'forjou'; tick: number; id: EntidadeId; receita: string; itemId: string }
+  // Marco 22 (D-089): o Mago trocou de encarnação; o Arqueiro disparou o tiro carregado.
+  | { t: 'encarnou'; tick: number; id: EntidadeId; elemento: 'fogo' | 'gelo' | 'raio' }
+  | { t: 'tiroCarregado'; tick: number; id: EntidadeId }
+  /** Marco 22 (D-090): o morto do Necromante longe demais voltou para o lado dele. */
+  | { t: 'invocacaoRetornou'; tick: number; id: EntidadeId; donoId: EntidadeId; deX: number; deY: number; x: number; y: number }
   | { t: 'descoberta'; tick: number; id: EntidadeId; entrada: string }
   | { t: 'renasceu'; tick: number; id: EntidadeId; hp: number }
   | { t: 'barraMudou'; tick: number; id: EntidadeId }

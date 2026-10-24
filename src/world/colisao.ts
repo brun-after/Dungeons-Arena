@@ -5,7 +5,8 @@ import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import type { Entidade } from '../entities/entidade';
 
 /** `fantasma` (§2.8): presença do efeito; os expirados saem na etapa 4 de cada tick. */
-const semColisao = (e: Entidade) => e.efeitos.some((f) => REGISTRO_EFEITOS[f.tipo].semColisao);
+// Marco 22: o falcão voa e não ocupa célula.
+const semColisao = (e: Entidade) => !!e.invocacao?.companheiro || e.efeitos.some((f) => REGISTRO_EFEITOS[f.tipo].semColisao);
 
 /** Regras de colisão do modo (§2.3, itens 8 e 9). Vêm de dados. */
 export interface RegrasColisao {

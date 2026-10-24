@@ -3,8 +3,8 @@
 import { t, type ChaveTexto } from '../i18n';
 import { criarModal, type Modal } from './modal';
 
-// Marco 11A: a seção do editor (aventuras, ferramentas e tileset).
-const SECOES = ['controles', 'combate', 'atributos', 'habilidades', 'itens', 'descobertas', 'vida', 'portas', 'ambiente', 'invocacoes', 'arena', 'editor'] as const;
+// Marco 11A: a seção do editor (aventuras, ferramentas e tileset). Marco 22 (23/10/2026): a identidade das classes.
+const SECOES = ['controles', 'combate', 'atributos', 'habilidades', 'classes', 'itens', 'descobertas', 'vida', 'portas', 'ambiente', 'invocacoes', 'arena', 'editor'] as const;
 
 export function criarGuia(aoFechar?: () => void): Modal {
   const modal = criarModal({ titulo: t('guia.titulo'), rotuloFechar: t('guia.fechar'), classe: 'guia', ...(aoFechar && { aoFechar }) });

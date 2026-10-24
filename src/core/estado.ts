@@ -41,6 +41,8 @@ export interface Projetil {
   /** Marco 14: multiplicador de cura (rank, caminhos e perfil) congelado no lançamento. */
   multCura: number;
   atravessa: boolean;
+  /** Marco 22 (D-089): o tiro carregado da Mira firme leva o crítico garantido até o impacto. */
+  d20Minimo?: number;
   /** Quem já foi atingido (o projétil que atravessa não acerta o mesmo alvo duas vezes). */
   atingidos: EntidadeId[];
 }

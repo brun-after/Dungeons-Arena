@@ -3,6 +3,7 @@ import { entregaRemota, extraGuerreiro, multiplicadorDireto, protecaoInicial, pu
 import { comboDoImpacto, confirmarImpactoTatico } from './sequencias';
 import { defenderGolpe, fluxoRestaurador } from './tatica';
 import { comCombo } from './combos';
+import { reagirAoGolpe } from './encarnacao';
 import { acumularFuria, multiplicadorFuria } from './furia';
 import { ticksDe } from '../core/tempo';
 // Aplicação de um impacto num alvo (§2.7, passo 10): dano com HP mínimo 0, cura limitada ao
@@ -82,6 +83,12 @@ export function aplicarImpacto(
   saida: EventoSimulacao[],
 ): void {
   if (!vivo(alvo)) return;
+  // Marco 22 (D-089): o golpe no falcão do Aventureiro cai no dono, com as defesas, os escudos e as proteções dele.
+  const dono = alvo.invocacao?.companheiro ? buscarEntidade(estado, alvo.invocacao.donoId) : undefined;
+  if (dono && vivo(dono)) {
+    aplicarImpacto(estado, ctx, dono, impacto, saida);
+    return;
+  }
   const { hab } = impacto;
   const atacante = buscarEntidade(estado, impacto.fonte.id);
   const combo = atacante ? comboDoImpacto(estado, ctx, atacante, hab, impacto.acaoId, alvo) : null;
@@ -133,6 +140,8 @@ export function aplicarImpacto(
       registrarParticipacao(alvo, fonte.id, tick, ctx);
       alvo.ultimoGolpe = { fonteId: fonte.id, chave: hab.chave };
       if (atacante) registrarDardo(ctx, atacante, alvo, hab, tick, Math.min(hpAntes, dano));
+      // Marco 22 (D-089): o Mago encarnado em gelo resfria quem o golpeia de perto.
+      if (hab.politicaImpacto === 'contato') reagirAoGolpe(estado, ctx, alvo, atacante, saida);
     }
   }
   if (hab.formulaCura !== null) {

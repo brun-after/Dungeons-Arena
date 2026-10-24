@@ -3,6 +3,7 @@
 // Fontes: o modificador `encadear` (saltos da habilidade compilada) e o raio sobre um alvo eletrizado (+1).
 // Os saltos não saltam de novo. Hostilidade sempre pela relação do modo (§2.5).
 
+import { saltosEncarnacao } from './encarnacao';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
@@ -17,9 +18,10 @@ const RAIO_ELETRIZADO = 3;
 const PCT_ELETRIZADO = 60;
 
 /** Quantos saltos este golpe terá (conferir antes do golpe principal: ele mesmo pode eletrizar). */
-export function quantidadeDeSaltos(hab: Habilidade, alvo: Entidade, tick: number): number {
+export function quantidadeDeSaltos(hab: Habilidade, alvo: Entidade, tick: number, ator?: Entidade): number {
   const eletrizado = hab.elemento === 'raio' && alvo.efeitos.some((f) => f.tipo === 'eletrizado' && f.ateTick > tick);
-  return (hab.saltos?.quantidade ?? 0) + (eletrizado ? 1 : 0);
+  // Marco 22 (D-089): o Mago encarnado em raio ganha um salto.
+  return (hab.saltos?.quantidade ?? 0) + (eletrizado ? 1 : 0) + saltosEncarnacao(ator, hab);
 }
 
 export function saltar(

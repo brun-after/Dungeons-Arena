@@ -318,6 +318,24 @@
       "invocacao": {
         "comportamento": "agressivo"
       }
+    },
+    {
+      "id": "falcao_companheiro",
+      "nome": "Falcão",
+      "hpBase": 1,
+      "hesitacaoS": 0,
+      "deteccao": 6,
+      "xp": 0,
+      "modelo": "falcao",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 0,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 1200,
+      "invocacao": {
+        "comportamento": "companheiro"
+      }
     }
   ]
 }

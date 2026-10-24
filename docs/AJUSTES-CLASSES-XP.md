@@ -1,7 +1,9 @@
 # Classes, experiência e Botas do vento
 
-**Versão:** 1.4 · **Data:** 23/10/2026 · **Balance:** 31 · **Save:** 21
+**Versão:** 1.6 · **Data:** 23/10/2026 · **Balance:** 33 · **Save:** 22
 
+> **1.6 (23/10/2026)**: marco 22 (D-090): Necromante nas metas; mortos com 75% de dano × quantidade^-0,8, até 10, reanimados por 20 s, +1 atributo nos mortos por ponto de Inteligência acima de 10, vida base 50; retorno a 10 células; Dízimo ergue sem morto ao alcance. 94/94 metas.
+> **1.5 (23/10/2026)**: marco 22 (D-089): identidade das classes. O Aventureiro ganha o falcão (mesma vida, origem das habilidades); o Mago, a encarnação elemental (fogo +5% de dano mágico e queima em volta, gelo -10% de dano recebido e resfria, raio +15% de velocidade e +1 salto); o Arqueiro, a Mira firme (6 s sem levar dano; o tiro carregado tem d20 mínimo 16, atravessa e vai até o alcance máximo). 77/77 metas.
 > **1.4 (23/10/2026)**: marco 21 (D-088): o Guerreiro se cura ao abater; a aura vale desde o nível 1 (3% a 15% de dano, 20% a 50% de cura, metade da defesa), o pulso remoto não espera mais o 16; barra de fúria. Os trechos abaixo sobre a aura de 1% a 5% e o pulso remoto do 16 ao 20 são históricos.
 
 Implementação baseada no arquivo `AJUSTES-CLASSES-A-PARTIR-DA-MAIN.md` fornecido pelo usuário, mais os pedidos de reduzir o farm de criaturas inferiores e substituir o efeito redundante das botas. Os percentuais históricos do anexo não certificam este pacote de produção.

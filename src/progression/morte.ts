@@ -52,7 +52,8 @@ function concederXp(estado: EstadoJogo, ctx: ContextoSimulacao, morto: Entidade,
     .filter((p) => estado.tick - p.tick <= janela)
     .map((p) => {
       const participante = buscarEntidade(estado, p.id);
-      return participante?.invocacao?.necromancia ? buscarEntidade(estado, participante.invocacao.donoId) : participante;
+      // Marco 22: o falcão também credita o XP ao dono.
+      return participante?.invocacao?.necromancia || participante?.invocacao?.companheiro ? buscarEntidade(estado, participante.invocacao.donoId) : participante;
     })
     .filter((e): e is Entidade => e !== undefined && podeFerir(e, morto, ctx.modo))
     .filter((e, i, todos) => todos.findIndex((x) => x.id === e.id) === i)

@@ -35,7 +35,8 @@ export type AplicarDireto = (alvo: Entidade, ef: EfeitoCanonico, origem: OrigemF
 
 /** Invocações vivas (não dominadas e que não são avatar) de um dono. */
 export function contarInvocacoes(estado: EstadoJogo, donoId: EntidadeId): number {
-  return estado.entidades.filter((e) => vivo(e) && e.invocacao?.donoId === donoId && !e.invocacao.dominado && !e.invocacao.avatar).length;
+  // Marco 22: o falcão do Aventureiro tem vaga própria.
+  return estado.entidades.filter((e) => vivo(e) && e.invocacao?.donoId === donoId && !e.invocacao.dominado && !e.invocacao.avatar && !e.invocacao.companheiro).length;
 }
 
 export function contarAvatares(estado: EstadoJogo, donoId: EntidadeId): number {

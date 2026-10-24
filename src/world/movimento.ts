@@ -1,4 +1,5 @@
 import { classeDe, progressoReforcosGuerreiro } from '../combat/ajustes-classes';
+import { velocidadeEncarnacao } from '../combat/encarnacao';
 import { celulaOcupada } from '../combat/geometria';
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import { podeFerir } from '../modos/relacao';
@@ -130,12 +131,13 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
   const inv = e.invocacao;
   const vel =
     inv && !inv.dominado
-      ? 1000 / ctx.balance.invocacoes.passoMs
+      ? 1000 / (inv.companheiro ? ctx.balance.ajustesClasses.aventureiro.falcaoPassoMs : ctx.balance.invocacoes.passoMs)
       : velocidade(e.atributos.destreza, ctx.balance.movimento.velocidadeBaseMs, inv?.dominado ?? false);
   // Marco 14: o frio (resfriado) deixa mais lento. Ajuste de 15/10/2026: conjurar uma habilidade `lenta` também.
   const conjurando = mobilidadeDaAcao(e, ctx) === 'lenta' ? ctx.balance.habilidades.velocidadeConjurandoLenta : 1;
   const r = ctx.balance.ajustesClasses.guerreiro;
-  const classe = classeDe(e) === 'guerreiro' && !inv ? 1 + (r.movimentoMult - 1) * progressoReforcosGuerreiro(ctx, e.nivel) : 1;
+  // Marco 22 (D-089): o Mago encarnado em raio anda mais rápido.
+  const classe = (classeDe(e) === 'guerreiro' && !inv ? 1 + (r.movimentoMult - 1) * progressoReforcosGuerreiro(ctx, e.nivel) : 1) * velocidadeEncarnacao(ctx, e);
   const bonus = e.efeitos.reduce((pct, f) => f.ateTick > estado.tick && REGISTRO_EFEITOS[f.tipo].velocidade ? Math.max(pct, f.pct) : pct, 0);
   const lento = (1 - lentidaoPct(e, estado.tick) / 100) * conjurando * classe * (1 + bonus / 100);
   let restante = (dtMs / 1000) * vel * lento;

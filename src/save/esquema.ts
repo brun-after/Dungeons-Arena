@@ -14,7 +14,7 @@ import type { Dificuldade } from '../modos/dificuldade';
 import { MAX_REGRAS, RE_REGRA_ESTILO } from '../world/estilo';
 import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 21;
+export const VERSAO_SCHEMA = 22;
 export const SLOTS = [1, 2, 3] as const;
 export const FORMATO_EXPORTACAO = 'dungeons-arena/save';
 
@@ -366,32 +366,8 @@ export const MIGRACOES: Readonly<Record<number, Migracao>> = {
     // Não altera certificados assinados nem outros metadados do registro.
     return { ...r, estado: migrar(r.estado), fasesVisitadas: migrar(r.fasesVisitadas) };
   },
-  // 18/10/2026: a base antiga do Necromante acompanha o catálogo; XP histórico começa vazio.
-  19: (r) => {
-    const conteudo = conteudoOficial();
-    const migrar = (v: unknown): unknown => {
-      if (!ehObjeto(v) || !Array.isArray(v.entidades)) return v;
-      return { ...v, entidades: v.entidades.map((x: unknown) => {
-        if (!ehObjeto(x) || !ehObjeto(x.bolsa)) return x;
-        const e = { ...x, bolsa: { ...x.bolsa, xpPorFase: lerHistoricoXp(x.bolsa.xpPorFase) } } as unknown as Entidade;
-        if (e.bolsa?.classeId === 'necromante' && e.bolsa.hpBase === 42) {
-          e.bolsa.hpBase = conteudo.classes.get('necromante')?.hpBase ?? e.bolsa.hpBase;
-          // A migração precede a validação do registro importado: não consultar fichas incompletas.
-          const b = e.bolsa;
-          const atributos = ['forca', 'destreza', 'constituicao', 'inteligencia', 'sabedoria', 'carisma'] as const;
-          const fichaCompleta = ehObjeto(b.atributosBase) && atributos.every(k => typeof b.atributosBase[k] === 'number')
-            && ehObjeto(b.equipamento) && Object.values(b.equipamento).every(i => i === null || (ehObjeto(i) && typeof i.itemId === 'string'))
-            && Array.isArray(b.conhecidas) && b.conhecidas.every(c => ehObjeto(c) && typeof c.id === 'string' && typeof c.rank === 'number')
-            && Array.isArray(b.barra) && typeof b.defesaBase === 'number' && typeof e.nivel === 'number' && typeof e.hp === 'number';
-          if (fichaCompleta) recalcularFicha(e, { balance: BALANCE_PADRAO, conteudo });
-        }
-        return e;
-      }) };
-    };
-    const fasesVisitadas = ehObjeto(r.fasesVisitadas)
-      ? Object.fromEntries(Object.entries(r.fasesVisitadas).map(([id, fase]) => [id, migrar(fase)])) : r.fasesVisitadas;
-    return { ...r, estado: migrar(r.estado), fasesVisitadas };
-  },
+  // 18/10/2026: a base antiga do Necromante (42) vai para a de então (32); XP histórico começa vazio.
+  19: (r) => migrarHpNecromante(r, 42, 32, true),
   // 18/10/2026: contadores por fase independentes; mantém todo valor histórico existente.
   20: (r) => {
     const migrar = (v: unknown): unknown => !ehObjeto(v) || !Array.isArray(v.entidades) ? v : {
@@ -403,7 +379,36 @@ export const MIGRACOES: Readonly<Record<number, Migracao>> = {
       ? Object.fromEntries(Object.entries(r.fasesVisitadas).map(([id, fase]) => [id, migrar(fase)])) : r.fasesVisitadas;
     return { ...r, estado: migrar(r.estado), fasesVisitadas };
   },
+  // Marco 22 (23/10/2026, D-090): a base do Necromante sobe de 32 para a do catálogo (50).
+  21: (r) => migrarHpNecromante(r, 32, conteudoOficial().classes.get('necromante')?.hpBase ?? 32, false),
 };
+
+/** Troca a vida base do Necromante (`de` -> `para`) e refaz a ficha; `xp` também zera o histórico de XP (v19). */
+function migrarHpNecromante(r: Objeto, de: number, para: number, xp: boolean): Objeto {
+  const conteudo = conteudoOficial();
+  const migrar = (v: unknown): unknown => {
+    if (!ehObjeto(v) || !Array.isArray(v.entidades)) return v;
+    return { ...v, entidades: v.entidades.map((x: unknown) => {
+      if (!ehObjeto(x) || !ehObjeto(x.bolsa)) return x;
+      const e = (xp ? { ...x, bolsa: { ...x.bolsa, xpPorFase: lerHistoricoXp(x.bolsa.xpPorFase) } } : { ...x, bolsa: { ...x.bolsa } }) as unknown as Entidade;
+      if (e.bolsa?.classeId === 'necromante' && e.bolsa.hpBase === de) {
+        e.bolsa.hpBase = para;
+        // A migração precede a validação do registro importado: não consultar fichas incompletas.
+        const b = e.bolsa;
+        const atributos = ['forca', 'destreza', 'constituicao', 'inteligencia', 'sabedoria', 'carisma'] as const;
+        const fichaCompleta = ehObjeto(b.atributosBase) && atributos.every(k => typeof b.atributosBase[k] === 'number')
+          && ehObjeto(b.equipamento) && Object.values(b.equipamento).every(i => i === null || (ehObjeto(i) && typeof i.itemId === 'string'))
+          && Array.isArray(b.conhecidas) && b.conhecidas.every(c => ehObjeto(c) && typeof c.id === 'string' && typeof c.rank === 'number')
+          && Array.isArray(b.barra) && typeof b.defesaBase === 'number' && typeof e.nivel === 'number' && typeof e.hp === 'number';
+        if (fichaCompleta) recalcularFicha(e, { balance: BALANCE_PADRAO, conteudo });
+      }
+      return e;
+    }) };
+  };
+  const fasesVisitadas = ehObjeto(r.fasesVisitadas)
+    ? Object.fromEntries(Object.entries(r.fasesVisitadas).map(([id, fase]) => [id, migrar(fase)])) : r.fasesVisitadas;
+  return { ...r, estado: migrar(r.estado), fasesVisitadas };
+}
 
 function temNaoFinito(v: unknown): boolean {
   if (typeof v === 'number') return !Number.isFinite(v);

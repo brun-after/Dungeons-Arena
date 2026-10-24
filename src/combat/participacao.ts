@@ -6,10 +6,13 @@ import type { ContextoSimulacao } from '../core/contexto';
 import { ticksDe } from '../core/tempo';
 import type { Entidade } from '../entities/entidade';
 import { contarGolpe } from './invocacoes';
+import { zerarMira } from './mira';
 
 export function registrarParticipacao(alvo: Entidade, fonteId: string, tick: number, ctx: ContextoSimulacao): void {
   const janela = ticksDe(ctx.balance.combate.janelaParticipacaoS * 1000);
   alvo.participacao = alvo.participacao.filter((p) => p.id !== fonteId && tick - p.tick <= janela);
   alvo.participacao.push({ id: fonteId, tick });
   contarGolpe(alvo);
+  // Marco 22 (D-089): levar dano zera a Mira firme do Arqueiro.
+  zerarMira(alvo, tick);
 }

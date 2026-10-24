@@ -167,7 +167,8 @@ export function verificarInvariantes(estado: EstadoJogo, ctx: ContextoSimulacao)
   // Marco 8A-2: invocações (não dominadas) e armadilhas dentro dos limites do modo, por dono.
   const porDono = new Map<string, number>();
   for (const e of estado.entidades) {
-    if (e.invocacao && !e.invocacao.dominado && !e.invocacao.avatar && e.hp > 0) porDono.set(e.invocacao.donoId, (porDono.get(e.invocacao.donoId) ?? 0) + 1);
+    // Marco 22: o falcão do Aventureiro tem vaga própria.
+    if (e.invocacao && !e.invocacao.dominado && !e.invocacao.avatar && !e.invocacao.companheiro && e.hp > 0) porDono.set(e.invocacao.donoId, (porDono.get(e.invocacao.donoId) ?? 0) + 1);
   }
   for (const [dono, n] of porDono) if (n > ctx.modo.limites.invocacoesPorJogador) erros.push(`${dono} com ${n} invocações`);
   // Marco 10A-3: avatares contam à parte; golpes do avatar nunca negativos.

@@ -43,7 +43,8 @@ export interface EfeitoAtivo {
 }
 
 /** Comportamento da invocação (§2.9, marco 10A-3). */
-export type ComportamentoInvocacao = 'agressivo' | 'assassino' | 'protetor' | 'curador' | 'isca';
+// Marco 22 (D-089): `companheiro` (o falcão do Aventureiro) ataca sempre o alvo selecionado do dono.
+export type ComportamentoInvocacao = 'agressivo' | 'assassino' | 'protetor' | 'curador' | 'isca' | 'companheiro';
 
 /** Invocação ou dominado (§2.9): de quem é, até quando, e se foi dominado (sobrevive ao dono). */
 export interface DadosInvocacao {
@@ -61,7 +62,13 @@ export interface DadosInvocacao {
   nivelDominacao: number;
   /** Mortos do Necromante têm atributos próprios; o modelo só guarda a semelhança visual. */
   necromancia?: 'servo' | 'reanimado' | 'eco';
+  /** Marco 22 (D-090): quantos mortos do mesmo Necromante estão de pé (o dano de cada um cai com a quantidade). */
+  exercito?: number;
   modeloOriginal?: string;
+  /** Marco 22 (D-089): o falcão do Aventureiro. Divide a vida do dono (o dano nele sai do dono) e tem vaga própria. */
+  companheiro?: boolean;
+  /** A vida do dono copiada no fim do último tick; a diferença é o dano que o falcão levou. */
+  hpEspelhado?: number;
 }
 
 /** Ação em conjuração (§2.7, etapa 3). Ticks publicados para a telegrafia (§3.6). */
@@ -293,6 +300,10 @@ export interface Entidade {
   encontro?: { faseId: string; inicioTick: number };
   auraFracoes?: Record<string, number>;
   auraCuraFracao?: number;
+  /** Marco 22 (D-089): o elemento que o Mago encarna (fogo, gelo ou raio). */
+  encarnacao?: 'fogo' | 'gelo' | 'raio';
+  /** Marco 22 (D-089): Mira firme do Arqueiro — a barra enche a partir deste tick (dano recebido ou tiro carregado zeram). */
+  mira?: { desdeTick: number };
   /** Marco 21 (D-088): fúria do Guerreiro, valor no `ultimoTick` (o esvaziamento é calculado na leitura). */
   furia?: { valor: number; ultimoTick: number };
   /** 18/10/2026: acertos efetivos consecutivos do Dardo no mesmo alvo e vida. */
@@ -471,6 +482,7 @@ export function clonarEntidade(e: Entidade): Entidade {
     ...(e.concentracaoArcana ? { concentracaoArcana: { ...e.concentracaoArcana } } : {}),
     ...(e.auraFracoes ? { auraFracoes: { ...e.auraFracoes } } : {}),
     ...(e.furia ? { furia: { ...e.furia } } : {}),
+    ...(e.mira ? { mira: { ...e.mira } } : {}),
     waypoints: copiarCelulas(e.waypoints),
     caminho: copiarCelulas(e.caminho),
     atributos: { ...e.atributos },

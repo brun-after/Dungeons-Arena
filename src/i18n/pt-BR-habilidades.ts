@@ -3,11 +3,11 @@
 // dicionário principal (pt-BR.ts) por espalhamento, com as mesmas chaves tipadas.
 
 export const textosHabilidades = {
-  'classe.necromante.descricao': 'Um servo morto-vivo retorna passivamente após 8 s. Seus abates reanimam inimigos por 25 s; aliados que caem perto deixam ecos independentes. Até 4 invocações. Drene seus mortos para sobreviver. Mortos fortalecidos, dano próprio reduzido e proteção contra grupos nos primeiros 5 s de combate.',
+  'classe.necromante.descricao': 'Um servo morto-vivo retorna passivamente após 8 s. Seus abates reanimam inimigos por 20 s; aliados que caem perto deixam ecos independentes. Até 10 mortos: quanto maior o exército, menos cada um bate, e a sua Inteligência os fortalece. Mortos que se afastam demais voltam para o seu lado. Drene seus mortos para sobreviver; sem nenhum por perto, o Dízimo ergue um. Dano próprio reduzido e proteção contra grupos nos primeiros 5 s de combate.',
   'efeito.definhando': 'Definhando',
   'desc.efeito.definhando': 'Reduz dano causado e cura recebida em {pct}% por {s} s',
   'efeito.drenar_invocacao': 'Dízimo vital',
-  'desc.efeito.drenar_invocacao': 'Consome até {valor} de vida da invocação própria mais próxima, a até 6 células, para curar você; nunca drena um aliado jogador',
+  'desc.efeito.drenar_invocacao': 'Consome até {valor} de vida da invocação própria mais próxima, a até 6 células, para curar você; nunca drena um aliado jogador. Sem invocação ao alcance, ergue um morto (o servo, se ele caiu)',
   'efeito.comandar_mortos': 'Comando sepulcral',
   'desc.efeito.comandar_mortos': 'Suas invocações a até 6 células ganham +{pct}% de dano e 20% de redução da recarga do básico por {s} s',
   'sinergia.putrefacao': 'Putrefação!',
@@ -186,10 +186,10 @@ export const textosHabilidades = {
   'sinergia.panico': 'Pânico!',
 
   // Classes e a escolha ao criar o personagem.
-  'classe.aventureiro.descricao': 'Um pouco de tudo: golpe, magia e cura. Aprende de qualquer escola. Seta Arcana e Explosão causam 5% menos dano a partir do nível 20.',
+  'classe.aventureiro.descricao': 'Um pouco de tudo: golpe, magia e cura. Aprende de qualquer escola. Anda com um falcão que divide a vida com ele, persegue o mesmo alvo, lança as habilidades (o ataque básico sai do Aventureiro), recolhe ouro e revela armadilhas. Seta Arcana e Explosão causam 5% menos dano a partir do nível 20.',
   'classe.guerreiro.descricao': 'Corpo a corpo e resistência. O bônus de contato cresce até o nível 10; diante de dois ou mais inimigos próximos, ganha resistência progressiva até 15%. Recupera 10% do dano efetivo do ataque básico como vida e metade da vida que falta ao derrubar um inimigo. Desde o nível 1, seus golpes pulsam uma aura que fere os inimigos em volta (de 3% a 15% do dano, conforme o nível) e o cura (de 20% a 50% do que a aura causou). O ataque básico enche a barra de fúria; cheia, todas essas curas dobram. Do nível 16 ao 20, ganha progressivamente até 15% de velocidade e paga menos vida nas técnicas de sangue.',
-  'classe.mago.descricao': 'Magias de elemento: fogo, gelo e raio. Dano mágico +35% no início e a partir do nível 20; +25% entre os níveis 5 e 15, com transições graduais. O Dardo Arcano recupera seu poder inicial entre os níveis 10 e 20 e concentra poder com acertos no mesmo alvo, chegando a +25% após quatro acertos. A concentração expira após 12 segundos sem acertar.',
-  'classe.arqueiro.descricao': 'Projéteis de longe, veneno e posicionamento. Mais alcance e dano com projéteis. Chuva de Flechas e Tiro em Leque causam +15% nos alvos secundários.',
+  'classe.mago.descricao': 'Magias de elemento: fogo, gelo e raio. Encarna o elemento da última magia de fogo, gelo ou raio: fogo dá +5% de dano mágico e queima quem chega perto; gelo reduz 10% do dano recebido e resfria quem golpeia de perto; raio dá +15% de velocidade e um salto a mais nas magias. Dano mágico +35% no início e a partir do nível 20; +25% entre os níveis 5 e 15, com transições graduais. O Dardo Arcano recupera seu poder inicial entre os níveis 10 e 20 e concentra poder com acertos no mesmo alvo, chegando a +25% após quatro acertos. A concentração expira após 12 segundos sem acertar.',
+  'classe.arqueiro.descricao': 'Projéteis de longe, veneno e posicionamento. Mira firme: a barra enche em 6 s sem levar dano (a Destreza encurta); cheia, o próximo tiro é crítico garantido (não falha), atravessa todos na linha e vai até o alcance máximo. Mais alcance e dano com projéteis. Chuva de Flechas e Tiro em Leque causam +15% nos alvos secundários.',
   'escolhaClasse.titulo': 'Escolha a classe',
   'escolhaClasse.aviso': 'A classe não muda depois. As habilidades das outras escolas ainda chegam por livros.',
   'escolhaClasse.iniciais': 'Começa com: {lista}',

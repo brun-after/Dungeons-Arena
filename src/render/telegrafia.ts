@@ -16,6 +16,7 @@ import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import { DT_MS } from '../core/loop';
 import { resolverHabilidade } from '../combat/compilar-habilidade';
+import { origemDaHabilidade } from '../combat/acao';
 import { celulasDaForma, deSuporte } from '../combat/formas';
 import { relacao } from '../modos/relacao';
 import { CELULA_PX } from './camera-calculo';
@@ -87,11 +88,13 @@ export class CamadaTelegrafia {
       const fracao = Math.min(1, Math.max(0, (tickVisual - a.inicioTick) / Math.max(1, a.lancamentoTick - a.inicioTick)));
 
       if (hab.politicaImpacto === 'area') {
-        const celulas = celulasDaForma(hab, { x: e.x, y: e.y }, { x: a.alvoX, y: a.alvoY }, ctx.fase);
+        // Marco 22: as áreas do Aventureiro partem do falcão (a mesma origem do núcleo).
+        const de = origemDaHabilidade(estado, e, hab);
+        const celulas = celulasDaForma(hab, de, { x: a.alvoX, y: a.alvoY }, ctx.fase);
         let contorno = this.contornos.get(a.acaoId);
         if (!contorno) {
           // Linha e cone saem de quem conjura (o miolo cresce a partir dele); as demais são redondas.
-          const origem = centroDaCelula(e.x, e.y);
+          const origem = centroDaCelula(de.x, de.y);
           const desenho = hab.tipoArea === 'linha' ? { tipo: 'faixa' as const, origem } : hab.tipoArea === 'cone' ? { tipo: 'leque' as const, origem } : { tipo: 'radial' as const };
           contorno = contornoDaArea(celulas, a.acaoId, desenho);
           this.contornos.set(a.acaoId, contorno);
