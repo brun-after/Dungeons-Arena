@@ -31,10 +31,13 @@ import type { Habilidade } from './habilidades';
 import { rampaDeInvocacao } from './invocacoes';
 import { habilidadeDoAtor, perfilPara } from './perfil';
 import { lancarProjetil } from './projeteis';
+import { celulaDoCompanheiro } from './companheiro';
+import { encarnar } from './encarnacao';
+import { consumirMira } from './mira';
 import { quantidadeDeSaltos, saltar } from './saltos';
 import { dispararGanchosDe, passivosDe } from '../progression/ganchos-do-portador';
 import { comCombo, fazerCombo } from './combos';
-import { invocacaoParaDrenar } from './necromancia';
+import { dizimoErgue, podeErguerNoDizimo } from './necromancia';
 
 export function chaveRecarga(entidadeId: EntidadeId, habilidadeId: string): string {
   return `${entidadeId}_${habilidadeId}`;
@@ -68,6 +71,15 @@ export function fonteDaHabilidade(e: Entidade, ctx: ContextoSimulacao, tick: num
   return { ...f, multDano: f.multDano * hab.multDano * (1 + p.danoPct / 100), multCura: hab.multCura * (1 + p.curaPct / 100) };
 }
 
+/**
+ * Marco 22 (23/10/2026, D-089): de onde a habilidade parte. As do Aventureiro (fora o ataque básico, a espada) saem
+ * do falcão quando ele está em campo: o projétil nasce nele e a área "em volta" é em volta dele. O alcance continua
+ * medido a partir do Aventureiro (quem joga não precisa calcular onde o pássaro está).
+ */
+export function origemDaHabilidade(estado: EstadoJogo, ator: Entidade, hab: Habilidade): Celula {
+  return (hab.id !== ator.ataqueBasico ? celulaDoCompanheiro(estado, ator) : null) ?? celulaOcupada(ator);
+}
+
 /** Alcance com o perfil (marco 14) e o `ab_alcance` quando é o ataque básico (§2.8, marco 8A). */
 export function alcanceDe(ctx: ContextoSimulacao, ator: Entidade, hab: Habilidade, tick: number): number {
   const basico = hab.id === ator.ataqueBasico ? bonusAtaqueBasico(ator, tick).alcance : 0;
@@ -81,7 +93,8 @@ export function alvoOfensivoValido(estado: EstadoJogo, ctx: ContextoSimulacao, a
 
 /** Marco 14: alvo de suporte válido: vivo e o próprio ou aliado, pela relação do modo. */
 export function alvoDeSuporteValido(ctx: ContextoSimulacao, ator: Entidade, alvo: Entidade): boolean {
-  return vivo(alvo) && podeAjudar(ator, alvo, ctx.modo);
+  // Marco 22: o falcão divide a vida do dono; curá-lo não faria nada.
+  return vivo(alvo) && !alvo.invocacao?.companheiro && podeAjudar(ator, alvo, ctx.modo);
 }
 
 function alvoValido(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, alvo: Entidade, hab: Habilidade): boolean {
@@ -90,7 +103,8 @@ function alvoValido(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, 
 
 /** Avatar hostil vem antes de qualquer outro alvo (§2.9): é regra de alvo, não de hostilidade. */
 export function prioridadeDeAlvo(e: Entidade): number {
-  return e.invocacao?.avatar ? 0 : 1;
+  // Marco 22 (D-089): o falcão alheio só é escolhido sozinho quando não há outro alvo (golpeá-lo fere o dono).
+  return e.invocacao?.avatar ? 0 : e.invocacao?.companheiro ? 2 : 1;
 }
 
 /** Auto-alvo (§4.7): hostil no alcance por Chebyshev; avatar primeiro, depois mais próximo, menor HP e id. */
@@ -100,8 +114,8 @@ export function autoAlvo(
   ator: Entidade,
   alcance: number,
   filtro: (e: Entidade) => boolean = () => true,
+  origem: Celula = celulaOcupada(ator),
 ): Entidade | null {
-  const origem = celulaOcupada(ator);
   let melhor: Entidade | null = null;
   let melhorDist = Infinity;
   for (const e of estado.entidades) {
@@ -121,8 +135,7 @@ export function autoAlvo(
 }
 
 /** Marco 14: o aliado (ou o próprio) no alcance com a menor fração de vida; empate pelo id. */
-function aliadoMaisFerido(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, alcance: number): Entidade | null {
-  const origem = celulaOcupada(ator);
+function aliadoMaisFerido(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, alcance: number, origem: Celula): Entidade | null {
   let melhor: Entidade | null = null;
   for (const e of estado.entidades) {
     if (!alvoDeSuporteValido(ctx, ator, e) || chebyshev(origem, celulaOcupada(e)) > alcance) continue;
@@ -180,12 +193,16 @@ export function iniciarAcao(
   } else if (typeof alvoPedido === 'object') {
     celula = alvoPedido;
   } else {
-    alvo = escolherAlvo(estado, ctx, ator, hab, alvoPedido);
+    alvo = escolherAlvo(estado, ctx, ator, hab, alvoPedido, origem);
   }
   if (!alvo && !celula) return recusar('sem_alvo');
+  // Marco 22: o alvo de uma habilidade do Aventureiro vira o selecionado, e o falcão voa até ele.
+  if (alvo && alvo !== ator && !deSuporte(hab) && celulaDoCompanheiro(estado, ator)) ator.alvoSelecionado = alvo.id;
   if (hab.efeitos.some((ef) => ef.tipo === 'drenar_invocacao')) {
-    if (ator.hp >= ator.hpMax) return recusar('vida_cheia');
-    if (!invocacaoParaDrenar(estado, ctx, ator)) return recusar('sem_invocacao');
+    // Marco 22 (D-090): sem morto ao alcance, o Dízimo ergue um (se houver vaga) em vez de drenar.
+    if (dizimoErgue(estado, ctx, ator)) {
+      if (!podeErguerNoDizimo(estado, ctx, ator)) return recusar('sem_invocacao');
+    } else if (ator.hp >= ator.hpMax) return recusar('vida_cheia');
   }
   // Em volta de quem conjura (ao redor, aliados): a mira é a própria célula.
   const mira = hab.tipoArea === 'ao_redor' ? origem : (celula ?? celulaOcupada(alvo as Entidade));
@@ -236,6 +253,7 @@ function escolherAlvo(
   ator: Entidade,
   hab: Habilidade,
   pedido: EntidadeId | undefined,
+  origem: Celula,
 ): Entidade | null {
   const alcance = alcanceDe(ctx, ator, hab, estado.tick);
   if (pedido) {
@@ -243,13 +261,13 @@ function escolherAlvo(
     const e = buscarEntidade(estado, pedido);
     if (e && alvoValido(estado, ctx, ator, e, hab)) return e;
   }
-  if (deSuporte(hab)) return aliadoMaisFerido(estado, ctx, ator, alcance);
+  if (deSuporte(hab)) return aliadoMaisFerido(estado, ctx, ator, alcance, origem);
   // Ajuste de 15/10/2026 (D-065): travado, a habilidade vai no travado mesmo fora do alcance (a validação recusa),
   // nunca em outro; destravado, o hostil escolhido pelo auto-alvo passa a ser o selecionado (o anel acompanha).
   const atual = alvoAtual(estado, ctx, ator);
-  if (atual && (ator.alvoTravado || chebyshev(celulaOcupada(ator), celulaOcupada(atual)) <= alcance)) return atual;
+  if (atual && (ator.alvoTravado || chebyshev(origem, celulaOcupada(atual)) <= alcance)) return atual;
   if (ator.alvoTravado && ator.alvoSelecionado) return null;
-  const novo = autoAlvo(estado, ctx, ator, alcance);
+  const novo = autoAlvo(estado, ctx, ator, alcance, undefined, origem);
   if (novo) ator.alvoSelecionado = novo.id;
   return novo;
 }
@@ -302,6 +320,8 @@ function lancar(
   const fonte = comCombo(fonteDaHabilidade(ator, ctx, estado.tick, hab), fazerCombo(estado, ctx, ator, hab, alvo, mira, saida, false));
   dispararGanchosDe(estado, ctx, ator, 'aoUsarHabilidade', { outro: alvo, hab }, saida);
   ator.ultimaHabilidade = { id: hab.id, chave: hab.chave, tick: estado.tick, alvoId: alvo?.id ?? null };
+  // Marco 22 (D-089): a magia de fogo, gelo ou raio troca a encarnação do Mago.
+  if (encarnar(ator, hab)) saida.push({ t: 'encarnou', tick: estado.tick, id: ator.id, elemento: ator.encarnacao ?? 'fogo' });
   const basico = hab.id === ator.ataqueBasico ? bonusAtaqueBasico(ator, estado.tick) : null;
   const alcance = alcanceDe(ctx, ator, hab, estado.tick);
   const base = { acaoId, fonte, hab, mira, ...(basico && basico.dano > 0 && { danoExtra: basico.dano }) };
@@ -315,17 +335,17 @@ function lancar(
       break;
     case 'contato': {
       if (!alvo) break;
-      if (chebyshev(celulaOcupada(ator), celulaOcupada(alvo)) > alcance) {
+      const origem = celulaOcupada(ator);
+      if (chebyshev(origem, celulaOcupada(alvo)) > alcance) {
         saida.push({ t: 'esquivou', tick: estado.tick, acaoId, atorId: ator.id, alvoId: alvo.id });
         break;
       }
-      const saltos = quantidadeDeSaltos(hab, alvo, estado.tick);
+      const saltos = quantidadeDeSaltos(hab, alvo, estado.tick, ator);
       aplicarImpacto(estado, ctx, alvo, { ...base, indice: 0 }, saida);
       const atingidos = [alvo.id];
       // `ab_multi_alvo` (§2.8): alvos adicionais no alcance, os mais próximos primeiro.
       const extras = basico?.alvosExtras ?? 0;
       if (extras > 0) {
-        const origem = celulaOcupada(ator);
         const perto = (e: Entidade) => chebyshev(origem, celulaOcupada(e));
         estado.entidades
           .filter((e) => e.id !== alvo.id && alvoOfensivoValido(estado, ctx, ator, e) && perto(e) <= alcance)
@@ -340,17 +360,22 @@ function lancar(
       break;
     }
     case 'area': {
-      const atingidos = alvosDaForma(estado, ctx, ator, hab, celulasDaForma(hab, celulaOcupada(ator), mira, ctx.fase));
+      const atingidos = alvosDaForma(estado, ctx, ator, hab, celulasDaForma(hab, origemDaHabilidade(estado, ator, hab), mira, ctx.fase));
       const principal = [...atingidos].sort((a, b) => chebyshev(celulaOcupada(a), mira) - chebyshev(celulaOcupada(b), mira) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))[0];
       atingidos.forEach((e, indice) => {
         aplicarImpacto(estado, ctx, e, { ...base, indice, secundario: e !== principal }, saida);
       });
       break;
     }
-    case 'projetil':
+    case 'projetil': {
       // Mira na célula do alvo no lançamento; daí em diante segue em linha reta e pode ser esquivado.
-      lancarProjetil(estado, ator, hab, acaoId, fonte, alvo ? celulaOcupada(alvo) : mira, saida);
+      // Marco 22 (D-089): com a Mira firme cheia, o tiro sai carregado (crítico garantido, atravessa, alcance máximo).
+      const carregado = consumirMira(ctx, ator, estado.tick);
+      if (carregado) saida.push({ t: 'tiroCarregado', tick: estado.tick, id: ator.id });
+      const fonteTiro = carregado ? { ...fonte, d20Minimo: Math.max(fonte.d20Minimo ?? 0, ctx.balance.ajustesClasses.arqueiro.mira.d20Minimo) } : fonte;
+      lancarProjetil(estado, ator, hab, acaoId, fonteTiro, alvo ? celulaOcupada(alvo) : mira, saida, origemDaHabilidade(estado, ator, hab), carregado ? { alcance } : null);
       break;
+    }
   }
 }
 

@@ -111,10 +111,12 @@ export function afetavel(ctx: ContextoSimulacao, ator: Entidade, alvo: Entidade,
 export function alvosDaForma(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, hab: Habilidade, celulas: readonly Celula[]): Entidade[] {
   const chaves = new Set(celulas.map((c) => `${c.x},${c.y}`));
   const origem = celulaOcupada(ator);
-  const dentro = estado.entidades.filter((e) => {
+  const naArea = estado.entidades.filter((e) => {
     const c = celulaOcupada(e);
     return chaves.has(`${c.x},${c.y}`) && afetavel(ctx, ator, e, hab);
   });
+  // Marco 22 (D-089): o golpe no falcão cai no dono; com os dois na área, o dono é atingido uma vez só.
+  const dentro = naArea.filter((e) => !e.invocacao?.companheiro || !naArea.some((d) => d.id === e.invocacao?.donoId));
   const porId = (a: Entidade, b: Entidade) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
   if (hab.tipoArea === 'linha') return dentro.sort((a, b) => chebyshev(origem, celulaOcupada(a)) - chebyshev(origem, celulaOcupada(b)) || porId(a, b));
   return dentro.sort(porId);

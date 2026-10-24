@@ -32,6 +32,8 @@ import { revelarArmadilhas } from '../world/armadilhas-ocultas';
 import { atualizarRessonancias } from '../progression/ressonancias';
 import { forjar } from '../progression/forja';
 import { processarServosNecromantes } from '../combat/necromancia';
+import { processarCompanheiros, sincronizarCompanheiros } from '../combat/companheiro';
+import { processarEncarnacoes } from '../combat/encarnacao';
 import { processarMissoes } from '../progression/missoes';
 import { registrarDescobertas } from '../progression/diario';
 import { coletarObjetos } from '../world/objetos';
@@ -54,12 +56,16 @@ export function simular(
   // Marco 18: o que este tick emitir (missões e diário leem só os eventos dele).
   const inicio = saida.length;
   processarServosNecromantes(estado, ctx, saida);
+  // Marco 22 (D-089): o falcão do Aventureiro.
+  processarCompanheiros(estado, ctx, saida);
   aplicarComandos(estado, ctx, comandos, saida);
   processarIa(estado, ctx, saida);
   processarAcoes(estado, ctx, saida);
   moverProjeteis(estado, ctx, saida, dtMs);
   processarAutoAtaque(estado, ctx, saida);
   processarEfeitos(estado, ctx, saida);
+  // Marco 22 (D-089): o Mago encarnado em fogo queima quem está perto.
+  processarEncarnacoes(estado, ctx, saida);
   processarCampos(estado, ctx, saida);
   processarPantanos(estado, ctx, saida);
   regenerarRecursos(estado, ctx);
@@ -77,6 +83,8 @@ export function simular(
   atualizarRessonancias(estado, ctx, saida);
   processarAmbientes(estado, ctx, saida, inicio);
   processarGatilhosDeEfeito(estado, ctx, saida);
+  // Marco 22: o dano que o falcão levou sai da vida do dono antes das mortes.
+  sincronizarCompanheiros(estado, ctx);
   const abates = processarMortes(estado, ctx, saida);
   // Marco 18 (D-070): missões e o diário de descobertas.
   processarMissoes(estado, ctx, saida.slice(inicio), abates, saida);

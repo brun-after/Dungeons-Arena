@@ -118,7 +118,7 @@ describe('ajustes das classes (18/10/2026)', () => {
   });
   it('Necromante soma -75 pontos à afinidade de Trevas e a proteção expira sem renovar por onda', () => {
     const c = cena('necromante', 1);
-    expect(c.j.bolsa?.hpBase).toBe(32);
+    expect(c.j.bolsa?.hpBase).toBe(50);
     expect(perfilPara(c.ctx, c.j, c.hab('dardo_funesto')).danoPct).toBe(-65);
     expect(protecaoInicial(c.estado, c.ctx, c.j, c.alvo)).toBe(1);
     c.estado.entidades.push(criarEntidade({ id: 'b', tipo: 'inimigo', x: 9, y: 9 }));
@@ -347,7 +347,8 @@ describe('botas ao cruzar inimigos e saves legados', () => {
     const r = lerRegistro(antigo); expect(r.ok).toBe(true);
     if (!r.ok) return;
     const j = obter(r.registro.estado.entidades[0]);
-    expect(j.bolsa?.hpBase).toBe(32); expect(j.hpMax).toBe(72); expect(j.hp).toBe(72);
+    // 42 -> 32 (v19) -> 50 (v21, marco 22).
+    expect(j.bolsa?.hpBase).toBe(50); expect(j.hpMax).toBe(90); expect(j.hp).toBe(72); // a vida máxima sobe; a atual não cura sozinha
     expect(j.bolsa?.xpPorFase).toEqual({});
     expect(c.j.bolsa?.hpBase).toBe(42);
   });

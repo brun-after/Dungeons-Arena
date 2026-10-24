@@ -1,5 +1,6 @@
 import { faixaSuperior } from './aviso';
 import { IndicadorCombo } from './combos';
+import { fracaoMira } from '../combat/mira';
 import { CamadaCombosTaticos } from '../render/combos-taticos';
 // Apresentação do marco 12 (14/10/2026), D-056: junta numa peça só o que a cena ganhou — áudio, partículas,
 // presets de impacto, luz, minimapa, prompt de interação, pausa, configurações e guia —, aplica as
@@ -90,7 +91,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   const som = ligarSom({ motor, bus: o.bus, estado: o.estado, idLocal, habilidades: o.habilidades, fase: ctx.fase });
   const particulas = new SistemaParticulas(palco.efeitos, palco.app.renderer, () => camera.projecaoAtual);
   const impacto = new ControladorImpacto(() => prefs.efeitosDeTela && !reduzido() && qualidade().impacto);
-  const efeitos = new EfeitosDeHabilidade({ particulas, impacto, habilidades: o.habilidades, idLocal, qualidade, fase: ctx.fase });
+  const efeitos = new EfeitosDeHabilidade({ particulas, impacto, habilidades: o.habilidades, idLocal, qualidade, fase: ctx.fase, miraCheia: (e, tick) => fracaoMira(ctx, e, tick) === 1 });
   efeitos.ligar(o.bus, o.estado, () => performance.now());
   const combos = new CamadaCombosTaticos(palco.efeitos, () => camera.projecaoAtual, reduzido, () => qualidade().particulas === 0, 24, particulas);
   combos.ligar(o.bus, o.estado, () => performance.now());

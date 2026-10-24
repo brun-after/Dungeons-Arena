@@ -1,4 +1,5 @@
-// Bot de duelo (marco 15/16, 15/10/2026): joga como uma pessoa razoável — mira o hostil mais próximo, usa a barra
+// Bot de duelo (marco 15/16, 15/10/2026): joga como uma pessoa razoável — mira o hostil mais próximo (marco 22: quem
+// invoca antes das invocações), usa a barra
 // quando pronta, deixa o ataque básico automático, anda até o alcance, sai das áreas telegrafadas, toma poção com a
 // vida baixa e, atacando de longe, se afasta de quem só bate de perto. Usado pelo simulador de balanceamento
 // (tools/balanceamento) e pelas cenas de benchmark (?bench=). Puro: devolve comandos.
@@ -12,6 +13,7 @@ import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type EstadoJogo } from '../core/estado';
 import { vivo, type Entidade } from '../entities/entidade';
 import { podeFerir } from '../modos/relacao';
+import { dizimoErgue, invocacaoParaDrenar, podeErguerNoDizimo } from '../combat/necromancia';
 
 /** Quanto tempo o bot espera antes de reavaliar o caminho (para não mandar `irPara` a cada tick). */
 const REAVALIAR_CAMINHO_TICKS = 15;
@@ -62,9 +64,12 @@ export class BotDeDuelo {
       eu.autoAtaque = false;
       return [];
     }
+    // Marco 22 (D-090): como uma pessoa, foca o jogador que invoca, não as invocações dele (o servo do Necromante volta
+    // sempre). Os adds de um chefe continuam valendo como qualquer hostil.
+    const invocada = (e: Entidade) => (e.invocacao && buscarEntidade(estado, e.invocacao.donoId)?.controlador !== 'ia' ? 1 : 0);
     const alvo = estado.entidades
       .filter((e) => vivo(e) && podeFerir(eu, e, ctx.modo))
-      .sort((a, b) => chebyshev(celulaOcupada(eu), celulaOcupada(a)) - chebyshev(celulaOcupada(eu), celulaOcupada(b)) || (a.id < b.id ? -1 : 1))[0];
+      .sort((a, b) => invocada(a) - invocada(b) || chebyshev(celulaOcupada(eu), celulaOcupada(a)) - chebyshev(celulaOcupada(eu), celulaOcupada(b)) || (a.id < b.id ? -1 : 1))[0];
     if (!alvo) return [];
     const cmds: Comando[] = [];
     if (this.defendeSe) {
@@ -93,9 +98,17 @@ export class BotDeDuelo {
     }
     // Habilidades: a primeira pronta da barra que alcança (só quando não está no meio de outra que não seja o básico).
     if (this.usaHabilidades && (!eu.acao || eu.acao.habilidadeId === eu.ataqueBasico)) {
-      for (const id of eu.habilidades) {
+      for (const id of this.ordemDaBarra(estado, ctx, eu)) {
         const h = habilidadeDoAtor(ctx, eu, id);
         if (!h || h.passiva || recargaRestante(estado, eu.id, h.id) > 0 || eu.mana < h.custoRecurso) continue;
+        // Marco 22 (D-090): os rituais do Necromante. O Comando vai quando há mortos perto e um hostil no alcance
+        // deles; o Dízimo ergue um morto quando não há nenhum ao alcance, e drena para curar com a vida pela metade.
+        const ritual = this.ritual(estado, ctx, eu, h.efeitos.map((ef) => ef.tipo), distancia);
+        if (ritual !== null) {
+          if (!ritual) continue;
+          cmds.push({ t: 'usarHabilidade', id: h.id, alvo: eu.id });
+          break;
+        }
         const ofensiva = h.politicaAlvo === 'hostil' || h.politicaAlvo === 'celula' || h.tipoArea === 'ao_redor';
         const alcance = alcanceDe(ctx, eu, h, estado.tick);
         if (ofensiva && distancia > Math.max(1, h.tipoArea === 'ao_redor' ? h.raioArea : alcance)) continue;
@@ -115,5 +128,26 @@ export class BotDeDuelo {
       cmds.push({ t: 'mover', dir: 'parado' });
     }
     return cmds;
+  }
+
+  /** Com a vida pela metade, o Dízimo que drena vem antes das outras (como faz quem precisa se curar). */
+  private ordemDaBarra(estado: EstadoJogo, ctx: ContextoSimulacao, eu: Entidade): readonly string[] {
+    if (eu.hp > eu.hpMax / 2) return eu.habilidades;
+    const drena = (id: string) => !!habilidadeDoAtor(ctx, eu, id)?.efeitos.some((ef) => ef.tipo === 'drenar_invocacao') && !dizimoErgue(estado, ctx, eu);
+    return [...eu.habilidades.filter(drena), ...eu.habilidades.filter((id) => !drena(id))];
+  }
+
+  /** null: não é ritual; true/false: usar agora ou não. */
+  private ritual(estado: EstadoJogo, ctx: ContextoSimulacao, eu: Entidade, tipos: readonly string[], distanciaDoAlvo: number): boolean | null {
+    const alcance = ctx.balance.necromancia.alcanceRitual;
+    if (tipos.includes('comandar_mortos')) {
+      const perto = estado.entidades.filter((e) => vivo(e) && e.invocacao?.donoId === eu.id && chebyshev(celulaOcupada(eu), celulaOcupada(e)) <= alcance);
+      return perto.length > 0 && distanciaDoAlvo <= alcance + 2;
+    }
+    if (tipos.includes('drenar_invocacao')) {
+      if (dizimoErgue(estado, ctx, eu)) return podeErguerNoDizimo(estado, ctx, eu);
+      return eu.hp <= eu.hpMax / 2 && !!invocacaoParaDrenar(estado, ctx, eu);
+    }
+    return null;
   }
 }

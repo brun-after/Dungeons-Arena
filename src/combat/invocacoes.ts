@@ -20,7 +20,10 @@ export function rampaDeInvocacao(e: Entidade, tick: number, ctx: ContextoSimulac
   const r = ctx.balance.invocacoes;
   const minutos = Math.max(0, msDe(tick - inv.criadoTick)) / 60_000;
   const base = 1 + Math.min(r.rampaMaxPct, r.rampaPorMinutoPct * minutos + r.rampaPorAbatePct * inv.abates) / 100;
-  return base * (inv.necromancia ? ctx.balance.necromancia.danoPct / 100 : 1);
+  if (!inv.necromancia) return base;
+  // Marco 22 (D-090): quanto maior o exército, menos cada morto bate (`quantidade ^ -perdaPorQuantidade`).
+  const n = ctx.balance.necromancia;
+  return base * (n.danoPct / 100) * Math.pow(Math.max(1, inv.exercito ?? 1), -n.perdaPorQuantidade);
 }
 
 /** Chamado por todo dano maior que zero (participacao.ts): o avatar perde um golpe. */
@@ -47,7 +50,8 @@ export function explodirSeIsca(estado: EstadoJogo, ctx: ContextoSimulacao, e: En
 export function dispensarInvocacoes(estado: EstadoJogo, dono: Entidade, saida: EventoSimulacao[]): void {
   let n = 0;
   for (const e of estado.entidades) {
-    if (!vivo(e) || e.invocacao?.donoId !== dono.id || e.invocacao.dominado) continue;
+    // Marco 22: o falcão do Aventureiro não se dispensa (é a origem das habilidades dele).
+    if (!vivo(e) || e.invocacao?.donoId !== dono.id || e.invocacao.dominado || e.invocacao.companheiro) continue;
     e.hp = 0;
     e.participacao = [];
     n++;

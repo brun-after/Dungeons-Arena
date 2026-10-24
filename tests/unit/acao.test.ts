@@ -112,7 +112,8 @@ describe('ciclo de uma ação (§2.7)', () => {
   it('projétil lançado continua depois da morte do lançador', () => {
     const a = arena(4, 9);
     a.tick([['j', { t: 'usarHabilidade', id: 'seta_arcana', alvo: 'b' }]]);
-    a.ticks(ticksDe(600) + 1);
+    // Marco 22: a Seta sai do falcão, que voa até o alvo; espera o projétil estar no ar, sem supor a distância.
+    for (let i = 0; i < ticksDe(1500) && a.estado.projeteis.length === 0; i++) a.tick();
     expect(a.estado.projeteis).toHaveLength(1);
     a.ent('j').hp = 0;
     a.ticks(120);

@@ -1,4 +1,5 @@
 // Criaturas não bípedes (§2.16): lobo, aranha e slime. Marco 13 (14/10/2026), D-058.
+// Marco 22 (23/10/2026, D-089): o falcão do Aventureiro, em voo (asas abertas, acima do chão).
 // Mesmas regras de quadro dos bípedes: 3/4 com os pés em y = 60; de cima com centro em (32, 32), olhando +x.
 
 import { circulo, clarear, elipse, escurecer, hex, linha, MEIO, olhos, PES_Y, poligono, type Vista } from './svg.ts';
@@ -95,3 +96,34 @@ function slimeCima(cor: number): string {
 export const lobo = (cor: number) => (vista: Vista) => (vista === '34' ? lobo34(cor) : loboCima(cor));
 export const aranha = (cor: number) => (vista: Vista) => (vista === '34' ? aranha34(cor) : aranhaCima(cor));
 export const slime = (cor: number) => (vista: Vista) => (vista === '34' ? slime34(cor) : slimeCima(cor));
+
+// Marco 22: o falcão voa alto (o corpo bem acima dos pés) para não se confundir com quem anda no chão.
+function falcao34(cor: number): string {
+  const y = PES_Y - 30;
+  const asa = escurecer(cor, 0.25);
+  return [
+    // Asas abertas, a de trás mais escura.
+    poligono([MEIO - 2, y - 2, MEIO - 22, y - 14, MEIO - 18, y - 4, MEIO - 6, y + 2], escurecer(cor, 0.4)),
+    poligono([MEIO - 12, y + 3, MEIO - 22, y + 6, MEIO - 16, y + 9, MEIO - 6, y + 5], escurecer(cor, 0.3)),
+    elipse(MEIO - 1, y, 10, 5, cor),
+    poligono([MEIO + 2, y - 1, MEIO + 20, y - 15, MEIO + 16, y - 3, MEIO + 6, y + 3], asa),
+    elipse(MEIO, y + 2, 7, 2.4, clarear(cor, 0.35), false),
+    circulo(MEIO + 10, y - 3, 4.2, cor),
+    poligono([MEIO + 13.5, y - 4, MEIO + 19, y - 2, MEIO + 13.5, y - 0.5], 0xf4d03f),
+    circulo(MEIO + 11.5, y - 4.2, 1.1, 0x111111, false),
+  ].join('');
+}
+
+function falcaoCima(cor: number): string {
+  const c = MEIO;
+  return [
+    poligono([c - 4, c - 3, c - 2, c - 24, c + 6, c - 20, c + 4, c - 3], escurecer(cor, 0.25)),
+    poligono([c - 4, c + 3, c - 2, c + 24, c + 6, c + 20, c + 4, c + 3], escurecer(cor, 0.25)),
+    poligono([c - 10, c - 4, c - 18, c - 6, c - 18, c + 6, c - 10, c + 4], escurecer(cor, 0.35)),
+    elipse(c - 1, c, 10, 4.5, cor),
+    circulo(c + 9, c, 3.8, cor),
+    poligono([c + 12, c - 1.6, c + 17, c, c + 12, c + 1.6], 0xf4d03f),
+  ].join('');
+}
+
+export const falcao = (cor: number) => (vista: Vista) => (vista === '34' ? falcao34(cor) : falcaoCima(cor));

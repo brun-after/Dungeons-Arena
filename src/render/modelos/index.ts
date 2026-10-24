@@ -5,7 +5,7 @@
 
 import type { EstiloCaminhada } from '../caminhada.ts';
 import { bipede, type OpcoesBipede } from './bipede.ts';
-import { aranha, lobo, slime } from './feras.ts';
+import { aranha, falcao, lobo, slime } from './feras.ts';
 import type { Vista } from './svg.ts';
 
 export interface DefinicaoModelo {
@@ -78,6 +78,8 @@ export const MODELOS = {
   lobo: { estilo: 'quique', quadros: 1, desenhar: lobo(0x7f8a99) },
   aranha: { estilo: 'quique', quadros: 1, desenhar: aranha(0x3d2b4f) },
   slime: { estilo: 'quique', quadros: 1, desenhar: slime(0x58d68d) },
+  // Marco 22 (D-089): o falcão do Aventureiro.
+  falcao: { estilo: 'flutuar', quadros: 1, desenhar: falcao(0x8b5a2b) },
   cultista: {
     estilo: 'deslizar',
     quadros: 1,

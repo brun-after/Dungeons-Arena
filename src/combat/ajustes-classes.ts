@@ -8,6 +8,7 @@ import { podeFerir } from '../modos/relacao';
 import { absorverEscudo, imuneADano, multiplicadorCuraRecebida, multiplicadorDanoRecebido } from './efeitos';
 import { celulaOcupada, chebyshev } from './geometria';
 import type { Habilidade } from './habilidades';
+import { multiplicadorEncarnacao, protecaoEncarnacao } from './encarnacao';
 import { multiplicadorFuria } from './furia';
 import { registrarParticipacao } from './participacao';
 
@@ -38,6 +39,8 @@ export function protecaoInicial(estado: EstadoJogo, ctx: ContextoSimulacao, alvo
     const progresso = 1 - (1 - faixa) ** g.contatoExpoente;
     return hostis >= 2 ? 1 - g.grupoReducaoMaxPct / 100 * progresso : 1;
   }
+  // Marco 22 (D-089): o Mago encarnado em gelo recebe menos dano.
+  if (classeDe(alvo) === 'mago' && !alvo.invocacao) return protecaoEncarnacao(ctx, alvo);
   if (classeDe(alvo) !== 'necromante' || alvo.invocacao) return 1;
   const r = ctx.balance.ajustesClasses.necromante;
   if (estado.tick - (alvo.encontro?.inicioTick ?? estado.tick) >= ticksDe(r.protecaoMs)) return 1;
@@ -52,6 +55,8 @@ export function entregaRemota(hab: Habilidade): boolean {
 
 export function multiplicadorDireto(ctx: ContextoSimulacao, ator: Entidade, hab: Habilidade, secundario: boolean): number {
   const classe = classeDe(ator);
+  // Marco 22 (D-089): o Mago encarnado em fogo.
+  if (classe === 'mago') return multiplicadorEncarnacao(ctx, ator, hab);
   if (classe === 'aventureiro' && ator.nivel >= ctx.balance.ajustesClasses.aventureiro.nivelCorte && ['seta_arcana', 'explosao'].includes(hab.id)) return ctx.balance.ajustesClasses.aventureiro.danoMult;
   if (classe === 'arqueiro' && secundario && ['chuva_de_flechas', 'tiro_em_leque'].includes(hab.id)) return ctx.balance.ajustesClasses.arqueiro.secundariosMult;
   return 1;

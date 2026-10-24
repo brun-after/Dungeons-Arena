@@ -4,6 +4,7 @@
 import { construirFichaDeSessao } from '../../src/arena/ficha-sessao';
 import { entrarNaArena } from '../../src/arena/entrada';
 import { resolverHabilidade } from '../../src/combat/compilar-habilidade';
+import { chaveServo } from '../../src/combat/necromancia';
 import type { ContextoSimulacao } from '../../src/core/contexto';
 import { DT_MS } from '../../src/core/loop';
 import type { EventoSimulacao } from '../../src/core/eventos-simulacao';
@@ -16,7 +17,8 @@ import type { Raridade } from '../../src/modos/modo';
 import perfis from '../rede/perfis.json';
 import { ATRIBUTOS_TIPICOS, BotDeDuelo, CONTEUDO, contextoDoCenario, inimigo, jogadorTipico, mundo, TICKS_POR_S } from './cenarios';
 
-export const CLASSES = ['aventureiro', 'guerreiro', 'mago', 'arqueiro'] as const;
+// Marco 22 (23/10/2026, D-090): o Necromante entra nas metas (antes só no diagnóstico).
+export const CLASSES = ['aventureiro', 'guerreiro', 'mago', 'arqueiro', 'necromante'] as const;
 const LIMITE_S = 120;
 /** O estado público vai a 20 Hz: o evento do golpe chega, em média, meio período depois (e até um inteiro). */
 const PERIODO_ESTADO_MS = 50;
@@ -34,6 +36,15 @@ function primeiro(eventos: readonly EventoSimulacao[], f: (e: EventoSimulacao) =
   return eventos.find(f);
 }
 
+/**
+ * Marco 22 (D-090): a luta começa na primeira ação do time do jogador, ele ou uma invocação dele (o servo do
+ * Necromante costuma abrir a luta antes do dono).
+ */
+function primeiraAcaoDoTime(todos: readonly EventoSimulacao[], trecho: readonly EventoSimulacao[], dono: string): EventoSimulacao | undefined {
+  const time = new Set([dono, ...todos.flatMap((e) => (e.t === 'invocou' && e.donoId === dono ? [e.id] : []))]);
+  return primeiro(trecho, (e) => e.t === 'acaoIniciada' && time.has(e.atorId));
+}
+
 export interface ResultadoDuelo {
   golpes: number;
   tempoS: number;
@@ -46,7 +57,7 @@ export function duelo(classe: string, nivel: number, preset: string, semente: nu
   m.bots.push(new BotDeDuelo('j1'));
   const acabou = () => m.eventos.some((e) => e.t === 'morreu' && (e.id === 'i1' || e.id === 'j1'));
   m.rodar(LIMITE_S * TICKS_POR_S, acabou);
-  const inicio = primeiro(m.eventos, (e) => e.t === 'acaoIniciada' && e.atorId === 'j1')?.tick ?? 0;
+  const inicio = primeiraAcaoDoTime(m.eventos, m.eventos, 'j1')?.tick ?? 0;
   const morte = primeiro(m.eventos, (e) => e.t === 'morreu' && e.id === 'i1');
   const golpes = m.eventos.filter((e) => e.t === 'impacto' && e.fonteId === 'j1' && e.alvoId === 'i1').length;
   return { golpes, tempoS: segundos((morte?.tick ?? m.estado.tick) - inicio), venceu: morte !== undefined };
@@ -76,7 +87,7 @@ export function sequencia(classe: string, nivel: number, presets: readonly strin
     const desde = m.eventos.length;
     m.rodar(LIMITE_S * TICKS_POR_S, () => m.eventos.slice(desde).some((ev) => ev.t === 'morreu' && (ev.id === id || ev.id === 'j1')));
     const novos = m.eventos.slice(desde);
-    const inicio = primeiro(novos, (ev) => ev.t === 'acaoIniciada' && ev.atorId === 'j1')?.tick ?? m.estado.tick;
+    const inicio = primeiraAcaoDoTime(m.eventos, novos, 'j1')?.tick ?? m.estado.tick;
     const morte = primeiro(novos, (ev) => ev.t === 'morreu' && ev.id === id);
     resultados.push({
       golpes: novos.filter((ev) => ev.t === 'impacto' && ev.fonteId === 'j1' && ev.alvoId === id).length,
@@ -101,6 +112,8 @@ export interface ResultadoAguenta {
 export function aguenta(classe: string, nivel: number, preset: string, semente: number, dificuldade: Dificuldade = 'normal'): ResultadoAguenta {
   const ctx = contextoDoCenario();
   const m = mundo(ctx, semente, [jogadorTipico(ctx, classe, nivel), inimigo(ctx, preset, nivel, 'i1', 5, 9)], dificuldade);
+  // Marco 22 (D-090): mede o corpo do personagem; o servo do Necromante (que tankaria e mataria o inimigo) fica de fora.
+  m.estado.recargas[chaveServo('j1')] = Number.MAX_SAFE_INTEGER;
   m.bots.push(new BotDeDuelo('j1', false, true));
   const morreu = () => m.eventos.some((e) => e.t === 'morreu' && e.id === 'j1');
   m.rodar(LIMITE_S * TICKS_POR_S, morreu);
@@ -155,10 +168,11 @@ export function pvpLivre(classe: string, semente: number, nivel: number): { temp
   Object.assign(a, { x: 6, y: 9, destinoX: 6, destinoY: 9 });
   Object.assign(b, { x: 10, y: 9, destinoX: 10, destinoY: 9 });
   m.bots.push(new BotDeDuelo('j1'), new BotDeDuelo('j2'));
-  const morreu = () => m.eventos.some((e) => e.t === 'morreu');
-  m.rodar(LIMITE_S * TICKS_POR_S, morreu);
+  // Marco 22 (D-090): só a queda de um dos dois personagens encerra (a de uma invocação, não).
+  const caiu = (e: EventoSimulacao) => e.t === 'morreu' && (e.id === 'j1' || e.id === 'j2');
+  m.rodar(LIMITE_S * TICKS_POR_S, () => m.eventos.some(caiu));
   const inicio = primeiro(m.eventos, (e) => e.t === 'acaoIniciada')?.tick ?? 0;
-  const morte = primeiro(m.eventos, (e) => e.t === 'morreu')?.tick ?? m.estado.tick;
+  const morte = primeiro(m.eventos, caiu)?.tick ?? m.estado.tick;
   return { tempoS: segundos(morte - inicio) };
 }
 
@@ -238,7 +252,7 @@ export function economiaPorMinuto(classe: string, nivel: number, semente: number
     j.hp = j.hpMax; j.mana = j.manaMax;
     const m = mundo(ctx, semente + i, [j, inimigo(ctx, preset, nivel)], dificuldade);
     m.bots.push(new BotDeDuelo('j1'));
-    m.rodar(LIMITE_S * TICKS_POR_S, () => m.eventos.some((e) => e.t === 'morreu'));
+    m.rodar(LIMITE_S * TICKS_POR_S, () => m.eventos.some((e) => e.t === 'morreu' && (e.id === 'i1' || e.id === 'j1')));
     for (const e of m.eventos) if (e.t === 'xpGanho' && e.id === 'j1') xp += e.xp;
     ouro += m.estado.objetos.filter((o) => o.tipo === 'ouro').reduce((total, o) => total + o.valor, 0);
     tempo += segundos(m.estado.tick);
@@ -264,8 +278,9 @@ export function dueloDeFichas(classe: string, nivel: number, semente: number, mo
   }
   const m = mundo(ctx, semente, [a, b]);
   m.bots.push(new BotDeDuelo('a'), new BotDeDuelo('b'));
-  m.rodar(LIMITE_S * TICKS_POR_S, () => m.eventos.some((e) => e.t === 'morreu'));
-  const morte = primeiro(m.eventos, (e) => e.t === 'morreu');
+  const caiu = (e: EventoSimulacao) => e.t === 'morreu' && (e.id === 'a' || e.id === 'b');
+  m.rodar(LIMITE_S * TICKS_POR_S, () => m.eventos.some(caiu));
+  const morte = primeiro(m.eventos, caiu);
   return morte?.t === 'morreu' && morte.id === 'b';
 }
 

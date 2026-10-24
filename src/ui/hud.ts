@@ -8,6 +8,7 @@ import { ChipsEfeito } from './chips-efeito';
 import { BuffsPendentes } from './buffs-pendentes';
 import { icone } from './icones';
 import type { DadosRede } from './diagnostico';
+import type { IdentidadeClasse } from './barra-classe';
 
 const MAX_LINHAS_LOG = 6;
 
@@ -35,8 +36,10 @@ export class Hud {
   private readonly morte: HTMLElement;
   private readonly vida = barra('vida');
   private readonly mana = barra('mana');
-  /** Marco 21 (D-088): a fúria do Guerreiro; escondida nas outras classes. */
-  private readonly furia = barra('furia');
+  /** Marco 21 (D-088): a fúria do Guerreiro; marco 22 (D-089): também a Mira firme do Arqueiro. Escondida nas outras. */
+  private readonly classe = barra('classe');
+  /** Marco 22 (D-089): o elemento encarnado do Mago. */
+  private readonly encarnacao = document.createElement('span');
   private readonly numeros = document.createElement('span');
   private readonly rede = document.createElement('span');
   /** Marco 8A: ícones dos efeitos ativos, na cor do registro; marco 14: com duração e cartão. */
@@ -61,12 +64,14 @@ export class Hud {
     this.rede.setAttribute('role', 'status');
     const barras = document.createElement('div');
     barras.className = 'barras';
-    this.furia.raiz.hidden = true;
-    this.furia.raiz.setAttribute('aria-valuemax', '100');
-    barras.append(this.vida.raiz, this.mana.raiz, this.furia.raiz);
+    this.classe.raiz.hidden = true;
+    this.classe.raiz.setAttribute('aria-valuemax', '100');
+    barras.append(this.vida.raiz, this.mana.raiz, this.classe.raiz);
+    this.encarnacao.className = 'chip-encarnacao';
+    this.encarnacao.hidden = true;
     this.efeitos.className = 'chips-efeito';
     this.efeitos.setAttribute('aria-label', t('hud.efeitos'));
-    this.status.append(barras, this.numeros, this.efeitos, this.pendentes.elemento, this.rede);
+    this.status.append(barras, this.numeros, this.encarnacao, this.efeitos, this.pendentes.elemento, this.rede);
     this.chips = new ChipsEfeito(this.efeitos, nomeDe);
 
     this.log = document.createElement('ol');
@@ -103,13 +108,14 @@ export class Hud {
   }
 
 
-  /** `furia`: fração da barra de fúria (0..1), ou null para quem não tem (marco 21). */
-  atualizar(jogador: Entidade | undefined, tick = 0, furia: number | null = null): void {
+  /** `identidade`: a barra (fúria, mira) e a encarnação da classe (marcos 21 e 22). */
+  atualizar(jogador: Entidade | undefined, tick = 0, identidade: IdentidadeClasse = { barra: null, encarnacao: null }): void {
     if (!jogador) return;
     this.chips.atualizar(jogador, tick);
     this.pendentes.atualizar(jogador, tick);
-    const pctFuria = furia === null ? -1 : Math.round(furia * 100);
-    const chave = `${jogador.hp}/${jogador.hpMax}/${jogador.mana}/${jogador.manaMax}/${jogador.morto}/${pctFuria}`;
+    const { barra: bc, encarnacao } = identidade;
+    const pct = bc ? Math.round(bc.fracao * 100) : -1;
+    const chave = `${jogador.hp}/${jogador.hpMax}/${jogador.mana}/${jogador.manaMax}/${jogador.morto}/${bc?.tipo ?? ''}${pct}/${encarnacao ?? ''}`;
     if (chave === this.ultimo) return;
     this.ultimo = chave;
     const fracaoVida = jogador.hp / Math.max(1, jogador.hpMax);
@@ -122,12 +128,21 @@ export class Hud {
     this.mana.raiz.setAttribute('aria-valuemax', String(jogador.manaMax));
     this.mana.raiz.setAttribute('aria-valuenow', String(jogador.mana));
     this.mana.raiz.setAttribute('aria-label', t('hud.mana', { atual: jogador.mana, maximo: jogador.manaMax }));
-    this.furia.raiz.hidden = pctFuria < 0;
-    if (pctFuria >= 0) {
-      this.furia.preenchimento.style.width = `${pctFuria}%`;
-      this.furia.raiz.dataset.cheia = String(pctFuria >= 100);
-      this.furia.raiz.setAttribute('aria-valuenow', String(pctFuria));
-      this.furia.raiz.setAttribute('aria-label', t(pctFuria >= 100 ? 'hud.furiaCheia' : 'hud.furia', { pct: pctFuria }));
+    this.classe.raiz.hidden = !bc;
+    if (bc) {
+      const cheia = pct >= 100;
+      this.classe.raiz.dataset.tipo = bc.tipo;
+      this.classe.preenchimento.style.width = `${pct}%`;
+      this.classe.raiz.dataset.cheia = String(cheia);
+      this.classe.raiz.setAttribute('aria-valuenow', String(pct));
+      const rotulo = bc.tipo === 'furia' ? (cheia ? 'hud.furiaCheia' : 'hud.furia') : cheia ? 'hud.miraCheia' : 'hud.mira';
+      this.classe.raiz.setAttribute('aria-label', t(rotulo, { pct }));
+    }
+    this.encarnacao.hidden = !encarnacao;
+    if (encarnacao) {
+      this.encarnacao.dataset.elemento = encarnacao;
+      this.encarnacao.textContent = t(`hud.encarnacao.${encarnacao}`);
+      this.encarnacao.title = t(`hud.encarnacaoDica.${encarnacao}`);
     }
     this.numeros.textContent = `${jogador.hp}/${jogador.hpMax}`;
     this.morte.hidden = !jogador.morto;

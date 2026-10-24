@@ -33,8 +33,11 @@ export function lancarProjetil(
   fonte: FonteDeDano,
   mira: Celula,
   saida: EventoSimulacao[],
+  // Marco 22 (D-089): as habilidades do Aventureiro partem do falcão.
+  origem: Celula = celulaOcupada(ator),
+  // Marco 22 (D-089): o tiro carregado do Arqueiro atravessa todos e vai até o alcance máximo (em células).
+  carregado: { alcance: number } | null = null,
 ): void {
-  const origem = celulaOcupada(ator);
   const dx = mira.x - origem.x;
   const dy = mira.y - origem.y;
   const distancia = Math.hypot(dx, dy);
@@ -50,7 +53,7 @@ export function lancarProjetil(
     y: origem.y,
     dirX: distancia > 0 ? dx / distancia : 0,
     dirY: distancia > 0 ? dy / distancia : 0,
-    restante: distancia + FOLGA,
+    restante: Math.max(distancia, carregado?.alcance ?? 0) + FOLGA,
     velocidade: hab.velocidadeProjetil,
     bonusAtributo: fonte.bonusAtributo,
     carisma: fonte.carisma,
@@ -58,7 +61,8 @@ export function lancarProjetil(
     potencia: fonte.potencia,
     multDano: fonte.multDano,
     multCura: fonte.multCura,
-    atravessa: hab.perfura || projeteisAtravessam(ator, estado.tick),
+    atravessa: !!carregado || hab.perfura || projeteisAtravessam(ator, estado.tick),
+    ...(fonte.d20Minimo ? { d20Minimo: fonte.d20Minimo } : {}),
     atingidos: [],
   };
   estado.projeteis.push(p);
@@ -103,9 +107,10 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
           potencia: p.potencia,
           multDano: p.multDano,
           multCura: p.multCura,
+          ...(p.d20Minimo ? { d20Minimo: p.d20Minimo } : {}),
         };
         const primeiro = p.atingidos.length === 0;
-        const saltos = primeiro ? quantidadeDeSaltos(hab, alvo, estado.tick) : 0;
+        const saltos = primeiro ? quantidadeDeSaltos(hab, alvo, estado.tick, dono) : 0;
         aplicarImpacto(estado, ctx, alvo, { acaoId: p.acaoId, fonte, hab, indice: p.atingidos.length }, saida);
         p.atingidos.push(alvo.id);
         // Marco 14: o primeiro acerto salta (os alvos do salto entram em `atingidos`).

@@ -9,6 +9,9 @@
 // solta o dobro de partículas.
 // Ajuste de 15/10/2026 (D-060): a habilidade de área explode pela área no lançamento — o impacto do visual em
 // pontos espalhados pelas células e uma onda saindo do centro —, mesmo sem ninguém atingido. Cancelada, não explode.
+// Marco 22 (23/10/2026, D-089): identidade das classes em partículas. As habilidades do Aventureiro saem do falcão
+// (penas no lançamento); o Mago encarnado solta a aura do elemento; o Arqueiro com a Mira firme cheia brilha, e o tiro
+// carregado deixa um rastro dourado.
 
 import { celulasDaForma } from '../combat/formas';
 import type { BuscaHabilidade } from '../combat/habilidades';
@@ -18,6 +21,7 @@ import type { EstadoJogo } from '../core/estado';
 import type { Barramento } from '../core/events';
 import type { EventosDaSimulacao } from '../core/eventos-simulacao';
 import type { Entidade, PontoVisual } from '../entities/entidade';
+import { encarnacaoDe } from '../combat/encarnacao';
 import type { ControladorImpacto } from './impacto';
 import type { SistemaParticulas } from './particulas';
 import type { NomePreset } from './presets-particula';
@@ -40,6 +44,15 @@ const AURA: Partial<Record<TipoEfeito, NomePreset>> = {
 
 const cor = (hex: string) => Number.parseInt(hex.slice(1), 16);
 
+/** Marco 22 (D-089): a aura e a cor de cada encarnação do Mago. */
+const ENCARNACAO: Record<'fogo' | 'gelo' | 'raio', { preset: NomePreset; cor: number }> = {
+  fogo: { preset: 'brasas', cor: 0xff6b3d },
+  gelo: { preset: 'cristais', cor: 0x85c1e9 },
+  raio: { preset: 'faiscas', cor: 0xbb8fce },
+};
+const COR_MIRA = 0xf9e79f;
+const COR_PENAS = 0xc8a165;
+
 export interface OpcoesEfeitos {
   /** Ajuste de 15/10/2026: a fase, para as células da área (linha para na parede). */
   fase: Fase;
@@ -48,6 +61,8 @@ export interface OpcoesEfeitos {
   habilidades: BuscaHabilidade;
   idLocal: string;
   qualidade: () => PresetQualidade;
+  /** Marco 22 (D-089): a Mira firme do Arqueiro está cheia (o brilho na mão)? */
+  miraCheia?: (e: Entidade, tick: number) => boolean;
 }
 
 export class EfeitosDeHabilidade {
@@ -60,6 +75,9 @@ export class EfeitosDeHabilidade {
   private ultimoChao = 0;
   /** Posições em células conhecidas no quadro anterior (para eventos de quem já saiu do mundo). */
   private readonly posicoes = new Map<string, PontoVisual>();
+  /** Marco 22: os projéteis do tiro carregado (rastro dourado). */
+  private readonly carregados = new Set<number>();
+  private carregadoDe: string | null = null;
 
   constructor(private readonly o: OpcoesEfeitos) {}
 
@@ -68,14 +86,23 @@ export class EfeitosDeHabilidade {
       const e = estado().entidades.find((x) => x.id === id);
       return e ? { x: e.x, y: e.y } : (this.posicoes.get(id) ?? null);
     };
+    // Marco 22 (D-089): a habilidade do Aventureiro (que não o básico) parte do falcão.
+    const quemLanca = (atorId: string, chave: string): string => {
+      const st = estado();
+      const dono = st.entidades.find((x) => x.id === atorId);
+      const falcao = st.entidades.find((x) => !x.morto && x.invocacao?.companheiro === true && x.invocacao.donoId === atorId);
+      const h = this.o.habilidades(chave);
+      return falcao && dono && h && h.id !== dono.ataqueBasico ? falcao.id : atorId;
+    };
     bus.on('acaoIniciada', (ev) => {
       const h = this.o.habilidades(ev.chave);
-      const ator = pos(ev.atorId);
+      const lancador = quemLanca(ev.atorId, ev.chave);
+      const ator = pos(lancador);
       if (h?.politicaImpacto === 'area' && ator) {
         this.areas.set(ev.acaoId, { chave: ev.chave, origem: ator, mira: { x: ev.alvoX, y: ev.alvoY }, ...(ev.raioCombo ? { raioCombo: ev.raioCombo } : {}), ateTick: ev.lancamentoTick });
       }
       if (!h || !visualDe(h).conjuracao) return;
-      this.conjurando.set(ev.acaoId, { atorId: ev.atorId, chave: ev.chave, ateTick: ev.lancamentoTick, ultimoMs: 0 });
+      this.conjurando.set(ev.acaoId, { atorId: lancador, chave: ev.chave, ateTick: ev.lancamentoTick, ultimoMs: 0 });
     });
     bus.on('impacto', (ev) => {
       const h = this.o.habilidades(ev.chave);
@@ -127,6 +154,34 @@ export class EfeitosDeHabilidade {
       const p = pos(ev.id);
       if (p) this.o.particulas.emitir('anel', p.x, p.y, 0x1abc9c);
     });
+    bus.on('encarnou', (ev) => {
+      const p = pos(ev.id);
+      const e = ENCARNACAO[ev.elemento];
+      if (!p) return;
+      this.o.particulas.emitir('onda', p.x, p.y, e.cor);
+      this.o.particulas.emitir(e.preset, p.x, p.y, e.cor);
+    });
+    // Marco 22 (D-090): o morto longe demais some numa fumaça e reaparece ao lado do Necromante.
+    bus.on('invocacaoRetornou', (ev) => {
+      this.o.particulas.emitir('fumaca', ev.deX, ev.deY, 0x7ee0bb);
+      this.o.particulas.emitir('sombra', ev.x, ev.y, 0x7ee0bb);
+    });
+    bus.on('tiroCarregado', (ev) => {
+      // O projétil do tiro carregado vem logo depois, no mesmo tick.
+      this.carregadoDe = ev.id;
+      const p = pos(ev.id);
+      if (p) this.o.particulas.emitir('estrelas', p.x, p.y, COR_MIRA);
+    });
+    bus.on('projetilLancado', (ev) => {
+      if (this.carregadoDe === ev.donoId) {
+        this.carregados.add(ev.projetilId);
+        this.carregadoDe = null;
+      }
+      const dono = estado().entidades.find((x) => x.id === ev.donoId);
+      const falcao = estado().entidades.find((x) => !x.morto && x.invocacao?.companheiro === true && x.invocacao.donoId === ev.donoId);
+      const p = falcao && dono && ev.habilidadeId !== dono.ataqueBasico ? pos(falcao.id) : null;
+      if (p) this.o.particulas.emitir('vento', p.x, p.y, COR_PENAS);
+    });
   }
 
   /** Por quadro: conjurações em curso, rastros de projétil, auras e poeira. */
@@ -158,8 +213,10 @@ export class EfeitosDeHabilidade {
       const h = this.o.habilidades(pr.chave);
       const v = h ? visualDe(h) : null;
       if (v?.viagem) p.emitir(v.viagem, pr.x, pr.y, v.cor, undefined, { x: pr.dirX, y: pr.dirY });
+      if (this.carregados.has(pr.id)) p.emitir('brilho', pr.x, pr.y, COR_MIRA);
     }
     if (this.ultimoRastro.size > 64) this.ultimoRastro.clear();
+    if (this.carregados.size > 0) for (const id of this.carregados) if (!estado.projeteis.some((pr) => pr.id === id)) this.carregados.delete(id);
     if (q.auras) this.auras(estado, agoraMs);
     // Marco 11A: os rastros no chão são partícula na cor do efeito (não quadrados pintados).
     if (agoraMs - this.ultimoChao >= INTERVALO_CHAO_MS) {
@@ -218,6 +275,20 @@ export class EfeitosDeHabilidade {
       this.ultimaAura.set(e.id, agoraMs);
       const pos = this.posicoes.get(e.id);
       if (pos) this.o.particulas.emitir(AURA[primeiro.tipo] ?? 'aura', pos.x, pos.y, cor(REGISTRO_EFEITOS[primeiro.tipo].cor));
+    }
+    // Marco 22 (D-089): a aura da encarnação do Mago e o brilho do Arqueiro com a Mira firme cheia.
+    for (const e of estado.entidades) {
+      if (e.morto) continue;
+      const el = encarnacaoDe(e);
+      const mira = !el && this.o.miraCheia?.(e, estado.tick) === true;
+      if (!el && !mira) continue;
+      const chave = `classe:${e.id}`;
+      if (agoraMs - (this.ultimaAura.get(chave) ?? 0) < INTERVALO_AURA_MS) continue;
+      this.ultimaAura.set(chave, agoraMs);
+      const pos = this.posicoes.get(e.id);
+      if (!pos) continue;
+      if (el) this.o.particulas.emitir(ENCARNACAO[el].preset, pos.x, pos.y, ENCARNACAO[el].cor);
+      else this.o.particulas.emitir('brilho', pos.x, pos.y, COR_MIRA);
     }
     // Marco 18 (D-069): quem veste Lendária solta fagulhas âmbar; a Última, uma aura carmim (partículas, nunca forma).
     for (const e of estado.entidades) {

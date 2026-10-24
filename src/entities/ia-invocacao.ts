@@ -6,6 +6,8 @@
 //   protetor  -> só quem ameaça o dono, a até 3 células dele, sem se afastar mais que isso do dono;
 //   curador   -> não ataca: cura o dono pelo dispatcher, com recarga própria;
 //   isca      -> imóvel.
+//   companheiro (marco 22, D-089) -> o falcão do Aventureiro: não ataca; voa até o alvo selecionado do dono (de onde
+//                 saem as habilidades dele) e, sem alvo, acompanha o dono.
 // Ao engajar, a invocação fica em `perseguindo` (a regeneração enxerga o perigo).
 
 import { alvoOfensivoValido, iniciarAcao, prioridadeDeAlvo } from '../combat/acao';
@@ -31,6 +33,10 @@ function ameacaODono(estado: EstadoJogo, x: Entidade, dono: Entidade, janelaTick
 function escolherAlvo(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, dono: Entidade | undefined): Entidade | null {
   const inv = e.invocacao;
   if (!inv) return null;
+  if (inv.comportamento === 'companheiro') {
+    const alvo = dono?.alvoSelecionado ? buscarEntidade(estado, dono.alvoSelecionado) : undefined;
+    return alvo && alvoOfensivoValido(estado, ctx, e, alvo) ? alvo : null;
+  }
   const r = ctx.balance.invocacoes;
   const origem = celulaOcupada(e);
   const janela = ticksDe(ctx.balance.combate.janelaParticipacaoS * 1000);
@@ -110,6 +116,11 @@ export function processarInvocacao(estado: EstadoJogo, ctx: ContextoSimulacao, e
   mudarModo(ia, 'perseguindo', alvo.id, estado.tick);
   const celulaAlvo = celulaOcupada(alvo);
   if (chebyshev(celulaOcupada(e), celulaAlvo) <= 1) {
+    // O falcão só paira junto do alvo; quem ataca é o Aventureiro.
+    if (inv.comportamento === 'companheiro') {
+      if (!emPasso(e)) pararMovimento(e);
+      return;
+    }
     if (!emPasso(e)) pararMovimento(e);
     if (!e.acao && estado.tick >= ia.proximoAtaqueTick && iniciarAcao(estado, ctx, e, e.ataqueBasico, alvo.id, saida)) {
       ia.proximoAtaqueTick = estado.tick + ticksDe(preset.intervaloAtaqueMs);

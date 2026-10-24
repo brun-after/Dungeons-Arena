@@ -4,6 +4,7 @@
 // leva `desarmeMs` parado e, no fim, a Sabedoria decide — sucesso tira a armadilha e dá um pouco de XP; falha a dispara.
 // O modo decide se vale (`sobrevivencia.revelarArmadilhas`; a arena não mostra armadilhas a ninguém).
 
+import { celulaDoCompanheiro } from '../combat/companheiro';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { Armadilha, EstadoJogo } from '../core/estado';
@@ -32,9 +33,12 @@ export function revelarArmadilhas(estado: EstadoJogo, ctx: ContextoSimulacao, sa
     const raio = raioDeRevelar(e.atributos, ctx.balance);
     // Marco 18 (D-069): o Elmo Lendário revela mais.
     const chance = Math.min(1, (chanceDeRevelarPct(e.atributos, ctx.balance) * (1 + passivosDe(ctx, e).revelarPct / 100)) / 100);
-    const origem = celulaOcupada(e);
+    // Marco 22 (D-089): o falcão do Aventureiro procura junto, com a Sabedoria do dono.
+    const origens = [celulaOcupada(e)];
+    const falcao = celulaDoCompanheiro(estado, e);
+    if (falcao) origens.push(falcao);
     for (const a of estado.armadilhas) {
-      if (a.reveladaPara.includes(e.id) || chebyshev(origem, a) > raio || !ameaca(ctx, a, e)) continue;
+      if (a.reveladaPara.includes(e.id) || origens.every((o) => chebyshev(o, a) > raio) || !ameaca(ctx, a, e)) continue;
       if (aleatorio(estado.rng) >= chance) continue;
       a.reveladaPara.push(e.id);
       saida.push({ t: 'armadilhaRevelada', tick: estado.tick, id: e.id, armadilhaId: a.id, x: a.x, y: a.y });

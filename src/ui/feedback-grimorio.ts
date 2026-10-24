@@ -47,6 +47,17 @@ export function ligarFeedbackGrimorio(o: OpcoesFeedbackGrimorio): void {
     hud.registrar(t('log.ressonancia', { nome: r.nome, texto: r.texto }));
     o.aviso(t('log.ressonancia', { nome: r.nome, texto: r.texto }));
   });
+  // Marco 22 (23/10/2026, D-089): a encarnação do Mago e o tiro carregado do Arqueiro.
+  bus.on('encarnou', (ev) => {
+    flutuar(ev.id, t(`hud.encarnacao.${ev.elemento}`));
+    if (ev.id === idLocal) hud.registrar(t(`hud.encarnacaoDica.${ev.elemento}`));
+  });
+  bus.on('invocacaoRetornou', (ev) => {
+    if (ev.donoId === idLocal) hud.registrar(t('log.invocacaoRetornou'));
+  });
+  bus.on('tiroCarregado', (ev) => {
+    if (ev.id === idLocal) flutuar(ev.id, t('numero.tiroCarregado'));
+  });
   bus.on('renasceu', (ev) => {
     flutuar(ev.id, t('numero.renasceu'));
     if (ev.id === idLocal) {

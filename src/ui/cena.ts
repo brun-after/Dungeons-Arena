@@ -8,11 +8,11 @@
 
 import { proximoHostil, recargaRestante } from '../combat/acao';
 import { celulaOcupada } from '../combat/geometria';
-import { fracaoFuria } from '../combat/furia';
 import type { Habilidade } from '../combat/habilidades';
 import type { Dificuldade } from '../modos/dificuldade';
 import { resolverHabilidade } from '../combat/compilar-habilidade';
 import { habilidadeDoAtor } from '../combat/perfil';
+import { dizimoErgue } from '../combat/necromancia';
 import type { Celula, Comando } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
@@ -58,6 +58,7 @@ import { DadoD20 } from './dado';
 import { criarBarraHabilidades } from './habilidades';
 import { criarSeletorBarra } from './seletor-barra';
 import { Hud } from './hud';
+import { identidadeDaClasse } from './barra-classe';
 import { QuadroAlvo } from './quadro-alvo';
 import { montarVisao, type ControleVisao } from './visao';
 
@@ -487,9 +488,11 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       barra.atualizar((h) => ({
         recarga: h.recargaMs > 0 ? recargaRestante(estado, j.id, h.id) / ticksDe(h.recargaMs) : 0,
         semMana: j.mana < h.custoRecurso,
+        // Marco 22 (D-090): sem morto ao alcance, o Dízimo vital ergue um; o botão mostra o ícone de invocar.
+        ...(h.efeitos.some((ef) => ef.tipo === 'drenar_invocacao') && dizimoErgue(estado, ctx, j) && { icone: 'invocar', dica: t('habilidades.dizimoErgue') }),
       }));
     }
-    hud.atualizar(j, estado.tick, j ? fracaoFuria(ctx, j, estado.tick) : null);
+    hud.atualizar(j, estado.tick, identidadeDaClasse(ctx, j, estado.tick));
     const alvo = j?.alvoSelecionado ? estado.entidades.find((e) => e.id === j.alvoSelecionado) : undefined;
     quadroAlvo.atualizar(j, alvo);
     controles?.marcarTrava(!!alvo && j?.alvoTravado === true);

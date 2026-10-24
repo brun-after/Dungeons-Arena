@@ -15,6 +15,10 @@ export interface EstadoBotao {
   /** Fração da recarga que ainda falta, em [0, 1]. */
   recarga: number;
   semMana: boolean;
+  /** Marco 22 (D-090): ícone de outro modo da habilidade (o Dízimo vital que ergue um morto); ausente, o próprio. */
+  icone?: string;
+  /** O que a habilidade faz nesse outro modo (dica e leitor de tela). */
+  dica?: string;
 }
 
 export interface BarraHabilidades {
@@ -116,9 +120,17 @@ export function criarBarraHabilidades(
     atualizar: (estado) => {
       for (const item of botoes) {
         const s = estado(item.h);
-        const chave = `${s.recarga.toFixed(2)}/${s.semMana}`;
+        const chave = `${s.recarga.toFixed(2)}/${s.semMana}/${s.icone ?? ''}`;
         if (chave === item.ultimo) continue;
+        const iconeAntes = item.ultimo.split('/')[2] ?? '';
         item.ultimo = chave;
+        if ((s.icone ?? '') !== iconeAntes) {
+          item.b.querySelector('.icone')?.replaceChildren(icone(s.icone ?? item.h.icone));
+          item.b.dataset.modo = s.icone ?? '';
+          item.b.title = s.dica ?? '';
+          if (s.dica) item.b.setAttribute('aria-description', s.dica);
+          else item.b.removeAttribute('aria-description');
+        }
         item.b.style.setProperty('--recarga', s.recarga.toFixed(3));
         item.b.classList.toggle('em-recarga', s.recarga > 0);
         item.b.classList.toggle('sem-mana', s.semMana);

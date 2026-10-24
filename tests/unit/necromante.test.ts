@@ -65,17 +65,17 @@ describe('Necromante: passiva e colheita', () => {
     expect(c.meus()).toHaveLength(2);
     const a = obter(c.meus().find((e) => e.invocacao?.necromancia === 'reanimado'));
     expect(a.invocacao?.modeloOriginal).toBe('goblin');
-    expect(a.invocacao?.expiraTick).toBe(c.estado.tick + ticksDe(25000));
+    expect(a.invocacao?.expiraTick).toBe(c.estado.tick + ticksDe(c.ctx.balance.necromancia.duracaoMortoMs));
     const xp = c.j.xp; c.matar(c.npc('b'), c.servo());
     expect(c.meus()).toHaveLength(3); expect(c.j.xp).toBeGreaterThan(xp);
     c.matar(a, c.j); expect(c.meus()).toHaveLength(2);
   });
-  it('máximo de quatro mortos, com espaço reservado ao servo; sem abates distantes ou de outros', () => {
+  it('máximo de dez mortos (marco 22), com espaço reservado ao servo; sem abates distantes ou de outros', () => {
     const c = cena(); c.passiva();
-    for (let i = 0; i < 10; i++) c.matar(c.npc(String(i)), c.j);
-    expect(c.meus()).toHaveLength(4);
-    c.matar(c.servo()); c.matar(c.npc('extra'), c.j); expect(c.meus()).toHaveLength(3);
-    c.estado.tick += ticksDe(8000); c.passiva(); expect(c.meus()).toHaveLength(4);
+    for (let i = 0; i < 14; i++) c.matar(c.npc(String(i)), c.j);
+    expect(c.meus()).toHaveLength(10);
+    c.matar(c.servo()); c.matar(c.npc('extra'), c.j); expect(c.meus()).toHaveLength(9);
+    c.estado.tick += ticksDe(8000); c.passiva(); expect(c.meus()).toHaveLength(10);
     const d = cena(); const longe = d.npc(); longe.x = 30; d.matar(longe, d.j);
     expect(d.meus()).toHaveLength(0);
     d.matar(d.npc('outro')); expect(d.meus()).toHaveLength(0);
@@ -127,12 +127,42 @@ describe('rituais, combos e Trevas', () => {
     s.invocacao = { ...obter(s.invocacao), donoId: 'outro' }; c.j.hp -= 10;
     c.aplicar(c.j, 'drenar_invocacao', { valor: 18 }); expect(c.j.hp).toBe(c.j.hpMax - 10);
   });
-  it('recusa Dízimo sem gastar mana ou recarga se vida cheia ou sem invocação', () => {
-    const c = cena(); const mana = c.j.mana;
+  it('recusa Dízimo sem gastar mana ou recarga com vida cheia (havendo morto) ou sem vaga para erguer', () => {
+    const c = cena(); c.passiva(); const mana = c.j.mana;
     expect(iniciarAcao(c.estado, c.ctx, c.j, 'dizimo_vital', undefined, c.eventos)).toBe(false);
-    c.j.hp--; expect(iniciarAcao(c.estado, c.ctx, c.j, 'dizimo_vital', undefined, c.eventos)).toBe(false);
+    // Marco 22 (D-090): sem morto ao alcance, o Dízimo ergue um; sem vaga, recusa.
+    c.servo().x = 30; c.servo().destinoX = 30;
+    // Uma vaga só, ocupada pelo servo distante.
+    const ctxSemVaga = { ...c.ctx, modo: { ...c.ctx.modo, limites: { ...c.ctx.modo.limites, invocacoesPorJogador: 1 } }, balance: { ...c.ctx.balance, necromancia: { ...c.ctx.balance.necromancia, servosExtras: 0 } } };
+    c.j.hp--; expect(iniciarAcao(c.estado, ctxSemVaga, c.j, 'dizimo_vital', undefined, c.eventos)).toBe(false);
     expect(c.eventos.filter((e) => e.t === 'acaoRecusada').map((e) => e.motivo)).toEqual(['vida_cheia', 'sem_invocacao']);
     expect(c.j.mana).toBe(mana); expect(c.estado.recargas).toEqual({});
+  });
+  it('sem morto ao alcance, o Dízimo ergue o servo caído, mesmo com a vida cheia, e libera o retorno dele', () => {
+    const c = cena(); c.passiva(); c.matar(c.servo());
+    expect(c.meus()).toHaveLength(0);
+    expect(c.estado.recargas[chaveServo(c.j.id)]).toBeGreaterThan(c.estado.tick);
+    expect(iniciarAcao(c.estado, c.ctx, c.j, 'dizimo_vital', undefined, c.eventos)).toBe(true);
+    c.estado.tick = obter(c.j.acao).lancamentoTick; processarAcoes(c.estado, c.ctx, c.eventos);
+    expect(c.servo().invocacao?.necromancia).toBe('servo');
+    expect(c.estado.recargas[chaveServo(c.j.id)]).toBeLessThanOrEqual(c.estado.tick);
+    expect(c.j.hp).toBe(c.j.hpMax);
+  });
+  it('com o servo vivo mas longe, o Dízimo ergue um reanimado', () => {
+    const c = cena(); c.passiva();
+    const s = c.servo(); s.x = s.destinoX = 13;
+    c.aplicar(c.j, 'drenar_invocacao', { valor: 18 });
+    expect(c.meus().map((e) => e.invocacao?.necromancia).sort()).toEqual(['reanimado', 'servo']);
+  });
+  it('o morto além da distância de retorno volta para o lado do Necromante', () => {
+    const c = cena(); c.passiva();
+    const s = c.servo(); s.x = s.destinoX = 5 + c.ctx.balance.necromancia.distanciaRetorno; s.y = s.destinoY = 5;
+    c.passiva();
+    expect(s.x).toBe(5 + c.ctx.balance.necromancia.distanciaRetorno);
+    s.x = s.destinoX = 5 + c.ctx.balance.necromancia.distanciaRetorno + 1;
+    c.passiva();
+    expect(Math.max(Math.abs(s.x - c.j.x), Math.abs(s.y - c.j.y))).toBeLessThanOrEqual(2);
+    expect(c.eventos.filter((e) => e.t === 'invocacaoRetornou')).toEqual([expect.objectContaining({ id: s.id, donoId: c.j.id })]);
   });
   it('conjuração real do Dízimo pode consumir um servo e arma seu retorno', () => {
     const c = cena(); c.passiva(); c.servo().hp = 4; c.j.hp -= 20;
@@ -176,7 +206,7 @@ describe('rituais, combos e Trevas', () => {
       fasesVisitadas: { 'oficial:fase-02': estado }, referenciasFases: { 'gerada:gerada-1': faseRef }, certificado: null });
     expect(lido.ok).toBe(true);
     if (!lido.ok) return;
-    expect(lido.registro.versaoSchema).toBe(21);
+    expect(lido.registro.versaoSchema).toBe(VERSAO_SCHEMA);
     expect(lido.registro.estado.entidades[0]?.aparencia?.elementoArma).toBe('trevas');
     expect(lido.registro.fasesVisitadas['oficial:fase-02']?.entidades[0]?.aparencia?.elementoArma).toBe('trevas');
     expect(lido.registro.faseRef).toEqual(faseRef);
@@ -195,7 +225,7 @@ describe('rituais, combos e Trevas', () => {
     expect(JSON.stringify(migrado)).toContain('"elementoArma":"trevas"'); expect(JSON.stringify(migrado)).toContain('"elemento":"trevas"');
     expect(migrado.itemId).toBe(antigo.itemId);
     expect(migrado.certificado).toEqual(antigo.certificado);
-    expect(lerIdItemBase(antigo.itemId)?.elemento).toBe('trevas'); expect(VERSAO_SCHEMA).toBe(21);
+    expect(lerIdItemBase(antigo.itemId)?.elemento).toBe('trevas'); expect(VERSAO_SCHEMA).toBe(22);
     expect(CONTEUDO.itens.get(antigo.itemId)).toMatchObject({ id: antigo.itemId, elemento: 'trevas' });
   });
 });

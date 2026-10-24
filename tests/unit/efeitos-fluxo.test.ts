@@ -151,7 +151,8 @@ describe('invocar (§2.9)', () => {
       expect(Math.max(Math.abs(e.x - 3), Math.abs(e.y - 5))).toBeLessThanOrEqual(2);
     }
     c.ticks(ticksDe(1000) + 2);
-    expect(c.estado.entidades.some((e) => e.invocacao)).toBe(false);
+    // O falcão do Aventureiro (marco 22) fica; as invocadas somem.
+    expect(c.estado.entidades.some((e) => e.invocacao && !e.invocacao.companheiro)).toBe(false);
     expect(c.estado.respawns).toHaveLength(0);
     expect(c.ent('j').xp).toBe(0);
   });
