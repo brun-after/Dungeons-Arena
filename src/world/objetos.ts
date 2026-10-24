@@ -55,6 +55,9 @@ function coletavel(o: ObjetoNoMundo): boolean {
   return !interagivel(o) && o.tipo !== 'saida';
 }
 
+/** O que o falcão do Aventureiro recolhe para o dono (itens e refúgio ficam para o jogador). */
+const TIPOS_DO_FALCAO: ReadonlySet<ObjetoNoMundo['tipo']> = new Set(['ouro', 'orbe_hp', 'orbe_recurso', 'orbe_efeito']);
+
 /** Quem coleta: entidades controladas por jogadores (local ou remoto), nunca a IA. */
 function coletor(e: Entidade): boolean {
   return e.controlador !== 'ia' && vivo(e);
@@ -70,58 +73,54 @@ export function coletarObjetos(estado: EstadoJogo, ctx: ContextoSimulacao, saida
     if (!dono || dono.x !== o.x || dono.y !== o.y) delete o.aguardaSaidaDe;
   }
   for (const e of ordemRotativa(estado.entidades, estado.tick)) {
-    // Marco 22 (D-089): o falcão do Aventureiro recolhe o ouro em que pousa, para a bolsa do dono (só ouro).
+    // Marco 22 (D-089): o falcão do Aventureiro recolhe para o dono o que encontra onde pousa.
     const dono = e.invocacao?.companheiro && vivo(e) ? estado.entidades.find((x) => x.id === e.invocacao?.donoId) : undefined;
     if (!coletor(e) && !dono) continue;
     const o = estado.objetos.find((x) => x.x === e.x && x.y === e.y && x.aguardaSaidaDe !== e.id && !consumidos.has(x.objetoId) && coletavel(x));
     if (!o) continue;
-    if (dono) {
-      if (o.tipo !== 'ouro' || !dono.bolsa || !vivo(dono)) continue;
-      consumidos.add(o.objetoId);
-      dono.bolsa.ouro += o.valor;
-      saida.push({ t: 'coletou', tick: estado.tick, id: dono.id, objetoId: o.objetoId, tipo: o.tipo, ganho: o.valor, itemId: null });
-      continue;
-    }
+    // Ajuste de 24/10/2026 (D-091): também os orbes de vida, de mana e de buff, aplicados ao dono.
+    if (dono && (!vivo(dono) || !TIPOS_DO_FALCAO.has(o.tipo))) continue;
+    const quem = dono ?? e;
     // Transação: verificar -> consumir -> transferir -> registrar, tudo neste tick.
     if (o.tipo === 'item') {
       // Item: só quem tem mochila com espaço para a quantidade toda; senão fica no chão (§2.10).
       const item = o.itemId ? ctx.conteudo.itens.get(o.itemId) : undefined;
-      if (!item || !e.bolsa || !guardarItem(e.bolsa, item, o.valor, ctx.balance.inventario, o.ref)) continue;
+      if (!item || !quem.bolsa || !guardarItem(quem.bolsa, item, o.valor, ctx.balance.inventario, o.ref)) continue;
       consumidos.add(o.objetoId);
-      saida.push({ t: 'coletou', tick: estado.tick, id: e.id, objetoId: o.objetoId, tipo: o.tipo, ganho: o.valor, itemId: item.id });
+      saida.push({ t: 'coletou', tick: estado.tick, id: quem.id, objetoId: o.objetoId, tipo: o.tipo, ganho: o.valor, itemId: item.id });
       continue;
     }
     if (o.tipo === 'ouro') {
       // Ouro (marco 9A): só quem tem bolsa (a ficha de sessão da arena não tem economia).
-      if (!e.bolsa) continue;
+      if (!quem.bolsa) continue;
       consumidos.add(o.objetoId);
-      e.bolsa.ouro += o.valor;
-      saida.push({ t: 'coletou', tick: estado.tick, id: e.id, objetoId: o.objetoId, tipo: o.tipo, ganho: o.valor, itemId: null });
+      quem.bolsa.ouro += o.valor;
+      saida.push({ t: 'coletou', tick: estado.tick, id: quem.id, objetoId: o.objetoId, tipo: o.tipo, ganho: o.valor, itemId: null });
       continue;
     }
     if (o.tipo === 'orbe_refugio') {
       // D-067: uma carga só; quem já tem deixa no chão.
-      if (e.refugio || !e.bolsa) continue;
+      if (quem.refugio || !quem.bolsa) continue;
       consumidos.add(o.objetoId);
-      e.refugio = true;
-      saida.push({ t: 'coletou', tick: estado.tick, id: e.id, objetoId: o.objetoId, tipo: o.tipo, ganho: 1, itemId: null });
+      quem.refugio = true;
+      saida.push({ t: 'coletou', tick: estado.tick, id: quem.id, objetoId: o.objetoId, tipo: o.tipo, ganho: 1, itemId: null });
       continue;
     }
     if (o.tipo === 'orbe_efeito') {
       // Orbe de efeito: sempre serve; o efeito passa pelo dispatcher único (§2.8). D-067: o ofensivo chega armado.
       if (!o.efeito) continue;
       consumidos.add(o.objetoId);
-      if (EFEITOS_OFENSIVOS.has(o.efeito.tipo)) armarBuff(estado, ctx, e, o.efeito, saida);
-      else aplicarEfeito(estado, ctx, e, o.efeito, { id: e.id, x: e.x, y: e.y }, null, saida);
-      saida.push({ t: 'coletou', tick: estado.tick, id: e.id, objetoId: o.objetoId, tipo: o.tipo, ganho: 1, itemId: null });
+      if (EFEITOS_OFENSIVOS.has(o.efeito.tipo)) armarBuff(estado, ctx, quem, o.efeito, saida);
+      else aplicarEfeito(estado, ctx, quem, o.efeito, { id: quem.id, x: quem.x, y: quem.y }, null, saida);
+      saida.push({ t: 'coletou', tick: estado.tick, id: quem.id, objetoId: o.objetoId, tipo: o.tipo, ganho: 1, itemId: null });
       continue;
     }
-    const ganho = ganhoDoObjeto(o, e);
+    const ganho = ganhoDoObjeto(o, quem);
     if (ganho <= 0) continue;
     consumidos.add(o.objetoId);
-    if (o.tipo === 'orbe_hp') e.hp += ganho;
-    else e.mana += ganho;
-    saida.push({ t: 'coletou', tick: estado.tick, id: e.id, objetoId: o.objetoId, tipo: o.tipo, ganho, itemId: null });
+    if (o.tipo === 'orbe_hp') quem.hp += ganho;
+    else quem.mana += ganho;
+    saida.push({ t: 'coletou', tick: estado.tick, id: quem.id, objetoId: o.objetoId, tipo: o.tipo, ganho, itemId: null });
   }
   if (consumidos.size > 0) estado.objetos = estado.objetos.filter((o) => !consumidos.has(o.objetoId));
 }

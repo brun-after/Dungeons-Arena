@@ -77,6 +77,8 @@ export function fonteDaHabilidade(e: Entidade, ctx: ContextoSimulacao, tick: num
  * medido a partir do Aventureiro (quem joga não precisa calcular onde o pássaro está).
  */
 export function origemDaHabilidade(estado: EstadoJogo, ator: Entidade, hab: Habilidade): Celula {
+  // Ajuste de 24/10/2026 (D-091): o falcão tem alcance global. A habilidade sempre sai dele, esteja onde estiver; quem
+  // decide se dá para usar é o alcance contado do Aventureiro. O projétil voa do falcão até o alvo (paredes o param).
   return (hab.id !== ator.ataqueBasico ? celulaDoCompanheiro(estado, ator) : null) ?? celulaOcupada(ator);
 }
 
@@ -321,7 +323,7 @@ function lancar(
   dispararGanchosDe(estado, ctx, ator, 'aoUsarHabilidade', { outro: alvo, hab }, saida);
   ator.ultimaHabilidade = { id: hab.id, chave: hab.chave, tick: estado.tick, alvoId: alvo?.id ?? null };
   // Marco 22 (D-089): a magia de fogo, gelo ou raio troca a encarnação do Mago.
-  if (encarnar(ator, hab)) saida.push({ t: 'encarnou', tick: estado.tick, id: ator.id, elemento: ator.encarnacao ?? 'fogo' });
+  if (encarnar(ctx, ator, hab, estado.tick)) saida.push({ t: 'encarnou', tick: estado.tick, id: ator.id, elemento: ator.encarnacao ?? 'fogo' });
   const basico = hab.id === ator.ataqueBasico ? bonusAtaqueBasico(ator, estado.tick) : null;
   const alcance = alcanceDe(ctx, ator, hab, estado.tick);
   const base = { acaoId, fonte, hab, mira, ...(basico && basico.dano > 0 && { danoExtra: basico.dano }) };

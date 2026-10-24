@@ -1,6 +1,6 @@
 {
   "necromancia": { "danoPct": 75, "servosExtras": 8, "retornoServoMs": 8000, "duracaoMortoMs": 20000, "raioColheita": 6, "ecoRecargaMs": 30000, "vidaBase": 24, "vidaPorNivel": 3, "vidaServoPct": 100, "alcanceRitual": 6, "distanciaRetorno": 10, "atributoPorInt": 1, "perdaPorQuantidade": 0.8 },
-  "versao": 33,
+  "versao": 34,
   "ajustesClasses": {
     "guerreiro": {
       "contatoMaxPct": 15,
@@ -35,12 +35,13 @@
       "concentracaoAcertos": 4,
       "concentracaoJanelaMs": 12000,
       "concentracaoExtraPct": 25,
-      "encarnacao": { "fogoDanoPct": 5, "fogoIntervaloMs": 1000, "fogoRaio": 1, "fogoQueimaValor": 2, "fogoQueimaMs": 2000, "geloReducaoPct": 10, "geloResfriarMs": 2000, "raioVelocidadePct": 15 }
+      "encarnacao": { "fogoDanoPct": 5, "fogoIntervaloMs": 1000, "fogoRaio": 1, "fogoQueimaValor": 2, "fogoQueimaMs": 2000, "geloReducaoPct": 10, "geloResfriarMs": 2000, "raioVelocidadePct": 15, "duracaoMs": 12000 }
     },
     "aventureiro": {
       "nivelCorte": 20,
       "danoMult": 0.95,
-      "falcaoPassoMs": 200
+      "falcaoPassoMs": 200,
+      "falcao": { "distanciaAlvo": 3, "raioPasseio": 3, "raioColeta": 7, "passeioMs": 1200, "raioCombate": 8 }
     },
     "arqueiro": {
       "secundariosMult": 1.15,

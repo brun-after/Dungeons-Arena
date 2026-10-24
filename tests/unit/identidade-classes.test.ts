@@ -11,6 +11,7 @@ import {
   processarEncarnacoes,
   protecaoEncarnacao,
   reagirAoGolpe,
+  restanteEncarnacaoMs,
   saltosEncarnacao,
   velocidadeEncarnacao,
 } from '../../src/combat/encarnacao';
@@ -26,7 +27,9 @@ import { ticksDe } from '../../src/core/tempo';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import type { Entidade } from '../../src/entities/entidade';
 import { personagemNoInicio } from '../../src/save/transicao';
-import { largarOuro, coletarObjetos } from '../../src/world/objetos';
+import { largarObjeto, largarOrbeEfeito, largarOuro, coletarObjetos } from '../../src/world/objetos';
+import { construirEfeito } from '../../src/combat/registro-efeitos';
+import { chebyshev } from '../../src/combat/geometria';
 import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 
 const ctx = contexto(faseDeTexto(SALA_ABERTA));
@@ -131,26 +134,98 @@ describe('falcão do Aventureiro', () => {
   });
 });
 
+describe('IA do falcão (ajuste de 24/10/2026, D-091)', () => {
+  const falcaoDe = (a: ReturnType<typeof arena>) => obter(companheiroDe(a.estado, a.j), 'falcão');
+
+  it('fora de combate, passeia em volta do dono sem se afastar', () => {
+    const a = arena('aventureiro', 10);
+    a.estado.entidades = a.estado.entidades.filter((e) => e.id !== 'b');
+    a.tick();
+    const visitadas = new Set<string>();
+    for (let i = 0; i < 600; i++) {
+      a.tick();
+      const f = falcaoDe(a);
+      visitadas.add(`${f.x},${f.y}`);
+      expect(chebyshev(f, a.j)).toBeLessThanOrEqual(ctx.balance.ajustesClasses.aventureiro.falcao.raioPasseio + 1);
+    }
+    expect(visitadas.size).toBeGreaterThan(3);
+  });
+
+  it('fora de combate, busca vida, mana e buffs para o dono', () => {
+    const a = arena('aventureiro', 10);
+    a.estado.entidades = a.estado.entidades.filter((e) => e.id !== 'b');
+    a.tick();
+    a.j.hp -= 20;
+    a.j.mana = 0;
+    largarObjeto(a.estado, 'orbe_hp', 7, 8, 10, 'abs', a.eventos);
+    largarObjeto(a.estado, 'orbe_recurso', 1, 9, 5, 'abs', a.eventos);
+    largarOrbeEfeito(a.estado, construirEfeito('bonus_dano', { pct: 20, duracaoMs: 5000 }), 7, 2, a.eventos);
+    const hp = a.j.hp;
+    a.ticks(900);
+    expect(a.estado.objetos.filter((o) => o.tipo.startsWith('orbe'))).toEqual([]);
+    expect(a.j.hp).toBeGreaterThan(hp);
+    expect(a.j.mana).toBeGreaterThan(0);
+    expect(a.j.buffsArmados.some((b) => b.efeito.tipo === 'bonus_dano')).toBe(true);
+    expect(a.de('coletou').every((ev) => ev.id === 'j')).toBe(true);
+  });
+
+  it('em combate, mantém distância do alvo em vez de grudar nele', () => {
+    const a = arena('aventureiro', 8);
+    a.tick([['j', { t: 'selecionarAlvo', alvo: 'b' }]]);
+    const distancias: number[] = [];
+    for (let i = 0; i < 300; i++) {
+      a.tick();
+      distancias.push(chebyshev(falcaoDe(a), a.boneco));
+    }
+    expect(distancias.slice(120).filter((d) => d <= 1).length).toBeLessThan(30);
+  });
+
+  it('não volta a um combate longe do dono (ao renascer, o alvo antigo não puxa o falcão)', () => {
+    const a = arena('aventureiro', 10);
+    a.boneco.y = a.boneco.destinoY = 10;
+    a.j.x = a.j.destinoX = 1; a.j.y = a.j.destinoY = 1;
+    a.tick([['j', { t: 'selecionarAlvo', alvo: 'b' }]]);
+    for (let i = 0; i < 300; i++) {
+      a.tick();
+      expect(chebyshev(falcaoDe(a), a.j)).toBeLessThanOrEqual(ctx.balance.ajustesClasses.aventureiro.falcao.raioPasseio + 1);
+    }
+  });
+
+  it('a habilidade sai do falcão mesmo longe; o uso conta o alcance do Aventureiro e o projétil voa até o alvo', () => {
+    const a = arena('aventureiro');
+    a.tick();
+    const f = falcaoDe(a);
+    f.x = f.destinoX = 10; f.y = f.destinoY = 10;
+    const seta = obter(habilidadeDoAtor(ctx, a.j, 'seta_arcana'), 'seta');
+    expect(origemDaHabilidade(a.estado, a.j, seta)).toEqual({ x: 10, y: 10 });
+    a.tick([['j', { t: 'usarHabilidade', id: 'seta_arcana', alvo: 'b' }]]);
+    expect(a.de('acaoRecusada')).toEqual([]);
+    for (let i = 0; i < 200 && a.de('impacto').length === 0; i++) a.tick();
+    expect(a.de('impacto')[0]).toMatchObject({ alvoId: 'b' });
+  });
+});
+
 describe('encarnação elemental do Mago', () => {
   const hab = (id: string, j: Entidade) => obter(habilidadeDoAtor(ctx, j, id), id);
 
   it('fogo, gelo e raio trocam; outros elementos e outras classes não', () => {
     const a = arena('mago');
-    expect(encarnar(a.j, hab('bola_de_fogo', a.j))).toBe(true);
+    expect(encarnar(ctx, a.j, hab('bola_de_fogo', a.j), 0)).toBe(true);
     expect(a.j.encarnacao).toBe('fogo');
-    expect(encarnar(a.j, hab('bola_de_fogo', a.j))).toBe(false);
-    expect(encarnar(a.j, hab('dardo_toxico', a.j))).toBe(false);
+    expect(encarnar(ctx, a.j, hab('bola_de_fogo', a.j), 0)).toBe(false);
+    expect(encarnar(ctx, a.j, hab('dardo_toxico', a.j), 0)).toBe(false);
     expect(a.j.encarnacao).toBe('fogo');
-    expect(encarnar(a.j, hab('lanca_de_gelo', a.j))).toBe(true);
+    expect(encarnar(ctx, a.j, hab('lanca_de_gelo', a.j), 0)).toBe(true);
     expect(a.j.encarnacao).toBe('gelo');
     const outro = arena('arqueiro');
-    expect(encarnar(outro.j, hab('bola_de_fogo', outro.j))).toBe(false);
+    expect(encarnar(ctx, outro.j, hab('bola_de_fogo', outro.j), 0)).toBe(false);
     expect(outro.j.encarnacao).toBeUndefined();
   });
 
   it('fogo: +5% nas magias e queima quem está a 1 célula', () => {
     const a = arena('mago', 4);
     a.j.encarnacao = 'fogo';
+    a.j.encarnacaoAteTick = 99_999;
     expect(multiplicadorEncarnacao(ctx, a.j, hab('bola_de_fogo', a.j))).toBeCloseTo(1.05);
     a.estado.tick = 0;
     processarEncarnacoes(a.estado, ctx, a.eventos);
@@ -173,6 +248,22 @@ describe('encarnação elemental do Mago', () => {
     a.j.encarnacao = 'fogo';
     expect(velocidadeEncarnacao(ctx, a.j)).toBe(1);
     expect(saltosEncarnacao(a.j, hab('raio_em_cadeia', a.j))).toBe(0);
+  });
+
+  it('dura 12 s desde a última magia do elemento; renova ao relançar e depois se apaga', () => {
+    const a = arena('mago');
+    const duracao = ticksDe(ctx.balance.ajustesClasses.mago.encarnacao.duracaoMs);
+    encarnar(ctx, a.j, hab('bola_de_fogo', a.j), 0);
+    expect(restanteEncarnacaoMs(a.j, 0)).toBe(ctx.balance.ajustesClasses.mago.encarnacao.duracaoMs);
+    a.estado.tick = duracao - 10;
+    encarnar(ctx, a.j, hab('bola_de_fogo', a.j), a.estado.tick);
+    a.estado.tick = duracao + 5;
+    processarEncarnacoes(a.estado, ctx, a.eventos);
+    expect(a.j.encarnacao).toBe('fogo');
+    a.estado.tick = 2 * duracao;
+    processarEncarnacoes(a.estado, ctx, a.eventos);
+    expect(a.j.encarnacao).toBeUndefined();
+    expect(a.de('encarnacaoAcabou')).toEqual([expect.objectContaining({ id: 'j' })]);
   });
 
   it('lançar a magia emite `encarnou`; a fase nova zera', () => {

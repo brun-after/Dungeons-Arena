@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.52 · **Data:** 23/10/2026
+**Versão:** 0.53 · **Data:** 24/10/2026
 
 > **Histórico**
+> - **0.53 (24/10/2026)**: D-091 (IA livre do falcão, alcance global e coleta; encarnação do Mago com 12 s e trilha; flecha do tiro carregado).
 > - **0.52 (23/10/2026)**: D-090 (marco 22: Necromante no simulador, exército de até 10 mortos, retorno dos distantes e Dízimo que ergue).
 > - **0.51 (23/10/2026)**: D-089 (marco 22: falcão do Aventureiro, encarnação elemental do Mago e Mira firme do Arqueiro).
 > - **0.50 (23/10/2026)**: D-088 (marco 21: Guerreiro mais forte com fúria, chave fixa do APK e aviso de atualização no app).
@@ -2281,4 +2282,40 @@ passam. As metas não mudaram.
 - **Dízimo que ergue:** sem um morto ao alcance do ritual, o Dízimo vital ergue um: o servo, se ele caiu (e o retorno de
   8 s é liberado), ou um reanimado. Nesse modo não pede vida faltando; sem vaga, é recusado. O botão troca o ícone para o
   de invocar e ganha uma dica.
+
+## D-091 — Falcão livre, encarnação com duração e flecha carregada (24/10/2026)
+
+**Contexto.** O usuário achou a IA do falcão travada: ele voava até o alvo e ficava grudado nele. Depois de morrer e
+renascer, o falcão novo saía do lado do Aventureiro e voltava sozinho ao combate antigo.
+
+**Decisão.**
+- **Alcance global:** as habilidades do Aventureiro (exceto o ataque básico) sempre saem do falcão, esteja onde estiver.
+  O que decide se a habilidade pode ser usada é o alcance contado da posição do Aventureiro. O projétil voa do falcão
+  até o alvo e só para em parede.
+- **IA própria** (`entities/ia-falcao.ts`), números em `balance.ajustesClasses.aventureiro.falcao`:
+  - o dono conjurando uma habilidade corpo a corpo: o falcão mergulha no alvo (só avança nesse caso);
+  - em combate, com o alvo do dono a até 8 células dele: passeia em volta do alvo a 3 células, em arcos de até 90
+    graus (contorna, não cruza por cima);
+  - fora de combate: busca para o dono o ouro, os orbes de vida e de mana (quando faltam) e os de buff a até 7 células
+    dele; sem nada para pegar, passeia a até 3 células do dono;
+  - o ponto do passeio é sorteado pelo PRNG da IA e trocado a cada 1,2 s ou ao chegar.
+- **Coleta:** o falcão entrega ao dono o ouro, a vida, a mana e os buffs (o ofensivo chega armado). Itens e o orbe de
+  refúgio continuam para o jogador.
+- **Voo:** o falcão não usa portas internas e passa por cima de rastros e armadilhas.
+- **Renascer:** como o falcão só luta perto do dono, o alvo antigo, longe, não o puxa de volta.
+
+**Simulador.** Na sequência de comuns, o próximo inimigo nascia 2 células à direita do jogador sem checar a parede.
+Com o jogador na borda, nascia dentro dela, e os projéteis do falcão batiam ali. Agora ele nasce numa célula passável.
+Metas: 94/94.
+
+**Mago.** O usuário achou irritantes os efeitos piscando sobre o Mago encarnado. Agora:
+- **visual:** parado, só um respiro discreto a cada 1,4 s; andando, uma trilha de partículas longas e lentas na cor do
+  elemento, deixada onde ele passou. A rajada fica só no instante da troca de elemento;
+- **duração:** a encarnação dura 12 s (`mago.encarnacao.duracaoMs`) desde a última magia do elemento. Lançar outra
+  magia do mesmo elemento renova o tempo. O chip do HUD mostra quanto falta.
+
+**Arqueiro.** O tiro carregado parecia uma bola de energia sem forma, porque soltava bolhas de brilho sobre a flecha.
+Agora deixa uma esteira dourada longa e fina, alinhada com o voo, com algumas fagulhas soltas.
+
+Metas: 94/94 (balance 34).
 

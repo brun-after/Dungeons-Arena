@@ -302,6 +302,8 @@ export interface Entidade {
   auraCuraFracao?: number;
   /** Marco 22 (D-089): o elemento que o Mago encarna (fogo, gelo ou raio). */
   encarnacao?: 'fogo' | 'gelo' | 'raio';
+  /** Ajuste de 24/10/2026 (D-091): até quando a encarnação vale (renova ao lançar outra magia do elemento). */
+  encarnacaoAteTick?: number;
   /** Marco 22 (D-089): Mira firme do Arqueiro — a barra enche a partir deste tick (dano recebido ou tiro carregado zeram). */
   mira?: { desdeTick: number };
   /** Marco 21 (D-088): fúria do Guerreiro, valor no `ultimoTick` (o esvaziamento é calculado na leitura). */

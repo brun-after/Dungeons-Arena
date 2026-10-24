@@ -31,6 +31,9 @@ import { visualDe } from './visual-habilidade';
 const INTERVALO_CONJURACAO_MS = 120;
 const INTERVALO_RASTRO_MS = 30;
 const INTERVALO_AURA_MS = 320;
+/** Ajuste de 24/10/2026 (D-091): a encarnação do Mago, andando (trilha) e parado (respiro). */
+const INTERVALO_TRILHA_MS = 70;
+const INTERVALO_RESPIRO_MS = 1400;
 const INTERVALO_POEIRA_MS = 220;
 const INTERVALO_CHAO_MS = 160;
 
@@ -75,6 +78,8 @@ export class EfeitosDeHabilidade {
   private ultimoChao = 0;
   /** Posições em células conhecidas no quadro anterior (para eventos de quem já saiu do mundo). */
   private readonly posicoes = new Map<string, PontoVisual>();
+  /** Ajuste de 24/10/2026: onde o Mago encarnado estava no quadro anterior (para saber se anda). */
+  private readonly ultimaPosicao = new Map<string, PontoVisual>();
   /** Marco 22: os projéteis do tiro carregado (rastro dourado). */
   private readonly carregados = new Set<number>();
   private carregadoDe: string | null = null;
@@ -213,7 +218,8 @@ export class EfeitosDeHabilidade {
       const h = this.o.habilidades(pr.chave);
       const v = h ? visualDe(h) : null;
       if (v?.viagem) p.emitir(v.viagem, pr.x, pr.y, v.cor, undefined, { x: pr.dirX, y: pr.dirY });
-      if (this.carregados.has(pr.id)) p.emitir('brilho', pr.x, pr.y, COR_MIRA);
+      // Ajuste de 24/10/2026 (D-091): o tiro carregado é uma flecha com esteira dourada (não uma bola de brilho).
+      if (this.carregados.has(pr.id)) p.emitir('esteira_carregada', pr.x, pr.y, COR_MIRA, undefined, { x: pr.dirX, y: pr.dirY });
     }
     if (this.ultimoRastro.size > 64) this.ultimoRastro.clear();
     if (this.carregados.size > 0) for (const id of this.carregados) if (!estado.projeteis.some((pr) => pr.id === id)) this.carregados.delete(id);
@@ -266,6 +272,18 @@ export class EfeitosDeHabilidade {
     }
   }
 
+  /** Parado: um respiro a cada `INTERVALO_RESPIRO_MS`. Andando: a trilha a cada `INTERVALO_TRILHA_MS`, onde ele passou. */
+  private encarnacaoVisual(id: string, pos: PontoVisual, cor: number, agoraMs: number): void {
+    const antes = this.ultimaPosicao.get(id);
+    this.ultimaPosicao.set(id, { x: pos.x, y: pos.y });
+    const rastro = antes && Math.hypot(pos.x - antes.x, pos.y - antes.y) > 0.01 ? antes : null;
+    const chave = `encarnacao:${id}`;
+    if (agoraMs - (this.ultimaAura.get(chave) ?? 0) < (rastro ? INTERVALO_TRILHA_MS : INTERVALO_RESPIRO_MS)) return;
+    this.ultimaAura.set(chave, agoraMs);
+    if (rastro) this.o.particulas.emitir('trilha_elemental', rastro.x, rastro.y, cor);
+    else this.o.particulas.emitir('aura_sutil', pos.x, pos.y, cor);
+  }
+
   private auras(estado: EstadoJogo, agoraMs: number): void {
     for (const e of estado.entidades) {
       if (e.morto) continue;
@@ -276,19 +294,22 @@ export class EfeitosDeHabilidade {
       const pos = this.posicoes.get(e.id);
       if (pos) this.o.particulas.emitir(AURA[primeiro.tipo] ?? 'aura', pos.x, pos.y, cor(REGISTRO_EFEITOS[primeiro.tipo].cor));
     }
-    // Marco 22 (D-089): a aura da encarnação do Mago e o brilho do Arqueiro com a Mira firme cheia.
+    // Marco 22 (D-089): a encarnação do Mago e o brilho do Arqueiro com a Mira firme cheia. Ajuste de 24/10/2026
+    // (D-091): a encarnação é sutil com o Mago parado e vira uma trilha elegante quando ele anda.
     for (const e of estado.entidades) {
       if (e.morto) continue;
+      const pos = this.posicoes.get(e.id);
+      if (!pos) continue;
       const el = encarnacaoDe(e);
-      const mira = !el && this.o.miraCheia?.(e, estado.tick) === true;
-      if (!el && !mira) continue;
+      if (el) {
+        this.encarnacaoVisual(e.id, pos, ENCARNACAO[el].cor, agoraMs);
+        continue;
+      }
+      if (this.o.miraCheia?.(e, estado.tick) !== true) continue;
       const chave = `classe:${e.id}`;
       if (agoraMs - (this.ultimaAura.get(chave) ?? 0) < INTERVALO_AURA_MS) continue;
       this.ultimaAura.set(chave, agoraMs);
-      const pos = this.posicoes.get(e.id);
-      if (!pos) continue;
-      if (el) this.o.particulas.emitir(ENCARNACAO[el].preset, pos.x, pos.y, ENCARNACAO[el].cor);
-      else this.o.particulas.emitir('brilho', pos.x, pos.y, COR_MIRA);
+      this.o.particulas.emitir('brilho', pos.x, pos.y, COR_MIRA);
     }
     // Marco 18 (D-069): quem veste Lendária solta fagulhas âmbar; a Última, uma aura carmim (partículas, nunca forma).
     for (const e of estado.entidades) {

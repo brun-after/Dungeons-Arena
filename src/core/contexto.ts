@@ -24,8 +24,8 @@ export interface Balance {
       furia: { max: number; porBasico: number; carenciaMs: number; perdaPorS: number; curaMult: number }; reforcosInicioNivel: number; reforcosPlenosNivel: number; movimentoMult: number };
     mago: { inicialPct: number; intermediarioPct: number; nivelIntermediario: number; fimIntermediario: number; nivelFinal: number; dardoInicioMult: number; dardoRecuperacaoNivel: number; dardoPlenoNivel: number; concentracaoAcertos: number; concentracaoJanelaMs: number; concentracaoExtraPct: number;
       /** Marco 22 (D-089): encarnação elemental. */
-      encarnacao: { fogoDanoPct: number; fogoIntervaloMs: number; fogoRaio: number; fogoQueimaValor: number; fogoQueimaMs: number; geloReducaoPct: number; geloResfriarMs: number; raioVelocidadePct: number } };
-    aventureiro: { nivelCorte: number; danoMult: number; /** Marco 22 (D-089): passo do falcão. */ falcaoPassoMs: number };
+      encarnacao: { fogoDanoPct: number; fogoIntervaloMs: number; fogoRaio: number; fogoQueimaValor: number; fogoQueimaMs: number; geloReducaoPct: number; geloResfriarMs: number; raioVelocidadePct: number; duracaoMs: number } };
+    aventureiro: { nivelCorte: number; danoMult: number; /** Marco 22 (D-089): passo do falcão. */ falcaoPassoMs: number; /** D-091: IA do falcão. */ falcao: { distanciaAlvo: number; raioPasseio: number; raioColeta: number; passeioMs: number; raioCombate: number } };
     arqueiro: { secundariosMult: number; /** Marco 22 (D-089): Mira firme. */ mira: { cargaMs: number; reducaoPorDestrezaPct: number; reducaoMaxPct: number; d20Minimo: number } };
     necromante: { protecaoMs: number; doisPct: number; grupoPct: number };
   };

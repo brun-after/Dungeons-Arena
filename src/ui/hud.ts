@@ -113,9 +113,9 @@ export class Hud {
     if (!jogador) return;
     this.chips.atualizar(jogador, tick);
     this.pendentes.atualizar(jogador, tick);
-    const { barra: bc, encarnacao } = identidade;
+    const { barra: bc, encarnacao, encarnacaoS = 0 } = identidade;
     const pct = bc ? Math.round(bc.fracao * 100) : -1;
-    const chave = `${jogador.hp}/${jogador.hpMax}/${jogador.mana}/${jogador.manaMax}/${jogador.morto}/${bc?.tipo ?? ''}${pct}/${encarnacao ?? ''}`;
+    const chave = `${jogador.hp}/${jogador.hpMax}/${jogador.mana}/${jogador.manaMax}/${jogador.morto}/${bc?.tipo ?? ''}${pct}/${encarnacao ?? ''}${encarnacaoS}`;
     if (chave === this.ultimo) return;
     this.ultimo = chave;
     const fracaoVida = jogador.hp / Math.max(1, jogador.hpMax);
@@ -141,7 +141,7 @@ export class Hud {
     this.encarnacao.hidden = !encarnacao;
     if (encarnacao) {
       this.encarnacao.dataset.elemento = encarnacao;
-      this.encarnacao.textContent = t(`hud.encarnacao.${encarnacao}`);
+      this.encarnacao.textContent = t('hud.encarnacaoTempo', { nome: t(`hud.encarnacao.${encarnacao}`), s: encarnacaoS });
       this.encarnacao.title = t(`hud.encarnacaoDica.${encarnacao}`);
     }
     this.numeros.textContent = `${jogador.hp}/${jogador.hpMax}`;
