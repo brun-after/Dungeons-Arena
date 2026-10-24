@@ -383,6 +383,37 @@ body.toque .faixa-controles {
 }
 
 /* Marco 22 (D-089): o elemento encarnado do Mago. */
+/* Marco 23 (24/10/2026, D-092): o chip do tema da fase e a linha da afinidade do alvo. */
+.chip-tema {
+  padding: 0 6px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: #f4ecd8;
+  background: rgba(60, 52, 70, 0.85);
+}
+.chip-tema[data-elemento='fogo'] { background: #a8401f; }
+.chip-tema[data-elemento='gelo'] { background: #2c6e9e; }
+.chip-tema[data-elemento='raio'] { background: #7a6a14; }
+.chip-tema[data-elemento='veneno'] { background: #2f7a45; }
+.chip-tema[data-elemento='terra'] { background: #7a5a30; }
+.chip-tema[data-elemento='trevas'] { background: #4a2f70; }
+.chip-tema[data-elemento='sagrado'] { background: #9a8030; }
+.afinidade-alvo {
+  display: block;
+  font-size: 0.72rem;
+  color: #f4ecd8;
+  opacity: 0.9;
+}
+.afinidade-alvo[data-elemento='fogo'] { color: #ff9a6a; }
+.afinidade-alvo[data-elemento='gelo'] { color: #9ad0ff; }
+.afinidade-alvo[data-elemento='raio'] { color: #f7e46a; }
+.afinidade-alvo[data-elemento='veneno'] { color: #8ae0a0; }
+.afinidade-alvo[data-elemento='psiquico'] { color: #e09af0; }
+.afinidade-alvo[data-elemento='terra'] { color: #d8b080; }
+.afinidade-alvo[data-elemento='trevas'] { color: #b090ff; }
+.afinidade-alvo[data-elemento='sagrado'] { color: #fff0a0; }
+
 .chip-encarnacao {
   padding: 0 6px;
   border-radius: 8px;
@@ -1397,8 +1428,42 @@ body.toque .botao-habilidade .tecla {
   color: var(--texto-suave);
 }
 
+/* Marco 23 (24/10/2026, D-092): dez slots numa grade de duas colunas (uma no celular). */
+.grade-slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(360px, 100%), 1fr));
+  gap: 10px;
+  width: min(860px, 100%);
+}
+
+.cartao-slot.vazio {
+  padding: 8px 14px;
+  opacity: 0.85;
+}
+
+.cartao-slot.vazio .resumo-slot {
+  margin-bottom: 6px;
+}
+
+.opcoes-slot {
+  margin-top: 6px;
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
+
+.opcoes-slot summary {
+  cursor: pointer;
+  min-height: 32px;
+  line-height: 32px;
+}
+
+.opcoes-slot .escolha-fase {
+  margin-top: 6px;
+}
+
 .cartao-slot {
-  width: min(420px, 100%);
+  width: 100%;
+  box-sizing: border-box;
   padding: 12px 14px;
   border: 1px solid var(--borda);
   border-radius: 12px;

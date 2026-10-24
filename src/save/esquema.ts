@@ -11,11 +11,14 @@ import { ehObjeto, type Objeto } from '../core/validar';
 import type { Entidade } from '../entities/entidade';
 import { lerCertificado, type Certificado } from '../integridade/certificado';
 import type { Dificuldade } from '../modos/dificuldade';
+import { basicoDoPersonagem } from '../progression/armas';
 import { MAX_REGRAS, RE_REGRA_ESTILO } from '../world/estilo';
 import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 22;
-export const SLOTS = [1, 2, 3] as const;
+export const VERSAO_SCHEMA = 23;
+// Marco 23 (24/10/2026, D-092): dez slots de personagem por jogador (eram três).
+export const MAX_SLOTS = 10;
+export const SLOTS: readonly number[] = Array.from({ length: MAX_SLOTS }, (_, i) => i + 1);
 export const FORMATO_EXPORTACAO = 'dungeons-arena/save';
 
 /**
@@ -381,7 +384,26 @@ export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   },
   // Marco 22 (23/10/2026, D-090): a base do Necromante sobe de 32 para a do catálogo (50).
   21: (r) => migrarHpNecromante(r, 32, conteudoOficial().classes.get('necromante')?.hpBase ?? 32, false),
+  // Marco 23 (24/10/2026, D-092): o tema das fases geradas é opcional; a versão impede um cliente antigo de descartá-lo
+  // e regenerar a fase sem os pilares sobre um estado salvo com eles. D-093: quem já segurava uma arma de outra
+  // família passa a usar o básico dela.
+  22: (r) => migrarBasicoDaArma(r),
 };
+
+/** D-093: o ataque básico de cada personagem pela arma na mão (só lê a classe e a arma principal). */
+function migrarBasicoDaArma(r: Objeto): Objeto {
+  const conteudo = conteudoOficial();
+  const migrar = (v: unknown): unknown => {
+    if (!ehObjeto(v) || !Array.isArray(v.entidades)) return v;
+    return { ...v, entidades: v.entidades.map((x: unknown) => {
+      if (!ehObjeto(x) || !ehObjeto(x.bolsa) || typeof x.bolsa.classeId !== 'string' || !ehObjeto(x.bolsa.equipamento)) return x;
+      return { ...x, ataqueBasico: basicoDoPersonagem({ conteudo }, x as unknown as Entidade) };
+    }) };
+  };
+  const fasesVisitadas = ehObjeto(r.fasesVisitadas)
+    ? Object.fromEntries(Object.entries(r.fasesVisitadas).map(([id, fase]) => [id, migrar(fase)])) : r.fasesVisitadas;
+  return { ...r, estado: migrar(r.estado), fasesVisitadas };
+}
 
 /** Troca a vida base do Necromante (`de` -> `para`) e refaz a ficha; `xp` também zera o histórico de XP (v19). */
 function migrarHpNecromante(r: Objeto, de: number, para: number, xp: boolean): Objeto {
@@ -439,6 +461,11 @@ function lerParametros(v: unknown): ParametrosGeracao | null {
     if (!Array.isArray(v.eventos) || v.eventos.length > 5 || !v.eventos.every((x): x is string => typeof x === 'string' && /^[a-z_]{1,30}$/.test(x))) return null;
     p.eventos = [...v.eventos];
   }
+  // Marco 23 (D-092): o tema da fase gerada.
+  if (v.tema !== undefined) {
+    if (typeof v.tema !== 'string' || !/^[a-z_]{1,30}$/.test(v.tema)) return null;
+    p.tema = v.tema;
+  }
   // Marco 11A (D-066): as regras de estilo que geraram a fase (até 64, na forma compacta).
   if (v.estilo !== undefined) {
     if (!Array.isArray(v.estilo) || v.estilo.length > MAX_REGRAS || !v.estilo.every((r): r is string => typeof r === 'string' && RE_REGRA_ESTILO.test(r))) return null;
@@ -477,7 +504,7 @@ export function lerRegistro(bruto: unknown, migracoes: Readonly<Record<number, M
     if (!migrar) return { ok: false, erro: 'formato' };
     r = { ...migrar(r), versaoSchema: v + 1 };
   }
-  if (typeof r.slot !== 'number' || !(SLOTS as readonly number[]).includes(r.slot)) return { ok: false, erro: 'slot' };
+  if (typeof r.slot !== 'number' || !SLOTS.includes(r.slot)) return { ok: false, erro: 'slot' };
   const faseRef = lerRefFase(r.faseRef);
   if (!faseRef) return { ok: false, erro: 'fase' };
   const e = r.estado;

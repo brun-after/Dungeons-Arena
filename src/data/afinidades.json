@@ -1,0 +1,14 @@
+{
+  "versao": 1,
+  "nomeExtrema": "Primordial",
+  "elementos": {
+    "fogo": { "oposto": "gelo", "habilidade": "bola_de_fogo", "sufixo": "de Fogo" },
+    "gelo": { "oposto": "fogo", "habilidade": "lanca_de_gelo", "sufixo": "de Gelo" },
+    "raio": { "oposto": "terra", "habilidade": "raio_em_cadeia", "sufixo": "do Trovão" },
+    "veneno": { "oposto": "sagrado", "habilidade": "dardo_toxico", "sufixo": "da Peçonha" },
+    "psiquico": { "oposto": "trevas", "habilidade": "mente_partida", "sufixo": "da Mente" },
+    "terra": { "oposto": "raio", "habilidade": "estaca_de_pedra", "sufixo": "de Pedra" },
+    "trevas": { "oposto": "sagrado", "habilidade": "toque_funesto", "sufixo": "das Trevas" },
+    "sagrado": { "oposto": "trevas", "habilidade": "lanca_radiante", "sufixo": "da Luz" }
+  }
+}

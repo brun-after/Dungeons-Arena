@@ -128,6 +128,8 @@ export type EventoSimulacao =
       indice: number;
       /** Marco 14: sinergias de elemento disparadas neste golpe (ids de interacoes.json). */
       sinergias: string[];
+      /** Marco 23 (D-092): o alvo afim absorveu o elemento (a `cura` veio do golpe). */
+      absorveu?: boolean;
     }
   | { t: 'esquivou'; tick: number; acaoId: number; atorId: EntidadeId; alvoId: EntidadeId }
   /** Marco 14: habilidade aprendida ou com rank novo (e o caminho escolhido, nos ranks de evolução). */

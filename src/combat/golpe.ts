@@ -24,6 +24,9 @@ import { chebyshev } from './geometria';
 import { podeAjudar, podeFerir } from '../modos/relacao';
 import { dispararGanchosDe, passivosDe } from '../progression/ganchos-do-portador';
 import { dispararSinergias, resistenciaPct, sinergiasAtivas } from './elementos';
+import { absorcaoPct } from './afinidade';
+import { estenderNoClima, multiplicadorClima } from './clima';
+import { multiplicadorArma } from '../progression/armas';
 import { fatorDoGolpe } from '../modos/dificuldade';
 import type { Habilidade } from './habilidades';
 import { registrarParticipacao } from './participacao';
@@ -115,24 +118,33 @@ export function aplicarImpacto(
   // Marco 18: os estados do alvo antes do golpe (os ganchos "se o alvo estava…" olham estes).
   const estadosAntes = alvo.efeitos.filter((f) => f.ateTick > tick).map((f) => f.tipo);
 
+  let absorveu = false;
   if (hab.formulaDano !== null) {
     // Marco 15: a dificuldade e o tamanho do grupo pesam pelo lado de quem bate e de quem apanha.
     // Marco 18: o dano extra das sinergias cresce com a potência (Inteligência) de quem lança.
     const extraPct = sinergias.reduce((s, x) => s + x.danoExtraPct, 0) * fonte.potencia;
-    const recebido = multiplicadorRecebido(estado, ctx, alvo, hab, tick, extraPct) * fatorDoGolpe(estado, ctx, fonte, alvo) * protecaoInicial(estado, ctx, alvo, atacante);
+    // Marco 23 (D-092): o inimigo afim absorve o próprio elemento — o golpe rola igual, mas cura em vez de ferir.
+    const absorve = absorcaoPct(ctx, alvo, hab.elemento);
+    const recebido = (absorve > 0 ? absorve / 100 : multiplicadorRecebido(estado, ctx, alvo, hab, tick, extraPct)) * fatorDoGolpe(estado, ctx, fonte, alvo) * protecaoInicial(estado, ctx, alvo, atacante);
     const r = resolverGolpe(
       estado.rng,
       hab.formulaDano,
       { ...fonte, bonusAtributo: fonte.bonusAtributo + (impacto.danoExtra ?? 0) },
-      { defesa: alvo.defesa, imune: imuneADano(alvo, tick) || recebido === 0, multRecebido: recebido },
+      { defesa: alvo.defesa, imune: absorve === 0 && (imuneADano(alvo, tick) || recebido === 0), multRecebido: recebido },
       ctx.balance.combate,
-      fonte.multDano * (atacante ? extraGuerreiro(ctx, atacante, alvo) * multiplicadorDireto(ctx, atacante, hab, impacto.secundario ?? false) * multiplicadorDardo(ctx, atacante, alvo, hab, tick) : 1),
+      fonte.multDano * multiplicadorClima(ctx, hab.elemento) * (atacante ? multiplicadorArma(ctx, atacante, hab.id) * extraGuerreiro(ctx, atacante, alvo) * multiplicadorDireto(ctx, atacante, hab, impacto.secundario ?? false) * multiplicadorDardo(ctx, atacante, alvo, hab, tick) : 1),
     );
     ({ d20, mult, falha, critico, imune } = r);
+    absorveu = absorve > 0 && !r.falha;
+    if (absorveu) {
+      const antes = alvo.hp;
+      alvo.hp = Math.min(alvo.hpMax, alvo.hp + r.dano);
+      cura += alvo.hp - antes;
+    }
     // Marco 14: o escudo absorve antes da vida.
-    const defesa = !r.falha && !r.imune && atacante ? defenderGolpe(estado, ctx, alvo, atacante, hab.tipoAtaque === 'fisico', saida) : { esquivou: false, fator: 1 };
+    const defesa = absorve === 0 && !r.falha && !r.imune && atacante ? defenderGolpe(estado, ctx, alvo, atacante, hab.tipoAtaque === 'fisico', saida) : { esquivou: false, fator: 1 };
     if (defesa.esquivou) { falha = true; saida.push({ t: 'esquivou', tick, acaoId: impacto.acaoId, atorId: fonte.id, alvoId: alvo.id }); }
-    const antesDoEscudo = defesa.esquivou ? 0 : Math.round(r.dano * defesa.fator);
+    const antesDoEscudo = defesa.esquivou || absorve > 0 ? 0 : Math.round(r.dano * defesa.fator);
     dano = absorverEscudo(alvo, antesDoEscudo, tick);
     absorvidoEscudo = antesDoEscudo - dano;
     alvo.hp = Math.max(0, alvo.hp - dano);
@@ -146,13 +158,13 @@ export function aplicarImpacto(
   }
   if (hab.formulaCura !== null) {
     const bruta = rolar(estado.rng, hab.formulaCura).total;
-    cura = Math.max(0, Math.round(bruta * fonte.multCura * multiplicadorCuraRecebida(alvo, tick)));
+    const pedida = Math.max(0, Math.round(bruta * fonte.multCura * multiplicadorCuraRecebida(alvo, tick)));
     const antes = alvo.hp;
-    alvo.hp = Math.min(alvo.hpMax, alvo.hp + cura);
-    cura = alvo.hp - antes;
+    alvo.hp = Math.min(alvo.hpMax, alvo.hp + pedida);
+    cura += alvo.hp - antes;
   }
 
-  const disparadas = falha || imune ? [] : sinergias.map((s) => s.id);
+  const disparadas = falha || imune || absorveu ? [] : sinergias.map((s) => s.id);
   if (disparadas.length > 0) alvo.ultimaSinergia = disparadas[0] ?? null;
   saida.push({
     t: 'impacto',
@@ -174,10 +186,12 @@ export function aplicarImpacto(
     imune,
     indice: impacto.indice,
     sinergias: disparadas,
+    ...(absorveu && { absorveu: true }),
   });
 
-  // Efeitos dependentes de acerto não se aplicam na falha crítica nem com imunidade (§2.7, passo 7).
-  if (falha || imune) return;
+  // Efeitos dependentes de acerto não se aplicam na falha crítica nem com imunidade (§2.7, passo 7). Marco 23: nem
+  // no golpe absorvido (o estado do elemento não pega no afim).
+  if (falha || imune || absorveu) return;
   // D-078 (17/10/2026): só o básico recupera vida, sobre dano efetivo após defesa/escudo e sem excesso letal.
   const curaBasicoPct = conjurador?.bolsa ? (ctx.balance.recursos.curaBasicoPorClassePct[conjurador.bolsa.classeId] ?? 0) : 0;
   const basicoQueFere = !!conjurador && vivo(conjurador) && conjurador !== alvo && hab.id === conjurador.ataqueBasico && dano > 0 && podeFerir(conjurador, alvo, ctx.modo);
@@ -219,7 +233,8 @@ export function aplicarImpacto(
     // Armadilha e invocação saem uma vez no lançamento (acao.ts), não por alvo atingido.
     if (REGISTRO_EFEITOS[efeito.tipo].aoLancar) continue;
     const sobre = efeito.em === 'conjurador' ? conjurador : alvo;
-    if (sobre) aplicarEfeito(estado, ctx, sobre, comPotencia(efeito, fonte.potencia), origem, mira, saida);
+    // Marco 23 (D-092): no clima do elemento, o estado dele dura mais.
+    if (sobre) aplicarEfeito(estado, ctx, sobre, estenderNoClima(ctx, hab, comPotencia(efeito, fonte.potencia)), origem, mira, saida);
   }
   if (conjurador) {
     if (resposta && conjurador.tatica) { conjurador.tatica.respostaConsumida = true; conjurador.efeitos = conjurador.efeitos.filter((f) => f.tipo !== 'resposta_aparo'); }

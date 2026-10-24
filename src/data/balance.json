@@ -1,6 +1,6 @@
 {
   "necromancia": { "danoPct": 75, "servosExtras": 8, "retornoServoMs": 8000, "duracaoMortoMs": 20000, "raioColheita": 6, "ecoRecargaMs": 30000, "vidaBase": 24, "vidaPorNivel": 3, "vidaServoPct": 100, "alcanceRitual": 6, "distanciaRetorno": 10, "atributoPorInt": 1, "perdaPorQuantidade": 0.8 },
-  "versao": 34,
+  "versao": 35,
   "ajustesClasses": {
     "guerreiro": {
       "contatoMaxPct": 15,
@@ -386,6 +386,37 @@
     "enxameLeva": 6,
     "enxameInicio": 24,
     "enxameRaio": 18,
-    "enxameDistanciaSegura": 5
+    "enxameDistanciaSegura": 5,
+    "resfriadoPct": 30,
+    "atoladoPct": 40,
+    "definhandoPct": 15,
+    "curaSagrada": 3
+  },
+  "clima": {
+    "reforcoPct": 25,
+    "opressaoPct": 25,
+    "duracaoEstadoPct": 50,
+    "pulsoMs": 6000,
+    "resistenciaImunePct": 20,
+    "pulsos": {
+      "fogo": { "tipo": "queimando", "valor": 2, "pct": 0, "duracaoMs": 2000 },
+      "gelo": { "tipo": "resfriado", "valor": 0, "pct": 20, "duracaoMs": 2500 },
+      "raio": { "tipo": "eletrizado", "valor": 0, "pct": 0, "duracaoMs": 1500 },
+      "veneno": { "tipo": "envenenado", "valor": 1, "pct": 0, "duracaoMs": 3000 },
+      "terra": { "tipo": "atolado", "valor": 0, "pct": 20, "duracaoMs": 1500 },
+      "trevas": { "tipo": "definhando", "valor": 0, "pct": 10, "duracaoMs": 3000 }
+    }
+  },
+  "afinidade": {
+    "absorcaoPct": 150,
+    "fraquezaPct": -50,
+    "extremaFraquezaPct": -100,
+    "chanceExtrema": 0.125,
+    "vidaExtremaPct": 130,
+    "xpPct": 25,
+    "xpExtremaPct": 60
+  },
+  "armas": {
+    "danoForaDaClassePct": -15
   }
 }

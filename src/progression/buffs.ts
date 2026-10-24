@@ -83,7 +83,7 @@ const BASES_DE_ARMA = new Set(['espada', 'machado', 'adaga', 'cajado', 'arco', '
  * O visual de um item equipado: a base da arma pelo ícone; nas peças, a raridade. Marco 18: os itens com forma dizem o
  * desenho da arma (`arma` da base; a maça usa o da clava) e as peças de mão sem arma (tomo, aljava) não desenham nada.
  */
-function baseDaArma(ctx: ContextoSimulacao, itemId: string | undefined): string | null {
+export function baseDaArma(ctx: Pick<ContextoSimulacao, 'conteudo'>, itemId: string | undefined): string | null {
   const item = itemId ? ctx.conteudo.itens.get(itemId) : undefined;
   if (!item) return null;
   if (item.base) {

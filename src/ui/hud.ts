@@ -40,6 +40,7 @@ export class Hud {
   private readonly classe = barra('classe');
   /** Marco 22 (D-089): o elemento encarnado do Mago. */
   private readonly encarnacao = document.createElement('span');
+  private readonly tema = document.createElement('span');
   private readonly numeros = document.createElement('span');
   private readonly rede = document.createElement('span');
   /** Marco 8A: ícones dos efeitos ativos, na cor do registro; marco 14: com duração e cartão. */
@@ -71,7 +72,9 @@ export class Hud {
     this.encarnacao.hidden = true;
     this.efeitos.className = 'chips-efeito';
     this.efeitos.setAttribute('aria-label', t('hud.efeitos'));
-    this.status.append(barras, this.numeros, this.encarnacao, this.efeitos, this.pendentes.elemento, this.rede);
+    this.tema.className = 'chip-tema';
+    this.tema.hidden = true;
+    this.status.append(barras, this.numeros, this.tema, this.encarnacao, this.efeitos, this.pendentes.elemento, this.rede);
     this.chips = new ChipsEfeito(this.efeitos, nomeDe);
 
     this.log = document.createElement('ol');
@@ -149,6 +152,15 @@ export class Hud {
   }
 
   /** Indicador de rede (§2.15): ping e qualidade, só na arena. */
+  /** Marco 23 (D-092): o chip do tema da fase (com o clima no tema elemental). */
+  mostrarTema(nome: string, dica: string, elemento: string | null): void {
+    this.tema.hidden = false;
+    this.tema.textContent = nome;
+    this.tema.title = dica;
+    this.tema.setAttribute('aria-label', dica ? `${nome}: ${dica}` : nome);
+    if (elemento) this.tema.dataset.elemento = elemento;
+  }
+
   mostrarRede(r: DadosRede): void {
     const texto = r.conectado ? t('rede.ping', { ms: Math.round(r.rttMs) }) : t('rede.conectando');
     if (this.rede.textContent === texto) return;

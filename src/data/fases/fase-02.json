@@ -1,6 +1,7 @@
 {
   "id": "fase-02",
   "nome": "Catacumbas",
+  "tema": "catacumbas",
   "ordem": 2,
   "tipo": "campanha",
   "mapa": [

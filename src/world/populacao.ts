@@ -6,11 +6,26 @@ import type { ContextoSimulacao } from '../core/contexto';
 import { DONO_FASE, type EstadoJogo } from '../core/estado';
 import { ticksDe } from '../core/tempo';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
-import { criarInimigo } from '../entities/fabrica';
+import { nomeComAfinidade } from '../combat/afinidade';
+import { criarInimigo, type OpcoesInimigo } from '../entities/fabrica';
+import type { PresetInimigo } from '../entities/presets';
+import type { InimigoPosicionado } from './fase';
 import { largarItem, largarObjeto, largarOrbeEfeito, novoObjeto } from './objetos';
 
 export function idDoInimigo(indice: number): string {
   return `i${String(indice).padStart(3, '0')}`;
+}
+
+/** As opções do inimigo posicionado (nível, vida, habilidades e, marco 23, a afinidade com nome e habilidade). */
+export function opcoesDoPosicionado(ctx: ContextoSimulacao, preset: PresetInimigo, pos: InimigoPosicionado): OpcoesInimigo {
+  const a = pos.afinidade;
+  const dados = a ? ctx.conteudo.afinidades.elementos.get(a.elemento) : undefined;
+  return {
+    ...(pos.nivel !== undefined && { nivel: pos.nivel }),
+    ...(pos.hpBase !== undefined && { hpBase: pos.hpBase }),
+    ...(pos.habilidades && { habilidadesExtras: pos.habilidades }),
+    ...(a && dados && { afinidade: { ...a, nome: nomeComAfinidade(preset.nome, ctx.conteudo.afinidades, a), habilidade: dados.habilidade } }),
+  };
 }
 
 export function povoarFase(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[] = []): void {
@@ -22,12 +37,7 @@ export function povoarFase(estado: EstadoJogo, ctx: ContextoSimulacao, saida: Ev
         (estado.reservaEnxame ??= []).push(indice);
         return;
       }
-      const opcoes = {
-        ...(pos.nivel !== undefined && { nivel: pos.nivel }),
-        ...(pos.hpBase !== undefined && { hpBase: pos.hpBase }),
-        ...(pos.habilidades && { habilidadesExtras: pos.habilidades }),
-      };
-      estado.entidades.push(criarInimigo(preset, idDoInimigo(indice), pos.x, pos.y, ctx.balance, opcoes));
+      estado.entidades.push(criarInimigo(preset, idDoInimigo(indice), pos.x, pos.y, ctx.balance, opcoesDoPosicionado(ctx, preset, pos)));
     });
   }
   if (ctx.modo.objetosDeFase) {

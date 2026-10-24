@@ -149,7 +149,8 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
   }
   // Marco 14: jogo novo num slot sem classe escolhida -> a tela de escolha (o endereço volta com `&classe=`).
   if (slot !== null && !leitura && !opcoes.classe) {
-    const fase = opcoes.faseNova?.tipo === 'aventura' ? `&fase=${encodeURIComponent(`aventura:${opcoes.faseNova.id}`)}` : '';
+    const nova = opcoes.faseNova;
+    const fase = nova?.tipo === 'aventura' ? `&fase=${encodeURIComponent(`aventura:${nova.id}`)}` : nova?.tipo === 'gerada' && nova.params.tema ? `&fase=tema:${nova.params.tema}` : '';
     const dificuldade = opcoes.dificuldade ? `&dificuldade=${opcoes.dificuldade}` : '';
     mostrarEscolhaDeClasse(raiz, conteudo, `./?jogo=campanha&slot=${slot}${fase}${dificuldade}${location.search.includes('diag=1') ? '&diag=1' : ''}`);
     return;

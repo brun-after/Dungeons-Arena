@@ -6,6 +6,7 @@ import type { MemoriaTatica } from '../combat/estado-tatico';
 import type { Celula, Dir8, EntidadeId } from '../core/comandos';
 import { clonarRng, type EstadoRng } from '../core/rng';
 import type { EfeitoCanonico, TipoEfeito } from '../combat/registro-efeitos';
+import type { Afinidade } from '../combat/afinidade';
 import type { Slot } from '../modos/modo';
 
 export type TipoEntidade = 'jogador' | 'inimigo' | 'invocacao' | 'avatar';
@@ -300,6 +301,8 @@ export interface Entidade {
   encontro?: { faseId: string; inicioTick: number };
   auraFracoes?: Record<string, number>;
   auraCuraFracao?: number;
+  /** Marco 23 (D-092): a afinidade elemental do inimigo (absorve o elemento, fraco ao oposto). */
+  afinidade?: Afinidade;
   /** Marco 22 (D-089): o elemento que o Mago encarna (fogo, gelo ou raio). */
   encarnacao?: 'fogo' | 'gelo' | 'raio';
   /** Ajuste de 24/10/2026 (D-091): até quando a encarnação vale (renova ao lançar outra magia do elemento). */
@@ -485,6 +488,7 @@ export function clonarEntidade(e: Entidade): Entidade {
     ...(e.auraFracoes ? { auraFracoes: { ...e.auraFracoes } } : {}),
     ...(e.furia ? { furia: { ...e.furia } } : {}),
     ...(e.mira ? { mira: { ...e.mira } } : {}),
+    ...(e.afinidade ? { afinidade: { ...e.afinidade } } : {}),
     waypoints: copiarCelulas(e.waypoints),
     caminho: copiarCelulas(e.caminho),
     atributos: { ...e.atributos },

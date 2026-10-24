@@ -1,6 +1,8 @@
 // Tela de slots da campanha (§3.5). Marco 6B (13/10/2026): três slots com continuar, jogo novo,
 // exportar, importar e excluir (com confirmação). Importar só em slot vazio, para nunca
 // sobrescrever um save sem querer. Textos sempre por textContent.
+// Marco 23 (24/10/2026, D-092): dez slots numa grade; o slot vazio fica compacto (as opções do jogo novo, dificuldade e
+// fase, num `details`).
 
 import { t, type ChaveTexto } from '../i18n';
 import { DIFICULDADES, type Dificuldade } from '../modos/dificuldade';
@@ -132,8 +134,10 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
 
   // Marco 17: os cartões, para a nuvem pôr "Enviar" e "Baixar" em cada um.
   const cartoes = new Map<number, HTMLElement>();
+  const grade = el('div', 'grade-slots');
+  tela.append(grade);
   for (const s of slots) {
-    const cartao = el('article', 'cartao-slot');
+    const cartao = el('article', s.tipo === 'vazio' ? 'cartao-slot vazio' : 'cartao-slot');
     cartoes.set(s.slot, cartao);
     cartao.dataset.slot = String(s.slot);
     cartao.append(el('h2', undefined, t('slots.slot', { n: s.slot })));
@@ -176,7 +180,9 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
         novo.href = `./?jogo=campanha&slot=${s.slot}&dificuldade=${dificuldadeNova}${faseNova ? `&fase=${encodeURIComponent(faseNova)}` : ''}`;
       };
       acoes.append(novo);
-      cartao.append(
+      const opcoes = el('details', 'opcoes-slot');
+      opcoes.append(
+        el('summary', undefined, t('slots.opcoesNovo')),
         seletorDeDificuldade(s.slot, 'normal', (d) => {
           dificuldadeNova = d;
           atualizarNovo();
@@ -197,7 +203,7 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
           faseNova = escolha.value;
           atualizarNovo();
         });
-        acoes.append(escolha);
+        opcoes.append(escolha);
       }
       const arquivo = el('input');
       arquivo.type = 'file';
@@ -223,6 +229,7 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
           arquivo.click();
         }),
       );
+      cartao.append(acoes, opcoes);
     } else {
       cartao.append(el('p', 'resumo-slot', t('slots.invalido')));
     }
@@ -240,9 +247,9 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
       });
       acoes.append(excluir);
     }
-    cartao.append(acoes);
+    if (!acoes.parentElement) cartao.append(acoes);
     if (grupoDoCartao) cartao.append(grupoDoCartao);
-    tela.append(cartao);
+    grade.append(cartao);
   }
   tela.append(status, link('./', t('menu.voltar'), 'link-menu'));
   void ligarNuvemNosSlots({ depoisDe: titulo, cartoes, locais: new Set(slots.filter((s) => s.tipo === 'ok').map((s) => s.slot)), status, recarregar });

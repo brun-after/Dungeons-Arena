@@ -1,4 +1,5 @@
 import { extraGuerreiro, protecaoInicial, pulsarAura } from './ajustes-classes';
+import { imuneAoEstado } from './afinidade';
 import { executarTatica, fato, muralhaEm, fluxoRestaurador } from './tatica';
 import { passivasDaBolsa } from './perfil';
 import { executarRitual } from './necromancia';
@@ -180,6 +181,8 @@ export function aplicarEfeito(
   notificar = true,
 ): void {
   if (!vivo(alvo)) return;
+  // Marco 23 (D-092): o estado do elemento afim não pega no inimigo afim (brasas não queimam o inimigo de fogo).
+  if (imuneAoEstado(ctx, alvo, ef.tipo)) return;
   const def = REGISTRO_EFEITOS[ef.tipo];
   const tick = estado.tick;
   if (ef.tipo === 'aparando') ef = { ...ef, duracaoMs: Math.min(ef.duracaoMs, ctx.balance.tatica.aparoJanelaMaxMs) };

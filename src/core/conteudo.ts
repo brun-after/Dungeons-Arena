@@ -22,6 +22,12 @@ import campanhaJson from '../data/modos/campanha.json';
 import cooperativoJson from '../data/modos/cooperativo.json';
 import livreJson from '../data/modos/livre.json';
 import skillsJson from '../data/skills.json';
+import temasJson from '../data/temas.json';
+import afinidadesJson from '../data/afinidades.json';
+import armasJson from '../data/armas.json';
+import { lerArmas, type RegrasDeArmas } from '../progression/armas';
+import { lerAfinidades, type CatalogoAfinidades } from '../combat/afinidade';
+import { lerTemas, type Tema } from '../world/temas';
 import { lerInteracoes, type Interacoes } from '../combat/acumulo';
 import { lerElementos, type DefinicaoElemento, type Elemento } from '../combat/elementos';
 import { compilarHabilidade, lerCaminhos, type Caminho, type FontesCompilacao } from '../combat/compilar-habilidade';
@@ -68,6 +74,11 @@ export interface Conteudo {
   missoes: Catalogo<Missao>;
   origens: Catalogo<OrigemRara>;
   forja: Catalogo<ReceitaDeForja>;
+  /** Marco 23 (D-092): os 20 temas de fase e as afinidades elementais dos inimigos. */
+  temas: Catalogo<Tema>;
+  afinidades: CatalogoAfinidades;
+  /** Marco 23 (D-093): as famílias de arma e o básico de cada uma. */
+  armas: RegrasDeArmas;
 }
 
 export interface FontesDeConteudo {
@@ -89,6 +100,9 @@ export interface FontesDeConteudo {
   missoes: unknown;
   origens: unknown;
   forja: unknown;
+  temas: unknown;
+  afinidades: unknown;
+  armas: unknown;
   /** Arquivo -> JSON de cada modo em src/data/modos. */
   modos: Readonly<Record<string, unknown>>;
 }
@@ -110,7 +124,10 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const mi = lerMissoes(fontes.missoes);
   const og = lerOrigens(fontes.origens);
   const fj = lerForja(fontes.forja);
-  const erros = [...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...rs.erros, ...cb.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
+  const tm = lerTemas(fontes.temas, new Set([...p.presets.values()].filter((x) => x.invocacao === null).map((x) => x.id)));
+  const af = lerAfinidades(fontes.afinidades);
+  const ar = lerArmas(fontes.armas);
+  const erros = [...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...rs.erros, ...cb.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
   for (const conj of cj.conjuntos.values()) {
     for (const peca of conj.pecas) if (!fo.dados.bases.has(peca)) erros.push(`conjunto ${conj.id}: base desconhecida "${peca}"`);
   }
@@ -144,6 +161,9 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   }
   for (const item of it.itens.values()) if (item.ensina !== null) conferir(`item ${item.id}`, [item.ensina]);
   for (const combo of cb.combos.values()) conferir(`combo ${combo.id}`, combo.sequencia);
+  for (const [e, a] of af.afinidades.elementos) conferir(`afinidade ${e}`, [a.habilidade]);
+  conferir('armas.json', Object.values(ar.armas.basicoDaFamilia));
+  for (const id of c.classes.keys()) if (!ar.armas.naturalDaClasse.has(id)) erros.push(`armas.json: classe sem família natural "${id}"`);
   for (const r of fj.receitas.values()) {
     for (const x of r.entrada) if (!it.itens.has(x.item)) erros.push(`forja ${r.id}: item desconhecido "${x.item}"`);
     if (r.saida.tipo === 'item' && !it.itens.has(r.saida.item)) erros.push(`forja ${r.id}: item desconhecido "${r.saida.item}"`);
@@ -194,6 +214,9 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       missoes: mi.missoes,
       origens: og.origens,
       forja: fj.receitas,
+      temas: tm.temas,
+      afinidades: af.afinidades,
+      armas: ar.armas,
     },
     erros,
   };
@@ -236,6 +259,9 @@ export const FONTES_OFICIAIS: FontesDeConteudo = {
   missoes: missoesJson,
   origens: origensJson,
   forja: forjaJson,
+  temas: temasJson,
+  afinidades: afinidadesJson,
+  armas: armasJson,
   modos: { 'campanha.json': campanhaJson, 'cooperativo.json': cooperativoJson, 'livre.json': livreJson },
 };
 

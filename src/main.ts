@@ -11,6 +11,8 @@
 // O código da arena e do SDK de rede é carregado sob demanda (§3.8, code splitting).
 
 import { ehDificuldade } from './modos/dificuldade';
+import { MAX_SLOTS, type RefFase } from './save/esquema';
+import { faseSeguinte } from './save/fases-campanha';
 import './estilos.css';
 import { registerSW } from 'virtual:pwa-register';
 import { iniciarJogo } from './jogo';
@@ -28,6 +30,12 @@ const raiz = document.getElementById('app');
 if (raiz) void prepararPreferencias().then(() => {
   rotear(raiz);
 });
+
+/** A primeira fase gerada, com o tema pedido (o id inválido some na leitura dos parâmetros). */
+function geradaComTema(tema: string): RefFase | undefined {
+  const ref = faseSeguinte({ tipo: 'oficial', id: 'fase-02' });
+  return ref?.tipo === 'gerada' && /^[a-z_]{1,30}$/.test(tema) ? { ...ref, params: { ...ref.params, tema } } : undefined;
+}
 
 function rotear(raiz: HTMLElement): void {
   const params = new URLSearchParams(location.search);
@@ -62,7 +70,7 @@ function rotear(raiz: HTMLElement): void {
     const dificuldade = params.get('dificuldade');
     void import('./grupo-tela').then((m) =>
       m.iniciarGrupo(raiz, {
-        slot: Number.isInteger(slot) && slot >= 1 && slot <= 3 ? slot : 1,
+        slot: Number.isInteger(slot) && slot >= 1 && slot <= MAX_SLOTS ? slot : 1,
         ...(codigo && { codigo: codigo.trim().toUpperCase() }),
         ...(ehDificuldade(dificuldade) && { dificuldade }),
       }),
@@ -70,8 +78,9 @@ function rotear(raiz: HTMLElement): void {
   } else if (params.get('jogo') === 'campanha') {
     const slot = Number(params.get('slot'));
     const fase = params.get('fase');
-    const faseNova = fase?.startsWith('aventura:') ? { tipo: 'aventura' as const, id: fase.slice('aventura:'.length) } : undefined;
-    if (params.has('slot') && Number.isInteger(slot) && slot >= 0 && slot <= 3) {
+    // Marco 23 (D-092): `fase=tema:<id>` começa o jogo novo na primeira fase gerada, com aquele tema (testes e e2e).
+    const faseNova = fase?.startsWith('aventura:') ? { tipo: 'aventura' as const, id: fase.slice('aventura:'.length) } : fase?.startsWith('tema:') ? geradaComTema(fase.slice('tema:'.length)) : undefined;
+    if (params.has('slot') && Number.isInteger(slot) && slot >= 0 && slot <= MAX_SLOTS) {
       const classe = params.get('classe');
       const dificuldade = params.get('dificuldade');
       void iniciarJogo(raiz, {

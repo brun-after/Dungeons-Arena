@@ -34,6 +34,7 @@ import { forjar } from '../progression/forja';
 import { processarServosNecromantes } from '../combat/necromancia';
 import { processarCompanheiros, sincronizarCompanheiros } from '../combat/companheiro';
 import { processarEncarnacoes } from '../combat/encarnacao';
+import { processarClima } from '../combat/clima';
 import { processarMissoes } from '../progression/missoes';
 import { registrarDescobertas } from '../progression/diario';
 import { coletarObjetos } from '../world/objetos';
@@ -82,6 +83,8 @@ export function simular(
   atualizarAparencias(estado, ctx);
   atualizarRessonancias(estado, ctx, saida);
   processarAmbientes(estado, ctx, saida, inicio);
+  // Marco 23 (D-092): o pulso do clima da fase de tema elemental.
+  processarClima(estado, ctx, saida);
   processarGatilhosDeEfeito(estado, ctx, saida);
   // Marco 22: o dano que o falcão levou sai da vida do dono antes das mortes.
   sincronizarCompanheiros(estado, ctx);

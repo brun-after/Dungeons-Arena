@@ -44,8 +44,21 @@ export function desenharAmbiente(g: Graphics, fase: Fase, x: number, y: number):
     } else if (a.tipo === 'brasas') {
       g.moveTo(cx - 9, cy + 4).lineTo(cx - 3, cy - 2).lineTo(cx + 3, cy + 2).lineTo(cx + 8, cy - 6).stroke({ width: 2, color: 0xffab5c, alpha: 0.7 });
       g.circle(cx + 5, cy + 6, 1.6).fill(0xffce7e);
-    } else {
+    } else if (a.tipo === 'miasma') {
       for (const [dx, dy] of [[-6, 2], [5, -4], [8, 6]]) g.circle(cx + (dx ?? 0), cy + (dy ?? 0), 2.5).stroke({ width: 1.5, color: 0xa6d583, alpha: 0.6 });
+    } else if (a.tipo === 'gelo_fino') {
+      // Marco 23 (D-092): as cinco áreas novas, cada uma com o seu traço.
+      g.moveTo(cx - 10, cy - 6).lineTo(cx - 1, cy + 1).lineTo(cx + 9, cy - 4).moveTo(cx - 1, cy + 1).lineTo(cx + 2, cy + 10);
+      g.stroke({ width: 1.3, color: 0xffffff, alpha: 0.6 });
+    } else if (a.tipo === 'campo_eletrico') {
+      g.moveTo(cx - 9, cy - 5).lineTo(cx - 2, cy + 1).lineTo(cx - 5, cy + 3).lineTo(cx + 6, cy + 9).stroke({ width: 1.6, color: 0xfff3a0, alpha: 0.75 });
+    } else if (a.tipo === 'lama') {
+      for (const [dx, dy, r] of [[-6, 3, 4], [6, -3, 3], [3, 8, 2.5]] as const) g.ellipse(cx + dx, cy + dy, r * 1.4, r).fill({ color: 0x4a3a24, alpha: 0.5 });
+    } else if (a.tipo === 'nevoa_sombria') {
+      for (const [dx, dy] of [[-7, -2], [6, 3]] as const) g.ellipse(cx + dx, cy + dy, 9, 4).fill({ color: 0x2a1840, alpha: 0.35 });
+    } else {
+      g.circle(cx, cy, 5).fill({ color: 0xfff6c8, alpha: 0.35 });
+      g.moveTo(cx, cy - 9).lineTo(cx, cy + 9).moveTo(cx - 9, cy).lineTo(cx + 9, cy).stroke({ width: 1.2, color: 0xfff6c8, alpha: 0.5 });
     }
   }
 }

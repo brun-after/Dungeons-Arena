@@ -4,7 +4,8 @@ import { TIPOS_AMBIENTE, type AreaAmbiente, type TipoAmbiente } from './ambiente
 import type { ErroFase } from './validacao-fase';
 export function lerAmbientes(v: unknown, mapa: readonly string[], erros: ErroFase[]): AreaAmbiente[] {
   if (v === undefined) return [];
-  if (!Array.isArray(v) || v.length > 24) { erros.push({ mensagem: 'ambientes: até 24 áreas' }); return []; }
+  // Marco 23 (D-092): os temas elementais têm uma área por sala.
+  if (!Array.isArray(v) || v.length > 48) { erros.push({ mensagem: 'ambientes: até 48 áreas' }); return []; }
   const resultado: AreaAmbiente[] = [];
   for (const a of v) {
     if (!ehObjeto(a) || !(TIPOS_AMBIENTE as readonly unknown[]).includes(a.tipo) ||

@@ -21,6 +21,9 @@ import { lerPreferencias, type NivelQualidade, type Preferencias } from '../plat
 import type { Camera } from '../render/camera';
 import { EfeitosDeHabilidade } from '../render/efeitos-habilidade';
 import { ControladorImpacto } from '../render/impacto';
+import { temaDaFase } from '../combat/clima';
+import type { Elemento } from '../combat/elementos';
+import { decoracoesDaFase } from '../world/decoracao';
 import { CamadaLuz, type PontoDeLuz } from '../render/luz';
 import { SistemaParticulas } from '../render/particulas';
 import { escalaDaResolucao, fpsAlvo, PuladorDeQuadros } from '../render/desempenho';
@@ -91,7 +94,15 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   const som = ligarSom({ motor, bus: o.bus, estado: o.estado, idLocal, habilidades: o.habilidades, fase: ctx.fase });
   const particulas = new SistemaParticulas(palco.efeitos, palco.app.renderer, () => camera.projecaoAtual);
   const impacto = new ControladorImpacto(() => prefs.efeitosDeTela && !reduzido() && qualidade().impacto);
-  const efeitos = new EfeitosDeHabilidade({ particulas, impacto, habilidades: o.habilidades, idLocal, qualidade, fase: ctx.fase, miraCheia: (e, tick) => fracaoMira(ctx, e, tick) === 1 });
+  // Marco 23 (D-092): o tema da fase dá as partículas do ar, a cor da luz e as tochas acesas.
+  const tema = temaDaFase(ctx);
+  const corElemento = (el: Elemento) => Number.parseInt((ctx.conteudo.elementos.get(el)?.cor ?? '#ffffff').slice(1), 16);
+  const efeitos = new EfeitosDeHabilidade({
+    particulas, impacto, habilidades: o.habilidades, idLocal, qualidade, fase: ctx.fase,
+    miraCheia: (e, tick) => fracaoMira(ctx, e, tick) === 1,
+    clima: tema?.particulas ?? null,
+    corElemento,
+  });
   efeitos.ligar(o.bus, o.estado, () => performance.now());
   const combos = new CamadaCombosTaticos(palco.efeitos, () => camera.projecaoAtual, reduzido, () => qualidade().particulas === 0, 24, particulas);
   combos.ligar(o.bus, o.estado, () => performance.now());
@@ -141,13 +152,16 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     },
   });
 
+  const acesos = decoracoesDaFase(ctx.fase, tema).filter((d) => d.tipo === 'tocha' || d.tipo === 'vela' || d.tipo === 'lava');
   const pontosDeLuz = (estado: EstadoJogo, posicao: (e: Entidade) => PontoVisual): PontoDeLuz[] => {
     const pontos: PontoDeLuz[] = [];
     const eu = estado.entidades.find((e) => e.id === idLocal);
     if (eu) {
       const p = posicao(eu);
       // Ajuste de 14/10/2026: o brilho em volta do jogador pela metade (feedback de jogo).
-      pontos.push({ x: p.x, y: p.y, cor: 0xffd9a0, semente: 0, intensidade: 0.5 });
+      pontos.push({ x: p.x, y: p.y, cor: tema?.luz ?? 0xffd9a0, semente: 0, intensidade: 0.5 });
+      // As tochas, velas e fendas de lava do tema perto do jogador.
+      for (const d of acesos) if (Math.abs(d.x - p.x) < 12 && Math.abs(d.y - p.y) < 9) pontos.push({ x: d.x, y: d.y - (d.tipo === 'tocha' ? 0.35 : 0), cor: d.tipo === 'vela' ? 0xffd890 : 0xff9a40, semente: d.x * 7 + d.y, intensidade: d.tipo === 'lava' ? 0.4 : 0.6 });
     }
     for (const obj of estado.objetos) {
       if (obj.tipo === 'loja' || obj.tipo === 'bau' || obj.tipo === 'saida') pontos.push({ x: obj.x, y: obj.y, cor: 0xffc070, semente: obj.x * 31 + obj.y });

@@ -5,6 +5,8 @@
 // modelos do atlas gerado no build, caminhada por fatias e o token por imagem. A silhueta geométrica por
 // arquétipo continua como substituto quando o modelo não existe ou o atlas não carrega.
 
+import type { Elemento } from '../combat/elementos';
+import { misturarCor } from './decoracao';
 import { Container, Graphics, Text } from 'pixi.js';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
@@ -106,6 +108,8 @@ export interface OpcoesEntidades {
   /** Atalho de qualidade (§4.10): false = um desenho só. */
   usarTiras: () => boolean;
   reduzido: () => boolean;
+  /** Marco 23 (D-092): a cor de cada elemento (o inimigo afim fica tingido dela). */
+  corElemento?: (e: Elemento) => number;
 }
 
 interface Marcador {
@@ -296,6 +300,9 @@ export class CamadaEntidades {
     if (!m.rig) m.rig = new RigToken(escolha.fonte);
     else if (m.rig.fonteAtual !== escolha.fonte) m.rig.trocarFonte(escolha.fonte);
     if (!m.rig.raiz.parent) m.raiz.addChildAt(m.rig.raiz, m.raiz.getChildIndex(m.silhueta));
+    // Marco 23 (D-092): o inimigo afim leva a cor do elemento (o extremo, mais forte).
+    const af = e.afinidade;
+    m.rig.raiz.tint = af && this.o.corElemento ? misturarCor(0xffffff, this.o.corElemento(af.elemento), af.extrema ? 0.6 : 0.42) : 0xffffff;
     const tamanho = escolha.proprio ? q.aparencia.tamanho : 1;
     const alturaPx = ALTURA_TOKEN * m.escala * tamanho;
     const ataqueMs = q.agoraMs - m.ataqueDesdeMs;

@@ -5,7 +5,9 @@ import type { Celula } from '../core/comandos';
 import { construirEfeito } from '../combat/registro-efeitos';
 import type { FaseJson } from './fase';
 import type { CatalogoGeracao, ParametrosGeracao } from './gerador';
-import { TIPOS_AMBIENTE } from './ambiente-tipos';
+import { TIPOS_AMBIENTE_CLASSICOS } from './ambiente-tipos';
+import { porPeso } from './temas';
+import { aleatorio } from '../core/rng';
 interface Sala { x: number; y: number; l: number; a: number }
 
 /** Corredor de três células em espiral, com parede entre voltas e pequenas câmaras ao longo dele. */
@@ -50,12 +52,16 @@ export function enriquecerFase(f: FaseJson, p: ParametrosGeracao, catalogo: Cata
   const santuario = primeira ? ponto(primeira) : null;
   if (santuario) objetos.push({ tipo: 'santuario', x: (santuario.x + 0.5) / l, y: (santuario.y + 0.5) / a });
   f.ambientes = [];
+  // Marco 23 (D-092): o tema escolhe os tipos, a frequência (uma a cada `aCada` salas) e o tamanho das áreas.
+  const tema = p.tema ? catalogo.temas.get(p.tema) : undefined;
+  const aCada = tema?.ambientes.aCada ?? 3;
   for (let i = 1; i < salas.length - 1; i++) {
     const s = salas[i]; if (!s) continue;
     // Uma área a cada três salas: preserva espaço de luta e rotas para contornar.
-    if (i % 3 === 1) {
+    if (i % aCada === 1 % aCada) {
       const c = ponto(s);
-      if (c) f.ambientes.push({ ...c, tipo: escolher(rng, TIPOS_AMBIENTE), raio: 1 });
+      if (c && tema) f.ambientes.push({ ...c, tipo: escolher(rng, tema.ambientes.tipos), raio: inteiro(rng, 1, Math.max(1, Math.min(tema.ambientes.raioMax, Math.floor(Math.min(s.l, s.a) / 3)))) });
+      else if (c) f.ambientes.push({ ...c, tipo: escolher(rng, TIPOS_AMBIENTE_CLASSICOS), raio: 1 });
     }
     if (i % 2 === 0) {
       const c = ponto(s);
@@ -69,6 +75,6 @@ export function enriquecerFase(f: FaseJson, p: ParametrosGeracao, catalogo: Cata
   // Reservas são dados inertes até o jogador se aproximar: limite real na simulação, sem sprites falsos.
   for (const s of salas.slice(1, -1)) for (let i = 0; i < b.enxamePorSala && inimigos.length < b.enxameReservaMax; i++) {
     const c = ponto(s);
-    if (c && catalogo.comuns.length > 0) inimigos.push({ ...c, preset: escolher(rng, catalogo.comuns), nivel: p.nivelInimigos });
+    if (c && catalogo.comuns.length > 0) inimigos.push({ ...c, preset: (tema ? porPeso(tema.inimigos, aleatorio(rng)) : null) ?? escolher(rng, catalogo.comuns), nivel: p.nivelInimigos });
   }
 }

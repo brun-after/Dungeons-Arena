@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.53 · **Data:** 24/10/2026
+**Versão:** 0.54 · **Data:** 24/10/2026
 
 > **Histórico**
+> - **0.54 (24/10/2026)**: D-092 (marco 23: dez slots, 20 temas de fase, clima elemental e inimigos afins) e D-093 (armas fora da classe trocam o ataque básico).
 > - **0.53 (24/10/2026)**: D-091 (IA livre do falcão, alcance global e coleta; encarnação do Mago com 12 s e trilha; flecha do tiro carregado).
 > - **0.52 (23/10/2026)**: D-090 (marco 22: Necromante no simulador, exército de até 10 mortos, retorno dos distantes e Dízimo que ergue).
 > - **0.51 (23/10/2026)**: D-089 (marco 22: falcão do Aventureiro, encarnação elemental do Mago e Mira firme do Arqueiro).
@@ -2319,3 +2320,99 @@ Agora deixa uma esteira dourada longa e fina, alinhada com o voo, com algumas fa
 
 Metas: 94/94 (balance 34).
 
+## D-092 — Dez slots, temas de fase, clima elemental e inimigos afins (24/10/2026)
+
+**Contexto.** O usuário pediu:
+- até 10 personagens por jogador;
+- fases com decoração própria (floresta, gelo, castelo...), em 20 temas;
+- elementos que pesem na fase a ponto de valer trocar a build;
+- inimigos muito resistentes ou afins a um elemento, com aparência que mostre isso, e que em alguns casos se curem com
+  o próprio elemento.
+
+**Decisão.**
+- **Slots:** `SLOTS` vai de 1 a 10 (`MAX_SLOTS`). A tela vira uma grade de duas colunas, e o slot vazio fica compacto,
+  com a dificuldade e a fase do jogo novo num `details`.
+  - Na nuvem, a migração `20261024120000_dez_slots.sql` troca o `check` do slot para 1–10. **Ela precisa ser aplicada
+    no Supabase de produção** antes de alguém enviar o slot 4 em diante.
+  - O schema do save sobe para 23 (migração identidade para os temas; D-093 usa o mesmo passo).
+- **Temas** (`data/temas.json`, lidos em `world/temas.ts` e conferidos com o conteúdo). Cada tema traz:
+  - paleta, luz e partículas do ar;
+  - enfeites com pesos e densidade, e o pilar das salas grandes;
+  - tipos e frequência das áreas de terreno;
+  - inimigos com pesos e a chance de afinidade.
+- **Os 20 temas:**
+  - 7 neutros: masmorra, castelo, catacumbas, ruínas, biblioteca, mina e esgotos;
+  - 13 elementais: vulcão, forja e deserto (fogo); caverna de gelo e tundra (gelo); pico da tempestade e laboratório
+    (raio); pântano e floresta fúngica (veneno); floresta antiga e cânion de cristal (terra); cripta profana (trevas);
+    templo celestial (sagrado).
+- **Escolha do tema:**
+  - cada fase gerada nova ganha um tema (`save/sequencia.ts`): elemental a cada 3 fases e neutro nas outras, sem
+    repetir o anterior;
+  - o sorteio usa PRNGs próprios (`id:tema`, `semente:tema`, `semente:pilares`), então **a fase sem tema sai igual à
+    de antes**;
+  - `fase-01` e `fase-02` usam masmorra e catacumbas;
+  - a arena fica como está.
+- **Mapa:**
+  - nas salas de ao menos 7 × 6, o gerador ergue pilares: paredes soltas com as 8 vizinhas livres, que nunca fecham
+    passagem;
+  - os enfeites são só aparência: um hash da célula decide onde ficam (nada no estado nem no save), e o desenho é
+    procedural e cozido no bloco do terreno;
+  - a face das paredes ganha blocos na cor do tema;
+  - tochas, velas e fendas de lava acendem a luz perto do jogador.
+- **Áreas novas:**
+  - gelo fino resfria;
+  - campo elétrico eletriza;
+  - lama atola;
+  - névoa sombria definha;
+  - luz sagrada cura e limpa o veneno.
+
+  Os temas elementais têm uma área do elemento por sala, de raio 1 a 2. As fases sem tema sorteiam só as três
+  clássicas, na ordem de antes.
+- **Clima** (`combat/clima.ts`, `balance.clima`). No tema elemental:
+  - as habilidades do elemento batem +25%, e o estado delas dura +50%;
+  - as do oposto batem −25%;
+  - a cada 6 s, o clima pesa nos personagens: queima, resfria, eletriza, envenena, atola ou definha. Quem tem 20% de
+    resistência ao elemento pelo equipamento fica de fora;
+  - o HUD mostra o chip do tema, e o log anuncia o clima ao entrar.
+- **Afinidade** (`combat/afinidade.ts`, `data/afinidades.json`, `balance.afinidade`). É um afixo por instância, sem
+  presets novos:
+  - o afim absorve o próprio elemento (resistência 150): o golpe rola igual, mas **cura** metade do dano, e o estado
+    do elemento não pega nele;
+  - é fraco ao oposto (−50);
+  - ganha uma habilidade do elemento e o nome dele ("Goblin de Gelo");
+  - vale +25% de XP;
+  - a variante extrema ("Primordial") tem 30% mais vida e vale +60% de XP. É imune a todo outro elemento e leva o
+    dobro do oposto, então só cai pelo oposto ou pelo golpe sem elemento. É 1 em 8 dos afins, e sempre o chefe de um
+    tema elemental.
+- **Aparência e leitura:**
+  - o afim fica tingido da cor do elemento e solta uma aura de partículas dela;
+  - o quadro do alvo diz "Absorve Gelo · Fraco a Fogo";
+  - a primeira absorção de cada elemento avisa qual é o oposto.
+- **Bots:** não lançam o elemento que o alvo absorve e começam pela fraqueza dele.
+
+**Simulador.** Os cenários das metas continuam neutros. Metas: 94/94 (balance 35). Medir builds certas e erradas numa
+fase elemental fica para depois, sem meta nova, até o usuário aprovar números.
+
+## D-093 — Armas fora da classe trocam o ataque básico (24/10/2026)
+
+**Contexto.** O usuário quer que a arma na mão mude o jeito de atacar mesmo quando não é a da classe: o Mago de espada
+golpeia corpo a corpo, o Guerreiro de cajado ataca de longe e o Mago de arco atira flechas.
+
+**Decisão** (`progression/armas.ts`, `data/armas.json`):
+- **Famílias:**
+  - toda arma principal é de uma família: lâmina (espada, machado, adaga, maça, lança), cajado ou arco;
+  - cada classe tem a sua família natural: lâmina para Aventureiro e Guerreiro, cajado para Mago e Necromante, arco
+    para o Arqueiro.
+- **Básico:**
+  - com uma arma de outra família, o ataque básico vira o da arma: Golpe (corpo a corpo), Dardo arcano (projétil
+    mágico) ou Tiro (flecha);
+  - sem arma, ou com a natural, fica o básico da classe;
+  - a troca é feita em `recalcularFicha`, ao equipar e ao desequipar;
+  - a migração 22 → 23 a aplica nos saves de antes.
+- **Custo:**
+  - o básico emprestado bate 15% menos (`balance.armas.danoForaDaClassePct`);
+  - o resto vem dos atributos e das afinidades da classe: o Guerreiro tem pouca Inteligência para o dardo, e o Mago
+    perde o bônus mágico na espada;
+  - as identidades seguem com a classe: a Mira firme só vale para o Arqueiro, e as habilidades do falcão não incluem
+    o básico.
+- **Interface:** ao trocar, o log e um aviso dizem qual é o ataque básico agora; a arma já aparece desenhada na mão.

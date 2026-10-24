@@ -1,6 +1,7 @@
 {
   "id": "fase-01",
   "nome": "Salões da entrada",
+  "tema": "masmorra",
   "ordem": 1,
   "tipo": "campanha",
   "mapa": [

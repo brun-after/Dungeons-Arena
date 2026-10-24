@@ -6,7 +6,23 @@ import { DONO_FASE, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { vivo } from '../entities/entidade';
-import { dentroDaArea } from './ambiente-tipos';
+import { dentroDaArea, type TipoAmbiente } from './ambiente-tipos';
+import type { EfeitoCanonico } from '../combat/registro-efeitos';
+import type { Balance } from '../core/contexto';
+
+/** O efeito de cada área (marco 23, D-092: as cinco novas). Números em balance.ambiente. */
+function efeitoDaArea(tipo: TipoAmbiente, b: Balance['ambiente']): EfeitoCanonico {
+  switch (tipo) {
+    case 'agua': return construirEfeito('molhado', { duracaoMs: b.duracaoMs });
+    case 'brasas': return construirEfeito('queimando', { duracaoMs: b.duracaoMs, valor: b.queimadura });
+    case 'miasma': return construirEfeito('envenenado', { duracaoMs: b.duracaoMs, valor: b.veneno });
+    case 'gelo_fino': return construirEfeito('resfriado', { duracaoMs: b.duracaoMs, pct: b.resfriadoPct });
+    case 'campo_eletrico': return construirEfeito('eletrizado', { duracaoMs: b.duracaoMs });
+    case 'lama': return construirEfeito('atolado', { duracaoMs: b.duracaoMs, pct: b.atoladoPct });
+    case 'nevoa_sombria': return construirEfeito('definhando', { duracaoMs: b.duracaoMs, pct: b.definhandoPct });
+    case 'luz_sagrada': return construirEfeito('cura', { valor: b.curaSagrada });
+  }
+}
 
 export function processarAmbientes(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[], inicio = 0): void {
   const areas = ctx.fase.ambientes;
@@ -28,9 +44,9 @@ export function processarAmbientes(estado: EstadoJogo, ctx: ContextoSimulacao, s
       const chave = `terreno:${e.id}:${i}`;
       if ((estado.recargas[chave] ?? 0) > estado.tick) continue;
       estado.recargas[chave] = estado.tick + intervalo;
-      const tipo = a.tipo === 'agua' ? 'molhado' : a.tipo === 'brasas' ? 'queimando' : 'envenenado';
-      aplicarEfeito(estado, ctx, e, construirEfeito(tipo, { duracaoMs: b.duracaoMs, valor: a.tipo === 'brasas' ? b.queimadura : b.veneno }),
-        { id: DONO_FASE, x: a.x, y: a.y }, null, saida);
+      // A luz sagrada também limpa o veneno de quem passa.
+      if (a.tipo === 'luz_sagrada') e.efeitos = e.efeitos.filter((f) => f.tipo !== 'envenenado');
+      aplicarEfeito(estado, ctx, e, efeitoDaArea(a.tipo, b), { id: DONO_FASE, x: a.x, y: a.y }, null, saida);
     }
   }
 }
