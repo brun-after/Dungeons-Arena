@@ -1,6 +1,7 @@
 import { aplicaAntifarmDeFase, xpDeCriatura } from './xp-antifarm';
 import { novaMemoria } from '../combat/estado-tatico';
 import { colherMorto } from '../combat/necromancia';
+import { multiplicadorFuria, temFuria } from '../combat/furia';
 // Mortes, XP, revivescência e respawn (§2.7 "Morte", §2.12) — etapa 8 do tick.
 // HP 0 é morte direta. Entidades de IA saem do mundo e voltam pelo respawn agendado, com o mesmo
 // id e a geração incrementada; jogadores reaparecem pelas regras do modo (§2.13).
@@ -112,6 +113,13 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
       if (quemAbateu.controlador === 'ia' && !e.invocacao && !ladoDoJogador(estado, quemAbateu) && vivo(quemAbateu) && podeFerir(quemAbateu, e, ctx.modo)) {
         const cura = Math.round((quemAbateu.hpMax - quemAbateu.hp) * ctx.balance.recursos.curaNpcAoAbaterPct / 100);
         quemAbateu.hp = Math.min(quemAbateu.hpMax, quemAbateu.hp + cura);
+        if (cura > 0) saida.push({ t: 'efeitoResultado', tick: estado.tick, alvoId: quemAbateu.id, origemId: quemAbateu.id, tipo: 'cura', dano: 0, cura, mana: 0 });
+      } else if (temFuria(quemAbateu) && !e.invocacao && vivo(quemAbateu) && podeFerir(quemAbateu, e, ctx.modo)) {
+        // Marco 21 (23/10/2026, D-088): o Guerreiro também se cura ao derrubar um hostil, como os inimigos (metade da
+        // vida que falta); com a fúria cheia, dobra. Invocações derrubadas não curam.
+        const pct = ctx.balance.ajustesClasses.guerreiro.curaAoAbaterPct * multiplicadorFuria(ctx, quemAbateu, estado.tick);
+        const cura = Math.min(quemAbateu.hpMax - quemAbateu.hp, Math.round((quemAbateu.hpMax - quemAbateu.hp) * pct / 100));
+        quemAbateu.hp += cura;
         if (cura > 0) saida.push({ t: 'efeitoResultado', tick: estado.tick, alvoId: quemAbateu.id, origemId: quemAbateu.id, tipo: 'cura', dano: 0, cura, mana: 0 });
       }
       const abate = abateDe(ctx, quemAbateu, e);

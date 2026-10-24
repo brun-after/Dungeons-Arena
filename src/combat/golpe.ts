@@ -3,6 +3,7 @@ import { entregaRemota, extraGuerreiro, multiplicadorDireto, protecaoInicial, pu
 import { comboDoImpacto, confirmarImpactoTatico } from './sequencias';
 import { defenderGolpe, fluxoRestaurador } from './tatica';
 import { comCombo } from './combos';
+import { acumularFuria, multiplicadorFuria } from './furia';
 import { ticksDe } from '../core/tempo';
 // Aplicação de um impacto num alvo (§2.7, passo 10): dano com HP mínimo 0, cura limitada ao
 // máximo, efeitos só quando acerta, e registro de participação para dividir XP.
@@ -170,8 +171,12 @@ export function aplicarImpacto(
   if (falha || imune) return;
   // D-078 (17/10/2026): só o básico recupera vida, sobre dano efetivo após defesa/escudo e sem excesso letal.
   const curaBasicoPct = conjurador?.bolsa ? (ctx.balance.recursos.curaBasicoPorClassePct[conjurador.bolsa.classeId] ?? 0) : 0;
-  if (conjurador && vivo(conjurador) && conjurador !== alvo && hab.id === conjurador.ataqueBasico && dano > 0 && curaBasicoPct > 0 && podeFerir(conjurador, alvo, ctx.modo)) {
-    aplicarEfeito(estado, ctx, conjurador, construirEfeito('cura', { valor: Math.min(hpAntes, dano) * curaBasicoPct / 100 }), origem, null, saida);
+  const basicoQueFere = !!conjurador && vivo(conjurador) && conjurador !== alvo && hab.id === conjurador.ataqueBasico && dano > 0 && podeFerir(conjurador, alvo, ctx.modo);
+  // Marco 21 (D-088): o básico que fere enche a fúria do Guerreiro (antes da cura, que já dobra no golpe que a enche).
+  if (conjurador && basicoQueFere) acumularFuria(ctx, conjurador, estado.tick);
+  if (conjurador && basicoQueFere && curaBasicoPct > 0) {
+    const valor = Math.min(hpAntes, dano) * curaBasicoPct / 100 * multiplicadorFuria(ctx, conjurador, estado.tick);
+    aplicarEfeito(estado, ctx, conjurador, construirEfeito('cura', { valor }), origem, null, saida);
   }
   if (conjurador) pulsarAura(estado, ctx, conjurador, alvo, Math.min(hpAntes, dano), saida, entregaRemota(hab));
   // Sinergias (marco 14): o estado consumido sai e os efeitos da sinergia entram, antes dos da habilidade.

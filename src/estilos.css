@@ -359,6 +359,35 @@ body.toque .faixa-controles {
   background: #5dade2;
 }
 
+/* Marco 21 (23/10/2026, D-088): fúria do Guerreiro; cheia, pulsa (as curas dobram). */
+.barra.furia {
+  height: 4px;
+}
+
+.barra.furia .preenchimento {
+  background: #c0392b;
+}
+
+.barra.furia[data-cheia='true'] .preenchimento {
+  background: #ff6b3d;
+  animation: furia-cheia 900ms ease-in-out infinite alternate;
+}
+
+@keyframes furia-cheia {
+  from {
+    filter: brightness(1);
+  }
+  to {
+    filter: brightness(1.6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barra.furia[data-cheia='true'] .preenchimento {
+    animation: none;
+  }
+}
+
 @media (max-width: 479px) {
   :root {
     --largura-barra-vida: 40px;
@@ -1035,6 +1064,36 @@ body.toque .botao-habilidade .tecla {
   font-variant-numeric: tabular-nums;
   pointer-events: none;
   white-space: nowrap;
+}
+
+/* Marco 21 (23/10/2026, D-088): versão do app e o aviso de atualização no menu. */
+.versao-app {
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: 0.8rem;
+}
+
+.aviso-atualizacao {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: min(420px, 100%);
+  padding: 10px 12px;
+  border: 1px solid var(--destaque);
+  border-radius: 8px;
+  background: var(--painel);
+  text-align: center;
+}
+
+.aviso-atualizacao p {
+  margin: 0;
+}
+
+.dica-atualizacao {
+  color: var(--texto-suave);
+  font-size: 0.85rem;
 }
 
 /* Diagnóstico e avisos */

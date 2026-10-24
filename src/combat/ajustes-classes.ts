@@ -8,6 +8,7 @@ import { podeFerir } from '../modos/relacao';
 import { absorverEscudo, imuneADano, multiplicadorCuraRecebida, multiplicadorDanoRecebido } from './efeitos';
 import { celulaOcupada, chebyshev } from './geometria';
 import type { Habilidade } from './habilidades';
+import { multiplicadorFuria } from './furia';
 import { registrarParticipacao } from './participacao';
 
 export const classeDe = (e: Entidade): string => e.bolsa?.classeId ?? e.classeId ?? '';
@@ -56,13 +57,25 @@ export function multiplicadorDireto(ctx: ContextoSimulacao, ator: Entidade, hab:
   return 1;
 }
 
+/** Marco 21 (23/10/2026, D-088): progresso linear do nível 1 (0) ao nível máximo (1), para as curvas da aura. */
+function progressoDoNivel(ctx: ContextoSimulacao, nivel: number): number {
+  return (Math.min(ctx.balance.xp.nivelMax, Math.max(1, nivel)) - 1) / (ctx.balance.xp.nivelMax - 1);
+}
+
+/** Dano da aura (% do dano efetivo do golpe) e cura (% do que a aura causou) no nível. */
+export function curvaDaAura(ctx: ContextoSimulacao, nivel: number): { danoPct: number; curaPct: number } {
+  const r = ctx.balance.ajustesClasses.guerreiro;
+  const p = progressoDoNivel(ctx, nivel);
+  return { danoPct: r.auraMinPct + (r.auraMaxPct - r.auraMinPct) * p, curaPct: r.auraCuraMinPct + (r.auraCuraMaxPct - r.auraCuraMinPct) * p };
+}
+
+// Marco 21 (23/10/2026, D-088): a aura vale com força desde o nível 1 (de 3% a 15% de dano e de 20% a 50% de cura), desconta
+// só metade da defesa e o pulso dos golpes à distância deixa de esperar o nível 16. Com a fúria cheia, a cura dobra.
 export function pulsarAura(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, alvo: Entidade, danoEfetivo: number, saida: EventoSimulacao[], remoto = false): void {
   if (danoEfetivo <= 0 || !vivo(ator) || !extraElegivel(ator, alvo, ctx)) return;
   const r = ctx.balance.ajustesClasses.guerreiro;
-  const pct = r.auraMinPct + (r.auraMaxPct - r.auraMinPct) * (Math.min(ctx.balance.xp.nivelMax, ator.nivel) - 1) / (ctx.balance.xp.nivelMax - 1);
-  // Um impacto remoto gera somente o pulso no atingido, escalado; antes do 16 não o gera.
-  const reforco = remoto ? progressoReforcosGuerreiro(ctx, ator.nivel) : 1;
-  if (reforco <= 0) return;
+  const { danoPct: pct, curaPct } = curvaDaAura(ctx, ator.nivel);
+  // Um impacto remoto gera somente o pulso centrado no atingido.
   const centro = celulaOcupada(remoto ? alvo : ator);
   let soma = 0;
   // Frações pertencem à vida atual do destinatário (não atravessam respawns).
@@ -71,7 +84,7 @@ export function pulsarAura(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Ent
   for (const e of estado.entidades) {
     if (!vivo(e) || !podeFerir(ator, e, ctx.modo) || chebyshev(centro, celulaOcupada(e)) > r.auraRaio || imuneADano(e, estado.tick)) continue;
     const id = `${e.id}/${e.geracao}`;
-    const bruto = Math.max(0, danoEfetivo * pct / 100 * reforco - e.defesa) * multiplicadorDanoRecebido(e, estado.tick) * protecaoInicial(estado, ctx, e, ator);
+    const bruto = Math.max(0, danoEfetivo * pct / 100 - e.defesa * r.auraDefesaPct / 100) * multiplicadorDanoRecebido(e, estado.tick) * protecaoInicial(estado, ctx, e, ator);
     const total = bruto + (fracoes[id] ?? 0);
     const inteiro = Math.floor(total + 1e-9);
     fracoes[id] = Math.max(0, total - inteiro);
@@ -85,7 +98,7 @@ export function pulsarAura(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Ent
       saida.push({ t: 'efeitoResultado', tick: estado.tick, alvoId: e.id, origemId: ator.id, tipo: 'dano_direto', dano, cura: 0, mana: 0 });
     }
   }
-  const curaTotal = (ator.auraCuraFracao ?? 0) + soma * r.auraCuraPct / 100 * multiplicadorCuraRecebida(ator, estado.tick);
+  const curaTotal = (ator.auraCuraFracao ?? 0) + soma * curaPct / 100 * multiplicadorCuraRecebida(ator, estado.tick) * multiplicadorFuria(ctx, ator, estado.tick);
   const curaInteira = Math.floor(curaTotal + 1e-9);
   ator.auraCuraFracao = Math.max(0, curaTotal - curaInteira);
   const cura = Math.min(ator.hpMax - ator.hp, curaInteira);

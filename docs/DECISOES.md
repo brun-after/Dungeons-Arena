@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.49 · **Data:** 22/10/2026
+**Versão:** 0.50 · **Data:** 23/10/2026
 
 > **Histórico**
+> - **0.50 (23/10/2026)**: D-088 (marco 21: Guerreiro mais forte com fúria, chave fixa do APK e aviso de atualização no app).
 > - **0.49 (22/10/2026)**: D-087 (marco 20: app Android pelo Capacitor, APK no CI, login por deep link e modo de desempenho).
 > - **0.47 (18/10/2026)**: D-085 (piso absoluto de 1 XP por abate no novo antifarm, preservando a penalidade por morte).
 > - **0.46 (18/10/2026)**: D-084 (XP com fadiga permanente independente, piso de 5%, reforços do Guerreiro entre 16–20 e somente Botas do vento).
@@ -2160,3 +2161,40 @@ PWA, para ganhar desempenho.
 
 **Pendente:** medir num Android real com o medidor e registrar em `BENCHMARKS.md`; com os números, atacar os
 gargalos que aparecerem.
+
+## D-088 — Guerreiro com fúria e atualização do app Android (marco 21, 23/10/2026)
+
+**Contexto.** O usuário achou o Guerreiro muito fraco. Também perguntou se atualizar o código atualiza o app
+instalado: não atualiza. Pior, cada APK do CI saía assinado com uma chave de depuração nova, e o Android recusava
+instalar por cima, obrigando a desinstalar e perder os saves locais.
+
+**Decisão: Guerreiro.**
+- **Cura ao abater:** ao derrubar um hostil, recupera metade da vida que falta, como os inimigos (D-071). Vale contra
+  jogadores na arena. Derrubar invocações não cura, a mesma regra do PR #54.
+- **Aura desde o nível 1:** o dano passa a ir de 3% a 15% do dano efetivo do golpe, e a cura de 20% a 50% do que a
+  aura causou, ambos lineares do nível 1 ao 30. Antes eram de 1% a 5% e 20% fixos. A aura desconta metade da defesa
+  do alvo, porque com a defesa inteira o pulso zerava nos níveis baixos. O pulso dos golpes à distância (projétil e
+  área quadrada) vale com potência total desde o nível 1; a escada do 16 ao 20 fica só no movimento.
+- **Fúria:** barra de 0 a 100. Cada ataque básico que fere soma 12, então nove golpes enchem a barra. Cheia, dobra as
+  curas do próprio Guerreiro: aura, básico e abate. Depois de 3 s sem um básico que fira, perde 20 por segundo. O
+  esvaziamento é calculado na leitura, a partir do valor e do tick guardados, sem um sistema rodando por tick. A barra
+  vai no estado público (o HUD a mostra na arena e no grupo) e zera na troca de fase. Números em
+  `balance.ajustesClasses.guerreiro` (balance 31).
+- **Meta do simulador:** com os reforços, o Guerreiro derruba um inimigo comum do mesmo nível em 3,8 s nos níveis 5 e
+  10 (na main já estava no piso, 4,0 s). O usuário escolheu manter os reforços e baixar o piso da meta `comum` de 4 s
+  para 3,5 s; nenhuma outra classe fica abaixo de 4,1 s.
+
+**Decisão: atualização do app.**
+- **Chave fixa:** o dono do projeto cria uma vez um PKCS12 de 30 anos com `tools/android/criar-chave.sh` (só openssl
+  e gh, sem Java). O arquivo fica fora do repositório. A chave e a senha vão para os secrets `ANDROID_CHAVE_B64` e
+  `ANDROID_CHAVE_SENHA`, digitadas pelo dono e nunca vistas pelo assistente. O CI assina o `assembleRelease` com ela.
+  `versionCode` é o número da execução do workflow, sempre crescente. Assim o APK novo instala por cima e mantém os
+  saves. Sem os secrets, o CI cai no APK de depuração e avisa.
+- **Release e aviso:** cada push na main que mexe no cliente publica a Release `android-vN` com
+  `dungeons-arena.apk`, marcada como a mais recente. No menu, o app pergunta uma vez por sessão à API pública do
+  GitHub (sem conta e sem dado do jogador), aceita só APK hospedado no próprio repositório e, se houver versão maior,
+  mostra "Nova versão disponível" com o botão de download. O Android não deixa um app de fora da loja se atualizar
+  sozinho: a pessoa toca em instalar. A Play Store fica como opção futura.
+- **Transição:** o APK de depuração já instalado não aceita o primeiro APK com a chave fixa. É preciso desinstalá-lo
+  uma vez; antes, convém enviar o slot para a nuvem.
+

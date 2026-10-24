@@ -35,6 +35,8 @@ export class Hud {
   private readonly morte: HTMLElement;
   private readonly vida = barra('vida');
   private readonly mana = barra('mana');
+  /** Marco 21 (D-088): a fúria do Guerreiro; escondida nas outras classes. */
+  private readonly furia = barra('furia');
   private readonly numeros = document.createElement('span');
   private readonly rede = document.createElement('span');
   /** Marco 8A: ícones dos efeitos ativos, na cor do registro; marco 14: com duração e cartão. */
@@ -59,7 +61,9 @@ export class Hud {
     this.rede.setAttribute('role', 'status');
     const barras = document.createElement('div');
     barras.className = 'barras';
-    barras.append(this.vida.raiz, this.mana.raiz);
+    this.furia.raiz.hidden = true;
+    this.furia.raiz.setAttribute('aria-valuemax', '100');
+    barras.append(this.vida.raiz, this.mana.raiz, this.furia.raiz);
     this.efeitos.className = 'chips-efeito';
     this.efeitos.setAttribute('aria-label', t('hud.efeitos'));
     this.status.append(barras, this.numeros, this.efeitos, this.pendentes.elemento, this.rede);
@@ -99,11 +103,13 @@ export class Hud {
   }
 
 
-  atualizar(jogador: Entidade | undefined, tick = 0): void {
+  /** `furia`: fração da barra de fúria (0..1), ou null para quem não tem (marco 21). */
+  atualizar(jogador: Entidade | undefined, tick = 0, furia: number | null = null): void {
     if (!jogador) return;
     this.chips.atualizar(jogador, tick);
     this.pendentes.atualizar(jogador, tick);
-    const chave = `${jogador.hp}/${jogador.hpMax}/${jogador.mana}/${jogador.manaMax}/${jogador.morto}`;
+    const pctFuria = furia === null ? -1 : Math.round(furia * 100);
+    const chave = `${jogador.hp}/${jogador.hpMax}/${jogador.mana}/${jogador.manaMax}/${jogador.morto}/${pctFuria}`;
     if (chave === this.ultimo) return;
     this.ultimo = chave;
     const fracaoVida = jogador.hp / Math.max(1, jogador.hpMax);
@@ -116,6 +122,13 @@ export class Hud {
     this.mana.raiz.setAttribute('aria-valuemax', String(jogador.manaMax));
     this.mana.raiz.setAttribute('aria-valuenow', String(jogador.mana));
     this.mana.raiz.setAttribute('aria-label', t('hud.mana', { atual: jogador.mana, maximo: jogador.manaMax }));
+    this.furia.raiz.hidden = pctFuria < 0;
+    if (pctFuria >= 0) {
+      this.furia.preenchimento.style.width = `${pctFuria}%`;
+      this.furia.raiz.dataset.cheia = String(pctFuria >= 100);
+      this.furia.raiz.setAttribute('aria-valuenow', String(pctFuria));
+      this.furia.raiz.setAttribute('aria-label', t(pctFuria >= 100 ? 'hud.furiaCheia' : 'hud.furia', { pct: pctFuria }));
+    }
     this.numeros.textContent = `${jogador.hp}/${jogador.hpMax}`;
     this.morte.hidden = !jogador.morto;
   }
