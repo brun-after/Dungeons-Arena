@@ -1,0 +1,941 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Grimório das Classes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: o mesmo grimório de consulta do marco 18. Abre com as regras novas, segue para a ficha de cada classe
+   (skills, o par que forma a ultimate e os combos da classe) e termina nas skills gerais, combos e ressonâncias. */
+:root {
+  --bg: #f3f2f7; --panel: #ffffff; --ink: #1d1a26; --muted: #5d5870; --line: #d9d5e4; --gold: #9a6b0c;
+  --novo: #6b3fd6; --novo-bg: #efe9fd; --sel: #fff6df;
+  --c-guerreiro: #b8452a; --c-mago: #5b45d6; --c-arqueiro: #8a6a00; --c-necromante: #6e4bb8; --c-aventureiro: #2f6f9f; --c-geral: #3f7a5a;
+  --f-display: "Alegreya SC", "Palatino Linotype", Georgia, serif;
+  --f-body: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14121a; --panel: #1d1a26; --ink: #ebe7f3; --muted: #a29cb5; --line: #332e42; --gold: #e0b84f;
+    --novo: #b69cff; --novo-bg: #2a2240; --sel: #2e2716;
+    --c-guerreiro: #ff8a6a; --c-mago: #a99bff; --c-arqueiro: #e8c547; --c-necromante: #c2a4ff; --c-aventureiro: #7fc3f0; --c-geral: #7fd0a2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14121a; --panel: #1d1a26; --ink: #ebe7f3; --muted: #a29cb5; --line: #332e42; --gold: #e0b84f;
+  --novo: #b69cff; --novo-bg: #2a2240; --sel: #2e2716;
+  --c-guerreiro: #ff8a6a; --c-mago: #a99bff; --c-arqueiro: #e8c547; --c-necromante: #c2a4ff; --c-aventureiro: #7fc3f0; --c-geral: #7fd0a2;
+  color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.55; }
+.pagina { max-width: 1180px; margin: 0 auto; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 44px; }
+h1, h2, h3, h4 { font-family: var(--f-display); font-weight: 700; text-wrap: balance; margin: 0; letter-spacing: 0.01em; }
+h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); color: var(--gold); }
+h2 { font-size: 1.55rem; }
+h3 { font-size: 1.15rem; }
+h4 { font-size: 1rem; }
+p { margin: 0; max-width: 70ch; }
+code { font-family: var(--f-mono); font-size: 0.85em; }
+.rotulo { font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+header.topo { display: grid; gap: 10px; }
+header.topo p { color: var(--muted); }
+section { display: grid; gap: 16px; min-width: 0; }
+.contagens { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.contagem { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; gap: 2px; }
+.contagem b { font-family: var(--f-mono); font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+.contagem b small { color: var(--novo); font-size: 0.9rem; font-weight: 500; }
+.contagem span { color: var(--muted); font-size: 0.85rem; line-height: 1.3; }
+.regras { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.regra { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; }
+.regra p { font-size: 0.93rem; }
+.etiqueta { font-family: var(--f-mono); font-size: 0.66rem; padding: 2px 7px; border-radius: 4px; background: var(--bg); color: var(--muted); letter-spacing: 0.04em; white-space: nowrap; }
+.etiqueta.novo { background: var(--novo-bg); color: var(--novo); }
+.etiqueta.ini { background: var(--sel); color: var(--gold); }
+
+.abas { display: flex; flex-wrap: wrap; gap: 6px; }
+.aba { font: 600 0.95rem var(--f-body); border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 7px 16px; border-radius: 999px; cursor: pointer; }
+.aba[aria-selected="true"] { background: var(--cl); border-color: var(--cl); color: var(--bg); }
+button:focus-visible, select:focus-visible, input:focus-visible, .celula:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.ficha { display: grid; gap: 18px; border-top: 4px solid var(--cl); background: var(--panel); border-radius: 0 0 12px 12px; padding: 18px; }
+.ficha-topo { display: grid; gap: 6px; }
+.ficha-topo h3 { color: var(--cl); font-size: 1.4rem; }
+.skills { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+.skill { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 5px; align-content: start; background: var(--bg); cursor: pointer; text-align: left; font: inherit; color: inherit; }
+.skill.acesa { border-color: var(--cl); box-shadow: 0 0 0 1px var(--cl) inset; }
+.skill .linha { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.skill b { font-size: 1rem; }
+.skill p { font-size: 0.88rem; }
+.visual { font-size: 0.82rem; color: var(--muted); display: grid; grid-template-columns: 12px minmax(0, 1fr); gap: 7px; align-items: start; }
+.visual i { width: 12px; height: 12px; border-radius: 50%; margin-top: 4px; border: 1px solid var(--line); }
+.visual em { font-style: normal; font-weight: 700; color: var(--ink); }
+
+.montador { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 380px); gap: 16px; align-items: start; }
+@media (max-width: 900px) { .montador { grid-template-columns: minmax(0, 1fr); } }
+.seletores { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+.seletores label { display: grid; gap: 3px; font-size: 0.8rem; color: var(--muted); }
+select, input[type="search"] { font: 500 0.95rem var(--f-body); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); max-width: 100%; }
+.matriz-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+table.matriz { border-collapse: collapse; font-size: 0.74rem; min-width: 640px; }
+.matriz th { font-family: var(--f-mono); font-weight: 500; font-size: 0.66rem; color: var(--muted); padding: 6px; text-align: left; vertical-align: bottom; }
+.matriz th.lin { white-space: nowrap; text-align: right; }
+.matriz td { border: 1px solid var(--line); padding: 0; width: 12.5%; }
+.celula { display: block; width: 100%; min-height: 44px; border: 0; background: transparent; color: var(--ink); font: 500 0.74rem/1.2 var(--f-body); padding: 5px; cursor: pointer; text-align: left; }
+.celula:hover { background: var(--bg); }
+.celula.acesa { background: var(--novo-bg); }
+.celula.escolhida { background: var(--sel); box-shadow: 0 0 0 2px var(--gold) inset; font-weight: 700; }
+.matriz td.vazio { background: var(--bg); }
+.ultimate { border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 10px; background: var(--bg); position: sticky; top: calc(12px + env(safe-area-inset-top, 0px)); min-width: 0; }
+.ultimate h4 { font-size: 1.3rem; color: var(--gold); }
+.par { font-family: var(--f-mono); font-size: 0.78rem; color: var(--muted); }
+.faixa { height: 6px; border-radius: 3px; }
+.tabela { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+table.lista { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+.lista th, .lista td { text-align: left; padding: 8px 11px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.lista th { font-family: var(--f-mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.lista tr:last-child td { border-bottom: 0; }
+.lista td.nome { font-weight: 700; white-space: nowrap; }
+.lista tr.acesa td { background: var(--novo-bg); }
+.seq { font-family: var(--f-mono); font-size: 0.78rem; }
+.filtros { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip { font: 500 0.8rem var(--f-body); border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 4px 11px; border-radius: 999px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.familias { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.familia { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; align-content: start; }
+.familia ul, .ress ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.familia li { display: grid; gap: 2px; }
+.ress { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.ress-card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; gap: 4px; align-content: start; }
+.ress-card.nova { border-style: dashed; border-color: var(--novo); }
+.ress-card .exige { font-family: var(--f-mono); font-size: 0.74rem; color: var(--muted); }
+.ress-card p { font-size: 0.9rem; }
+.aviso { border-left: 3px solid var(--gold); padding: 8px 12px; background: var(--panel); border-radius: 0 8px 8px 0; font-size: 0.93rem; max-width: 86ch; }
+.linha { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.passiva { display: grid; gap: 10px; border: 1px solid var(--line); border-radius: 10px; padding: 14px; background: var(--bg); }
+.passiva-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.passiva-col { display: grid; gap: 8px; align-content: start; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; min-width: 0; }
+.passiva-col.nova { border-style: dashed; border-color: var(--novo); }
+.passiva-col ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 0.9rem; }
+.passiva-col .visual i { background: var(--cl); }
+/* v1.1 (24/10/2026): estilos de sintonia, passivas gerais, contagem de combos e marca de versão. */
+.etiqueta.v11 { background: var(--sel); color: var(--gold); }
+.celula.v11 { box-shadow: inset 3px 0 0 var(--gold); }
+.furia { font-size: 0.84rem; border-left: 2px solid var(--cl); padding-left: 8px; }
+.furia em { font-style: normal; font-weight: 700; color: var(--cl); }
+.sintonia { display: grid; gap: 12px; border: 1px solid var(--line); border-radius: 10px; padding: 14px; background: var(--bg); }
+.sint-sel { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; }
+.sint-sel label { display: grid; gap: 3px; font-size: 0.8rem; color: var(--muted); }
+.sint-sel select { width: 100%; }
+.lista tr.ligada td { background: var(--novo-bg); }
+.lista tr.dominio td { background: var(--sel); }
+.vertentes { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+.vertente { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--panel); display: grid; gap: 4px; align-content: start; }
+.vertente.ligada { border-color: var(--cl); box-shadow: 0 0 0 1px var(--cl) inset; }
+.vertente p { font-size: 0.88rem; }
+.estado { font-size: 0.88rem; color: var(--muted); }
+.familia h4 { font-size: 0.82rem; color: var(--muted); font-family: var(--f-body); font-weight: 700; }
+.familia .sub { font-size: 0.86rem; }
+.familia .uso { font-size: 0.8rem; color: var(--muted); }
+.sem-combo { font-size: 0.9rem; }
+.vazio-msg { color: var(--muted); font-size: 0.9rem; padding: 12px; }
+@media (prefers-reduced-motion: no-preference) { .celula, .skill { transition: background-color 120ms ease, box-shadow 120ms ease; } }
+</style>
+
+<div class="pagina">
+  <header class="topo">
+    <span class="rotulo">Dungeons Arena · marco 24 · versão 1.2 · proposta para revisão · 24/10/2026</span>
+    <h1>Grimório das Classes</h1>
+    <!-- v1.1 (24/10/2026): versão adicionada no topo; as mudanças desta versão levam a etiqueta “v1.1” na página. -->
+    <p>Como ficam as skills de classe, as ultimates, os combos e as ressonâncias. O que mudou na versão 1.1 leva a etiqueta v1.1, e o que mudou na 1.2 (o Guerreiro, as encarnações duplas e o ataque pelas costas), a etiqueta v1.2. Cada item novo traz uma sugestão de efeito visual. Os que já existem mostram o visual de hoje, lido do jogo. Nada disto está no código ainda: os ajustes que você pedir entram aqui primeiro.</p>
+  </header>
+
+  <section aria-labelledby="t-numeros">
+    <h2 id="t-numeros">O tamanho do sistema</h2>
+    <div class="contagens" id="contagens"></div>
+  </section>
+
+  <section aria-labelledby="t-regras">
+    <h2 id="t-regras">As regras novas</h2>
+    <div class="regras">
+      <div class="regra"><span class="rotulo">barra</span><h3>Teclas 1–2, 3–6 e a ultimate</h3><p>As teclas 1 e 2 aceitam só skills de classe. As teclas 3 a 6 aceitam só gerais. O botão grande é a ultimate, que depende do par nas teclas 1 e 2. São 7 skills ao todo. No teclado, R faz a ultimate; os consumíveis ficam nas teclas 7 a 0.</p></div>
+      <div class="regra"><span class="rotulo">aprender</span><h3>Livros</h3><p>Cada classe começa com 2 skills de classe e 1 geral. As outras 6 de classe vêm de <b>livros exclusivos</b>, que só a classe lê e que ensinam na hora. As gerais precisam <b>achar o livro e gastar ponto</b>, e depois passam pelo estudo de sempre.</p></div>
+      <div class="regra"><span class="rotulo">passivas</span><h3>Passiva de classe e passivas gerais</h3><p>Cada classe tem uma passiva inata, sempre ativa, que também enche a ultimate do seu jeito. Afinidade elemental e Olho de águia viram skills ativas de classe. <!-- v1.1 (24/10/2026): regra de passivas gerais --> Cada família tem 2 passivas gerais, uma defensiva e uma ofensiva. Você mantém <b>até 3 ativas</b>, além da passiva da classe, e troca à vontade fora de combate no painel de passivas. Elas são aprendidas por livro e ponto e não ocupam tecla.</p></div>
+      <!-- v1.1 (24/10/2026): regra nova de sintonia -->
+      <div class="regra"><span class="rotulo">sintonia</span><h3>As gerais mudam a passiva</h3><p>A família de cada geral nas teclas 3 a 6 liga uma sintonia na passiva da classe. Duas da mesma família fazem Domínio e marcam a ultimate, e certos pares 2 + 2 ligam vertentes. Detalhes na ficha de cada classe e na seção Sintonia.</p></div>
+      <!-- v1.2 (24/10/2026): regra de ataque pelas costas -->
+      <div class="regra"><span class="rotulo">costas</span><h3>Ataque pelas costas</h3><p>Cada personagem e inimigo olha para onde andou por último ou para quem está atacando. Um golpe é pelas costas quando sai do lado oposto a esse olhar. Em grupo, enquanto um segura o inimigo, os outros flanqueiam. <span class="etiqueta v11">v1.2</span></p></div>
+      <div class="regra"><span class="rotulo">evolução</span><h3>Rank pelo nível</h3><p>As skills de classe sobem de rank sozinhas com o nível do personagem (ranks nos níveis 1, 3, 6, 10 e 15). Nos ranks 3 e 5 você escolhe o caminho. As gerais continuam subindo por ponto ou essência.</p></div>
+      <div class="regra"><span class="rotulo">ultimate</span><h3>Medidor de carga</h3><p>O medidor enche com dano, cura, combos e abates, e a meta é encher a cada 45 a 70 s de luta. Cheio, o botão brilha. Usar zera o medidor.</p></div>
+      <div class="regra"><span class="rotulo">celular</span><h3>Alvo e Parar ataque</h3><p>Os botões 1 e 2, de classe, ficam à esquerda da roda. O toque no botão de alvo troca o alvo e liga o ataque básico. Acima dele, <b>Parar ataque</b> desliga o automático, para deixar o abate para um aliado. No teclado, a tecla F liga e desliga.</p></div>
+      <div class="regra"><span class="rotulo">grupo</span><h3>XP compartilhado</h3><p>Quem faz o abate leva 100% do XP. Cada aliado vivo a até 12 células, ou que lutou nos últimos 10 s, leva 75%. Jogando sozinho, nada muda.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="t-classes">
+    <h2 id="t-classes">As classes</h2>
+    <div class="abas" role="tablist" aria-label="Classe" id="abas"></div>
+    <div class="ficha" id="ficha" role="tabpanel"></div>
+  </section>
+
+  <section aria-labelledby="t-gerais">
+    <h2 id="t-gerais">Skills gerais (teclas 3–6)</h2>
+    <!-- v1.1 (24/10/2026): famílias com 4 ativas e 2 passivas cada -->
+    <p>Qualquer classe aprende, achando o livro e gastando ponto. Cada família tem 4 skills de tecla, com papéis diferentes, e 2 passivas (até 3 ativas ao mesmo tempo). As que já existiam mostram o visual de hoje; as novas, uma sugestão.</p>
+    <div class="familias" id="gerais"></div>
+    <h3>Fusões</h3>
+    <div class="tabela"><table class="lista"><thead><tr><th>Fusão</th><th>Partes</th><th>Quem faz</th></tr></thead><tbody id="fusoes"></tbody></table></div>
+  </section>
+
+  <!-- v1.1 (24/10/2026): seção nova de sintonia -->
+  <section aria-labelledby="t-sint">
+    <h2 id="t-sint">Sintonia</h2>
+    <p>A composição das 4 gerais de tecla muda a passiva de cada classe. O efeito de cada família por classe e as vertentes estão na ficha da classe; abaixo, as regras e a marca que cada família deixa na ultimate quando faz Domínio.</p>
+    <div class="regras" id="sint-regras"></div>
+    <div class="tabela"><table class="lista"><thead><tr><th>Família em Domínio</th><th>Marca em qualquer ultimate</th></tr></thead><tbody id="sint-dominio"></tbody></table></div>
+  </section>
+
+  <section aria-labelledby="t-combos">
+    <h2 id="t-combos">Combos</h2>
+    <p>O visual de hoje usa duas formas e um movimento, e cada combo tem uma combinação única. A sugestão para os combos novos segue a mesma regra, com formas ligadas à classe.</p>
+    <!-- v1.1 (24/10/2026): contagem de combos por tipo -->
+    <div class="tabela"><table class="lista"><thead><tr><th>Quem</th><th>Classe + classe</th><th>Classe + geral</th><th>Geral + geral</th><th>Sinergias passivas</th></tr></thead><tbody id="combo-contagem"></tbody></table></div>
+    <p class="sem-combo" id="sem-combo"></p>
+    <div class="filtros">
+      <div class="filtros" id="filtro-classe" role="group" aria-label="Filtrar por classe"></div>
+      <button type="button" class="chip" id="so-novos" aria-pressed="false">Só os novos</button>
+      <button type="button" class="chip" id="so-v11" aria-pressed="false">Só v1.1</button>
+      <input type="search" id="busca" placeholder="Buscar combo ou skill" aria-label="Buscar combo ou skill">
+    </div>
+    <div class="tabela"><table class="lista"><thead><tr><th>Combo</th><th>Sequência</th><th>Efeito</th><th>Visual</th></tr></thead><tbody id="combos"></tbody></table></div>
+  </section>
+
+  <section aria-labelledby="t-ress">
+    <h2 id="t-ress">Ressonâncias</h2>
+    <p>Atributos altos ligam efeitos extras. As 12 novas são as de borda tracejada: completam os pares de atributos que faltavam e trazem 6 trios, quase todos ligados à ultimate.</p>
+    <div class="ress" id="ress"></div>
+  </section>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var D = {"skills":{"ataque_basico":{"id":"ataque_basico","nome":"Golpe","familia":"tecnica","elemento":null,"visual":{"cor":null,"texto":"no impacto, riscos de lâmina."},"nova":false},"seta_arcana":{"id":"seta_arcana","nome":"Seta arcana","familia":"arcana","elemento":null,"visual":{"cor":"#9b8cff","texto":"ao conjurar, runas girando; no voo, trilha de brilho; no impacto, runas girando."},"nova":false},"explosao":{"id":"explosao","nome":"Explosão","familia":"arcana","elemento":null,"visual":{"cor":"#ff8c42","texto":"ao conjurar, línguas de fogo subindo; no impacto, estouro de fagulhas e fumaça; tremor forte."},"nova":false},"curar":{"id":"curar","nome":"Curar","familia":"suporte","elemento":null,"visual":{"cor":"#2ecc71","texto":"ao conjurar, luz dourada subindo; no impacto, luz dourada subindo."},"nova":false},"golpe_atordoante":{"id":"golpe_atordoante","nome":"Golpe atordoante","familia":"tecnica","elemento":null,"visual":{"cor":"#f1c40f","texto":"no impacto, estrelinhas girando para cima; tremor leve."},"nova":false},"golpe":{"id":"golpe","nome":"Golpe","familia":"tecnica","elemento":null,"visual":{"cor":null,"texto":"no impacto, riscos de lâmina."},"nova":false},"raio":{"id":"raio","nome":"Raio","familia":"arcana","elemento":null,"visual":{"cor":"#5dade2","texto":"ao conjurar, centelhas de luz; no impacto, faíscas em zigue-zague."},"nova":false},"flecha":{"id":"flecha","nome":"Flecha","familia":"tecnica","elemento":null,"visual":{"cor":"#d5c4a1","texto":"no voo, fagulhas atrás da flecha; no impacto, lascas espalhadas."},"nova":false},"marca_de_area":{"id":"marca_de_area","nome":"Marca sombria","familia":"arcana","elemento":null,"visual":{"cor":"#c0392b","texto":"ao conjurar, línguas de fogo subindo; no impacto, estouro de fagulhas e fumaça; tremor leve."},"nova":false},"golpe_demoniaco":{"id":"golpe_demoniaco","nome":"Golpe demoníaco","familia":"tecnica","elemento":null,"visual":{"cor":"#8e44ad","texto":"no impacto, fumaça roxa; tremor leve."},"nova":false},"teia":{"id":"teia","nome":"Teia","familia":"arcana","elemento":null,"visual":{"cor":"#bdc3c7","texto":"no voo, fagulhas atrás da flecha; projétil desenhado (teia); no impacto, fumaça."},"nova":false},"golpe_viscoso":{"id":"golpe_viscoso","nome":"Golpe viscoso","familia":"tecnica","elemento":null,"visual":{"cor":"#27ae60","texto":"no impacto, bolhas que estouram."},"nova":false},"golpe_pesado":{"id":"golpe_pesado","nome":"Golpe pesado","familia":"tecnica","elemento":null,"visual":{"cor":null,"texto":"no impacto, lascas de pedra; tremor forte."},"nova":false},"raio_vampirico":{"id":"raio_vampirico","nome":"Raio vampírico","familia":"arcana","elemento":null,"visual":{"cor":"#c0392b","texto":"ao conjurar, fumaça roxa; no impacto, gotas vermelhas."},"nova":false},"invocar_lacaios":{"id":"invocar_lacaios","nome":"Chamar lacaios","familia":"suporte","elemento":null,"visual":{"cor":"#1abc9c","texto":"ao conjurar, anel de luz que se abre."},"nova":false},"armar_teia":{"id":"armar_teia","nome":"Armar teia","familia":"suporte","elemento":null,"visual":{"cor":"#bdc3c7","texto":"ao conjurar, fumaça."},"nova":false},"dardo_arcano":{"id":"dardo_arcano","nome":"Dardo arcano","familia":"arcana","elemento":null,"visual":{"cor":"#9b8cff","texto":"no voo, trilha de brilho; no impacto, runas girando."},"nova":false},"tiro":{"id":"tiro","nome":"Tiro","familia":"tecnica","elemento":null,"visual":{"cor":"#d4ac0d","texto":"no voo, fagulhas atrás da flecha; no impacto, lascas espalhadas."},"nova":false},"investida":{"id":"investida","nome":"Investida","familia":"tecnica","elemento":null,"visual":{"cor":"#e67e22","texto":"no impacto, lascas de pedra; tremor leve."},"nova":false},"redemoinho":{"id":"redemoinho","nome":"Redemoinho","familia":"tecnica","elemento":null,"visual":{"cor":"#c0392b","texto":"no impacto, espiral de ar; tremor leve."},"nova":false,"texto":"Gira e acerta tudo em volta."},"grito_de_guerra":{"id":"grito_de_guerra","nome":"Grito de guerra","familia":"suporte","elemento":null,"visual":{"cor":"#f39c12","texto":"ao conjurar, anel de luz que se abre; no impacto, estrelinhas girando para cima."},"nova":false,"texto":"Aliados próximos batem mais."},"escudo_de_ferro":{"id":"escudo_de_ferro","nome":"Escudo de ferro","familia":"suporte","elemento":null,"visual":{"cor":"#95a5a6","texto":"no impacto, anel de luz que se abre."},"nova":false,"texto":"Escudo próprio."},"corrente":{"id":"corrente","nome":"Corrente","familia":"tecnica","elemento":null,"visual":{"cor":"#7f8c8d","texto":"no impacto, riscos de lâmina."},"nova":false,"texto":"Puxa o alvo até você."},"golpe_flamejante":{"id":"golpe_flamejante","nome":"Golpe flamejante","familia":"fogo","elemento":"fogo","visual":{"cor":"#ff7b39","texto":"ao conjurar, línguas de fogo subindo; no impacto, línguas de fogo subindo; tremor leve."},"nova":false,"texto":"Golpe que queima."},"pele_de_pedra":{"id":"pele_de_pedra","nome":"Pele de pedra","familia":"suporte","elemento":null,"visual":null,"nova":false,"passiva":true,"texto":"+10% de vida máxima e +2 de defesa."},"bola_de_fogo":{"id":"bola_de_fogo","nome":"Bola de fogo","familia":"fogo","elemento":"fogo","visual":{"cor":"#ff7b39","texto":"ao conjurar, línguas de fogo subindo; no voo, brasas; no impacto, estouro de fagulhas e fumaça; tremor forte."},"nova":false},"lanca_de_gelo":{"id":"lanca_de_gelo","nome":"Lança de gelo","familia":"gelo","elemento":"gelo","visual":{"cor":"#74b9ff","texto":"ao conjurar, estilhaços de gelo; no voo, trilha de brilho; no impacto, estilhaços de gelo."},"nova":false,"texto":"Projétil que resfria."},"raio_em_cadeia":{"id":"raio_em_cadeia","nome":"Raio em cadeia","familia":"raio","elemento":"raio","visual":{"cor":"#f7dc6f","texto":"ao conjurar, faíscas; no voo, faíscas; no impacto, faíscas em zigue-zague; tremor leve."},"nova":false,"texto":"Salta entre alvos."},"barreira":{"id":"barreira","nome":"Barreira","familia":"suporte","elemento":null,"visual":{"cor":"#5dade2","texto":"no impacto, runas girando."},"nova":false},"nova_glacial":{"id":"nova_glacial","nome":"Nova glacial","familia":"gelo","elemento":"gelo","visual":{"cor":"#a0d8ef","texto":"ao conjurar, centelhas de luz; no impacto, estilhaços de gelo; tremor leve."},"nova":false,"texto":"Explosão de gelo em volta."},"mente_partida":{"id":"mente_partida","nome":"Mente partida","familia":"psiquico","elemento":"psiquico","visual":{"cor":"#d980fa","texto":"ao conjurar, runas girando; no voo, centelhas de luz; no impacto, estrelinhas girando para cima."},"nova":false,"texto":"Dano psíquico e silêncio."},"afinidade_elemental":{"id":"afinidade_elemental","nome":"Afinidade elemental","familia":"suporte","elemento":null,"visual":null,"nova":false,"texto":"Vira ativa: por 8 s, as magias do elemento encarnado batem +20% e o estado delas dura mais. Hoje é passiva (+15% em dano elemental), e esse bônus passa para a encarnação.","viraAtiva":true},"flecha_perfurante":{"id":"flecha_perfurante","nome":"Flecha perfurante","familia":"tecnica","elemento":null,"visual":{"cor":"#d4ac0d","texto":"no voo, fagulhas atrás da flecha; no impacto, lascas espalhadas."},"nova":false,"texto":"Atravessa a linha."},"chuva_de_flechas":{"id":"chuva_de_flechas","nome":"Chuva de flechas","familia":"tecnica","elemento":null,"visual":{"cor":"#d4ac0d","texto":"no impacto, flechas caindo do alto; tremor leve."},"nova":false,"texto":"Área mirada."},"flecha_venenosa":{"id":"flecha_venenosa","nome":"Flecha venenosa","familia":"veneno","elemento":"veneno","visual":{"cor":"#58d68d","texto":"no voo, fagulhas atrás da flecha; no impacto, bolhas que estouram."},"nova":false},"tiro_em_leque":{"id":"tiro_em_leque","nome":"Tiro em leque","familia":"tecnica","elemento":null,"visual":{"cor":"#d4ac0d","texto":"no impacto, rajada em cone."},"nova":false,"texto":"Várias flechas em cone."},"troca_sombria":{"id":"troca_sombria","nome":"Troca sombria","familia":"suporte","elemento":null,"visual":{"cor":"#8e44ad","texto":"no impacto, fumaça roxa."},"nova":false,"texto":"Troca de lugar com o alvo e o prende."},"olho_de_aguia":{"id":"olho_de_aguia","nome":"Olho de águia","familia":"suporte","elemento":null,"visual":null,"nova":false,"texto":"Vira ativa: por 6 s, +2 de alcance e +15% de chance de crítico. Hoje é passiva (+1 de alcance e +5% em projéteis), e esse bônus passa para a Mira firme.","viraAtiva":true},"flecha_arcana":{"id":"flecha_arcana","nome":"Flecha arcana","familia":"fusao","elemento":null,"visual":{"cor":"#9b8cff","texto":"ao conjurar, runas girando; no voo, fagulhas atrás da flecha; projétil desenhado (flecha); no impacto, runas girando."},"nova":false},"lanca_tempestuosa":{"id":"lanca_tempestuosa","nome":"Lança tempestuosa","familia":"fusao","elemento":"raio","visual":{"cor":"#a0d8ef","texto":"ao conjurar, estilhaços de gelo; no impacto, faíscas em zigue-zague; tremor leve."},"nova":false},"ciclone_flamejante":{"id":"ciclone_flamejante","nome":"Ciclone flamejante","familia":"fusao","elemento":"fogo","visual":{"cor":"#ff7b39","texto":"ao conjurar, línguas de fogo subindo; no impacto, línguas de fogo subindo; tremor forte."},"nova":false},"cadeia_sombria":{"id":"cadeia_sombria","nome":"Cadeia sombria","familia":"fusao","elemento":"trevas","visual":{"cor":"#6c3483","texto":"no impacto, fumaça roxa; tremor leve."},"nova":false},"chuva_de_estrelas":{"id":"chuva_de_estrelas","nome":"Chuva de estrelas","familia":"sagrado","elemento":"sagrado","visual":{"cor":"#f7e9a0","texto":"ao conjurar, luz dourada subindo; no impacto, flechas caindo do alto; tremor leve."},"nova":false},"estaca_de_pedra":{"id":"estaca_de_pedra","nome":"Estaca de pedra","familia":"terra","elemento":"terra","visual":{"cor":"#a1887f","texto":"ao conjurar, lascas de pedra; no impacto, lascas de pedra."},"nova":false},"abalo_sismico":{"id":"abalo_sismico","nome":"Abalo sísmico","familia":"terra","elemento":"terra","visual":{"cor":"#ad885d","texto":"ao conjurar, lascas de pedra; no impacto, lascas de pedra."},"nova":false},"muralha_de_pedra":{"id":"muralha_de_pedra","nome":"Muralha de pedra","familia":"terra","elemento":null,"visual":{"cor":"#a1887f","texto":"ao conjurar, lascas de pedra; no impacto, lascas de pedra."},"nova":false},"passo_sombrio":{"id":"passo_sombrio","nome":"Passo sombrio","familia":"sombra","elemento":null,"visual":{"cor":"#765b9e","texto":"ao conjurar, fumaça roxa; no impacto, fumaça roxa."},"nova":false},"punhal_das_sombras":{"id":"punhal_das_sombras","nome":"Punhal das sombras","familia":"sombra","elemento":"trevas","visual":{"cor":"#6c3483","texto":"ao conjurar, fumaça roxa; no impacto, riscos de lâmina."},"nova":false},"veu_da_noite":{"id":"veu_da_noite","nome":"Véu da noite","familia":"sombra","elemento":null,"visual":{"cor":"#82689e","texto":"ao conjurar, fumaça roxa; no impacto, fumaça roxa."},"nova":false},"lanca_radiante":{"id":"lanca_radiante","nome":"Lança radiante","familia":"sagrado","elemento":"sagrado","visual":{"cor":"#f7e9a0","texto":"ao conjurar, luz dourada subindo; no impacto, luz dourada subindo."},"nova":false},"circulo_de_amparo":{"id":"circulo_de_amparo","nome":"Círculo de amparo","familia":"sagrado","elemento":null,"visual":{"cor":"#83dcb6","texto":"ao conjurar, luz dourada subindo; no impacto, luz dourada subindo."},"nova":false},"purificacao":{"id":"purificacao","nome":"Purificação","familia":"suporte","elemento":null,"visual":{"cor":"#dcfff3","texto":"ao conjurar, luz dourada subindo; no impacto, centelhas de luz."},"nova":false},"dardo_toxico":{"id":"dardo_toxico","nome":"Dardo tóxico","familia":"veneno","elemento":"veneno","visual":{"cor":"#58d68d","texto":"ao conjurar, bolhas que estouram; no impacto, bolhas que estouram."},"nova":false},"nevoa_venenosa":{"id":"nevoa_venenosa","nome":"Névoa venenosa","familia":"veneno","elemento":null,"visual":{"cor":"#60aa79","texto":"ao conjurar, bolhas que estouram; no impacto, bolhas que estouram."},"nova":false},"corte_dilacerante":{"id":"corte_dilacerante","nome":"Corte dilacerante","familia":"tecnica","elemento":null,"visual":{"cor":"#ae3445","texto":"ao conjurar, centelhas de luz; no impacto, riscos de lâmina."},"nova":false},"postura_de_aparo":{"id":"postura_de_aparo","nome":"Postura de aparo","familia":"tecnica","elemento":null,"visual":{"cor":"#b6cee0","texto":"ao conjurar, centelhas de luz; no impacto, centelhas de luz."},"nova":false},"onda_de_repulsao":{"id":"onda_de_repulsao","nome":"Onda de repulsão","familia":"psiquico","elemento":null,"visual":{"cor":"#d980fa","texto":"ao conjurar, runas girando; no impacto, runas girando."},"nova":false},"tenacidade":{"id":"tenacidade","nome":"Tenacidade","familia":"suporte","elemento":null,"visual":{"cor":"#a6cfb7","texto":"ao conjurar, runas girando; no impacto, runas girando."},"nova":false,"passiva":true,"texto":"Reduz em 15% a duração dos controles (limite de 40%)."},"disciplina_marcial":{"id":"disciplina_marcial","nome":"Disciplina marcial","familia":"tecnica","elemento":null,"visual":{"cor":"#a6cfb7","texto":"ao conjurar, runas girando; no impacto, runas girando."},"nova":false,"passiva":true,"texto":"Habilidades físicas custam 10% menos."},"fluxo_restaurador":{"id":"fluxo_restaurador","nome":"Fluxo restaurador","familia":"suporte","elemento":null,"visual":{"cor":"#a6cfb7","texto":"ao conjurar, runas girando; no impacto, runas girando."},"nova":false,"passiva":true,"texto":"Cura efetiva dá 25% em escudo, até 8, uma vez a cada 2 s."},"toque_funesto":{"id":"toque_funesto","nome":"Toque funesto","familia":"sombra","elemento":"trevas","visual":{"cor":"#8b68d9","texto":"ao conjurar, fumaça roxa; no impacto, fumaça roxa."},"nova":false},"dardo_funesto":{"id":"dardo_funesto","nome":"Dardo funesto","familia":"sombra","elemento":"trevas","visual":{"cor":"#8b68d9","texto":"ao conjurar, fumaça roxa; no impacto, fumaça roxa."},"nova":false,"texto":"Definha o alvo."},"dizimo_vital":{"id":"dizimo_vital","nome":"Dízimo vital","familia":"sombra","elemento":null,"visual":{"cor":"#7ee0bb","texto":"ao conjurar, fumaça roxa; no impacto, luz dourada subindo."},"nova":false,"texto":"Drena uma invocação; sem invocação, ergue uma."},"garras_do_ossuario":{"id":"garras_do_ossuario","nome":"Garras do ossuário","familia":"sombra","elemento":"trevas","visual":{"cor":"#b8a4dd","texto":"ao conjurar, fumaça roxa; no impacto, lascas de pedra."},"nova":false,"texto":"Enraíza."},"comando_sepulcral":{"id":"comando_sepulcral","nome":"Comando sepulcral","familia":"sombra","elemento":null,"visual":{"cor":"#8b68d9","texto":"ao conjurar, fumaça roxa; no impacto, fumaça roxa."},"nova":false,"texto":"Comanda os mortos."},"ceifa_de_almas":{"id":"ceifa_de_almas","nome":"Ceifa de almas","familia":"sombra","elemento":"trevas","visual":{"cor":"#8b68d9","texto":"ao conjurar, fumaça roxa; no impacto, fumaça roxa."},"nova":false,"texto":"Puxa o alvo."},"mortalha_funebre":{"id":"mortalha_funebre","nome":"Mortalha fúnebre","familia":"sombra","elemento":null,"visual":{"cor":"#8b68d9","texto":"ao conjurar, fumaça roxa; no impacto, fumaça roxa."},"nova":false,"texto":"Escudo, e você fica fantasma."},"provocacao":{"id":"provocacao","nome":"Provocação","texto":"Os hostis a até 3 células passam a atacar você por 3 s. Cada provocado dá fúria.","nova":true,"visual":null,"sugestao":{"cor":"#e0453a","texto":"Anel vermelho pulsando em volta, com fios de fúria ligando você a cada provocado; estrelas vermelhas sobre a cabeça deles."}},"salto_esmagador":{"id":"salto_esmagador","nome":"Salto esmagador","texto":"Salta até uma célula a até 4 de distância e atordoa em volta por 0,5 s ao cair.","nova":true,"visual":null,"sugestao":{"cor":"#c8a165","texto":"Poeira na decolagem, a sombra cresce no ponto de queda; na queda, anel de lascas de pedra e tremor forte."}},"retaliacao":{"id":"retaliacao","nome":"Retaliação","texto":"Postura de 2 s: cada golpe recebido devolve parte do dano ao atacante.","nova":true,"visual":null,"sugestao":{"cor":"#b9c4cc","texto":"Brilho de aço em volta; a cada golpe recebido, faíscas voam de volta até quem bateu."}},"sobrecarga_arcana":{"id":"sobrecarga_arcana","nome":"Sobrecarga arcana","texto":"A próxima magia bate +40% e custa 10% da vida em vez de mana.","nova":true,"visual":null,"sugestao":{"cor":"#a06cff","texto":"Runas violetas girando nas mãos e gotas vermelhas (a vida paga) subindo e entrando nelas."}},"piscar":{"id":"piscar","nome":"Piscar","texto":"Teleporte de até 4 células que deixa, na origem, um eco do elemento da última magia.","nova":true,"visual":null,"sugestao":{"cor":"#c9b8ff","texto":"Implosão de centelhas na origem, onde fica um eco na cor do último elemento; reaparece num anel de luz."}},"orbe_instavel":{"id":"orbe_instavel","nome":"Orbe instável","texto":"Orbe lento que absorve o elemento da última magia e explode em área no fim ou ao tocar um hostil.","nova":true,"visual":null,"sugestao":{"cor":"#e6e1ff","texto":"Orbe que pulsa e muda de cor com o elemento absorvido, soltando faíscas; explode nas partículas do elemento."}},"flecha_explosiva":{"id":"flecha_explosiva","nome":"Flecha explosiva","texto":"Explode no impacto (raio 1) e empurra 1 célula.","nova":true,"visual":null,"sugestao":{"cor":"#ff8a3d","texto":"Flecha com esteira de brasas; no impacto, estouro de fagulhas e fumaça."}},"rolamento":{"id":"rolamento","nome":"Rolamento","texto":"Recua 3 células. A próxima flecha conta como Mira firme cheia.","nova":true,"visual":null,"sugestao":{"cor":"#d4ac0d","texto":"Rastro de poeira baixa; ao terminar, o brilho dourado da Mira firme cheia."}},"marca_do_cacador":{"id":"marca_do_cacador","nome":"Marca do caçador","texto":"Marca o alvo por 8 s: seus projéteis batem +20% nele, e ele não fica invisível.","nova":true,"visual":null,"sugestao":{"cor":"#f5c542","texto":"Retícula de pontos dourados girando sobre o alvo enquanto a marca dura."}},"explosao_cadaverica":{"id":"explosao_cadaverica","nome":"Explosão cadavérica","texto":"Detona uma invocação sua: dano de trevas em área, proporcional à vida dela.","nova":true,"visual":null,"sugestao":{"cor":"#9b6ae0","texto":"A invocação incha em luz roxa e estoura em lascas de osso e fumaça escura."}},"levante_profano":{"id":"levante_profano","nome":"Levante profano","texto":"Ergue 2 esqueletos temporários (12 s), além do limite normal.","nova":true,"visual":null,"sugestao":{"cor":"#7ee0bb","texto":"Mãos de sombra rompem o chão, poeira de osso sobe e olhos verdes acendem."}},"mergulho":{"id":"mergulho","nome":"Mergulho","texto":"O falcão mergulha no alvo, causa dano e o atordoa por 0,3 s.","nova":true,"visual":null,"sugestao":{"cor":"#f2f2f2","texto":"O falcão sobe soltando penas e desce num rasante com esteira branca; impacto em penas e estrelas."}},"grito_do_falcao":{"id":"grito_do_falcao","nome":"Grito do falcão","texto":"O alvo fica exposto (+15% de dano recebido) por 5 s.","nova":true,"visual":null,"sugestao":{"cor":"#9fd3ff","texto":"Anéis sonoros em cone e penas soltas; o alvo ganha uma marca de garra luminosa."}},"garras_cegantes":{"id":"garras_cegantes","nome":"Garras cegantes","texto":"O alvo erra 50% dos golpes por 3 s.","nova":true,"visual":null,"sugestao":{"cor":"#ffffff","texto":"Três riscos de garra brancos sobre o alvo e fumaça cinza na altura dos olhos."}},"vigia":{"id":"vigia","nome":"Vigia","texto":"Por 5 s, o falcão circula você e intercepta 1 projétil por segundo.","nova":true,"visual":null,"sugestao":{"cor":"#cfe8ff","texto":"O falcão orbita você deixando um anel de penas; projéteis interceptados estouram em faíscas."}},"rasante":{"id":"rasante","nome":"Rasante","texto":"Dano em linha entre você e o falcão.","nova":true,"visual":null,"sugestao":{"cor":"#bfe3ff","texto":"Uma linha de vento e penas entre você e o falcão."}},"tempestade_de_penas":{"id":"tempestade_de_penas","nome":"Tempestade de penas","texto":"Área em volta do falcão que deixa lento e corta.","nova":true,"visual":null,"sugestao":{"cor":"#dfeaf5","texto":"Espiral de penas cortantes em volta do falcão."}},"retorno_ao_punho":{"id":"retorno_ao_punho","nome":"Retorno ao punho","texto":"O falcão volta, cura você ou um aliado e zera a recarga do Mergulho.","nova":true,"visual":null,"sugestao":{"cor":"#9fe3a8","texto":"Trilha verde-dourada do falcão até você, com brilho de cura no braço."}},"presa_dupla":{"id":"presa_dupla","nome":"Presa dupla","texto":"Você e o falcão golpeiam o mesmo alvo. Se os dois acertarem, +50%.","nova":true,"visual":null,"sugestao":{"cor":"#ffd27a","texto":"Dois cortes cruzados ao mesmo tempo (o seu e o do falcão); estrelas se os dois acertarem."}}},"classes":[{"id":"guerreiro","nome":"Guerreiro","tema":"Corpo a corpo, fúria e proteção do grupo","geral":"investida","skills":["redemoinho","escudo_de_ferro","grito_de_guerra","corrente","golpe_flamejante","provocacao","salto_esmagador","retaliacao"],"pares":[{"a":0,"b":1,"nome":"Ciclone de aço","texto":"Gira andando por 3 s com o escudo girando junto. Cada hostil atingido reforça o escudo.","cores":["#c0392b","#95a5a6"]},{"a":0,"b":2,"nome":"Fúria rodopiante","texto":"Um giro largo (raio 3). Cada aliado no alcance soma +10% ao giro, e o brado ecoa neles.","cores":["#c0392b","#f39c12"]},{"a":0,"b":3,"nome":"Turbilhão de correntes","texto":"Correntes em todos a até 4 células puxam todos para o centro, e o giro os esmaga.","cores":["#c0392b","#7f8c8d"]},{"a":0,"b":4,"nome":"Vórtice ígneo","texto":"O giro deixa um anel de fogo que se fecha para o centro, queimando quem fica dentro.","cores":["#c0392b","#ff7b39"]},{"a":0,"b":5,"nome":"Olho do furacão","texto":"Provoca todos a até 5 células. Quem chega perto é arremessado pelo giro contínuo; você não sofre empurrão.","cores":["#c0392b","#e0453a"]},{"a":0,"b":6,"nome":"Meteoro de aço","texto":"Salta alto e cai girando a até 6 células: cratera que atordoa por 1 s e onda de choque.","cores":["#c0392b","#c8a165"]},{"a":0,"b":7,"nome":"Lâminas vingativas","texto":"Por 4 s acumula todo dano recebido e o devolve num giro final em área.","cores":["#c0392b","#b9c4cc"]},{"a":1,"b":2,"nome":"Muralha da legião","texto":"Um escudo de ferro em cada aliado a até 5 células, todos ligados: o dano num deles se divide entre todos.","cores":["#95a5a6","#f39c12"]},{"a":1,"b":3,"nome":"Âncora de ferro","texto":"Crava o escudo no chão. Correntes prendem os hostis a até 3 células à âncora por 4 s.","cores":["#95a5a6","#7f8c8d"]},{"a":1,"b":4,"nome":"Égide flamejante","texto":"O escudo vira brasa: quem golpeia você queima, e o escudo explode em chamas ao acabar.","cores":["#95a5a6","#ff7b39"]},{"a":1,"b":5,"nome":"Fortaleza desafiadora","texto":"Provoca todos a até 6 células e fica imune por 2 s. Depois ganha um escudo do tamanho do número de provocados.","cores":["#95a5a6","#e0453a"]},{"a":1,"b":6,"nome":"Queda do bastião","texto":"Salta até um aliado, pousa à frente dele com escudo para os dois e empurra os hostis em volta.","cores":["#95a5a6","#c8a165"]},{"a":1,"b":7,"nome":"Espelho de ferro","texto":"Por 3 s, os projéteis que batem no escudo voltam ao atirador com o dobro do dano.","cores":["#95a5a6","#b9c4cc"]},{"a":2,"b":3,"nome":"Chamado às armas","texto":"Puxa os aliados a até 6 células para o seu lado. Os hostis no caminho ficam atordoados.","cores":["#f39c12","#7f8c8d"]},{"a":2,"b":4,"nome":"Brado incandescente","texto":"Um grito em cone que incendeia. Os aliados atingidos ganham golpes flamejantes por 6 s.","cores":["#f39c12","#ff7b39"]},{"a":2,"b":5,"nome":"Rugido do tirano","texto":"Os hostis a até 5 células fogem aterrorizados por 2 s e, ao voltar, estão provocados por você.","cores":["#f39c12","#e0453a"]},{"a":2,"b":6,"nome":"Estrondo de guerra","texto":"Salta no centro dos inimigos. Cada hostil atingido dá +5% de dano aos aliados próximos (até +25%).","cores":["#f39c12","#c8a165"]},{"a":2,"b":7,"nome":"Juramento de sangue","texto":"Por 5 s, metade do dano dos aliados próximos vem para você, e cada golpe que você recebe fortalece o grupo.","cores":["#f39c12","#b9c4cc"]},{"a":3,"b":4,"nome":"Grilhões em brasa","texto":"Uma corrente incandescente salta entre até 4 hostis e os prende uns aos outros. Quem se afasta queima.","cores":["#7f8c8d","#ff7b39"]},{"a":3,"b":5,"nome":"Laço do carrasco","texto":"Puxa o hostil de mais vida e o prende por 3 s. Seus golpes nele batem +50%, e mais com a vida baixa.","cores":["#7f8c8d","#e0453a"]},{"a":3,"b":6,"nome":"Arrasto sísmico","texto":"Lança a corrente, salta até o alvo e o arrasta até você, abrindo uma fenda que atordoa no caminho.","cores":["#7f8c8d","#c8a165"]},{"a":3,"b":7,"nome":"Correntes da desforra","texto":"Acorrenta os 3 últimos que feriram você. Cada um leva o dano que causou nos últimos 5 s.","cores":["#7f8c8d","#b9c4cc"]},{"a":4,"b":5,"nome":"Pira desafiadora","texto":"Vira uma tocha viva por 5 s: provoca e queima quem está a até 2 células, e cresce a cada provocado.","cores":["#ff7b39","#e0453a"]},{"a":4,"b":6,"nome":"Impacto vulcânico","texto":"Salta e cai abrindo uma fenda de lava em linha, que queima por 4 s.","cores":["#ff7b39","#c8a165"]},{"a":4,"b":7,"nome":"Brasa do talião","texto":"Por 4 s, cada golpe recebido deixa uma brasa em você. No fim, as brasas voam até quem o atacou.","cores":["#ff7b39","#b9c4cc"]},{"a":5,"b":6,"nome":"Desafio do titã","texto":"Salta sobre o mais forte e provoca todos. Fica ancorado por 4 s: sem empurrão e com 40% menos dano.","cores":["#e0453a","#c8a165"]},{"a":5,"b":7,"nome":"Desforra suprema","texto":"Provoca todos a até 4 células por 3 s sem atacar. No fim, devolve num golpe tudo o que recebeu.","cores":["#e0453a","#b9c4cc"]},{"a":6,"b":7,"nome":"Golpe do juízo","texto":"Salta sobre um alvo. O dano cresce com o que ele já causou ao grupo, e executa abaixo de 15% de vida.","cores":["#c8a165","#b9c4cc"]}],"linguagem":"Aço e fogo: ondas de choque no chão, faíscas metálicas, poeira e tremor forte. Paleta aço, vermelho e brasa.","passiva":{"nome":"Fúria e aura de batalha","hoje":["O bônus de contato cresce até o nível 10.","Diante de 2 ou mais inimigos próximos, ganha resistência progressiva, até 15%.","Recupera como vida 10% do dano efetivo do ataque básico e, ao derrubar um inimigo, metade da vida que falta.","Os golpes pulsam uma aura que fere os inimigos em volta (3% a 15% do dano, conforme o nível) e o cura (20% a 50% do que a aura causou).","O ataque básico enche a barra de fúria. Cheia, todas essas curas dobram.","Do nível 16 ao 20, ganha até 15% de velocidade e paga menos vida nas técnicas de sangue."],"visualHoje":"Sem partícula própria: a fúria aparece só como barra no HUD.","proposta":["Tudo o que vale hoje continua.","Encher a fúria dá +15 de carga na ultimate.","A Provocação e a Retaliação (novas) também enchem a fúria."],"visualSugestao":"Cada pulso da aura solta um anel de faíscas vermelhas no chão. Com a fúria cheia, brasas sobem do corpo."}},{"id":"mago","nome":"Mago","tema":"Elementos, afinidade e mana","geral":"bola_de_fogo","skills":["lanca_de_gelo","raio_em_cadeia","nova_glacial","mente_partida","afinidade_elemental","sobrecarga_arcana","piscar","orbe_instavel"],"pares":[{"a":0,"b":1,"nome":"Tempestade cristalina","texto":"Seis lanças de gelo caem em sequência. Cada acerto solta um raio, e os resfriados conduzem em dobro.","cores":["#74b9ff","#f7dc6f"]},{"a":0,"b":2,"nome":"Inverno eterno","texto":"O chão congela numa área grande por 6 s. Quem entra se resfria e, com 3 acúmulos, vira estátua (1,5 s).","cores":["#74b9ff","#a0d8ef"]},{"a":0,"b":3,"nome":"Estilhaço mental","texto":"Uma lança que silencia. Se o alvo tentar conjurar no silêncio, ele estilhaça e leva dano alto.","cores":["#74b9ff","#d980fa"]},{"a":0,"b":4,"nome":"Lança dos quatro ventos","texto":"Quatro lanças, de gelo, fogo, raio e terra, cada uma com o seu estado. A da afinidade atual sai em dobro.","cores":["#74b9ff"]},{"a":0,"b":5,"nome":"Geleira arcana","texto":"Uma lança gigante e lenta, que cresce a cada alvo atravessado. Custa vida em vez de mana.","cores":["#74b9ff","#a06cff"]},{"a":0,"b":6,"nome":"Rastro de geada","texto":"Pisca três vezes. Cada ponto vira uma estaca de gelo, e todas explodem juntas.","cores":["#74b9ff","#c9b8ff"]},{"a":0,"b":7,"nome":"Cometa congelado","texto":"O orbe vira um cometa que cai na área. Os cristais que deixa explodem de novo 2 s depois.","cores":["#74b9ff","#e6e1ff"]},{"a":1,"b":2,"nome":"Supercondutor","texto":"Uma nova que congela tudo. O próximo raio num congelado salta para todos os congelados à vista.","cores":["#f7dc6f","#a0d8ef"]},{"a":1,"b":3,"nome":"Tempestade de pensamentos","texto":"Raios psíquicos saltam entre os hostis e os confundem: eles se atacam por 2 s.","cores":["#f7dc6f","#d980fa"]},{"a":1,"b":4,"nome":"Prisma elemental","texto":"Um prisma gira por 4 s e dispara, em todas as direções, raios do elemento da afinidade.","cores":["#f7dc6f"]},{"a":1,"b":5,"nome":"Sobretensão","texto":"Um raio que salta 10 vezes e ganha dano a cada salto. O último descarrega no hostil de mais vida.","cores":["#f7dc6f","#a06cff"]},{"a":1,"b":6,"nome":"Relâmpago errante","texto":"Você vira o raio: pisca de hostil em hostil (até 6), ferindo cada um, e reaparece no último.","cores":["#f7dc6f","#c9b8ff"]},{"a":1,"b":7,"nome":"Esfera de plasma","texto":"Um orbe elétrico segue o seu alvo por 5 s, disparando raios em quem estiver a até 3 células.","cores":["#f7dc6f","#e6e1ff"]},{"a":2,"b":3,"nome":"Silêncio glacial","texto":"Congela e silencia em área. Os silenciados levam dano psíquico a cada pulso.","cores":["#a0d8ef","#d980fa"]},{"a":2,"b":4,"nome":"Zero absoluto","texto":"Os hostis perdem as resistências elementais por 6 s e ficam resfriados, até os que absorvem gelo.","cores":["#a0d8ef"]},{"a":2,"b":5,"nome":"Nova cataclísmica","texto":"Três novas seguidas, cada uma maior. Custa vida, e a última atordoa.","cores":["#a0d8ef","#a06cff"]},{"a":2,"b":6,"nome":"Passo do inverno","texto":"Por 4 s você pisca até 4 vezes à vontade, e cada piscada solta uma nova pequena.","cores":["#a0d8ef","#c9b8ff"]},{"a":2,"b":7,"nome":"Coração de gelo","texto":"O orbe vira um núcleo que puxa os hostis, resfria e explode em nova no fim.","cores":["#a0d8ef","#e6e1ff"]},{"a":3,"b":4,"nome":"Mente elemental","texto":"Lê a mente do alvo: por 6 s, suas magias usam o elemento ao qual ele é mais fraco.","cores":["#d980fa"]},{"a":3,"b":5,"nome":"Colapso psíquico","texto":"Dano psíquico alto. Se o alvo cair, o silêncio passa para quem estiver a até 3 células.","cores":["#d980fa","#a06cff"]},{"a":3,"b":6,"nome":"Labirinto da mente","texto":"Três cópias ilusórias suas piscam pela área. Os hostis as atacam, e cada cópia destruída explode.","cores":["#d980fa","#c9b8ff"]},{"a":3,"b":7,"nome":"Singularidade","texto":"O orbe vira um buraco negro: puxa tudo por 3 s, silencia quem está dentro e colapsa.","cores":["#d980fa","#e6e1ff"]},{"a":4,"b":5,"nome":"Ascensão arcana","texto":"Por 8 s, as skills de classe custam vida em vez de mana, batem +30% e trocam de elemento a cada conjuração.","cores":["#a06cff"]},{"a":4,"b":6,"nome":"Dança dos elementos","texto":"Pisca entre 4 pontos em volta do alvo, deixando uma explosão de elemento em cada um. Juntas, fecham numa sinergia.","cores":["#c9b8ff"]},{"a":4,"b":7,"nome":"Orbe primordial","texto":"Um orbe que troca de elemento a cada segundo e aplica o estado na área.","cores":["#e6e1ff"]},{"a":5,"b":6,"nome":"Ruptura dimensional","texto":"Abre um rasgo entre a origem e o destino. O que está nele vai para o vazio: dano alto, e execução abaixo de 20%.","cores":["#a06cff","#c9b8ff"]},{"a":5,"b":7,"nome":"Supernova","texto":"Canaliza 2 s, alimentando o orbe com a sua mana, e explode em toda a área visível.","cores":["#a06cff","#e6e1ff"]},{"a":6,"b":7,"nome":"Eco do vazio","texto":"Pisca e deixa o orbe. Dois segundos depois, troca de lugar com ele, que explode onde você estava.","cores":["#c9b8ff","#e6e1ff"]}],"linguagem":"Elemento puro: flash na cor do elemento, um círculo de runas no chão antes do efeito, cristais, relâmpagos e brasas em volume.","passiva":{"nome":"Encarnação elemental","hoje":["Encarna por 12 s o elemento da última magia de fogo, gelo ou raio.","Fogo dá +5% de dano mágico e queima quem chega perto.","Gelo reduz 10% do dano recebido e resfria quem golpeia de perto.","Raio dá +15% de velocidade e um salto a mais nas magias.","Dano mágico +35% no começo e a partir do nível 20, e +25% entre os níveis 5 e 15, com transições graduais.","O Dardo arcano concentra poder com acertos seguidos no mesmo alvo: até +25% depois de 4 acertos, e a concentração acaba após 12 s sem acertar."],"visualHoje":"Aura do elemento encarnado em volta do Mago (brasas, cristais ou faíscas), com uma trilha ao andar e um respiro quando parado.","proposta":["Tudo o que vale hoje continua.","A Afinidade elemental vira skill ativa de classe. O bônus passivo dela (+15% nas magias de elemento) entra na encarnação: vale enquanto o Mago está encarnado.","Trocar de encarnação dá +5 de carga na ultimate (no máximo uma vez a cada 4 s)."],"visualSugestao":"Ao trocar de encarnação, um anel do elemento novo empurra o antigo para fora."}},{"id":"arqueiro","nome":"Arqueiro","tema":"Distância, Mira firme e marcação","geral":"flecha_venenosa","skills":["flecha_perfurante","chuva_de_flechas","tiro_em_leque","troca_sombria","olho_de_aguia","flecha_explosiva","rolamento","marca_do_cacador"],"pares":[{"a":0,"b":1,"nome":"Lança dos céus","texto":"Uma flecha sobe e cai como lança gigante, perfurando o chão em linha.","cores":["#d4ac0d","#d4ac0d"]},{"a":0,"b":2,"nome":"Leque perfurante","texto":"Sete flechas em leque que atravessam tudo. Quem leva duas ou mais sangra.","cores":["#d4ac0d","#d4ac0d"]},{"a":0,"b":3,"nome":"Disparo fantasma","texto":"Troca de lugar com o alvo e, pelas costas, atira uma perfurante que atravessa toda a fila.","cores":["#d4ac0d","#8e44ad"]},{"a":0,"b":4,"nome":"Tiro do falcão-rei","texto":"Mira por 1,5 s, com a linha de mira à vista. A flecha alcança a tela toda e é crítico garantido.","cores":["#d4ac0d"]},{"a":0,"b":5,"nome":"Flecha do cataclismo","texto":"Perfura em linha e explode em cada hostil atravessado, em cadeia.","cores":["#d4ac0d","#ff8a3d"]},{"a":0,"b":6,"nome":"Tiro de retirada","texto":"Rola 4 células para trás e atira 3 perfurantes durante o rolamento.","cores":["#d4ac0d","#d4ac0d"]},{"a":0,"b":7,"nome":"Sentença do caçador","texto":"Uma flecha que persegue o marcado pela tela, atravessando o resto. Executa o marcado abaixo de 25%.","cores":["#d4ac0d","#f5c542"]},{"a":1,"b":2,"nome":"Céu de aço","texto":"Uma chuva enorme que avança devagar, por 4 s, na direção apontada.","cores":["#d4ac0d","#d4ac0d"]},{"a":1,"b":3,"nome":"Chuva das sombras","texto":"A chuva cai e você surge no centro. Os atingidos ficam cegos.","cores":["#d4ac0d","#8e44ad"]},{"a":1,"b":4,"nome":"Olhar da tempestade","texto":"Por 5 s, todo alvo que você seleciona recebe uma mini-chuva automática.","cores":["#d4ac0d"]},{"a":1,"b":5,"nome":"Bombardeio","texto":"Dez flechas explosivas caem pela área e empurram os hostis para fora do centro.","cores":["#d4ac0d","#ff8a3d"]},{"a":1,"b":6,"nome":"Chuva em fuga","texto":"Você rola 3 vezes, e a chuva cai onde você estava.","cores":["#d4ac0d","#d4ac0d"]},{"a":1,"b":7,"nome":"Cerco do caçador","texto":"Um anel de flechas cai em volta do marcado, e quem cruza o anel fica enraizado.","cores":["#d4ac0d","#f5c542"]},{"a":2,"b":3,"nome":"Leque espectral","texto":"Troca com o alvo, e o leque sai das duas posições ao mesmo tempo.","cores":["#d4ac0d","#8e44ad"]},{"a":2,"b":4,"nome":"Salva certeira","texto":"Cinco leques em 2 s, cada um mais fechado e com mais chance de crítico.","cores":["#d4ac0d"]},{"a":2,"b":5,"nome":"Leque incendiário","texto":"Um leque de flechas explosivas que deixam o chão em chamas.","cores":["#d4ac0d","#ff8a3d"]},{"a":2,"b":6,"nome":"Pirueta mortal","texto":"Um salto mortal que atira flechas em 360°.","cores":["#d4ac0d","#d4ac0d"]},{"a":2,"b":7,"nome":"Matilha de flechas","texto":"Oito flechas sobem e caçam até 8 hostis diferentes, primeiro os marcados.","cores":["#d4ac0d","#f5c542"]},{"a":3,"b":4,"nome":"Emboscada perfeita","texto":"Fica invisível por 3 s. O primeiro tiro sai de trás do alvo, com crítico triplo.","cores":["#8e44ad"]},{"a":3,"b":5,"nome":"Armadilha de troca","texto":"Deixa uma flecha explosiva no chão. Ao trocar com um hostil, ele cai em cima dela.","cores":["#8e44ad","#ff8a3d"]},{"a":3,"b":6,"nome":"Passos do fantasma","texto":"Por 5 s, cada rolamento deixa uma sombra que atira junto com você.","cores":["#8e44ad","#d4ac0d"]},{"a":3,"b":7,"nome":"Caçada nas sombras","texto":"Troca de lugar com até 4 marcados em sequência, atirando a cada troca.","cores":["#8e44ad","#f5c542"]},{"a":4,"b":5,"nome":"Ponto de impacto","texto":"Mira um ponto por 1 s. A flecha explode em raio 3, com o dobro do dano no centro.","cores":["#ff8a3d"]},{"a":4,"b":6,"nome":"Mira em movimento","texto":"Por 6 s, atira andando sem perder a Mira firme, e o rolamento fica sem recarga.","cores":["#d4ac0d"]},{"a":4,"b":7,"nome":"Olho do predador","texto":"Marca todos os hostis à vista. Por 6 s, cada crítico num marcado reduz as recargas.","cores":["#f5c542"]},{"a":5,"b":6,"nome":"Rastro explosivo","texto":"Rola deixando 3 flechas explosivas, que detonam quando um hostil passa.","cores":["#ff8a3d","#d4ac0d"]},{"a":5,"b":7,"nome":"Presa marcada","texto":"O marcado vira uma bomba: 2 s depois explode e fere os hostis em volta dele.","cores":["#ff8a3d","#f5c542"]},{"a":6,"b":7,"nome":"Dança do caçador","texto":"Por 5 s, rola em volta do marcado atirando. Cada tiro estende a marca.","cores":["#d4ac0d","#f5c542"]}],"linguagem":"Precisão: uma linha de mira dourada antes do disparo, o tempo desacelera por 0,2 s e as flechas deixam rastros longos.","passiva":{"nome":"Mira firme","hoje":["A barra de Mira firme enche em 6 s sem levar dano; a Destreza encurta esse tempo.","Cheia, o próximo tiro é crítico garantido, atravessa todos na linha e vai até o alcance máximo.","Mais alcance e dano com projéteis.","Chuva de flechas e Tiro em leque causam +15% nos alvos secundários."],"visualHoje":"Com a Mira cheia, o Arqueiro brilha. O tiro carregado sai como flecha desenhada, com rastro dourado.","proposta":["Tudo o que vale hoje continua.","O Olho de águia vira skill ativa de classe (alcance e crítico por um tempo). O bônus passivo dele (+1 de alcance e +5% em projéteis) entra na Mira firme e vale sempre.","O tiro da Mira firme cheia dá +8 de carga na ultimate.","O Rolamento (novo) enche a Mira na hora."],"visualSugestao":"A barra enche como um arco de pontos dourados em volta do Arqueiro, e fecha num estalo de luz quando está cheia."}},{"id":"necromante","nome":"Necromante","tema":"Invocações, definhar e dreno","geral":"barreira","skills":["dardo_funesto","dizimo_vital","garras_do_ossuario","comando_sepulcral","ceifa_de_almas","mortalha_funebre","explosao_cadaverica","levante_profano"],"pares":[{"a":0,"b":1,"nome":"Banquete funesto","texto":"Um dardo cinematográfico atravessa a fila de hostis. Depois, uma energia flui de cada atingido e de cada invocação sua até você, tirando vida de todos e curando você.","cores":["#8b68d9","#7ee0bb"]},{"a":0,"b":2,"nome":"Ossário faminto","texto":"O dardo crava no chão e abre um poço de ossos. Mãos esqueléticas enraízam e definham quem está ali.","cores":["#8b68d9","#b8a4dd"]},{"a":0,"b":3,"nome":"Ordem da praga","texto":"Todas as suas invocações lançam dardos funestos no seu alvo ao mesmo tempo.","cores":["#8b68d9","#8b68d9"]},{"a":0,"b":4,"nome":"Colheita sombria","texto":"Definha tudo em área. Três segundos depois, a foice passa, e bate mais em quem está definhando.","cores":["#8b68d9","#8b68d9"]},{"a":0,"b":5,"nome":"Véu da peste","texto":"Você e as invocações viram névoa intangível por 3 s. Quem atravessa a névoa definha.","cores":["#8b68d9","#8b68d9"]},{"a":0,"b":6,"nome":"Pestilência explosiva","texto":"O dardo infecta. Quem morrer em 6 s explode como cadáver e infecta os vizinhos, em cadeia.","cores":["#8b68d9","#9b6ae0"]},{"a":0,"b":7,"nome":"Praga dos mortos","texto":"Se o atingido morrer em 5 s, ele se ergue como um zumbi seu que espalha definhar.","cores":["#8b68d9","#7ee0bb"]},{"a":1,"b":2,"nome":"Raízes do tributo","texto":"Raízes ligam os hostis da área a você e drenam, a cada segundo, vida para você e as invocações.","cores":["#7ee0bb","#b8a4dd"]},{"a":1,"b":3,"nome":"Pacto da legião","texto":"Tira metade da vida de cada invocação. Em troca, todas ganham +50% de dano e velocidade por 8 s.","cores":["#7ee0bb","#8b68d9"]},{"a":1,"b":4,"nome":"Dízimo das almas","texto":"A foice ceifa em cone. De cada hostil atingido volta uma alma, que cura você ou uma invocação.","cores":["#7ee0bb","#8b68d9"]},{"a":1,"b":5,"nome":"Sudário vampírico","texto":"Enquanto a mortalha dura, 50% do dano que você causa vira cura.","cores":["#7ee0bb","#8b68d9"]},{"a":1,"b":6,"nome":"Oferenda ardente","texto":"Drena todas as invocações de uma vez e explode essa vida em chamas negras à sua volta.","cores":["#7ee0bb","#9b6ae0"]},{"a":1,"b":7,"nome":"Ciclo eterno","texto":"Ergue 3 esqueletos. Quando um cai, você recupera vida, e outro nasce no lugar (uma vez cada).","cores":["#7ee0bb","#7ee0bb"]},{"a":2,"b":3,"nome":"Mãos da cripta","texto":"Mãos saem do chão em volta de cada invocação e enraízam quem está perto delas.","cores":["#b8a4dd","#8b68d9"]},{"a":2,"b":4,"nome":"Abraço do ossuário","texto":"Enraíza a área, e a foice puxa os enraizados para o centro, arrancando as raízes com dano.","cores":["#b8a4dd","#8b68d9"]},{"a":2,"b":5,"nome":"Cemitério vivo","texto":"O chão vira cemitério por 8 s: você e os aliados nele ganham escudo a cada 2 s, e os hostis ficam lentos.","cores":["#b8a4dd","#8b68d9"]},{"a":2,"b":6,"nome":"Campo de ossos","texto":"Cada invocação explode em estilhaços de osso que enraízam quem atingem.","cores":["#b8a4dd","#9b6ae0"]},{"a":2,"b":7,"nome":"Exército sepulto","texto":"Quatro esqueletos sobem do chão sob os hostis, enraizando-os ao sair.","cores":["#b8a4dd","#7ee0bb"]},{"a":3,"b":4,"nome":"Marcha dos ceifadores","texto":"As invocações ganham foices e avançam em linha por 6 s, ceifando.","cores":["#8b68d9","#8b68d9"]},{"a":3,"b":5,"nome":"Guarda fantasma","texto":"As invocações viram fantasmas guardiões. Cada uma absorve um golpe que viria para você.","cores":["#8b68d9","#8b68d9"]},{"a":3,"b":6,"nome":"Sacrifício em massa","texto":"As invocações correm até os hostis e explodem uma atrás da outra.","cores":["#8b68d9","#9b6ae0"]},{"a":3,"b":7,"nome":"Rei dos mortos","texto":"Ergue um Cavaleiro da morte (invocação grande, 15 s) que comanda as outras e lhes dá +20%.","cores":["#8b68d9","#7ee0bb"]},{"a":4,"b":5,"nome":"Foice do além","texto":"Vira fantasma com uma foice grande por 4 s. Cada golpe atravessa e marca, e os marcados levam um dano final.","cores":["#8b68d9","#8b68d9"]},{"a":4,"b":6,"nome":"Ceifa explosiva","texto":"A foice puxa os hostis até uma invocação sua e a detona com eles grudados.","cores":["#8b68d9","#9b6ae0"]},{"a":4,"b":7,"nome":"Colheita da legião","texto":"Por 8 s, cada hostil que morre se ergue como esqueleto seu (até 4 a mais).","cores":["#8b68d9","#7ee0bb"]},{"a":5,"b":6,"nome":"Mortalha em chamas","texto":"Explode a própria mortalha: dano em volta proporcional ao escudo que sobrou, e 2 s como fantasma.","cores":["#8b68d9","#9b6ae0"]},{"a":5,"b":7,"nome":"Hoste espectral","texto":"Ergue 4 espectros que atravessam paredes e recebem golpes por você e pelos aliados.","cores":["#8b68d9","#7ee0bb"]},{"a":6,"b":7,"nome":"Ressurreição detonante","texto":"Detona todas as invocações, e cada explosão ergue um esqueleto novo no mesmo lugar.","cores":["#9b6ae0","#7ee0bb"]}],"linguagem":"Trevas e vida: névoa roxa rente ao chão, fluxos verdes de energia (o dreno) correndo até o Necromante, ossos e olhos que acendem.","passiva":{"nome":"Exército dos mortos","hoje":["Um servo morto-vivo volta sozinho 8 s depois de cair.","Seus abates reanimam inimigos por 20 s, e aliados que caem perto deixam ecos independentes.","Até 10 mortos. Quanto maior o exército, menos cada um bate, e a sua Inteligência os fortalece.","Mortos que se afastam demais voltam para o seu lado.","Drene seus mortos para sobreviver. Sem nenhum por perto, o Dízimo ergue um.","Dano próprio reduzido, e proteção contra grupos nos primeiros 5 s de combate."],"visualHoje":"Os ecos ficam translúcidos. O morto que se afasta demais some numa fumaça e reaparece ao lado do Necromante.","proposta":["Tudo o que vale hoje continua.","Cada morto seu que cai dá +3 de carga na ultimate.","Os erguidos pelas ultimates e pelo Levante profano são temporários e não contam no limite de 10."],"visualSugestao":"Um fio roxo fino liga o Necromante a cada morto enquanto drena. Olhos verdes acendem quando um morto se ergue."}},{"id":"aventureiro","nome":"Aventureiro","tema":"O falcão: todas as skills de classe saem dele","geral":"curar","skills":["mergulho","grito_do_falcao","garras_cegantes","vigia","rasante","tempestade_de_penas","retorno_ao_punho","presa_dupla"],"pares":[{"a":0,"b":1,"nome":"Mergulho do trovão","texto":"O falcão sobe, grita (expondo a área) e mergulha como um raio, atordoando em volta.","cores":["#f2f2f2","#9fd3ff"]},{"a":0,"b":2,"nome":"Ataque cego","texto":"O falcão mergulha em até 4 alvos seguidos e cega cada um.","cores":["#f2f2f2","#ffffff"]},{"a":0,"b":3,"nome":"Sentinela em queda","texto":"O falcão mergulha num aliado e o guarda por 3 s, interceptando tudo e ferindo quem o ataca.","cores":["#f2f2f2","#cfe8ff"]},{"a":0,"b":4,"nome":"Voo rasante mortal","texto":"Três rasantes cruzados pela área, em estrela.","cores":["#f2f2f2","#bfe3ff"]},{"a":0,"b":5,"nome":"Furacão alado","texto":"O falcão desce em espiral sobre a área, puxando e cortando.","cores":["#f2f2f2","#dfeaf5"]},{"a":0,"b":6,"nome":"Bumerangue vivo","texto":"O falcão mergulha em linha, atravessa e volta: acerta duas vezes e cura você na volta.","cores":["#f2f2f2","#9fe3a8"]},{"a":0,"b":7,"nome":"Caçada em dupla","texto":"Você e o falcão alternam 5 golpes sincronizados, e o último é crítico.","cores":["#f2f2f2","#ffd27a"]},{"a":1,"b":2,"nome":"Pânico na revoada","texto":"O grito chama uma revoada: os hostis da área fogem e erram golpes.","cores":["#9fd3ff","#ffffff"]},{"a":1,"b":3,"nome":"Alarme da vigília","texto":"Por 8 s o falcão revela invisíveis. Quando um hostil chega a 3 células, os aliados ganham escudo.","cores":["#9fd3ff","#cfe8ff"]},{"a":1,"b":4,"nome":"Clamor dos céus","texto":"O grito vira uma onda sônica em linha que empurra e expõe.","cores":["#9fd3ff","#bfe3ff"]},{"a":1,"b":5,"nome":"Tempestade estridente","texto":"Penas vibrando com o grito: área que silencia e corta.","cores":["#9fd3ff","#dfeaf5"]},{"a":1,"b":6,"nome":"Chamado ao lar","texto":"O falcão chama você: você voa até ele, curando no caminho.","cores":["#9fd3ff","#9fe3a8"]},{"a":1,"b":7,"nome":"Marca da presa","texto":"Até o alvo morrer, você e o falcão batem +30% nele, e ele fica lento.","cores":["#9fd3ff","#ffd27a"]},{"a":2,"b":3,"nome":"Guardião das garras","texto":"O falcão guarda você: quem ataca corpo a corpo fica cego e arranhado.","cores":["#ffffff","#cfe8ff"]},{"a":2,"b":4,"nome":"Riscos de garra","texto":"Três rasantes paralelos com garras, cegando quem é atingido.","cores":["#ffffff","#bfe3ff"]},{"a":2,"b":5,"nome":"Nuvem de penas cortantes","texto":"Uma nuvem segue o falcão e cega quem está dentro dela.","cores":["#ffffff","#dfeaf5"]},{"a":2,"b":6,"nome":"Garras de retorno","texto":"O falcão arranca um efeito positivo do alvo e o traz para você.","cores":["#ffffff","#9fe3a8"]},{"a":2,"b":7,"nome":"Dilacerar em par","texto":"Você e o falcão aplicam juntos um sangramento forte e a cegueira.","cores":["#ffffff","#ffd27a"]},{"a":3,"b":4,"nome":"Patrulha aérea","texto":"Por 8 s, o falcão patrulha em círculos amplos e dá rasantes em quem entra.","cores":["#cfe8ff","#bfe3ff"]},{"a":3,"b":5,"nome":"Redemoinho de asas","texto":"O falcão gira em volta de você: o redemoinho bloqueia projéteis e empurra quem se aproxima.","cores":["#cfe8ff","#dfeaf5"]},{"a":3,"b":6,"nome":"Asas protetoras","texto":"O falcão cobre você e um aliado: os dois se curam e ganham escudo por 5 s.","cores":["#cfe8ff","#9fe3a8"]},{"a":3,"b":7,"nome":"Vigília da matilha","texto":"Dois falcões espectrais extras por 10 s, copiando as ações do seu.","cores":["#cfe8ff","#ffd27a"]},{"a":4,"b":5,"nome":"Ventania de penas","texto":"O rasante deixa um corredor de vento: aliados correm mais nele, e os hostis ficam lentos.","cores":["#bfe3ff","#dfeaf5"]},{"a":4,"b":6,"nome":"Voo de ida e volta","texto":"O falcão vai e volta 4 vezes entre você e o alvo, ferindo na ida e curando na volta.","cores":["#bfe3ff","#9fe3a8"]},{"a":4,"b":7,"nome":"Ataque em pinça","texto":"Você avança por um lado e o falcão pelo outro. Quem fica no meio é atordoado.","cores":["#bfe3ff","#ffd27a"]},{"a":5,"b":6,"nome":"Refúgio de penas","texto":"Uma esfera de penas em volta de você e dos aliados próximos absorve dano por 4 s.","cores":["#dfeaf5","#9fe3a8"]},{"a":5,"b":7,"nome":"Tempestade da caçada","texto":"Você e o falcão giram em volta do alvo cortando. Cada golpe reduz a recarga do Mergulho.","cores":["#dfeaf5","#ffd27a"]},{"a":6,"b":7,"nome":"Laço inquebrável","texto":"Por 8 s, você e o falcão dividem a vida, cada acerto de um cura o outro, e as skills do falcão ficam sem recarga.","cores":["#9fe3a8","#ffd27a"]}],"linguagem":"Céu aberto: a sombra do falcão cruza a tela, espirais de penas, vento e riscos brancos de voo.","passiva":{"nome":"Falcão companheiro","hoje":["Anda com um falcão que divide a vida com ele, persegue o mesmo alvo e lança as habilidades. O ataque básico sai do Aventureiro.","O falcão recolhe ouro e revela armadilhas, com alcance global e voo livre (D-091).","Aprende de qualquer escola.","Seta arcana e Explosão causam 5% menos dano a partir do nível 20."],"visualHoje":"Penas soltas no lançamento de cada skill, que sai do falcão.","proposta":["O falcão continua igual e passa a lançar só as 8 skills de classe, todas dele. As gerais saem do Aventureiro.","\"Aprende de qualquer escola\" sai, porque agora toda classe aprende as gerais por livro.","A redução de 5% na Seta arcana e na Explosão também sai, porque elas viram gerais para todos.","Cada coleta do falcão (ouro ou armadilha revelada) dá +2 de carga na ultimate."],"visualSugestao":"A sombra do falcão cruza o chão quando ele troca de alvo. Quando a ultimate está cheia, as penas brilham."}}],"gerais":[{"familia":"Técnica","ids":["investida","golpe_atordoante","corte_dilacerante","postura_de_aparo","disciplina_marcial"]},{"familia":"Arcana","ids":["seta_arcana","explosao"]},{"familia":"Suporte","ids":["curar","barreira","pele_de_pedra","purificacao","tenacidade","fluxo_restaurador"]},{"familia":"Fogo","ids":["bola_de_fogo"]},{"familia":"Veneno","ids":["flecha_venenosa","dardo_toxico","nevoa_venenosa"]},{"familia":"Terra","ids":["estaca_de_pedra","abalo_sismico","muralha_de_pedra"]},{"familia":"Sombra","ids":["passo_sombrio","punhal_das_sombras","veu_da_noite"]},{"familia":"Sagrado","ids":["lanca_radiante","circulo_de_amparo","chuva_de_estrelas"]},{"familia":"Psíquico","ids":["onda_de_repulsao"]}],"fusoes":[["Flecha arcana",["seta_arcana","flecha_perfurante"],"Arqueiro (com o livro da Seta arcana).",false],["Lança tempestuosa",["lanca_de_gelo","raio_em_cadeia"],"Mago.",false],["Ciclone flamejante",["redemoinho","golpe_flamejante"],"Guerreiro.",false],["Cadeia sombria",["corrente","passo_sombrio"],"Guerreiro. Antes era Corrente + Troca sombria, que misturava Guerreiro e Arqueiro.",true]],"combos":[{"id":"moedor","nome":"Moedor","seq":["corrente","redemoinho"],"texto":"Corrente e depois Redemoinho: +40% de dano e atordoa quem está perto por 0,5 s.","classe":"guerreiro","nova":false,"ajuste":null,"visual":{"cor":"#a9b4c6","formas":["espiral","laminas"],"movimento":"girar"}},{"id":"estandarte","nome":"Carga do estandarte","seq":["investida","grito_de_guerra"],"texto":"Após deslocar com Investida, Grito de guerra suprime ataques físicos próximos e dá +30% de dano por 4 s.","classe":"guerreiro","nova":false,"ajuste":null,"visual":{"cor":"#e4bb72","formas":["estandarte","onda"],"movimento":"expandir"}},{"id":"chuva_acida","nome":"Chuva ácida","seq":["flecha_venenosa","chuva_de_flechas"],"texto":"Flecha venenosa e depois Chuva de flechas: a área mirada fica envenenada.","classe":"arqueiro","nova":false,"ajuste":null,"visual":{"cor":"#7bcf77","formas":["flechas","gotas"],"movimento":"cair"}},{"id":"condutor","nome":"Condutor congelado","seq":["lanca_de_gelo","raio_em_cadeia"],"texto":"Lança de gelo e depois Raio em cadeia: +30% de dano e o alvo fica eletrizado (o raio salta mais).","classe":"mago","nova":false,"ajuste":null,"visual":{"cor":"#8acbff","formas":["cristais","raios"],"movimento":"pulsar"}},{"id":"emboscada","nome":"Emboscada","seq":["troca_sombria","golpe_atordoante"],"texto":"Troca sombria e depois Golpe atordoante: o d20 vira 20 (crítico garantido).","classe":"arqueiro","nova":false,"ajuste":null,"visual":{"cor":"#c0a1f0","formas":["silhuetas","corte"],"movimento":"convergir"}},{"id":"escudo_de_geada","nome":"Escudo de geada","seq":["barreira","nova_glacial"],"texto":"Barreira e depois Nova glacial: +25% de dano e os hostis a até 2 células ficam resfriados.","classe":"mago","nova":false,"ajuste":null,"visual":{"cor":"#a9e4ff","formas":["hexagonos","coroa"],"movimento":"expandir"}},{"id":"colapso","nome":"Colapso","seq":["mente_partida","explosao"],"texto":"Mente partida e depois Explosão: +35% de dano e a área mirada fica exposta.","classe":"mago","nova":false,"ajuste":null,"visual":{"cor":"#cf86f3","formas":["orbita","fissuras"],"movimento":"contrair"}},{"id":"saraivada","nome":"Saraivada","seq":["tiro_em_leque","flecha_perfurante"],"texto":"Tiro em leque e depois Flecha perfurante: +40% de dano e o alvo fica exposto.","classe":"arqueiro","nova":false,"ajuste":null,"visual":{"cor":"#e0c28a","formas":["leque","prisma"],"movimento":"convergir"}},{"id":"contra_ataque_ferro","nome":"Contra-ataque de ferro","seq":["escudo_de_ferro","golpe_atordoante"],"texto":"Acertar com o escudo ativo reforça a proteção em 6 e fortalece o golpe.","classe":"guerreiro","nova":false,"ajuste":null,"visual":{"cor":"#b6cee0","formas":["lascas","escudo"],"movimento":"convergir"}},{"id":"ariete_flamejante","nome":"Aríete flamejante","seq":["investida","golpe_flamejante"],"texto":"Acertar o mesmo alvo após avançar prolonga a queimadura em 2 s.","classe":"guerreiro","nova":false,"ajuste":null,"visual":{"cor":"#ff9b4f","formas":["chifres","chamas"],"movimento":"avancar"}},{"id":"fornalha","nome":"Fornalha","seq":["corrente","bola_de_fogo"],"texto":"Acertar o inimigo puxado espalha queimadura curta a até 1 célula.","classe":"guerreiro","nova":false,"ajuste":null,"visual":{"cor":"#ed784a","formas":["elos","fornalha"],"movimento":"contrair"}},{"id":"ruptura","nome":"Ruptura","seq":["golpe_atordoante","flecha_perfurante"],"texto":"A flecha fortalece o acerto no mesmo alvo ainda atordoado.","classe":"arqueiro","nova":false,"ajuste":null,"visual":{"cor":"#f0d6b1","formas":["fissuras","flecha"],"movimento":"avancar"}},{"id":"retirada_glacial","nome":"Retirada glacial","seq":["nova_glacial","piscar"],"texto":"Após a nova atingir inimigos, concluir a troca concede escudo de 8 por 3 s.","classe":"mago","nova":false,"ajuste":"Era Nova glacial > Troca sombria, que misturava Mago e Arqueiro.","visual":{"cor":"#a9dafa","formas":["casulo","fumaca"],"movimento":"pulsar"}},{"id":"refugio_restaurador","nome":"Refúgio restaurador","seq":["barreira","curar"],"texto":"Curar efetivamente o mesmo destinatário protegido concede escudo de 6 por 3 s.","classe":"geral","nova":false,"ajuste":null,"visual":{"cor":"#8bdfb4","formas":["escudo","costura"],"movimento":"convergir"}},{"id":"disparo_encantado","nome":"Disparo encantado","seq":["seta_arcana","flecha_perfurante"],"texto":"Acertar as duas habilidades no mesmo alvo fortalece a flecha.","classe":"arqueiro","nova":false,"ajuste":null,"visual":{"cor":"#bf9fff","formas":["runas","flecha"],"movimento":"avancar"}},{"id":"convergencia_astral","nome":"Convergência astral","seq":["mente_partida","chuva_de_estrelas"],"texto":"Acertar o mesmo alvo prolonga sua exposição em 2 s, sem ampliar silêncio.","classe":"mago","nova":false,"ajuste":null,"visual":{"cor":"#e2b5ff","formas":["constelacao","anel"],"movimento":"convergir"}},{"id":"pantano_aprisionante","nome":"Pântano aprisionante","seq":["estaca_de_pedra","nevoa_venenosa"],"texto":"A névoa sobre o alvo enraizado aplica lentidão apenas enquanto ocupada.","classe":"geral","nova":false,"ajuste":null,"visual":{"cor":"#90b56b","formas":["raizes","bolhas"],"movimento":"pulsar"}},{"id":"cerco_de_pedra","nome":"Cerco de pedra","seq":["muralha_de_pedra","onda_de_repulsao"],"texto":"Colidir contra a muralha causa dano de colisão e atordoa brevemente.","classe":"geral","nova":false,"ajuste":null,"visual":{"cor":"#c5a781","formas":["muralha","pressao"],"movimento":"contrair"}},{"id":"epicentro","nome":"Epicentro","seq":["investida","abalo_sismico"],"texto":"Após deslocar com Investida, o abalo ganha 1 célula de raio.","classe":"geral","nova":false,"ajuste":null,"visual":{"cor":"#d8ae78","formas":["fissuras","aneis"],"movimento":"expandir"}},{"id":"emboscada_noturna","nome":"Emboscada noturna","seq":["passo_sombrio","punhal_das_sombras"],"texto":"Acertar após o passo prolonga a Marca em 2 s e fortalece o punhal.","classe":"geral","nova":false,"ajuste":null,"visual":{"cor":"#a98bd2","formas":["silhuetas","punhal"],"movimento":"avancar"}},{"id":"retorno_sombras","nome":"Retorno das sombras","seq":["veu_da_noite","corte_dilacerante"],"texto":"Após esquivar durante o véu, o corte prolonga seu sangramento em 2 s.","classe":"geral","nova":false,"ajuste":null,"visual":{"cor":"#c68caa","formas":["fumaca","corte"],"movimento":"girar"}},{"id":"resposta_dilacerante","nome":"Resposta dilacerante","seq":["postura_de_aparo","corte_dilacerante"],"texto":"Aparar o atacante prepara sangramento +1 por pulso, substituindo a resposta normal do aparo.","classe":"geral","nova":false,"ajuste":null,"visual":{"cor":"#e8a0a3","formas":["faiscas","serrilha"],"movimento":"avancar"}},{"id":"santuario_purificado","nome":"Santuário purificado","seq":["circulo_de_amparo","purificacao"],"texto":"Remover um efeito no próprio círculo concede escudo de 5 aos aliados nele.","classe":"geral","nova":false,"ajuste":null,"visual":{"cor":"#b5f3db","formas":["gotas","domo"],"movimento":"subir"}},{"id":"veredito_radiante","nome":"Veredito radiante","seq":["lanca_radiante","flecha_perfurante"],"texto":"Acertar o mesmo alvo ainda consagrado prolonga o estado em 2 s.","classe":"arqueiro","nova":false,"ajuste":null,"visual":{"cor":"#f5dea0","formas":["selo","flecha"],"movimento":"avancar"}},{"id":"disseminacao_toxica","nome":"Disseminação tóxica","seq":["dardo_toxico","tiro_em_leque"],"texto":"O leque espalha veneno fraco por 2 s sem substituir um veneno mais forte.","classe":"arqueiro","nova":false,"ajuste":null,"visual":{"cor":"#77d498","formas":["gota","leque"],"movimento":"expandir"}},{"id":"prisao_pestilenta","nome":"Prisão pestilenta","seq":["estaca_de_pedra","nevoa_venenosa","abalo_sismico"],"texto":"O abalo espalha veneno curto e prolonga lentidão a partir do alvo preparado ainda na névoa.","classe":"geral","nova":false,"ajuste":null,"visual":{"cor":"#a8bd65","formas":["jaula","esporos"],"movimento":"expandir"}},{"id":"execucao_eclipse","nome":"Execução do eclipse","seq":["passo_sombrio","punhal_das_sombras","lanca_radiante"],"texto":"Confirmar Eclipse após o passo e o punhal concede escudo de 8, sem multiplicar a reação.","classe":"geral","nova":false,"ajuste":null,"visual":{"cor":"#e5c98c","formas":["eclipse","escudo"],"movimento":"convergir"}},{"id":"fortaleza_viva","nome":"Fortaleza viva","seq":["muralha_de_pedra","circulo_de_amparo","purificacao"],"texto":"Purificar dentro do círculo junto da muralha concede escudo coletivo uma vez.","classe":"geral","nova":false,"ajuste":null,"visual":{"cor":"#8cddb2","formas":["muralha","domo"],"movimento":"subir"}},{"id":"danca_duelista","nome":"Dança do duelista","seq":["postura_de_aparo","corte_dilacerante","investida"],"texto":"Após aparar e cortar o atacante, a investida consome o sangramento para dano limitado.","classe":"geral","nova":false,"ajuste":null,"visual":{"cor":"#e8aaa7","formas":["triangulo","serrilha"],"movimento":"girar"}},{"id":"forja_guerra","nome":"Forja de guerra","seq":["escudo_de_ferro","corrente","golpe_flamejante"],"texto":"Acertar o alvo puxado reforça o escudo e espalha queimadura curta.","classe":"guerreiro","nova":false,"ajuste":null,"visual":{"cor":"#f3a35e","formas":["elos","escudo"],"movimento":"pulsar"}},{"id":"tempestade_confinada","nome":"Tempestade confinada","seq":["muralha_de_pedra","onda_de_repulsao","raio_em_cadeia"],"texto":"Acertar o alvo que colidiu permite um salto elétrico adicional sem repetir alvos.","classe":"mago","nova":false,"ajuste":null,"visual":{"cor":"#f3d98c","formas":["muralha","raios"],"movimento":"pulsar"}},{"id":"cacada_implacavel","nome":"Caçada implacável","seq":["dardo_toxico","tiro_em_leque","flecha_perfurante"],"texto":"Três acertos no mesmo alvo consomem seu veneno para dano adicional limitado.","classe":"arqueiro","nova":false,"ajuste":null,"visual":{"cor":"#9bda86","formas":["filamentos","prisma"],"movimento":"convergir"}},{"id":"inverno_marcha","nome":"Inverno em marcha","seq":["barreira","nova_glacial","investida"],"texto":"Com a barreira ativa e a nova confirmada, a investida deixa rastro de lentidão sem dano periódico.","classe":"mago","nova":false,"ajuste":null,"visual":{"cor":"#a4deeb","formas":["proa","cristais"],"movimento":"avancar"}},{"id":"convergencia_arcana","nome":"Convergência arcana","seq":["seta_arcana","mente_partida","explosao"],"texto":"Dois acertos no mesmo alvo preparam uma explosão com 1 célula adicional de raio.","classe":"mago","nova":false,"ajuste":null,"visual":{"cor":"#cbb4ff","formas":["tres_aneis","runas"],"movimento":"expandir"}},{"id":"resgate_sombras","nome":"Resgate entre sombras","seq":["veu_da_noite","passo_sombrio","curar"],"texto":"Após esquivar e deslocar, curar efetivamente outro aliado concede escudo de 6.","classe":"geral","nova":false,"ajuste":null,"visual":{"cor":"#c8d7ed","formas":["fio","abrigo"],"movimento":"convergir"}},{"id":"sepultura_aberta","nome":"Sepultura aberta","seq":["dardo_funesto","garras_do_ossuario"],"texto":"Dardo funesto e Garras do ossuário no mesmo alvo definhando: +25% de dano nas garras.","classe":"necromante","nova":false,"ajuste":null,"visual":{"cor":"#9e86d8","formas":["jaula","silhuetas"],"movimento":"contrair"}},{"id":"tributo_da_legiao","nome":"Tributo da legião","seq":["comando_sepulcral","dizimo_vital"],"texto":"Comande uma invocação e drene vida efetivamente: ganha escudo de 8 por 3 s.","classe":"necromante","nova":false,"ajuste":null,"visual":{"cor":"#9e86d8","formas":["escudo","gota"],"movimento":"subir"}},{"id":"crematorio","nome":"Crematório","seq":["garras_do_ossuario","bola_de_fogo"],"texto":"Bola de fogo no mesmo alvo ainda enraizado pelas garras causa +20% de dano.","classe":"necromante","nova":false,"ajuste":null,"visual":{"cor":"#9e86d8","formas":["chifres","raizes"],"movimento":"expandir"}},{"id":"absolvicao_funesta","nome":"Absolvição funesta","seq":["dardo_funesto","lanca_radiante"],"texto":"Lança radiante no mesmo alvo definhando pelo dardo causa +15% de dano além das reações de Trevas e luz.","classe":"necromante","nova":false,"ajuste":null,"visual":{"cor":"#9e86d8","formas":["eclipse","constelacao"],"movimento":"convergir"}},{"nome":"Grito imperioso","seq":["provocacao","grito_de_guerra"],"texto":"Aliados perto ganham escudo de 6 enquanto os hostis estão provocados.","classe":"guerreiro","nova":true,"sugestao":{"cor":"#d0603f","formas":["laminas","escudo"],"movimento":"convergir"}},{"nome":"Terremoto de aço","seq":["salto_esmagador","redemoinho"],"texto":"+35% de dano e atordoa por 0,5 s.","classe":"guerreiro","nova":true,"sugestao":{"cor":"#d0603f","formas":["laminas","chamas"],"movimento":"subir"}},{"nome":"Âncora","seq":["corrente","salto_esmagador"],"texto":"Salta direto no alvo puxado, com +30%.","classe":"guerreiro","nova":true,"sugestao":{"cor":"#d0603f","formas":["escudo","estandarte"],"movimento":"girar"}},{"nome":"Desforra flamejante","seq":["retaliacao","golpe_flamejante"],"texto":"A queimadura dura +2 s no atacante.","classe":"guerreiro","nova":true,"sugestao":{"cor":"#d0603f","formas":["escudo","muralha"],"movimento":"contrair"}},{"nome":"Muralha desafiadora","seq":["escudo_de_ferro","provocacao"],"texto":"Escudo +8 enquanto provoca.","classe":"guerreiro","nova":true,"sugestao":{"cor":"#d0603f","formas":["estandarte","elos"],"movimento":"avancar"}},{"nome":"Quebra-guarda","seq":["retaliacao","golpe_atordoante"],"texto":"Atordoamento +0,5 s.","classe":"guerreiro","nova":true,"sugestao":{"cor":"#d0603f","formas":["estandarte","chifres"],"movimento":"expandir"}},{"nome":"Investida brutal","seq":["investida","salto_esmagador"],"texto":"O impacto do salto ganha +1 de raio.","classe":"guerreiro","nova":true,"sugestao":{"cor":"#d0603f","formas":["elos","fissuras"],"movimento":"cair"}},{"nome":"Forja viva","seq":["provocacao","redemoinho","golpe_flamejante"],"texto":"Queimadura em todos os atingidos pelo giro.","classe":"guerreiro","nova":true,"sugestao":{"cor":"#d0603f","formas":["fissuras","laminas"],"movimento":"pulsar"}},{"nome":"Hino de batalha","seq":["grito_de_guerra","@ultimate"],"texto":"A ultimate dá +20% de dano aos aliados por 5 s.","classe":"guerreiro","nova":true,"sugestao":{"cor":"#d0603f","formas":["fissuras","muralha"],"movimento":"convergir"}},{"nome":"Curto-circuito","seq":["sobrecarga_arcana","raio_em_cadeia"],"texto":"+1 salto.","classe":"mago","nova":true,"sugestao":{"cor":"#8f7cff","formas":["constelacao","raios"],"movimento":"subir"}},{"nome":"Piscar glacial","seq":["piscar","nova_glacial"],"texto":"A nova sai da origem e do destino.","classe":"mago","nova":true,"sugestao":{"cor":"#8f7cff","formas":["constelacao","faiscas"],"movimento":"girar"}},{"nome":"Orbe congelante","seq":["lanca_de_gelo","orbe_instavel"],"texto":"O orbe vira gelo e resfria.","classe":"mago","nova":true,"sugestao":{"cor":"#8f7cff","formas":["anel","prisma"],"movimento":"contrair"}},{"nome":"Orbe tempestuoso","seq":["raio_em_cadeia","orbe_instavel"],"texto":"O orbe eletriza.","classe":"mago","nova":true,"sugestao":{"cor":"#8f7cff","formas":["anel","hexagonos"],"movimento":"avancar"}},{"nome":"Mente sobrecarregada","seq":["mente_partida","sobrecarga_arcana"],"texto":"Silêncio +1 s e +25%.","classe":"mago","nova":true,"sugestao":{"cor":"#8f7cff","formas":["faiscas","selo"],"movimento":"expandir"}},{"nome":"Espelho elemental","seq":["afinidade_elemental","piscar"],"texto":"O eco do Piscar dura o dobro.","classe":"mago","nova":true,"sugestao":{"cor":"#8f7cff","formas":["hexagonos","cristais"],"movimento":"cair"}},{"nome":"Estilhaço em fuga","seq":["lanca_de_gelo","piscar"],"texto":"O alvo resfriado fica enraizado por 1 s.","classe":"mago","nova":true,"sugestao":{"cor":"#8f7cff","formas":["hexagonos","constelacao"],"movimento":"pulsar"}},{"nome":"Cataclismo arcano","seq":["sobrecarga_arcana","orbe_instavel","explosao"],"texto":"O orbe explode com +1 de raio.","classe":"mago","nova":true,"sugestao":{"cor":"#8f7cff","formas":["cristais","runas"],"movimento":"convergir"}},{"nome":"Convergência elemental","seq":["afinidade_elemental","@ultimate"],"texto":"A ultimate aplica o estado do elemento a todos os atingidos.","classe":"mago","nova":true,"sugestao":{"cor":"#8f7cff","formas":["cristais","faiscas"],"movimento":"subir"}},{"nome":"Bombardeio marcado","seq":["marca_do_cacador","flecha_explosiva"],"texto":"+40% no marcado e expõe quem está em volta.","classe":"arqueiro","nova":true,"sugestao":{"cor":"#d4ac0d","formas":["costura","serrilha"],"movimento":"girar"}},{"nome":"Retirada certeira","seq":["rolamento","flecha_perfurante"],"texto":"Crítico garantido.","classe":"arqueiro","nova":true,"sugestao":{"cor":"#d4ac0d","formas":["fio","costura"],"movimento":"contrair"}},{"nome":"Chuva incendiária","seq":["flecha_explosiva","chuva_de_flechas"],"texto":"A área queima.","classe":"arqueiro","nova":true,"sugestao":{"cor":"#d4ac0d","formas":["triangulo","flecha"],"movimento":"avancar"}},{"nome":"Leque marcado","seq":["marca_do_cacador","tiro_em_leque"],"texto":"As flechas do leque buscam o marcado.","classe":"arqueiro","nova":true,"sugestao":{"cor":"#d4ac0d","formas":["triangulo","serrilha"],"movimento":"expandir"}},{"nome":"Sombra em fuga","seq":["troca_sombria","rolamento"],"texto":"Invisível por 1,5 s.","classe":"arqueiro","nova":true,"sugestao":{"cor":"#d4ac0d","formas":["corte","costura"],"movimento":"cair"}},{"nome":"Olhar do predador","seq":["olho_de_aguia","marca_do_cacador"],"texto":"A marca dura +3 s.","classe":"arqueiro","nova":true,"sugestao":{"cor":"#d4ac0d","formas":["serrilha","flecha"],"movimento":"pulsar"}},{"nome":"Detonação tóxica","seq":["flecha_venenosa","flecha_explosiva"],"texto":"A explosão espalha veneno.","classe":"arqueiro","nova":true,"sugestao":{"cor":"#d4ac0d","formas":["serrilha","corte"],"movimento":"convergir"}},{"nome":"Caça perfeita","seq":["marca_do_cacador","rolamento","flecha_perfurante"],"texto":"+60% de dano, com limite.","classe":"arqueiro","nova":true,"sugestao":{"cor":"#d4ac0d","formas":["flechas","fio"],"movimento":"subir"}},{"nome":"Olhar absoluto","seq":["olho_de_aguia","@ultimate"],"texto":"Todos os projéteis da ultimate são críticos.","classe":"arqueiro","nova":true,"sugestao":{"cor":"#d4ac0d","formas":["flecha","leque"],"movimento":"girar"}},{"nome":"Cadáver-bomba","seq":["comando_sepulcral","explosao_cadaverica"],"texto":"+1 de raio.","classe":"necromante","nova":true,"sugestao":{"cor":"#8b68d9","formas":["gota","jaula"],"movimento":"contrair"}},{"nome":"Levante funesto","seq":["dardo_funesto","levante_profano"],"texto":"Os erguidos definham quem tocam.","classe":"necromante","nova":true,"sugestao":{"cor":"#8b68d9","formas":["esporos","raizes"],"movimento":"avancar"}},{"nome":"Ceifa detonante","seq":["ceifa_de_almas","explosao_cadaverica"],"texto":"Puxa para dentro da explosão, com +30%.","classe":"necromante","nova":true,"sugestao":{"cor":"#8b68d9","formas":["esporos","gota"],"movimento":"expandir"}},{"nome":"Mortalha da legião","seq":["mortalha_funebre","comando_sepulcral"],"texto":"As invocações ganham escudo de 6.","classe":"necromante","nova":true,"sugestao":{"cor":"#8b68d9","formas":["coroa","fumaca"],"movimento":"cair"}},{"nome":"Túmulo aberto","seq":["garras_do_ossuario","levante_profano"],"texto":"Os erguidos surgem em volta do enraizado.","classe":"necromante","nova":true,"sugestao":{"cor":"#8b68d9","formas":["coroa","esporos"],"movimento":"pulsar"}},{"nome":"Dízimo explosivo","seq":["dizimo_vital","explosao_cadaverica"],"texto":"A explosão cura você em 20% do dano.","classe":"necromante","nova":true,"sugestao":{"cor":"#8b68d9","formas":["silhuetas","casulo"],"movimento":"convergir"}},{"nome":"Colheita eterna","seq":["ceifa_de_almas","dizimo_vital"],"texto":"O dreno rende +50%.","classe":"necromante","nova":true,"sugestao":{"cor":"#8b68d9","formas":["raizes","silhuetas"],"movimento":"subir"}},{"nome":"Marcha fúnebre","seq":["levante_profano","comando_sepulcral","ceifa_de_almas"],"texto":"As invocações batem +25% por 5 s.","classe":"necromante","nova":true,"sugestao":{"cor":"#8b68d9","formas":["raizes","gota"],"movimento":"girar"}},{"nome":"Coro dos mortos","seq":["comando_sepulcral","@ultimate"],"texto":"As invocações repetem o último golpe da ultimate (50%).","classe":"necromante","nova":true,"sugestao":{"cor":"#8b68d9","formas":["fumaca","raizes"],"movimento":"contrair"}},{"nome":"Mergulho cegante","seq":["garras_cegantes","mergulho"],"texto":"Atordoa por 1 s.","classe":"aventureiro","nova":true,"sugestao":{"cor":"#7fbde8","formas":["corte","proa"],"movimento":"avancar"}},{"nome":"Presa anunciada","seq":["grito_do_falcao","presa_dupla"],"texto":"+40%.","classe":"aventureiro","nova":true,"sugestao":{"cor":"#7fbde8","formas":["orbita","lascas"],"movimento":"expandir"}},{"nome":"Rasante duplo","seq":["rasante","presa_dupla"],"texto":"O rasante repete na volta do falcão.","classe":"aventureiro","nova":true,"sugestao":{"cor":"#7fbde8","formas":["espiral","orbita"],"movimento":"cair"}},{"nome":"Vigília restauradora","seq":["vigia","retorno_ao_punho"],"texto":"Escudo de 8 além da cura.","classe":"aventureiro","nova":true,"sugestao":{"cor":"#7fbde8","formas":["espiral","filamentos"],"movimento":"pulsar"}},{"nome":"Tufão","seq":["tempestade_de_penas","rasante"],"texto":"Puxa os atingidos para a linha.","classe":"aventureiro","nova":true,"sugestao":{"cor":"#7fbde8","formas":["onda","lascas"],"movimento":"convergir"}},{"nome":"Mergulho estrondoso","seq":["grito_do_falcao","mergulho"],"texto":"Expõe quem está em volta do alvo.","classe":"aventureiro","nova":true,"sugestao":{"cor":"#7fbde8","formas":["aneis","orbita"],"movimento":"subir"}},{"nome":"Olhos vendados","seq":["garras_cegantes","tempestade_de_penas"],"texto":"A cegueira se espalha na área, por +2 s.","classe":"aventureiro","nova":true,"sugestao":{"cor":"#7fbde8","formas":["aneis","filamentos"],"movimento":"girar"}},{"nome":"Ciclo do falcão","seq":["mergulho","retorno_ao_punho","presa_dupla"],"texto":"A próxima skill do falcão sai sem recarga.","classe":"aventureiro","nova":true,"sugestao":{"cor":"#7fbde8","formas":["lascas","onda"],"movimento":"contrair"}},{"nome":"Asa do destino","seq":["vigia","@ultimate"],"texto":"Escudo de 10 em você e nos aliados a até 3 células.","classe":"aventureiro","nova":true,"sugestao":{"cor":"#7fbde8","formas":["proa","orbita"],"movimento":"avancar"}},{"nome":"Gás inflamável","seq":["dardo_toxico","bola_de_fogo"],"texto":"Envenenados levam +30% e queimam.","classe":"geral","nova":true,"sugestao":{"cor":"#7fa38a","formas":["abrigo","bolhas"],"movimento":"expandir"}},{"nome":"Pedra em brasa","seq":["estaca_de_pedra","bola_de_fogo"],"texto":"+25% e queimadura +2 s.","classe":"geral","nova":true,"sugestao":{"cor":"#7fa38a","formas":["abrigo","fornalha"],"movimento":"cair"}},{"nome":"Lâmina sombria","seq":["passo_sombrio","corte_dilacerante"],"texto":"Sangramento +1 por pulso.","classe":"geral","nova":true,"sugestao":{"cor":"#7fa38a","formas":["punhal","bolhas"],"movimento":"pulsar"}},{"nome":"Escudo consagrado","seq":["barreira","lanca_radiante"],"texto":"Escudo +5 ao consagrar.","classe":"geral","nova":true,"sugestao":{"cor":"#7fa38a","formas":["punhal","muralha"],"movimento":"convergir"}},{"nome":"Estrela cadente","seq":["chuva_de_estrelas","explosao"],"texto":"+1 de raio.","classe":"geral","nova":true,"sugestao":{"cor":"#7fa38a","formas":["tres_aneis","bolhas"],"movimento":"subir"}},{"nome":"Tremor tóxico","seq":["abalo_sismico","nevoa_venenosa"],"texto":"A névoa cresce 1 célula.","classe":"geral","nova":true,"sugestao":{"cor":"#7fa38a","formas":["tres_aneis","muralha"],"movimento":"girar"}},{"nome":"Investida sombria","seq":["veu_da_noite","investida"],"texto":"Crítico garantido.","classe":"geral","nova":true,"sugestao":{"cor":"#7fa38a","formas":["fornalha","bolhas"],"movimento":"contrair"}},{"nome":"Bastião de pedra","seq":["pele_de_pedra","muralha_de_pedra"],"texto":"Atrás da muralha, você cura 2 por segundo.","classe":"geral","nova":true,"sugestao":{"cor":"#7fa38a","formas":["fornalha","muralha"],"movimento":"avancar"}},{"nome":"Seta purificadora","seq":["purificacao","seta_arcana"],"texto":"A seta ignora escudos.","classe":"geral","nova":true,"sugestao":{"cor":"#7fa38a","formas":["muralha","domo"],"movimento":"expandir"}},{"nome":"Repulsão ardente","seq":["onda_de_repulsao","bola_de_fogo"],"texto":"Os empurrados queimam.","classe":"geral","nova":true,"sugestao":{"cor":"#7fa38a","formas":["muralha","fornalha"],"movimento":"cair"}},{"nome":"Disciplina férrea","seq":["disciplina_marcial","golpe_atordoante"],"texto":"Atordoamento +0,5 s.","classe":"geral","nova":true,"sugestao":{"cor":"#7fa38a","formas":["onda","domo"],"movimento":"pulsar"}},{"nome":"Fluxo de cura","seq":["fluxo_restaurador","curar"],"texto":"Cura +30%.","classe":"geral","nova":true,"sugestao":{"cor":"#7fa38a","formas":["onda","muralha"],"movimento":"convergir"}},{"nome":"Aparo preciso","seq":["postura_de_aparo","punhal_das_sombras"],"texto":"Crítico garantido.","classe":"geral","nova":true,"sugestao":{"cor":"#7fa38a","formas":["runas","domo"],"movimento":"subir"}},{"nome":"Avalanche humana","seq":["tenacidade","investida","golpe_atordoante"],"texto":"Atordoa todos em volta do alvo.","classe":"geral","nova":true,"sugestao":{"cor":"#7fa38a","formas":["runas","muralha"],"movimento":"girar"}}],"ressonancias":[{"nome":"Impacto","exige":"Força 16","texto":"Golpe corpo a corpo crítico empurra 1 célula.","nova":false},{"nome":"Ricochete","exige":"Destreza 16","texto":"Projétil físico que abate salta para o hostil mais perto (6 de dano).","nova":false},{"nome":"Muralha","exige":"Constituição 16","texto":"Escudos recebidos duram e absorvem 50% mais.","nova":false},{"nome":"Resíduo","exige":"Inteligência 16","texto":"Magias de área deixam os atingidos expostos (+10% de dano recebido) por 3 s.","nova":false},{"nome":"Purificar","exige":"Sabedoria 16","texto":"Usar uma cura tira 1 efeito negativo de você.","nova":false},{"nome":"Presença","exige":"Carisma 16","texto":"No crítico, os hostis a até 2 células hesitam (sem golpes físicos) por 1 s.","nova":false},{"nome":"Lâmina rúnica","exige":"Força 14 + Inteligência 14","texto":"Golpes físicos de contato aplicam o elemento da sua última magia (até 5 s depois).","nova":false},{"nome":"Olhar sereno","exige":"Destreza 14 + Sabedoria 14","texto":"Crítico de projétil devolve 2 de mana.","nova":false},{"nome":"Bastião","exige":"Constituição 14 + Carisma 14","texto":"Aliados a até 3 células levam 10% menos dano.","nova":false},{"nome":"Inamovível","exige":"Força 14 + Constituição 14","texto":"Imune a empurrão e puxão.","nova":false},{"nome":"Mente dupla","exige":"Inteligência 14 + Sabedoria 14","texto":"Seus efeitos ficam 15% mais fortes (soma à potência da Inteligência).","nova":false},{"nome":"Trapaceiro","exige":"Destreza 14 + Carisma 14","texto":"A Troca sombria deixa um espantalho como isca por 6 s.","nova":false},{"nome":"Ímpeto","exige":"Força 14 + Destreza 14","texto":"Crítico corpo a corpo reduz em 1 s a recarga das skills de classe.","nova":true},{"nome":"Disciplina interior","exige":"Força 14 + Sabedoria 14","texto":"Golpe corpo a corpo devolve 1 de mana.","nova":true},{"nome":"Comandante","exige":"Força 14 + Carisma 14","texto":"Seu abate dá +10 de carga de ultimate aos aliados a até 6 células.","nova":true},{"nome":"Engenhoso","exige":"Destreza 14 + Inteligência 14","texto":"Projéteis mágicos atravessam 1 alvo.","nova":true},{"nome":"Resiliente","exige":"Constituição 14 + Sabedoria 14","texto":"Estados negativos duram 25% menos em você.","nova":true},{"nome":"Maestro","exige":"Inteligência 14 + Carisma 14","texto":"Cada combo concluído dá +8 de carga de ultimate.","nova":true},{"nome":"Gladiador","exige":"Força 13 + Destreza 13 + Constituição 13","texto":"Ao usar a ultimate, ganha escudo de 10.","nova":true},{"nome":"Oráculo","exige":"Inteligência 13 + Sabedoria 13 + Carisma 13","texto":"A ultimate enche 15% mais rápido.","nova":true},{"nome":"Senhor da guerra","exige":"Força 13 + Constituição 13 + Carisma 13","texto":"Ao usar a ultimate, os aliados a até 3 células batem +15% por 4 s.","nova":true},{"nome":"Arcano preciso","exige":"Destreza 13 + Inteligência 13 + Sabedoria 13","texto":"Crítico de magia deixa o alvo exposto por 2 s.","nova":true},{"nome":"Sobrevivente","exige":"Destreza 13 + Constituição 13 + Carisma 13","texto":"Abaixo de 30% de vida, a ultimate enche o dobro.","nova":true},{"nome":"Eco ancestral","exige":"Constituição 13 + Inteligência 13 + Sabedoria 13","texto":"Ao encher a ultimate, a próxima skill de classe não gasta mana.","nova":true}],"comumUltimate":"Comum a todas: vinheta escura por 0,3 s, flash de abertura, o nome da ultimate no alto da tela, tremor de câmera (desligado com movimento reduzido) e o dobro de partículas da skill normal."};
+
+  /* =====================================================================
+     VERSÃO 1.1 · 24/10/2026
+     Tudo o que mudou da 1.0 para a 1.1 está neste bloco, aplicado por cima
+     dos dados da 1.0 (D). Cada item alterado ou criado recebe v11 = true,
+     e a página mostra a etiqueta "v1.1" nele.
+     ===================================================================== */
+  var V11 = { versao: '1.1', data: '24/10/2026' };
+  function v11(o) { o.v11 = true; return o; }
+  function setSkill(id, o) { var s = D.skills[id] || { id: id }; Object.keys(o).forEach(function (k) { s[k] = o[k]; }); s.id = id; D.skills[id] = v11(s); return s; }
+  function classe(id) { return D.classes.filter(function (c) { return c.id === id; })[0]; }
+  function setPar(cid, a, b, nome, texto, cores) {
+    var c = classe(cid), x = Math.min(a, b), y = Math.max(a, b);
+    var p = c.pares.filter(function (q) { return q.a === x && q.b === y; })[0];
+    var antes = p.nome; p.nome = nome; p.texto = texto; if (cores) p.cores = cores; p.antes = antes; v11(p);
+  }
+  function comboPorNome(n) { return D.combos.filter(function (c) { return c.nome === n; })[0]; }
+  function novoCombo(classe, nome, seq, texto) { D.combos.push(v11({ id: 'v11_' + D.combos.length, nome: nome, seq: seq, texto: texto, classe: classe, nova: true, ajuste: null })); }
+
+  // v1.1 (24/10/2026): Troca sombria deixa o Arqueiro e vira geral da família Sombra.
+  setSkill('troca_sombria', { familia: 'sombra', papel: 'posicionamento', uso: 'Alvo único, alcance 5.' });
+
+  // v1.1 (24/10/2026): Armadilha de caça entra no lugar da Troca sombria no Arqueiro.
+  setSkill('armadilha_de_caca', {
+    nome: 'Armadilha de caça', nova: true, visual: null,
+    texto: 'Arma uma armadilha a até 4 células. Quem pisa fica enraizado por 1,5 s e marcado. Suas flechas no enraizado contam como Mira firme cheia.',
+    sugestao: { cor: '#8fae4a', texto: 'Ao armar, uma estrela de cordas se fecha no chão; ao disparar, um laço que se aperta em volta das pernas e lascas de madeira.' }
+  });
+  classe('arqueiro').skills[3] = 'armadilha_de_caca';
+  // v1.1 (24/10/2026): as 7 ultimates que usavam a Troca sombria (índice 3) são trocadas pelas da Armadilha.
+  var AR = '#8fae4a', OU = '#d4ac0d';
+  setPar('arqueiro', 0, 3, 'Fio de disparo', 'Estica um fio entre você e a armadilha. Quem cruza é enraizado e leva uma flecha perfurante automática.', [OU, AR]);
+  setPar('arqueiro', 1, 3, 'Campo minado', 'A chuva planta 6 armadilhas pela área, e quem fica preso nelas leva a chuva de novo.', [OU, AR]);
+  setPar('arqueiro', 2, 3, 'Rede de caça', 'Um leque de redes: os atingidos ficam lentos, e dois atingidos que se tocam ficam presos juntos por 2 s.', [OU, AR]);
+  setPar('arqueiro', 3, 4, 'Tocaia', 'Arma 3 armadilhas em volta de você. Cada uma disparada enche a Mira firme na hora.', [AR]);
+  setPar('arqueiro', 3, 5, 'Mina de estilhaços', 'A armadilha puxa todos a até 2 células para o centro e explode em seguida.', [AR, '#ff8a3d']);
+  setPar('arqueiro', 3, 6, 'Rota de fuga', 'Rola 3 vezes, deixando uma armadilha em cada parada.', [AR, OU]);
+  setPar('arqueiro', 3, 7, 'Caçada guiada', 'Armadilhas surgem no caminho do marcado, e cada uma que ele pisa dobra o bônus da marca.', [AR, '#f5c542']);
+
+  // v1.1 (24/10/2026): Olho de águia ativo passa a acelerar a Mira em vez de dar crítico (a Mira cheia já garante crítico).
+  setSkill('olho_de_aguia', { texto: 'Vira ativa: por 6 s, a Mira firme enche no dobro da velocidade e o tiro cheio não a esvazia na primeira vez. Hoje é passiva (+1 de alcance e +5% em projéteis), e esse bônus passa para a Mira firme.' });
+  // v1.1 (24/10/2026): ultimates do Arqueiro que eram só buff ou contradiziam a Mira firme.
+  setPar('arqueiro', 1, 4, 'Olhar da tempestade', 'Por 6 s, cada tiro com a Mira firme cheia faz cair uma chuva de flechas sobre o alvo.');
+  setPar('arqueiro', 4, 6, 'Mira inabalável', 'Por 6 s, levar dano não zera a Mira firme, e o Rolamento fica sem recarga.');
+  (function () { var p = classe('arqueiro').passiva.proposta; p[1] = 'O Olho de águia vira skill ativa de classe (a Mira enche no dobro da velocidade por um tempo). O bônus passivo dele (+1 de alcance e +5% em projéteis) entra na Mira firme e vale sempre.'; classe('arqueiro').passiva.v11 = true; })();
+
+  // v1.1 (24/10/2026): combos do Arqueiro com a Troca sombria. Emboscada passa a ser geral; Sombra em fuga sai.
+  (function () { var e = comboPorNome('Emboscada'); e.classe = 'geral'; e.ajuste = 'v1.1: passa a ser combo geral, porque a Troca sombria virou geral.'; v11(e);
+    D.combos = D.combos.filter(function (c) { return c.nome !== 'Sombra em fuga'; }); })();
+
+  // v1.1 (24/10/2026): Guerreiro. Retaliação vira aparo com atordoamento.
+  setSkill('retaliacao', { texto: 'Postura de 1,5 s: apara o próximo golpe recebido, anula o dano e atordoa o atacante por 1 s. Aparar enche a fúria.' });
+  // v1.1 (24/10/2026): as 7 ultimates de “acumula e devolve” da Retaliação (índice 7) reescritas em torno do aparo.
+  setPar('guerreiro', 0, 7, 'Lâminas em guarda', 'Gira devagar por 3 s aparando todo golpe corpo a corpo. Cada aparo solta uma lâmina que atordoa o atacante por 0,5 s.');
+  setPar('guerreiro', 1, 7, 'Muralha de lâminas', 'Crava o escudo no chão. Por 4 s, você e os aliados atrás dele aparam o primeiro golpe que receberiam.');
+  setPar('guerreiro', 2, 7, 'Brado do desafio', 'Por 4 s, você e os aliados a até 3 células aparam o primeiro golpe recebido. Cada aparo dá +10% de dano ao grupo (até +30%).');
+  setPar('guerreiro', 3, 7, 'Desarme', 'Puxa até 3 hostis. O primeiro golpe de cada um contra você é aparado, e ele fica sem golpes físicos por 2 s.');
+  setPar('guerreiro', 4, 7, 'Lâmina de brasa', 'Por 4 s, cada aparo incendeia o atacante e deixa uma brasa aos pés dele, que explode 1 s depois.');
+  setPar('guerreiro', 5, 7, 'Duelo de honra', 'Provoca o hostil mais forte por 5 s e apara os golpes dele em sequência. No terceiro aparo, ele fica atordoado por 2 s e leva um crítico.');
+  setPar('guerreiro', 6, 7, 'Golpe do juízo', 'Salta sobre um alvo e apara o próximo golpe dele. Se aparar, o golpe de queda executa abaixo de 25% de vida.');
+  // v1.1 (24/10/2026): fúria cheia muda cada skill de classe do Guerreiro.
+  [['redemoinho', '+1 de raio, e os atingidos são puxados 1 célula para dentro.'],
+   ['escudo_de_ferro', 'Escudo em dobro, e o primeiro projétil que bate nele volta ao atirador.'],
+   ['grito_de_guerra', 'Também tira lentidão e medo dos aliados atingidos.'],
+   ['corrente', 'Puxa também os hostis a até 1 célula do alvo.'],
+   ['golpe_flamejante', 'A queimadura pula para quem está a até 1 célula do alvo.'],
+   ['provocacao', 'Alcance de 5 células, e você leva 20% menos dano dos provocados.'],
+   ['salto_esmagador', 'Atordoa por 1 s em vez de 0,5 s.'],
+   ['retaliacao', 'O aparo também atordoa quem está a até 1 célula do atacante.']
+  ].forEach(function (f) { var s = D.skills[f[0]]; s.furia = f[1]; v11(s); });
+  (function () { var p = classe('guerreiro').passiva; p.proposta.push('Usar uma skill de classe com a fúria cheia gasta metade da barra e liga o efeito de fúria daquela skill.'); p.proposta.push('A Retaliação enche a fúria a cada aparo.'); p.v11 = true; })();
+
+  // v1.1 (24/10/2026): Mago. Afinidade, Piscar e Orbe passam a usar o elemento encarnado.
+  setSkill('piscar', { texto: 'Teleporte de até 4 células que deixa, na origem, um eco do elemento encarnado.' });
+  setSkill('orbe_instavel', { texto: 'Orbe lento que carrega o elemento encarnado e explode em área no fim ou ao tocar um hostil.' });
+  setPar('mago', 0, 4, 'Lança dos quatro ventos', 'Quatro lanças, de gelo, fogo, raio e terra, cada uma com o seu estado. A do elemento encarnado sai em dobro.');
+  // v1.1 (24/10/2026): ultimates do Mago que eram só buff ou repetiam o tema “todos os elementos”.
+  setPar('mago', 3, 4, 'Mente elemental', 'Lê a mente do alvo: por 6 s, todas as suas magias nele são críticas e usam o elemento ao qual ele é mais fraco.');
+  setPar('mago', 4, 7, 'Orbe da fusão', 'O orbe guarda as duas últimas encarnações e explode como encarnação dupla, aplicando a fusão em toda a área.');
+  (function () { var p = classe('mago').passiva; p.proposta.push('As gerais de terra, veneno, sombra e sagrado abrem encarnações novas, e trocar de elemento em até 3 s funde os dois por 6 s (ver Sintonia).'); p.v11 = true; })();
+
+  // v1.1 (24/10/2026): Necromante. Comando sepulcral com efeito claro e limite na carga.
+  setSkill('comando_sepulcral', { texto: 'Seus mortos atacam o seu alvo e ganham +30% de velocidade por 4 s. Os que estão longe voltam para o seu lado.' });
+  (function () { var p = classe('necromante').passiva; p.proposta[1] = 'Cada morto seu que cai lutando contra hostis dá +3 de carga na ultimate, no máximo uma vez a cada 2 s.'; p.v11 = true; })();
+  setPar('necromante', 1, 5, 'Sudário vampírico', 'Por 6 s a mortalha drena: cada hostil a até 2 células perde vida, que vira escudo para você e para os mortos perto.');
+  setPar('necromante', 3, 5, 'Marcha fantasma', 'As invocações viram fantasmas por 4 s e atravessam os hostis. Cada hostil atravessado fica lento e definhando.');
+
+  // v1.1 (24/10/2026): Aventureiro (nome mantido). Carga por acerto do falcão e ultimates reescritas.
+  (function () { var p = classe('aventureiro').passiva; p.proposta[3] = 'Cada acerto de skill do falcão dá +2 de carga na ultimate, no máximo uma vez por segundo.'; p.v11 = true; })();
+  setPar('aventureiro', 6, 7, 'Laço inquebrável', 'Por 8 s, cada acerto seu cura o falcão e cada acerto dele cura você, e as skills do falcão ficam sem recarga.');
+  setPar('aventureiro', 2, 6, 'Pilhagem', 'O falcão arranca até 3 efeitos positivos dos hostis na área e os traz para você e os aliados a até 3 células.');
+  setPar('aventureiro', 1, 6, 'Chamado ao lar', 'O falcão grita e volta. Você voa até ele, deixando expostos e lentos os hostis no caminho, e ao pousar cura você e os aliados a até 2 células.');
+  setPar('aventureiro', 1, 7, 'Marca da presa', 'O alvo fica exposto até morrer. Quando morre, a marca salta para o hostil mais perto, e você e o falcão batem +30% no marcado.');
+
+  // v1.1 (24/10/2026): Flecha venenosa e Dardo tóxico diferenciados.
+  setSkill('flecha_venenosa', { texto: 'Alcance longo (8). Veneno lento e fraco por 6 s, que não acumula.', papel: 'dano à distância (longo)', uso: 'Alvo único, alcance 8.' });
+  setSkill('dardo_toxico', { texto: 'Alcance curto (4). Veneno rápido por 3 s, que acumula até 3 vezes.', papel: 'dano à distância (curto)', uso: 'Alvo único, alcance 4.' });
+
+  // v1.1 (24/10/2026): papel e uso das gerais ativas que já existiam (para mostrar a função de cada uma na família).
+  [['investida', 'mobilidade', 'Alvo único, alcance 4.'], ['golpe_atordoante', 'controle', 'Corpo a corpo.'], ['corte_dilacerante', 'dano contínuo', 'Corpo a corpo.'], ['postura_de_aparo', 'defesa', 'Próprio.'],
+   ['seta_arcana', 'dano direto', 'Alvo único, alcance 6.'], ['explosao', 'área', 'Área mirada, alcance 5.'],
+   ['curar', 'cura', 'Aliado ou você.'], ['barreira', 'escudo', 'Aliado ou você.'], ['purificacao', 'limpeza', 'Aliado ou você.'],
+   ['bola_de_fogo', 'área à distância', 'Área mirada, alcance 6.'], ['nevoa_venenosa', 'área', 'Área mirada, alcance 5.'],
+   ['estaca_de_pedra', 'controle', 'Alvo único, alcance 5.'], ['abalo_sismico', 'área', 'Em volta de você.'], ['muralha_de_pedra', 'terreno', 'Linha mirada, alcance 4.'],
+   ['passo_sombrio', 'mobilidade', 'Ponto ou alvo, alcance 4.'], ['punhal_das_sombras', 'dano e marca', 'Alvo único, alcance 4.'], ['veu_da_noite', 'defesa', 'Próprio.'],
+   ['lanca_radiante', 'dano direto', 'Alvo único, alcance 6.'], ['circulo_de_amparo', 'cura em área', 'Área sob você.'], ['chuva_de_estrelas', 'dano em área', 'Área mirada, alcance 6.'],
+   ['onda_de_repulsao', 'controle em área', 'Em volta de você.']
+  ].forEach(function (r) { var s = D.skills[r[0]]; if (!s.papel) s.papel = r[1]; if (!s.uso) s.uso = r[2]; });
+
+  // v1.1 (24/10/2026): 12 gerais ativas novas, para que toda família tenha 4 skills de tecla.
+  function geralNova(id, familia, nome, papel, uso, texto, cor, vis) { setSkill(id, { nome: nome, familia: familia, papel: papel, uso: uso, texto: texto, nova: true, visual: null, sugestao: { cor: cor, texto: vis } }); }
+  geralNova('rastro_igneo', 'fogo', 'Rastro ígneo', 'mobilidade', 'Direção, 4 células.', 'Corre 4 células em linha reta, deixando um rastro de fogo que queima por 3 s.', '#ff8c42', 'Brasas soltando dos pés e línguas de fogo subindo ao longo da linha.');
+  geralNova('anel_de_chamas', 'fogo', 'Anel de chamas', 'controle de terreno', 'Em volta de você, raio 2.', 'Um anel de fogo de raio 2 em volta de você por 4 s. Quem cruza queima e é empurrado 1 célula para fora.', '#ff7b39', 'O anel nasce como um círculo de fagulhas e sobe em línguas de fogo.');
+  geralNova('incinerar', 'fogo', 'Incinerar', 'finalização', 'Alvo único, alcance 4.', 'Consome a queimadura do alvo e causa de uma vez o dano que ela ainda faria, +50%. Sem queimadura, aplica uma curta.', '#ff5e2b', 'O alvo acende por dentro e solta um estouro de fagulhas e fumaça.');
+  geralNova('agulha_mental', 'psiquico', 'Agulha mental', 'dano direto', 'Alvo único, alcance 6.', 'Projétil rápido de dano psíquico que ignora escudos e defesa.', '#d980fa', 'Um fio fino de luz lilás no voo; no impacto, estrelinhas girando sobre a cabeça.');
+  geralNova('telecinese', 'psiquico', 'Telecinese', 'posicionamento', 'Alvo e direção, até 3 células (no celular, arrasto a partir do alvo).', 'Move o hostil selecionado até 3 células na direção escolhida. Se bater em algo, fica atordoado por 0,5 s.', '#c77dea', 'Runas girando em volta do alvo, que flutua com um contorno lilás.');
+  geralNova('pressagio', 'psiquico', 'Presságio', 'defesa', 'Próprio.', 'Por 4 s, você esquiva o primeiro golpe que receberia, e o seu próximo ataque contra quem o tentou é crítico.', '#e2a6ff', 'Um olho de runas se abre sobre a cabeça e se fecha ao esquivar.');
+  geralNova('dissipar', 'arcana', 'Dissipar', 'anti-defesa', 'Área mirada, raio 2, alcance 5.', 'Retira os escudos e até 2 efeitos positivos dos hostis na área. É o espelho da Purificação.', '#9b8cff', 'Runas que se partem em cacos de brilho.');
+  geralNova('runa_amplificadora', 'arcana', 'Runa amplificadora', 'zona de apoio', 'Área sob você, raio 2.', 'Grava uma runa de raio 2 no chão por 6 s. Você e os aliados dentro têm +20% de dano de magia e recargas 20% mais rápidas.', '#8c7dff', 'Círculo de runas girando devagar no chão, pulsando a cada segundo.');
+  geralNova('impulso', 'suporte', 'Impulso', 'mobilidade de grupo', 'Em volta de você, 3 células.', 'Você e os aliados a até 3 células ganham +30% de velocidade por 3 s e perdem lentidão e enraizamento.', '#83dcb6', 'Anel de luz que se abre, com riscos de vento nos pés de cada aliado.');
+  geralNova('seiva_corrosiva', 'veneno', 'Seiva corrosiva', 'defesa reativa', 'Próprio.', 'Por 5 s, quem golpeia você corpo a corpo é envenenado e perde 5 de escudo por golpe.', '#58d68d', 'A pele brilha em verde e pinga gotas que viram bolhas no chão.');
+  geralNova('pedregulho', 'terra', 'Pedregulho', 'dano em linha', 'Direção, 5 células.', 'Arremessa uma rocha que rola 5 células em linha, ferindo e empurrando 1 célula cada hostil no caminho.', '#a1887f', 'Lascas de pedra no lançamento e um rastro de poeira; tremor leve no fim.');
+  geralNova('asas_da_aurora', 'sagrado', 'Asas da aurora', 'mobilidade de resgate', 'Aliado ou ponto, alcance 5.', 'Salta até um aliado a até 5 células e o consagra: ele recupera vida por 4 s. Sem aliado, salta até o ponto escolhido.', '#f7e9a0', 'Asas de luz se abrem por um instante e deixam uma trilha dourada.');
+
+  // v1.1 (24/10/2026): passivas gerais. Duas por família (uma defensiva, uma ofensiva), até 3 ativas além da passiva de classe.
+  // As que já existiam ganham tipo e visual de gatilho (antes mostravam “ao conjurar”, que não faz sentido em passiva).
+  function passiva(id, familia, nome, tipo, texto, cor, vis, nova) { setSkill(id, { nome: nome, familia: familia, tipo: tipo, texto: texto, passiva: true, nova: !!nova, visual: null, sugestao: { cor: cor, texto: vis } }); }
+  passiva('pele_de_pedra', 'terra', 'Pele de pedra', 'defensiva', '+10% de vida máxima e +2 de defesa.', '#a1887f', 'Ao levar um golpe forte, a pele racha em lascas de pedra que se fecham de novo.');
+  passiva('tenacidade', 'suporte', 'Tenacidade', 'defensiva', 'Reduz em 15% a duração dos controles (limite de 40%).', '#a6cfb7', 'Ao sair de um controle antes da hora, um anel verde-claro se rompe em volta.');
+  passiva('fluxo_restaurador', 'suporte', 'Fluxo restaurador', 'ofensiva', 'Cura efetiva dá 25% em escudo, até 8, uma vez a cada 2 s.', '#a6cfb7', 'Quando a cura vira escudo, um fio de luz verde se enrola no alvo.');
+  passiva('disciplina_marcial', 'tecnica', 'Disciplina marcial', 'ofensiva', 'Habilidades físicas custam 10% menos.', '#c9a46b', 'Ao usar uma skill física, um traço curto de lâmina risca o chão.');
+  passiva('couraca_treinada', 'tecnica', 'Couraça treinada', 'defensiva', 'Leva 10% menos dano físico.', '#b0b8c0', 'Ao bloquear parte do dano, faíscas metálicas saltam do peito.', true);
+  passiva('manto_runico', 'arcana', 'Manto rúnico', 'defensiva', 'Leva 15% menos dano de magia.', '#9b8cff', 'Ao absorver magia, runas acendem por um instante sobre a pele.', true);
+  passiva('foco_arcano', 'arcana', 'Foco arcano', 'ofensiva', '+10% de dano de magia, e as magias gerais recarregam 5% mais rápido.', '#8c7dff', 'Ao conjurar, uma runa pequena gira na ponta dos dedos.', true);
+  passiva('sangue_quente', 'fogo', 'Sangue quente', 'defensiva', 'Leva 25% menos dano de fogo, e lentidão e resfriamento duram 20% menos.', '#ff8c42', 'Ao sair de uma lentidão, vapor sobe do corpo.', true);
+  passiva('brasa_interior', 'fogo', 'Brasa interior', 'ofensiva', 'Seus golpes e magias têm 10% de chance de queimar.', '#ff7b39', 'Quando a chance acontece, uma brasa salta do golpe.', true);
+  passiva('imunidade_adquirida', 'veneno', 'Imunidade adquirida', 'defensiva', 'Leva 50% menos dano de veneno, e definhar dura 20% menos.', '#7fd0a2', 'Ao resistir a um veneno, bolhas verdes estouram na pele e somem.', true);
+  passiva('toxinas_potentes', 'veneno', 'Toxinas potentes', 'ofensiva', 'Seus venenos causam +20% e duram +1 s.', '#58d68d', 'Os alvos envenenados por você soltam bolhas mais escuras.', true);
+  passiva('peso_da_rocha', 'terra', 'Peso da rocha', 'ofensiva', '+15% de dano contra alvos enraizados ou atordoados.', '#ad885d', 'No golpe bônus, poeira sobe do chão sob o alvo.', true);
+  passiva('silhueta_esquiva', 'sombra', 'Silhueta esquiva', 'defensiva', '+8% de esquiva, e +15% enquanto você está invisível.', '#765b9e', 'Ao esquivar, o corpo vira fumaça roxa por um instante.', true);
+  passiva('golpe_traicoeiro', 'sombra', 'Golpe traiçoeiro', 'ofensiva', 'Ataques pelas costas causam +20%.', '#6c3483', 'No golpe pelas costas, um risco roxo cruza o alvo.', true);
+  passiva('graca', 'sagrado', 'Graça', 'defensiva', 'Leva 25% menos dano de trevas, e as curas que você recebe rendem +10%.', '#f7e9a0', 'Ao receber cura, uma luz dourada sobe dos pés.', true);
+  passiva('zelo', 'sagrado', 'Zelo', 'ofensiva', '+15% de dano sagrado, e ele ignora 10% da resistência.', '#ffe680', 'O dano sagrado sai com um brilho dourado mais forte.', true);
+  passiva('mente_blindada', 'psiquico', 'Mente blindada', 'defensiva', 'Imune a medo e confusão, e o silêncio dura 30% menos em você.', '#e2a6ff', 'Ao resistir a medo ou confusão, um círculo lilás se fecha em volta da cabeça.', true);
+  passiva('pressao_mental', 'psiquico', 'Pressão mental', 'ofensiva', 'Hostis sob efeito de controle levam +15% de dano de você.', '#d980fa', 'No golpe bônus, ondas lilases saem da cabeça do alvo.', true);
+
+  // v1.1 (24/10/2026): famílias reorganizadas em ativas (4 por família) e passivas (2 por família).
+  var FAM_NOMES = { tecnica: 'Técnica', arcana: 'Arcana', suporte: 'Suporte', fogo: 'Fogo', veneno: 'Veneno', terra: 'Terra', sombra: 'Sombra', sagrado: 'Sagrado', psiquico: 'Psíquico' };
+  var FAM_ORDEM = ['tecnica', 'arcana', 'suporte', 'fogo', 'veneno', 'terra', 'sombra', 'sagrado', 'psiquico'];
+  D.gerais = [
+    ['tecnica', ['investida', 'golpe_atordoante', 'corte_dilacerante', 'postura_de_aparo'], ['couraca_treinada', 'disciplina_marcial']],
+    ['arcana', ['seta_arcana', 'explosao', 'dissipar', 'runa_amplificadora'], ['manto_runico', 'foco_arcano']],
+    ['suporte', ['curar', 'barreira', 'purificacao', 'impulso'], ['tenacidade', 'fluxo_restaurador']],
+    ['fogo', ['bola_de_fogo', 'rastro_igneo', 'anel_de_chamas', 'incinerar'], ['sangue_quente', 'brasa_interior']],
+    ['veneno', ['flecha_venenosa', 'dardo_toxico', 'nevoa_venenosa', 'seiva_corrosiva'], ['imunidade_adquirida', 'toxinas_potentes']],
+    ['terra', ['estaca_de_pedra', 'abalo_sismico', 'muralha_de_pedra', 'pedregulho'], ['pele_de_pedra', 'peso_da_rocha']],
+    ['sombra', ['passo_sombrio', 'punhal_das_sombras', 'veu_da_noite', 'troca_sombria'], ['silhueta_esquiva', 'golpe_traicoeiro']],
+    ['sagrado', ['lanca_radiante', 'circulo_de_amparo', 'chuva_de_estrelas', 'asas_da_aurora'], ['graca', 'zelo']],
+    ['psiquico', ['onda_de_repulsao', 'agulha_mental', 'telecinese', 'pressagio'], ['mente_blindada', 'pressao_mental']]
+  ].map(function (g) { return { id: g[0], familia: FAM_NOMES[g[0]], ativas: g[1], passivas: g[2], ids: g[1].concat(g[2]) }; });
+
+  // v1.1 (24/10/2026): os 4 combos que começavam por uma passiva viram sinergias passivas (passiva não é usada, então não abre sequência).
+  [['Bastião de pedra', 'Com Pele de pedra ativa, atrás da sua Muralha de pedra você recupera 2 de vida por segundo.'],
+   ['Disciplina férrea', 'Com Disciplina marcial ativa, o Golpe atordoante atordoa +0,5 s.'],
+   ['Fluxo de cura', 'Com Fluxo restaurador ativo, o escudo gerado pelo Curar vale o dobro.'],
+   ['Avalanche humana', 'Com Tenacidade ativa, Investida e depois Golpe atordoante atordoa todos em volta do alvo.']
+  ].forEach(function (s) { var c = comboPorNome(s[0]); c.tipo = 'sinergia'; c.texto = s[1]; c.ajuste = 'v1.1: virou sinergia passiva.'; v11(c); });
+
+  // v1.1 (24/10/2026): combos de classe com geral, para que toda skill de classe tenha uma geral parceira.
+  novoCombo('guerreiro', 'Postura inabalável', ['provocacao', 'postura_de_aparo'], 'Cada provocado que ataca você é aparado automaticamente, uma vez por provocado.');
+  novoCombo('guerreiro', 'Moenda de sangue', ['corte_dilacerante', 'redemoinho'], 'O giro espalha o sangramento do alvo para todos os atingidos.');
+  novoCombo('mago', 'Fratura', ['estaca_de_pedra', 'lanca_de_gelo'], 'O alvo enraizado e resfriado estilhaça: leva dano alto e o enraizamento acaba.');
+  novoCombo('mago', 'Eco repulsor', ['piscar', 'onda_de_repulsao'], 'A onda sai do destino e também do eco deixado na origem.');
+  novoCombo('mago', 'Chama sintonizada', ['afinidade_elemental', 'bola_de_fogo'], 'Com fogo encarnado, a bola deixa o chão em chamas por 3 s.');
+  novoCombo('arqueiro', 'Tiro do véu', ['veu_da_noite', 'marca_do_cacador'], 'Enquanto você está invisível, os tiros no marcado não revelam você.');
+  novoCombo('arqueiro', 'Cortina tóxica', ['rolamento', 'nevoa_venenosa'], 'A névoa sai no ponto de onde você rolou e cobre a retirada.');
+  novoCombo('arqueiro', 'Visão profunda', ['olho_de_aguia', 'seta_arcana'], 'A seta ricocheteia entre os marcados.');
+  novoCombo('arqueiro', 'Armadilha pestilenta', ['armadilha_de_caca', 'nevoa_venenosa'], 'A névoa nasce sobre a armadilha, e quem fica preso nela é envenenado em dobro.');
+  novoCombo('arqueiro', 'Fosso de estacas', ['armadilha_de_caca', 'estaca_de_pedra'], 'A estaca brota sob o preso, e o enraizamento dura +1 s.');
+  novoCombo('arqueiro', 'Recuo armado', ['rolamento', 'armadilha_de_caca'], 'A armadilha surge sozinha no ponto de onde você rolou.');
+  novoCombo('necromante', 'Égide da legião', ['barreira', 'comando_sepulcral'], 'A barreira se divide entre os mortos comandados.');
+  novoCombo('necromante', 'Nuvem pestilenta', ['explosao_cadaverica', 'nevoa_venenosa'], 'A explosão vira uma névoa que definha em vez de envenenar.');
+  novoCombo('necromante', 'Prensa', ['ceifa_de_almas', 'muralha_de_pedra'], 'A foice puxa o alvo contra a muralha: dano de colisão e atordoamento.');
+  novoCombo('necromante', 'Assombração', ['mortalha_funebre', 'passo_sombrio'], 'Como fantasma, o passo atravessa os hostis e definha quem atravessa.');
+  novoCombo('necromante', 'Transbordo', ['dizimo_vital', 'curar'], 'A cura que passar da sua vida máxima vai para os mortos próximos.');
+  novoCombo('necromante', 'Mortos consagrados', ['levante_profano', 'lanca_radiante'], 'Os erguidos explodem em luz ao expirar, disparando a reação Trevas e luz.');
+  novoCombo('aventureiro', 'Bote', ['mergulho', 'investida'], 'Você avança até o alvo atordoado, e o golpe é crítico.');
+  novoCombo('aventureiro', 'Golpe às cegas', ['garras_cegantes', 'punhal_das_sombras'], 'O alvo cego leva o punhal como se fosse pelas costas.');
+  novoCombo('aventureiro', 'Penas em brasa', ['tempestade_de_penas', 'bola_de_fogo'], 'A área de penas em volta do falcão passa a queimar.');
+  novoCombo('aventureiro', 'Rastro tóxico', ['rasante', 'nevoa_venenosa'], 'O falcão arrasta a névoa pela linha do rasante.');
+  novoCombo('aventureiro', 'Presa revelada', ['grito_do_falcao', 'lanca_radiante'], 'O alvo exposto também fica consagrado.');
+  novoCombo('aventureiro', 'Sentinela curativa', ['vigia', 'curar'], 'Cada projétil interceptado pelo falcão aumenta a próxima cura em 10%.');
+  novoCombo('aventureiro', 'Mão que recebe', ['retorno_ao_punho', 'curar'], 'A cura dobra se lançada até 2 s depois do retorno.');
+  novoCombo('aventureiro', 'Dentes e garras', ['presa_dupla', 'corte_dilacerante'], 'Se você e o falcão acertam, o sangramento dobra.');
+
+  // v1.1 (24/10/2026): combos novos entre gerais (cruzam famílias que nunca se encontravam).
+  [['Veneno fundido', ['flecha_venenosa', 'dardo_toxico'], 'Os dois venenos viram um só, mais forte, que pula para o hostil mais perto quando acaba.'],
+   ['Veneno silencioso', ['veu_da_noite', 'flecha_venenosa'], 'Atirar invisível não quebra o véu, e o veneno dura +2 s.'],
+   ['Combustão de miasma', ['nevoa_venenosa', 'explosao'], 'A névoa detona: cada hostil dentro leva de uma vez todo o veneno que restava.'],
+   ['Runa sísmica', ['seta_arcana', 'estaca_de_pedra'], 'A estaca brota onde a seta acertou, em qualquer distância.'],
+   ['Alvo fixo', ['golpe_atordoante', 'seta_arcana'], 'A seta no atordoado volta e acerta uma segunda vez.'],
+   ['Isca explosiva', ['troca_sombria', 'explosao'], 'A explosão sai no ponto onde você estava antes da troca, sem precisar mirar.'],
+   ['Encurralado', ['troca_sombria', 'muralha_de_pedra'], 'A muralha sobe entre você e o alvo trocado, e ele fica preso contra ela por 1 s.'],
+   ['Duplo passo', ['passo_sombrio', 'troca_sombria'], 'A troca alcança o dobro da distância e não entra em recarga.'],
+   ['Desequilíbrio', ['onda_de_repulsao', 'punhal_das_sombras'], 'Os empurrados ficam de costas por 1 s, e o punhal conta como ataque pelas costas.'],
+   ['Fogo-fátuo', ['veu_da_noite', 'bola_de_fogo'], 'A bola sai invisível e não pode ser esquivada nem aparada.'],
+   ['Ferida em brasa', ['corte_dilacerante', 'bola_de_fogo'], 'Enquanto o alvo queima e sangra ao mesmo tempo, o sangramento pulsa em dobro.'],
+   ['Sol nascente', ['bola_de_fogo', 'lanca_radiante'], 'O alvo queimado e consagrado vira farol: aliados que o golpeiam recuperam um pouco de vida.'],
+   ['Chama purificadora', ['purificacao', 'bola_de_fogo'], 'A bola tira 1 efeito positivo de cada hostil atingido.'],
+   ['Espaço para respirar', ['onda_de_repulsao', 'curar'], 'A cura também empurra 1 célula os hostis colados no aliado curado.'],
+   ['Dispersão', ['nevoa_venenosa', 'onda_de_repulsao'], 'A onda leva a névoa junto, e ela segue os empurrados.'],
+   ['Contragolpe repulsor', ['postura_de_aparo', 'onda_de_repulsao'], 'Aparar solta a onda sozinha, sem custo e sem recarga.'],
+   ['Toxina consagrada', ['lanca_radiante', 'dardo_toxico'], 'O alvo consagrado e envenenado não pode ser curado por 3 s.'],
+   ['Atropelo tóxico', ['dardo_toxico', 'investida'], 'Investir num envenenado espirra o veneno nos hostis a até 1 célula.'],
+   ['Estrela guia', ['golpe_atordoante', 'chuva_de_estrelas'], 'Três estrelas da chuva são atraídas para o alvo atordoado.'],
+   ['Contágio reverso', ['purificacao', 'nevoa_venenosa'], 'O efeito negativo tirado do aliado passa para os hostis dentro da névoa.'],
+   ['Passo no tremor', ['abalo_sismico', 'passo_sombrio'], 'O passo leva você até um hostil atordoado pelo abalo, e o próximo golpe é crítico.'],
+   ['Golpe perfeito', ['veu_da_noite', 'troca_sombria', 'punhal_das_sombras'], 'Invisível, troca e apunhala: crítico triplo, com limite de dano.'],
+   ['Leito de pedras', ['estaca_de_pedra', 'onda_de_repulsao', 'abalo_sismico'], 'Os empurrados contra as estacas ficam atordoados, e o abalo nasce do ponto da colisão.'],
+   ['Inferno químico', ['dardo_toxico', 'nevoa_venenosa', 'bola_de_fogo'], 'A névoa pega fogo e espalha queimadura em todos dentro, sem tirar o veneno.'],
+   ['Juízo das estrelas', ['lanca_radiante', 'golpe_atordoante', 'chuva_de_estrelas'], 'Toda a chuva converge no alvo consagrado e atordoado.']
+  ].forEach(function (c) { novoCombo('geral', c[0], c[1], c[2]); });
+
+  // v1.1 (24/10/2026): dois combos com gerais para cada uma das 12 gerais novas.
+  [['Fornalha de pedra', ['rastro_igneo', 'muralha_de_pedra'], 'A muralha erguida sobre o rastro vira pedra em brasa: quem encosta queima.'],
+   ['Fuga em cinzas', ['veu_da_noite', 'rastro_igneo'], 'Correr invisível não quebra o véu, e o rastro só acende 1 s depois.'],
+   ['Arena de fogo', ['anel_de_chamas', 'onda_de_repulsao'], 'A onda joga os hostis contra o anel, que os devolve para dentro: queimam duas vezes.'],
+   ['Santuário ardente', ['circulo_de_amparo', 'anel_de_chamas'], 'O anel nasce na borda do círculo, e cada hostil que queima nele cura um pouco os aliados dentro.'],
+   ['Combustão total', ['bola_de_fogo', 'incinerar'], 'Incinera também os queimados a até 2 células do alvo.'],
+   ['Fervura', ['dardo_toxico', 'incinerar'], 'Incinerar um envenenado consome também o veneno e soma os dois danos.'],
+   ['Mente exposta', ['dissipar', 'agulha_mental'], 'No alvo que perdeu o escudo, a agulha silencia por 1 s.'],
+   ['Dor fantasma', ['punhal_das_sombras', 'agulha_mental'], 'A agulha no alvo marcado pelo punhal repete metade do dano do punhal.'],
+   ['Empalar', ['telecinese', 'estaca_de_pedra'], 'Jogar o hostil sobre a estaca causa dano de colisão e enraíza por +1 s.'],
+   ['Afogar', ['telecinese', 'nevoa_venenosa'], 'O hostil arremessado para dentro da névoa fica lento, e o veneno conta em dobro enquanto ele estiver nela.'],
+   ['Antevisão', ['pressagio', 'postura_de_aparo'], 'Os dois primeiros golpes são anulados, e o atacante fica atordoado por 1 s.'],
+   ['Passo previsto', ['pressagio', 'passo_sombrio'], 'Ao esquivar com o Presságio, você aparece atrás do atacante sozinho.'],
+   ['Ruptura de defesas', ['dissipar', 'explosao'], 'Os hostis que perderam o escudo levam a explosão como crítico.'],
+   ['Golpe sem guarda', ['dissipar', 'golpe_atordoante'], 'Em alvo que perdeu o escudo, o atordoamento dura o dobro.'],
+   ['Seta canalizada', ['runa_amplificadora', 'seta_arcana'], 'Dentro da runa, a seta sai 3 vezes seguidas.'],
+   ['Constelação', ['runa_amplificadora', 'chuva_de_estrelas'], 'A chuva cai centrada na runa e dura +2 s.'],
+   ['Carga coletiva', ['impulso', 'investida'], 'Os aliados acelerados avançam junto com você até o alvo.'],
+   ['Escolta', ['barreira', 'impulso'], 'Os aliados que recebem o impulso também ganham metade da barreira.'],
+   ['Lâmina de seiva', ['seiva_corrosiva', 'postura_de_aparo'], 'Cada aparo envenena o atacante em dobro e tira todo o escudo dele.'],
+   ['Muralha corrosiva', ['seiva_corrosiva', 'muralha_de_pedra'], 'A muralha pinga seiva: quem a golpeia fica envenenado.'],
+   ['Avalanche', ['pedregulho', 'abalo_sismico'], 'O abalo nasce onde o pedregulho parou e lança lascas de volta pela linha.'],
+   ['Ricochete de pedra', ['muralha_de_pedra', 'pedregulho'], 'O pedregulho bate na muralha e volta pelo mesmo caminho, acertando de novo.'],
+   ['Pouso sagrado', ['asas_da_aurora', 'circulo_de_amparo'], 'O círculo nasce onde você pousou e dura +2 s.'],
+   ['Lança do resgate', ['asas_da_aurora', 'lanca_radiante'], 'Ao pousar, a lança sai do aliado na direção do hostil mais perto dele.']
+  ].forEach(function (c) { novoCombo('geral', c[0], c[1], c[2]); });
+
+  // v1.1 (24/10/2026): sugestão de visual para os combos novos, seguindo a regra de hoje (duas formas e um movimento, combinação única).
+  (function () {
+    var FORMA = { tecnica: ['corte', 'laminas', 'serrilha'], arcana: ['runas', 'hexagonos', 'selo'], suporte: ['escudo', 'domo', 'abrigo'], fogo: ['fornalha', 'chamas', 'faiscas'],
+      veneno: ['gota', 'bolhas', 'esporos'], terra: ['fissuras', 'lascas', 'muralha'], sombra: ['fumaca', 'silhuetas', 'punhal'], sagrado: ['constelacao', 'coroa', 'raios'], psiquico: ['onda', 'pressao', 'prisma'],
+      guerreiro: ['estandarte', 'elos', 'laminas'], mago: ['cristais', 'prisma', 'orbita'], arqueiro: ['flecha', 'costura', 'fio'], necromante: ['raizes', 'filamentos', 'casulo'], aventureiro: ['leque', 'espiral', 'proa'] };
+    var MOV = ['convergir', 'expandir', 'avancar', 'pulsar', 'girar', 'contrair', 'subir', 'cair'];
+    var usados = {};
+    function chave(f, m) { return f.slice().sort().join('+') + '|' + m; }
+    D.combos.forEach(function (c) { var v = c.visual || c.sugestao; if (v) usados[chave(v.formas, v.movimento)] = true; });
+    function grupo(id) { var s = D.skills[id]; if (s && s.familia && FORMA[s.familia]) return s.familia; var dono = D.classes.filter(function (c) { return c.skills.indexOf(id) >= 0; })[0]; return dono ? dono.id : 'tecnica'; }
+    D.combos.forEach(function (c, n) {
+      if (!c.v11 || c.visual || c.sugestao) return;
+      var ids = c.seq.filter(function (x) { return x !== '@ultimate'; }), g1 = grupo(ids[0]), g2 = grupo(ids[ids.length - 1]);
+      var ult = D.skills[ids[ids.length - 1]], cor = (ult.visual && ult.visual.cor) || (ult.sugestao && ult.sugestao.cor) || '#9a9a9a';
+      for (var t = 0; t < 72; t++) {
+        var f1 = FORMA[g1][t % 3], f2 = FORMA[g2][(Math.floor(t / 3) + 1) % 3], m = MOV[(n + t) % MOV.length];
+        if (f1 === f2) continue;
+        if (!usados[chave([f1, f2], m)]) { usados[chave([f1, f2], m)] = true; c.sugestao = { cor: cor, formas: [f1, f2], movimento: m }; break; }
+      }
+    });
+  })();
+
+  // v1.1 (24/10/2026): sistema de sintonia. A família das 4 gerais de tecla muda a passiva da classe.
+  D.sintonia = {
+    regras: [
+      ['Sintonia', 'Cada família com pelo menos 1 geral nas teclas 3 a 6 liga um efeito na passiva da classe.'],
+      ['Domínio', 'Com 2 ou mais gerais da mesma família, a sintonia dela dobra, e a família deixa a sua marca em qualquer ultimate.'],
+      ['Vertente', 'Com 2 gerais de uma família e 2 de outra, certos pares ligam uma vertente nomeada da classe.'],
+      ['O que conta', 'Só as 4 gerais de tecla. As passivas gerais não contam para a sintonia.']
+    ],
+    dominio: { tecnica: 'Os atingidos sangram por 3 s.', arcana: '+1 célula de raio ou alcance.', suporte: 'Escudo de 8 em você e nos aliados a até 3 células.', fogo: 'Os atingidos queimam.', veneno: 'Os atingidos ficam envenenados.', terra: 'Os atingidos ficam atordoados por 0,5 s.', sombra: 'Você fica invisível por 1,5 s depois de usar.', sagrado: 'Aliados a até 3 células recuperam vida.', psiquico: 'Os atingidos ficam silenciados por 1 s.' },
+    classes: {
+      guerreiro: { tecnica: 'Gerais técnicas enchem a fúria como o ataque básico.', arcana: 'A aura alcança +1 célula.', suporte: 'Com a fúria cheia, curas e escudos gerais que você lança também dobram.', fogo: 'A aura queima.', veneno: 'Cada hostil envenenado perto conta em dobro para a resistência contra grupos.', terra: 'Com a fúria cheia, você não sofre empurrão nem puxão.', sombra: 'Encher a fúria deixa o próximo golpe como ataque pelas costas.', sagrado: 'A cura da aura também alcança aliados a até 2 células (25%).', psiquico: 'Com a fúria cheia, cada pulso da aura faz os hostis hesitarem por 0,5 s.' },
+      mago: { fogo: 'Encarnação de fogo (como hoje).', terra: 'Encarnação de terra: você não sofre empurrão, e magias de área ganham +1 de raio.', veneno: 'Encarnação de veneno: as magias deixam veneno leve, e quem chega perto é envenenado.', sombra: 'Encarnação de trevas: cada magia devolve 5% do dano em vida.', sagrado: 'Encarnação de luz: as magias consagram, e aliados perto recuperam um pouco de vida.', psiquico: 'Não encarna: usar uma geral psíquica estende a encarnação atual em 4 s.', arcana: 'Seta e Explosão renovam a encarnação atual, e o Dardo arcano concentra no dobro da velocidade.', tecnica: 'Golpes físicos renovam a encarnação em 2 s.', suporte: 'Curas e escudos herdam a encarnação (escudo de gelo resfria quem bate, cura de fogo queima em volta).' },
+      arqueiro: { tecnica: 'Acertar uma geral técnica enche 25% da Mira.', arcana: 'O tiro cheio vira mágico e ricocheteia uma vez.', suporte: 'Levar dano com escudo ativo não zera a Mira.', fogo: 'O tiro cheio deixa fogo na linha que atravessou.', veneno: 'O tiro cheio espalha o veneno do alvo para todos os atravessados.', terra: 'O tiro cheio empurra 1 célula e enraíza por 0,5 s o último atingido.', sombra: 'Invisível, a Mira enche no dobro da velocidade.', sagrado: 'O tiro cheio cura os aliados que atravessa.', psiquico: 'O tiro cheio silencia por 1 s.' },
+      necromante: { tecnica: 'Os golpes dos mortos fazem sangrar.', arcana: 'Cada morto que cai solta uma seta no hostil mais perto.', suporte: 'Curas e escudos gerais saltam também para 2 mortos perto do alvo.', fogo: 'Os mortos explodem em chamas ao cair.', veneno: 'Os golpes dos mortos envenenam.', terra: 'Os mortos têm +20% de vida e não sofrem empurrão.', sombra: 'Os mortos ficam translúcidos e esquivam 20% dos golpes.', sagrado: 'Cada morto que cai cura os aliados a até 2 células.', psiquico: 'Um hostil golpeado por 3 ou mais mortos fica aterrorizado por 1 s.' },
+      aventureiro: { tecnica: 'Uma geral técnica no alvo do falcão faz ele golpear junto.', arcana: 'O falcão repete a Seta ou a Explosão com 30% do dano.', suporte: 'Os escudos que você recebe também protegem o falcão.', fogo: 'O Mergulho queima.', veneno: 'As garras envenenam.', terra: 'O Mergulho atordoa também quem está a 1 célula do alvo.', sombra: 'O falcão fica invisível entre ataques, e o primeiro golpe dele é crítico.', sagrado: 'O Retorno ao punho também cura os aliados a até 2 células.', psiquico: 'O Grito do falcão também silencia por 0,5 s.' }
+    },
+    vertentes: {
+      guerreiro: [['Paladino', 'sagrado', 'suporte', 'Com a fúria cheia, a aura cura os aliados com a mesma força com que cura você.'],
+        ['Berserker', 'fogo', 'tecnica', 'Com a fúria cheia, a aura vira chamas, e cada hostil queimando perto enche a fúria.'],
+        ['Carcereiro', 'terra', 'psiquico', 'Os provocados ficam enraizados por 0,5 s ao chegar a 1 célula de você.']],
+      mago: [['Alquimista', 'fogo', 'veneno', 'Toda encarnação dupla vira Miasma ardente, e a explosão final do miasma espalha os dois estados.'],
+        ['Arquimago', 'arcana', 'psiquico', 'A encarnação dura o dobro, e Seta e Agulha contam como magias do elemento encarnado.'],
+        ['Geomante', 'terra', 'fogo', 'A Lava dura o dobro, e quem entra no chão de lava fica enraizado por 0,5 s.']],
+      arqueiro: [['Caçador noturno', 'sombra', 'veneno', 'O tiro cheio feito invisível não revela você e dobra o veneno no alvo.'],
+        ['Atirador de elite', 'arcana', 'tecnica', 'O tiro cheio ricocheteia em até 2 alvos, e cada ricochete enche 15% da próxima Mira.'],
+        ['Sentinela', 'terra', 'sagrado', 'Parado com a Mira cheia, você e os aliados a até 2 células ganham 4 de escudo por segundo (até 12).']],
+      necromante: [['Lich', 'arcana', 'sombra', 'Os mortos lançam setas arcanas em vez de golpear, à distância.'],
+        ['Senhor da praga', 'veneno', 'psiquico', 'Os golpes dos mortos espalham veneno, e o veneno dobra em hostis aterrorizados.'],
+        ['Pastor das almas', 'sagrado', 'suporte', 'Cada morto que cai vira luz que cura os aliados, e o servo volta em 4 s em vez de 8.']],
+      aventureiro: [['Druida', 'terra', 'suporte', 'O falcão ganha a postura de guardião: fica ao seu lado e absorve um golpe a cada 4 s.'],
+        ['Rapina', 'tecnica', 'sombra', 'Toda vez que você acerta uma geral técnica, o falcão ataca o alvo pelas costas, com crítico garantido uma vez a cada 4 s.'],
+        ['Tempestuoso', 'arcana', 'psiquico', 'O falcão repete as suas magias gerais com 50% do dano e silencia por 0,5 s quem acerta.']]
+    },
+    encarnacaoDupla: [['Vapor', 'fogo', 'gelo', 'Os atingidos erram 30% dos golpes.'], ['Plasma', 'fogo', 'raio', 'As magias saltam e queimam.'], ['Supercondução', 'gelo', 'raio', 'Os resfriados conduzem raios em dobro.'],
+      ['Lava', 'fogo', 'terra', 'As magias deixam chão em chamas.'], ['Miasma ardente', 'fogo', 'veneno', 'Queimadura e veneno juntos, que se espalham ao acabar.'], ['Eclipse', 'luz', 'trevas', 'Liga a reação Trevas e luz em toda magia.']]
+  };
+
+
+  /* =====================================================================
+     VERSÃO 1.2 · 24/10/2026
+     Aplicada por cima da 1.1: o Guerreiro reequilibrado (ataque e defesa em
+     cada skill, com o Frenesi), as 15 encarnações duplas que faltavam e a
+     regra de ataque pelas costas. Cada item mexido recebe v12 = true e mostra
+     a etiqueta "v1.2".
+     ===================================================================== */
+  function v12(o) { o.v12 = true; o.v11 = true; return o; }
+  function setSkill12(id, o) { var s = D.skills[id]; Object.keys(o).forEach(function (k) { s[k] = o[k]; }); return v12(s); }
+  function setPar12(cid, a, b, nome, texto) {
+    var c = classe(cid), x = Math.min(a, b), y = Math.max(a, b);
+    var p = c.pares.filter(function (q) { return q.a === x && q.b === y; })[0];
+    if (!p.antes) p.antes = p.nome; p.nome = nome; p.texto = texto; v12(p);
+  }
+  function trocarTermos(t) {
+    return t.replace(/Provocação/g, 'Desafio').replace(/Provoca/g, 'Desafia').replace(/provocad/g, 'desafiad').replace(/provoca/g, 'desafia')
+      .replace(/Com a fúria cheia/g, 'No Frenesi').replace(/com a fúria cheia/g, 'no Frenesi').replace(/Retaliação/g, 'Contragolpe')
+      .replace(/Golpe flamejante/g, 'Lâmina em brasa').replace(/Escudo de ferro/g, 'Investida de escudo').replace(/Grito de guerra/g, 'Brado');
+  }
+
+  // v1.2 (24/10/2026): as 8 skills do Guerreiro. Os ids das skills renomeadas mudam no código (ver idNovo).
+  [['redemoinho', null, 'Redemoinho', 'Gira e acerta tudo em volta. Cada hostil atingido dá 2 de escudo, até 10.', '+1 de raio, e os atingidos são puxados 1 célula para dentro.', 'Imagens residuais da arma em volta, com um funil de faíscas metálicas.'],
+   ['escudo_de_ferro', 'investida_de_escudo', 'Investida de escudo', 'Avança 2 células com o escudo à frente, bloqueando projéteis frontais durante o avanço. Cada hostil atingido é empurrado 1 célula e dá 4 de escudo, até 16.', 'Avança 4 células, e o primeiro atingido fica atordoado por 0,5 s.', 'Placas hexagonais de metal se montam na frente do corpo, e o impacto solta faíscas em leque.'],
+   ['grito_de_guerra', 'brado', 'Brado', 'Os aliados próximos batem mais, e uma onda curta empurra os hostis 1 célula, com dano leve.', 'A onda empurra 2 células e tira lentidão e medo dos aliados.', 'Uma onda de choque visível no chão, levantando poeira em anel.'],
+   ['corrente', null, 'Corrente', 'Puxa o alvo até você, e o próximo golpe nele é crítico.', 'Puxa também os hostis a até 1 célula do alvo.', 'Elos que brilham em brasa durante o puxão.'],
+   ['golpe_flamejante', 'lamina_em_brasa', 'Lâmina em brasa', 'Carrega 0,5 s e solta um arco de fogo em cone de 3 células. Com a fúria acima da metade, o arco é maior e deixa o chão em brasa por 2 s.', 'Sai sem tempo de carga.', 'A lâmina esquenta do cinza ao laranja durante a carga e corta deixando um rastro de fogo no ar.'],
+   ['provocacao', 'desafio', 'Desafio', 'Os hostis a até 3 células passam a atacar você por 3 s e levam +15% de dano de você enquanto isso. Cada desafiado dá fúria.', 'Alcance de 5 células, e o bônus sobe para +25%.', 'Correntes de luz vermelha saem do peito e se prendem em cada desafiado, esticando quando eles se afastam.'],
+   ['salto_esmagador', null, 'Salto esmagador', 'Salta até 4 células e atordoa em volta por 0,5 s ao cair.', 'Atordoa por 1 s.', 'Uma sombra cresce no ponto de queda antes do impacto, e a cratera fica com rachaduras incandescentes por 2 s.'],
+   ['retaliacao', 'contragolpe', 'Contragolpe', 'Postura de 1,5 s: apara o próximo golpe, anula o dano, atordoa o atacante por 1 s e responde na hora com um golpe em arco de 180° à frente. Aparar enche a fúria.', 'O arco vira 360°.', 'Congelamento de 60 ms no aparo, um anel branco de impacto e o arco da lâmina em vermelho.']
+  ].forEach(function (r) {
+    var s = D.skills[r[0]], cor = (s.sugestao && s.sugestao.cor) || (s.visual && s.visual.cor) || '#c0392b';
+    setSkill12(r[0], { idNovo: r[1], nome: r[2], texto: r[3], furia: r[4], sugestao: { cor: cor, texto: r[5] } });
+  });
+
+  // v1.2 (24/10/2026): passiva do Guerreiro com o Frenesi.
+  (function () {
+    var c = classe('guerreiro'), p = c.passiva;
+    p.proposta = [
+      'Princípio: cada skill tem um lado de ataque e um de defesa, e a fúria decide qual pesa mais. O Guerreiro se protege batendo e bate mais quando se arrisca.',
+      'Tudo o que vale hoje continua, com as três mudanças abaixo.',
+      'A resistência contra grupos cai de 15% para 10%. A proteção que sai volta como escudo por acerto no Redemoinho (até 10) e na Investida de escudo (até 16), ou seja, só para quem está batendo.',
+      'Até a metade, a fúria funciona como hoje, alimentando a aura e as curas.',
+      'Fúria cheia liga o Frenesi: por 6 s, +20% de dano e +15% de velocidade de ataque, mas a resistência contra grupos vai a zero. As curas dobradas continuam. No fim, a barra zera.',
+      'Durante o Frenesi, cada skill de classe tem o seu efeito de fúria. Isso substitui a regra da 1.1 de gastar metade da barra a cada skill.',
+      'Encher a fúria dá +15 de carga na ultimate. O Desafio e o Contragolpe também enchem a fúria.'
+    ];
+    p.visualSugestao = 'O rastro da lâmina muda de cor com a fúria: cinza, vermelho na metade e laranja com brasas no Frenesi. No Frenesi, brasas sobem do corpo e os olhos acendem.';
+    v12(p);
+    c.linguagem = 'Pausa de 40 a 60 ms em todo golpe forte, rastro da lâmina na cor da fúria e rachaduras no chão que somem em 2 s.';
+    c.pares.forEach(function (q) { var t = trocarTermos(q.texto); if (t !== q.texto) { q.texto = t; v12(q); } });
+  })();
+
+  // v1.2 (24/10/2026): as 15 ultimates do Guerreiro que mudam (índices: 0 Redemoinho, 1 Investida de escudo, 2 Brado,
+  // 3 Corrente, 4 Lâmina em brasa, 5 Desafio, 6 Salto esmagador, 7 Contragolpe).
+  setPar12('guerreiro', 0, 1, 'Ciclone de aço', 'Gira andando por 3 s com o escudo girando junto, bloqueando projéteis. Cada hostil atingido dá 3 de escudo (até 15), e no fim o escudo acumulado explode em dano em volta.');
+  setPar12('guerreiro', 0, 4, 'Vórtice ígneo', 'O giro solta arcos de fogo em todas as direções e deixa um anel de brasa que se fecha para o centro.');
+  setPar12('guerreiro', 0, 5, 'Olho do furacão', 'Desafia todos a até 5 células. Quem chega perto é arremessado pelo giro e leva +15%; você não sofre empurrão.');
+  setPar12('guerreiro', 0, 7, 'Lâminas em guarda', 'Gira devagar por 3 s. Cada golpe corpo a corpo recebido é aparado e respondido com um contragolpe em arco.');
+  setPar12('guerreiro', 1, 2, 'Formação de choque', 'Você e os aliados a até 4 células avançam juntos 3 células atrás do seu escudo. Os hostis no caminho são empurrados e atordoados por 0,5 s, e cada aliado ganha 6 de escudo.');
+  setPar12('guerreiro', 1, 3, 'Aríete acorrentado', 'Investe com o escudo e acorrenta os hostis a até 3 células do caminho. Todos são arrastados junto e esmagados no ponto final.');
+  setPar12('guerreiro', 1, 4, 'Égide flamejante', 'Avança com o escudo em brasa, deixando um rastro de fogo. Por 5 s, quem golpeia você queima, e no fim o escudo explode em chamas.');
+  setPar12('guerreiro', 1, 5, 'Carga do desafiante', 'Investe até o hostil mais forte e desafia todos a até 5 células, ganhando escudo por desafiado. Cada golpe que o escudo absorve aumenta o seu próximo golpe em 5% (até 50%).');
+  setPar12('guerreiro', 1, 7, 'Parede de aço', 'Avança 3 células com o escudo, aparando tudo à frente. Cada aparo responde com um contragolpe no atacante.');
+  setPar12('guerreiro', 2, 4, 'Brado incandescente', 'Um brado em cone que incendeia. Os aliados atingidos soltam arcos de fogo nos golpes por 6 s.');
+  setPar12('guerreiro', 2, 5, 'Rugido do tirano', 'Os hostis a até 5 células fogem aterrorizados por 2 s e, ao voltar, estão desafiados por você.');
+  setPar12('guerreiro', 2, 7, 'Brado do desafio', 'Por 4 s, você e os aliados a até 3 células aparam o primeiro golpe e respondem com um contragolpe. Cada contragolpe dá +10% de dano ao grupo (até +30%).');
+  setPar12('guerreiro', 3, 7, 'Desarme', 'Puxa até 3 hostis. O primeiro golpe de cada um é aparado e respondido, e ele fica sem golpes físicos por 2 s.');
+  setPar12('guerreiro', 4, 7, 'Riposta ígnea', 'Por 4 s, cada aparo responde com um arco de fogo e deixa uma brasa aos pés do atacante, que explode 1 s depois.');
+  setPar12('guerreiro', 5, 6, 'Desafio do titã', 'Salta sobre o mais forte, desafia todos e entra em Frenesi na hora, sem perder a resistência durante os primeiros 4 s.');
+
+  // v1.2 (24/10/2026): combos do Guerreiro afetados.
+  [['Contra-ataque de ferro', 'O alvo empurrado contra uma parede ou outro hostil fica atordoado o dobro.'],
+   ['Forja de guerra', 'A corrente puxa de volta o alvo empurrado, e a lâmina sai sem carga nele.'],
+   ['Muralha desafiadora', 'Os empurrados já ficam desafiados, e cada um dá 4 de escudo a mais.'],
+   ['Aríete flamejante', 'Depois de avançar, a lâmina sai sem tempo de carga.'],
+   ['Desforra flamejante', 'O contragolpe sai em chamas, e a lâmina seguinte ganha +1 célula de alcance.'],
+   ['Forja viva', 'O giro queima todos os atingidos, e a lâmina é crítica nos desafiados.']
+  ].forEach(function (r) { var c = comboPorNome(r[0]); if (c) { c.texto = r[1]; c.ajuste = 'v1.2: revisto com o Guerreiro novo.'; v12(c); } });
+  D.combos.forEach(function (c) { var t = trocarTermos(c.texto); if (t !== c.texto) { c.texto = t; v12(c); } });
+  D.fusoes.forEach(function (f) { if (f[0] === 'Ciclone flamejante') { f[2] = 'Guerreiro. v1.2: passa a soltar arcos de fogo durante o giro.'; f[3] = true; } });
+  (function () {
+    var st = D.sintonia;
+    Object.keys(st.classes.guerreiro).forEach(function (k) { st.classes.guerreiro[k] = trocarTermos(st.classes.guerreiro[k]); });
+    st.vertentes.guerreiro.forEach(function (v) { v[3] = trocarTermos(v[3]); });
+  })();
+
+  // v1.2 (24/10/2026): as 15 encarnações duplas que faltavam (7 elementos, 21 pares).
+  [['Permafrost', 'gelo', 'terra', 'O chão congelado enraíza quem fica 2 s nele.'],
+   ['Névoa gélida', 'gelo', 'veneno', 'O veneno também resfria, e o envenenado resfriado não recebe cura.'],
+   ['Inverno sombrio', 'gelo', 'trevas', 'As magias resfriam e definham; quem morre congelado congela os vizinhos.'],
+   ['Aurora', 'gelo', 'luz', 'As magias resfriam os hostis e dão 3 de escudo aos aliados a até 2 células.'],
+   ['Magnetita', 'raio', 'terra', 'As magias puxam 1 célula, em direção ao alvo, os eletrizados próximos.'],
+   ['Neurotoxina', 'raio', 'veneno', 'O envenenado eletrizado fica atordoado por 0,3 s a cada pulso, no máximo uma vez a cada 2 s.'],
+   ['Relâmpago negro', 'raio', 'trevas', 'Os raios saltam entre marcados e drenam 5% do dano em vida.'],
+   ['Fulgor', 'raio', 'luz', 'Os raios cegam (30% de erro) e curam os aliados que atravessam.'],
+   ['Chama negra', 'fogo', 'trevas', 'A queimadura impede a cura do alvo.'],
+   ['Chama sagrada', 'fogo', 'luz', 'A queimadura consagra: quem acerta o alvo se cura.'],
+   ['Lodo tóxico', 'terra', 'veneno', 'As magias deixam lama envenenada que atola.'],
+   ['Túmulo', 'terra', 'trevas', 'O hostil abatido vira estacas de osso que enraízam os vizinhos.'],
+   ['Santuário de pedra', 'terra', 'luz', 'Cada magia dá 2 de escudo aos aliados perto (até 10).'],
+   ['Pestilência', 'veneno', 'trevas', 'Quando o alvo morre, o veneno pula para quem estiver a até 2 células.'],
+   ['Purgação', 'veneno', 'luz', 'As magias envenenam os hostis e tiram 1 efeito negativo dos aliados atingidos.']
+  ].forEach(function (x) { x.v12 = true; D.sintonia.encarnacaoDupla.push(x); });
+
+  var S = D.skills;
+  function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+  function nomeSk(id) { return id === '@ultimate' ? 'Ultimate' : (S[id] ? S[id].nome : id); }
+  function etiqueta(txt, cls) { return el('span', 'etiqueta' + (cls ? ' ' + cls : ''), txt); }
+  // v1.1 (24/10/2026): etiqueta para tudo o que mudou nesta versão.
+  function tagV(o, alvo) { if (o && o.v12) alvo.appendChild(etiqueta('v1.2', 'v11')); else if (o && o.v11) alvo.appendChild(etiqueta('v1.1', 'v11')); }
+  function ehAtivaGeral(id) { return D.gerais.some(function (g) { return g.ativas.indexOf(id) >= 0; }); }
+  function linhaVisual(sk) {
+    var v = sk.visual, sug = sk.sugestao, d = el('div', 'visual');
+    var bola = el('i'); var cor = (v && v.cor) || (sug && sug.cor) || null;
+    if (cor) bola.style.background = cor; d.appendChild(bola);
+    var t = el('span'); var forte = el('em', null, v ? 'Visual hoje: ' : 'Sugestão de visual: ');
+    t.appendChild(forte); t.appendChild(document.createTextNode(v ? v.texto : (sug ? sug.texto : 'sem efeito próprio.')));
+    d.appendChild(t);
+    if (v && sug && sk.v12) { var t2 = el('span'); t2.style.gridColumn = '2'; t2.appendChild(el('em', null, 'Sugestão de visual (v1.2): ')); t2.appendChild(document.createTextNode(sug.texto)); d.appendChild(t2); }
+    return d;
+  }
+
+  // ---------- Números ----------
+  // v1.1 (24/10/2026): contagens refeitas com ativas e passivas gerais separadas.
+  var novasSkills = D.classes.reduce(function (n, c) { return n + c.skills.filter(function (k) { return S[k].nova; }).length; }, 0);
+  var ativasG = D.gerais.reduce(function (n, g) { return n + g.ativas.length; }, 0), passG = D.gerais.reduce(function (n, g) { return n + g.passivas.length; }, 0);
+  var ativasNovas = D.gerais.reduce(function (n, g) { return n + g.ativas.filter(function (k) { return S[k].nova; }).length; }, 0);
+  var passNovas = D.gerais.reduce(function (n, g) { return n + g.passivas.filter(function (k) { return S[k].nova; }).length; }, 0);
+  var combosNovos = D.combos.filter(function (c) { return c.nova; }).length;
+  var ressNovas = D.ressonancias.filter(function (r) { return r.nova; }).length;
+  [[D.classes.length * 8, novasSkills, 'skills de classe (8 por classe)'], [D.classes.length * 28, D.classes.length * 28, 'ultimates (28 por classe)'],
+   [ativasG, ativasNovas, 'gerais de tecla (4 por família)'], [passG, passNovas, 'passivas gerais (até 3 ativas)'], [D.combos.length, combosNovos, 'combos e sinergias'],
+   [D.ressonancias.length, ressNovas, 'ressonâncias'], [7, 0, 'skills na barra (2 + 4 + ultimate)']].forEach(function (c) {
+    var d = el('div', 'contagem'), b = el('b', null, String(c[0]) + ' ');
+    if (c[1]) b.appendChild(el('small', null, c[1] === c[0] ? 'todas novas' : '+' + c[1] + ' novas'));
+    d.appendChild(b); d.appendChild(el('span', null, c[2])); document.getElementById('contagens').appendChild(d);
+  });
+
+  // ---------- Fichas de classe ----------
+  var abas = document.getElementById('abas'), ficha = document.getElementById('ficha');
+  var atual = null, par = [0, 1], realce = null;
+  function corClasse(id) { return 'var(--c-' + id + ')'; }
+  D.classes.forEach(function (c, i) {
+    var b = el('button', 'aba', c.nome); b.type = 'button'; b.setAttribute('role', 'tab'); b.id = 'aba-' + c.id;
+    b.style.setProperty('--cl', corClasse(c.id));
+    b.addEventListener('click', function () { abrir(i); });
+    abas.appendChild(b);
+  });
+  function abrir(i) {
+    atual = D.classes[i]; par = [0, 1]; realce = null;
+    Array.prototype.forEach.call(abas.children, function (b, j) { b.setAttribute('aria-selected', String(j === i)); });
+    ficha.style.setProperty('--cl', corClasse(atual.id));
+    ficha.setAttribute('aria-labelledby', 'aba-' + atual.id);
+    desenharFicha();
+  }
+  function ultDoPar(a, b) { var x = Math.min(a, b), y = Math.max(a, b); return atual.pares.filter(function (p) { return p.a === x && p.b === y; })[0]; }
+  function desenharFicha() {
+    var c = atual; ficha.textContent = '';
+    var topo = el('div', 'ficha-topo'); topo.appendChild(el('h3', null, c.nome)); topo.appendChild(el('p', null, c.tema + '. Geral inicial (tecla 3): ' + nomeSk(c.geral) + '.'));
+    ficha.appendChild(topo);
+    var pv = c.passiva, bloco = el('div', 'passiva');
+    var cab = el('div', 'linha'); cab.appendChild(el('h4', null, 'Passiva da classe: ' + pv.nome)); cab.appendChild(etiqueta('sempre ativa'));
+    bloco.appendChild(cab);
+    var cols = el('div', 'passiva-cols');
+    [['Hoje', pv.hoje, pv.visualHoje, 'Visual hoje: '], ['Na proposta', pv.proposta, pv.visualSugestao, 'Sugestão de visual: ']].forEach(function (col, j) {
+      var d = el('div', 'passiva-col' + (j ? ' nova' : '')); d.appendChild(el('span', 'rotulo', col[0]));
+      if (j) tagV(pv, d); // v1.1 (24/10/2026)
+      var ul = el('ul'); col[1].forEach(function (t) { ul.appendChild(el('li', null, t)); }); d.appendChild(ul);
+      var vv = el('div', 'visual'); vv.appendChild(el('i')); var sp = el('span'); sp.appendChild(el('em', null, col[3])); sp.appendChild(document.createTextNode(col[2])); vv.appendChild(sp);
+      d.appendChild(vv); cols.appendChild(d);
+    });
+    bloco.appendChild(cols); ficha.appendChild(bloco);
+    ficha.appendChild(el('h4', null, 'As 8 skills de classe'));
+    ficha.appendChild(el('p', 'dica', 'Toque numa skill para acender as ultimates e os combos em que ela entra.'));
+    var grade = el('div', 'skills');
+    c.skills.forEach(function (id, idx) {
+      var sk = S[id], card = el('button', 'skill' + (realce === idx ? ' acesa' : '')); card.type = 'button';
+      card.setAttribute('aria-pressed', String(realce === idx));
+      var l = el('div', 'linha'); l.appendChild(el('b', null, sk.nome));
+      if (idx < 2) l.appendChild(etiqueta('★ inicial', 'ini'));
+      if (sk.nova) l.appendChild(etiqueta('nova', 'novo'));
+      if (sk.viraAtiva) l.appendChild(etiqueta('era passiva', 'novo'));
+      tagV(sk, l); // v1.1 (24/10/2026)
+      card.appendChild(l); card.appendChild(el('p', null, sk.texto || ''));
+      // v1.1 (24/10/2026): efeito com a fúria cheia (Guerreiro).
+      if (sk.furia) { var fu = el('p', 'furia'); fu.appendChild(el('em', null, 'No Frenesi: ')); fu.appendChild(document.createTextNode(sk.furia)); card.appendChild(fu); }
+      card.appendChild(linhaVisual(sk));
+      card.addEventListener('click', function () { realce = realce === idx ? null : idx; desenharFicha(); });
+      grade.appendChild(card);
+    });
+    ficha.appendChild(grade);
+    desenharSintonia(c); // v1.1 (24/10/2026)
+
+    ficha.appendChild(el('h4', null, 'Monte o par: a ultimate'));
+    var mont = el('div', 'montador'), esq = el('div'), dir = el('div', 'ultimate');
+    esq.style.display = 'grid'; esq.style.gap = '10px'; esq.style.minWidth = '0';
+    var sel = el('div', 'seletores');
+    [0, 1].forEach(function (k) {
+      var lab = el('label', null, 'Tecla ' + (k + 1)), s = el('select'); s.id = 'tecla-' + (k + 1);
+      c.skills.forEach(function (id, idx) { var o = el('option', null, S[id].nome); o.value = String(idx); if (idx === par[k]) o.selected = true; s.appendChild(o); });
+      s.addEventListener('change', function () {
+        var v = Number(s.value); if (v === par[1 - k]) par[1 - k] = par[k]; par[k] = v; desenharFicha();
+      });
+      lab.appendChild(s); sel.appendChild(lab);
+    });
+    esq.appendChild(sel);
+    var mw = el('div', 'matriz-wrap'), t = el('table', 'matriz'), th = el('tr');
+    th.appendChild(el('th'));
+    c.skills.forEach(function (id) { th.appendChild(el('th', null, S[id].nome)); });
+    var thead = el('thead'); thead.appendChild(th); t.appendChild(thead);
+    var tb = el('tbody');
+    c.skills.forEach(function (ida, a) {
+      var tr = el('tr'); tr.appendChild(el('th', 'lin', S[ida].nome));
+      c.skills.forEach(function (idb, b) {
+        var td = el('td');
+        if (b <= a) { td.className = 'vazio'; tr.appendChild(td); return; }
+        var u = ultDoPar(a, b), bt = el('button', 'celula', u.nome); bt.type = 'button';
+        bt.setAttribute('aria-label', S[ida].nome + ' + ' + S[idb].nome + ': ' + u.nome);
+        var esc = Math.min(par[0], par[1]) === a && Math.max(par[0], par[1]) === b;
+        if (u.v11) bt.classList.add('v11'); // v1.1 (24/10/2026): marca as ultimates reescritas
+        if (esc) bt.classList.add('escolhida');
+        else if (realce !== null && (realce === a || realce === b)) bt.classList.add('acesa');
+        bt.addEventListener('click', function () { par = [a, b]; desenharFicha(); });
+        td.appendChild(bt); tr.appendChild(td);
+      });
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); mw.appendChild(t); esq.appendChild(mw);
+    mont.appendChild(esq);
+    var u = ultDoPar(par[0], par[1]);
+    dir.appendChild(el('span', 'rotulo', 'ultimate do par'));
+    dir.appendChild(el('h4', null, u.nome));
+    dir.appendChild(el('span', 'par', S[c.skills[u.a]].nome + ' + ' + S[c.skills[u.b]].nome));
+    if (u.v11) { var tv11 = el('div', 'linha'); tagV(u, tv11); if (u.antes && u.antes !== u.nome) tv11.appendChild(el('span', 'estado', 'antes: ' + u.antes)); dir.appendChild(tv11); } // v1.1 (24/10/2026)
+    var fx = el('div', 'faixa'); fx.style.background = u.cores.length > 1 ? 'linear-gradient(90deg,' + u.cores[0] + ',' + u.cores[1] + ')' : (u.cores[0] || 'var(--line)');
+    dir.appendChild(fx);
+    dir.appendChild(el('p', null, u.texto));
+    var vis = el('div', 'visual'), bolinha = el('i'); bolinha.style.background = u.cores[0] || 'transparent'; vis.appendChild(bolinha);
+    var tv = el('span'); tv.appendChild(el('em', null, 'Sugestão de visual: '));
+    tv.appendChild(document.createTextNode('as cores de ' + S[c.skills[u.a]].nome + ' e ' + S[c.skills[u.b]].nome + ' juntas. ' + c.linguagem));
+    vis.appendChild(tv); dir.appendChild(vis);
+    dir.appendChild(el('p', 'dica', D.comumUltimate));
+    mont.appendChild(dir); ficha.appendChild(mont);
+
+    ficha.appendChild(el('h4', null, 'Combos da classe'));
+    var cs = D.combos.filter(function (x) { return x.classe === c.id; });
+    var tab = el('div', 'tabela'), tt = el('table', 'lista');
+    tt.innerHTML = '<thead><tr><th>Combo</th><th>Sequência</th><th>Efeito</th></tr></thead>';
+    var b2 = el('tbody');
+    cs.forEach(function (x) {
+      var tr = el('tr'); var envolve = realce !== null && x.seq.indexOf(c.skills[realce]) >= 0;
+      if (envolve) tr.className = 'acesa';
+      var n = el('td', 'nome', x.nome + ' '); if (x.nova) n.appendChild(etiqueta('novo', 'novo')); if (x.ajuste) n.appendChild(etiqueta('ajustado')); tagV(x, n);
+      tr.appendChild(n); tr.appendChild(el('td', 'seq', textoSeq(x))); tr.appendChild(el('td', null, x.texto)); b2.appendChild(tr);
+    });
+    tt.appendChild(b2); tab.appendChild(tt); ficha.appendChild(tab);
+  }
+  // v1.1 (24/10/2026): bloco de sintonia na ficha, com um montador das 4 gerais de tecla.
+  var escolhaGerais = {};
+  function desenharSintonia(c) {
+    var st = D.sintonia, box = el('div', 'sintonia');
+    var cab = el('div', 'linha'); cab.appendChild(el('h4', null, 'Sintonia com as gerais')); cab.appendChild(etiqueta('v1.1', 'v11')); box.appendChild(cab);
+    box.appendChild(el('p', 'estado', 'Escolha as 4 gerais de tecla para ver o que liga na passiva. As linhas acesas estão em sintonia; as douradas, em Domínio.'));
+    if (!escolhaGerais[c.id]) escolhaGerais[c.id] = [c.geral, '', '', ''];
+    var esc = escolhaGerais[c.id], sel = el('div', 'sint-sel');
+    esc.forEach(function (val, k) {
+      var lab = el('label', null, 'Tecla ' + (k + 3)), s = el('select'); s.appendChild(el('option', null, '—')).value = '';
+      D.gerais.forEach(function (g) {
+        var og = el('optgroup'); og.label = g.familia;
+        g.ativas.forEach(function (id) { var o = el('option', null, S[id].nome); o.value = id; if (id === val) o.selected = true; if (esc.indexOf(id) >= 0 && id !== val) o.disabled = true; og.appendChild(o); });
+        s.appendChild(og);
+      });
+      s.addEventListener('change', function () { esc[k] = s.value; desenharFicha(); });
+      lab.appendChild(s); sel.appendChild(lab);
+    });
+    box.appendChild(sel);
+    var conta = {}; esc.forEach(function (id) { if (!id) return; var f = S[id].familia; conta[f] = (conta[f] || 0) + 1; });
+    var tab = el('div', 'tabela'), t = el('table', 'lista'); t.innerHTML = '<thead><tr><th>Família</th><th>Sintonia na passiva</th><th>No Domínio</th></tr></thead>';
+    var tb = el('tbody');
+    FAM_ORDEM.forEach(function (f) {
+      var tr = el('tr'); if (conta[f] >= 2) tr.className = 'dominio'; else if (conta[f]) tr.className = 'ligada';
+      tr.appendChild(el('td', 'nome', FAM_NOMES[f] + (conta[f] ? ' ×' + conta[f] : '')));
+      tr.appendChild(el('td', null, st.classes[c.id][f])); tr.appendChild(el('td', null, 'Sintonia em dobro. Ultimate: ' + st.dominio[f].charAt(0).toLowerCase() + st.dominio[f].slice(1)));
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); tab.appendChild(t); box.appendChild(tab);
+    box.appendChild(el('h4', null, 'Vertentes (2 + 2)'));
+    var vs = el('div', 'vertentes');
+    st.vertentes[c.id].forEach(function (v) {
+      var liga = conta[v[1]] >= 2 && conta[v[2]] >= 2, d = el('div', 'vertente' + (liga ? ' ligada' : ''));
+      var l = el('div', 'linha'); l.appendChild(el('b', null, v[0])); if (liga) l.appendChild(etiqueta('ligada', 'novo')); d.appendChild(l);
+      d.appendChild(el('span', 'estado', '2 de ' + FAM_NOMES[v[1]] + ' + 2 de ' + FAM_NOMES[v[2]]));
+      d.appendChild(el('p', null, v[3])); vs.appendChild(d);
+    });
+    box.appendChild(vs);
+    if (c.id === 'mago') {
+      box.appendChild(el('h4', null, 'Encarnação dupla'));
+      box.appendChild(el('p', 'estado', 'Trocar de um elemento para outro em até 3 s funde os dois por 6 s. São 7 elementos (fogo, gelo, raio, terra, veneno, trevas e luz) e 21 fusões, uma para cada par.'));
+      var t2 = el('table', 'lista'), w2 = el('div', 'tabela'); t2.innerHTML = '<thead><tr><th>Fusão</th><th>Elementos</th><th>Efeito</th></tr></thead>';
+      var b2 = el('tbody'); st.encarnacaoDupla.forEach(function (x) { var tr = el('tr'); var nx = el('td', 'nome', x[0] + ' '); if (x.v12) nx.appendChild(etiqueta('v1.2', 'v11')); tr.appendChild(nx); tr.appendChild(el('td', null, x[1] + ' + ' + x[2])); tr.appendChild(el('td', null, x[3])); b2.appendChild(tr); });
+      t2.appendChild(b2); w2.appendChild(t2); box.appendChild(w2);
+    }
+    ficha.appendChild(box);
+  }
+  function textoSeq(x) { return x.tipo === 'sinergia' ? nomeSk(x.seq[0]) + ' (passiva) + ' + x.seq.slice(1).map(nomeSk).join(' › ') : x.seq.map(nomeSk).join(' › '); }
+  abrir(3);
+
+  // ---------- Gerais e fusões ----------
+  var gerais = document.getElementById('gerais');
+  // v1.1 (24/10/2026): cada família mostra as 4 ativas (papel e uso) e as 2 passivas (defensiva e ofensiva).
+  D.gerais.forEach(function (g) {
+    var f = el('div', 'familia'); f.appendChild(el('h3', null, g.familia));
+    [['Teclas 3–6', g.ativas], ['Passivas', g.passivas]].forEach(function (bl) {
+      f.appendChild(el('h4', null, bl[0])); var ul = el('ul');
+      bl[1].forEach(function (id) {
+        var sk = S[id], li = el('li'), l = el('div', 'linha'); l.appendChild(el('b', null, sk.nome));
+        if (sk.papel) l.appendChild(etiqueta(sk.papel)); if (sk.tipo) l.appendChild(etiqueta(sk.tipo));
+        if (sk.nova) l.appendChild(etiqueta('nova', 'novo')); tagV(sk, l);
+        li.appendChild(l); if (sk.texto) li.appendChild(el('span', 'sub', sk.texto)); if (sk.uso) li.appendChild(el('span', 'uso', 'Uso: ' + sk.uso));
+        li.appendChild(linhaVisual(sk)); ul.appendChild(li);
+      });
+      f.appendChild(ul);
+    });
+    gerais.appendChild(f);
+  });
+  // v1.1 (24/10/2026): seção de sintonia (regras e marcas do Domínio).
+  D.sintonia.regras.forEach(function (r) { var d = el('div', 'regra'); d.appendChild(el('h3', null, r[0])); d.appendChild(el('p', null, r[1])); document.getElementById('sint-regras').appendChild(d); });
+  FAM_ORDEM.forEach(function (f) { var tr = el('tr'); tr.appendChild(el('td', 'nome', FAM_NOMES[f])); tr.appendChild(el('td', null, D.sintonia.dominio[f])); document.getElementById('sint-dominio').appendChild(tr); });
+  var fus = document.getElementById('fusoes');
+  D.fusoes.forEach(function (f) {
+    var tr = el('tr'), n = el('td', 'nome', f[0] + ' '); if (f[3]) n.appendChild(etiqueta('ajustada'));
+    tr.appendChild(n); tr.appendChild(el('td', 'seq', f[1].map(nomeSk).join(' + '))); tr.appendChild(el('td', null, f[2])); fus.appendChild(tr);
+  });
+
+  // ---------- Combos ----------
+  var NOMES_CLASSE = { geral: 'Gerais' }; D.classes.forEach(function (c) { NOMES_CLASSE[c.id] = c.nome; });
+  var filtroClasse = 'todas', soNovos = false, soV11 = false, busca = '';
+  // v1.1 (24/10/2026): contagem de combos por tipo e lista das skills sem combo.
+  (function () {
+    var dono = {}; D.classes.forEach(function (c) { c.skills.forEach(function (k) { dono[k] = c.id; }); });
+    var t = {}, usados = {}; D.classes.concat([{ id: 'geral' }]).forEach(function (c) { t[c.id] = { cc: 0, cg: 0, gg: 0, sin: 0 }; });
+    D.combos.forEach(function (x) {
+      x.seq.forEach(function (k) { usados[k] = true; });
+      if (x.tipo === 'sinergia') { t.geral.sin++; return; }
+      var cs = x.seq.filter(function (k) { return dono[k]; }), gs = x.seq.filter(function (k) { return ehAtivaGeral(k); });
+      if (!cs.length) t.geral.gg++; else if (gs.length) t[dono[cs[0]]].cg++; else t[dono[cs[0]]].cc++;
+    });
+    var tb = document.getElementById('combo-contagem');
+    D.classes.concat([{ id: 'geral', nome: 'Gerais' }]).forEach(function (c) {
+      var r = t[c.id], tr = el('tr'); tr.appendChild(el('td', 'nome', c.nome));
+      [c.id === 'geral' ? '—' : r.cc, c.id === 'geral' ? '—' : r.cg, c.id === 'geral' ? r.gg : '—', c.id === 'geral' ? r.sin : '—'].forEach(function (v) { tr.appendChild(el('td', null, String(v))); });
+      tb.appendChild(tr);
+    });
+    var todas = Object.keys(dono).concat(D.gerais.reduce(function (a, g) { return a.concat(g.ativas); }, []));
+    var sem = todas.filter(function (k) { return !usados[k]; });
+    var pSem = D.gerais.reduce(function (a, g) { return a.concat(g.passivas); }, []).filter(function (k) { return !usados[k]; });
+    document.getElementById('sem-combo').textContent = (sem.length ? 'Skills de tecla sem nenhum combo: ' + sem.map(nomeSk).join(', ') + '. ' : 'Todas as skills de tecla, de classe e gerais, entram em pelo menos um combo. ') +
+      'Passivas gerais sem sinergia: ' + pSem.length + ' de ' + passG + '. A contagem de classe + classe inclui os combos que terminam na ultimate.';
+  })();
+  var fc = document.getElementById('filtro-classe');
+  ['todas'].concat(D.classes.map(function (c) { return c.id; }), ['geral']).forEach(function (id) {
+    var b = el('button', 'chip', id === 'todas' ? 'Todas' : NOMES_CLASSE[id]); b.type = 'button'; b.dataset.id = id;
+    b.setAttribute('aria-pressed', String(id === filtroClasse));
+    b.addEventListener('click', function () { filtroClasse = id; Array.prototype.forEach.call(fc.children, function (x) { x.setAttribute('aria-pressed', String(x.dataset.id === id)); }); desenharCombos(); });
+    fc.appendChild(b);
+  });
+  var bn = document.getElementById('so-novos');
+  bn.addEventListener('click', function () { soNovos = !soNovos; bn.setAttribute('aria-pressed', String(soNovos)); desenharCombos(); });
+  var bv = document.getElementById('so-v11'); // v1.1 (24/10/2026)
+  bv.addEventListener('click', function () { soV11 = !soV11; bv.setAttribute('aria-pressed', String(soV11)); desenharCombos(); });
+  document.getElementById('busca').addEventListener('input', function (e) { busca = e.target.value.trim().toLowerCase(); desenharCombos(); });
+  function textoVisual(c) {
+    var v = c.visual || c.sugestao; if (!v) return '';
+    return (c.visual ? 'Hoje: ' : 'Sugestão: ') + v.formas.join(' + ') + ', ' + v.movimento;
+  }
+  function desenharCombos() {
+    var tb = document.getElementById('combos'); tb.textContent = '';
+    var lista = D.combos.filter(function (c) {
+      if (filtroClasse !== 'todas' && c.classe !== filtroClasse) return false;
+      if (soNovos && !c.nova) return false;
+      if (soV11 && !c.v11) return false;
+      if (busca) { var alvo = (c.nome + ' ' + c.seq.map(nomeSk).join(' ') + ' ' + c.texto).toLowerCase(); if (alvo.indexOf(busca) < 0) return false; }
+      return true;
+    });
+    if (!lista.length) { var tr0 = el('tr'), td0 = el('td', 'vazio-msg', 'Nenhum combo com esse filtro.'); td0.colSpan = 4; tr0.appendChild(td0); tb.appendChild(tr0); return; }
+    lista.forEach(function (c) {
+      var tr = el('tr'), n = el('td', 'nome', c.nome + ' ');
+      n.appendChild(etiqueta(NOMES_CLASSE[c.classe])); if (c.tipo === 'sinergia') n.appendChild(etiqueta('sinergia passiva')); if (c.nova) n.appendChild(etiqueta('novo', 'novo')); if (c.ajuste) n.appendChild(etiqueta('ajustado')); tagV(c, n);
+      tr.appendChild(n); tr.appendChild(el('td', 'seq', textoSeq(c)));
+      var ef = el('td', null, c.texto); if (c.ajuste) { ef.appendChild(el('br')); ef.appendChild(el('small', null, 'Ajuste: ' + c.ajuste)); }
+      tr.appendChild(ef);
+      var vt = el('td'); var v = c.visual || c.sugestao; var vd = el('div', 'visual'), bol = el('i'); if (v && v.cor) bol.style.background = v.cor; vd.appendChild(bol); vd.appendChild(el('span', null, textoVisual(c))); vt.appendChild(vd);
+      tr.appendChild(vt); tb.appendChild(tr);
+    });
+  }
+  desenharCombos();
+
+  // ---------- Ressonâncias ----------
+  var rs = document.getElementById('ress');
+  D.ressonancias.forEach(function (r) {
+    var c = el('div', 'ress-card' + (r.nova ? ' nova' : '')), l = el('div'); l.style.display = 'flex'; l.style.gap = '6px'; l.style.alignItems = 'center'; l.style.flexWrap = 'wrap';
+    l.appendChild(el('h3', null, r.nome)); if (r.nova) l.appendChild(etiqueta('nova', 'novo'));
+    c.appendChild(l); c.appendChild(el('span', 'exige', r.exige)); c.appendChild(el('p', null, r.texto)); rs.appendChild(c);
+  });
+})();
+</script>
+
+</body></html>

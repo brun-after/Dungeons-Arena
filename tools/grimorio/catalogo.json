@@ -1,0 +1,2897 @@
+{
+  "versao": "1.2",
+  "classes": [
+    {
+      "id": "guerreiro",
+      "skills": [
+        "redemoinho",
+        "investida_de_escudo",
+        "brado",
+        "corrente",
+        "lamina_em_brasa",
+        "desafio",
+        "salto_esmagador",
+        "contragolpe"
+      ],
+      "iniciais": [
+        "redemoinho",
+        "investida_de_escudo"
+      ],
+      "geralInicial": "investida",
+      "ultimates": [
+        {
+          "par": [
+            "redemoinho",
+            "investida_de_escudo"
+          ],
+          "nome": "Ciclone de aço"
+        },
+        {
+          "par": [
+            "redemoinho",
+            "brado"
+          ],
+          "nome": "Fúria rodopiante"
+        },
+        {
+          "par": [
+            "redemoinho",
+            "corrente"
+          ],
+          "nome": "Turbilhão de correntes"
+        },
+        {
+          "par": [
+            "redemoinho",
+            "lamina_em_brasa"
+          ],
+          "nome": "Vórtice ígneo"
+        },
+        {
+          "par": [
+            "redemoinho",
+            "desafio"
+          ],
+          "nome": "Olho do furacão"
+        },
+        {
+          "par": [
+            "redemoinho",
+            "salto_esmagador"
+          ],
+          "nome": "Meteoro de aço"
+        },
+        {
+          "par": [
+            "redemoinho",
+            "contragolpe"
+          ],
+          "nome": "Lâminas em guarda"
+        },
+        {
+          "par": [
+            "investida_de_escudo",
+            "brado"
+          ],
+          "nome": "Formação de choque"
+        },
+        {
+          "par": [
+            "investida_de_escudo",
+            "corrente"
+          ],
+          "nome": "Aríete acorrentado"
+        },
+        {
+          "par": [
+            "investida_de_escudo",
+            "lamina_em_brasa"
+          ],
+          "nome": "Égide flamejante"
+        },
+        {
+          "par": [
+            "investida_de_escudo",
+            "desafio"
+          ],
+          "nome": "Carga do desafiante"
+        },
+        {
+          "par": [
+            "investida_de_escudo",
+            "salto_esmagador"
+          ],
+          "nome": "Queda do bastião"
+        },
+        {
+          "par": [
+            "investida_de_escudo",
+            "contragolpe"
+          ],
+          "nome": "Parede de aço"
+        },
+        {
+          "par": [
+            "brado",
+            "corrente"
+          ],
+          "nome": "Chamado às armas"
+        },
+        {
+          "par": [
+            "brado",
+            "lamina_em_brasa"
+          ],
+          "nome": "Brado incandescente"
+        },
+        {
+          "par": [
+            "brado",
+            "desafio"
+          ],
+          "nome": "Rugido do tirano"
+        },
+        {
+          "par": [
+            "brado",
+            "salto_esmagador"
+          ],
+          "nome": "Estrondo de guerra"
+        },
+        {
+          "par": [
+            "brado",
+            "contragolpe"
+          ],
+          "nome": "Brado do desafio"
+        },
+        {
+          "par": [
+            "corrente",
+            "lamina_em_brasa"
+          ],
+          "nome": "Grilhões em brasa"
+        },
+        {
+          "par": [
+            "corrente",
+            "desafio"
+          ],
+          "nome": "Laço do carrasco"
+        },
+        {
+          "par": [
+            "corrente",
+            "salto_esmagador"
+          ],
+          "nome": "Arrasto sísmico"
+        },
+        {
+          "par": [
+            "corrente",
+            "contragolpe"
+          ],
+          "nome": "Desarme"
+        },
+        {
+          "par": [
+            "lamina_em_brasa",
+            "desafio"
+          ],
+          "nome": "Pira desafiadora"
+        },
+        {
+          "par": [
+            "lamina_em_brasa",
+            "salto_esmagador"
+          ],
+          "nome": "Impacto vulcânico"
+        },
+        {
+          "par": [
+            "lamina_em_brasa",
+            "contragolpe"
+          ],
+          "nome": "Riposta ígnea"
+        },
+        {
+          "par": [
+            "desafio",
+            "salto_esmagador"
+          ],
+          "nome": "Desafio do titã"
+        },
+        {
+          "par": [
+            "desafio",
+            "contragolpe"
+          ],
+          "nome": "Duelo de honra"
+        },
+        {
+          "par": [
+            "salto_esmagador",
+            "contragolpe"
+          ],
+          "nome": "Golpe do juízo"
+        }
+      ]
+    },
+    {
+      "id": "mago",
+      "skills": [
+        "lanca_de_gelo",
+        "raio_em_cadeia",
+        "nova_glacial",
+        "mente_partida",
+        "afinidade_elemental",
+        "sobrecarga_arcana",
+        "piscar",
+        "orbe_instavel"
+      ],
+      "iniciais": [
+        "lanca_de_gelo",
+        "raio_em_cadeia"
+      ],
+      "geralInicial": "bola_de_fogo",
+      "ultimates": [
+        {
+          "par": [
+            "lanca_de_gelo",
+            "raio_em_cadeia"
+          ],
+          "nome": "Tempestade cristalina"
+        },
+        {
+          "par": [
+            "lanca_de_gelo",
+            "nova_glacial"
+          ],
+          "nome": "Inverno eterno"
+        },
+        {
+          "par": [
+            "lanca_de_gelo",
+            "mente_partida"
+          ],
+          "nome": "Estilhaço mental"
+        },
+        {
+          "par": [
+            "lanca_de_gelo",
+            "afinidade_elemental"
+          ],
+          "nome": "Lança dos quatro ventos"
+        },
+        {
+          "par": [
+            "lanca_de_gelo",
+            "sobrecarga_arcana"
+          ],
+          "nome": "Geleira arcana"
+        },
+        {
+          "par": [
+            "lanca_de_gelo",
+            "piscar"
+          ],
+          "nome": "Rastro de geada"
+        },
+        {
+          "par": [
+            "lanca_de_gelo",
+            "orbe_instavel"
+          ],
+          "nome": "Cometa congelado"
+        },
+        {
+          "par": [
+            "raio_em_cadeia",
+            "nova_glacial"
+          ],
+          "nome": "Supercondutor"
+        },
+        {
+          "par": [
+            "raio_em_cadeia",
+            "mente_partida"
+          ],
+          "nome": "Tempestade de pensamentos"
+        },
+        {
+          "par": [
+            "raio_em_cadeia",
+            "afinidade_elemental"
+          ],
+          "nome": "Prisma elemental"
+        },
+        {
+          "par": [
+            "raio_em_cadeia",
+            "sobrecarga_arcana"
+          ],
+          "nome": "Sobretensão"
+        },
+        {
+          "par": [
+            "raio_em_cadeia",
+            "piscar"
+          ],
+          "nome": "Relâmpago errante"
+        },
+        {
+          "par": [
+            "raio_em_cadeia",
+            "orbe_instavel"
+          ],
+          "nome": "Esfera de plasma"
+        },
+        {
+          "par": [
+            "nova_glacial",
+            "mente_partida"
+          ],
+          "nome": "Silêncio glacial"
+        },
+        {
+          "par": [
+            "nova_glacial",
+            "afinidade_elemental"
+          ],
+          "nome": "Zero absoluto"
+        },
+        {
+          "par": [
+            "nova_glacial",
+            "sobrecarga_arcana"
+          ],
+          "nome": "Nova cataclísmica"
+        },
+        {
+          "par": [
+            "nova_glacial",
+            "piscar"
+          ],
+          "nome": "Passo do inverno"
+        },
+        {
+          "par": [
+            "nova_glacial",
+            "orbe_instavel"
+          ],
+          "nome": "Coração de gelo"
+        },
+        {
+          "par": [
+            "mente_partida",
+            "afinidade_elemental"
+          ],
+          "nome": "Mente elemental"
+        },
+        {
+          "par": [
+            "mente_partida",
+            "sobrecarga_arcana"
+          ],
+          "nome": "Colapso psíquico"
+        },
+        {
+          "par": [
+            "mente_partida",
+            "piscar"
+          ],
+          "nome": "Labirinto da mente"
+        },
+        {
+          "par": [
+            "mente_partida",
+            "orbe_instavel"
+          ],
+          "nome": "Singularidade"
+        },
+        {
+          "par": [
+            "afinidade_elemental",
+            "sobrecarga_arcana"
+          ],
+          "nome": "Ascensão arcana"
+        },
+        {
+          "par": [
+            "afinidade_elemental",
+            "piscar"
+          ],
+          "nome": "Dança dos elementos"
+        },
+        {
+          "par": [
+            "afinidade_elemental",
+            "orbe_instavel"
+          ],
+          "nome": "Orbe da fusão"
+        },
+        {
+          "par": [
+            "sobrecarga_arcana",
+            "piscar"
+          ],
+          "nome": "Ruptura dimensional"
+        },
+        {
+          "par": [
+            "sobrecarga_arcana",
+            "orbe_instavel"
+          ],
+          "nome": "Supernova"
+        },
+        {
+          "par": [
+            "piscar",
+            "orbe_instavel"
+          ],
+          "nome": "Eco do vazio"
+        }
+      ]
+    },
+    {
+      "id": "arqueiro",
+      "skills": [
+        "flecha_perfurante",
+        "chuva_de_flechas",
+        "tiro_em_leque",
+        "armadilha_de_caca",
+        "olho_de_aguia",
+        "flecha_explosiva",
+        "rolamento",
+        "marca_do_cacador"
+      ],
+      "iniciais": [
+        "flecha_perfurante",
+        "chuva_de_flechas"
+      ],
+      "geralInicial": "flecha_venenosa",
+      "ultimates": [
+        {
+          "par": [
+            "flecha_perfurante",
+            "chuva_de_flechas"
+          ],
+          "nome": "Lança dos céus"
+        },
+        {
+          "par": [
+            "flecha_perfurante",
+            "tiro_em_leque"
+          ],
+          "nome": "Leque perfurante"
+        },
+        {
+          "par": [
+            "flecha_perfurante",
+            "armadilha_de_caca"
+          ],
+          "nome": "Fio de disparo"
+        },
+        {
+          "par": [
+            "flecha_perfurante",
+            "olho_de_aguia"
+          ],
+          "nome": "Tiro do falcão-rei"
+        },
+        {
+          "par": [
+            "flecha_perfurante",
+            "flecha_explosiva"
+          ],
+          "nome": "Flecha do cataclismo"
+        },
+        {
+          "par": [
+            "flecha_perfurante",
+            "rolamento"
+          ],
+          "nome": "Tiro de retirada"
+        },
+        {
+          "par": [
+            "flecha_perfurante",
+            "marca_do_cacador"
+          ],
+          "nome": "Sentença do caçador"
+        },
+        {
+          "par": [
+            "chuva_de_flechas",
+            "tiro_em_leque"
+          ],
+          "nome": "Céu de aço"
+        },
+        {
+          "par": [
+            "chuva_de_flechas",
+            "armadilha_de_caca"
+          ],
+          "nome": "Campo minado"
+        },
+        {
+          "par": [
+            "chuva_de_flechas",
+            "olho_de_aguia"
+          ],
+          "nome": "Olhar da tempestade"
+        },
+        {
+          "par": [
+            "chuva_de_flechas",
+            "flecha_explosiva"
+          ],
+          "nome": "Bombardeio"
+        },
+        {
+          "par": [
+            "chuva_de_flechas",
+            "rolamento"
+          ],
+          "nome": "Chuva em fuga"
+        },
+        {
+          "par": [
+            "chuva_de_flechas",
+            "marca_do_cacador"
+          ],
+          "nome": "Cerco do caçador"
+        },
+        {
+          "par": [
+            "tiro_em_leque",
+            "armadilha_de_caca"
+          ],
+          "nome": "Rede de caça"
+        },
+        {
+          "par": [
+            "tiro_em_leque",
+            "olho_de_aguia"
+          ],
+          "nome": "Salva certeira"
+        },
+        {
+          "par": [
+            "tiro_em_leque",
+            "flecha_explosiva"
+          ],
+          "nome": "Leque incendiário"
+        },
+        {
+          "par": [
+            "tiro_em_leque",
+            "rolamento"
+          ],
+          "nome": "Pirueta mortal"
+        },
+        {
+          "par": [
+            "tiro_em_leque",
+            "marca_do_cacador"
+          ],
+          "nome": "Matilha de flechas"
+        },
+        {
+          "par": [
+            "armadilha_de_caca",
+            "olho_de_aguia"
+          ],
+          "nome": "Tocaia"
+        },
+        {
+          "par": [
+            "armadilha_de_caca",
+            "flecha_explosiva"
+          ],
+          "nome": "Mina de estilhaços"
+        },
+        {
+          "par": [
+            "armadilha_de_caca",
+            "rolamento"
+          ],
+          "nome": "Rota de fuga"
+        },
+        {
+          "par": [
+            "armadilha_de_caca",
+            "marca_do_cacador"
+          ],
+          "nome": "Caçada guiada"
+        },
+        {
+          "par": [
+            "olho_de_aguia",
+            "flecha_explosiva"
+          ],
+          "nome": "Ponto de impacto"
+        },
+        {
+          "par": [
+            "olho_de_aguia",
+            "rolamento"
+          ],
+          "nome": "Mira inabalável"
+        },
+        {
+          "par": [
+            "olho_de_aguia",
+            "marca_do_cacador"
+          ],
+          "nome": "Olho do predador"
+        },
+        {
+          "par": [
+            "flecha_explosiva",
+            "rolamento"
+          ],
+          "nome": "Rastro explosivo"
+        },
+        {
+          "par": [
+            "flecha_explosiva",
+            "marca_do_cacador"
+          ],
+          "nome": "Presa marcada"
+        },
+        {
+          "par": [
+            "rolamento",
+            "marca_do_cacador"
+          ],
+          "nome": "Dança do caçador"
+        }
+      ]
+    },
+    {
+      "id": "necromante",
+      "skills": [
+        "dardo_funesto",
+        "dizimo_vital",
+        "garras_do_ossuario",
+        "comando_sepulcral",
+        "ceifa_de_almas",
+        "mortalha_funebre",
+        "explosao_cadaverica",
+        "levante_profano"
+      ],
+      "iniciais": [
+        "dardo_funesto",
+        "dizimo_vital"
+      ],
+      "geralInicial": "barreira",
+      "ultimates": [
+        {
+          "par": [
+            "dardo_funesto",
+            "dizimo_vital"
+          ],
+          "nome": "Banquete funesto"
+        },
+        {
+          "par": [
+            "dardo_funesto",
+            "garras_do_ossuario"
+          ],
+          "nome": "Ossário faminto"
+        },
+        {
+          "par": [
+            "dardo_funesto",
+            "comando_sepulcral"
+          ],
+          "nome": "Ordem da praga"
+        },
+        {
+          "par": [
+            "dardo_funesto",
+            "ceifa_de_almas"
+          ],
+          "nome": "Colheita sombria"
+        },
+        {
+          "par": [
+            "dardo_funesto",
+            "mortalha_funebre"
+          ],
+          "nome": "Véu da peste"
+        },
+        {
+          "par": [
+            "dardo_funesto",
+            "explosao_cadaverica"
+          ],
+          "nome": "Pestilência explosiva"
+        },
+        {
+          "par": [
+            "dardo_funesto",
+            "levante_profano"
+          ],
+          "nome": "Praga dos mortos"
+        },
+        {
+          "par": [
+            "dizimo_vital",
+            "garras_do_ossuario"
+          ],
+          "nome": "Raízes do tributo"
+        },
+        {
+          "par": [
+            "dizimo_vital",
+            "comando_sepulcral"
+          ],
+          "nome": "Pacto da legião"
+        },
+        {
+          "par": [
+            "dizimo_vital",
+            "ceifa_de_almas"
+          ],
+          "nome": "Dízimo das almas"
+        },
+        {
+          "par": [
+            "dizimo_vital",
+            "mortalha_funebre"
+          ],
+          "nome": "Sudário vampírico"
+        },
+        {
+          "par": [
+            "dizimo_vital",
+            "explosao_cadaverica"
+          ],
+          "nome": "Oferenda ardente"
+        },
+        {
+          "par": [
+            "dizimo_vital",
+            "levante_profano"
+          ],
+          "nome": "Ciclo eterno"
+        },
+        {
+          "par": [
+            "garras_do_ossuario",
+            "comando_sepulcral"
+          ],
+          "nome": "Mãos da cripta"
+        },
+        {
+          "par": [
+            "garras_do_ossuario",
+            "ceifa_de_almas"
+          ],
+          "nome": "Abraço do ossuário"
+        },
+        {
+          "par": [
+            "garras_do_ossuario",
+            "mortalha_funebre"
+          ],
+          "nome": "Cemitério vivo"
+        },
+        {
+          "par": [
+            "garras_do_ossuario",
+            "explosao_cadaverica"
+          ],
+          "nome": "Campo de ossos"
+        },
+        {
+          "par": [
+            "garras_do_ossuario",
+            "levante_profano"
+          ],
+          "nome": "Exército sepulto"
+        },
+        {
+          "par": [
+            "comando_sepulcral",
+            "ceifa_de_almas"
+          ],
+          "nome": "Marcha dos ceifadores"
+        },
+        {
+          "par": [
+            "comando_sepulcral",
+            "mortalha_funebre"
+          ],
+          "nome": "Marcha fantasma"
+        },
+        {
+          "par": [
+            "comando_sepulcral",
+            "explosao_cadaverica"
+          ],
+          "nome": "Sacrifício em massa"
+        },
+        {
+          "par": [
+            "comando_sepulcral",
+            "levante_profano"
+          ],
+          "nome": "Rei dos mortos"
+        },
+        {
+          "par": [
+            "ceifa_de_almas",
+            "mortalha_funebre"
+          ],
+          "nome": "Foice do além"
+        },
+        {
+          "par": [
+            "ceifa_de_almas",
+            "explosao_cadaverica"
+          ],
+          "nome": "Ceifa explosiva"
+        },
+        {
+          "par": [
+            "ceifa_de_almas",
+            "levante_profano"
+          ],
+          "nome": "Colheita da legião"
+        },
+        {
+          "par": [
+            "mortalha_funebre",
+            "explosao_cadaverica"
+          ],
+          "nome": "Mortalha em chamas"
+        },
+        {
+          "par": [
+            "mortalha_funebre",
+            "levante_profano"
+          ],
+          "nome": "Hoste espectral"
+        },
+        {
+          "par": [
+            "explosao_cadaverica",
+            "levante_profano"
+          ],
+          "nome": "Ressurreição detonante"
+        }
+      ]
+    },
+    {
+      "id": "aventureiro",
+      "skills": [
+        "mergulho",
+        "grito_do_falcao",
+        "garras_cegantes",
+        "vigia",
+        "rasante",
+        "tempestade_de_penas",
+        "retorno_ao_punho",
+        "presa_dupla"
+      ],
+      "iniciais": [
+        "mergulho",
+        "grito_do_falcao"
+      ],
+      "geralInicial": "curar",
+      "ultimates": [
+        {
+          "par": [
+            "mergulho",
+            "grito_do_falcao"
+          ],
+          "nome": "Mergulho do trovão"
+        },
+        {
+          "par": [
+            "mergulho",
+            "garras_cegantes"
+          ],
+          "nome": "Ataque cego"
+        },
+        {
+          "par": [
+            "mergulho",
+            "vigia"
+          ],
+          "nome": "Sentinela em queda"
+        },
+        {
+          "par": [
+            "mergulho",
+            "rasante"
+          ],
+          "nome": "Voo rasante mortal"
+        },
+        {
+          "par": [
+            "mergulho",
+            "tempestade_de_penas"
+          ],
+          "nome": "Furacão alado"
+        },
+        {
+          "par": [
+            "mergulho",
+            "retorno_ao_punho"
+          ],
+          "nome": "Bumerangue vivo"
+        },
+        {
+          "par": [
+            "mergulho",
+            "presa_dupla"
+          ],
+          "nome": "Caçada em dupla"
+        },
+        {
+          "par": [
+            "grito_do_falcao",
+            "garras_cegantes"
+          ],
+          "nome": "Pânico na revoada"
+        },
+        {
+          "par": [
+            "grito_do_falcao",
+            "vigia"
+          ],
+          "nome": "Alarme da vigília"
+        },
+        {
+          "par": [
+            "grito_do_falcao",
+            "rasante"
+          ],
+          "nome": "Clamor dos céus"
+        },
+        {
+          "par": [
+            "grito_do_falcao",
+            "tempestade_de_penas"
+          ],
+          "nome": "Tempestade estridente"
+        },
+        {
+          "par": [
+            "grito_do_falcao",
+            "retorno_ao_punho"
+          ],
+          "nome": "Chamado ao lar"
+        },
+        {
+          "par": [
+            "grito_do_falcao",
+            "presa_dupla"
+          ],
+          "nome": "Marca da presa"
+        },
+        {
+          "par": [
+            "garras_cegantes",
+            "vigia"
+          ],
+          "nome": "Guardião das garras"
+        },
+        {
+          "par": [
+            "garras_cegantes",
+            "rasante"
+          ],
+          "nome": "Riscos de garra"
+        },
+        {
+          "par": [
+            "garras_cegantes",
+            "tempestade_de_penas"
+          ],
+          "nome": "Nuvem de penas cortantes"
+        },
+        {
+          "par": [
+            "garras_cegantes",
+            "retorno_ao_punho"
+          ],
+          "nome": "Pilhagem"
+        },
+        {
+          "par": [
+            "garras_cegantes",
+            "presa_dupla"
+          ],
+          "nome": "Dilacerar em par"
+        },
+        {
+          "par": [
+            "vigia",
+            "rasante"
+          ],
+          "nome": "Patrulha aérea"
+        },
+        {
+          "par": [
+            "vigia",
+            "tempestade_de_penas"
+          ],
+          "nome": "Redemoinho de asas"
+        },
+        {
+          "par": [
+            "vigia",
+            "retorno_ao_punho"
+          ],
+          "nome": "Asas protetoras"
+        },
+        {
+          "par": [
+            "vigia",
+            "presa_dupla"
+          ],
+          "nome": "Vigília da matilha"
+        },
+        {
+          "par": [
+            "rasante",
+            "tempestade_de_penas"
+          ],
+          "nome": "Ventania de penas"
+        },
+        {
+          "par": [
+            "rasante",
+            "retorno_ao_punho"
+          ],
+          "nome": "Voo de ida e volta"
+        },
+        {
+          "par": [
+            "rasante",
+            "presa_dupla"
+          ],
+          "nome": "Ataque em pinça"
+        },
+        {
+          "par": [
+            "tempestade_de_penas",
+            "retorno_ao_punho"
+          ],
+          "nome": "Refúgio de penas"
+        },
+        {
+          "par": [
+            "tempestade_de_penas",
+            "presa_dupla"
+          ],
+          "nome": "Tempestade da caçada"
+        },
+        {
+          "par": [
+            "retorno_ao_punho",
+            "presa_dupla"
+          ],
+          "nome": "Laço inquebrável"
+        }
+      ]
+    }
+  ],
+  "familias": [
+    {
+      "id": "tecnica",
+      "ativas": [
+        "investida",
+        "golpe_atordoante",
+        "corte_dilacerante",
+        "postura_de_aparo"
+      ],
+      "passivas": [
+        "couraca_treinada",
+        "disciplina_marcial"
+      ]
+    },
+    {
+      "id": "arcana",
+      "ativas": [
+        "seta_arcana",
+        "explosao",
+        "dissipar",
+        "runa_amplificadora"
+      ],
+      "passivas": [
+        "manto_runico",
+        "foco_arcano"
+      ]
+    },
+    {
+      "id": "suporte",
+      "ativas": [
+        "curar",
+        "barreira",
+        "purificacao",
+        "impulso"
+      ],
+      "passivas": [
+        "tenacidade",
+        "fluxo_restaurador"
+      ]
+    },
+    {
+      "id": "fogo",
+      "ativas": [
+        "bola_de_fogo",
+        "rastro_igneo",
+        "anel_de_chamas",
+        "incinerar"
+      ],
+      "passivas": [
+        "sangue_quente",
+        "brasa_interior"
+      ]
+    },
+    {
+      "id": "veneno",
+      "ativas": [
+        "flecha_venenosa",
+        "dardo_toxico",
+        "nevoa_venenosa",
+        "seiva_corrosiva"
+      ],
+      "passivas": [
+        "imunidade_adquirida",
+        "toxinas_potentes"
+      ]
+    },
+    {
+      "id": "terra",
+      "ativas": [
+        "estaca_de_pedra",
+        "abalo_sismico",
+        "muralha_de_pedra",
+        "pedregulho"
+      ],
+      "passivas": [
+        "pele_de_pedra",
+        "peso_da_rocha"
+      ]
+    },
+    {
+      "id": "sombra",
+      "ativas": [
+        "passo_sombrio",
+        "punhal_das_sombras",
+        "veu_da_noite",
+        "troca_sombria"
+      ],
+      "passivas": [
+        "silhueta_esquiva",
+        "golpe_traicoeiro"
+      ]
+    },
+    {
+      "id": "sagrado",
+      "ativas": [
+        "lanca_radiante",
+        "circulo_de_amparo",
+        "chuva_de_estrelas",
+        "asas_da_aurora"
+      ],
+      "passivas": [
+        "graca",
+        "zelo"
+      ]
+    },
+    {
+      "id": "psiquico",
+      "ativas": [
+        "onda_de_repulsao",
+        "agulha_mental",
+        "telecinese",
+        "pressagio"
+      ],
+      "passivas": [
+        "mente_blindada",
+        "pressao_mental"
+      ]
+    }
+  ],
+  "combos": [
+    {
+      "nome": "Moedor",
+      "classe": "guerreiro",
+      "seq": [
+        "corrente",
+        "redemoinho"
+      ]
+    },
+    {
+      "nome": "Carga do estandarte",
+      "classe": "guerreiro",
+      "seq": [
+        "investida",
+        "brado"
+      ]
+    },
+    {
+      "nome": "Chuva ácida",
+      "classe": "arqueiro",
+      "seq": [
+        "flecha_venenosa",
+        "chuva_de_flechas"
+      ]
+    },
+    {
+      "nome": "Condutor congelado",
+      "classe": "mago",
+      "seq": [
+        "lanca_de_gelo",
+        "raio_em_cadeia"
+      ]
+    },
+    {
+      "nome": "Emboscada",
+      "classe": "geral",
+      "seq": [
+        "troca_sombria",
+        "golpe_atordoante"
+      ]
+    },
+    {
+      "nome": "Escudo de geada",
+      "classe": "mago",
+      "seq": [
+        "barreira",
+        "nova_glacial"
+      ]
+    },
+    {
+      "nome": "Colapso",
+      "classe": "mago",
+      "seq": [
+        "mente_partida",
+        "explosao"
+      ]
+    },
+    {
+      "nome": "Saraivada",
+      "classe": "arqueiro",
+      "seq": [
+        "tiro_em_leque",
+        "flecha_perfurante"
+      ]
+    },
+    {
+      "nome": "Contra-ataque de ferro",
+      "classe": "guerreiro",
+      "seq": [
+        "investida_de_escudo",
+        "golpe_atordoante"
+      ]
+    },
+    {
+      "nome": "Aríete flamejante",
+      "classe": "guerreiro",
+      "seq": [
+        "investida",
+        "lamina_em_brasa"
+      ]
+    },
+    {
+      "nome": "Fornalha",
+      "classe": "guerreiro",
+      "seq": [
+        "corrente",
+        "bola_de_fogo"
+      ]
+    },
+    {
+      "nome": "Ruptura",
+      "classe": "arqueiro",
+      "seq": [
+        "golpe_atordoante",
+        "flecha_perfurante"
+      ]
+    },
+    {
+      "nome": "Retirada glacial",
+      "classe": "mago",
+      "seq": [
+        "nova_glacial",
+        "piscar"
+      ]
+    },
+    {
+      "nome": "Refúgio restaurador",
+      "classe": "geral",
+      "seq": [
+        "barreira",
+        "curar"
+      ]
+    },
+    {
+      "nome": "Disparo encantado",
+      "classe": "arqueiro",
+      "seq": [
+        "seta_arcana",
+        "flecha_perfurante"
+      ]
+    },
+    {
+      "nome": "Convergência astral",
+      "classe": "mago",
+      "seq": [
+        "mente_partida",
+        "chuva_de_estrelas"
+      ]
+    },
+    {
+      "nome": "Pântano aprisionante",
+      "classe": "geral",
+      "seq": [
+        "estaca_de_pedra",
+        "nevoa_venenosa"
+      ]
+    },
+    {
+      "nome": "Cerco de pedra",
+      "classe": "geral",
+      "seq": [
+        "muralha_de_pedra",
+        "onda_de_repulsao"
+      ]
+    },
+    {
+      "nome": "Epicentro",
+      "classe": "geral",
+      "seq": [
+        "investida",
+        "abalo_sismico"
+      ]
+    },
+    {
+      "nome": "Emboscada noturna",
+      "classe": "geral",
+      "seq": [
+        "passo_sombrio",
+        "punhal_das_sombras"
+      ]
+    },
+    {
+      "nome": "Retorno das sombras",
+      "classe": "geral",
+      "seq": [
+        "veu_da_noite",
+        "corte_dilacerante"
+      ]
+    },
+    {
+      "nome": "Resposta dilacerante",
+      "classe": "geral",
+      "seq": [
+        "postura_de_aparo",
+        "corte_dilacerante"
+      ]
+    },
+    {
+      "nome": "Santuário purificado",
+      "classe": "geral",
+      "seq": [
+        "circulo_de_amparo",
+        "purificacao"
+      ]
+    },
+    {
+      "nome": "Veredito radiante",
+      "classe": "arqueiro",
+      "seq": [
+        "lanca_radiante",
+        "flecha_perfurante"
+      ]
+    },
+    {
+      "nome": "Disseminação tóxica",
+      "classe": "arqueiro",
+      "seq": [
+        "dardo_toxico",
+        "tiro_em_leque"
+      ]
+    },
+    {
+      "nome": "Prisão pestilenta",
+      "classe": "geral",
+      "seq": [
+        "estaca_de_pedra",
+        "nevoa_venenosa",
+        "abalo_sismico"
+      ]
+    },
+    {
+      "nome": "Execução do eclipse",
+      "classe": "geral",
+      "seq": [
+        "passo_sombrio",
+        "punhal_das_sombras",
+        "lanca_radiante"
+      ]
+    },
+    {
+      "nome": "Fortaleza viva",
+      "classe": "geral",
+      "seq": [
+        "muralha_de_pedra",
+        "circulo_de_amparo",
+        "purificacao"
+      ]
+    },
+    {
+      "nome": "Dança do duelista",
+      "classe": "geral",
+      "seq": [
+        "postura_de_aparo",
+        "corte_dilacerante",
+        "investida"
+      ]
+    },
+    {
+      "nome": "Forja de guerra",
+      "classe": "guerreiro",
+      "seq": [
+        "investida_de_escudo",
+        "corrente",
+        "lamina_em_brasa"
+      ]
+    },
+    {
+      "nome": "Tempestade confinada",
+      "classe": "mago",
+      "seq": [
+        "muralha_de_pedra",
+        "onda_de_repulsao",
+        "raio_em_cadeia"
+      ]
+    },
+    {
+      "nome": "Caçada implacável",
+      "classe": "arqueiro",
+      "seq": [
+        "dardo_toxico",
+        "tiro_em_leque",
+        "flecha_perfurante"
+      ]
+    },
+    {
+      "nome": "Inverno em marcha",
+      "classe": "mago",
+      "seq": [
+        "barreira",
+        "nova_glacial",
+        "investida"
+      ]
+    },
+    {
+      "nome": "Convergência arcana",
+      "classe": "mago",
+      "seq": [
+        "seta_arcana",
+        "mente_partida",
+        "explosao"
+      ]
+    },
+    {
+      "nome": "Resgate entre sombras",
+      "classe": "geral",
+      "seq": [
+        "veu_da_noite",
+        "passo_sombrio",
+        "curar"
+      ]
+    },
+    {
+      "nome": "Sepultura aberta",
+      "classe": "necromante",
+      "seq": [
+        "dardo_funesto",
+        "garras_do_ossuario"
+      ]
+    },
+    {
+      "nome": "Tributo da legião",
+      "classe": "necromante",
+      "seq": [
+        "comando_sepulcral",
+        "dizimo_vital"
+      ]
+    },
+    {
+      "nome": "Crematório",
+      "classe": "necromante",
+      "seq": [
+        "garras_do_ossuario",
+        "bola_de_fogo"
+      ]
+    },
+    {
+      "nome": "Absolvição funesta",
+      "classe": "necromante",
+      "seq": [
+        "dardo_funesto",
+        "lanca_radiante"
+      ]
+    },
+    {
+      "nome": "Grito imperioso",
+      "classe": "guerreiro",
+      "seq": [
+        "desafio",
+        "brado"
+      ]
+    },
+    {
+      "nome": "Terremoto de aço",
+      "classe": "guerreiro",
+      "seq": [
+        "salto_esmagador",
+        "redemoinho"
+      ]
+    },
+    {
+      "nome": "Âncora",
+      "classe": "guerreiro",
+      "seq": [
+        "corrente",
+        "salto_esmagador"
+      ]
+    },
+    {
+      "nome": "Desforra flamejante",
+      "classe": "guerreiro",
+      "seq": [
+        "contragolpe",
+        "lamina_em_brasa"
+      ]
+    },
+    {
+      "nome": "Muralha desafiadora",
+      "classe": "guerreiro",
+      "seq": [
+        "investida_de_escudo",
+        "desafio"
+      ]
+    },
+    {
+      "nome": "Quebra-guarda",
+      "classe": "guerreiro",
+      "seq": [
+        "contragolpe",
+        "golpe_atordoante"
+      ]
+    },
+    {
+      "nome": "Investida brutal",
+      "classe": "guerreiro",
+      "seq": [
+        "investida",
+        "salto_esmagador"
+      ]
+    },
+    {
+      "nome": "Forja viva",
+      "classe": "guerreiro",
+      "seq": [
+        "desafio",
+        "redemoinho",
+        "lamina_em_brasa"
+      ]
+    },
+    {
+      "nome": "Hino de batalha",
+      "classe": "guerreiro",
+      "seq": [
+        "brado",
+        "@ultimate"
+      ]
+    },
+    {
+      "nome": "Curto-circuito",
+      "classe": "mago",
+      "seq": [
+        "sobrecarga_arcana",
+        "raio_em_cadeia"
+      ]
+    },
+    {
+      "nome": "Piscar glacial",
+      "classe": "mago",
+      "seq": [
+        "piscar",
+        "nova_glacial"
+      ]
+    },
+    {
+      "nome": "Orbe congelante",
+      "classe": "mago",
+      "seq": [
+        "lanca_de_gelo",
+        "orbe_instavel"
+      ]
+    },
+    {
+      "nome": "Orbe tempestuoso",
+      "classe": "mago",
+      "seq": [
+        "raio_em_cadeia",
+        "orbe_instavel"
+      ]
+    },
+    {
+      "nome": "Mente sobrecarregada",
+      "classe": "mago",
+      "seq": [
+        "mente_partida",
+        "sobrecarga_arcana"
+      ]
+    },
+    {
+      "nome": "Espelho elemental",
+      "classe": "mago",
+      "seq": [
+        "afinidade_elemental",
+        "piscar"
+      ]
+    },
+    {
+      "nome": "Estilhaço em fuga",
+      "classe": "mago",
+      "seq": [
+        "lanca_de_gelo",
+        "piscar"
+      ]
+    },
+    {
+      "nome": "Cataclismo arcano",
+      "classe": "mago",
+      "seq": [
+        "sobrecarga_arcana",
+        "orbe_instavel",
+        "explosao"
+      ]
+    },
+    {
+      "nome": "Convergência elemental",
+      "classe": "mago",
+      "seq": [
+        "afinidade_elemental",
+        "@ultimate"
+      ]
+    },
+    {
+      "nome": "Bombardeio marcado",
+      "classe": "arqueiro",
+      "seq": [
+        "marca_do_cacador",
+        "flecha_explosiva"
+      ]
+    },
+    {
+      "nome": "Retirada certeira",
+      "classe": "arqueiro",
+      "seq": [
+        "rolamento",
+        "flecha_perfurante"
+      ]
+    },
+    {
+      "nome": "Chuva incendiária",
+      "classe": "arqueiro",
+      "seq": [
+        "flecha_explosiva",
+        "chuva_de_flechas"
+      ]
+    },
+    {
+      "nome": "Leque marcado",
+      "classe": "arqueiro",
+      "seq": [
+        "marca_do_cacador",
+        "tiro_em_leque"
+      ]
+    },
+    {
+      "nome": "Olhar do predador",
+      "classe": "arqueiro",
+      "seq": [
+        "olho_de_aguia",
+        "marca_do_cacador"
+      ]
+    },
+    {
+      "nome": "Detonação tóxica",
+      "classe": "arqueiro",
+      "seq": [
+        "flecha_venenosa",
+        "flecha_explosiva"
+      ]
+    },
+    {
+      "nome": "Caça perfeita",
+      "classe": "arqueiro",
+      "seq": [
+        "marca_do_cacador",
+        "rolamento",
+        "flecha_perfurante"
+      ]
+    },
+    {
+      "nome": "Olhar absoluto",
+      "classe": "arqueiro",
+      "seq": [
+        "olho_de_aguia",
+        "@ultimate"
+      ]
+    },
+    {
+      "nome": "Cadáver-bomba",
+      "classe": "necromante",
+      "seq": [
+        "comando_sepulcral",
+        "explosao_cadaverica"
+      ]
+    },
+    {
+      "nome": "Levante funesto",
+      "classe": "necromante",
+      "seq": [
+        "dardo_funesto",
+        "levante_profano"
+      ]
+    },
+    {
+      "nome": "Ceifa detonante",
+      "classe": "necromante",
+      "seq": [
+        "ceifa_de_almas",
+        "explosao_cadaverica"
+      ]
+    },
+    {
+      "nome": "Mortalha da legião",
+      "classe": "necromante",
+      "seq": [
+        "mortalha_funebre",
+        "comando_sepulcral"
+      ]
+    },
+    {
+      "nome": "Túmulo aberto",
+      "classe": "necromante",
+      "seq": [
+        "garras_do_ossuario",
+        "levante_profano"
+      ]
+    },
+    {
+      "nome": "Dízimo explosivo",
+      "classe": "necromante",
+      "seq": [
+        "dizimo_vital",
+        "explosao_cadaverica"
+      ]
+    },
+    {
+      "nome": "Colheita eterna",
+      "classe": "necromante",
+      "seq": [
+        "ceifa_de_almas",
+        "dizimo_vital"
+      ]
+    },
+    {
+      "nome": "Marcha fúnebre",
+      "classe": "necromante",
+      "seq": [
+        "levante_profano",
+        "comando_sepulcral",
+        "ceifa_de_almas"
+      ]
+    },
+    {
+      "nome": "Coro dos mortos",
+      "classe": "necromante",
+      "seq": [
+        "comando_sepulcral",
+        "@ultimate"
+      ]
+    },
+    {
+      "nome": "Mergulho cegante",
+      "classe": "aventureiro",
+      "seq": [
+        "garras_cegantes",
+        "mergulho"
+      ]
+    },
+    {
+      "nome": "Presa anunciada",
+      "classe": "aventureiro",
+      "seq": [
+        "grito_do_falcao",
+        "presa_dupla"
+      ]
+    },
+    {
+      "nome": "Rasante duplo",
+      "classe": "aventureiro",
+      "seq": [
+        "rasante",
+        "presa_dupla"
+      ]
+    },
+    {
+      "nome": "Vigília restauradora",
+      "classe": "aventureiro",
+      "seq": [
+        "vigia",
+        "retorno_ao_punho"
+      ]
+    },
+    {
+      "nome": "Tufão",
+      "classe": "aventureiro",
+      "seq": [
+        "tempestade_de_penas",
+        "rasante"
+      ]
+    },
+    {
+      "nome": "Mergulho estrondoso",
+      "classe": "aventureiro",
+      "seq": [
+        "grito_do_falcao",
+        "mergulho"
+      ]
+    },
+    {
+      "nome": "Olhos vendados",
+      "classe": "aventureiro",
+      "seq": [
+        "garras_cegantes",
+        "tempestade_de_penas"
+      ]
+    },
+    {
+      "nome": "Ciclo do falcão",
+      "classe": "aventureiro",
+      "seq": [
+        "mergulho",
+        "retorno_ao_punho",
+        "presa_dupla"
+      ]
+    },
+    {
+      "nome": "Asa do destino",
+      "classe": "aventureiro",
+      "seq": [
+        "vigia",
+        "@ultimate"
+      ]
+    },
+    {
+      "nome": "Gás inflamável",
+      "classe": "geral",
+      "seq": [
+        "dardo_toxico",
+        "bola_de_fogo"
+      ]
+    },
+    {
+      "nome": "Pedra em brasa",
+      "classe": "geral",
+      "seq": [
+        "estaca_de_pedra",
+        "bola_de_fogo"
+      ]
+    },
+    {
+      "nome": "Lâmina sombria",
+      "classe": "geral",
+      "seq": [
+        "passo_sombrio",
+        "corte_dilacerante"
+      ]
+    },
+    {
+      "nome": "Escudo consagrado",
+      "classe": "geral",
+      "seq": [
+        "barreira",
+        "lanca_radiante"
+      ]
+    },
+    {
+      "nome": "Estrela cadente",
+      "classe": "geral",
+      "seq": [
+        "chuva_de_estrelas",
+        "explosao"
+      ]
+    },
+    {
+      "nome": "Tremor tóxico",
+      "classe": "geral",
+      "seq": [
+        "abalo_sismico",
+        "nevoa_venenosa"
+      ]
+    },
+    {
+      "nome": "Investida sombria",
+      "classe": "geral",
+      "seq": [
+        "veu_da_noite",
+        "investida"
+      ]
+    },
+    {
+      "nome": "Seta purificadora",
+      "classe": "geral",
+      "seq": [
+        "purificacao",
+        "seta_arcana"
+      ]
+    },
+    {
+      "nome": "Repulsão ardente",
+      "classe": "geral",
+      "seq": [
+        "onda_de_repulsao",
+        "bola_de_fogo"
+      ]
+    },
+    {
+      "nome": "Aparo preciso",
+      "classe": "geral",
+      "seq": [
+        "postura_de_aparo",
+        "punhal_das_sombras"
+      ]
+    },
+    {
+      "nome": "Postura inabalável",
+      "classe": "guerreiro",
+      "seq": [
+        "desafio",
+        "postura_de_aparo"
+      ]
+    },
+    {
+      "nome": "Moenda de sangue",
+      "classe": "guerreiro",
+      "seq": [
+        "corte_dilacerante",
+        "redemoinho"
+      ]
+    },
+    {
+      "nome": "Fratura",
+      "classe": "mago",
+      "seq": [
+        "estaca_de_pedra",
+        "lanca_de_gelo"
+      ]
+    },
+    {
+      "nome": "Eco repulsor",
+      "classe": "mago",
+      "seq": [
+        "piscar",
+        "onda_de_repulsao"
+      ]
+    },
+    {
+      "nome": "Chama sintonizada",
+      "classe": "mago",
+      "seq": [
+        "afinidade_elemental",
+        "bola_de_fogo"
+      ]
+    },
+    {
+      "nome": "Tiro do véu",
+      "classe": "arqueiro",
+      "seq": [
+        "veu_da_noite",
+        "marca_do_cacador"
+      ]
+    },
+    {
+      "nome": "Cortina tóxica",
+      "classe": "arqueiro",
+      "seq": [
+        "rolamento",
+        "nevoa_venenosa"
+      ]
+    },
+    {
+      "nome": "Visão profunda",
+      "classe": "arqueiro",
+      "seq": [
+        "olho_de_aguia",
+        "seta_arcana"
+      ]
+    },
+    {
+      "nome": "Armadilha pestilenta",
+      "classe": "arqueiro",
+      "seq": [
+        "armadilha_de_caca",
+        "nevoa_venenosa"
+      ]
+    },
+    {
+      "nome": "Fosso de estacas",
+      "classe": "arqueiro",
+      "seq": [
+        "armadilha_de_caca",
+        "estaca_de_pedra"
+      ]
+    },
+    {
+      "nome": "Recuo armado",
+      "classe": "arqueiro",
+      "seq": [
+        "rolamento",
+        "armadilha_de_caca"
+      ]
+    },
+    {
+      "nome": "Égide da legião",
+      "classe": "necromante",
+      "seq": [
+        "barreira",
+        "comando_sepulcral"
+      ]
+    },
+    {
+      "nome": "Nuvem pestilenta",
+      "classe": "necromante",
+      "seq": [
+        "explosao_cadaverica",
+        "nevoa_venenosa"
+      ]
+    },
+    {
+      "nome": "Prensa",
+      "classe": "necromante",
+      "seq": [
+        "ceifa_de_almas",
+        "muralha_de_pedra"
+      ]
+    },
+    {
+      "nome": "Assombração",
+      "classe": "necromante",
+      "seq": [
+        "mortalha_funebre",
+        "passo_sombrio"
+      ]
+    },
+    {
+      "nome": "Transbordo",
+      "classe": "necromante",
+      "seq": [
+        "dizimo_vital",
+        "curar"
+      ]
+    },
+    {
+      "nome": "Mortos consagrados",
+      "classe": "necromante",
+      "seq": [
+        "levante_profano",
+        "lanca_radiante"
+      ]
+    },
+    {
+      "nome": "Bote",
+      "classe": "aventureiro",
+      "seq": [
+        "mergulho",
+        "investida"
+      ]
+    },
+    {
+      "nome": "Golpe às cegas",
+      "classe": "aventureiro",
+      "seq": [
+        "garras_cegantes",
+        "punhal_das_sombras"
+      ]
+    },
+    {
+      "nome": "Penas em brasa",
+      "classe": "aventureiro",
+      "seq": [
+        "tempestade_de_penas",
+        "bola_de_fogo"
+      ]
+    },
+    {
+      "nome": "Rastro tóxico",
+      "classe": "aventureiro",
+      "seq": [
+        "rasante",
+        "nevoa_venenosa"
+      ]
+    },
+    {
+      "nome": "Presa revelada",
+      "classe": "aventureiro",
+      "seq": [
+        "grito_do_falcao",
+        "lanca_radiante"
+      ]
+    },
+    {
+      "nome": "Sentinela curativa",
+      "classe": "aventureiro",
+      "seq": [
+        "vigia",
+        "curar"
+      ]
+    },
+    {
+      "nome": "Mão que recebe",
+      "classe": "aventureiro",
+      "seq": [
+        "retorno_ao_punho",
+        "curar"
+      ]
+    },
+    {
+      "nome": "Dentes e garras",
+      "classe": "aventureiro",
+      "seq": [
+        "presa_dupla",
+        "corte_dilacerante"
+      ]
+    },
+    {
+      "nome": "Veneno fundido",
+      "classe": "geral",
+      "seq": [
+        "flecha_venenosa",
+        "dardo_toxico"
+      ]
+    },
+    {
+      "nome": "Veneno silencioso",
+      "classe": "geral",
+      "seq": [
+        "veu_da_noite",
+        "flecha_venenosa"
+      ]
+    },
+    {
+      "nome": "Combustão de miasma",
+      "classe": "geral",
+      "seq": [
+        "nevoa_venenosa",
+        "explosao"
+      ]
+    },
+    {
+      "nome": "Runa sísmica",
+      "classe": "geral",
+      "seq": [
+        "seta_arcana",
+        "estaca_de_pedra"
+      ]
+    },
+    {
+      "nome": "Alvo fixo",
+      "classe": "geral",
+      "seq": [
+        "golpe_atordoante",
+        "seta_arcana"
+      ]
+    },
+    {
+      "nome": "Isca explosiva",
+      "classe": "geral",
+      "seq": [
+        "troca_sombria",
+        "explosao"
+      ]
+    },
+    {
+      "nome": "Encurralado",
+      "classe": "geral",
+      "seq": [
+        "troca_sombria",
+        "muralha_de_pedra"
+      ]
+    },
+    {
+      "nome": "Duplo passo",
+      "classe": "geral",
+      "seq": [
+        "passo_sombrio",
+        "troca_sombria"
+      ]
+    },
+    {
+      "nome": "Desequilíbrio",
+      "classe": "geral",
+      "seq": [
+        "onda_de_repulsao",
+        "punhal_das_sombras"
+      ]
+    },
+    {
+      "nome": "Fogo-fátuo",
+      "classe": "geral",
+      "seq": [
+        "veu_da_noite",
+        "bola_de_fogo"
+      ]
+    },
+    {
+      "nome": "Ferida em brasa",
+      "classe": "geral",
+      "seq": [
+        "corte_dilacerante",
+        "bola_de_fogo"
+      ]
+    },
+    {
+      "nome": "Sol nascente",
+      "classe": "geral",
+      "seq": [
+        "bola_de_fogo",
+        "lanca_radiante"
+      ]
+    },
+    {
+      "nome": "Chama purificadora",
+      "classe": "geral",
+      "seq": [
+        "purificacao",
+        "bola_de_fogo"
+      ]
+    },
+    {
+      "nome": "Espaço para respirar",
+      "classe": "geral",
+      "seq": [
+        "onda_de_repulsao",
+        "curar"
+      ]
+    },
+    {
+      "nome": "Dispersão",
+      "classe": "geral",
+      "seq": [
+        "nevoa_venenosa",
+        "onda_de_repulsao"
+      ]
+    },
+    {
+      "nome": "Contragolpe repulsor",
+      "classe": "geral",
+      "seq": [
+        "postura_de_aparo",
+        "onda_de_repulsao"
+      ]
+    },
+    {
+      "nome": "Toxina consagrada",
+      "classe": "geral",
+      "seq": [
+        "lanca_radiante",
+        "dardo_toxico"
+      ]
+    },
+    {
+      "nome": "Atropelo tóxico",
+      "classe": "geral",
+      "seq": [
+        "dardo_toxico",
+        "investida"
+      ]
+    },
+    {
+      "nome": "Estrela guia",
+      "classe": "geral",
+      "seq": [
+        "golpe_atordoante",
+        "chuva_de_estrelas"
+      ]
+    },
+    {
+      "nome": "Contágio reverso",
+      "classe": "geral",
+      "seq": [
+        "purificacao",
+        "nevoa_venenosa"
+      ]
+    },
+    {
+      "nome": "Passo no tremor",
+      "classe": "geral",
+      "seq": [
+        "abalo_sismico",
+        "passo_sombrio"
+      ]
+    },
+    {
+      "nome": "Golpe perfeito",
+      "classe": "geral",
+      "seq": [
+        "veu_da_noite",
+        "troca_sombria",
+        "punhal_das_sombras"
+      ]
+    },
+    {
+      "nome": "Leito de pedras",
+      "classe": "geral",
+      "seq": [
+        "estaca_de_pedra",
+        "onda_de_repulsao",
+        "abalo_sismico"
+      ]
+    },
+    {
+      "nome": "Inferno químico",
+      "classe": "geral",
+      "seq": [
+        "dardo_toxico",
+        "nevoa_venenosa",
+        "bola_de_fogo"
+      ]
+    },
+    {
+      "nome": "Juízo das estrelas",
+      "classe": "geral",
+      "seq": [
+        "lanca_radiante",
+        "golpe_atordoante",
+        "chuva_de_estrelas"
+      ]
+    },
+    {
+      "nome": "Fornalha de pedra",
+      "classe": "geral",
+      "seq": [
+        "rastro_igneo",
+        "muralha_de_pedra"
+      ]
+    },
+    {
+      "nome": "Fuga em cinzas",
+      "classe": "geral",
+      "seq": [
+        "veu_da_noite",
+        "rastro_igneo"
+      ]
+    },
+    {
+      "nome": "Arena de fogo",
+      "classe": "geral",
+      "seq": [
+        "anel_de_chamas",
+        "onda_de_repulsao"
+      ]
+    },
+    {
+      "nome": "Santuário ardente",
+      "classe": "geral",
+      "seq": [
+        "circulo_de_amparo",
+        "anel_de_chamas"
+      ]
+    },
+    {
+      "nome": "Combustão total",
+      "classe": "geral",
+      "seq": [
+        "bola_de_fogo",
+        "incinerar"
+      ]
+    },
+    {
+      "nome": "Fervura",
+      "classe": "geral",
+      "seq": [
+        "dardo_toxico",
+        "incinerar"
+      ]
+    },
+    {
+      "nome": "Mente exposta",
+      "classe": "geral",
+      "seq": [
+        "dissipar",
+        "agulha_mental"
+      ]
+    },
+    {
+      "nome": "Dor fantasma",
+      "classe": "geral",
+      "seq": [
+        "punhal_das_sombras",
+        "agulha_mental"
+      ]
+    },
+    {
+      "nome": "Empalar",
+      "classe": "geral",
+      "seq": [
+        "telecinese",
+        "estaca_de_pedra"
+      ]
+    },
+    {
+      "nome": "Afogar",
+      "classe": "geral",
+      "seq": [
+        "telecinese",
+        "nevoa_venenosa"
+      ]
+    },
+    {
+      "nome": "Antevisão",
+      "classe": "geral",
+      "seq": [
+        "pressagio",
+        "postura_de_aparo"
+      ]
+    },
+    {
+      "nome": "Passo previsto",
+      "classe": "geral",
+      "seq": [
+        "pressagio",
+        "passo_sombrio"
+      ]
+    },
+    {
+      "nome": "Ruptura de defesas",
+      "classe": "geral",
+      "seq": [
+        "dissipar",
+        "explosao"
+      ]
+    },
+    {
+      "nome": "Golpe sem guarda",
+      "classe": "geral",
+      "seq": [
+        "dissipar",
+        "golpe_atordoante"
+      ]
+    },
+    {
+      "nome": "Seta canalizada",
+      "classe": "geral",
+      "seq": [
+        "runa_amplificadora",
+        "seta_arcana"
+      ]
+    },
+    {
+      "nome": "Constelação",
+      "classe": "geral",
+      "seq": [
+        "runa_amplificadora",
+        "chuva_de_estrelas"
+      ]
+    },
+    {
+      "nome": "Carga coletiva",
+      "classe": "geral",
+      "seq": [
+        "impulso",
+        "investida"
+      ]
+    },
+    {
+      "nome": "Escolta",
+      "classe": "geral",
+      "seq": [
+        "barreira",
+        "impulso"
+      ]
+    },
+    {
+      "nome": "Lâmina de seiva",
+      "classe": "geral",
+      "seq": [
+        "seiva_corrosiva",
+        "postura_de_aparo"
+      ]
+    },
+    {
+      "nome": "Muralha corrosiva",
+      "classe": "geral",
+      "seq": [
+        "seiva_corrosiva",
+        "muralha_de_pedra"
+      ]
+    },
+    {
+      "nome": "Avalanche",
+      "classe": "geral",
+      "seq": [
+        "pedregulho",
+        "abalo_sismico"
+      ]
+    },
+    {
+      "nome": "Ricochete de pedra",
+      "classe": "geral",
+      "seq": [
+        "muralha_de_pedra",
+        "pedregulho"
+      ]
+    },
+    {
+      "nome": "Pouso sagrado",
+      "classe": "geral",
+      "seq": [
+        "asas_da_aurora",
+        "circulo_de_amparo"
+      ]
+    },
+    {
+      "nome": "Lança do resgate",
+      "classe": "geral",
+      "seq": [
+        "asas_da_aurora",
+        "lanca_radiante"
+      ]
+    }
+  ],
+  "sinergias": [
+    {
+      "nome": "Bastião de pedra",
+      "seq": [
+        "pele_de_pedra",
+        "muralha_de_pedra"
+      ]
+    },
+    {
+      "nome": "Disciplina férrea",
+      "seq": [
+        "disciplina_marcial",
+        "golpe_atordoante"
+      ]
+    },
+    {
+      "nome": "Fluxo de cura",
+      "seq": [
+        "fluxo_restaurador",
+        "curar"
+      ]
+    },
+    {
+      "nome": "Avalanche humana",
+      "seq": [
+        "tenacidade",
+        "investida",
+        "golpe_atordoante"
+      ]
+    }
+  ],
+  "ressonancias": [
+    "Impacto",
+    "Ricochete",
+    "Muralha",
+    "Resíduo",
+    "Purificar",
+    "Presença",
+    "Lâmina rúnica",
+    "Olhar sereno",
+    "Bastião",
+    "Inamovível",
+    "Mente dupla",
+    "Trapaceiro",
+    "Ímpeto",
+    "Disciplina interior",
+    "Comandante",
+    "Engenhoso",
+    "Resiliente",
+    "Maestro",
+    "Gladiador",
+    "Oráculo",
+    "Senhor da guerra",
+    "Arcano preciso",
+    "Sobrevivente",
+    "Eco ancestral"
+  ],
+  "sintonia": {
+    "dominios": [
+      "tecnica",
+      "arcana",
+      "suporte",
+      "fogo",
+      "veneno",
+      "terra",
+      "sombra",
+      "sagrado",
+      "psiquico"
+    ],
+    "vertentes": {
+      "guerreiro": [
+        {
+          "nome": "Paladino",
+          "familias": [
+            "sagrado",
+            "suporte"
+          ]
+        },
+        {
+          "nome": "Berserker",
+          "familias": [
+            "fogo",
+            "tecnica"
+          ]
+        },
+        {
+          "nome": "Carcereiro",
+          "familias": [
+            "terra",
+            "psiquico"
+          ]
+        }
+      ],
+      "mago": [
+        {
+          "nome": "Alquimista",
+          "familias": [
+            "fogo",
+            "veneno"
+          ]
+        },
+        {
+          "nome": "Arquimago",
+          "familias": [
+            "arcana",
+            "psiquico"
+          ]
+        },
+        {
+          "nome": "Geomante",
+          "familias": [
+            "terra",
+            "fogo"
+          ]
+        }
+      ],
+      "arqueiro": [
+        {
+          "nome": "Caçador noturno",
+          "familias": [
+            "sombra",
+            "veneno"
+          ]
+        },
+        {
+          "nome": "Atirador de elite",
+          "familias": [
+            "arcana",
+            "tecnica"
+          ]
+        },
+        {
+          "nome": "Sentinela",
+          "familias": [
+            "terra",
+            "sagrado"
+          ]
+        }
+      ],
+      "necromante": [
+        {
+          "nome": "Lich",
+          "familias": [
+            "arcana",
+            "sombra"
+          ]
+        },
+        {
+          "nome": "Senhor da praga",
+          "familias": [
+            "veneno",
+            "psiquico"
+          ]
+        },
+        {
+          "nome": "Pastor das almas",
+          "familias": [
+            "sagrado",
+            "suporte"
+          ]
+        }
+      ],
+      "aventureiro": [
+        {
+          "nome": "Druida",
+          "familias": [
+            "terra",
+            "suporte"
+          ]
+        },
+        {
+          "nome": "Rapina",
+          "familias": [
+            "tecnica",
+            "sombra"
+          ]
+        },
+        {
+          "nome": "Tempestuoso",
+          "familias": [
+            "arcana",
+            "psiquico"
+          ]
+        }
+      ]
+    },
+    "encarnacoesDuplas": [
+      {
+        "nome": "Vapor",
+        "elementos": [
+          "fogo",
+          "gelo"
+        ]
+      },
+      {
+        "nome": "Plasma",
+        "elementos": [
+          "fogo",
+          "raio"
+        ]
+      },
+      {
+        "nome": "Supercondução",
+        "elementos": [
+          "gelo",
+          "raio"
+        ]
+      },
+      {
+        "nome": "Lava",
+        "elementos": [
+          "fogo",
+          "terra"
+        ]
+      },
+      {
+        "nome": "Miasma ardente",
+        "elementos": [
+          "fogo",
+          "veneno"
+        ]
+      },
+      {
+        "nome": "Eclipse",
+        "elementos": [
+          "luz",
+          "trevas"
+        ]
+      },
+      {
+        "nome": "Permafrost",
+        "elementos": [
+          "gelo",
+          "terra"
+        ]
+      },
+      {
+        "nome": "Névoa gélida",
+        "elementos": [
+          "gelo",
+          "veneno"
+        ]
+      },
+      {
+        "nome": "Inverno sombrio",
+        "elementos": [
+          "gelo",
+          "trevas"
+        ]
+      },
+      {
+        "nome": "Aurora",
+        "elementos": [
+          "gelo",
+          "luz"
+        ]
+      },
+      {
+        "nome": "Magnetita",
+        "elementos": [
+          "raio",
+          "terra"
+        ]
+      },
+      {
+        "nome": "Neurotoxina",
+        "elementos": [
+          "raio",
+          "veneno"
+        ]
+      },
+      {
+        "nome": "Relâmpago negro",
+        "elementos": [
+          "raio",
+          "trevas"
+        ]
+      },
+      {
+        "nome": "Fulgor",
+        "elementos": [
+          "raio",
+          "luz"
+        ]
+      },
+      {
+        "nome": "Chama negra",
+        "elementos": [
+          "fogo",
+          "trevas"
+        ]
+      },
+      {
+        "nome": "Chama sagrada",
+        "elementos": [
+          "fogo",
+          "luz"
+        ]
+      },
+      {
+        "nome": "Lodo tóxico",
+        "elementos": [
+          "terra",
+          "veneno"
+        ]
+      },
+      {
+        "nome": "Túmulo",
+        "elementos": [
+          "terra",
+          "trevas"
+        ]
+      },
+      {
+        "nome": "Santuário de pedra",
+        "elementos": [
+          "terra",
+          "luz"
+        ]
+      },
+      {
+        "nome": "Pestilência",
+        "elementos": [
+          "veneno",
+          "trevas"
+        ]
+      },
+      {
+        "nome": "Purgação",
+        "elementos": [
+          "veneno",
+          "luz"
+        ]
+      }
+    ]
+  }
+}
