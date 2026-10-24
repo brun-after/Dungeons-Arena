@@ -125,7 +125,8 @@ export function processarPortas(estado: EstadoJogo, ctx: ContextoSimulacao, said
   const chegaram = chegaramNesteTick(saida, estado.tick);
   if (chegaram.size === 0) return;
   for (const e of ordemRotativa(estado.entidades, estado.tick)) {
-    if (!chegaram.has(e.id) || !vivo(e)) continue;
+    // Ajuste de 24/10/2026 (D-091): o falcão não usa portas (o retorno ao dono é a passiva dele).
+    if (!chegaram.has(e.id) || !vivo(e) || e.invocacao?.companheiro) continue;
     if (teleportar(estado, ctx, e, saida)) continue;
     if (e.controlador !== 'ia') tentarSair(estado, ctx, e, saida);
   }

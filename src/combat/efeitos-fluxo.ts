@@ -244,7 +244,8 @@ export function processarGatilhos(estado: EstadoJogo, ctx: ContextoSimulacao, ap
   for (const r of estado.rastros) {
     const dono = { id: r.donoId, equipe: r.equipeDono };
     for (const e of ordem) {
-      if (!vivo(e) || e.x !== r.x || e.y !== r.y || r.atingidos.includes(e.id) || !podeFerir(dono, e, ctx.modo)) continue;
+      // Ajuste de 24/10/2026 (D-091): o falcão do Aventureiro voa por cima de rastros e armadilhas.
+      if (!vivo(e) || e.invocacao?.companheiro || e.x !== r.x || e.y !== r.y || r.atingidos.includes(e.id) || !podeFerir(dono, e, ctx.modo)) continue;
       r.atingidos.push(e.id);
       const efeito = r.tipo === 'rastro_dano' ? null : r.interno;
       const origem = { id: r.donoId, x: r.x, y: r.y };
@@ -257,7 +258,7 @@ export function processarGatilhos(estado: EstadoJogo, ctx: ContextoSimulacao, ap
     // Marco 9A-2: com rearme, a armadilha fica inerte depois de disparar.
     if (a.inerteAteTick > tick) continue;
     const dono = { id: a.donoId, equipe: a.equipeDono };
-    const alvo = ordem.find((e) => vivo(e) && e.x === a.x && e.y === a.y && podeFerir(dono, e, ctx.modo));
+    const alvo = ordem.find((e) => vivo(e) && !e.invocacao?.companheiro && e.x === a.x && e.y === a.y && podeFerir(dono, e, ctx.modo));
     if (!alvo) continue;
     if (dispararArmadilha(estado, ctx, a, alvo, aplicar, saida)) disparadas.add(a.id);
   }

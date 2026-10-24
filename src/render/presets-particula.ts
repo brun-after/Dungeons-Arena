@@ -54,7 +54,7 @@ export interface Emissao {
  * forma do ataque também é partícula — `telegrafo` (o miolo da área enchendo), `borda` (o contorno, na cor de quem
  * ataca), `mira` (a linha do golpe e do projétil), `projetil` (o núcleo que voa) e `chao` (os rastros no chão).
  */
-export type NomePreset = PresetVisual | 'poeira' | 'aura' | 'onda' | 'telegrafo' | 'borda' | 'mira' | 'projetil' | 'chao' | 'projetil_flecha' | 'projetil_teia' | 'aura_forma';
+export type NomePreset = PresetVisual | 'poeira' | 'aura' | 'onda' | 'telegrafo' | 'borda' | 'mira' | 'projetil' | 'chao' | 'projetil_flecha' | 'projetil_teia' | 'aura_forma' | 'trilha_elemental' | 'aura_sutil' | 'esteira_carregada';
 
 const faiscas: Emissao = { textura: 'faisca', quantidade: 12, vidaMs: [180, 340], velocidade: [140, 300], direcao: 'livre', gravidade: 320, escala: [0.8, 0.2], alpha: [1, 0], aditivo: true, raio: 4, cor: null, arrasto: 0.6 };
 const brilho: Emissao = { textura: 'brilho', quantidade: 10, vidaMs: [300, 520], velocidade: [20, 60], direcao: 'cima', gravidade: 0, escala: [0.9, 0.1], alpha: [0.9, 0], aditivo: true, raio: 10, cor: null };
@@ -127,6 +127,13 @@ export const PRESETS_PARTICULA: Readonly<Record<NomePreset, readonly Emissao[]>>
   ],
   poeira: [{ textura: 'ponto', quantidade: 1, vidaMs: [2500, 4000], velocidade: [3, 10], direcao: 'livre', gravidade: 0, escala: [0.25, 0.25], alpha: [0.25, 0], aditivo: false, raio: 220, cor: 0xd8cfb8 }],
   aura: [{ ...brilho, quantidade: 3, vidaMs: [400, 700], velocidade: [10, 25], escala: [0.5, 0.1], raio: 12 }],
+  // Ajuste de 24/10/2026 (D-091): a encarnação do Mago. Parado, um respiro discreto; andando, a trilha que fica para trás
+  // (partículas longas e lentas, que se apagam devagar, em vez de rajadas que piscam).
+  aura_sutil: [{ ...brilho, quantidade: 1, vidaMs: [900, 1300], velocidade: [6, 14], escala: [0.45, 0.1], alpha: [0.35, 0], raio: 10 }],
+  trilha_elemental: [
+    { textura: 'brilho', quantidade: 2, vidaMs: [700, 1100], velocidade: [0, 6], direcao: 'livre', gravidade: -6, escala: [0.55, 0.05], alpha: [0.55, 0], aditivo: true, raio: 5, cor: null },
+    { textura: 'ponto', quantidade: 1, vidaMs: [500, 800], velocidade: [2, 8], direcao: 'cima', gravidade: 0, escala: [0.35, 0.05], alpha: [0.7, 0], aditivo: true, raio: 3, cor: 0xffffff },
+  ],
   telegrafo: [{ textura: 'brilho', quantidade: 1, vidaMs: [420, 680], velocidade: [4, 14], direcao: 'cima', gravidade: 0, escala: [0.7, 0.25], alpha: [0.55, 0], aditivo: true, raio: 16, cor: null }],
   borda: [{ textura: 'ponto', quantidade: 1, vidaMs: [260, 420], velocidade: [0, 6], direcao: 'livre', gravidade: 0, escala: [0.45, 0.15], alpha: [0.95, 0], aditivo: true, raio: 14, cor: null }],
   mira: [{ textura: 'ponto', quantidade: 5, vidaMs: [220, 340], velocidade: [0, 8], direcao: 'livre', gravidade: 0, escala: [0.35, 0.1], alpha: [0.8, 0], aditivo: true, raio: 2, cor: null }],
@@ -138,6 +145,18 @@ export const PRESETS_PARTICULA: Readonly<Record<NomePreset, readonly Emissao[]>>
   // --- Ajuste de 16/10/2026 (D-067): flechas.
   /** O traço fino que fica atrás da flecha, alinhado com o voo (no lugar das bolinhas de brilho). */
   esteira: [{ textura: 'faisca', quantidade: 2, vidaMs: [140, 220], velocidade: [-30, -10], direcao: 'orientada', gravidade: 0, escala: [0.55, 0.15], alpha: [0.6, 0], aditivo: true, raio: 1, cor: null }],
+  /**
+   * Ajuste de 24/10/2026 (D-091): o tiro carregado da Mira firme, entre a flecha simples e um mini cometa: um núcleo
+   * luminoso colado na ponta, a cauda fina e longa alinhada com o voo, um halo suave em volta da cauda e fagulhas
+   * que se soltam e caem.
+   */
+  esteira_carregada: [
+    { textura: 'brilho', quantidade: 1, vidaMs: [90, 140], velocidade: [0, 4], direcao: 'livre', gravidade: 0, escala: [0.85, 0.45], alpha: [0.95, 0], aditivo: true, raio: 0, cor: null },
+    { textura: 'faisca', quantidade: 4, vidaMs: [320, 520], velocidade: [-34, -10], direcao: 'orientada', abertura: 0.06, gravidade: 0, escala: [0.95, 0.15], alpha: [0.9, 0], aditivo: true, raio: 1, cor: null },
+    { textura: 'brilho', quantidade: 2, vidaMs: [280, 460], velocidade: [-18, -4], direcao: 'orientada', abertura: 0.2, gravidade: 0, escala: [0.55, 0.1], alpha: [0.4, 0], aditivo: true, raio: 3, cor: null },
+    { textura: 'ponto', quantidade: 1, vidaMs: [380, 620], velocidade: [-45, -15], direcao: 'orientada', abertura: 0.7, gravidade: 40, escala: [0.3, 0.05], alpha: [0.85, 0], aditivo: true, raio: 2, cor: 0xffffff },
+  ],
+
   /** O acerto da flecha: lascas de madeira e um pouco de pó, sem brilho. */
   farpas: [
     { textura: 'lasca', quantidade: 6, vidaMs: [220, 380], velocidade: [60, 140], direcao: 'livre', gravidade: 420, escala: [0.45, 0.25], alpha: [1, 0], aditivo: false, raio: 3, cor: 0xb08d5a, giro: [-8, 8], arrasto: 0.4 },

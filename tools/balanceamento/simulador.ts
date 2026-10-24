@@ -5,6 +5,7 @@ import { construirFichaDeSessao } from '../../src/arena/ficha-sessao';
 import { entrarNaArena } from '../../src/arena/entrada';
 import { resolverHabilidade } from '../../src/combat/compilar-habilidade';
 import { chaveServo } from '../../src/combat/necromancia';
+import { passavel } from '../../src/world/fase';
 import type { ContextoSimulacao } from '../../src/core/contexto';
 import { DT_MS } from '../../src/core/loop';
 import type { EventoSimulacao } from '../../src/core/eventos-simulacao';
@@ -81,7 +82,9 @@ export function sequencia(classe: string, nivel: number, presets: readonly strin
   const resultados: ResultadoDuelo[] = [];
   presets.forEach((preset, i) => {
     const id = `i${i + 1}`;
-    const e = inimigo(ctx, preset, nivel, id, j.x + 2, j.y);
+    // Ajuste de 24/10/2026 (D-091): o próximo nasce a 2 células numa célula passável (encostado na borda, nascia na parede).
+    const lado = [2, -2].find((dx) => passavel(ctx.fase, j.x + dx, j.y)) ?? 0;
+    const e = inimigo(ctx, preset, nivel, id, j.x + lado, j.y + (lado === 0 ? 2 : 0));
     if (!m.estado.entidades.includes(j) || !vivo(j)) return;
     m.estado.entidades.push(e);
     const desde = m.eventos.length;

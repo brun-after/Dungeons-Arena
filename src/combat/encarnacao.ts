@@ -3,12 +3,13 @@
 //   fogo -> magias +5% de dano e, a cada segundo, queima os hostis a 1 célula;
 //   gelo -> recebe 10% menos dano, e quem o golpeia de perto fica resfriado;
 //   raio -> anda 15% mais rápido, e as magias que saltam (e as de projétil) ganham um salto.
-// Zera na troca de fase. Números em balance.ajustesClasses.mago.encarnacao.
+// Zera na troca de fase. Ajuste de 24/10/2026 (D-091): dura `duracaoMs` (12 s) desde a última magia do elemento.
+// Números em balance.ajustesClasses.mago.encarnacao.
 
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
-import { ticksDe } from '../core/tempo';
+import { msDe, ticksDe } from '../core/tempo';
 import { vivo, type Entidade } from '../entities/entidade';
 import { podeFerir } from '../modos/relacao';
 import { aplicarEfeito } from './efeitos';
@@ -30,13 +31,19 @@ export function encarnacaoDe(e: Entidade): ElementoEncarnado | null {
   return ehMago(e) && e.encarnacao ? e.encarnacao : null;
 }
 
-/** Ao lançar: uma magia ofensiva de fogo, gelo ou raio troca a encarnação. Devolve se trocou. */
-export function encarnar(e: Entidade, hab: Habilidade): boolean {
+/** Ao lançar: uma magia ofensiva de fogo, gelo ou raio troca (ou renova) a encarnação. Devolve se trocou. */
+export function encarnar(ctx: ContextoSimulacao, e: Entidade, hab: Habilidade, tick: number): boolean {
   if (!ehMago(e) || !hab.formulaDano || !hab.elemento || !ENCARNAVEIS.includes(hab.elemento)) return false;
   const novo = hab.elemento as ElementoEncarnado;
+  e.encarnacaoAteTick = tick + ticksDe(ctx.balance.ajustesClasses.mago.encarnacao.duracaoMs);
   if (e.encarnacao === novo) return false;
   e.encarnacao = novo;
   return true;
+}
+
+/** Quanto falta da encarnação, em ms (0 sem encarnação). */
+export function restanteEncarnacaoMs(e: Entidade, tick: number): number {
+  return encarnacaoDe(e) && e.encarnacaoAteTick !== undefined ? Math.max(0, msDe(e.encarnacaoAteTick - tick)) : 0;
 }
 
 /** Fogo: multiplicador das magias (dano mágico) do Mago. */
@@ -70,6 +77,14 @@ export function reagirAoGolpe(estado: EstadoJogo, ctx: ContextoSimulacao, mago: 
 /** Fogo: a cada `fogoIntervaloMs`, os hostis a `fogoRaio` células começam a queimar. */
 export function processarEncarnacoes(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
   const r = ctx.balance.ajustesClasses.mago.encarnacao;
+  // A encarnação vencida se apaga.
+  for (const e of estado.entidades) {
+    if (e.encarnacao && (e.encarnacaoAteTick ?? 0) <= estado.tick) {
+      delete e.encarnacao;
+      delete e.encarnacaoAteTick;
+      saida.push({ t: 'encarnacaoAcabou', tick: estado.tick, id: e.id });
+    }
+  }
   if (estado.tick % Math.max(1, ticksDe(r.fogoIntervaloMs)) !== 0) return;
   for (const mago of estado.entidades) {
     if (!vivo(mago) || encarnacaoDe(mago) !== 'fogo') continue;
