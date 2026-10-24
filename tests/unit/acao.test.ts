@@ -7,7 +7,7 @@ import { simular, type EventoSimulacao } from '../../src/core/simulacao';
 import { ticksDe } from '../../src/core/tempo';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import type { Entidade } from '../../src/entities/entidade';
-import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
+import { comKit, CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 
 const ctx = contexto(faseDeTexto(SALA_ABERTA));
 
@@ -21,7 +21,7 @@ function arena(semente = 1, bonecoX = 5) {
   const estado = criarEstado({ semente, faseId: 'teste' });
   const classe = obter(CONTEUDO.classes.get('aventureiro'), 'classe');
   const boneco = obter(CONTEUDO.presets.get('boneco'), 'boneco');
-  estado.entidades.push(criarJogador(classe, 'j', 3, 5, ctx.balance));
+  estado.entidades.push(comKit(criarJogador(classe, 'j', 3, 5, ctx.balance)));
   estado.entidades.push(criarInimigo(boneco, 'b', bonecoX, 5, ctx.balance));
   const eventos: EventoSimulacao[] = [];
   const ent = (id: string): Entidade => obter(buscarEntidade(estado, id), id);

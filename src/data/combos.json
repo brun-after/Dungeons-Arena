@@ -1,5 +1,5 @@
 {
-  "versao": 2,
+  "versao": 3,
   "combos": [
     {
       "id": "moedor",
@@ -41,7 +41,7 @@
       "nome": "Carga do estandarte",
       "janelaMs": 2000,
       "mesmoAlvo": false,
-      "texto": "Após deslocar com Investida, Grito de guerra suprime ataques físicos próximos e dá +30% de dano por 4 s.",
+      "texto": "Após deslocar com Investida, Brado suprime ataques físicos próximos e dá +30% de dano por 4 s.",
       "danoPct": 0,
       "emVolta": {
         "raio": 3,
@@ -54,7 +54,7 @@
       },
       "sequencia": [
         "investida",
-        "grito_de_guerra"
+        "brado"
       ],
       "condicoes": [
         "deslocou"
@@ -283,16 +283,16 @@
       "id": "contra_ataque_ferro",
       "nome": "Contra-ataque de ferro",
       "sequencia": [
-        "escudo_de_ferro",
+        "investida_de_escudo",
         "golpe_atordoante"
       ],
       "janelaMs": 3000,
       "mesmoAlvo": false,
       "condicoes": [
-        "escudo"
+        "deslocou"
       ],
       "danoPct": 25,
-      "texto": "Acertar com o escudo ativo reforça a proteção em 6 e fortalece o golpe.",
+      "texto": "O alvo empurrado contra uma parede ou outro hostil fica atordoado o dobro.",
       "recompensa": "reforcar_escudo",
       "visual": {
         "cor": "#b6cee0",
@@ -313,7 +313,7 @@
       "nome": "Aríete flamejante",
       "sequencia": [
         "investida",
-        "golpe_flamejante"
+        "lamina_em_brasa"
       ],
       "janelaMs": 3000,
       "mesmoAlvo": false,
@@ -322,7 +322,7 @@
         "deslocou"
       ],
       "danoPct": 20,
-      "texto": "Acertar o mesmo alvo após avançar prolonga a queimadura em 2 s.",
+      "texto": "Depois de avançar, a lâmina sai sem tempo de carga.",
       "recompensa": "queima_longa",
       "visual": {
         "cor": "#ff9b4f",
@@ -401,13 +401,11 @@
       "nome": "Retirada glacial",
       "sequencia": [
         "nova_glacial",
-        "troca_sombria"
+        "piscar"
       ],
       "janelaMs": 3000,
       "mesmoAlvo": false,
-      "condicoes": [
-        "trocou"
-      ],
+      "condicoes": [],
       "danoPct": 0,
       "texto": "Após a nova atingir inimigos, concluir a troca concede escudo de 8 por 3 s.",
       "recompensa": "escudo_curto",
@@ -910,18 +908,15 @@
       "id": "forja_guerra",
       "nome": "Forja de guerra",
       "sequencia": [
-        "escudo_de_ferro",
+        "investida_de_escudo",
         "corrente",
-        "golpe_flamejante"
+        "lamina_em_brasa"
       ],
       "janelaMs": 3000,
       "mesmoAlvo": false,
-      "condicoes": [
-        "escudo",
-        "puxou"
-      ],
+      "condicoes": [],
       "danoPct": 0,
-      "texto": "Acertar o alvo puxado reforça o escudo e espalha queimadura curta.",
+      "texto": "A corrente puxa de volta o alvo empurrado, e a lâmina sai sem carga nele.",
       "recompensa": "forja",
       "visual": {
         "cor": "#f3a35e",
@@ -1209,6 +1204,4308 @@
         ]
       },
       "texto": "Lança radiante no mesmo alvo definhando pelo dardo causa +15% de dano além das reações de Trevas e luz."
+    },
+    {
+      "id": "grito_imperioso",
+      "nome": "Grito imperioso",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Aliados perto ganham escudo de 6 enquanto os hostis estão desafiados.",
+      "danoPct": 0,
+      "noProprio": [
+        {
+          "tipo": "escudo",
+          "valor": 6,
+          "duracaoMs": 4000
+        }
+      ],
+      "emVolta": {
+        "raio": 3,
+        "efeitos": [
+          {
+            "tipo": "escudo",
+            "valor": 6,
+            "duracaoMs": 4000
+          }
+        ]
+      },
+      "sequencia": [
+        "desafio",
+        "brado"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#d0603f",
+        "formas": [
+          "laminas",
+          "escudo"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "terremoto_de_aco",
+      "nome": "Terremoto de aço",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "+35% de dano e atordoa por 0,5 s.",
+      "danoPct": 35,
+      "emVolta": {
+        "raio": 1,
+        "efeitos": [
+          {
+            "tipo": "atordoar",
+            "duracaoMs": 500
+          }
+        ]
+      },
+      "sequencia": [
+        "salto_esmagador",
+        "redemoinho"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#d0603f",
+        "formas": [
+          "laminas",
+          "chamas"
+        ],
+        "movimento": "subir",
+        "duracaoMs": 800,
+        "destinos": [
+          "mira",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "ancora",
+      "nome": "Âncora",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Salta direto no alvo puxado, com +30%.",
+      "danoPct": 30,
+      "sequencia": [
+        "corrente",
+        "salto_esmagador"
+      ],
+      "condicoes": [
+        "puxou"
+      ],
+      "visual": {
+        "cor": "#d0603f",
+        "formas": [
+          "escudo",
+          "estandarte"
+        ],
+        "movimento": "girar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "desforra_flamejante",
+      "nome": "Desforra flamejante",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "O contragolpe sai em chamas, e a lâmina seguinte ganha +1 célula de alcance.",
+      "danoPct": 20,
+      "noAlvo": [
+        {
+          "tipo": "queimando",
+          "valor": 4,
+          "duracaoMs": 3000
+        }
+      ],
+      "sequencia": [
+        "contragolpe",
+        "lamina_em_brasa"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#d0603f",
+        "formas": [
+          "escudo",
+          "muralha"
+        ],
+        "movimento": "contrair",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "muralha_desafiadora",
+      "nome": "Muralha desafiadora",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "Os empurrados já ficam desafiados, e cada um dá 4 de escudo a mais.",
+      "danoPct": 0,
+      "noAlvo": [
+        {
+          "tipo": "desafiado",
+          "pct": 15,
+          "duracaoMs": 3000
+        }
+      ],
+      "noProprio": [
+        {
+          "tipo": "escudo",
+          "valor": 4,
+          "duracaoMs": 4000
+        }
+      ],
+      "sequencia": [
+        "investida_de_escudo",
+        "desafio"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#d0603f",
+        "formas": [
+          "estandarte",
+          "elos"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "quebra_guarda",
+      "nome": "Quebra-guarda",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Atordoamento +0,5 s.",
+      "danoPct": 0,
+      "noAlvo": [
+        {
+          "tipo": "atordoar",
+          "duracaoMs": 500
+        }
+      ],
+      "sequencia": [
+        "contragolpe",
+        "golpe_atordoante"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#d0603f",
+        "formas": [
+          "estandarte",
+          "chifres"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "investida_brutal",
+      "nome": "Investida brutal",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "O impacto do salto ganha +1 de raio.",
+      "danoPct": 20,
+      "emVolta": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "atordoar",
+            "duracaoMs": 500
+          }
+        ]
+      },
+      "sequencia": [
+        "investida",
+        "salto_esmagador"
+      ],
+      "condicoes": [
+        "deslocou"
+      ],
+      "visual": {
+        "cor": "#d0603f",
+        "formas": [
+          "elos",
+          "fissuras"
+        ],
+        "movimento": "cair",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "forja_viva",
+      "nome": "Forja viva",
+      "janelaMs": 3000,
+      "mesmoAlvo": true,
+      "texto": "O giro queima todos os atingidos, e a lâmina é crítica nos desafiados.",
+      "danoPct": 25,
+      "d20Minimo": 20,
+      "emVolta": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "queimando",
+            "valor": 3,
+            "duracaoMs": 3000
+          }
+        ]
+      },
+      "sequencia": [
+        "desafio",
+        "redemoinho",
+        "lamina_em_brasa"
+      ],
+      "condicoes": [
+        "alvo:desafiado"
+      ],
+      "visual": {
+        "cor": "#d0603f",
+        "formas": [
+          "fissuras",
+          "laminas"
+        ],
+        "movimento": "pulsar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "hino_de_batalha",
+      "nome": "Hino de batalha",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A ultimate dá +20% de dano aos aliados por 5 s.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 4,
+        "efeitos": [
+          {
+            "tipo": "bonus_dano",
+            "pct": 20,
+            "duracaoMs": 5000
+          }
+        ]
+      },
+      "sequencia": [
+        "brado",
+        "@ultimate"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#d0603f",
+        "formas": [
+          "fissuras",
+          "muralha"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "curto_circuito",
+      "nome": "Curto-circuito",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "+1 salto.",
+      "danoPct": 25,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "eletrizado",
+            "duracaoMs": 2000
+          }
+        ]
+      },
+      "sequencia": [
+        "sobrecarga_arcana",
+        "raio_em_cadeia"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#8f7cff",
+        "formas": [
+          "constelacao",
+          "raios"
+        ],
+        "movimento": "subir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "piscar_glacial",
+      "nome": "Piscar glacial",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A nova sai da origem e do destino.",
+      "danoPct": 20,
+      "emVolta": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "resfriado",
+            "pct": 30,
+            "duracaoMs": 3000
+          }
+        ]
+      },
+      "sequencia": [
+        "piscar",
+        "nova_glacial"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#8f7cff",
+        "formas": [
+          "constelacao",
+          "faiscas"
+        ],
+        "movimento": "girar",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "orbe_congelante",
+      "nome": "Orbe congelante",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "O orbe vira gelo e resfria.",
+      "danoPct": 0,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "resfriado",
+            "pct": 40,
+            "duracaoMs": 3000
+          }
+        ]
+      },
+      "sequencia": [
+        "lanca_de_gelo",
+        "orbe_instavel"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#8f7cff",
+        "formas": [
+          "anel",
+          "prisma"
+        ],
+        "movimento": "contrair",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "orbe_tempestuoso",
+      "nome": "Orbe tempestuoso",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "O orbe eletriza.",
+      "danoPct": 0,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "eletrizado",
+            "duracaoMs": 2000
+          }
+        ]
+      },
+      "sequencia": [
+        "raio_em_cadeia",
+        "orbe_instavel"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#8f7cff",
+        "formas": [
+          "anel",
+          "hexagonos"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "mente_sobrecarregada",
+      "nome": "Mente sobrecarregada",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Silêncio +1 s e +25%.",
+      "danoPct": 25,
+      "noAlvo": [
+        {
+          "tipo": "silenciar",
+          "duracaoMs": 1000
+        }
+      ],
+      "sequencia": [
+        "mente_partida",
+        "sobrecarga_arcana"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#8f7cff",
+        "formas": [
+          "faiscas",
+          "selo"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "espelho_elemental",
+      "nome": "Espelho elemental",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "O eco do Piscar dura o dobro.",
+      "danoPct": 0,
+      "noProprio": [
+        {
+          "tipo": "esquiva",
+          "pct": 15,
+          "duracaoMs": 3000
+        }
+      ],
+      "sequencia": [
+        "afinidade_elemental",
+        "piscar"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#8f7cff",
+        "formas": [
+          "hexagonos",
+          "cristais"
+        ],
+        "movimento": "cair",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "estilhaco_em_fuga",
+      "nome": "Estilhaço em fuga",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "O alvo resfriado fica enraizado por 1 s.",
+      "danoPct": 0,
+      "noAlvo": [
+        {
+          "tipo": "enraizado",
+          "duracaoMs": 1000
+        }
+      ],
+      "sequencia": [
+        "lanca_de_gelo",
+        "piscar"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#8f7cff",
+        "formas": [
+          "hexagonos",
+          "constelacao"
+        ],
+        "movimento": "pulsar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "cataclismo_arcano",
+      "nome": "Cataclismo arcano",
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "texto": "O orbe explode com +1 de raio.",
+      "danoPct": 30,
+      "naMira": {
+        "raio": 3,
+        "efeitos": [
+          {
+            "tipo": "empurrao",
+            "valor": 1
+          }
+        ]
+      },
+      "sequencia": [
+        "sobrecarga_arcana",
+        "orbe_instavel",
+        "explosao"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#8f7cff",
+        "formas": [
+          "cristais",
+          "runas"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 800,
+        "destinos": [
+          "mira",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "convergencia_elemental",
+      "nome": "Convergência elemental",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A ultimate aplica o estado do elemento a todos os atingidos.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 4,
+        "efeitos": [
+          {
+            "tipo": "resfriado",
+            "pct": 30,
+            "duracaoMs": 3000
+          }
+        ]
+      },
+      "sequencia": [
+        "afinidade_elemental",
+        "@ultimate"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#8f7cff",
+        "formas": [
+          "cristais",
+          "faiscas"
+        ],
+        "movimento": "subir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "bombardeio_marcado",
+      "nome": "Bombardeio marcado",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "+40% no marcado e expõe quem está em volta.",
+      "danoPct": 40,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "exposto",
+            "pct": 15,
+            "duracaoMs": 4000
+          }
+        ]
+      },
+      "sequencia": [
+        "marca_do_cacador",
+        "flecha_explosiva"
+      ],
+      "condicoes": [
+        "alvo:marca_cacador"
+      ],
+      "visual": {
+        "cor": "#d4ac0d",
+        "formas": [
+          "costura",
+          "serrilha"
+        ],
+        "movimento": "girar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "retirada_certeira",
+      "nome": "Retirada certeira",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Crítico garantido.",
+      "danoPct": 0,
+      "d20Minimo": 20,
+      "sequencia": [
+        "rolamento",
+        "flecha_perfurante"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#d4ac0d",
+        "formas": [
+          "fio",
+          "costura"
+        ],
+        "movimento": "contrair",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "chuva_incendiaria",
+      "nome": "Chuva incendiária",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A área queima.",
+      "danoPct": 0,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "queimando",
+            "valor": 3,
+            "duracaoMs": 4000
+          }
+        ]
+      },
+      "sequencia": [
+        "flecha_explosiva",
+        "chuva_de_flechas"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#d4ac0d",
+        "formas": [
+          "triangulo",
+          "flecha"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 800,
+        "destinos": [
+          "mira",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "leque_marcado",
+      "nome": "Leque marcado",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "As flechas do leque buscam o marcado.",
+      "danoPct": 30,
+      "sequencia": [
+        "marca_do_cacador",
+        "tiro_em_leque"
+      ],
+      "condicoes": [
+        "alvo:marca_cacador"
+      ],
+      "visual": {
+        "cor": "#d4ac0d",
+        "formas": [
+          "triangulo",
+          "serrilha"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "olhar_do_predador",
+      "nome": "Olhar do predador",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A marca dura +3 s.",
+      "danoPct": 0,
+      "noAlvo": [
+        {
+          "tipo": "marca_cacador",
+          "pct": 20,
+          "duracaoMs": 11000
+        }
+      ],
+      "sequencia": [
+        "olho_de_aguia",
+        "marca_do_cacador"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#d4ac0d",
+        "formas": [
+          "serrilha",
+          "flecha"
+        ],
+        "movimento": "pulsar",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "detonacao_toxica",
+      "nome": "Detonação tóxica",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A explosão espalha veneno.",
+      "danoPct": 0,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "envenenado",
+            "valor": 2,
+            "pct": 50,
+            "duracaoMs": 4000
+          }
+        ]
+      },
+      "sequencia": [
+        "flecha_venenosa",
+        "flecha_explosiva"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#d4ac0d",
+        "formas": [
+          "serrilha",
+          "corte"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "caca_perfeita",
+      "nome": "Caça perfeita",
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "texto": "+60% de dano, com limite.",
+      "danoPct": 60,
+      "sequencia": [
+        "marca_do_cacador",
+        "rolamento",
+        "flecha_perfurante"
+      ],
+      "condicoes": [
+        "alvo:marca_cacador"
+      ],
+      "visual": {
+        "cor": "#d4ac0d",
+        "formas": [
+          "flechas",
+          "fio"
+        ],
+        "movimento": "subir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "olhar_absoluto",
+      "nome": "Olhar absoluto",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Todos os projéteis da ultimate são críticos.",
+      "danoPct": 0,
+      "d20Minimo": 20,
+      "sequencia": [
+        "olho_de_aguia",
+        "@ultimate"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#d4ac0d",
+        "formas": [
+          "flecha",
+          "leque"
+        ],
+        "movimento": "girar",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "cadaver_bomba",
+      "nome": "Cadáver-bomba",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "+1 de raio.",
+      "danoPct": 20,
+      "naMira": {
+        "raio": 3,
+        "efeitos": [
+          {
+            "tipo": "atordoar",
+            "duracaoMs": 300
+          }
+        ]
+      },
+      "sequencia": [
+        "comando_sepulcral",
+        "explosao_cadaverica"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#8b68d9",
+        "formas": [
+          "gota",
+          "jaula"
+        ],
+        "movimento": "contrair",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "levante_funesto",
+      "nome": "Levante funesto",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Os erguidos definham quem tocam.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 3,
+        "efeitos": [
+          {
+            "tipo": "definhando",
+            "pct": 20,
+            "duracaoMs": 4000
+          }
+        ]
+      },
+      "sequencia": [
+        "dardo_funesto",
+        "levante_profano"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#8b68d9",
+        "formas": [
+          "esporos",
+          "raizes"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "ceifa_detonante",
+      "nome": "Ceifa detonante",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "Puxa para dentro da explosão, com +30%.",
+      "danoPct": 30,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "puxao",
+            "valor": 1
+          }
+        ]
+      },
+      "sequencia": [
+        "ceifa_de_almas",
+        "explosao_cadaverica"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#8b68d9",
+        "formas": [
+          "esporos",
+          "gota"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "mortalha_da_legiao",
+      "nome": "Mortalha da legião",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "As invocações ganham escudo de 6.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 4,
+        "efeitos": [
+          {
+            "tipo": "escudo",
+            "valor": 6,
+            "duracaoMs": 5000
+          }
+        ]
+      },
+      "sequencia": [
+        "mortalha_funebre",
+        "comando_sepulcral"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#8b68d9",
+        "formas": [
+          "coroa",
+          "fumaca"
+        ],
+        "movimento": "cair",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "tumulo_aberto",
+      "nome": "Túmulo aberto",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Os erguidos surgem em volta do enraizado.",
+      "danoPct": 0,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "enraizado",
+            "duracaoMs": 1000
+          }
+        ]
+      },
+      "sequencia": [
+        "garras_do_ossuario",
+        "levante_profano"
+      ],
+      "condicoes": [
+        "enraizou"
+      ],
+      "visual": {
+        "cor": "#8b68d9",
+        "formas": [
+          "coroa",
+          "esporos"
+        ],
+        "movimento": "pulsar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "dizimo_explosivo",
+      "nome": "Dízimo explosivo",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A explosão cura você em 20% do dano.",
+      "danoPct": 0,
+      "noProprio": [
+        {
+          "tipo": "cura",
+          "valor": 10
+        }
+      ],
+      "sequencia": [
+        "dizimo_vital",
+        "explosao_cadaverica"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#8b68d9",
+        "formas": [
+          "silhuetas",
+          "casulo"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "colheita_eterna",
+      "nome": "Colheita eterna",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "O dreno rende +50%.",
+      "danoPct": 0,
+      "noProprio": [
+        {
+          "tipo": "cura",
+          "valor": 8
+        }
+      ],
+      "sequencia": [
+        "ceifa_de_almas",
+        "dizimo_vital"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#8b68d9",
+        "formas": [
+          "raizes",
+          "silhuetas"
+        ],
+        "movimento": "subir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "marcha_funebre",
+      "nome": "Marcha fúnebre",
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "texto": "As invocações batem +25% por 5 s.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 5,
+        "efeitos": [
+          {
+            "tipo": "bonus_dano",
+            "pct": 25,
+            "duracaoMs": 5000
+          }
+        ]
+      },
+      "sequencia": [
+        "levante_profano",
+        "comando_sepulcral",
+        "ceifa_de_almas"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#8b68d9",
+        "formas": [
+          "raizes",
+          "gota"
+        ],
+        "movimento": "girar",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "coro_dos_mortos",
+      "nome": "Coro dos mortos",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "As invocações repetem o último golpe da ultimate (50%).",
+      "danoPct": 25,
+      "sequencia": [
+        "comando_sepulcral",
+        "@ultimate"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#8b68d9",
+        "formas": [
+          "fumaca",
+          "raizes"
+        ],
+        "movimento": "contrair",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "mergulho_cegante",
+      "nome": "Mergulho cegante",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "Atordoa por 1 s.",
+      "danoPct": 0,
+      "noAlvo": [
+        {
+          "tipo": "atordoar",
+          "duracaoMs": 1000
+        }
+      ],
+      "sequencia": [
+        "garras_cegantes",
+        "mergulho"
+      ],
+      "condicoes": [
+        "alvo:cego"
+      ],
+      "visual": {
+        "cor": "#7fbde8",
+        "formas": [
+          "corte",
+          "proa"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "presa_anunciada",
+      "nome": "Presa anunciada",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "+40%.",
+      "danoPct": 40,
+      "sequencia": [
+        "grito_do_falcao",
+        "presa_dupla"
+      ],
+      "condicoes": [
+        "alvo:exposto"
+      ],
+      "visual": {
+        "cor": "#7fbde8",
+        "formas": [
+          "orbita",
+          "lascas"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "rasante_duplo",
+      "nome": "Rasante duplo",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "O rasante repete na volta do falcão.",
+      "danoPct": 50,
+      "sequencia": [
+        "rasante",
+        "presa_dupla"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#7fbde8",
+        "formas": [
+          "espiral",
+          "orbita"
+        ],
+        "movimento": "cair",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "vigilia_restauradora",
+      "nome": "Vigília restauradora",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Escudo de 8 além da cura.",
+      "danoPct": 0,
+      "noProprio": [
+        {
+          "tipo": "escudo",
+          "valor": 8,
+          "duracaoMs": 4000
+        }
+      ],
+      "sequencia": [
+        "vigia",
+        "retorno_ao_punho"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#7fbde8",
+        "formas": [
+          "espiral",
+          "filamentos"
+        ],
+        "movimento": "pulsar",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "tufao",
+      "nome": "Tufão",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "Puxa os atingidos para a linha.",
+      "danoPct": 0,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "puxao",
+            "valor": 1
+          }
+        ]
+      },
+      "sequencia": [
+        "tempestade_de_penas",
+        "rasante"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#7fbde8",
+        "formas": [
+          "onda",
+          "lascas"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "mergulho_estrondoso",
+      "nome": "Mergulho estrondoso",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "Expõe quem está em volta do alvo.",
+      "danoPct": 0,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "exposto",
+            "pct": 15,
+            "duracaoMs": 4000
+          }
+        ]
+      },
+      "sequencia": [
+        "grito_do_falcao",
+        "mergulho"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#7fbde8",
+        "formas": [
+          "aneis",
+          "orbita"
+        ],
+        "movimento": "subir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "olhos_vendados",
+      "nome": "Olhos vendados",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "A cegueira se espalha na área, por +2 s.",
+      "danoPct": 0,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "cego",
+            "pct": 40,
+            "duracaoMs": 2000
+          }
+        ]
+      },
+      "sequencia": [
+        "garras_cegantes",
+        "tempestade_de_penas"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#7fbde8",
+        "formas": [
+          "aneis",
+          "filamentos"
+        ],
+        "movimento": "girar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "ciclo_do_falcao",
+      "nome": "Ciclo do falcão",
+      "janelaMs": 3000,
+      "mesmoAlvo": true,
+      "texto": "A próxima skill do falcão sai sem recarga.",
+      "danoPct": 0,
+      "noProprio": [
+        {
+          "tipo": "zerar_recarga",
+          "ref": "mergulho"
+        }
+      ],
+      "sequencia": [
+        "mergulho",
+        "retorno_ao_punho",
+        "presa_dupla"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#7fbde8",
+        "formas": [
+          "lascas",
+          "onda"
+        ],
+        "movimento": "contrair",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "asa_do_destino",
+      "nome": "Asa do destino",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Escudo de 10 em você e nos aliados a até 3 células.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 3,
+        "efeitos": [
+          {
+            "tipo": "escudo",
+            "valor": 10,
+            "duracaoMs": 5000
+          }
+        ]
+      },
+      "sequencia": [
+        "vigia",
+        "@ultimate"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#7fbde8",
+        "formas": [
+          "proa",
+          "orbita"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "gas_inflamavel",
+      "nome": "Gás inflamável",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Envenenados levam +30% e queimam.",
+      "danoPct": 30,
+      "noAlvo": [
+        {
+          "tipo": "queimando",
+          "valor": 3,
+          "duracaoMs": 3000
+        }
+      ],
+      "sequencia": [
+        "dardo_toxico",
+        "bola_de_fogo"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#7fa38a",
+        "formas": [
+          "abrigo",
+          "bolhas"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "pedra_em_brasa",
+      "nome": "Pedra em brasa",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "+25% e queimadura +2 s.",
+      "danoPct": 25,
+      "noAlvo": [
+        {
+          "tipo": "queimando",
+          "valor": 3,
+          "duracaoMs": 5000
+        }
+      ],
+      "sequencia": [
+        "estaca_de_pedra",
+        "bola_de_fogo"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#7fa38a",
+        "formas": [
+          "abrigo",
+          "fornalha"
+        ],
+        "movimento": "cair",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "lamina_sombria",
+      "nome": "Lâmina sombria",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Sangramento +1 por pulso.",
+      "danoPct": 0,
+      "noAlvo": [
+        {
+          "tipo": "sangrando",
+          "valor": 1,
+          "duracaoMs": 4000
+        }
+      ],
+      "sequencia": [
+        "passo_sombrio",
+        "corte_dilacerante"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#7fa38a",
+        "formas": [
+          "punhal",
+          "bolhas"
+        ],
+        "movimento": "pulsar",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "escudo_consagrado",
+      "nome": "Escudo consagrado",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "Escudo +5 ao consagrar.",
+      "danoPct": 0,
+      "noProprio": [
+        {
+          "tipo": "escudo",
+          "valor": 5,
+          "duracaoMs": 4000
+        }
+      ],
+      "sequencia": [
+        "barreira",
+        "lanca_radiante"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#7fa38a",
+        "formas": [
+          "punhal",
+          "muralha"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "estrela_cadente",
+      "nome": "Estrela cadente",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "+1 de raio.",
+      "danoPct": 0,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "consagrado",
+            "valor": 2,
+            "duracaoMs": 3000
+          }
+        ]
+      },
+      "sequencia": [
+        "chuva_de_estrelas",
+        "explosao"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#7fa38a",
+        "formas": [
+          "tres_aneis",
+          "bolhas"
+        ],
+        "movimento": "subir",
+        "duracaoMs": 800,
+        "destinos": [
+          "mira",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "tremor_toxico",
+      "nome": "Tremor tóxico",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A névoa cresce 1 célula.",
+      "danoPct": 0,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "envenenado",
+            "valor": 1,
+            "pct": 50,
+            "duracaoMs": 3000
+          }
+        ]
+      },
+      "sequencia": [
+        "abalo_sismico",
+        "nevoa_venenosa"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#7fa38a",
+        "formas": [
+          "tres_aneis",
+          "muralha"
+        ],
+        "movimento": "girar",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "investida_sombria",
+      "nome": "Investida sombria",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Crítico garantido.",
+      "danoPct": 0,
+      "d20Minimo": 20,
+      "sequencia": [
+        "veu_da_noite",
+        "investida"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#7fa38a",
+        "formas": [
+          "fornalha",
+          "bolhas"
+        ],
+        "movimento": "contrair",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "seta_purificadora",
+      "nome": "Seta purificadora",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "A seta ignora escudos.",
+      "danoPct": 20,
+      "noAlvo": [
+        {
+          "tipo": "dissipar",
+          "valor": 0
+        }
+      ],
+      "sequencia": [
+        "purificacao",
+        "seta_arcana"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#7fa38a",
+        "formas": [
+          "muralha",
+          "domo"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "repulsao_ardente",
+      "nome": "Repulsão ardente",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Os empurrados queimam.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "queimando",
+            "valor": 3,
+            "duracaoMs": 3000
+          }
+        ]
+      },
+      "sequencia": [
+        "onda_de_repulsao",
+        "bola_de_fogo"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#7fa38a",
+        "formas": [
+          "muralha",
+          "fornalha"
+        ],
+        "movimento": "cair",
+        "duracaoMs": 800,
+        "destinos": [
+          "mira",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "aparo_preciso",
+      "nome": "Aparo preciso",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Crítico garantido.",
+      "danoPct": 0,
+      "d20Minimo": 20,
+      "sequencia": [
+        "postura_de_aparo",
+        "punhal_das_sombras"
+      ],
+      "condicoes": [
+        "aparou"
+      ],
+      "visual": {
+        "cor": "#7fa38a",
+        "formas": [
+          "runas",
+          "domo"
+        ],
+        "movimento": "subir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "postura_inabalavel",
+      "nome": "Postura inabalável",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Cada desafiado que ataca você é aparado automaticamente, uma vez por desafiado.",
+      "danoPct": 0,
+      "noProprio": [
+        {
+          "tipo": "aparando",
+          "pct": 65,
+          "duracaoMs": 3000
+        }
+      ],
+      "sequencia": [
+        "desafio",
+        "postura_de_aparo"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#b6cee0",
+        "formas": [
+          "estandarte",
+          "laminas"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "moenda_de_sangue",
+      "nome": "Moenda de sangue",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "O giro espalha o sangramento do alvo para todos os atingidos.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 1,
+        "efeitos": [
+          {
+            "tipo": "sangrando",
+            "valor": 2,
+            "duracaoMs": 4000
+          }
+        ]
+      },
+      "sequencia": [
+        "corte_dilacerante",
+        "redemoinho"
+      ],
+      "condicoes": [
+        "sangrando"
+      ],
+      "visual": {
+        "cor": "#c0392b",
+        "formas": [
+          "corte",
+          "laminas"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "fratura",
+      "nome": "Fratura",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "O alvo enraizado e resfriado estilhaça: leva dano alto e o enraizamento acaba.",
+      "danoPct": 60,
+      "sequencia": [
+        "estaca_de_pedra",
+        "lanca_de_gelo"
+      ],
+      "condicoes": [
+        "enraizado",
+        "alvo:resfriado"
+      ],
+      "visual": {
+        "cor": "#74b9ff",
+        "formas": [
+          "fissuras",
+          "prisma"
+        ],
+        "movimento": "pulsar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "eco_repulsor",
+      "nome": "Eco repulsor",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A onda sai do destino e também do eco deixado na origem.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "empurrao",
+            "valor": 1
+          }
+        ]
+      },
+      "sequencia": [
+        "piscar",
+        "onda_de_repulsao"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#d980fa",
+        "formas": [
+          "cristais",
+          "pressao"
+        ],
+        "movimento": "girar",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "chama_sintonizada",
+      "nome": "Chama sintonizada",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Com fogo encarnado, a bola deixa o chão em chamas por 3 s.",
+      "danoPct": 0,
+      "naMira": {
+        "raio": 1,
+        "efeitos": [
+          {
+            "tipo": "queimando",
+            "valor": 3,
+            "duracaoMs": 3000
+          }
+        ]
+      },
+      "sequencia": [
+        "afinidade_elemental",
+        "bola_de_fogo"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#ff7b39",
+        "formas": [
+          "escudo",
+          "chamas"
+        ],
+        "movimento": "contrair",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "tiro_do_veu",
+      "nome": "Tiro do véu",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Enquanto você está invisível, os tiros no marcado não revelam você.",
+      "danoPct": 25,
+      "noProprio": [
+        {
+          "tipo": "invisivel",
+          "duracaoMs": 1000
+        }
+      ],
+      "sequencia": [
+        "veu_da_noite",
+        "marca_do_cacador"
+      ],
+      "condicoes": [
+        "alvo:marca_cacador"
+      ],
+      "visual": {
+        "cor": "#f5c542",
+        "formas": [
+          "fumaca",
+          "costura"
+        ],
+        "movimento": "subir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "cortina_toxica",
+      "nome": "Cortina tóxica",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A névoa sai no ponto de onde você rolou e cobre a retirada.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "envenenado",
+            "valor": 2,
+            "pct": 50,
+            "duracaoMs": 4000
+          }
+        ]
+      },
+      "sequencia": [
+        "rolamento",
+        "nevoa_venenosa"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#60aa79",
+        "formas": [
+          "flecha",
+          "bolhas"
+        ],
+        "movimento": "cair",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "visao_profunda",
+      "nome": "Visão profunda",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A seta ricocheteia entre os marcados.",
+      "danoPct": 25,
+      "sequencia": [
+        "olho_de_aguia",
+        "seta_arcana"
+      ],
+      "condicoes": [
+        "alvo:marca_cacador"
+      ],
+      "visual": {
+        "cor": "#9b8cff",
+        "formas": [
+          "escudo",
+          "hexagonos"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "armadilha_pestilenta",
+      "nome": "Armadilha pestilenta",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A névoa nasce sobre a armadilha, e quem fica preso nela é envenenado em dobro.",
+      "danoPct": 0,
+      "noAlvo": [
+        {
+          "tipo": "envenenado",
+          "valor": 4,
+          "pct": 50,
+          "duracaoMs": 5000
+        }
+      ],
+      "sequencia": [
+        "armadilha_de_caca",
+        "nevoa_venenosa"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#60aa79",
+        "formas": [
+          "flecha",
+          "bolhas"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 800,
+        "destinos": [
+          "mira",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "fosso_de_estacas",
+      "nome": "Fosso de estacas",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A estaca brota sob o preso, e o enraizamento dura +1 s.",
+      "danoPct": 0,
+      "noAlvo": [
+        {
+          "tipo": "enraizado",
+          "duracaoMs": 1000
+        }
+      ],
+      "sequencia": [
+        "armadilha_de_caca",
+        "estaca_de_pedra"
+      ],
+      "condicoes": [
+        "enraizado"
+      ],
+      "visual": {
+        "cor": "#a1887f",
+        "formas": [
+          "flecha",
+          "lascas"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 800,
+        "destinos": [
+          "mira",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "recuo_armado",
+      "nome": "Recuo armado",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A armadilha surge sozinha no ponto de onde você rolou.",
+      "danoPct": 0,
+      "noProprio": [
+        {
+          "tipo": "armadilha",
+          "valor": 8,
+          "duracaoMs": 20000,
+          "efeito": {
+            "enraizado": 1500
+          }
+        }
+      ],
+      "sequencia": [
+        "rolamento",
+        "armadilha_de_caca"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#8fae4a",
+        "formas": [
+          "flecha",
+          "costura"
+        ],
+        "movimento": "pulsar",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "egide_da_legiao",
+      "nome": "Égide da legião",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A barreira se divide entre os mortos comandados.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 4,
+        "efeitos": [
+          {
+            "tipo": "escudo",
+            "valor": 5,
+            "duracaoMs": 4000
+          }
+        ]
+      },
+      "sequencia": [
+        "barreira",
+        "comando_sepulcral"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#8b68d9",
+        "formas": [
+          "escudo",
+          "silhuetas"
+        ],
+        "movimento": "girar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "nuvem_pestilenta",
+      "nome": "Nuvem pestilenta",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A explosão vira uma névoa que definha em vez de envenenar.",
+      "danoPct": 0,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "definhando",
+            "pct": 20,
+            "duracaoMs": 4000
+          }
+        ]
+      },
+      "sequencia": [
+        "explosao_cadaverica",
+        "nevoa_venenosa"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#60aa79",
+        "formas": [
+          "raizes",
+          "bolhas"
+        ],
+        "movimento": "contrair",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "prensa",
+      "nome": "Prensa",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A foice puxa o alvo contra a muralha: dano de colisão e atordoamento.",
+      "danoPct": 30,
+      "noAlvo": [
+        {
+          "tipo": "atordoar",
+          "duracaoMs": 800
+        }
+      ],
+      "sequencia": [
+        "ceifa_de_almas",
+        "muralha_de_pedra"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#a1887f",
+        "formas": [
+          "fumaca",
+          "lascas"
+        ],
+        "movimento": "subir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "assombracao",
+      "nome": "Assombração",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Como fantasma, o passo atravessa os hostis e definha quem atravessa.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 1,
+        "efeitos": [
+          {
+            "tipo": "definhando",
+            "pct": 20,
+            "duracaoMs": 3000
+          }
+        ]
+      },
+      "sequencia": [
+        "mortalha_funebre",
+        "passo_sombrio"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#765b9e",
+        "formas": [
+          "fumaca",
+          "silhuetas"
+        ],
+        "movimento": "cair",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "transbordo",
+      "nome": "Transbordo",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A cura que passar da sua vida máxima vai para os mortos próximos.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 3,
+        "efeitos": [
+          {
+            "tipo": "cura",
+            "valor": 6
+          }
+        ]
+      },
+      "sequencia": [
+        "dizimo_vital",
+        "curar"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#2ecc71",
+        "formas": [
+          "fumaca",
+          "domo"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "mortos_consagrados",
+      "nome": "Mortos consagrados",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Os erguidos explodem em luz ao expirar, disparando a reação Trevas e luz.",
+      "danoPct": 0,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "consagrado",
+            "valor": 2,
+            "duracaoMs": 3000
+          }
+        ]
+      },
+      "sequencia": [
+        "levante_profano",
+        "lanca_radiante"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#f7e9a0",
+        "formas": [
+          "raizes",
+          "coroa"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "bote",
+      "nome": "Bote",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "Você avança até o alvo atordoado, e o golpe é crítico.",
+      "danoPct": 0,
+      "d20Minimo": 20,
+      "sequencia": [
+        "mergulho",
+        "investida"
+      ],
+      "condicoes": [
+        "atordoado"
+      ],
+      "visual": {
+        "cor": "#e67e22",
+        "formas": [
+          "leque",
+          "laminas"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "golpe_as_cegas",
+      "nome": "Golpe às cegas",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "O alvo cego leva o punhal como se fosse pelas costas.",
+      "danoPct": 30,
+      "sequencia": [
+        "garras_cegantes",
+        "punhal_das_sombras"
+      ],
+      "condicoes": [
+        "alvo:cego"
+      ],
+      "visual": {
+        "cor": "#6c3483",
+        "formas": [
+          "leque",
+          "silhuetas"
+        ],
+        "movimento": "pulsar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "penas_em_brasa",
+      "nome": "Penas em brasa",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A área de penas em volta do falcão passa a queimar.",
+      "danoPct": 0,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "queimando",
+            "valor": 3,
+            "duracaoMs": 3000
+          }
+        ]
+      },
+      "sequencia": [
+        "tempestade_de_penas",
+        "bola_de_fogo"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#ff7b39",
+        "formas": [
+          "leque",
+          "chamas"
+        ],
+        "movimento": "girar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "rastro_toxico",
+      "nome": "Rastro tóxico",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "O falcão arrasta a névoa pela linha do rasante.",
+      "danoPct": 0,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "envenenado",
+            "valor": 2,
+            "pct": 50,
+            "duracaoMs": 4000
+          }
+        ]
+      },
+      "sequencia": [
+        "rasante",
+        "nevoa_venenosa"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#60aa79",
+        "formas": [
+          "leque",
+          "bolhas"
+        ],
+        "movimento": "contrair",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "presa_revelada",
+      "nome": "Presa revelada",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "O alvo exposto também fica consagrado.",
+      "danoPct": 0,
+      "noAlvo": [
+        {
+          "tipo": "consagrado",
+          "valor": 2,
+          "duracaoMs": 4000
+        }
+      ],
+      "sequencia": [
+        "grito_do_falcao",
+        "lanca_radiante"
+      ],
+      "condicoes": [
+        "alvo:exposto"
+      ],
+      "visual": {
+        "cor": "#f7e9a0",
+        "formas": [
+          "leque",
+          "coroa"
+        ],
+        "movimento": "subir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "sentinela_curativa",
+      "nome": "Sentinela curativa",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Cada projétil interceptado pelo falcão aumenta a próxima cura em 10%.",
+      "danoPct": 20,
+      "sequencia": [
+        "vigia",
+        "curar"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#2ecc71",
+        "formas": [
+          "leque",
+          "domo"
+        ],
+        "movimento": "cair",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "mao_que_recebe",
+      "nome": "Mão que recebe",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "A cura dobra se lançada até 2 s depois do retorno.",
+      "danoPct": 100,
+      "sequencia": [
+        "retorno_ao_punho",
+        "curar"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#2ecc71",
+        "formas": [
+          "leque",
+          "domo"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "dentes_e_garras",
+      "nome": "Dentes e garras",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "Se você e o falcão acertam, o sangramento dobra.",
+      "danoPct": 0,
+      "noAlvo": [
+        {
+          "tipo": "sangrando",
+          "valor": 3,
+          "duracaoMs": 4000
+        }
+      ],
+      "sequencia": [
+        "presa_dupla",
+        "corte_dilacerante"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#ae3445",
+        "formas": [
+          "leque",
+          "laminas"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "veneno_fundido",
+      "nome": "Veneno fundido",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "Os dois venenos viram um só, mais forte, que pula para o hostil mais perto quando acaba.",
+      "danoPct": 20,
+      "noAlvo": [
+        {
+          "tipo": "envenenado",
+          "valor": 4,
+          "pct": 50,
+          "duracaoMs": 5000
+        }
+      ],
+      "sequencia": [
+        "flecha_venenosa",
+        "dardo_toxico"
+      ],
+      "condicoes": [
+        "envenenado"
+      ],
+      "visual": {
+        "cor": "#58d68d",
+        "formas": [
+          "gota",
+          "bolhas"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "veneno_silencioso",
+      "nome": "Veneno silencioso",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Atirar invisível não quebra o véu, e o veneno dura +2 s.",
+      "danoPct": 0,
+      "noAlvo": [
+        {
+          "tipo": "envenenado",
+          "valor": 2,
+          "pct": 50,
+          "duracaoMs": 7000
+        }
+      ],
+      "noProprio": [
+        {
+          "tipo": "invisivel",
+          "duracaoMs": 1000
+        }
+      ],
+      "sequencia": [
+        "veu_da_noite",
+        "flecha_venenosa"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#58d68d",
+        "formas": [
+          "fumaca",
+          "bolhas"
+        ],
+        "movimento": "pulsar",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "combustao_de_miasma",
+      "nome": "Combustão de miasma",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A névoa detona: cada hostil dentro leva de uma vez todo o veneno que restava.",
+      "danoPct": 0,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "consumir",
+            "ref": "envenenado",
+            "pct": 30
+          }
+        ]
+      },
+      "sequencia": [
+        "nevoa_venenosa",
+        "explosao"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#ff8c42",
+        "formas": [
+          "gota",
+          "hexagonos"
+        ],
+        "movimento": "girar",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "runa_sismica",
+      "nome": "Runa sísmica",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "A estaca brota onde a seta acertou, em qualquer distância.",
+      "danoPct": 0,
+      "naMira": {
+        "raio": 1,
+        "efeitos": [
+          {
+            "tipo": "enraizado",
+            "duracaoMs": 1000
+          }
+        ]
+      },
+      "sequencia": [
+        "seta_arcana",
+        "estaca_de_pedra"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#a1887f",
+        "formas": [
+          "runas",
+          "lascas"
+        ],
+        "movimento": "contrair",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "alvo_fixo",
+      "nome": "Alvo fixo",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "A seta no atordoado volta e acerta uma segunda vez.",
+      "danoPct": 25,
+      "sequencia": [
+        "golpe_atordoante",
+        "seta_arcana"
+      ],
+      "condicoes": [
+        "atordoado"
+      ],
+      "visual": {
+        "cor": "#9b8cff",
+        "formas": [
+          "corte",
+          "hexagonos"
+        ],
+        "movimento": "subir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "isca_explosiva",
+      "nome": "Isca explosiva",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "A explosão sai no ponto onde você estava antes da troca, sem precisar mirar.",
+      "danoPct": 20,
+      "sequencia": [
+        "troca_sombria",
+        "explosao"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#ff8c42",
+        "formas": [
+          "fumaca",
+          "hexagonos"
+        ],
+        "movimento": "cair",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "encurralado",
+      "nome": "Encurralado",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A muralha sobe entre você e o alvo trocado, e ele fica preso contra ela por 1 s.",
+      "danoPct": 0,
+      "noAlvo": [
+        {
+          "tipo": "sem_movimento",
+          "duracaoMs": 1000
+        }
+      ],
+      "sequencia": [
+        "troca_sombria",
+        "muralha_de_pedra"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#a1887f",
+        "formas": [
+          "fumaca",
+          "lascas"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "duplo_passo",
+      "nome": "Duplo passo",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A troca alcança o dobro da distância e não entra em recarga.",
+      "danoPct": 0,
+      "noProprio": [
+        {
+          "tipo": "zerar_recarga",
+          "ref": "troca_sombria"
+        }
+      ],
+      "sequencia": [
+        "passo_sombrio",
+        "troca_sombria"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#8e44ad",
+        "formas": [
+          "fumaca",
+          "silhuetas"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "desequilibrio",
+      "nome": "Desequilíbrio",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Os empurrados ficam de costas por 1 s, e o punhal conta como ataque pelas costas.",
+      "danoPct": 0,
+      "d20Minimo": 20,
+      "sequencia": [
+        "onda_de_repulsao",
+        "punhal_das_sombras"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#6c3483",
+        "formas": [
+          "onda",
+          "silhuetas"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 800,
+        "destinos": [
+          "mira",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "fogo_fatuo",
+      "nome": "Fogo-fátuo",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A bola sai invisível e não pode ser esquivada nem aparada.",
+      "danoPct": 20,
+      "noProprio": [
+        {
+          "tipo": "invisivel",
+          "duracaoMs": 500
+        }
+      ],
+      "sequencia": [
+        "veu_da_noite",
+        "bola_de_fogo"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#ff7b39",
+        "formas": [
+          "fumaca",
+          "chamas"
+        ],
+        "movimento": "pulsar",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "ferida_em_brasa",
+      "nome": "Ferida em brasa",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Enquanto o alvo queima e sangra ao mesmo tempo, o sangramento pulsa em dobro.",
+      "danoPct": 0,
+      "noAlvo": [
+        {
+          "tipo": "sangrando",
+          "valor": 2,
+          "duracaoMs": 3000
+        }
+      ],
+      "sequencia": [
+        "corte_dilacerante",
+        "bola_de_fogo"
+      ],
+      "condicoes": [
+        "sangrando",
+        "alvo:queimando"
+      ],
+      "visual": {
+        "cor": "#ff7b39",
+        "formas": [
+          "corte",
+          "chamas"
+        ],
+        "movimento": "girar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "sol_nascente",
+      "nome": "Sol nascente",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "O alvo queimado e consagrado vira farol: aliados que o golpeiam recuperam um pouco de vida.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "cura_periodica",
+            "valor": 2,
+            "duracaoMs": 3000
+          }
+        ]
+      },
+      "sequencia": [
+        "bola_de_fogo",
+        "lanca_radiante"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#f7e9a0",
+        "formas": [
+          "fornalha",
+          "coroa"
+        ],
+        "movimento": "contrair",
+        "duracaoMs": 800,
+        "destinos": [
+          "mira",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "chama_purificadora",
+      "nome": "Chama purificadora",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A bola tira 1 efeito positivo de cada hostil atingido.",
+      "danoPct": 0,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "dissipar",
+            "valor": 1
+          }
+        ]
+      },
+      "sequencia": [
+        "purificacao",
+        "bola_de_fogo"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#ff7b39",
+        "formas": [
+          "escudo",
+          "chamas"
+        ],
+        "movimento": "subir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "espaco_para_respirar",
+      "nome": "Espaço para respirar",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A cura também empurra 1 célula os hostis colados no aliado curado.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 1,
+        "efeitos": [
+          {
+            "tipo": "empurrao",
+            "valor": 1
+          }
+        ]
+      },
+      "sequencia": [
+        "onda_de_repulsao",
+        "curar"
+      ],
+      "condicoes": [
+        "curou"
+      ],
+      "visual": {
+        "cor": "#2ecc71",
+        "formas": [
+          "onda",
+          "domo"
+        ],
+        "movimento": "cair",
+        "duracaoMs": 800,
+        "destinos": [
+          "mira",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "dispersao",
+      "nome": "Dispersão",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A onda leva a névoa junto, e ela segue os empurrados.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "envenenado",
+            "valor": 1,
+            "pct": 50,
+            "duracaoMs": 3000
+          }
+        ]
+      },
+      "sequencia": [
+        "nevoa_venenosa",
+        "onda_de_repulsao"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#d980fa",
+        "formas": [
+          "gota",
+          "pressao"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "contragolpe_repulsor",
+      "nome": "Contragolpe repulsor",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Aparar solta a onda sozinha, sem custo e sem recarga.",
+      "danoPct": 0,
+      "noProprio": [
+        {
+          "tipo": "zerar_recarga",
+          "ref": "onda_de_repulsao"
+        }
+      ],
+      "sequencia": [
+        "postura_de_aparo",
+        "onda_de_repulsao"
+      ],
+      "condicoes": [
+        "aparou"
+      ],
+      "visual": {
+        "cor": "#d980fa",
+        "formas": [
+          "corte",
+          "pressao"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "toxina_consagrada",
+      "nome": "Toxina consagrada",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "O alvo consagrado e envenenado não pode ser curado por 3 s.",
+      "danoPct": 0,
+      "noAlvo": [
+        {
+          "tipo": "definhando",
+          "pct": 100,
+          "duracaoMs": 3000
+        }
+      ],
+      "sequencia": [
+        "lanca_radiante",
+        "dardo_toxico"
+      ],
+      "condicoes": [
+        "consagrado"
+      ],
+      "visual": {
+        "cor": "#58d68d",
+        "formas": [
+          "constelacao",
+          "bolhas"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "atropelo_toxico",
+      "nome": "Atropelo tóxico",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "Investir num envenenado espirra o veneno nos hostis a até 1 célula.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 1,
+        "efeitos": [
+          {
+            "tipo": "envenenado",
+            "valor": 2,
+            "pct": 50,
+            "duracaoMs": 4000
+          }
+        ]
+      },
+      "sequencia": [
+        "dardo_toxico",
+        "investida"
+      ],
+      "condicoes": [
+        "envenenado"
+      ],
+      "visual": {
+        "cor": "#e67e22",
+        "formas": [
+          "gota",
+          "laminas"
+        ],
+        "movimento": "pulsar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "estrela_guia",
+      "nome": "Estrela guia",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Três estrelas da chuva são atraídas para o alvo atordoado.",
+      "danoPct": 40,
+      "sequencia": [
+        "golpe_atordoante",
+        "chuva_de_estrelas"
+      ],
+      "condicoes": [
+        "atordoado"
+      ],
+      "visual": {
+        "cor": "#f7e9a0",
+        "formas": [
+          "corte",
+          "coroa"
+        ],
+        "movimento": "girar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "contagio_reverso",
+      "nome": "Contágio reverso",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "O efeito negativo tirado do aliado passa para os hostis dentro da névoa.",
+      "danoPct": 0,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "resfriado",
+            "pct": 30,
+            "duracaoMs": 3000
+          }
+        ]
+      },
+      "sequencia": [
+        "purificacao",
+        "nevoa_venenosa"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#60aa79",
+        "formas": [
+          "escudo",
+          "bolhas"
+        ],
+        "movimento": "contrair",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "passo_no_tremor",
+      "nome": "Passo no tremor",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "O passo leva você até um hostil atordoado pelo abalo, e o próximo golpe é crítico.",
+      "danoPct": 0,
+      "noProprio": [
+        {
+          "tipo": "critico_garantido",
+          "duracaoMs": 3000
+        }
+      ],
+      "sequencia": [
+        "abalo_sismico",
+        "passo_sombrio"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#765b9e",
+        "formas": [
+          "fissuras",
+          "silhuetas"
+        ],
+        "movimento": "subir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "golpe_perfeito",
+      "nome": "Golpe perfeito",
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "texto": "Invisível, troca e apunhala: crítico triplo, com limite de dano.",
+      "danoPct": 80,
+      "d20Minimo": 20,
+      "sequencia": [
+        "veu_da_noite",
+        "troca_sombria",
+        "punhal_das_sombras"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#6c3483",
+        "formas": [
+          "punhal",
+          "silhuetas"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "leito_de_pedras",
+      "nome": "Leito de pedras",
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "texto": "Os empurrados contra as estacas ficam atordoados, e o abalo nasce do ponto da colisão.",
+      "danoPct": 25,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "atordoar",
+            "duracaoMs": 600
+          }
+        ]
+      },
+      "sequencia": [
+        "estaca_de_pedra",
+        "onda_de_repulsao",
+        "abalo_sismico"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#ad885d",
+        "formas": [
+          "fissuras",
+          "lascas"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 800,
+        "destinos": [
+          "mira",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "inferno_quimico",
+      "nome": "Inferno químico",
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "texto": "A névoa pega fogo e espalha queimadura em todos dentro, sem tirar o veneno.",
+      "danoPct": 0,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "queimando",
+            "valor": 3,
+            "duracaoMs": 4000
+          }
+        ]
+      },
+      "sequencia": [
+        "dardo_toxico",
+        "nevoa_venenosa",
+        "bola_de_fogo"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#ff7b39",
+        "formas": [
+          "gota",
+          "chamas"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "juizo_das_estrelas",
+      "nome": "Juízo das estrelas",
+      "janelaMs": 3000,
+      "mesmoAlvo": false,
+      "texto": "Toda a chuva converge no alvo consagrado e atordoado.",
+      "danoPct": 60,
+      "sequencia": [
+        "lanca_radiante",
+        "golpe_atordoante",
+        "chuva_de_estrelas"
+      ],
+      "condicoes": [
+        "consagrado",
+        "atordoado"
+      ],
+      "visual": {
+        "cor": "#f7e9a0",
+        "formas": [
+          "constelacao",
+          "coroa"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "fornalha_de_pedra",
+      "nome": "Fornalha de pedra",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A muralha erguida sobre o rastro vira pedra em brasa: quem encosta queima.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "queimando",
+            "valor": 3,
+            "duracaoMs": 3000
+          }
+        ]
+      },
+      "sequencia": [
+        "rastro_igneo",
+        "muralha_de_pedra"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#a1887f",
+        "formas": [
+          "fornalha",
+          "lascas"
+        ],
+        "movimento": "pulsar",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "fuga_em_cinzas",
+      "nome": "Fuga em cinzas",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Correr invisível não quebra o véu, e o rastro só acende 1 s depois.",
+      "danoPct": 0,
+      "noProprio": [
+        {
+          "tipo": "invisivel",
+          "duracaoMs": 1000
+        }
+      ],
+      "sequencia": [
+        "veu_da_noite",
+        "rastro_igneo"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#ff8c42",
+        "formas": [
+          "fumaca",
+          "chamas"
+        ],
+        "movimento": "girar",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "arena_de_fogo",
+      "nome": "Arena de fogo",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A onda joga os hostis contra o anel, que os devolve para dentro: queimam duas vezes.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "queimando",
+            "valor": 4,
+            "duracaoMs": 3000
+          }
+        ]
+      },
+      "sequencia": [
+        "anel_de_chamas",
+        "onda_de_repulsao"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#d980fa",
+        "formas": [
+          "fornalha",
+          "pressao"
+        ],
+        "movimento": "contrair",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "santuario_ardente",
+      "nome": "Santuário ardente",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "O anel nasce na borda do círculo, e cada hostil que queima nele cura um pouco os aliados dentro.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 3,
+        "efeitos": [
+          {
+            "tipo": "cura_periodica",
+            "valor": 2,
+            "duracaoMs": 3000
+          }
+        ]
+      },
+      "sequencia": [
+        "circulo_de_amparo",
+        "anel_de_chamas"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#ff7b39",
+        "formas": [
+          "constelacao",
+          "chamas"
+        ],
+        "movimento": "subir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "combustao_total",
+      "nome": "Combustão total",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Incinera também os queimados a até 2 células do alvo.",
+      "danoPct": 20,
+      "emVolta": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "consumir",
+            "ref": "queimando",
+            "pct": 20
+          }
+        ]
+      },
+      "sequencia": [
+        "bola_de_fogo",
+        "incinerar"
+      ],
+      "condicoes": [
+        "alvo:queimando"
+      ],
+      "visual": {
+        "cor": "#ff5e2b",
+        "formas": [
+          "fornalha",
+          "chamas"
+        ],
+        "movimento": "cair",
+        "duracaoMs": 800,
+        "destinos": [
+          "mira",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "fervura",
+      "nome": "Fervura",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "Incinerar um envenenado consome também o veneno e soma os dois danos.",
+      "danoPct": 0,
+      "noAlvo": [
+        {
+          "tipo": "consumir",
+          "ref": "envenenado",
+          "pct": 40
+        }
+      ],
+      "sequencia": [
+        "dardo_toxico",
+        "incinerar"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#ff5e2b",
+        "formas": [
+          "gota",
+          "chamas"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "mente_exposta",
+      "nome": "Mente exposta",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "No alvo que perdeu o escudo, a agulha silencia por 1 s.",
+      "danoPct": 0,
+      "noAlvo": [
+        {
+          "tipo": "silenciar",
+          "duracaoMs": 1000
+        }
+      ],
+      "sequencia": [
+        "dissipar",
+        "agulha_mental"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#d980fa",
+        "formas": [
+          "runas",
+          "pressao"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "dor_fantasma",
+      "nome": "Dor fantasma",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "A agulha no alvo marcado pelo punhal repete metade do dano do punhal.",
+      "danoPct": 50,
+      "sequencia": [
+        "punhal_das_sombras",
+        "agulha_mental"
+      ],
+      "condicoes": [
+        "alvo:marcado"
+      ],
+      "visual": {
+        "cor": "#d980fa",
+        "formas": [
+          "fumaca",
+          "pressao"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "empalar",
+      "nome": "Empalar",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "Jogar o hostil sobre a estaca causa dano de colisão e enraíza por +1 s.",
+      "danoPct": 25,
+      "noAlvo": [
+        {
+          "tipo": "enraizado",
+          "duracaoMs": 1000
+        }
+      ],
+      "sequencia": [
+        "telecinese",
+        "estaca_de_pedra"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#a1887f",
+        "formas": [
+          "onda",
+          "lascas"
+        ],
+        "movimento": "pulsar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "afogar",
+      "nome": "Afogar",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "O hostil arremessado para dentro da névoa fica lento, e o veneno conta em dobro enquanto ele estiver nela.",
+      "danoPct": 0,
+      "noAlvo": [
+        {
+          "tipo": "resfriado",
+          "pct": 40,
+          "duracaoMs": 3000
+        },
+        {
+          "tipo": "envenenado",
+          "valor": 3,
+          "pct": 50,
+          "duracaoMs": 4000
+        }
+      ],
+      "sequencia": [
+        "telecinese",
+        "nevoa_venenosa"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#60aa79",
+        "formas": [
+          "onda",
+          "bolhas"
+        ],
+        "movimento": "girar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "antevisao",
+      "nome": "Antevisão",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Os dois primeiros golpes são anulados, e o atacante fica atordoado por 1 s.",
+      "danoPct": 0,
+      "noProprio": [
+        {
+          "tipo": "aparando",
+          "pct": 100,
+          "duracaoMs": 2000
+        },
+        {
+          "tipo": "contragolpe",
+          "ref": "contragolpe_arco",
+          "duracaoMs": 2000
+        }
+      ],
+      "sequencia": [
+        "pressagio",
+        "postura_de_aparo"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#b6cee0",
+        "formas": [
+          "onda",
+          "laminas"
+        ],
+        "movimento": "contrair",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "passo_previsto",
+      "nome": "Passo previsto",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Ao esquivar com o Presságio, você aparece atrás do atacante sozinho.",
+      "danoPct": 0,
+      "noProprio": [
+        {
+          "tipo": "critico_garantido",
+          "duracaoMs": 2000
+        }
+      ],
+      "sequencia": [
+        "pressagio",
+        "passo_sombrio"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#765b9e",
+        "formas": [
+          "onda",
+          "silhuetas"
+        ],
+        "movimento": "subir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "ruptura_de_defesas",
+      "nome": "Ruptura de defesas",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "Os hostis que perderam o escudo levam a explosão como crítico.",
+      "danoPct": 0,
+      "d20Minimo": 20,
+      "sequencia": [
+        "dissipar",
+        "explosao"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#ff8c42",
+        "formas": [
+          "runas",
+          "hexagonos"
+        ],
+        "movimento": "cair",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "golpe_sem_guarda",
+      "nome": "Golpe sem guarda",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "Em alvo que perdeu o escudo, o atordoamento dura o dobro.",
+      "danoPct": 0,
+      "noAlvo": [
+        {
+          "tipo": "atordoar",
+          "duracaoMs": 1000
+        }
+      ],
+      "sequencia": [
+        "dissipar",
+        "golpe_atordoante"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#f1c40f",
+        "formas": [
+          "runas",
+          "laminas"
+        ],
+        "movimento": "convergir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "seta_canalizada",
+      "nome": "Seta canalizada",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Dentro da runa, a seta sai 3 vezes seguidas.",
+      "danoPct": 100,
+      "sequencia": [
+        "runa_amplificadora",
+        "seta_arcana"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#9b8cff",
+        "formas": [
+          "runas",
+          "hexagonos"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "constelacao",
+      "nome": "Constelação",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A chuva cai centrada na runa e dura +2 s.",
+      "danoPct": 0,
+      "naMira": {
+        "raio": 3,
+        "efeitos": [
+          {
+            "tipo": "consagrado",
+            "valor": 2,
+            "duracaoMs": 5000
+          }
+        ]
+      },
+      "sequencia": [
+        "runa_amplificadora",
+        "chuva_de_estrelas"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#f7e9a0",
+        "formas": [
+          "runas",
+          "coroa"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "mira"
+        ]
+      }
+    },
+    {
+      "id": "carga_coletiva",
+      "nome": "Carga coletiva",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Os aliados acelerados avançam junto com você até o alvo.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 3,
+        "efeitos": [
+          {
+            "tipo": "acelerado",
+            "pct": 30,
+            "duracaoMs": 2000
+          }
+        ]
+      },
+      "sequencia": [
+        "impulso",
+        "investida"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#e67e22",
+        "formas": [
+          "escudo",
+          "laminas"
+        ],
+        "movimento": "pulsar",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "escolta",
+      "nome": "Escolta",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Os aliados que recebem o impulso também ganham metade da barreira.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 3,
+        "efeitos": [
+          {
+            "tipo": "escudo",
+            "valor": 5,
+            "duracaoMs": 4000
+          }
+        ]
+      },
+      "sequencia": [
+        "barreira",
+        "impulso"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#83dcb6",
+        "formas": [
+          "escudo",
+          "domo"
+        ],
+        "movimento": "girar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "lamina_de_seiva",
+      "nome": "Lâmina de seiva",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "Cada aparo envenena o atacante em dobro e tira todo o escudo dele.",
+      "danoPct": 0,
+      "noAlvo": [
+        {
+          "tipo": "envenenado",
+          "valor": 4,
+          "pct": 50,
+          "duracaoMs": 4000
+        },
+        {
+          "tipo": "dissipar",
+          "valor": 0
+        }
+      ],
+      "sequencia": [
+        "seiva_corrosiva",
+        "postura_de_aparo"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#b6cee0",
+        "formas": [
+          "gota",
+          "laminas"
+        ],
+        "movimento": "contrair",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "muralha_corrosiva",
+      "nome": "Muralha corrosiva",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "A muralha pinga seiva: quem a golpeia fica envenenado.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "envenenado",
+            "valor": 2,
+            "pct": 50,
+            "duracaoMs": 4000
+          }
+        ]
+      },
+      "sequencia": [
+        "seiva_corrosiva",
+        "muralha_de_pedra"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#a1887f",
+        "formas": [
+          "gota",
+          "lascas"
+        ],
+        "movimento": "subir",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "avalanche",
+      "nome": "Avalanche",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "O abalo nasce onde o pedregulho parou e lança lascas de volta pela linha.",
+      "danoPct": 25,
+      "naMira": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "empurrao",
+            "valor": 1
+          }
+        ]
+      },
+      "sequencia": [
+        "pedregulho",
+        "abalo_sismico"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#ad885d",
+        "formas": [
+          "fissuras",
+          "lascas"
+        ],
+        "movimento": "cair",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "ricochete_de_pedra",
+      "nome": "Ricochete de pedra",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "O pedregulho bate na muralha e volta pelo mesmo caminho, acertando de novo.",
+      "danoPct": 60,
+      "sequencia": [
+        "muralha_de_pedra",
+        "pedregulho"
+      ],
+      "condicoes": [
+        "muralha"
+      ],
+      "visual": {
+        "cor": "#a1887f",
+        "formas": [
+          "muralha",
+          "lascas"
+        ],
+        "movimento": "avancar",
+        "duracaoMs": 800,
+        "destinos": [
+          "ator",
+          "alvo"
+        ]
+      }
+    },
+    {
+      "id": "pouso_sagrado",
+      "nome": "Pouso sagrado",
+      "janelaMs": 2000,
+      "mesmoAlvo": false,
+      "texto": "O círculo nasce onde você pousou e dura +2 s.",
+      "danoPct": 0,
+      "emVolta": {
+        "raio": 2,
+        "efeitos": [
+          {
+            "tipo": "cura_periodica",
+            "valor": 2,
+            "duracaoMs": 2000
+          }
+        ]
+      },
+      "sequencia": [
+        "asas_da_aurora",
+        "circulo_de_amparo"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#83dcb6",
+        "formas": [
+          "constelacao",
+          "coroa"
+        ],
+        "movimento": "expandir",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "ator"
+        ]
+      }
+    },
+    {
+      "id": "lanca_do_resgate",
+      "nome": "Lança do resgate",
+      "janelaMs": 2000,
+      "mesmoAlvo": true,
+      "texto": "Ao pousar, a lança sai do aliado na direção do hostil mais perto dele.",
+      "danoPct": 30,
+      "sequencia": [
+        "asas_da_aurora",
+        "lanca_radiante"
+      ],
+      "condicoes": [],
+      "visual": {
+        "cor": "#f7e9a0",
+        "formas": [
+          "raios",
+          "coroa"
+        ],
+        "movimento": "girar",
+        "duracaoMs": 800,
+        "destinos": [
+          "alvo",
+          "alvo"
+        ]
+      }
     }
   ],
   "recompensas": {

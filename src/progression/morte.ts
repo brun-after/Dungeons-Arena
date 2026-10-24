@@ -19,7 +19,9 @@ import { criarInimigo } from '../entities/fabrica';
 import { aleatorio, inteiro, proximoU32, criarRng, hashTexto } from '../core/rng';
 import { idGerada } from '../combat/chave-habilidade';
 import { fatoresDoMundo, ladoDoJogador } from '../modos/dificuldade';
-import { podeFerir } from '../modos/relacao';
+import { podeAjudar, podeFerir } from '../modos/relacao';
+import { chebyshev } from '../combat/geometria';
+import { cargaPorMomento } from '../combat/carga-ultimate';
 import { atrasoDeRespawnTicks, localDeRespawn, penalidadeDeMorte, podeRespawnar, protecaoDeRespawnTicks } from '../modos/regras';
 import { celulaLivrePara } from '../world/colisao';
 import { passavel } from '../world/fase';
@@ -44,25 +46,45 @@ function zerarMovimento(e: Entidade): void {
   e.progressoPasso = 0;
 }
 
+/** Marco 22: o morto do Necromante e o falcão creditam ao dono. */
+function creditado(estado: EstadoJogo, e: Entidade | undefined): Entidade | undefined {
+  return e?.invocacao?.necromancia || e?.invocacao?.companheiro ? buscarEntidade(estado, e.invocacao.donoId) : e;
+}
+
+/**
+ * Marco 24 (24/10/2026, D-097): com a partilha do modo, quem abate leva tudo e cada aliado vivo perto dele (ou que
+ * lutou na janela) leva `aliadoPct`. Devolve a parte de cada um; null quando a partilha não vale (sem regra no modo ou
+ * quem abateu não é jogador): fica a divisão de antes.
+ */
+function partilhaDeGrupo(estado: EstadoJogo, ctx: ContextoSimulacao, morto: Entidade, matador: Entidade | undefined, lutaram: readonly Entidade[]): Map<Entidade, number> | null {
+  const regra = ctx.modo.partilhaXp;
+  if (!regra || !matador?.bolsa || !podeFerir(matador, morto, ctx.modo)) return null;
+  const partes = new Map<Entidade, number>([[matador, 1]]);
+  for (const e of estado.entidades) {
+    if (e === matador || !e.bolsa || !vivo(e) || !podeAjudar(matador, e, ctx.modo) || !podeFerir(e, morto, ctx.modo)) continue;
+    if (chebyshev(e, matador) <= regra.raio || lutaram.includes(e)) partes.set(e, regra.aliadoPct / 100);
+  }
+  return partes;
+}
+
 /** XP a quem abateu e a quem participou na janela (§2.7), com antifarm (§2.12). */
-function concederXp(estado: EstadoJogo, ctx: ContextoSimulacao, morto: Entidade, saida: EventoSimulacao[]): void {
+function concederXp(estado: EstadoJogo, ctx: ContextoSimulacao, morto: Entidade, saida: EventoSimulacao[], quemAbateu?: Entidade): void {
   if (morto.xpBase <= 0) return;
   const janela = ticksDe(ctx.balance.combate.janelaParticipacaoS * 1000);
-  const participantes = morto.participacao
+  const lutaram = morto.participacao
     .filter((p) => estado.tick - p.tick <= janela)
-    .map((p) => {
-      const participante = buscarEntidade(estado, p.id);
-      // Marco 22: o falcão também credita o XP ao dono.
-      return participante?.invocacao?.necromancia || participante?.invocacao?.companheiro ? buscarEntidade(estado, participante.invocacao.donoId) : participante;
-    })
+    .map((p) => creditado(estado, buscarEntidade(estado, p.id)))
     .filter((e): e is Entidade => e !== undefined && podeFerir(e, morto, ctx.modo))
     .filter((e, i, todos) => todos.findIndex((x) => x.id === e.id) === i)
     .sort((a, b) => (a.id < b.id ? -1 : 1));
+  const grupo = partilhaDeGrupo(estado, ctx, morto, creditado(estado, quemAbateu), lutaram);
+  const participantes = grupo ? [...grupo.keys()].sort((a, b) => (a.id < b.id ? -1 : 1)) : lutaram;
   if (participantes.length === 0) return;
+  const parte = (p: Entidade) => grupo?.get(p) ?? 1 / participantes.length;
   // Marco 15: a recompensa da dificuldade e do grupo vale para quem derruba o mundo (não entre jogadores).
   const recompensa = ladoDoJogador(estado, morto) ? 1 : fatoresDoMundo(estado, ctx).recompensa;
   const total = Math.max(1, Math.round(morto.xpBase * ctx.balance.xp.decaimentoAntifarm ** morto.abates * recompensa));
-  const cota = Math.max(1, Math.round(total / participantes.length));
+  const cota = (p: Entidade) => Math.max(1, Math.round(total * parte(p)));
   for (const p of participantes) {
     const faixa = ctx.balance.xp.faixaAvancada;
     const fator = p.nivel >= faixa.nivelInicio && ctx.modo.sobrevivencia.estudoAvanca
@@ -70,9 +92,9 @@ function concederXp(estado: EstadoJogo, ctx: ContextoSimulacao, morto: Entidade,
     // Na faixa avançada, usa a cota antes do arredondamento e do mínimo de 1 XP.
     // A campanha usa apenas o novo desgaste permanente: o antigo decaimento por respawn
     // é substituído pelo contador da fase; o piso incide somente no XP recebido por abate.
-    const bruto = aplicaAntifarmDeFase(ctx, p, morto) ? morto.xpBase * recompensa / participantes.length
+    const bruto = aplicaAntifarmDeFase(ctx, p, morto) ? morto.xpBase * recompensa * parte(p)
       : p.nivel >= faixa.nivelInicio && ctx.modo.sobrevivencia.estudoAvanca
-        ? morto.xpBase * ctx.balance.xp.decaimentoAntifarm ** morto.abates * recompensa / participantes.length : cota;
+        ? morto.xpBase * ctx.balance.xp.decaimentoAntifarm ** morto.abates * recompensa * parte(p) : cota(p);
     concederXpDeProgressao(p, ctx, xpDeCriatura(estado, ctx, p, morto, bruto * fator), estado.tick, saida);
   }
 }
@@ -123,6 +145,9 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
         quemAbateu.hp += cura;
         if (cura > 0) saida.push({ t: 'efeitoResultado', tick: estado.tick, alvoId: quemAbateu.id, origemId: quemAbateu.id, tipo: 'cura', dano: 0, cura, mana: 0 });
       }
+      // Marco 24 (D-094): abater um hostil (não invocação) enche o medidor da ultimate de quem abateu (ou do dono).
+      const dono = creditado(estado, quemAbateu);
+      if (dono && !e.invocacao && podeFerir(dono, e, ctx.modo)) cargaPorMomento(ctx, dono, 'abate', estado.tick, saida);
       const abate = abateDe(ctx, quemAbateu, e);
       abates.push(abate);
       dispararGanchosDe(estado, ctx, quemAbateu, 'aoMatar', { outro: e, hab: abate.golpe ?? null }, saida);
@@ -135,7 +160,7 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
       const matador = porId ? buscarEntidade(estado, porId.id) : undefined;
       if (matador?.invocacao && !e.invocacao) matador.invocacao.abates++;
       explodirSeIsca(estado, ctx, e, saida);
-      concederXp(estado, ctx, e, saida);
+      concederXp(estado, ctx, e, saida, quemAbateu);
       // Boss morto abre a passagem (§2.1, marco 10A-1).
       aoMorrerBoss(estado, ctx, e, saida);
       // Invocações não soltam nada nem voltam (§2.9).
@@ -169,7 +194,7 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
       // Marco 17 (D-063): onde o modo recompensa abater jogadores (a arena com a ficha inteira), quem derrubou ganha XP
       // (com o decaimento por abates, contra o farm) e, na primeira queda, o drop.
       if (ctx.modo.recompensaJogador && e.xpBase > 0) {
-        concederXp(estado, ctx, e, saida);
+        concederXp(estado, ctx, e, saida, quemAbateu);
         if (e.abates === 0) largarDrops(estado, ctx, e, saida);
       }
     }

@@ -35,7 +35,7 @@ function cena() {
 describe('consumíveis de progressão', () => {
   it('aceleração soma graus, preserva frações e não conclui tempo instantaneamente', () => {
     const c = cena();
-    c.b.estudo = { id: 'nova_glacial', totalTicks: 100, restanteTicks: 100, aceleracoes: 0 };
+    c.b.estudo = { id: 'pedregulho', totalTicks: 100, restanteTicks: 100, aceleracoes: 0 };
     c.b.pontosHabilidade = 7;
     for (const grau of ['comum', 'incomum', 'rara']) usarItem(c.estado, c.j, c.ctx, c.dar(`aceleracao_mente_${grau}`), c.eventos);
     expect(c.b.estudo.velocidade12).toBe(25);
@@ -50,9 +50,10 @@ describe('consumíveis de progressão', () => {
     expect(copia.bolsa?.estudo).not.toBe(c.b.estudo);
     for (let n = 0; n < 36; n++) avancarEstudos(c.estado, c.ctx, c.eventos);
     expect(c.b.estudo).toBeNull();
-    expect(c.b.conhecidas.some((h) => h.id === 'nova_glacial')).toBe(true);
+    expect(c.b.conhecidas.some((h) => h.id === 'pedregulho')).toBe(true);
     c.b.pontosHabilidade = 1;
-    subirRank(c.j, c.ctx, 'mente_partida', undefined, 0, c.eventos);
+    c.b.liberadas = ['seta_arcana'];
+    subirRank(c.j, c.ctx, 'seta_arcana', undefined, 0, c.eventos);
     expect(c.b.estudo.velocidade12).toBe(12);
   });
 
@@ -174,7 +175,7 @@ describe('nível 30 e faixa avançada', () => {
     expect(c.b.xpFracao).toBeGreaterThan(0);
     expect(c.b.xpFracao).toBeCloseTo(0.1);
   });
-  it('um grupo misto aplica a faixa a cada participante, sem reduzir a cota do personagem baixo', () => {
+  it('um grupo misto aplica a faixa a cada um: quem abate leva tudo e o aliado perto, 75%', () => {
     const c = cena();
     c.j.nivel = 20;
     const baixo = criarJogador(obter(CONTEUDO.classes.get('mago')), 'baixo', 4, 3, c.ctx.balance);
@@ -185,9 +186,9 @@ describe('nível 30 e faixa avançada', () => {
     i.participacao = [{ id: c.j.id, tick: 0 }, { id: baixo.id, tick: 0 }];
     c.estado.entidades.push(baixo, i);
     processarMortes(c.estado, c.ctx, c.eventos);
-    expect(c.j.xp).toBe(5);
-    expect(baixo.xp).toBe(55);
-    expect(c.b.xpFracao).toBeCloseTo(0.5);
+    // Marco 24 (D-097): o último a bater (baixo) abate e leva tudo; o aliado perto leva 75%, cada um na sua faixa.
+    expect(baixo.xp).toBe(110);
+    expect(c.j.xp + (c.b.xpFracao ?? 0)).toBeCloseTo(8.25);
   });
   it('geração de equipamento aceita o novo nível máximo', () => {
     const c = cena();

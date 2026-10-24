@@ -13,7 +13,7 @@ export function temFuria(e: Entidade): boolean {
 }
 
 /** A fúria agora (0..max), já descontado o esvaziamento. */
-export function furiaAtual(ctx: ContextoSimulacao, e: Entidade, tick: number): number {
+export function furiaAtual(ctx: Pick<ContextoSimulacao, 'balance'>, e: Entidade, tick: number): number {
   const f = e.furia;
   if (!f) return 0;
   const r = ctx.balance.ajustesClasses.guerreiro.furia;
@@ -28,11 +28,14 @@ export function fracaoFuria(ctx: ContextoSimulacao, e: Entidade, tick: number): 
   return furiaAtual(ctx, e, tick) / ctx.balance.ajustesClasses.guerreiro.furia.max;
 }
 
-/** Um ataque básico que feriu: soma à barra (até o máximo) e renova a carência. */
-export function acumularFuria(ctx: ContextoSimulacao, e: Entidade, tick: number): void {
+/**
+ * Um ataque básico que feriu: soma à barra (até o máximo) e renova a carência. Marco 24 (24/10/2026): `quanto` vem do
+ * efeito `furia` (Desafio, Contragolpe); sem ele, vale o do básico.
+ */
+export function acumularFuria(ctx: ContextoSimulacao, e: Entidade, tick: number, quanto?: number): void {
   if (!temFuria(e)) return;
   const r = ctx.balance.ajustesClasses.guerreiro.furia;
-  e.furia = { valor: Math.min(r.max, furiaAtual(ctx, e, tick) + r.porBasico), ultimoTick: tick };
+  e.furia = { valor: Math.min(r.max, furiaAtual(ctx, e, tick) + (quanto ?? r.porBasico)), ultimoTick: tick };
 }
 
 /** Multiplicador das curas do próprio Guerreiro: `curaMult` com a barra cheia, senão 1. */

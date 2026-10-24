@@ -93,7 +93,8 @@ export function sequencia(classe: string, nivel: number, presets: readonly strin
     const inicio = primeiraAcaoDoTime(m.eventos, novos, 'j1')?.tick ?? m.estado.tick;
     const morte = primeiro(novos, (ev) => ev.t === 'morreu' && ev.id === id);
     resultados.push({
-      golpes: novos.filter((ev) => ev.t === 'impacto' && ev.fonteId === 'j1' && ev.alvoId === id).length,
+      // Marco 24 (24/10/2026): golpe é o que fere ou erra; o impacto só de efeito (o Grito do falcão expõe) não conta.
+      golpes: novos.filter((ev) => ev.t === 'impacto' && ev.fonteId === 'j1' && ev.alvoId === id && (ev.dano > 0 || ev.falha)).length,
       tempoS: segundos((morte?.tick ?? m.estado.tick) - inicio),
       venceu: morte !== undefined,
     });
@@ -265,9 +266,9 @@ export function economiaPorMinuto(classe: string, nivel: number, semente: number
 
 /**
  * Marco 17 (D-063): duelo na arena com a ficha inteira (dois personagens da mesma classe e nível). `montarA` e
- * `montarB` ajustam cada um (build, equipamento). Devolve se o A venceu.
+ * `montarB` ajustam cada um (build, equipamento). Devolve 1 se o A venceu, 0,5 no empate e 0 na derrota.
  */
-export function dueloDeFichas(classe: string, nivel: number, semente: number, montarA: (e: Entidade, ctx: ContextoSimulacao) => void, montarB: (e: Entidade, ctx: ContextoSimulacao) => void): boolean {
+export function dueloDeFichas(classe: string, nivel: number, semente: number, montarA: (e: Entidade, ctx: ContextoSimulacao) => void, montarB: (e: Entidade, ctx: ContextoSimulacao) => void): number {
   const ctx = contextoDoCenario('livre');
   const a = jogadorTipico(ctx, classe, nivel, 'a', 6, 9);
   const b = jogadorTipico(ctx, classe, nivel, 'b', 11, 9);
@@ -284,7 +285,10 @@ export function dueloDeFichas(classe: string, nivel: number, semente: number, mo
   const caiu = (e: EventoSimulacao) => e.t === 'morreu' && (e.id === 'a' || e.id === 'b');
   m.rodar(LIMITE_S * TICKS_POR_S, () => m.eventos.some(caiu));
   const morte = primeiro(m.eventos, caiu);
-  return morte?.t === 'morreu' && morte.id === 'b';
+  // Marco 24 (24/10/2026): os dois caindo no mesmo tick é empate (meio ponto), não derrota de quem foi processado antes.
+  const empate = morte && m.eventos.filter((e) => caiu(e) && e.tick === morte.tick).length > 1;
+  if (empate) return 0.5;
+  return morte?.t === 'morreu' && morte.id === 'b' ? 1 : 0;
 }
 
 /** A build dispersa: os pontos dos níveis espalhados por igual nos seis atributos (em vez do principal e da Constituição). */
@@ -302,7 +306,8 @@ export function dispersar(e: Entidade, ctx: ContextoSimulacao): void {
   recalcularFicha(e, ctx);
 }
 
-const ARMA_DA_CLASSE: Readonly<Record<string, string>> = { guerreiro: 'espada', aventureiro: 'espada', mago: 'cajado', arqueiro: 'arco' };
+// Marco 24 (24/10/2026): o Necromante luta de cajado (o naturalDaClasse de armas.json); com a espada, o básico era o emprestado.
+const ARMA_DA_CLASSE: Readonly<Record<string, string>> = { guerreiro: 'espada', aventureiro: 'espada', mago: 'cajado', arqueiro: 'arco', necromante: 'cajado' };
 
 /** Equipa arma, peitoral e elmo gerados do nível do personagem, na raridade pedida. */
 export function equipar(raridade: Raridade): (e: Entidade, ctx: ContextoSimulacao) => void {

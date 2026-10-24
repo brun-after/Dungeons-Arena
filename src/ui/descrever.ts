@@ -10,6 +10,7 @@ import type { Elemento } from '../combat/elementos';
 import type { Habilidade, Passiva } from '../combat/habilidades';
 import type { EfeitoCanonico, TipoEfeito } from '../combat/registro-efeitos';
 import { t, type ChaveTexto } from '../i18n';
+import { descreverPassivaGeral } from './descrever-passivas';
 
 /** Segundos com vírgula, sem casas inúteis: 1500 -> "1,5"; 3000 -> "3". */
 export function segundos(ms: number): string {
@@ -70,6 +71,7 @@ export function descreverBonus(b: Partial<Passiva> & { duracaoPct?: number; raio
     const comTag = b.tag && c !== 'hpMaxPct' && c !== 'manaMaxPct' && c !== 'defesa';
     linhas.push(comTag ? t('desc.bonus.comTag', { bonus, tag: t(`tag.${b.tag ?? ''}` as ChaveTexto) }) : bonus);
   }
+  linhas.push(...descreverPassivaGeral(b, descreverEfeito));
   return linhas;
 }
 

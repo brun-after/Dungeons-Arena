@@ -13,6 +13,7 @@ import { alvoOfensivoValido, iniciarAcao, prioridadeDeAlvo, recargaRestante } fr
 import { resolverHabilidade } from '../combat/compilar-habilidade';
 import { fatoresDoMundo } from '../modos/dificuldade';
 import { excedeLimite } from '../combat/efeitos-fluxo';
+import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
 import { ordemRotativa } from '../world/colisao';
 import { passavel } from '../world/fase';
@@ -116,6 +117,7 @@ export function processarIa(estado: EstadoJogo, ctx: ContextoSimulacao, saida: E
       continue;
     }
     revidar(estado, ctx, e, ia, saida);
+    if (reagirAoEstado(estado, ctx, e, ia, saida)) continue;
     switch (ia.modo) {
       case 'patrulha':
         if (!tentarDetectar(estado, ctx, e, ia, preset, saida)) patrulhar(estado, ctx, e, ia);
@@ -145,6 +147,27 @@ function revidar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: Es
   const agressor = buscarEntidade(estado, ultimo.id);
   if (!agressor || !alvoOfensivoValido(estado, ctx, e, agressor)) return;
   comecarPerseguicao(estado, ctx, e, ia, agressor.id, saida);
+}
+
+/**
+ * Marco 24 (24/10/2026, D-097): os estados que mandam na IA. Aterrorizado foge de quem aplicou; confuso vaga sem
+ * atacar; desafiado persegue quem desafiou (e só ele). Devolve se o estado tomou o tick (a IA normal não roda).
+ */
+function reagirAoEstado(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa, saida: EventoSimulacao[]): boolean {
+  const f = e.efeitos.find((x) => x.ateTick > estado.tick && REGISTRO_EFEITOS[x.tipo].ia !== null);
+  if (!f) return false;
+  const modo = REGISTRO_EFEITOS[f.tipo].ia;
+  const quem = buscarEntidade(estado, f.origemId);
+  if (modo === 'foge') {
+    if (quem && vivo(quem)) recuar(estado, ctx, e, celulaOcupada(quem));
+    return true;
+  }
+  if (modo === 'vaga') {
+    patrulhar(estado, ctx, e, ia);
+    return true;
+  }
+  if (quem && alvoOfensivoValido(estado, ctx, e, quem) && (ia.modo !== 'perseguindo' || ia.alvoId !== quem.id)) comecarPerseguicao(estado, ctx, e, ia, quem.id, saida);
+  return false;
 }
 
 function voltarAPatrulhar(estado: EstadoJogo, e: Entidade, ia: EstadoIa): void {

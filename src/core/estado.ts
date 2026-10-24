@@ -140,6 +140,19 @@ export interface Atrasado {
   efeito: EfeitoCanonico;
 }
 
+/**
+ * Marco 24 (24/10/2026, D-094): a fase de uma habilidade em etapas (ultimates, Brado, Contragolpe). No `tick`, quem
+ * lançou solta a habilidade `chave` no alvo (ou na célula), sem custo nem recarga.
+ */
+export interface FaseAgendada {
+  atorId: EntidadeId;
+  chave: string;
+  alvoId: EntidadeId | null;
+  x: number;
+  y: number;
+  tick: number;
+}
+
 /** Respawn agendado de um inimigo (§2.5): o id continua estável e a geração incrementa. */
 export interface RespawnPendente {
   id: EntidadeId;
@@ -156,6 +169,8 @@ export interface RespawnPendente {
 
 export interface EstadoJogo {
   camposTaticos?: CampoTatico[];
+  /** Marco 24: fases agendadas (ausente = nenhuma). */
+  fases?: FaseAgendada[];
   versao: 1;
   faseId: string;
   tick: number;
@@ -218,6 +233,7 @@ const copiaEfeito = (e: EfeitoCanonico | null): EfeitoCanonico | null => (e ? { 
 // Clone explícito, campo a campo (§5.3 regra 4): nada de ida e volta por JSON em estado vivo.
 export function clonarEstado(estado: EstadoJogo): EstadoJogo {
   return {
+    ...(estado.fases ? { fases: estado.fases.map((x) => ({ ...x })) } : {}),
     ...(estado.camposTaticos ? { camposTaticos: estado.camposTaticos.map((c) => ({ ...c, efeito: copiaEfeito(c.efeito) })) } : {}),
     versao: estado.versao,
     faseId: estado.faseId,

@@ -29,7 +29,9 @@ import { estenderNoClima, multiplicadorClima } from './clima';
 import { multiplicadorArma } from '../progression/armas';
 import { fatorDoGolpe } from '../modos/dificuldade';
 import type { Habilidade } from './habilidades';
+import { cegoErra, curaRecebidaPassivas, estadosAoAcertar, golpePelasCostas, multiplicadorMarco24, reforcarEstado, resistenciaIgnorada } from './modificadores-golpe';
 import { registrarParticipacao } from './participacao';
+import { cargaPorMomento } from './carga-ultimate';
 
 export interface Impacto {
   acaoId: number;
@@ -62,8 +64,10 @@ export function comPotencia(ef: EfeitoCanonico, potencia: number): EfeitoCanonic
 }
 
 /** Multiplicador do dano recebido: exposto, resistência ao elemento e as sinergias. 0 = imune ao elemento. */
-function multiplicadorRecebido(estado: EstadoJogo, ctx: ContextoSimulacao, alvo: Entidade, hab: Habilidade, tick: number, sinergiaPct: number): number {
-  const resistencia = resistenciaPct(ctx, alvo, hab.elemento);
+function multiplicadorRecebido(estado: EstadoJogo, ctx: ContextoSimulacao, alvo: Entidade, hab: Habilidade, tick: number, sinergiaPct: number, ignorarPct = 0): number {
+  // Marco 24 (D-095): o Zelo ignora parte da resistência (só a positiva).
+  const bruta = resistenciaPct(ctx, alvo, hab.elemento);
+  const resistencia = bruta > 0 && bruta < 100 ? bruta * (1 - ignorarPct / 100) : bruta;
   if (resistencia >= 100) return 0;
   return multiplicadorDanoRecebido(alvo, tick) * (1 - resistencia / 100) * (1 + sinergiaPct / 100) * (1 - auraDeDefesaPct(estado, ctx, alvo) / 100);
 }
@@ -119,13 +123,15 @@ export function aplicarImpacto(
   const estadosAntes = alvo.efeitos.filter((f) => f.ateTick > tick).map((f) => f.tipo);
 
   let absorveu = false;
+  // Marco 24 (D-097): pelas costas pelo olhar do alvo; a marca vai no evento para o número na tela.
+  const costas = golpePelasCostas(ctx, atacante, alvo, hab);
   if (hab.formulaDano !== null) {
     // Marco 15: a dificuldade e o tamanho do grupo pesam pelo lado de quem bate e de quem apanha.
     // Marco 18: o dano extra das sinergias cresce com a potência (Inteligência) de quem lança.
     const extraPct = sinergias.reduce((s, x) => s + x.danoExtraPct, 0) * fonte.potencia;
     // Marco 23 (D-092): o inimigo afim absorve o próprio elemento — o golpe rola igual, mas cura em vez de ferir.
     const absorve = absorcaoPct(ctx, alvo, hab.elemento);
-    const recebido = (absorve > 0 ? absorve / 100 : multiplicadorRecebido(estado, ctx, alvo, hab, tick, extraPct)) * fatorDoGolpe(estado, ctx, fonte, alvo) * protecaoInicial(estado, ctx, alvo, atacante);
+    const recebido = (absorve > 0 ? absorve / 100 : multiplicadorRecebido(estado, ctx, alvo, hab, tick, extraPct, resistenciaIgnorada(ctx, atacante)) * multiplicadorMarco24(ctx, atacante, alvo, hab, costas, tick)) * fatorDoGolpe(estado, ctx, fonte, alvo) * protecaoInicial(estado, ctx, alvo, atacante);
     const r = resolverGolpe(
       estado.rng,
       hab.formulaDano,
@@ -142,7 +148,9 @@ export function aplicarImpacto(
       cura += alvo.hp - antes;
     }
     // Marco 14: o escudo absorve antes da vida.
-    const defesa = absorve === 0 && !r.falha && !r.imune && atacante ? defenderGolpe(estado, ctx, alvo, atacante, hab.tipoAtaque === 'fisico', saida) : { esquivou: false, fator: 1 };
+    // Marco 24: o cego erra como quem esquiva (antes das defesas do alvo).
+    const cegou = absorve === 0 && !r.falha && !r.imune && cegoErra(estado, ctx, atacante);
+    const defesa = cegou ? { esquivou: true, fator: 1 } : absorve === 0 && !r.falha && !r.imune && atacante ? defenderGolpe(estado, ctx, alvo, atacante, hab.tipoAtaque === 'fisico', saida) : { esquivou: false, fator: 1 };
     if (defesa.esquivou) { falha = true; saida.push({ t: 'esquivou', tick, acaoId: impacto.acaoId, atorId: fonte.id, alvoId: alvo.id }); }
     const antesDoEscudo = defesa.esquivou || absorve > 0 ? 0 : Math.round(r.dano * defesa.fator);
     dano = absorverEscudo(alvo, antesDoEscudo, tick);
@@ -158,7 +166,7 @@ export function aplicarImpacto(
   }
   if (hab.formulaCura !== null) {
     const bruta = rolar(estado.rng, hab.formulaCura).total;
-    const pedida = Math.max(0, Math.round(bruta * fonte.multCura * multiplicadorCuraRecebida(alvo, tick)));
+    const pedida = Math.max(0, Math.round(bruta * fonte.multCura * multiplicadorCuraRecebida(alvo, tick) * curaRecebidaPassivas(ctx, alvo)));
     const antes = alvo.hp;
     alvo.hp = Math.min(alvo.hpMax, alvo.hp + pedida);
     cura += alvo.hp - antes;
@@ -187,6 +195,7 @@ export function aplicarImpacto(
     indice: impacto.indice,
     sinergias: disparadas,
     ...(absorveu && { absorveu: true }),
+    ...(costas && dano > 0 && { costas: true }),
   });
 
   // Efeitos dependentes de acerto não se aplicam na falha crítica nem com imunidade (§2.7, passo 7). Marco 23: nem
@@ -202,6 +211,11 @@ export function aplicarImpacto(
     aplicarEfeito(estado, ctx, conjurador, construirEfeito('cura', { valor }), origem, null, saida);
   }
   if (conjurador) pulsarAura(estado, ctx, conjurador, alvo, Math.min(hpAntes, dano), saida, entregaRemota(hab));
+  // Marco 24 (D-094): o primeiro alvo de cada ação enche o medidor da ultimate (a própria ultimate não enche).
+  if (conjurador && impacto.indice === 0 && !hab.tags.includes('ultimate')) {
+    if (dano > 0 && conjurador !== alvo) cargaPorMomento(ctx, conjurador, basicoQueFere ? 'basico' : 'habilidade', estado.tick, saida);
+    if (cura > 0) cargaPorMomento(ctx, conjurador, 'cura', estado.tick, saida);
+  }
   // Sinergias (marco 14): o estado consumido sai e os efeitos da sinergia entram, antes dos da habilidade.
   dispararSinergias(alvo, sinergias, (ef) => {
     aplicarEfeito(estado, ctx, alvo, comPotencia(ef, fonte.potencia), origem, mira, saida);
@@ -227,6 +241,12 @@ export function aplicarImpacto(
       aplicarEfeito(estado, ctx, conjurador, construirEfeito('cura', { valor: consagrado.valor }), origem, null, saida);
     }
     alvo.efeitos = alvo.efeitos.filter((f) => !REGISTRO_EFEITOS[f.tipo].someAoLevarGolpe);
+    // Marco 24: o reflexo do alvo cai em quem golpeou de perto.
+    if (conjurador && conjurador !== alvo && hab.politicaImpacto === 'contato') {
+      for (const f of alvo.efeitos) if (f.ateTick > tick && f.interno && REGISTRO_EFEITOS[f.tipo].reflexo) aplicarEfeito(estado, ctx, conjurador, f.interno, { id: alvo.id, x: alvo.x, y: alvo.y }, null, saida);
+    }
+    // Marco 24 (D-095): as passivas de quem bate que aplicam estado por chance.
+    if (conjurador && conjurador !== alvo) for (const ef of estadosAoAcertar(estado, ctx, conjurador)) aplicarEfeito(estado, ctx, alvo, ef, origem, mira, saida);
   }
   // Dispatcher único (§2.8); `em: 'conjurador'` cai sobre quem lançou (ex.: avanço, roubo de vida).
   for (const efeito of hab.efeitos) {
@@ -234,7 +254,7 @@ export function aplicarImpacto(
     if (REGISTRO_EFEITOS[efeito.tipo].aoLancar) continue;
     const sobre = efeito.em === 'conjurador' ? conjurador : alvo;
     // Marco 23 (D-092): no clima do elemento, o estado dele dura mais.
-    if (sobre) aplicarEfeito(estado, ctx, sobre, estenderNoClima(ctx, hab, comPotencia(efeito, fonte.potencia)), origem, mira, saida);
+    if (sobre) aplicarEfeito(estado, ctx, sobre, estenderNoClima(ctx, hab, reforcarEstado(ctx, conjurador, comPotencia(efeito, fonte.potencia))), origem, mira, saida);
   }
   if (conjurador) {
     if (resposta && conjurador.tatica) { conjurador.tatica.respostaConsumida = true; conjurador.efeitos = conjurador.efeitos.filter((f) => f.tipo !== 'resposta_aparo'); }

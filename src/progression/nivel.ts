@@ -5,6 +5,7 @@ import type { Balance, ContextoSimulacao } from '../core/contexto';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import type { Entidade } from '../entities/entidade';
 import { recalcularFicha } from './derivados';
+import { sincronizarRanksDeClasse } from './habilidades-classe';
 import { NOMES_ATRIBUTOS } from './itens';
 
 /** XP para passar do nível `nivel` ao seguinte: tabela configurável, com fallback `nivel × 100`. */
@@ -37,6 +38,8 @@ export function aplicarSubidas(e: Entidade, ctx: ContextoSimulacao, tick: number
     subiu = true;
     saida.push({ t: 'subiuNivel', tick, id: e.id, nivel: e.nivel });
   }
+  // Marco 24 (D-094): as skills de classe sobem de rank com o nível.
+  if (subiu) sincronizarRanksDeClasse(e, ctx, tick, saida);
   if (subiu) recalcularFicha(e, ctx);
 }
 

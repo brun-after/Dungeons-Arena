@@ -15,6 +15,7 @@ import type { Dificuldade } from '../../src/modos/dificuldade';
 import type { ModoDeJogo } from '../../src/modos/modo';
 import { recalcularFicha } from '../../src/progression/derivados';
 import { caminhosDoRank, nivelParaRank } from '../../src/progression/habilidades-personagem';
+import { ehDaClasse, rankDeClassePeloNivel } from '../../src/progression/habilidades-classe';
 import { carregarFase } from '../../src/world/fase';
 import { BotDeDuelo } from '../../src/bench/bot-duelo';
 
@@ -48,7 +49,7 @@ export function contextoDoCenario(modoId = 'campanha', balance: Balance = BALANC
  * Destreza do arqueiro é cadência, não dano). Os pontos do "principal" se dividem por igual entre os da lista.
  */
 export const ATRIBUTOS_TIPICOS: Readonly<Record<string, readonly (keyof Atributos)[]>> = {
-  aventureiro: ['forca', 'inteligencia'],
+  aventureiro: ['forca', 'destreza'],
   guerreiro: ['forca'],
   mago: ['inteligencia'],
   necromante: ['inteligencia'],
@@ -85,10 +86,20 @@ export function jogadorTipico(ctx: ContextoSimulacao, classeId: string, nivel: n
     excedentes -= dar;
   }
 
+  // Marco 24 (D-094): as skills de classe sobem com o nível (o típico escolhe o primeiro caminho); os pontos vão às gerais.
+  for (const c of bolsa.conhecidas) {
+    if (!ehDaClasse(ctx, bolsa, c.id)) continue;
+    for (const r of ctx.balance.habilidades.ranksEvolucao) {
+      const opcao = caminhosDoRank(ctx, c.id, r)[0];
+      if (opcao && nivel >= nivelParaRank(ctx, c.id, r) && c.caminhos.length < ctx.balance.habilidades.ranksEvolucao.filter((x) => x <= r && caminhosDoRank(ctx, c.id, x).length > 0).length) c.caminhos.push(opcao);
+    }
+    c.rank = Math.max(1, rankDeClassePeloNivel(ctx, c.id, nivel, c.caminhos));
+  }
   let pontosHab = (nivel - 1) * ctx.balance.habilidades.pontosPorNivel;
   for (let volta = 0; pontosHab > 0 && volta < 10; volta++) {
     for (const c of bolsa.conhecidas) {
       if (pontosHab <= 0) break;
+      if (ehDaClasse(ctx, bolsa, c.id)) continue;
       const novo = c.rank + 1;
       if (novo > ctx.balance.habilidades.rankMax || nivel < nivelParaRank(ctx, c.id, novo)) continue;
       const caminhos = caminhosDoRank(ctx, c.id, novo);

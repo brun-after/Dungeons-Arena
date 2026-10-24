@@ -22,10 +22,13 @@ import campanhaJson from '../data/modos/campanha.json';
 import cooperativoJson from '../data/modos/cooperativo.json';
 import livreJson from '../data/modos/livre.json';
 import skillsJson from '../data/skills.json';
+import ultimatesJson from '../data/ultimates.json';
 import temasJson from '../data/temas.json';
 import afinidadesJson from '../data/afinidades.json';
 import armasJson from '../data/armas.json';
 import { lerArmas, type RegrasDeArmas } from '../progression/armas';
+import { lerUltimates, type Ultimate } from '../combat/ultimates';
+import { conferirClassesEUltimates } from './conteudo-classes';
 import { lerAfinidades, type CatalogoAfinidades } from '../combat/afinidade';
 import { lerTemas, type Tema } from '../world/temas';
 import { lerInteracoes, type Interacoes } from '../combat/acumulo';
@@ -79,10 +82,14 @@ export interface Conteudo {
   afinidades: CatalogoAfinidades;
   /** Marco 23 (D-093): as famílias de arma e o básico de cada uma. */
   armas: RegrasDeArmas;
+  /** Marco 24 (D-094): as 140 ultimates (as definições delas e das etapas ficam em `definicoes`). */
+  ultimates: Catalogo<Ultimate>;
 }
 
 export interface FontesDeConteudo {
   skills: unknown;
+  /** Marco 24: data/ultimates.json. */
+  ultimates: unknown;
   inimigos: unknown;
   classes: unknown;
   itens: unknown;
@@ -109,6 +116,11 @@ export interface FontesDeConteudo {
 
 export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; erros: string[] } {
   const h = lerHabilidades(fontes.skills);
+  const ul = lerUltimates(fontes.ultimates);
+  for (const [id, def] of ul.definicoes) {
+    if (h.definicoes.has(id)) ul.erros.push(`ultimates.json: "${id}" já existe em skills.json`);
+    h.definicoes.set(id, def);
+  }
   const p = lerPresets(fontes.inimigos);
   const c = lerClasses(fontes.classes);
   const it = lerItens(fontes.itens);
@@ -127,7 +139,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const tm = lerTemas(fontes.temas, new Set([...p.presets.values()].filter((x) => x.invocacao === null).map((x) => x.id)));
   const af = lerAfinidades(fontes.afinidades);
   const ar = lerArmas(fontes.armas);
-  const erros = [...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...rs.erros, ...cb.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
+  const erros = [...ul.erros, ...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...rs.erros, ...cb.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
   for (const conj of cj.conjuntos.values()) {
     for (const peca of conj.pecas) if (!fo.dados.bases.has(peca)) erros.push(`conjunto ${conj.id}: base desconhecida "${peca}"`);
   }
@@ -155,12 +167,13 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   };
   for (const preset of p.presets.values()) conferir(`preset ${preset.id}`, [preset.ataqueBasico, ...preset.habilidades]);
   for (const classe of c.classes.values()) {
-    conferir(`classe ${classe.id}`, [classe.ataqueBasico, ...classe.habilidades, ...classe.aprendiveis]);
-    if (classe.habilidades.length > 4) erros.push(`classe ${classe.id}: no máximo 4 habilidades iniciais (as teclas 1–4)`);
+    conferir(`classe ${classe.id}`, [classe.ataqueBasico, ...classe.habilidades, ...classe.exclusivas]);
+    if (classe.iniciais.length !== 2) erros.push(`classe ${classe.id}: são 2 skills de classe iniciais (as teclas 1 e 2)`);
     for (const { id } of classe.itensIniciais) if (!it.itens.has(id)) erros.push(`classe ${classe.id}: item inicial desconhecido "${id}"`);
   }
   for (const item of it.itens.values()) if (item.ensina !== null) conferir(`item ${item.id}`, [item.ensina]);
-  for (const combo of cb.combos.values()) conferir(`combo ${combo.id}`, combo.sequencia);
+  for (const combo of cb.combos.values()) conferir(`combo ${combo.id}`, combo.sequencia.filter((s) => s !== '@ultimate'));
+  erros.push(...conferirClassesEUltimates(h.definicoes, c.classes, ul.ultimates, p.presets, it.itens));
   for (const [e, a] of af.afinidades.elementos) conferir(`afinidade ${e}`, [a.habilidade]);
   conferir('armas.json', Object.values(ar.armas.basicoDaFamilia));
   for (const id of c.classes.keys()) if (!ar.armas.naturalDaClasse.has(id)) erros.push(`armas.json: classe sem família natural "${id}"`);
@@ -179,11 +192,11 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   if (!RARIDADES.includes(BALANCE_PADRAO.drops.raridadeMinBoss)) erros.push('balance.json: drops.raridadeMinBoss desconhecida');
   // Marco 14: o que o jogador alcança (classes e livros) cabe no orçamento de poder, em todo rank e caminho.
   const jogaveis = new Set<string>();
-  for (const classe of c.classes.values()) for (const id of [...classe.habilidades, ...classe.aprendiveis]) jogaveis.add(id);
+  for (const classe of c.classes.values()) for (const id of [...classe.habilidades, ...classe.exclusivas]) jogaveis.add(id);
   for (const item of it.itens.values()) if (item.ensina) jogaveis.add(item.ensina);
   for (const id of jogaveis) {
     const def = h.definicoes.get(id);
-    if (def && !def.basico) erros.push(...foraDoOrcamento(def, fontesCompilacao));
+    if (def && !def.basico && !def.interna) erros.push(...foraDoOrcamento(def, fontesCompilacao));
   }
   for (const modo of modos.values()) {
     const clamp = modo.clamp;
@@ -217,6 +230,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       temas: tm.temas,
       afinidades: af.afinidades,
       armas: ar.armas,
+      ultimates: ul.ultimates,
     },
     erros,
   };
@@ -244,6 +258,7 @@ export function foraDoOrcamento(def: DefinicaoHabilidade, fontes: FontesCompilac
 
 export const FONTES_OFICIAIS: FontesDeConteudo = {
   skills: skillsJson,
+  ultimates: ultimatesJson,
   inimigos: inimigosJson,
   classes: classesJson,
   itens: itensJson,

@@ -163,7 +163,7 @@
     {
       "id": "boss",
       "nome": "Demônio",
-      "hpBase": 281,
+      "hpBase": 310,
       "hesitacaoS": 1,
       "deteccao": 6,
       "xp": 50,
@@ -335,6 +335,96 @@
       "intervaloAtaqueMs": 1200,
       "invocacao": {
         "comportamento": "companheiro"
+      }
+    },
+    {
+      "id": "esqueleto_profano",
+      "nome": "Esqueleto profano",
+      "hpBase": 35,
+      "hesitacaoS": 0,
+      "deteccao": 5,
+      "xp": 0,
+      "modelo": "esqueleto",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 1,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 1500,
+      "invocacao": {
+        "comportamento": "agressivo"
+      }
+    },
+    {
+      "id": "espectro",
+      "nome": "Espectro",
+      "hpBase": 30,
+      "hesitacaoS": 0,
+      "deteccao": 5,
+      "xp": 0,
+      "modelo": "sombra",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 0,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 1600,
+      "invocacao": {
+        "comportamento": "agressivo"
+      }
+    },
+    {
+      "id": "cavaleiro_da_morte",
+      "nome": "Cavaleiro da morte",
+      "hpBase": 120,
+      "hesitacaoS": 0,
+      "deteccao": 5,
+      "xp": 0,
+      "modelo": "esqueleto",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 3,
+      "ataqueBasico": "golpe_pesado",
+      "habilidades": [],
+      "intervaloAtaqueMs": 1800,
+      "invocacao": {
+        "comportamento": "agressivo"
+      }
+    },
+    {
+      "id": "copia_ilusoria",
+      "nome": "Cópia ilusória",
+      "hpBase": 15,
+      "hesitacaoS": 0,
+      "deteccao": 5,
+      "xp": 0,
+      "modelo": "sombra",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 0,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2000,
+      "invocacao": {
+        "comportamento": "agressivo"
+      }
+    },
+    {
+      "id": "falcao_espectral",
+      "nome": "Falcão espectral",
+      "hpBase": 20,
+      "hesitacaoS": 0,
+      "deteccao": 5,
+      "xp": 0,
+      "modelo": "falcao",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 0,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 1200,
+      "invocacao": {
+        "comportamento": "agressivo"
       }
     }
   ]

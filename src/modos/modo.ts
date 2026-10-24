@@ -113,6 +113,11 @@ export interface ModoDeJogo {
   faixas: FaixaDeNivel[];
   /** Marco 17: recompensa por jogador derrotado (null: só NPCs dão XP). */
   recompensaJogador: RecompensaDeJogador | null;
+  /**
+   * Marco 24 (24/10/2026, D-097): XP de grupo. Quem abate leva tudo e cada aliado vivo a até `raio` células (ou que
+   * lutou na janela) leva `aliadoPct`. null = a divisão de antes, entre quem participou.
+   */
+  partilhaXp: { aliadoPct: number; raio: number } | null;
   /** Marco 10A-2 (§2.12): regeneração por célula e penalidade de morte (null = sem). O descanso saiu (D-067). */
   sobrevivencia: {
     regenPorCelula: boolean;
@@ -241,6 +246,13 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
         : (() => {
             const x = l.objeto(o.recompensaJogador, 'recompensaJogador');
             return { xpPorNivel: l.numero(x, 'xpPorNivel', { min: 0 }), tetoXpPorHora: l.numero(x, 'tetoXpPorHora', { min: 0 }) };
+          })(),
+    partilhaXp:
+      o.partilhaXp === null || o.partilhaXp === undefined
+        ? null
+        : (() => {
+            const x = l.objeto(o.partilhaXp, 'partilhaXp');
+            return { aliadoPct: l.numero(x, 'aliadoPct', { min: 0, max: 100 }), raio: l.numero(x, 'raio', { min: 0, max: 50, inteiro: true }) };
           })(),
     sobrevivencia: {
       regenPorCelula: l.booleano(sobrevivencia, 'regenPorCelula'),

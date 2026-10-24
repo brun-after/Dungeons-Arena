@@ -50,6 +50,8 @@ export type MotivoItem =
   | 'ja_conhece'
   /** Marco 18 (D-068): já há um estudo em andamento (o livro não é gasto). */
   | 'estudando'
+  /** Marco 24 (D-094): livro de skill de outra classe. */
+  | 'outra_classe'
   /** Marco 18 (D-070): a forja pede material que falta. */
   | 'sem_material'
   | 'sem_espaco_no_chao';
@@ -75,7 +77,12 @@ export type MotivoHabilidade =
   /** Marco 18 (camada 7): fusão sem a runa, sem as duas no nível máximo, ou já tendo outra. */
   | 'fusao_runa'
   | 'fusao_niveis'
-  | 'fusao_unica';
+  | 'fusao_unica'
+  /** Marco 24 (D-094): a tecla nÃ£o aceita esse tipo (1â€“2 sÃ³ de classe, 3â€“6 sÃ³ gerais); a geral ainda nÃ£o foi liberada
+   *  por livro; a skill de classe nÃ£o se aprende nem sobe com ponto (vem do livro e do nÃ­vel). */
+  | 'tecla_errada'
+  | 'nao_liberada'
+  | 'de_classe';
 
 export type MotivoCancelamento = 'morte' | 'interrompido' | 'alvo_invalido' | 'substituido';
 
@@ -116,6 +123,8 @@ export type EventoSimulacao =
       dano: number;
       /** HP efetivamente retirado, sem excesso letal; dano mantém o valor histórico. */
       danoEfetivo?: number;
+      /** Marco 24 (D-097): o golpe pegou pelas costas. */
+      costas?: boolean;
       /** Absorção de escudo neste impacto, após esquiva/aparo. */
       absorvidoEscudo?: number;
       cura: number;
@@ -137,6 +146,8 @@ export type EventoSimulacao =
   | { t: 'habilidadeRecusada'; tick: number; id: EntidadeId; habilidadeId: string; motivo: MotivoHabilidade }
   // Marco 18 (D-068): o estudo de uma habilidade nova.
   | { t: 'estudoIniciado'; tick: number; id: EntidadeId; habilidadeId: string; totalTicks: number }
+  /** Marco 24 (D-094): o livro de uma geral a liberou (aprender custa um ponto). */
+  | { t: 'habilidadeLiberada'; tick: number; id: EntidadeId; habilidadeId: string }
   | { t: 'estudoAcelerado'; tick: number; id: EntidadeId; habilidadeId: string; restanteTicks: number }
   | { t: 'estudoConcluido'; tick: number; id: EntidadeId; habilidadeId: string }
   // Marco 18 (D-068, D-069): ressonância nova, combo feito e o renascer do item.
@@ -150,6 +161,9 @@ export type EventoSimulacao =
   // Marco 22 (D-089): o Mago trocou de encarnação; o Arqueiro disparou o tiro carregado.
   | { t: 'encarnou'; tick: number; id: EntidadeId; elemento: 'fogo' | 'gelo' | 'raio' }
   | { t: 'tiroCarregado'; tick: number; id: EntidadeId }
+  // Marco 24 (24/10/2026, D-094): o medidor da ultimate encheu, e a ultimate saiu (par de skills e o id dela).
+  | { t: 'ultimateCheia'; tick: number; id: EntidadeId }
+  | { t: 'ultimateUsada'; tick: number; id: EntidadeId; ultimateId: string; acaoId: number }
   /** Ajuste de 24/10/2026 (D-091): a encarnação do Mago venceu. */
   | { t: 'encarnacaoAcabou'; tick: number; id: EntidadeId }
   /** Marco 22 (D-090): o morto do Necromante longe demais voltou para o lado dele. */

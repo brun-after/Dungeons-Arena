@@ -58,6 +58,8 @@ export function multiplicadorDireto(ctx: ContextoSimulacao, ator: Entidade, hab:
   // Marco 22 (D-089): o Mago encarnado em fogo.
   if (classe === 'mago') return multiplicadorEncarnacao(ctx, ator, hab);
   if (classe === 'aventureiro' && ator.nivel >= ctx.balance.ajustesClasses.aventureiro.nivelCorte && ['seta_arcana', 'explosao'].includes(hab.id)) return ctx.balance.ajustesClasses.aventureiro.danoMult;
+  // Marco 24 (24/10/2026, D-094): o kit do Aventureiro sai do falcão; o ajuste da classe pesa nas skills dele.
+  if (classe === 'aventureiro' && hab.tags.includes('falcao')) return ctx.balance.ajustesClasses.aventureiro.falcaoDanoMult;
   if (classe === 'arqueiro' && secundario && ['chuva_de_flechas', 'tiro_em_leque'].includes(hab.id)) return ctx.balance.ajustesClasses.arqueiro.secundariosMult;
   return 1;
 }

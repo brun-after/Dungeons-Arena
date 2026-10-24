@@ -22,9 +22,10 @@
   "spawnerDinamico": true,
   "portas": { "inimigosCruzamChance": 0.5 },
   "saida": "todos_vivos",
-  "comandosDeRede": ["mover", "irPara", "usarHabilidade", "ataqueBasico", "selecionarAlvo", "usarItem", "soltarItem", "equipar", "desequipar", "distribuirPonto", "interagir", "abrirMenu", "comprar", "vender", "fecharLoja", "moverItem", "dispensar", "subirRank", "acelerarEstudo", "forjar", "equiparHabilidade", "definirDificuldade"],
+  "comandosDeRede": ["mover", "irPara", "usarHabilidade", "ataqueBasico", "selecionarAlvo", "usarItem", "soltarItem", "equipar", "desequipar", "distribuirPonto", "interagir", "abrirMenu", "comprar", "vender", "fecharLoja", "moverItem", "dispensar", "subirRank", "acelerarEstudo", "forjar", "equiparHabilidade", "definirDificuldade", "autoAtaque"],
   "faixas": [],
   "recompensaJogador": null,
+  "partilhaXp": { "aliadoPct": 75, "raio": 12 },
   "sobrevivencia": {
     "regenPorCelula": true,
     "revelarArmadilhas": true,

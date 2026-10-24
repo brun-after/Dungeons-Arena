@@ -1,4 +1,7 @@
-// Habilidades do personagem (D-057, D-059). Marco 14 (14/10/2026). Tudo chega por comando (§3.3):
+// Habilidades do personagem (D-057, D-059). Marco 14 (14/10/2026). Tudo chega por comando (§3.3).
+// Marco 24 (24/10/2026, D-094): as skills de classe não gastam ponto (sobem com o nível; o livro de classe ensina na
+// hora) e as gerais pedem o livro (que libera) e um ponto; as teclas 1–2 são de classe e as 3–6, gerais
+// (habilidades-classe.ts). O que segue vale para as gerais:
 // - `subirRank`: gasta 1 ponto de habilidade (1 por nível). Do rank 0 para o 1, aprende — só o que a classe pode
 //   aprender. O nível libera cada rank (balance.habilidades.ranks). Nos ranks de evolução (3 e 5), escolhe 1
 //   entre 2 ou 3 caminhos, e a escolha é definitiva.
@@ -10,7 +13,8 @@ import { familiaDaHabilidade } from './itens-progressao';
 import { definicaoDe } from '../combat/compilar-habilidade';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EventoSimulacao, MotivoHabilidade } from '../core/eventos-simulacao';
-import { SLOTS_BARRA, type Bolsa, type Entidade } from '../entities/entidade';
+import { type Bolsa, type Entidade } from '../entities/entidade';
+import { ehDaClasse, ehDeAlgumaClasse, ocuparTeclaLivre, rankDeClassePeloNivel, teclaRecusa } from './habilidades-classe';
 import { recalcularFicha } from './derivados';
 import { reducaoEstudoPct } from './efeitos-atributo';
 import { passivosDe } from './ganchos-do-portador';
@@ -23,10 +27,9 @@ export function habilidadesDaBarra(bolsa: Bolsa): string[] {
   return bolsa.barra.filter((id): id is string => id !== null && bolsa.conhecidas.some((c) => c.id === id));
 }
 
-/** O que a classe deixa aprender com pontos: as iniciais e as `aprendiveis`. */
-export function aprendiveisDa(ctx: ContextoSimulacao, bolsa: Bolsa): string[] {
-  const classe = ctx.conteudo.classes.get(bolsa.classeId);
-  return classe ? [...new Set([...classe.habilidades, ...classe.aprendiveis])] : [];
+/** Marco 24 (D-094): o que se aprende com ponto — as gerais que um livro liberou. */
+export function aprendiveisDa(_ctx: ContextoSimulacao, bolsa: Bolsa): string[] {
+  return [...(bolsa.liberadas ?? [])];
 }
 
 /** Marco 18: a runa de fusão (item de missão) que destrava uma fusão. */
@@ -68,11 +71,23 @@ export function motivoParaNaoSubir(ctx: ContextoSimulacao, e: Entidade, id: stri
   const def = definicaoDe(ctx, id);
   if (!def) return 'desconhecida';
   const conhecida = bolsa.conhecidas.find((c) => c.id === id);
+  // Marco 24 (D-094): a skill de classe vem do livro e sobe com o nível; com ponto, nunca. O comando só serve para
+  // escolher o caminho no rank de evolução, quando o nível já chegou lá.
+  if (ehDaClasse(ctx, bolsa, id)) {
+    if (!conhecida) return 'de_classe';
+    const novoRank = conhecida.rank + 1;
+    if (novoRank > ctx.balance.habilidades.rankMax) return 'rank_maximo';
+    const opcoesClasse = caminhosDoRank(ctx, id, novoRank);
+    if (opcoesClasse.length === 0) return 'de_classe';
+    if (e.nivel < nivelParaRank(ctx, id, novoRank)) return 'nivel_baixo';
+    return caminho !== undefined && opcoesClasse.includes(caminho) ? null : 'caminho_invalido';
+  }
+  if (!conhecida && ehDeAlgumaClasse(ctx, id)) return 'nao_aprendivel';
   // Marco 18 (D-068, camada 7): a fusão pede a runa, as duas habilidades no nível máximo e nenhuma outra fusão.
   if (!conhecida && def.fusao) {
     const motivoFusao = motivoDaFusao(ctx, bolsa, def.fusao);
     if (motivoFusao) return motivoFusao;
-  } else if (!conhecida && !aprendiveisDa(ctx, bolsa).includes(id)) return 'nao_aprendivel';
+  } else if (!conhecida && !aprendiveisDa(ctx, bolsa).includes(id)) return 'nao_liberada';
   // Marco 18 (D-068): um estudo por vez (e a própria habilidade em estudo não se aprende de novo).
   if (!conhecida && bolsa.estudo) return 'estudando';
   const novo = (conhecida?.rank ?? 0) + 1;
@@ -87,13 +102,6 @@ export function motivoParaNaoSubir(ctx: ContextoSimulacao, e: Entidade, id: stri
   if (caminho !== undefined && opcoes.length > 0 && !opcoes.includes(caminho)) return 'caminho_invalido';
   if (caminho === undefined && opcoes.length > 0) return 'caminho_invalido';
   return null;
-}
-
-/** Põe a habilidade na primeira tecla vazia (ativas apenas). */
-function ocuparTeclaLivre(ctx: ContextoSimulacao, bolsa: Bolsa, id: string): void {
-  if (definicaoDe(ctx, id)?.base.passiva || bolsa.barra.includes(id)) return;
-  const livre = bolsa.barra.indexOf(null);
-  if (livre >= 0) bolsa.barra[livre] = id;
 }
 
 function atualizar(e: Entidade, ctx: ContextoSimulacao): void {
@@ -127,7 +135,10 @@ export function subirRank(e: Entidade, ctx: ContextoSimulacao, id: string, camin
     iniciarEstudo(e, ctx, id, tick, saida);
     return true;
   }
-  if (invId !== undefined) {
+  const deClasse = ehDaClasse(ctx, bolsa, id);
+  if (deClasse) {
+    // Marco 24: o caminho da skill de classe é escolhido sem ponto; depois o nível leva o rank adiante.
+  } else if (invId !== undefined) {
     const entrada = bolsa.mochila.find((i) => i.invId === invId);
     if (!entrada) return false;
     entrada.qtd--;
@@ -138,6 +149,7 @@ export function subirRank(e: Entidade, ctx: ContextoSimulacao, id: string, camin
   conhecida.rank++;
   const escolhido = caminhosDoRank(ctx, id, conhecida.rank).length > 0 && caminho !== undefined ? caminho : null;
   if (escolhido) conhecida.caminhos.push(escolhido);
+  if (deClasse) conhecida.rank = Math.max(conhecida.rank, rankDeClassePeloNivel(ctx, id, e.nivel, conhecida.caminhos));
   if (conhecida.rank === 1) ocuparTeclaLivre(ctx, bolsa, id);
   atualizar(e, ctx);
   saida.push({ t: 'habilidadeMudou', tick, id: e.id, habilidadeId: id, rank: conhecida.rank, caminho: escolhido });
@@ -151,10 +163,11 @@ export function equiparHabilidade(e: Entidade, ctx: ContextoSimulacao, id: strin
     return false;
   };
   if (!bolsa) return recusar('sem_ficha');
-  if (!Number.isInteger(slot) || slot < 0 || slot >= SLOTS_BARRA) return recusar('tecla_invalida');
+  if (!Number.isInteger(slot) || slot < 0 || slot >= bolsa.barra.length) return recusar('tecla_invalida');
   if (id !== null) {
     if (!bolsa.conhecidas.some((c) => c.id === id)) return recusar('desconhecida');
-    if (definicaoDe(ctx, id)?.base.passiva) return recusar('passiva');
+    const recusa = teclaRecusa(ctx, bolsa, slot, id);
+    if (recusa) return recusar(recusa);
     // A mesma habilidade em outra tecla troca de lugar com a desta.
     const outra = bolsa.barra.indexOf(id);
     if (outra >= 0) bolsa.barra[outra] = bolsa.barra[slot] ?? null;
@@ -166,14 +179,24 @@ export function equiparHabilidade(e: Entidade, ctx: ContextoSimulacao, id: strin
 }
 
 /**
- * Livro (marco 14): ensina no rank 1, sem ponto e sem a restrição de classe. Marco 18 (D-068): o livro também começa
- * um estudo (e é recusado sem gastar se já houver outro, ou se a habilidade já é conhecida ou está em estudo).
+ * Livro. Marco 24 (D-094): o de skill de classe ensina na hora, no rank do nível, e só serve para a dona; o de geral
+ * libera a skill, que se aprende com um ponto (e o estudo de sempre). Recusado sem gastar quando não serve.
  */
-export function aprenderPorLivro(e: Entidade, ctx: ContextoSimulacao, id: string, tick: number, saida: EventoSimulacao[]): 'ok' | 'ja_conhece' | 'estudando' {
+export function aprenderPorLivro(e: Entidade, ctx: ContextoSimulacao, id: string, tick: number, saida: EventoSimulacao[]): 'ok' | 'ja_conhece' | 'outra_classe' {
   const bolsa = e.bolsa;
   if (!bolsa || !definicaoDe(ctx, id) || bolsa.conhecidas.some((c) => c.id === id) || bolsa.estudo?.id === id) return 'ja_conhece';
-  if (bolsa.estudo) return 'estudando';
-  iniciarEstudo(e, ctx, id, tick, saida);
+  if (ehDeAlgumaClasse(ctx, id)) {
+    if (!ehDaClasse(ctx, bolsa, id)) return 'outra_classe';
+    const rank = Math.max(1, rankDeClassePeloNivel(ctx, id, e.nivel, []));
+    bolsa.conhecidas.push({ id, rank, caminhos: [] });
+    ocuparTeclaLivre(ctx, bolsa, id);
+    atualizar(e, ctx);
+    saida.push({ t: 'habilidadeMudou', tick, id: e.id, habilidadeId: id, rank, caminho: null });
+    return 'ok';
+  }
+  if (bolsa.liberadas?.includes(id)) return 'ja_conhece';
+  (bolsa.liberadas ??= []).push(id);
+  saida.push({ t: 'habilidadeLiberada', tick, id: e.id, habilidadeId: id });
   return 'ok';
 }
 

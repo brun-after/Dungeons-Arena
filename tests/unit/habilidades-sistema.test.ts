@@ -177,11 +177,12 @@ describe('formas de área', () => {
     expect(conjunto.has('6,7')).toBe(false);
   });
 
-  it('ao redor: em volta de quem conjura, sem ele (os aliados incluem o próprio)', () => {
+  // Marco 24 (24/10/2026): a célula de quem conjura entra (quem a divide é atingido); o próprio sai pelo `afetavel`.
+  it('ao redor: em volta de quem conjura, com a célula dele', () => {
     const redemoinho = hab('redemoinho');
     const celulas = celulasDaForma(redemoinho, { x: 5, y: 5 }, { x: 5, y: 5 }, fase);
-    expect(celulas).toHaveLength(8);
-    expect(celulas.some((c) => c.x === 5 && c.y === 5)).toBe(false);
-    expect(celulasDaForma(hab('grito_de_guerra'), { x: 5, y: 5 }, { x: 5, y: 5 }, fase).some((c) => c.x === 5 && c.y === 5)).toBe(true);
+    expect(celulas).toHaveLength(9);
+    expect(celulas.some((c) => c.x === 5 && c.y === 5)).toBe(true);
+    expect(celulasDaForma(hab('brado'), { x: 5, y: 5 }, { x: 5, y: 5 }, fase).some((c) => c.x === 5 && c.y === 5)).toBe(true);
   });
 });

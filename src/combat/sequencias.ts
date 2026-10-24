@@ -11,11 +11,14 @@ import { aplicarEfeito } from './efeitos';
 import { novaMemoria, type EtapaTatica } from './estado-tatico';
 import { chebyshev } from './geometria';
 import type { Habilidade } from './habilidades';
-import { construirEfeito, type TipoEfeito } from './registro-efeitos';
+import { construirEfeito, ehTipoEfeito, type TipoEfeito } from './registro-efeitos';
 
 const r = recompensasJson.recompensas;
 const ativo = (e: Entidade, tipo: TipoEfeito, tick: number) => e.efeitos.find((f) => f.tipo === tipo && f.ateTick > tick);
 const contemFato = (etapas: EtapaTatica[], nome: string, alvo?: string) => etapas.some((e) => e.fatos.includes(alvo ? `${nome}:${alvo}` : nome));
+/** Marco 24 (24/10/2026): o passo `@ultimate` de uma sequência casa com qualquer ultimate (etiqueta `ultimate`). */
+const ehUltimate = (ctx: ContextoSimulacao, id: string) => ctx.conteudo.habilidades.get(id)?.tags.includes('ultimate') ?? false;
+const casa = (ctx: ContextoSimulacao, passo: string | undefined, id: string) => passo === id || (passo === '@ultimate' && ehUltimate(ctx, id));
 
 function anteriores(ator: Entidade, etapa: EtapaTatica, combo: Combo): EtapaTatica[] {
   const etapas = ator.tatica?.etapas ?? [];
@@ -79,6 +82,8 @@ function condicoes(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, a
       case 'eclipse': if (final && !sinergias.includes('eclipse_luz')) return false; break;
       case 'outro_aliado': if (alvo && (alvo === ator || !podeAjudar(ator, alvo, ctx.modo))) return false; break;
       case 'curou': if (final && (!alvo || !contemFato([etapa], 'curou', alvo.id))) return false; break;
+      // Marco 24 (24/10/2026): `alvo:<estado>` — o alvo está com o estado (desafiado, cego, marca do caçador…).
+      default: if (cond.startsWith('alvo:')) { const tipo = cond.slice(5); if (!alvo || !ehTipoEfeito(tipo) || !ativo(alvo, tipo, tick)) return false; }
     }
   }
   return true;
@@ -87,7 +92,8 @@ function condicoes(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, a
 /** Só mantém histórico quando o repertório permite concluir alguma sequência desta skill. */
 export function participaDeCombo(ctx: ContextoSimulacao, ator: Entidade, id: string): boolean {
   const repertorio = new Set([...(ator.bolsa?.conhecidas.map((c) => c.id) ?? []), ...ator.habilidades]);
-  return [...ctx.conteudo.combos.values()].some((c) => c.sequencia.includes(id) && c.sequencia.every((s) => repertorio.has(s)));
+  const temUltimate = [...repertorio].some((r) => ehUltimate(ctx, r));
+  return [...ctx.conteudo.combos.values()].some((c) => c.sequencia.some((s) => casa(ctx, s, id)) && c.sequencia.every((s) => repertorio.has(s) || (s === '@ultimate' && temUltimate)));
 }
 
 export function prepararSequencia(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, hab: Habilidade, acaoId: number, alvo: Entidade | null, mira: { x: number; y: number }): Habilidade {
@@ -99,9 +105,9 @@ export function prepararSequencia(estado: EstadoJogo, ctx: ContextoSimulacao, at
   const etapa: EtapaTatica = { id: hab.id, acaoId, tick: estado.tick, x: ator.x, y: ator.y, miraX: mira.x, miraY: mira.y, alvos: [], fatos: [`ator:${ator.id}`], preparado: null, concluidos: [] };
   mem.etapas.push(etapa);
   const candidatos = [...ctx.conteudo.combos.values()].filter((c) => {
-    if (c.sequencia.at(-1) !== hab.id) return false;
+    if (!casa(ctx, c.sequencia.at(-1), hab.id)) return false;
     const prev = anteriores(ator, etapa, c);
-    if (prev.length !== c.sequencia.length - 1 || prev.some((p, i) => p.id !== c.sequencia[i] || (!p.alvos.length && !p.fatos.some((f) => !f.startsWith('ator:'))))) return false;
+    if (prev.length !== c.sequencia.length - 1 || prev.some((p, i) => !casa(ctx, c.sequencia[i], p.id) || (!p.alvos.length && !p.fatos.some((f) => !f.startsWith('ator:'))))) return false;
     const primeiro = prev[0], ultimo = prev.at(-1);
     if (!primeiro || !ultimo || estado.tick - primeiro.tick > ticksDe(ctx.balance.tatica.janelaTotalMs)) return false;
     if (!todasJanelas([...prev, etapa], ticksDe(c.janelaMs))) return false;
@@ -126,11 +132,11 @@ function opcoesDoImpacto(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entid
   const concluido = etapa.concluidos[0];
   if (concluido) { const c = ctx.conteudo.combos.get(concluido); return c ? [c] : []; }
   return [...ctx.conteudo.combos.values()].filter((c) => {
-    if (c.sequencia.at(-1) !== etapa.id) return false;
+    if (!casa(ctx, c.sequencia.at(-1), etapa.id)) return false;
     const prev = anteriores(ator, etapa, c);
     const primeiro = prev[0];
     return !!primeiro && prev.length === c.sequencia.length - 1
-      && prev.every((e, i) => e.id === c.sequencia[i] && e.alvos.length > 0)
+      && prev.every((e, i) => casa(ctx, c.sequencia[i], e.id) && e.alvos.length > 0)
       && etapa.tick - primeiro.tick <= ticksDe(ctx.balance.tatica.janelaTotalMs)
       && todasJanelas([...prev, etapa], ticksDe(c.janelaMs));
   }).sort((a, b) => b.sequencia.length - a.sequencia.length);
@@ -228,12 +234,12 @@ export function progressoDeCombo(estado: EstadoJogo, ctx: ContextoSimulacao, ato
   const barra = ator.bolsa?.barra ?? ator.habilidades;
   const candidatos: { combo: Combo; etapa: number; proxima: string }[] = [];
   for (const c of ctx.conteudo.combos.values()) {
-    if (!c.sequencia.every((id) => barra.includes(id))) continue;
+    if (!c.sequencia.every((id) => id === '@ultimate' || barra.includes(id))) continue;
     for (let n = c.sequencia.length - 1; n > 0; n--) {
       const prev = etapas.slice(-n);
       const ultimo = prev.at(-1), primeiro = prev[0];
       if (!ultimo || !primeiro || prev.length !== n || estado.tick - ultimo.tick > ticksDe(c.janelaMs) || estado.tick - primeiro.tick > ticksDe(ctx.balance.tatica.janelaTotalMs)) continue;
-      if (!todasJanelas(prev, ticksDe(c.janelaMs)) || !prev.every((e, i) => e.id === c.sequencia[i] && e.alvos.length > 0)) continue;
+      if (!todasJanelas(prev, ticksDe(c.janelaMs)) || !prev.every((e, i) => casa(ctx, c.sequencia[i], e.id) && e.alvos.length > 0)) continue;
       const proxima = c.sequencia[n];
       if (proxima) candidatos.push({ combo: c, etapa: n, proxima });
       break;

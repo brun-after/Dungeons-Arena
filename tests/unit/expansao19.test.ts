@@ -9,7 +9,7 @@ import type { EventoSimulacao } from '../../src/core/eventos-simulacao';
 import { prepararSequencia, processarPantanos } from '../../src/combat/sequencias';
 import { aplicarImpacto } from '../../src/combat/golpe';
 import { aplicarEfeito } from '../../src/combat/efeitos';
-import { construirEfeito } from '../../src/combat/registro-efeitos';
+import { construirEfeito, ehTipoEfeito } from '../../src/combat/registro-efeitos';
 import { defenderGolpe, muralhaEm, processarCampos } from '../../src/combat/tatica';
 import { celulaLivre } from '../../src/world/movimento';
 import { avancar, reposicionar } from '../../src/combat/efeitos-instantaneos';
@@ -53,12 +53,24 @@ describe('35 combos de resultados confirmados', () => {
             c.j.hp -= 30;
             invocar(c.estado, c.ctx, c.j, construirEfeito('invocar', { ref: 'servo_ossuario', valor: 1, duracaoMs: 25000 }), c.eventos);
         }
-        for (const skill of combo.sequencia) {
+        // Marco 24 (24/10/2026): as condições de estado no alvo (`alvo:<estado>` e as antigas atordoado, envenenado…) são
+        // preparadas antes do último passo, como faria a luta de verdade.
+        const ESTADO_DA_CONDICAO: Record<string, string> = { atordoado: 'atordoar', envenenado: 'envenenado', sangrando: 'sangrando', consagrado: 'consagrado', enraizado: 'enraizado', definhando: 'definhando' };
+        const ultimo = combo.sequencia.at(-1);
+        // O passo `@ultimate` usa uma ultimate do par da skill anterior.
+        const comUltimate = combo.sequencia.map((s, i) => s !== '@ultimate' ? s : obter([...CONTEUDO.ultimates.values()].find((u) => u.par.includes(combo.sequencia[i - 1] ?? ''))).id);
+        for (const skill of comUltimate) {
+            if (skill === comUltimate.at(-1) && ultimo) {
+                for (const cond of combo.condicoes) {
+                    const tipo = cond.startsWith('alvo:') ? cond.slice(5) : ESTADO_DA_CONDICAO[cond];
+                    if (tipo && ehTipoEfeito(tipo)) aplicarEfeito(c.estado, c.ctx, c.a, construirEfeito(tipo, { duracaoMs: 5000 }), c.j, null, c.eventos);
+                }
+            }
             if (skill === 'curar' || skill === 'purificacao')
                 c.j.hp = Math.min(c.j.hp, c.j.hpMax - 30);
             if (skill === 'purificacao')
                 aplicarEfeito(c.estado, c.ctx, c.j, construirEfeito('envenenado'), c.a, null, c.eventos);
-            const aliado = ['barreira', 'curar', 'purificacao', 'escudo_de_ferro', 'grito_de_guerra', 'postura_de_aparo', 'veu_da_noite'].includes(skill);
+            const aliado = ['barreira', 'curar', 'purificacao', 'brado', 'postura_de_aparo', 'veu_da_noite'].includes(skill);
             const mira = skill === 'muralha_de_pedra' ? { x: 6, y: 5 } : skill === 'circulo_de_amparo' ? { x: 4, y: 5 } : skill === 'passo_sombrio' ? { x: 3, y: 4 } : { x: c.a.x, y: c.a.y };
             let alvo = aliado ? c.j : c.a;
             if (id === 'resgate_sombras' && skill === 'curar') {

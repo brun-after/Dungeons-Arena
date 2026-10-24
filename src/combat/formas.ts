@@ -72,10 +72,10 @@ export function celulasDoCone(origem: Celula, mira: Celula, raio: number): Celul
   return saida;
 }
 
-export function celulasDoQuadrado(centro: Celula, raio: number, semCentro = false): Celula[] {
+export function celulasDoQuadrado(centro: Celula, raio: number): Celula[] {
   const saida: Celula[] = [];
   for (let y = -raio; y <= raio; y++) {
-    for (let x = -raio; x <= raio; x++) if (!semCentro || x !== 0 || y !== 0) saida.push({ x: centro.x + x, y: centro.y + y });
+    for (let x = -raio; x <= raio; x++) saida.push({ x: centro.x + x, y: centro.y + y });
   }
   return saida;
 }
@@ -90,7 +90,9 @@ export function celulasDaForma(hab: Habilidade, origem: Celula, mira: Celula, fa
     case 'cone':
       return celulasDoCone(origem, mira, hab.raioArea);
     case 'ao_redor':
-      return celulasDoQuadrado(origem, hab.raioArea, hab.politicaAlvo !== 'aliados');
+      // Marco 24 (24/10/2026): a célula de quem conjura entra. Jogadores não se bloqueiam, e quem estava na mesma
+      // célula (dois avanços cruzados) escapava do Redemoinho; o próprio conjurador sai pelo `afetavel`.
+      return celulasDoQuadrado(origem, hab.raioArea);
     case 'nenhuma':
       return [];
   }

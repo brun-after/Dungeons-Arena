@@ -36,7 +36,8 @@ export type AplicarDireto = (alvo: Entidade, ef: EfeitoCanonico, origem: OrigemF
 /** Invocações vivas (não dominadas e que não são avatar) de um dono. */
 export function contarInvocacoes(estado: EstadoJogo, donoId: EntidadeId): number {
   // Marco 22: o falcão do Aventureiro tem vaga própria.
-  return estado.entidades.filter((e) => vivo(e) && e.invocacao?.donoId === donoId && !e.invocacao.dominado && !e.invocacao.avatar && !e.invocacao.companheiro).length;
+  // Marco 24: as temporárias (Levante profano) ficam fora do limite.
+  return estado.entidades.filter((e) => vivo(e) && e.invocacao?.donoId === donoId && !e.invocacao.dominado && !e.invocacao.avatar && !e.invocacao.companheiro && !e.invocacao.extra).length;
 }
 
 export function contarAvatares(estado: EstadoJogo, donoId: EntidadeId): number {
@@ -61,6 +62,7 @@ export function excedeLimite(estado: EstadoJogo, ctx: ContextoSimulacao, ator: E
   let avatares = contarAvatares(estado, ator.id);
   let armadilhas = contarArmadilhas(estado, ator.id);
   for (const ef of efeitos) {
+    if (ef.tipo === 'invocar_temporario') continue;
     const fluxo = REGISTRO_EFEITOS[ef.tipo].fluxo;
     const avatar = fluxo === 'invocar' && ef.ref !== null && ctx.conteudo.presets.get(ef.ref)?.invocacao?.avatar === true;
     if (avatar) avatares += Math.max(1, ef.valor);
@@ -143,6 +145,7 @@ export function invocar(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entida
       // Avatar (§2.9): golpesRestantes = rolar('1d4') (ou a fórmula do preset), pelo PRNG do estado.
       if (p.golpes) e.invocacao.golpesRestantes = Math.max(1, rolar(estado.rng, p.golpes).total);
     }
+    if (e.invocacao && ef.tipo === 'invocar_temporario') e.invocacao.extra = true;
     e.x = e.destinoX = e.origemX = lugar.x;
     e.y = e.destinoY = e.origemY = lugar.y;
     estado.entidades.push(e);

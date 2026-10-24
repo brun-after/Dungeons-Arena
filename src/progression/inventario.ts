@@ -7,7 +7,8 @@ import { REGISTRO_EFEITOS, type EfeitoCanonico } from '../combat/registro-efeito
 import type { Balance, ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import type { EventoSimulacao, MotivoItem } from '../core/eventos-simulacao';
-import { SLOTS_BARRA, type Bolsa, type Entidade, type ItemNaMochila } from '../entities/entidade';
+import { type Bolsa, type Entidade, type ItemNaMochila } from '../entities/entidade';
+import { barraInicial } from './habilidades-classe';
 import type { ClasseJogador } from '../entities/presets';
 import { SLOTS_DE_EQUIPAMENTO, type Slot } from '../modos/modo';
 import { recalcularFicha } from './derivados';
@@ -25,10 +26,10 @@ export function criarBolsa(classe: ClasseJogador, ouroInicial = 0): Bolsa {
     pontosAtributo: 0,
     proximoInv: 1,
     ouro: ouroInicial,
-    // Marco 14: começa com as habilidades da classe no rank 1, as 4 primeiras na barra.
+    // Marco 24 (D-094): começa com as 2 skills de classe iniciais (teclas 1–2) e a geral inicial (tecla 3), no rank 1.
     classeId: classe.id,
-    conhecidas: classe.habilidades.map((id) => ({ id, rank: 1, caminhos: [] })),
-    barra: Array.from({ length: SLOTS_BARRA }, (_, i) => classe.habilidades[i] ?? null),
+    conhecidas: [...classe.iniciais, ...(classe.geralInicial ? [classe.geralInicial] : [])].map((id) => ({ id, rank: 1, caminhos: [] })),
+    barra: barraInicial(classe.iniciais, classe.geralInicial),
     pontosHabilidade: 0,
     personagemId: '',
     estudo: null,
@@ -179,7 +180,7 @@ export function usarItem(estado: EstadoJogo, e: Entidade, ctx: ContextoSimulacao
     if (item.tipo === 'livro') {
       const ensina = item.ensina ?? entrada.ref;
       if (!ensina) return recusa('ja_conhece');
-      // Marco 18 (D-068): o livro começa um estudo; com outro em andamento, é recusado sem gastar.
+      // Marco 24 (D-094): o livro de classe ensina na hora (só a dona lê); o de geral libera a skill.
       const r = aprenderPorLivro(e, ctx, ensina, tick, saida);
       if (r !== 'ok') return recusa(r);
       entrada.qtd--;

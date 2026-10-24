@@ -155,6 +155,9 @@ export function lerComando(v: unknown): Comando | null {
       return (v.id === null || id(v.id)) && inteiro(v.slot) && v.slot >= 0 && v.slot < 16 ? { t: 'equiparHabilidade', id: v.id, slot: v.slot } : null;
     case 'definirDificuldade':
       return ehDificuldade(v.nivel) ? { t: 'definirDificuldade', nivel: v.nivel } : null;
+    // Marco 24 (D-097): o Parar ataque.
+    case 'autoAtaque':
+      return typeof v.ligado === 'boolean' ? { t: 'autoAtaque', ligado: v.ligado } : null;
     default:
       return null;
   }

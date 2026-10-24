@@ -27,3 +27,19 @@ export const SALA_ABERTA: string[] = [
   ...Array.from({ length: 10 }, () => '#..........#'),
   '############',
 ];
+
+/** O kit de antes do marco 24 do Aventureiro: skills gerais que os testes do motor usam como "kit qualquer". */
+export const KIT_GERAL = ['seta_arcana', 'explosao', 'curar', 'golpe_atordoante'] as const;
+
+/**
+ * Marco 24 (24/10/2026): dá ao jogador de teste um kit explícito — conhecidas no rank 1 e na barra, sem a regra das
+ * teclas (1–2 de classe) —, para os testes do motor não dependerem do kit da classe.
+ */
+export function comKit<E extends { habilidades: string[]; bolsa?: { conhecidas: { id: string; rank: number; caminhos: string[] }[]; barra: (string | null)[] } | null }>(e: E, ids: readonly string[] = KIT_GERAL): E {
+  if (e.bolsa) {
+    for (const id of ids) if (!e.bolsa.conhecidas.some((c) => c.id === id)) e.bolsa.conhecidas.push({ id, rank: 1, caminhos: [] });
+    e.bolsa.barra = Array.from({ length: Math.max(6, ids.length) }, (_, i) => ids[i] ?? null);
+  }
+  e.habilidades = [...ids];
+  return e;
+}

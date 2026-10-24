@@ -77,3 +77,22 @@ export function trocarLugar(a: Entidade, b: Entidade): boolean {
 export function empurrar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, origem: Celula, celulas: number): boolean {
   return deslizar(estado, ctx, e, Math.sign(e.x - origem.x), Math.sign(e.y - origem.y), celulas);
 }
+
+/**
+ * Marco 24 (24/10/2026): arremessa para longe da origem (a Telecinese). Devolve se bateu em algo antes de completar
+ * as células (parede, muralha ou alguém no caminho) — quem bate fica atordoado em efeitos.ts.
+ */
+export function arremessar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, origem: Celula, celulas: number): boolean {
+  const dx = Math.sign(e.x - origem.x);
+  const dy = Math.sign(e.y - origem.y);
+  if (dx === 0 && dy === 0) return false;
+  let { x, y } = e;
+  let andou = 0;
+  while (andou < celulas && livre(estado, ctx, e, x + dx, y + dy)) {
+    x += dx;
+    y += dy;
+    andou++;
+  }
+  if (andou > 0) reposicionar(e, x, y);
+  return andou < celulas;
+}

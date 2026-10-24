@@ -22,6 +22,8 @@ import { fatorDoGolpe } from '../modos/dificuldade';
 import { registrarEfeitoAtivo } from './acumulo';
 import { avancar, empurrar, puxar, teleportar, trocarLugar } from './efeitos-instantaneos';
 import { registrarParticipacao } from './participacao';
+import { aplicarInstantaneoNovo } from './efeitos-novos';
+import { agendarFase } from './fases';
 import { REGISTRO_EFEITOS, type DefinicaoEfeito, type EfeitoCanonico } from './registro-efeitos';
 
 export { REGISTRO_EFEITOS, TIPOS_EFEITO, type EfeitoCanonico, type TipoEfeito } from './registro-efeitos';
@@ -191,6 +193,13 @@ export function aplicarEfeito(
     const pct = Math.min(ctx.balance.tatica.tenacidadeMaxPct, passivasDaBolsa(ctx, alvo.bolsa).reduce((s, p) => s + (p.tenacidadePct ?? 0), 0));
     if (pct > 0) ef = { ...ef, duracaoMs: Math.round(ef.duracaoMs * (1 - pct / 100)) };
   }
+  // Marco 24 (D-095): as passivas gerais tiram estados (Mente blindada) e encurtam os que pegam (Sangue quente).
+  if (alvo.bolsa && !def.positivo && ef.duracaoMs > 0) {
+    const passivas = passivasDaBolsa(ctx, alvo.bolsa);
+    if (passivas.some((p) => p.imunes?.includes(ef.tipo))) return;
+    const pct = passivas.reduce((s, p) => s + (p.duracaoRecebidaPct?.[ef.tipo] ?? 0), 0);
+    if (pct !== 0) ef = { ...ef, duracaoMs: Math.max(0, Math.round(ef.duracaoMs * (1 + pct / 100))) };
+  }
   // Marco 18 (ressonância Muralha): escudos recebidos duram e absorvem mais.
   if (def.escudo && alvo.bolsa) {
     const k = 1 + passivosDe(ctx, alvo).escudoPct / 100;
@@ -252,6 +261,8 @@ export function aplicarEfeito(
         resultado(saida, tick, alvo, origem.id, ef, { dano });
         break;
       }
+      default:
+        aplicarInstantaneoNovo(estado, ctx, alvo, ef, instantaneo, origem, saida);
     }
     saida.push({ t: 'efeitoAplicado', tick, alvoId: alvo.id, origemId: origem.id, tipo: ef.tipo, ateTick: tick });
     return;
@@ -268,9 +279,23 @@ export function aplicarEfeito(
       case 'invocar':
         if (!excedeLimite(estado, ctx, alvo, [ef])) invocar(estado, ctx, alvo, ef, saida);
         break;
+      case 'fase':
+        // Marco 24: a fase vinda de gancho ou de outro efeito sai de quem aplicou, na célula mirada.
+        if (ef.ref) agendarFase(estado, alvo, ef.ref, mira, ef.duracaoMs);
+        break;
     }
     saida.push({ t: 'efeitoAplicado', tick, alvoId: alvo.id, origemId: origem.id, tipo: ef.tipo, ateTick: tick });
     return;
+  }
+  // Marco 24 (D-094): o escudo de cada acerto soma ao que já existe, até o teto (`pct`).
+  if (def.somaAteTeto) {
+    const atual = alvo.efeitos.find((f) => f.tipo === ef.tipo && f.ateTick > tick);
+    if (atual) {
+      atual.valor = Math.min(Math.max(atual.valor, ef.pct), atual.valor + ef.valor);
+      atual.ateTick = Math.max(atual.ateTick, tick + ticksDe(ef.duracaoMs));
+      return;
+    }
+    ef = { ...ef, valor: Math.min(ef.valor, ef.pct) };
   }
   // Marco 14: acúmulo, oposições, transformação, teto e imunidade vêm das interações (acumulo.ts).
   const ativo = registrarEfeitoAtivo(ctx, alvo, ef, origem.id, tick, (vira) => {

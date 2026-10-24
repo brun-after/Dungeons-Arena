@@ -14,7 +14,7 @@ import { vivo, type Entidade } from '../entities/entidade';
 import { podeFerir } from '../modos/relacao';
 import { passavel } from '../world/fase';
 import type { FonteDeDano } from './dano';
-import { projeteisAtravessam } from './efeitos';
+import { projeteisAtravessam, REGISTRO_EFEITOS } from './efeitos';
 import { celulaOcupada } from './geometria';
 import { aplicarImpacto } from './golpe';
 import type { Habilidade } from './habilidades';
@@ -96,6 +96,14 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
       const alvo = alvoNaCelula(estado, ctx, p, cx, cy);
       const base = resolverHabilidade(ctx, p.chave);
       const hab = base && p.saltosExtrasCombo ? { ...base, saltos: { quantidade: (base.saltos?.quantidade ?? 0) + p.saltosExtrasCombo, raio: base.saltos?.raio ?? 3, pct: base.saltos?.pct ?? 60 } } : base;
+      // Marco 24 (D-094): quem intercepta (Vigia, Investida de escudo) gasta uma carga e o projétil para nele.
+      const escudo = alvo?.efeitos.find((f) => f.ateTick > estado.tick && f.valor > 0 && REGISTRO_EFEITOS[f.tipo].intercepta);
+      if (alvo && escudo) {
+        escudo.valor -= 1;
+        if (escudo.valor <= 0) alvo.efeitos = alvo.efeitos.filter((f) => f !== escudo);
+        fim = 'parede';
+        break;
+      }
       if (alvo && hab) {
         const dono = buscarEntidade(estado, p.donoId);
         const fonte: FonteDeDano = {

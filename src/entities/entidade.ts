@@ -70,6 +70,8 @@ export interface DadosInvocacao {
   companheiro?: boolean;
   /** A vida do dono copiada no fim do último tick; a diferença é o dano que o falcão levou. */
   hpEspelhado?: number;
+  /** Marco 24 (24/10/2026): invocação temporária fora do limite (Levante profano). */
+  extra?: boolean;
 }
 
 /** Ação em conjuração (§2.7, etapa 3). Ticks publicados para a telegrafia (§3.6). */
@@ -136,8 +138,9 @@ export interface ItemNaMochila {
   ref: string | null;
 }
 
-/** Marco 14: teclas 1–4 da barra de habilidades. */
-export const SLOTS_BARRA = 4;
+/** Marco 24 (24/10/2026, D-094): a barra tem 6 teclas — 1 e 2 só de classe, 3 a 6 só gerais (eram 4 livres). */
+export const SLOTS_BARRA = 6;
+export const SLOTS_CLASSE = 2;
 
 /** Marco 14: uma habilidade que o personagem conhece, no rank e com os caminhos escolhidos (definitivos). */
 export interface HabilidadeConhecida {
@@ -164,9 +167,13 @@ export interface Bolsa {
   /** Marco 14 (D-059): a classe escolhida ao criar o personagem (fixa). */
   classeId: string;
   conhecidas: HabilidadeConhecida[];
-  /** As 4 teclas (1–4): ids de habilidades conhecidas, ou null. `Entidade.habilidades` deriva daqui. */
+  /** As 6 teclas (1–2 de classe, 3–6 gerais): ids de habilidades conhecidas, ou null. `Entidade.habilidades` deriva daqui. */
   barra: (string | null)[];
   pontosHabilidade: number;
+  /** Marco 24 (D-094): as gerais que um livro liberou; aprender uma delas custa um ponto. */
+  liberadas?: string[];
+  /** Marco 24 (D-095): as passivas gerais ligadas (até 3), trocadas só fora de combate. */
+  passivasAtivas?: string[];
   /** D-075 (17/10/2026): origens permanentes dos ganhos por consumíveis e saldo fracionário de XP. */
   tomosComprados?: number;
   pontosPorItens?: number;
@@ -311,6 +318,10 @@ export interface Entidade {
   mira?: { desdeTick: number };
   /** Marco 21 (D-088): fúria do Guerreiro, valor no `ultimoTick` (o esvaziamento é calculado na leitura). */
   furia?: { valor: number; ultimoTick: number };
+  /** Marco 24 (24/10/2026, D-097): para onde olha (último passo ou quem ataca); ausente = sul. Decide o "pelas costas". */
+  olhando?: Dir8;
+  /** Marco 24 (D-094): o medidor da ultimate (0..balance.ultimate.max); ausente = vazio. */
+  cargaUltimate?: number;
   /** 18/10/2026: acertos efetivos consecutivos do Dardo no mesmo alvo e vida. */
   concentracaoArcana?: { alvoId: string; geracao: number; abates: number; acertos: number; ultimoTick: number };
 }

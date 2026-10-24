@@ -13,7 +13,7 @@ import type { Dificuldade } from '../../src/modos/dificuldade';
 import { recalcularFicha } from '../../src/progression/derivados';
 import { caminhosDoRank, nivelParaRank } from '../../src/progression/habilidades-personagem';
 const builds = [
-    { nome: 'Duelista', classe: 'guerreiro', skills: ['postura_de_aparo', 'corte_dilacerante', 'investida', 'escudo_de_ferro'] },
+    { nome: 'Duelista', classe: 'guerreiro', skills: ['postura_de_aparo', 'corte_dilacerante', 'investida', 'investida_de_escudo'] },
     { nome: 'Pântano', classe: 'mago', skills: ['estaca_de_pedra', 'nevoa_venenosa', 'abalo_sismico', 'onda_de_repulsao'] },
     { nome: 'Arqueiro arcano', classe: 'arqueiro', skills: ['seta_arcana', 'flecha_perfurante', 'barreira', 'curar'] },
     { nome: 'Protetor radiante', classe: 'aventureiro', skills: ['lanca_radiante', 'circulo_de_amparo', 'purificacao', 'barreira'] },
