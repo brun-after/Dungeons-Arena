@@ -39,6 +39,7 @@ export function personagemNoInicio(e: Entidade, c: Celula, id = e.id): Entidade 
   delete p.concentracaoArcana;
   delete p.auraFracoes;
   delete p.auraCuraFracao;
+  delete p.furia;
   if (p.tatica) p.tatica = novaMemoria();
   p.ultimaHabilidade = null;
   return p;

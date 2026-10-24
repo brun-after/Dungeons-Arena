@@ -4,6 +4,29 @@
 import { t } from '../i18n';
 import { criarFundoMenu } from './fundo-menu';
 import { criarCampoServidor } from './servidor-menu';
+import { baixarAtualizacao, procurarAtualizacao, versaoDoApp, type VersaoPublicada } from '../plataforma/atualizacao';
+import { ehAppNativo } from '../plataforma/nativo';
+
+/** Faixa no topo do menu: versão nova disponível, com o botão que baixa o APK. */
+function criarAvisoDeAtualizacao(nova: VersaoPublicada): HTMLElement {
+  const aviso = document.createElement('div');
+  aviso.className = 'aviso-atualizacao';
+  aviso.setAttribute('role', 'status');
+  const texto = document.createElement('p');
+  texto.textContent = t('atualizacao.disponivel', { versao: `1.0.${nova.versao}` });
+  const botao = document.createElement('button');
+  botao.type = 'button';
+  botao.className = 'botao-menu';
+  botao.textContent = t('atualizacao.baixar');
+  botao.addEventListener('click', () => {
+    void baixarAtualizacao(nova.urlApk).catch(() => undefined);
+  });
+  const dica = document.createElement('p');
+  dica.className = 'dica-atualizacao';
+  dica.textContent = t('atualizacao.dica');
+  aviso.append(texto, botao, dica);
+  return aviso;
+}
 
 export function mostrarMenu(raiz: HTMLElement): void {
   raiz.textContent = '';
@@ -40,5 +63,16 @@ export function mostrarMenu(raiz: HTMLElement): void {
   tela.append(pesquisa);
   // Marco 20: servidor da rede local escolhido neste aparelho (o app Android não tem barra de endereço).
   tela.append(criarCampoServidor());
+  // Marco 21 (D-088): no app, a versão instalada e o aviso quando há APK mais novo.
+  const versao = versaoDoApp();
+  if (ehAppNativo() && versao > 0) {
+    const rotulo = document.createElement('p');
+    rotulo.className = 'versao-app';
+    rotulo.textContent = t('app.versao', { versao: `1.0.${versao}` });
+    tela.append(rotulo);
+  }
+  void procurarAtualizacao().then((nova) => {
+    if (nova) tela.prepend(criarAvisoDeAtualizacao(nova));
+  });
   raiz.append(tela);
 }

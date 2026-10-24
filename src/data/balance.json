@@ -1,6 +1,6 @@
 {
   "necromancia": { "danoPct": 180, "servosExtras": 2, "retornoServoMs": 8000, "duracaoMortoMs": 25000, "raioColheita": 6, "ecoRecargaMs": 30000, "vidaBase": 24, "vidaPorNivel": 3, "vidaServoPct": 100, "alcanceRitual": 6 },
-  "versao": 30,
+  "versao": 31,
   "ajustesClasses": {
     "guerreiro": {
       "contatoMaxPct": 15,
@@ -11,10 +11,14 @@
       "grupoRaio": 2,
       "extraInicioNivel": 10,
       "extraMaxPct": 10,
-      "auraMinPct": 1,
-      "auraMaxPct": 5,
+      "auraMinPct": 3,
+      "auraMaxPct": 15,
       "auraRaio": 2,
-      "auraCuraPct": 20,
+      "auraCuraMinPct": 20,
+      "auraCuraMaxPct": 50,
+      "auraDefesaPct": 50,
+      "curaAoAbaterPct": 50,
+      "furia": { "max": 100, "porBasico": 12, "carenciaMs": 3000, "perdaPorS": 20, "curaMult": 2 },
       "reforcosInicioNivel": 16,
       "reforcosPlenosNivel": 20,
       "movimentoMult": 1.15
@@ -242,7 +246,7 @@
   },
   "metas": {
     "comuns": ["goblin", "esqueleto", "lobo", "cultista", "slime", "aranha"],
-    "comum": { "golpesMin": 3, "golpesMax": 5, "tempoMinS": 4, "tempoMaxS": 7 },
+    "comum": { "golpesMin": 3, "golpesMax": 5, "tempoMinS": 3.5, "tempoMaxS": 7 },
     "aguenta": { "golpesMin": 6, "golpesMax": 8 },
     "chefe": { "tempoMinS": 25, "tempoMaxS": 40, "nivelJogador": 2, "nivelChefe": 1 },
     "pvpLivre": { "tempoMinS": 6, "tempoMaxS": 10, "nivel": 10 },

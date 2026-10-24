@@ -34,6 +34,9 @@ export const ptBR = {
   'cabecalho.cameraCentralizada': 'Câmera: centro',
   'hud.vida': 'Vida {atual} de {maximo}',
   'hud.mana': 'Mana {atual} de {maximo}',
+  // Marco 21 (D-088): a barra de fúria do Guerreiro.
+  'hud.furia': 'Fúria {pct}%',
+  'hud.furiaCheia': 'Fúria cheia: curas dobradas',
   'hud.d20': 'Último d20: {valor}',
   'hud.log': 'Registro de combate',
   'hud.abrirLog': 'Mostrar registro de combate',
@@ -215,6 +218,11 @@ export const ptBR = {
   'resolucao.media': 'Média',
   'resolucao.baixa': 'Baixa (mais leve)',
   'medidor.texto': '{fps} fps · p95 {p95} ms · travadas {pausas}',
+  // Marco 21 (D-088): versão do app e o aviso de atualização.
+  'app.versao': 'Versão {versao}',
+  'atualizacao.disponivel': 'Nova versão do app disponível: {versao}',
+  'atualizacao.baixar': 'Baixar a atualização',
+  'atualizacao.dica': 'Depois do download, toque no arquivo e em Atualizar. Seus saves continuam.',
   'servidor.titulo': 'Servidor',
   'servidor.dica': 'Para jogar na rede local, digite o endereço do computador que roda o servidor, como ws://192.168.0.10:2567. Vazio usa o servidor oficial.',
   'servidor.rotulo': 'Endereço do servidor',

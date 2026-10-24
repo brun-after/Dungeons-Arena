@@ -1,6 +1,8 @@
 # Classes, experiência e Botas do vento
 
-**Versão:** 1.3 · **Data:** 18/10/2026 · **Balance:** 29 · **Save:** 21
+**Versão:** 1.4 · **Data:** 23/10/2026 · **Balance:** 31 · **Save:** 21
+
+> **1.4 (23/10/2026)**: marco 21 (D-088): o Guerreiro se cura ao abater; a aura vale desde o nível 1 (3% a 15% de dano, 20% a 50% de cura, metade da defesa), o pulso remoto não espera mais o 16; barra de fúria. Os trechos abaixo sobre a aura de 1% a 5% e o pulso remoto do 16 ao 20 são históricos.
 
 Implementação baseada no arquivo `AJUSTES-CLASSES-A-PARTIR-DA-MAIN.md` fornecido pelo usuário, mais os pedidos de reduzir o farm de criaturas inferiores e substituir o efeito redundante das botas. Os percentuais históricos do anexo não certificam este pacote de produção.
 

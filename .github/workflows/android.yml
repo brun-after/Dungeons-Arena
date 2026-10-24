@@ -1,10 +1,25 @@
 name: App Android (APK)
 
-# Marco 20 (21/10/2026, D-087): compila o APK de depuração do app (Capacitor) e o deixa como artefato do workflow.
-# Roda em PR que mexe no cliente e quando pedido à mão (Actions -> App Android -> Run workflow). Assinatura de
-# loja (keystore) fica para quando houver Play Store; o APK de depuração instala direto no celular.
+# Marco 20 (21/10/2026, D-087): compila o APK do app (Capacitor).
+# Marco 21 (23/10/2026, D-088): com a chave fixa (secrets ANDROID_CHAVE_B64 e ANDROID_CHAVE_SENHA, criados por
+# tools/android/criar-chave.sh), o APK sai assinado sempre com a mesma chave e a versão é o número desta execução;
+# assim um APK novo instala por cima do antigo e mantém os saves. No push na main, vira uma Release do GitHub
+# (`android-vN`, marcada como a mais recente): é dela que o app tira o aviso "Nova versão disponível".
+# Em PR, o APK fica só como artefato do workflow. Sem a chave, cai no APK de depuração (não atualiza por cima).
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'android/**'
+      - 'index.html'
+      - 'capacitor.config.ts'
+      - 'vite.config.ts'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/android.yml'
   pull_request:
     paths:
       - 'src/**'
@@ -28,6 +43,11 @@ concurrency:
 jobs:
   apk:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      VERSAO_APP: ${{ github.run_number }}
+      TEM_CHAVE: ${{ secrets.ANDROID_CHAVE_B64 != '' }}
     steps:
       - uses: actions/checkout@v5
 
@@ -52,12 +72,50 @@ jobs:
           VITE_ARENA_URL: ${{ vars.ARENA_URL }}
           VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          # O app compara esta versão com a da Release mais recente.
+          VITE_VERSAO_APP: ${{ github.run_number }}
 
-      - run: ./gradlew assembleDebug --no-daemon
+      - name: Chave fixa de assinatura
+        if: env.TEM_CHAVE == 'true'
+        env:
+          ANDROID_CHAVE_B64: ${{ secrets.ANDROID_CHAVE_B64 }}
+        run: |
+          echo "$ANDROID_CHAVE_B64" | base64 -d > "$RUNNER_TEMP/chave.p12"
+          echo "ANDROID_CHAVE_ARQUIVO=$RUNNER_TEMP/chave.p12" >> "$GITHUB_ENV"
+
+      - name: APK assinado com a chave fixa
+        if: env.TEM_CHAVE == 'true'
         working-directory: android
+        env:
+          ANDROID_CHAVE_SENHA: ${{ secrets.ANDROID_CHAVE_SENHA }}
+        run: |
+          ./gradlew assembleRelease --no-daemon
+          cp app/build/outputs/apk/release/app-release.apk ../dungeons-arena.apk
+
+      - name: APK de depuração (sem a chave fixa)
+        if: env.TEM_CHAVE != 'true'
+        working-directory: android
+        run: |
+          echo "::warning::Sem os secrets ANDROID_CHAVE_*: APK de depuração, que não atualiza por cima do instalado."
+          ./gradlew assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk ../dungeons-arena.apk
+
+      - name: Apaga a chave do disco
+        if: always()
+        run: rm -f "$RUNNER_TEMP/chave.p12"
 
       - uses: actions/upload-artifact@v4
         with:
           name: dungeons-arena-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: dungeons-arena.apk
           retention-days: 30
+
+      - name: Release (só na main, com a chave fixa)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && env.TEM_CHAVE == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "android-v${VERSAO_APP}" dungeons-arena.apk \
+            --target "${GITHUB_SHA}" --latest \
+            --title "App Android 1.0.${VERSAO_APP}" \
+            --notes "APK do app Android (versão ${VERSAO_APP}). Instale por cima da versão anterior; os saves ficam."

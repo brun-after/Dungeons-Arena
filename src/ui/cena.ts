@@ -8,6 +8,7 @@
 
 import { proximoHostil, recargaRestante } from '../combat/acao';
 import { celulaOcupada } from '../combat/geometria';
+import { fracaoFuria } from '../combat/furia';
 import type { Habilidade } from '../combat/habilidades';
 import type { Dificuldade } from '../modos/dificuldade';
 import { resolverHabilidade } from '../combat/compilar-habilidade';
@@ -488,7 +489,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
         semMana: j.mana < h.custoRecurso,
       }));
     }
-    hud.atualizar(j, estado.tick);
+    hud.atualizar(j, estado.tick, j ? fracaoFuria(ctx, j, estado.tick) : null);
     const alvo = j?.alvoSelecionado ? estado.entidades.find((e) => e.id === j.alvoSelecionado) : undefined;
     quadroAlvo.atualizar(j, alvo);
     controles?.marcarTrava(!!alvo && j?.alvoTravado === true);

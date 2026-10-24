@@ -16,7 +16,12 @@ import type { Conteudo } from './conteudo';
 export interface Balance {
   /** Ajustes de classes (18/10/2026): curvas e passivas de produção. */
   ajustesClasses: {
-    guerreiro: { contatoMaxPct: number; contatoNivel: number; contatoExpoente: number; grupoReducaoMaxPct: number; grupoNivelPleno: number; grupoRaio: number; extraInicioNivel: number; extraMaxPct: number; auraMinPct: number; auraMaxPct: number; auraRaio: number; auraCuraPct: number; reforcosInicioNivel: number; reforcosPlenosNivel: number; movimentoMult: number };
+    guerreiro: { contatoMaxPct: number; contatoNivel: number; contatoExpoente: number; grupoReducaoMaxPct: number; grupoNivelPleno: number; grupoRaio: number; extraInicioNivel: number; extraMaxPct: number; auraMinPct: number; auraMaxPct: number; auraRaio: number; auraCuraMinPct: number; auraCuraMaxPct: number;
+      /** Marco 21 (D-088): fração da defesa do alvo descontada do pulso da aura (100 = inteira). */
+      auraDefesaPct: number;
+      /** Marco 21 (D-088): parte da vida que falta recuperada ao derrubar um hostil (não invocação). */
+      curaAoAbaterPct: number;
+      furia: { max: number; porBasico: number; carenciaMs: number; perdaPorS: number; curaMult: number }; reforcosInicioNivel: number; reforcosPlenosNivel: number; movimentoMult: number };
     mago: { inicialPct: number; intermediarioPct: number; nivelIntermediario: number; fimIntermediario: number; nivelFinal: number; dardoInicioMult: number; dardoRecuperacaoNivel: number; dardoPlenoNivel: number; concentracaoAcertos: number; concentracaoJanelaMs: number; concentracaoExtraPct: number };
     aventureiro: { nivelCorte: number; danoMult: number };
     arqueiro: { secundariosMult: number };
