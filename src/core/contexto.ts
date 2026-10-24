@@ -52,7 +52,13 @@ export interface Balance {
     janelaParticipacaoS: number;
     carismaNeutro: number;
     critico: FaixaCritico[];
+    /** Marco 24 (D-097): abertura do cone de trás, em graus (135 = a célula de trás e as duas diagonais). */
+    costasConeGraus: number;
   };
+  /** Marco 24 (24/10/2026, D-094): o medidor da ultimate e quanto cada momento enche. */
+  ultimate: { max: number; ganhos: { habilidade: number; basico: number; cura: number; abate: number; combo: number } };
+  /** Marco 24 (24/10/2026, D-097): tetos e números dos estados novos. */
+  estados: { esquivaMaxPct: number; cegoMaxPct: number; contragolpeAtordoarMs: number; contragolpeFuria: number };
   hp: {
     hpAtributoMult: number;
     dificuldadeMult: number;

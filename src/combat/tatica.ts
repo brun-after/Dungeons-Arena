@@ -14,7 +14,8 @@ import { avancar } from './efeitos-instantaneos';
 import { novaMemoria, type CampoTatico } from './estado-tatico';
 import { chebyshev } from './geometria';
 import { passivasDaBolsa } from './perfil';
-import { construirEfeito, type EfeitoCanonico } from './registro-efeitos';
+import { construirEfeito, REGISTRO_EFEITOS, type EfeitoCanonico } from './registro-efeitos';
+import { agendarFase } from './fases';
 
 export function muralhaEm(estado: EstadoJogo, x: number, y: number): CampoTatico | undefined {
   return estado.camposTaticos?.find((c) => c.tipo === 'muralha' && c.x === x && c.y === y && c.ateTick > estado.tick);
@@ -102,9 +103,43 @@ export function fluxoRestaurador(estado: EstadoJogo, ctx: ContextoSimulacao, ato
   aplicarEfeito(estado, ctx, alvo, construirEfeito('escudo', { valor: Math.min(ctx.balance.tatica.fluxoTeto, Math.max(1, Math.round(cura * pct / 100))), duracaoMs: ctx.balance.tatica.fluxoDuracaoMs }), ator, alvo, saida);
 }
 
-/** Só golpes físicos diretos podem ser aparados/esquivados; nenhum dano periódico entra aqui. */
+/** Marco 24 (D-097): a chance de esquivar golpes diretos — os estados de esquiva e as passivas (sem o teto). */
+export function esquivaPct(ctx: ContextoSimulacao, e: Entidade, tick: number): number {
+  let soma = 0;
+  for (const f of e.efeitos) if (f.ateTick > tick && REGISTRO_EFEITOS[f.tipo].esquiva) soma += f.pct;
+  if (e.bolsa) {
+    const invisivel = e.invisivelAteTick > tick;
+    for (const p of passivasDaBolsa(ctx, e.bolsa)) soma += (p.esquivaPct ?? 0) + (invisivel ? (p.esquivaInvisivelPct ?? 0) : 0);
+  }
+  return soma;
+}
+
+/**
+ * Só golpes diretos chegam aqui; nenhum dano periódico. O véu e o aparo valem contra os físicos. Marco 24 (24/10/2026,
+ * D-097): a esquiva somada (estado e passivas) e o Presságio valem contra qualquer golpe direto; o Contragolpe apara
+ * qualquer golpe, anula o dano, atordoa quem bateu, enche a fúria e responde na hora com a habilidade do efeito.
+ */
 export function defenderGolpe(estado: EstadoJogo, ctx: ContextoSimulacao, alvo: Entidade, atacante: Entidade, fisico: boolean, saida: EventoSimulacao[] = []): { esquivou: boolean; fator: number } {
-  if (!fisico || alvo === atacante) return { esquivou: false, fator: 1 };
+  if (alvo === atacante) return { esquivou: false, fator: 1 };
+  const tick = estado.tick;
+  const presagio = alvo.efeitos.find((f) => f.tipo === 'presagio' && f.ateTick > tick);
+  if (presagio) {
+    alvo.efeitos = alvo.efeitos.filter((f) => f !== presagio);
+    aplicarEfeito(estado, ctx, alvo, construirEfeito('critico_garantido', {}), alvo, alvo, saida);
+    return { esquivou: true, fator: 1 };
+  }
+  const contra = alvo.efeitos.find((f) => f.tipo === 'contragolpe' && f.ateTick > tick);
+  if (contra) {
+    alvo.efeitos = alvo.efeitos.filter((f) => f !== contra);
+    const r = ctx.balance.estados;
+    aplicarEfeito(estado, ctx, atacante, construirEfeito('atordoar', { duracaoMs: r.contragolpeAtordoarMs }), alvo, atacante, saida);
+    aplicarEfeito(estado, ctx, alvo, construirEfeito('furia', { valor: r.contragolpeFuria }), alvo, alvo, saida);
+    if (contra.ref) agendarFase(estado, alvo, contra.ref, atacante, 0);
+    return { esquivou: false, fator: 0 };
+  }
+  const esquiva = Math.min(ctx.balance.estados.esquivaMaxPct, esquivaPct(ctx, alvo, tick));
+  if (esquiva > 0 && aleatorio(estado.rng) * 100 < esquiva) return { esquivou: true, fator: 1 };
+  if (!fisico) return { esquivou: false, fator: 1 };
   const veu = alvo.efeitos.find((f) => f.tipo === 'veu_noturno' && f.ateTick > estado.tick);
   if (veu && aleatorio(estado.rng) * 100 < Math.min(50, veu.pct)) {
     const mem = alvo.tatica ??= novaMemoria(); mem.esquivou = estado.tick;

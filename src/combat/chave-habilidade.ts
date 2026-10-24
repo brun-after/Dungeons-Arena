@@ -6,13 +6,15 @@
 // Habilidades geradas por semente têm id `g_<semente base 36>_<nível>`; o código curto de compartilhar é a
 // semente em maiúsculas.
 
-import { MODIFICADORES, type Modificador } from './habilidades';
+// Marco 24 (24/10/2026): `~variante` no fim — a variante que o estado de quem usa liga (`redemoinho@3~frenesi`).
+import { MODIFICADORES, VARIANTES, type Modificador, type Variante } from './habilidades';
 
 export interface PartesChave {
   id: string;
   rank: number;
   caminhos: readonly string[];
   mods: readonly Modificador[];
+  variantes?: readonly Variante[];
 }
 
 export function formatarChave(p: PartesChave): string {
@@ -21,19 +23,24 @@ export function formatarChave(p: PartesChave): string {
   if (p.caminhos.length > 0) s += `/${p.caminhos.join(',')}`;
   const mods = [...new Set(p.mods)].sort();
   if (mods.length > 0) s += `+${mods.join(',')}`;
+  const variantes = [...new Set(p.variantes ?? [])].sort();
+  if (variantes.length > 0) s += `~${variantes.join(',')}`;
   return s;
 }
 
 const ehModificador = (v: string): v is Modificador => (MODIFICADORES as readonly string[]).includes(v);
+const ehVariante = (v: string): v is Variante => (VARIANTES as readonly string[]).includes(v);
 
 export function lerChave(chave: string): PartesChave | null {
-  const m = /^([a-z0-9_]+)(?:@(\d+))?(?:\/([a-z0-9_,]+))?(?:\+([a-z_,]+))?$/.exec(chave);
+  const m = /^([a-z0-9_]+)(?:@(\d+))?(?:\/([a-z0-9_,]+))?(?:\+([a-z_,]+))?(?:~([a-z_,]+))?$/.exec(chave);
   if (!m?.[1]) return null;
   const mods = (m[4] ?? '').split(',').filter((x) => x !== '');
   if (!mods.every(ehModificador)) return null;
+  const variantes = (m[5] ?? '').split(',').filter((x) => x !== '');
+  if (!variantes.every(ehVariante)) return null;
   const rank = m[2] === undefined ? 1 : Number(m[2]);
   if (!Number.isInteger(rank) || rank < 1) return null;
-  return { id: m[1], rank, caminhos: (m[3] ?? '').split(',').filter((x) => x !== ''), mods };
+  return { id: m[1], rank, caminhos: (m[3] ?? '').split(',').filter((x) => x !== ''), mods, ...(variantes.length > 0 && { variantes }) };
 }
 
 const PREFIXO_GERADA = 'g_';

@@ -5,6 +5,7 @@ import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import { podeFerir } from '../modos/relacao';
 import { dispararGanchosDe } from '../progression/ganchos-do-portador';
 import { muralhaEm } from '../combat/tatica';
+import { virarPara } from '../combat/orientacao';
 // Movimento célula a célula com integração por distância (§2.2, §2.3).
 // Cada passo é cardinal: reserva o destino, avança `progressoPasso` pela velocidade e, ao
 // completar, a posição lógica vira o destino. Um tick pode consumir vários passos.
@@ -152,6 +153,11 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
       }
       e.destinoX = passo.celula.x;
       e.destinoY = passo.celula.y;
+      // Marco 24 (D-097): quem anda olha para onde vai (a direção pedida, na diagonal), salvo se está golpeando alguém.
+      if (!e.acao) {
+        if (e.direcao !== 'parado') e.olhando = e.direcao;
+        else virarPara(e, passo.celula);
+      }
       e.proximoEixoX = passo.proximoEixoX;
       e.progressoPasso = 0;
     }

@@ -2,6 +2,7 @@
 import { textosEditor } from './pt-BR-editor';
 import { textosGrupo } from './pt-BR-grupo';
 import { textosHabilidades } from './pt-BR-habilidades';
+import { textosClasses } from './pt-BR-classes';
 
 export const ptBR = {
   'progressao.selecionarHabilidade': 'Escolha uma habilidade compatível e o caminho de evolução, quando necessário.',
@@ -626,6 +627,8 @@ export const ptBR = {
   // Marco 15 (15/10/2026): campanha cooperativa.
   ...textosGrupo,
   ...textosEditor,
+  // Marco 24 (24/10/2026): skills de classe, ultimates e sintonia.
+  ...textosClasses,
 } as const;
 
 export type ChaveTexto = keyof typeof ptBR;

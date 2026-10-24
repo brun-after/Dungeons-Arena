@@ -38,6 +38,8 @@ import { quantidadeDeSaltos, saltar } from './saltos';
 import { dispararGanchosDe, passivosDe } from '../progression/ganchos-do-portador';
 import { comCombo, fazerCombo } from './combos';
 import { dizimoErgue, podeErguerNoDizimo } from './necromancia';
+import { agendarFase, fasesVencidas } from './fases';
+import { virarPara } from './orientacao';
 
 export function chaveRecarga(entidadeId: EntidadeId, habilidadeId: string): string {
   return `${entidadeId}_${habilidadeId}`;
@@ -90,7 +92,9 @@ export function alcanceDe(ctx: ContextoSimulacao, ator: Entidade, hab: Habilidad
 
 /** Alvo ofensivo válido: vivo, visível e passível de dano pela relação do modo (§2.5). */
 export function alvoOfensivoValido(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, alvo: Entidade): boolean {
-  return vivo(alvo) && alvo.invisivelAteTick <= estado.tick && podeFerir(ator, alvo, ctx.modo);
+  // Marco 24 (D-094): quem tem a marca do caçador de quem ataca não some para ele.
+  const visivel = alvo.invisivelAteTick <= estado.tick || alvo.efeitos.some((f) => f.ateTick > estado.tick && f.origemId === ator.id && REGISTRO_EFEITOS[f.tipo].revela);
+  return vivo(alvo) && visivel && podeFerir(ator, alvo, ctx.modo);
 }
 
 /** Marco 14: alvo de suporte válido: vivo e o próprio ou aliado, pela relação do modo. */
@@ -169,7 +173,7 @@ export function iniciarAcao(
     return false;
   };
   if (!vivo(ator)) return false;
-  const hab = habilidadeDisponivel(ator, habilidadeId) ? habilidadeDoAtor(ctx, ator, habilidadeId) : undefined;
+  const hab = habilidadeDisponivel(ator, habilidadeId) ? habilidadeDoAtor(ctx, ator, habilidadeId, estado.tick) : undefined;
   // Passiva não se conjura (marco 14): vale enquanto conhecida.
   if (!hab || hab.passiva) return recusar('sem_habilidade');
   // Pedir uma habilidade durante a conjuração do ataque básico substitui o básico (D-020):
@@ -211,6 +215,8 @@ export function iniciarAcao(
   if (chebyshev(origem, mira) > alcanceDe(ctx, ator, hab, estado.tick)) return recusar('fora_de_alcance');
 
   if (substituiBasico) cancelar(ator, estado, 'substituido', saida);
+  // Marco 24 (D-097): quem ataca olha para o alvo (decide o "pelas costas" de quem bate nele).
+  if (mira.x !== origem.x || mira.y !== origem.y) virarPara(ator, mira);
   // Conjuração (§2.7, etapa 3): custo e recarga descontados aqui, com recarga monotônica.
   ator.mana -= custoMana;
   ator.hp -= custoVida;
@@ -280,8 +286,25 @@ function cancelar(ator: Entidade, estado: EstadoJogo, motivo: MotivoCancelamento
   ator.acao = null;
 }
 
+/**
+ * Marco 24 (24/10/2026, D-094): as fases que vencem saem antes das conjurações — a habilidade da fase no alvo guardado
+ * (ou na célula, se ele morreu ou é de área), sem custo, recarga, combo nem ganchos de uso.
+ */
+function processarFases(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
+  for (const f of fasesVencidas(estado)) {
+    const ator = buscarEntidade(estado, f.atorId);
+    const hab = ator && vivo(ator) ? resolverHabilidade(ctx, f.chave) : undefined;
+    if (!ator || !hab) continue;
+    const alvo = f.alvoId === null ? null : buscarEntidade(estado, f.alvoId);
+    const valido = alvo && vivo(alvo) ? alvo : null;
+    const mira = valido && hab.politicaImpacto !== 'area' ? celulaOcupada(valido) : { x: f.x, y: f.y };
+    lancar(estado, ctx, ator, hab, novoId(estado), mira, valido, saida, true);
+  }
+}
+
 /** Etapa 3 do tick: conjurações em curso — interrupção e lançamento. */
 export function processarAcoes(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
+  processarFases(estado, ctx, saida);
   for (const ator of ordemRotativa(estado.entidades, estado.tick)) {
     const a = ator.acao;
     if (!a) continue;
@@ -314,22 +337,35 @@ function lancar(
   mira: Celula,
   alvo: Entidade | null,
   saida: EventoSimulacao[],
+  /** Marco 24: lançada por uma fase (sem combo, ganchos de uso nem encarnação). */
+  daFase = false,
 ): void {
-  const hab = prepararSequencia(estado, ctx, ator, habilidadeBase, acaoId, alvo, mira);
+  const hab = daFase ? habilidadeBase : prepararSequencia(estado, ctx, ator, habilidadeBase, acaoId, alvo, mira);
   if (hab.formulaDano) ator.efeitos = ator.efeitos.filter((f) => f.tipo !== 'veu_noturno');
   // Marco 18 (D-068, D-069): o combo (a habilidade anterior em até a janela) fortalece esta; os ganchos "ao usar"
   // disparam; e esta vira a última.
-  const fonte = comCombo(fonteDaHabilidade(ator, ctx, estado.tick, hab), fazerCombo(estado, ctx, ator, hab, alvo, mira, saida, false));
-  dispararGanchosDe(estado, ctx, ator, 'aoUsarHabilidade', { outro: alvo, hab }, saida);
-  ator.ultimaHabilidade = { id: hab.id, chave: hab.chave, tick: estado.tick, alvoId: alvo?.id ?? null };
-  // Marco 22 (D-089): a magia de fogo, gelo ou raio troca a encarnação do Mago.
-  if (encarnar(ctx, ator, hab, estado.tick)) saida.push({ t: 'encarnou', tick: estado.tick, id: ator.id, elemento: ator.encarnacao ?? 'fogo' });
+  let fonte = daFase ? fonteDaHabilidade(ator, ctx, estado.tick, hab) : comCombo(fonteDaHabilidade(ator, ctx, estado.tick, hab), fazerCombo(estado, ctx, ator, hab, alvo, mira, saida, false));
+  // Marco 24 (D-095): o crítico garantido (Presságio) sai no próximo golpe; a sobrecarga sai na magia que fortaleceu.
+  if (hab.formulaDano) {
+    const tick = estado.tick;
+    if (ator.efeitos.some((f) => f.ateTick > tick && REGISTRO_EFEITOS[f.tipo].criticoGarantido)) fonte = { ...fonte, d20Minimo: 20 };
+    ator.efeitos = ator.efeitos.filter((f) => !(REGISTRO_EFEITOS[f.tipo].criticoGarantido || REGISTRO_EFEITOS[f.tipo].someAoLancar === hab.tipoAtaque));
+  }
+  if (!daFase) {
+    dispararGanchosDe(estado, ctx, ator, 'aoUsarHabilidade', { outro: alvo, hab }, saida);
+    ator.ultimaHabilidade = { id: hab.id, chave: hab.chave, tick: estado.tick, alvoId: alvo?.id ?? null };
+    // Marco 22 (D-089): a magia de fogo, gelo ou raio troca a encarnação do Mago.
+    if (encarnar(ctx, ator, hab, estado.tick)) saida.push({ t: 'encarnou', tick: estado.tick, id: ator.id, elemento: ator.encarnacao ?? 'fogo' });
+  }
   const basico = hab.id === ator.ataqueBasico ? bonusAtaqueBasico(ator, estado.tick) : null;
   const alcance = alcanceDe(ctx, ator, hab, estado.tick);
   const base = { acaoId, fonte, hab, mira, ...(basico && basico.dano > 0 && { danoExtra: basico.dano }) };
   // Efeitos de lançamento (armadilha, invocação): uma vez, sobre quem conjura, na célula mirada.
   for (const ef of hab.efeitos) {
-    if (REGISTRO_EFEITOS[ef.tipo].aoLancar) aplicarEfeito(estado, ctx, ator, ef, { id: ator.id, x: ator.x, y: ator.y }, mira, saida);
+    if (!REGISTRO_EFEITOS[ef.tipo].aoLancar) continue;
+    // Marco 24: a fase guarda o alvo da ação (o resto do lançamento cai em quem conjura, na célula mirada).
+    if (REGISTRO_EFEITOS[ef.tipo].fluxo === 'fase' && ef.ref) agendarFase(estado, ator, ef.ref, alvo ?? mira, ef.duracaoMs);
+    else aplicarEfeito(estado, ctx, ator, ef, { id: ator.id, x: ator.x, y: ator.y }, mira, saida);
   }
   switch (hab.politicaImpacto) {
     case 'proprio':

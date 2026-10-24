@@ -70,6 +70,8 @@ export interface DadosInvocacao {
   companheiro?: boolean;
   /** A vida do dono copiada no fim do último tick; a diferença é o dano que o falcão levou. */
   hpEspelhado?: number;
+  /** Marco 24 (24/10/2026): invocação temporária fora do limite (Levante profano). */
+  extra?: boolean;
 }
 
 /** Ação em conjuração (§2.7, etapa 3). Ticks publicados para a telegrafia (§3.6). */
@@ -311,6 +313,10 @@ export interface Entidade {
   mira?: { desdeTick: number };
   /** Marco 21 (D-088): fúria do Guerreiro, valor no `ultimoTick` (o esvaziamento é calculado na leitura). */
   furia?: { valor: number; ultimoTick: number };
+  /** Marco 24 (24/10/2026, D-097): para onde olha (último passo ou quem ataca); ausente = sul. Decide o "pelas costas". */
+  olhando?: Dir8;
+  /** Marco 24 (D-094): o medidor da ultimate (0..balance.ultimate.max); ausente = vazio. */
+  cargaUltimate?: number;
   /** 18/10/2026: acertos efetivos consecutivos do Dardo no mesmo alvo e vida. */
   concentracaoArcana?: { alvoId: string; geracao: number; abates: number; acertos: number; ultimoTick: number };
 }

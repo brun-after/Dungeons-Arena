@@ -15,7 +15,7 @@ import { formatarChave, lerChave } from './chave-habilidade';
 import { faixaDaFormula } from './dados';
 import { ehElemento, type DefinicaoElemento, type Elemento } from './elementos';
 import { gerarDefinicao } from './gerar-habilidade';
-import { etiquetasDe, MODIFICADORES, type Catalogo, type DefinicaoHabilidade, type Habilidade, type Modificador } from './habilidades';
+import { etiquetasDe, MODIFICADORES, type Catalogo, type DefinicaoHabilidade, type Habilidade, type Modificador, type Variante } from './habilidades';
 import { normalizarEfeitos } from './normalizar-efeito';
 import { construirEfeito, REGISTRO_EFEITOS, type EfeitoCanonico } from './registro-efeitos';
 
@@ -135,6 +135,8 @@ export interface OpcoesCompilacao {
   rank: number;
   caminhos: readonly string[];
   mods: readonly Modificador[];
+  /** Marco 24: as variantes ligadas (Frenesi, fúria alta, elemento encarnado). */
+  variantes?: readonly Variante[];
 }
 
 export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilacao, fontes: FontesCompilacao, regras: RegrasHabilidades): Habilidade {
@@ -181,7 +183,28 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
     extras.push(...c.efeitos);
     for (const m of c.mods) mods.add(m);
   }
-  const efeitos = [...b.efeitos, ...extras];
+  // Marco 24 (24/10/2026, D-094): as variantes ligadas valem como marcos, e ainda mudam conjuração, elemento e trocam
+  // efeitos do mesmo tipo. Só entram na chave as que a definição tem.
+  let conjuracao = 1;
+  let trocados: EfeitoCanonico[] = [];
+  const variantes = (op.variantes ?? []).filter((v) => def.variantes[v] !== undefined).sort();
+  for (const v of variantes) {
+    const m = def.variantes[v];
+    if (!m) continue;
+    multDano *= 1 + m.danoPct / 100;
+    multCura *= 1 + m.danoPct / 100;
+    custo *= 1 + m.custoPct / 100;
+    recarga *= 1 + m.recargaPct / 100;
+    duracao *= 1 + m.duracaoPct / 100;
+    conjuracao *= 1 + m.conjuracaoPct / 100;
+    alcance += m.alcance;
+    if (b.politicaImpacto === 'area') raio += m.raio;
+    if (m.elemento) elemento = m.elemento;
+    extras.push(...m.efeitos);
+    trocados = [...trocados.filter((t) => !m.trocar.some((x) => x.tipo === t.tipo)), ...m.trocar];
+    for (const x of m.mods) mods.add(x);
+  }
+  const efeitos = [...b.efeitos.filter((e) => !trocados.some((t) => t.tipo === e.tipo)), ...trocados, ...extras];
   // O elemento acrescenta o seu estado (o de um caminho elemental também).
   const estado = elemento ? fontes.elementos.get(elemento)?.estado : undefined;
   if (estado && b.formulaDano !== null && !efeitos.some((e) => e.tipo === estado.tipo)) efeitos.push({ ...estado });
@@ -194,6 +217,7 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
     custoRecurso: Math.max(0, Math.round(b.custoRecurso * custo)),
     custoVida: Math.max(0, Math.round(b.custoVida * custo)),
     recargaMs: Math.max(0, Math.round(b.recargaMs * recarga)),
+    conjuracaoMs: Math.max(0, Math.round(b.conjuracaoMs * conjuracao)),
     elemento,
     rank,
     perfura: false,
@@ -220,7 +244,7 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
   h.multCura = multCura;
   h.tags = etiquetasDe(h, b.tags);
   // Na chave só entram os modificadores de fora (equipamento): os da definição e dos caminhos já estão implícitos.
-  h.chave = formatarChave({ id: b.id, rank, caminhos: caminhosValidos, mods: op.mods.filter((m) => aplicados.includes(m)) });
+  h.chave = formatarChave({ id: b.id, rank, caminhos: caminhosValidos, mods: op.mods.filter((m) => aplicados.includes(m)), variantes });
   return h;
 }
 

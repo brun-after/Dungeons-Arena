@@ -77,8 +77,11 @@
       { "ate": 15, "mult": 1.2 },
       { "ate": 19, "mult": 1.5 },
       { "ate": 20, "mult": 2 }
-    ]
+    ],
+    "costasConeGraus": 135
   },
+  "ultimate": { "max": 100, "ganhos": { "habilidade": 3, "basico": 0.6, "cura": 1.5, "abate": 8, "combo": 6 } },
+  "estados": { "esquivaMaxPct": 50, "cegoMaxPct": 60, "contragolpeAtordoarMs": 1000, "contragolpeFuria": 20 },
   "hp": {
     "hpAtributoMult": 4,
     "dificuldadeMult": 1,

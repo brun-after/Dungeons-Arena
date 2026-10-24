@@ -7,6 +7,10 @@
 // Marco 14 (14/10/2026), D-059: os estados dos 5 elementos (queimando, resfriado, congelado, eletrizado,
 // envenenado, exposto), escudo, puxão, troca de lugar e dano direto; ganchos de lentidão, cura recebida,
 // dano recebido e escudo. Acúmulo, oposições e sinergias ficam em dados (interacoes.json, acumulo.ts).
+// Marco 24 (24/10/2026, D-094/D-097): cego, aterrorizado, confuso, desafiado, marca do caçador, Frenesi, esquiva,
+// interceptar projéteis, contragolpe, presságio, crítico garantido, sobrecarga, escudo que soma até um teto e
+// invisível; os instantâneos dissipar, consumir estado, detonar invocação, arremessar, zerar recarga, libertar,
+// fúria e carga da ultimate; e os fluxos fase (lança outra habilidade depois de um prazo) e invocação temporária.
 
 import { aleatorio, type EstadoRng } from '../core/rng';
 
@@ -65,6 +69,10 @@ export const TIPOS_EFEITO = [
   'trocar_lugar',
   'dano_direto',
   'sangrando', 'aparando', 'resposta_aparo', 'veu_noturno', 'purificar', 'passo_sombrio', 'muralha_pedra', 'campo_cura', 'campo_veneno',
+  // marco 24
+  'cego', 'aterrorizado', 'confuso', 'desafiado', 'marca_cacador', 'frenesi', 'esquiva', 'intercepta', 'contragolpe', 'presagio',
+  'critico_garantido', 'sobrecarga', 'escudo_acumulado', 'invisivel', 'dissipar', 'consumir', 'detonar_invocacao', 'arremessar',
+  'zerar_recarga', 'libertar', 'furia', 'carga_ultimate', 'fase', 'invocar_temporario',
 ] as const;
 export type TipoEfeito = (typeof TIPOS_EFEITO)[number];
 
@@ -89,10 +97,11 @@ export interface EfeitoCanonico {
 }
 
 /** Fluxos próprios de um disparo só: agendar, armar ou invocar (não ficam como status). */
-export type Fluxo = 'atrasado' | 'armadilha' | 'invocar';
+export type Fluxo = 'atrasado' | 'armadilha' | 'invocar' | 'fase';
 
 export type Periodico = 'dano' | 'cura' | 'recurso';
-export type Instantaneo = 'drenar_invocacao' | 'comandar_mortos' | 'purificar' | 'passo_sombrio' | 'muralha_pedra' | 'campo_cura' | 'campo_veneno' | 'cura' | 'recurso' | 'teleporte' | 'avanco' | 'empurrao' | 'puxao' | 'trocar' | 'dano';
+export type Instantaneo = 'drenar_invocacao' | 'comandar_mortos' | 'purificar' | 'passo_sombrio' | 'muralha_pedra' | 'campo_cura' | 'campo_veneno' | 'cura' | 'recurso' | 'teleporte' | 'avanco' | 'empurrao' | 'puxao' | 'trocar' | 'dano'
+  | 'invisivel' | 'dissipar' | 'consumir' | 'detonar' | 'arremessar' | 'zerar_recarga' | 'libertar' | 'furia' | 'carga_ultimate';
 export type BonusDeAtaqueBasico = 'dano' | 'recarga' | 'alcance' | 'alvos';
 
 export interface DefinicaoEfeito {
@@ -141,6 +150,24 @@ export interface DefinicaoEfeito {
   someAoLevarGolpe: boolean;
   /** Marco 18 (D-068): quem acerta o alvo se cura `valor` (consagrado). */
   curaQuemAcerta: boolean;
+  /** Marco 24 (D-097): o `pct` é a chance de errar os golpes (cego). */
+  erroPct: boolean;
+  /** Marco 24: a IA foge de quem aplicou (aterrorizado), vaga sem atacar (confuso) ou só persegue quem aplicou (desafiado). */
+  ia: 'foge' | 'vaga' | 'persegue' | null;
+  /** Marco 24: o `pct` aumenta só o dano que vem de quem aplicou (desafiado, marca do caçador). */
+  danoDaOrigem: boolean;
+  /** Marco 24: quem tem o efeito não fica invisível para quem o aplicou (marca do caçador). */
+  revela: boolean;
+  /** Marco 24: o `pct` é a chance de esquivar golpes diretos (soma, com teto em `balance.estados`). */
+  esquiva: boolean;
+  /** Marco 24: o `valor` é quantos projéteis hostis o portador ainda bloqueia. */
+  intercepta: boolean;
+  /** Marco 24: o próximo golpe do portador é crítico, e o efeito sai nele. */
+  criticoGarantido: boolean;
+  /** Marco 24: sai quando o portador lança uma habilidade com dano desse tipo (a sobrecarga sai na magia que fortalece). */
+  someAoLancar: 'magico' | 'fisico' | null;
+  /** Marco 24: o `valor` soma ao que já existe, até o `pct` (o escudo de cada acerto). */
+  somaAteTeto: boolean;
 }
 
 type Def = Omit<DefinicaoEfeito, 'id'>;
@@ -170,6 +197,15 @@ const BASE: Omit<Def, 'icone' | 'cor' | 'positivo' | 'padrao' | 'campos'> = {
   escudo: false,
   someAoLevarGolpe: false,
   curaQuemAcerta: false,
+  erroPct: false,
+  ia: null,
+  danoDaOrigem: false,
+  revela: false,
+  esquiva: false,
+  intercepta: false,
+  criticoGarantido: false,
+  someAoLancar: null,
+  somaAteTeto: false,
 };
 
 const negativo = (icone: string, cor: string, campos: readonly CampoEfeito[], padrao: Def['padrao'], extra: Partial<Def>): Def => ({
@@ -265,6 +301,31 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   puxao: instantaneo('puxar', '#7f8c8d', ['valor'], { duracaoMs: 0, valor: 2, pct: 0 }, 'puxao', false),
   trocar_lugar: instantaneo('troca', '#8e44ad', [], { duracaoMs: 0, valor: 0, pct: 0 }, 'trocar', true),
   dano_direto: instantaneo('runa', '#e74c3c', ['valor'], { duracaoMs: 0, valor: 5, pct: 0 }, 'dano', false),
+
+  cego: negativo('olho', '#5b5b6e', ['pct'], { duracaoMs: 3000, valor: 0, pct: 30 }, { erroPct: true }),
+  aterrorizado: negativo('caveira', '#6c3483', [], { duracaoMs: 1500, valor: 0, pct: 0 }, { bloqueiaAcoes: 'todas', ia: 'foge' }),
+  confuso: negativo('estrela', '#c39bd3', [], { duracaoMs: 2000, valor: 0, pct: 0 }, { bloqueiaAcoes: 'todas', ia: 'vaga' }),
+  desafiado: negativo('alvo', '#e74c3c', ['pct'], { duracaoMs: 3000, valor: 0, pct: 15 }, { ia: 'persegue', danoDaOrigem: true }),
+  marca_cacador: negativo('alvo', '#d4ac0d', ['pct'], { duracaoMs: 8000, valor: 0, pct: 20 }, { danoDaOrigem: true, revela: true }),
+  frenesi: { ...BASE, icone: 'fogo', cor: '#ff6a00', positivo: true, campos: ['pct'], padrao: { duracaoMs: 6000, valor: 0, pct: 20 }, danoCausado: 1 },
+  esquiva: { ...BASE, icone: 'fantasma', cor: '#aab7b8', positivo: true, campos: ['pct'], padrao: { duracaoMs: 4000, valor: 0, pct: 20 }, esquiva: true },
+  intercepta: { ...BASE, icone: 'escudo', cor: '#d5dbdb', positivo: true, campos: ['valor'], padrao: { duracaoMs: 5000, valor: 5, pct: 0 }, intercepta: true },
+  contragolpe: { ...BASE, icone: 'espada', cor: '#f0f3f4', positivo: true, campos: [], padrao: { duracaoMs: 1500, valor: 0, pct: 0 } },
+  presagio: { ...BASE, icone: 'olho', cor: '#bb8fce', positivo: true, campos: [], padrao: { duracaoMs: 4000, valor: 0, pct: 0 } },
+  critico_garantido: { ...BASE, icone: 'estrela', cor: '#f4d03f', positivo: true, campos: [], padrao: { duracaoMs: 5000, valor: 0, pct: 0 }, criticoGarantido: true },
+  sobrecarga: { ...BASE, icone: 'raio', cor: '#a569bd', positivo: true, campos: ['pct'], padrao: { duracaoMs: 10_000, valor: 0, pct: 40 }, danoCausado: 1, someAoLancar: 'magico' },
+  escudo_acumulado: { ...BASE, icone: 'barreira', cor: '#85929e', positivo: true, campos: ['valor', 'pct'], padrao: { duracaoMs: 5000, valor: 2, pct: 10 }, escudo: true, somaAteTeto: true },
+  invisivel: instantaneo('fantasma', '#5d6d7e', [], { duracaoMs: 1500, valor: 0, pct: 0 }, 'invisivel', true),
+  dissipar: instantaneo('runa', '#aed6f1', ['valor'], { duracaoMs: 0, valor: 2, pct: 0 }, 'dissipar', false),
+  consumir: { ...instantaneo('fogo', '#ff7b39', ['pct'], { duracaoMs: 0, valor: 0, pct: 50 }, 'consumir', false), exige: ['ref'] },
+  detonar_invocacao: instantaneo('caveira', '#7d3c98', ['valor', 'pct'], { duracaoMs: 0, valor: 2, pct: 50 }, 'detonar', false),
+  arremessar: instantaneo('empurrar', '#8e44ad', ['valor'], { duracaoMs: 0, valor: 3, pct: 0 }, 'arremessar', false),
+  zerar_recarga: { ...instantaneo('relogio', '#16a085', [], { duracaoMs: 0, valor: 0, pct: 0 }, 'zerar_recarga', true), exige: ['ref'] },
+  libertar: instantaneo('botas', '#76d7c4', [], { duracaoMs: 0, valor: 0, pct: 0 }, 'libertar', true),
+  furia: instantaneo('fogo', '#e74c3c', ['valor'], { duracaoMs: 0, valor: 10, pct: 0 }, 'furia', true),
+  carga_ultimate: instantaneo('estrela', '#f5b041', ['valor'], { duracaoMs: 0, valor: 5, pct: 0 }, 'carga_ultimate', true),
+  fase: { ...BASE, icone: 'ampulheta', cor: '#f5b041', positivo: true, ehStatus: false, campos: [], padrao: { duracaoMs: 0, valor: 0, pct: 0 }, fluxo: 'fase', aoLancar: true, exige: ['ref'] },
+  invocar_temporario: { ...BASE, icone: 'invocar', cor: '#48c9b0', positivo: true, ehStatus: false, campos: ['valor'], padrao: { duracaoMs: 12_000, valor: 1, pct: 0 }, fluxo: 'invocar', aoLancar: true, exige: ['ref'] },
 };
 
 export const REGISTRO_EFEITOS: Readonly<Record<TipoEfeito, DefinicaoEfeito>> = Object.fromEntries(

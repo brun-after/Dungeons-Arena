@@ -174,7 +174,7 @@ describe('nível 30 e faixa avançada', () => {
     expect(c.b.xpFracao).toBeGreaterThan(0);
     expect(c.b.xpFracao).toBeCloseTo(0.1);
   });
-  it('um grupo misto aplica a faixa a cada participante, sem reduzir a cota do personagem baixo', () => {
+  it('um grupo misto aplica a faixa a cada um: quem abate leva tudo e o aliado perto, 75%', () => {
     const c = cena();
     c.j.nivel = 20;
     const baixo = criarJogador(obter(CONTEUDO.classes.get('mago')), 'baixo', 4, 3, c.ctx.balance);
@@ -185,9 +185,9 @@ describe('nível 30 e faixa avançada', () => {
     i.participacao = [{ id: c.j.id, tick: 0 }, { id: baixo.id, tick: 0 }];
     c.estado.entidades.push(baixo, i);
     processarMortes(c.estado, c.ctx, c.eventos);
-    expect(c.j.xp).toBe(5);
-    expect(baixo.xp).toBe(55);
-    expect(c.b.xpFracao).toBeCloseTo(0.5);
+    // Marco 24 (D-097): o último a bater (baixo) abate e leva tudo; o aliado perto leva 75%, cada um na sua faixa.
+    expect(baixo.xp).toBe(110);
+    expect(c.j.xp + c.b.xpFracao!).toBeCloseTo(8.25);
   });
   it('geração de equipamento aceita o novo nível máximo', () => {
     const c = cena();

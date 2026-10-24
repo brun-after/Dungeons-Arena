@@ -116,6 +116,8 @@ export type EventoSimulacao =
       dano: number;
       /** HP efetivamente retirado, sem excesso letal; dano mantém o valor histórico. */
       danoEfetivo?: number;
+      /** Marco 24 (D-097): o golpe pegou pelas costas. */
+      costas?: boolean;
       /** Absorção de escudo neste impacto, após esquiva/aparo. */
       absorvidoEscudo?: number;
       cura: number;
@@ -150,6 +152,9 @@ export type EventoSimulacao =
   // Marco 22 (D-089): o Mago trocou de encarnação; o Arqueiro disparou o tiro carregado.
   | { t: 'encarnou'; tick: number; id: EntidadeId; elemento: 'fogo' | 'gelo' | 'raio' }
   | { t: 'tiroCarregado'; tick: number; id: EntidadeId }
+  // Marco 24 (24/10/2026, D-094): o medidor da ultimate encheu, e a ultimate saiu (par de skills e o id dela).
+  | { t: 'ultimateCheia'; tick: number; id: EntidadeId }
+  | { t: 'ultimateUsada'; tick: number; id: EntidadeId; ultimateId: string; acaoId: number }
   /** Ajuste de 24/10/2026 (D-091): a encarnação do Mago venceu. */
   | { t: 'encarnacaoAcabou'; tick: number; id: EntidadeId }
   /** Marco 22 (D-090): o morto do Necromante longe demais voltou para o lado dele. */

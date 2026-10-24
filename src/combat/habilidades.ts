@@ -12,7 +12,7 @@ import { formulaValida } from './dados';
 import { ehElemento, type Elemento } from './elementos';
 import { normalizarEfeitos } from './normalizar-efeito';
 import type { Atributos } from '../entities/entidade';
-import type { EfeitoCanonico } from './registro-efeitos';
+import { ehTipoEfeito, type EfeitoCanonico, type TipoEfeito } from './registro-efeitos';
 
 export type TipoAtaque = 'fisico' | 'magico';
 export const TIPOS_AREA = ['nenhuma', 'quadrado', 'linha', 'cone', 'ao_redor'] as const;
@@ -43,6 +43,21 @@ export type Mobilidade = (typeof MOBILIDADES)[number];
 export const MODIFICADORES = ['atravessar', 'encadear', 'ecoar', 'maior_e_mais_lenta'] as const;
 export type Modificador = (typeof MODIFICADORES)[number];
 
+/**
+ * Marco 24 (24/10/2026, D-094): as variantes de uma habilidade, ligadas pelo estado de quem usa. `frenesi` (o
+ * Guerreiro em Frenesi), `furia_alta` (fúria acima da metade) e `enc_<elemento>` (o elemento que o Mago encarna).
+ */
+export const VARIANTES = ['frenesi', 'furia_alta', 'enc_fogo', 'enc_gelo', 'enc_raio', 'enc_terra', 'enc_veneno', 'enc_trevas', 'enc_sagrado'] as const;
+export type Variante = (typeof VARIANTES)[number];
+
+/** Marco 24: o que uma variante muda — os ajustes de um marco, mais a conjuração, o elemento e efeitos trocados. */
+export interface AjusteDeVariante extends MarcoDeNivel {
+  conjuracaoPct: number;
+  elemento: Elemento | null;
+  /** Efeitos que substituem os do mesmo tipo (a Investida que avança 4, o arco do Contragolpe que vira 360°). */
+  trocar: readonly EfeitoCanonico[];
+}
+
 /** Saltos para alvos próximos depois do golpe principal (encadear; raio sobre eletrizado). */
 export interface Saltos {
   quantidade: number;
@@ -67,6 +82,32 @@ export interface Passiva {
   hpMaxPct: number;
   manaMaxPct: number;
   defesa: number;
+  // Marco 24 (24/10/2026, D-095): as passivas gerais (uma defensiva e uma ofensiva por família).
+  /** Dano físico e mágico recebido a menos, em %. */
+  reducaoFisicoPct?: number;
+  reducaoMagicoPct?: number;
+  /** Resistência por elemento, em %. */
+  resistencias?: Partial<Record<Elemento, number>>;
+  /** Quanto duram em você os estados recebidos (−20 = 20% menos). */
+  duracaoRecebidaPct?: Partial<Record<TipoEfeito, number>>;
+  /** Estados que não pegam em você. */
+  imunes?: readonly TipoEfeito[];
+  /** Chance de aplicar um estado a cada golpe que acerta. */
+  aoAcertar?: { chancePct: number; efeito: EfeitoCanonico } | null;
+  /** Os estados desse tipo que você aplica batem mais (`valorPct`) e duram mais (`duracaoMs`). */
+  reforcoEstado?: { tipo: TipoEfeito; valorPct: number; duracaoMs: number } | null;
+  /** Dano a mais contra alvos com algum destes estados. */
+  danoContraEstados?: { estados: readonly TipoEfeito[]; pct: number } | null;
+  esquivaPct?: number;
+  esquivaInvisivelPct?: number;
+  /** Dano a mais nos golpes pelas costas. */
+  costasPct?: number;
+  /** Cura recebida a mais, em %. */
+  curaRecebidaPct?: number;
+  /** Resistência elemental do alvo ignorada, em %. */
+  resistenciaIgnoradaPct?: number;
+  /** `defensiva` ou `ofensiva` nas passivas gerais; null nas demais. */
+  tipo?: 'defensiva' | 'ofensiva' | null;
 }
 
 export interface Habilidade {
@@ -185,6 +226,10 @@ export interface DefinicaoHabilidade {
   marcos: Readonly<Record<number, MarcoDeNivel>>;
   /** Marco 18 (camada 7): a fusão nasce de duas habilidades no nível máximo (null = não é fusão). */
   fusao: readonly string[] | null;
+  /** Marco 24 (D-094): o que muda em cada variante (vazio = nenhuma). */
+  variantes: Readonly<Partial<Record<Variante, AjusteDeVariante>>>;
+  /** Marco 24: habilidade interna (fase de ultimate, resposta do Contragolpe): não vai para barra, livro nem orçamento. */
+  interna: boolean;
 }
 
 /** Marco 18: um marco de nível — os mesmos ajustes de um caminho, com o texto que a carta mostra. */
@@ -224,6 +269,32 @@ function lerMarcos(l: Leitor, v: unknown): Record<number, MarcoDeNivel> {
   return saida;
 }
 
+function lerVariantes(l: Leitor, v: unknown): Partial<Record<Variante, AjusteDeVariante>> {
+  if (v === undefined) return {};
+  const o: Objeto = l.objeto(v, 'variantes');
+  const saida: Partial<Record<Variante, AjusteDeVariante>> = {};
+  for (const k of Object.keys(o)) {
+    if (!(VARIANTES as readonly string[]).includes(k)) {
+      l.erro(`variantes: "${k}" desconhecida`);
+      continue;
+    }
+    const m = l.objeto(o[k], `variantes.${k}`);
+    const n = (campo: string, min: number, max: number) => (m[campo] === undefined ? 0 : l.numero(m, campo, { min, max }));
+    const elemento = m.elemento === undefined ? null : ehElemento(m.elemento) ? m.elemento : null;
+    if (m.elemento !== undefined && !elemento) l.erro(`variantes.${k}: elemento desconhecido`);
+    const resto = Object.fromEntries(Object.entries(m).filter(([c]) => !['conjuracaoPct', 'elemento', 'trocar'].includes(c)));
+    const base = lerMarcos(l, { 2: { ...resto, texto: m.texto ?? k } })[2];
+    if (!base) continue;
+    saida[k as Variante] = {
+      ...base,
+      conjuracaoPct: n('conjuracaoPct', -100, 200),
+      elemento,
+      trocar: m.trocar === undefined ? [] : normalizarEfeitos(l.lista(m, 'trocar'), l),
+    };
+  }
+  return saida;
+}
+
 function lerVisual(l: Leitor, v: unknown): VisualHabilidade | null {
   if (v === undefined || v === null) return null;
   const o = l.objeto(v, 'visual');
@@ -244,7 +315,29 @@ function lerVisual(l: Leitor, v: unknown): VisualHabilidade | null {
   };
 }
 
-const CAMPOS_PASSIVA = ['tag', 'danoPct', 'curaPct', 'alcance', 'custoPct', 'recargaPct', 'hpMaxPct', 'manaMaxPct', 'defesa', 'tenacidadePct', 'fluxoEscudoPct'];
+const CAMPOS_PASSIVA = ['tag', 'danoPct', 'curaPct', 'alcance', 'custoPct', 'recargaPct', 'hpMaxPct', 'manaMaxPct', 'defesa', 'tenacidadePct', 'fluxoEscudoPct',
+  'reducaoFisicoPct', 'reducaoMagicoPct', 'resistencias', 'duracaoRecebidaPct', 'imunes', 'aoAcertar', 'reforcoEstado', 'danoContraEstados',
+  'esquivaPct', 'esquivaInvisivelPct', 'costasPct', 'curaRecebidaPct', 'resistenciaIgnoradaPct', 'tipo'];
+
+/** Marco 24 (D-095): um mapa de chave para porcentagem (`resistencias`, `duracaoRecebidaPct`), com as chaves conferidas. */
+function lerMapaPct<K extends string>(l: Leitor, o: Objeto, campo: string, valida: (k: string) => k is K): Partial<Record<K, number>> | undefined {
+  if (o[campo] === undefined) return undefined;
+  const m = l.objeto(o[campo], campo);
+  const saida: Partial<Record<K, number>> = {};
+  for (const k of Object.keys(m)) {
+    if (!valida(k)) l.erro(`passiva.${campo}: chave desconhecida "${k}"`);
+    else saida[k] = l.numero(m, k, { min: -100, max: 100 });
+  }
+  return saida;
+}
+
+function tiposValidos(l: Leitor, lista: readonly string[], campo: string): TipoEfeito[] {
+  return lista.filter((x): x is TipoEfeito => {
+    if (ehTipoEfeito(x)) return true;
+    l.erro(`passiva.${campo}: efeito desconhecido "${x}"`);
+    return false;
+  });
+}
 
 export function lerPassiva(l: Leitor, v: unknown): Passiva | null {
   if (v === undefined || v === null) return null;
@@ -263,7 +356,37 @@ export function lerPassiva(l: Leitor, v: unknown): Passiva | null {
     hpMaxPct: n('hpMaxPct', -50, 200),
     manaMaxPct: n('manaMaxPct', -50, 200),
     defesa: n('defesa', -20, 20),
+    ...lerPassivaGeral(l, o, n),
   };
+}
+
+/** Marco 24 (D-095): os campos das passivas gerais (só os presentes entram, para as passivas antigas ficarem iguais). */
+function lerPassivaGeral(l: Leitor, o: Objeto, n: (campo: string, min: number, max: number) => number): Partial<Passiva> {
+  const p: Partial<Passiva> = {};
+  const nums = [['reducaoFisicoPct', 0, 75], ['reducaoMagicoPct', 0, 75], ['esquivaPct', 0, 50], ['esquivaInvisivelPct', 0, 50], ['costasPct', 0, 100],
+    ['curaRecebidaPct', -50, 100], ['resistenciaIgnoradaPct', 0, 100]] as const;
+  for (const [campo, min, max] of nums) if (o[campo] !== undefined) p[campo] = n(campo, min, max);
+  const resist = lerMapaPct(l, o, 'resistencias', ehElemento);
+  if (resist) p.resistencias = resist;
+  const duracao = lerMapaPct(l, o, 'duracaoRecebidaPct', ehTipoEfeito);
+  if (duracao) p.duracaoRecebidaPct = duracao;
+  if (o.imunes !== undefined) p.imunes = tiposValidos(l, l.listaDeTextos(o, 'imunes'), 'imunes');
+  if (o.aoAcertar !== undefined) {
+    const a = l.objeto(o.aoAcertar, 'aoAcertar');
+    const [efeito] = normalizarEfeitos([a.efeito], l);
+    if (efeito) p.aoAcertar = { chancePct: l.numero(a, 'chancePct', { min: 1, max: 100 }), efeito };
+  }
+  if (o.reforcoEstado !== undefined) {
+    const r = l.objeto(o.reforcoEstado, 'reforcoEstado');
+    const [tipo] = tiposValidos(l, [l.texto(r, 'tipo')], 'reforcoEstado');
+    if (tipo) p.reforcoEstado = { tipo, valorPct: r.valorPct === undefined ? 0 : l.numero(r, 'valorPct', { min: 0, max: 200 }), duracaoMs: r.duracaoMs === undefined ? 0 : l.numero(r, 'duracaoMs', { min: 0, max: 10_000 }) };
+  }
+  if (o.danoContraEstados !== undefined) {
+    const d = l.objeto(o.danoContraEstados, 'danoContraEstados');
+    p.danoContraEstados = { estados: tiposValidos(l, l.listaDeTextos(d, 'estados'), 'danoContraEstados'), pct: l.numero(d, 'pct', { min: 0, max: 100 }) };
+  }
+  if (o.tipo !== undefined) p.tipo = l.opcao(o, 'tipo', ['defensiva', 'ofensiva'] as const);
+  return p;
 }
 
 /** Etiquetas deduzidas das camadas; as autoradas vêm junto, sem repetição, em ordem fixa. */
@@ -374,6 +497,8 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
     }),
     marcos: lerMarcos(l, o.marcos),
     fusao: o.fusao === undefined ? null : l.listaDeTextos(o, 'fusao'),
+    variantes: lerVariantes(l, o.variantes),
+    interna: o.interna === undefined ? false : l.booleano(o, 'interna'),
   };
 }
 
@@ -382,6 +507,8 @@ const CAMPOS_DEFINICAO = [
   'custoRecurso', 'recargaMs', 'conjuracaoMs', 'politicaAlvo', 'politicaImpacto', 'interrupcao', 'velocidadeProjetil',
   'efeitos', 'visual', 'elemento', 'custoVida', 'tags', 'nivelMinimo', 'passiva', 'basico', 'evolucoes', 'mods',
   'mobilidade', 'escalaCom', 'grau', 'marcos', 'fusao', 'familiaEvolucao',
+  // Marco 24
+  'variantes', 'interna', 'familiaGeral',
 ];
 
 /** Marco 18 (D-068): sem `escalaCom`, o físico escala com Força e o mágico com Inteligência. */
