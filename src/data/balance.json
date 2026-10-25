@@ -42,7 +42,7 @@
       "danoMult": 0.95,
       "falcaoDanoMult": 1.5,
       "falcaoPassoMs": 200,
-      "falcao": { "distanciaAlvo": 3, "raioPasseio": 3, "raioColeta": 7, "passeioMs": 1200, "raioCombate": 8 }
+      "falcao": { "distanciaAlvo": 3, "raioPasseio": 3, "raioColeta": 7, "passeioMs": 1200, "raioCombate": 8, "reflexoInicioPct": 80, "reflexoFimPct": 60, "pousoMs": 6000 }
     },
     "arqueiro": {
       "secundariosMult": 1.15,

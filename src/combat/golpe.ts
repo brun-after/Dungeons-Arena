@@ -1,6 +1,6 @@
 import { multiplicadorDardo, registrarDardo } from './concentracao-arcana';
 import { encherFuria } from './frenesi';
-import { entregaRemota, extraGuerreiro, multiplicadorDireto, protecaoInicial, pulsarAura } from './ajustes-classes';
+import { entregaRemota, extraGuerreiro, multiplicadorDireto, protecaoInicial, pulsarAura, reflexoDoFalcao } from './ajustes-classes';
 import { comboDoImpacto, confirmarImpactoTatico } from './sequencias';
 import { defenderGolpe, fluxoRestaurador } from './tatica';
 import { comCombo } from './combos';
@@ -99,8 +99,10 @@ export function aplicarImpacto(
   if (!vivo(alvo)) return;
   // Marco 22 (D-089): o golpe no falcão do Aventureiro cai no dono, com as defesas, os escudos e as proteções dele.
   const dono = alvo.invocacao?.companheiro ? buscarEntidade(estado, alvo.invocacao.donoId) : undefined;
+  // Marco 24 (25/10/2026, D-098): só parte do dano chega ao dono (o reflexo cai com o nível); cura e estados seguem inteiros.
   if (dono && vivo(dono)) {
-    aplicarImpacto(estado, ctx, dono, impacto, saida);
+    const fonte = { ...impacto.fonte, multDano: impacto.fonte.multDano * reflexoDoFalcao(ctx, dono.nivel) };
+    aplicarImpacto(estado, ctx, dono, { ...impacto, fonte }, saida);
     return;
   }
   const { hab } = impacto;

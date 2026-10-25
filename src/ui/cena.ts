@@ -187,6 +187,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     usarTiras: () => ap.qualidade().tiras,
     reduzido: () => ap.movimentoReduzido(),
     corElemento: (el) => Number.parseInt((ctx.conteudo.elementos.get(el)?.cor ?? '#ffffff').slice(1), 16),
+    ajuste: (e, agoraMs) => ap.ajusteVisual(e, agoraMs),
   });
   const telegrafia = new CamadaTelegrafia(palco.chao, palco.voo, projecao, () => aparencia.areaExata, ap.particulas);
   await carregarTexturasDeIcones([...new Set([...ctx.conteudo.itens.values()].map((i) => i.icone)), 'pergaminho']);
@@ -552,7 +553,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     fluxo.desenhar(estado, idLocal, ap.movimentoReduzido());
     if (!congelado) {
       telegrafia.desenhar(estado, ctx, idLocal, q.alpha);
-      sprites.desenhar(estado, ctx, q.posicao, q.alpha, q.agoraMs, q.aoRemover);
+      sprites.desenhar(estado, ctx, ap.posicaoVisual(q.posicao), q.alpha, q.agoraMs, q.aoRemover);
       numeros.atualizar(q.agoraMs);
     }
     palco.renderizar();

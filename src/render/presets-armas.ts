@@ -4,7 +4,8 @@
 // - esmagar: o anel de choque no chão, poeira pesada e rachaduras curtas;
 // - estocada: o traço longo da ponta e farpas;
 // - o giro (Redemoinho): o vento girando junto do corpo e o anel de lâminas na borda;
-// - as formas da arma: o brilho da gema (Épica), as brasas (Lendária) e o eco do golpe (Última).
+// - as formas da arma: o brilho da gema (Épica), as brasas (Lendária) e o eco do golpe (Última);
+// - o voo do falcão nas habilidades: o rastro, as linhas de velocidade do mergulho, as penas e o grito.
 // A cor do rastro vem de quem golpeia (elemento da arma, fúria do Guerreiro ou o aço).
 
 import type { Emissao } from './presets-particula';
@@ -21,7 +22,11 @@ export type NomePresetArma =
   | 'forma_lendaria'
   | 'forma_ultima'
   | 'vento_giro'
-  | 'laminas_giro';
+  | 'laminas_giro'
+  | 'falcao_rastro'
+  | 'falcao_velocidade'
+  | 'falcao_penas'
+  | 'falcao_grito';
 
 /** A lâmina do corte: meia-lua que cresce e some, orientada pelo golpe (com `abertura`, um leque). */
 const lamina = (quantidade: number, escala: readonly [number, number], abertura: number, vidaMs: readonly [number, number]): Emissao => ({
@@ -71,5 +76,10 @@ export const PRESETS_ARMAS: Readonly<Record<NomePresetArma, readonly Emissao[]>>
     { textura: 'faisca', quantidade: 3, vidaMs: [220, 340], velocidade: [140, 200], direcao: 'fora', gravidade: 0, escala: [1, 0.3], alpha: [0.85, 0], aditivo: true, raio: 26, cor: 0xeef6f8, forma: 'espiral', arrasto: 0.4 },
     { textura: 'fumaca', quantidade: 1, vidaMs: [380, 560], velocidade: [60, 100], direcao: 'fora', gravidade: 0, escala: [0.4, 1], alpha: [0.25, 0], aditivo: false, raio: 18, cor: 0xdfe6e9, forma: 'espiral', arrasto: 0.6 },
   ],
+  // O voo do falcão: o rastro na cor da skill, as linhas do mergulho, as penas no impacto e os anéis do grito.
+  falcao_rastro: [{ textura: 'brilho', quantidade: 1, vidaMs: [260, 380], velocidade: [0, 8], direcao: 'livre', gravidade: 0, escala: [0.55, 0.1], alpha: [0.75, 0], aditivo: true, raio: 2, cor: null }],
+  falcao_velocidade: [{ textura: 'faisca', quantidade: 2, vidaMs: [140, 200], velocidade: [30, 60], direcao: 'cima', gravidade: 0, escala: [1.4, 0.4], alpha: [0.9, 0], aditivo: true, raio: 6, cor: null }],
+  falcao_penas: [{ textura: 'lasca', quantidade: 6, vidaMs: [600, 900], velocidade: [40, 90], direcao: 'fora', gravidade: 60, escala: [0.6, 0.45], alpha: [1, 0], aditivo: false, raio: 6, cor: 0xc8a165, giro: [-5, 5], arrasto: 0.8 }],
+  falcao_grito: [{ textura: 'anel', quantidade: 3, vidaMs: [380, 560], velocidade: [0, 0], direcao: 'livre', gravidade: 0, escala: [0.3, 2.2], alpha: [0.8, 0], aditivo: true, raio: 0, cor: null }],
   laminas_giro: [{ textura: 'corte', quantidade: 10, vidaMs: [200, 280], velocidade: [10, 30], direcao: 'fora', gravidade: 0, escala: [1.2, 1.8], alpha: [1, 0], aditivo: true, raio: 40, cor: null, forma: 'espiral' }],
 };

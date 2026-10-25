@@ -111,6 +111,23 @@ export interface OpcoesEntidades {
   reduzido: () => boolean;
   /** Marco 23 (D-092): a cor de cada elemento (o inimigo afim fica tingido dela). */
   corElemento?: (e: Elemento) => number;
+  /** Marco 24 (D-098): o ajuste do voo (o falcão); null para quem anda no chão. */
+  ajuste?: (e: Entidade, agoraMs: number) => AjusteVisual | null;
+}
+
+/** Marco 24 (25/10/2026, D-098): quem voa solto por cima da regra (o falcão). */
+export interface AjusteVisual {
+  /** Altura extra do desenho, em px de mundo. */
+  alturaPx: number;
+  /** Inclinação na curva, em rad. */
+  inclina: number;
+  escala: number;
+  /** Cor que tinge o desenho (null: a de sempre). */
+  tinta: number | null;
+  /** Quadro do modelo (as asas), em vez do da caminhada. */
+  quadro: number | null;
+  /** Soma à profundidade (o falcão no ombro fica na frente do dono). */
+  zMais: number;
 }
 
 interface Marcador {
@@ -176,7 +193,7 @@ export class CamadaEntidades {
   }
 
   /** Modelo e fonte de desenho da entidade na visão atual (null: silhueta). */
-  private fonteDe(e: Entidade, ctx: ContextoSimulacao, iso: boolean, quadroMs: number, andando: boolean): { fonte: FonteToken; estilo: EstiloCaminhada; proprio: boolean; modelo: string } | null {
+  private fonteDe(e: Entidade, ctx: ContextoSimulacao, iso: boolean, quadroMs: number, andando: boolean, quadroFixo: number | null): { fonte: FonteToken; estilo: EstiloCaminhada; proprio: boolean; modelo: string } | null {
     const vista = iso ? '34' : 'cima';
     const token = e.id === this.o.idLocal ? this.o.tokenProprio() : null;
     if (token) return { fonte: iso ? token.emPe : token.cima, estilo: 'passada', proprio: true, modelo: '' };
@@ -187,7 +204,7 @@ export class CamadaEntidades {
     const nome = e.invocacao?.modeloOriginal ?? ctx.conteudo.presets.get(e.preset)?.modelo ?? (e.arquetipo === 'jogador' ? (classe ?? MODELO_JOGADOR) : '');
     if (!ehModelo(nome)) return null;
     const m = MODELOS[nome];
-    const quadro = m.quadros > 1 && andando ? Math.floor(quadroMs / QUADRO_MS) % m.quadros : 0;
+    const quadro = quadroFixo !== null ? Math.min(m.quadros - 1, quadroFixo) : m.quadros > 1 && andando ? Math.floor(quadroMs / QUADRO_MS) % m.quadros : 0;
     const fonte = biblioteca.fonte(nome, vista, quadro);
     return fonte ? { fonte, estilo: m.estilo, proprio: false, modelo: nome } : null;
   }
@@ -242,8 +259,9 @@ export class CamadaEntidades {
       }
       const c = centroDaCelula(p.x, p.y);
       const pt = proj.projetar(c.x, c.y);
+      const ajuste = this.o.ajuste?.(e, agoraMs) ?? null;
       m.raiz.position.set(pt.x, pt.y);
-      m.raiz.zIndex = pt.y;
+      m.raiz.zIndex = pt.y + (ajuste?.zMais ?? 0);
       // Direção do olhar na tela: o ângulo da grade passado pela projeção.
       const frente = proj.projetar(c.x + Math.cos(m.angulo), c.y + Math.sin(m.angulo));
       const dtx = frente.x - pt.x;
@@ -254,7 +272,7 @@ export class CamadaEntidades {
       m.raiz.alpha = e.morto ? 0.25 : e.invisivelAteTick > estado.tick ? 0.5 : e.invocacao?.necromancia === 'eco' ? 0.7 : 1;
 
       const andando = agoraMs < m.andandoAteMs && !e.morto;
-      const escolha = this.fonteDe(e, ctx, iso, agoraMs, andando);
+      const escolha = this.fonteDe(e, ctx, iso, agoraMs, andando, ajuste?.quadro ?? null);
       // Marco 24 (D-098): o golpe da arma (ou o giro) da ação em curso, e quanto da conjuração já passou.
       if (e.acao && escolha && m.chaveGolpe !== e.acao.chave) {
         m.golpe = golpeDaAcao(ctx, e, e.acao.chave, escolha.modelo);
@@ -263,7 +281,7 @@ export class CamadaEntidades {
       const conjura = e.acao ? e.acao.lancamentoTick - e.acao.inicioTick : 0;
       const preparo = e.acao && m.golpe ? (conjura > 0 ? Math.min(1, Math.max(0, (tickVisual - e.acao.inicioTick) / conjura)) : 1) : null;
       this.desenharCorpo(m, e, escolha, {
-        iso, usarTiras, reduzido, agoraMs, andando, aparencia, preparo,
+        iso, usarTiras, reduzido, agoraMs, andando, aparencia, preparo, ajuste,
         direcao: { x: dtx / norma, y: dty / norma },
         angulo: Math.atan2(dty, dtx),
       });
@@ -299,6 +317,7 @@ export class CamadaEntidades {
       direcao: { x: number; y: number };
       angulo: number;
       preparo: number | null;
+      ajuste: AjusteVisual | null;
     },
   ): void {
     m.silhueta.visible = !escolha;
@@ -314,7 +333,11 @@ export class CamadaEntidades {
     if (!m.rig.raiz.parent) m.raiz.addChildAt(m.rig.raiz, m.raiz.getChildIndex(m.silhueta));
     // Marco 23 (D-092): o inimigo afim leva a cor do elemento (o extremo, mais forte).
     const af = e.afinidade;
-    m.rig.raiz.tint = af && this.o.corElemento ? misturarCor(0xffffff, this.o.corElemento(af.elemento), af.extrema ? 0.6 : 0.42) : 0xffffff;
+    m.rig.raiz.tint = q.ajuste?.tinta != null ? misturarCor(0xffffff, q.ajuste.tinta, 0.75) : af && this.o.corElemento ? misturarCor(0xffffff, this.o.corElemento(af.elemento), af.extrema ? 0.6 : 0.42) : 0xffffff;
+    // Marco 24 (D-098): o voo solto do falcão (altura, inclinação na curva e o tamanho no ombro).
+    m.rig.raiz.position.y = -(q.ajuste?.alturaPx ?? 0);
+    m.rig.raiz.rotation = q.ajuste?.inclina ?? 0;
+    m.rig.raiz.scale.set(q.ajuste?.escala ?? 1);
     const tamanho = escolha.proprio ? q.aparencia.tamanho : 1;
     const alturaPx = ALTURA_TOKEN * m.escala * tamanho;
     const ataqueMs = q.agoraMs - m.ataqueDesdeMs;

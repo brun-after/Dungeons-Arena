@@ -1,7 +1,8 @@
 // Marco 22 (23/10/2026, D-089): identidade do Aventureiro (falcão), do Mago (encarnação) e do Arqueiro (Mira firme).
 import { describe, expect, it } from 'vitest';
 import { estadoPublico } from '../../src/arena/estado-publico';
-import { fonteDaHabilidade, origemDaHabilidade } from '../../src/combat/acao';
+import { alvoOfensivoValido, fonteDaHabilidade, origemDaHabilidade } from '../../src/combat/acao';
+import { reflexoDoFalcao } from '../../src/combat/ajustes-classes';
 import { aplicarImpacto } from '../../src/combat/golpe';
 import { companheiroDe, sincronizarCompanheiros } from '../../src/combat/companheiro';
 import { contarInvocacoes } from '../../src/combat/efeitos-fluxo';
@@ -84,10 +85,11 @@ describe('falcão do Aventureiro', () => {
     a.tick();
     const f = obter(companheiroDe(a.estado, a.j), 'falcão');
     const hp = a.j.hp;
-    f.hp -= 7;
+    // Marco 24 (D-098): no nível 1, 80% do dano chega ao dono.
+    f.hp -= 10;
     registrarParticipacao(f, 'b', a.estado.tick, ctx);
     sincronizarCompanheiros(a.estado, ctx);
-    expect(a.j.hp).toBe(hp - 7);
+    expect(a.j.hp).toBe(hp - 8);
     expect(f.hp).toBe(a.j.hp);
     expect(a.j.participacao.some((p) => p.id === 'b')).toBe(true);
     expect(f.participacao).toEqual([]);
@@ -100,6 +102,48 @@ describe('falcão do Aventureiro', () => {
     a.j.hp = 0;
     sincronizarCompanheiros(a.estado, ctx);
     expect(f.hp).toBe(0);
+  });
+
+  it('o reflexo do dano no dono cai com o nível: 80% no 1, 60% no máximo (marco 24)', () => {
+    expect(reflexoDoFalcao(ctx, 1)).toBeCloseTo(0.8, 5);
+    expect(reflexoDoFalcao(ctx, ctx.balance.xp.nivelMax)).toBeCloseTo(0.6, 5);
+    const a = arena('aventureiro');
+    a.tick();
+    const f = obter(companheiroDe(a.estado, a.j), 'falcão');
+    // No nível máximo, 10 de dano no falcão viram 6 no dono.
+    a.j.nivel = ctx.balance.xp.nivelMax;
+    const hp = a.j.hp;
+    f.hp -= 10;
+    sincronizarCompanheiros(a.estado, ctx);
+    expect(a.j.hp).toBe(hp - 6);
+  });
+
+  it('o falcão não atrai inimigos: só vira alvo de quem já está perseguindo (marco 24)', () => {
+    const a = arena('aventureiro');
+    a.tick();
+    const f = obter(companheiroDe(a.estado, a.j), 'falcão');
+    const orc = criarInimigo(obter(CONTEUDO.presets.get('orc'), 'orc'), 'o', 8, 8, ctx.balance);
+    a.estado.entidades.push(orc);
+    a.tick();
+    const ia = obter(orc.ia, 'ia do orc');
+    ia.modo = 'patrulha';
+    expect(alvoOfensivoValido(a.estado, ctx, orc, f)).toBe(false);
+    expect(alvoOfensivoValido(a.estado, ctx, orc, a.j)).toBe(true);
+    ia.modo = 'perseguindo';
+    expect(alvoOfensivoValido(a.estado, ctx, orc, f)).toBe(true);
+  });
+
+  it('com o dono parado e nada em volta, o falcão pousa no ombro; o dono anda e ele sai (marco 24)', () => {
+    const a = arena('aventureiro', 11);
+    a.estado.entidades.splice(a.estado.entidades.indexOf(a.boneco), 1);
+    a.tick();
+    const f = obter(companheiroDe(a.estado, a.j), 'falcão');
+    a.ticks(ticksDe(ctx.balance.ajustesClasses.aventureiro.falcao.pousoMs) + ticksDe(3000));
+    expect(f.ia?.modo).toBe('pousado');
+    expect(chebyshev(f, a.j)).toBe(0);
+    a.tick([['j', { t: 'mover', dir: 'E' }]]);
+    a.ticks(3);
+    expect(f.ia?.modo).toBe('patrulha');
   });
 
   it('as habilidades saem do falcão; o ataque básico, do Aventureiro', () => {

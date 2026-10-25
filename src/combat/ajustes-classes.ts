@@ -73,6 +73,12 @@ function progressoDoNivel(ctx: ContextoSimulacao, nivel: number): number {
   return (Math.min(ctx.balance.xp.nivelMax, Math.max(1, nivel)) - 1) / (ctx.balance.xp.nivelMax - 1);
 }
 
+/** Marco 24 (25/10/2026, D-098): a fração do dano no falcão que chega ao dono (de 80% no nível 1 a 60% no máximo). */
+export function reflexoDoFalcao(ctx: ContextoSimulacao, nivel: number): number {
+  const r = ctx.balance.ajustesClasses.aventureiro.falcao;
+  return (r.reflexoInicioPct + (r.reflexoFimPct - r.reflexoInicioPct) * progressoDoNivel(ctx, nivel)) / 100;
+}
+
 /** Dano da aura (% do dano efetivo do golpe) e cura (% do que a aura causou) no nível. */
 export function curvaDaAura(ctx: ContextoSimulacao, nivel: number): { danoPct: number; curaPct: number } {
   const r = ctx.balance.ajustesClasses.guerreiro;

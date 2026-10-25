@@ -90,7 +90,8 @@ export interface AcaoEmCurso {
   impactoPrevistoTick: number;
 }
 
-export type ModoIa = 'patrulha' | 'hesitando' | 'perseguindo';
+/** `pousado`: só o falcão do Aventureiro, no ombro do dono (marco 24, D-098). */
+export type ModoIa = 'patrulha' | 'hesitando' | 'perseguindo' | 'pousado';
 
 /** Estado da IA (§2.6). Só dados, com PRNG próprio: reproduzível no harness. */
 export interface EstadoIa {

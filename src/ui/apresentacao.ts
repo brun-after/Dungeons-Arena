@@ -22,6 +22,8 @@ import type { Camera } from '../render/camera';
 import { EfeitosDeHabilidade } from '../render/efeitos-habilidade';
 import { EfeitosDeClasse } from '../render/efeitos-classe';
 import { EfeitosDeArma } from '../render/efeitos-arma';
+import type { AjusteVisual } from '../render/sprites';
+import { VooDoFalcao } from '../render/voo-falcao';
 import { golpeDaAcao } from '../render/golpe-visual';
 import { corDaFuria } from '../render/materiais';
 import { ehElemento } from '../combat/elementos';
@@ -78,6 +80,9 @@ export interface Apresentacao {
   qualidade: () => PresetQualidade;
   /** Marco 20: o laço desenha este quadro? (teto de fps). */
   quadroPermitido: (agoraMs: number) => boolean;
+  /** Marco 24 (D-098): a posição desenhada (o falcão voa solto) e o ajuste do voo para os sprites. */
+  posicaoVisual: (base: (e: Entidade) => PontoVisual) => (e: Entidade) => PontoVisual;
+  ajusteVisual: (e: Entidade, agoraMs: number) => AjusteVisual | null;
   /** Antes de aplicar a câmera: atualiza efeitos, som, minimapa e prompt; devolve se o desenho congela. */
   quadro: (estado: EstadoJogo, agoraMs: number, dtMs: number, posicao: (e: Entidade) => PontoVisual) => boolean;
   /** Depois de atualizar a câmera: aplica o tremor e o flash. */
@@ -119,6 +124,12 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     },
   });
   efeitosArma.ligar(o.bus, o.estado, () => performance.now());
+  // Marco 24 (25/10/2026, D-098): o falcão voa solto, bate as asas, pousa no ombro e tem o voo de cada skill.
+  const voo = new VooDoFalcao({
+    particulas, habilidades: o.habilidades, reduzido,
+    parDaUltimate: (id) => ctx.conteudo.ultimates.get(id.replace(/_\d+$/, ''))?.par ?? null,
+  });
+  voo.ligar(o.bus, o.estado, () => performance.now());
   const efeitos = new EfeitosDeHabilidade({
     particulas, impacto, habilidades: o.habilidades, idLocal, qualidade, fase: ctx.fase,
     miraCheia: (e, tick) => fracaoMira(ctx, e, tick) === 1,
@@ -232,7 +243,11 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     movimentoReduzido: reduzido,
     qualidade,
     quadroPermitido: (agoraMs) => pulador.deveDesenhar(agoraMs, alvoFps()),
-    quadro: (estado, agoraMs, dtMs, posicao) => {
+    posicaoVisual: (base) => voo.posicao(base),
+    ajusteVisual: (e, agoraMs) => voo.ajuste(e, agoraMs),
+    quadro: (estado, agoraMs, dtMs, base) => {
+      voo.quadro(estado, agoraMs, base);
+      const posicao = voo.posicao(base);
       medidor.registrar(dtMs, agoraMs);
       if (prefs.qualidade === 'auto') {
         const caiu = monitor.registrar(dtMs, agoraMs, alvoFps());
