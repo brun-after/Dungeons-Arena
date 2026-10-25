@@ -15,7 +15,7 @@ import * as ultMago from './specs/ultimates-mago.mjs';
 import * as ultArqueiro from './specs/ultimates-arqueiro.mjs';
 import * as ultNecromante from './specs/ultimates-necromante.mjs';
 import * as ultAventureiro from './specs/ultimates-aventureiro.mjs';
-import { INTERNAS as INTERNAS_DOMINIO, MECANICAS, MECANICAS_VERTENTES, varianteDeDominio } from './specs/sintonia.mjs';
+import { DUPLAS, ENCARNACOES, INTERNAS as INTERNAS_DOMINIO, MECANICAS, MECANICAS_VERTENTES, varianteDeDominio } from './specs/sintonia.mjs';
 
 const dados = (arq) => join(raiz, 'src', 'data', arq);
 const ler = (arq) => JSON.parse(readFileSync(dados(arq), 'utf8'));
@@ -121,8 +121,9 @@ escrever('sintonia.json', {
   dominios: s.dominio,
   classes: s.classes,
   vertentes: Object.entries(s.vertentes).flatMap(([classe, l]) => l.map(([nome, a, b, texto]) => ({ id: slug(nome), nome, classe, familias: [a, b], texto }))),
-  encarnacoesDuplas: s.encarnacaoDupla.map(([nome, a, b, texto]) => ({ id: slug(nome), nome, elementos: [a, b], texto })),
-  mecanicas: { classes: MECANICAS, vertentes: MECANICAS_VERTENTES },
+  // A luz do Grimório é o elemento `sagrado` do jogo.
+  encarnacoesDuplas: s.encarnacaoDupla.map(([nome, a, b, texto]) => ({ id: slug(nome), nome, elementos: [a, b].map((x) => (x === 'luz' ? 'sagrado' : x)), texto, efeitos: DUPLAS[slug(nome)] })),
+  mecanicas: { classes: MECANICAS, vertentes: MECANICAS_VERTENTES, encarnacoes: ENCARNACOES },
 });
 
 // ---------------- classes.json ----------------

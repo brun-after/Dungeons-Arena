@@ -19,9 +19,12 @@ export const TIPOS_SINTONIA = [
   'mortoAterroriza', 'mortoAtira', 'estadoDobraEm', 'retornoDoServo', 'mortoInamovivel',
   // Aventureiro
   'falcaoGolpeiaComGeral', 'escudoNoFalcao', 'habilidadeAplica', 'falcaoCritico', 'habilidadeCuraAliados', 'falcaoGuardiao',
-  // Mago
+  // Mago: a sintonia e as vertentes
   'encarnar', 'encarnacaoEstende', 'encarnacaoRenova', 'suporteHerdaEncarnacao', 'duplaFixa', 'encarnacaoDuracao',
-  'contaComoElemento', 'lavaReforcada',
+  'duplaDuracao', 'contaComoElemento', 'dardoConcentra',
+  // Mago: as encarnações novas e as duplas (data/sintonia.json, mecanicas.encarnacoes e encarnacoesDuplas)
+  'magiaAplica', 'magiaAliados', 'magiaChao', 'magiaPuxa', 'danoContraEstado', 'rouboDeVida', 'aoAbaterAplica',
+  'saltoExtra', 'raioArea', 'auraAliados', 'herancaSuporte',
 ] as const;
 export type TipoSintonia = (typeof TIPOS_SINTONIA)[number];
 

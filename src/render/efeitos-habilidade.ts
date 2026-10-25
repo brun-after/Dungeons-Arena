@@ -23,7 +23,7 @@ import type { EstadoJogo } from '../core/estado';
 import type { Barramento } from '../core/events';
 import type { EventosDaSimulacao } from '../core/eventos-simulacao';
 import type { Entidade, PontoVisual } from '../entities/entidade';
-import { encarnacaoDe } from '../combat/encarnacao';
+import { encarnacaoDe, type ElementoEncarnado } from '../combat/encarnacao';
 import type { ControladorImpacto } from './impacto';
 import type { SistemaParticulas } from './particulas';
 import type { NomePreset } from './presets-particula';
@@ -54,10 +54,15 @@ const AURA: Partial<Record<TipoEfeito, NomePreset>> = {
 const cor = (hex: string) => Number.parseInt(hex.slice(1), 16);
 
 /** Marco 22 (D-089): a aura e a cor de cada encarnação do Mago. */
-const ENCARNACAO: Record<'fogo' | 'gelo' | 'raio', { preset: NomePreset; cor: number }> = {
+// Marco 24 (24/10/2026, D-095): as encarnações de terra, veneno, trevas e luz.
+const ENCARNACAO: Record<ElementoEncarnado, { preset: NomePreset; cor: number }> = {
   fogo: { preset: 'brasas', cor: 0xff6b3d },
   gelo: { preset: 'cristais', cor: 0x85c1e9 },
   raio: { preset: 'faiscas', cor: 0xbb8fce },
+  terra: { preset: 'pedra', cor: 0xb08d57 },
+  veneno: { preset: 'bolhas', cor: 0x58d68d },
+  trevas: { preset: 'sombra', cor: 0x6c3483 },
+  sagrado: { preset: 'sagrado', cor: 0xf7dc6f },
 };
 const COR_MIRA = 0xf9e79f;
 const COR_PENAS = 0xc8a165;

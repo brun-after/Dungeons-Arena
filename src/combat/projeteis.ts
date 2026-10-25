@@ -122,7 +122,7 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
           ...(p.d20Minimo ? { d20Minimo: p.d20Minimo } : {}),
         };
         const primeiro = p.atingidos.length === 0;
-        const saltos = primeiro ? quantidadeDeSaltos(hab, alvo, estado.tick, dono) : 0;
+        const saltos = primeiro ? quantidadeDeSaltos(hab, alvo, estado.tick, dono, ctx) : 0;
         aplicarImpacto(estado, ctx, alvo, { acaoId: p.acaoId, fonte, hab, indice: p.atingidos.length }, saida);
         p.atingidos.push(alvo.id);
         if (p.carregado) aoAcertarTiroCheio(estado, ctx, p, alvo, saida);

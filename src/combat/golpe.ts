@@ -37,6 +37,7 @@ import { furiaDaGeral, gastarCostas, reforcoDaGeral } from './sintonia-guerreiro
 import { miraDaGeral } from './sintonia-arqueiro';
 import { aoGolpeDoMorto, curaGeralNosMortos, mortoEsquivou } from './sintonia-necromante';
 import { aoAcertarComFalcao, criticoDoFalcao, falcaoGuardiaoAbsorve } from './sintonia-aventureiro';
+import { aoAcertarMagia, multiplicadorDaEncarnacao } from './encarnacao-efeitos';
 
 export interface Impacto {
   acaoId: number;
@@ -146,7 +147,7 @@ export function aplicarImpacto(
       { ...fonte, bonusAtributo: fonte.bonusAtributo + (impacto.danoExtra ?? 0) },
       { defesa: alvo.defesa, imune: absorve === 0 && (imuneADano(alvo, tick) || recebido === 0), multRecebido: recebido },
       ctx.balance.combate,
-      fonte.multDano * multiplicadorClima(ctx, hab.elemento) * (atacante ? multiplicadorArma(ctx, atacante, hab.id) * extraGuerreiro(ctx, atacante, alvo) * multiplicadorDireto(ctx, atacante, hab, impacto.secundario ?? false) * multiplicadorDardo(ctx, atacante, alvo, hab, tick) : 1),
+      fonte.multDano * multiplicadorClima(ctx, hab.elemento) * (atacante ? multiplicadorArma(ctx, atacante, hab.id) * extraGuerreiro(ctx, atacante, alvo) * multiplicadorDireto(ctx, atacante, hab, impacto.secundario ?? false) * multiplicadorDardo(ctx, atacante, alvo, hab, tick) * multiplicadorDaEncarnacao(ctx, atacante, alvo, hab, tick) : 1),
     );
     ({ d20, mult, falha, critico, imune } = r);
     absorveu = absorve > 0 && !r.falha;
@@ -229,6 +230,8 @@ export function aplicarImpacto(
   // Marco 24 (D-094): o primeiro alvo de cada ação enche o medidor da ultimate (a própria ultimate não enche).
   // Marco 24 (D-095): a sintonia do Aventureiro (o falcão golpeia junto, aplica estados, cura em volta).
   if (conjurador) aoAcertarComFalcao(estado, ctx, conjurador, alvo, hab, Math.min(hpAntes, dano), cura, saida);
+  // A do Mago: as encarnações novas e as duplas nas magias que acertam.
+  if (conjurador) aoAcertarMagia(estado, ctx, conjurador, alvo, hab, Math.min(hpAntes, dano), cura, impacto.indice === 0, saida);
   // Marco 24 (D-095): a sintonia do suporte do Necromante leva as curas e os escudos gerais aos mortos.
   if (conjurador && impacto.indice === 0 && conjurador.bolsa) curaGeralNosMortos(estado, ctx, conjurador, alvo, hab, cura, saida);
   if (conjurador && impacto.indice === 0 && !hab.tags.includes('ultimate')) {

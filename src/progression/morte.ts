@@ -1,6 +1,7 @@
 import { aplicaAntifarmDeFase, xpDeCriatura } from './xp-antifarm';
 import { novaMemoria } from '../combat/estado-tatico';
 import { colherMorto } from '../combat/necromancia';
+import { aoAbaterComEncarnacao } from '../combat/encarnacao-efeitos';
 import { multiplicadorFuria, temFuria } from '../combat/furia';
 // Mortes, XP, revivescência e respawn (§2.7 "Morte", §2.12) — etapa 8 do tick.
 // HP 0 é morte direta. Entidades de IA saem do mundo e voltam pelo respawn agendado, com o mesmo
@@ -129,6 +130,8 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
     // Marco 18: os ganchos "ao abater" de quem derrubou (com a habilidade do último golpe, se foi dele).
     const quemAbateu = porId ? buscarEntidade(estado, porId.id) : undefined;
     if (e.controlador !== 'ia' || e.invocacao) colherMorto(estado, ctx, e, quemAbateu, saida);
+    // Marco 24 (D-095): as duplas do Mago que agem no abate (Túmulo, Pestilência, Inverno sombrio, Miasma ardente).
+    aoAbaterComEncarnacao(estado, ctx, quemAbateu, e, saida);
     if (quemAbateu) {
       // D-071 (17/10/2026): metade da vida que falta, uma vez por morte confirmada.
       // Aliados do jogador não ganham a cura de inimigo; mortes simultâneas não ressuscitam o matador.

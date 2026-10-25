@@ -23,6 +23,8 @@ export interface EncarnacaoDupla {
   nome: string;
   elementos: readonly [string, string];
   texto: string;
+  /** Marco 24 (D-095): o efeito da fusão, no vocabulário da sintonia. */
+  efeitos: readonly EfeitoSintonia[];
 }
 
 export interface RegrasSintonia {
@@ -35,6 +37,8 @@ export interface RegrasSintonia {
   /** Marco 24 (D-095): a mecânica de cada sintonia (por classe e família) e de cada vertente, no vocabulário fechado. */
   efeitosDaClasse: Readonly<Record<string, Readonly<Record<string, readonly EfeitoSintonia[]>>>>;
   efeitosDaVertente: Readonly<Record<string, readonly EfeitoSintonia[]>>;
+  /** O efeito de cada encarnação do Mago (por elemento). */
+  efeitosDaEncarnacao: Readonly<Record<string, readonly EfeitoSintonia[]>>;
 }
 
 export interface Sintonia {
@@ -72,7 +76,7 @@ export function lerSintonia(json: unknown): { sintonia: RegrasSintonia; erros: s
   const encarnacoesDuplas = l.lista(o, 'encarnacoesDuplas').map((b): EncarnacaoDupla => {
     const v = l.objeto(b, 'encarnação dupla');
     const id = l.texto(v, 'id');
-    return { id, nome: l.texto(v, 'nome'), elementos: par(l, l.listaDeTextos(v, 'elementos'), `dupla ${id}`), texto: l.texto(v, 'texto') };
+    return { id, nome: l.texto(v, 'nome'), elementos: par(l, l.listaDeTextos(v, 'elementos'), `dupla ${id}`), texto: l.texto(v, 'texto'), efeitos: lerEfeitosSintonia(l, v.efeitos, `dupla ${id}`) };
   });
   const mec = l.objeto(o.mecanicas ?? {}, 'mecanicas');
   const mecClasses = l.objeto(mec.classes ?? {}, 'mecanicas.classes');
@@ -84,7 +88,9 @@ export function lerSintonia(json: unknown): { sintonia: RegrasSintonia; erros: s
   const mecVertentes = l.objeto(mec.vertentes ?? {}, 'mecanicas.vertentes');
   for (const id of Object.keys(mecVertentes)) if (!vertentes.some((v) => v.id === id)) l.erro(`mecanicas.vertentes: vertente "${id}" desconhecida`);
   const efeitosDaVertente = Object.fromEntries(Object.keys(mecVertentes).map((id) => [id, lerEfeitosSintonia(l, mecVertentes[id], `vertente ${id}`)]));
-  return { sintonia: { dominios, classes, vertentes, encarnacoesDuplas, efeitosDaClasse, efeitosDaVertente }, erros: l.erros };
+  const mecEncarnacoes = l.objeto(mec.encarnacoes ?? {}, 'mecanicas.encarnacoes');
+  const efeitosDaEncarnacao = Object.fromEntries(Object.keys(mecEncarnacoes).map((el) => [el, lerEfeitosSintonia(l, mecEncarnacoes[el], `encarnação ${el}`)]));
+  return { sintonia: { dominios, classes, vertentes, encarnacoesDuplas, efeitosDaClasse, efeitosDaVertente, efeitosDaEncarnacao }, erros: l.erros };
 }
 
 /** As gerais de tecla de quem usa: as teclas 3 a 6 da barra (sem bolsa, como na arena, as habilidades da ficha a partir da 3ª). */

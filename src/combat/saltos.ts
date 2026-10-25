@@ -18,10 +18,10 @@ const RAIO_ELETRIZADO = 3;
 const PCT_ELETRIZADO = 60;
 
 /** Quantos saltos este golpe terá (conferir antes do golpe principal: ele mesmo pode eletrizar). */
-export function quantidadeDeSaltos(hab: Habilidade, alvo: Entidade, tick: number, ator?: Entidade): number {
+export function quantidadeDeSaltos(hab: Habilidade, alvo: Entidade, tick: number, ator?: Entidade, ctx?: ContextoSimulacao): number {
   const eletrizado = hab.elemento === 'raio' && alvo.efeitos.some((f) => f.tipo === 'eletrizado' && f.ateTick > tick);
   // Marco 22 (D-089): o Mago encarnado em raio ganha um salto.
-  return (hab.saltos?.quantidade ?? 0) + (eletrizado ? 1 : 0) + saltosEncarnacao(ator, hab);
+  return (hab.saltos?.quantidade ?? 0) + (eletrizado ? 1 : 0) + saltosEncarnacao(ator, hab, ctx, tick);
 }
 
 export function saltar(

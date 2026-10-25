@@ -36,6 +36,7 @@ import { celulaDoCompanheiro } from './companheiro';
 import { encarnar } from './encarnacao';
 import { consumirMira } from './mira';
 import { prepararTiroCheio } from './sintonia-arqueiro';
+import { raioAreaDaEncarnacao } from './encarnacao-efeitos';
 import { quantidadeDeSaltos, saltar } from './saltos';
 import { dispararGanchosDe, passivosDe } from '../progression/ganchos-do-portador';
 import { comCombo, fazerCombo } from './combos';
@@ -362,7 +363,7 @@ function lancar(
     ator.ultimaHabilidade = { id: hab.id, chave: hab.chave, tick: estado.tick, alvoId: alvo?.id ?? null };
     // Marco 22 (D-089): a magia de fogo, gelo ou raio troca a encarnação do Mago.
     if (encarnar(ctx, ator, hab, estado.tick)) {
-      saida.push({ t: 'encarnou', tick: estado.tick, id: ator.id, elemento: ator.encarnacao ?? 'fogo' });
+      saida.push({ t: 'encarnou', tick: estado.tick, id: ator.id, elemento: ator.encarnacao ?? 'fogo', ...(ator.encarnacaoDupla && { dupla: ator.encarnacaoDupla }) });
       // Marco 24 (D-094): trocar de encarnação enche a ultimate (no máximo uma vez a cada 4 s).
       cargaDaClasse(ctx, ator, 'encarnacao', estado.tick, saida);
     }
@@ -389,7 +390,7 @@ function lancar(
         saida.push({ t: 'esquivou', tick: estado.tick, acaoId, atorId: ator.id, alvoId: alvo.id });
         break;
       }
-      const saltos = quantidadeDeSaltos(hab, alvo, estado.tick, ator);
+      const saltos = quantidadeDeSaltos(hab, alvo, estado.tick, ator, ctx);
       aplicarImpacto(estado, ctx, alvo, { ...base, indice: 0 }, saida);
       const atingidos = [alvo.id];
       // `ab_multi_alvo` (§2.8): alvos adicionais no alcance, os mais próximos primeiro.
@@ -409,7 +410,8 @@ function lancar(
       break;
     }
     case 'area': {
-      const atingidos = alvosDaForma(estado, ctx, ator, hab, celulasDaForma(hab, origemDaHabilidade(estado, ator, hab), mira, ctx.fase));
+      // Marco 24 (D-095): o Mago encarnado em terra alcança +1 de raio nas magias de área.
+      const atingidos = alvosDaForma(estado, ctx, ator, hab, celulasDaForma(raioAreaDaEncarnacao(ctx, ator, hab, estado.tick), origemDaHabilidade(estado, ator, hab), mira, ctx.fase));
       const principal = [...atingidos].sort((a, b) => chebyshev(celulaOcupada(a), mira) - chebyshev(celulaOcupada(b), mira) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))[0];
       atingidos.forEach((e, indice) => {
         aplicarImpacto(estado, ctx, e, { ...base, indice, secundario: e !== principal }, saida);

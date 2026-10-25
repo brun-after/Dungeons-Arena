@@ -311,7 +311,11 @@ export interface Entidade {
   /** Marco 23 (D-092): a afinidade elemental do inimigo (absorve o elemento, fraco ao oposto). */
   afinidade?: Afinidade;
   /** Marco 22 (D-089): o elemento que o Mago encarna (fogo, gelo ou raio). */
-  encarnacao?: 'fogo' | 'gelo' | 'raio';
+  encarnacao?: 'fogo' | 'gelo' | 'raio' | 'terra' | 'veneno' | 'trevas' | 'sagrado';
+  /** Marco 24 (D-095): o tick da última magia do elemento (a janela da dupla) e a encarnação dupla (id) até quando. */
+  encarnacaoUltimoTick?: number;
+  encarnacaoDupla?: string;
+  encarnacaoDuplaAteTick?: number;
   /** Ajuste de 24/10/2026 (D-091): até quando a encarnação vale (renova ao lançar outra magia do elemento). */
   encarnacaoAteTick?: number;
   /** Marco 22 (D-089): Mira firme do Arqueiro — a barra enche a partir deste tick (dano recebido ou tiro carregado zeram). */
