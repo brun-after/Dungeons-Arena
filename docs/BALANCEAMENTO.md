@@ -8,9 +8,8 @@
 
 Sementes: 8 por cenário (1000, 8919, 16838, 24757, 32676, 40595, 48514, 56433). Balance versão 36.
 
-## Resultado: 93/94 metas aprovadas
+## Resultado: 94/94 metas aprovadas
 
-- ✗ build: aventureiro focada vence a dispersa: 43,8% (meta 60–100%)
 
 ## Tabelas
 
@@ -19,7 +18,7 @@ Sementes: 8 por cenário (1000, 8919, 16838, 24757, 32676, 40595, 48514, 56433).
 | Classe | Nível | Golpes | Tempo | Derrotas do jogador |
 |---|---|---|---|---|
 | aventureiro | 1 | 4 | 4,9 s | 0 |
-| aventureiro | 5 | 4 | 4,8 s | 0 |
+| aventureiro | 5 | 4 | 4,7 s | 0 |
 | aventureiro | 10 | 5 | 6,5 s | 0 |
 | guerreiro | 1 | 4 | 5 s | 0 |
 | guerreiro | 5 | 4 | 4 s | 0 |
@@ -60,7 +59,7 @@ Sementes: 8 por cenário (1000, 8919, 16838, 24757, 32676, 40595, 48514, 56433).
 |---|---|---|---|
 | aventureiro | 1 | 26,3 s | 0 |
 | aventureiro | 2 | 23,5 s | 0 |
-| aventureiro | 4 | 20,9 s | 0 |
+| aventureiro | 4 | 21,6 s | 0 |
 | aventureiro | 6 | 20,8 s | 0 |
 | guerreiro | 1 | 26 s | 0 |
 | guerreiro | 2 | 19,5 s | 0 |
@@ -68,14 +67,14 @@ Sementes: 8 por cenário (1000, 8919, 16838, 24757, 32676, 40595, 48514, 56433).
 | guerreiro | 6 | 19 s | 0 |
 | mago | 1 | 33,7 s | 0 |
 | mago | 2 | 24 s | 0 |
-| mago | 4 | 22,9 s | 0 |
+| mago | 4 | 23,1 s | 0 |
 | mago | 6 | 21,8 s | 0 |
 | arqueiro | 1 | 30,4 s | 0 |
 | arqueiro | 2 | 19,9 s | 0 |
 | arqueiro | 4 | 23,3 s | 0 |
 | arqueiro | 6 | 22,3 s | 0 |
 | necromante | 1 | 30,8 s | 0 |
-| necromante | 2 | 19,8 s | 0 |
+| necromante | 2 | 19,9 s | 0 |
 | necromante | 4 | 20,8 s | 0 |
 | necromante | 6 | 21,7 s | 0 |
 
@@ -84,8 +83,8 @@ Sementes: 8 por cenário (1000, 8919, 16838, 24757, 32676, 40595, 48514, 56433).
 | Dificuldade | Tempo no comum | Golpes que aguenta | Chefe (vitórias) | Derrotas no chefe |
 |---|---|---|---|---|
 | facil | 4 s | 12 | 23 s | 0/4 |
-| normal | 5 s | 8 | 27,3 s | 0/4 |
-| dificil | 7 s | 6 | 34,8 s | 1/4 |
+| normal | 4,9 s | 8 | 27,3 s | 0/4 |
+| dificil | 7,3 s | 6 | 34,8 s | 1/4 |
 | pesadelo | 10 s | 6 | 38,5 s | 1/4 |
 
 ### PvP no Livre (nível 10, com o clamp do modo)
@@ -115,33 +114,33 @@ Sementes: 8 por cenário (1000, 8919, 16838, 24757, 32676, 40595, 48514, 56433).
 
 | Classe | Focada vence a dispersa | Equipado (raro) vence o sem equipamento |
 |---|---|---|
-| aventureiro | 43,8% | 87,5% |
-| guerreiro | 87,5% | 81,3% |
-| mago | 87,5% | 68,8% |
-| arqueiro | 75% | 81,3% |
-| necromante | 81,3% | 68,8% |
+| aventureiro | 65,6% | 95,3% |
+| guerreiro | 92,2% | 70,3% |
+| mago | 90,6% | 67,2% |
+| arqueiro | 74,2% | 89,1% |
+| necromante | 92,2% | 87,5% |
 
 ### Economia (nível 5, comuns em sequência)
 
 | Classe | XP por minuto | Ouro por minuto (estimado) |
 |---|---|---|
-| aventureiro | 162,6 | 97,5 |
+| aventureiro | 166,7 | 100 |
 | guerreiro | 304,7 | 182,8 |
 | mago | 448,9 | 269,3 |
 | arqueiro | 196,9 | 118,1 |
 | necromante | 175 | 105 |
-| invocação | 18,9% do dano | — |
+| invocação | 18,8% do dano | — |
 
 ### Faixa avançada (equipamento raro, Normal, duas sementes; informativo)
 
 | Classe | Nível | Build | Tempo no comum (s) | Vitórias |
 |---|---|---|---|---|
 | aventureiro | 20 | focada | 10 | 12/12 |
-| aventureiro | 20 | dispersa | 5,3 | 12/12 |
-| aventureiro | 25 | focada | 9,4 | 12/12 |
+| aventureiro | 20 | dispersa | 5,8 | 12/12 |
+| aventureiro | 25 | focada | 9 | 12/12 |
 | aventureiro | 25 | dispersa | 5,5 | 12/12 |
-| aventureiro | 30 | focada | 10,9 | 12/12 |
-| aventureiro | 30 | dispersa | 4,2 | 12/12 |
+| aventureiro | 30 | focada | 11 | 12/12 |
+| aventureiro | 30 | dispersa | 5,5 | 12/12 |
 | guerreiro | 20 | focada | 11,6 | 12/12 |
 | guerreiro | 20 | dispersa | 6,3 | 12/12 |
 | guerreiro | 25 | focada | 8,4 | 12/12 |
@@ -171,9 +170,9 @@ Sementes: 8 por cenário (1000, 8919, 16838, 24757, 32676, 40595, 48514, 56433).
 
 | Classe | Nível | Fácil | Normal | Difícil | Pesadelo |
 |---|---|---|---|---|---|
-| aventureiro | 20 | 20,4 | 33,4 | 103,2 | 362,5 |
-| aventureiro | 25 | 22,5 | 38,4 | 105 | 418,7 |
-| aventureiro | 30 | 25,3 | 37,7 | 111,4 | 450,1 |
+| aventureiro | 20 | 20,4 | 36,3 | 110,7 | 396,6 |
+| aventureiro | 25 | 25,2 | 43,3 | 106 | 446,5 |
+| aventureiro | 30 | 25,3 | 37,7 | 115,3 | 457,6 |
 | guerreiro | 20 | 37,1 | 44,7 | 47,9 | 139,3 |
 | guerreiro | 25 | 35,3 | 35,4 | 82,8 | 246,4 |
 | guerreiro | 30 | 50 | 42,8 | 78,6 | 216,5 |
@@ -191,9 +190,9 @@ Sementes: 8 por cenário (1000, 8919, 16838, 24757, 32676, 40595, 48514, 56433).
 
 | Classe | Nível | Fácil | Normal | Difícil | Pesadelo | Tomo no Normal (min) | Tomo no Pesadelo (min) |
 |---|---|---|---|---|---|---|---|
-| aventureiro | 20 | 236,6 | 240,7 | 209,5 | 163,1 | 41,5 | 61,3 |
-| aventureiro | 25 | 242,4 | 250,3 | 216,3 | 237,4 | 39,9 | 42,1 |
-| aventureiro | 30 | 275,4 | 194,3 | 204,7 | 252,8 | 51,5 | 39,6 |
+| aventureiro | 20 | 236,6 | 257,5 | 262 | 212,3 | 38,8 | 47,1 |
+| aventureiro | 25 | 241,2 | 262,3 | 218,3 | 222,5 | 38,1 | 44,9 |
+| aventureiro | 30 | 275,4 | 194,3 | 212,5 | 263 | 51,5 | 38 |
 | guerreiro | 20 | 463,4 | 247,8 | 85,1 | 64,2 | 40,4 | 155,8 |
 | guerreiro | 25 | 388 | 228,6 | 138,7 | 135,5 | 43,7 | 73,8 |
 | guerreiro | 30 | 520,7 | 231,6 | 149,9 | 144,2 | 43,2 | 69,3 |

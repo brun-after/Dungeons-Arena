@@ -2553,10 +2553,22 @@ aprender a evitá-las. Quem absorve um elemento pode usar a área dele para se c
   patrulha fica clara.
 - **Rede:** as fases agendadas entram nos patches da arena.
 
-**Balanceamento.** A meta "build focada vence a dispersa" do Aventureiro caiu de 62,5% para 43,8%, nas 16 sementes do
-relatório. Em 64 sementes, a taxa era 53% antes do voo e é 47% com ele: a meta já estava abaixo dos 60% e passava pela
-amostra. Mais velocidade não resolve: 2x, 10x e 14x dá o mesmo. Fica registrada para revisar a build do Aventureiro,
-sem mexer no falcão pedido.
+**Balanceamento.**
+- A meta "build focada vence a dispersa" do Aventureiro falhou com o voo, e o motivo era outro:
+  - o Mergulho tirava cerca de 60% da vida no duelo, então dois matavam qualquer build;
+  - vencia quem acertava o segundo primeiro, o que dependia de onde cada falcão patrulhava;
+  - em 64 sementes, a taxa já era de 53 a 55% antes do voo, e a amostra de 16 passava por sorte.
+- **Correções, aprovadas pelo usuário:**
+  - a skill que escala com Destreza (as do falcão e a Flecha explosiva) rola com Força e Destreza, em vez de Força e
+    Inteligência; a build que investe no atributo da skill rende mais;
+  - na arena (`modos/livre.json`, `pvp.danoClassePct`: 60), as skills de classe batem 60% entre personagens. O duelo
+    dura alguns golpes, e os atributos decidem. A campanha e o cooperativo não mudam;
+  - o golpe em voo não confere de novo o alcance a partir do dono, que pode ter andado: o alcance já valeu na
+    conjuração.
+- **Amostra:** os duelos de build passam a 64 sementes, porque com 16 a taxa do Arqueiro oscilava cerca de 20 pontos.
+  O simulador inteiro leva cerca de 1 min.
+- **Resultado:** focada contra dispersa dá Aventureiro 65,6%, Guerreiro 92,2%, Mago 90,6%, Arqueiro 74,2% e
+  Necromante 92,2%. Metas: 94/94.
 
 ## D-103 — Arco branco, anel do Necromante e aceleração pelo total (marco 25, 25/10/2026)
 

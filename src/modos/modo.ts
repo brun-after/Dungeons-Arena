@@ -127,6 +127,11 @@ export interface ModoDeJogo {
     /** Marco 18 (D-068): o estudo de habilidades anda nesta modalidade (a arena usa a ficha certificada, sem estudo). */
     estudoAvanca: boolean;
   };
+  /**
+   * Marco 25 (25/10/2026, D-102): entre personagens (os dois com ficha), as skills de classe batem `danoClassePct`%.
+   * Ausente = 100 (a campanha). Na arena, o duelo dura alguns golpes e os atributos decidem, não quem acerta primeiro.
+   */
+  pvp?: { danoClassePct: number };
 }
 
 export interface PenalidadeMorte {
@@ -260,6 +265,7 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
       revelarArmadilhas: sobrevivencia.revelarArmadilhas === undefined ? false : l.booleano(sobrevivencia, 'revelarArmadilhas'),
       estudoAvanca: sobrevivencia.estudoAvanca === undefined ? false : l.booleano(sobrevivencia, 'estudoAvanca'),
     },
+    ...(o.pvp === undefined ? {} : { pvp: { danoClassePct: l.numero(l.objeto(o.pvp, 'pvp'), 'danoClassePct', { min: 0, max: 100 }) } }),
   };
   if (modo.fim.tipo !== 'nenhum' && modo.fim.alvo === null && modo.fim.tempoLimiteS === null) {
     l.erro('fim com tipo diferente de "nenhum" precisa de alvo ou tempo limite');

@@ -60,7 +60,7 @@ export function fonteDe(e: Entidade, ctx: ContextoSimulacao, tick: number, hab: 
     equipe: e.equipe,
     // Marco 18 (D-068): o bônus fixo segue o atributo da habilidade; a rolagem escala com Força e Inteligência.
     bonusAtributo: bonusDeAtributo(e.atributos, hab.escalaCom, ctx.balance.combate.multiplicadorAtributoPadrao) + (e.bolsa ? bonusDeEspecializacao(e.atributos, hab.escalaCom, ctx.balance) : 0),
-    multRolagem: multiplicadorDeRolagem(e.atributos, ctx.balance),
+    multRolagem: multiplicadorDeRolagem(e.atributos, ctx.balance, hab.escalaCom),
     // Marco 18: a Inteligência e os passivos (Mente dupla) dão a potência dos efeitos.
     potencia: potenciaDeEfeito(e.atributos, ctx.balance) * (1 + passivosDe(ctx, e).potenciaPct / 100),
     carisma: e.atributos.carisma,

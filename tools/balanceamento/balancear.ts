@@ -20,8 +20,11 @@ const valor = (nome: string, padrao: number) => {
 };
 const SEMENTES = Array.from({ length: valor('sementes', 8) }, (_, i) => 1000 + i * 7919);
 const NIVEIS = [1, 5, 10];
-/** Os duelos de build decidem por vitória: o dobro de sementes, para o d20 não decidir sozinho. */
-const SEMENTES_DUELO = Array.from({ length: SEMENTES.length * 2 }, (_, i) => 3000 + i * 7919);
+/**
+ * Os duelos de build decidem por vitória. Marco 25 (25/10/2026, D-102): 8x as sementes (64) — com 16, a taxa do
+ * Arqueiro oscilava ~20 pontos só pela amostra (47% nas 16 primeiras, 73% nas 64).
+ */
+const SEMENTES_DUELO = Array.from({ length: SEMENTES.length * 8 }, (_, i) => 3000 + i * 7919);
 const metas = BALANCE_PADRAO.metas;
 const r1 = (v: number) => Math.round(v * 10) / 10;
 const br = (v: number) => String(r1(v)).replace('.', ',');
