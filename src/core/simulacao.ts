@@ -16,6 +16,7 @@ import { atualizarAparencias, processarBuffsArmados, usarRefugio } from '../prog
 import { alvoOfensivoValido, iniciarAcao, processarAcoes, processarAutoAtaque, usarUltimate } from '../combat/acao';
 import { dispararArmadilhaEm, processarEfeitos, processarGatilhosDeEfeito } from '../combat/efeitos';
 import { processarCarcereiros } from '../combat/sintonia-guerreiro';
+import { processarMiras } from '../combat/sintonia-arqueiro';
 import { dispensarInvocacoes } from '../combat/invocacoes';
 import { moverProjeteis } from '../combat/projeteis';
 import { vivo } from '../entities/entidade';
@@ -71,6 +72,8 @@ export function simular(
   processarEncarnacoes(estado, ctx, saida);
   // Marco 24 (D-095): a vertente Carcereiro enraíza os desafiados que chegam perto.
   processarCarcereiros(estado, ctx, saida);
+  // A do Arqueiro: a Mira invisível e o escudo da Sentinela.
+  processarMiras(estado, ctx, saida);
   processarCampos(estado, ctx, saida);
   processarPantanos(estado, ctx, saida);
   regenerarRecursos(estado, ctx);

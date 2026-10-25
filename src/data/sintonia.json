@@ -485,6 +485,86 @@
             "quando": "frenesi"
           }
         ]
+      },
+      "arqueiro": {
+        "tecnica": [
+          {
+            "t": "miraPorGeral",
+            "familia": "tecnica",
+            "pct": 25,
+            "dobra": true
+          }
+        ],
+        "arcana": [
+          {
+            "t": "tiroCheioMagico"
+          },
+          {
+            "t": "tiroCheioRicochete",
+            "n": 1,
+            "raio": 4,
+            "dobra": true
+          }
+        ],
+        "suporte": [
+          {
+            "t": "miraEscudoProtege"
+          }
+        ],
+        "fogo": [
+          {
+            "t": "tiroCheioRastro",
+            "valor": 3,
+            "ms": 3000,
+            "dobra": true
+          }
+        ],
+        "veneno": [
+          {
+            "t": "tiroCheioEspalhaEstado",
+            "estado": "envenenado"
+          }
+        ],
+        "terra": [
+          {
+            "t": "tiroCheioUltimo",
+            "efeito": {
+              "tipo": "empurrao",
+              "valor": 1
+            }
+          },
+          {
+            "t": "tiroCheioUltimo",
+            "efeito": {
+              "tipo": "enraizado",
+              "duracaoMs": 500
+            }
+          }
+        ],
+        "sombra": [
+          {
+            "t": "miraAcelera",
+            "pct": 100,
+            "quando": "invisivel",
+            "dobra": true
+          }
+        ],
+        "sagrado": [
+          {
+            "t": "tiroCheioCuraAliados",
+            "valor": 8,
+            "dobra": true
+          }
+        ],
+        "psiquico": [
+          {
+            "t": "tiroCheioAplica",
+            "efeito": {
+              "tipo": "silenciar",
+              "duracaoMs": 1000
+            }
+          }
+        ]
       }
     },
     "vertentes": {
@@ -522,6 +602,35 @@
             "tipo": "enraizado",
             "duracaoMs": 500
           }
+        }
+      ],
+      "cacador_noturno": [
+        {
+          "t": "tiroCheioInvisivel",
+          "estado": "envenenado",
+          "pct": 100
+        }
+      ],
+      "atirador_de_elite": [
+        {
+          "t": "tiroCheioRicochete",
+          "n": 2,
+          "raio": 4,
+          "pct": 15
+        }
+      ],
+      "sentinela": [
+        {
+          "t": "escudoParadoComMira",
+          "raio": 2,
+          "ms": 1000,
+          "efeito": {
+            "tipo": "escudo_acumulado",
+            "valor": 4,
+            "pct": 12,
+            "duracaoMs": 2000
+          },
+          "quando": "parado"
         }
       ]
     }

@@ -45,6 +45,14 @@ export interface Projetil {
   d20Minimo?: number;
   /** Quem já foi atingido (o projétil que atravessa não acerta o mesmo alvo duas vezes). */
   atingidos: EntidadeId[];
+  /** Marco 24 (D-095): o tiro cheio do Arqueiro e o que a sintonia pôs nele (mágico, ricochetes, invisível). */
+  carregado?: boolean;
+  magico?: boolean;
+  ricochetes?: number;
+  ricochetePct?: number;
+  invisivel?: boolean;
+  /** Aliados que o tiro cheio já curou (a sintonia sagrada), à parte de `atingidos`. */
+  curados?: EntidadeId[];
 }
 
 /**
@@ -241,7 +249,7 @@ export function clonarEstado(estado: EstadoJogo): EstadoJogo {
     rng: clonarRng(estado.rng),
     entidades: estado.entidades.map(clonarEntidade),
     recargas: { ...estado.recargas },
-    projeteis: estado.projeteis.map((p) => ({ ...p, atingidos: [...p.atingidos] })),
+    projeteis: estado.projeteis.map((p) => ({ ...p, atingidos: [...p.atingidos], ...(p.curados && { curados: [...p.curados] }) })),
     objetos: estado.objetos.map((o) => ({ ...o, efeito: copiaEfeito(o.efeito), itens: [...o.itens] })),
     respawns: estado.respawns.map((r) => ({ ...r, habilidades: [...r.habilidades] })),
     rastros: estado.rastros.map((r) => ({ ...r, interno: copiaEfeito(r.interno), atingidos: [...r.atingidos] })),

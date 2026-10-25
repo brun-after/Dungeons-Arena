@@ -13,7 +13,7 @@ export const TIPOS_SINTONIA = [
   'auraCuraAliados', 'frenesiPorEstadoPerto', 'desafiadoEnraiza',
   // Arqueiro
   'miraPorGeral', 'tiroCheioMagico', 'miraEscudoProtege', 'tiroCheioRastro', 'tiroCheioEspalhaEstado', 'tiroCheioAplica',
-  'miraInvisivel', 'tiroCheioCuraAliados', 'tiroCheioInvisivel', 'tiroCheioRicochete', 'escudoParadoComMira',
+  'tiroCheioUltimo', 'miraAcelera', 'tiroCheioCuraAliados', 'tiroCheioInvisivel', 'tiroCheioRicochete', 'escudoParadoComMira',
   // Necromante
   'mortoAplica', 'mortoCaiSeta', 'curaGeralNosMortos', 'mortoCaiExplode', 'mortoVida', 'mortoEsquiva', 'mortoCaiCura',
   'mortoAterroriza', 'mortoAtira', 'estadoDobraEm', 'retornoDoServo',

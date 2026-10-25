@@ -34,6 +34,7 @@ import { cegoErra, curaRecebidaPassivas, estadosAoAcertar, golpePelasCostas, mul
 import { registrarParticipacao } from './participacao';
 import { cargaDaClasse, cargaPorMomento } from './carga-ultimate';
 import { furiaDaGeral, gastarCostas, reforcoDaGeral } from './sintonia-guerreiro';
+import { miraDaGeral } from './sintonia-arqueiro';
 
 export interface Impacto {
   acaoId: number;
@@ -213,6 +214,8 @@ export function aplicarImpacto(
   // Marco 24 (D-095): com a sintonia técnica, as gerais técnicas que ferem também enchem.
   const furiaGeral = conjurador && !basicoQueFere && dano > 0 && conjurador !== alvo && podeFerir(conjurador, alvo, ctx.modo) ? furiaDaGeral(ctx, conjurador, hab, estado.tick) : 0;
   if (conjurador && furiaGeral > 0 && acumularFuria(ctx, conjurador, estado.tick, furiaGeral)) encherFuria(estado, ctx, conjurador, origem, saida);
+  // A do Arqueiro: as gerais técnicas que ferem enchem parte da Mira.
+  if (conjurador && !basicoQueFere && dano > 0 && conjurador !== alvo && podeFerir(conjurador, alvo, ctx.modo)) miraDaGeral(ctx, conjurador, hab, estado.tick);
   if (conjurador && basicoQueFere && curaBasicoPct > 0) {
     const valor = Math.min(hpAntes, dano) * curaBasicoPct / 100 * multiplicadorFuria(ctx, conjurador, estado.tick);
     aplicarEfeito(estado, ctx, conjurador, construirEfeito('cura', { valor }), origem, null, saida);

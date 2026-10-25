@@ -124,8 +124,8 @@ function vale(ef: EfeitoSintonia, e: Entidade, tick: number): boolean {
     case 'sempre': return true;
     case 'frenesi': return emFrenesi(e, tick);
     case 'foraDoFrenesi': return !emFrenesi(e, tick);
-    case 'invisivel': return e.efeitos.some((f) => f.tipo === 'invisivel' && f.ateTick > tick);
-    case 'parado': return e.caminho.length === 0 && !e.acao;
+    case 'invisivel': return e.invisivelAteTick > tick;
+    case 'parado': return e.direcao === 'parado' && e.caminho.length === 0;
   }
 }
 

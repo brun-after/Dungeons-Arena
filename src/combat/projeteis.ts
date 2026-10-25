@@ -19,6 +19,7 @@ import { celulaOcupada } from './geometria';
 import { aplicarImpacto } from './golpe';
 import type { Habilidade } from './habilidades';
 import { quantidadeDeSaltos, saltar } from './saltos';
+import { aoAcertarTiroCheio, aoFimDoTiroCheio, noCaminhoDoTiroCheio } from './sintonia-arqueiro';
 
 /** Sub-passo máximo da integração, em células: nenhum alvo é atravessado sem teste. */
 const SUBPASSO = 0.25;
@@ -93,8 +94,11 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
         fim = 'parede';
         break;
       }
+      // Marco 24 (D-095): o tiro cheio do Arqueiro deixa fogo e cura aliados no caminho, conforme a sintonia.
+      if (p.carregado) noCaminhoDoTiroCheio(estado, ctx, p, cx, cy, saida);
       const alvo = alvoNaCelula(estado, ctx, p, cx, cy);
-      const base = resolverHabilidade(ctx, p.chave);
+      const resolvida = resolverHabilidade(ctx, p.chave);
+      const base = resolvida && p.magico ? { ...resolvida, tipoAtaque: 'magico' as const } : resolvida;
       const hab = base && p.saltosExtrasCombo ? { ...base, saltos: { quantidade: (base.saltos?.quantidade ?? 0) + p.saltosExtrasCombo, raio: base.saltos?.raio ?? 3, pct: base.saltos?.pct ?? 60 } } : base;
       // Marco 24 (D-094): quem intercepta (Vigia, Investida de escudo) gasta uma carga e o projétil para nele.
       const escudo = alvo?.efeitos.find((f) => f.ateTick > estado.tick && f.valor > 0 && REGISTRO_EFEITOS[f.tipo].intercepta);
@@ -121,6 +125,7 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
         const saltos = primeiro ? quantidadeDeSaltos(hab, alvo, estado.tick, dono) : 0;
         aplicarImpacto(estado, ctx, alvo, { acaoId: p.acaoId, fonte, hab, indice: p.atingidos.length }, saida);
         p.atingidos.push(alvo.id);
+        if (p.carregado) aoAcertarTiroCheio(estado, ctx, p, alvo, saida);
         // Marco 14: o primeiro acerto salta (os alvos do salto entram em `atingidos`).
         if (saltos > 0) saltar(estado, ctx, { id: p.donoId, equipe: p.equipeDono }, hab, alvo, saltos, { acaoId: p.acaoId, fonte, hab }, p.atingidos, saida);
         // `atravessar` (§2.8): segue em frente e pode acertar o próximo da linha.
@@ -141,6 +146,7 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
     }
     if (fim) saida.push({ t: 'projetilFim', tick: estado.tick, projetilId: p.id, motivo: fim });
     else restantes.push(p);
+    if (fim && p.carregado) aoFimDoTiroCheio(estado, ctx, p, saida);
   }
   estado.projeteis = restantes;
 }

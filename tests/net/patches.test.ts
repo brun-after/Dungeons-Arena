@@ -24,7 +24,8 @@ describe('patches de estado (§3.6, D-035)', () => {
       comparados++;
     }
     expect(comparados).toBeGreaterThan(3000);
-  }, 60_000);
+    // 24/10/2026: ~18 s sozinho; com a suíte inteira em paralelo passava de 60 s.
+  }, 150_000);
 
   it('patch de outra base é recusado', () => {
     const cenario = criarCenario({ semente: 1 });

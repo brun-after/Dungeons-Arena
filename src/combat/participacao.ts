@@ -7,6 +7,7 @@ import { ticksDe } from '../core/tempo';
 import type { Entidade } from '../entities/entidade';
 import { contarGolpe } from './invocacoes';
 import { zerarMira } from './mira';
+import { miraProtegida } from './sintonia-arqueiro';
 
 export function registrarParticipacao(alvo: Entidade, fonteId: string, tick: number, ctx: ContextoSimulacao): void {
   const janela = ticksDe(ctx.balance.combate.janelaParticipacaoS * 1000);
@@ -14,5 +15,6 @@ export function registrarParticipacao(alvo: Entidade, fonteId: string, tick: num
   alvo.participacao.push({ id: fonteId, tick });
   contarGolpe(alvo);
   // Marco 22 (D-089): levar dano zera a Mira firme do Arqueiro.
-  zerarMira(alvo, tick);
+  // Marco 24 (D-095): com a sintonia do suporte, o escudo ativo protege a Mira.
+  if (!miraProtegida(ctx, alvo, tick)) zerarMira(alvo, tick);
 }

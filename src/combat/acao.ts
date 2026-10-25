@@ -35,6 +35,7 @@ import { lancarProjetil } from './projeteis';
 import { celulaDoCompanheiro } from './companheiro';
 import { encarnar } from './encarnacao';
 import { consumirMira } from './mira';
+import { prepararTiroCheio } from './sintonia-arqueiro';
 import { quantidadeDeSaltos, saltar } from './saltos';
 import { dispararGanchosDe, passivosDe } from '../progression/ganchos-do-portador';
 import { comCombo, fazerCombo } from './combos';
@@ -425,6 +426,9 @@ function lancar(
       }
       const fonteTiro = carregado ? { ...fonte, d20Minimo: Math.max(fonte.d20Minimo ?? 0, ctx.balance.ajustesClasses.arqueiro.mira.d20Minimo) } : fonte;
       lancarProjetil(estado, ator, hab, acaoId, fonteTiro, alvo ? celulaOcupada(alvo) : mira, saida, origemDaHabilidade(estado, ator, hab), carregado ? { alcance } : null);
+      // Marco 24 (D-095): a sintonia do Arqueiro marca o tiro cheio (mágico, ricochetes, invisível).
+      const tiro = estado.projeteis.at(-1);
+      if (carregado && tiro) prepararTiroCheio(ctx, ator, tiro, estado.tick);
       break;
     }
   }

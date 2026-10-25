@@ -57,6 +57,17 @@ export const MECANICAS = {
     sagrado: [{ t: 'auraCuraAliados', raio: 2, pct: 25, dobra: true }],
     psiquico: [{ t: 'auraAplica', efeito: ef.semAtaque(0.5), quando: 'frenesi' }],
   },
+  arqueiro: {
+    tecnica: [{ t: 'miraPorGeral', familia: 'tecnica', pct: 25, dobra: true }],
+    arcana: [{ t: 'tiroCheioMagico' }, { t: 'tiroCheioRicochete', n: 1, raio: 4, dobra: true }],
+    suporte: [{ t: 'miraEscudoProtege' }],
+    fogo: [{ t: 'tiroCheioRastro', valor: 3, ms: 3000, dobra: true }],
+    veneno: [{ t: 'tiroCheioEspalhaEstado', estado: 'envenenado' }],
+    terra: [{ t: 'tiroCheioUltimo', efeito: ef.empurra(1) }, { t: 'tiroCheioUltimo', efeito: ef.enraiza(0.5) }],
+    sombra: [{ t: 'miraAcelera', pct: 100, quando: 'invisivel', dobra: true }],
+    sagrado: [{ t: 'tiroCheioCuraAliados', valor: 8, dobra: true }],
+    psiquico: [{ t: 'tiroCheioAplica', efeito: ef.silencia(1) }],
+  },
 };
 
 /** Vertente (id) → entradas. */
@@ -67,4 +78,7 @@ export const MECANICAS_VERTENTES = {
     { t: 'frenesiPorEstadoPerto', estado: 'queimando', ms: 500, valor: 3000, quando: 'frenesi' },
   ],
   carcereiro: [{ t: 'desafiadoEnraiza', raio: 1, efeito: ef.enraiza(0.5) }],
+  cacador_noturno: [{ t: 'tiroCheioInvisivel', estado: 'envenenado', pct: 100 }],
+  atirador_de_elite: [{ t: 'tiroCheioRicochete', n: 2, raio: 4, pct: 15 }],
+  sentinela: [{ t: 'escudoParadoComMira', raio: 2, ms: 1000, efeito: ef.escudoAc(4, 12, 2), quando: 'parado' }],
 };
