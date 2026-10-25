@@ -171,6 +171,7 @@
   },
   "portas": {
     "recargaMs": 800,
+    "esperaMs": 3000,
     "janelaPortaBossMs": 30000
   },
   "invocacoes": {
@@ -387,7 +388,6 @@
   },
   "ambiente": {
     "intervaloMs": 1000,
-    "engenhoMs": 20000,
     "queimadura": 4,
     "veneno": 3,
     "duracaoMs": 1800,

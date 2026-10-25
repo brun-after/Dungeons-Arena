@@ -168,7 +168,7 @@ export interface Balance {
   /** Portas (§2.1, marco 10A-1): recarga da porta interna e janela de destaque da porta do boss. */
   portas: {
     recargaMs: number;
-    janelaPortaBossMs: number;
+    janelaPortaBossMs: number; /** Marco 24 (D-099): parado na porta de fase até sair. */ esperaMs: number;
   };
   /** Invocações (§2.9, marco 10A-3): IA própria, rampa e cascata de dominação. */
   invocacoes: {
@@ -206,7 +206,7 @@ export interface Balance {
   };
   /** Marco 18 (D-068): a Sabedoria revela (raio e chance por teste) e desarma armadilhas. */
   ambiente: {
-    intervaloMs: number; engenhoMs: number; queimadura: number; veneno: number; duracaoMs: number;
+    intervaloMs: number; queimadura: number; veneno: number; duracaoMs: number;
     danoArmadilhaBase: number; danoArmadilhaPorNivel: number; danoArmadilhaMax: number; rearmeMs: number;
     sangramento: number; sangramentoMs: number; enxameReservaMax: number; enxamePorSala: number;
     enxameAtivos: number; enxameLeva: number; enxameInicio: number; enxameRaio: number; enxameDistanciaSegura: number;

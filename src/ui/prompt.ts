@@ -6,7 +6,8 @@ import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import { t } from '../i18n';
 import { armadilhaParaDesarmar } from '../world/armadilhas-ocultas';
-import { alvoDeInteracao, recargaLojaRestante } from '../world/interacao';
+import { alvoDeInteracao, podeConverterArmadilha, recargaLojaRestante } from '../world/interacao';
+import { esperaNaPorta } from '../world/portas';
 
 const INTERVALO_MS = 200;
 
@@ -34,7 +35,10 @@ export function criarPrompt(ctx: ContextoSimulacao, idLocal: string, toque: bool
     if (o?.tipo === 'santuario') return t('prompt.santuario', { tecla: tecla('E') });
     if (o?.tipo === 'bau') return t(o.chave ? 'prompt.bauTrancado' : 'prompt.bau', { tecla: tecla('E') });
     // Marco 18 (D-068): armadilha revelada ao alcance.
-    if (!o && armadilhaParaDesarmar(estado, ctx, eu)) return t(eu.efeitos.some((f) => f.tipo === 'engenho' && f.ateTick > estado.tick) ? 'prompt.converter' : 'prompt.desarmar', { tecla: tecla('E') });
+    if (!o && armadilhaParaDesarmar(estado, ctx, eu)) return t(podeConverterArmadilha(eu, estado.tick) ? 'prompt.converter' : 'prompt.desarmar', { tecla: tecla('E') });
+    // Marco 24 (D-099): parado na porta de fase, a contagem até sair.
+    const espera = esperaNaPorta(estado, ctx, eu);
+    if (espera !== null && espera < 1) return t('prompt.esperaPorta', { s: Math.ceil((1 - espera) * (ctx.balance.portas.esperaMs / 1000)) });
     const volta = ctx.fase.portaRetorno;
     if (volta && Math.max(Math.abs(volta.x - eu.x), Math.abs(volta.y - eu.y)) <= 1) return t('prompt.retorno');
     const s = ctx.fase.portaSaida;

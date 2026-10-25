@@ -12,6 +12,18 @@ import { sonsDoEvento } from '../audio/mapeamento';
 import type { MotorAudio } from '../audio/motor';
 import type { PontoVisual } from '../entities/entidade';
 import type { Fase } from '../world/fase';
+import { hashTexto } from '../core/rng';
+
+/** Marco 24 (25/10/2026, D-099): a música da fase troca de variante a cada 3 a 4 min (o período sai da fase). */
+const TROCA_MIN_MS = 180_000;
+const TROCA_FAIXA_MS = 60_000;
+const VARIANTES = 3;
+
+/** A variante da música da fase no instante (0 nos primeiros minutos; depois gira entre as variantes). */
+export function varianteDaMusica(faseId: string, agoraMs: number): number {
+  const periodo = TROCA_MIN_MS + (hashTexto(faseId) % TROCA_FAIXA_MS);
+  return Math.floor(Math.max(0, agoraMs) / periodo) % VARIANTES;
+}
 
 export interface OpcoesSom {
   motor: MotorAudio;
@@ -27,6 +39,8 @@ export function ligarSom(o: OpcoesSom): { quadro: (ouvinte: PontoVisual | null, 
   let ouvinte: PontoVisual | null = null;
   const contexto = new ContextoMusical();
   const sombraMusical = new SombraMusical();
+  // Marco 24 (D-099): a troca de variante conta da entrada na fase.
+  const inicioMs = performance.now();
   const profundidade = profundidadeDaFase(o.fase);
 
   const tocarEm = (som: Parameters<MotorAudio['tocar']>[0], origemId: string | null) => {
@@ -81,7 +95,7 @@ export function ligarSom(o: OpcoesSom): { quadro: (ouvinte: PontoVisual | null, 
       const clima = contexto.atualizar(climaDoEstado(o.estado(), idLocal), agoraMs);
       // Marco 11A (D-066): a sombra (casual <-> dark) pela profundidade, a dificuldade e o clima, deslizando.
       const sombra = sombraMusical.atualizar(sombraDaCena(clima, profundidade, o.estado().dificuldade), agoraMs);
-      motor.definirMusica(o.fase.id, clima, sombra);
+      motor.definirMusica(o.fase.id, clima, sombra, varianteDaMusica(o.fase.id, agoraMs - inicioMs));
       for (const f of fontes) {
         motor.definirFonte(f.id, f.som);
         const d = pos ? distancia(f.obj.x, f.obj.y, pos.x, pos.y) : Infinity;

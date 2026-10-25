@@ -317,6 +317,21 @@
       "dropavel": false
     },
     {
+      "id": "kit_de_engenho",
+      "nome": "Kit de engenho",
+      "tipo": "chave",
+      "descricao": "Interaja com uma armadilha revelada para convertê-la para sua equipe. Gasta o kit.",
+      "icone": "peca",
+      "raridade": "incomum",
+      "valorBase": 0,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false
+    },
+    {
       "id": "chave_cripta",
       "nome": "Chave da cripta",
       "tipo": "chave",

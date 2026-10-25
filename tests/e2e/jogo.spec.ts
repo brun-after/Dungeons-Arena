@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test, type Locator, type Page } from '@playwright/test';
+import { pararNaPorta } from './porta';
 
 async function abrir(page: Page) {
   const erros: string[] = [];
@@ -307,9 +308,8 @@ test.describe('desktop', () => {
     await expect(page).toHaveURL(/jogo=teste/);
     await page.goto(`${page.url()}&diag=1`);
     await expect(page.locator('#diag')).toHaveAttribute('data-celula', '9,8');
-    await page.keyboard.down('d');
+    await pararNaPorta(page, 'd', '11,8');
     await expect(page.getByText('Fase concluída! Voltando ao editor…')).toBeVisible({ timeout: 20_000 });
-    await page.keyboard.up('d');
     await expect(page).toHaveURL(/editor=/, { timeout: 10_000 });
     expect(erros).toEqual([]);
   });
@@ -335,9 +335,8 @@ test.describe('desktop', () => {
     await expect(page.locator('[data-slot="2"]')).toContainText('Salões da entrada');
     await page.goto('./?jogo=campanha&slot=2&diag=1');
     await expect(page.locator('#diag')).toHaveAttribute('data-celula', '35,24');
-    await page.keyboard.down('d');
+    await pararNaPorta(page, 'd', '36,24');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Catacumbas', { timeout: 30_000 });
-    await page.keyboard.up('d');
     await expect(page.locator('#diag')).toHaveAttribute('data-celula', '4,4');
 
     // Marco 10A-2: depois da última fase oficial vem uma gerada. Mesmo truque, agora nas Catacumbas.
@@ -355,9 +354,8 @@ test.describe('desktop', () => {
     await expect(page.locator('[data-slot="3"]')).toContainText('Catacumbas');
     await page.goto('./?jogo=campanha&slot=3&diag=1');
     await expect(page.locator('#diag')).toHaveAttribute('data-celula', '35,26');
-    await page.keyboard.down('d');
+    await pararNaPorta(page, 'd', '36,26');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(/^Profundezas 1(?: · .+)?$/, { timeout: 30_000 });
-    await page.keyboard.up('d');
     expect(erros).toEqual([]);
   });
 

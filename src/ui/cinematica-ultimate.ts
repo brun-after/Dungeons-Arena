@@ -1,6 +1,7 @@
 // A cinemática da ultimate (marco 24, 25/10/2026, D-094): ao lançar a sua ultimate, uma vinheta escurece as bordas da
-// tela e o nome dela cruza o centro por ~1,4 s, na cor da habilidade. Não bloqueia o toque (pointer-events: none) e,
-// com movimento reduzido, só aparece e some (o CSS tira a animação). A explosão em partículas fica em efeitos-classe.ts.
+// tela por ~1,4 s, com o brilho na cor da habilidade. Ajuste de 25/10/2026 (D-099): sem o nome na tela. Não bloqueia o
+// toque (pointer-events: none) e, com movimento reduzido, só aparece e some (o CSS tira a animação). A explosão em
+// partículas fica em efeitos-classe.ts.
 
 import type { BuscaHabilidade } from '../combat/habilidades';
 import type { Barramento } from '../core/events';
@@ -23,9 +24,6 @@ export function ligarCinematicaUltimate(raiz: HTMLElement, bus: Barramento<Event
     el.setAttribute('aria-hidden', 'true');
     const cor = h ? visualDe(h).cor : 0xfff3c4;
     el.style.setProperty('--cor-ultimate', `#${cor.toString(16).padStart(6, '0')}`);
-    const nome = document.createElement('strong');
-    nome.textContent = h?.nome ?? ev.ultimateId;
-    el.append(nome);
     raiz.append(el);
     atual = el;
     timer = window.setTimeout(() => {

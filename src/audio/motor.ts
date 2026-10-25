@@ -53,7 +53,7 @@ export class MotorAudio {
   private ambiencia: GainNode | null = null;
   private efeitos: GainNode | null = null;
   private atual: { chave: string; seq: Sequenciador } | null = null;
-  private pedidoMusica: { faseId: string; clima: Clima; sombra: number } | null = null;
+  private pedidoMusica: { faseId: string; clima: Clima; sombra: number; variante: number } | null = null;
   private readonly limitador = new LimitadorDeSom();
   private readonly fontes = new Map<string, Fonte>();
   private pausadoPeloJogo = false;
@@ -110,7 +110,7 @@ export class MotorAudio {
       this.aplicarVolumes();
       void ctx.resume().catch(() => undefined);
       document.body.dataset.audio = 'ativo';
-      if (this.pedidoMusica) this.definirMusica(this.pedidoMusica.faseId, this.pedidoMusica.clima, this.pedidoMusica.sombra);
+      if (this.pedidoMusica) this.definirMusica(this.pedidoMusica.faseId, this.pedidoMusica.clima, this.pedidoMusica.sombra, this.pedidoMusica.variante);
       if (this.pausadoPeloJogo) void ctx.suspend().catch(() => undefined);
     } catch {
       // Sem Web Audio: o jogo segue mudo.
@@ -164,15 +164,16 @@ export class MotorAudio {
    * Música da fase no clima e na sombra pedidos (marco 11A). A sombra mexe ao vivo no filtro e no eco; quando muda a
    * faixa (ou o clima), o laço novo entra no fim do compasso do atual, cruzando em 1,5 s.
    */
-  definirMusica(faseId: string, clima: Clima, sombra = 0.5): void {
-    this.pedidoMusica = { faseId, clima, sombra };
+  definirMusica(faseId: string, clima: Clima, sombra = 0.5, variante = 0): void {
+    this.pedidoMusica = { faseId, clima, sombra, variante };
     const ctx = this.ctx;
     if (!ctx || !this.entradaMusica) return;
     const s = Math.max(0, Math.min(1, sombra));
     this.filtroMusica?.frequency.setTargetAtTime(7000 - 5200 * s, ctx.currentTime, 0.8);
     this.ambiencia?.gain.setTargetAtTime(0.1 + 0.3 * s, ctx.currentTime, 0.8);
     const faixa = faixaDaSombra(s);
-    const chave = `${faseId}:${clima}:${faixa}`;
+    // Marco 24 (D-099): a variante troca a música de tempos em tempos (o mesmo cruzamento da troca de clima).
+    const chave = `${faseId}:${clima}:${faixa}:${variante}`;
     if (this.atual?.chave === chave) return;
     const anterior = this.atual;
     // O começo do próximo compasso do laço atual (ou já, se não há música).
@@ -182,7 +183,7 @@ export class MotorAudio {
       const faltam = (PASSOS_POR_COMPASSO - (estado.passo % PASSOS_POR_COMPASSO)) % PASSOS_POR_COMPASSO;
       inicio = Math.max(inicio, estado.proximoS + faltam * duracaoPassoS);
     }
-    const seq = this.criarSequenciador(ctx, this.entradaMusica, compor(faseId, clima, faixa), inicio);
+    const seq = this.criarSequenciador(ctx, this.entradaMusica, compor(faseId, clima, faixa, variante), inicio);
     seq.ganho.gain.setValueAtTime(0.0001, inicio);
     seq.ganho.gain.exponentialRampToValueAtTime(1, inicio + FADE_CLIMA_S);
     this.atual = { chave, seq };

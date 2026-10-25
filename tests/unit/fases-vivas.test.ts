@@ -16,7 +16,9 @@ import { processarAmbientes } from '../../src/world/ambientes';
 import { processarEnxame } from '../../src/world/enxame';
 import { carregarFase, type FaseJson } from '../../src/world/fase';
 import { catalogoDeGeracao, gerarFase, type ParametrosGeracao } from '../../src/world/gerador';
-import { interagir } from '../../src/world/interacao';
+import { interagir, KIT_ENGENHO } from '../../src/world/interacao';
+import { guardarItem } from '../../src/progression/inventario';
+import { ticksDe } from '../../src/core/tempo';
 import { alcancaveis } from '../../src/world/navegacao';
 import { povoarFase } from '../../src/world/populacao';
 import { processarPortas } from '../../src/world/portas';
@@ -91,10 +93,15 @@ describe('fases vivas e preservação da campanha', () => {
     const fase = comRetorno(c.ctx.fase, { tipo: 'oficial', id: 'fase-02' });
     expect(faseAnterior({ tipo: 'oficial', id: 'fase-02' })).toEqual({ tipo: 'oficial', id: 'fase-01' });
     expect(faseAnterior({ tipo: 'aventura', id: 'a', indice: 3 })).toMatchObject({ indice: 2 });
+    // Marco 24 (D-099): parado na porta azul pela espera inteira, volta (uma vez só).
     const eventos: EventoSimulacao[] = [{ t: 'moveu', tick: 0, id: c.j.id, x: 2, y: 2 }];
+    processarPortas(c.estado, { ...c.ctx, fase }, eventos);
+    expect(eventos.some((e) => e.t === 'saidaAlcancada')).toBe(false);
+    c.estado.tick += ticksDe(c.ctx.balance.portas.esperaMs);
     processarPortas(c.estado, { ...c.ctx, fase }, eventos);
     expect(eventos.some((e) => e.t === 'saidaAlcancada' && e.retorno)).toBe(true);
     const parada: EventoSimulacao[] = [];
+    c.estado.tick++;
     processarPortas(c.estado, { ...c.ctx, fase }, parada);
     expect(parada).toEqual([]);
     expect(chegadaNaFase(fase, false)).not.toEqual(fase.portaRetorno);
@@ -152,15 +159,26 @@ describe('perigo, Sabedoria e Engenho', () => {
     expect(c.eventos.find((e) => e.t === 'armadilhaDisparou')).toMatchObject({ x: a.x, y: a.y });
   });
 
-  it('santuário dá o buff uma vez; sem ele, interagir inicia o desarme normal', () => {
+  it('santuário dá o kit de engenho; o kit converte uma armadilha revelada e se gasta; sem ele, desarma (marco 24)', () => {
     const c = cenario({ objetos: [{ tipo: 'santuario', x: 2.5 / 12, y: 3.5 / 12 }] });
     interagir(c.estado, c.ctx, c.j, c.eventos);
-    expect(c.j.efeitos.some((f) => f.tipo === 'engenho')).toBe(true);
+    expect(c.j.efeitos.some((f) => f.tipo === 'engenho')).toBe(false);
+    expect(c.j.bolsa?.mochila.some((i) => i.itemId === KIT_ENGENHO)).toBe(true);
     expect(c.estado.objetos[0]?.abertoTick).toBeGreaterThan(0);
     const d = cenario({ objetos: [armadilha] });
-    obter(d.estado.armadilhas[0]).reveladaPara.push(d.j.id);
+    const a = obter(d.estado.armadilhas[0]);
+    a.reveladaPara.push(d.j.id);
     interagir(d.estado, d.ctx, d.j, d.eventos);
     expect(d.j.interacao?.tipo).toBe('desarme');
+    // Com o kit: converte na hora e o kit some.
+    const e = cenario({ objetos: [armadilha] });
+    const b = obter(e.estado.armadilhas[0]);
+    b.reveladaPara.push(e.j.id);
+    guardarItem(obter(e.j.bolsa), obter(CONTEUDO.itens.get(KIT_ENGENHO)), 1, e.ctx.balance.inventario);
+    interagir(e.estado, e.ctx, e.j, e.eventos);
+    expect(e.j.interacao).toBeNull();
+    expect(b.donoId).toBe(e.j.id);
+    expect(e.j.bolsa?.mochila.some((i) => i.itemId === KIT_ENGENHO)).toBe(false);
   });
 
   it('água e superfícies perigosas afetam os dois lados; fora delas o piso continua normal', () => {

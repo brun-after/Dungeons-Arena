@@ -5,8 +5,6 @@
 // arma a recarga dela para aquele jogador; morrer fecha e também arma (§2.12).
 // Baú compartilhado tem um abridor por vez (§3.6): a reserva sai com a entrega, a morte ou a saída.
 
-import { aplicarEfeito } from '../combat/efeitos';
-import { construirEfeito } from '../combat/registro-efeitos';
 import { usarRefugio } from '../progression/buffs';
 import { perseguido } from '../progression/recursos';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
@@ -55,6 +53,23 @@ export function alvoDeInteracao(estado: EstadoJogo, ctx: ContextoSimulacao, e: E
 
 const temItem = (e: Entidade, itemId: string): boolean => e.bolsa?.mochila.some((i) => i.itemId === itemId) ?? false;
 
+/** Marco 24 (25/10/2026, D-099): o item do santuário de Engenho (converte uma armadilha revelada e se gasta). */
+export const KIT_ENGENHO = 'kit_de_engenho';
+
+/** Converte a armadilha revelada: com o efeito Engenho ativo (orbe) ou gastando um kit. */
+export function podeConverterArmadilha(e: Entidade, tick: number): boolean {
+  return e.efeitos.some((f) => f.tipo === 'engenho' && f.ateTick > tick) || temItem(e, KIT_ENGENHO);
+}
+
+function gastarItem(e: Entidade, itemId: string): void {
+  const mochila = e.bolsa?.mochila ?? [];
+  const indice = mochila.findIndex((i) => i.itemId === itemId);
+  const entrada = mochila[indice];
+  if (!entrada) return;
+  entrada.qtd--;
+  if (entrada.qtd <= 0) mochila.splice(indice, 1);
+}
+
 /** D-067: a janela da loja não tem prazo (fecha pelo jogador ou pela perseguição). */
 export const LOJA_SEM_PRAZO = 2 ** 31 - 1;
 
@@ -74,7 +89,9 @@ function tentarInteragir(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade
     const a = armadilhaParaDesarmar(estado, ctx, e);
     if (!a) return 'nada_perto';
     // 17/10/2026: Engenho converte somente armadilhas descobertas, preservando o valor da Sabedoria.
-    if (e.efeitos.some((f) => f.tipo === 'engenho' && f.ateTick > tick)) {
+    // Marco 24 (D-099): o efeito do orbe converte à vontade enquanto dura; sem ele, o kit do santuário converte uma.
+    if (podeConverterArmadilha(e, tick)) {
+      if (!e.efeitos.some((f) => f.tipo === 'engenho' && f.ateTick > tick)) gastarItem(e, KIT_ENGENHO);
       a.donoId = e.id;
       a.equipeDono = e.equipe;
       a.reveladaPara = [...new Set([...a.reveladaPara, e.id])];
@@ -89,9 +106,13 @@ function tentarInteragir(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade
     saida.push({ t: 'interacaoIniciada', tick, id: e.id, objetoId: String(a.id), tipo: 'desarme', ateTick });
     return null;
   }
+  // Marco 24 (25/10/2026, D-099): o santuário entrega o kit de engenho (na mochila, ou ao lado se não couber).
   if (o.tipo === 'santuario') {
+    const kit = ctx.conteudo.itens.get(KIT_ENGENHO);
+    if (!kit) return 'nada_perto';
     o.abertoTick = tick + 1;
-    aplicarEfeito(estado, ctx, e, construirEfeito('engenho', { duracaoMs: ctx.balance.ambiente.engenhoMs }), { id: e.id, x: o.x, y: o.y }, null, saida);
+    if (!guardarItem(e.bolsa, kit, 1, ctx.balance.inventario)) largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, KIT_ENGENHO, x, y, saida));
+    saida.push({ t: 'santuarioUsado', tick, id: e.id, itemId: KIT_ENGENHO });
     return null;
   }
   const eco = ctx.balance.economia;

@@ -198,7 +198,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     { camada: palco.entidades, projecao },
     (id) => ctx.conteudo.itens.get(id)?.icone,
   );
-  const fluxo = new CamadaFluxo(palco.chao, () => ap.particulas.limite > 0, () => ticksDe(ctx.balance.armadilhas.desarmeMs));
+  const fluxo = new CamadaFluxo(palco.chao, () => ap.particulas.limite > 0, () => ticksDe(ctx.balance.armadilhas.desarmeMs), () => ticksDe(ctx.balance.portas.esperaMs));
   bus.on('armadilhaDisparou', (ev) => {
     if (ev.x !== undefined && ev.y !== undefined) fluxo.disparou(ev.x, ev.y, ev.tick);
   });

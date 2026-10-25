@@ -3,6 +3,7 @@
 // e, no desktop, um tileset enviado como imagem vira o terreno da fase.
 
 import { expect, test, type Page } from '@playwright/test';
+import { pararNaPorta } from './porta';
 
 /** Mesmo enquadramento do "ajustar" do editor: fase 24×16 centrada, célula de 48 px × zoom. */
 async function grade(page: Page) {
@@ -77,9 +78,10 @@ test('celular: aventura de 2 fases criada no toque, testada da fase 1 até a 2',
   await page.getByRole('button', { name: 'Testar a aventura desde a fase 1' }).click();
   await expect(page).toHaveURL(/jogo=teste.*indice=0.*seguir=1/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Fase 1');
-  await page.keyboard.down('d');
+  // Marco 24 (D-099): para na saída (ao lado do início) e fica parado nela até sair.
+  await page.goto(`${page.url()}&diag=1`);
+  await pararNaPorta(page, 'd', '3,1');
   await expect(page.getByText('Fase concluída! Indo para a próxima fase da aventura…')).toBeVisible({ timeout: 30_000 });
-  await page.keyboard.up('d');
   await expect(page).toHaveURL(/indice=1/, { timeout: 10_000 });
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Fase 2');
   expect(erros).toEqual([]);
