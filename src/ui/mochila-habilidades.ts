@@ -161,7 +161,9 @@ export function desenharHabilidades(
       const falta = el('span', 'detalhe-item estudo-restante');
       falta.dataset.estudoRestante = id;
       falta.textContent = t('habilidades.estudando', { tempo: duracaoLegivel(ticksRestantesDoEstudo(bolsa.estudo) * DT_MS) });
-      acoes.append(falta, el('span', 'detalhe-item', t('progressao.velocidadeEstudo', { n: Math.round(velocidadeDoEstudo(bolsa.estudo) * 100) / 100 })));
+      // Marco 25 (D-103): a aceleração corta o tempo; a velocidade só aparece em saves antigos acelerados.
+      const velocidade = velocidadeDoEstudo(bolsa.estudo);
+      acoes.append(falta, el('span', 'detalhe-item', velocidade > 1 ? t('progressao.velocidadeEstudo', { n: Math.round(velocidade * 100) / 100 }) : t('progressao.acelerarEstudo')));
     } else if (proximo <= rankMax) {
       const essencias = conhecida ? bolsa.mochila.filter((i) => {
         const p = ctx.conteudo.itens.get(i.itemId)?.progressao;

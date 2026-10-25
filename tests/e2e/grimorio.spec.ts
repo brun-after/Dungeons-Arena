@@ -64,11 +64,11 @@ test('progressão: acelerar estudo por item, consumir tomo e escolher evolução
   await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
   await page.keyboard.press('KeyI');
   const mochila = page.getByRole('dialog', { name: 'Mochila' });
-  await mochila.locator('[data-chave="inv-teste-acelerador"]').click();
+  // Marco 25 (D-103): a rara corta metade do tempo total do estudo (sobra uma; a segunda concluiria).
   await mochila.locator('[data-chave="inv-teste-acelerador"]').click();
   await mochila.locator('[data-chave="inv-teste-tomo"]').click();
   await mochila.getByRole('button', { name: /^Habilidades/ }).click();
-  await expect(mochila.getByText(/Velocidade do estudo: 2×/)).toBeVisible();
+  await expect(mochila.getByText(/cortar o tempo do estudo/)).toBeVisible();
   await expect(mochila.locator('[data-pontos-habilidade]')).toHaveAttribute('data-pontos-habilidade', '4');
   await expect(mochila.locator('[data-chave^="acelerar-"]')).toHaveCount(0);
   await mochila.getByRole('button', { name: 'Itens', exact: true }).click();
@@ -86,7 +86,10 @@ test('progressão: acelerar estudo por item, consumir tomo e escolher evolução
   const final = JSON.parse(await readFile(caminhoFinal, 'utf8')) as typeof salvo;
   const b = final.registro.estado.entidades.find(e => e.bolsa)?.bolsa;
   if (!b?.estudo) throw new Error('estudo não persistido');
-  expect(b.estudo.velocidade12).toBe(24);
+  // Metade das 18 000 cortada; o estudo seguiu andando enquanto se jogava.
+  expect(b.estudo.restanteTicks).toBeLessThanOrEqual(9000);
+  expect(b.estudo.restanteTicks).toBeGreaterThan(7000);
+  expect(b.estudo.velocidade12).toBe(12);
   expect(b.pontosHabilidade).toBe(4);
   expect(b.ranksPorItens).toBe(1);
   expect(b.conhecidas.find(h => h.id === 'bola_de_fogo')?.caminhos).toContain('eficiente');

@@ -31,6 +31,8 @@ export class RigToken {
   private readonly adornoFrente = new Sprite();
   /** Marco 24 (25/10/2026, D-098): a arma principal, girando em torno da mão no golpe. */
   private readonly arma = new Sprite();
+  /** Marco 25 (25/10/2026, D-103): a silhueta branca por cima da arma (o pulso do arco com a mira cheia). */
+  private readonly brilhoArma = new Sprite();
   private pivo = { x: 0, y: 0 };
   private readonly tiras: Sprite[] = [];
   private readonly colunas: [Sprite, Sprite][] = [];
@@ -47,8 +49,8 @@ export class RigToken {
       this.colunas.push([e, d]);
       this.corpo.addChild(s, e, d);
     }
-    this.corpo.addChild(this.adornoFrente, this.arma);
-    this.adornoAtras.visible = this.adornoFrente.visible = this.arma.visible = false;
+    this.corpo.addChild(this.adornoFrente, this.arma, this.brilhoArma);
+    this.adornoAtras.visible = this.adornoFrente.visible = this.arma.visible = this.brilhoArma.visible = false;
     this.raiz.addChild(this.corpo);
     this.trocarFonte(fonte);
   }
@@ -98,6 +100,9 @@ export class RigToken {
     this.arma.pivot.set(this.pivo.x, this.pivo.y);
     this.arma.position.set(ox0 + this.pivo.x + (a?.dx ?? 0) * f.largura, oy0 + this.pivo.y + (a?.dy ?? 0) * f.altura);
     this.arma.rotation = a?.rotacao ?? 0;
+    this.brilhoArma.pivot.copyFrom(this.arma.pivot);
+    this.brilhoArma.position.copyFrom(this.arma.position);
+    this.brilhoArma.rotation = this.arma.rotation;
     const tiras = o.usarTiras && p.tiras.length === TIRAS;
     this.inteiro.visible = !tiras;
     const ox = -f.ancoraX * f.largura;
@@ -121,8 +126,12 @@ export class RigToken {
   }
 
   /** D-067: as texturas do equipamento (null esconde a camada). Marco 24: a arma à parte, com o pivô na mão. */
-  adornar(atras: Texture | null, frente: Texture | null, arma: Texture | null = null, pivo?: { x: number; y: number }): void {
+  adornar(atras: Texture | null, frente: Texture | null, arma: Texture | null = null, pivo?: { x: number; y: number }, armaBranca: Texture | null = null, brilho = 0): void {
     this.arma.visible = !!arma;
+    // Marco 25 (D-103): a silhueta branca da arma, com o alfa pedido (0 esconde).
+    this.brilhoArma.visible = !!arma && !!armaBranca && brilho > 0;
+    if (armaBranca && this.brilhoArma.texture !== armaBranca) this.brilhoArma.texture = armaBranca;
+    this.brilhoArma.alpha = brilho;
     if (arma && this.arma.texture !== arma) this.arma.texture = arma;
     if (pivo) this.pivo = pivo;
     this.adornoAtras.visible = !!atras;

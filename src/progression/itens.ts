@@ -18,7 +18,8 @@ import type { FormaItem } from './gerar-item-base';
 export type NomeAtributo = keyof Atributos;
 export const NOMES_ATRIBUTOS = Object.keys(ATRIBUTOS_NEUTROS) as NomeAtributo[];
 
-export type ProgressaoItem = { tipo: 'aceleracao'; unidades12: number } | { tipo: 'ponto' } | { tipo: 'rank'; familia: string };
+/** Marco 25 (25/10/2026, D-103): a aceleração corta `cortePct` do tempo total do estudo. */
+export type ProgressaoItem = { tipo: 'aceleracao'; cortePct: number } | { tipo: 'ponto' } | { tipo: 'rank'; familia: string };
 
 export type TipoItem = 'equipamento' | 'consumivel' | 'chave' | 'livro';
 
@@ -126,7 +127,7 @@ export function lerItens(json: unknown): { itens: Map<string, Item>; erros: stri
     if (o.progressao !== undefined) {
       const p = l.objeto(o.progressao, 'progressao');
       const t = l.opcao(p, 'tipo', ['aceleracao', 'ponto', 'rank'] as const);
-      item.progressao = t === 'aceleracao' ? { tipo: t, unidades12: l.numero(p, 'unidades12', { min: 1, max: 12, inteiro: true }) }
+      item.progressao = t === 'aceleracao' ? { tipo: t, cortePct: l.numero(p, 'cortePct', { min: 1, max: 100 }) }
         : t === 'rank' ? { tipo: t, familia: l.texto(p, 'familia') } : { tipo: t };
       if (tipo !== 'consumivel') l.erro('progressão exige consumível');
     }

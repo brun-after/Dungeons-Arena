@@ -17,13 +17,18 @@ export interface TexturasAdorno {
   frente: Texture | null;
   /** Marco 24 (25/10/2026, D-098): a arma principal à parte, e o pivô dela (a mão) em px da textura. */
   arma: Texture | null;
+  /** Marco 25 (25/10/2026, D-103): a silhueta branca da arma (o arco do Arqueiro com a mira cheia). */
+  armaBranca: Texture | null;
   pivo: { x: number; y: number };
 }
 
 /** Combinações guardadas (modelo, vista e equipamento); passando disso, sai a mais antiga. */
 const MAXIMO = 96;
 const cache = new Map<string, TexturasAdorno | 'carregando'>();
-const VAZIO: TexturasAdorno = { atras: null, frente: null, arma: null, pivo: { x: 0, y: 0 } };
+const VAZIO: TexturasAdorno = { atras: null, frente: null, arma: null, armaBranca: null, pivo: { x: 0, y: 0 } };
+/** A arma inteira pintada de branco (mantém só o alfa do desenho). */
+const silhuetaBranca = (svg: string) =>
+  svg ? `<defs><filter id="branco"><feFlood flood-color="#ffffff"/><feComposite in2="SourceAlpha" operator="in"/></filter></defs><g filter="url(#branco)">${svg}</g>` : '';
 /** Do quadro do modelo (64) para os px da textura. */
 const PX = LADO_PX / LADO_QUADRO;
 
@@ -78,8 +83,8 @@ export function texturasDoAdorno(modelo: string, vista: Vista, aparencia: Aparen
     formaMaxima: ap.formaMaxima,
   });
   const pivo = { x: camadas.pivo.x * PX, y: camadas.pivo.y * PX };
-  void Promise.all([textura(camadas.atras), textura(camadas.frente), textura(camadas.arma)]).then(([atras, frente, arma]) => {
-    cache.set(chave, { atras, frente, arma, pivo });
+  void Promise.all([textura(camadas.atras), textura(camadas.frente), textura(camadas.arma), textura(silhuetaBranca(camadas.arma))]).then(([atras, frente, arma, armaBranca]) => {
+    cache.set(chave, { atras, frente, arma, armaBranca, pivo });
   });
   return VAZIO;
 }

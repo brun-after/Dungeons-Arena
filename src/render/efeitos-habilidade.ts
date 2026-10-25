@@ -331,11 +331,8 @@ export class EfeitosDeHabilidade {
         this.encarnacaoVisual(e.id, pos, ENCARNACAO[el].cor, agoraMs);
         continue;
       }
-      if (this.o.miraCheia?.(e, estado.tick) !== true) continue;
-      const chave = `classe:${e.id}`;
-      if (agoraMs - (this.ultimaAura.get(chave) ?? 0) < INTERVALO_AURA_MS) continue;
-      this.ultimaAura.set(chave, agoraMs);
-      this.o.particulas.emitir('brilho', pos.x, pos.y, COR_MIRA);
+      // Marco 25 (25/10/2026, D-103): a mira cheia do Arqueiro não solta mais o pulso de brilho; o arco fica branco
+      // (render/sprites.ts, `armaBranca`).
     }
     // Marco 23 (D-092): o inimigo afim solta o elemento dele.
     for (const e of estado.entidades) {

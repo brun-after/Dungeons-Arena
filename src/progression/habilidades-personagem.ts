@@ -219,7 +219,7 @@ function iniciarEstudo(e: Entidade, ctx: ContextoSimulacao, id: string, tick: nu
 }
 
 /** Fim do estudo: a habilidade entra no rank 1 (e numa tecla livre, se for ativa). */
-function concluirEstudo(e: Entidade, ctx: ContextoSimulacao, tick: number, saida: EventoSimulacao[]): void {
+export function concluirEstudo(e: Entidade, ctx: ContextoSimulacao, tick: number, saida: EventoSimulacao[]): void {
   const bolsa = e.bolsa;
   const estudo = bolsa?.estudo;
   if (!bolsa || !estudo) return;

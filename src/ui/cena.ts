@@ -52,6 +52,7 @@ import { cargaDe, ultimateDe } from '../combat/carga-ultimate';
 import { criarControles, type Controles } from './controles';
 import { Diagnostico, type DadosRede } from './diagnostico';
 import { montarApresentacao } from './apresentacao';
+import { fracaoMira } from '../combat/mira';
 import { ligarFeedback } from './feedback';
 import { ligarFeedbackGrimorio } from './feedback-grimorio';
 import { ligarCinematicaUltimate } from './cinematica-ultimate';
@@ -188,6 +189,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     reduzido: () => ap.movimentoReduzido(),
     corElemento: (el) => Number.parseInt((ctx.conteudo.elementos.get(el)?.cor ?? '#ffffff').slice(1), 16),
     ajuste: (e, agoraMs) => ap.ajusteVisual(e, agoraMs),
+    // Marco 25 (D-103): o arco branco do Arqueiro com a mira cheia.
+    armaBranca: (e, tick) => fracaoMira(ctx, e, tick) === 1,
   });
   const telegrafia = new CamadaTelegrafia(palco.chao, palco.voo, projecao, () => aparencia.areaExata, ap.particulas);
   await carregarTexturasDeIcones([...new Set([...ctx.conteudo.itens.values()].map((i) => i.icone)), 'pergaminho']);

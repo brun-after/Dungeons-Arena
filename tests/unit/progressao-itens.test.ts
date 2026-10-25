@@ -33,28 +33,39 @@ function cena() {
 }
 
 describe('consumíveis de progressão', () => {
-  it('aceleração soma graus, preserva frações e não conclui tempo instantaneamente', () => {
+  it('aceleração corta uma fatia do tempo total; se passa do que falta, conclui na hora (marco 25)', () => {
+    // 18 min de estudo (21 600 ticks), restando 6 min (7 200).
     const c = cena();
-    c.b.estudo = { id: 'pedregulho', totalTicks: 100, restanteTicks: 100, aceleracoes: 0 };
+    c.b.estudo = { id: 'pedregulho', totalTicks: 21_600, restanteTicks: 7_200, aceleracoes: 0 };
     c.b.pontosHabilidade = 7;
-    for (const grau of ['comum', 'incomum', 'rara']) usarItem(c.estado, c.j, c.ctx, c.dar(`aceleracao_mente_${grau}`), c.eventos);
-    expect(c.b.estudo.velocidade12).toBe(25);
-    expect(c.b.estudo.restanteTicks).toBe(100);
-    expect(ticksRestantesDoEstudo(c.b.estudo)).toBe(48);
-    for (let n = 0; n < 12; n++) avancarEstudos(c.estado, c.ctx, c.eventos);
-    expect(c.b.estudo.restanteTicks).toBe(75);
-    expect(c.b.estudo.fracao12).toBe(0);
+    usarItem(c.estado, c.j, c.ctx, c.dar('aceleracao_mente_comum'), c.eventos);
+    // A comum tira 25% de 18 min (4,5 min): restam 1,5 min.
+    expect(c.b.estudo.restanteTicks).toBe(7_200 - 5_400);
     expect(c.b.pontosHabilidade).toBe(7);
     const copia = clonarEntidade(c.j);
     expect(copia.bolsa?.estudo).toEqual(c.b.estudo);
     expect(copia.bolsa?.estudo).not.toBe(c.b.estudo);
-    for (let n = 0; n < 36; n++) avancarEstudos(c.estado, c.ctx, c.eventos);
+    // A incomum (um terço, 6 min) passa do que falta: conclui na hora.
+    usarItem(c.estado, c.j, c.ctx, c.dar('aceleracao_mente_incomum'), c.eventos);
     expect(c.b.estudo).toBeNull();
     expect(c.b.conhecidas.some((h) => h.id === 'pedregulho')).toBe(true);
-    c.b.pontosHabilidade = 1;
-    c.b.liberadas = ['seta_arcana'];
-    subirRank(c.j, c.ctx, 'seta_arcana', undefined, 0, c.eventos);
-    expect(c.b.estudo.velocidade12).toBe(12);
+    // Com 6 min restando, a incomum sozinha também conclui.
+    const d = cena();
+    d.b.estudo = { id: 'pedregulho', totalTicks: 21_600, restanteTicks: 7_200, aceleracoes: 0 };
+    usarItem(d.estado, d.j, d.ctx, d.dar('aceleracao_mente_incomum'), d.eventos);
+    expect(d.b.estudo).toBeNull();
+    // O estudo segue andando normalmente depois do corte.
+    const e = cena();
+    e.b.estudo = { id: 'pedregulho', totalTicks: 100, restanteTicks: 100, aceleracoes: 0 };
+    usarItem(e.estado, e.j, e.ctx, e.dar('aceleracao_mente_rara'), e.eventos);
+    expect(e.b.estudo.restanteTicks).toBe(50);
+    expect(ticksRestantesDoEstudo(e.b.estudo)).toBe(50);
+    for (let n = 0; n < 50; n++) avancarEstudos(e.estado, e.ctx, e.eventos);
+    expect(e.b.estudo).toBeNull();
+    e.b.pontosHabilidade = 1;
+    e.b.liberadas = ['seta_arcana'];
+    subirRank(e.j, e.ctx, 'seta_arcana', undefined, 0, e.eventos);
+    expect(e.b.estudo.velocidade12).toBe(12);
   });
 
   it('sem estudo não consome; os itens de progressão não ocupam atalhos de poção', () => {
