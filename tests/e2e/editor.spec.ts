@@ -80,7 +80,7 @@ test('celular: aventura de 2 fases criada no toque, testada da fase 1 até a 2',
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Fase 1');
   // Marco 24 (D-099): para na saída (ao lado do início) e fica parado nela até sair.
   await page.goto(`${page.url()}&diag=1`);
-  await pararNaPorta(page, 'd', '3,1');
+  await pararNaPorta(page, '3,1');
   await expect(page.getByText('Fase concluída! Indo para a próxima fase da aventura…')).toBeVisible({ timeout: 30_000 });
   await expect(page).toHaveURL(/indice=1/, { timeout: 10_000 });
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Fase 2');

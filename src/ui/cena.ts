@@ -563,7 +563,9 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       return {
         tick: estado.tick,
         celula: { x: j?.x ?? 0, y: j?.y ?? 0 },
+        destino: { x: j?.destinoX ?? 0, y: j?.destinoY ?? 0 },
         tela: camera.paraTela(p.x, p.y),
+        grade: [camera.paraTela(j?.x ?? 0, j?.y ?? 0), camera.paraTela((j?.x ?? 0) + 1, j?.y ?? 0), camera.paraTela(j?.x ?? 0, (j?.y ?? 0) + 1)],
         entidades: estado.entidades.length,
         impactos: feedback.impactos(),
         hp: j?.hp ?? 0,

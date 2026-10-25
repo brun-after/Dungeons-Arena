@@ -74,7 +74,7 @@ test('porta azul retorna e a saída reabre a fase seguinte, sem perder o mundo v
   await page.screenshot({ path: info.outputPath('porta-retorno.png') });
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Salões da entrada', { timeout: 30000 });
   await expect(page.locator('#diag')).toHaveAttribute('data-celula', '36,25');
-  await pararNaPorta(page, 'w', '36,24');
+  await pararNaPorta(page, '36,24');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Catacumbas', { timeout: 30000 });
   expect(erros).toEqual([]);
 });
