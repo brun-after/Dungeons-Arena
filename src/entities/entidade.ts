@@ -90,8 +90,11 @@ export interface AcaoEmCurso {
   impactoPrevistoTick: number;
 }
 
-/** `pousado`: só o falcão do Aventureiro, no ombro do dono (marco 24, D-098). */
-export type ModoIa = 'patrulha' | 'hesitando' | 'perseguindo' | 'pousado';
+/**
+ * Só o falcão do Aventureiro: `pousado` no ombro do dono (marco 24, D-098); `mergulho` voando ao alvo do golpe e
+ * `dash` cortando a linha de um projétil (marco 25, D-102), os dois mais rápidos que a patrulha.
+ */
+export type ModoIa = 'patrulha' | 'hesitando' | 'perseguindo' | 'pousado' | 'mergulho' | 'dash';
 
 /** Estado da IA (§2.6). Só dados, com PRNG próprio: reproduzível no harness. */
 export interface EstadoIa {
@@ -122,6 +125,12 @@ export interface EstadoIa {
   /** Marco 18 (17/10/2026): o tick do último golpe recebido que já virou revide (os mais novos ainda não). */
   ultimaAgressaoVista: number;
   rng: EstadoRng;
+  /**
+   * Marco 25 (25/10/2026, D-100): donos de armadilha que esta IA viu disparar (passa a contornar as deles), até
+   * `balance.ia.armadilhasLembradas`; e se está indo se curar na área do próprio elemento.
+   */
+  armadilhasVistas?: EntidadeId[];
+  curando?: boolean;
 }
 
 /** Quem causou dano e quando, para dividir XP entre participantes (§2.7, morte). */
@@ -535,6 +544,7 @@ export function clonarEntidade(e: Entidade): Entidade {
           detectados: [...e.ia.detectados],
           recentes: copiarCelulas(e.ia.recentes),
           rng: clonarRng(e.ia.rng),
+          ...(e.ia.armadilhasVistas ? { armadilhasVistas: [...e.ia.armadilhasVistas] } : {}),
         }
       : null,
     bolsa: e.bolsa ? clonarBolsa(e.bolsa) : null,

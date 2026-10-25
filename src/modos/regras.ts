@@ -19,6 +19,11 @@ export function regeneraPorCelula(modo: ModoDeJogo): boolean {
   return modo.sobrevivencia.regenPorCelula;
 }
 
+/** Marco 25 (D-102): o fator das skills de classe entre personagens neste modo (1 na campanha). */
+export function fatorDeClasseEntrePersonagens(modo: ModoDeJogo): number {
+  return (modo.pvp?.danoClassePct ?? 100) / 100;
+}
+
 /** Marco 18 (D-068): a Sabedoria revela e desarma armadilhas neste modo? */
 export function revelaArmadilhas(modo: ModoDeJogo): boolean {
   return modo.sobrevivencia.revelarArmadilhas;

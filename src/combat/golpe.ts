@@ -28,6 +28,8 @@ import { dispararSinergias, resistenciaPct, sinergiasAtivas } from './elementos'
 import { absorcaoPct } from './afinidade';
 import { estenderNoClima, multiplicadorClima } from './clima';
 import { multiplicadorArma } from '../progression/armas';
+import { ehDeAlgumaClasse } from '../progression/habilidades-classe';
+import { fatorDeClasseEntrePersonagens } from '../modos/regras';
 import { fatorDoGolpe } from '../modos/dificuldade';
 import type { Habilidade } from './habilidades';
 import { cegoErra, curaRecebidaPassivas, estadosAoAcertar, golpePelasCostas, multiplicadorMarco24, reforcarEstado, resistenciaIgnorada } from './modificadores-golpe';
@@ -143,7 +145,9 @@ export function aplicarImpacto(
     const extraPct = sinergias.reduce((s, x) => s + x.danoExtraPct, 0) * fonte.potencia;
     // Marco 23 (D-092): o inimigo afim absorve o próprio elemento — o golpe rola igual, mas cura em vez de ferir.
     const absorve = absorcaoPct(ctx, alvo, hab.elemento);
-    const recebido = (absorve > 0 ? absorve / 100 : multiplicadorRecebido(estado, ctx, alvo, hab, tick, extraPct, resistenciaIgnorada(ctx, atacante)) * multiplicadorMarco24(ctx, atacante, alvo, hab, costas, tick)) * fatorDoGolpe(estado, ctx, fonte, alvo) * protecaoInicial(estado, ctx, alvo, atacante);
+    // Marco 25 (25/10/2026, D-102): entre personagens, as skills de classe batem menos no modo que pede (arena).
+    const pvp = atacante?.bolsa && alvo.bolsa && ehDeAlgumaClasse(ctx, hab.id) ? fatorDeClasseEntrePersonagens(ctx.modo) : 1;
+    const recebido = (absorve > 0 ? absorve / 100 : multiplicadorRecebido(estado, ctx, alvo, hab, tick, extraPct, resistenciaIgnorada(ctx, atacante)) * multiplicadorMarco24(ctx, atacante, alvo, hab, costas, tick)) * fatorDoGolpe(estado, ctx, fonte, alvo) * protecaoInicial(estado, ctx, alvo, atacante) * pvp;
     const r = resolverGolpe(
       estado.rng,
       hab.formulaDano,

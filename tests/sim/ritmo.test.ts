@@ -58,7 +58,8 @@ describe('ritmo médio (balance.metas)', () => {
   });
 
   it('o degrau das dificuldades: mais difícil, a luta demora mais e se aguenta menos', () => {
-    const tempo = (d: 'facil' | 'normal' | 'pesadelo') => mediana(sequencia('aventureiro', 5, metas.comuns, 1000, d).map((l) => l.tempoS));
+    // Marco 25 (25/10/2026): mediana das três sementes; o voo do falcão deixa uma semente só ruidosa demais.
+    const tempo = (d: 'facil' | 'normal' | 'pesadelo') => mediana(SEMENTES.flatMap((s) => sequencia('aventureiro', 5, metas.comuns, s, d)).map((l) => l.tempoS));
     const golpes = (d: 'facil' | 'normal' | 'pesadelo') => mediana(metas.comuns.map((p) => aguenta('aventureiro', 5, p, 1000, d).golpes));
     expect(tempo('facil')).toBeLessThan(tempo('normal'));
     expect(tempo('normal')).toBeLessThan(tempo('pesadelo'));

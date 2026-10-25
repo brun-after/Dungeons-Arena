@@ -7,6 +7,9 @@
 //   células dele (world/objetos.ts entrega ao dono); sem nada para pegar, passeia em volta do dono.
 // - marco 24 (25/10/2026, D-098): com o dono parado, sem hostil e sem nada para pegar por `pousoMs`, pousa no ombro
 //   dele (modo `pousado`, na célula do dono); sai na hora quando o dono anda, conjura ou aparece um hostil.
+// - marco 25 (25/10/2026, D-102): protetor. Um projétil hostil que acertaria o dono faz o falcão dar um dash até a
+//   linha dele (o projétil acerta o falcão, que reflete menos dano no dono); o golpe dele voa até o alvo (`mergulho`).
+//   Os dois são mais rápidos que a patrulha (combat/companheiro.ts: o nível dá a base; Carisma e Sabedoria somam).
 // O ponto do passeio é sorteado pelo PRNG da própria IA e trocado a cada `passeioMs` ou ao chegar.
 // `alvoCacheX/Y` guardam o destino atual e `proximaAvaliacaoTick`, a troca do passeio.
 
@@ -14,6 +17,8 @@ import { alvoOfensivoValido } from '../combat/acao';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
 import { habilidadeDoAtor } from '../combat/perfil';
 import { falcaoDeGuarda } from '../combat/sintonia-aventureiro';
+import { velocidadeDoDash } from '../combat/companheiro';
+import { podeFerir } from '../modos/relacao';
 import type { Celula } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type EstadoJogo, type ObjetoNoMundo } from '../core/estado';
@@ -94,9 +99,62 @@ function donoQuieto(dono: Entidade): boolean {
   return !emPasso(dono) && dono.caminho.length === 0 && !dono.acao;
 }
 
+/**
+ * Marco 25 (D-102): a célula em que o falcão corta a linha de um projétil hostil que acertaria o dono, a tempo pela
+ * velocidade do dash (null: nenhum projétil ameaça, ou não dá tempo). Entre vários, o que chega primeiro.
+ */
+export function celulaDeInterceptacao(estado: EstadoJogo, ctx: ContextoSimulacao, falcao: Entidade, dono: Entidade): Celula | null {
+  const r = ctx.balance.ajustesClasses.aventureiro.falcao;
+  const passoMs = ctx.balance.ajustesClasses.aventureiro.falcaoPassoMs / velocidadeDoDash(ctx, dono);
+  const daqui = celulaOcupada(falcao);
+  let melhor: { c: Celula; ms: number } | null = null;
+  for (const p of estado.projeteis) {
+    if (p.velocidade <= 0 || p.atingidos.includes(dono.id) || !podeFerir({ id: p.donoId, equipe: p.equipeDono }, dono, ctx.modo)) continue;
+    const ox = dono.x - p.x;
+    const oy = dono.y - p.y;
+    // Até onde, na linha, o projétil passa mais perto do dono, e a que distância de lado.
+    const ao = ox * p.dirX + oy * p.dirY;
+    if (ao <= 0 || ao > Math.min(p.restante, r.vigiaCelulas) || Math.abs(ox * p.dirY - oy * p.dirX) > r.vigiaRaio) continue;
+    // O corte mais perto do dono que o falcão alcança antes do projétil (até meia célula de onde ele está).
+    for (let s = ao - 1; s >= 0.5; s -= 0.5) {
+      const c = { x: Math.round(p.x + p.dirX * s), y: Math.round(p.y + p.dirY * s) };
+      if (!passavel(ctx.fase, c.x, c.y) || (c.x === dono.x && c.y === dono.y)) continue;
+      const msProjetil = (s / p.velocidade) * 1000;
+      if (chebyshev(daqui, c) * passoMs > msProjetil) continue;
+      if (!melhor || msProjetil < melhor.ms) melhor = { c, ms: msProjetil };
+      break;
+    }
+  }
+  return melhor?.c ?? null;
+}
+
+/** Marco 25 (D-102): o alvo do golpe do falcão em curso (a conjuração de contato do dono ou o golpe já em voo). */
+function alvoDoGolpe(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade): Entidade | undefined {
+  const acao = dono.acao;
+  const hab = acao && acao.habilidadeId !== dono.ataqueBasico ? habilidadeDoAtor(ctx, dono, acao.habilidadeId) : undefined;
+  const id = hab?.politicaImpacto === 'contato' && hab.politicaAlvo === 'hostil' ? acao?.alvoId : estado.fases?.find((f) => f.atorId === dono.id && f.acaoId !== undefined)?.alvoId;
+  const alvo = id ? buscarEntidade(estado, id) : undefined;
+  return alvo && alvo !== dono && vivo(alvo) ? alvo : undefined;
+}
+
 export function processarFalcao(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa, dono: Entidade | undefined, saida: EventoSimulacao[]): void {
   if (!dono || !vivo(dono)) return;
   const r = ctx.balance.ajustesClasses.aventureiro.falcao;
+  // Marco 25 (D-102): o golpe em curso vem primeiro (o falcão voa ao alvo); depois, cortar um projétil.
+  const golpe = alvoDoGolpe(estado, ctx, dono);
+  if (golpe) {
+    mudarModo(ia, 'mergulho', estado.tick, true);
+    irPara(estado, ctx, e, ia, celulaOcupada(golpe), saida);
+    return;
+  }
+  const corte = celulaDeInterceptacao(estado, ctx, e, dono);
+  if (corte) {
+    mudarModo(ia, 'dash', estado.tick, true);
+    irPara(estado, ctx, e, ia, corte, saida);
+    return;
+  }
+  // Terminado o dash ou o mergulho, volta à patrulha (o passo fica no ritmo de sempre).
+  if (ia.modo === 'mergulho' || ia.modo === 'dash') mudarModo(ia, 'patrulha', estado.tick, true);
   const alvo = dono.alvoSelecionado ? buscarEntidade(estado, dono.alvoSelecionado) : undefined;
   // Só luta perto do dono: depois de renascer longe, o alvo antigo não puxa o falcão de volta ao combate.
   const hostil = alvo && alvoOfensivoValido(estado, ctx, e, alvo) && chebyshev(dono, alvo) <= r.raioCombate ? alvo : undefined;
@@ -109,14 +167,6 @@ export function processarFalcao(estado: EstadoJogo, ctx: ContextoSimulacao, e: E
   }
   if (ia.modo === 'pousado') {
     irPara(estado, ctx, e, ia, celulaOcupada(dono), saida);
-    return;
-  }
-  // O dono conjura uma habilidade corpo a corpo: o falcão mergulha no alvo dela.
-  const acao = dono.acao;
-  const hab = acao && acao.habilidadeId !== dono.ataqueBasico ? habilidadeDoAtor(ctx, dono, acao.habilidadeId) : undefined;
-  const alvoDaAcao = acao?.alvoId ? buscarEntidade(estado, acao.alvoId) : undefined;
-  if (hab?.politicaImpacto === 'contato' && alvoDaAcao && alvoDaAcao !== dono && vivo(alvoDaAcao)) {
-    irPara(estado, ctx, e, ia, celulaOcupada(alvoDaAcao), saida);
     return;
   }
   // Marco 24 (D-095): na vertente Druida, o falcão guardião fica ao lado do dono.

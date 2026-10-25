@@ -19,6 +19,7 @@ import { criarInimigo } from '../entities/fabrica';
 import { podeFerir } from '../modos/relacao';
 import { celulaLivrePara, ordemRotativa } from '../world/colisao';
 import { passavel } from '../world/fase';
+import { aprenderArmadilha } from '../world/perigos';
 import { celulaOcupada } from './geometria';
 import { registrarParticipacao } from './participacao';
 import { rolar } from './dados';
@@ -279,6 +280,8 @@ export function dispararArmadilha(estado: EstadoJogo, ctx: ContextoSimulacao, a:
   causarDano(estado, ctx, alvo, a.valor, a.donoId, 'armadilha', saida);
   if (a.interno) aplicar(alvo, a.interno, { id: a.donoId, x: a.x, y: a.y }, null);
   saida.push({ t: 'armadilhaDisparou', tick, donoId: a.donoId, armadilhaId: a.id, alvoId: alvo.id, x: a.x, y: a.y });
+  // Marco 25 (25/10/2026, D-100): quem viu disparar pode aprender a contornar as armadilhas desse dono.
+  aprenderArmadilha(estado, ctx, a);
   return some;
 }
 

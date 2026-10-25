@@ -6,6 +6,7 @@ import { podeFerir } from '../modos/relacao';
 import { dispararGanchosDe } from '../progression/ganchos-do-portador';
 import { muralhaEm } from '../combat/tatica';
 import { virarPara } from '../combat/orientacao';
+import { multiplicadorDoPassoDoFalcao } from '../combat/companheiro';
 // Movimento célula a célula com integração por distância (§2.2, §2.3).
 // Cada passo é cardinal: reserva o destino, avança `progressoPasso` pela velocidade e, ao
 // completar, a posição lógica vira o destino. Um tick pode consumir vários passos.
@@ -21,7 +22,7 @@ import { emPasso, type Entidade } from '../entities/entidade';
 import { regenerarPorPasso } from '../progression/recursos';
 import { celulaLivrePara, ordemRotativa } from './colisao';
 import { passavel } from './fase';
-import { caminho } from './navegacao';
+import { caminho, caminhoComCusto } from './navegacao';
 
 export const VETOR_DIR: Readonly<Record<Dir8, readonly [number, number]>> = {
   N: [0, -1],
@@ -89,9 +90,11 @@ export function planejarCaminho(
   tick: number,
   saida: EventoSimulacao[],
   maxPassos = ctx.balance.navegacao.maxPassosToque,
+  // Marco 25 (25/10/2026, D-100): a IA que evita perigo passa o mapa dele (world/perigos.ts).
+  perigo: Uint8Array | null = null,
 ): boolean {
   const origem = { x: e.destinoX, y: e.destinoY };
-  const resultado = caminho(ctx.fase, origem, destino, maxPassos);
+  const resultado = perigo ? caminhoComCusto(ctx.fase, origem, destino, maxPassos, perigo, ctx.balance.ia.custoPerigo) : caminho(ctx.fase, origem, destino, maxPassos);
   if (resultado.status !== 'alcancado') {
     saida.push({ t: 'caminhoFalhou', tick, id: e.id, status: resultado.status });
     return false;
@@ -132,7 +135,10 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
   const inv = e.invocacao;
   const vel =
     inv && !inv.dominado
-      ? 1000 / (inv.companheiro ? ctx.balance.ajustesClasses.aventureiro.falcaoPassoMs : ctx.balance.invocacoes.passoMs)
+      ? // Marco 25 (D-102): o falcão mergulhando ou no dash anda mais rápido que na patrulha.
+        inv.companheiro
+        ? (1000 / ctx.balance.ajustesClasses.aventureiro.falcaoPassoMs) * multiplicadorDoPassoDoFalcao(estado, ctx, e)
+        : 1000 / ctx.balance.invocacoes.passoMs
       : velocidade(e.atributos.destreza, ctx.balance.movimento.velocidadeBaseMs, inv?.dominado ?? false);
   // Marco 14: o frio (resfriado) deixa mais lento. Ajuste de 15/10/2026: conjurar uma habilidade `lenta` também.
   const conjurando = mobilidadeDaAcao(e, ctx) === 'lenta' ? ctx.balance.habilidades.velocidadeConjurandoLenta : 1;

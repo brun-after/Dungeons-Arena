@@ -6,7 +6,7 @@ import type { CampoTatico } from '../combat/estado-tatico';
 // nesse tick pede o estado completo (D-035). Marco 8A-2: rastros e efeitos atrasados também.
 
 import type { Entidade } from '../entities/entidade';
-import type { Atrasado, EstadoJogo, ObjetoNoMundo, Projetil, Rastro, RespawnPendente } from '../core/estado';
+import type { Atrasado, EstadoJogo, FaseAgendada, ObjetoNoMundo, Projetil, Rastro, RespawnPendente } from '../core/estado';
 
 export interface EntidadeAlterada {
   id: string;
@@ -15,6 +15,8 @@ export interface EntidadeAlterada {
 
 export interface PatchDeEstado {
   camposTaticos?: CampoTatico[] | null;
+  /** Marco 25 (25/10/2026, D-102): as fases agendadas (o golpe do falcão em voo); ausente = sem mudança, null = nenhuma. */
+  fases?: FaseAgendada[] | null;
   /** Tick do estado de onde o patch parte. */
   base: number;
   tick: number;
@@ -48,6 +50,7 @@ export class GeradorDePatches {
   private rastros = '';
   private atrasados = '';
   private camposTaticos = '';
+  private fases = '';
   private recargas: Record<string, number> = {};
   private tickAnterior = -1;
 
@@ -82,6 +85,8 @@ export class GeradorDePatches {
     };
     const textoCampos = JSON.stringify(publico.camposTaticos ?? null);
     const camposTaticos = textoCampos === this.camposTaticos ? undefined : publico.camposTaticos ?? null;
+    const textoFases = JSON.stringify(publico.fases ?? null);
+    const fases = textoFases === this.fases ? undefined : publico.fases ?? null;
     const [objetos, textoObjetos] = lista(publico.objetos, this.objetos);
     const [projeteis, textoProjeteis] = lista(publico.projeteis, this.projeteis);
     const [respawns, textoRespawns] = lista(publico.respawns, this.respawns);
@@ -96,6 +101,7 @@ export class GeradorDePatches {
 
     const patch: PatchDeEstado = {
       ...(camposTaticos !== undefined ? { camposTaticos } : {}),
+      ...(fases !== undefined ? { fases } : {}),
       base: this.tickAnterior,
       tick: publico.tick,
       proximoId: publico.proximoId,
@@ -110,6 +116,7 @@ export class GeradorDePatches {
       recargas,
     };
     this.camposTaticos = textoCampos;
+    this.fases = textoFases;
     this.entidades = atuais;
     this.rastros = textoRastros;
     this.atrasados = textoAtrasados;
@@ -144,6 +151,7 @@ export function aplicarPatch(base: EstadoJogo, patch: PatchDeEstado): EstadoJogo
   const resultado: EstadoJogo = {
     ...base,
     ...(patch.camposTaticos ? { camposTaticos: patch.camposTaticos } : {}),
+    ...(patch.fases ? { fases: patch.fases } : {}),
     tick: patch.tick,
     proximoId: patch.proximoId,
     dificuldade: patch.dificuldade,
@@ -157,5 +165,6 @@ export function aplicarPatch(base: EstadoJogo, patch: PatchDeEstado): EstadoJogo
     recargas,
   };
   if (patch.camposTaticos === null) delete resultado.camposTaticos;
+  if (patch.fases === null) delete resultado.fases;
   return resultado;
 }

@@ -11,7 +11,7 @@ import { aleatorio, criarRng, escolher, hashTexto, type EstadoRng } from '../cor
 import { ticksDe } from '../core/tempo';
 import { alvoOfensivoValido, iniciarAcao, prioridadeDeAlvo, recargaRestante } from '../combat/acao';
 import { resolverHabilidade } from '../combat/compilar-habilidade';
-import { fatoresDoMundo } from '../modos/dificuldade';
+import { fatoresDoMundo, perfilDaIa, type PerfilIa } from '../modos/dificuldade';
 import { excedeLimite } from '../combat/efeitos-fluxo';
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
@@ -20,6 +20,8 @@ import { passavel } from '../world/fase';
 import { celulaLivre, pararMovimento, planejarCaminho, VETOR_DIR } from '../world/movimento';
 import { emPasso, vivo, type Entidade, type EstadoIa, type ModoIa } from './entidade';
 import { processarInvocacao } from './ia-invocacao';
+import { alvoMaisFerido, celulaDeCerco, destinoDeCura, fugaDoAviso, perigoDoCaminho } from './ia-tatica';
+import { emPerigo, naAreaAfim } from '../world/perigos';
 import type { PresetInimigo } from './presets';
 
 const CARDINAIS: readonly Dir8[] = ['N', 'E', 'S', 'O'];
@@ -257,7 +259,8 @@ function patrulhar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: 
   if (!ia.direcaoPatrulha) return;
   const [dx, dy] = VETOR_DIR[ia.direcaoPatrulha];
   const destino = { x: e.x + dx, y: e.y + dy };
-  if (!celulaLivre(e, destino.x, destino.y, estado, ctx)) {
+  // Marco 25 (25/10/2026, D-100): a patrulha não pisa em chão que fere (antes pisava, mesmo sem perseguir).
+  if (!celulaLivre(e, destino.x, destino.y, estado, ctx) || emPerigo(estado, ctx, e, destino.x, destino.y)) {
     ia.direcaoPatrulha = null;
     return;
   }
@@ -274,18 +277,22 @@ function escolherDirecaoPatrulha(estado: EstadoJogo, ctx: ContextoSimulacao, e: 
     if (alvo) {
       const dx = alvo.x - e.x;
       const dy = alvo.y - e.y;
-      if (Math.abs(dx) >= Math.abs(dy) && dx !== 0) return dx > 0 ? 'E' : 'O';
-      if (dy !== 0) return dy > 0 ? 'S' : 'N';
+      const d: Dir8 | null = Math.abs(dx) >= Math.abs(dy) && dx !== 0 ? (dx > 0 ? 'E' : 'O') : dy !== 0 ? (dy > 0 ? 'S' : 'N') : null;
+      const [vx, vy] = d ? VETOR_DIR[d] : [0, 0];
+      if (d && !emPerigo(estado, ctx, e, e.x + vx, e.y + vy)) return d;
     }
   } else if (u < regras.chanceAproximar + regras.chanceManter && ia.direcaoPatrulha) {
     return ia.direcaoPatrulha;
   }
   const reversa = ia.direcaoPatrulha ? REVERSA[ia.direcaoPatrulha] : undefined;
-  const validas = CARDINAIS.filter((d) => {
+  const andaveis = CARDINAIS.filter((d) => {
     const [dx, dy] = VETOR_DIR[d];
     const c = { x: e.x + dx, y: e.y + dy };
     return passavel(ctx.fase, c.x, c.y) && !ia.recentes.some((r) => r.x === c.x && r.y === c.y);
   });
+  // Marco 25 (D-100): fora do perigo; só se não houver outra saída (nasceu no meio das brasas) passa por ele.
+  const seguras = andaveis.filter((d) => !emPerigo(estado, ctx, e, e.x + VETOR_DIR[d][0], e.y + VETOR_DIR[d][1]));
+  const validas = seguras.length > 0 ? seguras : andaveis;
   const preferidas = validas.filter((d) => d !== reversa);
   const opcoes = preferidas.length > 0 ? preferidas : validas;
   return opcoes.length > 0 ? escolher(ia.rng, opcoes) : null;
@@ -329,6 +336,21 @@ function perseguir(
     }
   }
 
+  // Marco 25 (25/10/2026, D-100): a tática da dificuldade (entities/ia-tatica.ts).
+  const perfil = perfilDaIa(estado, ctx);
+  const maisFerido = perfil.focoFracoPct > 0 ? alvoMaisFerido(estado, ctx, e, alvo, preset.deteccao, perfil) : null;
+  if (maisFerido) {
+    comecarPerseguicao(estado, ctx, e, ia, maisFerido.id, saida);
+    return;
+  }
+  // Quem já conjura o próprio golpe não larga a conjuração para se esquivar.
+  const fuga = emPasso(e) || e.acao ? null : fugaDoAviso(estado, ctx, e, perfil);
+  if (fuga) {
+    const fim = e.caminho.at(-1);
+    if (fim?.x !== fuga.x || fim.y !== fuga.y) planejarCaminho(e, fuga, ctx, estado.tick, saida, 4);
+    return;
+  }
+
   const hab = resolverHabilidade(ctx, habilidadeDaVez(estado, ctx, e, ia));
   const basico = resolverHabilidade(ctx, e.ataqueBasico);
   if (!hab || !basico) return;
@@ -340,12 +362,22 @@ function perseguir(
   const mantemDistancia = e.arquetipo === 'atirador' || e.arquetipo === 'controlador';
   const distanciaMax = mantemDistancia ? Math.min(regras.distanciaMaxAtirador, basico.alcanceCelulas) : basico.alcanceCelulas;
 
-  // Atirador e controlador recuam antes de atacar; só atacam de perto se estiverem encurralados.
+  // Atirador e controlador recuam antes de atacar; só atacam de perto se estiverem encurralados. Marco 25: ferido
+  // (abaixo de `recuaHpPct`), o atirador mantém a distância máxima.
+  const ferido = e.hp * 100 < e.hpMax * perfil.recuaHpPct;
+  const distanciaMin = ferido ? distanciaMax : regras.distanciaMinAtirador;
+  const cura = destinoDeCura(estado, ctx, e, ia, perfil);
   let recuando = false;
-  if (mantemDistancia && distancia < regras.distanciaMinAtirador) {
+  if (cura) {
+    // O afim ferido vai à área do próprio elemento e fica nela (ataca se o alvo vier).
+    if (!naAreaAfim(ctx, e)) aproximar(estado, ctx, e, ia, cura, saida, perfil);
+    else if (!emPasso(e)) pararMovimento(e);
+  } else if (mantemDistancia && distancia < distanciaMin) {
     recuando = recuar(estado, ctx, e, celulaAlvo);
   } else if (distancia > distanciaMax) {
-    aproximar(estado, ctx, e, ia, celulaAlvo, saida);
+    // O corpo a corpo cerca: cada perseguidor do alvo mira uma célula em volta dele.
+    const cerco = perfil.cercar && !mantemDistancia ? celulaDeCerco(estado, ctx, e, alvo) : null;
+    aproximar(estado, ctx, e, ia, cerco ?? celulaAlvo, saida, perfil);
   } else if (!emPasso(e)) {
     pararMovimento(e);
   }
@@ -358,7 +390,7 @@ function perseguir(
   }
 }
 
-function aproximar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa, celulaAlvo: Celula, saida: EventoSimulacao[]): void {
+function aproximar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa, celulaAlvo: Celula, saida: EventoSimulacao[], perfil: PerfilIa): void {
   const regras = ctx.balance.ia;
   const proxima = e.waypoints[0] ?? e.caminho[0];
   const bloqueado = proxima !== undefined && !emPasso(e) && !celulaLivre(e, proxima.x, proxima.y, estado, ctx);
@@ -368,7 +400,7 @@ function aproximar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: 
 
   ia.alvoCacheX = celulaAlvo.x;
   ia.alvoCacheY = celulaAlvo.y;
-  if (planejarCaminho(e, celulaAlvo, ctx, estado.tick, saida, regras.maxPassosPerseguicao)) {
+  if (planejarCaminho(e, celulaAlvo, ctx, estado.tick, saida, regras.maxPassosPerseguicao, perigoDoCaminho(estado, ctx, e, perfil))) {
     ia.falhasCaminho = 0;
     return;
   }

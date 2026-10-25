@@ -45,10 +45,15 @@ export function reducaoRecargaBasicoPct(atributos: Atributos, b: Balance, perfil
   return Math.min(teto, acimaDe10(atributos.destreza) * porPonto);
 }
 
-/** Marco 18 (D-068): a rolagem bruta × `1 + ((FOR−10) + (INT−10)) / 2 × k` (com piso), igual para todo mundo. */
-export function multiplicadorDeRolagem(atributos: Atributos, b: Balance): number {
+/**
+ * Marco 18 (D-068): a rolagem bruta × `1 + ((FOR−10) + (INT−10)) / 2 × k` (com piso), igual para todo mundo.
+ * Marco 25 (25/10/2026, D-102): a habilidade que escala com Destreza (as do falcão, a Flecha explosiva) troca a
+ * Inteligência pela Destreza — a build que investe no atributo da skill rende mais que a que espalha os pontos.
+ */
+export function multiplicadorDeRolagem(atributos: Atributos, b: Balance, escala?: keyof Atributos): number {
   const e = b.atributos.efeitos;
-  const pontos = (atributos.forca - 10 + (atributos.inteligencia - 10)) / 2;
+  const segundo = escala === 'destreza' ? atributos.destreza : atributos.inteligencia;
+  const pontos = (atributos.forca - 10 + (segundo - 10)) / 2;
   return Math.max(e.rolagemMin, 1 + (pontos * e.rolagemPorPontoPct) / 100);
 }
 

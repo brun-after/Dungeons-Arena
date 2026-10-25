@@ -42,7 +42,7 @@
       "danoMult": 0.95,
       "falcaoDanoMult": 1.5,
       "falcaoPassoMs": 200,
-      "falcao": { "distanciaAlvo": 3, "raioPasseio": 3, "raioColeta": 7, "passeioMs": 1200, "raioCombate": 8, "reflexoInicioPct": 80, "reflexoFimPct": 60, "pousoMs": 6000 }
+      "falcao": { "distanciaAlvo": 3, "raioPasseio": 3, "raioColeta": 7, "passeioMs": 1200, "raioCombate": 8, "reflexoInicioPct": 80, "reflexoFimPct": 60, "pousoMs": 6000, "velocidadeAtaque": { "n1": 1, "n20": 5, "n30": 7 }, "velocidadeDash": { "n1": 2, "n20": 6, "n30": 9 }, "atributoBonusPorPontoPct": 1.5, "atributoBonusMaxPct": 30, "vigiaCelulas": 8, "vigiaRaio": 0.6 }
     },
     "arqueiro": {
       "secundariosMult": 1.15,
@@ -169,6 +169,7 @@
     "danoArmadilha": 8,
     "armadilhaExpiraS": 180
   },
+  "populacao": { "reforcoPorFasePct": 10, "areaReferencia": 545, "tetoMult": 3, "tetoInimigos": 60 },
   "portas": {
     "recargaMs": 800,
     "esperaMs": 3000,
@@ -278,10 +279,14 @@
     "build": { "nivel": 8, "vitoriasMinPct": 60 }
   },
   "dificuldades": {
-    "facil": { "vidaPct": 75, "danoPct": 70, "hesitacaoPct": 130, "avisoExtraMs": 150, "recompensaPct": 80 },
-    "normal": { "vidaPct": 100, "danoPct": 100, "hesitacaoPct": 100, "avisoExtraMs": 0, "recompensaPct": 100 },
-    "dificil": { "vidaPct": 130, "danoPct": 125, "hesitacaoPct": 80, "avisoExtraMs": 0, "recompensaPct": 125 },
-    "pesadelo": { "vidaPct": 170, "danoPct": 150, "hesitacaoPct": 60, "avisoExtraMs": 0, "recompensaPct": 160 }
+    "facil": { "vidaPct": 75, "danoPct": 70, "hesitacaoPct": 130, "avisoExtraMs": 150, "recompensaPct": 80,
+      "ia": { "evitaPerigoPct": 30, "esquivaAvisoPct": 0, "cercar": false, "recuaHpPct": 0, "curaHpPct": 0, "curaAfimPct": 0, "aprendeArmadilhaPct": 0, "focoFracoPct": 0 } },
+    "normal": { "vidaPct": 100, "danoPct": 100, "hesitacaoPct": 100, "avisoExtraMs": 0, "recompensaPct": 100,
+      "ia": { "evitaPerigoPct": 70, "esquivaAvisoPct": 35, "cercar": true, "recuaHpPct": 0, "curaHpPct": 35, "curaAfimPct": 40, "aprendeArmadilhaPct": 0, "focoFracoPct": 0 } },
+    "dificil": { "vidaPct": 130, "danoPct": 125, "hesitacaoPct": 80, "avisoExtraMs": 0, "recompensaPct": 125,
+      "ia": { "evitaPerigoPct": 90, "esquivaAvisoPct": 65, "cercar": true, "recuaHpPct": 40, "curaHpPct": 45, "curaAfimPct": 70, "aprendeArmadilhaPct": 50, "focoFracoPct": 30 } },
+    "pesadelo": { "vidaPct": 170, "danoPct": 150, "hesitacaoPct": 60, "avisoExtraMs": 0, "recompensaPct": 160,
+      "ia": { "evitaPerigoPct": 100, "esquivaAvisoPct": 90, "cercar": true, "recuaHpPct": 50, "curaHpPct": 55, "curaAfimPct": 90, "aprendeArmadilhaPct": 85, "focoFracoPct": 60 } }
   },
   "grupo": { "vidaPorJogadorPct": 70, "danoPorJogadorPct": 8, "recompensaPorJogadorPct": 10, "spawnerPorJogadorPct": 25 },
   "itensGerados": {
@@ -353,7 +358,14 @@
     "checagemDesistenciaMs": 3000,
     "chanceDesistir": 0.1,
     "distanciaMinAtirador": 3,
-    "distanciaMaxAtirador": 5
+    "distanciaMaxAtirador": 5,
+    "custoPerigo": 8,
+    "curaAfimRaio": 6,
+    "curaAfimSaiPct": 90,
+    "sorteioTaticoMs": 3000,
+    "armadilhaVistaRaio": 6,
+    "armadilhasLembradas": 8,
+    "arquetiposFirmes": ["boss"]
   },
   "tatica": {
     "janelaEtapaMs": 3000,
@@ -388,6 +400,7 @@
   },
   "ambiente": {
     "intervaloMs": 1000,
+    "curaAfim": 6,
     "queimadura": 4,
     "veneno": 3,
     "duracaoMs": 1800,

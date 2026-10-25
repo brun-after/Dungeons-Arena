@@ -1,7 +1,9 @@
 // D-075 (17/10/2026): consumíveis permanentes de progressão; família da definição original, nunca do caminho.
 import { definicaoDe } from '../combat/compilar-habilidade';
 import type { ContextoSimulacao } from '../core/contexto';
+import type { EventoSimulacao } from '../core/eventos-simulacao';
 import type { Entidade } from '../entities/entidade';
+import { concluirEstudo } from './habilidades-personagem';
 import type { Item } from './itens';
 import { precoDeCompra } from './efeitos-atributo';
 
@@ -11,13 +13,15 @@ export function familiaDaHabilidade(ctx: ContextoSimulacao, id: string): string 
   return d.familiaEvolucao ?? (d.fusao ? 'fusao' : d.base.elemento ?? (d.base.passiva || !d.base.formulaDano ? 'suporte' : d.base.tipoAtaque === 'fisico' ? 'tecnica' : 'arcana'));
 }
 
-export function aplicarItemDeProgressao(e: Entidade, ctx: ContextoSimulacao, item: Item): boolean {
+export function aplicarItemDeProgressao(e: Entidade, ctx: ContextoSimulacao, item: Item, tick: number, saida: EventoSimulacao[]): boolean {
   const b = e.bolsa;
   const p = item.progressao;
   if (!b || !p) return false;
   if (p.tipo === 'aceleracao') {
     if (!b.estudo) return false;
-    b.estudo.velocidade12 = (b.estudo.velocidade12 ?? 12) + p.unidades12;
+    // Marco 25 (25/10/2026, D-103): corta uma fatia do tempo total; se passar do que falta, conclui na hora.
+    b.estudo.restanteTicks -= Math.ceil((b.estudo.totalTicks * p.cortePct) / 100);
+    if (b.estudo.restanteTicks <= 0) concluirEstudo(e, ctx, tick, saida);
     return true;
   }
   if (p.tipo === 'ponto') {

@@ -21,6 +21,7 @@ import { ehModelo, MODELO_JOGADOR, MODELOS } from './modelos';
 import { centroDaCelula, type Projecao } from './projecao';
 import { texturasDoAdorno } from './adornos';
 import { RigToken } from './rig-token';
+import { anelDaInvocacao } from './anel-invocacao';
 import type { BibliotecaCriaturas, FonteToken } from './texturas-criaturas';
 
 const COR_PROPRIO = 0x3498db;
@@ -33,8 +34,17 @@ const LARGURA_BARRA = CELULA_PX * 0.84;
 export const ALTURA_TOKEN = CELULA_PX * 1.12;
 /** Andou há menos que isto: ainda conta como andando (absorve quadros sem avanço). */
 const ANDANDO_MS = 120;
+/** Marco 25 (D-103): o pulso do arco branco do Arqueiro. */
+const PULSO_ARMA_MS = 2000;
 /** Troca de quadro das classes jogáveis (2 quadros) enquanto andam. */
 const QUADRO_MS = 190;
+
+/** Marco 25 (D-103): invocação do Necromante (os mortos dele, ou qualquer invocação de dono Necromante). */
+function doNecromante(estado: EstadoJogo, inv: NonNullable<Entidade['invocacao']>): boolean {
+  if (inv.necromancia) return true;
+  const dono = estado.entidades.find((x) => x.id === inv.donoId);
+  return (dono?.bolsa?.classeId ?? dono?.classeId) === 'necromante';
+}
 
 /** Cor da barra de HP por faixa (§2.15). */
 export function corDoHp(fracao: number): number {
@@ -111,6 +121,8 @@ export interface OpcoesEntidades {
   reduzido: () => boolean;
   /** Marco 23 (D-092): a cor de cada elemento (o inimigo afim fica tingido dela). */
   corElemento?: (e: Elemento) => number;
+  /** Marco 25 (D-103): a arma fica branca (o arco do Arqueiro com a mira cheia)? */
+  armaBranca?: (e: Entidade, tick: number) => boolean;
   /** Marco 24 (D-098): o ajuste do voo (o falcão); null para quem anda no chão. */
   ajuste?: (e: Entidade, agoraMs: number) => AjusteVisual | null;
 }
@@ -281,7 +293,7 @@ export class CamadaEntidades {
       const conjura = e.acao ? e.acao.lancamentoTick - e.acao.inicioTick : 0;
       const preparo = e.acao && m.golpe ? (conjura > 0 ? Math.min(1, Math.max(0, (tickVisual - e.acao.inicioTick) / conjura)) : 1) : null;
       this.desenharCorpo(m, e, escolha, {
-        iso, usarTiras, reduzido, agoraMs, andando, aparencia, preparo, ajuste,
+        iso, usarTiras, reduzido, agoraMs, andando, aparencia, preparo, ajuste, tick: estado.tick,
         direcao: { x: dtx / norma, y: dty / norma },
         angulo: Math.atan2(dty, dtx),
       });
@@ -318,6 +330,7 @@ export class CamadaEntidades {
       angulo: number;
       preparo: number | null;
       ajuste: AjusteVisual | null;
+      tick: number;
     },
   ): void {
     m.silhueta.visible = !escolha;
@@ -366,7 +379,10 @@ export class CamadaEntidades {
     });
     // D-067: o equipamento aparece no token (modelos de classe; a imagem própria fica como o jogador a fez).
     const adorno = escolha.proprio ? null : texturasDoAdorno(escolha.modelo, q.iso ? '34' : 'cima', e.aparencia);
-    m.rig.adornar(adorno?.atras ?? null, adorno?.frente ?? null, adorno?.arma ?? null, adorno?.pivo);
+    // Marco 25 (25/10/2026, D-103): o arco branco com a mira cheia, num pulso suave de 2 s (fixo com movimento reduzido).
+    const branca = !e.morto && (this.o.armaBranca?.(e, q.tick) ?? false);
+    const brilho = !branca ? 0 : q.reduzido ? 0.65 : 0.55 + 0.25 * Math.sin((2 * Math.PI * q.agoraMs) / PULSO_ARMA_MS);
+    m.rig.adornar(adorno?.atras ?? null, adorno?.frente ?? null, adorno?.arma ?? null, adorno?.pivo, adorno?.armaBranca ?? null, brilho);
     const f = escolha.fonte;
     m.topo = gira ? -alturaPx * 0.42 : f.ancoraY === 1 ? -alturaPx : -alturaPx * f.ancoraY * 0.9;
   }
@@ -405,6 +421,25 @@ export class CamadaEntidades {
     }
     // Marco 8A-2: dominado (lutando do outro lado) ganha um anel roxo.
     if (e.invocacao?.dominado) anel(RAIO * 1.15 * m.escala + 3).stroke({ width: 2, color: 0x8e44ad, alpha: 0.95 });
+    // Marco 25 (25/10/2026, D-103): a do Necromante tem o anel roxo que esvazia com a duração (e clareia no fim).
+    else if (e.invocacao && doNecromante(estado, e.invocacao)) {
+      const a = anelDaInvocacao(e.invocacao, estado.tick);
+      const r = RAIO * 1.15 * m.escala + 3;
+      const inicio = -Math.PI / 2;
+      if (a.fracao >= 1) anel(r).stroke({ width: 2, color: a.cor, alpha: a.alpha });
+      else if (a.fracao > 0) {
+        // O arco na elipse do chão (achatada no isométrico), ponto a ponto.
+        const passos = Math.max(2, Math.ceil(48 * a.fracao));
+        for (let i = 0; i <= passos; i++) {
+          const ang = inicio + Math.PI * 2 * a.fracao * (i / passos);
+          const x = Math.cos(ang) * r;
+          const y = Math.sin(ang) * r * k;
+          if (i === 0) g.moveTo(x, y);
+          else g.lineTo(x, y);
+        }
+        g.stroke({ width: 2, color: a.cor, alpha: a.alpha });
+      }
+    }
     // Marco 10A-3: invocação com anel verde-azulado; avatar mostra os golpes que ainda aguenta.
     else if (e.invocacao) anel(RAIO * 1.15 * m.escala + 3).stroke({ width: 1.5, color: 0x1abc9c, alpha: 0.9 });
     const golpes = e.invocacao?.avatar ? e.invocacao.golpesRestantes : 0;

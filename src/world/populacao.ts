@@ -3,13 +3,14 @@
 // objetos (§2.13).
 
 import type { ContextoSimulacao } from '../core/contexto';
+import { aleatorio, criarRng, hashTexto } from '../core/rng';
 import { DONO_FASE, type EstadoJogo } from '../core/estado';
 import { ticksDe } from '../core/tempo';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { nomeComAfinidade } from '../combat/afinidade';
 import { criarInimigo, type OpcoesInimigo } from '../entities/fabrica';
 import type { PresetInimigo } from '../entities/presets';
-import type { InimigoPosicionado } from './fase';
+import { passavel, type Fase, type InimigoPosicionado } from './fase';
 import { largarItem, largarObjeto, largarOrbeEfeito, novoObjeto } from './objetos';
 
 export function idDoInimigo(indice: number): string {
@@ -28,6 +29,55 @@ export function opcoesDoPosicionado(ctx: ContextoSimulacao, preset: PresetInimig
   };
 }
 
+/**
+ * Marco 25 (25/10/2026, D-101): o número da fase na campanha. As oficiais pela `ordem` (1 e 2); as geradas seguem
+ * depois delas (`gerada-N` é a fase N + 2). Outras (arena, editor) contam como a primeira.
+ */
+export function numeroDaFase(fase: Pick<Fase, 'id' | 'ordem'>): number {
+  const gerada = /^gerada-(\d+)$/.exec(fase.id);
+  if (gerada) return 2 + Number(gerada[1]);
+  return fase.ordem >= 1 && fase.ordem < 100 ? fase.ordem : 1;
+}
+
+function areaPassavel(fase: Fase): number {
+  let n = 0;
+  for (let y = 0; y < fase.altura; y++) for (let x = 0; x < fase.largura; x++) if (passavel(fase, x, y)) n++;
+  return n;
+}
+
+/** Quantos reforços a fase ganha: +reforcoPorFasePct por fase depois da primeira, proporcional à área, com tetos. */
+export function reforcosDaFase(ctx: ContextoSimulacao, comuns: number, total: number): number {
+  const r = ctx.balance.populacao;
+  const n = numeroDaFase(ctx.fase);
+  const area = areaPassavel(ctx.fase) / Math.max(1, r.areaReferencia);
+  const desejados = Math.round(comuns * (r.reforcoPorFasePct / 100) * (n - 1) * area);
+  return Math.max(0, Math.min(desejados, comuns * (r.tetoMult - 1), r.tetoInimigos - total));
+}
+
+/** Os reforços nascem perto de inimigos comuns sorteados, com o mesmo preset e nível (PRNG próprio da fase). */
+function reforcar(estado: EstadoJogo, ctx: ContextoSimulacao): void {
+  const comuns = ctx.fase.inimigos.filter((p) => ctx.conteudo.presets.get(p.preset)?.arquetipo !== 'boss');
+  const quantos = reforcosDaFase(ctx, comuns.length, ctx.fase.inimigos.length);
+  if (quantos <= 0) return;
+  const rng = criarRng(hashTexto(`${ctx.fase.id}:reforco`));
+  const ocupadas = new Set(estado.entidades.map((e) => `${e.x},${e.y}`));
+  for (const s of ctx.fase.spawns) ocupadas.add(`${s.x},${s.y}`);
+  if (ctx.fase.portaSaida) ocupadas.add(`${ctx.fase.portaSaida.x},${ctx.fase.portaSaida.y}`);
+  for (let i = 0; i < quantos; i++) {
+    const base = comuns[Math.floor(aleatorio(rng) * comuns.length)];
+    const preset = base ? ctx.conteudo.presets.get(base.preset) : undefined;
+    if (!base || !preset) continue;
+    for (let tentativa = 0; tentativa < 12; tentativa++) {
+      const x = base.x + Math.round((aleatorio(rng) - 0.5) * 6);
+      const y = base.y + Math.round((aleatorio(rng) - 0.5) * 6);
+      if (!passavel(ctx.fase, x, y) || ocupadas.has(`${x},${y}`)) continue;
+      ocupadas.add(`${x},${y}`);
+      estado.entidades.push(criarInimigo(preset, `r${String(i).padStart(3, '0')}`, x, y, ctx.balance, opcoesDoPosicionado(ctx, preset, { ...base, x, y })));
+      break;
+    }
+  }
+}
+
 export function povoarFase(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[] = []): void {
   if (ctx.modo.inimigosDeIA === 'da_fase') {
     ctx.fase.inimigos.forEach((pos, indice) => {
@@ -39,6 +89,8 @@ export function povoarFase(estado: EstadoJogo, ctx: ContextoSimulacao, saida: Ev
       }
       estado.entidades.push(criarInimigo(preset, idDoInimigo(indice), pos.x, pos.y, ctx.balance, opcoesDoPosicionado(ctx, preset, pos)));
     });
+    // Marco 25 (D-101): mais inimigos conforme se avança (fora do enxame, que já tem a sua leva).
+    if (!ctx.fase.eventos.includes('enxame')) reforcar(estado, ctx);
   }
   if (ctx.modo.objetosDeFase) {
     ctx.fase.objetos.forEach((o, indice) => {

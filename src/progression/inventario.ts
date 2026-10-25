@@ -190,7 +190,7 @@ export function usarItem(estado: EstadoJogo, e: Entidade, ctx: ContextoSimulacao
     }
     if (item.tipo !== 'consumivel') return recusa('nao_consumivel');
     if (item.progressao) {
-      if (!aplicarItemDeProgressao(e, ctx, item)) return recusa('sem_efeito');
+      if (!aplicarItemDeProgressao(e, ctx, item, tick, saida)) return recusa('sem_efeito');
       entrada.qtd--;
       if (entrada.qtd <= 0) bolsa.mochila.splice(indice, 1);
       saida.push({ t: 'usouItem', tick, id: e.id, itemId: item.id, hp: 0, mana: 0 });

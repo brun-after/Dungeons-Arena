@@ -6,7 +6,7 @@ import { DONO_FASE, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { vivo } from '../entities/entidade';
-import { dentroDaArea, type TipoAmbiente } from './ambiente-tipos';
+import { dentroDaArea, ELEMENTO_DO_AMBIENTE, type TipoAmbiente } from './ambiente-tipos';
 import type { EfeitoCanonico } from '../combat/registro-efeitos';
 import type { Balance } from '../core/contexto';
 
@@ -46,7 +46,10 @@ export function processarAmbientes(estado: EstadoJogo, ctx: ContextoSimulacao, s
       estado.recargas[chave] = estado.tick + intervalo;
       // A luz sagrada também limpa o veneno de quem passa.
       if (a.tipo === 'luz_sagrada') e.efeitos = e.efeitos.filter((f) => f.tipo !== 'envenenado');
-      aplicarEfeito(estado, ctx, e, efeitoDaArea(a.tipo, b), { id: DONO_FASE, x: a.x, y: a.y }, null, saida);
+      // Marco 25 (25/10/2026, D-100): o afim absorve a área do próprio elemento — cura em vez do efeito.
+      const afim = e.afinidade !== undefined && e.afinidade.elemento === ELEMENTO_DO_AMBIENTE[a.tipo];
+      const efeito = afim ? construirEfeito('cura', { valor: b.curaAfim }) : efeitoDaArea(a.tipo, b);
+      aplicarEfeito(estado, ctx, e, efeito, { id: DONO_FASE, x: a.x, y: a.y }, null, saida);
     }
   }
 }
