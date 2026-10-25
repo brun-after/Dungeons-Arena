@@ -125,6 +125,12 @@ export interface EstadoIa {
   /** Marco 18 (17/10/2026): o tick do último golpe recebido que já virou revide (os mais novos ainda não). */
   ultimaAgressaoVista: number;
   rng: EstadoRng;
+  /**
+   * Marco 25 (25/10/2026, D-100): donos de armadilha que esta IA viu disparar (passa a contornar as deles), até
+   * `balance.ia.armadilhasLembradas`; e se está indo se curar na área do próprio elemento.
+   */
+  armadilhasVistas?: EntidadeId[];
+  curando?: boolean;
 }
 
 /** Quem causou dano e quando, para dividir XP entre participantes (§2.7, morte). */
@@ -538,6 +544,7 @@ export function clonarEntidade(e: Entidade): Entidade {
           detectados: [...e.ia.detectados],
           recentes: copiarCelulas(e.ia.recentes),
           rng: clonarRng(e.ia.rng),
+          ...(e.ia.armadilhasVistas ? { armadilhasVistas: [...e.ia.armadilhasVistas] } : {}),
         }
       : null,
     bolsa: e.bolsa ? clonarBolsa(e.bolsa) : null,

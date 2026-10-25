@@ -18,12 +18,35 @@ export function ehDificuldade(v: unknown): v is Dificuldade {
   return typeof v === 'string' && (DIFICULDADES as readonly string[]).includes(v);
 }
 
+/**
+ * Marco 25 (25/10/2026, D-100): o quanto a IA dos inimigos é esperta na dificuldade. Chances em %:
+ * - `evitaPerigoPct`: contorna áreas de dano ao planejar o caminho na perseguição;
+ * - `esquivaAvisoPct`: sai da área telegrafada de um golpe antes do impacto;
+ * - `cercar`: os perseguidores corpo a corpo se espalham em volta do alvo, em vez de fazer fila;
+ * - `recuaHpPct`: abaixo desta vida, o atirador mantém a distância máxima (0 = nunca; no Normal alongava demais a
+ *   luta do Necromante, balance.metas);
+ * - `curaHpPct` e `curaAfimPct`: abaixo desta vida, a chance de o afim ir se curar na área do próprio elemento;
+ * - `aprendeArmadilhaPct`: chance de quem viu uma armadilha disparar passar a contornar as daquele dono;
+ * - `focoFracoPct`: chance de trocar para o alvo mais ferido por perto.
+ */
+export interface PerfilIa {
+  evitaPerigoPct: number;
+  esquivaAvisoPct: number;
+  cercar: boolean;
+  recuaHpPct: number;
+  curaHpPct: number;
+  curaAfimPct: number;
+  aprendeArmadilhaPct: number;
+  focoFracoPct: number;
+}
+
 export interface RegrasDificuldade {
   vidaPct: number;
   danoPct: number;
   hesitacaoPct: number;
   avisoExtraMs: number;
   recompensaPct: number;
+  ia: PerfilIa;
 }
 
 export interface RegrasGrupo {
@@ -73,6 +96,11 @@ export function fatoresDoMundo(estado: EstadoJogo, ctx: Pick<ContextoSimulacao, 
     recompensa: (d.recompensaPct / 100) * (1 + (g.recompensaPorJogadorPct / 100) * extras),
     spawner: 1 + (g.spawnerPorJogadorPct / 100) * extras,
   };
+}
+
+/** Marco 25 (D-100): o perfil de inteligência dos inimigos na dificuldade da fase. */
+export function perfilDaIa(estado: Pick<EstadoJogo, 'dificuldade'>, ctx: Pick<ContextoSimulacao, 'balance'>): PerfilIa {
+  return ctx.balance.dificuldades[estado.dificuldade].ia;
 }
 
 /** Multiplicador do dano de um golpe, pelos lados de quem bate e de quem apanha. */

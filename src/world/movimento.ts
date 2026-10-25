@@ -22,7 +22,7 @@ import { emPasso, type Entidade } from '../entities/entidade';
 import { regenerarPorPasso } from '../progression/recursos';
 import { celulaLivrePara, ordemRotativa } from './colisao';
 import { passavel } from './fase';
-import { caminho } from './navegacao';
+import { caminho, caminhoComCusto } from './navegacao';
 
 export const VETOR_DIR: Readonly<Record<Dir8, readonly [number, number]>> = {
   N: [0, -1],
@@ -90,9 +90,11 @@ export function planejarCaminho(
   tick: number,
   saida: EventoSimulacao[],
   maxPassos = ctx.balance.navegacao.maxPassosToque,
+  // Marco 25 (25/10/2026, D-100): a IA que evita perigo passa o mapa dele (world/perigos.ts).
+  perigo: Uint8Array | null = null,
 ): boolean {
   const origem = { x: e.destinoX, y: e.destinoY };
-  const resultado = caminho(ctx.fase, origem, destino, maxPassos);
+  const resultado = perigo ? caminhoComCusto(ctx.fase, origem, destino, maxPassos, perigo, ctx.balance.ia.custoPerigo) : caminho(ctx.fase, origem, destino, maxPassos);
   if (resultado.status !== 'alcancado') {
     saida.push({ t: 'caminhoFalhou', tick, id: e.id, status: resultado.status });
     return false;

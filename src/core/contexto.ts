@@ -214,6 +214,8 @@ export interface Balance {
     enxameAtivos: number; enxameLeva: number; enxameInicio: number; enxameRaio: number; enxameDistanciaSegura: number;
     /** Marco 23 (D-092): as áreas novas (gelo fino, lama, névoa sombria, luz sagrada). */
     resfriadoPct: number; atoladoPct: number; definhandoPct: number; curaSagrada: number;
+    /** Marco 25 (D-100): a área do próprio elemento cura o inimigo afim, por pulso. */
+    curaAfim: number;
   };
   /** Marco 23 (24/10/2026, D-092): o clima da fase de tema elemental (combat/clima.ts). */
   clima: {
@@ -347,6 +349,19 @@ export interface RegrasIa {
   chanceDesistir: number;
   distanciaMinAtirador: number;
   distanciaMaxAtirador: number;
+  /**
+   * Marco 25 (25/10/2026, D-100): quanto uma célula de perigo pesa no caminho de quem evita (em passos); o raio da
+   * busca pela área do próprio elemento e a vida em que sai dela; o intervalo dos sorteios táticos (cura, foco); o
+   * raio em que se vê uma armadilha disparar e quantos donos de armadilha a IA lembra.
+   */
+  custoPerigo: number;
+  curaAfimRaio: number;
+  curaAfimSaiPct: number;
+  sorteioTaticoMs: number;
+  armadilhaVistaRaio: number;
+  armadilhasLembradas: number;
+  /** Marco 25 (D-100): arquétipos que não largam a posição para se esquivar da telegrafia (o chefe segura o lugar). */
+  arquetiposFirmes: string[];
 }
 
 // O JSON importado tipa `raridadeMinBoss` como string e as tuplas como listas; o leitor de conteúdo e os testes

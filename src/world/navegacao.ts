@@ -110,3 +110,57 @@ export function alcancaveisComPortas(fase: Fase, origem: Celula): Uint8Array {
   return marcadas;
 }
 
+
+/**
+ * Marco 25 (25/10/2026, D-100): o caminho que contorna o perigo. Dijkstra por baldes (custo inteiro): entrar numa
+ * célula marcada em `perigo` custa `1 + custoPerigo`; as demais, 1. Mesma ordem de expansão (N, E, S, O) e o mesmo
+ * limite de passos do `caminho`; sem perigo no mapa, devolve o mesmo caminho que ele. Se só houver caminho pelo
+ * perigo, atravessa (o custo só desempata).
+ */
+export function caminhoComCusto(fase: Fase, origem: Celula, destino: Celula, maxPassos: number, perigo: Uint8Array, custoPerigo: number): ResultadoCaminho {
+  if (origem.x === destino.x && origem.y === destino.y) return { status: 'alcancado', passos: [] };
+  if (!passavel(fase, destino.x, destino.y)) return { status: 'inacessivel', passos: [] };
+
+  const { largura } = fase;
+  const total = largura * fase.altura;
+  const custo = new Int32Array(total).fill(-1);
+  const passos = new Int32Array(total);
+  const veioDe = new Int32Array(total).fill(-1);
+  const inicio = origem.y * largura + origem.x;
+  const alvo = destino.y * largura + destino.x;
+  custo[inicio] = 0;
+  veioDe[inicio] = inicio;
+  const baldes: number[][] = [[inicio]];
+  let cortado = false;
+  for (let c = 0; c < baldes.length; c++) {
+    const balde = baldes[c];
+    if (!balde) continue;
+    for (let k = 0; k < balde.length; k++) {
+      const atual = balde[k] as number;
+      // Entrada velha: a célula já saiu de um balde mais barato.
+      if (custo[atual] !== c) continue;
+      if (atual === alvo) return { status: 'alcancado', passos: reconstruir(veioDe, inicio, alvo, largura) };
+      const prof = passos[atual] as number;
+      if (prof >= maxPassos) {
+        cortado = true;
+        continue;
+      }
+      const cx = atual % largura;
+      const cy = (atual - cx) / largura;
+      for (const [dx, dy] of VIZINHOS) {
+        const nx = cx + dx;
+        const ny = cy + dy;
+        if (!passavel(fase, nx, ny)) continue;
+        const vizinho = ny * largura + nx;
+        const novo = c + 1 + (perigo[vizinho] === 1 ? custoPerigo : 0);
+        const antigo = custo[vizinho] as number;
+        if (antigo !== -1 && antigo <= novo) continue;
+        custo[vizinho] = novo;
+        veioDe[vizinho] = atual;
+        passos[vizinho] = prof + 1;
+        (baldes[novo] ??= []).push(vizinho);
+      }
+    }
+  }
+  return { status: cortado ? 'limite_excedido' : 'inacessivel', passos: [] };
+}
