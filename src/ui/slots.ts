@@ -11,6 +11,10 @@ import { apagarSlot, carregarSlot, gravarRegistro, listarSlots, type EstadoSlot 
 import { enderecoDoServidor } from '../plataforma/servidor';
 import { ligarNuvemNosSlots } from './nuvem-slots';
 import { exportarRegistro, importarRegistro } from '../save/esquema';
+import classesJson from '../data/classes.json';
+
+/** 25/10/2026: o nome da classe do slot, direto do catálogo (a tela de slots não monta o conteúdo inteiro). */
+const NOMES_DAS_CLASSES = new Map(classesJson.classes.map((c) => [c.id, c.nome]));
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, texto?: string): HTMLElementTagNameMap[K] {
   const e = document.createElement(tag);
@@ -148,7 +152,13 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
         el(
           'p',
           'resumo-slot',
-          t('slots.resumo', { nivel: s.resumo.nivel, fase: s.resumo.nomeFase, data: dataHora.format(s.resumo.atualizadoEm), descobertas: s.resumo.descobertas }),
+          t('slots.resumo', {
+            classe: NOMES_DAS_CLASSES.get(s.resumo.classeId ?? '') ?? t('slots.semClasse'),
+            nivel: s.resumo.nivel,
+            fase: s.resumo.nomeFase,
+            data: dataHora.format(s.resumo.atualizadoEm),
+            descobertas: s.resumo.descobertas,
+          }),
         ),
       );
       const continuar = link(`./?jogo=campanha&slot=${s.slot}&dificuldade=${s.resumo.dificuldade}`, t('slots.continuar'));

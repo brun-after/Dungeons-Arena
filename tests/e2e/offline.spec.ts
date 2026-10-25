@@ -27,7 +27,7 @@ test('offline: depois da primeira visita, a campanha abre, anda e salva sem rede
   await expect.poll(() => diag.getAttribute('data-celula'), { timeout: 15_000 }).not.toBe(antes);
   await page.keyboard.up('d');
   await page.getByRole('button', { name: 'Salvar e voltar aos slots' }).click();
-  await expect(page.locator('[data-slot="1"]')).toContainText('Nível 1');
+  await expect(page.locator('[data-slot="1"]')).toContainText('nível 1');
 
   // Navegação para um endereço que o cache nunca viu: cai no index.html do precache (o menu abre).
   await page.goto('./qualquer-pagina');

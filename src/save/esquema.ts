@@ -72,6 +72,8 @@ export interface ResumoSlot {
   dificuldade: Dificuldade;
   /** Marco 18 (D-070): quantas entradas o diário do personagem tem. */
   descobertas: number;
+  /** 25/10/2026: a classe do personagem do slot (null em saves sem bolsa). */
+  classeId: string | null;
 }
 
 /** O jogador do save: a entidade com bolsa (a campanha tem um só). */
@@ -88,6 +90,7 @@ export function resumoDoRegistro(r: RegistroProgresso): ResumoSlot {
     atualizadoEm: r.atualizadoEm,
     dificuldade: r.estado.dificuldade,
     descobertas: jogador?.bolsa?.diario.length ?? 0,
+    classeId: jogador?.bolsa?.classeId ?? null,
   };
 }
 
