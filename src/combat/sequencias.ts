@@ -1,4 +1,5 @@
 // Marco 19 (17/10/2026): sequências de duas/três skills. Preparar não confirma: a finalização exige resultado real.
+import { cargaPorMomento } from './carga-ultimate';
 import recompensasJson from '../data/combos.json';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type EstadoJogo } from '../core/estado';
@@ -214,6 +215,8 @@ export function confirmarImpactoTatico(estado: EstadoJogo, ctx: ContextoSimulaca
     }
   }
   saida.push({ t: 'comboFeito', tick: estado.tick, id: ator.id, combo: c.id, alvoId: alvo.id, x: alvo.x, y: alvo.y, origemX: etapa.x, origemY: etapa.y, atorX: ator.x, atorY: ator.y, miraX: etapa.miraX, miraY: etapa.miraY });
+  // Marco 24 (D-094): concluir um combo enche a ultimate.
+  cargaPorMomento(ctx, ator, 'combo', estado.tick, saida);
 }
 
 /** A névoa preparada renova lentidão curta só em quem continua dentro dela. */

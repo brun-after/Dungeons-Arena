@@ -20,7 +20,10 @@ export type MotivoRecusa =
   | 'sem_alvo'
   | 'fora_de_alcance'
   /** Marco 8A-2: limite de invocações ou armadilhas do modo, recusado antes de cobrar (§5.6). */
-  | 'limite';
+  | 'limite'
+  /** Marco 24 (D-094): o par das teclas 1 e 2 não forma ultimate, ou o medidor não encheu. */
+  | 'sem_ultimate'
+  | 'sem_carga';
 
 /** Recusas de mochila, equipamento e pontos (marco 6). */
 export type MotivoItem =

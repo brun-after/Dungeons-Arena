@@ -81,7 +81,17 @@
     ],
     "costasConeGraus": 135
   },
-  "ultimate": { "max": 100, "ganhos": { "habilidade": 3, "basico": 0.6, "cura": 1.5, "abate": 8, "combo": 6 } },
+  "ultimate": {
+    "max": 100,
+    "ganhos": { "habilidade": 3, "basico": 0.6, "cura": 1.5, "abate": 8, "combo": 6 },
+    "classe": {
+      "furiaCheia": { "valor": 15, "intervaloMs": 0 },
+      "encarnacao": { "valor": 5, "intervaloMs": 4000 },
+      "miraFirme": { "valor": 8, "intervaloMs": 0 },
+      "servoCaiu": { "valor": 3, "intervaloMs": 2000 },
+      "falcao": { "valor": 2, "intervaloMs": 1000 }
+    }
+  },
   "estados": { "esquivaMaxPct": 50, "cegoMaxPct": 60, "contragolpeAtordoarMs": 1000, "contragolpeFuria": 20 },
   "passivasGerais": { "maxAtivas": 3 },
   "hp": {

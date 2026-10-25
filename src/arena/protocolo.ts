@@ -156,6 +156,11 @@ export function lerComando(v: unknown): Comando | null {
     case 'definirDificuldade':
       return ehDificuldade(v.nivel) ? { t: 'definirDificuldade', nivel: v.nivel } : null;
     // Marco 24 (D-097): o Parar ataque.
+    case 'usarUltimate': {
+      if (v.alvo === undefined) return { t: 'usarUltimate' };
+      const alvo = id(v.alvo) ? v.alvo : lerCelula(v.alvo);
+      return alvo ? { t: 'usarUltimate', alvo } : null;
+    }
     case 'autoAtaque':
       return typeof v.ligado === 'boolean' ? { t: 'autoAtaque', ligado: v.ligado } : null;
     default:

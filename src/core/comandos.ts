@@ -47,7 +47,9 @@ export type Comando =
   /** Marco 15: troca a dificuldade do mundo (o personagem não muda). */
   | { t: 'definirDificuldade'; nivel: Dificuldade }
   /** Marco 24 (D-097): liga ou desliga o ataque básico automático (o botão Parar ataque e a tecla F). */
-  | { t: 'autoAtaque'; ligado: boolean };
+  | { t: 'autoAtaque'; ligado: boolean }
+  /** Marco 24 (D-094): a ultimate do par nas teclas 1 e 2, com o medidor cheio (o botão grande e a tecla R). */
+  | { t: 'usarUltimate'; alvo?: EntidadeId | Celula };
 
 /** Marco 15: os tipos de comando, para os modos listarem quais aceitam pela rede (`comandosDeRede`). */
 export const TIPOS_DE_COMANDO: readonly Comando['t'][] = [
@@ -74,6 +76,7 @@ export const TIPOS_DE_COMANDO: readonly Comando['t'][] = [
   'equiparHabilidade',
   'definirDificuldade',
   'autoAtaque',
+  'usarUltimate',
 ];
 
 /** Envelope de rede. O servidor deriva o jogador da sessão e atribui o tick de aplicação. */

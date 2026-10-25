@@ -21,7 +21,7 @@ import { idGerada } from '../combat/chave-habilidade';
 import { fatoresDoMundo, ladoDoJogador } from '../modos/dificuldade';
 import { podeAjudar, podeFerir } from '../modos/relacao';
 import { chebyshev } from '../combat/geometria';
-import { cargaPorMomento } from '../combat/carga-ultimate';
+import { cargaDaClasse, cargaPorMomento } from '../combat/carga-ultimate';
 import { atrasoDeRespawnTicks, localDeRespawn, penalidadeDeMorte, podeRespawnar, protecaoDeRespawnTicks } from '../modos/regras';
 import { celulaLivrePara } from '../world/colisao';
 import { passavel } from '../world/fase';
@@ -148,6 +148,9 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
       // Marco 24 (D-094): abater um hostil (não invocação) enche o medidor da ultimate de quem abateu (ou do dono).
       const dono = creditado(estado, quemAbateu);
       if (dono && !e.invocacao && podeFerir(dono, e, ctx.modo)) cargaPorMomento(ctx, dono, 'abate', estado.tick, saida);
+      // O morto do Necromante que cai lutando contra um hostil enche a ultimate do dono (uma vez a cada 2 s).
+      const donoDoMorto = e.invocacao?.necromancia ? buscarEntidade(estado, e.invocacao.donoId) : undefined;
+      if (donoDoMorto && vivo(donoDoMorto) && podeFerir(quemAbateu, e, ctx.modo)) cargaDaClasse(ctx, donoDoMorto, 'servoCaiu', estado.tick, saida);
       const abate = abateDe(ctx, quemAbateu, e);
       abates.push(abate);
       dispararGanchosDe(estado, ctx, quemAbateu, 'aoMatar', { outro: e, hab: abate.golpe ?? null }, saida);

@@ -30,12 +30,15 @@ export function fracaoFuria(ctx: ContextoSimulacao, e: Entidade, tick: number): 
 
 /**
  * Um ataque básico que feriu: soma à barra (até o máximo) e renova a carência. Marco 24 (24/10/2026): `quanto` vem do
- * efeito `furia` (Desafio, Contragolpe); sem ele, vale o do básico.
+ * efeito `furia` (Desafio, Contragolpe); sem ele, vale o do básico. Devolve se a barra encheu agora.
  */
-export function acumularFuria(ctx: ContextoSimulacao, e: Entidade, tick: number, quanto?: number): void {
-  if (!temFuria(e)) return;
+export function acumularFuria(ctx: ContextoSimulacao, e: Entidade, tick: number, quanto?: number): boolean {
+  if (!temFuria(e)) return false;
   const r = ctx.balance.ajustesClasses.guerreiro.furia;
-  e.furia = { valor: Math.min(r.max, furiaAtual(ctx, e, tick) + (quanto ?? r.porBasico)), ultimoTick: tick };
+  const antes = furiaAtual(ctx, e, tick);
+  e.furia = { valor: Math.min(r.max, antes + (quanto ?? r.porBasico)), ultimoTick: tick };
+  // Marco 24 (D-094): devolve se a barra acabou de encher (a fúria cheia enche a ultimate).
+  return antes < r.max && e.furia.valor >= r.max;
 }
 
 /** Multiplicador das curas do próprio Guerreiro: `curaMult` com a barra cheia, senão 1. */

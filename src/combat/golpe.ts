@@ -31,7 +31,7 @@ import { fatorDoGolpe } from '../modos/dificuldade';
 import type { Habilidade } from './habilidades';
 import { cegoErra, curaRecebidaPassivas, estadosAoAcertar, golpePelasCostas, multiplicadorMarco24, reforcarEstado, resistenciaIgnorada } from './modificadores-golpe';
 import { registrarParticipacao } from './participacao';
-import { cargaPorMomento } from './carga-ultimate';
+import { cargaDaClasse, cargaPorMomento } from './carga-ultimate';
 
 export interface Impacto {
   acaoId: number;
@@ -205,7 +205,7 @@ export function aplicarImpacto(
   const curaBasicoPct = conjurador?.bolsa ? (ctx.balance.recursos.curaBasicoPorClassePct[conjurador.bolsa.classeId] ?? 0) : 0;
   const basicoQueFere = !!conjurador && vivo(conjurador) && conjurador !== alvo && hab.id === conjurador.ataqueBasico && dano > 0 && podeFerir(conjurador, alvo, ctx.modo);
   // Marco 21 (D-088): o básico que fere enche a fúria do Guerreiro (antes da cura, que já dobra no golpe que a enche).
-  if (conjurador && basicoQueFere) acumularFuria(ctx, conjurador, estado.tick);
+  if (conjurador && basicoQueFere && acumularFuria(ctx, conjurador, estado.tick)) cargaDaClasse(ctx, conjurador, 'furiaCheia', estado.tick, saida);
   if (conjurador && basicoQueFere && curaBasicoPct > 0) {
     const valor = Math.min(hpAntes, dano) * curaBasicoPct / 100 * multiplicadorFuria(ctx, conjurador, estado.tick);
     aplicarEfeito(estado, ctx, conjurador, construirEfeito('cura', { valor }), origem, null, saida);
@@ -214,6 +214,8 @@ export function aplicarImpacto(
   // Marco 24 (D-094): o primeiro alvo de cada ação enche o medidor da ultimate (a própria ultimate não enche).
   if (conjurador && impacto.indice === 0 && !hab.tags.includes('ultimate')) {
     if (dano > 0 && conjurador !== alvo) cargaPorMomento(ctx, conjurador, basicoQueFere ? 'basico' : 'habilidade', estado.tick, saida);
+    // O acerto das skills do falcão enche do jeito do Aventureiro (no máximo uma vez por intervalo).
+    if (dano > 0 && conjurador !== alvo && hab.tags.includes('falcao')) cargaDaClasse(ctx, conjurador, 'falcao', estado.tick, saida);
     if (cura > 0) cargaPorMomento(ctx, conjurador, 'cura', estado.tick, saida);
   }
   // Sinergias (marco 14): o estado consumido sai e os efeitos da sinergia entram, antes dos da habilidade.

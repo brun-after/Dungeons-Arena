@@ -322,6 +322,8 @@ export interface Entidade {
   olhando?: Dir8;
   /** Marco 24 (D-094): o medidor da ultimate (0..balance.ultimate.max); ausente = vazio. */
   cargaUltimate?: number;
+  /** Marco 24 (D-094): o tick do último ganho de carga de cada momento da classe (o intervalo mínimo entre eles). */
+  cargaClasseTick?: Partial<Record<string, number>>;
   /** 18/10/2026: acertos efetivos consecutivos do Dardo no mesmo alvo e vida. */
   concentracaoArcana?: { alvoId: string; geracao: number; abates: number; acertos: number; ultimoTick: number };
 }
@@ -500,6 +502,7 @@ export function clonarEntidade(e: Entidade): Entidade {
     ...(e.furia ? { furia: { ...e.furia } } : {}),
     ...(e.mira ? { mira: { ...e.mira } } : {}),
     ...(e.afinidade ? { afinidade: { ...e.afinidade } } : {}),
+    ...(e.cargaClasseTick ? { cargaClasseTick: { ...e.cargaClasseTick } } : {}),
     waypoints: copiarCelulas(e.waypoints),
     caminho: copiarCelulas(e.caminho),
     atributos: { ...e.atributos },

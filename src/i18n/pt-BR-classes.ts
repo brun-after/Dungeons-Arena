@@ -71,6 +71,8 @@ export const textosClasses = {
   'tag.sagrado': 'sagradas',
   'tag.falcao': 'do falcão',
   'tag.ultimate': 'de ultimate',
+  'recusa.sem_ultimate': 'As teclas 1 e 2 não formam uma ultimate',
+  'recusa.sem_carga': 'A ultimate ainda não carregou',
   // Barra de 6, livros e ranks (D-094)
   'item.outra_classe': 'Este livro é de skill de outra classe',
   'habilidades.motivo.tecla_errada': 'As teclas 1 e 2 são das skills de classe; 3 a 6, das gerais',

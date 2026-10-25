@@ -13,6 +13,9 @@ import type { Atributos } from '../entities/entidade';
 import type { RegrasItensGerados } from '../progression/gerar-item';
 import type { Conteudo } from './conteudo';
 
+/** Marco 24 (24/10/2026, D-094): os momentos de cada classe que enchem o medidor da ultimate (balance.ultimate.classe). */
+export type MomentoCargaClasse = 'furiaCheia' | 'encarnacao' | 'miraFirme' | 'servoCaiu' | 'falcao';
+
 export interface Balance {
   /** Ajustes de classes (18/10/2026): curvas e passivas de produção. */
   ajustesClasses: {
@@ -55,8 +58,8 @@ export interface Balance {
     /** Marco 24 (D-097): abertura do cone de trás, em graus (135 = a célula de trás e as duas diagonais). */
     costasConeGraus: number;
   };
-  /** Marco 24 (24/10/2026, D-094): o medidor da ultimate e quanto cada momento enche. */
-  ultimate: { max: number; ganhos: { habilidade: number; basico: number; cura: number; abate: number; combo: number } };
+  /** Marco 24 (D-094): o medidor da ultimate; `classe`, o ganho do jeito de cada classe (com intervalo mínimo). */
+  ultimate: { max: number; ganhos: { habilidade: number; basico: number; cura: number; abate: number; combo: number }; classe: Record<MomentoCargaClasse, { valor: number; intervaloMs: number }> };
   /** Marco 24 (24/10/2026, D-097): tetos e números dos estados novos. */
   estados: { esquivaMaxPct: number; cegoMaxPct: number; contragolpeAtordoarMs: number; contragolpeFuria: number };
   /** Marco 24 (D-095): quantas passivas gerais ficam ligadas ao mesmo tempo. */
