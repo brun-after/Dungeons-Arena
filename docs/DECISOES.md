@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.54 · **Data:** 24/10/2026
+**Versão:** 0.55 · **Data:** 25/10/2026
 
 > **Histórico**
+> - **0.55 (25/10/2026)**: D-094 a D-099 (marco 24: skills de classe, ultimates, sintonia, ressonâncias, orientação, falcão e portas) e D-100 a D-103 (marco 25: IA por dificuldade, população por fase, falcão protetor, arco branco, anel do Necromante e aceleração pelo total).
 > - **0.54 (24/10/2026)**: D-092 (marco 23: dez slots, 20 temas de fase, clima elemental e inimigos afins) e D-093 (armas fora da classe trocam o ataque básico).
 > - **0.53 (24/10/2026)**: D-091 (IA livre do falcão, alcance global e coleta; encarnação do Mago com 12 s e trilha; flecha do tiro carregado).
 > - **0.52 (23/10/2026)**: D-090 (marco 22: Necromante no simulador, exército de até 10 mortos, retorno dos distantes e Dízimo que ergue).
@@ -2416,3 +2417,156 @@ golpeia corpo a corpo, o Guerreiro de cajado ataca de longe e o Mago de arco ati
   - as identidades seguem com a classe: a Mira firme só vale para o Arqueiro, e as habilidades do falcão não incluem
     o básico.
 - **Interface:** ao trocar, o log e um aviso dizem qual é o ataque básico agora; a arma já aparece desenhada na mão.
+
+## D-094 — Skills de classe, ultimates e estados de controle (marco 24, 24/10/2026)
+
+**Contexto.** O Grimório das Classes (aprovado antes do código) dá a cada classe skills próprias, uma ultimate por par
+de skills e estados novos de controle.
+
+**Decisão:**
+- **Teclas:** 1 e 2 são as skills de classe; 3 a 6, as gerais. R usa a ultimate e F liga o ataque automático.
+- **Ultimate:**
+  - sai do par nas teclas 1 e 2, com um medidor que enche com o combate;
+  - não fica na barra e é recusada sem par ou com o medidor abaixo do cheio;
+  - trocar de encarnação enche o medidor, no máximo uma vez a cada 4 s.
+- **Fases agendadas:** as etapas das ultimates ficam em `estado.fases` e vencem antes das conjurações do tick. Usam o
+  alvo guardado ou a célula.
+- **Estados:** cego, aterrorizado, confuso, desafiado, marca do caçador e Frenesi. No Frenesi, a resistência contra
+  grupos vai a zero. Quem tem a marca do caçador de quem ataca não some para ele.
+
+## D-095 — Sintonia, encarnações do Mago e tiro cheio do Arqueiro (marco 24, 24/10/2026)
+
+**Decisão:**
+- **Sintonia:** as famílias das skills gerais mudam as de classe (`data/sintonia.json`). As vertentes de cada classe
+  dão a variação maior: Druida, Rapina, Tempestuoso, Alquimista, Arquimago, Geomante e as demais.
+- **Mago:**
+  - as gerais de terra, veneno, sombra e sagrado abrem encarnações (a de terra dá +1 de raio nas áreas);
+  - trocar de elemento até 3 s depois da última magia funde os dois por 6 s: são as 21 encarnações duplas;
+  - a sintonia arcana concentra mais rápido.
+- **Arqueiro:** a sintonia marca o tiro cheio, que pode sair mágico, com ricochetes ou invisível.
+- **Golpe:** o crítico garantido (Presságio) sai no próximo golpe; a sobrecarga sai na magia que ela fortaleceu.
+
+## D-096 — Ressonâncias e sinergias passivas (marco 24, 24/10/2026)
+
+**Decisão:**
+- **Ressonâncias:** `ressonancias.json` v2 traz 24. Entre as novas:
+  - Eco ancestral deixa a próxima skill de classe sem mana;
+  - Engenhoso faz o projétil mágico atravessar;
+  - Resiliente encurta os estados;
+  - Oráculo enche o medidor mais rápido.
+- **Sinergias:** Bastião de pedra, Disciplina férrea, Fluxo de cura e Avalanche humana valem com a passiva geral
+  ligada. Os ganchos `aoUsarUltimate`, `aoEncherUltimate` e `aoConcluirCombo` são disparados pelos eventos do tick.
+- **Ritmo:** o Ímpeto fica em 0,5 s e só nas skills de classe que ferem, porque o ritmo do Aventureiro no nível 10
+  saía da meta.
+
+## D-097 — Orientação, pelas costas e estados na IA (marco 24, 24/10/2026)
+
+**Decisão:**
+- **Orientação:** cada entidade olha para onde deu o último passo ou para quem atacou. "Pelas costas" é decidido pelo
+  olhar do alvo, e a marca vai no evento para o número na tela.
+- **Parar ataque:** um comando próprio, no teclado e no toque.
+- **IA:** os estados mandam nela. O aterrorizado foge de quem aplicou, o confuso vaga sem atacar e o desafiado
+  persegue só quem o desafiou.
+
+## D-098 — Falcão com reflexo, pouso e voo livre (marco 24, 25/10/2026)
+
+**Decisão:**
+- **Reflexo:** do dano no falcão, chega ao dono 80% no nível 1 e 60% no máximo. Cura e estados seguem inteiros.
+- **Alvo:** o falcão não atrai inimigos; só é alvo de quem já está perseguindo.
+- **Pouso:** com o dono parado, sem hostil e sem nada para pegar por 6 s, o falcão pousa no ombro.
+- **Render:** voo solto com mola e deriva, três quadros de asas e uma trajetória por skill. As ultimates são tingidas
+  da cor delas.
+
+## D-099 — Porta com espera, kit de engenho e música que alterna (marco 24, 25/10/2026)
+
+**Decisão:**
+- **Portas:** sair pela porta de fase pede ficar parado nela 3 s (`portas.esperaMs`); andar zera a espera. No grupo,
+  cada um precisa ter cumprido a espera.
+- **Santuário de Engenho:** entrega o kit de engenho, que converte uma armadilha revelada.
+- **Música:** a variante troca a música dentro da mesma fase a cada 3 a 4 min.
+- **Ultimate:** a cinemática fica só com a vinheta na cor dela, sem o nome.
+
+## D-100 — IA dos inimigos por dificuldade (marco 25, 25/10/2026)
+
+**Contexto.** O usuário pediu inimigos mais espertos quanto mais difícil, com o Normal já acima do de antes. Eles
+pisavam em áreas de dano mesmo fora de perseguição. Devem cair nas armadilhas do jogador, e nas dificuldades altas
+aprender a evitá-las. Quem absorve um elemento pode usar a área dele para se curar.
+
+**Decisão:**
+- **Perfil em dados** (`balance.dificuldades.<d>.ia`, lido por `perfilDaIa`):
+
+  | | Fácil | Normal | Difícil | Pesadelo |
+  |---|---|---|---|---|
+  | Evita perigo | 30% | 70% | 90% | 100% |
+  | Esquiva da telegrafia | 0 | 35% | 65% | 90% |
+  | Cerca | não | sim | sim | sim |
+  | Recua ferido (atirador) | — | — | 40% de vida | 50% de vida |
+  | Cura na área afim | — | 40% abaixo de 35% | 70% abaixo de 45% | 90% abaixo de 55% |
+  | Aprende armadilhas | 0 | 0 | 50% | 85% |
+  | Foca o mais ferido | 0 | 0 | 30% | 60% |
+
+- **Perigo** (`world/perigos.ts`):
+  - entram as áreas que ferem (menos a do próprio elemento), os rastros e campos de veneno hostis pela `relacao()` e
+    as armadilhas dos donos já vistos;
+  - a patrulha nunca pisa no perigo; só passa por ele quando não há outra saída;
+  - na perseguição, quem evita usa `caminhoComCusto` (Dijkstra por baldes, `custoPerigo` = 8 passos), que atravessa o
+    perigo quando não há outro caminho.
+- **Armadilhas:**
+  - as do jogador são invisíveis para a IA: ela pisa, e o jogador pode atrair os inimigos andando em volta delas;
+  - as de habilidade somem ao disparar, então o que se aprende é o dono: quem vê uma disparar a até 6 células passa,
+    com a chance do perfil, a contornar as próximas dele (até 8 donos lembrados).
+- **Cura afim:**
+  - a área do próprio elemento cura o afim (`ambiente.curaAfim`, 6 por pulso), em vez de aplicar o efeito;
+  - abaixo do limiar, ele pode ir até ela (a até 6 células) e fica até 90% da vida.
+- **Esquiva:** sai da área telegrafada para a célula livre mais perto fora dela, até 2 passos. Quem já conjura não
+  esquiva, e o chefe segura a posição (`balance.ia.arquetiposFirmes`).
+- **Sorteios:** são por chave (hash), sem gastar o PRNG da IA, para o resto da partida seguir reproduzível.
+
+**Balanceamento.**
+- O recuo do atirador ferido no Normal alongava a luta do Necromante além da meta; ficou só no Difícil e no Pesadelo.
+- A esquiva do chefe encurtava a luta do Guerreiro abaixo da meta, então o chefe não esquiva.
+
+## D-101 — Mais inimigos conforme se avança (marco 25, 25/10/2026)
+
+**Decisão** (`world/populacao.ts`, `balance.populacao`):
+- Cada fase depois da primeira soma 10% dos inimigos comuns, proporcional à área passável da fase (a referência é a
+  área média das oficiais).
+- Tetos: 3x os comuns e 60 inimigos.
+- Os reforços nascem perto de comuns sorteados, com o mesmo preset e nível, pelo PRNG da fase.
+- Fica fora das fases de enxame.
+- Só vale na criação da fase: saves em curso não mudam.
+
+## D-102 — Falcão protetor (marco 25, 25/10/2026)
+
+**Decisão:**
+- **Golpe com voo:**
+  - os golpes de contato do Aventureiro que ferem saem do falcão: ele voa até o alvo, e o impacto vem na chegada;
+  - a fase agendada leva a ação, e o lançamento é o completo;
+  - o dono fica livre durante o voo;
+  - a velocidade é 1x, 5x e 7x a patrulha nos níveis 1, 20 e 30, e a Sabedoria soma até +30%.
+- **Dash de defesa:**
+  - um projétil hostil que acertaria o dono (passa a até 0,6 célula dele, nas próximas 8) faz o falcão cortar a
+    linha a tempo;
+  - o projétil acerta o falcão, e só o reflexo chega ao dono;
+  - a velocidade é 2x, 6x e 9x nos níveis 1, 20 e 30, e o Carisma soma até +30%. No nível 30, quase nada passa.
+- **Render:** no dash e no mergulho, a mola fica bem mais dura, sem deriva, com rastro branco curto. A diferença para a
+  patrulha fica clara.
+- **Rede:** as fases agendadas entram nos patches da arena.
+
+**Balanceamento.** A meta "build focada vence a dispersa" do Aventureiro caiu de 62,5% para 43,8%, nas 16 sementes do
+relatório. Em 64 sementes, a taxa era 53% antes do voo e é 47% com ele: a meta já estava abaixo dos 60% e passava pela
+amostra. Mais velocidade não resolve: 2x, 10x e 14x dá o mesmo. Fica registrada para revisar a build do Aventureiro,
+sem mexer no falcão pedido.
+
+## D-103 — Arco branco, anel do Necromante e aceleração pelo total (marco 25, 25/10/2026)
+
+**Decisão:**
+- **Arqueiro:** com o tiro especial pronto, o arco fica branco, num pulso suave de 2000 ms (alfa entre 0,55 e 0,8,
+  fixo em 0,65 com movimento reduzido). Sai a emissão de partículas.
+- **Necromante:**
+  - as invocações temporárias ganham um anel roxo que se esvazia com a duração;
+  - no último terço, o anel mistura para branco e o alfa cai até 0,25;
+  - a permanente fica roxa e inteira.
+- **Aceleração da mente:**
+  - corta 25%, 33% ou 50% do tempo total do estudo;
+  - se o corte passa do que falta, o estudo conclui na hora. Exemplo: 18 min, restam 6, e a incomum conclui.
