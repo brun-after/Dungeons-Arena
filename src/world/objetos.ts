@@ -9,40 +9,23 @@ import { armarBuff, EFEITOS_OFENSIVOS } from '../progression/buffs';
 import { aplicarEfeito } from '../combat/efeitos';
 import type { EfeitoCanonico } from '../combat/registro-efeitos';
 import type { ContextoSimulacao } from '../core/contexto';
-import type { EstadoJogo, ObjetoNoMundo, TipoObjeto } from '../core/estado';
+import type { EstadoJogo, ObjetoNoMundo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { vivo, type Entidade } from '../entities/entidade';
 import { guardarItem } from '../progression/inventario';
 import { ordemRotativa } from './colisao';
 import { passavel } from './fase';
 
+// 25/10/2026: `novoObjeto` mora em objeto-novo.ts (só tipos), para o e2e importar sem puxar o núcleo inteiro.
+import { novoObjeto } from './objeto-novo';
+
+export { novoObjeto };
+
 /** Quanto o orbe daria a esta entidade agora (0 = não serve, não coleta). */
 export function ganhoDoObjeto(o: ObjetoNoMundo, e: Entidade): number {
   const [atual, maximo] = o.tipo === 'orbe_hp' ? [e.hp, e.hpMax] : [e.mana, e.manaMax];
   const bruto = o.modo === 'pct' ? Math.round((maximo * o.valor) / 100) : o.valor;
   return Math.max(0, Math.min(maximo - atual, bruto));
-}
-
-/** Objeto com os campos de todos os tipos em valor neutro; `campos` preenche os do tipo. */
-export function novoObjeto(objetoId: string, tipo: TipoObjeto, x: number, y: number, campos: Partial<ObjetoNoMundo> = {}): ObjetoNoMundo {
-  return {
-    objetoId,
-    tipo,
-    x,
-    y,
-    valor: 1,
-    modo: 'abs',
-    geracao: 0,
-    itemId: null,
-    efeito: null,
-    itens: [],
-    ouro: 0,
-    chave: null,
-    abertoTick: 0,
-    abridorId: null,
-    ref: null,
-    ...campos,
-  };
 }
 
 /** Baú e loja abrem por `interagir`; o resto é coletado ao pisar. */

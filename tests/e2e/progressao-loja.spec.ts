@@ -2,7 +2,7 @@
 import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import type { RegistroProgresso } from '../../src/save/esquema';
-import { novoObjeto } from '../../src/world/objetos';
+import { novoObjeto } from '../../src/world/objeto-novo';
 
 test('loja mantém tomo a preço fixo e mochila permanece aberta ao trocar equipamentos', async ({ page, isMobile }) => {
   // Duas reaberturas esperam a recarga em tempo de simulação no WebGL por software.

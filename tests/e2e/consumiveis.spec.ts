@@ -32,7 +32,8 @@ test('interação e alvo dobram a folga até as skills sem sobrepor a roda', asy
     expect(interagir).not.toBeNull();
     expect(alvo).not.toBeNull();
     if (!interagir || !alvo) throw new Error('Controles sem caixa');
-    expect(interagir.x).toBeCloseTo(antes.x - 7.5, 1);
+    // Marco 24 (25/10/2026): na horizontal, mais 60 px para as skills de classe à esquerda da 3 e da 4.
+    expect(interagir.x).toBeCloseTo(antes.x - (largura === 393 ? 7.5 : 67.5), 1);
     if (largura !== 393) {
       const skill = await page.locator('.botao-habilidade').first().boundingBox();
       if (!skill) throw new Error('Skill sem caixa');
@@ -40,7 +41,9 @@ test('interação e alvo dobram a folga até as skills sem sobrepor a roda', asy
     }
     expect(Math.abs(interagir.y + interagir.height / 2 - alvo.y - alvo.height / 2)).toBeLessThan(1);
     expect(alvo.x).toBeGreaterThanOrEqual(interagir.x + interagir.width);
-    expect(interagir.x + interagir.width / 2).toBeGreaterThan(largura / 2);
+    // Marco 24: com as skills de classe e o Parar ataque, a fileira só cabe na metade direita das telas largas; nas
+    // estreitas ela avança para a esquerda, sem cobrir o joystick nem a roda (conferido abaixo).
+    if (largura >= 900) expect(interagir.x + interagir.width / 2).toBeGreaterThan(largura / 2);
     for (const botao of await page.locator('.botao-habilidade, .joystick, .botao-acao.ataque').all()) {
       const caixa = await botao.boundingBox();
       if (!caixa) continue;

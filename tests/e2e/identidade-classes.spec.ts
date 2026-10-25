@@ -21,7 +21,8 @@ test('o Mago encarna o elemento da magia lançada', async ({ page }) => {
 
 test('o Aventureiro chega com o falcão', async ({ page }) => {
   await page.goto('/?jogo=campanha&slot=3&dificuldade=normal&classe=aventureiro');
-  await expect(page.getByTestId('habilidade-seta_arcana')).toBeVisible({ timeout: 30000 });
+  // Marco 24 (D-094): o kit inicial do Aventureiro começa pelo Mergulho (tecla 1).
+  await expect(page.getByTestId('habilidade-mergulho')).toBeVisible({ timeout: 30000 });
   await expect(page.locator('.log-combate')).toContainText('Falcão', { timeout: 10000 });
   await expect(page.locator('.barra.classe')).toBeHidden();
 });
