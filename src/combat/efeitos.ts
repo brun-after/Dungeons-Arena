@@ -208,7 +208,8 @@ export function aplicarEfeito(
   if (alvo.bolsa && !def.positivo && ef.duracaoMs > 0) {
     const passivas = passivasDaBolsa(ctx, alvo.bolsa);
     if (passivas.some((p) => p.imunes?.includes(ef.tipo))) return;
-    const pct = passivas.reduce((s, p) => s + (p.duracaoRecebidaPct?.[ef.tipo] ?? 0), 0);
+    // Marco 24 (D-096): e a ressonância Resiliente encurta todos.
+    const pct = passivas.reduce((s, p) => s + (p.duracaoRecebidaPct?.[ef.tipo] ?? 0), 0) - passivosDe(ctx, alvo).negativosMenosPct;
     if (pct !== 0) ef = { ...ef, duracaoMs: Math.max(0, Math.round(ef.duracaoMs * (1 + pct / 100))) };
   }
   // Marco 18 (ressonância Muralha): escudos recebidos duram e absorvem mais.

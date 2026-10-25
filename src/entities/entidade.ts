@@ -326,6 +326,10 @@ export interface Entidade {
   furia?: { valor: number; ultimoTick: number; frenesiAteTick?: number; frenesiExtraTicks?: number };
   /** Marco 24 (D-095): a sintonia da sombra do Guerreiro deixou o próximo golpe como pelas costas. */
   costasGarantidas?: boolean;
+  /** Marco 24 (D-096): a skill lançada antes da última (as sinergias de sequência, como a Avalanche humana). */
+  habilidadeAnterior?: { id: string; tick: number };
+  /** Marco 24 (D-096): a próxima skill de classe não gasta mana (ressonância Eco ancestral). */
+  classeSemMana?: boolean;
   /** Marco 24 (D-095): marcas da sintonia por alvo (`id/geração` para tick), como o desafio que já enraizou (Carcereiro). */
   sintoniaVistos?: Record<string, number>;
   /** Marco 24 (24/10/2026, D-097): para onde olha (último passo ou quem ataca); ausente = sul. Decide o "pelas costas". */
@@ -514,6 +518,7 @@ export function clonarEntidade(e: Entidade): Entidade {
     ...(e.afinidade ? { afinidade: { ...e.afinidade } } : {}),
     ...(e.cargaClasseTick ? { cargaClasseTick: { ...e.cargaClasseTick } } : {}),
     ...(e.sintoniaVistos ? { sintoniaVistos: { ...e.sintoniaVistos } } : {}),
+    ...(e.habilidadeAnterior ? { habilidadeAnterior: { ...e.habilidadeAnterior } } : {}),
     waypoints: copiarCelulas(e.waypoints),
     caminho: copiarCelulas(e.caminho),
     atributos: { ...e.atributos },

@@ -7,6 +7,7 @@ import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { SLOTS_CLASSE, type Entidade } from '../entities/entidade';
 import { ultimateDoPar, type Ultimate } from './ultimates';
+import { passivosDe } from '../progression/ganchos-do-portador';
 
 /** Momentos que enchem o medidor, com o ganho base em balance.ultimate.ganhos. */
 export type MomentoCarga = 'habilidade' | 'basico' | 'cura' | 'abate' | 'combo';
@@ -23,13 +24,19 @@ export function medidorCheio(ctx: ContextoSimulacao, e: Entidade): boolean {
   return cargaDe(e) >= ctx.balance.ultimate.max;
 }
 
-/** Soma ao medidor (até o máximo); avisa quando enche. */
+/**
+ * Soma ao medidor (até o máximo); avisa quando enche. Marco 24 (D-096): as ressonâncias Oráculo (mais rápido) e
+ * Sobrevivente (mais ainda com pouca vida) multiplicam o ganho.
+ */
 export function somarCarga(ctx: ContextoSimulacao, e: Entidade, valor: number, tick: number, saida: EventoSimulacao[]): void {
   if (!temMedidor(e) || valor <= 0) return;
   const max = ctx.balance.ultimate.max;
   const antes = cargaDe(e);
   if (antes >= max) return;
-  e.cargaUltimate = Math.min(max, antes + valor);
+  const p = passivosDe(ctx, e);
+  const vidaBaixa = e.hp * 100 < e.hpMax * ctx.balance.ultimate.vidaBaixaPct;
+  const ganho = valor * (1 + p.cargaUltimatePct / 100) * (vidaBaixa ? 1 + p.cargaVidaBaixaPct / 100 : 1);
+  e.cargaUltimate = Math.min(max, antes + ganho);
   if (e.cargaUltimate >= max) saida.push({ t: 'ultimateCheia', tick, id: e.id });
 }
 

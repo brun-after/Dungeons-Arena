@@ -175,6 +175,8 @@ export type EventoSimulacao =
   | { t: 'ultimateUsada'; tick: number; id: EntidadeId; ultimateId: string; acaoId: number }
   /** Ajuste de 24/10/2026 (D-091): a encarnação do Mago venceu. */
   | { t: 'encarnacaoAcabou'; tick: number; id: EntidadeId }
+  /** Marco 24 (D-096): uma sinergia passiva agiu (a passiva geral ligada mudou a skill). */
+  | { t: 'sinergiaPassiva'; tick: number; id: EntidadeId; sinergia: string }
   /** Marco 22 (D-090): o morto do Necromante longe demais voltou para o lado dele. */
   | { t: 'invocacaoRetornou'; tick: number; id: EntidadeId; donoId: EntidadeId; deX: number; deY: number; x: number; y: number }
   | { t: 'descoberta'; tick: number; id: EntidadeId; entrada: string }

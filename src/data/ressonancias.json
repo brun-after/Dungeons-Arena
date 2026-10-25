@@ -1,123 +1,482 @@
 {
-  "versao": 1,
+  "versao": 2,
   "ressonancias": [
     {
       "id": "impacto",
       "nome": "Impacto",
-      "exige": { "forca": 16 },
+      "exige": {
+        "forca": 16
+      },
       "texto": "Golpe corpo a corpo crítico empurra 1 célula.",
       "ganchos": [
-        { "quando": "aoCritico", "se": { "tag": "contato", "tipoAtaque": "fisico" }, "efeito": { "aplicar": { "tipo": "empurrao", "valor": 1 } } }
+        {
+          "quando": "aoCritico",
+          "se": {
+            "tag": "contato",
+            "tipoAtaque": "fisico"
+          },
+          "efeito": {
+            "aplicar": {
+              "tipo": "empurrao",
+              "valor": 1
+            }
+          }
+        }
       ]
     },
     {
       "id": "ricochete",
       "nome": "Ricochete",
-      "exige": { "destreza": 16 },
+      "exige": {
+        "destreza": 16
+      },
       "texto": "Projétil físico que abate salta para o hostil mais perto (6 de dano).",
       "ganchos": [
         {
           "quando": "aoMatar",
-          "se": { "tag": "projetil", "tipoAtaque": "fisico" },
-          "efeito": { "aplicarNoProximo": { "tipo": "dano_direto", "valor": 6 }, "raio": 3 }
+          "se": {
+            "tag": "projetil",
+            "tipoAtaque": "fisico"
+          },
+          "efeito": {
+            "aplicarNoProximo": {
+              "tipo": "dano_direto",
+              "valor": 6
+            },
+            "raio": 3
+          }
         }
       ]
     },
     {
       "id": "muralha",
       "nome": "Muralha",
-      "exige": { "constituicao": 16 },
+      "exige": {
+        "constituicao": 16
+      },
       "texto": "Escudos recebidos duram e absorvem 50% mais.",
       "ganchos": [
-        { "quando": "passivo", "efeito": { "escudoPct": 50 } }
+        {
+          "quando": "passivo",
+          "efeito": {
+            "escudoPct": 50
+          }
+        }
       ]
     },
     {
       "id": "residuo",
       "nome": "Resíduo",
-      "exige": { "inteligencia": 16 },
+      "exige": {
+        "inteligencia": 16
+      },
       "texto": "Magias de área deixam os atingidos expostos (+10% de dano recebido) por 3 s.",
       "ganchos": [
         {
           "quando": "aoAcertar",
-          "se": { "tag": "area", "tipoAtaque": "magico" },
-          "efeito": { "aplicar": { "tipo": "exposto", "duracaoMs": 3000, "pct": 10 } }
+          "se": {
+            "tag": "area",
+            "tipoAtaque": "magico"
+          },
+          "efeito": {
+            "aplicar": {
+              "tipo": "exposto",
+              "duracaoMs": 3000,
+              "pct": 10
+            }
+          }
         }
       ]
     },
     {
       "id": "purificar",
       "nome": "Purificar",
-      "exige": { "sabedoria": 16 },
+      "exige": {
+        "sabedoria": 16
+      },
       "texto": "Usar uma cura tira 1 efeito negativo de você.",
       "ganchos": [
-        { "quando": "aoUsarHabilidade", "se": { "tag": "cura" }, "efeito": { "purificar": 1 } }
+        {
+          "quando": "aoUsarHabilidade",
+          "se": {
+            "tag": "cura"
+          },
+          "efeito": {
+            "purificar": 1
+          }
+        }
       ]
     },
     {
       "id": "presenca",
       "nome": "Presença",
-      "exige": { "carisma": 16 },
+      "exige": {
+        "carisma": 16
+      },
       "texto": "No crítico, os hostis a até 2 células hesitam (sem golpes físicos) por 1 s.",
       "ganchos": [
-        { "quando": "aoCritico", "efeito": { "aplicarEmVolta": { "tipo": "sem_ataque", "duracaoMs": 1000 }, "raio": 2 } }
+        {
+          "quando": "aoCritico",
+          "efeito": {
+            "aplicarEmVolta": {
+              "tipo": "sem_ataque",
+              "duracaoMs": 1000
+            },
+            "raio": 2
+          }
+        }
       ]
     },
     {
       "id": "lamina_runica",
       "nome": "Lâmina rúnica",
-      "exige": { "forca": 14, "inteligencia": 14 },
+      "exige": {
+        "forca": 14,
+        "inteligencia": 14
+      },
       "texto": "Golpes físicos de contato aplicam o elemento da sua última magia (até 5 s depois).",
       "ganchos": [
-        { "quando": "aoAcertar", "se": { "tag": "contato", "tipoAtaque": "fisico" }, "efeito": { "herdarElemento": 5000 } }
+        {
+          "quando": "aoAcertar",
+          "se": {
+            "tag": "contato",
+            "tipoAtaque": "fisico"
+          },
+          "efeito": {
+            "herdarElemento": 5000
+          }
+        }
       ]
     },
     {
       "id": "olhar_sereno",
       "nome": "Olhar sereno",
-      "exige": { "destreza": 14, "sabedoria": 14 },
+      "exige": {
+        "destreza": 14,
+        "sabedoria": 14
+      },
       "texto": "Crítico de projétil devolve 2 de mana.",
       "ganchos": [
-        { "quando": "aoCritico", "se": { "tag": "projetil" }, "efeito": { "mana": 2 } }
+        {
+          "quando": "aoCritico",
+          "se": {
+            "tag": "projetil"
+          },
+          "efeito": {
+            "mana": 2
+          }
+        }
       ]
     },
     {
       "id": "bastiao",
       "nome": "Bastião",
-      "exige": { "constituicao": 14, "carisma": 14 },
+      "exige": {
+        "constituicao": 14,
+        "carisma": 14
+      },
       "texto": "Aliados a até 3 células levam 10% menos dano.",
       "ganchos": [
-        { "quando": "passivo", "efeito": { "auraDefesaPct": 10 } }
+        {
+          "quando": "passivo",
+          "efeito": {
+            "auraDefesaPct": 10
+          }
+        }
       ]
     },
     {
       "id": "inamovivel",
       "nome": "Inamovível",
-      "exige": { "forca": 14, "constituicao": 14 },
+      "exige": {
+        "forca": 14,
+        "constituicao": 14
+      },
       "texto": "Imune a empurrão e puxão.",
       "ganchos": [
-        { "quando": "passivo", "efeito": { "inamovivel": true } }
+        {
+          "quando": "passivo",
+          "efeito": {
+            "inamovivel": true
+          }
+        }
       ]
     },
     {
       "id": "mente_dupla",
       "nome": "Mente dupla",
-      "exige": { "inteligencia": 14, "sabedoria": 14 },
+      "exige": {
+        "inteligencia": 14,
+        "sabedoria": 14
+      },
       "texto": "Seus efeitos ficam 15% mais fortes (soma à potência da Inteligência).",
       "ganchos": [
-        { "quando": "passivo", "efeito": { "potenciaPct": 15 } }
+        {
+          "quando": "passivo",
+          "efeito": {
+            "potenciaPct": 15
+          }
+        }
       ]
     },
     {
       "id": "trapaceiro",
       "nome": "Trapaceiro",
-      "exige": { "destreza": 14, "carisma": 14 },
+      "exige": {
+        "destreza": 14,
+        "carisma": 14
+      },
       "texto": "A Troca sombria deixa um espantalho como isca por 6 s.",
       "ganchos": [
         {
           "quando": "aoUsarHabilidade",
-          "se": { "habilidade": "troca_sombria" },
-          "efeito": { "aplicar": { "tipo": "invocar", "valor": 1, "duracaoMs": 6000, "ref": "espantalho" }, "em": "portador" }
+          "se": {
+            "habilidade": "troca_sombria"
+          },
+          "efeito": {
+            "aplicar": {
+              "tipo": "invocar",
+              "valor": 1,
+              "duracaoMs": 6000,
+              "ref": "espantalho"
+            },
+            "em": "portador"
+          }
+        }
+      ]
+    },
+    {
+      "id": "impeto",
+      "nome": "Ímpeto",
+      "exige": {
+        "forca": 14,
+        "destreza": 14
+      },
+      "texto": "Crítico corpo a corpo reduz em 0,5 s a recarga das skills de classe que ferem.",
+      "ganchos": [
+        {
+          "quando": "aoCritico",
+          "se": {
+            "tag": "contato",
+            "tipoAtaque": "fisico"
+          },
+          "efeito": {
+            "recargaClasseMs": 500
+          }
+        }
+      ]
+    },
+    {
+      "id": "disciplina_interior",
+      "nome": "Disciplina interior",
+      "exige": {
+        "forca": 14,
+        "sabedoria": 14
+      },
+      "texto": "Golpe corpo a corpo devolve 1 de mana.",
+      "ganchos": [
+        {
+          "quando": "aoAcertar",
+          "se": {
+            "tag": "contato"
+          },
+          "efeito": {
+            "mana": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "comandante",
+      "nome": "Comandante",
+      "exige": {
+        "forca": 14,
+        "carisma": 14
+      },
+      "texto": "Seu abate dá +10 de carga de ultimate aos aliados a até 6 células.",
+      "ganchos": [
+        {
+          "quando": "aoMatar",
+          "efeito": {
+            "cargaUltimate": 10,
+            "raio": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "engenhoso",
+      "nome": "Engenhoso",
+      "exige": {
+        "destreza": 14,
+        "inteligencia": 14
+      },
+      "texto": "Projéteis mágicos atravessam 1 alvo.",
+      "ganchos": [
+        {
+          "quando": "passivo",
+          "efeito": {
+            "atravessaMagico": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "resiliente",
+      "nome": "Resiliente",
+      "exige": {
+        "constituicao": 14,
+        "sabedoria": 14
+      },
+      "texto": "Estados negativos duram 25% menos em você.",
+      "ganchos": [
+        {
+          "quando": "passivo",
+          "efeito": {
+            "negativosMenosPct": 25
+          }
+        }
+      ]
+    },
+    {
+      "id": "maestro",
+      "nome": "Maestro",
+      "exige": {
+        "inteligencia": 14,
+        "carisma": 14
+      },
+      "texto": "Cada combo concluído dá +8 de carga de ultimate.",
+      "ganchos": [
+        {
+          "quando": "aoConcluirCombo",
+          "efeito": {
+            "cargaUltimate": 8
+          }
+        }
+      ]
+    },
+    {
+      "id": "gladiador",
+      "nome": "Gladiador",
+      "exige": {
+        "forca": 13,
+        "destreza": 13,
+        "constituicao": 13
+      },
+      "texto": "Ao usar a ultimate, ganha escudo de 10.",
+      "ganchos": [
+        {
+          "quando": "aoUsarUltimate",
+          "efeito": {
+            "aplicar": {
+              "tipo": "escudo",
+              "valor": 10,
+              "duracaoMs": 6000
+            },
+            "em": "portador"
+          }
+        }
+      ]
+    },
+    {
+      "id": "oraculo",
+      "nome": "Oráculo",
+      "exige": {
+        "inteligencia": 13,
+        "sabedoria": 13,
+        "carisma": 13
+      },
+      "texto": "A ultimate enche 15% mais rápido.",
+      "ganchos": [
+        {
+          "quando": "passivo",
+          "efeito": {
+            "cargaUltimatePct": 15
+          }
+        }
+      ]
+    },
+    {
+      "id": "senhor_da_guerra",
+      "nome": "Senhor da guerra",
+      "exige": {
+        "forca": 13,
+        "constituicao": 13,
+        "carisma": 13
+      },
+      "texto": "Ao usar a ultimate, os aliados a até 3 células batem +15% por 4 s.",
+      "ganchos": [
+        {
+          "quando": "aoUsarUltimate",
+          "efeito": {
+            "aplicarAliados": {
+              "tipo": "bonus_dano",
+              "pct": 15,
+              "duracaoMs": 4000
+            },
+            "raio": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "arcano_preciso",
+      "nome": "Arcano preciso",
+      "exige": {
+        "destreza": 13,
+        "inteligencia": 13,
+        "sabedoria": 13
+      },
+      "texto": "Crítico de magia deixa o alvo exposto por 2 s.",
+      "ganchos": [
+        {
+          "quando": "aoCritico",
+          "se": {
+            "tipoAtaque": "magico"
+          },
+          "efeito": {
+            "aplicar": {
+              "tipo": "exposto",
+              "pct": 15,
+              "duracaoMs": 2000
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sobrevivente",
+      "nome": "Sobrevivente",
+      "exige": {
+        "destreza": 13,
+        "constituicao": 13,
+        "carisma": 13
+      },
+      "texto": "Abaixo de 30% de vida, a ultimate enche o dobro.",
+      "ganchos": [
+        {
+          "quando": "passivo",
+          "efeito": {
+            "cargaVidaBaixaPct": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "eco_ancestral",
+      "nome": "Eco ancestral",
+      "exige": {
+        "constituicao": 13,
+        "inteligencia": 13,
+        "sabedoria": 13
+      },
+      "texto": "Ao encher a ultimate, a próxima skill de classe não gasta mana.",
+      "ganchos": [
+        {
+          "quando": "aoEncherUltimate",
+          "efeito": {
+            "classeSemMana": true
+          }
         }
       ]
     }

@@ -1,0 +1,55 @@
+{
+  "versao": 1,
+  "sinergias": [
+    {
+      "id": "bastiao_de_pedra",
+      "nome": "Bastião de pedra",
+      "texto": "Com Pele de pedra ativa, atrás da sua Muralha de pedra você recupera 2 de vida por segundo.",
+      "passiva": "pele_de_pedra",
+      "sequencia": [
+        "muralha_de_pedra"
+      ],
+      "tipo": "curaJuntoDaMuralha",
+      "valor": 2,
+      "raio": 1,
+      "ms": 1000
+    },
+    {
+      "id": "disciplina_ferrea",
+      "nome": "Disciplina férrea",
+      "texto": "Com Disciplina marcial ativa, o Golpe atordoante atordoa +0,5 s.",
+      "passiva": "disciplina_marcial",
+      "sequencia": [
+        "golpe_atordoante"
+      ],
+      "tipo": "estadoMaisLongo",
+      "estado": "atordoar",
+      "ms": 500
+    },
+    {
+      "id": "fluxo_de_cura",
+      "nome": "Fluxo de cura",
+      "texto": "Com Fluxo restaurador ativo, o escudo gerado pelo Curar vale o dobro.",
+      "passiva": "fluxo_restaurador",
+      "sequencia": [
+        "curar"
+      ],
+      "tipo": "escudoDoFluxo",
+      "pct": 100
+    },
+    {
+      "id": "avalanche_humana",
+      "nome": "Avalanche humana",
+      "texto": "Com Tenacidade ativa, Investida e depois Golpe atordoante atordoa todos em volta do alvo.",
+      "passiva": "tenacidade",
+      "sequencia": [
+        "investida",
+        "golpe_atordoante"
+      ],
+      "tipo": "atordoaEmVolta",
+      "raio": 1,
+      "ms": 1000,
+      "janelaMs": 3000
+    }
+  ]
+}

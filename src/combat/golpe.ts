@@ -38,6 +38,7 @@ import { miraDaGeral } from './sintonia-arqueiro';
 import { aoGolpeDoMorto, curaGeralNosMortos, mortoEsquivou } from './sintonia-necromante';
 import { aoAcertarComFalcao, criticoDoFalcao, falcaoGuardiaoAbsorve } from './sintonia-aventureiro';
 import { aoAcertarMagia, multiplicadorDaEncarnacao } from './encarnacao-efeitos';
+import { aoFecharSequencia, efeitoDaSinergia } from './sinergias-passivas';
 
 export interface Impacto {
   acaoId: number;
@@ -230,6 +231,8 @@ export function aplicarImpacto(
   // Marco 24 (D-094): o primeiro alvo de cada ação enche o medidor da ultimate (a própria ultimate não enche).
   // Marco 24 (D-095): a sintonia do Aventureiro (o falcão golpeia junto, aplica estados, cura em volta).
   if (conjurador) aoAcertarComFalcao(estado, ctx, conjurador, alvo, hab, Math.min(hpAntes, dano), cura, saida);
+  // Marco 24 (D-096): a sinergia de sequência no primeiro atingido (Avalanche humana).
+  if (conjurador && impacto.indice === 0 && dano > 0 && conjurador.habilidadeAnterior) aoFecharSequencia(estado, ctx, conjurador, alvo, hab, conjurador.habilidadeAnterior.id, conjurador.habilidadeAnterior.tick, saida);
   // A do Mago: as encarnações novas e as duplas nas magias que acertam.
   if (conjurador) aoAcertarMagia(estado, ctx, conjurador, alvo, hab, Math.min(hpAntes, dano), cura, impacto.indice === 0, saida);
   // Marco 24 (D-095): a sintonia do suporte do Necromante leva as curas e os escudos gerais aos mortos.
@@ -281,12 +284,13 @@ export function aplicarImpacto(
     const sobre = efeito.em === 'conjurador' ? conjurador : alvo;
     // Marco 23 (D-092): no clima do elemento, o estado dele dura mais.
     const reforco = efeito.tipo === 'escudo' || efeito.tipo === 'escudo_acumulado' ? reforcoDaGeral(ctx, conjurador, hab, tick) : 1;
-    const final = reforco > 1 ? { ...efeito, valor: Math.round(efeito.valor * reforco) } : efeito;
+    // Marco 24 (D-096): a sinergia passiva alonga o estado (Disciplina férrea).
+    const final = efeitoDaSinergia(ctx, conjurador, hab, reforco > 1 ? { ...efeito, valor: Math.round(efeito.valor * reforco) } : efeito);
     if (sobre) aplicarEfeito(estado, ctx, sobre, estenderNoClima(ctx, hab, reforcarEstado(ctx, conjurador, comPotencia(final, fonte.potencia))), origem, mira, saida);
   }
   if (conjurador) {
     if (resposta && conjurador.tatica) { conjurador.tatica.respostaConsumida = true; conjurador.efeitos = conjurador.efeitos.filter((f) => f.tipo !== 'resposta_aparo'); }
-    fluxoRestaurador(estado, ctx, conjurador, alvo, cura, saida);
+    fluxoRestaurador(estado, ctx, conjurador, alvo, cura, saida, hab);
     confirmarImpactoTatico(estado, ctx, conjurador, alvo, hab, impacto.acaoId, cura, disparadas, saida);
   }
   // Marco 18 (D-069): ganchos de quem acerta (no acerto e no crítico) e de quem leva o golpe.

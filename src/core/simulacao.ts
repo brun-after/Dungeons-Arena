@@ -17,6 +17,8 @@ import { alvoOfensivoValido, iniciarAcao, processarAcoes, processarAutoAtaque, u
 import { dispararArmadilhaEm, processarEfeitos, processarGatilhosDeEfeito } from '../combat/efeitos';
 import { processarCarcereiros } from '../combat/sintonia-guerreiro';
 import { processarMiras } from '../combat/sintonia-arqueiro';
+import { processarSinergiasPassivas } from '../combat/sinergias-passivas';
+import { dispararGanchosDosEventos } from '../progression/ganchos-do-portador';
 import { dispensarInvocacoes } from '../combat/invocacoes';
 import { moverProjeteis } from '../combat/projeteis';
 import { vivo } from '../entities/entidade';
@@ -74,6 +76,8 @@ export function simular(
   processarCarcereiros(estado, ctx, saida);
   // A do Arqueiro: a Mira invisível e o escudo da Sentinela.
   processarMiras(estado, ctx, saida);
+  // Marco 24 (D-096): as sinergias passivas por tempo (Bastião de pedra).
+  processarSinergiasPassivas(estado, ctx, saida);
   processarCampos(estado, ctx, saida);
   processarPantanos(estado, ctx, saida);
   regenerarRecursos(estado, ctx);
@@ -99,6 +103,8 @@ export function simular(
   // Marco 18 (D-070): missões e o diário de descobertas.
   processarMissoes(estado, ctx, saida.slice(inicio), abates, saida);
   registrarDescobertas(estado, ctx, saida.slice(inicio), saida);
+  // Marco 24 (D-096): os ganchos da ultimate e do combo (ressonâncias Gladiador, Maestro, Eco ancestral…).
+  dispararGanchosDosEventos(estado, ctx, saida.slice(inicio), saida);
   processarEnxame(estado, ctx);
   processarSpawner(estado, ctx, saida);
   estado.tick++;

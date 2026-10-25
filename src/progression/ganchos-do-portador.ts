@@ -11,7 +11,9 @@ import { dispararGanchos, PASSIVOS_NEUTROS, somarPassivos, type Gancho, type Mom
 import { resolverHabilidade } from '../combat/compilar-habilidade';
 import { chebyshev } from '../combat/geometria';
 import { ticksDe } from '../core/tempo';
-import { podeFerir } from '../modos/relacao';
+import { podeAjudar, podeFerir } from '../modos/relacao';
+import { somarCarga } from '../combat/carga-ultimate';
+import { chaveRecarga } from '../combat/acao';
 import { vivo } from '../entities/entidade';
 import type { ModificadorDeItem } from './itens';
 import { ganchosDasRessonancias } from './ressonancias';
@@ -56,6 +58,19 @@ export function dispararGanchosDe(
   dispararGanchos(estado, ganchos, portador, momento, m, mundoDoGancho(estado, ctx, saida), saida);
 }
 
+/**
+ * Marco 24 (24/10/2026, D-096): os momentos que saem de eventos do tick — a ultimate usada, a ultimate cheia e o combo
+ * concluído — disparam os ganchos de quem os causou (no fim do tick, sobre os eventos dele).
+ */
+export function dispararGanchosDosEventos(estado: EstadoJogo, ctx: ContextoSimulacao, eventos: readonly EventoSimulacao[], saida: EventoSimulacao[]): void {
+  for (const ev of eventos) {
+    if (ev.t !== 'ultimateUsada' && ev.t !== 'ultimateCheia' && ev.t !== 'comboFeito') continue;
+    const momento = ev.t === 'ultimateUsada' ? 'aoUsarUltimate' : ev.t === 'ultimateCheia' ? 'aoEncherUltimate' : 'aoConcluirCombo';
+    const portador = estado.entidades.find((e) => e.id === ev.id);
+    if (portador?.bolsa) dispararGanchosDe(estado, ctx, portador, momento, {}, saida);
+  }
+}
+
 /** O mundo que os ganchos enxergam: aplicar pelo dispatcher, hostis perto e o elemento da última magia. */
 function mundoDoGancho(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): MundoDoGancho {
   return {
@@ -73,6 +88,22 @@ function mundoDoGancho(estado: EstadoJogo, ctx: ContextoSimulacao, saida: Evento
       if (h?.tipoAtaque !== 'magico' || !h.elemento) return null;
       const def = ctx.conteudo.elementos.get(h.elemento);
       return def ? { ...def.estado } : null;
+    },
+    aliadosPerto: (portador, raio) =>
+      estado.entidades
+        .filter((x) => x !== portador && vivo(x) && !x.invocacao && chebyshev(x, portador) <= raio && podeAjudar(portador, x, ctx.modo))
+        .sort((a, b) => chebyshev(a, portador) - chebyshev(b, portador) || (a.id < b.id ? -1 : 1)),
+    cargaUltimate: (e, valor) => {
+      somarCarga(ctx, e, valor, estado.tick, saida);
+    },
+    reduzirRecargaClasse: (e, ms) => {
+      const classe = ctx.conteudo.classes.get(e.bolsa?.classeId ?? e.classeId ?? '');
+      // Só as que ferem (as de utilidade ficam com a recarga delas).
+      for (const id of (classe?.exclusivas ?? []).filter((x) => ctx.conteudo.definicoes.get(x)?.base.formulaDano)) {
+        const chave = chaveRecarga(e.id, id);
+        const fim = estado.recargas[chave];
+        if (fim !== undefined) estado.recargas[chave] = Math.max(estado.tick, fim - ticksDe(ms));
+      }
     },
   };
 }

@@ -83,6 +83,7 @@
   },
   "ultimate": {
     "max": 100,
+    "vidaBaixaPct": 30,
     "ganhos": { "habilidade": 3, "basico": 0.6, "cura": 1.5, "abate": 8, "combo": 6 },
     "classe": {
       "furiaCheia": { "valor": 15, "intervaloMs": 0 },

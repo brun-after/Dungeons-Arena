@@ -189,7 +189,9 @@ export function iniciarAcao(
   if (acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) return recusar('bloqueado');
   if (recargaRestante(estado, ator.id, hab.id) > 0) return recusar('recarga');
   const perfil = perfilPara(ctx, ator, hab);
-  const custoMana = Math.max(0, Math.round(hab.custoRecurso * (1 + perfil.custoPct / 100)));
+  // Marco 24 (D-096): a ressonância Eco ancestral deixa a próxima skill de classe sem custo de mana.
+  const semMana = !!ator.classeSemMana && !!ctx.conteudo.classes.get(ator.bolsa?.classeId ?? ator.classeId ?? '')?.exclusivas.includes(hab.id);
+  const custoMana = semMana ? 0 : Math.max(0, Math.round(hab.custoRecurso * (1 + perfil.custoPct / 100)));
   const custoVida = Math.max(0, Math.round(hab.custoVida * (1 + perfil.custoPct / 100)));
   // Custo em vida (marco 14): nunca mata quem conjura.
   if (ator.mana < custoMana || (custoVida > 0 && ator.hp <= custoVida)) return recusar('recurso');
@@ -227,6 +229,7 @@ export function iniciarAcao(
   // Conjuração (§2.7, etapa 3): custo e recarga descontados aqui, com recarga monotônica.
   ator.mana -= custoMana;
   ator.hp -= custoVida;
+  if (semMana) delete ator.classeSemMana;
   if (hab.recargaMs > 0) {
     const chave = chaveRecarga(ator.id, hab.id);
     // `ab_recarga` encurta a recarga do ataque básico (até 75%); o perfil, a de qualquer habilidade.
@@ -360,6 +363,8 @@ function lancar(
   }
   if (!daFase) {
     dispararGanchosDe(estado, ctx, ator, 'aoUsarHabilidade', { outro: alvo, hab }, saida);
+    // Marco 24 (D-096): a anterior fica para as sinergias de sequência.
+    if (ator.ultimaHabilidade) ator.habilidadeAnterior = { id: ator.ultimaHabilidade.id, tick: ator.ultimaHabilidade.tick };
     ator.ultimaHabilidade = { id: hab.id, chave: hab.chave, tick: estado.tick, alvoId: alvo?.id ?? null };
     // Marco 22 (D-089): a magia de fogo, gelo ou raio troca a encarnação do Mago.
     if (encarnar(ctx, ator, hab, estado.tick)) {
@@ -431,6 +436,9 @@ function lancar(
       // Marco 24 (D-095): a sintonia do Arqueiro marca o tiro cheio (mágico, ricochetes, invisível).
       const tiro = estado.projeteis.at(-1);
       if (carregado && tiro) prepararTiroCheio(ctx, ator, tiro, estado.tick);
+      // Marco 24 (D-096): a ressonância Engenhoso faz o projétil mágico atravessar.
+      const atravessa = hab.tipoAtaque === 'magico' && ator.bolsa ? passivosDe(ctx, ator).atravessaMagico : 0;
+      if (tiro && atravessa > 0) tiro.perfuraExtra = atravessa;
       break;
     }
   }

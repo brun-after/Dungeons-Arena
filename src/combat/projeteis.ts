@@ -130,6 +130,10 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
         if (saltos > 0) saltar(estado, ctx, { id: p.donoId, equipe: p.equipeDono }, hab, alvo, saltos, { acaoId: p.acaoId, fonte, hab }, p.atingidos, saida);
         // `atravessar` (§2.8): segue em frente e pode acertar o próximo da linha.
         if (p.atravessa) continue;
+        if ((p.perfuraExtra ?? 0) > 0) {
+          p.perfuraExtra = (p.perfuraExtra ?? 0) - 1;
+          continue;
+        }
         fim = 'acertou';
         break;
       }

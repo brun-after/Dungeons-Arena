@@ -59,7 +59,7 @@ export interface Balance {
     costasConeGraus: number;
   };
   /** Marco 24 (D-094): o medidor da ultimate; `classe`, o ganho do jeito de cada classe (com intervalo mínimo). */
-  ultimate: { max: number; ganhos: { habilidade: number; basico: number; cura: number; abate: number; combo: number }; classe: Record<MomentoCargaClasse, { valor: number; intervaloMs: number }> };
+  ultimate: { max: number; vidaBaixaPct: number; ganhos: { habilidade: number; basico: number; cura: number; abate: number; combo: number }; classe: Record<MomentoCargaClasse, { valor: number; intervaloMs: number }> };
   /** Marco 24 (24/10/2026, D-097): tetos e números dos estados novos. */
   estados: { esquivaMaxPct: number; cegoMaxPct: number; contragolpeAtordoarMs: number; contragolpeFuria: number };
   /** Marco 24 (D-095): quantas passivas gerais ficam ligadas ao mesmo tempo. */

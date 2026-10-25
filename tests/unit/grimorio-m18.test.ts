@@ -78,6 +78,9 @@ describe('ganchos', () => {
     aplicar: (alvo, ef) => aplicados.push([alvo.id, ef.tipo]),
     hostisPerto: () => [],
     elementoRecente: () => null,
+    aliadosPerto: () => [],
+    cargaUltimate: () => undefined,
+    reduzirRecargaClasse: () => undefined,
   });
 
   it('dispara no momento certo, respeita a condição do estado do alvo e cura % da vida', () => {

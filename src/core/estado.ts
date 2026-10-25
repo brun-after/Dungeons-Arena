@@ -51,6 +51,8 @@ export interface Projetil {
   ricochetes?: number;
   ricochetePct?: number;
   invisivel?: boolean;
+  /** Marco 24 (D-096): quantos alvos a mais o projétil mágico ainda atravessa (ressonância Engenhoso). */
+  perfuraExtra?: number;
   /** Aliados que o tiro cheio já curou (a sintonia sagrada), à parte de `atingidos`. */
   curados?: EntidadeId[];
 }
