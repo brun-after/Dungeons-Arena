@@ -36,6 +36,7 @@ import { cargaDaClasse, cargaPorMomento } from './carga-ultimate';
 import { furiaDaGeral, gastarCostas, reforcoDaGeral } from './sintonia-guerreiro';
 import { miraDaGeral } from './sintonia-arqueiro';
 import { aoGolpeDoMorto, curaGeralNosMortos, mortoEsquivou } from './sintonia-necromante';
+import { aoAcertarComFalcao, criticoDoFalcao, falcaoGuardiaoAbsorve } from './sintonia-aventureiro';
 
 export interface Impacto {
   acaoId: number;
@@ -110,6 +111,8 @@ export function aplicarImpacto(
     fonte = { ...fonte, multDano: fonte.multDano * (1 + ctx.balance.tatica.respostaPct / 100) };
   }
   const tick = estado.tick;
+  // Marco 24 (D-095): a sintonia da sombra do Aventureiro deixa crítico o primeiro golpe do falcão.
+  fonte = criticoDoFalcao(ctx, atacante, hab, fonte, tick);
   const hpAntes = alvo.hp;
   let dano = 0;
   let absorvidoEscudo = 0;
@@ -155,7 +158,7 @@ export function aplicarImpacto(
     // Marco 14: o escudo absorve antes da vida.
     // Marco 24: o cego erra como quem esquiva (antes das defesas do alvo).
     // Marco 24 (D-095): o morto do Necromante com a sintonia da sombra também esquiva.
-    const cegou = absorve === 0 && !r.falha && !r.imune && (cegoErra(estado, ctx, atacante) || mortoEsquivou(estado, ctx, alvo));
+    const cegou = absorve === 0 && !r.falha && !r.imune && (cegoErra(estado, ctx, atacante) || mortoEsquivou(estado, ctx, alvo) || falcaoGuardiaoAbsorve(ctx, alvo, atacante, hab, tick));
     const defesa = cegou ? { esquivou: true, fator: 1 } : absorve === 0 && !r.falha && !r.imune && atacante ? defenderGolpe(estado, ctx, alvo, atacante, hab.tipoAtaque === 'fisico', saida) : { esquivou: false, fator: 1 };
     if (defesa.esquivou) { falha = true; saida.push({ t: 'esquivou', tick, acaoId: impacto.acaoId, atorId: fonte.id, alvoId: alvo.id }); }
     const antesDoEscudo = defesa.esquivou || absorve > 0 ? 0 : Math.round(r.dano * defesa.fator);
@@ -224,6 +227,8 @@ export function aplicarImpacto(
   }
   if (conjurador) pulsarAura(estado, ctx, conjurador, alvo, Math.min(hpAntes, dano), saida, entregaRemota(hab));
   // Marco 24 (D-094): o primeiro alvo de cada ação enche o medidor da ultimate (a própria ultimate não enche).
+  // Marco 24 (D-095): a sintonia do Aventureiro (o falcão golpeia junto, aplica estados, cura em volta).
+  if (conjurador) aoAcertarComFalcao(estado, ctx, conjurador, alvo, hab, Math.min(hpAntes, dano), cura, saida);
   // Marco 24 (D-095): a sintonia do suporte do Necromante leva as curas e os escudos gerais aos mortos.
   if (conjurador && impacto.indice === 0 && conjurador.bolsa) curaGeralNosMortos(estado, ctx, conjurador, alvo, hab, cura, saida);
   if (conjurador && impacto.indice === 0 && !hab.tags.includes('ultimate')) {

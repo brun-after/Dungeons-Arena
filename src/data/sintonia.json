@@ -654,6 +654,109 @@
             }
           }
         ]
+      },
+      "aventureiro": {
+        "tecnica": [
+          {
+            "t": "falcaoGolpeiaComGeral",
+            "familia": "tecnica",
+            "pct": 40,
+            "dobra": true
+          }
+        ],
+        "arcana": [
+          {
+            "t": "falcaoGolpeiaComGeral",
+            "habilidade": "seta_arcana",
+            "pct": 30,
+            "dobra": true
+          },
+          {
+            "t": "falcaoGolpeiaComGeral",
+            "habilidade": "explosao",
+            "pct": 30,
+            "dobra": true
+          }
+        ],
+        "suporte": [
+          {
+            "t": "escudoNoFalcao",
+            "pct": 25,
+            "dobra": true
+          }
+        ],
+        "fogo": [
+          {
+            "t": "habilidadeAplica",
+            "habilidade": "mergulho",
+            "efeito": {
+              "tipo": "queimando",
+              "valor": 3,
+              "duracaoMs": 3000
+            },
+            "dobra": true
+          }
+        ],
+        "veneno": [
+          {
+            "t": "habilidadeAplica",
+            "habilidade": "garras_cegantes",
+            "efeito": {
+              "tipo": "envenenado",
+              "valor": 2,
+              "pct": 50,
+              "duracaoMs": 4000
+            },
+            "dobra": true
+          },
+          {
+            "t": "habilidadeAplica",
+            "habilidade": "presa_dupla",
+            "efeito": {
+              "tipo": "envenenado",
+              "valor": 2,
+              "pct": 50,
+              "duracaoMs": 4000
+            },
+            "dobra": true
+          }
+        ],
+        "terra": [
+          {
+            "t": "habilidadeAplica",
+            "habilidade": "mergulho",
+            "raio": 1,
+            "efeito": {
+              "tipo": "atordoar",
+              "duracaoMs": 500
+            }
+          }
+        ],
+        "sombra": [
+          {
+            "t": "falcaoCritico",
+            "valor": 16,
+            "ms": 4000
+          }
+        ],
+        "sagrado": [
+          {
+            "t": "habilidadeCuraAliados",
+            "habilidade": "retorno_ao_punho",
+            "raio": 2,
+            "pct": 100
+          }
+        ],
+        "psiquico": [
+          {
+            "t": "habilidadeAplica",
+            "habilidade": "grito_do_falcao",
+            "efeito": {
+              "tipo": "silenciar",
+              "duracaoMs": 500
+            }
+          }
+        ]
       }
     },
     "vertentes": {
@@ -741,6 +844,31 @@
         {
           "t": "retornoDoServo",
           "ms": 4000
+        }
+      ],
+      "druida": [
+        {
+          "t": "falcaoGuardiao",
+          "ms": 4000
+        }
+      ],
+      "rapina": [
+        {
+          "t": "falcaoGolpeiaComGeral",
+          "familia": "tecnica",
+          "pct": 100,
+          "ms": 4000
+        }
+      ],
+      "tempestuoso": [
+        {
+          "t": "falcaoGolpeiaComGeral",
+          "habilidade": "magico",
+          "pct": 50,
+          "efeito": {
+            "tipo": "silenciar",
+            "duracaoMs": 500
+          }
         }
       ],
       "sentinela": [

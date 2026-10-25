@@ -16,6 +16,7 @@ import { buscarEntidade, type Armadilha, type EstadoJogo } from '../core/estado'
 import { passivosDe } from '../progression/ganchos-do-portador';
 import { inamovivelPelaSintonia } from './sintonia-guerreiro';
 import { mortoInamovivel } from './sintonia-necromante';
+import { escudoComFalcao } from './sintonia-aventureiro';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { congelada, vivo, type EfeitoAtivo, type Entidade } from '../entities/entidade';
@@ -189,6 +190,8 @@ export function aplicarEfeito(
   if (imuneAoEstado(ctx, alvo, ef.tipo)) return;
   const def = REGISTRO_EFEITOS[ef.tipo];
   const tick = estado.tick;
+  // Marco 24 (D-095): a sintonia do suporte do Aventureiro reforça os escudos recebidos.
+  ef = escudoComFalcao(ctx, alvo, ef, tick);
   if (ef.tipo === 'aparando') ef = { ...ef, duracaoMs: Math.min(ef.duracaoMs, ctx.balance.tatica.aparoJanelaMaxMs) };
   if (ef.tipo === 'veu_noturno') ef = { ...ef, duracaoMs: Math.min(ef.duracaoMs, ctx.balance.tatica.veuJanelaMaxMs) };
   if (alvo.bolsa && (def.bloqueiaMovimento || def.bloqueiaAcoes !== 'nenhuma')) {

@@ -18,8 +18,7 @@ export const TIPOS_SINTONIA = [
   'mortoAplica', 'mortoCaiSeta', 'curaGeralNosMortos', 'mortoCaiExplode', 'mortoVida', 'mortoEsquiva', 'mortoCaiCura',
   'mortoAterroriza', 'mortoAtira', 'estadoDobraEm', 'retornoDoServo', 'mortoInamovivel',
   // Aventureiro
-  'falcaoGolpeiaComGeral', 'falcaoRepete', 'escudoNoFalcao', 'habilidadeAplica', 'mergulhoEmVolta', 'falcaoInvisivel',
-  'habilidadeCuraAliados', 'falcaoGuardiao', 'falcaoRapina',
+  'falcaoGolpeiaComGeral', 'escudoNoFalcao', 'habilidadeAplica', 'falcaoCritico', 'habilidadeCuraAliados', 'falcaoGuardiao',
   // Mago
   'encarnar', 'encarnacaoEstende', 'encarnacaoRenova', 'suporteHerdaEncarnacao', 'duplaFixa', 'encarnacaoDuracao',
   'contaComoElemento', 'lavaReforcada',
@@ -40,7 +39,7 @@ export interface EfeitoSintonia {
   efeito: EfeitoCanonico | null;
   /** Quando vale: sempre, só no Frenesi, só fora dele, só invisível ou só parado. */
   quando: 'sempre' | 'frenesi' | 'foraDoFrenesi' | 'invisivel' | 'parado';
-  /** A habilidade (ou família, ou elemento) a que a mecânica se refere. */
+  /** A habilidade (ou família, ou elemento) a que a mecânica se refere; `magico` vale para toda geral mágica. */
   habilidade: string | null;
   familia: string | null;
   elemento: string | null;

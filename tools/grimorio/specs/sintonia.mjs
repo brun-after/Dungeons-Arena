@@ -79,6 +79,23 @@ export const MECANICAS = {
     sagrado: [{ t: 'mortoCaiCura', valor: 6, raio: 2, dobra: true }],
     psiquico: [{ t: 'mortoAterroriza', n: 3, ms: 3000, efeito: ef.medo(1) }],
   },
+  aventureiro: {
+    tecnica: [{ t: 'falcaoGolpeiaComGeral', familia: 'tecnica', pct: 40, dobra: true }],
+    arcana: [
+      { t: 'falcaoGolpeiaComGeral', habilidade: 'seta_arcana', pct: 30, dobra: true },
+      { t: 'falcaoGolpeiaComGeral', habilidade: 'explosao', pct: 30, dobra: true },
+    ],
+    suporte: [{ t: 'escudoNoFalcao', pct: 25, dobra: true }],
+    fogo: [{ t: 'habilidadeAplica', habilidade: 'mergulho', efeito: ef.queima(3, 3), dobra: true }],
+    veneno: [
+      { t: 'habilidadeAplica', habilidade: 'garras_cegantes', efeito: ef.envenena(2, 4), dobra: true },
+      { t: 'habilidadeAplica', habilidade: 'presa_dupla', efeito: ef.envenena(2, 4), dobra: true },
+    ],
+    terra: [{ t: 'habilidadeAplica', habilidade: 'mergulho', raio: 1, efeito: ef.atordoa(0.5) }],
+    sombra: [{ t: 'falcaoCritico', valor: 16, ms: 4000 }],
+    sagrado: [{ t: 'habilidadeCuraAliados', habilidade: 'retorno_ao_punho', raio: 2, pct: 100 }],
+    psiquico: [{ t: 'habilidadeAplica', habilidade: 'grito_do_falcao', efeito: ef.silencia(0.5) }],
+  },
 };
 
 /** Vertente (id) → entradas. */
@@ -97,5 +114,8 @@ export const MECANICAS_VERTENTES = {
     { t: 'estadoDobraEm', estado: 'envenenado', habilidade: 'aterrorizado' },
   ],
   pastor_das_almas: [{ t: 'mortoCaiCura', valor: 10, raio: 3 }, { t: 'retornoDoServo', ms: 4000 }],
+  druida: [{ t: 'falcaoGuardiao', ms: 4000 }],
+  rapina: [{ t: 'falcaoGolpeiaComGeral', familia: 'tecnica', pct: 100, ms: 4000 }],
+  tempestuoso: [{ t: 'falcaoGolpeiaComGeral', habilidade: 'magico', pct: 50, efeito: ef.silencia(0.5) }],
   sentinela: [{ t: 'escudoParadoComMira', raio: 2, ms: 1000, efeito: ef.escudoAc(4, 12, 2), quando: 'parado' }],
 };
