@@ -166,6 +166,8 @@ export interface Balance {
     armadilhaExpiraS: number;
   };
   /** Portas (§2.1, marco 10A-1): recarga da porta interna e janela de destaque da porta do boss. */
+  /** Marco 25 (D-101): reforço de inimigos por fase avançada, proporcional à área passável da fase. */
+  populacao: { reforcoPorFasePct: number; areaReferencia: number; tetoMult: number; tetoInimigos: number };
   portas: {
     recargaMs: number;
     janelaPortaBossMs: number; /** Marco 24 (D-099): parado na porta de fase até sair. */ esperaMs: number;

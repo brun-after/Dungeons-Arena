@@ -169,6 +169,7 @@
     "danoArmadilha": 8,
     "armadilhaExpiraS": 180
   },
+  "populacao": { "reforcoPorFasePct": 10, "areaReferencia": 545, "tetoMult": 3, "tetoInimigos": 60 },
   "portas": {
     "recargaMs": 800,
     "esperaMs": 3000,
