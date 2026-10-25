@@ -39,3 +39,32 @@ export const INTERNAS = [
   interna('dom_sagrado', 'Domínio sagrado', { ...forma.aliados(3), formulaCura: '2d6+2', visual: { cor: '#f7e08a', impacto: 'sagrado', camera: 'leve', som: 'cura' } }),
   interna('dom_sombra', 'Domínio da sombra', { ...forma.proprio(), efeitos: [eu(ef.invisivel(1.5))], visual: { cor: '#5b4a7a', impacto: 'fumaca', camera: 'leve', som: 'golpe' } }),
 ];
+
+// ---------- a mecânica de cada sintonia e vertente (vocabulário de progression/sintonia-efeitos.ts) ----------
+// Marco 24 (24/10/2026, D-095). `dobra`: com Domínio da família, os números dobram. `quando`: frenesi, foraDoFrenesi,
+// invisivel ou parado (padrão: sempre).
+
+/** Classe → família → entradas. */
+export const MECANICAS = {
+  guerreiro: {
+    tecnica: [{ t: 'furiaPorGeral', familia: 'tecnica', valor: 12, dobra: true }],
+    arcana: [{ t: 'auraRaio', valor: 1, dobra: true }],
+    suporte: [{ t: 'curaGeralNoFrenesi', pct: 100, quando: 'frenesi', dobra: true }],
+    fogo: [{ t: 'auraAplica', efeito: ef.queima(2, 2), dobra: true }],
+    veneno: [{ t: 'grupoContaEstado', estado: 'envenenado', n: 2, quando: 'foraDoFrenesi' }],
+    terra: [{ t: 'inamovivel', quando: 'frenesi' }],
+    sombra: [{ t: 'costasAoEncherFuria' }],
+    sagrado: [{ t: 'auraCuraAliados', raio: 2, pct: 25, dobra: true }],
+    psiquico: [{ t: 'auraAplica', efeito: ef.semAtaque(0.5), quando: 'frenesi' }],
+  },
+};
+
+/** Vertente (id) → entradas. */
+export const MECANICAS_VERTENTES = {
+  paladino: [{ t: 'auraCuraAliados', raio: 2, pct: 100, quando: 'frenesi' }],
+  berserker: [
+    { t: 'auraAplica', efeito: ef.queima(3, 2), quando: 'frenesi' },
+    { t: 'frenesiPorEstadoPerto', estado: 'queimando', ms: 500, valor: 3000, quando: 'frenesi' },
+  ],
+  carcereiro: [{ t: 'desafiadoEnraiza', raio: 1, efeito: ef.enraiza(0.5) }],
+};

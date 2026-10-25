@@ -15,6 +15,7 @@ import { processarCampos } from '../combat/tatica';
 import { atualizarAparencias, processarBuffsArmados, usarRefugio } from '../progression/buffs';
 import { alvoOfensivoValido, iniciarAcao, processarAcoes, processarAutoAtaque, usarUltimate } from '../combat/acao';
 import { dispararArmadilhaEm, processarEfeitos, processarGatilhosDeEfeito } from '../combat/efeitos';
+import { processarCarcereiros } from '../combat/sintonia-guerreiro';
 import { dispensarInvocacoes } from '../combat/invocacoes';
 import { moverProjeteis } from '../combat/projeteis';
 import { vivo } from '../entities/entidade';
@@ -68,6 +69,8 @@ export function simular(
   processarEfeitos(estado, ctx, saida);
   // Marco 22 (D-089): o Mago encarnado em fogo queima quem está perto.
   processarEncarnacoes(estado, ctx, saida);
+  // Marco 24 (D-095): a vertente Carcereiro enraíza os desafiados que chegam perto.
+  processarCarcereiros(estado, ctx, saida);
   processarCampos(estado, ctx, saida);
   processarPantanos(estado, ctx, saida);
   regenerarRecursos(estado, ctx);

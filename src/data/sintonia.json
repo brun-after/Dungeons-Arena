@@ -410,5 +410,120 @@
       ],
       "texto": "As magias envenenam os hostis e tiram 1 efeito negativo dos aliados atingidos."
     }
-  ]
+  ],
+  "mecanicas": {
+    "classes": {
+      "guerreiro": {
+        "tecnica": [
+          {
+            "t": "furiaPorGeral",
+            "familia": "tecnica",
+            "valor": 12,
+            "dobra": true
+          }
+        ],
+        "arcana": [
+          {
+            "t": "auraRaio",
+            "valor": 1,
+            "dobra": true
+          }
+        ],
+        "suporte": [
+          {
+            "t": "curaGeralNoFrenesi",
+            "pct": 100,
+            "quando": "frenesi",
+            "dobra": true
+          }
+        ],
+        "fogo": [
+          {
+            "t": "auraAplica",
+            "efeito": {
+              "tipo": "queimando",
+              "valor": 2,
+              "duracaoMs": 2000
+            },
+            "dobra": true
+          }
+        ],
+        "veneno": [
+          {
+            "t": "grupoContaEstado",
+            "estado": "envenenado",
+            "n": 2,
+            "quando": "foraDoFrenesi"
+          }
+        ],
+        "terra": [
+          {
+            "t": "inamovivel",
+            "quando": "frenesi"
+          }
+        ],
+        "sombra": [
+          {
+            "t": "costasAoEncherFuria"
+          }
+        ],
+        "sagrado": [
+          {
+            "t": "auraCuraAliados",
+            "raio": 2,
+            "pct": 25,
+            "dobra": true
+          }
+        ],
+        "psiquico": [
+          {
+            "t": "auraAplica",
+            "efeito": {
+              "tipo": "sem_ataque",
+              "duracaoMs": 500
+            },
+            "quando": "frenesi"
+          }
+        ]
+      }
+    },
+    "vertentes": {
+      "paladino": [
+        {
+          "t": "auraCuraAliados",
+          "raio": 2,
+          "pct": 100,
+          "quando": "frenesi"
+        }
+      ],
+      "berserker": [
+        {
+          "t": "auraAplica",
+          "efeito": {
+            "tipo": "queimando",
+            "valor": 3,
+            "duracaoMs": 2000
+          },
+          "quando": "frenesi"
+        },
+        {
+          "t": "frenesiPorEstadoPerto",
+          "estado": "queimando",
+          "ms": 500,
+          "valor": 3000,
+          "quando": "frenesi"
+        }
+      ],
+      "carcereiro": [
+        {
+          "t": "desafiadoEnraiza",
+          "raio": 1,
+          "efeito": {
+            "tipo": "enraizado",
+            "duracaoMs": 500
+          }
+        }
+      ]
+    }
+  }
 }
