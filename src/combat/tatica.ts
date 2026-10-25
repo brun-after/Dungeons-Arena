@@ -16,6 +16,8 @@ import { chebyshev } from './geometria';
 import { passivasDaBolsa } from './perfil';
 import { construirEfeito, REGISTRO_EFEITOS, type EfeitoCanonico } from './registro-efeitos';
 import { agendarFase } from './fases';
+import type { Habilidade } from './habilidades';
+import { escudoDoFluxo } from './sinergias-passivas';
 
 export function muralhaEm(estado: EstadoJogo, x: number, y: number): CampoTatico | undefined {
   return estado.camposTaticos?.find((c) => c.tipo === 'muralha' && c.x === x && c.y === y && c.ateTick > estado.tick);
@@ -93,14 +95,16 @@ export function processarCampos(estado: EstadoJogo, ctx: ContextoSimulacao, said
   }
 }
 
-export function fluxoRestaurador(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, alvo: Entidade, cura: number, saida: EventoSimulacao[]): void {
+export function fluxoRestaurador(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, alvo: Entidade, cura: number, saida: EventoSimulacao[], hab?: Habilidade): void {
   if (!ator.bolsa || cura <= 0) return;
   const pct = passivasDaBolsa(ctx, ator.bolsa).reduce((s, p) => s + (p.fluxoEscudoPct ?? 0), 0);
   if (pct <= 0) return;
   const mem = ator.tatica ??= novaMemoria();
   if (mem.fluxoAte > estado.tick) return;
   mem.fluxoAte = estado.tick + ticksDe(ctx.balance.tatica.fluxoIntervaloMs);
-  aplicarEfeito(estado, ctx, alvo, construirEfeito('escudo', { valor: Math.min(ctx.balance.tatica.fluxoTeto, Math.max(1, Math.round(cura * pct / 100))), duracaoMs: ctx.balance.tatica.fluxoDuracaoMs }), ator, alvo, saida);
+  // Marco 24 (D-096): a sinergia Fluxo de cura dobra o escudo do Curar.
+  const valor = Math.min(ctx.balance.tatica.fluxoTeto, Math.max(1, Math.round(cura * pct / 100))) * escudoDoFluxo(ctx, ator, hab);
+  aplicarEfeito(estado, ctx, alvo, construirEfeito('escudo', { valor: Math.round(valor), duracaoMs: ctx.balance.tatica.fluxoDuracaoMs }), ator, alvo, saida);
 }
 
 /** Marco 24 (D-097): a chance de esquivar golpes diretos — os estados de esquiva e as passivas (sem o teto). */

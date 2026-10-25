@@ -33,6 +33,12 @@ import type { Habilidade } from './habilidades';
 import { cegoErra, curaRecebidaPassivas, estadosAoAcertar, golpePelasCostas, multiplicadorMarco24, reforcarEstado, resistenciaIgnorada } from './modificadores-golpe';
 import { registrarParticipacao } from './participacao';
 import { cargaDaClasse, cargaPorMomento } from './carga-ultimate';
+import { furiaDaGeral, gastarCostas, reforcoDaGeral } from './sintonia-guerreiro';
+import { miraDaGeral } from './sintonia-arqueiro';
+import { aoGolpeDoMorto, curaGeralNosMortos, mortoEsquivou } from './sintonia-necromante';
+import { aoAcertarComFalcao, criticoDoFalcao, falcaoGuardiaoAbsorve } from './sintonia-aventureiro';
+import { aoAcertarMagia, multiplicadorDaEncarnacao } from './encarnacao-efeitos';
+import { aoFecharSequencia, efeitoDaSinergia } from './sinergias-passivas';
 
 export interface Impacto {
   acaoId: number;
@@ -107,6 +113,8 @@ export function aplicarImpacto(
     fonte = { ...fonte, multDano: fonte.multDano * (1 + ctx.balance.tatica.respostaPct / 100) };
   }
   const tick = estado.tick;
+  // Marco 24 (D-095): a sintonia da sombra do Aventureiro deixa crítico o primeiro golpe do falcão.
+  fonte = criticoDoFalcao(ctx, atacante, hab, fonte, tick);
   const hpAntes = alvo.hp;
   let dano = 0;
   let absorvidoEscudo = 0;
@@ -125,7 +133,8 @@ export function aplicarImpacto(
 
   let absorveu = false;
   // Marco 24 (D-097): pelas costas pelo olhar do alvo; a marca vai no evento para o número na tela.
-  const costas = golpePelasCostas(ctx, atacante, alvo, hab);
+  // Marco 24 (D-095): ou a sintonia da sombra do Guerreiro armou o golpe.
+  const costas = gastarCostas(atacante, alvo, hab, ctx) || golpePelasCostas(ctx, atacante, alvo, hab);
   if (hab.formulaDano !== null) {
     // Marco 15: a dificuldade e o tamanho do grupo pesam pelo lado de quem bate e de quem apanha.
     // Marco 18: o dano extra das sinergias cresce com a potência (Inteligência) de quem lança.
@@ -139,7 +148,7 @@ export function aplicarImpacto(
       { ...fonte, bonusAtributo: fonte.bonusAtributo + (impacto.danoExtra ?? 0) },
       { defesa: alvo.defesa, imune: absorve === 0 && (imuneADano(alvo, tick) || recebido === 0), multRecebido: recebido },
       ctx.balance.combate,
-      fonte.multDano * multiplicadorClima(ctx, hab.elemento) * (atacante ? multiplicadorArma(ctx, atacante, hab.id) * extraGuerreiro(ctx, atacante, alvo) * multiplicadorDireto(ctx, atacante, hab, impacto.secundario ?? false) * multiplicadorDardo(ctx, atacante, alvo, hab, tick) : 1),
+      fonte.multDano * multiplicadorClima(ctx, hab.elemento) * (atacante ? multiplicadorArma(ctx, atacante, hab.id) * extraGuerreiro(ctx, atacante, alvo) * multiplicadorDireto(ctx, atacante, hab, impacto.secundario ?? false) * multiplicadorDardo(ctx, atacante, alvo, hab, tick) * multiplicadorDaEncarnacao(ctx, atacante, alvo, hab, tick) : 1),
     );
     ({ d20, mult, falha, critico, imune } = r);
     absorveu = absorve > 0 && !r.falha;
@@ -150,7 +159,8 @@ export function aplicarImpacto(
     }
     // Marco 14: o escudo absorve antes da vida.
     // Marco 24: o cego erra como quem esquiva (antes das defesas do alvo).
-    const cegou = absorve === 0 && !r.falha && !r.imune && cegoErra(estado, ctx, atacante);
+    // Marco 24 (D-095): o morto do Necromante com a sintonia da sombra também esquiva.
+    const cegou = absorve === 0 && !r.falha && !r.imune && (cegoErra(estado, ctx, atacante) || mortoEsquivou(estado, ctx, alvo) || falcaoGuardiaoAbsorve(ctx, alvo, atacante, hab, tick));
     const defesa = cegou ? { esquivou: true, fator: 1 } : absorve === 0 && !r.falha && !r.imune && atacante ? defenderGolpe(estado, ctx, alvo, atacante, hab.tipoAtaque === 'fisico', saida) : { esquivou: false, fator: 1 };
     if (defesa.esquivou) { falha = true; saida.push({ t: 'esquivou', tick, acaoId: impacto.acaoId, atorId: fonte.id, alvoId: alvo.id }); }
     const antesDoEscudo = defesa.esquivou || absorve > 0 ? 0 : Math.round(r.dano * defesa.fator);
@@ -167,7 +177,8 @@ export function aplicarImpacto(
   }
   if (hab.formulaCura !== null) {
     const bruta = rolar(estado.rng, hab.formulaCura).total;
-    const pedida = Math.max(0, Math.round(bruta * fonte.multCura * multiplicadorCuraRecebida(alvo, tick) * curaRecebidaPassivas(ctx, alvo)));
+    // Marco 24 (D-095): a sintonia do suporte do Guerreiro reforça as curas gerais no Frenesi.
+    const pedida = Math.max(0, Math.round(bruta * fonte.multCura * reforcoDaGeral(ctx, conjurador, hab, tick) * multiplicadorCuraRecebida(alvo, tick) * curaRecebidaPassivas(ctx, alvo)));
     const antes = alvo.hp;
     alvo.hp = Math.min(alvo.hpMax, alvo.hp + pedida);
     cura += alvo.hp - antes;
@@ -207,12 +218,25 @@ export function aplicarImpacto(
   const basicoQueFere = !!conjurador && vivo(conjurador) && conjurador !== alvo && hab.id === conjurador.ataqueBasico && dano > 0 && podeFerir(conjurador, alvo, ctx.modo);
   // Marco 21 (D-088): o básico que fere enche a fúria do Guerreiro (antes da cura, que já dobra no golpe que a enche).
   if (conjurador && basicoQueFere && acumularFuria(ctx, conjurador, estado.tick)) encherFuria(estado, ctx, conjurador, origem, saida);
+  // Marco 24 (D-095): com a sintonia técnica, as gerais técnicas que ferem também enchem.
+  const furiaGeral = conjurador && !basicoQueFere && dano > 0 && conjurador !== alvo && podeFerir(conjurador, alvo, ctx.modo) ? furiaDaGeral(ctx, conjurador, hab, estado.tick) : 0;
+  if (conjurador && furiaGeral > 0 && acumularFuria(ctx, conjurador, estado.tick, furiaGeral)) encherFuria(estado, ctx, conjurador, origem, saida);
+  // A do Arqueiro: as gerais técnicas que ferem enchem parte da Mira.
+  if (conjurador && !basicoQueFere && dano > 0 && conjurador !== alvo && podeFerir(conjurador, alvo, ctx.modo)) miraDaGeral(ctx, conjurador, hab, estado.tick);
   if (conjurador && basicoQueFere && curaBasicoPct > 0) {
     const valor = Math.min(hpAntes, dano) * curaBasicoPct / 100 * multiplicadorFuria(ctx, conjurador, estado.tick);
     aplicarEfeito(estado, ctx, conjurador, construirEfeito('cura', { valor }), origem, null, saida);
   }
   if (conjurador) pulsarAura(estado, ctx, conjurador, alvo, Math.min(hpAntes, dano), saida, entregaRemota(hab));
   // Marco 24 (D-094): o primeiro alvo de cada ação enche o medidor da ultimate (a própria ultimate não enche).
+  // Marco 24 (D-095): a sintonia do Aventureiro (o falcão golpeia junto, aplica estados, cura em volta).
+  if (conjurador) aoAcertarComFalcao(estado, ctx, conjurador, alvo, hab, Math.min(hpAntes, dano), cura, saida);
+  // Marco 24 (D-096): a sinergia de sequência no primeiro atingido (Avalanche humana).
+  if (conjurador && impacto.indice === 0 && dano > 0 && conjurador.habilidadeAnterior) aoFecharSequencia(estado, ctx, conjurador, alvo, hab, conjurador.habilidadeAnterior.id, conjurador.habilidadeAnterior.tick, saida);
+  // A do Mago: as encarnações novas e as duplas nas magias que acertam.
+  if (conjurador) aoAcertarMagia(estado, ctx, conjurador, alvo, hab, Math.min(hpAntes, dano), cura, impacto.indice === 0, saida);
+  // Marco 24 (D-095): a sintonia do suporte do Necromante leva as curas e os escudos gerais aos mortos.
+  if (conjurador && impacto.indice === 0 && conjurador.bolsa) curaGeralNosMortos(estado, ctx, conjurador, alvo, hab, cura, saida);
   if (conjurador && impacto.indice === 0 && !hab.tags.includes('ultimate')) {
     if (dano > 0 && conjurador !== alvo) cargaPorMomento(ctx, conjurador, basicoQueFere ? 'basico' : 'habilidade', estado.tick, saida);
     // O acerto das skills do falcão enche do jeito do Aventureiro (no máximo uma vez por intervalo).
@@ -250,6 +274,8 @@ export function aplicarImpacto(
     }
     // Marco 24 (D-095): as passivas de quem bate que aplicam estado por chance.
     if (conjurador && conjurador !== alvo) for (const ef of estadosAoAcertar(estado, ctx, conjurador)) aplicarEfeito(estado, ctx, alvo, ef, origem, mira, saida);
+    // A sintonia do Necromante nos golpes dos mortos.
+    if (conjurador && conjurador !== alvo) aoGolpeDoMorto(estado, ctx, conjurador, alvo, saida);
   }
   // Dispatcher único (§2.8); `em: 'conjurador'` cai sobre quem lançou (ex.: avanço, roubo de vida).
   for (const efeito of hab.efeitos) {
@@ -257,11 +283,14 @@ export function aplicarImpacto(
     if (REGISTRO_EFEITOS[efeito.tipo].aoLancar) continue;
     const sobre = efeito.em === 'conjurador' ? conjurador : alvo;
     // Marco 23 (D-092): no clima do elemento, o estado dele dura mais.
-    if (sobre) aplicarEfeito(estado, ctx, sobre, estenderNoClima(ctx, hab, reforcarEstado(ctx, conjurador, comPotencia(efeito, fonte.potencia))), origem, mira, saida);
+    const reforco = efeito.tipo === 'escudo' || efeito.tipo === 'escudo_acumulado' ? reforcoDaGeral(ctx, conjurador, hab, tick) : 1;
+    // Marco 24 (D-096): a sinergia passiva alonga o estado (Disciplina férrea).
+    const final = efeitoDaSinergia(ctx, conjurador, hab, reforco > 1 ? { ...efeito, valor: Math.round(efeito.valor * reforco) } : efeito);
+    if (sobre) aplicarEfeito(estado, ctx, sobre, estenderNoClima(ctx, hab, reforcarEstado(ctx, conjurador, comPotencia(final, fonte.potencia))), origem, mira, saida);
   }
   if (conjurador) {
     if (resposta && conjurador.tatica) { conjurador.tatica.respostaConsumida = true; conjurador.efeitos = conjurador.efeitos.filter((f) => f.tipo !== 'resposta_aparo'); }
-    fluxoRestaurador(estado, ctx, conjurador, alvo, cura, saida);
+    fluxoRestaurador(estado, ctx, conjurador, alvo, cura, saida, hab);
     confirmarImpactoTatico(estado, ctx, conjurador, alvo, hab, impacto.acaoId, cura, disparadas, saida);
   }
   // Marco 18 (D-069): ganchos de quem acerta (no acerto e no crítico) e de quem leva o golpe.

@@ -3,6 +3,8 @@
 // habilidade, ou passivo), SE (etiqueta, habilidade, elemento, tipo de ataque, estado do alvo e chance) e O QUÊ
 // (aplicar um efeito pelo dispatcher único, curar % da vida, devolver mana, ou um passivo que outro sistema consulta).
 // Tudo em dados; as chances usam o RNG da simulação (determinístico).
+// Marco 24 (24/10/2026, D-096): os momentos da ultimate e do combo (aoUsarUltimate, aoEncherUltimate, aoConcluirCombo),
+// a carga da ultimate, a recarga das skills de classe, os aliados perto e a próxima skill de classe sem mana.
 
 import { ehElemento, type Elemento } from '../combat/elementos';
 import type { Habilidade, TipoAtaque } from '../combat/habilidades';
@@ -15,7 +17,10 @@ import { aleatorio } from '../core/rng';
 import { Leitor, type Objeto } from '../core/validar';
 import { vivo, type Entidade } from '../entities/entidade';
 
-export const MOMENTOS_GANCHO = ['aoAcertar', 'aoCritico', 'aoMatar', 'aoReceberGolpe', 'aoGastarRefugio', 'aoUsarHabilidade', 'aoCruzarInimigo', 'passivo'] as const;
+export const MOMENTOS_GANCHO = [
+  'aoAcertar', 'aoCritico', 'aoMatar', 'aoReceberGolpe', 'aoGastarRefugio', 'aoUsarHabilidade', 'aoCruzarInimigo',
+  'aoUsarUltimate', 'aoEncherUltimate', 'aoConcluirCombo', 'passivo',
+] as const;
 export type MomentoGancho = (typeof MOMENTOS_GANCHO)[number];
 
 export interface CondicaoGancho {
@@ -45,6 +50,13 @@ export interface PassivosDeGancho {
   auraDefesaPct: number;
   /** Potência dos efeitos (soma à da Inteligência). */
   potenciaPct: number;
+  /** Marco 24: os projéteis mágicos atravessam tantos alvos (Engenhoso). */
+  atravessaMagico: number;
+  /** Marco 24: os estados negativos duram tanto % menos (Resiliente). */
+  negativosMenosPct: number;
+  /** Marco 24: a ultimate enche tanto % mais rápido (Oráculo) e, com pouca vida, mais tanto % (Sobrevivente). */
+  cargaUltimatePct: number;
+  cargaVidaBaixaPct: number;
 }
 
 export type EfeitoGancho =
@@ -59,6 +71,14 @@ export type EfeitoGancho =
   | { tipo: 'purificar'; n: number }
   /** Aplica no outro o estado do elemento da última magia do portador, se foi há até `janelaMs`. */
   | { tipo: 'herdarElemento'; janelaMs: number }
+  /** Marco 24: carga da ultimate no portador (`raio` 0) ou nos aliados a até `raio` células. */
+  | { tipo: 'cargaUltimate'; valor: number; raio: number }
+  /** Marco 24: tira `ms` da recarga das skills de classe do portador. */
+  | { tipo: 'recargaClasse'; ms: number }
+  /** Marco 24: nos aliados do portador a até `raio` células (não nele). */
+  | { tipo: 'aplicarAliados'; efeito: EfeitoCanonico; raio: number }
+  /** Marco 24: a próxima skill de classe do portador não gasta mana. */
+  | { tipo: 'classeSemMana' }
   | { tipo: 'passivo'; passivo: Partial<PassivosDeGancho> };
 
 export interface Gancho {
@@ -82,6 +102,10 @@ export const PASSIVOS_NEUTROS: PassivosDeGancho = {
   escudoPct: 0,
   auraDefesaPct: 0,
   potenciaPct: 0,
+  atravessaMagico: 0,
+  negativosMenosPct: 0,
+  cargaUltimatePct: 0,
+  cargaVidaBaixaPct: 0,
 };
 
 function lerCondicao(l: Leitor, v: unknown): CondicaoGancho {
@@ -107,7 +131,7 @@ function lerPassivo(l: Leitor, o: Objeto): Partial<PassivosDeGancho> {
   if (o.inamovivel !== undefined) p.inamovivel = l.booleano(o, 'inamovivel');
   const campos = [
     'estudoPct', 'revelarPct', 'desarmarPct', 'refugioMaisPct', 'buffArmadoPrazoPct', 'buffArmadoDuracaoPct', 'renascerPct',
-    'escudoPct', 'auraDefesaPct', 'potenciaPct',
+    'escudoPct', 'auraDefesaPct', 'potenciaPct', 'atravessaMagico', 'negativosMenosPct', 'cargaUltimatePct', 'cargaVidaBaixaPct',
   ] as const;
   for (const c of campos) {
     const v = num(c);
@@ -148,8 +172,15 @@ export function lerGanchos(l: Leitor, v: unknown): Gancho[] {
     else if (e.herdarElemento !== undefined) efeito = { tipo: 'herdarElemento', janelaMs: l.numero(e, 'herdarElemento', { min: 100, max: 60_000 }) };
     else if (e.curarPct !== undefined) efeito = { tipo: 'curarPct', pct: l.numero(e, 'curarPct', { min: 0, max: 100 }) };
     else if (e.mana !== undefined) efeito = { tipo: 'mana', valor: l.numero(e, 'mana', { min: 0, max: 100, inteiro: true }) };
+    else if (e.cargaUltimate !== undefined) efeito = { tipo: 'cargaUltimate', valor: l.numero(e, 'cargaUltimate', { min: 0, max: 100 }), raio: e.raio === undefined ? 0 : l.numero(e, 'raio', { min: 0, max: 12, inteiro: true }) };
+    else if (e.recargaClasseMs !== undefined) efeito = { tipo: 'recargaClasse', ms: l.numero(e, 'recargaClasseMs', { min: 0, max: 60_000 }) };
+    else if (e.aplicarAliados !== undefined) {
+      const [ef] = normalizarEfeito(e.aplicarAliados, l);
+      if (!ef) return [];
+      efeito = { tipo: 'aplicarAliados', efeito: ef, raio: e.raio === undefined ? 3 : l.numero(e, 'raio', { min: 1, max: 12, inteiro: true }) };
+    } else if (e.classeSemMana !== undefined) efeito = { tipo: 'classeSemMana' };
     else {
-      l.erro('gancho: efeito precisa de "aplicar", "aplicarEmVolta", "aplicarNoProximo", "purificar", "herdarElemento", "curarPct" ou "mana"');
+      l.erro('gancho: efeito precisa de "aplicar", "aplicarEmVolta", "aplicarNoProximo", "aplicarAliados", "purificar", "herdarElemento", "curarPct", "mana", "cargaUltimate", "recargaClasseMs" ou "classeSemMana"');
       return [];
     }
     return [{ quando, se, efeito }];
@@ -173,6 +204,10 @@ export function somarPassivos(ganchos: readonly Gancho[]): PassivosDeGancho {
     s.escudoPct += p.escudoPct ?? 0;
     s.auraDefesaPct = Math.max(s.auraDefesaPct, p.auraDefesaPct ?? 0);
     s.potenciaPct += p.potenciaPct ?? 0;
+    s.atravessaMagico += p.atravessaMagico ?? 0;
+    s.negativosMenosPct += p.negativosMenosPct ?? 0;
+    s.cargaUltimatePct += p.cargaUltimatePct ?? 0;
+    s.cargaVidaBaixaPct += p.cargaVidaBaixaPct ?? 0;
     s.resistencias.push(...(p.resistencias ?? []));
   }
   return s;
@@ -207,6 +242,12 @@ export interface MundoDoGancho {
   hostisPerto: (portador: Entidade, centro: Entidade, raio: number) => Entidade[];
   /** O estado do elemento da última magia do portador, se foi há até `janelaMs` (null: nenhuma). */
   elementoRecente: (portador: Entidade, janelaMs: number) => EfeitoCanonico | null;
+  /** Marco 24: os aliados do portador a até `raio` células (sem ele). */
+  aliadosPerto: (portador: Entidade, raio: number) => Entidade[];
+  /** Marco 24: soma carga à ultimate de `e`. */
+  cargaUltimate: (e: Entidade, valor: number) => void;
+  /** Marco 24: tira `ms` da recarga das skills de classe de `e`. */
+  reduzirRecargaClasse: (e: Entidade, ms: number) => void;
 }
 
 /**
@@ -249,6 +290,14 @@ export function dispararGanchos(
     } else if (ef.tipo === 'herdarElemento') {
       const recente = mundo.elementoRecente(portador, ef.janelaMs);
       if (recente && m.outro && vivo(m.outro)) aplicar(m.outro, recente, portador);
+    } else if (ef.tipo === 'cargaUltimate') {
+      for (const x of ef.raio > 0 ? mundo.aliadosPerto(portador, ef.raio) : [portador]) mundo.cargaUltimate(x, ef.valor);
+    } else if (ef.tipo === 'recargaClasse') {
+      mundo.reduzirRecargaClasse(portador, ef.ms);
+    } else if (ef.tipo === 'aplicarAliados') {
+      for (const x of mundo.aliadosPerto(portador, ef.raio)) aplicar(x, ef.efeito, portador);
+    } else if (ef.tipo === 'classeSemMana') {
+      portador.classeSemMana = true;
     } else if (ef.tipo === 'curarPct') {
       aplicar(portador, construirEfeito('cura', { valor: Math.max(1, Math.round((portador.hpMax * ef.pct) / 100)) }), portador);
     } else if (ef.tipo === 'mana') {

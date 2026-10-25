@@ -10,6 +10,7 @@ import { construirEfeito, type EfeitoCanonico } from './registro-efeitos';
 import { fato, muralhaEm } from './tatica';
 import { passavel } from '../world/fase';
 import { reservaCelula } from '../world/colisao';
+import { aoCairOMorto, retornoDoServo, vidaDoMorto } from './sintonia-necromante';
 
 const necromante = (e: Entidade) => vivo(e) && (e.classeId ?? e.bolsa?.classeId) === 'necromante';
 export const chaveServo = (id: string) => `necromante:servo:${id}`;
@@ -50,7 +51,8 @@ function erguer(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade, tipo
   // Marco 22 (D-090): a Inteligência do Necromante acima de 10 fortalece os mortos (a build focada rende).
   const poder = 8 + Math.floor(dono.nivel / 2) + Math.floor(Math.max(0, dono.atributos.inteligencia - 10) * r.atributoPorInt);
   morto.atributos = { ...morto.atributos, forca: poder, inteligencia: poder };
-  morto.hpMax = Math.round((r.vidaBase + dono.nivel * r.vidaPorNivel) * (tipo === 'servo' ? r.vidaServoPct / 100 : 1));
+  // Marco 24 (D-095): a sintonia da terra dá mais vida aos mortos.
+  morto.hpMax = vidaDoMorto(ctx, dono, Math.round((r.vidaBase + dono.nivel * r.vidaPorNivel) * (tipo === 'servo' ? r.vidaServoPct / 100 : 1)), estado.tick);
   morto.hp = morto.hpMax;
   morto.aparencia = fonte?.aparencia ? { ...fonte.aparencia } : null;
   contarExercito(estado, dono);
@@ -95,7 +97,11 @@ export function processarServosNecromantes(estado: EstadoJogo, ctx: ContextoSimu
 /** Uma morte confirmada cria no máximo um eco aliado; nunca consome o personagem original. */
 export function colherMorto(estado: EstadoJogo, ctx: ContextoSimulacao, morto: Entidade, matador: Entidade | undefined, saida: EventoSimulacao[]): void {
   if (morto.invocacao) {
-    if (morto.invocacao.necromancia === 'servo') estado.recargas[chaveServo(morto.invocacao.donoId)] = estado.tick + ticksDe(ctx.balance.necromancia.retornoServoMs);
+    // Marco 24 (D-095): o que a sintonia faz quando um morto cai; o Pastor das almas traz o servo mais cedo.
+    aoCairOMorto(estado, ctx, morto, saida);
+    const dono = buscarEntidade(estado, morto.invocacao.donoId);
+    const retorno = retornoDoServo(ctx, dono, estado.tick) ?? ctx.balance.necromancia.retornoServoMs;
+    if (morto.invocacao.necromancia === 'servo') estado.recargas[chaveServo(morto.invocacao.donoId)] = estado.tick + ticksDe(retorno);
     return;
   }
   const r = ctx.balance.necromancia;

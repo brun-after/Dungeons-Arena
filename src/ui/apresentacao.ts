@@ -20,6 +20,10 @@ import type { Dificuldade } from '../modos/dificuldade';
 import { lerPreferencias, type NivelQualidade, type Preferencias } from '../plataforma/preferencias';
 import type { Camera } from '../render/camera';
 import { EfeitosDeHabilidade } from '../render/efeitos-habilidade';
+import { EfeitosDeClasse } from '../render/efeitos-classe';
+import { elementosDaDupla } from '../combat/encarnacao';
+import { fracaoFuria } from '../combat/furia';
+import { sintoniaDe } from '../progression/sintonia';
 import { ControladorImpacto } from '../render/impacto';
 import { temaDaFase } from '../combat/clima';
 import type { Elemento } from '../combat/elementos';
@@ -104,6 +108,15 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     corElemento,
   });
   efeitos.ligar(o.bus, o.estado, () => performance.now());
+  // Marco 24 (25/10/2026): a ultimate, a fúria e o Frenesi do Guerreiro, a encarnação dupla e a vertente.
+  const efeitosClasse = new EfeitosDeClasse({
+    particulas, impacto, habilidades: o.habilidades,
+    fracaoFuria: (e, tick) => fracaoFuria(ctx, e, tick),
+    elementosDaDupla: (e, tick) => elementosDaDupla(ctx, e, tick),
+    deClasse: (e, id) => !!e.classeId && (ctx.conteudo.classes.get(e.classeId)?.exclusivas.includes(id) ?? false),
+    vertenteDe: (e) => sintoniaDe(ctx, e).vertente?.id ?? null,
+  });
+  efeitosClasse.ligar(o.bus, o.estado, () => performance.now());
   const combos = new CamadaCombosTaticos(palco.efeitos, () => camera.projecaoAtual, reduzido, () => qualidade().particulas === 0, 24, particulas);
   combos.ligar(o.bus, o.estado, () => performance.now());
   const luz = new CamadaLuz(palco.luz);
@@ -212,6 +225,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
       som.quadro(pos, agoraMs);
       camera.enquadrar(focoDoQuadro(estado, posicao), agoraMs);
       efeitos.quadro(estado, agoraMs, posicao);
+      efeitosClasse.quadro(estado, agoraMs, posicao);
       combos.desenhar(estado, agoraMs);
       particulas.atualizar(Math.min(100, dtMs));
       luz.desenhar(pontosDeLuz(estado, posicao), agoraMs, qualidade().luz, reduzido());

@@ -18,12 +18,12 @@
 import { celulasDaForma } from '../combat/formas';
 import type { BuscaHabilidade } from '../combat/habilidades';
 import type { Fase } from '../world/fase';
-import { REGISTRO_EFEITOS, type TipoEfeito } from '../combat/registro-efeitos';
+import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import type { EstadoJogo } from '../core/estado';
 import type { Barramento } from '../core/events';
 import type { EventosDaSimulacao } from '../core/eventos-simulacao';
 import type { Entidade, PontoVisual } from '../entities/entidade';
-import { encarnacaoDe } from '../combat/encarnacao';
+import { encarnacaoDe, type ElementoEncarnado } from '../combat/encarnacao';
 import type { ControladorImpacto } from './impacto';
 import type { SistemaParticulas } from './particulas';
 import type { NomePreset } from './presets-particula';
@@ -31,6 +31,7 @@ import type { ParticulaClima } from '../world/temas';
 import type { Elemento } from '../combat/elementos';
 import type { PresetQualidade } from './qualidade';
 import { visualDe } from './visual-habilidade';
+import { AURA_DO_ESTADO, presetDeConjuracao, presetDeImpacto } from './materiais';
 
 const INTERVALO_CONJURACAO_MS = 120;
 const INTERVALO_RASTRO_MS = 30;
@@ -43,21 +44,19 @@ const INTERVALO_CLIMA_MS = 140;
 const INTERVALO_AFINIDADE_MS = 420;
 const INTERVALO_CHAO_MS = 160;
 
-/** Aura por tipo de status; os demais usam `aura` na cor do registro. */
-const AURA: Partial<Record<TipoEfeito, NomePreset>> = {
-  dano_periodico: 'brasas',
-  atordoar: 'estrelas',
-  imune_dano: 'anel',
-  sem_movimento: 'fumaca',
-};
 
 const cor = (hex: string) => Number.parseInt(hex.slice(1), 16);
 
 /** Marco 22 (D-089): a aura e a cor de cada encarnação do Mago. */
-const ENCARNACAO: Record<'fogo' | 'gelo' | 'raio', { preset: NomePreset; cor: number }> = {
+// Marco 24 (24/10/2026, D-095): as encarnações de terra, veneno, trevas e luz.
+const ENCARNACAO: Record<ElementoEncarnado, { preset: NomePreset; cor: number }> = {
   fogo: { preset: 'brasas', cor: 0xff6b3d },
   gelo: { preset: 'cristais', cor: 0x85c1e9 },
   raio: { preset: 'faiscas', cor: 0xbb8fce },
+  terra: { preset: 'pedra', cor: 0xb08d57 },
+  veneno: { preset: 'bolhas', cor: 0x58d68d },
+  trevas: { preset: 'sombra', cor: 0x6c3483 },
+  sagrado: { preset: 'sagrado', cor: 0xf7dc6f },
 };
 const COR_MIRA = 0xf9e79f;
 const COR_PENAS = 0xc8a165;
@@ -131,6 +130,8 @@ export class EfeitosDeHabilidade {
         // D-067: chuva e leque já desenham as flechas pela área; no alvo, as farpas do acerto.
         else if (v.impacto && (ev.dano > 0 || ev.cura > 0 || ev.d20 === 0)) this.o.particulas.emitir(v.impacto === 'chuva' || v.impacto === 'leque' ? 'farpas' : v.impacto, alvo.x, alvo.y, v.cor);
       }
+      // Marco 24 (25/10/2026): a matéria do elemento no acerto (nos 3 primeiros alvos da área, pelo custo).
+      if (h.elemento && ev.dano > 0 && ev.indice < 3) this.o.particulas.emitir(presetDeImpacto(h.elemento), alvo.x, alvo.y, v.cor);
       if (ev.indice > 0) return;
       const agoraMs = agora();
       if (ev.critico || v.camera === 'forte') this.o.impacto.pedir('forte', agoraMs);
@@ -215,6 +216,8 @@ export class EfeitosDeHabilidade {
       const h = this.o.habilidades(c.chave);
       const v = h ? visualDe(h) : null;
       if (pos && v?.conjuracao) p.emitir(v.conjuracao, pos.x, pos.y, v.cor);
+      // Marco 24 (25/10/2026): a matéria do elemento na mão de quem conjura (chamas, geada, arcos, bolhas…).
+      if (pos && h?.elemento) p.emitir(presetDeConjuracao(h.elemento), pos.x, pos.y, v?.cor ?? 0xffffff);
     }
     for (const [acaoId, a] of this.areas) {
       if (estado.tick < a.ateTick) continue;
@@ -305,7 +308,7 @@ export class EfeitosDeHabilidade {
       if (!primeiro || agoraMs - (this.ultimaAura.get(e.id) ?? 0) < INTERVALO_AURA_MS) continue;
       this.ultimaAura.set(e.id, agoraMs);
       const pos = this.posicoes.get(e.id);
-      if (pos) this.o.particulas.emitir(AURA[primeiro.tipo] ?? 'aura', pos.x, pos.y, cor(REGISTRO_EFEITOS[primeiro.tipo].cor));
+      if (pos) this.o.particulas.emitir(AURA_DO_ESTADO[primeiro.tipo] ?? 'aura', pos.x, pos.y, cor(REGISTRO_EFEITOS[primeiro.tipo].cor));
     }
     // Marco 22 (D-089): a encarnação do Mago e o brilho do Arqueiro com a Mira firme cheia. Ajuste de 24/10/2026
     // (D-091): a encarnação é sutil com o Mago parado e vira uma trilha elegante quando ele anda.

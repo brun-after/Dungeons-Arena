@@ -10,6 +10,7 @@ import { cargaDaClasse } from './carga-ultimate';
 import { aplicarEfeito, type OrigemDoEfeito } from './efeitos';
 import { marcarFrenesi } from './furia';
 import { construirEfeito } from './registro-efeitos';
+import { armarCostas } from './sintonia-guerreiro';
 
 /** A barra acabou de encher: Frenesi e carga da ultimate. */
 export function encherFuria(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, origem: OrigemDoEfeito, saida: EventoSimulacao[]): void {
@@ -17,4 +18,6 @@ export function encherFuria(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entid
   marcarFrenesi(ctx, e, estado.tick);
   aplicarEfeito(estado, ctx, e, construirEfeito('frenesi', { duracaoMs: r.duracaoMs, pct: r.danoPct }), origem, null, saida);
   cargaDaClasse(ctx, e, 'furiaCheia', estado.tick, saida);
+  // Marco 24 (D-095): a sintonia da sombra deixa o próximo golpe como pelas costas.
+  armarCostas(ctx, e, estado.tick);
 }

@@ -27,6 +27,7 @@ export interface OpcoesFeedbackGrimorio {
 export function ligarFeedbackGrimorio(o: OpcoesFeedbackGrimorio): void {
   const { bus, ctx, idLocal, hud } = o;
   const nomeItem = (id: string) => ctx.conteudo.itens.get(id)?.nome ?? id;
+  const nomeHabilidade = (id: string) => ctx.conteudo.definicoes.get(id)?.base.nome ?? id;
   const flutuar = (id: string, texto: string) => {
     const p = o.posicao(id);
     if (p) o.numeros.mostrar(texto, 'critico', p.x, p.y, o.agora());
@@ -49,8 +50,34 @@ export function ligarFeedbackGrimorio(o: OpcoesFeedbackGrimorio): void {
   });
   // Marco 22 (23/10/2026, D-089): a encarnação do Mago e o tiro carregado do Arqueiro.
   bus.on('encarnou', (ev) => {
-    flutuar(ev.id, t(`hud.encarnacao.${ev.elemento}`));
-    if (ev.id === idLocal) hud.registrar(t(`hud.encarnacaoDica.${ev.elemento}`));
+    // Marco 24 (24/10/2026, D-095): a encarnação dupla tem aviso próprio, com o nome da fusão.
+    const dupla = ev.dupla ? ctx.conteudo.sintonia.encarnacoesDuplas.find((d) => d.id === ev.dupla) : undefined;
+    flutuar(ev.id, dupla ? dupla.nome : t(`hud.encarnacao.${ev.elemento}`));
+    if (ev.id !== idLocal) return;
+    if (dupla) {
+      hud.registrar(t('feedback.encarnacaoDupla', { nome: dupla.nome }));
+      o.aviso(t('feedback.encarnacaoDupla', { nome: dupla.nome }));
+    } else hud.registrar(t(`hud.encarnacaoDica.${ev.elemento}`));
+  });
+  // Marco 24 (24/10/2026, D-094 a D-096): a ultimate, as passivas gerais e as sinergias passivas.
+  bus.on('ultimateCheia', (ev) => {
+    if (ev.id !== idLocal) return;
+    hud.registrar(t('feedback.ultimateCheia'));
+    o.aviso(t('feedback.ultimateCheia'));
+  });
+  bus.on('ultimateUsada', (ev) => {
+    flutuar(ev.id, t('numero.ultimate', { nome: nomeHabilidade(ev.ultimateId) }));
+  });
+  bus.on('passivaDefinida', (ev) => {
+    if (ev.id !== idLocal) return;
+    const nome = nomeHabilidade(ev.habilidadeId);
+    hud.registrar(t(ev.ligada ? 'feedback.passivaLigada' : 'feedback.passivaDesligada', { nome }));
+  });
+  bus.on('sinergiaPassiva', (ev) => {
+    const s = ctx.conteudo.sinergias.find((x) => x.id === ev.sinergia);
+    if (!s) return;
+    flutuar(ev.id, t('feedback.sinergiaPassiva', { nome: s.nome }));
+    if (ev.id === idLocal) hud.registrar(t('feedback.sinergiaPassiva', { nome: s.nome }));
   });
   bus.on('invocacaoRetornou', (ev) => {
     if (ev.donoId === idLocal) hud.registrar(t('log.invocacaoRetornou'));

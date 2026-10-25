@@ -24,12 +24,14 @@ import livreJson from '../data/modos/livre.json';
 import skillsJson from '../data/skills.json';
 import ultimatesJson from '../data/ultimates.json';
 import sintoniaJson from '../data/sintonia.json';
+import sinergiasJson from '../data/sinergias.json';
 import temasJson from '../data/temas.json';
 import afinidadesJson from '../data/afinidades.json';
 import armasJson from '../data/armas.json';
 import { lerArmas, type RegrasDeArmas } from '../progression/armas';
 import { lerUltimates, type Ultimate } from '../combat/ultimates';
 import { lerSintonia, type RegrasSintonia } from '../progression/sintonia';
+import { lerSinergias, type SinergiaPassiva } from '../progression/sinergias-passivas';
 import { conferirClassesEUltimates } from './conteudo-classes';
 import { lerAfinidades, type CatalogoAfinidades } from '../combat/afinidade';
 import { lerTemas, type Tema } from '../world/temas';
@@ -88,6 +90,8 @@ export interface Conteudo {
   ultimates: Catalogo<Ultimate>;
   /** Marco 24 (D-095): data/sintonia.json (Domínios, sintonias por classe, vertentes e encarnações duplas). */
   sintonia: RegrasSintonia;
+  /** Marco 24 (D-096): data/sinergias.json (as sinergias passivas). */
+  sinergias: readonly SinergiaPassiva[];
 }
 
 export interface FontesDeConteudo {
@@ -95,6 +99,7 @@ export interface FontesDeConteudo {
   /** Marco 24: data/ultimates.json. */
   ultimates: unknown;
   sintonia: unknown;
+  sinergias: unknown;
   inimigos: unknown;
   classes: unknown;
   itens: unknown;
@@ -123,6 +128,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const h = lerHabilidades(fontes.skills);
   const ul = lerUltimates(fontes.ultimates);
   const si = lerSintonia(fontes.sintonia);
+  const sg = lerSinergias(fontes.sinergias);
   for (const [id, def] of ul.definicoes) {
     if (h.definicoes.has(id)) ul.erros.push(`ultimates.json: "${id}" já existe em skills.json`);
     h.definicoes.set(id, def);
@@ -180,7 +186,11 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   for (const item of it.itens.values()) if (item.ensina !== null) conferir(`item ${item.id}`, [item.ensina]);
   for (const combo of cb.combos.values()) conferir(`combo ${combo.id}`, combo.sequencia.filter((s) => s !== '@ultimate'));
   erros.push(...conferirClassesEUltimates(h.definicoes, c.classes, ul.ultimates, p.presets, it.itens));
-  erros.push(...si.erros);
+  erros.push(...si.erros, ...sg.erros);
+  for (const s of sg.sinergias) {
+    if (!h.definicoes.get(s.passiva)?.base.passiva) erros.push(`sinergias.json: ${s.id} pede a passiva "${s.passiva}"`);
+    for (const id of s.sequencia) if (!h.definicoes.has(id)) erros.push(`sinergias.json: ${s.id} com skill desconhecida "${id}"`);
+  }
   for (const v of si.sintonia.vertentes) if (!c.classes.has(v.classe)) erros.push(`sintonia.json: vertente ${v.id} de classe desconhecida "${v.classe}"`);
   for (const [e, a] of af.afinidades.elementos) conferir(`afinidade ${e}`, [a.habilidade]);
   conferir('armas.json', Object.values(ar.armas.basicoDaFamilia));
@@ -240,6 +250,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       armas: ar.armas,
       ultimates: ul.ultimates,
       sintonia: si.sintonia,
+      sinergias: sg.sinergias,
     },
     erros,
   };
@@ -269,6 +280,7 @@ export const FONTES_OFICIAIS: FontesDeConteudo = {
   skills: skillsJson,
   ultimates: ultimatesJson,
   sintonia: sintoniaJson,
+  sinergias: sinergiasJson,
   inimigos: inimigosJson,
   classes: classesJson,
   itens: itensJson,

@@ -2,7 +2,7 @@
 // No toque, tocar a linha inteira equipa, usa ou desequipa; equipar e desequipar mantêm o modal aberto. No desktop, cada linha
 // tem o seu botão. A lista é redesenhada só quando a bolsa, o nível ou o XP mudam.
 // Marco 9A (14/10/2026): ouro, ordenação manual (subir e descer, persistida no save) e a tecla de atalho de
-// cada consumível (5–9 e 0, D-050).
+// cada consumível (7–9 e 0 desde o marco 24, D-050).
 // Marco 14 (14/10/2026): a aba Habilidades (ui/mochila-habilidades.ts) e os livros (usar ensina).
 
 import type { Comando } from '../core/comandos';
@@ -431,7 +431,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     const conteudo = el('div', 'conteudo-modal');
     if (aba === 'itens') desenharItens(j, conteudo);
     else if (aba === 'ficha') desenharFicha(j, conteudo);
-    else if (aba === 'habilidades') desenharHabilidades(conteudo, j, ctx, emitir, estadoHabilidades, desenhar);
+    else if (aba === 'habilidades') desenharHabilidades(conteudo, j, ctx, emitir, estadoHabilidades, desenhar, o.estado?.().tick ?? 0);
     else desenharDiario(conteudo, j, ctx);
     corpo.append(conteudo);
     if (focoAntes) corpo.querySelector<HTMLElement>(`[data-chave="${CSS.escape(focoAntes)}"]`)?.focus();

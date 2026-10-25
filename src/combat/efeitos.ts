@@ -14,6 +14,15 @@ import type { Celula, EntidadeId } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type Armadilha, type EstadoJogo } from '../core/estado';
 import { passivosDe } from '../progression/ganchos-do-portador';
+import { inamovivelPelaSintonia } from './sintonia-guerreiro';
+import { mortoInamovivel } from './sintonia-necromante';
+import { escudoComFalcao } from './sintonia-aventureiro';
+import { magoInamovivel } from './encarnacao-efeitos';
+
+/** Marco 24 (D-095): a sintonia deixa inamovível o Guerreiro no Frenesi (terra), os mortos (terra) e o Mago em terra. */
+function inamovivelPelaSintoniaAgora(estado: EstadoJogo, ctx: ContextoSimulacao, alvo: Entidade): boolean {
+  return inamovivelPelaSintonia(ctx, alvo, estado.tick) || mortoInamovivel(estado, ctx, alvo) || magoInamovivel(ctx, alvo, estado.tick);
+}
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { congelada, vivo, type EfeitoAtivo, type Entidade } from '../entities/entidade';
@@ -187,6 +196,8 @@ export function aplicarEfeito(
   if (imuneAoEstado(ctx, alvo, ef.tipo)) return;
   const def = REGISTRO_EFEITOS[ef.tipo];
   const tick = estado.tick;
+  // Marco 24 (D-095): a sintonia do suporte do Aventureiro reforça os escudos recebidos.
+  ef = escudoComFalcao(ctx, alvo, ef, tick);
   if (ef.tipo === 'aparando') ef = { ...ef, duracaoMs: Math.min(ef.duracaoMs, ctx.balance.tatica.aparoJanelaMaxMs) };
   if (ef.tipo === 'veu_noturno') ef = { ...ef, duracaoMs: Math.min(ef.duracaoMs, ctx.balance.tatica.veuJanelaMaxMs) };
   if (alvo.bolsa && (def.bloqueiaMovimento || def.bloqueiaAcoes !== 'nenhuma')) {
@@ -197,7 +208,8 @@ export function aplicarEfeito(
   if (alvo.bolsa && !def.positivo && ef.duracaoMs > 0) {
     const passivas = passivasDaBolsa(ctx, alvo.bolsa);
     if (passivas.some((p) => p.imunes?.includes(ef.tipo))) return;
-    const pct = passivas.reduce((s, p) => s + (p.duracaoRecebidaPct?.[ef.tipo] ?? 0), 0);
+    // Marco 24 (D-096): e a ressonância Resiliente encurta todos.
+    const pct = passivas.reduce((s, p) => s + (p.duracaoRecebidaPct?.[ef.tipo] ?? 0), 0) - passivosDe(ctx, alvo).negativosMenosPct;
     if (pct !== 0) ef = { ...ef, duracaoMs: Math.max(0, Math.round(ef.duracaoMs * (1 + pct / 100))) };
   }
   // Marco 18 (ressonância Muralha): escudos recebidos duram e absorvem mais.
@@ -235,7 +247,8 @@ export function aplicarEfeito(
         break;
       case 'empurrao':
         // Marco 18: quem é inamovível (ressonância, grevas, escudo Último) não sai do lugar.
-        if (!passivosDe(ctx, alvo).inamovivel) {
+        // Marco 24 (D-095): nem quem a sintonia deixa inamovível.
+        if (!passivosDe(ctx, alvo).inamovivel && !inamovivelPelaSintoniaAgora(estado, ctx, alvo)) {
           const dx = Math.sign(alvo.x - origem.x), dy = Math.sign(alvo.y - origem.y);
           empurrar(estado, ctx, alvo, origem, ef.valor);
           if ((dx || dy) && muralhaEm(estado, alvo.x + dx, alvo.y + dy)) {
@@ -245,7 +258,7 @@ export function aplicarEfeito(
         }
         break;
       case 'puxao':
-        if (!passivosDe(ctx, alvo).inamovivel && puxar(estado, ctx, alvo, origem, ef.valor)) { const ator = buscarEntidade(estado, origem.id); if (ator) fato(ator, 'puxou', alvo.id, origem.acaoId); }
+        if (!passivosDe(ctx, alvo).inamovivel && !inamovivelPelaSintoniaAgora(estado, ctx, alvo) && puxar(estado, ctx, alvo, origem, ef.valor)) { const ator = buscarEntidade(estado, origem.id); if (ator) fato(ator, 'puxou', alvo.id, origem.acaoId); }
         break;
       case 'trocar': {
         const outro = buscarEntidade(estado, origem.id);

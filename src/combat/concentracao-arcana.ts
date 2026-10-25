@@ -4,6 +4,7 @@ import { ticksDe } from '../core/tempo';
 import { vivo, type Entidade } from '../entities/entidade';
 import type { Habilidade } from './habilidades';
 import { podeFerir } from '../modos/relacao';
+import { concentracaoExtra } from './encarnacao-efeitos';
 
 function elegivel(ator: Entidade, alvo: Entidade, hab: Habilidade, ctx: ContextoSimulacao): boolean {
   return (ator.bolsa?.classeId ?? ator.classeId) === 'mago' && !ator.invocacao && hab.id === 'dardo_arcano'
@@ -32,5 +33,6 @@ export function registrarDardo(ctx: ContextoSimulacao, ator: Entidade, alvo: Ent
   const continua = anterior && anterior.alvoId === alvo.id && anterior.geracao === alvo.geracao && anterior.abates === alvo.abates
     && tick >= anterior.ultimoTick && tick - anterior.ultimoTick <= ticksDe(r.concentracaoJanelaMs);
   ator.concentracaoArcana = { alvoId: alvo.id, geracao: alvo.geracao, abates: alvo.abates,
-    acertos: Math.min(r.concentracaoAcertos, (continua ? anterior.acertos : 0) + 1), ultimoTick: tick };
+    // Marco 24 (D-095): a sintonia arcana do Mago concentra mais rápido.
+    acertos: Math.min(r.concentracaoAcertos, (continua ? anterior.acertos : 0) + 1 + concentracaoExtra(ctx, ator, tick)), ultimoTick: tick };
 }

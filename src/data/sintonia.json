@@ -228,7 +228,17 @@
         "fogo",
         "gelo"
       ],
-      "texto": "Os atingidos erram 30% dos golpes."
+      "texto": "Os atingidos erram 30% dos golpes.",
+      "efeitos": [
+        {
+          "t": "magiaAplica",
+          "efeito": {
+            "tipo": "cego",
+            "pct": 30,
+            "duracaoMs": 3000
+          }
+        }
+      ]
     },
     {
       "id": "plasma",
@@ -237,7 +247,21 @@
         "fogo",
         "raio"
       ],
-      "texto": "As magias saltam e queimam."
+      "texto": "As magias saltam e queimam.",
+      "efeitos": [
+        {
+          "t": "saltoExtra",
+          "n": 1
+        },
+        {
+          "t": "magiaAplica",
+          "efeito": {
+            "tipo": "queimando",
+            "valor": 2,
+            "duracaoMs": 3000
+          }
+        }
+      ]
     },
     {
       "id": "superconducao",
@@ -246,7 +270,15 @@
         "gelo",
         "raio"
       ],
-      "texto": "Os resfriados conduzem raios em dobro."
+      "texto": "Os resfriados conduzem raios em dobro.",
+      "efeitos": [
+        {
+          "t": "danoContraEstado",
+          "estado": "resfriado",
+          "elemento": "raio",
+          "pct": 50
+        }
+      ]
     },
     {
       "id": "lava",
@@ -255,7 +287,14 @@
         "fogo",
         "terra"
       ],
-      "texto": "As magias deixam chão em chamas."
+      "texto": "As magias deixam chão em chamas.",
+      "efeitos": [
+        {
+          "t": "magiaChao",
+          "valor": 3,
+          "ms": 3000
+        }
+      ]
     },
     {
       "id": "miasma_ardente",
@@ -264,16 +303,55 @@
         "fogo",
         "veneno"
       ],
-      "texto": "Queimadura e veneno juntos, que se espalham ao acabar."
+      "texto": "Queimadura e veneno juntos, que se espalham ao acabar.",
+      "efeitos": [
+        {
+          "t": "magiaAplica",
+          "efeito": {
+            "tipo": "queimando",
+            "valor": 2,
+            "duracaoMs": 3000
+          }
+        },
+        {
+          "t": "magiaAplica",
+          "efeito": {
+            "tipo": "envenenado",
+            "valor": 2,
+            "pct": 50,
+            "duracaoMs": 4000
+          }
+        },
+        {
+          "t": "aoAbaterAplica",
+          "estado": "queimando",
+          "raio": 2
+        },
+        {
+          "t": "aoAbaterAplica",
+          "estado": "envenenado",
+          "raio": 2
+        }
+      ]
     },
     {
       "id": "eclipse",
       "nome": "Eclipse",
       "elementos": [
-        "luz",
+        "sagrado",
         "trevas"
       ],
-      "texto": "Liga a reação Trevas e luz em toda magia."
+      "texto": "Liga a reação Trevas e luz em toda magia.",
+      "efeitos": [
+        {
+          "t": "magiaAplica",
+          "efeito": {
+            "tipo": "consagrado",
+            "valor": 2,
+            "duracaoMs": 4000
+          }
+        }
+      ]
     },
     {
       "id": "permafrost",
@@ -282,7 +360,17 @@
         "gelo",
         "terra"
       ],
-      "texto": "O chão congelado enraíza quem fica 2 s nele."
+      "texto": "O chão congelado enraíza quem fica 2 s nele.",
+      "efeitos": [
+        {
+          "t": "magiaChao",
+          "efeito": {
+            "tipo": "enraizado",
+            "duracaoMs": 1000
+          },
+          "ms": 3000
+        }
+      ]
     },
     {
       "id": "nevoa_gelida",
@@ -291,7 +379,28 @@
         "gelo",
         "veneno"
       ],
-      "texto": "O veneno também resfria, e o envenenado resfriado não recebe cura."
+      "texto": "O veneno também resfria, e o envenenado resfriado não recebe cura.",
+      "efeitos": [
+        {
+          "t": "magiaAplica",
+          "estado": "envenenado",
+          "efeito": {
+            "tipo": "resfriado",
+            "pct": 30,
+            "duracaoMs": 3000
+          }
+        },
+        {
+          "t": "magiaAplica",
+          "estado": "resfriado",
+          "efeito": {
+            "tipo": "envenenado",
+            "valor": 1,
+            "pct": 100,
+            "duracaoMs": 3000
+          }
+        }
+      ]
     },
     {
       "id": "inverno_sombrio",
@@ -300,16 +409,62 @@
         "gelo",
         "trevas"
       ],
-      "texto": "As magias resfriam e definham; quem morre congelado congela os vizinhos."
+      "texto": "As magias resfriam e definham; quem morre congelado congela os vizinhos.",
+      "efeitos": [
+        {
+          "t": "magiaAplica",
+          "efeito": {
+            "tipo": "resfriado",
+            "pct": 30,
+            "duracaoMs": 3000
+          }
+        },
+        {
+          "t": "magiaAplica",
+          "efeito": {
+            "tipo": "definhando",
+            "pct": 20,
+            "duracaoMs": 4000
+          }
+        },
+        {
+          "t": "aoAbaterAplica",
+          "estado": "congelado",
+          "raio": 1,
+          "efeito": {
+            "tipo": "congelado",
+            "duracaoMs": 1000
+          }
+        }
+      ]
     },
     {
       "id": "aurora",
       "nome": "Aurora",
       "elementos": [
         "gelo",
-        "luz"
+        "sagrado"
       ],
-      "texto": "As magias resfriam os hostis e dão 3 de escudo aos aliados a até 2 células."
+      "texto": "As magias resfriam os hostis e dão 3 de escudo aos aliados a até 2 células.",
+      "efeitos": [
+        {
+          "t": "magiaAplica",
+          "efeito": {
+            "tipo": "resfriado",
+            "pct": 30,
+            "duracaoMs": 3000
+          }
+        },
+        {
+          "t": "magiaAliados",
+          "raio": 2,
+          "efeito": {
+            "tipo": "escudo",
+            "valor": 3,
+            "duracaoMs": 4000
+          }
+        }
+      ]
     },
     {
       "id": "magnetita",
@@ -318,7 +473,15 @@
         "raio",
         "terra"
       ],
-      "texto": "As magias puxam 1 célula, em direção ao alvo, os eletrizados próximos."
+      "texto": "As magias puxam 1 célula, em direção ao alvo, os eletrizados próximos.",
+      "efeitos": [
+        {
+          "t": "magiaPuxa",
+          "estado": "eletrizado",
+          "raio": 2,
+          "valor": 1
+        }
+      ]
     },
     {
       "id": "neurotoxina",
@@ -327,7 +490,26 @@
         "raio",
         "veneno"
       ],
-      "texto": "O envenenado eletrizado fica atordoado por 0,3 s a cada pulso, no máximo uma vez a cada 2 s."
+      "texto": "O envenenado eletrizado fica atordoado por 0,3 s a cada pulso, no máximo uma vez a cada 2 s.",
+      "efeitos": [
+        {
+          "t": "magiaAplica",
+          "estado": "envenenado",
+          "efeito": {
+            "tipo": "eletrizado",
+            "duracaoMs": 2000
+          }
+        },
+        {
+          "t": "magiaAplica",
+          "estado": "eletrizado",
+          "efeito": {
+            "tipo": "atordoar",
+            "duracaoMs": 300
+          },
+          "ms": 2000
+        }
+      ]
     },
     {
       "id": "relampago_negro",
@@ -336,16 +518,47 @@
         "raio",
         "trevas"
       ],
-      "texto": "Os raios saltam entre os que estão definhando e drenam 5% do dano em vida."
+      "texto": "Os raios saltam entre os que estão definhando e drenam 5% do dano em vida.",
+      "efeitos": [
+        {
+          "t": "rouboDeVida",
+          "pct": 5,
+          "elemento": "raio"
+        },
+        {
+          "t": "saltoExtra",
+          "n": 1
+        }
+      ]
     },
     {
       "id": "fulgor",
       "nome": "Fulgor",
       "elementos": [
         "raio",
-        "luz"
+        "sagrado"
       ],
-      "texto": "Os raios cegam (30% de erro) e curam os aliados que atravessam."
+      "texto": "Os raios cegam (30% de erro) e curam os aliados que atravessam.",
+      "efeitos": [
+        {
+          "t": "magiaAplica",
+          "elemento": "raio",
+          "efeito": {
+            "tipo": "cego",
+            "pct": 30,
+            "duracaoMs": 3000
+          }
+        },
+        {
+          "t": "magiaAliados",
+          "raio": 2,
+          "elemento": "raio",
+          "efeito": {
+            "tipo": "cura",
+            "valor": 4
+          }
+        }
+      ]
     },
     {
       "id": "chama_negra",
@@ -354,16 +567,39 @@
         "fogo",
         "trevas"
       ],
-      "texto": "A queimadura impede a cura do alvo."
+      "texto": "A queimadura impede a cura do alvo.",
+      "efeitos": [
+        {
+          "t": "magiaAplica",
+          "estado": "queimando",
+          "efeito": {
+            "tipo": "envenenado",
+            "valor": 1,
+            "pct": 100,
+            "duracaoMs": 3000
+          }
+        }
+      ]
     },
     {
       "id": "chama_sagrada",
       "nome": "Chama sagrada",
       "elementos": [
         "fogo",
-        "luz"
+        "sagrado"
       ],
-      "texto": "A queimadura consagra: quem acerta o alvo se cura."
+      "texto": "A queimadura consagra: quem acerta o alvo se cura.",
+      "efeitos": [
+        {
+          "t": "magiaAplica",
+          "estado": "queimando",
+          "efeito": {
+            "tipo": "consagrado",
+            "valor": 2,
+            "duracaoMs": 4000
+          }
+        }
+      ]
     },
     {
       "id": "lodo_toxico",
@@ -372,7 +608,27 @@
         "terra",
         "veneno"
       ],
-      "texto": "As magias deixam lama envenenada que atola."
+      "texto": "As magias deixam lama envenenada que atola.",
+      "efeitos": [
+        {
+          "t": "magiaChao",
+          "efeito": {
+            "tipo": "atolado",
+            "pct": 40,
+            "duracaoMs": 2000
+          },
+          "ms": 3000
+        },
+        {
+          "t": "magiaAplica",
+          "efeito": {
+            "tipo": "envenenado",
+            "valor": 1,
+            "pct": 50,
+            "duracaoMs": 3000
+          }
+        }
+      ]
     },
     {
       "id": "tumulo",
@@ -381,16 +637,38 @@
         "terra",
         "trevas"
       ],
-      "texto": "O hostil abatido vira estacas de osso que enraízam os vizinhos."
+      "texto": "O hostil abatido vira estacas de osso que enraízam os vizinhos.",
+      "efeitos": [
+        {
+          "t": "aoAbaterAplica",
+          "raio": 1,
+          "efeito": {
+            "tipo": "enraizado",
+            "duracaoMs": 1000
+          }
+        }
+      ]
     },
     {
       "id": "santuario_de_pedra",
       "nome": "Santuário de pedra",
       "elementos": [
         "terra",
-        "luz"
+        "sagrado"
       ],
-      "texto": "Cada magia dá 2 de escudo aos aliados perto (até 10)."
+      "texto": "Cada magia dá 2 de escudo aos aliados perto (até 10).",
+      "efeitos": [
+        {
+          "t": "magiaAliados",
+          "raio": 2,
+          "efeito": {
+            "tipo": "escudo_acumulado",
+            "valor": 2,
+            "pct": 10,
+            "duracaoMs": 5000
+          }
+        }
+      ]
     },
     {
       "id": "pestilencia",
@@ -399,16 +677,746 @@
         "veneno",
         "trevas"
       ],
-      "texto": "Quando o alvo morre, o veneno pula para quem estiver a até 2 células."
+      "texto": "Quando o alvo morre, o veneno pula para quem estiver a até 2 células.",
+      "efeitos": [
+        {
+          "t": "aoAbaterAplica",
+          "estado": "envenenado",
+          "raio": 2
+        }
+      ]
     },
     {
       "id": "purgacao",
       "nome": "Purgação",
       "elementos": [
         "veneno",
-        "luz"
+        "sagrado"
       ],
-      "texto": "As magias envenenam os hostis e tiram 1 efeito negativo dos aliados atingidos."
+      "texto": "As magias envenenam os hostis e tiram 1 efeito negativo dos aliados atingidos.",
+      "efeitos": [
+        {
+          "t": "magiaAplica",
+          "efeito": {
+            "tipo": "envenenado",
+            "valor": 2,
+            "pct": 50,
+            "duracaoMs": 4000
+          }
+        },
+        {
+          "t": "magiaAliados",
+          "raio": 2,
+          "efeito": {
+            "tipo": "purificar"
+          }
+        }
+      ]
     }
-  ]
+  ],
+  "mecanicas": {
+    "classes": {
+      "guerreiro": {
+        "tecnica": [
+          {
+            "t": "furiaPorGeral",
+            "familia": "tecnica",
+            "valor": 12,
+            "dobra": true
+          }
+        ],
+        "arcana": [
+          {
+            "t": "auraRaio",
+            "valor": 1,
+            "dobra": true
+          }
+        ],
+        "suporte": [
+          {
+            "t": "curaGeralNoFrenesi",
+            "pct": 100,
+            "quando": "frenesi",
+            "dobra": true
+          }
+        ],
+        "fogo": [
+          {
+            "t": "auraAplica",
+            "efeito": {
+              "tipo": "queimando",
+              "valor": 2,
+              "duracaoMs": 2000
+            },
+            "dobra": true
+          }
+        ],
+        "veneno": [
+          {
+            "t": "grupoContaEstado",
+            "estado": "envenenado",
+            "n": 2,
+            "quando": "foraDoFrenesi"
+          }
+        ],
+        "terra": [
+          {
+            "t": "inamovivel",
+            "quando": "frenesi"
+          }
+        ],
+        "sombra": [
+          {
+            "t": "costasAoEncherFuria"
+          }
+        ],
+        "sagrado": [
+          {
+            "t": "auraCuraAliados",
+            "raio": 2,
+            "pct": 25,
+            "dobra": true
+          }
+        ],
+        "psiquico": [
+          {
+            "t": "auraAplica",
+            "efeito": {
+              "tipo": "sem_ataque",
+              "duracaoMs": 500
+            },
+            "quando": "frenesi"
+          }
+        ]
+      },
+      "arqueiro": {
+        "tecnica": [
+          {
+            "t": "miraPorGeral",
+            "familia": "tecnica",
+            "pct": 25,
+            "dobra": true
+          }
+        ],
+        "arcana": [
+          {
+            "t": "tiroCheioMagico"
+          },
+          {
+            "t": "tiroCheioRicochete",
+            "n": 1,
+            "raio": 4,
+            "dobra": true
+          }
+        ],
+        "suporte": [
+          {
+            "t": "miraEscudoProtege"
+          }
+        ],
+        "fogo": [
+          {
+            "t": "tiroCheioRastro",
+            "valor": 3,
+            "ms": 3000,
+            "dobra": true
+          }
+        ],
+        "veneno": [
+          {
+            "t": "tiroCheioEspalhaEstado",
+            "estado": "envenenado"
+          }
+        ],
+        "terra": [
+          {
+            "t": "tiroCheioUltimo",
+            "efeito": {
+              "tipo": "empurrao",
+              "valor": 1
+            }
+          },
+          {
+            "t": "tiroCheioUltimo",
+            "efeito": {
+              "tipo": "enraizado",
+              "duracaoMs": 500
+            }
+          }
+        ],
+        "sombra": [
+          {
+            "t": "miraAcelera",
+            "pct": 100,
+            "quando": "invisivel",
+            "dobra": true
+          }
+        ],
+        "sagrado": [
+          {
+            "t": "tiroCheioCuraAliados",
+            "valor": 8,
+            "dobra": true
+          }
+        ],
+        "psiquico": [
+          {
+            "t": "tiroCheioAplica",
+            "efeito": {
+              "tipo": "silenciar",
+              "duracaoMs": 1000
+            }
+          }
+        ]
+      },
+      "necromante": {
+        "tecnica": [
+          {
+            "t": "mortoAplica",
+            "efeito": {
+              "tipo": "sangrando",
+              "valor": 2,
+              "duracaoMs": 3000
+            },
+            "dobra": true
+          }
+        ],
+        "arcana": [
+          {
+            "t": "mortoCaiSeta",
+            "valor": 8,
+            "raio": 5,
+            "dobra": true
+          }
+        ],
+        "suporte": [
+          {
+            "t": "curaGeralNosMortos",
+            "n": 2,
+            "dobra": true
+          }
+        ],
+        "fogo": [
+          {
+            "t": "mortoCaiExplode",
+            "valor": 6,
+            "raio": 1,
+            "efeito": {
+              "tipo": "queimando",
+              "valor": 2,
+              "duracaoMs": 3000
+            },
+            "dobra": true
+          }
+        ],
+        "veneno": [
+          {
+            "t": "mortoAplica",
+            "efeito": {
+              "tipo": "envenenado",
+              "valor": 2,
+              "pct": 50,
+              "duracaoMs": 4000
+            },
+            "dobra": true
+          }
+        ],
+        "terra": [
+          {
+            "t": "mortoVida",
+            "pct": 20,
+            "dobra": true
+          },
+          {
+            "t": "mortoInamovivel"
+          }
+        ],
+        "sombra": [
+          {
+            "t": "mortoEsquiva",
+            "pct": 20,
+            "dobra": true
+          }
+        ],
+        "sagrado": [
+          {
+            "t": "mortoCaiCura",
+            "valor": 6,
+            "raio": 2,
+            "dobra": true
+          }
+        ],
+        "psiquico": [
+          {
+            "t": "mortoAterroriza",
+            "n": 3,
+            "ms": 3000,
+            "efeito": {
+              "tipo": "aterrorizado",
+              "duracaoMs": 1000
+            }
+          }
+        ]
+      },
+      "mago": {
+        "fogo": [
+          {
+            "t": "encarnar",
+            "elemento": "fogo"
+          }
+        ],
+        "terra": [
+          {
+            "t": "encarnar",
+            "elemento": "terra"
+          }
+        ],
+        "veneno": [
+          {
+            "t": "encarnar",
+            "elemento": "veneno"
+          }
+        ],
+        "sombra": [
+          {
+            "t": "encarnar",
+            "elemento": "trevas"
+          }
+        ],
+        "sagrado": [
+          {
+            "t": "encarnar",
+            "elemento": "sagrado"
+          }
+        ],
+        "psiquico": [
+          {
+            "t": "encarnacaoEstende",
+            "familia": "psiquico",
+            "ms": 4000,
+            "dobra": true
+          }
+        ],
+        "arcana": [
+          {
+            "t": "encarnacaoRenova",
+            "habilidade": "seta_arcana"
+          },
+          {
+            "t": "encarnacaoRenova",
+            "habilidade": "explosao"
+          },
+          {
+            "t": "dardoConcentra",
+            "valor": 1,
+            "dobra": true
+          }
+        ],
+        "tecnica": [
+          {
+            "t": "encarnacaoRenova",
+            "habilidade": "fisico",
+            "ms": 2000,
+            "dobra": true
+          }
+        ],
+        "suporte": [
+          {
+            "t": "suporteHerdaEncarnacao"
+          }
+        ]
+      },
+      "aventureiro": {
+        "tecnica": [
+          {
+            "t": "falcaoGolpeiaComGeral",
+            "familia": "tecnica",
+            "pct": 40,
+            "dobra": true
+          }
+        ],
+        "arcana": [
+          {
+            "t": "falcaoGolpeiaComGeral",
+            "habilidade": "seta_arcana",
+            "pct": 30,
+            "dobra": true
+          },
+          {
+            "t": "falcaoGolpeiaComGeral",
+            "habilidade": "explosao",
+            "pct": 30,
+            "dobra": true
+          }
+        ],
+        "suporte": [
+          {
+            "t": "escudoNoFalcao",
+            "pct": 25,
+            "dobra": true
+          }
+        ],
+        "fogo": [
+          {
+            "t": "habilidadeAplica",
+            "habilidade": "mergulho",
+            "efeito": {
+              "tipo": "queimando",
+              "valor": 3,
+              "duracaoMs": 3000
+            },
+            "dobra": true
+          }
+        ],
+        "veneno": [
+          {
+            "t": "habilidadeAplica",
+            "habilidade": "garras_cegantes",
+            "efeito": {
+              "tipo": "envenenado",
+              "valor": 2,
+              "pct": 50,
+              "duracaoMs": 4000
+            },
+            "dobra": true
+          },
+          {
+            "t": "habilidadeAplica",
+            "habilidade": "presa_dupla",
+            "efeito": {
+              "tipo": "envenenado",
+              "valor": 2,
+              "pct": 50,
+              "duracaoMs": 4000
+            },
+            "dobra": true
+          }
+        ],
+        "terra": [
+          {
+            "t": "habilidadeAplica",
+            "habilidade": "mergulho",
+            "raio": 1,
+            "efeito": {
+              "tipo": "atordoar",
+              "duracaoMs": 500
+            }
+          }
+        ],
+        "sombra": [
+          {
+            "t": "falcaoCritico",
+            "valor": 16,
+            "ms": 4000
+          }
+        ],
+        "sagrado": [
+          {
+            "t": "habilidadeCuraAliados",
+            "habilidade": "retorno_ao_punho",
+            "raio": 2,
+            "pct": 100
+          }
+        ],
+        "psiquico": [
+          {
+            "t": "habilidadeAplica",
+            "habilidade": "grito_do_falcao",
+            "efeito": {
+              "tipo": "silenciar",
+              "duracaoMs": 500
+            }
+          }
+        ]
+      }
+    },
+    "vertentes": {
+      "paladino": [
+        {
+          "t": "auraCuraAliados",
+          "raio": 2,
+          "pct": 100,
+          "quando": "frenesi"
+        }
+      ],
+      "berserker": [
+        {
+          "t": "auraAplica",
+          "efeito": {
+            "tipo": "queimando",
+            "valor": 3,
+            "duracaoMs": 2000
+          },
+          "quando": "frenesi"
+        },
+        {
+          "t": "frenesiPorEstadoPerto",
+          "estado": "queimando",
+          "ms": 500,
+          "valor": 3000,
+          "quando": "frenesi"
+        }
+      ],
+      "carcereiro": [
+        {
+          "t": "desafiadoEnraiza",
+          "raio": 1,
+          "efeito": {
+            "tipo": "enraizado",
+            "duracaoMs": 500
+          }
+        }
+      ],
+      "cacador_noturno": [
+        {
+          "t": "tiroCheioInvisivel",
+          "estado": "envenenado",
+          "pct": 100
+        }
+      ],
+      "atirador_de_elite": [
+        {
+          "t": "tiroCheioRicochete",
+          "n": 2,
+          "raio": 4,
+          "pct": 15
+        }
+      ],
+      "lich": [
+        {
+          "t": "mortoAtira",
+          "habilidade": "dardo_arcano",
+          "raio": 4
+        }
+      ],
+      "senhor_da_praga": [
+        {
+          "t": "mortoAplica",
+          "efeito": {
+            "tipo": "envenenado",
+            "valor": 1,
+            "pct": 50,
+            "duracaoMs": 3000
+          },
+          "raio": 1
+        },
+        {
+          "t": "estadoDobraEm",
+          "estado": "envenenado",
+          "habilidade": "aterrorizado"
+        }
+      ],
+      "pastor_das_almas": [
+        {
+          "t": "mortoCaiCura",
+          "valor": 10,
+          "raio": 3
+        },
+        {
+          "t": "retornoDoServo",
+          "ms": 4000
+        }
+      ],
+      "alquimista": [
+        {
+          "t": "duplaFixa",
+          "habilidade": "miasma_ardente"
+        }
+      ],
+      "arquimago": [
+        {
+          "t": "encarnacaoDuracao",
+          "pct": 100
+        },
+        {
+          "t": "contaComoElemento",
+          "habilidade": "seta_arcana"
+        },
+        {
+          "t": "contaComoElemento",
+          "habilidade": "agulha_mental"
+        }
+      ],
+      "geomante": [
+        {
+          "t": "duplaDuracao",
+          "habilidade": "lava",
+          "pct": 100
+        },
+        {
+          "t": "magiaChao",
+          "habilidade": "lava",
+          "efeito": {
+            "tipo": "enraizado",
+            "duracaoMs": 500
+          },
+          "ms": 3000
+        }
+      ],
+      "druida": [
+        {
+          "t": "falcaoGuardiao",
+          "ms": 4000
+        }
+      ],
+      "rapina": [
+        {
+          "t": "falcaoGolpeiaComGeral",
+          "familia": "tecnica",
+          "pct": 100,
+          "ms": 4000
+        }
+      ],
+      "tempestuoso": [
+        {
+          "t": "falcaoGolpeiaComGeral",
+          "habilidade": "magico",
+          "pct": 50,
+          "efeito": {
+            "tipo": "silenciar",
+            "duracaoMs": 500
+          }
+        }
+      ],
+      "sentinela": [
+        {
+          "t": "escudoParadoComMira",
+          "raio": 2,
+          "ms": 1000,
+          "efeito": {
+            "tipo": "escudo_acumulado",
+            "valor": 4,
+            "pct": 12,
+            "duracaoMs": 2000
+          },
+          "quando": "parado"
+        }
+      ]
+    },
+    "encarnacoes": {
+      "fogo": [
+        {
+          "t": "herancaSuporte",
+          "efeito": {
+            "tipo": "queimando",
+            "valor": 2,
+            "duracaoMs": 2000
+          },
+          "raio": 1
+        }
+      ],
+      "gelo": [
+        {
+          "t": "herancaSuporte",
+          "efeito": {
+            "tipo": "resfriado",
+            "pct": 30,
+            "duracaoMs": 2000
+          },
+          "raio": 1
+        }
+      ],
+      "raio": [
+        {
+          "t": "herancaSuporte",
+          "efeito": {
+            "tipo": "eletrizado",
+            "duracaoMs": 2000
+          },
+          "raio": 1
+        }
+      ],
+      "terra": [
+        {
+          "t": "inamovivel"
+        },
+        {
+          "t": "raioArea",
+          "valor": 1
+        },
+        {
+          "t": "herancaSuporte",
+          "efeito": {
+            "tipo": "escudo",
+            "valor": 4,
+            "duracaoMs": 4000
+          },
+          "raio": 0
+        }
+      ],
+      "veneno": [
+        {
+          "t": "magiaAplica",
+          "efeito": {
+            "tipo": "envenenado",
+            "valor": 1,
+            "pct": 50,
+            "duracaoMs": 3000
+          }
+        },
+        {
+          "t": "auraAplica",
+          "raio": 1,
+          "efeito": {
+            "tipo": "envenenado",
+            "valor": 1,
+            "pct": 50,
+            "duracaoMs": 2000
+          }
+        },
+        {
+          "t": "herancaSuporte",
+          "efeito": {
+            "tipo": "envenenado",
+            "valor": 1,
+            "pct": 50,
+            "duracaoMs": 3000
+          },
+          "raio": 1
+        }
+      ],
+      "trevas": [
+        {
+          "t": "rouboDeVida",
+          "pct": 5
+        },
+        {
+          "t": "herancaSuporte",
+          "efeito": {
+            "tipo": "definhando",
+            "pct": 20,
+            "duracaoMs": 3000
+          },
+          "raio": 1
+        }
+      ],
+      "sagrado": [
+        {
+          "t": "magiaAplica",
+          "efeito": {
+            "tipo": "consagrado",
+            "valor": 2,
+            "duracaoMs": 4000
+          }
+        },
+        {
+          "t": "auraAliados",
+          "raio": 2,
+          "efeito": {
+            "tipo": "cura",
+            "valor": 1
+          }
+        },
+        {
+          "t": "herancaSuporte",
+          "efeito": {
+            "tipo": "cura_periodica",
+            "valor": 2,
+            "duracaoMs": 4000
+          },
+          "raio": 0
+        }
+      ]
+    }
+  }
 }

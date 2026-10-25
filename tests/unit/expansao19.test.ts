@@ -200,6 +200,8 @@ describe('passivas e limites da expansão', () => {
         const c = cena();
         obter(c.j.bolsa).conhecidas.push({ id: 'fluxo_restaurador', rank: 1, caminhos: [] });
         obter(c.j.bolsa).passivasAtivas = ['fluxo_restaurador'];
+        // Marco 24 (D-095): sem gerais de tecla (a sintonia do suporte do Aventureiro reforçaria o escudo).
+        obter(c.j.bolsa).barra.fill(null, 2);
         aplicarEfeito(c.estado, c.ctx, c.j, construirEfeito('cura', { valor: 100 }), c.j, c.j, c.eventos);
         expect(c.j.efeitos.some((e) => e.tipo === 'escudo')).toBe(false);
         c.j.hp -= 100;

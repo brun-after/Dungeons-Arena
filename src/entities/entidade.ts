@@ -311,14 +311,27 @@ export interface Entidade {
   /** Marco 23 (D-092): a afinidade elemental do inimigo (absorve o elemento, fraco ao oposto). */
   afinidade?: Afinidade;
   /** Marco 22 (D-089): o elemento que o Mago encarna (fogo, gelo ou raio). */
-  encarnacao?: 'fogo' | 'gelo' | 'raio';
+  encarnacao?: 'fogo' | 'gelo' | 'raio' | 'terra' | 'veneno' | 'trevas' | 'sagrado';
+  /** Marco 24 (D-095): o tick da última magia do elemento (a janela da dupla) e a encarnação dupla (id) até quando. */
+  encarnacaoUltimoTick?: number;
+  encarnacaoDupla?: string;
+  encarnacaoDuplaAteTick?: number;
   /** Ajuste de 24/10/2026 (D-091): até quando a encarnação vale (renova ao lançar outra magia do elemento). */
   encarnacaoAteTick?: number;
   /** Marco 22 (D-089): Mira firme do Arqueiro — a barra enche a partir deste tick (dano recebido ou tiro carregado zeram). */
   mira?: { desdeTick: number };
   /** Marco 21 (D-088): fúria do Guerreiro, valor no `ultimoTick` (o esvaziamento é calculado na leitura). */
   /** Marco 24 (D-094): `frenesiAteTick`, o fim do Frenesi (a barra fica cheia até lá e zera no fim). */
-  furia?: { valor: number; ultimoTick: number; frenesiAteTick?: number };
+  /** Marco 24 (D-095): `frenesiExtraTicks`, quanto o Frenesi já foi prolongado (Berserker, até o teto). */
+  furia?: { valor: number; ultimoTick: number; frenesiAteTick?: number; frenesiExtraTicks?: number };
+  /** Marco 24 (D-095): a sintonia da sombra do Guerreiro deixou o próximo golpe como pelas costas. */
+  costasGarantidas?: boolean;
+  /** Marco 24 (D-096): a skill lançada antes da última (as sinergias de sequência, como a Avalanche humana). */
+  habilidadeAnterior?: { id: string; tick: number };
+  /** Marco 24 (D-096): a próxima skill de classe não gasta mana (ressonância Eco ancestral). */
+  classeSemMana?: boolean;
+  /** Marco 24 (D-095): marcas da sintonia por alvo (`id/geração` para tick), como o desafio que já enraizou (Carcereiro). */
+  sintoniaVistos?: Record<string, number>;
   /** Marco 24 (24/10/2026, D-097): para onde olha (último passo ou quem ataca); ausente = sul. Decide o "pelas costas". */
   olhando?: Dir8;
   /** Marco 24 (D-094): o medidor da ultimate (0..balance.ultimate.max); ausente = vazio. */
@@ -504,6 +517,8 @@ export function clonarEntidade(e: Entidade): Entidade {
     ...(e.mira ? { mira: { ...e.mira } } : {}),
     ...(e.afinidade ? { afinidade: { ...e.afinidade } } : {}),
     ...(e.cargaClasseTick ? { cargaClasseTick: { ...e.cargaClasseTick } } : {}),
+    ...(e.sintoniaVistos ? { sintoniaVistos: { ...e.sintoniaVistos } } : {}),
+    ...(e.habilidadeAnterior ? { habilidadeAnterior: { ...e.habilidadeAnterior } } : {}),
     waypoints: copiarCelulas(e.waypoints),
     caminho: copiarCelulas(e.caminho),
     atributos: { ...e.atributos },

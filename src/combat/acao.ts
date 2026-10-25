@@ -35,6 +35,8 @@ import { lancarProjetil } from './projeteis';
 import { celulaDoCompanheiro } from './companheiro';
 import { encarnar } from './encarnacao';
 import { consumirMira } from './mira';
+import { prepararTiroCheio } from './sintonia-arqueiro';
+import { raioAreaDaEncarnacao } from './encarnacao-efeitos';
 import { quantidadeDeSaltos, saltar } from './saltos';
 import { dispararGanchosDe, passivosDe } from '../progression/ganchos-do-portador';
 import { comCombo, fazerCombo } from './combos';
@@ -187,7 +189,9 @@ export function iniciarAcao(
   if (acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) return recusar('bloqueado');
   if (recargaRestante(estado, ator.id, hab.id) > 0) return recusar('recarga');
   const perfil = perfilPara(ctx, ator, hab);
-  const custoMana = Math.max(0, Math.round(hab.custoRecurso * (1 + perfil.custoPct / 100)));
+  // Marco 24 (D-096): a ressonância Eco ancestral deixa a próxima skill de classe sem custo de mana.
+  const semMana = !!ator.classeSemMana && !!ctx.conteudo.classes.get(ator.bolsa?.classeId ?? ator.classeId ?? '')?.exclusivas.includes(hab.id);
+  const custoMana = semMana ? 0 : Math.max(0, Math.round(hab.custoRecurso * (1 + perfil.custoPct / 100)));
   const custoVida = Math.max(0, Math.round(hab.custoVida * (1 + perfil.custoPct / 100)));
   // Custo em vida (marco 14): nunca mata quem conjura.
   if (ator.mana < custoMana || (custoVida > 0 && ator.hp <= custoVida)) return recusar('recurso');
@@ -225,6 +229,7 @@ export function iniciarAcao(
   // Conjuração (§2.7, etapa 3): custo e recarga descontados aqui, com recarga monotônica.
   ator.mana -= custoMana;
   ator.hp -= custoVida;
+  if (semMana) delete ator.classeSemMana;
   if (hab.recargaMs > 0) {
     const chave = chaveRecarga(ator.id, hab.id);
     // `ab_recarga` encurta a recarga do ataque básico (até 75%); o perfil, a de qualquer habilidade.
@@ -358,10 +363,12 @@ function lancar(
   }
   if (!daFase) {
     dispararGanchosDe(estado, ctx, ator, 'aoUsarHabilidade', { outro: alvo, hab }, saida);
+    // Marco 24 (D-096): a anterior fica para as sinergias de sequência.
+    if (ator.ultimaHabilidade) ator.habilidadeAnterior = { id: ator.ultimaHabilidade.id, tick: ator.ultimaHabilidade.tick };
     ator.ultimaHabilidade = { id: hab.id, chave: hab.chave, tick: estado.tick, alvoId: alvo?.id ?? null };
     // Marco 22 (D-089): a magia de fogo, gelo ou raio troca a encarnação do Mago.
     if (encarnar(ctx, ator, hab, estado.tick)) {
-      saida.push({ t: 'encarnou', tick: estado.tick, id: ator.id, elemento: ator.encarnacao ?? 'fogo' });
+      saida.push({ t: 'encarnou', tick: estado.tick, id: ator.id, elemento: ator.encarnacao ?? 'fogo', ...(ator.encarnacaoDupla && { dupla: ator.encarnacaoDupla }) });
       // Marco 24 (D-094): trocar de encarnação enche a ultimate (no máximo uma vez a cada 4 s).
       cargaDaClasse(ctx, ator, 'encarnacao', estado.tick, saida);
     }
@@ -388,7 +395,7 @@ function lancar(
         saida.push({ t: 'esquivou', tick: estado.tick, acaoId, atorId: ator.id, alvoId: alvo.id });
         break;
       }
-      const saltos = quantidadeDeSaltos(hab, alvo, estado.tick, ator);
+      const saltos = quantidadeDeSaltos(hab, alvo, estado.tick, ator, ctx);
       aplicarImpacto(estado, ctx, alvo, { ...base, indice: 0 }, saida);
       const atingidos = [alvo.id];
       // `ab_multi_alvo` (§2.8): alvos adicionais no alcance, os mais próximos primeiro.
@@ -408,7 +415,8 @@ function lancar(
       break;
     }
     case 'area': {
-      const atingidos = alvosDaForma(estado, ctx, ator, hab, celulasDaForma(hab, origemDaHabilidade(estado, ator, hab), mira, ctx.fase));
+      // Marco 24 (D-095): o Mago encarnado em terra alcança +1 de raio nas magias de área.
+      const atingidos = alvosDaForma(estado, ctx, ator, hab, celulasDaForma(raioAreaDaEncarnacao(ctx, ator, hab, estado.tick), origemDaHabilidade(estado, ator, hab), mira, ctx.fase));
       const principal = [...atingidos].sort((a, b) => chebyshev(celulaOcupada(a), mira) - chebyshev(celulaOcupada(b), mira) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))[0];
       atingidos.forEach((e, indice) => {
         aplicarImpacto(estado, ctx, e, { ...base, indice, secundario: e !== principal }, saida);
@@ -425,6 +433,12 @@ function lancar(
       }
       const fonteTiro = carregado ? { ...fonte, d20Minimo: Math.max(fonte.d20Minimo ?? 0, ctx.balance.ajustesClasses.arqueiro.mira.d20Minimo) } : fonte;
       lancarProjetil(estado, ator, hab, acaoId, fonteTiro, alvo ? celulaOcupada(alvo) : mira, saida, origemDaHabilidade(estado, ator, hab), carregado ? { alcance } : null);
+      // Marco 24 (D-095): a sintonia do Arqueiro marca o tiro cheio (mágico, ricochetes, invisível).
+      const tiro = estado.projeteis.at(-1);
+      if (carregado && tiro) prepararTiroCheio(ctx, ator, tiro, estado.tick);
+      // Marco 24 (D-096): a ressonância Engenhoso faz o projétil mágico atravessar.
+      const atravessa = hab.tipoAtaque === 'magico' && ator.bolsa ? passivosDe(ctx, ator).atravessaMagico : 0;
+      if (tiro && atravessa > 0) tiro.perfuraExtra = atravessa;
       break;
     }
   }

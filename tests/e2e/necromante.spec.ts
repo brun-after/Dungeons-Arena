@@ -21,6 +21,8 @@ test.beforeAll(async () => {
       const j = criarJogador(conteudo.classes.get('necromante'), 'j1', 5, 5, r.ctx.balance);
       const aliado = criarJogador(conteudo.classes.get('mago'), 'aliado', 6, 5, r.ctx.balance);
       const inimigo = criarInimigo(conteudo.presets.get('goblin'), 'inimigo', 7, 5, r.ctx.balance);
+      // Marco 24 (D-094): as skills de classe dos combos conferidos abaixo (fora do kit inicial).
+      j.bolsa.conhecidas.push({ id: 'garras_do_ossuario', rank: 1, caminhos: [] }, { id: 'comando_sepulcral', rank: 1, caminhos: [] });
       j.hp -= 40; j.autoAtaque = false; aliado.equipe = j.equipe; aliado.hp = 0;
       inimigo.hp = 0; inimigo.participacao = [{ id: j.id, tick: estado.tick }];
       estado.entidades = [j, aliado, inimigo]; estado.objetos = []; estado.armadilhas = [];
@@ -40,7 +42,9 @@ test('Necromante é selecionável ao criar um personagem', async ({ page }) => {
   await expect(cartao).toContainText('Trevas');
   await cartao.getByRole('link', { name: 'Jogar de Necromante' }).click();
   await expect(page.getByTestId('habilidade-dizimo_vital')).toBeVisible({ timeout: 30000 });
-  await expect(page.getByTestId('habilidade-comando_sepulcral')).toBeVisible();
+  // Marco 24 (D-094): o kit inicial é Dardo funesto e Dízimo vital (classe) e a Barreira (geral).
+  await expect(page.getByTestId('habilidade-dardo_funesto')).toBeVisible();
+  await expect(page.getByTestId('habilidade-barreira')).toBeVisible();
 });
 
 test('passiva, reanimado, eco e Dízimo funcionam e persistem no save', async ({ page }, info) => {

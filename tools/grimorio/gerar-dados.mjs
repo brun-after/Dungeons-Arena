@@ -15,7 +15,8 @@ import * as ultMago from './specs/ultimates-mago.mjs';
 import * as ultArqueiro from './specs/ultimates-arqueiro.mjs';
 import * as ultNecromante from './specs/ultimates-necromante.mjs';
 import * as ultAventureiro from './specs/ultimates-aventureiro.mjs';
-import { INTERNAS as INTERNAS_DOMINIO, varianteDeDominio } from './specs/sintonia.mjs';
+import { SINERGIAS } from './specs/sinergias.mjs';
+import { DUPLAS, ENCARNACOES, INTERNAS as INTERNAS_DOMINIO, MECANICAS, MECANICAS_VERTENTES, varianteDeDominio } from './specs/sintonia.mjs';
 
 const dados = (arq) => join(raiz, 'src', 'data', arq);
 const ler = (arq) => JSON.parse(readFileSync(dados(arq), 'utf8'));
@@ -114,14 +115,16 @@ escrever('ultimates.json', {
 
 // ---------------- sintonia.json ----------------
 // Marco 24 (D-095): as regras, as marcas de Domínio, a sintonia de cada classe por família, as vertentes e as
-// encarnações duplas, com os textos do Grimório. A mecânica de cada uma fica no código que a consulta (sintonia.ts).
+// encarnações duplas, com os textos do Grimório; a mecânica de cada uma vem de specs/sintonia.mjs (MECANICAS).
 const s = D.sintonia;
 escrever('sintonia.json', {
   versao: 1,
   dominios: s.dominio,
   classes: s.classes,
   vertentes: Object.entries(s.vertentes).flatMap(([classe, l]) => l.map(([nome, a, b, texto]) => ({ id: slug(nome), nome, classe, familias: [a, b], texto }))),
-  encarnacoesDuplas: s.encarnacaoDupla.map(([nome, a, b, texto]) => ({ id: slug(nome), nome, elementos: [a, b], texto })),
+  // A luz do Grimório é o elemento `sagrado` do jogo.
+  encarnacoesDuplas: s.encarnacaoDupla.map(([nome, a, b, texto]) => ({ id: slug(nome), nome, elementos: [a, b].map((x) => (x === 'luz' ? 'sagrado' : x)), texto, efeitos: DUPLAS[slug(nome)] })),
+  mecanicas: { classes: MECANICAS, vertentes: MECANICAS_VERTENTES, encarnacoes: ENCARNACOES },
 });
 
 // ---------------- classes.json ----------------
@@ -196,6 +199,18 @@ for (const c of combos) {
   ids.add(c.id);
 }
 escrever('combos.json', { versao: 3, combos, recompensas: combosAntes.recompensas });
+
+// ---------------- sinergias.json ----------------
+// Marco 24 (D-096): as 4 sinergias passivas (a primeira da sequência do Grimório é a passiva geral).
+escrever('sinergias.json', {
+  versao: 1,
+  sinergias: D.combos.filter((g) => g.tipo === 'sinergia').map((g) => {
+    const m = SINERGIAS[g.nome];
+    if (!m) throw new Error(`sinergia sem mecânica nas specs: ${g.nome}`);
+    const [passiva, ...sequencia] = g.seq.map(idCodigo);
+    return { id: slug(g.nome), nome: g.nome, texto: g.texto, passiva, sequencia, ...m };
+  }),
+});
 
 // ---------------- livros (itens.json) ----------------
 const itensAntes = ler('itens.json');

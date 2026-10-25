@@ -7,6 +7,8 @@ import { definicaoDe } from '../combat/compilar-habilidade';
 import type { ContextoSimulacao } from '../core/contexto';
 import { Leitor } from '../core/validar';
 import { SLOTS_CLASSE, type Entidade } from '../entities/entidade';
+import { emFrenesi } from '../combat/furia';
+import { lerEfeitosSintonia, type EfeitoSintonia, type TipoSintonia } from './sintonia-efeitos';
 
 export interface Vertente {
   id: string;
@@ -21,6 +23,8 @@ export interface EncarnacaoDupla {
   nome: string;
   elementos: readonly [string, string];
   texto: string;
+  /** Marco 24 (D-095): o efeito da fusão, no vocabulário da sintonia. */
+  efeitos: readonly EfeitoSintonia[];
 }
 
 export interface RegrasSintonia {
@@ -30,6 +34,11 @@ export interface RegrasSintonia {
   classes: Readonly<Record<string, Readonly<Record<string, string>>>>;
   vertentes: readonly Vertente[];
   encarnacoesDuplas: readonly EncarnacaoDupla[];
+  /** Marco 24 (D-095): a mecânica de cada sintonia (por classe e família) e de cada vertente, no vocabulário fechado. */
+  efeitosDaClasse: Readonly<Record<string, Readonly<Record<string, readonly EfeitoSintonia[]>>>>;
+  efeitosDaVertente: Readonly<Record<string, readonly EfeitoSintonia[]>>;
+  /** O efeito de cada encarnação do Mago (por elemento). */
+  efeitosDaEncarnacao: Readonly<Record<string, readonly EfeitoSintonia[]>>;
 }
 
 export interface Sintonia {
@@ -67,9 +76,21 @@ export function lerSintonia(json: unknown): { sintonia: RegrasSintonia; erros: s
   const encarnacoesDuplas = l.lista(o, 'encarnacoesDuplas').map((b): EncarnacaoDupla => {
     const v = l.objeto(b, 'encarnação dupla');
     const id = l.texto(v, 'id');
-    return { id, nome: l.texto(v, 'nome'), elementos: par(l, l.listaDeTextos(v, 'elementos'), `dupla ${id}`), texto: l.texto(v, 'texto') };
+    return { id, nome: l.texto(v, 'nome'), elementos: par(l, l.listaDeTextos(v, 'elementos'), `dupla ${id}`), texto: l.texto(v, 'texto'), efeitos: lerEfeitosSintonia(l, v.efeitos, `dupla ${id}`) };
   });
-  return { sintonia: { dominios, classes, vertentes, encarnacoesDuplas }, erros: l.erros };
+  const mec = l.objeto(o.mecanicas ?? {}, 'mecanicas');
+  const mecClasses = l.objeto(mec.classes ?? {}, 'mecanicas.classes');
+  const efeitosDaClasse = Object.fromEntries(Object.keys(mecClasses).map((c) => {
+    const m = l.objeto(mecClasses[c], `mecanicas.classes.${c}`);
+    for (const f of Object.keys(m)) if (!familias.has(f)) l.erro(`mecanicas.classes.${c}: família "${f}" desconhecida`);
+    return [c, Object.fromEntries(Object.keys(m).map((f) => [f, lerEfeitosSintonia(l, m[f], `sintonia ${c}/${f}`)]))];
+  }));
+  const mecVertentes = l.objeto(mec.vertentes ?? {}, 'mecanicas.vertentes');
+  for (const id of Object.keys(mecVertentes)) if (!vertentes.some((v) => v.id === id)) l.erro(`mecanicas.vertentes: vertente "${id}" desconhecida`);
+  const efeitosDaVertente = Object.fromEntries(Object.keys(mecVertentes).map((id) => [id, lerEfeitosSintonia(l, mecVertentes[id], `vertente ${id}`)]));
+  const mecEncarnacoes = l.objeto(mec.encarnacoes ?? {}, 'mecanicas.encarnacoes');
+  const efeitosDaEncarnacao = Object.fromEntries(Object.keys(mecEncarnacoes).map((el) => [el, lerEfeitosSintonia(l, mecEncarnacoes[el], `encarnação ${el}`)]));
+  return { sintonia: { dominios, classes, vertentes, encarnacoesDuplas, efeitosDaClasse, efeitosDaVertente, efeitosDaEncarnacao }, erros: l.erros };
 }
 
 /** As gerais de tecla de quem usa: as teclas 3 a 6 da barra (sem bolsa, como na arena, as habilidades da ficha a partir da 3ª). */
@@ -101,4 +122,50 @@ export function sintoniaDe(ctx: Pick<ContextoSimulacao, 'conteudo' | 'balance'>,
 export function forcaDaSintonia(s: Sintonia, familia: string): number {
   const n = s.familias[familia] ?? 0;
   return n === 0 ? 0 : s.dominios.includes(familia) ? 2 : 1;
+}
+
+/** A condição `quando` de uma entrada vale agora? */
+function vale(ef: EfeitoSintonia, e: Entidade, tick: number): boolean {
+  switch (ef.quando) {
+    case 'sempre': return true;
+    case 'frenesi': return emFrenesi(e, tick);
+    case 'foraDoFrenesi': return !emFrenesi(e, tick);
+    case 'invisivel': return e.invisivelAteTick > tick;
+    case 'parado': return e.direcao === 'parado' && e.caminho.length === 0;
+  }
+}
+
+const dobrar = (ef: EfeitoSintonia, forca: number): EfeitoSintonia =>
+  forca > 1 && ef.dobra
+    ? { ...ef, valor: ef.valor * forca, pct: ef.pct * forca, efeito: ef.efeito ? { ...ef.efeito, valor: ef.efeito.valor * forca } : null }
+    : ef;
+
+/**
+ * Marco 24 (24/10/2026, D-095): os efeitos do tipo `t` que valem para `e` agora — os da sintonia de cada família das
+ * gerais de tecla (dobrados pelo Domínio quando a entrada `dobra`) e os da vertente ligada. Invocação não tem sintonia.
+ */
+export function efeitosDeSintonia(ctx: Pick<ContextoSimulacao, 'conteudo' | 'balance'>, e: Entidade, t: TipoSintonia, tick: number): EfeitoSintonia[] {
+  if (e.invocacao) return [];
+  const classe = e.bolsa?.classeId ?? e.classeId ?? '';
+  const regras = ctx.conteudo.sintonia;
+  const daClasse = regras.efeitosDaClasse[classe];
+  if (!daClasse) return [];
+  const s = sintoniaDe(ctx, e);
+  const saida: EfeitoSintonia[] = [];
+  for (const familia of Object.keys(s.familias)) {
+    const forca = forcaDaSintonia(s, familia);
+    for (const ef of daClasse[familia] ?? []) if (ef.t === t && vale(ef, e, tick)) saida.push(dobrar(ef, forca));
+  }
+  if (s.vertente) for (const ef of regras.efeitosDaVertente[s.vertente.id] ?? []) if (ef.t === t && vale(ef, e, tick)) saida.push(ef);
+  return saida;
+}
+
+/** O primeiro efeito do tipo (ou null), para as mecânicas que só ligam ou desligam. */
+export function efeitoDeSintonia(ctx: Pick<ContextoSimulacao, 'conteudo' | 'balance'>, e: Entidade, t: TipoSintonia, tick: number): EfeitoSintonia | null {
+  return efeitosDeSintonia(ctx, e, t, tick)[0] ?? null;
+}
+
+/** A soma de um campo nos efeitos do tipo (0 sem nenhum). */
+export function somaDeSintonia(ctx: Pick<ContextoSimulacao, 'conteudo' | 'balance'>, e: Entidade, t: TipoSintonia, campo: 'valor' | 'pct' | 'ms', tick: number): number {
+  return efeitosDeSintonia(ctx, e, t, tick).reduce((soma, ef) => soma + ef[campo], 0);
 }

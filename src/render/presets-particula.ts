@@ -11,8 +11,10 @@ import type { PresetVisual } from '../combat/habilidades';
 // Ajuste de 16/10/2026 (D-067): `flecha` (haste, ponta e penas) e `teia`; a direção `orientada` (para onde o
 // projétil voa) e a `alturaInicial` (a chuva nasce no alto e cai); presets esteira, farpas, chuva e leque.
 import type { ParticulaClima } from '../world/temas';
+import { PRESETS_ELEMENTOS, type NomePresetElemento } from './presets-elementos';
 
-export const TEXTURAS_PARTICULA = ['ponto', 'brilho', 'fumaca', 'anel', 'estrela', 'faisca', 'gota', 'floco', 'runa', 'bolha', 'lasca', 'corte', 'chama', 'flecha', 'teia'] as const;
+// Marco 24 (25/10/2026): `arco` (o raio ramificado, também a rachadura no chão) e `cristal` (o gelo facetado).
+export const TEXTURAS_PARTICULA = ['ponto', 'brilho', 'fumaca', 'anel', 'estrela', 'faisca', 'gota', 'floco', 'runa', 'bolha', 'lasca', 'corte', 'chama', 'flecha', 'teia', 'arco', 'cristal'] as const;
 export type TexturaParticula = (typeof TEXTURAS_PARTICULA)[number];
 
 /** Onde as partículas nascem: no ponto (com `raio` de espalhamento), num anel, ao longo do segmento, num cone, ou em espiral. */
@@ -56,7 +58,7 @@ export interface Emissao {
  * forma do ataque também é partícula — `telegrafo` (o miolo da área enchendo), `borda` (o contorno, na cor de quem
  * ataca), `mira` (a linha do golpe e do projétil), `projetil` (o núcleo que voa) e `chao` (os rastros no chão).
  */
-export type NomePreset = PresetVisual | 'poeira' | 'aura' | 'onda' | 'telegrafo' | 'borda' | 'mira' | 'projetil' | 'chao' | 'projetil_flecha' | 'projetil_teia' | 'aura_forma' | 'trilha_elemental' | 'aura_sutil' | 'esteira_carregada' | NomeClima | 'aura_afinidade' | 'aura_afinidade_extrema';
+export type NomePreset = PresetVisual | 'poeira' | 'aura' | 'onda' | 'telegrafo' | 'borda' | 'mira' | 'projetil' | 'chao' | 'projetil_flecha' | 'projetil_teia' | 'aura_forma' | 'trilha_elemental' | 'aura_sutil' | 'esteira_carregada' | NomeClima | 'aura_afinidade' | 'aura_afinidade_extrema' | NomePresetElemento;
 
 /** Marco 23 (D-092): as partículas do ar de cada tema (render/efeitos-habilidade.ts, perto do jogador). */
 export type NomeClima = `clima_${ParticulaClima}`;
@@ -70,6 +72,8 @@ const COR_FLECHA = 0xeadfc8;
 const anelDeLuz: Emissao = { textura: 'brilho', quantidade: 18, vidaMs: [320, 420], velocidade: [70, 90], direcao: 'fora', gravidade: 0, escala: [0.7, 0.2], alpha: [1, 0], aditivo: true, raio: 10, cor: null, forma: 'anel', arrasto: 0.5 };
 
 export const PRESETS_PARTICULA: Readonly<Record<NomePreset, readonly Emissao[]>> = {
+  // Marco 24 (25/10/2026): os materiais por elemento e estado, a ultimate e o Frenesi (presets-elementos.ts).
+  ...PRESETS_ELEMENTOS,
   faiscas: [faiscas],
   brilho: [brilho],
   fumaca: [fumaca],

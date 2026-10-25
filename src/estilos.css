@@ -160,10 +160,11 @@ body.toque .faixa-controles {
   padding-left: 16px;
 }
 
-/* D-076 (17/10/2026): dobra a folga horizontal para a skill à esquerda da roda: 7,5 para 15 px. */
+/* D-076 (17/10/2026): dobra a folga horizontal para a skill à esquerda da roda: 7,5 para 15 px.
+   Marco 24 (25/10/2026): mais 60 px, para as skills de classe à esquerda da 3 e da 4. */
 .coluna.centro {
   position: absolute;
-  right: calc(191.5px + var(--seguro-dir));
+  right: calc(251.5px + var(--seguro-dir));
   bottom: calc(18px + var(--seguro-base));
   height: 56px;
   flex-direction: row;
@@ -2534,3 +2535,206 @@ body.toque .botao-consumivel {
 .catalogo-combos article { border-top: 1px solid #413949; padding: 5px 0; }
 .catalogo-combos h4, .catalogo-combos p { margin: 4px 0; }
 @media (max-height: 460px) { .indicador-combo { font-size: 10px; padding: 3px 5px; } }
+
+/* Marco 24 (25/10/2026, D-094): no toque, as teclas 1 e 2 (skills de classe) à esquerda da 3 e da 4. */
+body.toque .botao-habilidade.de-classe {
+  transform: translate(-50%, -50%) rotate(var(--angulo)) translate(97px) rotate(calc(var(--angulo) * -1)) translateX(-60px);
+  border-color: var(--destaque);
+}
+
+/* Marco 24 (D-094): no desktop, a barra e a ultimate numa fila centrada embaixo. */
+.fila-barra {
+  position: absolute;
+  left: 50%;
+  bottom: calc(16px + var(--seguro-base));
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  zoom: var(--escala-ui, 1);
+}
+
+.fila-barra .barra-habilidades {
+  position: static;
+  transform: none;
+  zoom: 1;
+}
+
+/* Marco 24 (D-097): Parar ataque, aceso quando o básico automático está desligado. */
+.botao-acao.parar-ataque {
+  width: 48px;
+  height: 48px;
+  font-size: 1.2rem;
+}
+
+.botao-acao.parar-ataque[data-parado='true'] {
+  border-color: #e74c3c;
+  color: #e74c3c;
+}
+
+/* Marco 24 (D-094): botão da ultimate com o anel de carga (conic-gradient pela fração `--carga`). */
+.botao-ultimate {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 60px;
+  height: 60px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid var(--borda);
+  background: rgba(31, 28, 40, 0.9);
+  color: var(--texto-suave);
+  font-size: 1.5rem;
+  touch-action: none;
+  cursor: pointer;
+}
+
+.botao-ultimate .anel-carga {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: conic-gradient(var(--destaque) calc(var(--carga, 0) * 360deg), transparent 0);
+  -webkit-mask: radial-gradient(circle, transparent 62%, #000 64%);
+  mask: radial-gradient(circle, transparent 62%, #000 64%);
+  pointer-events: none;
+}
+
+.botao-ultimate .tecla {
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  font-size: 0.6rem;
+  color: var(--destaque);
+}
+
+.botao-ultimate.cheia {
+  color: var(--destaque);
+  border-color: var(--destaque);
+  box-shadow: 0 0 12px rgba(243, 156, 18, 0.7);
+  animation: ultimate-pronta 1.2s ease-in-out infinite;
+}
+
+.botao-ultimate.sem-par {
+  opacity: 0.45;
+}
+
+/* No toque, a ultimate ocupa o botão grande do canto (o centro da roda). */
+.coluna.direita .botao-ultimate {
+  position: absolute;
+  right: 16px;
+  bottom: 18px;
+  width: 76px;
+  height: 76px;
+  font-size: 2rem;
+}
+
+body.toque .botao-ultimate .tecla {
+  display: none;
+}
+
+@keyframes ultimate-pronta {
+  50% {
+    box-shadow: 0 0 20px rgba(243, 156, 18, 0.95);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .botao-ultimate.cheia {
+    animation: none;
+  }
+}
+
+/* Marco 24 (D-095): painéis da Sintonia e das passivas gerais na aba Habilidades. */
+.painel-sintonia,
+.painel-passivas {
+  margin: 12px 0;
+}
+
+.lista-sintonia,
+.lista-passivas,
+.vertentes-possiveis {
+  list-style: none;
+  margin: 6px 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.lista-sintonia .familia {
+  display: grid;
+  gap: 2px;
+  padding: 6px 8px;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+}
+
+.lista-sintonia .familia.dominio {
+  border-color: var(--destaque);
+}
+
+.marca-dominio,
+.vertente-ativa {
+  color: var(--destaque);
+}
+
+.lista-passivas .passiva {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+}
+
+.lista-passivas .passiva.ligada {
+  border-color: var(--destaque);
+}
+
+/* Marco 24 (25/10/2026, D-094): a cinemática da ultimate — vinheta nas bordas e o nome cruzando o centro. */
+.cinematica-ultimate {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.55) 100%);
+  animation: ultimate-vinheta 1.4s ease-out forwards;
+  z-index: 5;
+}
+
+.cinematica-ultimate strong {
+  font-size: clamp(1.4rem, 4vw, 2.6rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 0 12px var(--cor-ultimate, #fff3c4), 0 0 28px var(--cor-ultimate, #fff3c4);
+  animation: ultimate-nome 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes ultimate-vinheta {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  75% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes ultimate-nome {
+  0% { opacity: 0; transform: translateX(-12%) scale(1.15); }
+  20% { opacity: 1; transform: translateX(0) scale(1); }
+  75% { opacity: 1; transform: translateX(2%) scale(1); }
+  100% { opacity: 0; transform: translateX(10%) scale(0.98); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cinematica-ultimate,
+  .cinematica-ultimate strong {
+    animation: none;
+  }
+}
+
+body.movimento-reduzido .cinematica-ultimate,
+body.movimento-reduzido .cinematica-ultimate strong {
+  animation: none;
+}

@@ -11,6 +11,7 @@
 import { alvoOfensivoValido } from '../combat/acao';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
 import { habilidadeDoAtor } from '../combat/perfil';
+import { falcaoDeGuarda } from '../combat/sintonia-aventureiro';
 import type { Celula } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type EstadoJogo, type ObjetoNoMundo } from '../core/estado';
@@ -94,6 +95,11 @@ export function processarFalcao(estado: EstadoJogo, ctx: ContextoSimulacao, e: E
   const alvoDaAcao = acao?.alvoId ? buscarEntidade(estado, acao.alvoId) : undefined;
   if (hab?.politicaImpacto === 'contato' && alvoDaAcao && alvoDaAcao !== dono && vivo(alvoDaAcao)) {
     irPara(estado, ctx, e, ia, celulaOcupada(alvoDaAcao), saida);
+    return;
+  }
+  // Marco 24 (D-095): na vertente Druida, o falcão guardião fica ao lado do dono.
+  if (hostil && falcaoDeGuarda(ctx, dono, estado.tick)) {
+    passear(estado, ctx, e, ia, celulaOcupada(dono), 1, true, saida);
     return;
   }
   if (hostil) {

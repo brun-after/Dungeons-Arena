@@ -207,7 +207,7 @@ test.describe('desktop', () => {
     await expect.poll(async () => ler(diag, 'celula'), { timeout: 15_000 }).toEqual([x, y]);
   }
 
-  test('loja: comprar uma poção desconta o ouro; fechar arma a recarga; a tecla 5 usa a poção', async ({ page }) => {
+  test('loja: comprar uma poção desconta o ouro; fechar arma a recarga; a tecla 7 usa a poção', async ({ page }) => {
     const { diag, erros } = await abrir(page);
     // 17/10/2026: a loja permanece aberta até o jogador fechar; falhas no clique não podem ser ignoradas.
     const mochila = page.getByRole('dialog', { name: 'Mochila' });
@@ -232,8 +232,8 @@ test.describe('desktop', () => {
     await ouroNaMochila('5');
     await page.keyboard.press('KeyE');
     await expect(log).toContainText('A loja ainda não atende você de novo');
-    // Vida cheia: a poção do atalho 5 é recusada sem gastar (prova que a tecla chegou ao item).
-    await page.keyboard.press('Digit5');
+    // Vida cheia: a poção do atalho 7 (marco 24) é recusada sem gastar (prova que a tecla chegou ao item).
+    await page.keyboard.press('Digit7');
     await expect(log).toContainText('Não teria efeito agora');
     expect(erros).toEqual([]);
   });
@@ -361,7 +361,7 @@ test.describe('desktop', () => {
     expect(erros).toEqual([]);
   });
 
-  test('invocação: um pergaminho na mochila, usado pela tecla 6, chama o lobo espiritual', async ({ page }) => {
+  test('invocação: um pergaminho na mochila, usado pela tecla 8, chama o lobo espiritual', async ({ page }) => {
     const { erros } = await abrir(page);
     await page.getByRole('button', { name: 'Salvar e voltar aos slots' }).click();
     const slot1 = page.locator('[data-slot="1"]');
@@ -377,8 +377,8 @@ test.describe('desktop', () => {
     await expect(page.locator('[data-slot="2"]')).toContainText('Salões da entrada');
     await page.goto('./?jogo=campanha&slot=2&diag=1');
     await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
-    // Consumíveis na ordem da mochila: a poção é a tecla 5, o pergaminho a 6.
-    await page.keyboard.press('Digit6');
+    // Consumíveis na ordem da mochila: a poção é a tecla 7, o pergaminho a 8 (marco 24).
+    await page.keyboard.press('Digit8');
     await expect(page.locator('.log-combate')).toContainText('invocou Lobo espiritual', { timeout: 10_000 });
     expect(erros).toEqual([]);
   });
@@ -532,27 +532,29 @@ test.describe('desktop', () => {
     expect(erros).toEqual([]);
   });
 
-  test('habilidades: escolher o mago, pôr a barreira na tecla 1, lançar e ler o efeito no cartão', async ({ page }) => {
+  // Marco 24 (25/10/2026, D-094): 1 e 2 são de classe; a barreira (geral inicial do Necromante) começa na 3 e vai para a 4.
+  test('habilidades: escolher o necromante, pôr a barreira na tecla 4, lançar e ler o efeito no cartão', async ({ page }) => {
     const erros: string[] = [];
     page.on('pageerror', (e) => erros.push(e.message));
     await page.goto('./?jogo=campanha&slot=1&diag=1');
     await expect(page.getByRole('heading', { name: 'Escolha a classe' })).toBeVisible();
-    await page.getByRole('link', { name: 'Jogar de Mago' }).click();
+    await page.getByRole('link', { name: 'Jogar de Necromante' }).click();
     await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
-    await expect(page.getByTestId('habilidade-bola_de_fogo')).toBeVisible();
+    await expect(page.getByTestId('habilidade-barreira')).toBeVisible();
 
     await page.keyboard.press('KeyI');
     const mochila = page.getByRole('dialog', { name: 'Mochila' });
     await mochila.getByRole('button', { name: 'Habilidades' }).click();
-    await expect(mochila.locator('[data-habilidade="raio_em_cadeia"]')).toContainText('Salta para mais 2 alvo(s)');
-    // Ajuste de 16/10/2026 (D-067): o botão 1 da carta põe direto na tecla 1.
-    await mochila.locator('[data-chave="tecla-barreira-0"]').click();
-    await expect(mochila.locator('[data-tecla="1"]')).toContainText('Barreira');
+    await expect(mochila.getByTestId('painel-sintonia')).toBeVisible();
+    // Ajuste de 16/10/2026 (D-067): o botão da carta põe direto na tecla (aqui, a 4).
+    await mochila.locator('[data-chave="tecla-barreira-3"]').click();
+    await expect(mochila.locator('[data-tecla="4"]')).toContainText('Barreira');
     await page.keyboard.press('Escape');
-    await expect(page.locator('.barra-habilidades .botao-habilidade').first()).toHaveAttribute('data-testid', 'habilidade-barreira');
+    // A barra é posicional: com a 3 vazia, a barreira segue na tecla 4.
+    await expect(page.getByTestId('habilidade-barreira').locator('.tecla')).toHaveText('4');
 
-    // Sem aliado por perto, a barreira cai no próprio mago: o escudo aparece com o anel de duração.
-    await page.keyboard.press('Digit1');
+    // Sem aliado por perto, a barreira cai no próprio necromante: o escudo aparece com o anel de duração.
+    await page.keyboard.press('Digit4');
     const chip = page.locator('.chip-efeito[data-efeito="escudo"]');
     await expect(chip).toBeVisible({ timeout: 10_000 });
     await expect(chip.locator('.restante')).toHaveText(/^\d/);
@@ -564,10 +566,10 @@ test.describe('desktop', () => {
   test('teclado numérico lança habilidades e o d20 aparece perto da barra', async ({ page }) => {
     const erros: string[] = [];
     page.on('pageerror', (e) => erros.push(e.message));
-    await page.goto('./?jogo=campanha&slot=1&diag=1&classe=mago');
+    await page.goto('./?jogo=campanha&slot=1&diag=1&classe=necromante');
     await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
-    // Numpad4 = tecla 4 do mago (barreira): o escudo cai nele mesmo.
-    await page.keyboard.press('Numpad4');
+    // Numpad3 = tecla 3 do necromante (barreira, a geral inicial; marco 24): o escudo cai nele mesmo.
+    await page.keyboard.press('Numpad3');
     await expect(page.locator('.chip-efeito[data-efeito="escudo"]')).toBeVisible({ timeout: 10_000 });
     // O dardo básico no boneco rola o d20: o dado ao lado da barra mostra o número.
     await page.keyboard.press('Space');
@@ -749,7 +751,9 @@ test.describe('celular (emulação)', () => {
     await abrir(page);
     const viewport = page.viewportSize();
     const joystick = await page.getByTestId('joystick').boundingBox();
-    for (const id of ['seta_arcana', 'explosao', 'curar', 'golpe_atordoante']) {
+    // Marco 24: o kit inicial do Aventureiro (2 de classe e a geral) e a ultimate no botão grande.
+    await expect(page.getByTestId('ultimate')).toBeVisible();
+    for (const id of ['mergulho', 'grito_do_falcao', 'curar']) {
       const caixa = await page.getByTestId(`habilidade-${id}`).boundingBox();
       expect(caixa, id).not.toBeNull();
       if (!caixa || !viewport || !joystick) continue;

@@ -23,8 +23,11 @@ export interface EstadoBotao {
 
 export interface BarraHabilidades {
   elemento: HTMLElement;
-  /** As habilidades da barra, na ordem das teclas (compiladas: rank e caminhos); `livre` mostra o botão "+". */
-  definir: (habilidades: readonly Habilidade[], livre?: boolean) => void;
+  /**
+   * As habilidades da barra por tecla (compiladas: rank e caminhos); `livre` mostra o botão "+". Marco 24 (25/10/2026,
+   * D-094): a posição é a tecla — null é tecla vazia (sem botão), para a 4 seguir sendo a 4 com a 3 vazia.
+   */
+  definir: (habilidades: readonly (Habilidade | null)[], livre?: boolean) => void;
   atualizar: (estado: (h: Habilidade) => EstadoBotao) => void;
 }
 
@@ -61,15 +64,20 @@ export function criarBarraHabilidades(
     b.addEventListener('pointerleave', cancelar);
   };
 
-  const definir = (habilidades: readonly Habilidade[], livre = false) => {
+  const definir = (habilidades: readonly (Habilidade | null)[], livre = false) => {
     barra.textContent = '';
-    botoes = habilidades.map((h, i) => {
+    botoes = [];
+    habilidades.forEach((h, i) => {
+      if (!h) return;
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'botao-habilidade';
       b.dataset.testid = `habilidade-${h.id}`;
       b.dataset.rank = String(h.rank);
-      b.style.setProperty('--angulo', `${180 + i * 30}deg`);
+      // Marco 24 (D-094, 25/10/2026): no toque, as gerais (3 a 6) ficam na roda e as de classe (1 e 2) à esquerda
+      // da 3 e da 4 (o mesmo ângulo, deslocadas pelo CSS).
+      b.style.setProperty('--angulo', `${180 + (i < 2 ? i : i - 2) * 30}deg`);
+      if (i < 2) b.classList.add('de-classe');
       const cor = corDo(h);
       if (cor) b.style.setProperty('--cor-elemento', cor);
       b.setAttribute('aria-label', t('controles.habilidade', { nome: h.nome, tecla: i + 1 }));
@@ -96,15 +104,18 @@ export function criarBarraHabilidades(
       });
       pedirTroca(b, h.id);
       barra.append(b);
-      return { h, b, ultimo: '' };
+      botoes.push({ h, b, ultimo: '' });
     });
     if (livre && aoTrocar) {
       const mais = document.createElement('button');
       mais.type = 'button';
       mais.className = 'botao-habilidade vazio';
       mais.dataset.testid = 'habilidade-livre';
-      mais.style.setProperty('--angulo', `${180 + habilidades.length * 30}deg`);
-      mais.setAttribute('aria-label', t('habilidades.escolherNaBarra', { n: habilidades.length + 1 }));
+      // A primeira tecla geral vazia (3 a 6), ou a seguinte à última.
+      const vazia = habilidades.findIndex((h, i) => i >= 2 && h === null);
+      const slot = vazia >= 0 ? vazia : Math.max(2, habilidades.length);
+      mais.style.setProperty('--angulo', `${180 + (slot - 2) * 30}deg`);
+      mais.setAttribute('aria-label', t('habilidades.escolherNaBarra', { n: slot + 1 }));
       const simbolo = document.createElement('span');
       simbolo.className = 'icone';
       simbolo.append(icone('mais'));

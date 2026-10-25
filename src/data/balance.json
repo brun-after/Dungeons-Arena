@@ -35,7 +35,7 @@
       "concentracaoAcertos": 4,
       "concentracaoJanelaMs": 12000,
       "concentracaoExtraPct": 25,
-      "encarnacao": { "fogoDanoPct": 5, "fogoIntervaloMs": 1000, "fogoRaio": 1, "fogoQueimaValor": 2, "fogoQueimaMs": 2000, "geloReducaoPct": 10, "geloResfriarMs": 2000, "raioVelocidadePct": 15, "duracaoMs": 12000 }
+      "encarnacao": { "fogoDanoPct": 5, "fogoIntervaloMs": 1000, "fogoRaio": 1, "fogoQueimaValor": 2, "fogoQueimaMs": 2000, "geloReducaoPct": 10, "geloResfriarMs": 2000, "raioVelocidadePct": 15, "duracaoMs": 12000, "duplaJanelaMs": 3000, "duplaDuracaoMs": 6000 }
     },
     "aventureiro": {
       "nivelCorte": 20,
@@ -83,6 +83,7 @@
   },
   "ultimate": {
     "max": 100,
+    "vidaBaixaPct": 30,
     "ganhos": { "habilidade": 3, "basico": 0.6, "cura": 1.5, "abate": 8, "combo": 6 },
     "classe": {
       "furiaCheia": { "valor": 15, "intervaloMs": 0 },

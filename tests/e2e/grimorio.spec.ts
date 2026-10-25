@@ -45,6 +45,8 @@ test('progressão: acelerar estudo por item, consumir tomo e escolher evolução
   j.nivel = 20;
   j.bolsa.pontosHabilidade = 3;
   // Estudo curto para testar conclusão sem aguardar minutos de tempo real.
+  // Marco 24 (D-094): a Seta arcana é geral; o estudo só aparece para a geral que um livro liberou.
+  j.bolsa.liberadas = [...(j.bolsa.liberadas ?? []), 'seta_arcana'];
   j.bolsa.estudo = { id: 'seta_arcana', totalTicks: 18000, restanteTicks: 18000, aceleracoes: 0, velocidade12: 12, fracao12: 0 };
   const bola = j.bolsa.conhecidas.find(h => h.id === 'bola_de_fogo');
   if (!bola) throw new Error('Bola de fogo ausente');
@@ -98,7 +100,9 @@ test('progressão: acelerar estudo por item, consumir tomo e escolher evolução
   await mochila.getByRole('button', { name: /^Habilidades/ }).click();
   await expect(mochila.locator('[data-habilidade="bola_de_fogo"]')).toContainText('Eficiente');
   await expect(mochila.locator('[data-estudo-restante="seta_arcana"]')).toHaveCount(0, { timeout: 30000 });
-  await mochila.locator('[data-chave="tecla-seta_arcana-0"]').click();
-  await expect(mochila.locator('[data-tecla="1"]')).toContainText('Seta arcana');
+  // As teclas 1 e 2 são de classe: a geral estudada entra na primeira geral livre (a 4) e o botão a leva para a 5.
+  await expect(mochila.locator('[data-tecla="4"]')).toContainText('Seta arcana');
+  await mochila.locator('[data-chave="tecla-seta_arcana-4"]').click();
+  await expect(mochila.locator('[data-tecla="5"]')).toContainText('Seta arcana');
   expect(erros).toEqual([]);
 });

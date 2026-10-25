@@ -106,6 +106,20 @@ function desenharTextura(g: Graphics, tipo: TexturaParticula, ox: number): void 
       g.poly([cx, cy + 8, cx + 4, cy + 14, cx + 4, cy + 10, cx, cy + 5]).fill({ color: 0xffffff, alpha: 0.85 });
       g.poly([cx, cy + 8, cx - 4, cy + 14, cx - 4, cy + 10, cx, cy + 5]).fill({ color: 0xffffff, alpha: 0.85 });
       return;
+    case 'arco': {
+      // Marco 24 (25/10/2026): o raio que se ramifica — um zigue-zague com dois galhos.
+      const traco = { width: 2, color: 0xffffff };
+      g.moveTo(cx - 2, cy - 15).lineTo(cx + 4, cy - 6).lineTo(cx - 3, cy + 1).lineTo(cx + 3, cy + 8).lineTo(cx - 1, cy + 15).stroke(traco);
+      g.moveTo(cx + 4, cy - 6).lineTo(cx + 11, cy - 2).lineTo(cx + 13, cy + 4).stroke({ width: 1.5, color: 0xffffff, alpha: 0.8 });
+      g.moveTo(cx - 3, cy + 1).lineTo(cx - 10, cy + 4).stroke({ width: 1.5, color: 0xffffff, alpha: 0.7 });
+      return;
+    }
+    case 'cristal':
+      // O gelo facetado: losango alongado com a face clara e a escura.
+      g.poly([cx, cy - 15, cx + 7, cy - 2, cx, cy + 15, cx - 7, cy - 2]).fill({ color: 0xffffff, alpha: 0.75 });
+      g.poly([cx, cy - 15, cx + 7, cy - 2, cx, cy + 3]).fill(0xffffff);
+      g.moveTo(cx, cy - 15).lineTo(cx, cy + 15).stroke({ width: 1, color: 0xffffff, alpha: 0.9 });
+      return;
     case 'teia':
       for (let i = 0; i < 4; i++) {
         const a = (Math.PI / 4) * i;

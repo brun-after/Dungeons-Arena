@@ -19,7 +19,7 @@ import type { EstadoJogo } from '../core/estado';
 import { Barramento } from '../core/events';
 import type { EventosDaSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
-import type { Entidade, PontoVisual } from '../entities/entidade';
+import { SLOTS_BARRA, type Entidade, type PontoVisual } from '../entities/entidade';
 import { t } from '../i18n';
 import { ligarPonteiro } from '../input/ponteiro';
 import { ligarTeclado, type Teclado } from '../input/teclado';
@@ -47,11 +47,14 @@ import { velocidade } from '../world/movimento';
 import { faixaSuperior, mostrarAviso } from './aviso';
 import { criarCabecalho } from './cabecalho';
 import { criarBarraConsumiveis } from './consumiveis';
+import { criarBotaoUltimate } from './ultimate';
+import { cargaDe, ultimateDe } from '../combat/carga-ultimate';
 import { criarControles, type Controles } from './controles';
 import { Diagnostico, type DadosRede } from './diagnostico';
 import { montarApresentacao } from './apresentacao';
 import { ligarFeedback } from './feedback';
 import { ligarFeedbackGrimorio } from './feedback-grimorio';
+import { ligarCinematicaUltimate } from './cinematica-ultimate';
 import { nuvemDoBuild } from '../plataforma/nuvem';
 import type { AcaoDaPausa } from './pausa';
 import { criarLoja } from './loja';
@@ -66,7 +69,8 @@ import { montarVisao, type ControleVisao } from './visao';
 
 const LEITURA_FAIXA_MS = 1000;
 /** Teclas 1–4 são das habilidades; as seguintes, dos consumíveis (D-050). */
-const ATALHOS_DE_HABILIDADE = 4;
+// Marco 24 (D-094): 1–6 são as habilidades da barra; 7–9 e 0, os consumíveis.
+const ATALHOS_DE_HABILIDADE = SLOTS_BARRA;
 
 export interface OpcoesCena {
   raiz: HTMLElement;
@@ -277,18 +281,21 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const quadroAlvo = new QuadroAlvo((alvo) => descreverAfinidade(ctx, alvo));
   faixaSuperior(ui).append(quadroAlvo.elemento);
   // Marco 14: a barra é a do jogador (teclas 1–4), refeita quando muda (rank, caminho ou troca de tecla).
-  let habilidadesDaBarra: Habilidade[] = [];
+  let habilidadesDaBarra: (Habilidade | null)[] = [];
   let chaveDaBarra = '';
   const sincronizarBarra = (j: Entidade) => {
-    const habs = j.habilidades.map((id) => habilidadeDoAtor(ctx, j, id)).filter((h): h is Habilidade => h !== undefined);
     const bolsa = j.bolsa;
+    // Marco 24 (25/10/2026, D-094): com bolsa, a barra é posicional (a tecla é o espaço, mesmo com vazios antes).
+    const habs = bolsa
+      ? bolsa.barra.map((id) => (id && j.habilidades.includes(id) ? (habilidadeDoAtor(ctx, j, id) ?? null) : null))
+      : j.habilidades.map((id) => habilidadeDoAtor(ctx, j, id) ?? null);
     const ativa = (id: string) => {
       const h = resolverHabilidade(ctx, id);
       return !!h && !h.passiva;
     };
     // D-067: o "+" aparece com tecla livre e alguma ativa conhecida fora da barra.
     const livre = !!bolsa?.barra.includes(null) && bolsa.conhecidas.some((c) => !bolsa.barra.includes(c.id) && ativa(c.id));
-    const chave = `${habs.map((h) => h.chave).join('|')}/${livre}`;
+    const chave = `${habs.map((h) => h?.chave ?? '-').join('|')}/${livre}`;
     if (chave === chaveDaBarra) return;
     chaveDaBarra = chave;
     habilidadesDaBarra = habs;
@@ -321,6 +328,15 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   // D-067: poções e pergaminhos à direita, sem abrir a mochila.
   const consumiveis = criarBarraConsumiveis(ctx, emitir, toque);
   ui.append(consumiveis.elemento);
+  // Marco 24 (D-094): a ultimate pelo botão (anel de carga) e pela tecla R; o alvo dela é o selecionado.
+  const usarUltimate = () => {
+    const alvo = jogador()?.alvoSelecionado;
+    emitir(alvo ? { t: 'usarUltimate', alvo } : { t: 'usarUltimate' });
+  };
+  const botaoUltimate = criarBotaoUltimate(usarUltimate);
+  const alternarBasico = () => {
+    emitir({ t: 'autoAtaque', ligado: !(jogador()?.autoAtaque ?? true) });
+  };
   const usarAtalhoDeConsumivel = (n: number) => {
     const bolsa = jogador()?.bolsa;
     const entrada = bolsa ? consumiveisComAtalho(bolsa, ctx.conteudo.itens)[n] : undefined;
@@ -332,22 +348,27 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       aoMudarDirecao: (dir) => {
         emitir({ t: 'mover', dir });
       },
-      aoAtacar: () => {
-        emitir({ t: 'ataqueBasico' });
-      },
+      principal: botaoUltimate.elemento,
       aoInteragir: () => {
         emitir({ t: 'interagir' });
       },
       aoTrocarAlvo: () => {
         trocarAlvo(1);
+        // Marco 24 (D-097): tocar no alvo também liga o básico.
+        emitir({ t: 'autoAtaque', ligado: true });
       },
       aoTravarAlvo: travarAlvo,
+      aoPararAtaque: alternarBasico,
       isometrico,
     });
     controles.direita.append(barra.elemento);
     ui.append(controles.elemento);
   } else {
-    ui.append(barra.elemento);
+    // A barra se redesenha inteira; a ultimate fica ao lado dela, numa fila própria.
+    const fila = document.createElement('div');
+    fila.className = 'fila-barra';
+    fila.append(barra.elemento, botaoUltimate.elemento);
+    ui.append(fila);
   }
   ui.append(
     criarCabecalho({
@@ -407,7 +428,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     aoAtacar: () => {
       emitir({ t: 'ataqueBasico' });
     },
-    // 1–4: habilidades; 5–9 e 0: consumíveis na ordem da mochila (D-050).
+    // 1–6: habilidades; 7–9 e 0: consumíveis na ordem da mochila (D-050, marco 24).
     aoAtalho: (indice) => {
       if (indice >= ATALHOS_DE_HABILIDADE) {
         usarAtalhoDeConsumivel(indice - ATALHOS_DE_HABILIDADE);
@@ -425,6 +446,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     aoAlternarVisao: alternarVisao,
     aoTrocarAlvo: trocarAlvo,
     aoTravarAlvo: travarAlvo,
+    aoUltimate: usarUltimate,
+    aoAlternarBasico: alternarBasico,
     // `Esc` contextual (§2.15): com alvo, cancela a mira; sem alvo, pausa (ou abre o menu, na arena).
     aoCancelar: () => {
       if (jogador()?.alvoSelecionado) emitir({ t: 'selecionarAlvo', alvo: null });
@@ -463,6 +486,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     hud.registrar(dica ? t('log.temaClima', { nome: tema.nome, dica }) : t('log.tema', { nome: tema.nome }));
   }
   // Marco 18 (D-068 a D-070): combos, ressonâncias, missões, origens raras, forja e descobertas.
+  ligarCinematicaUltimate(ui, bus, idLocal, (chave) => resolverHabilidade(ctx, chave));
   ligarFeedbackGrimorio({
     bus,
     ctx,
@@ -508,6 +532,11 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     const alvo = j?.alvoSelecionado ? estado.entidades.find((e) => e.id === j.alvoSelecionado) : undefined;
     quadroAlvo.atualizar(j, alvo);
     controles?.marcarTrava(!!alvo && j?.alvoTravado === true);
+    controles?.marcarBasico(j?.autoAtaque ?? true);
+    if (j) {
+      const u = ultimateDe(ctx, j);
+      botaoUltimate.atualizar(cargaDe(j) / ctx.balance.ultimate.max, u ? (ctx.conteudo.definicoes.get(u.id)?.base.nome ?? u.id) : null);
+    }
     dado.atualizar(q.agoraMs);
     mochila.atualizar();
     loja.atualizar();
