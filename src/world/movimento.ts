@@ -6,6 +6,7 @@ import { podeFerir } from '../modos/relacao';
 import { dispararGanchosDe } from '../progression/ganchos-do-portador';
 import { muralhaEm } from '../combat/tatica';
 import { virarPara } from '../combat/orientacao';
+import { multiplicadorDoPassoDoFalcao } from '../combat/companheiro';
 // Movimento célula a célula com integração por distância (§2.2, §2.3).
 // Cada passo é cardinal: reserva o destino, avança `progressoPasso` pela velocidade e, ao
 // completar, a posição lógica vira o destino. Um tick pode consumir vários passos.
@@ -132,7 +133,10 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
   const inv = e.invocacao;
   const vel =
     inv && !inv.dominado
-      ? 1000 / (inv.companheiro ? ctx.balance.ajustesClasses.aventureiro.falcaoPassoMs : ctx.balance.invocacoes.passoMs)
+      ? // Marco 25 (D-102): o falcão mergulhando ou no dash anda mais rápido que na patrulha.
+        inv.companheiro
+        ? (1000 / ctx.balance.ajustesClasses.aventureiro.falcaoPassoMs) * multiplicadorDoPassoDoFalcao(estado, ctx, e)
+        : 1000 / ctx.balance.invocacoes.passoMs
       : velocidade(e.atributos.destreza, ctx.balance.movimento.velocidadeBaseMs, inv?.dominado ?? false);
   // Marco 14: o frio (resfriado) deixa mais lento. Ajuste de 15/10/2026: conjurar uma habilidade `lenta` também.
   const conjurando = mobilidadeDaAcao(e, ctx) === 'lenta' ? ctx.balance.habilidades.velocidadeConjurandoLenta : 1;

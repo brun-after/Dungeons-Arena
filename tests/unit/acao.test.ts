@@ -127,7 +127,8 @@ describe('ciclo de uma ação (§2.7)', () => {
     for (let semente = 1; semente < 400; semente++) {
       const a = arena(semente, 4);
       a.tick([['j', { t: 'usarHabilidade', id: 'golpe_atordoante', alvo: 'b' }]]);
-      a.ticks(ticksDe(600) + 2);
+      // Marco 25 (D-102): o golpe sai do falcão quando ele chega ao alvo.
+      for (let i = 0; i < 600 && a.de('impacto').length === 0 && a.de('esquivou').length === 0; i++) a.tick();
       const [imp] = a.de('impacto');
       if (!imp?.falha) continue;
       expect(imp.dano).toBe(0);
@@ -141,7 +142,7 @@ describe('ciclo de uma ação (§2.7)', () => {
     for (let semente = 1; semente < 50; semente++) {
       const a = arena(semente, 4);
       a.tick([['j', { t: 'usarHabilidade', id: 'golpe_atordoante', alvo: 'b' }]]);
-      a.ticks(ticksDe(600) + 1);
+      for (let i = 0; i < 600 && a.de('impacto').length === 0 && a.de('esquivou').length === 0; i++) a.tick();
       if (a.de('impacto')[0]?.falha !== false) continue;
       expect(a.de('efeitoAplicado')).toMatchObject([{ tipo: 'atordoar', alvoId: 'b' }]);
       a.tick([['b', { t: 'mover', dir: 'E' }]]);

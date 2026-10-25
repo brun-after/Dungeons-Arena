@@ -42,7 +42,7 @@
       "danoMult": 0.95,
       "falcaoDanoMult": 1.5,
       "falcaoPassoMs": 200,
-      "falcao": { "distanciaAlvo": 3, "raioPasseio": 3, "raioColeta": 7, "passeioMs": 1200, "raioCombate": 8, "reflexoInicioPct": 80, "reflexoFimPct": 60, "pousoMs": 6000 }
+      "falcao": { "distanciaAlvo": 3, "raioPasseio": 3, "raioColeta": 7, "passeioMs": 1200, "raioCombate": 8, "reflexoInicioPct": 80, "reflexoFimPct": 60, "pousoMs": 6000, "velocidadeAtaque": { "n1": 1, "n20": 5, "n30": 7 }, "velocidadeDash": { "n1": 2, "n20": 6, "n30": 9 }, "atributoBonusPorPontoPct": 1.5, "atributoBonusMaxPct": 30, "vigiaCelulas": 8, "vigiaRaio": 0.6 }
     },
     "arqueiro": {
       "secundariosMult": 1.15,

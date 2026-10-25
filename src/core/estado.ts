@@ -161,6 +161,11 @@ export interface FaseAgendada {
   x: number;
   y: number;
   tick: number;
+  /**
+   * Marco 25 (25/10/2026, D-102): o golpe do falcão em voo. Com a ação, o lançamento é o completo (combo, ganchos),
+   * só adiado até o falcão chegar ao alvo.
+   */
+  acaoId?: number;
 }
 
 /** Respawn agendado de um inimigo (§2.5): o id continua estável e a geração incrementa. */

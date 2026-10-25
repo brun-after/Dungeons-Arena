@@ -21,6 +21,13 @@ import { pontoDoVoo, quadroDasAsas, VOOS_SKILL, vooDaUltimate, type VooDeSkill }
 /** Rigidez e amortecimento da mola (um pouco abaixo do crítico: o falcão passa do ponto e volta, como quem plana). */
 const RIGIDEZ = 16;
 const AMORTECE = 2 * Math.sqrt(RIGIDEZ) * 0.7;
+/**
+ * Marco 25 (25/10/2026, D-102): no dash e no mergulho da regra, a mola é bem mais dura (quase crítica) e sem deriva,
+ * com um rastro branco curto — a diferença de velocidade para a patrulha fica clara.
+ */
+const RIGIDEZ_RAPIDA = 140;
+const AMORTECE_RAPIDO = 2 * Math.sqrt(RIGIDEZ_RAPIDA) * 0.9;
+const COR_DASH = 0xffffff;
 /** A deriva em volta da célula, em células. */
 const DERIVA = 0.32;
 /** O ombro do dono, em células a partir dos pés, e a altura extra para o falcão menor ficar no ombro. */
@@ -48,6 +55,9 @@ interface EstadoVoo {
   semente: number;
   voo: VooEmCurso | null;
   pousado: boolean;
+  /** A IA no dash ou no mergulho (marco 25). */
+  rapido: boolean;
+  ultimoRastroMs: number;
 }
 
 export interface OpcoesVooFalcao {
@@ -109,11 +119,12 @@ export class VooDoFalcao {
       const b = base(e);
       let st = this.estados.get(e.id);
       if (!st) {
-        st = { x: b.x, y: b.y, vx: 0, vy: 0, altura: 0, semente: this.estados.size + 1, voo: null, pousado: false };
+        st = { x: b.x, y: b.y, vx: 0, vy: 0, altura: 0, semente: this.estados.size + 1, voo: null, pousado: false, rapido: false, ultimoRastroMs: 0 };
         this.estados.set(e.id, st);
       }
       const dono = estado.entidades.find((x) => x.id === e.invocacao?.donoId);
       st.pousado = e.ia?.modo === 'pousado' && !st.voo;
+      st.rapido = e.ia?.modo === 'dash' || e.ia?.modo === 'mergulho';
       if (st.voo) this.voar(st, agoraMs, dt, estado, base, dono);
       else this.planar(st, agoraMs, dt, b, dono ? base(dono) : null);
     }
@@ -161,16 +172,21 @@ export class VooDoFalcao {
     const s = agoraMs / 1000;
     const destino = st.pousado && dono
       ? { x: dono.x + OMBRO.x, y: dono.y + OMBRO.y }
-      : this.o.reduzido()
+      : this.o.reduzido() || st.rapido
         ? b
         : { x: b.x + DERIVA * Math.sin(s * 0.9 + st.semente), y: b.y + DERIVA * 0.8 * Math.cos(s * 0.7 + st.semente * 2) };
     if (Math.hypot(destino.x - st.x, destino.y - st.y) > SALTO) {
       Object.assign(st, { x: destino.x, y: destino.y, vx: 0, vy: 0 });
     }
-    st.vx += (RIGIDEZ * (destino.x - st.x) - AMORTECE * st.vx) * dt;
-    st.vy += (RIGIDEZ * (destino.y - st.y) - AMORTECE * st.vy) * dt;
+    const [k, c] = st.rapido ? [RIGIDEZ_RAPIDA, AMORTECE_RAPIDO] : [RIGIDEZ, AMORTECE];
+    st.vx += (k * (destino.x - st.x) - c * st.vx) * dt;
+    st.vy += (k * (destino.y - st.y) - c * st.vy) * dt;
     st.x += st.vx * dt;
     st.y += st.vy * dt;
+    if (st.rapido && !this.o.reduzido() && Math.hypot(st.vx, st.vy) > 3 && agoraMs - st.ultimoRastroMs >= RASTRO_MS) {
+      st.ultimoRastroMs = agoraMs;
+      this.o.particulas.emitir('falcao_rastro', st.x, st.y - st.altura, COR_DASH);
+    }
     const altura = st.pousado ? OMBRO.altura : 0;
     st.altura += (altura - st.altura) * Math.min(1, dt * 6);
   }
@@ -187,7 +203,7 @@ export class VooDoFalcao {
   ajuste(e: Entidade, agoraMs: number): AjusteVisual | null {
     const st = ehFalcao(e) ? this.estados.get(e.id) : undefined;
     if (!st) return null;
-    const rapido = Math.hypot(st.vx, st.vy) > 4 || (st.voo !== null && st.voo.forma !== 'grito' && st.voo.forma !== 'circulo');
+    const rapido = st.rapido || Math.hypot(st.vx, st.vy) > 4 || (st.voo !== null && st.voo.forma !== 'grito' && st.voo.forma !== 'circulo');
     const balanco = st.pousado || this.o.reduzido() ? 0 : Math.sin(agoraMs / 520 + st.semente) * 0.04;
     return {
       alturaPx: (st.altura + balanco) * CELULA_PX,

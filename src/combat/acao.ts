@@ -32,7 +32,7 @@ import type { Habilidade } from './habilidades';
 import { rampaDeInvocacao } from './invocacoes';
 import { chaveDoAtor, habilidadeDoAtor, perfilPara } from './perfil';
 import { lancarProjetil } from './projeteis';
-import { celulaDoCompanheiro } from './companheiro';
+import { celulaDoCompanheiro, ticksDoVooDoFalcao } from './companheiro';
 import { encarnar } from './encarnacao';
 import { consumirMira } from './mira';
 import { prepararTiroCheio } from './sintonia-arqueiro';
@@ -86,6 +86,16 @@ export function origemDaHabilidade(estado: EstadoJogo, ator: Entidade, hab: Habi
   // Ajuste de 24/10/2026 (D-091): o falcão tem alcance global. A habilidade sempre sai dele, esteja onde estiver; quem
   // decide se dá para usar é o alcance contado do Aventureiro. O projétil voa do falcão até o alvo (paredes o param).
   return (hab.id !== ator.ataqueBasico ? celulaDoCompanheiro(estado, ator) : null) ?? celulaOcupada(ator);
+}
+
+/**
+ * Marco 25 (25/10/2026, D-102): o golpe de contato que sai do falcão voa até o alvo — o impacto vem quando ele chega,
+ * na velocidade de ataque do falcão (nível e Sabedoria). Devolve os ticks do voo (0: não é golpe do falcão).
+ */
+function vooDoGolpe(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, hab: Habilidade, mira: Celula): number {
+  if (hab.politicaImpacto !== 'contato' || hab.politicaAlvo !== 'hostil' || hab.id === ator.ataqueBasico) return 0;
+  const falcao = celulaDoCompanheiro(estado, ator);
+  return falcao ? ticksDoVooDoFalcao(ctx, ator, falcao, mira) : 0;
 }
 
 /** Alcance com o perfil (marco 14) e o `ab_alcance` quando é o ataque básico (§2.8, marco 8A). */
@@ -245,7 +255,7 @@ export function iniciarAcao(
   const avisoExtra = ladoDoJogador(estado, ator) ? 0 : fatoresDoMundo(estado, ctx).avisoExtraMs;
   const lancamentoTick = estado.tick + ticksDe(hab.conjuracaoMs + avisoExtra);
   const viagem =
-    hab.politicaImpacto === 'projetil' ? ticksDe((Math.hypot(mira.x - origem.x, mira.y - origem.y) / hab.velocidadeProjetil) * 1000) : 0;
+    hab.politicaImpacto === 'projetil' ? ticksDe((Math.hypot(mira.x - origem.x, mira.y - origem.y) / hab.velocidadeProjetil) * 1000) : vooDoGolpe(estado, ctx, ator, hab, mira);
   const alvoId = hab.politicaImpacto === 'area' ? null : (alvo?.id ?? null);
   ator.acao = {
     acaoId: novoId(estado),
@@ -310,7 +320,9 @@ function processarFases(estado: EstadoJogo, ctx: ContextoSimulacao, saida: Event
     const alvo = f.alvoId === null ? null : buscarEntidade(estado, f.alvoId);
     const valido = alvo && vivo(alvo) ? alvo : null;
     const mira = valido && hab.politicaImpacto !== 'area' ? celulaOcupada(valido) : { x: f.x, y: f.y };
-    lancar(estado, ctx, ator, hab, novoId(estado), mira, valido, saida, true);
+    // Marco 25 (D-102): o golpe do falcão que chegou ao alvo é o lançamento completo da ação (só adiado).
+    if (f.acaoId !== undefined) lancar(estado, ctx, ator, hab, f.acaoId, mira, valido, saida);
+    else lancar(estado, ctx, ator, hab, novoId(estado), mira, valido, saida, true);
   }
 }
 
@@ -336,6 +348,11 @@ export function processarAcoes(estado: EstadoJogo, ctx: ContextoSimulacao, saida
     }
     if (estado.tick < a.lancamentoTick) continue;
     ator.acao = null;
+    // Marco 25 (D-102): o golpe do falcão sai quando ele chega ao alvo; o dono já fica livre.
+    if (hab.politicaImpacto === 'contato' && a.impactoPrevistoTick > a.lancamentoTick) {
+      (estado.fases ??= []).push({ atorId: ator.id, chave: a.chave, alvoId: a.alvoId, x: a.alvoX, y: a.alvoY, tick: a.impactoPrevistoTick, acaoId: a.acaoId });
+      continue;
+    }
     lancar(estado, ctx, ator, hab, a.acaoId, { x: a.alvoX, y: a.alvoY }, alvo ?? null, saida);
   }
 }

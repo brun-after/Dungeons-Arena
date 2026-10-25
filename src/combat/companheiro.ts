@@ -9,7 +9,9 @@
 // - revela armadilhas com a Sabedoria do dono e recolhe o ouro em que pousa (world/).
 // Tem vaga própria (não conta no limite de invocações) e voa (não ocupa célula). Números em balance.json.
 
-import type { ContextoSimulacao } from '../core/contexto';
+import type { Celula } from '../core/comandos';
+import type { ContextoSimulacao, CurvaPorNivel } from '../core/contexto';
+import { ticksDe } from '../core/tempo';
 import { buscarEntidade, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { vivo, type Entidade } from '../entities/entidade';
@@ -84,6 +86,43 @@ export function sincronizarCompanheiros(estado: EstadoJogo, ctx: ContextoSimulac
     espelhar(falcao, dono);
     if (dono.hp <= 0) falcao.hp = 0;
   }
+}
+
+/** Marco 25 (25/10/2026, D-102): o valor da curva no nível (linear de 1 a 20 e de 20 a 30). */
+export function curvaNoNivel(c: CurvaPorNivel, nivel: number): number {
+  if (nivel <= 20) return c.n1 + (c.n20 - c.n1) * ((Math.max(1, nivel) - 1) / 19);
+  return c.n20 + (c.n30 - c.n20) * ((Math.min(30, nivel) - 20) / 10);
+}
+
+/** O atributo acima de 10 soma à velocidade, até o teto. */
+function bonusDoAtributo(ctx: ContextoSimulacao, valor: number): number {
+  const r = ctx.balance.ajustesClasses.aventureiro.falcao;
+  return 1 + Math.min(r.atributoBonusMaxPct, Math.max(0, (valor - 10) * r.atributoBonusPorPontoPct)) / 100;
+}
+
+/** Quantas vezes o golpe do falcão voa mais rápido que a patrulha (o nível dá a base, a Sabedoria soma). */
+export function velocidadeDoAtaqueDoFalcao(ctx: ContextoSimulacao, dono: Entidade): number {
+  return curvaNoNivel(ctx.balance.ajustesClasses.aventureiro.falcao.velocidadeAtaque, dono.nivel) * bonusDoAtributo(ctx, dono.atributos.sabedoria);
+}
+
+/** Quantas vezes o dash de defesa é mais rápido que a patrulha (o nível dá a base, o Carisma soma). */
+export function velocidadeDoDash(ctx: ContextoSimulacao, dono: Entidade): number {
+  return curvaNoNivel(ctx.balance.ajustesClasses.aventureiro.falcao.velocidadeDash, dono.nivel) * bonusDoAtributo(ctx, dono.atributos.carisma);
+}
+
+/** O multiplicador do passo do falcão agora: mergulhando ou no dash, mais rápido; patrulhando, 1. */
+export function multiplicadorDoPassoDoFalcao(estado: EstadoJogo, ctx: ContextoSimulacao, falcao: Entidade): number {
+  const dono = falcao.invocacao ? buscarEntidade(estado, falcao.invocacao.donoId) : undefined;
+  if (!dono) return 1;
+  if (falcao.ia?.modo === 'mergulho') return velocidadeDoAtaqueDoFalcao(ctx, dono);
+  if (falcao.ia?.modo === 'dash') return velocidadeDoDash(ctx, dono);
+  return 1;
+}
+
+/** Ticks que o golpe do falcão leva da célula dele até o alvo, na velocidade de ataque. */
+export function ticksDoVooDoFalcao(ctx: ContextoSimulacao, dono: Entidade, de: Celula, ate: Celula): number {
+  const celulas = Math.max(Math.abs(ate.x - de.x), Math.abs(ate.y - de.y));
+  return ticksDe((celulas * ctx.balance.ajustesClasses.aventureiro.falcaoPassoMs) / velocidadeDoAtaqueDoFalcao(ctx, dono));
 }
 
 /** A célula do falcão, quando ele está vivo (para a origem das habilidades). */
