@@ -82,8 +82,8 @@ describe('porta interna (§2.1)', () => {
     const parado = criarInimigo(goblin, 'g2', 8, 8, c.ctx.balance);
     c.estado.entidades.push(viajante, parado);
     c.tick(); // cria o estado da IA
-    Object.assign(viajante, { x: 4, y: 2, destinoX: 4, destinoY: 2, progressoPasso: 0 });
-    Object.assign(parado, { x: 8, y: 8, destinoX: 8, destinoY: 8, progressoPasso: 0 });
+    Object.assign(viajante, { x: 4, y: 2 });
+    Object.assign(parado, { x: 8, y: 8 });
     const chegou = (): EventoSimulacao[] => [{ t: 'moveu', tick: c.estado.tick, id: 'g1', x: 4, y: 2 }];
     processarPortas(c.estado, nunca, chegou());
     expect([viajante.x, viajante.y]).toEqual([4, 2]);

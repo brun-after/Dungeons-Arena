@@ -131,8 +131,8 @@ describe('coleta transacional (§3.6)', () => {
       const a = arena();
       const jogadores = Array.from({ length: 10 }, (_, i) => a.entrar(i));
       for (const j of jogadores) {
-        j.x = j.destinoX = 5;
-        j.y = j.destinoY = 5;
+        j.x = 5;
+        j.y = 5;
         j.hp = 10;
         j.autoAtaque = false;
       }
@@ -149,8 +149,8 @@ describe('coleta transacional (§3.6)', () => {
   it('IA não coleta; quem está com a vida cheia não desperdiça o orbe', () => {
     const a = arena();
     const j = a.entrar(1);
-    j.x = j.destinoX = 3;
-    j.y = j.destinoY = 3;
+    j.x = 3;
+    j.y = 3;
     const inimigo = criarInimigo(obter(CONTEUDO.presets.get('boneco'), 'boneco'), 'b', 5, 5, BALANCE_PADRAO);
     a.estado.entidades.push(inimigo);
     largarObjeto(a.estado, 'orbe_hp', 5, 5, 30, 'pct', a.eventos);
@@ -181,8 +181,8 @@ describe('coleta transacional (§3.6)', () => {
     const j2 = a.entrar(2);
     expect(j1.equipe).not.toBe(j2.equipe);
     expect(podeFerir(j1, j2, a.ctx.modo)).toBe(true);
-    j2.x = j2.destinoX = j1.x + 1;
-    j2.y = j2.destinoY = j1.y;
+    j2.x = j1.x + 1;
+    j2.y = j1.y;
     simular(a.estado, a.ctx, [{ tick: 0, entidadeId: j1.id, cmd: { t: 'ataqueBasico' } }], a.eventos, DT_MS);
     expect(a.eventos.find((e) => e.t === 'acaoIniciada')).toMatchObject({ atorId: j1.id, alvoId: j2.id });
   });
@@ -195,8 +195,8 @@ describe('coleta transacional (§3.6)', () => {
     const { ficha } = construirFichaDeSessao({ classeId: 'aventureiro' }, c.modo, CONTEUDO, BALANCE_PADRAO);
     const j1 = entrarNaArena(estado, c, 'p1', 'j1', ficha, 'Um');
     const j2 = entrarNaArena(estado, c, 'p2', 'j2', ficha, 'Dois');
-    j2.x = j2.destinoX = 2;
-    j2.y = j2.destinoY = 2;
+    j2.x = 2;
+    j2.y = 2;
     j1.hp = 0;
     const eventos: EventoSimulacao[] = [];
     for (let i = 0; i < ticksDe(5000) + 2; i++) simular(estado, c, [], eventos, DT_MS);

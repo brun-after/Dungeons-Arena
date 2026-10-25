@@ -81,6 +81,9 @@ const DIRECOES: readonly (Dir8 | 'parado')[] = ['N', 'NE', 'E', 'SE', 'S', 'SO',
 
 const finito = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
 const inteiro = (v: unknown): v is number => finito(v) && Number.isInteger(v);
+/** Marco 26 (D-104): o componente do vetor do `mover` e a coordenada com fração do `irPara`. */
+const rumo = (v: unknown): v is number => inteiro(v) && Math.abs(v) <= 1000;
+const ponto = (v: unknown): v is number => finito(v) && Math.abs(v) <= MAX_COORDENADA;
 const coordenada = (v: unknown): v is number => inteiro(v) && Math.abs(v) <= MAX_COORDENADA;
 const id = (v: unknown): v is string => typeof v === 'string' && v.length > 0 && v.length <= MAX_ID;
 
@@ -96,10 +99,15 @@ function lerCelula(v: unknown): Celula | null {
 export function lerComando(v: unknown): Comando | null {
   if (!ehObjeto(v) || typeof v.t !== 'string') return null;
   switch (v.t) {
-    case 'mover':
-      return typeof v.dir === 'string' && (DIRECOES as readonly string[]).includes(v.dir) ? { t: 'mover', dir: v.dir as Dir8 | 'parado' } : null;
+    case 'mover': {
+      if (typeof v.dir !== 'string' || !(DIRECOES as readonly string[]).includes(v.dir)) return null;
+      const dir = v.dir as Dir8 | 'parado';
+      // Marco 26 (D-104): o vetor exato é opcional; vindo, os dois inteiros em ±1000.
+      if (v.dx === undefined && v.dy === undefined) return { t: 'mover', dir };
+      return rumo(v.dx) && rumo(v.dy) ? { t: 'mover', dir, dx: v.dx, dy: v.dy } : null;
+    }
     case 'irPara':
-      return coordenada(v.x) && coordenada(v.y) ? { t: 'irPara', x: v.x, y: v.y } : null;
+      return ponto(v.x) && ponto(v.y) ? { t: 'irPara', x: v.x, y: v.y } : null;
     case 'usarHabilidade': {
       if (!id(v.id)) return null;
       if (v.alvo === undefined) return { t: 'usarHabilidade', id: v.id };

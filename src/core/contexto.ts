@@ -41,6 +41,8 @@ export interface Balance {
     velocidadeBaseMs: number;
     /** Tamanho máximo da fila de waypoints do jogador (§2.3). */
     filaMaxWaypoints: number;
+    /** Marco 26 (D-104): o raio do corpo redondo, em células (dois corpos que se bloqueiam ficam a 2 raios). */
+    raioCorpo: number;
   };
   navegacao: {
     /** Limite da busca para toque no mapa (§2.3). */

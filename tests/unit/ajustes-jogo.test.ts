@@ -57,7 +57,7 @@ describe('andar enquanto conjura (mobilidade por habilidade)', () => {
     if (id) cmds.push(['j', { t: 'usarHabilidade', id, alvo: 'i0' }]);
     c.tick(cmds);
     c.ticks(n);
-    return c.ent('j').y + c.ent('j').progressoPasso - 2;
+    return c.ent('j').py - 2;
   };
 
   it('o ataque básico do jogador é livre; a explosão trava; a seta arcana anda devagar', () => {
@@ -106,8 +106,8 @@ describe('atenção do inimigo: tempo mínimo na zona', () => {
     c.ent('j').autoAtaque = false;
     const mover = (x: number, y: number) => {
       const j = c.ent('j');
-      j.x = j.destinoX = x;
-      j.y = j.destinoY = y;
+      j.x = x;
+      j.y = y;
     };
     return { ...c, ctx, mover };
   };

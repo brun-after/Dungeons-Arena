@@ -330,7 +330,7 @@ test.describe('desktop', () => {
     estado.saidaAberta = true;
     estado.entidades = estado.entidades.filter((e) => e.bolsa || e.preset !== 'boss');
     const j = estado.entidades.find((e) => e.bolsa);
-    Object.assign(j ?? {}, { x: 36, y: 24, destinoX: 36, destinoY: 24, origemX: 36, origemY: 24 });
+    Object.assign(j ?? {}, { x: 36, y: 24, origemX: 36, origemY: 24 });
     await page.locator('[data-slot="2"] input[type=file]').setInputFiles({ name: 'save.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(arquivo)) });
     await expect(page.locator('[data-slot="2"]')).toContainText('Salões da entrada');
     await page.goto('./?jogo=campanha&slot=2&diag=1');
@@ -348,7 +348,7 @@ test.describe('desktop', () => {
     const estado2 = arquivo2.registro.estado;
     estado2.saidaAberta = true;
     estado2.entidades = estado2.entidades.filter((e) => e.bolsa);
-    Object.assign(estado2.entidades[0] ?? {}, { x: 36, y: 26, destinoX: 36, destinoY: 26, origemX: 36, origemY: 26 });
+    Object.assign(estado2.entidades[0] ?? {}, { x: 36, y: 26, origemX: 36, origemY: 26 });
     await page.locator('[data-slot="3"] input[type=file]').setInputFiles({ name: 'save.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(arquivo2)) });
     await expect(page.locator('[data-slot="3"]')).toContainText('Catacumbas');
     await page.goto('./?jogo=campanha&slot=3&diag=1');

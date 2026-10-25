@@ -7,12 +7,13 @@ import { criarEstado, type EstadoJogo } from '../../src/core/estado';
 import { DT_MS } from '../../src/core/loop';
 import { aleatorio, criarRng, escolher, inteiro, type EstadoRng } from '../../src/core/rng';
 import { simular, type EventoSimulacao } from '../../src/core/simulacao';
-import { emPasso, type Entidade } from '../../src/entities/entidade';
+import type { Entidade } from '../../src/entities/entidade';
 import { SLOTS_DE_EQUIPAMENTO } from '../../src/modos/modo';
 import { guardarItem } from '../../src/progression/inventario';
 import { NOMES_ATRIBUTOS } from '../../src/progression/itens';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
-import { bloqueia, reservaCelula } from '../../src/world/colisao';
+import { bloqueia } from '../../src/world/colisao';
+import { corpoCabe } from '../../src/world/corpo';
 import { passavel } from '../../src/world/fase';
 import { contarDoSpawner } from '../../src/world/spawner';
 import { CONTEUDO, contexto, faseOficial01 } from '../apoio/fases';
@@ -135,11 +136,9 @@ export function verificarInvariantes(estado: EstadoJogo, ctx: ContextoSimulacao)
     if (ids.has(e.id)) erros.push(`id repetido ${e.id}`);
     ids.add(e.id);
     if (!passavel(fase, e.x, e.y)) erros.push(`${e.id} em célula não passável (${e.x}, ${e.y})`);
-    if (!passavel(fase, e.destinoX, e.destinoY)) erros.push(`${e.id} com destino não passável`);
-    const distancia = Math.abs(e.destinoX - e.x) + Math.abs(e.destinoY - e.y);
-    if (distancia > 1) erros.push(`${e.id} com destino não adjacente`);
-    if (e.progressoPasso < 0 || e.progressoPasso >= 1) erros.push(`${e.id} com progresso ${e.progressoPasso}`);
-    if (!emPasso(e) && e.progressoPasso !== 0) erros.push(`${e.id} parado com progresso`);
+    // Marco 26 (D-104): a célula é o arredondamento da posição contínua, e o corpo cabe no terreno.
+    if (Math.round(e.px) !== e.x || Math.round(e.py) !== e.y) erros.push(`${e.id} com célula (${e.x}, ${e.y}) fora da posição (${e.px}, ${e.py})`);
+    if (!corpoCabe(fase, e.px, e.py, balance.movimento.raioCorpo)) erros.push(`${e.id} com o corpo dentro da parede (${e.px}, ${e.py})`);
     if (e.waypoints.length > balance.movimento.filaMaxWaypoints) erros.push(`${e.id} com fila longa`);
     if (e.hp < 0 || e.hp > e.hpMax) erros.push(`${e.id} com hp ${e.hp} fora de [0, ${e.hpMax}]`);
     if (e.mana < 0 || e.mana > e.manaMax) erros.push(`${e.id} com mana ${e.mana} fora de [0, ${e.manaMax}]`);
@@ -189,16 +188,17 @@ export function verificarInvariantes(estado: EstadoJogo, ctx: ContextoSimulacao)
   for (const p of estado.projeteis) {
     if (!passavel(fase, Math.round(p.x), Math.round(p.y))) erros.push(`projétil ${p.id} fora do terreno`);
   }
-  // Pares bloqueantes nunca dividem célula reservada (§2.3).
+  // Pares bloqueantes não se sobrepõem (§2.3). Marco 26 (D-104): andando, ficam a 2 raios; quem é posto no centro de
+  // uma célula livre (teletransporte, empurrão) fica a pelo menos meia célula do corpo da vizinha.
   const vivos = estado.entidades.filter((e) => !e.morto);
   for (let i = 0; i < vivos.length; i++) {
     for (let j = i + 1; j < vivos.length; j++) {
       const a = vivos[i];
       const b = vivos[j];
       if (!a || !b || !bloqueia(a, b, balance.colisao)) continue;
-      if (reservaCelula(b, a.x, a.y) || reservaCelula(b, a.destinoX, a.destinoY)) {
-        erros.push(`${a.id} e ${b.id} dividem célula reservada`);
-      }
+      const dx = a.px - b.px;
+      const dy = a.py - b.py;
+      if (dx * dx + dy * dy < 0.25 - 1e-6) erros.push(`${a.id} e ${b.id} sobrepostos`);
     }
   }
   return erros;

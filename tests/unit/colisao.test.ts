@@ -34,12 +34,12 @@ describe('regras de colisão (§2.3)', () => {
     expect(bloqueia(ent('a', 'jogador'), ent('b', 'avatar'), PADRAO)).toBe(true);
   });
 
-  it('a célula de destino de um passo em curso também fica reservada', () => {
-    const andando = ent('a', 'inimigo', 1, 1);
-    andando.destinoX = 2;
+  // Marco 26 (D-104): sem passo, só a célula ocupada (a do centro do corpo) fica reservada.
+  it('a célula ocupada fica reservada; a vizinha, não', () => {
+    const parado = ent('a', 'inimigo', 1, 1);
     const outro = ent('b', 'inimigo', 3, 1);
-    expect(celulaLivrePara(outro, 2, 1, [andando, outro], PADRAO)).toBe(false);
-    expect(celulaLivrePara(outro, 1, 2, [andando, outro], PADRAO)).toBe(true);
+    expect(celulaLivrePara(outro, 1, 1, [parado, outro], PADRAO)).toBe(false);
+    expect(celulaLivrePara(outro, 2, 1, [parado, outro], PADRAO)).toBe(true);
   });
 });
 

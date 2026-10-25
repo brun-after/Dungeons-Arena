@@ -17,7 +17,7 @@ test('Estaca, Névoa e Abalo concluem Prisão pestilenta e o diário persiste', 
   const j = salvo.registro.estado.entidades.find((e) => e.bolsa);
   const a = salvo.registro.estado.entidades.find((e) => e.preset === 'boneco');
   if (!j?.bolsa || !a) throw new Error('Cena de treino ausente');
-  j.x = j.destinoX = 7; j.y = j.destinoY = 8; j.progressoPasso = 0; j.caminho = []; j.waypoints = [];
+  j.x = 7; j.y = 8; j.caminho = []; j.waypoints = [];
   j.nivel = 20; j.autoAtaque = false; j.alvoSelecionado = a.id; j.alvoTravado = true;
   j.bolsa.barra = ['estaca_de_pedra','nevoa_venenosa','abalo_sismico',null];
   // O save guarda também a barra derivada; a fixture mantém as duas representações coerentes.

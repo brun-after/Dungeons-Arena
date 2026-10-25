@@ -148,7 +148,7 @@ describe('ajustes das classes (18/10/2026)', () => {
     // Mesma Destreza para isolar o reforço de classe no integrador da predição.
     controle.j.atributos.destreza = c.j.atributos.destreza;
     for (const x of [c, controle]) { x.j.direcao = 'S'; integrarEntidade(x.j, x.estado, x.ctx, x.eventos, 100); }
-    expect(c.j.progressoPasso / controle.j.progressoPasso).toBeCloseTo(1 + .15 * reforco);
+    expect((c.j.py - 3) / (controle.j.py - 3)).toBeCloseTo(1 + .15 * reforco);
     c.alvo.x = 9;
     const perto = criarEntidade({ id: 'remoto', tipo: 'inimigo', x: 8, y: 3, hpMax: 10000 });
     const local = criarEntidade({ id: 'local', tipo: 'inimigo', x: 4, y: 3, hpMax: 10000 });
@@ -314,7 +314,7 @@ describe('botas ao cruzar inimigos e saves legados', () => {
     c.j.direcao = 'parado'; c.estado.tick++;
     integrarEntidade(c.j, c.estado, c.ctx, c.eventos, 500);
     expect(efeito.ateTick).toBe(ticksDe(ms));
-    c.j.efeitos = []; c.j.x = c.j.destinoX = 3; c.j.progressoPasso = 0;
+    c.j.efeitos = []; c.j.x = 3;
     c.alvo.equipe = c.j.equipe; c.j.direcao = 'E';
     integrarEntidade(c.j, c.estado, c.ctx, c.eventos, 220);
     expect(c.j.efeitos).toEqual([]);

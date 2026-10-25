@@ -51,7 +51,7 @@ export function sortearCelula(estado: EstadoJogo, ctx: ContextoSimulacao): Celul
     const x = inteiro(estado.rng, 0, fase.largura - 1);
     const y = inteiro(estado.rng, 0, fase.altura - 1);
     if (!passavel(fase, x, y)) continue;
-    if (estado.entidades.some((e) => (e.x === x && e.y === y) || (e.destinoX === x && e.destinoY === y))) continue;
+    if (estado.entidades.some((e) => e.x === x && e.y === y)) continue;
     if (estado.objetos.some((o) => o.x === x && o.y === y) || estado.armadilhas.some((a) => a.x === x && a.y === y)) continue;
     if (jogadores.some((j) => Math.max(Math.abs(j.x - x), Math.abs(j.y - y)) < s.distanciaMinJogador)) continue;
     return { x, y };

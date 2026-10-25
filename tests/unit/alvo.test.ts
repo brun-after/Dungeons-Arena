@@ -37,7 +37,7 @@ function cena() {
   };
   const de = <T extends EventoSimulacao['t']>(t: T) => eventos.filter((e): e is Extract<EventoSimulacao, { t: T }> => e.t === t);
   const mover = (id: string, x: number) => {
-    Object.assign(ent(id), { x, destinoX: x, origemX: x, progressoPasso: 0 });
+    Object.assign(ent(id), { x, px: x, origemX: x });
   };
   /** Espera a recarga do básico e pede outro golpe sem alvo (Espaço). */
   const espaco = () => {

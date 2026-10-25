@@ -15,7 +15,9 @@ export interface Celula {
 export type Dir8 = 'N' | 'NE' | 'E' | 'SE' | 'S' | 'SO' | 'O' | 'NO';
 
 export type Comando =
-  | { t: 'mover'; dir: Dir8 | 'parado' }
+  // Marco 26 (25/10/2026, D-104): `dx`, `dy` é o vetor exato (inteiros em ±1000; o joystick manda qualquer ângulo);
+  // `dir` é o octante dele (ou a direção, para quem só tem 8). O `irPara` aceita um ponto com fração (o toque).
+  | { t: 'mover'; dir: Dir8 | 'parado'; dx?: number; dy?: number }
   | { t: 'irPara'; x: number; y: number }
   | { t: 'usarHabilidade'; id: string; alvo?: EntidadeId | Celula }
   | { t: 'ataqueBasico'; alvo?: EntidadeId }

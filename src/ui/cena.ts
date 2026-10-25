@@ -566,7 +566,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       return {
         tick: estado.tick,
         celula: { x: j?.x ?? 0, y: j?.y ?? 0 },
-        destino: { x: j?.destinoX ?? 0, y: j?.destinoY ?? 0 },
+        // Marco 26 (D-104): a célula onde o movimento em curso termina (parado: a própria).
+        destino: ((fim) => (fim ? { x: Math.round(fim.x), y: Math.round(fim.y) } : { x: j?.x ?? 0, y: j?.y ?? 0 }))(j?.caminho.at(-1) ?? j?.waypoints.at(-1)),
         tela: camera.paraTela(p.x, p.y),
         grade: [camera.paraTela(j?.x ?? 0, j?.y ?? 0), camera.paraTela((j?.x ?? 0) + 1, j?.y ?? 0), camera.paraTela(j?.x ?? 0, (j?.y ?? 0) + 1)],
         entidades: estado.entidades.length,

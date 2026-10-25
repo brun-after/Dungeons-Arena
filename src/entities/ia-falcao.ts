@@ -96,7 +96,7 @@ function mudarModo(ia: EstadoIa, modo: EstadoIa['modo'], tick: number, ativo: bo
 
 /** O dono parado e sem conjurar (o falcão pode pousar). */
 function donoQuieto(dono: Entidade): boolean {
-  return !emPasso(dono) && dono.caminho.length === 0 && !dono.acao;
+  return !emPasso(dono) && dono.direcao === 'parado' && dono.caminho.length === 0 && !dono.acao;
 }
 
 /**

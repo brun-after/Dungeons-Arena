@@ -199,7 +199,7 @@ export class CamadaEntidades {
     this.camada.addChild(raiz);
     return {
       raiz, chao, silhueta, seta, rig: null, barras, aneis, indicador, cor,
-      angulo: 0, sentido: 1, ultimoX: e.x, ultimoY: e.y, visualX: Number.NaN, visualY: Number.NaN,
+      angulo: 0, sentido: 1, ultimoX: e.px, ultimoY: e.py, visualX: Number.NaN, visualY: Number.NaN,
       andandoAteMs: 0, acaoId: null, ataqueDesdeMs: -Infinity, golpe: null, chaveGolpe: '', escala, topo: -RAIO * escala, achatamento: 1, chaoDesenhado: '',
     };
   }
@@ -251,12 +251,13 @@ export class CamadaEntidades {
         m = this.criar(e, cor);
         this.marcadores.set(e.id, m);
       }
-      const dx = e.destinoX - e.x || e.x - m.ultimoX;
-      const dy = e.destinoY - e.y || e.y - m.ultimoY;
-      if (dx !== 0 || dy !== 0) m.angulo = Math.atan2(dy, dx);
-      if (e.acao) m.angulo = Math.atan2(e.acao.alvoY - e.y, e.acao.alvoX - e.x) || m.angulo;
-      m.ultimoX = e.x;
-      m.ultimoY = e.y;
+      // Marco 26 (D-104): o rumo é o quanto a posição contínua andou desde o último quadro.
+      const dx = e.px - m.ultimoX;
+      const dy = e.py - m.ultimoY;
+      if (dx * dx + dy * dy > 1e-6) m.angulo = Math.atan2(dy, dx);
+      if (e.acao) m.angulo = Math.atan2(e.acao.alvoY - e.py, e.acao.alvoX - e.px) || m.angulo;
+      m.ultimoX = e.px;
+      m.ultimoY = e.py;
 
       // O ataque sai no lançamento: a ação em curso some (ou troca) e o empurrão começa.
       const acaoAtual = e.acao?.acaoId ?? null;

@@ -66,7 +66,7 @@ function celulaDeSaida(s: SalaCampanha): { x: number; y: number } {
 /** Põe na célula já com a espera da porta cumprida (marco 24, D-099: sair pede ficar parado nela). */
 function porEm(s: SalaCampanha, e: Entidade, c: { x: number; y: number }): void {
   const espera = ticksDe(s.ctx.balance.portas.esperaMs);
-  Object.assign(e, { x: c.x, y: c.y, destinoX: c.x, destinoY: c.y, progressoPasso: 0, caminho: [], waypoints: [], naPortaDesdeTick: s.estado.tick - espera });
+  Object.assign(e, { x: c.x, y: c.y, caminho: [], waypoints: [], naPortaDesdeTick: s.estado.tick - espera });
 }
 
 function porNaSaida(s: SalaCampanha, e: Entidade): void {

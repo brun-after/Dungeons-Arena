@@ -15,7 +15,7 @@ import type { EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { aleatorio } from '../core/rng';
 import { ticksDe } from '../core/tempo';
-import { emPasso, vivo, type Entidade } from '../entities/entidade';
+import { posicionar, emPasso, vivo, type Entidade } from '../entities/entidade';
 import { celulaLivrePara, ordemRotativa } from './colisao';
 import { passavel, tipoEm, type PortaInterna } from './fase';
 import { largarPerto, novoObjeto } from './objetos';
@@ -70,7 +70,7 @@ function teleportar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sai
   const c = celulaDeChegada(estado, ctx, e, achada.destino);
   if (!c) return false;
   estado.recargas[chave] = estado.tick + ticksDe(ctx.balance.portas.recargaMs);
-  Object.assign(e, { x: c.x, y: c.y, destinoX: c.x, destinoY: c.y, progressoPasso: 0, caminho: [], waypoints: [] });
+  posicionar(e, c.x, c.y);
   saida.push({ t: 'teleportou', tick: estado.tick, id: e.id, numero: achada.porta.numero, x: c.x, y: c.y });
   return true;
 }
@@ -111,7 +111,7 @@ export function esperouNaPorta(estado: EstadoJogo, ctx: ContextoSimulacao, e: En
 /** Marco 24 (D-099): conta a espera de quem está parado na porta de fase e, ao completar, sai (uma vez). */
 function aguardarNaPorta(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
   const retorno = naPortaDeRetorno(ctx, e);
-  const parado = !emPasso(e) && e.caminho.length === 0;
+  const parado = !emPasso(e) && e.direcao === 'parado' && e.caminho.length === 0;
   if (!parado || (!retorno && !naSaidaAberta(estado, ctx, e))) {
     delete e.naPortaDesdeTick;
     return;

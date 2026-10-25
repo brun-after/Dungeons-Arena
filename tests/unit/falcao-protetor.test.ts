@@ -116,7 +116,7 @@ describe('falcão protetor (marco 25)', () => {
       Object.assign(a.falcao, { x: 10, y: 9 });
       simular(a.estado, ctx, [{ tick: a.estado.tick, entidadeId: 'j', cmd: { t: 'usarHabilidade', id: 'golpe_atordoante', alvo: 'b' } }], a.eventos, DT_MS);
       for (let i = 0; i < 400 && !a.eventos.some((e) => e.t === 'impacto' || e.t === 'esquivou'); i++) {
-        if (afastar && !a.j.acao) Object.assign(a.j, { x: 1, y: 9, destinoX: 1, destinoY: 9 });
+        if (afastar && !a.j.acao) Object.assign(a.j, { x: 1, y: 9});
         a.tick();
       }
       return a.eventos.find((e) => e.t === 'impacto' || e.t === 'esquivou')?.t;

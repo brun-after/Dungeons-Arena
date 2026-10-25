@@ -43,8 +43,8 @@ function cenario() {
     aplicarEfeito(estado, ctx, ent(sobreId), efeito, { id: o.id, x: o.x, y: o.y }, mira, eventos);
   };
   const por = (e: Entidade, x: number, y: number) => {
-    e.x = e.destinoX = x;
-    e.y = e.destinoY = y;
+    e.x = x;
+    e.y = y;
   };
   return { ctx, estado, eventos, ent, tick, ticks, ef, aplicar, por };
 }

@@ -66,9 +66,9 @@ describe('loopback: dois clientes, predição e reconciliação (§3.6, §5.6)',
     const e2 = buscarEntidade(amb.sala.estado, c2.entidadeId);
     if (!e1 || !e2) throw new Error('entidades ausentes');
     // Lados opostos do orbe em (6,10), ambos feridos.
-    e1.x = e1.destinoX = 5;
-    e2.x = e2.destinoX = 7;
-    e1.y = e1.destinoY = e2.y = e2.destinoY = 10;
+    e1.x = 5;
+    e2.x = 7;
+    e1.y = e2.y = 10;
     e1.hp = e2.hp = 10;
     e1.autoAtaque = e2.autoAtaque = false;
     amb.sala.estado.objetos = [];

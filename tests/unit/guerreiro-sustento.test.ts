@@ -59,5 +59,6 @@ it('o avanço recalcula o trajeto até o destino clicado e conserva a direção 
   expect([c.j.x, c.j.y]).toEqual([5, 3]);
   expect(c.j.caminho.at(-1)).toEqual({ x: 3, y: 5 });
   expect(c.j.direcao).toBe('S');
-  expect(Math.abs(obter(c.j.caminho[0]).x - c.j.x) + Math.abs(obter(c.j.caminho[0]).y - c.j.y)).toBe(1);
+  // Marco 26 (D-104): o resto do trajeto sai suavizado, em trechos retos.
+  expect(c.j.caminho.length).toBeLessThanOrEqual(2);
 });
