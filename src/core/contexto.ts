@@ -64,6 +64,8 @@ export interface Balance {
   estados: { esquivaMaxPct: number; cegoMaxPct: number; contragolpeAtordoarMs: number; contragolpeFuria: number };
   /** Marco 24 (D-095): quantas passivas gerais ficam ligadas ao mesmo tempo. */
   passivasGerais: { maxAtivas: number };
+  /** Marco 24 (D-095): quantas gerais da mesma família nas teclas 3–6 fazem Domínio. */
+  sintonia: { dominioMinimo: number };
   hp: {
     hpAtributoMult: number;
     dificuldadeMult: number;

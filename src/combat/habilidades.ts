@@ -47,7 +47,9 @@ export type Modificador = (typeof MODIFICADORES)[number];
  * Marco 24 (24/10/2026, D-094): as variantes de uma habilidade, ligadas pelo estado de quem usa. `frenesi` (o
  * Guerreiro em Frenesi), `furia_alta` (fúria acima da metade) e `enc_<elemento>` (o elemento que o Mago encarna).
  */
-export const VARIANTES = ['frenesi', 'furia_alta', 'enc_fogo', 'enc_gelo', 'enc_raio', 'enc_terra', 'enc_veneno', 'enc_trevas', 'enc_sagrado'] as const;
+export const VARIANTES = ['frenesi', 'furia_alta', 'enc_fogo', 'enc_gelo', 'enc_raio', 'enc_terra', 'enc_veneno', 'enc_trevas', 'enc_sagrado',
+  // Marco 24 (D-095): as marcas de Domínio nas ultimates (2 gerais da mesma família nas teclas 3–6).
+  'dom_tecnica', 'dom_arcana', 'dom_suporte', 'dom_fogo', 'dom_veneno', 'dom_terra', 'dom_sombra', 'dom_sagrado', 'dom_psiquico'] as const;
 export type Variante = (typeof VARIANTES)[number];
 
 /** Marco 24: o que uma variante muda — os ajustes de um marco, mais a conjuração, o elemento e efeitos trocados. */

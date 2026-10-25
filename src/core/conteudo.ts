@@ -23,11 +23,13 @@ import cooperativoJson from '../data/modos/cooperativo.json';
 import livreJson from '../data/modos/livre.json';
 import skillsJson from '../data/skills.json';
 import ultimatesJson from '../data/ultimates.json';
+import sintoniaJson from '../data/sintonia.json';
 import temasJson from '../data/temas.json';
 import afinidadesJson from '../data/afinidades.json';
 import armasJson from '../data/armas.json';
 import { lerArmas, type RegrasDeArmas } from '../progression/armas';
 import { lerUltimates, type Ultimate } from '../combat/ultimates';
+import { lerSintonia, type RegrasSintonia } from '../progression/sintonia';
 import { conferirClassesEUltimates } from './conteudo-classes';
 import { lerAfinidades, type CatalogoAfinidades } from '../combat/afinidade';
 import { lerTemas, type Tema } from '../world/temas';
@@ -84,12 +86,15 @@ export interface Conteudo {
   armas: RegrasDeArmas;
   /** Marco 24 (D-094): as 140 ultimates (as definições delas e das etapas ficam em `definicoes`). */
   ultimates: Catalogo<Ultimate>;
+  /** Marco 24 (D-095): data/sintonia.json (Domínios, sintonias por classe, vertentes e encarnações duplas). */
+  sintonia: RegrasSintonia;
 }
 
 export interface FontesDeConteudo {
   skills: unknown;
   /** Marco 24: data/ultimates.json. */
   ultimates: unknown;
+  sintonia: unknown;
   inimigos: unknown;
   classes: unknown;
   itens: unknown;
@@ -117,6 +122,7 @@ export interface FontesDeConteudo {
 export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; erros: string[] } {
   const h = lerHabilidades(fontes.skills);
   const ul = lerUltimates(fontes.ultimates);
+  const si = lerSintonia(fontes.sintonia);
   for (const [id, def] of ul.definicoes) {
     if (h.definicoes.has(id)) ul.erros.push(`ultimates.json: "${id}" já existe em skills.json`);
     h.definicoes.set(id, def);
@@ -174,6 +180,8 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   for (const item of it.itens.values()) if (item.ensina !== null) conferir(`item ${item.id}`, [item.ensina]);
   for (const combo of cb.combos.values()) conferir(`combo ${combo.id}`, combo.sequencia.filter((s) => s !== '@ultimate'));
   erros.push(...conferirClassesEUltimates(h.definicoes, c.classes, ul.ultimates, p.presets, it.itens));
+  erros.push(...si.erros);
+  for (const v of si.sintonia.vertentes) if (!c.classes.has(v.classe)) erros.push(`sintonia.json: vertente ${v.id} de classe desconhecida "${v.classe}"`);
   for (const [e, a] of af.afinidades.elementos) conferir(`afinidade ${e}`, [a.habilidade]);
   conferir('armas.json', Object.values(ar.armas.basicoDaFamilia));
   for (const id of c.classes.keys()) if (!ar.armas.naturalDaClasse.has(id)) erros.push(`armas.json: classe sem família natural "${id}"`);
@@ -231,6 +239,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       afinidades: af.afinidades,
       armas: ar.armas,
       ultimates: ul.ultimates,
+      sintonia: si.sintonia,
     },
     erros,
   };
@@ -259,6 +268,7 @@ export function foraDoOrcamento(def: DefinicaoHabilidade, fontes: FontesCompilac
 export const FONTES_OFICIAIS: FontesDeConteudo = {
   skills: skillsJson,
   ultimates: ultimatesJson,
+  sintonia: sintoniaJson,
   inimigos: inimigosJson,
   classes: classesJson,
   itens: itensJson,

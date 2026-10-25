@@ -94,6 +94,7 @@
   },
   "estados": { "esquivaMaxPct": 50, "cegoMaxPct": 60, "contragolpeAtordoarMs": 1000, "contragolpeFuria": 20 },
   "passivasGerais": { "maxAtivas": 3 },
+  "sintonia": { "dominioMinimo": 2 },
   "hp": {
     "hpAtributoMult": 4,
     "dificuldadeMult": 1,

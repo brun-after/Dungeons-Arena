@@ -11,6 +11,7 @@ import { definicaoDe, resolverHabilidade } from './compilar-habilidade';
 import type { DefinicaoHabilidade, Habilidade, Modificador, Passiva, Variante } from './habilidades';
 import { furiaAtual } from './furia';
 import { modificadoresDosConjuntos } from '../progression/ganchos-do-portador';
+import { sintoniaDe } from '../progression/sintonia';
 
 export type ContextoPerfil = Pick<ContextoSimulacao, 'conteudo' | 'balance'>;
 
@@ -26,7 +27,7 @@ export const PERFIL_NEUTRO: PerfilHabilidade = { danoPct: 0, curaPct: 0, alcance
 
 /**
  * Marco 24 (24/10/2026, D-094): as variantes que o estado do ator liga nesta habilidade — o Frenesi, a fúria acima da
- * metade e o elemento encarnado. Sem `tick`, vale o que está guardado (os efeitos vencidos saem no fim de cada tick).
+ * metade, o elemento encarnado e, nas ultimates, as marcas de Domínio da barra. Sem `tick`, vale o que está guardado (os efeitos vencidos saem no fim de cada tick).
  */
 export function variantesDoAtor(ctx: ContextoPerfil, ator: Entidade, def: DefinicaoHabilidade | null, tick?: number): Variante[] {
   if (!def || Object.keys(def.variantes).length === 0) return [];
@@ -40,6 +41,13 @@ export function variantesDoAtor(ctx: ContextoPerfil, ator: Entidade, def: Defini
   if (ator.encarnacao && vale(ator.encarnacaoAteTick ?? 0)) {
     const v = `enc_${ator.encarnacao}` as Variante;
     if (def.variantes[v]) saida.push(v);
+  }
+  // Marco 24 (D-095): o Domínio (2 gerais da mesma família nas teclas 3–6) marca qualquer ultimate.
+  if (def.base.tags.includes('ultimate')) {
+    for (const f of sintoniaDe(ctx, ator).dominios) {
+      const v = `dom_${f}` as Variante;
+      if (def.variantes[v]) saida.push(v);
+    }
   }
   return saida;
 }
