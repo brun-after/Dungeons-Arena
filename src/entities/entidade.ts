@@ -317,7 +317,8 @@ export interface Entidade {
   /** Marco 22 (D-089): Mira firme do Arqueiro — a barra enche a partir deste tick (dano recebido ou tiro carregado zeram). */
   mira?: { desdeTick: number };
   /** Marco 21 (D-088): fúria do Guerreiro, valor no `ultimoTick` (o esvaziamento é calculado na leitura). */
-  furia?: { valor: number; ultimoTick: number };
+  /** Marco 24 (D-094): `frenesiAteTick`, o fim do Frenesi (a barra fica cheia até lá e zera no fim). */
+  furia?: { valor: number; ultimoTick: number; frenesiAteTick?: number };
   /** Marco 24 (24/10/2026, D-097): para onde olha (último passo ou quem ataca); ausente = sul. Decide o "pelas costas". */
   olhando?: Dir8;
   /** Marco 24 (D-094): o medidor da ultimate (0..balance.ultimate.max); ausente = vazio. */

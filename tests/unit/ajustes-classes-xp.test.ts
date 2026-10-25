@@ -361,9 +361,11 @@ describe('progressão de contato e concentração arcana', () => {
     expect(protecaoInicial(c.estado, c.ctx, c.j, c.alvo)).toBe(1);
     const outro = criarEntidade({ id: 'b', tipo: 'inimigo', x: 3, y: 4, hpMax: 100 });
     c.estado.entidades.push(outro);
-    expect(protecaoInicial(c.estado, c.ctx, c.j, c.alvo)).toBeCloseTo(1 - .15 * (1 - (5/9)**2));
+    // Marco 24 (D-094): o teto caiu de 15% para 10% (o resto virou escudo por acerto).
+    const teto = c.ctx.balance.ajustesClasses.guerreiro.grupoReducaoMaxPct / 100;
+    expect(protecaoInicial(c.estado, c.ctx, c.j, c.alvo)).toBeCloseTo(1 - teto * (1 - (5/9)**2));
     c.j.nivel = 10;
-    expect(protecaoInicial(c.estado, c.ctx, c.j, c.alvo)).toBe(.85);
+    expect(protecaoInicial(c.estado, c.ctx, c.j, c.alvo)).toBeCloseTo(1 - teto, 10);
     outro.x = 10;
     expect(protecaoInicial(c.estado, c.ctx, c.j, c.alvo)).toBe(1);
     expect(protecaoInicial(c.estado, c.ctx, c.j, c.j)).toBe(1);

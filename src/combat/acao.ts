@@ -1,4 +1,5 @@
 import { clonarEntidade } from '../entities/entidade';
+import { velocidadeFrenesiPct } from './furia';
 import { prepararSequencia, participaDeCombo } from './sequencias';
 // O ciclo de uma ação (§2.7): intenção -> validação -> conjuração -> viagem -> impacto.
 // Custo e recarga são pagos no início da conjuração. Durante a conjuração a ação fica telegrafada
@@ -229,7 +230,7 @@ export function iniciarAcao(
     // `ab_recarga` encurta a recarga do ataque básico (até 75%); o perfil, a de qualquer habilidade.
     // Marco 17: a Destreza acima de 10 também encurta o básico (somada ao `ab_recarga`, dentro do mesmo teto).
     // Marco 18: o teto passa a 75% só somando buff; a Destreza do arqueiro chega a 50% sozinha.
-    const reducao = hab.id === ator.ataqueBasico ? Math.min(75, bonusAtaqueBasico(ator, estado.tick).recargaPct + reducaoRecargaBasicoPct(ator.atributos, ctx.balance, perfilDestreza(ctx, ator))) : 0;
+    const reducao = hab.id === ator.ataqueBasico ? Math.min(75, bonusAtaqueBasico(ator, estado.tick).recargaPct + reducaoRecargaBasicoPct(ator.atributos, ctx.balance, perfilDestreza(ctx, ator)) + velocidadeFrenesiPct(ctx, ator, estado.tick)) : 0;
     const ms = hab.recargaMs * (1 - reducao / 100) * (1 + perfil.recargaPct / 100);
     estado.recargas[chave] = Math.max(estado.recargas[chave] ?? 0, estado.tick + ticksDe(ms));
   }

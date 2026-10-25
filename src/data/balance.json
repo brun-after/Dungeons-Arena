@@ -6,7 +6,7 @@
       "contatoMaxPct": 15,
       "contatoNivel": 10,
       "contatoExpoente": 2,
-      "grupoReducaoMaxPct": 15,
+      "grupoReducaoMaxPct": 10,
       "grupoNivelPleno": 10,
       "grupoRaio": 2,
       "extraInicioNivel": 10,
@@ -18,7 +18,7 @@
       "auraCuraMaxPct": 50,
       "auraDefesaPct": 50,
       "curaAoAbaterPct": 50,
-      "furia": { "max": 100, "porBasico": 12, "carenciaMs": 3000, "perdaPorS": 20, "curaMult": 2 },
+      "furia": { "max": 100, "porBasico": 12, "carenciaMs": 3000, "perdaPorS": 20, "curaMult": 2, "frenesi": { "duracaoMs": 6000, "danoPct": 20, "velocidadeAtaquePct": 15 } },
       "reforcosInicioNivel": 16,
       "reforcosPlenosNivel": 20,
       "movimentoMult": 1.15

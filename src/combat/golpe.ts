@@ -1,4 +1,5 @@
 import { multiplicadorDardo, registrarDardo } from './concentracao-arcana';
+import { encherFuria } from './frenesi';
 import { entregaRemota, extraGuerreiro, multiplicadorDireto, protecaoInicial, pulsarAura } from './ajustes-classes';
 import { comboDoImpacto, confirmarImpactoTatico } from './sequencias';
 import { defenderGolpe, fluxoRestaurador } from './tatica';
@@ -205,7 +206,7 @@ export function aplicarImpacto(
   const curaBasicoPct = conjurador?.bolsa ? (ctx.balance.recursos.curaBasicoPorClassePct[conjurador.bolsa.classeId] ?? 0) : 0;
   const basicoQueFere = !!conjurador && vivo(conjurador) && conjurador !== alvo && hab.id === conjurador.ataqueBasico && dano > 0 && podeFerir(conjurador, alvo, ctx.modo);
   // Marco 21 (D-088): o básico que fere enche a fúria do Guerreiro (antes da cura, que já dobra no golpe que a enche).
-  if (conjurador && basicoQueFere && acumularFuria(ctx, conjurador, estado.tick)) cargaDaClasse(ctx, conjurador, 'furiaCheia', estado.tick, saida);
+  if (conjurador && basicoQueFere && acumularFuria(ctx, conjurador, estado.tick)) encherFuria(estado, ctx, conjurador, origem, saida);
   if (conjurador && basicoQueFere && curaBasicoPct > 0) {
     const valor = Math.min(hpAntes, dano) * curaBasicoPct / 100 * multiplicadorFuria(ctx, conjurador, estado.tick);
     aplicarEfeito(estado, ctx, conjurador, construirEfeito('cura', { valor }), origem, null, saida);

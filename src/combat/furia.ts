@@ -17,6 +17,11 @@ export function furiaAtual(ctx: Pick<ContextoSimulacao, 'balance'>, e: Entidade,
   const f = e.furia;
   if (!f) return 0;
   const r = ctx.balance.ajustesClasses.guerreiro.furia;
+  // Marco 24 (D-094): no Frenesi a barra fica cheia; no fim, zera (o que veio depois soma do zero).
+  if (f.frenesiAteTick !== undefined) {
+    if (tick < f.frenesiAteTick) return r.max;
+    if (f.ultimoTick < f.frenesiAteTick) return 0;
+  }
   const parado = tick - f.ultimoTick - ticksDe(r.carenciaMs);
   if (parado <= 0) return f.valor;
   return Math.max(0, f.valor - (parado * r.perdaPorS) / ticksDe(1000));
@@ -36,6 +41,7 @@ export function acumularFuria(ctx: ContextoSimulacao, e: Entidade, tick: number,
   if (!temFuria(e)) return false;
   const r = ctx.balance.ajustesClasses.guerreiro.furia;
   const antes = furiaAtual(ctx, e, tick);
+  if (emFrenesi(e, tick)) return false;
   e.furia = { valor: Math.min(r.max, antes + (quanto ?? r.porBasico)), ultimoTick: tick };
   // Marco 24 (D-094): devolve se a barra acabou de encher (a fúria cheia enche a ultimate).
   return antes < r.max && e.furia.valor >= r.max;
@@ -46,4 +52,20 @@ export function multiplicadorFuria(ctx: ContextoSimulacao, e: Entidade, tick: nu
   if (!temFuria(e)) return 1;
   const r = ctx.balance.ajustesClasses.guerreiro.furia;
   return furiaAtual(ctx, e, tick) >= r.max ? r.curaMult : 1;
+}
+
+/** Marco 24 (24/10/2026, D-094): o Guerreiro está em Frenesi (fúria cheia, por `frenesi.duracaoMs`). */
+export function emFrenesi(e: Entidade, tick: number): boolean {
+  return e.furia?.frenesiAteTick !== undefined && tick < e.furia.frenesiAteTick;
+}
+
+/** No Frenesi, o ataque básico fica tanto % mais rápido (somado à redução de recarga do básico). */
+export function velocidadeFrenesiPct(ctx: Pick<ContextoSimulacao, 'balance'>, e: Entidade, tick: number): number {
+  return emFrenesi(e, tick) ? ctx.balance.ajustesClasses.guerreiro.furia.frenesi.velocidadeAtaquePct : 0;
+}
+
+/** Marca o início do Frenesi na barra (o estado `frenesi`, com o dano e as variantes, vem de `encherFuria`). */
+export function marcarFrenesi(ctx: Pick<ContextoSimulacao, 'balance'>, e: Entidade, tick: number): void {
+  const r = ctx.balance.ajustesClasses.guerreiro.furia;
+  e.furia = { valor: r.max, ultimoTick: tick, frenesiAteTick: tick + ticksDe(r.frenesi.duracaoMs) };
 }
