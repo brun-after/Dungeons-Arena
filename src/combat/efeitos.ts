@@ -15,6 +15,7 @@ import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type Armadilha, type EstadoJogo } from '../core/estado';
 import { passivosDe } from '../progression/ganchos-do-portador';
 import { inamovivelPelaSintonia } from './sintonia-guerreiro';
+import { mortoInamovivel } from './sintonia-necromante';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { congelada, vivo, type EfeitoAtivo, type Entidade } from '../entities/entidade';
@@ -237,7 +238,7 @@ export function aplicarEfeito(
       case 'empurrao':
         // Marco 18: quem é inamovível (ressonância, grevas, escudo Último) não sai do lugar.
         // Marco 24 (D-095): nem o Guerreiro com a sintonia da terra no Frenesi.
-        if (!passivosDe(ctx, alvo).inamovivel && !inamovivelPelaSintonia(ctx, alvo, tick)) {
+        if (!passivosDe(ctx, alvo).inamovivel && !inamovivelPelaSintonia(ctx, alvo, tick) && !mortoInamovivel(estado, ctx, alvo)) {
           const dx = Math.sign(alvo.x - origem.x), dy = Math.sign(alvo.y - origem.y);
           empurrar(estado, ctx, alvo, origem, ef.valor);
           if ((dx || dy) && muralhaEm(estado, alvo.x + dx, alvo.y + dy)) {
@@ -247,7 +248,7 @@ export function aplicarEfeito(
         }
         break;
       case 'puxao':
-        if (!passivosDe(ctx, alvo).inamovivel && !inamovivelPelaSintonia(ctx, alvo, tick) && puxar(estado, ctx, alvo, origem, ef.valor)) { const ator = buscarEntidade(estado, origem.id); if (ator) fato(ator, 'puxou', alvo.id, origem.acaoId); }
+        if (!passivosDe(ctx, alvo).inamovivel && !inamovivelPelaSintonia(ctx, alvo, tick) && !mortoInamovivel(estado, ctx, alvo) && puxar(estado, ctx, alvo, origem, ef.valor)) { const ator = buscarEntidade(estado, origem.id); if (ator) fato(ator, 'puxou', alvo.id, origem.acaoId); }
         break;
       case 'trocar': {
         const outro = buscarEntidade(estado, origem.id);

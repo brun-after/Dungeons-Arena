@@ -565,6 +565,95 @@
             }
           }
         ]
+      },
+      "necromante": {
+        "tecnica": [
+          {
+            "t": "mortoAplica",
+            "efeito": {
+              "tipo": "sangrando",
+              "valor": 2,
+              "duracaoMs": 3000
+            },
+            "dobra": true
+          }
+        ],
+        "arcana": [
+          {
+            "t": "mortoCaiSeta",
+            "valor": 8,
+            "raio": 5,
+            "dobra": true
+          }
+        ],
+        "suporte": [
+          {
+            "t": "curaGeralNosMortos",
+            "n": 2,
+            "dobra": true
+          }
+        ],
+        "fogo": [
+          {
+            "t": "mortoCaiExplode",
+            "valor": 6,
+            "raio": 1,
+            "efeito": {
+              "tipo": "queimando",
+              "valor": 2,
+              "duracaoMs": 3000
+            },
+            "dobra": true
+          }
+        ],
+        "veneno": [
+          {
+            "t": "mortoAplica",
+            "efeito": {
+              "tipo": "envenenado",
+              "valor": 2,
+              "pct": 50,
+              "duracaoMs": 4000
+            },
+            "dobra": true
+          }
+        ],
+        "terra": [
+          {
+            "t": "mortoVida",
+            "pct": 20,
+            "dobra": true
+          },
+          {
+            "t": "mortoInamovivel"
+          }
+        ],
+        "sombra": [
+          {
+            "t": "mortoEsquiva",
+            "pct": 20,
+            "dobra": true
+          }
+        ],
+        "sagrado": [
+          {
+            "t": "mortoCaiCura",
+            "valor": 6,
+            "raio": 2,
+            "dobra": true
+          }
+        ],
+        "psiquico": [
+          {
+            "t": "mortoAterroriza",
+            "n": 3,
+            "ms": 3000,
+            "efeito": {
+              "tipo": "aterrorizado",
+              "duracaoMs": 1000
+            }
+          }
+        ]
       }
     },
     "vertentes": {
@@ -617,6 +706,41 @@
           "n": 2,
           "raio": 4,
           "pct": 15
+        }
+      ],
+      "lich": [
+        {
+          "t": "mortoAtira",
+          "habilidade": "dardo_arcano",
+          "raio": 4
+        }
+      ],
+      "senhor_da_praga": [
+        {
+          "t": "mortoAplica",
+          "efeito": {
+            "tipo": "envenenado",
+            "valor": 1,
+            "pct": 50,
+            "duracaoMs": 3000
+          },
+          "raio": 1
+        },
+        {
+          "t": "estadoDobraEm",
+          "estado": "envenenado",
+          "habilidade": "aterrorizado"
+        }
+      ],
+      "pastor_das_almas": [
+        {
+          "t": "mortoCaiCura",
+          "valor": 10,
+          "raio": 3
+        },
+        {
+          "t": "retornoDoServo",
+          "ms": 4000
         }
       ],
       "sentinela": [

@@ -16,7 +16,7 @@ export const TIPOS_SINTONIA = [
   'tiroCheioUltimo', 'miraAcelera', 'tiroCheioCuraAliados', 'tiroCheioInvisivel', 'tiroCheioRicochete', 'escudoParadoComMira',
   // Necromante
   'mortoAplica', 'mortoCaiSeta', 'curaGeralNosMortos', 'mortoCaiExplode', 'mortoVida', 'mortoEsquiva', 'mortoCaiCura',
-  'mortoAterroriza', 'mortoAtira', 'estadoDobraEm', 'retornoDoServo',
+  'mortoAterroriza', 'mortoAtira', 'estadoDobraEm', 'retornoDoServo', 'mortoInamovivel',
   // Aventureiro
   'falcaoGolpeiaComGeral', 'falcaoRepete', 'escudoNoFalcao', 'habilidadeAplica', 'mergulhoEmVolta', 'falcaoInvisivel',
   'habilidadeCuraAliados', 'falcaoGuardiao', 'falcaoRapina',

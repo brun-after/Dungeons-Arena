@@ -68,6 +68,17 @@ export const MECANICAS = {
     sagrado: [{ t: 'tiroCheioCuraAliados', valor: 8, dobra: true }],
     psiquico: [{ t: 'tiroCheioAplica', efeito: ef.silencia(1) }],
   },
+  necromante: {
+    tecnica: [{ t: 'mortoAplica', efeito: ef.sangra(2, 3), dobra: true }],
+    arcana: [{ t: 'mortoCaiSeta', valor: 8, raio: 5, dobra: true }],
+    suporte: [{ t: 'curaGeralNosMortos', n: 2, dobra: true }],
+    fogo: [{ t: 'mortoCaiExplode', valor: 6, raio: 1, efeito: ef.queima(2, 3), dobra: true }],
+    veneno: [{ t: 'mortoAplica', efeito: ef.envenena(2, 4), dobra: true }],
+    terra: [{ t: 'mortoVida', pct: 20, dobra: true }, { t: 'mortoInamovivel' }],
+    sombra: [{ t: 'mortoEsquiva', pct: 20, dobra: true }],
+    sagrado: [{ t: 'mortoCaiCura', valor: 6, raio: 2, dobra: true }],
+    psiquico: [{ t: 'mortoAterroriza', n: 3, ms: 3000, efeito: ef.medo(1) }],
+  },
 };
 
 /** Vertente (id) → entradas. */
@@ -80,5 +91,11 @@ export const MECANICAS_VERTENTES = {
   carcereiro: [{ t: 'desafiadoEnraiza', raio: 1, efeito: ef.enraiza(0.5) }],
   cacador_noturno: [{ t: 'tiroCheioInvisivel', estado: 'envenenado', pct: 100 }],
   atirador_de_elite: [{ t: 'tiroCheioRicochete', n: 2, raio: 4, pct: 15 }],
+  lich: [{ t: 'mortoAtira', habilidade: 'dardo_arcano', raio: 4 }],
+  senhor_da_praga: [
+    { t: 'mortoAplica', efeito: ef.envenena(1, 3), raio: 1 },
+    { t: 'estadoDobraEm', estado: 'envenenado', habilidade: 'aterrorizado' },
+  ],
+  pastor_das_almas: [{ t: 'mortoCaiCura', valor: 10, raio: 3 }, { t: 'retornoDoServo', ms: 4000 }],
   sentinela: [{ t: 'escudoParadoComMira', raio: 2, ms: 1000, efeito: ef.escudoAc(4, 12, 2), quando: 'parado' }],
 };

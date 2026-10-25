@@ -35,6 +35,7 @@ import { registrarParticipacao } from './participacao';
 import { cargaDaClasse, cargaPorMomento } from './carga-ultimate';
 import { furiaDaGeral, gastarCostas, reforcoDaGeral } from './sintonia-guerreiro';
 import { miraDaGeral } from './sintonia-arqueiro';
+import { aoGolpeDoMorto, curaGeralNosMortos, mortoEsquivou } from './sintonia-necromante';
 
 export interface Impacto {
   acaoId: number;
@@ -153,7 +154,8 @@ export function aplicarImpacto(
     }
     // Marco 14: o escudo absorve antes da vida.
     // Marco 24: o cego erra como quem esquiva (antes das defesas do alvo).
-    const cegou = absorve === 0 && !r.falha && !r.imune && cegoErra(estado, ctx, atacante);
+    // Marco 24 (D-095): o morto do Necromante com a sintonia da sombra também esquiva.
+    const cegou = absorve === 0 && !r.falha && !r.imune && (cegoErra(estado, ctx, atacante) || mortoEsquivou(estado, ctx, alvo));
     const defesa = cegou ? { esquivou: true, fator: 1 } : absorve === 0 && !r.falha && !r.imune && atacante ? defenderGolpe(estado, ctx, alvo, atacante, hab.tipoAtaque === 'fisico', saida) : { esquivou: false, fator: 1 };
     if (defesa.esquivou) { falha = true; saida.push({ t: 'esquivou', tick, acaoId: impacto.acaoId, atorId: fonte.id, alvoId: alvo.id }); }
     const antesDoEscudo = defesa.esquivou || absorve > 0 ? 0 : Math.round(r.dano * defesa.fator);
@@ -222,6 +224,8 @@ export function aplicarImpacto(
   }
   if (conjurador) pulsarAura(estado, ctx, conjurador, alvo, Math.min(hpAntes, dano), saida, entregaRemota(hab));
   // Marco 24 (D-094): o primeiro alvo de cada ação enche o medidor da ultimate (a própria ultimate não enche).
+  // Marco 24 (D-095): a sintonia do suporte do Necromante leva as curas e os escudos gerais aos mortos.
+  if (conjurador && impacto.indice === 0 && conjurador.bolsa) curaGeralNosMortos(estado, ctx, conjurador, alvo, hab, cura, saida);
   if (conjurador && impacto.indice === 0 && !hab.tags.includes('ultimate')) {
     if (dano > 0 && conjurador !== alvo) cargaPorMomento(ctx, conjurador, basicoQueFere ? 'basico' : 'habilidade', estado.tick, saida);
     // O acerto das skills do falcão enche do jeito do Aventureiro (no máximo uma vez por intervalo).
@@ -259,6 +263,8 @@ export function aplicarImpacto(
     }
     // Marco 24 (D-095): as passivas de quem bate que aplicam estado por chance.
     if (conjurador && conjurador !== alvo) for (const ef of estadosAoAcertar(estado, ctx, conjurador)) aplicarEfeito(estado, ctx, alvo, ef, origem, mira, saida);
+    // A sintonia do Necromante nos golpes dos mortos.
+    if (conjurador && conjurador !== alvo) aoGolpeDoMorto(estado, ctx, conjurador, alvo, saida);
   }
   // Dispatcher único (§2.8); `em: 'conjurador'` cai sobre quem lançou (ex.: avanço, roubo de vida).
   for (const efeito of hab.efeitos) {

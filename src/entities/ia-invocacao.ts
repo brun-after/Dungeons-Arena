@@ -13,6 +13,7 @@ import { alvoOfensivoValido, iniciarAcao, prioridadeDeAlvo } from '../combat/aca
 import { aplicarEfeito } from '../combat/efeitos';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
 import { construirEfeito } from '../combat/registro-efeitos';
+import { ataqueDoMorto } from '../combat/sintonia-necromante';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
@@ -116,9 +117,11 @@ export function processarInvocacao(estado: EstadoJogo, ctx: ContextoSimulacao, e
   }
   mudarModo(ia, 'perseguindo', alvo.id, estado.tick);
   const celulaAlvo = celulaOcupada(alvo);
-  if (chebyshev(celulaOcupada(e), celulaAlvo) <= 1) {
+  // Marco 24 (D-095): com a vertente Lich, os mortos atiram de longe.
+  const lich = ataqueDoMorto(estado, ctx, e);
+  if (chebyshev(celulaOcupada(e), celulaAlvo) <= (lich?.alcance ?? 1)) {
     if (!emPasso(e)) pararMovimento(e);
-    if (!e.acao && estado.tick >= ia.proximoAtaqueTick && iniciarAcao(estado, ctx, e, e.ataqueBasico, alvo.id, saida)) {
+    if (!e.acao && estado.tick >= ia.proximoAtaqueTick && iniciarAcao(estado, ctx, e, lich?.habilidade ?? e.ataqueBasico, alvo.id, saida)) {
       ia.proximoAtaqueTick = estado.tick + ticksDe(preset.intervaloAtaqueMs);
       ia.ataquesFeitos++;
     }
