@@ -81,11 +81,15 @@ export type MotivoHabilidade =
   | 'fusao_runa'
   | 'fusao_niveis'
   | 'fusao_unica'
-  /** Marco 24 (D-094): a tecla nÃ£o aceita esse tipo (1â€“2 sÃ³ de classe, 3â€“6 sÃ³ gerais); a geral ainda nÃ£o foi liberada
-   *  por livro; a skill de classe nÃ£o se aprende nem sobe com ponto (vem do livro e do nÃ­vel). */
+  /** Marco 24 (D-094): a tecla não aceita esse tipo (1–2 só de classe, 3–6 só gerais); a geral ainda não foi liberada
+   *  por livro; a skill de classe não se aprende nem sobe com ponto (vem do livro e do nível). */
   | 'tecla_errada'
   | 'nao_liberada'
-  | 'de_classe';
+  | 'de_classe'
+  /** Marco 24 (D-095): só passivas gerais se ligam; a troca é fora de combate e até o limite. */
+  | 'nao_passiva'
+  | 'em_combate'
+  | 'limite_passivas';
 
 export type MotivoCancelamento = 'morte' | 'interrompido' | 'alvo_invalido' | 'substituido';
 
@@ -147,6 +151,8 @@ export type EventoSimulacao =
   /** Marco 14: habilidade aprendida ou com rank novo (e o caminho escolhido, nos ranks de evolução). */
   | { t: 'habilidadeMudou'; tick: number; id: EntidadeId; habilidadeId: string; rank: number; caminho: string | null }
   | { t: 'habilidadeRecusada'; tick: number; id: EntidadeId; habilidadeId: string; motivo: MotivoHabilidade }
+  /** Marco 24 (D-095): uma passiva geral ligada ou desligada. */
+  | { t: 'passivaDefinida'; tick: number; id: EntidadeId; habilidadeId: string; ligada: boolean }
   // Marco 18 (D-068): o estudo de uma habilidade nova.
   | { t: 'estudoIniciado'; tick: number; id: EntidadeId; habilidadeId: string; totalTicks: number }
   /** Marco 24 (D-094): o livro de uma geral a liberou (aprender custa um ponto). */

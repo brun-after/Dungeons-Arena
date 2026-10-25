@@ -9,6 +9,7 @@
 // - livros ensinam no rank 1, sem gastar ponto.
 // `Entidade.habilidades` é sempre derivada da barra (`habilidadesDaBarra`), como a ficha deriva da bolsa.
 
+import { ligarAoAprender } from './passivas-gerais';
 import { familiaDaHabilidade } from './itens-progressao';
 import { definicaoDe } from '../combat/compilar-habilidade';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -226,6 +227,7 @@ function concluirEstudo(e: Entidade, ctx: ContextoSimulacao, tick: number, saida
   if (!bolsa.conhecidas.some((c) => c.id === estudo.id)) {
     bolsa.conhecidas.push({ id: estudo.id, rank: 1, caminhos: [] });
     ocuparTeclaLivre(ctx, bolsa, estudo.id);
+    ligarAoAprender(ctx, bolsa, estudo.id);
     atualizar(e, ctx);
     saida.push({ t: 'habilidadeMudou', tick, id: e.id, habilidadeId: estudo.id, rank: 1, caminho: null });
   }

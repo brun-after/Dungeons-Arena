@@ -65,11 +65,13 @@ export function habilidadeDoAtor(ctx: ContextoPerfil, ator: Entidade, id: string
   return resolverHabilidade(ctx, chaveDoAtor(ctx, ator, id, tick));
 }
 
-/** As passivas que o personagem conhece, escaladas pelo rank. */
+/** As passivas que o personagem conhece, escaladas pelo rank. Marco 24 (D-095): as gerais, só as ligadas. */
 export function passivasDaBolsa(ctx: ContextoPerfil, bolsa: Bolsa): Passiva[] {
   const saida: Passiva[] = [];
   for (const c of bolsa.conhecidas) {
-    const p = definicaoDe(ctx, c.id)?.base.passiva;
+    const def = definicaoDe(ctx, c.id);
+    const p = def?.base.passiva;
+    if (def?.familiaGeral && !bolsa.passivasAtivas?.includes(c.id)) continue;
     if (p) saida.push(escalarPassiva(p, c.rank, ctx));
   }
   return saida;

@@ -269,10 +269,12 @@ describe('progressão de habilidades', () => {
     expect(j.habilidades.slice(0, 2)).toEqual(['raio_em_cadeia', 'lanca_de_gelo']);
     c.tick([['j', { t: 'equiparHabilidade', id: 'seta_arcana', slot: 5 }]]);
     expect(bolsa.barra[5]).toBe('seta_arcana');
-    // Passiva conhecida melhora a ficha e não vai para a tecla.
+    // Passiva geral conhecida só vale ligada (D-095): ligar melhora a ficha, e ela não vai para a tecla.
     bolsa.conhecidas.push({ id: 'pele_de_pedra', rank: 1, caminhos: [] });
     const antes = j.hpMax;
     recalcularFicha(j, c.ctx);
+    expect(j.hpMax).toBe(antes);
+    c.tick([['j', { t: 'ativarPassiva', id: 'pele_de_pedra' }]]);
     expect(j.hpMax).toBeGreaterThan(antes);
     c.tick([['j', { t: 'equiparHabilidade', id: 'pele_de_pedra', slot: 3 }]]);
     expect(c.eventos.at(-1)).toMatchObject({ t: 'habilidadeRecusada', motivo: 'passiva' });

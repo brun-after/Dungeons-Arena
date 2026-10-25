@@ -161,6 +161,9 @@ export function lerComando(v: unknown): Comando | null {
       const alvo = id(v.alvo) ? v.alvo : lerCelula(v.alvo);
       return alvo ? { t: 'usarUltimate', alvo } : null;
     }
+    case 'ativarPassiva':
+    case 'desativarPassiva':
+      return id(v.id) ? { t: v.t, id: v.id } : null;
     case 'autoAtaque':
       return typeof v.ligado === 'boolean' ? { t: 'autoAtaque', ligado: v.ligado } : null;
     default:

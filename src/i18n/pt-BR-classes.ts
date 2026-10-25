@@ -78,5 +78,8 @@ export const textosClasses = {
   'habilidades.motivo.tecla_errada': 'As teclas 1 e 2 são das skills de classe; 3 a 6, das gerais',
   'habilidades.motivo.nao_liberada': 'Ache o livro desta skill para poder aprendê-la',
   'habilidades.motivo.de_classe': 'Skill de classe: vem do livro da classe e sobe com o nível',
+  'habilidades.motivo.nao_passiva': 'Só passivas gerais se ligam no painel',
+  'habilidades.motivo.em_combate': 'Troque as passivas fora de combate',
+  'habilidades.motivo.limite_passivas': 'Já há 3 passivas ligadas',
   'feedback.habilidadeLiberada': 'Livro lido: {nome} liberada. Aprenda com um ponto de habilidade.',
 } as const;

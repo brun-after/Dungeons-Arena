@@ -49,7 +49,10 @@ export type Comando =
   /** Marco 24 (D-097): liga ou desliga o ataque básico automático (o botão Parar ataque e a tecla F). */
   | { t: 'autoAtaque'; ligado: boolean }
   /** Marco 24 (D-094): a ultimate do par nas teclas 1 e 2, com o medidor cheio (o botão grande e a tecla R). */
-  | { t: 'usarUltimate'; alvo?: EntidadeId | Celula };
+  | { t: 'usarUltimate'; alvo?: EntidadeId | Celula }
+  /** Marco 24 (D-095): liga ou desliga uma passiva geral conhecida (até 3, fora de combate). */
+  | { t: 'ativarPassiva'; id: string }
+  | { t: 'desativarPassiva'; id: string };
 
 /** Marco 15: os tipos de comando, para os modos listarem quais aceitam pela rede (`comandosDeRede`). */
 export const TIPOS_DE_COMANDO: readonly Comando['t'][] = [
@@ -77,6 +80,8 @@ export const TIPOS_DE_COMANDO: readonly Comando['t'][] = [
   'definirDificuldade',
   'autoAtaque',
   'usarUltimate',
+  'ativarPassiva',
+  'desativarPassiva',
 ];
 
 /** Envelope de rede. O servidor deriva o jogador da sessão e atribui o tick de aplicação. */

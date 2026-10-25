@@ -22,6 +22,7 @@ import { processarIa } from '../entities/ia';
 import { desequipar, distribuirPonto, equipar, moverItem, usarItem } from '../progression/inventario';
 import { ehDificuldade } from '../modos/dificuldade';
 import { acelerarEstudo, avancarEstudos, equiparHabilidade, subirRank } from '../progression/habilidades-personagem';
+import { definirPassiva } from '../progression/passivas-gerais';
 import { comprar, vender } from '../progression/loja';
 import { soltarItem } from '../progression/soltar-item';
 import { processarMortes } from '../progression/morte';
@@ -129,6 +130,10 @@ function aplicarComandos(
       }
       case 'autoAtaque':
         ator.autoAtaque = cmd.ligado;
+        break;
+      case 'ativarPassiva':
+      case 'desativarPassiva':
+        definirPassiva(estado, ctx, ator, cmd.id, cmd.t === 'ativarPassiva', saida);
         break;
       case 'usarUltimate':
         usarUltimate(estado, ctx, ator, cmd.alvo, saida);
