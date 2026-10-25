@@ -202,7 +202,7 @@ export const textosHabilidades = {
   'habilidades.conhecidas': 'Conhecidas',
   'habilidades.aprendiveis': 'Para aprender',
   'habilidades.passivas': 'Passivas',
-  'habilidades.barra': 'Teclas 1–4',
+  'habilidades.barra': 'Teclas 1–6 (1 e 2 de classe; R: ultimate)',
   'habilidades.tecla': 'Tecla {n}',
   'habilidades.teclaVazia': 'Tecla {n}: vazia',
   'habilidades.subir': 'Subir para o nível {rank}',

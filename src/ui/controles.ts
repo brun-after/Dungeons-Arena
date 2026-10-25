@@ -13,11 +13,14 @@ import { icone } from './icones';
 export interface OpcoesControles {
   tipo: TipoControle;
   aoMudarDirecao: (dir: Dir8 | 'parado') => void;
-  aoAtacar: () => void;
+  /** Marco 24 (25/10/2026, D-094): o botão grande do canto é a ultimate; o básico liga pelo alvo (D-097). */
+  principal: HTMLElement;
   aoInteragir: () => void;
   /** Ajuste de 15/10/2026 (D-065): tocar no botão de alvo troca de alvo; segurar trava ou destrava. */
   aoTrocarAlvo: () => void;
   aoTravarAlvo: () => void;
+  /** Marco 24 (24/10/2026, D-097): o botão Parar ataque (liga e desliga o básico automático). */
+  aoPararAtaque: () => void;
   isometrico: () => boolean;
 }
 
@@ -28,6 +31,8 @@ export interface Controles {
   trocarTipo: (tipo: TipoControle) => void;
   /** Mostra no botão de alvo se o alvo está travado. */
   marcarTrava: (travado: boolean) => void;
+  /** Marco 24: mostra no Parar ataque se o básico automático está desligado. */
+  marcarBasico: (ligado: boolean) => void;
   desligar: () => void;
 }
 
@@ -105,8 +110,9 @@ export function criarControles(opcoes: OpcoesControles): Controles {
   const direita = document.createElement('div');
   direita.className = 'coluna direita';
   const alvo = botaoAlvo(opcoes.aoTrocarAlvo, opcoes.aoTravarAlvo);
-  centro.append(botaoAcao('controles.interagir', 'interagir', 'interagir', opcoes.aoInteragir), alvo);
-  direita.append(botaoAcao('controles.ataque', 'ataque', 'ataque', opcoes.aoAtacar));
+  const parar = botaoAcao('controles.pararAtaque', 'pausa', 'parar-ataque', opcoes.aoPararAtaque);
+  centro.append(botaoAcao('controles.interagir', 'interagir', 'interagir', opcoes.aoInteragir), parar, alvo);
+  direita.append(opcoes.principal);
   faixa.append(esquerda, centro, direita);
 
   let desligarDirecional: (() => void) | null = null;
@@ -125,6 +131,9 @@ export function criarControles(opcoes: OpcoesControles): Controles {
     trocarTipo,
     marcarTrava: (travado) => {
       if (alvo.dataset.travado !== String(travado)) alvo.dataset.travado = String(travado);
+    },
+    marcarBasico: (ligado) => {
+      if (parar.dataset.parado !== String(!ligado)) parar.dataset.parado = String(!ligado);
     },
     desligar: () => {
       desligarDirecional?.();

@@ -24,6 +24,7 @@ import { familiaDaHabilidade } from '../progression/itens-progressao';
 import { duracaoLegivel } from './tempo';
 import { descreverCaminho, descreverHabilidade } from './descrever';
 import { icone } from './icones';
+import { desenharPassivasGerais, desenharSintonia } from './painel-sintonia';
 
 export interface EstadoAbaHabilidades {
   /** Mantido para a mochila (D-067: a escolha agora é direta, pelos botões 1 2 3 4 da carta). */
@@ -57,6 +58,8 @@ export function desenharHabilidades(
   emitir: (cmd: Comando) => void,
   ui: EstadoAbaHabilidades,
   redesenhar: () => void,
+  /** Marco 24: o tick, para a encarnação e a dupla no painel da Sintonia. */
+  tick = 0,
 ): void {
   const bolsa = j.bolsa;
   if (!bolsa) return;
@@ -90,7 +93,11 @@ export function desenharHabilidades(
     }
     teclas.append(li);
   }
-  corpo.append(teclas, catalogoCombos(ctx, j));
+  corpo.append(teclas);
+  // Marco 24 (D-095): a Sintonia das gerais de tecla e as passivas gerais ligadas.
+  desenharSintonia(corpo, j, ctx, tick);
+  desenharPassivasGerais(corpo, j, ctx, emitir, redesenhar);
+  corpo.append(catalogoCombos(ctx, j));
   /** Os botões 1 2 3 4 de uma habilidade ativa conhecida: põe na tecla; na tecla em que já está, tira. */
   const botoesDeTecla = (id: string, nome: string): HTMLElement => {
     const grupo = el('div', 'teclas-da-carta');

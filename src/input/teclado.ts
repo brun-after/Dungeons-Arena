@@ -35,6 +35,9 @@ export interface OpcoesTeclado {
   aoTrocarAlvo?: (sentido: 1 | -1) => void;
   /** Ajuste de 15/10/2026 (D-065): `T` trava ou destrava o alvo. */
   aoTravarAlvo?: () => void;
+  /** Marco 24 (24/10/2026, D-094): `R` usa a ultimate; `F` liga ou desliga o ataque básico automático (D-097). */
+  aoUltimate?: () => void;
+  aoAlternarBasico?: () => void;
   /** Com um modal aberto, as teclas não chegam ao jogo (marco 6). */
   bloqueado?: () => boolean;
 }
@@ -89,6 +92,10 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
       opcoes.aoDispensar();
     } else if (ev.code === 'KeyQ' && !ev.repeat && opcoes.aoTrocarAlvo) {
       opcoes.aoTrocarAlvo(ev.shiftKey ? -1 : 1);
+    } else if (ev.code === 'KeyR' && !ev.repeat && opcoes.aoUltimate) {
+      opcoes.aoUltimate();
+    } else if (ev.code === 'KeyF' && !ev.repeat && opcoes.aoAlternarBasico) {
+      opcoes.aoAlternarBasico();
     } else if (ev.code === 'KeyT' && !ev.repeat && opcoes.aoTravarAlvo) {
       opcoes.aoTravarAlvo();
     } else if (ev.code === 'KeyV' && !ev.repeat && opcoes.aoAlternarVisao) {
