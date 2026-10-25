@@ -1,0 +1,414 @@
+{
+  "versao": 1,
+  "dominios": {
+    "tecnica": "Os atingidos sangram por 3 s.",
+    "arcana": "+1 célula de raio ou alcance.",
+    "suporte": "Escudo de 8 em você e nos aliados a até 3 células.",
+    "fogo": "Os atingidos queimam.",
+    "veneno": "Os atingidos ficam envenenados.",
+    "terra": "Os atingidos ficam atordoados por 0,5 s.",
+    "sombra": "Você fica invisível por 1,5 s depois de usar.",
+    "sagrado": "Aliados a até 3 células recuperam vida.",
+    "psiquico": "Os atingidos ficam silenciados por 1 s."
+  },
+  "classes": {
+    "guerreiro": {
+      "tecnica": "Gerais técnicas enchem a fúria como o ataque básico.",
+      "arcana": "A aura alcança +1 célula.",
+      "suporte": "No Frenesi, curas e escudos gerais que você lança também dobram.",
+      "fogo": "A aura queima.",
+      "veneno": "Cada hostil envenenado perto conta em dobro para a resistência contra grupos, fora do Frenesi.",
+      "terra": "No Frenesi, você não sofre empurrão nem puxão.",
+      "sombra": "Encher a fúria deixa o próximo golpe como ataque pelas costas.",
+      "sagrado": "A cura da aura também alcança aliados a até 2 células (25%).",
+      "psiquico": "No Frenesi, cada pulso da aura faz os hostis hesitarem por 0,5 s."
+    },
+    "mago": {
+      "fogo": "Encarnação de fogo (como hoje).",
+      "terra": "Encarnação de terra: você não sofre empurrão, e magias de área ganham +1 de raio.",
+      "veneno": "Encarnação de veneno: as magias deixam veneno leve, e quem chega perto é envenenado.",
+      "sombra": "Encarnação de trevas: cada magia devolve 5% do dano em vida.",
+      "sagrado": "Encarnação de luz: as magias consagram, e aliados perto recuperam um pouco de vida.",
+      "psiquico": "Não encarna: usar uma geral psíquica estende a encarnação atual em 4 s.",
+      "arcana": "Seta e Explosão renovam a encarnação atual, e o Dardo arcano concentra no dobro da velocidade.",
+      "tecnica": "Golpes físicos renovam a encarnação em 2 s.",
+      "suporte": "Curas e escudos herdam a encarnação (escudo de gelo resfria quem bate, cura de fogo queima em volta)."
+    },
+    "arqueiro": {
+      "tecnica": "Acertar uma geral técnica enche 25% da Mira.",
+      "arcana": "O tiro cheio vira mágico e ricocheteia uma vez.",
+      "suporte": "Levar dano com escudo ativo não zera a Mira.",
+      "fogo": "O tiro cheio deixa fogo na linha que atravessou.",
+      "veneno": "O tiro cheio espalha o veneno do alvo para todos os atravessados.",
+      "terra": "O tiro cheio empurra 1 célula e enraíza por 0,5 s o último atingido.",
+      "sombra": "Invisível, a Mira enche no dobro da velocidade.",
+      "sagrado": "O tiro cheio cura os aliados que atravessa.",
+      "psiquico": "O tiro cheio silencia por 1 s."
+    },
+    "necromante": {
+      "tecnica": "Os golpes dos mortos fazem sangrar.",
+      "arcana": "Cada morto que cai solta uma seta no hostil mais perto.",
+      "suporte": "Curas e escudos gerais saltam também para 2 mortos perto do alvo.",
+      "fogo": "Os mortos explodem em chamas ao cair.",
+      "veneno": "Os golpes dos mortos envenenam.",
+      "terra": "Os mortos têm +20% de vida e não sofrem empurrão.",
+      "sombra": "Os mortos ficam translúcidos e esquivam 20% dos golpes.",
+      "sagrado": "Cada morto que cai cura os aliados a até 2 células.",
+      "psiquico": "Um hostil golpeado por 3 ou mais mortos fica aterrorizado por 1 s."
+    },
+    "aventureiro": {
+      "tecnica": "Uma geral técnica no alvo do falcão faz ele golpear junto.",
+      "arcana": "O falcão repete a Seta ou a Explosão com 30% do dano.",
+      "suporte": "Os escudos que você recebe também protegem o falcão.",
+      "fogo": "O Mergulho queima.",
+      "veneno": "As garras envenenam.",
+      "terra": "O Mergulho atordoa também quem está a 1 célula do alvo.",
+      "sombra": "O falcão fica invisível entre ataques, e o primeiro golpe dele é crítico.",
+      "sagrado": "O Retorno ao punho também cura os aliados a até 2 células.",
+      "psiquico": "O Grito do falcão também silencia por 0,5 s."
+    }
+  },
+  "vertentes": [
+    {
+      "id": "paladino",
+      "nome": "Paladino",
+      "classe": "guerreiro",
+      "familias": [
+        "sagrado",
+        "suporte"
+      ],
+      "texto": "No Frenesi, a aura cura os aliados com a mesma força com que cura você."
+    },
+    {
+      "id": "berserker",
+      "nome": "Berserker",
+      "classe": "guerreiro",
+      "familias": [
+        "fogo",
+        "tecnica"
+      ],
+      "texto": "No Frenesi, a aura vira chamas, e cada hostil queimando perto prolonga o Frenesi em 0,5 s, até +3 s."
+    },
+    {
+      "id": "carcereiro",
+      "nome": "Carcereiro",
+      "classe": "guerreiro",
+      "familias": [
+        "terra",
+        "psiquico"
+      ],
+      "texto": "Os desafiados ficam enraizados por 0,5 s ao chegar a 1 célula de você."
+    },
+    {
+      "id": "alquimista",
+      "nome": "Alquimista",
+      "classe": "mago",
+      "familias": [
+        "fogo",
+        "veneno"
+      ],
+      "texto": "Toda encarnação dupla vira Miasma ardente, e a explosão final do miasma espalha os dois estados."
+    },
+    {
+      "id": "arquimago",
+      "nome": "Arquimago",
+      "classe": "mago",
+      "familias": [
+        "arcana",
+        "psiquico"
+      ],
+      "texto": "A encarnação dura o dobro, e Seta e Agulha contam como magias do elemento encarnado."
+    },
+    {
+      "id": "geomante",
+      "nome": "Geomante",
+      "classe": "mago",
+      "familias": [
+        "terra",
+        "fogo"
+      ],
+      "texto": "A Lava dura o dobro, e quem entra no chão de lava fica enraizado por 0,5 s."
+    },
+    {
+      "id": "cacador_noturno",
+      "nome": "Caçador noturno",
+      "classe": "arqueiro",
+      "familias": [
+        "sombra",
+        "veneno"
+      ],
+      "texto": "O tiro cheio feito invisível não revela você e dobra o veneno no alvo."
+    },
+    {
+      "id": "atirador_de_elite",
+      "nome": "Atirador de elite",
+      "classe": "arqueiro",
+      "familias": [
+        "arcana",
+        "tecnica"
+      ],
+      "texto": "O tiro cheio ricocheteia em até 2 alvos, e cada ricochete enche 15% da próxima Mira."
+    },
+    {
+      "id": "sentinela",
+      "nome": "Sentinela",
+      "classe": "arqueiro",
+      "familias": [
+        "terra",
+        "sagrado"
+      ],
+      "texto": "Parado com a Mira cheia, você e os aliados a até 2 células ganham 4 de escudo por segundo (até 12)."
+    },
+    {
+      "id": "lich",
+      "nome": "Lich",
+      "classe": "necromante",
+      "familias": [
+        "arcana",
+        "sombra"
+      ],
+      "texto": "Os mortos lançam setas arcanas em vez de golpear, à distância."
+    },
+    {
+      "id": "senhor_da_praga",
+      "nome": "Senhor da praga",
+      "classe": "necromante",
+      "familias": [
+        "veneno",
+        "psiquico"
+      ],
+      "texto": "Os golpes dos mortos espalham veneno, e o veneno dobra em hostis aterrorizados."
+    },
+    {
+      "id": "pastor_das_almas",
+      "nome": "Pastor das almas",
+      "classe": "necromante",
+      "familias": [
+        "sagrado",
+        "suporte"
+      ],
+      "texto": "Cada morto que cai vira luz que cura os aliados, e o servo volta em 4 s em vez de 8."
+    },
+    {
+      "id": "druida",
+      "nome": "Druida",
+      "classe": "aventureiro",
+      "familias": [
+        "terra",
+        "suporte"
+      ],
+      "texto": "O falcão ganha a postura de guardião: fica ao seu lado e absorve um golpe a cada 4 s."
+    },
+    {
+      "id": "rapina",
+      "nome": "Rapina",
+      "classe": "aventureiro",
+      "familias": [
+        "tecnica",
+        "sombra"
+      ],
+      "texto": "Toda vez que você acerta uma geral técnica, o falcão ataca o alvo pelas costas, com crítico garantido uma vez a cada 4 s."
+    },
+    {
+      "id": "tempestuoso",
+      "nome": "Tempestuoso",
+      "classe": "aventureiro",
+      "familias": [
+        "arcana",
+        "psiquico"
+      ],
+      "texto": "O falcão repete as suas magias gerais com 50% do dano e silencia por 0,5 s quem acerta."
+    }
+  ],
+  "encarnacoesDuplas": [
+    {
+      "id": "vapor",
+      "nome": "Vapor",
+      "elementos": [
+        "fogo",
+        "gelo"
+      ],
+      "texto": "Os atingidos erram 30% dos golpes."
+    },
+    {
+      "id": "plasma",
+      "nome": "Plasma",
+      "elementos": [
+        "fogo",
+        "raio"
+      ],
+      "texto": "As magias saltam e queimam."
+    },
+    {
+      "id": "superconducao",
+      "nome": "Supercondução",
+      "elementos": [
+        "gelo",
+        "raio"
+      ],
+      "texto": "Os resfriados conduzem raios em dobro."
+    },
+    {
+      "id": "lava",
+      "nome": "Lava",
+      "elementos": [
+        "fogo",
+        "terra"
+      ],
+      "texto": "As magias deixam chão em chamas."
+    },
+    {
+      "id": "miasma_ardente",
+      "nome": "Miasma ardente",
+      "elementos": [
+        "fogo",
+        "veneno"
+      ],
+      "texto": "Queimadura e veneno juntos, que se espalham ao acabar."
+    },
+    {
+      "id": "eclipse",
+      "nome": "Eclipse",
+      "elementos": [
+        "luz",
+        "trevas"
+      ],
+      "texto": "Liga a reação Trevas e luz em toda magia."
+    },
+    {
+      "id": "permafrost",
+      "nome": "Permafrost",
+      "elementos": [
+        "gelo",
+        "terra"
+      ],
+      "texto": "O chão congelado enraíza quem fica 2 s nele."
+    },
+    {
+      "id": "nevoa_gelida",
+      "nome": "Névoa gélida",
+      "elementos": [
+        "gelo",
+        "veneno"
+      ],
+      "texto": "O veneno também resfria, e o envenenado resfriado não recebe cura."
+    },
+    {
+      "id": "inverno_sombrio",
+      "nome": "Inverno sombrio",
+      "elementos": [
+        "gelo",
+        "trevas"
+      ],
+      "texto": "As magias resfriam e definham; quem morre congelado congela os vizinhos."
+    },
+    {
+      "id": "aurora",
+      "nome": "Aurora",
+      "elementos": [
+        "gelo",
+        "luz"
+      ],
+      "texto": "As magias resfriam os hostis e dão 3 de escudo aos aliados a até 2 células."
+    },
+    {
+      "id": "magnetita",
+      "nome": "Magnetita",
+      "elementos": [
+        "raio",
+        "terra"
+      ],
+      "texto": "As magias puxam 1 célula, em direção ao alvo, os eletrizados próximos."
+    },
+    {
+      "id": "neurotoxina",
+      "nome": "Neurotoxina",
+      "elementos": [
+        "raio",
+        "veneno"
+      ],
+      "texto": "O envenenado eletrizado fica atordoado por 0,3 s a cada pulso, no máximo uma vez a cada 2 s."
+    },
+    {
+      "id": "relampago_negro",
+      "nome": "Relâmpago negro",
+      "elementos": [
+        "raio",
+        "trevas"
+      ],
+      "texto": "Os raios saltam entre os que estão definhando e drenam 5% do dano em vida."
+    },
+    {
+      "id": "fulgor",
+      "nome": "Fulgor",
+      "elementos": [
+        "raio",
+        "luz"
+      ],
+      "texto": "Os raios cegam (30% de erro) e curam os aliados que atravessam."
+    },
+    {
+      "id": "chama_negra",
+      "nome": "Chama negra",
+      "elementos": [
+        "fogo",
+        "trevas"
+      ],
+      "texto": "A queimadura impede a cura do alvo."
+    },
+    {
+      "id": "chama_sagrada",
+      "nome": "Chama sagrada",
+      "elementos": [
+        "fogo",
+        "luz"
+      ],
+      "texto": "A queimadura consagra: quem acerta o alvo se cura."
+    },
+    {
+      "id": "lodo_toxico",
+      "nome": "Lodo tóxico",
+      "elementos": [
+        "terra",
+        "veneno"
+      ],
+      "texto": "As magias deixam lama envenenada que atola."
+    },
+    {
+      "id": "tumulo",
+      "nome": "Túmulo",
+      "elementos": [
+        "terra",
+        "trevas"
+      ],
+      "texto": "O hostil abatido vira estacas de osso que enraízam os vizinhos."
+    },
+    {
+      "id": "santuario_de_pedra",
+      "nome": "Santuário de pedra",
+      "elementos": [
+        "terra",
+        "luz"
+      ],
+      "texto": "Cada magia dá 2 de escudo aos aliados perto (até 10)."
+    },
+    {
+      "id": "pestilencia",
+      "nome": "Pestilência",
+      "elementos": [
+        "veneno",
+        "trevas"
+      ],
+      "texto": "Quando o alvo morre, o veneno pula para quem estiver a até 2 células."
+    },
+    {
+      "id": "purgacao",
+      "nome": "Purgação",
+      "elementos": [
+        "veneno",
+        "luz"
+      ],
+      "texto": "As magias envenenam os hostis e tiram 1 efeito negativo dos aliados atingidos."
+    }
+  ]
+}

@@ -190,6 +190,7 @@ describe('passivas e limites da expansão', () => {
     it('Tenacidade reduz controle mas respeita o teto e a imunidade não é concedida', () => {
         const c = cena();
         obter(c.j.bolsa).conhecidas.push({ id: 'tenacidade', rank: 5, caminhos: [] });
+        obter(c.j.bolsa).passivasAtivas = ['tenacidade'];
         aplicarEfeito(c.estado, c.ctx, c.j, construirEfeito('atordoar', { duracaoMs: 1000 }), c.a, c.j, c.eventos);
         const f = obter(c.j.efeitos.find((e) => e.tipo === 'atordoar'));
         expect(f.ateTick).toBeLessThan(60);
@@ -198,6 +199,7 @@ describe('passivas e limites da expansão', () => {
     it('Fluxo restaurador não premia sobrecura, tem intervalo e limita o escudo', () => {
         const c = cena();
         obter(c.j.bolsa).conhecidas.push({ id: 'fluxo_restaurador', rank: 1, caminhos: [] });
+        obter(c.j.bolsa).passivasAtivas = ['fluxo_restaurador'];
         aplicarEfeito(c.estado, c.ctx, c.j, construirEfeito('cura', { valor: 100 }), c.j, c.j, c.eventos);
         expect(c.j.efeitos.some((e) => e.tipo === 'escudo')).toBe(false);
         c.j.hp -= 100;

@@ -13,7 +13,7 @@ import { processarCampos } from '../combat/tatica';
 //   7. gatilhos por célula     8. mortes e respawns  9. periódicos de 1 Hz e spawner
 
 import { atualizarAparencias, processarBuffsArmados, usarRefugio } from '../progression/buffs';
-import { alvoOfensivoValido, iniciarAcao, processarAcoes, processarAutoAtaque } from '../combat/acao';
+import { alvoOfensivoValido, iniciarAcao, processarAcoes, processarAutoAtaque, usarUltimate } from '../combat/acao';
 import { dispararArmadilhaEm, processarEfeitos, processarGatilhosDeEfeito } from '../combat/efeitos';
 import { dispensarInvocacoes } from '../combat/invocacoes';
 import { moverProjeteis } from '../combat/projeteis';
@@ -22,6 +22,7 @@ import { processarIa } from '../entities/ia';
 import { desequipar, distribuirPonto, equipar, moverItem, usarItem } from '../progression/inventario';
 import { ehDificuldade } from '../modos/dificuldade';
 import { acelerarEstudo, avancarEstudos, equiparHabilidade, subirRank } from '../progression/habilidades-personagem';
+import { definirPassiva } from '../progression/passivas-gerais';
 import { comprar, vender } from '../progression/loja';
 import { soltarItem } from '../progression/soltar-item';
 import { processarMortes } from '../progression/morte';
@@ -129,6 +130,13 @@ function aplicarComandos(
       }
       case 'autoAtaque':
         ator.autoAtaque = cmd.ligado;
+        break;
+      case 'ativarPassiva':
+      case 'desativarPassiva':
+        definirPassiva(estado, ctx, ator, cmd.id, cmd.t === 'ativarPassiva', saida);
+        break;
+      case 'usarUltimate':
+        usarUltimate(estado, ctx, ator, cmd.alvo, saida);
         break;
       // Marco 6 (13/10/2026): mochila, equipamento e pontos de atributo.
       case 'equipar':

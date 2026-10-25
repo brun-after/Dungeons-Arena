@@ -6,7 +6,7 @@
       "contatoMaxPct": 15,
       "contatoNivel": 10,
       "contatoExpoente": 2,
-      "grupoReducaoMaxPct": 15,
+      "grupoReducaoMaxPct": 10,
       "grupoNivelPleno": 10,
       "grupoRaio": 2,
       "extraInicioNivel": 10,
@@ -18,7 +18,7 @@
       "auraCuraMaxPct": 50,
       "auraDefesaPct": 50,
       "curaAoAbaterPct": 50,
-      "furia": { "max": 100, "porBasico": 12, "carenciaMs": 3000, "perdaPorS": 20, "curaMult": 2 },
+      "furia": { "max": 100, "porBasico": 12, "carenciaMs": 3000, "perdaPorS": 20, "curaMult": 2, "frenesi": { "duracaoMs": 6000, "danoPct": 20, "velocidadeAtaquePct": 15 } },
       "reforcosInicioNivel": 16,
       "reforcosPlenosNivel": 20,
       "movimentoMult": 1.15
@@ -81,9 +81,20 @@
     ],
     "costasConeGraus": 135
   },
-  "ultimate": { "max": 100, "ganhos": { "habilidade": 3, "basico": 0.6, "cura": 1.5, "abate": 8, "combo": 6 } },
+  "ultimate": {
+    "max": 100,
+    "ganhos": { "habilidade": 3, "basico": 0.6, "cura": 1.5, "abate": 8, "combo": 6 },
+    "classe": {
+      "furiaCheia": { "valor": 15, "intervaloMs": 0 },
+      "encarnacao": { "valor": 5, "intervaloMs": 4000 },
+      "miraFirme": { "valor": 8, "intervaloMs": 0 },
+      "servoCaiu": { "valor": 3, "intervaloMs": 2000 },
+      "falcao": { "valor": 2, "intervaloMs": 1000 }
+    }
+  },
   "estados": { "esquivaMaxPct": 50, "cegoMaxPct": 60, "contragolpeAtordoarMs": 1000, "contragolpeFuria": 20 },
   "passivasGerais": { "maxAtivas": 3 },
+  "sintonia": { "dominioMinimo": 2 },
   "hp": {
     "hpAtributoMult": 4,
     "dificuldadeMult": 1,

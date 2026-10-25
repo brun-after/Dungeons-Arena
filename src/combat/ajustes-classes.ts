@@ -9,7 +9,7 @@ import { absorverEscudo, imuneADano, multiplicadorCuraRecebida, multiplicadorDan
 import { celulaOcupada, chebyshev } from './geometria';
 import type { Habilidade } from './habilidades';
 import { multiplicadorEncarnacao, protecaoEncarnacao } from './encarnacao';
-import { multiplicadorFuria } from './furia';
+import { emFrenesi, multiplicadorFuria } from './furia';
 import { registrarParticipacao } from './participacao';
 
 export const classeDe = (e: Entidade): string => e.bolsa?.classeId ?? e.classeId ?? '';
@@ -33,6 +33,8 @@ export function protecaoInicial(estado: EstadoJogo, ctx: ContextoSimulacao, alvo
     if (!e.encontro || e.encontro.faseId !== estado.faseId) e.encontro = { faseId: estado.faseId, inicioTick: estado.tick };
   }
   if (classeDe(alvo) === 'guerreiro' && !alvo.invocacao) {
+    // Marco 24 (D-094): no Frenesi, a resistência contra grupos vai a zero.
+    if (emFrenesi(alvo, estado.tick)) return 1;
     const g = ctx.balance.ajustesClasses.guerreiro;
     const hostis = estado.entidades.filter(e => vivo(e) && podeFerir(e, alvo, ctx.modo) && chebyshev(celulaOcupada(e), celulaOcupada(alvo)) <= g.grupoRaio).length;
     const faixa = Math.min(1, Math.max(0, (alvo.nivel - 1) / (g.grupoNivelPleno - 1)));

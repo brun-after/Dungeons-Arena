@@ -13,6 +13,9 @@ import type { Atributos } from '../entities/entidade';
 import type { RegrasItensGerados } from '../progression/gerar-item';
 import type { Conteudo } from './conteudo';
 
+/** Marco 24 (24/10/2026, D-094): os momentos de cada classe que enchem o medidor da ultimate (balance.ultimate.classe). */
+export type MomentoCargaClasse = 'furiaCheia' | 'encarnacao' | 'miraFirme' | 'servoCaiu' | 'falcao';
+
 export interface Balance {
   /** Ajustes de classes (18/10/2026): curvas e passivas de produção. */
   ajustesClasses: {
@@ -21,7 +24,7 @@ export interface Balance {
       auraDefesaPct: number;
       /** Marco 21 (D-088): parte da vida que falta recuperada ao derrubar um hostil (não invocação). */
       curaAoAbaterPct: number;
-      furia: { max: number; porBasico: number; carenciaMs: number; perdaPorS: number; curaMult: number }; reforcosInicioNivel: number; reforcosPlenosNivel: number; movimentoMult: number };
+      furia: { max: number; porBasico: number; carenciaMs: number; perdaPorS: number; curaMult: number; /** Marco 24 (D-094): a fúria cheia liga o Frenesi. */ frenesi: { duracaoMs: number; danoPct: number; velocidadeAtaquePct: number } }; reforcosInicioNivel: number; reforcosPlenosNivel: number; movimentoMult: number };
     mago: { inicialPct: number; intermediarioPct: number; nivelIntermediario: number; fimIntermediario: number; nivelFinal: number; dardoInicioMult: number; dardoRecuperacaoNivel: number; dardoPlenoNivel: number; concentracaoAcertos: number; concentracaoJanelaMs: number; concentracaoExtraPct: number;
       /** Marco 22 (D-089): encarnação elemental. */
       encarnacao: { fogoDanoPct: number; fogoIntervaloMs: number; fogoRaio: number; fogoQueimaValor: number; fogoQueimaMs: number; geloReducaoPct: number; geloResfriarMs: number; raioVelocidadePct: number; duracaoMs: number } };
@@ -55,12 +58,14 @@ export interface Balance {
     /** Marco 24 (D-097): abertura do cone de trás, em graus (135 = a célula de trás e as duas diagonais). */
     costasConeGraus: number;
   };
-  /** Marco 24 (24/10/2026, D-094): o medidor da ultimate e quanto cada momento enche. */
-  ultimate: { max: number; ganhos: { habilidade: number; basico: number; cura: number; abate: number; combo: number } };
+  /** Marco 24 (D-094): o medidor da ultimate; `classe`, o ganho do jeito de cada classe (com intervalo mínimo). */
+  ultimate: { max: number; ganhos: { habilidade: number; basico: number; cura: number; abate: number; combo: number }; classe: Record<MomentoCargaClasse, { valor: number; intervaloMs: number }> };
   /** Marco 24 (24/10/2026, D-097): tetos e números dos estados novos. */
   estados: { esquivaMaxPct: number; cegoMaxPct: number; contragolpeAtordoarMs: number; contragolpeFuria: number };
   /** Marco 24 (D-095): quantas passivas gerais ficam ligadas ao mesmo tempo. */
   passivasGerais: { maxAtivas: number };
+  /** Marco 24 (D-095): quantas gerais da mesma família nas teclas 3–6 fazem Domínio. */
+  sintonia: { dominioMinimo: number };
   hp: {
     hpAtributoMult: number;
     dificuldadeMult: number;

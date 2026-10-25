@@ -15,6 +15,7 @@ import * as ultMago from './specs/ultimates-mago.mjs';
 import * as ultArqueiro from './specs/ultimates-arqueiro.mjs';
 import * as ultNecromante from './specs/ultimates-necromante.mjs';
 import * as ultAventureiro from './specs/ultimates-aventureiro.mjs';
+import { INTERNAS as INTERNAS_DOMINIO, varianteDeDominio } from './specs/sintonia.mjs';
 
 const dados = (arq) => join(raiz, 'src', 'data', arq);
 const ler = (arq) => JSON.parse(readFileSync(dados(arq), 'utf8'));
@@ -92,6 +93,10 @@ for (const c of D.classes) {
       return onde === 'eu' ? { ...f, em: 'conjurador' } : f;
     });
     const def = definicao(id, par.nome, { ...e, ef: [...(e.ef ?? []), ...fases] }, c.id, { visual });
+    // Marco 24 (D-095): as marcas de Domínio (variantes `dom_<família>`), as dos atingidos só nas que miram hostis.
+    const ofensiva = def.politicaAlvo === 'hostil' || def.politicaAlvo === 'celula';
+    const dominios = Object.fromEntries(Object.entries(D.sintonia.dominio).map(([f, texto]) => [`dom_${f}`, varianteDeDominio(f, texto, ofensiva)]).filter(([, v]) => v));
+    def.variantes = { ...def.variantes, ...dominios };
     internas.unshift(def);
     ultimates.push({ id, classe: c.id, par: [idCodigo(c.skills[par.a]), idCodigo(c.skills[par.b])], texto: par.texto });
   });
@@ -104,7 +109,19 @@ const principais = new Set(ultimates.map((u) => u.id));
 escrever('ultimates.json', {
   versao: 1,
   ultimates,
-  habilidades: [...internas.filter((h) => principais.has(h.id)), ...internas.filter((h) => !principais.has(h.id))],
+  habilidades: [...internas.filter((h) => principais.has(h.id)), ...internas.filter((h) => !principais.has(h.id)), ...INTERNAS_DOMINIO],
+});
+
+// ---------------- sintonia.json ----------------
+// Marco 24 (D-095): as regras, as marcas de Domínio, a sintonia de cada classe por família, as vertentes e as
+// encarnações duplas, com os textos do Grimório. A mecânica de cada uma fica no código que a consulta (sintonia.ts).
+const s = D.sintonia;
+escrever('sintonia.json', {
+  versao: 1,
+  dominios: s.dominio,
+  classes: s.classes,
+  vertentes: Object.entries(s.vertentes).flatMap(([classe, l]) => l.map(([nome, a, b, texto]) => ({ id: slug(nome), nome, classe, familias: [a, b], texto }))),
+  encarnacoesDuplas: s.encarnacaoDupla.map(([nome, a, b, texto]) => ({ id: slug(nome), nome, elementos: [a, b], texto })),
 });
 
 // ---------------- classes.json ----------------

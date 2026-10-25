@@ -10,6 +10,7 @@ import { vivo, type Entidade } from '../entities/entidade';
 import { podeFerir } from '../modos/relacao';
 import { passivosDe } from '../progression/ganchos-do-portador';
 import { somarCarga } from './carga-ultimate';
+import { encherFuria } from './frenesi';
 import { aplicarEfeito, imuneADano, sofrerDano, type OrigemDoEfeito } from './efeitos';
 import { arremessar } from './efeitos-instantaneos';
 import { acumularFuria } from './furia';
@@ -99,7 +100,7 @@ export function aplicarInstantaneoNovo(
       });
       break;
     case 'furia':
-      acumularFuria(ctx, alvo, tick, ef.valor);
+      if (acumularFuria(ctx, alvo, tick, ef.valor)) encherFuria(estado, ctx, alvo, origem, saida);
       break;
     case 'executar':
       // Abaixo de `pct` da vida, o alvo cai (sem imunidade).

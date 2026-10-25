@@ -1,4 +1,5 @@
 import { clonarEntidade } from '../entities/entidade';
+import { velocidadeFrenesiPct } from './furia';
 import { prepararSequencia, participaDeCombo } from './sequencias';
 // O ciclo de uma ação (§2.7): intenção -> validação -> conjuração -> viagem -> impacto.
 // Custo e recarga são pagos no início da conjuração. Durante a conjuração a ação fica telegrafada
@@ -40,6 +41,7 @@ import { comCombo, fazerCombo } from './combos';
 import { dizimoErgue, podeErguerNoDizimo } from './necromancia';
 import { agendarFase, fasesVencidas } from './fases';
 import { virarPara } from './orientacao';
+import { cargaDaClasse, medidorCheio, ultimateDe } from './carga-ultimate';
 
 export function chaveRecarga(entidadeId: EntidadeId, habilidadeId: string): string {
   return `${entidadeId}_${habilidadeId}`;
@@ -167,13 +169,15 @@ export function iniciarAcao(
   habilidadeId: string,
   alvoPedido: EntidadeId | Celula | undefined,
   saida: EventoSimulacao[],
+  /** Marco 24 (D-094): a ultimate não fica na barra; quem chama já conferiu o par e o medidor. */
+  ultimate = false,
 ): boolean {
   const recusar = (motivo: MotivoRecusa) => {
     saida.push({ t: 'acaoRecusada', tick: estado.tick, atorId: ator.id, habilidadeId, motivo });
     return false;
   };
   if (!vivo(ator)) return false;
-  const hab = habilidadeDisponivel(ator, habilidadeId) ? habilidadeDoAtor(ctx, ator, habilidadeId, estado.tick) : undefined;
+  const hab = ultimate || habilidadeDisponivel(ator, habilidadeId) ? habilidadeDoAtor(ctx, ator, habilidadeId, estado.tick) : undefined;
   // Passiva não se conjura (marco 14): vale enquanto conhecida.
   if (!hab || hab.passiva) return recusar('sem_habilidade');
   // Pedir uma habilidade durante a conjuração do ataque básico substitui o básico (D-020):
@@ -204,7 +208,8 @@ export function iniciarAcao(
   if (!alvo && !celula) return recusar('sem_alvo');
   // Marco 22: o alvo de uma habilidade do Aventureiro vira o selecionado, e o falcão voa até ele.
   if (alvo && alvo !== ator && !deSuporte(hab) && celulaDoCompanheiro(estado, ator)) ator.alvoSelecionado = alvo.id;
-  if (hab.efeitos.some((ef) => ef.tipo === 'drenar_invocacao')) {
+  // Marco 24: a regra do ritual é do Dízimo; a ultimate que drena sai mesmo com a vida cheia.
+  if (!ultimate && hab.efeitos.some((ef) => ef.tipo === 'drenar_invocacao')) {
     // Marco 22 (D-090): sem morto ao alcance, o Dízimo ergue um (se houver vaga) em vez de drenar.
     if (dizimoErgue(estado, ctx, ator)) {
       if (!podeErguerNoDizimo(estado, ctx, ator)) return recusar('sem_invocacao');
@@ -225,7 +230,7 @@ export function iniciarAcao(
     // `ab_recarga` encurta a recarga do ataque básico (até 75%); o perfil, a de qualquer habilidade.
     // Marco 17: a Destreza acima de 10 também encurta o básico (somada ao `ab_recarga`, dentro do mesmo teto).
     // Marco 18: o teto passa a 75% só somando buff; a Destreza do arqueiro chega a 50% sozinha.
-    const reducao = hab.id === ator.ataqueBasico ? Math.min(75, bonusAtaqueBasico(ator, estado.tick).recargaPct + reducaoRecargaBasicoPct(ator.atributos, ctx.balance, perfilDestreza(ctx, ator))) : 0;
+    const reducao = hab.id === ator.ataqueBasico ? Math.min(75, bonusAtaqueBasico(ator, estado.tick).recargaPct + reducaoRecargaBasicoPct(ator.atributos, ctx.balance, perfilDestreza(ctx, ator)) + velocidadeFrenesiPct(ctx, ator, estado.tick)) : 0;
     const ms = hab.recargaMs * (1 - reducao / 100) * (1 + perfil.recargaPct / 100);
     estado.recargas[chave] = Math.max(estado.recargas[chave] ?? 0, estado.tick + ticksDe(ms));
   }
@@ -355,7 +360,11 @@ function lancar(
     dispararGanchosDe(estado, ctx, ator, 'aoUsarHabilidade', { outro: alvo, hab }, saida);
     ator.ultimaHabilidade = { id: hab.id, chave: hab.chave, tick: estado.tick, alvoId: alvo?.id ?? null };
     // Marco 22 (D-089): a magia de fogo, gelo ou raio troca a encarnação do Mago.
-    if (encarnar(ctx, ator, hab, estado.tick)) saida.push({ t: 'encarnou', tick: estado.tick, id: ator.id, elemento: ator.encarnacao ?? 'fogo' });
+    if (encarnar(ctx, ator, hab, estado.tick)) {
+      saida.push({ t: 'encarnou', tick: estado.tick, id: ator.id, elemento: ator.encarnacao ?? 'fogo' });
+      // Marco 24 (D-094): trocar de encarnação enche a ultimate (no máximo uma vez a cada 4 s).
+      cargaDaClasse(ctx, ator, 'encarnacao', estado.tick, saida);
+    }
   }
   const basico = hab.id === ator.ataqueBasico ? bonusAtaqueBasico(ator, estado.tick) : null;
   const alcance = alcanceDe(ctx, ator, hab, estado.tick);
@@ -410,7 +419,10 @@ function lancar(
       // Mira na célula do alvo no lançamento; daí em diante segue em linha reta e pode ser esquivado.
       // Marco 22 (D-089): com a Mira firme cheia, o tiro sai carregado (crítico garantido, atravessa, alcance máximo).
       const carregado = consumirMira(ctx, ator, estado.tick);
-      if (carregado) saida.push({ t: 'tiroCarregado', tick: estado.tick, id: ator.id });
+      if (carregado) {
+        saida.push({ t: 'tiroCarregado', tick: estado.tick, id: ator.id });
+        cargaDaClasse(ctx, ator, 'miraFirme', estado.tick, saida);
+      }
       const fonteTiro = carregado ? { ...fonte, d20Minimo: Math.max(fonte.d20Minimo ?? 0, ctx.balance.ajustesClasses.arqueiro.mira.d20Minimo) } : fonte;
       lancarProjetil(estado, ator, hab, acaoId, fonteTiro, alvo ? celulaOcupada(alvo) : mira, saida, origemDaHabilidade(estado, ator, hab), carregado ? { alcance } : null);
       break;
@@ -483,4 +495,21 @@ export function proximoHostil(
   const i = atualId ? lista.findIndex((e) => e.id === atualId) : -1;
   if (i < 0) return sentido === 1 ? (lista[0] ?? null) : (lista[lista.length - 1] ?? null);
   return lista[(i + sentido + lista.length) % lista.length] ?? null;
+}
+
+/**
+ * Marco 24 (24/10/2026, D-094): a ultimate do par nas teclas 1 e 2. Recusada sem par ou com o medidor abaixo do
+ * máximo; no mais, segue as regras de qualquer habilidade (alvo, alcance, ocupado). Começar zera o medidor.
+ */
+export function usarUltimate(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, alvo: EntidadeId | Celula | undefined, saida: EventoSimulacao[]): boolean {
+  const u = ultimateDe(ctx, ator);
+  const recusa = !u ? 'sem_ultimate' : !medidorCheio(ctx, ator) ? 'sem_carga' : null;
+  if (recusa || !u) {
+    saida.push({ t: 'acaoRecusada', tick: estado.tick, atorId: ator.id, habilidadeId: u?.id ?? '', motivo: recusa ?? 'sem_ultimate' });
+    return false;
+  }
+  if (!iniciarAcao(estado, ctx, ator, u.id, alvo, saida, true) || !ator.acao) return false;
+  ator.cargaUltimate = 0;
+  saida.push({ t: 'ultimateUsada', tick: estado.tick, id: ator.id, ultimateId: u.id, acaoId: ator.acao.acaoId });
+  return true;
 }

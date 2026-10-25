@@ -153,8 +153,8 @@ describe('preferências', () => {
 describe('efeitos visuais como dado (D-055)', () => {
   it('as habilidades oficiais (fora as passivas) têm visual; sem o bloco, ele é deduzido', () => {
     // Marco 14: 16 do marco 12 e 22 do sistema de habilidades; marco 18: as 4 fusões e a Chuva de estrelas.
-    // Marco 24: 120 em skills.json (7 internas) e as 140 ultimates com as 155 etapas e a resposta da Riposta ígnea.
-    expect(CONTEUDO.habilidades.size).toBe(120 + 140 + 156);
+    // Marco 24: 120 em skills.json (7 internas) e as 140 ultimates com as 155 etapas e a resposta da Riposta ígnea. Marco 24 (D-095): mais as 3 etapas internas das marcas de Domínio.
+    expect(CONTEUDO.habilidades.size).toBe(120 + 140 + 156 + 3);
     for (const h of CONTEUDO.habilidades.values()) {
       if (h.passiva) continue;
       expect(h.visual).not.toBeNull();
