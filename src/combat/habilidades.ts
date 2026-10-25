@@ -209,6 +209,8 @@ export interface VisualHabilidade {
   projetil: FormaProjetil | null;
   /** Id do som (audio/mapeamento.ts); validado lá, pois o catálogo de sons é da apresentação. */
   som: string | null;
+  /** Marco 24 (25/10/2026, D-098): a animação do corpo (`giro`: o Redemoinho e afins); ausente, a da arma. */
+  animacao?: 'giro';
 }
 
 /** Marco 14: o que o skills.json descreve. A base é a habilidade no rank 1, sem caminhos. */
@@ -306,7 +308,7 @@ function lerVisual(l: Leitor, v: unknown): VisualHabilidade | null {
   const cor = o.cor === undefined ? null : l.texto(o, 'cor');
   if (cor !== null && !/^#[0-9a-f]{6}$/i.test(cor)) l.erro(`visual.cor precisa ser #rrggbb ("${cor}")`);
   for (const k of Object.keys(o)) {
-    if (!['cor', 'conjuracao', 'viagem', 'impacto', 'camera', 'som', 'projetil'].includes(k)) l.erro(`visual: campo desconhecido "${k}"`);
+    if (!['cor', 'conjuracao', 'viagem', 'impacto', 'camera', 'som', 'projetil', 'animacao'].includes(k)) l.erro(`visual: campo desconhecido "${k}"`);
   }
   return {
     cor,
@@ -316,6 +318,7 @@ function lerVisual(l: Leitor, v: unknown): VisualHabilidade | null {
     camera: o.camera === undefined ? 'nenhum' : l.opcao(o, 'camera', ['nenhum', 'leve', 'forte'] as const),
     projetil: o.projetil === undefined ? null : l.opcao(o, 'projetil', FORMAS_PROJETIL),
     som: o.som === undefined ? null : l.texto(o, 'som'),
+    ...(o.animacao === undefined ? {} : { animacao: l.opcao(o, 'animacao', ['giro'] as const) }),
   };
 }
 

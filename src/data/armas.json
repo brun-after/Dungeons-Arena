@@ -1,5 +1,5 @@
 {
-  "versao": 1,
+  "versao": 2,
   "familias": {
     "espada": "lamina",
     "machado": "lamina",
@@ -20,5 +20,15 @@
     "mago": "cajado",
     "arqueiro": "arco",
     "necromante": "cajado"
+  },
+  "golpes": {
+    "espada": "corte",
+    "machado": "corte_pesado",
+    "adaga": "estocada_rapida",
+    "clava": "contundente",
+    "lanca": "estocada",
+    "cajado": "contundente_leve",
+    "arco": "disparo",
+    "foice": "corte"
   }
 }

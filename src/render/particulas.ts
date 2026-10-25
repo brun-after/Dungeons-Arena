@@ -244,7 +244,8 @@ export class SistemaParticulas {
       p.scaleX = e.escala[0];
       p.scaleY = e.escala[0];
       // Faísca, lasca, gota e flecha apontam para onde voam (a orientada, para a direção pedida, mesmo parada).
-      const aponta = e.textura === 'faisca' || e.textura === 'lasca' || e.textura === 'gota' || e.textura === 'flecha';
+      // Marco 24 (D-098): o corte em anel ou espiral sai tangente (as lâminas do giro em volta do corpo).
+      const aponta = e.textura === 'faisca' || e.textura === 'lasca' || e.textura === 'gota' || e.textura === 'flecha' || (e.textura === 'corte' && (forma === 'anel' || forma === 'espiral'));
       p.rotation = aponta || e.direcao === 'orientada' ? angulo + Math.PI / 2 : e.textura === 'corte' ? entre(-0.6, 0.6) : entre(0, Math.PI * 2);
       const corInicial = e.cor ?? cor;
       p.tint = corInicial;

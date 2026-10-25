@@ -21,6 +21,10 @@ import { lerPreferencias, type NivelQualidade, type Preferencias } from '../plat
 import type { Camera } from '../render/camera';
 import { EfeitosDeHabilidade } from '../render/efeitos-habilidade';
 import { EfeitosDeClasse } from '../render/efeitos-classe';
+import { EfeitosDeArma } from '../render/efeitos-arma';
+import { golpeDaAcao } from '../render/golpe-visual';
+import { corDaFuria } from '../render/materiais';
+import { ehElemento } from '../combat/elementos';
 import { elementosDaDupla } from '../combat/encarnacao';
 import { fracaoFuria } from '../combat/furia';
 import { sintoniaDe } from '../progression/sintonia';
@@ -101,11 +105,29 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   // Marco 23 (D-092): o tema da fase dá as partículas do ar, a cor da luz e as tochas acesas.
   const tema = temaDaFase(ctx);
   const corElemento = (el: Elemento) => Number.parseInt((ctx.conteudo.elementos.get(el)?.cor ?? '#ffffff').slice(1), 16);
+  // Marco 24 (25/10/2026, D-098): o golpe de cada arma (pose, rastro e forma) e o giro do Redemoinho.
+  const golpeDe = (e: Entidade, chave: string) => golpeDaAcao(ctx, e, chave, e.classeId ?? '');
+  const efeitosArma = new EfeitosDeArma({
+    particulas, impacto, golpeDe, corElemento,
+    armaDe: (e) => {
+      const el = e.aparencia?.elementoArma;
+      return { elemento: ehElemento(el) ? el : null, forma: e.aparencia?.formaArma ?? null };
+    },
+    corDaFuria: (e, tick) => {
+      const f = fracaoFuria(ctx, e, tick);
+      return f === null ? null : corDaFuria(f, (e.furia?.frenesiAteTick ?? 0) > tick);
+    },
+  });
+  efeitosArma.ligar(o.bus, o.estado, () => performance.now());
   const efeitos = new EfeitosDeHabilidade({
     particulas, impacto, habilidades: o.habilidades, idLocal, qualidade, fase: ctx.fase,
     miraCheia: (e, tick) => fracaoMira(ctx, e, tick) === 1,
     clima: tema?.particulas ?? null,
     corElemento,
+    golpeDeArma: (fonte, chave) => efeitosArma.cuidaDoImpacto(fonte, chave),
+    aoGirar: (centro, cor) => {
+      efeitosArma.laminasDoGiro(centro, cor);
+    },
   });
   efeitos.ligar(o.bus, o.estado, () => performance.now());
   // Marco 24 (25/10/2026): a ultimate, a fúria e o Frenesi do Guerreiro, a encarnação dupla e a vertente.
@@ -226,6 +248,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
       camera.enquadrar(focoDoQuadro(estado, posicao), agoraMs);
       efeitos.quadro(estado, agoraMs, posicao);
       efeitosClasse.quadro(estado, agoraMs, posicao);
+      efeitosArma.quadro(estado, agoraMs, posicao);
       combos.desenhar(estado, agoraMs);
       particulas.atualizar(Math.min(100, dtMs));
       luz.desenhar(pontosDeLuz(estado, posicao), agoraMs, qualidade().luz, reduzido());

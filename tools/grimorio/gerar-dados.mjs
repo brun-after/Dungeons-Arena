@@ -83,12 +83,13 @@ for (const c of D.classes) {
     const e = esp.default[i];
     const id = `ult_${slug(par.nome)}`;
     const cor = par.cores?.[0] ?? '#e0c068';
-    const visual = { cor, conjuracao: 'runas', impacto: e.impacto ?? 'explosao', camera: e.camera ?? 'leve', som: 'nivel', ...(e.projetil ? { projetil: e.projetil } : {}) };
+    const giro = e.animacao ? { animacao: e.animacao } : {};
+    const visual = { cor, conjuracao: 'runas', impacto: e.impacto ?? 'explosao', camera: e.camera ?? 'leve', som: 'nivel', ...(e.projetil ? { projetil: e.projetil } : {}), ...giro };
     const fases = (e.fases ?? []).map(([s, etapa, onde], k) => {
       const sub = `${id}_${k + 1}`;
       internas.push(definicao(sub, `${par.nome} (${k + 2}ª etapa)`, { ...etapa, impacto: etapa.impacto ?? e.impacto }, c.id, {
         interna: true,
-        visual: { cor, impacto: etapa.impacto ?? e.impacto ?? 'explosao', camera: 'leve', som: 'golpe' },
+        visual: { cor, impacto: etapa.impacto ?? e.impacto ?? 'explosao', camera: 'leve', som: 'golpe', ...(etapa.tipoArea === 'ao_redor' ? giro : {}) },
       }));
       const f = { tipo: 'fase', ref: sub, duracaoMs: Math.round(s * 1000) };
       return onde === 'eu' ? { ...f, em: 'conjurador' } : f;

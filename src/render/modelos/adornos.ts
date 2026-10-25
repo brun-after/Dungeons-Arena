@@ -46,6 +46,10 @@ const comoArma = (base: string | null): Arma | null => (base && ARMAS.has(base) 
 export interface CamadasAdorno {
   atras: string;
   frente: string;
+  /** Marco 24 (25/10/2026, D-098): a arma principal (com a mão) numa camada própria, para girar no golpe. */
+  arma: string;
+  /** O pivô da arma (a mão), em unidades do quadro. */
+  pivo: { x: number; y: number };
 }
 
 function adornos34(o: OpcoesBipede, v: VisualEquipamento): CamadasAdorno {
@@ -82,9 +86,9 @@ function adornos34(o: OpcoesBipede, v: VisualEquipamento): CamadasAdorno {
   }
   if (secundaria) frente.push(circulo(maoE.x, maoE.y, 2.2, o.pele));
   const arma = comoArma(v.arma);
-  if (arma) frente.push(arma34(arma, maoD.x, maoD.y), realceDaArma(v, maoD.x, maoD.y, maoD.y - 16), circulo(maoD.x, maoD.y, 2.2, escurecer(o.pele, 0.15)));
+  const camadaArma = arma ? arma34(arma, maoD.x, maoD.y) + realceDaArma(v, maoD.x, maoD.y, maoD.y - 16) + circulo(maoD.x, maoD.y, 2.2, escurecer(o.pele, 0.15)) : '';
   atras.unshift(auraDaForma(v, MEIO, (cabecaY + base) / 2, o.ombro + 8, (base - cabecaY) / 2 + 6));
-  return { atras: atras.join(''), frente: frente.join('') };
+  return { atras: atras.join(''), frente: frente.join(''), arma: camadaArma, pivo: maoD };
 }
 
 function adornosCima(o: OpcoesBipede, v: VisualEquipamento): CamadasAdorno {
@@ -102,7 +106,7 @@ function adornosCima(o: OpcoesBipede, v: VisualEquipamento): CamadasAdorno {
   }
   if (v.secundaria) frente.push(circulo(maoE.x, maoE.y, 2.4, o.pele));
   const arma = comoArma(v.arma);
-  if (arma) frente.push(armaCima(arma, maoD.x, maoD.y), realceDaArma(v, maoD.x + 14, maoD.y, maoD.y), circulo(maoD.x, maoD.y, 2.4, escurecer(o.pele, 0.15)));
+  const camadaArma = arma ? armaCima(arma, maoD.x, maoD.y) + realceDaArma(v, maoD.x + 14, maoD.y, maoD.y) + circulo(maoD.x, maoD.y, 2.4, escurecer(o.pele, 0.15)) : '';
   atras.unshift(auraDaForma(v, c, c, o.ombro + 7, o.ombro + 7));
   if (v.cabeca !== null) {
     const r = o.cabeca * 0.95;
@@ -110,7 +114,8 @@ function adornosCima(o: OpcoesBipede, v: VisualEquipamento): CamadasAdorno {
   }
   // Mesma ampliação da vista de cima do modelo.
   const g = (s: string) => (s ? `<g transform="translate(${c} ${c}) scale(1.35) translate(${-c} ${-c})">${s}</g>` : '');
-  return { atras: g(atras.join('')), frente: g(frente.join('')) };
+  const pivo = { x: c + (maoD.x - c) * 1.35, y: c + (maoD.y - c) * 1.35 };
+  return { atras: g(atras.join('')), frente: g(frente.join('')), arma: g(camadaArma), pivo };
 }
 
 /** As duas camadas de adorno de um bípede, na vista pedida (vazias quando não há o que mostrar). */

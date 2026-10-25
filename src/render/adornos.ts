@@ -15,12 +15,17 @@ import type { Raridade } from '../modos/modo';
 export interface TexturasAdorno {
   atras: Texture | null;
   frente: Texture | null;
+  /** Marco 24 (25/10/2026, D-098): a arma principal à parte, e o pivô dela (a mão) em px da textura. */
+  arma: Texture | null;
+  pivo: { x: number; y: number };
 }
 
 /** Combinações guardadas (modelo, vista e equipamento); passando disso, sai a mais antiga. */
 const MAXIMO = 96;
 const cache = new Map<string, TexturasAdorno | 'carregando'>();
-const VAZIO: TexturasAdorno = { atras: null, frente: null };
+const VAZIO: TexturasAdorno = { atras: null, frente: null, arma: null, pivo: { x: 0, y: 0 } };
+/** Do quadro do modelo (64) para os px da textura. */
+const PX = LADO_PX / LADO_QUADRO;
 
 const corDe = (r: string | null) => (r && Object.hasOwn(COR_RARIDADE, r) ? COR_RARIDADE[r as Raridade] : null);
 
@@ -72,8 +77,9 @@ export function texturasDoAdorno(modelo: string, vista: Vista, aparencia: Aparen
     forma: eq.arma ? ap.formaArma : null,
     formaMaxima: ap.formaMaxima,
   });
-  void Promise.all([textura(camadas.atras), textura(camadas.frente)]).then(([atras, frente]) => {
-    cache.set(chave, { atras, frente });
+  const pivo = { x: camadas.pivo.x * PX, y: camadas.pivo.y * PX };
+  void Promise.all([textura(camadas.atras), textura(camadas.frente), textura(camadas.arma)]).then(([atras, frente, arma]) => {
+    cache.set(chave, { atras, frente, arma, pivo });
   });
   return VAZIO;
 }

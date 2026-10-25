@@ -46,6 +46,8 @@ const INTERVALO_CHAO_MS = 160;
 
 
 const cor = (hex: string) => Number.parseInt(hex.slice(1), 16);
+/** Marco 24 (D-098): os impactos genéricos que o golpe de arma substitui pelo rastro dele. */
+const GENERICOS: ReadonlySet<string> = new Set(['corte', 'faiscas']);
 
 /** Marco 22 (D-089): a aura e a cor de cada encarnação do Mago. */
 // Marco 24 (24/10/2026, D-095): as encarnações de terra, veneno, trevas e luz.
@@ -74,6 +76,9 @@ export interface OpcoesEfeitos {
   /** Marco 23 (D-092): as partículas do ar do tema da fase e a cor de cada elemento (a aura dos afins). */
   clima?: ParticulaClima | null;
   corElemento?: (e: Elemento) => number;
+  /** Marco 24 (D-098): o golpe de arma desenha o próprio impacto (o genérico sai) e o giro, as lâminas em volta. */
+  golpeDeArma?: (fonte: Entidade | undefined, chave: string) => boolean;
+  aoGirar?: (centro: PontoVisual, cor: number) => void;
 }
 
 export class EfeitosDeHabilidade {
@@ -128,7 +133,7 @@ export class EfeitosDeHabilidade {
         // Raio e relâmpago correm da fonte ao alvo (marco 11A: o relâmpago é o raio com ramificação).
         if ((v.impacto === 'raio' || v.impacto === 'relampago') && fonte) this.o.particulas.emitir(v.impacto, fonte.x, fonte.y, v.cor, alvo);
         // D-067: chuva e leque já desenham as flechas pela área; no alvo, as farpas do acerto.
-        else if (v.impacto && (ev.dano > 0 || ev.cura > 0 || ev.d20 === 0)) this.o.particulas.emitir(v.impacto === 'chuva' || v.impacto === 'leque' ? 'farpas' : v.impacto, alvo.x, alvo.y, v.cor);
+        else if (v.impacto && (ev.dano > 0 || ev.cura > 0 || ev.d20 === 0) && !(GENERICOS.has(v.impacto) && this.o.golpeDeArma?.(estado().entidades.find((e) => e.id === ev.fonteId), ev.chave))) this.o.particulas.emitir(v.impacto === 'chuva' || v.impacto === 'leque' ? 'farpas' : v.impacto, alvo.x, alvo.y, v.cor);
       }
       // Marco 24 (25/10/2026): a matéria do elemento no acerto (nos 3 primeiros alvos da área, pelo custo).
       if (h.elemento && ev.dano > 0 && ev.indice < 3) this.o.particulas.emitir(presetDeImpacto(h.elemento), alvo.x, alvo.y, v.cor);
@@ -266,6 +271,11 @@ export class EfeitosDeHabilidade {
     };
     const p = this.o.particulas;
     const impacto = v.impacto && v.impacto !== 'raio' && v.impacto !== 'relampago' ? v.impacto : null;
+    // Marco 24 (25/10/2026, D-098): o giro (Redemoinho) não explode pelas células: as lâminas correm em volta de quem gira.
+    if (h.visual?.animacao === 'giro') {
+      this.o.aoGirar?.(a.origem, v.cor);
+      return;
+    }
     // Marco 11A (D-066): a forma do ataque em partículas.
     if (h.tipoArea === 'linha') {
       // Feixe: o impacto corre de quem conjura até a ponta da linha, mais faíscas pelo caminho.

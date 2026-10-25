@@ -13,7 +13,8 @@ import type { EstadoJogo } from '../core/estado';
 import { efeitosAtivos } from '../combat/efeitos';
 import type { Arquetipo, Entidade } from '../entities/entidade';
 import { relacao } from '../modos/relacao';
-import { pose, type EstiloCaminhada } from './caminhada';
+import { duracaoDoGolpe, pose, type EstiloCaminhada, type Golpe } from './caminhada';
+import { golpeDaAcao } from './golpe-visual';
 import { CELULA_PX } from './camera-calculo';
 import type { PontoVisual } from './interpolacao';
 import { ehModelo, MODELO_JOGADOR, MODELOS } from './modelos';
@@ -131,6 +132,9 @@ interface Marcador {
   andandoAteMs: number;
   acaoId: number | null;
   ataqueDesdeMs: number;
+  /** Marco 24 (D-098): o golpe da última ação (pela chave), que a pose anima. */
+  golpe: Golpe | null;
+  chaveGolpe: string;
   escala: number;
   /** Altura do topo do desenho acima da origem (negativo), para barras e indicador. */
   topo: number;
@@ -167,7 +171,7 @@ export class CamadaEntidades {
     return {
       raiz, chao, silhueta, seta, rig: null, barras, aneis, indicador, cor,
       angulo: 0, sentido: 1, ultimoX: e.x, ultimoY: e.y, visualX: Number.NaN, visualY: Number.NaN,
-      andandoAteMs: 0, acaoId: null, ataqueDesdeMs: -Infinity, escala, topo: -RAIO * escala, achatamento: 1, chaoDesenhado: '',
+      andandoAteMs: 0, acaoId: null, ataqueDesdeMs: -Infinity, golpe: null, chaveGolpe: '', escala, topo: -RAIO * escala, achatamento: 1, chaoDesenhado: '',
     };
   }
 
@@ -251,8 +255,15 @@ export class CamadaEntidades {
 
       const andando = agoraMs < m.andandoAteMs && !e.morto;
       const escolha = this.fonteDe(e, ctx, iso, agoraMs, andando);
+      // Marco 24 (D-098): o golpe da arma (ou o giro) da ação em curso, e quanto da conjuração já passou.
+      if (e.acao && escolha && m.chaveGolpe !== e.acao.chave) {
+        m.golpe = golpeDaAcao(ctx, e, e.acao.chave, escolha.modelo);
+        m.chaveGolpe = e.acao.chave;
+      }
+      const conjura = e.acao ? e.acao.lancamentoTick - e.acao.inicioTick : 0;
+      const preparo = e.acao && m.golpe ? (conjura > 0 ? Math.min(1, Math.max(0, (tickVisual - e.acao.inicioTick) / conjura)) : 1) : null;
       this.desenharCorpo(m, e, escolha, {
-        iso, usarTiras, reduzido, agoraMs, andando, aparencia,
+        iso, usarTiras, reduzido, agoraMs, andando, aparencia, preparo,
         direcao: { x: dtx / norma, y: dty / norma },
         angulo: Math.atan2(dty, dtx),
       });
@@ -287,6 +298,7 @@ export class CamadaEntidades {
       aparencia: { tamanho: number; imagemOlhaEsquerda: boolean };
       direcao: { x: number; y: number };
       angulo: number;
+      preparo: number | null;
     },
   ): void {
     m.silhueta.visible = !escolha;
@@ -310,10 +322,12 @@ export class CamadaEntidades {
       estilo: escolha.estilo,
       tMs: q.agoraMs,
       andando: q.andando,
-      ataqueMs: ataqueMs < 400 ? ataqueMs : null,
+      ataqueMs: ataqueMs < duracaoDoGolpe(m.golpe) ? ataqueMs : null,
       fase: faseDe(e.id),
       tiras: q.iso && q.usarTiras,
       reduzido: q.reduzido || e.morto,
+      golpe: m.golpe,
+      preparo: q.preparo,
     });
     // De cima, o modelo gira para o olhar; a imagem própria (sem vista de cima) fica em pé e espelha.
     const gira = !q.iso && !escolha.proprio;
@@ -325,10 +339,11 @@ export class CamadaEntidades {
       rotacao: gira ? q.angulo : 0,
       direcao: q.direcao,
       usarTiras: q.iso && q.usarTiras,
+      vistaDeCima: gira,
     });
     // D-067: o equipamento aparece no token (modelos de classe; a imagem própria fica como o jogador a fez).
     const adorno = escolha.proprio ? null : texturasDoAdorno(escolha.modelo, q.iso ? '34' : 'cima', e.aparencia);
-    m.rig.adornar(adorno?.atras ?? null, adorno?.frente ?? null);
+    m.rig.adornar(adorno?.atras ?? null, adorno?.frente ?? null, adorno?.arma ?? null, adorno?.pivo);
     const f = escolha.fonte;
     m.topo = gira ? -alturaPx * 0.42 : f.ancoraY === 1 ? -alturaPx : -alturaPx * f.ancoraY * 0.9;
   }
