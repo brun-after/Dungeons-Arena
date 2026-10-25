@@ -77,7 +77,7 @@ export class EfeitosDeClasse {
       if (fracao === null) return;
       const alvo = pos(ev.alvoId);
       const frenesi = (fonte.furia?.frenesiAteTick ?? 0) > ev.tick;
-      if (alvo && h.politicaImpacto !== 'projetil') p.emitir('corte', alvo.x, alvo.y, corDaFuria(fracao, frenesi));
+      // O rastro da lâmina (na cor da fúria) é do golpe de arma (efeitos-arma.ts); aqui, o que é só do Guerreiro.
       if (alvo && frenesi) p.emitir('brasas', alvo.x, alvo.y, corDaFuria(1, true));
       if (h.id === SALTO && alvo) p.emitir('rachadura', alvo.x, alvo.y, corDaFuria(fracao, frenesi));
       // A pausa de impacto nos golpes fortes: as skills de classe (nem o básico nem as gerais) e os críticos.

@@ -13,11 +13,20 @@ import { baseDaArma } from './buffs';
 export const FAMILIAS_DE_ARMA = ['lamina', 'cajado', 'arco'] as const;
 export type FamiliaDeArma = (typeof FAMILIAS_DE_ARMA)[number];
 
+/**
+ * Marco 24 (25/10/2026, D-098): a natureza do golpe de cada arma, para a animação e o rastro (só apresentação). O
+ * machado corta e esmaga; a maça e o cajado esmagam; a lança e a adaga estocam.
+ */
+export const GOLPES_DE_ARMA = ['corte', 'corte_pesado', 'contundente', 'contundente_leve', 'estocada', 'estocada_rapida', 'disparo'] as const;
+export type GolpeDeArma = (typeof GOLPES_DE_ARMA)[number];
+
 export interface RegrasDeArmas {
   /** Desenho da arma (`arma` da base ou o ícone) -> família. */
   familias: ReadonlyMap<string, FamiliaDeArma>;
   basicoDaFamilia: Readonly<Record<FamiliaDeArma, string>>;
   naturalDaClasse: ReadonlyMap<string, FamiliaDeArma>;
+  /** Marco 24 (D-098): desenho da arma -> natureza do golpe. */
+  golpes: ReadonlyMap<string, GolpeDeArma>;
 }
 
 export function lerArmas(json: unknown): { armas: RegrasDeArmas; erros: string[] } {
@@ -32,7 +41,13 @@ export function lerArmas(json: unknown): { armas: RegrasDeArmas; erros: string[]
   const naturalDaClasse = new Map(Object.entries(l.objeto(raiz.naturalDaClasse, 'naturalDaClasse')).map(([k, v]) => [k, familia(v, `naturalDaClasse.${k}`)] as const));
   const b = l.objeto(raiz.basicoDaFamilia, 'basicoDaFamilia');
   const basicoDaFamilia = { lamina: l.texto(b, 'lamina'), cajado: l.texto(b, 'cajado'), arco: l.texto(b, 'arco') };
-  return { armas: { familias, basicoDaFamilia, naturalDaClasse }, erros: l.erros };
+  const golpe = (v: unknown, onde: string): GolpeDeArma => {
+    if (typeof v === 'string' && (GOLPES_DE_ARMA as readonly string[]).includes(v)) return v as GolpeDeArma;
+    l.erro(`${onde}: golpe desconhecido "${String(v)}"`);
+    return 'corte';
+  };
+  const golpes = new Map(Object.entries(raiz.golpes === undefined ? {} : l.objeto(raiz.golpes, 'golpes')).map(([k, v]) => [k, golpe(v, `golpes.${k}`)] as const));
+  return { armas: { familias, basicoDaFamilia, naturalDaClasse, golpes }, erros: l.erros };
 }
 
 /** A família da arma principal equipada, ou null sem arma (ou com uma que não é de nenhuma família). */

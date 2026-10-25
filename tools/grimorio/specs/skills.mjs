@@ -35,7 +35,7 @@ const guerreiro = [
     familiaEvolucao: 'tecnica', grau: 'A', icone: 'redemoinho', tipoAtaque: 'fisico', formulaDano: '2d6', ...forma.aoRedor(1),
     custoRecurso: 0, custoVida: 4, recargaMs: 6000, conjuracaoMs: 500,
     efeitos: [eu(ef.escudoAc(2, 10, 5))],
-    visual: visual('#c0392b', 'vento', { camera: 'leve', som: 'golpe' }),
+    visual: visual('#c0392b', 'vento', { camera: 'leve', som: 'golpe', animacao: 'giro' }),
     marcos: marcos({ texto: 'Puxa 1 célula para o centro', efeitos: [ef.puxa(1)] }, { texto: 'Os atingidos ficam atolados (−10%) por 1 s', efeitos: [ef.atola(10, 1)] }),
     evolucoes: ev(['amplo', 'brutal'], ['sanguessuga', 'eficiente']),
     variantes: { frenesi: { texto: '+1 de raio, e puxa 1 célula para dentro', raio: 1, alcance: 1, efeitos: [ef.puxa(1)] } },

@@ -6,6 +6,8 @@
 // Porta de saída: só jogadores. Livre abre sempre; chave exige e consome o item; boss abre quando o
 // boss indicado morre (`estado.saidaAberta`). Sem porta de saída, toda célula `S` é livre. Boss morto
 // numa fase sem saída deixa uma porta temporária (objeto `saida`) onde caiu.
+// Marco 24 (25/10/2026, D-099): sair da fase (pela saída aberta ou pela porta de retorno) pede ficar parado em cima
+// por `portas.esperaMs`; andar zera a espera. As trancas continuam avisando (e a chave abrindo) ao pisar.
 
 import type { Celula, EntidadeId } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -13,7 +15,7 @@ import type { EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { aleatorio } from '../core/rng';
 import { ticksDe } from '../core/tempo';
-import { vivo, type Entidade } from '../entities/entidade';
+import { emPasso, vivo, type Entidade } from '../entities/entidade';
 import { celulaLivrePara, ordemRotativa } from './colisao';
 import { passavel, tipoEm, type PortaInterna } from './fase';
 import { largarPerto, novoObjeto } from './objetos';
@@ -89,12 +91,39 @@ export function naSaidaAberta(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
   return tipo === 'temporaria' || !p || p.tranca === 'livre' || estado.saidaAberta;
 }
 
-function tentarSair(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
-  const retorno = ctx.fase.portaRetorno;
-  if (retorno && e.x === retorno.x && e.y === retorno.y) {
-    saida.push({ t: 'saidaAlcancada', tick: estado.tick, id: e.id, retorno: true });
+/** Na porta de retorno da fase? */
+function naPortaDeRetorno(ctx: ContextoSimulacao, e: Entidade): boolean {
+  const r = ctx.fase.portaRetorno;
+  return !!r && e.x === r.x && e.y === r.y;
+}
+
+/** Marco 24 (D-099): quanto da espera na porta de fase já passou, de 0 a 1 (null: não está esperando). */
+export function esperaNaPorta(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade): number | null {
+  if (e.naPortaDesdeTick === undefined) return null;
+  return Math.min(1, (estado.tick - e.naPortaDesdeTick) / Math.max(1, ticksDe(ctx.balance.portas.esperaMs)));
+}
+
+/** Marco 24 (D-099): ficou parado na porta de fase o tempo todo (o grupo confere isso para todos). */
+export function esperouNaPorta(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade): boolean {
+  return esperaNaPorta(estado, ctx, e) === 1;
+}
+
+/** Marco 24 (D-099): conta a espera de quem está parado na porta de fase e, ao completar, sai (uma vez). */
+function aguardarNaPorta(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
+  const retorno = naPortaDeRetorno(ctx, e);
+  const parado = !emPasso(e) && e.caminho.length === 0;
+  if (!parado || (!retorno && !naSaidaAberta(estado, ctx, e))) {
+    delete e.naPortaDesdeTick;
     return;
   }
+  e.naPortaDesdeTick ??= estado.tick;
+  if (estado.tick - e.naPortaDesdeTick !== ticksDe(ctx.balance.portas.esperaMs)) return;
+  saida.push({ t: 'saidaAlcancada', tick: estado.tick, id: e.id, ...(retorno && { retorno: true }) });
+}
+
+/** Ao pisar numa saída: a tranca avisa (boss) ou a chave abre. Sair mesmo é com a espera (`aguardarNaPorta`). */
+function chegarNaSaida(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
+  if (naPortaDeRetorno(ctx, e)) return;
   const tipo = ehSaida(estado, ctx, e.x, e.y);
   if (!tipo) return;
   const p = ctx.fase.portaSaida;
@@ -117,18 +146,19 @@ function tentarSair(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sai
     estado.saidaAberta = true;
     saida.push({ t: 'saidaDestrancada', tick, motivo: 'chave', x: p.x, y: p.y });
   }
-  saida.push({ t: 'saidaAlcancada', tick, id: e.id });
 }
 
-/** Etapa 7 (gatilhos por célula alcançada): porta interna e, para jogadores, porta de saída. */
+/** Etapa 7 (gatilhos por célula alcançada): porta interna e, para jogadores, porta de saída e a espera nela. */
 export function processarPortas(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
   const chegaram = chegaramNesteTick(saida, estado.tick);
-  if (chegaram.size === 0) return;
   for (const e of ordemRotativa(estado.entidades, estado.tick)) {
     // Ajuste de 24/10/2026 (D-091): o falcão não usa portas (o retorno ao dono é a passiva dele).
-    if (!chegaram.has(e.id) || !vivo(e) || e.invocacao?.companheiro) continue;
-    if (teleportar(estado, ctx, e, saida)) continue;
-    if (e.controlador !== 'ia') tentarSair(estado, ctx, e, saida);
+    if (!vivo(e) || e.invocacao?.companheiro) continue;
+    if (chegaram.has(e.id)) {
+      if (teleportar(estado, ctx, e, saida)) continue;
+      if (e.controlador !== 'ia') chegarNaSaida(estado, ctx, e, saida);
+    }
+    if (e.controlador !== 'ia') aguardarNaPorta(estado, ctx, e, saida);
   }
 }
 

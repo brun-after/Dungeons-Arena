@@ -209,6 +209,8 @@ export type EventoSimulacao =
   | { t: 'equipou'; tick: number; id: EntidadeId; itemId: string; slot: Slot }
   | { t: 'usouItem'; tick: number; id: EntidadeId; itemId: string; hp: number; mana: number }
   | { t: 'itemRecusado'; tick: number; id: EntidadeId; motivo: MotivoItem }
+  /** Marco 24 (D-099): o santuário de Engenho entregou o kit. */
+  | { t: 'santuarioUsado'; tick: number; id: EntidadeId; itemId: string }
   /** Marco 9A: baú e loja. `ateTick` é o fim do congelamento (anel de progresso, contagem da janela). */
   | { t: 'interacaoIniciada'; tick: number; id: EntidadeId; objetoId: string; tipo: 'bau' | 'loja' | 'desarme'; ateTick: number }
   /** Marco 10A-2: penalidade de morte (§2.12). */

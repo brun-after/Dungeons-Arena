@@ -90,7 +90,8 @@ export interface AcaoEmCurso {
   impactoPrevistoTick: number;
 }
 
-export type ModoIa = 'patrulha' | 'hesitando' | 'perseguindo';
+/** `pousado`: só o falcão do Aventureiro, no ombro do dono (marco 24, D-098). */
+export type ModoIa = 'patrulha' | 'hesitando' | 'perseguindo' | 'pousado';
 
 /** Estado da IA (§2.6). Só dados, com PRNG próprio: reproduzível no harness. */
 export interface EstadoIa {
@@ -316,6 +317,8 @@ export interface Entidade {
   encarnacaoUltimoTick?: number;
   encarnacaoDupla?: string;
   encarnacaoDuplaAteTick?: number;
+  /** Marco 24 (25/10/2026, D-099): desde quando o jogador está parado na porta de fase (a saída leva 3 s). */
+  naPortaDesdeTick?: number;
   /** Ajuste de 24/10/2026 (D-091): até quando a encarnação vale (renova ao lançar outra magia do elemento). */
   encarnacaoAteTick?: number;
   /** Marco 22 (D-089): Mira firme do Arqueiro — a barra enche a partir deste tick (dano recebido ou tiro carregado zeram). */

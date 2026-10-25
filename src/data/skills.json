@@ -768,7 +768,8 @@
         "cor": "#c0392b",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "animacao": "giro"
       },
       "marcos": {
         "2": {

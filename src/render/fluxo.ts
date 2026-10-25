@@ -11,6 +11,8 @@ const cor = (hex: string) => Number.parseInt(hex.slice(1), 16);
 /** Marco 18: armadilha alheia revelada pela Sabedoria, e o anel do desarme. */
 const COR_REVELADA = 0xe74c3c;
 const COR_DESARME = 0xf1c40f;
+/** Marco 24 (D-099): o anel da espera na porta de fase. */
+const COR_PORTA = 0x9cf0b0;
 
 export class CamadaFluxo {
   private readonly g = new Graphics();
@@ -27,6 +29,8 @@ export class CamadaFluxo {
     private readonly comParticulas: () => boolean = () => false,
     /** Marco 18: duração do desarme em ticks (para o anel de progresso). */
     private readonly ticksDesarme: () => number = () => 90,
+    /** Marco 24 (D-099): a espera na porta de fase, em ticks. */
+    private readonly ticksPorta: () => number = () => 180,
   ) {
     camada.addChild(this.g);
   }
@@ -84,6 +88,16 @@ export class CamadaFluxo {
         g.moveTo(cx + Math.cos(inicio) * p * 0.48, cy + Math.sin(inicio) * p * 0.48);
         g.arc(cx, cy, p * 0.48, inicio, inicio + Math.PI * 2 * fracao).stroke({ width: 3, color: COR_DESARME, alpha: 0.95 });
       }
+    }
+    // Marco 24 (25/10/2026, D-099): parado na porta de fase, o anel enche até sair.
+    if (local?.naPortaDesdeTick !== undefined) {
+      const fracao = Math.max(0, Math.min(1, (estado.tick - local.naPortaDesdeTick) / Math.max(1, this.ticksPorta())));
+      const cx = (local.x + 0.5) * p;
+      const cy = (local.y + 0.5) * p;
+      const inicio = -Math.PI / 2;
+      g.circle(cx, cy, p * 0.5).stroke({ width: 3, color: COR_PORTA, alpha: 0.3 });
+      g.moveTo(cx + Math.cos(inicio) * p * 0.5, cy + Math.sin(inicio) * p * 0.5);
+      g.arc(cx, cy, p * 0.5, inicio, inicio + Math.PI * 2 * fracao).stroke({ width: 5, color: COR_PORTA, alpha: 0.95 });
     }
     for (const a of estado.atrasados) {
       const alvo = estado.entidades.find((e) => e.id === a.alvoId);

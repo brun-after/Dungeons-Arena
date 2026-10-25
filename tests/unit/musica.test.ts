@@ -2,6 +2,7 @@
 // clima; a faixa escolhe modos, andamento e timbres; o laço tem pad, arpejo e duas seções; tudo determinístico.
 
 import { describe, expect, it } from 'vitest';
+import { varianteDaMusica } from '../../src/ui/som';
 import { compor, faixaDaSombra, FAIXAS, PASSOS_POR_COMPASSO, PASSOS_POR_LACO } from '../../src/audio/composicao';
 import { profundidadeDaFase, sombraDaCena, SombraMusical } from '../../src/audio/contexto-musical';
 
@@ -44,6 +45,17 @@ describe('composição por faixa', () => {
     expect(compor('fase-01', 'exploracao', 0)).toEqual(a);
     expect(compor('fase-01', 'exploracao', 4)).not.toEqual(a);
     expect(a.passos).toHaveLength(PASSOS_POR_LACO);
+  });
+
+  it('a variante troca a música dentro da fase; a 0 é a de sempre; o período fica entre 3 e 4 min (marco 24)', () => {
+    expect(compor('fase-01', 'exploracao', 2, 0)).toEqual(compor('fase-01', 'exploracao', 2));
+    expect(compor('fase-01', 'exploracao', 2, 1)).not.toEqual(compor('fase-01', 'exploracao', 2));
+    expect(compor('fase-01', 'exploracao', 2, 1)).toEqual(compor('fase-01', 'exploracao', 2, 1));
+    expect(varianteDaMusica('fase-01', 0)).toBe(0);
+    expect(varianteDaMusica('fase-01', 179_000)).toBe(0);
+    expect(varianteDaMusica('fase-01', 241_000)).toBe(1);
+    const vistas = new Set(Array.from({ length: 12 }, (_, i) => varianteDaMusica('fase-01', i * 60_000)));
+    expect(vistas.size).toBe(3);
   });
 
   it('o casual é mais rápido e mais brilhante que o dark; o dark tem drone', () => {

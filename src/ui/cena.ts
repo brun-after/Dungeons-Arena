@@ -187,6 +187,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     usarTiras: () => ap.qualidade().tiras,
     reduzido: () => ap.movimentoReduzido(),
     corElemento: (el) => Number.parseInt((ctx.conteudo.elementos.get(el)?.cor ?? '#ffffff').slice(1), 16),
+    ajuste: (e, agoraMs) => ap.ajusteVisual(e, agoraMs),
   });
   const telegrafia = new CamadaTelegrafia(palco.chao, palco.voo, projecao, () => aparencia.areaExata, ap.particulas);
   await carregarTexturasDeIcones([...new Set([...ctx.conteudo.itens.values()].map((i) => i.icone)), 'pergaminho']);
@@ -197,7 +198,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     { camada: palco.entidades, projecao },
     (id) => ctx.conteudo.itens.get(id)?.icone,
   );
-  const fluxo = new CamadaFluxo(palco.chao, () => ap.particulas.limite > 0, () => ticksDe(ctx.balance.armadilhas.desarmeMs));
+  const fluxo = new CamadaFluxo(palco.chao, () => ap.particulas.limite > 0, () => ticksDe(ctx.balance.armadilhas.desarmeMs), () => ticksDe(ctx.balance.portas.esperaMs));
   bus.on('armadilhaDisparou', (ev) => {
     if (ev.x !== undefined && ev.y !== undefined) fluxo.disparou(ev.x, ev.y, ev.tick);
   });
@@ -552,7 +553,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     fluxo.desenhar(estado, idLocal, ap.movimentoReduzido());
     if (!congelado) {
       telegrafia.desenhar(estado, ctx, idLocal, q.alpha);
-      sprites.desenhar(estado, ctx, q.posicao, q.alpha, q.agoraMs, q.aoRemover);
+      sprites.desenhar(estado, ctx, ap.posicaoVisual(q.posicao), q.alpha, q.agoraMs, q.aoRemover);
       numeros.atualizar(q.agoraMs);
     }
     palco.renderizar();
@@ -562,7 +563,9 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       return {
         tick: estado.tick,
         celula: { x: j?.x ?? 0, y: j?.y ?? 0 },
+        destino: { x: j?.destinoX ?? 0, y: j?.destinoY ?? 0 },
         tela: camera.paraTela(p.x, p.y),
+        grade: [camera.paraTela(j?.x ?? 0, j?.y ?? 0), camera.paraTela((j?.x ?? 0) + 1, j?.y ?? 0), camera.paraTela(j?.x ?? 0, (j?.y ?? 0) + 1)],
         entidades: estado.entidades.length,
         impactos: feedback.impactos(),
         hp: j?.hp ?? 0,

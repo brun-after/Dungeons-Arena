@@ -105,7 +105,19 @@ export class CamadaTelegrafia {
         const fundo = elemento ? corDe(elemento) : visualDe(hab).cor;
         if (p) {
           // A área em partículas: o miolo enche conforme o impacto chega; a borda, em pontos na cor de quem ataca.
-          if (vez(a.acaoId, INTERVALO_TELEGRAFO_MS)) {
+          // Marco 24 (25/10/2026, D-098): em volta de quem age, a área é um círculo (não o quadrado das células).
+          if (hab.tipoArea === 'ao_redor' && vez(a.acaoId, INTERVALO_TELEGRAFO_MS)) {
+            const r = hab.raioArea + 0.45;
+            for (let i = 0; i < 4 + Math.round(6 * fracao); i++) {
+              const t = Math.random() * Math.PI * 2;
+              p.emitir('borda', de.x + Math.cos(t) * r, de.y + Math.sin(t) * r, cor);
+            }
+            for (let i = 0; i < 2 + Math.round(4 * fracao); i++) {
+              const t = Math.random() * Math.PI * 2;
+              const d = Math.sqrt(Math.random()) * r * 0.9;
+              p.emitir('telegrafo', de.x + Math.cos(t) * d, de.y + Math.sin(t) * d, fundo);
+            }
+          } else if (vez(a.acaoId, INTERVALO_TELEGRAFO_MS)) {
             const miolo = Math.min(celulas.length, 2 + Math.round(10 * fracao));
             for (let i = 0; i < miolo; i++) {
               const c = sortear(celulas);

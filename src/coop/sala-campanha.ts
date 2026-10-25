@@ -23,7 +23,7 @@ import { concluirEnxame, contextoDaFase, estadoInicialDaFase, faseOficialOuGerad
 import { personagemNoInicio } from '../save/transicao';
 import { reservaCelula } from '../world/colisao';
 import { passavel } from '../world/fase';
-import { naSaidaAberta } from '../world/portas';
+import { esperouNaPorta, naSaidaAberta } from '../world/portas';
 import { conferirPersonagem, previaDoPersonagem } from './personagem';
 
 export const MODO_COOPERATIVO = 'cooperativo';
@@ -171,11 +171,13 @@ export class SalaCampanha extends SalaArena {
   private conferirSaida(): void {
     const jogadores = this.jogadoresPresentes();
     const volta = this.ctx.fase.portaRetorno;
-    if (volta && faseConcluida(this.ctx.modo, jogadores, (e) => e.x === volta.x && e.y === volta.y)) {
+    // Marco 24 (25/10/2026, D-099): cada um precisa ter ficado parado na porta o tempo da espera.
+    const esperou = (e: Entidade) => esperouNaPorta(this.estado, this.ctx, e);
+    if (volta && faseConcluida(this.ctx.modo, jogadores, (e) => e.x === volta.x && e.y === volta.y && esperou(e))) {
       this.avancar(true);
       return;
     }
-    if (!faseConcluida(this.ctx.modo, jogadores, (e) => naSaidaAberta(this.estado, this.ctx, e))) return;
+    if (!faseConcluida(this.ctx.modo, jogadores, (e) => naSaidaAberta(this.estado, this.ctx, e) && esperou(e))) return;
     this.avancar();
   }
 

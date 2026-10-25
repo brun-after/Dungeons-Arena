@@ -5,6 +5,8 @@
 // - em combate (alvo do dono a até `raioCombate` dele): passeia em volta do alvo, a `distanciaAlvo` células;
 // - fora de combate: busca para o dono o ouro, os orbes de vida e mana (quando faltam) e os buffs a até `raioColeta`
 //   células dele (world/objetos.ts entrega ao dono); sem nada para pegar, passeia em volta do dono.
+// - marco 24 (25/10/2026, D-098): com o dono parado, sem hostil e sem nada para pegar por `pousoMs`, pousa no ombro
+//   dele (modo `pousado`, na célula do dono); sai na hora quando o dono anda, conjura ou aparece um hostil.
 // O ponto do passeio é sorteado pelo PRNG da própria IA e trocado a cada `passeioMs` ou ao chegar.
 // `alvoCacheX/Y` guardam o destino atual e `proximaAvaliacaoTick`, a troca do passeio.
 
@@ -81,14 +83,34 @@ function passear(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: Es
   if (ponto) irPara(estado, ctx, e, ia, ponto, saida);
 }
 
+/** Troca o modo; `modoDesdeTick` marca a última atividade (o pouso conta a partir dela). */
+function mudarModo(ia: EstadoIa, modo: EstadoIa['modo'], tick: number, ativo: boolean): void {
+  if (ia.modo !== modo || ativo) ia.modoDesdeTick = tick;
+  ia.modo = modo;
+}
+
+/** O dono parado e sem conjurar (o falcão pode pousar). */
+function donoQuieto(dono: Entidade): boolean {
+  return !emPasso(dono) && dono.caminho.length === 0 && !dono.acao;
+}
+
 export function processarFalcao(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa, dono: Entidade | undefined, saida: EventoSimulacao[]): void {
   if (!dono || !vivo(dono)) return;
   const r = ctx.balance.ajustesClasses.aventureiro.falcao;
   const alvo = dono.alvoSelecionado ? buscarEntidade(estado, dono.alvoSelecionado) : undefined;
   // Só luta perto do dono: depois de renascer longe, o alvo antigo não puxa o falcão de volta ao combate.
   const hostil = alvo && alvoOfensivoValido(estado, ctx, e, alvo) && chebyshev(dono, alvo) <= r.raioCombate ? alvo : undefined;
-  ia.modo = hostil ? 'perseguindo' : 'patrulha';
   ia.alvoId = hostil?.id ?? null;
+  if (hostil) mudarModo(ia, 'perseguindo', estado.tick, false);
+  else {
+    const calmo = donoQuieto(dono) && !emCombate(estado, dono) && !coletavelMaisPerto(estado, ctx, e, dono);
+    const pousa = calmo && (ia.modo === 'pousado' || (ia.modo === 'patrulha' && estado.tick - ia.modoDesdeTick >= ticksDe(r.pousoMs)));
+    mudarModo(ia, pousa ? 'pousado' : 'patrulha', estado.tick, !calmo);
+  }
+  if (ia.modo === 'pousado') {
+    irPara(estado, ctx, e, ia, celulaOcupada(dono), saida);
+    return;
+  }
   // O dono conjura uma habilidade corpo a corpo: o falcão mergulha no alvo dela.
   const acao = dono.acao;
   const hab = acao && acao.habilidadeId !== dono.ataqueBasico ? habilidadeDoAtor(ctx, dono, acao.habilidadeId) : undefined;

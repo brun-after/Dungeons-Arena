@@ -42,7 +42,7 @@
       "danoMult": 0.95,
       "falcaoDanoMult": 1.5,
       "falcaoPassoMs": 200,
-      "falcao": { "distanciaAlvo": 3, "raioPasseio": 3, "raioColeta": 7, "passeioMs": 1200, "raioCombate": 8 }
+      "falcao": { "distanciaAlvo": 3, "raioPasseio": 3, "raioColeta": 7, "passeioMs": 1200, "raioCombate": 8, "reflexoInicioPct": 80, "reflexoFimPct": 60, "pousoMs": 6000 }
     },
     "arqueiro": {
       "secundariosMult": 1.15,
@@ -171,6 +171,7 @@
   },
   "portas": {
     "recargaMs": 800,
+    "esperaMs": 3000,
     "janelaPortaBossMs": 30000
   },
   "invocacoes": {
@@ -387,7 +388,6 @@
   },
   "ambiente": {
     "intervaloMs": 1000,
-    "engenhoMs": 20000,
     "queimadura": 4,
     "veneno": 3,
     "duracaoMs": 1800,

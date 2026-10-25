@@ -1,6 +1,7 @@
 // Marco 15 (15/10/2026, D-061): campanha cooperativa em loopback — ficha conferida, canal privado, anfitrião, saída
 // com todos os vivos, fase nova levando os personagens, reconexão, escala pelo grupo e o save de cada um.
 
+import { ticksDe } from '../../src/core/tempo';
 import { describe, expect, it } from 'vitest';
 import { versaoDoConteudo, type MensagemServidor } from '../../src/arena/protocolo';
 import { atualizarPersonagemNoSave, conferirPersonagem, pedidoDoPersonagem } from '../../src/coop/personagem';
@@ -62,9 +63,14 @@ function celulaDeSaida(s: SalaCampanha): { x: number; y: number } {
   throw new Error('fase sem porta de saída');
 }
 
+/** Põe na célula já com a espera da porta cumprida (marco 24, D-099: sair pede ficar parado nela). */
+function porEm(s: SalaCampanha, e: Entidade, c: { x: number; y: number }): void {
+  const espera = ticksDe(s.ctx.balance.portas.esperaMs);
+  Object.assign(e, { x: c.x, y: c.y, destinoX: c.x, destinoY: c.y, progressoPasso: 0, caminho: [], waypoints: [], naPortaDesdeTick: s.estado.tick - espera });
+}
+
 function porNaSaida(s: SalaCampanha, e: Entidade): void {
-  const c = celulaDeSaida(s);
-  Object.assign(e, { x: c.x, y: c.y, destinoX: c.x, destinoY: c.y, progressoPasso: 0, caminho: [], waypoints: [] });
+  porEm(s, e, celulaDeSaida(s));
 }
 
 describe('entrada com o personagem do slot', () => {
@@ -214,10 +220,10 @@ describe('a saída do grupo', () => {
     expect(s.faseRef.id).toBe('fase-02');
     const volta = obter(s.ctx.fase.portaRetorno, 'retorno');
     a.entidade().hp = 30;
-    for (const e of [a.entidade()]) Object.assign(e, { x: volta.x, y: volta.y, destinoX: volta.x, destinoY: volta.y });
+    porEm(s, a.entidade(), volta);
     rodar(s, 1);
     expect(s.faseRef.id).toBe('fase-02');
-    Object.assign(b.entidade(), { x: volta.x, y: volta.y, destinoX: volta.x, destinoY: volta.y });
+    porEm(s, b.entidade(), volta);
     rodar(s, 1);
     expect(s.faseRef.id).toBe('fase-01');
     expect(s.estado.objetos).toEqual([]);

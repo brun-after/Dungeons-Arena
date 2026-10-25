@@ -18709,7 +18709,8 @@
         "conjuracao": "runas",
         "impacto": "vento",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "animacao": "giro"
       },
       "variantes": {
         "dom_tecnica": {
@@ -19123,7 +19124,8 @@
         "conjuracao": "runas",
         "impacto": "chamas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "animacao": "giro"
       },
       "variantes": {
         "dom_tecnica": {
@@ -19381,7 +19383,8 @@
         "conjuracao": "runas",
         "impacto": "vento",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "animacao": "giro"
       },
       "variantes": {
         "dom_tecnica": {
@@ -19535,7 +19538,8 @@
         "conjuracao": "runas",
         "impacto": "vento",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "animacao": "giro"
       },
       "variantes": {
         "dom_tecnica": {
@@ -19662,7 +19666,8 @@
         "cor": "#c0392b",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "animacao": "giro"
       }
     },
     {
@@ -19700,7 +19705,8 @@
         "cor": "#c0392b",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "animacao": "giro"
       }
     },
     {
@@ -19735,7 +19741,8 @@
         "cor": "#c0392b",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "animacao": "giro"
       }
     },
     {
@@ -19771,7 +19778,8 @@
         "cor": "#c0392b",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "animacao": "giro"
       }
     },
     {
@@ -19842,7 +19850,8 @@
         "cor": "#c0392b",
         "impacto": "chamas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "animacao": "giro"
       }
     },
     {
@@ -19873,7 +19882,8 @@
         "cor": "#c0392b",
         "impacto": "chamas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "animacao": "giro"
       }
     },
     {
@@ -20043,7 +20053,8 @@
         "cor": "#c0392b",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "animacao": "giro"
       }
     },
     {
@@ -20073,7 +20084,8 @@
         "cor": "#c0392b",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "animacao": "giro"
       }
     },
     {

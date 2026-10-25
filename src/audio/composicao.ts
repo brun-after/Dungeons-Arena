@@ -106,10 +106,14 @@ export function faixaDaSombra(sombra: number): number {
   return Math.max(0, Math.min(FAIXAS - 1, Math.floor(Math.max(0, Math.min(1, sombra)) * FAIXAS)));
 }
 
-export function compor(faseId: string, clima: Clima, faixa = 2): Composicao {
+/**
+ * Marco 24 (25/10/2026, D-099): `variante` troca a música dentro da mesma fase (outra semente e outro tom); a variante
+ * 0 é a de sempre.
+ */
+export function compor(faseId: string, clima: Clima, faixa = 2, variante = 0): Composicao {
   const f = Math.max(0, Math.min(FAIXAS - 1, Math.round(faixa)));
-  const raiz = 45 + (hashTexto(faseId) % 8);
-  const rng = criarRng(hashTexto(`${faseId}:${clima}:${f}`));
+  const raiz = 45 + ((hashTexto(faseId) + variante * 3) % 8);
+  const rng = criarRng(hashTexto(`${faseId}:${clima}:${f}${variante ? `:${variante}` : ''}`));
   const escala = escolher(rng, MODOS[f] ?? MODOS[2] ?? [[0, 2, 3, 5, 7, 9, 10]]);
   const [min, max] = ANDAMENTO[clima];
   // Casual mais ligeiro, dark mais arrastado (o combate continua mais rápido que a exploração).

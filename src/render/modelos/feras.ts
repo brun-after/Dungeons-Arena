@@ -98,15 +98,18 @@ export const aranha = (cor: number) => (vista: Vista) => (vista === '34' ? aranh
 export const slime = (cor: number) => (vista: Vista) => (vista === '34' ? slime34(cor) : slimeCima(cor));
 
 // Marco 22: o falcão voa alto (o corpo bem acima dos pés) para não se confundir com quem anda no chão.
-function falcao34(cor: number): string {
+// Marco 24 (25/10/2026, D-098): três quadros de asas: 0 abertas (planando), 1 batendo para baixo, 2 fechadas (pousado).
+function falcao34(cor: number, quadro: number): string {
   const y = PES_Y - 30;
   const asa = escurecer(cor, 0.25);
+  // A ponta das asas: alta e aberta, baixa na batida, colada ao corpo quando fecha.
+  const ponta = quadro === 1 ? { tras: [MEIO - 20, y + 10], frente: [MEIO + 18, y + 11] } : quadro === 2 ? { tras: [MEIO - 12, y + 1], frente: [MEIO + 2, y - 3] } : { tras: [MEIO - 22, y - 14], frente: [MEIO + 20, y - 15] };
   return [
-    // Asas abertas, a de trás mais escura.
-    poligono([MEIO - 2, y - 2, MEIO - 22, y - 14, MEIO - 18, y - 4, MEIO - 6, y + 2], escurecer(cor, 0.4)),
+    // Asas, a de trás mais escura.
+    poligono([MEIO - 2, y - 2, ...ponta.tras, MEIO - 18, y - 4 + (quadro === 1 ? 10 : 0), MEIO - 6, y + 2], escurecer(cor, 0.4)),
     poligono([MEIO - 12, y + 3, MEIO - 22, y + 6, MEIO - 16, y + 9, MEIO - 6, y + 5], escurecer(cor, 0.3)),
     elipse(MEIO - 1, y, 10, 5, cor),
-    poligono([MEIO + 2, y - 1, MEIO + 20, y - 15, MEIO + 16, y - 3, MEIO + 6, y + 3], asa),
+    poligono([MEIO + 2, y - 1, ...ponta.frente, MEIO + 16 - (quadro === 2 ? 12 : 0), y - 3 + (quadro === 1 ? 10 : 0), MEIO + 6, y + 3], asa),
     elipse(MEIO, y + 2, 7, 2.4, clarear(cor, 0.35), false),
     circulo(MEIO + 10, y - 3, 4.2, cor),
     poligono([MEIO + 13.5, y - 4, MEIO + 19, y - 2, MEIO + 13.5, y - 0.5], 0xf4d03f),
@@ -114,11 +117,13 @@ function falcao34(cor: number): string {
   ].join('');
 }
 
-function falcaoCima(cor: number): string {
+function falcaoCima(cor: number, quadro: number): string {
   const c = MEIO;
+  // De cima, a envergadura: inteira, a meio na batida, recolhida pousado.
+  const env = quadro === 1 ? 15 : quadro === 2 ? 6 : 24;
   return [
-    poligono([c - 4, c - 3, c - 2, c - 24, c + 6, c - 20, c + 4, c - 3], escurecer(cor, 0.25)),
-    poligono([c - 4, c + 3, c - 2, c + 24, c + 6, c + 20, c + 4, c + 3], escurecer(cor, 0.25)),
+    poligono([c - 4, c - 3, c - 2, c - env, c + 6, c - env + 4, c + 4, c - 3], escurecer(cor, 0.25)),
+    poligono([c - 4, c + 3, c - 2, c + env, c + 6, c + env - 4, c + 4, c + 3], escurecer(cor, 0.25)),
     poligono([c - 10, c - 4, c - 18, c - 6, c - 18, c + 6, c - 10, c + 4], escurecer(cor, 0.35)),
     elipse(c - 1, c, 10, 4.5, cor),
     circulo(c + 9, c, 3.8, cor),
@@ -126,4 +131,4 @@ function falcaoCima(cor: number): string {
   ].join('');
 }
 
-export const falcao = (cor: number) => (vista: Vista) => (vista === '34' ? falcao34(cor) : falcaoCima(cor));
+export const falcao = (cor: number) => (vista: Vista, quadro = 0) => (vista === '34' ? falcao34(cor, quadro) : falcaoCima(cor, quadro));

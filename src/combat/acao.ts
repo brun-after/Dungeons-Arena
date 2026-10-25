@@ -98,7 +98,9 @@ export function alcanceDe(ctx: ContextoSimulacao, ator: Entidade, hab: Habilidad
 export function alvoOfensivoValido(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, alvo: Entidade): boolean {
   // Marco 24 (D-094): quem tem a marca do caçador de quem ataca não some para ele.
   const visivel = alvo.invisivelAteTick <= estado.tick || alvo.efeitos.some((f) => f.ateTick > estado.tick && f.origemId === ator.id && REGISTRO_EFEITOS[f.tipo].revela);
-  return vivo(alvo) && visivel && podeFerir(ator, alvo, ctx.modo);
+  // Marco 24 (25/10/2026, D-098): o falcão não atrai ninguém; só vira alvo de quem já está perseguindo.
+  const falcaoFora = !!alvo.invocacao?.companheiro && ator.controlador === 'ia' && ator.ia?.modo !== 'perseguindo';
+  return vivo(alvo) && visivel && !falcaoFora && podeFerir(ator, alvo, ctx.modo);
 }
 
 /** Marco 14: alvo de suporte válido: vivo e o próprio ou aliado, pela relação do modo. */

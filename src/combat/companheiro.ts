@@ -1,7 +1,8 @@
 // Falcão do Aventureiro (marco 22, 23/10/2026, D-089). Um companheiro permanente que:
 // - nasce ao lado do dono em cada fase e quando o dono volta;
 // - divide a vida com o dono: o golpe no falcão cai no Aventureiro (combat/golpe.ts, com as defesas dele), o dano
-//   periódico que o falcão leva sai da vida do dono, e os dois caem juntos;
+//   periódico que o falcão leva sai da vida do dono, e os dois caem juntos (marco 24, D-098: só o reflexo do dano,
+//   de 80% no nível 1 a 60% no máximo);
 // - não ataca: voa até o alvo selecionado do dono (entities/ia-invocacao.ts, comportamento `companheiro`), e o
 //   ataque básico continua saindo do Aventureiro;
 // - é a origem das habilidades do Aventureiro (combat/acao.ts, `origemDaHabilidade`);
@@ -12,6 +13,7 @@ import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { vivo, type Entidade } from '../entities/entidade';
+import { reflexoDoFalcao } from './ajustes-classes';
 import { invocar } from './efeitos-fluxo';
 import { celulaOcupada } from './geometria';
 import { registrarParticipacao } from './participacao';
@@ -71,7 +73,8 @@ export function sincronizarCompanheiros(estado: EstadoJogo, ctx: ContextoSimulac
       falcao.hp = 0;
       continue;
     }
-    const dano = Math.max(0, (inv.hpEspelhado ?? dono.hp) - falcao.hp);
+    // Marco 24 (25/10/2026, D-098): o dono sente só o reflexo do dano (80% no nível 1, 60% no máximo).
+    const dano = Math.round(Math.max(0, (inv.hpEspelhado ?? dono.hp) - falcao.hp) * reflexoDoFalcao(ctx, dono.nivel));
     if (dano > 0) {
       dono.hp = Math.max(0, dono.hp - dano);
       // A autoria dos golpes no falcão passa ao dono (quem derruba o Aventureiro pelo falcão leva o abate).

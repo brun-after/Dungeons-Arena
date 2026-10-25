@@ -4,7 +4,7 @@
 // nunca a simulação. Desligados com movimento reduzido ou com "efeitos de tela" desmarcado.
 
 // Marco 24 (25/10/2026): `golpe` (a pausa de ~50 ms dos golpes fortes do Guerreiro e do aparo) e `ultimate`.
-export type TipoImpacto = 'leve' | 'forte' | 'dano' | 'golpe' | 'ultimate';
+export type TipoImpacto = 'leve' | 'forte' | 'dano' | 'golpe' | 'golpe_leve' | 'ultimate';
 
 interface Receita {
   tremorPx: number;
@@ -22,6 +22,7 @@ export const RECEITAS: Readonly<Record<TipoImpacto, Receita>> = {
   forte: { tremorPx: 4.5, duracaoMs: 300, congelaMs: 60, flash: 0.11, corFlash: 0xffffff, zoom: 0.04 },
   dano: { tremorPx: 2.5, duracaoMs: 200, congelaMs: 0, flash: 0.09, corFlash: 0xe74c3c, zoom: 0 },
   golpe: { tremorPx: 2, duracaoMs: 140, congelaMs: 50, flash: 0, corFlash: 0xffffff, zoom: 0 },
+  golpe_leve: { tremorPx: 1.2, duracaoMs: 110, congelaMs: 35, flash: 0, corFlash: 0xffffff, zoom: 0 },
   ultimate: { tremorPx: 5, duracaoMs: 420, congelaMs: 80, flash: 0.16, corFlash: 0xfff3c4, zoom: 0.06 },
 };
 

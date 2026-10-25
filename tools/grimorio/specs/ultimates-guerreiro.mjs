@@ -5,14 +5,15 @@ import { ef, eu, forma } from './dsl.mjs';
 export const COR = '#d0603f';
 export default [
   // 0 Redemoinho + Investida de escudo: Ciclone de aço
-  { ...forma.aoRedor(2), d: '3d6', ef: [eu(ef.escudoAc(3, 15, 4)), eu(ef.intercepta(9, 3)), eu(ef.acelera(20, 3))], impacto: 'vento',
+  // Marco 24 (25/10/2026, D-098): `animacao: 'giro'` nas ultimates que giram (o corpo roda com a arma e o vento).
+  { ...forma.aoRedor(2), d: '3d6', ef: [eu(ef.escudoAc(3, 15, 4)), eu(ef.intercepta(9, 3)), eu(ef.acelera(20, 3))], impacto: 'vento', animacao: 'giro',
     fases: [[1, { ...forma.aoRedor(2), d: '2d6', ef: [eu(ef.escudoAc(3, 15, 4))] }], [2, { ...forma.aoRedor(2), d: '2d6', ef: [eu(ef.escudoAc(3, 15, 4))] }], [3, { ...forma.aoRedor(2), d: '4d6', ef: [ef.empurra(1)] }]] },
   // 1 Redemoinho + Brado: Fúria rodopiante
-  { ...forma.aoRedor(3), d: '5d6', ef: [ef.empurra(1)], impacto: 'vento', fases: [[0, { ...forma.aliados(3), ef: [ef.bonus(20, 6)] }]] },
+  { ...forma.aoRedor(3), d: '5d6', ef: [ef.empurra(1)], impacto: 'vento', animacao: 'giro', fases: [[0, { ...forma.aliados(3), ef: [ef.bonus(20, 6)] }]] },
   // 2 Redemoinho + Corrente: Turbilhão de correntes
   { ...forma.aoRedor(4), d: '2d6', ef: [ef.puxa(3)], impacto: 'corte', fases: [[0.5, { ...forma.aoRedor(2), d: '5d6', ef: [ef.atordoa(0.5)] }]] },
   // 3 Redemoinho + Lâmina em brasa: Vórtice ígneo
-  { ...forma.aoRedor(3), d: '4d6', el: 'fogo', ef: [ef.queima(4, 4)], impacto: 'chamas',
+  { ...forma.aoRedor(3), d: '4d6', el: 'fogo', ef: [ef.queima(4, 4)], impacto: 'chamas', animacao: 'giro',
     fases: [[1, { ...forma.aoRedor(2), d: '2d6', el: 'fogo', ef: [ef.puxa(1)] }], [2, { ...forma.aoRedor(1), d: '3d6', el: 'fogo' }]] },
   // 4 Redemoinho + Desafio: Olho do furacão
   { ...forma.aoRedor(5), ef: [ef.desafia(15, 4), eu(ef.libertar())], impacto: 'anel',
@@ -20,7 +21,7 @@ export default [
   // 5 Redemoinho + Salto esmagador: Meteoro de aço
   { ...forma.area(6, 2), d: '6d6', ef: [ef.atordoa(1), ef.avanca(6)], impacto: 'pedra', camera: 'forte', fases: [[0.3, { ...forma.aoRedor(3), d: '2d6', ef: [ef.empurra(1)] }]] },
   // 6 Redemoinho + Contragolpe: Lâminas em guarda
-  { ...forma.aoRedor(2), d: '2d6', ef: [eu(ef.contragolpe('contragolpe_giro', 3)), eu(ef.aparo(50, 3))], impacto: 'vento',
+  { ...forma.aoRedor(2), d: '2d6', ef: [eu(ef.contragolpe('contragolpe_giro', 3)), eu(ef.aparo(50, 3))], impacto: 'vento', animacao: 'giro',
     fases: [[1, { ...forma.aoRedor(2), d: '2d6' }], [2, { ...forma.aoRedor(2), d: '2d6' }]] },
   // 7 Investida de escudo + Brado: Formação de choque
   { ...forma.linha(3), d: '4d6', ef: [ef.avanca(3), ef.empurra(1), ef.atordoa(0.5)], impacto: 'faiscas', fases: [[0, { ...forma.aliados(4), ef: [ef.escudo(6, 6), ef.acelera(30, 2)] }]] },

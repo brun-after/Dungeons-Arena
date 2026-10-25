@@ -3,10 +3,11 @@
 
 import { describe, expect, it } from 'vitest';
 import type { Comando } from '../../src/core/comandos';
-import type { ContextoSimulacao } from '../../src/core/contexto';
+import { BALANCE_PADRAO, type ContextoSimulacao } from '../../src/core/contexto';
 import { buscarEntidade, clonarEstado, criarEstado } from '../../src/core/estado';
 import { DT_MS } from '../../src/core/loop';
 import { simular, type EventoSimulacao } from '../../src/core/simulacao';
+import { ticksDe } from '../../src/core/tempo';
 import type { Entidade } from '../../src/entities/entidade';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import { guardarItem } from '../../src/progression/inventario';
@@ -52,6 +53,7 @@ function cenario(extra: Partial<FaseJson> = {}) {
   return { ctx, estado, eventos, j, tick, ir, de };
 }
 
+const ESPERA = ticksDe(BALANCE_PADRAO.portas.esperaMs);
 const PAR = [{ numero: 1, nome: 'atalho', a: { x: 4, y: 2 }, b: { x: 8, y: 8 } }];
 
 describe('porta interna (§2.1)', () => {
@@ -93,6 +95,26 @@ describe('porta interna (§2.1)', () => {
 });
 
 describe('porta de saída (§2.1)', () => {
+  it('sair pede 3 s parado na porta: antes não sai, andar zera a espera e a saída sai uma vez só (marco 24)', () => {
+    const c = cenario();
+    const chegar = (x: number, y: number) => {
+      c.ir(x, y, 0);
+      for (let i = 0; i < 600 && (c.j().x !== x || c.j().y !== y || c.j().naPortaDesdeTick === undefined); i++) c.tick();
+    };
+    chegar(10, 10);
+    const chegou = obter(c.j().naPortaDesdeTick, 'espera');
+    expect(c.de('saidaAlcancada')).toHaveLength(0);
+    // Sai da porta e volta: a espera recomeça.
+    c.ir(9, 10, 30);
+    expect(c.j().naPortaDesdeTick).toBeUndefined();
+    chegar(10, 10);
+    expect(obter(c.j().naPortaDesdeTick, 'espera')).toBeGreaterThan(chegou);
+    for (let i = 0; i < ESPERA; i++) c.tick();
+    expect(c.de('saidaAlcancada')).toMatchObject([{ id: 'j' }]);
+    for (let i = 0; i < ESPERA; i++) c.tick();
+    expect(c.de('saidaAlcancada')).toHaveLength(1);
+  });
+
   it('sem portaSaida, toda célula S é saída livre', () => {
     const c = cenario();
     c.ir(10, 10);
@@ -107,7 +129,7 @@ describe('porta de saída (§2.1)', () => {
     const chave = obter(CONTEUDO.itens.get('chave_cripta'), 'chave');
     guardarItem(obter(c.j().bolsa, 'bolsa'), chave, 1, c.ctx.balance.inventario);
     c.ir(9, 10, 60);
-    c.ir(10, 10, 60);
+    c.ir(10, 10, 60 + ESPERA);
     expect(c.de('saidaAlcancada')).toHaveLength(1);
     expect(c.estado.saidaAberta).toBe(true);
     expect(c.j().bolsa?.mochila.some((i) => i.itemId === 'chave_cripta')).toBe(false);
@@ -122,7 +144,7 @@ describe('porta de saída (§2.1)', () => {
     expect(c.estado.saidaAberta).toBe(true);
     expect(c.de('saidaDestrancada')).toMatchObject([{ motivo: 'boss' }]);
     c.ir(9, 10, 60);
-    c.ir(10, 10, 60);
+    c.ir(10, 10, 60 + ESPERA);
     expect(c.de('saidaAlcancada')).toHaveLength(1);
   });
 

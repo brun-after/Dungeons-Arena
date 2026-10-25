@@ -75,16 +75,19 @@ describe('flechas e equipamento no token', () => {
   it('os adornos desenham a arma, o escudo, o elmo e a capa pedidos, e nada sem equipamento', () => {
     const o = OPCOES_JOGAVEIS.guerreiro;
     const nada = { arma: null, secundaria: null, cabeca: null, corpo: null, capa: null, corElemento: null, forma: null, formaMaxima: null };
-    expect(adornosDoBipede(o, '34', nada)).toEqual({ atras: '', frente: '' });
+    expect(adornosDoBipede(o, '34', nada)).toMatchObject({ atras: '', frente: '', arma: '' });
     const cheio = adornosDoBipede(o, '34', { ...nada, arma: 'arco', secundaria: 'escudo', cabeca: 0x3498db, corpo: 0x9b59b6, capa: 0xf39c12 });
     // Marco 18: a arma elemental brilha na ponta, a forma põe a gema e a Última ganha o halo atrás.
     const ultima = adornosDoBipede(o, '34', { ...nada, arma: 'espada', corElemento: 0xff7b39, forma: 'ultima', formaMaxima: 'ultima' });
-    expect(ultima.frente).toContain('fill-opacity');
+    // Marco 24 (D-098): a arma principal vem numa camada própria, com o pivô na mão.
+    expect(ultima.arma).toContain('fill-opacity');
+    expect(ultima.pivo.y).toBeGreaterThan(20);
     expect(ultima.atras).toContain('<ellipse');
     expect(cheio.atras).toContain('#'); // a capa
-    expect(cheio.frente).toContain('<path'); // o arco (e o elmo)
+    expect(cheio.arma).toContain('<path'); // o arco
+    expect(cheio.frente).toContain('<path'); // o elmo
     expect(cheio.frente).toContain('<ellipse'); // o escudo
-    expect(adornosDoBipede(o, 'cima', { ...nada, arma: 'espada' }).frente).toContain('scale(1.35)');
+    expect(adornosDoBipede(o, 'cima', { ...nada, arma: 'espada' }).arma).toContain('scale(1.35)');
     // Os modelos das classes vêm sem arma: quem desenha a arma é o equipamento.
     for (const opcoes of Object.values(OPCOES_JOGAVEIS)) expect('arma' in opcoes || 'escudo' in opcoes).toBe(false);
   });

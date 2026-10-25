@@ -18,6 +18,8 @@ export interface AplicarRig {
   /** Direção do olhar na tela (unitária), para o empurrão do ataque. */
   direcao: { x: number; y: number };
   usarTiras: boolean;
+  /** Marco 24 (D-098): de cima o giro do Redemoinho roda o corpo; em pé, o corpo vira de lado (escala) e volta. */
+  vistaDeCima?: boolean;
 }
 
 export class RigToken {
@@ -27,6 +29,9 @@ export class RigToken {
   /** D-067: o equipamento (capa atrás; armadura, elmo e armas na frente), no tamanho do quadro. */
   private readonly adornoAtras = new Sprite();
   private readonly adornoFrente = new Sprite();
+  /** Marco 24 (25/10/2026, D-098): a arma principal, girando em torno da mão no golpe. */
+  private readonly arma = new Sprite();
+  private pivo = { x: 0, y: 0 };
   private readonly tiras: Sprite[] = [];
   private readonly colunas: [Sprite, Sprite][] = [];
   private fonte: FonteToken;
@@ -42,8 +47,8 @@ export class RigToken {
       this.colunas.push([e, d]);
       this.corpo.addChild(s, e, d);
     }
-    this.corpo.addChild(this.adornoFrente);
-    this.adornoAtras.visible = this.adornoFrente.visible = false;
+    this.corpo.addChild(this.adornoFrente, this.arma);
+    this.adornoAtras.visible = this.adornoFrente.visible = this.arma.visible = false;
     this.raiz.addChild(this.corpo);
     this.trocarFonte(fonte);
   }
@@ -82,8 +87,17 @@ export class RigToken {
     const p = o.pose;
     const empurrao = p.empurrao * f.largura * escala;
     this.corpo.position.set(o.direcao.x * empurrao, o.direcao.y * empurrao + p.dy * f.altura * escala);
-    this.corpo.scale.set(escala * p.escalaX * o.sentido, escala * p.escalaY);
-    this.corpo.rotation = o.rotacao + p.rotacao * o.sentido;
+    const giro = p.giro ?? 0;
+    // Em pé, o giro vira o corpo de lado e de volta (a escala passa pelo cosseno, sem sumir no meio).
+    const vira = giro !== 0 && !o.vistaDeCima ? Math.sign(Math.cos(giro) || 1) * Math.max(0.22, Math.abs(Math.cos(giro))) : 1;
+    this.corpo.scale.set(escala * p.escalaX * o.sentido * vira, escala * p.escalaY);
+    this.corpo.rotation = o.rotacao + p.rotacao * o.sentido + (o.vistaDeCima ? giro : 0);
+    const ox0 = -f.ancoraX * f.largura;
+    const oy0 = -f.ancoraY * f.altura;
+    const a = p.arma;
+    this.arma.pivot.set(this.pivo.x, this.pivo.y);
+    this.arma.position.set(ox0 + this.pivo.x + (a?.dx ?? 0) * f.largura, oy0 + this.pivo.y + (a?.dy ?? 0) * f.altura);
+    this.arma.rotation = a?.rotacao ?? 0;
     const tiras = o.usarTiras && p.tiras.length === TIRAS;
     this.inteiro.visible = !tiras;
     const ox = -f.ancoraX * f.largura;
@@ -106,8 +120,11 @@ export class RigToken {
     }
   }
 
-  /** D-067: as texturas do equipamento (null esconde a camada). */
-  adornar(atras: Texture | null, frente: Texture | null): void {
+  /** D-067: as texturas do equipamento (null esconde a camada). Marco 24: a arma à parte, com o pivô na mão. */
+  adornar(atras: Texture | null, frente: Texture | null, arma: Texture | null = null, pivo?: { x: number; y: number }): void {
+    this.arma.visible = !!arma;
+    if (arma && this.arma.texture !== arma) this.arma.texture = arma;
+    if (pivo) this.pivo = pivo;
     this.adornoAtras.visible = !!atras;
     if (atras && this.adornoAtras.texture !== atras) this.adornoAtras.texture = atras;
     this.adornoFrente.visible = !!frente;

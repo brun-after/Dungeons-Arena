@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test, type Locator, type Page } from '@playwright/test';
+import { pararNaPorta } from './porta';
 
 async function abrir(page: Page) {
   const erros: string[] = [];
@@ -307,9 +308,8 @@ test.describe('desktop', () => {
     await expect(page).toHaveURL(/jogo=teste/);
     await page.goto(`${page.url()}&diag=1`);
     await expect(page.locator('#diag')).toHaveAttribute('data-celula', '9,8');
-    await page.keyboard.down('d');
+    await pararNaPorta(page, '11,8');
     await expect(page.getByText('Fase concluída! Voltando ao editor…')).toBeVisible({ timeout: 20_000 });
-    await page.keyboard.up('d');
     await expect(page).toHaveURL(/editor=/, { timeout: 10_000 });
     expect(erros).toEqual([]);
   });
@@ -323,21 +323,19 @@ test.describe('desktop', () => {
     const download = page.waitForEvent('download');
     await slot1.getByRole('button', { name: 'Exportar' }).click();
     const caminho = await (await download).path();
-    // Save preparado: boss fora do mundo, saída aberta e o jogador ao lado do S (36,24).
+    // Save preparado: boss fora do mundo, saída aberta e o jogador já no S (36,24), onde fica parado os 3 s (D-099).
     type Ent = { bolsa: unknown; preset: string; x: number; y: number };
     const arquivo = JSON.parse(await readFile(caminho, 'utf8')) as { registro: { estado: { saidaAberta: boolean; entidades: Ent[] } } };
     const estado = arquivo.registro.estado;
     estado.saidaAberta = true;
     estado.entidades = estado.entidades.filter((e) => e.bolsa || e.preset !== 'boss');
     const j = estado.entidades.find((e) => e.bolsa);
-    Object.assign(j ?? {}, { x: 35, y: 24, destinoX: 35, destinoY: 24, origemX: 35, origemY: 24 });
+    Object.assign(j ?? {}, { x: 36, y: 24, destinoX: 36, destinoY: 24, origemX: 36, origemY: 24 });
     await page.locator('[data-slot="2"] input[type=file]').setInputFiles({ name: 'save.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(arquivo)) });
     await expect(page.locator('[data-slot="2"]')).toContainText('Salões da entrada');
     await page.goto('./?jogo=campanha&slot=2&diag=1');
-    await expect(page.locator('#diag')).toHaveAttribute('data-celula', '35,24');
-    await page.keyboard.down('d');
+    await expect(page.locator('#diag')).toHaveAttribute('data-celula', '36,24');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Catacumbas', { timeout: 30_000 });
-    await page.keyboard.up('d');
     await expect(page.locator('#diag')).toHaveAttribute('data-celula', '4,4');
 
     // Marco 10A-2: depois da última fase oficial vem uma gerada. Mesmo truque, agora nas Catacumbas.
@@ -350,14 +348,12 @@ test.describe('desktop', () => {
     const estado2 = arquivo2.registro.estado;
     estado2.saidaAberta = true;
     estado2.entidades = estado2.entidades.filter((e) => e.bolsa);
-    Object.assign(estado2.entidades[0] ?? {}, { x: 35, y: 26, destinoX: 35, destinoY: 26, origemX: 35, origemY: 26 });
+    Object.assign(estado2.entidades[0] ?? {}, { x: 36, y: 26, destinoX: 36, destinoY: 26, origemX: 36, origemY: 26 });
     await page.locator('[data-slot="3"] input[type=file]').setInputFiles({ name: 'save.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(arquivo2)) });
     await expect(page.locator('[data-slot="3"]')).toContainText('Catacumbas');
     await page.goto('./?jogo=campanha&slot=3&diag=1');
-    await expect(page.locator('#diag')).toHaveAttribute('data-celula', '35,26');
-    await page.keyboard.down('d');
+    await expect(page.locator('#diag')).toHaveAttribute('data-celula', '36,26');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(/^Profundezas 1(?: · .+)?$/, { timeout: 30_000 });
-    await page.keyboard.up('d');
     expect(erros).toEqual([]);
   });
 
