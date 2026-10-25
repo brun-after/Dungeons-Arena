@@ -154,7 +154,7 @@ test.describe('desktop', () => {
     // "Menu" grava e volta para a tela de slots.
     await page.getByRole('button', { name: 'Salvar e voltar aos slots' }).click();
     const slot1 = page.locator('[data-slot="1"]');
-    await expect(slot1).toContainText('Nível 1 · Salões da entrada');
+    await expect(slot1).toContainText('nível 1 · Salões da entrada');
     const download = page.waitForEvent('download');
     await slot1.getByRole('button', { name: 'Exportar' }).click();
     expect((await download).suggestedFilename()).toBe('dungeons-arena-slot1.json');

@@ -8,7 +8,7 @@ async function personagemNoSlot(page: Page, classe: string): Promise<void> {
   await page.goto(`./?jogo=campanha&slot=1&diag=1&classe=${classe}`);
   await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
   await page.getByRole('button', { name: 'Salvar e voltar aos slots' }).click();
-  await expect(page.locator('[data-slot="1"]')).toContainText('Nível 1');
+  await expect(page.locator('[data-slot="1"]')).toContainText('nível 1');
 }
 
 test.describe('arena com o personagem e a nuvem', () => {
@@ -51,7 +51,7 @@ test.describe('arena com o personagem e a nuvem', () => {
     await slot1.getByRole('button', { name: /Confirmar/ }).click();
     await expect(slot1).toContainText('Vazio');
     await slot1.getByRole('button', { name: 'Baixar da nuvem' }).click();
-    await expect(slot1).toContainText('Nível 1');
+    await expect(slot1).toContainText('nível 1');
     expect(erros).toEqual([]);
   });
 });
