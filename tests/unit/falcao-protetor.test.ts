@@ -107,6 +107,24 @@ describe('falcão protetor (marco 25)', () => {
     expect(a.estado.tick).toBeLessThanOrEqual(inicio.impactoPrevistoTick + 1);
   });
 
+  it('o golpe em voo acerta mesmo que o dono se afaste durante o voo', () => {
+    // Com o dono parado o golpe acerta; com o dono longe durante o voo, acerta igual (o alcance valeu na conjuração).
+    const resultado = (afastar: boolean) => {
+      const a = arena(1);
+      a.j.atributos.sabedoria = 10;
+      Object.assign(a.boneco, { x: 4, y: 5 });
+      Object.assign(a.falcao, { x: 10, y: 9 });
+      simular(a.estado, ctx, [{ tick: a.estado.tick, entidadeId: 'j', cmd: { t: 'usarHabilidade', id: 'golpe_atordoante', alvo: 'b' } }], a.eventos, DT_MS);
+      for (let i = 0; i < 400 && !a.eventos.some((e) => e.t === 'impacto' || e.t === 'esquivou'); i++) {
+        if (afastar && !a.j.acao) Object.assign(a.j, { x: 1, y: 9, destinoX: 1, destinoY: 9 });
+        a.tick();
+      }
+      return a.eventos.find((e) => e.t === 'impacto' || e.t === 'esquivou')?.t;
+    };
+    expect(resultado(false)).toBe('impacto');
+    expect(resultado(true)).toBe('impacto');
+  });
+
   it('no nível 30 o falcão corta a linha do projétil; no 1 não chega a tempo', () => {
     const longe = { x: 4, y: 8 };
     expect(tiroNoDono(30, longe)).toBe(arena(30).falcao.id);

@@ -321,7 +321,7 @@ function processarFases(estado: EstadoJogo, ctx: ContextoSimulacao, saida: Event
     const valido = alvo && vivo(alvo) ? alvo : null;
     const mira = valido && hab.politicaImpacto !== 'area' ? celulaOcupada(valido) : { x: f.x, y: f.y };
     // Marco 25 (D-102): o golpe do falcão que chegou ao alvo é o lançamento completo da ação (só adiado).
-    if (f.acaoId !== undefined) lancar(estado, ctx, ator, hab, f.acaoId, mira, valido, saida);
+    if (f.acaoId !== undefined) lancar(estado, ctx, ator, hab, f.acaoId, mira, valido, saida, false, true);
     else lancar(estado, ctx, ator, hab, novoId(estado), mira, valido, saida, true);
   }
 }
@@ -368,6 +368,8 @@ function lancar(
   saida: EventoSimulacao[],
   /** Marco 24: lançada por uma fase (sem combo, ganchos de uso nem encarnação). */
   daFase = false,
+  /** Marco 25 (D-102): o golpe do falcão que chegou ao alvo — o alcance já valeu na conjuração; o dono pode ter andado. */
+  falcaoChegou = false,
 ): void {
   const hab = daFase ? habilidadeBase : prepararSequencia(estado, ctx, ator, habilidadeBase, acaoId, alvo, mira);
   if (hab.formulaDano) ator.efeitos = ator.efeitos.filter((f) => f.tipo !== 'veu_noturno');
@@ -410,7 +412,7 @@ function lancar(
     case 'contato': {
       if (!alvo) break;
       const origem = celulaOcupada(ator);
-      if (chebyshev(origem, celulaOcupada(alvo)) > alcance) {
+      if (!falcaoChegou && chebyshev(origem, celulaOcupada(alvo)) > alcance) {
         saida.push({ t: 'esquivou', tick: estado.tick, acaoId, atorId: ator.id, alvoId: alvo.id });
         break;
       }
