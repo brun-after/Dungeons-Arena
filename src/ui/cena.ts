@@ -54,6 +54,7 @@ import { Diagnostico, type DadosRede } from './diagnostico';
 import { montarApresentacao } from './apresentacao';
 import { ligarFeedback } from './feedback';
 import { ligarFeedbackGrimorio } from './feedback-grimorio';
+import { ligarCinematicaUltimate } from './cinematica-ultimate';
 import { nuvemDoBuild } from '../plataforma/nuvem';
 import type { AcaoDaPausa } from './pausa';
 import { criarLoja } from './loja';
@@ -485,6 +486,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     hud.registrar(dica ? t('log.temaClima', { nome: tema.nome, dica }) : t('log.tema', { nome: tema.nome }));
   }
   // Marco 18 (D-068 a D-070): combos, ressonâncias, missões, origens raras, forja e descobertas.
+  ligarCinematicaUltimate(ui, bus, idLocal, (chave) => resolverHabilidade(ctx, chave));
   ligarFeedbackGrimorio({
     bus,
     ctx,

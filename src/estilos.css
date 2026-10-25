@@ -2691,3 +2691,50 @@ body.toque .botao-ultimate .tecla {
 .lista-passivas .passiva.ligada {
   border-color: var(--destaque);
 }
+
+/* Marco 24 (25/10/2026, D-094): a cinemática da ultimate — vinheta nas bordas e o nome cruzando o centro. */
+.cinematica-ultimate {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.55) 100%);
+  animation: ultimate-vinheta 1.4s ease-out forwards;
+  z-index: 5;
+}
+
+.cinematica-ultimate strong {
+  font-size: clamp(1.4rem, 4vw, 2.6rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 0 12px var(--cor-ultimate, #fff3c4), 0 0 28px var(--cor-ultimate, #fff3c4);
+  animation: ultimate-nome 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes ultimate-vinheta {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  75% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes ultimate-nome {
+  0% { opacity: 0; transform: translateX(-12%) scale(1.15); }
+  20% { opacity: 1; transform: translateX(0) scale(1); }
+  75% { opacity: 1; transform: translateX(2%) scale(1); }
+  100% { opacity: 0; transform: translateX(10%) scale(0.98); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cinematica-ultimate,
+  .cinematica-ultimate strong {
+    animation: none;
+  }
+}
+
+body.movimento-reduzido .cinematica-ultimate,
+body.movimento-reduzido .cinematica-ultimate strong {
+  animation: none;
+}

@@ -17,7 +17,7 @@ import { msDe, ticksDe } from '../core/tempo';
 import { vivo, type Entidade } from '../entities/entidade';
 import { podeFerir } from '../modos/relacao';
 import { aplicarEfeito } from './efeitos';
-import type { Elemento } from './elementos';
+import { ehElemento, type Elemento } from './elementos';
 import { celulaOcupada, chebyshev } from './geometria';
 import type { Habilidade } from './habilidades';
 import { construirEfeito } from './registro-efeitos';
@@ -103,6 +103,14 @@ function fundir(ctx: ContextoSimulacao, e: Entidade, a: ElementoEncarnado, b: El
 /** A encarnação dupla agora (id), se houver. */
 export function duplaDe(e: Entidade, tick: number): string | null {
   return ehMago(e) && e.encarnacaoDupla && (e.encarnacaoDuplaAteTick ?? 0) > tick ? e.encarnacaoDupla : null;
+}
+
+/** Marco 24 (25/10/2026): os dois elementos da dupla ativa (para o visual), se houver. */
+export function elementosDaDupla(ctx: Pick<ContextoSimulacao, 'conteudo'>, e: Entidade, tick: number): readonly [Elemento, Elemento] | null {
+  const id = duplaDe(e, tick);
+  const par = id ? ctx.conteudo.sintonia.encarnacoesDuplas.find((d) => d.id === id)?.elementos : undefined;
+  if (!par || !ehElemento(par[0]) || !ehElemento(par[1])) return null;
+  return [par[0], par[1]];
 }
 
 /** Quanto falta da encarnação, em ms (0 sem encarnação). */
