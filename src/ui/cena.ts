@@ -9,7 +9,6 @@
 import { proximoHostil, recargaRestante } from '../combat/acao';
 import { celulaOcupada } from '../combat/geometria';
 import type { Habilidade } from '../combat/habilidades';
-import type { Dificuldade } from '../modos/dificuldade';
 import { resolverHabilidade } from '../combat/compilar-habilidade';
 import { habilidadeDoAtor } from '../combat/perfil';
 import { dizimoErgue } from '../combat/necromancia';
@@ -58,7 +57,7 @@ import { ligarFeedback } from './feedback';
 import { ligarFeedbackGrimorio } from './feedback-grimorio';
 import { ligarCinematicaUltimate } from './cinematica-ultimate';
 import { nuvemDoBuild } from '../plataforma/nuvem';
-import type { AcaoDaPausa } from './pausa';
+import type { AcaoDaPausa, OpcaoDificuldade } from './pausa';
 import { criarLoja } from './loja';
 import { criarMochila } from './mochila';
 import { DadoD20 } from './dado';
@@ -88,7 +87,7 @@ export interface OpcoesCena {
   /** Ações extras no menu de pausa (ex.: "Salvar e sair"). */
   acoesDaPausa?: AcaoDaPausa[];
   /** Marco 15: quem pode trocar a dificuldade (campanha solo e anfitrião do grupo). */
-  dificuldade?: { atual: () => Dificuldade; definir: (d: Dificuldade) => void };
+  dificuldade?: OpcaoDificuldade;
   /** Marco 11A (D-066): o tileset do jogador já carregado (só nas aventuras do editor). */
   tileset?: TexturasTileset | null;
   /** Marco 18: registrar a primeira descoberta do servidor na nuvem (a arena e os testes desligam). */

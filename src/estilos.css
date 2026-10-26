@@ -1829,6 +1829,14 @@ body.toque .prompt-interacao {
   gap: 12px;
   min-height: 40px;
 }
+/* Marco 26 (25/10/2026): o convidado do grupo vê a dificuldade travada, com o motivo embaixo. */
+.linha-dificuldade {
+  flex-wrap: wrap;
+}
+.nota-dificuldade {
+  flex-basis: 100%;
+  opacity: 0.8;
+}
 .linha-config select,
 .linha-config input[type='range'] {
   min-width: 140px;
