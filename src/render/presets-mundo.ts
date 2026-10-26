@@ -7,6 +7,14 @@ import type { Emissao } from './presets-particula';
 
 export type NomePresetMundo = `portal_${EstiloPortal}` | 'portal_par' | 'quebra_madeira' | 'quebra_barro' | 'quebra_cristal' | 'quebra_folhas';
 
+/** As lascas de cada quebrável (D-113): madeira, barro, cristal ou folhas. */
+export function presetDaQuebra(forma: string): NomePresetMundo {
+  if (forma === 'vaso') return 'quebra_barro';
+  if (forma === 'cristal') return 'quebra_cristal';
+  if (forma === 'cogumelo' || forma === 'arbusto') return 'quebra_folhas';
+  return 'quebra_madeira';
+}
+
 export const PRESETS_MUNDO: Readonly<Record<NomePresetMundo, readonly Emissao[]>> = {
   portal_pedra: [{ textura: 'brilho', quantidade: 1, vidaMs: [900, 1300], velocidade: [6, 14], direcao: 'cima', gravidade: 0, escala: [0.4, 0.05], alpha: [0.5, 0], aditivo: true, raio: 12, cor: null }],
   portal_gelo: [

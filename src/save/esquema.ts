@@ -17,7 +17,7 @@ import { migrarSkillsDeClasse } from './migracao-24';
 import { MAX_REGRAS, RE_REGRA_ESTILO } from '../world/estilo';
 import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 25;
+export const VERSAO_SCHEMA = 26;
 // Marco 23 (24/10/2026, D-092): dez slots de personagem por jogador (eram três).
 export const MAX_SLOTS = 10;
 export const SLOTS: readonly number[] = Array.from({ length: MAX_SLOTS }, (_, i) => i + 1);
@@ -397,6 +397,9 @@ export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   23: (r) => migrarSkillsDeClasse(r),
   // Marco 26 (25/10/2026, D-104): o movimento livre — posição contínua no centro da célula, sem passo em curso.
   24: (r) => migrarMovimentoLivre(r),
+  // Marco 26 (26/10/2026, D-113): os quebráveis (objeto novo e o marcador opcional `quebraveis` no estado). Nada a
+  // mudar: a fase gravada antes ganha os seus ao abrir. A versão impede um cliente antigo de tomá-los por orbes.
+  25: (r) => r,
 };
 
 /** D-093: o ataque básico de cada personagem pela arma na mão (só lê a classe e a arma principal). */

@@ -14,6 +14,8 @@ export const TIPOS_DECORACAO = [
   'pedras', 'rachadura', 'musgo', 'ossos', 'teia', 'tocha', 'barril', 'corrente', 'tapete', 'estandarte', 'lapide', 'vela',
   'raiz', 'arbusto', 'runa', 'estante', 'livros', 'trilho', 'carrinho', 'cristal', 'poca', 'grade', 'lodo', 'lava',
   'cinzas', 'brasa', 'areia', 'cacto', 'gelo', 'estalactite', 'neve', 'junco', 'cogumelo', 'flores', 'arvore', 'vitral',
+  // Marco 26 (26/10/2026, D-113): mais dois que quebram.
+  'caixote', 'vaso',
 ] as const;
 export type TipoDecoracao = (typeof TIPOS_DECORACAO)[number];
 
@@ -32,11 +34,12 @@ const DE_PAREDE: ReadonlySet<TipoDecoracao> = new Set(['tocha', 'estandarte', 'e
  */
 const EM_PE: ReadonlySet<TipoDecoracao> = new Set([
   'tocha', 'barril', 'estandarte', 'lapide', 'vela', 'arbusto', 'arvore', 'estante', 'livros', 'carrinho', 'cristal',
-  'cacto', 'cogumelo', 'junco', 'vitral', 'corrente', 'estalactite',
+  'cacto', 'cogumelo', 'junco', 'vitral', 'corrente', 'estalactite', 'caixote', 'vaso',
 ]);
 
 export const ehDecoracaoDeParede = (tipo: TipoDecoracao): boolean => DE_PAREDE.has(tipo);
 export const ehDecoracaoEmPe = (tipo: TipoDecoracao): boolean => EM_PE.has(tipo);
+export const ehTipoDecoracao = (tipo: string): tipo is TipoDecoracao => (TIPOS_DECORACAO as readonly string[]).includes(tipo);
 
 export interface Decoracao {
   tipo: TipoDecoracao;

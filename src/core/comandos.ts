@@ -20,7 +20,8 @@ export type Comando =
   | { t: 'mover'; dir: Dir8 | 'parado'; dx?: number; dy?: number }
   | { t: 'irPara'; x: number; y: number }
   | { t: 'usarHabilidade'; id: string; alvo?: EntidadeId | Celula }
-  | { t: 'ataqueBasico'; alvo?: EntidadeId }
+  // Marco 26 (26/10/2026, D-113): o básico também mira uma célula (o quebrável que o jogador clicou).
+  | { t: 'ataqueBasico'; alvo?: EntidadeId | Celula }
   // Ajuste de 15/10/2026 (D-065): `travar` (padrão true com alvo): a escolha manual trava; false destrava.
   | { t: 'selecionarAlvo'; alvo: EntidadeId | null; travar?: boolean }
   | { t: 'usarItem'; invId: string }

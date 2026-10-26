@@ -12,6 +12,8 @@ import { criarInimigo, type OpcoesInimigo } from '../entities/fabrica';
 import type { PresetInimigo } from '../entities/presets';
 import { passavel, type Fase, type InimigoPosicionado } from './fase';
 import { largarItem, largarObjeto, largarOrbeEfeito, novoObjeto } from './objetos';
+import { temaDaFase } from '../combat/clima';
+import { decoracoesDaFase } from './decoracao';
 
 export function idDoInimigo(indice: number): string {
   return `i${String(indice).padStart(3, '0')}`;
@@ -78,6 +80,20 @@ function reforcar(estado: EstadoJogo, ctx: ContextoSimulacao): void {
   }
 }
 
+/**
+ * Marco 26 (26/10/2026, D-113): os enfeites que quebram viram objetos da fase (o id vem da célula). O enfeite continua
+ * vindo do hash da célula e do tema (world/decoracao.ts); o estado só guarda os que ainda estão inteiros.
+ */
+export function povoarQuebraveis(estado: EstadoJogo, ctx: ContextoSimulacao): void {
+  if (estado.quebraveis) return;
+  estado.quebraveis = true;
+  const tipos = new Set(ctx.balance.quebraveis.tipos);
+  for (const d of decoracoesDaFase(ctx.fase, temaDaFase(ctx))) {
+    if (!tipos.has(d.tipo)) continue;
+    estado.objetos.push(novoObjeto(`q:${d.x},${d.y}`, 'quebravel', d.x, d.y, { ref: d.tipo }));
+  }
+}
+
 export function povoarFase(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[] = []): void {
   if (ctx.modo.inimigosDeIA === 'da_fase') {
     ctx.fase.inimigos.forEach((pos, indice) => {
@@ -137,4 +153,5 @@ export function povoarFase(estado: EstadoJogo, ctx: ContextoSimulacao, saida: Ev
       }
     });
   }
+  if (ctx.modo.objetosDeFase) povoarQuebraveis(estado, ctx);
 }

@@ -30,7 +30,7 @@ export interface DecoracaoIso {
 type Item = { tipo: 'enfeite'; d: Decoracao } | { tipo: 'pilar'; x: number; y: number };
 
 /** O que fica em pé na fase, agrupado pela diagonal x + y (pura). */
-export function itensEmPe(fase: Fase, tema: Tema | null): Map<number, Item[]> {
+export function itensEmPe(fase: Fase, tema: Tema | null, pular: ReadonlySet<string> = new Set()): Map<number, Item[]> {
   const porDiagonal = new Map<number, Item[]>();
   const por = (d: number, item: Item) => {
     const lista = porDiagonal.get(d) ?? [];
@@ -38,7 +38,8 @@ export function itensEmPe(fase: Fase, tema: Tema | null): Map<number, Item[]> {
     porDiagonal.set(d, lista);
   };
   for (let y = 0; y < fase.altura; y++) for (let x = 0; x < fase.largura; x++) if (ehPilar(fase, x, y)) por(x + y, { tipo: 'pilar', x, y });
-  for (const d of decoracoesDaFase(fase, tema)) if (ehDecoracaoEmPe(d.tipo)) por(d.x + d.y, { tipo: 'enfeite', d });
+  // Marco 26 (D-113): os quebráveis ficam em pé pelo estado (render/objetos.ts).
+  for (const d of decoracoesDaFase(fase, tema)) if (ehDecoracaoEmPe(d.tipo) && !pular.has(d.tipo)) por(d.x + d.y, { tipo: 'enfeite', d });
   return porDiagonal;
 }
 
@@ -70,11 +71,11 @@ function desenharItem(g: Graphics, item: Item, p: Projecao, paleta: PaletaTema, 
   g.restore();
 }
 
-export function criarDecoracaoIso(camada: Container, fase: Fase, tema: Tema | null, p: Projecao): DecoracaoIso {
+export function criarDecoracaoIso(camada: Container, fase: Fase, tema: Tema | null, p: Projecao, pular: ReadonlySet<string> = new Set()): DecoracaoIso {
   const paleta = tema?.paleta ?? paletaDe(fase.matizGraus);
   const pilar: TipoPilar = tema?.pilar ?? 'coluna';
   const graficos: Graphics[] = [];
-  for (const [d, itens] of itensEmPe(fase, tema)) {
+  for (const [d, itens] of itensEmPe(fase, tema, pular)) {
     const g = new Graphics();
     // Os enfeites de trás da diagonal primeiro (o x maior fica mais à direita, na mesma altura).
     for (const item of itens) desenharItem(g, item, p, paleta, pilar);

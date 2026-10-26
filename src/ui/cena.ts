@@ -68,6 +68,8 @@ import { Hud } from './hud';
 import { identidadeDaClasse } from './barra-classe';
 import { QuadroAlvo } from './quadro-alvo';
 import { montarVisao, type ControleVisao } from './visao';
+import { criarGolpeNoQuebravel } from './golpe-quebravel';
+import { presetDaQuebra } from '../render/presets-mundo';
 
 const LEITURA_FAIXA_MS = 1000;
 /** Teclas 1–4 são das habilidades; as seguintes, dos consumíveis (D-050). */
@@ -186,7 +188,9 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       teclado?.atualizar();
     },
   });
-  const terreno = criarTerreno(palco.terreno, fase, o.tileset ?? null, temaDaFase(ctx));
+  // Marco 26 (D-113): nos modos com objetos, os enfeites que quebram saem do estado (render/objetos.ts), não do terreno.
+  const quebraveis: ReadonlySet<string> = ctx.modo.objetosDeFase ? new Set(ctx.balance.quebraveis.tipos) : new Set();
+  const terreno = criarTerreno(palco.terreno, fase, o.tileset ?? null, temaDaFase(ctx), quebraveis);
   const projecao = () => camera.projecaoAtual;
   const sprites = new CamadaEntidades(palco.entidades, {
     idLocal,
@@ -209,7 +213,11 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     ticksDe(ctx.balance.economia.bauCongelaMs),
     { camada: palco.entidades, projecao },
     (id) => ctx.conteudo.itens.get(id)?.icone,
+    temaDaFase(ctx)?.paleta ?? null,
   );
+  bus.on('quebrou', (ev) => {
+    ap.particulas.emitir(presetDaQuebra(ev.forma), ev.x, ev.y, 0x9ad8ff);
+  });
   const fluxo = new CamadaFluxo(palco.chao, () => ap.particulas.limite > 0, () => ticksDe(ctx.balance.armadilhas.desarmeMs), () => ticksDe(ctx.balance.portas.esperaMs));
   bus.on('armadilhaDisparou', (ev) => {
     if (ev.x !== undefined && ev.y !== undefined) fluxo.disparou(ev.x, ev.y, ev.tick);
@@ -228,6 +236,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     corParede: o.tileset?.corParede ?? temaDaFase(ctx)?.paleta.paredeTopo ?? null,
     terreno,
     tema: temaDaFase(ctx),
+    quebraveis,
     aoTrocar: () => {
       sprites.reiniciarVisual();
       objetos.reiniciarVisual();
@@ -248,8 +257,12 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
 
   // Toque ou clique num hostil seleciona e trava o alvo (no travado, destrava: D-065); em outra célula, vai até ela.
   // Marco 26 (D-115): devolve se andou (o mouse segurado só guia quando o clique não foi num alvo).
+  const golpeQuebravel = criarGolpeNoQuebravel({ ctx, estado: o.estado, jogador, emitir });
   const aoTocarCelula = (c: Celula, ponto: Celula = c): boolean => {
     const local = jogador();
+    // Marco 26 (D-113): no quebrável, o golpe (ou o caminho até ele); não guia como o joystick.
+    if (golpeQuebravel.tocar(c, performance.now())) return false;
+    golpeQuebravel.esquecer();
     const hostil = o.estado().entidades.find((e) => {
       const oc = celulaOcupada(e);
       return oc.x === c.x && oc.y === c.y && !!local && podeFerir(local, e, ctx.modo) && !e.morto;
@@ -373,6 +386,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       tipo: prefs.controle,
       direcional,
       aoMudarDirecao: (rumo) => {
+        golpeQuebravel.esquecer();
         emitir(comandoMover(rumo));
       },
       principal: botaoUltimate.elemento,
@@ -569,6 +583,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       }));
     }
     ponteiro.atualizar(q.agoraMs);
+    golpeQuebravel.atualizar(performance.now());
     hud.atualizar(j, estado.tick, identidadeDaClasse(ctx, j, estado.tick));
     feedback.conferirBasico();
     const alvo = j?.alvoSelecionado ? estado.entidades.find((e) => e.id === j.alvoSelecionado) : undefined;
