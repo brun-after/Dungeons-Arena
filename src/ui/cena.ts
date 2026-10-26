@@ -42,6 +42,7 @@ import { CamadaTelegrafia } from '../render/telegrafia';
 import { descreverAfinidade, dicaDoClima } from './descrever-elemento';
 import { temaDaFase } from '../combat/clima';
 import { criarTerreno } from '../render/terreno';
+import type { TemasDosPortais } from '../save/destinos';
 import type { TexturasTileset } from '../render/tileset-textura';
 import { velocidade } from '../world/movimento';
 import { faixaSuperior, mostrarAviso } from './aviso';
@@ -90,6 +91,8 @@ export interface OpcoesCena {
   dificuldade?: OpcaoDificuldade;
   /** Marco 11A (D-066): o tileset do jogador já carregado (só nas aventuras do editor). */
   tileset?: TexturasTileset | null;
+  /** Marco 26 (26/10/2026, D-112): o tema das fases para onde a saída e o retorno levam (null: portal neutro). */
+  portais?: TemasDosPortais;
   /** Marco 18: registrar a primeira descoberta do servidor na nuvem (a arena e os testes desligam). */
   nuvemDescobertas?: boolean;
 }
@@ -211,7 +214,12 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   bus.on('armadilhaDisparou', (ev) => {
     if (ev.x !== undefined && ev.y !== undefined) fluxo.disparou(ev.x, ev.y, ev.tick);
   });
-  const portas = new CamadaPortas(palco.chao, fase, ticksDe(ctx.balance.portas.janelaPortaBossMs), { camada: palco.entidades, projecao });
+  const temaPorId = (id: string | null | undefined) => (id ? (ctx.conteudo.temas.get(id) ?? null) : null);
+  const portas = new CamadaPortas(palco.chao, fase, ticksDe(ctx.balance.portas.janelaPortaBossMs), {
+    emPe: { camada: palco.entidades, projecao },
+    destinos: { saida: temaPorId(o.portais?.saida), retorno: temaPorId(o.portais?.retorno), aqui: temaDaFase(ctx) },
+    particulas: ap.particulas,
+  });
   const numeros = new CamadaNumeros(palco.efeitos, ap.movimentoReduzido, projecao);
   visao = await montarVisao({
     palco,

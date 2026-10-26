@@ -39,6 +39,7 @@ import { avancarFase, personagemNoInicio } from './save/transicao';
 import { chegadaNaFase, comRetorno, faseAnterior, referenciaConhecida } from './save/retorno';
 import { mostrarAviso } from './ui/aviso';
 import { montarCena } from './ui/cena';
+import { temasDosPortais } from './save/destinos';
 import { mostrarEscolhaDeClasse } from './ui/escolha-classe';
 import { criarPesquisa } from './ui/pesquisa';
 import { validarFase } from './world/validacao-fase';
@@ -250,6 +251,8 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     estado: () => estado,
     emitir: (cmd: Comando) => enfileirar(fila, { tick: estado.tick, entidadeId: idJogador, cmd }),
     acoesExtras,
+    // Marco 26 (D-112): os portais mostram a fase para onde levam.
+    portais: temasDosPortais(faseRef, referenciasFases),
     // Marco 12: a campanha pausa (§2.15); o menu de pausa também salva e sai.
     pausaOJogo: true,
     dificuldade: { atual: () => estado.dificuldade, definir: definirDificuldade },

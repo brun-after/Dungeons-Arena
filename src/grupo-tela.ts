@@ -25,6 +25,7 @@ import { jogadorDoSave, type RefFase, type RegistroProgresso } from './save/esqu
 import { contextoDaFase, estadoInicialDaFase, faseOficialOuGerada } from './save/fases-campanha';
 import { avancarFase } from './save/transicao';
 import { comRetorno } from './save/retorno';
+import { temasDosPortais } from './save/destinos';
 import { mostrarAviso } from './ui/aviso';
 import { montarCena, type Cena } from './ui/cena';
 import { criarPainelGrupo } from './ui/grupo';
@@ -154,6 +155,8 @@ export async function iniciarGrupo(raiz: HTMLElement, o: OpcoesGrupo): Promise<v
   let cena: Cena | null = null;
   let pararLaco: (() => void) | null = null;
   const vazio = criarEstado({ semente: 0, faseId: ctxInicial.fase.id });
+  // Marco 26 (D-112): a fase em que o grupo está, para os portais mostrarem o destino.
+  let refAtual: RefFase = conexao.faseRef;
   const monitor = new MonitorDeConexao();
   const avisar = (texto: string, ms?: number) => {
     mostrarAviso(raiz.querySelector<HTMLElement>('.camada-ui') ?? raiz, texto, ms);
@@ -189,6 +192,7 @@ export async function iniciarGrupo(raiz: HTMLElement, o: OpcoesGrupo): Promise<v
         eu.enviarComando(cmd);
       },
       acoesExtras: [sair],
+      portais: temasDosPortais(refAtual),
       pausaOJogo: false,
       acoesDaPausa: [{ rotulo: t('grupo.sairRotulo'), fazer: () => { sair.click(); } }],
       dificuldade: {
@@ -235,6 +239,7 @@ export async function iniciarGrupo(raiz: HTMLElement, o: OpcoesGrupo): Promise<v
   // Fase nova: grava (o anfitrião leva o avanço para o slot dele), desmonta e monta de novo.
   eu.aoNovaFase = (msg: NovaFase) => {
     const ehAnfitriao = eu.anfitriao;
+    refAtual = msg.faseRef;
     void gravar((r) => {
       if (!ehAnfitriao) return r;
       const campanha = contextoDaFase(conteudo, faseOficialOuGerada(msg.faseRef, conteudo));

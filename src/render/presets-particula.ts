@@ -13,6 +13,7 @@ import type { PresetVisual } from '../combat/habilidades';
 import type { ParticulaClima } from '../world/temas';
 import { PRESETS_ELEMENTOS, type NomePresetElemento } from './presets-elementos';
 import { PRESETS_ARMAS, type NomePresetArma } from './presets-armas';
+import { PRESETS_MUNDO, type NomePresetMundo } from './presets-mundo';
 
 // Marco 24 (25/10/2026): `arco` (o raio ramificado, também a rachadura no chão) e `cristal` (o gelo facetado).
 export const TEXTURAS_PARTICULA = ['ponto', 'brilho', 'fumaca', 'anel', 'estrela', 'faisca', 'gota', 'floco', 'runa', 'bolha', 'lasca', 'corte', 'chama', 'flecha', 'teia', 'arco', 'cristal'] as const;
@@ -59,7 +60,7 @@ export interface Emissao {
  * forma do ataque também é partícula — `telegrafo` (o miolo da área enchendo), `borda` (o contorno, na cor de quem
  * ataca), `mira` (a linha do golpe e do projétil), `projetil` (o núcleo que voa) e `chao` (os rastros no chão).
  */
-export type NomePreset = PresetVisual | 'poeira' | 'aura' | 'onda' | 'telegrafo' | 'borda' | 'mira' | 'projetil' | 'chao' | 'projetil_flecha' | 'projetil_teia' | 'aura_forma' | 'trilha_elemental' | 'aura_sutil' | 'esteira_carregada' | NomeClima | 'aura_afinidade' | 'aura_afinidade_extrema' | NomePresetElemento | NomePresetArma;
+export type NomePreset = PresetVisual | 'poeira' | 'aura' | 'onda' | 'telegrafo' | 'borda' | 'mira' | 'projetil' | 'chao' | 'projetil_flecha' | 'projetil_teia' | 'aura_forma' | 'trilha_elemental' | 'aura_sutil' | 'esteira_carregada' | NomeClima | 'aura_afinidade' | 'aura_afinidade_extrema' | NomePresetElemento | NomePresetArma | NomePresetMundo;
 
 /** Marco 23 (D-092): as partículas do ar de cada tema (render/efeitos-habilidade.ts, perto do jogador). */
 export type NomeClima = `clima_${ParticulaClima}`;
@@ -77,6 +78,8 @@ export const PRESETS_PARTICULA: Readonly<Record<NomePreset, readonly Emissao[]>>
   ...PRESETS_ELEMENTOS,
   // Marco 24 (D-098): os golpes de arma e o giro.
   ...PRESETS_ARMAS,
+  // Marco 26 (26/10/2026): o ar dos portais e as lascas dos quebráveis (presets-mundo.ts).
+  ...PRESETS_MUNDO,
   faiscas: [faiscas],
   brilho: [brilho],
   fumaca: [fumaca],

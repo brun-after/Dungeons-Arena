@@ -4,137 +4,150 @@
 // - porta temporária do boss, dourada, pulsando durante a janela de 30 s.
 // Marco 26 (25/10/2026, D-109): no isométrico, a porta (moldura, cadeado) e o número do par ficam em pé na camada
 // das entidades, com profundidade; os anéis de espera seguem no chão.
+// Marco 26 (26/10/2026, D-112): as portas viraram portais. A saída e o retorno mostram a fase para onde levam (a
+// moldura no estilo do tema de destino, render/molduras-portal.ts, e o ar em partículas); a saída trancada fica com o
+// vórtice apagado, correntes e cadeado; a porta temporária do chefe é dourada. Os portais internos são vórtices sem
+// número: o par se reconhece só pela cor, e o anel de espera no chão usa a mesma cor.
 
-import { Graphics, Text, type Container } from 'pixi.js';
+import { Graphics, type Container } from 'pixi.js';
 import type { EstadoJogo } from '../core/estado';
 import type { Fase } from '../world/fase';
+import type { EstiloPortal, Tema } from '../world/temas';
 import { CELULA_PX } from './camera-calculo';
+import { ALTURA, corDoPar, portalDeCima, portalEmPe, trancas, vortice, type DesenhoPortal } from './molduras-portal';
 import type { OpcoesEmPe } from './objetos';
+import type { SistemaParticulas } from './particulas';
 import { centroDaCelula } from './projecao';
+import { paletaDe } from './terreno';
 
 const P = CELULA_PX;
+/** De quanto em quanto tempo cada portal solta o ar em partículas. */
+const AR_MS = 260;
+/** O dourado da porta temporária do chefe. */
+const COR_CHEFE = 0xf1c40f;
 
-interface Numero {
-  texto: Text;
+export interface OpcoesPortas {
+  emPe?: OpcoesEmPe | null;
+  /** O tema de destino da saída e do retorno, e o desta fase (o portal neutro usa a paleta dela). */
+  destinos?: { saida: Tema | null; retorno: Tema | null; aqui: Tema | null };
+  particulas?: SistemaParticulas | null;
+}
+
+interface Portal {
   x: number;
   y: number;
+  desenho: DesenhoPortal;
+  /** Portal interno: o vórtice oval sem moldura. */
+  par: boolean;
+  trancado: boolean;
 }
 
 export class CamadaPortas {
   private readonly g = new Graphics();
-  private readonly numeros: Numero[] = [];
-  /** As portas em pé (só no isométrico), uma por célula. */
+  /** Os portais em pé (só no isométrico), um por célula. */
   private readonly altas = new Map<string, Graphics>();
+  private ultimoArMs = 0;
 
   constructor(
     private readonly camada: Container,
     private readonly fase: Fase,
     private readonly ticksJanela: number,
-    private readonly emPe: OpcoesEmPe | null = null,
+    private readonly o: OpcoesPortas = {},
   ) {
     camada.addChild(this.g);
-    for (const porta of fase.portasInternas) {
-      for (const c of [porta.a, porta.b]) {
-        const n = new Text({ text: String(porta.numero), style: { fill: 0xe8daef, fontSize: 14, fontWeight: '700', stroke: { color: 0x1a0f22, width: 3 } } });
-        n.anchor.set(0.5);
-        camada.addChild(n);
-        this.numeros.push({ texto: n, x: c.x, y: c.y });
-      }
-    }
   }
 
-  private porta(g: Graphics, cx: number, cy: number, cor: number, trancada: boolean, brilho: number): void {
-    if (brilho > 0) g.circle(cx, cy, 22 + brilho * 4).fill({ color: cor, alpha: 0.25 });
-    g.roundRect(cx - 12, cy - 18, 24, 34, 10).fill(0x3b2410).stroke({ width: 3, color: cor });
-    g.rect(cx - 8, cy - 12, 16, 26).fill(trancada ? 0x5d4037 : 0x111111);
-    if (trancada) {
-      g.roundRect(cx - 6, cy - 2, 12, 10, 2).fill(0x2c3e50).stroke({ width: 1.5, color: 0xd4ac0d });
-      g.circle(cx, cy + 3, 1.8).fill(0xd4ac0d);
-    }
+  /** O estilo e a cor do portal que leva a uma fase do tema (sem tema: pedra na cor da parede desta fase). */
+  private estiloDe(tema: Tema | null): { estilo: EstiloPortal; cor: number } {
+    if (tema) return tema.portal;
+    const aqui = this.o.destinos?.aqui;
+    return { estilo: 'pedra', cor: aqui ? aqui.portal.cor : paletaDe(this.fase.matizGraus).paredeTopo };
   }
 
-  /** Uma porta: no chão (de cima) ou em pé sobre a célula (isométrico). */
-  private desenharPorta(x: number, y: number, vistas: Set<string>, desenho: (g: Graphics, cx: number, cy: number) => void): void {
-    const proj = this.emPe?.projecao();
-    if (!this.emPe || proj?.visao !== 'iso') {
-      desenho(this.g, (x + 0.5) * P, (y + 0.5) * P);
-      return;
-    }
-    const chave = `${x},${y}`;
-    vistas.add(chave);
-    let alta = this.altas.get(chave);
-    if (!alta) {
-      alta = new Graphics();
-      this.emPe.camada.addChild(alta);
-      this.altas.set(chave, alta);
-    }
-    const c = centroDaCelula(x, y);
-    const p = proj.projetar(c.x, c.y);
-    alta.position.set(p.x, p.y);
-    alta.zIndex = p.y;
-    // A sombra no chão e a porta acima dela (a base da moldura no centro da célula).
-    alta.clear().ellipse(0, 0, 16, 6).fill({ color: 0x000000, alpha: 0.3 });
-    desenho(alta, 0, -16);
-  }
-
-  desenhar(estado: EstadoJogo, agoraMs: number, movimentoReduzido: boolean): void {
-    const g = this.g.clear();
-    const pulso = movimentoReduzido ? 1 : (Math.sin(agoraMs / 220) + 1) / 2;
-    const vistas = new Set<string>();
+  private portaisDoQuadro(estado: EstadoJogo, tMs: number): Portal[] {
+    const lista: Portal[] = [];
+    const d = this.o.destinos;
     for (const porta of this.fase.portasInternas) {
-      for (const c of [porta.a, porta.b]) {
-        const cx = (c.x + 0.5) * P;
-        const cy = (c.y + 0.5) * P;
-        g.circle(cx, cy, 17).fill({ color: 0x8e44ad, alpha: 0.25 }).stroke({ width: 3, color: 0xbb8fce, alpha: 0.6 + 0.4 * pulso });
-      }
+      const cor = corDoPar(porta.numero);
+      for (const c of [porta.a, porta.b]) lista.push({ x: c.x, y: c.y, par: true, trancado: false, desenho: { estilo: 'pedra', cor, tMs, aceso: true } });
     }
-    this.posicionarNumeros();
     const volta = this.fase.portaRetorno;
-    if (volta) {
-      this.desenharPorta(volta.x, volta.y, vistas, (alvo, cx, cy) => {
-        this.porta(alvo, cx, cy, 0x65d7ee, false, pulso * 0.5);
-        alvo.moveTo(cx + 5, cy - 5).lineTo(cx - 4, cy).lineTo(cx + 5, cy + 5).stroke({ width: 3, color: 0xc8f6ff });
-      });
-    }
+    if (volta) lista.push({ x: volta.x, y: volta.y, par: false, trancado: false, desenho: { ...this.estiloDe(d?.retorno ?? null), tMs, aceso: true } });
     const s = this.fase.portaSaida;
     if (s) {
       const trancada = s.tranca !== 'livre' && !estado.saidaAberta;
-      this.desenharPorta(s.x, s.y, vistas, (alvo, cx, cy) => {
-        this.porta(alvo, cx, cy, trancada ? 0x95a5a6 : 0x2ecc71, trancada, trancada ? 0 : pulso);
-      });
+      lista.push({ x: s.x, y: s.y, par: false, trancado: trancada, desenho: { ...this.estiloDe(d?.saida ?? null), tMs, aceso: !trancada } });
     }
     for (const o of estado.objetos) {
       if (o.tipo !== 'saida') continue;
       const naJanela = estado.tick < o.abertoTick + this.ticksJanela;
-      this.desenharPorta(o.x, o.y, vistas, (alvo, cx, cy) => {
-        this.porta(alvo, cx, cy, 0xf1c40f, false, naJanela ? pulso : 0);
-      });
+      lista.push({ x: o.x, y: o.y, par: false, trancado: false, desenho: { estilo: this.estiloDe(d?.saida ?? null).estilo, cor: COR_CHEFE, tMs: naJanela ? tMs : 0, aceso: true } });
+    }
+    return lista;
+  }
+
+  desenhar(estado: EstadoJogo, agoraMs: number, movimentoReduzido: boolean): void {
+    const g = this.g.clear();
+    const tMs = movimentoReduzido ? 0 : agoraMs;
+    const emPe = this.o.emPe ?? null;
+    const proj = emPe?.projecao() ?? null;
+    const vistas = new Set<string>();
+    const pulso = movimentoReduzido ? 1 : (Math.sin(agoraMs / 220) + 1) / 2;
+    const portais = this.portaisDoQuadro(estado, tMs);
+    for (const p of portais) {
+      const cx = (p.x + 0.5) * P;
+      const cy = (p.y + 0.5) * P;
+      // O anel de espera do portal interno fica no chão, na cor do par.
+      if (p.par) g.circle(cx, cy, 17).fill({ color: p.desenho.cor, alpha: 0.18 }).stroke({ width: 2.5, color: p.desenho.cor, alpha: 0.5 + 0.4 * pulso });
+      if (!emPe || proj?.visao !== 'iso') {
+        if (p.par) vortice(g, cx, cy, 12, 12, p.desenho.cor, tMs, true);
+        else portalDeCima(g, cx, cy, p.desenho);
+        if (p.trancado) trancas(g, cx, cy, false);
+        continue;
+      }
+      const chave = `${p.x},${p.y}`;
+      vistas.add(chave);
+      let alta = this.altas.get(chave);
+      if (!alta) {
+        alta = new Graphics();
+        emPe.camada.addChild(alta);
+        this.altas.set(chave, alta);
+      }
+      const c = centroDaCelula(p.x, p.y);
+      const pt = proj.projetar(c.x, c.y);
+      alta.position.set(pt.x, pt.y);
+      alta.zIndex = pt.y;
+      alta.clear();
+      if (p.par) {
+        // O portal interno de pé: um vórtice oval flutuando sobre o anel, sem moldura.
+        alta.ellipse(0, 0, 14, 5).fill({ color: 0x000000, alpha: 0.25 });
+        vortice(alta, 0, -ALTURA * 0.45, 11, ALTURA * 0.38, p.desenho.cor, tMs, true);
+      } else {
+        portalEmPe(alta, 0, 0, p.desenho);
+        if (p.trancado) trancas(alta, 0, 0, true);
+      }
     }
     for (const [chave, alta] of this.altas) {
       if (vistas.has(chave)) continue;
       alta.destroy();
       this.altas.delete(chave);
     }
+    this.soltarAr(portais, agoraMs, movimentoReduzido);
   }
 
-  /** O número do par: no chão de cima; no isométrico, de pé acima do anel (sem achatar com o piso). */
-  private posicionarNumeros(): void {
-    const emPe = this.emPe;
-    const proj = emPe?.projecao() ?? null;
-    const camada = emPe && proj?.visao === 'iso' ? emPe.camada : this.camada;
-    const iso = camada !== this.camada;
-    for (const n of this.numeros) {
-      if (n.texto.parent !== camada) camada.addChild(n.texto);
-      const c = centroDaCelula(n.x, n.y);
-      const p = iso && proj ? proj.projetar(c.x, c.y) : c;
-      n.texto.position.set(p.x, p.y - (iso ? 14 : 0));
-      n.texto.zIndex = p.y;
+  /** O ar de cada portal aceso, em partículas, de tempos em tempos (nada com movimento reduzido). */
+  private soltarAr(portais: readonly Portal[], agoraMs: number, reduzido: boolean): void {
+    const particulas = this.o.particulas;
+    if (!particulas || reduzido || particulas.limite <= 0 || agoraMs - this.ultimoArMs < AR_MS) return;
+    this.ultimoArMs = agoraMs;
+    for (const p of portais) {
+      if (!p.desenho.aceso) continue;
+      particulas.emitir(p.par ? 'portal_par' : `portal_${p.desenho.estilo}`, p.x, p.y, p.desenho.cor);
     }
   }
 
   destruir(): void {
     this.g.destroy();
-    for (const n of this.numeros) n.texto.destroy();
     for (const alta of this.altas.values()) alta.destroy();
     this.altas.clear();
   }

@@ -18,6 +18,10 @@ export interface PaletaTema {
   piso: readonly [number, number, number];
 }
 
+/** Marco 26 (26/10/2026, D-112): a moldura do portal que leva a uma fase do tema. */
+export const ESTILOS_PORTAL = ['pedra', 'gelo', 'fogo', 'veneno', 'raio', 'trevas', 'sagrado', 'terra', 'psiquico'] as const;
+export type EstiloPortal = (typeof ESTILOS_PORTAL)[number];
+
 export interface Tema {
   id: string;
   nome: string;
@@ -35,6 +39,8 @@ export interface Tema {
   inimigos: Readonly<Record<string, number>>;
   elementosInimigos: readonly Elemento[];
   chanceElemental: number;
+  /** Marco 26 (D-112): como é o portal que leva a uma fase deste tema. */
+  portal: { estilo: EstiloPortal; cor: number };
 }
 
 const ehElemento = (v: string): v is Elemento => (ELEMENTOS as readonly string[]).includes(v);
@@ -72,6 +78,7 @@ export function lerTemas(json: unknown, presets?: ReadonlySet<string>): { temas:
     const elemento = l.textoOuNulo(o, 'elemento');
     if (elemento !== null && !ehElemento(elemento)) l.erro(`elemento desconhecido "${elemento}"`);
     const a = l.objeto(o.ambientes, 'ambientes');
+    const portal = l.objeto(o.portal, 'portal');
     const tiposAmbiente = l.listaDeTextos(a, 'tipos');
     for (const t of tiposAmbiente) if (!(TIPOS_AMBIENTE as readonly string[]).includes(t)) l.erro(`ambiente desconhecido "${t}"`);
     const elementosInimigos = l.listaDeTextos(o, 'elementosInimigos');
@@ -96,6 +103,7 @@ export function lerTemas(json: unknown, presets?: ReadonlySet<string>): { temas:
       inimigos: pesos(l, o, 'inimigos', presets ? (k) => presets.has(k) : null),
       elementosInimigos: elementosInimigos.filter(ehElemento),
       chanceElemental: l.numero(o, 'chanceElemental', { min: 0, max: 1 }),
+      portal: { estilo: l.opcao(portal, 'estilo', ESTILOS_PORTAL), cor: cor(l, portal, 'cor') },
     };
     if (tema.ambientes.tipos.length === 0) l.erro('ambientes.tipos: ao menos um');
     if (tema.chanceElemental > 0 && tema.elementosInimigos.length === 0) l.erro('chanceElemental sem elementosInimigos');
