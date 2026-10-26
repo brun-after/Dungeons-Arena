@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.56 · **Data:** 25/10/2026
+**Versão:** 0.57 · **Data:** 26/10/2026
 
 > **Histórico**
+> - **0.57 (26/10/2026)**: D-107 a D-109 (marco 26: sem direcional no computador e teclas EWAS, braços e pernas animados, objetos em pé no isométrico).
 > - **0.56 (25/10/2026)**: D-104 a D-106 (marco 26: movimento livre em qualquer direção, controles do isométrico na inclinação do mapa e paredes do isométrico finas e baixas).
 > - **0.55 (25/10/2026)**: D-094 a D-099 (marco 24: skills de classe, ultimates, sintonia, ressonâncias, orientação, falcão e portas) e D-100 a D-103 (marco 25: IA por dificuldade, população por fase, falcão protetor, arco branco, anel do Necromante e aceleração pelo total).
 > - **0.54 (24/10/2026)**: D-092 (marco 23: dez slots, 20 temas de fase, clima elemental e inimigos afins) e D-093 (armas fora da classe trocam o ataque básico).
@@ -2659,3 +2660,58 @@ paredes 80% mais finas e 70% mais baixas.
 - **O resto da célula de parede** é a rocha plana e escura do terreno, como na visão de cima.
 - **Ordem de desenho:** um Graphics por diagonal, com o `zIndex` de antes.
 
+## D-107 — Sem direcional no computador e teclas EWAS (marco 26, 25/10/2026)
+
+**Contexto.** No computador com tela de toque (ou janela pequena), o jogo mostrava o joystick ou o D-pad. Lá o
+isométrico se joga com o mouse. O usuário pediu também uma opção de teclas que acompanhe a inclinação do mapa.
+
+**Decisão:**
+- **`mostrarDirecional(s)`** (`plataforma/dispositivo.ts`) = toque e **sem mouse** (`any-hover: hover` e
+  `any-pointer: fine`). No computador, o direcional some; a faixa de ações fica.
+- **Preferência `teclasMovimento`** (`wasd` padrão, ou `ewas`), nas Configurações, mesmo sem toque.
+- **EWAS no isométrico** (`input/teclas.ts`, `rumoDasTeclas`): E anda para o norte da fase (cima-direita na tela), W
+  para o oeste, A para o sul e S para o leste. Duas teclas juntas dão a diagonal da fase. As setas seguem como
+  direções de tela. De cima, EWAS vale como WASD.
+- **Interagir** passa para o **D** no modo EWAS do isométrico. O prompt e o guia mostram a tecla atual.
+
+## D-108 — Braços e pernas animados nos quadros do atlas (marco 26, 25/10/2026)
+
+**Contexto.** O usuário pediu braços e pernas que se mexem nos personagens jogáveis e nos inimigos, nas duas visões.
+O "quadro 1" antigo só trocava um pouco o comprimento dos membros. Ao testar, viu-se que o token **nunca contava como
+andando**: a posição visual começava em `NaN`, e a comparação com `NaN` dá sempre falso (falha desde o marco 13). Por
+isso nem a passada por fatias aparecia.
+
+**Decisão:**
+- **Seis quadros por vista** (`render/modelos/membros.ts`): 0 parado, 1–2 a perna esquerda à frente, 3–4 a direita,
+  5 o golpe com o braço da arma estendido. Pernas giram no quadril (até 34°) e braços no ombro (até 30°), em
+  oposição. Os modelos de veste ondulam a bainha. De cima, os pés alternam à frente e atrás.
+- **Feras:** o lobo trota em pares diagonais, a aranha alterna as patas em dois grupos e o slime achata e estica. O
+  falcão segue com os três quadros de asa (`membros: false`).
+- **Escolha do quadro** (`render/quadro-membros.ts`, puro): andando, pela fase da passada (o mesmo relógio de
+  `caminhada.ts`); no golpe, o quadro 5; parado, o 0; com movimento reduzido, sempre o 0.
+- **Fatias:** nesses modelos, as tiras de baixo não se dividem mais em duas colunas (as pernas não andam duas vezes).
+  Ficam o balanço vertical, a respiração e o empurrão.
+- **Equipamento:** a arma e a mão secundária (agora numa camada própria) seguem a mão em cada quadro. O rig as desloca
+  pela diferença da mão em relação ao quadro 0.
+- **A imagem própria do jogador** não tem membros. Segue com a passada por fatias.
+- **Atlas:** cerca de 250 quadros numa grade de 16 colunas (2368 × 2368 px, dentro do limite de 4096).
+
+## D-109 — Objetos em pé no isométrico (marco 26, 25/10/2026)
+
+**Contexto.** No isométrico, ouro, orbes, portas, enfeites e pilares ficavam no contêiner do chão, com a matriz do
+piso. Pareciam pintados no chão em vez de acompanhar a ilusão 3D. O usuário escolheu pilares como **colunas altas**.
+
+**Decisão:**
+- **Objetos** (`render/objetos.ts`): ouro (moedas de pé), orbes (flutuando sobre uma sombra que encolhe quando sobem)
+  e santuário (cristal sobre a base) ficam na camada das entidades, com o `zIndex` da profundidade. Os halos seguem
+  no chão.
+- **Portas** (`render/portas.ts`): a moldura e o cadeado ficam de pé na célula da porta; o número do par fica de pé
+  acima do anel. O anel de espera segue no chão.
+- **Enfeites e pilares** (`render/decoracao-iso.ts`): um Graphics por diagonal, como as paredes.
+  - **Em pé:** tocha, barril, estandarte, lápide, vela, arbusto, árvore, estante, livros, carrinho, cristal, cacto,
+    cogumelo, junco, vitral, corrente e estalactite, com o desenho de sempre, sem a matriz. Os de parede ficam com a
+    base na aresta norte.
+  - **Chão:** os demais (pedras, tapete, poça, runa, lava, teia…) seguem no terreno.
+  - **Pilar:** o desenho do tema esticado 1,5 vez (cerca de 1 célula de altura), sobre uma sombra no losango da
+    célula. `placasDaParede` não gera placa para o pilar, e o terreno pinta o piso por baixo.
+- **Troca de visão:** o terreno redesenha os blocos (`definirVisao`). De cima, nada muda.
