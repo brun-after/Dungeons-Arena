@@ -206,15 +206,20 @@ export function desenharDecoracao(g: Graphics, d: Decoracao, paleta: PaletaTema)
   }
 }
 
-/** O pilar do tema, por cima da parede solta (x, y). */
-export function desenharPilar(g: Graphics, tipo: TipoPilar, x: number, y: number, paleta: PaletaTema, variante: number): void {
+/**
+ * O pilar do tema, por cima da parede solta (x, y). Marco 26 (D-109): `comChao` false desenha só a peça (o isométrico
+ * a põe de pé em render/decoracao-iso.ts, com a sombra própria).
+ */
+export function desenharPilar(g: Graphics, tipo: TipoPilar, x: number, y: number, paleta: PaletaTema, variante: number, comChao = true): void {
   const px = x * P;
   const py = y * P;
   const cx = px + P / 2;
   const cy = py + P / 2;
   // O piso por baixo (a parede vira um objeto na sala) e a sombra.
-  g.rect(px, py, P, P).fill(paleta.piso[0]);
-  g.ellipse(cx + 4, py + P - 8, 18, 6).fill({ color: 0x000000, alpha: 0.3 });
+  if (comChao) {
+    g.rect(px, py, P, P).fill(paleta.piso[0]);
+    g.ellipse(cx + 4, py + P - 8, 18, 6).fill({ color: 0x000000, alpha: 0.3 });
+  }
   switch (tipo) {
     case 'coluna':
     case 'obelisco': {

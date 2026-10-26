@@ -275,7 +275,9 @@ export class CamadaEntidades {
       m.acaoId = acaoAtual;
 
       const p = posicao(e);
-      if (Math.abs(p.x - m.visualX) > 0.001 || Math.abs(p.y - m.visualY) > 0.001) {
+      // Marco 26 (25/10/2026, D-108): o primeiro quadro só guarda a posição (com NaN, a comparação dava sempre falso e
+      // o token nunca contava como andando).
+      if (Number.isNaN(m.visualX) || Math.abs(p.x - m.visualX) > 0.001 || Math.abs(p.y - m.visualY) > 0.001) {
         if (!Number.isNaN(m.visualX)) m.andandoAteMs = agoraMs + ANDANDO_MS;
         m.visualX = p.x;
         m.visualY = p.y;

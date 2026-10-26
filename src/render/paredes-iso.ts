@@ -8,6 +8,7 @@
 // De cima, as paredes continuam no terreno, como antes.
 
 import { Graphics, type Container } from 'pixi.js';
+import { ehPilar } from '../world/decoracao';
 import { tipoEm, type Fase } from '../world/fase';
 import { CELULA_PX } from './camera-calculo';
 import { escurecer } from './modelos/svg';
@@ -49,7 +50,8 @@ export interface Placa {
  * é parede: ali a placa continua (ou vira a quina) e a face ficaria escondida.
  */
 export function placasDaParede(fase: Fase, x: number, y: number): Placa[] {
-  if (!ehParede(fase, x, y)) return [];
+  // Marco 26 (D-109): o pilar não ganha placas; fica de pé como coluna alta (render/decoracao-iso.ts).
+  if (!ehParede(fase, x, y) || ehPilar(fase, x, y)) return [];
   const t = ESPESSURA_PAREDE;
   const chao = (dx: number, dy: number) => deAndar(fase, x + dx, y + dy);
   const abertoSul = !ehParede(fase, x, y + 1);

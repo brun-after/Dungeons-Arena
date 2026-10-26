@@ -11,8 +11,8 @@ export const QUADRO_GOLPE = 5;
 export const BALANCO: readonly number[] = [0, 0.5, 1, -0.5, -1, 0.35];
 
 /** Ângulos máximos, em graus: a perna e o braço no pico da passada; o braço da arma no golpe. */
-export const GRAUS_PERNA = 26;
-export const GRAUS_BRACO = 24;
+export const GRAUS_PERNA = 34;
+export const GRAUS_BRACO = 30;
 export const GRAUS_GOLPE = 78;
 
 /** O quadro da passada para o balanço `s` (−1 a 1): o ciclo sai 1, 2, 1, 0, 3, 4, 3, 0 com `s` senoidal. */

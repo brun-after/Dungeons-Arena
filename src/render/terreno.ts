@@ -5,11 +5,13 @@
 // autotiling ou a escolhida à mão, NEAREST); sem tileset, as cores lisas de sempre. O matiz não tinge o tileset.
 // Marco 23 (24/10/2026, D-092): na fase com tema, a paleta é a do tema (sem matiz), e cada bloco ganha os enfeites e
 // os pilares do tema (render/decoracao.ts), também sobre o tileset.
+// Marco 26 (25/10/2026, D-109): no isométrico, os enfeites altos e os pilares saem do terreno (ficam de pé em
+// render/decoracao-iso.ts); sob o pilar fica o piso.
 
 import { Container, Graphics, Sprite } from 'pixi.js';
 import { desenharAmbiente } from './ambiente';
 import { desenharDecoracao, desenharPilar } from './decoracao';
-import { decoracoesDaFase, ehPilar, hashCelula, type Decoracao } from '../world/decoracao';
+import { decoracoesDaFase, ehDecoracaoEmPe, ehPilar, hashCelula, type Decoracao } from '../world/decoracao';
 import type { Tema } from '../world/temas';
 import { tipoEm, type Fase, type TipoCelula } from '../world/fase';
 import { pecaDaCelula } from '../world/tileset';
@@ -127,6 +129,8 @@ export interface Terreno {
   atualizarVisibilidade: (x0: number, y0: number, x1: number, y1: number) => void;
   /** Editor (marco 6C): redesenha o bloco da célula e o de cima (a parede depende de quem está abaixo). */
   redesenharCelula: (x: number, y: number) => void;
+  /** Marco 26 (D-109): no isométrico, sem os enfeites altos e os pilares (redesenha os blocos na troca). */
+  definirVisao: (iso: boolean) => void;
   destruir: () => void;
 }
 
@@ -145,6 +149,7 @@ interface Bloco {
 export function criarTerreno(camada: Container, fase: Fase, tileset: TexturasTileset | null = null, tema: Tema | null = null): Terreno {
   const blocos: Bloco[] = [];
   const paleta: Paleta = tema ? tema.paleta : paletaDe(fase.matizGraus);
+  let iso = false;
   // Os enfeites, por bloco (calculados uma vez; o editor não tem tema).
   const enfeites = new Map<number, Decoracao[]>();
   const porLinhaBlocos = Math.ceil(fase.largura / BLOCO_CELULAS);
@@ -179,9 +184,13 @@ export function criarTerreno(camada: Container, fase: Fase, tileset: TexturasTil
     if (tema) {
       const enfeite = new Graphics();
       for (let y = b.by; y < fimY; y++) for (let x = b.bx; x < fimX; x++) {
-        if (ehPilar(fase, x, y)) desenharPilar(enfeite, tema.pilar, x, y, tema.paleta, hashCelula(x, y, 4));
+        if (!ehPilar(fase, x, y)) continue;
+        if (iso) enfeite.rect(x * CELULA_PX, y * CELULA_PX, CELULA_PX, CELULA_PX).fill(tema.paleta.piso[0]);
+        else desenharPilar(enfeite, tema.pilar, x, y, tema.paleta, hashCelula(x, y, 4));
       }
-      for (const d of enfeites.get((b.by / BLOCO_CELULAS) * porLinhaBlocos + b.bx / BLOCO_CELULAS) ?? []) desenharDecoracao(enfeite, d, tema.paleta);
+      for (const d of enfeites.get((b.by / BLOCO_CELULAS) * porLinhaBlocos + b.bx / BLOCO_CELULAS) ?? []) {
+        if (!iso || !ehDecoracaoEmPe(d.tipo)) desenharDecoracao(enfeite, d, tema.paleta);
+      }
       b.c.addChild(enfeite);
     }
     // 17/10/2026: o perigo fica sobre o atlas também; uma textura própria não pode escondê-lo.
@@ -221,6 +230,11 @@ export function criarTerreno(camada: Container, fase: Fase, tileset: TexturasTil
         if (b) tocados.add(b);
       }
       for (const b of tocados) desenharBloco(b);
+    },
+    definirVisao: (v) => {
+      if (v === iso) return;
+      iso = v;
+      for (const b of blocos) desenharBloco(b);
     },
     // Retângulo visível em px de mundo.
     atualizarVisibilidade: (x0, y0, x1, y1) => {

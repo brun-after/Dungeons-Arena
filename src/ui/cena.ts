@@ -211,13 +211,15 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   bus.on('armadilhaDisparou', (ev) => {
     if (ev.x !== undefined && ev.y !== undefined) fluxo.disparou(ev.x, ev.y, ev.tick);
   });
-  const portas = new CamadaPortas(palco.chao, fase, ticksDe(ctx.balance.portas.janelaPortaBossMs));
+  const portas = new CamadaPortas(palco.chao, fase, ticksDe(ctx.balance.portas.janelaPortaBossMs), { camada: palco.entidades, projecao });
   const numeros = new CamadaNumeros(palco.efeitos, ap.movimentoReduzido, projecao);
   visao = await montarVisao({
     palco,
     camera,
     fase,
     corParede: o.tileset?.corParede ?? temaDaFase(ctx)?.paleta.paredeTopo ?? null,
+    terreno,
+    tema: temaDaFase(ctx),
     aoTrocar: () => {
       sprites.reiniciarVisual();
       objetos.reiniciarVisual();
