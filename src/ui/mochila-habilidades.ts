@@ -22,7 +22,7 @@ import { aprendiveisDa, caminhosDoRank, fusoesVisiveis, motivoParaNaoSubir, nive
 import { definicaoDe } from '../combat/compilar-habilidade';
 import { familiaDaHabilidade } from '../progression/itens-progressao';
 import { duracaoLegivel } from './tempo';
-import { descreverCaminho, descreverHabilidade } from './descrever';
+import { descreverBonus, descreverCaminho, descreverHabilidade } from './descrever';
 import { icone } from './icones';
 import { desenharPassivasGerais, desenharSintonia } from './painel-sintonia';
 
@@ -98,6 +98,15 @@ export function desenharHabilidades(
   desenharSintonia(corpo, j, ctx, tick);
   desenharPassivasGerais(corpo, j, ctx, emitir, redesenhar);
   corpo.append(catalogoCombos(ctx, j));
+  // Marco 26 (26/10/2026, D-110): os números da classe (que saíram da escolha) e as afinidades, num bloco dobrável.
+  const classe = ctx.conteudo.classes.get(j.classeId ?? bolsa.classeId);
+  if (classe) {
+    const dom = el('details', 'dom-classe');
+    dom.append(el('summary', undefined, t('classe.domTitulo')), el('p', 'detalhe-item', t(`classe.${classe.id}.dom` as ChaveTexto)));
+    const afinidades = classe.afinidades.flatMap((a) => descreverBonus(a));
+    if (afinidades.length > 0) dom.append(el('p', 'detalhe-item', t('escolhaClasse.afinidades', { lista: afinidades.join('; ') })));
+    corpo.append(dom);
+  }
   /** Os botões 1 2 3 4 de uma habilidade ativa conhecida: põe na tecla; na tecla em que já está, tira. */
   const botoesDeTecla = (id: string, nome: string): HTMLElement => {
     const grupo = el('div', 'teclas-da-carta');

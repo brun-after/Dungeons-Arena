@@ -177,12 +177,30 @@ describe('irPara em trechos retos', () => {
     expect(c.jogador()).toMatchObject({ x: 9, y: 5 });
   });
 
-  it('destino inalcançável gera evento e não move', () => {
+  // Marco 26 (26/10/2026, D-114): o clique do jogador nunca se perde.
+  it('clique na parede vai à célula livre mais perto dele, sem caminhoFalhou', () => {
     const c = cenario();
     c.tick({ t: 'irPara', x: 0, y: 0 });
-    c.ticks(60);
-    expect(c.jogador()).toMatchObject({ x: 5, y: 5, px: 5, py: 5 });
-    expect(c.eventos).toContainEqual({ t: 'caminhoFalhou', tick: 0, id: 'j', status: 'inacessivel' });
+    c.ticks(120);
+    expect(c.jogador()).toMatchObject({ x: 1, y: 1 });
+    expect(c.eventos.some((e) => e.t === 'caminhoFalhou')).toBe(false);
+  });
+
+  it('clique fora do mapa anda até a borda naquela direção', () => {
+    const c = cenario();
+    c.tick({ t: 'irPara', x: -30, y: 5 });
+    c.ticks(120);
+    expect(c.jogador()).toMatchObject({ x: 1, y: 5 });
+  });
+
+  it('já na célula mais perto, anda reto na direção do clique até encostar', () => {
+    const c = cenario(SALA_ABERTA, 1, 5);
+    const x0 = c.jogador().px;
+    c.tick({ t: 'irPara', x: -5, y: 5.2 });
+    c.ticks(40);
+    expect(c.jogador().px).toBeLessThan(x0);
+    expect(c.jogador().x).toBe(1);
+    expect(c.eventos.some((e) => e.t === 'caminhoFalhou')).toBe(false);
   });
 
   it('entrada direcional cancela o caminho do irPara', () => {

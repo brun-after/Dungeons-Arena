@@ -8,7 +8,7 @@ import type { EventosDaSimulacao } from '../core/eventos-simulacao';
 import { t } from '../i18n';
 import type { Nuvem } from '../plataforma/nuvem';
 import type { CamadaNumeros } from '../render/numeros';
-import { descreverEntrada } from './mochila-diario';
+import { descreverEntrada } from './diario-detalhes';
 import type { Hud } from './hud';
 
 export interface OpcoesFeedbackGrimorio {

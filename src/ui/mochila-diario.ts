@@ -2,71 +2,22 @@
 // ressonâncias, marcos de nível, fusões, variações de item, conjuntos, regras de buff, missões, origens raras e eventos
 // de fase — e o que falta como silhueta ("???", com o tipo à vista). As missões aparecem com a contagem. Um rumor
 // (meia pista) muda a cada abertura. Só lê o estado.
+// Marco 26 (26/10/2026, D-111): cada descoberta vira um cartão com "Como" (as habilidades, condições ou peças) e
+// "Efeito" (ui/diario-detalhes.ts); o combo diz se está na sua barra, e a silhueta do combo, quantas habilidades tem.
 
 import type { ContextoSimulacao } from '../core/contexto';
 import type { Entidade } from '../entities/entidade';
 import { t, type ChaveTexto } from '../i18n';
 import { entradasDoDiario, TIPOS_DE_ENTRADA, type EntradaDoDiario, type TipoDeEntrada } from '../progression/diario';
+import { descreverEntrada } from './diario-detalhes';
+
+export { descreverEntrada } from './diario-detalhes';
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, texto?: string): HTMLElementTagNameMap[K] {
   const e = document.createElement(tag);
   if (classe) e.className = classe;
   if (texto !== undefined) e.textContent = texto;
   return e;
-}
-
-/** O nome e a descrição de uma entrada (do conteúdo). */
-export function descreverEntrada(ctx: ContextoSimulacao, id: string): { nome: string; texto: string } {
-  const [tipo = '', a = '', b = '', c = ''] = id.split(':');
-  const conteudo = ctx.conteudo;
-  switch (tipo as TipoDeEntrada) {
-    case 'reacao': {
-      const s = conteudo.interacoes.sinergias.find((x) => x.id === a);
-      return { nome: t(`sinergia.${a}` as ChaveTexto), texto: s ? t('diario.reacao', { elemento: t(`elemento.${s.elemento}` as ChaveTexto), estados: s.sobre.map((e) => t(`efeito.${e}` as ChaveTexto)).join(', ') }) : '' };
-    }
-    case 'combo': {
-      const k = conteudo.combos.get(a);
-      return { nome: k?.nome ?? a, texto: k?.texto ?? '' };
-    }
-    case 'ressonancia': {
-      const r = conteudo.ressonancias.get(a);
-      return { nome: r?.nome ?? a, texto: r?.texto ?? '' };
-    }
-    case 'marco': {
-      const d = conteudo.definicoes.get(a);
-      return { nome: t('diario.marco', { nome: d?.base.nome ?? a, n: b }), texto: d?.marcos[Number(b)]?.texto ?? '' };
-    }
-    case 'fusao': {
-      const d = conteudo.definicoes.get(a);
-      const partes = (d?.fusao ?? []).map((p) => conteudo.definicoes.get(p)?.base.nome ?? p);
-      return { nome: d?.base.nome ?? a, texto: t('habilidades.fusaoDe', { a: partes[0] ?? '', b: partes[1] ?? '' }) };
-    }
-    case 'item': {
-      const base = conteudo.itensComFormas.bases.get(a);
-      const forma = base?.formas[b as 'comum'];
-      const q = c !== 'n' && forma ? conteudo.itensComFormas.qualificadores[c as 'fogo']?.[forma.genero] : undefined;
-      return { nome: forma ? `${forma.nome}${q ? ` ${q}` : ''}` : a, texto: [t(`forma.${b}` as ChaveTexto), forma?.texto ?? ''].filter(Boolean).join(' · ') };
-    }
-    case 'conjunto': {
-      const cj = conteudo.conjuntos.get(a);
-      return { nome: t('diario.conjunto', { nome: cj?.nome ?? a, n: b }), texto: cj?.bonus[Number(b)]?.texto ?? '' };
-    }
-    case 'buff': {
-      const r = conteudo.regrasDeBuff.get(a);
-      return { nome: r?.nome ?? a, texto: r?.texto ?? '' };
-    }
-    case 'missao': {
-      const m = conteudo.missoes.get(a);
-      return { nome: m?.nome ?? a, texto: m?.texto ?? '' };
-    }
-    case 'origem': {
-      const o = conteudo.origens.get(a);
-      return { nome: o?.nome ?? a, texto: o?.texto ?? '' };
-    }
-    case 'evento':
-      return { nome: t(`evento.${a}` as ChaveTexto), texto: t(`evento.${a}.texto` as ChaveTexto) };
-  }
-  return { nome: id, texto: '' };
 }
 
 /** Quantos rumores existem no dicionário (`rumor.1` … `rumor.N`). */
@@ -114,11 +65,16 @@ export function desenharDiario(corpo: HTMLElement, j: Entidade, ctx: ContextoSim
       const li = el('li', vistas.has(e.id) ? 'entrada-diario vista' : 'entrada-diario silhueta');
       if (vistas.has(e.id)) {
         const d = descreverEntrada(ctx, e.id);
-        li.append(el('strong', undefined, d.nome));
-        if (d.texto) li.append(el('span', 'detalhe-item', d.texto));
+        const titulo = el('strong', undefined, d.nome);
+        const combo = tipo === 'combo' ? ctx.conteudo.combos.get(e.id.slice(6)) : undefined;
+        if (combo && combo.sequencia.every((id) => bolsa.barra.includes(id))) titulo.append(' ', el('span', 'marca-barra', t('diario.naBarra')));
+        li.append(titulo);
+        if (d.como.length > 0) li.append(el('span', 'linha-diario', `${t('diario.como')}: ${d.como.join(' · ')}`));
+        if (d.efeito) li.append(el('span', 'linha-diario', `${t('diario.efeito')}: ${d.efeito}`));
         li.dataset.entrada = e.id;
       } else {
-        li.append(el('strong', undefined, '???'));
+        const combo = tipo === 'combo' ? ctx.conteudo.combos.get(e.id.slice(6)) : undefined;
+        li.append(el('strong', undefined, combo ? t('diario.silhuetaCombo', { n: combo.sequencia.length }) : '???'));
       }
       ul.append(li);
     }

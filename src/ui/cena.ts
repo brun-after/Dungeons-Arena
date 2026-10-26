@@ -239,15 +239,20 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   };
 
   // Toque ou clique num hostil seleciona e trava o alvo (no travado, destrava: D-065); em outra célula, vai até ela.
-  const aoTocarCelula = (c: Celula, ponto: Celula = c) => {
+  // Marco 26 (D-115): devolve se andou (o mouse segurado só guia quando o clique não foi num alvo).
+  const aoTocarCelula = (c: Celula, ponto: Celula = c): boolean => {
     const local = jogador();
     const hostil = o.estado().entidades.find((e) => {
       const oc = celulaOcupada(e);
       return oc.x === c.x && oc.y === c.y && !!local && podeFerir(local, e, ctx.modo) && !e.morto;
     });
-    if (!hostil) emitir({ t: 'irPara', x: ponto.x, y: ponto.y });
-    else if (local?.alvoSelecionado === hostil.id && local.alvoTravado) emitir({ t: 'selecionarAlvo', alvo: hostil.id, travar: false });
+    if (!hostil) {
+      emitir({ t: 'irPara', x: ponto.x, y: ponto.y });
+      return true;
+    }
+    if (local?.alvoSelecionado === hostil.id && local.alvoTravado) emitir({ t: 'selecionarAlvo', alvo: hostil.id, travar: false });
     else emitir({ t: 'selecionarAlvo', alvo: hostil.id });
+    return false;
   };
   // Ajuste de 15/10/2026 (D-065): Q / botão de alvo trocam para o hostil seguinte (e travam); T / segurar o botão trava ou destrava.
   const trocarAlvo = (sentido: 1 | -1) => {
@@ -472,7 +477,19 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     aoMochila: mochila.alternar,
     bloqueado: () => mochila.aberta() || loja.aberta() || ap.menuAberto() || seletor.aberto(),
   });
-  ligarPonteiro(palco.canvas, { camera, aoIrPara: aoTocarCelula });
+  // Marco 26 (26/10/2026, D-115): com mouse, segurar o botão guia como o joystick (o vetor até o cursor).
+  let posicaoVisual: { x: number; y: number } | null = null;
+  const ponteiro = ligarPonteiro(palco.canvas, {
+    camera,
+    aoIrPara: aoTocarCelula,
+    guiar: {
+      posicaoNaTela: () => (posicaoVisual ? camera.paraTela(posicaoVisual.x, posicaoVisual.y) : null),
+      aoMudarDirecao: (rumo) => {
+        emitir(comandoMover(rumo));
+      },
+      isometrico,
+    },
+  });
   palco.canvas.addEventListener('contextmenu', (ev) => {
     ev.preventDefault();
   });
@@ -533,7 +550,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
         celulaCentralizada = true;
       }
       camera.seguirCelula({ x: j.x, y: j.y });
-      camera.atualizar(dtS, q.posicao(j), velocidade(j.atributos.destreza, ctx.balance.movimento.velocidadeBaseMs));
+      posicaoVisual = q.posicao(j);
+      camera.atualizar(dtS, posicaoVisual, velocidade(j.atributos.destreza, ctx.balance.movimento.velocidadeBaseMs));
       sincronizarBarra(j);
       barra.atualizar((h) => ({
         recarga: h.recargaMs > 0 ? recargaRestante(estado, j.id, h.id) / ticksDe(h.recargaMs) : 0,
@@ -542,6 +560,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
         ...(h.efeitos.some((ef) => ef.tipo === 'drenar_invocacao') && dizimoErgue(estado, ctx, j) && { icone: 'invocar', dica: t('habilidades.dizimoErgue') }),
       }));
     }
+    ponteiro.atualizar(q.agoraMs);
     hud.atualizar(j, estado.tick, identidadeDaClasse(ctx, j, estado.tick));
     feedback.conferirBasico();
     const alvo = j?.alvoSelecionado ? estado.entidades.find((e) => e.id === j.alvoSelecionado) : undefined;

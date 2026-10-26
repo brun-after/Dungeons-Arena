@@ -19,7 +19,7 @@ import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { DT_MS } from '../core/loop';
 import { ticksDe } from '../core/tempo';
 import { posicaoNoPasso, type PontoVisual } from '../entities/entidade';
-import { definirDirecao, integrarEntidade, planejarCaminho } from '../world/movimento';
+import { definirDirecao, integrarEntidade, planejarIrPara } from '../world/movimento';
 import { BufferRemoto } from './interpolacao-remota';
 import type { Transporte } from './transporte';
 
@@ -272,7 +272,7 @@ export class ClienteArena {
       for (const p of this.pendentes) {
         if (p.tickCliente !== k && !(k === this.baseTick && p.tickCliente < k)) continue;
         if (p.cmd.t === 'mover') definirDirecao(e, p.cmd.dir, p.cmd.dx, p.cmd.dy);
-        else if (p.cmd.t === 'irPara') planejarCaminho(e, { x: p.cmd.x, y: p.cmd.y }, this.ctx, k, this.descarte);
+        else if (p.cmd.t === 'irPara') planejarIrPara(e, { x: p.cmd.x, y: p.cmd.y }, this.ctx, k, this.descarte);
       }
       this.descarte.length = 0;
       if (!e.morto) integrarEntidade(e, estado, this.ctx, this.descarte, DT_MS);

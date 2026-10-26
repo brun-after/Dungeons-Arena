@@ -3,6 +3,7 @@ import { textosEditor } from './pt-BR-editor';
 import { textosGrupo } from './pt-BR-grupo';
 import { textosHabilidades } from './pt-BR-habilidades';
 import { textosClasses } from './pt-BR-classes';
+import { textosDiario } from './pt-BR-diario';
 
 export const ptBR = {
   'progressao.selecionarHabilidade': 'Escolha uma habilidade compatível e o caminho de evolução, quando necessário.',
@@ -642,6 +643,8 @@ export const ptBR = {
   ...textosEditor,
   // Marco 24 (24/10/2026): skills de classe, ultimates e sintonia.
   ...textosClasses,
+  // Marco 26 (26/10/2026): Diário detalhado e combos da build.
+  ...textosDiario,
 } as const;
 
 export type ChaveTexto = keyof typeof ptBR;

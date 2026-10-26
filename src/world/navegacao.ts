@@ -68,6 +68,46 @@ function reconstruir(veioDe: Int32Array, inicio: number, alvo: number, largura: 
   return passos.reverse();
 }
 
+/**
+ * Marco 26 (26/10/2026, D-114): a célula alcançável (até `maxPassos`) mais perto de um ponto qualquer, mesmo parede ou
+ * fora do mapa. Empate: a de menos passos e, nela, a primeira na ordem fixa da busca (determinístico).
+ */
+export function alcancavelMaisPerto(fase: Fase, origem: Celula, ponto: { x: number; y: number }, maxPassos = 60): Celula {
+  const { largura } = fase;
+  const indice = (x: number, y: number) => y * largura + x;
+  const visto = new Uint8Array(largura * fase.altura);
+  const profundidade = new Int32Array(largura * fase.altura);
+  const distancia = (x: number, y: number) => (x - ponto.x) * (x - ponto.x) + (y - ponto.y) * (y - ponto.y);
+  let melhor = origem;
+  let melhorD = distancia(origem.x, origem.y);
+  if (!passavel(fase, origem.x, origem.y)) return origem;
+  visto[indice(origem.x, origem.y)] = 1;
+  const fila: number[] = [indice(origem.x, origem.y)];
+  for (let cabeca = 0; cabeca < fila.length; cabeca++) {
+    const atual = fila[cabeca] as number;
+    const prof = profundidade[atual] as number;
+    if (prof >= maxPassos) continue;
+    const cx = atual % largura;
+    const cy = (atual - cx) / largura;
+    for (const [dx, dy] of VIZINHOS) {
+      const nx = cx + dx;
+      const ny = cy + dy;
+      if (!passavel(fase, nx, ny)) continue;
+      const vizinho = indice(nx, ny);
+      if (visto[vizinho]) continue;
+      visto[vizinho] = 1;
+      profundidade[vizinho] = prof + 1;
+      fila.push(vizinho);
+      const d = distancia(nx, ny);
+      if (d < melhorD) {
+        melhor = { x: nx, y: ny };
+        melhorD = d;
+      }
+    }
+  }
+  return melhor;
+}
+
 /** Marca todas as células alcançáveis a partir da origem, sem limite (validação de fase). */
 export function alcancaveis(fase: Fase, origem: Celula): Uint8Array {
   const marcadas = new Uint8Array(fase.largura * fase.altura);
