@@ -240,16 +240,20 @@ export interface Entidade {
   /** Jogador que controla, quando `controlador` não é IA. Vazio para IA. */
   jogadorId: string;
 
-  /** Posição lógica em células (§2.2): a origem do passo em curso. */
+  /**
+   * A célula ocupada (§2.2): onde valem as regras (armadilhas, áreas, alcance, terreno). Marco 26 (25/10/2026,
+   * D-104): é o arredondamento da posição contínua `px`, `py`, mantido pelo integrador e por `posicionar`.
+   */
   x: number;
   y: number;
-  /** Célula de destino do passo em curso; igual a (x, y) quando parado. Fica reservada. */
-  destinoX: number;
-  destinoY: number;
-  /** Fração do passo em curso, em [0, 1). */
-  progressoPasso: number;
+  /** Marco 26 (D-104): a posição contínua, em células (o centro de uma célula é o inteiro). */
+  px: number;
+  py: number;
+  /** O octante da direção mantida ('parado' sem direção); `rumoX`, `rumoY` é o vetor exato, quantizado em ±1000. */
   direcao: Dir8 | 'parado';
-  proximoEixoX: boolean;
+  rumoX: number;
+  rumoY: number;
+  /** Pontos a percorrer em linha reta (o caminho já suavizado), e a fila curta de onde o integrador tira o próximo. */
   waypoints: Celula[];
   caminho: Celula[];
   relogioAndar: number;
@@ -419,11 +423,11 @@ export function criarEntidade(n: NovaEntidade): Entidade {
     jogadorId: n.jogadorId ?? '',
     x: n.x,
     y: n.y,
-    destinoX: n.x,
-    destinoY: n.y,
-    progressoPasso: 0,
+    px: n.x,
+    py: n.y,
     direcao: 'parado',
-    proximoEixoX: true,
+    rumoX: 0,
+    rumoY: 0,
     waypoints: [],
     caminho: [],
     relogioAndar: 0,
@@ -474,16 +478,37 @@ export interface PontoVisual {
   y: number;
 }
 
-/** Posição contínua em células: origem do passo + fração do caminho até o destino. */
-export function posicaoNoPasso(e: Entidade): PontoVisual {
-  return {
-    x: e.x + (e.destinoX - e.x) * e.progressoPasso,
-    y: e.y + (e.destinoY - e.y) * e.progressoPasso,
-  };
+/**
+ * Posição contínua em células. Marco 26 (D-104): a célula `x`, `y` manda — a posição contínua é a dela enquanto
+ * arredonda para ela; se alguém mudou só a célula (um teletransporte escrito direto), vale o centro da célula.
+ */
+export function posicaoNoPasso(e: Pick<Entidade, 'x' | 'y' | 'px' | 'py'>): PontoVisual {
+  return Math.round(e.px) === e.x && Math.round(e.py) === e.y ? { x: e.px, y: e.py } : { x: e.x, y: e.y };
 }
 
+/** Marco 26 (D-104): traz a posição contínua para a célula, se ela foi mudada direto (ver `posicaoNoPasso`). */
+export function sincronizarPosicao(e: Entidade): void {
+  const p = posicaoNoPasso(e);
+  e.px = p.x;
+  e.py = p.y;
+}
+
+/** Marco 26 (D-104): indo a um ponto (o waypoint em curso). Quem só segura uma direção não está "em passo". */
 export function emPasso(e: Entidade): boolean {
-  return e.destinoX !== e.x || e.destinoY !== e.y;
+  return e.waypoints.length > 0;
+}
+
+/**
+ * Marco 26 (25/10/2026, D-104): põe a entidade num lugar (teletransporte, respawn, avanço, troca de fase): a posição
+ * contínua no ponto, a célula no arredondamento, e o movimento em curso descartado.
+ */
+export function posicionar(e: Entidade, x: number, y: number): void {
+  e.px = x;
+  e.py = y;
+  e.x = Math.round(x);
+  e.y = Math.round(y);
+  e.caminho = [];
+  e.waypoints = [];
 }
 
 export function vivo(e: Entidade): boolean {

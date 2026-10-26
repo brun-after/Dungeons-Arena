@@ -50,6 +50,11 @@ export interface EntradaPose {
   golpe?: Golpe | null;
   /** Fração da conjuração em curso, de 0 a 1 (null: sem conjuração) — a preparação do golpe. */
   preparo?: number | null;
+  /**
+   * Marco 26 (25/10/2026, D-108): o modelo mexe braços e pernas nos quadros do atlas; as tiras de baixo não se
+   * dividem em duas colunas (as pernas não andam duas vezes) e a bainha não balança por fatia.
+   */
+  membros?: boolean;
 }
 
 export interface PoseTira {
@@ -88,6 +93,20 @@ export function alturaDaTira(i: number): number {
 
 const onda = (tMs: number, cadenciaMs: number, fase: number) => Math.sin(((tMs / cadenciaMs) * 2 + fase) * Math.PI);
 
+/**
+ * Marco 26 (D-108): o balanço da passada, de −1 a 1, na mesma fase do quique e do contrabalanço das tiras. Escolhe o
+ * quadro de braços e pernas (modelos/membros.ts `quadroDoBalanco`).
+ */
+export function balancoDaPassada(estilo: EstiloCaminhada, tMs: number, fase: number): number {
+  const cadencia =
+    estilo === 'passada' ? PARAMETROS.passada.cadenciaMs
+    : estilo === 'marcha' ? PARAMETROS.marcha.cadenciaMs
+    : estilo === 'deslizar' ? PARAMETROS.deslizar.cadenciaMs
+    : estilo === 'quique' ? PARAMETROS.quique.cadenciaMs
+    : PARAMETROS.flutuar.cadenciaAsasMs;
+  return onda(tMs, cadencia, fase);
+}
+
 function tirasVazias(): PoseTira[] {
   return Array.from({ length: TIRAS }, () => ({ dx: 0, dy: 0, colunas: null }));
 }
@@ -119,6 +138,7 @@ function bipede(e: EntradaPose, p: ParametrosBipede): Pose {
   if (!e.tiras) return pose;
   pose.tiras = Array.from({ length: TIRAS }, (_, i) => {
     const h = alturaDaTira(i);
+    if (h < p.corte && e.membros) return { dx: 0, dy: 0, colunas: null };
     if (h < p.corte) {
       // Pernas: cada coluna com elevação e deslocamento em fase oposta (π).
       const peso = 1 - h / p.corte;
@@ -158,7 +178,7 @@ function deslizar(e: EntradaPose): Pose {
   // A bainha como pêndulo: abaixo do corte, quanto mais perto do chão, mais balança.
   pose.tiras = Array.from({ length: TIRAS }, (_, i) => {
     const h = alturaDaTira(i);
-    return { dx: h < p.corte ? p.amplitude * s * (1 - h / p.corte) : 0, dy: 0, colunas: null };
+    return { dx: h < p.corte && !e.membros ? p.amplitude * s * (1 - h / p.corte) : 0, dy: 0, colunas: null };
   });
   return pose;
 }

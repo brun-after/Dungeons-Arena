@@ -1,5 +1,5 @@
-// Colisão contra entidades (§2.3), resolvida na integração do movimento.
-// Cada entidade reserva a célula onde está e a célula de destino do passo em curso.
+// Colisão contra entidades (§2.3), resolvida na integração do movimento. Marco 26 (D-104): o corpo é redondo
+// (world/movimento.ts); a célula de cada entidade ainda conta para as escolhas da IA e do spawner.
 
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import type { Entidade } from '../entities/entidade';
@@ -35,7 +35,7 @@ export function bloqueia(a: Entidade, b: Entidade, regras: RegrasColisao): boole
 }
 
 export function reservaCelula(e: Entidade, x: number, y: number): boolean {
-  return (e.x === x && e.y === y) || (e.destinoX === x && e.destinoY === y);
+  return e.x === x && e.y === y;
 }
 
 /** A célula está livre para `quem`, considerando as reservas de todas as outras entidades? */

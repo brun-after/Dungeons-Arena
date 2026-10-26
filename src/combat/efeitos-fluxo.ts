@@ -14,7 +14,7 @@ import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type Armadilha, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
-import { vivo, type Entidade } from '../entities/entidade';
+import { posicionar, vivo, type Entidade } from '../entities/entidade';
 import { criarInimigo } from '../entities/fabrica';
 import { podeFerir } from '../modos/relacao';
 import { celulaLivrePara, ordemRotativa } from '../world/colisao';
@@ -147,8 +147,9 @@ export function invocar(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entida
       if (p.golpes) e.invocacao.golpesRestantes = Math.max(1, rolar(estado.rng, p.golpes).total);
     }
     if (e.invocacao && ef.tipo === 'invocar_temporario') e.invocacao.extra = true;
-    e.x = e.destinoX = e.origemX = lugar.x;
-    e.y = e.destinoY = e.origemY = lugar.y;
+    posicionar(e, lugar.x, lugar.y);
+    e.origemX = lugar.x;
+    e.origemY = lugar.y;
     estado.entidades.push(e);
     saida.push({ t: 'invocou', tick: estado.tick, donoId: dono.id, id: e.id });
   }

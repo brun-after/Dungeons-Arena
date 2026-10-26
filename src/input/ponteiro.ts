@@ -1,5 +1,5 @@
 // Gestos no mapa (§4.8):
-// - toque/clique curto sem arrastar -> ir até a célula;
+// - toque/clique curto sem arrastar -> ir até o ponto tocado (marco 26: o ponto contínuo, não o centro da célula);
 // - segurar parado por 300 ms -> seguir o dedo, recalculando o caminho a cada célula (D-012);
 // - arrastar além da zona morta (3 px no toque, 6 px no mouse) -> mover a câmera; acima de 4 px
 //   o clique é suprimido;
@@ -28,7 +28,8 @@ interface Ponto {
 
 export interface OpcoesPonteiro {
   camera: Camera;
-  aoIrPara: (celula: Celula) => void;
+  /** A célula tocada (para achar quem está nela) e o ponto contínuo exato. */
+  aoIrPara: (celula: Celula, ponto: Celula) => void;
 }
 
 export function ligarPonteiro(alvo: HTMLElement, opcoes: OpcoesPonteiro): () => void {
@@ -54,7 +55,7 @@ export function ligarPonteiro(alvo: HTMLElement, opcoes: OpcoesPonteiro): () => 
     const celula = camera.celulaSob(p.x, p.y);
     if (ultimaCelula && ultimaCelula.x === celula.x && ultimaCelula.y === celula.y) return;
     ultimaCelula = celula;
-    opcoes.aoIrPara(celula);
+    opcoes.aoIrPara(celula, camera.pontoSob(p.x, p.y));
   };
 
   const medidasPinca = () => {

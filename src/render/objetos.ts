@@ -8,10 +8,12 @@
 // Ajuste de 16/10/2026 (D-067): sem anel de progresso (o `arc` sem `moveTo` puxava uma linha de outro objeto até o
 // baú). No lugar, um halo suave pulsando no baú ou na loja em uso, como um brilho de CSS; no baú, ele fica mais
 // forte conforme abre. O anel do descanso saiu com o descanso.
+// Marco 26 (25/10/2026, D-109): no isométrico, ouro, orbes e santuário também ficam em pé (as moedas de pé, o orbe
+// flutuando sobre a sombra, o cristal sobre a base), com profundidade; só os halos seguem no chão.
 
 import { CanvasSource, Container, Graphics, Sprite, Text, Texture } from 'pixi.js';
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
-import type { EstadoJogo, ObjetoNoMundo } from '../core/estado';
+import type { EstadoJogo, ObjetoNoMundo, TipoObjeto } from '../core/estado';
 import type { Raridade } from '../modos/modo';
 import { CELULA_PX } from './camera-calculo';
 import { centroDaCelula, type Projecao } from './projecao';
@@ -32,6 +34,9 @@ export const COR_RARIDADE: Readonly<Record<Raridade, number>> = {
   ultima: 0xff4d6d,
 };
 
+/** Os que ficam em pé no isométrico (D-058: baú e loja; D-109: ouro, orbes e santuário). */
+const EM_PE: ReadonlySet<TipoObjeto> = new Set<TipoObjeto>(['bau', 'loja', 'ouro', 'santuario', 'orbe_hp', 'orbe_recurso', 'orbe_efeito', 'orbe_refugio']);
+
 /** Onde desenhar os objetos altos no isométrico. */
 export interface OpcoesEmPe {
   camada: Container;
@@ -40,7 +45,7 @@ export interface OpcoesEmPe {
 
 export class CamadaObjetos {
   private readonly g = new Graphics();
-  /** Baús e lojas em pé, um Graphics por objeto (só no isométrico). */
+  /** Os objetos em pé, um Graphics por objeto (só no isométrico). */
   private readonly altos = new Map<string, Graphics>();
   /** Halo do objeto em uso (baú abrindo, loja aberta), um sprite por objeto. */
   private readonly halos = new Map<string, Sprite>();
@@ -140,6 +145,36 @@ export class CamadaObjetos {
     g.circle(cx, cy + 4, 4).fill(0xf1c40f).stroke({ width: 1.5, color: 0x9a7d0a });
   }
 
+  /** O santuário: a base e o cristal (aceso enquanto não usado). */
+  private santuario(g: Graphics, o: ObjetoNoMundo, cx: number, cy: number): void {
+    const aceso = o.abertoTick === 0;
+    const cor = aceso ? 0x50e3c2 : 0x586464;
+    g.ellipse(cx, cy + 9, 19, 9).fill({ color: cor, alpha: 0.15 });
+    g.roundRect(cx - 12, cy + 4, 24, 12, 3).fill(0x3b4d50).stroke({ width: 2, color: cor });
+    g.poly([cx, cy - 19, cx + 9, cy - 5, cx, cy + 6, cx - 9, cy - 5]).fill(cor).stroke({ width: 2, color: 0xc6eee3 });
+  }
+
+  /** Os orbes (vida, recurso, efeito e refúgio), com o brilho em volta. */
+  private orbe(g: Graphics, o: ObjetoNoMundo, cx: number, cy: number, pulso: number): void {
+    if (o.tipo === 'orbe_efeito') {
+      const cor = o.efeito ? Number.parseInt(REGISTRO_EFEITOS[o.efeito.tipo].cor.slice(1), 16) : 0xffffff;
+      g.circle(cx, cy, 15 + pulso).fill({ color: cor, alpha: 0.22 });
+      g.circle(cx, cy, 9).fill(cor).stroke({ width: 3, color: 0xffffff, alpha: 0.95 });
+      g.circle(cx, cy, 3).fill(0xffffff);
+      return;
+    }
+    if (o.tipo === 'orbe_refugio') {
+      // D-067: o refúgio, prateado, com um losango no miolo (a carga de imunidade).
+      g.circle(cx, cy, 16 + pulso).fill({ color: 0xd6eaf8, alpha: 0.22 });
+      g.circle(cx, cy, 9).fill(0x85c1e9).stroke({ width: 2, color: 0xffffff, alpha: 0.95 });
+      g.poly([cx, cy - 5, cx + 4, cy, cx, cy + 5, cx - 4, cy]).fill(0xffffff);
+      return;
+    }
+    if (o.tipo !== 'orbe_hp' && o.tipo !== 'orbe_recurso') return;
+    g.circle(cx, cy, 14 + pulso).fill({ color: COR_ORBE[o.tipo], alpha: 0.18 });
+    g.circle(cx, cy, 8).fill(COR_ORBE[o.tipo]).stroke({ width: 2, color: 0xffffff, alpha: 0.8 });
+  }
+
   desenhar(estado: EstadoJogo, agoraMs: number, movimentoReduzido: boolean): void {
     const g = this.g.clear();
     const pulso = movimentoReduzido ? 0 : Math.sin(agoraMs / 260) * 2;
@@ -149,9 +184,9 @@ export class CamadaObjetos {
     for (const o of estado.objetos) {
       const cx = (o.x + 0.5) * CELULA_PX;
       const cy = (o.y + 0.5) * CELULA_PX;
-      if (iso && this.emPe && (o.tipo === 'bau' || o.tipo === 'loja')) {
+      if (iso && this.emPe && EM_PE.has(o.tipo)) {
         vistos.add(o.objetoId);
-        this.desenharEmPe(o, estado, proj, this.emPe.camada);
+        this.desenharEmPe(o, estado, proj, this.emPe.camada, movimentoReduzido ? 0 : agoraMs, pulso);
         continue;
       }
       if (o.tipo === 'item') {
@@ -176,30 +211,11 @@ export class CamadaObjetos {
       }
       // A porta temporária do boss é desenhada com as outras portas (render/portas.ts).
       if (o.tipo === 'santuario') {
-        const aceso = o.abertoTick === 0;
-        const cor = aceso ? 0x50e3c2 : 0x586464;
-        this.g.ellipse(cx, cy + 9, 19, 9).fill({ color: cor, alpha: 0.15 });
-        this.g.roundRect(cx - 12, cy + 4, 24, 12, 3).fill(0x3b4d50).stroke({ width: 2, color: cor });
-        this.g.poly([cx, cy - 19, cx + 9, cy - 5, cx, cy + 6, cx - 9, cy - 5]).fill(cor).stroke({ width: 2, color: 0xc6eee3 });
+        this.santuario(g, o, cx, cy);
         continue;
       }
       if (o.tipo === 'saida') continue;
-      if (o.tipo === 'orbe_efeito') {
-        const cor = o.efeito ? Number.parseInt(REGISTRO_EFEITOS[o.efeito.tipo].cor.slice(1), 16) : 0xffffff;
-        g.circle(cx, cy, 15 + pulso).fill({ color: cor, alpha: 0.22 });
-        g.circle(cx, cy, 9).fill(cor).stroke({ width: 3, color: 0xffffff, alpha: 0.95 });
-        g.circle(cx, cy, 3).fill(0xffffff);
-        continue;
-      }
-      if (o.tipo === 'orbe_refugio') {
-        // D-067: o refúgio, prateado, com um losango no miolo (a carga de imunidade).
-        g.circle(cx, cy, 16 + pulso).fill({ color: 0xd6eaf8, alpha: 0.22 });
-        g.circle(cx, cy, 9).fill(0x85c1e9).stroke({ width: 2, color: 0xffffff, alpha: 0.95 });
-        g.poly([cx, cy - 5, cx + 4, cy, cx, cy + 5, cx - 4, cy]).fill(0xffffff);
-        continue;
-      }
-      g.circle(cx, cy, 14 + pulso).fill({ color: COR_ORBE[o.tipo], alpha: 0.18 });
-      g.circle(cx, cy, 8).fill(COR_ORBE[o.tipo]).stroke({ width: 2, color: 0xffffff, alpha: 0.8 });
+      this.orbe(g, o, cx, cy, pulso);
     }
     this.halos_(estado, agoraMs, movimentoReduzido);
     for (const [id, alto] of this.altos) {
@@ -244,7 +260,8 @@ export class CamadaObjetos {
     item.quantidade.text = o.valor > 1 ? `×${o.valor}` : '';
   }
 
-  private desenharEmPe(o: ObjetoNoMundo, estado: EstadoJogo, proj: Projecao, camada: Container): void {
+  /** `tMs` 0 com movimento reduzido (sem flutuar). */
+  private desenharEmPe(o: ObjetoNoMundo, estado: EstadoJogo, proj: Projecao, camada: Container, tMs: number, pulso: number): void {
     let alto = this.altos.get(o.objetoId);
     if (!alto) {
       alto = new Graphics();
@@ -255,10 +272,28 @@ export class CamadaObjetos {
     const p = proj.projetar(c.x, c.y);
     alto.position.set(p.x, p.y);
     alto.zIndex = p.y;
-    alto.clear().ellipse(0, 0, 18, 8).fill({ color: 0x000000, alpha: 0.3 });
     // Desenhado acima da origem (os pés do objeto ficam no centro da célula).
-    if (o.tipo === 'bau') this.bau(alto, estado, o, 0, -10);
-    else this.loja(alto, 0, -12);
+    const flutua = Math.sin(tMs / 380 + o.x * 1.7 + o.y) * 2.5;
+    if (o.tipo === 'bau' || o.tipo === 'loja') {
+      alto.clear().ellipse(0, 0, 18, 8).fill({ color: 0x000000, alpha: 0.3 });
+      if (o.tipo === 'bau') this.bau(alto, estado, o, 0, -10);
+      else this.loja(alto, 0, -12);
+    } else if (o.tipo === 'ouro') {
+      // D-109: duas moedas de pé (de perfil, elipses altas) e uma deitada atrás.
+      alto.clear().ellipse(0, 0, 13, 5.5).fill({ color: 0x000000, alpha: 0.3 });
+      alto.ellipse(2, -2, 8, 3.2).fill(0xd4ac0d).stroke({ width: 1.2, color: 0x9a7d0a });
+      alto.ellipse(-5, -8, 5, 7.5).fill(0xd4ac0d).stroke({ width: 1.5, color: 0x9a7d0a });
+      alto.ellipse(5, -10 + flutua * 0.3, 5.5, 8 + pulso / 3).fill(0xf1c40f).stroke({ width: 1.5, color: 0x9a7d0a });
+      alto.rect(4.2, -15 + flutua * 0.3, 1.6, 9).fill({ color: 0xfff3b0, alpha: 0.8 });
+    } else if (o.tipo === 'santuario') {
+      alto.clear().ellipse(0, 0, 18, 8).fill({ color: 0x000000, alpha: 0.3 });
+      this.santuario(alto, o, 0, -14);
+    } else {
+      // O orbe flutua sobre a sombra (a sombra encolhe quando ele sobe).
+      const altura = 20 + flutua;
+      alto.clear().ellipse(0, 0, 9 - flutua * 0.4, 4 - flutua * 0.15).fill({ color: 0x000000, alpha: 0.32 });
+      this.orbe(alto, o, 0, -altura, pulso);
+    }
   }
 
   /** Troca de visão: os objetos em pé voltam para o chão (ou o contrário) no próximo quadro. */

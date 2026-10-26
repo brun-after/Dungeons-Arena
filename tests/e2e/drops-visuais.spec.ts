@@ -26,6 +26,8 @@ test('drops usam os desenhos dos itens nas duas projeções e limpam sprites col
         mapa: Array.from({ length: 7 }, () => '.'.repeat(16)), spawns: [] });
       const estado = criarEstado({ semente: 1, faseId: 'visual' });
       estado.objetos = ids.map((id, i) => novoObjeto('item-' + i, 'item', 2 + i * 2, 3, { itemId: id, valor: id === 'pocao_vida' ? 4 : 1 }));
+      // Marco 26 (D-109): ouro e orbe ficam de pé no isométrico (camada alta); de cima, no chão.
+      estado.objetos.push(novoObjeto('ouro', 'ouro', 3, 5, { valor: 10 }), novoObjeto('orbe', 'orbe_hp', 6, 5, { valor: 10 }));
       for (const [visao, y] of [['cima', 45], ['iso', 430]]) {
         const grupo = new Container(); grupo.position.set(70, y); app.stage.addChild(grupo);
         const plano = new Container(), altos = new Container({ sortableChildren: true }); grupo.addChild(plano, altos);
@@ -38,7 +40,7 @@ test('drops usam os desenhos dos itens nas duas projeções e limpam sprites col
         const antes = visao === 'iso' ? altos.children.length : chao.children.length;
         camada.desenhar({ ...estado, objetos: [] }, 0, true);
         const depois = visao === 'iso' ? altos.children.length : chao.children.length;
-        if (antes - depois !== ids.length) throw Error('Sprites não foram removidos: ' + visao);
+        if (antes - depois !== ids.length + (visao === 'iso' ? 2 : 0)) throw Error('Sprites não foram removidos: ' + visao);
         camada.desenhar(estado, 0, true);
         const titulo = new Text({ text: visao === 'cima' ? 'Vista de cima' : 'Vista isométrica', style: { fontSize: 22, fill: '#f4e6cf' } });
         titulo.position.set(0, -30); grupo.addChild(titulo);

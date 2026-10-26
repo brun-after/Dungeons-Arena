@@ -48,8 +48,22 @@ export function estadoPublico(estado: EstadoJogo): EstadoJogo {
   for (const e of publico.entidades) {
     if (e.ia) e.ia = iaPublica(e.ia);
     e.bolsa = null;
+    // Marco 26 (25/10/2026, D-104): a posição contínua muda a cada tick; com milésimos de célula, o patch fica curto.
+    // O relógio de caminhada (que nada na tela lê) mudava a cada tick de quem anda: fica só no servidor.
+    e.px = milesimoParaOCentro(e.px);
+    e.py = milesimoParaOCentro(e.py);
+    e.relogioAndar = 0;
   }
   return publico;
+}
+
+/**
+ * Arredonda a milésimos de célula na direção do centro da célula ocupada: quem encosta na parede (a aresta da célula)
+ * se afasta dela, nunca entra, e a célula (o arredondamento) não muda. Idempotente.
+ */
+export function milesimoParaOCentro(v: number): number {
+  const m = v * 1000;
+  return (v > Math.round(v) ? Math.floor(m + 1e-6) : Math.ceil(m - 1e-6)) / 1000;
 }
 
 /** Digest do estado público: cliente e servidor comparam no mesmo tick (§5.6). */

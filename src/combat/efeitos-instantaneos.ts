@@ -8,10 +8,11 @@ import { muralhaEm } from './tatica';
 import type { Celula } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
-import type { Entidade } from '../entities/entidade';
+import { posicionar, type Entidade } from '../entities/entidade';
 import { celulaLivrePara } from '../world/colisao';
 import { passavel } from '../world/fase';
 import { caminho } from '../world/navegacao';
+import { suavizarCaminho } from '../world/corpo';
 
 function livre(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, x: number, y: number): boolean {
   return !muralhaEm(estado, x, y) && passavel(ctx.fase, x, y) && celulaLivrePara(e, x, y, estado.entidades, ctx.balance.colisao);
@@ -19,9 +20,7 @@ function livre(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, x: numbe
 
 /** Coloca a entidade numa célula, parada: o passo em curso e o caminho planejado são descartados. */
 export function reposicionar(e: Entidade, x: number, y: number): void {
-  e.x = e.destinoX = x;
-  e.y = e.destinoY = y;
-  e.progressoPasso = 0;
+  posicionar(e, x, y);
   e.caminho = [];
   e.waypoints = [];
 }
@@ -51,10 +50,14 @@ export function teleportar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entida
 export function avancar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, mira: Celula | null, celulas: number): boolean {
   if (!mira) return false;
   // D-078 (17/10/2026): o avanço voluntário mantém a intenção de ir até o ponto clicado.
-  const destino = e.caminho.at(-1) ?? e.waypoints.at(-1) ?? (e.progressoPasso > 0 && e.direcao === 'parado' ? { x: e.destinoX, y: e.destinoY } : null);
+  const destino = e.caminho.at(-1) ?? e.waypoints.at(-1) ?? null;
   const distancia = Math.max(Math.abs(mira.x - e.x), Math.abs(mira.y - e.y));
   const andou = deslizar(estado, ctx, e, Math.sign(mira.x - e.x), Math.sign(mira.y - e.y), Math.min(celulas, distancia));
-  if (andou && destino) e.caminho = caminho(ctx.fase, e, destino, ctx.balance.navegacao.maxPassosToque).passos;
+  if (andou && destino) {
+    // Marco 26 (D-104): o resto do caminho, de novo em trechos retos a partir de onde o avanço parou.
+    const passos = caminho(ctx.fase, e, { x: Math.round(destino.x), y: Math.round(destino.y) }, ctx.balance.navegacao.maxPassosToque).passos;
+    e.caminho = suavizarCaminho(ctx.fase, { x: e.px, y: e.py }, passos, ctx.balance.movimento.raioCorpo);
+  }
   return andou;
 }
 

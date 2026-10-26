@@ -25,8 +25,12 @@ export type EscolhaResolucao = 'auto' | 'alta' | 'media' | 'baixa';
 /** Para onde a imagem do personagem olha no arquivo original. */
 export type SentidoToken = 'direita' | 'esquerda';
 
+/** Marco 26 (D-107): WASD (direções de tela) ou EWAS (a inclinação do isométrico). */
+export type TeclasMovimento = 'wasd' | 'ewas';
+
 export interface Preferencias {
   controle: TipoControle;
+  teclasMovimento: TeclasMovimento;
   camera: ModoCamera;
   qualidade: EscolhaQualidade;
   /** Tremor, flash, congelamento e soco de zoom (§2.4). */
@@ -67,6 +71,7 @@ const CHAVE_LOCAL = 'dungeons-arena:preferencias';
 const CHAVE_PERFIL = 'preferencias';
 export const PREFERENCIAS_PADRAO: Preferencias = {
   controle: 'joystick',
+  teclasMovimento: 'wasd',
   camera: 'janela',
   qualidade: 'auto',
   efeitosDeTela: true,
@@ -101,6 +106,7 @@ export function normalizarPreferencias(dados: unknown): Preferencias {
   const d = typeof dados === 'object' && dados !== null ? (dados as Partial<Record<keyof Preferencias, unknown>>) : {};
   return {
     controle: d.controle === 'dpad' ? 'dpad' : 'joystick',
+    teclasMovimento: opcao(d.teclasMovimento, ['wasd', 'ewas'] as const, PADRAO.teclasMovimento),
     camera: d.camera === 'centralizada' ? 'centralizada' : 'janela',
     qualidade: opcao(d.qualidade, ['auto', ...QUALIDADES], PADRAO.qualidade),
     efeitosDeTela: booleano(d.efeitosDeTela, PADRAO.efeitosDeTela),

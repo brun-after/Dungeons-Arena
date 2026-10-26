@@ -4,14 +4,14 @@
 import { describe, expect, it } from 'vitest';
 import type { ComandoDoTick, Dir8 } from '../../src/core/comandos';
 import { digest } from '../../src/core/digest';
-import { remapearParaGrade } from '../../src/input/direcao';
+import { rumoDaTela } from '../../src/input/direcao';
 import { normalizarPreferencias } from '../../src/plataforma/preferencias';
 import { alturaDaTira, pose, TIRAS, type EntradaPose, type EstiloCaminhada } from '../../src/render/caminhada';
 import { Camera } from '../../src/render/camera';
 import { CELULA_PX } from '../../src/render/camera-calculo';
 import { chaveQuadro, gerarAtlas, LADO_PX, VISTAS } from '../../src/render/modelos/atlas';
 import { ehModelo, MODELO_JOGADOR, MODELOS } from '../../src/render/modelos';
-import { paredeDeBorda } from '../../src/render/paredes-iso';
+import { ALTURA_PAREDE_PX, ESPESSURA_PAREDE, paredeDeBorda, placasDaParede } from '../../src/render/paredes-iso';
 import { celulaSobProjetado, centroDaCelula, criarProjecao, profundidade, type Visao } from '../../src/render/projecao';
 import { caixaVisivel, encaixar, LIMITE_BYTES, validarArquivo, validarDimensoes } from '../../src/render/token-imagem';
 import { criarBotAleatorio, criarCenario, rodar, type Produtor } from '../sim/harness';
@@ -73,15 +73,14 @@ describe('projeção (§2.16, §4.5)', () => {
     const p = criarProjecao('iso', 20, 20);
     const tela: Readonly<Record<Dir8, readonly [number, number]>> = { N: [0, -1], NE: [1, -1], E: [1, 0], SE: [1, 1], S: [0, 1], SO: [-1, 1], O: [-1, 0], NO: [-1, -1] };
     for (const d of DIRECOES) {
-      const g = remapearParaGrade(d, true);
-      if (g === 'parado') throw new Error('sem direção');
-      const passo = tela[g];
+      const g = rumoDaTela(d, true);
+      if (g.dir === 'parado') throw new Error('sem direção');
       const a = p.projetar(0, 0);
-      const b = p.projetar(passo[0], passo[1]);
+      const b = p.projetar(g.dx, g.dy);
       const angTela = Math.atan2(b.y - a.y, b.x - a.x);
       const angPedido = Math.atan2(tela[d][1], tela[d][0]);
-      // O passo na grade cai a menos de 45° do pedido na tela (o losango achata o eixo vertical).
-      expect(Math.abs(Math.atan2(Math.sin(angTela - angPedido), Math.cos(angTela - angPedido)))).toBeLessThan(Math.PI / 4);
+      // Marco 26 (D-105): pela inversa da projeção, o andar na tela é o pedido (só o arredondamento em ±1000).
+      expect(Math.abs(Math.atan2(Math.sin(angTela - angPedido), Math.cos(angTela - angPedido)))).toBeLessThan(0.002);
     }
   });
 });
@@ -144,6 +143,19 @@ describe('profundidade e paredes em prisma', () => {
     expect(paredeDeBorda(fase, 2, 1)).toBe(true);
     expect(paredeDeBorda(fase, 2, 2)).toBe(false); // é piso
     expect(paredeDeBorda(fase, 4, 0)).toBe(false);
+  });
+
+  it('marco 26 (D-106): placas 80% mais finas e 70% mais baixas, na aresta que encosta no chão', () => {
+    expect(ESPESSURA_PAREDE).toBeCloseTo(0.2);
+    expect(ALTURA_PAREDE_PX).toBeCloseTo(CELULA_PX * 0.6 * 0.3);
+    // Sala 2×1 em (2..3, 2): a parede de cima tem a placa na aresta sul; a da esquerda, na leste.
+    const fase = faseDeTexto(['#####', '#####', '##..#', '#####']);
+    expect(placasDaParede(fase, 2, 1)).toEqual([{ x0: 0, y0: 0.8, x1: 1, y1: 1, frenteSul: true, frenteLeste: false }]);
+    expect(placasDaParede(fase, 1, 2)).toEqual([{ x0: 0.8, y0: 0, x1: 1, y1: 1, frenteSul: false, frenteLeste: true }]);
+    // A quina que só toca o chão na diagonal fecha com um bloquinho 0,2 × 0,2.
+    expect(placasDaParede(fase, 1, 1)).toEqual([{ x0: 0.8, y0: 0.8, x1: 1, y1: 1, frenteSul: true, frenteLeste: true }]);
+    expect(placasDaParede(fase, 0, 0)).toEqual([]);
+    expect(placasDaParede(fase, 2, 2)).toEqual([]);
   });
 });
 
@@ -249,7 +261,11 @@ describe('atlas dos modelos (gerado no build)', () => {
     }
     // Os 11 da spec.
     for (const m of ['goblin', 'esqueleto', 'orc', 'troll', 'vampiro', 'demonio', 'generico', 'lobo', 'aranha', 'slime', 'cultista']) expect(ehModelo(m), m).toBe(true);
-    expect(MODELOS.aventureiro.quadros).toBe(2);
+    // Marco 26 (D-108): os quadros de braços e pernas (parado, quatro da passada e o golpe); o falcão segue com as asas.
+    expect(MODELOS.aventureiro.quadros).toBe(6);
+    expect(MODELOS.falcao.membros).toBe(false);
+    for (const m of Object.values(MODELOS)) if (m.membros) expect(m.quadros).toBe(6);
+    expect(Math.max(atlas.largura, atlas.altura)).toBeLessThanOrEqual(4096);
   });
 
   it('o JSON aponta quadros dentro da imagem, sem sobreposição, e o SVG é limpo', () => {
@@ -278,8 +294,8 @@ describe('a visão não muda o jogo (D-058)', () => {
       produtor(estado).map((c): ComandoDoTick => {
         if (c.cmd.t === 'mover' && c.cmd.dir !== 'parado') {
           const alvo = c.cmd.dir;
-          const naTela = DIRECOES.find((d) => remapearParaGrade(d, true) === alvo);
-          return { ...c, cmd: { t: 'mover', dir: naTela ? remapearParaGrade(naTela, true) : 'parado' } };
+          const naTela = DIRECOES.find((d) => rumoDaTela(d, true).dir === alvo);
+          return { ...c, cmd: { t: 'mover', dir: naTela ? rumoDaTela(naTela, true).dir : 'parado' } };
         }
         if (c.cmd.t === 'irPara') {
           const centro = centroDaCelula(c.cmd.x, c.cmd.y);

@@ -26,6 +26,18 @@ export type TipoPilar = (typeof TIPOS_PILAR)[number];
 /** Enfeites que pedem parede atrás (encostados na parede de cima). */
 const DE_PAREDE: ReadonlySet<TipoDecoracao> = new Set(['tocha', 'estandarte', 'estante', 'vitral', 'corrente', 'estalactite', 'teia']);
 
+/**
+ * Marco 26 (25/10/2026, D-109): os enfeites que ficam em pé no isométrico (os demais são do chão: pedras, tapete,
+ * poça…). A teia fica no chão: é o canto da parede, sem volume.
+ */
+const EM_PE: ReadonlySet<TipoDecoracao> = new Set([
+  'tocha', 'barril', 'estandarte', 'lapide', 'vela', 'arbusto', 'arvore', 'estante', 'livros', 'carrinho', 'cristal',
+  'cacto', 'cogumelo', 'junco', 'vitral', 'corrente', 'estalactite',
+]);
+
+export const ehDecoracaoDeParede = (tipo: TipoDecoracao): boolean => DE_PAREDE.has(tipo);
+export const ehDecoracaoEmPe = (tipo: TipoDecoracao): boolean => EM_PE.has(tipo);
+
 export interface Decoracao {
   tipo: TipoDecoracao;
   x: number;

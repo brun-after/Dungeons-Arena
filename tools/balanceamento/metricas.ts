@@ -6,7 +6,7 @@ import { habilidadeDoAtor, perfilPara } from '../../src/combat/perfil';
 import type { ContextoSimulacao } from '../../src/core/contexto';
 import type { EstadoJogo } from '../../src/core/estado';
 import type { EventoSimulacao } from '../../src/core/eventos-simulacao';
-import { vivo, type Entidade } from '../../src/entities/entidade';
+import { emPasso, vivo, type Entidade } from '../../src/entities/entidade';
 import { TICKS_POR_S } from './cenarios';
 
 export interface FonteMedida {
@@ -108,7 +108,7 @@ export class MedidorCombate {
     m.tempoVivoS += dt;
     if (j.hp / j.hpMax < 0.35) m.tempoVidaBaixaS += dt;
     if (j.acao) m.tempoConjurandoS += dt;
-    if (j.x !== j.destinoX || j.y !== j.destinoY) m.tempoMovendoS += dt;
+    if (emPasso(j) || j.direcao !== 'parado') m.tempoMovendoS += dt;
     if (movimentoBloqueado(j, estado.tick) || acaoBloqueada(j, estado.tick, 'fisico') || acaoBloqueada(j, estado.tick, 'magico')) m.tempoControladoS += dt;
     const hostis = estado.entidades.filter(e => this.inimigos.has(e.id) && vivo(e));
     const distancia = hostis.length ? Math.min(...hostis.map(e => chebyshev(j, e))) : null;

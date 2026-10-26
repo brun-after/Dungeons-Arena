@@ -121,7 +121,7 @@ function aplicarComandos(
     if (!ator || !vivo(ator)) continue;
     switch (cmd.t) {
       case 'mover':
-        definirDirecao(ator, cmd.dir);
+        definirDirecao(ator, cmd.dir, cmd.dx, cmd.dy);
         break;
       case 'irPara':
         planejarCaminho(ator, { x: cmd.x, y: cmd.y }, ctx, estado.tick, saida);

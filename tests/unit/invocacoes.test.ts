@@ -53,7 +53,7 @@ function cenario(balance: Balance = BALANCE_PADRAO, semente = 9) {
     return b;
   };
   const por = (e: Entidade, x: number, y: number) => {
-    Object.assign(e, { x, y, destinoX: x, destinoY: y, progressoPasso: 0, caminho: [], waypoints: [] });
+    Object.assign(e, { x, y, caminho: [], waypoints: [] });
   };
   return { ctx, estado, eventos, ent, tick, ticks, invocar, boneco, por };
 }
@@ -118,17 +118,21 @@ describe('comportamentos (§2.9)', () => {
     expect(c.eventos.some((e) => e.t === 'acaoIniciada' && e.atorId === fada.id)).toBe(false);
   });
 
-  it('invocação anda um passo a cada 380 ms e não bloqueia aliado', () => {
+  it('invocação anda uma célula a cada 380 ms e não bloqueia aliado', () => {
     const c = cenario();
     const lobo = c.invocar('lobo_espiritual');
     c.por(lobo, 9, 9);
-    c.ticks(300);
-    const passos = c.eventos.filter((e) => e.t === 'moveu' && e.id === lobo.id).map((e) => e.tick);
-    expect(passos.length).toBeGreaterThan(3);
-    for (let i = 2; i < passos.length; i++) {
-      const intervalo = (passos[i] ?? 0) - (passos[i - 1] ?? 0);
-      if (intervalo < 40) expect(Math.abs(intervalo - (380 / 1000) * 60)).toBeLessThanOrEqual(1);
+    c.tick(); // a posição contínua acompanha a célula escrita direto
+    // Marco 26 (D-104): sem passo, a velocidade é a distância por tick (a mais longa, em trecho livre).
+    let maior = 0;
+    for (let i = 0; i < 300; i++) {
+      const x = lobo.px;
+      const y = lobo.py;
+      c.tick();
+      maior = Math.max(maior, Math.sqrt((lobo.px - x) ** 2 + (lobo.py - y) ** 2));
     }
+    expect(c.eventos.filter((e) => e.t === 'moveu' && e.id === lobo.id).length).toBeGreaterThan(3);
+    expect(maior).toBeCloseTo(1000 / 380 / 60, 6);
     expect(bloqueia(lobo, c.ent('j'), c.ctx.balance.colisao)).toBe(false);
   });
 });

@@ -9,6 +9,7 @@
 // `criarPersonagem`, `motivoParaRecusar`, `depoisDoTick`, `aoRemoverSessao` e `trocarMundo`; os comandos aceitos
 // pela rede vêm do modo (`comandosDeRede`).
 
+import { posicionar } from '../entities/entidade';
 import type { Comando, ComandoDoTick, Dir8, EntidadeId } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import { criarEstado, type EstadoJogo } from '../core/estado';
@@ -352,7 +353,8 @@ export class SalaArena {
       e.equipe = equipeDeEntrada(this.ctx.modo, jogadorId, this.estado);
       e.xpBase = Math.round((this.ctx.modo.recompensaJogador?.xpPorNivel ?? 0) * e.nivel);
       const local = localDeRespawn(this.estado, this.ctx.fase, this.ctx.modo, e, this.estado.rng);
-      Object.assign(e, { x: local.x, y: local.y, destinoX: local.x, destinoY: local.y, origemX: local.x, origemY: local.y });
+      posicionar(e, local.x, local.y);
+      Object.assign(e, { origemX: local.x, origemY: local.y });
       this.estado.entidades.push(e);
       return { ok: true, previa: previaDoPersonagem(e, [], this.ctx.modo.id, this.ctx.balance.versao), certificada: true };
     }

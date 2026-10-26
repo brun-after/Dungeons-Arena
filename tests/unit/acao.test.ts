@@ -93,7 +93,6 @@ describe('ciclo de uma ação (§2.7)', () => {
     // O boneco foge para longe durante a conjuração.
     const b = a.ent('b');
     b.x = 10;
-    b.destinoX = 10;
     a.ticks(ticksDe(504) + 2);
     expect(a.de('esquivou')).toHaveLength(1);
     expect(a.de('impacto')).toHaveLength(0);
@@ -104,7 +103,6 @@ describe('ciclo de uma ação (§2.7)', () => {
     a.tick([['j', { t: 'usarHabilidade', id: 'explosao', alvo: 'b' }]]);
     const b = a.ent('b');
     b.y = 9;
-    b.destinoY = 9;
     a.ticks(ticksDe(900) + 2);
     expect(a.de('impacto')).toHaveLength(0);
   });
@@ -153,12 +151,15 @@ describe('ciclo de uma ação (§2.7)', () => {
     throw new Error('nenhum acerto encontrado');
   });
 
-  it('quem conjura não começa passo novo', () => {
-    const a = arena();
-    a.tick([['j', { t: 'usarHabilidade', id: 'curar' }]]);
-    a.tick([['j', { t: 'mover', dir: 'N' }]]);
-    a.ticks(ticksDe(700) - 3);
-    expect(a.ent('j').y).toBe(5);
+  it('quem conjura anda menos que quem só anda (marco 26: sem passo, a conjuração pesa na velocidade)', () => {
+    const andou = (curar: boolean) => {
+      const a = arena();
+      a.tick(curar ? [['j', { t: 'usarHabilidade', id: 'curar' }]] : []);
+      a.tick([['j', { t: 'mover', dir: 'N' }]]);
+      a.ticks(ticksDe(700) - 3);
+      return 5 - a.ent('j').py;
+    };
+    expect(andou(true)).toBeLessThan(andou(false));
   });
 
   it('cura não passa do HP máximo', () => {
@@ -246,7 +247,7 @@ describe('morte e respawn', () => {
     a.estado.entidades.push(ocupante);
     a.ticks(5);
     expect(a.estado.entidades.map((e) => e.id)).not.toContain('b');
-    ocupante.x = ocupante.destinoX = 8;
+    ocupante.x = 8;
     a.ticks(2);
     expect(a.ent('b')).toMatchObject({ x: 6, y: 6, geracao: 1 });
   });

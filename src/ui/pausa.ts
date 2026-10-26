@@ -24,14 +24,25 @@ export interface Pausa {
   abrirConfiguracoes: () => void;
 }
 
+/**
+ * Marco 15: a dificuldade da sessão. Marco 26 (25/10/2026): `bloqueada` devolve o motivo de não poder trocar (o
+ * convidado do grupo): o seletor fica desabilitado com a nota fixa ao lado, em vez de um aviso que some.
+ */
+export interface OpcaoDificuldade {
+  atual: () => Dificuldade;
+  definir: (d: Dificuldade) => void;
+  bloqueada?: () => string | null;
+}
+
 export function criarPausa(o: {
   pausaOJogo: boolean;
   toque: boolean;
+  direcional?: boolean;
   acoes: readonly AcaoDaPausa[];
   aoMudarPreferencias: (p: Preferencias) => void;
   aoMudarEstado: (aberta: boolean) => void;
   /** Marco 15: a dificuldade, quando quem joga pode trocar (campanha solo e anfitrião do grupo). */
-  dificuldade?: { atual: () => Dificuldade; definir: (d: Dificuldade) => void } | undefined;
+  dificuldade?: OpcaoDificuldade | undefined;
   /** Marco 18 (D-070): a fase e a semente dela (para trocar dicas: "a semente 4F2A tem mercador errante"). */
   fase?: { nome: string; semente: string } | undefined;
 }): Pausa {
@@ -47,7 +58,7 @@ export function criarPausa(o: {
     }, 0);
   };
 
-  const config = criarConfiguracoes({ toque: o.toque, aoMudar: o.aoMudarPreferencias, aoFechar: avisar });
+  const config = criarConfiguracoes({ toque: o.toque, direcional: o.direcional ?? o.toque, aoMudar: o.aoMudarPreferencias, aoFechar: avisar });
   const guia = criarGuia(avisar);
   const modal = criarModal({
     titulo: t(o.pausaOJogo ? 'pausa.titulo' : 'pausa.tituloArena'),
@@ -108,10 +119,16 @@ export function criarPausa(o: {
       const valor = DIFICULDADES.find((d) => d === escolha.value);
       if (valor) dif.definir(valor);
     });
-    linha.append(escolha);
+    const nota = document.createElement('small');
+    nota.className = 'nota-dificuldade';
+    linha.append(escolha, nota);
     modal.corpo.append(linha);
     const sincronizar = () => {
       escolha.value = dif.atual();
+      const motivo = dif.bloqueada?.() ?? null;
+      escolha.disabled = motivo !== null;
+      nota.textContent = motivo ?? '';
+      nota.hidden = motivo === null;
     };
     modal.dialogo.addEventListener('toggle', sincronizar);
     sincronizar();

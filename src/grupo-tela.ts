@@ -195,8 +195,8 @@ export async function iniciarGrupo(raiz: HTMLElement, o: OpcoesGrupo): Promise<v
         atual: () => eu.previsto?.dificuldade ?? 'normal',
         definir: (nivel) => {
           if (eu.anfitriao) eu.enviarComando({ t: 'definirDificuldade', nivel });
-          else avisar(t('grupo.soAnfitriao'));
         },
+        bloqueada: () => (eu.anfitriao ? null : t('grupo.soAnfitriao')),
       },
     });
     if (!cena) return;

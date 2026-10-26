@@ -57,8 +57,9 @@ test.describe('campanha em grupo', () => {
       // Só o anfitrião troca a dificuldade (online, o menu não pausa a partida).
       await convidado.getByRole('button', { name: 'Menu (Esc)' }).click();
       const pausa = convidado.getByRole('dialog', { name: 'Menu (a partida continua)' });
-      await pausa.getByLabel('Dificuldade').selectOption('pesadelo');
-      await expect(convidado.getByText('Só quem criou o grupo troca a dificuldade.')).toBeVisible();
+      // Marco 26: o seletor do convidado fica desabilitado, com a nota fixa (o aviso passageiro era substituído).
+      await expect(pausa.getByLabel('Dificuldade')).toBeDisabled();
+      await expect(pausa.getByText('Só quem criou o grupo troca a dificuldade.')).toBeVisible();
       expect(erros).toEqual([]);
     } finally {
       await Promise.all([contextoAnfitriao.close(), contextoConvidado.close()]);

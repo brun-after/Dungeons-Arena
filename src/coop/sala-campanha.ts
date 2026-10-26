@@ -14,7 +14,7 @@ import type { Celula, Comando, EntidadeId } from '../core/comandos';
 import { modoPorId, type Conteudo } from '../core/conteudo';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, clonarEstado, type EstadoJogo } from '../core/estado';
-import type { Entidade } from '../entities/entidade';
+import { posicionar, type Entidade } from '../entities/entidade';
 import type { Dificuldade } from '../modos/dificuldade';
 import { equipeDeEntrada, faseConcluida } from '../modos/regras';
 import { chaveDaFase, type RefFase } from '../save/esquema';
@@ -73,8 +73,9 @@ function celulaDeEntrada(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade
   return origem;
 }
 
-function posicionar(e: Entidade, c: Celula): void {
-  Object.assign(e, { x: c.x, y: c.y, destinoX: c.x, destinoY: c.y, origemX: c.x, origemY: c.y });
+function colocarEm(e: Entidade, c: Celula): void {
+  posicionar(e, c.x, c.y);
+  Object.assign(e, { origemX: c.x, origemY: c.y });
 }
 
 export class SalaCampanha extends SalaArena {
@@ -108,7 +109,7 @@ export class SalaCampanha extends SalaArena {
     e.controlador = 'remoto';
     e.equipe = equipeDeEntrada(this.ctx.modo, jogadorId, this.estado);
     const entrada = this.ctx.fase.portaRetorno ? chegadaNaFase(this.ctx.fase, false) : this.ctx.fase.spawns[0] ?? { x: 1, y: 1 };
-    posicionar(e, celulaDeEntrada(this.estado, this.ctx, e, entrada));
+    colocarEm(e, celulaDeEntrada(this.estado, this.ctx, e, entrada));
     this.estado.entidades.push(e);
     return { ok: true, previa: previaDoPersonagem(e, r.alteracoes, this.ctx.modo.id, this.ctx.balance.versao) };
   }
@@ -212,7 +213,7 @@ export class SalaCampanha extends SalaArena {
       const novo = personagemNoInicio(e, spawn);
       // Revisitar não vira fonte de cura instantânea ao alternar duas portas.
       if ((retorno || anterior) && !e.morto && e.hp > 0) { novo.hp = Math.min(novo.hpMax, e.hp); novo.mana = Math.min(novo.manaMax, e.mana); }
-      posicionar(novo, celulaDeEntrada(estado, r.ctx, novo, spawn));
+      colocarEm(novo, celulaDeEntrada(estado, r.ctx, novo, spawn));
       estado.entidades.push(novo);
     }
     this.faseRef = proxima;

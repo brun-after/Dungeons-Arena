@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { estadoPublico } from '../../src/arena/estado-publico';
+import { estadoPublico, milesimoParaOCentro } from '../../src/arena/estado-publico';
 import { aplicarPatch, GeradorDePatches } from '../../src/arena/patches';
 import { digest } from '../../src/core/digest';
 import { clonarEstado } from '../../src/core/estado';
@@ -63,5 +63,16 @@ describe('patches de estado (§3.6, D-035)', () => {
     amb.rodar(60);
     expect(c.ressincronizacoes).toBeGreaterThanOrEqual(1);
     expect(amb.digests.get(c.baseTick)).toBe(digest(c.base));
+  });
+});
+
+describe('posição contínua no estado público (marco 26, D-104)', () => {
+  it('vai a milésimos na direção do centro da célula: não entra na parede nem muda a célula', () => {
+    expect(milesimoParaOCentro(6.181666666666667)).toBe(6.181);
+    expect(milesimoParaOCentro(4.8183333)).toBe(4.819);
+    expect(milesimoParaOCentro(5)).toBe(5);
+    expect(milesimoParaOCentro(6.4999)).toBe(6.499);
+    for (const v of [6.181, 4.819, 2.5, 7.0005]) expect(milesimoParaOCentro(milesimoParaOCentro(v))).toBe(milesimoParaOCentro(v));
+    expect(Math.round(milesimoParaOCentro(7.4999999))).toBe(7);
   });
 });

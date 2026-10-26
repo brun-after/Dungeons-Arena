@@ -10,7 +10,8 @@ import { LADO_QUADRO, MEIO, PES_Y, type Vista } from './svg.ts';
 /** Lado de cada quadro no atlas, em px: 18 × 8, para as 18 tiras caírem em pixels inteiros. */
 export const LADO_PX = 144;
 const RESPIRO_PX = 4;
-const COLUNAS = 8;
+// Marco 26 (D-108): 16 colunas — com os quadros de membros, a grade fica perto de quadrada (cerca de 2.400 px).
+const COLUNAS = 16;
 export const VISTAS: readonly Vista[] = ['cima', '34'];
 
 export interface QuadroAtlas {

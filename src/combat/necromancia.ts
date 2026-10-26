@@ -2,7 +2,7 @@ import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
-import { vivo, type Entidade } from '../entities/entidade';
+import { posicionar, vivo, type Entidade } from '../entities/entidade';
 import { podeAjudar, podeFerir } from '../modos/relacao';
 import { contarInvocacoes, invocar, limiteDeInvocacoes } from './efeitos-fluxo';
 import { chebyshev } from './geometria';
@@ -39,8 +39,9 @@ function erguer(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade, tipo
   invocar(estado, ctx, dono, construirEfeito('invocar', { ref: 'servo_ossuario', valor: 1, duracaoMs: tipo === 'servo' ? 86_400_000 : r.duracaoMortoMs }), saida);
   const morto = estado.entidades[antes];
   if (!morto?.invocacao) return false;
-  morto.x = morto.destinoX = morto.origemX = lugar.x;
-  morto.y = morto.destinoY = morto.origemY = lugar.y;
+  posicionar(morto, lugar.x, lugar.y);
+  morto.origemX = lugar.x;
+  morto.origemY = lugar.y;
   morto.invocacao.necromancia = tipo;
   if (tipo === 'servo') morto.invocacao.expiraTick = Number.MAX_SAFE_INTEGER;
   const classe = fonte ? ctx.conteudo.classes.get(fonte.classeId ?? fonte.bolsa?.classeId ?? '') : undefined;
@@ -70,7 +71,7 @@ function trazerDeVolta(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidad
     const lugar = lugarPerto(estado, ctx, dono);
     if (!lugar) return;
     const de = { x: morto.x, y: morto.y };
-    Object.assign(morto, { x: lugar.x, y: lugar.y, destinoX: lugar.x, destinoY: lugar.y, origemX: lugar.x, origemY: lugar.y, progressoPasso: 0, caminho: [], waypoints: [] });
+    Object.assign(morto, { x: lugar.x, y: lugar.y, px: lugar.x, py: lugar.y, origemX: lugar.x, origemY: lugar.y, caminho: [], waypoints: [] });
     saida.push({ t: 'invocacaoRetornou', tick: estado.tick, id: morto.id, donoId: dono.id, deX: de.x, deY: de.y, x: lugar.x, y: lugar.y });
   }
 }

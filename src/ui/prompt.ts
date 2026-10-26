@@ -16,26 +16,27 @@ export interface Prompt {
   atualizar: (estado: EstadoJogo, agoraMs: number) => void;
 }
 
-export function criarPrompt(ctx: ContextoSimulacao, idLocal: string, toque: boolean): Prompt {
+export function criarPrompt(ctx: ContextoSimulacao, idLocal: string, toque: boolean, letraInteragir: () => string = () => 'E'): Prompt {
   const el = document.createElement('div');
   el.className = 'prompt-interacao';
   el.setAttribute('role', 'status');
   el.hidden = true;
   let ultimo = -Infinity;
   // D-067: no toque, a palavra (o botão de interagir tem o ícone da mão).
-  const tecla = (letra: string) => (toque ? t('prompt.toque') : letra);
+  // Marco 26 (D-107): a letra de interagir muda com EWAS no isométrico (o D).
+  const tecla = () => (toque ? t('prompt.toque') : letraInteragir());
 
   const texto = (estado: EstadoJogo): string => {
     const eu = estado.entidades.find((e) => e.id === idLocal);
     if (!eu?.bolsa || eu.morto || eu.interacao) return '';
     const o = alvoDeInteracao(estado, ctx, eu);
     if (o?.tipo === 'loja') {
-      return recargaLojaRestante(estado, o.objetoId, eu.id) > 0 ? t('prompt.lojaRecarga') : t('prompt.loja', { tecla: tecla('E') });
+      return recargaLojaRestante(estado, o.objetoId, eu.id) > 0 ? t('prompt.lojaRecarga') : t('prompt.loja', { tecla: tecla() });
     }
-    if (o?.tipo === 'santuario') return t('prompt.santuario', { tecla: tecla('E') });
-    if (o?.tipo === 'bau') return t(o.chave ? 'prompt.bauTrancado' : 'prompt.bau', { tecla: tecla('E') });
+    if (o?.tipo === 'santuario') return t('prompt.santuario', { tecla: tecla() });
+    if (o?.tipo === 'bau') return t(o.chave ? 'prompt.bauTrancado' : 'prompt.bau', { tecla: tecla() });
     // Marco 18 (D-068): armadilha revelada ao alcance.
-    if (!o && armadilhaParaDesarmar(estado, ctx, eu)) return t(podeConverterArmadilha(eu, estado.tick) ? 'prompt.converter' : 'prompt.desarmar', { tecla: tecla('E') });
+    if (!o && armadilhaParaDesarmar(estado, ctx, eu)) return t(podeConverterArmadilha(eu, estado.tick) ? 'prompt.converter' : 'prompt.desarmar', { tecla: tecla() });
     // Marco 24 (D-099): parado na porta de fase, a contagem até sair.
     const espera = esperaNaPorta(estado, ctx, eu);
     if (espera !== null && espera < 1) return t('prompt.esperaPorta', { s: Math.ceil((1 - espera) * (ctx.balance.portas.esperaMs / 1000)) });

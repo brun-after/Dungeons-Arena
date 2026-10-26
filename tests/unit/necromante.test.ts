@@ -131,7 +131,7 @@ describe('rituais, combos e Trevas', () => {
     const c = cena(); c.passiva(); const mana = c.j.mana;
     expect(iniciarAcao(c.estado, c.ctx, c.j, 'dizimo_vital', undefined, c.eventos)).toBe(false);
     // Marco 22 (D-090): sem morto ao alcance, o Dízimo ergue um; sem vaga, recusa.
-    c.servo().x = 30; c.servo().destinoX = 30;
+    c.servo().x = 30;
     // Uma vaga só, ocupada pelo servo distante.
     const ctxSemVaga = { ...c.ctx, modo: { ...c.ctx.modo, limites: { ...c.ctx.modo.limites, invocacoesPorJogador: 1 } }, balance: { ...c.ctx.balance, necromancia: { ...c.ctx.balance.necromancia, servosExtras: 0 } } };
     c.j.hp--; expect(iniciarAcao(c.estado, ctxSemVaga, c.j, 'dizimo_vital', undefined, c.eventos)).toBe(false);
@@ -150,16 +150,16 @@ describe('rituais, combos e Trevas', () => {
   });
   it('com o servo vivo mas longe, o Dízimo ergue um reanimado', () => {
     const c = cena(); c.passiva();
-    const s = c.servo(); s.x = s.destinoX = 13;
+    const s = c.servo(); s.x = 13;
     c.aplicar(c.j, 'drenar_invocacao', { valor: 18 });
     expect(c.meus().map((e) => e.invocacao?.necromancia).sort()).toEqual(['reanimado', 'servo']);
   });
   it('o morto além da distância de retorno volta para o lado do Necromante', () => {
     const c = cena(); c.passiva();
-    const s = c.servo(); s.x = s.destinoX = 5 + c.ctx.balance.necromancia.distanciaRetorno; s.y = s.destinoY = 5;
+    const s = c.servo(); s.x = 5 + c.ctx.balance.necromancia.distanciaRetorno; s.y = 5;
     c.passiva();
     expect(s.x).toBe(5 + c.ctx.balance.necromancia.distanciaRetorno);
-    s.x = s.destinoX = 5 + c.ctx.balance.necromancia.distanciaRetorno + 1;
+    s.x = 5 + c.ctx.balance.necromancia.distanciaRetorno + 1;
     c.passiva();
     expect(Math.max(Math.abs(s.x - c.j.x), Math.abs(s.y - c.j.y))).toBeLessThanOrEqual(2);
     expect(c.eventos.filter((e) => e.t === 'invocacaoRetornou')).toEqual([expect.objectContaining({ id: s.id, donoId: c.j.id })]);
@@ -227,7 +227,7 @@ describe('rituais, combos e Trevas', () => {
     expect(JSON.stringify(migrado)).toContain('"elementoArma":"trevas"'); expect(JSON.stringify(migrado)).toContain('"elemento":"trevas"');
     expect(migrado.itemId).toBe(antigo.itemId);
     expect(migrado.certificado).toEqual(antigo.certificado);
-    expect(lerIdItemBase(antigo.itemId)?.elemento).toBe('trevas'); expect(VERSAO_SCHEMA).toBe(24);
+    expect(lerIdItemBase(antigo.itemId)?.elemento).toBe('trevas'); expect(VERSAO_SCHEMA).toBe(25);
     expect(CONTEUDO.itens.get(antigo.itemId)).toMatchObject({ id: antigo.itemId, elemento: 'trevas' });
   });
 });

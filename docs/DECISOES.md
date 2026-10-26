@@ -1,8 +1,10 @@
 # Decisões de projeto
 
-**Versão:** 0.55 · **Data:** 25/10/2026
+**Versão:** 0.57 · **Data:** 26/10/2026
 
 > **Histórico**
+> - **0.57 (26/10/2026)**: D-107 a D-109 (marco 26: sem direcional no computador e teclas EWAS, braços e pernas animados, objetos em pé no isométrico).
+> - **0.56 (25/10/2026)**: D-104 a D-106 (marco 26: movimento livre em qualquer direção, controles do isométrico na inclinação do mapa e paredes do isométrico finas e baixas).
 > - **0.55 (25/10/2026)**: D-094 a D-099 (marco 24: skills de classe, ultimates, sintonia, ressonâncias, orientação, falcão e portas) e D-100 a D-103 (marco 25: IA por dificuldade, população por fase, falcão protetor, arco branco, anel do Necromante e aceleração pelo total).
 > - **0.54 (24/10/2026)**: D-092 (marco 23: dez slots, 20 temas de fase, clima elemental e inimigos afins) e D-093 (armas fora da classe trocam o ataque básico).
 > - **0.53 (24/10/2026)**: D-091 (IA livre do falcão, alcance global e coleta; encarnação do Mago com 12 s e trilha; flecha do tiro carregado).
@@ -2582,3 +2584,134 @@ aprender a evitá-las. Quem absorve um elemento pode usar a área dele para se c
 - **Aceleração da mente:**
   - corta 25%, 33% ou 50% do tempo total do estudo;
   - se o corte passa do que falta, o estudo conclui na hora. Exemplo: 18 min, restam 6, e a incomum conclui.
+
+## D-104 — Movimento livre em qualquer direção (marco 26, 25/10/2026)
+
+**Contexto.** O personagem andava célula a célula, só em passos cardinais. Uma diagonal virava passos alternados, e
+clicar num ponto diagonal fazia uma escadinha. O usuário pediu o máximo de fluidez em todas as direções, não só a
+diagonal. Armadilhas, áreas, rastros e alcance continuam por célula (escolha do usuário).
+
+**Decisão:**
+- **Posição:** a entidade ganha `px`, `py`, a posição contínua em células (o centro da célula é o inteiro). `x`, `y`
+  continuam como a célula ocupada, o arredondamento da posição, mantido pelo integrador e por `posicionar()`. Por isso
+  as regras por célula, a IA e o alcance seguem iguais. Saem `destinoX`, `destinoY`, `progressoPasso` e
+  `proximoEixoX`. Quem escreve só a célula (teletransporte antigo, testes) leva a posição junto no tick seguinte.
+- **Corpo redondo** (`world/corpo.ts`, raio `balance.movimento.raioCorpo` = 0,32):
+  - o círculo contra as células intransitáveis e as muralhas táticas, em subpassos de 0,2, um eixo de cada vez: o eixo
+    que bate fica, o outro segue, e o corpo desliza na parede;
+  - quando não cabe inteiro, encosta por bissecção (rente à parede, a menos de 0,0002 célula);
+  - entre quem se bloqueia (as regras de `bloqueia`), dois raios de distância; travado de frente contra um corpo, tira
+    a componente que aproxima e escorrega em volta. Quem já encosta (nasceu junto) pode se afastar, não se aproximar.
+- **Comando:** `mover` leva o vetor exato (`dx`, `dy`, inteiros em ±1000) além do octante `dir`, que os bots e a IA
+  ainda usam. `irPara` aceita o ponto com fração, validado na rede (finito e dentro de ±10.000).
+- **Caminho sem escadinha:** a busca continua nas 4 direções; o caminho é suavizado puxando a corda
+  (`suavizarCaminho`): de cada ponto, o nó mais distante que o corpo alcança em linha reta (a faixa do raio,
+  amostrada a cada 0,2, até 24 nós à frente). Com o mapa de perigo da IA, o perigo conta como parede na suavização. O
+  último ponto é o ponto tocado, se o corpo cabe nele. O avanço (Investida) replaneja o resto do trajeto do mesmo jeito.
+- **Determinismo:** só soma, produto, divisão e `Math.sqrt` no núcleo; nada de trigonometria.
+- **Parado:** a direção mantida conta como movimento para o pouso do falcão e para a espera na porta de fase (antes,
+  quem segurava a seta contra a parede não dava passo e contava como parado).
+- **Rede:** o estado público leva `px`, `py` em milésimos de célula, arredondados na direção do centro da célula (quem
+  encosta na parede se afasta dela, nunca entra, e a célula não muda). O relógio de caminhada, que nada na tela lê,
+  fica só no servidor. O falcão marca o fim da atividade do dono só nas transições: reescrever `modoDesdeTick` a cada
+  tick mandava a IA inteira em todo patch. Com isso, a carga da arena-02 (10 bots, perfil suportado) fica em 33 a
+  37 KiB/s, abaixo dos 43,8 da `main` medidos na mesma máquina; sem esses ajustes eram 96 KiB/s.
+- **Save:** schema 25. A migração põe cada entidade no centro da célula onde estava (a de destino, se já tinha passado
+  da metade do passo), parada e sem caminho.
+
+**Balanceamento.**
+- Com o movimento livre, o Guerreiro sozinho matava o chefe da fase 1 em 21,4 s (meta 25 a 40 s): fica colado nele,
+  sem perder golpes reposicionando. O chefe (`boss`) passa de 310 para 350 de vida. As outras classes ficam entre 33 e
+  36 s sozinhas. Metas: 94/94.
+- O diagnóstico que mantinha a morte simultânea do Arqueiro no Pesadelo usava uma semente que deixou de morrer; o
+  teste passa à semente 30801 no nível 1.
+
+## D-105 — Controles do isométrico na inclinação do mapa (marco 26, 25/10/2026)
+
+**Contexto.** No isométrico, o joystick usava 8 setores de 45° e um remapeamento a 45°, mas a projeção é 2:1: os eixos
+da fase aparecem a cerca de 26,6°. Empurrar ao longo do corredor caía no setor errado. O usuário pediu que as direções
+do joystick acompanhem a inclinação do mapa, e que o D-pad gire com ele.
+
+**Decisão:**
+- **`vetorDaTela(sx, sy, iso)`** (`input/direcao.ts`) leva o vetor da tela à fase pela inversa linear da projeção:
+  `x = sx + 2·sy`, `y = 2·sy − sx`, normalizado e quantizado em ±1000 (sem −0). De cima é a identidade. O personagem
+  anda na tela exatamente para onde o dedo aponta, e empurrar ao longo da inclinação anda no eixo da fase.
+  Substitui `remapearParaGrade`.
+- **Joystick:** analógico, em qualquer ângulo, fora da zona morta de 14 px. Só reemite quando o ângulo muda mais de
+  cerca de 3°, o que poupa rede.
+- **D-pad:** no isométrico, o anel recebe a mesma projeção em CSS (`scale(0.9) scaleY(0.5) rotate(45deg)`). Cada botão
+  fica na inclinação do eixo da fase que manda, e manda esse eixo exato. A visão nova vale na hora (tecla V ou
+  Configurações).
+- **Teclado:** as 8 direções de tela (setas e WASD) passam pela mesma inversa.
+- **Clique e toque no chão:** mandam o ponto contínuo tocado (`Camera.pontoSob`, em centésimos de célula), não o centro
+  da célula. Tocar num hostil continua selecionando pela célula.
+
+## D-106 — Paredes do isométrico finas e baixas (marco 26, 25/10/2026)
+
+**Contexto.** As paredes do isométrico eram prismas de uma célula inteira com 0,6 célula de altura. O usuário pediu
+paredes 80% mais finas e 70% mais baixas.
+
+**Decisão:**
+- **Placa** (`render/paredes-iso.ts`, `placasDaParede`): uma por aresta entre parede e chão (cardinal), dentro da
+  célula de parede, com 0,2 célula de espessura (`ESPESSURA_PAREDE`) e 0,18 de altura (`ALTURA_PAREDE_PX`). A face fica
+  na aresta, onde o corpo do personagem encosta: o desenho bate com a colisão.
+- **Quinas:** um bloquinho de 0,2 × 0,2 onde a parede só toca o chão na diagonal. A face da frente some quando a
+  célula vizinha daquele lado é parede (ali a placa continua ou vira a quina).
+- **O resto da célula de parede** é a rocha plana e escura do terreno, como na visão de cima.
+- **Ordem de desenho:** um Graphics por diagonal, com o `zIndex` de antes.
+
+## D-107 — Sem direcional no computador e teclas EWAS (marco 26, 25/10/2026)
+
+**Contexto.** No computador com tela de toque (ou janela pequena), o jogo mostrava o joystick ou o D-pad. Lá o
+isométrico se joga com o mouse. O usuário pediu também uma opção de teclas que acompanhe a inclinação do mapa.
+
+**Decisão:**
+- **`mostrarDirecional(s)`** (`plataforma/dispositivo.ts`) = toque e **sem mouse** (`any-hover: hover` e
+  `any-pointer: fine`). No computador, o direcional some; a faixa de ações fica.
+- **Preferência `teclasMovimento`** (`wasd` padrão, ou `ewas`), nas Configurações, mesmo sem toque.
+- **EWAS no isométrico** (`input/teclas.ts`, `rumoDasTeclas`): E anda para o norte da fase (cima-direita na tela), W
+  para o oeste, A para o sul e S para o leste. Duas teclas juntas dão a diagonal da fase. As setas seguem como
+  direções de tela. De cima, EWAS vale como WASD.
+- **Interagir** passa para o **D** no modo EWAS do isométrico. O prompt e o guia mostram a tecla atual.
+
+## D-108 — Braços e pernas animados nos quadros do atlas (marco 26, 25/10/2026)
+
+**Contexto.** O usuário pediu braços e pernas que se mexem nos personagens jogáveis e nos inimigos, nas duas visões.
+O "quadro 1" antigo só trocava um pouco o comprimento dos membros. Ao testar, viu-se que o token **nunca contava como
+andando**: a posição visual começava em `NaN`, e a comparação com `NaN` dá sempre falso (falha desde o marco 13). Por
+isso nem a passada por fatias aparecia.
+
+**Decisão:**
+- **Seis quadros por vista** (`render/modelos/membros.ts`): 0 parado, 1–2 a perna esquerda à frente, 3–4 a direita,
+  5 o golpe com o braço da arma estendido. Pernas giram no quadril (até 34°) e braços no ombro (até 30°), em
+  oposição. Os modelos de veste ondulam a bainha. De cima, os pés alternam à frente e atrás.
+- **Feras:** o lobo trota em pares diagonais, a aranha alterna as patas em dois grupos e o slime achata e estica. O
+  falcão segue com os três quadros de asa (`membros: false`).
+- **Escolha do quadro** (`render/quadro-membros.ts`, puro): andando, pela fase da passada (o mesmo relógio de
+  `caminhada.ts`); no golpe, o quadro 5; parado, o 0; com movimento reduzido, sempre o 0.
+- **Fatias:** nesses modelos, as tiras de baixo não se dividem mais em duas colunas (as pernas não andam duas vezes).
+  Ficam o balanço vertical, a respiração e o empurrão.
+- **Equipamento:** a arma e a mão secundária (agora numa camada própria) seguem a mão em cada quadro. O rig as desloca
+  pela diferença da mão em relação ao quadro 0.
+- **A imagem própria do jogador** não tem membros. Segue com a passada por fatias.
+- **Atlas:** cerca de 250 quadros numa grade de 16 colunas (2368 × 2368 px, dentro do limite de 4096).
+
+## D-109 — Objetos em pé no isométrico (marco 26, 25/10/2026)
+
+**Contexto.** No isométrico, ouro, orbes, portas, enfeites e pilares ficavam no contêiner do chão, com a matriz do
+piso. Pareciam pintados no chão em vez de acompanhar a ilusão 3D. O usuário escolheu pilares como **colunas altas**.
+
+**Decisão:**
+- **Objetos** (`render/objetos.ts`): ouro (moedas de pé), orbes (flutuando sobre uma sombra que encolhe quando sobem)
+  e santuário (cristal sobre a base) ficam na camada das entidades, com o `zIndex` da profundidade. Os halos seguem
+  no chão.
+- **Portas** (`render/portas.ts`): a moldura e o cadeado ficam de pé na célula da porta; o número do par fica de pé
+  acima do anel. O anel de espera segue no chão.
+- **Enfeites e pilares** (`render/decoracao-iso.ts`): um Graphics por diagonal, como as paredes.
+  - **Em pé:** tocha, barril, estandarte, lápide, vela, arbusto, árvore, estante, livros, carrinho, cristal, cacto,
+    cogumelo, junco, vitral, corrente e estalactite, com o desenho de sempre, sem a matriz. Os de parede ficam com a
+    base na aresta norte.
+  - **Chão:** os demais (pedras, tapete, poça, runa, lava, teia…) seguem no terreno.
+  - **Pilar:** o desenho do tema esticado 1,5 vez (cerca de 1 célula de altura), sobre uma sombra no losango da
+    célula. `placasDaParede` não gera placa para o pilar, e o terreno pinta o piso por baixo.
+- **Troca de visão:** o terreno redesenha os blocos (`definirVisao`). De cima, nada muda.

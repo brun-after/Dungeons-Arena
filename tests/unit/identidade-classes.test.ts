@@ -228,8 +228,8 @@ describe('IA do falcão (ajuste de 24/10/2026, D-091)', () => {
 
   it('não volta a um combate longe do dono (ao renascer, o alvo antigo não puxa o falcão)', () => {
     const a = arena('aventureiro', 10);
-    a.boneco.y = a.boneco.destinoY = 10;
-    a.j.x = a.j.destinoX = 1; a.j.y = a.j.destinoY = 1;
+    a.boneco.y = 10;
+    a.j.x = 1; a.j.y = 1;
     a.tick([['j', { t: 'selecionarAlvo', alvo: 'b' }]]);
     for (let i = 0; i < 300; i++) {
       a.tick();
@@ -241,7 +241,7 @@ describe('IA do falcão (ajuste de 24/10/2026, D-091)', () => {
     const a = arena('aventureiro');
     a.tick();
     const f = falcaoDe(a);
-    f.x = f.destinoX = 10; f.y = f.destinoY = 10;
+    f.x = 10; f.y = 10;
     const seta = obter(habilidadeDoAtor(ctx, a.j, 'seta_arcana'), 'seta');
     expect(origemDaHabilidade(a.estado, a.j, seta)).toEqual({ x: 10, y: 10 });
     a.tick([['j', { t: 'usarHabilidade', id: 'seta_arcana', alvo: 'b' }]]);

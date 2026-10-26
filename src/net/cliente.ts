@@ -271,7 +271,7 @@ export class ClienteArena {
       // Pendentes atrasados (tick já passado na base) entram no primeiro tick reaplicado.
       for (const p of this.pendentes) {
         if (p.tickCliente !== k && !(k === this.baseTick && p.tickCliente < k)) continue;
-        if (p.cmd.t === 'mover') definirDirecao(e, p.cmd.dir);
+        if (p.cmd.t === 'mover') definirDirecao(e, p.cmd.dir, p.cmd.dx, p.cmd.dy);
         else if (p.cmd.t === 'irPara') planejarCaminho(e, { x: p.cmd.x, y: p.cmd.y }, this.ctx, k, this.descarte);
       }
       this.descarte.length = 0;

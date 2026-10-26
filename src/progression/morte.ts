@@ -15,7 +15,7 @@ import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
-import { vivo, type Entidade } from '../entities/entidade';
+import { posicionar, vivo, type Entidade } from '../entities/entidade';
 import { criarInimigo } from '../entities/fabrica';
 import { aleatorio, inteiro, proximoU32, criarRng, hashTexto } from '../core/rng';
 import { idGerada } from '../combat/chave-habilidade';
@@ -42,9 +42,7 @@ function zerarMovimento(e: Entidade): void {
   e.direcao = 'parado';
   e.caminho = [];
   e.waypoints = [];
-  e.destinoX = e.x;
-  e.destinoY = e.y;
-  e.progressoPasso = 0;
+  posicionar(e, e.x, e.y);
 }
 
 /** Marco 22: o morto do Necromante e o falcão creditam ao dono. */

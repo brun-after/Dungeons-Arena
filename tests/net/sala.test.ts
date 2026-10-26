@@ -76,7 +76,7 @@ describe('validação de comandos (§3.6)', () => {
     j.enviar('{nao é json');
     j.enviar({ t: 'cmd', pacote: { sessaoId: j.bem.sessaoId, epocaSala: 1, seq: 1, tickCliente: null, cmd: { t: 'mover', dir: 'E' } } });
     j.cmd({ t: 'voar' });
-    j.cmd({ t: 'irPara', x: 1.5, y: 2 });
+    j.cmd({ t: 'irPara', x: 1e9, y: 2 }); // marco 26: fração vale, fora do mapa não
     expect(j.de('rejeitado').map((r) => r.motivo)).toEqual(['grande_demais', 'json_invalido', 'malformada', 'malformada', 'malformada']);
   });
 
@@ -129,8 +129,8 @@ describe('validação de comandos (§3.6)', () => {
       for (const j of [a, b]) {
         const e = j.entidade();
         if (!e) continue;
-        e.x = e.destinoX = 6;
-        e.y = e.destinoY = 6;
+        e.x = 6;
+        e.y = 6;
         e.hp = 1;
       }
       sala.estado.objetos = [];

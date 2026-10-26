@@ -22,7 +22,7 @@ function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, text
 
 let proximo = 1;
 
-export function criarConfiguracoes(o: { toque: boolean; aoMudar: (p: Preferencias) => void; aoFechar?: () => void }): Configuracoes {
+export function criarConfiguracoes(o: { toque: boolean; direcional?: boolean; aoMudar: (p: Preferencias) => void; aoFechar?: () => void }): Configuracoes {
   const modal = criarModal({
     titulo: t('config.titulo'),
     rotuloFechar: t('config.fechar'),
@@ -121,8 +121,12 @@ export function criarConfiguracoes(o: { toque: boolean; aoMudar: (p: Preferencia
       campo(t('config.modoCamera'), escolha('camera', p.camera, ['janela', 'centralizada'] as const, 'modoCamera', (v) => { mudar({ camera: v }); })),
       campo(t('config.enquadrarDois'), marcador('enquadrarDois', p.enquadrarDois, (v) => { mudar({ enquadrarDois: v }); })),
     );
-    if (o.toque) {
-      secao(t('config.controles'), campo(t('config.controle'), escolha('controle', p.controle, ['joystick', 'dpad'] as const, 'tipoControle', (v) => { mudar({ controle: v }); })));
+    // Marco 26 (D-107): as teclas valem em qualquer aparelho; o tipo do direcional, só onde ele aparece.
+    const teclas = campo(t('config.teclas'), escolha('teclasMovimento', p.teclasMovimento, ['wasd', 'ewas'] as const, 'teclasMovimento', (v) => { mudar({ teclasMovimento: v }); }));
+    if (o.direcional ?? o.toque) {
+      secao(t('config.controles'), campo(t('config.controle'), escolha('controle', p.controle, ['joystick', 'dpad'] as const, 'tipoControle', (v) => { mudar({ controle: v }); })), teclas);
+    } else {
+      secao(t('config.controles'), teclas);
     }
     secao(
       t('config.acessibilidade'),

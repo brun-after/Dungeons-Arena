@@ -1,19 +1,21 @@
 // Joystick analógico (§4.3). Rastreia um único pointerId com captura, para que outro dedo
-// possa conjurar ao mesmo tempo. Só reemite quando o setor de 45° muda.
+// possa conjurar ao mesmo tempo. Marco 26 (25/10/2026, D-105): manda o vetor exato do botão (qualquer ângulo),
+// levado à fase pela inversa da projeção; só reemite quando o ângulo muda uns 3°.
 
-import type { Dir8 } from '../../core/comandos';
 import { t } from '../../i18n';
-import { limitarRaio, remapearParaGrade, setorJoystick } from '../direcao';
+import { limitarRaio, PARADO, rumoMudou, vetorDaTela, ZONA_MORTA_JOYSTICK_PX, type Rumo } from '../direcao';
 
 export const RAIO_MAX_PX = 50;
 
 export interface OpcoesJoystick {
-  aoMudarDirecao: (dir: Dir8 | 'parado') => void;
+  aoMudarDirecao: (rumo: Rumo) => void;
   isometrico: () => boolean;
 }
 
 export interface Joystick {
   elemento: HTMLElement;
+  /** O vetor já sai pela projeção atual a cada movimento: nada a redesenhar ao trocar de visão. */
+  atualizarVisao: () => void;
   desligar: () => void;
 }
 
@@ -28,16 +30,16 @@ export function criarJoystick(opcoes: OpcoesJoystick): Joystick {
   anel.append(botao);
 
   let ponteiro: number | null = null;
-  let atual: Dir8 | 'parado' = 'parado';
+  let atual: Rumo = PARADO;
 
   const posicionar = (x: number, y: number) => {
     botao.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
   };
 
-  const emitir = (dir: Dir8 | 'parado') => {
-    if (dir === atual) return;
-    atual = dir;
-    opcoes.aoMudarDirecao(dir);
+  const emitir = (rumo: Rumo) => {
+    if (!rumoMudou(atual, rumo)) return;
+    atual = rumo;
+    opcoes.aoMudarDirecao(rumo);
   };
 
   const mover = (ev: PointerEvent) => {
@@ -46,14 +48,14 @@ export function criarJoystick(opcoes: OpcoesJoystick): Joystick {
     const dy = ev.clientY - (r.top + r.height / 2);
     const p = limitarRaio(dx, dy, RAIO_MAX_PX);
     posicionar(p.x, p.y);
-    emitir(remapearParaGrade(setorJoystick(dx, dy), opcoes.isometrico()));
+    emitir(Math.hypot(dx, dy) < ZONA_MORTA_JOYSTICK_PX ? PARADO : vetorDaTela(dx, dy, opcoes.isometrico()));
   };
 
   const soltar = () => {
     ponteiro = null;
     anel.classList.remove('ativo');
     posicionar(0, 0);
-    emitir('parado');
+    emitir(PARADO);
   };
 
   const aoBaixar = (ev: PointerEvent) => {
@@ -79,6 +81,7 @@ export function criarJoystick(opcoes: OpcoesJoystick): Joystick {
 
   return {
     elemento: anel,
+    atualizarVisao: () => undefined,
     desligar: () => {
       if (ponteiro !== null) soltar();
       anel.remove();

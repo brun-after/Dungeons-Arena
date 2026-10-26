@@ -16,7 +16,6 @@ import type { EstadoJogo } from '../core/estado';
 import type { Barramento } from '../core/events';
 import type { EventosDaSimulacao } from '../core/eventos-simulacao';
 import type { Entidade, PontoVisual } from '../entities/entidade';
-import type { Dificuldade } from '../modos/dificuldade';
 import { lerPreferencias, type NivelQualidade, type Preferencias } from '../plataforma/preferencias';
 import type { Camera } from '../render/camera';
 import { EfeitosDeHabilidade } from '../render/efeitos-habilidade';
@@ -43,8 +42,9 @@ import { Graphics } from 'pixi.js';
 import { t } from '../i18n';
 import { Medidor } from './medidor';
 import { criarMinimapa } from './minimapa';
-import { criarPausa, type AcaoDaPausa } from './pausa';
+import { criarPausa, type AcaoDaPausa, type OpcaoDificuldade } from './pausa';
 import { criarPrompt } from './prompt';
+import { letraInteragir } from '../input/teclas';
 import { ligarSom } from './som';
 
 export interface OpcoesApresentacao {
@@ -58,12 +58,14 @@ export interface OpcoesApresentacao {
   /** Marco 14: acha a habilidade pela chave do evento (rank, caminhos, geradas). */
   habilidades: BuscaHabilidade;
   toque: boolean;
+  /** Marco 26 (D-107): o joystick ou o D-pad aparece (toque sem mouse); decide a opção do tipo nas Configurações. */
+  direcional?: boolean;
   /** Campanha: a pausa para a simulação. Arena: o menu abre e o mundo segue. */
   pausaOJogo: boolean;
   acoesDaPausa: readonly AcaoDaPausa[];
   aviso: (texto: string) => void;
   /** Marco 15: a dificuldade, quando a sessão deixa trocar. */
-  dificuldade?: { atual: () => Dificuldade; definir: (d: Dificuldade) => void } | undefined;
+  dificuldade?: OpcaoDificuldade | undefined;
   /** Ao mudar câmera ou controle nas Configurações. */
   aoMudarPreferencias: (p: Preferencias) => void;
 }
@@ -157,7 +159,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   palco.tela.addChild(flash);
 
   const minimapa = criarMinimapa(ctx, idLocal, toque);
-  const prompt = criarPrompt(ctx, idLocal, toque);
+  const prompt = criarPrompt(ctx, idLocal, toque, () => letraInteragir(prefs.teclasMovimento, camera.projecaoAtual.visao === 'iso'));
   const indicadorCombo = new IndicadorCombo();
   o.ui.append(minimapa.elemento, prompt.elemento, medidor.elemento);
   faixaSuperior(o.ui).append(indicadorCombo.elemento);
@@ -185,6 +187,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     fase: { nome: ctx.fase.nome, semente: (hashTexto(ctx.fase.id) >>> 0).toString(36).toUpperCase().slice(0, 6) },
     pausaOJogo: o.pausaOJogo,
     toque,
+    direcional: o.direcional ?? toque,
     acoes: o.acoesDaPausa,
     aoMudarPreferencias: (p) => {
       prefs = p;

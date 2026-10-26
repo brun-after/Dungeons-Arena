@@ -3,8 +3,8 @@
 // enquanto o primeiro segura o joystick; o teclado aciona pelo `click` sem ponteiro (detail 0).
 // Assim a ação nunca dispara duas vezes (§3.4).
 
-import type { Dir8 } from '../core/comandos';
 import { t, type ChaveTexto } from '../i18n';
+import type { Rumo } from '../input/direcao';
 import { criarDpad } from '../input/touch/dpad';
 import { criarJoystick } from '../input/touch/joystick';
 import type { TipoControle } from '../plataforma/preferencias';
@@ -12,7 +12,7 @@ import { icone } from './icones';
 
 export interface OpcoesControles {
   tipo: TipoControle;
-  aoMudarDirecao: (dir: Dir8 | 'parado') => void;
+  aoMudarDirecao: (rumo: Rumo) => void;
   /** Marco 24 (25/10/2026, D-094): o botão grande do canto é a ultimate; o básico liga pelo alvo (D-097). */
   principal: HTMLElement;
   aoInteragir: () => void;
@@ -22,6 +22,8 @@ export interface OpcoesControles {
   /** Marco 24 (24/10/2026, D-097): o botão Parar ataque (liga e desliga o básico automático). */
   aoPararAtaque: () => void;
   isometrico: () => boolean;
+  /** Marco 26 (25/10/2026, D-107): sem joystick nem D-pad no computador (com mouse); os botões de ação ficam. */
+  direcional?: boolean;
 }
 
 export interface Controles {
@@ -29,6 +31,8 @@ export interface Controles {
   /** Coluna do botão de ataque, onde a roda de habilidades é montada. */
   direita: HTMLElement;
   trocarTipo: (tipo: TipoControle) => void;
+  /** Marco 26 (D-105): a visão mudou (o D-pad gira com o mapa). */
+  atualizarVisao: () => void;
   /** Mostra no botão de alvo se o alvo está travado. */
   marcarTrava: (travado: boolean) => void;
   /** Marco 24: mostra no Parar ataque se o básico automático está desligado. */
@@ -116,12 +120,15 @@ export function criarControles(opcoes: OpcoesControles): Controles {
   faixa.append(esquerda, centro, direita);
 
   let desligarDirecional: (() => void) | null = null;
+  let atualizarVisao: () => void = () => undefined;
   const trocarTipo = (tipo: TipoControle) => {
+    if (opcoes.direcional === false) return;
     desligarDirecional?.();
     const args = { aoMudarDirecao: opcoes.aoMudarDirecao, isometrico: opcoes.isometrico };
     const controle = tipo === 'dpad' ? criarDpad(args) : criarJoystick(args);
     esquerda.append(controle.elemento);
     desligarDirecional = controle.desligar;
+    atualizarVisao = controle.atualizarVisao;
   };
   trocarTipo(opcoes.tipo);
 
@@ -129,6 +136,9 @@ export function criarControles(opcoes: OpcoesControles): Controles {
     elemento: faixa,
     direita,
     trocarTipo,
+    atualizarVisao: () => {
+      atualizarVisao();
+    },
     marcarTrava: (travado) => {
       if (alvo.dataset.travado !== String(travado)) alvo.dataset.travado = String(travado);
     },

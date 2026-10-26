@@ -86,7 +86,7 @@ describe('harness de simulação na fase oficial 1', () => {
     ] as const;
     cenario.estado.entidades.forEach((e, i) => {
       const [x, y] = celulas[i] ?? [7, 3];
-      Object.assign(e, { x, y, destinoX: x, destinoY: y });
+      Object.assign(e, { x, y});
       if (e.bolsa) e.bolsa.ouro = 60;
     });
     const rng = criarRng(4);

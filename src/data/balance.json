@@ -57,7 +57,8 @@
   "progressaoItens": { "tomoPrecoBase": 10000, "aceleracaoIncomumChancePct": 30, "aceleracaoRaraChancePct": 10, "essenciaChancePct": 2, "essenciaBossChancePct": 20 },
   "movimento": {
     "velocidadeBaseMs": 400,
-    "filaMaxWaypoints": 2
+    "filaMaxWaypoints": 2,
+    "raioCorpo": 0.32
   },
   "navegacao": {
     "maxPassosToque": 60

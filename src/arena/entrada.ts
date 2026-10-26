@@ -4,7 +4,7 @@
 import type { EntidadeId } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
-import { criarEntidade, type Entidade } from '../entities/entidade';
+import { posicionar, criarEntidade, type Entidade } from '../entities/entidade';
 import { equipeDeEntrada, localDeRespawn } from '../modos/regras';
 import type { FichaDeSessao } from './ficha-sessao';
 
@@ -37,8 +37,9 @@ export function entrarNaArena(
   });
   const local = localDeRespawn(estado, ctx.fase, ctx.modo, e, estado.rng);
   e.classeId = ficha.classeId;
-  e.x = e.destinoX = e.origemX = local.x;
-  e.y = e.destinoY = e.origemY = local.y;
+  posicionar(e, local.x, local.y);
+  e.origemX = local.x;
+  e.origemY = local.y;
   estado.entidades.push(e);
   return e;
 }

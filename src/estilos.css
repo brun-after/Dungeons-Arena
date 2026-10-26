@@ -260,6 +260,11 @@ body.toque .faixa-controles {
   border-bottom-right-radius: 14px;
 }
 
+/* Marco 26 (25/10/2026, D-105): no isométrico, o anel gira com o mapa (a mesma projeção 2:1 do terreno). */
+.dpad.iso {
+  transform: scale(0.9) scaleY(0.5) rotate(45deg);
+}
+
 .dpad-botao.pressionado {
   transform: scale(0.88);
   background: rgba(52, 152, 219, 0.85);
@@ -1823,6 +1828,14 @@ body.toque .prompt-interacao {
   justify-content: space-between;
   gap: 12px;
   min-height: 40px;
+}
+/* Marco 26 (25/10/2026): o convidado do grupo vê a dificuldade travada, com o motivo embaixo. */
+.linha-dificuldade {
+  flex-wrap: wrap;
+}
+.nota-dificuldade {
+  flex-basis: 100%;
+  opacity: 0.8;
 }
 .linha-config select,
 .linha-config input[type='range'] {

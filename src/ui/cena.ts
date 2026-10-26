@@ -9,7 +9,6 @@
 import { proximoHostil, recargaRestante } from '../combat/acao';
 import { celulaOcupada } from '../combat/geometria';
 import type { Habilidade } from '../combat/habilidades';
-import type { Dificuldade } from '../modos/dificuldade';
 import { resolverHabilidade } from '../combat/compilar-habilidade';
 import { habilidadeDoAtor } from '../combat/perfil';
 import { dizimoErgue } from '../combat/necromancia';
@@ -22,10 +21,11 @@ import { ticksDe } from '../core/tempo';
 import { SLOTS_BARRA, type Entidade, type PontoVisual } from '../entities/entidade';
 import { t } from '../i18n';
 import { ligarPonteiro } from '../input/ponteiro';
+import { comandoMover } from '../input/direcao';
 import { ligarTeclado, type Teclado } from '../input/teclado';
 import { podeFerir } from '../modos/relacao';
 import { consumiveisComAtalho } from '../progression/inventario';
-import { detectarToque, sinaisDoNavegador } from '../plataforma/dispositivo';
+import { detectarToque, mostrarDirecional, sinaisDoNavegador } from '../plataforma/dispositivo';
 import { gravarPreferencias, lerPreferencias, type Preferencias } from '../plataforma/preferencias';
 import { prepararSessaoDeTela } from '../plataforma/sessao-tela';
 import { Camera } from '../render/camera';
@@ -57,7 +57,7 @@ import { ligarFeedback } from './feedback';
 import { ligarFeedbackGrimorio } from './feedback-grimorio';
 import { ligarCinematicaUltimate } from './cinematica-ultimate';
 import { nuvemDoBuild } from '../plataforma/nuvem';
-import type { AcaoDaPausa } from './pausa';
+import type { AcaoDaPausa, OpcaoDificuldade } from './pausa';
 import { criarLoja } from './loja';
 import { criarMochila } from './mochila';
 import { DadoD20 } from './dado';
@@ -87,7 +87,7 @@ export interface OpcoesCena {
   /** Ações extras no menu de pausa (ex.: "Salvar e sair"). */
   acoesDaPausa?: AcaoDaPausa[];
   /** Marco 15: quem pode trocar a dificuldade (campanha solo e anfitrião do grupo). */
-  dificuldade?: { atual: () => Dificuldade; definir: (d: Dificuldade) => void };
+  dificuldade?: OpcaoDificuldade;
   /** Marco 11A (D-066): o tileset do jogador já carregado (só nas aventuras do editor). */
   tileset?: TexturasTileset | null;
   /** Marco 18: registrar a primeira descoberta do servidor na nuvem (a arena e os testes desligam). */
@@ -125,7 +125,10 @@ function div(classe: string): HTMLDivElement {
 export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const { ctx, idLocal, emitir } = o;
   const { fase } = ctx;
-  const toque = detectarToque(sinaisDoNavegador());
+  const sinais = sinaisDoNavegador();
+  const toque = detectarToque(sinais);
+  // Marco 26 (D-107): no computador (com mouse), sem joystick nem D-pad, mesmo com tela de toque.
+  const direcional = mostrarDirecional(sinais);
   document.body.classList.toggle('toque', toque);
   const prefs = lerPreferencias();
   let aparencia: Preferencias = prefs;
@@ -163,6 +166,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     idLocal,
     habilidades: (chave) => resolverHabilidade(ctx, chave),
     toque,
+    direcional,
     pausaOJogo: o.pausaOJogo ?? false,
     acoesDaPausa: o.acoesDaPausa ?? [],
     dificuldade: o.dificuldade,
@@ -175,6 +179,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       if (p.sentidoToken !== aparencia.sentidoToken || p.tamanhoToken !== aparencia.tamanhoToken) sprites.reiniciarVisual();
       aparencia = p;
       visao?.definir(p.visao);
+      controles?.atualizarVisao();
+      teclado?.atualizar();
     },
   });
   const terreno = criarTerreno(palco.terreno, fase, o.tileset ?? null, temaDaFase(ctx));
@@ -205,13 +211,15 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   bus.on('armadilhaDisparou', (ev) => {
     if (ev.x !== undefined && ev.y !== undefined) fluxo.disparou(ev.x, ev.y, ev.tick);
   });
-  const portas = new CamadaPortas(palco.chao, fase, ticksDe(ctx.balance.portas.janelaPortaBossMs));
+  const portas = new CamadaPortas(palco.chao, fase, ticksDe(ctx.balance.portas.janelaPortaBossMs), { camada: palco.entidades, projecao });
   const numeros = new CamadaNumeros(palco.efeitos, ap.movimentoReduzido, projecao);
   visao = await montarVisao({
     palco,
     camera,
     fase,
     corParede: o.tileset?.corParede ?? temaDaFase(ctx)?.paleta.paredeTopo ?? null,
+    terreno,
+    tema: temaDaFase(ctx),
     aoTrocar: () => {
       sprites.reiniciarVisual();
       objetos.reiniciarVisual();
@@ -224,19 +232,20 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     aparencia = { ...lerPreferencias(), visao: nova };
     gravarPreferencias(aparencia);
     visao.definir(nova);
+    controles?.atualizarVisao();
   };
   const usarHabilidade = (id: string) => {
     emitir({ t: 'usarHabilidade', id });
   };
 
   // Toque ou clique num hostil seleciona e trava o alvo (no travado, destrava: D-065); em outra célula, vai até ela.
-  const aoTocarCelula = (c: Celula) => {
+  const aoTocarCelula = (c: Celula, ponto: Celula = c) => {
     const local = jogador();
     const hostil = o.estado().entidades.find((e) => {
       const oc = celulaOcupada(e);
       return oc.x === c.x && oc.y === c.y && !!local && podeFerir(local, e, ctx.modo) && !e.morto;
     });
-    if (!hostil) emitir({ t: 'irPara', x: c.x, y: c.y });
+    if (!hostil) emitir({ t: 'irPara', x: ponto.x, y: ponto.y });
     else if (local?.alvoSelecionado === hostil.id && local.alvoTravado) emitir({ t: 'selecionarAlvo', alvo: hostil.id, travar: false });
     else emitir({ t: 'selecionarAlvo', alvo: hostil.id });
   };
@@ -349,8 +358,9 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   if (toque) {
     controles = criarControles({
       tipo: prefs.controle,
-      aoMudarDirecao: (dir) => {
-        emitir({ t: 'mover', dir });
+      direcional,
+      aoMudarDirecao: (rumo) => {
+        emitir(comandoMover(rumo));
       },
       principal: botaoUltimate.elemento,
       aoInteragir: () => {
@@ -426,8 +436,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   });
 
   teclado = ligarTeclado({
-    aoMudarDirecao: (dir) => {
-      emitir({ t: 'mover', dir });
+    aoMudarDirecao: (rumo) => {
+      emitir(comandoMover(rumo));
     },
     aoAtacar: () => {
       emitir({ t: 'ataqueBasico' });
@@ -458,6 +468,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       else ap.abrirPausa();
     },
     isometrico,
+    teclas: () => aparencia.teclasMovimento,
     aoMochila: mochila.alternar,
     bloqueado: () => mochila.aberta() || loja.aberta() || ap.menuAberto() || seletor.aberto(),
   });
@@ -566,8 +577,10 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       return {
         tick: estado.tick,
         celula: { x: j?.x ?? 0, y: j?.y ?? 0 },
-        destino: { x: j?.destinoX ?? 0, y: j?.destinoY ?? 0 },
+        // Marco 26 (D-104): a célula onde o movimento em curso termina (parado: a própria).
+        destino: ((fim) => (fim ? { x: Math.round(fim.x), y: Math.round(fim.y) } : { x: j?.x ?? 0, y: j?.y ?? 0 }))(j?.caminho.at(-1) ?? j?.waypoints.at(-1)),
         tela: camera.paraTela(p.x, p.y),
+        pos: { x: j?.px ?? 0, y: j?.py ?? 0 },
         grade: [camera.paraTela(j?.x ?? 0, j?.y ?? 0), camera.paraTela((j?.x ?? 0) + 1, j?.y ?? 0), camera.paraTela(j?.x ?? 0, (j?.y ?? 0) + 1)],
         entidades: estado.entidades.length,
         impactos: feedback.impactos(),

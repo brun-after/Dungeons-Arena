@@ -1,11 +1,13 @@
 // D-pad de 8 direções (§4.4). O dedo pode deslizar entre botões sem soltar: a direção segue o
 // botão sob o ponteiro capturado. A direção é estado mantido, então segurar não concede passos
 // extras; a repetição de 180 ms da spec não tem o que repetir (D-010).
+// Marco 26 (25/10/2026, D-105): no isométrico, o anel gira com o mapa (a mesma projeção, em CSS): cada botão fica na
+// inclinação do eixo da fase que ele manda, e manda esse eixo exato.
 
 import type { Dir8 } from '../../core/comandos';
 import { t } from '../../i18n';
 import { vibrar } from '../../plataforma/dispositivo';
-import { remapearParaGrade } from '../direcao';
+import { PARADO, rumoDaTela, rumoDoOctante, type Rumo } from '../direcao';
 import { icone } from '../../ui/icones';
 
 const GRADE: readonly (Dir8 | null)[] = ['NO', 'N', 'NE', 'O', null, 'E', 'SO', 'S', 'SE'];
@@ -22,12 +24,14 @@ const SETA: Readonly<Record<Dir8, string>> = {
 };
 
 export interface OpcoesDpad {
-  aoMudarDirecao: (dir: Dir8 | 'parado') => void;
+  aoMudarDirecao: (rumo: Rumo) => void;
   isometrico: () => boolean;
 }
 
 export interface Dpad {
   elemento: HTMLElement;
+  /** Gira ou desgira o anel conforme a visão atual. */
+  atualizarVisao: () => void;
   desligar: () => void;
 }
 
@@ -65,8 +69,14 @@ export function criarDpad(opcoes: OpcoesDpad): Dpad {
     if (dir === atual) return;
     if (dir !== 'parado') vibrar(18);
     atual = dir;
-    opcoes.aoMudarDirecao(remapearParaGrade(dir, opcoes.isometrico()));
+    // Girado com o mapa, o botão já está no eixo da fase; de cima, a tela é a fase.
+    const iso = opcoes.isometrico();
+    opcoes.aoMudarDirecao(dir === 'parado' ? PARADO : iso ? rumoDoOctante(dir) : rumoDaTela(dir, false));
   };
+  const atualizarVisao = () => {
+    pad.classList.toggle('iso', opcoes.isometrico());
+  };
+  atualizarVisao();
 
   const atualizar = (ev: PointerEvent) => {
     const sob = document.elementFromPoint(ev.clientX, ev.clientY);
@@ -84,6 +94,7 @@ export function criarDpad(opcoes: OpcoesDpad): Dpad {
   pad.addEventListener('pointerdown', (ev) => {
     if (ponteiro !== null) return;
     ev.preventDefault();
+    atualizarVisao();
     ponteiro = ev.pointerId;
     pad.setPointerCapture(ev.pointerId);
     atualizar(ev);
@@ -99,6 +110,7 @@ export function criarDpad(opcoes: OpcoesDpad): Dpad {
 
   return {
     elemento: pad,
+    atualizarVisao,
     desligar: () => {
       if (ponteiro !== null) soltar();
       pad.remove();

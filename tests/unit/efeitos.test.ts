@@ -225,7 +225,7 @@ describe('efeitos com duração', () => {
 
   it('ab_alcance deixa o ataque básico acertar mais longe', () => {
     const c = cenario();
-    c.ent('g').x = c.ent('g').destinoX = 7;
+    c.ent('g').x = 7;
     c.tick([['j', { t: 'ataqueBasico', alvo: 'g' }]]);
     expect(c.eventos.find((e) => e.t === 'acaoRecusada')).toMatchObject({ motivo: 'fora_de_alcance' });
     c.aplicar('j', 'ab_alcance', { valor: 2 });
@@ -237,7 +237,7 @@ describe('efeitos com duração', () => {
     const c = cenario();
     const outro = criarInimigo(obter(CONTEUDO.presets.get('boneco'), 'boneco'), 'g2', 4, 6, BALANCE_PADRAO);
     c.estado.entidades.push(outro);
-    c.ent('g').x = c.ent('g').destinoX = 4;
+    c.ent('g').x = 4;
     c.aplicar('j', 'ab_multi_alvo', { valor: 1 });
     c.tick([['j', { t: 'ataqueBasico', alvo: 'g' }]]);
     c.ticks(ticksDe(1000));
@@ -286,7 +286,7 @@ describe('instantâneos', () => {
     c.aplicar('g', 'empurrao', { valor: 10 });
     const g = c.ent('g');
     expect([g.x, g.y]).toEqual([10, 10]);
-    expect(g.destinoX).toBe(g.x);
+    expect([g.px, g.py]).toEqual([10, 10]);
   });
 });
 
