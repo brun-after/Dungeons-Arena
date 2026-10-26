@@ -37,6 +37,7 @@ export interface OpcaoDificuldade {
 export function criarPausa(o: {
   pausaOJogo: boolean;
   toque: boolean;
+  direcional?: boolean;
   acoes: readonly AcaoDaPausa[];
   aoMudarPreferencias: (p: Preferencias) => void;
   aoMudarEstado: (aberta: boolean) => void;
@@ -57,7 +58,7 @@ export function criarPausa(o: {
     }, 0);
   };
 
-  const config = criarConfiguracoes({ toque: o.toque, aoMudar: o.aoMudarPreferencias, aoFechar: avisar });
+  const config = criarConfiguracoes({ toque: o.toque, direcional: o.direcional ?? o.toque, aoMudar: o.aoMudarPreferencias, aoFechar: avisar });
   const guia = criarGuia(avisar);
   const modal = criarModal({
     titulo: t(o.pausaOJogo ? 'pausa.titulo' : 'pausa.tituloArena'),

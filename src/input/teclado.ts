@@ -1,19 +1,10 @@
 // Teclado (§2.3): teclas mantidas viram estado direcional. Emite só início, mudança e parada;
 // a repetição automática do sistema operacional não gera comandos. Marco 26 (D-105): as 8 direções de tela vão à
-// fase pela inversa da projeção (no isométrico, a seta para a direita anda para a direita na tela).
+// fase pela inversa da projeção (no isométrico, a seta para a direita anda para a direita na tela). D-107: com EWAS
+// nas Configurações, as teclas seguem a inclinação do isométrico e interagir vai para o D (input/teclas.ts).
 
-import { dirDeVetor, PARADO, rumoDaTela, type Rumo } from './direcao';
-
-const EIXOS: Readonly<Record<string, readonly [number, number]>> = {
-  KeyW: [0, -1],
-  ArrowUp: [0, -1],
-  KeyS: [0, 1],
-  ArrowDown: [0, 1],
-  KeyA: [-1, 0],
-  ArrowLeft: [-1, 0],
-  KeyD: [1, 0],
-  ArrowRight: [1, 0],
-};
+import { PARADO, type Rumo } from './direcao';
+import { ehTeclaDeMovimento, rumoDasTeclas, teclaInteragir, type TeclasMovimento } from './teclas';
 
 export interface OpcoesTeclado {
   aoMudarDirecao: (rumo: Rumo) => void;
@@ -23,6 +14,8 @@ export interface OpcoesTeclado {
   /** `Esc` é contextual (§2.15): cancela a mira antes de pausar. */
   aoCancelar: () => void;
   isometrico: () => boolean;
+  /** Marco 26 (D-107): WASD (tela) ou EWAS (inclinação do isométrico). */
+  teclas?: () => TeclasMovimento;
   /** Tecla `I`: abre a mochila (marco 6). */
   aoMochila?: () => void;
   /** Tecla `E`: interage com baú ou loja (marco 9A). */
@@ -46,6 +39,8 @@ export interface Teclado {
   desligar: () => void;
   /** Solta as teclas mantidas (ao abrir um modal, por exemplo). */
   soltarTudo: () => void;
+  /** Marco 26: a visão ou o modo das teclas mudou; as teclas mantidas passam a valer no novo. */
+  atualizar: () => void;
 }
 
 const ORDEM_ATALHOS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
@@ -64,17 +59,9 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
   const pressionadas = new Set<string>();
   let atual: Rumo = PARADO;
 
+  const modo = (): TeclasMovimento => opcoes.teclas?.() ?? 'wasd';
   const recalcular = () => {
-    let dx = 0;
-    let dy = 0;
-    for (const codigo of pressionadas) {
-      const eixo = EIXOS[codigo];
-      if (eixo) {
-        dx += eixo[0];
-        dy += eixo[1];
-      }
-    }
-    const rumo = rumoDaTela(dirDeVetor(dx, dy), opcoes.isometrico());
+    const rumo = rumoDasTeclas(pressionadas, modo(), opcoes.isometrico());
     if (rumo.dx !== atual.dx || rumo.dy !== atual.dy || rumo.dir !== atual.dir) {
       atual = rumo;
       opcoes.aoMudarDirecao(rumo);
@@ -84,10 +71,11 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
   const aoBaixar = (ev: KeyboardEvent) => {
     if (ev.target instanceof HTMLInputElement || ev.target instanceof HTMLTextAreaElement) return;
     if (opcoes.bloqueado?.()) return;
+    const iso = opcoes.isometrico();
     if (ev.code === 'KeyI' && !ev.repeat && opcoes.aoMochila) {
       opcoes.aoMochila();
-    } else if (ev.code === 'KeyE' && !ev.repeat && opcoes.aoInteragir) {
-      opcoes.aoInteragir();
+    } else if (ev.code === teclaInteragir(modo(), iso)) {
+      if (!ev.repeat) opcoes.aoInteragir?.();
     } else if (ev.code === 'KeyX' && !ev.repeat && opcoes.aoDispensar) {
       opcoes.aoDispensar();
     } else if (ev.code === 'KeyQ' && !ev.repeat && opcoes.aoTrocarAlvo) {
@@ -102,7 +90,7 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
       opcoes.aoAlternarVisao();
       // As teclas mantidas passam a valer na visão nova (o remapeamento muda).
       recalcular();
-    } else if (ev.code in EIXOS) {
+    } else if (ehTeclaDeMovimento(ev.code, modo(), iso)) {
       ev.preventDefault();
       if (!ev.repeat) {
         pressionadas.add(ev.code);
@@ -140,5 +128,6 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
       document.removeEventListener('visibilitychange', soltarTudo);
     },
     soltarTudo,
+    atualizar: recalcular,
   };
 }

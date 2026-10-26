@@ -22,6 +22,8 @@ export interface OpcoesControles {
   /** Marco 24 (24/10/2026, D-097): o botão Parar ataque (liga e desliga o básico automático). */
   aoPararAtaque: () => void;
   isometrico: () => boolean;
+  /** Marco 26 (25/10/2026, D-107): sem joystick nem D-pad no computador (com mouse); os botões de ação ficam. */
+  direcional?: boolean;
 }
 
 export interface Controles {
@@ -120,6 +122,7 @@ export function criarControles(opcoes: OpcoesControles): Controles {
   let desligarDirecional: (() => void) | null = null;
   let atualizarVisao: () => void = () => undefined;
   const trocarTipo = (tipo: TipoControle) => {
+    if (opcoes.direcional === false) return;
     desligarDirecional?.();
     const args = { aoMudarDirecao: opcoes.aoMudarDirecao, isometrico: opcoes.isometrico };
     const controle = tipo === 'dpad' ? criarDpad(args) : criarJoystick(args);

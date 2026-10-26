@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Dir8 } from '../../src/core/comandos';
 import { comandoMover, dirDeVetor, limitarRaio, movimentoTelaX, rumoDaTela, rumoMudou, setorJoystick, vetorDaTela } from '../../src/input/direcao';
 import { criarProjecao } from '../../src/render/projecao';
-import { detectarToque, type SinaisDispositivo } from '../../src/plataforma/dispositivo';
+import { detectarToque, mostrarDirecional, type SinaisDispositivo } from '../../src/plataforma/dispositivo';
 
 describe('setor do joystick (§4.3)', () => {
   it('abaixo da zona morta de 14 px, para', () => {
@@ -108,7 +108,7 @@ describe('tela → fase pela inversa da projeção (§4.5, marco 26, D-105)', ()
 });
 
 describe('detecção de toque (§4.2)', () => {
-  const nada: SinaisDispositivo = { temToque: false, ponteiroGrosso: false, semHover: false, uaMobile: false, telaPequena: false };
+  const nada: SinaisDispositivo = { temToque: false, ponteiroGrosso: false, semHover: false, uaMobile: false, telaPequena: false, temMouse: false };
 
   it('sem toque nunca é modo toque', () => {
     expect(detectarToque({ ...nada, uaMobile: true, telaPequena: true })).toBe(false);
@@ -121,5 +121,12 @@ describe('detecção de toque (§4.2)', () => {
 
   it('laptop com touchscreen, tela grande e mouse não é modo toque', () => {
     expect(detectarToque({ ...nada, temToque: true })).toBe(false);
+  });
+
+  it('marco 26 (D-107): com mouse, o direcional some mesmo em janela pequena de tela de toque', () => {
+    expect(mostrarDirecional({ ...nada, temToque: true, telaPequena: true, temMouse: true })).toBe(false);
+    expect(detectarToque({ ...nada, temToque: true, telaPequena: true, temMouse: true })).toBe(true);
+    expect(mostrarDirecional({ ...nada, temToque: true, uaMobile: true })).toBe(true);
+    expect(mostrarDirecional({ ...nada, temMouse: true })).toBe(false);
   });
 });

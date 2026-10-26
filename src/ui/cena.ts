@@ -25,7 +25,7 @@ import { comandoMover } from '../input/direcao';
 import { ligarTeclado, type Teclado } from '../input/teclado';
 import { podeFerir } from '../modos/relacao';
 import { consumiveisComAtalho } from '../progression/inventario';
-import { detectarToque, sinaisDoNavegador } from '../plataforma/dispositivo';
+import { detectarToque, mostrarDirecional, sinaisDoNavegador } from '../plataforma/dispositivo';
 import { gravarPreferencias, lerPreferencias, type Preferencias } from '../plataforma/preferencias';
 import { prepararSessaoDeTela } from '../plataforma/sessao-tela';
 import { Camera } from '../render/camera';
@@ -125,7 +125,10 @@ function div(classe: string): HTMLDivElement {
 export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const { ctx, idLocal, emitir } = o;
   const { fase } = ctx;
-  const toque = detectarToque(sinaisDoNavegador());
+  const sinais = sinaisDoNavegador();
+  const toque = detectarToque(sinais);
+  // Marco 26 (D-107): no computador (com mouse), sem joystick nem D-pad, mesmo com tela de toque.
+  const direcional = mostrarDirecional(sinais);
   document.body.classList.toggle('toque', toque);
   const prefs = lerPreferencias();
   let aparencia: Preferencias = prefs;
@@ -163,6 +166,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     idLocal,
     habilidades: (chave) => resolverHabilidade(ctx, chave),
     toque,
+    direcional,
     pausaOJogo: o.pausaOJogo ?? false,
     acoesDaPausa: o.acoesDaPausa ?? [],
     dificuldade: o.dificuldade,
@@ -176,6 +180,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       aparencia = p;
       visao?.definir(p.visao);
       controles?.atualizarVisao();
+      teclado?.atualizar();
     },
   });
   const terreno = criarTerreno(palco.terreno, fase, o.tileset ?? null, temaDaFase(ctx));
@@ -351,6 +356,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   if (toque) {
     controles = criarControles({
       tipo: prefs.controle,
+      direcional,
       aoMudarDirecao: (rumo) => {
         emitir(comandoMover(rumo));
       },
@@ -460,6 +466,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       else ap.abrirPausa();
     },
     isometrico,
+    teclas: () => aparencia.teclasMovimento,
     aoMochila: mochila.alternar,
     bloqueado: () => mochila.aberta() || loja.aberta() || ap.menuAberto() || seletor.aberto(),
   });
