@@ -21,6 +21,7 @@ import { ehModelo, MODELO_JOGADOR, MODELOS } from './modelos';
 import { centroDaCelula, type Projecao } from './projecao';
 import { texturasDoAdorno } from './adornos';
 import { RigToken } from './rig-token';
+import { quadroDoToken, type MomentoDoQuadro } from './quadro-membros';
 import { anelDaInvocacao } from './anel-invocacao';
 import type { BibliotecaCriaturas, FonteToken } from './texturas-criaturas';
 
@@ -37,7 +38,6 @@ const ANDANDO_MS = 120;
 /** Marco 25 (D-103): o pulso do arco branco do Arqueiro. */
 const PULSO_ARMA_MS = 2000;
 /** Troca de quadro das classes jogáveis (2 quadros) enquanto andam. */
-const QUADRO_MS = 190;
 
 /** Marco 25 (D-103): invocação do Necromante (os mortos dele, ou qualquer invocação de dono Necromante). */
 function doNecromante(estado: EstadoJogo, inv: NonNullable<Entidade['invocacao']>): boolean {
@@ -142,6 +142,16 @@ export interface AjusteVisual {
   zMais: number;
 }
 
+/** O que desenhar no token: a fonte, o estilo de passo e (Marco 26, D-108) o quadro de membros escolhido. */
+interface EscolhaDeFonte {
+  fonte: FonteToken;
+  estilo: EstiloCaminhada;
+  proprio: boolean;
+  modelo: string;
+  quadro: number;
+  membros: boolean;
+}
+
 interface Marcador {
   raiz: Container;
   chao: Graphics;
@@ -204,11 +214,11 @@ export class CamadaEntidades {
     };
   }
 
-  /** Modelo e fonte de desenho da entidade na visão atual (null: silhueta). */
-  private fonteDe(e: Entidade, ctx: ContextoSimulacao, iso: boolean, quadroMs: number, andando: boolean, quadroFixo: number | null): { fonte: FonteToken; estilo: EstiloCaminhada; proprio: boolean; modelo: string } | null {
+  /** Modelo e fonte de desenho da entidade na visão atual (null: silhueta). Marco 26 (D-108): e o quadro dos membros. */
+  private fonteDe(e: Entidade, ctx: ContextoSimulacao, iso: boolean, momento: Omit<MomentoDoQuadro, 'fase'>): EscolhaDeFonte | null {
     const vista = iso ? '34' : 'cima';
     const token = e.id === this.o.idLocal ? this.o.tokenProprio() : null;
-    if (token) return { fonte: iso ? token.emPe : token.cima, estilo: 'passada', proprio: true, modelo: '' };
+    if (token) return { fonte: iso ? token.emPe : token.cima, estilo: 'passada', proprio: true, modelo: '', quadro: 0, membros: false };
     const biblioteca = this.o.biblioteca();
     if (!biblioteca) return null;
     // Marco 14: o jogador usa o modelo da classe (sem bolsa — arena — o aventureiro).
@@ -216,9 +226,9 @@ export class CamadaEntidades {
     const nome = e.invocacao?.modeloOriginal ?? ctx.conteudo.presets.get(e.preset)?.modelo ?? (e.arquetipo === 'jogador' ? (classe ?? MODELO_JOGADOR) : '');
     if (!ehModelo(nome)) return null;
     const m = MODELOS[nome];
-    const quadro = quadroFixo !== null ? Math.min(m.quadros - 1, quadroFixo) : m.quadros > 1 && andando ? Math.floor(quadroMs / QUADRO_MS) % m.quadros : 0;
+    const quadro = quadroDoToken(m, { ...momento, fase: faseDe(e.id) });
     const fonte = biblioteca.fonte(nome, vista, quadro);
-    return fonte ? { fonte, estilo: m.estilo, proprio: false, modelo: nome } : null;
+    return fonte ? { fonte, estilo: m.estilo, proprio: false, modelo: nome, quadro, membros: m.membros } : null;
   }
 
   /**
@@ -285,7 +295,8 @@ export class CamadaEntidades {
       m.raiz.alpha = e.morto ? 0.25 : e.invisivelAteTick > estado.tick ? 0.5 : e.invocacao?.necromancia === 'eco' ? 0.7 : 1;
 
       const andando = agoraMs < m.andandoAteMs && !e.morto;
-      const escolha = this.fonteDe(e, ctx, iso, agoraMs, andando, ajuste?.quadro ?? null);
+      const golpeando = agoraMs - m.ataqueDesdeMs < duracaoDoGolpe(m.golpe) && !e.morto;
+      const escolha = this.fonteDe(e, ctx, iso, { tMs: agoraMs, andando, golpeando, reduzido: reduzido || e.morto, fixo: ajuste?.quadro ?? null });
       // Marco 24 (D-098): o golpe da arma (ou o giro) da ação em curso, e quanto da conjuração já passou.
       if (e.acao && escolha && m.chaveGolpe !== e.acao.chave) {
         m.golpe = golpeDaAcao(ctx, e, e.acao.chave, escolha.modelo);
@@ -319,7 +330,7 @@ export class CamadaEntidades {
   private desenharCorpo(
     m: Marcador,
     e: Entidade,
-    escolha: { fonte: FonteToken; estilo: EstiloCaminhada; proprio: boolean; modelo: string } | null,
+    escolha: EscolhaDeFonte | null,
     q: {
       iso: boolean;
       usarTiras: boolean;
@@ -365,10 +376,13 @@ export class CamadaEntidades {
       reduzido: q.reduzido || e.morto,
       golpe: m.golpe,
       preparo: q.preparo,
+      membros: escolha.membros,
     });
     // De cima, o modelo gira para o olhar; a imagem própria (sem vista de cima) fica em pé e espelha.
     const gira = !q.iso && !escolha.proprio;
     const espelho = escolha.proprio && q.aparencia.imagemOlhaEsquerda ? -1 : 1;
+    // D-067: o equipamento aparece no token (modelos de classe; a imagem própria fica como o jogador a fez).
+    const adorno = escolha.proprio ? null : texturasDoAdorno(escolha.modelo, q.iso ? '34' : 'cima', e.aparencia);
     m.rig.aplicar({
       pose: p,
       alturaPx,
@@ -377,13 +391,13 @@ export class CamadaEntidades {
       direcao: q.direcao,
       usarTiras: q.iso && q.usarTiras,
       vistaDeCima: gira,
+      // Marco 26 (D-108): a arma e a mão secundária acompanham a mão no quadro de membros.
+      maos: adorno?.maos[escolha.quadro] ?? null,
     });
-    // D-067: o equipamento aparece no token (modelos de classe; a imagem própria fica como o jogador a fez).
-    const adorno = escolha.proprio ? null : texturasDoAdorno(escolha.modelo, q.iso ? '34' : 'cima', e.aparencia);
     // Marco 25 (25/10/2026, D-103): o arco branco com a mira cheia, num pulso suave de 2 s (fixo com movimento reduzido).
     const branca = !e.morto && (this.o.armaBranca?.(e, q.tick) ?? false);
     const brilho = !branca ? 0 : q.reduzido ? 0.65 : 0.55 + 0.25 * Math.sin((2 * Math.PI * q.agoraMs) / PULSO_ARMA_MS);
-    m.rig.adornar(adorno?.atras ?? null, adorno?.frente ?? null, adorno?.arma ?? null, adorno?.pivo, adorno?.armaBranca ?? null, brilho);
+    m.rig.adornar(adorno?.atras ?? null, adorno?.frente ?? null, adorno?.arma ?? null, adorno?.pivo, adorno?.armaBranca ?? null, brilho, adorno?.secundaria ?? null);
     const f = escolha.fonte;
     m.topo = gira ? -alturaPx * 0.42 : f.ancoraY === 1 ? -alturaPx : -alturaPx * f.ancoraY * 0.9;
   }

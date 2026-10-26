@@ -4,6 +4,7 @@
 // o centro na vista de cima.
 
 import { Container, Sprite, type Texture } from 'pixi.js';
+import type { MaosDoQuadro } from './adornos';
 import { TIRAS, type Pose } from './caminhada';
 import type { FonteToken } from './texturas-criaturas';
 
@@ -20,6 +21,9 @@ export interface AplicarRig {
   usarTiras: boolean;
   /** Marco 24 (D-098): de cima o giro do Redemoinho roda o corpo; em pé, o corpo vira de lado (escala) e volta. */
   vistaDeCima?: boolean;
+  /** Marco 26 (25/10/2026, D-108): quanto as mãos andaram no quadro de membros (px da textura); a arma e a mão
+   * secundária seguem. */
+  maos?: MaosDoQuadro | null;
 }
 
 export class RigToken {
@@ -33,6 +37,8 @@ export class RigToken {
   private readonly arma = new Sprite();
   /** Marco 25 (25/10/2026, D-103): a silhueta branca por cima da arma (o pulso do arco com a mira cheia). */
   private readonly brilhoArma = new Sprite();
+  /** Marco 26 (D-108): a mão secundária (escudo ou segunda arma), seguindo a mão esquerda no quadro. */
+  private readonly secundaria = new Sprite();
   private pivo = { x: 0, y: 0 };
   private readonly tiras: Sprite[] = [];
   private readonly colunas: [Sprite, Sprite][] = [];
@@ -49,8 +55,8 @@ export class RigToken {
       this.colunas.push([e, d]);
       this.corpo.addChild(s, e, d);
     }
-    this.corpo.addChild(this.adornoFrente, this.arma, this.brilhoArma);
-    this.adornoAtras.visible = this.adornoFrente.visible = this.arma.visible = this.brilhoArma.visible = false;
+    this.corpo.addChild(this.adornoFrente, this.secundaria, this.arma, this.brilhoArma);
+    this.adornoAtras.visible = this.adornoFrente.visible = this.arma.visible = this.brilhoArma.visible = this.secundaria.visible = false;
     this.raiz.addChild(this.corpo);
     this.trocarFonte(fonte);
   }
@@ -97,8 +103,10 @@ export class RigToken {
     const ox0 = -f.ancoraX * f.largura;
     const oy0 = -f.ancoraY * f.altura;
     const a = p.arma;
+    const maos = o.maos;
     this.arma.pivot.set(this.pivo.x, this.pivo.y);
-    this.arma.position.set(ox0 + this.pivo.x + (a?.dx ?? 0) * f.largura, oy0 + this.pivo.y + (a?.dy ?? 0) * f.altura);
+    this.arma.position.set(ox0 + this.pivo.x + (a?.dx ?? 0) * f.largura + (maos?.d.x ?? 0), oy0 + this.pivo.y + (a?.dy ?? 0) * f.altura + (maos?.d.y ?? 0));
+    this.secundaria.position.set(ox0 + (maos?.e.x ?? 0), oy0 + (maos?.e.y ?? 0));
     this.arma.rotation = a?.rotacao ?? 0;
     this.brilhoArma.pivot.copyFrom(this.arma.pivot);
     this.brilhoArma.position.copyFrom(this.arma.position);
@@ -126,7 +134,9 @@ export class RigToken {
   }
 
   /** D-067: as texturas do equipamento (null esconde a camada). Marco 24: a arma à parte, com o pivô na mão. */
-  adornar(atras: Texture | null, frente: Texture | null, arma: Texture | null = null, pivo?: { x: number; y: number }, armaBranca: Texture | null = null, brilho = 0): void {
+  adornar(atras: Texture | null, frente: Texture | null, arma: Texture | null = null, pivo?: { x: number; y: number }, armaBranca: Texture | null = null, brilho = 0, secundaria: Texture | null = null): void {
+    this.secundaria.visible = !!secundaria;
+    if (secundaria && this.secundaria.texture !== secundaria) this.secundaria.texture = secundaria;
     this.arma.visible = !!arma;
     // Marco 25 (D-103): a silhueta branca da arma, com o alfa pedido (0 esconde).
     this.brilhoArma.visible = !!arma && !!armaBranca && brilho > 0;

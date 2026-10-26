@@ -2,6 +2,7 @@
 // Um conjunto de proporções e acessórios vira as duas vistas: 3/4 em pé (pés em (32, 60)) e de cima
 // (centro em (32, 32), olhando para +x). O sombreamento é o escurecimento paramétrico da cor base.
 
+import { angulosDoQuadro, BALANCO, cantosDoMembro, pontaDoMembro, QUADRO_GOLPE } from './membros.ts';
 import { circulo, clarear, elipse, escurecer, hex, linha, MEIO, olhos, PES_Y, poligono, retangulo, type Vista } from './svg.ts';
 
 export type Arma = 'espada' | 'cajado' | 'clava' | 'adaga' | 'machado' | 'foice' | 'arco' | 'lanca';
@@ -64,9 +65,33 @@ export function arma34(tipo: Arma, x: number, y: number): string {
   }
 }
 
-/** Vista 3/4 em pé. `quadro` 1 é o passo (braços e pernas trocados), para as classes jogáveis. */
+/**
+ * Marco 26 (25/10/2026, D-108): as mãos no quadro (vista 3/4 em unidades do quadro de 64; de cima, antes da
+ * ampliação de 1,35). Os adornos (arma e mão secundária) seguem a mão: o rig desloca as camadas por esta diferença.
+ */
+export function maosDoBipede(o: OpcoesBipede, vista: Vista, quadro: number): { e: { x: number; y: number }; d: { x: number; y: number } } {
+  if (vista === 'cima') {
+    const b = BALANCO[quadro] ?? 0;
+    const c = MEIO;
+    const frenteD = quadro === QUADRO_GOLPE ? 7 : 3 * b;
+    return { e: { x: c + 5 - 3 * b, y: c - o.ombro - 1.5 }, d: { x: c + 5 + frenteD, y: c + o.ombro + 1.5 } };
+  }
+  const base = PES_Y - (o.elevacao ?? 0);
+  const ombroY = base - o.perna - o.tronco;
+  const bracoA = o.tronco + 3;
+  const a = angulosDoQuadro(quadro);
+  const e = pontaDoMembro(MEIO - o.ombro - 3.5 + 2.25, ombroY, bracoA, a.bracoE);
+  const d = pontaDoMembro(MEIO + o.ombro - 1 + 2.25, ombroY, bracoA, a.bracoD);
+  return { e, d };
+}
+
+/**
+ * Vista 3/4 em pé. Marco 26 (D-108): os quadros giram pernas (no quadril) e braços (no ombro) — 0 parado, 1–4 a
+ * passada, 5 o golpe com o braço da arma estendido (modelos/membros.ts).
+ */
 export function bipede34(o: OpcoesBipede, quadro: number): string {
-  const passo = quadro === 1 ? 1 : 0;
+  const ang = angulosDoQuadro(quadro);
+  const b = BALANCO[quadro] ?? 0;
   const base = PES_Y - (o.elevacao ?? 0);
   const quadrilY = base - o.perna;
   const ombroY = quadrilY - o.tronco;
@@ -85,18 +110,23 @@ export function bipede34(o: OpcoesBipede, quadro: number): string {
     partes.push(poligono([MEIO - o.ombro - 1, ombroY, MEIO + o.ombro + 1, ombroY, MEIO + o.ombro + 6, base - 3, MEIO - o.ombro - 6, base - 3], escurecer(o.capa, 0.15)));
   }
 
-  // Pernas ou veste.
+  // Pernas ou veste. A bainha da veste ondula com a passada (a perna por baixo empurra o pano).
   if (o.veste) {
-    partes.push(poligono([MEIO - o.quadril, quadrilY - 2, MEIO + o.quadril, quadrilY - 2, MEIO + o.quadril + 6, base, MEIO - o.quadril - 6, base], o.roupa));
-    partes.push(poligono([MEIO + 1, quadrilY - 2, MEIO + o.quadril, quadrilY - 2, MEIO + o.quadril + 6, base, MEIO + 3, base], sombra, false));
+    const onda = 3 * b;
+    partes.push(poligono([MEIO - o.quadril, quadrilY - 2, MEIO + o.quadril, quadrilY - 2, MEIO + o.quadril + 6 + onda, base, MEIO - o.quadril - 6 + onda, base], o.roupa));
+    partes.push(poligono([MEIO + 1, quadrilY - 2, MEIO + o.quadril, quadrilY - 2, MEIO + o.quadril + 6 + onda, base, MEIO + 3 + onda, base], sombra, false));
   } else {
     const perna = escurecer(o.roupa, 0.45);
-    const lx = MEIO - o.quadril + 1 - passo * 1.5;
-    const rx = MEIO + o.quadril - 5 + passo * 1.5;
-    partes.push(retangulo(lx, quadrilY - 1, 4.5, o.perna + 1 - passo, perna));
-    partes.push(retangulo(rx, quadrilY - 1, 4.5, o.perna + 1, escurecer(perna, 0.2)));
-    partes.push(elipse(lx + 2, base - 0.8, 3.4, 1.8, escurecer(perna, 0.4)));
-    partes.push(elipse(rx + 2.5, base - 0.8, 3.4, 1.8, escurecer(perna, 0.5)));
+    const comprimento = o.perna + 1;
+    const pernas = [
+      { x: MEIO - o.quadril + 3.25, angulo: ang.pernaE, cor: perna, pe: escurecer(perna, 0.4) },
+      { x: MEIO + o.quadril - 2.75, angulo: ang.pernaD, cor: escurecer(perna, 0.2), pe: escurecer(perna, 0.5) },
+    ];
+    for (const p of pernas) {
+      partes.push(poligono(cantosDoMembro(p.x, quadrilY - 1, comprimento, 4.5, p.angulo), p.cor));
+      const pe = pontaDoMembro(p.x, quadrilY - 1, comprimento, p.angulo);
+      partes.push(elipse(pe.x, pe.y - 0.8, 3.4, 1.8, p.pe));
+    }
   }
 
   // Tronco com o lado direito na sombra.
@@ -106,14 +136,13 @@ export function bipede34(o: OpcoesBipede, quadro: number): string {
     for (let i = 0; i < 3; i++) partes.push(linha([MEIO - o.ombro * 0.6, ombroY + 3 + i * 3.2, MEIO + o.ombro * 0.6, ombroY + 3 + i * 3.2], escurecer(o.roupa, 0.5), 1.2));
   }
 
-  // Braços (balançam em oposição às pernas no quadro do passo) e mãos.
+  // Braços (balançam em oposição às pernas; no golpe, o da arma vai à frente) e mãos.
   const bracoA = o.tronco + 3;
-  const ex = MEIO - o.ombro - 3.5;
-  const dx = MEIO + o.ombro - 1;
-  partes.push(retangulo(ex, ombroY, 4.5, bracoA - passo * 2, escurecer(o.roupa, 0.12)));
-  partes.push(retangulo(dx, ombroY, 4.5, bracoA, escurecer(o.roupa, 0.38)));
-  const maoE = { x: ex + 2.2, y: ombroY + bracoA - passo * 2 };
-  const maoD = { x: dx + 2.2, y: ombroY + bracoA };
+  const ex = MEIO - o.ombro - 3.5 + 2.25;
+  const dx = MEIO + o.ombro - 1 + 2.25;
+  partes.push(poligono(cantosDoMembro(ex, ombroY, bracoA, 4.5, ang.bracoE), escurecer(o.roupa, 0.12)));
+  partes.push(poligono(cantosDoMembro(dx, ombroY, bracoA, 4.5, ang.bracoD), escurecer(o.roupa, 0.38)));
+  const { e: maoE, d: maoD } = maosDoBipede(o, '34', quadro);
   partes.push(circulo(maoE.x, maoE.y, 2.2, o.pele));
   if (o.escudo !== undefined) partes.push(elipse(maoE.x - 1, maoE.y - 4, 4.8, 6.2, o.escudo) + circulo(maoE.x - 1, maoE.y - 4, 1.6, clarear(o.escudo, 0.5), false));
   if (o.arma) partes.push(arma34(o.arma, maoD.x, maoD.y));
@@ -158,9 +187,12 @@ export function armaCima(tipo: Arma, x: number, y: number): string {
   return linha([x, y, x + comprimento, y], cor, tipo === 'clava' ? 3.2 : 2.4) + ponta;
 }
 
-/** Vista de cima: ombros perpendiculares ao olhar (+x), cabeça no centro, mãos à frente. */
+/**
+ * Vista de cima: ombros perpendiculares ao olhar (+x), cabeça no centro, mãos à frente. Marco 26 (D-108): na passada,
+ * os pés aparecem alternando à frente e atrás e as mãos balançam ao contrário; no golpe, a mão da arma avança.
+ */
 export function bipedeCima(o: OpcoesBipede, quadro: number): string {
-  const balanco = quadro === 1 ? 2 : 0;
+  const b = BALANCO[quadro] ?? 0;
   const c = MEIO;
   const partes: string[] = [];
   if (o.asas !== undefined) {
@@ -168,13 +200,17 @@ export function bipedeCima(o: OpcoesBipede, quadro: number): string {
     partes.push(poligono([c - 2, c + 4, c - 8, c + 22, c + 2, c + 12], escurecer(o.asas, 0.25)));
   }
   if (o.cauda !== undefined) partes.push(linha([c - 6, c, c - 16, c + 4, c - 20, c - 2], o.cauda, 2.4));
+  if (!o.veste) {
+    const pe = escurecer(o.roupa, 0.55);
+    partes.push(elipse(c + 6 * b, c - o.quadril * 0.7, 3.2, 2.2, pe));
+    partes.push(elipse(c - 6 * b, c + o.quadril * 0.7, 3.2, 2.2, pe));
+  }
   if (o.capa !== undefined) partes.push(elipse(c - 4, c, o.ombro * 0.75, o.ombro + 3, escurecer(o.capa, 0.15)));
   if (o.veste) partes.push(elipse(c - 1, c, o.ombro * 0.95, o.ombro + 4, escurecer(o.roupa, 0.2)));
   partes.push(elipse(c - 1, c, o.ombro * 0.7 + 1.5, o.ombro + 2.5, o.roupa));
   partes.push(elipse(c - 2.5, c + o.ombro * 0.4, o.ombro * 0.45, o.ombro * 0.6, escurecer(o.roupa, 0.3), false));
-  // Mãos à frente, uma de cada lado; o quadro do passo balança as duas em oposição.
-  const maoE = { x: c + 5 - balanco, y: c - o.ombro - 1.5 };
-  const maoD = { x: c + 5 + balanco, y: c + o.ombro + 1.5 };
+  // Mãos à frente, uma de cada lado, balançando em oposição aos pés.
+  const { e: maoE, d: maoD } = maosDoBipede(o, 'cima', quadro);
   if (o.escudo !== undefined) partes.push(elipse(maoE.x + 2, maoE.y, 2.6, 5.5, o.escudo));
   partes.push(circulo(maoE.x, maoE.y, 2.4, o.pele));
   if (o.arma) partes.push(armaCima(o.arma, maoD.x, maoD.y));

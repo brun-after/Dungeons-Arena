@@ -3,7 +3,8 @@
 // secundária e arma), com o mesmo contorno (1,6) e os mesmos traços de arma dos modelos. A geometria das mãos, do
 // tronco e da cabeça repete a de bipede.ts (quadro 0).
 
-import { arma34, armaCima, type Arma, type OpcoesBipede } from './bipede.ts';
+import { arma34, armaCima, maosDoBipede, type Arma, type OpcoesBipede } from './bipede.ts';
+import { QUADROS_MEMBROS } from './membros.ts';
 import { circulo, clarear, elipse, escurecer, hex, linha, MEIO, PES_Y, poligono, type Vista } from './svg.ts';
 
 /** O que o token veste: a base da arma de cada mão e, nas peças, a cor (da raridade) ou null. */
@@ -50,6 +51,25 @@ export interface CamadasAdorno {
   arma: string;
   /** O pivô da arma (a mão), em unidades do quadro. */
   pivo: { x: number; y: number };
+  /** Marco 26 (25/10/2026, D-108): a mão secundária (escudo ou segunda arma) numa camada própria, que segue a mão. */
+  secundaria: string;
+}
+
+type Ponto = { x: number; y: number };
+
+/**
+ * Marco 26 (D-108): quanto cada mão anda, em cada quadro de membros, a partir do quadro 0 (unidades do quadro; de
+ * cima já com a ampliação de 1,35). O rig desloca as camadas da arma e da mão secundária por isso.
+ */
+export function deslocamentosDasMaos(o: OpcoesBipede, vista: Vista): { e: Ponto; d: Ponto }[] {
+  const k = vista === 'cima' ? 1.35 : 1;
+  const zero = maosDoBipede(o, vista, 0);
+  const lista: { e: Ponto; d: Ponto }[] = [];
+  for (let q = 0; q < QUADROS_MEMBROS; q++) {
+    const m = maosDoBipede(o, vista, q);
+    lista.push({ e: { x: (m.e.x - zero.e.x) * k, y: (m.e.y - zero.e.y) * k }, d: { x: (m.d.x - zero.d.x) * k, y: (m.d.y - zero.d.y) * k } });
+  }
+  return lista;
 }
 
 function adornos34(o: OpcoesBipede, v: VisualEquipamento): CamadasAdorno {
@@ -58,9 +78,7 @@ function adornos34(o: OpcoesBipede, v: VisualEquipamento): CamadasAdorno {
   const ombroY = quadrilY - o.tronco;
   const cabecaY = ombroY - o.cabeca * 0.8;
   const r = o.cabeca;
-  const bracoA = o.tronco + 3;
-  const maoE = { x: MEIO - o.ombro - 3.5 + 2.2, y: ombroY + bracoA };
-  const maoD = { x: MEIO + o.ombro - 1 + 2.2, y: ombroY + bracoA };
+  const { e: maoE, d: maoD } = maosDoBipede(o, '34', 0);
   const atras: string[] = [];
   const frente: string[] = [];
   if (v.capa !== null) {
@@ -78,33 +96,34 @@ function adornos34(o: OpcoesBipede, v: VisualEquipamento): CamadasAdorno {
     frente.push(linha([MEIO - r - 0.5, cabecaY - 0.8, MEIO + r + 0.5, cabecaY - 0.8], clarear(v.cabeca, 0.3), 1.4));
   }
   const secundaria = v.secundaria;
+  const mao2: string[] = [];
   if (secundaria === 'escudo') {
-    frente.push(elipse(maoE.x - 1, maoE.y - 4, 4.8, 6.2, 0x8a6d3b) + circulo(maoE.x - 1, maoE.y - 4, 1.6, clarear(0x8a6d3b, 0.5), false));
+    mao2.push(elipse(maoE.x - 1, maoE.y - 4, 4.8, 6.2, 0x8a6d3b) + circulo(maoE.x - 1, maoE.y - 4, 1.6, clarear(0x8a6d3b, 0.5), false));
   } else {
     const arma = comoArma(secundaria);
-    if (arma) frente.push(arma34(arma, maoE.x, maoE.y));
+    if (arma) mao2.push(arma34(arma, maoE.x, maoE.y));
   }
-  if (secundaria) frente.push(circulo(maoE.x, maoE.y, 2.2, o.pele));
+  if (secundaria) mao2.push(circulo(maoE.x, maoE.y, 2.2, o.pele));
   const arma = comoArma(v.arma);
   const camadaArma = arma ? arma34(arma, maoD.x, maoD.y) + realceDaArma(v, maoD.x, maoD.y, maoD.y - 16) + circulo(maoD.x, maoD.y, 2.2, escurecer(o.pele, 0.15)) : '';
   atras.unshift(auraDaForma(v, MEIO, (cabecaY + base) / 2, o.ombro + 8, (base - cabecaY) / 2 + 6));
-  return { atras: atras.join(''), frente: frente.join(''), arma: camadaArma, pivo: maoD };
+  return { atras: atras.join(''), frente: frente.join(''), arma: camadaArma, pivo: maoD, secundaria: mao2.join('') };
 }
 
 function adornosCima(o: OpcoesBipede, v: VisualEquipamento): CamadasAdorno {
   const c = MEIO;
-  const maoE = { x: c + 5, y: c - o.ombro - 1.5 };
-  const maoD = { x: c + 5, y: c + o.ombro + 1.5 };
+  const { e: maoE, d: maoD } = maosDoBipede(o, 'cima', 0);
   const atras: string[] = [];
   const frente: string[] = [];
   if (v.capa !== null) atras.push(elipse(c - 4, c, o.ombro * 0.75, o.ombro + 3, escurecer(v.capa, 0.35)));
   if (v.corpo !== null) frente.push(elipse(c - 1, c, o.ombro * 0.55, o.ombro + 1, escurecer(v.corpo, 0.25)));
-  if (v.secundaria === 'escudo') frente.push(elipse(maoE.x + 2, maoE.y, 2.6, 5.5, 0x8a6d3b));
+  const mao2: string[] = [];
+  if (v.secundaria === 'escudo') mao2.push(elipse(maoE.x + 2, maoE.y, 2.6, 5.5, 0x8a6d3b));
   else {
     const arma = comoArma(v.secundaria);
-    if (arma) frente.push(armaCima(arma, maoE.x, maoE.y));
+    if (arma) mao2.push(armaCima(arma, maoE.x, maoE.y));
   }
-  if (v.secundaria) frente.push(circulo(maoE.x, maoE.y, 2.4, o.pele));
+  if (v.secundaria) mao2.push(circulo(maoE.x, maoE.y, 2.4, o.pele));
   const arma = comoArma(v.arma);
   const camadaArma = arma ? armaCima(arma, maoD.x, maoD.y) + realceDaArma(v, maoD.x + 14, maoD.y, maoD.y) + circulo(maoD.x, maoD.y, 2.4, escurecer(o.pele, 0.15)) : '';
   atras.unshift(auraDaForma(v, c, c, o.ombro + 7, o.ombro + 7));
@@ -115,7 +134,7 @@ function adornosCima(o: OpcoesBipede, v: VisualEquipamento): CamadasAdorno {
   // Mesma ampliação da vista de cima do modelo.
   const g = (s: string) => (s ? `<g transform="translate(${c} ${c}) scale(1.35) translate(${-c} ${-c})">${s}</g>` : '');
   const pivo = { x: c + (maoD.x - c) * 1.35, y: c + (maoD.y - c) * 1.35 };
-  return { atras: g(atras.join('')), frente: g(frente.join('')), arma: g(camadaArma), pivo };
+  return { atras: g(atras.join('')), frente: g(frente.join('')), arma: g(camadaArma), pivo, secundaria: g(mao2.join('')) };
 }
 
 /** As duas camadas de adorno de um bípede, na vista pedida (vazias quando não há o que mostrar). */

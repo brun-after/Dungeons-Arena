@@ -5,7 +5,7 @@
 
 import { Texture } from 'pixi.js';
 import type { AparenciaEquipada } from '../entities/entidade';
-import { adornosDoBipede } from './modelos/adornos';
+import { adornosDoBipede, deslocamentosDasMaos } from './modelos/adornos';
 import { LADO_PX } from './modelos/atlas';
 import { ARMA_DE_CLASSE, OPCOES_JOGAVEIS } from './modelos';
 import { LADO_QUADRO, type Vista } from './modelos/svg';
@@ -20,12 +20,20 @@ export interface TexturasAdorno {
   /** Marco 25 (25/10/2026, D-103): a silhueta branca da arma (o arco do Arqueiro com a mira cheia). */
   armaBranca: Texture | null;
   pivo: { x: number; y: number };
+  /** Marco 26 (25/10/2026, D-108): a mão secundária à parte e, por quadro de membros, quanto cada mão anda (px). */
+  secundaria: Texture | null;
+  maos: readonly MaosDoQuadro[];
+}
+
+export interface MaosDoQuadro {
+  e: { x: number; y: number };
+  d: { x: number; y: number };
 }
 
 /** Combinações guardadas (modelo, vista e equipamento); passando disso, sai a mais antiga. */
 const MAXIMO = 96;
 const cache = new Map<string, TexturasAdorno | 'carregando'>();
-const VAZIO: TexturasAdorno = { atras: null, frente: null, arma: null, armaBranca: null, pivo: { x: 0, y: 0 } };
+const VAZIO: TexturasAdorno = { atras: null, frente: null, arma: null, armaBranca: null, pivo: { x: 0, y: 0 }, secundaria: null, maos: [] };
 /** A arma inteira pintada de branco (mantém só o alfa do desenho). */
 const silhuetaBranca = (svg: string) =>
   svg ? `<defs><filter id="branco"><feFlood flood-color="#ffffff"/><feComposite in2="SourceAlpha" operator="in"/></filter></defs><g filter="url(#branco)">${svg}</g>` : '';
@@ -83,8 +91,11 @@ export function texturasDoAdorno(modelo: string, vista: Vista, aparencia: Aparen
     formaMaxima: ap.formaMaxima,
   });
   const pivo = { x: camadas.pivo.x * PX, y: camadas.pivo.y * PX };
-  void Promise.all([textura(camadas.atras), textura(camadas.frente), textura(camadas.arma), textura(silhuetaBranca(camadas.arma))]).then(([atras, frente, arma, armaBranca]) => {
-    cache.set(chave, { atras, frente, arma, armaBranca, pivo });
+  const px = (p: { x: number; y: number }) => ({ x: p.x * PX, y: p.y * PX });
+  const maos = deslocamentosDasMaos(opcoes, vista).map((m) => ({ e: px(m.e), d: px(m.d) }));
+  const texturas = [camadas.atras, camadas.frente, camadas.arma, silhuetaBranca(camadas.arma), camadas.secundaria].map(textura);
+  void Promise.all(texturas).then(([atras = null, frente = null, arma = null, armaBranca = null, secundaria = null]) => {
+    cache.set(chave, { atras, frente, arma, armaBranca, pivo, secundaria, maos });
   });
   return VAZIO;
 }

@@ -86,7 +86,9 @@ describe('flechas e equipamento no token', () => {
     expect(cheio.atras).toContain('#'); // a capa
     expect(cheio.arma).toContain('<path'); // o arco
     expect(cheio.frente).toContain('<path'); // o elmo
-    expect(cheio.frente).toContain('<ellipse'); // o escudo
+    // Marco 26 (D-108): o escudo na camada da mão secundária, que segue a mão no quadro de membros.
+    expect(cheio.secundaria).toContain('<ellipse'); // o escudo
+    expect(cheio.frente).not.toContain('#8a6d3b');
     expect(adornosDoBipede(o, 'cima', { ...nada, arma: 'espada' }).arma).toContain('scale(1.35)');
     // Os modelos das classes vêm sem arma: quem desenha a arma é o equipamento.
     for (const opcoes of Object.values(OPCOES_JOGAVEIS)) expect('arma' in opcoes || 'escudo' in opcoes).toBe(false);

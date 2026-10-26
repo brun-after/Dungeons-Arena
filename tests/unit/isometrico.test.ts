@@ -261,7 +261,11 @@ describe('atlas dos modelos (gerado no build)', () => {
     }
     // Os 11 da spec.
     for (const m of ['goblin', 'esqueleto', 'orc', 'troll', 'vampiro', 'demonio', 'generico', 'lobo', 'aranha', 'slime', 'cultista']) expect(ehModelo(m), m).toBe(true);
-    expect(MODELOS.aventureiro.quadros).toBe(2);
+    // Marco 26 (D-108): os quadros de braços e pernas (parado, quatro da passada e o golpe); o falcão segue com as asas.
+    expect(MODELOS.aventureiro.quadros).toBe(6);
+    expect(MODELOS.falcao.membros).toBe(false);
+    for (const m of Object.values(MODELOS)) if (m.membros) expect(m.quadros).toBe(6);
+    expect(Math.max(atlas.largura, atlas.altura)).toBeLessThanOrEqual(4096);
   });
 
   it('o JSON aponta quadros dentro da imagem, sem sobreposição, e o SVG é limpo', () => {
