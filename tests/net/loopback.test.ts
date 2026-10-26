@@ -26,8 +26,8 @@ describe('loopback: dois clientes, predição e reconciliação (§3.6, §5.6)',
         expect(p95(erros)).toBeLessThanOrEqual(0.25);
         expect(c.rejeitados).toBe(0);
       }
-      // Os bots de fato andaram e lutaram.
-      const passos = amb.clientes.map((c) => c.base?.entidades.find((e) => e.id === c.entidadeId)?.relogioAndar ?? 0);
+      // Os bots de fato andaram e lutaram (o relógio de caminhada fica só no servidor, marco 26).
+      const passos = amb.clientes.map((c) => amb.sala.estado.entidades.find((e) => e.id === c.entidadeId)?.relogioAndar ?? 0);
       expect(Math.min(...passos)).toBeGreaterThan(1000);
     });
   }

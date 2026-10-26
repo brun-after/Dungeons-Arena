@@ -88,9 +88,16 @@ function passear(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: Es
   if (ponto) irPara(estado, ctx, e, ia, ponto, saida);
 }
 
-/** Troca o modo; `modoDesdeTick` marca a última atividade (o pouso conta a partir dela). */
+/** Marco 26 (25/10/2026, D-104): `modoDesdeTick` enquanto há atividade (o pouso ainda não conta). */
+const EM_ATIVIDADE = -1;
+
+/**
+ * Troca o modo; `modoDesdeTick` marca o fim da última atividade (o pouso conta a partir dela). Marco 26: escrito só
+ * nas transições — reescrever a cada tick de atividade mandava a IA inteira em todo patch da arena.
+ */
 function mudarModo(ia: EstadoIa, modo: EstadoIa['modo'], tick: number, ativo: boolean): void {
-  if (ia.modo !== modo || ativo) ia.modoDesdeTick = tick;
+  if (ativo) ia.modoDesdeTick = EM_ATIVIDADE;
+  else if (ia.modo !== modo || ia.modoDesdeTick === EM_ATIVIDADE) ia.modoDesdeTick = tick;
   ia.modo = modo;
 }
 
@@ -162,7 +169,8 @@ export function processarFalcao(estado: EstadoJogo, ctx: ContextoSimulacao, e: E
   if (hostil) mudarModo(ia, 'perseguindo', estado.tick, false);
   else {
     const calmo = donoQuieto(dono) && !emCombate(estado, dono) && !coletavelMaisPerto(estado, ctx, e, dono);
-    const pousa = calmo && (ia.modo === 'pousado' || (ia.modo === 'patrulha' && estado.tick - ia.modoDesdeTick >= ticksDe(r.pousoMs)));
+    const quieto = ia.modoDesdeTick !== EM_ATIVIDADE && estado.tick - ia.modoDesdeTick >= ticksDe(r.pousoMs);
+    const pousa = calmo && (ia.modo === 'pousado' || (ia.modo === 'patrulha' && quieto));
     mudarModo(ia, pousa ? 'pousado' : 'patrulha', estado.tick, !calmo);
   }
   if (ia.modo === 'pousado') {
