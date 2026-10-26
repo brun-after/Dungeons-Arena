@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.55 · **Data:** 25/10/2026
+**Versão:** 0.56 · **Data:** 25/10/2026
 
 > **Histórico**
+> - **0.56 (25/10/2026)**: D-104 a D-106 (marco 26: movimento livre em qualquer direção, controles do isométrico na inclinação do mapa e paredes do isométrico finas e baixas).
 > - **0.55 (25/10/2026)**: D-094 a D-099 (marco 24: skills de classe, ultimates, sintonia, ressonâncias, orientação, falcão e portas) e D-100 a D-103 (marco 25: IA por dificuldade, população por fase, falcão protetor, arco branco, anel do Necromante e aceleração pelo total).
 > - **0.54 (24/10/2026)**: D-092 (marco 23: dez slots, 20 temas de fase, clima elemental e inimigos afins) e D-093 (armas fora da classe trocam o ataque básico).
 > - **0.53 (24/10/2026)**: D-091 (IA livre do falcão, alcance global e coleta; encarnação do Mago com 12 s e trilha; flecha do tiro carregado).
@@ -2582,3 +2583,79 @@ aprender a evitá-las. Quem absorve um elemento pode usar a área dele para se c
 - **Aceleração da mente:**
   - corta 25%, 33% ou 50% do tempo total do estudo;
   - se o corte passa do que falta, o estudo conclui na hora. Exemplo: 18 min, restam 6, e a incomum conclui.
+
+## D-104 — Movimento livre em qualquer direção (marco 26, 25/10/2026)
+
+**Contexto.** O personagem andava célula a célula, só em passos cardinais. Uma diagonal virava passos alternados, e
+clicar num ponto diagonal fazia uma escadinha. O usuário pediu o máximo de fluidez em todas as direções, não só a
+diagonal. Armadilhas, áreas, rastros e alcance continuam por célula (escolha do usuário).
+
+**Decisão:**
+- **Posição:** a entidade ganha `px`, `py`, a posição contínua em células (o centro da célula é o inteiro). `x`, `y`
+  continuam como a célula ocupada, o arredondamento da posição, mantido pelo integrador e por `posicionar()`. Por isso
+  as regras por célula, a IA e o alcance seguem iguais. Saem `destinoX`, `destinoY`, `progressoPasso` e
+  `proximoEixoX`. Quem escreve só a célula (teletransporte antigo, testes) leva a posição junto no tick seguinte.
+- **Corpo redondo** (`world/corpo.ts`, raio `balance.movimento.raioCorpo` = 0,32):
+  - o círculo contra as células intransitáveis e as muralhas táticas, em subpassos de 0,2, um eixo de cada vez: o eixo
+    que bate fica, o outro segue, e o corpo desliza na parede;
+  - quando não cabe inteiro, encosta por bissecção (rente à parede, a menos de 0,0002 célula);
+  - entre quem se bloqueia (as regras de `bloqueia`), dois raios de distância; travado de frente contra um corpo, tira
+    a componente que aproxima e escorrega em volta. Quem já encosta (nasceu junto) pode se afastar, não se aproximar.
+- **Comando:** `mover` leva o vetor exato (`dx`, `dy`, inteiros em ±1000) além do octante `dir`, que os bots e a IA
+  ainda usam. `irPara` aceita o ponto com fração, validado na rede (finito e dentro de ±10.000).
+- **Caminho sem escadinha:** a busca continua nas 4 direções; o caminho é suavizado puxando a corda
+  (`suavizarCaminho`): de cada ponto, o nó mais distante que o corpo alcança em linha reta (a faixa do raio,
+  amostrada a cada 0,2, até 24 nós à frente). Com o mapa de perigo da IA, o perigo conta como parede na suavização. O
+  último ponto é o ponto tocado, se o corpo cabe nele. O avanço (Investida) replaneja o resto do trajeto do mesmo jeito.
+- **Determinismo:** só soma, produto, divisão e `Math.sqrt` no núcleo; nada de trigonometria.
+- **Parado:** a direção mantida conta como movimento para o pouso do falcão e para a espera na porta de fase (antes,
+  quem segurava a seta contra a parede não dava passo e contava como parado).
+- **Rede:** o estado público leva `px`, `py` em milésimos de célula, arredondados na direção do centro da célula (quem
+  encosta na parede se afasta dela, nunca entra, e a célula não muda). O relógio de caminhada, que nada na tela lê,
+  fica só no servidor. O falcão marca o fim da atividade do dono só nas transições: reescrever `modoDesdeTick` a cada
+  tick mandava a IA inteira em todo patch. Com isso, a carga da arena-02 (10 bots, perfil suportado) fica em 33 a
+  37 KiB/s, abaixo dos 43,8 da `main` medidos na mesma máquina; sem esses ajustes eram 96 KiB/s.
+- **Save:** schema 25. A migração põe cada entidade no centro da célula onde estava (a de destino, se já tinha passado
+  da metade do passo), parada e sem caminho.
+
+**Balanceamento.**
+- Com o movimento livre, o Guerreiro sozinho matava o chefe da fase 1 em 21,4 s (meta 25 a 40 s): fica colado nele,
+  sem perder golpes reposicionando. O chefe (`boss`) passa de 310 para 350 de vida. As outras classes ficam entre 33 e
+  36 s sozinhas. Metas: 94/94.
+- O diagnóstico que mantinha a morte simultânea do Arqueiro no Pesadelo usava uma semente que deixou de morrer; o
+  teste passa à semente 30801 no nível 1.
+
+## D-105 — Controles do isométrico na inclinação do mapa (marco 26, 25/10/2026)
+
+**Contexto.** No isométrico, o joystick usava 8 setores de 45° e um remapeamento a 45°, mas a projeção é 2:1: os eixos
+da fase aparecem a cerca de 26,6°. Empurrar ao longo do corredor caía no setor errado. O usuário pediu que as direções
+do joystick acompanhem a inclinação do mapa, e que o D-pad gire com ele.
+
+**Decisão:**
+- **`vetorDaTela(sx, sy, iso)`** (`input/direcao.ts`) leva o vetor da tela à fase pela inversa linear da projeção:
+  `x = sx + 2·sy`, `y = 2·sy − sx`, normalizado e quantizado em ±1000 (sem −0). De cima é a identidade. O personagem
+  anda na tela exatamente para onde o dedo aponta, e empurrar ao longo da inclinação anda no eixo da fase.
+  Substitui `remapearParaGrade`.
+- **Joystick:** analógico, em qualquer ângulo, fora da zona morta de 14 px. Só reemite quando o ângulo muda mais de
+  cerca de 3°, o que poupa rede.
+- **D-pad:** no isométrico, o anel recebe a mesma projeção em CSS (`scale(0.9) scaleY(0.5) rotate(45deg)`). Cada botão
+  fica na inclinação do eixo da fase que manda, e manda esse eixo exato. A visão nova vale na hora (tecla V ou
+  Configurações).
+- **Teclado:** as 8 direções de tela (setas e WASD) passam pela mesma inversa.
+- **Clique e toque no chão:** mandam o ponto contínuo tocado (`Camera.pontoSob`, em centésimos de célula), não o centro
+  da célula. Tocar num hostil continua selecionando pela célula.
+
+## D-106 — Paredes do isométrico finas e baixas (marco 26, 25/10/2026)
+
+**Contexto.** As paredes do isométrico eram prismas de uma célula inteira com 0,6 célula de altura. O usuário pediu
+paredes 80% mais finas e 70% mais baixas.
+
+**Decisão:**
+- **Placa** (`render/paredes-iso.ts`, `placasDaParede`): uma por aresta entre parede e chão (cardinal), dentro da
+  célula de parede, com 0,2 célula de espessura (`ESPESSURA_PAREDE`) e 0,18 de altura (`ALTURA_PAREDE_PX`). A face fica
+  na aresta, onde o corpo do personagem encosta: o desenho bate com a colisão.
+- **Quinas:** um bloquinho de 0,2 × 0,2 onde a parede só toca o chão na diagonal. A face da frente some quando a
+  célula vizinha daquele lado é parede (ali a placa continua ou vira a quina).
+- **O resto da célula de parede** é a rocha plana e escura do terreno, como na visão de cima.
+- **Ordem de desenho:** um Graphics por diagonal, com o `zIndex` de antes.
+

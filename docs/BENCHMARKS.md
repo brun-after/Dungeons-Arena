@@ -1,8 +1,9 @@
 # Benchmarks
 
-**Versão:** 0.7 · **Data:** 22/10/2026
+**Versão:** 0.8 · **Data:** 25/10/2026
 
 > **Histórico**
+> - **0.8 (25/10/2026)**: marco 26 (D-104): carga da arena com o movimento livre (posição contínua em milésimos no patch).
 > - **0.7 (22/10/2026)**: marco 20 (D-087): o app Android e o medidor de desempenho (Configurações → Gráficos) para medir no aparelho; a linha do Android real fica pendente até a medição no celular do usuário.
 > - **0.6 (15/10/2026)**: marco 16, teste de 10 min na VM (AWS Lightsail São Paulo, 1 GB) com 10 bots na arena-02: 10/10 metas, memória estável e sem reinício (o usuário reduziu o teste de 30 para 10 min).
 > - **0.5 (15/10/2026)**: marco 16 (D-062): benchmarks do cliente (`?bench=carga`, `?bench=padrao` e as trocas de fase, `npm run bench`), carga com a série do `/metricas` e a carga do grupo (campanha cooperativa, 6 bots). Ressalva: o WebGL do Chromium sem tela é por software (pior caso de CPU, não um aparelho).
@@ -43,3 +44,4 @@ As metas da §5.6 são critérios a validar; nada aqui foi medido até o marco 7
 | 2026-10-15 | 16 | `?bench=trocas`: 30 trocas de fase no mesmo documento (desmontar e montar a cena) | heap depois do GC | estabiliza: sem crescimento monotônico, último terço ≤ terço do meio +5% | base 13,01 MB, meio 16,97 MB, último terço 17,45 MB, final 16,93 MB | aprovado (2,8%); as primeiras trocas enchem caches limitados |
 | 2026-10-15 | 16 | arena-02, 10 bots, 600 s, wss://dungeons-bruno.duckdns.org, perfil real | RTT p50/p95 · correção p95/p99 · teleportes · banda rec./env. máx · tick p95/p99 · reconexão | — · ≤ 0,25/≤ 1 · — · ≤ 100/≤ 10 KiB/s · ≤ 8/≤ 16,7 ms · ≤ 5 s | 22/32 ms · 0/0,125 · 29 · 33,7/1,4 KiB/s · 1,422/1,663 ms · 0,3 s | metas 10/10; rejeições 0; ressinc. 0; aviso útil p5 (ms): teia 914, armar_teia 645, golpe 485, marca_de_area 823, golpe_pesado 438, flecha 1053, golpe_viscoso 574; memória 105,3→129,2 MB (máx. 129,2, tendência 0,66 MB/min), tick p95 máx. na série 2,849 ms, agendador p95 máx. 11,74 ms |
 | 2026-10-15 | 16 | VM depois da carga de 10 min acima (`GET /metricas` por HTTPS) | reinícios · RSS do processo · atraso do agendador p95/p99 | 0 · ≤ 700 MB (limite do contêiner) · — | 0 (processo no ar há 66 min, desde o deploy) · 129,2 MB · 10,7/11,2 ms | Ressalvas: a VM tem 1 GB e a referência da spec é 4 GB; a carga sai de um PC doméstico; a sessão real com 10 pessoas é no 11B. Os logs do contêiner não foram lidos: a chave SSH local foi recusada pela VM (o `/metricas` cobre memória, tick e reinício) |
+| 2026-10-26 | 26 | arena-02, 10 bots, 180 s, ws://localhost:2567, perfil suportado | RTT p50/p95 · correção p95/p99 · teleportes · banda rec./env. máx · tick p95/p99 · reconexão | — · ≤ 0,25/≤ 1 · — · ≤ 100/≤ 10 KiB/s · ≤ 8/≤ 16,7 ms · ≤ 5 s | 202/236 ms · 0,032/0,176 · 13 · 33,3/1,4 KiB/s · 2,926/3,912 ms · 0,4 s | metas 9/9; rejeições 0; ressinc. 0; aviso útil p5 (ms): golpe 336, teia 695, armar_teia 534, golpe_pesado 336, marca_de_area 936, flecha 816, golpe_viscoso 338; memória 159,1→194,3 MB (máx. 201,2, tendência 18,44 MB/min), tick p95 máx. na série 3,463 ms, agendador p95 máx. 19,81 ms |
