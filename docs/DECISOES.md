@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.57 · **Data:** 26/10/2026
+**Versão:** 0.58 · **Data:** 26/10/2026
 
 > **Histórico**
+> - **0.58 (26/10/2026)**: D-110 a D-115 (marco 26, terceira leva: lore das classes e Dom da classe, combos da build pela barra e Diário detalhado, portais por destino e por cor, quebráveis, clique fora das células e mouse que guia como o joystick).
 > - **0.57 (26/10/2026)**: D-107 a D-109 (marco 26: sem direcional no computador e teclas EWAS, braços e pernas animados, objetos em pé no isométrico).
 > - **0.56 (25/10/2026)**: D-104 a D-106 (marco 26: movimento livre em qualquer direção, controles do isométrico na inclinação do mapa e paredes do isométrico finas e baixas).
 > - **0.55 (25/10/2026)**: D-094 a D-099 (marco 24: skills de classe, ultimates, sintonia, ressonâncias, orientação, falcão e portas) e D-100 a D-103 (marco 25: IA por dificuldade, população por fase, falcão protetor, arco branco, anel do Necromante e aceleração pelo total).
@@ -2715,3 +2716,117 @@ piso. Pareciam pintados no chão em vez de acompanhar a ilusão 3D. O usuário e
   - **Pilar:** o desenho do tema esticado 1,5 vez (cerca de 1 célula de altura), sobre uma sombra no losango da
     célula. `placasDaParede` não gera placa para o pilar, e o terreno pinta o piso por baixo.
 - **Troca de visão:** o terreno redesenha os blocos (`definirVisao`). De cima, nada muda.
+
+## D-110 — Lore das classes e Dom da classe (marco 26, 26/10/2026)
+
+**Contexto.** A tela de seleção descrevia as classes por números (fúria, porcentagens, nível 20). O usuário pediu uma
+lore curta em dark fantasy, no estilo de Brandon Sanderson (magia com regra e custo), com o estilo de jogo e as
+mecânicas que importam, sem status.
+
+**Decisão:**
+- **Seleção** (`ui/escolha-classe.ts`): `classe.<id>.descricao` é a lore (2 a 3 frases, sem dígitos) e
+  `classe.<id>.estilo` é uma linha "Estilo:", com o jeito de jogar e as mecânicas (o falcão, as técnicas de sangue,
+  a encarnação, a Mira firme, o exército). As 5 classes foram reescritas do zero.
+- **Os números** foram para `classe.<id>.dom`: um bloco dobrável "Dom da classe" na aba Habilidades da mochila, com
+  as afinidades.
+- **Teste:** os textos de lore e estilo não têm dígitos.
+
+## D-111 — Combos da build pela barra e Diário detalhado (marco 26, 26/10/2026)
+
+**Contexto.** "Combos da sua build" listava combos ainda não descobertos, tirados das skills conhecidas. O Diário
+mostrava só nomes.
+
+**Decisão:**
+- **Combos da build** (`ui/combos.ts`): os candidatos são os combos cuja sequência está toda na barra (as skills
+  equipadas).
+  - **Descoberto** (`combo:<id>` no diário): nome, como se faz (as skills em ordem, a janela, "no mesmo alvo" e as
+    condições) e o efeito.
+  - **Não descoberto:** `????`, só com a quantidade de skills.
+  - **O indicador de combo em preparo** também não revela o nome de um combo não descoberto.
+- **Diário** (`ui/diario-detalhes.ts`, `descreverEntrada`): cada entrada descoberta vira um cartão com "Como" e
+  "Efeito", montados dos dados.
+  - **Cobre todos os tipos:** reação, combo (com a marca "na sua barra"), ressonância, marco de nível, fusão,
+    variação de item, conjunto, regra de buff, origem rara e evento.
+  - **Tipo novo:** `sinergia` (as passivas de `sinergias.json`), anotado no evento `sinergiaPassiva`.
+  - **O que falta** continua `???`, com o tipo à vista.
+
+## D-112 — Portais por destino e portais internos por cor (marco 26, 26/10/2026)
+
+**Contexto.** As portas de entrada e saída eram molduras iguais em toda fase, e os portais internos eram círculos
+com um número. O usuário pediu portais de verdade, com a cara da fase de destino (gelo com borda congelada e
+estalactites, por exemplo). Os internos deveriam ser identificados só pela cor.
+
+**Decisão:**
+- **Em dados:** cada tema de `temas.json` tem `portal: { estilo, cor }`.
+  - **Estilos** (`ESTILOS_PORTAL`): pedra, gelo, fogo, veneno, raio, trevas, sagrado, terra e psíquico.
+  - **Validação:** o leitor de `world/temas.ts` confere o campo.
+- **Destino:** `save/destinos.ts` (`temasDosPortais`) acha o tema da fase seguinte e da anterior por `faseSeguinte`
+  e `faseAnterior`.
+  - **Na cena:** o jogo solo e o grupo passam esses temas para ela.
+  - **Fase oficial sem tema:** vira o portal de pedra, na cor da fase.
+- **Desenho** (`render/molduras-portal.ts`, `render/portas.ts`):
+  - um vórtice animado no miolo e a moldura no estilo do destino;
+  - em pé no isométrico (com profundidade) e visto do alto de cima;
+  - a saída trancada tem o vórtice apagado, correntes e cadeado;
+  - a porta temporária do chefe é dourada.
+- **Ar em partículas** (`render/presets-mundo.ts`): um preset por estilo, emitido a cada 260 ms. Respeita o limite
+  de partículas e o movimento reduzido.
+- **Portais internos:** vórtices ovais sem número. A cor sai de uma paleta de 6 matizes por par (`corDoPar`), e o
+  anel de espera usa a mesma cor.
+
+## D-113 — Quebráveis (marco 26, 26/10/2026)
+
+**Contexto.** Barris, caixotes e afins eram só enfeite. O usuário pediu que os elementos que fazem sentido quebrar
+quebrem com ataques e soltem nada, 1 a 3 de ouro, um buff ou cura. Escolheu que **não bloqueiam a passagem** e que
+entram **caixote** e **vaso**.
+
+**Decisão:**
+- **Tipos** (`balance.quebraveis.tipos`): barril, caixote, vaso, carrinho, livros, cristal, cogumelo e arbusto.
+  - **Caixote:** novo, com pesos em masmorra, castelo, mina, esgotos e forja.
+  - **Vaso:** novo, com pesos em catacumbas, ruínas, templo, deserto e cripta.
+  - **A vela ficou de fora:** a luz dela seguiria acesa depois de quebrada.
+- **Estado:** um objeto `quebravel` (a forma em `ref`, o id `q:x,y`) para cada enfeite desses de `decoracoesDaFase`.
+  - **Onde nascem:** são postos em `povoarFase`, só nos modos com `objetosDeFase` (campanha e grupo).
+  - **Não bloqueiam e não são coletados:** o que cai no chão pode ficar na mesma célula.
+- **Quem quebra** (`combat/quebraveis.ts`): só o lado do jogador (`ladoDoJogador`); os monstros passam sem quebrar.
+  - **Básico:** o `ataqueBasico` aceita uma célula. Clicar no quebrável golpeia na hora, se estiver no alcance;
+    senão, o personagem anda até ele e golpeia ao chegar (`ui/golpe-quebravel.ts`).
+  - **Área:** as células da forma quebram o que pegam.
+  - **Projétil:** quebra o primeiro no caminho e para nele; o que atravessa segue.
+- **Saque** (`balance.quebraveis.saque`): nada 40, ouro (1 a 3) 34, orbe de vida 12, de recurso 9, de efeito 5.
+  - **Sorteio próprio:** semeado pela fase e pelo objeto, sem gastar o RNG do estado. As metas seguiram em 94/94.
+  - **Os orbes** usam as porcentagens de `drops`.
+- **Render:** o terreno e os enfeites em pé pulam esses tipos. `render/objetos.ts` desenha cada quebrável uma vez,
+  em pé no isométrico e no chão de cima. Ao quebrar, saem lascas em partículas (madeira, barro, cristal ou folhas)
+  e o som de acerto.
+- **Save v26:** a fase gravada antes ganha os quebráveis uma vez, ao abrir (o marcador `quebraveis` no estado). A
+  versão impede um cliente antigo de tomá-los por orbes.
+
+## D-114 — Clique fora das células anda na direção (marco 26, 26/10/2026)
+
+**Contexto.** Clicar numa parede, no vazio fora do mapa ou num lugar sem caminho fazia o `irPara` falhar, e o
+clique se perdia.
+
+**Decisão:**
+- **Novo `planejarIrPara`** (`world/movimento.ts`), usado pela simulação e pela previsão do cliente. Tenta, nesta
+  ordem:
+  1. limitar o ponto às bordas da fase;
+  2. achar o caminho até o ponto;
+  3. sem caminho, ir à célula alcançável mais próxima do ponto (`alcancavelMaisPerto`, uma busca em largura com
+     desempate fixo);
+  4. se essa célula for a própria, andar reto na direção do clique até o corpo não caber mais.
+- **A IA não muda:** segue com `planejarCaminho`.
+
+## D-115 — Mouse que guia como o joystick (marco 26, 26/10/2026)
+
+**Contexto.** No computador, o clique só valia ao soltar, arrastar movia a câmera e seguir o cursor esperava
+300 ms. O usuário pediu agilidade parecida com o joystick do celular.
+
+**Decisão** (`input/ponteiro.ts`, só `pointerType === 'mouse'`; o toque não muda):
+- **Botão esquerdo:** age já no `pointerdown`. No chão, `irPara`; num hostil, seleciona; num quebrável, o golpe.
+- **Segurar** (120 ms ou 6 px de movimento): guia como o joystick.
+  - **Direção:** a cada quadro, o vetor do personagem até o cursor passa por `vetorDaTela` e vira `mover`.
+  - **Rede:** só reemite quando o rumo muda.
+  - **Parar:** a até 14 px do personagem, ele para.
+- **Soltar:** depois de guiar, manda parado.
+- **Câmera:** o arrasto passou para o botão do meio ou o direito. A roda segue com o zoom.
