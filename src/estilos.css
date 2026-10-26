@@ -854,6 +854,16 @@ body.toque .log-combate.aberto {
   color: var(--texto-suave);
 }
 
+/* Marco 26 (26/10/2026, D-110): a lore em itálico e o estilo de jogo destacado. */
+.cartao-classe .lore-classe {
+  font-style: italic;
+}
+
+.cartao-classe .estilo-classe {
+  font-size: 0.9rem;
+  color: #e8d9b5;
+}
+
 .cartao-classe .botao-menu {
   margin-top: auto;
 }
@@ -2547,6 +2557,15 @@ body.toque .botao-consumivel {
 .catalogo-combos summary { cursor: pointer; }
 .catalogo-combos article { border-top: 1px solid #413949; padding: 5px 0; }
 .catalogo-combos h4, .catalogo-combos p { margin: 4px 0; }
+/* Marco 26 (26/10/2026, D-111): como fazer o combo, o combo não descoberto, o Dom da classe e o Diário em cartões. */
+.catalogo-combos .como-combo { color: #cdb8e6; font-size: 0.85rem; }
+.catalogo-combos .combo-oculto { opacity: 0.55; letter-spacing: 0.05em; }
+.dom-classe { margin: 8px 0; padding: 8px; border: 1px solid #574b66; border-radius: 5px; }
+.dom-classe summary { cursor: pointer; }
+.dom-classe p { margin: 4px 0; }
+.entrada-diario.vista { padding: 5px 7px; border-left: 3px solid #7d6aa0; background: #1b1724; border-radius: 3px; }
+.entrada-diario .linha-diario { color: var(--texto-suave); line-height: 1.35; }
+.entrada-diario .marca-barra { font-size: 0.75rem; font-weight: normal; color: #9ad8a8; border: 1px solid #4f7a5c; border-radius: 3px; padding: 0 4px; }
 @media (max-height: 460px) { .indicador-combo { font-size: 10px; padding: 3px 5px; } }
 
 /* Marco 24 (25/10/2026, D-094): no toque, as teclas 1 e 2 (skills de classe) à esquerda da 3 e da 4. */

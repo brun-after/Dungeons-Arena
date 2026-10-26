@@ -114,9 +114,11 @@ export function lerComando(v: unknown): Comando | null {
       const alvo = id(v.alvo) ? v.alvo : lerCelula(v.alvo);
       return alvo ? { t: 'usarHabilidade', id: v.id, alvo } : null;
     }
-    case 'ataqueBasico':
+    case 'ataqueBasico': {
       if (v.alvo === undefined) return { t: 'ataqueBasico' };
-      return id(v.alvo) ? { t: 'ataqueBasico', alvo: v.alvo } : null;
+      const alvo = id(v.alvo) ? v.alvo : lerCelula(v.alvo);
+      return alvo ? { t: 'ataqueBasico', alvo } : null;
+    }
     case 'selecionarAlvo':
       if (v.alvo !== null && !id(v.alvo)) return null;
       if (v.travar === undefined) return { t: 'selecionarAlvo', alvo: v.alvo };

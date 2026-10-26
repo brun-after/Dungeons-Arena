@@ -35,7 +35,15 @@ export function interagivel(o: ObjetoNoMundo): boolean {
 
 /** Ninguém coleta: interagíveis e a porta temporária do boss (marco 10A-1, world/portas.ts). */
 function coletavel(o: ObjetoNoMundo): boolean {
-  return !interagivel(o) && o.tipo !== 'saida';
+  return !interagivel(o) && o.tipo !== 'saida' && o.tipo !== 'quebravel';
+}
+
+/**
+ * Já há um objeto na célula? O quebrável não conta (marco 26, D-113): o que cai no chão fica junto dele, e o saque
+ * nasce onde ele estava.
+ */
+function ocupada(estado: EstadoJogo, x: number, y: number): boolean {
+  return estado.objetos.some((o) => o.x === x && o.y === y && o.tipo !== 'quebravel');
 }
 
 /** O que o falcão do Aventureiro recolhe para o dono (itens e refúgio ficam para o jogador). */
@@ -141,7 +149,7 @@ export function largarObjeto(
   saida: EventoSimulacao[],
   objetoId = `d:${estado.proximoId++}`,
 ): boolean {
-  if (estado.objetos.some((o) => o.x === x && o.y === y)) return false;
+  if (ocupada(estado, x, y)) return false;
   estado.objetos.push(novoObjeto(objetoId, tipo, x, y, { valor, modo }));
   saida.push({ t: 'objetoSurgiu', tick: estado.tick, objetoId, tipo, x, y });
   return true;
@@ -158,7 +166,7 @@ export function largarItem(
   objetoId = `d:${estado.proximoId++}`,
   ref: string | null = null,
 ): boolean {
-  if (estado.objetos.some((o) => o.x === x && o.y === y)) return false;
+  if (ocupada(estado, x, y)) return false;
   estado.objetos.push(novoObjeto(objetoId, 'item', x, y, { valor: qtd, itemId, ref }));
   saida.push({ t: 'objetoSurgiu', tick: estado.tick, objetoId, tipo: 'item', x, y });
   return true;
@@ -166,7 +174,7 @@ export function largarItem(
 
 /** Coloca ouro no mundo (marco 9A), se a célula estiver livre de outro objeto. */
 export function largarOuro(estado: EstadoJogo, quantia: number, x: number, y: number, saida: EventoSimulacao[]): boolean {
-  if (quantia <= 0 || estado.objetos.some((o) => o.x === x && o.y === y)) return false;
+  if (quantia <= 0 || ocupada(estado, x, y)) return false;
   const objetoId = `d:${estado.proximoId++}`;
   estado.objetos.push(novoObjeto(objetoId, 'ouro', x, y, { valor: quantia }));
   saida.push({ t: 'objetoSurgiu', tick: estado.tick, objetoId, tipo: 'ouro', x, y });
@@ -182,7 +190,7 @@ export function largarOrbeEfeito(
   saida: EventoSimulacao[],
   objetoId = `d:${estado.proximoId++}`,
 ): boolean {
-  if (estado.objetos.some((o) => o.x === x && o.y === y)) return false;
+  if (ocupada(estado, x, y)) return false;
   estado.objetos.push(novoObjeto(objetoId, 'orbe_efeito', x, y, { efeito: { ...efeito } }));
   saida.push({ t: 'objetoSurgiu', tick: estado.tick, objetoId, tipo: 'orbe_efeito', x, y });
   return true;

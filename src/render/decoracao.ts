@@ -114,6 +114,24 @@ export function desenharDecoracao(g: Graphics, d: Decoracao, paleta: PaletaTema)
         g.rect(px + 7 + j * 6, py + 3 + i * 9, 4, 7).fill([0x8c2f2a, 0x2f5a8c, 0x6a8c2f, 0xb08a3a][(i * 6 + j + Math.floor(v * 4)) % 4] ?? 0x8c2f2a);
       }
       break;
+    // Marco 26 (D-113): o caixote de tábuas e o vaso de barro, que quebram.
+    case 'caixote': {
+      const l = 10 * s;
+      g.rect(cx - l, cy - l + 4, l * 2, l * 2 - 2).fill(0x8a6034);
+      g.rect(cx - l, cy - l + 4, l * 2, l * 2 - 2).stroke({ width: 2, color: 0x4a3018 });
+      g.moveTo(cx - l, cy - l + 4).lineTo(cx + l, cy + l + 2).moveTo(cx + l, cy - l + 4).lineTo(cx - l, cy + l + 2).stroke({ width: 2, color: 0x5a3c20 });
+      g.rect(cx - l, cy - l + 4, l * 2, 3).fill({ color: 0xffffff, alpha: 0.12 });
+      break;
+    }
+    case 'vaso': {
+      const cor = v > 0.5 ? 0xb0643a : 0x9a7a52;
+      g.ellipse(cx, cy + 3, 9 * s, 10 * s).fill(cor);
+      g.rect(cx - 4 * s, cy - 11 * s, 8 * s, 6 * s).fill(cor);
+      g.ellipse(cx, cy - 11 * s, 5.5 * s, 2 * s).fill(misturarCor(cor, 0x000000, 0.45));
+      g.moveTo(cx - 8 * s, cy + 1).lineTo(cx + 8 * s, cy + 1).stroke({ width: 1.5, color: 0xe8d2a8, alpha: 0.5 });
+      g.ellipse(cx - 3 * s, cy - 1, 2 * s, 4 * s).fill({ color: 0xffffff, alpha: 0.14 });
+      break;
+    }
     case 'livros':
       g.rect(cx - 10, cy + 2, 14, 5).fill(0x8c2f2a).rect(cx - 8, cy - 3, 14, 5).fill(0x2f5a8c).rect(cx - 6, cy - 8, 12, 5).fill(0xb08a3a);
       break;

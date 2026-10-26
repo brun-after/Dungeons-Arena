@@ -31,7 +31,7 @@ import { comprar, vender } from '../progression/loja';
 import { soltarItem } from '../progression/soltar-item';
 import { processarMortes } from '../progression/morte';
 import { regenerarRecursos } from '../progression/recursos';
-import { definirDirecao, moverEntidades, planejarCaminho } from '../world/movimento';
+import { definirDirecao, moverEntidades, planejarIrPara } from '../world/movimento';
 import { fecharLoja, interagir, processarInteracoes } from '../world/interacao';
 import { revelarArmadilhas } from '../world/armadilhas-ocultas';
 import { atualizarRessonancias } from '../progression/ressonancias';
@@ -124,7 +124,7 @@ function aplicarComandos(
         definirDirecao(ator, cmd.dir, cmd.dx, cmd.dy);
         break;
       case 'irPara':
-        planejarCaminho(ator, { x: cmd.x, y: cmd.y }, ctx, estado.tick, saida);
+        planejarIrPara(ator, { x: cmd.x, y: cmd.y }, ctx, estado.tick, saida);
         break;
       case 'ataqueBasico':
         iniciarAcao(estado, ctx, ator, ator.ataqueBasico, cmd.alvo, saida);

@@ -10,7 +10,8 @@ import type { Entidade } from '../entities/entidade';
 import { bonusAtivos } from './conjuntos';
 import { variacoesDeItem } from './gerar-item-base';
 
-export const TIPOS_DE_ENTRADA = ['reacao', 'combo', 'ressonancia', 'marco', 'fusao', 'item', 'conjunto', 'buff', 'missao', 'origem', 'evento'] as const;
+// Marco 26 (26/10/2026, D-111): as sinergias passivas (data/sinergias.json) também entram.
+export const TIPOS_DE_ENTRADA = ['reacao', 'combo', 'sinergia', 'ressonancia', 'marco', 'fusao', 'item', 'conjunto', 'buff', 'missao', 'origem', 'evento'] as const;
 export type TipoDeEntrada = (typeof TIPOS_DE_ENTRADA)[number];
 
 export interface EntradaDoDiario {
@@ -29,6 +30,7 @@ export function entradasDoDiario(ctx: Pick<ContextoSimulacao, 'conteudo'>): Entr
   const saida: EntradaDoDiario[] = [];
   for (const s of c.interacoes.sinergias) saida.push(e('reacao', s.id));
   for (const id of c.combos.keys()) saida.push(e('combo', id));
+  for (const s of c.sinergias) saida.push(e('sinergia', s.id));
   for (const id of c.ressonancias.keys()) saida.push(e('ressonancia', id));
   for (const d of c.definicoes.values()) {
     for (const n of Object.keys(d.marcos)) saida.push(e('marco', `${d.base.id}:${n}`));
@@ -66,6 +68,11 @@ export function registrarDescobertas(estado: EstadoJogo, ctx: ContextoSimulacao,
       case 'comboFeito': {
         const quem = porId(ev.id);
         if (quem) anotar(estado, quem, `combo:${ev.combo}`, saida);
+        break;
+      }
+      case 'sinergiaPassiva': {
+        const quem = porId(ev.id);
+        if (quem) anotar(estado, quem, `sinergia:${ev.sinergia}`, saida);
         break;
       }
       case 'ressonanciaAtiva': {

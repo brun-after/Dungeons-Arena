@@ -17,6 +17,10 @@ import type { EstadoJogo, ObjetoNoMundo, TipoObjeto } from '../core/estado';
 import type { Raridade } from '../modos/modo';
 import { CELULA_PX } from './camera-calculo';
 import { centroDaCelula, type Projecao } from './projecao';
+import { hashCelula, ehTipoDecoracao } from '../world/decoracao';
+import type { PaletaTema } from '../world/temas';
+import { desenharDecoracao } from './decoracao';
+import { paletaDe } from './terreno';
 import { texturaDoIcone } from './icones-textura';
 
 const COR_ORBE: Readonly<Record<'orbe_hp' | 'orbe_recurso', number>> = {
@@ -52,6 +56,8 @@ export class CamadaObjetos {
   private readonly camadaHalo: Container;
   private texturaHalo: Texture | null = null;
   private readonly itens = new Map<string, { visual: Container; quantidade: Text }>();
+  /** Marco 26 (D-113): os quebráveis, um Graphics por objeto, desenhado uma vez (o enfeite não anima). */
+  private readonly quebras = new Map<string, Graphics>();
 
   /**
    * `raridadeDe` traduz o item do chão para a cor; item desconhecido aparece como comum.
@@ -63,6 +69,7 @@ export class CamadaObjetos {
     private readonly ticksBau = 1,
     private readonly emPe: OpcoesEmPe | null = null,
     private readonly iconeDe: (itemId: string) => string | undefined = () => undefined,
+    private readonly paleta: PaletaTema | null = null,
   ) {
     this.camadaHalo = camada;
     camada.addChild(this.g);
@@ -184,6 +191,11 @@ export class CamadaObjetos {
     for (const o of estado.objetos) {
       const cx = (o.x + 0.5) * CELULA_PX;
       const cy = (o.y + 0.5) * CELULA_PX;
+      if (o.tipo === 'quebravel') {
+        vistos.add(o.objetoId);
+        this.quebravel(o, iso ? proj : null);
+        continue;
+      }
       if (iso && this.emPe && EM_PE.has(o.tipo)) {
         vistos.add(o.objetoId);
         this.desenharEmPe(o, estado, proj, this.emPe.camada, movimentoReduzido ? 0 : agoraMs, pulso);
@@ -228,6 +240,39 @@ export class CamadaObjetos {
       item.visual.destroy({ children: true });
       this.itens.delete(id);
     }
+    for (const [id, q] of this.quebras) {
+      if (vistos.has(id)) continue;
+      q.destroy();
+      this.quebras.delete(id);
+    }
+  }
+
+  /**
+   * O enfeite que quebra, com o mesmo desenho do terreno (render/decoracao.ts): no chão, de cima; no isométrico, em pé
+   * na camada das entidades, com a base no centro da célula (como render/decoracao-iso.ts).
+   */
+  private quebravel(o: ObjetoNoMundo, proj: Projecao | null): void {
+    const camada = proj && this.emPe ? this.emPe.camada : this.camadaHalo;
+    let g = this.quebras.get(o.objetoId);
+    if (!g) {
+      g = new Graphics();
+      const tipo = o.ref ?? '';
+      if (ehTipoDecoracao(tipo)) {
+        if (proj) g.ellipse(CELULA_PX / 2, CELULA_PX * 0.75, CELULA_PX * 0.3, CELULA_PX * 0.12).fill({ color: 0x000000, alpha: 0.22 });
+        desenharDecoracao(g, { tipo, x: 0, y: 0, variante: hashCelula(o.x, o.y, 3) }, this.paleta ?? paletaDe(0));
+      }
+      this.quebras.set(o.objetoId, g);
+    }
+    if (g.parent !== camada) camada.addChild(g);
+    if (!proj) {
+      g.position.set(o.x * CELULA_PX, o.y * CELULA_PX);
+      return;
+    }
+    const c = centroDaCelula(o.x, o.y);
+    const p = proj.projetar(c.x, c.y);
+    // A base do desenho (0,75 da célula) cai no centro projetado.
+    g.position.set(p.x - CELULA_PX / 2, p.y - CELULA_PX * 0.75);
+    g.zIndex = p.y - 0.01;
   }
 
   /** Usa o mesmo desenho da mochila; no isométrico ele fica legível, sem achatar com o piso. */
@@ -302,6 +347,8 @@ export class CamadaObjetos {
     this.altos.clear();
     for (const item of this.itens.values()) item.visual.destroy({ children: true });
     this.itens.clear();
+    for (const q of this.quebras.values()) q.destroy();
+    this.quebras.clear();
   }
 
   destruir(): void {

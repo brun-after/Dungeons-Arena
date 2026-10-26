@@ -105,6 +105,16 @@ export interface Balance {
     raridadeMinBoss: Raridade;
     pesoRaridade: Record<Raridade, number>;
   };
+  /**
+   * Marco 26 (26/10/2026, D-113): os enfeites que quebram (tipos de world/decoracao.ts) e o peso de cada saque; o
+   * ouro sai entre `ouroMin` e `ouroMax`, e os orbes usam as porcentagens de `drops`.
+   */
+  quebraveis: {
+    tipos: string[];
+    saque: Record<'nada' | 'ouro' | 'orbe_hp' | 'orbe_recurso' | 'orbe_efeito', number>;
+    ouroMin: number;
+    ouroMax: number;
+  };
   /** Progressão (§2.12). XP para passar do nível N: `tabela[N-1]` ou `N × fallbackPorNivel`. */
   xp: {
     decaimentoAntifarm: number;

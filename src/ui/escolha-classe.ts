@@ -4,7 +4,6 @@
 
 import type { Conteudo } from '../core/conteudo';
 import { t, type ChaveTexto } from '../i18n';
-import { descreverBonus } from './descrever';
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, texto?: string): HTMLElementTagNameMap[K] {
   const e = document.createElement(tag);
@@ -26,14 +25,14 @@ export function mostrarEscolhaDeClasse(raiz: HTMLElement, conteudo: Conteudo, ba
     const cartao = el('article', 'cartao-classe');
     cartao.dataset.classe = c.id;
     cartao.append(el('h2', undefined, c.nome));
-    if (c.descricao) cartao.append(el('p', undefined, t(c.descricao as ChaveTexto)));
+    // Marco 26 (26/10/2026, D-110): a lore e o estilo de jogo, sem números (eles ficam no Dom da classe).
+    if (c.descricao) cartao.append(el('p', 'lore-classe', t(c.descricao as ChaveTexto)));
+    cartao.append(el('p', 'estilo-classe', t(`classe.${c.id}.estilo` as ChaveTexto)));
     const iniciais = c.habilidades.map((id) => {
       const h = conteudo.habilidades.get(id);
       return h ? h.nome : id;
     });
     cartao.append(el('p', 'detalhe-classe', t('escolhaClasse.iniciais', { lista: iniciais.join(', ') })));
-    const afinidades = c.afinidades.flatMap((a) => descreverBonus(a));
-    if (afinidades.length > 0) cartao.append(el('p', 'detalhe-classe', t('escolhaClasse.afinidades', { lista: afinidades.join('; ') })));
     const escolher = el('a', 'botao-menu', t('escolhaClasse.escolher', { nome: c.nome }));
     escolher.href = `${base}&classe=${encodeURIComponent(c.id)}`;
     cartao.append(escolher);

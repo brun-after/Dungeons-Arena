@@ -101,6 +101,9 @@ export function sonsDoEvento(ev: EventoSimulacao, idLocal: string, habilidade: (
       return ev.id === idLocal ? [{ som: 'moeda', origemId: null }] : [];
     case 'bauAberto':
       return [{ som: 'coleta', origemId: ev.id }];
+    // Marco 26 (D-113): o quebrável quebrando.
+    case 'quebrou':
+      return [{ som: 'acerto', origemId: ev.porId }];
     case 'subiuNivel':
       return ev.id === idLocal ? [{ som: 'nivel', origemId: null }] : [];
     case 'itemRecusado':

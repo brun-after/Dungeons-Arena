@@ -62,7 +62,8 @@ export interface Projetil {
  * `saida`, a porta temporária que surge onde o boss morre (§2.1).
  */
 /** Ajuste de 16/10/2026 (D-067): `orbe_refugio`, a carga de imunidade ao abrir a mochila ou a loja. */
-export type TipoObjeto = 'orbe_hp' | 'orbe_recurso' | 'orbe_efeito' | 'orbe_refugio' | 'item' | 'ouro' | 'bau' | 'loja' | 'saida' | 'santuario';
+/** Marco 26 (26/10/2026, D-113): `quebravel`, o enfeite que quebra (a forma em `ref`; combat/quebraveis.ts). */
+export type TipoObjeto = 'orbe_hp' | 'orbe_recurso' | 'orbe_efeito' | 'orbe_refugio' | 'item' | 'ouro' | 'bau' | 'loja' | 'saida' | 'santuario' | 'quebravel';
 
 /**
  * Objeto coletável no mundo (§2.1). `objetoId` é estável; a coleta é uma transação dentro do
@@ -208,6 +209,8 @@ export interface EstadoJogo {
   proximoId: number;
   /** Marco 15 (D-061): a dificuldade do mundo; muda pelo comando `definirDificuldade`, nunca o personagem. */
   dificuldade: Dificuldade;
+  /** Marco 26 (D-113): os quebráveis já foram postos (o save de antes não tem; world/populacao.ts põe uma vez). */
+  quebraveis?: true;
 }
 
 export interface OpcoesEstado {
@@ -266,5 +269,6 @@ export function clonarEstado(estado: EstadoJogo): EstadoJogo {
     saidaAberta: estado.saidaAberta,
     proximoId: estado.proximoId,
     dificuldade: estado.dificuldade,
+    ...(estado.quebraveis && { quebraveis: true }),
   };
 }

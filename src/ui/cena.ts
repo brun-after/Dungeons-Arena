@@ -42,6 +42,7 @@ import { CamadaTelegrafia } from '../render/telegrafia';
 import { descreverAfinidade, dicaDoClima } from './descrever-elemento';
 import { temaDaFase } from '../combat/clima';
 import { criarTerreno } from '../render/terreno';
+import type { TemasDosPortais } from '../save/destinos';
 import type { TexturasTileset } from '../render/tileset-textura';
 import { velocidade } from '../world/movimento';
 import { faixaSuperior, mostrarAviso } from './aviso';
@@ -67,6 +68,8 @@ import { Hud } from './hud';
 import { identidadeDaClasse } from './barra-classe';
 import { QuadroAlvo } from './quadro-alvo';
 import { montarVisao, type ControleVisao } from './visao';
+import { criarGolpeNoQuebravel } from './golpe-quebravel';
+import { presetDaQuebra } from '../render/presets-mundo';
 
 const LEITURA_FAIXA_MS = 1000;
 /** Teclas 1–4 são das habilidades; as seguintes, dos consumíveis (D-050). */
@@ -90,6 +93,8 @@ export interface OpcoesCena {
   dificuldade?: OpcaoDificuldade;
   /** Marco 11A (D-066): o tileset do jogador já carregado (só nas aventuras do editor). */
   tileset?: TexturasTileset | null;
+  /** Marco 26 (26/10/2026, D-112): o tema das fases para onde a saída e o retorno levam (null: portal neutro). */
+  portais?: TemasDosPortais;
   /** Marco 18: registrar a primeira descoberta do servidor na nuvem (a arena e os testes desligam). */
   nuvemDescobertas?: boolean;
 }
@@ -183,7 +188,9 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       teclado?.atualizar();
     },
   });
-  const terreno = criarTerreno(palco.terreno, fase, o.tileset ?? null, temaDaFase(ctx));
+  // Marco 26 (D-113): nos modos com objetos, os enfeites que quebram saem do estado (render/objetos.ts), não do terreno.
+  const quebraveis: ReadonlySet<string> = ctx.modo.objetosDeFase ? new Set(ctx.balance.quebraveis.tipos) : new Set();
+  const terreno = criarTerreno(palco.terreno, fase, o.tileset ?? null, temaDaFase(ctx), quebraveis);
   const projecao = () => camera.projecaoAtual;
   const sprites = new CamadaEntidades(palco.entidades, {
     idLocal,
@@ -206,12 +213,21 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     ticksDe(ctx.balance.economia.bauCongelaMs),
     { camada: palco.entidades, projecao },
     (id) => ctx.conteudo.itens.get(id)?.icone,
+    temaDaFase(ctx)?.paleta ?? null,
   );
+  bus.on('quebrou', (ev) => {
+    ap.particulas.emitir(presetDaQuebra(ev.forma), ev.x, ev.y, 0x9ad8ff);
+  });
   const fluxo = new CamadaFluxo(palco.chao, () => ap.particulas.limite > 0, () => ticksDe(ctx.balance.armadilhas.desarmeMs), () => ticksDe(ctx.balance.portas.esperaMs));
   bus.on('armadilhaDisparou', (ev) => {
     if (ev.x !== undefined && ev.y !== undefined) fluxo.disparou(ev.x, ev.y, ev.tick);
   });
-  const portas = new CamadaPortas(palco.chao, fase, ticksDe(ctx.balance.portas.janelaPortaBossMs), { camada: palco.entidades, projecao });
+  const temaPorId = (id: string | null | undefined) => (id ? (ctx.conteudo.temas.get(id) ?? null) : null);
+  const portas = new CamadaPortas(palco.chao, fase, ticksDe(ctx.balance.portas.janelaPortaBossMs), {
+    emPe: { camada: palco.entidades, projecao },
+    destinos: { saida: temaPorId(o.portais?.saida), retorno: temaPorId(o.portais?.retorno), aqui: temaDaFase(ctx) },
+    particulas: ap.particulas,
+  });
   const numeros = new CamadaNumeros(palco.efeitos, ap.movimentoReduzido, projecao);
   visao = await montarVisao({
     palco,
@@ -220,6 +236,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     corParede: o.tileset?.corParede ?? temaDaFase(ctx)?.paleta.paredeTopo ?? null,
     terreno,
     tema: temaDaFase(ctx),
+    quebraveis,
     aoTrocar: () => {
       sprites.reiniciarVisual();
       objetos.reiniciarVisual();
@@ -239,15 +256,24 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   };
 
   // Toque ou clique num hostil seleciona e trava o alvo (no travado, destrava: D-065); em outra célula, vai até ela.
-  const aoTocarCelula = (c: Celula, ponto: Celula = c) => {
+  // Marco 26 (D-115): devolve se andou (o mouse segurado só guia quando o clique não foi num alvo).
+  const golpeQuebravel = criarGolpeNoQuebravel({ ctx, estado: o.estado, jogador, emitir });
+  const aoTocarCelula = (c: Celula, ponto: Celula = c): boolean => {
     const local = jogador();
+    // Marco 26 (D-113): no quebrável, o golpe (ou o caminho até ele); não guia como o joystick.
+    if (golpeQuebravel.tocar(c, performance.now())) return false;
+    golpeQuebravel.esquecer();
     const hostil = o.estado().entidades.find((e) => {
       const oc = celulaOcupada(e);
       return oc.x === c.x && oc.y === c.y && !!local && podeFerir(local, e, ctx.modo) && !e.morto;
     });
-    if (!hostil) emitir({ t: 'irPara', x: ponto.x, y: ponto.y });
-    else if (local?.alvoSelecionado === hostil.id && local.alvoTravado) emitir({ t: 'selecionarAlvo', alvo: hostil.id, travar: false });
+    if (!hostil) {
+      emitir({ t: 'irPara', x: ponto.x, y: ponto.y });
+      return true;
+    }
+    if (local?.alvoSelecionado === hostil.id && local.alvoTravado) emitir({ t: 'selecionarAlvo', alvo: hostil.id, travar: false });
     else emitir({ t: 'selecionarAlvo', alvo: hostil.id });
+    return false;
   };
   // Ajuste de 15/10/2026 (D-065): Q / botão de alvo trocam para o hostil seguinte (e travam); T / segurar o botão trava ou destrava.
   const trocarAlvo = (sentido: 1 | -1) => {
@@ -360,6 +386,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       tipo: prefs.controle,
       direcional,
       aoMudarDirecao: (rumo) => {
+        golpeQuebravel.esquecer();
         emitir(comandoMover(rumo));
       },
       principal: botaoUltimate.elemento,
@@ -472,7 +499,19 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     aoMochila: mochila.alternar,
     bloqueado: () => mochila.aberta() || loja.aberta() || ap.menuAberto() || seletor.aberto(),
   });
-  ligarPonteiro(palco.canvas, { camera, aoIrPara: aoTocarCelula });
+  // Marco 26 (26/10/2026, D-115): com mouse, segurar o botão guia como o joystick (o vetor até o cursor).
+  let posicaoVisual: { x: number; y: number } | null = null;
+  const ponteiro = ligarPonteiro(palco.canvas, {
+    camera,
+    aoIrPara: aoTocarCelula,
+    guiar: {
+      posicaoNaTela: () => (posicaoVisual ? camera.paraTela(posicaoVisual.x, posicaoVisual.y) : null),
+      aoMudarDirecao: (rumo) => {
+        emitir(comandoMover(rumo));
+      },
+      isometrico,
+    },
+  });
   palco.canvas.addEventListener('contextmenu', (ev) => {
     ev.preventDefault();
   });
@@ -533,7 +572,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
         celulaCentralizada = true;
       }
       camera.seguirCelula({ x: j.x, y: j.y });
-      camera.atualizar(dtS, q.posicao(j), velocidade(j.atributos.destreza, ctx.balance.movimento.velocidadeBaseMs));
+      posicaoVisual = q.posicao(j);
+      camera.atualizar(dtS, posicaoVisual, velocidade(j.atributos.destreza, ctx.balance.movimento.velocidadeBaseMs));
       sincronizarBarra(j);
       barra.atualizar((h) => ({
         recarga: h.recargaMs > 0 ? recargaRestante(estado, j.id, h.id) / ticksDe(h.recargaMs) : 0,
@@ -542,6 +582,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
         ...(h.efeitos.some((ef) => ef.tipo === 'drenar_invocacao') && dizimoErgue(estado, ctx, j) && { icone: 'invocar', dica: t('habilidades.dizimoErgue') }),
       }));
     }
+    ponteiro.atualizar(q.agoraMs);
+    golpeQuebravel.atualizar(performance.now());
     hud.atualizar(j, estado.tick, identidadeDaClasse(ctx, j, estado.tick));
     feedback.conferirBasico();
     const alvo = j?.alvoSelecionado ? estado.entidades.find((e) => e.id === j.alvoSelecionado) : undefined;

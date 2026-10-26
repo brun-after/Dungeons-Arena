@@ -28,7 +28,7 @@ import { regenerarPorPasso } from '../progression/recursos';
 import { bloqueia, celulaLivrePara, ordemRotativa } from './colisao';
 import { corpoCabe, suavizarCaminho, type Barreira } from './corpo';
 import { passavel } from './fase';
-import { caminho, caminhoComCusto } from './navegacao';
+import { alcancavelMaisPerto, caminho, caminhoComCusto } from './navegacao';
 
 export const VETOR_DIR: Readonly<Record<Dir8, readonly [number, number]>> = {
   N: [0, -1],
@@ -119,6 +119,39 @@ export function planejarCaminho(
   e.rumoY = 0;
   e.caminho = pontos;
   e.waypoints = [];
+  return true;
+}
+
+/** O passo da busca do ponto mais longe em linha reta (em células). */
+const PASSO_RETA = 0.1;
+
+/**
+ * Marco 26 (26/10/2026, D-114): o `irPara` do jogador nunca se perde. O ponto fica dentro do mapa; sem caminho até
+ * ele (parede, vazio, longe demais), vai à célula alcançável mais perto do ponto; se essa é a própria, anda em linha
+ * reta na direção do clique até onde o corpo cabe. A IA continua com `planejarCaminho`.
+ */
+export function planejarIrPara(e: Entidade, destino: Celula, ctx: ContextoSimulacao, tick: number, saida: EventoSimulacao[]): boolean {
+  const fase = ctx.fase;
+  const ponto = { x: Math.min(fase.largura - 1, Math.max(0, destino.x)), y: Math.min(fase.altura - 1, Math.max(0, destino.y)) };
+  if (planejarCaminho(e, ponto, ctx, tick, [])) return true;
+  const perto = alcancavelMaisPerto(fase, { x: e.x, y: e.y }, ponto, ctx.balance.navegacao.maxPassosToque);
+  if (perto.x !== e.x || perto.y !== e.y) return planejarCaminho(e, perto, ctx, tick, saida);
+  // A própria célula é a mais perto: em linha reta, até onde o corpo cabe.
+  const dx = ponto.x - e.px;
+  const dy = ponto.y - e.py;
+  const d = Math.sqrt(dx * dx + dy * dy);
+  const r = ctx.balance.movimento.raioCorpo;
+  let alcance = 0;
+  for (let s = PASSO_RETA; s <= d + EPS; s += PASSO_RETA) {
+    if (!corpoCabe(fase, e.px + (dx / d) * s, e.py + (dy / d) * s, r)) break;
+    alcance = s;
+  }
+  if (alcance < CHEGOU) {
+    saida.push({ t: 'caminhoFalhou', tick, id: e.id, status: 'inacessivel' });
+    return false;
+  }
+  pararMovimento(e);
+  e.caminho = [{ x: e.px + (dx / d) * alcance, y: e.py + (dy / d) * alcance }];
   return true;
 }
 

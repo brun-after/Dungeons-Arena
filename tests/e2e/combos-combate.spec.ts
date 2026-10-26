@@ -46,7 +46,7 @@ test('Estaca, Névoa e Abalo concluem Prisão pestilenta e o diário persiste', 
   const mochila = page.getByRole('dialog', { name:'Mochila' });
   await mochila.getByRole('button', { name:/Habilidades/ }).click();
   await mochila.locator('.catalogo-combos summary').click();
-  await expect(mochila.locator('[data-combo="prisao_pestilenta"]')).toContainText('Estaca de pedra / Névoa venenosa / Abalo sísmico');
+  await expect(mochila.locator('[data-combo="prisao_pestilenta"]')).toContainText('Estaca de pedra › Névoa venenosa › Abalo sísmico');
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name:'Salvar e voltar aos slots' }).click();
   const baixarFinal = page.waitForEvent('download');

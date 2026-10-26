@@ -20,6 +20,7 @@ import { aplicarImpacto } from './golpe';
 import type { Habilidade } from './habilidades';
 import { quantidadeDeSaltos, saltar } from './saltos';
 import { aoAcertarTiroCheio, aoFimDoTiroCheio, noCaminhoDoTiroCheio } from './sintonia-arqueiro';
+import { quebrar, quebraQuem, quebravelEm } from './quebraveis';
 
 /** Sub-passo máximo da integração, em células: nenhum alvo é atravessado sem teste. */
 const SUBPASSO = 0.25;
@@ -82,6 +83,18 @@ function alvoNaCelula(estado: EstadoJogo, ctx: ContextoSimulacao, p: Projetil, c
   return escolhido;
 }
 
+/** O quebrável na célula do projétil, fora da célula de quem atirou (quem atira de cima de um barril). */
+function quebrouNoCaminho(estado: EstadoJogo, ctx: ContextoSimulacao, p: Projetil, cx: number, cy: number, saida: EventoSimulacao[]): boolean {
+  const o = quebravelEm(estado, cx, cy);
+  if (!o) return false;
+  const dono = buscarEntidade(estado, p.donoId);
+  if (!dono || !quebraQuem(estado, dono)) return false;
+  const daqui = celulaOcupada(dono);
+  if (daqui.x === cx && daqui.y === cy) return false;
+  quebrar(estado, ctx, o, dono.id, saida);
+  return true;
+}
+
 export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[], dtMs: number): void {
   const restantes: Projetil[] = [];
   for (const p of estado.projeteis) {
@@ -96,6 +109,11 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
       }
       // Marco 24 (D-095): o tiro cheio do Arqueiro deixa fogo e cura aliados no caminho, conforme a sintonia.
       if (p.carregado) noCaminhoDoTiroCheio(estado, ctx, p, cx, cy, saida);
+      // Marco 26 (D-113): o tiro do lado do jogador quebra o quebrável no caminho e para nele (o que atravessa segue).
+      if (quebrouNoCaminho(estado, ctx, p, cx, cy, saida) && !p.atravessa) {
+        fim = 'acertou';
+        break;
+      }
       const alvo = alvoNaCelula(estado, ctx, p, cx, cy);
       const resolvida = resolverHabilidade(ctx, p.chave);
       const base = resolvida && p.magico ? { ...resolvida, tipoAtaque: 'magico' as const } : resolvida;

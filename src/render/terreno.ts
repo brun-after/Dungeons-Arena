@@ -146,7 +146,14 @@ interface Bloco {
   y1: number;
 }
 
-export function criarTerreno(camada: Container, fase: Fase, tileset: TexturasTileset | null = null, tema: Tema | null = null): Terreno {
+export function criarTerreno(
+  camada: Container,
+  fase: Fase,
+  tileset: TexturasTileset | null = null,
+  tema: Tema | null = null,
+  /** Marco 26 (D-113): os enfeites que vêm do estado (os quebráveis), desenhados por render/objetos.ts. */
+  pular: ReadonlySet<string> = new Set(),
+): Terreno {
   const blocos: Bloco[] = [];
   const paleta: Paleta = tema ? tema.paleta : paletaDe(fase.matizGraus);
   let iso = false;
@@ -154,6 +161,7 @@ export function criarTerreno(camada: Container, fase: Fase, tileset: TexturasTil
   const enfeites = new Map<number, Decoracao[]>();
   const porLinhaBlocos = Math.ceil(fase.largura / BLOCO_CELULAS);
   for (const d of decoracoesDaFase(fase, tema)) {
+    if (pular.has(d.tipo)) continue;
     const chave = Math.floor(d.y / BLOCO_CELULAS) * porLinhaBlocos + Math.floor(d.x / BLOCO_CELULAS);
     const lista = enfeites.get(chave) ?? [];
     lista.push(d);

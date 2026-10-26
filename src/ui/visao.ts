@@ -27,6 +27,8 @@ export interface OpcoesVisao {
   tema?: Tema | null;
   /** Depois de trocar a visão ou o token: as camadas refazem o que depende disso. */
   aoTrocar: () => void;
+  /** Marco 26 (D-113): os tipos de enfeite que vêm do estado (os quebráveis); o terreno e o isométrico os pulam. */
+  quebraveis?: ReadonlySet<string>;
 }
 
 export interface TokenProprio {
@@ -54,7 +56,7 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
     paredes?.destruir();
     enfeites?.destruir();
     paredes = iso ? criarParedesIso(palco.entidades, fase, p, o.corParede ?? null) : null;
-    enfeites = iso ? criarDecoracaoIso(palco.entidades, fase, o.tema ?? null, p) : null;
+    enfeites = iso ? criarDecoracaoIso(palco.entidades, fase, o.tema ?? null, p, o.quebraveis) : null;
     o.terreno?.definirVisao(iso);
     document.body.dataset.visao = p.visao;
   };

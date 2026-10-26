@@ -205,6 +205,8 @@ export type EventoSimulacao =
   | { t: 'iaPerseguindo'; tick: number; id: EntidadeId; alvoId: EntidadeId }
   | { t: 'iaDesistiu'; tick: number; id: EntidadeId; alvoId: EntidadeId }
   | { t: 'objetoSurgiu'; tick: number; objetoId: string; tipo: TipoObjeto; x: number; y: number }
+  /** Marco 26 (D-113): um quebrável quebrou (`forma` é o tipo do enfeite, para as lascas e o som). */
+  | { t: 'quebrou'; tick: number; objetoId: string; forma: string; x: number; y: number; porId: EntidadeId }
   | { t: 'coletou'; tick: number; id: EntidadeId; objetoId: string; tipo: TipoObjeto; ganho: number; itemId: string | null }
   | { t: 'equipou'; tick: number; id: EntidadeId; itemId: string; slot: Slot }
   | { t: 'usouItem'; tick: number; id: EntidadeId; itemId: string; hp: number; mana: number }

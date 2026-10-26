@@ -26,6 +26,7 @@ import type { FonteDeDano } from './dano';
 import { acaoBloqueada, aplicarEfeito, bonusAtaqueBasico, multiplicadorDanoCausado, REGISTRO_EFEITOS } from './efeitos';
 import { excedeLimite } from './efeitos-fluxo';
 import { alvosDaForma, celulasDaForma, deSuporte } from './formas';
+import { quebrarEm } from './quebraveis';
 import { celulaOcupada, chebyshev } from './geometria';
 import { aplicarImpacto } from './golpe';
 import type { Habilidade } from './habilidades';
@@ -410,7 +411,11 @@ function lancar(
       aplicarImpacto(estado, ctx, ator, { ...base, indice: 0 }, saida);
       break;
     case 'contato': {
-      if (!alvo) break;
+      // Marco 26 (D-113): o golpe mirado numa célula (sem alvo) quebra o que houver nela.
+      if (!alvo) {
+        quebrarEm(estado, ctx, [mira], ator, saida);
+        break;
+      }
       const origem = celulaOcupada(ator);
       if (!falcaoChegou && chebyshev(origem, celulaOcupada(alvo)) > alcance) {
         saida.push({ t: 'esquivou', tick: estado.tick, acaoId, atorId: ator.id, alvoId: alvo.id });
@@ -437,7 +442,10 @@ function lancar(
     }
     case 'area': {
       // Marco 24 (D-095): o Mago encarnado em terra alcança +1 de raio nas magias de área.
-      const atingidos = alvosDaForma(estado, ctx, ator, hab, celulasDaForma(raioAreaDaEncarnacao(ctx, ator, hab, estado.tick), origemDaHabilidade(estado, ator, hab), mira, ctx.fase));
+      const celulas = celulasDaForma(raioAreaDaEncarnacao(ctx, ator, hab, estado.tick), origemDaHabilidade(estado, ator, hab), mira, ctx.fase);
+      const atingidos = alvosDaForma(estado, ctx, ator, hab, celulas);
+      // Marco 26 (D-113): a área quebra os quebráveis que pega.
+      if (!deSuporte(hab)) quebrarEm(estado, ctx, celulas, ator, saida);
       const principal = [...atingidos].sort((a, b) => chebyshev(celulaOcupada(a), mira) - chebyshev(celulaOcupada(b), mira) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))[0];
       atingidos.forEach((e, indice) => {
         aplicarImpacto(estado, ctx, e, { ...base, indice, secundario: e !== principal }, saida);

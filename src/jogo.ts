@@ -39,6 +39,8 @@ import { avancarFase, personagemNoInicio } from './save/transicao';
 import { chegadaNaFase, comRetorno, faseAnterior, referenciaConhecida } from './save/retorno';
 import { mostrarAviso } from './ui/aviso';
 import { montarCena } from './ui/cena';
+import { temasDosPortais } from './save/destinos';
+import { povoarQuebraveis } from './world/populacao';
 import { mostrarEscolhaDeClasse } from './ui/escolha-classe';
 import { criarPesquisa } from './ui/pesquisa';
 import { validarFase } from './world/validacao-fase';
@@ -173,6 +175,8 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
   const contextoBase = montarContexto(conteudo, validacao.fase);
   const ctx = { ...contextoBase, fase: comRetorno(contextoBase.fase, faseRef) };
   const estado = leitura?.estado ?? novoEstado(ctx, teste ? await personagemAtual() : null, opcoes.classe);
+  // Marco 26 (D-113): a fase gravada antes dos quebráveis ganha os seus uma vez (as de depois já os têm).
+  if (ctx.modo.objetosDeFase) povoarQuebraveis(estado, ctx);
   const idJogador = jogadorDoSave(estado)?.id ?? ID_JOGADOR;
   // Marco 17 (D-063): todo personagem ganha uma identidade (o certificado da arena se prende a ela).
   const bolsaDoJogador = jogadorDoSave(estado)?.bolsa;
@@ -250,6 +254,8 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     estado: () => estado,
     emitir: (cmd: Comando) => enfileirar(fila, { tick: estado.tick, entidadeId: idJogador, cmd }),
     acoesExtras,
+    // Marco 26 (D-112): os portais mostram a fase para onde levam.
+    portais: temasDosPortais(faseRef, referenciasFases),
     // Marco 12: a campanha pausa (§2.15); o menu de pausa também salva e sai.
     pausaOJogo: true,
     dificuldade: { atual: () => estado.dificuldade, definir: definirDificuldade },

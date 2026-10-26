@@ -39,7 +39,8 @@ test('Necromante é selecionável ao criar um personagem', async ({ page }) => {
   await page.goto('/?jogo=campanha&slot=1');
   const cartao = page.locator('[data-classe="necromante"]');
   await expect(cartao.getByRole('heading', { name: 'Necromante', exact: true })).toBeVisible();
-  await expect(cartao).toContainText('Trevas');
+  // Marco 26 (D-110): a seleção mostra a lore e o estilo; as afinidades foram para o Dom da classe, na mochila.
+  await expect(cartao).toContainText('Estilo:');
   await cartao.getByRole('link', { name: 'Jogar de Necromante' }).click();
   await expect(page.getByTestId('habilidade-dizimo_vital')).toBeVisible({ timeout: 30000 });
   // Marco 24 (D-094): o kit inicial é Dardo funesto e Dízimo vital (classe) e a Barreira (geral).
@@ -60,8 +61,11 @@ test('passiva, reanimado, eco e Dízimo funcionam e persistem no save', async ({
   const mochila = page.getByRole('dialog', { name: 'Mochila' });
   await mochila.getByRole('button', { name: /^Habilidades/ }).click();
   await mochila.getByText('Combos da sua build', { exact: true }).click();
-  await expect(mochila.getByText('Sepultura aberta', { exact: true })).toBeVisible();
-  await expect(mochila.getByText('Tributo da legião', { exact: true })).toBeVisible();
+  // Marco 26 (D-111): os combos saem da barra, não das conhecidas; as skills do combo só foram aprendidas, então
+  // o painel pede para equipá-las, e nenhum nome de combo não descoberto aparece.
+  await expect(mochila.getByText(/Equipe habilidades que combinem/)).toBeVisible();
+  await expect(mochila.getByText('Sepultura aberta', { exact: true })).toHaveCount(0);
+  await expect(mochila.getByText('Tributo da legião', { exact: true })).toHaveCount(0);
   await mochila.getByRole('button', { name: 'Fechar a mochila' }).click();
   await page.getByRole('button', { name: 'Salvar e voltar aos slots' }).click();
   const download = page.waitForEvent('download');
