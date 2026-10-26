@@ -22,6 +22,7 @@ import { ticksDe } from '../core/tempo';
 import { SLOTS_BARRA, type Entidade, type PontoVisual } from '../entities/entidade';
 import { t } from '../i18n';
 import { ligarPonteiro } from '../input/ponteiro';
+import { comandoMover } from '../input/direcao';
 import { ligarTeclado, type Teclado } from '../input/teclado';
 import { podeFerir } from '../modos/relacao';
 import { consumiveisComAtalho } from '../progression/inventario';
@@ -175,6 +176,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       if (p.sentidoToken !== aparencia.sentidoToken || p.tamanhoToken !== aparencia.tamanhoToken) sprites.reiniciarVisual();
       aparencia = p;
       visao?.definir(p.visao);
+      controles?.atualizarVisao();
     },
   });
   const terreno = criarTerreno(palco.terreno, fase, o.tileset ?? null, temaDaFase(ctx));
@@ -224,19 +226,20 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     aparencia = { ...lerPreferencias(), visao: nova };
     gravarPreferencias(aparencia);
     visao.definir(nova);
+    controles?.atualizarVisao();
   };
   const usarHabilidade = (id: string) => {
     emitir({ t: 'usarHabilidade', id });
   };
 
   // Toque ou clique num hostil seleciona e trava o alvo (no travado, destrava: D-065); em outra célula, vai até ela.
-  const aoTocarCelula = (c: Celula) => {
+  const aoTocarCelula = (c: Celula, ponto: Celula = c) => {
     const local = jogador();
     const hostil = o.estado().entidades.find((e) => {
       const oc = celulaOcupada(e);
       return oc.x === c.x && oc.y === c.y && !!local && podeFerir(local, e, ctx.modo) && !e.morto;
     });
-    if (!hostil) emitir({ t: 'irPara', x: c.x, y: c.y });
+    if (!hostil) emitir({ t: 'irPara', x: ponto.x, y: ponto.y });
     else if (local?.alvoSelecionado === hostil.id && local.alvoTravado) emitir({ t: 'selecionarAlvo', alvo: hostil.id, travar: false });
     else emitir({ t: 'selecionarAlvo', alvo: hostil.id });
   };
@@ -349,8 +352,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   if (toque) {
     controles = criarControles({
       tipo: prefs.controle,
-      aoMudarDirecao: (dir) => {
-        emitir({ t: 'mover', dir });
+      aoMudarDirecao: (rumo) => {
+        emitir(comandoMover(rumo));
       },
       principal: botaoUltimate.elemento,
       aoInteragir: () => {
@@ -426,8 +429,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   });
 
   teclado = ligarTeclado({
-    aoMudarDirecao: (dir) => {
-      emitir({ t: 'mover', dir });
+    aoMudarDirecao: (rumo) => {
+      emitir(comandoMover(rumo));
     },
     aoAtacar: () => {
       emitir({ t: 'ataqueBasico' });
@@ -569,6 +572,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
         // Marco 26 (D-104): a célula onde o movimento em curso termina (parado: a própria).
         destino: ((fim) => (fim ? { x: Math.round(fim.x), y: Math.round(fim.y) } : { x: j?.x ?? 0, y: j?.y ?? 0 }))(j?.caminho.at(-1) ?? j?.waypoints.at(-1)),
         tela: camera.paraTela(p.x, p.y),
+        pos: { x: j?.px ?? 0, y: j?.py ?? 0 },
         grade: [camera.paraTela(j?.x ?? 0, j?.y ?? 0), camera.paraTela((j?.x ?? 0) + 1, j?.y ?? 0), camera.paraTela(j?.x ?? 0, (j?.y ?? 0) + 1)],
         entidades: estado.entidades.length,
         impactos: feedback.impactos(),

@@ -24,6 +24,8 @@ export interface DadosDiagnostico {
   celula: { x: number; y: number };
   /** Marco 24 (D-099): a célula para onde o passo em curso vai (igual à célula quando parado); os testes param na porta. */
   destino?: { x: number; y: number };
+  /** Marco 26 (D-104): a posição contínua do jogador, em células (os testes conferem que o clique anda em reta). */
+  pos?: { x: number; y: number };
   /** Marco 24 (D-099): a célula do jogador e as duas vizinhas (+x, +y) na tela; os testes clicam numa célula exata. */
   grade?: readonly { x: number; y: number }[];
   tela: { x: number; y: number };
@@ -92,6 +94,7 @@ export class Diagnostico {
     this.elemento.dataset.tick = String(d.tick);
     this.elemento.dataset.celula = `${d.celula.x},${d.celula.y}`;
     if (d.destino) this.elemento.dataset.destino = `${d.destino.x},${d.destino.y}`;
+    if (d.pos) this.elemento.dataset.pos = `${d.pos.x.toFixed(3)},${d.pos.y.toFixed(3)}`;
     if (d.grade) this.elemento.dataset.grade = d.grade.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(',');
     this.elemento.dataset.tela = `${Math.round(d.tela.x)},${Math.round(d.tela.y)}`;
     this.elemento.dataset.impactos = String(d.impactos);

@@ -74,6 +74,15 @@ export function celulaSobProjetado(p: Projecao, x: number, y: number): { x: numb
   return { x: Math.floor(plano.x / CELULA_PX), y: Math.floor(plano.y / CELULA_PX) };
 }
 
+/**
+ * Marco 26 (25/10/2026, D-104): o ponto contínuo da fase sob um ponto do mundo projetado, em células (o centro de
+ * uma célula é o inteiro), arredondado a centésimos (o comando irPara vai pela rede).
+ */
+export function pontoSobProjetado(p: Projecao, x: number, y: number): { x: number; y: number } {
+  const plano = p.desprojetar(x, y);
+  return { x: Math.round((plano.x / CELULA_PX - 0.5) * 100) / 100, y: Math.round((plano.y / CELULA_PX - 0.5) * 100) / 100 };
+}
+
 /** Profundidade de desenho de algo em pé: o Y projetado (no isométrico, cresce com x + y). */
 export function profundidade(p: Projecao, cx: number, cy: number): number {
   const c = centroDaCelula(cx, cy);

@@ -20,7 +20,7 @@ import {
   type LimitesZoom,
   type Vista,
 } from './camera-calculo';
-import { celulaSobProjetado, centroDaCelula, type Projecao } from './projecao';
+import { celulaSobProjetado, centroDaCelula, pontoSobProjetado, type Projecao } from './projecao';
 
 /** Depois de mexer na câmera à mão, o "enquadrar dois" espera 4 s (§2.4). */
 export const JANELA_MANUAL_MS = 4000;
@@ -173,6 +173,11 @@ export class Camera {
 
   celulaSob(sx: number, sy: number): Celula {
     return celulaSobProjetado(this.projecao, this.x + sx / this.zoom, this.y + sy / this.zoom);
+  }
+
+  /** Marco 26 (D-104): o ponto contínuo da fase sob o ponto da tela (o irPara vai ao ponto tocado). */
+  pontoSob(sx: number, sy: number): Celula {
+    return pontoSobProjetado(this.projecao, this.x + sx / this.zoom, this.y + sy / this.zoom);
   }
 
   /** Centro de uma posição (em células) em px de tela. */

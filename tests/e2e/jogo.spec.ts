@@ -11,7 +11,7 @@ async function abrir(page: Page) {
   return { diag, erros };
 }
 
-async function ler(diag: Locator, atributo: 'celula' | 'tela'): Promise<[number, number]> {
+async function ler(diag: Locator, atributo: 'celula' | 'tela' | 'pos'): Promise<[number, number]> {
   const valor = (await diag.getAttribute(`data-${atributo}`)) ?? '0,0';
   const [a = 0, b = 0] = valor.split(',').map(Number);
   return [a, b];
@@ -78,12 +78,17 @@ test.describe('desktop', () => {
     await page.keyboard.up('d');
     await esperarParado(page, diag);
 
-    const [x, y] = await ler(diag, 'celula');
+    const [px, py] = await ler(diag, 'pos');
     const [tx, ty] = await ler(diag, 'tela');
-    // Zoom inicial 1: uma célula = 48 px. Clica na célula (3,3) da sala inicial: livre (longe do
+    // Zoom inicial 1: uma célula = 48 px. Clica no centro da célula (3,3) da sala inicial: livre (longe do
     // boneco de treino, que seleciona alvo em vez de andar) e alcançável de onde o jogador estiver.
-    await page.mouse.click(tx + (3 - x) * 48, ty + (3 - y) * 48);
-    await expect.poll(async () => ler(diag, 'celula'), { timeout: 15_000 }).toEqual([3, 3]);
+    await page.mouse.click(tx + (3 - px) * 48, ty + (3 - py) * 48);
+    // Marco 26 (D-104): o caminho é uma reta, sem escadinha — toda posição no trajeto fica rente à linha.
+    const trajeto: [number, number][] = [];
+    const amostrar = async () => (trajeto.push(await ler(diag, 'pos')), ler(diag, 'celula'));
+    await expect.poll(amostrar, { timeout: 15_000, intervals: [30] }).toEqual([3, 3]);
+    const desvio = (x: number, y: number) => Math.abs((x - px) * (3 - py) - (y - py) * (3 - px)) / Math.hypot(3 - px, 3 - py);
+    expect(Math.max(...trajeto.map(([x, y]) => desvio(x, y)))).toBeLessThan(0.1);
     expect(erros).toEqual([]);
   });
 
@@ -468,9 +473,10 @@ test.describe('desktop', () => {
     expect((await ler(diag, 'celula'))[1]).toBeLessThanOrEqual(y0);
     await esperarParado(page, diag);
 
-    // Zoom 1: a célula (3, 3) fica no losango projetado, a partir do centro do jogador na tela.
+    // Zoom 1: a célula (3, 3) fica no losango projetado, a partir do centro da célula do jogador na tela (marco 26: o
+    // jogador anda livre e pode parar fora do centro da célula).
     const [x, y] = await ler(diag, 'celula');
-    const [tx, ty] = await ler(diag, 'tela');
+    const [tx = 0, ty = 0] = ((await diag.getAttribute('data-grade')) ?? '').split(',').map(Number);
     const k = 48 * Math.SQRT1_2;
     const dx = 3 - x;
     const dy = 3 - y;

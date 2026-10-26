@@ -9,7 +9,7 @@ import { passavel } from '../../src/world/fase';
 import type { ContextoSimulacao } from '../../src/core/contexto';
 import { DT_MS } from '../../src/core/loop';
 import type { EventoSimulacao } from '../../src/core/eventos-simulacao';
-import { vivo, type Entidade } from '../../src/entities/entidade';
+import { posicionar, vivo, type Entidade } from '../../src/entities/entidade';
 import type { Dificuldade } from '../../src/modos/dificuldade';
 import { guardarItem } from '../../src/progression/inventario';
 import { recalcularFicha } from '../../src/progression/derivados';
@@ -169,8 +169,8 @@ export function pvpLivre(classe: string, semente: number, nivel: number): { temp
   const m = mundo(ctx, semente, []);
   const a = entrarNaArena(m.estado, ctx, 'jogador-1', 'j1', ficha, 'A');
   const b = entrarNaArena(m.estado, ctx, 'jogador-2', 'j2', ficha, 'B');
-  Object.assign(a, { x: 6, y: 9, destinoX: 6, destinoY: 9 });
-  Object.assign(b, { x: 10, y: 9, destinoX: 10, destinoY: 9 });
+  posicionar(a, 6, 9);
+  posicionar(b, 10, 9);
   m.bots.push(new BotDeDuelo('j1'), new BotDeDuelo('j2'));
   // Marco 22 (D-090): só a queda de um dos dois personagens encerra (a de uma invocação, não).
   const caiu = (e: EventoSimulacao) => e.t === 'morreu' && (e.id === 'j1' || e.id === 'j2');

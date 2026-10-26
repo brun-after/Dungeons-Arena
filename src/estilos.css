@@ -260,6 +260,11 @@ body.toque .faixa-controles {
   border-bottom-right-radius: 14px;
 }
 
+/* Marco 26 (25/10/2026, D-105): no isométrico, o anel gira com o mapa (a mesma projeção 2:1 do terreno). */
+.dpad.iso {
+  transform: scale(0.9) scaleY(0.5) rotate(45deg);
+}
+
 .dpad-botao.pressionado {
   transform: scale(0.88);
   background: rgba(52, 152, 219, 0.85);

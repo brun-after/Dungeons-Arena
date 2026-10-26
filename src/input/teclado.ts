@@ -1,8 +1,8 @@
 // Teclado (§2.3): teclas mantidas viram estado direcional. Emite só início, mudança e parada;
-// a repetição automática do sistema operacional não gera comandos.
+// a repetição automática do sistema operacional não gera comandos. Marco 26 (D-105): as 8 direções de tela vão à
+// fase pela inversa da projeção (no isométrico, a seta para a direita anda para a direita na tela).
 
-import type { Dir8 } from '../core/comandos';
-import { dirDeVetor, remapearParaGrade } from './direcao';
+import { dirDeVetor, PARADO, rumoDaTela, type Rumo } from './direcao';
 
 const EIXOS: Readonly<Record<string, readonly [number, number]>> = {
   KeyW: [0, -1],
@@ -16,7 +16,7 @@ const EIXOS: Readonly<Record<string, readonly [number, number]>> = {
 };
 
 export interface OpcoesTeclado {
-  aoMudarDirecao: (dir: Dir8 | 'parado') => void;
+  aoMudarDirecao: (rumo: Rumo) => void;
   aoAtacar: () => void;
   /** Teclas 1–9 e 0 (§2.10): índice 0 a 9. */
   aoAtalho: (indice: number) => void;
@@ -62,7 +62,7 @@ export function indiceDoAtalho(codigo: string): number {
 /** Liga o teclado. */
 export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
   const pressionadas = new Set<string>();
-  let atual: Dir8 | 'parado' = 'parado';
+  let atual: Rumo = PARADO;
 
   const recalcular = () => {
     let dx = 0;
@@ -74,10 +74,10 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
         dy += eixo[1];
       }
     }
-    const dir = remapearParaGrade(dirDeVetor(dx, dy), opcoes.isometrico());
-    if (dir !== atual) {
-      atual = dir;
-      opcoes.aoMudarDirecao(dir);
+    const rumo = rumoDaTela(dirDeVetor(dx, dy), opcoes.isometrico());
+    if (rumo.dx !== atual.dx || rumo.dy !== atual.dy || rumo.dir !== atual.dir) {
+      atual = rumo;
+      opcoes.aoMudarDirecao(rumo);
     }
   };
 
