@@ -233,8 +233,17 @@ export function iniciarAcao(
     } else if (ator.hp >= ator.hpMax) return recusar('vida_cheia');
   }
   // Em volta de quem conjura (ao redor, aliados): a mira é a própria célula.
-  const mira = hab.tipoArea === 'ao_redor' ? origem : (celula ?? celulaOcupada(alvo as Entidade));
-  if (chebyshev(origem, mira) > alcanceDe(ctx, ator, hab, estado.tick)) return recusar('fora_de_alcance');
+  let mira = hab.tipoArea === 'ao_redor' ? origem : (celula ?? celulaOcupada(alvo as Entidade));
+  const alcance = alcanceDe(ctx, ator, hab, estado.tick);
+  if (chebyshev(origem, mira) > alcance) {
+    // Marco 26 (28/10/2026, D-119): o alvo longe demais dá lugar ao mais próximo no alcance (hostil ou, no suporte,
+    // o aliado mais ferido); só a mira numa célula continua sendo recusada.
+    const perto = !celula && alvo && alvo !== ator && ator.controlador !== 'ia' ? (deSuporte(hab) ? aliadoMaisFerido(estado, ctx, ator, alcance, origem) : autoAlvo(estado, ctx, ator, alcance, undefined, origem)) : null;
+    if (!perto) return recusar('fora_de_alcance');
+    alvo = perto;
+    mira = celulaOcupada(perto);
+    if (!deSuporte(hab)) ator.alvoSelecionado = perto.id;
+  }
 
   if (substituiBasico) cancelar(ator, estado, 'substituido', saida);
   // Marco 24 (D-097): quem ataca olha para o alvo (decide o "pelas costas" de quem bate nele).

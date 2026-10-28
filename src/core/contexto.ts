@@ -43,6 +43,8 @@ export interface Balance {
     filaMaxWaypoints: number;
     /** Marco 26 (D-104): o raio do corpo redondo, em células (dois corpos que se bloqueiam ficam a 2 raios). */
     raioCorpo: number;
+    /** Marco 26 (28/10/2026, D-120): o avanço e o teleporte passam por paredes dentro do alcance. */
+    dashAtravessaParedes: boolean;
   };
   navegacao: {
     /** Limite da busca para toque no mapa (§2.3). */
@@ -351,6 +353,8 @@ export interface RegrasIa {
   /** Opções mais curtas que a base, com a chance de cada uma (a base fica com o restante). */
   hesitacao: { s: number; chance: number }[];
   hesitacaoBaseS: number;
+  /** Marco 26 (28/10/2026, D-118): o "?" nunca passa disto (depois do preset e da dificuldade). */
+  hesitacaoMaxS: number;
   /** Cada ponto de Carisma acima do neutro multiplica as chances por este fator. */
   fatorCarisma: number;
   maxPassosPerseguicao: number;

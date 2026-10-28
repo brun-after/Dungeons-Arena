@@ -9,7 +9,7 @@ import { ticksDe } from '../../src/core/tempo';
 import { chebyshev } from '../../src/combat/geometria';
 import type { Entidade } from '../../src/entities/entidade';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
-import { sortearHesitacaoS } from '../../src/entities/ia';
+import { hesitacaoComTeto, sortearHesitacaoS } from '../../src/entities/ia';
 import type { PresetInimigo } from '../../src/entities/presets';
 import { verificarInvariantes } from '../sim/harness';
 import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
@@ -61,24 +61,31 @@ describe('hesitação (§2.6)', () => {
     return (s: number) => (contagem.get(s) ?? 0) / n;
   }
 
-  it('segue a tabela: 2 s 10%, 5 s 30%, 7 s 50%, 10 s no restante', () => {
+  // Marco 26 (28/10/2026, D-118): a tabela curta — 0,5 s 35%, 1 s 35%, 1,5 s 20% e a base no restante.
+  it('segue a tabela: 0,5 s 35%, 1 s 35%, 1,5 s 20%, 10 s no restante', () => {
     const p = distribuicao(10, 10);
-    expect(p(2)).toBeCloseTo(0.1, 1);
-    expect(p(5)).toBeCloseTo(0.3, 1);
-    expect(p(7)).toBeCloseTo(0.5, 1);
+    expect(p(0.5)).toBeCloseTo(0.35, 1);
+    expect(p(1)).toBeCloseTo(0.35, 1);
+    expect(p(1.5)).toBeCloseTo(0.2, 1);
     expect(p(10)).toBeCloseTo(0.1, 1);
   });
 
   it('Carisma do alvo faz hesitar mais: cada ponto multiplica as chances curtas por 0.9', () => {
     const p = distribuicao(14, 10);
     const f = 0.9 ** 4;
-    expect(p(2)).toBeCloseTo(0.1 * f, 1);
+    expect(p(0.5)).toBeCloseTo(0.35 * f, 1);
     expect(p(10)).toBeCloseTo(1 - 0.9 * f, 1);
   });
 
   it('o tempo é escalado pela hesitação do preset (D-024)', () => {
     const p = distribuicao(10, 5, 4_000);
-    expect(p(1) + p(2.5) + p(3.5) + p(5)).toBeCloseTo(1, 5);
+    expect(p(0.25) + p(0.5) + p(0.75) + p(5)).toBeCloseTo(1, 5);
+  });
+
+  it('o "?" nunca passa do teto (D-118)', () => {
+    expect(hesitacaoComTeto(10, REGRAS)).toBe(REGRAS.hesitacaoMaxS);
+    expect(hesitacaoComTeto(0.5, REGRAS)).toBe(0.5);
+    expect(REGRAS.hesitacaoMaxS).toBeLessThanOrEqual(2);
   });
 
   it('é reprodutível pela semente', () => {

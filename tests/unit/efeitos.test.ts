@@ -270,12 +270,12 @@ describe('instantâneos', () => {
     expect(j.efeitos).toHaveLength(0);
   });
 
-  it('teleporte só para célula livre e passável', () => {
+  it('teleporte só para célula livre e passável; mirando a parede, cai na livre mais perto dela (D-120)', () => {
     const c = cenario();
     c.aplicar('j', 'teleporte', {}, { x: 8, y: 8 });
     expect([c.ent('j').x, c.ent('j').y]).toEqual([8, 8]);
     c.aplicar('j', 'teleporte', {}, { x: 0, y: 0 });
-    expect([c.ent('j').x, c.ent('j').y]).toEqual([8, 8]);
+    expect([c.ent('j').x, c.ent('j').y]).toEqual([1, 1]);
   });
 
   it('avanço vai em direção à mira, sem passar dela; empurrão afasta e para na parede', () => {

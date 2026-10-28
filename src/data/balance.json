@@ -58,7 +58,8 @@
   "movimento": {
     "velocidadeBaseMs": 400,
     "filaMaxWaypoints": 2,
-    "raioCorpo": 0.32
+    "raioCorpo": 0.32,
+    "dashAtravessaParedes": true
   },
   "navegacao": {
     "maxPassosToque": 60
@@ -70,7 +71,7 @@
   "combate": {
     "multiplicadorAtributoPadrao": 1,
     "autoAtaqueMs": 250,
-    "raioTrocaAlvo": 10,
+    "raioTrocaAlvo": 5,
     "janelaParticipacaoS": 10,
     "carismaNeutro": 10,
     "critico": [
@@ -352,11 +353,12 @@
     "chanceAproximar": 0.1,
     "chanceManter": 0.6,
     "hesitacao": [
-      { "s": 2, "chance": 0.1 },
-      { "s": 5, "chance": 0.3 },
-      { "s": 7, "chance": 0.5 }
+      { "s": 0.5, "chance": 0.35 },
+      { "s": 1, "chance": 0.35 },
+      { "s": 1.5, "chance": 0.2 }
     ],
     "hesitacaoBaseS": 10,
+    "hesitacaoMaxS": 2,
     "fatorCarisma": 0.9,
     "maxPassosPerseguicao": 150,
     "recalcularDistancia": 2,

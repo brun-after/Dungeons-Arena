@@ -40,9 +40,56 @@ function deslizar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, dx: n
   return andou > 0;
 }
 
+/** As células da reta de `de` até `ate` (Bresenham), sem a de partida. */
+export function linhaAte(de: Celula, ate: Celula): Celula[] {
+  const celulas: Celula[] = [];
+  let { x, y } = de;
+  const dx = Math.abs(ate.x - x);
+  const dy = -Math.abs(ate.y - y);
+  const sx = Math.sign(ate.x - x);
+  const sy = Math.sign(ate.y - y);
+  let erro = dx + dy;
+  while (x !== ate.x || y !== ate.y) {
+    const e2 = 2 * erro;
+    if (e2 >= dy) {
+      erro += dy;
+      x += sx;
+    }
+    if (e2 <= dx) {
+      erro += dx;
+      y += sy;
+    }
+    celulas.push({ x, y });
+  }
+  return celulas;
+}
+
+/**
+ * Marco 26 (28/10/2026, D-120): a última célula livre da reta até a mira, em até `passos` células. As paredes do meio
+ * não param quem passa (o dash troca de corredor); fora do mapa ou uma muralha tática encerram a reta.
+ */
+function ultimaLivreNaReta(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, mira: Celula, passos: number): Celula | null {
+  let achada: Celula | null = null;
+  for (const c of linhaAte({ x: e.x, y: e.y }, mira).slice(0, passos)) {
+    // A muralha tática é feita para barrar: ela para o dash (as paredes do mapa, não).
+    if (c.x < 0 || c.y < 0 || c.x >= ctx.fase.largura || c.y >= ctx.fase.altura || muralhaEm(estado, c.x, c.y)) break;
+    if (livre(estado, ctx, e, c.x, c.y)) achada = c;
+  }
+  return achada;
+}
+
 export function teleportar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, mira: Celula | null): boolean {
-  if (!mira || !livre(estado, ctx, e, mira.x, mira.y)) return false;
-  reposicionar(e, mira.x, mira.y);
+  if (!mira) return false;
+  if (livre(estado, ctx, e, mira.x, mira.y)) {
+    reposicionar(e, mira.x, mira.y);
+    return true;
+  }
+  // D-120: mira na parede (ou ocupada): a célula livre mais perto dela, voltando pela reta até quem conjura.
+  if (!ctx.balance.movimento.dashAtravessaParedes) return false;
+  const volta = linhaAte(mira, { x: e.x, y: e.y }).slice(0, -1);
+  const destino = volta.find((c) => livre(estado, ctx, e, c.x, c.y));
+  if (!destino) return false;
+  reposicionar(e, destino.x, destino.y);
   return true;
 }
 
@@ -52,7 +99,13 @@ export function avancar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade,
   // D-078 (17/10/2026): o avanço voluntário mantém a intenção de ir até o ponto clicado.
   const destino = e.caminho.at(-1) ?? e.waypoints.at(-1) ?? null;
   const distancia = Math.max(Math.abs(mira.x - e.x), Math.abs(mira.y - e.y));
-  const andou = deslizar(estado, ctx, e, Math.sign(mira.x - e.x), Math.sign(mira.y - e.y), Math.min(celulas, distancia));
+  let andou: boolean;
+  if (ctx.balance.movimento.dashAtravessaParedes) {
+    // D-120: segue a reta até a mira e para na última célula livre dela, passando pelas paredes do meio.
+    const fim = ultimaLivreNaReta(estado, ctx, e, mira, Math.min(celulas, distancia));
+    andou = !!fim;
+    if (fim) reposicionar(e, fim.x, fim.y);
+  } else andou = deslizar(estado, ctx, e, Math.sign(mira.x - e.x), Math.sign(mira.y - e.y), Math.min(celulas, distancia));
   if (andou && destino) {
     // Marco 26 (D-104): o resto do caminho, de novo em trechos retos a partir de onde o avanço parou.
     const passos = caminho(ctx.fase, e, { x: Math.round(destino.x), y: Math.round(destino.y) }, ctx.balance.navegacao.maxPassosToque).passos;

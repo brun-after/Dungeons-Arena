@@ -73,19 +73,24 @@ describe('alvo automático que acompanha (D-065)', () => {
 });
 
 describe('alvo travado (D-065)', () => {
-  it('a escolha manual trava; fora do alcance, nada de acertar outro', () => {
+  it('a escolha manual trava; o automático espera, e o golpe pedido fora do alcance vai no mais perto (D-119)', () => {
     const a = cena();
     a.tick([['j', { t: 'selecionarAlvo', alvo: 'b' }]]);
     expect(a.ent('j')).toMatchObject({ alvoSelecionado: 'b', alvoTravado: true });
     a.mover('b', 9);
+    a.ticks(120);
+    a.eventos.length = 0;
     const vidaC = a.ent('c').hp;
-    a.espaco();
-    expect(a.de('acaoRecusada')).toMatchObject([{ motivo: 'fora_de_alcance' }]);
     // O automático espera em vez de bater no `c`.
     a.ticks(300);
     expect(a.de('acaoIniciada')).toHaveLength(0);
     expect(a.ent('c').hp).toBe(vidaC);
     expect(a.ent('j').alvoSelecionado).toBe('b');
+    // Marco 26 (28/10/2026, D-119): pedir o golpe com o travado longe troca para o mais próximo no alcance.
+    a.espaco();
+    expect(a.de('acaoRecusada')).toHaveLength(0);
+    expect(a.de('acaoIniciada')).toMatchObject([{ alvoId: 'c' }]);
+    expect(a.ent('j').alvoSelecionado).toBe('c');
   });
 
   it('travado e no alcance, o automático bate só nele', () => {

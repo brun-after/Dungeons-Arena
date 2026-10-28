@@ -169,7 +169,7 @@ describe('integridade da execução completa', () => {
     expect(() => { validarAmostras([base], 1); }).toThrow('vida restaurada entre ondas');
   });
   it('mantém morte simultânea como derrota sem contar a onda como concluída', () => {
-    const base = simularDiagnostico({ ...configuracao, classe: 'arqueiro', nivel: 1, dificuldade: 'pesadelo', semente: 30801, intervencao: 'sem_pocoes' });
+    const base = simularDiagnostico({ ...configuracao, classe: 'arqueiro', nivel: 1, dificuldade: 'pesadelo', semente: 30810, intervencao: 'sem_pocoes' });
     expect(base.resultado).toBe('morte');
     expect(base.ondasConcluidas).toBe(0);
     const controle = simularDiagnostico({ ...base.configuracao, intervencao: 'base' });
