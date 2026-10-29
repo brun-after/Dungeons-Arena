@@ -48,7 +48,7 @@ import { processarPortas } from '../world/portas';
 import { processarSpawner } from '../world/spawner';
 import type { ComandoDoTick } from './comandos';
 import type { ContextoSimulacao } from './contexto';
-import { buscarEntidade, type EstadoJogo } from './estado';
+import { buscarEntidade, limparRecargasVencidas, type EstadoJogo } from './estado';
 import type { EventoSimulacao } from './eventos-simulacao';
 
 export type { EventoSimulacao } from './eventos-simulacao';
@@ -93,6 +93,7 @@ export function simular(
   processarPortas(estado, ctx, saida);
   coletarObjetos(estado, ctx, saida);
   expirarDrops(estado, ctx);
+  limparRecargasVencidas(estado);
   // Ajuste de 16/10/2026 (D-067): buffs armados começam em combate; a aparência segue o equipamento.
   processarBuffsArmados(estado, ctx, saida);
   atualizarAparencias(estado, ctx);

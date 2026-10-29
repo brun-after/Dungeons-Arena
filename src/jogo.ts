@@ -284,10 +284,13 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     cena.bus.on('coletou', (ev) => {
       if (ev.tipo === 'item') a.pedir();
     });
+    // Marco 26 (29/10/2026, D-122): o abate não grava mais na hora (o salvamento por tempo leva a contagem); só a
+    // morte do próprio jogador. Numa luta cheia, era um save inteiro por abate.
     cena.bus.on('morreu', (ev) => {
-      if (ev.id === idJogador) estatisticas.mortes++;
-      else if (ev.porId === idJogador) estatisticas.inimigosDerrotados++;
-      a.pedir();
+      if (ev.id === idJogador) {
+        estatisticas.mortes++;
+        a.pedir();
+      } else if (ev.porId === idJogador) estatisticas.inimigosDerrotados++;
     });
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') void a.agora();

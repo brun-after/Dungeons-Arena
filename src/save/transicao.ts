@@ -58,6 +58,9 @@ export interface DestinoDaTransicao {
   preservarRecursos?: boolean;
 }
 
+/** Marco 26 (D-122): quantas fases deixadas o save guarda (a ordem de inserção é a da visita). */
+export const MAX_FASES_GUARDADAS = 8;
+
 export function avancarFase(r: RegistroProgresso, destino: DestinoDaTransicao, agora: number): RegistroProgresso {
   const jogador = jogadorDoSave(r.estado);
   if (!jogador) throw new Error('save sem jogador');
@@ -69,6 +72,9 @@ export function avancarFase(r: RegistroProgresso, destino: DestinoDaTransicao, a
   const guardada = r.fasesVisitadas[chaveDestino];
   const visitadas: Record<string, EstadoJogo> = Object.fromEntries(Object.entries(r.fasesVisitadas).filter(([k]) => k !== chaveDestino));
   visitadas[chaveDaFase(r.faseRef)] = deixada;
+  // Marco 26 (29/10/2026, D-122): guarda só as últimas fases deixadas (cada uma é um estado inteiro, gravado em todo
+  // salvamento). A mais antiga sai; revisitada, é gerada de novo.
+  const guardadas = Object.fromEntries(Object.entries(visitadas).slice(-MAX_FASES_GUARDADAS));
   const estado = guardada ? clonarEstado(guardada) : destino.novoEstado();
   // Marco 15: a dificuldade escolhida vale na fase nova (e na revisitada).
   estado.dificuldade = r.estado.dificuldade;
@@ -79,5 +85,5 @@ export function avancarFase(r: RegistroProgresso, destino: DestinoDaTransicao, a
     personagem.mana = Math.min(personagem.manaMax, jogador.mana);
   }
   estado.entidades.push(personagem);
-  return { ...r, faseRef: destino.ref, nomeFase: destino.nome, estado, fasesVisitadas: visitadas, referenciasFases: { ...r.referenciasFases, [chaveDaFase(r.faseRef)]: r.faseRef, [chaveDestino]: destino.ref }, atualizadoEm: agora };
+  return { ...r, faseRef: destino.ref, nomeFase: destino.nome, estado, fasesVisitadas: guardadas, referenciasFases: { ...r.referenciasFases, [chaveDaFase(r.faseRef)]: r.faseRef, [chaveDestino]: destino.ref }, atualizadoEm: agora };
 }
