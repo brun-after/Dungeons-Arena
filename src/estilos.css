@@ -1211,11 +1211,12 @@ body.toque .botao-habilidade .tecla {
   background: rgba(0, 0, 0, 0.6);
   font: 11px ui-monospace, 'Cascadia Code', Consolas, monospace;
   font-variant-numeric: tabular-nums;
-  /* Marco 26 (D-122): a segunda linha (entidades, objetos, ticks, qualidade, salvamento). */
+  pointer-events: none;
+  /* Marco 26 (D-122): a segunda linha (entidades, objetos, ticks, qualidade, salvamento), sem sair da tela. */
   white-space: pre-line;
   text-align: center;
-  pointer-events: none;
-  white-space: nowrap;
+  width: max-content;
+  max-width: calc(100vw - 16px);
 }
 
 /* Marco 21 (23/10/2026, D-088): versão do app e o aviso de atualização no menu. */

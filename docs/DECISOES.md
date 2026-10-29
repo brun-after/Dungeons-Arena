@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.59 · **Data:** 28/10/2026
+**Versão:** 0.60 · **Data:** 29/10/2026
 
 > **Histórico**
+> - **0.60 (29/10/2026)**: D-122 (o jogo não pesa com o tempo no celular), D-123 (renascer fora da porta) e a nota de D-121 (a automação busca o alcance da skill pronta mais curta).
 > - **0.59 (28/10/2026)**: D-116 a D-121 (marco 26, quarta leva: runas das classes e seleção em colunas, câmera solta e botão de centralizar, inimigos que reagem logo e seleção em raio menor, skill fora do alcance que troca de alvo, dash e teleporte através de paredes, seguir alvo).
 > - **0.58 (26/10/2026)**: D-110 a D-115 (marco 26, terceira leva: lore das classes e Dom da classe, combos da build pela barra e Diário detalhado, portais por destino e por cor, quebráveis, clique fora das células e mouse que guia como o joystick).
 > - **0.57 (26/10/2026)**: D-107 a D-109 (marco 26: sem direcional no computador e teclas EWAS, braços e pernas animados, objetos em pé no isométrico).
@@ -2922,3 +2923,63 @@ diferentes para quem ataca à distância e corpo a corpo, troca de alvo depois d
   travar.
 - **Direcional:** o `mover` manual tem a vez enquanto dura. Mais de 120° contra o rumo do alvo, ou um `irPara`,
   cancela a automação daquele alvo até outro ser escolhido (`seguirCanceladoDe`, limpo por `selecionarAlvo`).
+
+- **Marco 26 (29/10/2026), a distância que a automação busca:** é o menor alcance entre o básico e as skills
+  ofensivas **prontas** da barra (sem recarga, com o custo de mana e vida pagável; a área em volta conta pelo raio).
+  Com o alvo no alcance do básico, mas fora do da skill pronta mais curta, o personagem ainda se aproxima. Por
+  exemplo, o Guerreiro com o Redemoinho pronto chega a 1 célula sem assumir o controle. A folga para seguir quem foge
+  e a troca depois do abate seguem medidas pelo básico. O custo saiu de `iniciarAcao` para `custoDaHabilidade`.
+
+## D-122 — O jogo não pesa com o tempo no celular (marco 26, 29/10/2026)
+
+**Contexto.** No celular, o jogo começava fluido e ficava pesado depois de um tempo jogando. A investigação achou
+várias causas que se somam; nenhuma é um vazamento que cresce sem parar:
+- **Qualidade automática que só descia.** Alguns picos levavam ao mínimo, com teto de 30 fps até o fim da cena.
+- **Laço que tentava alcançar o atraso.** Até 15 ticks num quadro lento deixavam o seguinte ainda mais lento.
+- **Drops que se acumulavam no chão.** Eram redesenhados todos, a cada quadro, mesmo fora da tela.
+- **Um salvamento inteiro por abate.** O save ainda crescia com as fases visitadas e com as recargas, que nunca
+  eram apagadas.
+- **O mapa inteiro convergindo sobre o jogador.** A colisão varria todas as entidades a cada subpasso e a cada
+  bissecção.
+- **Lixo para o coletor.** Um texto novo por número de dano, texturas de equipamento presas no cache global do
+  Pixi e mapas por id que nunca eram limpos.
+
+**Decisão:**
+- **Medidor:** uma segunda linha com entidades vivas, objetos no chão, máximo de ticks por quadro, nível de
+  qualidade e o tempo do último salvamento.
+- **Laço:** a campanha solo roda no máximo 4 ticks por quadro (`MAX_PASSOS_SOLO`) e descarta o atraso que passa
+  disso. O grupo e a arena seguem sem teto, porque acompanham o servidor.
+- **Qualidade que sobe:**
+  - Com 30 s de quadros bons (média ≥ 92% do alvo e p95 ≤ 1,25 quadro), sobe um nível, até o nível com que a
+    cena começou.
+  - Se cair logo depois de subir, a espera da próxima subida dobra, até 4 min.
+  - O quadro do salvamento não conta.
+  - Só a descida avisa.
+- **Drops com prazo no chão** (`economia.prazoNoChao`, em ticks e determinístico):
+  - orbes somem em 60 s;
+  - ouro e itens comuns e incomuns, em 180 s;
+  - livros, essências e itens raros ou melhores ficam.
+  - O desenho dos objetos pula o que está fora da vista da câmera.
+- **Save:**
+  - **Abate:** não grava na hora; o salvamento por tempo, de 30 s, leva a contagem.
+  - **`fasesVisitadas`:** guarda as 8 últimas fases. A mais antiga sai e é gerada de novo se revisitada.
+  - **`recargas`:** as vencidas saem a cada 600 ticks. Toda leitura trata a chave ausente como pronta, e o
+    invariante do harness aceita a saída da chave já vencida.
+- **Multidão:**
+  - **Colisão:** a grade de corpos por célula (`world/grade-corpos.ts`) devolve só os vizinhos, na ordem do vetor.
+    O resultado é idêntico ao da varredura completa, conferido por um teste de equivalência.
+  - **Patrulha:** só se aproxima de quem está a até `ia.raioAproximar`, 18 células.
+- **Lixo:**
+  - os números de dano reaproveitam os textos, com teto de 40 vivos;
+  - as texturas de equipamento ficam fora do cache global (`skipCache`);
+  - as marcas por id das auras, dos efeitos de classe e dos nomes do registro deixam de crescer.
+- **Aquecimento do aparelho:** rodar a 60 fps por muito tempo aquece o celular, que baixa o clock. Isso não se
+  corrige no código; trabalhar menos por quadro adia o efeito, e a qualidade que sobe e desce o acompanha.
+
+## D-123 — Renascer fora da porta (marco 26, 29/10/2026)
+
+**Contexto.** Nas fases com volta, a porta de retorno fica no primeiro spawn, que também é onde o jogador renasce.
+Quem demorava para voltar a jogar ficava parado na porta, completava a espera e voltava para a fase anterior.
+
+**Decisão** (`progression/morte.ts`, `world/portas.ts`): a célula de renascer pula as portas de fase (a de retorno e
+qualquer saída, `ehCelulaDePorta`) e fica na livre mais próxima. Vale no solo e no grupo, porque é o núcleo.
