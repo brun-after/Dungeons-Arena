@@ -2947,8 +2947,12 @@ várias causas que se somam; nenhuma é um vazamento que cresce sem parar:
 **Decisão:**
 - **Medidor:** uma segunda linha com entidades vivas, objetos no chão, máximo de ticks por quadro, nível de
   qualidade e o tempo do último salvamento.
-- **Laço:** a campanha solo roda no máximo 4 ticks por quadro (`MAX_PASSOS_SOLO`) e descarta o atraso que passa
-  disso. O grupo e a arena seguem sem teto, porque acompanham o servidor.
+- **Laço:** a campanha solo recupera o atraso enquanto os ticks do quadro somam até 10 ms
+  (`ORCAMENTO_SIM_SOLO_MS`); passado isso, descarta o resto. O grupo e a arena seguem sem orçamento, porque
+  acompanham o servidor.
+  - *Ajuste da sexta leva:* a primeira versão tinha um teto fixo de 4 ticks por quadro e deixava o jogo em câmera
+    lenta quando o desenho era o lento (o CI sem GPU falhou no e2e da sala B). O orçamento de tempo só corta quando o
+    tick é caro, que é o caso da bola de neve.
 - **Qualidade que sobe:**
   - Com 30 s de quadros bons (média ≥ 92% do alvo e p95 ≤ 1,25 quadro), sobe um nível, até o nível com que a
     cena começou.

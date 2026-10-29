@@ -24,7 +24,7 @@ import { criarJogador } from './entities/fabrica';
 import { t } from './i18n';
 import type { Dificuldade } from './modos/dificuldade';
 import { iniciarLaco } from './plataforma/laco-navegador';
-import { MAX_PASSOS_SOLO } from './core/loop';
+import { ORCAMENTO_SIM_SOLO_MS } from './core/loop';
 import { sincronizarSlot } from './plataforma/nuvem';
 import { sairDaTelaCheia } from './plataforma/sessao-tela';
 import { carregarAventura } from './plataforma/aventuras';
@@ -394,7 +394,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     },
     pausado: cena.pausado,
     quadroPermitido: cena.quadroPermitido,
-    maxPassos: MAX_PASSOS_SOLO,
+    orcamentoMs: ORCAMENTO_SIM_SOLO_MS,
   });
 }
 
