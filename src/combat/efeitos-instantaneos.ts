@@ -8,7 +8,9 @@ import { muralhaEm } from './tatica';
 import type { Celula } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
-import { posicionar, type Entidade } from '../entities/entidade';
+import { posicionar, vivo, type Entidade } from '../entities/entidade';
+import { podeFerir } from '../modos/relacao';
+import { celulaOcupada } from './geometria';
 import { celulaLivrePara } from '../world/colisao';
 import { passavel } from '../world/fase';
 import { caminho } from '../world/navegacao';
@@ -65,17 +67,48 @@ export function linhaAte(de: Celula, ate: Celula): Celula[] {
 }
 
 /**
- * Marco 26 (28/10/2026, D-120): a última célula livre da reta até a mira, em até `passos` células. As paredes do meio
+ * Marco 26 (28/10/2026, D-120): onde o avanço para na reta até a mira, em até `passos` células. As paredes do meio
  * não param quem passa (o dash troca de corredor); fora do mapa ou uma muralha tática encerram a reta.
+ * Marco 26 (29/10/2026, D-125): o primeiro hostil do caminho também; quem investe para nele (a linha da habilidade
+ * ainda acerta quem estiver além). Sem célula livre antes dele ou da mira (o alvo logo atrás da parede), pousa ao lado.
  */
-function ultimaLivreNaReta(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, mira: Celula, passos: number): Celula | null {
+function fimDoAvanco(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, mira: Celula, passos: number, celulas: number): Celula | null {
   let achada: Celula | null = null;
-  for (const c of linhaAte({ x: e.x, y: e.y }, mira).slice(0, passos)) {
+  const reta = linhaAte({ x: e.x, y: e.y }, mira).slice(0, passos);
+  for (const [i, c] of reta.entries()) {
     // A muralha tática é feita para barrar: ela para o dash (as paredes do mapa, não).
-    if (c.x < 0 || c.y < 0 || c.x >= ctx.fase.largura || c.y >= ctx.fase.altura || muralhaEm(estado, c.x, c.y)) break;
+    if (c.x < 0 || c.y < 0 || c.x >= ctx.fase.largura || c.y >= ctx.fase.altura || muralhaEm(estado, c.x, c.y)) return achada;
+    if (hostilEm(estado, ctx, e, c)) return achada ?? (i > 0 ? vizinhaLivre(estado, ctx, e, c, celulas) : null);
     if (livre(estado, ctx, e, c.x, c.y)) achada = c;
   }
-  return achada;
+  return achada ?? (reta.length > 1 ? vizinhaLivre(estado, ctx, e, mira, celulas) : null);
+}
+
+/** Há um hostil vivo de `e` (pela relação do modo) parado na célula? */
+function hostilEm(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, c: Celula): boolean {
+  return estado.entidades.some((o) => {
+    if (o === e || !vivo(o) || !podeFerir(e, o, ctx.modo)) return false;
+    const oc = celulaOcupada(o);
+    return oc.x === c.x && oc.y === c.y;
+  });
+}
+
+/**
+ * Marco 26 (29/10/2026, D-125): a célula livre vizinha da mira mais perto de quem avança, a até `celulas` dele
+ * (desempate por y e x). É o pouso quando a reta não tem célula livre: o inimigo logo atrás da parede.
+ */
+function vizinhaLivre(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, mira: Celula, celulas: number): Celula | null {
+  let melhor: Celula | null = null;
+  let melhorD = Infinity;
+  for (let y = mira.y - 1; y <= mira.y + 1; y++) {
+    for (let x = mira.x - 1; x <= mira.x + 1; x++) {
+      const d = Math.max(Math.abs(x - e.x), Math.abs(y - e.y));
+      if (d === 0 || d > celulas || d >= melhorD || muralhaEm(estado, x, y) || !livre(estado, ctx, e, x, y)) continue;
+      melhor = { x, y };
+      melhorD = d;
+    }
+  }
+  return melhor;
 }
 
 export function teleportar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, mira: Celula | null): boolean {
@@ -102,7 +135,7 @@ export function avancar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade,
   let andou: boolean;
   if (ctx.balance.movimento.dashAtravessaParedes) {
     // D-120: segue a reta até a mira e para na última célula livre dela, passando pelas paredes do meio.
-    const fim = ultimaLivreNaReta(estado, ctx, e, mira, Math.min(celulas, distancia));
+    const fim = fimDoAvanco(estado, ctx, e, mira, Math.min(celulas, distancia), celulas);
     andou = !!fim;
     if (fim) reposicionar(e, fim.x, fim.y);
   } else andou = deslizar(estado, ctx, e, Math.sign(mira.x - e.x), Math.sign(mira.y - e.y), Math.min(celulas, distancia));

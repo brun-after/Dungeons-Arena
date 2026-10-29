@@ -17,7 +17,7 @@ import type { EstadoJogo } from '../core/estado';
 import { DT_MS } from '../core/loop';
 import { resolverHabilidade } from '../combat/compilar-habilidade';
 import { origemDaHabilidade } from '../combat/acao';
-import { celulasDaForma, deSuporte } from '../combat/formas';
+import { celulasDaForma, deSuporte, deslocaQuemConjura } from '../combat/formas';
 import { relacao } from '../modos/relacao';
 import { CELULA_PX } from './camera-calculo';
 import { contornoDaArea, escalarContorno, type Contorno } from './formas-visuais';
@@ -92,7 +92,10 @@ export class CamadaTelegrafia {
       if (hab.politicaImpacto === 'area') {
         // Marco 22: as áreas do Aventureiro partem do falcão (a mesma origem do núcleo).
         const de = origemDaHabilidade(estado, e, hab);
-        const celulas = celulasDaForma(hab, de, { x: a.alvoX, y: a.alvoY }, ctx.fase);
+        // Marco 26 (29/10/2026, D-125): a linha da investida mostra a trajetória pelas paredes, como o núcleo a acerta.
+        const fase = ctx.fase;
+        const pelaParede = ctx.balance.movimento.dashAtravessaParedes && deslocaQuemConjura(hab) ? (c: { x: number; y: number }) => c.x < 0 || c.y < 0 || c.x >= fase.largura || c.y >= fase.altura : undefined;
+        const celulas = celulasDaForma(hab, de, { x: a.alvoX, y: a.alvoY }, fase, pelaParede);
         let contorno = this.contornos.get(a.acaoId);
         if (!contorno) {
           // Linha e cone saem de quem conjura (o miolo cresce a partir dele); as demais são redondas.

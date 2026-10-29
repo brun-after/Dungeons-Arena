@@ -4,7 +4,7 @@ import { fonteDaHabilidade } from '../../src/combat/acao';
 import { resolverHabilidade } from '../../src/combat/compilar-habilidade';
 import { aplicarImpacto } from '../../src/combat/golpe';
 import { aplicarEfeito } from '../../src/combat/efeitos';
-import { avancar } from '../../src/combat/efeitos-instantaneos';
+import { avancar, reposicionar } from '../../src/combat/efeitos-instantaneos';
 import { construirEfeito } from '../../src/combat/registro-efeitos';
 import { criarEstado } from '../../src/core/estado';
 import type { EventoSimulacao } from '../../src/core/eventos-simulacao';
@@ -54,7 +54,7 @@ describe('recuperação do guerreiro no ataque básico', () => {
 });
 
 it('o avanço recalcula o trajeto até o destino clicado e conserva a direção de movimento', () => {
-  const c = cena(); c.j.direcao = 'S'; c.j.caminho = [{ x: 3, y: 4 }, { x: 3, y: 5 }];
+  const c = cena(); reposicionar(c.a, 8, 8); c.j.direcao = 'S'; c.j.caminho = [{ x: 3, y: 4 }, { x: 3, y: 5 }];
   expect(avancar(c.estado, c.ctx, c.j, { x: 5, y: 3 }, 2)).toBe(true);
   expect([c.j.x, c.j.y]).toEqual([5, 3]);
   expect(c.j.caminho.at(-1)).toEqual({ x: 3, y: 5 });

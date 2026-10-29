@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.61 · **Data:** 29/10/2026
+**Versão:** 0.62 · **Data:** 29/10/2026
 
 > **Histórico**
+> - **0.62 (29/10/2026)**: D-125 (o avanço de quem conjura sai no lançamento, e a linha da investida passa pelas paredes) e a nota em D-120.
 > - **0.61 (29/10/2026)**: D-124 (assinaturas visuais: cada skill com o seu desenho, motor de efeitos com atlas rico, silhuetas, marcas no chão e deslize; galeria de efeitos) e a nota em D-066; ajuste da sexta leva em D-122 (orçamento de tempo no laço solo).
 > - **0.60 (29/10/2026)**: D-122 (o jogo não pesa com o tempo no celular), D-123 (renascer fora da porta) e a nota de D-121 (a automação busca o alcance da skill pronta mais curta).
 > - **0.59 (28/10/2026)**: D-116 a D-121 (marco 26, quarta leva: runas das classes e seleção em colunas, câmera solta e botão de centralizar, inimigos que reagem logo e seleção em raio menor, skill fora do alcance que troca de alvo, dash e teleporte através de paredes, seguir alvo).
@@ -2905,6 +2906,7 @@ mais próximo no alcance, se houver.
 - **Teleporte:** com a mira numa parede ou célula ocupada, cai na primeira célula livre da reta de volta até quem
   conjura.
 - **Empurrão, puxão e arremesso** seguem parando na parede.
+- **Nota (29/10/2026):** o avanço das skills só saía no acerto e a linha parava na parede; ver D-125.
 
 ## D-121 — Seguir alvo (marco 26, 28/10/2026)
 
@@ -3047,3 +3049,25 @@ O jogador não reconhecia o golpe que levou sem ler o nome.
 - **D-066 revista:** a regra de "nada de forma plana" continua. As fitas e silhuetas são texturas com gradiente e
   brilho, não formas desenhadas.
 - **Determinismo:** o `deslocado` só é emitido; o estado não muda e o digest continua igual.
+
+## D-125 — O avanço sai no lançamento, e a investida passa pelas paredes (marco 26, 29/10/2026)
+
+**Contexto.** O usuário relatou que a Investida não pulava paredes e às vezes não avançava. A D-120 já fazia o dash
+atravessar paredes, mas o avanço das skills nunca chegava lá:
+- **Só no acerto:** o `avanco` de quem conjura era aplicado a cada alvo atingido. Sem ninguém na linha, nada de
+  avanço; com dois alvos, avançava duas vezes.
+- **A linha parava na parede:** o inimigo atrás dela ficava fora da área, ninguém era atingido e o avanço não saía.
+
+**Decisão** (regra em dados: `deslocaConjurador` no registro de efeitos):
+- **No lançamento:** o `avanco` e o `teleporte` com `em: conjurador` saem uma vez, quando a habilidade é lançada,
+  antes do impacto (`combat/acao.ts`). O golpe não os repete por alvo (`combat/golpe.ts`). Vale para as 20 skills e
+  ultimates que deslocam quem conjura.
+- **A linha de quem avança** parte da célula de onde saiu e, com `movimento.dashAtravessaParedes`, só para no fim do
+  mapa ou numa muralha tática (`celulasDaForma` com `barreira`). A telegrafia desenha a mesma trajetória. As outras
+  linhas (magias, flechas) continuam parando na parede.
+- **Para no primeiro inimigo:** a investida é uma carga. O avanço para antes do primeiro hostil do caminho (pela
+  `relacao`), e a linha ainda acerta quem estiver além. Com um alvo, vai até onde ele está agora. Sem isso, dois
+  Guerreiros que investiam juntos se cruzavam, e o PvP passava da meta (mediana de 11,3 s, contra 7,3 s agora).
+- **Pouso ao lado do alvo:** sem célula livre na reta antes do hostil ou da mira, o avanço pousa na vizinha livre mais
+  perto de quem avança, dentro do alcance. A muralha tática na reta impede.
+- **Determinismo:** a ordem muda (avança, depois acerta), mas continua só a partir de comandos.
