@@ -363,6 +363,7 @@
     "patrulhaAvaliacaoMs": 2000,
     "patrulhaPassoMs": 1500,
     "chanceAproximar": 0.1,
+    "raioAproximar": 18,
     "chanceManter": 0.6,
     "hesitacao": [
       { "s": 0.5, "chance": 0.35 },

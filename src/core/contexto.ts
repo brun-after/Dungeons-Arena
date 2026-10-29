@@ -366,6 +366,8 @@ export interface RegrasIa {
   patrulhaAvaliacaoMs: number;
   patrulhaPassoMs: number;
   chanceAproximar: number;
+  /** Marco 26 (D-122): a patrulha só se aproxima de quem está a até este raio (células, Manhattan). */
+  raioAproximar: number;
   chanceManter: number;
   /** Opções mais curtas que a base, com a chance de cada uma (a base fica com o restante). */
   hesitacao: { s: number; chance: number }[];

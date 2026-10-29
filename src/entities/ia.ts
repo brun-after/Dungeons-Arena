@@ -277,8 +277,9 @@ function escolherDirecaoPatrulha(estado: EstadoJogo, ctx: ContextoSimulacao, e: 
   const regras = ctx.balance.ia;
   const u = aleatorio(ia.rng);
   if (u < regras.chanceAproximar) {
-    // Aproxima do hostil mais próximo, sem limite de raio, pelo eixo de maior distância.
-    const alvo = detectar(estado, ctx, e, Infinity);
+    // Aproxima do hostil mais próximo, pelo eixo de maior distância. Marco 26 (29/10/2026, D-122): só num raio; sem
+    // limite, o mapa inteiro convergia sobre o jogador com o tempo (as multidões pesavam no celular).
+    const alvo = detectar(estado, ctx, e, regras.raioAproximar);
     if (alvo) {
       const dx = alvo.x - e.x;
       const dy = alvo.y - e.y;
