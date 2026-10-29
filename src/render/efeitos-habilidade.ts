@@ -36,6 +36,8 @@ import { AURA_DO_ESTADO, presetDeConjuracao, presetDeImpacto } from './materiais
 const INTERVALO_CONJURACAO_MS = 120;
 const INTERVALO_RASTRO_MS = 30;
 const INTERVALO_AURA_MS = 320;
+/** Marco 26 (D-122): marca de aura mais velha que isto já não decide nada (os intervalos são de segundos). */
+const LIMPEZA_MS = 10_000;
 /** Ajuste de 24/10/2026 (D-091): a encarnação do Mago, andando (trilha) e parado (respiro). */
 const INTERVALO_TRILHA_MS = 70;
 const INTERVALO_RESPIRO_MS = 1400;
@@ -210,6 +212,13 @@ export class EfeitosDeHabilidade {
     const p = this.o.particulas;
     this.posicoes.clear();
     for (const e of estado.entidades) this.posicoes.set(e.id, posicao(e));
+    // Marco 26 (29/10/2026, D-122): as marcas por id (cada invocação nova tem o seu) não crescem sem fim.
+    if (this.ultimaAura.size > 4 * estado.entidades.length + 64) {
+      for (const [chave, ms] of this.ultimaAura) if (agoraMs - ms > LIMPEZA_MS) this.ultimaAura.delete(chave);
+    }
+    if (this.ultimaPosicao.size > 2 * estado.entidades.length + 32) {
+      for (const id of this.ultimaPosicao.keys()) if (!this.posicoes.has(id)) this.ultimaPosicao.delete(id);
+    }
     for (const [acaoId, c] of this.conjurando) {
       if (estado.tick >= c.ateTick) {
         this.conjurando.delete(acaoId);

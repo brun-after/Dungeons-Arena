@@ -17,6 +17,8 @@ export interface OpcoesLaco {
   pausado?: () => boolean;
   /** Marco 20: teto de fps; quando devolve false, este quadro do navegador é pulado inteiro (simula no próximo). */
   quadroPermitido?: (agoraMs: number) => boolean;
+  /** Marco 26 (D-122): teto de ticks por quadro (a campanha solo usa `MAX_PASSOS_SOLO`); sem ele, só o de tempo. */
+  maxPassos?: number;
 }
 
 /** Inicia o laço. Retorna a função que o interrompe. */
@@ -36,7 +38,7 @@ export function iniciarLaco(opcoes: OpcoesLaco): () => void {
       acumulador.anteriorMs = null;
       acumulador.acumuladoMs = 0;
     } else {
-      ultimoAlpha = avancarLaco(acumulador, relogio.agoraMs(), opcoes.simular).alpha;
+      ultimoAlpha = avancarLaco(acumulador, relogio.agoraMs(), opcoes.simular, opcoes.maxPassos).alpha;
     }
     opcoes.renderizar(ultimoAlpha);
     // Marco 16: parar de dentro do próprio quadro não agenda o seguinte.

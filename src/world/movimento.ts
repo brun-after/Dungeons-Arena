@@ -28,6 +28,7 @@ import { regenerarPorPasso } from '../progression/recursos';
 import { bloqueia, celulaLivrePara, ordemRotativa } from './colisao';
 import { corpoCabe, suavizarCaminho, type Barreira } from './corpo';
 import { passavel } from './fase';
+import { GradeDeCorpos } from './grade-corpos';
 import { alcancavelMaisPerto, caminho, caminhoComCusto } from './navegacao';
 
 export const VETOR_DIR: Readonly<Record<Dir8, readonly [number, number]>> = {
@@ -177,8 +178,11 @@ export function moverEntidades(
 ): void {
   // Antes de alguém andar, todos com a posição contínua na própria célula (a colisão lê a dos outros).
   for (const e of estado.entidades) sincronizarPosicao(e);
+  // Marco 26 (29/10/2026, D-122): a colisão pergunta só aos corpos de perto (a grade segue quem anda).
+  const grade = new GradeDeCorpos(estado.entidades);
   for (const e of ordemRotativa(estado.entidades, estado.tick)) {
-    integrarEntidade(e, estado, ctx, saida, dtMs);
+    integrarEntidade(e, estado, ctx, saida, dtMs, grade);
+    grade.atualizar(e);
   }
 }
 
@@ -203,7 +207,7 @@ function velocidadeAgora(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao
 }
 
 /** Integra o movimento de uma única entidade por um tick (usado também pela predição do cliente). */
-export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[], dtMs: number) {
+export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[], dtMs: number, grade?: GradeDeCorpos) {
   if (e.morto) return;
   sincronizarPosicao(e);
   // Quem conjura uma ação que trava ou está atordoado não anda (D-017, D-060).
@@ -245,12 +249,12 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
     // Quem anda olha para onde vai (Marco 24, D-097), salvo se está golpeando alguém.
     const olhar = e.acao ? null : direcaoDe(ux, uy);
     if (olhar) e.olhando = olhar;
-    const andou = andar(e, ux * trecho, uy * trecho, estado, ctx, saida);
+    const andou = andar(e, ux * trecho, uy * trecho, estado, ctx, saida, grade);
     e.relogioAndar += (1000 * andou) / vel;
     restante -= trecho;
     if (andou < EPS) {
       // Preso: atrás de quem bloqueia, espera mantendo o caminho; contra a parede, desiste do ponto.
-      if (wp && !bloqueadoPorEntidade(e, e.px + ux * SUBPASSO, e.py + uy * SUBPASSO, estado, ctx)) e.waypoints.shift();
+      if (wp && !bloqueadoPorEntidade(e, e.px + ux * SUBPASSO, e.py + uy * SUBPASSO, estado, ctx, grade)) e.waypoints.shift();
       return;
     }
   }
@@ -260,7 +264,7 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
  * Anda (dx, dy) em subpassos, um eixo de cada vez: o eixo que bate na parede (ou em quem bloqueia) fica, o outro
  * segue — o corpo desliza. Devolve a distância de fato andada.
  */
-function andar(e: Entidade, dx: number, dy: number, estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): number {
+function andar(e: Entidade, dx: number, dy: number, estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[], grade?: GradeDeCorpos): number {
   const n = Math.max(1, Math.ceil(Math.max(Math.abs(dx), Math.abs(dy)) / SUBPASSO));
   const sx = dx / n;
   const sy = dy / n;
@@ -268,9 +272,9 @@ function andar(e: Entidade, dx: number, dy: number, estado: EstadoJogo, ctx: Con
   for (let k = 0; k < n; k++) {
     const x0 = e.px;
     const y0 = e.py;
-    avancarEixo(e, sx, 0, estado, ctx);
-    avancarEixo(e, 0, sy, estado, ctx);
-    if (e.px === x0 && e.py === y0) contornar(e, sx, sy, estado, ctx);
+    avancarEixo(e, sx, 0, estado, ctx, grade);
+    avancarEixo(e, 0, sy, estado, ctx, grade);
+    if (e.px === x0 && e.py === y0) contornar(e, sx, sy, estado, ctx, grade);
     const mx = e.px - x0;
     const my = e.py - y0;
     if (mx === 0 && my === 0) break;
@@ -281,9 +285,9 @@ function andar(e: Entidade, dx: number, dy: number, estado: EstadoJogo, ctx: Con
 }
 
 /** Anda o subpasso num eixo; se não cabe inteiro, encosta (bissecção curta: o corpo para rente à parede). */
-function avancarEixo(e: Entidade, sx: number, sy: number, estado: EstadoJogo, ctx: ContextoSimulacao): void {
+function avancarEixo(e: Entidade, sx: number, sy: number, estado: EstadoJogo, ctx: ContextoSimulacao, grade?: GradeDeCorpos): void {
   if (sx === 0 && sy === 0) return;
-  if (cabe(e, e.px + sx, e.py + sy, estado, ctx)) {
+  if (cabe(e, e.px + sx, e.py + sy, estado, ctx, grade)) {
     e.px += sx;
     e.py += sy;
     return;
@@ -292,7 +296,7 @@ function avancarEixo(e: Entidade, sx: number, sy: number, estado: EstadoJogo, ct
   let hi = 1;
   for (let i = 0; i < BISSECCOES; i++) {
     const m = (lo + hi) / 2;
-    if (cabe(e, e.px + sx * m, e.py + sy * m, estado, ctx)) lo = m;
+    if (cabe(e, e.px + sx * m, e.py + sy * m, estado, ctx, grade)) lo = m;
     else hi = m;
   }
   if (lo > 0) {
@@ -305,11 +309,11 @@ function avancarEixo(e: Entidade, sx: number, sy: number, estado: EstadoJogo, ct
  * Travado de frente contra um corpo que bloqueia: tira do subpasso a componente que aproxima os dois e anda o resto
  * (a tangente), com o comprimento do subpasso — o corpo escorrega em volta em vez de parar.
  */
-function contornar(e: Entidade, sx: number, sy: number, estado: EstadoJogo, ctx: ContextoSimulacao): void {
+function contornar(e: Entidade, sx: number, sy: number, estado: EstadoJogo, ctx: ContextoSimulacao, grade?: GradeDeCorpos): void {
   const alcance = 2 * ctx.balance.movimento.raioCorpo + SUBPASSO;
   let perto: Entidade | null = null;
   let menor = alcance * alcance;
-  for (const o of estado.entidades) {
+  for (const o of grade ? grade.perto(e.px, e.py, alcance) : estado.entidades) {
     if (o === e || o.morto || !bloqueia(e, o, ctx.balance.colisao)) continue;
     const d = (o.px - e.px) ** 2 + (o.py - e.py) ** 2;
     if (d < menor && d > EPS) {
@@ -330,21 +334,21 @@ function contornar(e: Entidade, sx: number, sy: number, estado: EstadoJogo, ctx:
   const s = Math.sqrt(sx * sx + sy * sy);
   tx = (tx / t) * s;
   ty = (ty / t) * s;
-  avancarEixo(e, tx, 0, estado, ctx);
-  avancarEixo(e, 0, ty, estado, ctx);
+  avancarEixo(e, tx, 0, estado, ctx, grade);
+  avancarEixo(e, 0, ty, estado, ctx, grade);
 }
 
 /** O corpo da entidade cabe em (x, y): terreno, muralhas e quem a bloqueia (só barra quem se aproxima). */
-function cabe(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: ContextoSimulacao): boolean {
+function cabe(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: ContextoSimulacao, grade?: GradeDeCorpos): boolean {
   const r = ctx.balance.movimento.raioCorpo;
   if (!corpoCabe(ctx.fase, x, y, r, (i, j) => muralhaEm(estado, i, j) !== undefined)) return false;
-  return !bloqueadoPorEntidade(e, x, y, estado, ctx);
+  return !bloqueadoPorEntidade(e, x, y, estado, ctx, grade);
 }
 
 /** Algum corpo que bloqueia `e` fica mais perto que dois raios em (x, y), e o passo aproxima os dois? */
-function bloqueadoPorEntidade(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: ContextoSimulacao): boolean {
+function bloqueadoPorEntidade(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: ContextoSimulacao, grade?: GradeDeCorpos): boolean {
   const minimo = 2 * ctx.balance.movimento.raioCorpo;
-  for (const o of estado.entidades) {
+  for (const o of grade ? grade.perto(x, y, minimo) : estado.entidades) {
     if (o === e || o.morto || !bloqueia(e, o, ctx.balance.colisao)) continue;
     const nx = o.px - x;
     const ny = o.py - y;

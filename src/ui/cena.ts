@@ -120,6 +120,8 @@ export interface Cena {
   quadroPermitido: (agoraMs: number) => boolean;
   /** Marco 15: tira a cena da página (troca de fase no cooperativo, sem recarregar a conexão). */
   desmontar: () => void;
+  /** Marco 26 (D-122): quanto durou o último salvamento (medidor e qualidade automática). */
+  anotarSalvamento: (ms: number) => void;
 }
 
 function div(classe: string): HTMLDivElement {
@@ -624,9 +626,10 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     // Marco 12: efeitos, som, luz, minimapa e prompt; o congelamento de impacto só segura o desenho.
     const congelado = ap.quadro(estado, q.agoraMs, dtMs, q.posicao);
     ap.aplicarCamera(q.agoraMs);
-    terreno.atualizarVisibilidade(...camera.retanguloVisivel(palco.altura()));
+    const vista = camera.retanguloVisivel(palco.altura());
+    terreno.atualizarVisibilidade(...vista);
     const reduzido = ap.movimentoReduzido();
-    objetos.desenhar(estado, q.agoraMs, reduzido);
+    objetos.desenhar(estado, q.agoraMs, reduzido, vista);
     portas.desenhar(estado, q.agoraMs, reduzido);
     fluxo.desenhar(estado, idLocal, ap.movimentoReduzido());
     if (!congelado) {
@@ -663,6 +666,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     quadro,
     pausado: ap.pausado,
     quadroPermitido: ap.quadroPermitido,
+    anotarSalvamento: ap.anotarSalvamento,
     desmontar: () => {
       clearTimeout(releitura);
       teclado.desligar();

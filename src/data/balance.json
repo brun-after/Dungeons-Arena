@@ -166,7 +166,12 @@
     "recargaLojaMs": 10000,
     "bauCongelaMs": 3000,
     "bauSomeMs": 5000,
-    "alcanceInteracao": 1
+    "alcanceInteracao": 1,
+    "prazoNoChao": {
+      "orbeMs": 60000,
+      "ouroMs": 180000,
+      "itemMs": 180000
+    }
   },
   "spawner": {
     "carenciaS": 20,
@@ -358,6 +363,7 @@
     "patrulhaAvaliacaoMs": 2000,
     "patrulhaPassoMs": 1500,
     "chanceAproximar": 0.1,
+    "raioAproximar": 18,
     "chanceManter": 0.6,
     "hesitacao": [
       { "s": 0.5, "chance": 0.35 },

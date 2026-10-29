@@ -26,6 +26,7 @@ import { cargaDaClasse, cargaPorMomento } from '../combat/carga-ultimate';
 import { atrasoDeRespawnTicks, localDeRespawn, penalidadeDeMorte, podeRespawnar, protecaoDeRespawnTicks } from '../modos/regras';
 import { celulaLivrePara } from '../world/colisao';
 import { passavel } from '../world/fase';
+import { ehCelulaDePorta } from '../world/portas';
 import { tentarDominar } from '../combat/efeitos-fluxo';
 import { explodirSeIsca } from '../combat/invocacoes';
 import { sortearEfeitoDeOrbe } from '../combat/registro-efeitos';
@@ -278,7 +279,8 @@ function celulaLivreParaRenascer(estado: EstadoJogo, ctx: ContextoSimulacao, e: 
         if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
         const x = c.x + dx;
         const y = c.y + dy;
-        if (passavel(ctx.fase, x, y) && celulaLivrePara(e, x, y, outras, ctx.balance.colisao)) return { x, y };
+        // Marco 26 (29/10/2026, D-123): nunca numa porta de fase (a de retorno fica no primeiro spawn).
+        if (passavel(ctx.fase, x, y) && !ehCelulaDePorta(estado, ctx, x, y) && celulaLivrePara(e, x, y, outras, ctx.balance.colisao)) return { x, y };
       }
     }
   }

@@ -224,9 +224,11 @@ export function rodar(cenario: Cenario, ticks: number, produtor: Produtor): Even
     const recargasAntes = { ...estado.recargas };
     simular(estado, ctx, produtor(estado), eventos, DT_MS);
     const erros = verificarInvariantes(estado, ctx);
-    // Recargas são monotônicas (§2.7): nenhuma expiração anda para trás.
+    // Recargas são monotônicas (§2.7): nenhuma expiração anda para trás. Marco 26 (D-122): a chave que já venceu
+    // pode sair (a limpeza periódica); ausente vale como pronta.
     for (const [chave, antes] of Object.entries(recargasAntes)) {
-      if ((estado.recargas[chave] ?? 0) < antes) erros.push(`recarga ${chave} regrediu`);
+      const depois = estado.recargas[chave];
+      if (depois === undefined ? antes > estado.tick : depois < antes) erros.push(`recarga ${chave} regrediu`);
     }
     if (erros.length > 0) {
       throw new Error(`invariante violada no tick ${estado.tick}: ${erros.join('; ')}`);

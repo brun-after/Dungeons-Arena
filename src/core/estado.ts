@@ -98,6 +98,8 @@ export interface ObjetoNoMundo {
   ref: string | null;
   /** Quem soltou precisa sair da célula antes de recolher; aliados podem pegar imediatamente. */
   aguardaSaidaDe?: EntidadeId;
+  /** Marco 26 (29/10/2026, D-122): tick em que o drop caiu (só os largados em jogo; o prazo no chão conta daqui). */
+  largadoTick?: number;
 }
 
 /** Célula de rastro (§2.8): aplica dano ou efeito a quem é hostil ao dono e entra nela. */
@@ -271,4 +273,16 @@ export function clonarEstado(estado: EstadoJogo): EstadoJogo {
     dificuldade: estado.dificuldade,
     ...(estado.quebraveis && { quebraveis: true }),
   };
+}
+
+/**
+ * Marco 26 (29/10/2026, D-122): a cada `LIMPEZA_RECARGAS_TICKS`, tira de `recargas` as que já venceram. Toda leitura
+ * trata a chave ausente como pronta, então nada muda no jogo; só para de crescer (cada invocação nova deixava as suas
+ * chaves para sempre, e o save copiava todas).
+ */
+export const LIMPEZA_RECARGAS_TICKS = 600;
+export function limparRecargasVencidas(estado: EstadoJogo): void {
+  if (estado.tick % LIMPEZA_RECARGAS_TICKS !== 0) return;
+  if (!Object.values(estado.recargas).some((fim) => fim <= estado.tick)) return;
+  estado.recargas = Object.fromEntries(Object.entries(estado.recargas).filter(([, fim]) => fim > estado.tick));
 }

@@ -81,6 +81,58 @@ describe('degradação automática por travadas', () => {
     expect(rodar(m, 30, () => 1000 / 30, 30)).toEqual([]);
     expect(m.p95Ms()).toBeCloseTo(33.3, 0);
   });
+
+  // Marco 26 (29/10/2026, D-122): a qualidade volta a subir quando o aparelho folga, até o nível do começo.
+  /** Como `rodar`, mas com o relógio contínuo entre as chamadas. */
+  const continuo = (m: MonitorDeQualidade) => {
+    let t = 0;
+    return (s: number, quadro: () => number, alvo = 60) => {
+      const mudancas: string[] = [];
+      const fim = t + s * 1000;
+      while (t < fim) {
+        const d = quadro();
+        t += d;
+        const r = m.registrar(d, t, alvo);
+        if (r) mudancas.push(r);
+      }
+      return mudancas;
+    };
+  };
+
+  it('depois de cair, 30 s bons sobem um nível, nunca acima do nível do começo', () => {
+    const m = new MonitorDeQualidade('baixo');
+    const rodar = continuo(m);
+    expect(rodar(12, () => 40)).toEqual(['minimo']);
+    // No mínimo o teto é 30 fps: quadros firmes de 33 ms contam como bons.
+    expect(rodar(40, () => 1000 / 30, 30)).toEqual(['baixo']);
+    expect(rodar(60, () => 16)).toEqual([]);
+    expect(m.nivel).toBe('baixo');
+  });
+
+  it('cair logo depois de subir dobra a espera da próxima subida', () => {
+    const m = new MonitorDeQualidade('baixo');
+    const rodar = continuo(m);
+    rodar(12, () => 40);
+    expect(rodar(40, () => 1000 / 30, 30)).toEqual(['baixo']);
+    expect(rodar(12, () => 40)).toEqual(['minimo']);
+    // A espera agora é de 60 s: 40 s bons não bastam.
+    expect(rodar(40, () => 1000 / 30, 30)).toEqual([]);
+    expect(rodar(30, () => 1000 / 30, 30)).toEqual(['baixo']);
+  });
+
+  it('o quadro marcado (o salvamento) não conta', () => {
+    const m = new MonitorDeQualidade('alto');
+    let t = 0;
+    const mudancas: string[] = [];
+    for (let i = 0; i < 60 * 12; i++) {
+      const d = i % 30 === 0 ? 400 : 16;
+      t += d;
+      if (d > 16) m.ignorarProximo();
+      const r = m.registrar(d, t);
+      if (r) mudancas.push(r);
+    }
+    expect(mudancas).toEqual([]);
+  });
 });
 
 describe('medidor', () => {

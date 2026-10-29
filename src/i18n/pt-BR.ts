@@ -260,6 +260,7 @@ export const ptBR = {
   'resolucao.media': 'Média',
   'resolucao.baixa': 'Baixa (mais leve)',
   'medidor.texto': '{fps} fps · p95 {p95} ms · travadas {pausas}',
+  'medidor.detalhe': '{vivos} vivos · {objetos} no chão · até {ticks} ticks/quadro · {qualidade} · salvar {salvar} ms',
   // Marco 21 (D-088): versão do app e o aviso de atualização.
   'app.versao': 'Versão {versao}',
   'atualizacao.disponivel': 'Nova versão do app disponível: {versao}',

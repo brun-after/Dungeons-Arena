@@ -122,7 +122,7 @@ describe('qualidade (§4.10)', () => {
     expect(PRESETS_QUALIDADE.alto.poeira).toBe(true);
   });
 
-  it('desce um nível com média abaixo de 45 fps em duas verificações seguidas e nunca sobe', () => {
+  it('desce um nível com média abaixo de 45 fps em duas verificações seguidas e não sobe logo em seguida', () => {
     const m = new MonitorDeQualidade('alto');
     let t = 0;
     const rodarS = (s: number, fps: number) => {

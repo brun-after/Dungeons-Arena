@@ -18,6 +18,8 @@ import { passavel } from './fase';
 
 // 25/10/2026: `novoObjeto` mora em objeto-novo.ts (só tipos), para o e2e importar sem puxar o núcleo inteiro.
 import { novoObjeto } from './objeto-novo';
+import { ticksDe } from '../core/tempo';
+import { RARIDADES } from '../modos/modo';
 
 export { novoObjeto };
 
@@ -150,7 +152,7 @@ export function largarObjeto(
   objetoId = `d:${estado.proximoId++}`,
 ): boolean {
   if (ocupada(estado, x, y)) return false;
-  estado.objetos.push(novoObjeto(objetoId, tipo, x, y, { valor, modo }));
+  estado.objetos.push(novoObjeto(objetoId, tipo, x, y, { valor, modo, largadoTick: estado.tick }));
   saida.push({ t: 'objetoSurgiu', tick: estado.tick, objetoId, tipo, x, y });
   return true;
 }
@@ -167,7 +169,7 @@ export function largarItem(
   ref: string | null = null,
 ): boolean {
   if (ocupada(estado, x, y)) return false;
-  estado.objetos.push(novoObjeto(objetoId, 'item', x, y, { valor: qtd, itemId, ref }));
+  estado.objetos.push(novoObjeto(objetoId, 'item', x, y, { valor: qtd, itemId, ref, largadoTick: estado.tick }));
   saida.push({ t: 'objetoSurgiu', tick: estado.tick, objetoId, tipo: 'item', x, y });
   return true;
 }
@@ -176,7 +178,7 @@ export function largarItem(
 export function largarOuro(estado: EstadoJogo, quantia: number, x: number, y: number, saida: EventoSimulacao[]): boolean {
   if (quantia <= 0 || ocupada(estado, x, y)) return false;
   const objetoId = `d:${estado.proximoId++}`;
-  estado.objetos.push(novoObjeto(objetoId, 'ouro', x, y, { valor: quantia }));
+  estado.objetos.push(novoObjeto(objetoId, 'ouro', x, y, { valor: quantia, largadoTick: estado.tick }));
   saida.push({ t: 'objetoSurgiu', tick: estado.tick, objetoId, tipo: 'ouro', x, y });
   return true;
 }
@@ -191,7 +193,39 @@ export function largarOrbeEfeito(
   objetoId = `d:${estado.proximoId++}`,
 ): boolean {
   if (ocupada(estado, x, y)) return false;
-  estado.objetos.push(novoObjeto(objetoId, 'orbe_efeito', x, y, { efeito: { ...efeito } }));
+  estado.objetos.push(novoObjeto(objetoId, 'orbe_efeito', x, y, { efeito: { ...efeito }, largadoTick: estado.tick }));
   saida.push({ t: 'objetoSurgiu', tick: estado.tick, objetoId, tipo: 'orbe_efeito', x, y });
   return true;
+}
+
+/** O prazo no chão do drop, em ms (null: não some). Marco 26 (D-122). */
+function prazoNoChaoMs(ctx: ContextoSimulacao, o: ObjetoNoMundo): number | null {
+  const p = ctx.balance.economia.prazoNoChao;
+  switch (o.tipo) {
+    case 'orbe_hp':
+    case 'orbe_recurso':
+    case 'orbe_efeito':
+      return p.orbeMs;
+    case 'ouro':
+      return p.ouroMs;
+    case 'item': {
+      const item = o.itemId ? ctx.conteudo.itens.get(o.itemId) : undefined;
+      if (!item || o.ref || item.tipo === 'livro' || item.progressao || RARIDADES.indexOf(item.raridade) >= RARIDADES.indexOf('raro')) return null;
+      return p.itemMs;
+    }
+    default:
+      return null;
+  }
+}
+
+/** A cada segundo, tira do chão os drops que passaram do prazo (determinístico, em ticks). */
+const CHECAGEM_TICKS = 60;
+export function expirarDrops(estado: EstadoJogo, ctx: ContextoSimulacao): void {
+  if (estado.tick % CHECAGEM_TICKS !== 0) return;
+  const vencido = (o: ObjetoNoMundo): boolean => {
+    if (o.largadoTick === undefined) return false;
+    const ms = prazoNoChaoMs(ctx, o);
+    return ms !== null && estado.tick - o.largadoTick >= ticksDe(ms);
+  };
+  if (estado.objetos.some(vencido)) estado.objetos = estado.objetos.filter((o) => !vencido(o));
 }

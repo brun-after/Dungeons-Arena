@@ -91,6 +91,15 @@ export function naSaidaAberta(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
   return tipo === 'temporaria' || !p || p.tranca === 'livre' || estado.saidaAberta;
 }
 
+/**
+ * Marco 26 (29/10/2026, D-123): a célula é uma porta de fase (a de retorno ou uma saída)? Quem renasce não cai nela:
+ * parado ali, completava a espera e voltava de fase sem querer.
+ */
+export function ehCelulaDePorta(estado: EstadoJogo, ctx: ContextoSimulacao, x: number, y: number): boolean {
+  const r = ctx.fase.portaRetorno;
+  return (!!r && r.x === x && r.y === y) || ehSaida(estado, ctx, x, y) !== null;
+}
+
 /** Na porta de retorno da fase? */
 function naPortaDeRetorno(ctx: ContextoSimulacao, e: Entidade): boolean {
   const r = ctx.fase.portaRetorno;

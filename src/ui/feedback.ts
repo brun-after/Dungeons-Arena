@@ -52,6 +52,8 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number; conf
   const nome = (id: string | null) => {
     if (!id) return '?';
     const e = estado().entidades.find((x) => x.id === id);
+    // Marco 26 (D-122): o registro só precisa dos nomes recentes (cada invocação nova tem um id).
+    if (e && nomes.size > 256 && !nomes.has(id)) nomes.clear();
     if (e) nomes.set(id, e.id === idLocal ? 'Você' : e.nome);
     return nomes.get(id) ?? id;
   };

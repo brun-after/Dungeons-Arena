@@ -10,6 +10,8 @@
 // forte conforme abre. O anel do descanso saiu com o descanso.
 // Marco 26 (25/10/2026, D-109): no isométrico, ouro, orbes e santuário também ficam em pé (as moedas de pé, o orbe
 // flutuando sobre a sombra, o cristal sobre a base), com profundidade; só os halos seguem no chão.
+// Marco 26 (29/10/2026, D-122): só desenha o que está na vista da câmera (com folga); os de fora ficam escondidos,
+// sem redesenho por quadro. Com os drops que se acumulavam, o chão inteiro era redesenhado a cada quadro.
 
 import { CanvasSource, Container, Graphics, Sprite, Text, Texture } from 'pixi.js';
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
@@ -182,8 +184,11 @@ export class CamadaObjetos {
     g.circle(cx, cy, 8).fill(COR_ORBE[o.tipo]).stroke({ width: 2, color: 0xffffff, alpha: 0.8 });
   }
 
-  desenhar(estado: EstadoJogo, agoraMs: number, movimentoReduzido: boolean): void {
+  /** `vista`: o retângulo visível em px de plano (`Camera.retanguloVisivel`); sem ele, desenha tudo. */
+  desenhar(estado: EstadoJogo, agoraMs: number, movimentoReduzido: boolean, vista?: readonly [number, number, number, number]): void {
     const g = this.g.clear();
+    const folga = CELULA_PX * 2;
+    const naVista = (cx: number, cy: number) => !vista || (cx >= vista[0] - folga && cx <= vista[2] + folga && cy >= vista[1] - folga && cy <= vista[3] + folga);
     const pulso = movimentoReduzido ? 0 : Math.sin(agoraMs / 260) * 2;
     const proj = this.emPe?.projecao();
     const iso = proj?.visao === 'iso';
@@ -191,6 +196,12 @@ export class CamadaObjetos {
     for (const o of estado.objetos) {
       const cx = (o.x + 0.5) * CELULA_PX;
       const cy = (o.y + 0.5) * CELULA_PX;
+      const visivel = naVista(cx, cy);
+      this.mostrarProprios(o.objetoId, visivel);
+      if (!visivel) {
+        vistos.add(o.objetoId);
+        continue;
+      }
       if (o.tipo === 'quebravel') {
         vistos.add(o.objetoId);
         this.quebravel(o, iso ? proj : null);
@@ -302,7 +313,8 @@ export class CamadaObjetos {
     const p = proj ? proj.projetar(cx, cy) : { x: cx, y: cy };
     item.visual.position.set(p.x, p.y - (proj ? 9 : 0));
     item.visual.zIndex = p.y;
-    item.quantidade.text = o.valor > 1 ? `×${o.valor}` : '';
+    const qtd = o.valor > 1 ? `×${o.valor}` : '';
+    if (item.quantidade.text !== qtd) item.quantidade.text = qtd;
   }
 
   /** `tMs` 0 com movimento reduzido (sem flutuar). */
@@ -339,6 +351,16 @@ export class CamadaObjetos {
       alto.clear().ellipse(0, 0, 9 - flutua * 0.4, 4 - flutua * 0.15).fill({ color: 0x000000, alpha: 0.32 });
       this.orbe(alto, o, 0, -altura, pulso);
     }
+  }
+
+  /** Esconde (fora da vista) ou volta a mostrar os desenhos próprios do objeto, sem destruí-los. */
+  private mostrarProprios(id: string, visivel: boolean): void {
+    const alto = this.altos.get(id);
+    if (alto) alto.visible = visivel;
+    const item = this.itens.get(id);
+    if (item) item.visual.visible = visivel;
+    const q = this.quebras.get(id);
+    if (q) q.visible = visivel;
   }
 
   /** Troca de visão: os objetos em pé voltam para o chão (ou o contrário) no próximo quadro. */

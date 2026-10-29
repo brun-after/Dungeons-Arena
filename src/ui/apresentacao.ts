@@ -72,6 +72,8 @@ export interface OpcoesApresentacao {
 }
 
 export interface Apresentacao {
+  /** Marco 26 (D-122): o salvamento durou `ms`; o medidor mostra e a qualidade automática não conta o quadro. */
+  anotarSalvamento: (ms: number) => void;
   /** Marco 11A: as partículas, para a telegrafia e os rastros também serem partícula. */
   particulas: SistemaParticulas;
   botaoPausa: HTMLButtonElement;
@@ -192,7 +194,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     acoes: o.acoesDaPausa,
     aoMudarPreferencias: (p) => {
       prefs = p;
-      if (p.qualidade !== 'auto') monitor.nivel = p.qualidade;
+      if (p.qualidade !== 'auto') monitor.nivel = monitor.teto = p.qualidade;
       aplicarPreferencias();
       o.aoMudarPreferencias(p);
     },
@@ -240,6 +242,10 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
       motor.destruir();
       sistema.removeEventListener('change', aplicarPreferencias);
     },
+    anotarSalvamento: (ms) => {
+      medidor.anotarSalvamento(ms);
+      monitor.ignorarProximo();
+    },
     botaoPausa: pausa.botao,
     abrirPausa: pausa.abrir,
     pausado: () => o.pausaOJogo && pausaAberta,
@@ -252,12 +258,18 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     quadro: (estado, agoraMs, dtMs, base) => {
       voo.quadro(estado, agoraMs, base);
       const posicao = voo.posicao(base);
-      medidor.registrar(dtMs, agoraMs);
+      medidor.registrar(dtMs, agoraMs, estado.tick, () => ({
+        vivos: estado.entidades.reduce((n, e) => n + (e.morto ? 0 : 1), 0),
+        objetos: estado.objetos.length,
+        qualidade: nivel(),
+      }));
       if (prefs.qualidade === 'auto') {
-        const caiu = monitor.registrar(dtMs, agoraMs, alvoFps());
-        if (caiu) {
+        const antes = monitor.nivel;
+        const mudou = monitor.registrar(dtMs, agoraMs, alvoFps());
+        if (mudou) {
           aplicarPreferencias();
-          o.aviso(t('aviso.qualidadeReduzida'));
+          // Marco 26 (D-122): só a descida avisa; a volta é silenciosa.
+          if (PRESETS_QUALIDADE[mudou].particulas < PRESETS_QUALIDADE[antes].particulas) o.aviso(t('aviso.qualidadeReduzida'));
         }
       }
       const eu = estado.entidades.find((e) => e.id === idLocal);
