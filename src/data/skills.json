@@ -23,7 +23,8 @@
       "efeitos": [],
       "visual": {
         "impacto": "corte",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "golpe"
       },
       "basico": true,
       "mobilidade": "livre"
@@ -53,7 +54,8 @@
         "conjuracao": "runas",
         "viagem": "rastro",
         "impacto": "runas",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "seta_arcana"
       },
       "marcos": {
         "2": {
@@ -104,7 +106,8 @@
         "conjuracao": "chamas",
         "impacto": "explosao",
         "camera": "forte",
-        "som": "explosao"
+        "som": "explosao",
+        "assinatura": "explosao_de_fogo"
       },
       "marcos": {
         "2": {
@@ -159,7 +162,8 @@
         "cor": "#2ecc71",
         "conjuracao": "sagrado",
         "impacto": "sagrado",
-        "som": "cura"
+        "som": "cura",
+        "assinatura": "cura"
       },
       "marcos": {
         "2": {
@@ -219,7 +223,8 @@
         "cor": "#f1c40f",
         "impacto": "estrelas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "golpe_atordoante"
       },
       "marcos": {
         "2": {
@@ -271,7 +276,8 @@
       "efeitos": [],
       "visual": {
         "impacto": "corte",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "golpe"
       }
     },
     {
@@ -298,7 +304,8 @@
         "cor": "#5dade2",
         "conjuracao": "brilho",
         "impacto": "relampago",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "relampago"
       }
     },
     {
@@ -328,7 +335,8 @@
         "cor": "#d5c4a1",
         "viagem": "esteira",
         "impacto": "farpas",
-        "som": "projetil"
+        "som": "projetil",
+        "assinatura": "flecha"
       }
     },
     {
@@ -360,10 +368,11 @@
       ],
       "visual": {
         "cor": "#c0392b",
-        "conjuracao": "chamas",
-        "impacto": "explosao",
+        "conjuracao": "sombra",
+        "impacto": "sombra",
         "camera": "leve",
-        "som": "explosao"
+        "som": "explosao",
+        "assinatura": "marca_sombria"
       }
     },
     {
@@ -399,7 +408,8 @@
         "cor": "#8e44ad",
         "impacto": "sombra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "golpe_sombrio"
       }
     },
     {
@@ -431,7 +441,8 @@
         "cor": "#bdc3c7",
         "viagem": "esteira",
         "impacto": "fumaca",
-        "som": "armadilha"
+        "som": "armadilha",
+        "assinatura": "teia"
       }
     },
     {
@@ -473,7 +484,8 @@
       "visual": {
         "cor": "#27ae60",
         "impacto": "bolhas",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "golpe_viscoso"
       }
     },
     {
@@ -503,7 +515,8 @@
       "visual": {
         "impacto": "pedra",
         "camera": "forte",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "golpe_pesado"
       }
     },
     {
@@ -536,7 +549,8 @@
         "cor": "#c0392b",
         "conjuracao": "sombra",
         "impacto": "sangue",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "raio_vampirico"
       }
     },
     {
@@ -570,7 +584,8 @@
       "visual": {
         "cor": "#1abc9c",
         "conjuracao": "anel",
-        "som": "invocacao"
+        "som": "invocacao",
+        "assinatura": "invocacao"
       }
     },
     {
@@ -606,7 +621,8 @@
       "visual": {
         "cor": "#bdc3c7",
         "conjuracao": "fumaca",
-        "som": "armadilha"
+        "som": "armadilha",
+        "assinatura": "armar_teia"
       }
     },
     {
@@ -633,7 +649,8 @@
         "cor": "#9b8cff",
         "viagem": "rastro",
         "impacto": "runas",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "dardo_arcano"
       },
       "basico": true,
       "mobilidade": "livre"
@@ -665,7 +682,8 @@
         "viagem": "esteira",
         "cor": "#d4ac0d",
         "impacto": "farpas",
-        "som": "projetil"
+        "som": "projetil",
+        "assinatura": "flecha"
       },
       "basico": true,
       "mobilidade": "livre"
@@ -701,7 +719,8 @@
         "cor": "#e67e22",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "investida"
       },
       "tags": [
         "movimento"
@@ -769,7 +788,8 @@
         "impacto": "vento",
         "camera": "leve",
         "som": "golpe",
-        "animacao": "giro"
+        "animacao": "giro",
+        "assinatura": "redemoinho"
       },
       "marcos": {
         "2": {
@@ -850,7 +870,8 @@
       "visual": {
         "cor": "#7f8c8d",
         "impacto": "corte",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "corrente"
       },
       "marcos": {
         "2": {
@@ -939,7 +960,8 @@
         "viagem": "brasas",
         "impacto": "explosao",
         "camera": "forte",
-        "som": "explosao"
+        "som": "explosao",
+        "assinatura": "bola_de_fogo"
       },
       "elemento": "fogo",
       "marcos": {
@@ -994,7 +1016,8 @@
         "conjuracao": "cristais",
         "viagem": "rastro",
         "impacto": "cristais",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "lanca_de_gelo"
       },
       "elemento": "gelo",
       "marcos": {
@@ -1049,7 +1072,8 @@
         "viagem": "faiscas",
         "impacto": "relampago",
         "camera": "leve",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "raio_em_cadeia"
       },
       "elemento": "raio",
       "mods": [
@@ -1110,7 +1134,8 @@
       "visual": {
         "cor": "#5dade2",
         "impacto": "runas",
-        "som": "cura"
+        "som": "cura",
+        "assinatura": "barreira"
       },
       "marcos": {
         "2": {
@@ -1165,7 +1190,8 @@
         "conjuracao": "brilho",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "nova_glacial"
       },
       "elemento": "gelo",
       "marcos": {
@@ -1219,7 +1245,8 @@
         "conjuracao": "runas",
         "viagem": "brilho",
         "impacto": "estrelas",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "mente_partida"
       },
       "elemento": "psiquico",
       "marcos": {
@@ -1283,7 +1310,8 @@
         "cor": "#c39bd3",
         "impacto": "estrelas",
         "conjuracao": "runas",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "afinidade_elemental"
       },
       "marcos": {
         "2": {
@@ -1339,7 +1367,8 @@
         "cor": "#d4ac0d",
         "viagem": "esteira",
         "impacto": "farpas",
-        "som": "projetil"
+        "som": "projetil",
+        "assinatura": "flecha_perfurante"
       },
       "mods": [
         "atravessar"
@@ -1399,7 +1428,8 @@
         "cor": "#d4ac0d",
         "impacto": "chuva",
         "camera": "leve",
-        "som": "projetil"
+        "som": "projetil",
+        "assinatura": "chuva_de_flechas"
       },
       "marcos": {
         "2": {
@@ -1462,7 +1492,9 @@
         "cor": "#58d68d",
         "viagem": "esteira",
         "impacto": "bolhas",
-        "som": "projetil"
+        "som": "projetil",
+        "assinatura": "flecha",
+        "variante": "bolhas"
       },
       "elemento": "veneno",
       "marcos": {
@@ -1520,7 +1552,8 @@
       "visual": {
         "cor": "#d4ac0d",
         "impacto": "leque",
-        "som": "projetil"
+        "som": "projetil",
+        "assinatura": "leque_de_flechas"
       },
       "marcos": {
         "2": {
@@ -1579,7 +1612,8 @@
       "visual": {
         "cor": "#8e44ad",
         "impacto": "sombra",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "troca_sombria"
       },
       "marcos": {
         "2": {
@@ -1645,7 +1679,8 @@
         "cor": "#d4ac0d",
         "impacto": "estrelas",
         "conjuracao": "brilho",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "olho_de_aguia"
       },
       "marcos": {
         "2": {
@@ -1710,7 +1745,8 @@
         "viagem": "esteira",
         "impacto": "runas",
         "projetil": "flecha",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "flecha_arcana"
       }
     },
     {
@@ -1745,11 +1781,12 @@
         "raio_em_cadeia"
       ],
       "visual": {
-        "cor": "#a0d8ef",
-        "conjuracao": "cristais",
+        "cor": "#f9e79f",
+        "conjuracao": "faiscas",
         "impacto": "relampago",
         "camera": "leve",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "feixe_eletrico"
       }
     },
     {
@@ -1782,7 +1819,9 @@
         "conjuracao": "chamas",
         "impacto": "chamas",
         "camera": "forte",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "ciclone_de_fogo",
+        "animacao": "giro"
       }
     },
     {
@@ -1823,7 +1862,8 @@
         "cor": "#6c3483",
         "impacto": "sombra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "corrente_sombria"
       }
     },
     {
@@ -1853,9 +1893,10 @@
       "visual": {
         "cor": "#f7e9a0",
         "conjuracao": "sagrado",
-        "impacto": "chuva",
+        "impacto": "sagrado",
         "camera": "leve",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "chuva_de_estrelas"
       },
       "familiaGeral": "sagrado"
     },
@@ -1888,7 +1929,8 @@
         "cor": "#a1887f",
         "impacto": "pedra",
         "conjuracao": "pedra",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "estaca_de_pedra"
       },
       "marcos": {
         "2": {
@@ -1948,7 +1990,8 @@
         "cor": "#ad885d",
         "impacto": "pedra",
         "conjuracao": "pedra",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "abalo_sismico"
       },
       "marcos": {
         "2": {
@@ -2007,7 +2050,8 @@
         "cor": "#a1887f",
         "impacto": "pedra",
         "conjuracao": "pedra",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "muralha_de_pedra"
       },
       "marcos": {
         "2": {
@@ -2065,7 +2109,8 @@
         "cor": "#765b9e",
         "impacto": "sombra",
         "conjuracao": "sombra",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "passo_sombrio"
       },
       "marcos": {
         "2": {
@@ -2118,7 +2163,9 @@
         "cor": "#6c3483",
         "impacto": "corte",
         "conjuracao": "sombra",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "golpe_sombrio",
+        "variante": "laminas"
       },
       "marcos": {
         "2": {
@@ -2178,7 +2225,8 @@
         "cor": "#82689e",
         "impacto": "sombra",
         "conjuracao": "sombra",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "veu_da_noite"
       },
       "marcos": {
         "2": {
@@ -2231,7 +2279,8 @@
         "cor": "#f7e9a0",
         "impacto": "sagrado",
         "conjuracao": "sagrado",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "lanca_radiante"
       },
       "marcos": {
         "2": {
@@ -2291,7 +2340,8 @@
         "cor": "#83dcb6",
         "impacto": "sagrado",
         "conjuracao": "sagrado",
-        "som": "cura"
+        "som": "cura",
+        "assinatura": "circulo_de_amparo"
       },
       "marcos": {
         "2": {
@@ -2348,7 +2398,8 @@
         "cor": "#dcfff3",
         "impacto": "brilho",
         "conjuracao": "sagrado",
-        "som": "cura"
+        "som": "cura",
+        "assinatura": "purificacao"
       },
       "marcos": {
         "2": {
@@ -2408,7 +2459,8 @@
         "cor": "#58d68d",
         "impacto": "bolhas",
         "conjuracao": "bolhas",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "dardo_toxico"
       },
       "marcos": {
         "2": {
@@ -2468,7 +2520,8 @@
         "cor": "#60aa79",
         "impacto": "bolhas",
         "conjuracao": "bolhas",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "nevoa_venenosa"
       },
       "marcos": {
         "2": {
@@ -2527,7 +2580,8 @@
         "cor": "#ae3445",
         "impacto": "corte",
         "conjuracao": "brilho",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "corte_dilacerante"
       },
       "marcos": {
         "2": {
@@ -2586,7 +2640,8 @@
         "cor": "#b6cee0",
         "impacto": "brilho",
         "conjuracao": "brilho",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "postura_de_aparo"
       },
       "marcos": {
         "2": {
@@ -2644,7 +2699,8 @@
         "cor": "#d980fa",
         "impacto": "runas",
         "conjuracao": "runas",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "onda_de_repulsao"
       },
       "marcos": {
         "2": {
@@ -2842,7 +2898,8 @@
         "cor": "#8b68d9",
         "conjuracao": "sombra",
         "impacto": "sombra",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "cranio"
       },
       "mobilidade": "lenta",
       "nivelMinimo": 1,
@@ -2882,7 +2939,9 @@
         "cor": "#8b68d9",
         "conjuracao": "sombra",
         "impacto": "sombra",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "cranio",
+        "variante": "almas"
       },
       "mobilidade": "lenta",
       "nivelMinimo": 1,
@@ -2939,8 +2998,9 @@
       "visual": {
         "cor": "#7ee0bb",
         "conjuracao": "sombra",
-        "impacto": "sagrado",
-        "som": "cura"
+        "impacto": "brilho",
+        "som": "cura",
+        "assinatura": "fios_de_vida"
       },
       "mobilidade": "lenta",
       "nivelMinimo": 1,
@@ -2997,7 +3057,8 @@
         "cor": "#b8a4dd",
         "conjuracao": "sombra",
         "impacto": "pedra",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "garras_do_ossuario"
       },
       "mobilidade": "lenta",
       "nivelMinimo": 1,
@@ -3061,7 +3122,8 @@
         "cor": "#8b68d9",
         "impacto": "sombra",
         "conjuracao": "sombra",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "comando_sepulcral"
       },
       "marcos": {
         "2": {
@@ -3113,7 +3175,8 @@
         "cor": "#8b68d9",
         "conjuracao": "sombra",
         "impacto": "sombra",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "ceifa_de_almas"
       },
       "mobilidade": "lenta",
       "nivelMinimo": 5,
@@ -3176,7 +3239,8 @@
         "cor": "#8b68d9",
         "conjuracao": "sombra",
         "impacto": "sombra",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "mortalha"
       },
       "mobilidade": "lenta",
       "nivelMinimo": 3,
@@ -3252,9 +3316,9 @@
       "visual": {
         "cor": "#95a5a6",
         "impacto": "faiscas",
-        "conjuracao": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "investida_de_escudo"
       },
       "tags": [
         "movimento"
@@ -3341,7 +3405,8 @@
         "cor": "#f39c12",
         "impacto": "estrelas",
         "conjuracao": "anel",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "brado"
       },
       "marcos": {
         "2": {
@@ -3416,7 +3481,8 @@
       "visual": {
         "cor": "#f39c12",
         "impacto": "anel",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "onda_de_brado"
       }
     },
     {
@@ -3449,7 +3515,9 @@
       "visual": {
         "cor": "#ff6a00",
         "impacto": "anel",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "onda_de_brado",
+        "variante": "sangue"
       }
     },
     {
@@ -3479,7 +3547,8 @@
         "impacto": "chamas",
         "conjuracao": "brasas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "lamina_em_brasa"
       },
       "marcos": {
         "2": {
@@ -3563,7 +3632,8 @@
         "cor": "#e74c3c",
         "impacto": "anel",
         "conjuracao": "sangue",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "desafio"
       },
       "marcos": {
         "2": {
@@ -3637,7 +3707,8 @@
         "cor": "#a1887f",
         "impacto": "pedra",
         "camera": "forte",
-        "som": "explosao"
+        "som": "explosao",
+        "assinatura": "salto_esmagador"
       },
       "tags": [
         "movimento"
@@ -3705,7 +3776,8 @@
       "visual": {
         "cor": "#f0f3f4",
         "impacto": "anel",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "contragolpe"
       },
       "marcos": {
         "2": {
@@ -3765,7 +3837,8 @@
       "visual": {
         "cor": "#e74c3c",
         "impacto": "corte",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "contragolpe_arco"
       }
     },
     {
@@ -3793,7 +3866,10 @@
       "visual": {
         "cor": "#e74c3c",
         "impacto": "vento",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "redemoinho",
+        "variante": "faiscas",
+        "animacao": "giro"
       }
     },
     {
@@ -3828,7 +3904,8 @@
         "cor": "#a569bd",
         "impacto": "runas",
         "conjuracao": "relampago",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "sobrecarga_arcana"
       },
       "marcos": {
         "2": {
@@ -3895,7 +3972,8 @@
         "cor": "#9b8cff",
         "impacto": "runas",
         "conjuracao": "brilho",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "piscar"
       },
       "marcos": {
         "2": {
@@ -3943,7 +4021,8 @@
       "visual": {
         "cor": "#9b8cff",
         "impacto": "explosao",
-        "som": "explosao"
+        "som": "explosao",
+        "assinatura": "eco_arcano"
       },
       "variantes": {
         "enc_fogo": {
@@ -4003,7 +4082,8 @@
         "conjuracao": "runas",
         "viagem": "brilho",
         "camera": "leve",
-        "som": "explosao"
+        "som": "explosao",
+        "assinatura": "orbe_instavel"
       },
       "marcos": {
         "2": {
@@ -4091,7 +4171,8 @@
         "impacto": "explosao",
         "viagem": "esteira",
         "camera": "leve",
-        "som": "explosao"
+        "som": "explosao",
+        "assinatura": "flecha_explosiva"
       },
       "marcos": {
         "2": {
@@ -4158,7 +4239,8 @@
       "visual": {
         "cor": "#c9b37c",
         "impacto": "vento",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "rolamento"
       },
       "marcos": {
         "2": {
@@ -4218,7 +4300,8 @@
       "visual": {
         "cor": "#d4ac0d",
         "impacto": "brilho",
-        "som": "projetil"
+        "som": "projetil",
+        "assinatura": "marca_do_cacador"
       },
       "marcos": {
         "2": {
@@ -4280,7 +4363,8 @@
       "visual": {
         "cor": "#b9770e",
         "impacto": "farpas",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "armadilha_de_caca"
       },
       "marcos": {
         "2": {
@@ -4339,7 +4423,8 @@
         "impacto": "explosao",
         "conjuracao": "sombra",
         "camera": "leve",
-        "som": "explosao"
+        "som": "explosao",
+        "assinatura": "explosao_cadaverica"
       },
       "marcos": {
         "2": {
@@ -4403,7 +4488,8 @@
         "cor": "#8b68d9",
         "impacto": "sombra",
         "conjuracao": "runas",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "levante_profano"
       },
       "marcos": {
         "2": {
@@ -4460,7 +4546,8 @@
         "cor": "#7fbde8",
         "impacto": "farpas",
         "viagem": "vento",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "mergulho"
       },
       "marcos": {
         "2": {
@@ -4523,7 +4610,8 @@
       "visual": {
         "cor": "#aed6f1",
         "impacto": "anel",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "grito_do_falcao"
       },
       "marcos": {
         "2": {
@@ -4586,7 +4674,8 @@
       "visual": {
         "cor": "#5b5b6e",
         "impacto": "corte",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "garras_cegantes"
       },
       "marcos": {
         "2": {
@@ -4650,7 +4739,8 @@
         "cor": "#7fbde8",
         "impacto": "vento",
         "conjuracao": "anel",
-        "som": "cura"
+        "som": "cura",
+        "assinatura": "vigia"
       },
       "marcos": {
         "2": {
@@ -4708,7 +4798,8 @@
         "cor": "#7fbde8",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "rasante"
       },
       "marcos": {
         "2": {
@@ -4778,7 +4869,8 @@
         "impacto": "vento",
         "conjuracao": "leque",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "tempestade_de_penas"
       },
       "marcos": {
         "2": {
@@ -4835,7 +4927,8 @@
       "visual": {
         "cor": "#a9dfbf",
         "impacto": "sagrado",
-        "som": "cura"
+        "som": "cura",
+        "assinatura": "retorno"
       },
       "marcos": {
         "2": {
@@ -4898,7 +4991,8 @@
       "visual": {
         "cor": "#7fbde8",
         "impacto": "corte",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "presa_dupla"
       },
       "marcos": {
         "2": {
@@ -4956,7 +5050,9 @@
       "visual": {
         "cor": "#7fbde8",
         "impacto": "farpas",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "presa_dupla",
+        "variante": "penas"
       }
     },
     {
@@ -4988,7 +5084,8 @@
       "visual": {
         "cor": "#aed6f1",
         "impacto": "runas",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "dissipar"
       },
       "marcos": {
         "2": {
@@ -5056,7 +5153,8 @@
         "cor": "#9b8cff",
         "impacto": "runas",
         "conjuracao": "runas",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "runa_amplificadora"
       },
       "marcos": {
         "2": {
@@ -5119,7 +5217,8 @@
       "visual": {
         "cor": "#76d7c4",
         "impacto": "vento",
-        "som": "cura"
+        "som": "cura",
+        "assinatura": "impulso"
       },
       "marcos": {
         "2": {
@@ -5182,7 +5281,8 @@
       "visual": {
         "cor": "#ff7b39",
         "impacto": "chamas",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "rastro_de_fogo"
       },
       "marcos": {
         "2": {
@@ -5256,7 +5356,8 @@
         "impacto": "chamas",
         "conjuracao": "brasas",
         "camera": "leve",
-        "som": "explosao"
+        "som": "explosao",
+        "assinatura": "anel_de_chamas"
       },
       "marcos": {
         "2": {
@@ -5311,7 +5412,9 @@
       "visual": {
         "cor": "#ff5722",
         "impacto": "chamas",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "anel_de_chamas",
+        "variante": "brasas"
       }
     },
     {
@@ -5351,7 +5454,8 @@
         "cor": "#ff3d00",
         "impacto": "explosao",
         "conjuracao": "chamas",
-        "som": "explosao"
+        "som": "explosao",
+        "assinatura": "pilar_de_fogo"
       },
       "marcos": {
         "2": {
@@ -5411,7 +5515,8 @@
       "visual": {
         "cor": "#58d68d",
         "impacto": "bolhas",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "seiva_corrosiva"
       },
       "marcos": {
         "2": {
@@ -5472,7 +5577,8 @@
         "cor": "#a1887f",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "pedregulho"
       },
       "marcos": {
         "2": {
@@ -5541,7 +5647,8 @@
       "visual": {
         "cor": "#f7e9a0",
         "impacto": "sagrado",
-        "som": "cura"
+        "som": "cura",
+        "assinatura": "asas_da_aurora"
       },
       "marcos": {
         "2": {
@@ -5602,7 +5709,8 @@
         "cor": "#d980fa",
         "impacto": "estrelas",
         "viagem": "brilho",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "agulha_mental"
       },
       "marcos": {
         "2": {
@@ -5659,7 +5767,8 @@
       "visual": {
         "cor": "#d980fa",
         "impacto": "runas",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "telecinese"
       },
       "marcos": {
         "2": {
@@ -5712,7 +5821,8 @@
       "visual": {
         "cor": "#bb8fce",
         "impacto": "estrelas",
-        "som": "magia"
+        "som": "magia",
+        "assinatura": "pressagio"
       },
       "marcos": {
         "2": {

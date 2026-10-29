@@ -47,6 +47,7 @@ import { criarPrompt } from './prompt';
 import { letraInteragir } from '../input/teclas';
 import { ligarSom } from './som';
 import { classeDaHabilidade } from './runa-dom';
+import { DiretorVfx } from '../render/vfx/diretor';
 
 export interface OpcoesApresentacao {
   ctx: ContextoSimulacao;
@@ -135,8 +136,11 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     parDaUltimate: (id) => ctx.conteudo.ultimates.get(id.replace(/_\d+$/, ''))?.par ?? null,
   });
   voo.ligar(o.bus, o.estado, () => performance.now());
+  // Marco 26 (29/10/2026, D-124): as assinaturas das skills (silhuetas acima, marcas no chão, corpos que deslizam).
+  const diretor = new DiretorVfx({ efeitos: palco.efeitos, chao: palco.chao, particulas, impacto, reduzido });
   const efeitos = new EfeitosDeHabilidade({
-    particulas, impacto, habilidades: o.habilidades, idLocal, qualidade, fase: ctx.fase,
+    particulas, impacto, habilidades: o.habilidades, idLocal, qualidade, fase: ctx.fase, diretor,
+    classeDaUltimate: (id) => ctx.conteudo.ultimates.get(id.replace(/_\d+$/, ''))?.classe ?? null,
     miraCheia: (e, tick) => fracaoMira(ctx, e, tick) === 1,
     clima: tema?.particulas ?? null,
     corElemento,
@@ -177,7 +181,10 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     particulas.limite = qualidade().particulas;
     // Marco 11A: movimento reduzido também reduz as partículas (metade, sem giro).
     particulas.reduzido = reduzido();
-    if (particulas.limite === 0) particulas.limpar();
+    if (particulas.limite === 0) {
+      particulas.limpar();
+      diretor.limpar();
+    }
     palco.definirEscala(escalaDaResolucao(prefs.resolucao, toque));
     medidor.mostrar(prefs.medidor);
   };
@@ -235,10 +242,13 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
   };
 
+  const deslizando = (f: (e: Entidade) => PontoVisual) => (e: Entidade) => diretor.ponto(e.id, f(e));
+
   return {
     particulas,
     encerrar: () => {
       combos.destruir();
+      diretor.destruir();
       motor.destruir();
       sistema.removeEventListener('change', aplicarPreferencias);
     },
@@ -253,11 +263,13 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     movimentoReduzido: reduzido,
     qualidade,
     quadroPermitido: (agoraMs) => pulador.deveDesenhar(agoraMs, alvoFps()),
-    posicaoVisual: (base) => voo.posicao(base),
+    // D-124: o corpo puxado, empurrado ou arremessado desliza em vez de pular.
+    posicaoVisual: (base) => deslizando(voo.posicao(base)),
     ajusteVisual: (e, agoraMs) => voo.ajuste(e, agoraMs),
     quadro: (estado, agoraMs, dtMs, base) => {
+      diretor.relogio(agoraMs);
       voo.quadro(estado, agoraMs, base);
-      const posicao = voo.posicao(base);
+      const posicao = deslizando(voo.posicao(base));
       medidor.registrar(dtMs, agoraMs, estado.tick, () => ({
         vivos: estado.entidades.reduce((n, e) => n + (e.morto ? 0 : 1), 0),
         objetos: estado.objetos.length,

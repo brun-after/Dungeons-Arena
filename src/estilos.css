@@ -2829,3 +2829,56 @@ body.toque .botao-ultimate .tecla {
 body.movimento-reduzido .cinematica-ultimate {
   animation: none;
 }
+
+/* Marco 26 (29/10/2026, D-124): a galeria das assinaturas de efeito (?galeria=efeitos). */
+.galeria-efeitos {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr minmax(240px, 320px);
+}
+.galeria-palco {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+}
+.galeria-lista {
+  overflow-y: auto;
+  padding: 8px;
+  border-left: 1px solid var(--borda);
+  background: var(--painel);
+}
+.galeria-lista header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: center;
+  padding-bottom: 6px;
+  background: var(--painel);
+}
+.galeria-atual {
+  flex-basis: 100%;
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+.galeria-lista h3 {
+  margin: 10px 0 4px;
+  font-size: 0.85rem;
+}
+.galeria-lista section button {
+  margin: 2px;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+}
+@media (max-width: 700px) {
+  .galeria-efeitos {
+    grid-template-columns: 1fr;
+    grid-template-rows: 55% 45%;
+  }
+  .galeria-lista {
+    border-left: 0;
+    border-top: 1px solid var(--borda);
+  }
+}

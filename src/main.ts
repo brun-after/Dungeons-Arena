@@ -7,6 +7,7 @@
 //   ?editor[=id]      editor de fases (marco 6C), sob demanda
 //   ?jogo=teste&fase=id   "Testar agora" do editor
 //   ?bench=carga|padrao|trocas   benchmarks do cliente (marco 16)
+//   ?galeria=efeitos[&visao=iso]  a galeria das assinaturas de efeito (marco 26, D-124)
 //   ?pesquisa=1       teste com pessoas (marco 7A): campanha medida, questionário e envio anônimo
 // O código da arena e do SDK de rede é carregado sob demanda (§3.8, code splitting).
 
@@ -46,6 +47,9 @@ function rotear(raiz: HTMLElement): void {
     void import('./arena-tela').then((m) => {
       m.iniciarArenaOnline(raiz);
     });
+  } else if (params.get('galeria') === 'efeitos') {
+    // Marco 26 (D-124): a galeria das assinaturas de efeito (ferramenta de revisão, sob demanda).
+    void import('./galeria-tela').then((m) => m.iniciarGaleria(raiz, params));
   } else if (params.has('bench')) {
     // Marco 16: benchmarks do cliente (sob demanda, fora do pacote principal).
     void import('./bench-tela').then((m) => m.iniciarBench(raiz, params));

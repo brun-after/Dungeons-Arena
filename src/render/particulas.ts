@@ -6,15 +6,19 @@
 // Marco 11A (16/10/2026, D-066): ParticleContainer do Pixi (dois: aditivo e normal) com todas as texturas num atlas
 // só, gerado uma vez — muito mais partículas pelo mesmo custo. Formas de emissão, cor ao longo da vida, giro e
 // arrasto. Com movimento reduzido, metade das partículas e nada de giro.
+// Marco 26 (29/10/2026, D-124): um segundo atlas, rico (vfx/texturas.ts, canvas com gradiente), com os seus dois
+// contêineres; flipbook (`quadros`), `esticar`, curvas de vida, cores em paradas, turbulência e `aoMorrer`. As peças,
+// fitas e marcas pegam as texturas daqui (`textura`) e emitem em px de tela (`emitirNaTela`).
 
-import { Container, Graphics, Particle, ParticleContainer, Rectangle, Texture, type Renderer } from 'pixi.js';
+import { CanvasSource, Container, Graphics, Particle, ParticleContainer, Rectangle, Texture, type Renderer } from 'pixi.js';
 import { CELULA_PX } from './camera-calculo';
 import { centroDaCelula, type Projecao } from './projecao';
-import { PRESETS_PARTICULA, TEXTURAS_PARTICULA, type Emissao, type NomePreset, type TexturaParticula } from './presets-particula';
+import { PRESETS_PARTICULA, TEXTURAS_PARTICULA, type CurvaVida, type Emissao, type NomePreset, type TexturaParticula } from './presets-particula';
+import { celulaDaTextura, LADO_RICO, pintarAtlasRico, TEXTURAS_RICAS, type TexturaRica } from './vfx/texturas';
 
 interface Viva {
   p: Particle;
-  aditiva: boolean;
+  destino: ParticleContainer;
   vx: number;
   vy: number;
   gravidade: number;
@@ -26,6 +30,15 @@ interface Viva {
   corFinal: number | null;
   giro: number;
   arrasto: number;
+  quadros: Texture[] | null;
+  quadro0: number;
+  esticar: number;
+  curvaEscala: CurvaVida | undefined;
+  curvaAlpha: CurvaVida | undefined;
+  cores: number[] | null;
+  turbulencia: number;
+  fase: number;
+  aoMorrer: readonly Emissao[] | null;
 }
 
 const LADO = 32;
@@ -133,12 +146,47 @@ function desenharTextura(g: Graphics, tipo: TexturaParticula, ox: number): void 
   }
 }
 
+
+/** Marco 26 (D-124): a curva da vida (0 a 1) de cada `CurvaVida`. */
+export function curva(c: CurvaVida | undefined, f: number): number {
+  switch (c) {
+    case 'sai':
+      return 1 - (1 - f) * (1 - f) * (1 - f);
+    case 'entra':
+      return f * f;
+    case 'pulso':
+      return Math.sin(f * Math.PI);
+    case 'sino':
+      return f < 0.5 ? f * 2 : 2 - f * 2;
+    default:
+      return f;
+  }
+}
+
+/** Marco 26 (D-124): a cor de uma lista de paradas na fração `f` da vida. */
+export function corNasParadas(cores: readonly number[], f: number): number {
+  if (cores.length === 1) return cores[0] ?? 0xffffff;
+  const pos = Math.min(0.9999, Math.max(0, f)) * (cores.length - 1);
+  const i = Math.floor(pos);
+  return misturar(cores[i] ?? 0xffffff, cores[i + 1] ?? cores[i] ?? 0xffffff, pos - i);
+}
+
+/** A textura e a família de atlas dela (os dois atlas não se misturam num ParticleContainer). */
+interface TexturaNoAtlas {
+  t: Texture;
+  rica: boolean;
+}
+
 export class SistemaParticulas {
   private readonly camada = new Container({ label: 'particulas' });
   private readonly normal: ParticleContainer;
   private readonly aditiva: ParticleContainer;
+  /** Marco 26 (D-124): os contêineres do atlas rico (outra textura-base). */
+  private readonly normalRica: ParticleContainer | null = null;
+  private readonly aditivaRica: ParticleContainer | null = null;
   private readonly atlas: Texture;
-  private readonly texturas = new Map<TexturaParticula, Texture>();
+  private readonly atlasRico: Texture | null = null;
+  private readonly texturas = new Map<string, TexturaNoAtlas>();
   private readonly vivas: Viva[] = [];
   private readonly livres: Particle[] = [];
   /** Teto de partículas vivas, da qualidade atual. */
@@ -161,13 +209,30 @@ export class SistemaParticulas {
     this.atlas = renderer.generateTexture({ target: g, resolution: 2, frame: new Rectangle(0, 0, TEXTURAS_PARTICULA.length * LADO, LADO) });
     g.destroy();
     TEXTURAS_PARTICULA.forEach((tipo, i) => {
-      this.texturas.set(tipo, new Texture({ source: this.atlas.source, frame: new Rectangle(i * LADO, 0, LADO, LADO) }));
+      this.texturas.set(tipo, { t: new Texture({ source: this.atlas.source, frame: new Rectangle(i * LADO, 0, LADO, LADO) }), rica: false });
     });
     const dinamicas = { position: true, rotation: true, color: true, vertex: true, uvs: true };
     this.normal = new ParticleContainer({ texture: this.atlas, dynamicProperties: dinamicas });
     this.aditiva = new ParticleContainer({ texture: this.atlas, dynamicProperties: dinamicas });
     this.aditiva.blendMode = 'add';
-    this.camada.addChild(this.normal, this.aditiva);
+    // Marco 26 (29/10/2026, D-124): o atlas rico, pintado em canvas (64 px vistos como 32: a mesma escala).
+    const canvas = pintarAtlasRico();
+    if (canvas) {
+      const fonte = new CanvasSource({ resource: canvas, resolution: LADO_RICO / LADO });
+      this.atlasRico = new Texture({ source: fonte });
+      for (const nome of TEXTURAS_RICAS) {
+        const c = celulaDaTextura(nome);
+        const k = LADO / LADO_RICO;
+        this.texturas.set(nome, { t: new Texture({ source: fonte, frame: new Rectangle(c.x * k, c.y * k, LADO, LADO) }), rica: true });
+      }
+      this.normalRica = new ParticleContainer({ texture: this.atlasRico, dynamicProperties: dinamicas });
+      this.aditivaRica = new ParticleContainer({ texture: this.atlasRico, dynamicProperties: dinamicas });
+      this.aditivaRica.blendMode = 'add';
+    }
+    this.camada.addChild(this.normal);
+    if (this.normalRica) this.camada.addChild(this.normalRica);
+    this.camada.addChild(this.aditiva);
+    if (this.aditivaRica) this.camada.addChild(this.aditivaRica);
   }
 
   /** Quantas estão vivas (para o teto e para o diagnóstico/e2e). */
@@ -175,34 +240,63 @@ export class SistemaParticulas {
     return this.vivas.length;
   }
 
+  /** Marco 26 (D-124): a textura pelo nome (as peças, fitas e marcas usam as mesmas do atlas). */
+  textura(nome: TexturaParticula | TexturaRica): Texture | null {
+    return this.texturas.get(nome)?.t ?? null;
+  }
+
+  /** Marco 26 (D-124): o centro de uma célula na tela, na altura do corpo (como as emissões). */
+  naTela(x: number, y: number): { x: number; y: number } {
+    const proj = this.projecao();
+    const c = centroDaCelula(x, y);
+    const p = proj.projetar(c.x, c.y);
+    return { x: p.x, y: p.y - (proj.visao === 'iso' ? CELULA_PX * 0.4 : 0) };
+  }
+
+  /** O centro de uma célula no chão (sem a altura do corpo): as marcas e o que brota. */
+  noChao(x: number, y: number): { x: number; y: number } {
+    const c = centroDaCelula(x, y);
+    return this.projecao().projetar(c.x, c.y);
+  }
+
+  get iso(): boolean {
+    return this.projecao().visao === 'iso';
+  }
+
   /**
    * Emite um preset em (x, y) de célula; com `ate`, espalha ao longo do segmento (raio, relâmpago, rastro) — ou, nas
    * emissões em cone, aponta para lá. `dir` (em células) é a direção do voo, para as emissões `orientada` (D-067).
    */
   emitir(nome: NomePreset, x: number, y: number, cor: number, ate?: { x: number; y: number }, dir?: { x: number; y: number }): void {
-    if (this.limite <= 0) return;
-    for (const e of PRESETS_PARTICULA[nome]) this.emitirUma(e, x, y, cor, ate, dir);
+    this.emitirLista(PRESETS_PARTICULA[nome], x, y, cor, ate, dir);
   }
 
-  private emitirUma(e: Emissao, x: number, y: number, cor: number, ate?: { x: number; y: number }, dir?: { x: number; y: number }): void {
-    const proj = this.projecao();
-    // No isométrico, os efeitos saem do meio do corpo, não do chão.
-    const elevacao = proj.visao === 'iso' ? CELULA_PX * 0.4 : 0;
-    const centro = (cx: number, cy: number) => {
-      const c = centroDaCelula(cx, cy);
-      const p = proj.projetar(c.x, c.y);
-      return { x: p.x, y: p.y - elevacao };
-    };
-    const a = centro(x, y);
-    const b = ate ? centro(ate.x, ate.y) : a;
+  /** Marco 26 (D-124): emite uma lista de emissões (as das assinaturas), como `emitir`. */
+  emitirLista(lista: readonly Emissao[], x: number, y: number, cor: number, ate?: { x: number; y: number }, dir?: { x: number; y: number }): void {
+    if (this.limite <= 0) return;
+    const a = this.naTela(x, y);
+    const b = ate ? this.naTela(ate.x, ate.y) : null;
     // D-067: a direção do voo na tela (projetada), para as emissões orientadas.
-    const d = dir ? centro(x + dir.x, y + dir.y) : null;
+    const d = dir ? this.naTela(x + dir.x, y + dir.y) : null;
     const anguloVoo = d ? Math.atan2(d.y - a.y, d.x - a.x) : null;
+    for (const e of lista) this.nascer(e, a, b, anguloVoo, cor);
+  }
+
+  /** Marco 26 (D-124): emite em px de tela (as peças e fitas que já sabem onde estão). */
+  emitirNaTela(lista: readonly Emissao[], x: number, y: number, cor: number, ate?: { x: number; y: number }, angulo?: number): void {
+    if (this.limite <= 0) return;
+    for (const e of lista) this.nascer(e, { x, y }, ate ?? null, angulo ?? null, cor);
+  }
+
+  private nascer(e: Emissao, a: { x: number; y: number }, b: { x: number; y: number } | null, anguloVoo: number | null, cor: number, filha = false): void {
     const quantidade = this.reduzido ? Math.ceil(e.quantidade / 2) : e.quantidade;
     // O cone vale com `ate` (aponta para lá); as outras formas com `ate` correm ao longo do segmento.
-    const forma = e.forma === 'cone' ? 'cone' : ate ? 'linha' : (e.forma ?? 'ponto');
-    const textura = this.texturas.get(e.textura);
-    if (!textura) return;
+    const forma = e.forma === 'cone' ? 'cone' : b ? 'linha' : (e.forma ?? 'ponto');
+    const fim = b ?? a;
+    const tex = this.texturas.get(e.quadros?.[0] ?? e.textura);
+    if (!tex) return;
+    const destino = tex.rica ? (e.aditivo ? this.aditivaRica : this.normalRica) : e.aditivo ? this.aditiva : this.normal;
+    if (!destino) return;
     for (let i = 0; i < quantidade && this.vivas.length < this.limite; i++) {
       let ox = a.x;
       let oy = a.y;
@@ -216,15 +310,15 @@ export class SistemaParticulas {
       } else {
         if (forma === 'linha') {
           const t = Math.random();
-          ox += (b.x - a.x) * t;
-          oy += (b.y - a.y) * t;
+          ox += (fim.x - a.x) * t;
+          oy += (fim.y - a.y) * t;
         }
         ox += entre(-e.raio, e.raio);
         oy += entre(-e.raio, e.raio);
         const abertura = e.abertura ?? (forma === 'cone' ? 0.5 : e.direcao === 'baixo' ? 0.5 : 0.7);
         angulo =
           forma === 'cone'
-            ? Math.atan2(b.y - a.y, b.x - a.x) + entre(-abertura, abertura)
+            ? Math.atan2(fim.y - a.y, fim.x - a.x) + entre(-abertura, abertura)
             : e.direcao === 'orientada'
               ? (anguloVoo ?? entre(0, Math.PI * 2)) + entre(-(e.abertura ?? 0), e.abertura ?? 0)
               : e.direcao === 'cima'
@@ -237,23 +331,24 @@ export class SistemaParticulas {
       }
       oy -= e.alturaInicial ?? 0;
       const v = entre(e.velocidade[0], e.velocidade[1]);
-      const p = this.livres.pop() ?? new Particle({ texture: textura, anchorX: 0.5, anchorY: 0.5 });
-      p.texture = textura;
+      const p = this.livres.pop() ?? new Particle({ texture: tex.t, anchorX: 0.5, anchorY: 0.5 });
+      p.texture = tex.t;
       p.x = ox;
       p.y = oy;
       p.scaleX = e.escala[0];
       p.scaleY = e.escala[0];
       // Faísca, lasca, gota e flecha apontam para onde voam (a orientada, para a direção pedida, mesmo parada).
       // Marco 24 (D-098): o corte em anel ou espiral sai tangente (as lâminas do giro em volta do corpo).
-      const aponta = e.textura === 'faisca' || e.textura === 'lasca' || e.textura === 'gota' || e.textura === 'flecha' || (e.textura === 'corte' && (forma === 'anel' || forma === 'espiral'));
-      p.rotation = aponta || e.direcao === 'orientada' ? angulo + Math.PI / 2 : e.textura === 'corte' ? entre(-0.6, 0.6) : entre(0, Math.PI * 2);
-      const corInicial = e.cor ?? cor;
+      const aponta = APONTAM.has(e.textura) || (e.textura === 'corte' && (forma === 'anel' || forma === 'espiral'));
+      p.rotation = ERETAS.has(e.textura) ? entre(-0.12, 0.12) : aponta || e.direcao === 'orientada' || e.esticar ? angulo + Math.PI / 2 : e.textura === 'corte' ? entre(-0.6, 0.6) : entre(0, Math.PI * 2);
+      const cores = e.cores?.map((c) => c ?? cor);
+      const corInicial = cores?.[0] ?? e.cor ?? cor;
       p.tint = corInicial;
       p.alpha = e.alpha[0];
-      (e.aditivo ? this.aditiva : this.normal).addParticle(p);
+      destino.addParticle(p);
       this.vivas.push({
         p,
-        aditiva: e.aditivo,
+        destino,
         vx: Math.cos(angulo) * v,
         vy: Math.sin(angulo) * v,
         gravidade: e.gravidade,
@@ -265,12 +360,21 @@ export class SistemaParticulas {
         corFinal: e.corFinal ?? null,
         giro: e.giro && !this.reduzido ? entre(e.giro[0], e.giro[1]) : 0,
         arrasto: e.arrasto ?? 0,
+        quadros: e.quadros ? e.quadros.map((q) => this.texturas.get(q)?.t ?? tex.t) : null,
+        quadro0: Math.floor(Math.random() * 8),
+        esticar: e.esticar ?? 0,
+        curvaEscala: e.curvaEscala,
+        curvaAlpha: e.curvaAlpha,
+        cores: cores ?? null,
+        turbulencia: e.turbulencia ?? 0,
+        fase: Math.random() * Math.PI * 2,
+        aoMorrer: filha ? null : (e.aoMorrer ?? null),
       });
     }
   }
 
   private soltar(v: Viva): void {
-    (v.aditiva ? this.aditiva : this.normal).removeParticle(v.p);
+    v.destino.removeParticle(v.p);
     this.livres.push(v.p);
   }
 
@@ -283,6 +387,8 @@ export class SistemaParticulas {
       if (v.idadeMs >= v.vidaMs) {
         this.soltar(v);
         this.vivas.splice(i, 1);
+        // Marco 26 (D-124): o que nasce quando morre (uma geração só: as filhas não têm `aoMorrer` encadeado).
+        if (v.aoMorrer) for (const e of v.aoMorrer) this.nascer(e, { x: v.p.x, y: v.p.y }, null, null, v.cor, true);
         continue;
       }
       const f = v.idadeMs / v.vidaMs;
@@ -292,15 +398,32 @@ export class SistemaParticulas {
         v.vy *= freio;
       }
       v.vy += v.gravidade * dt;
+      if (v.turbulencia > 0) {
+        // Ruído barato: senos da posição e da idade, com a fase da partícula (sobe ondulando).
+        v.vx += Math.sin(v.p.y * 0.09 + v.idadeMs * 0.008 + v.fase) * v.turbulencia * dt * 6;
+      }
       const p = v.p;
       p.x += v.vx * dt;
       p.y += v.vy * dt;
-      const s = v.escala[0] + (v.escala[1] - v.escala[0]) * f;
-      p.scaleX = s;
-      p.scaleY = s;
-      p.alpha = v.alpha[0] + (v.alpha[1] - v.alpha[0]) * f;
+      const s = v.escala[0] + (v.escala[1] - v.escala[0]) * curva(v.curvaEscala, f);
+      if (v.esticar > 0) {
+        const rapidez = Math.hypot(v.vx, v.vy);
+        p.rotation = Math.atan2(v.vy, v.vx) + Math.PI / 2;
+        p.scaleX = s;
+        p.scaleY = s * (1 + (v.esticar * rapidez) / 200);
+      } else {
+        p.scaleX = s;
+        p.scaleY = s;
+      }
+      p.alpha = v.alpha[0] + (v.alpha[1] - v.alpha[0]) * curva(v.curvaAlpha, f);
       if (v.giro !== 0) p.rotation += v.giro * dt;
-      if (v.corFinal !== null) p.tint = misturar(v.cor, v.corFinal, f);
+      if (v.cores) p.tint = corNasParadas(v.cores, f);
+      else if (v.corFinal !== null) p.tint = misturar(v.cor, v.corFinal, f);
+      if (v.quadros) {
+        // O flipbook roda a ~16 quadros/s, começando de um quadro sorteado (as chamas não tremulam juntas).
+        const q = v.quadros[(v.quadro0 + Math.floor(v.idadeMs / 60)) % v.quadros.length];
+        if (q && p.texture !== q) p.texture = q;
+      }
     }
   }
 
@@ -313,8 +436,14 @@ export class SistemaParticulas {
   destruir(): void {
     this.limpar();
     this.livres.length = 0;
-    for (const t of this.texturas.values()) t.destroy(false);
+    for (const t of this.texturas.values()) t.t.destroy(false);
     this.atlas.destroy(true);
+    this.atlasRico?.destroy(true);
     this.camada.destroy({ children: true });
   }
 }
+
+/** Texturas que apontam para onde voam. */
+const APONTAM: ReadonlySet<string> = new Set(['faisca', 'lasca', 'gota', 'flecha', 'gelo', 'pena', 'estilhaco', 'lamina', 'gota_viva']);
+/** Marco 26 (D-124): texturas que ficam de pé (a chama sobe, a mão brota, o olho não gira). */
+const ERETAS: ReadonlySet<string> = new Set(['chama0', 'chama1', 'chama2', 'chama3', 'chama4', 'chama5', 'chama6', 'chama7', 'alma', 'cranio', 'mao_ossea', 'espinho', 'olho', 'mira_alvo', 'onda_som', 'asa']);

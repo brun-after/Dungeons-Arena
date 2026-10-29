@@ -1313,10 +1313,11 @@
       ],
       "visual": {
         "cor": "#9fe3a8",
-        "conjuracao": "runas",
         "impacto": "sagrado",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "bencao",
+        "variante": "penas"
       },
       "variantes": {
         "dom_arcana": {
@@ -1411,10 +1412,11 @@
       ],
       "visual": {
         "cor": "#dfeaf5",
-        "conjuracao": "runas",
         "impacto": "corte",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "presa_dupla",
+        "variante": "laminas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -1538,10 +1540,11 @@
       ],
       "visual": {
         "cor": "#dfeaf5",
-        "conjuracao": "runas",
         "impacto": "vento",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "barreira",
+        "variante": "penas"
       },
       "variantes": {
         "dom_arcana": {
@@ -1620,10 +1623,11 @@
       ],
       "visual": {
         "cor": "#bfe3ff",
-        "conjuracao": "runas",
         "impacto": "corte",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "rasante",
+        "variante": "laminas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -1762,10 +1766,11 @@
       ],
       "visual": {
         "cor": "#bfe3ff",
-        "conjuracao": "runas",
         "impacto": "vento",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "mergulho",
+        "variante": "penas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -1895,10 +1900,11 @@
       ],
       "visual": {
         "cor": "#bfe3ff",
-        "conjuracao": "runas",
         "impacto": "vento",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "rasante",
+        "variante": "penas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -2024,10 +2030,11 @@
       ],
       "visual": {
         "cor": "#cfe8ff",
-        "conjuracao": "runas",
         "impacto": "vento",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "vigia",
+        "variante": "estrelas"
       },
       "variantes": {
         "dom_arcana": {
@@ -2114,10 +2121,11 @@
       ],
       "visual": {
         "cor": "#cfe8ff",
-        "conjuracao": "runas",
         "impacto": "sagrado",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "asas_da_aurora",
+        "variante": "penas"
       },
       "variantes": {
         "dom_arcana": {
@@ -2215,10 +2223,11 @@
       ],
       "visual": {
         "cor": "#cfe8ff",
-        "conjuracao": "runas",
         "impacto": "vento",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "furacao",
+        "variante": "penas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -2361,10 +2370,10 @@
       ],
       "visual": {
         "cor": "#cfe8ff",
-        "conjuracao": "runas",
         "impacto": "vento",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "revoada"
       },
       "variantes": {
         "dom_tecnica": {
@@ -2493,10 +2502,11 @@
       ],
       "visual": {
         "cor": "#ffffff",
-        "conjuracao": "runas",
         "impacto": "sangue",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "presa_dupla",
+        "variante": "sangue"
       },
       "variantes": {
         "dom_tecnica": {
@@ -2625,10 +2635,11 @@
       ],
       "visual": {
         "cor": "#ffffff",
-        "conjuracao": "runas",
         "impacto": "estrelas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "revoada",
+        "variante": "estrelas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -2767,10 +2778,11 @@
       ],
       "visual": {
         "cor": "#ffffff",
-        "conjuracao": "runas",
         "impacto": "vento",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "tempestade_de_penas",
+        "variante": "laminas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -2899,10 +2911,11 @@
       ],
       "visual": {
         "cor": "#ffffff",
-        "conjuracao": "runas",
         "impacto": "corte",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "garras_cegantes",
+        "variante": "sangue"
       },
       "variantes": {
         "dom_tecnica": {
@@ -3038,10 +3051,11 @@
       ],
       "visual": {
         "cor": "#ffffff",
-        "conjuracao": "runas",
         "impacto": "corte",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "vigia",
+        "variante": "laminas"
       },
       "variantes": {
         "dom_arcana": {
@@ -3116,10 +3130,11 @@
       ],
       "visual": {
         "cor": "#9fd3ff",
-        "conjuracao": "runas",
         "impacto": "anel",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "marca_do_cacador",
+        "variante": "penas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -3259,10 +3274,11 @@
       ],
       "visual": {
         "cor": "#9fd3ff",
-        "conjuracao": "runas",
         "impacto": "vento",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "rasante",
+        "variante": "folhas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -3395,10 +3411,11 @@
       ],
       "visual": {
         "cor": "#9fd3ff",
-        "conjuracao": "runas",
         "impacto": "vento",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "tempestade_de_penas",
+        "variante": "som"
       },
       "variantes": {
         "dom_tecnica": {
@@ -3526,10 +3543,11 @@
       ],
       "visual": {
         "cor": "#9fd3ff",
-        "conjuracao": "runas",
         "impacto": "anel",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "onda_de_repulsao",
+        "variante": "penas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -3664,10 +3682,11 @@
       ],
       "visual": {
         "cor": "#9fd3ff",
-        "conjuracao": "runas",
         "impacto": "anel",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "brado",
+        "variante": "penas"
       },
       "variantes": {
         "dom_arcana": {
@@ -3746,10 +3765,11 @@
       ],
       "visual": {
         "cor": "#9fd3ff",
-        "conjuracao": "runas",
         "impacto": "anel",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "revoada",
+        "variante": "som"
       },
       "variantes": {
         "dom_tecnica": {
@@ -3888,10 +3908,11 @@
       ],
       "visual": {
         "cor": "#f2f2f2",
-        "conjuracao": "runas",
         "impacto": "corte",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "presa_dupla",
+        "variante": "penas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -4016,10 +4037,11 @@
       ],
       "visual": {
         "cor": "#f2f2f2",
-        "conjuracao": "runas",
         "impacto": "vento",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "rasante",
+        "variante": "estrelas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -4157,10 +4179,11 @@
       ],
       "visual": {
         "cor": "#f2f2f2",
-        "conjuracao": "runas",
         "impacto": "vento",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "furacao",
+        "variante": "laminas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -4294,10 +4317,11 @@
       ],
       "visual": {
         "cor": "#f2f2f2",
-        "conjuracao": "runas",
         "impacto": "vento",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "rasante",
+        "variante": "sangue"
       },
       "variantes": {
         "dom_tecnica": {
@@ -4436,10 +4460,11 @@
       ],
       "visual": {
         "cor": "#f2f2f2",
-        "conjuracao": "runas",
         "impacto": "vento",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "mergulho",
+        "variante": "pedras"
       },
       "variantes": {
         "dom_arcana": {
@@ -4517,10 +4542,11 @@
       ],
       "visual": {
         "cor": "#f2f2f2",
-        "conjuracao": "runas",
         "impacto": "corte",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "garras_cegantes",
+        "variante": "penas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -4649,10 +4675,10 @@
       ],
       "visual": {
         "cor": "#f2f2f2",
-        "conjuracao": "runas",
         "impacto": "anel",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "mergulho_do_trovao"
       },
       "variantes": {
         "dom_tecnica": {
@@ -4783,10 +4809,11 @@
       ],
       "visual": {
         "cor": "#9b6ae0",
-        "conjuracao": "runas",
         "impacto": "explosao",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "explosao_cadaverica",
+        "variante": "ossos"
       },
       "variantes": {
         "dom_tecnica": {
@@ -4916,10 +4943,10 @@
       ],
       "visual": {
         "cor": "#8b68d9",
-        "conjuracao": "runas",
         "impacto": "fumaca",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "hoste_espectral"
       },
       "variantes": {
         "dom_arcana": {
@@ -4998,10 +5025,10 @@
       ],
       "visual": {
         "cor": "#8b68d9",
-        "conjuracao": "runas",
         "impacto": "explosao",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "chamas_sombrias"
       },
       "variantes": {
         "dom_tecnica": {
@@ -5132,10 +5159,11 @@
       ],
       "visual": {
         "cor": "#8b68d9",
-        "conjuracao": "runas",
         "impacto": "corte",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "ceifa_de_almas",
+        "variante": "ossos"
       },
       "variantes": {
         "dom_tecnica": {
@@ -5263,10 +5291,11 @@
       ],
       "visual": {
         "cor": "#8b68d9",
-        "conjuracao": "runas",
         "impacto": "corte",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "ceifa_de_almas",
+        "variante": "sangue"
       },
       "variantes": {
         "dom_tecnica": {
@@ -5400,10 +5429,11 @@
       ],
       "visual": {
         "cor": "#8b68d9",
-        "conjuracao": "runas",
         "impacto": "corte",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "ceifa_de_almas",
+        "variante": "almas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -5533,10 +5563,11 @@
       ],
       "visual": {
         "cor": "#8b68d9",
-        "conjuracao": "runas",
         "impacto": "sombra",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "levante_profano",
+        "variante": "almas"
       },
       "variantes": {
         "dom_arcana": {
@@ -5617,10 +5648,11 @@
       ],
       "visual": {
         "cor": "#8b68d9",
-        "conjuracao": "runas",
         "impacto": "explosao",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "explosao_cadaverica",
+        "variante": "sangue"
       },
       "variantes": {
         "dom_tecnica": {
@@ -5759,10 +5791,11 @@
       ],
       "visual": {
         "cor": "#8b68d9",
-        "conjuracao": "runas",
         "impacto": "fumaca",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "hoste_espectral",
+        "variante": "almas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -5886,10 +5919,10 @@
       ],
       "visual": {
         "cor": "#8b68d9",
-        "conjuracao": "runas",
         "impacto": "corte",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "ceifa_de_almas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -6018,10 +6051,11 @@
       ],
       "visual": {
         "cor": "#b8a4dd",
-        "conjuracao": "runas",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "garras_do_ossuario",
+        "variante": "almas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -6149,10 +6183,10 @@
       ],
       "visual": {
         "cor": "#b8a4dd",
-        "conjuracao": "runas",
         "impacto": "pedra",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "campo_de_ossos"
       },
       "variantes": {
         "dom_tecnica": {
@@ -6313,10 +6347,11 @@
       ],
       "visual": {
         "cor": "#b8a4dd",
-        "conjuracao": "runas",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "garras_do_ossuario",
+        "variante": "pedras"
       },
       "variantes": {
         "dom_tecnica": {
@@ -6443,10 +6478,10 @@
       ],
       "visual": {
         "cor": "#b8a4dd",
-        "conjuracao": "runas",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "garras_do_ossuario"
       },
       "variantes": {
         "dom_tecnica": {
@@ -6574,10 +6609,11 @@
       ],
       "visual": {
         "cor": "#b8a4dd",
-        "conjuracao": "runas",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "garras_do_ossuario",
+        "variante": "ossos"
       },
       "variantes": {
         "dom_tecnica": {
@@ -6707,10 +6743,11 @@
       ],
       "visual": {
         "cor": "#7ee0bb",
-        "conjuracao": "runas",
         "impacto": "sombra",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "fios_de_vida",
+        "variante": "almas"
       },
       "variantes": {
         "dom_arcana": {
@@ -6789,10 +6826,11 @@
       ],
       "visual": {
         "cor": "#7ee0bb",
-        "conjuracao": "runas",
         "impacto": "explosao",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "chamas_sombrias",
+        "variante": "ossos"
       },
       "variantes": {
         "dom_tecnica": {
@@ -6940,10 +6978,11 @@
       ],
       "visual": {
         "cor": "#7ee0bb",
-        "conjuracao": "runas",
         "impacto": "fumaca",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "mortalha",
+        "variante": "sangue"
       },
       "variantes": {
         "dom_tecnica": {
@@ -7070,10 +7109,11 @@
       ],
       "visual": {
         "cor": "#7ee0bb",
-        "conjuracao": "runas",
         "impacto": "sombra",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "raio_vampirico",
+        "variante": "almas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -7201,10 +7241,11 @@
       ],
       "visual": {
         "cor": "#7ee0bb",
-        "conjuracao": "runas",
         "impacto": "sangue",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "fios_de_vida",
+        "variante": "sangue"
       },
       "variantes": {
         "dom_arcana": {
@@ -7301,10 +7342,11 @@
       ],
       "visual": {
         "cor": "#7ee0bb",
-        "conjuracao": "runas",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "campo_de_ossos",
+        "variante": "folhas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -7434,10 +7476,10 @@
       ],
       "visual": {
         "cor": "#8b68d9",
-        "conjuracao": "runas",
         "impacto": "sombra",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "peste"
       },
       "variantes": {
         "dom_tecnica": {
@@ -7571,10 +7613,11 @@
       ],
       "visual": {
         "cor": "#8b68d9",
-        "conjuracao": "runas",
         "impacto": "bolhas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "peste",
+        "variante": "bolhas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -7713,10 +7756,11 @@
       ],
       "visual": {
         "cor": "#8b68d9",
-        "conjuracao": "runas",
         "impacto": "fumaca",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "peste",
+        "variante": "almas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -7844,10 +7888,11 @@
       ],
       "visual": {
         "cor": "#8b68d9",
-        "conjuracao": "runas",
         "impacto": "sombra",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "marca_sombria",
+        "variante": "almas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -7986,10 +8031,11 @@
       ],
       "visual": {
         "cor": "#8b68d9",
-        "conjuracao": "runas",
         "impacto": "sombra",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "peste",
+        "variante": "ossos"
       },
       "variantes": {
         "dom_tecnica": {
@@ -8121,10 +8167,11 @@
       ],
       "visual": {
         "cor": "#8b68d9",
-        "conjuracao": "runas",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "campo_de_ossos",
+        "variante": "ossos"
       },
       "variantes": {
         "dom_tecnica": {
@@ -8257,10 +8304,11 @@
       ],
       "visual": {
         "cor": "#8b68d9",
-        "conjuracao": "runas",
         "impacto": "sombra",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "raio_vampirico",
+        "variante": "sangue"
       },
       "variantes": {
         "dom_tecnica": {
@@ -8413,11 +8461,12 @@
       ],
       "visual": {
         "cor": "#d4ac0d",
-        "conjuracao": "runas",
         "impacto": "farpas",
         "camera": "leve",
         "som": "nivel",
-        "projetil": "flecha"
+        "projetil": "flecha",
+        "assinatura": "flecha_perfurante",
+        "variante": "laminas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -8544,10 +8593,11 @@
       ],
       "visual": {
         "cor": "#ff8a3d",
-        "conjuracao": "runas",
         "impacto": "explosao",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "marca_do_cacador",
+        "variante": "brasas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -8681,10 +8731,11 @@
       ],
       "visual": {
         "cor": "#ff8a3d",
-        "conjuracao": "runas",
         "impacto": "explosao",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "rastro_de_fogo",
+        "variante": "faiscas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -8812,10 +8863,11 @@
       ],
       "visual": {
         "cor": "#f5c542",
-        "conjuracao": "runas",
         "impacto": "estrelas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "olho_de_aguia",
+        "variante": "estrelas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -8953,10 +9005,10 @@
       ],
       "visual": {
         "cor": "#d4ac0d",
-        "conjuracao": "runas",
         "impacto": "estrelas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "olho_de_aguia"
       },
       "variantes": {
         "dom_arcana": {
@@ -9030,10 +9082,11 @@
       ],
       "visual": {
         "cor": "#ff8a3d",
-        "conjuracao": "runas",
         "impacto": "explosao",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "explosao_de_fogo",
+        "variante": "faiscas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -9163,10 +9216,11 @@
       ],
       "visual": {
         "cor": "#8fae4a",
-        "conjuracao": "runas",
         "impacto": "farpas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "marca_do_cacador",
+        "variante": "folhas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -9302,10 +9356,11 @@
       ],
       "visual": {
         "cor": "#8fae4a",
-        "conjuracao": "runas",
         "impacto": "farpas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "rolamento",
+        "variante": "folhas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -9431,10 +9486,11 @@
       ],
       "visual": {
         "cor": "#8fae4a",
-        "conjuracao": "runas",
         "impacto": "farpas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "campo_minado",
+        "variante": "laminas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -9569,10 +9625,11 @@
       ],
       "visual": {
         "cor": "#8fae4a",
-        "conjuracao": "runas",
         "impacto": "farpas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "armadilha_de_caca",
+        "variante": "folhas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -9694,10 +9751,11 @@
       ],
       "visual": {
         "cor": "#d4ac0d",
-        "conjuracao": "runas",
         "impacto": "farpas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "chuva_de_flechas",
+        "variante": "folhas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -9825,10 +9883,11 @@
       ],
       "visual": {
         "cor": "#d4ac0d",
-        "conjuracao": "runas",
         "impacto": "leque",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "leque_de_flechas",
+        "variante": "laminas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -9957,10 +10016,11 @@
       ],
       "visual": {
         "cor": "#d4ac0d",
-        "conjuracao": "runas",
         "impacto": "explosao",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "leque_de_flechas",
+        "variante": "brasas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -10101,10 +10161,10 @@
       ],
       "visual": {
         "cor": "#d4ac0d",
-        "conjuracao": "runas",
         "impacto": "leque",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "leque_de_flechas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -10230,10 +10290,10 @@
       ],
       "visual": {
         "cor": "#d4ac0d",
-        "conjuracao": "runas",
         "impacto": "leque",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "rede_de_caca"
       },
       "variantes": {
         "dom_tecnica": {
@@ -10360,10 +10420,11 @@
       ],
       "visual": {
         "cor": "#d4ac0d",
-        "conjuracao": "runas",
         "impacto": "chuva",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "chuva_de_flechas",
+        "variante": "laminas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -10495,10 +10556,10 @@
       ],
       "visual": {
         "cor": "#d4ac0d",
-        "conjuracao": "runas",
         "impacto": "chuva",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "chuva_de_flechas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -10630,10 +10691,10 @@
       ],
       "visual": {
         "cor": "#d4ac0d",
-        "conjuracao": "runas",
         "impacto": "explosao",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "chuva_de_brasas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -10768,10 +10829,11 @@
       ],
       "visual": {
         "cor": "#d4ac0d",
-        "conjuracao": "runas",
         "impacto": "estrelas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "olho_de_aguia",
+        "variante": "faiscas"
       },
       "variantes": {
         "dom_arcana": {
@@ -10852,10 +10914,10 @@
       ],
       "visual": {
         "cor": "#d4ac0d",
-        "conjuracao": "runas",
         "impacto": "chuva",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "campo_minado"
       },
       "variantes": {
         "dom_tecnica": {
@@ -10992,10 +11054,11 @@
       ],
       "visual": {
         "cor": "#d4ac0d",
-        "conjuracao": "runas",
         "impacto": "chuva",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "chuva_de_flechas",
+        "variante": "faiscas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -11124,11 +11187,12 @@
       ],
       "visual": {
         "cor": "#d4ac0d",
-        "conjuracao": "runas",
         "impacto": "farpas",
         "camera": "forte",
         "som": "nivel",
-        "projetil": "flecha"
+        "projetil": "flecha",
+        "assinatura": "flecha_perfurante",
+        "variante": "sangue"
       },
       "variantes": {
         "dom_tecnica": {
@@ -11263,11 +11327,12 @@
       ],
       "visual": {
         "cor": "#d4ac0d",
-        "conjuracao": "runas",
         "impacto": "farpas",
         "camera": "leve",
         "som": "nivel",
-        "projetil": "flecha"
+        "projetil": "flecha",
+        "assinatura": "flecha",
+        "variante": "folhas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -11393,11 +11458,12 @@
       ],
       "visual": {
         "cor": "#d4ac0d",
-        "conjuracao": "runas",
         "impacto": "explosao",
         "camera": "leve",
         "som": "nivel",
-        "projetil": "flecha"
+        "projetil": "flecha",
+        "assinatura": "flecha_explosiva",
+        "variante": "pedras"
       },
       "variantes": {
         "dom_tecnica": {
@@ -11522,11 +11588,12 @@
       ],
       "visual": {
         "cor": "#d4ac0d",
-        "conjuracao": "runas",
         "impacto": "farpas",
         "camera": "forte",
         "som": "nivel",
-        "projetil": "flecha"
+        "projetil": "flecha",
+        "assinatura": "flecha",
+        "variante": "penas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -11660,10 +11727,10 @@
       ],
       "visual": {
         "cor": "#d4ac0d",
-        "conjuracao": "runas",
         "impacto": "farpas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "flecha_perfurante"
       },
       "variantes": {
         "dom_tecnica": {
@@ -11788,10 +11855,11 @@
       ],
       "visual": {
         "cor": "#d4ac0d",
-        "conjuracao": "runas",
         "impacto": "leque",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "leque_de_flechas",
+        "variante": "sangue"
       },
       "variantes": {
         "dom_tecnica": {
@@ -11913,10 +11981,11 @@
       ],
       "visual": {
         "cor": "#d4ac0d",
-        "conjuracao": "runas",
         "impacto": "chuva",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "chuva_de_flechas",
+        "variante": "estrelas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -12043,10 +12112,11 @@
       ],
       "visual": {
         "cor": "#c9b8ff",
-        "conjuracao": "runas",
         "impacto": "runas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "eco_arcano",
+        "variante": "runas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -12162,10 +12232,10 @@
       ],
       "visual": {
         "cor": "#a06cff",
-        "conjuracao": "runas",
         "impacto": "explosao",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "supernova"
       },
       "variantes": {
         "dom_tecnica": {
@@ -12292,10 +12362,11 @@
       ],
       "visual": {
         "cor": "#a06cff",
-        "conjuracao": "runas",
         "impacto": "sombra",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "seta_arcana",
+        "variante": "almas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -12577,10 +12648,11 @@
       ],
       "visual": {
         "cor": "#e6e1ff",
-        "conjuracao": "runas",
         "impacto": "explosao",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "orbe_instavel",
+        "variante": "estrelas"
       }
     },
     {
@@ -12629,10 +12701,11 @@
       ],
       "visual": {
         "cor": "#c9b8ff",
-        "conjuracao": "runas",
         "impacto": "explosao",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "mao_em_chamas",
+        "variante": "runas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -12761,10 +12834,11 @@
       ],
       "visual": {
         "cor": "#a06cff",
-        "conjuracao": "runas",
         "impacto": "runas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "sobrecarga_arcana",
+        "variante": "runas"
       },
       "variantes": {
         "dom_arcana": {
@@ -12856,10 +12930,10 @@
       ],
       "visual": {
         "cor": "#d980fa",
-        "conjuracao": "runas",
         "impacto": "sombra",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "singularidade"
       },
       "variantes": {
         "dom_tecnica": {
@@ -12989,10 +13063,11 @@
       ],
       "visual": {
         "cor": "#d980fa",
-        "conjuracao": "runas",
         "impacto": "runas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "pressagio",
+        "variante": "runas"
       },
       "variantes": {
         "dom_arcana": {
@@ -13070,10 +13145,11 @@
       ],
       "visual": {
         "cor": "#d980fa",
-        "conjuracao": "runas",
         "impacto": "runas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "mente_partida",
+        "variante": "estrelas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -13201,10 +13277,11 @@
       ],
       "visual": {
         "cor": "#d980fa",
-        "conjuracao": "runas",
         "impacto": "runas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "agulha_mental",
+        "variante": "runas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -13346,10 +13423,11 @@
       ],
       "visual": {
         "cor": "#a0d8ef",
-        "conjuracao": "runas",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "chao_congelado",
+        "variante": "gelo"
       },
       "variantes": {
         "dom_tecnica": {
@@ -13483,10 +13561,10 @@
       ],
       "visual": {
         "cor": "#a0d8ef",
-        "conjuracao": "runas",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "nova_glacial"
       },
       "variantes": {
         "dom_tecnica": {
@@ -13622,10 +13700,11 @@
       ],
       "visual": {
         "cor": "#a0d8ef",
-        "conjuracao": "runas",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "nova_glacial",
+        "variante": "gelo"
       },
       "variantes": {
         "dom_tecnica": {
@@ -13753,10 +13832,11 @@
       ],
       "visual": {
         "cor": "#a0d8ef",
-        "conjuracao": "runas",
         "impacto": "cristais",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "chao_congelado",
+        "variante": "runas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -13897,10 +13977,11 @@
       ],
       "visual": {
         "cor": "#a0d8ef",
-        "conjuracao": "runas",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "mente_partida",
+        "variante": "gelo"
       },
       "variantes": {
         "dom_tecnica": {
@@ -14047,10 +14128,10 @@
       ],
       "visual": {
         "cor": "#f7dc6f",
-        "conjuracao": "runas",
         "impacto": "relampago",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "esfera_de_plasma"
       },
       "variantes": {
         "dom_tecnica": {
@@ -14183,10 +14264,10 @@
       ],
       "visual": {
         "cor": "#f7dc6f",
-        "conjuracao": "runas",
         "impacto": "relampago",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "tempestade_de_raios"
       },
       "variantes": {
         "dom_tecnica": {
@@ -14318,10 +14399,11 @@
       ],
       "visual": {
         "cor": "#f7dc6f",
-        "conjuracao": "runas",
         "impacto": "relampago",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "relampago",
+        "variante": "faiscas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -14633,10 +14715,10 @@
       ],
       "visual": {
         "cor": "#f7dc6f",
-        "conjuracao": "runas",
         "impacto": "relampago",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "prisma"
       }
     },
     {
@@ -14672,10 +14754,11 @@
       ],
       "visual": {
         "cor": "#f7dc6f",
-        "conjuracao": "runas",
         "impacto": "relampago",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "raio_em_cadeia",
+        "variante": "runas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -14803,10 +14886,11 @@
       ],
       "visual": {
         "cor": "#f7dc6f",
-        "conjuracao": "runas",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "esfera_de_plasma",
+        "variante": "gelo"
       },
       "variantes": {
         "dom_tecnica": {
@@ -14934,10 +15018,10 @@
       ],
       "visual": {
         "cor": "#74b9ff",
-        "conjuracao": "runas",
         "impacto": "explosao",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "cometa_de_gelo"
       },
       "variantes": {
         "dom_tecnica": {
@@ -15081,10 +15165,11 @@
       ],
       "visual": {
         "cor": "#74b9ff",
-        "conjuracao": "runas",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "tempestade_de_gelo",
+        "variante": "runas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -15212,10 +15297,11 @@
       ],
       "visual": {
         "cor": "#74b9ff",
-        "conjuracao": "runas",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "lanca_de_gelo",
+        "variante": "runas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -15547,10 +15633,10 @@
       ],
       "visual": {
         "cor": "#74b9ff",
-        "conjuracao": "runas",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "lanca_de_gelo"
       }
     },
     {
@@ -15588,10 +15674,11 @@
       ],
       "visual": {
         "cor": "#74b9ff",
-        "conjuracao": "runas",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "agulha_mental",
+        "variante": "gelo"
       },
       "variantes": {
         "dom_tecnica": {
@@ -15729,10 +15816,10 @@
       ],
       "visual": {
         "cor": "#74b9ff",
-        "conjuracao": "runas",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "tempestade_de_gelo"
       },
       "variantes": {
         "dom_tecnica": {
@@ -15884,10 +15971,11 @@
       ],
       "visual": {
         "cor": "#74b9ff",
-        "conjuracao": "runas",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "tempestade_de_gelo",
+        "variante": "gelo"
       },
       "variantes": {
         "dom_tecnica": {
@@ -16019,10 +16107,11 @@
       ],
       "visual": {
         "cor": "#c8a165",
-        "conjuracao": "runas",
         "impacto": "pedra",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "golpe_pesado",
+        "variante": "estrelas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -16161,10 +16250,11 @@
       ],
       "visual": {
         "cor": "#e0453a",
-        "conjuracao": "runas",
         "impacto": "corte",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "contragolpe",
+        "variante": "sangue"
       },
       "variantes": {
         "dom_tecnica": {
@@ -16302,10 +16392,11 @@
       ],
       "visual": {
         "cor": "#e0453a",
-        "conjuracao": "runas",
         "impacto": "pedra",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "desafio",
+        "variante": "pedras"
       },
       "variantes": {
         "dom_tecnica": {
@@ -16432,10 +16523,11 @@
       ],
       "visual": {
         "cor": "#ff7b39",
-        "conjuracao": "runas",
         "impacto": "chamas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "postura_de_aparo",
+        "variante": "brasas"
       },
       "variantes": {
         "dom_arcana": {
@@ -16518,10 +16610,10 @@
       ],
       "visual": {
         "cor": "#ff7b39",
-        "conjuracao": "runas",
         "impacto": "explosao",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "meteoro"
       },
       "variantes": {
         "dom_tecnica": {
@@ -16669,10 +16761,10 @@
       ],
       "visual": {
         "cor": "#ff7b39",
-        "conjuracao": "runas",
         "impacto": "chamas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "anel_de_chamas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -16802,10 +16894,11 @@
       ],
       "visual": {
         "cor": "#7f8c8d",
-        "conjuracao": "runas",
         "impacto": "corte",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "contragolpe_arco",
+        "variante": "faiscas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -16936,10 +17029,11 @@
       ],
       "visual": {
         "cor": "#7f8c8d",
-        "conjuracao": "runas",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "golpe_pesado",
+        "variante": "pedras"
       },
       "variantes": {
         "dom_tecnica": {
@@ -17074,10 +17168,10 @@
       ],
       "visual": {
         "cor": "#7f8c8d",
-        "conjuracao": "runas",
         "impacto": "corte",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "laco"
       },
       "variantes": {
         "dom_tecnica": {
@@ -17207,10 +17301,10 @@
       ],
       "visual": {
         "cor": "#7f8c8d",
-        "conjuracao": "runas",
         "impacto": "chamas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "grilhoes"
       },
       "variantes": {
         "dom_tecnica": {
@@ -17337,10 +17431,11 @@
       ],
       "visual": {
         "cor": "#f39c12",
-        "conjuracao": "runas",
         "impacto": "estrelas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "brado",
+        "variante": "estrelas"
       },
       "variantes": {
         "dom_arcana": {
@@ -17422,10 +17517,11 @@
       ],
       "visual": {
         "cor": "#f39c12",
-        "conjuracao": "runas",
         "impacto": "pedra",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "salto_esmagador",
+        "variante": "faiscas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -17556,10 +17652,11 @@
       ],
       "visual": {
         "cor": "#f39c12",
-        "conjuracao": "runas",
         "impacto": "anel",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "brado",
+        "variante": "sangue"
       },
       "variantes": {
         "dom_tecnica": {
@@ -17687,10 +17784,10 @@
       ],
       "visual": {
         "cor": "#f39c12",
-        "conjuracao": "runas",
         "impacto": "chamas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "lanca_chamas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -17822,10 +17919,10 @@
       ],
       "visual": {
         "cor": "#f39c12",
-        "conjuracao": "runas",
         "impacto": "estrelas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "brado"
       },
       "variantes": {
         "dom_arcana": {
@@ -17916,10 +18013,10 @@
       ],
       "visual": {
         "cor": "#95a5a6",
-        "conjuracao": "runas",
         "impacto": "faiscas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "muralha_de_aco"
       },
       "variantes": {
         "dom_tecnica": {
@@ -18057,10 +18154,11 @@
       ],
       "visual": {
         "cor": "#95a5a6",
-        "conjuracao": "runas",
         "impacto": "sagrado",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "golpe_pesado",
+        "variante": "runas"
       },
       "variantes": {
         "dom_arcana": {
@@ -18143,10 +18241,11 @@
       ],
       "visual": {
         "cor": "#95a5a6",
-        "conjuracao": "runas",
         "impacto": "faiscas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "investida",
+        "variante": "faiscas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -18297,10 +18396,10 @@
       ],
       "visual": {
         "cor": "#95a5a6",
-        "conjuracao": "runas",
         "impacto": "chamas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "risco_de_fogo"
       },
       "variantes": {
         "dom_tecnica": {
@@ -18426,10 +18525,10 @@
       ],
       "visual": {
         "cor": "#95a5a6",
-        "conjuracao": "runas",
         "impacto": "corte",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "ariete"
       },
       "variantes": {
         "dom_tecnica": {
@@ -18564,10 +18663,11 @@
       ],
       "visual": {
         "cor": "#95a5a6",
-        "conjuracao": "runas",
         "impacto": "faiscas",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "investida_de_escudo",
+        "variante": "faiscas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -18706,11 +18806,12 @@
       ],
       "visual": {
         "cor": "#c0392b",
-        "conjuracao": "runas",
         "impacto": "vento",
         "camera": "leve",
         "som": "nivel",
-        "animacao": "giro"
+        "animacao": "giro",
+        "assinatura": "redemoinho",
+        "variante": "laminas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -18841,10 +18942,10 @@
       ],
       "visual": {
         "cor": "#c0392b",
-        "conjuracao": "runas",
         "impacto": "pedra",
         "camera": "forte",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "queda_de_aco"
       },
       "variantes": {
         "dom_tecnica": {
@@ -18985,10 +19086,12 @@
       ],
       "visual": {
         "cor": "#c0392b",
-        "conjuracao": "runas",
         "impacto": "anel",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "redemoinho",
+        "variante": "som",
+        "animacao": "giro"
       },
       "variantes": {
         "dom_tecnica": {
@@ -19121,11 +19224,11 @@
       ],
       "visual": {
         "cor": "#c0392b",
-        "conjuracao": "runas",
         "impacto": "chamas",
         "camera": "leve",
         "som": "nivel",
-        "animacao": "giro"
+        "animacao": "giro",
+        "assinatura": "ciclone_de_fogo"
       },
       "variantes": {
         "dom_tecnica": {
@@ -19251,10 +19354,11 @@
       ],
       "visual": {
         "cor": "#c0392b",
-        "conjuracao": "runas",
         "impacto": "corte",
         "camera": "leve",
-        "som": "nivel"
+        "som": "nivel",
+        "assinatura": "turbilhao_de_correntes",
+        "animacao": "giro"
       },
       "variantes": {
         "dom_tecnica": {
@@ -19380,11 +19484,12 @@
       ],
       "visual": {
         "cor": "#c0392b",
-        "conjuracao": "runas",
         "impacto": "vento",
         "camera": "leve",
         "som": "nivel",
-        "animacao": "giro"
+        "animacao": "giro",
+        "assinatura": "redemoinho",
+        "variante": "sangue"
       },
       "variantes": {
         "dom_tecnica": {
@@ -19535,11 +19640,12 @@
       ],
       "visual": {
         "cor": "#c0392b",
-        "conjuracao": "runas",
         "impacto": "vento",
         "camera": "leve",
         "som": "nivel",
-        "animacao": "giro"
+        "animacao": "giro",
+        "assinatura": "redemoinho",
+        "variante": "faiscas"
       },
       "variantes": {
         "dom_tecnica": {
@@ -19667,7 +19773,9 @@
         "impacto": "vento",
         "camera": "leve",
         "som": "golpe",
-        "animacao": "giro"
+        "animacao": "giro",
+        "assinatura": "redemoinho",
+        "variante": "faiscas"
       }
     },
     {
@@ -19706,7 +19814,9 @@
         "impacto": "vento",
         "camera": "leve",
         "som": "golpe",
-        "animacao": "giro"
+        "animacao": "giro",
+        "assinatura": "redemoinho",
+        "variante": "faiscas"
       }
     },
     {
@@ -19742,7 +19852,9 @@
         "impacto": "vento",
         "camera": "leve",
         "som": "golpe",
-        "animacao": "giro"
+        "animacao": "giro",
+        "assinatura": "redemoinho",
+        "variante": "faiscas"
       }
     },
     {
@@ -19779,7 +19891,9 @@
         "impacto": "vento",
         "camera": "leve",
         "som": "golpe",
-        "animacao": "giro"
+        "animacao": "giro",
+        "assinatura": "redemoinho",
+        "variante": "sangue"
       }
     },
     {
@@ -19814,7 +19928,9 @@
         "cor": "#c0392b",
         "impacto": "corte",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "turbilhao_de_correntes",
+        "animacao": "giro"
       }
     },
     {
@@ -19851,7 +19967,8 @@
         "impacto": "chamas",
         "camera": "leve",
         "som": "golpe",
-        "animacao": "giro"
+        "animacao": "giro",
+        "assinatura": "ciclone_de_fogo"
       }
     },
     {
@@ -19883,7 +20000,8 @@
         "impacto": "chamas",
         "camera": "leve",
         "som": "golpe",
-        "animacao": "giro"
+        "animacao": "giro",
+        "assinatura": "ciclone_de_fogo"
       }
     },
     {
@@ -19918,7 +20036,10 @@
         "cor": "#c0392b",
         "impacto": "anel",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "redemoinho",
+        "variante": "som",
+        "animacao": "giro"
       }
     },
     {
@@ -19953,7 +20074,10 @@
         "cor": "#c0392b",
         "impacto": "anel",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "redemoinho",
+        "variante": "som",
+        "animacao": "giro"
       }
     },
     {
@@ -19988,7 +20112,10 @@
         "cor": "#c0392b",
         "impacto": "anel",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "redemoinho",
+        "variante": "som",
+        "animacao": "giro"
       }
     },
     {
@@ -20023,7 +20150,8 @@
         "cor": "#c0392b",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "queda_de_aco"
       }
     },
     {
@@ -20054,7 +20182,9 @@
         "impacto": "vento",
         "camera": "leve",
         "som": "golpe",
-        "animacao": "giro"
+        "animacao": "giro",
+        "assinatura": "redemoinho",
+        "variante": "laminas"
       }
     },
     {
@@ -20085,7 +20215,9 @@
         "impacto": "vento",
         "camera": "leve",
         "som": "golpe",
-        "animacao": "giro"
+        "animacao": "giro",
+        "assinatura": "redemoinho",
+        "variante": "laminas"
       }
     },
     {
@@ -20126,7 +20258,9 @@
         "cor": "#95a5a6",
         "impacto": "faiscas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "investida_de_escudo",
+        "variante": "faiscas"
       }
     },
     {
@@ -20166,7 +20300,8 @@
         "cor": "#95a5a6",
         "impacto": "corte",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "ariete"
       }
     },
     {
@@ -20197,7 +20332,8 @@
         "cor": "#95a5a6",
         "impacto": "chamas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "risco_de_fogo"
       }
     },
     {
@@ -20246,7 +20382,9 @@
         "cor": "#95a5a6",
         "impacto": "faiscas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "investida",
+        "variante": "faiscas"
       }
     },
     {
@@ -20281,7 +20419,9 @@
         "cor": "#95a5a6",
         "impacto": "sagrado",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "golpe_pesado",
+        "variante": "runas"
       }
     },
     {
@@ -20316,7 +20456,8 @@
         "cor": "#f39c12",
         "impacto": "estrelas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "brado"
       }
     },
     {
@@ -20362,7 +20503,8 @@
         "cor": "#f39c12",
         "impacto": "chamas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "lanca_chamas"
       }
     },
     {
@@ -20398,7 +20540,9 @@
         "cor": "#f39c12",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "salto_esmagador",
+        "variante": "faiscas"
       }
     },
     {
@@ -20433,7 +20577,9 @@
         "cor": "#7f8c8d",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "golpe_pesado",
+        "variante": "pedras"
       }
     },
     {
@@ -20469,7 +20615,9 @@
         "cor": "#7f8c8d",
         "impacto": "corte",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "contragolpe_arco",
+        "variante": "faiscas"
       }
     },
     {
@@ -20506,7 +20654,8 @@
         "cor": "#ff7b39",
         "impacto": "chamas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "anel_de_chamas"
       }
     },
     {
@@ -20537,7 +20686,8 @@
         "cor": "#ff7b39",
         "impacto": "chamas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "anel_de_chamas"
       }
     },
     {
@@ -20568,7 +20718,8 @@
         "cor": "#ff7b39",
         "impacto": "chamas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "anel_de_chamas"
       }
     },
     {
@@ -20599,7 +20750,8 @@
         "cor": "#ff7b39",
         "impacto": "chamas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "anel_de_chamas"
       }
     },
     {
@@ -20636,7 +20788,8 @@
         "cor": "#ff7b39",
         "impacto": "explosao",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "meteoro"
       }
     },
     {
@@ -20671,7 +20824,9 @@
         "cor": "#e0453a",
         "impacto": "corte",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "contragolpe",
+        "variante": "sangue"
       }
     },
     {
@@ -20710,7 +20865,9 @@
         "cor": "#d0603f",
         "impacto": "chamas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "lamina_em_brasa",
+        "variante": "brasas"
       }
     },
     {
@@ -20751,7 +20908,9 @@
         "cor": "#74b9ff",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "tempestade_de_gelo",
+        "variante": "gelo"
       }
     },
     {
@@ -20792,7 +20951,9 @@
         "cor": "#74b9ff",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "tempestade_de_gelo",
+        "variante": "gelo"
       }
     },
     {
@@ -20833,7 +20994,9 @@
         "cor": "#74b9ff",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "tempestade_de_gelo",
+        "variante": "gelo"
       }
     },
     {
@@ -20874,7 +21037,9 @@
         "cor": "#74b9ff",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "tempestade_de_gelo",
+        "variante": "gelo"
       }
     },
     {
@@ -20915,7 +21080,9 @@
         "cor": "#74b9ff",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "tempestade_de_gelo",
+        "variante": "gelo"
       }
     },
     {
@@ -20952,7 +21119,8 @@
         "cor": "#74b9ff",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "tempestade_de_gelo"
       }
     },
     {
@@ -20989,7 +21157,8 @@
         "cor": "#74b9ff",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "tempestade_de_gelo"
       }
     },
     {
@@ -21025,7 +21194,8 @@
         "cor": "#74b9ff",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "tempestade_de_gelo"
       }
     },
     {
@@ -21053,10 +21223,11 @@
       ],
       "interna": true,
       "visual": {
-        "cor": "#74b9ff",
+        "cor": "#d980fa",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "telecinese"
       }
     },
     {
@@ -21090,10 +21261,11 @@
       ],
       "interna": true,
       "visual": {
-        "cor": "#74b9ff",
+        "cor": "#ff7b39",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "mao_em_chamas"
       }
     },
     {
@@ -21126,10 +21298,11 @@
       ],
       "interna": true,
       "visual": {
-        "cor": "#74b9ff",
+        "cor": "#f7dc6f",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "toque_eletrico"
       }
     },
     {
@@ -21163,10 +21336,11 @@
       ],
       "interna": true,
       "visual": {
-        "cor": "#74b9ff",
+        "cor": "#a1887f",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "golpe_pesado"
       }
     },
     {
@@ -21197,7 +21371,9 @@
         "cor": "#74b9ff",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "tempestade_de_gelo",
+        "variante": "runas"
       }
     },
     {
@@ -21233,7 +21409,9 @@
         "cor": "#74b9ff",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "tempestade_de_gelo",
+        "variante": "runas"
       }
     },
     {
@@ -21269,7 +21447,9 @@
         "cor": "#74b9ff",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "tempestade_de_gelo",
+        "variante": "runas"
       }
     },
     {
@@ -21305,7 +21485,8 @@
         "cor": "#74b9ff",
         "impacto": "explosao",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "cometa_de_gelo"
       }
     },
     {
@@ -21415,7 +21596,8 @@
         "cor": "#f7dc6f",
         "impacto": "relampago",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "prisma"
       }
     },
     {
@@ -21525,7 +21707,8 @@
         "cor": "#f7dc6f",
         "impacto": "relampago",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "prisma"
       }
     },
     {
@@ -21635,7 +21818,8 @@
         "cor": "#f7dc6f",
         "impacto": "relampago",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "prisma"
       }
     },
     {
@@ -21745,7 +21929,8 @@
         "cor": "#f7dc6f",
         "impacto": "relampago",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "prisma"
       }
     },
     {
@@ -21776,7 +21961,9 @@
         "cor": "#f7dc6f",
         "impacto": "relampago",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "relampago",
+        "variante": "faiscas"
       }
     },
     {
@@ -21807,7 +21994,8 @@
         "cor": "#f7dc6f",
         "impacto": "relampago",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "tempestade_de_raios"
       }
     },
     {
@@ -21838,7 +22026,8 @@
         "cor": "#f7dc6f",
         "impacto": "relampago",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "esfera_de_plasma"
       }
     },
     {
@@ -21869,7 +22058,8 @@
         "cor": "#f7dc6f",
         "impacto": "relampago",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "esfera_de_plasma"
       }
     },
     {
@@ -21900,7 +22090,8 @@
         "cor": "#f7dc6f",
         "impacto": "relampago",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "esfera_de_plasma"
       }
     },
     {
@@ -21931,7 +22122,8 @@
         "cor": "#f7dc6f",
         "impacto": "relampago",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "esfera_de_plasma"
       }
     },
     {
@@ -21962,7 +22154,8 @@
         "cor": "#f7dc6f",
         "impacto": "relampago",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "esfera_de_plasma"
       }
     },
     {
@@ -21990,10 +22183,11 @@
       ],
       "interna": true,
       "visual": {
-        "cor": "#a0d8ef",
+        "cor": "#d980fa",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "mente_partida"
       }
     },
     {
@@ -22021,10 +22215,11 @@
       ],
       "interna": true,
       "visual": {
-        "cor": "#a0d8ef",
+        "cor": "#d980fa",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "mente_partida"
       }
     },
     {
@@ -22052,10 +22247,11 @@
       ],
       "interna": true,
       "visual": {
-        "cor": "#a0d8ef",
+        "cor": "#d980fa",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "mente_partida"
       }
     },
     {
@@ -22086,7 +22282,9 @@
         "cor": "#a0d8ef",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "nova_glacial",
+        "variante": "gelo"
       }
     },
     {
@@ -22122,7 +22320,9 @@
         "cor": "#a0d8ef",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "nova_glacial",
+        "variante": "gelo"
       }
     },
     {
@@ -22158,7 +22358,9 @@
         "cor": "#a0d8ef",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "chao_congelado",
+        "variante": "gelo"
       }
     },
     {
@@ -22194,7 +22396,9 @@
         "cor": "#a0d8ef",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "chao_congelado",
+        "variante": "gelo"
       }
     },
     {
@@ -22230,7 +22434,9 @@
         "cor": "#a0d8ef",
         "impacto": "cristais",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "chao_congelado",
+        "variante": "gelo"
       }
     },
     {
@@ -22266,7 +22472,9 @@
         "cor": "#d980fa",
         "impacto": "runas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "mente_partida",
+        "variante": "estrelas"
       }
     },
     {
@@ -22302,7 +22510,8 @@
         "cor": "#d980fa",
         "impacto": "sombra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "singularidade"
       }
     },
     {
@@ -22338,7 +22547,8 @@
         "cor": "#d980fa",
         "impacto": "sombra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "singularidade"
       }
     },
     {
@@ -22369,7 +22579,8 @@
         "cor": "#d980fa",
         "impacto": "sombra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "singularidade"
       }
     },
     {
@@ -22403,10 +22614,11 @@
       ],
       "interna": true,
       "visual": {
-        "cor": "#c9b8ff",
+        "cor": "#74b9ff",
         "impacto": "explosao",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "tempestade_de_gelo"
       }
     },
     {
@@ -22439,10 +22651,11 @@
       ],
       "interna": true,
       "visual": {
-        "cor": "#c9b8ff",
+        "cor": "#f7dc6f",
         "impacto": "explosao",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "tempestade_de_raios"
       }
     },
     {
@@ -22476,10 +22689,11 @@
       ],
       "interna": true,
       "visual": {
-        "cor": "#c9b8ff",
+        "cor": "#a1887f",
         "impacto": "explosao",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "salto_esmagador"
       }
     },
     {
@@ -22509,7 +22723,9 @@
         "cor": "#c9b8ff",
         "impacto": "runas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "eco_arcano",
+        "variante": "runas"
       }
     },
     {
@@ -22539,7 +22755,8 @@
         "cor": "#d4ac0d",
         "impacto": "farpas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "flecha_perfurante"
       }
     },
     {
@@ -22574,7 +22791,9 @@
         "cor": "#d4ac0d",
         "impacto": "explosao",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "flecha_explosiva",
+        "variante": "pedras"
       }
     },
     {
@@ -22604,7 +22823,9 @@
         "cor": "#d4ac0d",
         "impacto": "farpas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "flecha",
+        "variante": "folhas"
       }
     },
     {
@@ -22634,7 +22855,9 @@
         "cor": "#d4ac0d",
         "impacto": "farpas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "flecha",
+        "variante": "folhas"
       }
     },
     {
@@ -22670,7 +22893,9 @@
         "cor": "#d4ac0d",
         "impacto": "chuva",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "chuva_de_flechas",
+        "variante": "faiscas"
       }
     },
     {
@@ -22706,7 +22931,9 @@
         "cor": "#d4ac0d",
         "impacto": "chuva",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "chuva_de_flechas",
+        "variante": "faiscas"
       }
     },
     {
@@ -22742,7 +22969,9 @@
         "cor": "#d4ac0d",
         "impacto": "chuva",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "chuva_de_flechas",
+        "variante": "faiscas"
       }
     },
     {
@@ -22778,7 +23007,9 @@
         "cor": "#d4ac0d",
         "impacto": "chuva",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "chuva_de_flechas",
+        "variante": "faiscas"
       }
     },
     {
@@ -22808,7 +23039,8 @@
         "cor": "#d4ac0d",
         "impacto": "chuva",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "campo_minado"
       }
     },
     {
@@ -22838,7 +23070,9 @@
         "cor": "#d4ac0d",
         "impacto": "estrelas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "olho_de_aguia",
+        "variante": "faiscas"
       }
     },
     {
@@ -22874,7 +23108,8 @@
         "cor": "#d4ac0d",
         "impacto": "explosao",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "chuva_de_brasas"
       }
     },
     {
@@ -22905,7 +23140,8 @@
         "cor": "#d4ac0d",
         "impacto": "explosao",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "chuva_de_brasas"
       }
     },
     {
@@ -22935,7 +23171,8 @@
         "cor": "#d4ac0d",
         "impacto": "chuva",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "chuva_de_flechas"
       }
     },
     {
@@ -22970,7 +23207,9 @@
         "cor": "#d4ac0d",
         "impacto": "chuva",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "chuva_de_flechas",
+        "variante": "laminas"
       }
     },
     {
@@ -23000,7 +23239,8 @@
         "cor": "#d4ac0d",
         "impacto": "leque",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "leque_de_flechas"
       }
     },
     {
@@ -23030,7 +23270,8 @@
         "cor": "#d4ac0d",
         "impacto": "leque",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "leque_de_flechas"
       }
     },
     {
@@ -23060,7 +23301,8 @@
         "cor": "#d4ac0d",
         "impacto": "leque",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "leque_de_flechas"
       }
     },
     {
@@ -23096,7 +23338,8 @@
         "cor": "#d4ac0d",
         "impacto": "leque",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "leque_de_flechas"
       }
     },
     {
@@ -23130,10 +23373,11 @@
       ],
       "interna": true,
       "visual": {
-        "cor": "#8fae4a",
+        "cor": "#ff7b39",
         "impacto": "farpas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "chuva_de_brasas"
       }
     },
     {
@@ -23164,7 +23408,9 @@
         "cor": "#ff8a3d",
         "impacto": "explosao",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "explosao_de_fogo",
+        "variante": "faiscas"
       }
     },
     {
@@ -23192,10 +23438,11 @@
       ],
       "interna": true,
       "visual": {
-        "cor": "#ff8a3d",
+        "cor": "#ff7b39",
         "impacto": "explosao",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "chuva_de_brasas"
       }
     },
     {
@@ -23231,7 +23478,9 @@
         "cor": "#d4ac0d",
         "impacto": "farpas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "flecha_perfurante",
+        "variante": "laminas"
       }
     },
     {
@@ -23267,7 +23516,9 @@
         "cor": "#d4ac0d",
         "impacto": "farpas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "flecha_perfurante",
+        "variante": "laminas"
       }
     },
     {
@@ -23303,7 +23554,9 @@
         "cor": "#d4ac0d",
         "impacto": "farpas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "flecha_perfurante",
+        "variante": "laminas"
       }
     },
     {
@@ -23339,7 +23592,9 @@
         "cor": "#d4ac0d",
         "impacto": "farpas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "flecha_perfurante",
+        "variante": "laminas"
       }
     },
     {
@@ -23375,7 +23630,9 @@
         "cor": "#d4ac0d",
         "impacto": "farpas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "flecha_perfurante",
+        "variante": "laminas"
       }
     },
     {
@@ -23411,7 +23668,9 @@
         "cor": "#8b68d9",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "campo_de_ossos",
+        "variante": "ossos"
       }
     },
     {
@@ -23442,7 +23701,9 @@
         "cor": "#8b68d9",
         "impacto": "sombra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "peste",
+        "variante": "ossos"
       }
     },
     {
@@ -23473,7 +23734,9 @@
         "cor": "#8b68d9",
         "impacto": "sombra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "peste",
+        "variante": "ossos"
       }
     },
     {
@@ -23509,7 +23772,9 @@
         "cor": "#8b68d9",
         "impacto": "sombra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "marca_sombria",
+        "variante": "almas"
       }
     },
     {
@@ -23546,7 +23811,9 @@
         "cor": "#8b68d9",
         "impacto": "fumaca",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "peste",
+        "variante": "almas"
       }
     },
     {
@@ -23581,10 +23848,11 @@
       ],
       "interna": true,
       "visual": {
-        "cor": "#8b68d9",
+        "cor": "#58d68d",
         "impacto": "bolhas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "poca_toxica"
       }
     },
     {
@@ -23615,7 +23883,9 @@
         "cor": "#7ee0bb",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "campo_de_ossos",
+        "variante": "folhas"
       }
     },
     {
@@ -23646,7 +23916,9 @@
         "cor": "#7ee0bb",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "campo_de_ossos",
+        "variante": "folhas"
       }
     },
     {
@@ -23677,7 +23949,9 @@
         "cor": "#7ee0bb",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "campo_de_ossos",
+        "variante": "folhas"
       }
     },
     {
@@ -23715,7 +23989,9 @@
         "cor": "#7ee0bb",
         "impacto": "fumaca",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "mortalha",
+        "variante": "sangue"
       }
     },
     {
@@ -23753,7 +24029,9 @@
         "cor": "#7ee0bb",
         "impacto": "fumaca",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "mortalha",
+        "variante": "sangue"
       }
     },
     {
@@ -23791,7 +24069,9 @@
         "cor": "#7ee0bb",
         "impacto": "fumaca",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "mortalha",
+        "variante": "sangue"
       }
     },
     {
@@ -23829,7 +24109,9 @@
         "cor": "#7ee0bb",
         "impacto": "fumaca",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "mortalha",
+        "variante": "sangue"
       }
     },
     {
@@ -23865,7 +24147,8 @@
         "cor": "#b8a4dd",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "garras_do_ossuario"
       }
     },
     {
@@ -23902,7 +24185,9 @@
         "cor": "#b8a4dd",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "garras_do_ossuario",
+        "variante": "pedras"
       }
     },
     {
@@ -23939,7 +24224,9 @@
         "cor": "#b8a4dd",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "garras_do_ossuario",
+        "variante": "pedras"
       }
     },
     {
@@ -23976,7 +24263,9 @@
         "cor": "#b8a4dd",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "garras_do_ossuario",
+        "variante": "pedras"
       }
     },
     {
@@ -24013,7 +24302,9 @@
         "cor": "#b8a4dd",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "garras_do_ossuario",
+        "variante": "pedras"
       }
     },
     {
@@ -24049,7 +24340,9 @@
         "cor": "#b8a4dd",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "garras_do_ossuario",
+        "variante": "pedras"
       }
     },
     {
@@ -24085,7 +24378,9 @@
         "cor": "#b8a4dd",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "garras_do_ossuario",
+        "variante": "pedras"
       }
     },
     {
@@ -24121,7 +24416,9 @@
         "cor": "#b8a4dd",
         "impacto": "pedra",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "garras_do_ossuario",
+        "variante": "pedras"
       }
     },
     {
@@ -24152,7 +24449,9 @@
         "cor": "#8b68d9",
         "impacto": "explosao",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "explosao_cadaverica",
+        "variante": "sangue"
       }
     },
     {
@@ -24183,7 +24482,9 @@
         "cor": "#8b68d9",
         "impacto": "corte",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "ceifa_de_almas",
+        "variante": "almas"
       }
     },
     {
@@ -24221,7 +24522,9 @@
         "cor": "#8b68d9",
         "impacto": "corte",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "ceifa_de_almas",
+        "variante": "sangue"
       }
     },
     {
@@ -24259,7 +24562,9 @@
         "cor": "#8b68d9",
         "impacto": "corte",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "ceifa_de_almas",
+        "variante": "ossos"
       }
     },
     {
@@ -24294,10 +24599,11 @@
       ],
       "interna": true,
       "visual": {
-        "cor": "#f2f2f2",
+        "cor": "#f7dc6f",
         "impacto": "anel",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "tempestade_de_raios"
       }
     },
     {
@@ -24329,7 +24635,9 @@
         "cor": "#f2f2f2",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "rasante",
+        "variante": "sangue"
       }
     },
     {
@@ -24361,7 +24669,9 @@
         "cor": "#f2f2f2",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "rasante",
+        "variante": "sangue"
       }
     },
     {
@@ -24403,7 +24713,9 @@
         "cor": "#f2f2f2",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "furacao",
+        "variante": "laminas"
       }
     },
     {
@@ -24445,7 +24757,9 @@
         "cor": "#f2f2f2",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "furacao",
+        "variante": "laminas"
       }
     },
     {
@@ -24487,7 +24801,9 @@
         "cor": "#f2f2f2",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "furacao",
+        "variante": "laminas"
       }
     },
     {
@@ -24525,7 +24841,9 @@
         "cor": "#f2f2f2",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "rasante",
+        "variante": "estrelas"
       }
     },
     {
@@ -24557,7 +24875,9 @@
         "cor": "#f2f2f2",
         "impacto": "corte",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "presa_dupla",
+        "variante": "penas"
       }
     },
     {
@@ -24589,7 +24909,9 @@
         "cor": "#f2f2f2",
         "impacto": "corte",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "presa_dupla",
+        "variante": "penas"
       }
     },
     {
@@ -24627,7 +24949,9 @@
         "cor": "#f2f2f2",
         "impacto": "corte",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "presa_dupla",
+        "variante": "penas"
       }
     },
     {
@@ -24659,7 +24983,9 @@
         "cor": "#f2f2f2",
         "impacto": "corte",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "presa_dupla",
+        "variante": "penas"
       }
     },
     {
@@ -24701,7 +25027,9 @@
         "cor": "#9fd3ff",
         "impacto": "anel",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "brado",
+        "variante": "penas"
       }
     },
     {
@@ -24738,7 +25066,9 @@
         "cor": "#9fd3ff",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "tempestade_de_penas",
+        "variante": "som"
       }
     },
     {
@@ -24770,7 +25100,9 @@
         "cor": "#9fd3ff",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "rasante",
+        "variante": "folhas"
       }
     },
     {
@@ -24808,7 +25140,9 @@
         "cor": "#ffffff",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "tempestade_de_penas",
+        "variante": "laminas"
       }
     },
     {
@@ -24846,7 +25180,9 @@
         "cor": "#ffffff",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "tempestade_de_penas",
+        "variante": "laminas"
       }
     },
     {
@@ -24884,7 +25220,9 @@
         "cor": "#ffffff",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "tempestade_de_penas",
+        "variante": "laminas"
       }
     },
     {
@@ -24927,7 +25265,9 @@
         "cor": "#ffffff",
         "impacto": "estrelas",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "revoada",
+        "variante": "estrelas"
       }
     },
     {
@@ -24959,7 +25299,8 @@
         "cor": "#cfe8ff",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "revoada"
       }
     },
     {
@@ -24991,7 +25332,8 @@
         "cor": "#cfe8ff",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "revoada"
       }
     },
     {
@@ -25023,7 +25365,8 @@
         "cor": "#cfe8ff",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "revoada"
       }
     },
     {
@@ -25055,7 +25398,8 @@
         "cor": "#cfe8ff",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "revoada"
       }
     },
     {
@@ -25092,7 +25436,9 @@
         "cor": "#cfe8ff",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "furacao",
+        "variante": "penas"
       }
     },
     {
@@ -25129,7 +25475,9 @@
         "cor": "#cfe8ff",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "furacao",
+        "variante": "penas"
       }
     },
     {
@@ -25166,7 +25514,9 @@
         "cor": "#cfe8ff",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "furacao",
+        "variante": "penas"
       }
     },
     {
@@ -25204,7 +25554,9 @@
         "cor": "#bfe3ff",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "mergulho",
+        "variante": "penas"
       }
     },
     {
@@ -25242,7 +25594,9 @@
         "cor": "#bfe3ff",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "mergulho",
+        "variante": "penas"
       }
     },
     {
@@ -25280,7 +25634,9 @@
         "cor": "#bfe3ff",
         "impacto": "vento",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "mergulho",
+        "variante": "penas"
       }
     },
     {
@@ -25318,7 +25674,9 @@
         "cor": "#dfeaf5",
         "impacto": "corte",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "presa_dupla",
+        "variante": "laminas"
       }
     },
     {
@@ -25356,7 +25714,9 @@
         "cor": "#dfeaf5",
         "impacto": "corte",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "presa_dupla",
+        "variante": "laminas"
       }
     },
     {
@@ -25394,7 +25754,9 @@
         "cor": "#dfeaf5",
         "impacto": "corte",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "presa_dupla",
+        "variante": "laminas"
       }
     },
     {
@@ -25432,7 +25794,9 @@
         "cor": "#dfeaf5",
         "impacto": "corte",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "presa_dupla",
+        "variante": "laminas"
       }
     },
     {
@@ -25465,7 +25829,9 @@
         "cor": "#7fd1ff",
         "impacto": "anel",
         "camera": "leve",
-        "som": "cura"
+        "som": "cura",
+        "assinatura": "circulo_de_amparo",
+        "variante": "estrelas"
       }
     },
     {
@@ -25492,7 +25858,9 @@
         "cor": "#f7e08a",
         "impacto": "sagrado",
         "camera": "leve",
-        "som": "cura"
+        "som": "cura",
+        "assinatura": "circulo_de_amparo",
+        "variante": "runas"
       }
     },
     {
@@ -25525,7 +25893,9 @@
         "cor": "#5b4a7a",
         "impacto": "fumaca",
         "camera": "leve",
-        "som": "golpe"
+        "som": "golpe",
+        "assinatura": "veu_da_noite",
+        "variante": "almas"
       }
     }
   ]

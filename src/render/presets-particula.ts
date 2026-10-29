@@ -14,6 +14,7 @@ import type { ParticulaClima } from '../world/temas';
 import { PRESETS_ELEMENTOS, type NomePresetElemento } from './presets-elementos';
 import { PRESETS_ARMAS, type NomePresetArma } from './presets-armas';
 import { PRESETS_MUNDO, type NomePresetMundo } from './presets-mundo';
+import type { TexturaRica } from './vfx/texturas';
 
 // Marco 24 (25/10/2026): `arco` (o raio ramificado, também a rachadura no chão) e `cristal` (o gelo facetado).
 export const TEXTURAS_PARTICULA = ['ponto', 'brilho', 'fumaca', 'anel', 'estrela', 'faisca', 'gota', 'floco', 'runa', 'bolha', 'lasca', 'corte', 'chama', 'flecha', 'teia', 'arco', 'cristal'] as const;
@@ -22,8 +23,15 @@ export type TexturaParticula = (typeof TEXTURAS_PARTICULA)[number];
 /** Onde as partículas nascem: no ponto (com `raio` de espalhamento), num anel, ao longo do segmento, num cone, ou em espiral. */
 export type FormaEmissao = 'ponto' | 'anel' | 'linha' | 'cone' | 'espiral';
 
+/**
+ * Marco 26 (29/10/2026, D-124): a forma da escala e da transparência ao longo da vida (no lugar da reta de `de` a
+ * `para`). `sai`: chega rápido ao fim e assenta; `pulso`: cresce e volta; `sino`: sobe até o meio e desce.
+ */
+export type CurvaVida = 'linear' | 'sai' | 'entra' | 'pulso' | 'sino';
+
 export interface Emissao {
-  textura: TexturaParticula;
+  /** Marco 26 (D-124): também as texturas ricas (vfx/texturas.ts), pintadas em canvas com gradiente. */
+  textura: TexturaParticula | TexturaRica;
   quantidade: number;
   vidaMs: readonly [number, number];
   /** Velocidade em px de mundo por segundo. */
@@ -53,6 +61,19 @@ export interface Emissao {
   alturaInicial?: number;
   /** D-067: espalhamento da direção em rad (padrão: 0,5 no cone, 0 na orientada). */
   abertura?: number;
+  // --- Marco 26 (29/10/2026, D-124): partículas mais ricas.
+  /** Flipbook: os quadros, trocados pela idade (a chama tremula, a fumaça se desfaz). Mesma família de atlas. */
+  quadros?: readonly TexturaRica[];
+  /** Estica no sentido da velocidade (faísca, rastro, chuva): o comprimento cresce com a rapidez. */
+  esticar?: number;
+  curvaEscala?: CurvaVida;
+  curvaAlpha?: CurvaVida;
+  /** Cores ao longo da vida, em paradas iguais (branco › amarelo › laranja › vermelho › fumaça). null = a da skill. */
+  cores?: readonly (number | null)[];
+  /** Turbulência em px/s: o fogo e a fumaça sobem ondulando. */
+  turbulencia?: number;
+  /** Ao morrer, solta estas emissões onde estava (a brasa vira fumaça, a gota respinga). Sem encadear de novo. */
+  aoMorrer?: readonly Emissao[];
 }
 
 /**
