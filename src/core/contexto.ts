@@ -166,6 +166,11 @@ export interface Balance {
     recargaLojaMs: number;
     /** Quanto o baú congela quem abre, e quanto ele fica no mundo depois de aberto. */
     bauCongelaMs: number;
+    /**
+     * Marco 26 (D-122): quanto o drop que ninguém pega fica no chão. Livros, essências e itens raros ou melhores
+     * não somem.
+     */
+    prazoNoChao: { orbeMs: number; ouroMs: number; itemMs: number };
     bauSomeMs: number;
     /** Distância Chebyshev máxima para interagir. */
     alcanceInteracao: number;

@@ -98,6 +98,8 @@ export interface ObjetoNoMundo {
   ref: string | null;
   /** Quem soltou precisa sair da célula antes de recolher; aliados podem pegar imediatamente. */
   aguardaSaidaDe?: EntidadeId;
+  /** Marco 26 (29/10/2026, D-122): tick em que o drop caiu (só os largados em jogo; o prazo no chão conta daqui). */
+  largadoTick?: number;
 }
 
 /** Célula de rastro (§2.8): aplica dano ou efeito a quem é hostil ao dono e entra nela. */

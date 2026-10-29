@@ -166,7 +166,12 @@
     "recargaLojaMs": 10000,
     "bauCongelaMs": 3000,
     "bauSomeMs": 5000,
-    "alcanceInteracao": 1
+    "alcanceInteracao": 1,
+    "prazoNoChao": {
+      "orbeMs": 60000,
+      "ouroMs": 180000,
+      "itemMs": 180000
+    }
   },
   "spawner": {
     "carenciaS": 20,

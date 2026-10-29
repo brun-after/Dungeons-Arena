@@ -43,7 +43,7 @@ import { processarEncarnacoes } from '../combat/encarnacao';
 import { processarClima } from '../combat/clima';
 import { processarMissoes } from '../progression/missoes';
 import { registrarDescobertas } from '../progression/diario';
-import { coletarObjetos } from '../world/objetos';
+import { coletarObjetos, expirarDrops } from '../world/objetos';
 import { processarPortas } from '../world/portas';
 import { processarSpawner } from '../world/spawner';
 import type { ComandoDoTick } from './comandos';
@@ -92,6 +92,7 @@ export function simular(
   // Gatilhos por célula alcançada (§2.3): portas antes da coleta e das armadilhas.
   processarPortas(estado, ctx, saida);
   coletarObjetos(estado, ctx, saida);
+  expirarDrops(estado, ctx);
   // Ajuste de 16/10/2026 (D-067): buffs armados começam em combate; a aparência segue o equipamento.
   processarBuffsArmados(estado, ctx, saida);
   atualizarAparencias(estado, ctx);

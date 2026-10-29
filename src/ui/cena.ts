@@ -626,9 +626,10 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     // Marco 12: efeitos, som, luz, minimapa e prompt; o congelamento de impacto só segura o desenho.
     const congelado = ap.quadro(estado, q.agoraMs, dtMs, q.posicao);
     ap.aplicarCamera(q.agoraMs);
-    terreno.atualizarVisibilidade(...camera.retanguloVisivel(palco.altura()));
+    const vista = camera.retanguloVisivel(palco.altura());
+    terreno.atualizarVisibilidade(...vista);
     const reduzido = ap.movimentoReduzido();
-    objetos.desenhar(estado, q.agoraMs, reduzido);
+    objetos.desenhar(estado, q.agoraMs, reduzido, vista);
     portas.desenhar(estado, q.agoraMs, reduzido);
     fluxo.desenhar(estado, idLocal, ap.movimentoReduzido());
     if (!congelado) {
