@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.58 · **Data:** 26/10/2026
+**Versão:** 0.59 · **Data:** 28/10/2026
 
 > **Histórico**
+> - **0.59 (28/10/2026)**: D-116 a D-121 (marco 26, quarta leva: runas das classes e seleção em colunas, câmera solta e botão de centralizar, inimigos que reagem logo e seleção em raio menor, skill fora do alcance que troca de alvo, dash e teleporte através de paredes, seguir alvo).
 > - **0.58 (26/10/2026)**: D-110 a D-115 (marco 26, terceira leva: lore das classes e Dom da classe, combos da build pela barra e Diário detalhado, portais por destino e por cor, quebráveis, clique fora das células e mouse que guia como o joystick).
 > - **0.57 (26/10/2026)**: D-107 a D-109 (marco 26: sem direcional no computador e teclas EWAS, braços e pernas animados, objetos em pé no isométrico).
 > - **0.56 (25/10/2026)**: D-104 a D-106 (marco 26: movimento livre em qualquer direção, controles do isométrico na inclinação do mapa e paredes do isométrico finas e baixas).
@@ -2830,3 +2831,94 @@ clique se perdia.
   - **Parar:** a até 14 px do personagem, ele para.
 - **Soltar:** depois de guiar, manda parado.
 - **Câmera:** o arrasto passou para o botão do meio ou o direito. A roda segue com o zoom.
+
+
+## D-116 — Runas das classes (marco 26, 28/10/2026)
+
+**Contexto.** O usuário enviou um desenho com uma runa por classe e pediu: a seleção de classe sem aparência de
+cartão, com o retrato, o estilo, uma linha de lore, "Ver mais" e a runa no topo; a runa nos livros e nas skills de
+classe; e a runa sobre a cabeça dos personagens, desligável, com cores diferentes para jogadores da mesma classe.
+
+**Decisão:**
+- **Uma fonte, dois desenhos** (`render/runas.ts`): os traços (linha, curva quadrática, círculo) num quadro de 100,
+  com a cor da classe. `ui/runa-dom.ts` monta o `<svg>` por `createElementNS`; `desenharRuna` desenha no Pixi com um
+  contorno escuro por baixo.
+- **Seleção em colunas** (`ui/escolha-classe.ts`): sem borda nem fundo, separadas por um fio. A runa (48 px), o
+  nome, o retrato (o modelo do jogo em 3/4 com a arma da classe, `render/retrato.ts`, num `<img>` de SVG), o estilo,
+  a primeira frase da lore e um `<details>` "Ver mais" com a lore inteira e as skills iniciais. No celular, uma faixa
+  com `scroll-snap` na horizontal.
+- **Livros e skills:** a runa pequena antes do nome do livro que ensina uma skill exclusiva (mochila e loja), no nome
+  e no começo da descrição das cartas de skill de classe e no seletor da barra. É `aria-hidden`: o texto não muda.
+- **Sobre a cabeça:** de todos os jogadores, acima das barras. A do jogador local é 1,25× maior e tem um halo. Some
+  com o morto. Só redesenha quando a classe, a cor ou o dono mudam.
+- **Cores:** `coresDasRunas` agrupa os jogadores (sem IA nem invocações) por classe e ordena por id. O primeiro
+  fica com a cor da classe; os seguintes com a matiz girada (180°, 90°, 270°…). É pura: todos os clientes veem igual.
+- **Opção:** `Preferencias.runaDaClasse` (ligada por padrão), em Gráficos.
+
+## D-117 — Câmera solta e o botão de centralizar (marco 26, 28/10/2026)
+
+**Contexto.** Com a câmera em janela, depois de arrastar para ver outro lugar, andar recentralizava. O usuário pediu
+que não recentralize, um botão ao lado do direcional que centraliza com toque duplo, e que, andando, a câmera só
+reenquadre o personagem quando ele sair 100% da tela, pondo-o na borda mais próxima.
+
+**Decisão** (`render/camera.ts`, `render/camera-calculo.ts`, `ui/botao-centralizar.ts`):
+- **Câmera solta:** o arrasto e o zoom manual, no modo janela, ligam `solta`. Solta, a câmera não usa a janela morta
+  nem o "enquadrar dois".
+- **`acomodarNaBorda`** (pura): com algum pedaço do personagem na vista, nada muda; fora dela, a câmera move só o
+  necessário, por eixo, para pô-lo na borda mais próxima, por dentro, com margem de 1 célula. Uma borda "presa" por
+  eixo evita o tranco de soltar e voltar a prender a cada quadro.
+- **Botão:** ao lado do direcional no toque; no computador, no mesmo canto. Dois toques em até 350 ms chamam
+  `recentralizar()`; um toque mostra a dica. Acende enquanto a câmera está solta. A tecla C, duas vezes, faz o mesmo.
+
+## D-118 — Inimigos reagem logo e seleção em raio menor (marco 26, 28/10/2026)
+
+**Contexto.** Inimigos demoravam até 10 s para reagir (o "?" da hesitação). O usuário pediu também a área de
+seleção de alvo 50% menor.
+
+**Decisão:**
+- **Hesitação:** a tabela passa a 0,5 s (35%), 1 s (35%) e 1,5 s (20%), com `hesitacaoBaseS` 10 (a escala dos
+  presets fica), e um teto novo `ia.hesitacaoMaxS` de 2 s, aplicado depois do fator de dificuldade
+  (`hesitacaoComTeto`).
+- **Seleção:** `combate.raioTrocaAlvo` de 10 para 5 (o Q, o botão de alvo e o toque que procura o próximo hostil). O
+  alvo automático no alcance da skill não muda.
+
+## D-119 — Skill fora do alcance troca de alvo (marco 26, 28/10/2026)
+
+**Contexto.** Uma skill com o alvo selecionado fora do alcance era recusada. O usuário pediu que mude para o alvo
+mais próximo no alcance, se houver.
+
+**Decisão** (`combat/acao.ts`, `iniciarAcao`, só para quem não é IA e quando o comando não mira uma célula):
+- **Ofensiva:** `autoAlvo` no alcance da skill; o achado vira o alvo da ação e o `alvoSelecionado`, mantendo a trava.
+- **De suporte:** `aliadoMaisFerido` no alcance.
+- **Ninguém no alcance:** recusa com `fora_de_alcance`, como antes. A mira em célula não muda.
+
+## D-120 — Dash e teleporte atravessam paredes (marco 26, 28/10/2026)
+
+**Contexto.** O usuário pediu que dash e teleporte atravessem paredes dentro do alcance, para trocar de corredor.
+
+**Decisão** (`combat/efeitos-instantaneos.ts`; regra em dados, `movimento.dashAtravessaParedes`):
+- **Dash (`avancar`):** percorre a reta até a mira (Bresenham, `linhaAte`) e para na última célula livre. Paredes no
+  meio não interrompem; a parede no fim recua até a célula livre anterior. O fim do mapa encerra a reta.
+- **Muralhas táticas** (as erguidas por skill) continuam barrando o dash: são parte da luta, não do mapa.
+- **Teleporte:** com a mira numa parede ou célula ocupada, cai na primeira célula livre da reta de volta até quem
+  conjura.
+- **Empurrão, puxão e arremesso** seguem parando na parede.
+
+## D-121 — Seguir alvo (marco 26, 28/10/2026)
+
+**Contexto.** O usuário pediu que, por padrão, o personagem siga o alvo para mantê-lo no alcance, com folgas
+diferentes para quem ataca à distância e corpo a corpo, troca de alvo depois do abate e cancelamento pelo direcional.
+
+**Decisão** (`combat/seguir-alvo.ts`, depois do básico automático em `simular`; números em `balance.seguirAlvo`):
+- **Comando** `seguirAlvo { ligado }`, como o `autoAtaque`, emitido pela cena conforme a preferência
+  `seguirAlvo` (ligada por padrão). Vale igual no solo e no grupo (`comandosDeRede`) e é determinístico.
+- **À distância** é o básico que sai em projétil (`politicaImpacto === 'projetil'`); não o alcance (a lança do
+  Guerreiro tem alcance 2 e é corpo a corpo).
+- **Segue** quem saiu do alcance até `alcance × (1 + folga)`: 1/3 à distância, 100% corpo a corpo. Além disso, para
+  e não persegue. No alcance, para e deixa o básico golpear. Replaneja quando o alvo se afasta
+  `ia.recalcularDistancia` do ponto planejado.
+- **Clicar em outro alvo** troca a seleção; a automação passa a segui-lo pela mesma regra.
+- **Depois do abate:** o hostil mais próximo no alcance (à distância) ou em até 4× o alcance (corpo a corpo), sem
+  travar.
+- **Direcional:** o `mover` manual tem a vez enquanto dura. Mais de 120° contra o rumo do alvo, ou um `irPara`,
+  cancela a automação daquele alvo até outro ser escolhido (`seguirCanceladoDe`, limpo por `selecionarAlvo`).
