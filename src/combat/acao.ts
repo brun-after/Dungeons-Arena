@@ -50,6 +50,23 @@ export function chaveRecarga(entidadeId: EntidadeId, habilidadeId: string): stri
   return `${entidadeId}_${habilidadeId}`;
 }
 
+/**
+ * O custo de conjurar agora (Marco 26, 29/10/2026: separado de `iniciarAcao` para o seguir alvo saber o que está pronto).
+ * Marco 24 (D-096): a ressonância Eco ancestral deixa a próxima skill de classe sem custo de mana.
+ */
+export function custoDaHabilidade(ctx: ContextoSimulacao, ator: Entidade, hab: Habilidade): { custoMana: number; custoVida: number; semMana: boolean } {
+  const perfil = perfilPara(ctx, ator, hab);
+  const semMana = !!ator.classeSemMana && !!ctx.conteudo.classes.get(ator.bolsa?.classeId ?? ator.classeId ?? '')?.exclusivas.includes(hab.id);
+  return {
+    custoMana: semMana ? 0 : Math.max(0, Math.round(hab.custoRecurso * (1 + perfil.custoPct / 100))),
+    custoVida: Math.max(0, Math.round(hab.custoVida * (1 + perfil.custoPct / 100))),
+    semMana,
+  };
+}
+
+/** Custo em vida (marco 14): nunca mata quem conjura. */
+export const podePagar = (ator: Entidade, custoMana: number, custoVida: number): boolean => ator.mana >= custoMana && !(custoVida > 0 && ator.hp <= custoVida);
+
 /** Ticks até a habilidade sair de recarga (0 = pronta). */
 export function recargaRestante(estado: EstadoJogo, entidadeId: EntidadeId, habilidadeId: string): number {
   return Math.max(0, (estado.recargas[chaveRecarga(entidadeId, habilidadeId)] ?? 0) - estado.tick);
@@ -202,12 +219,8 @@ export function iniciarAcao(
   if (acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) return recusar('bloqueado');
   if (recargaRestante(estado, ator.id, hab.id) > 0) return recusar('recarga');
   const perfil = perfilPara(ctx, ator, hab);
-  // Marco 24 (D-096): a ressonância Eco ancestral deixa a próxima skill de classe sem custo de mana.
-  const semMana = !!ator.classeSemMana && !!ctx.conteudo.classes.get(ator.bolsa?.classeId ?? ator.classeId ?? '')?.exclusivas.includes(hab.id);
-  const custoMana = semMana ? 0 : Math.max(0, Math.round(hab.custoRecurso * (1 + perfil.custoPct / 100)));
-  const custoVida = Math.max(0, Math.round(hab.custoVida * (1 + perfil.custoPct / 100)));
-  // Custo em vida (marco 14): nunca mata quem conjura.
-  if (ator.mana < custoMana || (custoVida > 0 && ator.hp <= custoVida)) return recusar('recurso');
+  const { custoMana, custoVida, semMana } = custoDaHabilidade(ctx, ator, hab);
+  if (!podePagar(ator, custoMana, custoVida)) return recusar('recurso');
   // Limites de invocação e armadilha do modo: recusa antes de cobrar (§5.6, marco 8A-2).
   if (excedeLimite(estado, ctx, ator, hab.efeitos)) return recusar('limite');
 

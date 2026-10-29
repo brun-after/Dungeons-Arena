@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { alcanceDe } from '../../src/combat/acao';
 import { habilidadeDoAtor } from '../../src/combat/perfil';
-import { limiteDeSeguir, raioDeTroca } from '../../src/combat/seguir-alvo';
+import { alcanceDeAproximar, limiteDeSeguir, raioDeTroca } from '../../src/combat/seguir-alvo';
 import type { Comando } from '../../src/core/comandos';
 import { BALANCE_PADRAO } from '../../src/core/contexto';
 import { buscarEntidade, criarEstado } from '../../src/core/estado';
@@ -115,5 +115,23 @@ describe('seguir alvo (D-121)', () => {
     c.ent('b').hp = 0;
     c.ticks(3);
     expect(c.j().alvoSelecionado).toBe('perto');
+  });
+  // Marco 26 (29/10/2026): aproxima até a skill ofensiva pronta de menor alcance (o Redemoinho do Guerreiro, 1 célula).
+  it('com o Redemoinho pronto, o Guerreiro chega a 1 célula; em recarga, fica no alcance do básico', () => {
+    const a = alcanceDaClasse('guerreiro');
+    expect(a).toBeGreaterThan(1);
+    const c = cena('guerreiro', [['b', 2 + a, 5]]);
+    expect(c.j().habilidades).toContain('redemoinho');
+    expect(alcanceDeAproximar(c.estado, c.ctx, c.j(), a)).toBe(1);
+    c.tick({ t: 'seguirAlvo', ligado: true }, { t: 'selecionarAlvo', alvo: 'b', travar: false });
+    c.ticks(200);
+    expect(Math.max(Math.abs(c.j().x - (2 + a)), Math.abs(c.j().y - 5))).toBe(1);
+
+    const r = cena('guerreiro', [['b', 2 + a, 5]]);
+    for (const id of r.j().habilidades) if (id !== r.j().ataqueBasico) r.estado.recargas[`j_${id}`] = 1e9;
+    expect(alcanceDeAproximar(r.estado, r.ctx, r.j(), a)).toBe(a);
+    r.tick({ t: 'seguirAlvo', ligado: true }, { t: 'selecionarAlvo', alvo: 'b', travar: false });
+    r.ticks(200);
+    expect([r.j().x, r.j().y]).toEqual([2, 5]);
   });
 });

@@ -6,14 +6,18 @@
 // - o direcional manual tem a vez enquanto dura; na direção contrária à do alvo (mais de 120°), ou com um `irPara`,
 //   cancela a automação para aquele alvo até outro ser escolhido.
 // Números em `balance.seguirAlvo`. Só a ficha do jogador (quem manda o comando `seguirAlvo`); a IA não usa.
+// Marco 26 (29/10/2026, D-121): para onde anda é o alcance da skill ofensiva PRONTA de menor alcance (o básico, se
+// nenhuma da barra estiver pronta): o Guerreiro com o Redemoinho pronto chega a 1 célula sem assumir o controle. A folga
+// para seguir quem foge e a troca depois do abate continuam medidas pelo básico.
 
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { vivo, type Entidade } from '../entities/entidade';
 import { pararMovimento, planejarCaminho } from '../world/movimento';
-import { alcanceDe, alvoAtual, autoAlvo } from './acao';
+import { alcanceDe, alvoAtual, autoAlvo, custoDaHabilidade, podePagar, recargaRestante } from './acao';
 import { celulaOcupada } from './geometria';
+import type { Habilidade } from './habilidades';
 import { habilidadeDoAtor } from './perfil';
 
 const chebyshev = (a: { x: number; y: number }, b: { x: number; y: number }) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
@@ -23,6 +27,26 @@ function alcanceDoBasico(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade
   const hab = habilidadeDoAtor(ctx, e, e.ataqueBasico, estado.tick);
   if (!hab) return null;
   return { alcance: alcanceDe(ctx, e, hab, estado.tick), distancia: hab.politicaImpacto === 'projetil' };
+}
+
+/** O alcance que vale para usar a skill: o da mira, ou o raio dela quando a área é em volta de quem conjura. */
+function alcanceDeUso(ctx: ContextoSimulacao, e: Entidade, hab: Habilidade, tick: number): number {
+  const alcance = alcanceDe(ctx, e, hab, tick);
+  return Math.max(1, hab.tipoArea === 'ao_redor' ? Math.max(alcance, hab.raioArea) : alcance);
+}
+
+/** A distância a que a automação aproxima: o menor alcance entre o básico e as skills ofensivas prontas da barra. */
+export function alcanceDeAproximar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, alcanceBasico: number): number {
+  let menor = alcanceBasico;
+  for (const id of e.bolsa?.barra ?? []) {
+    if (!id || id === e.ataqueBasico) continue;
+    const hab = habilidadeDoAtor(ctx, e, id, estado.tick);
+    if (!hab || hab.passiva || hab.politicaAlvo !== 'hostil' || recargaRestante(estado, e.id, hab.id) > 0) continue;
+    const { custoMana, custoVida } = custoDaHabilidade(ctx, e, hab);
+    if (!podePagar(e, custoMana, custoVida)) continue;
+    menor = Math.min(menor, alcanceDeUso(ctx, e, hab, estado.tick));
+  }
+  return menor;
 }
 
 /** Até onde segue quem saiu do alcance (o alcance mais a folga do tipo de arma). */
@@ -83,7 +107,7 @@ export function processarSeguirAlvo(estado: EstadoJogo, ctx: ContextoSimulacao, 
     // O direcional manual tem a vez; e o alvo cancelado não é mais seguido.
     if (e.direcao !== 'parado' || e.seguirCanceladoDe === alvo.id) continue;
     const d = chebyshev(celulaOcupada(e), cel);
-    if (d <= basico.alcance || d > limiteDeSeguir(ctx, basico.alcance, basico.distancia)) {
+    if (d <= alcanceDeAproximar(estado, ctx, e, basico.alcance) || d > limiteDeSeguir(ctx, basico.alcance, basico.distancia)) {
       if (s.andando) pararMovimento(e);
       s.andando = false;
       continue;
