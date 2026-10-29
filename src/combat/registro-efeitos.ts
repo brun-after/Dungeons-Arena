@@ -131,6 +131,11 @@ export interface DefinicaoEfeito {
   /** Marco 8A-2: fluxo próprio de um disparo; `aoLancar` aplica uma vez no lançamento da habilidade. */
   fluxo: Fluxo | null;
   aoLancar: boolean;
+  /**
+   * Marco 26 (29/10/2026, D-125): com `em: conjurador`, desloca quem lança uma vez, no lançamento (avanço,
+   * teleporte), e não a cada alvo atingido: a Investida avança mesmo sem acertar ninguém.
+   */
+  deslocaConjurador: boolean;
   /** Enquanto ativo, a entidade deixa rastro de dano ou de efeito nas células por onde passa. */
   rastro: 'dano' | 'efeito' | null;
   /** Quem morre com este efeito ativo é dominado por quem o aplicou (§2.9). */
@@ -189,6 +194,7 @@ const BASE: Omit<Def, 'icone' | 'cor' | 'positivo' | 'padrao' | 'campos'> = {
   instantaneo: null,
   fluxo: null,
   aoLancar: false,
+  deslocaConjurador: false,
   rastro: null,
   domina: false,
   exige: [],
@@ -275,8 +281,8 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   atravessar: positivo('flecha', '#1abc9c', 2, [], { duracaoMs: 12_000, valor: 0, pct: 0 }, { projeteisAtravessam: true }),
 
   cura: instantaneo('cura', '#2ecc71', ['valor', 'pct'], { duracaoMs: 0, valor: 10, pct: 0 }, 'cura', true),
-  teleporte: instantaneo('teleporte', '#9b59b6', [], { duracaoMs: 0, valor: 0, pct: 0 }, 'teleporte', true),
-  avanco: instantaneo('investida', '#34495e', ['valor'], { duracaoMs: 0, valor: 2, pct: 0 }, 'avanco', true),
+  teleporte: { ...instantaneo('teleporte', '#9b59b6', [], { duracaoMs: 0, valor: 0, pct: 0 }, 'teleporte', true), deslocaConjurador: true },
+  avanco: { ...instantaneo('investida', '#34495e', ['valor'], { duracaoMs: 0, valor: 2, pct: 0 }, 'avanco', true), deslocaConjurador: true },
   empurrao: instantaneo('empurrar', '#7f8c8d', ['valor'], { duracaoMs: 0, valor: 2, pct: 0 }, 'empurrao', false),
 
   efeito_atrasado: { ...BASE, icone: 'ampulheta', cor: '#e67e22', positivo: false, ehStatus: false, campos: [], padrao: { duracaoMs: 1500, valor: 0, pct: 0 }, fluxo: 'atrasado', exige: ['interno'] },

@@ -8,7 +8,7 @@ import { criarEstado, clonarEstado } from '../../src/core/estado';
 import type { EventoSimulacao } from '../../src/core/eventos-simulacao';
 import { prepararSequencia, processarPantanos } from '../../src/combat/sequencias';
 import { aplicarImpacto } from '../../src/combat/golpe';
-import { aplicarEfeito } from '../../src/combat/efeitos';
+import { aplicarEfeito, REGISTRO_EFEITOS } from '../../src/combat/efeitos';
 import { construirEfeito, ehTipoEfeito } from '../../src/combat/registro-efeitos';
 import { defenderGolpe, muralhaEm, processarCampos } from '../../src/combat/tatica';
 import { celulaLivre } from '../../src/world/movimento';
@@ -38,6 +38,8 @@ function cena() {
         const base = obter(CONTEUDO.habilidades.get(id));
         const h = prepararSequencia(estado, ctx, j, base, acao++, alvo, mira);
         const proprio = h.politicaImpacto === 'proprio';
+        // Marco 26 (D-125): o avanço de quem conjura sai no lançamento, como em acao.ts.
+        for (const ef of h.efeitos) if (ef.em === 'conjurador' && REGISTRO_EFEITOS[ef.tipo].deslocaConjurador) aplicarEfeito(estado, ctx, j, ef, { id: j.id, x: j.x, y: j.y, acaoId: acao - 1 }, mira, eventos);
         aplicarImpacto(estado, ctx, proprio ? j : alvo, { acaoId: acao - 1, hab: h, fonte: { id: j.id, equipe: j.equipe, bonusAtributo: 0, carisma: 10, multRolagem: 1, potencia: 1, multDano: 1, multCura: 1, d20Minimo: 20 }, indice: 0, mira }, eventos);
         estado.tick++;
         return h;

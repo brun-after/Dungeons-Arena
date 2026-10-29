@@ -286,7 +286,8 @@ export function aplicarImpacto(
   // Dispatcher único (§2.8); `em: 'conjurador'` cai sobre quem lançou (ex.: avanço, roubo de vida).
   for (const efeito of hab.efeitos) {
     // Armadilha e invocação saem uma vez no lançamento (acao.ts), não por alvo atingido.
-    if (REGISTRO_EFEITOS[efeito.tipo].aoLancar) continue;
+    // Marco 26 (D-125): nem o avanço e o teleporte de quem conjura (saem uma vez, no lançamento).
+    if (REGISTRO_EFEITOS[efeito.tipo].aoLancar || (efeito.em === 'conjurador' && REGISTRO_EFEITOS[efeito.tipo].deslocaConjurador)) continue;
     const sobre = efeito.em === 'conjurador' ? conjurador : alvo;
     // Marco 23 (D-092): no clima do elemento, o estado dele dura mais.
     const reforco = efeito.tipo === 'escudo' || efeito.tipo === 'escudo_acumulado' ? reforcoDaGeral(ctx, conjurador, hab, tick) : 1;

@@ -14,6 +14,7 @@ import { podeAjudar, podeFerir } from '../modos/relacao';
 import { passavel, type Fase } from '../world/fase';
 import { celulaOcupada, chebyshev } from './geometria';
 import type { Habilidade } from './habilidades';
+import { REGISTRO_EFEITOS } from './registro-efeitos';
 
 /** Células de Bresenham de `a` (exclusive) a `b` (inclusive). */
 export function bresenham(a: Celula, b: Celula): Celula[] {
@@ -39,8 +40,11 @@ export function bresenham(a: Celula, b: Celula): Celula[] {
   return saida;
 }
 
-/** A linha sai de quem conjura, passa pela mira e vai até o alcance; para antes da primeira parede. */
-export function celulasDaLinha(origem: Celula, mira: Celula, alcance: number, fase: Fase): Celula[] {
+/**
+ * A linha sai de quem conjura, passa pela mira e vai até o alcance; para antes da primeira parede. Marco 26
+ * (29/10/2026, D-125): com `barreira`, só ela encerra a linha (a investida passa pelas paredes, como o dash).
+ */
+export function celulasDaLinha(origem: Celula, mira: Celula, alcance: number, fase: Fase, barreira?: (c: Celula) => boolean): Celula[] {
   const dx = mira.x - origem.x;
   const dy = mira.y - origem.y;
   const passos = Math.max(Math.abs(dx), Math.abs(dy));
@@ -49,7 +53,7 @@ export function celulasDaLinha(origem: Celula, mira: Celula, alcance: number, fa
   const fim = { x: origem.x + Math.round((dx * alcance) / passos), y: origem.y + Math.round((dy * alcance) / passos) };
   const saida: Celula[] = [];
   for (const c of bresenham(origem, fim)) {
-    if (!passavel(fase, c.x, c.y)) break;
+    if (barreira ? barreira(c) : !passavel(fase, c.x, c.y)) break;
     saida.push(c);
   }
   return saida;
@@ -81,12 +85,17 @@ export function celulasDoQuadrado(centro: Celula, raio: number): Celula[] {
 }
 
 /** As células que a habilidade de área atinge, dadas a origem (quem conjura) e a mira. */
-export function celulasDaForma(hab: Habilidade, origem: Celula, mira: Celula, fase: Fase): Celula[] {
+/** Marco 26 (29/10/2026, D-125): a habilidade desloca quem a lança (avanço, teleporte em `em: conjurador`)? */
+export function deslocaQuemConjura(hab: Habilidade): boolean {
+  return hab.efeitos.some((ef) => ef.em === 'conjurador' && REGISTRO_EFEITOS[ef.tipo].deslocaConjurador);
+}
+
+export function celulasDaForma(hab: Habilidade, origem: Celula, mira: Celula, fase: Fase, barreira?: (c: Celula) => boolean): Celula[] {
   switch (hab.tipoArea) {
     case 'quadrado':
       return celulasDoQuadrado(mira, hab.raioArea);
     case 'linha':
-      return celulasDaLinha(origem, mira, hab.alcanceCelulas, fase);
+      return celulasDaLinha(origem, mira, hab.alcanceCelulas, fase, barreira);
     case 'cone':
       return celulasDoCone(origem, mira, hab.raioArea);
     case 'ao_redor':

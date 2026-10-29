@@ -25,7 +25,8 @@ import { resolverHabilidade } from './compilar-habilidade';
 import type { FonteDeDano } from './dano';
 import { acaoBloqueada, aplicarEfeito, bonusAtaqueBasico, multiplicadorDanoCausado, REGISTRO_EFEITOS } from './efeitos';
 import { excedeLimite } from './efeitos-fluxo';
-import { alvosDaForma, celulasDaForma, deSuporte } from './formas';
+import { alvosDaForma, celulasDaForma, deSuporte, deslocaQuemConjura } from './formas';
+import { muralhaEm } from './tatica';
 import { quebrarEm } from './quebraveis';
 import { celulaOcupada, chebyshev } from './geometria';
 import { aplicarImpacto } from './golpe';
@@ -420,13 +421,18 @@ function lancar(
   const basico = hab.id === ator.ataqueBasico ? bonusAtaqueBasico(ator, estado.tick) : null;
   const alcance = alcanceDe(ctx, ator, hab, estado.tick);
   const base = { acaoId, fonte, hab, mira, ...(basico && basico.dano > 0 && { danoExtra: basico.dano }) };
-  // Efeitos de lançamento (armadilha, invocação): uma vez, sobre quem conjura, na célula mirada.
+  // Marco 26 (29/10/2026, D-125): a célula de onde a habilidade sai, antes de quem conjura avançar.
+  const partida = origemDaHabilidade(estado, ator, hab);
+  // Efeitos de lançamento (armadilha, invocação): uma vez, sobre quem conjura, na célula mirada. D-125: o avanço e o
+  // teleporte de quem conjura também (antes, só saíam a cada alvo atingido: sem ninguém na linha, nada de avanço).
   for (const ef of hab.efeitos) {
-    if (!REGISTRO_EFEITOS[ef.tipo].aoLancar) continue;
+    const desloca = ef.em === 'conjurador' && REGISTRO_EFEITOS[ef.tipo].deslocaConjurador;
+    if (!REGISTRO_EFEITOS[ef.tipo].aoLancar && !desloca) continue;
     // Marco 24: a fase guarda o alvo da ação (o resto do lançamento cai em quem conjura, na célula mirada).
     // `em: conjurador` guarda a célula de onde quem lançou saiu (o eco do Piscar); a fase herda as variantes de agora.
     if (REGISTRO_EFEITOS[ef.tipo].fluxo === 'fase' && ef.ref) agendarFase(estado, ator, chaveDoAtor(ctx, ator, ef.ref, estado.tick), ef.em === 'conjurador' ? celulaOcupada(ator) : (alvo ?? mira), ef.duracaoMs);
-    else aplicarEfeito(estado, ctx, ator, ef, { id: ator.id, x: ator.x, y: ator.y }, mira, saida);
+    // D-125: quem avança sobre um alvo vai até onde ele está agora (ele pode ter andado durante a conjuração).
+    else aplicarEfeito(estado, ctx, ator, ef, { id: ator.id, x: ator.x, y: ator.y, ...(desloca && { acaoId }) }, desloca && alvo && alvo !== ator && vivo(alvo) ? celulaOcupada(alvo) : mira, saida);
   }
   switch (hab.politicaImpacto) {
     case 'proprio':
@@ -464,7 +470,10 @@ function lancar(
     }
     case 'area': {
       // Marco 24 (D-095): o Mago encarnado em terra alcança +1 de raio nas magias de área.
-      const celulas = celulasDaForma(raioAreaDaEncarnacao(ctx, ator, hab, estado.tick), origemDaHabilidade(estado, ator, hab), mira, ctx.fase);
+      // D-125: a investida acerta a trajetória toda, a partir de onde saiu, passando pelas paredes como o dash.
+      const atravessa = ctx.balance.movimento.dashAtravessaParedes && deslocaQuemConjura(hab);
+      const barreira = atravessa ? (c: Celula) => c.x < 0 || c.y < 0 || c.x >= ctx.fase.largura || c.y >= ctx.fase.altura || !!muralhaEm(estado, c.x, c.y) : undefined;
+      const celulas = celulasDaForma(raioAreaDaEncarnacao(ctx, ator, hab, estado.tick), partida, mira, ctx.fase, barreira);
       const atingidos = alvosDaForma(estado, ctx, ator, hab, celulas);
       // Marco 26 (D-113): a área quebra os quebráveis que pega.
       if (!deSuporte(hab)) quebrarEm(estado, ctx, celulas, ator, saida);
