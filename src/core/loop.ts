@@ -8,6 +8,13 @@ export const DT_MS = 1000 / 60;
 /** Teto de tempo absorvido por quadro, para não entrar em espiral após uma pausa da aba. */
 export const MAX_QUADRO_MS = 250;
 
+/**
+ * Marco 26 (29/10/2026, D-122): teto de ticks num quadro da campanha solo. Com o aparelho lento, rodar até 15 ticks
+ * para alcançar o atraso deixava o quadro seguinte ainda mais lento (bola de neve); acima do teto, o tempo que sobra é
+ * descartado e o jogo só fica um instante mais lento. O grupo e a arena seguem sem teto (acompanham o servidor).
+ */
+export const MAX_PASSOS_SOLO = 4;
+
 const TOLERANCIA_MS = 1e-6;
 
 export interface Acumulador {
@@ -30,6 +37,7 @@ export function avancarLaco(
   acumulador: Acumulador,
   agoraMs: number,
   simular: (dtMs: number) => void,
+  maxPassos = Number.POSITIVE_INFINITY,
 ): ResultadoQuadro {
   if (acumulador.anteriorMs === null) {
     acumulador.anteriorMs = agoraMs;
@@ -43,6 +51,11 @@ export function avancarLaco(
   // A tolerância absorve o erro de ponto flutuante de somar 1000/60 várias vezes,
   // que faria um segundo de quadros render 59 ou 61 ticks.
   while (acumulador.acumuladoMs >= DT_MS - TOLERANCIA_MS) {
+    if (passos >= maxPassos) {
+      // D-122: descarta o atraso, guardando só a fração do tick (a interpolação continua lisa).
+      acumulador.acumuladoMs %= DT_MS;
+      break;
+    }
     simular(DT_MS);
     acumulador.acumuladoMs = Math.max(0, acumulador.acumuladoMs - DT_MS);
     passos++;

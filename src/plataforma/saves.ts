@@ -49,6 +49,8 @@ export interface OpcoesAutosave {
   /** Marco 17: o certificado do personagem (o último que o servidor deu; a gravação o mantém). */
   certificado?: () => Certificado | null;
   aoFalhar?: (erro: unknown) => void;
+  /** Marco 26 (D-122): quanto a gravação ocupou a thread principal (a cópia do estado e o pedido ao banco). */
+  aoGravar?: (ms: number) => void;
 }
 
 export interface Autosave {
@@ -72,6 +74,7 @@ export function criarAutosave(o: OpcoesAutosave): Autosave {
       pendente = true;
       return gravando;
     }
+    const inicio = performance.now();
     const registro: RegistroProgresso = {
       versaoSchema: VERSAO_SCHEMA,
       slot: o.slot,
@@ -85,7 +88,9 @@ export function criarAutosave(o: OpcoesAutosave): Autosave {
       ...(o.referenciasFases && { referenciasFases: o.referenciasFases }),
       certificado: o.certificado?.() ?? null,
     };
-    gravando = gravarRegistro(registro)
+    const pedido = gravarRegistro(registro);
+    o.aoGravar?.(performance.now() - inicio);
+    gravando = pedido
       .catch((erro: unknown) => o.aoFalhar?.(erro))
       .finally(() => {
         gravando = null;

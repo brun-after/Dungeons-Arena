@@ -1211,6 +1211,9 @@ body.toque .botao-habilidade .tecla {
   background: rgba(0, 0, 0, 0.6);
   font: 11px ui-monospace, 'Cascadia Code', Consolas, monospace;
   font-variant-numeric: tabular-nums;
+  /* Marco 26 (D-122): a segunda linha (entidades, objetos, ticks, qualidade, salvamento). */
+  white-space: pre-line;
+  text-align: center;
   pointer-events: none;
   white-space: nowrap;
 }

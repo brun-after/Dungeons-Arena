@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { RelogioManual } from '../../src/core/clock';
-import { avancarLaco, criarAcumulador, DT_MS, MAX_QUADRO_MS } from '../../src/core/loop';
+import { avancarLaco, criarAcumulador, DT_MS, MAX_PASSOS_SOLO, MAX_QUADRO_MS } from '../../src/core/loop';
 
 describe('laço de passo fixo', () => {
   function contarPassos(quadrosMs: number[]) {
@@ -43,5 +43,27 @@ describe('laço de passo fixo', () => {
     const acumulador = criarAcumulador();
     avancarLaco(acumulador, 1_000, () => undefined);
     expect(avancarLaco(acumulador, 900, () => undefined).passos).toBe(0);
+  });
+});
+
+// Marco 26 (29/10/2026, D-122): o teto de ticks por quadro da campanha solo descarta o atraso.
+describe('teto de passos por quadro', () => {
+  it('não passa do teto e guarda só a fração do tick', () => {
+    const acumulador = criarAcumulador();
+    avancarLaco(acumulador, 0, () => undefined);
+    let ticks = 0;
+    const r = avancarLaco(acumulador, 200 + DT_MS / 2, () => ticks++, MAX_PASSOS_SOLO);
+    expect(r.passos).toBe(MAX_PASSOS_SOLO);
+    expect(ticks).toBe(MAX_PASSOS_SOLO);
+    expect(acumulador.acumuladoMs).toBeLessThan(DT_MS);
+    // O quadro seguinte, no ritmo normal, volta a 1 tick (sem bola de neve).
+    expect(avancarLaco(acumulador, 200 + DT_MS / 2 + DT_MS, () => ticks++, MAX_PASSOS_SOLO).passos).toBeLessThanOrEqual(2);
+  });
+
+  it('com quadros de 30 fps, 2 ticks por quadro continuam dando 60 ticks por segundo', () => {
+    const acumulador = criarAcumulador();
+    let ticks = 0;
+    for (let i = 0; i <= 30; i++) avancarLaco(acumulador, (i * 1000) / 30, () => ticks++, MAX_PASSOS_SOLO);
+    expect(ticks).toBe(60);
   });
 });

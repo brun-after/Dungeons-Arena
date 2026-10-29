@@ -24,6 +24,7 @@ import { criarJogador } from './entities/fabrica';
 import { t } from './i18n';
 import type { Dificuldade } from './modos/dificuldade';
 import { iniciarLaco } from './plataforma/laco-navegador';
+import { MAX_PASSOS_SOLO } from './core/loop';
 import { sincronizarSlot } from './plataforma/nuvem';
 import { sairDaTelaCheia } from './plataforma/sessao-tela';
 import { carregarAventura } from './plataforma/aventuras';
@@ -185,6 +186,8 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
   const estatisticas: Estatisticas = { ...(leitura?.estatisticas ?? { inimigosDerrotados: 0, mortes: 0 }) };
 
   let autosave: Autosave | null = null;
+  // Marco 26 (D-122): o tempo de cada salvamento vai ao medidor da cena (que só existe depois).
+  let anotarSalvamento: ((ms: number) => void) | null = null;
   const acoesExtras: HTMLElement[] = [];
   const criadoEm = leitura?.criadoEm ?? Date.now();
   const fasesVisitadas = leitura?.fasesVisitadas ?? {};
@@ -201,6 +204,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
       certificado: () => certificado,
       estado: () => estado,
       estatisticas: () => estatisticas,
+      aoGravar: (ms) => anotarSalvamento?.(ms),
       aoFalhar: () => {
         if (avisouFalha) return;
         avisouFalha = true;
@@ -264,6 +268,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
       .map((b) => ({ rotulo: t('pausa.salvarESair'), fazer: () => { b.click(); } })),
   });
   if (!cena) return;
+  anotarSalvamento = cena.anotarSalvamento;
   if (teste) mostrarAviso(raiz, t('editor.testeSemSave'), 4000);
   if (pesquisa) {
     pesquisa.ligar(cena.bus);
@@ -386,6 +391,7 @@ export async function iniciarJogo(raiz: HTMLElement, opcoes: OpcoesJogo): Promis
     },
     pausado: cena.pausado,
     quadroPermitido: cena.quadroPermitido,
+    maxPassos: MAX_PASSOS_SOLO,
   });
 }
 

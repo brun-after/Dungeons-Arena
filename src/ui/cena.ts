@@ -120,6 +120,8 @@ export interface Cena {
   quadroPermitido: (agoraMs: number) => boolean;
   /** Marco 15: tira a cena da página (troca de fase no cooperativo, sem recarregar a conexão). */
   desmontar: () => void;
+  /** Marco 26 (D-122): quanto durou o último salvamento (medidor e qualidade automática). */
+  anotarSalvamento: (ms: number) => void;
 }
 
 function div(classe: string): HTMLDivElement {
@@ -663,6 +665,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     quadro,
     pausado: ap.pausado,
     quadroPermitido: ap.quadroPermitido,
+    anotarSalvamento: ap.anotarSalvamento,
     desmontar: () => {
       clearTimeout(releitura);
       teclado.desligar();
