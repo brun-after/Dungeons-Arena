@@ -308,6 +308,29 @@ body.toque .faixa-controles {
   border-color: #ff7043;
 }
 
+/* Marco 26 (28/10/2026, D-117): centralizar a câmera, ao lado do direcional; acende com a câmera solta. */
+.botao-acao.centralizar {
+  width: 44px;
+  height: 44px;
+  margin-left: 12px;
+  font-size: 1.2rem;
+  opacity: 0.6;
+}
+
+.botao-acao.centralizar[data-solta='true'] {
+  opacity: 1;
+  border-color: #f1c40f;
+  color: #f1c40f;
+}
+
+.botao-acao.centralizar.flutuante {
+  position: absolute;
+  left: calc(16px + var(--seguro-esq));
+  bottom: calc(18px + var(--seguro-base));
+  margin-left: 0;
+  pointer-events: auto;
+}
+
 .botao-acao.pressionado {
   transform: scale(0.9);
   background: var(--controle-ativo);

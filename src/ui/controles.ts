@@ -24,6 +24,8 @@ export interface OpcoesControles {
   isometrico: () => boolean;
   /** Marco 26 (25/10/2026, D-107): sem joystick nem D-pad no computador (com mouse); os botões de ação ficam. */
   direcional?: boolean;
+  /** Marco 26 (28/10/2026, D-117): o botão de centralizar a câmera, ao lado do direcional. */
+  aoLadoDoDirecional?: HTMLElement;
 }
 
 export interface Controles {
@@ -126,11 +128,12 @@ export function criarControles(opcoes: OpcoesControles): Controles {
     desligarDirecional?.();
     const args = { aoMudarDirecao: opcoes.aoMudarDirecao, isometrico: opcoes.isometrico };
     const controle = tipo === 'dpad' ? criarDpad(args) : criarJoystick(args);
-    esquerda.append(controle.elemento);
+    esquerda.prepend(controle.elemento);
     desligarDirecional = controle.desligar;
     atualizarVisao = controle.atualizarVisao;
   };
   trocarTipo(opcoes.tipo);
+  if (opcoes.aoLadoDoDirecional) esquerda.append(opcoes.aoLadoDoDirecional);
 
   return {
     elemento: faixa,

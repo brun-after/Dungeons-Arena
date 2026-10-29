@@ -69,6 +69,7 @@ import { identidadeDaClasse } from './barra-classe';
 import { QuadroAlvo } from './quadro-alvo';
 import { montarVisao, type ControleVisao } from './visao';
 import { criarGolpeNoQuebravel } from './golpe-quebravel';
+import { criarBotaoCentralizar } from './botao-centralizar';
 import { presetDaQuebra } from '../render/presets-mundo';
 
 const LEITURA_FAIXA_MS = 1000;
@@ -381,10 +382,20 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     const entrada = bolsa ? consumiveisComAtalho(bolsa, ctx.conteudo.itens)[n] : undefined;
     if (entrada) emitir({ t: 'usarItem', invId: entrada.invId });
   };
+  // Marco 26 (D-117): centralizar a câmera solta (toque duplo); no computador sem direcional, fica no canto.
+  const centralizar = criarBotaoCentralizar({
+    aoCentralizar: () => {
+      camera.recentralizar();
+    },
+    aoDica: (texto) => {
+      mostrarAviso(ui, texto, 1500);
+    },
+  });
   if (toque) {
     controles = criarControles({
       tipo: prefs.controle,
       direcional,
+      aoLadoDoDirecional: centralizar.elemento,
       aoMudarDirecao: (rumo) => {
         golpeQuebravel.esquecer();
         emitir(comandoMover(rumo));
@@ -410,6 +421,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     fila.className = 'fila-barra';
     fila.append(barra.elemento, botaoUltimate.elemento);
     ui.append(fila);
+    centralizar.elemento.classList.add('flutuante');
+    ui.append(centralizar.elemento);
   }
   ui.append(
     criarCabecalho({
@@ -463,6 +476,9 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   });
 
   teclado = ligarTeclado({
+    aoCentralizar: () => {
+      centralizar.tocar(performance.now());
+    },
     aoMudarDirecao: (rumo) => {
       emitir(comandoMover(rumo));
     },
@@ -584,6 +600,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     }
     ponteiro.atualizar(q.agoraMs);
     golpeQuebravel.atualizar(performance.now());
+    centralizar.marcar(camera.estaSolta);
     hud.atualizar(j, estado.tick, identidadeDaClasse(ctx, j, estado.tick));
     feedback.conferirBasico();
     const alvo = j?.alvoSelecionado ? estado.entidades.find((e) => e.id === j.alvoSelecionado) : undefined;

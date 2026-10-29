@@ -24,6 +24,8 @@ export const ptBR = {
   'controles.joystick': 'Joystick de movimento',
   'controles.dpad': 'Direcional de movimento',
   'controles.interagir': 'Interagir',
+  'camera.centralizar': 'Centralizar a câmera (toque duas vezes; no teclado, C duas vezes)',
+  'camera.dicaCentralizar': 'Toque duas vezes para centralizar a câmera',
   'controles.trocarAlvo': 'Trocar alvo (segure para travar ou destravar)',
   'controles.habilidade': '{nome} (tecla {tecla})',
   'controles.habilidades': 'Habilidades',
