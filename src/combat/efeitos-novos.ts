@@ -11,7 +11,7 @@ import { podeFerir } from '../modos/relacao';
 import { passivosDe } from '../progression/ganchos-do-portador';
 import { somarCarga } from './carga-ultimate';
 import { encherFuria } from './frenesi';
-import { aplicarEfeito, imuneADano, sofrerDano, type OrigemDoEfeito } from './efeitos';
+import { anotarDeslocamento, aplicarEfeito, imuneADano, sofrerDano, type OrigemDoEfeito } from './efeitos';
 import { arremessar } from './efeitos-instantaneos';
 import { acumularFuria } from './furia';
 import { chebyshev } from './geometria';
@@ -84,11 +84,15 @@ export function aplicarInstantaneoNovo(
       morto.hp = 0;
       break;
     }
-    case 'arremessar':
-      if (!passivosDe(ctx, alvo).inamovivel && arremessar(estado, ctx, alvo, origem, ef.valor)) {
+    case 'arremessar': {
+      const { x, y } = alvo;
+      const bateu = !passivosDe(ctx, alvo).inamovivel && arremessar(estado, ctx, alvo, origem, ef.valor);
+      anotarDeslocamento(saida, tick, alvo, x, y, origem, 'arremesso');
+      if (bateu) {
         aplicarEfeito(estado, ctx, alvo, ef.interno ?? construirEfeito('atordoar', { duracaoMs: 500 }), origem, null, saida);
       }
       break;
+    }
     case 'zerar_recarga':
       // A mesma chave de acao.ts (`chaveRecarga`).
       if (ef.ref) estado.recargas[`${alvo.id}_${ef.ref}`] = estado.tick;

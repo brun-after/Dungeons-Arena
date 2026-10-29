@@ -13,6 +13,7 @@ import { ehElemento, type Elemento } from './elementos';
 import { normalizarEfeitos } from './normalizar-efeito';
 import type { Atributos } from '../entities/entidade';
 import { ehTipoEfeito, type EfeitoCanonico, type TipoEfeito } from './registro-efeitos';
+import { ASSINATURAS_VISUAIS, VARIANTES_VISUAIS, type AssinaturaVisual, type VarianteVisual } from './assinaturas-visuais';
 
 export type TipoAtaque = 'fisico' | 'magico';
 export const TIPOS_AREA = ['nenhuma', 'quadrado', 'linha', 'cone', 'ao_redor'] as const;
@@ -211,6 +212,10 @@ export interface VisualHabilidade {
   som: string | null;
   /** Marco 24 (25/10/2026, D-098): a animação do corpo (`giro`: o Redemoinho e afins); ausente, a da arma. */
   animacao?: 'giro';
+  /** Marco 26 (29/10/2026, D-124): o desenho próprio da skill (lista fechada); ausente, o render deduz. */
+  assinatura?: AssinaturaVisual;
+  /** D-124: o toque que se soma à assinatura (distingue duas skills com a mesma). */
+  variante?: VarianteVisual;
 }
 
 /** Marco 14: o que o skills.json descreve. A base é a habilidade no rank 1, sem caminhos. */
@@ -308,7 +313,7 @@ function lerVisual(l: Leitor, v: unknown): VisualHabilidade | null {
   const cor = o.cor === undefined ? null : l.texto(o, 'cor');
   if (cor !== null && !/^#[0-9a-f]{6}$/i.test(cor)) l.erro(`visual.cor precisa ser #rrggbb ("${cor}")`);
   for (const k of Object.keys(o)) {
-    if (!['cor', 'conjuracao', 'viagem', 'impacto', 'camera', 'som', 'projetil', 'animacao'].includes(k)) l.erro(`visual: campo desconhecido "${k}"`);
+    if (!['cor', 'conjuracao', 'viagem', 'impacto', 'camera', 'som', 'projetil', 'animacao', 'assinatura', 'variante'].includes(k)) l.erro(`visual: campo desconhecido "${k}"`);
   }
   return {
     cor,
@@ -319,6 +324,8 @@ function lerVisual(l: Leitor, v: unknown): VisualHabilidade | null {
     projetil: o.projetil === undefined ? null : l.opcao(o, 'projetil', FORMAS_PROJETIL),
     som: o.som === undefined ? null : l.texto(o, 'som'),
     ...(o.animacao === undefined ? {} : { animacao: l.opcao(o, 'animacao', ['giro'] as const) }),
+    ...(o.assinatura === undefined ? {} : { assinatura: l.opcao(o, 'assinatura', ASSINATURAS_VISUAIS) }),
+    ...(o.variante === undefined ? {} : { variante: l.opcao(o, 'variante', VARIANTES_VISUAIS) }),
   };
 }
 

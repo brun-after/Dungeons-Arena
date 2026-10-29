@@ -9,11 +9,19 @@ export const DT_MS = 1000 / 60;
 export const MAX_QUADRO_MS = 250;
 
 /**
- * Marco 26 (29/10/2026, D-122): teto de ticks num quadro da campanha solo. Com o aparelho lento, rodar até 15 ticks
- * para alcançar o atraso deixava o quadro seguinte ainda mais lento (bola de neve); acima do teto, o tempo que sobra é
- * descartado e o jogo só fica um instante mais lento. O grupo e a arena seguem sem teto (acompanham o servidor).
+ * Marco 26 (29/10/2026, D-122): orçamento de simulação num quadro da campanha solo. Com o tick caro (multidão no
+ * celular), rodar até 15 ticks para alcançar o atraso deixava o quadro seguinte ainda mais lento (bola de neve): passado
+ * o orçamento, o atraso é descartado e o jogo só fica um instante mais lento. Com o tick barato e o desenho lento (o CI
+ * sem GPU), o atraso ainda é todo recuperado: um teto fixo de ticks deixava o jogo em câmera lenta. O grupo e a arena
+ * seguem sem orçamento (acompanham o servidor).
  */
-export const MAX_PASSOS_SOLO = 4;
+export const ORCAMENTO_SIM_SOLO_MS = 10;
+
+/** O orçamento: quanto tempo os ticks deste quadro podem somar, medido pelo relógio dado. */
+export interface OrcamentoDoQuadro {
+  ms: number;
+  relogio: () => number;
+}
 
 const TOLERANCIA_MS = 1e-6;
 
@@ -37,7 +45,7 @@ export function avancarLaco(
   acumulador: Acumulador,
   agoraMs: number,
   simular: (dtMs: number) => void,
-  maxPassos = Number.POSITIVE_INFINITY,
+  orcamento?: OrcamentoDoQuadro,
 ): ResultadoQuadro {
   if (acumulador.anteriorMs === null) {
     acumulador.anteriorMs = agoraMs;
@@ -48,10 +56,11 @@ export function avancarLaco(
   acumulador.acumuladoMs += Math.min(decorrido, MAX_QUADRO_MS);
 
   let passos = 0;
+  const inicio = orcamento?.relogio();
   // A tolerância absorve o erro de ponto flutuante de somar 1000/60 várias vezes,
   // que faria um segundo de quadros render 59 ou 61 ticks.
   while (acumulador.acumuladoMs >= DT_MS - TOLERANCIA_MS) {
-    if (passos >= maxPassos) {
+    if (orcamento && inicio !== undefined && passos > 0 && orcamento.relogio() - inicio >= orcamento.ms) {
       // D-122: descarta o atraso, guardando só a fração do tick (a interpolação continua lisa).
       acumulador.acumuladoMs %= DT_MS;
       break;

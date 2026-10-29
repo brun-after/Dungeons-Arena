@@ -137,10 +137,14 @@ describe('efeitos novos', () => {
   it('puxão traz para o lado de quem puxa; troca de lugar troca as células', () => {
     const c = cenario();
     const a = c.ent('a');
+    const antes = { x: a.x, y: a.y };
     c.aplicar('a', 'puxao', { valor: 5 });
     expect([a.x, a.y]).toEqual([4, 5]);
+    // Marco 26 (29/10/2026, D-124): o puxão avisa de onde para onde (o desenho desliza o corpo).
+    expect(c.eventos).toContainEqual(expect.objectContaining({ t: 'deslocado', id: 'a', deX: antes.x, deY: antes.y, paraX: 4, paraY: 5, causa: 'puxao', origemId: 'j' }));
     c.aplicar('a', 'trocar_lugar');
     expect([c.ent('a').x, c.ent('j').x]).toEqual([3, 4]);
+    expect(c.eventos.filter((e) => e.t === 'deslocado' && e.causa === 'troca')).toHaveLength(2);
   });
 
   it('resfriado deixa mais lento', () => {

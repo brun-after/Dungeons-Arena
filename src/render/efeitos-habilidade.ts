@@ -14,6 +14,9 @@
 // carregado deixa um rastro dourado.
 // Marco 23 (24/10/2026, D-092): o ar do tema da fase (neve, cinzas, folhas…, da qualidade média para cima) e a aura do
 // elemento nos inimigos afins.
+// Marco 26 (29/10/2026, D-124): cada skill tem a sua assinatura (render/vfx): a conjuração, o rastro, o acerto e a área
+// saem dela, com silhuetas (a corrente que estica, a bola de fogo, o relâmpago) e marcas no chão. A ultimate conjura no
+// círculo com a runa da classe, e o puxão, o empurrão e o arremesso deslizam o corpo (evento `deslocado`).
 
 import { celulasDaForma } from '../combat/formas';
 import type { BuscaHabilidade } from '../combat/habilidades';
@@ -31,7 +34,12 @@ import type { ParticulaClima } from '../world/temas';
 import type { Elemento } from '../combat/elementos';
 import type { PresetQualidade } from './qualidade';
 import { visualDe } from './visual-habilidade';
-import { AURA_DO_ESTADO, presetDeConjuracao, presetDeImpacto } from './materiais';
+import { AURA_DO_ESTADO, presetDeConjuracao } from './materiais';
+import type { AssinaturaVisual } from '../combat/assinaturas-visuais';
+import type { Habilidade } from '../combat/habilidades';
+import type { DiretorVfx } from './vfx/diretor';
+import { assinaturaDe } from './vfx/resolver';
+import { DT_MS } from '../core/loop';
 
 const INTERVALO_CONJURACAO_MS = 120;
 const INTERVALO_RASTRO_MS = 30;
@@ -48,8 +56,8 @@ const INTERVALO_CHAO_MS = 160;
 
 
 const cor = (hex: string) => Number.parseInt(hex.slice(1), 16);
-/** Marco 24 (D-098): os impactos genéricos que o golpe de arma substitui pelo rastro dele. */
-const GENERICOS: ReadonlySet<string> = new Set(['corte', 'faiscas']);
+/** Marco 24 (D-098): as assinaturas que o golpe de arma substitui pelo rastro dele. Marco 26 (D-124): por assinatura. */
+const GENERICOS: ReadonlySet<AssinaturaVisual> = new Set(['golpe']);
 
 /** Marco 22 (D-089): a aura e a cor de cada encarnação do Mago. */
 // Marco 24 (24/10/2026, D-095): as encarnações de terra, veneno, trevas e luz.
@@ -81,12 +89,17 @@ export interface OpcoesEfeitos {
   /** Marco 24 (D-098): o golpe de arma desenha o próprio impacto (o genérico sai) e o giro, as lâminas em volta. */
   golpeDeArma?: (fonte: Entidade | undefined, chave: string) => boolean;
   aoGirar?: (centro: PontoVisual, cor: number) => void;
+  /** Marco 26 (D-124): as silhuetas, marcas e deslizes; e a classe da ultimate (o círculo com a runa dela). */
+  diretor: DiretorVfx;
+  classeDaUltimate?: (habilidadeId: string) => string | null;
 }
 
 export class EfeitosDeHabilidade {
   private readonly conjurando = new Map<number, { atorId: string; chave: string; ateTick: number; ultimoMs: number }>();
-  /** Ações de área esperando o lançamento: de onde saem e onde caem. */
-  private readonly areas = new Map<number, { chave: string; origem: PontoVisual; mira: PontoVisual; raioCombo?: number; ateTick: number }>();
+  /** Ações de área (e as em si mesmo, D-124) esperando o lançamento: de onde saem e onde caem. */
+  private readonly areas = new Map<number, { chave: string; atorId: string; origem: PontoVisual; mira: PontoVisual; raioCombo?: number; ateTick: number; emSi?: boolean; ultimate?: boolean }>();
+  /** D-124: a skill de cada ação, para o deslize do puxão esperar a corrente (some com o tempo). */
+  private readonly skillDaAcao = new Map<number, string>();
   private readonly ultimoRastro = new Map<number, number>();
   private readonly ultimaAura = new Map<string, number>();
   private ultimaPoeira = 0;
@@ -118,10 +131,15 @@ export class EfeitosDeHabilidade {
       const h = this.o.habilidades(ev.chave);
       const lancador = quemLanca(ev.atorId, ev.chave);
       const ator = pos(lancador);
-      if (h?.politicaImpacto === 'area' && ator) {
-        this.areas.set(ev.acaoId, { chave: ev.chave, origem: ator, mira: { x: ev.alvoX, y: ev.alvoY }, ...(ev.raioCombo ? { raioCombo: ev.raioCombo } : {}), ateTick: ev.lancamentoTick });
+      if (this.skillDaAcao.size > 64) this.skillDaAcao.clear();
+      this.skillDaAcao.set(ev.acaoId, ev.chave);
+      const classe = this.o.classeDaUltimate?.(ev.habilidadeId) ?? null;
+      if (h && ator && (h.politicaImpacto === 'area' || h.politicaImpacto === 'proprio')) {
+        this.areas.set(ev.acaoId, { chave: ev.chave, atorId: lancador, origem: ator, mira: { x: ev.alvoX, y: ev.alvoY }, ...(ev.raioCombo ? { raioCombo: ev.raioCombo } : {}), ateTick: ev.lancamentoTick, ...(h.politicaImpacto === 'proprio' ? { emSi: true } : {}), ...(classe ? { ultimate: true } : {}) });
       }
-      if (!h || !visualDe(h).conjuracao) return;
+      if (!h) return;
+      // D-124: a ultimate conjura no círculo com a runa da classe.
+      if (classe) this.o.diretor.circuloDaUltimate(ev.atorId, classe, visualDe(h).cor, (ev.lancamentoTick - ev.tick) * DT_MS);
       this.conjurando.set(ev.acaoId, { atorId: lancador, chave: ev.chave, ateTick: ev.lancamentoTick, ultimoMs: 0 });
     });
     bus.on('impacto', (ev) => {
@@ -130,19 +148,20 @@ export class EfeitosDeHabilidade {
       if (!h || !alvo) return;
       const v = visualDe(h);
       const fonte = pos(ev.fonteId);
-      const vezes = h.escalaVisual >= 1.4 ? 2 : 1;
-      for (let i = 0; i < vezes; i++) {
-        // Raio e relâmpago correm da fonte ao alvo (marco 11A: o relâmpago é o raio com ramificação).
-        if ((v.impacto === 'raio' || v.impacto === 'relampago') && fonte) this.o.particulas.emitir(v.impacto, fonte.x, fonte.y, v.cor, alvo);
-        // D-067: chuva e leque já desenham as flechas pela área; no alvo, as farpas do acerto.
-        else if (v.impacto && (ev.dano > 0 || ev.cura > 0 || ev.d20 === 0) && !(GENERICOS.has(v.impacto) && this.o.golpeDeArma?.(estado().entidades.find((e) => e.id === ev.fonteId), ev.chave))) this.o.particulas.emitir(v.impacto === 'chuva' || v.impacto === 'leque' ? 'farpas' : v.impacto, alvo.x, alvo.y, v.cor);
+      // Marco 26 (D-124): a assinatura desenha o acerto (silhueta, matéria, marca e o toque da variante). O golpe de
+      // arma continua desenhando o próprio rastro no lugar do golpe genérico.
+      const nome = assinaturaDe(h);
+      const daArma = GENERICOS.has(nome) && !!this.o.golpeDeArma?.(estado().entidades.find((e) => e.id === ev.fonteId), ev.chave);
+      if (!daArma) {
+        const comParticulas = ev.dano > 0 || ev.cura > 0 || ev.d20 === 0;
+        const corEtapa = h.elemento && this.o.corElemento ? { corEtapa: this.o.corElemento(h.elemento) } : {};
+        this.o.diretor.acertar(nome, { chave: ev.chave, fonteId: ev.fonteId, alvoId: ev.alvoId, de: fonte, ate: alvo, cor: v.cor, escala: escalaDe(h, !!this.o.classeDaUltimate?.(ev.habilidadeId)), critico: ev.critico, indice: ev.indice, ...corEtapa }, h.visual?.variante, comParticulas);
       }
-      // Marco 24 (25/10/2026): a matéria do elemento no acerto (nos 3 primeiros alvos da área, pelo custo).
-      if (h.elemento && ev.dano > 0 && ev.indice < 3) this.o.particulas.emitir(presetDeImpacto(h.elemento), alvo.x, alvo.y, v.cor);
       if (ev.indice > 0) return;
       const agoraMs = agora();
-      if (ev.critico || v.camera === 'forte') this.o.impacto.pedir('forte', agoraMs);
-      else if (v.camera === 'leve') this.o.impacto.pedir('leve', agoraMs);
+      const camera = this.o.diretor.def(nome).camera ?? (v.camera === 'nenhum' ? null : v.camera);
+      if (ev.critico || camera === 'forte') this.o.impacto.pedir('forte', agoraMs);
+      else if (camera === 'leve') this.o.impacto.pedir('leve', agoraMs);
       // Dano grande em você (≥ 20% da vida máxima): tremor e flash vermelhos.
       const local = estado().entidades.find((e) => e.id === this.o.idLocal);
       if (ev.alvoId === this.o.idLocal && local && ev.dano >= local.hpMax * 0.2) this.o.impacto.pedir('dano', agoraMs);
@@ -151,16 +170,22 @@ export class EfeitosDeHabilidade {
       this.areas.delete(ev.acaoId);
       this.conjurando.delete(ev.acaoId);
     });
+    // D-124: a armadilha disparada fecha a mandíbula dentada; a isca que explode é uma bola de fogo.
     bus.on('armadilhaDisparou', (ev) => {
       const p = ev.x !== undefined && ev.y !== undefined ? { x: ev.x, y: ev.y } : pos(ev.alvoId);
       if (!p) return;
-      this.o.particulas.emitir('explosao', p.x, p.y, 0xff6437);
-      this.o.particulas.emitir('estrelas', p.x, p.y, 0xffdf87);
+      this.o.diretor.area('armadilha_de_caca', { chave: '', atorId: ev.donoId, origem: p, mira: p, centro: p, celulas: [p], cor: 0xb9770e, escala: 1, tipoArea: 'quadrado', raio: 0 }, undefined);
       if (ev.alvoId === this.o.idLocal) this.o.impacto.pedir('forte', agora());
     });
     bus.on('explodiu', (ev) => {
-      this.o.particulas.emitir('explosao', ev.x, ev.y, 0xff8c42);
+      const p = { x: ev.x, y: ev.y };
+      this.o.diretor.area('explosao_de_fogo', { chave: '', atorId: ev.id, origem: p, mira: p, centro: p, celulas: [p], cor: 0xff8c42, escala: 1, tipoArea: 'quadrado', raio: ev.raio }, undefined);
       this.o.impacto.pedir('forte', agora());
+    });
+    bus.on('deslocado', (ev) => {
+      const chave = ev.acaoId === undefined ? undefined : this.skillDaAcao.get(ev.acaoId);
+      const h = chave ? this.o.habilidades(chave) : undefined;
+      this.o.diretor.deslocado(ev.id, { x: ev.deX, y: ev.deY }, { x: ev.paraX, y: ev.paraY }, ev.causa, h ? assinaturaDe(h) : null);
     });
     bus.on('morreu', (ev) => {
       const e = estado().entidades.find((x) => x.id === ev.id);
@@ -212,6 +237,8 @@ export class EfeitosDeHabilidade {
     const p = this.o.particulas;
     this.posicoes.clear();
     for (const e of estado.entidades) this.posicoes.set(e.id, posicao(e));
+    this.o.diretor.definirPosicoes((id) => this.posicoes.get(id) ?? null);
+    this.o.diretor.quadro(agoraMs);
     // Marco 26 (29/10/2026, D-122): as marcas por id (cada invocação nova tem o seu) não crescem sem fim.
     if (this.ultimaAura.size > 4 * estado.entidades.length + 64) {
       for (const [chave, ms] of this.ultimaAura) if (agoraMs - ms > LIMPEZA_MS) this.ultimaAura.delete(chave);
@@ -229,9 +256,12 @@ export class EfeitosDeHabilidade {
       const pos = this.posicoes.get(c.atorId);
       const h = this.o.habilidades(c.chave);
       const v = h ? visualDe(h) : null;
-      if (pos && v?.conjuracao) p.emitir(v.conjuracao, pos.x, pos.y, v.cor);
+      if (!pos || !h || !v) continue;
+      // D-124: a conjuração da assinatura (a mão em chamas, a geada, os arcos); sem ela, o preset antigo.
+      if (this.o.diretor.conjurar(assinaturaDe(h), pos, v.cor)) continue;
+      if (v.conjuracao) p.emitir(v.conjuracao, pos.x, pos.y, v.cor);
       // Marco 24 (25/10/2026): a matéria do elemento na mão de quem conjura (chamas, geada, arcos, bolhas…).
-      if (pos && h?.elemento) p.emitir(presetDeConjuracao(h.elemento), pos.x, pos.y, v?.cor ?? 0xffffff);
+      if (h.elemento) p.emitir(presetDeConjuracao(h.elemento), pos.x, pos.y, v.cor);
     }
     for (const [acaoId, a] of this.areas) {
       if (estado.tick < a.ateTick) continue;
@@ -243,7 +273,8 @@ export class EfeitosDeHabilidade {
       this.ultimoRastro.set(pr.id, agoraMs);
       const h = this.o.habilidades(pr.chave);
       const v = h ? visualDe(h) : null;
-      if (v?.viagem) p.emitir(v.viagem, pr.x, pr.y, v.cor, undefined, { x: pr.dirX, y: pr.dirY });
+      // D-124: o rastro da assinatura (brasas e fumaça da bola de fogo, névoa do crânio, geada da lança).
+      if (h && v && !this.o.diretor.rastro(assinaturaDe(h), pr.x, pr.y, v.cor, { x: pr.dirX, y: pr.dirY }) && v.viagem) p.emitir(v.viagem, pr.x, pr.y, v.cor, undefined, { x: pr.dirX, y: pr.dirY });
       // Ajuste de 24/10/2026 (D-091): o tiro carregado é uma flecha com esteira dourada (não uma bola de brilho).
       if (this.carregados.has(pr.id)) p.emitir('esteira_carregada', pr.x, pr.y, COR_MIRA, undefined, { x: pr.dirX, y: pr.dirY });
     }
@@ -267,44 +298,33 @@ export class EfeitosDeHabilidade {
   }
 
   /** A explosão pela área: o impacto do visual e a onda no centro, e faíscas em até 6 células sorteadas. */
-  private explodirArea(a: { chave: string; origem: PontoVisual; mira: PontoVisual; raioCombo?: number }): void {
+  private explodirArea(a: { chave: string; atorId: string; origem: PontoVisual; mira: PontoVisual; raioCombo?: number; emSi?: boolean; ultimate?: boolean }): void {
     const base = this.o.habilidades(a.chave);
     const h = base && a.raioCombo ? { ...base, raioArea: a.raioCombo } : base;
     if (!h) return;
     const v = visualDe(h);
+    const nome = assinaturaDe(h);
+    const escala = escalaDe(h, !!a.ultimate);
+    const agoraPos = this.posicoes.get(a.atorId) ?? a.origem;
+    if (a.ultimate) this.o.diretor.lancouUltimate(agoraPos, v.cor);
+    // D-124: a skill em si mesmo (buff, postura, invocação) desenha no corpo de quem lança.
+    if (a.emSi) {
+      this.o.diretor.emSi(nome, { chave: a.chave, id: a.atorId, pos: agoraPos, cor: v.cor, escala }, h.visual?.variante);
+      return;
+    }
     const celulas = celulasDaForma(h, { x: Math.round(a.origem.x), y: Math.round(a.origem.y) }, a.mira, this.o.fase);
     if (celulas.length === 0) return;
     const centro = {
       x: celulas.reduce((s, c) => s + c.x, 0) / celulas.length,
       y: celulas.reduce((s, c) => s + c.y, 0) / celulas.length,
     };
-    const p = this.o.particulas;
-    const impacto = v.impacto && v.impacto !== 'raio' && v.impacto !== 'relampago' ? v.impacto : null;
-    // Marco 24 (25/10/2026, D-098): o giro (Redemoinho) não explode pelas células: as lâminas correm em volta de quem gira.
-    if (h.visual?.animacao === 'giro') {
-      this.o.aoGirar?.(a.origem, v.cor);
-      return;
-    }
-    // Marco 11A (D-066): a forma do ataque em partículas.
-    if (h.tipoArea === 'linha') {
-      // Feixe: o impacto corre de quem conjura até a ponta da linha, mais faíscas pelo caminho.
-      const ponta = celulas.reduce((m, c) => (Math.hypot(c.x - a.origem.x, c.y - a.origem.y) > Math.hypot(m.x - a.origem.x, m.y - a.origem.y) ? c : m), celulas[0] ?? a.origem);
-      p.emitir(impacto ?? 'relampago', a.origem.x, a.origem.y, v.cor, ponta);
-      p.emitir('faiscas', a.origem.x, a.origem.y, v.cor, ponta);
-    } else if (impacto === 'chuva') {
-      // Ajuste de 16/10/2026 (D-067): a chuva de flechas cai em até 10 células da área, sem onda nem faíscas.
-      const sorteadas = [...celulas].sort(() => Math.random() - 0.5);
-      for (const c of sorteadas.slice(0, 10)) p.emitir('chuva', c.x + (Math.random() - 0.5) * 0.4, c.y + (Math.random() - 0.5) * 0.4, v.cor);
-    } else if (impacto === 'leque') {
-      // D-067: o leque sai de quem atira, em cone para o meio da área.
-      p.emitir('leque', a.origem.x, a.origem.y, v.cor, centro);
-    } else {
-      // Rajada pela área: o impacto em até 5 células espalhadas, faíscas no resto; a onda só nas redondas.
-      if (h.tipoArea !== 'cone') p.emitir('onda', centro.x, centro.y, v.cor);
-      const sorteadas = [...celulas].sort(() => Math.random() - 0.5);
-      for (const c of sorteadas.slice(0, 5)) p.emitir(impacto ?? 'faiscas', c.x + (Math.random() - 0.5) * 0.5, c.y + (Math.random() - 0.5) * 0.5, v.cor);
-      for (const c of sorteadas.slice(5, 11)) p.emitir('faiscas', c.x + (Math.random() - 0.5) * 0.6, c.y + (Math.random() - 0.5) * 0.6, v.cor);
-    }
+    // Marco 24 (25/10/2026, D-098): o giro (Redemoinho) corre as lâminas da arma em volta de quem gira.
+    if (h.visual?.animacao === 'giro') this.o.aoGirar?.(a.origem, v.cor);
+    // D-124: a área da assinatura (a bola de fogo voando, o meteoro, a nova, a chuva, o leque…).
+    if (this.o.diretor.area(nome, { chave: a.chave, atorId: a.atorId, origem: a.origem, mira: a.mira, centro, celulas, cor: v.cor, escala, tipoArea: h.tipoArea, raio: h.raioArea }, h.visual?.variante)) return;
+    if (h.visual?.animacao === 'giro') return;
+    // D-124: a assinatura sem desenho de área próprio estoura a matéria dela pela área (nunca a bola genérica).
+    this.o.diretor.rajada(nome, { chave: a.chave, atorId: a.atorId, origem: a.origem, mira: a.mira, centro, celulas, cor: v.cor, escala, tipoArea: h.tipoArea, raio: h.raioArea });
   }
 
   /** Parado: um respiro a cada `INTERVALO_RESPIRO_MS`. Andando: a trilha a cada `INTERVALO_TRILHA_MS`, onde ele passou. */
@@ -364,6 +384,11 @@ export class EfeitosDeHabilidade {
       if (pos) this.o.particulas.emitir('aura_forma', pos.x, pos.y, forma === 'ultima' ? COR_ULTIMA : COR_LENDARIA);
     }
   }
+}
+
+/** D-124: o tamanho do desenho (o rank alto cresce; a ultimate, um quarto a mais). */
+function escalaDe(h: Habilidade, ultimate: boolean): number {
+  return Math.min(1.8, h.escalaVisual * (ultimate ? 1.25 : 1));
 }
 
 const COR_LENDARIA = 0xf39c12;

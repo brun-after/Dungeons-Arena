@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { RelogioManual } from '../../src/core/clock';
-import { avancarLaco, criarAcumulador, DT_MS, MAX_PASSOS_SOLO, MAX_QUADRO_MS } from '../../src/core/loop';
+import { avancarLaco, criarAcumulador, DT_MS, MAX_QUADRO_MS, ORCAMENTO_SIM_SOLO_MS } from '../../src/core/loop';
 
 describe('laço de passo fixo', () => {
   function contarPassos(quadrosMs: number[]) {
@@ -46,24 +46,35 @@ describe('laço de passo fixo', () => {
   });
 });
 
-// Marco 26 (29/10/2026, D-122): o teto de ticks por quadro da campanha solo descarta o atraso.
-describe('teto de passos por quadro', () => {
-  it('não passa do teto e guarda só a fração do tick', () => {
+// Marco 26 (29/10/2026, D-122): o orçamento de simulação da campanha solo descarta o atraso só quando o tick é caro.
+describe('orçamento de simulação por quadro', () => {
+  /** Um relógio de mentira: cada tick custa `custoMs`. */
+  const relogioComCusto = (custoMs: number) => {
+    let agora = 0;
+    return { relogio: () => agora, tick: () => { agora += custoMs; } };
+  };
+
+  it('com o tick caro, para no orçamento e guarda só a fração do tick', () => {
     const acumulador = criarAcumulador();
     avancarLaco(acumulador, 0, () => undefined);
-    let ticks = 0;
-    const r = avancarLaco(acumulador, 200 + DT_MS / 2, () => ticks++, MAX_PASSOS_SOLO);
-    expect(r.passos).toBe(MAX_PASSOS_SOLO);
-    expect(ticks).toBe(MAX_PASSOS_SOLO);
+    const r = relogioComCusto(4);
+    const res = avancarLaco(acumulador, 200 + DT_MS / 2, r.tick, { ms: ORCAMENTO_SIM_SOLO_MS, relogio: r.relogio });
+    expect(res.passos).toBe(Math.ceil(ORCAMENTO_SIM_SOLO_MS / 4));
     expect(acumulador.acumuladoMs).toBeLessThan(DT_MS);
-    // O quadro seguinte, no ritmo normal, volta a 1 tick (sem bola de neve).
-    expect(avancarLaco(acumulador, 200 + DT_MS / 2 + DT_MS, () => ticks++, MAX_PASSOS_SOLO).passos).toBeLessThanOrEqual(2);
   });
 
-  it('com quadros de 30 fps, 2 ticks por quadro continuam dando 60 ticks por segundo', () => {
+  it('com o tick barato, recupera todo o atraso (desenho lento não vira câmera lenta)', () => {
     const acumulador = criarAcumulador();
-    let ticks = 0;
-    for (let i = 0; i <= 30; i++) avancarLaco(acumulador, (i * 1000) / 30, () => ticks++, MAX_PASSOS_SOLO);
-    expect(ticks).toBe(60);
+    avancarLaco(acumulador, 0, () => undefined);
+    const r = relogioComCusto(0.1);
+    const res = avancarLaco(acumulador, 200, r.tick, { ms: ORCAMENTO_SIM_SOLO_MS, relogio: r.relogio });
+    expect(res.passos).toBe(12);
+  });
+
+  it('sempre roda ao menos um tick', () => {
+    const acumulador = criarAcumulador();
+    avancarLaco(acumulador, 0, () => undefined);
+    const r = relogioComCusto(50);
+    expect(avancarLaco(acumulador, 100, r.tick, { ms: ORCAMENTO_SIM_SOLO_MS, relogio: r.relogio }).passos).toBe(1);
   });
 });

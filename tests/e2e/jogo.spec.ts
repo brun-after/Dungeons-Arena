@@ -123,8 +123,14 @@ test.describe('desktop', () => {
       await expect.poll(async () => ler(diag, 'celula'), { timeout: 20_000 }).toEqual([cx, cy]);
     }
     // O registro guarda as últimas linhas: "notou você" pode já ter saído quando a luta começa.
-    await expect(page.locator('.log-combate')).toContainText('Goblin', { timeout: 20_000 });
-    await expect.poll(async () => Number(await diag.getAttribute('data-hp')), { timeout: 30_000 }).toBeLessThan(100);
+    // Marco 26 (29/10/2026): o orbe de efeito e a armadilha no caminho mudam a luta conforme o ritmo dos quadros (no CI,
+    // a Fúria e a armadilha encheram o registro e o "Goblin" não apareceu em 20 s). Vale qualquer sinal de que os
+    // goblins chegaram: o nome no registro ou a vida caindo.
+    const log = page.locator('.log-combate');
+    await expect
+      .poll(async () => (await log.textContent())?.includes('Goblin') || Number(await diag.getAttribute('data-hp')) < 100, { timeout: 40_000 })
+      .toBe(true);
+    await expect.poll(async () => Number(await diag.getAttribute('data-hp')), { timeout: 40_000 }).toBeLessThan(100);
     expect(erros).toEqual([]);
   });
 

@@ -23,7 +23,7 @@ import { magoInamovivel } from './encarnacao-efeitos';
 function inamovivelPelaSintoniaAgora(estado: EstadoJogo, ctx: ContextoSimulacao, alvo: Entidade): boolean {
   return inamovivelPelaSintonia(ctx, alvo, estado.tick) || mortoInamovivel(estado, ctx, alvo) || magoInamovivel(ctx, alvo, estado.tick);
 }
-import type { EventoSimulacao } from '../core/eventos-simulacao';
+import type { CausaDeslocamento, EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { congelada, vivo, type EfeitoAtivo, type Entidade } from '../entities/entidade';
 import { agendarAtrasado, armarArmadilha, dispararArmadilha, excedeLimite, invocar, processarFluxo, processarGatilhos } from './efeitos-fluxo';
@@ -43,6 +43,15 @@ export interface OrigemDoEfeito {
   id: EntidadeId;
   x: number;
   y: number;
+}
+
+/**
+ * Marco 26 (29/10/2026, D-124): avisa o deslocamento (só um evento; o estado já mudou). O desenho desliza o corpo em vez
+ * de teletransportar, e a skill que puxou desenha o recolhimento.
+ */
+export function anotarDeslocamento(saida: EventoSimulacao[], tick: number, e: Entidade, deX: number, deY: number, origem: OrigemDoEfeito, causa: CausaDeslocamento): void {
+  if (e.x === deX && e.y === deY) return;
+  saida.push({ t: 'deslocado', tick, id: e.id, deX, deY, paraX: e.x, paraY: e.y, origemId: origem.id, causa, ...(origem.acaoId === undefined ? {} : { acaoId: origem.acaoId }) });
 }
 
 const ativos = (e: Entidade, tick: number): EfeitoAtivo[] => e.efeitos.filter((f) => f.ateTick > tick);
@@ -239,30 +248,49 @@ export function aplicarEfeito(
       case 'recurso':
         resultado(saida, tick, alvo, origem.id, ef, { mana: restaurar(alvo, 'recurso', ef.valor, ef.pct, tick) });
         break;
-      case 'teleporte':
-        teleportar(estado, ctx, alvo, mira);
+      case 'teleporte': {
+        const { x, y } = alvo;
+        if (teleportar(estado, ctx, alvo, mira)) anotarDeslocamento(saida, tick, alvo, x, y, origem, 'teleporte');
         break;
-      case 'avanco':
-        if (avancar(estado, ctx, alvo, mira, ef.valor)) fato(alvo, 'deslocou', undefined, origem.acaoId);
+      }
+      case 'avanco': {
+        const { x, y } = alvo;
+        if (avancar(estado, ctx, alvo, mira, ef.valor)) {
+          fato(alvo, 'deslocou', undefined, origem.acaoId);
+          anotarDeslocamento(saida, tick, alvo, x, y, origem, 'avanco');
+        }
         break;
+      }
       case 'empurrao':
         // Marco 18: quem é inamovível (ressonância, grevas, escudo Último) não sai do lugar.
         // Marco 24 (D-095): nem quem a sintonia deixa inamovível.
         if (!passivosDe(ctx, alvo).inamovivel && !inamovivelPelaSintoniaAgora(estado, ctx, alvo)) {
           const dx = Math.sign(alvo.x - origem.x), dy = Math.sign(alvo.y - origem.y);
-          empurrar(estado, ctx, alvo, origem, ef.valor);
+          const { x, y } = alvo;
+          if (empurrar(estado, ctx, alvo, origem, ef.valor)) anotarDeslocamento(saida, tick, alvo, x, y, origem, 'empurrao');
           if ((dx || dy) && muralhaEm(estado, alvo.x + dx, alvo.y + dy)) {
             const ator = buscarEntidade(estado, origem.id);
             if (ator) fato(ator, 'colidiu', alvo.id, origem.acaoId);
           }
         }
         break;
-      case 'puxao':
-        if (!passivosDe(ctx, alvo).inamovivel && !inamovivelPelaSintoniaAgora(estado, ctx, alvo) && puxar(estado, ctx, alvo, origem, ef.valor)) { const ator = buscarEntidade(estado, origem.id); if (ator) fato(ator, 'puxou', alvo.id, origem.acaoId); }
+      case 'puxao': {
+        const { x, y } = alvo;
+        if (!passivosDe(ctx, alvo).inamovivel && !inamovivelPelaSintoniaAgora(estado, ctx, alvo) && puxar(estado, ctx, alvo, origem, ef.valor)) {
+          const ator = buscarEntidade(estado, origem.id);
+          if (ator) fato(ator, 'puxou', alvo.id, origem.acaoId);
+          anotarDeslocamento(saida, tick, alvo, x, y, origem, 'puxao');
+        }
         break;
+      }
       case 'trocar': {
         const outro = buscarEntidade(estado, origem.id);
-        if (outro && vivo(outro) && trocarLugar(alvo, outro)) fato(outro, 'trocou', undefined, origem.acaoId);
+        const { x, y } = alvo;
+        if (outro && vivo(outro) && trocarLugar(alvo, outro)) {
+          fato(outro, 'trocou', undefined, origem.acaoId);
+          anotarDeslocamento(saida, tick, alvo, x, y, origem, 'troca');
+          anotarDeslocamento(saida, tick, outro, alvo.x, alvo.y, origem, 'troca');
+        }
         break;
       }
       case 'dano': {

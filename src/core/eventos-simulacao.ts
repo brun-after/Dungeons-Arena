@@ -9,6 +9,9 @@ import type { TipoEfeito } from '../combat/registro-efeitos';
 import type { Slot } from '../modos/modo';
 import type { StatusCaminho } from '../world/navegacao';
 
+/** Marco 26 (D-124): o que deslocou alguém (o evento `deslocado`). */
+export type CausaDeslocamento = 'puxao' | 'empurrao' | 'arremesso' | 'avanco' | 'teleporte' | 'troca';
+
 export type MotivoRecusa =
   | 'sem_habilidade'
   | 'vida_cheia'
@@ -179,6 +182,11 @@ export type EventoSimulacao =
   | { t: 'sinergiaPassiva'; tick: number; id: EntidadeId; sinergia: string }
   /** Marco 22 (D-090): o morto do Necromante longe demais voltou para o lado dele. */
   | { t: 'invocacaoRetornou'; tick: number; id: EntidadeId; donoId: EntidadeId; deX: number; deY: number; x: number; y: number }
+  /**
+   * Marco 26 (29/10/2026, D-124): alguém foi deslocado por um efeito (puxão, empurrão, arremesso, avanço, teleporte ou
+   * troca). Só apresentação: o desenho desliza o corpo e a assinatura da skill (a corrente que recolhe) usa a ação.
+   */
+  | { t: 'deslocado'; tick: number; id: EntidadeId; deX: number; deY: number; paraX: number; paraY: number; origemId: EntidadeId; causa: CausaDeslocamento; acaoId?: number }
   | { t: 'descoberta'; tick: number; id: EntidadeId; entrada: string }
   | { t: 'renasceu'; tick: number; id: EntidadeId; hp: number }
   | { t: 'barraMudou'; tick: number; id: EntidadeId }

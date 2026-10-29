@@ -24,6 +24,8 @@ import { contornoDaArea, escalarContorno, type Contorno } from './formas-visuais
 import type { SistemaParticulas } from './particulas';
 import { centroDaCelula, type Projecao } from './projecao';
 import { visualDe } from './visual-habilidade';
+import { ASSINATURAS } from './vfx/assinaturas';
+import { assinaturaDe } from './vfx/resolver';
 import type { Celula } from '../core/comandos';
 
 /** De quanto em quanto tempo cada ação solta as partículas da telegrafia. */
@@ -179,8 +181,11 @@ export class CamadaTelegrafia {
       const visual = hab ? visualDe(hab) : null;
       const forma = visual?.projetil ?? 'orbe';
       if (particulas) {
-        const preset = forma === 'flecha' ? 'projetil_flecha' : forma === 'teia' ? 'projetil_teia' : 'projetil';
-        particulas.emitir(preset, p.x + p.dirX * avanco, p.y + p.dirY * avanco, visual?.cor ?? cor, undefined, { x: p.dirX, y: p.dirY });
+        // Marco 26 (29/10/2026, D-124): o corpo da assinatura (bola de fogo, crânio, estaca de gelo, algema, gota).
+        const corpo = hab ? ASSINATURAS[assinaturaDe(hab)].corpo : undefined;
+        const dir = { x: p.dirX, y: p.dirY };
+        if (corpo) particulas.emitirLista(corpo, p.x + p.dirX * avanco, p.y + p.dirY * avanco, visual?.cor ?? cor, undefined, dir);
+        else particulas.emitir(forma === 'flecha' ? 'projetil_flecha' : forma === 'teia' ? 'projetil_teia' : 'projetil', p.x + p.dirX * avanco, p.y + p.dirY * avanco, visual?.cor ?? cor, undefined, dir);
         continue;
       }
       // Sem partículas: o rastro curto atrás mostra a trajetória (2 px, como os outros traços de reserva).

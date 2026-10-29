@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.60 · **Data:** 29/10/2026
+**Versão:** 0.61 · **Data:** 29/10/2026
 
 > **Histórico**
+> - **0.61 (29/10/2026)**: D-124 (assinaturas visuais: cada skill com o seu desenho, motor de efeitos com atlas rico, silhuetas, marcas no chão e deslize; galeria de efeitos) e a nota em D-066; ajuste da sexta leva em D-122 (orçamento de tempo no laço solo).
 > - **0.60 (29/10/2026)**: D-122 (o jogo não pesa com o tempo no celular), D-123 (renascer fora da porta) e a nota de D-121 (a automação busca o alcance da skill pronta mais curta).
 > - **0.59 (28/10/2026)**: D-116 a D-121 (marco 26, quarta leva: runas das classes e seleção em colunas, câmera solta e botão de centralizar, inimigos que reagem logo e seleção em raio menor, skill fora do alcance que troca de alvo, dash e teleporte através de paredes, seguir alvo).
 > - **0.58 (26/10/2026)**: D-110 a D-115 (marco 26, terceira leva: lore das classes e Dom da classe, combos da build pela barra e Diário detalhado, portais por destino e por cor, quebráveis, clique fora das células e mouse que guia como o joystick).
@@ -2947,8 +2948,12 @@ várias causas que se somam; nenhuma é um vazamento que cresce sem parar:
 **Decisão:**
 - **Medidor:** uma segunda linha com entidades vivas, objetos no chão, máximo de ticks por quadro, nível de
   qualidade e o tempo do último salvamento.
-- **Laço:** a campanha solo roda no máximo 4 ticks por quadro (`MAX_PASSOS_SOLO`) e descarta o atraso que passa
-  disso. O grupo e a arena seguem sem teto, porque acompanham o servidor.
+- **Laço:** a campanha solo recupera o atraso enquanto os ticks do quadro somam até 10 ms
+  (`ORCAMENTO_SIM_SOLO_MS`); passado isso, descarta o resto. O grupo e a arena seguem sem orçamento, porque
+  acompanham o servidor.
+  - *Ajuste da sexta leva:* a primeira versão tinha um teto fixo de 4 ticks por quadro e deixava o jogo em câmera
+    lenta quando o desenho era o lento (o CI sem GPU falhou no e2e da sala B). O orçamento de tempo só corta quando o
+    tick é caro, que é o caso da bola de neve.
 - **Qualidade que sobe:**
   - Com 30 s de quadros bons (média ≥ 92% do alvo e p95 ≤ 1,25 quadro), sobe um nível, até o nível com que a
     cena começou.
@@ -2983,3 +2988,62 @@ Quem demorava para voltar a jogar ficava parado na porta, completava a espera e 
 
 **Decisão** (`progression/morte.ts`, `world/portas.ts`): a célula de renascer pula as portas de fase (a de retorno e
 qualquer saída, `ehCelulaDePorta`) e fica na livre mais próxima. Vale no solo e no grupo, porque é o núcleo.
+
+## D-124 — Assinaturas visuais: cada skill com o seu desenho (marco 26, 29/10/2026)
+
+**Contexto.** O pedido foi direto: a Corrente não parecia corrente e o fogo parecia uma explosão de brilho. Revendo
+todas as skills, o problema era geral:
+- **Presets:** o `visual` das 419 skills escolhia entre 24 nomes, cada um uma rajada de carimbos brancos tingidos.
+- **Brilho genérico:** metade dos nomes era o mesmo ponto brilhante em outra cor.
+- **Corpos e conjuração:** todo projétil mágico era o mesmo orbe, e as 140 ultimates conjuravam as mesmas runas.
+- **Corrente:** nada desenhava a Corrente; o puxão teletransportava o alvo.
+
+O jogador não reconhecia o golpe que levou sem ler o nome.
+
+**Decisão.**
+- **Motor** (`render/particulas.ts` e `render/vfx/`):
+  - um segundo atlas pintado em canvas, com gradiente e sombreado, e contêineres próprios. Traz a chama em 8
+    quadros, brasa, fumaça macia, elo e gancho, osso, crânio, alma, pena, gelo translúcido, gota, rocha, lâmina,
+    garra, espinho, mão de osso, onda de choque, clarão, feixe, runas, hexágono, círculo rúnico, olho, mira, onda de
+    som, asa, as runas das classes e as marcas no chão;
+  - partículas com flipbook, `esticar`, curvas de escala e de transparência, cores em paradas, turbulência e
+    `aoMorrer` (a brasa vira fumaça);
+  - **pincel de silhuetas** (`vfx/pincel.ts`): sprites grandes em modo imediato que seguem um roteiro no tempo. A
+    corrente de elos com catenária, o relâmpago ramificado refeito a cada 50 ms, o feixe, a bola de fogo em
+    cogumelo, a onda de choque, o que brota do chão, o que cai do céu, o que gira em volta, o círculo no chão e a
+    cúpula;
+  - **marcas no chão** (`vfx/marcas.ts`) abaixo das entidades, com teto de 24 e desbotando: queimado, geada,
+    rachadura, sangue e veneno;
+  - **deslize** (`vfx/deslizes.ts`): o evento novo `deslocado` faz o puxão, o empurrão, o arremesso, o avanço e a
+    troca deslizarem o corpo em cerca de 200 ms. O puxão da Corrente espera o gancho chegar.
+- **Assinaturas** (`render/vfx/familias/`, uma família por arquivo): 140 nomes numa lista fechada
+  (`combat/assinaturas-visuais.ts`). Cada assinatura pode ter:
+  - conjuração, corpo do projétil, rastro e impacto;
+  - a silhueta do acerto, da área ou em si mesmo;
+  - a marca no chão e a câmera.
+
+  O tipo do registro exige uma entrada por nome. As 14 **variantes** são toques que se somam ao acerto e à área
+  (brasas, penas, ossos, gelo…).
+- **Dados:**
+  - **campo novo:** `visual.assinatura` e `visual.variante`, conferidos pelo parser; toda skill ativa diz a sua;
+  - **dedução:** as geradas e as criadas no editor deduzem a assinatura pelo tema do id, pelo elemento com a forma
+    (fogo em cone é o lança-chamas) ou pelo tipo de ataque com a forma;
+  - **ultimates:**
+    - conjuram no círculo com a runa da classe (D-116), sem as runas genéricas;
+    - dentro de cada classe, nenhuma repete a assinatura com a mesma variante;
+    - as etapas de outro elemento mostram o elemento delas;
+  - **correções de tema:**
+    - a Marca sombria é sombra, não fogo;
+    - a Lança tempestuosa sai na cor do raio;
+    - a Investida de escudo não conjura gelo;
+    - a Chuva de estrelas cai como estrelas;
+    - o Ciclone flamejante, o Contragolpe em giro, o Olho do furacão e o Turbilhão de correntes giram.
+- **Galeria** (`?galeria=efeitos[&visao=iso][&lento=N]`): a lista por classe, as gerais e uma gerada por elemento e
+  forma. Toca no boneco, tem "tocar todas" e expõe um relógio que pausa e avança, para o e2e e para a revisão.
+- **Orçamento:**
+  - as silhuetas são poucas peças grandes; as partículas de enfeite seguem o teto da qualidade;
+  - acima de 48 animações vivas, os enfeites mais antigos saem;
+  - na qualidade mínima, nada de silhueta (a telegrafia de reserva fica).
+- **D-066 revista:** a regra de "nada de forma plana" continua. As fitas e silhuetas são texturas com gradiente e
+  brilho, não formas desenhadas.
+- **Determinismo:** o `deslocado` só é emitido; o estado não muda e o digest continua igual.
