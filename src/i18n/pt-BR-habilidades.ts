@@ -206,6 +206,7 @@ export const textosHabilidades = {
   'escolhaClasse.aviso': 'A classe não muda depois. As habilidades das outras escolas ainda chegam por livros.',
   'escolhaClasse.iniciais': 'Começa com: {lista}',
   'escolhaClasse.escolher': 'Jogar de {nome}',
+  'escolhaClasse.verMais': 'Ver mais',
   'escolhaClasse.afinidades': 'Afinidades: {lista}',
 
   // A aba Habilidades da mochila.

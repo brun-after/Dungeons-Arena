@@ -23,6 +23,7 @@ import { texturasDoAdorno } from './adornos';
 import { RigToken } from './rig-token';
 import { quadroDoToken, type MomentoDoQuadro } from './quadro-membros';
 import { anelDaInvocacao } from './anel-invocacao';
+import { coresDasRunas, desenharRuna } from './runas';
 import type { BibliotecaCriaturas, FonteToken } from './texturas-criaturas';
 
 const COR_PROPRIO = 0x3498db;
@@ -31,6 +32,8 @@ const COR_HOSTIL = 0xe74c3c;
 const COR_NEUTRO = 0x95a5a6;
 const RAIO = CELULA_PX * 0.32;
 const LARGURA_BARRA = CELULA_PX * 0.84;
+/** Marco 26 (D-116): o lado da runa da classe sobre a cabeça, em px de tela. */
+const TAMANHO_RUNA = 18;
 /** Altura do token: célula × 1,12 (§2.16). */
 export const ALTURA_TOKEN = CELULA_PX * 1.12;
 /** Andou há menos que isto: ainda conta como andando (absorve quadros sem avanço). */
@@ -125,6 +128,8 @@ export interface OpcoesEntidades {
   armaBranca?: (e: Entidade, tick: number) => boolean;
   /** Marco 24 (D-098): o ajuste do voo (o falcão); null para quem anda no chão. */
   ajuste?: (e: Entidade, agoraMs: number) => AjusteVisual | null;
+  /** Marco 26 (28/10/2026, D-116): a runa da classe sobre a cabeça dos jogadores (preferência). */
+  runaDaClasse?: () => boolean;
 }
 
 /** Marco 24 (25/10/2026, D-098): quem voa solto por cima da regra (o falcão). */
@@ -161,6 +166,9 @@ interface Marcador {
   barras: Graphics;
   aneis: Graphics;
   indicador: Text;
+  /** Marco 26 (D-116): a runa da classe (só jogadores) e a chave do último desenho (classe, cor, se é o local). */
+  runa: Graphics | null;
+  runaDesenhada: string;
   cor: number;
   angulo: number;
   sentido: number;
@@ -206,9 +214,11 @@ export class CamadaEntidades {
     silhueta.scale.set(escala);
     seta.scale.set(escala);
     raiz.addChild(chao, aneis, silhueta, seta, barras, indicador);
+    const runa = e.arquetipo === 'jogador' && !e.invocacao ? new Graphics() : null;
+    if (runa) raiz.addChild(runa);
     this.camada.addChild(raiz);
     return {
-      raiz, chao, silhueta, seta, rig: null, barras, aneis, indicador, cor,
+      raiz, chao, silhueta, seta, rig: null, barras, aneis, indicador, runa, runaDesenhada: '', cor,
       angulo: 0, sentido: 1, ultimoX: e.px, ultimoY: e.py, visualX: Number.NaN, visualY: Number.NaN,
       andandoAteMs: 0, acaoId: null, ataqueDesdeMs: -Infinity, golpe: null, chaveGolpe: '', escala, topo: -RAIO * escala, achatamento: 1, chaoDesenhado: '',
     };
@@ -251,6 +261,8 @@ export class CamadaEntidades {
     const usarTiras = this.o.usarTiras();
     const reduzido = this.o.reduzido();
     const aparencia = this.o.aparencia();
+    const runas = this.o.runaDaClasse?.() ?? true;
+    const coresRunas = runas ? coresDasRunas(estado.entidades) : null;
 
     for (const e of estado.entidades) {
       vistos.add(e.id);
@@ -319,6 +331,7 @@ export class CamadaEntidades {
       m.indicador.position.set(0, m.topo - 16);
       this.desenharAneis(m, e, estado, local?.alvoSelecionado === e.id ? (local.alvoTravado ? 'travado' : 'auto') : null);
       this.desenharBarras(m, e, tickVisual, e.id === this.o.idLocal);
+      if (m.runa) this.desenharRunaDe(m, e, coresRunas?.get(e.id) ?? null);
     }
 
     for (const [id, m] of this.marcadores) {
@@ -492,6 +505,28 @@ export class CamadaEntidades {
       y += 5;
       g.rect(x, y, largura * (e.mana / Math.max(1, e.manaMax)), 2).fill(0x5dade2);
     }
+  }
+
+  /**
+   * Marco 26 (28/10/2026, D-116): a runa da classe acima das barras. A do jogador local é 1,25× maior e tem um halo;
+   * jogadores da mesma classe têm cores diferentes (`coresDasRunas`). Some com o morto e com a preferência desligada.
+   * Só redesenha quando a classe, a cor ou o dono mudam.
+   */
+  private desenharRunaDe(m: Marcador, e: Entidade, cor: number | null): void {
+    const g = m.runa;
+    if (!g) return;
+    g.visible = cor !== null && !e.morto && !!e.classeId;
+    if (!g.visible || cor === null || !e.classeId) return;
+    const proprio = e.id === this.o.idLocal;
+    const tamanho = TAMANHO_RUNA * (proprio ? 1.25 : 1);
+    const chave = `${e.classeId}:${cor}:${proprio ? 1 : 0}`;
+    if (m.runaDesenhada !== chave) {
+      g.clear();
+      if (proprio) g.circle(0, 0, tamanho * 0.72).fill({ color: cor, alpha: 0.22 });
+      desenharRuna(g, e.classeId, cor, tamanho);
+      m.runaDesenhada = chave;
+    }
+    g.position.set(0, m.topo - 22 - tamanho / 2);
   }
 
   /** Visão trocada ou token novo: refaz o chão de todos e solta as fontes antigas. */

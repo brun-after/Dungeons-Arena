@@ -843,52 +843,100 @@ body.toque .log-combate.aberto {
   outline-offset: 2px;
 }
 
-/* Marco 14: escolha de classe ao criar o personagem. */
-.cartoes-classe {
+/* Marco 26 (28/10/2026, D-116): a escolha de classe em colunas sem moldura (runa, nome, retrato, estilo, lore). */
+.colunas-classe {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
-  width: min(960px, 100%);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  width: min(1180px, 100%);
 }
 
-.cartao-classe {
+.classe-coluna {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 12px;
-  border: 1px solid var(--borda);
-  border-radius: 10px;
-  background: var(--painel);
+  align-items: center;
+  gap: 8px;
+  padding: 4px 14px 8px;
+  text-align: center;
 }
 
-.cartao-classe h2 {
+.classe-coluna + .classe-coluna {
+  border-left: 1px solid rgb(255 255 255 / 8%);
+}
+
+.classe-coluna h2 {
   margin: 0;
   color: var(--destaque);
-  font-size: 1.15rem;
+  font-size: 1.2rem;
 }
 
-.cartao-classe p {
+.retrato-classe {
+  width: 128px;
+  height: 128px;
+}
+
+.classe-coluna p {
   margin: 0;
   line-height: 1.4;
 }
 
-.cartao-classe .detalhe-classe {
-  font-size: 0.85rem;
-  color: var(--texto-suave);
-}
-
-/* Marco 26 (26/10/2026, D-110): a lore em itálico e o estilo de jogo destacado. */
-.cartao-classe .lore-classe {
-  font-style: italic;
-}
-
-.cartao-classe .estilo-classe {
+.classe-coluna .estilo-classe {
   font-size: 0.9rem;
   color: #e8d9b5;
 }
 
-.cartao-classe .botao-menu {
+.classe-coluna .lore-classe {
+  font-style: italic;
+  font-size: 0.88rem;
+}
+
+.classe-coluna .mais-classe {
+  width: 100%;
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+.classe-coluna .mais-classe summary {
+  cursor: pointer;
+  color: var(--destaque);
+  text-align: center;
+}
+
+.classe-coluna .mais-classe p {
+  margin-top: 6px;
+}
+
+.classe-coluna .detalhe-classe {
+  color: var(--texto-suave);
+}
+
+.classe-coluna .botao-menu {
   margin-top: auto;
+}
+
+@media (max-width: 900px) {
+  .colunas-classe {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+  }
+
+  .classe-coluna {
+    flex: 0 0 min(78vw, 300px);
+    scroll-snap-align: center;
+  }
+}
+
+/* Marco 26 (D-116): a runa da classe; a pequena vai antes do nome de livros e skills de classe. */
+.runa-classe {
+  flex: none;
+  margin-right: 4px;
+  vertical-align: -2px;
+}
+
+.classe-coluna .runa-classe {
+  margin-right: 0;
+  filter: drop-shadow(0 0 6px rgb(0 0 0 / 70%));
 }
 
 .escolha-classe {

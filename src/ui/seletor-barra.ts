@@ -4,11 +4,14 @@
 
 import { t } from '../i18n';
 import { icone } from './icones';
+import { comRuna } from './runa-dom';
 
 export interface OpcaoSeletor {
   id: string;
   nome: string;
   icone: string;
+  /** Marco 26 (28/10/2026, D-116): a classe da skill de classe (leva a runa), ou null. */
+  classe?: string | null;
 }
 
 export interface SeletorBarra {
@@ -40,7 +43,7 @@ export function criarSeletorBarra(raiz: HTMLElement, aoEscolher: (slot: number, 
     }
   };
 
-  const opcao = (texto: string, idIcone: string, chave: string, marcado: boolean, aoClicar: () => void) => {
+  const opcao = (texto: string, idIcone: string, chave: string, marcado: boolean, aoClicar: () => void, classe: string | null = null) => {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'opcao-seletor';
@@ -50,7 +53,7 @@ export function criarSeletorBarra(raiz: HTMLElement, aoEscolher: (slot: number, 
     b.append(icone(idIcone));
     const nome = document.createElement('span');
     nome.textContent = texto;
-    b.append(nome);
+    b.append(comRuna(nome, classe, 12));
     b.addEventListener('click', () => {
       aoClicar();
       fechar();
@@ -64,7 +67,7 @@ export function criarSeletorBarra(raiz: HTMLElement, aoEscolher: (slot: number, 
     titulo.className = 'titulo-seletor';
     titulo.textContent = t('habilidades.escolherNaBarra', { n: slot + 1 });
     caixa.append(titulo);
-    for (const o of opcoes) caixa.append(opcao(o.nome, o.icone, `barra-${o.id}`, o.id === atual, () => { aoEscolher(slot, o.id); }));
+    for (const o of opcoes) caixa.append(opcao(o.nome, o.icone, `barra-${o.id}`, o.id === atual, () => { aoEscolher(slot, o.id); }, o.classe ?? null));
     if (atual) caixa.append(opcao(t('habilidades.tirarDaTecla', { n: slot + 1 }), 'fechar', 'barra-tirar', false, () => { aoEscolher(slot, null); }));
     caixa.hidden = false;
     // Acima do botão, sem sair da tela.

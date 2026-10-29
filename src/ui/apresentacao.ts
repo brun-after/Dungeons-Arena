@@ -46,6 +46,7 @@ import { criarPausa, type AcaoDaPausa, type OpcaoDificuldade } from './pausa';
 import { criarPrompt } from './prompt';
 import { letraInteragir } from '../input/teclas';
 import { ligarSom } from './som';
+import { classeDaHabilidade } from './runa-dom';
 
 export interface OpcoesApresentacao {
   ctx: ContextoSimulacao;
@@ -148,7 +149,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     particulas, impacto, habilidades: o.habilidades,
     fracaoFuria: (e, tick) => fracaoFuria(ctx, e, tick),
     elementosDaDupla: (e, tick) => elementosDaDupla(ctx, e, tick),
-    deClasse: (e, id) => !!e.classeId && (ctx.conteudo.classes.get(e.classeId)?.exclusivas.includes(id) ?? false),
+    deClasse: (e, id) => !!e.classeId && classeDaHabilidade(ctx.conteudo, id) === e.classeId,
     vertenteDe: (e) => sintoniaDe(ctx, e).vertente?.id ?? null,
   });
   efeitosClasse.ligar(o.bus, o.estado, () => performance.now());

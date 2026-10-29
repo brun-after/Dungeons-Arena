@@ -70,6 +70,7 @@ import { QuadroAlvo } from './quadro-alvo';
 import { montarVisao, type ControleVisao } from './visao';
 import { criarGolpeNoQuebravel } from './golpe-quebravel';
 import { criarBotaoCentralizar } from './botao-centralizar';
+import { classeDaHabilidade } from './runa-dom';
 import { presetDaQuebra } from '../render/presets-mundo';
 
 const LEITURA_FAIXA_MS = 1000;
@@ -202,6 +203,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     aparencia: () => ({ tamanho: aparencia.tamanhoToken, imagemOlhaEsquerda: aparencia.sentidoToken === 'esquerda' }),
     usarTiras: () => ap.qualidade().tiras,
     reduzido: () => ap.movimentoReduzido(),
+    runaDaClasse: () => aparencia.runaDaClasse,
     corElemento: (el) => Number.parseInt((ctx.conteudo.elementos.get(el)?.cor ?? '#ffffff').slice(1), 16),
     ajuste: (e, agoraMs) => ap.ajusteVisual(e, agoraMs),
     // Marco 25 (D-103): o arco branco do Arqueiro com a mira cheia.
@@ -312,7 +314,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     const opcoes = bolsa.conhecidas
       .map((c) => resolverHabilidade(ctx, c.id))
       .filter((h): h is Habilidade => !!h && !h.passiva)
-      .map((h) => ({ id: h.id, nome: h.nome, icone: h.icone }));
+      .map((h) => ({ id: h.id, nome: h.nome, icone: h.icone, classe: classeDaHabilidade(ctx.conteudo, h.id) }));
     seletor.abrir(slot, id, opcoes, ancora);
   };
   const barra = criarBarraHabilidades(usarHabilidade, corDoElemento, pedirTroca);
