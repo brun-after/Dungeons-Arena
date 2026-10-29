@@ -108,6 +108,18 @@ export interface Balance {
     pesoRaridade: Record<Raridade, number>;
   };
   /**
+   * Marco 26 (28/10/2026, D-121): seguir alvo. À distância (o básico em projétil) segue
+   * até o alcance × (1 + `folgaDistancia`) e troca, depois do abate, no alcance × `trocaDistancia`; corpo a corpo, com
+   * `folgaCorpoACorpo` e `trocaCorpoACorpo`. O direcional a mais de `anguloCancelaGraus` do alvo cancela.
+   */
+  seguirAlvo: {
+    folgaDistancia: number;
+    folgaCorpoACorpo: number;
+    trocaDistancia: number;
+    trocaCorpoACorpo: number;
+    anguloCancelaGraus: number;
+  };
+  /**
    * Marco 26 (26/10/2026, D-113): os enfeites que quebram (tipos de world/decoracao.ts) e o peso de cada saque; o
    * ouro sai entre `ouroMin` e `ouroMax`, e os orbes usam as porcentagens de `drops`.
    */

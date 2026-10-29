@@ -273,6 +273,12 @@ export interface Entidade {
   /** Ajuste de 15/10/2026 (D-065): travado, o alvo só muda por escolha do jogador. Ausente em saves antigos = false. */
   alvoTravado: boolean;
   autoAtaque: boolean;
+  /** Marco 26 (28/10/2026, D-121): a opção seguir alvo do jogador (comando `seguirAlvo`); ausente = desligada. */
+  seguirAlvo?: boolean;
+  /** O alvo que a automação segue, a célula onde o caminho foi planejado e se ela está andando atrás dele. */
+  seguindo?: { id: EntidadeId; x: number; y: number; andando: boolean };
+  /** O alvo cuja automação o direcional cancelou (até outro ser escolhido). */
+  seguirCanceladoDe?: EntidadeId;
   invisivelAteTick: number;
   morto: boolean;
   /** Tick em que o jogador revive; 0 quando não há revivescência pendente. */
@@ -556,6 +562,7 @@ export function clonarEntidade(e: Entidade): Entidade {
     ...(e.cargaClasseTick ? { cargaClasseTick: { ...e.cargaClasseTick } } : {}),
     ...(e.sintoniaVistos ? { sintoniaVistos: { ...e.sintoniaVistos } } : {}),
     ...(e.habilidadeAnterior ? { habilidadeAnterior: { ...e.habilidadeAnterior } } : {}),
+    ...(e.seguindo ? { seguindo: { ...e.seguindo } } : {}),
     waypoints: copiarCelulas(e.waypoints),
     caminho: copiarCelulas(e.caminho),
     atributos: { ...e.atributos },

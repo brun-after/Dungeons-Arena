@@ -241,6 +241,8 @@ export const ptBR = {
   'config.camera': 'Câmera',
   'config.modoCamera': 'Modo',
   'config.enquadrarDois': 'Enquadrar o alvo junto',
+  'config.seguirAlvo': 'Seguir o alvo (andar até ele ficar no alcance)',
+  'config.runaDaClasse': 'Runa da classe sobre os personagens',
   'config.controles': 'Controles',
   'config.controle': 'Movimento',
   'config.acessibilidade': 'Acessibilidade',

@@ -128,6 +128,13 @@
     "ouroPorXp": 0.6,
     "pesoRaridade": { "comum": 60, "incomum": 28, "raro": 10, "epico": 2, "lendario": 0, "ultima": 0 }
   },
+  "seguirAlvo": {
+    "folgaDistancia": 0.3333,
+    "folgaCorpoACorpo": 1,
+    "trocaDistancia": 1,
+    "trocaCorpoACorpo": 4,
+    "anguloCancelaGraus": 120
+  },
   "quebraveis": {
     "tipos": ["barril", "caixote", "vaso", "carrinho", "livros", "cristal", "cogumelo", "arbusto"],
     "saque": { "nada": 40, "ouro": 34, "orbe_hp": 12, "orbe_recurso": 9, "orbe_efeito": 5 },

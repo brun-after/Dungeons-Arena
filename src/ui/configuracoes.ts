@@ -107,6 +107,7 @@ export function criarConfiguracoes(o: { toque: boolean; direcional?: boolean; ao
       campo(t('config.efeitosDeTela'), marcador('efeitosDeTela', p.efeitosDeTela, (v) => { mudar({ efeitosDeTela: v }); })),
       campo(t('config.visao'), escolha('visao', p.visao, ['cima', 'iso'] as const, 'visao', (v) => { mudar({ visao: v }); })),
       campo(t('config.areaExata'), marcador('areaExata', p.areaExata, (v) => { mudar({ areaExata: v }); })),
+      campo(t('config.runaDaClasse'), marcador('runaDaClasse', p.runaDaClasse, (v) => { mudar({ runaDaClasse: v }); })),
       campo(t('config.estiloNasGeradas'), marcador('estiloNasGeradas', p.estiloNasGeradas, (v) => { mudar({ estiloNasGeradas: v }); })),
     );
     secao(t('config.aparencia'), ...aparencia(p));
@@ -123,10 +124,12 @@ export function criarConfiguracoes(o: { toque: boolean; direcional?: boolean; ao
     );
     // Marco 26 (D-107): as teclas valem em qualquer aparelho; o tipo do direcional, só onde ele aparece.
     const teclas = campo(t('config.teclas'), escolha('teclasMovimento', p.teclasMovimento, ['wasd', 'ewas'] as const, 'teclasMovimento', (v) => { mudar({ teclasMovimento: v }); }));
+    // Marco 26 (D-121): seguir alvo, em qualquer aparelho.
+    const seguir = campo(t('config.seguirAlvo'), marcador('seguirAlvo', p.seguirAlvo, (v) => { mudar({ seguirAlvo: v }); }));
     if (o.direcional ?? o.toque) {
-      secao(t('config.controles'), campo(t('config.controle'), escolha('controle', p.controle, ['joystick', 'dpad'] as const, 'tipoControle', (v) => { mudar({ controle: v }); })), teclas);
+      secao(t('config.controles'), campo(t('config.controle'), escolha('controle', p.controle, ['joystick', 'dpad'] as const, 'tipoControle', (v) => { mudar({ controle: v }); })), teclas, seguir);
     } else {
-      secao(t('config.controles'), teclas);
+      secao(t('config.controles'), teclas, seguir);
     }
     secao(
       t('config.acessibilidade'),

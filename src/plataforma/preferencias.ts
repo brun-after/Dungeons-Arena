@@ -58,6 +58,10 @@ export interface Preferencias {
   medidor: boolean;
   /** Servidor escolhido neste aparelho (ws:// ou wss://); vazio = o do build. */
   servidor: string;
+  /** Marco 26 (28/10/2026, D-121): o personagem anda atrás do alvo selecionado para mantê-lo no alcance. */
+  seguirAlvo: boolean;
+  /** Marco 26 (28/10/2026, D-116): a runa da classe sobre a cabeça dos jogadores. */
+  runaDaClasse: boolean;
 }
 
 /** ws(s)://host[:porta], sem caminho: o único formato aceito para o servidor (URL ou preferência). */
@@ -90,6 +94,8 @@ export const PREFERENCIAS_PADRAO: Preferencias = {
   resolucao: 'auto',
   medidor: false,
   servidor: '',
+  seguirAlvo: true,
+  runaDaClasse: true,
 };
 const PADRAO = PREFERENCIAS_PADRAO;
 
@@ -125,6 +131,8 @@ export function normalizarPreferencias(dados: unknown): Preferencias {
     resolucao: opcao(d.resolucao, ['auto', 'alta', 'media', 'baixa'] as const, PADRAO.resolucao),
     medidor: booleano(d.medidor, PADRAO.medidor),
     servidor: typeof d.servidor === 'string' && enderecoDeServidorValido(d.servidor.trim()) ? d.servidor.trim() : PADRAO.servidor,
+    seguirAlvo: booleano(d.seguirAlvo, PADRAO.seguirAlvo),
+    runaDaClasse: booleano(d.runaDaClasse, PADRAO.runaDaClasse),
   };
 }
 

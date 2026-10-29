@@ -181,6 +181,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     },
     aoMudarPreferencias: (p) => {
       camera.modo = p.camera;
+      if (p.seguirAlvo !== aparencia.seguirAlvo) emitir({ t: 'seguirAlvo', ligado: p.seguirAlvo });
       controles?.trocarTipo(p.controle);
       if (p.sentidoToken !== aparencia.sentidoToken || p.tamanhoToken !== aparencia.tamanhoToken) sprites.reiniciarVisual();
       aparencia = p;
@@ -586,6 +587,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       if (!celulaCentralizada) {
         camera.centralizar({ x: j.x, y: j.y });
         celulaCentralizada = true;
+        // Marco 26 (D-121): a opção seguir alvo vai ao personagem assim que ele existe.
+        if (j.seguirAlvo !== aparencia.seguirAlvo) emitir({ t: 'seguirAlvo', ligado: aparencia.seguirAlvo });
       }
       camera.seguirCelula({ x: j.x, y: j.y });
       posicaoVisual = q.posicao(j);
