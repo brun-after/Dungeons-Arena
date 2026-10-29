@@ -49,6 +49,11 @@ export function sortearHesitacaoS(rng: EstadoRng, carismaAlvo: number, carismaNe
   return (escolhido * hesitacaoPresetS) / regras.hesitacaoBaseS;
 }
 
+/** Marco 26 (28/10/2026, D-118): o "?" curto — o inimigo reage em no máximo `hesitacaoMaxS`. */
+export function hesitacaoComTeto(segundos: number, regras: RegrasIa): number {
+  return Math.min(segundos, regras.hesitacaoMaxS);
+}
+
 function criarEstadoIa(estado: EstadoJogo, e: Entidade, regras: RegrasIa): EstadoIa {
   // Desvio por id: inimigos da mesma sala não andam todos no mesmo tick.
   const desvio = hashTexto(e.id) % Math.max(1, ticksDe(regras.patrulhaPassoMs));
@@ -210,7 +215,7 @@ function tentarDetectar(
   }
   ia.foraDaZonaTicks = 0;
   // Marco 15: a dificuldade encurta ou alonga o "?".
-  const segundos = sortearHesitacaoS(ia.rng, alvo.atributos.carisma, ctx.balance.combate.carismaNeutro, preset.hesitacaoS, ctx.balance.ia) * fatoresDoMundo(estado, ctx).hesitacao;
+  const segundos = hesitacaoComTeto(sortearHesitacaoS(ia.rng, alvo.atributos.carisma, ctx.balance.combate.carismaNeutro, preset.hesitacaoS, ctx.balance.ia) * fatoresDoMundo(estado, ctx).hesitacao, ctx.balance.ia);
   mudarModo(ia, 'hesitando', estado.tick);
   ia.alvoId = alvo.id;
   ia.hesitacaoAteTick = estado.tick + ticksDe(segundos * 1000);

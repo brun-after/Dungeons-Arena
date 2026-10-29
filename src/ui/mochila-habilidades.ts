@@ -24,6 +24,7 @@ import { familiaDaHabilidade } from '../progression/itens-progressao';
 import { duracaoLegivel } from './tempo';
 import { descreverBonus, descreverCaminho, descreverHabilidade } from './descrever';
 import { icone } from './icones';
+import { classeDaHabilidade, comRuna } from './runa-dom';
 import { desenharPassivasGerais, desenharSintonia } from './painel-sintonia';
 
 export interface EstadoAbaHabilidades {
@@ -137,6 +138,9 @@ export function desenharHabilidades(
     const titulo = el('strong', 'nome-item');
     titulo.append(icone(h.icone), ` ${h.nome}`);
     if (cor) titulo.style.color = cor;
+    // Marco 26 (28/10/2026, D-116): a skill de classe leva a runa no nome e no começo da descrição.
+    const classeDona = classeDaHabilidade(ctx.conteudo, id);
+    comRuna(titulo, classeDona);
     const grau = el('span', `grau-habilidade grau-${h.grau}`, t('habilidades.grau', { grau: h.grau }));
     grau.title = t('habilidades.grauDica', { grau: h.grau, min: Math.round((ticksDeEstudo(ctx, j, id) * DT_MS) / 60000) });
     titulo.append(' ', grau);
@@ -145,6 +149,8 @@ export function desenharHabilidades(
     const linhas = descreverHabilidade(h, { rankMax, perfilDanoPct: perfil.danoPct });
     const desc = el('ul', 'descricao-habilidade');
     for (const linha of linhas) desc.append(el('li', undefined, linha));
+    const primeira = desc.firstElementChild;
+    if (primeira instanceof HTMLElement) comRuna(primeira, classeDona, 12);
     textos.append(desc);
     // Marco 18 (D-068): os marcos de nível (o do 2 e o do 4); os já alcançados aparecem acesos.
     const marcos = definicaoDe(ctx, id)?.marcos ?? {};

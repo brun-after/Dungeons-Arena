@@ -69,6 +69,8 @@ import { identidadeDaClasse } from './barra-classe';
 import { QuadroAlvo } from './quadro-alvo';
 import { montarVisao, type ControleVisao } from './visao';
 import { criarGolpeNoQuebravel } from './golpe-quebravel';
+import { criarBotaoCentralizar } from './botao-centralizar';
+import { classeDaHabilidade } from './runa-dom';
 import { presetDaQuebra } from '../render/presets-mundo';
 
 const LEITURA_FAIXA_MS = 1000;
@@ -180,6 +182,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     },
     aoMudarPreferencias: (p) => {
       camera.modo = p.camera;
+      if (p.seguirAlvo !== aparencia.seguirAlvo) emitir({ t: 'seguirAlvo', ligado: p.seguirAlvo });
       controles?.trocarTipo(p.controle);
       if (p.sentidoToken !== aparencia.sentidoToken || p.tamanhoToken !== aparencia.tamanhoToken) sprites.reiniciarVisual();
       aparencia = p;
@@ -200,6 +203,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     aparencia: () => ({ tamanho: aparencia.tamanhoToken, imagemOlhaEsquerda: aparencia.sentidoToken === 'esquerda' }),
     usarTiras: () => ap.qualidade().tiras,
     reduzido: () => ap.movimentoReduzido(),
+    runaDaClasse: () => aparencia.runaDaClasse,
     corElemento: (el) => Number.parseInt((ctx.conteudo.elementos.get(el)?.cor ?? '#ffffff').slice(1), 16),
     ajuste: (e, agoraMs) => ap.ajusteVisual(e, agoraMs),
     // Marco 25 (D-103): o arco branco do Arqueiro com a mira cheia.
@@ -310,7 +314,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     const opcoes = bolsa.conhecidas
       .map((c) => resolverHabilidade(ctx, c.id))
       .filter((h): h is Habilidade => !!h && !h.passiva)
-      .map((h) => ({ id: h.id, nome: h.nome, icone: h.icone }));
+      .map((h) => ({ id: h.id, nome: h.nome, icone: h.icone, classe: classeDaHabilidade(ctx.conteudo, h.id) }));
     seletor.abrir(slot, id, opcoes, ancora);
   };
   const barra = criarBarraHabilidades(usarHabilidade, corDoElemento, pedirTroca);
@@ -381,10 +385,20 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     const entrada = bolsa ? consumiveisComAtalho(bolsa, ctx.conteudo.itens)[n] : undefined;
     if (entrada) emitir({ t: 'usarItem', invId: entrada.invId });
   };
+  // Marco 26 (D-117): centralizar a câmera solta (toque duplo); no computador sem direcional, fica no canto.
+  const centralizar = criarBotaoCentralizar({
+    aoCentralizar: () => {
+      camera.recentralizar();
+    },
+    aoDica: (texto) => {
+      mostrarAviso(ui, texto, 1500);
+    },
+  });
   if (toque) {
     controles = criarControles({
       tipo: prefs.controle,
       direcional,
+      aoLadoDoDirecional: centralizar.elemento,
       aoMudarDirecao: (rumo) => {
         golpeQuebravel.esquecer();
         emitir(comandoMover(rumo));
@@ -410,6 +424,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     fila.className = 'fila-barra';
     fila.append(barra.elemento, botaoUltimate.elemento);
     ui.append(fila);
+    centralizar.elemento.classList.add('flutuante');
+    ui.append(centralizar.elemento);
   }
   ui.append(
     criarCabecalho({
@@ -463,6 +479,9 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   });
 
   teclado = ligarTeclado({
+    aoCentralizar: () => {
+      centralizar.tocar(performance.now());
+    },
     aoMudarDirecao: (rumo) => {
       emitir(comandoMover(rumo));
     },
@@ -570,6 +589,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       if (!celulaCentralizada) {
         camera.centralizar({ x: j.x, y: j.y });
         celulaCentralizada = true;
+        // Marco 26 (D-121): a opção seguir alvo vai ao personagem assim que ele existe.
+        if (j.seguirAlvo !== aparencia.seguirAlvo) emitir({ t: 'seguirAlvo', ligado: aparencia.seguirAlvo });
       }
       camera.seguirCelula({ x: j.x, y: j.y });
       posicaoVisual = q.posicao(j);
@@ -584,6 +605,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     }
     ponteiro.atualizar(q.agoraMs);
     golpeQuebravel.atualizar(performance.now());
+    centralizar.marcar(camera.estaSolta);
     hud.atualizar(j, estado.tick, identidadeDaClasse(ctx, j, estado.tick));
     feedback.conferirBasico();
     const alvo = j?.alvoSelecionado ? estado.entidades.find((e) => e.id === j.alvoSelecionado) : undefined;

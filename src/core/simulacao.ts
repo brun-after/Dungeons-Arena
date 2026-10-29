@@ -31,7 +31,8 @@ import { comprar, vender } from '../progression/loja';
 import { soltarItem } from '../progression/soltar-item';
 import { processarMortes } from '../progression/morte';
 import { regenerarRecursos } from '../progression/recursos';
-import { definirDirecao, moverEntidades, planejarIrPara } from '../world/movimento';
+import { definirDirecao, moverEntidades, planejarIrPara, rumoDe } from '../world/movimento';
+import { aoMovimentoManual, processarSeguirAlvo } from '../combat/seguir-alvo';
 import { fecharLoja, interagir, processarInteracoes } from '../world/interacao';
 import { revelarArmadilhas } from '../world/armadilhas-ocultas';
 import { atualizarRessonancias } from '../progression/ressonancias';
@@ -69,6 +70,8 @@ export function simular(
   processarAcoes(estado, ctx, saida);
   moverProjeteis(estado, ctx, saida, dtMs);
   processarAutoAtaque(estado, ctx, saida);
+  // Marco 26 (D-121): o personagem anda atrás do alvo selecionado (opção seguir alvo).
+  processarSeguirAlvo(estado, ctx, saida);
   processarEfeitos(estado, ctx, saida);
   // Marco 22 (D-089): o Mago encarnado em fogo queima quem está perto.
   processarEncarnacoes(estado, ctx, saida);
@@ -121,9 +124,12 @@ function aplicarComandos(
     if (!ator || !vivo(ator)) continue;
     switch (cmd.t) {
       case 'mover':
+        // Marco 26 (D-121): o direcional diante do seguir alvo (contrário cancela, o resto pausa).
+        if (cmd.dir !== 'parado') aoMovimentoManual(estado, ator, cmd.dx !== undefined && cmd.dy !== undefined ? { dx: cmd.dx, dy: cmd.dy } : rumoDe(cmd.dir), ctx.balance.seguirAlvo.anguloCancelaGraus);
         definirDirecao(ator, cmd.dir, cmd.dx, cmd.dy);
         break;
       case 'irPara':
+        aoMovimentoManual(estado, ator, null, ctx.balance.seguirAlvo.anguloCancelaGraus);
         planejarIrPara(ator, { x: cmd.x, y: cmd.y }, ctx, estado.tick, saida);
         break;
       case 'ataqueBasico':
@@ -135,6 +141,8 @@ function aplicarComandos(
       case 'selecionarAlvo': {
         const alvo = cmd.alvo === null ? undefined : buscarEntidade(estado, cmd.alvo);
         ator.alvoSelecionado = alvo && alvoOfensivoValido(estado, ctx, ator, alvo) ? alvo.id : null;
+        // Marco 26 (D-121): escolher um alvo de propósito desfaz o cancelamento do seguir alvo.
+        delete ator.seguirCanceladoDe;
         ator.alvoTravado = ator.alvoSelecionado !== null && cmd.travar !== false;
         // Marco 24 (D-097): escolher um alvo de propósito religa o básico (que o Parar ataque desliga).
         if (ator.alvoTravado) ator.autoAtaque = true;
@@ -142,6 +150,10 @@ function aplicarComandos(
       }
       case 'autoAtaque':
         ator.autoAtaque = cmd.ligado;
+        break;
+      case 'seguirAlvo':
+        ator.seguirAlvo = cmd.ligado;
+        if (!cmd.ligado) delete ator.seguindo;
         break;
       case 'ativarPassiva':
       case 'desativarPassiva':

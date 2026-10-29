@@ -51,6 +51,8 @@ export type Comando =
   | { t: 'definirDificuldade'; nivel: Dificuldade }
   /** Marco 24 (D-097): liga ou desliga o ataque básico automático (o botão Parar ataque e a tecla F). */
   | { t: 'autoAtaque'; ligado: boolean }
+  /** Marco 26 (28/10/2026, D-121): liga ou desliga o seguir alvo (a opção das Configurações). */
+  | { t: 'seguirAlvo'; ligado: boolean }
   /** Marco 24 (D-094): a ultimate do par nas teclas 1 e 2, com o medidor cheio (o botão grande e a tecla R). */
   | { t: 'usarUltimate'; alvo?: EntidadeId | Celula }
   /** Marco 24 (D-095): liga ou desliga uma passiva geral conhecida (até 3, fora de combate). */
@@ -82,6 +84,7 @@ export const TIPOS_DE_COMANDO: readonly Comando['t'][] = [
   'equiparHabilidade',
   'definirDificuldade',
   'autoAtaque',
+  'seguirAlvo',
   'usarUltimate',
   'ativarPassiva',
   'desativarPassiva',

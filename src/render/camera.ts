@@ -9,6 +9,8 @@ import type { Container } from 'pixi.js';
 import type { Celula } from '../core/comandos';
 import type { ModoCamera } from '../plataforma/preferencias';
 import {
+  acomodarNaBorda,
+  CELULA_PX,
   aproximar,
   janelaMortaEixo,
   limitarEixo,
@@ -36,6 +38,14 @@ export class Camera {
   /** Ponto (em células) a enquadrar no lugar do jogador; null = segue o jogador. */
   private foco: { x: number; y: number } | null = null;
   private ultimaManualMs = -Infinity;
+  /**
+   * Marco 26 (28/10/2026, D-117): o jogador arrastou (ou deu zoom) e a câmera ficou onde ele deixou: andar não a
+   * recentraliza; só o boneco que sai inteiro da vista a faz andar, até a borda. `recentralizar()` volta ao normal.
+   */
+  private solta = false;
+  /** D-117: a borda que acompanha o boneco depois de reenquadrá-lo, por eixo (−1 início, 1 fim, 0 nenhuma). */
+  private presaX: -1 | 0 | 1 = 0;
+  private presaY: -1 | 0 | 1 = 0;
 
   constructor(
     private projecao: Projecao,
@@ -112,6 +122,10 @@ export class Camera {
     const anterior = this.ultimaCelula;
     this.ultimaCelula = { x: c.x, y: c.y };
     if (this.modo !== 'janela' || !anterior) return;
+    if (this.solta) {
+      this.acomodar(c);
+      return;
+    }
     const margem = this.toque ? MARGEM_TOQUE : MARGEM_DESKTOP;
     const antes = this.centro(anterior.x, anterior.y);
     const agora = this.centro(c.x, c.y);
@@ -119,12 +133,42 @@ export class Camera {
     if (antes.y !== agora.y) this.alvoY = this.limitarY(janelaMortaEixo(this.alvoY, agora.y, this.alturaVistaMundo, margem));
   }
 
+  /** D-117: a caixa do boneco (o desenho sobe acima do centro da célula); fora da vista, vai à borda mais perto. */
+  private acomodar(c: Celula): void {
+    const centro = this.centro(c.x, c.y);
+    const P = CELULA_PX;
+    const meia = P / 2;
+    const alturaDesenho = this.projecao.visao === 'iso' ? P * 1.3 : meia;
+    const x = acomodarNaBorda(this.alvoX, centro.x - meia, centro.x + meia, this.larguraVistaMundo, P, this.presaX);
+    const y = acomodarNaBorda(this.alvoY, centro.y - alturaDesenho, centro.y + meia, this.alturaVistaMundo, P, this.presaY);
+    this.alvoX = this.limitarX(x.origem);
+    this.alvoY = this.limitarY(y.origem);
+    this.presaX = x.presa;
+    this.presaY = y.presa;
+  }
+
+  get estaSolta(): boolean {
+    return this.solta;
+  }
+
+  /** D-117: o botão de centralizar (toque duplo) e a tecla C: volta a seguir o jogador e vai até ele, suave. */
+  recentralizar(): void {
+    this.solta = false;
+    this.presaX = this.presaY = 0;
+    this.foco = null;
+    const c = this.ultimaCelula;
+    if (!c) return;
+    const o = this.origemPara(c.x, c.y);
+    this.alvoX = o.x;
+    this.alvoY = o.y;
+  }
+
   /**
    * Enquadrar dois (§2.4): pede o ponto médio entre o jogador e o alvo. Ignorado por 4 s depois de
    * uma mexida manual na câmera. `null` volta a seguir só o jogador.
    */
   enquadrar(ponto: { x: number; y: number } | null, agoraMs: number): void {
-    this.foco = ponto && agoraMs - this.ultimaManualMs >= JANELA_MANUAL_MS ? ponto : null;
+    this.foco = ponto && !this.solta && agoraMs - this.ultimaManualMs >= JANELA_MANUAL_MS ? ponto : null;
   }
 
   /** Avança a suavização. `posicaoJogador` em células (posição de render). */
@@ -153,6 +197,8 @@ export class Camera {
   arrastar(dxTela: number, dyTela: number): void {
     this.ultimaManualMs = performance.now();
     this.foco = null;
+    if (this.modo === 'janela') this.solta = true;
+    this.presaX = this.presaY = 0;
     this.x = this.alvoX = this.limitarX(this.x - dxTela / this.zoom);
     this.y = this.alvoY = this.limitarY(this.y - dyTela / this.zoom);
   }
@@ -161,6 +207,7 @@ export class Camera {
   zoomEm(novoZoom: number, ancoraX: number, ancoraY: number): void {
     this.ultimaManualMs = performance.now();
     this.foco = null;
+    if (this.modo === 'janela') this.solta = true;
     const r = zoomAncorado({ x: this.x, y: this.y }, this.zoom, novoZoom, ancoraX, ancoraY, this.limites);
     const dx = r.x - this.x;
     const dy = r.y - this.y;

@@ -14,6 +14,7 @@ import { molduraDoItem, resumoDoItem } from './mochila';
 import { motivoParaNaoForjar } from '../progression/forja';
 import { criarModal } from './modal';
 import { icone } from './icones';
+import { classeDoItem, comRuna } from './runa-dom';
 
 export interface OpcoesLoja {
   ctx: ContextoSimulacao;
@@ -73,7 +74,8 @@ export function criarLoja(o: OpcoesLoja): Loja {
     iconeItem.append(icone(item?.icone ?? 'circulo'));
     iconeItem.setAttribute('aria-hidden', 'true');
     const textos = el('span', 'textos-item');
-    textos.append(el('span', `nome-item raridade-${item?.raridade ?? 'comum'}`, rotulo));
+    // Marco 26 (28/10/2026, D-116): o livro de skill de classe leva a runa da classe.
+    textos.append(comRuna(el('span', `nome-item raridade-${item?.raridade ?? 'comum'}`, rotulo), item ? classeDoItem(ctx.conteudo, item.id) : null));
     const detalhe = nota ?? (item ? resumoDoItem(item) : '');
     if (detalhe) textos.append(el('span', 'detalhe-item', detalhe));
     conteudo.append(iconeItem, textos);

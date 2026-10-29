@@ -88,6 +88,8 @@ export const ICONES = {
   eco: '<circle cx="12" cy="12" r="2"/><path d="M8 8a6 6 0 0 0 0 8M16 8a6 6 0 0 1 0 8M5 5a10 10 0 0 0 0 14M19 5a10 10 0 0 1 0 14"/>',
   circulo: '<circle cx="12" cy="12" r="9"/>',
   estrela: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/>',
+  // Marco 26 (D-117): centralizar a câmera no personagem (mira com o ponto no meio e os cantos).
+  centralizar: '<circle cx="12" cy="12" r="2.5" class="F"/><path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"/>',
   mapa: '<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3Z"/><path d="M9 3v15M15 6v15"/>',
   grupo: '<circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2 20c0-3.5 2.5-6 6-6s6 2.5 6 6M10 20c0-3.5 2.5-6 6-6s6 2.5 6 6"/>',
   // --- Interface

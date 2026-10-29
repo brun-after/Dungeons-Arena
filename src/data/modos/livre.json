@@ -37,7 +37,7 @@
   "spawnerDinamico": true,
   "portas": { "inimigosCruzamChance": 0.5 },
   "saida": "qualquer",
-  "comandosDeRede": ["mover", "irPara", "usarHabilidade", "ataqueBasico", "selecionarAlvo", "usarItem", "soltarItem", "equipar", "desequipar", "distribuirPonto", "interagir", "abrirMenu", "comprar", "vender", "fecharLoja", "moverItem", "dispensar", "autoAtaque", "usarUltimate"],
+  "comandosDeRede": ["mover", "irPara", "usarHabilidade", "ataqueBasico", "selecionarAlvo", "usarItem", "soltarItem", "equipar", "desequipar", "distribuirPonto", "interagir", "abrirMenu", "comprar", "vender", "fecharLoja", "moverItem", "dispensar", "autoAtaque", "seguirAlvo", "usarUltimate"],
   "faixas": [
     { "id": "1-5", "min": 1, "max": 5 },
     { "id": "6-10", "min": 6, "max": 10 },

@@ -56,6 +56,18 @@ export function janelaMortaEixo(
   return origem;
 }
 
+/**
+ * Marco 26 (28/10/2026, D-117): a câmera solta (o jogador arrastou) só reenquadra o boneco que saiu inteiro da vista,
+ * num eixo: põe a caixa dele logo dentro da borda por onde saiu, com `margem`. Ainda visível, a origem não muda.
+ */
+export function acomodarNaBorda(origem: number, caixaMin: number, caixaMax: number, tamanhoVista: number, margem: number, presa: -1 | 0 | 1 = 0): { origem: number; presa: -1 | 0 | 1 } {
+  // Saiu inteiro (ou já vinha preso àquela borda e passou dela): volta para logo dentro, e a borda fica presa.
+  if (caixaMax < origem || (presa === -1 && caixaMin < origem + margem)) return { origem: caixaMin - margem, presa: -1 };
+  if (caixaMin > origem + tamanhoVista || (presa === 1 && caixaMax > origem + tamanhoVista - margem)) return { origem: caixaMax + margem - tamanhoVista, presa: 1 };
+  // Preso, mas voltou para dentro: solta a borda (o arrasto do jogador vale de novo).
+  return { origem, presa: 0 };
+}
+
 /** Limita um eixo à fase; se a fase for menor que a vista, centraliza. */
 export function limitarEixo(origem: number, tamanhoMundo: number, tamanhoVistaMundo: number): number {
   if (tamanhoMundo <= tamanhoVistaMundo) return (tamanhoMundo - tamanhoVistaMundo) / 2;

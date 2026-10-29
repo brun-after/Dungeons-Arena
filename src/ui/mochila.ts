@@ -29,6 +29,7 @@ import { desenharDiario } from './mochila-diario';
 import { duracaoLegivel } from './tempo';
 import { criarModal } from './modal';
 import { icone } from './icones';
+import { classeDoItem, comRuna } from './runa-dom';
 
 export interface OpcoesMochila {
   ctx: ContextoSimulacao;
@@ -156,6 +157,8 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     iconeItem.setAttribute('aria-hidden', 'true');
     const textos = el('span', 'textos-item');
     const nome = el('span', `nome-item raridade-${opcoes.item?.raridade ?? 'comum'}`, opcoes.rotulo);
+    // Marco 26 (28/10/2026, D-116): o livro que ensina skill de classe leva a runa da classe.
+    if (opcoes.item) comRuna(nome, classeDoItem(ctx.conteudo, opcoes.item.id));
     textos.append(nome);
     const resumo = opcoes.item ? resumoDoItem(opcoes.item) : '';
     const detalhe = opcoes.bloqueio ?? (opcoes.atalho ? [t('mochila.atalho', { tecla: opcoes.atalho }), resumo].filter(Boolean).join(' · ') : resumo);
