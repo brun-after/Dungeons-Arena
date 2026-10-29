@@ -3,6 +3,9 @@
 // a ação. Com movimento reduzido, só o número final, parado.
 // Marco 13 (14/10/2026): guarda a célula e projeta a cada quadro (troca de visão no meio do número).
 // Ajuste de 15/10/2026 (D-060): o d20 desenhado sobre o alvo nos extremos (16+ e falha), com pulo de escala.
+// Marco 26 (29/10/2026, D-122): os textos são reaproveitados (um estoque por tipo) e há um teto de números vivos;
+// antes, cada número criava e destruía um Text (desenho do texto e textura nova), e as lutas cheias do fim da sessão
+// geravam engasgos do coletor no celular.
 
 import { Container, Graphics, Text } from 'pixi.js';
 import { CELULA_PX } from './camera-calculo';
@@ -27,9 +30,13 @@ const ESTILO: Readonly<Record<TipoNumero, { cor: number; tamanho: number }>> = {
 /** d20 nos extremos: cor da faixa (dourado no bom, vermelho na falha). */
 const COR_DADO = { bom: 0xf1c40f, falha: 0xe74c3c } as const;
 const VIDA_DADO_MS = 800;
+/** Teto de números (sem contar o d20) na tela ao mesmo tempo; passando dele, o mais antigo sai. */
+export const MAX_NUMEROS_VIVOS = 40;
 
 interface Numero {
   texto: Container;
+  /** O tipo do texto reaproveitável (null no d20, que é destruído). */
+  tipo: TipoNumero | null;
   inicioMs: number;
   /** O d20 desenhado (pulo de escala e vida própria). */
   dado: boolean;
@@ -41,6 +48,7 @@ interface Numero {
 
 export class CamadaNumeros {
   private readonly vivos: Numero[] = [];
+  private readonly livres = new Map<TipoNumero, Text[]>();
 
   constructor(
     private readonly camada: Container,
@@ -50,9 +58,30 @@ export class CamadaNumeros {
 
   /** `celulaX/Y` em células; `atrasoMs` para escalonar números de área. */
   mostrar(conteudo: string, tipo: TipoNumero, celulaX: number, celulaY: number, agoraMs: number, atrasoMs = 0): void {
+    if (this.vivos.reduce((n, v) => n + (v.dado ? 0 : 1), 0) >= MAX_NUMEROS_VIVOS) {
+      const i = this.vivos.findIndex((v) => !v.dado);
+      const velho = i >= 0 ? this.vivos[i] : undefined;
+      if (velho) {
+        this.vivos.splice(i, 1);
+        this.soltar(velho);
+      }
+    }
+    const texto = this.texto(tipo);
+    if (texto.text !== conteudo) texto.text = conteudo;
+    texto.visible = false;
+    texto.alpha = 1;
+    // Pequeno desvio horizontal para números simultâneos não se sobreporem.
+    const desvio = ((this.vivos.length % 3) - 1) * 10;
+    this.vivos.push({ texto, tipo, inicioMs: agoraMs + atrasoMs, celulaX, celulaY, desvio, dado: false });
+  }
+
+  /** Um Text do estoque do tipo, ou um novo. */
+  private texto(tipo: TipoNumero): Text {
+    const reaproveitado = this.livres.get(tipo)?.pop();
+    if (reaproveitado) return reaproveitado;
     const estilo = ESTILO[tipo];
     const texto = new Text({
-      text: conteudo,
+      text: '',
       style: {
         fontFamily: 'system-ui, sans-serif',
         fontSize: estilo.tamanho,
@@ -62,11 +91,24 @@ export class CamadaNumeros {
       },
     });
     texto.anchor.set(0.5);
-    texto.visible = false;
     this.camada.addChild(texto);
-    // Pequeno desvio horizontal para números simultâneos não se sobreporem.
-    const desvio = ((this.vivos.length % 3) - 1) * 10;
-    this.vivos.push({ texto, inicioMs: agoraMs + atrasoMs, celulaX, celulaY, desvio, dado: false });
+    return texto;
+  }
+
+  /** O número que acabou: o texto volta ao estoque escondido (o d20 é destruído). */
+  private soltar(n: Numero): void {
+    if (n.dado || !n.tipo || !(n.texto instanceof Text)) {
+      n.texto.destroy({ children: true });
+      return;
+    }
+    n.texto.visible = false;
+    const livres = this.livres.get(n.tipo) ?? [];
+    if (livres.length >= MAX_NUMEROS_VIVOS) {
+      n.texto.destroy();
+      return;
+    }
+    livres.push(n.texto);
+    this.livres.set(n.tipo, livres);
   }
 
   /** Ajuste de 15/10/2026: o d20 sobre o alvo, só nos extremos (quem chama decide). */
@@ -88,7 +130,7 @@ export class CamadaNumeros {
     dado.addChild(forma, numero);
     dado.visible = false;
     this.camada.addChild(dado);
-    this.vivos.push({ texto: dado, inicioMs: agoraMs, celulaX, celulaY, desvio: 26, dado: true });
+    this.vivos.push({ texto: dado, tipo: null, inicioMs: agoraMs, celulaX, celulaY, desvio: 26, dado: true });
   }
 
   atualizar(agoraMs: number): void {
@@ -103,8 +145,8 @@ export class CamadaNumeros {
       if (idade < 0) continue;
       const vida = n.dado ? VIDA_DADO_MS : VIDA_MS;
       if (idade > vida) {
-        n.texto.destroy({ children: true });
         this.vivos.splice(i, 1);
+        this.soltar(n);
         continue;
       }
       const t = idade / vida;
@@ -122,5 +164,7 @@ export class CamadaNumeros {
   destruir(): void {
     for (const n of this.vivos) n.texto.destroy({ children: true });
     this.vivos.length = 0;
+    for (const lista of this.livres.values()) for (const texto of lista) texto.destroy();
+    this.livres.clear();
   }
 }

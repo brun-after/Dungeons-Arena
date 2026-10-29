@@ -48,7 +48,9 @@ function textura(conteudo: string): Promise<Texture | null> {
   const img = new Image();
   img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
   return img.decode().then(
-    () => Texture.from(img),
+    // Marco 26 (29/10/2026, D-122): fora do cache global do Pixi (`skipCache`). Com ele, a combinação que saía do
+    // nosso cache continuava presa lá (com a imagem e a cópia na GPU) pela vida toda da página.
+    () => Texture.from(img, true),
     () => null,
   );
 }
@@ -95,7 +97,8 @@ export function texturasDoAdorno(modelo: string, vista: Vista, aparencia: Aparen
   const maos = deslocamentosDasMaos(opcoes, vista).map((m) => ({ e: px(m.e), d: px(m.d) }));
   const texturas = [camadas.atras, camadas.frente, camadas.arma, silhuetaBranca(camadas.arma), camadas.secundaria].map(textura);
   void Promise.all(texturas).then(([atras = null, frente = null, arma = null, armaBranca = null, secundaria = null]) => {
-    cache.set(chave, { atras, frente, arma, armaBranca, pivo, secundaria, maos });
+    // A combinação pode ter saído do cache enquanto carregava: não volta (o cache passaria do teto).
+    if (cache.get(chave) === 'carregando') cache.set(chave, { atras, frente, arma, armaBranca, pivo, secundaria, maos });
   });
   return VAZIO;
 }

@@ -94,6 +94,10 @@ export class EfeitosDeClasse {
 
   quadro(estado: EstadoJogo, agoraMs: number, posicao: (e: Entidade) => PontoVisual): void {
     const p = this.o.particulas;
+    // Marco 26 (29/10/2026, D-122): as marcas por id (frenesi:, furia:, dupla:…) não crescem sem fim.
+    if (this.ultimo.size > 4 * estado.entidades.length + 64) {
+      for (const [chave, ms] of this.ultimo) if (agoraMs - ms > 10_000) this.ultimo.delete(chave);
+    }
     this.posicoes.clear();
     for (const e of estado.entidades) {
       if (e.morto) continue;
