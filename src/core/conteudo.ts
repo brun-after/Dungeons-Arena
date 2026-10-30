@@ -182,6 +182,9 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
     conferir(`classe ${classe.id}`, [classe.ataqueBasico, ...classe.habilidades, ...classe.exclusivas]);
     if (classe.iniciais.length !== 2) erros.push(`classe ${classe.id}: são 2 skills de classe iniciais (as teclas 1 e 2)`);
     for (const { id } of classe.itensIniciais) if (!it.itens.has(id)) erros.push(`classe ${classe.id}: item inicial desconhecido "${id}"`);
+    // Marco 27 (D-126): a arma de partida é uma arma de mão principal com desenho em armas.json.
+    const arma = classe.armaInicial ? it.itens.get(classe.armaInicial) : undefined;
+    if (classe.armaInicial && (arma?.slotPadrao !== 'arma_principal' || !arma.arma)) erros.push(`classe ${classe.id}: arma inicial inválida "${classe.armaInicial}"`);
   }
   for (const item of it.itens.values()) if (item.ensina !== null) conferir(`item ${item.id}`, [item.ensina]);
   for (const combo of cb.combos.values()) conferir(`combo ${combo.id}`, combo.sequencia.filter((s) => s !== '@ultimate'));

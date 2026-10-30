@@ -11,6 +11,7 @@ import { fato, muralhaEm } from './tatica';
 import { passavel } from '../world/fase';
 import { reservaCelula } from '../world/colisao';
 import { aoCairOMorto, retornoDoServo, vidaDoMorto } from './sintonia-necromante';
+import { fatorDosServos } from './basico';
 
 const necromante = (e: Entidade) => vivo(e) && (e.classeId ?? e.bolsa?.classeId) === 'necromante';
 export const chaveServo = (id: string) => `necromante:servo:${id}`;
@@ -26,7 +27,7 @@ function lugarPerto(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade):
 }
 
 /** Todos os mortos têm o mesmo orçamento de atributos. Chefes só emprestam a aparência. */
-function erguer(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade, tipo: 'servo' | 'reanimado' | 'eco', fonte: Entidade | null, saida: EventoSimulacao[]): boolean {
+function erguer(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade, tipo: 'servo' | 'reanimado' | 'eco', fonte: Entidade | null, saida: EventoSimulacao[], duracaoMs?: number): boolean {
   const r = ctx.balance.necromancia;
   const meus = estado.entidades.filter((e) => vivo(e) && e.invocacao?.donoId === dono.id);
   const temServo = meus.some((e) => e.invocacao?.necromancia === 'servo');
@@ -36,7 +37,7 @@ function erguer(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade, tipo
   const lugar = lugarPerto(estado, ctx, dono);
   if (!lugar) return false;
   const antes = estado.entidades.length;
-  invocar(estado, ctx, dono, construirEfeito('invocar', { ref: 'servo_ossuario', valor: 1, duracaoMs: tipo === 'servo' ? 86_400_000 : r.duracaoMortoMs }), saida);
+  invocar(estado, ctx, dono, construirEfeito('invocar', { ref: 'servo_ossuario', valor: 1, duracaoMs: tipo === 'servo' ? 86_400_000 : (duracaoMs ?? r.duracaoMortoMs) }), saida);
   const morto = estado.entidades[antes];
   if (!morto?.invocacao) return false;
   posicionar(morto, lugar.x, lugar.y);
@@ -50,10 +51,12 @@ function erguer(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade, tipo
   morto.nome = tipo === 'servo' ? 'Servo do ossuário' : `${tipo === 'eco' ? 'Eco' : 'Reanimado'} de ${fonte?.nome ?? 'morto'}`;
   morto.nivel = dono.nivel;
   // Marco 22 (D-090): a Inteligência do Necromante acima de 10 fortalece os mortos (a build focada rende).
-  const poder = 8 + Math.floor(dono.nivel / 2) + Math.floor(Math.max(0, dono.atributos.inteligencia - 10) * r.atributoPorInt);
+  // Marco 27 (D-126): sem o cajado, o Necromante ergue mortos mais fracos (força e vida).
+  const servos = fatorDosServos(ctx, dono);
+  const poder = Math.max(1, Math.round((8 + Math.floor(dono.nivel / 2) + Math.floor(Math.max(0, dono.atributos.inteligencia - 10) * r.atributoPorInt)) * servos));
   morto.atributos = { ...morto.atributos, forca: poder, inteligencia: poder };
   // Marco 24 (D-095): a sintonia da terra dá mais vida aos mortos.
-  morto.hpMax = vidaDoMorto(ctx, dono, Math.round((r.vidaBase + dono.nivel * r.vidaPorNivel) * (tipo === 'servo' ? r.vidaServoPct / 100 : 1)), estado.tick);
+  morto.hpMax = Math.max(1, Math.round(vidaDoMorto(ctx, dono, Math.round((r.vidaBase + dono.nivel * r.vidaPorNivel) * (tipo === 'servo' ? r.vidaServoPct / 100 : 1)), estado.tick) * servos));
   morto.hp = morto.hpMax;
   morto.aparencia = fonte?.aparencia ? { ...fonte.aparencia } : null;
   contarExercito(estado, dono);
@@ -106,6 +109,10 @@ export function colherMorto(estado: EstadoJogo, ctx: ContextoSimulacao, morto: E
     return;
   }
   const r = ctx.balance.necromancia;
+  // Marco 27 (D-126): quem caiu no solo da Colheita se ergue como morto de quem lançou, longe ou perto.
+  const colheu = morto.colhidoPor ? buscarEntidade(estado, morto.colhidoPor) : undefined;
+  delete morto.colhidoPor;
+  if (colheu && vivo(colheu) && morto.controlador === 'ia' && erguer(estado, ctx, colheu, 'reanimado', morto, saida)) return;
   if (morto.controlador === 'ia') {
     const dono = matador?.invocacao ? buscarEntidade(estado, matador.invocacao.donoId) : matador;
     if (dono && necromante(dono) && podeFerir(dono, morto, ctx.modo) && chebyshev(dono, morto) <= r.raioColheita) erguer(estado, ctx, dono, 'reanimado', morto, saida);
@@ -162,4 +169,12 @@ export function executarRitual(estado: EstadoJogo, ctx: ContextoSimulacao, dono:
       fato(dono, 'comandou', alvo.id, acaoId);
     }
   }
+}
+
+/**
+ * Marco 27 (29/10/2026, D-126): a fração da passiva do Necromante que o cajado dá a outra classe. O abatido se ergue
+ * como aliado de quem o derrubou, por menos tempo que os mortos do Necromante.
+ */
+export function erguerEmprestado(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade, morto: Entidade, duracaoMs: number, saida: EventoSimulacao[]): boolean {
+  return erguer(estado, ctx, dono, 'reanimado', morto, saida, duracaoMs);
 }

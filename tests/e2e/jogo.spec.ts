@@ -134,17 +134,21 @@ test.describe('desktop', () => {
     expect(erros).toEqual([]);
   });
 
-  test('mochila: equipar a espada inicial muda a ficha; Esc fecha e o jogo segue', async ({ page }) => {
+  // Marco 27 (D-126): o Aventureiro já começa com o bumerangue de madeira na mão principal.
+  test('mochila: tirar e pôr de volta a arma inicial; Esc fecha e o jogo segue', async ({ page }) => {
     const { diag, erros } = await abrir(page);
     await page.keyboard.press('KeyI');
     const mochila = page.getByRole('dialog', { name: 'Mochila' });
     await expect(mochila).toBeVisible();
-    await mochila.getByRole('button', { name: 'Equipar: Espada curta' }).click();
-    await expect(mochila.getByText('Arma: Espada curta')).toBeVisible();
+    await expect(diag).toHaveAttribute('data-equipados', '1');
+    await mochila.getByRole('button', { name: 'Tirar: Arma: Bumerangue de madeira' }).click();
+    await expect(diag).toHaveAttribute('data-equipados', '0');
+    await mochila.getByRole('button', { name: 'Equipar: Bumerangue de madeira' }).click();
+    await expect(mochila.getByText('Arma: Bumerangue de madeira')).toBeVisible();
     await expect(diag).toHaveAttribute('data-equipados', '1');
     await mochila.getByRole('button', { name: 'Ficha' }).click();
-    // Marco 18: o aventureiro começa com Força 13 (+2 da espada).
-    await expect(mochila.locator('tr[data-atributo="forca"]')).toHaveAttribute('data-efetivo', '15');
+    // Marco 18: o aventureiro começa com Força 13 (a arma de partida não dá atributo).
+    await expect(mochila.locator('tr[data-atributo="forca"]')).toHaveAttribute('data-efetivo', '13');
     await page.keyboard.press('Escape');
     await expect(mochila).toBeHidden();
     // Com o modal fechado, o teclado volta a mover o jogador.
@@ -155,12 +159,12 @@ test.describe('desktop', () => {
     expect(erros).toEqual([]);
   });
 
-  test('save: equipar, sair pelo Menu, continuar do slot e exportar', async ({ page }) => {
+  test('save: tirar a arma, sair pelo Menu, continuar do slot e exportar', async ({ page }) => {
     const { diag, erros } = await abrir(page);
     await page.keyboard.press('KeyI');
     const mochila = page.getByRole('dialog', { name: 'Mochila' });
-    await mochila.getByRole('button', { name: 'Equipar: Espada curta' }).click();
-    await expect(diag).toHaveAttribute('data-equipados', '1');
+    await mochila.getByRole('button', { name: 'Tirar: Arma: Bumerangue de madeira' }).click();
+    await expect(diag).toHaveAttribute('data-equipados', '0');
     await page.keyboard.press('Escape');
     // "Menu" grava e volta para a tela de slots.
     await page.getByRole('button', { name: 'Salvar e voltar aos slots' }).click();
@@ -170,7 +174,7 @@ test.describe('desktop', () => {
     await slot1.getByRole('button', { name: 'Exportar' }).click();
     expect((await download).suggestedFilename()).toBe('dungeons-arena-slot1.json');
     await page.goto('./?jogo=campanha&slot=1&diag=1&classe=aventureiro');
-    await expect(page.locator('#diag')).toHaveAttribute('data-equipados', '1');
+    await expect(page.locator('#diag')).toHaveAttribute('data-equipados', '0');
     expect(erros).toEqual([]);
   });
 

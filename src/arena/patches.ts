@@ -5,6 +5,7 @@ import type { CampoTatico } from '../combat/estado-tatico';
 // recargas) quando mudam. Cada patch diz de qual tick parte (`base`); o cliente que não estiver
 // nesse tick pede o estado completo (D-035). Marco 8A-2: rastros e efeitos atrasados também.
 
+import type { Solo } from '../combat/solos';
 import type { Entidade } from '../entities/entidade';
 import type { Atrasado, EstadoJogo, FaseAgendada, ObjetoNoMundo, Projetil, Rastro, RespawnPendente } from '../core/estado';
 
@@ -15,6 +16,8 @@ export interface EntidadeAlterada {
 
 export interface PatchDeEstado {
   camposTaticos?: CampoTatico[] | null;
+  /** Marco 27 (29/10/2026, D-126): o solo amaldiçoado e a runa; ausente = sem mudança, null = nenhum. */
+  solos?: Solo[] | null;
   /** Marco 25 (25/10/2026, D-102): as fases agendadas (o golpe do falcão em voo); ausente = sem mudança, null = nenhuma. */
   fases?: FaseAgendada[] | null;
   /** Tick do estado de onde o patch parte. */
@@ -50,6 +53,7 @@ export class GeradorDePatches {
   private rastros = '';
   private atrasados = '';
   private camposTaticos = '';
+  private solos = '';
   private fases = '';
   private recargas: Record<string, number> = {};
   private tickAnterior = -1;
@@ -85,6 +89,8 @@ export class GeradorDePatches {
     };
     const textoCampos = JSON.stringify(publico.camposTaticos ?? null);
     const camposTaticos = textoCampos === this.camposTaticos ? undefined : publico.camposTaticos ?? null;
+    const textoSolos = JSON.stringify(publico.solos ?? null);
+    const solos = textoSolos === this.solos ? undefined : publico.solos ?? null;
     const textoFases = JSON.stringify(publico.fases ?? null);
     const fases = textoFases === this.fases ? undefined : publico.fases ?? null;
     const [objetos, textoObjetos] = lista(publico.objetos, this.objetos);
@@ -101,6 +107,7 @@ export class GeradorDePatches {
 
     const patch: PatchDeEstado = {
       ...(camposTaticos !== undefined ? { camposTaticos } : {}),
+      ...(solos !== undefined ? { solos } : {}),
       ...(fases !== undefined ? { fases } : {}),
       base: this.tickAnterior,
       tick: publico.tick,
@@ -116,6 +123,7 @@ export class GeradorDePatches {
       recargas,
     };
     this.camposTaticos = textoCampos;
+    this.solos = textoSolos;
     this.fases = textoFases;
     this.entidades = atuais;
     this.rastros = textoRastros;
@@ -151,6 +159,7 @@ export function aplicarPatch(base: EstadoJogo, patch: PatchDeEstado): EstadoJogo
   const resultado: EstadoJogo = {
     ...base,
     ...(patch.camposTaticos ? { camposTaticos: patch.camposTaticos } : {}),
+    ...(patch.solos ? { solos: patch.solos } : {}),
     ...(patch.fases ? { fases: patch.fases } : {}),
     tick: patch.tick,
     proximoId: patch.proximoId,
@@ -165,6 +174,7 @@ export function aplicarPatch(base: EstadoJogo, patch: PatchDeEstado): EstadoJogo
     recargas,
   };
   if (patch.camposTaticos === null) delete resultado.camposTaticos;
+  if (patch.solos === null) delete resultado.solos;
   if (patch.fases === null) delete resultado.fases;
   return resultado;
 }

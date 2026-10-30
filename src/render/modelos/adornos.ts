@@ -4,6 +4,7 @@
 // tronco e da cabeça repete a de bipede.ts (quadro 0).
 
 import { arma34, armaCima, maosDoBipede, type Arma, type OpcoesBipede } from './bipede.ts';
+import { armaDeClasse34, armaDeClasseCima } from './armas-classe.ts';
 import { QUADROS_MEMBROS } from './membros.ts';
 import { circulo, clarear, elipse, escurecer, hex, linha, MEIO, PES_Y, poligono, type Vista } from './svg.ts';
 
@@ -43,6 +44,14 @@ function auraDaForma(v: VisualEquipamento, cx: number, cy: number, rx: number, r
 
 const ARMAS: ReadonlySet<string> = new Set<Arma>(['espada', 'cajado', 'clava', 'adaga', 'machado', 'foice', 'arco', 'lanca']);
 const comoArma = (base: string | null): Arma | null => (base && ARMAS.has(base) ? (base as Arma) : null);
+
+/** Marco 27 (D-126): o desenho da arma na mão — os antigos de bipede.ts ou os das armas de classe (null: nenhum). */
+function desenhoDaArma(modelo: string | null, vista: Vista, x: number, y: number): string | null {
+  const antiga = comoArma(modelo);
+  if (antiga) return vista === '34' ? arma34(antiga, x, y) : armaCima(antiga, x, y);
+  if (!modelo) return null;
+  return vista === '34' ? armaDeClasse34(modelo, x, y) : armaDeClasseCima(modelo, x, y);
+}
 
 export interface CamadasAdorno {
   atras: string;
@@ -100,12 +109,12 @@ function adornos34(o: OpcoesBipede, v: VisualEquipamento): CamadasAdorno {
   if (secundaria === 'escudo') {
     mao2.push(elipse(maoE.x - 1, maoE.y - 4, 4.8, 6.2, 0x8a6d3b) + circulo(maoE.x - 1, maoE.y - 4, 1.6, clarear(0x8a6d3b, 0.5), false));
   } else {
-    const arma = comoArma(secundaria);
-    if (arma) mao2.push(arma34(arma, maoE.x, maoE.y));
+    const arma = desenhoDaArma(secundaria, '34', maoE.x, maoE.y);
+    if (arma) mao2.push(arma);
   }
   if (secundaria) mao2.push(circulo(maoE.x, maoE.y, 2.2, o.pele));
-  const arma = comoArma(v.arma);
-  const camadaArma = arma ? arma34(arma, maoD.x, maoD.y) + realceDaArma(v, maoD.x, maoD.y, maoD.y - 16) + circulo(maoD.x, maoD.y, 2.2, escurecer(o.pele, 0.15)) : '';
+  const arma = desenhoDaArma(v.arma, '34', maoD.x, maoD.y);
+  const camadaArma = arma ? arma + realceDaArma(v, maoD.x, maoD.y, maoD.y - 16) + circulo(maoD.x, maoD.y, 2.2, escurecer(o.pele, 0.15)) : '';
   atras.unshift(auraDaForma(v, MEIO, (cabecaY + base) / 2, o.ombro + 8, (base - cabecaY) / 2 + 6));
   return { atras: atras.join(''), frente: frente.join(''), arma: camadaArma, pivo: maoD, secundaria: mao2.join('') };
 }
@@ -120,12 +129,12 @@ function adornosCima(o: OpcoesBipede, v: VisualEquipamento): CamadasAdorno {
   const mao2: string[] = [];
   if (v.secundaria === 'escudo') mao2.push(elipse(maoE.x + 2, maoE.y, 2.6, 5.5, 0x8a6d3b));
   else {
-    const arma = comoArma(v.secundaria);
-    if (arma) mao2.push(armaCima(arma, maoE.x, maoE.y));
+    const arma = desenhoDaArma(v.secundaria, 'cima', maoE.x, maoE.y);
+    if (arma) mao2.push(arma);
   }
   if (v.secundaria) mao2.push(circulo(maoE.x, maoE.y, 2.4, o.pele));
-  const arma = comoArma(v.arma);
-  const camadaArma = arma ? armaCima(arma, maoD.x, maoD.y) + realceDaArma(v, maoD.x + 14, maoD.y, maoD.y) + circulo(maoD.x, maoD.y, 2.4, escurecer(o.pele, 0.15)) : '';
+  const arma = desenhoDaArma(v.arma, 'cima', maoD.x, maoD.y);
+  const camadaArma = arma ? arma + realceDaArma(v, maoD.x + 14, maoD.y, maoD.y) + circulo(maoD.x, maoD.y, 2.4, escurecer(o.pele, 0.15)) : '';
   atras.unshift(auraDaForma(v, c, c, o.ombro + 7, o.ombro + 7));
   if (v.cabeca !== null) {
     const r = o.cabeca * 0.95;

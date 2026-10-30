@@ -3,6 +3,9 @@ import { novaMemoria } from '../combat/estado-tatico';
 import { colherMorto } from '../combat/necromancia';
 import { aoAbaterComEncarnacao } from '../combat/encarnacao-efeitos';
 import { multiplicadorFuria, temFuria } from '../combat/furia';
+import { fatorDeCura } from '../combat/basico';
+import { aoAbaterComArmas } from '../combat/emprestimos';
+import { sorteDePergaminhoPct } from './passiva-aventureiro';
 // Mortes, XP, revivescência e respawn (§2.7 "Morte", §2.12) — etapa 8 do tick.
 // HP 0 é morte direta. Entidades de IA saem do mundo e voltam pelo respawn agendado, com o mesmo
 // id e a geração incrementada; jogadores reaparecem pelas regras do modo (§2.13).
@@ -142,11 +145,13 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
       } else if (temFuria(quemAbateu) && !e.invocacao && vivo(quemAbateu) && podeFerir(quemAbateu, e, ctx.modo)) {
         // Marco 21 (23/10/2026, D-088): o Guerreiro também se cura ao derrubar um hostil, como os inimigos (metade da
         // vida que falta); com a fúria cheia, dobra. Invocações derrubadas não curam.
-        const pct = ctx.balance.ajustesClasses.guerreiro.curaAoAbaterPct * multiplicadorFuria(ctx, quemAbateu, estado.tick);
+        const pct = ctx.balance.ajustesClasses.guerreiro.curaAoAbaterPct * multiplicadorFuria(ctx, quemAbateu, estado.tick) * fatorDeCura(ctx, quemAbateu);
         const cura = Math.min(quemAbateu.hpMax - quemAbateu.hp, Math.round((quemAbateu.hpMax - quemAbateu.hp) * pct / 100));
         quemAbateu.hp += cura;
         if (cura > 0) saida.push({ t: 'efeitoResultado', tick: estado.tick, alvoId: quemAbateu.id, origemId: quemAbateu.id, tipo: 'cura', dano: 0, cura, mana: 0 });
       }
+      // Marco 27 (D-126): a lâmina e o cajado de outra classe (cura ao abater, o abatido se ergue como aliado).
+      aoAbaterComArmas(estado, ctx, quemAbateu, e, saida);
       // Marco 24 (D-094): abater um hostil (não invocação) enche o medidor da ultimate de quem abateu (ou do dono).
       const dono = creditado(estado, quemAbateu);
       if (dono && !e.invocacao && podeFerir(dono, e, ctx.modo)) cargaPorMomento(ctx, dono, 'abate', estado.tick, saida);
@@ -169,7 +174,7 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
       // Boss morto abre a passagem (§2.1, marco 10A-1).
       aoMorrerBoss(estado, ctx, e, saida);
       // Invocações não soltam nada nem voltam (§2.9).
-      if (e.abates === 0 && !e.invocacao) largarDrops(estado, ctx, e, saida);
+      if (e.abates === 0 && !e.invocacao) largarDrops(estado, ctx, e, saida, quemAbateu);
       // Dominação (§2.9, marco 8A-2): volta do lado de quem a marcou, em vez de sair do mundo.
       if (tentarDominar(estado, ctx, e, saida)) {
         e.morto = false;
@@ -232,7 +237,7 @@ function penalizar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, said
  * Drops só na primeira morte (§2.10), sorteados pelo PRNG do estado: orbe de HP ou de recurso e,
  * num sorteio independente, um item (marco 6, só onde o modo solta itens).
  */
-function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
+function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[], quem?: Entidade): void {
   if (!ctx.modo.objetosDeFase) return;
   const d = ctx.balance.drops;
   if (aleatorio(estado.rng) < d.chanceOrbeHp) {
@@ -266,7 +271,8 @@ function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
     if (essencia) largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, essencia.id, x, y, saida));
   }
   if (aleatorio(estado.rng) >= (boss ? d.chanceItemBoss : d.chanceItem)) return;
-  const item = sortearItem(estado, ctx, boss, e.nivel);
+  // Marco 27 (D-126): a sorte do Aventureiro nos pergaminhos (de quem abateu, ou do dono da invocação).
+  const item = sortearItem(estado, ctx, boss, e.nivel, sorteDePergaminhoPct(ctx, quem ? creditado(estado, quem) : undefined));
   if (!item) return;
   largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, item.id, x, y, saida));
 }

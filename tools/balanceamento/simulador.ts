@@ -52,6 +52,17 @@ export interface ResultadoDuelo {
   venceu: boolean;
 }
 
+/**
+ * Golpe é cada ação que fere ou erra o alvo. Marco 24 (24/10/2026): o impacto só de efeito (o Grito do falcão expõe)
+ * não conta. Marco 27 (29/10/2026, D-126): conta a ação, não o impacto; o bumerangue que acerta na ida e na volta e
+ * os pulsos do solo amaldiçoado são um golpe só.
+ */
+function golpesDe(eventos: readonly EventoSimulacao[], fonte: string, alvo: string): number {
+  const acoes = new Set<number>();
+  for (const ev of eventos) if (ev.t === 'impacto' && ev.fonteId === fonte && ev.alvoId === alvo && (ev.dano > 0 || ev.falha)) acoes.add(ev.acaoId);
+  return acoes.size;
+}
+
 /** Jogador típico contra um inimigo do mesmo nível: golpes do jogador e tempo da primeira ação até a morte dele. */
 export function duelo(classe: string, nivel: number, preset: string, semente: number, dificuldade: Dificuldade = 'normal', ctx = contextoDoCenario()): ResultadoDuelo {
   const m = mundo(ctx, semente, [jogadorTipico(ctx, classe, nivel), inimigo(ctx, preset, nivel)], dificuldade);
@@ -60,7 +71,7 @@ export function duelo(classe: string, nivel: number, preset: string, semente: nu
   m.rodar(LIMITE_S * TICKS_POR_S, acabou);
   const inicio = primeiraAcaoDoTime(m.eventos, m.eventos, 'j1')?.tick ?? 0;
   const morte = primeiro(m.eventos, (e) => e.t === 'morreu' && e.id === 'i1');
-  const golpes = m.eventos.filter((e) => e.t === 'impacto' && e.fonteId === 'j1' && e.alvoId === 'i1').length;
+  const golpes = golpesDe(m.eventos, 'j1', 'i1');
   return { golpes, tempoS: segundos((morte?.tick ?? m.estado.tick) - inicio), venceu: morte !== undefined };
 }
 
@@ -93,8 +104,7 @@ export function sequencia(classe: string, nivel: number, presets: readonly strin
     const inicio = primeiraAcaoDoTime(m.eventos, novos, 'j1')?.tick ?? m.estado.tick;
     const morte = primeiro(novos, (ev) => ev.t === 'morreu' && ev.id === id);
     resultados.push({
-      // Marco 24 (24/10/2026): golpe é o que fere ou erra; o impacto só de efeito (o Grito do falcão expõe) não conta.
-      golpes: novos.filter((ev) => ev.t === 'impacto' && ev.fonteId === 'j1' && ev.alvoId === id && (ev.dano > 0 || ev.falha)).length,
+      golpes: golpesDe(novos, 'j1', id),
       tempoS: segundos((morte?.tick ?? m.estado.tick) - inicio),
       venceu: morte !== undefined,
     });

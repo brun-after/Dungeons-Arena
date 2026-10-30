@@ -112,7 +112,7 @@ function ricochetear(estado: EstadoJogo, ctx: ContextoSimulacao, p: Projetil, do
   const dx = destino.x - origem.x;
   const dy = destino.y - origem.y;
   const d = Math.hypot(dx, dy);
-  const novo: Projetil = { ...p, id: novoId(estado), x: origem.x, y: origem.y, dirX: dx / d, dirY: dy / d, restante: d + 0.5, atingidos: [...p.atingidos], ricochetes: p.ricochetes - 1 };
+  const novo: Projetil = { ...p, id: novoId(estado), x: origem.x, y: origem.y, dirX: dx / d, dirY: dy / d, restante: d + 0.5, atingidos: [...p.atingidos], ricochetes: p.ricochetes - 1, ...(p.var && { var: { ...p.var } }) };
   delete novo.curados;
   estado.projeteis.push(novo);
   saida.push({ t: 'projetilLancado', tick: estado.tick, projetilId: novo.id, acaoId: p.acaoId, donoId: p.donoId, habilidadeId: p.habilidadeId, chave: p.chave });

@@ -11,29 +11,75 @@
       "valorBase": 20,
       "slotPadrao": "arma_principal",
       "nivelMinimo": 1,
-      "bonusAtributos": {
-        "forca": 2
-      },
+      "bonusAtributos": {},
       "bonusDefesa": 0,
       "efeitos": [],
-      "dropavel": true
+      "dropavel": true,
+      "arma": "espada_curta"
     },
     {
       "id": "cajado_aprendiz",
       "nome": "Cajado de aprendiz",
       "tipo": "equipamento",
-      "descricao": "Canaliza magia com mais facilidade.",
+      "descricao": "Abre o solo amaldiçoado sob o inimigo.",
       "icone": "cajado",
       "raridade": "comum",
       "valorBase": 20,
       "slotPadrao": "arma_principal",
       "nivelMinimo": 1,
-      "bonusAtributos": {
-        "inteligencia": 2
-      },
+      "bonusAtributos": {},
       "bonusDefesa": 0,
       "efeitos": [],
-      "dropavel": true
+      "dropavel": true,
+      "arma": "cajado_aprendiz"
+    },
+    {
+      "id": "arco_simples",
+      "nome": "Arco simples",
+      "tipo": "equipamento",
+      "descricao": "Flechas retas, sem segredo.",
+      "icone": "arco",
+      "raridade": "comum",
+      "valorBase": 20,
+      "slotPadrao": "arma_principal",
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": true,
+      "arma": "arco_simples"
+    },
+    {
+      "id": "tomo_aprendiz",
+      "nome": "Tomo do aprendiz",
+      "tipo": "equipamento",
+      "descricao": "O primeiro livro de feitiços: dardos arcanos.",
+      "icone": "tomo",
+      "raridade": "comum",
+      "valorBase": 20,
+      "slotPadrao": "arma_principal",
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": true,
+      "arma": "tomo_aprendiz"
+    },
+    {
+      "id": "bumerangue_madeira",
+      "nome": "Bumerangue de madeira",
+      "tipo": "equipamento",
+      "descricao": "Vai, acerta e volta à mão.",
+      "icone": "bumerangue",
+      "raridade": "comum",
+      "valorBase": 20,
+      "slotPadrao": "arma_principal",
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": true,
+      "arma": "bumerangue"
     },
     {
       "id": "machado_orc",
@@ -50,24 +96,26 @@
       },
       "bonusDefesa": 0,
       "efeitos": [],
-      "dropavel": true
+      "dropavel": true,
+      "arma": "machado"
     },
     {
       "id": "adaga",
       "nome": "Adaga",
       "tipo": "equipamento",
-      "descricao": "Leve, para a mão livre.",
+      "descricao": "Arremessada, quica nas paredes e volta à mão.",
       "icone": "adaga",
       "raridade": "comum",
       "valorBase": 15,
-      "slotPadrao": "arma_secundaria",
+      "slotPadrao": "arma_principal",
       "nivelMinimo": 1,
       "bonusAtributos": {
         "destreza": 2
       },
       "bonusDefesa": 0,
       "efeitos": [],
-      "dropavel": true
+      "dropavel": true,
+      "arma": "adaga"
     },
     {
       "id": "escudo_madeira",

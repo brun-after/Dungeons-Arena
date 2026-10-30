@@ -24,7 +24,10 @@ const INTERVALO_GIRO_MS = 40;
 /** O giro segue soltando vento um pouco depois do lançamento (o corpo ainda roda). */
 const GIRO_MS = DURACAO_GOLPE.giro;
 
-const RASTRO: Readonly<Record<Exclude<Golpe, 'disparo' | 'giro'>, NomePreset>> = {
+/** Marco 27 (D-126): os golpes de longe (disparo, arremesso, leitura) não deixam rastro de arma no alvo. */
+const deLonge = (g: Golpe): g is 'disparo' | 'arremesso' | 'leitura' => g === 'disparo' || g === 'arremesso' || g === 'leitura';
+
+const RASTRO: Readonly<Record<Exclude<Golpe, 'disparo' | 'giro' | 'arremesso' | 'leitura'>, NomePreset>> = {
   corte: 'golpe_corte',
   corte_pesado: 'golpe_machado',
   contundente: 'golpe_esmagar',
@@ -63,7 +66,7 @@ export class EfeitosDeArma {
   /** O impacto genérico da habilidade fica de fora quando o golpe de arma o desenha. */
   cuidaDoImpacto(fonte: Entidade | undefined, chave: string): boolean {
     const g = fonte ? this.o.golpeDe(fonte, chave) : null;
-    return g !== null && g !== 'disparo';
+    return g !== null && !deLonge(g);
   }
 
   private corDoRastro(e: Entidade, tick: number): number {
@@ -90,7 +93,7 @@ export class EfeitosDeArma {
       const fonte = entidade(ev.fonteId);
       if (!fonte) return;
       const golpe = this.o.golpeDe(fonte, ev.chave);
-      if (!golpe || golpe === 'disparo') return;
+      if (!golpe || deLonge(golpe)) return;
       const de = pos(ev.fonteId);
       const alvo = pos(ev.alvoId);
       if (!de || !alvo) return;

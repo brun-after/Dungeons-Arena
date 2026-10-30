@@ -14,7 +14,8 @@ import { SLOTS_DE_EQUIPAMENTO, type Slot } from '../modos/modo';
 import { recalcularFicha } from './derivados';
 import { aplicarItemDeProgressao } from './itens-progressao';
 import { aprenderPorLivro } from './habilidades-personagem';
-import { NOMES_ATRIBUTOS, type Item, type NomeAtributo } from './itens';
+import { cabeNoSlot, NOMES_ATRIBUTOS, type Item, type NomeAtributo } from './itens';
+import { ehPergaminho, marcarPergaminhos } from './passiva-aventureiro';
 
 export function criarBolsa(classe: ClasseJogador, ouroInicial = 0): Bolsa {
   const bolsa: Bolsa = {
@@ -38,6 +39,8 @@ export function criarBolsa(classe: ClasseJogador, ouroInicial = 0): Bolsa {
     diario: [],
   };
   for (const { id, qtd } of classe.itensIniciais) bolsa.mochila.push({ invId: `i${bolsa.proximoInv++}`, itemId: id, qtd, ref: null });
+  // Marco 27 (29/10/2026, D-126): a arma de partida já vem na mão principal (sem bônus: a ficha segue a da classe).
+  if (classe.armaInicial) bolsa.equipamento.arma_principal = { invId: `i${bolsa.proximoInv++}`, itemId: classe.armaInicial, qtd: 1, ref: null };
   return bolsa;
 }
 
@@ -125,7 +128,7 @@ export function equipar(e: Entidade, ctx: ContextoSimulacao, invId: string, slot
     const entrada = bolsa.mochila[indice];
     const item = entrada ? ctx.conteudo.itens.get(entrada.itemId) : undefined;
     if (!entrada || !item) return recusa('nao_encontrado');
-    if (item.tipo !== 'equipamento' || item.slotPadrao !== slot) return recusa('slot_invalido');
+    if (!cabeNoSlot(item, slot)) return recusa('slot_invalido');
     if (e.nivel < item.nivelMinimo) return recusa('nivel_insuficiente');
     // Tira da mochila e troca com o que estava no slot: a troca sempre cabe.
     bolsa.mochila.splice(indice, 1);
@@ -197,10 +200,14 @@ export function usarItem(estado: EstadoJogo, e: Entidade, ctx: ContextoSimulacao
       return OK;
     }
     // Marco 10A-3: pergaminho de invocação acima do limite do modo é recusado sem gastar (§5.6).
-    if (excedeLimite(estado, ctx, e, item.efeitos)) return recusa('limite');
+    // Marco 27 (D-126): os pergaminhos acumulam no teto próprio deles, à parte das invocações de classe.
+    const pergaminho = ehPergaminho(item);
+    if (excedeLimite(estado, ctx, e, item.efeitos, pergaminho)) return recusa('limite');
     if (!item.efeitos.some((ef) => serviria(e, ef))) return recusa('sem_efeito');
     const [hpAntes, manaAntes] = [e.hp, e.mana];
+    const antes = estado.entidades.length;
     for (const ef of item.efeitos) aplicarEfeito(estado, ctx, e, ef, { id: e.id, x: e.x, y: e.y }, null, saida);
+    if (pergaminho) marcarPergaminhos(estado, ctx, e, antes);
     const [hp, mana] = [e.hp - hpAntes, e.mana - manaAntes];
     entrada.qtd--;
     if (entrada.qtd <= 0) bolsa.mochila.splice(indice, 1);

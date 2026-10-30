@@ -7,6 +7,7 @@
 // forma, tempo, custo, tema e apresentação), o elemento, as etiquetas, o nível mínimo, a passiva e as
 // evoluções. Formas novas (linha, cone, ao redor) e alvos novos (aliado, aliados, célula livre).
 
+import { lerVariacao, type VariacaoBasico } from './variacoes';
 import { ehObjeto, Leitor, type Objeto } from '../core/validar';
 import { formulaValida } from './dados';
 import { ehElemento, type Elemento } from './elementos';
@@ -161,6 +162,10 @@ export interface Habilidade {
   escalaCom: AtributoDeEscala;
   /** Marco 18 (D-068): grau B, A ou S (tempo de estudo para aprender). */
   grau: Grau;
+  /** Marco 27 (29/10/2026, D-126): a variação do básico da arma (combat/variacoes.ts); ausente = nenhuma. */
+  variacao?: VariacaoBasico;
+  /** D-126: os atributos que escalam a rolagem do básico da arma (ausente = Força e Inteligência, ou Destreza). */
+  escalaRolagem?: readonly AtributoDeEscala[];
 }
 
 // Marco 11A (D-066): um preset por fantasia (corte, runas, cristais, bolhas, sombra, sangue, sagrado, pedra, vento,
@@ -483,6 +488,13 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
     escalaVisual: 1,
   };
   base.escalaCom = o.escalaCom === undefined ? escalaPadrao(base.tipoAtaque) : l.opcao(o, 'escalaCom', ATRIBUTOS_DE_ESCALA);
+  const variacao = lerVariacao(l, o.variacao);
+  if (variacao) base.variacao = variacao;
+  if (o.escalaRolagem !== undefined) base.escalaRolagem = l.listaDeTextos(o, 'escalaRolagem').map((a) => {
+    if ((ATRIBUTOS_DE_ESCALA as readonly string[]).includes(a)) return a as AtributoDeEscala;
+    l.erro(`escalaRolagem: atributo desconhecido "${a}"`);
+    return 'forca';
+  });
   base.tags = etiquetasDe(base, o.tags === undefined ? [] : l.listaDeTextos(o, 'tags'));
   base.chave = base.id;
   const h = base;
@@ -527,6 +539,8 @@ const CAMPOS_DEFINICAO = [
   'mobilidade', 'escalaCom', 'grau', 'marcos', 'fusao', 'familiaEvolucao',
   // Marco 24
   'variantes', 'interna', 'familiaGeral',
+  // Marco 27 (D-126)
+  'variacao', 'escalaRolagem',
 ];
 
 /** Marco 18 (D-068): sem `escalaCom`, o físico escala com Força e o mágico com Inteligência. */

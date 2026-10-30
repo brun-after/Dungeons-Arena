@@ -29,9 +29,11 @@ export function golpeDaAcao(ctx: ContextoSimulacao, e: Entidade, chave: string, 
   const h = resolverHabilidade(ctx, chave);
   if (!h) return null;
   if (h.visual?.animacao === 'giro') return 'giro';
-  if (h.tipoAtaque !== 'fisico') return null;
   const golpe = golpeDaArmaNaMao(ctx, e, modelo);
+  // Marco 27 (D-126): o tomo lê a magia (o dardo e as de longe); de perto, bate com o livro.
+  if (golpe === 'leitura') return h.tipoAtaque === 'magico' || h.alcanceCelulas > ALCANCE_CORPO_A_CORPO ? 'leitura' : 'contundente_leve';
+  if (h.tipoAtaque !== 'fisico') return null;
   if (!golpe) return null;
-  if (golpe === 'disparo') return h.politicaImpacto === 'projetil' ? 'disparo' : h.alcanceCelulas <= ALCANCE_CORPO_A_CORPO ? 'contundente_leve' : null;
+  if (golpe === 'disparo' || golpe === 'arremesso') return h.politicaImpacto === 'projetil' ? golpe : h.alcanceCelulas <= ALCANCE_CORPO_A_CORPO ? 'contundente_leve' : null;
   return h.politicaImpacto === 'projetil' || h.alcanceCelulas > ALCANCE_CORPO_A_CORPO ? null : golpe;
 }

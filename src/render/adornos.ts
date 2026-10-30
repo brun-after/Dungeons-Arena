@@ -3,6 +3,7 @@
 // frente, geradas do SVG de modelos/adornos.ts uma vez por combinação. O rig as põe no corpo, então acompanham a
 // pose, o passo e o giro. Enquanto a imagem decodifica, o token aparece sem os adornos.
 
+import armasJson from '../data/armas.json';
 import { Texture } from 'pixi.js';
 import type { AparenciaEquipada } from '../entities/entidade';
 import { adornosDoBipede, deslocamentosDasMaos } from './modelos/adornos';
@@ -63,6 +64,10 @@ export function definirCoresDosElementos(f: (elemento: string) => number | null)
   corDoElemento = f;
 }
 
+/** Marco 27 (D-126): o modelo de cada desenho de arma (data/armas.json; sem `modelo`, o próprio desenho). */
+const MODELOS_POR_DESENHO: ReadonlyMap<string, string> = new Map(Object.entries(armasJson.armas).map(([d, a]) => [d, 'modelo' in a ? a.modelo : d]));
+const modeloDaArma = (desenho: string): string => MODELOS_POR_DESENHO.get(desenho) ?? desenho;
+
 /** As texturas do equipamento para o modelo e a vista (null: o modelo não é de classe ou nada a mostrar ainda). */
 export function texturasDoAdorno(modelo: string, vista: Vista, aparencia: AparenciaEquipada | null): TexturasAdorno | null {
   if (!Object.hasOwn(OPCOES_JOGAVEIS, modelo)) return null;
@@ -83,8 +88,8 @@ export function texturasDoAdorno(modelo: string, vista: Vista, aparencia: Aparen
   cache.set(chave, 'carregando');
   const opcoes = OPCOES_JOGAVEIS[classe];
   const camadas = adornosDoBipede(opcoes, vista, {
-    arma: ap.arma,
-    secundaria: ap.secundaria,
+    arma: ap.arma ? modeloDaArma(ap.arma) : null,
+    secundaria: ap.secundaria ? modeloDaArma(ap.secundaria) : null,
     cabeca: corDe(ap.cabeca),
     corpo: corDe(ap.corpo),
     capa: corDe(ap.capa),

@@ -469,6 +469,19 @@
     "xpExtremaPct": 60
   },
   "armas": {
-    "danoForaDaClassePct": -15
+    "secundariaACada": 3,
+    "carregadoAlcanceMult": 3,
+    "semFamiliaridade": { "curaPct": -50, "alcance": -2, "velocidadePct": -50, "elementalPct": -30, "servosPct": -35 },
+    "emprestimo": {
+      "curaAoAbaterChancePct": 35,
+      "curaAoAbaterPct": 6,
+      "elementalChancePct": 40,
+      "elementalMs": 4000,
+      "reanimarChancePct": 20,
+      "reanimarMs": 8000,
+      "invocacaoDuracaoPct": 25,
+      "arcoRecargaPct": 40
+    },
+    "aventureiro": { "descontoPergaminhoPct": 25, "sortePergaminhoPct": 50, "duracaoInvocacaoPct": 30, "danoBasicoPct": 10 }
   }
 }

@@ -216,6 +216,7 @@ export function gerarItemBase(
     forma: p.forma,
     elemento: p.elemento,
     ganchos,
+    ...(base.arma ? { arma: base.arma } : {}),
   };
 }
 

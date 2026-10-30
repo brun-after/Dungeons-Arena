@@ -1,4 +1,6 @@
 import type { CampoTatico } from '../combat/estado-tatico';
+import type { EstadoVariacao } from '../combat/projeteis-variacoes';
+import type { Solo } from '../combat/solos';
 // Estado raiz da simulação (§3.3). Um único objeto tipado, só com dados: sem classes,
 // sem funções e sem referências cíclicas, para clonar, comparar (digest) e gravar em checkpoint.
 // O terreno da fase é conteúdo imutável e fica no contexto (D-007); aqui só o `faseId`.
@@ -55,6 +57,8 @@ export interface Projetil {
   perfuraExtra?: number;
   /** Aliados que o tiro cheio já curou (a sintonia sagrada), à parte de `atingidos`. */
   curados?: EntidadeId[];
+  /** Marco 27 (29/10/2026, D-126): o estado da variação do básico em voo (bumerangue, ricochetes, órbita…). */
+  var?: EstadoVariacao;
 }
 
 /**
@@ -187,6 +191,8 @@ export interface RespawnPendente {
 
 export interface EstadoJogo {
   camposTaticos?: CampoTatico[];
+  /** Marco 27 (29/10/2026, D-126): o solo amaldiçoado do Necromante e a runa do Mago (combat/solos.ts). */
+  solos?: Solo[];
   /** Marco 24: fases agendadas (ausente = nenhuma). */
   fases?: FaseAgendada[];
   versao: 1;
@@ -254,6 +260,7 @@ const copiaEfeito = (e: EfeitoCanonico | null): EfeitoCanonico | null => (e ? { 
 export function clonarEstado(estado: EstadoJogo): EstadoJogo {
   return {
     ...(estado.fases ? { fases: estado.fases.map((x) => ({ ...x })) } : {}),
+    ...(estado.solos ? { solos: estado.solos.map((s) => ({ ...s })) } : {}),
     ...(estado.camposTaticos ? { camposTaticos: estado.camposTaticos.map((c) => ({ ...c, efeito: copiaEfeito(c.efeito) })) } : {}),
     versao: estado.versao,
     faseId: estado.faseId,
@@ -261,7 +268,7 @@ export function clonarEstado(estado: EstadoJogo): EstadoJogo {
     rng: clonarRng(estado.rng),
     entidades: estado.entidades.map(clonarEntidade),
     recargas: { ...estado.recargas },
-    projeteis: estado.projeteis.map((p) => ({ ...p, atingidos: [...p.atingidos], ...(p.curados && { curados: [...p.curados] }) })),
+    projeteis: estado.projeteis.map((p) => ({ ...p, atingidos: [...p.atingidos], ...(p.curados && { curados: [...p.curados] }), ...(p.var && { var: { ...p.var } }) })),
     objetos: estado.objetos.map((o) => ({ ...o, efeito: copiaEfeito(o.efeito), itens: [...o.itens] })),
     respawns: estado.respawns.map((r) => ({ ...r, habilidades: [...r.habilidades] })),
     rastros: estado.rastros.map((r) => ({ ...r, interno: copiaEfeito(r.interno), atingidos: [...r.atingidos] })),

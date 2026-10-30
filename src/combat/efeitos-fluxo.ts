@@ -38,7 +38,13 @@ export type AplicarDireto = (alvo: Entidade, ef: EfeitoCanonico, origem: OrigemF
 export function contarInvocacoes(estado: EstadoJogo, donoId: EntidadeId): number {
   // Marco 22: o falcão do Aventureiro tem vaga própria.
   // Marco 24: as temporárias (Levante profano) ficam fora do limite.
-  return estado.entidades.filter((e) => vivo(e) && e.invocacao?.donoId === donoId && !e.invocacao.dominado && !e.invocacao.avatar && !e.invocacao.companheiro && !e.invocacao.extra).length;
+  // Marco 27 (D-126): as de pergaminho também (acumulam no teto próprio delas).
+  return estado.entidades.filter((e) => vivo(e) && e.invocacao?.donoId === donoId && !e.invocacao.dominado && !e.invocacao.avatar && !e.invocacao.companheiro && !e.invocacao.extra && !e.invocacao.pergaminho).length;
+}
+
+/** Marco 27 (29/10/2026, D-126): as invocações de pergaminho de pé, que acumulam até `invocacoesDePergaminho`. */
+export function contarPergaminhos(estado: EstadoJogo, donoId: EntidadeId): number {
+  return estado.entidades.filter((e) => vivo(e) && e.invocacao?.donoId === donoId && e.invocacao.pergaminho && !e.invocacao.dominado).length;
 }
 
 export function contarAvatares(estado: EstadoJogo, donoId: EntidadeId): number {
@@ -57,9 +63,9 @@ export function contarArmadilhas(estado: EstadoJogo, donoId: EntidadeId): number
 }
 
 /** Os limites do modo valem antes de cobrar recurso e recarga (§5.6): a ação é recusada inteira. */
-export function excedeLimite(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, efeitos: readonly EfeitoCanonico[]): boolean {
+export function excedeLimite(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, efeitos: readonly EfeitoCanonico[], pergaminho = false): boolean {
   const lim = ctx.modo.limites;
-  let invocacoes = contarInvocacoes(estado, ator.id);
+  let invocacoes = pergaminho ? contarPergaminhos(estado, ator.id) : contarInvocacoes(estado, ator.id);
   let avatares = contarAvatares(estado, ator.id);
   let armadilhas = contarArmadilhas(estado, ator.id);
   for (const ef of efeitos) {
@@ -70,7 +76,7 @@ export function excedeLimite(estado: EstadoJogo, ctx: ContextoSimulacao, ator: E
     else if (fluxo === 'invocar') invocacoes += Math.max(1, ef.valor);
     if (fluxo === 'armadilha') armadilhas += 1;
   }
-  return invocacoes > limiteDeInvocacoes(ctx, ator) || avatares > lim.avataresPorJogador || armadilhas > lim.armadilhasPorJogador;
+  return invocacoes > (pergaminho ? lim.invocacoesDePergaminho : limiteDeInvocacoes(ctx, ator)) || avatares > lim.avataresPorJogador || armadilhas > lim.armadilhasPorJogador;
 }
 
 export function agendarAtrasado(estado: EstadoJogo, alvo: Entidade, ef: EfeitoCanonico, origem: OrigemFluxo): void {

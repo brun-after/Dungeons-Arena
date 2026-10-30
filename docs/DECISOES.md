@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.62 · **Data:** 29/10/2026
+**Versão:** 0.63 · **Data:** 29/10/2026
 
 > **Histórico**
+> - **0.63 (29/10/2026)**: D-126 (armas de classe: 8 por classe, cada uma com a sua variação do básico, familiaridade, a fração da passiva de outra classe, o 3º golpe pela mão secundária, o solo amaldiçoado, o bumerangue e os pergaminhos que acumulam) e as notas em D-069 e D-093.
 > - **0.62 (29/10/2026)**: D-125 (o avanço de quem conjura sai no lançamento, e a linha da investida passa pelas paredes) e a nota em D-120.
 > - **0.61 (29/10/2026)**: D-124 (assinaturas visuais: cada skill com o seu desenho, motor de efeitos com atlas rico, silhuetas, marcas no chão e deslize; galeria de efeitos) e a nota em D-066; ajuste da sexta leva em D-122 (orçamento de tempo no laço solo).
 > - **0.60 (29/10/2026)**: D-122 (o jogo não pesa com o tempo no celular), D-123 (renascer fora da porta) e a nota de D-121 (a automação busca o alcance da skill pronta mais curta).
@@ -1817,6 +1818,9 @@ ritmo. Saves vão para a v14.
 - **Aparência**: brilho do elemento na ponta da arma, gema por forma, halo da Última no token e aura de partículas
   para Lendária e Última; molduras na interface.
 
+> **Revista pela D-126 (29/10/2026)**: as 20 bases viram 52: as 40 armas de classe (8 por classe) e as 12 bases
+> fora das armas. As afinidades passam a 44, no máximo 2 por base.
+
 ## D-070 · Marco 18: combos, marcos, buff × habilidade, fusões, missões, origens, forja, eventos e diário (v0.34, 17/10/2026)
 
 **Decisão.**
@@ -2424,6 +2428,10 @@ golpeia corpo a corpo, o Guerreiro de cajado ataca de longe e o Mago de arco ati
   - as identidades seguem com a classe: a Mira firme só vale para o Arqueiro, e as habilidades do falcão não incluem
     o básico.
 - **Interface:** ao trocar, o log e um aviso dizem qual é o ataque básico agora; a arma já aparece desenhada na mão.
+
+> **Revista pela D-126 (29/10/2026)**: cada classe tem a sua família (lâmina, arco, tomo, cajado, arremessável) e
+> cada arma o seu básico. O corte de 15% fora da família sai: no lugar, a classe perde parte da passiva sem a arma
+> natural, e a arma de outra classe dá uma fração da passiva dela.
 
 ## D-094 — Skills de classe, ultimates e estados de controle (marco 24, 24/10/2026)
 
@@ -3071,3 +3079,72 @@ atravessar paredes, mas o avanço das skills nunca chegava lá:
 - **Pouso ao lado do alvo:** sem célula livre na reta antes do hostil ou da mira, o avanço pousa na vizinha livre mais
   perto de quem avança, dentro do alcance. A muralha tática na reta impede.
 - **Determinismo:** a ordem muda (avança, depois acerta), mas continua só a partir de comandos.
+
+
+## D-126 — Armas de classe (marco 27, 29/10/2026)
+
+**Contexto.** A arma quase não mudava o jogo na forma base:
+- as cinco lâminas davam o mesmo golpe;
+- fora da família, a arma só cortava 15% do dano (D-093);
+- a mão secundária só aceitava escudo, tomo e aljava.
+
+O usuário pediu que cada classe tivesse as suas armas, cada uma com um básico próprio que fica mais bonito a cada
+raridade. Também pediu que a arma natural alimentasse a passiva da classe.
+
+**Decisão** (`data/armas.json` v3, `progression/armas.ts`, `combat/basico.ts`):
+- **Famílias e classes:**
+  - lâmina para o Guerreiro, arco para o Arqueiro, tomo para o Mago (o tomo deixa de ser foco de mão secundária),
+    cajado para o Necromante e arremessável para o Aventureiro;
+  - o escudo e a aljava continuam focos de mão secundária.
+- **8 armas por classe, 40 ao todo:**
+  - cada arma tem uma variação fixa do básico, uma mecânica de verdade (trajetória, forma, gatilho);
+  - a raridade só aumenta a força, os ganchos e o visual;
+  - os ids antigos (`espada`, `machado`, `clava`, `lanca`, `adaga`, `arco`, `tomo`, `cajado`) continuam resolvendo;
+  - a `adaga` vira a adaga de arremesso do Aventureiro.
+- **Variações** (`hab.variacao`, lidas por funções pequenas em `combat/projeteis-variacoes.ts`, `combat/solos.ts` e
+  `combat/basico.ts`):
+  - **Guerreiro:** arco amplo, estocada, giro a cada 3º golpe, onda de corte, tremor, passo de investida, arrasto e
+    riposta;
+  - **Arqueiro:** perfurante, leque, salva, tiro parabólico, teleguiada, tabela, estilhaço e cravar;
+  - **Mago:** encadear, runa, onda, orbe pulsante, feixe, imagem, órbita arcana e implosão;
+  - **Necromante:** expansão, praga, meia-lua, mãos da cova, lamento, dreno, perseguição e colheita;
+  - **Aventureiro:** ricochete, tabela, curva, órbita, divisor, gancho de volta, pouso no falcão e rastro cortante.
+- **Básicos novos:**
+  - o do Necromante é o **solo amaldiçoado**: uma área sob o alvo que fere em pulsos (`estado.solos`);
+  - o do Aventureiro é o **bumerangue**, que acerta na ida e na volta. Na volta, atravessa paredes até a mão.
+- **Armas de partida** (`classe.armaInicial`, equipadas ao criar o personagem): espada curta, arco simples, tomo do
+  aprendiz, cajado do aprendiz e bumerangue de madeira. Têm o básico de base, sem variação e sem bônus.
+- **Scaling do item:** o dano do básico usa a rolagem da arma que golpeia (`escalaRolagem`), não o perfil da classe.
+- **Familiaridade:** sem a arma natural, a classe perde parte da passiva (`balance.armas.semFamiliaridade`):
+  - **Guerreiro:** cura menor. A lâmina vale também na mão secundária;
+  - **Arqueiro:** alcance e velocidade menores;
+  - **Mago:** a parte elemental do dano rende menos;
+  - **Necromante:** servos mais fracos;
+  - **Aventureiro:** perde a passiva nova inteira. Ela só vale com o arremessável na mão principal.
+- **Arma de outra classe** (`balance.armas.emprestimo`, por família, sem `if` de classe):
+  - **lâmina:** chance de cura ao abater;
+  - **arco:** atira, mas com recarga maior;
+  - **tomo:** depois de uma skill elemental, chance de o próximo básico sair com esse elemento;
+  - **cajado:** chance de o abatido se erguer como aliado por pouco tempo;
+  - **arremessável:** mais duração nas invocações de pergaminho.
+- **Mão secundária:** qualquer arma vale ali. A cada 3º básico, o golpe sai pela secundária (`basicoDaVez`):
+  - com o básico, a variação e o scaling dela, sem penalidade;
+  - só se o alvo estiver no alcance dela; senão, o golpe fica pendente;
+  - a passiva da classe continua valendo. O tiro carregado do Arqueiro, saindo pela espada, ganha alcance e
+    atravessa.
+- **Aventureiro e pergaminhos:**
+  - a passiva nova (`progression/passiva-aventureiro.ts`) dá desconto e sorte nos pergaminhos, mais duração das
+    invocações e bônus no dano do básico;
+  - as invocações de pergaminho acumulam, do mesmo tipo ou não, até `limites.invocacoesDePergaminho` (4), separado
+    das invocações de classe. Isso diverge da §5.6 da especificação.
+- **Visual:**
+  - cada arma tem modelo próprio na mão (`render/modelos/armas-classe.ts`);
+  - cada básico tem a sua assinatura (`arma_*`, `render/vfx/familias/armas.ts`), com camadas por raridade: a
+    silhueta limpa, rastro e brilho, partículas e marca no chão, aura e clarão;
+  - golpes novos: arremesso e leitura;
+  - a galeria (`?galeria=efeitos`) ganha o grupo Armas, com as 4 formas.
+- **Saves:** versão 27. A migração 26 → 27 dá a arma de partida a quem estava de mãos vazias e refaz os básicos.
+- **Ritmo:** o simulador conta golpe por ação, não por impacto. O bumerangue que acerta na ida e na volta e os pulsos
+  do solo são um golpe só. `npm run balancear` em 94/94.
+- **Determinismo:** o estado das variações (`Projetil.var`, `estado.solos`, `Entidade.armas`) só tem dados
+  primitivos, é clonado e muda só a partir de comandos.

@@ -20,7 +20,7 @@ import { criarDicaAtributo, linhasDaDica, type DicaAtributo } from './dica-atrib
 import { bonusDeAtributo } from '../progression/ficha';
 import { faixaDaFormula } from '../combat/dados';
 import { habilidadeDoAtor } from '../combat/perfil';
-import { NOMES_ATRIBUTOS, type Item } from '../progression/itens';
+import { cabeNoSlot, NOMES_ATRIBUTOS, type Item } from '../progression/itens';
 import { consumiveisComAtalho } from '../progression/inventario';
 import { xpParaProximo } from '../progression/nivel';
 import { resolverHabilidade } from '../combat/compilar-habilidade';
@@ -84,8 +84,16 @@ export function molduraDoItem(item: Item | undefined): string {
 }
 
 /** "FOR +2 · CON +10% · DEF +1" */
-export function resumoDoItem(item: Item): string {
+/** Marco 27 (D-126): a arma diz a família e o básico dela (o nome da variação). */
+export function armaDoItem(ctx: Pick<ContextoSimulacao, 'conteudo' | 'balance'>, item: Item): { familia: string; basico: string } | undefined {
+  const arma = item.arma ? ctx.conteudo.armas.armas.get(item.arma) : undefined;
+  const basico = arma ? resolverHabilidade(ctx, arma.basico)?.nome : undefined;
+  return arma && basico ? { familia: t(`familiaArma.${arma.familia}` as ChaveTexto), basico } : undefined;
+}
+
+export function resumoDoItem(item: Item, arma?: { familia: string; basico: string }): string {
   const partes: string[] = [];
+  if (arma) partes.push(t('mochila.basicoDaArma', { familia: arma.familia, basico: arma.basico }));
   for (const nome of NOMES_ATRIBUTOS) {
     const b = item.bonusAtributos[nome];
     if (!b) continue;
@@ -148,6 +156,8 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     vazio?: boolean;
     ordem?: { subir: (() => void) | null; descer: (() => void) | null; invId: string };
     atalho?: string;
+    /** Marco 27 (D-126): a arma também vai para a mão secundária. */
+    extra?: { texto: string; acao: () => void };
   }): HTMLLIElement => {
     const li = el('li', opcoes.vazio ? 'linha-item vazio' : 'linha-item');
     const conteudo = el('span', 'conteudo-item');
@@ -160,7 +170,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     // Marco 26 (28/10/2026, D-116): o livro que ensina skill de classe leva a runa da classe.
     if (opcoes.item) comRuna(nome, classeDoItem(ctx.conteudo, opcoes.item.id));
     textos.append(nome);
-    const resumo = opcoes.item ? resumoDoItem(opcoes.item) : '';
+    const resumo = opcoes.item ? resumoDoItem(opcoes.item, armaDoItem(ctx, opcoes.item)) : '';
     const detalhe = opcoes.bloqueio ?? (opcoes.atalho ? [t('mochila.atalho', { tecla: opcoes.atalho }), resumo].filter(Boolean).join(' · ') : resumo);
     if (detalhe) textos.append(el('span', 'detalhe-item', detalhe));
     conteudo.append(iconeItem, textos);
@@ -179,6 +189,12 @@ export function criarMochila(o: OpcoesMochila): Mochila {
         b.setAttribute('aria-label', `${opcoes.textoAcao}: ${opcoes.rotulo}`);
         li.append(b);
       }
+    }
+    const extra = opcoes.extra;
+    if (extra && !opcoes.bloqueio) {
+      const b = botao(extra.texto, `${opcoes.chave}-extra`, extra.acao);
+      b.setAttribute('aria-label', `${extra.texto}: ${opcoes.rotulo}`);
+      li.append(b);
     }
     const ordem = opcoes.ordem;
     if (ordem) {
@@ -293,6 +309,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
       bloqueio,
       ordem,
       ...(atalho !== undefined && { atalho }),
+      ...(item && slot === 'arma_principal' && cabeNoSlot(item, 'arma_secundaria') && { extra: { texto: t('mochila.naSecundaria'), acao: () => { agir({ t: 'equipar', invId: entrada.invId, slot: 'arma_secundaria' }); } } }),
     });
   };
 

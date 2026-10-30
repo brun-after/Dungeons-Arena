@@ -27,7 +27,8 @@ import { dispararGanchosDe, passivosDe } from '../progression/ganchos-do-portado
 import { dispararSinergias, resistenciaPct, sinergiasAtivas } from './elementos';
 import { absorcaoPct } from './afinidade';
 import { estenderNoClima, multiplicadorClima } from './clima';
-import { multiplicadorArma } from '../progression/armas';
+import { aoLevarGolpe, ehBasico, fatorDeCura, multiplicadorArma } from './basico';
+import { habilidadeDoAtor } from './perfil';
 import { ehDeAlgumaClasse } from '../progression/habilidades-classe';
 import { fatorDeClasseEntrePersonagens } from '../modos/regras';
 import { fatorDoGolpe } from '../modos/dificuldade';
@@ -154,7 +155,7 @@ export function aplicarImpacto(
       { ...fonte, bonusAtributo: fonte.bonusAtributo + (impacto.danoExtra ?? 0) },
       { defesa: alvo.defesa, imune: absorve === 0 && (imuneADano(alvo, tick) || recebido === 0), multRecebido: recebido },
       ctx.balance.combate,
-      fonte.multDano * multiplicadorClima(ctx, hab.elemento) * (atacante ? multiplicadorArma(ctx, atacante, hab.id) * extraGuerreiro(ctx, atacante, alvo) * multiplicadorDireto(ctx, atacante, hab, impacto.secundario ?? false) * multiplicadorDardo(ctx, atacante, alvo, hab, tick) * multiplicadorDaEncarnacao(ctx, atacante, alvo, hab, tick) : 1),
+      fonte.multDano * multiplicadorClima(ctx, hab.elemento) * (atacante ? multiplicadorArma(ctx, atacante, hab) * extraGuerreiro(ctx, atacante, alvo) * multiplicadorDireto(ctx, atacante, hab, impacto.secundario ?? false) * multiplicadorDardo(ctx, atacante, alvo, hab, tick) * multiplicadorDaEncarnacao(ctx, atacante, alvo, hab, tick) : 1),
     );
     ({ d20, mult, falha, critico, imune } = r);
     absorveu = absorve > 0 && !r.falha;
@@ -179,6 +180,8 @@ export function aplicarImpacto(
       if (atacante) registrarDardo(ctx, atacante, alvo, hab, tick, Math.min(hpAntes, dano));
       // Marco 22 (D-089): o Mago encarnado em gelo resfria quem o golpeia de perto.
       if (hab.politicaImpacto === 'contato') reagirAoGolpe(estado, ctx, alvo, atacante, saida);
+      // Marco 27 (D-126): a Rapieira deixa a riposta pronta em quem levou o golpe.
+      if (atacante && atacante !== alvo) aoLevarGolpe(estado, alvo, (id) => habilidadeDoAtor(ctx, alvo, id, tick));
     }
   }
   if (hab.formulaCura !== null) {
@@ -221,7 +224,7 @@ export function aplicarImpacto(
   if (falha || imune || absorveu) return;
   // D-078 (17/10/2026): só o básico recupera vida, sobre dano efetivo após defesa/escudo e sem excesso letal.
   const curaBasicoPct = conjurador?.bolsa ? (ctx.balance.recursos.curaBasicoPorClassePct[conjurador.bolsa.classeId] ?? 0) : 0;
-  const basicoQueFere = !!conjurador && vivo(conjurador) && conjurador !== alvo && hab.id === conjurador.ataqueBasico && dano > 0 && podeFerir(conjurador, alvo, ctx.modo);
+  const basicoQueFere = !!conjurador && vivo(conjurador) && conjurador !== alvo && ehBasico(conjurador, hab.id) && dano > 0 && podeFerir(conjurador, alvo, ctx.modo);
   // Marco 21 (D-088): o básico que fere enche a fúria do Guerreiro (antes da cura, que já dobra no golpe que a enche).
   if (conjurador && basicoQueFere && acumularFuria(ctx, conjurador, estado.tick)) encherFuria(estado, ctx, conjurador, origem, saida);
   // Marco 24 (D-095): com a sintonia técnica, as gerais técnicas que ferem também enchem.
@@ -230,7 +233,8 @@ export function aplicarImpacto(
   // A do Arqueiro: as gerais técnicas que ferem enchem parte da Mira.
   if (conjurador && !basicoQueFere && dano > 0 && conjurador !== alvo && podeFerir(conjurador, alvo, ctx.modo)) miraDaGeral(ctx, conjurador, hab, estado.tick);
   if (conjurador && basicoQueFere && curaBasicoPct > 0) {
-    const valor = Math.min(hpAntes, dano) * curaBasicoPct / 100 * multiplicadorFuria(ctx, conjurador, estado.tick);
+    // Marco 27 (D-126): sem a lâmina, o Guerreiro perde parte da cura.
+    const valor = Math.min(hpAntes, dano) * curaBasicoPct / 100 * multiplicadorFuria(ctx, conjurador, estado.tick) * fatorDeCura(ctx, conjurador);
     aplicarEfeito(estado, ctx, conjurador, construirEfeito('cura', { valor }), origem, null, saida);
   }
   if (conjurador) pulsarAura(estado, ctx, conjurador, alvo, Math.min(hpAntes, dano), saida, entregaRemota(hab));

@@ -80,6 +80,8 @@ export interface ClasseJogador {
   habilidades: string[];
   /** Mochila inicial (marco 6): referências ao catálogo de itens. */
   itensIniciais: { id: string; qtd: number }[];
+  /** Marco 27 (29/10/2026, D-126): a arma de partida, já na mão principal (sem ela, a classe perde parte da passiva). */
+  armaInicial: string | null;
   /** Marco 14: afinidades por etiqueta (mudam como cada habilidade funciona para a classe). */
   afinidades: Passiva[];
   /** Marco 14: o modelo de criatura (render) e a frase da tela de escolha (chave do i18n). */
@@ -183,6 +185,7 @@ export function lerClasses(json: unknown): { classes: Map<string, ClasseJogador>
         const i = l.objeto(v, 'itensIniciais[]');
         return { id: l.texto(i, 'id'), qtd: l.numero(i, 'qtd', { min: 1, max: 99, inteiro: true }) };
       }),
+      armaInicial: o.armaInicial === undefined ? null : l.texto(o, 'armaInicial'),
       afinidades: o.afinidades === undefined ? [] : l.lista(o, 'afinidades').flatMap((a) => lerPassiva(l, a) ?? []),
       modelo: o.modelo === undefined ? 'aventureiro' : l.texto(o, 'modelo'),
       descricao: o.descricao === undefined ? '' : l.texto(o, 'descricao'),

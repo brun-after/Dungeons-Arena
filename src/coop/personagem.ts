@@ -17,7 +17,7 @@ import { recalcularFicha } from '../progression/derivados';
 import { caminhosDoRank, nivelParaRank, ticksDeEstudo } from '../progression/habilidades-personagem';
 import { ehDaClasse, ehDeAlgumaClasse, teclaRecusa } from '../progression/habilidades-classe';
 import { empilha } from '../progression/inventario';
-import { NOMES_ATRIBUTOS } from '../progression/itens';
+import { cabeNoSlot, NOMES_ATRIBUTOS } from '../progression/itens';
 import { xpParaProximo } from '../progression/nivel';
 import { ticksDe } from '../core/tempo';
 import { jogadorDoSave, type RegistroProgresso } from '../save/esquema';
@@ -147,7 +147,10 @@ function conferirItens(b: Objeto, bolsa: Bolsa, nivel: number, ctx: ContextoSimu
   for (const slot of SLOTS_DE_EQUIPAMENTO) {
     const e = entrada(pedidoEquip[slot]);
     const item = e ? ctx.conteudo.itens.get(e.itemId) : undefined;
-    bolsa.equipamento[slot] = e && item?.tipo === 'equipamento' && item.slotPadrao === slot && item.nivelMinimo <= nivel ? e : null;
+    // Marco 27 (D-126): sem arma na mão principal, fica a de partida da classe (criarJogador já pôs).
+    const atual = slot === 'arma_principal' && !e ? bolsa.equipamento.arma_principal : null;
+    const inicial = atual ? { ...atual, invId: `i${String(proximo++)}` } : null;
+    bolsa.equipamento[slot] = e && item && cabeNoSlot(item, slot) && item.nivelMinimo <= nivel ? e : inicial;
   }
   bolsa.mochila = lista(b.mochila)
     .map(entrada)

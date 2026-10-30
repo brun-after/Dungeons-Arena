@@ -196,6 +196,9 @@ export const DURACAO_GOLPE: Readonly<Record<Golpe, number>> = {
   estocada_rapida: 420,
   disparo: 320,
   giro: 720,
+  // Marco 27 (D-126): o arremesso do bumerangue e a leitura do tomo.
+  arremesso: 380,
+  leitura: 420,
 };
 
 export function duracaoDoGolpe(golpe: Golpe | null | undefined): number {
@@ -274,6 +277,24 @@ function poseDoGolpe(golpe: Golpe, preparo: number | null, t: number | null, tir
         tiras,
         arma: { rotacao: 1.5 * (1 - entre01((t - 0.7) / 0.3)), dx: alcance * s - 0.12 * (1 - s), dy: 0.05 },
       };
+    }
+    case 'arremesso': {
+      // Marco 27 (D-126): o braço vai atrás e lança de lado, girando o pulso.
+      if (t === null) {
+        const p = suave(entre01(preparo ?? 0));
+        return { dy: 0, empurrao: -0.05 * p, escalaX: 1, escalaY: 1, rotacao: -0.08 * p, tiras, arma: { rotacao: -1.9 * p, dx: -0.08 * p, dy: -0.02 * p } };
+      }
+      const s = Math.sin(Math.PI * entre01(t * 1.4));
+      return { dy: 0, empurrao: 0.16 * s, escalaX: 1, escalaY: 1, rotacao: 0.1 * s, tiras, arma: { rotacao: trecho(t, 0, 0.35, -1.9, 1.6) * (1 - entre01((t - 0.6) / 0.4)), dx: 0.1 * s, dy: 0 } };
+    }
+    case 'leitura': {
+      // O tomo sobe aberto à frente e pulsa quando a magia sai.
+      if (t === null) {
+        const p = suave(entre01(preparo ?? 0));
+        return { dy: 0, empurrao: 0, escalaX: 1, escalaY: 1 + 0.02 * p, rotacao: -0.03 * p, tiras, arma: { rotacao: -0.5 * p, dx: 0.06 * p, dy: -0.08 * p } };
+      }
+      const s = Math.sin(Math.PI * t);
+      return { dy: 0, empurrao: 0.05 * s, escalaX: 1 + 0.02 * s, escalaY: 1, rotacao: 0.03 * s, tiras, arma: { rotacao: -0.5 * (1 - t), dx: 0.06 + 0.06 * s, dy: -0.08 * (1 - t) } };
     }
     case 'disparo': {
       if (t === null) {

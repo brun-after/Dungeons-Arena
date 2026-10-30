@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.26 · **Data:** 29/10/2026
+**Versão do documento:** 3.27 · **Data:** 29/10/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena
 
 > **Histórico**
+> - **3.27 (29/10/2026)**: marco 27: armas de classe. 8 por classe, cada uma com a sua variação do básico (o solo amaldiçoado do Necromante, o bumerangue do Aventureiro), modelo e efeito por raridade; a arma natural alimenta a passiva, a de outra classe dá uma fração dela, o 3º básico sai pela mão secundária e os pergaminhos acumulam (D-126).
 > - **3.26 (29/10/2026)**: marco 26: a Investida e todo avanço saem no lançamento, mesmo sem acertar ninguém, e a linha passa pelas paredes (D-125).
 > - **3.25 (29/10/2026)**: marco 26, sexta leva: assinaturas visuais (cada skill com o seu desenho: a Corrente de elos que puxa deslizando, o fogo em chama viva, o relâmpago ramificado, gelo, ossos, flechas e falcão; atlas rico, silhuetas, marcas no chão, círculo da runa nas ultimates e a galeria `?galeria=efeitos`, D-124); o laço solo com orçamento de tempo por quadro (D-122).
 > - **3.24 (29/10/2026)**: marco 26, quinta leva: o jogo não pesa com o tempo no celular (laço com teto de ticks, qualidade automática que volta a subir, drops com prazo no chão, save mais leve, colisão por grade e patrulha num raio, menos lixo; medidor com entidades, objetos, ticks, qualidade e salvamento, D-122); renascer fora da porta (D-123); o seguir alvo busca o alcance da skill pronta mais curta (D-121).

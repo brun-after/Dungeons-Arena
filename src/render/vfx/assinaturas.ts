@@ -7,13 +7,14 @@ import type { Emissao } from '../presets-particula';
 import type { DefAssinatura } from './cena';
 import { brasas, em, faiscasMetal } from './emissoes';
 import { ARCANO } from './familias/arcano';
+import { ARMAS_VFX } from './familias/armas';
 import { COMBATE } from './familias/combate';
 import { CORRENTE } from './familias/corrente';
 import { ELEMENTOS_VFX } from './familias/elementos';
 import { FOGO } from './familias/fogo';
 import { TREVAS } from './familias/trevas';
 
-const TODAS = { ...FOGO, ...CORRENTE, ...ELEMENTOS_VFX, ...TREVAS, ...ARCANO, ...COMBATE };
+const TODAS = { ...FOGO, ...CORRENTE, ...ELEMENTOS_VFX, ...TREVAS, ...ARCANO, ...COMBATE, ...ARMAS_VFX };
 
 /** Todas as assinaturas: o tipo exige uma por nome da lista fechada (e o teste confere que nenhuma sobra). */
 export const ASSINATURAS: Readonly<Record<AssinaturaVisual, DefAssinatura>> = TODAS;

@@ -1,34 +1,275 @@
 {
-  "versao": 2,
+  "versao": 3,
   "familias": {
-    "espada": "lamina",
-    "machado": "lamina",
-    "adaga": "lamina",
-    "clava": "lamina",
-    "lanca": "lamina",
-    "cajado": "cajado",
-    "arco": "arco"
+    "lamina": {
+      "basico": "ataque_basico",
+      "classe": "guerreiro",
+      "maos": "qualquer",
+      "passiva": "cura",
+      "emprestimo": "curaAoAbater"
+    },
+    "arco": {
+      "basico": "tiro",
+      "classe": "arqueiro",
+      "maos": "qualquer",
+      "passiva": "alcance",
+      "emprestimo": "recargaLenta"
+    },
+    "tomo": {
+      "basico": "dardo_arcano",
+      "classe": "mago",
+      "maos": "qualquer",
+      "passiva": "elemental",
+      "emprestimo": "basicoElemental"
+    },
+    "cajado": {
+      "basico": "solo_amaldicoado",
+      "classe": "necromante",
+      "maos": "qualquer",
+      "passiva": "servos",
+      "emprestimo": "reanimar"
+    },
+    "arremesso": {
+      "basico": "bumerangue",
+      "classe": "aventureiro",
+      "maos": "principal",
+      "passiva": "pergaminhos",
+      "emprestimo": "invocacaoDuracao"
+    }
   },
-  "basicoDaFamilia": {
-    "lamina": "ataque_basico",
-    "cajado": "dardo_arcano",
-    "arco": "tiro"
+  "armas": {
+    "machado": {
+      "familia": "lamina",
+      "basico": "basico_machado",
+      "golpe": "corte_pesado"
+    },
+    "lanca": {
+      "familia": "lamina",
+      "basico": "basico_lanca",
+      "golpe": "estocada"
+    },
+    "montante": {
+      "familia": "lamina",
+      "basico": "basico_montante",
+      "golpe": "corte_pesado"
+    },
+    "espada": {
+      "familia": "lamina",
+      "basico": "basico_espada",
+      "golpe": "corte"
+    },
+    "clava": {
+      "familia": "lamina",
+      "basico": "basico_maca",
+      "golpe": "contundente"
+    },
+    "sabre": {
+      "familia": "lamina",
+      "basico": "basico_sabre",
+      "golpe": "corte"
+    },
+    "mangual": {
+      "familia": "lamina",
+      "basico": "basico_mangual",
+      "golpe": "contundente"
+    },
+    "rapieira": {
+      "familia": "lamina",
+      "basico": "basico_rapieira",
+      "golpe": "estocada_rapida"
+    },
+    "besta": {
+      "familia": "arco",
+      "basico": "basico_besta",
+      "golpe": "disparo"
+    },
+    "composto": {
+      "familia": "arco",
+      "basico": "basico_composto",
+      "golpe": "disparo"
+    },
+    "arcocurto": {
+      "familia": "arco",
+      "basico": "basico_arcocurto",
+      "golpe": "disparo"
+    },
+    "arco": {
+      "familia": "arco",
+      "basico": "basico_arco",
+      "golpe": "disparo",
+      "modelo": "arco_longo"
+    },
+    "elfico": {
+      "familia": "arco",
+      "basico": "basico_elfico",
+      "golpe": "disparo"
+    },
+    "chifre": {
+      "familia": "arco",
+      "basico": "basico_chifre",
+      "golpe": "disparo"
+    },
+    "arcoguerra": {
+      "familia": "arco",
+      "basico": "basico_arcoguerra",
+      "golpe": "disparo"
+    },
+    "arcocaca": {
+      "familia": "arco",
+      "basico": "basico_arcocaca",
+      "golpe": "disparo"
+    },
+    "tomo": {
+      "familia": "tomo",
+      "basico": "basico_tomo",
+      "golpe": "leitura"
+    },
+    "codice": {
+      "familia": "tomo",
+      "basico": "basico_codice",
+      "golpe": "leitura"
+    },
+    "mares": {
+      "familia": "tomo",
+      "basico": "basico_mares",
+      "golpe": "leitura"
+    },
+    "estelar": {
+      "familia": "tomo",
+      "basico": "basico_estelar",
+      "golpe": "leitura"
+    },
+    "prisma": {
+      "familia": "tomo",
+      "basico": "basico_prisma",
+      "golpe": "leitura"
+    },
+    "espelhos": {
+      "familia": "tomo",
+      "basico": "basico_espelhos",
+      "golpe": "leitura"
+    },
+    "orbital": {
+      "familia": "tomo",
+      "basico": "basico_orbital",
+      "golpe": "leitura"
+    },
+    "vazio": {
+      "familia": "tomo",
+      "basico": "basico_vazio",
+      "golpe": "leitura"
+    },
+    "cajado": {
+      "familia": "cajado",
+      "basico": "basico_cajado",
+      "golpe": "contundente_leve"
+    },
+    "praga": {
+      "familia": "cajado",
+      "basico": "basico_praga",
+      "golpe": "contundente_leve"
+    },
+    "foice": {
+      "familia": "cajado",
+      "basico": "basico_foice",
+      "golpe": "corte"
+    },
+    "cova": {
+      "familia": "cajado",
+      "basico": "basico_cova",
+      "golpe": "contundente_leve"
+    },
+    "lamento": {
+      "familia": "cajado",
+      "basico": "basico_lamento",
+      "golpe": "contundente_leve",
+      "modelo": "cetro"
+    },
+    "sanguineo": {
+      "familia": "cajado",
+      "basico": "basico_sanguineo",
+      "golpe": "contundente_leve"
+    },
+    "espectro": {
+      "familia": "cajado",
+      "basico": "basico_espectro",
+      "golpe": "contundente_leve"
+    },
+    "colheita": {
+      "familia": "cajado",
+      "basico": "basico_colheita",
+      "golpe": "corte",
+      "modelo": "gadanha"
+    },
+    "chakram": {
+      "familia": "arremesso",
+      "basico": "basico_chakram",
+      "golpe": "arremesso"
+    },
+    "adaga": {
+      "familia": "arremesso",
+      "basico": "basico_adaga",
+      "golpe": "arremesso"
+    },
+    "machadinha": {
+      "familia": "arremesso",
+      "basico": "basico_machadinha",
+      "golpe": "arremesso"
+    },
+    "shuriken": {
+      "familia": "arremesso",
+      "basico": "basico_shuriken",
+      "golpe": "arremesso"
+    },
+    "duplo": {
+      "familia": "arremesso",
+      "basico": "basico_duplo",
+      "golpe": "arremesso"
+    },
+    "arpeu": {
+      "familia": "arremesso",
+      "basico": "basico_arpeu",
+      "golpe": "arremesso"
+    },
+    "falcoeiro": {
+      "familia": "arremesso",
+      "basico": "basico_falcoeiro",
+      "golpe": "arremesso"
+    },
+    "serrilhado": {
+      "familia": "arremesso",
+      "basico": "basico_serrilhado",
+      "golpe": "arremesso"
+    },
+    "espada_curta": {
+      "familia": "lamina",
+      "basico": "ataque_basico",
+      "golpe": "corte",
+      "modelo": "espada"
+    },
+    "arco_simples": {
+      "familia": "arco",
+      "basico": "tiro",
+      "golpe": "disparo",
+      "modelo": "arco"
+    },
+    "tomo_aprendiz": {
+      "familia": "tomo",
+      "basico": "dardo_arcano",
+      "golpe": "leitura",
+      "modelo": "tomo"
+    },
+    "cajado_aprendiz": {
+      "familia": "cajado",
+      "basico": "solo_amaldicoado",
+      "golpe": "contundente_leve",
+      "modelo": "cajado"
+    },
+    "bumerangue": {
+      "familia": "arremesso",
+      "basico": "bumerangue",
+      "golpe": "arremesso"
+    }
   },
-  "naturalDaClasse": {
-    "aventureiro": "lamina",
-    "guerreiro": "lamina",
-    "mago": "cajado",
-    "arqueiro": "arco",
-    "necromante": "cajado"
-  },
-  "golpes": {
-    "espada": "corte",
-    "machado": "corte_pesado",
-    "adaga": "estocada_rapida",
-    "clava": "contundente",
-    "lanca": "estocada",
-    "cajado": "contundente_leve",
-    "arco": "disparo",
-    "foice": "corte"
-  }
+  "golpes": {}
 }

@@ -77,6 +77,7 @@ export function usarRefugio(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entid
   dispararGanchosDe(estado, ctx, e, 'aoGastarRefugio', {}, saida);
 }
 
+// Os itens gerados antigos (`gi_`) dizem o desenho pelo ícone.
 const BASES_DE_ARMA = new Set(['espada', 'machado', 'adaga', 'cajado', 'arco', 'clava', 'lanca']);
 
 /**
@@ -86,6 +87,8 @@ const BASES_DE_ARMA = new Set(['espada', 'machado', 'adaga', 'cajado', 'arco', '
 export function baseDaArma(ctx: Pick<ContextoSimulacao, 'conteudo'>, itemId: string | undefined): string | null {
   const item = itemId ? ctx.conteudo.itens.get(itemId) : undefined;
   if (!item) return null;
+  // Marco 27 (D-126): o desenho vem do item (as bases com forma e os fixos de armas.json).
+  if (item.arma) return item.arma;
   if (item.base) {
     const base = ctx.conteudo.itensComFormas.bases.get(item.base);
     return base?.arma ?? (item.base === 'escudo' ? 'escudo' : null);
