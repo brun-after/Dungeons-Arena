@@ -151,10 +151,10 @@ export interface ResultadoChefe {
 }
 
 /** O chefe contra um grupo de N (1 = solo), com a escala do grupo. */
-export function chefe(classe: string, nivel: number, semente: number, n = 1, dificuldade: Dificuldade = 'normal', nivelChefe = nivel): ResultadoChefe {
+export function chefe(classe: string, nivel: number, semente: number, n = 1, dificuldade: Dificuldade = 'normal', nivelChefe = nivel, preset = 'boss'): ResultadoChefe {
   const ctx = contextoDoCenario();
   const jogadores = grupo(ctx, classe, nivel, n);
-  const m = mundo(ctx, semente, [...jogadores, inimigo(ctx, 'boss', nivelChefe, 'i1', 9, 9)], dificuldade);
+  const m = mundo(ctx, semente, [...jogadores, inimigo(ctx, preset, nivelChefe, 'i1', 9, 9)], dificuldade);
   for (const j of jogadores) m.bots.push(new BotDeDuelo(j.id));
   const ids = new Set(jogadores.map((j) => j.id));
   const acabou = () => m.eventos.some((e) => e.t === 'morreu' && e.id === 'i1') || jogadores.every((j) => m.eventos.some((e) => e.t === 'morreu' && e.id === j.id));

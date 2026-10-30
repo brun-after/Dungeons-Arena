@@ -1,6 +1,8 @@
 // O chão do exterior do Mundo (marco 29, 30/10/2026, D-128): o mato do campo, a estrada de terra, a água e a base
 // das fachadas. Cores lisas com marcas esparsas por posição, como o piso das fases (variação sem padrão diagonal);
 // as estruturas altas saem em render/estruturas-iso.ts, por cima da base escura.
+// Marco 30 (30/10/2026, D-129): o brilho da água sai numa camada à parte (`desenharBrilhoDaAgua`), que o terreno
+// anima a cada quadro sem redesenhar o bloco.
 
 import type { Graphics } from 'pixi.js';
 import { tipoEm, type Fase, type TipoCelula } from '../world/fase';
@@ -23,6 +25,19 @@ function ruido(x: number, y: number): number {
   h ^= h >>> 15;
   return (h >>> 0) / 4294967296;
 }
+
+/** As ondinhas de uma célula de água (na camada animada): duas, em pontos estáveis da célula. */
+export function desenharBrilhoDaAgua(g: Graphics, x: number, y: number): void {
+  const p = CELULA_PX;
+  for (const k of [0, 1]) {
+    if (ruido(x + k * 17, y) > 0.55) continue;
+    const cx = x * p + p * (0.2 + ruido(x + 11 + k, y) * 0.6);
+    const cy = y * p + p * (0.25 + ruido(x, y + 13 + k) * 0.5);
+    g.moveTo(cx - 6, cy).quadraticCurveTo(cx, cy - 3, cx + 6, cy);
+  }
+}
+
+export const COR_BRILHO_AGUA = AGUA_BRILHO;
 
 export function ehCelulaExterior(tipo: TipoCelula): boolean {
   return tipo === 'mato' || tipo === 'estrada' || tipo === 'agua' || tipo === 'fachada';
@@ -56,12 +71,6 @@ export function desenharCelulaExterior(g: Graphics, fase: Fase, x: number, y: nu
     case 'agua': {
       const funda = tipoEm(fase, x, y - 1) === 'agua' && tipoEm(fase, x, y + 1) === 'agua' && tipoEm(fase, x - 1, y) === 'agua' && tipoEm(fase, x + 1, y) === 'agua';
       g.rect(px, py, p, p).fill(funda ? AGUA_FUNDA : AGUA);
-      if (v < 0.35) {
-        const cx = px + p * (0.2 + ruido(x + 11, y) * 0.6);
-        const cy = py + p * (0.3 + ruido(x, y + 13) * 0.4);
-        g.moveTo(cx - 6, cy).quadraticCurveTo(cx, cy - 3, cx + 6, cy);
-        g.stroke({ width: 1.2, color: AGUA_BRILHO, alpha: 0.45 });
-      }
       break;
     }
     case 'fachada':

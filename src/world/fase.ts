@@ -5,6 +5,7 @@
 import type { Afinidade } from '../combat/afinidade';
 import type { EfeitoCanonico } from '../combat/registro-efeitos';
 import type { AreaAmbiente } from './ambiente-tipos';
+import type { Refugio } from './refugio';
 import type { Celula } from '../core/comandos';
 
 /**
@@ -221,6 +222,10 @@ export interface Fase {
   readonly ambientes?: readonly AreaAmbiente[];
   /** Marco 23 (D-092): o tema da fase, ou null (as fases de antes e as da arena). */
   readonly tema: string | null;
+  /** Marco 30 (D-129): onde os monstros não entram (world/refugio.ts); no Mundo, os muros da vila. */
+  readonly refugios?: readonly Refugio[];
+  /** Marco 30 (D-129): o tipo de cada estrutura do Mundo pelo canto (o render desenha a fachada pelo tipo). */
+  readonly estruturas?: readonly { x: number; y: number; tipo: string }[];
 }
 
 /** Converte uma fase já validada para a forma usada pela simulação. */

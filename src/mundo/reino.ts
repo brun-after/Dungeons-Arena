@@ -2,14 +2,23 @@
 // regiões; cada região tem o bioma, o perigo (seguro, normal, perigoso), a faixa de nível, o tema, a semente do
 // terreno, a vila (quando tem) e as estruturas (as entradas das dungeons e dos covis). As dungeons com objetivo
 // (`masmorras`, instanciadas por grupo) e os covis de boss (compartilhados) ficam em listas próprias. Puro.
+// Marco 30 (30/10/2026, D-129): as missões do quadro, os materiais que os monstros deixam e os NPCs do banco e do
+// mercado.
 
 import { ehObjeto, Leitor, type Objeto } from '../core/validar';
+import { conferirMissoes, lerMissaoDoMundo, type MissaoDoMundo } from './missoes-mundo';
 
 export type Perigo = 'seguro' | 'normal' | 'perigoso';
 export const PERIGOS: readonly Perigo[] = ['seguro', 'normal', 'perigoso'];
 
-export type PapelNpc = 'mercador' | 'ferreiro' | 'alquimista' | 'missoes' | 'portal' | 'save';
-export const PAPEIS_NPC: readonly PapelNpc[] = ['mercador', 'ferreiro', 'alquimista', 'missoes', 'portal', 'save'];
+export type PapelNpc = 'mercador' | 'ferreiro' | 'alquimista' | 'missoes' | 'portal' | 'save' | 'banco' | 'mercado';
+export const PAPEIS_NPC: readonly PapelNpc[] = ['mercador', 'ferreiro', 'alquimista', 'missoes', 'portal', 'save', 'banco', 'mercado'];
+
+/** Marco 30: o material que um preset deixa ao morrer no Mundo (no chão, como o loot). */
+export interface MaterialDeInimigo {
+  itemId: string;
+  chancePct: number;
+}
 
 export type Bioma = 'campo' | 'floresta' | 'pantano' | 'colinas' | 'ruinas' | 'neve';
 export const BIOMAS: readonly Bioma[] = ['campo', 'floresta', 'pantano', 'colinas', 'ruinas', 'neve'];
@@ -23,6 +32,8 @@ export interface RegrasDePerigo {
   /** Inimigos por 1000 células andáveis. */
   densidadePor1000: number;
   elitePct: number;
+  /** Marco 30 (D-129): a elite nasce estes níveis acima do topo da faixa da região. */
+  eliteNiveis: number;
   /** Multiplicador da chance de item dos drops, em %. */
   lootPct: number;
 }
@@ -111,9 +122,15 @@ export interface Reino {
   perigos: Readonly<Record<Perigo, RegrasDePerigo>>;
   /** O estoque das lojas da vila, por papel (ids de item). */
   lojas: Readonly<Partial<Record<PapelNpc, readonly string[]>>>;
+  /** Marco 30 (D-129): o estoque do mercador errante (o evento de região). */
+  mercadorErrante: readonly string[];
   regioes: readonly RegiaoDoMundo[];
   masmorras: readonly MasmorraDoMundo[];
   covis: readonly CovilDoMundo[];
+  /** Marco 30: as missões dos quadros das vilas. */
+  missoes: readonly MissaoDoMundo[];
+  /** Marco 30: preset -> os materiais que ele deixa ao morrer. */
+  materiais: Readonly<Record<string, readonly MaterialDeInimigo[]>>;
 }
 
 export type LadoDaRegiao = 'norte' | 'sul' | 'leste' | 'oeste';
@@ -185,6 +202,7 @@ function lerPerigos(l: Leitor, v: unknown): Record<Perigo, RegrasDePerigo> {
       pvp: l.booleano(r, 'pvp'),
       densidadePor1000: l.numero(r, 'densidadePor1000', { min: 0, max: 50 }),
       elitePct: l.numero(r, 'elitePct', { min: 0, max: 100 }),
+      eliteNiveis: r.eliteNiveis === undefined ? 0 : l.numero(r, 'eliteNiveis', { min: 0, max: 30, inteiro: true }),
       lootPct: l.numero(r, 'lootPct', { min: 0, max: 500 }),
     };
   };
@@ -205,6 +223,7 @@ export function lerReino(json: unknown): { reino: Reino | null; erros: string[] 
     inicio: l.texto(o, 'inicio'),
     perigos: lerPerigos(l, o.perigos),
     lojas: ehObjeto(o.lojas) ? Object.fromEntries(Object.entries(o.lojas).filter(([k]) => PAPEIS_NPC.includes(k as PapelNpc)).map(([k, v]) => [k, Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []])) : {},
+    mercadorErrante: o.mercadorErrante === undefined ? [] : l.listaDeTextos(o, 'mercadorErrante'),
     regioes: l.lista(o, 'regioes').map((x) => lerRegiao(l, x, tamanho)),
     masmorras: l.lista(o, 'masmorras').map((x) => {
       const m = l.objeto(x, 'masmorra');
@@ -235,6 +254,8 @@ export function lerReino(json: unknown): { reino: Reino | null; erros: string[] 
         renascerMin: l.numero(c, 'renascerMin', { min: 1, max: 24 * 60 }),
       };
     }),
+    missoes: o.missoes === undefined ? [] : l.lista(o, 'missoes').map((x) => lerMissaoDoMundo(l, x)),
+    materiais: lerMateriais(l, o.materiais),
   };
   const erros = [...l.erros];
   const ids = new Set<string>();
@@ -251,14 +272,37 @@ export function lerReino(json: unknown): { reino: Reino | null; erros: string[] 
     }
   }
   if (!reino.regioes.some((r) => r.id === reino.inicio && r.vila)) erros.push('inicio: precisa ser uma região com vila');
+  erros.push(
+    ...conferirMissoes(reino.missoes, {
+      preset: () => true,
+      item: () => true,
+      regiao: (id) => reino.regioes.some((r) => r.id === id),
+      vila: (id) => reino.regioes.some((r) => r.id === id && r.vila),
+      covil: (id) => reino.covis.some((c) => c.id === id),
+      masmorra: (id) => reino.masmorras.some((m) => m.id === id),
+    }),
+  );
   return { reino: erros.length === 0 ? reino : null, erros };
+}
+
+function lerMateriais(l: Leitor, v: unknown): Record<string, readonly MaterialDeInimigo[]> {
+  if (v === undefined) return {};
+  const o = l.objeto(v, 'materiais');
+  const r: Record<string, MaterialDeInimigo[]> = {};
+  for (const [preset, lista] of Object.entries(o)) {
+    r[preset] = (Array.isArray(lista) ? lista : []).map((x) => {
+      const m = l.objeto(x, `materiais.${preset}`);
+      return { itemId: l.texto(m, 'itemId'), chancePct: l.numero(m, 'chancePct', { min: 0, max: 100 }) };
+    });
+  }
+  return r;
 }
 
 /** Confere os ids contra o catálogo (presets, itens e temas). */
 export function conferirReino(reino: Reino, existe: { preset: (id: string) => boolean; item: (id: string) => boolean; tema: (id: string) => boolean }): string[] {
   const erros: string[] = [];
   const presets = (dono: string, lista: readonly string[]) => {
-    for (const p of lista) if (!existe.preset(p)) erros.push(`${dono}: preset desconhecido "${p}"`);
+    for (const p of lista) if (!existe.preset(p)) erros.push(`${dono}: preset desconhecido ou de invocação "${p}"`);
   };
   const itens = (dono: string, lista: readonly string[]) => {
     for (const i of lista) if (!existe.item(i)) erros.push(`${dono}: item desconhecido "${i}"`);
@@ -282,6 +326,14 @@ export function conferirReino(reino: Reino, existe: { preset: (id: string) => bo
     tema(c.id, c.tema);
   }
   for (const [papel, lista] of Object.entries(reino.lojas)) itens(`loja ${papel}`, lista);
+  itens('mercadorErrante', reino.mercadorErrante);
+  for (const [preset, lista] of Object.entries(reino.materiais)) {
+    presets('materiais', [preset]);
+    itens(`materiais ${preset}`, lista.map((m) => m.itemId));
+  }
+  erros.push(
+    ...conferirMissoes(reino.missoes, { preset: existe.preset, item: existe.item, regiao: () => true, vila: () => true, covil: () => true, masmorra: () => true }),
+  );
   return erros;
 }
 

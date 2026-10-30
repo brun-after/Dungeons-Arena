@@ -4,10 +4,13 @@
 // - a entrada na vila salva; a sala do servidor decide tudo (a mesma cena da campanha, com o estado da rede);
 // - a troca de sala (borda, porta, saída da dungeon, portal, renascer na vila) sem recarregar a página: a cena é
 //   desmontada, a conexão nova entra com o bilhete e o contexto do lugar é gerado aqui pela mesma semente.
+// Marco 30 (30/10/2026, D-129): o painel social (grupo e chat) e os diálogos do quadro, do banco, do mercado e da
+// troca, todos respondendo aos avisos da sala.
 
 import { conteudoOficial, modoPorId } from './core/conteudo';
 import { buscarEntidade, criarEstado } from './core/estado';
 import { t, type ChaveTexto } from './i18n';
+import type { AcaoDoMundo } from './mundo/acoes';
 import type { AvisoDoMundo } from './mundo/avisos';
 import { lerLugar, montarLugar } from './mundo/lugares';
 import { MODO_MUNDO } from './mundo/sala-mundo';
@@ -20,7 +23,9 @@ import { sairDaTelaCheia } from './plataforma/sessao-tela';
 import { conectarMundo, personagensDoMundo, type PedidoDoMundo, type PersonagemDoMundo } from './plataforma/transporte-colyseus';
 import { mostrarAviso } from './ui/aviso';
 import { montarCena, type Cena } from './ui/cena';
-import { abrirMapa, abrirPortal, abrirQuadro, criarFaixaDoLugar, textoDoAviso } from './ui/mundo-paineis';
+import { criarPaineisDaEconomia } from './ui/mundo-economia';
+import { abrirMapa, abrirPortal, criarFaixaDoLugar, textoDoAviso } from './ui/mundo-paineis';
+import { criarPainelSocial } from './ui/mundo-social';
 import { reinoDoConteudo } from './mundo/reino';
 
 const ESPERA_ENTRADA_MS = 10_000;
@@ -234,6 +239,19 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
   const avisar = (texto: string, ms?: number) => {
     mostrarAviso(raiz.querySelector<HTMLElement>('.camada-ui') ?? raiz, texto, ms);
   };
+  const idDoJogador = () => eu.entidadeId ?? 'p1';
+  const estadoAtual = () => eu.previsto;
+  const enviarAcao = (acao: AcaoDoMundo) => {
+    eu.acaoDoMundo(acao);
+  };
+  const social = criarPainelSocial({ ctx, reino, estado: estadoAtual, idLocal: idDoJogador, enviar: enviarAcao, avisar: (texto) => { avisar(texto, 4000); } });
+  const economia = criarPaineisDaEconomia({
+    ctx,
+    reino,
+    eu: () => (eu.previsto ? (buscarEntidade(eu.previsto, idDoJogador()) ?? null) : null),
+    enviar: enviarAcao,
+    agoraMs: () => Date.now(),
+  });
   const desmontar = () => {
     pararLaco?.();
     cena?.desmontar();
@@ -257,7 +275,27 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
         eu.viajar(destino, pagamento);
       });
     } else if (a.tipo === 'quadro') {
-      abrirQuadro();
+      economia.quadro(a);
+    } else if (a.tipo === 'banco') {
+      economia.banco(a);
+    } else if (a.tipo === 'mercado') {
+      economia.mercado(a);
+    } else if (a.tipo === 'missao') {
+      avisar(economia.missao(a), 4000);
+    } else if (a.tipo === 'chat') {
+      social.chat(a);
+    } else if (a.tipo === 'grupo') {
+      social.grupo(a);
+    } else if (a.tipo === 'convite') {
+      social.convite(a);
+    } else if (a.tipo === 'troca') {
+      social.troca(a);
+    } else if (a.tipo === 'evento') {
+      // Marco 30 (D-129): o evento da região vai para o chat (canal do Mundo) e para a faixa de avisos.
+      const min = Math.max(1, Math.round((a.fim - Date.now()) / 60_000));
+      const texto = a.evento ? t(`mundo.evento.${a.evento}` as ChaveTexto, { min, pct: ctx.balance.mundo.eventos.luaLootPct }) : t('mundo.evento.fim');
+      social.chat({ tipo: 'chat', canal: 'sistema', de: '', texto });
+      avisar(texto, 6000);
     } else if (a.tipo === 'trocarSala') {
       if (saindo) return;
       saindo = true;
@@ -309,7 +347,8 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
   });
   if (!cena) return;
   const c = cena;
-  raiz.querySelector('.camada-ui')?.append(faixa.elemento);
+  raiz.querySelector('.camada-ui')?.append(faixa.elemento, social.elemento);
+  social.ajustarAoToque();
   addEventListener('keydown', teclaMapa);
   eu.aoEventos = (eventos) => {
     for (const ev of eventos) {

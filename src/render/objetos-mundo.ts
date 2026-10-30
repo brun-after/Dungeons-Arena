@@ -12,6 +12,9 @@ const ROUPA_DO_PAPEL: Readonly<Record<string, number>> = {
   ferreiro: 0x8a4b2a,
   alquimista: 0x4f9a5a,
   missoes: 0x3d6fb3,
+  // Marco 30 (D-129): o banqueiro e o mercador do reino.
+  banco: 0x2e4a62,
+  mercado: 0x9a3d6a,
 };
 const PELE = 0xe0b48a;
 const PEDRA = 0x6f6a64;
@@ -107,7 +110,8 @@ export function desenharObjetoDoMundo(g: Graphics, o: ObjetoNoMundo, cx: number,
       pedra(g, cx, cy, 0xc77dff, pulso);
       return true;
     case 'porta_estrutura':
-      porta(g, cx, cy);
+      // Marco 30 (D-129): a porta escondida não aparece (quem chega perto acha pelo prompt e pela descoberta).
+      if (!o.escondido) porta(g, cx, cy);
       return true;
     default:
       return false;

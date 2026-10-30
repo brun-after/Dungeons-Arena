@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.65 · **Data:** 30/10/2026
+**Versão:** 0.66 · **Data:** 30/10/2026
 
 > **Histórico**
+> - **0.66 (30/10/2026)**: D-129 (o Mundo social: grupo, chat, banco, missões, troca, mercado, receitas por ofício, perigo, vila refúgio, passagem protegida, estrutura escondida, eventos por região, polimento visual e as metas do Mundo no simulador, com a vida dos chefes dos covis e o fim das invocações como monstros).
 > - **0.65 (30/10/2026)**: D-128 (o Mundo: lugares em salas, área de interesse, IA com ativação, personagem no servidor, exterior gerado com fachadas, perigo e PvP por região, túmulo, portais, coleta e covis; o Reino Central).
 > - **0.64 (30/10/2026)**: D-127 (nível 100, teto nível+20 nos pontos gastos, rendimento acima de 30, atributo de classe com marcos em 25/50/75/100, itens com % de dano e de defesa, "Escala com" nas skills e invocações iguais lado a lado) e a nota em D-061.
 > - **0.63 (29/10/2026)**: D-126 (armas de classe: 8 por classe, cada uma com a sua variação do básico, familiaridade, a fração da passiva de outra classe, o 3º golpe pela mão secundária, o solo amaldiçoado, o bumerangue e os pergaminhos que acumulam) e as notas em D-069 e D-093.
@@ -3324,3 +3325,78 @@ dentro da Vila do Centro, o pior caso da área de interesse):
 - sem os bots na mesma máquina (a sala sozinha, 40 sessões): tick médio 1,5 ms e p95 3,8 ms;
 - a medida na VM fica para depois do deploy com a chave. Se o tick ou a memória não couberem, o próximo passo é a VM
   de 2 GB, decidida com o número medido.
+
+## D-129 — Mundo: social, economia e polimento (marco 30, 30/10/2026)
+
+**Contexto.** O segundo marco do Mundo (D-128): o social, a economia, as missões, os eventos por região e o polimento,
+mais o que o marco 29 deixou para depois. O usuário pediu tudo junto, num PR só.
+
+**Decisão:**
+- **Ações do Mundo** (`src/mundo/acoes.ts`, `avisos.ts`): a mensagem `acaoMundo`, validada no núcleo, e as respostas
+  como avisos do Mundo. O que cruza as salas (o grupo, o chat do grupo, a denúncia, o mercado) vai como pendência ao
+  coordenador do servidor (`server/mundo-servicos.ts`), que entrega pela sala onde a pessoa está.
+- **Grupo** (`grupos.ts`, até 6, convite pelo nome em 60 s): `Entidade.grupo` (`null` ao sair, porque o patch não
+  leva chave apagada); o mesmo grupo nunca se fere, nem com o PvP da região (`podeFerir`); a XP de quem abate vai a
+  quem está perto só se for do grupo (`partilhaXp.exigeGrupo`, dado do modo); o minimapa mostra o grupo em azul; a
+  masmorra do grupo é uma instância só (`grupo:<id>:<masmorra>`).
+- **Chat** (`chat.ts`): `local` (raio 20), `regiao` (a sala) e `grupo`; 160 caracteres, 5 mensagens por 10 s,
+  sem caracteres de controle, HTML sempre escapado. Silenciar fica no aparelho; denunciar vira log no servidor.
+- **Banco** (`banco.ts`): 40 espaços e o ouro guardado na ficha, abertos em qualquer vila; não vão para o túmulo.
+- **Missões** (`missoes-mundo.ts`, 23 no reino): 6 ofertas por quadro, sorteadas pela semente do dia (vira às 0h
+  UTC, 21h de Brasília); até 5 ativas. Caçar um preset numa região, entregar um material, concluir uma masmorra ou
+  derrubar o chefe de um covil com a parte do dano. O progresso fica na ficha.
+- **Troca direta** (`troca.ts`): a até 4 células, até 8 itens e ouro de cada lado; duas confirmações, e qualquer
+  mudança desfaz as confirmações; a sala troca tudo de uma vez.
+- **Mercado** (`mercado.ts`, `server/mercado-mundo.ts`): anúncios para o reino, com taxa de 2% ao anunciar e 8% na
+  venda (o ouro sai da economia), 10 por personagem, 72 h. O item fica reservado no anúncio; a compra é atômica no
+  servidor; o ouro vendido se recebe no mercado de qualquer vila (se o vendedor estiver offline, vai ao banco). A
+  tabela `mercado_mundo` (migração `20261031120000_mercado_mundo.sql`) ou a memória, sem a chave.
+- **Receitas por ofício** (`forja.ts` `oficio`): o ferreiro e o alquimista forjam só as suas (13 novas com os
+  materiais do Mundo). Os materiais caem de presets (`reino.materiais`), no chão, como o loot.
+- **Perigo:** elites por região (`elitePct`, `eliteNiveis`) e o loot por perigo (`lootPct`, via `modo.lootPct`).
+- **A vila é refúgio** (`world/refugio.ts`, `Fase.refugios`): a IA que não é invocação não entra no círculo dos muros
+  (`movimento.cabe`) nem mira quem está dentro (`alvoOfensivoValido`).
+- **Proteção na passagem:** 3 s de `imune_dano` ao chegar numa sala do Mundo (`mundo.passagemProtecaoS`).
+- **Estrutura escondida:** fora, é rocha comum, sem estrada até ela; a porta (`escondido`) aparece quando um jogador
+  chega a até o raio de revelar.
+- **Eventos por região** (`eventos-mundo.ts`): por janela de 60 min, 35% de chance de um evento de 20 min,
+  determinístico pelo id da região e pela janela. A lua sangrenta (só em regiões normais e perigosas) dobra o
+  `lootPct` do modo da sala; o mercador errante é uma loja perto da entrada, com o estoque `reino.mercadorErrante`. O
+  começo e o fim vão a todos da sala e ao chat.
+- **Checkpoint:** o coordenador só grava quando a ficha mudou desde a última gravação.
+- **Polimento visual:**
+  - a fachada pelo tipo da estrutura (`fase.estruturas`): castelo com ameias, torre alta de telhado pontudo, caverna e
+    mina em rochedo (a mina com a boca escorada), cripta com frontão;
+  - a água ondula numa camada própria por bloco (parada com movimento reduzido);
+  - o terreno por bloco sob demanda nas fases com mais de 16 blocos: desenhado perto da vista, descartado além de três
+    margens. As fases menores continuam inteiras (os harnesses de teste e a campanha não mudam).
+- **Cliente:** painéis do quadro, do banco, do mercado, do chat, do grupo e da troca (`ui/mundo-economia.ts`,
+  `mundo-social.ts`, `mundo-dialogos.ts`); um diálogo aberto bloqueia o teclado do jogo; no toque, o painel social
+  começa recolhido, com o contador de mensagens novas.
+- **Metas do Mundo no simulador** (`tools/balanceamento/mundo.ts`, `balance.metas.mundo`):
+  - cada região com o jogador no meio da faixa (equipamento incomum) precisa vencer ≥ 75%; a XP por hora de combate
+    e os minutos por nível ficam na tabela, informativos;
+  - os covis, no nível do covil: o grupo de 3 em 30 a 60 s, sozinho até 90 s.
+- **Calibragem pelos números:**
+  - os chefes dos covis morriam em 8 a 21 s em grupo de 3 e 11 a 31 s sozinhos. A vida subiu: Rei Goblin 600 › 2200,
+    Bruxa 520 › 2800, Dragão 1400 › 3600 (agora 31 a 46 s em grupo e 43 a 66 s sozinhos);
+  - o reino usava invocações do Necromante (o esqueleto profano, o espectro e o cavaleiro da morte, com xp 0) como
+    monstros, e o cavaleiro como chefe das Catacumbas. Saíram (Ruínas e Ninho com vampiro e troll; Catacumbas com o
+    `boss`), e a conferência do reino recusa preset de invocação. A escama de dragão, que caía do cavaleiro, cai do
+    vampiro (6%).
+
+**Fica de fora:** o dia e a noite (opcional no plano).
+
+**Ponto aberto para o usuário:** a faixa avançada da campanha (D-075: a partir do nível 20, o Normal dá 10% da XP,
+porque o estudo carrega a progressão) vale também no Mundo, que roda no Normal. Por isso a XP por hora nas Ruínas do
+Norte (18 a 28) cai para cerca de 1/7 da do Pântano (12 a 18). Se o Mundo deve ter ritmo próprio a partir do 20, é
+uma regra de modo nova (por exemplo, a dificuldade por perigo da região), a decidir.
+
+**Medidas:**
+- `npm run balancear`: 140/140 metas (as 125 de antes e as 15 do Mundo);
+- `npm run carga -- --modo mundo --clientes 40 --segundos 60`, servidor local com os bots na mesma máquina: zero
+  rejeições, banda recebida de 34 KiB/s por bot (menos que no marco 29, porque os monstros não entram na vila), mas o
+  tick p95 ficou entre 43 e 64 ms. A main, medida em seguida na mesma máquina, deu de 24 a 60 ms: a máquina estava
+  mais carregada que no dia do marco 29 (7 a 9 ms). O perfil de CPU das duas é o mesmo (a escrita no socket, `writev`,
+  é ~20 s de 95; `clonarEntidade`, a geração do patch e `simular` empatam), então o marco 30 não pesa no tick. A meta
+  segue para a medida na VM, depois do deploy.

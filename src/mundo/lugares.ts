@@ -46,8 +46,11 @@ export function lerLugar(reino: Reino, texto: unknown): Lugar | null {
 
 /** O modo com as regras da região: PvP pelo perigo (fogo amigo entre jogadores). */
 export function modoDaRegiao(modo: ModoDeJogo, perigo: RegrasDePerigo): ModoDeJogo {
-  return { ...modo, fogoAmigo: perigo.pvp };
+  return { ...modo, fogoAmigo: perigo.pvp, lootPct: perigo.lootPct };
 }
+
+/** Marco 30 (D-129): o modo em todo lugar do reino leva os materiais que os monstros deixam. */
+const comMateriais = (modo: ModoDeJogo, reino: Reino): ModoDeJogo => ({ ...modo, materiaisDeInimigos: reino.materiais });
 
 export interface LugarMontado {
   ctx: ContextoSimulacao;
@@ -69,16 +72,22 @@ function interior(conteudo: Conteudo, reino: Reino, d: MasmorraDoMundo | CovilDo
 export function montarLugar(conteudo: Conteudo, reino: Reino, lugar: Lugar, modoBase: ModoDeJogo): LugarMontado {
   if (lugar.tipo === 'regiao') {
     const exterior = gerarExterior(reino, lugar.regiao);
-    const r = contextoDaFase(conteudo, exterior.fase, modoDaRegiao(modoBase, reino.perigos[lugar.regiao.perigo]));
+    const r = contextoDaFase(conteudo, exterior.fase, comMateriais(modoDaRegiao(modoBase, reino.perigos[lugar.regiao.perigo]), reino));
     if (!r.ok) throw new Error(`região ${lugar.regiao.id} inválida: ${r.erro}`);
-    const estado = estadoInicialDaFase(r.ctx);
+    // Marco 30 (30/10/2026, D-129): os muros da vila são refúgio (os monstros não entram nem atacam quem está dentro).
+    const v = exterior.vila;
+    // E o tipo de cada estrutura (o render desenha a fachada pelo tipo).
+    const estruturas = lugar.regiao.estruturas.map((e) => ({ x: e.x, y: e.y, tipo: e.tipo }));
+    const fase = { ...r.ctx.fase, estruturas, ...(v && { refugios: [{ x: v.x, y: v.y, raio: v.raio + 0.5 }] }) };
+    const ctx = { ...r.ctx, fase };
+    const estado = estadoInicialDaFase(ctx);
     estado.objetos.push(...objetosDoExterior(reino, exterior));
-    return { ctx: r.ctx, estado, exterior };
+    return { ctx, estado, exterior };
   }
   const masmorra = lugar.tipo === 'masmorra';
   const dados = masmorra ? lugar.masmorra : lugar.covil;
   // A masmorra não deixa túmulo; o covil segue a regra do Mundo (conta como fora).
-  const modo = masmorra ? { ...modoBase, tumuloNaMorte: false } : modoBase;
+  const modo = comMateriais(masmorra ? { ...modoBase, tumuloNaMorte: false } : modoBase, reino);
   const r = contextoDaFase(conteudo, interior(conteudo, reino, dados, lugar.tipo), modo);
   if (!r.ok) throw new Error(`${lugar.tipo} ${dados.id} inválida: ${r.erro}`);
   return { ctx: r.ctx, estado: estadoInicialDaFase(r.ctx), exterior: null };

@@ -11,7 +11,7 @@ import { precoDeVenda, vendavel, type Item } from '../progression/itens';
 import { precoDoItem } from '../progression/itens-progressao';
 import { estoqueDaLoja, lojaAberta } from '../progression/loja';
 import { armaDoItem, molduraDoItem, resumoDoItem } from './mochila';
-import { motivoParaNaoForjar } from '../progression/forja';
+import { motivoParaNaoForjar, receitaDaLoja } from '../progression/forja';
 import { criarModal } from './modal';
 import { icone } from './icones';
 import { classeDoItem, comRuna } from './runa-dom';
@@ -138,7 +138,7 @@ export function criarLoja(o: OpcoesLoja): Loja {
       );
     }
     listas.append(mochila);
-    desenharForja(j);
+    desenharForja(j, loja);
     if (focoAntes) modal.corpo.querySelector<HTMLElement>(`[data-chave="${CSS.escape(focoAntes)}"]`)?.focus();
   };
 
@@ -146,16 +146,18 @@ export function criarLoja(o: OpcoesLoja): Loja {
    * Marco 18 (D-070): a forja. As receitas de item aparecem com os materiais; a de ascender lista as peças Lendárias da
    * mochila, uma linha para cada.
    */
-  const desenharForja = (j: Entidade) => {
+  const desenharForja = (j: Entidade, loja: ObjetoNoMundo) => {
     const bolsa = j.bolsa;
-    if (!bolsa || ctx.conteudo.forja.size === 0) return;
+    // Marco 30 (30/10/2026, D-129): só as receitas do ofício da loja (no Mundo, o ferreiro e o alquimista).
+    const receitas = [...ctx.conteudo.forja.values()].filter((r) => receitaDaLoja(r, loja));
+    if (!bolsa || receitas.length === 0) return;
     listas.append(el('h3', 'subtitulo-modal', t('loja.forja')));
     const ul = el('ul', 'lista-itens forja-loja');
-    for (const r of ctx.conteudo.forja.values()) {
+    for (const r of receitas) {
       const materiais = r.entrada.map((x) => `${itens.get(x.item)?.nome ?? x.item} ×${x.qtd}`).concat(r.ouro > 0 ? [t('loja.forjaOuro', { ouro: r.ouro })] : []).join(' · ');
       if (r.saida.tipo === 'item') {
         const item = itens.get(r.saida.item);
-        const motivo = motivoParaNaoForjar(ctx, j, r, null);
+        const motivo = motivoParaNaoForjar(o.estado(), ctx, j, r, null);
         ul.append(linha(item, r.nome, 1, { texto: t('loja.forjar'), chave: `forjar-${r.id}`, desligado: motivo !== null, fazer: () => { emitir({ t: 'forjar', receita: r.id }); } }, `${r.texto} (${materiais})`));
         continue;
       }
@@ -166,7 +168,7 @@ export function criarLoja(o: OpcoesLoja): Loja {
       }
       for (const entrada of lendarias) {
         const item = itens.get(entrada.itemId);
-        const motivo = motivoParaNaoForjar(ctx, j, r, entrada.invId);
+        const motivo = motivoParaNaoForjar(o.estado(), ctx, j, r, entrada.invId);
         ul.append(
           linha(item, `${r.nome}: ${item?.nome ?? entrada.itemId}`, 1, {
             texto: t('loja.forjar'),

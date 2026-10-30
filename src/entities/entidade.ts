@@ -259,6 +259,8 @@ export interface Entidade {
   tipo: TipoEntidade;
   /** De que lado está. */
   equipe: EquipeId;
+  /** Marco 30 (30/10/2026, D-129): o grupo do Mundo (a sala põe e tira); null ao sair (o patch leva o null; a chave apagada não iria). */
+  grupo?: string | null;
   controlador: TipoControlador;
   /** Jogador que controla, quando `controlador` não é IA. Vazio para IA. */
   jogadorId: string;

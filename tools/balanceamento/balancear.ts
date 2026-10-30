@@ -7,6 +7,7 @@ import { BALANCE_PADRAO } from '../../src/core/contexto';
 import { DIFICULDADES } from '../../src/modos/dificuldade';
 import { xpParaProximo } from '../../src/progression/nivel';
 import { CLASSES, aguenta, avisos, chefe, desequipar, dispersar, dueloDeFichas, equipar, fatiaDaInvocacao, mediana, economiaPorMinuto, pvpLivre, semAjuste, sequencia, xpPorMinuto } from './simulador';
+import { ritmoDasRegioes, tempoDosCovis } from './mundo';
 
 const args = process.argv.slice(2);
 // Diagnóstico ampliado (18/10/2026): preserva o contrato e as metas do relatório histórico.
@@ -223,6 +224,24 @@ for (let n = 1; n < BALANCE_PADRAO.xp.nivelMax; n++) {
 }
 conferir('ritmo: tempo do 30 ao 100 em vezes o do 1 ao 30', minAte100 / minAte30, alto.razaoTempoMin, alto.razaoTempoMax, '×');
 tabela('Ritmo até o 100 (só combate, mediana das classes)', ['Trecho', 'Minutos de combate'], [['1 › 30', br(minAte30)], ['30 › 100', br(minAte100)]]);
+
+// Marco 30 (30/10/2026, D-129): o Mundo. Cada região com o jogador no meio da faixa (equipamento incomum) e os covis
+// de boss com um grupo no nível do covil; a XP por hora é só de combate (sem caminhada), para comparar as regiões.
+const mm = metas.mundo;
+const corpoRegioes = ritmoDasRegioes(SEMENTES).map((r) => {
+  conferir(`Mundo: ${r.regiao} (nível ${String(r.nivel)}), vitórias`, r.vitoriasPct, mm.regiaoVitoriasMinPct, 100, '%');
+  return [r.regiao, String(r.nivel), `${br(r.vitoriasPct)}%`, br(Math.round(r.xpPorHora)), br(r.minPorNivel)];
+});
+tabela('Mundo: regiões (meio da faixa, equipamento incomum; informativo além das vitórias)', ['Região', 'Nível', 'Vitórias', 'XP por hora de combate', 'Min de combate por nível'], corpoRegioes);
+const covis = (n: number) => tempoDosCovis(SEMENTES.slice(0, 4), n);
+const covisSolo = covis(1);
+const corpoCovis = covis(mm.covilGrupo).map((c, i) => {
+  const solo = covisSolo[i];
+  conferir(`Mundo: covil ${c.covil} em grupo de ${String(mm.covilGrupo)}, tempo`, c.tempoS, mm.covilTempoMinS, mm.covilTempoMaxS, ' s');
+  if (solo) conferir(`Mundo: covil ${c.covil} sozinho, tempo`, solo.tempoS, mm.covilTempoMinS, mm.covilSoloTempoMaxS, ' s');
+  return [c.covil, c.boss, String(c.nivel), `${br(solo?.tempoS ?? 0)} s`, `${br(c.tempoS)} s`, `${br(c.vitoriasPct)}%`];
+});
+tabela(`Mundo: covis de boss (no nível do covil; grupo de ${String(mm.covilGrupo)} com classes misturadas)`, ['Covil', 'Boss', 'Nível', 'Sozinho', 'Em grupo', 'Vitórias do grupo'], corpoCovis);
 
 tabela('Ouro por minuto e custo do primeiro tomo (sem desconto; só ouro direto, sem venda de loot)', ['Classe', 'Nível', 'Fácil', 'Normal', 'Difícil', 'Pesadelo', 'Tomo no Normal (min)', 'Tomo no Pesadelo (min)'], corpoOuroAvancado);
 

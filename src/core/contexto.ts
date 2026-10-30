@@ -9,6 +9,7 @@ import type { Dificuldade, RegrasDificuldade, RegrasGrupo } from '../modos/dific
 import type { ModoDeJogo, Raridade } from '../modos/modo';
 import type { RegrasColisao } from '../world/colisao';
 import type { Fase } from '../world/fase';
+import type { RegrasDeEventos } from '../mundo/eventos-mundo';
 import type { Atributos } from '../entities/entidade';
 import type { RegrasItensGerados } from '../progression/gerar-item';
 import type { Conteudo } from './conteudo';
@@ -334,6 +335,19 @@ export interface Balance {
     checkpointS: number;
     /** Invisível para inimigos por alguns segundos depois de passar de região. */
     passagemProtecaoS: number;
+    /** Marco 30 (D-129): o baú do banco (por personagem, em qualquer vila). */
+    banco: { slots: number };
+    /** Missões aceitas ao mesmo tempo e quantas o quadro oferece por dia. */
+    missoes: { ativasMax: number; ofertasPorQuadro: number };
+    /** Chat: o raio do canal local, o tamanho da mensagem, o limite por janela e o histórico do cliente. */
+    chat: { raioLocal: number; maxTexto: number; porJanela: number; janelaS: number; historico: number };
+    grupo: { max: number; conviteS: number };
+    /** Troca direta: a distância entre os dois e as pilhas por lado. */
+    troca: { raio: number; maxItens: number };
+    /** Mercado do reino: as taxas que tiram ouro da economia, o limite de anúncios, a validade e a página. */
+    mercado: { taxaAnuncioPct: number; taxaVendaPct: number; anunciosPorPersonagem: number; duracaoH: number; precoMax: number; pagina: number };
+    /** Marco 30 (D-129): os eventos por região, sorteados por janela de tempo (mundo/eventos-mundo.ts). */
+    eventos: RegrasDeEventos;
   };
   armadilhas: {
     revelarIntervaloMs: number;
@@ -382,6 +396,8 @@ export interface Balance {
     build: { nivel: number; vitoriasMinPct: number };
     /** Marco 28 (D-127): a luta nos níveis altos e o tempo do 30 ao 100 (em vezes o do 1 ao 30). */
     nivelAlto: { niveis: number[]; vitoriasMinPct: number; tempoMinS: number; tempoMaxS: number; ritmoNiveis: number[]; razaoTempoMin: number; razaoTempoMax: number };
+    /** Marco 30 (D-129): o ritmo das regiões do Mundo e o tempo dos covis de boss (tools/balanceamento/mundo.ts). */
+    mundo: { regiaoVitoriasMinPct: number; covilGrupo: number; covilTempoMinS: number; covilTempoMaxS: number; covilSoloTempoMaxS: number };
   };
   dificuldades: Record<Dificuldade, RegrasDificuldade>;
   grupo: RegrasGrupo;

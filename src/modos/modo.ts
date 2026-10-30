@@ -117,7 +117,8 @@ export interface ModoDeJogo {
    * Marco 24 (24/10/2026, D-097): XP de grupo. Quem abate leva tudo e cada aliado vivo a até `raio` células (ou que
    * lutou na janela) leva `aliadoPct`. null = a divisão de antes, entre quem participou.
    */
-  partilhaXp: { aliadoPct: number; raio: number } | null;
+  /** Marco 30 (D-129): `exigeGrupo` limita a partilha aos do mesmo grupo (no Mundo, todos os jogadores são aliados). */
+  partilhaXp: { aliadoPct: number; raio: number; exigeGrupo: boolean } | null;
   /** Marco 10A-2 (§2.12): regeneração por célula e penalidade de morte (null = sem). O descanso saiu (D-067). */
   sobrevivencia: {
     regenPorCelula: boolean;
@@ -141,6 +142,13 @@ export interface ModoDeJogo {
   iaRaioAtivacao?: number;
   /** Marco 29 (D-128): a morte do jogador deixa a mochila e o equipado num túmulo (o Mundo, fora das dungeons). */
   tumuloNaMorte?: boolean;
+  /**
+   * Marco 30 (D-129): o loot do lugar em % (o ouro e a chance de item); o Mundo põe o do perigo da região. Ausente =
+   * 100.
+   */
+  lootPct?: number;
+  /** Marco 30 (D-129): os materiais que cada preset deixa ao morrer (o Mundo põe os do reino). Ausente = nenhum. */
+  materiaisDeInimigos?: Readonly<Record<string, readonly { itemId: string; chancePct: number }[]>>;
 }
 
 export interface PenalidadeMorte {
@@ -269,7 +277,11 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
         ? null
         : (() => {
             const x = l.objeto(o.partilhaXp, 'partilhaXp');
-            return { aliadoPct: l.numero(x, 'aliadoPct', { min: 0, max: 100 }), raio: l.numero(x, 'raio', { min: 0, max: 50, inteiro: true }) };
+            return {
+              aliadoPct: l.numero(x, 'aliadoPct', { min: 0, max: 100 }),
+              raio: l.numero(x, 'raio', { min: 0, max: 50, inteiro: true }),
+              exigeGrupo: x.exigeGrupo === undefined ? false : l.booleano(x, 'exigeGrupo'),
+            };
           })(),
     sobrevivencia: {
       regenPorCelula: l.booleano(sobrevivencia, 'regenPorCelula'),

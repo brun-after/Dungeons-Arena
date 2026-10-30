@@ -6,6 +6,9 @@
 //   personagem novo);
 // - as pendências da sala do núcleo: gravar a ficha e trocar a sessão de sala (bilhete de uso único, 60 s).
 // Um personagem fica em uma sala por vez (a mesma conta não entra duas vezes no mesmo slot).
+// Marco 30 (30/10/2026, D-129): o coordenador guarda também os grupos, o perfil de quem está online (nome, classe,
+// nível e lugar, para o grupo e o convite pelo nome) e a loja do mercado; os serviços que passam entre salas ficam em
+// server/mundo-servicos.ts.
 
 import { randomUUID } from 'node:crypto';
 import { matchMaker, ServerError, type AuthContext, type Client } from '@colyseus/core';
@@ -14,11 +17,16 @@ import type { Celula } from '../../src/core/comandos';
 import { conteudoOficial, type Conteudo } from '../../src/core/conteudo';
 import { BALANCE_PADRAO } from '../../src/core/contexto';
 import { ehObjeto } from '../../src/core/validar';
+import type { AvisoDoMundo } from '../../src/mundo/avisos';
+import { depositarNoBanco } from '../../src/mundo/banco';
 import { fichaNova, type FichaDoMundo } from '../../src/mundo/ficha-mundo';
+import { GruposDoMundo } from '../../src/mundo/grupos';
 import { idDoLugar, lerLugar } from '../../src/mundo/lugares';
 import { reinoDoConteudo, type Reino } from '../../src/mundo/reino';
-import { SalaMundo, type PendenciaDoMundo } from '../../src/mundo/sala-mundo';
+import { SalaMundo, type PendenciaDoMundo, type ResultadoDoMercado } from '../../src/mundo/sala-mundo';
+import { MercadoEmMemoria, type LojaDoMercado } from '../mercado-mundo';
 import { registrarLog } from '../metricas';
+import { atenderMercado, atenderSocial, publicarGrupo } from '../mundo-servicos';
 import { slotValido, type PersistenciaMundo } from '../persistencia-mundo';
 import { SalaColyseusBase, type MetadataDaSala } from './sala-base';
 
@@ -38,9 +46,18 @@ interface Bilhete {
 /** O reino do Mundo (marco 29: o Reino Central, o único por enquanto). */
 export const reinoDoMundo = (conteudo: Conteudo): Reino => reinoDoConteudo(conteudo);
 
-/** O que o coordenador pede a uma sala: soltar o personagem de uma sessão caída (devolve a ficha atual). */
+/** O que o coordenador pede a uma sala: soltar a sessão caída e entregar a quem está nela (false = não está). */
 interface SalaDoCoordenador {
   liberarCaida(identidade: string): FichaDoMundo | null;
+  entregar(identidade: string, aviso: AvisoDoMundo): boolean;
+  definirGrupo(identidade: string, grupo: string | null): boolean;
+  concluirMercado(identidade: string, r: ResultadoDoMercado): boolean;
+}
+
+interface Perfil {
+  nome: string;
+  classeId: string;
+  nivel: number;
 }
 
 /** O estado do Mundo no processo: o reino, a persistência, os bilhetes e quem está jogando. */
@@ -50,12 +67,78 @@ export class CoordenadorDoMundo {
   /** Personagem -> a sala em que está (quem sai de uma sala velha não derruba a entrada na nova). */
   private readonly online = new Map<string, string>();
   private readonly salas = new Map<string, SalaDoCoordenador>();
+  /** Personagem -> o texto da última ficha gravada (só enquanto está online). */
+  private readonly gravadas = new Map<string, string>();
+  /** Personagem -> o lugar onde está (para o grupo) e o perfil (o convite pelo nome). */
+  private readonly lugares = new Map<string, string>();
+  private readonly perfis = new Map<string, Perfil>();
+  readonly grupos: GruposDoMundo;
 
   constructor(
     readonly persistencia: PersistenciaMundo,
     readonly conteudo: Conteudo = conteudoOficial(),
+    readonly mercado: LojaDoMercado = new MercadoEmMemoria(),
   ) {
     this.reino = reinoDoMundo(conteudo);
+    const g = BALANCE_PADRAO.mundo.grupo;
+    this.grupos = new GruposDoMundo(g.max, g.conviteS * 1000);
+  }
+
+  /** Quem entrou numa sala: o perfil e o lugar (o grupo mostra onde cada um está). */
+  registrarPerfil(identidade: string, ficha: FichaDoMundo, lugar: string): void {
+    const p = ficha.personagem;
+    this.perfis.set(identidade, { nome: p.nome, classeId: p.bolsa.classeId, nivel: p.nivel });
+    this.lugares.set(identidade, lugar);
+  }
+
+  perfil(identidade: string): Perfil | undefined {
+    return this.perfis.get(identidade);
+  }
+
+  lugarDe(identidade: string): string | null {
+    return this.online.has(identidade) ? (this.lugares.get(identidade) ?? null) : null;
+  }
+
+  /** O personagem online com o nome (sem caixa); o primeiro, se houver dois iguais. */
+  porNome(nome: string): string | undefined {
+    const n = nome.trim().toLowerCase();
+    for (const id of this.online.keys()) if (this.perfis.get(id)?.nome.toLowerCase() === n) return id;
+    return undefined;
+  }
+
+  private salaDe(identidade: string): SalaDoCoordenador | undefined {
+    const id = this.online.get(identidade);
+    return id === undefined ? undefined : this.salas.get(id);
+  }
+
+  entregarA(identidade: string, aviso: AvisoDoMundo): boolean {
+    return this.salaDe(identidade)?.entregar(identidade, aviso) ?? false;
+  }
+
+  definirGrupoDe(identidade: string, grupo: string | null): boolean {
+    return this.salaDe(identidade)?.definirGrupo(identidade, grupo) ?? false;
+  }
+
+  /** Entrega o resultado do mercado na sala onde a pessoa está; se saiu do jogo, no banco da ficha guardada. */
+  async concluirMercadoDe(identidade: string, r: ResultadoDoMercado): Promise<void> {
+    if (this.salaDe(identidade)?.concluirMercado(identidade, r)) return;
+    const { conta, slot } = separar(identidade);
+    const ficha = await this.persistencia.carregar(conta, slot);
+    if (!ficha) {
+      registrarLog('mundo_mercado_entrega_perdida', { itens: r.itens.length, ouro: r.ouro + r.ouroNoBanco });
+      return;
+    }
+    depositarNoBanco(ficha.banco, r.itens, r.ouro + r.ouroNoBanco);
+    await this.persistencia.gravar(conta, slot, ficha);
+    this.gravadas.delete(identidade);
+  }
+
+  /** Saiu do jogo de vez (não é troca de sala): sai do grupo, e os outros ficam sabendo. */
+  saiuDoJogo(identidade: string): void {
+    const r = this.grupos.sair(identidade);
+    if (r) publicarGrupo(this, r.desfeito ? null : r.grupo, r.desfeito ? r.grupo.membros : []);
+    this.perfis.delete(identidade);
+    this.lugares.delete(identidade);
   }
 
   emitir(b: Omit<Bilhete, 'expira'>): string {
@@ -86,7 +169,10 @@ export class CoordenadorDoMundo {
   }
 
   sair(identidade: string, sala: string | null = null): void {
-    if (sala === null || this.online.get(identidade) === sala) this.online.delete(identidade);
+    if (sala !== null && this.online.get(identidade) !== sala) return;
+    this.online.delete(identidade);
+    // Sem guardar a última gravada de quem saiu (a troca de sala também passa aqui: custa uma gravação a mais).
+    this.gravadas.delete(identidade);
   }
 
   registrarSala(id: string, sala: SalaDoCoordenador | null): void {
@@ -105,8 +191,17 @@ export class CoordenadorDoMundo {
     return ficha;
   }
 
+  /**
+   * Marco 30 (30/10/2026, D-129): grava só quando a ficha mudou desde a última gravação deste processo (o checkpoint
+   * de 60 s de quem está parado na vila não vai ao banco). A falha esquece a última, para a próxima tentar de novo.
+   */
   gravar(conta: string, slot: number, ficha: FichaDoMundo): void {
+    const chave = `${conta}#${String(slot)}`;
+    const texto = JSON.stringify(ficha);
+    if (this.gravadas.get(chave) === texto) return;
+    this.gravadas.set(chave, texto);
     this.persistencia.gravar(conta, slot, ficha).catch((e: unknown) => {
+      if (this.gravadas.get(chave) === texto) this.gravadas.delete(chave);
       registrarLog('mundo_gravacao_falhou', { motivo: e instanceof Error ? e.message : String(e) });
     });
   }
@@ -166,6 +261,18 @@ export class SalaMundoColyseus extends SalaColyseusBase {
     super.onDispose();
   }
 
+  entregar(identidade: string, aviso: AvisoDoMundo): boolean {
+    return this.mundo.entregar(identidade, aviso);
+  }
+
+  definirGrupo(identidade: string, grupo: string | null): boolean {
+    return this.mundo.definirGrupo(identidade, grupo);
+  }
+
+  concluirMercado(identidade: string, r: ResultadoDoMercado): boolean {
+    return this.mundo.concluirMercado(identidade, r);
+  }
+
   liberarCaida(identidade: string): FichaDoMundo | null {
     for (const [sessionId, id] of this.identidades) {
       if (id !== identidade || !this.caidas.has(sessionId)) continue;
@@ -173,7 +280,7 @@ export class SalaMundoColyseus extends SalaColyseusBase {
       this.encerrarCaida(sessionId);
       let ficha: FichaDoMundo | null = null;
       for (const p of this.mundo.retirarPendencias()) {
-        if (p.identidade === identidade) ficha = p.ficha;
+        if (p.identidade === identidade && (p.tipo === 'gravar' || p.tipo === 'trocar')) ficha = p.ficha;
         this.atender(p);
       }
       return ficha;
@@ -209,7 +316,8 @@ export class SalaMundoColyseus extends SalaColyseusBase {
       if (!ficha || !this.coordenador.entrar(identidade, this.roomId)) throw new ServerError(409, 'ja_jogando');
       if (entrada.chegada === null) entrada.ficha = ficha;
     }
-    this.mundo.reservar(identidade, entrada.ficha, entrada.chegada);
+    this.mundo.reservar(identidade, entrada.ficha, entrada.chegada, this.coordenador.grupos.grupoDe(identidade)?.id ?? null);
+    this.coordenador.registrarPerfil(identidade, entrada.ficha, this.mundo.idLugar);
     this.identidades.set(client.sessionId, identidade);
     void super.onJoin(client);
     registrarLog('mundo_entrada', { lugar: this.mundo.idLugar, canal: this.canal });
@@ -220,7 +328,10 @@ export class SalaMundoColyseus extends SalaColyseusBase {
     this.processarPendencias();
     const identidade = this.identidades.get(client.sessionId);
     this.identidades.delete(client.sessionId);
-    if (identidade && !this.coordenador.emTroca(identidade)) this.coordenador.sair(identidade, this.roomId);
+    if (identidade && !this.coordenador.emTroca(identidade)) {
+      this.coordenador.sair(identidade, this.roomId);
+      this.coordenador.saiuDoJogo(identidade);
+    }
   }
 
   /** Pelo bilhete (troca de sala) ou pelo slot (entrar no jogo, sempre na vila salva; ou criar o personagem). */
@@ -249,6 +360,14 @@ export class SalaMundoColyseus extends SalaColyseusBase {
   }
 
   private atender(p: PendenciaDoMundo): void {
+    if (p.tipo === 'social') {
+      atenderSocial(this.coordenador, p);
+      return;
+    }
+    if (p.tipo === 'mercado') {
+      void atenderMercado(this.coordenador, p);
+      return;
+    }
     const { conta, slot } = separar(p.identidade);
     this.coordenador.gravar(conta, slot, p.ficha);
     if (p.tipo === 'gravar') return;

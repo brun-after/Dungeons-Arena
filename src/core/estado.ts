@@ -107,6 +107,8 @@ export interface ObjetoNoMundo {
   aguardaSaidaDe?: EntidadeId;
   /** Marco 26 (29/10/2026, D-122): tick em que o drop caiu (só os largados em jogo; o prazo no chão conta daqui). */
   largadoTick?: number;
+  /** Marco 30 (30/10/2026, D-129): o render não desenha (a porta da estrutura escondida do Mundo; o prompt mostra). */
+  escondido?: boolean;
 }
 
 /** Célula de rastro (§2.8): aplica dano ou efeito a quem é hostil ao dono e entra nela. */
