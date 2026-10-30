@@ -448,7 +448,7 @@
     {
       "id": "rei_goblin",
       "nome": "Rei Goblin",
-      "hpBase": 600,
+      "hpBase": 2200,
       "hesitacaoS": 1,
       "deteccao": 7,
       "xp": 180,
@@ -469,7 +469,7 @@
     {
       "id": "bruxa_do_pantano",
       "nome": "Bruxa do Pântano",
-      "hpBase": 520,
+      "hpBase": 2800,
       "hesitacaoS": 1,
       "deteccao": 8,
       "xp": 320,
@@ -492,7 +492,7 @@
     {
       "id": "dragao_das_ruinas",
       "nome": "Dragão das Ruínas",
-      "hpBase": 1400,
+      "hpBase": 3600,
       "hesitacaoS": 0.8,
       "deteccao": 9,
       "xp": 900,

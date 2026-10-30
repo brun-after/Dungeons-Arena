@@ -302,7 +302,7 @@ function lerMateriais(l: Leitor, v: unknown): Record<string, readonly MaterialDe
 export function conferirReino(reino: Reino, existe: { preset: (id: string) => boolean; item: (id: string) => boolean; tema: (id: string) => boolean }): string[] {
   const erros: string[] = [];
   const presets = (dono: string, lista: readonly string[]) => {
-    for (const p of lista) if (!existe.preset(p)) erros.push(`${dono}: preset desconhecido "${p}"`);
+    for (const p of lista) if (!existe.preset(p)) erros.push(`${dono}: preset desconhecido ou de invocação "${p}"`);
   };
   const itens = (dono: string, lista: readonly string[]) => {
     for (const i of lista) if (!existe.item(i)) erros.push(`${dono}: item desconhecido "${i}"`);

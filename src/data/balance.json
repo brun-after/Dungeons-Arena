@@ -303,7 +303,8 @@
     "grupo": { "tempoMinPctDoSolo": 40, "tempoMaxPctDoSolo": 110 },
     "invocacao": { "fatiaMinPct": 15, "fatiaMaxPct": 35 },
     "build": { "nivel": 8, "vitoriasMinPct": 60 },
-    "nivelAlto": { "niveis": [50, 75, 100], "vitoriasMinPct": 75, "tempoMinS": 2, "tempoMaxS": 15, "ritmoNiveis": [3, 10, 20, 30, 40, 50, 60, 75, 90, 100], "razaoTempoMin": 8, "razaoTempoMax": 13 }
+    "nivelAlto": { "niveis": [50, 75, 100], "vitoriasMinPct": 75, "tempoMinS": 2, "tempoMaxS": 15, "ritmoNiveis": [3, 10, 20, 30, 40, 50, 60, 75, 90, 100], "razaoTempoMin": 8, "razaoTempoMax": 13 },
+    "mundo": { "regiaoVitoriasMinPct": 75, "covilGrupo": 3, "covilTempoMinS": 30, "covilTempoMaxS": 60, "covilSoloTempoMaxS": 90 }
   },
   "dificuldades": {
     "facil": { "vidaPct": 75, "danoPct": 70, "hesitacaoPct": 130, "avisoExtraMs": 150, "recompensaPct": 80,

@@ -50,7 +50,7 @@
     },
     {
       "id": "ruinas_do_norte", "nome": "Ruínas do Norte", "gx": 1, "gy": 0, "bioma": "ruinas", "perigo": "perigoso",
-      "nivel": [18, 28], "tema": "ruinas", "semente": 1011, "inimigos": ["esqueleto", "cultista", "vampiro", "esqueleto_profano", "cavaleiro_da_morte"],
+      "nivel": [18, 28], "tema": "ruinas", "semente": 1011, "inimigos": ["esqueleto", "cultista", "vampiro", "troll"],
       "estruturas": [
         { "id": "porta_ninho_dragao", "nome": "Ninho do Dragão", "tipo": "castelo", "x": 58, "y": 22, "largura": 9, "altura": 6, "destino": { "tipo": "covil", "id": "ninho_do_dragao" } }
       ],
@@ -90,14 +90,14 @@
   ],
   "masmorras": [
     { "id": "toca_dos_goblins", "nome": "Toca dos Goblins", "nivel": 5, "salas": 5, "tema": "mina", "inimigos": ["goblin", "slime"], "boss": "orc", "recompensa": ["pocao_vida_maior", "pergaminho_retorno", "minerio_prata"], "recargaH": 20 },
-    { "id": "catacumbas_pedravale", "nome": "Catacumbas de Pedravale", "nivel": 9, "salas": 7, "tema": "catacumbas", "inimigos": ["esqueleto", "esqueleto_profano", "espectro"], "boss": "cavaleiro_da_morte", "recompensa": ["osso_antigo", "cristal_arcano", "pergaminho_retorno"], "recargaH": 20 },
+    { "id": "catacumbas_pedravale", "nome": "Catacumbas de Pedravale", "nivel": 9, "salas": 7, "tema": "catacumbas", "inimigos": ["esqueleto", "vampiro", "cultista"], "boss": "boss", "recompensa": ["osso_antigo", "cristal_arcano", "pergaminho_retorno"], "recargaH": 20 },
     { "id": "mina_abandonada", "nome": "Mina Abandonada", "nivel": 8, "salas": 6, "tema": "mina", "inimigos": ["aranha", "goblin", "troll"], "boss": "boss", "recompensa": ["minerio_prata", "cristal_arcano", "pocao_mana_maior"], "recargaH": 20 },
     { "id": "caverna_de_gelo", "nome": "Caverna de Gelo", "nivel": 14, "salas": 8, "tema": "caverna_gelo", "inimigos": ["slime", "troll", "lobo"], "boss": "boss", "recompensa": ["cristal_arcano", "pocao_mana_maior", "pergaminho_retorno"], "recargaH": 20 }
   ],
   "covis": [
     { "id": "minas_do_rei_goblin", "nome": "Minas do Rei Goblin", "nivel": 12, "salas": 5, "tema": "mina", "inimigos": ["goblin", "orc"], "boss": "rei_goblin", "dropExclusivo": "coroa_do_rei_goblin", "chanceDropPct": 35, "renascerMin": 20 },
     { "id": "cabana_da_bruxa", "nome": "Cabana da Bruxa", "nivel": 18, "salas": 5, "tema": "pantano", "inimigos": ["slime", "cultista", "aranha"], "boss": "bruxa_do_pantano", "dropExclusivo": "amuleto_da_bruxa", "chanceDropPct": 30, "renascerMin": 25 },
-    { "id": "ninho_do_dragao", "nome": "Ninho do Dragão", "nivel": 28, "salas": 6, "tema": "vulcao", "inimigos": ["cultista", "cavaleiro_da_morte"], "boss": "dragao_das_ruinas", "dropExclusivo": "manto_de_escamas", "chanceDropPct": 25, "renascerMin": 40 }
+    { "id": "ninho_do_dragao", "nome": "Ninho do Dragão", "nivel": 28, "salas": 6, "tema": "vulcao", "inimigos": ["cultista", "vampiro", "troll"], "boss": "dragao_das_ruinas", "dropExclusivo": "manto_de_escamas", "chanceDropPct": 25, "renascerMin": 40 }
   ],
   "materiais": {
     "goblin": [{"itemId": "orelha_de_goblin", "chancePct": 35}],
@@ -105,9 +105,8 @@
     "aranha": [{"itemId": "seda_de_aranha", "chancePct": 30}],
     "slime": [{"itemId": "gosma_de_slime", "chancePct": 30}],
     "esqueleto": [{"itemId": "osso_antigo", "chancePct": 30}],
-    "esqueleto_profano": [{"itemId": "osso_antigo", "chancePct": 45}],
     "dragao_das_ruinas": [{"itemId": "escama_de_dragao", "chancePct": 100}],
-    "cavaleiro_da_morte": [{"itemId": "escama_de_dragao", "chancePct": 8}]
+    "vampiro": [{"itemId": "escama_de_dragao", "chancePct": 6}]
   },
   "missoes": [
     {"id": "limpar_os_campos", "nome": "Limpar os campos", "texto": "Derrote 10 slimes perto da Vila do Centro.", "vilas": ["vila_do_centro"], "alvo": {"tipo": "cacar", "preset": "slime", "qtd": 10, "regiao": "vila_do_centro"}, "recompensa": {"ouro": 40, "xp": 60}},

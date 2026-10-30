@@ -8,7 +8,7 @@
 
 Sementes: 8 por cenário (1000, 8919, 16838, 24757, 32676, 40595, 48514, 56433). Balance versão 36.
 
-## Resultado: 125/125 metas aprovadas
+## Resultado: 140/140 metas aprovadas
 
 
 ## Tabelas
@@ -102,13 +102,13 @@ Sementes: 8 por cenário (1000, 8919, 16838, 24757, 32676, 40595, 48514, 56433).
 | Habilidade | Quem usa | Conjuração | Suportado (150 ms) | Degradado (250 ms) |
 |---|---|---|---|---|
 | golpe | goblin, troll, lobo, sombra, sentinela, servo_ossuario, falcao_companheiro, esqueleto_profano, espectro, copia_ilusoria, falcao_espectral | 600 ms | 323 ms | 123 ms |
-| golpe_pesado | orc, cavaleiro_da_morte | 600 ms | 323 ms | 123 ms |
+| golpe_pesado | orc, cavaleiro_da_morte, rei_goblin | 600 ms | 323 ms | 123 ms |
 | golpe_viscoso | slime | 600 ms | 323 ms | 123 ms |
-| raio_vampirico | vampiro | 504 ms | 352 ms | 152 ms |
+| raio_vampirico | vampiro, bruxa_do_pantano | 504 ms | 352 ms | 152 ms |
 | teia | aranha | 504 ms | 370 ms | 170 ms |
-| golpe_demoniaco | boss | 700 ms | 423 ms | 223 ms |
+| golpe_demoniaco | boss, dragao_das_ruinas | 700 ms | 423 ms | 223 ms |
 | flecha | esqueleto, flecha_ancora | 700 ms | 548 ms | 348 ms |
-| marca_de_area | cultista, boss | 1200 ms | 923 ms | 723 ms |
+| marca_de_area | cultista, boss, rei_goblin, bruxa_do_pantano, dragao_das_ruinas | 1200 ms | 923 ms | 723 ms |
 
 ### Builds na arena (ficha inteira, nível 8)
 
@@ -212,6 +212,28 @@ Sementes: 8 por cenário (1000, 8919, 16838, 24757, 32676, 40595, 48514, 56433).
 |---|---|
 | 1 › 30 | 515,3 |
 | 30 › 100 | 5141,9 |
+
+### Mundo: regiões (meio da faixa, equipamento incomum; informativo além das vitórias)
+
+| Região | Nível | Vitórias | XP por hora de combate | Min de combate por nível |
+|---|---|---|---|---|
+| vila_do_centro | 3 | 100% | 8610 | 0,7 |
+| campos_do_oeste | 4 | 100% | 11112 | 0,8 |
+| encosta_do_leste | 7 | 100% | 19067 | 1,3 |
+| floresta_antiga | 7 | 100% | 18151 | 1,3 |
+| ruinas_do_norte | 23 | 100% | 3402 | 40,6 |
+| pico_gelado | 13 | 100% | 29830 | 2,6 |
+| pantano_sombrio | 15 | 100% | 23004 | 3,9 |
+| bosque_do_sul | 8 | 100% | 15595 | 2 |
+| colinas_do_sudeste | 11 | 100% | 26311 | 2,5 |
+
+### Mundo: covis de boss (no nível do covil; grupo de 3 com classes misturadas)
+
+| Covil | Boss | Nível | Sozinho | Em grupo | Vitórias do grupo |
+|---|---|---|---|---|---|
+| minas_do_rei_goblin | rei_goblin | 12 | 49,8 s | 37,5 s | 100% |
+| cabana_da_bruxa | bruxa_do_pantano | 18 | 43,2 s | 30,8 s | 100% |
+| ninho_do_dragao | dragao_das_ruinas | 28 | 65,5 s | 46,4 s | 100% |
 
 ### Ouro por minuto e custo do primeiro tomo (sem desconto; só ouro direto, sem venda de loot)
 

@@ -184,7 +184,8 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
     const r = lerReino(json);
     erros.push(...r.erros.map((e) => `mundo/${arquivo}: ${e}`));
     if (!r.reino) continue;
-    const existe = { preset: (id: string) => p.presets.has(id), item: (id: string) => it.itens.has(id), tema: (id: string) => tm.temas.has(id) };
+    // Marco 30 (D-129): invocação (xp 0, comportamento de servo) não serve de monstro do Mundo.
+    const existe = { preset: (id: string) => p.presets.get(id)?.invocacao === null, item: (id: string) => it.itens.has(id), tema: (id: string) => tm.temas.has(id) };
     erros.push(...conferirReino(r.reino, existe).map((e) => `mundo/${arquivo}: ${e}`));
     reinos.set(r.reino.id, r.reino);
   }
