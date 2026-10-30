@@ -12,6 +12,8 @@ interface Galeria {
 }
 
 test('a galeria toca uma skill de cada família sem erro', async ({ page }) => {
+  // Marco 27 (29/10/2026): no WebGL por software do CI, cada segundo avançado custa ~1 s de quadro; 13 skills passam de 90 s.
+  test.setTimeout(240_000);
   const erros: string[] = [];
   page.on('pageerror', (e) => erros.push(e.message));
   await page.goto('./?galeria=efeitos');

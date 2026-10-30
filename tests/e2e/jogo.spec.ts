@@ -139,7 +139,6 @@ test.describe('desktop', () => {
     await page.keyboard.press('KeyI');
     const mochila = page.getByRole('dialog', { name: 'Mochila' });
     await expect(mochila).toBeVisible();
-    // Marco 27 (D-126): o Aventureiro já começa com o bumerangue de madeira na mão principal.
     await mochila.getByRole('button', { name: 'Tirar: Arma: Bumerangue de madeira' }).click();
     await mochila.getByRole('button', { name: 'Equipar: Bumerangue de madeira' }).click();
     await expect(diag).toHaveAttribute('data-equipados', '1');
@@ -714,7 +713,8 @@ test.describe('celular (emulação)', () => {
     const { diag, erros } = await abrir(page);
     await page.getByRole('button', { name: /Abrir a mochila/ }).click();
     const mochila = page.getByRole('dialog', { name: 'Mochila' });
-    await mochila.getByRole('button', { name: 'Equipar: Espada curta' }).click();
+    await mochila.getByRole('button', { name: 'Tirar: Arma: Bumerangue de madeira' }).click();
+    await mochila.getByRole('button', { name: 'Equipar: Bumerangue de madeira' }).click();
     await expect(mochila).toBeVisible();
     await expect(diag).toHaveAttribute('data-equipados', '1');
     expect(erros).toEqual([]);
