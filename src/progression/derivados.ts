@@ -9,7 +9,7 @@ import type { Catalogo } from '../combat/habilidades';
 import { passivasDaBolsa } from '../combat/perfil';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { Atributos, Bolsa, Entidade } from '../entities/entidade';
-import { basicoDoPersonagem } from './armas';
+import { basicoDoPersonagem, basicoSecundario } from './armas';
 import { hpMaximo, manaMaxima } from './ficha';
 import { NOMES_ATRIBUTOS, type Item } from './itens';
 
@@ -77,6 +77,13 @@ export function recalcularFicha(e: Entidade, ctx: Pick<ContextoSimulacao, 'balan
   e.mana = Math.min(e.mana, e.manaMax);
   // Marco 14: as teclas 1–4 são as habilidades da entidade.
   e.habilidades = e.bolsa.barra.filter((id): id is string => id !== null && e.bolsa?.conhecidas.some((c) => c.id === id) === true);
-  // Marco 23 (D-093): a arma de outra família troca o ataque básico (progression/armas.ts).
+  // Marco 27 (D-126): o básico vem da arma principal; o da mão secundária sai a cada 3º (progression/armas.ts).
   e.ataqueBasico = basicoDoPersonagem(ctx, e);
+  const secundario = basicoSecundario(ctx, e);
+  if (secundario || e.armas) {
+    const a = (e.armas ??= { contador: 0, golpes: 0 });
+    if (a.secundario !== (secundario ?? undefined)) a.contador = 0;
+    if (secundario) a.secundario = secundario;
+    else delete a.secundario;
+  }
 }

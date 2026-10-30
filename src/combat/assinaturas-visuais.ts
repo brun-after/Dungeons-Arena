@@ -40,6 +40,13 @@ export const ASSINATURAS_VISUAIS = [
   // Falcão e vento.
   'mergulho', 'rasante', 'tempestade_de_penas', 'grito_do_falcao', 'garras_cegantes', 'vigia', 'presa_dupla',
   'furacao', 'revoada',
+  // Marco 27 (29/10/2026, D-126): o básico de cada arma de classe (render/vfx/familias/armas.ts).
+  'arma_machado', 'arma_lanca', 'arma_montante', 'arma_espada', 'arma_maca', 'arma_sabre', 'arma_mangual', 'arma_rapieira',
+  'arma_besta', 'arma_composto', 'arma_arcocurto', 'arma_arco', 'arma_elfico', 'arma_chifre', 'arma_arcoguerra', 'arma_arcocaca',
+  'arma_tomo', 'arma_codice', 'arma_mares', 'arma_estelar', 'arma_prisma', 'arma_espelhos', 'arma_orbital', 'arma_vazio',
+  'arma_cajado', 'arma_praga', 'arma_foice', 'arma_cova', 'arma_lamento', 'arma_sanguineo', 'arma_espectro', 'arma_colheita',
+  'arma_chakram', 'arma_adaga', 'arma_machadinha', 'arma_shuriken', 'arma_duplo', 'arma_arpeu', 'arma_falcoeiro', 'arma_serrilhado',
+  'arma_solo_amaldicoado', 'arma_bumerangue',
 ] as const;
 export type AssinaturaVisual = (typeof ASSINATURAS_VISUAIS)[number];
 

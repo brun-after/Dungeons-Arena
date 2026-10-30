@@ -10,6 +10,7 @@ import { celulaOcupada, chebyshev } from './geometria';
 import type { Habilidade } from './habilidades';
 import { multiplicadorEncarnacao, protecaoEncarnacao } from './encarnacao';
 import { emFrenesi, multiplicadorFuria } from './furia';
+import { fatorDeCura } from './basico';
 import { registrarParticipacao } from './participacao';
 import { curarAliadosDaAura, efeitosDoPulso, pesoDoHostil, prolongarFrenesi, raioExtraDaAura } from './sintonia-guerreiro';
 
@@ -121,7 +122,8 @@ export function pulsarAura(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Ent
   }
   efeitosDoPulso(estado, ctx, ator, atingidos, saida);
   prolongarFrenesi(estado, ctx, ator, atingidos);
-  const curaDaAura = soma * curaPct / 100 * multiplicadorFuria(ctx, ator, estado.tick);
+  // Marco 27 (D-126): sem a lâmina, o Guerreiro perde parte da cura.
+  const curaDaAura = soma * curaPct / 100 * multiplicadorFuria(ctx, ator, estado.tick) * fatorDeCura(ctx, ator);
   curarAliadosDaAura(estado, ctx, ator, curaDaAura, saida);
   const curaTotal = (ator.auraCuraFracao ?? 0) + curaDaAura * multiplicadorCuraRecebida(ator, estado.tick);
   const curaInteira = Math.floor(curaTotal + 1e-9);

@@ -16,12 +16,19 @@ function obter<T>(v: T | undefined, nome: string): T {
   return v;
 }
 
+/** Marco 27: estes casos medem o golpe de contato, então o Aventureiro larga o bumerangue e golpeia de perto. */
+function deMaosVazias(j: Entidade): Entidade {
+  if (j.bolsa) j.bolsa.equipamento.arma_principal = null;
+  j.ataqueBasico = 'ataque_basico';
+  return j;
+}
+
 /** Jogador em (3,5) e um boneco (sem IA) em (5,5), na sala aberta. */
 function arena(semente = 1, bonecoX = 5) {
   const estado = criarEstado({ semente, faseId: 'teste' });
   const classe = obter(CONTEUDO.classes.get('aventureiro'), 'classe');
   const boneco = obter(CONTEUDO.presets.get('boneco'), 'boneco');
-  estado.entidades.push(comKit(criarJogador(classe, 'j', 3, 5, ctx.balance)));
+  estado.entidades.push(comKit(deMaosVazias(criarJogador(classe, 'j', 3, 5, ctx.balance))));
   estado.entidades.push(criarInimigo(boneco, 'b', bonecoX, 5, ctx.balance));
   const eventos: EventoSimulacao[] = [];
   const ent = (id: string): Entidade => obter(buscarEntidade(estado, id), id);

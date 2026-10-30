@@ -6265,6 +6265,1713 @@
         }
       },
       "familiaGeral": "psiquico"
+    },
+    {
+      "id": "basico_machado",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Arco amplo",
+      "icone": "machado",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d10",
+      "formulaCura": null,
+      "alcanceCelulas": 1,
+      "tipoArea": "cone",
+      "raioArea": 1,
+      "custoRecurso": 0,
+      "recargaMs": 1700,
+      "conjuracaoMs": 560,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "visual": {
+        "impacto": "corte",
+        "som": "golpe",
+        "cor": "#c0392b",
+        "assinatura": "arma_machado"
+      },
+      "escalaCom": "forca",
+      "escalaRolagem": [
+        "forca"
+      ],
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_lanca",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Estocada",
+      "icone": "lanca",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d10",
+      "formulaCura": null,
+      "alcanceCelulas": 2,
+      "tipoArea": "linha",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1600,
+      "conjuracaoMs": 520,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "visual": {
+        "impacto": "corte",
+        "som": "golpe",
+        "cor": "#7f8c8d",
+        "assinatura": "arma_lanca"
+      },
+      "escalaCom": "forca",
+      "escalaRolagem": [
+        "forca",
+        "destreza"
+      ],
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_montante",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Giro",
+      "icone": "espada",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d12",
+      "formulaCura": null,
+      "alcanceCelulas": 1,
+      "tipoArea": "nenhuma",
+      "raioArea": 1,
+      "custoRecurso": 0,
+      "recargaMs": 1800,
+      "conjuracaoMs": 600,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "visual": {
+        "impacto": "corte",
+        "som": "golpe",
+        "cor": "#95a5a6",
+        "assinatura": "arma_montante"
+      },
+      "escalaCom": "forca",
+      "escalaRolagem": [
+        "forca",
+        "constituicao"
+      ],
+      "variacao": {
+        "giroACada": 3
+      },
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_espada",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Onda de corte",
+      "icone": "espada",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 3,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1500,
+      "conjuracaoMs": 504,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 12,
+      "efeitos": [],
+      "visual": {
+        "impacto": "corte",
+        "som": "golpe",
+        "cor": "#ecf0f1",
+        "assinatura": "arma_espada"
+      },
+      "mods": [
+        "atravessar"
+      ],
+      "escalaCom": "forca",
+      "escalaRolagem": [
+        "forca",
+        "constituicao"
+      ],
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_maca",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Tremor",
+      "icone": "maca",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 3,
+      "tipoArea": "linha",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1900,
+      "conjuracaoMs": 620,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "atordoar",
+          "duracaoMs": 300
+        }
+      ],
+      "visual": {
+        "impacto": "corte",
+        "som": "golpe",
+        "cor": "#a04000",
+        "assinatura": "arma_maca"
+      },
+      "escalaCom": "forca",
+      "escalaRolagem": [
+        "forca",
+        "constituicao"
+      ],
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_sabre",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Passo de investida",
+      "icone": "espada",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d10",
+      "formulaCura": null,
+      "alcanceCelulas": 2,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1500,
+      "conjuracaoMs": 480,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "avanco",
+          "valor": 1,
+          "em": "conjurador"
+        }
+      ],
+      "visual": {
+        "impacto": "corte",
+        "som": "golpe",
+        "cor": "#d5dbdb",
+        "assinatura": "arma_sabre"
+      },
+      "escalaCom": "destreza",
+      "escalaRolagem": [
+        "destreza",
+        "forca"
+      ],
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_mangual",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Arrasto",
+      "icone": "maca",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d10",
+      "formulaCura": null,
+      "alcanceCelulas": 2,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1700,
+      "conjuracaoMs": 560,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "puxao",
+          "valor": 1
+        }
+      ],
+      "visual": {
+        "impacto": "corte",
+        "som": "golpe",
+        "cor": "#5d6d7e",
+        "assinatura": "arma_mangual"
+      },
+      "escalaCom": "forca",
+      "escalaRolagem": [
+        "forca"
+      ],
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_rapieira",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Riposta",
+      "icone": "adaga",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 2,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1250,
+      "conjuracaoMs": 420,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "visual": {
+        "impacto": "corte",
+        "som": "golpe",
+        "cor": "#f4d03f",
+        "assinatura": "arma_rapieira"
+      },
+      "escalaCom": "destreza",
+      "escalaRolagem": [
+        "destreza"
+      ],
+      "variacao": {
+        "ripostaMs": 1000
+      },
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_besta",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Virote perfurante",
+      "icone": "besta",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d10",
+      "formulaCura": null,
+      "alcanceCelulas": 6,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1900,
+      "conjuracaoMs": 620,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 20,
+      "efeitos": [],
+      "visual": {
+        "viagem": "esteira",
+        "impacto": "farpas",
+        "som": "projetil",
+        "cor": "#6e2c00",
+        "assinatura": "arma_besta"
+      },
+      "tags": [
+        "flechas"
+      ],
+      "mods": [
+        "atravessar"
+      ],
+      "escalaCom": "destreza",
+      "escalaRolagem": [
+        "destreza",
+        "forca"
+      ],
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_composto",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Leque",
+      "icone": "arco",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1700,
+      "conjuracaoMs": 560,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 16,
+      "efeitos": [],
+      "visual": {
+        "viagem": "esteira",
+        "impacto": "farpas",
+        "som": "projetil",
+        "cor": "#a9cce3",
+        "assinatura": "arma_composto"
+      },
+      "tags": [
+        "flechas"
+      ],
+      "escalaCom": "destreza",
+      "escalaRolagem": [
+        "destreza"
+      ],
+      "variacao": {
+        "multiplos": {
+          "quantidade": 3,
+          "aberturaGraus": 30,
+          "recuo": 0,
+          "pctExtras": 50
+        }
+      },
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_arcocurto",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Salva",
+      "icone": "arco",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d6",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1500,
+      "conjuracaoMs": 480,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 18,
+      "efeitos": [],
+      "visual": {
+        "viagem": "esteira",
+        "impacto": "farpas",
+        "som": "projetil",
+        "cor": "#f0b27a",
+        "assinatura": "arma_arcocurto"
+      },
+      "tags": [
+        "flechas"
+      ],
+      "escalaCom": "destreza",
+      "escalaRolagem": [
+        "destreza"
+      ],
+      "variacao": {
+        "multiplos": {
+          "quantidade": 3,
+          "aberturaGraus": 0,
+          "recuo": 0.8,
+          "pctExtras": 45
+        }
+      },
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_arco",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Tiro parabólico",
+      "icone": "arco",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 8,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1700,
+      "conjuracaoMs": 560,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 14,
+      "efeitos": [],
+      "visual": {
+        "viagem": "esteira",
+        "impacto": "farpas",
+        "som": "projetil",
+        "cor": "#d4ac0d",
+        "assinatura": "arma_arco"
+      },
+      "tags": [
+        "flechas"
+      ],
+      "escalaCom": "destreza",
+      "escalaRolagem": [
+        "destreza",
+        "forca"
+      ],
+      "variacao": {
+        "porCima": true
+      },
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_elfico",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Flecha teleguiada",
+      "icone": "arco",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 6,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1550,
+      "conjuracaoMs": 520,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 14,
+      "efeitos": [],
+      "visual": {
+        "viagem": "esteira",
+        "impacto": "farpas",
+        "som": "projetil",
+        "cor": "#82e0aa",
+        "assinatura": "arma_elfico"
+      },
+      "tags": [
+        "flechas"
+      ],
+      "escalaCom": "destreza",
+      "escalaRolagem": [
+        "destreza",
+        "sabedoria"
+      ],
+      "variacao": {
+        "guiado": 25
+      },
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_chifre",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Flecha de tabela",
+      "icone": "arco",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 6,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1500,
+      "conjuracaoMs": 520,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 16,
+      "efeitos": [],
+      "visual": {
+        "viagem": "esteira",
+        "impacto": "farpas",
+        "som": "projetil",
+        "cor": "#dc7633",
+        "assinatura": "arma_chifre"
+      },
+      "tags": [
+        "flechas"
+      ],
+      "escalaCom": "destreza",
+      "escalaRolagem": [
+        "destreza",
+        "forca"
+      ],
+      "variacao": {
+        "ricocheteParede": 1
+      },
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_arcoguerra",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Flecha de estilhaço",
+      "icone": "arco",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 6,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1750,
+      "conjuracaoMs": 580,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 16,
+      "efeitos": [],
+      "visual": {
+        "viagem": "esteira",
+        "impacto": "farpas",
+        "som": "projetil",
+        "cor": "#922b21",
+        "assinatura": "arma_arcoguerra"
+      },
+      "tags": [
+        "flechas"
+      ],
+      "escalaCom": "forca",
+      "escalaRolagem": [
+        "forca",
+        "destreza"
+      ],
+      "variacao": {
+        "estilhacos": {
+          "quantidade": 3,
+          "alcance": 2,
+          "pct": 35
+        }
+      },
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_arcocaca",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Flecha que crava",
+      "icone": "arco",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 6,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1500,
+      "conjuracaoMs": 520,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 16,
+      "efeitos": [],
+      "visual": {
+        "viagem": "esteira",
+        "impacto": "farpas",
+        "som": "projetil",
+        "cor": "#7d6608",
+        "assinatura": "arma_arcocaca"
+      },
+      "tags": [
+        "flechas"
+      ],
+      "escalaCom": "destreza",
+      "escalaRolagem": [
+        "destreza"
+      ],
+      "variacao": {
+        "cravarMs": 1200
+      },
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_tomo",
+      "familiaEvolucao": "arcana",
+      "grau": "B",
+      "nome": "Dardo encadeado",
+      "icone": "tomo",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d6",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1550,
+      "conjuracaoMs": 630,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 14,
+      "efeitos": [],
+      "visual": {
+        "viagem": "rastro",
+        "impacto": "runas",
+        "som": "magia",
+        "cor": "#9b8cff",
+        "assinatura": "arma_tomo"
+      },
+      "mods": [
+        "encadear"
+      ],
+      "escalaCom": "inteligencia",
+      "escalaRolagem": [
+        "inteligencia"
+      ],
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_codice",
+      "familiaEvolucao": "arcana",
+      "grau": "B",
+      "nome": "Runa",
+      "icone": "tomo",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d6",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1600,
+      "conjuracaoMs": 600,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "visual": {
+        "impacto": "runas",
+        "som": "magia",
+        "cor": "#f39c12",
+        "assinatura": "arma_codice"
+      },
+      "escalaCom": "inteligencia",
+      "escalaRolagem": [
+        "inteligencia"
+      ],
+      "variacao": {
+        "solo": {
+          "pulsos": 1,
+          "atrasoMs": 700,
+          "raio": 1,
+          "pctPulso": 150
+        }
+      },
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_mares",
+      "familiaEvolucao": "arcana",
+      "grau": "B",
+      "nome": "Onda",
+      "icone": "tomo",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d6",
+      "formulaCura": null,
+      "alcanceCelulas": 2,
+      "tipoArea": "cone",
+      "raioArea": 2,
+      "custoRecurso": 0,
+      "recargaMs": 1650,
+      "conjuracaoMs": 600,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "molhado",
+          "duracaoMs": 3000
+        }
+      ],
+      "visual": {
+        "impacto": "runas",
+        "som": "magia",
+        "cor": "#5dade2",
+        "assinatura": "arma_mares"
+      },
+      "escalaCom": "inteligencia",
+      "escalaRolagem": [
+        "inteligencia",
+        "sabedoria"
+      ],
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_estelar",
+      "familiaEvolucao": "arcana",
+      "grau": "B",
+      "nome": "Orbe pulsante",
+      "icone": "tomo",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d6",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1800,
+      "conjuracaoMs": 650,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 6,
+      "efeitos": [],
+      "visual": {
+        "viagem": "rastro",
+        "impacto": "runas",
+        "som": "magia",
+        "cor": "#f7dc6f",
+        "assinatura": "arma_estelar"
+      },
+      "mods": [
+        "atravessar"
+      ],
+      "escalaCom": "inteligencia",
+      "escalaRolagem": [
+        "inteligencia"
+      ],
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_prisma",
+      "familiaEvolucao": "arcana",
+      "grau": "B",
+      "nome": "Feixe",
+      "icone": "tomo",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d6",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "linha",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1700,
+      "conjuracaoMs": 650,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "visual": {
+        "impacto": "runas",
+        "som": "magia",
+        "cor": "#bb8fce",
+        "assinatura": "arma_prisma"
+      },
+      "escalaCom": "inteligencia",
+      "escalaRolagem": [
+        "inteligencia",
+        "carisma"
+      ],
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_espelhos",
+      "familiaEvolucao": "arcana",
+      "grau": "B",
+      "nome": "Dardo e imagem",
+      "icone": "tomo",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d6",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1550,
+      "conjuracaoMs": 620,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 14,
+      "efeitos": [],
+      "visual": {
+        "viagem": "rastro",
+        "impacto": "runas",
+        "som": "magia",
+        "cor": "#d2b4de",
+        "assinatura": "arma_espelhos"
+      },
+      "escalaCom": "inteligencia",
+      "escalaRolagem": [
+        "inteligencia",
+        "destreza"
+      ],
+      "variacao": {
+        "multiplos": {
+          "quantidade": 2,
+          "aberturaGraus": 0,
+          "recuo": 1,
+          "pctExtras": 50
+        }
+      },
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_orbital",
+      "familiaEvolucao": "arcana",
+      "grau": "B",
+      "nome": "Dardos orbitais",
+      "icone": "tomo",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d6",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1500,
+      "conjuracaoMs": 600,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 14,
+      "efeitos": [],
+      "visual": {
+        "viagem": "rastro",
+        "impacto": "runas",
+        "som": "magia",
+        "cor": "#85c1e9",
+        "assinatura": "arma_orbital"
+      },
+      "escalaCom": "inteligencia",
+      "escalaRolagem": [
+        "inteligencia",
+        "sabedoria"
+      ],
+      "variacao": {
+        "multiplosACada": {
+          "n": 3,
+          "quantidade": 3,
+          "aberturaGraus": 30
+        }
+      },
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_vazio",
+      "familiaEvolucao": "arcana",
+      "grau": "B",
+      "nome": "Dardo do vazio",
+      "icone": "tomo",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d6",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1650,
+      "conjuracaoMs": 650,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 12,
+      "efeitos": [],
+      "visual": {
+        "viagem": "rastro",
+        "impacto": "runas",
+        "som": "magia",
+        "cor": "#5b2c6f",
+        "assinatura": "arma_vazio"
+      },
+      "escalaCom": "inteligencia",
+      "escalaRolagem": [
+        "inteligencia"
+      ],
+      "variacao": {
+        "implosao": 1
+      },
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_cajado",
+      "familiaEvolucao": "sombra",
+      "grau": "B",
+      "nome": "Solo que cresce",
+      "icone": "cajado",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d6+1",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1500,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "visual": {
+        "impacto": "sombra",
+        "som": "magia",
+        "conjuracao": "sombra",
+        "cor": "#8b68d9",
+        "assinatura": "arma_cajado"
+      },
+      "elemento": "trevas",
+      "escalaCom": "inteligencia",
+      "escalaRolagem": [
+        "inteligencia",
+        "sabedoria"
+      ],
+      "variacao": {
+        "solo": {
+          "pulsos": 3,
+          "raio": 0,
+          "pctPulso": 40,
+          "cresce": true
+        }
+      },
+      "basico": true,
+      "mobilidade": "lenta"
+    },
+    {
+      "id": "basico_praga",
+      "familiaEvolucao": "sombra",
+      "grau": "B",
+      "nome": "Solo da praga",
+      "icone": "cajado",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d6+1",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1500,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "visual": {
+        "impacto": "sombra",
+        "som": "magia",
+        "conjuracao": "sombra",
+        "cor": "#7dcea0",
+        "assinatura": "arma_praga"
+      },
+      "elemento": "veneno",
+      "escalaCom": "inteligencia",
+      "escalaRolagem": [
+        "inteligencia",
+        "sabedoria"
+      ],
+      "variacao": {
+        "solo": {
+          "pulsos": 2,
+          "raio": 1,
+          "pctPulso": 45,
+          "salta": 1
+        }
+      },
+      "basico": true,
+      "mobilidade": "lenta"
+    },
+    {
+      "id": "basico_foice",
+      "familiaEvolucao": "sombra",
+      "grau": "B",
+      "nome": "Meia-lua",
+      "icone": "foice",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d6+1",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1500,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "visual": {
+        "impacto": "sombra",
+        "som": "magia",
+        "conjuracao": "sombra",
+        "cor": "#566573",
+        "assinatura": "arma_foice"
+      },
+      "elemento": "trevas",
+      "escalaCom": "inteligencia",
+      "escalaRolagem": [
+        "inteligencia",
+        "sabedoria"
+      ],
+      "variacao": {
+        "solo": {
+          "pulsos": 2,
+          "raio": 1,
+          "pctPulso": 55,
+          "forma": "cone"
+        }
+      },
+      "basico": true,
+      "mobilidade": "lenta"
+    },
+    {
+      "id": "basico_cova",
+      "familiaEvolucao": "sombra",
+      "grau": "B",
+      "nome": "Mãos da cova",
+      "icone": "cajado",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d6+1",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1500,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "visual": {
+        "impacto": "sombra",
+        "som": "magia",
+        "conjuracao": "sombra",
+        "cor": "#6e2c00",
+        "assinatura": "arma_cova"
+      },
+      "elemento": "trevas",
+      "escalaCom": "inteligencia",
+      "escalaRolagem": [
+        "inteligencia",
+        "sabedoria"
+      ],
+      "variacao": {
+        "solo": {
+          "pulsos": 3,
+          "raio": 1,
+          "pctPulso": 35,
+          "enraizaMs": 800
+        }
+      },
+      "basico": true,
+      "mobilidade": "lenta"
+    },
+    {
+      "id": "basico_lamento",
+      "familiaEvolucao": "sombra",
+      "grau": "B",
+      "nome": "Solo do lamento",
+      "icone": "cajado",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d6+1",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1500,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 7,
+      "efeitos": [],
+      "visual": {
+        "impacto": "sombra",
+        "som": "magia",
+        "conjuracao": "sombra",
+        "cor": "#aed6f1",
+        "assinatura": "arma_lamento"
+      },
+      "elemento": "trevas",
+      "escalaCom": "inteligencia",
+      "escalaRolagem": [
+        "inteligencia",
+        "sabedoria"
+      ],
+      "variacao": {
+        "solo": {
+          "pulsos": 2,
+          "raio": 1,
+          "pctPulso": 40,
+          "almaPct": 60
+        },
+        "guiado": 30
+      },
+      "basico": true,
+      "mobilidade": "lenta"
+    },
+    {
+      "id": "basico_sanguineo",
+      "familiaEvolucao": "sombra",
+      "grau": "B",
+      "nome": "Solo que drena",
+      "icone": "cajado",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d6+1",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1500,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "visual": {
+        "impacto": "sombra",
+        "som": "magia",
+        "conjuracao": "sombra",
+        "cor": "#922b21",
+        "assinatura": "arma_sanguineo"
+      },
+      "elemento": "trevas",
+      "escalaCom": "inteligencia",
+      "escalaRolagem": [
+        "inteligencia",
+        "sabedoria"
+      ],
+      "variacao": {
+        "solo": {
+          "pulsos": 3,
+          "raio": 1,
+          "pctPulso": 35,
+          "drenoPct": 30
+        }
+      },
+      "basico": true,
+      "mobilidade": "lenta"
+    },
+    {
+      "id": "basico_espectro",
+      "familiaEvolucao": "sombra",
+      "grau": "B",
+      "nome": "Solo que persegue",
+      "icone": "cajado",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d6+1",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1500,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "visual": {
+        "impacto": "sombra",
+        "som": "magia",
+        "conjuracao": "sombra",
+        "cor": "#d6eaf8",
+        "assinatura": "arma_espectro"
+      },
+      "elemento": "trevas",
+      "escalaCom": "inteligencia",
+      "escalaRolagem": [
+        "inteligencia",
+        "sabedoria"
+      ],
+      "variacao": {
+        "solo": {
+          "pulsos": 3,
+          "raio": 1,
+          "pctPulso": 40,
+          "persegueMs": 1500
+        }
+      },
+      "basico": true,
+      "mobilidade": "lenta"
+    },
+    {
+      "id": "basico_colheita",
+      "familiaEvolucao": "sombra",
+      "grau": "B",
+      "nome": "Solo da colheita",
+      "icone": "foice",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d6+1",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1500,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "visual": {
+        "impacto": "sombra",
+        "som": "magia",
+        "conjuracao": "sombra",
+        "cor": "#7b7d7d",
+        "assinatura": "arma_colheita"
+      },
+      "elemento": "trevas",
+      "escalaCom": "inteligencia",
+      "escalaRolagem": [
+        "inteligencia",
+        "sabedoria"
+      ],
+      "variacao": {
+        "solo": {
+          "pulsos": 3,
+          "raio": 1,
+          "pctPulso": 40,
+          "colheitaPct": 35
+        }
+      },
+      "basico": true,
+      "mobilidade": "lenta"
+    },
+    {
+      "id": "basico_chakram",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Chakram em ricochete",
+      "icone": "chakram",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1600,
+      "conjuracaoMs": 520,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 12,
+      "efeitos": [],
+      "visual": {
+        "viagem": "esteira",
+        "impacto": "farpas",
+        "som": "projetil",
+        "cor": "#f5b041",
+        "assinatura": "arma_chakram"
+      },
+      "escalaCom": "destreza",
+      "escalaRolagem": [
+        "destreza",
+        "forca"
+      ],
+      "variacao": {
+        "retorna": true,
+        "voltaPct": 60,
+        "ricochetes": 2,
+        "ricochetePct": 70
+      },
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_adaga",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Adaga de tabela",
+      "icone": "adaga",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1600,
+      "conjuracaoMs": 520,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 12,
+      "efeitos": [],
+      "visual": {
+        "viagem": "esteira",
+        "impacto": "farpas",
+        "som": "projetil",
+        "cor": "#bdc3c7",
+        "assinatura": "arma_adaga"
+      },
+      "escalaCom": "destreza",
+      "escalaRolagem": [
+        "destreza",
+        "forca"
+      ],
+      "variacao": {
+        "retorna": true,
+        "voltaPct": 60,
+        "ricocheteParede": 2
+      },
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_machadinha",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Machadinha em curva",
+      "icone": "machado",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d10",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1800,
+      "conjuracaoMs": 520,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 12,
+      "efeitos": [],
+      "visual": {
+        "viagem": "esteira",
+        "impacto": "farpas",
+        "som": "projetil",
+        "cor": "#a04000",
+        "assinatura": "arma_machadinha"
+      },
+      "escalaCom": "forca",
+      "escalaRolagem": [
+        "forca",
+        "destreza"
+      ],
+      "variacao": {
+        "retorna": true,
+        "voltaPct": 60,
+        "desvioGraus": 35,
+        "guiado": 20
+      },
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_shuriken",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Shuriken em órbita",
+      "icone": "shuriken",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1600,
+      "conjuracaoMs": 520,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 12,
+      "efeitos": [],
+      "visual": {
+        "viagem": "esteira",
+        "impacto": "farpas",
+        "som": "projetil",
+        "cor": "#85929e",
+        "assinatura": "arma_shuriken"
+      },
+      "escalaCom": "destreza",
+      "escalaRolagem": [
+        "destreza",
+        "forca"
+      ],
+      "variacao": {
+        "retorna": true,
+        "voltaPct": 60,
+        "orbita": {
+          "duracaoMs": 1000,
+          "intervaloMs": 250,
+          "pct": 30
+        }
+      },
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_duplo",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Bumerangue que se divide",
+      "icone": "bumerangue",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1600,
+      "conjuracaoMs": 520,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 12,
+      "efeitos": [],
+      "visual": {
+        "viagem": "esteira",
+        "impacto": "farpas",
+        "som": "projetil",
+        "cor": "#ca6f1e",
+        "assinatura": "arma_duplo"
+      },
+      "escalaCom": "destreza",
+      "escalaRolagem": [
+        "destreza",
+        "forca"
+      ],
+      "variacao": {
+        "retorna": true,
+        "voltaPct": 45,
+        "divisor": true
+      },
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_arpeu",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Arpéu",
+      "icone": "corrente",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1600,
+      "conjuracaoMs": 520,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 12,
+      "efeitos": [],
+      "visual": {
+        "viagem": "esteira",
+        "impacto": "farpas",
+        "som": "projetil",
+        "cor": "#717d7e",
+        "assinatura": "arma_arpeu"
+      },
+      "escalaCom": "forca",
+      "escalaRolagem": [
+        "forca",
+        "destreza"
+      ],
+      "variacao": {
+        "retorna": true,
+        "voltaPct": 60,
+        "puxaNaVolta": 1
+      },
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_falcoeiro",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Bumerangue do falcão",
+      "icone": "bumerangue",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1600,
+      "conjuracaoMs": 520,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 12,
+      "efeitos": [],
+      "visual": {
+        "viagem": "esteira",
+        "impacto": "farpas",
+        "som": "projetil",
+        "cor": "#d68910",
+        "assinatura": "arma_falcoeiro"
+      },
+      "escalaCom": "destreza",
+      "escalaRolagem": [
+        "destreza",
+        "sabedoria"
+      ],
+      "variacao": {
+        "retorna": true,
+        "voltaPct": 60,
+        "voltaAoFalcao": 60
+      },
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "basico_serrilhado",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Bumerangue serrilhado",
+      "icone": "bumerangue",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1600,
+      "conjuracaoMs": 520,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 12,
+      "efeitos": [],
+      "visual": {
+        "viagem": "esteira",
+        "impacto": "farpas",
+        "som": "projetil",
+        "cor": "#1e8449",
+        "assinatura": "arma_serrilhado"
+      },
+      "escalaCom": "destreza",
+      "escalaRolagem": [
+        "destreza",
+        "forca"
+      ],
+      "variacao": {
+        "retorna": true,
+        "voltaPct": 60,
+        "rastro": {
+          "valor": 3,
+          "duracaoMs": 2000
+        }
+      },
+      "basico": true,
+      "mobilidade": "livre"
+    },
+    {
+      "id": "solo_amaldicoado",
+      "familiaEvolucao": "sombra",
+      "grau": "B",
+      "nome": "Solo amaldiçoado",
+      "icone": "caveira",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d6+1",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1500,
+      "conjuracaoMs": 500,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "contato",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "visual": {
+        "impacto": "sombra",
+        "som": "magia",
+        "conjuracao": "sombra",
+        "cor": "#8b68d9",
+        "assinatura": "arma_solo_amaldicoado"
+      },
+      "elemento": "trevas",
+      "escalaCom": "inteligencia",
+      "escalaRolagem": [
+        "inteligencia",
+        "sabedoria"
+      ],
+      "variacao": {
+        "solo": {
+          "pulsos": 3,
+          "raio": 1,
+          "pctPulso": 40
+        }
+      },
+      "basico": true,
+      "mobilidade": "lenta"
+    },
+    {
+      "id": "bumerangue",
+      "familiaEvolucao": "tecnica",
+      "grau": "B",
+      "nome": "Bumerangue",
+      "icone": "bumerangue",
+      "tipoAtaque": "fisico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 5,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 0,
+      "recargaMs": 1600,
+      "conjuracaoMs": 520,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "projetil",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 12,
+      "efeitos": [],
+      "visual": {
+        "viagem": "esteira",
+        "impacto": "farpas",
+        "som": "projetil",
+        "cor": "#c49a6c",
+        "assinatura": "arma_bumerangue"
+      },
+      "escalaCom": "destreza",
+      "escalaRolagem": [
+        "destreza",
+        "forca"
+      ],
+      "variacao": {
+        "retorna": true,
+        "voltaPct": 60
+      },
+      "basico": true,
+      "mobilidade": "livre"
     }
   ]
 }

@@ -112,12 +112,13 @@ describe('aparência pelo equipamento', () => {
   it('equipar uma arma e uma armadura muda a aparência pública', () => {
     const c = cenario();
     c.tick();
-    expect(c.j().aparencia).toMatchObject({ arma: null, corpo: null });
+    // Marco 27: o Aventureiro começa com o bumerangue na mão.
+    expect(c.j().aparencia).toMatchObject({ arma: 'bumerangue', corpo: null });
     const bolsa = obter(c.j().bolsa, 'bolsa');
     guardarItem(bolsa, obter(CONTEUDO.itens.get('espada_curta'), 'espada'), 1, c.ctx.balance.inventario);
     const entrada = obter(bolsa.mochila.find((i) => i.itemId === 'espada_curta'), 'entrada');
     c.tick({ t: 'equipar', invId: entrada.invId, slot: 'arma_principal' });
-    expect(c.j().aparencia?.arma).toBe('espada');
+    expect(c.j().aparencia?.arma).toBe('espada_curta');
   });
 });
 

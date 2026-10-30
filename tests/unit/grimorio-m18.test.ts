@@ -39,15 +39,16 @@ function cena() {
 }
 
 describe('itens base com formas (D-069)', () => {
-  it('20 bases × 4 formas + 15 afinidades × 4 = 140 variações, todas resolvem no catálogo', () => {
+  // Marco 27 (D-126): as 40 armas de classe e as 12 bases fora das armas; 44 afinidades.
+  it('52 bases × 4 formas + 44 afinidades × 4 = 384 variações, todas resolvem no catálogo', () => {
     const dados = CONTEUDO.itensComFormas;
-    expect(dados.bases.size).toBe(20);
+    expect(dados.bases.size).toBe(52);
     const variacoes = variacoesDeItem(dados);
-    expect(variacoes).toHaveLength(140);
-    expect(variacoes.filter((v) => v.elemento !== null)).toHaveLength(60);
-    // Afinidades desiguais: uma base com 3, outras com 2 e 1, a maioria com nenhuma.
+    expect(variacoes).toHaveLength(384);
+    expect(variacoes.filter((v) => v.elemento !== null)).toHaveLength(176);
+    // Afinidades desiguais: bases com 2 e 1, e outras sem nenhuma.
     const porBase = [...dados.bases.values()].map((b) => b.elementos.length).sort();
-    expect(Math.max(...porBase)).toBe(4);
+    expect(Math.max(...porBase)).toBe(2);
     expect(porBase.filter((n) => n === 0).length).toBeGreaterThan(10);
     for (const v of variacoes) {
       const item = obter(CONTEUDO.itens.get(idItemBase(v.base, v.forma, v.elemento, 5, 1234)), `${v.base}/${v.forma}/${v.elemento}`);

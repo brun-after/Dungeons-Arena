@@ -62,6 +62,14 @@ export interface Item {
   /** Marco 18: os ganchos que o item dá a quem o veste (data/itens-formas.json, ou `ganchos` em itens.json). */
   ganchos: Gancho[];
   progressao?: ProgressaoItem;
+  /** Marco 27 (29/10/2026, D-126): o desenho da arma (data/armas.json), que diz a família e o básico dela. */
+  arma?: string;
+}
+
+/** Marco 27 (D-126): qualquer arma também cabe na mão secundária (o 3º básico sai por ela). */
+export function cabeNoSlot(item: Pick<Item, 'tipo' | 'slotPadrao' | 'arma'>, slot: Slot): boolean {
+  if (item.tipo !== 'equipamento') return false;
+  return item.slotPadrao === slot || (slot === 'arma_secundaria' && item.slotPadrao === 'arma_principal' && !!item.arma);
 }
 
 function lerModificadores(l: Leitor, o: Objeto): ModificadorDeItem[] {
@@ -123,6 +131,7 @@ export function lerItens(json: unknown): { itens: Map<string, Item>; erros: stri
       forma: null,
       elemento: null,
       ganchos: lerGanchos(l, o.ganchos),
+      ...(o.arma !== undefined ? { arma: l.texto(o, 'arma') } : {}),
     };
     if (o.progressao !== undefined) {
       const p = l.objeto(o.progressao, 'progressao');

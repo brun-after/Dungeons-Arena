@@ -29,7 +29,7 @@
     "presetClasse": null
   },
   "loot": { "politica": "compartilhado", "janelaParticipacaoS": 15, "itens": true, "economiaDoSpawner": false },
-  "limites": { "npcs": 60, "invocacoesPorJogador": 2, "avataresPorJogador": 1, "armadilhasPorJogador": 3, "projeteis": 100 },
+  "limites": { "npcs": 60, "invocacoesPorJogador": 2, "invocacoesDePergaminho": 4, "avataresPorJogador": 1, "armadilhasPorJogador": 3, "projeteis": 100 },
   "progressaoContaParaCampanha": false,
   "fasesPermitidas": ["arena-01", "arena-02"],
   "inimigosDeIA": "da_fase",

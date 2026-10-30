@@ -34,10 +34,11 @@ export const OPCOES_JOGAVEIS = {
 
 /** D-067: a arma da classe, desenhada enquanto a mão está vazia (as habilidades da classe não pedem item). */
 export const ARMA_DE_CLASSE: Readonly<Record<keyof typeof OPCOES_JOGAVEIS, { arma: string; secundaria: string | null }>> = {
+  // Marco 27 (D-126): a família de cada classe (o tomo do Mago, o bumerangue do Aventureiro).
   necromante: { arma: 'cajado', secundaria: null },
-  aventureiro: { arma: 'espada', secundaria: 'escudo' },
+  aventureiro: { arma: 'bumerangue', secundaria: null },
   guerreiro: { arma: 'machado', secundaria: 'escudo' },
-  mago: { arma: 'cajado', secundaria: null },
+  mago: { arma: 'tomo', secundaria: null },
   arqueiro: { arma: 'arco', secundaria: null },
 };
 

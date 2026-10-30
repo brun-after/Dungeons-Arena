@@ -21,6 +21,7 @@ import { processarSinergiasPassivas } from '../combat/sinergias-passivas';
 import { dispararGanchosDosEventos } from '../progression/ganchos-do-portador';
 import { dispensarInvocacoes } from '../combat/invocacoes';
 import { moverProjeteis } from '../combat/projeteis';
+import { processarSolos } from '../combat/solos';
 import { vivo } from '../entities/entidade';
 import { processarIa } from '../entities/ia';
 import { desequipar, distribuirPonto, equipar, moverItem, usarItem } from '../progression/inventario';
@@ -69,6 +70,8 @@ export function simular(
   processarIa(estado, ctx, saida);
   processarAcoes(estado, ctx, saida);
   moverProjeteis(estado, ctx, saida, dtMs);
+  // Marco 27 (D-126): o solo amaldiçoado e a runa pulsam.
+  processarSolos(estado, ctx, saida);
   processarAutoAtaque(estado, ctx, saida);
   // Marco 26 (D-121): o personagem anda atrás do alvo selecionado (opção seguir alvo).
   processarSeguirAlvo(estado, ctx, saida);

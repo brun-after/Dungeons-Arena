@@ -33,10 +33,16 @@ interface Grupo {
 }
 
 /** As skills por grupo: cada classe (exclusivas e ultimates), as gerais, as dos inimigos e as geradas. */
+const FORMAS = ['Comum', 'Épica', 'Lendária', 'Última'];
+
 function grupos(): { grupos: Grupo[]; habilidade: (id: string) => Habilidade | undefined } {
   const c = conteudoOficial();
   const ctx = { conteudo: c, balance: BALANCE_PADRAO };
-  const habilidade = (id: string) => resolverHabilidade(ctx, id) ?? c.habilidades.get(id);
+  // Marco 27 (D-126): `id#n` é o básico de uma arma na forma n (Comum 0 a Última 3).
+  const habilidade = (id: string) => {
+    const base = id.split('#')[0] ?? id;
+    return resolverHabilidade(ctx, base) ?? c.habilidades.get(base);
+  };
   const usados = new Set<string>();
   const lista: Grupo[] = [];
   for (const classe of c.classes.values()) {
@@ -59,6 +65,9 @@ function grupos(): { grupos: Grupo[]; habilidade: (id: string) => Habilidade | u
     }
   }
   lista.push({ titulo: 'Geradas (elemento e forma)', ids: [...geradas.values()] });
+  // Marco 27 (D-126): o básico de cada arma de classe nas 4 formas (o efeito cresce com a raridade).
+  const basicos = [...new Set([...c.armas.armas.values()].map((a) => a.basico))];
+  lista.push({ titulo: 'Armas (Comum, Épica, Lendária, Última)', ids: basicos.flatMap((b) => [0, 1, 2, 3].map((t) => `${b}#${String(t)}`)) });
   return { grupos: lista, habilidade };
 }
 
@@ -166,7 +175,8 @@ export async function iniciarGaleria(raiz: HTMLElement, params: URLSearchParams)
     const nome: AssinaturaVisual = assinaturaDe(h);
     const def = ASSINATURAS[nome];
     const cor = visualDe(h).cor;
-    atual.value = `${h.nome} › ${nome}${h.visual?.variante ? ` + ${h.visual.variante}` : ''}`;
+    const tier = Number(id.split('#')[1] ?? 0) || 0;
+    atual.value = `${h.nome} › ${nome}${h.visual?.variante ? ` + ${h.visual.variante}` : ''}${id.includes('#') ? ` · ${FORMAS[tier] ?? ''}` : ''}`;
     boneco = { ...BONECO_INICIAL };
     const ultimate = /^ult_|^dom_/.test(h.id);
     const conjuraMs = ultimate ? 700 : 360;
@@ -174,7 +184,7 @@ export async function iniciarGaleria(raiz: HTMLElement, params: URLSearchParams)
     for (let t = 0; t < conjuraMs; t += 120) depois(t, () => (diretor.conjurar(nome, CONJURADOR, cor), undefined));
     const forma = formaVfx(h);
     const acerto = () => {
-      diretor.acertar(nome, { chave: h.id, fonteId: 'conjurador', alvoId: 'boneco', de: CONJURADOR, ate: boneco, cor, escala: ultimate ? 1.25 : 1, critico: false, indice: 0 }, h.visual?.variante, true);
+      diretor.acertar(nome, { chave: h.id, fonteId: 'conjurador', alvoId: 'boneco', de: CONJURADOR, ate: boneco, cor, escala: ultimate ? 1.25 : 1, critico: false, indice: 0, tier }, h.visual?.variante, true);
       if (def.camera) impacto.pedir(def.camera, relogio);
       // O puxão e o empurrão deslizam o boneco (a corrente espera o gancho chegar).
       const tipos = h.efeitos.map((e) => e.tipo);
@@ -232,7 +242,7 @@ export async function iniciarGaleria(raiz: HTMLElement, params: URLSearchParams)
     for (const id of g.ids) {
       const h = habilidade(id);
       if (!h) continue;
-      const b = el('button', '', h.nome);
+      const b = el('button', '', id.includes('#') ? `${h.nome} · ${FORMAS[Number(id.split('#')[1])] ?? ''}` : h.nome);
       b.type = 'button';
       b.dataset.id = id;
       b.title = assinaturaDe(h);

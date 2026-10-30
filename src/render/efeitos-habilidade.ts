@@ -39,6 +39,7 @@ import type { AssinaturaVisual } from '../combat/assinaturas-visuais';
 import type { Habilidade } from '../combat/habilidades';
 import type { DiretorVfx } from './vfx/diretor';
 import { assinaturaDe } from './vfx/resolver';
+import { ligarSolos, tierDaArma } from './solos-visual';
 import { DT_MS } from '../core/loop';
 
 const INTERVALO_CONJURACAO_MS = 120;
@@ -155,7 +156,9 @@ export class EfeitosDeHabilidade {
       if (!daArma) {
         const comParticulas = ev.dano > 0 || ev.cura > 0 || ev.d20 === 0;
         const corEtapa = h.elemento && this.o.corElemento ? { corEtapa: this.o.corElemento(h.elemento) } : {};
-        this.o.diretor.acertar(nome, { chave: ev.chave, fonteId: ev.fonteId, alvoId: ev.alvoId, de: fonte, ate: alvo, cor: v.cor, escala: escalaDe(h, !!this.o.classeDaUltimate?.(ev.habilidadeId)), critico: ev.critico, indice: ev.indice, ...corEtapa }, h.visual?.variante, comParticulas);
+        // Marco 27 (D-126): o básico da arma fica mais bonito com a raridade dela.
+        const tier = nome.startsWith('arma_') ? { tier: tierDaArma(estado().entidades.find((e) => e.id === ev.fonteId)) } : {};
+        this.o.diretor.acertar(nome, { chave: ev.chave, fonteId: ev.fonteId, alvoId: ev.alvoId, de: fonte, ate: alvo, cor: v.cor, escala: escalaDe(h, !!this.o.classeDaUltimate?.(ev.habilidadeId)), critico: ev.critico, indice: ev.indice, ...corEtapa, ...tier }, h.visual?.variante, comParticulas);
       }
       if (ev.indice > 0) return;
       const agoraMs = agora();
@@ -219,6 +222,8 @@ export class EfeitosDeHabilidade {
       const p = pos(ev.id);
       if (p) this.o.particulas.emitir('estrelas', p.x, p.y, COR_MIRA);
     });
+    // Marco 27 (D-126): o solo amaldiçoado e a runa.
+    ligarSolos(bus, estado, this.o.diretor, (chave) => this.o.habilidades(chave));
     bus.on('projetilLancado', (ev) => {
       if (this.carregadoDe === ev.donoId) {
         this.carregados.add(ev.projetilId);

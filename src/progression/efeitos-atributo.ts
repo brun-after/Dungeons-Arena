@@ -50,10 +50,11 @@ export function reducaoRecargaBasicoPct(atributos: Atributos, b: Balance, perfil
  * Marco 25 (25/10/2026, D-102): a habilidade que escala com Destreza (as do falcão, a Flecha explosiva) troca a
  * Inteligência pela Destreza — a build que investe no atributo da skill rende mais que a que espalha os pontos.
  */
-export function multiplicadorDeRolagem(atributos: Atributos, b: Balance, escala?: keyof Atributos): number {
+export function multiplicadorDeRolagem(atributos: Atributos, b: Balance, escala?: keyof Atributos, rolagem?: readonly (keyof Atributos)[]): number {
   const e = b.atributos.efeitos;
   const segundo = escala === 'destreza' ? atributos.destreza : atributos.inteligencia;
-  const pontos = (atributos.forca - 10 + (segundo - 10)) / 2;
+  // Marco 27 (29/10/2026, D-126): o básico de cada arma escala com os atributos do item (a média deles), não só Força.
+  const pontos = rolagem?.length ? rolagem.reduce((s, k) => s + atributos[k] - 10, 0) / rolagem.length : (atributos.forca - 10 + (segundo - 10)) / 2;
   return Math.max(e.rolagemMin, 1 + (pontos * e.rolagemPorPontoPct) / 100);
 }
 

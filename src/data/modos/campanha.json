@@ -14,7 +14,7 @@
   "espectadores": false,
   "clamp": null,
   "loot": { "politica": "compartilhado", "janelaParticipacaoS": 10, "itens": true, "economiaDoSpawner": true },
-  "limites": { "npcs": 200, "invocacoesPorJogador": 2, "avataresPorJogador": 1, "armadilhasPorJogador": 3, "projeteis": 100 },
+  "limites": { "npcs": 200, "invocacoesPorJogador": 2, "invocacoesDePergaminho": 4, "avataresPorJogador": 1, "armadilhasPorJogador": 3, "projeteis": 100 },
   "progressaoContaParaCampanha": false,
   "fasesPermitidas": "qualquer",
   "inimigosDeIA": "da_fase",

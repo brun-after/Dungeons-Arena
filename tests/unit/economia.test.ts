@@ -216,7 +216,7 @@ describe('loja (§2.10)', () => {
     const c = cenario();
     c.objeto(loja());
     const ouro = c.bolsa().ouro;
-    const espada = obter(c.bolsa().mochila.find((i) => i.itemId === 'espada_curta'), 'espada').invId;
+    const espada = c.dar('espada_curta');
     const chave = c.dar('chave_ferro');
     const escudo = c.dar('escudo_madeira');
     c.tick({ t: 'equipar', invId: escudo, slot: 'arma_secundaria' });
@@ -405,6 +405,8 @@ describe('ouro, loot e ordenação', () => {
     const c = cenario();
     const mana = c.dar('pocao_mana');
     const ordem = () => c.bolsa().mochila.map((i) => i.itemId);
+    const espada = c.dar('espada_curta');
+    c.tick({ t: 'moverItem', invId: espada, posicao: 0 });
     expect(ordem()).toEqual(['espada_curta', 'pocao_vida', 'pocao_mana']);
     c.tick({ t: 'moverItem', invId: mana, posicao: 0 });
     expect(ordem()).toEqual(['pocao_mana', 'espada_curta', 'pocao_vida']);

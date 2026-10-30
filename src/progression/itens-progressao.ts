@@ -1,4 +1,5 @@
 // D-075 (17/10/2026): consumíveis permanentes de progressão; família da definição original, nunca do caminho.
+import { descontoDePergaminhoPct, ehPergaminho } from './passiva-aventureiro';
 import { definicaoDe } from '../combat/compilar-habilidade';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
@@ -36,5 +37,7 @@ export function aplicarItemDeProgressao(e: Entidade, ctx: ContextoSimulacao, ite
 export function precoDoItem(item: Item, e: Entidade, ctx: ContextoSimulacao): number {
   const r = ctx.balance.progressaoItens;
   const base = item.progressao?.tipo === 'ponto' ? r.tomoPrecoBase : item.valorBase;
-  return precoDeCompra(base, e.atributos, ctx.balance);
+  // Marco 27 (D-126): a passiva do Aventureiro (arremessável na principal) barateia os pergaminhos de invocação.
+  const desconto = ehPergaminho(item) ? descontoDePergaminhoPct(ctx, e) : 0;
+  return Math.max(1, Math.round(precoDeCompra(base, e.atributos, ctx.balance) * (1 - desconto / 100)));
 }

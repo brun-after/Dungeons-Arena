@@ -1,5 +1,5 @@
 {
-  "versao": 2,
+  "versao": 3,
   "formas": {
     "comum": { "raridade": "comum", "poder": 1.0, "peso": 72, "elementalPct": 15, "visual": "simples" },
     "epica": { "raridade": "epico", "poder": 2.2, "peso": 24, "elementalPct": 25, "visual": "gema" },
@@ -18,6 +18,127 @@
   },
   "bases": [
     {
+      "base": "machado",
+      "slot": "arma_principal",
+      "icone": "machado",
+      "arma": "machado",
+      "defesa": 0,
+      "atributos": [
+        ["forca"]
+      ],
+      "elementos": ["fogo"],
+      "formas": {
+        "comum": { "nome": "Machado de guerra", "genero": "m" },
+        "epica": { "nome": "Ceifador de clãs", "genero": "m" },
+        "lendaria": {
+          "nome": "Ceifador rubro",
+          "genero": "m",
+          "texto": "Abater cura 8% da vida.",
+          "ganchos": [
+            { "quando": "aoMatar", "efeito": { "curarPct": 8 } }
+          ]
+        },
+        "ultima": {
+          "nome": "Fim dos clãs",
+          "genero": "m",
+          "texto": "Abater cura 12% da vida e dá +20% de dano por 4 s.",
+          "ganchos": [
+            { "quando": "aoMatar", "efeito": { "curarPct": 12 } },
+            {
+              "quando": "aoMatar",
+              "efeito": { "aplicar": { "tipo": "bonus_dano", "duracaoMs": 4000, "pct": 20 }, "em": "portador" }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "base": "lanca",
+      "slot": "arma_principal",
+      "icone": "lanca",
+      "arma": "lanca",
+      "defesa": 0,
+      "atributos": [
+        ["forca", "destreza"]
+      ],
+      "elementos": [],
+      "formas": {
+        "comum": { "nome": "Lança de soldado", "genero": "f" },
+        "epica": { "nome": "Lança do vigia", "genero": "f" },
+        "lendaria": {
+          "nome": "Presa do dragão",
+          "genero": "f",
+          "texto": "A estocada tem 20% de chance de expor o alvo por 3 s.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_lanca", "chancePct": 20 },
+              "efeito": { "aplicar": { "tipo": "exposto", "duracaoMs": 3000, "pct": 20 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Lança do horizonte",
+          "genero": "f",
+          "texto": "A estocada tem 35% de chance de expor e sangrar o alvo.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_lanca", "chancePct": 35 },
+              "efeito": { "aplicar": { "tipo": "exposto", "duracaoMs": 3000, "pct": 20 }, "em": "alvo" }
+            },
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_lanca", "chancePct": 35 },
+              "efeito": { "aplicar": { "tipo": "sangrando", "duracaoMs": 4000, "valor": 3 }, "em": "alvo" }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "base": "montante",
+      "slot": "arma_principal",
+      "icone": "espada",
+      "arma": "montante",
+      "defesa": 0,
+      "atributos": [
+        ["forca", "constituicao"]
+      ],
+      "elementos": ["terra"],
+      "formas": {
+        "comum": { "nome": "Montante", "genero": "m" },
+        "epica": { "nome": "Montante do bastião", "genero": "m" },
+        "lendaria": {
+          "nome": "Roda de aço",
+          "genero": "m",
+          "texto": "No crítico, +20% de dano por 4 s.",
+          "ganchos": [
+            {
+              "quando": "aoCritico",
+              "efeito": { "aplicar": { "tipo": "bonus_dano", "duracaoMs": 4000, "pct": 20 }, "em": "portador" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Ciclone de aço",
+          "genero": "m",
+          "texto": "No crítico, +30% de dano por 5 s; levar golpe pode dar escudo.",
+          "ganchos": [
+            {
+              "quando": "aoCritico",
+              "efeito": { "aplicar": { "tipo": "bonus_dano", "duracaoMs": 5000, "pct": 30 }, "em": "portador" }
+            },
+            {
+              "quando": "aoReceberGolpe",
+              "se": { "chancePct": 25 },
+              "efeito": { "aplicar": { "tipo": "escudo", "duracaoMs": 4000, "valor": 8 }, "em": "portador" }
+            }
+          ]
+        }
+      }
+    },
+    {
       "base": "espada",
       "slot": "arma_principal",
       "icone": "espada",
@@ -35,7 +156,10 @@
           "genero": "f",
           "texto": "No crítico, +20% de dano por 4 s.",
           "ganchos": [
-            { "quando": "aoCritico", "efeito": { "aplicar": { "tipo": "bonus_dano", "duracaoMs": 4000, "pct": 20 }, "em": "portador" } }
+            {
+              "quando": "aoCritico",
+              "efeito": { "aplicar": { "tipo": "bonus_dano", "duracaoMs": 4000, "pct": 20 }, "em": "portador" }
+            }
           ]
         },
         "ultima": {
@@ -43,123 +167,286 @@
           "genero": "f",
           "texto": "No crítico, +30% de dano por 5 s; abater cura 8% da vida.",
           "ganchos": [
-            { "quando": "aoCritico", "efeito": { "aplicar": { "tipo": "bonus_dano", "duracaoMs": 5000, "pct": 30 }, "em": "portador" } },
+            {
+              "quando": "aoCritico",
+              "efeito": { "aplicar": { "tipo": "bonus_dano", "duracaoMs": 5000, "pct": 30 }, "em": "portador" }
+            },
             { "quando": "aoMatar", "efeito": { "curarPct": 8 } }
           ]
         }
       }
     },
     {
-      "base": "machado",
+      "base": "maca",
       "slot": "arma_principal",
-      "icone": "machado",
-      "arma": "machado",
+      "icone": "maca",
+      "arma": "clava",
       "defesa": 0,
       "atributos": [
-        ["forca"]
+        ["forca", "constituicao"]
       ],
-      "elementos": [],
+      "elementos": ["terra"],
       "formas": {
-        "comum": { "nome": "Machado de guerra", "genero": "m" },
-        "epica": { "nome": "Ceifador de clãs", "genero": "m" },
+        "comum": { "nome": "Maça de guerra", "genero": "f" },
+        "epica": { "nome": "Quebra-escudos", "genero": "f" },
         "lendaria": {
-          "nome": "Ceifador rubro",
-          "genero": "m",
-          "texto": "Abater cura 10% da vida.",
+          "nome": "Rachador de montanhas",
+          "genero": "f",
+          "texto": "O tremor tem 20% de chance de enraizar por 1 s.",
           "ganchos": [
-            { "quando": "aoMatar", "efeito": { "curarPct": 10 } }
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_maca", "chancePct": 20 },
+              "efeito": { "aplicar": { "tipo": "enraizado", "duracaoMs": 1000 }, "em": "alvo" }
+            }
           ]
         },
         "ultima": {
-          "nome": "Fim dos clãs",
-          "genero": "m",
-          "texto": "Abater cura 15% da vida e dá +25% de dano por 4 s.",
+          "nome": "Coração do terremoto",
+          "genero": "f",
+          "texto": "O tremor tem 35% de chance de enraizar; no crítico, atordoa 0,8 s.",
           "ganchos": [
-            { "quando": "aoMatar", "efeito": { "curarPct": 15 } },
-            { "quando": "aoMatar", "efeito": { "aplicar": { "tipo": "bonus_dano", "duracaoMs": 4000, "pct": 25 }, "em": "portador" } }
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_maca", "chancePct": 35 },
+              "efeito": { "aplicar": { "tipo": "enraizado", "duracaoMs": 1000 }, "em": "alvo" }
+            },
+            { "quando": "aoCritico", "efeito": { "aplicar": { "tipo": "atordoar", "duracaoMs": 800 }, "em": "alvo" } }
           ]
         }
       }
     },
     {
-      "base": "adaga",
+      "base": "sabre",
       "slot": "arma_principal",
-      "icone": "adaga",
-      "arma": "adaga",
+      "icone": "espada",
+      "arma": "sabre",
       "defesa": 0,
       "atributos": [
         ["destreza", "forca"]
       ],
-      "elementos": ["veneno", "trevas"],
+      "elementos": ["raio"],
       "formas": {
-        "comum": { "nome": "Adaga", "genero": "f" },
-        "epica": { "nome": "Presa da víbora", "genero": "f" },
+        "comum": { "nome": "Sabre", "genero": "m" },
+        "epica": { "nome": "Sabre do batedor", "genero": "m" },
         "lendaria": {
-          "nome": "Beijo da víbora",
+          "nome": "Relâmpago curvo",
           "genero": "m",
-          "texto": "Golpes físicos marcam o alvo (30%): o próximo golpe nele causa +25%.",
+          "texto": "Abater dá +30% de velocidade de ataque por 4 s.",
           "ganchos": [
             {
-              "quando": "aoAcertar",
-              "se": { "tag": "fisico", "chancePct": 30 },
-              "efeito": { "aplicar": { "tipo": "marcado", "duracaoMs": 4000, "pct": 25 }, "em": "alvo" }
+              "quando": "aoMatar",
+              "efeito": { "aplicar": { "tipo": "ab_recarga", "duracaoMs": 4000, "pct": 30 }, "em": "portador" }
             }
           ]
         },
         "ultima": {
-          "nome": "Última picada",
-          "genero": "f",
-          "texto": "Golpes físicos marcam o alvo (45%); acertar um marcado envenena.",
+          "nome": "Vento do deserto",
+          "genero": "m",
+          "texto": "Abater dá +40% de velocidade de ataque e fica intangível por 2 s.",
           "ganchos": [
             {
-              "quando": "aoAcertar",
-              "se": { "tag": "fisico", "chancePct": 45 },
-              "efeito": { "aplicar": { "tipo": "marcado", "duracaoMs": 4000, "pct": 25 }, "em": "alvo" }
+              "quando": "aoMatar",
+              "efeito": { "aplicar": { "tipo": "ab_recarga", "duracaoMs": 5000, "pct": 40 }, "em": "portador" }
             },
+            { "quando": "aoMatar", "efeito": { "aplicar": { "tipo": "fantasma", "duracaoMs": 2000 }, "em": "portador" } }
+          ]
+        }
+      }
+    },
+    {
+      "base": "mangual",
+      "slot": "arma_principal",
+      "icone": "maca",
+      "arma": "mangual",
+      "defesa": 0,
+      "atributos": [
+        ["forca"]
+      ],
+      "elementos": ["trevas"],
+      "formas": {
+        "comum": { "nome": "Mangual", "genero": "m" },
+        "epica": { "nome": "Mangual do carrasco", "genero": "m" },
+        "lendaria": {
+          "nome": "Corrente do juízo",
+          "genero": "m",
+          "texto": "No crítico, enraíza o alvo por 1 s.",
+          "ganchos": [
+            { "quando": "aoCritico", "efeito": { "aplicar": { "tipo": "enraizado", "duracaoMs": 1000 }, "em": "alvo" } }
+          ]
+        },
+        "ultima": {
+          "nome": "Grilhão eterno",
+          "genero": "m",
+          "texto": "No crítico, enraíza 1,5 s e expõe o alvo.",
+          "ganchos": [
+            { "quando": "aoCritico", "efeito": { "aplicar": { "tipo": "enraizado", "duracaoMs": 1500 }, "em": "alvo" } },
             {
-              "quando": "aoAcertar",
-              "se": { "estadoDoAlvo": "marcado" },
-              "efeito": { "aplicar": { "tipo": "envenenado", "duracaoMs": 4000, "valor": 2, "pct": 50 }, "em": "alvo" }
+              "quando": "aoCritico",
+              "efeito": { "aplicar": { "tipo": "exposto", "duracaoMs": 3000, "pct": 20 }, "em": "alvo" }
             }
           ]
         }
       }
     },
     {
-      "base": "cajado",
+      "base": "rapieira",
       "slot": "arma_principal",
-      "icone": "cajado",
-      "arma": "cajado",
+      "icone": "adaga",
+      "arma": "rapieira",
       "defesa": 0,
       "atributos": [
-        ["inteligencia", "sabedoria"]
+        ["destreza"]
       ],
-      "elementos": ["fogo", "gelo", "raio", "trevas"],
+      "elementos": [],
       "formas": {
-        "comum": { "nome": "Cajado", "genero": "m" },
-        "epica": { "nome": "Báculo do sábio", "genero": "m" },
+        "comum": { "nome": "Rapieira", "genero": "f" },
+        "epica": { "nome": "Rapieira do duelista", "genero": "f" },
         "lendaria": {
-          "nome": "Inverno eterno",
-          "genero": "m",
-          "texto": "A Nova glacial congela na hora quem já estava resfriado.",
+          "nome": "Agulha de prata",
+          "genero": "f",
+          "texto": "Levar golpe tem 25% de chance de dar escudo de 6.",
           "ganchos": [
             {
-              "quando": "aoAcertar",
-              "se": { "habilidade": "nova_glacial", "estadoDoAlvo": "resfriado" },
-              "efeito": { "aplicar": { "tipo": "congelado", "duracaoMs": 1500 }, "em": "alvo" }
+              "quando": "aoReceberGolpe",
+              "se": { "chancePct": 25 },
+              "efeito": { "aplicar": { "tipo": "escudo", "duracaoMs": 4000, "valor": 6 }, "em": "portador" }
             }
           ]
         },
         "ultima": {
-          "nome": "Coração do inverno",
+          "nome": "Última palavra",
+          "genero": "f",
+          "texto": "Levar golpe tem 35% de chance de dar escudo de 10; o crítico sangra o alvo.",
+          "ganchos": [
+            {
+              "quando": "aoReceberGolpe",
+              "se": { "chancePct": 35 },
+              "efeito": { "aplicar": { "tipo": "escudo", "duracaoMs": 4000, "valor": 10 }, "em": "portador" }
+            },
+            {
+              "quando": "aoCritico",
+              "efeito": { "aplicar": { "tipo": "sangrando", "duracaoMs": 4000, "valor": 3 }, "em": "alvo" }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "base": "besta",
+      "slot": "arma_principal",
+      "icone": "besta",
+      "arma": "besta",
+      "defesa": 0,
+      "atributos": [
+        ["destreza", "forca"]
+      ],
+      "elementos": ["raio"],
+      "formas": {
+        "comum": { "nome": "Besta", "genero": "f" },
+        "epica": { "nome": "Besta do sitiante", "genero": "f" },
+        "lendaria": {
+          "nome": "Balestra rúnica",
+          "genero": "f",
+          "texto": "No crítico, expõe o alvo por 3 s.",
+          "ganchos": [
+            {
+              "quando": "aoCritico",
+              "efeito": { "aplicar": { "tipo": "exposto", "duracaoMs": 3000, "pct": 20 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Fúria do baluarte",
+          "genero": "f",
+          "texto": "No crítico, expõe e atordoa 0,6 s.",
+          "ganchos": [
+            {
+              "quando": "aoCritico",
+              "efeito": { "aplicar": { "tipo": "exposto", "duracaoMs": 3000, "pct": 25 }, "em": "alvo" }
+            },
+            { "quando": "aoCritico", "efeito": { "aplicar": { "tipo": "atordoar", "duracaoMs": 600 }, "em": "alvo" } }
+          ]
+        }
+      }
+    },
+    {
+      "base": "composto",
+      "slot": "arma_principal",
+      "icone": "arco",
+      "arma": "composto",
+      "defesa": 0,
+      "atributos": [
+        ["destreza"]
+      ],
+      "elementos": ["veneno"],
+      "formas": {
+        "comum": { "nome": "Arco composto", "genero": "m" },
+        "epica": { "nome": "Arco do vigia", "genero": "m" },
+        "lendaria": {
+          "nome": "Asa de tempestade",
           "genero": "m",
-          "texto": "Qualquer magia de gelo congela na hora quem já estava resfriado.",
+          "texto": "O leque tem 20% de chance de envenenar.",
           "ganchos": [
             {
               "quando": "aoAcertar",
-              "se": { "elemento": "gelo", "estadoDoAlvo": "resfriado" },
-              "efeito": { "aplicar": { "tipo": "congelado", "duracaoMs": 1800 }, "em": "alvo" }
+              "se": { "habilidade": "basico_composto", "chancePct": 20 },
+              "efeito": { "aplicar": { "tipo": "envenenado", "duracaoMs": 4000, "valor": 2 }, "em": "alvo" }
             }
+          ]
+        },
+        "ultima": {
+          "nome": "Céu partido",
+          "genero": "m",
+          "texto": "O leque tem 30% de chance de envenenar; abater acelera o arco.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_composto", "chancePct": 30 },
+              "efeito": { "aplicar": { "tipo": "envenenado", "duracaoMs": 4000, "valor": 3 }, "em": "alvo" }
+            },
+            {
+              "quando": "aoMatar",
+              "efeito": { "aplicar": { "tipo": "ab_recarga", "duracaoMs": 4000, "pct": 30 }, "em": "portador" }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "base": "arcocurto",
+      "slot": "arma_principal",
+      "icone": "arco",
+      "arma": "arcocurto",
+      "defesa": 0,
+      "atributos": [
+        ["destreza"]
+      ],
+      "elementos": [],
+      "formas": {
+        "comum": { "nome": "Arco curto", "genero": "m" },
+        "epica": { "nome": "Arco do batedor", "genero": "m" },
+        "lendaria": {
+          "nome": "Três penas",
+          "genero": "m",
+          "texto": "Abater dá +30% de velocidade de ataque por 4 s.",
+          "ganchos": [
+            {
+              "quando": "aoMatar",
+              "efeito": { "aplicar": { "tipo": "ab_recarga", "duracaoMs": 4000, "pct": 30 }, "em": "portador" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Revoada sem fim",
+          "genero": "m",
+          "texto": "Abater dá +40% de velocidade e o crítico devolve 2 de mana.",
+          "ganchos": [
+            {
+              "quando": "aoMatar",
+              "efeito": { "aplicar": { "tipo": "ab_recarga", "duracaoMs": 5000, "pct": 40 }, "em": "portador" }
+            },
+            { "quando": "aoCritico", "efeito": { "mana": 2 } }
           ]
         }
       }
@@ -176,110 +463,1150 @@
       "elementos": ["gelo", "veneno"],
       "formas": {
         "comum": { "nome": "Arco longo", "genero": "m" },
-        "epica": { "nome": "Arco do vigia", "genero": "m" },
+        "epica": { "nome": "Arco do caçador", "genero": "m" },
         "lendaria": {
-          "nome": "Asa do falcão",
-          "genero": "f",
-          "texto": "Projéteis expõem o alvo (20%): +20% de dano recebido por 3 s.",
+          "nome": "Sopro da aurora",
+          "genero": "m",
+          "texto": "A flecha tem 20% de chance de expor o alvo.",
           "ganchos": [
             {
               "quando": "aoAcertar",
-              "se": { "tag": "projetil", "chancePct": 20 },
+              "se": { "chancePct": 20 },
               "efeito": { "aplicar": { "tipo": "exposto", "duracaoMs": 3000, "pct": 20 }, "em": "alvo" }
             }
           ]
         },
         "ultima": {
-          "nome": "Céu sem fim",
+          "nome": "Horizonte sem fim",
           "genero": "m",
-          "texto": "Projéteis expõem o alvo (35%); o crítico devolve 2 de mana.",
+          "texto": "A flecha tem 35% de chance de expor; o crítico causa 6 a mais.",
           "ganchos": [
             {
               "quando": "aoAcertar",
-              "se": { "tag": "projetil", "chancePct": 35 },
+              "se": { "chancePct": 35 },
               "efeito": { "aplicar": { "tipo": "exposto", "duracaoMs": 3000, "pct": 20 }, "em": "alvo" }
             },
-            { "quando": "aoCritico", "se": { "tag": "projetil" }, "efeito": { "mana": 2 } }
+            { "quando": "aoCritico", "efeito": { "aplicar": { "tipo": "dano_direto", "valor": 6 }, "em": "alvo" } }
           ]
         }
       }
     },
     {
-      "base": "maca",
+      "base": "elfico",
       "slot": "arma_principal",
-      "icone": "maca",
-      "arma": "clava",
+      "icone": "arco",
+      "arma": "elfico",
       "defesa": 0,
       "atributos": [
-        ["forca", "constituicao"]
+        ["destreza", "sabedoria"]
+      ],
+      "elementos": ["sagrado"],
+      "formas": {
+        "comum": { "nome": "Arco élfico", "genero": "m" },
+        "epica": { "nome": "Arco da clareira", "genero": "m" },
+        "lendaria": {
+          "nome": "Canção da floresta",
+          "genero": "m",
+          "texto": "O crítico revela e marca o alvo.",
+          "ganchos": [
+            {
+              "quando": "aoCritico",
+              "efeito": { "aplicar": { "tipo": "marcado", "duracaoMs": 4000, "pct": 20 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Luar eterno",
+          "genero": "m",
+          "texto": "O crítico marca o alvo; abater cura 6% da vida.",
+          "ganchos": [
+            {
+              "quando": "aoCritico",
+              "efeito": { "aplicar": { "tipo": "marcado", "duracaoMs": 5000, "pct": 25 }, "em": "alvo" }
+            },
+            { "quando": "aoMatar", "efeito": { "curarPct": 6 } }
+          ]
+        }
+      }
+    },
+    {
+      "base": "chifre",
+      "slot": "arma_principal",
+      "icone": "arco",
+      "arma": "chifre",
+      "defesa": 0,
+      "atributos": [
+        ["destreza", "forca"]
       ],
       "elementos": ["terra"],
       "formas": {
-        "comum": { "nome": "Maça", "genero": "f" },
-        "epica": { "nome": "Martelo do juiz", "genero": "m" },
+        "comum": { "nome": "Arco de chifre", "genero": "m" },
+        "epica": { "nome": "Arco do pastor", "genero": "m" },
         "lendaria": {
-          "nome": "Sentença",
-          "genero": "f",
-          "texto": "Golpes físicos atordoam (15%) por 0,6 s.",
+          "nome": "Chifre do bisão",
+          "genero": "m",
+          "texto": "A flecha tem 20% de chance de empurrar.",
           "ganchos": [
             {
               "quando": "aoAcertar",
-              "se": { "tag": "fisico", "chancePct": 15 },
-              "efeito": { "aplicar": { "tipo": "atordoar", "duracaoMs": 600 }, "em": "alvo" }
+              "se": { "chancePct": 20 },
+              "efeito": { "aplicar": { "tipo": "empurrao", "valor": 1 }, "em": "alvo" }
             }
           ]
         },
         "ultima": {
-          "nome": "Juízo final",
+          "nome": "Trovão das planícies",
           "genero": "m",
-          "texto": "Golpes físicos atordoam (25%) por 0,8 s; o crítico enraíza.",
+          "texto": "A flecha tem 30% de chance de empurrar 2; o crítico atordoa.",
           "ganchos": [
             {
               "quando": "aoAcertar",
-              "se": { "tag": "fisico", "chancePct": 25 },
-              "efeito": { "aplicar": { "tipo": "atordoar", "duracaoMs": 800 }, "em": "alvo" }
+              "se": { "chancePct": 30 },
+              "efeito": { "aplicar": { "tipo": "empurrao", "valor": 2 }, "em": "alvo" }
             },
-            { "quando": "aoCritico", "efeito": { "aplicar": { "tipo": "enraizado", "duracaoMs": 1200 }, "em": "alvo" } }
+            { "quando": "aoCritico", "efeito": { "aplicar": { "tipo": "atordoar", "duracaoMs": 600 }, "em": "alvo" } }
           ]
         }
       }
     },
     {
-      "base": "lanca",
+      "base": "arcoguerra",
       "slot": "arma_principal",
-      "icone": "lanca",
-      "arma": "lanca",
+      "icone": "arco",
+      "arma": "arcoguerra",
+      "defesa": 0,
+      "atributos": [
+        ["forca", "destreza"]
+      ],
+      "elementos": ["fogo"],
+      "formas": {
+        "comum": { "nome": "Arco de guerra", "genero": "m" },
+        "epica": { "nome": "Arco do cerco", "genero": "m" },
+        "lendaria": {
+          "nome": "Chuva de ferro",
+          "genero": "m",
+          "texto": "A flecha queima o alvo por 2 s.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_arcoguerra", "chancePct": 30 },
+              "efeito": { "aplicar": { "tipo": "queimando", "duracaoMs": 2000, "valor": 2 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Fim da muralha",
+          "genero": "m",
+          "texto": "A flecha queima por 3 s; o crítico explode em volta.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_arcoguerra", "chancePct": 45 },
+              "efeito": { "aplicar": { "tipo": "queimando", "duracaoMs": 3000, "valor": 3 }, "em": "alvo" }
+            },
+            { "quando": "aoCritico", "efeito": { "aplicarEmVolta": { "tipo": "dano_direto", "valor": 5 }, "raio": 1 } }
+          ]
+        }
+      }
+    },
+    {
+      "base": "arcocaca",
+      "slot": "arma_principal",
+      "icone": "arco",
+      "arma": "arcocaca",
+      "defesa": 0,
+      "atributos": [
+        ["destreza"]
+      ],
+      "elementos": ["veneno"],
+      "formas": {
+        "comum": { "nome": "Arco de caça", "genero": "m" },
+        "epica": { "nome": "Arco do mateiro", "genero": "m" },
+        "lendaria": {
+          "nome": "Presa da matilha",
+          "genero": "m",
+          "texto": "A flecha tem 20% de chance de deixar lento.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "chancePct": 20 },
+              "efeito": { "aplicar": { "tipo": "atolado", "duracaoMs": 2000, "pct": 30 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Rei da caçada",
+          "genero": "m",
+          "texto": "A flecha tem 35% de chance de deixar lento; abater acelera o arco.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "chancePct": 35 },
+              "efeito": { "aplicar": { "tipo": "atolado", "duracaoMs": 2500, "pct": 35 }, "em": "alvo" }
+            },
+            {
+              "quando": "aoMatar",
+              "efeito": { "aplicar": { "tipo": "ab_recarga", "duracaoMs": 4000, "pct": 30 }, "em": "portador" }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "base": "tomo",
+      "slot": "arma_principal",
+      "icone": "tomo",
+      "arma": "tomo",
+      "defesa": 0,
+      "atributos": [
+        ["inteligencia", "sabedoria"]
+      ],
+      "elementos": ["raio", "trevas"],
+      "formas": {
+        "comum": { "nome": "Grimório arcano", "genero": "m" },
+        "epica": { "nome": "Grimório do adepto", "genero": "m" },
+        "lendaria": {
+          "nome": "Tratado das correntes",
+          "genero": "m",
+          "texto": "O crítico devolve 2 de mana.",
+          "ganchos": [
+            { "quando": "aoCritico", "efeito": { "mana": 2 } }
+          ]
+        },
+        "ultima": {
+          "nome": "Códice da tempestade",
+          "genero": "m",
+          "texto": "O crítico devolve 3 de mana e eletriza.",
+          "ganchos": [
+            { "quando": "aoCritico", "efeito": { "mana": 3 } },
+            { "quando": "aoCritico", "efeito": { "aplicar": { "tipo": "eletrizado", "duracaoMs": 3000 }, "em": "alvo" } }
+          ]
+        }
+      }
+    },
+    {
+      "base": "codice",
+      "slot": "arma_principal",
+      "icone": "tomo",
+      "arma": "codice",
+      "defesa": 0,
+      "atributos": [
+        ["inteligencia"]
+      ],
+      "elementos": ["fogo"],
+      "formas": {
+        "comum": { "nome": "Códice das runas", "genero": "m" },
+        "epica": { "nome": "Códice do escriba", "genero": "m" },
+        "lendaria": {
+          "nome": "Inscrição ardente",
+          "genero": "m",
+          "texto": "A runa tem 25% de chance de queimar.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_codice", "chancePct": 25 },
+              "efeito": { "aplicar": { "tipo": "queimando", "duracaoMs": 2000, "valor": 2 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Palavra primordial",
+          "genero": "m",
+          "texto": "A runa tem 40% de chance de queimar; o crítico atordoa.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_codice", "chancePct": 40 },
+              "efeito": { "aplicar": { "tipo": "queimando", "duracaoMs": 3000, "valor": 3 }, "em": "alvo" }
+            },
+            { "quando": "aoCritico", "efeito": { "aplicar": { "tipo": "atordoar", "duracaoMs": 600 }, "em": "alvo" } }
+          ]
+        }
+      }
+    },
+    {
+      "base": "mares",
+      "slot": "arma_principal",
+      "icone": "tomo",
+      "arma": "mares",
+      "defesa": 0,
+      "atributos": [
+        ["inteligencia", "sabedoria"]
+      ],
+      "elementos": ["gelo"],
+      "formas": {
+        "comum": { "nome": "Tomo das marés", "genero": "m" },
+        "epica": { "nome": "Tomo do navegante", "genero": "m" },
+        "lendaria": {
+          "nome": "Canto da maré",
+          "genero": "m",
+          "texto": "A onda tem 20% de chance de resfriar.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_mares", "chancePct": 20 },
+              "efeito": { "aplicar": { "tipo": "resfriado", "duracaoMs": 3000, "pct": 30 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Abismo azul",
+          "genero": "m",
+          "texto": "A onda tem 35% de chance de resfriar e empurra.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_mares", "chancePct": 35 },
+              "efeito": { "aplicar": { "tipo": "resfriado", "duracaoMs": 3000, "pct": 30 }, "em": "alvo" }
+            },
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_mares", "chancePct": 35 },
+              "efeito": { "aplicar": { "tipo": "empurrao", "valor": 1 }, "em": "alvo" }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "base": "estelar",
+      "slot": "arma_principal",
+      "icone": "tomo",
+      "arma": "estelar",
+      "defesa": 0,
+      "atributos": [
+        ["inteligencia"]
+      ],
+      "elementos": ["sagrado"],
+      "formas": {
+        "comum": { "nome": "Livro estelar", "genero": "m" },
+        "epica": { "nome": "Atlas do céu", "genero": "m" },
+        "lendaria": {
+          "nome": "Mapa das constelações",
+          "genero": "m",
+          "texto": "O orbe tem 20% de chance de cegar.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_estelar", "chancePct": 20 },
+              "efeito": { "aplicar": { "tipo": "cego", "duracaoMs": 1500 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Livro do firmamento",
+          "genero": "m",
+          "texto": "O orbe tem 30% de chance de cegar; abater devolve 3 de mana.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_estelar", "chancePct": 30 },
+              "efeito": { "aplicar": { "tipo": "cego", "duracaoMs": 2000 }, "em": "alvo" }
+            },
+            { "quando": "aoMatar", "efeito": { "mana": 3 } }
+          ]
+        }
+      }
+    },
+    {
+      "base": "prisma",
+      "slot": "arma_principal",
+      "icone": "tomo",
+      "arma": "prisma",
+      "defesa": 0,
+      "atributos": [
+        ["inteligencia", "carisma"]
+      ],
+      "elementos": ["raio"],
+      "formas": {
+        "comum": { "nome": "Grimório do prisma", "genero": "m" },
+        "epica": { "nome": "Grimório do vitral", "genero": "m" },
+        "lendaria": {
+          "nome": "Luz partida",
+          "genero": "m",
+          "texto": "O feixe tem 20% de chance de expor.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_prisma", "chancePct": 20 },
+              "efeito": { "aplicar": { "tipo": "exposto", "duracaoMs": 3000, "pct": 20 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Arco-íris eterno",
+          "genero": "m",
+          "texto": "O feixe tem 35% de chance de expor; o crítico eletriza.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_prisma", "chancePct": 35 },
+              "efeito": { "aplicar": { "tipo": "exposto", "duracaoMs": 3000, "pct": 25 }, "em": "alvo" }
+            },
+            { "quando": "aoCritico", "efeito": { "aplicar": { "tipo": "eletrizado", "duracaoMs": 3000 }, "em": "alvo" } }
+          ]
+        }
+      }
+    },
+    {
+      "base": "espelhos",
+      "slot": "arma_principal",
+      "icone": "tomo",
+      "arma": "espelhos",
+      "defesa": 0,
+      "atributos": [
+        ["inteligencia", "destreza"]
+      ],
+      "elementos": ["psiquico"],
+      "formas": {
+        "comum": { "nome": "Livro dos espelhos", "genero": "m" },
+        "epica": { "nome": "Livro do ilusionista", "genero": "m" },
+        "lendaria": {
+          "nome": "Reflexo infinito",
+          "genero": "m",
+          "texto": "Levar golpe tem 20% de chance de ficar intangível 1,5 s.",
+          "ganchos": [
+            {
+              "quando": "aoReceberGolpe",
+              "se": { "chancePct": 20 },
+              "efeito": { "aplicar": { "tipo": "fantasma", "duracaoMs": 1500 }, "em": "portador" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Mil faces",
+          "genero": "m",
+          "texto": "Levar golpe tem 30% de chance de ficar intangível; o crítico confunde.",
+          "ganchos": [
+            {
+              "quando": "aoReceberGolpe",
+              "se": { "chancePct": 30 },
+              "efeito": { "aplicar": { "tipo": "fantasma", "duracaoMs": 2000 }, "em": "portador" }
+            },
+            { "quando": "aoCritico", "efeito": { "aplicar": { "tipo": "confuso", "duracaoMs": 1500 }, "em": "alvo" } }
+          ]
+        }
+      }
+    },
+    {
+      "base": "orbital",
+      "slot": "arma_principal",
+      "icone": "tomo",
+      "arma": "orbital",
+      "defesa": 0,
+      "atributos": [
+        ["inteligencia", "sabedoria"]
+      ],
+      "elementos": ["raio"],
+      "formas": {
+        "comum": { "nome": "Tomo orbital", "genero": "m" },
+        "epica": { "nome": "Tomo do astrônomo", "genero": "m" },
+        "lendaria": {
+          "nome": "Roda dos astros",
+          "genero": "m",
+          "texto": "O crítico devolve 2 de mana.",
+          "ganchos": [
+            { "quando": "aoCritico", "efeito": { "mana": 2 } }
+          ]
+        },
+        "ultima": {
+          "nome": "Sistema eterno",
+          "genero": "m",
+          "texto": "O crítico devolve 3 de mana; abater acelera os dardos.",
+          "ganchos": [
+            { "quando": "aoCritico", "efeito": { "mana": 3 } },
+            {
+              "quando": "aoMatar",
+              "efeito": { "aplicar": { "tipo": "ab_recarga", "duracaoMs": 4000, "pct": 30 }, "em": "portador" }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "base": "vazio",
+      "slot": "arma_principal",
+      "icone": "tomo",
+      "arma": "vazio",
+      "defesa": 0,
+      "atributos": [
+        ["inteligencia"]
+      ],
+      "elementos": ["trevas"],
+      "formas": {
+        "comum": { "nome": "Grimório do vazio", "genero": "m" },
+        "epica": { "nome": "Grimório do abismo", "genero": "m" },
+        "lendaria": {
+          "nome": "Fome das estrelas",
+          "genero": "m",
+          "texto": "O dardo tem 20% de chance de deixar lento.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_vazio", "chancePct": 20 },
+              "efeito": { "aplicar": { "tipo": "atolado", "duracaoMs": 2000, "pct": 30 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Horizonte de eventos",
+          "genero": "m",
+          "texto": "O dardo tem 35% de chance de deixar lento; o crítico silencia.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_vazio", "chancePct": 35 },
+              "efeito": { "aplicar": { "tipo": "atolado", "duracaoMs": 2500, "pct": 35 }, "em": "alvo" }
+            },
+            { "quando": "aoCritico", "efeito": { "aplicar": { "tipo": "silenciar", "duracaoMs": 1500 }, "em": "alvo" } }
+          ]
+        }
+      }
+    },
+    {
+      "base": "cajado",
+      "slot": "arma_principal",
+      "icone": "cajado",
+      "arma": "cajado",
+      "defesa": 0,
+      "atributos": [
+        ["inteligencia", "sabedoria"]
+      ],
+      "elementos": ["gelo", "trevas"],
+      "formas": {
+        "comum": { "nome": "Cajado de ossos", "genero": "m" },
+        "epica": { "nome": "Cajado do ossuário", "genero": "m" },
+        "lendaria": {
+          "nome": "Cetro das catacumbas",
+          "genero": "m",
+          "texto": "O solo tem 15% de chance de deixar lento.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_cajado", "chancePct": 15 },
+              "efeito": { "aplicar": { "tipo": "atolado", "duracaoMs": 1500, "pct": 25 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Trono de ossos",
+          "genero": "m",
+          "texto": "O solo deixa lento; abater ergue o morto mais forte (cura 6%).",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_cajado", "chancePct": 25 },
+              "efeito": { "aplicar": { "tipo": "atolado", "duracaoMs": 2000, "pct": 30 }, "em": "alvo" }
+            },
+            { "quando": "aoMatar", "efeito": { "curarPct": 6 } }
+          ]
+        }
+      }
+    },
+    {
+      "base": "praga",
+      "slot": "arma_principal",
+      "icone": "cajado",
+      "arma": "praga",
+      "defesa": 0,
+      "atributos": [
+        ["inteligencia", "constituicao"]
+      ],
+      "elementos": ["veneno"],
+      "formas": {
+        "comum": { "nome": "Báculo da praga", "genero": "m" },
+        "epica": { "nome": "Báculo do pestilento", "genero": "m" },
+        "lendaria": {
+          "nome": "Ramo da peste",
+          "genero": "m",
+          "texto": "O solo tem 25% de chance de envenenar.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_praga", "chancePct": 25 },
+              "efeito": { "aplicar": { "tipo": "envenenado", "duracaoMs": 4000, "valor": 2 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Fim das colheitas",
+          "genero": "m",
+          "texto": "O solo tem 40% de chance de envenenar; abater espalha veneno em volta.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_praga", "chancePct": 40 },
+              "efeito": { "aplicar": { "tipo": "envenenado", "duracaoMs": 4000, "valor": 3 }, "em": "alvo" }
+            },
+            {
+              "quando": "aoMatar",
+              "efeito": { "aplicarEmVolta": { "tipo": "envenenado", "duracaoMs": 3000, "valor": 2 }, "raio": 2 }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "base": "foice",
+      "slot": "arma_principal",
+      "icone": "foice",
+      "arma": "foice",
+      "defesa": 0,
+      "atributos": [
+        ["inteligencia", "forca"]
+      ],
+      "elementos": ["trevas"],
+      "formas": {
+        "comum": { "nome": "Foice", "genero": "f" },
+        "epica": { "nome": "Foice do coveiro", "genero": "f" },
+        "lendaria": {
+          "nome": "Lua ceifadora",
+          "genero": "f",
+          "texto": "O solo tem 20% de chance de sangrar.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_foice", "chancePct": 20 },
+              "efeito": { "aplicar": { "tipo": "sangrando", "duracaoMs": 4000, "valor": 2 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Ceifa final",
+          "genero": "f",
+          "texto": "O solo tem 35% de chance de sangrar; abater cura 8%.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_foice", "chancePct": 35 },
+              "efeito": { "aplicar": { "tipo": "sangrando", "duracaoMs": 4000, "valor": 3 }, "em": "alvo" }
+            },
+            { "quando": "aoMatar", "efeito": { "curarPct": 8 } }
+          ]
+        }
+      }
+    },
+    {
+      "base": "cova",
+      "slot": "arma_principal",
+      "icone": "cajado",
+      "arma": "cova",
+      "defesa": 0,
+      "atributos": [
+        ["inteligencia", "constituicao"]
+      ],
+      "elementos": ["terra"],
+      "formas": {
+        "comum": { "nome": "Cajado da cova", "genero": "m" },
+        "epica": { "nome": "Cajado do coveiro", "genero": "m" },
+        "lendaria": {
+          "nome": "Raiz da sepultura",
+          "genero": "m",
+          "texto": "O solo tem 20% de chance de expor.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_cova", "chancePct": 20 },
+              "efeito": { "aplicar": { "tipo": "exposto", "duracaoMs": 3000, "pct": 20 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Abraço da terra",
+          "genero": "m",
+          "texto": "O solo tem 35% de chance de expor; no crítico, atordoa.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_cova", "chancePct": 35 },
+              "efeito": { "aplicar": { "tipo": "exposto", "duracaoMs": 3000, "pct": 25 }, "em": "alvo" }
+            },
+            { "quando": "aoCritico", "efeito": { "aplicar": { "tipo": "atordoar", "duracaoMs": 600 }, "em": "alvo" } }
+          ]
+        }
+      }
+    },
+    {
+      "base": "lamento",
+      "slot": "arma_principal",
+      "icone": "cajado",
+      "arma": "lamento",
+      "defesa": 0,
+      "atributos": [
+        ["inteligencia", "carisma"]
+      ],
+      "elementos": ["psiquico"],
+      "formas": {
+        "comum": { "nome": "Cetro do lamento", "genero": "m" },
+        "epica": { "nome": "Cetro da carpideira", "genero": "m" },
+        "lendaria": {
+          "nome": "Voz dos esquecidos",
+          "genero": "m",
+          "texto": "A alma tem 20% de chance de amedrontar.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_lamento", "chancePct": 20 },
+              "efeito": { "aplicar": { "tipo": "aterrorizado", "duracaoMs": 1500 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Coro das almas",
+          "genero": "m",
+          "texto": "A alma tem 30% de chance de amedrontar; o crítico confunde.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_lamento", "chancePct": 30 },
+              "efeito": { "aplicar": { "tipo": "aterrorizado", "duracaoMs": 2000 }, "em": "alvo" }
+            },
+            { "quando": "aoCritico", "efeito": { "aplicar": { "tipo": "confuso", "duracaoMs": 1500 }, "em": "alvo" } }
+          ]
+        }
+      }
+    },
+    {
+      "base": "sanguineo",
+      "slot": "arma_principal",
+      "icone": "cajado",
+      "arma": "sanguineo",
+      "defesa": 0,
+      "atributos": [
+        ["inteligencia", "constituicao"]
+      ],
+      "elementos": ["trevas"],
+      "formas": {
+        "comum": { "nome": "Cajado sanguíneo", "genero": "m" },
+        "epica": { "nome": "Cajado do sangrador", "genero": "m" },
+        "lendaria": {
+          "nome": "Veia escarlate",
+          "genero": "m",
+          "texto": "O solo tem 20% de chance de sangrar.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_sanguineo", "chancePct": 20 },
+              "efeito": { "aplicar": { "tipo": "sangrando", "duracaoMs": 4000, "valor": 2 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Coração vermelho",
+          "genero": "m",
+          "texto": "O solo tem 35% de chance de sangrar; abater cura 10%.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_sanguineo", "chancePct": 35 },
+              "efeito": { "aplicar": { "tipo": "sangrando", "duracaoMs": 4000, "valor": 3 }, "em": "alvo" }
+            },
+            { "quando": "aoMatar", "efeito": { "curarPct": 10 } }
+          ]
+        }
+      }
+    },
+    {
+      "base": "espectro",
+      "slot": "arma_principal",
+      "icone": "cajado",
+      "arma": "espectro",
+      "defesa": 0,
+      "atributos": [
+        ["inteligencia", "destreza"]
+      ],
+      "elementos": ["gelo"],
+      "formas": {
+        "comum": { "nome": "Cajado do espectro", "genero": "m" },
+        "epica": { "nome": "Cajado do assombrado", "genero": "m" },
+        "lendaria": {
+          "nome": "Sombra que segue",
+          "genero": "m",
+          "texto": "O solo tem 20% de chance de resfriar.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_espectro", "chancePct": 20 },
+              "efeito": { "aplicar": { "tipo": "resfriado", "duracaoMs": 3000, "pct": 30 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Caçador sem rosto",
+          "genero": "m",
+          "texto": "O solo tem 35% de chance de resfriar; o crítico congela 1 s.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_espectro", "chancePct": 35 },
+              "efeito": { "aplicar": { "tipo": "resfriado", "duracaoMs": 3000, "pct": 30 }, "em": "alvo" }
+            },
+            { "quando": "aoCritico", "efeito": { "aplicar": { "tipo": "congelado", "duracaoMs": 1000 }, "em": "alvo" } }
+          ]
+        }
+      }
+    },
+    {
+      "base": "colheita",
+      "slot": "arma_principal",
+      "icone": "foice",
+      "arma": "colheita",
+      "defesa": 0,
+      "atributos": [
+        ["inteligencia", "sabedoria"]
+      ],
+      "elementos": ["trevas"],
+      "formas": {
+        "comum": { "nome": "Cajado da colheita", "genero": "m" },
+        "epica": { "nome": "Cajado do ceifeiro", "genero": "m" },
+        "lendaria": {
+          "nome": "Gadanha das almas",
+          "genero": "m",
+          "texto": "Abater devolve 2 de mana.",
+          "ganchos": [
+            { "quando": "aoMatar", "efeito": { "mana": 2 } }
+          ]
+        },
+        "ultima": {
+          "nome": "Fim de todas as safras",
+          "genero": "m",
+          "texto": "Abater devolve 3 de mana e cura 6%.",
+          "ganchos": [
+            { "quando": "aoMatar", "efeito": { "mana": 3 } },
+            { "quando": "aoMatar", "efeito": { "curarPct": 6 } }
+          ]
+        }
+      }
+    },
+    {
+      "base": "chakram",
+      "slot": "arma_principal",
+      "icone": "chakram",
+      "arma": "chakram",
+      "defesa": 0,
+      "atributos": [
+        ["destreza"]
+      ],
+      "elementos": ["raio"],
+      "formas": {
+        "comum": { "nome": "Chakram", "genero": "m" },
+        "epica": { "nome": "Chakram do dançarino", "genero": "m" },
+        "lendaria": {
+          "nome": "Anel do relâmpago",
+          "genero": "m",
+          "texto": "O ricochete tem 20% de chance de expor.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_chakram", "chancePct": 20 },
+              "efeito": { "aplicar": { "tipo": "exposto", "duracaoMs": 3000, "pct": 20 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Sol cortante",
+          "genero": "m",
+          "texto": "O ricochete tem 35% de chance de expor; abater acelera.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_chakram", "chancePct": 35 },
+              "efeito": { "aplicar": { "tipo": "exposto", "duracaoMs": 3000, "pct": 20 }, "em": "alvo" }
+            },
+            {
+              "quando": "aoMatar",
+              "efeito": { "aplicar": { "tipo": "ab_recarga", "duracaoMs": 4000, "pct": 30 }, "em": "portador" }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "base": "adaga",
+      "slot": "arma_principal",
+      "icone": "adaga",
+      "arma": "adaga",
+      "defesa": 0,
+      "atributos": [
+        ["destreza", "forca"]
+      ],
+      "elementos": ["veneno", "trevas"],
+      "formas": {
+        "comum": { "nome": "Adaga de arremesso", "genero": "f" },
+        "epica": { "nome": "Adaga do saltimbanco", "genero": "f" },
+        "lendaria": {
+          "nome": "Presa da víbora",
+          "genero": "f",
+          "texto": "A adaga tem 20% de chance de envenenar.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_adaga", "chancePct": 20 },
+              "efeito": { "aplicar": { "tipo": "envenenado", "duracaoMs": 4000, "valor": 2 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Beijo da sombra",
+          "genero": "f",
+          "texto": "A adaga tem 35% de chance de envenenar; o crítico sangra.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_adaga", "chancePct": 35 },
+              "efeito": { "aplicar": { "tipo": "envenenado", "duracaoMs": 4000, "valor": 3 }, "em": "alvo" }
+            },
+            {
+              "quando": "aoCritico",
+              "efeito": { "aplicar": { "tipo": "sangrando", "duracaoMs": 4000, "valor": 3 }, "em": "alvo" }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "base": "machadinha",
+      "slot": "arma_principal",
+      "icone": "machado",
+      "arma": "machadinha",
+      "defesa": 0,
+      "atributos": [
+        ["forca", "destreza"]
+      ],
+      "elementos": ["fogo"],
+      "formas": {
+        "comum": { "nome": "Machadinha", "genero": "f" },
+        "epica": { "nome": "Machadinha do lenhador", "genero": "f" },
+        "lendaria": {
+          "nome": "Lua de ferro",
+          "genero": "f",
+          "texto": "No crítico, +20% de dano por 4 s.",
+          "ganchos": [
+            {
+              "quando": "aoCritico",
+              "efeito": { "aplicar": { "tipo": "bonus_dano", "duracaoMs": 4000, "pct": 20 }, "em": "portador" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Bico do trovão",
+          "genero": "f",
+          "texto": "No crítico, +30% de dano; abater cura 6%.",
+          "ganchos": [
+            {
+              "quando": "aoCritico",
+              "efeito": { "aplicar": { "tipo": "bonus_dano", "duracaoMs": 5000, "pct": 30 }, "em": "portador" }
+            },
+            { "quando": "aoMatar", "efeito": { "curarPct": 6 } }
+          ]
+        }
+      }
+    },
+    {
+      "base": "shuriken",
+      "slot": "arma_principal",
+      "icone": "shuriken",
+      "arma": "shuriken",
+      "defesa": 0,
+      "atributos": [
+        ["destreza"]
+      ],
+      "elementos": ["gelo"],
+      "formas": {
+        "comum": { "nome": "Shuriken", "genero": "f" },
+        "epica": { "nome": "Estrela do vigia", "genero": "f" },
+        "lendaria": {
+          "nome": "Flor de aço",
+          "genero": "f",
+          "texto": "A órbita tem 15% de chance de sangrar.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_shuriken", "chancePct": 15 },
+              "efeito": { "aplicar": { "tipo": "sangrando", "duracaoMs": 3000, "valor": 2 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Estrela do inverno",
+          "genero": "f",
+          "texto": "A órbita tem 25% de chance de sangrar; o crítico resfria.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_shuriken", "chancePct": 25 },
+              "efeito": { "aplicar": { "tipo": "sangrando", "duracaoMs": 4000, "valor": 2 }, "em": "alvo" }
+            },
+            {
+              "quando": "aoCritico",
+              "efeito": { "aplicar": { "tipo": "resfriado", "duracaoMs": 3000, "pct": 30 }, "em": "alvo" }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "base": "duplo",
+      "slot": "arma_principal",
+      "icone": "bumerangue",
+      "arma": "duplo",
+      "defesa": 0,
+      "atributos": [
+        ["destreza", "sabedoria"]
+      ],
+      "elementos": ["terra"],
+      "formas": {
+        "comum": { "nome": "Bumerangue duplo", "genero": "m" },
+        "epica": { "nome": "Bumerangue gêmeo", "genero": "m" },
+        "lendaria": {
+          "nome": "Asas partidas",
+          "genero": "m",
+          "texto": "A volta tem 20% de chance de deixar lento.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_duplo", "chancePct": 20 },
+              "efeito": { "aplicar": { "tipo": "atolado", "duracaoMs": 2000, "pct": 25 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Voo dos irmãos",
+          "genero": "m",
+          "texto": "A volta tem 35% de chance de deixar lento; abater acelera.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_duplo", "chancePct": 35 },
+              "efeito": { "aplicar": { "tipo": "atolado", "duracaoMs": 2000, "pct": 30 }, "em": "alvo" }
+            },
+            {
+              "quando": "aoMatar",
+              "efeito": { "aplicar": { "tipo": "ab_recarga", "duracaoMs": 4000, "pct": 30 }, "em": "portador" }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "base": "arpeu",
+      "slot": "arma_principal",
+      "icone": "corrente",
+      "arma": "arpeu",
       "defesa": 0,
       "atributos": [
         ["forca", "destreza"]
       ],
       "elementos": [],
       "formas": {
-        "comum": { "nome": "Lança", "genero": "f" },
-        "epica": { "nome": "Lança da guarda", "genero": "f" },
+        "comum": { "nome": "Arpéu", "genero": "m" },
+        "epica": { "nome": "Arpéu do pirata", "genero": "m" },
         "lendaria": {
-          "nome": "Presa do dragão",
-          "genero": "f",
-          "texto": "Golpes físicos empurram (25%) 1 célula.",
+          "nome": "Âncora viva",
+          "genero": "m",
+          "texto": "O arpéu tem 20% de chance de expor.",
           "ganchos": [
             {
               "quando": "aoAcertar",
-              "se": { "tag": "fisico", "chancePct": 25 },
-              "efeito": { "aplicar": { "tipo": "empurrao", "valor": 1 }, "em": "alvo" }
+              "se": { "habilidade": "basico_arpeu", "chancePct": 20 },
+              "efeito": { "aplicar": { "tipo": "exposto", "duracaoMs": 3000, "pct": 20 }, "em": "alvo" }
             }
           ]
         },
         "ultima": {
-          "nome": "Lança do horizonte",
-          "genero": "f",
-          "texto": "Golpes físicos empurram (40%) 2 células; o crítico expõe.",
+          "nome": "Mão do abismo",
+          "genero": "m",
+          "texto": "O arpéu tem 35% de chance de expor; o crítico enraíza.",
           "ganchos": [
             {
               "quando": "aoAcertar",
-              "se": { "tag": "fisico", "chancePct": 40 },
-              "efeito": { "aplicar": { "tipo": "empurrao", "valor": 2 }, "em": "alvo" }
+              "se": { "habilidade": "basico_arpeu", "chancePct": 35 },
+              "efeito": { "aplicar": { "tipo": "exposto", "duracaoMs": 3000, "pct": 25 }, "em": "alvo" }
             },
-            { "quando": "aoCritico", "efeito": { "aplicar": { "tipo": "exposto", "duracaoMs": 3000, "pct": 20 }, "em": "alvo" } }
+            { "quando": "aoCritico", "efeito": { "aplicar": { "tipo": "enraizado", "duracaoMs": 1000 }, "em": "alvo" } }
+          ]
+        }
+      }
+    },
+    {
+      "base": "falcoeiro",
+      "slot": "arma_principal",
+      "icone": "bumerangue",
+      "arma": "falcoeiro",
+      "defesa": 0,
+      "atributos": [
+        ["destreza", "sabedoria"]
+      ],
+      "elementos": ["sagrado"],
+      "formas": {
+        "comum": { "nome": "Bumerangue do falcoeiro", "genero": "m" },
+        "epica": { "nome": "Bumerangue da garra", "genero": "m" },
+        "lendaria": {
+          "nome": "Pena dourada",
+          "genero": "m",
+          "texto": "O falcão tem 20% de chance de cegar.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_falcoeiro", "chancePct": 20 },
+              "efeito": { "aplicar": { "tipo": "cego", "duracaoMs": 1500 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Céu dos falcões",
+          "genero": "m",
+          "texto": "O falcão tem 30% de chance de cegar; abater cura 6%.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_falcoeiro", "chancePct": 30 },
+              "efeito": { "aplicar": { "tipo": "cego", "duracaoMs": 2000 }, "em": "alvo" }
+            },
+            { "quando": "aoMatar", "efeito": { "curarPct": 6 } }
+          ]
+        }
+      }
+    },
+    {
+      "base": "serrilhado",
+      "slot": "arma_principal",
+      "icone": "bumerangue",
+      "arma": "serrilhado",
+      "defesa": 0,
+      "atributos": [
+        ["destreza", "forca"]
+      ],
+      "elementos": ["veneno"],
+      "formas": {
+        "comum": { "nome": "Bumerangue serrilhado", "genero": "m" },
+        "epica": { "nome": "Serra do mateiro", "genero": "m" },
+        "lendaria": {
+          "nome": "Dente da fera",
+          "genero": "m",
+          "texto": "O corte tem 20% de chance de sangrar.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_serrilhado", "chancePct": 20 },
+              "efeito": { "aplicar": { "tipo": "sangrando", "duracaoMs": 3000, "valor": 2 }, "em": "alvo" }
+            }
+          ]
+        },
+        "ultima": {
+          "nome": "Rasgo sem fim",
+          "genero": "m",
+          "texto": "O corte tem 35% de chance de sangrar; o crítico envenena.",
+          "ganchos": [
+            {
+              "quando": "aoAcertar",
+              "se": { "habilidade": "basico_serrilhado", "chancePct": 35 },
+              "efeito": { "aplicar": { "tipo": "sangrando", "duracaoMs": 4000, "valor": 3 }, "em": "alvo" }
+            },
+            {
+              "quando": "aoCritico",
+              "efeito": { "aplicar": { "tipo": "envenenado", "duracaoMs": 4000, "valor": 3 }, "em": "alvo" }
+            }
           ]
         }
       }
@@ -324,45 +1651,6 @@
       }
     },
     {
-      "base": "tomo",
-      "slot": "arma_secundaria",
-      "icone": "livro",
-      "defesa": 0,
-      "atributos": [
-        ["sabedoria", "inteligencia"]
-      ],
-      "elementos": ["trevas"],
-      "formas": {
-        "comum": { "nome": "Tomo", "genero": "m" },
-        "epica": { "nome": "Grimório do aprendiz", "genero": "m" },
-        "lendaria": {
-          "nome": "Códice das marés",
-          "genero": "m",
-          "texto": "Magias molham o alvo (25%): raio eletrocuta, fogo vira vapor, terra vira lama.",
-          "ganchos": [
-            {
-              "quando": "aoAcertar",
-              "se": { "tag": "magico", "chancePct": 25 },
-              "efeito": { "aplicar": { "tipo": "molhado", "duracaoMs": 5000 }, "em": "alvo" }
-            }
-          ]
-        },
-        "ultima": {
-          "nome": "Livro do dilúvio",
-          "genero": "m",
-          "texto": "Magias molham o alvo (40%); estudos 15% mais curtos.",
-          "ganchos": [
-            {
-              "quando": "aoAcertar",
-              "se": { "tag": "magico", "chancePct": 40 },
-              "efeito": { "aplicar": { "tipo": "molhado", "duracaoMs": 5000 }, "em": "alvo" }
-            },
-            { "quando": "passivo", "efeito": { "estudoPct": 15 } }
-          ]
-        }
-      }
-    },
-    {
       "base": "aljava",
       "slot": "arma_secundaria",
       "icone": "aljava",
@@ -396,7 +1684,11 @@
               "se": { "tag": "projetil", "tipoAtaque": "fisico" },
               "efeito": { "aplicar": { "tipo": "queimando", "duracaoMs": 3000, "valor": 3 }, "em": "alvo" }
             },
-            { "quando": "aoCritico", "se": { "tag": "projetil" }, "efeito": { "aplicar": { "tipo": "dano_direto", "valor": 6 }, "em": "alvo" } }
+            {
+              "quando": "aoCritico",
+              "se": { "tag": "projetil" },
+              "efeito": { "aplicar": { "tipo": "dano_direto", "valor": 6 }, "em": "alvo" }
+            }
           ]
         }
       }
@@ -450,7 +1742,10 @@
           "genero": "m",
           "texto": "Abater acelera o ataque básico em 30% por 5 s.",
           "ganchos": [
-            { "quando": "aoMatar", "efeito": { "aplicar": { "tipo": "ab_recarga", "duracaoMs": 5000, "pct": 30 }, "em": "portador" } }
+            {
+              "quando": "aoMatar",
+              "efeito": { "aplicar": { "tipo": "ab_recarga", "duracaoMs": 5000, "pct": 30 }, "em": "portador" }
+            }
           ]
         },
         "ultima": {
@@ -458,7 +1753,10 @@
           "genero": "f",
           "texto": "Abater acelera o básico 40% por 6 s e deixa atravessar criaturas.",
           "ganchos": [
-            { "quando": "aoMatar", "efeito": { "aplicar": { "tipo": "ab_recarga", "duracaoMs": 6000, "pct": 40 }, "em": "portador" } },
+            {
+              "quando": "aoMatar",
+              "efeito": { "aplicar": { "tipo": "ab_recarga", "duracaoMs": 6000, "pct": 40 }, "em": "portador" }
+            },
             { "quando": "aoMatar", "efeito": { "aplicar": { "tipo": "fantasma", "duracaoMs": 3000 }, "em": "portador" } }
           ]
         }
@@ -618,7 +1916,10 @@
           "genero": "f",
           "texto": "Cruzar a célula de um inimigo dá +30% de velocidade por 3 s.",
           "ganchos": [
-            { "quando": "aoCruzarInimigo", "efeito": { "aplicar": { "tipo": "acelerado", "duracaoMs": 3000, "pct": 30 }, "em": "portador" } }
+            {
+              "quando": "aoCruzarInimigo",
+              "efeito": { "aplicar": { "tipo": "acelerado", "duracaoMs": 3000, "pct": 30 }, "em": "portador" }
+            }
           ]
         },
         "ultima": {
@@ -660,7 +1961,10 @@
           "texto": "O crítico devolve 5 de mana e potencializa o próximo golpe (+20%).",
           "ganchos": [
             { "quando": "aoCritico", "efeito": { "mana": 5 } },
-            { "quando": "aoCritico", "efeito": { "aplicar": { "tipo": "bonus_dano", "duracaoMs": 3000, "pct": 20 }, "em": "portador" } }
+            {
+              "quando": "aoCritico",
+              "efeito": { "aplicar": { "tipo": "bonus_dano", "duracaoMs": 3000, "pct": 20 }, "em": "portador" }
+            }
           ]
         }
       }

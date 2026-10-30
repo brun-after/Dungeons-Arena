@@ -25,7 +25,7 @@ import { resolverHabilidade } from './compilar-habilidade';
 import type { FonteDeDano } from './dano';
 import { acaoBloqueada, aplicarEfeito, bonusAtaqueBasico, multiplicadorDanoCausado, REGISTRO_EFEITOS } from './efeitos';
 import { excedeLimite } from './efeitos-fluxo';
-import { alvosDaForma, celulasDaForma, deSuporte, deslocaQuemConjura } from './formas';
+import { alvosDaForma, celulasDaForma, celulasDaLinha, deSuporte, deslocaQuemConjura } from './formas';
 import { muralhaEm } from './tatica';
 import { quebrarEm } from './quebraveis';
 import { celulaOcupada, chebyshev } from './geometria';
@@ -34,6 +34,8 @@ import type { Habilidade } from './habilidades';
 import { rampaDeInvocacao } from './invocacoes';
 import { chaveDoAtor, habilidadeDoAtor, perfilPara } from './perfil';
 import { lancarProjetil } from './projeteis';
+import { alcanceSemArma, aoUsarSkill, basicoComVariacao, basicoDaVez, chaveDoBasico, consumirRiposta, contarBasico, ehBasico, fatorDaVelocidade, multiplosDaVez, recargaDoBasicoPct } from './basico';
+import { lancarSolo } from './solos';
 import { celulaDoCompanheiro, ticksDoVooDoFalcao } from './companheiro';
 import { encarnar } from './encarnacao';
 import { consumirMira } from './mira';
@@ -79,7 +81,7 @@ export function fonteDe(e: Entidade, ctx: ContextoSimulacao, tick: number, hab: 
     equipe: e.equipe,
     // Marco 18 (D-068): o bônus fixo segue o atributo da habilidade; a rolagem escala com Força e Inteligência.
     bonusAtributo: bonusDeAtributo(e.atributos, hab.escalaCom, ctx.balance.combate.multiplicadorAtributoPadrao) + (e.bolsa ? bonusDeEspecializacao(e.atributos, hab.escalaCom, ctx.balance) : 0),
-    multRolagem: multiplicadorDeRolagem(e.atributos, ctx.balance, hab.escalaCom),
+    multRolagem: multiplicadorDeRolagem(e.atributos, ctx.balance, hab.escalaCom, hab.escalaRolagem),
     // Marco 18: a Inteligência e os passivos (Mente dupla) dão a potência dos efeitos.
     potencia: potenciaDeEfeito(e.atributos, ctx.balance) * (1 + passivosDe(ctx, e).potenciaPct / 100),
     carisma: e.atributos.carisma,
@@ -104,7 +106,7 @@ export function fonteDaHabilidade(e: Entidade, ctx: ContextoSimulacao, tick: num
 export function origemDaHabilidade(estado: EstadoJogo, ator: Entidade, hab: Habilidade): Celula {
   // Ajuste de 24/10/2026 (D-091): o falcão tem alcance global. A habilidade sempre sai dele, esteja onde estiver; quem
   // decide se dá para usar é o alcance contado do Aventureiro. O projétil voa do falcão até o alvo (paredes o param).
-  return (hab.id !== ator.ataqueBasico ? celulaDoCompanheiro(estado, ator) : null) ?? celulaOcupada(ator);
+  return (!ehBasico(ator, hab.id) ? celulaDoCompanheiro(estado, ator) : null) ?? celulaOcupada(ator);
 }
 
 /**
@@ -112,15 +114,16 @@ export function origemDaHabilidade(estado: EstadoJogo, ator: Entidade, hab: Habi
  * na velocidade de ataque do falcão (nível e Sabedoria). Devolve os ticks do voo (0: não é golpe do falcão).
  */
 function vooDoGolpe(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, hab: Habilidade, mira: Celula): number {
-  if (hab.politicaImpacto !== 'contato' || hab.politicaAlvo !== 'hostil' || hab.id === ator.ataqueBasico) return 0;
+  if (hab.politicaImpacto !== 'contato' || hab.politicaAlvo !== 'hostil' || ehBasico(ator, hab.id)) return 0;
   const falcao = celulaDoCompanheiro(estado, ator);
   return falcao ? ticksDoVooDoFalcao(ctx, ator, falcao, mira) : 0;
 }
 
 /** Alcance com o perfil (marco 14) e o `ab_alcance` quando é o ataque básico (§2.8, marco 8A). */
 export function alcanceDe(ctx: ContextoSimulacao, ator: Entidade, hab: Habilidade, tick: number): number {
-  const basico = hab.id === ator.ataqueBasico ? bonusAtaqueBasico(ator, tick).alcance : 0;
-  return Math.max(0, hab.alcanceCelulas + perfilPara(ctx, ator, hab).alcance + basico);
+  const basico = ehBasico(ator, hab.id) ? bonusAtaqueBasico(ator, tick).alcance : 0;
+  // Marco 27 (D-126): sem o arco, o básico do Arqueiro perde o alcance característico.
+  return Math.max(0, hab.alcanceCelulas + perfilPara(ctx, ator, hab).alcance + basico + alcanceSemArma(ctx, ator, hab));
 }
 
 /** Alvo ofensivo válido: vivo, visível e passível de dano pela relação do modo (§2.5). */
@@ -188,7 +191,7 @@ function aliadoMaisFerido(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Enti
 }
 
 function habilidadeDisponivel(ator: Entidade, id: string): boolean {
-  return ator.ataqueBasico === id || ator.habilidades.includes(id);
+  return ehBasico(ator, id) || ator.habilidades.includes(id);
 }
 
 /**
@@ -210,15 +213,23 @@ export function iniciarAcao(
     return false;
   };
   if (!vivo(ator)) return false;
+  // Marco 27 (D-126): o 3º básico sai pela arma da mão secundária (quando o alvo está no alcance dela).
+  if (!ultimate) {
+    const pedido = habilidadeId;
+    habilidadeId = basicoDaVez(estado, ctx, ator, pedido, alvoPedido, (id) => {
+      const h = habilidadeDoAtor(ctx, ator, id, estado.tick);
+      return h ? alcanceDe(ctx, ator, h, estado.tick) : null;
+    });
+  }
   const hab = ultimate || habilidadeDisponivel(ator, habilidadeId) ? habilidadeDoAtor(ctx, ator, habilidadeId, estado.tick) : undefined;
   // Passiva não se conjura (marco 14): vale enquanto conhecida.
   if (!hab || hab.passiva) return recusar('sem_habilidade');
   // Pedir uma habilidade durante a conjuração do ataque básico substitui o básico (D-020):
   // o automático nunca impede o jogador de usar habilidades.
-  const substituiBasico = ator.acao?.habilidadeId === ator.ataqueBasico && habilidadeId !== ator.ataqueBasico;
+  const substituiBasico = !!ator.acao && ehBasico(ator, ator.acao.habilidadeId) && !ehBasico(ator, habilidadeId);
   if (ator.acao && !substituiBasico) return recusar('ocupado');
   if (acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) return recusar('bloqueado');
-  if (recargaRestante(estado, ator.id, hab.id) > 0) return recusar('recarga');
+  if (recargaRestante(estado, ator.id, chaveDoBasico(ator, hab.id)) > 0) return recusar('recarga');
   const perfil = perfilPara(ctx, ator, hab);
   const { custoMana, custoVida, semMana } = custoDaHabilidade(ctx, ator, hab);
   if (!podePagar(ator, custoMana, custoVida)) return recusar('recurso');
@@ -267,12 +278,14 @@ export function iniciarAcao(
   ator.hp -= custoVida;
   if (semMana) delete ator.classeSemMana;
   if (hab.recargaMs > 0) {
-    const chave = chaveRecarga(ator.id, hab.id);
+    // Marco 27 (D-126): o básico das duas mãos divide a recarga do automático.
+    const chave = chaveRecarga(ator.id, chaveDoBasico(ator, hab.id));
     // `ab_recarga` encurta a recarga do ataque básico (até 75%); o perfil, a de qualquer habilidade.
     // Marco 17: a Destreza acima de 10 também encurta o básico (somada ao `ab_recarga`, dentro do mesmo teto).
     // Marco 18: o teto passa a 75% só somando buff; a Destreza do arqueiro chega a 50% sozinha.
-    const reducao = hab.id === ator.ataqueBasico ? Math.min(75, bonusAtaqueBasico(ator, estado.tick).recargaPct + reducaoRecargaBasicoPct(ator.atributos, ctx.balance, perfilDestreza(ctx, ator)) + velocidadeFrenesiPct(ctx, ator, estado.tick)) : 0;
-    const ms = hab.recargaMs * (1 - reducao / 100) * (1 + perfil.recargaPct / 100);
+    // Marco 27 (D-126): sem o arco, o Arqueiro perde parte da cadência da Destreza; o arco de outra classe é lento.
+    const reducao = ehBasico(ator, hab.id) ? Math.min(75, bonusAtaqueBasico(ator, estado.tick).recargaPct + reducaoRecargaBasicoPct(ator.atributos, ctx.balance, perfilDestreza(ctx, ator)) * fatorDaVelocidade(ctx, ator) + velocidadeFrenesiPct(ctx, ator, estado.tick)) : 0;
+    const ms = hab.recargaMs * (1 - reducao / 100) * (1 + perfil.recargaPct / 100) * (1 + recargaDoBasicoPct(ctx, ator, hab) / 100);
     estado.recargas[chave] = Math.max(estado.recargas[chave] ?? 0, estado.tick + ticksDe(ms));
   }
   // Marco 15: na dificuldade fácil, os golpes de quem não é do lado do jogador avisam mais cedo.
@@ -292,7 +305,7 @@ export function iniciarAcao(
     lancamentoTick,
     impactoPrevistoTick: lancamentoTick + viagem,
   };
-  if (hab.id !== ator.ataqueBasico && participaDeCombo(ctx, ator, hab.id)) {
+  if (!ehBasico(ator, hab.id) && participaDeCombo(ctx, ator, hab.id)) {
     const previa = prepararSequencia(estado, ctx, clonarEntidade(ator), hab, ator.acao.acaoId, alvo, mira);
     if (previa.raioArea !== hab.raioArea) ator.acao.raioCombo = previa.raioArea;
   }
@@ -395,7 +408,10 @@ function lancar(
   /** Marco 25 (D-102): o golpe do falcão que chegou ao alvo — o alcance já valeu na conjuração; o dono pode ter andado. */
   falcaoChegou = false,
 ): void {
-  const hab = daFase ? habilidadeBase : prepararSequencia(estado, ctx, ator, habilidadeBase, acaoId, alvo, mira);
+  // Marco 27 (D-126): o básico com a variação da arma (o giro do Montante, o elemento emprestado do tomo).
+  const hab = daFase ? habilidadeBase : basicoComVariacao(estado, ator, prepararSequencia(estado, ctx, ator, habilidadeBase, acaoId, alvo, mira));
+  const multiplos = multiplosDaVez(ator, hab);
+  if (!daFase) contarBasico(ator, hab.id);
   if (hab.formulaDano) ator.efeitos = ator.efeitos.filter((f) => f.tipo !== 'veu_noturno');
   // Marco 18 (D-068, D-069): o combo (a habilidade anterior em até a janela) fortalece esta; os ganchos "ao usar"
   // disparam; e esta vira a última.
@@ -404,6 +420,8 @@ function lancar(
   if (hab.formulaDano) {
     const tick = estado.tick;
     if (ator.efeitos.some((f) => f.ateTick > tick && REGISTRO_EFEITOS[f.tipo].criticoGarantido)) fonte = { ...fonte, d20Minimo: 20 };
+    // Marco 27 (D-126): a riposta da Rapieira (levou um golpe há pouco) deixa o básico crítico.
+    if (consumirRiposta(estado, ator, hab)) fonte = { ...fonte, d20Minimo: 20 };
     ator.efeitos = ator.efeitos.filter((f) => !(REGISTRO_EFEITOS[f.tipo].criticoGarantido || REGISTRO_EFEITOS[f.tipo].someAoLancar === hab.tipoAtaque));
   }
   if (!daFase) {
@@ -411,6 +429,8 @@ function lancar(
     // Marco 24 (D-096): a anterior fica para as sinergias de sequência.
     if (ator.ultimaHabilidade) ator.habilidadeAnterior = { id: ator.ultimaHabilidade.id, tick: ator.ultimaHabilidade.tick };
     ator.ultimaHabilidade = { id: hab.id, chave: hab.chave, tick: estado.tick, alvoId: alvo?.id ?? null };
+    // Marco 27 (D-126): o tomo de outra classe deixa o próximo básico com o elemento da skill.
+    aoUsarSkill(estado, ctx, ator, hab);
     // Marco 22 (D-089): a magia de fogo, gelo ou raio troca a encarnação do Mago.
     if (encarnar(ctx, ator, hab, estado.tick)) {
       saida.push({ t: 'encarnou', tick: estado.tick, id: ator.id, elemento: ator.encarnacao ?? 'fogo', ...(ator.encarnacaoDupla && { dupla: ator.encarnacaoDupla }) });
@@ -418,7 +438,7 @@ function lancar(
       cargaDaClasse(ctx, ator, 'encarnacao', estado.tick, saida);
     }
   }
-  const basico = hab.id === ator.ataqueBasico ? bonusAtaqueBasico(ator, estado.tick) : null;
+  const basico = ehBasico(ator, hab.id) ? bonusAtaqueBasico(ator, estado.tick) : null;
   const alcance = alcanceDe(ctx, ator, hab, estado.tick);
   const base = { acaoId, fonte, hab, mira, ...(basico && basico.dano > 0 && { danoExtra: basico.dano }) };
   // Marco 26 (29/10/2026, D-125): a célula de onde a habilidade sai, antes de quem conjura avançar.
@@ -433,6 +453,23 @@ function lancar(
     if (REGISTRO_EFEITOS[ef.tipo].fluxo === 'fase' && ef.ref) agendarFase(estado, ator, chaveDoAtor(ctx, ator, ef.ref, estado.tick), ef.em === 'conjurador' ? celulaOcupada(ator) : (alvo ?? mira), ef.duracaoMs);
     // D-125: quem avança sobre um alvo vai até onde ele está agora (ele pode ter andado durante a conjuração).
     else aplicarEfeito(estado, ctx, ator, ef, { id: ator.id, x: ator.x, y: ator.y, ...(desloca && { acaoId }) }, desloca && alvo && alvo !== ator && vivo(alvo) ? celulaOcupada(alvo) : mira, saida);
+  }
+  // Marco 27 (D-126): o solo amaldiçoado (Necromante) e a runa (Mago) caem sob o alvo e pulsam (combat/solos.ts).
+  if (hab.variacao?.solo) {
+    lancarSolo(estado, ator, hab, acaoId, fonte, alvo, mira, saida);
+    return;
+  }
+  // Marco 27 (D-126): o tiro carregado do Arqueiro por uma arma corpo a corpo vira uma linha com o alcance multiplicado,
+  // que atravessa todos com o crítico garantido (a passiva da classe vale em qualquer arma).
+  if (basico && !daFase && alvo && alvo !== ator && hab.politicaImpacto !== 'projetil' && consumirMira(ctx, ator, estado.tick)) {
+    saida.push({ t: 'tiroCarregado', tick: estado.tick, id: ator.id });
+    cargaDaClasse(ctx, ator, 'miraFirme', estado.tick, saida);
+    const cheia = { ...fonte, d20Minimo: Math.max(fonte.d20Minimo ?? 0, ctx.balance.ajustesClasses.arqueiro.mira.d20Minimo) };
+    const linha = celulasDaLinha(partida, celulaOcupada(alvo), Math.round(alcance * ctx.balance.armas.carregadoAlcanceMult), ctx.fase);
+    alvosDaForma(estado, ctx, ator, hab, linha).forEach((e, indice) => {
+      aplicarImpacto(estado, ctx, e, { ...base, fonte: cheia, indice, secundario: indice > 0 }, saida);
+    });
+    return;
   }
   switch (hab.politicaImpacto) {
     case 'proprio':
@@ -492,13 +529,15 @@ function lancar(
         cargaDaClasse(ctx, ator, 'miraFirme', estado.tick, saida);
       }
       const fonteTiro = carregado ? { ...fonte, d20Minimo: Math.max(fonte.d20Minimo ?? 0, ctx.balance.ajustesClasses.arqueiro.mira.d20Minimo) } : fonte;
-      lancarProjetil(estado, ator, hab, acaoId, fonteTiro, alvo ? celulaOcupada(alvo) : mira, saida, origemDaHabilidade(estado, ator, hab), carregado ? { alcance } : null);
-      // Marco 24 (D-095): a sintonia do Arqueiro marca o tiro cheio (mágico, ricochetes, invisível).
-      const tiro = estado.projeteis.at(-1);
-      if (carregado && tiro) prepararTiroCheio(ctx, ator, tiro, estado.tick);
+      // Marco 27 (D-126): a variação pode lançar vários (leque, salva, imagem); cada um leva o que vale para o tiro.
+      const tiros = lancarProjetil(estado, ator, hab, acaoId, fonteTiro, alvo ? celulaOcupada(alvo) : mira, saida, origemDaHabilidade(estado, ator, hab), carregado ? { alcance } : null, multiplos);
       // Marco 24 (D-096): a ressonância Engenhoso faz o projétil mágico atravessar.
       const atravessa = hab.tipoAtaque === 'magico' && ator.bolsa ? passivosDe(ctx, ator).atravessaMagico : 0;
-      if (tiro && atravessa > 0) tiro.perfuraExtra = atravessa;
+      for (const tiro of tiros) {
+        // Marco 24 (D-095): a sintonia do Arqueiro marca o tiro cheio (mágico, ricochetes, invisível).
+        if (carregado) prepararTiroCheio(ctx, ator, tiro, estado.tick);
+        if (atravessa > 0) tiro.perfuraExtra = atravessa;
+      }
       break;
     }
   }

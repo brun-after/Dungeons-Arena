@@ -36,7 +36,11 @@ function obter<T>(v: T | undefined | null, nome: string): T {
 function cenario(balance: Balance = BALANCE_PADRAO) {
   const ctx = contexto(faseDeTexto(SALA_ABERTA), balance);
   const estado = criarEstado({ semente: 5, faseId: 'teste' });
-  estado.entidades.push(criarJogador(obter(CONTEUDO.classes.get('aventureiro'), 'classe'), 'j', 3, 5, balance));
+  const jogador = criarJogador(obter(CONTEUDO.classes.get('aventureiro'), 'classe'), 'j', 3, 5, balance);
+  // Marco 27: os casos do básico medem o golpe de contato; o Aventureiro larga o bumerangue.
+  if (jogador.bolsa) jogador.bolsa.equipamento.arma_principal = null;
+  jogador.ataqueBasico = 'ataque_basico';
+  estado.entidades.push(jogador);
   const goblin = criarInimigo(obter(CONTEUDO.presets.get('boneco'), 'boneco'), 'g', 5, 5, balance);
   estado.entidades.push(goblin);
   const eventos: EventoSimulacao[] = [];

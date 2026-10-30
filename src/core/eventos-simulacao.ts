@@ -121,6 +121,10 @@ export type EventoSimulacao =
   | { t: 'acaoCancelada'; tick: number; acaoId: number; atorId: EntidadeId; motivo: MotivoCancelamento }
   | { t: 'projetilLancado'; tick: number; projetilId: number; acaoId: number; donoId: EntidadeId; habilidadeId: string; chave: string }
   | { t: 'projetilFim'; tick: number; projetilId: number; motivo: 'acertou' | 'parede' | 'expirou' }
+  // Marco 27 (29/10/2026, D-126): o solo amaldiçoado e a runa (combat/solos.ts).
+  | { t: 'soloCriado'; tick: number; soloId: number; acaoId: number; donoId: EntidadeId; habilidadeId: string; chave: string; x: number; y: number; raio: number; forma: 'quadrado' | 'cone'; atrasoMs: number }
+  | { t: 'soloPulsou'; tick: number; soloId: number; x: number; y: number; raio: number; atingidos: number }
+  | { t: 'soloFim'; tick: number; soloId: number }
   | {
       t: 'impacto';
       tick: number;

@@ -167,9 +167,14 @@ export function verificarInvariantes(estado: EstadoJogo, ctx: ContextoSimulacao)
   const porDono = new Map<string, number>();
   for (const e of estado.entidades) {
     // Marco 22: o falcão do Aventureiro tem vaga própria.
-    if (e.invocacao && !e.invocacao.dominado && !e.invocacao.avatar && !e.invocacao.companheiro && e.hp > 0) porDono.set(e.invocacao.donoId, (porDono.get(e.invocacao.donoId) ?? 0) + 1);
+    if (e.invocacao && !e.invocacao.dominado && !e.invocacao.avatar && !e.invocacao.companheiro && !e.invocacao.pergaminho && e.hp > 0) porDono.set(e.invocacao.donoId, (porDono.get(e.invocacao.donoId) ?? 0) + 1);
   }
   for (const [dono, n] of porDono) if (n > ctx.modo.limites.invocacoesPorJogador) erros.push(`${dono} com ${n} invocações`);
+  // Marco 27 (D-126): as invocações de pergaminho acumulam num teto próprio.
+  for (const dono of new Set(estado.entidades.map((e) => e.invocacao?.donoId).filter((d): d is string => d !== undefined))) {
+    const n = estado.entidades.filter((e) => e.invocacao?.donoId === dono && e.invocacao.pergaminho && e.hp > 0).length;
+    if (n > ctx.modo.limites.invocacoesDePergaminho) erros.push(`${dono} com ${n} invocações de pergaminho`);
+  }
   // Marco 10A-3: avatares contam à parte; golpes do avatar nunca negativos.
   for (const dono of new Set(estado.entidades.map((e) => e.invocacao?.donoId).filter((d): d is string => d !== undefined))) {
     const n = estado.entidades.filter((e) => e.invocacao?.donoId === dono && e.invocacao.avatar && e.hp > 0).length;
@@ -186,7 +191,9 @@ export function verificarInvariantes(estado: EstadoJogo, ctx: ContextoSimulacao)
   for (const a of estado.armadilhas) if (a.inerteAteTick > estado.tick && a.rearmeTicks === 0) erros.push(`armadilha ${a.id} inerte sem rearme`);
   for (const [dono, n] of armadilhas) if (n > ctx.modo.limites.armadilhasPorJogador) erros.push(`${dono} com ${n} armadilhas`);
   for (const p of estado.projeteis) {
-    if (!passavel(fase, Math.round(p.x), Math.round(p.y))) erros.push(`projétil ${p.id} fora do terreno`);
+    // Marco 27 (D-126): o arremessável na volta atravessa paredes até a mão, sem sair do mapa.
+    const naVolta = p.var?.fase === 'volta';
+    if (naVolta ? p.x < 0 || p.y < 0 || p.x >= fase.largura || p.y >= fase.altura : !passavel(fase, Math.round(p.x), Math.round(p.y))) erros.push(`projétil ${p.id} fora do terreno`);
   }
   // Pares bloqueantes não se sobrepõem (§2.3). Marco 26 (D-104): andando, ficam a 2 raios; quem é posto no centro de
   // uma célula livre (teletransporte, empurrão) fica a pelo menos meia célula do corpo da vizinha.

@@ -11,6 +11,13 @@ export const ICONES = {
   adaga: '<path d="M16 3 21 8 11 18 6 13Z"/><path d="M8 15 4 19"/><path d="M3 21 4 19"/>',
   cajado: '<path d="M5 21 15 11"/><circle cx="17.5" cy="6.5" r="3.5"/><path d="M17.5 3v-1M21 6.5h1M14 6.5h-1"/>',
   arco: '<path d="M6 3c8 3 12 7 15 15"/><path d="M6 3 21 18"/><path d="M3 21 12 12"/><path d="M3 21v-4M3 21h4"/>',
+  // Marco 27 (29/10/2026, D-126): as armas de classe novas.
+  tomo: '<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3Z"/><path d="M5 17a3 3 0 0 1 3-3h11"/><path d="M12 7l1.2 2.3L15.5 10l-2.3 1.2L12 13.5l-1.2-2.3L8.5 10l2.3-.7Z" class="F"/>',
+  bumerangue: '<path d="M4 6c5-1 8 1 9 5 1-4 4-6 8-5-4 1-6 4-7 9-1 2-3 2-3 0 0-4-3-7-7-9Z"/>',
+  besta: '<path d="M3 7c6-3 12-3 18 0"/><path d="M12 5v15"/><path d="M3 7l9 5 9-5"/><path d="M10 20h4"/>',
+  foice: '<path d="M7 21 14 6"/><path d="M14 6c-4-3-9-2-11 1 4-1 8 0 10 3"/>',
+  chakram: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/>',
+  shuriken: '<path d="M12 2l2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5Z"/><circle cx="12" cy="12" r="1.8"/>',
   escudo: '<path d="M12 3 20 6v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6Z"/><path d="M12 7v10"/>',
   elmo: '<path d="M4 15c0-6 3.5-10 8-10s8 4 8 10"/><path d="M4 15h16v3H4Z"/><path d="M12 5v8"/>',
   peitoral: '<path d="M8 3 4 6v13h16V6l-4-3c-1 2-2.5 3-4 3s-3-1-4-3Z"/><path d="M12 9v10"/>',

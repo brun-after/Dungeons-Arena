@@ -10,7 +10,7 @@ import { t } from '../i18n';
 import { precoDeVenda, vendavel, type Item } from '../progression/itens';
 import { precoDoItem } from '../progression/itens-progressao';
 import { estoqueDaLoja, lojaAberta } from '../progression/loja';
-import { molduraDoItem, resumoDoItem } from './mochila';
+import { armaDoItem, molduraDoItem, resumoDoItem } from './mochila';
 import { motivoParaNaoForjar } from '../progression/forja';
 import { criarModal } from './modal';
 import { icone } from './icones';
@@ -76,7 +76,7 @@ export function criarLoja(o: OpcoesLoja): Loja {
     const textos = el('span', 'textos-item');
     // Marco 26 (28/10/2026, D-116): o livro de skill de classe leva a runa da classe.
     textos.append(comRuna(el('span', `nome-item raridade-${item?.raridade ?? 'comum'}`, rotulo), item ? classeDoItem(ctx.conteudo, item.id) : null));
-    const detalhe = nota ?? (item ? resumoDoItem(item) : '');
+    const detalhe = nota ?? (item ? resumoDoItem(item, armaDoItem(ctx, item)) : '');
     if (detalhe) textos.append(el('span', 'detalhe-item', detalhe));
     conteudo.append(iconeItem, textos);
     if (qtd > 1) conteudo.append(el('span', 'qtd-item', `×${qtd}`));

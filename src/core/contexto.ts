@@ -271,8 +271,28 @@ export interface Balance {
     xpPct: number;
     xpExtremaPct: number;
   };
-  /** Marco 23 (D-093): o básico emprestado da arma de outra família (progression/armas.ts). */
-  armas: { danoForaDaClassePct: number };
+  /** Marco 27 (D-126): as armas de classe (progression/armas.ts e combat/basico.ts). */
+  armas: {
+    /** O n-ésimo básico sai pela arma da mão secundária. */
+    secundariaACada: number;
+    /** O tiro carregado do Arqueiro por uma arma corpo a corpo vira uma linha com este multiplicador do alcance. */
+    carregadoAlcanceMult: number;
+    /** O que a classe perde sem a arma natural. */
+    semFamiliaridade: { curaPct: number; alcance: number; velocidadePct: number; elementalPct: number; servosPct: number };
+    /** A fração da passiva de outra classe que a arma dela dá. */
+    emprestimo: {
+      curaAoAbaterChancePct: number;
+      curaAoAbaterPct: number;
+      elementalChancePct: number;
+      elementalMs: number;
+      reanimarChancePct: number;
+      reanimarMs: number;
+      invocacaoDuracaoPct: number;
+      arcoRecargaPct: number;
+    };
+    /** A passiva do Aventureiro, com o arremessável na mão principal. */
+    aventureiro: { descontoPergaminhoPct: number; sortePergaminhoPct: number; duracaoInvocacaoPct: number; danoBasicoPct: number };
+  };
   armadilhas: {
     revelarIntervaloMs: number;
     raioBase: number;

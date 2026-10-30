@@ -96,7 +96,7 @@ export interface ModoDeJogo {
     /** Marco 17: o spawner põe baú e loot no mundo (a arena tem itens só dos abates). */
     economiaDoSpawner: boolean;
   };
-  limites: { npcs: number; invocacoesPorJogador: number; avataresPorJogador: number; armadilhasPorJogador: number; projeteis: number };
+  limites: { npcs: number; invocacoesPorJogador: number; invocacoesDePergaminho: number; avataresPorJogador: number; armadilhasPorJogador: number; projeteis: number };
   /** Sempre false na v1 (§3.7): o schema rejeita true. */
   progressaoContaParaCampanha: false;
   fasesPermitidas: string[] | 'qualquer';
@@ -229,6 +229,8 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
     limites: {
       npcs: l.numero(limites, 'npcs', { min: 0, inteiro: true }),
       invocacoesPorJogador: l.numero(limites, 'invocacoesPorJogador', { min: 0, inteiro: true }),
+      // Marco 27 (D-126): os pergaminhos de invocação acumulam até este teto, à parte das invocações de classe.
+      invocacoesDePergaminho: l.numero(limites, 'invocacoesDePergaminho', { min: 0, inteiro: true }),
       avataresPorJogador: l.numero(limites, 'avataresPorJogador', { min: 0, inteiro: true }),
       armadilhasPorJogador: l.numero(limites, 'armadilhasPorJogador', { min: 0, inteiro: true }),
       projeteis: l.numero(limites, 'projeteis', { min: 0, inteiro: true }),

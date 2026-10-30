@@ -7,6 +7,7 @@ import type { EstadoJogo } from '../core/estado';
 import { aleatorio } from '../core/rng';
 import { RARIDADES } from '../modos/modo';
 import { dropaveisDe, type Item } from './itens';
+import { ehPergaminho } from './passiva-aventureiro';
 
 /** Raridade por peso (o boss tem raridade mínima) e item uniforme entre os dessa raridade. */
 /**
@@ -14,7 +15,7 @@ import { dropaveisDe, type Item } from './itens';
  * Marco 17 (D-063): parte dos drops de equipamento é gerada no nível de quem caiu (`chanceGerado`), com as raridades
  * altas mais prováveis quanto maior o nível; o resto vem do catálogo fixo, como antes.
  */
-export function sortearItem(estado: EstadoJogo, ctx: ContextoSimulacao, boss: boolean, nivel = 1): Item | null {
+export function sortearItem(estado: EstadoJogo, ctx: ContextoSimulacao, boss: boolean, nivel = 1, sortePergaminhoPct = 0): Item | null {
   const d = ctx.balance.drops;
   const g = ctx.balance.itensGerados;
   if (aleatorio(estado.rng) < g.chanceGerado) {
@@ -37,7 +38,16 @@ export function sortearItem(estado: EstadoJogo, ctx: ContextoSimulacao, boss: bo
   for (let i = indice; i >= 0; i--) {
     const raridade = candidatas[i];
     const pool = raridade ? dropaveisDe(ctx.conteudo.itens, raridade) : [];
-    if (pool.length > 0) return pool[Math.floor(aleatorio(estado.rng) * pool.length)] ?? null;
+    if (pool.length === 0) continue;
+    // Marco 27 (D-126): a sorte do Aventureiro pesa mais os pergaminhos de invocação no catálogo fixo.
+    if (sortePergaminhoPct <= 0) return pool[Math.floor(aleatorio(estado.rng) * pool.length)] ?? null;
+    const peso = (it: Item) => (ehPergaminho(it) ? 1 + sortePergaminhoPct / 100 : 1);
+    let resto = aleatorio(estado.rng) * pool.reduce((s, it) => s + peso(it), 0);
+    for (const it of pool) {
+      resto -= peso(it);
+      if (resto < 0) return it;
+    }
+    return pool.at(-1) ?? null;
   }
   return null;
 }

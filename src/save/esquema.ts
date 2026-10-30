@@ -11,13 +11,13 @@ import { ehObjeto, type Objeto } from '../core/validar';
 import type { Entidade } from '../entities/entidade';
 import { lerCertificado, type Certificado } from '../integridade/certificado';
 import type { Dificuldade } from '../modos/dificuldade';
-import { basicoDoPersonagem } from '../progression/armas';
+import { basicoDoPersonagem, basicoSecundario } from '../progression/armas';
 import { migrarMovimentoLivre } from './migracao-25';
 import { migrarSkillsDeClasse } from './migracao-24';
 import { MAX_REGRAS, RE_REGRA_ESTILO } from '../world/estilo';
 import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 26;
+export const VERSAO_SCHEMA = 27;
 // Marco 23 (24/10/2026, D-092): dez slots de personagem por jogador (eram três).
 export const MAX_SLOTS = 10;
 export const SLOTS: readonly number[] = Array.from({ length: MAX_SLOTS }, (_, i) => i + 1);
@@ -400,7 +400,31 @@ export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   // Marco 26 (26/10/2026, D-113): os quebráveis (objeto novo e o marcador opcional `quebraveis` no estado). Nada a
   // mudar: a fase gravada antes ganha os seus ao abrir. A versão impede um cliente antigo de tomá-los por orbes.
   25: (r) => r,
+  // Marco 27 (29/10/2026, D-126): as armas de classe — a arma de partida na mão vazia, o básico pela arma e o da mão
+  // secundária.
+  26: (r) => migrarArmasDeClasse(r),
 };
+
+/** D-126: quem está de mãos vazias recebe a arma de partida da classe; o básico e o da secundária vêm das armas. */
+function migrarArmasDeClasse(r: Objeto): Objeto {
+  const conteudo = conteudoOficial();
+  const migrar = (v: unknown): unknown => {
+    if (!ehObjeto(v) || !Array.isArray(v.entidades)) return v;
+    return { ...v, entidades: v.entidades.map((x: unknown) => {
+      if (!ehObjeto(x) || !ehObjeto(x.bolsa) || typeof x.bolsa.classeId !== 'string' || !ehObjeto(x.bolsa.equipamento)) return x;
+      const arma = conteudo.classes.get(x.bolsa.classeId)?.armaInicial;
+      const proximo = typeof x.bolsa.proximoInv === 'number' ? x.bolsa.proximoInv : 1;
+      const vazia = !x.bolsa.equipamento.arma_principal && arma;
+      const bolsa = vazia ? { ...x.bolsa, proximoInv: proximo + 1, equipamento: { ...x.bolsa.equipamento, arma_principal: { invId: `i${String(proximo)}`, itemId: arma, qtd: 1, ref: null } } } : x.bolsa;
+      const e = { ...x, bolsa } as unknown as Entidade;
+      const secundario = basicoSecundario({ conteudo }, e);
+      return { ...x, bolsa, ataqueBasico: basicoDoPersonagem({ conteudo }, e), ...(secundario && { armas: { contador: 0, golpes: 0, secundario } }) };
+    }) };
+  };
+  const fasesVisitadas = ehObjeto(r.fasesVisitadas)
+    ? Object.fromEntries(Object.entries(r.fasesVisitadas).map(([id, fase]) => [id, migrar(fase)])) : r.fasesVisitadas;
+  return { ...r, estado: migrar(r.estado), fasesVisitadas };
+}
 
 /** D-093: o ataque básico de cada personagem pela arma na mão (só lê a classe e a arma principal). */
 function migrarBasicoDaArma(r: Objeto): Objeto {

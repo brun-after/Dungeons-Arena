@@ -100,14 +100,18 @@ describe('equipamento derivado (§2.10)', () => {
   it('equipar troca com o que estava no slot e desequipar devolve à mochila', () => {
     const c = cenario();
     c.j().nivel = 2;
-    const espada = obter(c.j().bolsa?.mochila.find((i) => i.itemId === 'espada_curta'), 'espada').invId;
+    // Marco 27: o Aventureiro já começa com o bumerangue de madeira na mão principal.
+    const adaga = c.dar('adaga');
     const forcaBase = c.j().atributos.forca;
-    c.tick({ t: 'equipar', invId: espada, slot: 'arma_principal' });
-    expect(c.j().atributos.forca).toBe(forcaBase + 2);
+    const destrezaBase = c.j().atributos.destreza;
+    c.tick({ t: 'equipar', invId: adaga, slot: 'arma_principal' });
+    expect(c.j().atributos.destreza).toBe(destrezaBase + 2);
+    expect(c.j().bolsa?.mochila.some((i) => i.itemId === 'bumerangue_madeira')).toBe(true);
     const machado = c.dar('machado_orc');
     c.tick({ t: 'equipar', invId: machado, slot: 'arma_principal' });
     expect(c.j().atributos.forca).toBe(forcaBase + 4);
-    expect(c.j().bolsa?.mochila.some((i) => i.itemId === 'espada_curta')).toBe(true);
+    expect(c.j().atributos.destreza).toBe(destrezaBase);
+    expect(c.j().bolsa?.mochila.some((i) => i.itemId === 'adaga')).toBe(true);
     c.tick({ t: 'desequipar', slot: 'arma_principal' });
     expect(c.j().atributos.forca).toBe(forcaBase);
     expect(c.j().bolsa?.equipamento.arma_principal).toBeNull();
@@ -115,10 +119,10 @@ describe('equipamento derivado (§2.10)', () => {
 
   it('recusas: slot errado, nível insuficiente, consumível equipado e mochila cheia ao desequipar', () => {
     const c = cenario();
-    const espada = obter(c.j().bolsa?.mochila[0], 'espada').invId;
+    const espada = c.dar('adaga');
     c.tick({ t: 'equipar', invId: espada, slot: 'cabeca' });
     c.tick({ t: 'equipar', invId: c.dar('cota_malha'), slot: 'corpo' });
-    c.tick({ t: 'equipar', invId: obter(c.j().bolsa?.mochila[1], 'poção').invId, slot: 'corpo' });
+    c.tick({ t: 'equipar', invId: obter(c.j().bolsa?.mochila.find((i) => i.itemId === 'pocao_vida'), 'poção').invId, slot: 'corpo' });
     c.tick({ t: 'equipar', invId: espada, slot: 'arma_principal' });
     const bolsa = obter(c.j().bolsa, 'bolsa');
     while (bolsa.mochila.length < BALANCE_PADRAO.inventario.capacidade) c.dar('adaga');

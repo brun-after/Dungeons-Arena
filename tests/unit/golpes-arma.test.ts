@@ -26,7 +26,7 @@ describe('a natureza do golpe pela arma (marco 24)', () => {
     expect(golpes.get('machado')).toBe('corte_pesado');
     expect(golpes.get('clava')).toBe('contundente');
     expect(golpes.get('lanca')).toBe('estocada');
-    expect(golpes.get('adaga')).toBe('estocada_rapida');
+    expect(golpes.get('adaga')).toBe('arremesso');
   });
 
   it('sem arma na mão, vale a arma da classe do modelo; criatura sem arma de classe não tem golpe', () => {

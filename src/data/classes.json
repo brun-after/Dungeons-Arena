@@ -15,17 +15,14 @@
         "sabedoria": 10,
         "carisma": 10
       },
-      "ataqueBasico": "ataque_basico",
+      "ataqueBasico": "bumerangue",
       "itensIniciais": [
-        {
-          "id": "espada_curta",
-          "qtd": 1
-        },
         {
           "id": "pocao_vida",
           "qtd": 2
         }
       ],
+      "armaInicial": "bumerangue_madeira",
       "modelo": "aventureiro",
       "descricao": "classe.aventureiro.descricao",
       "afinidades": [
@@ -79,14 +76,11 @@
       "descricao": "classe.guerreiro.descricao",
       "itensIniciais": [
         {
-          "id": "espada_curta",
-          "qtd": 1
-        },
-        {
           "id": "pocao_vida",
           "qtd": 2
         }
       ],
+      "armaInicial": "espada_curta",
       "exclusivas": [
         "redemoinho",
         "investida_de_escudo",
@@ -137,6 +131,7 @@
           "qtd": 2
         }
       ],
+      "armaInicial": "tomo_aprendiz",
       "exclusivas": [
         "lanca_de_gelo",
         "raio_em_cadeia",
@@ -187,6 +182,7 @@
           "qtd": 2
         }
       ],
+      "armaInicial": "arco_simples",
       "exclusivas": [
         "flecha_perfurante",
         "chuva_de_flechas",
@@ -217,17 +213,14 @@
         "sabedoria": 12,
         "carisma": 12
       },
-      "ataqueBasico": "toque_funesto",
+      "ataqueBasico": "solo_amaldicoado",
       "itensIniciais": [
-        {
-          "id": "cajado_aprendiz",
-          "qtd": 1
-        },
         {
           "id": "pocao_vida",
           "qtd": 2
         }
       ],
+      "armaInicial": "cajado_aprendiz",
       "modelo": "necromante",
       "descricao": "classe.necromante.descricao",
       "afinidades": [

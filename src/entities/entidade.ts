@@ -7,6 +7,7 @@ import type { Celula, Dir8, EntidadeId } from '../core/comandos';
 import { clonarRng, type EstadoRng } from '../core/rng';
 import type { EfeitoCanonico, TipoEfeito } from '../combat/registro-efeitos';
 import type { Afinidade } from '../combat/afinidade';
+import type { Elemento } from '../combat/elementos';
 import type { Slot } from '../modos/modo';
 
 export type TipoEntidade = 'jogador' | 'inimigo' | 'invocacao' | 'avatar';
@@ -72,9 +73,29 @@ export interface DadosInvocacao {
   hpEspelhado?: number;
   /** Marco 24 (24/10/2026): invocação temporária fora do limite (Levante profano). */
   extra?: boolean;
+  /** Marco 27 (29/10/2026, D-126): veio de um pergaminho; conta no limite próprio dos pergaminhos (acumulam). */
+  pergaminho?: boolean;
 }
 
 /** Ação em conjuração (§2.7, etapa 3). Ticks publicados para a telegrafia (§3.6). */
+/**
+ * Marco 27 (29/10/2026, D-126): o estado das armas de classe na entidade. Só primitivos. O básico da mão secundária é
+ * derivado do equipamento (progression/armas.ts); o contador anda a cada básico lançado.
+ */
+export interface EstadoArmas {
+  /** Quantos básicos saíram desde o último pela mão secundária (o 3º sai por ela). */
+  contador: number;
+  /** Quantos básicos saíram no total (o giro do Montante e a órbita do Tomo orbital contam por ele). */
+  golpes: number;
+  /** O básico da arma da mão secundária, quando há uma arma lá. */
+  secundario?: string;
+  /** Tomo de outra classe: o próximo básico sai com este elemento, até o tick. */
+  elemento?: Elemento;
+  elementoAteTick?: number;
+  /** Rapieira: levar um golpe deixa o próximo básico crítico até o tick. */
+  ripostaAteTick?: number;
+}
+
 export interface AcaoEmCurso {
   raioCombo?: number;
   acaoId: number;
@@ -266,6 +287,10 @@ export interface Entidade {
   mana: number;
   manaMax: number;
   ataqueBasico: string;
+  /** Marco 27 (29/10/2026, D-126): as armas de classe (o 3º golpe pela mão secundária e as frações de passiva). */
+  armas?: EstadoArmas;
+  /** Marco 27 (D-126): caiu num solo da Colheita; na morte, se ergue como morto deste dono. */
+  colhidoPor?: EntidadeId;
   habilidades: string[];
   efeitos: EfeitoAtivo[];
   acao: AcaoEmCurso | null;
@@ -563,6 +588,7 @@ export function clonarEntidade(e: Entidade): Entidade {
     ...(e.sintoniaVistos ? { sintoniaVistos: { ...e.sintoniaVistos } } : {}),
     ...(e.habilidadeAnterior ? { habilidadeAnterior: { ...e.habilidadeAnterior } } : {}),
     ...(e.seguindo ? { seguindo: { ...e.seguindo } } : {}),
+    ...(e.armas ? { armas: { ...e.armas } } : {}),
     waypoints: copiarCelulas(e.waypoints),
     caminho: copiarCelulas(e.caminho),
     atributos: { ...e.atributos },

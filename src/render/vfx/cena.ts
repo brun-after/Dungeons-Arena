@@ -44,6 +44,8 @@ export interface Acerto {
   indice: number;
   /** Etapa da ultimate de vários elementos: a cor do elemento desta etapa (D-124). */
   corEtapa?: number;
+  /** Marco 27 (D-126): a raridade da arma no básico (Comum 0, Épica 1, Lendária 2, Última 3). */
+  tier?: number;
 }
 
 /** A área no lançamento (antes de saber quem foi atingido). */
