@@ -25,7 +25,8 @@ import { comandoAceitoEmRede, equipeDeEntrada, localDeRespawn } from '../modos/r
 import { povoarFase } from '../world/populacao';
 import { entrarNaArena } from './entrada';
 import { estadoPublico } from './estado-publico';
-import { GeradorDePatches } from './patches';
+import { GeradorDePatches, novoCacheDeCampos } from './patches';
+import { recortarPorInteresse } from './interesse';
 import { construirFichaDeSessao, type PreviaDeFicha } from './ficha-sessao';
 import { lerMensagemCliente, type MensagemCliente, type MensagemServidor, type MotivoErro, type MotivoRejeicao } from './protocolo';
 
@@ -121,8 +122,10 @@ export class SalaArena {
   private proximoJogador = 1;
   /** PRNG só para IDs de sessão: não consome a sequência da simulação. */
   private readonly rngSessoes: EstadoRng;
-  private readonly eventosDoTick: EventoSimulacao[] = [];
+  protected readonly eventosDoTick: EventoSimulacao[] = [];
   private patches = new GeradorDePatches();
+  /** Marco 29 (D-128): com área de interesse, um gerador por sessão (cada uma vê um recorte diferente). */
+  private patchesPorSessao = new Map<string, GeradorDePatches>();
   /** Último canal privado mandado a cada sessão (texto), para só mandar quando muda. */
   private readonly privados = new Map<string, string>();
   private bytesTotais = 0;
@@ -160,7 +163,8 @@ export class SalaArena {
     };
   }
 
-  conectar(enviarBruto: (texto: string) => void): Conexao {
+  /** Marco 29 (D-128): `identidade` é quem o servidor autenticou nesta conexão (o Mundo reserva a ficha por ela). */
+  conectar(enviarBruto: (texto: string) => void, identidade: string | null = null): Conexao {
     let sessao: Sessao | null = null;
     const enviar = (texto: string) => {
       this.bytesTotais += texto.length;
@@ -183,7 +187,7 @@ export class SalaArena {
           responder({ t: 'rejeitado', seq: leitura.seq, motivo: leitura.motivo });
           return;
         }
-        const nova = this.tratar(leitura.msg, sessao, enviar, responder);
+        const nova = this.tratar(leitura.msg, sessao, enviar, responder, identidade);
         if (nova) sessao = nova;
       },
       fechar: () => {
@@ -213,18 +217,22 @@ export class SalaArena {
     sessao: Sessao | null,
     enviar: (texto: string) => void,
     responder: (m: MensagemServidor) => void,
+    identidade: string | null,
   ): Sessao | null {
     switch (msg.t) {
       case 'ping':
         responder({ t: 'pong', id: msg.id, enviadoMs: msg.enviadoMs, tickServidor: this.estado.tick });
         return null;
       case 'entrar':
-        return this.entrar(msg, sessao, enviar, responder);
+        return this.entrar(msg, sessao, enviar, responder, identidade);
       case 'ressincronizar':
         if (sessao) sessao.precisaCompleto = true;
         return null;
       case 'pedirCertificado':
         responder({ t: 'certificado', certificado: sessao ? this.certificadoDe(sessao) : null });
+        return null;
+      case 'viajar':
+        if (sessao) this.aoViajar?.(sessao, msg.destino, msg.pagamento);
         return null;
       case 'cmd': {
         const rejeitar = (motivo: MotivoRejeicao) => {
@@ -274,6 +282,7 @@ export class SalaArena {
     sessao: Sessao | null,
     enviar: (texto: string) => void,
     responder: (m: MensagemServidor) => void,
+    identidade: string | null,
   ): Sessao | null {
     if (sessao) {
       responder({ t: 'erro', motivo: 'ja_entrou' });
@@ -290,7 +299,7 @@ export class SalaArena {
     const n = this.proximoJogador;
     const jogadorId = `jogador-${n}`;
     const entidadeId = `p${n}`;
-    const entrada = this.criarPersonagem(msg, jogadorId, entidadeId, n);
+    const entrada = this.criarPersonagem(msg, jogadorId, entidadeId, n, identidade);
     if (!entrada.ok) {
       responder({ t: 'erro', motivo: entrada.motivo });
       return null;
@@ -330,7 +339,7 @@ export class SalaArena {
       faseId: this.ctx.fase.id,
       modoId: this.ctx.modo.id,
       previa,
-      estado: estadoPublico(this.estado),
+      estado: this.visaoDe(nova, estadoPublico(this.estado)),
     });
     return nova;
   }
@@ -340,7 +349,9 @@ export class SalaArena {
    * inteiro (bolsa, nível, itens) e ganha recompensas; sem ele, a ficha de treino com o clamp do modo. Nos dois, o
    * nível precisa caber na faixa da sala.
    */
-  protected criarPersonagem(msg: Extract<MensagemCliente, { t: 'entrar' }>, jogadorId: string, entidadeId: EntidadeId, n: number): EntradaDePersonagem {
+  // A identidade só importa ao Mundo (a ficha reservada pelo servidor); a arena ignora.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected criarPersonagem(msg: Extract<MensagemCliente, { t: 'entrar' }>, jogadorId: string, entidadeId: EntidadeId, n: number, _identidade: string | null = null): EntradaDePersonagem {
     const faixa = this.opcoes.faixa ?? null;
     const cabe = (nivel: number) => !faixa || (nivel >= faixa.min && nivel <= faixa.max);
     const pedido = ehObjeto(msg.pedidoFicha) ? msg.pedidoFicha : {};
@@ -426,6 +437,9 @@ export class SalaArena {
   /** Gancho: a sessão acabou de entrar (já está em `sessoes`). */
   protected aoEntrar?(s: Sessao): void;
 
+  /** Marco 29 (D-128): o pedido de viagem pelo portal (só o Mundo trata). */
+  protected aoViajar?(s: Sessao, destino: string, pagamento: 'ouro' | 'pergaminho'): void;
+
   /** Gancho: por que recusar o comando desta sessão (null = aceita). Na base, só o que o modo aceita pela rede. */
   protected motivoParaRecusar(s: Sessao, cmd: Comando): MotivoRejeicao | null {
     return comandoAceitoEmRede(this.ctx.modo, cmd) ? null : 'nao_permitido';
@@ -438,6 +452,7 @@ export class SalaArena {
   protected aoRemoverSessao?(s: Sessao): void;
 
   protected removerSessao(s: Sessao): void {
+    this.patchesPorSessao.delete(s.sessaoId);
     this.sessoes.delete(s.sessaoId);
     this.privados.delete(s.sessaoId);
     this.estado.entidades = this.estado.entidades.filter((e) => e.id !== s.entidadeId);
@@ -473,6 +488,7 @@ export class SalaArena {
       s.precisaCompleto = false;
     }
     this.patches = new GeradorDePatches();
+    this.patchesPorSessao.clear();
     const publico = estadoPublico(estado);
     this.patches.gerar(publico);
     return publico;
@@ -526,6 +542,10 @@ export class SalaArena {
    */
   private transmitirEstado(): void {
     const publico = estadoPublico(this.estado);
+    if (this.ctx.modo.areaDeInteresse) {
+      this.transmitirPorInteresse(publico);
+      return;
+    }
     const patch = this.patches.gerar(publico);
     const tick = this.estado.tick;
     // Serializa o corpo uma vez só; por sessão muda apenas o ack (o maior custo do tick era repetir o JSON).
@@ -540,6 +560,33 @@ export class SalaArena {
       } else {
         textoPatch ??= JSON.stringify(patch);
         s.enviar(`{"t":"patch",${cabecalho},"patch":${textoPatch}}`);
+      }
+      s.precisaCompleto = false;
+    }
+  }
+
+  /** Marco 29 (30/10/2026, D-128): o que a sessão vê do estado público (tudo, sem área de interesse no modo). */
+  protected visaoDe(s: Sessao, publico: EstadoJogo): EstadoJogo {
+    const area = this.ctx.modo.areaDeInteresse;
+    return area ? recortarPorInteresse(publico, s.entidadeId, area.raio) : publico;
+  }
+
+  /** Marco 29 (D-128): um recorte e um patch por sessão; o completo reinicia o gerador daquela sessão. */
+  private transmitirPorInteresse(publico: EstadoJogo): void {
+    const tick = this.estado.tick;
+    const cache = novoCacheDeCampos();
+    for (const s of this.sessoes.values()) {
+      if (!s.conectada) continue;
+      const visao = this.visaoDe(s, publico);
+      const cabecalho = `"tick":${tick},"epocaSala":${this.epoca},"ackSeq":${s.ultimoSeq}`;
+      let gerador = this.patchesPorSessao.get(s.sessaoId);
+      if (s.precisaCompleto || !gerador) {
+        gerador = new GeradorDePatches();
+        gerador.gerar(visao, cache);
+        this.patchesPorSessao.set(s.sessaoId, gerador);
+        s.enviar(`{"t":"estado",${cabecalho},"estado":${JSON.stringify(visao)}}`);
+      } else {
+        s.enviar(`{"t":"patch",${cabecalho},"patch":${JSON.stringify(gerador.gerar(visao, cache))}}`);
       }
       s.precisaCompleto = false;
     }

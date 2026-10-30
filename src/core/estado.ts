@@ -67,7 +67,10 @@ export interface Projetil {
  */
 /** Ajuste de 16/10/2026 (D-067): `orbe_refugio`, a carga de imunidade ao abrir a mochila ou a loja. */
 /** Marco 26 (26/10/2026, D-113): `quebravel`, o enfeite que quebra (a forma em `ref`; combat/quebraveis.ts). */
-export type TipoObjeto = 'orbe_hp' | 'orbe_recurso' | 'orbe_efeito' | 'orbe_refugio' | 'item' | 'ouro' | 'bau' | 'loja' | 'saida' | 'santuario' | 'quebravel';
+/** Marco 29 (D-128): os do Mundo: `npc`, `coleta`, `tumulo`, `porta_estrutura`, `pedra_portal` e `pedra_save`. */
+export type TipoObjeto =
+  | 'orbe_hp' | 'orbe_recurso' | 'orbe_efeito' | 'orbe_refugio' | 'item' | 'ouro' | 'bau' | 'loja' | 'saida' | 'santuario' | 'quebravel'
+  | 'npc' | 'coleta' | 'tumulo' | 'porta_estrutura' | 'pedra_portal' | 'pedra_save';
 
 /**
  * Objeto coletável no mundo (§2.1). `objetoId` é estável; a coleta é uma transação dentro do

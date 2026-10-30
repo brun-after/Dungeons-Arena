@@ -1,6 +1,6 @@
 # Dungeons Arena: guia para quem trabalha no código
 
-**Versão:** 0.5 · **Data:** 23/10/2026
+**Versão:** 0.6 · **Data:** 30/10/2026
 
 A especificação normativa é [`docs/PROMPT-PROJETO-v4.0.md`](docs/PROMPT-PROJETO-v4.0.md). Leia a Parte 1
 antes de decisões técnicas. Divergências vão para [`docs/DECISOES.md`](docs/DECISOES.md), com justificativa.
@@ -9,12 +9,16 @@ O roteiro e o estado de cada marco ficam no [`README.md`](README.md).
 ## Comandos
 
 - `npm run dev`: cliente em `http://localhost:5173` (menu; `?jogo=campanha` slots, `&slot=N` joga no slot, `?arena=online`, `?arena=loopback`,
-  `?jogo=grupo&slot=N&criar=1|&codigo=X` campanha em grupo, `?bench=carga|padrao|trocas` benchmarks)
+  `?jogo=grupo&slot=N&criar=1|&codigo=X` campanha em grupo, `?jogo=mundo` o Mundo (marco 29, guia em docs/MUNDO.md),
+  `?bench=carga|padrao|trocas` benchmarks)
 - `npm run dev:server`: servidor da arena (Colyseus) em `ws://localhost:2567`; `npm run carga`: teste de carga
 - `npm run carga -- --perfil suportado|degradado --fase arena-02`: carga com rede simulada (proxy em `tools/rede`);
-  `--modo grupo` mede a campanha cooperativa (até 6 bots); `--ficha certificada` entra com fichas certificadas (marco 17)
+  `--modo grupo` mede a campanha cooperativa (até 6 bots); `--ficha certificada` entra com fichas certificadas (marco 17);
+  `--modo mundo` põe até 40 bots na Vila do Centro do Mundo (marco 29)
 - Nuvem: `?nuvem=falsa` usa a nuvem em memória (testes); a de verdade (Supabase) vem de `VITE_SUPABASE_URL` e
-  `VITE_SUPABASE_ANON_KEY` no build. O certificado do personagem é assinado só pelo servidor (`CHAVE_CERTIFICADO`)
+  `VITE_SUPABASE_ANON_KEY` no build. O certificado do personagem é assinado só pelo servidor (`CHAVE_CERTIFICADO`).
+  O personagem do Mundo é gravado só pelo servidor (`SUPABASE_URL` e `SUPABASE_SERVICE_KEY`; sem elas, em memória e só
+  com contas `local:`)
 - `npm run balancear`: simulador de balanceamento contra `balance.metas` (`-- --registrar` grava docs/BALANCEAMENTO.md)
 - `npm run bench`: benchmarks do cliente no Chromium sem tela (`-- --registrar` grava docs/BENCHMARKS.md)
 - `npm run relatorios -- arquivo.jsonl`: resumo dos relatórios do teste com pessoas (`?pesquisa=1`, docs/TESTES-HUMANOS.md)

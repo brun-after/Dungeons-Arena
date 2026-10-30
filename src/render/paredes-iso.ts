@@ -9,7 +9,7 @@
 
 import { Graphics, type Container } from 'pixi.js';
 import { ehPilar } from '../world/decoracao';
-import { tipoEm, type Fase } from '../world/fase';
+import { chaoAberto, tipoEm, type Fase } from '../world/fase';
 import { CELULA_PX } from './camera-calculo';
 import { escurecer } from './modelos/svg';
 import { profundidade, type Projecao } from './projecao';
@@ -22,7 +22,8 @@ export const ESPESSURA_PAREDE = 0.2;
 const ehParede = (fase: Fase, x: number, y: number) => tipoEm(fase, x, y) === 'parede';
 const deAndar = (fase: Fase, x: number, y: number) => {
   const tipo = tipoEm(fase, x, y);
-  return tipo === 'piso' || tipo === 'saida';
+  // Marco 29 (D-128): o chão do exterior (mato e estrada) também levanta a borda das rochas e dos muros.
+  return tipo === 'saida' || chaoAberto(tipo);
 };
 
 /** Parede que encosta (inclusive na diagonal) num piso ou numa saída: a borda visível da sala. */

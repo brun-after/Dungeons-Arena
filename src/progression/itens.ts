@@ -21,7 +21,8 @@ export const NOMES_ATRIBUTOS = Object.keys(ATRIBUTOS_NEUTROS) as NomeAtributo[];
 /** Marco 25 (25/10/2026, D-103): a aceleração corta `cortePct` do tempo total do estudo. */
 export type ProgressaoItem = { tipo: 'aceleracao'; cortePct: number } | { tipo: 'ponto' } | { tipo: 'rank'; familia: string };
 
-export type TipoItem = 'equipamento' | 'consumivel' | 'chave' | 'livro';
+/** Marco 29 (D-128): `material` (minério, erva, pedaço de monstro), o que o ferreiro e o alquimista usam. */
+export type TipoItem = 'equipamento' | 'consumivel' | 'chave' | 'livro' | 'material';
 
 /** Marco 14: modificador que o equipamento dá às habilidades com a etiqueta (null = todas). */
 export interface ModificadorDeItem {
@@ -109,7 +110,7 @@ export function lerItens(json: unknown): { itens: Map<string, Item>; erros: stri
   for (const bruto of lista) {
     const l = new Leitor(`item ${ehObjeto(bruto) && typeof bruto.id === 'string' ? bruto.id : '?'}`);
     const o = l.objeto(bruto, 'item');
-    const tipo = l.opcao(o, 'tipo', ['equipamento', 'consumivel', 'chave', 'livro'] as const);
+    const tipo = l.opcao(o, 'tipo', ['equipamento', 'consumivel', 'chave', 'livro', 'material'] as const);
     const item: Item = {
       id: l.texto(o, 'id'),
       nome: l.texto(o, 'nome'),
@@ -145,6 +146,7 @@ export function lerItens(json: unknown): { itens: Map<string, Item>; erros: stri
     if (tipo === 'consumivel' && item.efeitos.length === 0 && !item.progressao) l.erro('consumível precisa de ao menos um efeito');
     if (tipo === 'chave' && (item.slotPadrao !== null || item.efeitos.length > 0)) l.erro('chave não tem slotPadrao nem efeitos');
     if (tipo === 'livro' && (item.slotPadrao !== null || item.efeitos.length > 0)) l.erro('livro não tem slotPadrao nem efeitos');
+    if (tipo === 'material' && (item.slotPadrao !== null || item.efeitos.length > 0)) l.erro('material não tem slotPadrao nem efeitos');
     if (tipo !== 'livro' && item.ensina !== null) l.erro('só livro ensina');
     if (tipo !== 'equipamento' && item.modificadores.length > 0) l.erro('só equipamento dá modificadores');
     if (tipo !== 'equipamento' && item.ganchos.length > 0) l.erro('só equipamento dá ganchos');

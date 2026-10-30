@@ -1,8 +1,9 @@
 # Implantação do servidor da arena
 
-**Versão:** 0.7 · **Data:** 16/10/2026
+**Versão:** 0.8 · **Data:** 30/10/2026
 
 > **Histórico**
+> - **0.8 (30/10/2026)**: marco 29 (D-128): o segredo `SUPABASE_SERVICE_KEY` e a tabela `personagens_mundo` do Mundo.
 > - **0.7 (16/10/2026)**: a tabela `saves` passa a ser aplicada pela integração do Supabase com o GitHub (`supabase/config.toml`).
 > - **0.6 (15/10/2026)**: marco 17 (D-063): `CHAVE_CERTIFICADO`, a conta Google no Supabase e as variáveis do Pages.
 > - **0.5 (15/10/2026)**: o teste de carga na VM passa a ter 10 minutos (decisão do usuário); a leitura dos logs por SSH depende da chave que a VM aceita.
@@ -123,8 +124,17 @@ No repositório: **Settings** → **Secrets and variables** → **Actions**.
 | Secret | `CHAVE_CERTIFICADO` | texto aleatório de 48 letras e números (marco 17); veja abaixo |
 | Variable | `SUPABASE_URL` | o endereço do projeto Supabase (`https://….supabase.co`), público |
 | Variable | `SUPABASE_ANON_KEY` | a chave anônima (publishable) do projeto, pública: o RLS protege |
+| Secret | `SUPABASE_SERVICE_KEY` | a chave **service_role** do projeto (marco 29); veja abaixo |
 
 Sem `ARENA_URL`, o workflow de deploy fica desligado e o Pages publica o jogo sem arena online.
+
+### Chave de serviço do Supabase (Mundo, marco 29)
+
+O servidor grava o personagem do Mundo na tabela `personagens_mundo` com ela (o RLS deixa o jogador só ler). Em
+<https://supabase.com>, **Project Settings** › **API**, copie a chave **service_role** e cole **direto** no GitHub
+como o segredo `SUPABASE_SERVICE_KEY` (não cole no chat nem em arquivo: ela passa por cima do RLS). O deploy grava a
+chave e o `SUPABASE_URL` no `.env` da VM. A tabela sobe pela integração com o GitHub, como a `saves`. Sem a chave, o
+servidor registra `mundo_sem_nuvem` e o Mundo não aceita as contas Google.
 
 ### Chave do certificado do personagem (marco 17)
 

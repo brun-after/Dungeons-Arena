@@ -22,6 +22,7 @@ import { posicaoNoPasso, type PontoVisual } from '../entities/entidade';
 import { definirDirecao, integrarEntidade, planejarIrPara } from '../world/movimento';
 import { BufferRemoto } from './interpolacao-remota';
 import type { Transporte } from './transporte';
+import type { AvisoDoMundo } from '../mundo/avisos';
 
 /** Margem, em ticks, além do RTT, para o comando chegar antes do seu tick. */
 const MARGEM_TICKS = 2;
@@ -81,6 +82,8 @@ export class ClienteArena {
   aoFimDaCampanha: (() => void) | null = null;
   /** Marco 17: o personagem certificado pela sala, em resposta a `pedirCertificado` (null: ficha de treino). */
   aoCertificado: ((c: Certificado | null) => void) | null = null;
+  /** Marco 29 (D-128): os avisos do Mundo (o lugar, o save, o portal, a troca de sala). */
+  aoMundo: ((aviso: AvisoDoMundo) => void) | null = null;
   /** Recusas de entrada (sala cheia, personagem inválido...), para a tela explicar. */
   erro: string | null = null;
   /** Marco 15: os campos da ficha que a sala ajustou na entrada. */
@@ -125,6 +128,11 @@ export class ClienteArena {
   /** Marco 17: pede à sala o personagem como está agora, certificado (resposta em `aoCertificado`). */
   pedirCertificado(): void {
     this.o.transporte.enviar(JSON.stringify({ t: 'pedirCertificado' }));
+  }
+
+  /** Marco 29 (D-128): viajar pelo portal do Mundo até a vila descoberta. */
+  viajar(destino: string, pagamento: 'ouro' | 'pergaminho'): void {
+    this.o.transporte.enviar(JSON.stringify({ t: 'viajar', destino, pagamento }));
   }
 
   private ping(): void {
@@ -176,6 +184,9 @@ export class ClienteArena {
         break;
       case 'certificado':
         this.aoCertificado?.(msg.certificado);
+        break;
+      case 'mundo':
+        this.aoMundo?.(msg.aviso);
         break;
       case 'estado':
         if (msg.epocaSala !== this.epoca) return;

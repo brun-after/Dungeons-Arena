@@ -1,6 +1,7 @@
 // Dicionário pt-BR (§5.5): nenhum texto de interface fica fixo no código.
 import { textosEditor } from './pt-BR-editor';
 import { textosGrupo } from './pt-BR-grupo';
+import { textosMundo } from './pt-BR-mundo';
 import { textosHabilidades } from './pt-BR-habilidades';
 import { textosClasses } from './pt-BR-classes';
 import { textosDiario } from './pt-BR-diario';
@@ -706,6 +707,7 @@ export const ptBR = {
   ...textosHabilidades,
   // Marco 15 (15/10/2026): campanha cooperativa.
   ...textosGrupo,
+  ...textosMundo,
   ...textosEditor,
   // Marco 24 (24/10/2026): skills de classe, ultimates e sintonia.
   ...textosClasses,

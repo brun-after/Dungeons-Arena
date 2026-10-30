@@ -21,6 +21,7 @@ import forjaJson from '../data/forja.json';
 import campanhaJson from '../data/modos/campanha.json';
 import cooperativoJson from '../data/modos/cooperativo.json';
 import livreJson from '../data/modos/livre.json';
+import mundoJson from '../data/modos/mundo.json';
 import skillsJson from '../data/skills.json';
 import ultimatesJson from '../data/ultimates.json';
 import sintoniaJson from '../data/sintonia.json';
@@ -28,6 +29,8 @@ import sinergiasJson from '../data/sinergias.json';
 import temasJson from '../data/temas.json';
 import afinidadesJson from '../data/afinidades.json';
 import armasJson from '../data/armas.json';
+import reinoCentralJson from '../data/mundo/reino-central.json';
+import { conferirReino, lerReino, type Reino } from '../mundo/reino';
 import { lerArmas, type RegrasDeArmas } from '../progression/armas';
 import { lerUltimates, type Ultimate } from '../combat/ultimates';
 import { lerSintonia, type RegrasSintonia } from '../progression/sintonia';
@@ -92,6 +95,8 @@ export interface Conteudo {
   sintonia: RegrasSintonia;
   /** Marco 24 (D-096): data/sinergias.json (as sinergias passivas). */
   sinergias: readonly SinergiaPassiva[];
+  /** Marco 29 (D-128): os reinos do modo Mundo (src/data/mundo). */
+  reinos: Catalogo<Reino>;
 }
 
 export interface FontesDeConteudo {
@@ -122,6 +127,8 @@ export interface FontesDeConteudo {
   armas: unknown;
   /** Arquivo -> JSON de cada modo em src/data/modos. */
   modos: Readonly<Record<string, unknown>>;
+  /** Marco 29: arquivo -> JSON de cada reino em src/data/mundo (opcional nos testes). */
+  reinos?: Readonly<Record<string, unknown>>;
 }
 
 export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; erros: string[] } {
@@ -170,6 +177,16 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
     erros.push(...m.erros);
     if (modos.has(m.modo.id)) erros.push(`modos/${arquivo}: id repetido "${m.modo.id}"`);
     modos.set(m.modo.id, m.modo);
+  }
+  // Marco 29 (30/10/2026, D-128): os reinos do Mundo, conferidos contra presets, itens e temas.
+  const reinos = new Map<string, Reino>();
+  for (const [arquivo, json] of Object.entries(fontes.reinos ?? {})) {
+    const r = lerReino(json);
+    erros.push(...r.erros.map((e) => `mundo/${arquivo}: ${e}`));
+    if (!r.reino) continue;
+    const existe = { preset: (id: string) => p.presets.has(id), item: (id: string) => it.itens.has(id), tema: (id: string) => tm.temas.has(id) };
+    erros.push(...conferirReino(r.reino, existe).map((e) => `mundo/${arquivo}: ${e}`));
+    reinos.set(r.reino.id, r.reino);
   }
   const modoCampanha = modos.get('campanha');
   if (!modoCampanha) erros.push('modo "campanha" ausente');
@@ -254,6 +271,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       ultimates: ul.ultimates,
       sintonia: si.sintonia,
       sinergias: sg.sinergias,
+      reinos,
     },
     erros,
   };
@@ -302,7 +320,8 @@ export const FONTES_OFICIAIS: FontesDeConteudo = {
   temas: temasJson,
   afinidades: afinidadesJson,
   armas: armasJson,
-  modos: { 'campanha.json': campanhaJson, 'cooperativo.json': cooperativoJson, 'livre.json': livreJson },
+  modos: { 'campanha.json': campanhaJson, 'cooperativo.json': cooperativoJson, 'livre.json': livreJson, 'mundo.json': mundoJson },
+  reinos: { 'reino-central.json': reinoCentralJson },
 };
 
 export function conteudoOficial(): Conteudo {

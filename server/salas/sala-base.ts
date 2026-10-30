@@ -45,7 +45,9 @@ export abstract class SalaColyseusBase extends Room {
     const url = typeof pedido?.url === 'string' ? pedido.url : '';
     if (!limites || !url.includes('/matchmake/create/')) return true;
     const origem = contexto.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? contexto.ip ?? 'local';
-    if ((await matchMaker.query({})).length >= limites.maxSalas) {
+    // Marco 29 (30/10/2026, D-128): as salas do Mundo (regiões e dungeons, pelo joinOrCreate) não ocupam a cota das
+    // salas criadas à mão (arena e grupo).
+    if ((await matchMaker.query({})).filter((s) => s.name !== 'mundo').length >= limites.maxSalas) {
       registrarLog('sala_recusada', { motivo: 'servidor_cheio' });
       throw new ServerError(503, 'servidor_cheio');
     }
@@ -59,6 +61,8 @@ export abstract class SalaColyseusBase extends Room {
   protected sala!: SalaArena;
   private readonly conexoes = new Map<string, Conexao>();
   private vaziaDesde: number | null = Date.now();
+  /** Marco 29 (30/10/2026, D-128): as sessões caídas, na reserva de reconexão. */
+  protected readonly caidas = new Set<string>();
   private readonly duracaoTick = new Janela(600);
   private bytesNaUltimaMedida = 0;
   private reconexoes = 0;
@@ -103,26 +107,40 @@ export abstract class SalaColyseusBase extends Room {
     registrarLog('sala_criada', { sala: this.roomId, ...this.metadataPropria() });
   }
 
-  override onJoin(client: Client): void {
+  /** Marco 29 (D-128): quem o servidor autenticou nesta conexão (o Mundo reserva a ficha por ela); null nas outras. */
+  protected identidadeDe?(client: Client): string | null;
+
+  override onJoin(client: Client): void | Promise<void> {
     const id = client.sessionId;
     const conexao = this.sala.conectar((texto) => {
       this.clients.get(id)?.send('m', texto);
-    });
+    }, this.identidadeDe?.(client) ?? null);
     this.conexoes.set(id, conexao);
     this.vaziaDesde = null;
   }
 
   override async onDrop(client: Client): Promise<void> {
     this.conexoes.get(client.sessionId)?.fechar();
+    this.caidas.add(client.sessionId);
     await this.allowReconnection(client, RESERVA_RECONEXAO_MS / 1000);
   }
 
   override onReconnect(client: Client): void {
     this.reconexoes++;
+    this.caidas.delete(client.sessionId);
     this.conexoes.get(client.sessionId)?.retomar();
   }
 
-  override onLeave(client: Client): void {
+  /** Encerra já a sessão caída (o Mundo: quem recarrega a página assume o personagem sem esperar a reserva). */
+  protected encerrarCaida(sessionId: string): boolean {
+    if (!this.caidas.delete(sessionId)) return false;
+    this.conexoes.get(sessionId)?.encerrar();
+    this.conexoes.delete(sessionId);
+    return true;
+  }
+
+  override onLeave(client: Client): void | Promise<void> {
+    this.caidas.delete(client.sessionId);
     this.conexoes.get(client.sessionId)?.encerrar();
     this.conexoes.delete(client.sessionId);
     if (this.conexoes.size === 0) this.vaziaDesde = Date.now();

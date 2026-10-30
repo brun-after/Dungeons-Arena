@@ -18,6 +18,9 @@ services:
       CRIACOES_POR_MINUTO: ${CRIACOES_POR_MINUTO:-6}
       # Marco 17 (D-063): chave do certificado do personagem (vem do .env que o deploy grava; nunca no repositório).
       CHAVE_CERTIFICADO: ${CHAVE_CERTIFICADO:-}
+      # Marco 29 (D-128): o personagem do Mundo no Supabase (sem as duas, o Mundo guarda em memória e perde ao reiniciar).
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY:-}
     # Marco 16: o servidor não leva a VM junto se algo crescer demais (o Node fica em 512 MB de heap, Dockerfile).
     mem_limit: 700m
     logging:

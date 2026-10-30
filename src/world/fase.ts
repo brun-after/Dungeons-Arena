@@ -7,7 +7,12 @@ import type { EfeitoCanonico } from '../combat/registro-efeitos';
 import type { AreaAmbiente } from './ambiente-tipos';
 import type { Celula } from '../core/comandos';
 
-export type TipoCelula = 'parede' | 'piso' | 'saida' | 'vazio';
+/**
+ * Marco 29 (30/10/2026, D-128): as células do exterior do Mundo. `agua` não se anda, mas o tiro passa por cima;
+ * `mato` e `estrada` se andam (o chão do campo); `fachada` é o corpo de uma estrutura vista de fora (sólida, como a
+ * parede, e desenhada alta pelo render das estruturas).
+ */
+export type TipoCelula = 'parede' | 'piso' | 'saida' | 'vazio' | 'agua' | 'mato' | 'estrada' | 'fachada';
 
 /** Caracteres do mapa autorado em texto (uma string por linha). */
 export const CARACTERE_CELULA: Readonly<Record<string, TipoCelula>> = {
@@ -15,11 +20,15 @@ export const CARACTERE_CELULA: Readonly<Record<string, TipoCelula>> = {
   '.': 'piso',
   S: 'saida',
   ' ': 'vazio',
+  '~': 'agua',
+  ',': 'mato',
+  '=': 'estrada',
+  F: 'fachada',
 };
 
-const CODIGO: Readonly<Record<TipoCelula, number>> = { parede: 0, piso: 1, saida: 2, vazio: 3 };
-const TIPO_POR_CODIGO: readonly TipoCelula[] = ['parede', 'piso', 'saida', 'vazio'];
-const CARACTERE_POR_TIPO: Readonly<Record<TipoCelula, string>> = { parede: '#', piso: '.', saida: 'S', vazio: ' ' };
+const CODIGO: Readonly<Record<TipoCelula, number>> = { parede: 0, piso: 1, saida: 2, vazio: 3, agua: 4, mato: 5, estrada: 6, fachada: 7 };
+const TIPO_POR_CODIGO: readonly TipoCelula[] = ['parede', 'piso', 'saida', 'vazio', 'agua', 'mato', 'estrada', 'fachada'];
+const CARACTERE_POR_TIPO: Readonly<Record<TipoCelula, string>> = { parede: '#', piso: '.', saida: 'S', vazio: ' ', agua: '~', mato: ',', estrada: '=', fachada: 'F' };
 
 /** Código numérico de `Fase.celulas` (o editor escreve direto nele, marco 6C). */
 export function codigoDeTipo(tipo: TipoCelula): number {
@@ -258,8 +267,20 @@ export function tipoEm(fase: Fase, x: number, y: number): TipoCelula {
   return TIPO_POR_CODIGO[fase.celulas[y * fase.largura + x] ?? CODIGO.vazio] ?? 'vazio';
 }
 
-/** Passável: piso e saída (§2.1). Portas e baús entram com os objetos de fase. */
+const ANDAVEIS: ReadonlySet<TipoCelula> = new Set(['piso', 'saida', 'mato', 'estrada']);
+
+/** Passável: piso e saída (§2.1); no exterior do Mundo, também o mato e a estrada (D-128). */
 export function passavel(fase: Fase, x: number, y: number): boolean {
+  return ANDAVEIS.has(tipoEm(fase, x, y));
+}
+
+/** Marco 29 (D-128): o tiro passa por onde se anda e por cima da água. */
+export function atravessavelPorTiro(fase: Fase, x: number, y: number): boolean {
   const tipo = tipoEm(fase, x, y);
-  return tipo === 'piso' || tipo === 'saida';
+  return ANDAVEIS.has(tipo) || tipo === 'agua';
+}
+
+/** O chão aberto (o que se anda e não é saída): onde cabem enfeites, objetos e inimigos. */
+export function chaoAberto(tipo: TipoCelula): boolean {
+  return tipo === 'piso' || tipo === 'mato' || tipo === 'estrada';
 }

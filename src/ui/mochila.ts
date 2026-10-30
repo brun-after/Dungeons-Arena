@@ -105,7 +105,7 @@ export function resumoDoItem(item: Item, arma?: { familia: string; basico: strin
   const m = balance ? multiplicadoresDoItem(item, balance) : null;
   if (m && m.danoPct > 0) partes.push(t('item.danoPct', { v: m.danoPct }));
   if (m && m.defesaPct > 0) partes.push(t('item.defesaPct', { v: m.defesaPct }));
-  if (item.tipo === 'consumivel' || item.tipo === 'livro' || item.tipo === 'chave') partes.push(item.descricao);
+  if (item.tipo === 'consumivel' || item.tipo === 'livro' || item.tipo === 'chave' || item.tipo === 'material') partes.push(item.descricao);
   // Marco 18 (D-069): a forma e o que a Lendária/Última faz.
   if (item.forma) partes.unshift(t(`forma.${item.forma}` as ChaveTexto));
   if (item.forma && item.descricao) partes.push(item.descricao);

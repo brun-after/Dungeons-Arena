@@ -2,6 +2,7 @@
 // o que chega do cliente. Estado recebido de cliente nunca é confiado: o servidor deriva o jogador
 // da sessão e rejeita, com motivo, mensagens grandes, malformadas ou com números não finitos.
 
+import type { AvisoDoMundo } from '../mundo/avisos';
 import type { Celula, Comando, ComandoEmpacotado, Dir8 } from '../core/comandos';
 import { FONTES_OFICIAIS } from '../core/conteudo';
 import { hash53, serializarCanonico } from '../core/digest';
@@ -29,7 +30,9 @@ export type MensagemCliente =
   /** O cliente perdeu a sequência de patches: pede o estado completo. */
   | { t: 'ressincronizar' }
   /** Marco 17: pede o personagem atual, certificado (só para quem entrou com a ficha inteira). */
-  | { t: 'pedirCertificado' };
+  | { t: 'pedirCertificado' }
+  /** Marco 29 (D-128): no Mundo, viajar pelo portal até a vila descoberta (`ouro` ou `pergaminho`). */
+  | { t: 'viajar'; destino: string; pagamento: 'ouro' | 'pergaminho' };
 
 export type MotivoRejeicao =
   | 'grande_demais'
@@ -70,6 +73,8 @@ export type MensagemServidor =
   | { t: 'fimDaCampanha' }
   /** Marco 17: o personagem como está na sala, certificado pelo servidor (null: a sessão entrou com ficha de treino). */
   | { t: 'certificado'; certificado: Certificado | null }
+  /** Marco 29 (D-128): avisos do Mundo, só para a própria sessão. */
+  | { t: 'mundo'; aviso: AvisoDoMundo }
   | { t: 'erro'; motivo: MotivoErro };
 
 /** Versão do conteúdo oficial: cliente e sala precisam concordar (§3.6, "versão/hash"). */
@@ -224,6 +229,9 @@ export function lerMensagemCliente(texto: string): LeituraCliente {
       return { ok: true, msg: { t: 'ressincronizar' } };
     case 'pedirCertificado':
       return { ok: true, msg: { t: 'pedirCertificado' } };
+    case 'viajar':
+      if (!id(bruto.destino) || (bruto.pagamento !== 'ouro' && bruto.pagamento !== 'pergaminho')) return malformada();
+      return { ok: true, msg: { t: 'viajar', destino: bruto.destino, pagamento: bruto.pagamento } };
     default:
       return malformada();
   }

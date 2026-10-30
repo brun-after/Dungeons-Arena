@@ -554,5 +554,13 @@
       "tempestadeCelulas": 8,
       "legiaoPulsos": 2
     }
+  },
+  "mundo": {
+    "tumulo": { "donoExclusivoS": 600, "duracaoS": 1800 },
+    "portal": { "ouroBase": 20, "ouroPorRegiao": 30, "recargaS": 60 },
+    "coleta": { "canalMs": 2500, "renascerS": 300, "raio": 1 },
+    "covil": { "contribuicaoMinPct": 10 },
+    "checkpointS": 60,
+    "passagemProtecaoS": 3
   }
 }

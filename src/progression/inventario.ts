@@ -71,7 +71,7 @@ export function guardarItem(bolsa: Bolsa, item: Item, qtd: number, regras: Balan
 
 /** Consumíveis e livros empilham (marco 14: livros também; marco 18: chaves e materiais da forja também). */
 export function empilha(item: Item): boolean {
-  return item.tipo === 'consumivel' || item.tipo === 'livro' || item.tipo === 'chave';
+  return item.tipo === 'consumivel' || item.tipo === 'livro' || item.tipo === 'chave' || item.tipo === 'material';
 }
 
 export function cabeNaMochila(bolsa: Bolsa, item: Item, qtd: number, regras: Balance['inventario']): boolean {

@@ -5,6 +5,7 @@
 // Marco 9A (14/10/2026): ouro (vai para a bolsa), loot com quantidade e os interagíveis (baú e loja),
 // que não são coletados ao pisar: abrem pelo comando `interagir` (world/interacao.ts).
 
+import { TIPOS_DO_MUNDO } from '../mundo/objetos-mundo';
 import { armarBuff, EFEITOS_OFENSIVOS } from '../progression/buffs';
 import { aplicarEfeito } from '../combat/efeitos';
 import type { EfeitoCanonico } from '../combat/registro-efeitos';
@@ -32,7 +33,7 @@ export function ganhoDoObjeto(o: ObjetoNoMundo, e: Entidade): number {
 
 /** Baú e loja abrem por `interagir`; o resto é coletado ao pisar. */
 export function interagivel(o: ObjetoNoMundo): boolean {
-  return o.tipo === 'bau' || o.tipo === 'loja' || o.tipo === 'santuario';
+  return o.tipo === 'bau' || o.tipo === 'loja' || o.tipo === 'santuario' || TIPOS_DO_MUNDO.has(o.tipo);
 }
 
 /** Ninguém coleta: interagíveis e a porta temporária do boss (marco 10A-1, world/portas.ts). */

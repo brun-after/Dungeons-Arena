@@ -42,6 +42,8 @@ export interface Nuvem {
    * conta ou sem rede). O servidor atribui um pseudônimo; o nome Google não é publicado.
    */
   registrarDescoberta: (entrada: string) => Promise<PrimeiraDescoberta | null>;
+  /** Marco 29 (D-128): o token da sessão, que o servidor do Mundo confere (null: sem conta). */
+  token: () => Promise<string | null>;
 }
 
 /** Quem descobriu primeiro uma entrada do diário (e se foi esta conta). */
@@ -115,6 +117,7 @@ export function criarNuvemSupabase(url: string, chaveAnonima: string): Nuvem {
   );
   const idDoUsuario = async () => (await (await cliente).auth.getSession()).data.session?.user.id ?? null;
   return {
+    token: async () => (await (await cliente).auth.getSession()).data.session?.access_token ?? null,
     usuario: async () => {
       const sessao = (await (await cliente).auth.getSession()).data.session;
       if (!sessao) return null;
@@ -198,6 +201,8 @@ export function criarNuvemFalsa(): Nuvem {
     sessionStorage.setItem(CHAVE, JSON.stringify(v));
   };
   return {
+    // O servidor sem nuvem aceita a conta `local:` (testes e desenvolvimento).
+    token: () => Promise.resolve(ler().logado ? 'local:pessoa-de-teste' : null),
     usuario: () => Promise.resolve(ler().logado ? { nome: 'Pessoa de teste' } : null),
     entrar: () => {
       gravar({ ...ler(), logado: true });

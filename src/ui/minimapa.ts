@@ -10,7 +10,8 @@ import { relacao } from '../modos/relacao';
 import { t } from '../i18n';
 import { tipoEm, type Fase } from '../world/fase';
 
-const COR_TERRENO: Readonly<Record<string, string>> = { piso: '#3a3546', saida: '#c98a1a', parede: '#15131b' };
+// Marco 29 (D-128): o exterior do Mundo (mato, estrada, água e fachadas).
+const COR_TERRENO: Readonly<Record<string, string>> = { piso: '#3a3546', saida: '#c98a1a', parede: '#15131b', mato: '#3d5a2e', estrada: '#7a6448', agua: '#2b5f86', fachada: '#5a4a3c' };
 
 export interface Minimapa {
   elemento: HTMLCanvasElement;

@@ -24,6 +24,7 @@ import type { PaletaTema } from '../world/temas';
 import { desenharDecoracao } from './decoracao';
 import { paletaDe } from './terreno';
 import { texturaDoIcone } from './icones-textura';
+import { desenharObjetoDoMundo, desenharVendedor } from './objetos-mundo';
 
 const COR_ORBE: Readonly<Record<'orbe_hp' | 'orbe_recurso', number>> = {
   orbe_hp: 0x2ecc71,
@@ -41,7 +42,8 @@ export const COR_RARIDADE: Readonly<Record<Raridade, number>> = {
 };
 
 /** Os que ficam em pé no isométrico (D-058: baú e loja; D-109: ouro, orbes e santuário). */
-const EM_PE: ReadonlySet<TipoObjeto> = new Set<TipoObjeto>(['bau', 'loja', 'ouro', 'santuario', 'orbe_hp', 'orbe_recurso', 'orbe_efeito', 'orbe_refugio']);
+// Marco 29 (D-128): os objetos do Mundo também ficam em pé no isométrico.
+const EM_PE: ReadonlySet<TipoObjeto> = new Set<TipoObjeto>(['bau', 'loja', 'ouro', 'santuario', 'orbe_hp', 'orbe_recurso', 'orbe_efeito', 'orbe_refugio', 'npc', 'coleta', 'tumulo', 'pedra_save', 'pedra_portal', 'porta_estrutura']);
 
 /** Onde desenhar os objetos altos no isométrico. */
 export interface OpcoesEmPe {
@@ -230,8 +232,10 @@ export class CamadaObjetos {
       }
       if (o.tipo === 'loja') {
         this.loja(g, cx, cy);
+        desenharVendedor(g, o, cx, cy);
         continue;
       }
+      if (desenharObjetoDoMundo(g, o, cx, cy + CELULA_PX * 0.3, pulso)) continue;
       // A porta temporária do boss é desenhada com as outras portas (render/portas.ts).
       if (o.tipo === 'santuario') {
         this.santuario(g, o, cx, cy);
@@ -334,7 +338,10 @@ export class CamadaObjetos {
     if (o.tipo === 'bau' || o.tipo === 'loja') {
       alto.clear().ellipse(0, 0, 18, 8).fill({ color: 0x000000, alpha: 0.3 });
       if (o.tipo === 'bau') this.bau(alto, estado, o, 0, -10);
-      else this.loja(alto, 0, -12);
+      else {
+        this.loja(alto, 0, -12);
+        desenharVendedor(alto, o, 0, -12);
+      }
     } else if (o.tipo === 'ouro') {
       // D-109: duas moedas de pé (de perfil, elipses altas) e uma deitada atrás.
       alto.clear().ellipse(0, 0, 13, 5.5).fill({ color: 0x000000, alpha: 0.3 });
@@ -345,6 +352,8 @@ export class CamadaObjetos {
     } else if (o.tipo === 'santuario') {
       alto.clear().ellipse(0, 0, 18, 8).fill({ color: 0x000000, alpha: 0.3 });
       this.santuario(alto, o, 0, -14);
+    } else if (desenharObjetoDoMundo(alto.clear(), o, 0, 0, pulso)) {
+      // Marco 29 (D-128): NPC, coleta, túmulo, pedras e a porta da estrutura.
     } else {
       // O orbe flutua sobre a sombra (a sombra encolhe quando ele sobe).
       const altura = 20 + flutua;

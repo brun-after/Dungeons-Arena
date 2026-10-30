@@ -16,6 +16,7 @@ import type { Entidade } from '../entities/entidade';
 import { guardarItem, recusarItem } from '../progression/inventario';
 import { armadilhaParaDesarmar, concluirDesarme } from './armadilhas-ocultas';
 import { interagivel, largarItem, largarPerto } from './objetos';
+import { concluirColeta, interagirNoMundo, processarObjetosDoMundo, SEMPRE_DISPONIVEIS, TIPOS_DO_MUNDO } from '../mundo/objetos-mundo';
 
 /** Recarga da loja por jogador e loja, no mesmo mapa monotônico das habilidades. */
 export function chaveRecargaLoja(objetoId: string, entidadeId: string): string {
@@ -28,7 +29,7 @@ export function recargaLojaRestante(estado: EstadoJogo, objetoId: string, entida
 
 /** Baú ainda fechado e sem ninguém abrindo; a loja está sempre disponível (a recarga é por jogador). */
 function disponivel(o: ObjetoNoMundo): boolean {
-  return o.tipo === 'loja' || (o.abertoTick === 0 && o.abridorId === null);
+  return o.tipo === 'loja' || SEMPRE_DISPONIVEIS.has(o.tipo) || (o.abertoTick === 0 && o.abridorId === null);
 }
 
 /** O interagível disponível mais próximo no alcance; empate pelo `objetoId` (determinístico). */
@@ -106,6 +107,8 @@ function tentarInteragir(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade
     saida.push({ t: 'interacaoIniciada', tick, id: e.id, objetoId: String(a.id), tipo: 'desarme', ateTick });
     return null;
   }
+  // Marco 29 (D-128): os objetos do Mundo (coleta, túmulo, NPCs, pedras e portas).
+  if (TIPOS_DO_MUNDO.has(o.tipo)) return interagirNoMundo(estado, ctx, e, o, saida);
   // Marco 24 (25/10/2026, D-099): o santuário entrega o kit de engenho (na mochila, ou ao lado se não couber).
   if (o.tipo === 'santuario') {
     const kit = ctx.conteudo.itens.get(KIT_ENGENHO);
@@ -214,8 +217,10 @@ export function processarInteracoes(
     if (!i || estado.tick < i.ateTick) continue;
     if (i.tipo === 'loja') fecharLoja(estado, ctx, e, saida);
     else if (i.tipo === 'desarme') concluirDesarme(estado, ctx, e, Number(i.objetoId), disparar, saida);
+    else if (i.tipo === 'coleta') concluirColeta(estado, ctx, e, saida);
     else entregarBau(estado, ctx, e, saida);
   }
+  processarObjetosDoMundo(estado, ctx);
   if (!estado.objetos.some((o) => o.tipo === 'bau')) return;
   const some = ticksDe(ctx.balance.economia.bauSomeMs);
   for (const o of estado.objetos) {

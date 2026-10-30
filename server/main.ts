@@ -5,6 +5,7 @@
 //   MAX_SALAS  salas por processo (padrão 6; marco 16, D-062)
 //   CRIACOES_POR_MINUTO  salas que uma origem pode criar por minuto (padrão 6)
 //   CHAVE_CERTIFICADO  chave do certificado do personagem (marco 17; segredo do GitHub, nunca no repositório)
+//   SUPABASE_URL, SUPABASE_SERVICE_KEY  o Supabase do Mundo (marco 29; a chave de serviço é segredo do GitHub)
 
 import { iniciarServidor } from './servidor';
 import { registrarLog } from './metricas';
@@ -21,6 +22,8 @@ const { encerrar } = await iniciarServidor({
   maxSalas: numero(process.env.MAX_SALAS, 6),
   criacoesPorMinuto: numero(process.env.CRIACOES_POR_MINUTO, 6),
   chaveCertificado: process.env.CHAVE_CERTIFICADO,
+  supabaseUrl: process.env.SUPABASE_URL,
+  supabaseChaveServico: process.env.SUPABASE_SERVICE_KEY,
 });
 
 for (const sinal of ['SIGINT', 'SIGTERM'] as const) {

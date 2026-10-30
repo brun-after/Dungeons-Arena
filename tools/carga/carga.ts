@@ -17,6 +17,11 @@
 // arena com a ficha inteira (bolsa, canal privado e recompensas), numa sala da faixa 1-5.
 //
 //   npm run carga -- --ficha certificada --perfil suportado --fase arena-02 --segundos 300
+// Marco 29 (30/10/2026, D-128): `--modo mundo` põe até 40 bots na Vila do Centro do Mundo, cada um com a sua conta
+// `local:` (o servidor sem nuvem, com a persistência em memória) e um personagem novo; a área de interesse corta o
+// estado por bot.
+//
+//   npm run carga -- --modo mundo --clientes 40 --segundos 300
 
 import { randomUUID } from 'node:crypto';
 import { appendFileSync } from 'node:fs';
@@ -33,7 +38,9 @@ import { conteudoOficial, modoPorId } from '../../src/core/conteudo';
 import { BALANCE_PADRAO, type ContextoSimulacao } from '../../src/core/contexto';
 import { criarJogador } from '../../src/entities/fabrica';
 import { pedirCertificado } from '../../src/plataforma/certificacao';
-import { conectarArena, conectarCampanha, type ConexaoArena } from '../../src/plataforma/transporte-colyseus';
+import { lerLugar, montarLugar } from '../../src/mundo/lugares';
+import { reinoDoConteudo } from '../../src/mundo/reino';
+import { conectarArena, conectarCampanha, conectarMundo, type ConexaoArena } from '../../src/plataforma/transporte-colyseus';
 import type { RefFase } from '../../src/save/esquema';
 import { contextoDaFase, FASE_INICIAL, faseOficialOuGerada } from '../../src/save/fases-campanha';
 import { iniciarProxy, PERFIS, type Proxy } from '../rede/proxy';
@@ -53,8 +60,9 @@ const { values } = parseArgs({
 });
 const urlServidor = values.url;
 const grupo = values.modo === 'grupo';
-const certificada = !grupo && values.ficha === 'certificada';
-const quantidade = Math.max(1, Math.min(grupo ? 6 : 10, Number(values.clientes)));
+const mundo = values.modo === 'mundo';
+const certificada = !grupo && !mundo && values.ficha === 'certificada';
+const quantidade = Math.max(1, Math.min(grupo ? 6 : mundo ? 40 : 10, Number(values.clientes)));
 const segundos = Math.max(5, Number(values.segundos));
 const fase = values.fase;
 const perfilNome = values.perfil ?? null;
@@ -94,7 +102,15 @@ function contextoDoGrupo(ref: RefFase): ContextoSimulacao | null {
   const r = contextoDaFase(conteudo, faseOficialOuGerada(ref, conteudo), modoPorId(conteudo, MODO_COOPERATIVO));
   return r.ok ? r.ctx : null;
 }
-const ctx = grupo ? (contextoDoGrupo(FASE_INICIAL) ?? contextoDaArena('livre', fase)) : contextoDaArena('livre', fase);
+/** Marco 29: o contexto do lugar de entrada do Mundo (o mesmo que o servidor monta). */
+function contextoDoMundo(): ContextoSimulacao {
+  const reino = reinoDoConteudo(conteudo);
+  const lugar = lerLugar(reino, `regiao:${reino.inicio}`);
+  if (!lugar) throw new Error('mundo sem lugar de início');
+  return montarLugar(conteudo, reino, lugar, modoPorId(conteudo, 'mundo')).ctx;
+}
+const LUGAR_DO_MUNDO = `regiao:${reinoDoConteudo(conteudo).inicio}`;
+const ctx = mundo ? contextoDoMundo() : grupo ? (contextoDoGrupo(FASE_INICIAL) ?? contextoDaArena('livre', fase)) : contextoDaArena('livre', fase);
 const CLASSES_DO_GRUPO = ['guerreiro', 'mago', 'arqueiro', 'aventureiro'];
 /** No grupo, cada bot traz um personagem de classe diferente (a sala confere a ficha como a de qualquer jogador). */
 function pedidoDoBot(i: number): unknown {
@@ -116,9 +132,12 @@ async function fichaCertificada(i: number): Promise<unknown> {
 const janelas = new Map<string, number[]>();
 
 async function conectar(pedido: { criar: true; fase: string; faixa?: string } | { codigo: string }, i: number): Promise<Participante> {
-  const conexao = grupo
-    ? await conectarCampanha(url, 'criar' in pedido ? { criar: { faseRef: FASE_INICIAL, dificuldade: 'normal' } } : pedido)
-    : await conectarArena(url, pedido);
+  const classeId = CLASSES_DO_GRUPO[i % CLASSES_DO_GRUPO.length] ?? 'aventureiro';
+  const conexao = mundo
+    ? await conectarMundo(url, `local:carga-${randomUUID().slice(0, 8)}-${String(i)}`, { lugar: LUGAR_DO_MUNDO, slot: 1, criar: { classeId, nome: `Bot ${i + 1}` } })
+    : grupo
+      ? await conectarCampanha(url, 'criar' in pedido ? { criar: { faseRef: FASE_INICIAL, dificuldade: 'normal' } } : pedido)
+      : await conectarArena(url, pedido);
   const p: Participante = { cliente: null as unknown as ClienteArena, conexao, bot: null as unknown as BotDeArena, recebidos: 0, enviados: 0 };
   // Conta os bytes recebidos e enviados por cliente.
   const original = conexao.transporte.aoReceber.bind(conexao.transporte);
@@ -139,7 +158,7 @@ async function conectar(pedido: { criar: true; fase: string; faixa?: string } | 
     ctx,
     transporte,
     nome: `Bot ${i + 1}`,
-    pedidoFicha: certificada ? await fichaCertificada(i) : pedidoDoBot(i),
+    pedidoFicha: mundo ? null : certificada ? await fichaCertificada(i) : pedidoDoBot(i),
     agoraMs: () => performance.now(),
     ...(grupo && { contextoDe: contextoDoGrupo }),
   });
@@ -160,13 +179,15 @@ async function conectar(pedido: { criar: true; fase: string; faixa?: string } | 
   return p;
 }
 
-const cena = grupo ? `campanha em grupo (${FASE_INICIAL.id})` : certificada ? `${fase}, fichas certificadas` : fase;
+const cena = mundo ? `mundo (${LUGAR_DO_MUNDO})` : grupo ? `campanha em grupo (${FASE_INICIAL.id})` : certificada ? `${fase}, fichas certificadas` : fase;
 console.log(`Carga: ${quantidade} clientes em ${urlServidor}${perfilNome ? ` (perfil ${perfilNome})` : ''}, ${cena}, por ${segundos} s`);
 const primeiro = await conectar(certificada ? { criar: true, fase, faixa: '1-5' } : { criar: true, fase }, 0);
 const codigo = primeiro.conexao.codigo;
 const participantes = [primeiro];
 for (let i = 1; i < quantidade; i++) participantes.push(await conectar({ codigo }, i));
-console.log(`Sala ${codigo} com ${participantes.length} clientes`);
+// No Mundo, o matchmaking escolhe a sala pelo lugar: todos precisam ter caído na mesma (o canal 1).
+const salas = new Set(participantes.map((p) => p.conexao.codigo));
+console.log(`Sala ${codigo} com ${participantes.length} clientes${salas.size > 1 ? ` (espalhados em ${salas.size} salas)` : ''}`);
 
 const inicio = performance.now();
 const laco = setInterval(() => {
@@ -314,11 +335,9 @@ const metas: (readonly [string, boolean])[] = [
   ['banda enviada ≤ 10 KiB/s', resultado.bandaEnviadaMaxKiBs <= 10],
 ];
 if (!degradado) {
-  metas.push(
-    ['correção p95 ≤ 0,25 célula', resultado.correcaoP95Celulas <= 0.25],
-    ['correção p99 ≤ 1 célula', resultado.correcaoP99Celulas <= 1],
-    ['aviso útil p5 ≥ 200 ms em toda habilidade', Number.isFinite(menorAviso) && menorAviso >= 200],
-  );
+  metas.push(['correção p95 ≤ 0,25 célula', resultado.correcaoP95Celulas <= 0.25], ['correção p99 ≤ 1 célula', resultado.correcaoP99Celulas <= 1]);
+  // Marco 29: a vila do Mundo é segura (quase sem monstros perto dos bots); o aviso só vale quando houve ataques.
+  if (!mundo || janelas.size > 0) metas.push(['aviso útil p5 ≥ 200 ms em toda habilidade', Number.isFinite(menorAviso) && menorAviso >= 200]);
 }
 if (tick) metas.push(['tick do servidor p95 ≤ 8 ms e p99 ≤ 16,7 ms', tick.p95Ms <= 8 && tick.p99Ms <= 16.7]);
 // Marco 16: na série do `/metricas`, nenhuma janela de 10 s com o tick acima da meta, e a memória sem subir mais de

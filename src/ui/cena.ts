@@ -99,6 +99,8 @@ export interface OpcoesCena {
   portais?: TemasDosPortais;
   /** Marco 18: registrar a primeira descoberta do servidor na nuvem (a arena e os testes desligam). */
   nuvemDescobertas?: boolean;
+  /** Marco 29 (D-128): a visão ao abrir (o Mundo começa no isométrico); sem ela, a das Configurações. */
+  visaoInicial?: Preferencias['visao'];
 }
 
 export interface QuadroCena {
@@ -139,8 +141,10 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   // Marco 26 (D-107): no computador (com mouse), sem joystick nem D-pad, mesmo com tela de toque.
   const direcional = mostrarDirecional(sinais);
   document.body.classList.toggle('toque', toque);
-  const prefs = lerPreferencias();
+  const lidas = lerPreferencias();
+  const prefs: Preferencias = { ...lidas, visao: o.visaoInicial ?? lidas.visao };
   let aparencia: Preferencias = prefs;
+  let visaoGravada = lidas.visao;
   const jogador = () => o.estado().entidades.find((e) => e.id === idLocal);
 
   o.raiz.textContent = '';
@@ -187,8 +191,11 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       if (p.seguirAlvo !== aparencia.seguirAlvo) emitir({ t: 'seguirAlvo', ligado: p.seguirAlvo });
       controles?.trocarTipo(p.controle);
       if (p.sentidoToken !== aparencia.sentidoToken || p.tamanhoToken !== aparencia.tamanhoToken) sprites.reiniciarVisual();
-      aparencia = p;
-      visao?.definir(p.visao);
+      // Marco 29 (D-128): só troca a visão quando ela mudou nas Configurações (o Mundo abre no isométrico).
+      const trocouVisao = p.visao !== visaoGravada;
+      visaoGravada = p.visao;
+      aparencia = trocouVisao ? p : { ...p, visao: aparencia.visao };
+      if (trocouVisao) visao?.definir(p.visao);
       controles?.atualizarVisao();
       teclado?.atualizar();
     },

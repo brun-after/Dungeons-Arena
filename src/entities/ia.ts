@@ -112,8 +112,9 @@ function ultimaInteracao(e: Entidade, alvo: Entidade): number {
 }
 
 export function processarIa(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
+  const acordada = filtroDeAtivacao(estado, ctx.modo.iaRaioAtivacao);
   for (const e of ordemRotativa(estado.entidades, estado.tick)) {
-    if (e.controlador !== 'ia' || !vivo(e) || e.arquetipo === 'boneco') continue;
+    if (e.controlador !== 'ia' || !vivo(e) || e.arquetipo === 'boneco' || !acordada(e)) continue;
     const preset = ctx.conteudo.presets.get(e.preset);
     if (!preset) continue;
     e.ia ??= criarEstadoIa(estado, e, ctx.balance.ia);
@@ -137,6 +138,16 @@ export function processarIa(estado: EstadoJogo, ctx: ContextoSimulacao, saida: E
         break;
     }
   }
+}
+
+/**
+ * Marco 29 (30/10/2026, D-128): no Mundo, a IA só pensa a até `raio` células de algum jogador; as outras dormem
+ * paradas onde estão (a região tem centenas de inimigos). Sem raio na regra do modo, todas pensam, como antes.
+ */
+export function filtroDeAtivacao(estado: EstadoJogo, raio: number | undefined): (e: Entidade) => boolean {
+  if (raio === undefined) return () => true;
+  const jogadores = estado.entidades.filter((j) => j.controlador !== 'ia' && vivo(j));
+  return (e) => jogadores.some((j) => chebyshev(j, e) <= raio);
 }
 
 /**

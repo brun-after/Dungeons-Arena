@@ -4,7 +4,8 @@
 
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
-import { t } from '../i18n';
+import { t, type ChaveTexto } from '../i18n';
+import { TIPOS_DO_MUNDO } from '../mundo/objetos-mundo';
 import { armadilhaParaDesarmar } from '../world/armadilhas-ocultas';
 import { alvoDeInteracao, podeConverterArmadilha, recargaLojaRestante } from '../world/interacao';
 import { esperaNaPorta } from '../world/portas';
@@ -34,6 +35,8 @@ export function criarPrompt(ctx: ContextoSimulacao, idLocal: string, toque: bool
       return recargaLojaRestante(estado, o.objetoId, eu.id) > 0 ? t('prompt.lojaRecarga') : t('prompt.loja', { tecla: tecla() });
     }
     if (o?.tipo === 'santuario') return t('prompt.santuario', { tecla: tecla() });
+    // Marco 29 (D-128): os objetos do Mundo.
+    if (o && TIPOS_DO_MUNDO.has(o.tipo)) return t(`prompt.mundo.${o.tipo}` as ChaveTexto, { tecla: tecla() });
     if (o?.tipo === 'bau') return t(o.chave ? 'prompt.bauTrancado' : 'prompt.bau', { tecla: tecla() });
     // Marco 18 (D-068): armadilha revelada ao alcance.
     if (!o && armadilhaParaDesarmar(estado, ctx, eu)) return t(podeConverterArmadilha(eu, estado.tick) ? 'prompt.converter' : 'prompt.desarmar', { tecla: tecla() });

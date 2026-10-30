@@ -15,7 +15,7 @@ import { resolverHabilidade } from './compilar-habilidade';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { vivo, type Entidade } from '../entities/entidade';
 import { podeFerir } from '../modos/relacao';
-import { passavel } from '../world/fase';
+import { atravessavelPorTiro } from '../world/fase';
 import type { FonteDeDano } from './dano';
 import { projeteisAtravessam, REGISTRO_EFEITOS } from './efeitos';
 import { celulaOcupada } from './geometria';
@@ -138,7 +138,7 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
       const cx = Math.round(p.x);
       const cy = Math.round(p.y);
       // O bumerangue volta à mão por cima de tudo; a tabela quica.
-      if (p.var?.fase !== 'volta' && (!passavel(ctx.fase, cx, cy) || muralhaEm(estado, cx, cy))) {
+      if (p.var?.fase !== 'volta' && (!atravessavelPorTiro(ctx.fase, cx, cy) || muralhaEm(estado, cx, cy))) {
         if (variacao && naParede(estado, ctx, p, variacao, ultimoPasso, saida)) {
           ultimoPasso = 0;
           continue;
