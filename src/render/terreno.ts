@@ -16,7 +16,7 @@ import type { Tema } from '../world/temas';
 import { tipoEm, type Fase, type TipoCelula } from '../world/fase';
 import { pecaDaCelula } from '../world/tileset';
 import { CELULA_PX } from './camera-calculo';
-import { desenharCelulaExterior, ehCelulaExterior } from './terreno-exterior';
+import { COR_BRILHO_AGUA, desenharBrilhoDaAgua, desenharCelulaExterior, ehCelulaExterior } from './terreno-exterior';
 import type { TexturasTileset } from './tileset-textura';
 
 export const BLOCO_CELULAS = 16;
@@ -131,7 +131,13 @@ function desenharCelula(g: Graphics, fase: Fase, paleta: Paleta, x: number, y: n
 }
 
 export interface Terreno {
+  /**
+   * Marco 30 (30/10/2026, D-129): o retângulo visível (px de mundo). Os blocos são desenhados quando chegam perto da
+   * vista e descartados quando ficam longe (a região do Mundo tem 128×128 células).
+   */
   atualizarVisibilidade: (x0: number, y0: number, x1: number, y1: number) => void;
+  /** Marco 30 (D-129): a água ondula (o brilho oscila e corre); com movimento reduzido, fica parada. */
+  animar: (agoraMs: number, reduzido: boolean) => void;
   /** Editor (marco 6C): redesenha o bloco da célula e o de cima (a parede depende de quem está abaixo). */
   redesenharCelula: (x: number, y: number) => void;
   /** Marco 26 (D-109): no isométrico, sem os enfeites altos e os pilares (redesenha os blocos na troca). */
@@ -149,7 +155,17 @@ interface Bloco {
   y0: number;
   x1: number;
   y1: number;
+  /** Marco 30 (D-129): desenhado agora (os longe da vista ficam vazios até voltarem). */
+  desenhado: boolean;
+  /** A camada animada do brilho da água (null sem água no bloco). */
+  agua: Graphics | null;
 }
+
+/** Até quantos blocos a fase desenha tudo de uma vez (64×64 células); acima, sob demanda. */
+const BLOCOS_DE_UMA_VEZ = 16;
+
+/** Margem (px de mundo) em volta da vista: perto dela o bloco é desenhado; além de três, descartado. */
+const MARGEM_BLOCO = BLOCO_CELULAS * CELULA_PX;
 
 export function criarTerreno(
   camada: Container,
@@ -175,6 +191,8 @@ export function criarTerreno(
   const desenharBloco = (b: Bloco) => {
     b.g.clear();
     if (b.c.children.length > 1) for (const filho of b.c.removeChildren(1)) filho.destroy();
+    b.agua = null;
+    b.desenhado = true;
     const fimX = Math.min(fase.largura, b.bx + BLOCO_CELULAS);
     const fimY = Math.min(fase.altura, b.by + BLOCO_CELULAS);
     for (let y = b.by; y < fimY; y++) {
@@ -215,8 +233,30 @@ export function criarTerreno(
       }
       b.c.addChild(ambientes);
     }
+    // Marco 30 (D-129): o brilho da água numa camada própria, por cima, para ondular sem redesenhar.
+    let temAgua = false;
+    const agua = new Graphics();
+    for (let y = b.by; y < fimY; y++) for (let x = b.bx; x < fimX; x++) {
+      if (tipoEm(fase, x, y) !== 'agua') continue;
+      desenharBrilhoDaAgua(agua, x, y);
+      temAgua = true;
+    }
+    if (temAgua) {
+      agua.stroke({ width: 1.2, color: COR_BRILHO_AGUA, alpha: 1 });
+      agua.alpha = 0.45;
+      b.c.addChild(agua);
+      b.agua = agua;
+    } else agua.destroy();
+  };
+  const descartarBloco = (b: Bloco) => {
+    b.g.clear();
+    if (b.c.children.length > 1) for (const filho of b.c.removeChildren(1)) filho.destroy();
+    b.agua = null;
+    b.desenhado = false;
   };
   const porLinha = Math.ceil(fase.largura / BLOCO_CELULAS);
+  // Marco 30 (D-129): só a fase grande (a região do Mundo) desenha sob demanda; a pequena desenha tudo de uma vez.
+  const sobDemanda = porLinha * Math.ceil(fase.altura / BLOCO_CELULAS) > BLOCOS_DE_UMA_VEZ;
   for (let by = 0; by < fase.altura; by += BLOCO_CELULAS) {
     for (let bx = 0; bx < fase.largura; bx += BLOCO_CELULAS) {
       const fimX = Math.min(fase.largura, bx + BLOCO_CELULAS);
@@ -224,8 +264,10 @@ export function criarTerreno(
       const c = new Container();
       const g = new Graphics();
       c.addChild(g);
-      const b: Bloco = { c, g, bx, by, x0: bx * CELULA_PX, y0: by * CELULA_PX, x1: fimX * CELULA_PX, y1: fimY * CELULA_PX };
-      desenharBloco(b);
+      const b: Bloco = { c, g, bx, by, x0: bx * CELULA_PX, y0: by * CELULA_PX, x1: fimX * CELULA_PX, y1: fimY * CELULA_PX, desenhado: false, agua: null };
+      // Marco 30 (D-129): sob demanda, o bloco nasce vazio e a primeira vista o desenha.
+      if (sobDemanda) c.visible = false;
+      else desenharBloco(b);
       camada.addChild(c);
       blocos.push(b);
     }
@@ -242,16 +284,39 @@ export function criarTerreno(
         const b = blocoDe(x + dx, y + dy);
         if (b) tocados.add(b);
       }
-      for (const b of tocados) desenharBloco(b);
+      for (const b of tocados) if (b.desenhado) desenharBloco(b);
     },
     definirVisao: (v) => {
       if (v === iso) return;
       iso = v;
-      for (const b of blocos) desenharBloco(b);
+      for (const b of blocos) if (b.desenhado) desenharBloco(b);
     },
     // Retângulo visível em px de mundo.
     atualizarVisibilidade: (x0, y0, x1, y1) => {
-      for (const b of blocos) b.c.visible = b.x1 > x0 && b.x0 < x1 && b.y1 > y0 && b.y0 < y1;
+      const dentro = (b: Bloco, m: number) => b.x1 > x0 - m && b.x0 < x1 + m && b.y1 > y0 - m && b.y0 < y1 + m;
+      for (const b of blocos) {
+        if (!sobDemanda) {
+          b.c.visible = dentro(b, 0);
+          continue;
+        }
+        if (dentro(b, MARGEM_BLOCO)) {
+          if (!b.desenhado) desenharBloco(b);
+        } else if (b.desenhado && !dentro(b, MARGEM_BLOCO * 3)) descartarBloco(b);
+        b.c.visible = b.desenhado && dentro(b, 0);
+      }
+    },
+    animar: (agoraMs, reduzido) => {
+      for (const b of blocos) {
+        if (!b.agua || !b.c.visible) continue;
+        if (reduzido) {
+          b.agua.alpha = 0.45;
+          b.agua.x = 0;
+          continue;
+        }
+        const fase = (b.bx * 0.37 + b.by * 0.61) % (Math.PI * 2);
+        b.agua.alpha = 0.3 + 0.25 * Math.sin(agoraMs / 650 + fase);
+        b.agua.x = 2 * Math.sin(agoraMs / 1100 + fase);
+      }
     },
     destruir: () => {
       for (const b of blocos) b.c.destroy({ children: true });

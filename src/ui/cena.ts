@@ -638,6 +638,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     const vista = camera.retanguloVisivel(palco.altura());
     terreno.atualizarVisibilidade(...vista);
     const reduzido = ap.movimentoReduzido();
+    terreno.animar(q.agoraMs, reduzido);
     objetos.desenhar(estado, q.agoraMs, reduzido, vista);
     portas.desenhar(estado, q.agoraMs, reduzido);
     fluxo.desenhar(estado, idLocal, ap.movimentoReduzido());

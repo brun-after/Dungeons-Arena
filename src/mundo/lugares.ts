@@ -76,7 +76,10 @@ export function montarLugar(conteudo: Conteudo, reino: Reino, lugar: Lugar, modo
     if (!r.ok) throw new Error(`região ${lugar.regiao.id} inválida: ${r.erro}`);
     // Marco 30 (30/10/2026, D-129): os muros da vila são refúgio (os monstros não entram nem atacam quem está dentro).
     const v = exterior.vila;
-    const ctx = v ? { ...r.ctx, fase: { ...r.ctx.fase, refugios: [{ x: v.x, y: v.y, raio: v.raio + 0.5 }] } } : r.ctx;
+    // E o tipo de cada estrutura (o render desenha a fachada pelo tipo).
+    const estruturas = lugar.regiao.estruturas.map((e) => ({ x: e.x, y: e.y, tipo: e.tipo }));
+    const fase = { ...r.ctx.fase, estruturas, ...(v && { refugios: [{ x: v.x, y: v.y, raio: v.raio + 0.5 }] }) };
+    const ctx = { ...r.ctx, fase };
     const estado = estadoInicialDaFase(ctx);
     estado.objetos.push(...objetosDoExterior(reino, exterior));
     return { ctx, estado, exterior };
