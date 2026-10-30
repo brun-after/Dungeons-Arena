@@ -19,6 +19,7 @@ import { simular } from '../core/simulacao';
 import { ticksDe } from '../core/tempo';
 import { conferirPersonagem, pedidoDoPersonagem, previaDoPersonagem, type PedidoDePersonagem } from '../coop/personagem';
 import { ehObjeto } from '../core/validar';
+import type { AcaoDoMundo } from '../mundo/acoes';
 import { xpTotal, type Certificado } from '../integridade/certificado';
 import type { FaixaDeNivel } from '../modos/modo';
 import { comandoAceitoEmRede, equipeDeEntrada, localDeRespawn } from '../modos/regras';
@@ -234,6 +235,9 @@ export class SalaArena {
       case 'viajar':
         if (sessao) this.aoViajar?.(sessao, msg.destino, msg.pagamento);
         return null;
+      case 'acaoMundo':
+        if (sessao) this.aoAcaoDoMundo?.(sessao, msg.acao);
+        return null;
       case 'cmd': {
         const rejeitar = (motivo: MotivoRejeicao) => {
           responder({ t: 'rejeitado', seq: msg.pacote.seq, motivo });
@@ -439,6 +443,9 @@ export class SalaArena {
 
   /** Marco 29 (D-128): o pedido de viagem pelo portal (só o Mundo trata). */
   protected aoViajar?(s: Sessao, destino: string, pagamento: 'ouro' | 'pergaminho'): void;
+
+  /** Marco 30 (D-129): as ações do Mundo fora da simulação (banco, missões, chat, grupo, troca, mercado). */
+  protected aoAcaoDoMundo?(s: Sessao, acao: AcaoDoMundo): void;
 
   /** Gancho: por que recusar o comando desta sessão (null = aceita). Na base, só o que o modo aceita pela rede. */
   protected motivoParaRecusar(s: Sessao, cmd: Comando): MotivoRejeicao | null {

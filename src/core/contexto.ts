@@ -334,6 +334,17 @@ export interface Balance {
     checkpointS: number;
     /** Invisível para inimigos por alguns segundos depois de passar de região. */
     passagemProtecaoS: number;
+    /** Marco 30 (D-129): o baú do banco (por personagem, em qualquer vila). */
+    banco: { slots: number };
+    /** Missões aceitas ao mesmo tempo e quantas o quadro oferece por dia. */
+    missoes: { ativasMax: number; ofertasPorQuadro: number };
+    /** Chat: o raio do canal local, o tamanho da mensagem, o limite por janela e o histórico do cliente. */
+    chat: { raioLocal: number; maxTexto: number; porJanela: number; janelaS: number; historico: number };
+    grupo: { max: number; conviteS: number };
+    /** Troca direta: a distância entre os dois e as pilhas por lado. */
+    troca: { raio: number; maxItens: number };
+    /** Mercado do reino: as taxas que tiram ouro da economia, o limite de anúncios, a validade e a página. */
+    mercado: { taxaAnuncioPct: number; taxaVendaPct: number; anunciosPorPersonagem: number; duracaoH: number; precoMax: number; pagina: number };
   };
   armadilhas: {
     revelarIntervaloMs: number;

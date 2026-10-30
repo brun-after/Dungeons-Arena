@@ -65,6 +65,8 @@ export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: bo
   const corDe = (e: Entidade, eu: Entidade | undefined): { cor: string; r: number } | null => {
     if (e.morto) return null;
     if (e.id === idLocal) return { cor: '#ffffff', r: 3 };
+    // Marco 30 (30/10/2026, D-129): os do meu grupo do Mundo, em azul e maiores.
+    if (eu?.grupo && e.grupo === eu.grupo) return { cor: '#3fa9f5', r: 3 };
     const rel = eu ? relacao(eu, e, ctx.modo) : 'hostil';
     // Marco 22 (D-089): o falcão do Aventureiro, em dourado.
     if (e.invocacao?.companheiro && rel !== 'hostil') return { cor: '#f5b041', r: 2 };

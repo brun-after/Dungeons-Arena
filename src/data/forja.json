@@ -372,6 +372,275 @@
         "tipo": "item",
         "item": "essencia_arcana"
       }
+    },
+    {
+      "id": "ferreiro_espada_curta",
+      "nome": "Espada curta",
+      "texto": "O ferreiro bate o ferro numa espada curta.",
+      "oficio": "ferreiro",
+      "entrada": [
+        {
+          "item": "minerio_ferro",
+          "qtd": 4
+        }
+      ],
+      "ouro": 8,
+      "saida": {
+        "tipo": "item",
+        "item": "espada_curta"
+      }
+    },
+    {
+      "id": "ferreiro_elmo_ferro",
+      "nome": "Elmo de ferro",
+      "texto": "Ferro e prata num elmo que aguenta pancada.",
+      "oficio": "ferreiro",
+      "entrada": [
+        {
+          "item": "minerio_ferro",
+          "qtd": 6
+        },
+        {
+          "item": "minerio_prata",
+          "qtd": 1
+        }
+      ],
+      "ouro": 15,
+      "saida": {
+        "tipo": "item",
+        "item": "elmo_ferro"
+      }
+    },
+    {
+      "id": "ferreiro_cota_malha",
+      "nome": "Cota de malha",
+      "texto": "Anéis de ferro e de prata, presos um a um.",
+      "oficio": "ferreiro",
+      "entrada": [
+        {
+          "item": "minerio_ferro",
+          "qtd": 10
+        },
+        {
+          "item": "minerio_prata",
+          "qtd": 3
+        }
+      ],
+      "ouro": 30,
+      "saida": {
+        "tipo": "item",
+        "item": "cota_malha"
+      }
+    },
+    {
+      "id": "ferreiro_luvas_couro",
+      "nome": "Luvas de couro",
+      "texto": "O couro do lobo, costurado com seda de aranha.",
+      "oficio": "ferreiro",
+      "entrada": [
+        {
+          "item": "presa_de_lobo",
+          "qtd": 3
+        },
+        {
+          "item": "seda_de_aranha",
+          "qtd": 2
+        }
+      ],
+      "ouro": 4,
+      "saida": {
+        "tipo": "item",
+        "item": "luvas_couro"
+      }
+    },
+    {
+      "id": "ferreiro_botas_rapidas",
+      "nome": "Botas rápidas",
+      "texto": "Seda de aranha e fivelas de prata: leves e firmes.",
+      "oficio": "ferreiro",
+      "entrada": [
+        {
+          "item": "seda_de_aranha",
+          "qtd": 4
+        },
+        {
+          "item": "minerio_prata",
+          "qtd": 2
+        }
+      ],
+      "ouro": 15,
+      "saida": {
+        "tipo": "item",
+        "item": "botas_rapidas"
+      }
+    },
+    {
+      "id": "ferreiro_escudo_madeira",
+      "nome": "Escudo de madeira",
+      "texto": "Madeira com aro de ferro e ossos antigos por dentro.",
+      "oficio": "ferreiro",
+      "entrada": [
+        {
+          "item": "minerio_ferro",
+          "qtd": 3
+        },
+        {
+          "item": "osso_antigo",
+          "qtd": 2
+        }
+      ],
+      "ouro": 12,
+      "saida": {
+        "tipo": "item",
+        "item": "escudo_madeira"
+      }
+    },
+    {
+      "id": "alquimista_pocao_vida",
+      "nome": "Poção de vida",
+      "texto": "Ervas curativas fervidas na gosma de slime.",
+      "oficio": "alquimista",
+      "entrada": [
+        {
+          "item": "erva_curativa",
+          "qtd": 2
+        },
+        {
+          "item": "gosma_de_slime",
+          "qtd": 1
+        }
+      ],
+      "ouro": 2,
+      "saida": {
+        "tipo": "item",
+        "item": "pocao_vida"
+      }
+    },
+    {
+      "id": "alquimista_pocao_mana",
+      "nome": "Poção de mana",
+      "texto": "A erva lunar destilada devolve a mana.",
+      "oficio": "alquimista",
+      "entrada": [
+        {
+          "item": "erva_lunar",
+          "qtd": 1
+        },
+        {
+          "item": "gosma_de_slime",
+          "qtd": 1
+        }
+      ],
+      "ouro": 2,
+      "saida": {
+        "tipo": "item",
+        "item": "pocao_mana"
+      }
+    },
+    {
+      "id": "alquimista_pocao_vida_maior",
+      "nome": "Poção de vida maior",
+      "texto": "Mais erva, mais fervura, mais vida.",
+      "oficio": "alquimista",
+      "entrada": [
+        {
+          "item": "erva_curativa",
+          "qtd": 4
+        },
+        {
+          "item": "gosma_de_slime",
+          "qtd": 2
+        }
+      ],
+      "ouro": 10,
+      "saida": {
+        "tipo": "item",
+        "item": "pocao_vida_maior"
+      }
+    },
+    {
+      "id": "alquimista_pocao_mana_maior",
+      "nome": "Poção de mana maior",
+      "texto": "Erva lunar destilada duas vezes.",
+      "oficio": "alquimista",
+      "entrada": [
+        {
+          "item": "erva_lunar",
+          "qtd": 3
+        },
+        {
+          "item": "gosma_de_slime",
+          "qtd": 1
+        }
+      ],
+      "ouro": 10,
+      "saida": {
+        "tipo": "item",
+        "item": "pocao_mana_maior"
+      }
+    },
+    {
+      "id": "alquimista_pergaminho_retorno",
+      "nome": "Pergaminho de retorno",
+      "texto": "Tinta de erva lunar em papel de seda: leva de volta à vila salva.",
+      "oficio": "alquimista",
+      "entrada": [
+        {
+          "item": "erva_lunar",
+          "qtd": 2
+        },
+        {
+          "item": "seda_de_aranha",
+          "qtd": 1
+        }
+      ],
+      "ouro": 12,
+      "saida": {
+        "tipo": "item",
+        "item": "pergaminho_retorno"
+      }
+    },
+    {
+      "id": "alquimista_essencia_arcana",
+      "nome": "Essência arcana",
+      "texto": "Cristais arcanos moídos e destilados com orelhas de goblin.",
+      "oficio": "alquimista",
+      "entrada": [
+        {
+          "item": "cristal_arcano",
+          "qtd": 6
+        },
+        {
+          "item": "orelha_de_goblin",
+          "qtd": 4
+        }
+      ],
+      "ouro": 300,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_arcana"
+      }
+    },
+    {
+      "id": "alquimista_essencia_fogo",
+      "nome": "Essência de fogo",
+      "texto": "Flores de fogo destiladas no próprio fogo.",
+      "oficio": "alquimista",
+      "entrada": [
+        {
+          "item": "flor_de_fogo",
+          "qtd": 6
+        },
+        {
+          "item": "cristal_arcano",
+          "qtd": 2
+        }
+      ],
+      "ouro": 300,
+      "saida": {
+        "tipo": "item",
+        "item": "essencia_fogo"
+      }
     }
   ]
 }

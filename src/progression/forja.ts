@@ -1,14 +1,20 @@
 // Forja (marco 18, 17/10/2026, D-070): na loja, materiais raros viram itens (5 fragmentos de eco = Anel do eco) e uma
 // peça Lendária sobe para a Última forma (com fragmentos e ouro). É a única porta da Última fora das missões e das
 // origens raras. Receitas em data/forja.json; o comando `forjar` só vale com a loja aberta.
+// Marco 30 (30/10/2026, D-129): a receita pode ter `oficio` (ferreiro, alquimista): só vale na loja daquele papel no
+// Mundo (o `ref` da loja). A sem ofício é a da campanha, nas lojas sem papel.
 
 import type { ContextoSimulacao } from '../core/contexto';
-import type { EstadoJogo } from '../core/estado';
+import type { EstadoJogo, ObjetoNoMundo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { Leitor } from '../core/validar';
 import type { Entidade } from '../entities/entidade';
 import { idItemBase, lerIdItemBase } from './gerar-item-base';
 import { guardarItem, recusarItem } from './inventario';
+import { lojaAberta } from './loja';
+
+export const OFICIOS = ['ferreiro', 'alquimista'] as const;
+export type Oficio = (typeof OFICIOS)[number];
 
 export interface ReceitaDeForja {
   id: string;
@@ -16,6 +22,8 @@ export interface ReceitaDeForja {
   texto: string;
   entrada: { item: string; qtd: number }[];
   ouro: number;
+  /** A loja que faz a receita (o papel do NPC no Mundo); null = a forja da campanha. */
+  oficio: Oficio | null;
   /** `item`: dá este item; `ascender`: a peça Lendária escolhida vira Última (mesma base, elemento, nível e semente). */
   saida: { tipo: 'item'; item: string } | { tipo: 'ascender' };
 }
@@ -37,6 +45,7 @@ export function lerForja(json: unknown): { receitas: Map<string, ReceitaDeForja>
         return { item: l.texto(e, 'item'), qtd: l.numero(e, 'qtd', { min: 1, max: 99, inteiro: true }) };
       }),
       ouro: o.ouro === undefined ? 0 : l.numero(o, 'ouro', { min: 0, max: 100_000, inteiro: true }),
+      oficio: o.oficio === undefined ? null : l.opcao(o, 'oficio', OFICIOS),
       saida: tipo === 'item' ? { tipo, item: l.texto(s, 'item') } : { tipo },
     });
   }
@@ -61,9 +70,14 @@ function gastar(e: Entidade, itemId: string, qtd: number): void {
   bolsa.mochila = bolsa.mochila.filter((i) => i.qtd > 0);
 }
 
+/** A receita é feita nesta loja? (o ofício da receita é o papel da loja; as sem ofício, nas lojas sem papel). */
+export const receitaDaLoja = (r: ReceitaDeForja, loja: ObjetoNoMundo): boolean => r.oficio === loja.ref;
+
 /** Pode forjar? (null = pode; senão o motivo, o mesmo que a recusa mostra). */
-export function motivoParaNaoForjar(ctx: ContextoSimulacao, e: Entidade, r: ReceitaDeForja, invId: string | null): 'loja_fechada' | 'sem_ouro' | 'sem_material' | 'nao_encontrado' | null {
-  if (e.interacao?.tipo !== 'loja' || !e.bolsa) return 'loja_fechada';
+export function motivoParaNaoForjar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, r: ReceitaDeForja, invId: string | null): 'loja_fechada' | 'sem_ouro' | 'sem_material' | 'nao_encontrado' | null {
+  const loja = lojaAberta(estado, e);
+  if (!loja || !e.bolsa) return 'loja_fechada';
+  if (!receitaDaLoja(r, loja)) return 'nao_encontrado';
   if (e.bolsa.ouro < r.ouro) return 'sem_ouro';
   if (r.entrada.some((x) => quantidade(e, x.item) < x.qtd)) return 'sem_material';
   if (r.saida.tipo === 'ascender') {
@@ -83,7 +97,7 @@ export function forjar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, 
     recusarItem(e, 'nao_encontrado', estado.tick, saida);
     return;
   }
-  const motivo = motivoParaNaoForjar(ctx, e, r, invId);
+  const motivo = motivoParaNaoForjar(estado, ctx, e, r, invId);
   if (motivo) {
     recusarItem(e, motivo === 'sem_material' ? 'sem_material' : motivo, estado.tick, saida);
     return;

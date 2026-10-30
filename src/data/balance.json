@@ -561,6 +561,12 @@
     "coleta": { "canalMs": 2500, "renascerS": 300, "raio": 1 },
     "covil": { "contribuicaoMinPct": 10 },
     "checkpointS": 60,
-    "passagemProtecaoS": 3
+    "passagemProtecaoS": 3,
+    "banco": { "slots": 40 },
+    "missoes": { "ativasMax": 5, "ofertasPorQuadro": 6 },
+    "chat": { "raioLocal": 20, "maxTexto": 160, "porJanela": 5, "janelaS": 10, "historico": 50 },
+    "grupo": { "max": 6, "conviteS": 60 },
+    "troca": { "raio": 4, "maxItens": 8 },
+    "mercado": { "taxaAnuncioPct": 2, "taxaVendaPct": 8, "anunciosPorPersonagem": 10, "duracaoH": 72, "precoMax": 1000000, "pagina": 20 }
   }
 }

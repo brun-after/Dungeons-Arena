@@ -35,7 +35,7 @@ const PERFIS: Readonly<Record<Bioma, PerfilDeBioma>> = {
 export type PontoDoExterior =
   | { tipo: 'npc'; papel: PapelNpc; x: number; y: number }
   | { tipo: 'coleta'; itemId: string; x: number; y: number }
-  | { tipo: 'estrutura'; estruturaId: string; porta: Celula; frente: Celula };
+  | { tipo: 'estrutura'; estruturaId: string; porta: Celula; frente: Celula; escondida: boolean };
 
 export interface ExteriorGerado {
   fase: FaseJson;
@@ -213,13 +213,14 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     for (let y = e.y - 2; y < e.y + e.altura + 2; y++) for (let x = e.x - 2; x < e.x + e.largura + 2; x++) if (g.interna(x, y)) g.por(x, y, perfil.chao);
     for (let y = e.y; y < e.y + e.altura; y++) {
       for (let x = e.x; x < e.x + e.largura; x++) {
-        g.por(x, y, 'F');
+        // Marco 30 (30/10/2026, D-129): a escondida é um rochedo como os outros (sem fachada nem estrada até ela).
+        g.por(x, y, e.escondida ? '#' : 'F');
         protegidas.add(y * n + x);
       }
     }
     const { porta, frente } = portaDa(e);
     g.por(porta.x, porta.y, '=');
-    pontos.push({ tipo: 'estrutura', estruturaId: e.id, porta, frente });
+    pontos.push({ tipo: 'estrutura', estruturaId: e.id, porta, frente, escondida: e.escondida });
   }
   if (regiao.vila) pontos.push(...erguerVila(g, regiao.vila, protegidas));
   const { passagens, entradas } = abrirPassagens(g, reino, regiao);
@@ -232,7 +233,7 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     return Math.abs(dx) > Math.abs(dy) ? { x: x + Math.sign(dx) * (raio + 1), y } : { x, y: y + Math.sign(dy || 1) * (raio + 1) };
   };
   for (const alvo of entradas) estrada(g, rng, saidaDaVila(alvo), alvo, protegidas);
-  for (const p of pontos) if (p.tipo === 'estrutura') estrada(g, rng, saidaDaVila(p.frente), p.frente, protegidas);
+  for (const p of pontos) if (p.tipo === 'estrutura' && !p.escondida) estrada(g, rng, saidaDaVila(p.frente), p.frente, protegidas);
   for (const lado of LADOS) for (const c of passagens[lado]) g.por(c.x, c.y, '=');
   // A frente da porta fica sempre livre.
   for (const p of pontos) if (p.tipo === 'estrutura') g.por(p.frente.x, p.frente.y, '=');
@@ -273,7 +274,11 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
   for (let i = 0; i < total && regiao.inimigos.length > 0; i++) {
     const c = sortearLivre((x) => !naVila(x) && spawns.every((s) => chebyshev(s, x) >= FOLGA_INIMIGOS));
     if (!c) continue;
-    inimigos.push({ preset: escolher(rng, regiao.inimigos), x: c.x, y: c.y, nivel: inteiro(rng, regiao.nivel[0], regiao.nivel[1]) });
+    const preset = escolher(rng, regiao.inimigos);
+    const nivel = inteiro(rng, regiao.nivel[0], regiao.nivel[1]);
+    // Marco 30 (D-129): a elite do perigo nasce acima do topo da faixa (mais forte e com mais XP e loot).
+    const elite = aleatorio(rng) * 100 < regras.elitePct;
+    inimigos.push({ preset, x: c.x, y: c.y, nivel: elite ? Math.min(100, regiao.nivel[1] + regras.eliteNiveis) : nivel });
   }
 
   const fase: FaseJson = {

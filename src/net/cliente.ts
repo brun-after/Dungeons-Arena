@@ -22,6 +22,7 @@ import { posicaoNoPasso, type PontoVisual } from '../entities/entidade';
 import { definirDirecao, integrarEntidade, planejarIrPara } from '../world/movimento';
 import { BufferRemoto } from './interpolacao-remota';
 import type { Transporte } from './transporte';
+import type { AcaoDoMundo } from '../mundo/acoes';
 import type { AvisoDoMundo } from '../mundo/avisos';
 
 /** Margem, em ticks, além do RTT, para o comando chegar antes do seu tick. */
@@ -133,6 +134,11 @@ export class ClienteArena {
   /** Marco 29 (D-128): viajar pelo portal do Mundo até a vila descoberta. */
   viajar(destino: string, pagamento: 'ouro' | 'pergaminho'): void {
     this.o.transporte.enviar(JSON.stringify({ t: 'viajar', destino, pagamento }));
+  }
+
+  /** Marco 30 (D-129): uma ação do Mundo (quadro, banco, chat, grupo, troca, mercado); a sala responde por aviso. */
+  acaoDoMundo(acao: AcaoDoMundo): void {
+    this.o.transporte.enviar(JSON.stringify({ t: 'acaoMundo', acao }));
   }
 
   private ping(): void {

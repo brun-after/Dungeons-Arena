@@ -67,6 +67,8 @@ function partilhaDeGrupo(estado: EstadoJogo, ctx: ContextoSimulacao, morto: Enti
   const partes = new Map<Entidade, number>([[matador, 1]]);
   for (const e of estado.entidades) {
     if (e === matador || !e.bolsa || !vivo(e) || !podeAjudar(matador, e, ctx.modo) || !podeFerir(e, morto, ctx.modo)) continue;
+    // Marco 30 (D-129): no Mundo, quem só estava perto leva a parte se for do grupo de quem abateu; quem lutou, sempre.
+    if (regra.exigeGrupo && (!matador.grupo || e.grupo !== matador.grupo) && !lutaram.includes(e)) continue;
     if (chebyshev(e, matador) <= regra.raio || lutaram.includes(e)) partes.set(e, regra.aliadoPct / 100);
   }
   return partes;
@@ -258,7 +260,9 @@ function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
   }
   if (!ctx.modo.loot.itens) return;
   // Ouro (marco 9A): só onde o modo solta itens, proporcional ao XP do inimigo.
-  const ouro = Math.round(e.xpBase * d.ouroPorXp * (0.5 + aleatorio(estado.rng)) * fatoresDoMundo(estado, ctx).recompensa);
+  // Marco 30 (D-129): o loot do lugar (no Mundo, pelo perigo da região).
+  const lootMult = (ctx.modo.lootPct ?? 100) / 100;
+  const ouro = Math.round(e.xpBase * d.ouroPorXp * (0.5 + aleatorio(estado.rng)) * fatoresDoMundo(estado, ctx).recompensa * lootMult);
   if (ouro > 0) largarPerto(ctx, e.x, e.y, (x, y) => largarOuro(estado, ouro, x, y, saida));
   // Marco 14: livro raro, com uma habilidade gerada pela semente no nível do inimigo (D-057).
   const livro = ctx.conteudo.itens.get(ID_LIVRO_RARO);
@@ -276,11 +280,25 @@ function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
     const essencia = ctx.conteudo.itens.get(`essencia_${familia}`);
     if (essencia) largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, essencia.id, x, y, saida));
   }
-  if (aleatorio(estado.rng) >= (boss ? d.chanceItemBoss : d.chanceItem)) return;
+  largarMateriais(estado, ctx, e, saida);
+  if (aleatorio(estado.rng) >= Math.min(1, (boss ? d.chanceItemBoss : d.chanceItem) * lootMult)) return;
   // Marco 27 (D-126): a sorte do Aventureiro nos pergaminhos (de quem abateu, ou do dono da invocação).
   const item = sortearItem(estado, ctx, boss, e.nivel, sorteDePergaminhoPct(ctx, quem ? creditado(estado, quem) : undefined));
   if (!item) return;
   largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, item.id, x, y, saida));
+}
+
+/**
+ * Marco 30 (30/10/2026, D-129): os materiais que o preset deixa (no Mundo, a tabela do reino), com um RNG próprio pela
+ * instância (não desloca o RNG do combate nem o do loot).
+ */
+function largarMateriais(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
+  const lista = ctx.modo.materiaisDeInimigos?.[e.preset];
+  if (!lista) return;
+  const rng = criarRng(hashTexto(`${estado.faseId}/${e.id}/${String(e.geracao)}/material`));
+  for (const m of lista) {
+    if (aleatorio(rng) * 100 < m.chancePct) largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, m.itemId, x, y, saida));
+  }
 }
 
 function celulaLivreParaRenascer(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, c: { x: number; y: number }): { x: number; y: number } {

@@ -13,6 +13,7 @@ import { guardarItem } from '../../src/progression/inventario';
 import { abateDe, processarMissoes, sortearOrigensRaras } from '../../src/progression/missoes';
 import { proximaFase } from '../../src/save/sequencia';
 import { catalogoDeGeracao, gerarFase } from '../../src/world/gerador';
+import { novoObjeto } from '../../src/world/objeto-novo';
 import campanha from '../../src/data/campanha.json';
 import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 
@@ -83,6 +84,8 @@ describe('forja', () => {
     const invId = obter(c.bolsa.mochila.find((i) => i.itemId === lendaria), 'entrada').invId;
     forjar(c.estado, c.ctx, c.j, 'ultima_forma', invId, c.eventos);
     expect(c.eventos.at(-1)).toMatchObject({ t: 'itemRecusado', motivo: 'loja_fechada' });
+    // Marco 30 (D-129): a forja confere a loja aberta (a receita sem ofício vale na loja sem papel).
+    c.estado.objetos.push(novoObjeto('l1', 'loja', 2, 2));
     c.j.interacao = { tipo: 'loja', objetoId: 'l1', ateTick: 2 ** 31 - 1 };
     forjar(c.estado, c.ctx, c.j, 'ultima_forma', invId, c.eventos);
     expect(c.bolsa.mochila.find((i) => i.invId === invId)?.itemId).toBe(idItemBase('arco', 'ultima', 'gelo', 6, 77));

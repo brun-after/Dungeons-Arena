@@ -1,44 +1,13 @@
 // Os painéis do Mundo (marco 29, 30/10/2026, D-128): a faixa do lugar (nome, canal e o aviso de perigo), o diálogo
-// do portal (as vilas descobertas, com o custo em ouro e o pergaminho de retorno), o quadro de missões e o mapa do
-// reino com névoa (só as regiões descobertas mostram o nome; a vila salva e o lugar atual ficam marcados).
+// do portal (as vilas descobertas, com o custo em ouro e o pergaminho de retorno) e o mapa do reino com névoa (só
+// as regiões descobertas mostram o nome; a vila salva e o lugar atual ficam marcados). O quadro de missões, o banco
+// e o mercado ficam em mundo-economia.ts; o chat, o grupo e a troca, em mundo-social.ts (marco 30).
 // Texto sempre por `textContent` (nada de HTML montado à mão).
 
 import { t, type ChaveTexto } from '../i18n';
 import type { AvisoDoMundo } from '../mundo/avisos';
 import type { Reino } from '../mundo/reino';
-
-function dialogo(titulo: string): { el: HTMLDialogElement; corpo: HTMLElement; fechar: () => void } {
-  const el = document.createElement('dialog');
-  el.className = 'modal';
-  const topo = document.createElement('div');
-  topo.className = 'modal-topo';
-  const h = document.createElement('h2');
-  h.textContent = titulo;
-  const x = document.createElement('button');
-  x.type = 'button';
-  x.className = 'botao-cabecalho';
-  x.textContent = t('mundo.portal.fechar');
-  const corpo = document.createElement('div');
-  corpo.className = 'modal-corpo';
-  topo.append(h, x);
-  el.append(topo, corpo);
-  const fechar = () => {
-    el.close();
-    el.remove();
-  };
-  x.addEventListener('click', fechar);
-  el.addEventListener('cancel', fechar);
-  document.body.append(el);
-  el.showModal();
-  return { el, corpo, fechar };
-}
-
-function paragrafo(texto: string, classe = 'vazio-modal'): HTMLParagraphElement {
-  const p = document.createElement('p');
-  p.className = classe;
-  p.textContent = texto;
-  return p;
-}
+import { dialogo, paragrafo } from './mundo-dialogos';
 
 /** O portal: um botão por vila descoberta (pagando ouro) e o pergaminho de retorno, quando há. */
 export function abrirPortal(aviso: Extract<AvisoDoMundo, { tipo: 'portais' }>, agoraMs: number, viajar: (destino: string, pagamento: 'ouro' | 'pergaminho') => void): void {
@@ -73,11 +42,6 @@ export function abrirPortal(aviso: Extract<AvisoDoMundo, { tipo: 'portais' }>, a
     }
     d.corpo.append(linha);
   }
-}
-
-export function abrirQuadro(): void {
-  const d = dialogo(t('mundo.quadro.titulo'));
-  d.corpo.append(paragrafo(t('mundo.quadro.texto')));
 }
 
 /** O texto do aviso de perigo do lugar. */
@@ -149,8 +113,11 @@ export function textoDoAviso(a: AvisoDoMundo): string | null {
       return t('mundo.salvo');
     case 'descoberta':
       return t('mundo.descoberta', { nome: a.nome });
-    case 'recompensa':
-      return t('mundo.recompensa', { nome: a.nome });
+    case 'recompensa': {
+      // Marco 30 (D-129): a recompensa da missão diz o ouro e a XP.
+      const extras = [a.ouro ? t('mundo.quadro.ouro', { ouro: a.ouro }) : '', a.xp ? t('mundo.quadro.xp', { xp: a.xp }) : ''].filter((x) => x !== '');
+      return extras.length > 0 ? t('mundo.recompensaCom', { nome: a.nome, extras: extras.join(' · ') }) : t('mundo.recompensa', { nome: a.nome });
+    }
     case 'recusa':
       return t(`mundo.recusa.${a.motivo}` as ChaveTexto);
     default:

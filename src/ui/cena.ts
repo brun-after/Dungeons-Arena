@@ -525,7 +525,9 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     isometrico,
     teclas: () => aparencia.teclasMovimento,
     aoMochila: mochila.alternar,
-    bloqueado: () => mochila.aberta() || loja.aberta() || ap.menuAberto() || seletor.aberto(),
+    // Marco 30 (30/10/2026, D-129): qualquer diálogo modal aberto (os do Mundo: quadro, banco, mercado, troca, portal)
+    // fica com o teclado; o Esc dele fecha o diálogo, não abre a pausa.
+    bloqueado: () => mochila.aberta() || loja.aberta() || ap.menuAberto() || seletor.aberto() || document.querySelector('dialog.modal[open]') !== null,
   });
   // Marco 26 (26/10/2026, D-115): com mouse, segurar o botão guia como o joystick (o vetor até o cursor).
   let posicaoVisual: { x: number; y: number } | null = null;

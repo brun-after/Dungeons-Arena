@@ -28,6 +28,7 @@ import { regenerarPorPasso } from '../progression/recursos';
 import { bloqueia, celulaLivrePara, ordemRotativa } from './colisao';
 import { corpoCabe, suavizarCaminho, type Barreira } from './corpo';
 import { passavel } from './fase';
+import { barradoNoRefugio, emRefugio } from './refugio';
 import { GradeDeCorpos } from './grade-corpos';
 import { alcancavelMaisPerto, caminho, caminhoComCusto } from './navegacao';
 
@@ -343,6 +344,8 @@ function contornar(e: Entidade, sx: number, sy: number, estado: EstadoJogo, ctx:
 function cabe(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: ContextoSimulacao, grade?: GradeDeCorpos): boolean {
   const r = ctx.balance.movimento.raioCorpo;
   if (!corpoCabe(ctx.fase, x, y, r, (i, j) => muralhaEm(estado, i, j) !== undefined)) return false;
+  // Marco 30 (30/10/2026, D-129): o monstro não entra no refúgio (os muros da vila do Mundo).
+  if (barradoNoRefugio(e) && emRefugio(ctx.fase, x, y)) return false;
   return !bloqueadoPorEntidade(e, x, y, estado, ctx, grade);
 }
 

@@ -2,15 +2,17 @@
 // `personagens_mundo` (coluna `ficha`). O personagem é separado da campanha (slots próprios, nível 1 ao criar) e o
 // cliente nunca manda a ficha: o servidor a carrega e a usa como verdade. Ao carregar, a progressão passa pela
 // mesma conferência da campanha em grupo (`conferirPersonagem`), como um sanity check. Puro.
+// Marco 30 (30/10/2026, D-129): a ficha ganha o baú do banco (fora da mochila: a morte não leva) e as missões do
+// quadro (as aceitas, com o progresso, e as feitas por dia). A versão 1 lê com os dois vazios.
 
 import type { ContextoSimulacao } from '../core/contexto';
 import { ehObjeto } from '../core/validar';
-import type { Entidade } from '../entities/entidade';
+import type { Entidade, ItemNaMochila } from '../entities/entidade';
 import { criarJogador } from '../entities/fabrica';
 import { pedidoDoPersonagem, type PedidoDePersonagem } from '../coop/personagem';
 import type { Reino } from './reino';
 
-export const VERSAO_FICHA_MUNDO = 1;
+export const VERSAO_FICHA_MUNDO = 2;
 export const SLOTS_DO_MUNDO = 3;
 const MAX_NOME = 24;
 
@@ -25,6 +27,43 @@ export interface FichaDoMundo {
   recargas: Record<string, number>;
   /** Hora (ms) em que o portal volta a ficar livre para o personagem. */
   portalLivreEm: number;
+  /** Marco 30: o baú do banco (os mesmos itens da mochila, com o próprio invId) e o ouro guardado. */
+  banco: { itens: ItemNaMochila[]; ouro: number };
+  /** Marco 30: as missões aceitas (o progresso e o dia em que foram aceitas) e o dia em que cada uma foi entregue. */
+  missoes: { ativas: MissaoAtiva[]; feitas: Record<string, number> };
+}
+
+export interface MissaoAtiva {
+  id: string;
+  progresso: number;
+  /** O dia (desde a época, no relógio do servidor) em que foi aceita. */
+  dia: number;
+}
+
+const MAX_ITENS_BANCO = 500;
+const MAX_MISSOES = 50;
+
+function lerItens(v: unknown): ItemNaMochila[] {
+  if (!Array.isArray(v)) return [];
+  const itens: ItemNaMochila[] = [];
+  for (const x of v.slice(0, MAX_ITENS_BANCO)) {
+    if (!ehObjeto(x) || typeof x.invId !== 'string' || typeof x.itemId !== 'string' || typeof x.qtd !== 'number' || !Number.isInteger(x.qtd) || x.qtd < 1) continue;
+    itens.push({ invId: x.invId, itemId: x.itemId, qtd: x.qtd, ref: typeof x.ref === 'string' ? x.ref : null });
+  }
+  return itens;
+}
+
+const inteiroNaoNegativo = (v: unknown): number => (typeof v === 'number' && Number.isFinite(v) && v >= 0 ? Math.floor(v) : 0);
+
+function lerMissoes(v: unknown): FichaDoMundo['missoes'] {
+  const o = ehObjeto(v) ? v : {};
+  const ativas: MissaoAtiva[] = [];
+  for (const x of Array.isArray(o.ativas) ? o.ativas.slice(0, MAX_MISSOES) : []) {
+    if (ehObjeto(x) && typeof x.id === 'string') ativas.push({ id: x.id, progresso: inteiroNaoNegativo(x.progresso), dia: inteiroNaoNegativo(x.dia) });
+  }
+  const feitas: Record<string, number> = {};
+  if (ehObjeto(o.feitas)) for (const [k, x] of Object.entries(o.feitas).slice(0, 500)) feitas[k] = inteiroNaoNegativo(x);
+  return { ativas, feitas };
 }
 
 /** O personagem novo do Mundo: nível 1 da classe, na vila de início do reino. */
@@ -36,7 +75,16 @@ export function fichaNova(ctx: Pick<ContextoSimulacao, 'conteudo' | 'balance'>, 
   if (e.bolsa) e.bolsa.personagemId = personagemId;
   const personagem = pedidoDoPersonagem(e);
   if (!personagem) return null;
-  return { versao: VERSAO_FICHA_MUNDO, personagem, vilaSalva: reino.inicio, descobertas: [`regiao:${reino.inicio}`], recargas: {}, portalLivreEm: 0 };
+  return {
+    versao: VERSAO_FICHA_MUNDO,
+    personagem,
+    vilaSalva: reino.inicio,
+    descobertas: [`regiao:${reino.inicio}`],
+    recargas: {},
+    portalLivreEm: 0,
+    banco: { itens: [], ouro: 0 },
+    missoes: { ativas: [], feitas: {} },
+  };
 }
 
 /** Lê a ficha guardada; o que faltar ou vier torto volta ao padrão (o personagem é conferido ao entrar). */
@@ -53,6 +101,8 @@ export function lerFichaDoMundo(v: unknown, reino: Reino): FichaDoMundo | null {
     descobertas: [...new Set([`regiao:${reino.inicio}`, ...descobertas])],
     recargas,
     portalLivreEm: typeof v.portalLivreEm === 'number' && Number.isFinite(v.portalLivreEm) ? v.portalLivreEm : 0,
+    banco: { itens: lerItens(ehObjeto(v.banco) ? v.banco.itens : null), ouro: inteiroNaoNegativo(ehObjeto(v.banco) ? v.banco.ouro : 0) },
+    missoes: lerMissoes(v.missoes),
   };
 }
 

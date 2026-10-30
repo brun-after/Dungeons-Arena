@@ -34,7 +34,7 @@ export function objetosDoExterior(reino: Reino, exterior: ExteriorGerado): Objet
   for (const [i, p] of exterior.pontos.entries()) {
     const id = `m${i}`;
     if (p.tipo === 'estrutura') {
-      objetos.push(novoObjeto(id, 'porta_estrutura', p.porta.x, p.porta.y, { ref: p.estruturaId }));
+      objetos.push(novoObjeto(id, 'porta_estrutura', p.porta.x, p.porta.y, { ref: p.estruturaId, ...(p.escondida && { escondido: true }) }));
     } else if (p.tipo === 'coleta') {
       objetos.push(novoObjeto(id, 'coleta', p.x, p.y, { itemId: p.itemId }));
     } else if (PAPEIS_DE_LOJA.has(p.papel)) {

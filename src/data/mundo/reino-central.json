@@ -1,5 +1,5 @@
 {
-  "versao": 1,
+  "versao": 2,
   "id": "reino_central",
   "nome": "Reino Central",
   "tamanhoRegiao": 128,
@@ -8,8 +8,8 @@
   "inicio": "vila_do_centro",
   "perigos": {
     "seguro": { "pvp": false, "densidadePor1000": 2, "elitePct": 0, "lootPct": 100 },
-    "normal": { "pvp": false, "densidadePor1000": 5, "elitePct": 6, "lootPct": 110 },
-    "perigoso": { "pvp": true, "densidadePor1000": 8, "elitePct": 20, "lootPct": 180 }
+    "normal": { "pvp": false, "densidadePor1000": 5, "elitePct": 6, "eliteNiveis": 4, "lootPct": 110 },
+    "perigoso": { "pvp": true, "densidadePor1000": 8, "elitePct": 20, "eliteNiveis": 6, "lootPct": 180 }
   },
   "lojas": {
     "mercador": ["pocao_vida", "pocao_mana", "pergaminho_lobo", "pergaminho_espantalho", "chave_ferro", "kit_de_engenho"],
@@ -20,7 +20,7 @@
     {
       "id": "vila_do_centro", "nome": "Vila do Centro", "gx": 1, "gy": 1, "bioma": "campo", "perigo": "seguro",
       "nivel": [1, 4], "tema": null, "semente": 1101, "inimigos": ["slime", "goblin"],
-      "vila": { "nome": "Vila do Centro", "x": 64, "y": 64, "raio": 16, "npcs": ["save", "portal", "mercador", "ferreiro", "alquimista", "missoes"] },
+      "vila": { "nome": "Vila do Centro", "x": 64, "y": 64, "raio": 16, "npcs": ["save", "portal", "mercador", "ferreiro", "alquimista", "missoes", "banco", "mercado"] },
       "estruturas": [],
       "coleta": [{ "itemId": "erva_curativa", "quantidade": 10 }, { "itemId": "minerio_ferro", "quantidade": 6 }]
     },
@@ -30,12 +30,12 @@
       "estruturas": [
         { "id": "porta_toca_goblins", "nome": "Toca dos Goblins", "tipo": "caverna", "x": 30, "y": 36, "largura": 5, "altura": 4, "destino": { "tipo": "masmorra", "id": "toca_dos_goblins" } }
       ],
-      "coleta": [{ "itemId": "erva_curativa", "quantidade": 12 }, { "itemId": "minerio_ferro", "quantidade": 8 }, { "itemId": "orelha_de_goblin", "quantidade": 3 }]
+      "coleta": [{ "itemId": "erva_curativa", "quantidade": 12 }, { "itemId": "minerio_ferro", "quantidade": 8 }]
     },
     {
       "id": "encosta_do_leste", "nome": "Encosta do Leste", "gx": 2, "gy": 1, "bioma": "colinas", "perigo": "seguro",
       "nivel": [5, 9], "tema": null, "semente": 1301, "inimigos": ["orc", "goblin", "lobo"],
-      "vila": { "nome": "Pedravale", "x": 64, "y": 70, "raio": 12, "npcs": ["save", "portal", "mercador", "ferreiro"] },
+      "vila": { "nome": "Pedravale", "x": 64, "y": 70, "raio": 12, "npcs": ["save", "portal", "mercador", "ferreiro", "alquimista", "missoes", "banco", "mercado"] },
       "estruturas": [
         { "id": "porta_catacumbas", "nome": "Catacumbas de Pedravale", "tipo": "cripta", "x": 92, "y": 26, "largura": 5, "altura": 4, "destino": { "tipo": "masmorra", "id": "catacumbas_pedravale" } }
       ],
@@ -45,7 +45,7 @@
       "id": "floresta_antiga", "nome": "Floresta Antiga", "gx": 0, "gy": 0, "bioma": "floresta", "perigo": "normal",
       "nivel": [4, 9], "tema": "floresta_antiga", "semente": 1001, "inimigos": ["lobo", "aranha", "goblin"],
       "estruturas": [],
-      "coleta": [{ "itemId": "erva_curativa", "quantidade": 8 }, { "itemId": "erva_lunar", "quantidade": 6 }, { "itemId": "presa_de_lobo", "quantidade": 4 }, { "itemId": "seda_de_aranha", "quantidade": 4 }]
+      "coleta": [{ "itemId": "erva_curativa", "quantidade": 8 }, { "itemId": "erva_lunar", "quantidade": 6 }]
     },
     {
       "id": "ruinas_do_norte", "nome": "Ruínas do Norte", "gx": 1, "gy": 0, "bioma": "ruinas", "perigo": "perigoso",
@@ -53,7 +53,7 @@
       "estruturas": [
         { "id": "porta_ninho_dragao", "nome": "Ninho do Dragão", "tipo": "castelo", "x": 58, "y": 22, "largura": 9, "altura": 6, "destino": { "tipo": "covil", "id": "ninho_do_dragao" } }
       ],
-      "coleta": [{ "itemId": "cristal_arcano", "quantidade": 6 }, { "itemId": "minerio_prata", "quantidade": 6 }, { "itemId": "osso_antigo", "quantidade": 5 }]
+      "coleta": [{ "itemId": "cristal_arcano", "quantidade": 6 }, { "itemId": "minerio_prata", "quantidade": 6 }]
     },
     {
       "id": "pico_gelado", "nome": "Pico Gelado", "gx": 2, "gy": 0, "bioma": "neve", "perigo": "normal",
@@ -69,7 +69,7 @@
       "estruturas": [
         { "id": "porta_cabana_bruxa", "nome": "Cabana da Bruxa", "tipo": "torre", "x": 34, "y": 80, "largura": 5, "altura": 5, "destino": { "tipo": "covil", "id": "cabana_da_bruxa" } }
       ],
-      "coleta": [{ "itemId": "flor_de_fogo", "quantidade": 6 }, { "itemId": "erva_lunar", "quantidade": 8 }, { "itemId": "gosma_de_slime", "quantidade": 5 }]
+      "coleta": [{ "itemId": "flor_de_fogo", "quantidade": 6 }, { "itemId": "erva_lunar", "quantidade": 8 }]
     },
     {
       "id": "bosque_do_sul", "nome": "Bosque do Sul", "gx": 1, "gy": 2, "bioma": "floresta", "perigo": "normal",
@@ -78,7 +78,7 @@
         { "id": "porta_mina_abandonada", "nome": "Mina Abandonada", "tipo": "mina", "x": 36, "y": 88, "largura": 5, "altura": 4, "destino": { "tipo": "masmorra", "id": "mina_abandonada" } },
         { "id": "porta_minas_rei_goblin", "nome": "Minas do Rei Goblin", "tipo": "mina", "x": 88, "y": 86, "largura": 7, "altura": 5, "destino": { "tipo": "covil", "id": "minas_do_rei_goblin" } }
       ],
-      "coleta": [{ "itemId": "erva_curativa", "quantidade": 8 }, { "itemId": "minerio_ferro", "quantidade": 8 }, { "itemId": "seda_de_aranha", "quantidade": 4 }]
+      "coleta": [{ "itemId": "erva_curativa", "quantidade": 8 }, { "itemId": "minerio_ferro", "quantidade": 8 }]
     },
     {
       "id": "colinas_do_sudeste", "nome": "Colinas do Sudeste", "gx": 2, "gy": 2, "bioma": "colinas", "perigo": "normal",
@@ -97,5 +97,40 @@
     { "id": "minas_do_rei_goblin", "nome": "Minas do Rei Goblin", "nivel": 12, "salas": 5, "tema": "mina", "inimigos": ["goblin", "orc"], "boss": "rei_goblin", "dropExclusivo": "coroa_do_rei_goblin", "chanceDropPct": 35, "renascerMin": 20 },
     { "id": "cabana_da_bruxa", "nome": "Cabana da Bruxa", "nivel": 18, "salas": 5, "tema": "pantano", "inimigos": ["slime", "cultista", "aranha"], "boss": "bruxa_do_pantano", "dropExclusivo": "amuleto_da_bruxa", "chanceDropPct": 30, "renascerMin": 25 },
     { "id": "ninho_do_dragao", "nome": "Ninho do Dragão", "nivel": 28, "salas": 6, "tema": "vulcao", "inimigos": ["cultista", "cavaleiro_da_morte"], "boss": "dragao_das_ruinas", "dropExclusivo": "manto_de_escamas", "chanceDropPct": 25, "renascerMin": 40 }
+  ],
+  "materiais": {
+    "goblin": [{"itemId": "orelha_de_goblin", "chancePct": 35}],
+    "lobo": [{"itemId": "presa_de_lobo", "chancePct": 30}],
+    "aranha": [{"itemId": "seda_de_aranha", "chancePct": 30}],
+    "slime": [{"itemId": "gosma_de_slime", "chancePct": 30}],
+    "esqueleto": [{"itemId": "osso_antigo", "chancePct": 30}],
+    "esqueleto_profano": [{"itemId": "osso_antigo", "chancePct": 45}],
+    "dragao_das_ruinas": [{"itemId": "escama_de_dragao", "chancePct": 100}],
+    "cavaleiro_da_morte": [{"itemId": "escama_de_dragao", "chancePct": 8}]
+  },
+  "missoes": [
+    {"id": "limpar_os_campos", "nome": "Limpar os campos", "texto": "Derrote 10 slimes perto da Vila do Centro.", "vilas": ["vila_do_centro"], "alvo": {"tipo": "cacar", "preset": "slime", "qtd": 10, "regiao": "vila_do_centro"}, "recompensa": {"ouro": 40, "xp": 60}},
+    {"id": "orelhas_de_goblin", "nome": "Orelhas de goblin", "texto": "Traga 6 orelhas de goblin: só os goblins as deixam.", "vilas": ["vila_do_centro"], "alvo": {"tipo": "entregar", "itemId": "orelha_de_goblin", "qtd": 6}, "recompensa": {"ouro": 60, "xp": 90}},
+    {"id": "bando_do_oeste", "nome": "O bando do oeste", "texto": "Derrote 12 goblins nos Campos do Oeste.", "vilas": ["vila_do_centro"], "alvo": {"tipo": "cacar", "preset": "goblin", "qtd": 12, "regiao": "campos_do_oeste"}, "recompensa": {"ouro": 70, "xp": 120}},
+    {"id": "ervas_para_o_curandeiro", "nome": "Ervas para o curandeiro", "texto": "Colha 8 ervas curativas.", "vilas": ["vila_do_centro"], "alvo": {"tipo": "entregar", "itemId": "erva_curativa", "qtd": 8}, "recompensa": {"ouro": 50, "xp": 70, "itens": ["pocao_vida"]}},
+    {"id": "ferro_para_a_forja", "nome": "Ferro para a forja", "texto": "Traga 6 minérios de ferro.", "vilas": ["vila_do_centro", "encosta_do_leste"], "alvo": {"tipo": "entregar", "itemId": "minerio_ferro", "qtd": 6}, "recompensa": {"ouro": 60, "xp": 80}},
+    {"id": "lobos_da_floresta", "nome": "Os lobos da floresta", "texto": "Derrote 10 lobos na Floresta Antiga.", "vilas": ["vila_do_centro"], "alvo": {"tipo": "cacar", "preset": "lobo", "qtd": 10, "regiao": "floresta_antiga"}, "recompensa": {"ouro": 90, "xp": 200}},
+    {"id": "presas_de_lobo", "nome": "Presas de lobo", "texto": "Traga 5 presas de lobo.", "vilas": ["vila_do_centro"], "alvo": {"tipo": "entregar", "itemId": "presa_de_lobo", "qtd": 5}, "recompensa": {"ouro": 80, "xp": 160}},
+    {"id": "teias_do_bosque", "nome": "Teias do bosque", "texto": "Derrote 10 aranhas no Bosque do Sul.", "vilas": ["vila_do_centro", "encosta_do_leste"], "alvo": {"tipo": "cacar", "preset": "aranha", "qtd": 10, "regiao": "bosque_do_sul"}, "recompensa": {"ouro": 110, "xp": 260}},
+    {"id": "seda_para_o_alfaiate", "nome": "Seda para o alfaiate", "texto": "Traga 5 sedas de aranha.", "vilas": ["vila_do_centro", "encosta_do_leste"], "alvo": {"tipo": "entregar", "itemId": "seda_de_aranha", "qtd": 5}, "recompensa": {"ouro": 100, "xp": 240}},
+    {"id": "a_toca_dos_goblins", "nome": "A Toca dos Goblins", "texto": "Conclua a Toca dos Goblins.", "vilas": ["vila_do_centro"], "alvo": {"tipo": "masmorra", "masmorra": "toca_dos_goblins"}, "recompensa": {"ouro": 150, "xp": 300, "itens": ["pergaminho_retorno"]}},
+    {"id": "a_mina_abandonada", "nome": "A Mina Abandonada", "texto": "Conclua a Mina Abandonada.", "vilas": ["vila_do_centro", "encosta_do_leste"], "alvo": {"tipo": "masmorra", "masmorra": "mina_abandonada"}, "recompensa": {"ouro": 220, "xp": 500}},
+    {"id": "o_rei_goblin", "nome": "O Rei Goblin", "texto": "Derrube o Rei Goblin nas Minas (com a sua parte do dano).", "vilas": ["vila_do_centro", "encosta_do_leste"], "alvo": {"tipo": "covil", "covil": "minas_do_rei_goblin"}, "recompensa": {"ouro": 400, "xp": 1200, "itens": ["pocao_vida_maior"]}},
+    {"id": "orcs_da_encosta", "nome": "Os orcs da encosta", "texto": "Derrote 10 orcs na Encosta do Leste.", "vilas": ["encosta_do_leste"], "alvo": {"tipo": "cacar", "preset": "orc", "qtd": 10, "regiao": "encosta_do_leste"}, "recompensa": {"ouro": 140, "xp": 380}},
+    {"id": "trolls_do_pico", "nome": "Os trolls do pico", "texto": "Derrote 6 trolls no Pico Gelado.", "vilas": ["encosta_do_leste"], "alvo": {"tipo": "cacar", "preset": "troll", "qtd": 6, "regiao": "pico_gelado"}, "recompensa": {"ouro": 220, "xp": 700}},
+    {"id": "ossos_antigos", "nome": "Ossos antigos", "texto": "Traga 6 ossos antigos: os esqueletos os deixam.", "vilas": ["encosta_do_leste"], "alvo": {"tipo": "entregar", "itemId": "osso_antigo", "qtd": 6}, "recompensa": {"ouro": 180, "xp": 520}},
+    {"id": "as_catacumbas", "nome": "As Catacumbas", "texto": "Conclua as Catacumbas de Pedravale.", "vilas": ["encosta_do_leste"], "alvo": {"tipo": "masmorra", "masmorra": "catacumbas_pedravale"}, "recompensa": {"ouro": 260, "xp": 650, "itens": ["pergaminho_retorno"]}},
+    {"id": "a_caverna_de_gelo", "nome": "A Caverna de Gelo", "texto": "Ache e conclua a Caverna de Gelo, escondida no Pico Gelado.", "vilas": ["encosta_do_leste"], "alvo": {"tipo": "masmorra", "masmorra": "caverna_de_gelo"}, "recompensa": {"ouro": 380, "xp": 1100}},
+    {"id": "cultistas_do_pantano", "nome": "Os cultistas do pântano", "texto": "Derrote 8 cultistas no Pântano Sombrio.", "vilas": ["encosta_do_leste"], "alvo": {"tipo": "cacar", "preset": "cultista", "qtd": 8, "regiao": "pantano_sombrio"}, "recompensa": {"ouro": 300, "xp": 1000}},
+    {"id": "cristais_arcanos", "nome": "Cristais arcanos", "texto": "Traga 4 cristais arcanos.", "vilas": ["encosta_do_leste"], "alvo": {"tipo": "entregar", "itemId": "cristal_arcano", "qtd": 4}, "recompensa": {"ouro": 260, "xp": 800}},
+    {"id": "a_bruxa_do_pantano", "nome": "A Bruxa do Pântano", "texto": "Derrube a Bruxa do Pântano na cabana (com a sua parte do dano).", "vilas": ["encosta_do_leste"], "alvo": {"tipo": "covil", "covil": "cabana_da_bruxa"}, "recompensa": {"ouro": 700, "xp": 2400, "itens": ["pocao_mana_maior"]}},
+    {"id": "ruinas_assombradas", "nome": "Ruínas assombradas", "texto": "Derrote 12 esqueletos nas Ruínas do Norte (região com PvP).", "vilas": ["encosta_do_leste"], "alvo": {"tipo": "cacar", "preset": "esqueleto", "qtd": 12, "regiao": "ruinas_do_norte"}, "recompensa": {"ouro": 600, "xp": 2600}},
+    {"id": "escamas_de_dragao", "nome": "Escamas de dragão", "texto": "Traga 2 escamas de dragão.", "vilas": ["encosta_do_leste"], "alvo": {"tipo": "entregar", "itemId": "escama_de_dragao", "qtd": 2}, "recompensa": {"ouro": 900, "xp": 3500}},
+    {"id": "o_dragao_das_ruinas", "nome": "O Dragão das Ruínas", "texto": "Derrube o Dragão no seu ninho (com a sua parte do dano).", "vilas": ["encosta_do_leste"], "alvo": {"tipo": "covil", "covil": "ninho_do_dragao"}, "recompensa": {"ouro": 1500, "xp": 6000, "itens": ["pocao_vida_maior", "pocao_mana_maior"]}}
   ]
 }

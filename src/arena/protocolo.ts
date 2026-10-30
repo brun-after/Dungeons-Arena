@@ -2,6 +2,7 @@
 // o que chega do cliente. Estado recebido de cliente nunca é confiado: o servidor deriva o jogador
 // da sessão e rejeita, com motivo, mensagens grandes, malformadas ou com números não finitos.
 
+import { lerAcaoDoMundo, type AcaoDoMundo } from '../mundo/acoes';
 import type { AvisoDoMundo } from '../mundo/avisos';
 import type { Celula, Comando, ComandoEmpacotado, Dir8 } from '../core/comandos';
 import { FONTES_OFICIAIS } from '../core/conteudo';
@@ -32,7 +33,9 @@ export type MensagemCliente =
   /** Marco 17: pede o personagem atual, certificado (só para quem entrou com a ficha inteira). */
   | { t: 'pedirCertificado' }
   /** Marco 29 (D-128): no Mundo, viajar pelo portal até a vila descoberta (`ouro` ou `pergaminho`). */
-  | { t: 'viajar'; destino: string; pagamento: 'ouro' | 'pergaminho' };
+  | { t: 'viajar'; destino: string; pagamento: 'ouro' | 'pergaminho' }
+  /** Marco 30 (D-129): no Mundo, o banco, as missões, o chat, o grupo, a troca e o mercado (src/mundo/acoes.ts). */
+  | { t: 'acaoMundo'; acao: AcaoDoMundo };
 
 export type MotivoRejeicao =
   | 'grande_demais'
@@ -232,6 +235,10 @@ export function lerMensagemCliente(texto: string): LeituraCliente {
     case 'viajar':
       if (!id(bruto.destino) || (bruto.pagamento !== 'ouro' && bruto.pagamento !== 'pergaminho')) return malformada();
       return { ok: true, msg: { t: 'viajar', destino: bruto.destino, pagamento: bruto.pagamento } };
+    case 'acaoMundo': {
+      const acao = lerAcaoDoMundo(bruto.acao);
+      return acao ? { ok: true, msg: { t: 'acaoMundo', acao } } : malformada();
+    }
     default:
       return malformada();
   }

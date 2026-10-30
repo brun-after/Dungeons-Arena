@@ -25,7 +25,7 @@
   "comandosDeRede": ["mover", "irPara", "usarHabilidade", "ataqueBasico", "selecionarAlvo", "usarItem", "soltarItem", "equipar", "desequipar", "distribuirPonto", "interagir", "abrirMenu", "comprar", "vender", "fecharLoja", "moverItem", "dispensar", "subirRank", "acelerarEstudo", "forjar", "equiparHabilidade", "autoAtaque", "seguirAlvo", "usarUltimate", "ativarPassiva", "desativarPassiva"],
   "faixas": [],
   "recompensaJogador": null,
-  "partilhaXp": { "aliadoPct": 75, "raio": 12 },
+  "partilhaXp": { "aliadoPct": 75, "raio": 12, "exigeGrupo": true },
   "sobrevivencia": {
     "regenPorCelula": true,
     "revelarArmadilhas": true,

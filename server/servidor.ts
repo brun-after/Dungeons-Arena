@@ -10,6 +10,7 @@
 //                         jogadores, banda, filas, entidades, rejeições, reconexões); agregado, sem dado pessoal
 // O matchmaking do Colyseus continua nas rotas padrão (/matchmake/...).
 
+import { MercadoEmMemoria, MercadoSupabase, type LojaDoMercado } from './mercado-mundo';
 import http from 'node:http';
 import { createEndpoint, createRouter, defineRoom, defineServer, matchMaker } from '@colyseus/core';
 import { WebSocketTransport } from '@colyseus/ws-transport';
@@ -78,7 +79,9 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
   const persistencia: PersistenciaMundo =
     o.supabaseUrl && o.supabaseChaveServico ? new PersistenciaSupabase(o.supabaseUrl, o.supabaseChaveServico, reinoDoMundo(conteudoMundo)) : new PersistenciaEmMemoria();
   if (!(o.supabaseUrl && o.supabaseChaveServico)) registrarLog('mundo_sem_nuvem', {});
-  const coordenador = new CoordenadorDoMundo(persistencia, conteudoMundo);
+  // Marco 30 (D-129): os anúncios do mercado ficam no mesmo Supabase (ou na memória).
+  const mercado: LojaDoMercado = o.supabaseUrl && o.supabaseChaveServico ? new MercadoSupabase(o.supabaseUrl, o.supabaseChaveServico) : new MercadoEmMemoria();
+  const coordenador = new CoordenadorDoMundo(persistencia, conteudoMundo, mercado);
   SalaMundoColyseus.coordenador = coordenador;
   const limiteMundo = new LimiteDeTentativas(30, 60_000);
   const httpServer = http.createServer();
