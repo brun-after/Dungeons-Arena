@@ -3,6 +3,7 @@
 // Marco 30 (30/10/2026, D-129): o banco, o quadro de missões de verdade, o chat, o grupo, a troca e o mercado.
 
 import type { CanalDoChat } from './acoes';
+import type { EventoDaRegiao } from './eventos-mundo';
 import type { ItemNaMochila } from '../entities/entidade';
 import type { MissaoAtiva } from './ficha-mundo';
 import type { Perigo } from './reino';
@@ -101,4 +102,6 @@ export type AvisoDoMundo =
    */
   | { tipo: 'troca'; estado: 'convite' | 'aberta' | 'feita' | 'cancelada'; com: string; comId: string; minha: OfertaVista; dele: OfertaVista; confirmei: boolean; confirmou: boolean }
   | { tipo: 'mercado'; anuncios: AnuncioVisto[]; pagina: number; total: number; meus: AnuncioVisto[]; aReceber: number }
+  /** Marco 30: o evento da região começou (até `fim`, em ms) ou acabou (null). */
+  | { tipo: 'evento'; evento: EventoDaRegiao | null; fim: number }
   | { tipo: 'recusa'; motivo: MotivoDoMundo };

@@ -290,6 +290,12 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
       social.convite(a);
     } else if (a.tipo === 'troca') {
       social.troca(a);
+    } else if (a.tipo === 'evento') {
+      // Marco 30 (D-129): o evento da região vai para o chat (canal do Mundo) e para a faixa de avisos.
+      const min = Math.max(1, Math.round((a.fim - Date.now()) / 60_000));
+      const texto = a.evento ? t(`mundo.evento.${a.evento}` as ChaveTexto, { min, pct: ctx.balance.mundo.eventos.luaLootPct }) : t('mundo.evento.fim');
+      social.chat({ tipo: 'chat', canal: 'sistema', de: '', texto });
+      avisar(texto, 6000);
     } else if (a.tipo === 'trocarSala') {
       if (saindo) return;
       saindo = true;

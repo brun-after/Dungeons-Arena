@@ -567,6 +567,7 @@
     "chat": { "raioLocal": 20, "maxTexto": 160, "porJanela": 5, "janelaS": 10, "historico": 50 },
     "grupo": { "max": 6, "conviteS": 60 },
     "troca": { "raio": 4, "maxItens": 8 },
-    "mercado": { "taxaAnuncioPct": 2, "taxaVendaPct": 8, "anunciosPorPersonagem": 10, "duracaoH": 72, "precoMax": 1000000, "pagina": 20 }
+    "mercado": { "taxaAnuncioPct": 2, "taxaVendaPct": 8, "anunciosPorPersonagem": 10, "duracaoH": 72, "precoMax": 1000000, "pagina": 20 },
+    "eventos": { "janelaMin": 60, "duracaoMin": 20, "chancePct": 35, "luaLootPct": 200, "perigosComLua": ["normal", "perigoso"] }
   }
 }

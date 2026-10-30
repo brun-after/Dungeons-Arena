@@ -122,6 +122,8 @@ export interface Reino {
   perigos: Readonly<Record<Perigo, RegrasDePerigo>>;
   /** O estoque das lojas da vila, por papel (ids de item). */
   lojas: Readonly<Partial<Record<PapelNpc, readonly string[]>>>;
+  /** Marco 30 (D-129): o estoque do mercador errante (o evento de região). */
+  mercadorErrante: readonly string[];
   regioes: readonly RegiaoDoMundo[];
   masmorras: readonly MasmorraDoMundo[];
   covis: readonly CovilDoMundo[];
@@ -221,6 +223,7 @@ export function lerReino(json: unknown): { reino: Reino | null; erros: string[] 
     inicio: l.texto(o, 'inicio'),
     perigos: lerPerigos(l, o.perigos),
     lojas: ehObjeto(o.lojas) ? Object.fromEntries(Object.entries(o.lojas).filter(([k]) => PAPEIS_NPC.includes(k as PapelNpc)).map(([k, v]) => [k, Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []])) : {},
+    mercadorErrante: o.mercadorErrante === undefined ? [] : l.listaDeTextos(o, 'mercadorErrante'),
     regioes: l.lista(o, 'regioes').map((x) => lerRegiao(l, x, tamanho)),
     masmorras: l.lista(o, 'masmorras').map((x) => {
       const m = l.objeto(x, 'masmorra');
@@ -323,6 +326,7 @@ export function conferirReino(reino: Reino, existe: { preset: (id: string) => bo
     tema(c.id, c.tema);
   }
   for (const [papel, lista] of Object.entries(reino.lojas)) itens(`loja ${papel}`, lista);
+  itens('mercadorErrante', reino.mercadorErrante);
   for (const [preset, lista] of Object.entries(reino.materiais)) {
     presets('materiais', [preset]);
     itens(`materiais ${preset}`, lista.map((m) => m.itemId));

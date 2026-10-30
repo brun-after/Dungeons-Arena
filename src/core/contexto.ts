@@ -9,6 +9,7 @@ import type { Dificuldade, RegrasDificuldade, RegrasGrupo } from '../modos/dific
 import type { ModoDeJogo, Raridade } from '../modos/modo';
 import type { RegrasColisao } from '../world/colisao';
 import type { Fase } from '../world/fase';
+import type { RegrasDeEventos } from '../mundo/eventos-mundo';
 import type { Atributos } from '../entities/entidade';
 import type { RegrasItensGerados } from '../progression/gerar-item';
 import type { Conteudo } from './conteudo';
@@ -345,6 +346,8 @@ export interface Balance {
     troca: { raio: number; maxItens: number };
     /** Mercado do reino: as taxas que tiram ouro da economia, o limite de anúncios, a validade e a página. */
     mercado: { taxaAnuncioPct: number; taxaVendaPct: number; anunciosPorPersonagem: number; duracaoH: number; precoMax: number; pagina: number };
+    /** Marco 30 (D-129): os eventos por região, sorteados por janela de tempo (mundo/eventos-mundo.ts). */
+    eventos: RegrasDeEventos;
   };
   armadilhas: {
     revelarIntervaloMs: number;

@@ -24,7 +24,10 @@ import { equipeDeEntrada } from '../modos/regras';
 import { raioDeRevelar } from '../progression/efeitos-atributo';
 import { concederXpDeProgressao } from '../progression/nivel';
 import { guardarItem } from '../progression/inventario';
-import { tipoEm } from '../world/fase';
+import { passavel, tipoEm } from '../world/fase';
+import { novoObjeto } from '../world/objeto-novo';
+import { eventoDaRegiao, type EventoAtivo } from './eventos-mundo';
+import type { ModoDeJogo } from '../modos/modo';
 import { largarItem, largarPerto } from '../world/objetos';
 import { naSaidaAberta } from '../world/portas';
 import type { AcaoDoMundo } from './acoes';
@@ -54,6 +57,10 @@ export interface OpcoesSalaMundo {
 
 export type { PendenciaDoMundo, ResultadoDoMercado } from './pendencias';
 
+/** De quanto em quanto tempo a sala confere o evento da região (1 s). */
+const CONFERIR_EVENTO_TICKS = 60;
+const ID_MERCADOR_ERRANTE = 'evento-mercador';
+
 interface Presenca {
   identidade: string;
   ficha: FichaDoMundo;
@@ -80,6 +87,9 @@ export class SalaMundo extends SalaArena {
   private readonly reservas = new Map<string, { ficha: FichaDoMundo; chegada: Celula | null; grupo: string | null }>();
   /** Por entidade: quem é e a ficha que entrou (a progressão vem da entidade na hora de gravar). */
   private readonly presencas = new Map<EntidadeId, Presenca>();
+  /** Marco 30: o evento da região em curso e o modo sem ele (a lua sangrenta troca o modo enquanto dura). */
+  private evento: EventoAtivo | null = null;
+  private readonly modoDaRegiao: ModoDeJogo;
   private readonly despedidos = new Set<string>();
   private pendencias: PendenciaDoMundo[] = [];
   /** Dano no chefe do covil por jogador (a contribuição do loot). */
@@ -103,6 +113,7 @@ export class SalaMundo extends SalaArena {
     this.proximoCheckpoint = ticksDe(this.ctx.balance.mundo.checkpointS * 1000);
     const chat = this.ctx.balance.mundo.chat;
     this.limiteDoChat = new LimiteDoChat(chat.porJanela, chat.janelaS * 1000);
+    this.modoDaRegiao = this.ctx.modo;
   }
 
   get idLugar(): string {
@@ -167,6 +178,7 @@ export class SalaMundo extends SalaArena {
       vilaSalva: p.ficha.vilaSalva,
       descobertas: [...p.ficha.descobertas],
     });
+    if (this.evento) this.avisar(s, { tipo: 'evento', evento: this.evento.evento, fim: this.evento.fim });
   }
 
   protected override aoRemoverSessao(s: Sessao): void {
@@ -191,10 +203,46 @@ export class SalaMundo extends SalaArena {
       this.conferirSaidaDoInterior(s, e, p);
       this.conferirEscondidas(s, e, p);
     }
+    if (this.estado.tick % CONFERIR_EVENTO_TICKS === 0) this.conferirEvento();
     if (this.estado.tick >= this.proximoCheckpoint) {
       this.proximoCheckpoint = this.estado.tick + ticksDe(this.ctx.balance.mundo.checkpointS * 1000);
       for (const p of this.presencas.values()) this.pendencias.push({ tipo: 'gravar', identidade: p.identidade, ficha: p.ficha });
     }
+  }
+
+  /**
+   * Marco 30 (30/10/2026, D-129): o evento da região (mundo/eventos-mundo.ts). A lua sangrenta multiplica o loot do
+   * modo; o mercador errante é uma loja que aparece perto da entrada da região. Começo e fim vão a todos da sala.
+   */
+  private conferirEvento(): void {
+    if (this.lugar.tipo !== 'regiao') return;
+    const agora = eventoDaRegiao(this.lugar.regiao.id, this.lugar.regiao.perigo, this.opcoesMundo.agora(), this.ctx.balance.mundo.eventos);
+    if (agora?.evento === this.evento?.evento && agora?.fim === this.evento?.fim) return;
+    this.estado.objetos = this.estado.objetos.filter((o) => o.objetoId !== ID_MERCADOR_ERRANTE);
+    this.ctx = { ...this.ctx, modo: this.modoDaRegiao };
+    this.evento = agora;
+    if (agora?.evento === 'lua_sangrenta') {
+      const lootPct = ((this.modoDaRegiao.lootPct ?? 100) * this.ctx.balance.mundo.eventos.luaLootPct) / 100;
+      this.ctx = { ...this.ctx, modo: { ...this.modoDaRegiao, lootPct } };
+    } else if (agora?.evento === 'mercador_errante') {
+      const c = this.celulaDoMercador();
+      if (c) this.estado.objetos.push(novoObjeto(ID_MERCADOR_ERRANTE, 'loja', c.x, c.y, { ref: 'mercador', itens: [...this.reino.mercadorErrante] }));
+    }
+    for (const s of this.sessoes.values()) this.avisar(s, { tipo: 'evento', evento: agora?.evento ?? null, fim: agora?.fim ?? 0 });
+  }
+
+  /** Uma célula andável e sem objeto, a poucos passos da entrada da região. */
+  private celulaDoMercador(): Celula | null {
+    const origem = this.ctx.fase.spawns[0];
+    if (!origem) return null;
+    for (let d = 3; d <= 8; d++) {
+      for (const [dx, dy] of [[d, 0], [-d, 0], [0, d], [0, -d], [d, d], [-d, -d]] as const) {
+        const x = origem.x + dx;
+        const y = origem.y + dy;
+        if (passavel(this.ctx.fase, x, y) && !this.estado.objetos.some((o) => o.x === x && o.y === y)) return { x, y };
+      }
+    }
+    return null;
   }
 
   /**

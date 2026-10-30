@@ -16,8 +16,9 @@ import { podeFerir } from '../../src/modos/relacao';
 import type { AvisoDoMundo } from '../../src/mundo/avisos';
 import { fichaNova, type FichaDoMundo } from '../../src/mundo/ficha-mundo';
 import { lerLugar } from '../../src/mundo/lugares';
+import { eventoDaRegiao, type EventoDaRegiao } from '../../src/mundo/eventos-mundo';
 import { diaDe, ofertasDoQuadro } from '../../src/mundo/missoes-mundo';
-import type { Reino } from '../../src/mundo/reino';
+import type { Perigo, Reino } from '../../src/mundo/reino';
 import { SalaMundo } from '../../src/mundo/sala-mundo';
 import { forjar } from '../../src/progression/forja';
 import { guardarItem } from '../../src/progression/inventario';
@@ -366,5 +367,47 @@ describe('estrutura escondida', () => {
     rodar(s, 1);
     expect(achouCaverna()).toBe(true);
     expect(c.ultimo('descoberta')?.nome).toBe(caverna.nome);
+  });
+});
+
+describe('eventos por região', () => {
+  const regras = BALANCE_PADRAO.mundo.eventos;
+  /** A primeira hora (a cada minuto, a partir de AGORA) em que a região tem o evento. */
+  const quandoHa = (regiao: string, perigo: Perigo, evento: EventoDaRegiao): number => {
+    for (let m = 0; m < 60 * 24 * 30; m++) {
+      const t = AGORA + m * 60_000;
+      if (eventoDaRegiao(regiao, perigo, t, regras)?.evento === evento) return t;
+    }
+    throw new Error(`sem ${evento} em ${regiao}`);
+  };
+
+  it('o sorteio é igual para a mesma hora, dura o tempo da regra e a vila segura não tem lua sangrenta', () => {
+    const t = quandoHa('campos_do_oeste', 'normal', 'lua_sangrenta');
+    const ev = obter(eventoDaRegiao('campos_do_oeste', 'normal', t, regras), 'evento');
+    expect(eventoDaRegiao('campos_do_oeste', 'normal', t, regras)).toEqual(ev);
+    expect(ev.fim - t).toBeLessThanOrEqual(regras.duracaoMin * 60_000);
+    expect(eventoDaRegiao('campos_do_oeste', 'normal', ev.fim, regras)).toBeNull();
+    for (let m = 0; m < 60 * 24 * 10; m += 7) expect(eventoDaRegiao('vila_do_centro', 'seguro', AGORA + m * 60_000, regras)?.evento).not.toBe('lua_sangrenta');
+  });
+
+  it('a lua sangrenta multiplica o loot do modo; o mercador errante põe a loja; os dois avisam a sala', () => {
+    const lua = new SalaDeTeste(REINO, obter(lerLugar(REINO, 'regiao:campos_do_oeste'), 'l'), CONTEUDO, { semente: 9, agora: () => quandoHa('campos_do_oeste', 'normal', 'lua_sangrenta') });
+    const a = entrar(lua, 'u1');
+    const base = lua.ctx.modo.lootPct ?? 100;
+    rodar(lua, 61);
+    expect(lua.ctx.modo.lootPct).toBe((base * regras.luaLootPct) / 100);
+    expect(a.ultimo('evento')).toMatchObject({ evento: 'lua_sangrenta' });
+
+    let agora = quandoHa('campos_do_oeste', 'normal', 'mercador_errante');
+    const merc = new SalaDeTeste(REINO, obter(lerLugar(REINO, 'regiao:campos_do_oeste'), 'l'), CONTEUDO, { semente: 9, agora: () => agora });
+    const b = entrar(merc, 'u2');
+    rodar(merc, 61);
+    expect(merc.estado.objetos.some((o) => o.objetoId === 'evento-mercador' && o.tipo === 'loja')).toBe(true);
+    expect(b.ultimo('evento')).toMatchObject({ evento: 'mercador_errante' });
+    // Acabou: a loja some e o aviso diz que acabou.
+    agora = obter(eventoDaRegiao('campos_do_oeste', 'normal', agora, regras), 'ev').fim;
+    rodar(merc, 61);
+    expect(merc.estado.objetos.some((o) => o.objetoId === 'evento-mercador')).toBe(false);
+    expect(b.ultimo('evento')).toMatchObject({ evento: null });
   });
 });

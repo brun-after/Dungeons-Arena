@@ -16,6 +16,7 @@
     "ferreiro": ["espada_curta", "arco_simples", "tomo_aprendiz", "cajado_aprendiz", "bumerangue_madeira", "escudo_madeira", "elmo_ferro", "cota_malha", "luvas_couro", "botas_rapidas"],
     "alquimista": ["pocao_vida", "pocao_mana", "pocao_vida_maior", "pocao_mana_maior", "pergaminho_retorno"]
   },
+  "mercadorErrante": ["pocao_vida_maior", "pocao_mana_maior", "pergaminho_retorno", "cota_malha", "botas_rapidas", "essencia_arcana"],
   "regioes": [
     {
       "id": "vila_do_centro", "nome": "Vila do Centro", "gx": 1, "gy": 1, "bioma": "campo", "perigo": "seguro",
