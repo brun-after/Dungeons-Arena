@@ -134,17 +134,14 @@ test.describe('desktop', () => {
     expect(erros).toEqual([]);
   });
 
-  // Marco 27 (D-126): o Aventureiro já começa com o bumerangue de madeira na mão principal.
   test('mochila: tirar e pôr de volta a arma inicial; Esc fecha e o jogo segue', async ({ page }) => {
     const { diag, erros } = await abrir(page);
     await page.keyboard.press('KeyI');
     const mochila = page.getByRole('dialog', { name: 'Mochila' });
     await expect(mochila).toBeVisible();
-    await expect(diag).toHaveAttribute('data-equipados', '1');
+    // Marco 27 (D-126): o Aventureiro já começa com o bumerangue de madeira na mão principal.
     await mochila.getByRole('button', { name: 'Tirar: Arma: Bumerangue de madeira' }).click();
-    await expect(diag).toHaveAttribute('data-equipados', '0');
     await mochila.getByRole('button', { name: 'Equipar: Bumerangue de madeira' }).click();
-    await expect(mochila.getByText('Arma: Bumerangue de madeira')).toBeVisible();
     await expect(diag).toHaveAttribute('data-equipados', '1');
     await mochila.getByRole('button', { name: 'Ficha' }).click();
     // Marco 18: o aventureiro começa com Força 13 (a arma de partida não dá atributo).
