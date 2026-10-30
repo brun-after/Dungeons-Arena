@@ -55,7 +55,7 @@ export function faseGerada(a: Aventura, conteudo: Conteudo, nome: string, nivel:
       nome,
       semente: Math.floor(Math.random() * 2 ** 31),
       salas: 6,
-      nivelInimigos: Math.max(1, Math.min(30, nivel)),
+      nivelInimigos: Math.max(1, Math.min(100, nivel)),
       matizGraus: Math.floor(Math.random() * 360),
       largura: 40,
       altura: 28,

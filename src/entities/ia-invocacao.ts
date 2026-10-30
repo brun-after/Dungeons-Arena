@@ -18,6 +18,8 @@ import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
+import type { Celula } from '../core/comandos';
+import { passavel } from '../world/fase';
 import { pararMovimento, planejarCaminho } from '../world/movimento';
 import { emPasso, vivo, type Entidade, type EstadoIa } from './entidade';
 import type { PresetInvocacao, PresetInimigo } from './presets';
@@ -64,10 +66,43 @@ function compara(a: readonly number[], b: readonly number[]): number {
   return 0;
 }
 
+// Marco 28 (30/10/2026, D-127): invocação não colide com aliado, então criaturas iguais seguiam o dono e cercavam o alvo
+// pela mesma célula, uma sobre a outra. Cada uma tem um lugar próprio: o índice entre as do mesmo dono (por id).
+const ANEL: readonly (readonly [number, number])[] = [[-1, 1], [1, 1], [-1, -1], [1, -1], [0, 2], [-2, 0], [2, 0], [0, -2], [-2, 2], [2, 2], [-2, -2], [2, -2]];
+const VIZINHAS: readonly (readonly [number, number])[] = [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]];
+
+function irmas(estado: EstadoJogo, e: Entidade): Entidade[] {
+  const dono = e.invocacao?.donoId;
+  if (!dono) return [];
+  return estado.entidades.filter((x) => vivo(x) && x.invocacao?.donoId === dono && !x.invocacao.companheiro).sort((a, b) => (a.id < b.id ? -1 : 1));
+}
+
+/** A célula da vez em volta de `centro`, a partir do índice de `e` entre as irmãs, pulando paredes e irmãs. */
+function lugarProprio(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, centro: Celula, offsets: readonly (readonly [number, number])[]): Celula | null {
+  const lista = irmas(estado, e);
+  const i = Math.max(0, lista.indexOf(e));
+  for (let k = 0; k < offsets.length; k++) {
+    const [dx, dy] = offsets[(i + k) % offsets.length] ?? [0, 0];
+    const c = { x: centro.x + dx, y: centro.y + dy };
+    if (!passavel(ctx.fase, c.x, c.y)) continue;
+    if (lista.some((x) => x !== e && celulaOcupada(x).x === c.x && celulaOcupada(x).y === c.y)) continue;
+    return c;
+  }
+  return null;
+}
+
+/** Outra irmã com id menor está na mesma célula: esta é quem sai. */
+function empilhada(estado: EstadoJogo, e: Entidade): boolean {
+  const aqui = celulaOcupada(e);
+  return irmas(estado, e).some((x) => x.id < e.id && celulaOcupada(x).x === aqui.x && celulaOcupada(x).y === aqui.y);
+}
+
 function seguirDono(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, dono: Entidade | undefined): void {
   if (!dono || !vivo(dono) || emPasso(e) || e.caminho.length > 0) return;
-  if (chebyshev(celulaOcupada(e), celulaOcupada(dono)) <= ctx.balance.invocacoes.distanciaDono) return;
-  planejarCaminho(e, { x: dono.x, y: dono.y }, ctx, estado.tick, [], ctx.balance.ia.maxPassosPerseguicao);
+  const perto = chebyshev(celulaOcupada(e), celulaOcupada(dono)) <= ctx.balance.invocacoes.distanciaDono;
+  if (perto && !empilhada(estado, e)) return;
+  const lugar = lugarProprio(estado, ctx, e, celulaOcupada(dono), ANEL) ?? { x: dono.x, y: dono.y };
+  planejarCaminho(e, lugar, ctx, estado.tick, [], ctx.balance.ia.maxPassosPerseguicao);
 }
 
 function curarDono(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, dono: Entidade | undefined, p: PresetInvocacao, saida: EventoSimulacao[]): void {
@@ -96,6 +131,11 @@ export function processarInvocacao(estado: EstadoJogo, ctx: ContextoSimulacao, e
   if (!inv) return;
   const dono = buscarEntidade(estado, inv.donoId);
   if (inv.comportamento === 'isca') return;
+  // Marco 28 (D-127): a Flecha-âncora do Arqueiro não anda; atira no hostil mais perto no alcance do básico dela.
+  if (inv.comportamento === 'torre') {
+    atirarDaTorre(estado, ctx, e, ia, preset, saida);
+    return;
+  }
   if (inv.comportamento === 'curador') {
     if (preset.invocacao) curarDono(estado, ctx, e, dono, preset.invocacao, saida);
     mudarModo(ia, 'patrulha', null, estado.tick);
@@ -120,7 +160,15 @@ export function processarInvocacao(estado: EstadoJogo, ctx: ContextoSimulacao, e
   // Marco 24 (D-095): com a vertente Lich, os mortos atiram de longe.
   const lich = ataqueDoMorto(estado, ctx, e);
   if (chebyshev(celulaOcupada(e), celulaAlvo) <= (lich?.alcance ?? 1)) {
-    if (!emPasso(e)) pararMovimento(e);
+    // Na mesma célula de uma irmã: dá um passo para outra vizinha do alvo antes de golpear.
+    if (!emPasso(e) && e.caminho.length === 0 && empilhada(estado, e)) {
+      const lugar = lugarProprio(estado, ctx, e, celulaAlvo, VIZINHAS);
+      if (lugar) {
+        planejarCaminho(e, lugar, ctx, estado.tick, saida, ctx.balance.ia.maxPassosPerseguicao);
+        return;
+      }
+    }
+    if (!emPasso(e) && e.caminho.length === 0) pararMovimento(e);
     if (!e.acao && estado.tick >= ia.proximoAtaqueTick && iniciarAcao(estado, ctx, e, lich?.habilidade ?? e.ataqueBasico, alvo.id, saida)) {
       ia.proximoAtaqueTick = estado.tick + ticksDe(preset.intervaloAtaqueMs);
       ia.ataquesFeitos++;
@@ -132,5 +180,12 @@ export function processarInvocacao(estado: EstadoJogo, ctx: ContextoSimulacao, e
   if (!andou && (emPasso(e) || e.caminho.length > 0 || e.waypoints.length > 0)) return;
   ia.alvoCacheX = celulaAlvo.x;
   ia.alvoCacheY = celulaAlvo.y;
-  planejarCaminho(e, celulaAlvo, ctx, estado.tick, saida, ctx.balance.ia.maxPassosPerseguicao);
+  planejarCaminho(e, lugarProprio(estado, ctx, e, celulaAlvo, VIZINHAS) ?? celulaAlvo, ctx, estado.tick, saida, ctx.balance.ia.maxPassosPerseguicao);
+}
+
+function atirarDaTorre(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa, preset: PresetInimigo, saida: EventoSimulacao[]): void {
+  const alvo = escolherAlvo(estado, ctx, e, undefined);
+  mudarModo(ia, alvo ? 'perseguindo' : 'patrulha', alvo?.id ?? null, estado.tick);
+  if (!alvo || e.acao || estado.tick < ia.proximoAtaqueTick) return;
+  if (iniciarAcao(estado, ctx, e, e.ataqueBasico, alvo.id, saida)) ia.proximoAtaqueTick = estado.tick + ticksDe(preset.intervaloAtaqueMs);
 }

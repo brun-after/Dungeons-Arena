@@ -234,6 +234,24 @@
       }
     },
     {
+      "id": "flecha_ancora",
+      "nome": "Flecha-âncora",
+      "hpBase": 30,
+      "hesitacaoS": 0,
+      "deteccao": 6,
+      "xp": 0,
+      "modelo": "sentinela",
+      "arquetipo": "atirador",
+      "classe": "corpo_a_corpo",
+      "defesa": 2,
+      "ataqueBasico": "flecha",
+      "habilidades": [],
+      "intervaloAtaqueMs": 800,
+      "invocacao": {
+        "comportamento": "torre"
+      }
+    },
+    {
       "id": "sentinela",
       "nome": "Sentinela",
       "hpBase": 70,

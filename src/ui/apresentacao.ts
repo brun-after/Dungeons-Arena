@@ -20,6 +20,9 @@ import { lerPreferencias, type NivelQualidade, type Preferencias } from '../plat
 import type { Camera } from '../render/camera';
 import { EfeitosDeHabilidade } from '../render/efeitos-habilidade';
 import { EfeitosDeClasse } from '../render/efeitos-classe';
+import { EfeitosDeDominio } from '../render/efeitos-dominio';
+import { raioDaAura } from '../combat/ajustes-classes';
+import { marcoDe } from '../progression/dominio';
 import { EfeitosDeArma } from '../render/efeitos-arma';
 import type { AjusteVisual } from '../render/sprites';
 import { VooDoFalcao } from '../render/voo-falcao';
@@ -159,6 +162,22 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     vertenteDe: (e) => sintoniaDe(ctx, e).vertente?.id ?? null,
   });
   efeitosClasse.ligar(o.bus, o.estado, () => performance.now());
+  // Marco 28 (30/10/2026, D-127): a aura visível, os orbes e os marcos do atributo de classe.
+  const corDoElemento = (el: string | null | undefined): number | null => {
+    const def = ehElemento(el) ? ctx.conteudo.elementos.get(el) : undefined;
+    return def ? Number.parseInt(def.cor.slice(1), 16) : null;
+  };
+  const efeitosDominio = new EfeitosDeDominio({
+    particulas,
+    auraDe: (e, tick) => marcoDe(ctx, e, 'auraVisivel') > 0
+      ? { raio: raioDaAura(ctx, e, tick), cor: (marcoDe(ctx, e, 'auraElementalPct') > 0 ? corDoElemento(e.aparencia?.elementoArma) : null) ?? 0xffd86b }
+      : null,
+    orbesDe: (e) => {
+      const n = e.encarnacao ? marcoDe(ctx, e, 'orbes') : 0;
+      return n > 0 ? { n, cor: corDoElemento(e.encarnacao) ?? 0xffffff } : null;
+    },
+  });
+  efeitosDominio.ligar(o.bus, o.estado);
   const combos = new CamadaCombosTaticos(palco.efeitos, () => camera.projecaoAtual, reduzido, () => qualidade().particulas === 0, 24, particulas);
   combos.ligar(o.bus, o.estado, () => performance.now());
   const luz = new CamadaLuz(palco.luz);
@@ -291,6 +310,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
       camera.enquadrar(focoDoQuadro(estado, posicao), agoraMs);
       efeitos.quadro(estado, agoraMs, posicao);
       efeitosClasse.quadro(estado, agoraMs, posicao);
+      efeitosDominio.quadro(estado, agoraMs, posicao);
       efeitosArma.quadro(estado, agoraMs, posicao);
       combos.desenhar(estado, agoraMs);
       particulas.atualizar(Math.min(100, dtMs));

@@ -24,6 +24,8 @@ export interface Atributos {
   inteligencia: number;
   sabedoria: number;
   carisma: number;
+  /** Marco 28 (30/10/2026, D-127): o atributo de classe (Bravura, Instinto, Arcano, Ritual, Engenho): passiva e skills de classe. */
+  dominio: number;
 }
 
 export interface EfeitoAtivo {
@@ -46,7 +48,7 @@ export interface EfeitoAtivo {
 
 /** Comportamento da invocação (§2.9, marco 10A-3). */
 // Marco 22 (D-089): `companheiro` (o falcão do Aventureiro) ataca sempre o alvo selecionado do dono.
-export type ComportamentoInvocacao = 'agressivo' | 'assassino' | 'protetor' | 'curador' | 'isca' | 'companheiro';
+export type ComportamentoInvocacao = 'agressivo' | 'assassino' | 'protetor' | 'curador' | 'isca' | 'companheiro' | 'torre';
 
 /** Invocação ou dominado (§2.9): de quem é, até quando, e se foi dominado (sobrevive ao dono). */
 export interface DadosInvocacao {
@@ -282,6 +284,8 @@ export interface Entidade {
   atributos: Atributos;
   classe: ClasseCombate;
   defesa: number;
+  /** Marco 28 (D-127): o % de dano dos itens equipados (derivado em recalcularFicha). */
+  danoItensPct?: number;
   hp: number;
   hpMax: number;
   mana: number;
@@ -416,6 +420,7 @@ export const ATRIBUTOS_NEUTROS: Readonly<Atributos> = {
   inteligencia: 10,
   sabedoria: 10,
   carisma: 10,
+  dominio: 10,
 };
 
 export interface NovaEntidade {

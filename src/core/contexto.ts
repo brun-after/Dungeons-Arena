@@ -12,6 +12,7 @@ import type { Fase } from '../world/fase';
 import type { Atributos } from '../entities/entidade';
 import type { RegrasItensGerados } from '../progression/gerar-item';
 import type { Conteudo } from './conteudo';
+import type { DominioDaClasse } from '../progression/dominio';
 
 /** Marco 24 (24/10/2026, D-094): os momentos de cada classe que enchem o medidor da ultimate (balance.ultimate.classe). */
 export type MomentoCargaClasse = 'furiaCheia' | 'encarnacao' | 'miraFirme' | 'servoCaiu' | 'falcao';
@@ -45,6 +46,8 @@ export interface Balance {
     raioCorpo: number;
     /** Marco 26 (28/10/2026, D-120): o avanço e o teleporte passam por paredes dentro do alcance. */
     dashAtravessaParedes: boolean;
+    /** Marco 28 (D-127): teto do multiplicador de velocidade pela Destreza (atributos até 100). */
+    velocidadeMaxMult: number;
   };
   navegacao: {
     /** Limite da busca para toque no mapa (§2.3). */
@@ -137,6 +140,12 @@ export interface Balance {
     fallbackPorNivel: number;
     nivelMax: number;
     pontosPorNivel: number;
+    /** Marco 28 (D-127): a partir de cada nível, quantos pontos de atributo cada nível dá (substitui `pontosPorNivel`). */
+    pontosPorFaixa: { aPartirDe: number; pontos: number }[];
+    /** Marco 28 (D-127): acima de `aPartirDe`, cada nível custa mais `crescimentoPct`% por nível (curva longa). */
+    curvaLonga: { aPartirDe: number; crescimentoPct: number };
+    /** Marco 28 (D-127): o nível em que as curvas de classe (aura, falcão, extra) chegam ao máximo. */
+    nivelPlenoDasClasses: number;
     /** Aumento automático de HP base por nível acima do 1º. */
     hpPorNivel: number;
     faixaAvancada: { nivelInicio: number; percentuais: Record<Dificuldade, number> };
@@ -218,6 +227,10 @@ export interface Balance {
   atributos: {
     minimo: number;
     maximo: number;
+    /** Marco 28 (D-127): o ponto gasto não leva o atributo-base acima de nível + folga. */
+    folgaSobreNivel: number;
+    /** Marco 28 (D-127): acima de `aPartirDe`, cada ponto rende `pct`% nas fórmulas sem teto. */
+    rendimentoAcima: { aPartirDe: number; pct: number };
     /** Marco 17 (D-063): o que cada ponto acima de 10 faz (progression/efeitos-atributo.ts). */
     efeitos: {
       regenManaPorSabedoriaPct: number;
@@ -293,6 +306,21 @@ export interface Balance {
     /** A passiva do Aventureiro, com o arremessável na mão principal. */
     aventureiro: { descontoPergaminhoPct: number; sortePergaminhoPct: number; duracaoInvocacaoPct: number; danoBasicoPct: number };
   };
+  /** Marco 28 (30/10/2026, D-127): o atributo de classe (progression/dominio.ts). */
+  dominio: {
+    skillsPorPontoPct: number;
+    semFamiliaridadePct: number;
+    classes: Readonly<Record<string, DominioDaClasse>>;
+    efeitos: {
+      rastroIntervaloMs: number; rastroPct: number;
+      ressonanciaRaio: number;
+      orbeRaio: number; orbeIntervaloMs: number; orbePct: number;
+      ancoraIntervaloMs: number; ancoraPct: number; ancoraAlcance: number;
+      explosaoRaio: number;
+      tempestadeCelulas: number;
+      legiaoPulsos: number;
+    };
+  };
   armadilhas: {
     revelarIntervaloMs: number;
     raioBase: number;
@@ -338,6 +366,8 @@ export interface Balance {
     invocacao: { fatiaMinPct: number; fatiaMaxPct: number };
     /** Marco 17: na arena com a ficha inteira, a build focada e o equipado vencem a maioria dos duelos. */
     build: { nivel: number; vitoriasMinPct: number };
+    /** Marco 28 (D-127): a luta nos níveis altos e o tempo do 30 ao 100 (em vezes o do 1 ao 30). */
+    nivelAlto: { niveis: number[]; vitoriasMinPct: number; tempoMinS: number; tempoMaxS: number; ritmoNiveis: number[]; razaoTempoMin: number; razaoTempoMax: number };
   };
   dificuldades: Record<Dificuldade, RegrasDificuldade>;
   grupo: RegrasGrupo;

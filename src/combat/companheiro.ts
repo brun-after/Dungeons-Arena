@@ -20,6 +20,7 @@ import { invocar } from './efeitos-fluxo';
 import { celulaOcupada } from './geometria';
 import { registrarParticipacao } from './participacao';
 import { construirEfeito } from './registro-efeitos';
+import { fatorDeDominio } from '../progression/dominio';
 
 export const PRESET_FALCAO = 'falcao_companheiro';
 
@@ -102,7 +103,9 @@ function bonusDoAtributo(ctx: ContextoSimulacao, valor: number): number {
 
 /** Quantas vezes o golpe do falcão voa mais rápido que a patrulha (o nível dá a base, a Sabedoria soma). */
 export function velocidadeDoAtaqueDoFalcao(ctx: ContextoSimulacao, dono: Entidade): number {
-  return curvaNoNivel(ctx.balance.ajustesClasses.aventureiro.falcao.velocidadeAtaque, dono.nivel) * bonusDoAtributo(ctx, dono.atributos.sabedoria);
+  // Marco 28 (D-127): o Engenho acelera o golpe do falcão (metade do ganho do dano).
+  const engenho = 1 + (fatorDeDominio(ctx, dono, 'falcao') - 1) / 2;
+  return curvaNoNivel(ctx.balance.ajustesClasses.aventureiro.falcao.velocidadeAtaque, dono.nivel) * bonusDoAtributo(ctx, dono.atributos.sabedoria) * engenho;
 }
 
 /** Quantas vezes o dash de defesa é mais rápido que a patrulha (o nível dá a base, o Carisma soma). */

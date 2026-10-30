@@ -56,8 +56,9 @@ const EPS = 1e-9;
 const BISSECCOES = 10;
 
 /** Velocidade em células por segundo (§2.3). Destreza 10 -> 2,5; destreza 20 -> 3,75. */
-export function velocidade(destreza: number, velocidadeBaseMs: number, dominado = false): number {
-  let mult = Math.max(0.2, 1 + ((destreza - 10) * 5) / 100);
+export function velocidade(destreza: number, velocidadeBaseMs: number, dominado = false, multMax = Infinity): number {
+  // Marco 28 (D-127): com a Destreza até 100, a velocidade tem teto (`movimento.velocidadeMaxMult`).
+  let mult = Math.min(multMax, Math.max(0.2, 1 + ((destreza - 10) * 5) / 100));
   if (dominado) mult *= 1.3;
   return Math.max(0.3, (1000 / velocidadeBaseMs) * mult);
 }
@@ -196,7 +197,7 @@ function velocidadeAgora(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao
         inv.companheiro
         ? (1000 / ctx.balance.ajustesClasses.aventureiro.falcaoPassoMs) * multiplicadorDoPassoDoFalcao(estado, ctx, e)
         : 1000 / ctx.balance.invocacoes.passoMs
-      : velocidade(e.atributos.destreza, ctx.balance.movimento.velocidadeBaseMs, inv?.dominado ?? false);
+      : velocidade(e.atributos.destreza, ctx.balance.movimento.velocidadeBaseMs, inv?.dominado ?? false, ctx.balance.movimento.velocidadeMaxMult);
   // Marco 14: o frio (resfriado) deixa mais lento. Ajuste de 15/10/2026: conjurar uma habilidade `lenta` também.
   const conjurando = mobilidadeDaAcao(e, ctx) === 'lenta' ? ctx.balance.habilidades.velocidadeConjurandoLenta : 1;
   const r = ctx.balance.ajustesClasses.guerreiro;

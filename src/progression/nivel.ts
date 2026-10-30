@@ -8,9 +8,33 @@ import { recalcularFicha } from './derivados';
 import { sincronizarRanksDeClasse } from './habilidades-classe';
 import { NOMES_ATRIBUTOS } from './itens';
 
-/** XP para passar do nível `nivel` ao seguinte: tabela configurável, com fallback `nivel × 100`. */
+/**
+ * XP para passar do nível `nivel` ao seguinte: tabela configurável, com fallback `nivel × 100`. Marco 28 (30/10/2026,
+ * D-127): acima do nível da curva longa, cada nível custa mais `crescimentoPct`% por nível (o 100 é meta de muitas horas).
+ */
 export function xpParaProximo(nivel: number, xp: Balance['xp']): number {
-  return xp.tabela[nivel - 1] ?? nivel * xp.fallbackPorNivel;
+  const base = xp.tabela[nivel - 1] ?? nivel * xp.fallbackPorNivel;
+  const acima = Math.max(0, nivel - xp.curvaLonga.aPartirDe);
+  return Math.round(base * (1 + (acima * xp.curvaLonga.crescimentoPct) / 100));
+}
+
+/** Marco 28 (D-127): os pontos de atributo que chegar ao nível `nivel` dá (crescem por faixa depois do 30). */
+export function pontosDoNivel(nivel: number, xp: Balance['xp']): number {
+  let pontos = xp.pontosPorNivel;
+  for (const f of xp.pontosPorFaixa) if (nivel >= f.aPartirDe) pontos = f.pontos;
+  return pontos;
+}
+
+/** Marco 28 (30/10/2026, D-127): o teto do atributo-base pelos pontos gastos: nível + folga, até o máximo. */
+export function tetoDoAtributo(nivel: number, b: Balance): number {
+  return Math.min(b.atributos.maximo, nivel + b.atributos.folgaSobreNivel);
+}
+
+/** Marco 28 (D-127): todos os pontos de atributo do nível 2 até `nivel`. */
+export function pontosAteONivel(nivel: number, xp: Balance['xp']): number {
+  let soma = 0;
+  for (let n = 2; n <= nivel; n++) soma += pontosDoNivel(n, xp);
+  return soma;
 }
 
 /** D-075: acumula frações para que penalidade e antifarm não virem sempre 1 XP por abate. */
@@ -32,7 +56,7 @@ export function aplicarSubidas(e: Entidade, ctx: ContextoSimulacao, tick: number
   while (e.nivel < regras.nivelMax && e.xp >= xpParaProximo(e.nivel, regras)) {
     e.xp -= xpParaProximo(e.nivel, regras);
     e.nivel++;
-    e.bolsa.pontosAtributo += regras.pontosPorNivel;
+    e.bolsa.pontosAtributo += pontosDoNivel(e.nivel, regras);
     // Marco 14: cada nível dá pontos de habilidade (ranks e aprender).
     e.bolsa.pontosHabilidade += ctx.balance.habilidades.pontosPorNivel;
     subiu = true;
@@ -55,12 +79,13 @@ export function perderXp(e: Entidade, ctx: ContextoSimulacao, quanto: number, pe
   e.xp -= quanto;
   let niveis = 0;
   while (perdeNivel && e.xp < 0 && e.nivel > 1) {
+    const revogados = pontosDoNivel(e.nivel, regras);
     e.nivel--;
     e.xp += xpParaProximo(e.nivel, regras);
     niveis++;
     // Marco 14: só os pontos de habilidade não gastos voltam (ranks e caminhos ficam).
     e.bolsa.pontosHabilidade = Math.max(0, e.bolsa.pontosHabilidade - ctx.balance.habilidades.pontosPorNivel);
-    let revogar = regras.pontosPorNivel;
+    let revogar = revogados;
     const livres = Math.min(revogar, e.bolsa.pontosAtributo);
     e.bolsa.pontosAtributo -= livres;
     revogar -= livres;

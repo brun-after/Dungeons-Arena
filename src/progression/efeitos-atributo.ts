@@ -14,6 +14,30 @@ import type { PerfilDestreza } from '../entities/presets';
 
 const acimaDe10 = (v: number) => Math.max(0, v - 10);
 
+/**
+ * Marco 28 (30/10/2026, D-127): com atributos até 100, as fórmulas sem teto passariam do razoável. Até `aPartirDe` (30)
+ * o ponto vale inteiro, como antes; acima, rende `pct`%. Até o 30 nada muda.
+ */
+export function pontosUteis(v: number, b: Balance): number {
+  const r = b.atributos.rendimentoAcima;
+  return v <= r.aPartirDe ? v : r.aPartirDe + ((v - r.aPartirDe) * r.pct) / 100;
+}
+
+/** Os atributos com o rendimento decrescente aplicado a cada um (para as fórmulas sem teto). */
+export function atributosUteis(a: Atributos, b: Balance): Atributos {
+  const r = { ...a };
+  for (const k of Object.keys(r) as (keyof Atributos)[]) r[k] = pontosUteis(a[k], b);
+  return r;
+}
+
+/**
+ * Os atributos que entram nas fórmulas de dano: os úteis para quem tem ficha. Os inimigos ficam com os brutos, porque o
+ * crescimento deles já passa de 30 nos níveis de hoje e o equilíbrio atual conta com isso.
+ */
+export function atributosDeFormula(e: Pick<Entidade, 'atributos' | 'bolsa'>, b: Balance): Atributos {
+  return e.bolsa ? atributosUteis(e.atributos, b) : e.atributos;
+}
+
 /** D-071 (17/10/2026): pontos ofensivos acima do patamar de ressonância, incluindo builds híbridas FOR/INT. */
 export function bonusDeEspecializacao(atributos: Atributos, atributo: keyof Atributos, b: Balance): number {
   const e = b.atributos.efeitos;
@@ -25,7 +49,7 @@ export function bonusDeEspecializacao(atributos: Atributos, atributo: keyof Atri
 /** Mana regenerada no segundo `segundo` (contado desde o tick 0): a base mais a parte inteira do bônus da Sabedoria. */
 export function manaPorSegundo(atributos: Atributos, segundo: number, b: Balance): number {
   const base = b.recursos.regenManaPorSegundo;
-  const bonus = (base * acimaDe10(atributos.sabedoria) * b.atributos.efeitos.regenManaPorSabedoriaPct) / 100;
+  const bonus = (base * acimaDe10(pontosUteis(atributos.sabedoria, b)) * b.atributos.efeitos.regenManaPorSabedoriaPct) / 100;
   // 17/10/2026: distribui também a base fracionária, mantendo mana inteira por segundo.
   const total = base + bonus;
   return Math.floor(segundo * total) - Math.floor((segundo - 1) * total);
@@ -72,7 +96,7 @@ export function reducaoEstudoPct(atributos: Atributos, b: Balance): number {
 
 /** Vida por célula caminhada, com o bônus da Constituição. */
 export function vidaPorCelula(atributos: Atributos, b: Balance): number {
-  const mult = 1 + (acimaDe10(atributos.constituicao) * b.atributos.efeitos.regenPorCelulaPorConstituicaoPct) / 100;
+  const mult = 1 + (acimaDe10(pontosUteis(atributos.constituicao, b)) * b.atributos.efeitos.regenPorCelulaPorConstituicaoPct) / 100;
   return Math.round(b.recursos.regenHpPorCelula * mult);
 }
 
@@ -90,7 +114,7 @@ export function precoDeCompra(valorBase: number, atributos: Atributos, b: Balanc
 /** Marco 18 (D-068): raio (células) em que a Sabedoria procura armadilhas. */
 export function raioDeRevelar(atributos: Atributos, b: Balance): number {
   const a = b.armadilhas;
-  return a.raioBase + Math.floor(acimaDe10(atributos.sabedoria) / Math.max(1, a.raioPorPontos));
+  return a.raioBase + Math.floor(acimaDe10(pontosUteis(atributos.sabedoria, b)) / Math.max(1, a.raioPorPontos));
 }
 
 /** Marco 18 (D-068): chance (%) de revelar cada armadilha no raio, por teste; abaixo de 10 de Sabedoria, menos. */

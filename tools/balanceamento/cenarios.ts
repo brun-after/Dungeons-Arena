@@ -18,6 +18,7 @@ import { caminhosDoRank, nivelParaRank } from '../../src/progression/habilidades
 import { ehDaClasse, rankDeClassePeloNivel } from '../../src/progression/habilidades-classe';
 import { carregarFase } from '../../src/world/fase';
 import { BotDeDuelo } from '../../src/bench/bot-duelo';
+import { pontosAteONivel, tetoDoAtributo } from '../../src/progression/nivel';
 
 export { BotDeDuelo };
 
@@ -67,21 +68,27 @@ export function jogadorTipico(ctx: ContextoSimulacao, classeId: string, nivel: n
   const bolsa = e.bolsa;
   if (!bolsa) throw new Error('sem bolsa');
   e.nivel = nivel;
-  const pontos = (nivel - 1) * ctx.balance.xp.pontosPorNivel;
+  const pontos = pontosAteONivel(nivel, ctx.balance.xp);
   const principais = ATRIBUTOS_TIPICOS[classe.id] ?? ['forca'];
   const noPrincipal = Math.round((pontos * 2) / 3);
   principais.forEach((a, i) => {
     bolsa.atributosBase[a] += Math.floor(noPrincipal / principais.length) + (i < noPrincipal % principais.length ? 1 : 0);
   });
   bolsa.atributosBase.constituicao += pontos - noPrincipal;
+  // Marco 28 (D-127): acima do 30, o típico põe um terço dos pontos novos no atributo de classe (até o 30, nada muda).
+  const noDominio = Math.round(Math.max(0, pontos - pontosAteONivel(ctx.balance.xp.nivelPlenoDasClasses, ctx.balance.xp)) / 3);
+  bolsa.atributosBase.dominio += noDominio;
+  bolsa.atributosBase.constituicao -= noDominio;
   // D-075: redistribui excedentes do teto como o jogador pode fazer na ficha, sem desperdiçar pontos.
+  // Marco 28 (D-127): o teto é nível + 20 (até 100), não mais o 30 fixo.
+  const teto = tetoDoAtributo(nivel, ctx.balance);
   let excedentes = 0;
   for (const nome of Object.keys(bolsa.atributosBase) as (keyof Atributos)[]) {
-    excedentes += Math.max(0, bolsa.atributosBase[nome] - ctx.balance.atributos.maximo);
-    bolsa.atributosBase[nome] = Math.min(ctx.balance.atributos.maximo, bolsa.atributosBase[nome]);
+    excedentes += Math.max(0, bolsa.atributosBase[nome] - teto);
+    bolsa.atributosBase[nome] = Math.min(teto, bolsa.atributosBase[nome]);
   }
-  for (const nome of ['constituicao', 'sabedoria', 'destreza', 'inteligencia', 'forca', 'carisma'] as const) {
-    const dar = Math.min(excedentes, ctx.balance.atributos.maximo - bolsa.atributosBase[nome]);
+  for (const nome of ['constituicao', 'sabedoria', 'destreza', 'inteligencia', 'forca', 'carisma', 'dominio'] as const) {
+    const dar = Math.min(excedentes, teto - bolsa.atributosBase[nome]);
     bolsa.atributosBase[nome] += dar;
     excedentes -= dar;
   }

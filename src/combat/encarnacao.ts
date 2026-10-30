@@ -24,6 +24,8 @@ import { construirEfeito } from './registro-efeitos';
 import { definicaoDe } from './compilar-habilidade';
 import { efeitosDeSintonia, somaDeSintonia } from '../progression/sintonia';
 import { pulsarEncarnacao } from './encarnacao-efeitos';
+import { fatorDeDominio } from '../progression/dominio';
+import { duracaoDaDuplaDoArcano, marcosDoMago } from './marcos-mago';
 
 export const ELEMENTOS_ENCARNAVEIS = ['fogo', 'gelo', 'raio', 'terra', 'veneno', 'trevas', 'sagrado'] as const;
 export type ElementoEncarnado = (typeof ELEMENTOS_ENCARNAVEIS)[number];
@@ -60,7 +62,8 @@ function estenderOuRenovar(ctx: ContextoSimulacao, e: Entidade, hab: Habilidade,
 
 /** A duração da encarnação (a vertente Arquimago dobra). */
 function duracaoDaEncarnacao(ctx: ContextoSimulacao, e: Entidade, tick: number): number {
-  return ctx.balance.ajustesClasses.mago.encarnacao.duracaoMs * (1 + somaDeSintonia(ctx, e, 'encarnacaoDuracao', 'pct', tick) / 100);
+  // Marco 28 (D-127): o Arcano estende a encarnação.
+  return ctx.balance.ajustesClasses.mago.encarnacao.duracaoMs * (1 + somaDeSintonia(ctx, e, 'encarnacaoDuracao', 'pct', tick) / 100) * fatorDeDominio(ctx, e, 'encarnacao');
 }
 
 /** O elemento que esta magia encarna (Seta e Agulha contam como o encarnado, na vertente Arquimago). */
@@ -97,7 +100,7 @@ function fundir(ctx: ContextoSimulacao, e: Entidade, a: ElementoEncarnado, b: El
   if (!dupla) return;
   const extra = efeitosDeSintonia(ctx, e, 'duplaDuracao', tick).filter((ef) => ef.habilidade === dupla).reduce((s, ef) => s + ef.pct, 0);
   e.encarnacaoDupla = dupla;
-  e.encarnacaoDuplaAteTick = tick + ticksDe(ctx.balance.ajustesClasses.mago.encarnacao.duplaDuracaoMs * (1 + extra / 100));
+  e.encarnacaoDuplaAteTick = tick + ticksDe(ctx.balance.ajustesClasses.mago.encarnacao.duplaDuracaoMs * (1 + extra / 100) * duracaoDaDuplaDoArcano(ctx, e));
 }
 
 /** A encarnação dupla agora (id), se houver. */
@@ -120,7 +123,9 @@ export function restanteEncarnacaoMs(e: Entidade, tick: number): number {
 
 /** Fogo: multiplicador das magias (dano mágico) do Mago. */
 export function multiplicadorEncarnacao(ctx: ContextoSimulacao, e: Entidade, hab: Habilidade): number {
-  return encarnacaoDe(e) === 'fogo' && hab.tipoAtaque === 'magico' ? 1 + ctx.balance.ajustesClasses.mago.encarnacao.fogoDanoPct / 100 : 1;
+  const fogo = encarnacaoDe(e) === 'fogo' && hab.tipoAtaque === 'magico' ? 1 + ctx.balance.ajustesClasses.mago.encarnacao.fogoDanoPct / 100 : 1;
+  // Marco 28 (D-127): o Arcano fortalece a parte elemental (as magias com elemento).
+  return fogo * (hab.elemento ? fatorDeDominio(ctx, e, 'elemental') : 1);
 }
 
 /** Gelo: multiplicador do dano que o Mago recebe. */
@@ -165,6 +170,11 @@ export function processarEncarnacoes(estado: EstadoJogo, ctx: ContextoSimulacao,
       delete e.encarnacaoDupla;
       delete e.encarnacaoDuplaAteTick;
     }
+  }
+  // Marco 28 (D-127): os marcos do Arcano (rastro e orbes), cada um no próprio ritmo.
+  for (const mago of estado.entidades) {
+    const encarnado = vivo(mago) ? encarnacaoDe(mago) : null;
+    if (encarnado) marcosDoMago(estado, ctx, mago, encarnado, saida);
   }
   if (estado.tick % Math.max(1, ticksDe(r.fogoIntervaloMs)) !== 0) return;
   for (const mago of estado.entidades) {

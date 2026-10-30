@@ -59,7 +59,8 @@
     "velocidadeBaseMs": 400,
     "filaMaxWaypoints": 2,
     "raioCorpo": 0.32,
-    "dashAtravessaParedes": true
+    "dashAtravessaParedes": true,
+    "velocidadeMaxMult": 2.5
   },
   "navegacao": {
     "maxPassosToque": 60
@@ -146,8 +147,11 @@
     "decaimentoAntifarm": 0.8,
     "tabela": [30, 60, 100, 150, 220, 300, 400, 520, 660, 820],
     "fallbackPorNivel": 100,
-    "nivelMax": 30,
+    "nivelMax": 100,
     "pontosPorNivel": 3,
+    "pontosPorFaixa": [{ "aPartirDe": 31, "pontos": 4 }, { "aPartirDe": 51, "pontos": 5 }, { "aPartirDe": 71, "pontos": 6 }],
+    "curvaLonga": { "aPartirDe": 30, "crescimentoPct": 4 },
+    "nivelPlenoDasClasses": 30,
     "hpPorNivel": 5,
     "faixaAvancada": { "nivelInicio": 20, "percentuais": { "facil": 5, "normal": 10, "dificil": 35, "pesadelo": 170 } }
   },
@@ -207,7 +211,9 @@
   },
   "atributos": {
     "minimo": 1,
-    "maximo": 30,
+    "maximo": 100,
+    "folgaSobreNivel": 20,
+    "rendimentoAcima": { "aPartirDe": 30, "pct": 50 },
     "efeitos": {
       "regenManaPorSabedoriaPct": 3,
       "recargaBasicoPorDestrezaPct": 1.5,
@@ -296,7 +302,8 @@
     "avisoUtilMinMs": 250,
     "grupo": { "tempoMinPctDoSolo": 40, "tempoMaxPctDoSolo": 110 },
     "invocacao": { "fatiaMinPct": 15, "fatiaMaxPct": 35 },
-    "build": { "nivel": 8, "vitoriasMinPct": 60 }
+    "build": { "nivel": 8, "vitoriasMinPct": 60 },
+    "nivelAlto": { "niveis": [50, 75, 100], "vitoriasMinPct": 75, "tempoMinS": 2, "tempoMaxS": 15, "ritmoNiveis": [3, 10, 20, 30, 40, 50, 60, 75, 90, 100], "razaoTempoMin": 8, "razaoTempoMax": 13 }
   },
   "dificuldades": {
     "facil": { "vidaPct": 75, "danoPct": 70, "hesitacaoPct": 130, "avisoExtraMs": 150, "recompensaPct": 80,
@@ -319,7 +326,12 @@
     "pesoRaridade": { "comum": 50, "incomum": 30, "raro": 14, "epico": 5, "lendario": 1, "ultima": 0 },
     "chanceElemental": 0.3,
     "raridadePorNivelPct": 8,
-    "nivelMax": 30
+    "nivelMax": 100,
+    "nivelPontosMax": 30,
+    "danoPorNivelPct": 0.4,
+    "defesaPorNivelPct": 0.3,
+    "pesoPorSlot": { "arma_principal": 100, "arma_secundaria": 50, "anel": 40, "amuleto": 40, "cabeca": 25, "corpo": 25, "maos": 25, "pernas": 25, "pes": 25, "capa": 25 },
+    "defesaPorSlot": { "cabeca": 100, "corpo": 100, "maos": 100, "pernas": 100, "pes": 100, "capa": 100 }
   },
   "integridade": {
     "nivelSemHistorico": 5,
@@ -483,5 +495,64 @@
       "arcoRecargaPct": 40
     },
     "aventureiro": { "descontoPergaminhoPct": 25, "sortePergaminhoPct": 50, "duracaoInvocacaoPct": 30, "danoBasicoPct": 10 }
+  },
+  "dominio": {
+    "skillsPorPontoPct": 1.5,
+    "semFamiliaridadePct": 50,
+    "classes": {
+      "guerreiro": {
+        "porPonto": { "furia": 1.5, "aura": 1.5 },
+        "marcos": {
+          "auraVisivel": [{ "em": 25, "valor": 1 }],
+          "auraRaio": [{ "em": 50, "valor": 1 }, { "em": 100, "valor": 2 }],
+          "auraElementalPct": [{ "em": 75, "valor": 25 }],
+          "estandartePct": [{ "em": 100, "valor": 50 }]
+        }
+      },
+      "necromante": {
+        "porPonto": { "servos": 1.5, "retornoServo": 1 },
+        "marcos": {
+          "retornoServoPct": [{ "em": 25, "valor": 30 }],
+          "servosDaPassiva": [{ "em": 50, "valor": 2 }, { "em": 75, "valor": 3 }],
+          "legiao": [{ "em": 100, "valor": 1 }]
+        }
+      },
+      "arqueiro": {
+        "porPonto": { "carga": 1, "alcanceCarregado": 1 },
+        "marcos": {
+          "cadeiaPct": [{ "em": 25, "valor": 100 }],
+          "ancoraMs": [{ "em": 50, "valor": 4000 }],
+          "explosaoPct": [{ "em": 75, "valor": 60 }],
+          "tempestadePct": [{ "em": 100, "valor": 35 }]
+        }
+      },
+      "mago": {
+        "porPonto": { "encarnacao": 1.5, "elemental": 1 },
+        "marcos": {
+          "rastroMs": [{ "em": 25, "valor": 2000 }],
+          "ressonanciaPct": [{ "em": 50, "valor": 80 }],
+          "orbes": [{ "em": 75, "valor": 1 }, { "em": 100, "valor": 2 }],
+          "arquimagoDuracaoMult": [{ "em": 100, "valor": 2 }]
+        }
+      },
+      "aventureiro": {
+        "porPonto": { "falcao": 1.5, "pergaminho": 1.5 },
+        "marcos": {
+          "pergaminhosExtras": [{ "em": 25, "valor": 1 }, { "em": 100, "valor": 2 }],
+          "matilhaPct": [{ "em": 50, "valor": 10 }],
+          "faroChancePct": [{ "em": 75, "valor": 8 }],
+          "primordialChancePct": [{ "em": 100, "valor": 25 }]
+        }
+      }
+    },
+    "efeitos": {
+      "rastroIntervaloMs": 250, "rastroPct": 20,
+      "ressonanciaRaio": 2,
+      "orbeRaio": 1.6, "orbeIntervaloMs": 700, "orbePct": 25,
+      "ancoraIntervaloMs": 800, "ancoraPct": 40, "ancoraAlcance": 6,
+      "explosaoRaio": 1,
+      "tempestadeCelulas": 8,
+      "legiaoPulsos": 2
+    }
   }
 }

@@ -596,7 +596,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       }
       camera.seguirCelula({ x: j.x, y: j.y });
       posicaoVisual = q.posicao(j);
-      camera.atualizar(dtS, posicaoVisual, velocidade(j.atributos.destreza, ctx.balance.movimento.velocidadeBaseMs));
+      camera.atualizar(dtS, posicaoVisual, velocidade(j.atributos.destreza, ctx.balance.movimento.velocidadeBaseMs, false, ctx.balance.movimento.velocidadeMaxMult));
       sincronizarBarra(j);
       barra.atualizar((h) => ({
         recarga: h.recargaMs > 0 ? recargaRestante(estado, j.id, h.id) / ticksDe(h.recargaMs) : 0,

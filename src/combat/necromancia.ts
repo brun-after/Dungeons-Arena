@@ -12,6 +12,8 @@ import { passavel } from '../world/fase';
 import { reservaCelula } from '../world/colisao';
 import { aoCairOMorto, retornoDoServo, vidaDoMorto } from './sintonia-necromante';
 import { fatorDosServos } from './basico';
+import { pontosUteis } from '../progression/efeitos-atributo';
+import { fatorDeDominio, marcoDe } from '../progression/dominio';
 
 const necromante = (e: Entidade) => vivo(e) && (e.classeId ?? e.bolsa?.classeId) === 'necromante';
 export const chaveServo = (id: string) => `necromante:servo:${id}`;
@@ -52,8 +54,9 @@ function erguer(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade, tipo
   morto.nivel = dono.nivel;
   // Marco 22 (D-090): a Inteligência do Necromante acima de 10 fortalece os mortos (a build focada rende).
   // Marco 27 (D-126): sem o cajado, o Necromante ergue mortos mais fracos (força e vida).
-  const servos = fatorDosServos(ctx, dono);
-  const poder = Math.max(1, Math.round((8 + Math.floor(dono.nivel / 2) + Math.floor(Math.max(0, dono.atributos.inteligencia - 10) * r.atributoPorInt)) * servos));
+  // Marco 28 (D-127): o Ritual fortalece o ataque e a vida dos mortos.
+  const servos = fatorDosServos(ctx, dono) * fatorDeDominio(ctx, dono, 'servos');
+  const poder = Math.max(1, Math.round((8 + Math.floor(dono.nivel / 2) + Math.floor(Math.max(0, pontosUteis(dono.atributos.inteligencia, ctx.balance) - 10) * r.atributoPorInt)) * servos));
   morto.atributos = { ...morto.atributos, forca: poder, inteligencia: poder };
   // Marco 24 (D-095): a sintonia da terra dá mais vida aos mortos.
   morto.hpMax = Math.max(1, Math.round(vidaDoMorto(ctx, dono, Math.round((r.vidaBase + dono.nivel * r.vidaPorNivel) * (tipo === 'servo' ? r.vidaServoPct / 100 : 1)), estado.tick) * servos));
@@ -92,7 +95,8 @@ export function processarServosNecromantes(estado: EstadoJogo, ctx: ContextoSimu
       trazerDeVolta(estado, ctx, dono, saida);
       contarExercito(estado, dono);
     }
-    if (!necromante(dono) || estado.entidades.some((e) => vivo(e) && e.invocacao?.donoId === dono.id && e.invocacao.necromancia === 'servo')) continue;
+    // Marco 28 (D-127): o Ritual permite até 2 e 3 servos da passiva.
+    if (!necromante(dono) || servosDaPassiva(estado, dono) >= Math.max(1, marcoDe(ctx, dono, 'servosDaPassiva'))) continue;
     if ((estado.recargas[chaveServo(dono.id)] ?? 0) > estado.tick) continue;
     if (!erguer(estado, ctx, dono, 'servo', null, saida)) estado.recargas[chaveServo(dono.id)] = estado.tick + ticksDe(1000);
   }
@@ -104,7 +108,7 @@ export function colherMorto(estado: EstadoJogo, ctx: ContextoSimulacao, morto: E
     // Marco 24 (D-095): o que a sintonia faz quando um morto cai; o Pastor das almas traz o servo mais cedo.
     aoCairOMorto(estado, ctx, morto, saida);
     const dono = buscarEntidade(estado, morto.invocacao.donoId);
-    const retorno = retornoDoServo(ctx, dono, estado.tick) ?? ctx.balance.necromancia.retornoServoMs;
+    const retorno = tempoDeRetorno(ctx, dono, retornoDoServo(ctx, dono, estado.tick) ?? ctx.balance.necromancia.retornoServoMs);
     if (morto.invocacao.necromancia === 'servo') estado.recargas[chaveServo(morto.invocacao.donoId)] = estado.tick + ticksDe(retorno);
     return;
   }
@@ -177,4 +181,14 @@ export function executarRitual(estado: EstadoJogo, ctx: ContextoSimulacao, dono:
  */
 export function erguerEmprestado(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade, morto: Entidade, duracaoMs: number, saida: EventoSimulacao[]): boolean {
   return erguer(estado, ctx, dono, 'reanimado', morto, saida, duracaoMs);
+}
+
+function servosDaPassiva(estado: EstadoJogo, dono: Entidade): number {
+  return estado.entidades.filter((e) => vivo(e) && e.invocacao?.donoId === dono.id && e.invocacao.necromancia === 'servo').length;
+}
+
+/** Marco 28 (30/10/2026, D-127): o Ritual traz o servo da passiva mais cedo (por ponto e no 1º marco). */
+function tempoDeRetorno(ctx: ContextoSimulacao, dono: Entidade | undefined, ms: number): number {
+  if (!dono) return ms;
+  return (ms / fatorDeDominio(ctx, dono, 'retornoServo')) * (1 - marcoDe(ctx, dono, 'retornoServoPct') / 100);
 }

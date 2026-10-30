@@ -10,6 +10,7 @@ import { ATRIBUTOS_NEUTROS, type Atributos, type ClasseCombate } from '../entiti
 import type { ClasseJogador } from '../entities/presets';
 import type { ClampDeFicha, ModoDeJogo } from '../modos/modo';
 import { hpMaximo, manaMaxima } from '../progression/ficha';
+import { pontosUteis } from '../progression/efeitos-atributo';
 
 const ATRIBUTOS = Object.keys(ATRIBUTOS_NEUTROS) as (keyof Atributos)[];
 const NEUTRO = 10;
@@ -127,7 +128,7 @@ export function construirFichaDeSessao(pedido: unknown, modo: ModoDeJogo, conteu
   registrar('nivel', p.nivel ?? 1, nivel);
 
   // HP, mana e defesa: sempre derivados; nada do cliente é aceito (§2.5, §3.7).
-  let hpMax = hpMaximo(classe.hpBase, atributos.constituicao, balance.hp.hpAtributoMult, balance.hp.dificuldadeMult);
+  let hpMax = hpMaximo(classe.hpBase, pontosUteis(atributos.constituicao, balance), balance.hp.hpAtributoMult, balance.hp.dificuldadeMult);
   // Marco 15: a vida do modo (o Livre dura mais, D-061).
   if (c) hpMax = Math.max(1, Math.round((hpMax * c.vidaPct) / 100));
   if (c?.hpMaxAbsoluto) hpMax = Math.min(hpMax, c.hpMaxAbsoluto);
@@ -141,7 +142,7 @@ export function construirFichaDeSessao(pedido: unknown, modo: ModoDeJogo, conteu
     ataqueBasico: classe.ataqueBasico,
     nivel,
     hpMax,
-    manaMax: manaMaxima(atributos.sabedoria),
+    manaMax: manaMaxima(pontosUteis(atributos.sabedoria, balance)),
     defesa: classe.defesa,
   };
   return { ficha, alteracoes, hashPolitica: hash53(serializarCanonico({ modo: modo.id, clamp: c, classe })) };

@@ -205,16 +205,21 @@ describe('nível 30 e faixa avançada', () => {
     const c = cena();
     expect(c.ctx.conteudo.itens.get('gi_espada_30_raro_7')?.nivelMinimo).toBe(30);
   });
-  it('30 é o teto e níveis adicionais continuam dando pontos', () => {
+  // Marco 28 (D-127): o teto passou a 100; depois do 30 o nível dá mais pontos (balance.xp.pontosPorFaixa).
+  it('100 é o teto e os pontos por nível crescem depois do 30', () => {
     const c = cena(); c.j.nivel = 29;
     c.j.xp = xpParaProximo(29, c.ctx.balance.xp);
     aplicarSubidas(c.j, c.ctx, 0, c.eventos);
     expect(c.j.nivel).toBe(30);
     expect(c.b.pontosAtributo).toBe(3);
     expect(c.b.pontosHabilidade).toBe(1);
-    c.j.xp = 999999;
+    c.j.xp = xpParaProximo(30, c.ctx.balance.xp);
     aplicarSubidas(c.j, c.ctx, 0, c.eventos);
-    expect(c.j.nivel).toBe(30);
+    expect(c.j.nivel).toBe(31);
+    expect(c.b.pontosAtributo).toBe(7);
+    c.j.nivel = 99; c.j.xp = 999999999;
+    aplicarSubidas(c.j, c.ctx, 0, c.eventos);
+    expect(c.j.nivel).toBe(100);
   });
   it('migração reembolsa só acelerações registradas e preserva XP legado sem subir níveis', () => {
     const c = cena(); c.j.nivel = 20; c.j.xp = 99999;

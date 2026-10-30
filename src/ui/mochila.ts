@@ -13,16 +13,16 @@ import { t, type ChaveTexto } from '../i18n';
 import { SLOTS_DE_EQUIPAMENTO, type Slot } from '../modos/modo';
 import { DT_MS } from '../core/loop';
 import { ticksRestantesDoEstudo } from '../progression/habilidades-personagem';
-import { derivarFicha } from '../progression/derivados';
-import { bonusDeEspecializacao, descontoNaLojaPct, multiplicadorDeRolagem, perfilDestreza, reducaoRecargaBasicoPct, vidaPorCelula } from '../progression/efeitos-atributo';
+import { derivarFicha, multiplicadoresDoItem } from '../progression/derivados';
+import { atributosUteis, bonusDeEspecializacao, descontoNaLojaPct, pontosUteis, multiplicadorDeRolagem, perfilDestreza, reducaoRecargaBasicoPct, vidaPorCelula } from '../progression/efeitos-atributo';
 import { ressonanciasDe } from '../progression/ressonancias';
-import { criarDicaAtributo, linhasDaDica, type DicaAtributo } from './dica-atributo';
+import { criarDicaAtributo, linhasDaDica, nomeDoAtributo, type DicaAtributo } from './dica-atributo';
 import { bonusDeAtributo } from '../progression/ficha';
 import { faixaDaFormula } from '../combat/dados';
 import { habilidadeDoAtor } from '../combat/perfil';
 import { cabeNoSlot, NOMES_ATRIBUTOS, type Item } from '../progression/itens';
 import { consumiveisComAtalho } from '../progression/inventario';
-import { xpParaProximo } from '../progression/nivel';
+import { tetoDoAtributo, xpParaProximo } from '../progression/nivel';
 import { resolverHabilidade } from '../combat/compilar-habilidade';
 import { desenharHabilidades, type EstadoAbaHabilidades } from './mochila-habilidades';
 import { desenharDiario } from './mochila-diario';
@@ -91,16 +91,20 @@ export function armaDoItem(ctx: Pick<ContextoSimulacao, 'conteudo' | 'balance'>,
   return arma && basico ? { familia: t(`familiaArma.${arma.familia}` as ChaveTexto), basico } : undefined;
 }
 
-export function resumoDoItem(item: Item, arma?: { familia: string; basico: string }): string {
+export function resumoDoItem(item: Item, arma?: { familia: string; basico: string }, classeDoLeitor?: string, balance?: ContextoSimulacao['balance']): string {
   const partes: string[] = [];
   if (arma) partes.push(t('mochila.basicoDaArma', { familia: arma.familia, basico: arma.basico }));
   for (const nome of NOMES_ATRIBUTOS) {
     const b = item.bonusAtributos[nome];
     if (!b) continue;
     const sinal = b.valor >= 0 ? '+' : '';
-    partes.push(`${t(`atributoCurto.${nome}` as ChaveTexto)} ${sinal}${b.valor}${b.modo === 'pct' ? '%' : ''}`);
+    partes.push(`${nomeDoAtributo(nome, classeDoLeitor, true)} ${sinal}${b.valor}${b.modo === 'pct' ? '%' : ''}`);
   }
   if (item.bonusDefesa !== 0) partes.push(`${t('atributoCurto.defesa')} ${item.bonusDefesa > 0 ? '+' : ''}${item.bonusDefesa}`);
+  // Marco 28 (D-127): o multiplicador do item (cresce com o nível e a raridade).
+  const m = balance ? multiplicadoresDoItem(item, balance) : null;
+  if (m && m.danoPct > 0) partes.push(t('item.danoPct', { v: m.danoPct }));
+  if (m && m.defesaPct > 0) partes.push(t('item.defesaPct', { v: m.defesaPct }));
   if (item.tipo === 'consumivel' || item.tipo === 'livro' || item.tipo === 'chave') partes.push(item.descricao);
   // Marco 18 (D-069): a forma e o que a Lendária/Última faz.
   if (item.forma) partes.unshift(t(`forma.${item.forma}` as ChaveTexto));
@@ -170,7 +174,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     // Marco 26 (28/10/2026, D-116): o livro que ensina skill de classe leva a runa da classe.
     if (opcoes.item) comRuna(nome, classeDoItem(ctx.conteudo, opcoes.item.id));
     textos.append(nome);
-    const resumo = opcoes.item ? resumoDoItem(opcoes.item, armaDoItem(ctx, opcoes.item)) : '';
+    const resumo = opcoes.item ? resumoDoItem(opcoes.item, armaDoItem(ctx, opcoes.item), o.jogador()?.bolsa?.classeId, ctx.balance) : '';
     const detalhe = opcoes.bloqueio ?? (opcoes.atalho ? [t('mochila.atalho', { tecla: opcoes.atalho }), resumo].filter(Boolean).join(' · ') : resumo);
     if (detalhe) textos.append(el('span', 'detalhe-item', detalhe));
     conteudo.append(iconeItem, textos);
@@ -322,6 +326,8 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     corpo.append(
       el('p', 'linha-nivel', nivelMax ? t('ficha.nivelMax', { nivel: j.nivel }) : t('ficha.nivel', { nivel: j.nivel, xp: j.xp, proximo })),
     );
+    const teto = tetoDoAtributo(j.nivel, ctx.balance);
+    corpo.append(el('p', 'detalhe-item', t('ficha.teto', { teto, nivel: j.nivel, folga: ctx.balance.atributos.folgaSobreNivel, maximo: ctx.balance.atributos.maximo })));
     const pontos = el('p', 'linha-pontos', t('ficha.pontos', { n: bolsa.pontosAtributo }));
     pontos.dataset.pontos = String(bolsa.pontosAtributo);
     corpo.append(pontos);
@@ -342,8 +348,10 @@ export function criarMochila(o: OpcoesMochila): Mochila {
       const base = bolsa.atributosBase[nome];
       const valor = efetiva.atributos[nome];
       const diff = valor - base;
-      const nomeAtributo = el('td', 'nome-atributo', t(`atributo.${nome}` as ChaveTexto));
-      nomeAtributo.append(' ', dicaAtual.botao(nome, () => linhasDaDica(nome, efetiva.atributos, ctx, j, efetiva.hpMax, efetiva.manaMax)));
+      // Marco 28 (D-127): o atributo de classe aparece com o nome da classe.
+      const rotulo = nomeDoAtributo(nome, bolsa.classeId);
+      const nomeAtributo = el('td', 'nome-atributo', rotulo);
+      nomeAtributo.append(' ', dicaAtual.botao(nome, () => linhasDaDica(nome, efetiva.atributos, ctx, j, efetiva.hpMax, efetiva.manaMax), rotulo));
       tr.append(
         nomeAtributo,
         el('td', undefined, String(base)),
@@ -353,7 +361,12 @@ export function criarMochila(o: OpcoesMochila): Mochila {
       const celulaMais = el('td');
       if (bolsa.pontosAtributo > 0) {
         const mais = botao('+', `ponto-${nome}`, () => { emitir({ t: 'distribuirPonto', atributo: nome }); });
-        mais.setAttribute('aria-label', t('ficha.aumentar', { atributo: t(`atributo.${nome}` as ChaveTexto) }));
+        mais.setAttribute('aria-label', t('ficha.aumentar', { atributo: rotulo }));
+        // Marco 28 (D-127): no teto do nível (nível + 20), o "+" trava e diz por quê.
+        if (base >= teto) {
+          mais.disabled = true;
+          mais.title = t('ficha.noTeto', { teto });
+        }
         celulaMais.append(mais);
       }
       tr.append(celulaMais);
@@ -383,12 +396,12 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     if (basico?.formulaDano) {
       // Marco 18: a rolagem já com o multiplicador de Força e Inteligência.
       const faixaBruta = faixaDaFormula(basico.formulaDano);
-      const mult = multiplicadorDeRolagem(efetiva.atributos, ctx.balance);
+      const mult = multiplicadorDeRolagem(atributosUteis(efetiva.atributos, ctx.balance), ctx.balance);
       const faixa = { min: Math.round(faixaBruta.min * mult), max: Math.round(faixaBruta.max * mult) };
-      const bonus = bonusDeAtributo(efetiva.atributos, basico.escalaCom, ctx.balance.combate.multiplicadorAtributoPadrao) + bonusDeEspecializacao(efetiva.atributos, basico.escalaCom, ctx.balance);
+      const bonus = bonusDeAtributo(atributosUteis(efetiva.atributos, ctx.balance), basico.escalaCom, ctx.balance.combate.multiplicadorAtributoPadrao) + bonusDeEspecializacao(efetiva.atributos, basico.escalaCom, ctx.balance);
       const recarga = (basico.recargaMs * (1 - reducaoRecargaBasicoPct(efetiva.atributos, ctx.balance, perfilDestreza(ctx, j)) / 100)) / 1000;
       const manaPorSegundo =
-        ctx.balance.recursos.regenManaPorSegundo * (1 + (Math.max(0, efetiva.atributos.sabedoria - 10) * ctx.balance.atributos.efeitos.regenManaPorSabedoriaPct) / 100);
+        ctx.balance.recursos.regenManaPorSegundo * (1 + (Math.max(0, pontosUteis(efetiva.atributos.sabedoria, ctx.balance) - 10) * ctx.balance.atributos.efeitos.regenManaPorSabedoriaPct) / 100);
       const derivados = el(
         'p',
         'derivados-ficha',

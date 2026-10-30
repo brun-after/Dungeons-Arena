@@ -21,7 +21,7 @@
     { "base": "calcas", "nome": "Calças", "genero": "f", "slot": "pernas", "icone": "calca", "defesa": 1, "atributos": [["constituicao"]] },
     { "base": "botas", "nome": "Botas", "genero": "f", "slot": "pes", "icone": "botas", "defesa": 0, "atributos": [["destreza"]] },
     { "base": "anel", "nome": "Anel", "genero": "m", "slot": "anel", "icone": "anel", "defesa": 0, "atributos": [["sabedoria", "inteligencia"], ["forca", "constituicao"], ["destreza", "carisma"]] },
-    { "base": "amuleto", "nome": "Amuleto", "genero": "m", "slot": "amuleto", "icone": "amuleto", "defesa": 0, "atributos": [["constituicao", "sabedoria"], ["carisma", "inteligencia"]] },
+    { "base": "amuleto", "nome": "Amuleto", "genero": "m", "slot": "amuleto", "icone": "amuleto", "defesa": 0, "atributos": [["constituicao", "sabedoria"], ["carisma", "inteligencia"], ["dominio", "carisma"]] },
     { "base": "capa", "nome": "Capa", "genero": "f", "slot": "capa", "icone": "capa", "defesa": 1, "atributos": [["destreza", "carisma"]] }
   ]
 }

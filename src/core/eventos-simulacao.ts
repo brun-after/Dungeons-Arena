@@ -39,6 +39,9 @@ export type MotivoItem =
   | 'sem_efeito'
   | 'sem_pontos'
   | 'atributo_no_maximo'
+  /** Marco 28 (D-127): o ponto passaria do teto nível + folga; o pergaminho não acha lugar para a criatura. */
+  | 'atributo_acima_do_nivel'
+  | 'sem_espaco'
   /** Marco 9A: interação, loja e baú. */
   | 'nada_perto'
   | 'congelado'
@@ -125,6 +128,8 @@ export type EventoSimulacao =
   | { t: 'soloCriado'; tick: number; soloId: number; acaoId: number; donoId: EntidadeId; habilidadeId: string; chave: string; x: number; y: number; raio: number; forma: 'quadrado' | 'cone'; atrasoMs: number }
   | { t: 'soloPulsou'; tick: number; soloId: number; x: number; y: number; raio: number; atingidos: number }
   | { t: 'soloFim'; tick: number; soloId: number }
+  /** Marco 28 (D-127): um marco do atributo de classe disparou (o render desenha pelas células). */
+  | { t: 'marcoDeClasse'; tick: number; id: EntidadeId; marco: string; celulas: { x: number; y: number }[]; itemId?: string }
   | {
       t: 'impacto';
       tick: number;

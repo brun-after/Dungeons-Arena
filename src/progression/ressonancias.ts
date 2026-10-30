@@ -30,7 +30,7 @@ export function lerRessonancias(json: unknown): { ressonancias: Map<string, Ress
     const exige: Partial<Record<NomeAtributo, number>> = {};
     for (const k of Object.keys(eo)) {
       if (!(NOMES_ATRIBUTOS as string[]).includes(k)) l.erro(`${id}: atributo desconhecido "${k}"`);
-      else exige[k as NomeAtributo] = l.numero(eo, k, { min: 1, max: 30, inteiro: true });
+      else exige[k as NomeAtributo] = l.numero(eo, k, { min: 1, max: 100, inteiro: true });
     }
     if (Object.keys(exige).length === 0) l.erro(`${id}: exige ao menos um atributo`);
     if (ressonancias.has(id)) l.erro(`ressonância "${id}" repetida`);

@@ -93,7 +93,7 @@ describe('equipamento derivado (§2.10)', () => {
     bolsa.equipamento.capa = { invId: 'b', itemId: 'b2', qtd: 1, ref: null };
     bolsa.equipamento.maos = { invId: 'c', itemId: 'luvas_couro', qtd: 1, ref: null };
     expect(derivarFicha(bolsa, 1, ctx).atributos.destreza).toBe(14);
-    bolsa.atributosBase.destreza = 29;
+    bolsa.atributosBase.destreza = BALANCE_PADRAO.atributos.maximo - 1;
     expect(derivarFicha(bolsa, 1, ctx).atributos.destreza).toBe(BALANCE_PADRAO.atributos.maximo);
   });
 

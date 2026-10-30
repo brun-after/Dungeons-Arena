@@ -43,6 +43,12 @@ export interface RegrasItensGerados {
   /** Quanto cada nível do inimigo aumenta o peso das raridades acima de comum (%). */
   raridadePorNivelPct: number;
   nivelMax: number;
+  /** Marco 28 (D-127): acima deste nível, os pontos e a defesa param; o item cresce pelo % de dano e de defesa. */
+  nivelPontosMax: number;
+  danoPorNivelPct: number;
+  defesaPorNivelPct: number;
+  pesoPorSlot: Readonly<Record<string, number>>;
+  defesaPorSlot: Readonly<Record<string, number>>;
   /** Marco 18 (D-069): chance de um item com forma sair na versão elemental (quando a base tem afinidade). */
   chanceElemental: number;
 }
@@ -101,7 +107,7 @@ export function gerarItem(id: string, bases: BasesDeItem, regras: RegrasItensGer
   if (!p || !base || p.nivel < 1 || p.nivel > regras.nivelMax) return null;
   const rng = criarRng(p.semente);
   const mult = regras.multiplicador[p.raridade];
-  const pontos = Math.max(1, Math.round((regras.pontosBase + regras.pontosPorNivel * p.nivel) * mult));
+  const pontos = Math.max(1, Math.round((regras.pontosBase + regras.pontosPorNivel * Math.min(p.nivel, regras.nivelPontosMax)) * mult));
   const par = base.atributos[inteiro(rng, 0, base.atributos.length - 1)] ?? base.atributos[0] ?? [];
   const bonusAtributos: Partial<Record<NomeAtributo, Bonus>> = {};
   const [a1, a2] = par;
@@ -112,7 +118,7 @@ export function gerarItem(id: string, bases: BasesDeItem, regras: RegrasItensGer
   } else if (a1) {
     bonusAtributos[a1] = { modo: 'abs', valor: pontos };
   }
-  const defesa = base.defesa + Math.floor(p.nivel * mult * regras.defesaPorNivel);
+  const defesa = base.defesa + Math.floor(Math.min(p.nivel, regras.nivelPontosMax) * mult * regras.defesaPorNivel);
   const adjetivo = bases.raridades[p.raridade][base.genero];
   return {
     id,

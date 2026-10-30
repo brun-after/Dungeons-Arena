@@ -10,7 +10,7 @@ import { prepararSequencia, participaDeCombo } from './sequencias';
 // formas.ts), custo em vida, saltos (saltos.ts) e o perfil da classe e das passivas (dano, alcance, custo,
 // recarga).
 
-import { bonusDeEspecializacao, multiplicadorDeRolagem, perfilDestreza, potenciaDeEfeito, reducaoRecargaBasicoPct } from '../progression/efeitos-atributo';
+import { atributosDeFormula, bonusDeEspecializacao, multiplicadorDeRolagem, perfilDestreza, potenciaDeEfeito, reducaoRecargaBasicoPct } from '../progression/efeitos-atributo';
 import type { Celula, EntidadeId } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, novoId, type EstadoJogo } from '../core/estado';
@@ -48,6 +48,9 @@ import { dizimoErgue, podeErguerNoDizimo } from './necromancia';
 import { agendarFase, fasesVencidas } from './fases';
 import { virarPara } from './orientacao';
 import { cargaDaClasse, medidorCheio, ultimateDe } from './carga-ultimate';
+import { fatorDeDominio, fatorDeSkillDeClasse } from '../progression/dominio';
+import { alcanceDoTiroCarregado } from './marcos-arqueiro';
+import { ressonanciaArcana } from './marcos-mago';
 
 export function chaveRecarga(entidadeId: EntidadeId, habilidadeId: string): string {
   return `${entidadeId}_${habilidadeId}`;
@@ -80,13 +83,15 @@ export function fonteDe(e: Entidade, ctx: ContextoSimulacao, tick: number, hab: 
     id: e.id,
     equipe: e.equipe,
     // Marco 18 (D-068): o bônus fixo segue o atributo da habilidade; a rolagem escala com Força e Inteligência.
-    bonusAtributo: bonusDeAtributo(e.atributos, hab.escalaCom, ctx.balance.combate.multiplicadorAtributoPadrao) + (e.bolsa ? bonusDeEspecializacao(e.atributos, hab.escalaCom, ctx.balance) : 0),
-    multRolagem: multiplicadorDeRolagem(e.atributos, ctx.balance, hab.escalaCom, hab.escalaRolagem),
+    // Marco 28 (D-127): acima de 30, o ponto de atributo do jogador rende menos (atributosDeFormula).
+    bonusAtributo: bonusDeAtributo(atributosDeFormula(e, ctx.balance), hab.escalaCom, ctx.balance.combate.multiplicadorAtributoPadrao) + (e.bolsa ? bonusDeEspecializacao(e.atributos, hab.escalaCom, ctx.balance) : 0),
+    multRolagem: multiplicadorDeRolagem(atributosDeFormula(e, ctx.balance), ctx.balance, hab.escalaCom, hab.escalaRolagem),
     // Marco 18: a Inteligência e os passivos (Mente dupla) dão a potência dos efeitos.
     potencia: potenciaDeEfeito(e.atributos, ctx.balance) * (1 + passivosDe(ctx, e).potenciaPct / 100),
     carisma: e.atributos.carisma,
     // Marco 10A-3: a rampa da invocação multiplica junto com os efeitos (§2.9).
-    multDano: multiplicadorDanoCausado(e, tick) * rampaDeInvocacao(e, tick, ctx),
+    // Marco 28 (D-127): o % de dano dos itens vale para básico, skill e ultimate.
+    multDano: multiplicadorDanoCausado(e, tick) * rampaDeInvocacao(e, tick, ctx) * (1 + (e.danoItensPct ?? 0) / 100),
     multCura: 1,
   };
 }
@@ -95,7 +100,9 @@ export function fonteDe(e: Entidade, ctx: ContextoSimulacao, tick: number, hab: 
 export function fonteDaHabilidade(e: Entidade, ctx: ContextoSimulacao, tick: number, hab: Habilidade): FonteDeDano {
   const f = fonteDe(e, ctx, tick, hab);
   const p = perfilPara(ctx, e, hab);
-  return { ...f, multDano: f.multDano * hab.multDano * (1 + p.danoPct / 100), multCura: hab.multCura * (1 + p.curaPct / 100) };
+  // Marco 28 (D-127): o atributo de classe fortalece as skills de classe e as ultimates (dano, cura e potência).
+  const classe = fatorDeSkillDeClasse(ctx, e, hab.id);
+  return { ...f, potencia: f.potencia * classe, multDano: f.multDano * hab.multDano * (1 + p.danoPct / 100) * classe, multCura: hab.multCura * (1 + p.curaPct / 100) * classe };
 }
 
 /**
@@ -432,7 +439,10 @@ function lancar(
     // Marco 27 (D-126): o tomo de outra classe deixa o próximo básico com o elemento da skill.
     aoUsarSkill(estado, ctx, ator, hab);
     // Marco 22 (D-089): a magia de fogo, gelo ou raio troca a encarnação do Mago.
+    const encarnadoAntes = ator.encarnacao;
     if (encarnar(ctx, ator, hab, estado.tick)) {
+      // Marco 28 (D-127): a Ressonância do Arcano explode na troca de encarnação.
+      if (encarnadoAntes) ressonanciaArcana(estado, ctx, ator, encarnadoAntes, hab, fonte, acaoId, saida);
       saida.push({ t: 'encarnou', tick: estado.tick, id: ator.id, elemento: ator.encarnacao ?? 'fogo', ...(ator.encarnacaoDupla && { dupla: ator.encarnacaoDupla }) });
       // Marco 24 (D-094): trocar de encarnação enche a ultimate (no máximo uma vez a cada 4 s).
       cargaDaClasse(ctx, ator, 'encarnacao', estado.tick, saida);
@@ -465,7 +475,7 @@ function lancar(
     saida.push({ t: 'tiroCarregado', tick: estado.tick, id: ator.id });
     cargaDaClasse(ctx, ator, 'miraFirme', estado.tick, saida);
     const cheia = { ...fonte, d20Minimo: Math.max(fonte.d20Minimo ?? 0, ctx.balance.ajustesClasses.arqueiro.mira.d20Minimo) };
-    const linha = celulasDaLinha(partida, celulaOcupada(alvo), Math.round(alcance * ctx.balance.armas.carregadoAlcanceMult), ctx.fase);
+    const linha = celulasDaLinha(partida, celulaOcupada(alvo), Math.round(alcanceCarregado(ctx, ator, alcance) * ctx.balance.armas.carregadoAlcanceMult), ctx.fase);
     alvosDaForma(estado, ctx, ator, hab, linha).forEach((e, indice) => {
       aplicarImpacto(estado, ctx, e, { ...base, fonte: cheia, indice, secundario: indice > 0 }, saida);
     });
@@ -530,7 +540,7 @@ function lancar(
       }
       const fonteTiro = carregado ? { ...fonte, d20Minimo: Math.max(fonte.d20Minimo ?? 0, ctx.balance.ajustesClasses.arqueiro.mira.d20Minimo) } : fonte;
       // Marco 27 (D-126): a variação pode lançar vários (leque, salva, imagem); cada um leva o que vale para o tiro.
-      const tiros = lancarProjetil(estado, ator, hab, acaoId, fonteTiro, alvo ? celulaOcupada(alvo) : mira, saida, origemDaHabilidade(estado, ator, hab), carregado ? { alcance } : null, multiplos);
+      const tiros = lancarProjetil(estado, ator, hab, acaoId, fonteTiro, alvo ? celulaOcupada(alvo) : mira, saida, origemDaHabilidade(estado, ator, hab), carregado ? { alcance: alcanceCarregado(ctx, ator, alcance) } : null, multiplos);
       // Marco 24 (D-096): a ressonância Engenhoso faz o projétil mágico atravessar.
       const atravessa = hab.tipoAtaque === 'magico' && ator.bolsa ? passivosDe(ctx, ator).atravessaMagico : 0;
       for (const tiro of tiros) {
@@ -625,4 +635,9 @@ export function usarUltimate(estado: EstadoJogo, ctx: ContextoSimulacao, ator: E
   ator.cargaUltimate = 0;
   saida.push({ t: 'ultimateUsada', tick: estado.tick, id: ator.id, ultimateId: u.id, acaoId: ator.acao.acaoId });
   return true;
+}
+
+/** Marco 28 (D-127): o alcance do tiro carregado com o Instinto (por ponto e a Tempestade de aço). */
+function alcanceCarregado(ctx: ContextoSimulacao, ator: Entidade, alcance: number): number {
+  return alcanceDoTiroCarregado(ctx, ator, alcance * fatorDeDominio(ctx, ator, 'alcanceCarregado'));
 }

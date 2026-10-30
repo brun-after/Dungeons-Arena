@@ -6,6 +6,7 @@
 import type { ContextoSimulacao } from '../core/contexto';
 import { ticksDe } from '../core/tempo';
 import type { Entidade } from '../entities/entidade';
+import { fatorDeDominio } from '../progression/dominio';
 
 /** Tem Mira firme? O Arqueiro (pela bolsa ou, na rede, pelo `classeId`), não as invocações. */
 export function temMira(e: Entidade): boolean {
@@ -16,7 +17,8 @@ export function temMira(e: Entidade): boolean {
 export function ticksParaCarregar(ctx: ContextoSimulacao, e: Entidade): number {
   const r = ctx.balance.ajustesClasses.arqueiro.mira;
   const reducao = Math.min(r.reducaoMaxPct, Math.max(0, e.atributos.destreza - 10) * r.reducaoPorDestrezaPct);
-  return Math.max(1, ticksDe(r.cargaMs * (1 - reducao / 100)));
+  // Marco 28 (D-127): o Instinto enche a Mira mais rápido.
+  return Math.max(1, ticksDe((r.cargaMs * (1 - reducao / 100)) / fatorDeDominio(ctx, e, 'carga')));
 }
 
 /** Fração da barra (0..1); null para quem não tem. */

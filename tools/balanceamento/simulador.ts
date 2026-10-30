@@ -17,6 +17,7 @@ import { idItemGerado } from '../../src/progression/gerar-item';
 import type { Raridade } from '../../src/modos/modo';
 import perfis from '../rede/perfis.json';
 import { ATRIBUTOS_TIPICOS, BotDeDuelo, CONTEUDO, contextoDoCenario, inimigo, jogadorTipico, mundo, TICKS_POR_S } from './cenarios';
+import { pontosAteONivel } from '../../src/progression/nivel';
 
 // Marco 22 (23/10/2026, D-090): o Necromante entra nas metas (antes só no diagnóstico).
 export const CLASSES = ['aventureiro', 'guerreiro', 'mago', 'arqueiro', 'necromante'] as const;
@@ -306,7 +307,7 @@ export function dispersar(e: Entidade, ctx: ContextoSimulacao): void {
   const bolsa = e.bolsa;
   const classe = bolsa ? CONTEUDO.classes.get(bolsa.classeId) : undefined;
   if (!bolsa || !classe) return;
-  const pontos = (e.nivel - 1) * ctx.balance.xp.pontosPorNivel;
+  const pontos = pontosAteONivel(e.nivel, ctx.balance.xp);
   bolsa.atributosBase = { ...classe.atributos };
   const nomes = Object.keys(bolsa.atributosBase) as (keyof typeof bolsa.atributosBase)[];
   for (let i = 0; i < pontos; i++) {
