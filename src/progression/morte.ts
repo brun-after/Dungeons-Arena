@@ -5,6 +5,7 @@ import { aoAbaterComEncarnacao } from '../combat/encarnacao-efeitos';
 import { multiplicadorFuria, temFuria } from '../combat/furia';
 import { fatorDeCura } from '../combat/basico';
 import { aoAbaterComArmas } from '../combat/emprestimos';
+import { marcosNaMorte } from '../combat/marcos-abate';
 import { sorteDePergaminhoPct } from './passiva-aventureiro';
 // Mortes, XP, revivescência e respawn (§2.7 "Morte", §2.12) — etapa 8 do tick.
 // HP 0 é morte direta. Entidades de IA saem do mundo e voltam pelo respawn agendado, com o mesmo
@@ -132,6 +133,8 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
     // Marco 18: os ganchos "ao abater" de quem derrubou (com a habilidade do último golpe, se foi dele).
     const quemAbateu = porId ? buscarEntidade(estado, porId.id) : undefined;
     if (e.controlador !== 'ia' || e.invocacao) colherMorto(estado, ctx, e, quemAbateu, saida);
+    // Marco 28 (D-127): os marcos do atributo de classe que agem na morte (Legião, Faro do falcão).
+    marcosNaMorte(estado, ctx, e, quemAbateu, saida);
     // Marco 24 (D-095): as duplas do Mago que agem no abate (Túmulo, Pestilência, Inverno sombrio, Miasma ardente).
     aoAbaterComEncarnacao(estado, ctx, quemAbateu, e, saida);
     if (quemAbateu) {

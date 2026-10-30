@@ -21,6 +21,7 @@ import {
   vidaPorCelula,
 } from '../progression/efeitos-atributo';
 import type { NomeAtributo } from '../progression/itens';
+import { fatorDeDominio, fatorDeSkillDeClasse, marcoDe, marcosDaClasse } from '../progression/dominio';
 import { velocidade } from '../world/movimento';
 
 const fmt = (v: number, casas = 1) => v.toFixed(casas).replace('.', ',');
@@ -35,7 +36,7 @@ export function linhasDaDica(nome: NomeAtributo, a: Atributos, ctx: ContextoSimu
     case 'destreza': {
       const perfil = perfilDestreza(ctx, j);
       return [
-        t('dica.destreza.1', { vel: fmt(velocidade(a.destreza, b.movimento.velocidadeBaseMs)) }),
+        t('dica.destreza.1', { vel: fmt(velocidade(a.destreza, b.movimento.velocidadeBaseMs, false, b.movimento.velocidadeMaxMult)) }),
         t('dica.destreza.2', { pct: fmt(reducaoRecargaBasicoPct(a, b, perfil), 0), teto: perfil?.recargaBasicoMaxPct ?? b.atributos.efeitos.recargaBasicoMaxPct }),
         t('dica.destreza.3'),
       ];
@@ -56,6 +57,8 @@ export function linhasDaDica(nome: NomeAtributo, a: Atributos, ctx: ContextoSimu
         t('dica.sabedoria.2', { raio: raioDeRevelar(a, b), revelar: fmt(chanceDeRevelarPct(a, b), 0), desarmar: fmt(chanceDeDesarmarPct(a, b), 0) }),
       ];
     }
+    case 'dominio':
+      return linhasDoDominio(ctx, j);
     case 'carisma':
       return [
         t('dica.carisma.1', { d20: fmt(chanceDeVinte(a.carisma, b.combate.carismaNeutro) * 100) }),
@@ -65,9 +68,32 @@ export function linhasDaDica(nome: NomeAtributo, a: Atributos, ctx: ContextoSimu
   }
 }
 
+/** Marco 28 (D-127): o nome do atributo para quem vê (o de classe leva o nome da classe). */
+export function nomeDoAtributo(nome: NomeAtributo, classeId: string | undefined, curto = false): string {
+  if (nome === 'dominio' && classeId) return t(`${curto ? 'atributoClasseCurto' : 'atributoClasse'}.${classeId}` as ChaveTexto);
+  return t(`${curto ? 'atributoCurto' : 'atributo'}.${nome}` as ChaveTexto);
+}
+
+/** Marco 28 (D-127): o que o atributo de classe dá agora e os marcos (os alcançados marcados). */
+function linhasDoDominio(ctx: ContextoSimulacao, j: Entidade): string[] {
+  const classe = j.bolsa?.classeId ?? '';
+  const regras = ctx.balance.dominio.classes[classe];
+  if (!regras) return [];
+  const fmt2 = (v: number) => v.toFixed(2).replace('.', ',');
+  const skills = Math.round((fatorDeSkillDeClasse(ctx, j, ctx.conteudo.classes.get(classe)?.exclusivas[0] ?? '') - 1) * 100);
+  const linhas = [t('dica.dominio.skills', { pct: skills })];
+  for (const chave of Object.keys(regras.porPonto)) linhas.push(t('dica.dominio.porPonto', { efeito: t(`dominio.porPonto.${chave}` as ChaveTexto), fator: fmt2(fatorDeDominio(ctx, j, chave)) }));
+  linhas.push(t('dica.dominio.semArma', { pct: ctx.balance.dominio.semFamiliaridadePct }), t('dica.dominio.marcos'));
+  for (const m of marcosDaClasse(ctx, classe)) {
+    const texto = t(`marco.${m.chave}` as ChaveTexto, { valor: m.valor, s: m.valor / 1000 });
+    linhas.push(t('dica.dominio.marco', { em: m.em, texto, ativo: j.atributos.dominio >= m.em && marcoDe(ctx, j, m.chave) >= m.valor ? t('dica.dominio.ativo') : '' }));
+  }
+  return linhas;
+}
+
 export interface DicaAtributo {
   /** O botão "?" da linha (abre e fecha o cartão). */
-  botao: (nome: NomeAtributo, linhas: () => string[]) => HTMLButtonElement;
+  botao: (nome: NomeAtributo, linhas: () => string[], rotulo?: string) => HTMLButtonElement;
   fechar: () => void;
   destruir: () => void;
 }
@@ -103,10 +129,10 @@ export function criarDicaAtributo(raiz: HTMLElement): DicaAtributo {
   document.addEventListener('keydown', aoTecla, true);
   document.addEventListener('pointerdown', aoTocarFora, true);
 
-  const abrir = (b: HTMLButtonElement, nome: NomeAtributo, linhas: string[]) => {
+  const abrir = (b: HTMLButtonElement, rotulo: string, linhas: string[]) => {
     cartao.textContent = '';
     const titulo = document.createElement('strong');
-    titulo.textContent = t(`atributo.${nome}` as ChaveTexto);
+    titulo.textContent = rotulo;
     cartao.append(titulo);
     const ul = document.createElement('ul');
     for (const l of linhas) {
@@ -126,18 +152,18 @@ export function criarDicaAtributo(raiz: HTMLElement): DicaAtributo {
   };
 
   return {
-    botao: (nome, linhas) => {
+    botao: (nome, linhas, rotulo = t(`atributo.${nome}` as ChaveTexto)) => {
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'botao-dica';
       b.textContent = '?';
       b.dataset.chave = `dica-${nome}`;
-      b.setAttribute('aria-label', t('dica.abrir', { atributo: t(`atributo.${nome}` as ChaveTexto) }));
+      b.setAttribute('aria-label', t('dica.abrir', { atributo: rotulo }));
       b.setAttribute('aria-expanded', 'false');
       b.setAttribute('aria-describedby', cartao.id);
       b.addEventListener('click', () => {
         if (aberto === b) fechar();
-        else abrir(b, nome, linhas());
+        else abrir(b, rotulo, linhas());
       });
       return b;
     },

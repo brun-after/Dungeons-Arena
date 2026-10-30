@@ -261,7 +261,7 @@
       "arma": "mangual",
       "defesa": 0,
       "atributos": [
-        ["forca"]
+        ["forca", "dominio"]
       ],
       "elementos": ["trevas"],
       "formas": {
@@ -616,7 +616,7 @@
       "arma": "arcocaca",
       "defesa": 0,
       "atributos": [
-        ["destreza"]
+        ["destreza", "dominio"]
       ],
       "elementos": ["veneno"],
       "formas": {
@@ -775,7 +775,7 @@
       "arma": "estelar",
       "defesa": 0,
       "atributos": [
-        ["inteligencia"]
+        ["inteligencia", "dominio"]
       ],
       "elementos": ["sagrado"],
       "formas": {
@@ -930,7 +930,7 @@
       "arma": "vazio",
       "defesa": 0,
       "atributos": [
-        ["inteligencia"]
+        ["inteligencia", "dominio"]
       ],
       "elementos": ["trevas"],
       "formas": {
@@ -1409,7 +1409,7 @@
       "arma": "shuriken",
       "defesa": 0,
       "atributos": [
-        ["destreza"]
+        ["destreza", "dominio"]
       ],
       "elementos": ["gelo"],
       "formas": {

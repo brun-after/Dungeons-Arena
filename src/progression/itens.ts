@@ -119,7 +119,7 @@ export function lerItens(json: unknown): { itens: Map<string, Item>; erros: stri
       raridade: l.opcao(o, 'raridade', RARIDADES),
       valorBase: l.numero(o, 'valorBase', { min: 0, inteiro: true }),
       slotPadrao: o.slotPadrao === null ? null : l.opcao(o, 'slotPadrao', SLOTS_DE_EQUIPAMENTO),
-      nivelMinimo: l.numero(o, 'nivelMinimo', { min: 1, max: 30, inteiro: true }),
+      nivelMinimo: l.numero(o, 'nivelMinimo', { min: 1, max: 100, inteiro: true }),
       bonusAtributos: lerBonus(l, o),
       bonusDefesa: l.numero(o, 'bonusDefesa', { min: -20, max: 50, inteiro: true }),
       efeitos: o.efeitos === undefined && tipo === 'livro' ? [] : lerEfeitos(l, o),

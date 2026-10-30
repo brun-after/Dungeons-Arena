@@ -44,7 +44,7 @@ export interface PresetInvocacao {
   explosao: { raio: number; dano: number } | null;
 }
 
-const COMPORTAMENTOS: readonly ComportamentoInvocacao[] = ['agressivo', 'assassino', 'protetor', 'curador', 'isca', 'companheiro'];
+const COMPORTAMENTOS: readonly ComportamentoInvocacao[] = ['agressivo', 'assassino', 'protetor', 'curador', 'isca', 'companheiro', 'torre'];
 
 function lerInvocacao(l: Leitor, v: unknown): PresetInvocacao | null {
   if (v === undefined || v === null) return null;
@@ -151,6 +151,8 @@ function lerAtributos(l: Leitor, o: Objeto): Atributos {
   const a = l.objeto(o.atributos, 'atributos');
   const saida = { ...ATRIBUTOS_NEUTROS };
   for (const chave of Object.keys(ATRIBUTOS_NEUTROS) as (keyof Atributos)[]) {
+    // Marco 28 (D-127): o atributo de classe é opcional nos dados (neutro, 10, para quem não o declara).
+    if (chave === 'dominio' && a.dominio === undefined) continue;
     saida[chave] = l.numero(a, chave, { min: 1, max: 100, inteiro: true });
   }
   return saida;

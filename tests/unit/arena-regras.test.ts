@@ -79,7 +79,7 @@ describe('ficha de sessão (§3.7)', () => {
     const r1 = construirFichaDeSessao(pedido, escalar, CONTEUDO, BALANCE_PADRAO).ficha.atributos;
     const r2 = construirFichaDeSessao(pedido, escalar, CONTEUDO, BALANCE_PADRAO).ficha.atributos;
     expect(r1).toEqual(r2);
-    expect(soma(r1)).toBe(72);
+    expect(soma(r1)).toBe(82); // Marco 28: 7 atributos, com o de classe
     expect(r1.forca).toBeGreaterThanOrEqual(r1.carisma);
   });
 

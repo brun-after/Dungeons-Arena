@@ -233,7 +233,7 @@ export function abrirInspetor(f: FaseEditavel, c: Celula, conteudo: Conteudo, ac
     const inimigo = celula.inimigo;
     const presets = [...conteudo.presets.values()].filter((p) => p.invocacao === null).map((p) => [p.id, p.nome] as const);
     const preset = seletor(presets, inimigo.preset);
-    const nivel = numero(inimigo.nivel ?? 1, 1, 30);
+    const nivel = numero(inimigo.nivel ?? 1, 1, 100);
     const mudar = () => {
       const n = Math.round(limitar(nivel.value, 1, 30, 1));
       const resto = { preset: preset.value, x: inimigo.x, y: inimigo.y, ...(inimigo.hpBase !== undefined && { hpBase: inimigo.hpBase }), ...(inimigo.habilidades && { habilidades: [...inimigo.habilidades] }) };

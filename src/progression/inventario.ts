@@ -16,6 +16,7 @@ import { aplicarItemDeProgressao } from './itens-progressao';
 import { aprenderPorLivro } from './habilidades-personagem';
 import { cabeNoSlot, NOMES_ATRIBUTOS, type Item, type NomeAtributo } from './itens';
 import { ehPergaminho, marcarPergaminhos } from './passiva-aventureiro';
+import { tetoDoAtributo } from './nivel';
 
 export function criarBolsa(classe: ClasseJogador, ouroInicial = 0): Bolsa {
   const bolsa: Bolsa = {
@@ -207,6 +208,8 @@ export function usarItem(estado: EstadoJogo, e: Entidade, ctx: ContextoSimulacao
     const [hpAntes, manaAntes] = [e.hp, e.mana];
     const antes = estado.entidades.length;
     for (const ef of item.efeitos) aplicarEfeito(estado, ctx, e, ef, { id: e.id, x: e.x, y: e.y }, null, saida);
+    // Marco 28 (D-127): sem lugar em volta, nada nasce e o pergaminho não é gasto.
+    if (pergaminho && estado.entidades.length === antes) return recusa('sem_espaco');
     if (pergaminho) marcarPergaminhos(estado, ctx, e, antes);
     const [hp, mana] = [e.hp - hpAntes, e.mana - manaAntes];
     entrada.qtd--;
@@ -224,6 +227,8 @@ export function distribuirPonto(e: Entidade, ctx: ContextoSimulacao, atributo: N
     if (!NOMES_ATRIBUTOS.includes(atributo)) return recusa('nao_encontrado');
     if (bolsa.pontosAtributo <= 0) return recusa('sem_pontos');
     if (bolsa.atributosBase[atributo] >= ctx.balance.atributos.maximo) return recusa('atributo_no_maximo');
+    // Marco 28 (D-127): o ponto gasto não leva o atributo acima de nível + 20 (itens podem levar).
+    if (bolsa.atributosBase[atributo] >= tetoDoAtributo(e.nivel, ctx.balance)) return recusa('atributo_acima_do_nivel');
     bolsa.pontosAtributo--;
     bolsa.atributosBase[atributo]++;
     recalcularFicha(e, ctx);

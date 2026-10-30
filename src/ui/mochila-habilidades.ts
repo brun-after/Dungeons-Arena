@@ -22,7 +22,7 @@ import { aprendiveisDa, caminhosDoRank, fusoesVisiveis, motivoParaNaoSubir, nive
 import { definicaoDe } from '../combat/compilar-habilidade';
 import { familiaDaHabilidade } from '../progression/itens-progressao';
 import { duracaoLegivel } from './tempo';
-import { descreverBonus, descreverCaminho, descreverHabilidade } from './descrever';
+import { descreverBonus, descreverCaminho, descreverHabilidade, linhasDeEscala } from './descrever';
 import { icone } from './icones';
 import { classeDaHabilidade, comRuna } from './runa-dom';
 import { desenharPassivasGerais, desenharSintonia } from './painel-sintonia';
@@ -147,6 +147,8 @@ export function desenharHabilidades(
     textos.append(titulo);
     const perfil = perfilPara(ctx, j, h);
     const linhas = descreverHabilidade(h, { rankMax, perfilDanoPct: perfil.danoPct });
+    // Marco 28 (D-127): com o que a skill escala e o efeito atual na ficha.
+    if (!h.passiva && (h.formulaDano !== null || h.formulaCura !== null)) linhas.push(...linhasDeEscala(ctx, j, h));
     const desc = el('ul', 'descricao-habilidade');
     for (const linha of linhas) desc.append(el('li', undefined, linha));
     const primeira = desc.firstElementChild;

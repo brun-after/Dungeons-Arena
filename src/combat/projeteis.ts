@@ -25,6 +25,7 @@ import { quantidadeDeSaltos, saltar } from './saltos';
 import { aoAcertarTiroCheio, aoFimDoTiroCheio, noCaminhoDoTiroCheio } from './sintonia-arqueiro';
 import { quebrar, quebraQuem, quebravelEm } from './quebraveis';
 import { aindaNoAr, aoAcertarVariacao, aoChegarNaMao, guiar, iniciarVolta, naParede, orbitar, prepararVariacao } from './projeteis-variacoes';
+import { aoPararOTiroCarregado, cacadaEmCadeia } from './marcos-arqueiro';
 
 /** Sub-passo máximo da integração, em células: nenhum alvo é atravessado sem teste. */
 const SUBPASSO = 0.25;
@@ -181,6 +182,8 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
         aplicarImpacto(estado, ctx, alvo, { acaoId: p.acaoId, fonte, hab, indice: p.atingidos.length, ...(volta && { secundario: true }) }, saida);
         p.atingidos.push(alvo.id);
         if (p.carregado) aoAcertarTiroCheio(estado, ctx, p, alvo, saida);
+        // Marco 28 (D-127): o Instinto do Arqueiro faz o tiro carregado que abate saltar (Caçada em cadeia).
+        if (p.carregado) cacadaEmCadeia(estado, ctx, p, alvo, saida);
         // Marco 14: o primeiro acerto salta (os alvos do salto entram em `atingidos`).
         if (saltos > 0) saltar(estado, ctx, { id: p.donoId, equipe: p.equipeDono }, hab, alvo, saltos, { acaoId: p.acaoId, fonte, hab }, p.atingidos, saida);
         // Marco 27 (D-126): a variação decide se o projétil segue (ricochete, órbita, volta do bumerangue).
@@ -216,6 +219,7 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
     if (fim) saida.push({ t: 'projetilFim', tick: estado.tick, projetilId: p.id, motivo: fim });
     else restantes.push(p);
     if (fim && p.carregado) aoFimDoTiroCheio(estado, ctx, p, saida);
+    if (fim && p.carregado) aoPararOTiroCarregado(estado, ctx, p, saida);
   }
   estado.projeteis = restantes;
 }

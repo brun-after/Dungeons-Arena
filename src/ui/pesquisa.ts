@@ -11,6 +11,7 @@ import { comPontosDistribuidos, criarColetor, type ClasseDeAlvo } from '../pesqu
 import { VERSAO_RELATORIO, type RelatorioPesquisa } from '../pesquisa/relatorio';
 import { enderecoDoServidor, enderecoHttp } from '../plataforma/servidor';
 import { abrirQuestionario } from './questionario';
+import { pontosAteONivel } from '../progression/nivel';
 
 /** Eventos que o coletor usa. */
 const EVENTOS = ['acaoIniciada', 'impacto', 'iaNotou', 'morreu', 'coletou', 'equipou', 'subiuNivel'] as const;
@@ -55,7 +56,7 @@ export function criarPesquisa(o: { ctx: ContextoSimulacao; estado: () => EstadoJ
   botao.addEventListener('click', () => {
     const j = o.estado().entidades.find((e) => e.id === o.idJogador);
     const nivel = j?.nivel ?? 1;
-    const distribuiu = !!j?.bolsa && j.bolsa.pontosAtributo < (nivel - 1) * o.ctx.balance.xp.pontosPorNivel;
+    const distribuiu = !!j?.bolsa && j.bolsa.pontosAtributo < pontosAteONivel(nivel, o.ctx.balance.xp);
     const medidas = comPontosDistribuidos(coletor.medidas(agoraS(), nivel), distribuiu);
     abrirQuestionario({
       aoEnviar: (respostas) =>

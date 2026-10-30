@@ -16,7 +16,7 @@
     "modo": "clamp",
     "nivelMax": 10,
     "atributoMax": 16,
-    "atributoTotalMax": 72,
+    "atributoTotalMax": 82,
     "orcamentoAtributos": 6,
     "raridadeMax": "raro",
     "slotsPermitidos": ["arma_principal", "arma_secundaria", "cabeca", "corpo", "maos", "pernas", "pes", "anel", "amuleto", "capa"],
@@ -25,7 +25,7 @@
     "hpMaxAbsoluto": null,
     "vidaPct": 120,
     "orcamentoEquipamento": 100,
-    "ordemReducao": ["carisma", "sabedoria", "inteligencia", "destreza", "constituicao", "forca"],
+    "ordemReducao": ["dominio", "carisma", "sabedoria", "inteligencia", "destreza", "constituicao", "forca"],
     "presetClasse": null
   },
   "loot": { "politica": "compartilhado", "janelaParticipacaoS": 15, "itens": true, "economiaDoSpawner": false },

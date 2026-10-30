@@ -17,7 +17,7 @@ import { migrarSkillsDeClasse } from './migracao-24';
 import { MAX_REGRAS, RE_REGRA_ESTILO } from '../world/estilo';
 import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 27;
+export const VERSAO_SCHEMA = 28;
 // Marco 23 (24/10/2026, D-092): dez slots de personagem por jogador (eram três).
 export const MAX_SLOTS = 10;
 export const SLOTS: readonly number[] = Array.from({ length: MAX_SLOTS }, (_, i) => i + 1);
@@ -403,7 +403,25 @@ export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   // Marco 27 (29/10/2026, D-126): as armas de classe — a arma de partida na mão vazia, o básico pela arma e o da mão
   // secundária.
   26: (r) => migrarArmasDeClasse(r),
+  // Marco 28 (30/10/2026, D-127): o atributo de classe (`dominio`) começa neutro, em 10, sem devolver pontos.
+  27: (r) => migrarAtributoDeClasse(r),
 };
+
+/** D-127: toda entidade ganha `dominio: 10` nos atributos (e na base da ficha, quem tem bolsa). */
+function migrarAtributoDeClasse(r: Objeto): Objeto {
+  const comDominio = (a: unknown): unknown => (ehObjeto(a) && typeof a.dominio !== 'number' ? { ...a, dominio: 10 } : a);
+  const migrar = (v: unknown): unknown => {
+    if (!ehObjeto(v) || !Array.isArray(v.entidades)) return v;
+    return { ...v, entidades: v.entidades.map((x: unknown) => {
+      if (!ehObjeto(x)) return x;
+      const bolsa = ehObjeto(x.bolsa) ? { ...x.bolsa, atributosBase: comDominio(x.bolsa.atributosBase) } : x.bolsa;
+      return { ...x, atributos: comDominio(x.atributos), ...(bolsa !== undefined && { bolsa }) };
+    }) };
+  };
+  const fasesVisitadas = ehObjeto(r.fasesVisitadas)
+    ? Object.fromEntries(Object.entries(r.fasesVisitadas).map(([id, fase]) => [id, migrar(fase)])) : r.fasesVisitadas;
+  return { ...r, estado: migrar(r.estado), fasesVisitadas };
+}
 
 /** D-126: quem está de mãos vazias recebe a arma de partida da classe; o básico e o da secundária vêm das armas. */
 function migrarArmasDeClasse(r: Objeto): Objeto {
@@ -479,7 +497,7 @@ function lerParametros(v: unknown): ParametrosGeracao | null {
   if (!ehObjeto(v)) return null;
   const inteiro = (x: unknown, min: number, max: number): x is number => typeof x === 'number' && Number.isInteger(x) && x >= min && x <= max;
   if (typeof v.id !== 'string' || typeof v.nome !== 'string') return null;
-  if (!inteiro(v.semente, 0, 2 ** 32) || !inteiro(v.salas, 1, 50) || !inteiro(v.nivelInimigos, 1, 30) || !inteiro(v.matizGraus, 0, 359)) return null;
+  if (!inteiro(v.semente, 0, 2 ** 32) || !inteiro(v.salas, 1, 50) || !inteiro(v.nivelInimigos, 1, 100) || !inteiro(v.matizGraus, 0, 359)) return null;
   if (v.ambientesVivos !== undefined && typeof v.ambientesVivos !== 'boolean') return null;
   if (v.enxameConcluido !== undefined && typeof v.enxameConcluido !== 'boolean') return null;
   if (v.formato !== undefined && v.formato !== 'salas' && v.formato !== 'espiral') return null;

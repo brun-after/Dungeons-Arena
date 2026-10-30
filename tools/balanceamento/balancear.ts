@@ -5,6 +5,7 @@
 import { writeFileSync } from 'node:fs';
 import { BALANCE_PADRAO } from '../../src/core/contexto';
 import { DIFICULDADES } from '../../src/modos/dificuldade';
+import { xpParaProximo } from '../../src/progression/nivel';
 import { CLASSES, aguenta, avisos, chefe, desequipar, dispersar, dueloDeFichas, equipar, fatiaDaInvocacao, mediana, economiaPorMinuto, pvpLivre, semAjuste, sequencia, xpPorMinuto } from './simulador';
 
 const args = process.argv.slice(2);
@@ -190,7 +191,38 @@ for (const classe of CLASSES) for (const nivel of [20, 25, 30]) {
   corpoOuroAvancado.push([classe, String(nivel), ...economia.map((e) => br(e.ouro)), ...[economia[1], economia[3]].map((e) => e && e.ouro > 0 ? br(BALANCE_PADRAO.progressaoItens.tomoPrecoBase / e.ouro) : '—')]);
 }
 tabela('Faixa avançada (equipamento raro, Normal, duas sementes; informativo)', ['Classe', 'Nível', 'Build', 'Tempo no comum (s)', 'Vitórias'], corpoAvancado);
-tabela('XP por minuto na faixa avançada (build focada, equipamento raro; nível 30 é o teto)', ['Classe', 'Nível', 'Fácil', 'Normal', 'Difícil', 'Pesadelo'], corpoXpAvancado);
+tabela('XP por minuto na faixa avançada (build focada, equipamento raro)', ['Classe', 'Nível', 'Fácil', 'Normal', 'Difícil', 'Pesadelo'], corpoXpAvancado);
+
+// Marco 28 (30/10/2026, D-127): os níveis altos (o típico põe parte dos pontos no atributo de classe) e o ritmo do 30
+// ao 100, em vezes o tempo de combate do 1 ao 30, pela XP por minuto interpolada entre os níveis medidos.
+const alto = metas.nivelAlto;
+const corpoAlto: string[][] = [];
+for (const classe of CLASSES) for (const nivel of alto.niveis) {
+  const r = SEMENTES.slice(0, 2).flatMap((s) => sequencia(classe, nivel, metas.comuns, s, 'normal', equipar('raro')));
+  const vitorias = (100 * r.filter((x) => x.venceu).length) / r.length;
+  const tempo = mediana(r.map((x) => x.tempoS));
+  conferir(`nível ${String(nivel)}: ${classe} vence os comuns`, vitorias, alto.vitoriasMinPct, 100, '%');
+  conferir(`nível ${String(nivel)}: ${classe}, tempo no comum`, tempo, alto.tempoMinS, alto.tempoMaxS, ' s');
+  corpoAlto.push([classe, String(nivel), `${br(vitorias)}%`, br(tempo)]);
+}
+tabela('Níveis altos (equipamento raro do nível, Normal, duas sementes)', ['Classe', 'Nível', 'Vitórias', 'Tempo no comum (s)'], corpoAlto);
+const taxas = alto.ritmoNiveis.map((n) => mediana(CLASSES.map((c) => economiaPorMinuto(c, n, SEMENTES[0] ?? 1000, metas.comuns, 'normal', equipar('raro')).xp)));
+const taxaEm = (n: number): number => {
+  const i = Math.max(0, alto.ritmoNiveis.findLastIndex((x) => x <= n));
+  const a = alto.ritmoNiveis[i] ?? n;
+  const b = alto.ritmoNiveis[i + 1] ?? a;
+  const f = b === a ? 0 : (n - a) / (b - a);
+  return Math.max(1, (taxas[i] ?? 1) * (1 - f) + (taxas[i + 1] ?? taxas[i] ?? 1) * f);
+};
+let minAte30 = 0;
+let minAte100 = 0;
+for (let n = 1; n < BALANCE_PADRAO.xp.nivelMax; n++) {
+  const m = xpParaProximo(n, BALANCE_PADRAO.xp) / taxaEm(n);
+  if (n < BALANCE_PADRAO.xp.curvaLonga.aPartirDe) minAte30 += m;
+  else minAte100 += m;
+}
+conferir('ritmo: tempo do 30 ao 100 em vezes o do 1 ao 30', minAte100 / minAte30, alto.razaoTempoMin, alto.razaoTempoMax, '×');
+tabela('Ritmo até o 100 (só combate, mediana das classes)', ['Trecho', 'Minutos de combate'], [['1 › 30', br(minAte30)], ['30 › 100', br(minAte100)]]);
 
 tabela('Ouro por minuto e custo do primeiro tomo (sem desconto; só ouro direto, sem venda de loot)', ['Classe', 'Nível', 'Fácil', 'Normal', 'Difícil', 'Pesadelo', 'Tomo no Normal (min)', 'Tomo no Pesadelo (min)'], corpoOuroAvancado);
 

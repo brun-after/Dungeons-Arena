@@ -15,7 +15,7 @@ const goblin = () => {
 
 describe('crescimento do inimigo por nível', () => {
   it('nível 1 é o neutro; os atributos entram nos níveis da regra', () => {
-    expect(atributosDoInimigo(1, BALANCE_PADRAO)).toEqual({ forca: 10, destreza: 10, constituicao: 10, inteligencia: 10, sabedoria: 10, carisma: 10 });
+    expect(atributosDoInimigo(1, BALANCE_PADRAO)).toEqual({ forca: 10, destreza: 10, constituicao: 10, inteligencia: 10, sabedoria: 10, carisma: 10, dominio: 10 });
     const n5 = atributosDoInimigo(5, BALANCE_PADRAO);
     const porNivel = (a: string) => BALANCE_PADRAO.inimigos.crescimento.find((c) => c.atributo === a)?.porNivel ?? 0;
     expect(n5.constituicao).toBe(10 + 4 * porNivel('constituicao'));

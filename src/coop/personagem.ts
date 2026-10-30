@@ -18,9 +18,9 @@ import { caminhosDoRank, nivelParaRank, ticksDeEstudo } from '../progression/hab
 import { ehDaClasse, ehDeAlgumaClasse, teclaRecusa } from '../progression/habilidades-classe';
 import { empilha } from '../progression/inventario';
 import { cabeNoSlot, NOMES_ATRIBUTOS } from '../progression/itens';
-import { xpParaProximo } from '../progression/nivel';
 import { ticksDe } from '../core/tempo';
 import { jogadorDoSave, type RegistroProgresso } from '../save/esquema';
+import { pontosAteONivel, tetoDoAtributo, xpParaProximo } from '../progression/nivel';
 
 const MAX_NOME = 24;
 
@@ -53,9 +53,11 @@ const lista = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
 function conferirAtributos(b: Objeto, bolsa: Bolsa, nivel: number, ctx: ContextoSimulacao, classeBase: Bolsa['atributosBase']): void {
   const { minimo, maximo } = ctx.balance.atributos;
   const pedidos = ehObjeto(b.atributosBase) ? b.atributosBase : {};
-  for (const nome of NOMES_ATRIBUTOS) bolsa.atributosBase[nome] = limitar(inteiro(pedidos[nome]) ?? classeBase[nome], minimo, maximo);
+  // Marco 28 (D-127): nenhum atributo-base acima de nível + folga (a base da classe sempre vale).
+  const teto = (nome: (typeof NOMES_ATRIBUTOS)[number]) => Math.max(classeBase[nome], Math.min(maximo, tetoDoAtributo(nivel, ctx.balance)));
+  for (const nome of NOMES_ATRIBUTOS) bolsa.atributosBase[nome] = limitar(inteiro(pedidos[nome]) ?? classeBase[nome], minimo, teto(nome));
   bolsa.pontosAtributo = Math.max(0, inteiro(b.pontosAtributo) ?? 0);
-  const orcamento = NOMES_ATRIBUTOS.reduce((s, n) => s + classeBase[n], 0) + (nivel - 1) * ctx.balance.xp.pontosPorNivel;
+  const orcamento = NOMES_ATRIBUTOS.reduce((s, n) => s + classeBase[n], 0) + pontosAteONivel(nivel, ctx.balance.xp);
   let excesso = NOMES_ATRIBUTOS.reduce((s, n) => s + bolsa.atributosBase[n], 0) + bolsa.pontosAtributo - orcamento;
   const livres = Math.min(Math.max(0, excesso), bolsa.pontosAtributo);
   bolsa.pontosAtributo -= livres;

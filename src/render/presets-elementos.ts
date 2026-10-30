@@ -36,7 +36,11 @@ export type NomePresetElemento =
   | 'frenesi_olhos'
   | 'furia_meia'
   | 'rachadura'
-  | 'aparo';
+  | 'aparo'
+  | 'dominio_aura'
+  | 'dominio_orbe'
+  | 'dominio_explosao'
+  | 'dominio_legiao';
 
 type Lista = readonly Emissao[];
 
@@ -126,4 +130,20 @@ export const PRESETS_ELEMENTOS: Readonly<Record<NomePresetElemento, Lista>> = {
     { textura: 'anel', quantidade: 1, vidaMs: [220, 300], velocidade: [0, 0], direcao: 'livre', gravidade: 0, escala: [0.5, 2.2], alpha: [1, 0], aditivo: true, raio: 0, cor: 0xffffff },
     { textura: 'faisca', quantidade: 10, vidaMs: [160, 260], velocidade: [180, 300], direcao: 'livre', gravidade: 0, escala: [0.8, 0.2], alpha: [1, 0], aditivo: true, raio: 2, cor: 0xffffff, arrasto: 0.6 },
   ],
+  // Marco 28 (30/10/2026, D-127): os marcos do atributo de classe (render/efeitos-dominio.ts).
+  // A borda da aura do Guerreiro: um ponto de luz que sobe devagar em cada célula da borda.
+  dominio_aura: [{ textura: 'brilho', quantidade: 1, vidaMs: [700, 1000], velocidade: [4, 10], direcao: 'cima', gravidade: -4, escala: [0.35, 0.05], alpha: [0.55, 0], aditivo: true, raio: 6, cor: null, curvaAlpha: 'sino' }],
+  // O orbe do Mago: um núcleo brilhante com um rastro curto.
+  dominio_orbe: [
+    { textura: 'brilho', quantidade: 1, vidaMs: [160, 220], velocidade: [0, 0], direcao: 'livre', gravidade: 0, escala: [0.7, 0.4], alpha: [1, 0], aditivo: true, raio: 0, cor: null },
+    { textura: 'ponto', quantidade: 2, vidaMs: [240, 380], velocidade: [4, 12], direcao: 'livre', gravidade: 0, escala: [0.35, 0.05], alpha: [0.8, 0], aditivo: true, raio: 3, cor: null },
+  ],
+  // O Disparo explosivo e a Ressonância: o anel que abre e os estilhaços.
+  dominio_explosao: [
+    { textura: 'anel', quantidade: 1, vidaMs: [320, 420], velocidade: [0, 0], direcao: 'livre', gravidade: 0, escala: [0.4, 2.6], alpha: [0.9, 0], aditivo: true, raio: 0, cor: null },
+    { textura: 'faisca', quantidade: 14, vidaMs: [260, 420], velocidade: [140, 260], direcao: 'livre', gravidade: 60, escala: [0.8, 0.2], alpha: [1, 0], aditivo: true, raio: 4, cor: null, arrasto: 0.5 },
+    { ...fumacaEscura, quantidade: 5 },
+  ],
+  // A Legião: a fumaça roxa que sobe do servo caído.
+  dominio_legiao: [{ ...suga, quantidade: 10, raio: 24 }, { textura: 'runa', quantidade: 2, vidaMs: [700, 1000], velocidade: [8, 16], direcao: 'cima', gravidade: -6, escala: [0.5, 0.7], alpha: [0.8, 0], aditivo: true, raio: 10, cor: 0x9b59b6 }],
 };

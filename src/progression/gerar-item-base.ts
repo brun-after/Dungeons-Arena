@@ -181,7 +181,7 @@ export function gerarItemBase(
   const def = dados.formas[p.forma];
   const forma = base.formas[p.forma];
   const rng = criarRng(p.semente);
-  const pontos = Math.max(1, Math.round((regras.pontosBase + regras.pontosPorNivel * p.nivel) * def.poder));
+  const pontos = Math.max(1, Math.round((regras.pontosBase + regras.pontosPorNivel * Math.min(p.nivel, regras.nivelPontosMax)) * def.poder));
   const par = base.atributos[inteiro(rng, 0, base.atributos.length - 1)] ?? base.atributos[0] ?? [];
   const bonusAtributos: Partial<Record<NomeAtributo, Bonus>> = {};
   const [a1, a2] = par;
@@ -190,7 +190,7 @@ export function gerarItemBase(
     bonusAtributos[a1] = { modo: 'abs', valor: principal };
     if (pontos - principal > 0) bonusAtributos[a2] = { modo: 'abs', valor: pontos - principal };
   } else if (a1) bonusAtributos[a1] = { modo: 'abs', valor: pontos };
-  const defesa = base.defesa + Math.floor(p.nivel * def.poder * regras.defesaPorNivel);
+  const defesa = base.defesa + Math.floor(Math.min(p.nivel, regras.nivelPontosMax) * def.poder * regras.defesaPorNivel);
   const ganchos = [...forma.ganchos];
   const elemento = p.elemento ? elementos.get(p.elemento) : undefined;
   if (elemento) ganchos.push(ganchoElemental(base, elemento, def.elementalPct));

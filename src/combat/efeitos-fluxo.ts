@@ -17,13 +17,14 @@ import { ticksDe } from '../core/tempo';
 import { posicionar, vivo, type Entidade } from '../entities/entidade';
 import { criarInimigo } from '../entities/fabrica';
 import { podeFerir } from '../modos/relacao';
-import { celulaLivrePara, ordemRotativa } from '../world/colisao';
+import { celulaLivrePara, ordemRotativa, reservaCelula } from '../world/colisao';
 import { passavel } from '../world/fase';
 import { aprenderArmadilha } from '../world/perigos';
 import { celulaOcupada } from './geometria';
 import { registrarParticipacao } from './participacao';
 import { rolar } from './dados';
 import { REGISTRO_EFEITOS, type EfeitoCanonico } from './registro-efeitos';
+import { marcoDe } from '../progression/dominio';
 
 export interface OrigemFluxo {
   id: EntidadeId;
@@ -76,7 +77,8 @@ export function excedeLimite(estado: EstadoJogo, ctx: ContextoSimulacao, ator: E
     else if (fluxo === 'invocar') invocacoes += Math.max(1, ef.valor);
     if (fluxo === 'armadilha') armadilhas += 1;
   }
-  return invocacoes > (pergaminho ? lim.invocacoesDePergaminho : limiteDeInvocacoes(ctx, ator)) || avatares > lim.avataresPorJogador || armadilhas > lim.armadilhasPorJogador;
+  // Marco 28 (D-127): o Engenho do Aventureiro abre vagas a mais para pergaminhos.
+  return invocacoes > (pergaminho ? lim.invocacoesDePergaminho + marcoDe(ctx, ator, 'pergaminhosExtras') : limiteDeInvocacoes(ctx, ator)) || avatares > lim.avataresPorJogador || armadilhas > lim.armadilhasPorJogador;
 }
 
 export function agendarAtrasado(estado: EstadoJogo, alvo: Entidade, ef: EfeitoCanonico, origem: OrigemFluxo): void {
@@ -143,7 +145,10 @@ export function invocar(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entida
     const e = criarInimigo(preset, `v${estado.proximoId++}`, dono.x, dono.y, ctx.balance);
     const p = preset.invocacao;
     if (p?.avatar) e.tipo = 'avatar';
-    const lugar = vizinhasLivres(estado, ctx, e, celulaOcupada(dono))[0];
+    // Marco 28 (30/10/2026, D-127): aliado não bloqueia invocação, então a 1ª vizinha "livre" era a mesma para todas e as
+    // criaturas iguais nasciam empilhadas. Prefere a célula que ninguém vivo ocupa.
+    const livres = vizinhasLivres(estado, ctx, e, celulaOcupada(dono));
+    const lugar = livres.find((c) => !estado.entidades.some((o) => vivo(o) && !o.invocacao?.companheiro && reservaCelula(o, c.x, c.y))) ?? livres[0];
     if (!lugar) return;
     tornarInvocacao(e, dono, estado.tick, estado.tick + ticksDe(ef.duracaoMs), 0, p?.avatar ? 'avatar' : 'invocacao');
     if (e.invocacao && p) {

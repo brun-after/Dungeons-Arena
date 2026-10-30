@@ -35,7 +35,7 @@ describe('equipamento gerado', () => {
     expect(item).toMatchObject({ tipo: 'equipamento', slotPadrao: 'arma_principal', nivelMinimo: 7, raridade: 'raro' });
     expect(item.nome).toContain('rara');
     expect(CONTEUDO.itens.get('gi_dragao_7_raro_1')).toBeUndefined();
-    expect(CONTEUDO.itens.get(idItemGerado('espada', 99, 'raro', 1))).toBeUndefined();
+    expect(CONTEUDO.itens.get(idItemGerado('espada', 101, 'raro', 1))).toBeUndefined();
     // Iterar o catálogo dá só os fixos (os pools de drop e de loja não mudam).
     expect([...CONTEUDO.itens.keys()].some((k) => k.startsWith('gi_'))).toBe(false);
   });

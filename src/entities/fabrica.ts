@@ -52,7 +52,11 @@ export interface OpcoesInimigo {
 /** Marco 15 (§2.5, D-061): os atributos do inimigo no nível, a partir do neutro, pelo crescimento do balance. */
 export function atributosDoInimigo(nivel: number, balance: Balance): Atributos {
   const a: Atributos = { ...ATRIBUTOS_NEUTROS };
-  for (const c of balance.inimigos.crescimento) a[c.atributo] += c.porNivel * Math.max(0, nivel - c.aPartirDoNivel + 1);
+  // Marco 28 (30/10/2026, D-127): acima do nível 30, o inimigo cresce pelo mesmo rendimento decrescente dos atributos
+  // (até o 30, igual a antes), para o nível 100 não ter atributos de centenas.
+  const r = balance.atributos.rendimentoAcima;
+  const util = nivel <= r.aPartirDe ? nivel : r.aPartirDe + ((nivel - r.aPartirDe) * r.pct) / 100;
+  for (const c of balance.inimigos.crescimento) a[c.atributo] += Math.round(c.porNivel * Math.max(0, util - c.aPartirDoNivel + 1));
   return a;
 }
 

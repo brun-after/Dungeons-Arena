@@ -169,7 +169,7 @@ function lerClamp(l: Leitor, valor: unknown): ClampDeFicha | null {
   if (!ordemValida) l.erro('ordemReducao precisa listar cada atributo exatamente uma vez');
   return {
     modo: l.opcao(o, 'modo', ['clamp', 'escalar', 'preset'] as const),
-    nivelMax: l.numero(o, 'nivelMax', { min: 1, max: 30, inteiro: true }),
+    nivelMax: l.numero(o, 'nivelMax', { min: 1, max: 100, inteiro: true }),
     atributoMax: l.numero(o, 'atributoMax', { min: 1, max: 100, inteiro: true }),
     atributoTotalMax: l.numero(o, 'atributoTotalMax', { min: 6, inteiro: true }),
     orcamentoAtributos: l.numero(o, 'orcamentoAtributos', { min: 0, inteiro: true }),
@@ -245,7 +245,7 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
     comandosDeRede: l.listaDeTextos(o, 'comandosDeRede'),
     faixas: (Array.isArray(o.faixas) ? o.faixas : []).map((f) => {
       const x = l.objeto(f, 'faixa');
-      return { id: l.texto(x, 'id'), min: l.numero(x, 'min', { min: 1, max: 30, inteiro: true }), max: l.numero(x, 'max', { min: 1, max: 30, inteiro: true }) };
+      return { id: l.texto(x, 'id'), min: l.numero(x, 'min', { min: 1, max: 100, inteiro: true }), max: l.numero(x, 'max', { min: 1, max: 100, inteiro: true }) };
     }),
     recompensaJogador:
       o.recompensaJogador === null || o.recompensaJogador === undefined

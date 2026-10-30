@@ -38,7 +38,7 @@ export type Grau = (typeof GRAUS)[number];
 
 /** Marco 18 (D-068): o atributo do bônus fixo de dano. Sem `escalaCom`, físico usa Força e mágico, Inteligência. */
 export type AtributoDeEscala = keyof Atributos;
-const ATRIBUTOS_DE_ESCALA: readonly AtributoDeEscala[] = ['forca', 'destreza', 'constituicao', 'inteligencia', 'sabedoria', 'carisma'];
+const ATRIBUTOS_DE_ESCALA: readonly AtributoDeEscala[] = ['forca', 'destreza', 'constituicao', 'inteligencia', 'sabedoria', 'carisma', 'dominio'];
 export type Mobilidade = (typeof MOBILIDADES)[number];
 
 /** Marco 14: modificadores de evolução e de equipamento (D-057). */
@@ -474,7 +474,7 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
     elemento,
     custoVida: o.custoVida === undefined ? 0 : l.numero(o, 'custoVida', { min: 0, max: 100, inteiro: true }),
     tags: [],
-    nivelMinimo: o.nivelMinimo === undefined ? 1 : l.numero(o, 'nivelMinimo', { min: 1, max: 30, inteiro: true }),
+    nivelMinimo: o.nivelMinimo === undefined ? 1 : l.numero(o, 'nivelMinimo', { min: 1, max: 100, inteiro: true }),
     passiva: lerPassiva(l, o.passiva),
     mobilidade: o.mobilidade === undefined ? 'trava' : l.opcao(o, 'mobilidade', MOBILIDADES),
     escalaCom: 'forca',

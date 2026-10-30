@@ -6,6 +6,7 @@
 import type { ContextoSimulacao } from '../core/contexto';
 import { ticksDe } from '../core/tempo';
 import type { Entidade } from '../entities/entidade';
+import { fatorDeDominio } from '../progression/dominio';
 
 /** Tem fúria? Só o Guerreiro (não as invocações dele). A classe é lida como em `classeDe` (sem importar o módulo). */
 export function temFuria(e: Entidade): boolean {
@@ -42,7 +43,8 @@ export function acumularFuria(ctx: ContextoSimulacao, e: Entidade, tick: number,
   const r = ctx.balance.ajustesClasses.guerreiro.furia;
   const antes = furiaAtual(ctx, e, tick);
   if (emFrenesi(e, tick)) return false;
-  e.furia = { valor: Math.min(r.max, antes + (quanto ?? r.porBasico)), ultimoTick: tick };
+  // Marco 28 (D-127): a Bravura enche a barra mais rápido.
+  e.furia = { valor: Math.min(r.max, antes + (quanto ?? r.porBasico) * fatorDeDominio(ctx, e, 'furia')), ultimoTick: tick };
   // Marco 24 (D-094): devolve se a barra acabou de encher (a fúria cheia enche a ultimate).
   return antes < r.max && e.furia.valor >= r.max;
 }

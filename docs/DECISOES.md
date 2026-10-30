@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.63 · **Data:** 29/10/2026
+**Versão:** 0.64 · **Data:** 30/10/2026
 
 > **Histórico**
+> - **0.64 (30/10/2026)**: D-127 (nível 100, teto nível+20 nos pontos gastos, rendimento acima de 30, atributo de classe com marcos em 25/50/75/100, itens com % de dano e de defesa, "Escala com" nas skills e invocações iguais lado a lado) e a nota em D-061.
 > - **0.63 (29/10/2026)**: D-126 (armas de classe: 8 por classe, cada uma com a sua variação do básico, familiaridade, a fração da passiva de outra classe, o 3º golpe pela mão secundária, o solo amaldiçoado, o bumerangue e os pergaminhos que acumulam) e as notas em D-069 e D-093.
 > - **0.62 (29/10/2026)**: D-125 (o avanço de quem conjura sai no lançamento, e a linha da investida passa pelas paredes) e a nota em D-120.
 > - **0.61 (29/10/2026)**: D-124 (assinaturas visuais: cada skill com o seu desenho, motor de efeitos com atlas rico, silhuetas, marcas no chão e deslize; galeria de efeitos) e a nota em D-066; ajuste da sexta leva em D-122 (orçamento de tempo no laço solo).
@@ -1353,6 +1354,10 @@ As escolhas do usuário ao planejar:
 - **1 e2e novo**: o teclado numérico lança a barreira e o d20 aparece perto da barra.
 
 ## D-061 · Dificuldade, campanha cooperativa e balanceamento por simulação (v0.28, 15/10/2026)
+
+> **Revista pela D-127 (30/10/2026)**: o teto de nível sobe de 30 para 100. Até o 30, o ritmo medido aqui não muda
+> (curva de XP, pontos e fórmulas idênticos); do 30 ao 100, a curva longa (`xp.curvaLonga`) é calibrada para levar
+> cerca de 10× o tempo de combate do 1 ao 30, e o simulador ganhou as metas `metas.nivelAlto` (níveis 50, 75 e 100).
 
 **Contexto.** O marco 15 pedia uma ferramenta de balanceamento por simulação e o ajuste dos números. Ao revisar o
 plano, o usuário acrescentou dois pedidos:
@@ -3148,3 +3153,84 @@ raridade. Também pediu que a arma natural alimentasse a passiva da classe.
   do solo são um golpe só. `npm run balancear` em 94/94.
 - **Determinismo:** o estado das variações (`Projetil.var`, `estado.solos`, `Entidade.armas`) só tem dados
   primitivos, é clonado e muda só a partir de comandos.
+
+## D-127 — Nível 100, atributo de classe e itens com % de dano (marco 28, 30/10/2026)
+
+**Contexto.** O usuário pediu quatro coisas:
+- poder invocar várias criaturas iguais: três lobos de pergaminho pareciam um só, porque nasciam e andavam na mesma
+  célula;
+- nível e atributos até 100, com um atributo que não passe de nível + 20 pelos pontos gastos;
+- um atributo de classe que fortaleça a passiva e as skills de classe;
+- itens que acompanhem o nível alto sem precisar de itens novos.
+
+Na revisão do plano, o usuário também pediu:
+- marcos criativos e de força parecida entre as classes (os primeiros do Arqueiro foram trocados);
+- mais pontos por nível depois do 30, para o atributo de classe caber sem largar os outros;
+- os cartões das skills dizendo com o que elas escalam.
+
+**Decisão:**
+- **Invocações iguais** (`combat/efeitos-fluxo.ts`, `entities/ia-invocacao.ts`):
+  - a invocação nasce na vizinha livre que nenhuma outra reserva;
+  - seguindo o dono, cada uma ocupa o seu lugar num anel em volta dele (pela ordem do id entre as irmãs);
+  - no combate, cada uma ataca de uma célula vizinha diferente do alvo, e a que fica empilhada dá um passo para o
+    lado;
+  - o pergaminho que não consegue invocar nada não é gasto e mostra o motivo (`sem_espaco`).
+- **Nível 100** (`progression/nivel.ts`, `balance.xp`):
+  - `nivelMax` 100;
+  - até o 30, a curva é a de antes; depois, cada nível custa `× (1 + (nível − 30) × curvaLonga.crescimentoPct%)`;
+  - com 4%, o simulador mede cerca de 10× o tempo de combate do 1 ao 30 (515 min contra 5.142 min);
+  - os pontos por nível crescem por faixa (`xp.pontosPorFaixa`): 3 até o 30, 4 até o 50, 5 até o 70 e 6 até o 100,
+    447 no total;
+  - as curvas de classe (aura, falcão, extra do Guerreiro) chegam ao máximo no `nivelPlenoDasClasses` (30), como
+    antes. Depois do 30, quem cresce é o atributo de classe.
+- **Teto nível + 20** (`tetoDoAtributo`):
+  - o ponto gasto para em `min(100, nível + 20)` e é recusado com `atributo_acima_do_nivel`. A ficha trava o "+" e
+    diz o teto;
+  - os itens levam o valor além, até 100;
+  - a mesma regra vale na conferência do personagem da campanha em grupo;
+  - a ficha da arena (`livre.json`) sobe o total de 72 para 82, pelo sétimo atributo.
+- **Rendimento acima de 30** (`pontosUteis`, `atributos.rendimentoAcima`):
+  - o ponto acima de 30 rende 50% na rolagem, no bônus fixo, na vida, na mana, na regeneração, no raio de revelar e
+    no poder dos servos;
+  - vale só para jogadores. Os inimigos crescem pelo nível útil, com o mesmo rendimento acima do 30;
+  - a velocidade tem teto (`movimento.velocidadeMaxMult` 2,5);
+  - até 30 tudo fica idêntico, então as metas antigas seguem em 94/94.
+- **Atributo de classe** (`progression/dominio.ts`, `balance.dominio`):
+  - o atributo `dominio` leva o nome da classe: Bravura, Instinto, Arcano, Ritual, Engenho;
+  - cada ponto acima de 10 (pelo rendimento) dá +1,5% nas skills de classe e nas ultimates da própria classe;
+  - também reforça a passiva por chave (`porPonto`): fúria e aura, carga e alcance da Mira, encarnação e parte
+    elemental, servos e retorno do servo, falcão e pergaminhos;
+  - sem a arma natural, rende 50% e os marcos ficam travados;
+  - os inimigos ficam neutros (10).
+- **Marcos em 25, 50, 75 e 100** (`balance.dominio.classes.<classe>.marcos`, lidos por chave, sem `if` de classe):
+
+  | Classe | 25 | 50 | 75 | 100 |
+  |---|---|---|---|---|
+  | Guerreiro | aura visível | raio +1 | aura elemental (estado da arma) | raio +2 e Estandarte (cura os aliados) |
+  | Necromante | servo da passiva 30% mais rápido | até 2 servos | até 3 servos | Legião: o servo que cai abre um solo amaldiçoado |
+  | Arqueiro | Caçada em cadeia | Flecha-âncora (torre que atira 4 s) | Disparo explosivo | Tempestade de aço |
+  | Mago | Rastro elemental | Ressonância | 1 orbe | Arquimago: 2 orbes e a dupla dura o dobro |
+  | Aventureiro | +1 pergaminho | Matilha (+10% por igual viva) | Faro do falcão (8%) | +2 pergaminhos e chance de 25% da versão primordial |
+
+  O visual dos marcos é feito de partículas (`render/efeitos-dominio.ts`): a borda da aura, os orbes que giram e a
+  explosão, a chuva, a fumaça da Legião e as estrelas do Faro, a partir do evento `marcoDeClasse`.
+- **Itens: valor base + % de dano** (`multiplicadoresDoItem` em `progression/derivados.ts`):
+  - os pontos e a defesa dos itens gerados param de crescer no nível 30 (`itensGerados.nivelPontosMax`);
+  - todo equipamento ganha um % de dano: `danoPorNivelPct` (0,4) × nível × multiplicador da raridade × peso do slot
+    (arma 100%, secundária 50%, anel e amuleto 40%, o resto 25%);
+  - as peças de armadura ganham também um % de defesa (`defesaPorNivelPct` 0,3);
+  - o % é derivado na hora, então itens e saves antigos ganham o multiplicador sem item novo;
+  - o % de dano entra no `multDano` da fonte e vale para básico, skill e ultimate. A mochila e a loja mostram
+    "+X% de dano" e "+Y% de defesa";
+  - o `dominio` entra em cinco armas de classe (mangual, arco de caça, estelar, vazio, shuriken) e como terceiro par
+    do amuleto. Um amuleto gerado antes pode trocar de par, porque o sorteio passa a ter três opções.
+- **"Escala com"** (`progression/escala-habilidade.ts`, `linhasDeEscala` em `ui/descrever.ts`):
+  - o cartão da skill mostra os atributos da rolagem com o peso, o do bônus fixo e o atributo de classe, quando é
+    skill de classe;
+  - também mostra o efeito atual: o % pela rolagem, pelo atributo de classe e pelos itens;
+  - a fonte é a mesma do combate, sem texto escrito à mão por skill.
+- **Saves:** versão 28. A migração 27 → 28 dá `dominio: 10` aos atributos e à base de toda entidade.
+- **Simulação:**
+  - acima do 30, o jogador típico põe um terço dos pontos novos no atributo de classe;
+  - `npm run balancear` em 125/125: as 94 de antes, mais vitórias e tempo nos níveis 50, 75 e 100 e o ritmo do 30 ao
+    100 (`metas.nivelAlto`).

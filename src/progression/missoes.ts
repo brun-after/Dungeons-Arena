@@ -101,7 +101,7 @@ export function lerOrigens(json: unknown): { origens: Map<string, OrigemRara>; e
       chancePct: l.numero(o, 'chancePct', { min: 0.1, max: 100 }),
       se: {
         chefe: se.chefe === undefined ? null : l.booleano(se, 'chefe'),
-        nivelMin: se.nivelMin === undefined ? 1 : l.numero(se, 'nivelMin', { min: 1, max: 30, inteiro: true }),
+        nivelMin: se.nivelMin === undefined ? 1 : l.numero(se, 'nivelMin', { min: 1, max: 100, inteiro: true }),
         elementoDoGolpe: ehElemento(el) ? el : null,
         sinergia: se.sinergia === undefined ? null : l.texto(se, 'sinergia'),
         fase: se.fase === undefined ? null : l.texto(se, 'fase'),
