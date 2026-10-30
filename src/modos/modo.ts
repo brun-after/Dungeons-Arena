@@ -132,6 +132,15 @@ export interface ModoDeJogo {
    * Ausente = 100 (a campanha). Na arena, o duelo dura alguns golpes e os atributos decidem, não quem acerta primeiro.
    */
   pvp?: { danoClassePct: number };
+  /**
+   * Marco 29 (30/10/2026, D-128): cada sessão recebe só as entidades a até `raio` células do seu personagem
+   * (o Mundo). Ausente = um patch só para todos, como antes.
+   */
+  areaDeInteresse?: { raio: number };
+  /** Marco 29 (D-128): a IA só pensa a até estas células de algum jogador. Ausente = sempre pensa. */
+  iaRaioAtivacao?: number;
+  /** Marco 29 (D-128): a morte do jogador deixa a mochila e o equipado num túmulo (o Mundo, fora das dungeons). */
+  tumuloNaMorte?: boolean;
 }
 
 export interface PenalidadeMorte {
@@ -217,7 +226,8 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
       protecaoS: l.numero(respawn, 'protecaoS', { min: 0 }),
     },
     entradaEmAndamento: l.booleano(o, 'entradaEmAndamento'),
-    maxJogadores: l.numero(o, 'maxJogadores', { min: 1, max: 10, inteiro: true }),
+    // Marco 29 (D-128): até 64, pelas regiões do Mundo (a arena e o grupo seguem no que os dados dizem).
+    maxJogadores: l.numero(o, 'maxJogadores', { min: 1, max: 64, inteiro: true }),
     espectadores: l.booleano(o, 'espectadores'),
     clamp: lerClamp(l, o.clamp),
     loot: {
@@ -268,6 +278,9 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
       estudoAvanca: sobrevivencia.estudoAvanca === undefined ? false : l.booleano(sobrevivencia, 'estudoAvanca'),
     },
     ...(o.pvp === undefined ? {} : { pvp: { danoClassePct: l.numero(l.objeto(o.pvp, 'pvp'), 'danoClassePct', { min: 0, max: 100 }) } }),
+    ...(o.areaDeInteresse === undefined ? {} : { areaDeInteresse: { raio: l.numero(l.objeto(o.areaDeInteresse, 'areaDeInteresse'), 'raio', { min: 8, max: 64, inteiro: true }) } }),
+    ...(o.iaRaioAtivacao === undefined ? {} : { iaRaioAtivacao: l.numero(o, 'iaRaioAtivacao', { min: 8, max: 128, inteiro: true }) }),
+    ...(o.tumuloNaMorte === undefined ? {} : { tumuloNaMorte: l.booleano(o, 'tumuloNaMorte') }),
   };
   if (modo.fim.tipo !== 'nenhum' && modo.fim.alvo === null && modo.fim.tempoLimiteS === null) {
     l.erro('fim com tipo diferente de "nenhum" precisa de alvo ou tempo limite');

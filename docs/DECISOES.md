@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.64 · **Data:** 30/10/2026
+**Versão:** 0.65 · **Data:** 30/10/2026
 
 > **Histórico**
+> - **0.65 (30/10/2026)**: D-128 (o Mundo: lugares em salas, área de interesse, IA com ativação, personagem no servidor, exterior gerado com fachadas, perigo e PvP por região, túmulo, portais, coleta e covis; o Reino Central).
 > - **0.64 (30/10/2026)**: D-127 (nível 100, teto nível+20 nos pontos gastos, rendimento acima de 30, atributo de classe com marcos em 25/50/75/100, itens com % de dano e de defesa, "Escala com" nas skills e invocações iguais lado a lado) e a nota em D-061.
 > - **0.63 (29/10/2026)**: D-126 (armas de classe: 8 por classe, cada uma com a sua variação do básico, familiaridade, a fração da passiva de outra classe, o 3º golpe pela mão secundária, o solo amaldiçoado, o bumerangue e os pergaminhos que acumulam) e as notas em D-069 e D-093.
 > - **0.62 (29/10/2026)**: D-125 (o avanço de quem conjura sai no lançamento, e a linha da investida passa pelas paredes) e a nota em D-120.
@@ -3234,3 +3235,92 @@ Na revisão do plano, o usuário também pediu:
   - acima do 30, o jogador típico põe um terço dos pontos novos no atributo de classe;
   - `npm run balancear` em 125/125: as 94 de antes, mais vitórias e tempo nos níveis 50, 75 e 100 e o ritmo do 30 ao
     100 (`metas.nivelAlto`).
+
+## D-128 — Mundo: fundação e o Reino Central (marco 29, 30/10/2026)
+
+**Contexto.** O usuário pediu um modo MMO de mundo aberto, separado da campanha:
+- as fases de hoje viram os interiores (as dungeons);
+- fora delas, um mundo isométrico igual para todos, em reinos com vilas, regiões de perigos diferentes, estruturas
+  com exterior, portais regulados e chefes especiais nos covis.
+
+As escolhas dele:
+- dungeons mistas: as masmorras com objetivo são instanciadas, os covis são compartilhados;
+- PvP só nas regiões perigosas;
+- a morte fora de dungeon perde a mochila e o equipado;
+- dois marcos: o 29 (a fundação e o Reino Central jogável) e o 30 (o social, a economia e o polimento).
+
+O plano aprovado está no histórico da conversa; aqui fica o que o marco 29 entrega e o que muda em relação a ele.
+
+**Decisão:**
+- **Lugares e salas** (`src/mundo/`, `server/salas/sala-mundo.ts`):
+  - cada lugar é uma sala Colyseus: uma região (`regiao:id`), uma masmorra (`masmorra:id`, instanciada por entrada) ou
+    um covil (`covil:id`, compartilhado);
+  - o `joinOrCreate` filtra por `lugar` e `instancia`. A região cheia (40, `maxJogadores` do modo) abre o canal 2, 3…;
+  - `SalaMundo` estende `SalaArena`, como a `SalaCampanha`. As regras ficam no núcleo; o servidor só atende as
+    pendências (gravar a ficha, trocar de sala).
+- **Área de interesse** (`arena/interesse.ts`, `modo.areaDeInteresse`):
+  - cada sessão recebe o seu recorte (raio 24, Chebyshev) e o seu patch. A própria entidade sempre vai;
+  - o trabalho comum de uma transmissão é feito uma vez (`CacheDeCampos`): os campos serializados de cada entidade e
+    a diferença pelo mapa anterior, que as sessões que viram a mesma versão dividem;
+  - sem a regra no modo, a sala manda um patch só, como antes.
+- **IA com ativação** (`modo.iaRaioAtivacao` 32): só pensa o inimigo a até 32 células de algum jogador vivo.
+- **Personagem no servidor** (`server/persistencia-mundo.ts`):
+  - tabela `personagens_mundo` (3 slots por conta); o RLS deixa o dono ler e só o servidor grava, pela chave de serviço
+    (`SUPABASE_SERVICE_KEY`, segredo do GitHub);
+  - o cliente nunca manda a ficha. O servidor a carrega ao entrar e confere com `conferirPersonagem`;
+  - grava ao salvar na pedra, a cada 60 s (`mundo.checkpointS`), ao sair e em cada troca de sala;
+  - sem a chave, o servidor guarda em memória (log `mundo_sem_nuvem`) e aceita só as contas `local:` dos testes;
+  - os personagens do Mundo não se cruzam com os slots nem com o certificado da campanha.
+- **Entrada e troca de sala:**
+  - a primeira entrada é sempre na vila salva (`fora_da_vila_salva` fora dela);
+  - a troca (borda da região, porta de estrutura, portal, saída da dungeon, morte) leva a ficha num bilhete de uso
+    único e 60 s; o cliente desmonta a cena e entra na sala nova sem recarregar a página;
+  - um personagem fica em uma sala por vez (`ja_jogando`). A página recarregada não espera os 30 s da reserva de
+    reconexão: a entrada nova assume o personagem da sessão caída, com a ficha atual dela.
+- **Exterior** (`world/gerador-exterior.ts`):
+  - região de 128×128 gerada pela semente (o servidor e o cliente geram igual): ruído em grade grossa para a água e
+    as rochas por bioma, a vila murada com quatro portões e os NPCs, as fachadas, as passagens de 6 células para as
+    regiões vizinhas e as estradas;
+  - o rochedo fica só com a borda (o miolo, sem acesso, vira chão): no isométrico, o miolo de parede é a base escura
+    das masmorras, que fora parecia um buraco;
+  - células novas: `agua`, `mato`, `estrada` e `fachada`;
+  - a fachada é um prisma alto de pedra com ameias e a porta em arco (`render/estruturas-iso.ts`), mais alta conforme o
+    tamanho.
+- **Interiores:** o gerador de fases de sempre, com o nível, o tema, os inimigos e o chefe da dungeon. A saída aberta
+  devolve à porta. A masmorra dá a recompensa ao concluir, com recarga por personagem (`recargaH`).
+- **Covis:** o chefe especial renasce no tempo do dado (`renascerMin`); quem deu ≥ 10% do dano
+  (`mundo.covil.contribuicaoMinPct`) tem o próprio sorteio do drop exclusivo. Os três do Reino Central: o Rei Goblin
+  nas Minas, a Bruxa do Pântano e o Dragão das Ruínas.
+- **Perigo por região** (`reino.perigos`): `seguro` (densidade 2), `normal` (5) e `perigoso` (8, PvP). O PvP liga o
+  `fogoAmigo` do modo da região (`modoDaRegiao`), sem `if` de modo; a faixa do lugar avisa na entrada.
+- **Morte** (`modo.tumuloNaMorte`): fora de dungeon, a mochila e o equipado vão para um túmulo no lugar. Só o dono
+  abre por 10 min (na região perigosa, qualquer um, na hora); some em 30 min. O personagem renasce na vila salva. Na
+  masmorra, nada se perde.
+- **Portais:** a pedra da vila leva às vilas descobertas, por ouro (20 + 30 por região de distância) e com recarga de
+  60 s; o pergaminho de retorno (alquimista) vale em qualquer lugar.
+- **Coleta:** veios e ervas com canal de 2,5 s, interrompido por dano; o nó renasce em 5 min.
+- **Cliente:** `?jogo=mundo` (menu "Mundo"):
+  - login, três slots e a criação;
+  - a vista começa no isométrico;
+  - a faixa do lugar, o mapa do reino com névoa (tecla M), o portal e o quadro.
+- **Infraestrutura:**
+  - o deploy grava `SUPABASE_URL` e `SUPABASE_SERVICE_KEY` no `.env` da VM;
+  - as salas do Mundo não ocupam a cota `MAX_SALAS` das salas de arena e de grupo.
+
+**O que fica para o marco 30** (do plano):
+- as missões do quadro (hoje o quadro só explica);
+- o banco, o chat, o grupo, a troca e o mercado;
+- as receitas novas do ferreiro e do alquimista (hoje as lojas vendem o estoque de sempre e os materiais de coleta
+  servem para vender);
+- a elite e o multiplicador de loot por perigo (`elitePct`, `lootPct`), a proteção na passagem
+  (`mundo.passagemProtecaoS`) e a estrutura escondida também fora do mapa (hoje ela só some do mapa do reino);
+- o terreno montado por bloco sob demanda.
+
+**Medidas** (`npm run carga -- --modo mundo --clientes 40`, servidor local, com os 40 bots na mesma máquina e todos
+dentro da Vila do Centro, o pior caso da área de interesse):
+- antes do cache da transmissão: tick p95 30 ms e p99 39 ms;
+- depois do cache: tick p95 7 a 9 ms e p99 10 a 14 ms; banda recebida de 64 a 109 KiB/s por bot, enviada 1,5 KiB/s;
+  zero rejeições, reconexão em 0,2 s, RTT p95 26 ms;
+- sem os bots na mesma máquina (a sala sozinha, 40 sessões): tick médio 1,5 ms e p95 3,8 ms;
+- a medida na VM fica para depois do deploy com a chave. Se o tick ou a memória não couberem, o próximo passo é a VM
+  de 2 GB, decidida com o número medido.

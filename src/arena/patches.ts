@@ -38,15 +38,39 @@ export interface PatchDeEstado {
 
 type Campos = Map<string, string>;
 
+/**
+ * Marco 29 (30/10/2026, D-128): o trabalho comum de uma transmissão. Com a área de interesse, cada sessão gera o seu
+ * patch sobre as mesmas entidades; sem o cache, cada uma serializava e comparava tudo de novo. Os campos de cada
+ * entidade saem uma vez, e a diferença também, pelo mapa anterior (as sessões que viram a mesma versão o dividem).
+ */
+export interface CacheDeCampos {
+  campos: WeakMap<Entidade, ReadonlyMap<string, string>>;
+  diferencas: WeakMap<ReadonlyMap<string, string>, Record<string, unknown> | null>;
+}
+
+export const novoCacheDeCampos = (): CacheDeCampos => ({ campos: new WeakMap(), diferencas: new WeakMap() });
+
 function camposDe(e: Entidade): Campos {
   const campos: Campos = new Map();
   for (const [k, v] of Object.entries(e)) campos.set(k, JSON.stringify(v));
   return campos;
 }
 
+/** Os campos que mudaram (null se nenhum). */
+function diferenca(e: Entidade, campos: ReadonlyMap<string, string>, anteriores: ReadonlyMap<string, string>): Record<string, unknown> | null {
+  let mudados: Record<string, unknown> | null = null;
+  for (const [k, texto] of campos) {
+    if (anteriores.get(k) !== texto) {
+      mudados ??= {};
+      mudados[k] = (e as unknown as Record<string, unknown>)[k];
+    }
+  }
+  return mudados;
+}
+
 /** Gera patches sucessivos a partir dos estados públicos transmitidos. */
 export class GeradorDePatches {
-  private entidades = new Map<string, Campos>();
+  private entidades = new Map<string, ReadonlyMap<string, string>>();
   private objetos = '';
   private projeteis = '';
   private respawns = '';
@@ -59,27 +83,28 @@ export class GeradorDePatches {
   private tickAnterior = -1;
 
   /** Patch do estado anterior para `publico`; a primeira chamada parte do "vazio". */
-  gerar(publico: EstadoJogo): PatchDeEstado {
-    const atuais = new Map<string, Campos>();
+  gerar(publico: EstadoJogo, cache?: CacheDeCampos): PatchDeEstado {
+    const atuais = new Map<string, ReadonlyMap<string, string>>();
     const novas: Entidade[] = [];
     const alteradas: EntidadeAlterada[] = [];
     for (const e of publico.entidades) {
-      const campos = camposDe(e);
+      let campos = cache?.campos.get(e);
+      if (!campos) {
+        campos = camposDe(e);
+        cache?.campos.set(e, campos);
+      }
       atuais.set(e.id, campos);
       const anteriores = this.entidades.get(e.id);
       if (!anteriores) {
         novas.push(e);
         continue;
       }
-      const mudados: Record<string, unknown> = {};
-      let mudou = false;
-      for (const [k, texto] of campos) {
-        if (anteriores.get(k) !== texto) {
-          mudados[k] = (e as unknown as Record<string, unknown>)[k];
-          mudou = true;
-        }
+      let mudados = cache?.diferencas.get(anteriores);
+      if (mudados === undefined) {
+        mudados = diferenca(e, campos, anteriores);
+        cache?.diferencas.set(anteriores, mudados);
       }
-      if (mudou) alteradas.push({ id: e.id, campos: mudados });
+      if (mudados) alteradas.push({ id: e.id, campos: mudados });
     }
     const removidas = [...this.entidades.keys()].filter((id) => !atuais.has(id));
 

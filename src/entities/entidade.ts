@@ -247,7 +247,7 @@ export interface Estudo {
  */
 export interface Interacao {
   /** Marco 18: `desarme` de armadilha revelada (o `objetoId` é o id da armadilha em texto). */
-  tipo: 'bau' | 'loja' | 'desarme';
+  tipo: 'bau' | 'loja' | 'desarme' | 'coleta';
   objetoId: string;
   ateTick: number;
 }

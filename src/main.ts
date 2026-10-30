@@ -2,6 +2,7 @@
 //   (nada)            menu inicial
 //   ?jogo=campanha    slots da campanha (marco 6B); com &slot=N, joga no slot N (0 = sem salvar)
 //   ?jogo=grupo&slot=N&criar=1 | &codigo=XXXXXX   campanha cooperativa (marco 15)
+//   ?jogo=mundo       o Mundo aberto (marco 29): personagens no servidor, regiões, vilas e dungeons
 //   ?arena=online     lobby e arena no servidor real (marco 5)
 //   ?arena=loopback   treino de arena com sala e bot na página (marco 4)
 //   ?editor[=id]      editor de fases (marco 6C), sob demanda
@@ -67,6 +68,9 @@ function rotear(raiz: HTMLElement): void {
       testeIndice: Number.isInteger(indice) && indice >= 0 && indice < 12 ? indice : 0,
       testeSeguir: params.get('seguir') === '1',
     });
+  } else if (params.get('jogo') === 'mundo') {
+    // Marco 29 (D-128): o Mundo (o código de rede vem sob demanda).
+    void import('./mundo-tela').then((m) => m.iniciarMundo(raiz));
   } else if (params.get('jogo') === 'grupo') {
     // Marco 15: campanha cooperativa (o código de rede vem sob demanda, como o da arena).
     const slot = Number(params.get('slot'));

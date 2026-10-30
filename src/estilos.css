@@ -2882,3 +2882,85 @@ body.movimento-reduzido .cinematica-ultimate {
     border-top: 1px solid var(--borda);
   }
 }
+
+/* Marco 29 (30/10/2026, D-128): o Mundo. A faixa do lugar no topo (vermelha com PvP) e o mapa do reino com névoa. */
+.faixa-lugar {
+  position: absolute;
+  top: calc(52px + var(--seguro-topo));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 14px;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  background: rgba(16, 21, 28, 0.78);
+  color: var(--texto);
+  font-size: 0.85rem;
+  pointer-events: none;
+  text-align: center;
+}
+
+.faixa-lugar strong {
+  color: var(--destaque);
+}
+
+.faixa-lugar[data-pvp='1'] {
+  border-color: #e74c3c;
+  box-shadow: 0 0 0 1px #e74c3c inset;
+}
+
+.mapa-reino {
+  display: grid;
+  gap: 6px;
+}
+
+.regiao-mapa {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  min-height: 84px;
+  padding: 8px;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  background: var(--painel);
+  text-align: center;
+}
+
+.regiao-mapa small {
+  color: var(--texto-suave);
+  font-size: 0.75rem;
+}
+
+.regiao-mapa[data-vista='0'] {
+  background: repeating-linear-gradient(45deg, #151a21, #151a21 6px, #1b2129 6px, #1b2129 12px);
+  color: var(--texto-suave);
+}
+
+.regiao-mapa[data-perigo='seguro'] {
+  border-color: #4f9a5a;
+}
+
+.regiao-mapa[data-perigo='perigoso'] {
+  border-color: #e74c3c;
+}
+
+.form-mundo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-mundo input,
+.form-mundo select {
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  background: var(--fundo);
+  color: var(--texto);
+  font: inherit;
+}

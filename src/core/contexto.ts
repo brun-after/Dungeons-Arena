@@ -321,6 +321,20 @@ export interface Balance {
       legiaoPulsos: number;
     };
   };
+  /** Marco 29 (30/10/2026, D-128): o modo Mundo (túmulo, portais, coleta, covis e o checkpoint). */
+  mundo: {
+    /** Só o dono abre o túmulo por `donoExclusivoS` (fora das regiões com PvP); some em `duracaoS`. */
+    tumulo: { donoExclusivoS: number; duracaoS: number };
+    /** Custo do portal: base + por região de distância (Chebyshev na grade do reino). */
+    portal: { ouroBase: number; ouroPorRegiao: number; recargaS: number };
+    /** A coleta canaliza por `canalMs` (o dano interrompe) a até `raio` células; o nó volta em `renascerS`. */
+    coleta: { canalMs: number; renascerS: number; raio: number };
+    /** No covil, quem causou ao menos esta % do dano no boss leva o próprio sorteio. */
+    covil: { contribuicaoMinPct: number };
+    checkpointS: number;
+    /** Invisível para inimigos por alguns segundos depois de passar de região. */
+    passagemProtecaoS: number;
+  };
   armadilhas: {
     revelarIntervaloMs: number;
     raioBase: number;

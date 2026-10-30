@@ -1,4 +1,5 @@
 import { aplicaAntifarmDeFase, xpDeCriatura } from './xp-antifarm';
+import { criarTumulo } from '../mundo/objetos-mundo';
 import { novaMemoria } from '../combat/estado-tatico';
 import { colherMorto } from '../combat/necromancia';
 import { aoAbaterComEncarnacao } from '../combat/encarnacao-efeitos';
@@ -204,6 +205,8 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
     } else {
       // Marco 10A-2: a morte do jogador custa XP e ouro onde o modo manda (§2.12).
       penalizar(estado, ctx, e, saida);
+      // Marco 29 (D-128): no Mundo, fora das dungeons, a mochila e o equipado ficam num túmulo.
+      if (ctx.modo.tumuloNaMorte) criarTumulo(estado, ctx, e, saida);
       // Marco 17 (D-063): onde o modo recompensa abater jogadores (a arena com a ficha inteira), quem derrubou ganha XP
       // (com o decaimento por abates, contra o farm) e, na primeira queda, o drop.
       if (ctx.modo.recompensaJogador && e.xpBase > 0) {

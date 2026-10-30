@@ -78,11 +78,14 @@ jobs:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Marco 17 (D-063): a chave do certificado do personagem (só no GitHub e no .env da VM).
           CHAVE_CERTIFICADO: ${{ secrets.CHAVE_CERTIFICADO }}
+          # Marco 29 (D-128): o Mundo grava o personagem no Supabase com a chave de serviço (só no GitHub e no .env).
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: |
           ssh -i ~/.ssh/vm "$VM_USER@$VM_HOST" bash -s <<EOF
           set -euo pipefail
           cd /opt/dungeons-arena
-          printf 'IMAGEM_SERVIDOR=%s\nDOMINIO=%s\nREGIAO=%s\nCHAVE_CERTIFICADO=%s\n' '${{ env.IMAGEM }}:${{ github.sha }}' '$DOMINIO' 'sa-east-1' '$CHAVE_CERTIFICADO' > .env
+          printf 'IMAGEM_SERVIDOR=%s\nDOMINIO=%s\nREGIAO=%s\nCHAVE_CERTIFICADO=%s\nSUPABASE_URL=%s\nSUPABASE_SERVICE_KEY=%s\n' '${{ env.IMAGEM }}:${{ github.sha }}' '$DOMINIO' 'sa-east-1' '$CHAVE_CERTIFICADO' '$SUPABASE_URL' '$SUPABASE_SERVICE_KEY' > .env
           chmod 600 .env
           echo '$TOKEN' | docker login ghcr.io -u '${{ github.actor }}' --password-stdin
           docker compose --profile producao pull

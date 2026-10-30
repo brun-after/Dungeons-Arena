@@ -19,8 +19,8 @@ export interface ConexaoArena {
   fase: string;
   /** Avisos de queda, volta e encerramento (§4.12: "reconectando, voltou, sala encerrada"). */
   aoMudar: (ouvinte: (estado: EstadoDaConexao) => void) => void;
-  /** Só para testes: derruba a conexão como se a rede tivesse caído. */
-  derrubar: () => void;
+  /** Só para testes: derruba a conexão como se a rede tivesse caído (`semVolta`: como a página fechada). */
+  derrubar: (semVolta?: boolean) => void;
 }
 
 /** Marco 17: ao criar, a faixa de nível da sala (sem ela, aberta). */
@@ -69,6 +69,41 @@ export async function conectarCampanha(url: string, pedido: PedidoDeGrupo): Prom
   if (info.tipo !== 'campanha' || !info.faseRef) throw new Error('nao_e_grupo');
   const sala = await cliente.joinById(pedido.codigo);
   return { ...embrulhar(sala), faseRef: info.faseRef };
+}
+
+/**
+ * Marco 29 (30/10/2026, D-128): entrar num lugar do Mundo. A primeira entrada é pelo slot (na vila salva, ou criando
+ * o personagem); as trocas de sala, pelo bilhete que a sala anterior mandou. O token é o da conta (o servidor confere).
+ */
+export interface PedidoDoMundo {
+  lugar: string;
+  slot?: number;
+  criar?: { classeId: string; nome: string };
+  bilhete?: string;
+  instancia?: string | null;
+}
+
+export async function conectarMundo(url: string, token: string, pedido: PedidoDoMundo): Promise<Omit<ConexaoArena, 'fase'>> {
+  const cliente = new Client(url);
+  cliente.auth.token = token;
+  const sala = await cliente.joinOrCreate('mundo', { ...pedido, instancia: pedido.instancia ?? '' });
+  return embrulhar(sala);
+}
+
+export interface PersonagemDoMundo {
+  slot: number;
+  nome: string;
+  classeId: string;
+  nivel: number;
+  vilaSalva: string;
+}
+
+/** Os personagens do Mundo da conta (a tela de escolha). */
+export async function personagensDoMundo(url: string, token: string): Promise<PersonagemDoMundo[]> {
+  const r = await fetch(`${url.replace(/^ws/, 'http')}/mundo/personagens`, { cache: 'no-store', headers: { authorization: `Bearer ${token}` } });
+  if (!r.ok) throw new Error(r.status === 401 ? 'sem_conta' : `mundo: ${String(r.status)}`);
+  const corpo = (await r.json()) as { personagens?: unknown };
+  return Array.isArray(corpo.personagens) ? (corpo.personagens as PersonagemDoMundo[]) : [];
 }
 
 function embrulhar(sala: Room): Omit<ConexaoArena, 'fase'> {
@@ -122,7 +157,8 @@ function embrulhar(sala: Room): Omit<ConexaoArena, 'fase'> {
       ouvintesEstado.push(fn);
     },
     // 4010 = "pode tentar reconectar" no protocolo do Colyseus.
-    derrubar: () => {
+    derrubar: (semVolta = false) => {
+      if (semVolta) sala.reconnection.enabled = false;
       sala.connection.close(4010, 'teste');
     },
   };

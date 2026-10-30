@@ -16,6 +16,7 @@ import type { Tema } from '../world/temas';
 import { tipoEm, type Fase, type TipoCelula } from '../world/fase';
 import { pecaDaCelula } from '../world/tileset';
 import { CELULA_PX } from './camera-calculo';
+import { desenharCelulaExterior, ehCelulaExterior } from './terreno-exterior';
 import type { TexturasTileset } from './tileset-textura';
 
 export const BLOCO_CELULAS = 16;
@@ -122,6 +123,10 @@ function desenharCelula(g: Graphics, fase: Fase, paleta: Paleta, x: number, y: n
       break;
     case 'vazio':
       break;
+    default:
+      // Marco 29 (D-128): o chão do exterior do Mundo.
+      desenharCelulaExterior(g, fase, x, y, tipo);
+      break;
   }
 }
 
@@ -179,7 +184,7 @@ export function criarTerreno(
         const textura = peca && tileset ? tileset.textura(peca) : null;
         if (!textura) {
           // Sem tileset (ou sem a peça no atlas): a cor lisa; parede funda com tileset fica no escuro.
-          if (!tileset || tipo === 'piso' || tipo === 'saida') desenharCelula(b.g, fase, paleta, x, y, tipo, tema !== null);
+          if (!tileset || tipo === 'piso' || tipo === 'saida' || ehCelulaExterior(tipo)) desenharCelula(b.g, fase, paleta, x, y, tipo, tema !== null);
           continue;
         }
         const s = new Sprite(textura);

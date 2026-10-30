@@ -5,6 +5,7 @@
 //   GET /salas?faixa=X  → marco 17: até 10 salas da arena com vaga naquela faixa de nível
 //   POST /relatorios    → relatório anônimo do teste com pessoas (marco 7A, D-044)
 //   POST /certificar    → marco 17 (D-063): certifica o personagem (corpo `{personagem, anterior}`, texto JSON)
+//   GET /mundo/personagens → marco 29 (D-128): os personagens do Mundo da conta (cabeçalho `Authorization: Bearer`)
 //   GET /metricas       → marco 16 (D-062): processo (memória, uptime, atraso do agendador) e cada sala (tick,
 //                         jogadores, banda, filas, entidades, rejeições, reconexões); agregado, sem dado pessoal
 // O matchmaking do Colyseus continua nas rotas padrão (/matchmake/...).
@@ -21,6 +22,9 @@ import { contextoDaArena } from '../src/arena/contexto-arena';
 import { receberRelatorio } from './relatorios';
 import { SalaCampanhaColyseus } from './salas/sala-campanha';
 import { SalaLivreColyseus } from './salas/sala-livre';
+import { CoordenadorDoMundo, reinoDoMundo, SalaMundoColyseus } from './salas/sala-mundo';
+import { conteudoOficial } from '../src/core/conteudo';
+import { PersistenciaEmMemoria, PersistenciaSupabase, type PersistenciaMundo } from './persistencia-mundo';
 
 export interface OpcoesServidor {
   porta: number;
@@ -34,6 +38,9 @@ export interface OpcoesServidor {
   criacoesPorMinuto?: number;
   /** Marco 17: chave do certificado do personagem (sem ela, uma chave sorteada por processo). */
   chaveCertificado?: string | undefined;
+  /** Marco 29 (D-128): o Supabase do Mundo (a chave de serviço é segredo do GitHub). Sem os dois, o Mundo guarda na memória. */
+  supabaseUrl?: string | undefined;
+  supabaseChaveServico?: string | undefined;
 }
 
 /** Teto do corpo do `/certificar` (um personagem com a mochila cheia cabe com folga). */
@@ -66,6 +73,14 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
     agendador,
     certificador,
   };
+  // Marco 29 (D-128): sem a nuvem configurada, o Mundo roda na memória (desenvolvimento e testes; nada persiste).
+  const conteudoMundo = conteudoOficial();
+  const persistencia: PersistenciaMundo =
+    o.supabaseUrl && o.supabaseChaveServico ? new PersistenciaSupabase(o.supabaseUrl, o.supabaseChaveServico, reinoDoMundo(conteudoMundo)) : new PersistenciaEmMemoria();
+  if (!(o.supabaseUrl && o.supabaseChaveServico)) registrarLog('mundo_sem_nuvem', {});
+  const coordenador = new CoordenadorDoMundo(persistencia, conteudoMundo);
+  SalaMundoColyseus.coordenador = coordenador;
+  const limiteMundo = new LimiteDeTentativas(30, 60_000);
   const httpServer = http.createServer();
   const inicio = Date.now();
 
@@ -144,6 +159,16 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
     return resposta(r.ok ? 200 : 422, r);
   });
 
+  const personagensMundo = createEndpoint('/mundo/personagens', { method: 'GET' }, async (ctx) => {
+    const req = ctx.request;
+    const origem = req?.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'local';
+    if (!limiteMundo.permitir(origem, Date.now())) return resposta(429, { ok: false, motivo: 'muitas_tentativas' });
+    const token = req?.headers.get('authorization')?.replace(/^Bearer /, '') ?? '';
+    const conta = token ? await persistencia.autenticar(token) : null;
+    if (!conta) return resposta(401, { ok: false, motivo: 'sem_conta' });
+    return resposta(200, { ok: true, personagens: await persistencia.listar(conta) });
+  });
+
   const metricas = createEndpoint('/metricas', { method: 'GET' }, async () => {
     const salas = await matchMaker.query({});
     const mem = process.memoryUsage();
@@ -165,8 +190,12 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
   });
 
   const servidor = defineServer({
-    rooms: { arena: defineRoom(SalaLivreColyseus), campanha: defineRoom(SalaCampanhaColyseus) },
-    routes: createRouter({ saude, buscarSala, listarSalas, relatorios, metricas, certificar }),
+    rooms: {
+      arena: defineRoom(SalaLivreColyseus),
+      campanha: defineRoom(SalaCampanhaColyseus),
+      mundo: defineRoom(SalaMundoColyseus).filterBy(['lugar', 'instancia']),
+    },
+    routes: createRouter({ saude, buscarSala, listarSalas, relatorios, metricas, certificar, personagensMundo }),
     transport: new WebSocketTransport({ server: httpServer, maxPayload: o.maxPayload ?? MAX_BYTES_MENSAGEM + 4096 }),
     greet: false,
     gracefullyShutdown: false,

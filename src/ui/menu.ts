@@ -44,6 +44,8 @@ export function mostrarMenu(raiz: HTMLElement): void {
 
   const opcoes: [string, string][] = [
     ['./?jogo=campanha', t('menu.campanha')],
+    // Marco 29 (D-128): o Mundo aberto.
+    ['./?jogo=mundo', t('menu.mundo')],
     ['./?arena=online', t('menu.arenaOnline')],
     ['./?arena=loopback', t('menu.treino')],
     ['./?editor', t('menu.editor')],

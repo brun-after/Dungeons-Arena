@@ -8,6 +8,7 @@ import { aoMudarImagemToken, lerImagemToken } from '../plataforma/token';
 import type { Camera } from '../render/camera';
 import { criarDecoracaoIso, type DecoracaoIso } from '../render/decoracao-iso';
 import { criarParedesIso, type ParedesIso } from '../render/paredes-iso';
+import { criarEstruturasIso, type EstruturasIso } from '../render/estruturas-iso';
 import { criarProjecao, type Projecao } from '../render/projecao';
 import type { Palco } from '../render/stage';
 import { carregarBiblioteca, destruirFonte, fontesDoToken, type BibliotecaCriaturas, type FonteToken } from '../render/texturas-criaturas';
@@ -48,6 +49,7 @@ export interface ControleVisao {
 export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
   const { palco, camera, fase } = o;
   let paredes: ParedesIso | null = null;
+  let estruturas: EstruturasIso | null = null;
   let enfeites: DecoracaoIso | null = null;
   const aplicar = () => {
     const p = camera.projecaoAtual;
@@ -55,7 +57,10 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
     palco.definirMatrizPlano(p.matriz);
     paredes?.destruir();
     enfeites?.destruir();
+    estruturas?.destruir();
     paredes = iso ? criarParedesIso(palco.entidades, fase, p, o.corParede ?? null) : null;
+    // Marco 29 (D-128): as fachadas altas das estruturas do Mundo.
+    estruturas = iso ? criarEstruturasIso(palco.entidades, fase, p) : null;
     enfeites = iso ? criarDecoracaoIso(palco.entidades, fase, o.tema ?? null, p, o.quebraveis) : null;
     o.terreno?.definirVisao(iso);
     document.body.dataset.visao = p.visao;
@@ -97,6 +102,7 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
       desligarToken();
       paredes?.destruir();
       enfeites?.destruir();
+      estruturas?.destruir();
     },
   };
 }

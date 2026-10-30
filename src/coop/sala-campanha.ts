@@ -54,7 +54,7 @@ export function criarSalaCampanha(conteudo: Conteudo, o: OpcoesSalaCampanha): Cr
  * A célula desocupada mais perto de `origem` (busca em largura pelas passáveis), para o grupo não nascer empilhado —
  * jogadores não se bloqueiam (balance.colisao), então a conta é de quem ocupa, não de quem bloqueia.
  */
-function celulaDeEntrada(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, origem: Celula): Celula {
+export function celulaDeEntrada(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, origem: Celula): Celula {
   const visto = new Set<string>([`${origem.x},${origem.y}`]);
   const fila: Celula[] = [origem];
   for (let i = 0; i < fila.length; i++) {
@@ -73,7 +73,7 @@ function celulaDeEntrada(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade
   return origem;
 }
 
-function colocarEm(e: Entidade, c: Celula): void {
+export function colocarEm(e: Entidade, c: Celula): void {
   posicionar(e, c.x, c.y);
   Object.assign(e, { origemX: c.x, origemY: c.y });
 }

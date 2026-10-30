@@ -444,6 +444,72 @@
       "invocacao": {
         "comportamento": "agressivo"
       }
+    },
+    {
+      "id": "rei_goblin",
+      "nome": "Rei Goblin",
+      "hpBase": 600,
+      "hesitacaoS": 1,
+      "deteccao": 7,
+      "xp": 180,
+      "modelo": "goblin",
+      "arquetipo": "boss",
+      "classe": "corpo_a_corpo",
+      "defesa": 4,
+      "ataqueBasico": "golpe_pesado",
+      "habilidades": [
+        "invocar_lacaios",
+        "marca_de_area"
+      ],
+      "intervaloAtaqueMs": 2600,
+      "resistencias": {
+        "veneno": 25
+      }
+    },
+    {
+      "id": "bruxa_do_pantano",
+      "nome": "Bruxa do Pântano",
+      "hpBase": 520,
+      "hesitacaoS": 1,
+      "deteccao": 8,
+      "xp": 320,
+      "modelo": "cultista",
+      "arquetipo": "boss",
+      "classe": "conjurador",
+      "defesa": 2,
+      "ataqueBasico": "raio_vampirico",
+      "habilidades": [
+        "marca_de_area",
+        "armar_teia"
+      ],
+      "intervaloAtaqueMs": 2400,
+      "resistencias": {
+        "veneno": 75,
+        "psiquico": 50,
+        "fogo": -25
+      }
+    },
+    {
+      "id": "dragao_das_ruinas",
+      "nome": "Dragão das Ruínas",
+      "hpBase": 1400,
+      "hesitacaoS": 0.8,
+      "deteccao": 9,
+      "xp": 900,
+      "modelo": "demonio",
+      "arquetipo": "boss",
+      "classe": "corpo_a_corpo",
+      "defesa": 7,
+      "ataqueBasico": "golpe_demoniaco",
+      "habilidades": [
+        "marca_de_area",
+        "invocar_lacaios"
+      ],
+      "intervaloAtaqueMs": 2800,
+      "resistencias": {
+        "fogo": 75,
+        "gelo": -25
+      }
     }
   ]
 }

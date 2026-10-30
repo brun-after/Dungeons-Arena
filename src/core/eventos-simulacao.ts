@@ -63,6 +63,8 @@ export type MotivoItem =
   | 'outra_classe'
   /** Marco 18 (D-070): a forja pede material que falta. */
   | 'sem_material'
+  /** Marco 29 (D-128): a coleta levou dano durante o canal. */
+  | 'interrompido'
   | 'sem_espaco_no_chao';
 
 /** Marco 14: por que a habilidade não subiu de rank ou não foi para a barra. */
@@ -231,7 +233,12 @@ export type EventoSimulacao =
   /** Marco 24 (D-099): o santuário de Engenho entregou o kit. */
   | { t: 'santuarioUsado'; tick: number; id: EntidadeId; itemId: string }
   /** Marco 9A: baú e loja. `ateTick` é o fim do congelamento (anel de progresso, contagem da janela). */
-  | { t: 'interacaoIniciada'; tick: number; id: EntidadeId; objetoId: string; tipo: 'bau' | 'loja' | 'desarme'; ateTick: number }
+  | { t: 'interacaoIniciada'; tick: number; id: EntidadeId; objetoId: string; tipo: 'bau' | 'loja' | 'desarme' | 'coleta'; ateTick: number }
+  /** Marco 29 (D-128): o Mundo. O pedido vai ao servidor (salvar, portal, entrar na estrutura, o quadro de missões). */
+  | { t: 'pedidoDoMundo'; tick: number; id: EntidadeId; tipo: string; ref: string }
+  | { t: 'coletado'; tick: number; id: EntidadeId; objetoId: string; itemId: string; qtd: number }
+  | { t: 'tumuloCriado'; tick: number; id: EntidadeId; objetoId: string; x: number; y: number; itens: number }
+  | { t: 'tumuloAberto'; tick: number; id: EntidadeId; objetoId: string; itens: number }
   /** Marco 10A-2: penalidade de morte (§2.12). */
   | { t: 'penalidadeMorte'; tick: number; id: EntidadeId; xp: number; ouro: number; niveis: number }
   | { t: 'bauAberto'; tick: number; id: EntidadeId; objetoId: string; itens: string[]; ouro: number }

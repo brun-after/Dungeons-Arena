@@ -35,7 +35,8 @@ export interface ErroFase {
 export type ResultadoValidacao = { ok: true; fase: FaseJson; avisos: ErroFase[] } | { ok: false; erros: ErroFase[]; avisos: ErroFase[] };
 
 export const TAMANHO_MIN = 8;
-export const TAMANHO_MAX = 120;
+// Marco 29 (D-128): 160, para as regiões do Mundo (128×128) caberem; o editor continua no que já fazia.
+export const TAMANHO_MAX = 160;
 const TIPOS = ['campanha', 'arena', 'ambas'] as const;
 
 function ehObjeto(v: unknown): v is Record<string, unknown> {
