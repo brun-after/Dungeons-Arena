@@ -167,6 +167,20 @@ export interface PortaInterna {
   b: Celula;
 }
 
+/**
+ * Marco 31 (31/10/2026, D-130): o telhado de uma casa fechada (só visual: as regras e a área de interesse não mudam).
+ * O retângulo cobre a casa com as paredes. `perto`: some quando o jogador chega perto. `dentro`: some só quando ele
+ * entra, e quem está fora não vê quem está dentro (entrar é um risco).
+ */
+export interface Telhado {
+  x: number;
+  y: number;
+  largura: number;
+  altura: number;
+  revela: 'perto' | 'dentro';
+  estilo: 'telha' | 'palha';
+}
+
 /** Formato da fase no JSON oficial e no editor (validado por `validarFase`). */
 export interface FaseJson {
   id: string;
@@ -190,6 +204,8 @@ export interface FaseJson {
   ambientes?: AreaAmbiente[];
   /** Marco 23 (D-092): o tema (data/temas.json): aparência, enfeites e, no tema elemental, o clima. */
   tema?: string;
+  /** Marco 31 (D-130): os telhados das casas (o Mundo gera; as fases à mão ainda não usam). */
+  telhados?: Telhado[];
 }
 
 export function celulaNormalizada(v: number, tamanho: number): number {
@@ -228,6 +244,8 @@ export interface Fase {
   readonly estruturas?: readonly { x: number; y: number; tipo: string }[];
   /** Marco 31 (31/10/2026, D-130): o exterior do Mundo (céu aberto: menos escuro que as masmorras). */
   readonly exterior?: boolean;
+  /** Marco 31 (D-130): os telhados das casas fechadas. */
+  readonly telhados?: readonly Telhado[];
 }
 
 /** Converte uma fase já validada para a forma usada pela simulação. */
@@ -261,6 +279,7 @@ export function carregarFase(json: FaseJson): Fase {
     eventos: [...(json.eventos ?? [])],
     ambientes: (json.ambientes ?? []).map((a) => ({ ...a })),
     tema: json.tema ?? null,
+    ...(json.telhados && { telhados: json.telhados.map((t) => ({ ...t })) }),
   };
 }
 

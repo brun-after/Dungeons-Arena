@@ -18,6 +18,12 @@ export default defineConfig({
     trace: 'retain-on-failure',
     // O Service Worker do PWA não deve servir respostas em cache entre testes.
     serviceWorkers: 'block',
+    // Marco 31 (31/10/2026, D-130): o jogo abre no isométrico; os testes foram escritos de cima e começam com essa
+    // preferência gravada (o padrão isométrico tem o seu teste em jogo.spec.ts, com o perfil limpo).
+    storageState: {
+      cookies: [],
+      origins: [{ origin: `http://localhost:${PORTA}`, localStorage: [{ name: 'dungeons-arena:preferencias', value: JSON.stringify({ visao: 'cima', versaoVisual: 1 }) }] }],
+    },
   },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'] }, testIgnore: /offline\.spec\.ts/ },

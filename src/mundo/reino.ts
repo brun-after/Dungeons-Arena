@@ -36,6 +36,8 @@ export interface RegrasDePerigo {
   eliteNiveis: number;
   /** Multiplicador da chance de item dos drops, em %. */
   lootPct: number;
+  /** Marco 31 (D-130): casas abandonadas com telhado (`dentro`) e um monstro lá dentro, por região. */
+  casas: number;
 }
 
 export interface DestinoDeEstrutura {
@@ -204,6 +206,7 @@ function lerPerigos(l: Leitor, v: unknown): Record<Perigo, RegrasDePerigo> {
       elitePct: l.numero(r, 'elitePct', { min: 0, max: 100 }),
       eliteNiveis: r.eliteNiveis === undefined ? 0 : l.numero(r, 'eliteNiveis', { min: 0, max: 30, inteiro: true }),
       lootPct: l.numero(r, 'lootPct', { min: 0, max: 500 }),
+      casas: r.casas === undefined ? 0 : l.numero(r, 'casas', { min: 0, max: 8, inteiro: true }),
     };
   };
   return { seguro: ler('seguro'), normal: ler('normal'), perigoso: ler('perigoso') };

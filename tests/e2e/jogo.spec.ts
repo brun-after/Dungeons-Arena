@@ -494,6 +494,15 @@ test.describe('desktop', () => {
     expect(erros).toEqual([]);
   });
 
+  test.describe('perfil limpo', () => {
+    test.use({ storageState: { cookies: [], origins: [] } });
+    test('marco 31 (D-130): sem preferência gravada, o jogo abre no isométrico', async ({ page }) => {
+      const { erros } = await abrir(page);
+      await expect(page.locator('body')).toHaveAttribute('data-visao', 'iso');
+      expect(erros).toEqual([]);
+    });
+  });
+
   test('configurações: a visão isométrica persiste depois de recarregar', async ({ page }) => {
     const { erros } = await abrir(page);
     const config = await abrirConfiguracoes(page);

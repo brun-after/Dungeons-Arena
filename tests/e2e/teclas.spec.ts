@@ -12,7 +12,7 @@ test.describe('teclas de movimento', () => {
 
   test('EWAS no isométrico: E anda só para o norte da fase, sem direcional na tela', async ({ page }) => {
     await page.addInitScript(() => {
-      localStorage.setItem('dungeons-arena:preferencias', JSON.stringify({ visao: 'iso', teclasMovimento: 'ewas' }));
+      localStorage.setItem('dungeons-arena:preferencias', JSON.stringify({ visao: 'iso', teclasMovimento: 'ewas', versaoVisual: 1 }));
     });
     await page.goto('./?jogo=campanha&slot=1&diag=1&classe=aventureiro');
     await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/, { timeout: 30_000 });
@@ -31,7 +31,7 @@ test.describe('teclas de movimento', () => {
   // Marco 26 (26/10/2026, D-115): o botão esquerdo segurado guia como o joystick; soltar para na hora.
   test('mouse segurado guia o personagem e soltar para', async ({ page }) => {
     await page.addInitScript(() => {
-      localStorage.setItem('dungeons-arena:preferencias', JSON.stringify({ visao: 'cima' }));
+      localStorage.setItem('dungeons-arena:preferencias', JSON.stringify({ visao: 'cima', versaoVisual: 1 }));
     });
     await page.goto('./?jogo=campanha&slot=1&diag=1&classe=aventureiro');
     await expect(page.locator('#diag')).toHaveAttribute('data-tela', /^\d+,\d+$/, { timeout: 30_000 });

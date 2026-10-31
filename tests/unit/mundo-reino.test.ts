@@ -113,4 +113,28 @@ describe('gerarExterior', () => {
     expect(exSul.pontos.filter((p) => p.tipo === 'coleta').length).toBeGreaterThan(0);
     expect((exSul.fase.inimigos ?? []).length).toBeGreaterThan(10);
   });
+
+  it('marco 31 (D-130): casas com telhado: na vila (perto) e abandonadas com um monstro dentro (dentro)', () => {
+    const r = reino();
+    for (const regiao of r.regioes) {
+      const { fase } = gerarExterior(r, regiao);
+      const f = carregarFase(fase);
+      const telhados = fase.telhados ?? [];
+      if (regiao.perigo !== 'seguro') expect(telhados.filter((t) => t.revela === 'dentro')).toHaveLength(r.perigos[regiao.perigo].casas);
+      if (regiao.perigo === 'seguro') expect(telhados.every((t) => t.revela === 'perto')).toBe(true);
+      for (const t of telhados) {
+        // A porta no meio da parede sul é andável, e a parede em volta fecha o resto.
+        expect(passavel(f, t.x + Math.floor(t.largura / 2), t.y + t.altura - 1)).toBe(true);
+        expect(passavel(f, t.x, t.y)).toBe(false);
+        expect(passavel(f, t.x + t.largura - 1, t.y + t.altura - 1)).toBe(false);
+        if (t.revela === 'dentro') {
+          const dentro = (fase.inimigos ?? []).filter((i) => i.x > t.x && i.x < t.x + t.largura - 1 && i.y > t.y && i.y < t.y + t.altura - 1);
+          expect(dentro.length).toBeGreaterThan(0);
+        }
+      }
+    }
+    const centro = regiaoPorId(r, 'vila_do_centro');
+    if (!centro) throw new Error('sem vila');
+    expect(gerarExterior(r, centro).fase.telhados).toHaveLength(4);
+  });
 });

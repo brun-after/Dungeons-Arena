@@ -3,11 +3,14 @@
 // entram os pontos escritos à mão no reino: a vila murada com os NPCs, as fachadas das estruturas com a porta e as
 // passagens para as regiões vizinhas. Estradas ligam a vila (ou o centro) às passagens e às portas, então tudo o
 // que importa fica alcançável; a coleta e os inimigos só caem em células alcançáveis. Puro.
+// Marco 31 (31/10/2026, D-130): casas fechadas de pedra com telhado: na vila (o telhado some de perto) e, nas regiões
+// normais e perigosas, as abandonadas (o telhado só some ao entrar, e há um monstro lá dentro). As casas usam um
+// gerador de números à parte, para não mexer no sorteio do resto.
 
 import { aleatorio, criarRng, inteiro, escolher, type EstadoRng } from '../core/rng';
 import { LADOS, portaDa, vizinha, type Bioma, type LadoDaRegiao, type PapelNpc, type Reino, type RegiaoDoMundo } from '../mundo/reino';
 import type { Celula } from '../core/comandos';
-import type { FaseJson, InimigoPosicionado, SpawnJson } from './fase';
+import type { FaseJson, InimigoPosicionado, SpawnJson, Telhado } from './fase';
 
 /** Largura da abertura na borda que leva à região vizinha. */
 export const LARGURA_PASSAGEM = 6;
@@ -82,6 +85,86 @@ class Grade {
 }
 
 const ANDA = new Set([',', '.', '=']);
+
+/** A casa da vila e a abandonada (células, com as paredes). */
+const CASA_VILA = { largura: 5, altura: 4 } as const;
+const CASA_ABANDONADA = { largura: 6, altura: 5 } as const;
+/** Os quatro quadrantes da vila (entre os caminhos em cruz), um por casa. */
+const QUADRANTES = [[1, 1], [-1, 1], [-1, -1], [1, -1]] as const;
+const CASAS_NA_VILA = 4;
+/** Desloca a semente das casas (o outro gerador de números). */
+const SEMENTE_CASAS = 7919;
+
+/**
+ * Cabe a casa em (x, y)? A casa só sobre o chão `chao`; a volta de uma célula em `margem` (por onde se passa em
+ * volta dela); nada nas células `bloqueadas`.
+ */
+function cabeCasa(g: Grade, x: number, y: number, l: number, a: number, chao: string, margem: ReadonlySet<string>, bloqueadas: ReadonlySet<number>): boolean {
+  for (let cy = y - 1; cy <= y + a; cy++) {
+    for (let cx = x - 1; cx <= x + l; cx++) {
+      const casa = cx >= x && cy >= y && cx < x + l && cy < y + a;
+      const ch = g.em(cx, cy);
+      if (!g.interna(cx, cy) || bloqueadas.has(cy * g.n + cx) || (casa ? ch !== chao : !margem.has(ch))) return false;
+    }
+  }
+  return true;
+}
+
+/** A casa: paredes em volta, o chão `piso` dentro e a porta no meio da parede sul. Devolve a porta. */
+function erguerCasa(g: Grade, x: number, y: number, l: number, a: number, piso: string): Celula {
+  for (let cy = y; cy < y + a; cy++) {
+    for (let cx = x; cx < x + l; cx++) {
+      const borda = cx === x || cy === y || cx === x + l - 1 || cy === y + a - 1;
+      g.por(cx, cy, borda ? '#' : piso);
+    }
+  }
+  const porta = { x: x + Math.floor(l / 2), y: y + a - 1 };
+  g.por(porta.x, porta.y, piso);
+  return porta;
+}
+
+/** As casas da vila, no meio do caminho entre o anel dos NPCs e o muro. */
+function casasDaVila(g: Grade, vila: NonNullable<RegiaoDoMundo['vila']>, npcs: readonly Celula[]): Telhado[] {
+  const { largura: l, altura: a } = CASA_VILA;
+  const anel = Math.max(4, Math.floor(vila.raio * 0.55));
+  const bloqueadas = new Set(npcs.map((c) => c.y * g.n + c.x));
+  const telhados: Telhado[] = [];
+  // Uma casa por quadrante, na posição que cabe mais perto do meio do caminho entre o anel e o muro.
+  const ideal = (anel + vila.raio) / 2;
+  for (const [sx, sy] of QUADRANTES) {
+    if (telhados.length >= CASAS_NA_VILA) break;
+    const candidatas: { x: number; y: number; erro: number }[] = [];
+    for (let dy = 2; dy <= vila.raio; dy++) {
+      for (let dx = 2; dx <= vila.raio; dx++) {
+        const x = sx > 0 ? vila.x + dx : vila.x - dx - l + 1;
+        const y = sy > 0 ? vila.y + dy : vila.y - dy - a + 1;
+        candidatas.push({ x, y, erro: Math.abs(Math.hypot(x + l / 2 - vila.x, y + a / 2 - vila.y) - ideal) });
+      }
+    }
+    candidatas.sort((p, q) => p.erro - q.erro || p.y - q.y || p.x - q.x);
+    const c = candidatas.find((k) => cabeCasa(g, k.x, k.y, l, a, '.', ANDA, bloqueadas));
+    if (!c) continue;
+    erguerCasa(g, c.x, c.y, l, a, '.');
+    telhados.push({ x: c.x, y: c.y, largura: l, altura: a, revela: 'perto', estilo: 'telha' });
+  }
+  return telhados;
+}
+
+/** As casas abandonadas, longe da vila e dos spawns, e a célula de dentro de cada uma (onde fica o monstro). */
+function casasAbandonadas(g: Grade, rng: EstadoRng, quantas: number, chao: string, longe: (c: Celula) => boolean, protegidas: ReadonlySet<number>): { telhados: Telhado[]; dentro: Celula[] } {
+  const { largura: l, altura: a } = CASA_ABANDONADA;
+  const telhados: Telhado[] = [];
+  const dentro: Celula[] = [];
+  for (let t = 0; t < 120 && telhados.length < quantas; t++) {
+    const x = inteiro(rng, 3, g.n - l - 4);
+    const y = inteiro(rng, 3, g.n - a - 4);
+    if (!longe({ x, y }) || !cabeCasa(g, x, y, l, a, chao, new Set([chao]), protegidas)) continue;
+    erguerCasa(g, x, y, l, a, chao);
+    telhados.push({ x, y, largura: l, altura: a, revela: 'dentro', estilo: 'palha' });
+    dentro.push({ x: x + Math.floor(l / 2), y: y + 1 });
+  }
+  return { telhados, dentro };
+}
 
 /** A estrada de 2 células de largura, em L com a curva sorteada; atravessa água (ponte) e rocha. */
 function estrada(g: Grade, rng: EstadoRng, de: Celula, para: Celula, protegidas: ReadonlySet<number>): void {
@@ -222,7 +305,12 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     g.por(porta.x, porta.y, '=');
     pontos.push({ tipo: 'estrutura', estruturaId: e.id, porta, frente, escondida: e.escondida });
   }
-  if (regiao.vila) pontos.push(...erguerVila(g, regiao.vila, protegidas));
+  const telhados: Telhado[] = [];
+  if (regiao.vila) {
+    const npcs = erguerVila(g, regiao.vila, protegidas);
+    pontos.push(...npcs);
+    telhados.push(...casasDaVila(g, regiao.vila, npcs.flatMap((p) => (p.tipo === 'npc' ? [p] : []))));
+  }
   const { passagens, entradas } = abrirPassagens(g, reino, regiao);
   // Das portas da vila (ou do centro) até cada passagem e cada porta de estrutura.
   const saidaDaVila = (alvo: Celula): Celula => {
@@ -244,6 +332,10 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
       ? entradas.map((c) => ({ x: c.x, y: c.y }))
       : [{ x: centro.x, y: centro.y }];
   for (const s of spawns) if (!ANDA.has(g.em(s.x, s.y))) g.por(s.x, s.y, regiao.vila ? '.' : '=');
+  const regras = reino.perigos[regiao.perigo];
+  const longeDaVila = (c: Celula) => !regiao.vila || Math.hypot(c.x - regiao.vila.x, c.y - regiao.vila.y) > regiao.vila.raio + FOLGA_INIMIGOS;
+  const abandonadas = casasAbandonadas(g, criarRng(regiao.semente + SEMENTE_CASAS), regiao.inimigos.length > 0 ? regras.casas : 0, perfil.chao, (c) => longeDaVila(c) && spawns.every((s) => chebyshev(s, c) >= FOLGA_INIMIGOS), protegidas);
+  telhados.push(...abandonadas.telhados);
 
   const alcance = alcancaveis(g, spawns[0] as Celula);
   const livres: Celula[] = [];
@@ -268,7 +360,6 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     }
   }
 
-  const regras = reino.perigos[regiao.perigo];
   const total = Math.floor((livres.length * regras.densidadePor1000) / 1000);
   const inimigos: InimigoPosicionado[] = [];
   for (let i = 0; i < total && regiao.inimigos.length > 0; i++) {
@@ -280,6 +371,8 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     const elite = aleatorio(rng) * 100 < regras.elitePct;
     inimigos.push({ preset, x: c.x, y: c.y, nivel: elite ? Math.min(100, regiao.nivel[1] + regras.eliteNiveis) : nivel });
   }
+  // Marco 31 (D-130): quem mora na casa abandonada (no topo da faixa: entrar é arriscado).
+  for (const c of abandonadas.dentro) if (regiao.inimigos.length > 0) inimigos.push({ preset: escolher(rng, regiao.inimigos), x: c.x, y: c.y, nivel: regiao.nivel[1] });
 
   const fase: FaseJson = {
     id: `mundo_${reino.id}_${regiao.id}`,
@@ -290,6 +383,7 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     spawns,
     inimigos,
     ...(regiao.tema && { tema: regiao.tema }),
+    ...(telhados.length > 0 && { telhados }),
   };
   return { fase, pontos, passagens, vila: regiao.vila ? { x: regiao.vila.x, y: regiao.vila.y, raio: regiao.vila.raio } : null };
 }

@@ -10,6 +10,7 @@ import type { Camera } from '../render/camera';
 import { criarDecoracaoIso, type DecoracaoIso } from '../render/decoracao-iso';
 import { criarParedesIso, type ParedesIso } from '../render/paredes-iso';
 import { criarEstruturasIso, type EstruturasIso } from '../render/estruturas-iso';
+import { criarTelhados, type Telhados } from '../render/telhados-iso';
 import { criarProjecao, type Projecao } from '../render/projecao';
 import type { Palco } from '../render/stage';
 import { carregarBiblioteca, destruirFonte, fontesDoToken, type BibliotecaCriaturas, type FonteToken } from '../render/texturas-criaturas';
@@ -47,8 +48,10 @@ export interface ControleVisao {
   biblioteca: () => BibliotecaCriaturas | null;
   tokenProprio: () => TokenProprio | null;
   definir: (v: VisaoJogo) => void;
-  /** Marco 31 (D-130): a parede da frente esmaece perto do jogador (posição em células). */
+  /** Marco 31 (D-130): a parede da frente e os telhados esmaecem perto do jogador (posição em células). */
   esmaecer: (jogador: { x: number; y: number } | null, dtMs: number) => void;
+  /** Marco 31 (D-130): quem está em (x, y) fica escondido sob um telhado `dentro` fechado. */
+  oculto: (x: number, y: number) => boolean;
   destruir: () => void;
 }
 
@@ -58,6 +61,7 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
   let estruturas: EstruturasIso | null = null;
   let enfeites: DecoracaoIso | null = null;
   let pedra: Texture | null = null;
+  let telhados: Telhados | null = null;
   const corParede = o.corParede ?? paletaDe(fase.matizGraus).paredeTopo;
   const criarParedes = (p: Projecao) =>
     criarParedesIso(palco.entidades, fase, p, { cor: corParede, textura: pedra, altura: o.paredeIso.altura, raioFade: o.paredeIso.raioFade, alphaFade: o.paredeIso.alphaFade });
@@ -69,6 +73,9 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
     enfeites?.destruir();
     estruturas?.destruir();
     paredes = iso ? criarParedes(p) : null;
+    // Marco 31 (D-130): os telhados das casas, nas duas visões (de cima, chatos).
+    telhados?.destruir();
+    telhados = fase.telhados?.length ? criarTelhados(palco.entidades, fase, p, { altura: o.paredeIso.altura, perto: o.paredeIso.telhadoPerto }) : null;
     // Marco 29 (D-128): as fachadas altas das estruturas do Mundo.
     estruturas = iso ? criarEstruturasIso(palco.entidades, fase, p) : null;
     enfeites = iso ? criarDecoracaoIso(palco.entidades, fase, o.tema ?? null, p, o.quebraveis) : null;
@@ -117,13 +124,18 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
       aplicar();
       o.aoTrocar();
     },
-    esmaecer: (jogador, dtMs) => paredes?.esmaecer(jogador, dtMs),
+    esmaecer: (jogador, dtMs) => {
+      paredes?.esmaecer(jogador, dtMs);
+      telhados?.atualizar(jogador, dtMs);
+    },
+    oculto: (x, y) => telhados?.oculto(x, y) ?? false,
     destruir: () => {
       destruida = true;
       desligarToken();
       paredes?.destruir();
       enfeites?.destruir();
       estruturas?.destruir();
+      telhados?.destruir();
       pedra?.destroy(true);
     },
   };

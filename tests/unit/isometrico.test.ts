@@ -12,6 +12,8 @@ import { CELULA_PX } from '../../src/render/camera-calculo';
 import { chaveQuadro, gerarAtlas, LADO_PX, VISTAS } from '../../src/render/modelos/atlas';
 import { ehModelo, MODELO_JOGADOR, MODELOS } from '../../src/render/modelos';
 import { alfaDaFaixa, ESPESSURA_PAREDE, paredeDeBorda, placasDaParede } from '../../src/render/paredes-iso';
+import { alfaDoTelhado, dentroDoTelhado } from '../../src/render/telhados-iso';
+import type { Telhado } from '../../src/world/fase';
 import balance from '../../src/data/balance.json';
 import { celulaSobProjetado, centroDaCelula, criarProjecao, profundidade, type Visao } from '../../src/render/projecao';
 import { caixaVisivel, encaixar, LIMITE_BYTES, validarArquivo, validarDimensoes } from '../../src/render/token-imagem';
@@ -169,6 +171,19 @@ describe('profundidade e paredes em prisma', () => {
     expect(alfa(30, 0)).toBe(1); // longe na frente
     expect(alfa(21, 12)).toBe(1); // ao lado, fora do raio
   });
+
+  it('marco 31 (D-130): o telhado `perto` some de perto; o `dentro`, só ao entrar', () => {
+    const casa: Telhado = { x: 10, y: 10, largura: 6, altura: 5, revela: 'dentro', estilo: 'palha' };
+    const vila: Telhado = { ...casa, revela: 'perto', estilo: 'telha' };
+    const perto = balance.visual.paredeIso.telhadoPerto;
+    expect(dentroDoTelhado(casa, 12, 12)).toBe(true);
+    expect(dentroDoTelhado(casa, 10, 12)).toBe(false); // na parede
+    expect(alfaDoTelhado(casa, { x: 13, y: 16 }, perto)).toBe(1); // à porta, ainda fora
+    expect(alfaDoTelhado(casa, { x: 13, y: 12 }, perto)).toBe(0);
+    expect(alfaDoTelhado(vila, { x: 13, y: 16 }, perto)).toBeLessThan(0.5);
+    expect(alfaDoTelhado(vila, { x: 13, y: 16 + perto + 1 }, perto)).toBe(1);
+    expect(alfaDoTelhado(vila, null, perto)).toBe(1);
+  });
 });
 
 describe('caminhada por fatias (§2.16)', () => {
@@ -256,7 +271,10 @@ describe('personagem por imagem', () => {
 
   it('a visão e a aparência são preferências normalizadas', () => {
     expect(normalizarPreferencias({ visao: 'iso', tamanhoToken: 2, sentidoToken: 'esquerda' })).toMatchObject({ visao: 'iso', tamanhoToken: 1.3, sentidoToken: 'esquerda' });
-    expect(normalizarPreferencias({ visao: '3d', tamanhoToken: 'x' })).toMatchObject({ visao: 'cima', tamanhoToken: 1, sentidoToken: 'direita' });
+    expect(normalizarPreferencias({ visao: '3d', tamanhoToken: 'x', versaoVisual: 1 })).toMatchObject({ visao: 'iso', tamanhoToken: 1, sentidoToken: 'direita' });
+    // Marco 31 (D-130): a preferência de antes (sem versão) vira isométrica uma vez; depois, vale a escolha.
+    expect(normalizarPreferencias({ visao: 'cima' })).toMatchObject({ visao: 'iso', versaoVisual: 1 });
+    expect(normalizarPreferencias({ visao: 'cima', versaoVisual: 1 })).toMatchObject({ visao: 'cima' });
   });
 });
 

@@ -133,6 +133,8 @@ export interface OpcoesEntidades {
   armaBranca?: (e: Entidade, tick: number) => boolean;
   /** Marco 24 (D-098): o ajuste do voo (o falcão); null para quem anda no chão. */
   ajuste?: (e: Entidade, agoraMs: number) => AjusteVisual | null;
+  /** Marco 31 (D-130): quem está em (x, y) não aparece (dentro de uma casa fechada, para quem está fora). */
+  oculto?: (x: number, y: number) => boolean;
   /** Marco 26 (28/10/2026, D-116): a runa da classe sobre a cabeça dos jogadores (preferência). */
   runaDaClasse?: () => boolean;
 }
@@ -318,6 +320,7 @@ export class CamadaEntidades {
       if (Math.abs(dtx) > 0.01) m.sentido = dtx > 0 ? 1 : -1;
       // Morto fica apagado; invisível (pós-morte) fica translúcido.
       m.raiz.alpha = e.morto ? 0.25 : e.invisivelAteTick > estado.tick ? 0.5 : e.invocacao?.necromancia === 'eco' ? 0.7 : 1;
+      m.raiz.visible = e.id === this.o.idLocal || !(this.o.oculto?.(p.x, p.y) ?? false);
       if (this.o.rotulos) {
         m.sobre.position.set(pt.x, pt.y);
         m.sobre.alpha = m.raiz.alpha;

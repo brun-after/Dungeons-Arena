@@ -230,6 +230,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     runaDaClasse: () => aparencia.runaDaClasse,
     corElemento: (el) => Number.parseInt((ctx.conteudo.elementos.get(el)?.cor ?? '#ffffff').slice(1), 16),
     ajuste: (e, agoraMs) => ap.ajusteVisual(e, agoraMs),
+    oculto: (x, y) => visao?.oculto(x, y) ?? false,
     // Marco 25 (D-103): o arco branco do Arqueiro com a mira cheia.
     armaBranca: (e, tick) => fracaoMira(ctx, e, tick) === 1,
   });
