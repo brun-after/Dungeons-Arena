@@ -7,7 +7,7 @@
 
 import type { Elemento } from '../combat/elementos';
 import { misturarCor } from './decoracao';
-import { Container, Graphics, Text } from 'pixi.js';
+import { Container, Graphics, Sprite, Text } from 'pixi.js';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import { efeitosAtivos } from '../combat/efeitos';
@@ -21,6 +21,7 @@ import { ehModelo, MODELO_JOGADOR, MODELOS } from './modelos';
 import { centroDaCelula, type Projecao } from './projecao';
 import { texturasDoAdorno } from './adornos';
 import { RigToken } from './rig-token';
+import { direcaoDoAngulo, quadroDoEstado, type AtlasDePersonagens, type EstadoPersonagem } from './personagens-3d';
 import { quadroDoToken, type MomentoDoQuadro } from './quadro-membros';
 import { anelDaInvocacao } from './anel-invocacao';
 import { coresDasRunas, desenharRuna } from './runas';
@@ -135,6 +136,8 @@ export interface OpcoesEntidades {
   armaBranca?: (e: Entidade, tick: number) => boolean;
   /** Marco 24 (D-098): o ajuste do voo (o falcão); null para quem anda no chão. */
   ajuste?: (e: Entidade, agoraMs: number) => AjusteVisual | null;
+  /** Marco 32 (D-131): os atlas dos personagens pré-renderizados (no isométrico, no lugar do token desenhado). */
+  personagens?: AtlasDePersonagens | null;
   /** Marco 31 (D-130): quem está em (x, y) não aparece (dentro de uma casa fechada, para quem está fora). */
   oculto?: (x: number, y: number) => boolean;
   /** Marco 26 (28/10/2026, D-116): a runa da classe sobre a cabeça dos jogadores (preferência). */
@@ -174,6 +177,10 @@ interface Marcador {
   silhueta: Graphics;
   seta: Graphics;
   rig: RigToken | null;
+  /** Marco 32 (D-131): o quadro do atlas pré-renderizado (null: o token desenhado). */
+  corpo3d: Sprite | null;
+  /** Quando a entidade caiu (para a animação de morte), ou -1. */
+  morteDesdeMs: number;
   barras: Graphics;
   aneis: Graphics;
   indicador: Text;
@@ -233,7 +240,7 @@ export class CamadaEntidades {
     if (runa) raiz.addChild(runa);
     this.camada.addChild(raiz);
     return {
-      raiz, sobre, chao, silhueta, seta, rig: null, barras, aneis, indicador, runa, runaDesenhada: '', cor,
+      raiz, sobre, chao, silhueta, seta, rig: null, corpo3d: null, morteDesdeMs: -1, barras, aneis, indicador, runa, runaDesenhada: '', cor,
       angulo: 0, sentido: 1, ultimoX: e.px, ultimoY: e.py, visualX: Number.NaN, visualY: Number.NaN,
       andandoAteMs: 0, acaoId: null, ataqueDesdeMs: -Infinity, golpe: null, chaveGolpe: '', escala, topo: -RAIO * escala, achatamento: 1, chaoDesenhado: '',
     };
@@ -387,11 +394,14 @@ export class CamadaEntidades {
     m.seta.rotation = q.angulo;
     if (!escolha) {
       m.rig?.raiz.removeFromParent();
+      if (m.corpo3d) m.corpo3d.visible = false;
       m.topo = -RAIO * m.escala;
       return;
     }
+    if (this.corpo3d(m, e, escolha, q)) return;
     if (!m.rig) m.rig = new RigToken(escolha.fonte);
     else if (m.rig.fonteAtual !== escolha.fonte) m.rig.trocarFonte(escolha.fonte);
+    m.rig.raiz.visible = true;
     if (!m.rig.raiz.parent) m.raiz.addChildAt(m.rig.raiz, m.raiz.getChildIndex(m.silhueta));
     // Marco 23 (D-092): o inimigo afim leva a cor do elemento (o extremo, mais forte).
     const af = e.afinidade;
@@ -437,6 +447,49 @@ export class CamadaEntidades {
     m.rig.adornar(adorno?.atras ?? null, adorno?.frente ?? null, adorno?.arma ?? null, adorno?.pivo, adorno?.armaBranca ?? null, brilho, adorno?.secundaria ?? null);
     const f = escolha.fonte;
     m.topo = gira ? -alturaPx * 0.42 : f.ancoraY === 1 ? -alturaPx : -alturaPx * f.ancoraY * 0.9;
+  }
+
+  /**
+   * Marco 32 (31/10/2026, D-131): no isométrico, o modelo com atlas pré-renderizado vira um sprite com o quadro da
+   * direção (pelo rumo na grade) e do estado (morte, golpe, conjuração, andar ou parado). False enquanto o atlas
+   * carrega, na vista de cima e na imagem própria (o token desenhado continua).
+   */
+  private corpo3d(m: Marcador, e: Entidade, escolha: EscolhaDeFonte, q: { iso: boolean; agoraMs: number; andando: boolean; reduzido: boolean; preparo: number | null; ajuste: AjusteVisual | null }): boolean {
+    const atlas = this.o.personagens;
+    if (e.morto) {
+      if (m.morteDesdeMs < 0) m.morteDesdeMs = q.agoraMs;
+    } else m.morteDesdeMs = -1;
+    const esconder = () => {
+      if (m.corpo3d) m.corpo3d.visible = false;
+      return false;
+    };
+    if (!atlas || !q.iso || escolha.proprio || !atlas.existe(escolha.modelo)) return esconder();
+    const ataqueMs = q.agoraMs - m.ataqueDesdeMs;
+    const duracao = duracaoDoGolpe(m.golpe);
+    const estado: EstadoPersonagem = e.morto ? 'morte' : ataqueMs < duracao ? 'golpe' : q.preparo !== null && q.preparo < 1 ? 'conjurar' : q.andando ? 'andar' : 'parado';
+    const n = atlas.quadrosDe(escolha.modelo, estado);
+    const ciclo = q.reduzido && estado !== 'morte' && estado !== 'golpe' ? 0 : q.agoraMs + faseDe(e.id) * 1000;
+    const tempo = estado === 'morte' ? q.agoraMs - m.morteDesdeMs : ciclo;
+    const indice = quadroDoEstado(estado, n, tempo, duracao > 0 ? ataqueMs / duracao : 0);
+    const textura = atlas.quadro(escolha.modelo, estado, direcaoDoAngulo(m.angulo), indice);
+    const medidas = atlas.medidas(escolha.modelo);
+    if (!textura || !medidas) return esconder();
+    if (!m.corpo3d) {
+      m.corpo3d = new Sprite();
+      m.raiz.addChildAt(m.corpo3d, m.raiz.getChildIndex(m.silhueta));
+    }
+    const s = m.corpo3d;
+    s.texture = textura;
+    s.anchor.set(medidas.ancoraX, medidas.ancoraY);
+    s.scale.set(medidas.escala * m.escala * (q.ajuste?.escala ?? 1));
+    s.position.y = -(q.ajuste?.alturaPx ?? 0);
+    // Marco 23 (D-092): o inimigo afim leva a cor do elemento, como no token desenhado.
+    const af = e.afinidade;
+    s.tint = q.ajuste?.tinta != null ? misturarCor(0xffffff, q.ajuste.tinta, 0.75) : af && this.o.corElemento ? misturarCor(0xffffff, this.o.corElemento(af.elemento), af.extrema ? 0.6 : 0.42) : 0xffffff;
+    s.visible = true;
+    if (m.rig) m.rig.raiz.visible = false;
+    m.topo = -medidas.topo * m.escala * 1.02;
+    return true;
   }
 
   /**

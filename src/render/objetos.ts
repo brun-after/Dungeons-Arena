@@ -32,6 +32,7 @@ import { paletaDe } from './terreno';
 import { texturaDoIcone } from './icones-textura';
 import { desenharObjetoDoMundo, desenharVendedor, desenharVendedorDeLoja } from './objetos-mundo';
 import type { ObjetosPreRenderizados } from './objetos-3d';
+import { quadroDoEstado, type AtlasDePersonagens } from './personagens-3d';
 import { varianteEmPassos, type PintorDeDesenhos } from './pintura';
 
 const COR_ORBE: Readonly<Record<'orbe_hp' | 'orbe_recurso', number>> = {
@@ -98,6 +99,7 @@ export class CamadaObjetos {
     private readonly pintor: PintorDeDesenhos | null = null,
     private readonly modelos: ObjetosPreRenderizados | null = null,
     private readonly ouroMontes: readonly number[] = [],
+    private readonly personagens: AtlasDePersonagens | null = null,
   ) {
     this.camadaHalo = camada;
     camada.addChild(this.g);
@@ -182,11 +184,30 @@ export class CamadaObjetos {
    * A loja em tamanho real: o vendedor fica atrás do balcão (o balcão cobre as pernas). A barraca está girada 22° no
    * render (tools/objetos/receitas.ts): atrás dela é o sentido contrário à frente, na grade.
    */
-  private vendedorDaLoja(o: ObjetoNoMundo, proj: Projecao, camada: Container): void {
+  private vendedorDaLoja(o: ObjetoNoMundo, proj: Projecao, camada: Container, tMs: number): void {
     const id = `${o.objetoId}#v`;
     const c = centroDaCelula(o.x, o.y);
     const atras = 0.32 * CELULA_PX;
     const p = proj.projetar(c.x - Math.sin(Math.PI / 8) * atras, c.y - Math.cos(Math.PI / 8) * atras);
+    // Marco 32 (D-131): o vendedor pré-renderizado (o atlas `vendedor`, parado e conversando, de frente para a câmera).
+    const atlas = this.personagens;
+    const quadro = atlas?.quadro('vendedor', 'parado', 1, quadroDoEstado('parado', atlas.quadrosDe('vendedor', 'parado'), tMs + o.x * 137, null));
+    const medidas = atlas?.medidas('vendedor');
+    if (quadro && medidas) {
+      let v = this.modelos3d.get(id);
+      if (!v) {
+        v = new Sprite(quadro);
+        this.modelos3d.set(id, v);
+      }
+      if (v.parent !== camada) camada.addChild(v);
+      v.texture = quadro;
+      v.anchor.set(medidas.ancoraX, medidas.ancoraY);
+      v.scale.set(medidas.escala);
+      v.position.set(p.x, p.y);
+      v.zIndex = p.y;
+      v.visible = true;
+      return;
+    }
     const ref = o.ref ?? 'mercador';
     const pintura = this.pintor?.pintura(`vendedor:${ref}`, (g) => {
       desenharVendedorDeLoja(g, ref);
@@ -503,7 +524,7 @@ export class CamadaObjetos {
     if (nome && medidas && this.modelo(o.objetoId, nome, p.x, p.y, camada, p.y + 0.001)) {
       const r = Math.min(medidas.largura * 0.42, CELULA_PX * 1.3);
       alto.clear().ellipse(0, 0, r, r * 0.42).fill({ color: 0x000000, alpha: 0.32 });
-      if (o.tipo === 'loja') this.vendedorDaLoja(o, proj, camada);
+      if (o.tipo === 'loja') this.vendedorDaLoja(o, proj, camada, tMs);
       return;
     }
     // Marco 31 (D-130): a sombra no Graphics e o desenho repintado num sprite logo à frente dela.

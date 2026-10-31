@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.69 · **Data:** 31/10/2026
+**Versão:** 0.70 · **Data:** 31/10/2026
 
 > **Histórico**
+> - **0.70 (31/10/2026)**: D-131 (os personagens pré-renderizados de modelos 3D CC0, marco 32).
 > - **0.69 (31/10/2026)**: D-130: objetos, loja e portais pré-renderizados de modelos 3D CC0 (KayKit e Quaternius); escuro 50% mais claro e sem o quadrado da vinheta; borda de pedra mais fina.
 > - **0.68 (31/10/2026)**: D-130 revista: o jogo passa a ser só isométrico (sai a vista de cima, a tecla V e a opção "Visão"); objetos e áreas elementais repintados; nota em D-058.
 > - **0.67 (31/10/2026)**: D-130 (o visual sombrio: chão texturizado CC0 sem grade, escuridão com luz em volta, paredes altas que esmaecem, telhados das casas, isométrico como padrão e marcas discretas) e a nota em D-106.
@@ -3483,3 +3484,45 @@ pedido foi dividido em dois marcos: este (o mundo) e o 32 (os personagens pré-r
 texturizadas; o monitor de qualidade cai para a vinheta quando preciso. As medidas ficam em `BENCHMARKS.md`. A
 Pedravale (raio 12) é pequena demais para as casas e fica sem. Os telhados dos castelos ficaram de fora: as fachadas
 já são blocos fechados.
+
+## D-131 — Personagens pré-renderizados de modelos 3D CC0 (marco 32, 31/10/2026)
+
+**Contexto.** O usuário quer personagens no clima do Diablo, não o desenho infantil dos tokens em SVG (D-058). O
+marco 31 já pré-renderizou os objetos de modelos CC0 (D-130); o marco 32 faz o mesmo com quem se move.
+
+**Decisão.**
+- **Pacotes, todos CC0** (aprovados um a um pelo usuário; lista e origens em `src/assets/personagens/LICENCAS.md`):
+  - da Quaternius: Universal Base Characters, Modular Character Outfits – Fantasy e Universal Animation Library 1 e 2,
+    todos no mesmo esqueleto humanoide;
+  - KayKit Skeletons.
+  - Os brutos ficam em `.brutos/`, fora do git.
+- **Ferramenta** (`tools/sprites/`): three.js no Chromium do Playwright, como `tools/objetos/`.
+  - Cada receita junta o traje da Quaternius com a cabeça do corpo base. A cabeça é religada aos ossos do traje
+    pelos nomes, e os ossos do resto do corpo base viram um osso de escala quase zero preso ao pescoço, de modo que o
+    corpo emprestado some dentro da gola em qualquer pose (um plano de corte vazava nas animações curvadas).
+  - As armas (do KayKit e da Quaternius) ficam presas nos ossos das mãos; as cores multiplicam os materiais pelo
+    nome; as animações saem das bibliotecas pelo nome.
+- **Atlas** (`src/assets/personagens/<modelo>.webp`, com `catalogo.json`):
+  - 8 direções na grade e 30 quadros: parado 4, andar 8, golpe 6, conjurar 6, morte 6;
+  - 72 px por célula, desenhado a 48 no jogo;
+  - a mesma luz, a mesma dessaturação e o mesmo contorno escuro dos objetos.
+- **No jogo** (`render/personagens-3d.ts`, `render/sprites.ts`):
+  - no isométrico, o modelo com atlas vira um sprite;
+  - a direção vem do rumo na grade;
+  - o estado vem da entidade: a morte (tocada uma vez desde a queda), o golpe (pela fração da duração), a conjuração,
+    o andar e o parado;
+  - a tinta da afinidade elemental continua;
+  - cada atlas carrega só quando o modelo aparece na cena;
+  - o token desenhado continua como reserva: enquanto o atlas carrega, na imagem própria do jogador e nos modelos
+    ainda sem atlas.
+- **Modelos com atlas:** as 5 classes, goblin, orc, troll, vampiro, cultista, sombra, demônio e esqueleto; o boneco
+  de treino e o espantalho (o boneco da Quaternius, parado); o vendedor da loja (atrás do balcão).
+- **Sem atlas, ainda:** lobo, aranha, slime, falcão, sentinela e fada. Os pacotes de animais e monstros da Quaternius
+  ficam numa pasta do Google Drive que estava com a cota de download esgotada; entram quando ela liberar.
+
+**Consequências.**
+- Os atlas somam cerca de 4,5 MB (de 170 a 470 KB cada) e vão para o cache do PWA.
+- A arma por raridade dos tokens (D-067) e o brilho do arco com a mira cheia (D-103) não aparecem nos modelos
+  pré-renderizados: a arma de cada classe vem no próprio render.
+- O troll fica abaixo de 4096 px de largura (o limite de textura de muitos celulares).
+

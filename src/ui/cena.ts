@@ -74,6 +74,7 @@ import { identidadeDaClasse } from './barra-classe';
 import { QuadroAlvo } from './quadro-alvo';
 import { montarVisao, type ControleVisao } from './visao';
 import { ObjetosPreRenderizados } from '../render/objetos-3d';
+import { AtlasDePersonagens } from '../render/personagens-3d';
 import { criarGolpeNoQuebravel } from './golpe-quebravel';
 import { criarBotaoCentralizar } from './botao-centralizar';
 import { classeDaHabilidade } from './runa-dom';
@@ -206,6 +207,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const pintor = new PintorDeDesenhos(palco.app.renderer);
   // Ajuste de 31/10/2026 (D-130): os objetos pré-renderizados de modelos 3D CC0 (render/objetos-3d.ts).
   const modelos3d = new ObjetosPreRenderizados();
+  // Marco 32 (31/10/2026, D-131): os personagens pré-renderizados (cada atlas carrega quando o modelo aparece).
+  const personagens = o.tileset ? null : new AtlasDePersonagens();
   const solo: SoloDoTerreno | null = o.tileset
     ? null
     : {
@@ -221,6 +224,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const sprites = new CamadaEntidades(palco.entidades, {
     idLocal,
     rotulos: palco.rotulos,
+    personagens,
     projecao,
     biblioteca: () => visao?.biblioteca() ?? null,
     tokenProprio: () => visao?.tokenProprio() ?? null,
@@ -247,6 +251,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     pintor,
     o.tileset ? null : modelos3d,
     ctx.balance.visual.ouroMontes,
+    personagens,
   );
   bus.on('quebrou', (ev) => {
     ap.particulas.emitir(presetDaQuebra(ev.forma), ev.x, ev.y, 0x9ad8ff);
@@ -702,6 +707,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       visao.destruir();
       pintor.destruir();
       modelos3d.destruir();
+      personagens?.destruir();
       ap.encerrar();
       for (const d of document.querySelectorAll('dialog.modal')) if (!modaisDeAntes.has(d)) d.remove();
       palco.destruir();
