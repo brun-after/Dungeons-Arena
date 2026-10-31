@@ -28,7 +28,7 @@ test.beforeAll(async () => {
       estado.entidades = [j, aliado, inimigo]; estado.objetos = []; estado.armadilhas = [];
       await gravarRegistro({ versaoSchema: VERSAO_SCHEMA, slot: 1, criadoEm: 1, atualizadoEm: 1, faseRef,
         nomeFase: r.ctx.fase.nome, estado, estatisticas: { mortes: 0, inimigosDerrotados: 0 }, fasesVisitadas: {}, certificado: null });
-      await gravarNoBanco('perfil', { chave: 'preferencias', valor: { ...PREFERENCIAS_PADRAO, visao: 'iso', movimentoReduzido: 'sempre', mudo: true } });
+      await gravarNoBanco('perfil', { chave: 'preferencias', valor: { ...PREFERENCIAS_PADRAO, movimentoReduzido: 'sempre', mudo: true } });
       document.body.dataset.semeado = 'sim';
     })();
   ` }, bundle: true, platform: 'browser', format: 'iife', write: false });

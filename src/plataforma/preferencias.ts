@@ -17,7 +17,6 @@ export type NivelQualidade = 'minimo' | 'baixo' | 'medio' | 'alto';
 /** `auto`: começa pelo padrão do aparelho e desce sozinho se o fps cair (§4.10). */
 export type EscolhaQualidade = 'auto' | NivelQualidade;
 export type MovimentoReduzido = 'sistema' | 'sempre' | 'nunca';
-export type VisaoJogo = 'cima' | 'iso';
 /** Teto de quadros por segundo; `auto`: 60, e 30 se a qualidade automática chegar ao mínimo. */
 export type EscolhaFps = 'auto' | '60' | '30';
 /** Escala da resolução do palco; `auto`: média no toque, alta no desktop. */
@@ -44,7 +43,6 @@ export interface Preferencias {
   /** Escala da interface, de 0,8 a 1,5 (§5.4). */
   escalaInterface: number;
   movimentoReduzido: MovimentoReduzido;
-  visao: VisaoJogo;
   sentidoToken: SentidoToken;
   /** Tamanho do personagem neste aparelho, de 0,8 a 1,3 (§2.16). */
   tamanhoToken: number;
@@ -62,14 +60,7 @@ export interface Preferencias {
   seguirAlvo: boolean;
   /** Marco 26 (28/10/2026, D-116): a runa da classe sobre a cabeça dos jogadores. */
   runaDaClasse: boolean;
-  /**
-   * Marco 31 (31/10/2026, D-130): a versão do visual que já migrou as preferências. Abaixo de `VERSAO_VISUAL`, a visão
-   * guardada vira isométrica uma vez (o novo padrão); depois, vale a escolha do jogador.
-   */
-  versaoVisual: number;
 }
-
-export const VERSAO_VISUAL = 1;
 
 /** ws(s)://host[:porta], sem caminho: o único formato aceito para o servidor (URL ou preferência). */
 export function enderecoDeServidorValido(v: string): boolean {
@@ -92,7 +83,6 @@ export const PREFERENCIAS_PADRAO: Preferencias = {
   mudo: false,
   escalaInterface: 1,
   movimentoReduzido: 'sistema',
-  visao: 'iso',
   sentidoToken: 'direita',
   tamanhoToken: 1,
   areaExata: false,
@@ -103,7 +93,6 @@ export const PREFERENCIAS_PADRAO: Preferencias = {
   servidor: '',
   seguirAlvo: true,
   runaDaClasse: true,
-  versaoVisual: VERSAO_VISUAL,
 };
 const PADRAO = PREFERENCIAS_PADRAO;
 
@@ -118,7 +107,6 @@ let usarBanco = false;
 
 export function normalizarPreferencias(dados: unknown): Preferencias {
   const d = typeof dados === 'object' && dados !== null ? (dados as Partial<Record<keyof Preferencias, unknown>>) : {};
-  const migrarVisual = numeroEntre(d.versaoVisual, 0, VERSAO_VISUAL, 0) < VERSAO_VISUAL;
   return {
     controle: d.controle === 'dpad' ? 'dpad' : 'joystick',
     teclasMovimento: opcao(d.teclasMovimento, ['wasd', 'ewas'] as const, PADRAO.teclasMovimento),
@@ -131,7 +119,6 @@ export function normalizarPreferencias(dados: unknown): Preferencias {
     mudo: booleano(d.mudo, PADRAO.mudo),
     escalaInterface: numeroEntre(d.escalaInterface, 0.8, 1.5, PADRAO.escalaInterface),
     movimentoReduzido: opcao(d.movimentoReduzido, ['sistema', 'sempre', 'nunca'] as const, PADRAO.movimentoReduzido),
-    visao: migrarVisual ? 'iso' : opcao(d.visao, ['cima', 'iso'] as const, PADRAO.visao),
     sentidoToken: opcao(d.sentidoToken, ['direita', 'esquerda'] as const, PADRAO.sentidoToken),
     tamanhoToken: numeroEntre(d.tamanhoToken, 0.8, 1.3, PADRAO.tamanhoToken),
     areaExata: booleano(d.areaExata, PADRAO.areaExata),
@@ -142,7 +129,6 @@ export function normalizarPreferencias(dados: unknown): Preferencias {
     servidor: typeof d.servidor === 'string' && enderecoDeServidorValido(d.servidor.trim()) ? d.servidor.trim() : PADRAO.servidor,
     seguirAlvo: booleano(d.seguirAlvo, PADRAO.seguirAlvo),
     runaDaClasse: booleano(d.runaDaClasse, PADRAO.runaDaClasse),
-    versaoVisual: VERSAO_VISUAL,
   };
 }
 

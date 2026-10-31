@@ -5,13 +5,16 @@
 // - enfeite de parede (tocha, estandarte, estante…): a base na aresta norte, encostado na parede de cima;
 // - pilar: a coluna do tema esticada até cerca de 1 célula de altura, sobre uma sombra no losango da célula.
 // Os enfeites de chão (pedras, tapete, poça…) seguem no terreno; de cima, nada muda.
+// Marco 31 (31/10/2026, D-130): com o pintor (render/pintura.ts), cada enfeite e pilar é um sprite repintado (sem o
+// ar chapado), na mesma posição e profundidade; a variante do desenho vai em 6 passos (as texturas se repetem).
 
-import { Graphics, type Container } from 'pixi.js';
+import { Container, Graphics, Sprite } from 'pixi.js';
 import { decoracoesDaFase, ehDecoracaoDeParede, ehDecoracaoEmPe, ehPilar, hashCelula, type Decoracao, type TipoPilar } from '../world/decoracao';
 import type { Fase } from '../world/fase';
 import type { PaletaTema, Tema } from '../world/temas';
 import { CELULA_PX } from './camera-calculo';
 import { desenharDecoracao, desenharPilar } from './decoracao';
+import { varianteEmPassos, type PintorDeDesenhos } from './pintura';
 import { profundidade, type Projecao } from './projecao';
 import { paletaDe } from './terreno';
 
@@ -71,14 +74,57 @@ function desenharItem(g: Graphics, item: Item, p: Projecao, paleta: PaletaTema, 
   g.restore();
 }
 
-export function criarDecoracaoIso(camada: Container, fase: Fase, tema: Tema | null, p: Projecao, pular: ReadonlySet<string> = new Set()): DecoracaoIso {
+/** Marco 31 (D-130): o item como sprite repintado, com a sombra num Graphics por baixo. */
+function itemPintado(c: Container, item: Item, p: Projecao, paleta: PaletaTema, pilar: TipoPilar, pintor: PintorDeDesenhos, chavePaleta: string): void {
+  const sombra = new Graphics();
+  c.addChild(sombra);
+  if (item.tipo === 'pilar') {
+    const { x, y } = item;
+    const centro = p.projetar((x + 0.5) * P, (y + 0.5) * P);
+    const canto = (cx: number, cy: number) => p.projetar(cx * P, cy * P);
+    const n = canto(x + 0.15, y + 0.15);
+    const l = canto(x + 0.85, y + 0.15);
+    const s = canto(x + 0.85, y + 0.85);
+    const o = canto(x + 0.15, y + 0.85);
+    sombra.poly([n.x, n.y, l.x, l.y, s.x, s.y, o.x, o.y]).fill({ color: 0x000000, alpha: 0.3 });
+    const variante = hashCelula(x, y, 4);
+    const pintura = pintor.pintura(`pilar:${pilar}:${variante}:${chavePaleta}`, (g) => { desenharPilar(g, pilar, 0, 0, paleta, variante, false); });
+    if (!pintura) return;
+    // A base do desenho (y + P − 6) cai no centro da célula; esticado para cima (como em `desenharItem`).
+    const sp = new Sprite(pintura.textura);
+    sp.position.set(centro.x + pintura.x - 0.5 * P, centro.y + ESTICA_PILAR * (pintura.y - (P - 6)));
+    sp.width = pintura.largura;
+    sp.height = pintura.altura * ESTICA_PILAR;
+    c.addChild(sp);
+    return;
+  }
+  const d = item.d;
+  const deParede = ehDecoracaoDeParede(d.tipo);
+  const chao = p.projetar((d.x + 0.5) * P, (d.y + (deParede ? 0.08 : 0.5)) * P);
+  const base = deParede ? BASE_DE_PAREDE : BASE_ENFEITE;
+  if (!deParede) sombra.ellipse(chao.x, chao.y, P * 0.3, P * 0.12).fill({ color: 0x000000, alpha: 0.22 });
+  const variante = varianteEmPassos(d.variante);
+  const pintura = pintor.pintura(`enfeite:${d.tipo}:${variante}:${chavePaleta}`, (g) => { desenharDecoracao(g, { tipo: d.tipo, x: 0, y: 0, variante }, paleta); });
+  if (!pintura) return;
+  const sp = new Sprite(pintura.textura);
+  sp.position.set(chao.x - 0.5 * P + pintura.x, chao.y - base + pintura.y);
+  sp.width = pintura.largura;
+  sp.height = pintura.altura;
+  c.addChild(sp);
+}
+
+export function criarDecoracaoIso(camada: Container, fase: Fase, tema: Tema | null, p: Projecao, pular: ReadonlySet<string> = new Set(), pintor: PintorDeDesenhos | null = null): DecoracaoIso {
   const paleta = tema?.paleta ?? paletaDe(fase.matizGraus);
   const pilar: TipoPilar = tema?.pilar ?? 'coluna';
-  const graficos: Graphics[] = [];
+  const chavePaleta = tema?.id ?? `matiz${fase.matizGraus}`;
+  const graficos: Container[] = [];
   for (const [d, itens] of itensEmPe(fase, tema, pular)) {
-    const g = new Graphics();
+    const g = pintor ? new Container() : new Graphics();
     // Os enfeites de trás da diagonal primeiro (o x maior fica mais à direita, na mesma altura).
-    for (const item of itens) desenharItem(g, item, p, paleta, pilar);
+    for (const item of itens) {
+      if (pintor) itemPintado(g, item, p, paleta, pilar, pintor, chavePaleta);
+      else if (g instanceof Graphics) desenharItem(g, item, p, paleta, pilar);
+    }
     g.zIndex = profundidade(p, d, 0) - 0.005;
     g.label = `enfeites-${d}`;
     g.cullable = true;
@@ -87,7 +133,7 @@ export function criarDecoracaoIso(camada: Container, fase: Fase, tema: Tema | nu
   }
   return {
     destruir: () => {
-      for (const g of graficos) g.destroy();
+      for (const g of graficos) g.destroy({ children: true });
       graficos.length = 0;
     },
   };

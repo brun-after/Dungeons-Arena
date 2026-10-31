@@ -22,8 +22,6 @@ export interface OpcoesTeclado {
   aoInteragir?: () => void;
   /** Tecla `X`: dispensa as invocações (marco 10A-3). */
   aoDispensar?: () => void;
-  /** Tecla `V`: alterna a visão (de cima <-> isométrica, marco 13). */
-  aoAlternarVisao?: () => void;
   /** Marco 26 (D-117): a tecla C (quem a usa decide o toque duplo). */
   aoCentralizar?: () => void;
   /** Ajuste de 15/10/2026 (D-065): `Q` troca para o próximo alvo; com Shift, o anterior. */
@@ -90,10 +88,6 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
       opcoes.aoTravarAlvo();
     } else if (ev.code === 'KeyC' && !ev.repeat && opcoes.aoCentralizar) {
       opcoes.aoCentralizar();
-    } else if (ev.code === 'KeyV' && !ev.repeat && opcoes.aoAlternarVisao) {
-      opcoes.aoAlternarVisao();
-      // As teclas mantidas passam a valer na visão nova (o remapeamento muda).
-      recalcular();
     } else if (ehTeclaDeMovimento(ev.code, modo(), iso)) {
       ev.preventDefault();
       if (!ev.repeat) {

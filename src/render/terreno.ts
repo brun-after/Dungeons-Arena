@@ -15,6 +15,7 @@ import { CanvasSource, Container, Graphics, Sprite, Texture } from 'pixi.js';
 import { AssadorDeSolo } from './solo/assar';
 import { pesosDoBloco, type ConfigSolo } from './solo/mascaras';
 import type { TexturasDoSolo } from './solo/texturas';
+import { varianteEmPassos, type PintorDeDesenhos } from './pintura';
 import type { SoloTema } from '../world/solo';
 import { desenharAmbiente } from './ambiente';
 import { desenharDecoracao, desenharPilar } from './decoracao';
@@ -179,6 +180,8 @@ export interface SoloDoTerreno {
   /** A semente do ruído (a mesma fase, o mesmo chão). */
   semente: number;
   texturas: Promise<TexturasDoSolo>;
+  /** Os enfeites repintados (render/pintura.ts); null desenha os de antes. */
+  pintor?: PintorDeDesenhos | null;
 }
 
 /** Até quantos blocos a fase desenha tudo de uma vez (64×64 células); acima, sob demanda. */
@@ -204,7 +207,7 @@ export function criarTerreno(
   if (solo && !tileset) {
     void solo.texturas.then((texturas) => {
       if (destruido || texturas.size === 0) return;
-      assador = new AssadorDeSolo(texturas, solo.tema, solo.escala);
+      assador = new AssadorDeSolo(texturas, solo.tema, solo.escala, fase.ambientes ?? [], solo.semente);
       for (const b of blocos) if (b.desenhado) fila.add(b);
     });
   }
@@ -284,20 +287,41 @@ export function criarTerreno(
     }
     if (tema) {
       const enfeite = new Graphics();
+      // Marco 31 (D-130): com o chão assado, os enfeites e pilares viram sprites repintados.
+      const pintor = b.solo ? (solo?.pintor ?? null) : null;
+      const pintado = (chave: string, desenhar: (g: Graphics) => void, x: number, y: number) => {
+        const pintura = pintor?.pintura(chave, desenhar);
+        if (!pintura) return;
+        const sp = new Sprite(pintura.textura);
+        sp.position.set(x * CELULA_PX + pintura.x, y * CELULA_PX + pintura.y);
+        sp.width = pintura.largura;
+        sp.height = pintura.altura;
+        b.c.addChild(sp);
+      };
       for (let y = b.by; y < fimY; y++) for (let x = b.bx; x < fimX; x++) {
         if (!ehPilar(fase, x, y)) continue;
         if (iso) {
           if (!b.solo) enfeite.rect(x * CELULA_PX, y * CELULA_PX, CELULA_PX, CELULA_PX).fill(tema.paleta.piso[0]);
+          continue;
         }
-        else desenharPilar(enfeite, tema.pilar, x, y, tema.paleta, hashCelula(x, y, 4));
+        const variante = hashCelula(x, y, 4);
+        if (pintor) pintado(`pilar-chao:${tema.pilar}:${variante}:${tema.id}`, (g) => { desenharPilar(g, tema.pilar, 0, 0, tema.paleta, variante); }, x, y);
+        else desenharPilar(enfeite, tema.pilar, x, y, tema.paleta, variante);
       }
       for (const d of enfeites.get((b.by / BLOCO_CELULAS) * porLinhaBlocos + b.bx / BLOCO_CELULAS) ?? []) {
-        if (!iso || !ehDecoracaoEmPe(d.tipo)) desenharDecoracao(enfeite, d, tema.paleta);
+        if (iso && ehDecoracaoEmPe(d.tipo)) continue;
+        if (!pintor) {
+          desenharDecoracao(enfeite, d, tema.paleta);
+          continue;
+        }
+        const variante = varianteEmPassos(d.variante);
+        pintado(`enfeite:${d.tipo}:${variante}:${tema.id}`, (g) => { desenharDecoracao(g, { tipo: d.tipo, x: 0, y: 0, variante }, tema.paleta); }, d.x, d.y);
       }
       b.c.addChild(enfeite);
     }
     // 17/10/2026: o perigo fica sobre o atlas também; uma textura própria não pode escondê-lo.
-    if (fase.ambientes?.length) {
+    // Marco 31 (D-130): com o chão assado, as áreas elementais já estão pintadas nele (render/solo/).
+    if (fase.ambientes?.length && !b.solo) {
       const ambientes = new Graphics();
       for (let y = b.by; y < fimY; y++) for (let x = b.bx; x < fimX; x++) {
         const tipo = tipoEm(fase, x, y);

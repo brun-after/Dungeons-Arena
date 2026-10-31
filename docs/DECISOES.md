@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.67 · **Data:** 31/10/2026
+**Versão:** 0.68 · **Data:** 31/10/2026
 
 > **Histórico**
+> - **0.68 (31/10/2026)**: D-130 revista: o jogo passa a ser só isométrico (sai a vista de cima, a tecla V e a opção "Visão"); objetos e áreas elementais repintados; nota em D-058.
 > - **0.67 (31/10/2026)**: D-130 (o visual sombrio: chão texturizado CC0 sem grade, escuridão com luz em volta, paredes altas que esmaecem, telhados das casas, isométrico como padrão e marcas discretas) e a nota em D-106.
 > - **0.66 (30/10/2026)**: D-129 (o Mundo social: grupo, chat, banco, missões, troca, mercado, receitas por ofício, perigo, vila refúgio, passagem protegida, estrutura escondida, eventos por região, polimento visual e as metas do Mundo no simulador, com a vida dos chefes dos covis e o fim das invocações como monstros).
 > - **0.65 (30/10/2026)**: D-128 (o Mundo: lugares em salas, área de interesse, IA com ativação, personagem no servidor, exterior gerado com fachadas, perigo e PvP por região, túmulo, portais, coleta e covis; o Reino Central).
@@ -1148,7 +1149,7 @@ adotou o personagem por imagem.
   - a barra de vida, a de conjuração, o status, os anéis de alvo e de invocação e o "?"/"!" acompanham o topo do
     desenho;
   - a silhueta por arquétipo continua como substituto quando o modelo não existe ou o atlas não carrega.
-- **Escolha da visão**:
+- **Escolha da visão** (nota de 31/10/2026: retirada em D-130, o jogo ficou só isométrico):
   - em Configurações → Gráficos → "Visão", ou pela tecla `V`, que grava a mesma preferência;
   - a troca é instantânea: câmera, matriz do chão, paredes e tokens se refazem;
   - as teclas mantidas são remapeadas na hora.
@@ -3443,9 +3444,17 @@ pedido foi dividido em dois marcos: este (o mundo) e o 32 (os personagens pré-r
   telhado: até 4 na vila (`perto`) e, nas regiões normais e perigosas, as abandonadas (`perigos.*.casas`, com um
   monstro no topo da faixa lá dentro, `dentro`). As casas usam um gerador de números à parte, para não mexer no
   sorteio do resto. De cima, o telhado é chato.
-- **Isométrico como padrão** (`preferencias.ts`): a preferência ganha `versaoVisual`; a gravada antes dela vira
-  isométrica uma vez, e depois vale a escolha. O editor continua de cima. Os e2e escritos de cima começam com a
-  preferência `cima` gravada (`playwright.config.ts`).
+- **Só isométrico** (revisto a pedido do usuário, 31/10/2026): o jogo deixa de ter a vista de cima. Saem a tecla `V`,
+  a opção "Visão" das Configurações e a preferência `visao` (a guardada antes é ignorada). A câmera do jogo é sempre
+  isométrica (`ui/cena.ts`); a projeção de cima continua no código para o editor de fases e a galeria de efeitos.
+  Os e2e rodam no isométrico.
+- **Objetos repintados** (`render/pintura.ts`): o baú, a loja, o ouro, o santuário, os objetos do Mundo, os
+  quebráveis, os enfeites e os pilares são desenhados uma vez, extraídos para um canvas e repintados (menos
+  saturação, luz de cima, sombra nos pés, grão e borda escura), e viram sprites com cache por chave. Os orbes ganham
+  volume.
+- **Áreas elementais no chão** (`render/solo/ambientes-solo.ts`): no lugar do círculo translúcido com riscos, cada
+  área entra no canvas do bloco, antes das paredes: contorno orgânico de borda macia, a textura e a cor do elemento
+  e, nas que brilham, rachaduras acesas. As que brilham soltam luz no escuro.
 - **Marcas e barras** (`render/sprites.ts`): a marca de equipe vira um decalque fino e translúcido em tons sóbrios
   (dourado, cinza-azulado, vermelho escuro), a sombra fica macia e as barras ganham moldura e brilho. O vermelho do
   hostil continua sempre (mais legível que mostrar só em combate).

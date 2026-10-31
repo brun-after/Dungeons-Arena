@@ -342,8 +342,6 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
     acoesExtras: [mapa, sair],
     pausaOJogo: false,
     acoesDaPausa: [{ rotulo: t('mundo.sairRotulo'), fazer: () => { sair.click(); } }],
-    // O Mundo prioriza a visão isométrica (a tecla V e as Configurações trocam).
-    visaoInicial: 'iso',
   });
   if (!cena) return;
   const c = cena;

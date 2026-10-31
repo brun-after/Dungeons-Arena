@@ -287,12 +287,11 @@ describe('personagem por imagem', () => {
     expect([e.ancoraX, e.ancoraY]).toEqual([0.5, 1]);
   });
 
-  it('a visão e a aparência são preferências normalizadas', () => {
-    expect(normalizarPreferencias({ visao: 'iso', tamanhoToken: 2, sentidoToken: 'esquerda' })).toMatchObject({ visao: 'iso', tamanhoToken: 1.3, sentidoToken: 'esquerda' });
-    expect(normalizarPreferencias({ visao: '3d', tamanhoToken: 'x', versaoVisual: 1 })).toMatchObject({ visao: 'iso', tamanhoToken: 1, sentidoToken: 'direita' });
-    // Marco 31 (D-130): a preferência de antes (sem versão) vira isométrica uma vez; depois, vale a escolha.
-    expect(normalizarPreferencias({ visao: 'cima' })).toMatchObject({ visao: 'iso', versaoVisual: 1 });
-    expect(normalizarPreferencias({ visao: 'cima', versaoVisual: 1 })).toMatchObject({ visao: 'cima' });
+  it('a aparência é preferência normalizada', () => {
+    expect(normalizarPreferencias({ tamanhoToken: 2, sentidoToken: 'esquerda' })).toMatchObject({ tamanhoToken: 1.3, sentidoToken: 'esquerda' });
+    expect(normalizarPreferencias({ tamanhoToken: 'x' })).toMatchObject({ tamanhoToken: 1, sentidoToken: 'direita' });
+    // Marco 31 (D-130): o jogo é só isométrico; a visão guardada antes some das preferências.
+    expect(normalizarPreferencias({ visao: 'cima', versaoVisual: 1 })).not.toHaveProperty('visao');
   });
 });
 

@@ -1,3 +1,4 @@
+import { luzesDosAmbientes } from '../render/solo/ambientes-solo';
 import { faixaSuperior } from './aviso';
 import { IndicadorCombo } from './combos';
 import { fracaoMira } from '../combat/mira';
@@ -261,6 +262,8 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   });
 
   const acesos = decoracoesDaFase(ctx.fase, tema).filter((d) => d.tipo === 'tocha' || d.tipo === 'vela' || d.tipo === 'lava');
+  // Marco 31 (D-130): as áreas elementais que brilham (brasas, raios, geada, luz sagrada) iluminam em volta.
+  const luzesDasAreas = luzesDosAmbientes(ctx.fase.ambientes ?? []);
   const pontosDeLuz = (estado: EstadoJogo, posicao: (e: Entidade) => PontoVisual): PontoDeLuz[] => {
     const pontos: PontoDeLuz[] = [];
     const eu = estado.entidades.find((e) => e.id === idLocal);
@@ -269,6 +272,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
       // Ajuste de 14/10/2026: o brilho em volta do jogador pela metade (feedback de jogo).
       pontos.push({ x: p.x, y: p.y, cor: tema?.luz ?? 0xffd9a0, semente: 0, intensidade: 0.5, raio: vis.raioJogador, jogador: true });
       // As tochas, velas e fendas de lava do tema perto do jogador.
+      for (const a of luzesDasAreas) if (Math.abs(a.x - p.x) < 14 && Math.abs(a.y - p.y) < 11) pontos.push({ x: a.x, y: a.y, cor: a.cor, semente: a.x * 11 + a.y, intensidade: 0.4, raio: a.raio });
       for (const d of acesos) if (Math.abs(d.x - p.x) < 12 && Math.abs(d.y - p.y) < 9) pontos.push({ x: d.x, y: d.y - (d.tipo === 'tocha' ? 0.35 : 0), cor: d.tipo === 'vela' ? 0xffd890 : 0xff9a40, semente: d.x * 7 + d.y, intensidade: d.tipo === 'lava' ? 0.4 : 0.6, raio: d.tipo === 'vela' ? vis.raioObjeto : vis.raioTocha });
     }
     // Marco 31 (31/10/2026, D-130): os outros jogadores também levam luz, e os projéteis brilham no escuro.

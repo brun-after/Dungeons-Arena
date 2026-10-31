@@ -19,8 +19,6 @@ const MARCO = valor('marco', '16');
 const PORTA = 4175;
 const BASE = `http://localhost:${PORTA}/`;
 const TROCAS = Number(valor('trocas', '30'));
-// Marco 31 (D-130): `--visao cima|iso` fixa a visão (vazio: a padrão).
-const VISAO = valor('visao', '');
 
 interface ResultadoBench {
   cena: string;
@@ -53,7 +51,7 @@ async function esperarServidor(): Promise<void> {
 }
 
 async function medirCena(pagina: Page, cena: string, qualidade: string): Promise<ResultadoBench> {
-  await pagina.goto(`${BASE}?bench=${cena}&qualidade=${qualidade}&segundos=${SEGUNDOS}${VISAO ? `&visao=${VISAO}` : ''}`);
+  await pagina.goto(`${BASE}?bench=${cena}&qualidade=${qualidade}&segundos=${SEGUNDOS}`);
   await pagina.waitForSelector('body[data-bench="pronto"]', { timeout: (SEGUNDOS + 90) * 1000 });
   const texto = await pagina.locator('#resultado-bench').textContent();
   return JSON.parse(texto ?? '{}') as ResultadoBench;

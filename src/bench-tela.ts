@@ -114,9 +114,6 @@ export async function iniciarBench(raiz: HTMLElement, params: URLSearchParams): 
   const qualidade = params.get('qualidade');
   const nivel = QUALIDADES.find((q) => q === qualidade);
   if (nivel) gravarPreferencias({ ...lerPreferencias(), qualidade: nivel });
-  // Marco 31 (31/10/2026, D-130): `&visao=cima|iso` mede a cena numa visão fixa (o padrão agora é o isométrico).
-  const visao = params.get('visao');
-  if (visao === 'cima' || visao === 'iso') gravarPreferencias({ ...lerPreferencias(), visao });
   const pedido = params.get('bench');
 
   if (pedido === 'trocas') {

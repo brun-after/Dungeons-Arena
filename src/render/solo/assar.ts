@@ -7,6 +7,8 @@
 import type { SoloTema, TexturaSolo } from '../../world/solo';
 import type { CamadaSolo, PesosDoBloco } from './mascaras';
 import type { TexturasDoSolo } from './texturas';
+import { areaNoRetangulo, contornoDaArea, ESTILOS_AMBIENTE, veiosDaArea } from './ambientes-solo';
+import type { AreaAmbiente } from '../../world/ambiente-tipos';
 import { CELULA_PX } from '../camera-calculo';
 
 const COR_AGUA = '#15303d';
@@ -32,6 +34,9 @@ export class AssadorDeSolo {
     private readonly solo: SoloTema,
     /** Pixels do canvas por pixel de mundo (a qualidade). */
     private readonly escala: number,
+    /** Marco 31 (D-130): as áreas elementais da fase e a semente do desenho delas. */
+    private readonly areas: readonly AreaAmbiente[] = [],
+    private readonly semente = 0,
   ) {}
 
   /** Lado do canvas para `celulas` células. */
@@ -67,12 +72,18 @@ export class AssadorDeSolo {
       g.globalAlpha = 1;
     }
     this.recortada(g, this.solo.variacao, pesos.variacao, origemX, origemY, pesos, 1.3);
-    for (const { camada, pesos: p } of outras) if (camada !== 'vazio') this.recortada(g, camada, p, origemX, origemY, pesos, 1);
+    // Marco 31 (D-130): as áreas elementais sobre o chão e sob as paredes (a água, a parede e o escuro cobrem a borda).
+    const solida = (c: CamadaSolo) => c === 'agua' || c === this.solo.parede || c === 'escuro' || c === 'vazio';
+    for (const { camada, pesos: p } of outras) if (!solida(camada)) this.recortada(g, camada, p, origemX, origemY, pesos, 1);
+    this.ambientes(g, origemX, origemY, l, a);
+    for (const { camada, pesos: p } of outras) if (solida(camada) && camada !== 'vazio') this.recortada(g, camada, p, origemX, origemY, pesos, 1);
     this.sombra(g, pesos.macro, pesos);
     this.sombra(g, pesos.ao, pesos);
     g.globalCompositeOperation = 'multiply';
     g.fillStyle = hexCss(this.solo.tinta);
     g.fillRect(0, 0, l, a);
+    // As rachaduras acesas depois da tinta (o brilho não escurece com o tema).
+    this.veiosDasAreas(g, origemX, origemY, l, a);
     // O vazio por último: apaga (transparente), com a borda macia da máscara.
     const vazio = outras.find((c) => c.camada === 'vazio');
     if (vazio) {
@@ -115,6 +126,85 @@ export class AssadorDeSolo {
     r.imageSmoothingEnabled = true;
     r.drawImage(this.mascara, 0, 0, this.rascunho.width, this.rascunho.height);
     g.drawImage(this.rascunho, 0, 0);
+  }
+
+  /**
+   * Marco 31 (D-130): as áreas elementais que tocam o bloco: a textura e a cor do elemento recortadas pelo contorno
+   * orgânico (borda desfocada pela sombra do canvas), na resolução cheia do bloco.
+   */
+  private ambientes(g: Contexto2D, origemX: number, origemY: number, l: number, a: number): void {
+    const r = this.rascunho.getContext('2d');
+    if (!r) return;
+    const k = this.escala;
+    const x0 = origemX / CELULA_PX;
+    const y0 = origemY / CELULA_PX;
+    for (const area of this.areas) {
+      if (!areaNoRetangulo(area, x0, y0, x0 + l / k / CELULA_PX, y0 + a / k / CELULA_PX)) continue;
+      const e = ESTILOS_AMBIENTE[area.tipo];
+      r.save();
+      r.globalCompositeOperation = 'source-over';
+      r.globalAlpha = 1;
+      r.clearRect(0, 0, l, a);
+      if (e.textura && this.texturas.has(e.textura)) {
+        r.fillStyle = this.preenchimento(r, e.textura, origemX, origemY, 0.8, 0.6);
+        r.fillRect(0, 0, l, a);
+        r.globalCompositeOperation = 'multiply';
+      }
+      r.globalAlpha = e.textura ? 1 : e.forca;
+      r.fillStyle = e.cor;
+      r.fillRect(0, 0, l, a);
+      // O recorte: o contorno cheio, desenhado longe e trazido pela sombra (assim só a sombra desfocada aparece).
+      r.globalAlpha = 1;
+      r.globalCompositeOperation = 'destination-in';
+      const longe = l + a + 1000;
+      r.shadowColor = '#000';
+      r.shadowBlur = CELULA_PX * 0.3 * k;
+      r.shadowOffsetX = longe;
+      r.beginPath();
+      contornoDaArea(area, this.semente).forEach((p, n) => {
+        const x = (p.x * CELULA_PX - origemX) * k - longe;
+        const y = (p.y * CELULA_PX - origemY) * k;
+        if (n === 0) r.moveTo(x, y);
+        else r.lineTo(x, y);
+      });
+      r.closePath();
+      r.fill();
+      r.restore();
+      g.globalAlpha = e.textura ? e.forca : 1;
+      g.drawImage(this.rascunho, 0, 0);
+      g.globalAlpha = 1;
+    }
+  }
+
+  /** As rachaduras das áreas (brasa, raio, geada…): linhas com brilho, somadas em `lighter` nas que brilham. */
+  private veiosDasAreas(g: Contexto2D, origemX: number, origemY: number, l: number, a: number): void {
+    const k = this.escala;
+    const x0 = origemX / CELULA_PX;
+    const y0 = origemY / CELULA_PX;
+    for (const area of this.areas) {
+      const e = ESTILOS_AMBIENTE[area.tipo];
+      if (e.forcaVeio <= 0 || !areaNoRetangulo(area, x0, y0, x0 + l / k / CELULA_PX, y0 + a / k / CELULA_PX)) continue;
+      g.save();
+      g.globalCompositeOperation = e.brilha ? 'lighter' : 'source-over';
+      g.globalAlpha = e.forcaVeio;
+      g.strokeStyle = e.veio;
+      g.lineCap = 'round';
+      g.lineJoin = 'round';
+      g.shadowColor = e.veio;
+      g.shadowBlur = e.brilha ? 6 * k : 0;
+      for (const linha of veiosDaArea(area, this.semente)) {
+        g.lineWidth = Math.max(1, 2.2 * k);
+        g.beginPath();
+        linha.forEach((p, n) => {
+          const x = (p.x * CELULA_PX - origemX) * k;
+          const y = (p.y * CELULA_PX - origemY) * k;
+          if (n === 0) g.moveTo(x, y);
+          else g.lineTo(x, y);
+        });
+        g.stroke();
+      }
+      g.restore();
+    }
   }
 
   /** Escurece pelo peso (a oclusão e a sombra grande). */
