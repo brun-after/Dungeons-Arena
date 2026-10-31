@@ -246,6 +246,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     temaDaFase(ctx)?.paleta ?? null,
     pintor,
     o.tileset ? null : modelos3d,
+    ctx.balance.visual.ouroMontes,
   );
   bus.on('quebrou', (ev) => {
     ap.particulas.emitir(presetDaQuebra(ev.forma), ev.x, ev.y, 0x9ad8ff);

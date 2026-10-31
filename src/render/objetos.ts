@@ -97,6 +97,7 @@ export class CamadaObjetos {
     private readonly paleta: PaletaTema | null = null,
     private readonly pintor: PintorDeDesenhos | null = null,
     private readonly modelos: ObjetosPreRenderizados | null = null,
+    private readonly ouroMontes: readonly number[] = [],
   ) {
     this.camadaHalo = camada;
     camada.addChild(this.g);
@@ -150,7 +151,12 @@ export class CamadaObjetos {
   /** O modelo pré-renderizado do objeto (render/objetos-3d.ts), ou null. */
   private nomeModelo(o: ObjetoNoMundo): string | null {
     if (o.tipo === 'bau') return o.abertoTick > 0 ? 'bau_aberto' : o.chave ? 'bau_trancado' : 'bau_fechado';
-    if (o.tipo === 'loja' || o.tipo === 'ouro') return o.tipo;
+    if (o.tipo === 'loja') return o.tipo;
+    // O monte cresce com a quantia: o primeiro limite que a quantia não passa (acima de todos, o maior).
+    if (o.tipo === 'ouro') {
+      const i = this.ouroMontes.findIndex((limite) => o.valor <= limite);
+      return `ouro_${(i < 0 ? this.ouroMontes.length : i) + 1}`;
+    }
     if (o.tipo === 'santuario') return o.abertoTick === 0 ? 'santuario_aceso' : 'santuario_apagado';
     if (o.tipo === 'quebravel') return o.ref ?? null;
     return null;

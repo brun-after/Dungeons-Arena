@@ -59,11 +59,29 @@
     "ancoraX": 139.5,
     "ancoraY": 230.6
   },
-  "ouro": {
-    "largura": 86,
-    "altura": 82,
-    "ancoraX": 42.9,
-    "ancoraY": 57.7
+  "ouro_1": {
+    "largura": 68,
+    "altura": 51,
+    "ancoraX": 31.6,
+    "ancoraY": 26.5
+  },
+  "ouro_2": {
+    "largura": 70,
+    "altura": 56,
+    "ancoraX": 29.7,
+    "ancoraY": 26.9
+  },
+  "ouro_3": {
+    "largura": 111,
+    "altura": 86,
+    "ancoraX": 57,
+    "ancoraY": 48.2
+  },
+  "ouro_4": {
+    "largura": 170,
+    "altura": 130,
+    "ancoraX": 95.5,
+    "ancoraY": 72
   },
   "portal": {
     "largura": 233,

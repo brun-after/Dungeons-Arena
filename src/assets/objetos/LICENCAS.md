@@ -20,7 +20,7 @@ O crédito não é obrigatório em nenhum dos dois; fica registrado aqui por cor
 |---|---|
 | `bau_fechado`, `bau_aberto`, `bau_trancado` | Quaternius `Chest_Wood` (poses da animação), `Chain_Coil` |
 | `loja` | Quaternius `Stall_Empty`, `FarmCrate_Apple`, `Barrel`, `Potion_1`, `Potion_2`, `SmallBottles_1` |
-| `ouro` | KayKit `coin_stack_large` |
+| `ouro_1` a `ouro_4` (o monte cresce com a quantia) | KayKit `coin`, `coin_stack_small`, `coin_stack_medium`, `coin_stack_large` |
 | `santuario_aceso`, `santuario_apagado` | KayKit `pillar_decorated`, `candle_thin_lit`, `candle_lit`, `candle_thin`, `candle_melted`; Quaternius `Chalice` |
 | `barril`, `caixote`, `vaso`, `carrinho`, `livros`, `estante` | Quaternius `Barrel`, `Crate_Wooden`, `Vase_4`, `Stall_Cart_Empty`, `Book_Stack_1`, `Book_Stack_2`, `Bookcase_2` |
 | `coluna`, `vela` | KayKit `pillar`, `candle_triple` |

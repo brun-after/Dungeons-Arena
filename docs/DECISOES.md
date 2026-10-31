@@ -3461,6 +3461,8 @@ pedido foi dividido em dois marcos: este (o mundo) e o 32 (os personagens pré-r
   frio, menos saturação e contorno escuro. As imagens ficam em `src/assets/objetos/`, a 96 px por célula, com
   `catalogo.json` (âncora dos pés) e `LICENCAS.md`. Os zips brutos ficam em `.brutos/`, fora do git. O jogo carrega
   as imagens com a cena (`render/objetos-3d.ts`); sem elas, vale o desenho repintado.
+  - O monte de ouro cresce com a quantia: 4 tamanhos, com os limites em `visual.ouroMontes` (até 3, 20 e 100;
+    acima, o maior).
   - A loja ganha tamanho real: uma barraca de cerca de 3 células com o vendedor atrás do balcão. O vendedor é
     desenhado e é provisório até os personagens 3D do marco 32.
   - Os portais de saída, de retorno e do chefe viram um arco de pedra, tingido de leve na cor do tema de destino, com

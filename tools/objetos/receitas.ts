@@ -38,7 +38,40 @@ export const RECEITAS: Receita[] = [
       { m: 'q:Chain_Coil', p: [0, 0.45, 0.05], escala: 0.8 },
     ],
   },
-  { nome: 'ouro', pecas: [{ m: 'k:coin_stack_large', escala: 0.7 }] },
+  // O monte de ouro cresce com a quantia (as faixas ficam em balance.json, visual.ouroMontes).
+  {
+    nome: 'ouro_1',
+    pecas: [
+      { m: 'k:coin', p: [-0.08, 0, 0.02], escala: 1.1 },
+      { m: 'k:coin', p: [0.1, 0, -0.06], escala: 1.1, giro: 40 },
+      { m: 'k:coin', p: [0.02, 0.06, 0.08], escala: 1.1, giro: 15 },
+    ],
+  },
+  {
+    nome: 'ouro_2',
+    pecas: [
+      { m: 'k:coin_stack_small', escala: 0.6 },
+      { m: 'k:coin', p: [0.26, 0, 0.12], escala: 1.1 },
+    ],
+  },
+  {
+    nome: 'ouro_3',
+    pecas: [
+      { m: 'k:coin_stack_medium', escala: 0.8 },
+      { m: 'k:coin_stack_small', p: [0.36, 0, 0.2], escala: 0.45, giro: 60 },
+      { m: 'k:coin', p: [-0.32, 0, 0.18], escala: 1.1 },
+    ],
+  },
+  {
+    nome: 'ouro_4',
+    pecas: [
+      { m: 'k:coin_stack_large', escala: 0.75 },
+      { m: 'k:coin_stack_medium', p: [0.5, 0, 0.25], escala: 0.55, giro: 30 },
+      { m: 'k:coin_stack_small', p: [-0.45, 0, 0.3], escala: 0.5, giro: 80 },
+      { m: 'k:coin', p: [0.1, 0, 0.55], escala: 1.1 },
+      { m: 'k:coin', p: [-0.15, 0, 0.6], escala: 1.1, giro: 50 },
+    ],
+  },
   {
     nome: 'santuario_aceso',
     giro: 30,
