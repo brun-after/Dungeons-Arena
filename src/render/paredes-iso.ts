@@ -115,9 +115,10 @@ export function placasDaParede(fase: Fase, x: number, y: number): Placa[] {
     placas.push({ x0, y0, x1, y1, frenteSul, frenteLeste });
   };
   // Marco 31 (31/10/2026, D-130): o muro de uma célula, com chão dos dois lados (o muro da vila, as casas, a parede
-  // fina entre duas salas), vira um bloco só, da célula inteira: duas placas com um vão no meio pareciam duas paredes.
+  // fina entre duas salas), vira uma só parede fina pelo meio da célula, com braços até as paredes vizinhas: duas
+  // placas nas arestas, com um vão no meio, pareciam duas paredes.
   const opostos = (norte && sul) || (leste && oeste) || (chao(-1, -1) && chao(1, 1)) || (chao(1, -1) && chao(-1, 1));
-  if (opostos) return [{ x0: 0, y0: 0, x1: 1, y1: 1, frenteSul: abertoSul, frenteLeste: abertoLeste }];
+  if (opostos) return placasDoMeio(fase, x, y, t);
   if (norte) placa(0, 0, 1, t, true, abertoLeste);
   if (oeste) placa(0, 0, t, 1, abertoSul, true);
   if (!norte && !oeste && chao(-1, -1)) placa(0, 0, t, t, true, true);
@@ -126,6 +127,24 @@ export function placasDaParede(fase: Fase, x: number, y: number): Placa[] {
   if (leste) placa(1 - t, 0, 1, 1, abertoSul, true);
   if (sul) placa(0, 1 - t, 1, 1, true, abertoLeste);
   if (!sul && !leste && chao(1, 1)) placa(1 - t, 1 - t, 1, 1, true, true);
+  return placas;
+}
+
+/**
+ * Marco 31 (D-130): a parede fina pelo meio da célula: o braço de trás (norte), a barra de oeste a leste (só o miolo
+ * quando não há parede dos lados) e o braço da frente (sul), cada braço só até a parede vizinha daquele lado.
+ */
+function placasDoMeio(fase: Fase, x: number, y: number, t: number): Placa[] {
+  const a = 0.5 - t / 2;
+  const b = 0.5 + t / 2;
+  const norte = ehParede(fase, x, y - 1);
+  const sul = ehParede(fase, x, y + 1);
+  const oeste = ehParede(fase, x - 1, y);
+  const leste = ehParede(fase, x + 1, y);
+  const placas: Placa[] = [];
+  if (norte) placas.push({ x0: a, y0: 0, x1: b, y1: a, frenteSul: false, frenteLeste: true });
+  placas.push({ x0: oeste ? 0 : a, y0: a, x1: leste ? 1 : b, y1: b, frenteSul: true, frenteLeste: !leste });
+  if (sul) placas.push({ x0: a, y0: b, x1: b, y1: 1, frenteSul: false, frenteLeste: true });
   return placas;
 }
 

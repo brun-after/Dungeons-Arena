@@ -161,12 +161,16 @@ describe('profundidade e paredes em prisma', () => {
     expect(placasDaParede(fase, 2, 2)).toEqual([]);
   });
 
-  it('marco 31 (D-130): o muro de uma célula com chão dos dois lados é um bloco só', () => {
+  it('marco 31 (D-130): o muro de uma célula com chão dos dois lados é uma parede fina pelo meio', () => {
     // Muro horizontal entre duas salas e a quina de um muro em diagonal (chão em cantos opostos).
     const fase = faseDeTexto(['#####', '#...#', '#####', '#...#', '#####']);
-    expect(placasDaParede(fase, 2, 2)).toEqual([{ x0: 0, y0: 0, x1: 1, y1: 1, frenteSul: true, frenteLeste: false }]);
+    expect(placasDaParede(fase, 2, 2)).toEqual([{ x0: 0, y0: 0.35, x1: 1, y1: 0.65, frenteSul: true, frenteLeste: false }]);
     const diagonal = faseDeTexto(['#####', '#.###', '#####', '###.#', '#####']);
-    expect(placasDaParede(diagonal, 2, 2)).toEqual([{ x0: 0, y0: 0, x1: 1, y1: 1, frenteSul: false, frenteLeste: false }]);
+    expect(placasDaParede(diagonal, 2, 2)).toEqual([
+      { x0: 0.35, y0: 0, x1: 0.65, y1: 0.35, frenteSul: false, frenteLeste: true },
+      { x0: 0, y0: 0.35, x1: 1, y1: 0.65, frenteSul: true, frenteLeste: false },
+      { x0: 0.35, y0: 0.65, x1: 0.65, y1: 1, frenteSul: false, frenteLeste: true },
+    ]);
   });
 
   it('marco 31 (D-130): só a faixa de parede à frente do jogador e perto dele esmaece', () => {

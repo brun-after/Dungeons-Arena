@@ -214,6 +214,21 @@ function erguerVila(g: Grade, vila: NonNullable<RegiaoDoMundo['vila']>, protegid
       if (d <= raio + 0.5) protegidas.add(y * g.n + x);
     }
   }
+  // Marco 31 (31/10/2026, D-130): o muro com uma célula de espessura (as que encostam na praça); com 1,5, os degraus
+  // do círculo viravam paredes duplas no isométrico. As de fora voltam a ser mato.
+  const fora: Celula[] = [];
+  for (let y = cy - raio - 1; y <= cy + raio + 1; y++) {
+    for (let x = cx - raio - 1; x <= cx + raio + 1; x++) {
+      if (g.em(x, y) !== '#' || !g.interna(x, y)) continue;
+      let encosta = false;
+      for (let dy = -1; dy <= 1 && !encosta; dy++) for (let dx = -1; dx <= 1 && !encosta; dx++) encosta = g.em(x + dx, y + dy) === '.';
+      if (!encosta) fora.push({ x, y });
+    }
+  }
+  for (const c of fora) {
+    g.por(c.x, c.y, ',');
+    protegidas.delete(c.y * g.n + c.x);
+  }
   // Os quatro caminhos internos em cruz, do portão à praça.
   for (let i = -raio; i <= raio; i++) {
     g.por(cx + i, cy, '=');

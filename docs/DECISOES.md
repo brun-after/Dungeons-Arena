@@ -2683,7 +2683,7 @@ paredes 80% mais finas e 70% mais baixas.
 
 > **Nota (31/10/2026, D-130):** revista a pedido do usuário. As placas ficam com 0,3 de espessura e 1,15 célula de
 > altura (`visual.paredeIso`), com a pedra do tema e sumindo perto do jogador; o muro de uma célula com chão dos dois
-> lados vira um bloco só.
+> lados vira uma parede fina só, pelo meio da célula.
 
 ## D-107 — Sem direcional no computador e teclas EWAS (marco 26, 25/10/2026)
 
@@ -3430,8 +3430,9 @@ pedido foi dividido em dois marcos: este (o mundo) e o 32 (os personagens pré-r
 - **Paredes altas** (`render/paredes-iso.ts`, revê o D-106): 1,15 célula, placas de 0,3, a pedra do tema nas faces
   (a textura segue a aresta, `pedraDaFace`) e sem contorno. Os Graphics são por diagonal e por faixa de 4 células da
   tela; a faixa à frente do jogador e perto dele some de todo (alfa 0, pedido do usuário; `alfaDaFaixa`). O muro de
-  uma célula com chão dos dois lados (o da vila, as casas, a parede fina entre salas) é um bloco só, não duas placas
-  com um vão. As fachadas do Mundo usam a
+  uma célula com chão dos dois lados (as casas, a parede fina entre salas) é uma só parede fina pelo meio da célula,
+  ligada às vizinhas, não duas placas com um vão; o muro da vila passa a ter uma célula de espessura (as de fora
+  voltam a ser mato). As fachadas do Mundo usam a
   mesma pedra.
 - **Telhados** (`Fase.telhados`, `render/telhados-iso.ts`): só visual. `perto` some quando o jogador chega a 3
   células; `dentro` só quando ele entra, e quem está fora não vê quem está dentro. O Mundo gera casas de pedra com
