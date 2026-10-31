@@ -113,6 +113,11 @@ function faseDe(id: string): number {
 
 export interface OpcoesEntidades {
   idLocal: string;
+  /**
+   * Marco 31 (31/10/2026, D-130): onde vão as barras, os anéis e o indicador (acima do escuro). Sem ela, ficam na
+   * própria entidade (a galeria e os testes).
+   */
+  rotulos?: Container;
   projecao: () => Projecao;
   biblioteca: () => BibliotecaCriaturas | null;
   /** A imagem do jogador local, já fatiada (null: usa o modelo). */
@@ -159,6 +164,8 @@ interface EscolhaDeFonte {
 
 interface Marcador {
   raiz: Container;
+  /** Marco 31 (D-130): barras, anéis e indicador (na camada de rótulos, ou dentro da raiz). */
+  sobre: Container;
   chao: Graphics;
   silhueta: Graphics;
   seta: Graphics;
@@ -213,12 +220,16 @@ export class CamadaEntidades {
     indicador.anchor.set(0.5, 1);
     silhueta.scale.set(escala);
     seta.scale.set(escala);
-    raiz.addChild(chao, aneis, silhueta, seta, barras, indicador);
+    raiz.addChild(chao, silhueta, seta);
+    const sobre = new Container({ label: `${e.id}:rotulos` });
+    sobre.addChild(aneis, barras, indicador);
+    if (this.o.rotulos) this.o.rotulos.addChild(sobre);
+    else raiz.addChild(sobre);
     const runa = e.arquetipo === 'jogador' && !e.invocacao ? new Graphics() : null;
     if (runa) raiz.addChild(runa);
     this.camada.addChild(raiz);
     return {
-      raiz, chao, silhueta, seta, rig: null, barras, aneis, indicador, runa, runaDesenhada: '', cor,
+      raiz, sobre, chao, silhueta, seta, rig: null, barras, aneis, indicador, runa, runaDesenhada: '', cor,
       angulo: 0, sentido: 1, ultimoX: e.px, ultimoY: e.py, visualX: Number.NaN, visualY: Number.NaN,
       andandoAteMs: 0, acaoId: null, ataqueDesdeMs: -Infinity, golpe: null, chaveGolpe: '', escala, topo: -RAIO * escala, achatamento: 1, chaoDesenhado: '',
     };
@@ -307,6 +318,11 @@ export class CamadaEntidades {
       if (Math.abs(dtx) > 0.01) m.sentido = dtx > 0 ? 1 : -1;
       // Morto fica apagado; invisível (pós-morte) fica translúcido.
       m.raiz.alpha = e.morto ? 0.25 : e.invisivelAteTick > estado.tick ? 0.5 : e.invocacao?.necromancia === 'eco' ? 0.7 : 1;
+      if (this.o.rotulos) {
+        m.sobre.position.set(pt.x, pt.y);
+        m.sobre.alpha = m.raiz.alpha;
+        m.sobre.visible = m.raiz.visible;
+      }
 
       const andando = agoraMs < m.andandoAteMs && !e.morto;
       const golpeando = agoraMs - m.ataqueDesdeMs < duracaoDoGolpe(m.golpe) && !e.morto;
@@ -336,6 +352,7 @@ export class CamadaEntidades {
 
     for (const [id, m] of this.marcadores) {
       if (vistos.has(id)) continue;
+      m.sobre.destroy({ children: true });
       m.raiz.destroy({ children: true });
       this.marcadores.delete(id);
       aoRemover?.(id);
@@ -539,7 +556,10 @@ export class CamadaEntidades {
   }
 
   destruir(): void {
-    for (const m of this.marcadores.values()) m.raiz.destroy({ children: true });
+    for (const m of this.marcadores.values()) {
+      m.sobre.destroy({ children: true });
+      m.raiz.destroy({ children: true });
+    }
     this.marcadores.clear();
   }
 }

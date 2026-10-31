@@ -293,6 +293,11 @@
     "chanceSecundario": 0.4,
     "chanceLivroRaro": 0.04
   },
+  "visual": {
+    "luz": { "raioJogador": 6, "raioTocha": 3.5, "raioObjeto": 2.5, "raioMagia": 2.5, "resolucaoMapa": 0.5, "realceMinimo": 0.1, "escuridaoExterior": 0.45 },
+    "solo": { "amostrasPorCelula": 4, "raioMistura": 0.35, "ruidoBorda": 0.35, "aoRaio": 1.1, "aoForca": 0.55, "macroForca": 0.22, "variacaoCobre": 0.28 },
+    "paredeIso": { "altura": 1.15, "raioFade": 2.6, "alphaFade": 0.3, "telhadoPerto": 3 }
+  },
   "metas": {
     "comuns": ["goblin", "esqueleto", "lobo", "cultista", "slime", "aranha"],
     "comum": { "golpesMin": 3, "golpesMax": 5, "tempoMinS": 3.5, "tempoMaxS": 7 },

@@ -55,7 +55,7 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         cacheId: 'dungeons-arena',
         // Assets versionados pelo hash do build: precache (cache-first).
-        globPatterns: ['**/*.{js,css,html,png,svg,webmanifest,json}'],
+        globPatterns: ['**/*.{js,css,html,png,svg,webp,webmanifest,json}'],
         cleanupOutdatedCaches: true,
         // Navegação: rede primeiro; offline, cai no index.html do precache (D-013).
         navigateFallback: null,

@@ -7,8 +7,15 @@
 // os pilares do tema (render/decoracao.ts), também sobre o tileset.
 // Marco 26 (25/10/2026, D-109): no isométrico, os enfeites altos e os pilares saem do terreno (ficam de pé em
 // render/decoracao-iso.ts); sob o pilar fica o piso.
+// Marco 31 (31/10/2026, D-130): com o solo (render/solo/), o chão de cada bloco é pintado num canvas com as texturas
+// CC0 do tema, sem a grade das células: a cor lisa aparece só até o bloco ser assado (um por quadro) e continua como
+// reserva (sem texturas, editor e tileset do jogador).
 
-import { Container, Graphics, Sprite } from 'pixi.js';
+import { CanvasSource, Container, Graphics, Sprite, Texture } from 'pixi.js';
+import { AssadorDeSolo } from './solo/assar';
+import { pesosDoBloco, type ConfigSolo } from './solo/mascaras';
+import type { TexturasDoSolo } from './solo/texturas';
+import type { SoloTema } from '../world/solo';
 import { desenharAmbiente } from './ambiente';
 import { desenharDecoracao, desenharPilar } from './decoracao';
 import { decoracoesDaFase, ehDecoracaoEmPe, ehPilar, hashCelula, type Decoracao } from '../world/decoracao';
@@ -159,6 +166,19 @@ interface Bloco {
   desenhado: boolean;
   /** A camada animada do brilho da água (null sem água no bloco). */
   agua: Graphics | null;
+  /** Marco 31 (D-130): o chão assado (embaixo de `g`), com o canvas e a textura dele. */
+  solo: { sprite: Sprite; canvas: HTMLCanvasElement } | null;
+}
+
+/** Marco 31 (D-130): o chão texturizado da fase (sem ele, as cores lisas de sempre). */
+export interface SoloDoTerreno {
+  tema: SoloTema;
+  cfg: ConfigSolo;
+  /** Pixels do canvas por pixel de mundo (a qualidade). */
+  escala: number;
+  /** A semente do ruído (a mesma fase, o mesmo chão). */
+  semente: number;
+  texturas: Promise<TexturasDoSolo>;
 }
 
 /** Até quantos blocos a fase desenha tudo de uma vez (64×64 células); acima, sob demanda. */
@@ -174,8 +194,20 @@ export function criarTerreno(
   tema: Tema | null = null,
   /** Marco 26 (D-113): os enfeites que vêm do estado (os quebráveis), desenhados por render/objetos.ts. */
   pular: ReadonlySet<string> = new Set(),
+  solo: SoloDoTerreno | null = null,
 ): Terreno {
   const blocos: Bloco[] = [];
+  // Marco 31 (D-130): o assador nasce quando as texturas chegam; os blocos desenhados entram na fila.
+  let assador: AssadorDeSolo | null = null;
+  const fila = new Set<Bloco>();
+  let destruido = false;
+  if (solo && !tileset) {
+    void solo.texturas.then((texturas) => {
+      if (destruido || texturas.size === 0) return;
+      assador = new AssadorDeSolo(texturas, solo.tema, solo.escala);
+      for (const b of blocos) if (b.desenhado) fila.add(b);
+    });
+  }
   const paleta: Paleta = tema ? tema.paleta : paletaDe(fase.matizGraus);
   let iso = false;
   // Os enfeites, por bloco (calculados uma vez; o editor não tem tema).
@@ -188,16 +220,54 @@ export function criarTerreno(
     lista.push(d);
     enfeites.set(chave, lista);
   }
+  /** Tira do bloco tudo menos a cor lisa e o chão assado. */
+  const limparEnfeites = (b: Bloco) => {
+    for (const filho of [...b.c.children]) {
+      if (filho === b.g || filho === b.solo?.sprite) continue;
+      b.c.removeChild(filho);
+      filho.destroy();
+    }
+  };
+  const soltarSolo = (b: Bloco) => {
+    if (!b.solo) return;
+    b.solo.sprite.destroy({ texture: true, textureSource: true });
+    b.solo.canvas.width = b.solo.canvas.height = 0;
+    b.solo = null;
+  };
+  const assarBloco = (b: Bloco) => {
+    if (!assador || !solo) return;
+    const fimX = Math.min(fase.largura, b.bx + BLOCO_CELULAS);
+    const fimY = Math.min(fase.altura, b.by + BLOCO_CELULAS);
+    const pesos = pesosDoBloco(fase, solo.tema, b.bx, b.by, fimX - b.bx, fimY - b.by, solo.cfg, solo.semente);
+    const canvas = document.createElement('canvas');
+    canvas.width = assador.lado(fimX - b.bx);
+    canvas.height = assador.lado(fimY - b.by);
+    assador.assar(canvas, pesos, b.x0, b.y0);
+    soltarSolo(b);
+    const sprite = new Sprite(new Texture({ source: new CanvasSource({ resource: canvas }) }));
+    sprite.position.set(b.x0, b.y0);
+    sprite.width = b.x1 - b.x0;
+    sprite.height = b.y1 - b.y0;
+    b.c.addChildAt(sprite, 0);
+    b.solo = { sprite, canvas };
+    desenharBloco(b);
+  };
   const desenharBloco = (b: Bloco) => {
     b.g.clear();
-    if (b.c.children.length > 1) for (const filho of b.c.removeChildren(1)) filho.destroy();
+    limparEnfeites(b);
     b.agua = null;
     b.desenhado = true;
+    if (assador && !b.solo) fila.add(b);
     const fimX = Math.min(fase.largura, b.bx + BLOCO_CELULAS);
     const fimY = Math.min(fase.altura, b.by + BLOCO_CELULAS);
     for (let y = b.by; y < fimY; y++) {
       for (let x = b.bx; x < fimX; x++) {
         const tipo = tipoEm(fase, x, y);
+        // Marco 31 (D-130): com o chão assado, a cor lisa só desenha a saída (o resto já está no canvas).
+        if (b.solo) {
+          if (tipo === 'saida') desenharCelula(b.g, fase, paleta, x, y, tipo, tema !== null);
+          continue;
+        }
         const peca = tileset ? pecaDaCelula(fase, x, y, 0) : null;
         const textura = peca && tileset ? tileset.textura(peca) : null;
         if (!textura) {
@@ -216,7 +286,9 @@ export function criarTerreno(
       const enfeite = new Graphics();
       for (let y = b.by; y < fimY; y++) for (let x = b.bx; x < fimX; x++) {
         if (!ehPilar(fase, x, y)) continue;
-        if (iso) enfeite.rect(x * CELULA_PX, y * CELULA_PX, CELULA_PX, CELULA_PX).fill(tema.paleta.piso[0]);
+        if (iso) {
+          if (!b.solo) enfeite.rect(x * CELULA_PX, y * CELULA_PX, CELULA_PX, CELULA_PX).fill(tema.paleta.piso[0]);
+        }
         else desenharPilar(enfeite, tema.pilar, x, y, tema.paleta, hashCelula(x, y, 4));
       }
       for (const d of enfeites.get((b.by / BLOCO_CELULAS) * porLinhaBlocos + b.bx / BLOCO_CELULAS) ?? []) {
@@ -250,7 +322,9 @@ export function criarTerreno(
   };
   const descartarBloco = (b: Bloco) => {
     b.g.clear();
-    if (b.c.children.length > 1) for (const filho of b.c.removeChildren(1)) filho.destroy();
+    limparEnfeites(b);
+    soltarSolo(b);
+    fila.delete(b);
     b.agua = null;
     b.desenhado = false;
   };
@@ -264,7 +338,7 @@ export function criarTerreno(
       const c = new Container();
       const g = new Graphics();
       c.addChild(g);
-      const b: Bloco = { c, g, bx, by, x0: bx * CELULA_PX, y0: by * CELULA_PX, x1: fimX * CELULA_PX, y1: fimY * CELULA_PX, desenhado: false, agua: null };
+      const b: Bloco = { c, g, bx, by, x0: bx * CELULA_PX, y0: by * CELULA_PX, x1: fimX * CELULA_PX, y1: fimY * CELULA_PX, desenhado: false, agua: null, solo: null };
       // Marco 30 (D-129): sob demanda, o bloco nasce vazio e a primeira vista o desenha.
       if (sobDemanda) c.visible = false;
       else desenharBloco(b);
@@ -284,7 +358,11 @@ export function criarTerreno(
         const b = blocoDe(x + dx, y + dy);
         if (b) tocados.add(b);
       }
-      for (const b of tocados) if (b.desenhado) desenharBloco(b);
+      for (const b of tocados) {
+        if (!b.desenhado) continue;
+        soltarSolo(b);
+        desenharBloco(b);
+      }
     },
     definirVisao: (v) => {
       if (v === iso) return;
@@ -304,6 +382,21 @@ export function criarTerreno(
         } else if (b.desenhado && !dentro(b, MARGEM_BLOCO * 3)) descartarBloco(b);
         b.c.visible = b.desenhado && dentro(b, 0);
       }
+      // Marco 31 (D-130): um bloco assado por quadro, o visível primeiro.
+      if (fila.size > 0) {
+        let escolhido: Bloco | undefined;
+        for (const b of fila) {
+          if (b.c.visible) {
+            escolhido = b;
+            break;
+          }
+          escolhido ??= b;
+        }
+        if (escolhido) {
+          fila.delete(escolhido);
+          assarBloco(escolhido);
+        }
+      }
     },
     animar: (agoraMs, reduzido) => {
       for (const b of blocos) {
@@ -319,8 +412,13 @@ export function criarTerreno(
       }
     },
     destruir: () => {
-      for (const b of blocos) b.c.destroy({ children: true });
+      destruido = true;
+      for (const b of blocos) {
+        soltarSolo(b);
+        b.c.destroy({ children: true });
+      }
       blocos.length = 0;
+      fila.clear();
     },
   };
 }

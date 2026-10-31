@@ -78,7 +78,7 @@ export function montarLugar(conteudo: Conteudo, reino: Reino, lugar: Lugar, modo
     const v = exterior.vila;
     // E o tipo de cada estrutura (o render desenha a fachada pelo tipo).
     const estruturas = lugar.regiao.estruturas.map((e) => ({ x: e.x, y: e.y, tipo: e.tipo }));
-    const fase = { ...r.ctx.fase, estruturas, ...(v && { refugios: [{ x: v.x, y: v.y, raio: v.raio + 0.5 }] }) };
+    const fase = { ...r.ctx.fase, estruturas, exterior: true, ...(v && { refugios: [{ x: v.x, y: v.y, raio: v.raio + 0.5 }] }) };
     const ctx = { ...r.ctx, fase };
     const estado = estadoInicialDaFase(ctx);
     estado.objetos.push(...objetosDoExterior(reino, exterior));

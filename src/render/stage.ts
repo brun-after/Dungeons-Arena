@@ -3,6 +3,9 @@
 // Marco 13 (14/10/2026), D-058: o que é plano (terreno, chão, luz) fica num container `plano`, que recebe a
 // matriz da projeção; o que fica em pé (entidades, paredes em prisma, projéteis, efeitos) é posicionado
 // já projetado e alinhado à tela. As entidades se ordenam por `zIndex` (profundidade).
+// Marco 31 (31/10/2026, D-130): depois das entidades, o escuro (render/escuridao.ts); acima dele, o que precisa ser
+// lido no escuro: as marcas no chão (a telegrafia, com a matriz do plano), os rótulos (barras, anéis, indicador), os
+// projéteis e os efeitos.
 
 import { Application, Container, Matrix } from 'pixi.js';
 import { resolucaoDoPalco } from './desempenho';
@@ -24,6 +27,12 @@ export interface Palco {
   luz: Container;
   /** Em pé: entidades e, no isométrico, as paredes em prisma; ordenadas por `zIndex`. */
   entidades: Container;
+  /** Marco 31 (D-130): o escuro e o mapa de luz, acima das entidades. */
+  escuro: Container;
+  /** Marco 31 (D-130): marcas no chão acima do escuro (a telegrafia), com a matriz da projeção. */
+  marcas: Container;
+  /** Marco 31 (D-130): barras, anéis e indicadores das entidades, acima do escuro. */
+  rotulos: Container;
   /** Projéteis em voo. */
   voo: Container;
   /** Números de dano e efeitos de habilidade, acima de tudo no mundo. */
@@ -67,9 +76,12 @@ export async function criarPalco(host: HTMLElement): Promise<Palco> {
   const plano = new Container({ label: 'plano' });
   plano.addChild(terreno, chao, luz);
   const entidades = new Container({ label: 'entidades', sortableChildren: true });
+  const escuro = new Container({ label: 'escuro' });
+  const marcas = new Container({ label: 'marcas' });
+  const rotulos = new Container({ label: 'rotulos' });
   const voo = new Container({ label: 'voo' });
   const efeitos = new Container({ label: 'efeitos' });
-  mundo.addChild(plano, entidades, voo, efeitos);
+  mundo.addChild(plano, entidades, escuro, marcas, rotulos, voo, efeitos);
   const tela = new Container({ label: 'tela' });
   app.stage.addChild(mundo, tela);
 
@@ -100,6 +112,9 @@ export async function criarPalco(host: HTMLElement): Promise<Palco> {
     chao,
     luz,
     entidades,
+    escuro,
+    marcas,
+    rotulos,
     voo,
     efeitos,
     tela,
@@ -118,6 +133,7 @@ export async function criarPalco(host: HTMLElement): Promise<Palco> {
     },
     definirMatrizPlano: (m) => {
       plano.setFromMatrix(new Matrix(m.a, m.b, m.c, m.d, m.tx, m.ty));
+      marcas.setFromMatrix(new Matrix(m.a, m.b, m.c, m.d, m.tx, m.ty));
     },
     destruir: () => {
       clearTimeout(espera);

@@ -41,7 +41,10 @@ import { criarPalco, type Palco } from '../render/stage';
 import { CamadaTelegrafia } from '../render/telegrafia';
 import { descreverAfinidade, dicaDoClima } from './descrever-elemento';
 import { temaDaFase } from '../combat/clima';
-import { criarTerreno } from '../render/terreno';
+import { criarTerreno, type SoloDoTerreno } from '../render/terreno';
+import { carregarTexturasDoSolo } from '../render/solo/texturas';
+import { SOLO_PADRAO } from '../world/solo';
+import { hashTexto } from '../core/rng';
 import type { TemasDosPortais } from '../save/destinos';
 import type { TexturasTileset } from '../render/tileset-textura';
 import { velocidade } from '../world/movimento';
@@ -202,10 +205,22 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   });
   // Marco 26 (D-113): nos modos com objetos, os enfeites que quebram saem do estado (render/objetos.ts), não do terreno.
   const quebraveis: ReadonlySet<string> = ctx.modo.objetosDeFase ? new Set(ctx.balance.quebraveis.tipos) : new Set();
-  const terreno = criarTerreno(palco.terreno, fase, o.tileset ?? null, temaDaFase(ctx), quebraveis);
+  // Marco 31 (31/10/2026, D-130): o chão texturizado do tema (render/solo/), na resolução da qualidade de agora.
+  const soloTema = temaDaFase(ctx)?.solo ?? SOLO_PADRAO;
+  const solo: SoloDoTerreno | null = o.tileset
+    ? null
+    : {
+        tema: soloTema,
+        cfg: ctx.balance.visual.solo,
+        escala: ap.qualidade().soloEscala,
+        semente: hashTexto(fase.id),
+        texturas: carregarTexturasDoSolo([soloTema.base, soloTema.variacao, soloTema.parede, soloTema.mato, 'estrada']),
+      };
+  const terreno = criarTerreno(palco.terreno, fase, o.tileset ?? null, temaDaFase(ctx), quebraveis, solo);
   const projecao = () => camera.projecaoAtual;
   const sprites = new CamadaEntidades(palco.entidades, {
     idLocal,
+    rotulos: palco.rotulos,
     projecao,
     biblioteca: () => visao?.biblioteca() ?? null,
     tokenProprio: () => visao?.tokenProprio() ?? null,
@@ -218,7 +233,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     // Marco 25 (D-103): o arco branco do Arqueiro com a mira cheia.
     armaBranca: (e, tick) => fracaoMira(ctx, e, tick) === 1,
   });
-  const telegrafia = new CamadaTelegrafia(palco.chao, palco.voo, projecao, () => aparencia.areaExata, ap.particulas);
+  // Marco 31 (D-130): a telegrafia acima do escuro (a área do golpe inimigo se lê mesmo fora da luz).
+  const telegrafia = new CamadaTelegrafia(palco.marcas, palco.voo, projecao, () => aparencia.areaExata, ap.particulas);
   await carregarTexturasDeIcones([...new Set([...ctx.conteudo.itens.values()].map((i) => i.icone)), 'pergaminho']);
   const objetos = new CamadaObjetos(
     palco.chao,

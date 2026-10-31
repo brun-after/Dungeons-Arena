@@ -226,6 +226,8 @@ export interface Fase {
   readonly refugios?: readonly Refugio[];
   /** Marco 30 (D-129): o tipo de cada estrutura do Mundo pelo canto (o render desenha a fachada pelo tipo). */
   readonly estruturas?: readonly { x: number; y: number; tipo: string }[];
+  /** Marco 31 (31/10/2026, D-130): o exterior do Mundo (céu aberto: menos escuro que as masmorras). */
+  readonly exterior?: boolean;
 }
 
 /** Converte uma fase já validada para a forma usada pela simulação. */
