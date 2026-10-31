@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.66 · **Data:** 30/10/2026
+**Versão:** 0.67 · **Data:** 31/10/2026
 
 > **Histórico**
+> - **0.67 (31/10/2026)**: D-130 (o visual sombrio: chão texturizado CC0 sem grade, escuridão com luz em volta, paredes altas que esmaecem, telhados das casas, isométrico como padrão e marcas discretas) e a nota em D-106.
 > - **0.66 (30/10/2026)**: D-129 (o Mundo social: grupo, chat, banco, missões, troca, mercado, receitas por ofício, perigo, vila refúgio, passagem protegida, estrutura escondida, eventos por região, polimento visual e as metas do Mundo no simulador, com a vida dos chefes dos covis e o fim das invocações como monstros).
 > - **0.65 (30/10/2026)**: D-128 (o Mundo: lugares em salas, área de interesse, IA com ativação, personagem no servidor, exterior gerado com fachadas, perigo e PvP por região, túmulo, portais, coleta e covis; o Reino Central).
 > - **0.64 (30/10/2026)**: D-127 (nível 100, teto nível+20 nos pontos gastos, rendimento acima de 30, atributo de classe com marcos em 25/50/75/100, itens com % de dano e de defesa, "Escala com" nas skills e invocações iguais lado a lado) e a nota em D-061.
@@ -2680,6 +2681,10 @@ paredes 80% mais finas e 70% mais baixas.
 - **O resto da célula de parede** é a rocha plana e escura do terreno, como na visão de cima.
 - **Ordem de desenho:** um Graphics por diagonal, com o `zIndex` de antes.
 
+> **Nota (31/10/2026, D-130):** revista a pedido do usuário. As placas ficam com 0,3 de espessura e 1,15 célula de
+> altura (`visual.paredeIso`), com a pedra do tema e sumindo perto do jogador; o muro de uma célula com chão dos dois
+> lados vira um bloco só.
+
 ## D-107 — Sem direcional no computador e teclas EWAS (marco 26, 25/10/2026)
 
 **Contexto.** No computador com tela de toque (ou janela pequena), o jogo mostrava o joystick ou o D-pad. Lá o
@@ -3400,3 +3405,48 @@ uma regra de modo nova (por exemplo, a dificuldade por perigo da região), a dec
   mais carregada que no dia do marco 29 (7 a 9 ms). O perfil de CPU das duas é o mesmo (a escrita no socket, `writev`,
   é ~20 s de 95; `clonarEntidade`, a geração do patch e `simular` empatam), então o marco 30 não pesa no tick. A meta
   segue para a medida na VM, depois do deploy.
+
+## D-130 — O visual sombrio (marco 31, 31/10/2026)
+
+**Contexto.** O usuário pediu que o mundo e os personagens lembrassem o Diablo, e não o Minecraft ou o Roblox: sem o
+chão de quadrados e sem o ar de desenho infantil. As regras seguem em células; o visual não precisa mostrá-las. O
+pedido foi dividido em dois marcos: este (o mundo) e o 32 (os personagens pré-renderizados de modelos 3D CC0).
+
+**Decisão:**
+- **Arte só CC0.** As 10 texturas do chão vêm do ambientCG (lajes, rocha, blocos, terra, grama, lama, neve, areia,
+  estrada e basalto), processadas por `tools/texturas/processar.ts` (512 px, 30% menos saturação, webp) e listadas
+  em `LICENCAS.md`. Os arquivos brutos ficam fora do git. Nada CC-BY nem QAL.
+- **Chão sem grade** (`src/render/solo/`): cada bloco do terreno é pintado num canvas (um bloco por quadro, os
+  visíveis primeiro; a cor lisa de antes enquanto isso). As máscaras de cada camada têm a borda borrada e deslocada
+  por ruído, em coordenadas de mundo (sem emenda entre blocos). Por cima, uma segunda passada da base maior e girada
+  (esconde a repetição), a oclusão junto às paredes, uma sombra de escala grande e a tinta do tema. O tema diz a base,
+  a variação, a pedra das paredes, a tinta e a escala (`temas.json`, `solo`). Fora do exterior do Mundo, o que fica
+  além da borda andável continua transparente, como antes (pedido do usuário).
+- **Escuridão** (`render/escuridao.ts`): no médio e no alto, um mapa de luz em meia resolução (as luzes do jogador,
+  de outros jogadores, das tochas, da lava, dos objetos e dos projéteis, somadas) aplicado em `multiply`; no baixo e
+  no mínimo, só uma vinheta em volta do jogador. O tema diz a cor e o nível do escuro; o exterior do Mundo é menos
+  escuro (`escuridaoExterior`). As marcas, as barras, a telegrafia e os efeitos ficam acima do escuro (camadas
+  `marcas` e `rotulos`), para a leitura do combate.
+- **Paredes altas** (`render/paredes-iso.ts`, revê o D-106): 1,15 célula, placas de 0,3, a pedra do tema nas faces
+  (a textura segue a aresta, `pedraDaFace`) e sem contorno. Os Graphics são por diagonal e por faixa de 4 células da
+  tela; a faixa à frente do jogador e perto dele some de todo (alfa 0, pedido do usuário; `alfaDaFaixa`). O muro de
+  uma célula com chão dos dois lados (o da vila, as casas, a parede fina entre salas) é um bloco só, não duas placas
+  com um vão. As fachadas do Mundo usam a
+  mesma pedra.
+- **Telhados** (`Fase.telhados`, `render/telhados-iso.ts`): só visual. `perto` some quando o jogador chega a 3
+  células; `dentro` só quando ele entra, e quem está fora não vê quem está dentro. O Mundo gera casas de pedra com
+  telhado: até 4 na vila (`perto`) e, nas regiões normais e perigosas, as abandonadas (`perigos.*.casas`, com um
+  monstro no topo da faixa lá dentro, `dentro`). As casas usam um gerador de números à parte, para não mexer no
+  sorteio do resto. De cima, o telhado é chato.
+- **Isométrico como padrão** (`preferencias.ts`): a preferência ganha `versaoVisual`; a gravada antes dela vira
+  isométrica uma vez, e depois vale a escolha. O editor continua de cima. Os e2e escritos de cima começam com a
+  preferência `cima` gravada (`playwright.config.ts`).
+- **Marcas e barras** (`render/sprites.ts`): a marca de equipe vira um decalque fino e translúcido em tons sóbrios
+  (dourado, cinza-azulado, vermelho escuro), a sombra fica macia e as barras ganham moldura e brilho. O vermelho do
+  hostil continua sempre (mais legível que mostrar só em combate).
+- **Números** no bloco `visual` de `balance.json` (luz, chão e paredes).
+
+**Consequências.** No Chromium sem tela (WebGL por software) o quadro pesa mais com o mapa de luz e as faces
+texturizadas; o monitor de qualidade cai para a vinheta quando preciso. As medidas ficam em `BENCHMARKS.md`. A
+Pedravale (raio 12) é pequena demais para as casas e fica sem. Os telhados dos castelos ficaram de fora: as fachadas
+já são blocos fechados.

@@ -114,6 +114,10 @@ export function placasDaParede(fase: Fase, x: number, y: number): Placa[] {
   const placa = (x0: number, y0: number, x1: number, y1: number, frenteSul: boolean, frenteLeste: boolean) => {
     placas.push({ x0, y0, x1, y1, frenteSul, frenteLeste });
   };
+  // Marco 31 (31/10/2026, D-130): o muro de uma célula, com chão dos dois lados (o muro da vila, as casas, a parede
+  // fina entre duas salas), vira um bloco só, da célula inteira: duas placas com um vão no meio pareciam duas paredes.
+  const opostos = (norte && sul) || (leste && oeste) || (chao(-1, -1) && chao(1, 1)) || (chao(1, -1) && chao(-1, 1));
+  if (opostos) return [{ x0: 0, y0: 0, x1: 1, y1: 1, frenteSul: abertoSul, frenteLeste: abertoLeste }];
   if (norte) placa(0, 0, 1, t, true, abertoLeste);
   if (oeste) placa(0, 0, t, 1, abertoSul, true);
   if (!norte && !oeste && chao(-1, -1)) placa(0, 0, t, t, true, true);

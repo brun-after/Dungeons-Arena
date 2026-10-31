@@ -1,8 +1,9 @@
 # O Mundo: guia do modo
 
-**Versão:** 0.2 · **Data:** 30/10/2026
+**Versão:** 0.3 · **Data:** 31/10/2026
 
 > **Histórico**
+> - **0.3 (31/10/2026)**: marco 31 (D-130): as casas com telhado (na vila e as abandonadas) e o visual sombrio.
 > - **0.2 (30/10/2026)**: marco 30 (D-129): o social, a economia, as missões, os eventos por região e o polimento.
 > - **0.1 (30/10/2026)**: marco 29 (D-128): a fundação e o Reino Central.
 
@@ -69,6 +70,14 @@ Os dados ficam em `src/data/mundo/reino-central.json`: as regiões (bioma, perig
 inimigos, coleta e estruturas), as vilas, as lojas, as masmorras, os covis e as regras de perigo. Os números gerais
 ficam no bloco `mundo` de `balance.json`.
 
+### Casas e telhados (marco 31)
+
+- **Na vila:** até 4 casas de pedra, uma por quadrante entre os caminhos. O telhado some quando você chega perto.
+- **Abandonadas:** nas regiões normais (2) e perigosas (3), conforme `perigos.*.casas` no reino. O telhado só some
+  quando você entra, e de fora não se vê quem está lá dentro: há sempre um monstro no topo da faixa da região.
+- É só visual: as regras, a colisão e a área de interesse não mudam. O gerador (`gerador-exterior.ts`) usa um sorteio
+  à parte para as casas.
+
 ## Para rodar
 
 ```bash
@@ -118,7 +127,7 @@ npm run dev
   - `src/mundo-tela.ts`: a lista, a criação e a troca de sala;
   - `src/ui/mundo-paineis.ts`: o portal, a faixa e o mapa; `mundo-economia.ts`: o quadro, o banco e o mercado;
     `mundo-social.ts`: o chat, o grupo e a troca; `mundo-dialogos.ts`: as peças dos diálogos;
-  - `src/render/terreno-exterior.ts`, `estruturas-iso.ts` e `objetos-mundo.ts`;
+  - `src/render/terreno-exterior.ts`, `estruturas-iso.ts`, `telhados-iso.ts` e `objetos-mundo.ts`;
   - textos em `src/i18n/pt-BR-mundo.ts`.
 
 ## Em produção (marco 30)
