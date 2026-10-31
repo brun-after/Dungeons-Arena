@@ -64,7 +64,7 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
   let telhados: Telhados | null = null;
   const corParede = o.corParede ?? paletaDe(fase.matizGraus).paredeTopo;
   const criarParedes = (p: Projecao) =>
-    criarParedesIso(palco.entidades, fase, p, { cor: corParede, textura: pedra, altura: o.paredeIso.altura, raioFade: o.paredeIso.raioFade, alphaFade: o.paredeIso.alphaFade });
+    criarParedesIso(palco.entidades, fase, p, { cor: corParede, textura: pedra, altura: o.paredeIso.altura, alcanceSala: o.paredeIso.alcanceSala, alphaFade: o.paredeIso.alphaFade });
   const aplicar = () => {
     const p = camera.projecaoAtual;
     const iso = p.visao === 'iso';

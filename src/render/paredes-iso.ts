@@ -8,8 +8,10 @@
 // De cima, as paredes continuam no terreno, como antes.
 // Marco 31 (31/10/2026, D-130, revê o D-106 a pedido do usuário): paredes altas como no Diablo (`visual.paredeIso.
 // altura`, 1,15 célula) e um pouco mais grossas (0,3), com as faces na textura de pedra do tema (inclinada pela face,
-// as juntas seguem a diagonal) e sem contorno. O trecho de parede à frente do jogador, perto dele, fica translúcido
-// (`esmaecer`): os Graphics são por diagonal e por faixa da tela, para esmaecer só o pedaço que cobre o jogador.
+// as juntas seguem a diagonal) e sem contorno. Com o jogador numa sala ou corredor, somem as paredes da frente de todo o
+// chão que ele alcança andando até `alcanceSala` passos (`paredesDaSala`): a sala inteira e um pouco além, estável
+// enquanto ele anda (só muda ao trocar de célula, e a borda fica longe dele). Os Graphics são por diagonal e por faixa
+// de 2 células da tela.
 
 import { FillPattern, Graphics, Matrix, type Container, type Texture } from 'pixi.js';
 import { ehPilar } from '../world/decoracao';
@@ -21,7 +23,7 @@ import { profundidade, type Projecao } from './projecao';
 /** Espessura da placa, em células. */
 export const ESPESSURA_PAREDE = 0.3;
 /** A largura (em x - y, células) de cada faixa de parede: o esmaecimento acende ou apaga uma faixa inteira. */
-const FAIXA = 4;
+const FAIXA = 2;
 /** Quantas células da textura de pedra cabem numa repetição (na horizontal e na vertical). */
 const CELULAS_POR_TEXTURA = 2;
 /** Quanto do caminho até o alfa alvo o esmaecimento anda por segundo (rápido, sem piscar). */
@@ -34,8 +36,8 @@ export interface OpcoesParedesIso {
   textura: Texture | null;
   /** Altura em células. */
   altura: number;
-  /** Até quantas células do jogador a parede da frente esmaece, e até que alfa. */
-  raioFade: number;
+  /** Até quantos passos de chão a partir do jogador as paredes da frente somem, e até que alfa. */
+  alcanceSala: number;
   alphaFade: number;
 }
 
@@ -53,19 +55,10 @@ export function pedraDaFace(textura: Texture, p: Projecao, eixoX: boolean): Fill
   return f;
 }
 
-/** Uma faixa de parede: a diagonal (profundidade) e o centro em x - y (a posição horizontal na tela). */
+/** Uma faixa de parede e as células de parede dela (índices `y·largura + x`). */
 interface Faixa {
   g: Graphics;
-  d: number;
-  centro: number;
-}
-
-/** Alfa alvo da faixa para o jogador em (px, py): a da frente e perto dele fica translúcida. Puro. */
-export function alfaDaFaixa(d: number, centro: number, px: number, py: number, alturaCelulas: number, raio: number, alphaFade: number): number {
-  const dJogador = px + py;
-  // A parede cobre quem está até ~2 × altura diagonais atrás dela (cada diagonal sobe meia célula na tela).
-  const cobre = d > dJogador - 0.5 && d - dJogador <= alturaCelulas * 2 + 1.5;
-  return cobre && Math.abs(centro - (px - py)) <= raio + FAIXA / 2 ? alphaFade : 1;
+  celulas: number[];
 }
 
 const ehParede = (fase: Fase, x: number, y: number) => tipoEm(fase, x, y) === 'parede';
@@ -74,6 +67,40 @@ const deAndar = (fase: Fase, x: number, y: number) => {
   // Marco 29 (D-128): o chão do exterior (mato e estrada) também levanta a borda das rochas e dos muros.
   return tipo === 'saida' || chaoAberto(tipo);
 };
+
+/**
+ * Marco 31 (D-130): as paredes que somem com o jogador na célula (cx, cy). Anda pelo chão (4 vizinhos) até `alcance`
+ * passos; de cada célula alcançada, as paredes vizinhas (8) mais à frente na tela (diagonal x + y maior) são as que
+ * podem cobri-la. Fora do chão (numa porta, por exemplo), nenhuma. Puro.
+ */
+export function paredesDaSala(fase: Fase, cx: number, cy: number, alcance: number): Set<number> {
+  const paredes = new Set<number>();
+  if (!deAndar(fase, cx, cy)) return paredes;
+  const n = fase.largura;
+  const passos = new Map<number, number>([[cy * n + cx, 0]]);
+  const fila = [cy * n + cx];
+  for (let i = 0; i < fila.length; i++) {
+    const k = fila[i] as number;
+    const x = k % n;
+    const y = (k - x) / n;
+    const dist = passos.get(k) ?? 0;
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        if (dx + dy > 0 && ehParede(fase, x + dx, y + dy)) paredes.add((y + dy) * n + x + dx);
+      }
+    }
+    if (dist >= alcance) continue;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+      const nx = x + dx;
+      const ny = y + dy;
+      const nk = ny * n + nx;
+      if (passos.has(nk) || !deAndar(fase, nx, ny)) continue;
+      passos.set(nk, dist + 1);
+      fila.push(nk);
+    }
+  }
+  return paredes;
+}
 
 /** Parede que encosta (inclusive na diagonal) num piso ou numa saída: a borda visível da sala. */
 export function paredeDeBorda(fase: Fase, x: number, y: number): boolean {
@@ -179,32 +206,45 @@ export function criarParedesIso(camada: Container, fase: Fase, p: Projecao, o: O
   };
   const faixas: Faixa[] = [];
   for (let d = 0; d <= fase.largura + fase.altura - 2; d++) {
-    const porFaixa = new Map<number, Graphics>();
+    const porFaixa = new Map<number, Faixa>();
     for (let x = Math.max(0, d - fase.altura + 1); x <= Math.min(d, fase.largura - 1); x++) {
       const y = d - x;
       const placas = placasDaParede(fase, x, y);
       if (placas.length === 0) continue;
       const chave = Math.floor((x - y) / FAIXA);
-      let g = porFaixa.get(chave);
-      if (!g) {
-        g = new Graphics();
-        porFaixa.set(chave, g);
+      let f = porFaixa.get(chave);
+      if (!f) {
+        f = { g: new Graphics(), celulas: [] };
+        porFaixa.set(chave, f);
       }
-      for (const pl of placas) caixa(g, x + pl.x0, y + pl.y0, x + pl.x1, y + pl.y1, pl.frenteSul, pl.frenteLeste);
+      f.celulas.push(y * fase.largura + x);
+      for (const pl of placas) caixa(f.g, x + pl.x0, y + pl.y0, x + pl.x1, y + pl.y1, pl.frenteSul, pl.frenteLeste);
     }
-    for (const [chave, g] of porFaixa) {
+    for (const [chave, f] of porFaixa) {
       // Um pouco antes da diagonal: quem está na mesma diagonal é desenhado por cima.
-      g.zIndex = profundidade(p, d, 0) - 0.01;
-      g.label = `paredes-${d}-${chave}`;
-      camada.addChild(g);
-      faixas.push({ g, d, centro: chave * FAIXA + FAIXA / 2 });
+      f.g.zIndex = profundidade(p, d, 0) - 0.01;
+      f.g.label = `paredes-${d}-${chave}`;
+      camada.addChild(f.g);
+      faixas.push(f);
     }
   }
+  // O conjunto da sala só é refeito quando o jogador troca de célula.
+  let celulaJogador = -1;
+  let somem = new Set<number>();
   return {
     esmaecer: (jogador, dtMs) => {
+      const cx = jogador ? Math.floor(jogador.x + 0.5) : -1;
+      const cy = jogador ? Math.floor(jogador.y + 0.5) : -1;
+      const celula = jogador ? cy * fase.largura + cx : -1;
+      if (celula !== celulaJogador) {
+        celulaJogador = celula;
+        // Na porta (fora do chão), a sala de antes continua.
+        const nova = jogador ? paredesDaSala(fase, cx, cy, o.alcanceSala) : new Set<number>();
+        if (!jogador || nova.size > 0) somem = nova;
+      }
       const passo = Math.min(1, (VELOCIDADE_FADE * dtMs) / 1000);
       for (const f of faixas) {
-        const alvo = jogador ? alfaDaFaixa(f.d, f.centro, jogador.x, jogador.y, o.altura, o.raioFade, o.alphaFade) : 1;
+        const alvo = f.celulas.some((c) => somem.has(c)) ? o.alphaFade : 1;
         if (f.g.alpha !== alvo) f.g.alpha = Math.abs(alvo - f.g.alpha) < 0.01 ? alvo : f.g.alpha + (alvo - f.g.alpha) * passo;
       }
     },

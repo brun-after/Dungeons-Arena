@@ -388,7 +388,7 @@ export interface Balance {
   visual: {
     luz: { raioJogador: number; raioTocha: number; raioObjeto: number; raioMagia: number; resolucaoMapa: number; realceMinimo: number; escuridaoExterior: number };
     solo: { amostrasPorCelula: number; raioMistura: number; ruidoBorda: number; aoRaio: number; aoForca: number; macroForca: number; variacaoCobre: number };
-    paredeIso: { altura: number; raioFade: number; alphaFade: number; telhadoPerto: number };
+    paredeIso: { altura: number; alcanceSala: number; alphaFade: number; telhadoPerto: number };
   };
   /** Marco 15 (D-061): as metas do ritmo, conferidas pelo simulador (tools/balanceamento) e pelo teste "ritmo". */
   metas: {

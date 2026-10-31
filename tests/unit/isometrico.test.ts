@@ -11,7 +11,7 @@ import { Camera } from '../../src/render/camera';
 import { CELULA_PX } from '../../src/render/camera-calculo';
 import { chaveQuadro, gerarAtlas, LADO_PX, VISTAS } from '../../src/render/modelos/atlas';
 import { ehModelo, MODELO_JOGADOR, MODELOS } from '../../src/render/modelos';
-import { alfaDaFaixa, ESPESSURA_PAREDE, paredeDeBorda, placasDaParede } from '../../src/render/paredes-iso';
+import { ESPESSURA_PAREDE, paredesDaSala, paredeDeBorda, placasDaParede } from '../../src/render/paredes-iso';
 import { alfaDoTelhado, dentroDoTelhado } from '../../src/render/telhados-iso';
 import type { Telhado } from '../../src/world/fase';
 import balance from '../../src/data/balance.json';
@@ -173,15 +173,21 @@ describe('profundidade e paredes em prisma', () => {
     ]);
   });
 
-  it('marco 31 (D-130): só a faixa de parede à frente do jogador e perto dele esmaece', () => {
-    const { altura, raioFade, alphaFade } = balance.visual.paredeIso;
-    const alfa = (d: number, centro: number) => alfaDaFaixa(d, centro, 10, 10, altura, raioFade, alphaFade);
-    // Jogador em (10, 10): diagonal 20, x - y = 0.
-    expect(alfa(21, 0)).toBe(alphaFade); // logo à frente
-    expect(alfa(23, 2)).toBe(alphaFade);
-    expect(alfa(19, 0)).toBe(1); // atrás dele: não cobre
-    expect(alfa(30, 0)).toBe(1); // longe na frente
-    expect(alfa(21, 12)).toBe(1); // ao lado, fora do raio
+  it('marco 31 (D-130): somem as paredes da frente da sala inteira, não as das outras salas', () => {
+    // Duas salas ligadas por uma porta na parede do meio (linha 3); o jogador na de cima.
+    const fase = faseDeTexto(['#######', '#.....#', '#.....#', '###.###', '#.....#', '#.....#', '#######']);
+    const n = fase.largura;
+    const somem = paredesDaSala(fase, 1, 1, 6);
+    // A parede do meio, à frente da sala de cima, some; a de cima (atrás da sala) não.
+    expect(somem.has(3 * n + 1)).toBe(true);
+    expect(somem.has(3 * n + 5)).toBe(true);
+    expect(somem.has(0 * n + 2)).toBe(false);
+    // Com alcance 6, o fundo da sala de baixo fica longe: a parede da frente dela continua.
+    expect(somem.has(6 * n + 1)).toBe(false);
+    // Andar dentro da sala não muda o conjunto das paredes dela (só a borda do alcance, longe).
+    const outra = paredesDaSala(fase, 2, 1, 6);
+    expect(outra.has(3 * n + 1)).toBe(true);
+    expect(paredesDaSala(fase, 0, 0, 3).size).toBe(0);
   });
 
   it('marco 31 (D-130): o telhado `perto` some de perto; o `dentro`, só ao entrar', () => {

@@ -3428,8 +3428,12 @@ pedido foi dividido em dois marcos: este (o mundo) e o 32 (os personagens pré-r
   escuro (`escuridaoExterior`). As marcas, as barras, a telegrafia e os efeitos ficam acima do escuro (camadas
   `marcas` e `rotulos`), para a leitura do combate.
 - **Paredes altas** (`render/paredes-iso.ts`, revê o D-106): 1,15 célula, placas de 0,3, a pedra do tema nas faces
-  (a textura segue a aresta, `pedraDaFace`) e sem contorno. Os Graphics são por diagonal e por faixa de 4 células da
-  tela; a faixa à frente do jogador e perto dele some de todo (alfa 0, pedido do usuário; `alfaDaFaixa`). O muro de
+  (a textura segue a aresta, `pedraDaFace`) e sem contorno. Com o jogador numa sala ou corredor, somem de todo (alfa 0)
+  as paredes da frente de todo o chão que ele alcança andando até `alcanceSala` (14) passos (`paredesDaSala`): a sala
+  inteira e um pouco além. O conjunto só muda quando ele troca de célula e a borda fica longe dele; um raio em volta do
+  personagem mudava a cada passo e poluía a tela (pedido do usuário). Os Graphics são por diagonal e por faixa de 2
+  células da tela.
+  O muro de
   uma célula com chão dos dois lados (as casas, a parede fina entre salas) é uma só parede fina pelo meio da célula,
   ligada às vizinhas, não duas placas com um vão; o muro da vila passa a ter uma célula de espessura (as de fora
   voltam a ser mato). As fachadas do Mundo usam a
