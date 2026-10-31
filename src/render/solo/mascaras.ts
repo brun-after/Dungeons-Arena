@@ -47,6 +47,12 @@ const SEMENTE_VARIACAO = 307;
 const SEMENTE_MACRO = 401;
 /** A faixa de mistura da parede, em fração da do chão. */
 const FIRMEZA_PAREDE = 0.3;
+/**
+ * Ajuste de 31/10/2026 (D-130, pedido do usuário): a pedra da parede no chão fica com metade da largura (o corte em
+ * 0,75 da interpolação, no lugar de 0,5) e com metade do ruído da borda (menos disforme).
+ */
+const CORTE_PAREDE = 0.75;
+const RUIDO_PAREDE = 0.5;
 
 /** Que camada pinta a célula, pelo tipo e pelo solo do tema. */
 export function camadaDaCelula(tipo: TipoCelula, solo: SoloTema): CamadaSolo {
@@ -149,6 +155,18 @@ export function pesosDoBloco(fase: Fase, solo: SoloTema, bx: number, by: number,
       const c10 = camadaEm[celula(x0 + 1, y0)];
       const c01 = camadaEm[celula(x0, y0 + 1)];
       const c11 = camadaEm[celula(x0 + 1, y0 + 1)];
+      // A parede usa o ponto com metade do deslocamento.
+      const qu = u + du * RUIDO_PAREDE - 0.5;
+      const qv = v + dv * RUIDO_PAREDE - 0.5;
+      const qx = Math.floor(qu);
+      const qy = Math.floor(qv);
+      const sx = qu - qx;
+      const sy = qv - qy;
+      // O vazio do lado de fora conta como parede (a pedra não abre uma faixa de chão antes do vazio).
+      const eParede = (c: CamadaSolo | undefined, p: CamadaSolo) => c === p || c === 'vazio';
+      const bilParede = (c: CamadaSolo) =>
+        (eParede(camadaEm[celula(qx, qy)], c) ? (1 - sx) * (1 - sy) : 0) + (eParede(camadaEm[celula(qx + 1, qy)], c) ? sx * (1 - sy) : 0) +
+        (eParede(camadaEm[celula(qx, qy + 1)], c) ? (1 - sx) * sy : 0) + (eParede(camadaEm[celula(qx + 1, qy + 1)], c) ? sx * sy : 0);
       for (const { camada, pesos } of camadas) {
         if (camada === base) {
           pesos[n] = 1;
@@ -157,6 +175,11 @@ export function pesosDoBloco(fase: Fase, solo: SoloTema, bx: number, by: number,
         // A célula interpolada entre os centros (bilinear) e afiada em volta de 0,5: a faixa de mistura tem 2k. A
         // borda da parede e do escuro é mais firme (a pedra não se mistura com o chão como a grama com a terra).
         const bil = (c00 === camada ? (1 - tx) * (1 - ty) : 0) + (c10 === camada ? tx * (1 - ty) : 0) + (c01 === camada ? (1 - tx) * ty : 0) + (c11 === camada ? tx * ty : 0);
+        if (camada === solo.parede) {
+          const bp = bilParede(camada);
+          pesos[n] = bp === 0 ? 0 : smoothstep(CORTE_PAREDE - k * FIRMEZA_PAREDE, CORTE_PAREDE + k * FIRMEZA_PAREDE, bp);
+          continue;
+        }
         const kc = camada === solo.parede || camada === 'escuro' || camada === 'vazio' ? k * FIRMEZA_PAREDE : k;
         pesos[n] = bil === 0 ? 0 : smoothstep(0.5 - kc, 0.5 + kc, bil);
       }

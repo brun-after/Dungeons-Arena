@@ -7,7 +7,7 @@
 import type { SoloTema, TexturaSolo } from '../../world/solo';
 import type { CamadaSolo, PesosDoBloco } from './mascaras';
 import type { TexturasDoSolo } from './texturas';
-import { areaNoRetangulo, contornoDaArea, ESTILOS_AMBIENTE, veiosDaArea } from './ambientes-solo';
+import { areaNoRetangulo, centroDaArea, contornoDaArea, ESTILOS_AMBIENTE, veiosDaArea } from './ambientes-solo';
 import type { AreaAmbiente } from '../../world/ambiente-tipos';
 import { CELULA_PX } from '../camera-calculo';
 
@@ -28,6 +28,8 @@ const hexCss = (cor: number) => `#${cor.toString(16).padStart(6, '0')}`;
 export class AssadorDeSolo {
   private readonly rascunho = document.createElement('canvas');
   private readonly mascara = document.createElement('canvas');
+  /** Marco 31 (D-130): o contorno desfocado de uma área elemental (o recorte em `destination-in`). */
+  private readonly recorte = document.createElement('canvas');
 
   constructor(
     private readonly texturas: TexturasDoSolo,
@@ -131,6 +133,9 @@ export class AssadorDeSolo {
   /**
    * Marco 31 (D-130): as áreas elementais que tocam o bloco: a textura e a cor do elemento recortadas pelo contorno
    * orgânico (borda desfocada pela sombra do canvas), na resolução cheia do bloco.
+   * Ajuste de 31/10/2026: o contorno é pintado num canvas à parte e só depois recorta (desenhado direto em
+   * `destination-in`, o próprio contorno fora da tela apagava o preenchimento e sobravam só as rachaduras); o
+   * núcleo ganha o brilho do elemento, como na pintura por manchas de antes.
    */
   private ambientes(g: Contexto2D, origemX: number, origemY: number, l: number, a: number): void {
     const r = this.rascunho.getContext('2d');
@@ -153,27 +158,58 @@ export class AssadorDeSolo {
       r.globalAlpha = e.textura ? 1 : e.forca;
       r.fillStyle = e.cor;
       r.fillRect(0, 0, l, a);
-      // O recorte: o contorno cheio, desenhado longe e trazido pela sombra (assim só a sombra desfocada aparece).
-      r.globalAlpha = 1;
-      r.globalCompositeOperation = 'destination-in';
-      const longe = l + a + 1000;
-      r.shadowColor = '#000';
-      r.shadowBlur = CELULA_PX * 0.3 * k;
-      r.shadowOffsetX = longe;
-      r.beginPath();
-      contornoDaArea(area, this.semente).forEach((p, n) => {
-        const x = (p.x * CELULA_PX - origemX) * k - longe;
-        const y = (p.y * CELULA_PX - origemY) * k;
-        if (n === 0) r.moveTo(x, y);
-        else r.lineTo(x, y);
-      });
-      r.closePath();
-      r.fill();
+      // O núcleo: a cor do veio se espalha do centro, mais forte no meio (a mancha pintada).
+      const c = centroDaArea(area);
+      const cx = (c.x * CELULA_PX - origemX) * k;
+      const cy = (c.y * CELULA_PX - origemY) * k;
+      const raio = (area.raio + 0.5) * CELULA_PX * k;
+      const nucleo = r.createRadialGradient(cx, cy, 0, cx, cy, raio);
+      nucleo.addColorStop(0, e.veio);
+      nucleo.addColorStop(1, 'rgba(0,0,0,0)');
+      r.globalCompositeOperation = e.brilha ? 'lighter' : 'source-over';
+      r.globalAlpha = e.brilha ? 0.35 : 0.2;
+      r.fillStyle = nucleo;
+      r.fillRect(0, 0, l, a);
       r.restore();
+      if (!this.recortar(r, area, origemX, origemY, l, a)) continue;
       g.globalAlpha = e.textura ? e.forca : 1;
       g.drawImage(this.rascunho, 0, 0);
       g.globalAlpha = 1;
     }
+  }
+
+  /** Recorta o rascunho pelo contorno desfocado da área (pintado à parte, trazido pela sombra do canvas). */
+  private recortar(r: Contexto2D, area: AreaAmbiente, origemX: number, origemY: number, l: number, a: number): boolean {
+    if (this.recorte.width !== l || this.recorte.height !== a) {
+      this.recorte.width = l;
+      this.recorte.height = a;
+    }
+    const m = this.recorte.getContext('2d');
+    if (!m) return false;
+    const k = this.escala;
+    m.save();
+    m.clearRect(0, 0, l, a);
+    const longe = l + a + 1000;
+    m.shadowColor = '#000';
+    m.shadowBlur = CELULA_PX * 0.3 * k;
+    m.shadowOffsetX = longe;
+    m.fillStyle = '#000';
+    m.beginPath();
+    contornoDaArea(area, this.semente).forEach((p, n) => {
+      const x = (p.x * CELULA_PX - origemX) * k - longe;
+      const y = (p.y * CELULA_PX - origemY) * k;
+      if (n === 0) m.moveTo(x, y);
+      else m.lineTo(x, y);
+    });
+    m.closePath();
+    m.fill();
+    m.restore();
+    r.save();
+    r.globalCompositeOperation = 'destination-in';
+    r.globalAlpha = 1;
+    r.drawImage(this.recorte, 0, 0);
+    r.restore();
+    return true;
   }
 
   /** As rachaduras das áreas (brasa, raio, geada…): linhas com brilho, somadas em `lighter` nas que brilham. */

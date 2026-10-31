@@ -386,7 +386,7 @@ export interface Balance {
    * oclusão do chão texturizado (render/solo/) e a parede alta do isométrico (altura em células, esmaecimento).
    */
   visual: {
-    luz: { raioJogador: number; raioTocha: number; raioObjeto: number; raioMagia: number; resolucaoMapa: number; realceMinimo: number; escuridaoExterior: number };
+    luz: { raioJogador: number; raioTocha: number; raioObjeto: number; raioMagia: number; resolucaoMapa: number; realceMinimo: number; escuridaoExterior: number; clareza: number };
     solo: { amostrasPorCelula: number; raioMistura: number; ruidoBorda: number; aoRaio: number; aoForca: number; macroForca: number; variacaoCobre: number };
     paredeIso: { altura: number; alcanceSala: number; alphaFade: number; telhadoPerto: number };
   };

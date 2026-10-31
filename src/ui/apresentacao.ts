@@ -190,7 +190,8 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   // Marco 31 (31/10/2026, D-130): o escuro fora da luz. O exterior do Mundo é céu aberto (menos escuro).
   const escuridao = new CamadaEscuridao(palco.escuro, palco.app.renderer);
   const escuroTema = tema?.escuridao ?? ESCURIDAO_PADRAO;
-  const nivelEscuro = ctx.fase.exterior ? vis.escuridaoExterior : escuroTema.nivel;
+  // Ajuste de 31/10/2026 (pedido do usuário): o escuro fora da luz fica mais claro pela `clareza` (0,5 = metade).
+  const nivelEscuro = (ctx.fase.exterior ? vis.escuridaoExterior : escuroTema.nivel) * (1 - vis.clareza);
   let pontosDoQuadro: PontoDeLuz[] = [];
   /** As luzes do quadro, da grade para a tela (depois da câmera aplicada). */
   const desenharEscuro = (agoraMs: number) => {

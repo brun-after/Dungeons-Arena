@@ -4,10 +4,12 @@
 //   escuro do tema e com as luzes somadas (sprites radiais aditivos nas posições da tela); um sprite de tela inteira
 //   aplica o mapa sobre o mundo em `multiply`. Funciona igual de cima e no isométrico (as posições já vêm na tela).
 // - `vinheta` (baixa e mínima, o padrão do celular): um escuro pré-pintado em volta do jogador, sem render texture.
+//   Ajuste de 31/10/2026: a textura da vinheta é um quadrado; fora dele, quatro faixas do mesmo escuro cobrem o resto
+//   da tela (antes aparecia um quadrado escuro seguindo o jogador, com a fase clara em volta).
 // O container fica dentro do `mundo` (acima das entidades, abaixo das marcas, dos rótulos, dos projéteis e dos
 // efeitos) e é reposicionado a cada quadro para cobrir a tela: desfaz o zoom e o deslocamento da câmera.
 
-import { CanvasSource, Container, RenderTexture, Sprite, Texture, type Renderer } from 'pixi.js';
+import { CanvasSource, Container, Graphics, RenderTexture, Sprite, Texture, type Renderer } from 'pixi.js';
 
 export interface LuzNaTela {
   /** Posição em px de tela (CSS). */
@@ -89,6 +91,8 @@ export class CamadaEscuridao {
   private readonly luzes = new Container({ label: 'luzes' });
   private readonly sprites: Sprite[] = [];
   private readonly vinheta = new Sprite(this.texVinheta);
+  /** O escuro fora do quadrado da vinheta. */
+  private readonly fora = new Graphics();
   private readonly cobre = new Sprite(Texture.EMPTY);
   private rt: RenderTexture | null = null;
 
@@ -99,7 +103,7 @@ export class CamadaEscuridao {
     pai.addChild(this.camada);
     this.vinheta.anchor.set(0.5);
     this.cobre.blendMode = 'multiply';
-    this.camada.addChild(this.cobre, this.vinheta);
+    this.camada.addChild(this.cobre, this.vinheta, this.fora);
   }
 
   /**
@@ -124,9 +128,21 @@ export class CamadaEscuridao {
       this.vinheta.scale.set((Math.hypot(largura, altura) * 1.25) / LADO_RADIAL);
       this.vinheta.tint = p.ambiente;
       this.vinheta.alpha = Math.min(1, p.nivel * (1 - p.realceMinimo));
+      const m = (this.vinheta.scale.x * LADO_RADIAL) / 2;
+      const [x0, y0, x1, y1] = [c.x - m, c.y - m, c.x + m, c.y + m];
+      const folga = 4;
+      const [l, a] = [largura + folga, altura + folga];
+      this.fora.clear();
+      if (y0 > -folga) this.fora.rect(-folga, -folga, l + folga, y0 + folga);
+      if (y1 < a) this.fora.rect(-folga, y1, l + folga, a - y1);
+      if (x0 > -folga) this.fora.rect(-folga, y0, x0 + folga, y1 - y0);
+      if (x1 < l) this.fora.rect(x1, y0, l - x1, y1 - y0);
+      this.fora.fill({ color: p.ambiente, alpha: this.vinheta.alpha });
+      this.fora.visible = true;
       return;
     }
     this.vinheta.visible = false;
+    this.fora.visible = false;
     this.cobre.visible = true;
     const r = Math.max(0.1, Math.min(1, p.resolucao));
     const l = Math.max(1, Math.ceil(largura * r));
