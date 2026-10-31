@@ -11,7 +11,10 @@ import { Camera } from '../../src/render/camera';
 import { CELULA_PX } from '../../src/render/camera-calculo';
 import { chaveQuadro, gerarAtlas, LADO_PX, VISTAS } from '../../src/render/modelos/atlas';
 import { ehModelo, MODELO_JOGADOR, MODELOS } from '../../src/render/modelos';
-import { ALTURA_PAREDE_PX, ESPESSURA_PAREDE, paredeDeBorda, placasDaParede } from '../../src/render/paredes-iso';
+import { ESPESSURA_PAREDE, paredesDaSala, paredeDeBorda, placasDaParede } from '../../src/render/paredes-iso';
+import { alfaDoTelhado, dentroDoTelhado } from '../../src/render/telhados-iso';
+import type { Telhado } from '../../src/world/fase';
+import balance from '../../src/data/balance.json';
 import { celulaSobProjetado, centroDaCelula, criarProjecao, profundidade, type Visao } from '../../src/render/projecao';
 import { caixaVisivel, encaixar, LIMITE_BYTES, validarArquivo, validarDimensoes } from '../../src/render/token-imagem';
 import { criarBotAleatorio, criarCenario, rodar, type Produtor } from '../sim/harness';
@@ -145,17 +148,59 @@ describe('profundidade e paredes em prisma', () => {
     expect(paredeDeBorda(fase, 4, 0)).toBe(false);
   });
 
-  it('marco 26 (D-106): placas 80% mais finas e 70% mais baixas, na aresta que encosta no chão', () => {
-    expect(ESPESSURA_PAREDE).toBeCloseTo(0.2);
-    expect(ALTURA_PAREDE_PX).toBeCloseTo(CELULA_PX * 0.6 * 0.3);
+  it('marco 31 (D-130, revê o D-106): placas de 0,3 e altas (1,15 célula), na aresta que encosta no chão', () => {
+    expect(ESPESSURA_PAREDE).toBeCloseTo(0.3);
+    expect(balance.visual.paredeIso.altura).toBeCloseTo(1.15);
     // Sala 2×1 em (2..3, 2): a parede de cima tem a placa na aresta sul; a da esquerda, na leste.
     const fase = faseDeTexto(['#####', '#####', '##..#', '#####']);
-    expect(placasDaParede(fase, 2, 1)).toEqual([{ x0: 0, y0: 0.8, x1: 1, y1: 1, frenteSul: true, frenteLeste: false }]);
-    expect(placasDaParede(fase, 1, 2)).toEqual([{ x0: 0.8, y0: 0, x1: 1, y1: 1, frenteSul: false, frenteLeste: true }]);
-    // A quina que só toca o chão na diagonal fecha com um bloquinho 0,2 × 0,2.
-    expect(placasDaParede(fase, 1, 1)).toEqual([{ x0: 0.8, y0: 0.8, x1: 1, y1: 1, frenteSul: true, frenteLeste: true }]);
+    expect(placasDaParede(fase, 2, 1)).toEqual([{ x0: 0, y0: 0.7, x1: 1, y1: 1, frenteSul: true, frenteLeste: false }]);
+    expect(placasDaParede(fase, 1, 2)).toEqual([{ x0: 0.7, y0: 0, x1: 1, y1: 1, frenteSul: false, frenteLeste: true }]);
+    // A quina que só toca o chão na diagonal fecha com um bloquinho 0,3 × 0,3.
+    expect(placasDaParede(fase, 1, 1)).toEqual([{ x0: 0.7, y0: 0.7, x1: 1, y1: 1, frenteSul: true, frenteLeste: true }]);
     expect(placasDaParede(fase, 0, 0)).toEqual([]);
     expect(placasDaParede(fase, 2, 2)).toEqual([]);
+  });
+
+  it('marco 31 (D-130): o muro de uma célula com chão dos dois lados é uma parede fina pelo meio', () => {
+    // Muro horizontal entre duas salas e a quina de um muro em diagonal (chão em cantos opostos).
+    const fase = faseDeTexto(['#####', '#...#', '#####', '#...#', '#####']);
+    expect(placasDaParede(fase, 2, 2)).toEqual([{ x0: 0, y0: 0.35, x1: 1, y1: 0.65, frenteSul: true, frenteLeste: false }]);
+    const diagonal = faseDeTexto(['#####', '#.###', '#####', '###.#', '#####']);
+    expect(placasDaParede(diagonal, 2, 2)).toEqual([
+      { x0: 0.35, y0: 0, x1: 0.65, y1: 0.35, frenteSul: false, frenteLeste: true },
+      { x0: 0, y0: 0.35, x1: 1, y1: 0.65, frenteSul: true, frenteLeste: false },
+      { x0: 0.35, y0: 0.65, x1: 0.65, y1: 1, frenteSul: false, frenteLeste: true },
+    ]);
+  });
+
+  it('marco 31 (D-130): somem as paredes da frente da sala inteira, não as das outras salas', () => {
+    // Duas salas ligadas por uma porta na parede do meio (linha 3); o jogador na de cima.
+    const fase = faseDeTexto(['#######', '#.....#', '#.....#', '###.###', '#.....#', '#.....#', '#######']);
+    const n = fase.largura;
+    const somem = paredesDaSala(fase, 1, 1, 6);
+    // A parede do meio, à frente da sala de cima, some; a de cima (atrás da sala) não.
+    expect(somem.has(3 * n + 1)).toBe(true);
+    expect(somem.has(3 * n + 5)).toBe(true);
+    expect(somem.has(0 * n + 2)).toBe(false);
+    // Com alcance 6, o fundo da sala de baixo fica longe: a parede da frente dela continua.
+    expect(somem.has(6 * n + 1)).toBe(false);
+    // Andar dentro da sala não muda o conjunto das paredes dela (só a borda do alcance, longe).
+    const outra = paredesDaSala(fase, 2, 1, 6);
+    expect(outra.has(3 * n + 1)).toBe(true);
+    expect(paredesDaSala(fase, 0, 0, 3).size).toBe(0);
+  });
+
+  it('marco 31 (D-130): o telhado `perto` some de perto; o `dentro`, só ao entrar', () => {
+    const casa: Telhado = { x: 10, y: 10, largura: 6, altura: 5, revela: 'dentro', estilo: 'palha' };
+    const vila: Telhado = { ...casa, revela: 'perto', estilo: 'telha' };
+    const perto = balance.visual.paredeIso.telhadoPerto;
+    expect(dentroDoTelhado(casa, 12, 12)).toBe(true);
+    expect(dentroDoTelhado(casa, 10, 12)).toBe(false); // na parede
+    expect(alfaDoTelhado(casa, { x: 13, y: 16 }, perto)).toBe(1); // à porta, ainda fora
+    expect(alfaDoTelhado(casa, { x: 13, y: 12 }, perto)).toBe(0);
+    expect(alfaDoTelhado(vila, { x: 13, y: 16 }, perto)).toBeLessThan(0.5);
+    expect(alfaDoTelhado(vila, { x: 13, y: 16 + perto + 1 }, perto)).toBe(1);
+    expect(alfaDoTelhado(vila, null, perto)).toBe(1);
   });
 });
 
@@ -242,9 +287,11 @@ describe('personagem por imagem', () => {
     expect([e.ancoraX, e.ancoraY]).toEqual([0.5, 1]);
   });
 
-  it('a visão e a aparência são preferências normalizadas', () => {
-    expect(normalizarPreferencias({ visao: 'iso', tamanhoToken: 2, sentidoToken: 'esquerda' })).toMatchObject({ visao: 'iso', tamanhoToken: 1.3, sentidoToken: 'esquerda' });
-    expect(normalizarPreferencias({ visao: '3d', tamanhoToken: 'x' })).toMatchObject({ visao: 'cima', tamanhoToken: 1, sentidoToken: 'direita' });
+  it('a aparência é preferência normalizada', () => {
+    expect(normalizarPreferencias({ tamanhoToken: 2, sentidoToken: 'esquerda' })).toMatchObject({ tamanhoToken: 1.3, sentidoToken: 'esquerda' });
+    expect(normalizarPreferencias({ tamanhoToken: 'x' })).toMatchObject({ tamanhoToken: 1, sentidoToken: 'direita' });
+    // Marco 31 (D-130): o jogo é só isométrico; a visão guardada antes some das preferências.
+    expect(normalizarPreferencias({ visao: 'cima', versaoVisual: 1 })).not.toHaveProperty('visao');
   });
 });
 

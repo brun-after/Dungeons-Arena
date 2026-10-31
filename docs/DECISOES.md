@@ -1,8 +1,11 @@
 # Decisões de projeto
 
-**Versão:** 0.66 · **Data:** 30/10/2026
+**Versão:** 0.69 · **Data:** 31/10/2026
 
 > **Histórico**
+> - **0.69 (31/10/2026)**: D-130: objetos, loja e portais pré-renderizados de modelos 3D CC0 (KayKit e Quaternius); escuro 50% mais claro e sem o quadrado da vinheta; borda de pedra mais fina.
+> - **0.68 (31/10/2026)**: D-130 revista: o jogo passa a ser só isométrico (sai a vista de cima, a tecla V e a opção "Visão"); objetos e áreas elementais repintados; nota em D-058.
+> - **0.67 (31/10/2026)**: D-130 (o visual sombrio: chão texturizado CC0 sem grade, escuridão com luz em volta, paredes altas que esmaecem, telhados das casas, isométrico como padrão e marcas discretas) e a nota em D-106.
 > - **0.66 (30/10/2026)**: D-129 (o Mundo social: grupo, chat, banco, missões, troca, mercado, receitas por ofício, perigo, vila refúgio, passagem protegida, estrutura escondida, eventos por região, polimento visual e as metas do Mundo no simulador, com a vida dos chefes dos covis e o fim das invocações como monstros).
 > - **0.65 (30/10/2026)**: D-128 (o Mundo: lugares em salas, área de interesse, IA com ativação, personagem no servidor, exterior gerado com fachadas, perigo e PvP por região, túmulo, portais, coleta e covis; o Reino Central).
 > - **0.64 (30/10/2026)**: D-127 (nível 100, teto nível+20 nos pontos gastos, rendimento acima de 30, atributo de classe com marcos em 25/50/75/100, itens com % de dano e de defesa, "Escala com" nas skills e invocações iguais lado a lado) e a nota em D-061.
@@ -1147,7 +1150,7 @@ adotou o personagem por imagem.
   - a barra de vida, a de conjuração, o status, os anéis de alvo e de invocação e o "?"/"!" acompanham o topo do
     desenho;
   - a silhueta por arquétipo continua como substituto quando o modelo não existe ou o atlas não carrega.
-- **Escolha da visão**:
+- **Escolha da visão** (nota de 31/10/2026: retirada em D-130, o jogo ficou só isométrico):
   - em Configurações → Gráficos → "Visão", ou pela tecla `V`, que grava a mesma preferência;
   - a troca é instantânea: câmera, matriz do chão, paredes e tokens se refazem;
   - as teclas mantidas são remapeadas na hora.
@@ -2680,6 +2683,10 @@ paredes 80% mais finas e 70% mais baixas.
 - **O resto da célula de parede** é a rocha plana e escura do terreno, como na visão de cima.
 - **Ordem de desenho:** um Graphics por diagonal, com o `zIndex` de antes.
 
+> **Nota (31/10/2026, D-130):** revista a pedido do usuário. As placas ficam com 0,3 de espessura e 1,15 célula de
+> altura (`visual.paredeIso`), com a pedra do tema e sumindo perto do jogador; o muro de uma célula com chão dos dois
+> lados vira uma parede fina só, pelo meio da célula.
+
 ## D-107 — Sem direcional no computador e teclas EWAS (marco 26, 25/10/2026)
 
 **Contexto.** No computador com tela de toque (ou janela pequena), o jogo mostrava o joystick ou o D-pad. Lá o
@@ -3400,3 +3407,79 @@ uma regra de modo nova (por exemplo, a dificuldade por perigo da região), a dec
   mais carregada que no dia do marco 29 (7 a 9 ms). O perfil de CPU das duas é o mesmo (a escrita no socket, `writev`,
   é ~20 s de 95; `clonarEntidade`, a geração do patch e `simular` empatam), então o marco 30 não pesa no tick. A meta
   segue para a medida na VM, depois do deploy.
+
+## D-130 — O visual sombrio (marco 31, 31/10/2026)
+
+**Contexto.** O usuário pediu que o mundo e os personagens lembrassem o Diablo, e não o Minecraft ou o Roblox: sem o
+chão de quadrados e sem o ar de desenho infantil. As regras seguem em células; o visual não precisa mostrá-las. O
+pedido foi dividido em dois marcos: este (o mundo) e o 32 (os personagens pré-renderizados de modelos 3D CC0).
+
+**Decisão:**
+- **Arte só CC0.** As 10 texturas do chão vêm do ambientCG (lajes, rocha, blocos, terra, grama, lama, neve, areia,
+  estrada e basalto), processadas por `tools/texturas/processar.ts` (512 px, 30% menos saturação, webp) e listadas
+  em `LICENCAS.md`. Os arquivos brutos ficam fora do git. Nada CC-BY nem QAL.
+- **Chão sem grade** (`src/render/solo/`): cada bloco do terreno é pintado num canvas (um bloco por quadro, os
+  visíveis primeiro; a cor lisa de antes enquanto isso). As máscaras de cada camada têm a borda borrada e deslocada
+  por ruído, em coordenadas de mundo (sem emenda entre blocos). Por cima, uma segunda passada da base maior e girada
+  (esconde a repetição), a oclusão junto às paredes, uma sombra de escala grande e a tinta do tema. O tema diz a base,
+  a variação, a pedra das paredes, a tinta e a escala (`temas.json`, `solo`). Fora do exterior do Mundo, o que fica
+  além da borda andável continua transparente, como antes (pedido do usuário).
+- **Escuridão** (`render/escuridao.ts`): no médio e no alto, um mapa de luz em meia resolução (as luzes do jogador,
+  de outros jogadores, das tochas, da lava, dos objetos e dos projéteis, somadas) aplicado em `multiply`; no baixo e
+  no mínimo, só uma vinheta em volta do jogador. O tema diz a cor e o nível do escuro; o exterior do Mundo é menos
+  escuro (`escuridaoExterior`). As marcas, as barras, a telegrafia e os efeitos ficam acima do escuro (camadas
+  `marcas` e `rotulos`), para a leitura do combate.
+- **Paredes altas** (`render/paredes-iso.ts`, revê o D-106): 1,15 célula, placas de 0,3, a pedra do tema nas faces
+  (a textura segue a aresta, `pedraDaFace`) e sem contorno. Com o jogador numa sala ou corredor, somem de todo (alfa 0)
+  as paredes da frente de todo o chão que ele alcança andando até `alcanceSala` (14) passos (`paredesDaSala`): a sala
+  inteira e um pouco além. O conjunto só muda quando ele troca de célula e a borda fica longe dele; um raio em volta do
+  personagem mudava a cada passo e poluía a tela (pedido do usuário). Os Graphics são por diagonal e por faixa de 2
+  células da tela.
+  O muro de
+  uma célula com chão dos dois lados (as casas, a parede fina entre salas) é uma só parede fina pelo meio da célula,
+  ligada às vizinhas, não duas placas com um vão; o muro da vila passa a ter uma célula de espessura (as de fora
+  voltam a ser mato). As fachadas do Mundo usam a
+  mesma pedra.
+- **Telhados** (`Fase.telhados`, `render/telhados-iso.ts`): só visual. `perto` some quando o jogador chega a 3
+  células; `dentro` só quando ele entra, e quem está fora não vê quem está dentro. O Mundo gera casas de pedra com
+  telhado: até 4 na vila (`perto`) e, nas regiões normais e perigosas, as abandonadas (`perigos.*.casas`, com um
+  monstro no topo da faixa lá dentro, `dentro`). As casas usam um gerador de números à parte, para não mexer no
+  sorteio do resto. De cima, o telhado é chato.
+- **Só isométrico** (revisto a pedido do usuário, 31/10/2026): o jogo deixa de ter a vista de cima. Saem a tecla `V`,
+  a opção "Visão" das Configurações e a preferência `visao` (a guardada antes é ignorada). A câmera do jogo é sempre
+  isométrica (`ui/cena.ts`); a projeção de cima continua no código para o editor de fases e a galeria de efeitos.
+  Os e2e rodam no isométrico.
+- **Objetos repintados** (`render/pintura.ts`): o baú, a loja, o ouro, o santuário, os objetos do Mundo, os
+  quebráveis, os enfeites e os pilares são desenhados uma vez, extraídos para um canvas e repintados (menos
+  saturação, luz de cima, sombra nos pés, grão e borda escura), e viram sprites com cache por chave. Os orbes ganham
+  volume.
+- **Objetos de modelos 3D CC0** (ajuste pedido pelo usuário): o baú (fechado, aberto, trancado), a loja, o ouro, o
+  santuário, os quebráveis e os enfeites que têm modelo (barril, caixote, vaso, carrinho, livros, vela, estante,
+  coluna) e o arco dos portais saem de modelos do KayKit Dungeon Remastered e do Quaternius Fantasy Props MegaKit,
+  ambos CC0. Os modelos são renderizados por `tools/objetos/` (three.js no Chromium do Playwright, só no
+  desenvolvimento) no ângulo do isométrico: câmera ortográfica a 45° e 30°, luz quente de cima à esquerda, recorte
+  frio, menos saturação e contorno escuro. As imagens ficam em `src/assets/objetos/`, a 96 px por célula, com
+  `catalogo.json` (âncora dos pés) e `LICENCAS.md`. Os zips brutos ficam em `.brutos/`, fora do git. O jogo carrega
+  as imagens com a cena (`render/objetos-3d.ts`); sem elas, vale o desenho repintado.
+  - O monte de ouro cresce com a quantia: 4 tamanhos, com os limites em `visual.ouroMontes` (até 3, 20 e 100;
+    acima, o maior).
+  - A loja ganha tamanho real: uma barraca de cerca de 3 células com o vendedor atrás do balcão. O vendedor é
+    desenhado e é provisório até os personagens 3D do marco 32.
+  - Os portais de saída, de retorno e do chefe viram um arco de pedra, tingido de leve na cor do tema de destino, com
+    o vórtice no vão. Os portais internos continuam só com o vórtice.
+- **Escuro e chão** (ajuste pedido pelo usuário):
+  - a vinheta do celular e da qualidade baixa cobre a tela toda (fora da textura, faixas do mesmo escuro);
+  - o escuro fica 50% mais claro (`visual.luz.clareza`);
+  - a pedra da parede no chão tem metade da largura e metade do ruído da borda.
+- **Áreas elementais no chão** (`render/solo/ambientes-solo.ts`): no lugar do círculo translúcido com riscos, cada
+  área entra no canvas do bloco, antes das paredes: contorno orgânico de borda macia, a textura e a cor do elemento
+  e, nas que brilham, rachaduras acesas. As que brilham soltam luz no escuro.
+- **Marcas e barras** (`render/sprites.ts`): a marca de equipe vira um decalque fino e translúcido em tons sóbrios
+  (dourado, cinza-azulado, vermelho escuro), a sombra fica macia e as barras ganham moldura e brilho. O vermelho do
+  hostil continua sempre (mais legível que mostrar só em combate).
+- **Números** no bloco `visual` de `balance.json` (luz, chão e paredes).
+
+**Consequências.** No Chromium sem tela (WebGL por software) o quadro pesa mais com o mapa de luz e as faces
+texturizadas; o monitor de qualidade cai para a vinheta quando preciso. As medidas ficam em `BENCHMARKS.md`. A
+Pedravale (raio 12) é pequena demais para as casas e fica sem. Os telhados dos castelos ficaram de fora: as fachadas
+já são blocos fechados.

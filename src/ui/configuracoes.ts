@@ -105,7 +105,6 @@ export function criarConfiguracoes(o: { toque: boolean; direcional?: boolean; ao
       campo(t('config.resolucao'), escolha('resolucao', p.resolucao, ['auto', 'alta', 'media', 'baixa'] as const, 'resolucao', (v) => { mudar({ resolucao: v }); })),
       campo(t('config.medidor'), marcador('medidor', p.medidor, (v) => { mudar({ medidor: v }); })),
       campo(t('config.efeitosDeTela'), marcador('efeitosDeTela', p.efeitosDeTela, (v) => { mudar({ efeitosDeTela: v }); })),
-      campo(t('config.visao'), escolha('visao', p.visao, ['cima', 'iso'] as const, 'visao', (v) => { mudar({ visao: v }); })),
       campo(t('config.areaExata'), marcador('areaExata', p.areaExata, (v) => { mudar({ areaExata: v }); })),
       campo(t('config.runaDaClasse'), marcador('runaDaClasse', p.runaDaClasse, (v) => { mudar({ runaDaClasse: v }); })),
       campo(t('config.estiloNasGeradas'), marcador('estiloNasGeradas', p.estiloNasGeradas, (v) => { mudar({ estiloNasGeradas: v }); })),

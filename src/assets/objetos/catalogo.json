@@ -1,0 +1,116 @@
+{
+  "barril": {
+    "largura": 85,
+    "altura": 107,
+    "ancoraX": 42.5,
+    "ancoraY": 82.2
+  },
+  "bau_aberto": {
+    "largura": 138,
+    "altura": 130,
+    "ancoraX": 62.3,
+    "ancoraY": 96
+  },
+  "bau_fechado": {
+    "largura": 120,
+    "altura": 103,
+    "ancoraX": 59.6,
+    "ancoraY": 68.4
+  },
+  "bau_trancado": {
+    "largura": 122,
+    "altura": 109,
+    "ancoraX": 61.6,
+    "ancoraY": 73.9
+  },
+  "caixote": {
+    "largura": 110,
+    "altura": 111,
+    "ancoraX": 54.9,
+    "ancoraY": 77.9
+  },
+  "carrinho": {
+    "largura": 129,
+    "altura": 138,
+    "ancoraX": 81,
+    "ancoraY": 105
+  },
+  "coluna": {
+    "largura": 75,
+    "altura": 147,
+    "ancoraX": 37.3,
+    "ancoraY": 124.6
+  },
+  "estante": {
+    "largura": 104,
+    "altura": 183,
+    "ancoraX": 51.7,
+    "ancoraY": 152.5
+  },
+  "livros": {
+    "largura": 94,
+    "altura": 77,
+    "ancoraX": 50.1,
+    "ancoraY": 45.9
+  },
+  "loja": {
+    "largura": 276,
+    "altura": 314,
+    "ancoraX": 139.5,
+    "ancoraY": 230.6
+  },
+  "ouro_1": {
+    "largura": 68,
+    "altura": 51,
+    "ancoraX": 31.6,
+    "ancoraY": 26.5
+  },
+  "ouro_2": {
+    "largura": 70,
+    "altura": 56,
+    "ancoraX": 29.7,
+    "ancoraY": 26.9
+  },
+  "ouro_3": {
+    "largura": 111,
+    "altura": 86,
+    "ancoraX": 57,
+    "ancoraY": 48.2
+  },
+  "ouro_4": {
+    "largura": 170,
+    "altura": 130,
+    "ancoraX": 95.5,
+    "ancoraY": 72
+  },
+  "portal": {
+    "largura": 233,
+    "altura": 241,
+    "ancoraX": 116.2,
+    "ancoraY": 179.2
+  },
+  "santuario_aceso": {
+    "largura": 103,
+    "altura": 127,
+    "ancoraX": 49.8,
+    "ancoraY": 88.6
+  },
+  "santuario_apagado": {
+    "largura": 103,
+    "altura": 127,
+    "ancoraX": 49.8,
+    "ancoraY": 88.6
+  },
+  "vaso": {
+    "largura": 48,
+    "altura": 60,
+    "ancoraX": 23.9,
+    "ancoraY": 44.9
+  },
+  "vela": {
+    "largura": 45,
+    "altura": 69,
+    "ancoraX": 20.6,
+    "ancoraY": 51.8
+  }
+}

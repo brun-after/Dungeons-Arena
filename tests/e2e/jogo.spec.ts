@@ -17,6 +17,25 @@ async function ler(diag: Locator, atributo: 'celula' | 'tela' | 'pos'): Promise<
   return [a, b];
 }
 
+/**
+ * Marco 31 (31/10/2026, D-130): o ponto da tela no centro da célula (x, y), no isométrico com zoom 1, a partir do centro
+ * da célula do jogador na tela (`data-grade`).
+ */
+async function telaDaCelula(diag: Locator, x: number, y: number): Promise<{ x: number; y: number }> {
+  const [cx, cy] = await ler(diag, 'celula');
+  const [gx = 0, gy = 0] = ((await diag.getAttribute('data-grade')) ?? '').split(',').map(Number);
+  const k = 48 * Math.SQRT1_2;
+  const dx = x - cx;
+  const dy = y - cy;
+  return { x: gx + (dx - dy) * k, y: gy + ((dx + dy) * k) / 2 };
+}
+
+/** Clica no centro da célula (x, y) do mapa. */
+async function clicarCelula(page: Page, diag: Locator, x: number, y: number): Promise<void> {
+  const p = await telaDaCelula(diag, x, y);
+  await page.mouse.click(p.x, p.y);
+}
+
 /** Espera o jogador e a câmera pararem (célula e posição na tela iguais em duas leituras). */
 async function esperarParado(page: Page, diag: Locator) {
   await expect
@@ -79,10 +98,9 @@ test.describe('desktop', () => {
     await esperarParado(page, diag);
 
     const [px, py] = await ler(diag, 'pos');
-    const [tx, ty] = await ler(diag, 'tela');
-    // Zoom inicial 1: uma célula = 48 px. Clica no centro da célula (3,3) da sala inicial: livre (longe do
-    // boneco de treino, que seleciona alvo em vez de andar) e alcançável de onde o jogador estiver.
-    await page.mouse.click(tx + (3 - px) * 48, ty + (3 - py) * 48);
+    // Zoom inicial 1. Clica no centro da célula (3,3) da sala inicial: livre (longe do boneco de treino, que
+    // seleciona alvo em vez de andar) e alcançável de onde o jogador estiver.
+    await clicarCelula(page, diag, 3, 3);
     // Marco 26 (D-104): o caminho é uma reta, sem escadinha — toda posição no trajeto fica rente à linha.
     const trajeto: [number, number][] = [];
     const amostrar = async () => (trajeto.push(await ler(diag, 'pos')), ler(diag, 'celula'));
@@ -96,13 +114,10 @@ test.describe('desktop', () => {
     const { diag, erros } = await abrir(page);
     // Anda até (7,8), duas células à esquerda do boneco de treino em (9,8).
     await esperarParado(page, diag);
-    const [px, py] = await ler(diag, 'celula');
-    const [sx, sy] = await ler(diag, 'tela');
-    await page.mouse.click(sx + (7 - px) * 48, sy + (8 - py) * 48);
+    await clicarCelula(page, diag, 7, 8);
     await expect.poll(async () => ler(diag, 'celula'), { timeout: 20_000 }).toEqual([7, 8]);
     await esperarParado(page, diag);
-    const [tx, ty] = await ler(diag, 'tela');
-    await page.mouse.click(tx + 2 * 48, ty);
+    await clicarCelula(page, diag, 9, 8);
     await expect.poll(async () => Number(await diag.getAttribute('data-impactos')), { timeout: 15_000 }).toBeGreaterThan(0);
     await page.keyboard.press('Digit1');
     await expect(page.locator('.log-combate li').first()).toBeVisible();
@@ -117,9 +132,7 @@ test.describe('desktop', () => {
       [19, 3],
     ] as const) {
       await esperarParado(page, diag);
-      const [px, py] = await ler(diag, 'celula');
-      const [tx, ty] = await ler(diag, 'tela');
-      await page.mouse.click(tx + (cx - px) * 48, ty + (cy - py) * 48);
+      await clicarCelula(page, diag, cx, cy);
       await expect.poll(async () => ler(diag, 'celula'), { timeout: 20_000 }).toEqual([cx, cy]);
     }
     // O registro guarda as últimas linhas: "notou você" pode já ter saído quando a luta começa.
@@ -213,9 +226,7 @@ test.describe('desktop', () => {
   // Marco 9A: loja e baú da sala inicial da fase 1.
   async function irPara(page: Page, diag: Locator, x: number, y: number) {
     await esperarParado(page, diag);
-    const [px, py] = await ler(diag, 'celula');
-    const [tx, ty] = await ler(diag, 'tela');
-    await page.mouse.click(tx + (x - px) * 48, ty + (y - py) * 48);
+    await clicarCelula(page, diag, x, y);
     await expect.poll(async () => ler(diag, 'celula'), { timeout: 15_000 }).toEqual([x, y]);
   }
 
@@ -467,9 +478,8 @@ test.describe('desktop', () => {
     expect(erros).toEqual([]);
   });
 
-  test('isométrico: a tecla V alterna; o teclado anda pela tela e o clique leva até a célula', async ({ page }) => {
+  test('isométrico: o teclado anda pela tela e o clique leva até a célula', async ({ page }) => {
     const { diag, erros } = await abrir(page);
-    await page.keyboard.press('KeyV');
     await expect(page.locator('body')).toHaveAttribute('data-visao', 'iso');
     // D é "para a direita na tela": no isométrico, NE na grade (x cresce, y não cresce).
     const [x0, y0] = await ler(diag, 'celula');
@@ -479,30 +489,9 @@ test.describe('desktop', () => {
     expect((await ler(diag, 'celula'))[1]).toBeLessThanOrEqual(y0);
     await esperarParado(page, diag);
 
-    // Zoom 1: a célula (3, 3) fica no losango projetado, a partir do centro da célula do jogador na tela (marco 26: o
-    // jogador anda livre e pode parar fora do centro da célula).
-    const [x, y] = await ler(diag, 'celula');
-    const [tx = 0, ty = 0] = ((await diag.getAttribute('data-grade')) ?? '').split(',').map(Number);
-    const k = 48 * Math.SQRT1_2;
-    const dx = 3 - x;
-    const dy = 3 - y;
-    await page.mouse.click(tx + (dx - dy) * k, ty + ((dx + dy) * k) / 2);
+    // Zoom 1: a célula (3, 3) fica no losango projetado (marco 26: o jogador anda livre e pode parar fora do centro).
+    await clicarCelula(page, diag, 3, 3);
     await expect.poll(async () => ler(diag, 'celula'), { timeout: 15_000 }).toEqual([3, 3]);
-
-    await page.keyboard.press('KeyV');
-    await expect(page.locator('body')).toHaveAttribute('data-visao', 'cima');
-    expect(erros).toEqual([]);
-  });
-
-  test('configurações: a visão isométrica persiste depois de recarregar', async ({ page }) => {
-    const { erros } = await abrir(page);
-    const config = await abrirConfiguracoes(page);
-    await config.getByLabel('Visão').selectOption('iso');
-    await expect(page.locator('body')).toHaveAttribute('data-visao', 'iso');
-    await config.getByRole('button', { name: 'Fechar as configurações' }).click();
-    await page.reload();
-    await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
-    await expect(page.locator('body')).toHaveAttribute('data-visao', 'iso');
     expect(erros).toEqual([]);
   });
 
@@ -526,12 +515,9 @@ test.describe('desktop', () => {
     await expect(page.locator('body')).toHaveAttribute('data-token', 'imagem');
     await config.getByLabel('Tamanho do personagem neste aparelho (%)').fill('120');
 
-    // Fica no aparelho: depois de recarregar, nas duas visões.
+    // Fica no aparelho: depois de recarregar.
     await config.getByRole('button', { name: 'Fechar as configurações' }).click();
     await page.reload();
-    await expect(page.locator('body')).toHaveAttribute('data-token', 'imagem');
-    await page.keyboard.press('KeyV');
-    await expect(page.locator('body')).toHaveAttribute('data-visao', 'iso');
     await expect(page.locator('body')).toHaveAttribute('data-token', 'imagem');
 
     const config2 = await abrirConfiguracoes(page);
@@ -774,7 +760,6 @@ test.describe('celular (emulação)', () => {
 
   test('no isométrico, o joystick para a direita anda para a direita na tela', async ({ page }) => {
     const { diag, erros } = await abrir(page);
-    await page.keyboard.press('KeyV');
     await expect(page.locator('body')).toHaveAttribute('data-visao', 'iso');
     const [x0, y0] = await ler(diag, 'celula');
     const j = await centro(page.getByTestId('joystick'));

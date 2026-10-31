@@ -381,6 +381,17 @@ export interface Balance {
     chanceLivroRaro: number;
   };
   /** Marco 15 (D-061): as alavancas de cada dificuldade e a escala pelo tamanho do grupo. */
+  /**
+   * Marco 31 (31/10/2026, D-130): o visual sombrio. Os raios de luz (em células) e o escuro do exterior, a mistura e a
+   * oclusão do chão texturizado (render/solo/) e a parede alta do isométrico (altura em células, esmaecimento).
+   */
+  visual: {
+    luz: { raioJogador: number; raioTocha: number; raioObjeto: number; raioMagia: number; resolucaoMapa: number; realceMinimo: number; escuridaoExterior: number; clareza: number };
+    /** Ajuste de 31/10/2026 (D-130): até quanto ouro cada monte vai (o maior fica com o resto). */
+    ouroMontes: number[];
+    solo: { amostrasPorCelula: number; raioMistura: number; ruidoBorda: number; aoRaio: number; aoForca: number; macroForca: number; variacaoCobre: number };
+    paredeIso: { altura: number; alcanceSala: number; alphaFade: number; telhadoPerto: number };
+  };
   /** Marco 15 (D-061): as metas do ritmo, conferidas pelo simulador (tools/balanceamento) e pelo teste "ritmo". */
   metas: {
     /** Os presets que contam como "inimigo comum". */

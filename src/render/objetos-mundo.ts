@@ -29,6 +29,26 @@ function pessoa(g: Graphics, cx: number, cy: number, roupa: number): void {
 }
 
 /** O vendedor atrás do balcão da loja (mercador, ferreiro ou alquimista). */
+/**
+ * Ajuste de 31/10/2026 (D-130): o vendedor da loja em tamanho de gente (~1,1 célula), com os pés em (0, 0): avental,
+ * braços e capuz na cor do papel (o mercador da campanha, sem papel, usa o dourado). Provisório até o marco 32.
+ */
+export function desenharVendedorDeLoja(g: Graphics, papel: string): void {
+  const roupa = ROUPA_DO_PAPEL[papel] ?? ROUPA_DO_PAPEL.mercador ?? 0xc9a227;
+  const escura = 0x2a221b;
+  g.poly([-9, 0, -3, 0, -3, -22, -9, -22]).fill(escura);
+  g.poly([3, 0, 9, 0, 9, -22, 3, -22]).fill(escura);
+  g.poly([-13, -20, 13, -20, 10, -44, -10, -44]).fill(roupa).stroke({ width: 1.2, color: 0x1b1712, alpha: 0.7 });
+  g.poly([-8, -22, 8, -22, 6, -40, -6, -40]).fill(0xb9ac8f);
+  g.poly([-13, -42, -18, -26, -14, -24, -9, -38]).fill(roupa);
+  g.poly([13, -42, 18, -26, 14, -24, 9, -38]).fill(roupa);
+  g.circle(-16, -24, 3).fill(PELE);
+  g.circle(16, -24, 3).fill(PELE);
+  g.circle(0, -50, 7).fill(PELE).stroke({ width: 1, color: 0x1b1712, alpha: 0.6 });
+  g.poly([-9, -50, -7, -58, 0, -61, 7, -58, 9, -50, 6, -55, -6, -55]).fill(roupa);
+  g.rect(-4, -49, 8, 2).fill({ color: 0x3a2a1e, alpha: 0.8 });
+}
+
 export function desenharVendedor(g: Graphics, o: ObjetoNoMundo, cx: number, cy: number): void {
   const roupa = ROUPA_DO_PAPEL[o.ref ?? ''];
   if (roupa === undefined) return;

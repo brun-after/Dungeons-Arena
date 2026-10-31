@@ -7,11 +7,14 @@
 // Marco 30 (30/10/2026, D-129): a fachada pelo tipo da estrutura (`fase.estruturas`): o castelo com ameias, a torre
 // alta de telhado pontudo, a caverna e a mina como rochedo de topo irregular (a mina com a boca escorada em madeira)
 // e a cripta em pedra fria com frontão.
+// Marco 31 (31/10/2026, D-130): as faces na textura de pedra do tema (a mesma das paredes), com o contorno quase
+// apagado (o traço escuro em volta dava o ar de desenho infantil).
 
-import { Graphics, type Container } from 'pixi.js';
+import { Graphics, type Container, type FillPattern, type Texture } from 'pixi.js';
 import { tipoEm, type Fase } from '../world/fase';
 import { CELULA_PX } from './camera-calculo';
 import { escurecer } from './modelos/svg';
+import { pedraDaFace } from './paredes-iso';
 import { profundidade, type Projecao } from './projecao';
 
 const PEDRAS = [0x8a8178, 0x7d7468, 0x6f7480, 0x857766] as const;
@@ -124,7 +127,10 @@ const ESTILOS: Readonly<Record<string, Estilo>> = {
   cripta: { alto: 0.85, pedras: [0x7c8590, 0x6f7883, 0x858d96], topo: 'frontao', porta: 'arco' },
 };
 
-export function criarEstruturasIso(camada: Container, fase: Fase, p: Projecao): EstruturasIso {
+export function criarEstruturasIso(camada: Container, fase: Fase, p: Projecao, textura: Texture | null = null): EstruturasIso {
+  const pedraSul = textura ? pedraDaFace(textura, p, true) : null;
+  const pedraLeste = textura ? pedraDaFace(textura, p, false) : null;
+  const face = (pedra: FillPattern | null, cor: number) => (pedra ? { fill: pedra, color: cor } : { color: cor });
   const canto = (x: number, y: number) => p.projetar(x * CELULA_PX, y * CELULA_PX);
   const graficos: Graphics[] = [];
   for (const r of retangulosDeFachada(fase)) {
@@ -136,17 +142,17 @@ export function criarEstruturasIso(camada: Container, fase: Fase, p: Projecao): 
     const sul = pedra;
     const leste = escurecer(pedra, 0.22);
     const topo = escurecer(pedra, 0.45);
-    const contorno = { width: 1.2, color: escurecer(pedra, 0.7), alpha: 0.9 };
+    const contorno = { width: 1, color: escurecer(pedra, 0.7), alpha: 0.3 };
     const n = canto(r.x0, r.y0);
     const l = canto(r.x1 + 1, r.y0);
     const s = canto(r.x1 + 1, r.y1 + 1);
     const o = canto(r.x0, r.y1 + 1);
     const g = new Graphics();
-    g.poly([o.x, o.y, s.x, s.y, s.x, s.y - h, o.x, o.y - h]).fill(sul).stroke(contorno);
-    g.poly([s.x, s.y, l.x, l.y, l.x, l.y - h, s.x, s.y - h]).fill(leste).stroke(contorno);
+    g.poly([o.x, o.y, s.x, s.y, s.x, s.y - h, o.x, o.y - h]).fill(face(pedraSul, sul)).stroke(contorno);
+    g.poly([s.x, s.y, l.x, l.y, l.x, l.y - h, s.x, s.y - h]).fill(face(pedraLeste, leste)).stroke(contorno);
     g.poly([n.x, n.y - h, l.x, l.y - h, s.x, s.y - h, o.x, o.y - h]).fill(topo).stroke(contorno);
-    // Fiadas de pedra na face sul (o rochedo não tem: é pedra bruta, com veios tortos).
-    for (let k = 1; k < 4; k++) {
+    // Fiadas de pedra na face sul (o rochedo não tem: é pedra bruta, com veios tortos); com a textura, só no rochedo.
+    for (let k = 1; k < 4 && (!textura || estilo.topo === 'rochedo'); k++) {
       const f = (h * k) / 4;
       const torto = estilo.topo === 'rochedo' ? (k % 2 === 0 ? 5 : -4) : 0;
       g.moveTo(o.x, o.y - f).lineTo((o.x + s.x) / 2, (o.y + s.y) / 2 - f + torto).lineTo(s.x, s.y - f);

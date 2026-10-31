@@ -13,6 +13,10 @@ export interface PontoDeLuz {
   semente: number;
   /** Multiplica o brilho (1 = normal). A do jogador é 0,5 desde o ajuste de 14/10/2026. */
   intensidade?: number;
+  /** Marco 31 (31/10/2026, D-130): o raio no mapa de luz (render/escuridao.ts), em células. */
+  raio?: number;
+  /** A luz que um jogador leva (sobe até o peito; a vinheta segue a do jogador local). */
+  jogador?: boolean;
 }
 
 const RAIO_CELULAS = 3.2;

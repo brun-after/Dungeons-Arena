@@ -18,6 +18,7 @@ import { aplicarEfeito } from './efeitos';
 import { celulaOcupada, chebyshev } from './geometria';
 import { aplicarImpacto } from './golpe';
 import type { Habilidade } from './habilidades';
+import { quebrarEm } from './quebraveis';
 import { construirEfeito } from './registro-efeitos';
 import type { SoloDaVariacao } from './variacoes';
 
@@ -143,6 +144,10 @@ function pulsar(estado: EstadoJogo, ctx: ContextoSimulacao, s: Solo, def: SoloDa
   };
   const alvos = estado.entidades.filter((e) => hostil(estado, ctx, s, e) && dentro(e)).sort((a, b) => (a.id < b.id ? -1 : 1));
   saida.push({ t: 'soloPulsou', tick: estado.tick, soloId: s.id, x: s.x, y: s.y, raio: s.raio, atingidos: alvos.length });
+  // Correção de 31/10/2026 (D-113): o solo quebra os quebráveis que cobre, como a área (o básico do Necromante é
+  // um solo e, antes, passava pelos barris sem quebrar).
+  const dono = buscarEntidade(estado, s.donoId);
+  if (dono) quebrarEm(estado, ctx, celulas, dono, saida);
   let drenado = 0;
   const fonte = fonteDoSolo(estado, s, def.pctPulso);
   alvos.forEach((alvo, indice) => {

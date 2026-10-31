@@ -8,8 +8,8 @@
   "inicio": "vila_do_centro",
   "perigos": {
     "seguro": { "pvp": false, "densidadePor1000": 2, "elitePct": 0, "lootPct": 100 },
-    "normal": { "pvp": false, "densidadePor1000": 5, "elitePct": 6, "eliteNiveis": 4, "lootPct": 110 },
-    "perigoso": { "pvp": true, "densidadePor1000": 8, "elitePct": 20, "eliteNiveis": 6, "lootPct": 180 }
+    "normal": { "pvp": false, "densidadePor1000": 5, "elitePct": 6, "eliteNiveis": 4, "lootPct": 110, "casas": 2 },
+    "perigoso": { "pvp": true, "densidadePor1000": 8, "elitePct": 20, "eliteNiveis": 6, "lootPct": 180, "casas": 3 }
   },
   "lojas": {
     "mercador": ["pocao_vida", "pocao_mana", "pergaminho_lobo", "pergaminho_espantalho", "chave_ferro", "kit_de_engenho"],

@@ -1,19 +1,23 @@
-// Visão da cena (§2.16, §4.5). Marco 13 (14/10/2026), D-058: de cima ou isométrica, trocada na hora (tecla V
-// ou Configurações), sem recarregar; os modelos de criatura do atlas e a imagem do personagem.
+// Visão da cena (§2.16, §4.5). Marco 13 (14/10/2026), D-058: de cima ou isométrica; os modelos de criatura do atlas
+// e a imagem do personagem. Marco 31 (31/10/2026, D-130): o jogo é só isométrico; a montagem segue a projeção da
+// câmera (de cima, só sem as peças em pé).
 // A simulação nunca sabe a visão: só a câmera, as camadas e a entrada mudam.
 
-import type { TextureSource } from 'pixi.js';
-import type { VisaoJogo } from '../plataforma/preferencias';
+import { Texture, type TextureSource } from 'pixi.js';
+import type { Balance } from '../core/contexto';
 import { aoMudarImagemToken, lerImagemToken } from '../plataforma/token';
 import type { Camera } from '../render/camera';
 import { criarDecoracaoIso, type DecoracaoIso } from '../render/decoracao-iso';
 import { criarParedesIso, type ParedesIso } from '../render/paredes-iso';
 import { criarEstruturasIso, type EstruturasIso } from '../render/estruturas-iso';
-import { criarProjecao, type Projecao } from '../render/projecao';
+import { criarTelhados, type Telhados } from '../render/telhados-iso';
+import type { PintorDeDesenhos } from '../render/pintura';
+import type { ObjetosPreRenderizados } from '../render/objetos-3d';
+import type { Projecao } from '../render/projecao';
 import type { Palco } from '../render/stage';
 import { carregarBiblioteca, destruirFonte, fontesDoToken, type BibliotecaCriaturas, type FonteToken } from '../render/texturas-criaturas';
 import { prepararToken } from '../render/token-imagem';
-import type { Terreno } from '../render/terreno';
+import { paletaDe, type Terreno } from '../render/terreno';
 import type { Fase } from '../world/fase';
 import type { Tema } from '../world/temas';
 
@@ -26,10 +30,17 @@ export interface OpcoesVisao {
   /** Marco 26 (D-109): o terreno e o tema, para os enfeites e pilares em pé no isométrico. */
   terreno?: Terreno;
   tema?: Tema | null;
-  /** Depois de trocar a visão ou o token: as camadas refazem o que depende disso. */
+  /** Depois de trocar o token: as camadas refazem o que depende disso. */
   aoTrocar: () => void;
   /** Marco 26 (D-113): os tipos de enfeite que vêm do estado (os quebráveis); o terreno e o isométrico os pulam. */
   quebraveis?: ReadonlySet<string>;
+  /** Marco 31 (D-130): a altura e o esmaecimento das paredes, e a pedra das faces (chega depois; refaz as paredes). */
+  paredeIso: Balance['visual']['paredeIso'];
+  /** Marco 31 (D-130): os enfeites e pilares repintados (render/pintura.ts). */
+  pintor?: PintorDeDesenhos | null;
+  /** Ajuste de 31/10/2026 (D-130): os enfeites e pilares que têm modelo 3D pré-renderizado. */
+  modelos3d?: ObjetosPreRenderizados | null;
+  pedraParede?: Promise<ImageBitmap | null>;
 }
 
 export interface TokenProprio {
@@ -42,7 +53,10 @@ export interface ControleVisao {
   isometrico: () => boolean;
   biblioteca: () => BibliotecaCriaturas | null;
   tokenProprio: () => TokenProprio | null;
-  definir: (v: VisaoJogo) => void;
+  /** Marco 31 (D-130): a parede da frente e os telhados esmaecem perto do jogador (posição em células). */
+  esmaecer: (jogador: { x: number; y: number } | null, dtMs: number) => void;
+  /** Marco 31 (D-130): quem está em (x, y) fica escondido sob um telhado `dentro` fechado. */
+  oculto: (x: number, y: number) => boolean;
   destruir: () => void;
 }
 
@@ -51,6 +65,11 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
   let paredes: ParedesIso | null = null;
   let estruturas: EstruturasIso | null = null;
   let enfeites: DecoracaoIso | null = null;
+  let pedra: Texture | null = null;
+  let telhados: Telhados | null = null;
+  const corParede = o.corParede ?? paletaDe(fase.matizGraus).paredeTopo;
+  const criarParedes = (p: Projecao) =>
+    criarParedesIso(palco.entidades, fase, p, { cor: corParede, textura: pedra, altura: o.paredeIso.altura, alcanceSala: o.paredeIso.alcanceSala, alphaFade: o.paredeIso.alphaFade });
   const aplicar = () => {
     const p = camera.projecaoAtual;
     const iso = p.visao === 'iso';
@@ -58,14 +77,28 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
     paredes?.destruir();
     enfeites?.destruir();
     estruturas?.destruir();
-    paredes = iso ? criarParedesIso(palco.entidades, fase, p, o.corParede ?? null) : null;
+    paredes = iso ? criarParedes(p) : null;
+    // Marco 31 (D-130): os telhados das casas.
+    telhados?.destruir();
+    telhados = fase.telhados?.length ? criarTelhados(palco.entidades, fase, p, { altura: o.paredeIso.altura, perto: o.paredeIso.telhadoPerto }) : null;
     // Marco 29 (D-128): as fachadas altas das estruturas do Mundo.
-    estruturas = iso ? criarEstruturasIso(palco.entidades, fase, p) : null;
-    enfeites = iso ? criarDecoracaoIso(palco.entidades, fase, o.tema ?? null, p, o.quebraveis) : null;
+    estruturas = iso ? criarEstruturasIso(palco.entidades, fase, p, pedra) : null;
+    enfeites = iso ? criarDecoracaoIso(palco.entidades, fase, o.tema ?? null, p, o.quebraveis, o.pintor ?? null, o.modelos3d ?? null) : null;
     o.terreno?.definirVisao(iso);
     document.body.dataset.visao = p.visao;
   };
   aplicar();
+  let destruida = false;
+  void o.pedraParede?.then((img) => {
+    if (!img || destruida) return;
+    pedra = Texture.from(img);
+    pedra.source.addressMode = 'repeat';
+    if (camera.projecaoAtual.visao !== 'iso') return;
+    paredes?.destruir();
+    paredes = criarParedes(camera.projecaoAtual);
+    estruturas?.destruir();
+    estruturas = criarEstruturasIso(palco.entidades, fase, camera.projecaoAtual, pedra);
+  });
 
   const biblioteca = await carregarBiblioteca();
   let token: (TokenProprio & { source: TextureSource }) | null = null;
@@ -92,17 +125,19 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
     isometrico: () => camera.projecaoAtual.visao === 'iso',
     biblioteca: () => biblioteca,
     tokenProprio: () => token,
-    definir: (v) => {
-      if (v === camera.projecaoAtual.visao) return;
-      camera.definirProjecao(criarProjecao(v, fase.largura, fase.altura));
-      aplicar();
-      o.aoTrocar();
+    esmaecer: (jogador, dtMs) => {
+      paredes?.esmaecer(jogador, dtMs);
+      telhados?.atualizar(jogador, dtMs);
     },
+    oculto: (x, y) => telhados?.oculto(x, y) ?? false,
     destruir: () => {
+      destruida = true;
       desligarToken();
       paredes?.destruir();
       enfeites?.destruir();
       estruturas?.destruir();
+      telhados?.destruir();
+      pedra?.destroy(true);
     },
   };
 }

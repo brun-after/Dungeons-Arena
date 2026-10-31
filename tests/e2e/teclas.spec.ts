@@ -7,12 +7,24 @@ async function ler(page: import('@playwright/test').Page, atributo: 'celula' | '
   return [a, b];
 }
 
+// Marco 31 (31/10/2026, D-130): o jogo é só isométrico, mesmo com a preferência de cima guardada antes.
+test.describe('visão', () => {
+  test('a preferência antiga de cima abre no isométrico', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('dungeons-arena:preferencias', JSON.stringify({ visao: 'cima' }));
+    });
+    await page.goto('./?jogo=campanha&slot=1&diag=1&classe=aventureiro');
+    await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/, { timeout: 30_000 });
+    await expect(page.locator('body')).toHaveAttribute('data-visao', 'iso');
+  });
+});
+
 test.describe('teclas de movimento', () => {
   test.skip(({ isMobile }) => isMobile, 'teclado do computador');
 
   test('EWAS no isométrico: E anda só para o norte da fase, sem direcional na tela', async ({ page }) => {
     await page.addInitScript(() => {
-      localStorage.setItem('dungeons-arena:preferencias', JSON.stringify({ visao: 'iso', teclasMovimento: 'ewas' }));
+      localStorage.setItem('dungeons-arena:preferencias', JSON.stringify({ teclasMovimento: 'ewas' }));
     });
     await page.goto('./?jogo=campanha&slot=1&diag=1&classe=aventureiro');
     await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/, { timeout: 30_000 });
@@ -30,9 +42,6 @@ test.describe('teclas de movimento', () => {
 
   // Marco 26 (26/10/2026, D-115): o botão esquerdo segurado guia como o joystick; soltar para na hora.
   test('mouse segurado guia o personagem e soltar para', async ({ page }) => {
-    await page.addInitScript(() => {
-      localStorage.setItem('dungeons-arena:preferencias', JSON.stringify({ visao: 'cima' }));
-    });
     await page.goto('./?jogo=campanha&slot=1&diag=1&classe=aventureiro');
     await expect(page.locator('#diag')).toHaveAttribute('data-tela', /^\d+,\d+$/, { timeout: 30_000 });
     const tela = ((await page.locator('#diag').getAttribute('data-tela')) ?? '0,0').split(',').map(Number);

@@ -7,6 +7,7 @@ import { ELEMENTOS, type Elemento } from '../combat/elementos';
 import { Leitor, type Objeto } from '../core/validar';
 import { TIPOS_AMBIENTE, type TipoAmbiente } from './ambiente-tipos';
 import { TIPOS_DECORACAO, TIPOS_PILAR, type TipoDecoracao, type TipoPilar } from './decoracao';
+import { lerEscuridao, lerSolo, type EscuridaoTema, type SoloTema } from './solo';
 
 export const PARTICULAS_CLIMA = ['poeira', 'folhas', 'brilhos', 'bolhas', 'cinzas', 'faiscas', 'areia', 'neve', 'vagalumes', 'esporos', 'sombras'] as const;
 export type ParticulaClima = (typeof PARTICULAS_CLIMA)[number];
@@ -41,6 +42,9 @@ export interface Tema {
   chanceElemental: number;
   /** Marco 26 (D-112): como é o portal que leva a uma fase deste tema. */
   portal: { estilo: EstiloPortal; cor: number };
+  /** Marco 31 (31/10/2026, D-130): as texturas do chão e o escuro fora da luz (world/solo.ts). */
+  solo: SoloTema;
+  escuridao: EscuridaoTema;
 }
 
 const ehElemento = (v: string): v is Elemento => (ELEMENTOS as readonly string[]).includes(v);
@@ -104,6 +108,8 @@ export function lerTemas(json: unknown, presets?: ReadonlySet<string>): { temas:
       elementosInimigos: elementosInimigos.filter(ehElemento),
       chanceElemental: l.numero(o, 'chanceElemental', { min: 0, max: 1 }),
       portal: { estilo: l.opcao(portal, 'estilo', ESTILOS_PORTAL), cor: cor(l, portal, 'cor') },
+      solo: lerSolo(l, o.solo),
+      escuridao: lerEscuridao(l, o.escuridao),
     };
     if (tema.ambientes.tipos.length === 0) l.erro('ambientes.tipos: ao menos um');
     if (tema.chanceElemental > 0 && tema.elementosInimigos.length === 0) l.erro('chanceElemental sem elementosInimigos');

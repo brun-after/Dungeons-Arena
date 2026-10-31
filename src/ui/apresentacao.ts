@@ -1,3 +1,4 @@
+import { luzesDosAmbientes } from '../render/solo/ambientes-solo';
 import { faixaSuperior } from './aviso';
 import { IndicadorCombo } from './combos';
 import { fracaoMira } from '../combat/mira';
@@ -33,10 +34,14 @@ import { elementosDaDupla } from '../combat/encarnacao';
 import { fracaoFuria } from '../combat/furia';
 import { sintoniaDe } from '../progression/sintonia';
 import { ControladorImpacto } from '../render/impacto';
+import { ACHATAMENTO_ISO, CamadaEscuridao, type LuzNaTela } from '../render/escuridao';
+import { centroDaCelula } from '../render/projecao';
+import { CELULA_PX } from '../render/camera-calculo';
+import { ESCURIDAO_PADRAO } from '../world/solo';
 import { temaDaFase } from '../combat/clima';
 import type { Elemento } from '../combat/elementos';
 import { decoracoesDaFase } from '../world/decoracao';
-import { CamadaLuz, type PontoDeLuz } from '../render/luz';
+import { CamadaLuz, cintilacao, type PontoDeLuz } from '../render/luz';
 import { SistemaParticulas } from '../render/particulas';
 import { escalaDaResolucao, fpsAlvo, PuladorDeQuadros } from '../render/desempenho';
 import { MonitorDeQualidade, PRESETS_QUALIDADE, qualidadePadrao, type PresetQualidade } from '../render/qualidade';
@@ -118,6 +123,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   const impacto = new ControladorImpacto(() => prefs.efeitosDeTela && !reduzido() && qualidade().impacto);
   // Marco 23 (D-092): o tema da fase dá as partículas do ar, a cor da luz e as tochas acesas.
   const tema = temaDaFase(ctx);
+  const vis = ctx.balance.visual.luz;
   const corElemento = (el: Elemento) => Number.parseInt((ctx.conteudo.elementos.get(el)?.cor ?? '#ffffff').slice(1), 16);
   // Marco 24 (25/10/2026, D-098): o golpe de cada arma (pose, rastro e forma) e o giro do Redemoinho.
   const golpeDe = (e: Entidade, chave: string) => golpeDaAcao(ctx, e, chave, e.classeId ?? '');
@@ -181,6 +187,32 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   const combos = new CamadaCombosTaticos(palco.efeitos, () => camera.projecaoAtual, reduzido, () => qualidade().particulas === 0, 24, particulas);
   combos.ligar(o.bus, o.estado, () => performance.now());
   const luz = new CamadaLuz(palco.luz);
+  // Marco 31 (31/10/2026, D-130): o escuro fora da luz. O exterior do Mundo é céu aberto (menos escuro).
+  const escuridao = new CamadaEscuridao(palco.escuro, palco.app.renderer);
+  const escuroTema = tema?.escuridao ?? ESCURIDAO_PADRAO;
+  // Ajuste de 31/10/2026 (pedido do usuário): o escuro fora da luz fica mais claro pela `clareza` (0,5 = metade).
+  const nivelEscuro = (ctx.fase.exterior ? vis.escuridaoExterior : escuroTema.nivel) * (1 - vis.clareza);
+  let pontosDoQuadro: PontoDeLuz[] = [];
+  /** As luzes do quadro, da grade para a tela (depois da câmera aplicada). */
+  const desenharEscuro = (agoraMs: number) => {
+    const proj = camera.projecaoAtual;
+    const zoom = palco.mundo.scale.x || 1;
+    escuridao.achatamento = proj.visao === 'iso' ? ACHATAMENTO_ISO : 1;
+    let centro: { x: number; y: number } | null = null;
+    const luzes: LuzNaTela[] = [];
+    for (const p of pontosDoQuadro) {
+      const c = centroDaCelula(p.x, p.y);
+      const tela = palco.mundo.toGlobal(proj.projetar(c.x, c.y));
+      // A luz do jogador sobe até o peito (ilumina o corpo, não só os pés).
+      const y = tela.y - (p.jogador && proj.visao === 'iso' ? CELULA_PX * 0.35 * zoom : 0);
+      if (p.jogador && !centro) centro = { x: tela.x, y };
+      const pulso = reduzido() ? 1 : 0.92 + (cintilacao(agoraMs, p.semente) - 0.55) * 0.8;
+      luzes.push({ x: tela.x, y, raio: (p.raio ?? vis.raioObjeto) * CELULA_PX * zoom, cor: p.cor, intensidade: Math.min(1, (p.intensidade ?? 1) * 1.6) * pulso });
+    }
+    const modo = qualidade().escuridao;
+    document.body.dataset.escuridao = modo;
+    escuridao.desenhar(palco.mundo, palco.largura(), palco.altura(), { modo, ambiente: escuroTema.ambiente, nivel: nivelEscuro, realceMinimo: vis.realceMinimo, resolucao: vis.resolucaoMapa }, centro, luzes);
+  };
   const flash = new Graphics();
   palco.tela.addChild(flash);
 
@@ -231,22 +263,32 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   });
 
   const acesos = decoracoesDaFase(ctx.fase, tema).filter((d) => d.tipo === 'tocha' || d.tipo === 'vela' || d.tipo === 'lava');
+  // Marco 31 (D-130): as áreas elementais que brilham (brasas, raios, geada, luz sagrada) iluminam em volta.
+  const luzesDasAreas = luzesDosAmbientes(ctx.fase.ambientes ?? []);
   const pontosDeLuz = (estado: EstadoJogo, posicao: (e: Entidade) => PontoVisual): PontoDeLuz[] => {
     const pontos: PontoDeLuz[] = [];
     const eu = estado.entidades.find((e) => e.id === idLocal);
     if (eu) {
       const p = posicao(eu);
       // Ajuste de 14/10/2026: o brilho em volta do jogador pela metade (feedback de jogo).
-      pontos.push({ x: p.x, y: p.y, cor: tema?.luz ?? 0xffd9a0, semente: 0, intensidade: 0.5 });
+      pontos.push({ x: p.x, y: p.y, cor: tema?.luz ?? 0xffd9a0, semente: 0, intensidade: 0.5, raio: vis.raioJogador, jogador: true });
       // As tochas, velas e fendas de lava do tema perto do jogador.
-      for (const d of acesos) if (Math.abs(d.x - p.x) < 12 && Math.abs(d.y - p.y) < 9) pontos.push({ x: d.x, y: d.y - (d.tipo === 'tocha' ? 0.35 : 0), cor: d.tipo === 'vela' ? 0xffd890 : 0xff9a40, semente: d.x * 7 + d.y, intensidade: d.tipo === 'lava' ? 0.4 : 0.6 });
+      for (const a of luzesDasAreas) if (Math.abs(a.x - p.x) < 14 && Math.abs(a.y - p.y) < 11) pontos.push({ x: a.x, y: a.y, cor: a.cor, semente: a.x * 11 + a.y, intensidade: 0.4, raio: a.raio });
+      for (const d of acesos) if (Math.abs(d.x - p.x) < 12 && Math.abs(d.y - p.y) < 9) pontos.push({ x: d.x, y: d.y - (d.tipo === 'tocha' ? 0.35 : 0), cor: d.tipo === 'vela' ? 0xffd890 : 0xff9a40, semente: d.x * 7 + d.y, intensidade: d.tipo === 'lava' ? 0.4 : 0.6, raio: d.tipo === 'vela' ? vis.raioObjeto : vis.raioTocha });
     }
+    // Marco 31 (31/10/2026, D-130): os outros jogadores também levam luz, e os projéteis brilham no escuro.
+    for (const e of estado.entidades) {
+      if (e.id === idLocal || e.morto || e.arquetipo !== 'jogador' || e.invocacao) continue;
+      const q = posicao(e);
+      pontos.push({ x: q.x, y: q.y, cor: 0xffe2b8, semente: q.x * 3 + q.y, intensidade: 0.35, raio: vis.raioJogador * 0.7, jogador: true });
+    }
+    for (const pr of estado.projeteis) pontos.push({ x: pr.x, y: pr.y, cor: 0xffc890, semente: pr.id, intensidade: 0.5, raio: vis.raioMagia });
     for (const obj of estado.objetos) {
-      if (obj.tipo === 'loja' || obj.tipo === 'bau' || obj.tipo === 'saida') pontos.push({ x: obj.x, y: obj.y, cor: 0xffc070, semente: obj.x * 31 + obj.y });
+      if (obj.tipo === 'loja' || obj.tipo === 'bau' || obj.tipo === 'saida') pontos.push({ x: obj.x, y: obj.y, cor: 0xffc070, semente: obj.x * 31 + obj.y, raio: vis.raioObjeto });
     }
     const s = ctx.fase.portaSaida;
-    if (s) pontos.push({ x: s.x, y: s.y, cor: estado.saidaAberta || s.tranca === 'livre' ? 0x9cf0b0 : 0xb0b0c0, semente: 7 });
-    for (const obj of ctx.fase.objetos) if (obj.tipo === 'fonte_som' && obj.som === 'fogo') pontos.push({ x: obj.x, y: obj.y, cor: 0xff9a40, semente: obj.x + obj.y * 13 });
+    if (s) pontos.push({ x: s.x, y: s.y, cor: estado.saidaAberta || s.tranca === 'livre' ? 0x9cf0b0 : 0xb0b0c0, semente: 7, raio: vis.raioObjeto });
+    for (const obj of ctx.fase.objetos) if (obj.tipo === 'fonte_som' && obj.som === 'fogo') pontos.push({ x: obj.x, y: obj.y, cor: 0xff9a40, semente: obj.x + obj.y * 13, raio: vis.raioTocha });
     return pontos;
   };
 
@@ -314,7 +356,8 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
       efeitosArma.quadro(estado, agoraMs, posicao);
       combos.desenhar(estado, agoraMs);
       particulas.atualizar(Math.min(100, dtMs));
-      luz.desenhar(pontosDeLuz(estado, posicao), agoraMs, qualidade().luz, reduzido());
+      pontosDoQuadro = pontosDeLuz(estado, posicao);
+      luz.desenhar(pontosDoQuadro, agoraMs, qualidade().luz, reduzido());
       minimapa.atualizar(estado, agoraMs);
       prompt.atualizar(estado, agoraMs);
       document.body.dataset.particulas = String(particulas.quantidade);
@@ -323,6 +366,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     aplicarCamera: (agoraMs) => {
       const q = impacto.quadro(agoraMs);
       camera.aplicar(palco.mundo, q);
+      desenharEscuro(agoraMs);
       flash.clear();
       if (q.flash > 0) flash.rect(0, 0, palco.largura(), palco.altura()).fill({ color: q.corFlash, alpha: q.flash });
     },

@@ -125,6 +125,17 @@ describe('quebráveis', () => {
     expect(c.eventos.some((e) => e.t === 'projetilFim' && e.motivo === 'acertou')).toBe(true);
   });
 
+  // Correção de 31/10/2026: o básico do Necromante é um solo; o pulso dele quebra o que cobre.
+  it('o solo amaldiçoado do Necromante quebra o barril', () => {
+    const c = cenario('necromante');
+    comKit(c.j());
+    c.barril(5, 5);
+    c.tick({ t: 'ataqueBasico', alvo: { x: 5, y: 5 } });
+    c.avancar(120);
+    expect(quebravelEm(c.estado, 5, 5)).toBeUndefined();
+    expect(c.eventos.find((e) => e.t === 'quebrou')).toMatchObject({ forma: 'barril', porId: 'j' });
+  });
+
   it('o saque nasce onde o barril estava (ou numa vizinha)', () => {
     const c = cenario();
     // Quebra vários até sair algum saque.

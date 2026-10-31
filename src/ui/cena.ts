@@ -26,7 +26,7 @@ import { ligarTeclado, type Teclado } from '../input/teclado';
 import { podeFerir } from '../modos/relacao';
 import { consumiveisComAtalho } from '../progression/inventario';
 import { detectarToque, mostrarDirecional, sinaisDoNavegador } from '../plataforma/dispositivo';
-import { gravarPreferencias, lerPreferencias, type Preferencias } from '../plataforma/preferencias';
+import { lerPreferencias, type Preferencias } from '../plataforma/preferencias';
 import { prepararSessaoDeTela } from '../plataforma/sessao-tela';
 import { Camera } from '../render/camera';
 import { criarProjecao } from '../render/projecao';
@@ -41,7 +41,12 @@ import { criarPalco, type Palco } from '../render/stage';
 import { CamadaTelegrafia } from '../render/telegrafia';
 import { descreverAfinidade, dicaDoClima } from './descrever-elemento';
 import { temaDaFase } from '../combat/clima';
-import { criarTerreno } from '../render/terreno';
+import { criarTerreno, type SoloDoTerreno } from '../render/terreno';
+import { carregarTexturasDoSolo } from '../render/solo/texturas';
+import { texturasDosAmbientes } from '../render/solo/ambientes-solo';
+import { PintorDeDesenhos } from '../render/pintura';
+import { SOLO_PADRAO } from '../world/solo';
+import { hashTexto } from '../core/rng';
 import type { TemasDosPortais } from '../save/destinos';
 import type { TexturasTileset } from '../render/tileset-textura';
 import { velocidade } from '../world/movimento';
@@ -68,6 +73,7 @@ import { Hud } from './hud';
 import { identidadeDaClasse } from './barra-classe';
 import { QuadroAlvo } from './quadro-alvo';
 import { montarVisao, type ControleVisao } from './visao';
+import { ObjetosPreRenderizados } from '../render/objetos-3d';
 import { criarGolpeNoQuebravel } from './golpe-quebravel';
 import { criarBotaoCentralizar } from './botao-centralizar';
 import { classeDaHabilidade } from './runa-dom';
@@ -99,8 +105,6 @@ export interface OpcoesCena {
   portais?: TemasDosPortais;
   /** Marco 18: registrar a primeira descoberta do servidor na nuvem (a arena e os testes desligam). */
   nuvemDescobertas?: boolean;
-  /** Marco 29 (D-128): a visão ao abrir (o Mundo começa no isométrico); sem ela, a das Configurações. */
-  visaoInicial?: Preferencias['visao'];
 }
 
 export interface QuadroCena {
@@ -141,10 +145,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   // Marco 26 (D-107): no computador (com mouse), sem joystick nem D-pad, mesmo com tela de toque.
   const direcional = mostrarDirecional(sinais);
   document.body.classList.toggle('toque', toque);
-  const lidas = lerPreferencias();
-  const prefs: Preferencias = { ...lidas, visao: o.visaoInicial ?? lidas.visao };
+  const prefs: Preferencias = lerPreferencias();
   let aparencia: Preferencias = prefs;
-  let visaoGravada = lidas.visao;
   const jogador = () => o.estado().entidades.find((e) => e.id === idLocal);
 
   o.raiz.textContent = '';
@@ -165,7 +167,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   }
   const encerrarSessaoDeTela = prepararSessaoDeTela(toque);
 
-  const camera = new Camera(criarProjecao(prefs.visao, fase.largura, fase.altura), prefs.camera, toque);
+  // Marco 31 (31/10/2026, D-130): o jogo é só isométrico (a vista de cima fica para o editor e a galeria).
+  const camera = new Camera(criarProjecao('iso', fase.largura, fase.altura), prefs.camera, toque);
   let visao: ControleVisao | null = null;
   const bus = new Barramento<EventosDaSimulacao>();
   let controles: Controles | null = null;
@@ -191,21 +194,33 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       if (p.seguirAlvo !== aparencia.seguirAlvo) emitir({ t: 'seguirAlvo', ligado: p.seguirAlvo });
       controles?.trocarTipo(p.controle);
       if (p.sentidoToken !== aparencia.sentidoToken || p.tamanhoToken !== aparencia.tamanhoToken) sprites.reiniciarVisual();
-      // Marco 29 (D-128): só troca a visão quando ela mudou nas Configurações (o Mundo abre no isométrico).
-      const trocouVisao = p.visao !== visaoGravada;
-      visaoGravada = p.visao;
-      aparencia = trocouVisao ? p : { ...p, visao: aparencia.visao };
-      if (trocouVisao) visao?.definir(p.visao);
-      controles?.atualizarVisao();
+      aparencia = p;
       teclado?.atualizar();
     },
   });
   // Marco 26 (D-113): nos modos com objetos, os enfeites que quebram saem do estado (render/objetos.ts), não do terreno.
   const quebraveis: ReadonlySet<string> = ctx.modo.objetosDeFase ? new Set(ctx.balance.quebraveis.tipos) : new Set();
-  const terreno = criarTerreno(palco.terreno, fase, o.tileset ?? null, temaDaFase(ctx), quebraveis);
+  // Marco 31 (31/10/2026, D-130): o chão texturizado do tema (render/solo/), na resolução da qualidade de agora.
+  const soloTema = temaDaFase(ctx)?.solo ?? SOLO_PADRAO;
+  // Os enfeites, os pilares e os objetos repintados (render/pintura.ts), com o cache de texturas da cena.
+  const pintor = new PintorDeDesenhos(palco.app.renderer);
+  // Ajuste de 31/10/2026 (D-130): os objetos pré-renderizados de modelos 3D CC0 (render/objetos-3d.ts).
+  const modelos3d = new ObjetosPreRenderizados();
+  const solo: SoloDoTerreno | null = o.tileset
+    ? null
+    : {
+        tema: soloTema,
+        cfg: ctx.balance.visual.solo,
+        escala: ap.qualidade().soloEscala,
+        semente: hashTexto(fase.id),
+        texturas: carregarTexturasDoSolo([soloTema.base, soloTema.variacao, soloTema.parede, soloTema.mato, 'estrada', ...texturasDosAmbientes(fase.ambientes ?? [])]),
+        pintor,
+      };
+  const terreno = criarTerreno(palco.terreno, fase, o.tileset ?? null, temaDaFase(ctx), quebraveis, solo);
   const projecao = () => camera.projecaoAtual;
   const sprites = new CamadaEntidades(palco.entidades, {
     idLocal,
+    rotulos: palco.rotulos,
     projecao,
     biblioteca: () => visao?.biblioteca() ?? null,
     tokenProprio: () => visao?.tokenProprio() ?? null,
@@ -215,11 +230,13 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     runaDaClasse: () => aparencia.runaDaClasse,
     corElemento: (el) => Number.parseInt((ctx.conteudo.elementos.get(el)?.cor ?? '#ffffff').slice(1), 16),
     ajuste: (e, agoraMs) => ap.ajusteVisual(e, agoraMs),
+    oculto: (x, y) => visao?.oculto(x, y) ?? false,
     // Marco 25 (D-103): o arco branco do Arqueiro com a mira cheia.
     armaBranca: (e, tick) => fracaoMira(ctx, e, tick) === 1,
   });
-  const telegrafia = new CamadaTelegrafia(palco.chao, palco.voo, projecao, () => aparencia.areaExata, ap.particulas);
-  await carregarTexturasDeIcones([...new Set([...ctx.conteudo.itens.values()].map((i) => i.icone)), 'pergaminho']);
+  // Marco 31 (D-130): a telegrafia acima do escuro (a área do golpe inimigo se lê mesmo fora da luz).
+  const telegrafia = new CamadaTelegrafia(palco.marcas, palco.voo, projecao, () => aparencia.areaExata, ap.particulas);
+  await Promise.all([carregarTexturasDeIcones([...new Set([...ctx.conteudo.itens.values()].map((i) => i.icone)), 'pergaminho']), o.tileset ? null : modelos3d.carregar()]);
   const objetos = new CamadaObjetos(
     palco.chao,
     (id) => ctx.conteudo.itens.get(id)?.raridade,
@@ -227,6 +244,9 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     { camada: palco.entidades, projecao },
     (id) => ctx.conteudo.itens.get(id)?.icone,
     temaDaFase(ctx)?.paleta ?? null,
+    pintor,
+    o.tileset ? null : modelos3d,
+    ctx.balance.visual.ouroMontes,
   );
   bus.on('quebrou', (ev) => {
     ap.particulas.emitir(presetDaQuebra(ev.forma), ev.x, ev.y, 0x9ad8ff);
@@ -240,6 +260,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     emPe: { camada: palco.entidades, projecao },
     destinos: { saida: temaPorId(o.portais?.saida), retorno: temaPorId(o.portais?.retorno), aqui: temaDaFase(ctx) },
     particulas: ap.particulas,
+    modelos: o.tileset ? null : modelos3d,
   });
   const numeros = new CamadaNumeros(palco.efeitos, ap.movimentoReduzido, projecao);
   visao = await montarVisao({
@@ -250,20 +271,16 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     terreno,
     tema: temaDaFase(ctx),
     quebraveis,
+    paredeIso: ctx.balance.visual.paredeIso,
+    pintor: o.tileset ? null : pintor,
+    modelos3d: o.tileset ? null : modelos3d,
+    ...(solo && { pedraParede: solo.texturas.then((t) => t.get(soloTema.parede) ?? null) }),
     aoTrocar: () => {
       sprites.reiniciarVisual();
       objetos.reiniciarVisual();
     },
   });
   const isometrico = () => camera.projecaoAtual.visao === 'iso';
-  // Tecla V: alterna e guarda a escolha (a mesma das Configurações).
-  const alternarVisao = () => {
-    const nova = isometrico() ? 'cima' : 'iso';
-    aparencia = { ...lerPreferencias(), visao: nova };
-    gravarPreferencias(aparencia);
-    visao.definir(nova);
-    controles?.atualizarVisao();
-  };
   const usarHabilidade = (id: string) => {
     emitir({ t: 'usarHabilidade', id });
   };
@@ -512,7 +529,6 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     aoDispensar: () => {
       emitir({ t: 'dispensar' });
     },
-    aoAlternarVisao: alternarVisao,
     aoTrocarAlvo: trocarAlvo,
     aoTravarAlvo: travarAlvo,
     aoUltimate: usarUltimate,
@@ -639,6 +655,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     terreno.atualizarVisibilidade(...vista);
     const reduzido = ap.movimentoReduzido();
     terreno.animar(q.agoraMs, reduzido);
+    visao.esmaecer(j ? posicaoVisual : null, dtMs);
     objetos.desenhar(estado, q.agoraMs, reduzido, vista);
     portas.desenhar(estado, q.agoraMs, reduzido);
     fluxo.desenhar(estado, idLocal, ap.movimentoReduzido());
@@ -683,6 +700,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       encerrarSessaoDeTela();
       hud.destruir();
       visao.destruir();
+      pintor.destruir();
+      modelos3d.destruir();
       ap.encerrar();
       for (const d of document.querySelectorAll('dialog.modal')) if (!modaisDeAntes.has(d)) d.remove();
       palco.destruir();

@@ -29,13 +29,20 @@ export interface PresetQualidade {
   animacoesCss: boolean;
   /** Caminhada por 18 tiras (§2.16); sem ela, um desenho só por token (atalho de sprite, marco 13). */
   tiras: boolean;
+  /**
+   * Marco 31 (31/10/2026, D-130): a escuridão. `mapa` é o mapa de luz em render texture (as luzes recortam o escuro);
+   * `vinheta`, um escuro pré-pintado em volta do jogador (barato, para o celular).
+   */
+  escuridao: 'mapa' | 'vinheta';
+  /** A resolução do chão texturizado assado por bloco (1 = 48 px por célula). */
+  soloEscala: number;
 }
 
 export const PRESETS_QUALIDADE: Readonly<Record<NivelQualidade, PresetQualidade>> = {
-  minimo: { particulas: 0, luz: false, poeira: false, impacto: false, auras: false, animacoesCss: false, tiras: false },
-  baixo: { particulas: 120, luz: false, poeira: false, impacto: true, auras: true, animacoesCss: false, tiras: false },
-  medio: { particulas: 300, luz: true, poeira: false, impacto: true, auras: true, animacoesCss: true, tiras: true },
-  alto: { particulas: 600, luz: true, poeira: true, impacto: true, auras: true, animacoesCss: true, tiras: true },
+  minimo: { particulas: 0, luz: false, poeira: false, impacto: false, auras: false, animacoesCss: false, tiras: false, escuridao: 'vinheta', soloEscala: 0.375 },
+  baixo: { particulas: 120, luz: false, poeira: false, impacto: true, auras: true, animacoesCss: false, tiras: false, escuridao: 'vinheta', soloEscala: 0.5 },
+  medio: { particulas: 300, luz: true, poeira: false, impacto: true, auras: true, animacoesCss: true, tiras: true, escuridao: 'mapa', soloEscala: 0.625 },
+  alto: { particulas: 600, luz: true, poeira: true, impacto: true, auras: true, animacoesCss: true, tiras: true, escuridao: 'mapa', soloEscala: 0.75 },
 };
 
 const ORDEM: readonly NivelQualidade[] = ['minimo', 'baixo', 'medio', 'alto'];

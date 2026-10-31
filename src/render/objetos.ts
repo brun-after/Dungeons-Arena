@@ -12,6 +12,12 @@
 // flutuando sobre a sombra, o cristal sobre a base), com profundidade; só os halos seguem no chão.
 // Marco 26 (29/10/2026, D-122): só desenha o que está na vista da câmera (com folga); os de fora ficam escondidos,
 // sem redesenho por quadro. Com os drops que se acumulavam, o chão inteiro era redesenhado a cada quadro.
+// Marco 31 (31/10/2026, D-130): com o pintor (render/pintura.ts), o baú, a loja, o ouro, o santuário e os objetos do
+// Mundo viram sprites repintados (um por objeto, trocado quando o estado muda: aberto, trancado, aceso), nas duas
+// visões; os orbes ganham volume (núcleo, reflexo e brilho) no lugar do traço branco.
+// Ajuste de 31/10/2026 (D-130): no isométrico, o baú, a loja (em tamanho real, com o vendedor atrás do balcão), o
+// ouro, o santuário e os quebráveis que têm modelo usam os sprites pré-renderizados de modelos 3D CC0
+// (render/objetos-3d.ts); sem a imagem, o desenho repintado de antes.
 
 import { CanvasSource, Container, Graphics, Sprite, Text, Texture } from 'pixi.js';
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
@@ -24,12 +30,23 @@ import type { PaletaTema } from '../world/temas';
 import { desenharDecoracao } from './decoracao';
 import { paletaDe } from './terreno';
 import { texturaDoIcone } from './icones-textura';
-import { desenharObjetoDoMundo, desenharVendedor } from './objetos-mundo';
+import { desenharObjetoDoMundo, desenharVendedor, desenharVendedorDeLoja } from './objetos-mundo';
+import type { ObjetosPreRenderizados } from './objetos-3d';
+import { varianteEmPassos, type PintorDeDesenhos } from './pintura';
 
 const COR_ORBE: Readonly<Record<'orbe_hp' | 'orbe_recurso', number>> = {
   orbe_hp: 0x2ecc71,
   orbe_recurso: 0x5dade2,
 };
+
+/** Marco 31 (D-130): o orbe com volume: a sombra na borda de baixo, o corpo, a luz de cima e o reflexo. */
+function esfera(g: Graphics, cx: number, cy: number, r: number, cor: number): void {
+  const escuro = (c: number, k: number) => (Math.round(((c >> 16) & 0xff) * k) << 16) | (Math.round(((c >> 8) & 0xff) * k) << 8) | Math.round((c & 0xff) * k);
+  g.circle(cx, cy, r).fill(escuro(cor, 0.45));
+  g.circle(cx - r * 0.12, cy - r * 0.14, r * 0.82).fill(escuro(cor, 0.8));
+  g.circle(cx - r * 0.25, cy - r * 0.3, r * 0.5).fill(cor);
+  g.circle(cx - r * 0.38, cy - r * 0.42, r * 0.2).fill({ color: 0xffffff, alpha: 0.75 });
+}
 
 /** Cores de raridade da §2.10. */
 export const COR_RARIDADE: Readonly<Record<Raridade, number>> = {
@@ -62,6 +79,10 @@ export class CamadaObjetos {
   private readonly itens = new Map<string, { visual: Container; quantidade: Text }>();
   /** Marco 26 (D-113): os quebráveis, um Graphics por objeto, desenhado uma vez (o enfeite não anima). */
   private readonly quebras = new Map<string, Graphics>();
+  /** Marco 31 (D-130): os objetos repintados, um sprite por objeto e a chave do desenho que ele mostra. */
+  private readonly pinturas = new Map<string, { sprite: Sprite; chave: string }>();
+  /** Os sprites dos modelos pré-renderizados, por objeto (o vendedor da loja leva o sufixo `#v`). */
+  private readonly modelos3d = new Map<string, Sprite>();
 
   /**
    * `raridadeDe` traduz o item do chão para a cor; item desconhecido aparece como comum.
@@ -74,6 +95,9 @@ export class CamadaObjetos {
     private readonly emPe: OpcoesEmPe | null = null,
     private readonly iconeDe: (itemId: string) => string | undefined = () => undefined,
     private readonly paleta: PaletaTema | null = null,
+    private readonly pintor: PintorDeDesenhos | null = null,
+    private readonly modelos: ObjetosPreRenderizados | null = null,
+    private readonly ouroMontes: readonly number[] = [],
   ) {
     this.camadaHalo = camada;
     camada.addChild(this.g);
@@ -96,6 +120,118 @@ export class CamadaObjetos {
     }
     this.texturaHalo = new Texture({ source: new CanvasSource({ resource: c }) });
     return this.texturaHalo;
+  }
+
+  /**
+   * Marco 31 (D-130): o objeto como sprite repintado, com a origem do desenho em (x, y) da `camada`. Devolve false sem
+   * pintor (quem chama desenha como antes).
+   */
+  private pintado(o: ObjetoNoMundo, chave: string, desenhar: (g: Graphics) => void, x: number, y: number, camada: Container, z: number): boolean {
+    if (!this.pintor) return false;
+    const pintura = this.pintor.pintura(chave, desenhar);
+    if (!pintura) return true;
+    let p = this.pinturas.get(o.objetoId);
+    if (!p) {
+      p = { sprite: new Sprite(pintura.textura), chave };
+      this.pinturas.set(o.objetoId, p);
+    }
+    if (p.chave !== chave) {
+      p.sprite.texture = pintura.textura;
+      p.chave = chave;
+    }
+    if (p.sprite.parent !== camada) camada.addChild(p.sprite);
+    p.sprite.position.set(x + pintura.x, y + pintura.y);
+    p.sprite.width = pintura.largura;
+    p.sprite.height = pintura.altura;
+    p.sprite.zIndex = z;
+    p.sprite.visible = true;
+    return true;
+  }
+
+  /** O modelo pré-renderizado do objeto (render/objetos-3d.ts), ou null. */
+  private nomeModelo(o: ObjetoNoMundo): string | null {
+    if (o.tipo === 'bau') return o.abertoTick > 0 ? 'bau_aberto' : o.chave ? 'bau_trancado' : 'bau_fechado';
+    if (o.tipo === 'loja') return o.tipo;
+    // O monte cresce com a quantia: o primeiro limite que a quantia não passa (acima de todos, o maior).
+    if (o.tipo === 'ouro') {
+      const i = this.ouroMontes.findIndex((limite) => o.valor <= limite);
+      return `ouro_${(i < 0 ? this.ouroMontes.length : i) + 1}`;
+    }
+    if (o.tipo === 'santuario') return o.abertoTick === 0 ? 'santuario_aceso' : 'santuario_apagado';
+    if (o.tipo === 'quebravel') return o.ref ?? null;
+    return null;
+  }
+
+  /** Mostra o modelo com os pés em (x, y) da camada; false se ele não está pronto (quem chama desenha como antes). */
+  private modelo(id: string, nome: string, x: number, y: number, camada: Container, z: number): boolean {
+    if (!this.modelos?.tem(nome)) return false;
+    let s = this.modelos3d.get(id);
+    if (!s) {
+      s = new Sprite();
+      this.modelos3d.set(id, s);
+    }
+    this.modelos.aplicar(s, nome);
+    if (s.parent !== camada) camada.addChild(s);
+    s.position.set(x, y);
+    s.zIndex = z;
+    s.visible = true;
+    return true;
+  }
+
+  /**
+   * A loja em tamanho real: o vendedor fica atrás do balcão (o balcão cobre as pernas). A barraca está girada 22° no
+   * render (tools/objetos/receitas.ts): atrás dela é o sentido contrário à frente, na grade.
+   */
+  private vendedorDaLoja(o: ObjetoNoMundo, proj: Projecao, camada: Container): void {
+    const id = `${o.objetoId}#v`;
+    const c = centroDaCelula(o.x, o.y);
+    const atras = 0.32 * CELULA_PX;
+    const p = proj.projetar(c.x - Math.sin(Math.PI / 8) * atras, c.y - Math.cos(Math.PI / 8) * atras);
+    const ref = o.ref ?? 'mercador';
+    const pintura = this.pintor?.pintura(`vendedor:${ref}`, (g) => {
+      desenharVendedorDeLoja(g, ref);
+    });
+    if (!pintura) return;
+    let s = this.modelos3d.get(id);
+    if (!s) {
+      s = new Sprite(pintura.textura);
+      this.modelos3d.set(id, s);
+    }
+    if (s.parent !== camada) camada.addChild(s);
+    s.anchor.set(0, 0);
+    s.scale.set(1);
+    s.position.set(p.x + pintura.x, p.y + pintura.y);
+    s.width = pintura.largura;
+    s.height = pintura.altura;
+    s.zIndex = p.y;
+    s.visible = true;
+  }
+
+  /** A chave do desenho repintado do objeto (o que muda o desenho entra nela), ou null para os que animam. */
+  private chaveDe(o: ObjetoNoMundo): string | null {
+    if (o.tipo === 'bau') return `bau:${o.abertoTick > 0 ? 'aberto' : o.chave ? 'trancado' : 'fechado'}`;
+    if (o.tipo === 'loja') return `loja:${o.ref ?? ''}`;
+    if (o.tipo === 'ouro') return 'ouro';
+    if (o.tipo === 'santuario') return `santuario:${o.abertoTick === 0 ? 'aceso' : 'apagado'}`;
+    if (o.tipo === 'npc' || o.tipo === 'coleta' || o.tipo === 'tumulo' || o.tipo === 'pedra_save' || o.tipo === 'pedra_portal' || o.tipo === 'porta_estrutura') {
+      return `mundo:${o.tipo}:${o.ref ?? ''}:${o.escondido ? 1 : 0}`;
+    }
+    return null;
+  }
+
+  /** O desenho do objeto com a origem nos pés (o centro da célula), como os de pé do isométrico. */
+  private desenhoDe(g: Graphics, o: ObjetoNoMundo, estado: EstadoJogo): void {
+    if (o.tipo === 'bau') this.bau(g, estado, o, 0, -10);
+    else if (o.tipo === 'loja') {
+      this.loja(g, 0, -12);
+      desenharVendedor(g, o, 0, -12);
+    } else if (o.tipo === 'ouro') {
+      g.ellipse(2, -2, 8, 3.2).fill(0xd4ac0d).stroke({ width: 1.2, color: 0x9a7d0a });
+      g.ellipse(-5, -8, 5, 7.5).fill(0xd4ac0d).stroke({ width: 1.5, color: 0x9a7d0a });
+      g.ellipse(5, -10, 5.5, 8).fill(0xf1c40f).stroke({ width: 1.5, color: 0x9a7d0a });
+      g.rect(4.2, -15, 1.6, 9).fill({ color: 0xfff3b0, alpha: 0.8 });
+    } else if (o.tipo === 'santuario') this.santuario(g, o, 0, -14);
+    else desenharObjetoDoMundo(g, o, 0, 0, 0);
   }
 
   /** Halos dos objetos em uso; os que pararam de ser usados somem. */
@@ -170,20 +306,19 @@ export class CamadaObjetos {
     if (o.tipo === 'orbe_efeito') {
       const cor = o.efeito ? Number.parseInt(REGISTRO_EFEITOS[o.efeito.tipo].cor.slice(1), 16) : 0xffffff;
       g.circle(cx, cy, 15 + pulso).fill({ color: cor, alpha: 0.22 });
-      g.circle(cx, cy, 9).fill(cor).stroke({ width: 3, color: 0xffffff, alpha: 0.95 });
-      g.circle(cx, cy, 3).fill(0xffffff);
+      esfera(g, cx, cy, 9, cor);
       return;
     }
     if (o.tipo === 'orbe_refugio') {
       // D-067: o refúgio, prateado, com um losango no miolo (a carga de imunidade).
       g.circle(cx, cy, 16 + pulso).fill({ color: 0xd6eaf8, alpha: 0.22 });
-      g.circle(cx, cy, 9).fill(0x85c1e9).stroke({ width: 2, color: 0xffffff, alpha: 0.95 });
-      g.poly([cx, cy - 5, cx + 4, cy, cx, cy + 5, cx - 4, cy]).fill(0xffffff);
+      esfera(g, cx, cy, 9, 0x85c1e9);
+      g.poly([cx, cy - 5, cx + 4, cy, cx, cy + 5, cx - 4, cy]).fill({ color: 0xffffff, alpha: 0.85 });
       return;
     }
     if (o.tipo !== 'orbe_hp' && o.tipo !== 'orbe_recurso') return;
     g.circle(cx, cy, 14 + pulso).fill({ color: COR_ORBE[o.tipo], alpha: 0.18 });
-    g.circle(cx, cy, 8).fill(COR_ORBE[o.tipo]).stroke({ width: 2, color: 0xffffff, alpha: 0.8 });
+    esfera(g, cx, cy, 8, COR_ORBE[o.tipo]);
   }
 
   /** `vista`: o retângulo visível em px de plano (`Camera.retanguloVisivel`); sem ele, desenha tudo. */
@@ -219,6 +354,15 @@ export class CamadaObjetos {
         g.circle(cx, cy, 16 + pulso).fill({ color: cor, alpha: 0.2 });
         vistos.add(o.objetoId);
         this.desenharItem(o, cx, cy, iso ? proj : undefined);
+        continue;
+      }
+      // Marco 31 (D-130): de cima, os que têm desenho repintado, com os pés um pouco abaixo do centro da célula.
+      const chave = this.chaveDe(o);
+      const desenho = (gp: Graphics) => {
+        this.desenhoDe(gp, o, estado);
+      };
+      if (chave && this.pintado(o, chave, desenho, cx, cy + CELULA_PX * 0.3, this.camadaHalo, 0)) {
+        vistos.add(o.objetoId);
         continue;
       }
       if (o.tipo === 'ouro') {
@@ -260,6 +404,16 @@ export class CamadaObjetos {
       q.destroy();
       this.quebras.delete(id);
     }
+    for (const [id, p] of this.pinturas) {
+      if (vistos.has(id)) continue;
+      p.sprite.destroy();
+      this.pinturas.delete(id);
+    }
+    for (const [id, s] of this.modelos3d) {
+      if (vistos.has(id.endsWith('#v') ? id.slice(0, -2) : id)) continue;
+      s.destroy();
+      this.modelos3d.delete(id);
+    }
   }
 
   /**
@@ -274,20 +428,28 @@ export class CamadaObjetos {
       const tipo = o.ref ?? '';
       if (ehTipoDecoracao(tipo)) {
         if (proj) g.ellipse(CELULA_PX / 2, CELULA_PX * 0.75, CELULA_PX * 0.3, CELULA_PX * 0.12).fill({ color: 0x000000, alpha: 0.22 });
-        desenharDecoracao(g, { tipo, x: 0, y: 0, variante: hashCelula(o.x, o.y, 3) }, this.paleta ?? paletaDe(0));
+        // Marco 31 (D-130): com o pintor, o enfeite vai num sprite repintado (abaixo); aqui fica só a sombra.
+        if (!this.pintor) desenharDecoracao(g, { tipo, x: 0, y: 0, variante: hashCelula(o.x, o.y, 3) }, this.paleta ?? paletaDe(0));
       }
       this.quebras.set(o.objetoId, g);
     }
     if (g.parent !== camada) camada.addChild(g);
-    if (!proj) {
-      g.position.set(o.x * CELULA_PX, o.y * CELULA_PX);
-      return;
+    if (!proj) g.position.set(o.x * CELULA_PX, o.y * CELULA_PX);
+    else {
+      const c = centroDaCelula(o.x, o.y);
+      const p = proj.projetar(c.x, c.y);
+      // A base do desenho (0,75 da célula) cai no centro projetado.
+      g.position.set(p.x - CELULA_PX / 2, p.y - CELULA_PX * 0.75);
+      g.zIndex = p.y - 0.01;
     }
-    const c = centroDaCelula(o.x, o.y);
-    const p = proj.projetar(c.x, c.y);
-    // A base do desenho (0,75 da célula) cai no centro projetado.
-    g.position.set(p.x - CELULA_PX / 2, p.y - CELULA_PX * 0.75);
-    g.zIndex = p.y - 0.01;
+    const tipo = o.ref ?? '';
+    if (proj && this.modelo(o.objetoId, tipo, g.x + CELULA_PX / 2, g.y + CELULA_PX * 0.75, camada, g.zIndex + 0.001)) return;
+    if (!ehTipoDecoracao(tipo)) return;
+    const variante = varianteEmPassos(hashCelula(o.x, o.y, 3));
+    const desenho = (gp: Graphics) => {
+      desenharDecoracao(gp, { tipo, x: 0, y: 0, variante }, this.paleta ?? paletaDe(0));
+    };
+    this.pintado(o, `quebravel:${tipo}:${variante}`, desenho, g.x, g.y, camada, g.zIndex + 0.001);
   }
 
   /** Usa o mesmo desenho da mochila; no isométrico ele fica legível, sem achatar com o piso. */
@@ -335,6 +497,27 @@ export class CamadaObjetos {
     alto.zIndex = p.y;
     // Desenhado acima da origem (os pés do objeto ficam no centro da célula).
     const flutua = Math.sin(tMs / 380 + o.x * 1.7 + o.y) * 2.5;
+    // Ajuste de 31/10/2026 (D-130): o modelo pré-renderizado, com a sombra macia no Graphics.
+    const nome = this.nomeModelo(o);
+    const medidas = nome ? this.modelos?.medidas(nome) : null;
+    if (nome && medidas && this.modelo(o.objetoId, nome, p.x, p.y, camada, p.y + 0.001)) {
+      const r = Math.min(medidas.largura * 0.42, CELULA_PX * 1.3);
+      alto.clear().ellipse(0, 0, r, r * 0.42).fill({ color: 0x000000, alpha: 0.32 });
+      if (o.tipo === 'loja') this.vendedorDaLoja(o, proj, camada);
+      return;
+    }
+    // Marco 31 (D-130): a sombra no Graphics e o desenho repintado num sprite logo à frente dela.
+    const chave = this.chaveDe(o);
+    if (chave && this.pintor) {
+      alto.clear();
+      const ouro = o.tipo === 'ouro';
+      if (o.tipo !== 'npc' && o.tipo !== 'porta_estrutura') alto.ellipse(0, 0, ouro ? 13 : 18, ouro ? 5.5 : 8).fill({ color: 0x000000, alpha: 0.3 });
+      const desenho = (gp: Graphics) => {
+        this.desenhoDe(gp, o, estado);
+      };
+      this.pintado(o, chave, desenho, p.x, p.y, camada, p.y + 0.001);
+      return;
+    }
     if (o.tipo === 'bau' || o.tipo === 'loja') {
       alto.clear().ellipse(0, 0, 18, 8).fill({ color: 0x000000, alpha: 0.3 });
       if (o.tipo === 'bau') this.bau(alto, estado, o, 0, -10);
@@ -370,6 +553,10 @@ export class CamadaObjetos {
     if (item) item.visual.visible = visivel;
     const q = this.quebras.get(id);
     if (q) q.visible = visivel;
+    const pintura = this.pinturas.get(id);
+    if (pintura) pintura.sprite.visible = visivel;
+    const m = this.modelos3d.get(id);
+    if (m) m.visible = visivel;
   }
 
   /** Troca de visão: os objetos em pé voltam para o chão (ou o contrário) no próximo quadro. */
@@ -380,6 +567,10 @@ export class CamadaObjetos {
     this.itens.clear();
     for (const q of this.quebras.values()) q.destroy();
     this.quebras.clear();
+    for (const p of this.pinturas.values()) p.sprite.destroy();
+    this.pinturas.clear();
+    for (const s of this.modelos3d.values()) s.destroy();
+    this.modelos3d.clear();
   }
 
   destruir(): void {

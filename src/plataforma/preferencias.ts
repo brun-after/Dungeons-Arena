@@ -17,7 +17,6 @@ export type NivelQualidade = 'minimo' | 'baixo' | 'medio' | 'alto';
 /** `auto`: começa pelo padrão do aparelho e desce sozinho se o fps cair (§4.10). */
 export type EscolhaQualidade = 'auto' | NivelQualidade;
 export type MovimentoReduzido = 'sistema' | 'sempre' | 'nunca';
-export type VisaoJogo = 'cima' | 'iso';
 /** Teto de quadros por segundo; `auto`: 60, e 30 se a qualidade automática chegar ao mínimo. */
 export type EscolhaFps = 'auto' | '60' | '30';
 /** Escala da resolução do palco; `auto`: média no toque, alta no desktop. */
@@ -44,7 +43,6 @@ export interface Preferencias {
   /** Escala da interface, de 0,8 a 1,5 (§5.4). */
   escalaInterface: number;
   movimentoReduzido: MovimentoReduzido;
-  visao: VisaoJogo;
   sentidoToken: SentidoToken;
   /** Tamanho do personagem neste aparelho, de 0,8 a 1,3 (§2.16). */
   tamanhoToken: number;
@@ -85,7 +83,6 @@ export const PREFERENCIAS_PADRAO: Preferencias = {
   mudo: false,
   escalaInterface: 1,
   movimentoReduzido: 'sistema',
-  visao: 'cima',
   sentidoToken: 'direita',
   tamanhoToken: 1,
   areaExata: false,
@@ -122,7 +119,6 @@ export function normalizarPreferencias(dados: unknown): Preferencias {
     mudo: booleano(d.mudo, PADRAO.mudo),
     escalaInterface: numeroEntre(d.escalaInterface, 0.8, 1.5, PADRAO.escalaInterface),
     movimentoReduzido: opcao(d.movimentoReduzido, ['sistema', 'sempre', 'nunca'] as const, PADRAO.movimentoReduzido),
-    visao: opcao(d.visao, ['cima', 'iso'] as const, PADRAO.visao),
     sentidoToken: opcao(d.sentidoToken, ['direita', 'esquerda'] as const, PADRAO.sentidoToken),
     tamanhoToken: numeroEntre(d.tamanhoToken, 0.8, 1.3, PADRAO.tamanhoToken),
     areaExata: booleano(d.areaExata, PADRAO.areaExata),
