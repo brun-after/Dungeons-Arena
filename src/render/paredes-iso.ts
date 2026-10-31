@@ -6,18 +6,53 @@
 // parede é a rocha plana e escura do terreno, como na visão de cima. Desenhadas por diagonal (um Graphics por x + y),
 // na mesma camada das entidades e com o `zIndex` da diagonal: quem passa atrás de uma parede fica atrás dela.
 // De cima, as paredes continuam no terreno, como antes.
+// Marco 31 (31/10/2026, D-130, revê o D-106 a pedido do usuário): paredes altas como no Diablo (`visual.paredeIso.
+// altura`, 1,15 célula) e um pouco mais grossas (0,3), com as faces na textura de pedra do tema (inclinada pela face,
+// as juntas seguem a diagonal) e sem contorno. O trecho de parede à frente do jogador, perto dele, fica translúcido
+// (`esmaecer`): os Graphics são por diagonal e por faixa da tela, para esmaecer só o pedaço que cobre o jogador.
 
-import { Graphics, type Container } from 'pixi.js';
+import { FillPattern, Graphics, Matrix, type Container, type Texture } from 'pixi.js';
 import { ehPilar } from '../world/decoracao';
 import { chaoAberto, tipoEm, type Fase } from '../world/fase';
 import { CELULA_PX } from './camera-calculo';
-import { escurecer } from './modelos/svg';
+import { clarear, escurecer } from './modelos/svg';
 import { profundidade, type Projecao } from './projecao';
-import { paletaDe } from './terreno';
 
-export const ALTURA_PAREDE_PX = CELULA_PX * 0.18;
 /** Espessura da placa, em células. */
-export const ESPESSURA_PAREDE = 0.2;
+export const ESPESSURA_PAREDE = 0.3;
+/** A largura (em x - y, células) de cada faixa de parede: o esmaecimento acende ou apaga uma faixa inteira. */
+const FAIXA = 4;
+/** Quantas células da textura de pedra cabem numa repetição (na horizontal e na vertical). */
+const CELULAS_POR_TEXTURA = 2;
+/** Quanto do caminho até o alfa alvo o esmaecimento anda por segundo (rápido, sem piscar). */
+const VELOCIDADE_FADE = 8;
+
+export interface OpcoesParedesIso {
+  /** A cor das faces (a do topo da parede do tema, ou a do tileset do jogador). */
+  cor: number;
+  /** A pedra das faces (null: cor lisa). */
+  textura: Texture | null;
+  /** Altura em células. */
+  altura: number;
+  /** Até quantas células do jogador a parede da frente esmaece, e até que alfa. */
+  raioFade: number;
+  alphaFade: number;
+}
+
+/** Uma faixa de parede: a diagonal (profundidade) e o centro em x - y (a posição horizontal na tela). */
+interface Faixa {
+  g: Graphics;
+  d: number;
+  centro: number;
+}
+
+/** Alfa alvo da faixa para o jogador em (px, py): a da frente e perto dele fica translúcida. Puro. */
+export function alfaDaFaixa(d: number, centro: number, px: number, py: number, alturaCelulas: number, raio: number, alphaFade: number): number {
+  const dJogador = px + py;
+  // A parede cobre quem está até ~2 × altura diagonais atrás dela (cada diagonal sobe meia célula na tela).
+  const cobre = d > dJogador - 0.5 && d - dJogador <= alturaCelulas * 2 + 1.5;
+  return cobre && Math.abs(centro - (px - py)) <= raio + FAIXA / 2 ? alphaFade : 1;
+}
 
 const ehParede = (fase: Fase, x: number, y: number) => tipoEm(fase, x, y) === 'parede';
 const deAndar = (fase: Fase, x: number, y: number) => {
@@ -77,49 +112,79 @@ export function placasDaParede(fase: Fase, x: number, y: number): Placa[] {
 }
 
 export interface ParedesIso {
+  /** Marco 31 (D-130): a parede da frente esmaece perto do jogador (em células; null sem jogador). */
+  esmaecer: (jogador: { x: number; y: number } | null, dtMs: number) => void;
   destruir: () => void;
 }
 
-/** Marco 11A: `corParede` (a cor média da parede do tileset do jogador) substitui a paleta da fase. */
-export function criarParedesIso(camada: Container, fase: Fase, p: Projecao, corParede: number | null = null): ParedesIso {
-  const base = corParede ?? paletaDe(fase.matizGraus).paredeTopo;
-  const topo = escurecer(base, 0.45);
-  const esquerda = base;
-  const direita = escurecer(base, 0.25);
-  const contorno = { width: 1, color: escurecer(base, 0.7), alpha: 0.8 };
-  const h = ALTURA_PAREDE_PX;
+/** Marco 11A: `o.cor` (a cor média da parede do tileset do jogador) substitui a paleta da fase. */
+export function criarParedesIso(camada: Container, fase: Fase, p: Projecao, o: OpcoesParedesIso): ParedesIso {
+  const base = o.cor;
+  const topo = escurecer(base, 0.55);
+  const esquerda = escurecer(base, 0.05);
+  const direita = escurecer(base, 0.35);
+  const h = o.altura * CELULA_PX;
   const canto = (x: number, y: number) => p.projetar(x * CELULA_PX, y * CELULA_PX);
+  // A pedra de cada face: a textura corre ao longo da aresta (sul: o eixo x; leste: o eixo y) e cai na vertical.
+  const padrao = (eixoX: boolean): FillPattern | null => {
+    if (!o.textura) return null;
+    const origem = canto(0, 0);
+    const passo = eixoX ? canto(1, 0) : canto(0, 1);
+    const k = 1 / (o.textura.width / CELULAS_POR_TEXTURA);
+    const m = new Matrix((passo.x - origem.x) * k, (passo.y - origem.y) * k, 0, CELULA_PX * k, origem.x, origem.y);
+    const f = new FillPattern(o.textura, 'repeat');
+    f.setTransform(m);
+    return f;
+  };
+  const pedraSul = padrao(true);
+  const pedraLeste = padrao(false);
+  const face = (pedra: FillPattern | null, cor: number) => (pedra ? { fill: pedra, color: cor } : { color: cor });
   /** Caixa [x0, x1] × [y0, y1] (em células) com altura `h`; as faces da frente só se não houver placa encostada. */
   const caixa = (g: Graphics, x0: number, y0: number, x1: number, y1: number, frenteSul: boolean, frenteLeste: boolean) => {
     const n = canto(x0, y0);
     const l = canto(x1, y0);
     const s = canto(x1, y1);
-    const o = canto(x0, y1);
-    if (frenteSul) g.poly([o.x, o.y, s.x, s.y, s.x, s.y - h, o.x, o.y - h]).fill(esquerda).stroke(contorno);
-    if (frenteLeste) g.poly([s.x, s.y, l.x, l.y, l.x, l.y - h, s.x, s.y - h]).fill(direita).stroke(contorno);
-    g.poly([n.x, n.y - h, l.x, l.y - h, s.x, s.y - h, o.x, o.y - h]).fill(topo).stroke(contorno);
+    const ponto = canto(x0, y1);
+    if (frenteSul) g.poly([ponto.x, ponto.y, s.x, s.y, s.x, s.y - h, ponto.x, ponto.y - h]).fill(face(pedraSul, esquerda));
+    if (frenteLeste) g.poly([s.x, s.y, l.x, l.y, l.x, l.y - h, s.x, s.y - h]).fill(face(pedraLeste, direita));
+    g.poly([n.x, n.y - h, l.x, l.y - h, s.x, s.y - h, ponto.x, ponto.y - h]).fill(topo);
+    // A aresta de cima das faces, um pouco mais clara: dá o volume da pedra.
+    if (frenteSul) g.moveTo(ponto.x, ponto.y - h).lineTo(s.x, s.y - h).stroke({ width: 1, color: clarear(base, 0.2), alpha: 0.35 });
   };
-  const graficos: Graphics[] = [];
+  const faixas: Faixa[] = [];
   for (let d = 0; d <= fase.largura + fase.altura - 2; d++) {
-    let g: Graphics | null = null;
+    const porFaixa = new Map<number, Graphics>();
     for (let x = Math.max(0, d - fase.altura + 1); x <= Math.min(d, fase.largura - 1); x++) {
       const y = d - x;
       const placas = placasDaParede(fase, x, y);
       if (placas.length === 0) continue;
-      g ??= new Graphics();
+      const chave = Math.floor((x - y) / FAIXA);
+      let g = porFaixa.get(chave);
+      if (!g) {
+        g = new Graphics();
+        porFaixa.set(chave, g);
+      }
       for (const pl of placas) caixa(g, x + pl.x0, y + pl.y0, x + pl.x1, y + pl.y1, pl.frenteSul, pl.frenteLeste);
     }
-    if (!g) continue;
-    // Um pouco antes da diagonal: quem está na mesma diagonal é desenhado por cima.
-    g.zIndex = profundidade(p, d, 0) - 0.01;
-    g.label = `paredes-${d}`;
-    camada.addChild(g);
-    graficos.push(g);
+    for (const [chave, g] of porFaixa) {
+      // Um pouco antes da diagonal: quem está na mesma diagonal é desenhado por cima.
+      g.zIndex = profundidade(p, d, 0) - 0.01;
+      g.label = `paredes-${d}-${chave}`;
+      camada.addChild(g);
+      faixas.push({ g, d, centro: chave * FAIXA + FAIXA / 2 });
+    }
   }
   return {
+    esmaecer: (jogador, dtMs) => {
+      const passo = Math.min(1, (VELOCIDADE_FADE * dtMs) / 1000);
+      for (const f of faixas) {
+        const alvo = jogador ? alfaDaFaixa(f.d, f.centro, jogador.x, jogador.y, o.altura, o.raioFade, o.alphaFade) : 1;
+        if (f.g.alpha !== alvo) f.g.alpha = Math.abs(alvo - f.g.alpha) < 0.01 ? alvo : f.g.alpha + (alvo - f.g.alpha) * passo;
+      }
+    },
     destruir: () => {
-      for (const g of graficos) g.destroy();
-      graficos.length = 0;
+      for (const f of faixas) f.g.destroy();
+      faixas.length = 0;
     },
   };
 }

@@ -11,7 +11,8 @@ import { Camera } from '../../src/render/camera';
 import { CELULA_PX } from '../../src/render/camera-calculo';
 import { chaveQuadro, gerarAtlas, LADO_PX, VISTAS } from '../../src/render/modelos/atlas';
 import { ehModelo, MODELO_JOGADOR, MODELOS } from '../../src/render/modelos';
-import { ALTURA_PAREDE_PX, ESPESSURA_PAREDE, paredeDeBorda, placasDaParede } from '../../src/render/paredes-iso';
+import { alfaDaFaixa, ESPESSURA_PAREDE, paredeDeBorda, placasDaParede } from '../../src/render/paredes-iso';
+import balance from '../../src/data/balance.json';
 import { celulaSobProjetado, centroDaCelula, criarProjecao, profundidade, type Visao } from '../../src/render/projecao';
 import { caixaVisivel, encaixar, LIMITE_BYTES, validarArquivo, validarDimensoes } from '../../src/render/token-imagem';
 import { criarBotAleatorio, criarCenario, rodar, type Produtor } from '../sim/harness';
@@ -145,17 +146,28 @@ describe('profundidade e paredes em prisma', () => {
     expect(paredeDeBorda(fase, 4, 0)).toBe(false);
   });
 
-  it('marco 26 (D-106): placas 80% mais finas e 70% mais baixas, na aresta que encosta no chão', () => {
-    expect(ESPESSURA_PAREDE).toBeCloseTo(0.2);
-    expect(ALTURA_PAREDE_PX).toBeCloseTo(CELULA_PX * 0.6 * 0.3);
+  it('marco 31 (D-130, revê o D-106): placas de 0,3 e altas (1,15 célula), na aresta que encosta no chão', () => {
+    expect(ESPESSURA_PAREDE).toBeCloseTo(0.3);
+    expect(balance.visual.paredeIso.altura).toBeCloseTo(1.15);
     // Sala 2×1 em (2..3, 2): a parede de cima tem a placa na aresta sul; a da esquerda, na leste.
     const fase = faseDeTexto(['#####', '#####', '##..#', '#####']);
-    expect(placasDaParede(fase, 2, 1)).toEqual([{ x0: 0, y0: 0.8, x1: 1, y1: 1, frenteSul: true, frenteLeste: false }]);
-    expect(placasDaParede(fase, 1, 2)).toEqual([{ x0: 0.8, y0: 0, x1: 1, y1: 1, frenteSul: false, frenteLeste: true }]);
-    // A quina que só toca o chão na diagonal fecha com um bloquinho 0,2 × 0,2.
-    expect(placasDaParede(fase, 1, 1)).toEqual([{ x0: 0.8, y0: 0.8, x1: 1, y1: 1, frenteSul: true, frenteLeste: true }]);
+    expect(placasDaParede(fase, 2, 1)).toEqual([{ x0: 0, y0: 0.7, x1: 1, y1: 1, frenteSul: true, frenteLeste: false }]);
+    expect(placasDaParede(fase, 1, 2)).toEqual([{ x0: 0.7, y0: 0, x1: 1, y1: 1, frenteSul: false, frenteLeste: true }]);
+    // A quina que só toca o chão na diagonal fecha com um bloquinho 0,3 × 0,3.
+    expect(placasDaParede(fase, 1, 1)).toEqual([{ x0: 0.7, y0: 0.7, x1: 1, y1: 1, frenteSul: true, frenteLeste: true }]);
     expect(placasDaParede(fase, 0, 0)).toEqual([]);
     expect(placasDaParede(fase, 2, 2)).toEqual([]);
+  });
+
+  it('marco 31 (D-130): só a faixa de parede à frente do jogador e perto dele esmaece', () => {
+    const { altura, raioFade, alphaFade } = balance.visual.paredeIso;
+    const alfa = (d: number, centro: number) => alfaDaFaixa(d, centro, 10, 10, altura, raioFade, alphaFade);
+    // Jogador em (10, 10): diagonal 20, x - y = 0.
+    expect(alfa(21, 0)).toBe(alphaFade); // logo à frente
+    expect(alfa(23, 2)).toBe(alphaFade);
+    expect(alfa(19, 0)).toBe(1); // atrás dele: não cobre
+    expect(alfa(30, 0)).toBe(1); // longe na frente
+    expect(alfa(21, 12)).toBe(1); // ao lado, fora do raio
   });
 });
 

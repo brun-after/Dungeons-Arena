@@ -266,6 +266,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     terreno,
     tema: temaDaFase(ctx),
     quebraveis,
+    paredeIso: ctx.balance.visual.paredeIso,
+    ...(solo && { pedraParede: solo.texturas.then((t) => t.get(soloTema.parede) ?? null) }),
     aoTrocar: () => {
       sprites.reiniciarVisual();
       objetos.reiniciarVisual();
@@ -655,6 +657,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     terreno.atualizarVisibilidade(...vista);
     const reduzido = ap.movimentoReduzido();
     terreno.animar(q.agoraMs, reduzido);
+    visao.esmaecer(j ? posicaoVisual : null, dtMs);
     objetos.desenhar(estado, q.agoraMs, reduzido, vista);
     portas.desenhar(estado, q.agoraMs, reduzido);
     fluxo.desenhar(estado, idLocal, ap.movimentoReduzido());
