@@ -26,10 +26,12 @@ import { anelDaInvocacao } from './anel-invocacao';
 import { coresDasRunas, desenharRuna } from './runas';
 import type { BibliotecaCriaturas, FonteToken } from './texturas-criaturas';
 
-const COR_PROPRIO = 0x3498db;
-const COR_ALIADO = 0x27ae60;
-const COR_HOSTIL = 0xe74c3c;
-const COR_NEUTRO = 0x95a5a6;
+// Marco 31 (31/10/2026, D-130): a marca de equipe no chão fica discreta, em tons sóbrios (dourado para o próprio,
+// cinza-azulado para o aliado, vermelho escuro para o hostil) em vez do anel saturado.
+const COR_PROPRIO = 0xc9a24a;
+const COR_ALIADO = 0x7f93a8;
+const COR_HOSTIL = 0x9b2f2a;
+const COR_NEUTRO = 0x7a7570;
 const RAIO = CELULA_PX * 0.32;
 const LARGURA_BARRA = CELULA_PX * 0.84;
 /** Marco 26 (D-116): o lado da runa da classe sobre a cabeça, em px de tela. */
@@ -437,7 +439,10 @@ export class CamadaEntidades {
     m.topo = gira ? -alturaPx * 0.42 : f.ancoraY === 1 ? -alturaPx : -alturaPx * f.ancoraY * 0.9;
   }
 
-  /** Sombra e anel de equipe sob os pés; elipse no isométrico (o chão está achatado pela projeção). */
+  /**
+   * Sombra e marca de equipe sob os pés; elipse no isométrico (o chão está achatado pela projeção). Marco 31 (D-130):
+   * a sombra macia (camadas de alfa decrescente) e a marca fina e translúcida, como um decalque no chão.
+   */
   private desenharChao(m: Marcador, iso: boolean): void {
     const chave = iso ? 'iso' : 'cima';
     if (m.chaoDesenhado === chave) return;
@@ -445,12 +450,11 @@ export class CamadaEntidades {
     m.achatamento = iso ? 0.5 : 1;
     const r = RAIO * 1.15 * m.escala;
     const k = m.achatamento;
-    m.chao
-      .clear()
-      .ellipse(0, iso ? 0 : RAIO * 0.9, r * 0.95, r * 0.42 * (iso ? 1 : 0.8))
-      .fill({ color: 0x000000, alpha: 0.35 })
-      .ellipse(0, 0, r, r * k)
-      .stroke({ width: 3, color: m.cor, alpha: 0.9 });
+    const g = m.chao.clear();
+    const sy = iso ? 0 : RAIO * 0.9;
+    const sk = 0.42 * (iso ? 1 : 0.8);
+    for (const [f, a] of [[1.15, 0.12], [0.9, 0.16], [0.65, 0.2]] as const) g.ellipse(0, sy, r * f, r * sk * f).fill({ color: 0x000000, alpha: a });
+    g.ellipse(0, 0, r, r * k).fill({ color: m.cor, alpha: 0.08 }).stroke({ width: 1.5, color: m.cor, alpha: 0.6 });
   }
 
   private desenharAneis(m: Marcador, e: Entidade, estado: EstadoJogo, selecao: 'auto' | 'travado' | null): void {
@@ -518,9 +522,11 @@ export class CamadaEntidades {
       g.rect(x, y - 8, largura * fracao, 5).fill(proprio ? 0x5dade2 : 0xff7b54);
     }
 
+    // Marco 31 (D-130): a moldura escura com borda de metal gasto e um brilho no alto da barra (volume).
     const fracaoHp = e.hp / Math.max(1, e.hpMax);
-    g.rect(x - 1, y - 1, largura + 2, proprio ? 9 : 6).fill({ color: 0x000000, alpha: 0.7 });
+    g.rect(x - 1, y - 1, largura + 2, proprio ? 9 : 6).fill({ color: 0x0b0a0d, alpha: 0.85 }).stroke({ width: 1, color: 0x5a5046, alpha: 0.7 });
     g.rect(x, y, largura * fracaoHp, 4).fill(corDoHp(fracaoHp));
+    g.rect(x, y, largura * fracaoHp, 1).fill({ color: 0xffffff, alpha: 0.25 });
     if (proprio) {
       y += 5;
       g.rect(x, y, largura * (e.mana / Math.max(1, e.manaMax)), 2).fill(0x5dade2);

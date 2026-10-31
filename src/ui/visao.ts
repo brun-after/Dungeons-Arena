@@ -77,7 +77,7 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
     telhados?.destruir();
     telhados = fase.telhados?.length ? criarTelhados(palco.entidades, fase, p, { altura: o.paredeIso.altura, perto: o.paredeIso.telhadoPerto }) : null;
     // Marco 29 (D-128): as fachadas altas das estruturas do Mundo.
-    estruturas = iso ? criarEstruturasIso(palco.entidades, fase, p) : null;
+    estruturas = iso ? criarEstruturasIso(palco.entidades, fase, p, pedra) : null;
     enfeites = iso ? criarDecoracaoIso(palco.entidades, fase, o.tema ?? null, p, o.quebraveis) : null;
     o.terreno?.definirVisao(iso);
     document.body.dataset.visao = p.visao;
@@ -91,6 +91,8 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
     if (camera.projecaoAtual.visao !== 'iso') return;
     paredes?.destruir();
     paredes = criarParedes(camera.projecaoAtual);
+    estruturas?.destruir();
+    estruturas = criarEstruturasIso(palco.entidades, fase, camera.projecaoAtual, pedra);
   });
 
   const biblioteca = await carregarBiblioteca();

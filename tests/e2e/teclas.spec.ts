@@ -7,6 +7,27 @@ async function ler(page: import('@playwright/test').Page, atributo: 'celula' | '
   return [a, b];
 }
 
+// Marco 31 (31/10/2026, D-130): sem preferência gravada (o perfil limpo, sem a do playwright.config.ts), o jogo abre
+// no isométrico; a preferência antiga, sem versão, migra uma vez.
+test.describe('visão padrão', () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+
+  test('perfil limpo abre no isométrico', async ({ page }) => {
+    await page.goto('./?jogo=campanha&slot=1&diag=1&classe=aventureiro');
+    await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/, { timeout: 30_000 });
+    await expect(page.locator('body')).toHaveAttribute('data-visao', 'iso');
+  });
+
+  test('a preferência antiga de cima migra para o isométrico', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('dungeons-arena:preferencias', JSON.stringify({ visao: 'cima' }));
+    });
+    await page.goto('./?jogo=campanha&slot=1&diag=1&classe=aventureiro');
+    await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/, { timeout: 30_000 });
+    await expect(page.locator('body')).toHaveAttribute('data-visao', 'iso');
+  });
+});
+
 test.describe('teclas de movimento', () => {
   test.skip(({ isMobile }) => isMobile, 'teclado do computador');
 

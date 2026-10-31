@@ -39,6 +39,20 @@ export interface OpcoesParedesIso {
   alphaFade: number;
 }
 
+/**
+ * A pedra numa face vertical: a textura corre ao longo da aresta (`eixoX`: a face sul, ao longo de x; senão a leste,
+ * ao longo de y) e cai na vertical, `CELULAS_POR_TEXTURA` células por repetição. Também usada nas fachadas.
+ */
+export function pedraDaFace(textura: Texture, p: Projecao, eixoX: boolean): FillPattern {
+  const origem = p.projetar(0, 0);
+  const passo = eixoX ? p.projetar(CELULA_PX, 0) : p.projetar(0, CELULA_PX);
+  const k = 1 / (textura.width / CELULAS_POR_TEXTURA);
+  const m = new Matrix((passo.x - origem.x) * k, (passo.y - origem.y) * k, 0, CELULA_PX * k, origem.x, origem.y);
+  const f = new FillPattern(textura, 'repeat');
+  f.setTransform(m);
+  return f;
+}
+
 /** Uma faixa de parede: a diagonal (profundidade) e o centro em x - y (a posição horizontal na tela). */
 interface Faixa {
   g: Graphics;
@@ -125,19 +139,8 @@ export function criarParedesIso(camada: Container, fase: Fase, p: Projecao, o: O
   const direita = escurecer(base, 0.35);
   const h = o.altura * CELULA_PX;
   const canto = (x: number, y: number) => p.projetar(x * CELULA_PX, y * CELULA_PX);
-  // A pedra de cada face: a textura corre ao longo da aresta (sul: o eixo x; leste: o eixo y) e cai na vertical.
-  const padrao = (eixoX: boolean): FillPattern | null => {
-    if (!o.textura) return null;
-    const origem = canto(0, 0);
-    const passo = eixoX ? canto(1, 0) : canto(0, 1);
-    const k = 1 / (o.textura.width / CELULAS_POR_TEXTURA);
-    const m = new Matrix((passo.x - origem.x) * k, (passo.y - origem.y) * k, 0, CELULA_PX * k, origem.x, origem.y);
-    const f = new FillPattern(o.textura, 'repeat');
-    f.setTransform(m);
-    return f;
-  };
-  const pedraSul = padrao(true);
-  const pedraLeste = padrao(false);
+  const pedraSul = o.textura ? pedraDaFace(o.textura, p, true) : null;
+  const pedraLeste = o.textura ? pedraDaFace(o.textura, p, false) : null;
   const face = (pedra: FillPattern | null, cor: number) => (pedra ? { fill: pedra, color: cor } : { color: cor });
   /** Caixa [x0, x1] × [y0, y1] (em células) com altura `h`; as faces da frente só se não houver placa encostada. */
   const caixa = (g: Graphics, x0: number, y0: number, x1: number, y1: number, frenteSul: boolean, frenteLeste: boolean) => {
