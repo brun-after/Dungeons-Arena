@@ -9,7 +9,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { clone as clonarComEsqueleto } from 'three/examples/jsm/utils/SkeletonUtils.js';
-import { DIRECOES, ESTADOS, QUADROS, type Arma, type Estado, type Receita } from './receitas';
+import { BASE, COLUNAS_POR_FAIXA, DIRECOES, ehVariante, estadosDe, QUADROS, VARIANTES, type Arma, type Estado, type EstadoBase, type Receita, type Variante } from './receitas';
 import { posProcessar } from './pos';
 import { renderizarArmas } from './icones';
 import { asas, capa, elmo, peito, tiara } from './armaduras3d';
@@ -49,6 +49,8 @@ export interface SaidaAtlas {
   ancoraY: number;
   pxCelula: number;
   colunas: number;
+  /** As colunas por faixa (a coluna c fica na faixa c ÷ faixa, cada faixa com as 8 direções). */
+  faixa: number;
   estados: Record<Estado, { inicio: number; n: number }>;
 }
 
@@ -112,7 +114,7 @@ interface Montado {
   /** A escala de ossos por nome, reaplicada depois de cada pose. */
   escalas: Record<string, number>;
   /** As criaturas de geometria (`proc:`): a pose de cada estado por deformação. */
-  animar?: (estado: Estado, f: number) => void;
+  animar?: (estado: EstadoBase, f: number) => void;
 }
 
 /** Os ossos da cabeça emprestada que ficam (o resto do corpo base some). */
@@ -191,6 +193,25 @@ function pose(mt: Montado, c: THREE.AnimationClip | null, t: number): void {
   mt.grupo.updateMatrixWorld(true);
 }
 
+/** Os ossos das pernas (Quaternius e KayKit): no golpe andando, a pose deles vem do andar. */
+const OSSOS_DAS_PERNAS = /^(root|pelvis|hips|thigh|calf|foot|ball|upperleg|lowerleg|toes)/i;
+
+/**
+ * Marco 32 (31/10/2026, D-131): a pose do andar nas pernas e a do golpe (ou da conjuração) no resto, para quem ataca
+ * andando não deslizar duro pelo chão.
+ */
+function poseAndando(mt: Montado, andar: THREE.AnimationClip | null, tAndar: number, tronco: THREE.AnimationClip | null, t: number): void {
+  pose(mt, andar, tAndar);
+  const pernas: [THREE.Bone, THREE.Quaternion, THREE.Vector3][] = [];
+  for (const [nome, o] of mt.ossos) if (OSSOS_DAS_PERNAS.test(nome)) pernas.push([o, o.quaternion.clone(), o.position.clone()]);
+  pose(mt, tronco, t);
+  for (const [o, q, p] of pernas) {
+    o.quaternion.copy(q);
+    o.position.copy(p);
+  }
+  mt.grupo.updateMatrixWorld(true);
+}
+
 /** Prende a arma no osso (o tamanho é a maior medida, em células). */
 async function armar(mt: Montado, a: Arma, urls: Urls): Promise<THREE.Object3D | null> {
   const osso = mt.ossos.get(a.osso);
@@ -220,7 +241,33 @@ const EIXO_DA_ARMA = new THREE.Vector3(-1, 0, 0);
 const MEDIDA = 0.3;
 
 /** O punho e o eixo da arma de uma mão, na tela do quadro. */
-function medirMao(mt: Montado, lado: 'r' | 'l', camera: THREE.Camera, quadroL: number, quadroA: number, pxCelula: number): number[] {
+const raio = new THREE.Raycaster();
+
+/**
+ * Marco 32 (31/10/2026, D-131): a arma vai na frente se, onde ela cobre o corpo na tela, estiver mais perto da câmera
+ * que ele (raios da câmera por pontos ao longo da lâmina e em volta do punho, para o tomo). Sem sobreposição, vale a
+ * profundidade da mão contra o tronco; no empate, a frente (a arma inteira à vista).
+ */
+function naFrenteDoCorpo(punho: THREE.Vector3, eixo: THREE.Vector3, camera: THREE.Camera, corpo: THREE.Mesh[], padrao: boolean): number {
+  const direcao = new THREE.Vector3(0, 0, -1).transformDirection(camera.matrixWorld);
+  const lado = new THREE.Vector3(1, 0, 0).transformDirection(camera.matrixWorld);
+  const cima = new THREE.Vector3(0, 1, 0).transformDirection(camera.matrixWorld);
+  const pontos = [0.06, 0.14, 0.22, 0.32].map((s) => punho.clone().addScaledVector(eixo, s));
+  for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) pontos.push(punho.clone().addScaledVector(lado, a * 0.08).addScaledVector(cima, b * 0.08));
+  let sobre = 0;
+  let perto = 0;
+  for (const p of pontos) {
+    raio.set(p.clone().addScaledVector(direcao, -50), direcao);
+    const acerto = raio.intersectObjects(corpo, false)[0];
+    if (!acerto) continue;
+    sobre++;
+    if (acerto.distance >= 50 - 0.005) perto++;
+  }
+  if (sobre === 0) return padrao ? 1 : 0;
+  return perto * 2 >= sobre ? 1 : 0;
+}
+
+function medirMao(mt: Montado, lado: 'r' | 'l', camera: THREE.Camera, quadroL: number, quadroA: number, pxCelula: number, corpo: THREE.Mesh[] = []): number[] {
   const mao = mt.ossos.get(`hand_${lado}`);
   const meio = mt.ossos.get(`middle_01_${lado}`);
   const tronco = mt.ossos.get('spine_02');
@@ -238,7 +285,8 @@ function medirMao(mt: Montado, lado: 'r' | 'l', camera: THREE.Camera, quadroL: n
   const dy = b.y - a.y;
   const k = Math.min(1, Math.hypot(dx, dy) / (MEDIDA * pxCelula));
   const prof = (v: THREE.Vector3) => v.clone().applyMatrix4(camera.matrixWorldInverse).z;
-  const frente = tronco ? (prof(punho) > prof(tronco.getWorldPosition(new THREE.Vector3())) ? 1 : 0) : 1;
+  const porProfundidade = tronco ? prof(punho) > prof(tronco.getWorldPosition(new THREE.Vector3())) : true;
+  const frente = corpo.length ? naFrenteDoCorpo(punho, eixo, camera, corpo, porProfundidade) : porProfundidade ? 1 : 0;
   const r2 = (n: number) => Math.round(n * 100) / 100;
   return [r2(a.x), r2(a.y), r2(Math.atan2(dx, -dy)), r2(Math.max(0.25, k)), frente];
 }
@@ -338,8 +386,11 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
   naFrente.clear();
   soProfundidade.clear();
   const mt = await montar(r, urls);
-  const clipes = {} as Record<Estado, THREE.AnimationClip | null>;
-  for (const e of ESTADOS) clipes[e] = r.animacoes ? await clipe(r.animacoes[e], urls) : null;
+  const clipes = {} as Record<EstadoBase, THREE.AnimationClip | null>;
+  for (const e of ['parado', 'andar', 'golpe', 'conjurar', 'morte'] as const) clipes[e] = r.animacoes ? await clipe(r.animacoes[e], urls) : null;
+  const ESTADOS = estadosDe(r);
+  const variantes = {} as Record<Variante, THREE.AnimationClip | null>;
+  for (const e of ESTADOS) if (ehVariante(e)) variantes[e] = r.animacoes ? await clipe(VARIANTES[e], urls) : null;
 
   // A altura: a pessoa parada (o primeiro quadro do parado) mede `altura` células.
   pose(mt, clipes.parado, 0);
@@ -356,6 +407,8 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
   }
   if (r.asas !== undefined) asas(mt.ossos, r.asas);
   const corpo = malhas(mt.grupo);
+  // As malhas do corpo com pele (os raios da frente da arma); as peças sem esqueleto (asas, armadura fixa) ficam de fora.
+  const pele = corpo.filter((m) => m instanceof THREE.SkinnedMesh);
   const originais = new Map<THREE.Mesh, Mats>(corpo.map((m) => [m, m.material]));
   const montadas: CamadaMontada[] = [];
   for (const p of camadas) montadas.push(await montarCamada(mt, corpo, p, urls));
@@ -396,10 +449,12 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
     estados[e] = { inicio: colunas, n: QUADROS[e] };
     colunas += QUADROS[e];
   }
+  const faixa = Math.min(colunas, COLUNAS_POR_FAIXA);
+  const faixas = Math.ceil(colunas / faixa);
   const tela = () => {
     const c = document.createElement('canvas');
-    c.width = colunas * quadroL;
-    c.height = DIRECOES * quadroA;
+    c.width = faixa * quadroL;
+    c.height = faixas * DIRECOES * quadroA;
     const g = c.getContext('2d');
     if (!g) throw new Error('sem canvas 2d');
     return { c, g };
@@ -408,6 +463,7 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
   const maos = comCorpo && r.equipamento ? { d: [] as number[], e: [] as number[] } : null;
   const telas = montadas.map(() => tela());
 
+  const bacia = mt.ossos.get('pelvis') ?? null;
   const aplicar = (cm: CamadaMontada | null) => {
     for (const m of corpo) {
       m.material = cm ? (cm.mats.get(m) ?? m.material) : (originais.get(m) ?? m.material);
@@ -422,32 +478,49 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
     const a = (d * Math.PI * 2) / DIRECOES;
     pivo.rotation.y = Math.atan2(Math.cos(a), Math.sin(a));
     for (const e of ESTADOS) {
-      const c = clipes[e];
+      const base = BASE[e];
+      const c = ehVariante(e) ? variantes[e] : clipes[base];
+      let inicioDaBacia = new THREE.Vector3();
       const n = QUADROS[e];
       for (let i = 0; i < n; i++) {
         // Os ciclos repartem a volta toda; o golpe e a morte vão do começo ao fim (o último quadro é o fim).
-        const ciclo = e === 'parado' || e === 'andar' || e === 'conjurar';
+        const ciclo = !ehVariante(e) && (base === 'parado' || base === 'andar' || base === 'conjurar');
         const duracao = c?.duration ?? 0;
-        const t = ciclo ? (duracao * i) / n : (duracao * i) / Math.max(1, n - 1) - (i === n - 1 ? 1e-3 : 0);
-        pose(mt, c, Math.max(0, t));
-        mt.animar?.(e, ciclo ? i / n : i / Math.max(1, n - 1));
+        const t = Math.max(0, ciclo ? (duracao * i) / n : (duracao * i) / Math.max(1, n - 1) - (i === n - 1 ? 1e-3 : 0));
+        // O giro: uma volta inteira do corpo ao longo do golpe.
+        pivo.rotation.y = Math.atan2(Math.cos(a), Math.sin(a)) + (e === 'golpeGiro' ? (2 * Math.PI * i) / n : 0);
+        mt.grupo.position.set(0, 0, 0);
+        if (base === e || ehVariante(e)) pose(mt, c, t);
+        else poseAndando(mt, clipes.andar, ((clipes.andar?.duration ?? 0) * i) / n, c, t);
+        // Os golpes de arma avançam o corpo (o bote do corte pesado): a bacia fica no lugar do começo, no chão, para
+        // o corpo não sair do quadro (o jogo já anda a entidade).
+        if (ehVariante(e) && bacia) {
+          if (i === 0) inicioDaBacia = pivo.worldToLocal(bacia.getWorldPosition(new THREE.Vector3()));
+          const agora = pivo.worldToLocal(bacia.getWorldPosition(new THREE.Vector3()));
+          mt.grupo.position.set(inicioDaBacia.x - agora.x, 0, inicioDaBacia.z - agora.z);
+          mt.grupo.updateMatrixWorld(true);
+        }
+        // As criaturas de geometria: o tronco do estado de base (o passo delas não se separa).
+        mt.animar?.(base, ciclo ? i / n : i / Math.max(1, n - 1));
         // O pivô girou: as matrizes do mundo (e a da câmera) valem para as medidas das mãos.
         cena.updateMatrixWorld(true);
         camera.updateMatrixWorld(true);
-        const x = (estados[e].inicio + i) * quadroL;
+        const coluna = estados[e].inicio + i;
+        const x = (coluna % faixa) * quadroL;
+        const y = (Math.floor(coluna / faixa) * DIRECOES + d) * quadroA;
         if (maos) {
-          maos.d.push(...medirMao(mt, 'r', camera, quadroL, quadroA, PX_CELULA));
-          maos.e.push(...medirMao(mt, 'l', camera, quadroL, quadroA, PX_CELULA));
+          maos.d.push(...medirMao(mt, 'r', camera, quadroL, quadroA, PX_CELULA, pele));
+          maos.e.push(...medirMao(mt, 'l', camera, quadroL, quadroA, PX_CELULA, pele));
         }
         if (atlas) {
           aplicar(null);
           renderer.render(cena, camera);
-          atlas.g.drawImage(renderer.domElement, x, d * quadroA);
+          atlas.g.drawImage(renderer.domElement, x, y);
         }
         montadas.forEach((cm, j) => {
           aplicar(cm);
           renderer.render(cena, camera);
-          telas[j]?.g.drawImage(renderer.domElement, x, d * quadroA);
+          telas[j]?.g.drawImage(renderer.domElement, x, y);
         });
       }
     }
@@ -468,6 +541,7 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
     ancoraY: (topo / q.altura) * quadroA,
     pxCelula: PX_CELULA,
     colunas,
+    faixa,
     estados,
   };
 }

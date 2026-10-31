@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.71 · **Data:** 31/10/2026
+**Versão:** 0.72 · **Data:** 31/10/2026
 
 > **Histórico**
+> - **0.72 (31/10/2026)**: D-131: o golpe de cada tipo de arma, a arma de arremesso em voo com a forma dela, o passo no golpe e na conjuração em movimento, a frente da arma por raios, a runa do elemento no tomo e o voo do falcão acima da cabeça.
 > - **0.71 (31/10/2026)**: D-131: o equipamento nos personagens pré-renderizados (camadas por arma e peça) e o retrato 3D na escolha de classe.
 > - **0.70 (31/10/2026)**: D-131 (os personagens pré-renderizados de modelos 3D CC0, marco 32).
 > - **0.69 (31/10/2026)**: D-130: objetos, loja e portais pré-renderizados de modelos 3D CC0 (KayKit e Quaternius); escuro 50% mais claro e sem o quadrado da vinheta; borda de pedra mais fina.
@@ -3504,7 +3505,19 @@ marco 31 já pré-renderizou os objetos de modelos CC0 (D-130); o marco 32 faz o
   - As armas (do KayKit e da Quaternius) ficam presas nos ossos das mãos; as cores multiplicam os materiais pelo
     nome; as animações saem das bibliotecas pelo nome.
 - **Atlas** (`src/assets/personagens/<modelo>.webp`, com `catalogo.json`):
-  - 8 direções na grade e 30 quadros: parado 4, andar 8, golpe 6, conjurar 6, morte 6;
+  - 8 direções na grade e 42 quadros: parado 4, andar 8, golpe 6, conjurar 6, morte 6, andar golpeando 6 e andar
+    conjurando 6. Nos dois últimos, as pernas (e a bacia) vêm do andar e o resto do golpe ou da conjuração: quem
+    ataca andando dá passos em vez de deslizar duro (o mago no ataque básico parecia arrastado);
+  - **o golpe de cada tipo de arma, nas classes** (5 quadros cada, da UAL 1 e 2). Antes, todo ataque básico
+    estendia o braço esquerdo (a pose de magia) na preparação e golpeava igual. Agora: o corte da espada, do sabre e
+    da foice (`Sword_Regular_A`); o golpe largo do montante e do machado (`Sword_Attack`); o esmagar da maça e do
+    mangual, de cima para baixo (`TreeChopping`); o golpe leve do cajado (`Melee_Hook`); a estocada da lança e da
+    rapieira (`Punch_Jab`); o disparo do arco e da besta (`Pistol_Shoot`); o arremesso por cima do ombro
+    (`OverhandThrow`); e o giro, uma volta inteira do corpo. A preparação do ataque mostra o começo do próprio golpe
+    (o recuo). A magia e a leitura do tomo continuam com a mão estendida. Os golpes que avançam o corpo ficam com a
+    bacia no lugar, para não sair do quadro. Os monstros, sem esses quadros, usam o golpe deles;
+  - em faixas de 21 colunas, cada uma com as 8 direções (`faixa` no catálogo), para a largura ficar abaixo de
+    4096 px (as classes têm 82 colunas em 4 faixas);
   - 72 px por célula, desenhado a 48 no jogo;
   - a mesma luz, a mesma dessaturação e o mesmo contorno escuro dos objetos.
 - **No jogo** (`render/personagens-3d.ts`, `render/sprites.ts`):
@@ -3541,6 +3554,14 @@ marco 31 já pré-renderizou os objetos de modelos CC0 (D-130); o marco 32 faz o
     onde a arma aponta na tela, quanto ela encurta e se a mão está na frente ou atrás do tronco (`maos` no
     catálogo). O jogo prende a arma ali (`render/figura-3d.ts`), gira com o pulso e a põe na frente ou atrás do corpo:
     ela encaixa na mão e não some atrás da perna. O escudo e os livros ficam em pé.
+  - **Frente ou atrás:** a profundidade da mão contra o tronco errava com o braço do lado (o tomo do mago sumia atrás
+    do braço). A ferramenta lança raios da câmera por pontos ao longo da lâmina e em volta do punho: onde a arma cobre
+    o corpo, ela vai na frente se estiver mais perto que ele na maioria dos pontos (no empate, na frente).
+  - **Arma de arremesso em voo** (`render/armas-em-voo.ts`): o projétil do golpe de arremesso (chakram, shuriken,
+    machadinha, bumerangue…) é desenhado com o modelo da própria arma do lançador, no grau dela, girando no ar; a
+    adaga e o arpeu voam de ponta. Antes, todas iam ao alvo com o mesmo brilho.
+  - **Runa no tomo:** enquanto conjura ou golpeia com um livro, a runa do elemento da magia (a da habilidade, senão a
+    da arma; o arcano sem elemento) acende na página, na cor do elemento (`render/runas-elementos.ts`).
   - **Brilho:** a arma ganha, somado por cima, o brilho do elemento, o branco da mira cheia do Arqueiro (D-103) ou,
     do lendário em diante, a cor da raridade.
   - **Armadura:** a capa, o peito e a cabeça têm uma camada do tamanho do atlas da classe por grau (18 por classe,
@@ -3559,4 +3580,9 @@ marco 31 já pré-renderizou os objetos de modelos CC0 (D-130); o marco 32 faz o
 **Consequências.**
 - Os corpos somam cerca de 5,5 MB (de 170 a 470 KB cada) e vão para o cache do PWA. As camadas de armadura somam
   cerca de 10 MB: ficam fora do precache, e cada uma entra no cache quando o jogo a usa.
-- O troll fica abaixo de 4096 px de largura (o limite de textura de muitos celulares).
+- O troll fica abaixo de 4096 px de largura (o limite de textura de muitos celulares), e com as faixas os atlas têm no
+  máximo cerca de 2800 × 2600 px.
+- **O falcão do aventureiro** fica 10% menor e voa a 1,3 célula do chão, acima da cabeça do dono (antes, rente ao
+  chão); pousado, fica na altura do ombro do modelo novo. No corte de um projétil (o dash da IA), desce até a altura
+  em que os projéteis voam; no mergulho de ataque, até o tronco do alvo; nas skills, desce rápido para a trajetória.
+  Na vista de cima, só um quarto da altura aparece.

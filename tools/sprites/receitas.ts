@@ -4,11 +4,62 @@
 // Base Characters, `traje:` Modular Character Outfits – Fantasy, `ual1:`/`ual2:` Universal Animation Library 1 e 2,
 // `kes:` KayKit Skeletons, `q:` Fantasy Props MegaKit; licenças em src/assets/personagens/LICENCAS.md.
 
-export type Estado = 'parado' | 'andar' | 'golpe' | 'conjurar' | 'morte';
+/** Os estados com animação própria na receita. */
+export type EstadoBase = 'parado' | 'andar' | 'golpe' | 'conjurar' | 'morte';
+/**
+ * Marco 32 (31/10/2026, D-131): o golpe e a conjuração em movimento juntam as pernas do andar com o tronco e os braços
+ * do estado de base (o mago que ataca andando dá passos em vez de deslizar).
+ */
+/**
+ * Marco 32 (31/10/2026, D-131): o golpe de cada tipo de arma (golpe de `armas.json`), só nas classes (que trocam de
+ * arma): o corte da espada, o golpe pesado do montante e do machado, o esmagar da maça e do mangual, o golpe leve do
+ * cajado, a estocada da lança e da rapieira, o disparo do arco, o arremesso e o giro. O `golpe` da receita fica para a
+ * magia e para quem não tem arma de golpe (o tomo lê a magia).
+ */
+export type Variante = 'golpeCorte' | 'golpePesado' | 'golpeEsmagar' | 'golpeLeve' | 'golpeEstocada' | 'golpeDisparo' | 'golpeArremesso' | 'golpeGiro';
+export type Estado = EstadoBase | 'andarGolpe' | 'andarConjurar' | Variante;
+
+/** A animação de cada golpe de arma (UAL 1 e 2). O giro gira o corpo inteiro numa volta. */
+export const VARIANTES: Readonly<Record<Variante, string>> = {
+  golpeCorte: 'ual2:Sword_Regular_A',
+  golpePesado: 'ual1:Sword_Attack',
+  golpeEsmagar: 'ual2:TreeChopping_Loop',
+  golpeLeve: 'ual2:Melee_Hook',
+  golpeEstocada: 'ual1:Punch_Jab',
+  golpeDisparo: 'ual1:Pistol_Shoot',
+  golpeArremesso: 'ual2:OverhandThrow',
+  golpeGiro: 'ual2:Sword_Regular_A',
+};
+const NOMES_VARIANTES = Object.keys(VARIANTES) as Variante[];
+export const ehVariante = (e: Estado): e is Variante => Object.hasOwn(VARIANTES, e);
 
 /** Quantos quadros cada estado tem (a mesma ordem em todos os atlas). */
-export const QUADROS: Readonly<Record<Estado, number>> = { parado: 4, andar: 8, golpe: 6, conjurar: 6, morte: 6 };
-export const ESTADOS: readonly Estado[] = ['parado', 'andar', 'golpe', 'conjurar', 'morte'];
+export const QUADROS: Readonly<Record<Estado, number>> = {
+  parado: 4,
+  andar: 8,
+  golpe: 6,
+  conjurar: 6,
+  morte: 6,
+  andarGolpe: 6,
+  andarConjurar: 6,
+  ...(Object.fromEntries(NOMES_VARIANTES.map((v) => [v, 5])) as Record<Variante, number>),
+};
+const ESTADOS: readonly Estado[] = ['parado', 'andar', 'golpe', 'conjurar', 'morte', 'andarGolpe', 'andarConjurar'];
+/** Os estados do atlas da receita: as classes ganham os golpes de cada arma. */
+export const estadosDe = (r: Receita): readonly Estado[] => (r.equipamento ? [...ESTADOS, ...NOMES_VARIANTES] : ESTADOS);
+/** O estado de base (a animação do tronco) de cada estado; os golpes de arma contam como golpe. */
+export const BASE: Readonly<Record<Estado, EstadoBase>> = {
+  parado: 'parado',
+  andar: 'andar',
+  golpe: 'golpe',
+  conjurar: 'conjurar',
+  morte: 'morte',
+  andarGolpe: 'golpe',
+  andarConjurar: 'conjurar',
+  ...(Object.fromEntries(NOMES_VARIANTES.map((v) => [v, 'golpe'])) as Record<Variante, EstadoBase>),
+};
+/** As colunas por faixa: o atlas vai em faixas de 8 direções para não passar de 4096 px de largura. */
+export const COLUNAS_POR_FAIXA = 21;
 /** As direções na grade: 0 = +x (direita-baixo na tela), girando para +y (esquerda-baixo), de 45° em 45°. */
 export const DIRECOES = 8;
 
@@ -56,7 +107,7 @@ export interface Receita {
   emissao?: Record<string, number>;
   armas?: Arma[];
   /** Sem esqueleto (o boneco de treino): a mesma pose em todos os quadros. */
-  animacoes: Record<Estado, string> | null;
+  animacoes: Record<EstadoBase, string> | null;
   /** Escala de ossos por nome (a cabeça grande do esqueleto do KayKit encolhe). */
   ossos?: Record<string, number>;
   exposicao?: number;
@@ -181,7 +232,7 @@ export const RECEITAS: Receita[] = [
   // Os bichos: geometria feita na ferramenta (criaturas3d.ts, feras3d.ts), animada por rotação e deformação.
   { nome: 'lobo', corpo: 'proc:lobo', altura: 0.78, animacoes: null, exposicao: 1.3, quadro: { largura: 1.8, altura: 1.6, baixo: 0.5 } },
   { nome: 'aranha', corpo: 'proc:aranha', altura: 0.55, animacoes: null, exposicao: 1.8, quadro: { largura: 1.8, altura: 1.4, baixo: 0.5 } },
-  { nome: 'falcao', corpo: 'proc:falcao', altura: 0.24, animacoes: null, exposicao: 1.5 },
+  { nome: 'falcao', corpo: 'proc:falcao', altura: 0.216, animacoes: null, exposicao: 1.5 },
   // O slime: geometria feita na ferramenta (criaturas3d.ts), animada por deformação.
   { nome: 'slime', corpo: 'proc:slime', altura: 0.62, animacoes: null, exposicao: 1.4 },
   // O boneco de treino (o único que usa `generico`) e o espantalho: o boneco da Quaternius, parado.

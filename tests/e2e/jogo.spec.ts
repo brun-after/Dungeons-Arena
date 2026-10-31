@@ -127,22 +127,23 @@ test.describe('desktop', () => {
   test('inimigos da sala B notam o jogador, perseguem e atacam', async ({ page }) => {
     const { diag, erros } = await abrir(page);
     // Vai até (16,3) e depois (19,3), perto dos goblins.
-    for (const [cx, cy] of [
-      [16, 3],
-      [19, 3],
-    ] as const) {
-      await esperarParado(page, diag);
-      await clicarCelula(page, diag, cx, cy);
-      await expect.poll(async () => ler(diag, 'celula'), { timeout: 20_000 }).toEqual([cx, cy]);
-    }
+    await esperarParado(page, diag);
+    await clicarCelula(page, diag, 16, 3);
+    await expect.poll(async () => ler(diag, 'celula'), { timeout: 20_000 }).toEqual([16, 3]);
     // O registro guarda as últimas linhas: "notou você" pode já ter saído quando a luta começa.
     // Marco 26 (29/10/2026): o orbe de efeito e a armadilha no caminho mudam a luta conforme o ritmo dos quadros (no CI,
     // a Fúria e a armadilha encheram o registro e o "Goblin" não apareceu em 20 s). Vale qualquer sinal de que os
     // goblins chegaram: o nome no registro ou a vida caindo.
     const log = page.locator('.log-combate');
+    const chegaram = async () => (await log.textContent())?.includes('Goblin') || Number(await diag.getAttribute('data-hp')) < 100;
+    // Marco 32 (31/10/2026): o clique em (19,3) seleciona o goblin se ele já estiver lá (com os quadros mais lentos do
+    // CI, ele chega antes): vale chegar à célula ou os goblins chegarem ao jogador.
+    await esperarParado(page, diag);
+    await clicarCelula(page, diag, 19, 3);
     await expect
-      .poll(async () => (await log.textContent())?.includes('Goblin') || Number(await diag.getAttribute('data-hp')) < 100, { timeout: 40_000 })
+      .poll(async () => (await ler(diag, 'celula')).join(',') === '19,3' || (await chegaram()), { timeout: 20_000 })
       .toBe(true);
+    await expect.poll(chegaram, { timeout: 40_000 }).toBe(true);
     await expect.poll(async () => Number(await diag.getAttribute('data-hp')), { timeout: 40_000 }).toBeLessThan(100);
     expect(erros).toEqual([]);
   });

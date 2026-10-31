@@ -2,7 +2,7 @@
 // animadas por deformação (sem esqueleto). `animar(estado, f)` põe a pose da fração `f` (0 a 1) do estado.
 
 import * as THREE from 'three';
-import type { Estado } from './receitas';
+import type { EstadoBase as Estado } from './receitas';
 import { aranha, falcao, lobo } from './feras3d';
 
 export interface Criatura {

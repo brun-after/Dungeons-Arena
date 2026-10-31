@@ -38,7 +38,8 @@ export function modeloDaArma3d(desenho: string, existe: (m: string) => boolean):
 }
 
 /** Os que ficam em pé na mão (não giram com o pulso): o escudo, os livros. */
-export const SEM_GIRO: ReadonlySet<string> = new Set(['escudo', 'tomo', 'codice', 'mares', 'estelar', 'prisma', 'espelhos', 'orbital', 'vazio']);
+export const TOMOS: ReadonlySet<string> = new Set(['tomo', 'codice', 'mares', 'estelar', 'prisma', 'espelhos', 'orbital', 'vazio']);
+export const SEM_GIRO: ReadonlySet<string> = new Set(['escudo', ...TOMOS]);
 
 /** O nome do atlas da camada (o mesmo em tools/sprites/ e no catálogo). */
 export const nomeDaCamada = (modelo: string, camada: string): string => `${modelo}~${camada}`;

@@ -2,13 +2,20 @@
 // por cima dele (já recortadas pelo corpo) e as armas presas nas mãos medidas em cada quadro. A arma vai na frente ou
 // atrás do corpo conforme a mão (nunca some atrás da perna), gira com o pulso e encurta quando aponta para a câmera.
 // O brilho da arma (somado por cima dela): o elemento, o branco da mira cheia do Arqueiro (D-103) ou, do lendário em
-// diante, a cor da raridade.
+// diante, a cor da raridade. Na conjuração (e no golpe) com tomo, a runa do elemento acende na página.
 
-import { Container, Sprite } from 'pixi.js';
+import { Container, Graphics, Sprite } from 'pixi.js';
 import type { Equipamento3d } from './adornos';
-import { SEM_GIRO } from './equipamento-3d';
+import { SEM_GIRO, TOMOS } from './equipamento-3d';
 import { maoNoQuadro, type AtlasDePersonagens } from './personagens-3d';
 import type { EstadoPersonagem } from './quadros-personagem';
+import type { Runa } from './runas';
+import { desenharRunaDoElemento } from './runas-elementos';
+
+/** Os estados em que a runa do tomo acende. */
+const LENDO: ReadonlySet<EstadoPersonagem> = new Set(['golpe', 'conjurar', 'andarGolpe', 'andarConjurar']);
+/** O lado da runa na página (px do atlas). */
+const TAMANHO_RUNA = 18;
 
 /** A cor de destaque dos graus altos (lendário e última: objetos.ts COR_RARIDADE). */
 const BRILHO_DO_GRAU: Readonly<Record<number, number>> = { 4: 0xf39c12, 5: 0xff4d6d };
@@ -27,6 +34,8 @@ export interface QuadroDaFigura {
   branca: number;
   pulso: number;
   morto: boolean;
+  /** A runa da magia em curso (o elemento dela), acesa no tomo enquanto lê; null sem magia. */
+  runa: Runa | null;
 }
 
 export class Figura3d {
@@ -37,10 +46,13 @@ export class Figura3d {
   private readonly camadas: Sprite[] = [];
   private readonly maos = { d: new Sprite(), e: new Sprite() };
   private readonly brilho = new Sprite();
+  private readonly runa = new Graphics();
+  private runaDesenhada: Runa | null = null;
 
   constructor() {
     this.raiz.addChild(this.atras, this.corpo, this.frente);
     this.brilho.blendMode = 'add';
+    this.runa.blendMode = 'add';
   }
 
   /** Monta o quadro; false enquanto o atlas do corpo carrega (quem chama mostra o token desenhado). */
@@ -58,9 +70,34 @@ export class Figura3d {
     const coluna = atlas.coluna(q.modelo, q.estado, q.indice);
     const origem = { x: medidas.ancoraPxX, y: medidas.ancoraPxY };
     const principal = this.empunhar(atlas, q, 'd', eq?.arma ?? null, coluna, origem);
-    this.empunhar(atlas, q, 'e', eq?.secundaria ?? null, coluna, origem);
+    const secundaria = this.empunhar(atlas, q, 'e', eq?.secundaria ?? null, coluna, origem);
     this.brilhar(principal, q, eq);
+    const tomo = eq && TOMOS.has(eq.secundaria?.modelo ?? '') ? secundaria : eq && TOMOS.has(eq.arma.modelo) ? principal : null;
+    this.ler(tomo, q);
     return true;
+  }
+
+  /** A runa no meio da página do tomo, pulsando, por cima do livro. */
+  private ler(tomo: Sprite | null, q: QuadroDaFigura): void {
+    const g = this.runa;
+    if (!tomo || !q.runa || q.morto || !LENDO.has(q.estado)) {
+      g.visible = false;
+      return;
+    }
+    if (this.runaDesenhada !== q.runa) {
+      g.clear();
+      desenharRunaDoElemento(g, q.runa, TAMANHO_RUNA);
+      this.runaDesenhada = q.runa;
+    }
+    const pai = tomo.parent;
+    if (!pai) return;
+    // Por cima do livro (e do brilho, quando ele está no mesmo lado).
+    if (g.parent !== pai) pai.addChild(g);
+    else pai.setChildIndex(g, pai.children.length - 1);
+    const t = tomo.texture;
+    g.position.set(tomo.x + (0.5 - tomo.anchor.x) * t.width, tomo.y + (0.5 - tomo.anchor.y) * t.height);
+    g.alpha = 0.7 + 0.3 * q.pulso;
+    g.visible = true;
   }
 
   private vestir(atlas: AtlasDePersonagens, q: QuadroDaFigura, eq: Equipamento3d | null): void {

@@ -9,7 +9,7 @@ import { Assets, Rectangle, Texture } from 'pixi.js';
 import CATALOGO from '../assets/personagens/catalogo.json';
 import CATALOGO_ARMAS from '../assets/personagens/armas/catalogo.json';
 import { CELULA_PX } from './camera-calculo';
-import type { EstadoPersonagem } from './quadros-personagem';
+import { SEM_PASSO, type EstadoPersonagem } from './quadros-personagem';
 
 const URLS = import.meta.glob<string>('../assets/personagens/*.webp', { query: '?url', import: 'default' });
 const URLS_ARMAS = import.meta.glob<string>('../assets/personagens/armas/*.webp', { query: '?url', import: 'default' });
@@ -30,8 +30,10 @@ interface Entrada {
   ancoraY: number;
   pxCelula: number;
   colunas: number;
+  /** Colunas por faixa (cada faixa com as 8 direções); sem ela, uma faixa só. */
+  faixa?: number;
   altura: number;
-  estados: Record<EstadoPersonagem, { inicio: number; n: number }>;
+  estados: Partial<Record<EstadoPersonagem, { inicio: number; n: number }>>;
   maos?: { d: number[]; e: number[] };
 }
 
@@ -47,6 +49,11 @@ const CAT_ARMAS = CATALOGO_ARMAS as Readonly<Record<string, EntradaArma>>;
 
 function entrada(nome: string): Entrada | null {
   return Object.hasOwn(CAT, nome) ? (CAT[nome] ?? null) : null;
+}
+
+/** As colunas do estado no atlas (o atlas sem o estado andando cai no estado sem passo). */
+function colunasDoEstado(e: Entrada, estado: EstadoPersonagem): { inicio: number; n: number } | null {
+  return e.estados[estado] ?? e.estados[SEM_PASSO[estado]] ?? null;
 }
 
 function urlEm(urls: Record<string, () => Promise<string>>, nome: string): Promise<string> | null {
@@ -131,7 +138,8 @@ export class AtlasDePersonagens {
 
   /** A coluna do quadro do estado no atlas. */
   coluna(nome: string, estado: EstadoPersonagem, indice: number): number {
-    const faixa = entrada(nome)?.estados[estado];
+    const e = entrada(nome);
+    const faixa = e ? colunasDoEstado(e, estado) : null;
     return faixa ? faixa.inicio + Math.min(faixa.n - 1, indice) : 0;
   }
 
@@ -141,7 +149,11 @@ export class AtlasDePersonagens {
     const base = e ? this.base(nome) : null;
     if (!e || !base) return null;
     const coluna = this.coluna(nome, estado, indice);
-    return this.recorte(`${nome}:${direcao}:${coluna}`, base, coluna * e.quadroL, direcao * e.quadroA, e.quadroL, e.quadroA);
+    // Marco 32 (D-131): o atlas em faixas (a largura fica abaixo de 4096 px com os estados andando).
+    const porFaixa = e.faixa ?? e.colunas;
+    const x = (coluna % porFaixa) * e.quadroL;
+    const y = (Math.floor(coluna / porFaixa) * 8 + direcao) * e.quadroA;
+    return this.recorte(`${nome}:${direcao}:${coluna}`, base, x, y, e.quadroL, e.quadroA);
   }
 
   /** A arma do grau (0 a 5) e o punho (fração do recorte), ou null enquanto carrega. */
@@ -158,7 +170,8 @@ export class AtlasDePersonagens {
 
   /** Quantos quadros o estado tem. */
   quadrosDe(nome: string, estado: EstadoPersonagem): number {
-    return entrada(nome)?.estados[estado].n ?? 1;
+    const e = entrada(nome);
+    return (e ? colunasDoEstado(e, estado)?.n : undefined) ?? 1;
   }
 
   /** A âncora (fração do quadro e px), a escala para o jogo e a altura do topo acima dos pés (px de mundo). */

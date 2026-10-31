@@ -9,7 +9,7 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium } from '@playwright/test';
 import { build } from 'esbuild';
-import { RECEITAS, type Receita } from './receitas';
+import { RECEITAS, VARIANTES, type Receita } from './receitas';
 import type { PedidoDeCamada, SaidaAtlas } from './pagina';
 import { ARMAS_3D } from './armas3d';
 import { GRAUS, nomeDaCamada, PECAS_DE_ARMADURA } from '../../src/render/equipamento-3d';
@@ -88,7 +88,8 @@ function urlsDe(r: Receita, camadas: PedidoDeCamada[]): Record<string, string> {
   ];
   const urls: Record<string, string> = {};
   for (const ref of refs) urls[ref] = HOST + caminhoDe(ref);
-  for (const nome of Object.values(r.animacoes ?? {})) {
+  // Marco 32 (D-131): mais os golpes de cada arma das classes.
+  for (const nome of [...Object.values(r.animacoes ?? {}), ...(r.equipamento && r.animacoes ? Object.values(VARIANTES) : [])]) {
     const [bib = '', grupo = ''] = nome.split(':');
     const chave = bib === 'kes' ? `kes-anim:${grupo}` : bib;
     urls[chave] = HOST + caminhoDe(chave);
@@ -171,8 +172,8 @@ for (const receita of RECEITAS) {
   let bytesTotal = 0;
   for (const [k, lote] of lotes.entries()) {
     const saida = await pagina.evaluate(async ([r, u, c, corpo]) => window.personagens.renderizarAtlas(r, u, c, corpo), [receita, urls, lote, k === 0] as const);
-    const { quadroL, quadroA, ancoraX, ancoraY, pxCelula, colunas, estados } = saida;
-    const entrada = { quadroL, quadroA, ancoraX, ancoraY, pxCelula, colunas, estados, altura: receita.altura };
+    const { quadroL, quadroA, ancoraX, ancoraY, pxCelula, colunas, faixa, estados } = saida;
+    const entrada = { quadroL, quadroA, ancoraX, ancoraY, pxCelula, colunas, faixa, estados, altura: receita.altura };
     const gravar = async (nome: string, png: string) => {
       const bytes = await webpDe(png);
       writeFileSync(join(DESTINO, `${nome}.webp`), bytes);
@@ -184,7 +185,7 @@ for (const receita of RECEITAS) {
       if (saida.maos) catalogo[receita.nome] = { ...entrada, maos: saida.maos };
     }
     for (const [j, png] of saida.camadas.entries()) await gravar(nomeDaCamada(receita.nome, lote[j]?.nome ?? ''), png);
-    if (k === 0) console.log(receita.nome, `${colunas * quadroL}×${8 * quadroA}`);
+    if (k === 0) console.log(receita.nome, `${faixa * quadroL}×${Math.ceil(colunas / faixa) * 8 * quadroA}`);
   }
   console.log(' ', receita.nome, `${camadas.length} camadas`, `${Math.round(bytesTotal / 1024)} KB`, `${Date.now() - inicio} ms`);
 }

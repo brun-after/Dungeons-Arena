@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   verificar:
-    name: Typecheck, lint, testes, build e smoke
+    name: Typecheck, lint, testes e build
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -57,20 +57,40 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Servidor empacotado
+        run: npm run build:server
+
+  # Marco 32 (31/10/2026): o smoke passou de 20 min num runner só (WebGL por software, 1 worker) e estourava os
+  # 30 min do job (no main também, depois do marco 31). Em 3 fatias paralelas, cada uma no seu runner.
+  smoke:
+    name: Smoke de ponta a ponta (${{ matrix.fatia }}/3)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        fatia: [1, 2, 3]
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+
       - name: Instalar Chromium do Playwright
         run: npx playwright install --with-deps chromium
 
       - name: Smoke de ponta a ponta
-        run: npm run test:e2e
-
-      - name: Servidor empacotado
-        run: npm run build:server
+        run: npx playwright test --shard=${{ matrix.fatia }}/3
 
       - name: Galeria visual dos combos
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: galeria-combos
+          name: galeria-combos-${{ matrix.fatia }}
           path: test-results/combos-visuais-*/combos-*.png
           if-no-files-found: ignore
           retention-days: 7
@@ -79,7 +99,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.fatia }}
           path: test-results/
           retention-days: 7
 
