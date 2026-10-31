@@ -14,13 +14,19 @@ import { efeitosAtivos } from '../combat/efeitos';
 import type { Arquetipo, Entidade } from '../entities/entidade';
 import { relacao } from '../modos/relacao';
 import { duracaoDoGolpe, pose, type EstiloCaminhada, type Golpe } from './caminhada';
-import { golpeDaAcao } from './golpe-visual';
+import { elementoDaAcao, golpeDaAcao } from './golpe-visual';
+import { runaDoElemento } from './runas-elementos';
+import type { Runa } from './runas';
 import { CELULA_PX } from './camera-calculo';
 import type { PontoVisual } from './interpolacao';
 import { ehModelo, MODELO_JOGADOR, MODELOS } from './modelos';
 import { centroDaCelula, type Projecao } from './projecao';
-import { texturasDoAdorno } from './adornos';
+import { equipamento3d, texturasDoAdorno } from './adornos';
 import { RigToken } from './rig-token';
+import { existeArma3d, type AtlasDePersonagens } from './personagens-3d';
+import { Figura3d } from './figura-3d';
+import { ArmasEmVoo, type DonoDoProjetil } from './armas-em-voo';
+import { direcaoDoAngulo, estadoDoPersonagem, peloGolpe, quadroDoEstado, RECUO_DO_GOLPE } from './quadros-personagem';
 import { quadroDoToken, type MomentoDoQuadro } from './quadro-membros';
 import { anelDaInvocacao } from './anel-invocacao';
 import { coresDasRunas, desenharRuna } from './runas';
@@ -42,6 +48,8 @@ export const ALTURA_TOKEN = CELULA_PX * 1.12;
 const ANDANDO_MS = 120;
 /** Marco 25 (D-103): o pulso do arco branco do Arqueiro. */
 const PULSO_ARMA_MS = 2000;
+/** Marco 32 (31/10/2026, D-131): a fração da altura do voo (o falcão) que aparece na vista de cima. */
+const ALTURA_VISTA_DE_CIMA = 0.25;
 /** Troca de quadro das classes jogáveis (2 quadros) enquanto andam. */
 
 /** Marco 25 (D-103): invocação do Necromante (os mortos dele, ou qualquer invocação de dono Necromante). */
@@ -135,6 +143,8 @@ export interface OpcoesEntidades {
   armaBranca?: (e: Entidade, tick: number) => boolean;
   /** Marco 24 (D-098): o ajuste do voo (o falcão); null para quem anda no chão. */
   ajuste?: (e: Entidade, agoraMs: number) => AjusteVisual | null;
+  /** Marco 32 (D-131): os atlas dos personagens pré-renderizados (no isométrico, no lugar do token desenhado). */
+  personagens?: AtlasDePersonagens | null;
   /** Marco 31 (D-130): quem está em (x, y) não aparece (dentro de uma casa fechada, para quem está fora). */
   oculto?: (x: number, y: number) => boolean;
   /** Marco 26 (28/10/2026, D-116): a runa da classe sobre a cabeça dos jogadores (preferência). */
@@ -174,6 +184,12 @@ interface Marcador {
   silhueta: Graphics;
   seta: Graphics;
   rig: RigToken | null;
+  /** Marco 32 (D-131): a figura pré-renderizada, com a armadura e as armas (null: o token desenhado). */
+  figura3d: Figura3d | null;
+  /** Marco 32 (D-131): o modelo e a arma da figura 3D (o desenho do projétil das armas de arremesso). */
+  dono3d: DonoDoProjetil | null;
+  /** Quando a entidade caiu (para a animação de morte), ou -1. */
+  morteDesdeMs: number;
   barras: Graphics;
   aneis: Graphics;
   indicador: Text;
@@ -193,6 +209,8 @@ interface Marcador {
   /** Marco 24 (D-098): o golpe da última ação (pela chave), que a pose anima. */
   golpe: Golpe | null;
   chaveGolpe: string;
+  /** Marco 32 (D-131): a runa do elemento da última ação, acesa no tomo enquanto conjura. */
+  runaGolpe: Runa | null;
   escala: number;
   /** Altura do topo do desenho acima da origem (negativo), para barras e indicador. */
   topo: number;
@@ -203,11 +221,14 @@ interface Marcador {
 
 export class CamadaEntidades {
   private readonly marcadores = new Map<string, Marcador>();
+  private readonly armasEmVoo: ArmasEmVoo;
 
   constructor(
     private readonly camada: Container,
     private readonly o: OpcoesEntidades,
-  ) {}
+  ) {
+    this.armasEmVoo = new ArmasEmVoo(camada);
+  }
 
   private criar(e: Entidade, cor: number): Marcador {
     const raiz = new Container({ label: e.id });
@@ -233,9 +254,9 @@ export class CamadaEntidades {
     if (runa) raiz.addChild(runa);
     this.camada.addChild(raiz);
     return {
-      raiz, sobre, chao, silhueta, seta, rig: null, barras, aneis, indicador, runa, runaDesenhada: '', cor,
+      raiz, sobre, chao, silhueta, seta, rig: null, figura3d: null, dono3d: null, morteDesdeMs: -1, barras, aneis, indicador, runa, runaDesenhada: '', cor,
       angulo: 0, sentido: 1, ultimoX: e.px, ultimoY: e.py, visualX: Number.NaN, visualY: Number.NaN,
-      andandoAteMs: 0, acaoId: null, ataqueDesdeMs: -Infinity, golpe: null, chaveGolpe: '', escala, topo: -RAIO * escala, achatamento: 1, chaoDesenhado: '',
+      andandoAteMs: 0, acaoId: null, ataqueDesdeMs: -Infinity, golpe: null, chaveGolpe: '', runaGolpe: null, escala, topo: -RAIO * escala, achatamento: 1, chaoDesenhado: '',
     };
   }
 
@@ -336,6 +357,8 @@ export class CamadaEntidades {
       if (e.acao && escolha && m.chaveGolpe !== e.acao.chave) {
         m.golpe = golpeDaAcao(ctx, e, e.acao.chave, escolha.modelo);
         m.chaveGolpe = e.acao.chave;
+        const el = elementoDaAcao(ctx, e, e.acao.chave);
+        m.runaGolpe = runaDoElemento(el, el && this.o.corElemento ? this.o.corElemento(el) : null);
       }
       const conjura = e.acao ? e.acao.lancamentoTick - e.acao.inicioTick : 0;
       const preparo = e.acao && m.golpe ? (conjura > 0 ? Math.min(1, Math.max(0, (tickVisual - e.acao.inicioTick) / conjura)) : 1) : null;
@@ -362,6 +385,7 @@ export class CamadaEntidades {
       this.marcadores.delete(id);
       aoRemover?.(id);
     }
+    this.armasEmVoo.desenhar(estado, ctx, alpha, agoraMs, proj, this.o.personagens ?? null, (id) => this.marcadores.get(id)?.dono3d ?? null);
   }
 
   private desenharCorpo(
@@ -387,17 +411,21 @@ export class CamadaEntidades {
     m.seta.rotation = q.angulo;
     if (!escolha) {
       m.rig?.raiz.removeFromParent();
+      if (m.figura3d) m.figura3d.raiz.visible = false;
       m.topo = -RAIO * m.escala;
       return;
     }
+    if (this.corpo3d(m, e, escolha, q)) return;
     if (!m.rig) m.rig = new RigToken(escolha.fonte);
     else if (m.rig.fonteAtual !== escolha.fonte) m.rig.trocarFonte(escolha.fonte);
+    m.rig.raiz.visible = true;
     if (!m.rig.raiz.parent) m.raiz.addChildAt(m.rig.raiz, m.raiz.getChildIndex(m.silhueta));
     // Marco 23 (D-092): o inimigo afim leva a cor do elemento (o extremo, mais forte).
     const af = e.afinidade;
     m.rig.raiz.tint = q.ajuste?.tinta != null ? misturarCor(0xffffff, q.ajuste.tinta, 0.75) : af && this.o.corElemento ? misturarCor(0xffffff, this.o.corElemento(af.elemento), af.extrema ? 0.6 : 0.42) : 0xffffff;
     // Marco 24 (D-098): o voo solto do falcão (altura, inclinação na curva e o tamanho no ombro).
-    m.rig.raiz.position.y = -(q.ajuste?.alturaPx ?? 0);
+    // Marco 32 (D-131): de cima, a altura do voo aparece menor (a câmera olha de cima; a sombra marca o chão).
+    m.rig.raiz.position.y = -(q.ajuste?.alturaPx ?? 0) * (q.iso ? 1 : ALTURA_VISTA_DE_CIMA);
     m.rig.raiz.rotation = q.ajuste?.inclina ?? 0;
     m.rig.raiz.scale.set(q.ajuste?.escala ?? 1);
     const tamanho = escolha.proprio ? q.aparencia.tamanho : 1;
@@ -437,6 +465,72 @@ export class CamadaEntidades {
     m.rig.adornar(adorno?.atras ?? null, adorno?.frente ?? null, adorno?.arma ?? null, adorno?.pivo, adorno?.armaBranca ?? null, brilho, adorno?.secundaria ?? null);
     const f = escolha.fonte;
     m.topo = gira ? -alturaPx * 0.42 : f.ancoraY === 1 ? -alturaPx : -alturaPx * f.ancoraY * 0.9;
+  }
+
+  /**
+   * Marco 32 (31/10/2026, D-131): no isométrico, o modelo com atlas pré-renderizado vira um sprite com o quadro da
+   * direção (pelo rumo na grade) e do estado (morte, golpe, conjuração, andar ou parado). False enquanto o atlas
+   * carrega, na vista de cima e na imagem própria (o token desenhado continua).
+   */
+  private corpo3d(
+    m: Marcador,
+    e: Entidade,
+    escolha: EscolhaDeFonte,
+    q: { iso: boolean; agoraMs: number; andando: boolean; reduzido: boolean; preparo: number | null; ajuste: AjusteVisual | null; tick: number },
+  ): boolean {
+    const atlas = this.o.personagens;
+    if (e.morto) {
+      if (m.morteDesdeMs < 0) m.morteDesdeMs = q.agoraMs;
+    } else m.morteDesdeMs = -1;
+    const esconder = () => {
+      if (m.figura3d) m.figura3d.raiz.visible = false;
+      return false;
+    };
+    // A arma na mão vale também de cima (o projétil das armas de arremesso tem a forma dela).
+    const equipamento = equipamento3d(escolha.modelo, e.aparencia, existeArma3d);
+    m.dono3d = { modelo: escolha.modelo, arma: equipamento?.arma ?? null };
+    if (!atlas || !q.iso || escolha.proprio || !atlas.existe(escolha.modelo)) return esconder();
+    const ataqueMs = q.agoraMs - m.ataqueDesdeMs;
+    const duracao = duracaoDoGolpe(m.golpe);
+    const golpeando = ataqueMs < duracao;
+    const estado = estadoDoPersonagem({ morto: e.morto, golpeando, conjurando: q.preparo !== null && q.preparo < 1, andando: q.andando, golpe: m.golpe });
+    const n = atlas.quadrosDe(escolha.modelo, estado);
+    const ciclo = q.reduzido && estado !== 'morte' && !peloGolpe(estado) ? 0 : q.agoraMs + faseDe(e.id) * 1000;
+    const tempo = estado === 'morte' ? q.agoraMs - m.morteDesdeMs : ciclo;
+    // Marco 32 (D-131): na preparação de um golpe de arma, o recuo dele (o começo da animação) acompanha a conjuração.
+    const fracao = golpeando ? (duracao > 0 ? ataqueMs / duracao : 0) : (q.preparo ?? 0) * RECUO_DO_GOLPE;
+    const indice = quadroDoEstado(estado, n, tempo, fracao);
+    if (!m.figura3d) {
+      m.figura3d = new Figura3d();
+      m.raiz.addChildAt(m.figura3d.raiz, m.raiz.getChildIndex(m.silhueta));
+    }
+    const medidas = atlas.medidas(escolha.modelo);
+    // Marco 23 (D-092): o inimigo afim leva a cor do elemento, como no token desenhado.
+    const af = e.afinidade;
+    const tinta = q.ajuste?.tinta != null ? misturarCor(0xffffff, q.ajuste.tinta, 0.75) : af && this.o.corElemento ? misturarCor(0xffffff, this.o.corElemento(af.elemento), af.extrema ? 0.6 : 0.42) : 0xffffff;
+    const branca = !e.morto && (this.o.armaBranca?.(e, q.tick) ?? false);
+    const pulso = q.reduzido ? 0.5 : 0.5 + 0.5 * Math.sin((2 * Math.PI * q.agoraMs) / PULSO_ARMA_MS);
+    const pronto =
+      !!medidas &&
+      m.figura3d.atualizar(atlas, {
+        modelo: escolha.modelo,
+        estado,
+        direcao: direcaoDoAngulo(m.angulo),
+        indice,
+        escala: medidas.escala * m.escala * (q.ajuste?.escala ?? 1),
+        alturaPx: q.ajuste?.alturaPx ?? 0,
+        tinta,
+        equipamento,
+        branca: branca ? 0.45 + 0.3 * pulso : 0,
+        pulso,
+        morto: e.morto,
+        runa: m.runaGolpe,
+      });
+    if (!pronto) return esconder();
+    m.figura3d.raiz.visible = true;
+    if (m.rig) m.rig.raiz.visible = false;
+    m.topo = -medidas.topo * m.escala * 1.02;
+    return true;
   }
 
   /**
@@ -565,6 +659,7 @@ export class CamadaEntidades {
   }
 
   destruir(): void {
+    this.armasEmVoo.destruir();
     for (const m of this.marcadores.values()) {
       m.sobre.destroy({ children: true });
       m.raiz.destroy({ children: true });

@@ -12,6 +12,7 @@ import { ARMA_DE_CLASSE, OPCOES_JOGAVEIS } from './modelos';
 import { LADO_QUADRO, type Vista } from './modelos/svg';
 import { COR_RARIDADE } from './objetos';
 import type { Raridade } from '../modos/modo';
+import { grauDe, modeloDaArma3d, nomeDaCamada, PECAS_DE_ARMADURA } from './equipamento-3d';
 
 export interface TexturasAdorno {
   atras: Texture | null;
@@ -106,4 +107,56 @@ export function texturasDoAdorno(modelo: string, vista: Vista, aparencia: Aparen
     if (cache.get(chave) === 'carregando') cache.set(chave, { atras, frente, arma, armaBranca, pivo, secundaria, maos });
   });
   return VAZIO;
+}
+
+/** Marco 32 (31/10/2026, D-131): uma peça de armadura do personagem pré-renderizado (o atlas da camada). */
+export interface Camada3d {
+  nome: string;
+}
+
+/** Uma arma na mão: o modelo 3D (armas/<modelo>.webp) e o grau (0 a 5). */
+export interface Arma3d {
+  modelo: string;
+  grau: number;
+}
+
+export interface Equipamento3d {
+  camadas: readonly Camada3d[];
+  arma: Arma3d;
+  secundaria: Arma3d | null;
+  /** A cor do elemento da arma (o brilho por cima dela), ou null. */
+  corElemento: number | null;
+}
+
+const cache3d = new Map<string, Equipamento3d>();
+
+/**
+ * O equipamento do personagem pré-renderizado (null: o modelo não é de classe): a capa, o peito e a cabeça pelo grau
+ * da raridade (só as peças vestidas) e as armas de cada mão pelo desenho e pelo grau (a raridade ou a forma). Mãos
+ * vazias: a arma da classe, no grau comum.
+ */
+export function equipamento3d(modelo: string, aparencia: AparenciaEquipada | null, existeArma: (m: string) => boolean): Equipamento3d | null {
+  if (!Object.hasOwn(OPCOES_JOGAVEIS, modelo)) return null;
+  const padrao = ARMA_DE_CLASSE[modelo as keyof typeof OPCOES_JOGAVEIS];
+  const eq = aparencia;
+  const desenho = eq?.arma ?? padrao.arma;
+  const secundaria = eq?.arma ? eq.secundaria : (eq?.secundaria ?? padrao.secundaria);
+  const elemento = eq?.arma ? eq.elementoArma : null;
+  const chave = `${modelo}|${desenho}|${secundaria}|${eq?.cabeca}|${eq?.corpo}|${eq?.capa}|${elemento}|${eq?.raridadeArma}|${eq?.raridadeSecundaria}|${eq?.formaArma}`;
+  const pronto = cache3d.get(chave);
+  if (pronto) return pronto;
+  const camadas: Camada3d[] = [];
+  for (const peca of PECAS_DE_ARMADURA) {
+    const raridade = eq?.[peca] ?? null;
+    if (raridade) camadas.push({ nome: nomeDaCamada(modelo, `${peca}-${grauDe(raridade)}`) });
+  }
+  const saida: Equipamento3d = {
+    camadas,
+    arma: { modelo: modeloDaArma3d(desenho, existeArma), grau: eq?.arma ? grauDe(eq.raridadeArma, eq.formaArma) : 0 },
+    secundaria: secundaria ? { modelo: modeloDaArma3d(secundaria, existeArma), grau: grauDe(eq?.raridadeSecundaria) } : null,
+    corElemento: elemento ? corDoElemento(elemento) : null,
+  };
+  if (cache3d.size >= MAXIMO) cache3d.clear();
+  cache3d.set(chave, saida);
+  return saida;
 }

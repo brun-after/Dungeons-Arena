@@ -4,6 +4,7 @@
 // genérico. Só apresentação: nada aqui entra na simulação.
 
 import { resolverHabilidade } from '../combat/compilar-habilidade';
+import { ehElemento, type Elemento } from '../combat/elementos';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { Entidade } from '../entities/entidade';
 import type { GolpeDeArma } from '../progression/armas';
@@ -36,4 +37,14 @@ export function golpeDaAcao(ctx: ContextoSimulacao, e: Entidade, chave: string, 
   if (!golpe) return null;
   if (golpe === 'disparo' || golpe === 'arremesso') return h.politicaImpacto === 'projetil' ? golpe : h.alcanceCelulas <= ALCANCE_CORPO_A_CORPO ? 'contundente_leve' : null;
   return h.politicaImpacto === 'projetil' || h.alcanceCelulas > ALCANCE_CORPO_A_CORPO ? null : golpe;
+}
+
+/**
+ * Marco 32 (31/10/2026, D-131): o elemento que a ação lança (o da habilidade, senão o da arma), para a runa do tomo;
+ * null: sem elemento (o arcano).
+ */
+export function elementoDaAcao(ctx: ContextoSimulacao, e: Entidade, chave: string): Elemento | null {
+  const h = resolverHabilidade(ctx, chave);
+  const daArma = e.aparencia?.elementoArma ?? null;
+  return h?.elemento ?? (daArma && ehElemento(daArma) ? daArma : null);
 }

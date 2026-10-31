@@ -14,7 +14,7 @@ import type { EventosDaSimulacao } from '../core/eventos-simulacao';
 import { msDe } from '../core/tempo';
 import type { Entidade, PontoVisual } from '../entities/entidade';
 import { CELULA_PX } from './camera-calculo';
-import type { SistemaParticulas } from './particulas';
+import { ALTURA_NO_AR, type SistemaParticulas } from './particulas';
 import type { AjusteVisual } from './sprites';
 import { pontoDoVoo, quadroDasAsas, VOOS_SKILL, vooDaUltimate, type VooDeSkill } from './voos-falcao';
 
@@ -30,8 +30,21 @@ const AMORTECE_RAPIDO = 2 * Math.sqrt(RIGIDEZ_RAPIDA) * 0.9;
 const COR_DASH = 0xffffff;
 /** A deriva em volta da célula, em células. */
 const DERIVA = 0.32;
-/** O ombro do dono, em células a partir dos pés, e a altura extra para o falcão menor ficar no ombro. */
-const OMBRO = { x: 0.14, y: -0.04, altura: 0.16 };
+/**
+ * O ombro do dono, em células a partir dos pés, e a altura para o falcão menor ficar no ombro. Marco 32 (31/10/2026,
+ * D-131): o ombro do aventureiro pré-renderizado (1,12 célula de altura) fica perto de 0,88.
+ */
+const OMBRO = { x: 0.14, y: -0.04, altura: 0.88 };
+/** Marco 32 (31/10/2026, D-131): o voo solto passa acima da cabeça do aventureiro (1,12 célula), não rente ao chão. */
+const ALTURA_VOO = 1.3;
+/** Quão rápido o falcão desce para a trajetória da skill (por segundo): um mergulho curto, sem salto. */
+const DESCIDA = 10;
+/**
+ * Marco 32 (31/10/2026, D-131): no corte de um projétil (o dash da IA), o falcão desce até a altura em que o projétil
+ * voa (o meio do corpo dele nela); no mergulho de ataque, até o tronco do alvo.
+ */
+const ALTURA_DO_BLOQUEIO = ALTURA_NO_AR - 0.1;
+const ALTURA_DO_MERGULHO = 0.5;
 const ESCALA_POUSADO = 0.7;
 /** Longe demais (troca de fase, teleporte): salta em vez de voar. */
 const SALTO = 6;
@@ -57,6 +70,8 @@ interface EstadoVoo {
   pousado: boolean;
   /** A IA no dash ou no mergulho (marco 25). */
   rapido: boolean;
+  /** A IA no dash: cortando um projétil (marco 32). */
+  bloqueando: boolean;
   ultimoRastroMs: number;
 }
 
@@ -119,12 +134,13 @@ export class VooDoFalcao {
       const b = base(e);
       let st = this.estados.get(e.id);
       if (!st) {
-        st = { x: b.x, y: b.y, vx: 0, vy: 0, altura: 0, semente: this.estados.size + 1, voo: null, pousado: false, rapido: false, ultimoRastroMs: 0 };
+        st = { x: b.x, y: b.y, vx: 0, vy: 0, altura: ALTURA_VOO, semente: this.estados.size + 1, voo: null, pousado: false, rapido: false, bloqueando: false, ultimoRastroMs: 0 };
         this.estados.set(e.id, st);
       }
       const dono = estado.entidades.find((x) => x.id === e.invocacao?.donoId);
       st.pousado = e.ia?.modo === 'pousado' && !st.voo;
       st.rapido = e.ia?.modo === 'dash' || e.ia?.modo === 'mergulho';
+      st.bloqueando = e.ia?.modo === 'dash';
       if (st.voo) this.voar(st, agoraMs, dt, estado, base, dono);
       else this.planar(st, agoraMs, dt, b, dono ? base(dono) : null);
     }
@@ -151,7 +167,7 @@ export class VooDoFalcao {
     }
     st.x = ponto.x;
     st.y = ponto.y;
-    st.altura = ponto.altura;
+    st.altura += (ponto.altura - st.altura) * Math.min(1, dt * DESCIDA);
     if (agoraMs - v.ultimoRastroMs < RASTRO_MS) return;
     v.ultimoRastroMs = agoraMs;
     const y = st.y - st.altura;
@@ -187,8 +203,8 @@ export class VooDoFalcao {
       st.ultimoRastroMs = agoraMs;
       this.o.particulas.emitir('falcao_rastro', st.x, st.y - st.altura, COR_DASH);
     }
-    const altura = st.pousado ? OMBRO.altura : 0;
-    st.altura += (altura - st.altura) * Math.min(1, dt * 6);
+    const altura = st.pousado ? OMBRO.altura : st.bloqueando ? ALTURA_DO_BLOQUEIO : st.rapido ? ALTURA_DO_MERGULHO : ALTURA_VOO;
+    st.altura += (altura - st.altura) * Math.min(1, dt * (st.rapido ? DESCIDA : 6));
   }
 
   /** A posição desenhada: a do voo para o falcão, a da regra para os outros. */

@@ -117,13 +117,16 @@ export function aparenciaDe(ctx: ContextoSimulacao, e: Entidade): AparenciaEquip
     formaArma: arma?.forma ?? null,
     elementoArma: arma?.elemento ?? null,
     formaMaxima,
+    raridadeArma: raridade(eq.arma_principal?.itemId),
+    raridadeSecundaria: raridade(eq.arma_secundaria?.itemId),
   };
 }
 
 const iguais = (a: AparenciaEquipada | null, b: AparenciaEquipada | null) =>
   a === b ||
   (!!a && !!b && a.arma === b.arma && a.secundaria === b.secundaria && a.cabeca === b.cabeca && a.corpo === b.corpo && a.capa === b.capa &&
-    a.formaArma === b.formaArma && a.elementoArma === b.elementoArma && a.formaMaxima === b.formaMaxima);
+    a.formaArma === b.formaArma && a.elementoArma === b.elementoArma && a.formaMaxima === b.formaMaxima &&
+    a.raridadeArma === b.raridadeArma && a.raridadeSecundaria === b.raridadeSecundaria);
 
 /** Etapa do tick: a aparência pública segue o equipamento de quem tem bolsa. */
 export function atualizarAparencias(estado: EstadoJogo, ctx: ContextoSimulacao): void {

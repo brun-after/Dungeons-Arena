@@ -151,7 +151,11 @@ function caminho(g: Graphics, runa: Runa, escala: number, ox: number, oy: number
  */
 export function desenharRuna(g: Graphics, classeId: string, cor: number, tamanho: number): void {
   const runa = runaDe(classeId);
-  if (!runa) return;
+  if (runa) desenharTracos(g, runa, cor, tamanho);
+}
+
+/** Os traços de uma runa qualquer (as das classes e as dos elementos, runas-elementos.ts). */
+export function desenharTracos(g: Graphics, runa: Runa, cor: number, tamanho: number): void {
   const escala = tamanho / 100;
   const o = -tamanho / 2;
   const largura = TRACO_RUNA * escala;

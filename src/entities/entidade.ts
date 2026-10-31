@@ -413,6 +413,9 @@ export interface AparenciaEquipada {
   elementoArma: string | null;
   /** Marco 18: a forma mais alta entre as peças vestidas (o brilho e a aura do token). */
   formaMaxima: string | null;
+  /** Marco 32 (31/10/2026, D-131): a raridade da arma de cada mão (o modelo 3D cresce e se enfeita com ela). */
+  raridadeArma?: string | null;
+  raridadeSecundaria?: string | null;
 }
 
 export const ATRIBUTOS_NEUTROS: Readonly<Atributos> = {

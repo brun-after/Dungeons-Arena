@@ -1,8 +1,11 @@
 # Decisões de projeto
 
-**Versão:** 0.69 · **Data:** 31/10/2026
+**Versão:** 0.72 · **Data:** 31/10/2026
 
 > **Histórico**
+> - **0.72 (31/10/2026)**: D-131: o golpe de cada tipo de arma, a arma de arremesso em voo com a forma dela, o passo no golpe e na conjuração em movimento, a frente da arma por raios, a runa do elemento no tomo e o voo do falcão acima da cabeça.
+> - **0.71 (31/10/2026)**: D-131: o equipamento nos personagens pré-renderizados (camadas por arma e peça) e o retrato 3D na escolha de classe.
+> - **0.70 (31/10/2026)**: D-131 (os personagens pré-renderizados de modelos 3D CC0, marco 32).
 > - **0.69 (31/10/2026)**: D-130: objetos, loja e portais pré-renderizados de modelos 3D CC0 (KayKit e Quaternius); escuro 50% mais claro e sem o quadrado da vinheta; borda de pedra mais fina.
 > - **0.68 (31/10/2026)**: D-130 revista: o jogo passa a ser só isométrico (sai a vista de cima, a tecla V e a opção "Visão"); objetos e áreas elementais repintados; nota em D-058.
 > - **0.67 (31/10/2026)**: D-130 (o visual sombrio: chão texturizado CC0 sem grade, escuridão com luz em volta, paredes altas que esmaecem, telhados das casas, isométrico como padrão e marcas discretas) e a nota em D-106.
@@ -3483,3 +3486,103 @@ pedido foi dividido em dois marcos: este (o mundo) e o 32 (os personagens pré-r
 texturizadas; o monitor de qualidade cai para a vinheta quando preciso. As medidas ficam em `BENCHMARKS.md`. A
 Pedravale (raio 12) é pequena demais para as casas e fica sem. Os telhados dos castelos ficaram de fora: as fachadas
 já são blocos fechados.
+
+## D-131 — Personagens pré-renderizados de modelos 3D CC0 (marco 32, 31/10/2026)
+
+**Contexto.** O usuário quer personagens no clima do Diablo, não o desenho infantil dos tokens em SVG (D-058). O
+marco 31 já pré-renderizou os objetos de modelos CC0 (D-130); o marco 32 faz o mesmo com quem se move.
+
+**Decisão.**
+- **Pacotes, todos CC0** (aprovados um a um pelo usuário; lista e origens em `src/assets/personagens/LICENCAS.md`):
+  - da Quaternius: Universal Base Characters, Modular Character Outfits – Fantasy e Universal Animation Library 1 e 2,
+    todos no mesmo esqueleto humanoide;
+  - KayKit Skeletons.
+  - Os brutos ficam em `.brutos/`, fora do git.
+- **Ferramenta** (`tools/sprites/`): three.js no Chromium do Playwright, como `tools/objetos/`.
+  - Cada receita junta o traje da Quaternius com a cabeça do corpo base. A cabeça é religada aos ossos do traje
+    pelos nomes, e os ossos do resto do corpo base viram um osso de escala quase zero preso ao pescoço, de modo que o
+    corpo emprestado some dentro da gola em qualquer pose (um plano de corte vazava nas animações curvadas).
+  - As armas (do KayKit e da Quaternius) ficam presas nos ossos das mãos; as cores multiplicam os materiais pelo
+    nome; as animações saem das bibliotecas pelo nome.
+- **Atlas** (`src/assets/personagens/<modelo>.webp`, com `catalogo.json`):
+  - 8 direções na grade e 42 quadros: parado 4, andar 8, golpe 6, conjurar 6, morte 6, andar golpeando 6 e andar
+    conjurando 6. Nos dois últimos, as pernas (e a bacia) vêm do andar e o resto do golpe ou da conjuração: quem
+    ataca andando dá passos em vez de deslizar duro (o mago no ataque básico parecia arrastado);
+  - **o golpe de cada tipo de arma, nas classes** (5 quadros cada, da UAL 1 e 2). Antes, todo ataque básico
+    estendia o braço esquerdo (a pose de magia) na preparação e golpeava igual. Agora: o corte da espada, do sabre e
+    da foice (`Sword_Regular_A`); o golpe largo do montante e do machado (`Sword_Attack`); o esmagar da maça e do
+    mangual, de cima para baixo (`TreeChopping`); o golpe leve do cajado (`Melee_Hook`); a estocada da lança e da
+    rapieira (`Punch_Jab`); o disparo do arco e da besta (`Pistol_Shoot`); o arremesso por cima do ombro
+    (`OverhandThrow`); e o giro, uma volta inteira do corpo. A preparação do ataque mostra o começo do próprio golpe
+    (o recuo). A magia e a leitura do tomo continuam com a mão estendida. Os golpes que avançam o corpo ficam com a
+    bacia no lugar, para não sair do quadro. Os monstros, sem esses quadros, usam o golpe deles;
+  - em faixas de 21 colunas, cada uma com as 8 direções (`faixa` no catálogo), para a largura ficar abaixo de
+    4096 px (as classes têm 82 colunas em 4 faixas);
+  - 72 px por célula, desenhado a 48 no jogo;
+  - a mesma luz, a mesma dessaturação e o mesmo contorno escuro dos objetos.
+- **No jogo** (`render/personagens-3d.ts`, `render/sprites.ts`):
+  - no isométrico, o modelo com atlas vira um sprite;
+  - a direção vem do rumo na grade;
+  - o estado vem da entidade: a morte (tocada uma vez desde a queda), o golpe (pela fração da duração), a conjuração,
+    o andar e o parado;
+  - a tinta da afinidade elemental continua;
+  - cada atlas carrega só quando o modelo aparece na cena;
+  - o token desenhado continua como reserva: enquanto o atlas carrega, na imagem própria do jogador e nos modelos
+    ainda sem atlas.
+- **Modelos com atlas: todos os do jogo.**
+  - Dos pacotes: as 5 classes, goblin, orc, troll, vampiro, cultista, sombra, demônio e esqueleto; o boneco de
+    treino e o espantalho (o boneco da Quaternius, parado); o vendedor da loja (atrás do balcão).
+  - A sentinela: o traje com elmo, peitoral e ombreiras fixos, escudo e espada.
+  - A fada: o traje de camponesa, pequena, com asas translúcidas.
+  - Os bichos sem modelo CC0 baixável (a pasta de animais e monstros da Quaternius no Google Drive estava com a cota
+    esgotada): o lobo, a aranha, o falcão e o slime, feitos de geometria na ferramenta (`criaturas3d.ts`,
+    `feras3d.ts`). São peças rígidas em pivôs, animadas por rotação e deformação: o trote, o bote e o uivo do lobo,
+    as oito pernas da aranha, as asas do falcão, o pulo e o derreter do slime.
+- **Equipamento (pedido do usuário no mesmo dia).** O novo visual não pode apagar a identidade dos itens: precisa
+  melhorá-la, e o jogador evoluído fica cada vez mais imponente.
+  - **Armas:** um modelo 3D para cada desenho (`tools/sprites/armas3d.ts`). São os 42 de `armas.json` mais o escudo,
+    com as mesmas formas e cores dos tokens, cada um em 6 graus. O grau é a raridade ou a forma (D-069), o que for
+    maior; a raridade da arma de cada mão entra na aparência pública (`raridadeArma`, `raridadeSecundaria`).
+  - Cada grau é maior (até 1,42×) e mais enfeitado:
+    - incomum: faixas no cabo;
+    - raro: a gema da raridade;
+    - épico: o aço polido e a guarda com asas;
+    - lendário: o ouro, as runas acesas e os espinhos;
+    - última: o aço negro com cristais flutuando.
+  - Os atlas das armas (`armas/<desenho>.webp`, cerca de 150 KB ao todo) são pequenos.
+  - **Na mão:** a ferramenta mede, em cada quadro das classes, onde fica o punho (entre a mão e o dedo médio), para
+    onde a arma aponta na tela, quanto ela encurta e se a mão está na frente ou atrás do tronco (`maos` no
+    catálogo). O jogo prende a arma ali (`render/figura-3d.ts`), gira com o pulso e a põe na frente ou atrás do corpo:
+    ela encaixa na mão e não some atrás da perna. O escudo e os livros ficam em pé.
+  - **Frente ou atrás:** a profundidade da mão contra o tronco errava com o braço do lado (o tomo do mago sumia atrás
+    do braço). A ferramenta lança raios da câmera por pontos ao longo da lâmina e em volta do punho: onde a arma cobre
+    o corpo, ela vai na frente se estiver mais perto que ele na maioria dos pontos (no empate, na frente).
+  - **Arma de arremesso em voo** (`render/armas-em-voo.ts`): o projétil do golpe de arremesso (chakram, shuriken,
+    machadinha, bumerangue…) é desenhado com o modelo da própria arma do lançador, no grau dela, girando no ar; a
+    adaga e o arpeu voam de ponta. Antes, todas iam ao alvo com o mesmo brilho.
+  - **Runa no tomo:** enquanto conjura ou golpeia com um livro, a runa do elemento da magia (a da habilidade, senão a
+    da arma; o arcano sem elemento) acende na página, na cor do elemento (`render/runas-elementos.ts`).
+  - **Brilho:** a arma ganha, somado por cima, o brilho do elemento, o branco da mira cheia do Arqueiro (D-103) ou,
+    do lendário em diante, a cor da raridade.
+  - **Armadura:** a capa, o peito e a cabeça têm uma camada do tamanho do atlas da classe por grau (18 por classe,
+    `<classe>~<peça>-<grau>.webp`). Na ferramenta, o corpo só escreve profundidade nessas passadas, então a camada
+    já sai recortada por ele; no jogo, ela vai por cima. As peças (`armaduras3d.ts`), presas nos ossos:
+    - comum: o pano na cor da raridade;
+    - incomum: o capuz com a tiara e as ombreiras de couro;
+    - raro: o elmo, o peitoral e as ombreiras de aço;
+    - épico: a crista e as bordas de prata;
+    - lendário: os chifres, o ouro, a gema e os espinhos;
+    - última: o aço negro, os espinhos e as runas acesos;
+    - a capa fica mais longa a cada grau, com a barra, o fecho e a barra acesa.
+- **Retrato:** a escolha de classe mostra o primeiro quadro parado, de frente, com a arma da classe na mão. O desenho
+  de antes fica enquanto a imagem carrega.
+
+**Consequências.**
+- Os corpos somam cerca de 5,5 MB (de 170 a 470 KB cada) e vão para o cache do PWA. As camadas de armadura somam
+  cerca de 10 MB: ficam fora do precache, e cada uma entra no cache quando o jogo a usa.
+- O troll fica abaixo de 4096 px de largura (o limite de textura de muitos celulares), e com as faixas os atlas têm no
+  máximo cerca de 2800 × 2600 px.
+- **O falcão do aventureiro** fica 10% menor e voa a 1,3 célula do chão, acima da cabeça do dono (antes, rente ao
+  chão); pousado, fica na altura do ombro do modelo novo. No corte de um projétil (o dash da IA), desce até a altura
+  em que os projéteis voam; no mergulho de ataque, até o tronco do alvo; nas skills, desce rápido para a trajetória.
+  Na vista de cima, só um quarto da altura aparece.

@@ -16,6 +16,9 @@ import { centroDaCelula, type Projecao } from './projecao';
 import { PRESETS_PARTICULA, TEXTURAS_PARTICULA, type CurvaVida, type Emissao, type NomePreset, type TexturaParticula } from './presets-particula';
 import { celulaDaTextura, LADO_RICO, pintarAtlasRico, TEXTURAS_RICAS, type TexturaRica } from './vfx/texturas';
 
+/** A altura (células) das partículas no ar no isométrico: a do corpo e a dos projéteis em voo. */
+export const ALTURA_NO_AR = 0.4;
+
 interface Viva {
   p: Particle;
   destino: ParticleContainer;
@@ -247,10 +250,11 @@ export class SistemaParticulas {
 
   /** Marco 26 (D-124): o centro de uma célula na tela, na altura do corpo (como as emissões). */
   naTela(x: number, y: number): { x: number; y: number } {
+    // A altura do corpo (e dos projéteis em voo) no isométrico: ALTURA_NO_AR células acima do chão.
     const proj = this.projecao();
     const c = centroDaCelula(x, y);
     const p = proj.projetar(c.x, c.y);
-    return { x: p.x, y: p.y - (proj.visao === 'iso' ? CELULA_PX * 0.4 : 0) };
+    return { x: p.x, y: p.y - (proj.visao === 'iso' ? CELULA_PX * ALTURA_NO_AR : 0) };
   }
 
   /** O centro de uma célula no chão (sem a altura do corpo): as marcas e o que brota. */
