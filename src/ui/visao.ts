@@ -12,6 +12,7 @@ import { criarParedesIso, type ParedesIso } from '../render/paredes-iso';
 import { criarEstruturasIso, type EstruturasIso } from '../render/estruturas-iso';
 import { criarTelhados, type Telhados } from '../render/telhados-iso';
 import type { PintorDeDesenhos } from '../render/pintura';
+import type { ObjetosPreRenderizados } from '../render/objetos-3d';
 import type { Projecao } from '../render/projecao';
 import type { Palco } from '../render/stage';
 import { carregarBiblioteca, destruirFonte, fontesDoToken, type BibliotecaCriaturas, type FonteToken } from '../render/texturas-criaturas';
@@ -37,6 +38,8 @@ export interface OpcoesVisao {
   paredeIso: Balance['visual']['paredeIso'];
   /** Marco 31 (D-130): os enfeites e pilares repintados (render/pintura.ts). */
   pintor?: PintorDeDesenhos | null;
+  /** Ajuste de 31/10/2026 (D-130): os enfeites e pilares que têm modelo 3D pré-renderizado. */
+  modelos3d?: ObjetosPreRenderizados | null;
   pedraParede?: Promise<ImageBitmap | null>;
 }
 
@@ -80,7 +83,7 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
     telhados = fase.telhados?.length ? criarTelhados(palco.entidades, fase, p, { altura: o.paredeIso.altura, perto: o.paredeIso.telhadoPerto }) : null;
     // Marco 29 (D-128): as fachadas altas das estruturas do Mundo.
     estruturas = iso ? criarEstruturasIso(palco.entidades, fase, p, pedra) : null;
-    enfeites = iso ? criarDecoracaoIso(palco.entidades, fase, o.tema ?? null, p, o.quebraveis, o.pintor ?? null) : null;
+    enfeites = iso ? criarDecoracaoIso(palco.entidades, fase, o.tema ?? null, p, o.quebraveis, o.pintor ?? null, o.modelos3d ?? null) : null;
     o.terreno?.definirVisao(iso);
     document.body.dataset.visao = p.visao;
   };

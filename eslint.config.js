@@ -16,7 +16,7 @@ const camadasDeApresentacao = [
 ];
 
 export default tseslint.config(
-  { ignores: ['dist', 'dist-server', 'node_modules', 'playwright-report', 'test-results', 'android'] },
+  { ignores: ['.brutos', 'dist', 'dist-server', 'node_modules', 'playwright-report', 'test-results', 'android'] },
   js.configs.recommended,
   {
     files: ['**/*.ts'],

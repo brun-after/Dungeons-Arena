@@ -8,14 +8,18 @@
 // moldura no estilo do tema de destino, render/molduras-portal.ts, e o ar em partículas); a saída trancada fica com o
 // vórtice apagado, correntes e cadeado; a porta temporária do chefe é dourada. Os portais internos são vórtices sem
 // número: o par se reconhece só pela cor, e o anel de espera no chão usa a mesma cor.
+// Ajuste de 31/10/2026 (D-130): no isométrico, a saída, o retorno e a porta do chefe ficam num arco de pedra
+// pré-renderizado de modelos 3D CC0 (render/objetos-3d.ts, `portal`), tingido de leve na cor do tema de destino, com o
+// vórtice no vão; sem a imagem, a moldura desenhada de antes.
 
-import { Graphics, type Container } from 'pixi.js';
+import { Graphics, Sprite, type Container } from 'pixi.js';
 import type { EstadoJogo } from '../core/estado';
 import type { Fase } from '../world/fase';
 import type { EstiloPortal, Tema } from '../world/temas';
 import { CELULA_PX } from './camera-calculo';
 import { ALTURA, corDoPar, portalDeCima, portalEmPe, trancas, vortice, type DesenhoPortal } from './molduras-portal';
 import type { OpcoesEmPe } from './objetos';
+import type { ObjetosPreRenderizados } from './objetos-3d';
 import type { SistemaParticulas } from './particulas';
 import { centroDaCelula } from './projecao';
 import { paletaDe } from './terreno';
@@ -25,12 +29,25 @@ const P = CELULA_PX;
 const AR_MS = 260;
 /** O dourado da porta temporária do chefe. */
 const COR_CHEFE = 0xf1c40f;
+/**
+ * O vão do arco pré-renderizado (tools/objetos/receitas.ts, `portal`): pilares a ±0,6 célula com 0,31 de largura e o
+ * lintel a 1,36 de altura; na tela, 48 px por célula na horizontal e 48·cos 30° na vertical.
+ */
+const VAO = { meiaLargura: 19, altura: 54 };
+/** Quanto da cor do tema tinge a pedra do arco. */
+const TINTA_ARCO = 0.3;
+
+function tingir(cor: number, k: number): number {
+  const canal = (d: number) => Math.round(255 + (((cor >> d) & 0xff) - 255) * k);
+  return (canal(16) << 16) | (canal(8) << 8) | canal(0);
+}
 
 export interface OpcoesPortas {
   emPe?: OpcoesEmPe | null;
   /** O tema de destino da saída e do retorno, e o desta fase (o portal neutro usa a paleta dela). */
   destinos?: { saida: Tema | null; retorno: Tema | null; aqui: Tema | null };
   particulas?: SistemaParticulas | null;
+  modelos?: ObjetosPreRenderizados | null;
 }
 
 interface Portal {
@@ -46,6 +63,8 @@ export class CamadaPortas {
   private readonly g = new Graphics();
   /** Os portais em pé (só no isométrico), um por célula. */
   private readonly altas = new Map<string, Graphics>();
+  /** Os arcos de pedra dos portais em pé, por célula. */
+  private readonly arcos = new Map<string, Sprite>();
   private ultimoArMs = 0;
 
   constructor(
@@ -122,6 +141,12 @@ export class CamadaPortas {
         // O portal interno de pé: um vórtice oval flutuando sobre o anel, sem moldura.
         alta.ellipse(0, 0, 14, 5).fill({ color: 0x000000, alpha: 0.25 });
         vortice(alta, 0, -ALTURA * 0.45, 11, ALTURA * 0.38, p.desenho.cor, tMs, true);
+      } else if (this.arco(chave, pt.x, pt.y, p.desenho.cor, emPe.camada)) {
+        alta.ellipse(0, 0, 30, 11).fill({ color: 0x000000, alpha: 0.3 });
+        const cy = -VAO.altura / 2;
+        if (p.desenho.aceso) vortice(alta, 0, cy, VAO.meiaLargura, VAO.altura / 2 - 2, p.desenho.cor, tMs, true);
+        else alta.ellipse(0, cy, VAO.meiaLargura, VAO.altura / 2 - 2).fill({ color: 0x07060a, alpha: 0.85 });
+        if (p.trancado) trancas(alta, 0, 0, true);
       } else {
         portalEmPe(alta, 0, 0, p.desenho);
         if (p.trancado) trancas(alta, 0, 0, true);
@@ -132,7 +157,30 @@ export class CamadaPortas {
       alta.destroy();
       this.altas.delete(chave);
     }
+    for (const [chave, arco] of this.arcos) {
+      if (vistas.has(chave)) continue;
+      arco.destroy();
+      this.arcos.delete(chave);
+    }
     this.soltarAr(portais, agoraMs, movimentoReduzido);
+  }
+
+  /** O arco de pedra atrás do vórtice (os pés no centro da célula); false sem a imagem. */
+  private arco(chave: string, x: number, y: number, cor: number, camada: Container): boolean {
+    const modelos = this.o.modelos;
+    if (!modelos?.tem('portal')) return false;
+    let s = this.arcos.get(chave);
+    if (!s) {
+      s = modelos.sprite('portal') ?? undefined;
+      if (!s) return false;
+      this.arcos.set(chave, s);
+      camada.addChild(s);
+    }
+    s.position.set(x, y);
+    // Logo atrás do vórtice (o Graphics do portal fica em y).
+    s.zIndex = y - 0.001;
+    s.tint = tingir(cor, TINTA_ARCO);
+    return true;
   }
 
   /** O ar de cada portal aceso, em partículas, de tempos em tempos (nada com movimento reduzido). */
@@ -150,5 +198,7 @@ export class CamadaPortas {
     this.g.destroy();
     for (const alta of this.altas.values()) alta.destroy();
     this.altas.clear();
+    for (const arco of this.arcos.values()) arco.destroy();
+    this.arcos.clear();
   }
 }

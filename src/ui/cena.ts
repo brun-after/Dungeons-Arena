@@ -73,6 +73,7 @@ import { Hud } from './hud';
 import { identidadeDaClasse } from './barra-classe';
 import { QuadroAlvo } from './quadro-alvo';
 import { montarVisao, type ControleVisao } from './visao';
+import { ObjetosPreRenderizados } from '../render/objetos-3d';
 import { criarGolpeNoQuebravel } from './golpe-quebravel';
 import { criarBotaoCentralizar } from './botao-centralizar';
 import { classeDaHabilidade } from './runa-dom';
@@ -203,6 +204,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const soloTema = temaDaFase(ctx)?.solo ?? SOLO_PADRAO;
   // Os enfeites, os pilares e os objetos repintados (render/pintura.ts), com o cache de texturas da cena.
   const pintor = new PintorDeDesenhos(palco.app.renderer);
+  // Ajuste de 31/10/2026 (D-130): os objetos pré-renderizados de modelos 3D CC0 (render/objetos-3d.ts).
+  const modelos3d = new ObjetosPreRenderizados();
   const solo: SoloDoTerreno | null = o.tileset
     ? null
     : {
@@ -233,7 +236,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   });
   // Marco 31 (D-130): a telegrafia acima do escuro (a área do golpe inimigo se lê mesmo fora da luz).
   const telegrafia = new CamadaTelegrafia(palco.marcas, palco.voo, projecao, () => aparencia.areaExata, ap.particulas);
-  await carregarTexturasDeIcones([...new Set([...ctx.conteudo.itens.values()].map((i) => i.icone)), 'pergaminho']);
+  await Promise.all([carregarTexturasDeIcones([...new Set([...ctx.conteudo.itens.values()].map((i) => i.icone)), 'pergaminho']), o.tileset ? null : modelos3d.carregar()]);
   const objetos = new CamadaObjetos(
     palco.chao,
     (id) => ctx.conteudo.itens.get(id)?.raridade,
@@ -242,6 +245,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     (id) => ctx.conteudo.itens.get(id)?.icone,
     temaDaFase(ctx)?.paleta ?? null,
     pintor,
+    o.tileset ? null : modelos3d,
   );
   bus.on('quebrou', (ev) => {
     ap.particulas.emitir(presetDaQuebra(ev.forma), ev.x, ev.y, 0x9ad8ff);
@@ -255,6 +259,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     emPe: { camada: palco.entidades, projecao },
     destinos: { saida: temaPorId(o.portais?.saida), retorno: temaPorId(o.portais?.retorno), aqui: temaDaFase(ctx) },
     particulas: ap.particulas,
+    modelos: o.tileset ? null : modelos3d,
   });
   const numeros = new CamadaNumeros(palco.efeitos, ap.movimentoReduzido, projecao);
   visao = await montarVisao({
@@ -267,6 +272,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     quebraveis,
     paredeIso: ctx.balance.visual.paredeIso,
     pintor: o.tileset ? null : pintor,
+    modelos3d: o.tileset ? null : modelos3d,
     ...(solo && { pedraParede: solo.texturas.then((t) => t.get(soloTema.parede) ?? null) }),
     aoTrocar: () => {
       sprites.reiniciarVisual();
@@ -694,6 +700,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       hud.destruir();
       visao.destruir();
       pintor.destruir();
+      modelos3d.destruir();
       ap.encerrar();
       for (const d of document.querySelectorAll('dialog.modal')) if (!modaisDeAntes.has(d)) d.remove();
       palco.destruir();

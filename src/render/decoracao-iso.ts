@@ -17,6 +17,7 @@ import { desenharDecoracao, desenharPilar } from './decoracao';
 import { varianteEmPassos, type PintorDeDesenhos } from './pintura';
 import { profundidade, type Projecao } from './projecao';
 import { paletaDe } from './terreno';
+import type { ObjetosPreRenderizados } from './objetos-3d';
 
 const P = CELULA_PX;
 /** O pilar fica 1,5 vez mais alto que o desenho de cima (a base em 0,85 da célula: cerca de 1 célula de altura). */
@@ -74,13 +75,28 @@ function desenharItem(g: Graphics, item: Item, p: Projecao, paleta: PaletaTema, 
   g.restore();
 }
 
-/** Marco 31 (D-130): o item como sprite repintado, com a sombra num Graphics por baixo. */
-function itemPintado(c: Container, item: Item, p: Projecao, paleta: PaletaTema, pilar: TipoPilar, pintor: PintorDeDesenhos, chavePaleta: string): void {
+/**
+ * Marco 31 (D-130): o item como sprite repintado, com a sombra num Graphics por baixo. Ajuste de 31/10/2026: o que tem
+ * modelo 3D pré-renderizado (render/objetos-3d.ts: barril, caixote, vaso, livros, vela, estante, coluna…) usa ele.
+ */
+function itemPintado(c: Container, item: Item, p: Projecao, paleta: PaletaTema, pilar: TipoPilar, pintor: PintorDeDesenhos, chavePaleta: string, modelos: ObjetosPreRenderizados | null): void {
   const sombra = new Graphics();
   c.addChild(sombra);
+  const modelo = (nome: string, x: number, y: number): boolean => {
+    const sp = modelos?.sprite(nome);
+    if (!sp) return false;
+    sp.position.set(x, y);
+    c.addChild(sp);
+    return true;
+  };
   if (item.tipo === 'pilar') {
     const { x, y } = item;
     const centro = p.projetar((x + 0.5) * P, (y + 0.5) * P);
+    if (modelos?.tem(pilar)) {
+      sombra.ellipse(centro.x, centro.y, P * 0.42, P * 0.18).fill({ color: 0x000000, alpha: 0.3 });
+      modelo(pilar, centro.x, centro.y);
+      return;
+    }
     const canto = (cx: number, cy: number) => p.projetar(cx * P, cy * P);
     const n = canto(x + 0.15, y + 0.15);
     const l = canto(x + 0.85, y + 0.15);
@@ -103,6 +119,7 @@ function itemPintado(c: Container, item: Item, p: Projecao, paleta: PaletaTema, 
   const chao = p.projetar((d.x + 0.5) * P, (d.y + (deParede ? 0.08 : 0.5)) * P);
   const base = deParede ? BASE_DE_PAREDE : BASE_ENFEITE;
   if (!deParede) sombra.ellipse(chao.x, chao.y, P * 0.3, P * 0.12).fill({ color: 0x000000, alpha: 0.22 });
+  if (!deParede && modelo(d.tipo, chao.x, chao.y)) return;
   const variante = varianteEmPassos(d.variante);
   const pintura = pintor.pintura(`enfeite:${d.tipo}:${variante}:${chavePaleta}`, (g) => { desenharDecoracao(g, { tipo: d.tipo, x: 0, y: 0, variante }, paleta); });
   if (!pintura) return;
@@ -113,7 +130,7 @@ function itemPintado(c: Container, item: Item, p: Projecao, paleta: PaletaTema, 
   c.addChild(sp);
 }
 
-export function criarDecoracaoIso(camada: Container, fase: Fase, tema: Tema | null, p: Projecao, pular: ReadonlySet<string> = new Set(), pintor: PintorDeDesenhos | null = null): DecoracaoIso {
+export function criarDecoracaoIso(camada: Container, fase: Fase, tema: Tema | null, p: Projecao, pular: ReadonlySet<string> = new Set(), pintor: PintorDeDesenhos | null = null, modelos: ObjetosPreRenderizados | null = null): DecoracaoIso {
   const paleta = tema?.paleta ?? paletaDe(fase.matizGraus);
   const pilar: TipoPilar = tema?.pilar ?? 'coluna';
   const chavePaleta = tema?.id ?? `matiz${fase.matizGraus}`;
@@ -122,7 +139,7 @@ export function criarDecoracaoIso(camada: Container, fase: Fase, tema: Tema | nu
     const g = pintor ? new Container() : new Graphics();
     // Os enfeites de trás da diagonal primeiro (o x maior fica mais à direita, na mesma altura).
     for (const item of itens) {
-      if (pintor) itemPintado(g, item, p, paleta, pilar, pintor, chavePaleta);
+      if (pintor) itemPintado(g, item, p, paleta, pilar, pintor, chavePaleta, modelos);
       else if (g instanceof Graphics) desenharItem(g, item, p, paleta, pilar);
     }
     g.zIndex = profundidade(p, d, 0) - 0.005;

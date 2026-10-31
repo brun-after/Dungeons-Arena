@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.68 · **Data:** 31/10/2026
+**Versão:** 0.69 · **Data:** 31/10/2026
 
 > **Histórico**
+> - **0.69 (31/10/2026)**: D-130: objetos, loja e portais pré-renderizados de modelos 3D CC0 (KayKit e Quaternius); escuro 50% mais claro e sem o quadrado da vinheta; borda de pedra mais fina.
 > - **0.68 (31/10/2026)**: D-130 revista: o jogo passa a ser só isométrico (sai a vista de cima, a tecla V e a opção "Visão"); objetos e áreas elementais repintados; nota em D-058.
 > - **0.67 (31/10/2026)**: D-130 (o visual sombrio: chão texturizado CC0 sem grade, escuridão com luz em volta, paredes altas que esmaecem, telhados das casas, isométrico como padrão e marcas discretas) e a nota em D-106.
 > - **0.66 (30/10/2026)**: D-129 (o Mundo social: grupo, chat, banco, missões, troca, mercado, receitas por ofício, perigo, vila refúgio, passagem protegida, estrutura escondida, eventos por região, polimento visual e as metas do Mundo no simulador, com a vida dos chefes dos covis e o fim das invocações como monstros).
@@ -3452,6 +3453,22 @@ pedido foi dividido em dois marcos: este (o mundo) e o 32 (os personagens pré-r
   quebráveis, os enfeites e os pilares são desenhados uma vez, extraídos para um canvas e repintados (menos
   saturação, luz de cima, sombra nos pés, grão e borda escura), e viram sprites com cache por chave. Os orbes ganham
   volume.
+- **Objetos de modelos 3D CC0** (ajuste pedido pelo usuário): o baú (fechado, aberto, trancado), a loja, o ouro, o
+  santuário, os quebráveis e os enfeites que têm modelo (barril, caixote, vaso, carrinho, livros, vela, estante,
+  coluna) e o arco dos portais saem de modelos do KayKit Dungeon Remastered e do Quaternius Fantasy Props MegaKit,
+  ambos CC0. Os modelos são renderizados por `tools/objetos/` (three.js no Chromium do Playwright, só no
+  desenvolvimento) no ângulo do isométrico: câmera ortográfica a 45° e 30°, luz quente de cima à esquerda, recorte
+  frio, menos saturação e contorno escuro. As imagens ficam em `src/assets/objetos/`, a 96 px por célula, com
+  `catalogo.json` (âncora dos pés) e `LICENCAS.md`. Os zips brutos ficam em `.brutos/`, fora do git. O jogo carrega
+  as imagens com a cena (`render/objetos-3d.ts`); sem elas, vale o desenho repintado.
+  - A loja ganha tamanho real: uma barraca de cerca de 3 células com o vendedor atrás do balcão. O vendedor é
+    desenhado e é provisório até os personagens 3D do marco 32.
+  - Os portais de saída, de retorno e do chefe viram um arco de pedra, tingido de leve na cor do tema de destino, com
+    o vórtice no vão. Os portais internos continuam só com o vórtice.
+- **Escuro e chão** (ajuste pedido pelo usuário):
+  - a vinheta do celular e da qualidade baixa cobre a tela toda (fora da textura, faixas do mesmo escuro);
+  - o escuro fica 50% mais claro (`visual.luz.clareza`);
+  - a pedra da parede no chão tem metade da largura e metade do ruído da borda.
 - **Áreas elementais no chão** (`render/solo/ambientes-solo.ts`): no lugar do círculo translúcido com riscos, cada
   área entra no canvas do bloco, antes das paredes: contorno orgânico de borda macia, a textura e a cor do elemento
   e, nas que brilham, rachaduras acesas. As que brilham soltam luz no escuro.

@@ -15,6 +15,9 @@
 // Marco 31 (31/10/2026, D-130): com o pintor (render/pintura.ts), o baú, a loja, o ouro, o santuário e os objetos do
 // Mundo viram sprites repintados (um por objeto, trocado quando o estado muda: aberto, trancado, aceso), nas duas
 // visões; os orbes ganham volume (núcleo, reflexo e brilho) no lugar do traço branco.
+// Ajuste de 31/10/2026 (D-130): no isométrico, o baú, a loja (em tamanho real, com o vendedor atrás do balcão), o
+// ouro, o santuário e os quebráveis que têm modelo usam os sprites pré-renderizados de modelos 3D CC0
+// (render/objetos-3d.ts); sem a imagem, o desenho repintado de antes.
 
 import { CanvasSource, Container, Graphics, Sprite, Text, Texture } from 'pixi.js';
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
@@ -27,7 +30,8 @@ import type { PaletaTema } from '../world/temas';
 import { desenharDecoracao } from './decoracao';
 import { paletaDe } from './terreno';
 import { texturaDoIcone } from './icones-textura';
-import { desenharObjetoDoMundo, desenharVendedor } from './objetos-mundo';
+import { desenharObjetoDoMundo, desenharVendedor, desenharVendedorDeLoja } from './objetos-mundo';
+import type { ObjetosPreRenderizados } from './objetos-3d';
 import { varianteEmPassos, type PintorDeDesenhos } from './pintura';
 
 const COR_ORBE: Readonly<Record<'orbe_hp' | 'orbe_recurso', number>> = {
@@ -77,6 +81,8 @@ export class CamadaObjetos {
   private readonly quebras = new Map<string, Graphics>();
   /** Marco 31 (D-130): os objetos repintados, um sprite por objeto e a chave do desenho que ele mostra. */
   private readonly pinturas = new Map<string, { sprite: Sprite; chave: string }>();
+  /** Os sprites dos modelos pré-renderizados, por objeto (o vendedor da loja leva o sufixo `#v`). */
+  private readonly modelos3d = new Map<string, Sprite>();
 
   /**
    * `raridadeDe` traduz o item do chão para a cor; item desconhecido aparece como comum.
@@ -90,6 +96,7 @@ export class CamadaObjetos {
     private readonly iconeDe: (itemId: string) => string | undefined = () => undefined,
     private readonly paleta: PaletaTema | null = null,
     private readonly pintor: PintorDeDesenhos | null = null,
+    private readonly modelos: ObjetosPreRenderizados | null = null,
   ) {
     this.camadaHalo = camada;
     camada.addChild(this.g);
@@ -138,6 +145,60 @@ export class CamadaObjetos {
     p.sprite.zIndex = z;
     p.sprite.visible = true;
     return true;
+  }
+
+  /** O modelo pré-renderizado do objeto (render/objetos-3d.ts), ou null. */
+  private nomeModelo(o: ObjetoNoMundo): string | null {
+    if (o.tipo === 'bau') return o.abertoTick > 0 ? 'bau_aberto' : o.chave ? 'bau_trancado' : 'bau_fechado';
+    if (o.tipo === 'loja' || o.tipo === 'ouro') return o.tipo;
+    if (o.tipo === 'santuario') return o.abertoTick === 0 ? 'santuario_aceso' : 'santuario_apagado';
+    if (o.tipo === 'quebravel') return o.ref ?? null;
+    return null;
+  }
+
+  /** Mostra o modelo com os pés em (x, y) da camada; false se ele não está pronto (quem chama desenha como antes). */
+  private modelo(id: string, nome: string, x: number, y: number, camada: Container, z: number): boolean {
+    if (!this.modelos?.tem(nome)) return false;
+    let s = this.modelos3d.get(id);
+    if (!s) {
+      s = new Sprite();
+      this.modelos3d.set(id, s);
+    }
+    this.modelos.aplicar(s, nome);
+    if (s.parent !== camada) camada.addChild(s);
+    s.position.set(x, y);
+    s.zIndex = z;
+    s.visible = true;
+    return true;
+  }
+
+  /**
+   * A loja em tamanho real: o vendedor fica atrás do balcão (o balcão cobre as pernas). A barraca está girada 22° no
+   * render (tools/objetos/receitas.ts): atrás dela é o sentido contrário à frente, na grade.
+   */
+  private vendedorDaLoja(o: ObjetoNoMundo, proj: Projecao, camada: Container): void {
+    const id = `${o.objetoId}#v`;
+    const c = centroDaCelula(o.x, o.y);
+    const atras = 0.32 * CELULA_PX;
+    const p = proj.projetar(c.x - Math.sin(Math.PI / 8) * atras, c.y - Math.cos(Math.PI / 8) * atras);
+    const ref = o.ref ?? 'mercador';
+    const pintura = this.pintor?.pintura(`vendedor:${ref}`, (g) => {
+      desenharVendedorDeLoja(g, ref);
+    });
+    if (!pintura) return;
+    let s = this.modelos3d.get(id);
+    if (!s) {
+      s = new Sprite(pintura.textura);
+      this.modelos3d.set(id, s);
+    }
+    if (s.parent !== camada) camada.addChild(s);
+    s.anchor.set(0, 0);
+    s.scale.set(1);
+    s.position.set(p.x + pintura.x, p.y + pintura.y);
+    s.width = pintura.largura;
+    s.height = pintura.altura;
+    s.zIndex = p.y;
+    s.visible = true;
   }
 
   /** A chave do desenho repintado do objeto (o que muda o desenho entra nela), ou null para os que animam. */
@@ -342,6 +403,11 @@ export class CamadaObjetos {
       p.sprite.destroy();
       this.pinturas.delete(id);
     }
+    for (const [id, s] of this.modelos3d) {
+      if (vistos.has(id.endsWith('#v') ? id.slice(0, -2) : id)) continue;
+      s.destroy();
+      this.modelos3d.delete(id);
+    }
   }
 
   /**
@@ -371,6 +437,7 @@ export class CamadaObjetos {
       g.zIndex = p.y - 0.01;
     }
     const tipo = o.ref ?? '';
+    if (proj && this.modelo(o.objetoId, tipo, g.x + CELULA_PX / 2, g.y + CELULA_PX * 0.75, camada, g.zIndex + 0.001)) return;
     if (!ehTipoDecoracao(tipo)) return;
     const variante = varianteEmPassos(hashCelula(o.x, o.y, 3));
     const desenho = (gp: Graphics) => {
@@ -424,6 +491,15 @@ export class CamadaObjetos {
     alto.zIndex = p.y;
     // Desenhado acima da origem (os pés do objeto ficam no centro da célula).
     const flutua = Math.sin(tMs / 380 + o.x * 1.7 + o.y) * 2.5;
+    // Ajuste de 31/10/2026 (D-130): o modelo pré-renderizado, com a sombra macia no Graphics.
+    const nome = this.nomeModelo(o);
+    const medidas = nome ? this.modelos?.medidas(nome) : null;
+    if (nome && medidas && this.modelo(o.objetoId, nome, p.x, p.y, camada, p.y + 0.001)) {
+      const r = Math.min(medidas.largura * 0.42, CELULA_PX * 1.3);
+      alto.clear().ellipse(0, 0, r, r * 0.42).fill({ color: 0x000000, alpha: 0.32 });
+      if (o.tipo === 'loja') this.vendedorDaLoja(o, proj, camada);
+      return;
+    }
     // Marco 31 (D-130): a sombra no Graphics e o desenho repintado num sprite logo à frente dela.
     const chave = this.chaveDe(o);
     if (chave && this.pintor) {
@@ -473,6 +549,8 @@ export class CamadaObjetos {
     if (q) q.visible = visivel;
     const pintura = this.pinturas.get(id);
     if (pintura) pintura.sprite.visible = visivel;
+    const m = this.modelos3d.get(id);
+    if (m) m.visible = visivel;
   }
 
   /** Troca de visão: os objetos em pé voltam para o chão (ou o contrário) no próximo quadro. */
@@ -485,6 +563,8 @@ export class CamadaObjetos {
     this.quebras.clear();
     for (const p of this.pinturas.values()) p.sprite.destroy();
     this.pinturas.clear();
+    for (const s of this.modelos3d.values()) s.destroy();
+    this.modelos3d.clear();
   }
 
   destruir(): void {
