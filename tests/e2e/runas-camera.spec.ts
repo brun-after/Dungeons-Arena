@@ -10,9 +10,10 @@ test('a seleção mostra runa e retrato de cada classe, e "Ver mais" abre a lore
   const colunas = page.locator('.classe-coluna');
   await expect(colunas).toHaveCount(5);
   await expect(page.locator('.classe-coluna svg[data-runa]')).toHaveCount(5);
-  const retratos = page.locator('.classe-coluna img.retrato-classe');
+  // Marco 32 (D-131): o retrato pré-renderizado (canvas) troca o desenho (img) quando carrega.
+  const retratos = page.locator('.classe-coluna .retrato-classe');
   await expect(retratos).toHaveCount(5);
-  await expect.poll(() => retratos.evaluateAll((imgs) => imgs.every((i) => (i as HTMLImageElement).naturalWidth > 0))).toBe(true);
+  await expect.poll(() => page.locator('.classe-coluna canvas.retrato-3d').count()).toBe(5);
 
   const guerreiro = page.locator('[data-classe="guerreiro"]');
   await expect(guerreiro.locator('.estilo-classe')).toContainText('Estilo:');

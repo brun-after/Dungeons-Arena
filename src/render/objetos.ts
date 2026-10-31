@@ -32,7 +32,8 @@ import { paletaDe } from './terreno';
 import { texturaDoIcone } from './icones-textura';
 import { desenharObjetoDoMundo, desenharVendedor, desenharVendedorDeLoja } from './objetos-mundo';
 import type { ObjetosPreRenderizados } from './objetos-3d';
-import { quadroDoEstado, type AtlasDePersonagens } from './personagens-3d';
+import type { AtlasDePersonagens } from './personagens-3d';
+import { quadroDoEstado } from './quadros-personagem';
 import { varianteEmPassos, type PintorDeDesenhos } from './pintura';
 
 const COR_ORBE: Readonly<Record<'orbe_hp' | 'orbe_recurso', number>> = {

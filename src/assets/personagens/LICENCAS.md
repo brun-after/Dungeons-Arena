@@ -1,6 +1,6 @@
 # Personagens pré-renderizados
 
-**Versão:** 1.0 · **Data:** 31/10/2026
+**Versão:** 1.2 · **Data:** 31/10/2026 (1.1: as camadas de equipamento; 1.2: armas por desenho e grau, armadura por grau e as feras)
 
 Os atlas desta pasta são renderizados por `tools/sprites/render.ts` a partir de modelos 3D e animações de pacotes sob
 a licença **CC0 1.0 Universal** (domínio público). A licença está no arquivo de licença de cada pacote. Cada atlas tem
@@ -22,9 +22,14 @@ Lousberg (www.kaylousberg.com).
 
 | Atlas | Corpo e peças |
 |---|---|
-| `guerreiro`, `necromante`, `vampiro`, `cultista` | traje Ranger (masculino) com a cabeça do corpo base; machado e escudo, cajado ou lâmina do KayKit |
+| `guerreiro`, `necromante`, `vampiro`, `cultista` | traje Ranger (masculino) com a cabeça do corpo base; as classes sem armas (vêm nas camadas), o cultista com a lâmina do KayKit |
 | `arqueiro`, `sombra` | traje Ranger (feminino) com a cabeça do corpo base; besta do KayKit |
 | `mago`, `aventureiro`, `goblin`, `orc`, `troll`, `vendedor` | traje Peasant com a cabeça do corpo base; livro (Quaternius), lâmina e machado (KayKit) |
 | `demonio` | corpo base Superhero, tingido |
 | `esqueleto` | KayKit `Skeleton_Minion` (cabeça reduzida) com a lâmina |
 | `generico` (boneco de treino), `espantalho` | Quaternius `Dummy` (parado) |
+| `sentinela` | traje Ranger com elmo, peitoral e ombreiras feitos na ferramenta; lâmina e escudo do KayKit |
+| `fada` | traje de camponesa (feminino) com a cabeça do corpo base; asas feitas na ferramenta |
+| `lobo`, `aranha`, `falcao`, `slime` | geometria simples feita na ferramenta (`tools/sprites/feras3d.ts`, `criaturas3d.ts`) |
+| `armas/*` | geometria simples feita na ferramenta (`tools/sprites/armas3d.ts`), com as formas e cores dos desenhos do jogo |
+| `<classe>~cabeca-*`, `<classe>~corpo-*`, `<classe>~capa-*` | o capuz e o pano do traje (Quaternius) na cor da raridade; elmo, peitoral, ombreiras e capa feitos na ferramenta (`tools/sprites/armaduras3d.ts`) |

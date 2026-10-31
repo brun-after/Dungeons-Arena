@@ -24,6 +24,23 @@ export interface Arma {
   cor?: number;
 }
 
+/**
+ * As peças de armadura de uma classe (marco 32, D-131): as malhas do próprio traje (pelo nome e, se houver, pelo
+ * material) e as peças a mais do pacote de trajes, religadas ao esqueleto. `esconder`: o que sai da máscara do corpo
+ * nessa camada (o cabelo, que atravessaria o capuz posto).
+ */
+export interface PecaDeTraje {
+  malhas?: string;
+  material?: string;
+  pecas?: string[];
+  esconder?: string;
+}
+
+export interface Equipamento {
+  cabeca: PecaDeTraje;
+  corpo: PecaDeTraje;
+}
+
 export interface Receita {
   nome: string;
   /** O corpo: o traje (com a cabeça de `cabeca`) ou o personagem inteiro. */
@@ -45,7 +62,22 @@ export interface Receita {
   exposicao?: number;
   /** O quadro (em células, em volta dos pés) quando o modelo é maior que o padrão. */
   quadro?: { largura: number; altura: number; baixo: number };
+  /** Armadura fixa no corpo (a sentinela): o grau do elmo e do peito, com a cor de destaque. */
+  armadura?: { cabeca: number; corpo: number; acento: number };
+  /** Asas translúcidas nas costas (a fada), na cor dada. */
+  asas?: number;
+  /** As classes: o corpo sai sem armas (vão na mão, medida em cada quadro) e cada peça de armadura vira camadas por grau. */
+  equipamento?: Equipamento;
 }
+
+const DO_RANGER: Equipamento = {
+  cabeca: { malhas: 'Hood' },
+  corpo: { malhas: '_Body|Pauldron|Bracer|_Arms', material: 'MI_Ranger' },
+};
+const DO_CAMPONES: Equipamento = {
+  cabeca: { pecas: ['traje:Modular Parts/Male_Ranger_Head_Hood'], esconder: 'Hair' },
+  corpo: { malhas: '_Body|_Arms', material: 'MI_Peasant' },
+};
 
 const HUMANO = { parado: 'ual1:Idle_Loop', andar: 'ual1:Walk_Loop', golpe: 'ual1:Sword_Attack', conjurar: 'ual1:Spell_Simple_Shoot', morte: 'ual1:Death01' } as const;
 const ESPADA = { ...HUMANO, parado: 'ual1:Sword_Idle' } as const;
@@ -66,11 +98,8 @@ export const RECEITAS: Receita[] = [
     cabeca: CABECA_M,
     altura: 1.14,
     cores: { Ranger: 0xc8ccd2, Hair: 0x3a2a1e },
-    armas: [
-      { m: 'kes:assets/gltf/Skeleton_Axe.gltf', osso: 'hand_r', tamanho: 0.62, giro: [0, 0, 90] },
-      { m: 'kes:assets/gltf/Skeleton_Shield_Small_A.gltf', osso: 'hand_l', tamanho: 0.48, giro: [0, 90, 0], cor: 0x8a6a4a },
-    ],
     animacoes: ESPADA,
+    equipamento: DO_RANGER,
   },
   {
     nome: 'mago',
@@ -79,8 +108,8 @@ export const RECEITAS: Receita[] = [
     altura: 1.12,
     cores: { Peasant: 0x7a90e0, Hair: 0xb8b0a0 },
     exposicao: 2.1,
-    armas: [{ m: 'q:Book_5', osso: 'hand_l', tamanho: 0.22, giro: [0, 0, 0] }],
     animacoes: MAGIA,
+    equipamento: DO_CAMPONES,
   },
   {
     nome: 'arqueiro',
@@ -88,8 +117,8 @@ export const RECEITAS: Receita[] = [
     cabeca: CABECA_F,
     altura: 1.08,
     cores: { Ranger: 0x7d9a6a, Hair: 0x5a3a22 },
-    armas: [{ m: 'kes:assets/gltf/Skeleton_Crossbow.gltf', osso: 'hand_r', tamanho: 0.5, giro: [0, 0, 90] }],
     animacoes: MAGIA,
+    equipamento: DO_RANGER,
   },
   {
     nome: 'necromante',
@@ -98,8 +127,8 @@ export const RECEITAS: Receita[] = [
     altura: 1.14,
     cores: { Ranger: 0x8a70a8, Superhero: 0xc8d4c8, Regular: 0xc8d4c8, Hair: 0x1a1a1a },
     exposicao: 1.8,
-    armas: [{ m: 'kes:assets/gltf/Skeleton_Staff.gltf', osso: 'hand_r', tamanho: 1.0, giro: [0, 0, 90] }],
     animacoes: MAGIA,
+    equipamento: DO_RANGER,
   },
   {
     nome: 'aventureiro',
@@ -108,8 +137,8 @@ export const RECEITAS: Receita[] = [
     altura: 1.12,
     cores: { Peasant: 0xa0b4d8, Hair: 0x6a4a2a },
     exposicao: 1.8,
-    armas: [{ m: 'kes:assets/gltf/Skeleton_Blade.gltf', osso: 'hand_r', tamanho: 0.45, giro: [0, 0, 90] }],
     animacoes: HUMANO,
+    equipamento: DO_CAMPONES,
   },
   // O vendedor da loja (parado e conversando; a loja usa só a direção de frente para a câmera).
   {
@@ -121,6 +150,40 @@ export const RECEITAS: Receita[] = [
     exposicao: 1.8,
     animacoes: { ...HUMANO, parado: 'ual1:Idle_Talking_Loop' },
   },
+  // A sentinela: o guarda de armadura (elmo com crista, peitoral e ombreiras), escudo e espada.
+  {
+    nome: 'sentinela',
+    corpo: RANGER_M,
+    cabeca: CABECA_M,
+    altura: 1.16,
+    largura: 1.1,
+    cores: { Ranger: 0x8a96a0, Hair: 0x2a2a2a },
+    exposicao: 1.7,
+    armadura: { cabeca: 3, corpo: 3, acento: 0x5dade2 },
+    armas: [
+      { m: 'kes:assets/gltf/Skeleton_Blade.gltf', osso: 'hand_r', tamanho: 0.5, giro: [0, 0, 90], cor: 0xd0d8e0 },
+      { m: 'kes:assets/gltf/Skeleton_Shield_Large_A.gltf', osso: 'hand_l', tamanho: 0.55, giro: [0, 90, 0], cor: 0x6d7d8e },
+    ],
+    animacoes: ESPADA,
+  },
+  // A fada: pequena, de vestido verde-água e asas translúcidas (flutua no jogo).
+  {
+    nome: 'fada',
+    corpo: 'traje:Outfits/Female_Peasant',
+    cabeca: CABECA_F,
+    altura: 0.62,
+    cores: { Peasant: 0xa8f4e4, Superhero: 0xfff0e8, Regular: 0xfff0e8, Hair: 0xf8e090 },
+    emissao: { Eye: 0.6 },
+    exposicao: 2.6,
+    asas: 0xd6eaf8,
+    animacoes: MAGIA,
+  },
+  // Os bichos: geometria feita na ferramenta (criaturas3d.ts, feras3d.ts), animada por rotação e deformação.
+  { nome: 'lobo', corpo: 'proc:lobo', altura: 0.78, animacoes: null, exposicao: 1.3, quadro: { largura: 1.8, altura: 1.6, baixo: 0.5 } },
+  { nome: 'aranha', corpo: 'proc:aranha', altura: 0.55, animacoes: null, exposicao: 1.8, quadro: { largura: 1.8, altura: 1.4, baixo: 0.5 } },
+  { nome: 'falcao', corpo: 'proc:falcao', altura: 0.24, animacoes: null, exposicao: 1.5 },
+  // O slime: geometria feita na ferramenta (criaturas3d.ts), animada por deformação.
+  { nome: 'slime', corpo: 'proc:slime', altura: 0.62, animacoes: null, exposicao: 1.4 },
   // O boneco de treino (o único que usa `generico`) e o espantalho: o boneco da Quaternius, parado.
   { nome: 'generico', corpo: 'q:Dummy', altura: 1.1, animacoes: null },
   { nome: 'espantalho', corpo: 'q:Dummy', altura: 1.1, cores: { '': 0xd8c080 }, animacoes: null },

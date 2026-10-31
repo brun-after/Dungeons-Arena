@@ -1,14 +1,18 @@
 // Personagens pré-renderizados (marco 32, 31/10/2026, D-131): `npx tsx tools/sprites/render.ts [--so nome,nome]` grava
 // src/assets/personagens/<nome>.webp (o atlas: 8 direções × os quadros dos estados) e catalogo.json. Os pacotes brutos
 // ficam em .brutos/ (fora do git; as pastas estão em PASTAS). Roda o three.js no Chromium do Playwright, como
-// tools/objetos/render.ts.
+// tools/objetos/render.ts. As classes saem também com as medidas das mãos e as camadas de armadura por grau
+// (`<nome>~<peça>-<grau>.webp`, src/render/equipamento-3d.ts); `--so-corpo` pula as camadas. `--armas` grava as armas
+// (`armas/<desenho>.webp`, os 6 graus lado a lado, e armas/catalogo.json).
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium } from '@playwright/test';
 import { build } from 'esbuild';
 import { RECEITAS, type Receita } from './receitas';
-import type { SaidaAtlas } from './pagina';
+import type { PedidoDeCamada, SaidaAtlas } from './pagina';
+import { ARMAS_3D } from './armas3d';
+import { GRAUS, nomeDaCamada, PECAS_DE_ARMADURA } from '../../src/render/equipamento-3d';
 
 const RAIZ = join(import.meta.dirname, '..', '..');
 const B = join(RAIZ, '.brutos');
@@ -23,6 +27,8 @@ const PASTAS: Record<string, string[]> = {
 };
 const DESTINO = join(RAIZ, 'src', 'assets', 'personagens');
 const QUALIDADE_WEBP = 0.85;
+/** Camadas por chamada da página (cada uma é um canvas do tamanho do atlas). */
+const LOTE = 8;
 const HOST = 'http://modelos.local/';
 
 /** O caminho (no HOST) de cada referência da receita. */
@@ -52,8 +58,34 @@ function arquivoNoDisco(caminho: string): string | null {
   return null;
 }
 
-function urlsDe(r: Receita): Record<string, string> {
-  const refs = [r.corpo, ...(r.cabeca ? [r.cabeca] : []), ...(r.armas ?? []).map((a) => a.m)];
+/** A cor de destaque de cada grau: a da raridade (render/objetos.ts COR_RARIDADE). */
+const ACENTOS = [0x888888, 0x2ecc71, 0x3498db, 0x9b59b6, 0xf39c12, 0xff4d6d];
+
+/** As camadas de armadura da classe: a capa, o peito e a cabeça, um atlas por grau. */
+function camadasDe(r: Receita): PedidoDeCamada[] {
+  const eq = r.equipamento;
+  if (!eq) return [];
+  return PECAS_DE_ARMADURA.flatMap((peca) =>
+    GRAUS.map((_, grau) => {
+      const armadura = { peca, grau, acento: ACENTOS[grau] ?? 0x888888 };
+      const nome = `${peca}-${grau}`;
+      if (peca === 'capa') return { nome, tingir: false, armadura };
+      // O peito sempre tinge o pano do traje; a cabeça, só enquanto é capuz (o elmo entra no raro).
+      if (peca === 'corpo') return { nome, tingir: false, armadura, ...eq.corpo, pecas: [] };
+      // O elmo cobre o capuz e o cabelo: eles saem da máscara do corpo.
+      if (grau >= 2) return { nome, tingir: false, armadura, esconder: 'Hood|Hair' };
+      return { nome, tingir: false, armadura, ...eq.cabeca };
+    }),
+  );
+}
+
+function urlsDe(r: Receita, camadas: PedidoDeCamada[]): Record<string, string> {
+  const refs = [
+    ...(r.corpo.startsWith('proc:') ? [] : [r.corpo]),
+    ...(r.cabeca ? [r.cabeca] : []),
+    ...(r.armas ?? []).map((a) => a.m),
+    ...camadas.flatMap((c) => [...(c.pecas ?? []), ...(c.armas ?? []).map((a) => a.m)]),
+  ];
   const urls: Record<string, string> = {};
   for (const ref of refs) urls[ref] = HOST + caminhoDe(ref);
   for (const nome of Object.values(r.animacoes ?? {})) {
@@ -65,7 +97,10 @@ function urlsDe(r: Receita): Record<string, string> {
 }
 
 const args = process.argv.slice(2);
-const so = args[0] === '--so' ? new Set((args[1] ?? '').split(',')) : null;
+const iSo = args.indexOf('--so');
+const so = iSo >= 0 ? new Set((args[iSo + 1] ?? '').split(',')) : null;
+const soCorpo = args.includes('--so-corpo');
+const comArmas = args.includes('--armas');
 mkdirSync(DESTINO, { recursive: true });
 const pacote = await build({ entryPoints: [join(import.meta.dirname, 'pagina.ts')], bundle: true, format: 'iife', write: false, platform: 'browser' });
 const codigo = pacote.outputFiles[0]?.text ?? '';
@@ -89,17 +124,11 @@ await pagina.route(`${HOST}**`, async (rota) => {
 });
 await pagina.goto(`${HOST}index.html`);
 
-const caminhoCatalogo = join(DESTINO, 'catalogo.json');
-type Entrada = Omit<SaidaAtlas, "png"> & { altura: number };
-const catalogo: Record<string, Entrada> = existsSync(caminhoCatalogo) ? (JSON.parse(readFileSync(caminhoCatalogo, 'utf8')) as Record<string, Entrada>) : {};
-for (const receita of RECEITAS) {
-  if (so && !so.has(receita.nome)) continue;
-  const inicio = Date.now();
-  const saida = await pagina.evaluate(async ([r, u]) => window.personagens.renderizarAtlas(r, u), [receita, urlsDe(receita)] as const);
+async function webpDe(png: string): Promise<Buffer> {
   const webp = await pagina.evaluate(
-    async ([png, q]) => {
+    async ([p, q]) => {
       const img = new Image();
-      img.src = png;
+      img.src = p;
       await img.decode();
       const c = document.createElement('canvas');
       c.width = img.width;
@@ -107,13 +136,57 @@ for (const receita of RECEITAS) {
       c.getContext('2d')?.drawImage(img, 0, 0);
       return c.toDataURL('image/webp', q);
     },
-    [saida.png, QUALIDADE_WEBP] as const,
+    [png, QUALIDADE_WEBP] as const,
   );
-  const bytes = Buffer.from(webp.split(',')[1] ?? '', 'base64');
-  writeFileSync(join(DESTINO, `${receita.nome}.webp`), bytes);
-  const { quadroL, quadroA, ancoraX, ancoraY, pxCelula, colunas, estados } = saida;
-  catalogo[receita.nome] = { quadroL, quadroA, ancoraX, ancoraY, pxCelula, colunas, estados, altura: receita.altura };
-  console.log(receita.nome, `${saida.colunas * saida.quadroL}×${8 * saida.quadroA}`, `${Math.round(bytes.length / 1024)} KB`, `${Date.now() - inicio} ms`);
+  return Buffer.from(webp.split(',')[1] ?? '', 'base64');
+}
+
+const caminhoCatalogo = join(DESTINO, 'catalogo.json');
+type Entrada = Omit<SaidaAtlas, 'png' | 'camadas' | 'maos'> & { altura: number; maos?: SaidaAtlas['maos'] };
+
+if (comArmas) {
+  const pastaArmas = join(DESTINO, 'armas');
+  mkdirSync(pastaArmas, { recursive: true });
+  const saidas = await pagina.evaluate(([nomes, px, exp]) => window.personagens.renderizarArmas(nomes, px, exp), [Object.keys(ARMAS_3D), 72, 1.6] as const);
+  const cat: Record<string, { celL: number; celA: number; pegaX: number; pegaY: number }> = {};
+  let total = 0;
+  for (const a of saidas) {
+    const bytes = await webpDe(a.png);
+    total += bytes.length;
+    writeFileSync(join(pastaArmas, `${a.nome}.webp`), bytes);
+    cat[a.nome] = { celL: a.celL, celA: a.celA, pegaX: a.pegaX, pegaY: a.pegaY };
+  }
+  writeFileSync(join(pastaArmas, 'catalogo.json'), `${JSON.stringify(cat, null, 2)}
+`);
+  console.log('armas', saidas.length, `${Math.round(total / 1024)} KB`);
+}
+const catalogo: Record<string, Entrada> = existsSync(caminhoCatalogo) ? (JSON.parse(readFileSync(caminhoCatalogo, 'utf8')) as Record<string, Entrada>) : {};
+for (const receita of RECEITAS) {
+  if ((so && !so.has(receita.nome)) || (comArmas && !so)) continue;
+  const inicio = Date.now();
+  const camadas = soCorpo ? [] : camadasDe(receita);
+  const urls = urlsDe(receita, camadas);
+  const lotes: PedidoDeCamada[][] = [];
+  for (let k = 0; k < Math.max(1, camadas.length); k += LOTE) lotes.push(camadas.slice(k, k + LOTE));
+  let bytesTotal = 0;
+  for (const [k, lote] of lotes.entries()) {
+    const saida = await pagina.evaluate(async ([r, u, c, corpo]) => window.personagens.renderizarAtlas(r, u, c, corpo), [receita, urls, lote, k === 0] as const);
+    const { quadroL, quadroA, ancoraX, ancoraY, pxCelula, colunas, estados } = saida;
+    const entrada = { quadroL, quadroA, ancoraX, ancoraY, pxCelula, colunas, estados, altura: receita.altura };
+    const gravar = async (nome: string, png: string) => {
+      const bytes = await webpDe(png);
+      writeFileSync(join(DESTINO, `${nome}.webp`), bytes);
+      catalogo[nome] = entrada;
+      bytesTotal += bytes.length;
+    };
+    if (k === 0) {
+      await gravar(receita.nome, saida.png);
+      if (saida.maos) catalogo[receita.nome] = { ...entrada, maos: saida.maos };
+    }
+    for (const [j, png] of saida.camadas.entries()) await gravar(nomeDaCamada(receita.nome, lote[j]?.nome ?? ''), png);
+    if (k === 0) console.log(receita.nome, `${colunas * quadroL}×${8 * quadroA}`);
+  }
+  console.log(' ', receita.nome, `${camadas.length} camadas`, `${Math.round(bytesTotal / 1024)} KB`, `${Date.now() - inicio} ms`);
 }
 writeFileSync(caminhoCatalogo, `${JSON.stringify(Object.fromEntries(Object.entries(catalogo).sort(([a], [b]) => a.localeCompare(b))), null, 2)}\n`);
 await navegador.close();

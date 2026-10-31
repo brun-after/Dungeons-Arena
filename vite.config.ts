@@ -56,6 +56,9 @@ export default defineConfig(({ mode }) => ({
         cacheId: 'dungeons-arena',
         // Assets versionados pelo hash do build: precache (cache-first).
         globPatterns: ['**/*.{js,css,html,png,svg,webp,webmanifest,json}'],
+        // Marco 32 (31/10/2026, D-131): as camadas de equipamento dos personagens (`<classe>~<camada>`, cerca de 12 MB
+        // ao todo) ficam fora do precache; cada uma entra no cache quando o jogo a usa (abaixo).
+        globIgnores: ['**/*~*.webp'],
         cleanupOutdatedCaches: true,
         // Navegação: rede primeiro; offline, cai no index.html do precache (D-013).
         navigateFallback: null,
@@ -68,6 +71,11 @@ export default defineConfig(({ mode }) => ({
               networkTimeoutSeconds: 3,
               precacheFallback: { fallbackURL: 'index.html' },
             },
+          },
+          {
+            urlPattern: ({ url }) => /~[^/]*\.webp$/.test(url.pathname),
+            handler: 'CacheFirst',
+            options: { cacheName: 'dungeons-arena-equipamento', expiration: { maxEntries: 200 } },
           },
         ],
       },

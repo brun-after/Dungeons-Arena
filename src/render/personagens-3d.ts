@@ -2,38 +2,87 @@
 // (tools/sprites/: Quaternius e KayKit, licenças em src/assets/personagens/LICENCAS.md) com 8 direções na grade (as
 // linhas: 0 = +x, girando 45° para +y) e os quadros de cada estado (as colunas). O atlas só carrega quando um modelo
 // aparece na cena; até lá (ou se falhar), quem pede recebe null e o token desenhado de antes continua.
+// As classes trazem também as mãos de cada quadro (onde a arma é presa) e as armas têm um atlas por desenho, com os
+// 6 graus de raridade lado a lado (equipamento-3d.ts).
 
 import { Assets, Rectangle, Texture } from 'pixi.js';
 import CATALOGO from '../assets/personagens/catalogo.json';
+import CATALOGO_ARMAS from '../assets/personagens/armas/catalogo.json';
 import { CELULA_PX } from './camera-calculo';
+import type { EstadoPersonagem } from './quadros-personagem';
 
 const URLS = import.meta.glob<string>('../assets/personagens/*.webp', { query: '?url', import: 'default' });
+const URLS_ARMAS = import.meta.glob<string>('../assets/personagens/armas/*.webp', { query: '?url', import: 'default' });
 
-export type EstadoPersonagem = 'parado' | 'andar' | 'golpe' | 'conjurar' | 'morte';
-type Entrada = (typeof CATALOGO)[keyof typeof CATALOGO];
+/** Uma mão no quadro: o punho (px do quadro), o ângulo da arma (rad, 0 = para cima), o encurtamento e se está na frente. */
+export interface Mao {
+  x: number;
+  y: number;
+  angulo: number;
+  encurta: number;
+  frente: boolean;
+}
 
-const DIRECOES = 8;
-/** Quanto dura cada quadro dos ciclos (ms). */
-const MS_QUADRO: Readonly<Record<EstadoPersonagem, number>> = { parado: 220, andar: 95, golpe: 0, conjurar: 110, morte: 110 };
+interface Entrada {
+  quadroL: number;
+  quadroA: number;
+  ancoraX: number;
+  ancoraY: number;
+  pxCelula: number;
+  colunas: number;
+  altura: number;
+  estados: Record<EstadoPersonagem, { inicio: number; n: number }>;
+  maos?: { d: number[]; e: number[] };
+}
+
+interface EntradaArma {
+  celL: number;
+  celA: number;
+  pegaX: number;
+  pegaY: number;
+}
+
+const CAT = CATALOGO as Readonly<Record<string, Entrada>>;
+const CAT_ARMAS = CATALOGO_ARMAS as Readonly<Record<string, EntradaArma>>;
 
 function entrada(nome: string): Entrada | null {
-  return Object.hasOwn(CATALOGO, nome) ? CATALOGO[nome as keyof typeof CATALOGO] : null;
+  return Object.hasOwn(CAT, nome) ? (CAT[nome] ?? null) : null;
 }
 
-/** A direção do atlas para o rumo na grade (rad, de +x para +y). */
-export function direcaoDoAngulo(angulo: number): number {
-  const d = Math.round(angulo / (Math.PI / 4));
-  return ((d % DIRECOES) + DIRECOES) % DIRECOES;
+function urlEm(urls: Record<string, () => Promise<string>>, nome: string): Promise<string> | null {
+  const carregar = Object.entries(urls).find(([caminho]) => caminho.endsWith(`/${nome}.webp`))?.[1];
+  return carregar ? carregar() : null;
 }
 
-/**
- * O quadro do estado: os ciclos (parado, andar, conjurar) pelo relógio; o golpe pela fração (0 a 1) dele; a morte
- * pelo tempo desde a queda, parando no último.
- */
-export function quadroDoEstado(estado: EstadoPersonagem, n: number, tMs: number, fracao: number | null): number {
-  if (estado === 'golpe') return Math.min(n - 1, Math.max(0, Math.floor((fracao ?? 0) * n)));
-  if (estado === 'morte') return Math.min(n - 1, Math.floor(tMs / MS_QUADRO.morte));
-  return Math.floor(tMs / MS_QUADRO[estado]) % n;
+/** O endereço do atlas (carregado sob demanda), ou null se o modelo não tiver um. */
+export function urlDoAtlas(nome: string): Promise<string> | null {
+  return urlEm(URLS, nome);
+}
+
+/** O endereço do atlas da arma e as medidas dela (null se o desenho não tiver modelo). */
+export function armaDe(modelo: string): { url: Promise<string>; medidas: EntradaArma } | null {
+  const medidas = Object.hasOwn(CAT_ARMAS, modelo) ? CAT_ARMAS[modelo] : undefined;
+  const url = medidas ? urlEm(URLS_ARMAS, modelo) : null;
+  return medidas && url ? { url, medidas } : null;
+}
+
+/** Há modelo 3D para a arma? */
+export const existeArma3d = (modelo: string): boolean => Object.hasOwn(CAT_ARMAS, modelo);
+
+/** As medidas do atlas em px (o quadro, a âncora dos pés e a primeira coluna de cada estado). */
+export function atlasDe(nome: string): Entrada | null {
+  return entrada(nome);
+}
+
+/** A mão (`d` direita, `e` esquerda) no quadro da direção e da coluna, se a classe tiver as medidas. */
+export function maoNoQuadro(nome: string, lado: 'd' | 'e', direcao: number, coluna: number): Mao | null {
+  const e = entrada(nome);
+  const v = e?.maos?.[lado];
+  if (!e || !v) return null;
+  const i = (direcao * e.colunas + coluna) * 5;
+  const x = v[i];
+  if (x === undefined) return null;
+  return { x, y: v[i + 1] ?? 0, angulo: v[i + 2] ?? 0, encurta: v[i + 3] ?? 1, frente: v[i + 4] === 1 };
 }
 
 export class AtlasDePersonagens {
@@ -46,25 +95,44 @@ export class AtlasDePersonagens {
     return entrada(nome) !== null;
   }
 
-  private base(nome: string): Texture | null {
-    const b = this.bases.get(nome);
+  private carregar(chave: string, url: Promise<string> | null): Texture | null {
+    const b = this.bases.get(chave);
     if (b instanceof Texture) return b;
     if (b) return null;
-    const url = Object.entries(URLS).find(([caminho]) => caminho.endsWith(`/${nome}.webp`))?.[1];
     if (!url) {
-      this.bases.set(nome, 'falhou');
+      this.bases.set(chave, 'falhou');
       return null;
     }
-    this.bases.set(nome, 'carregando');
-    void url()
+    this.bases.set(chave, 'carregando');
+    void url
       .then((u) => Assets.load<Texture>(u))
       .then((t) => {
-        if (!this.destruido) this.bases.set(nome, t);
+        if (!this.destruido) this.bases.set(chave, t);
       })
       .catch(() => {
-        this.bases.set(nome, 'falhou');
+        this.bases.set(chave, 'falhou');
       });
     return null;
+  }
+
+  private base(nome: string): Texture | null {
+    const b = this.bases.get(nome);
+    return b instanceof Texture ? b : b ? null : this.carregar(nome, urlDoAtlas(nome));
+  }
+
+  private recorte(chave: string, base: Texture, x: number, y: number, l: number, a: number): Texture {
+    let t = this.quadros.get(chave);
+    if (!t) {
+      t = new Texture({ source: base.source, frame: new Rectangle(x, y, l, a) });
+      this.quadros.set(chave, t);
+    }
+    return t;
+  }
+
+  /** A coluna do quadro do estado no atlas. */
+  coluna(nome: string, estado: EstadoPersonagem, indice: number): number {
+    const faixa = entrada(nome)?.estados[estado];
+    return faixa ? faixa.inicio + Math.min(faixa.n - 1, indice) : 0;
   }
 
   /** A textura do quadro (null enquanto o atlas carrega). */
@@ -72,15 +140,20 @@ export class AtlasDePersonagens {
     const e = entrada(nome);
     const base = e ? this.base(nome) : null;
     if (!e || !base) return null;
-    const faixa = e.estados[estado];
-    const coluna = faixa.inicio + Math.min(faixa.n - 1, indice);
-    const chave = `${nome}:${direcao}:${coluna}`;
-    let t = this.quadros.get(chave);
-    if (!t) {
-      t = new Texture({ source: base.source, frame: new Rectangle(coluna * e.quadroL, direcao * e.quadroA, e.quadroL, e.quadroA) });
-      this.quadros.set(chave, t);
-    }
-    return t;
+    const coluna = this.coluna(nome, estado, indice);
+    return this.recorte(`${nome}:${direcao}:${coluna}`, base, coluna * e.quadroL, direcao * e.quadroA, e.quadroL, e.quadroA);
+  }
+
+  /** A arma do grau (0 a 5) e o punho (fração do recorte), ou null enquanto carrega. */
+  arma(modelo: string, grau: number): { textura: Texture; pegaX: number; pegaY: number } | null {
+    const a = armaDe(modelo);
+    const chave = `arma:${modelo}`;
+    const b = this.bases.get(chave);
+    const base = b instanceof Texture ? b : b ? null : this.carregar(chave, a?.url ?? null);
+    if (!a || !base) return null;
+    const m = a.medidas;
+    const g = Math.max(0, Math.min(5, grau));
+    return { textura: this.recorte(`${chave}:${g}`, base, g * m.celL, 0, m.celL, m.celA), pegaX: m.pegaX / m.celL, pegaY: m.pegaY / m.celA };
   }
 
   /** Quantos quadros o estado tem. */
@@ -88,11 +161,11 @@ export class AtlasDePersonagens {
     return entrada(nome)?.estados[estado].n ?? 1;
   }
 
-  /** A âncora (fração do quadro), a escala para o jogo e a altura do topo acima dos pés (px de mundo). */
-  medidas(nome: string): { ancoraX: number; ancoraY: number; escala: number; topo: number } | null {
+  /** A âncora (fração do quadro e px), a escala para o jogo e a altura do topo acima dos pés (px de mundo). */
+  medidas(nome: string): { ancoraX: number; ancoraY: number; ancoraPxX: number; ancoraPxY: number; escala: number; topo: number } | null {
     const e = entrada(nome);
     if (!e) return null;
-    return { ancoraX: e.ancoraX / e.quadroL, ancoraY: e.ancoraY / e.quadroA, escala: CELULA_PX / e.pxCelula, topo: e.altura * CELULA_PX };
+    return { ancoraX: e.ancoraX / e.quadroL, ancoraY: e.ancoraY / e.quadroA, ancoraPxX: e.ancoraX, ancoraPxY: e.ancoraY, escala: CELULA_PX / e.pxCelula, topo: e.altura * CELULA_PX };
   }
 
   destruir(): void {

@@ -874,6 +874,12 @@ body.toque .log-combate.aberto {
   height: 128px;
 }
 
+/* Marco 32 (D-131): o retrato pré-renderizado guarda a proporção do quadro (mais alto que largo). */
+.retrato-classe.retrato-3d {
+  width: auto;
+  height: 140px;
+}
+
 .classe-coluna p {
   margin: 0;
   line-height: 1.4;
