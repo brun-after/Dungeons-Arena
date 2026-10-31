@@ -19,8 +19,11 @@ import { CELULA_PX } from './camera-calculo';
 import type { PontoVisual } from './interpolacao';
 import { ehModelo, MODELO_JOGADOR, MODELOS } from './modelos';
 import { centroDaCelula, type Projecao } from './projecao';
-import { texturasDoAdorno } from './adornos';
+import { equipamento3d, texturasDoAdorno } from './adornos';
 import { RigToken } from './rig-token';
+import { existeArma3d, type AtlasDePersonagens } from './personagens-3d';
+import { Figura3d } from './figura-3d';
+import { direcaoDoAngulo, quadroDoEstado, type EstadoPersonagem } from './quadros-personagem';
 import { quadroDoToken, type MomentoDoQuadro } from './quadro-membros';
 import { anelDaInvocacao } from './anel-invocacao';
 import { coresDasRunas, desenharRuna } from './runas';
@@ -135,6 +138,8 @@ export interface OpcoesEntidades {
   armaBranca?: (e: Entidade, tick: number) => boolean;
   /** Marco 24 (D-098): o ajuste do voo (o falcão); null para quem anda no chão. */
   ajuste?: (e: Entidade, agoraMs: number) => AjusteVisual | null;
+  /** Marco 32 (D-131): os atlas dos personagens pré-renderizados (no isométrico, no lugar do token desenhado). */
+  personagens?: AtlasDePersonagens | null;
   /** Marco 31 (D-130): quem está em (x, y) não aparece (dentro de uma casa fechada, para quem está fora). */
   oculto?: (x: number, y: number) => boolean;
   /** Marco 26 (28/10/2026, D-116): a runa da classe sobre a cabeça dos jogadores (preferência). */
@@ -174,6 +179,10 @@ interface Marcador {
   silhueta: Graphics;
   seta: Graphics;
   rig: RigToken | null;
+  /** Marco 32 (D-131): a figura pré-renderizada, com a armadura e as armas (null: o token desenhado). */
+  figura3d: Figura3d | null;
+  /** Quando a entidade caiu (para a animação de morte), ou -1. */
+  morteDesdeMs: number;
   barras: Graphics;
   aneis: Graphics;
   indicador: Text;
@@ -233,7 +242,7 @@ export class CamadaEntidades {
     if (runa) raiz.addChild(runa);
     this.camada.addChild(raiz);
     return {
-      raiz, sobre, chao, silhueta, seta, rig: null, barras, aneis, indicador, runa, runaDesenhada: '', cor,
+      raiz, sobre, chao, silhueta, seta, rig: null, figura3d: null, morteDesdeMs: -1, barras, aneis, indicador, runa, runaDesenhada: '', cor,
       angulo: 0, sentido: 1, ultimoX: e.px, ultimoY: e.py, visualX: Number.NaN, visualY: Number.NaN,
       andandoAteMs: 0, acaoId: null, ataqueDesdeMs: -Infinity, golpe: null, chaveGolpe: '', escala, topo: -RAIO * escala, achatamento: 1, chaoDesenhado: '',
     };
@@ -387,11 +396,14 @@ export class CamadaEntidades {
     m.seta.rotation = q.angulo;
     if (!escolha) {
       m.rig?.raiz.removeFromParent();
+      if (m.figura3d) m.figura3d.raiz.visible = false;
       m.topo = -RAIO * m.escala;
       return;
     }
+    if (this.corpo3d(m, e, escolha, q)) return;
     if (!m.rig) m.rig = new RigToken(escolha.fonte);
     else if (m.rig.fonteAtual !== escolha.fonte) m.rig.trocarFonte(escolha.fonte);
+    m.rig.raiz.visible = true;
     if (!m.rig.raiz.parent) m.raiz.addChildAt(m.rig.raiz, m.raiz.getChildIndex(m.silhueta));
     // Marco 23 (D-092): o inimigo afim leva a cor do elemento (o extremo, mais forte).
     const af = e.afinidade;
@@ -437,6 +449,65 @@ export class CamadaEntidades {
     m.rig.adornar(adorno?.atras ?? null, adorno?.frente ?? null, adorno?.arma ?? null, adorno?.pivo, adorno?.armaBranca ?? null, brilho, adorno?.secundaria ?? null);
     const f = escolha.fonte;
     m.topo = gira ? -alturaPx * 0.42 : f.ancoraY === 1 ? -alturaPx : -alturaPx * f.ancoraY * 0.9;
+  }
+
+  /**
+   * Marco 32 (31/10/2026, D-131): no isométrico, o modelo com atlas pré-renderizado vira um sprite com o quadro da
+   * direção (pelo rumo na grade) e do estado (morte, golpe, conjuração, andar ou parado). False enquanto o atlas
+   * carrega, na vista de cima e na imagem própria (o token desenhado continua).
+   */
+  private corpo3d(
+    m: Marcador,
+    e: Entidade,
+    escolha: EscolhaDeFonte,
+    q: { iso: boolean; agoraMs: number; andando: boolean; reduzido: boolean; preparo: number | null; ajuste: AjusteVisual | null; tick: number },
+  ): boolean {
+    const atlas = this.o.personagens;
+    if (e.morto) {
+      if (m.morteDesdeMs < 0) m.morteDesdeMs = q.agoraMs;
+    } else m.morteDesdeMs = -1;
+    const esconder = () => {
+      if (m.figura3d) m.figura3d.raiz.visible = false;
+      return false;
+    };
+    if (!atlas || !q.iso || escolha.proprio || !atlas.existe(escolha.modelo)) return esconder();
+    const ataqueMs = q.agoraMs - m.ataqueDesdeMs;
+    const duracao = duracaoDoGolpe(m.golpe);
+    const estado: EstadoPersonagem = e.morto ? 'morte' : ataqueMs < duracao ? 'golpe' : q.preparo !== null && q.preparo < 1 ? 'conjurar' : q.andando ? 'andar' : 'parado';
+    const n = atlas.quadrosDe(escolha.modelo, estado);
+    const ciclo = q.reduzido && estado !== 'morte' && estado !== 'golpe' ? 0 : q.agoraMs + faseDe(e.id) * 1000;
+    const tempo = estado === 'morte' ? q.agoraMs - m.morteDesdeMs : ciclo;
+    const indice = quadroDoEstado(estado, n, tempo, duracao > 0 ? ataqueMs / duracao : 0);
+    if (!m.figura3d) {
+      m.figura3d = new Figura3d();
+      m.raiz.addChildAt(m.figura3d.raiz, m.raiz.getChildIndex(m.silhueta));
+    }
+    const medidas = atlas.medidas(escolha.modelo);
+    // Marco 23 (D-092): o inimigo afim leva a cor do elemento, como no token desenhado.
+    const af = e.afinidade;
+    const tinta = q.ajuste?.tinta != null ? misturarCor(0xffffff, q.ajuste.tinta, 0.75) : af && this.o.corElemento ? misturarCor(0xffffff, this.o.corElemento(af.elemento), af.extrema ? 0.6 : 0.42) : 0xffffff;
+    const branca = !e.morto && (this.o.armaBranca?.(e, q.tick) ?? false);
+    const pulso = q.reduzido ? 0.5 : 0.5 + 0.5 * Math.sin((2 * Math.PI * q.agoraMs) / PULSO_ARMA_MS);
+    const pronto =
+      !!medidas &&
+      m.figura3d.atualizar(atlas, {
+        modelo: escolha.modelo,
+        estado,
+        direcao: direcaoDoAngulo(m.angulo),
+        indice,
+        escala: medidas.escala * m.escala * (q.ajuste?.escala ?? 1),
+        alturaPx: q.ajuste?.alturaPx ?? 0,
+        tinta,
+        equipamento: equipamento3d(escolha.modelo, e.aparencia, existeArma3d),
+        branca: branca ? 0.45 + 0.3 * pulso : 0,
+        pulso,
+        morto: e.morto,
+      });
+    if (!pronto) return esconder();
+    m.figura3d.raiz.visible = true;
+    if (m.rig) m.rig.raiz.visible = false;
+    m.topo = -medidas.topo * m.escala * 1.02;
+    return true;
   }
 
   /**

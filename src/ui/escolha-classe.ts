@@ -6,7 +6,7 @@
 
 import type { Conteudo } from '../core/conteudo';
 import { t, type ChaveTexto } from '../i18n';
-import { mioloDoRetrato } from '../render/retrato';
+import { mioloDoRetrato, retrato3d } from '../render/retrato';
 import { svgDaRuna } from './runa-dom';
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, texto?: string): HTMLElementTagNameMap[K] {
@@ -33,6 +33,15 @@ function retrato(modelo: string, nome: string): HTMLElement | null {
   img.decoding = 'async';
   img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">${miolo}</svg>`)}`;
   img.dataset.retrato = nome;
+  // Marco 32 (31/10/2026, D-131): o personagem pré-renderizado toma o lugar do desenho quando a imagem carrega.
+  const r3d = retrato3d(modelo);
+  if (r3d) {
+    r3d.canvas.className = 'retrato-classe retrato-3d';
+    r3d.canvas.dataset.retrato = nome;
+    void r3d.pronto.then((ok) => {
+      if (ok && img.isConnected) img.replaceWith(r3d.canvas);
+    });
+  }
   return img;
 }
 
