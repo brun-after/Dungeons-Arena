@@ -3595,3 +3595,10 @@ A pedido do produto, passiva, Dízimo, colheita, ecos e Levante do Necromante du
 São 12 ataques por invocação, ponto de partida próximo dos 13 ataques possíveis em 20 segundos com intervalo de 1,5 segundo. A resistência parte da vida já calculada (nível, arma, sintonia e Ritual) e ganha 0,5% por ponto útil de Sabedoria acima de 10, limitado a 25%. Valores em balance.necromancia. Só HP efetivamente retirado consome resistência; curas não repõem o saldo. Dízimo também consome resistência.
 
 Mantidos retorno do servo e perda de dano por tamanho do exército. Esperar não aumenta a rampa dos mortos com reservas. O Levante passa a contar no teto, reservando uma vaga para o servo, para evitar acumulação ilimitada. Outras classes mantêm suas invocações temporárias. O anel indica a menor fração das reservas. Instâncias antigas sem reservas mantêm o ciclo anterior até serem substituídas. Exige validação automatizada e em partidas reais.
+
+
+## Mundo: reentrada, geografia e natação — 01/11/2026 (versão 1)
+
+A solicitação do produto amplia o Mundo em até três vezes a área, com variação entre regiões (160–216 por lado), vilas orgânicas, mais dungeons e hordas. A grade retangular permanece como armazenamento; o terreno tem costas irregulares. As vilas preservam o refúgio existente, com expansão proporcional, e as hordas ficam nos arredores. Água integra a navegação e a colisão contínua; nadar reduz a velocidade a 55% e impede ataques, mas não concede imunidade. Quatro masmorras novas e drop de 6% da Pedra de retorno nos presets comuns do reino. O ID antigo do pergaminho é mantido por compatibilidade. Retorno direto ao último save conferido pelo servidor, inclusive na mesma região.
+
+Corrigido o caminho que mantinha online uma sessão encerrada com bilhete de troca pendente. Reservas pertencem à sessão, bilhetes vencidos são descartados e a saída não depende deles. Callback antigo não remove a sessão nova; descarte da sala limpa suas reservas. Gravações são serializadas e aguardadas na reentrada. Não há expulsão de outro navegador realmente conectado. Detalhes e regras de uso em MUNDO.md v0.4.

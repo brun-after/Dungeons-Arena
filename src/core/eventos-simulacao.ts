@@ -13,6 +13,7 @@ import type { StatusCaminho } from '../world/navegacao';
 export type CausaDeslocamento = 'puxao' | 'empurrao' | 'arremesso' | 'avanco' | 'teleporte' | 'troca';
 
 export type MotivoRecusa =
+  | 'nadando'
   | 'sem_habilidade'
   | 'vida_cheia'
   | 'sem_invocacao'

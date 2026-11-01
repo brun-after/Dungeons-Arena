@@ -1,7 +1,7 @@
 // Marco 30 (30/10/2026, D-129): o coordenador do Mundo grava a ficha só quando ela mudou (o checkpoint de quem está
 // parado não vai ao banco), e a falha de gravação deixa a próxima tentar de novo.
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { BALANCE_PADRAO } from '../../src/core/contexto';
 import { fichaNova, type FichaDoMundo } from '../../src/mundo/ficha-mundo';
 import { PersistenciaEmMemoria } from '../../server/persistencia-mundo';
@@ -60,4 +60,53 @@ describe('coordenador do Mundo: gravação só com mudança', () => {
     await esperar();
     expect(p.gravacoes).toBe(3);
   });
+});
+
+
+describe('reservas de sessão do Mundo', () => {
+  it('uma saída atrasada não libera a nova sessão na mesma sala', () => {
+    const c = new CoordenadorDoMundo(new Contadora(), CONTEUDO);
+    expect(c.entrar('a#1', 'sala', 'antiga')).toBe(true);
+    expect(c.sair('a#1', 'sala', 'antiga')).toBe(true);
+    expect(c.entrar('a#1', 'sala', 'nova')).toBe(true);
+    expect(c.sair('a#1', 'sala', 'antiga')).toBe(false);
+    expect(c.entrar('a#1', 'outra', 'intrusa')).toBe(false);
+  });
+  it('bilhetes expirados não mantêm o personagem em troca', () => {
+    const c = new CoordenadorDoMundo(new Contadora(), CONTEUDO);
+    const agora = vi.spyOn(Date, 'now').mockReturnValue(1000);
+    try {
+      c.emitir({ conta: 'a', slot: 1, ficha: ficha(), lugar: 'regiao:vila_do_centro', chegada: null, instancia: null });
+      expect(c.emTroca('a#1')).toBe(true);
+      agora.mockReturnValue(61001);
+      expect(c.emTroca('a#1')).toBe(false);
+    } finally { agora.mockRestore(); }
+  });
+  it('descartar a sala limpa a reserva órfã', () => {
+    const c = new CoordenadorDoMundo(new Contadora(), CONTEUDO);
+    c.entrar('a#1', 'velha');
+    c.registrarSala('velha', null);
+    expect(c.entrar('a#1', 'nova')).toBe(true);
+  });
+});
+
+
+it('reentrada aguarda gravações em ordem e preserva o save mais recente', async () => {
+  const p = new PersistenciaEmMemoria();
+  const gravar = p.gravar.bind(p);
+  let liberar = () => {};
+  const espera = new Promise<void>(r => { liberar = r; });
+  let chamadas = 0;
+  vi.spyOn(p, 'gravar').mockImplementation(async (conta, slot, f) => {
+    if (++chamadas === 1) await espera;
+    await gravar(conta, slot, f);
+  });
+  const c = new CoordenadorDoMundo(p, CONTEUDO), f = ficha();
+  c.gravar('local:ordem', 1, f);
+  c.gravar('local:ordem', 1, { ...f, vilaSalva: 'encosta_do_leste' });
+  const carregando = c.carregar('local:ordem', 1);
+  await esperar(); expect(chamadas).toBe(1);
+  liberar();
+  expect((await carregando)?.vilaSalva).toBe('encosta_do_leste');
+  expect(chamadas).toBe(2);
 });

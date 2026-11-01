@@ -1,8 +1,9 @@
 # O Mundo: guia do modo
 
-**Versão:** 0.3 · **Data:** 31/10/2026
+**Versão:** 0.4 · **Data:** 01/11/2026
 
 > **Histórico**
+> - **0.4 (01/11/2026)**: reentrada sem reserva fantasma, geografia ampliada, natação, hordas e retorno ao save.
 > - **0.3 (31/10/2026)**: marco 31 (D-130): as casas com telhado (na vila e as abandonadas) e o visual sombrio.
 > - **0.2 (30/10/2026)**: marco 30 (D-129): o social, a economia, as missões, os eventos por região e o polimento.
 > - **0.1 (30/10/2026)**: marco 29 (D-128): a fundação e o Reino Central.
@@ -140,3 +141,14 @@ a do marco 29. Sem a chave de serviço, o servidor guarda o mercado em memória,
 
 - o dia e a noite (opcional no plano, ficou fora);
 - reinos novos para o 30 ao 100.
+
+
+## Geografia, água e retorno (0.4)
+
+As nove regiões variam entre 160 e 216 células por lado (1,56 a 2,85 vezes a área de 128×128). Costas irregulares preservam as passagens entre vizinhas, com a posição de chegada ajustada ao tamanho do destino. Os núcleos seguros da Vila do Centro e Pedravale cresceram e têm contornos orgânicos e mais casas. Monstros formam grupos nos arredores, preservando a segurança dos saves, comerciantes e entradas.
+
+A água pode ser atravessada a nado, a 55% da velocidade de terra. Não é possível iniciar ou concluir ataques de dentro dela; ataques automáticos aguardam a saída. É possível receber dano de inimigos na margem. Ondulações sinalizam a travessia.
+
+O botão **Retornar à vila** consome uma **Pedra de retorno** e leva à vila do último save, inclusive quando o personagem já está na região dela. O servidor determina o destino salvo. O item mantém o ID `pergaminho_retorno`, preservando inventários, receitas e viagens existentes. Os monstros comuns do Mundo têm 6% de chance de deixá-lo; continua disponível com o alquimista e em recompensas. Gruta das Nascentes, Cripta das Raízes, Ruínas Afogadas e Galerias de Prata ampliam as masmorras de quatro para oito.
+
+Ao sair, a reserva online é liberada mesmo com bilhete pendente. Uma sessão antiga não pode liberar a reserva de outra conexão, e bilhetes expirados deixam de indicar transferência ativa. Saves são serializados e a reentrada aguarda as gravações pendentes para carregar a ficha mais recente. A recusa de uma segunda sessão realmente ativa permanece.

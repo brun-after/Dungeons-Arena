@@ -273,15 +273,17 @@ export class SalaMundo extends SalaArena {
     const p = this.presencas.get(s.entidadeId);
     const bolsa = e?.bolsa;
     if (!e || !p || !bolsa || !vivo(e)) return null;
+    if (this.despedidos.has(s.sessaoId) || this.pendencias.some(x => x.tipo === 'trocar' && x.sessaoId === s.sessaoId)) return null;
+    if (pagamento === 'pergaminho' && destino === 'ultima_vila_salva') destino = p.ficha.vilaSalva;
     const alvo = this.reino.regioes.find((r) => r.id === destino && r.vila);
     if (!alvo) return 'destino_invalido';
-    if (this.lugar.tipo === 'regiao' && this.lugar.regiao.id === alvo.id) return 'mesmo_lugar';
+    if (this.lugar.tipo === 'regiao' && this.lugar.regiao.id === alvo.id && pagamento !== 'pergaminho') return 'mesmo_lugar';
     if (!p.ficha.descobertas.includes(`regiao:${alvo.id}`)) return 'nao_descoberto';
     const agora = this.opcoesMundo.agora();
     if (pagamento === 'pergaminho') {
       const i = bolsa.mochila.findIndex((m) => m.itemId === PERGAMINHO_RETORNO);
       const m = bolsa.mochila[i];
-      if (!m) return 'destino_invalido';
+      if (!m || m.qtd <= 0) return 'sem_item';
       m.qtd--;
       if (m.qtd <= 0) bolsa.mochila.splice(i, 1);
     } else {
@@ -398,7 +400,7 @@ export class SalaMundo extends SalaArena {
       if (!this.exterior.passagens[lado].some((c) => c.x === e.x && c.y === e.y)) continue;
       const destino = vizinha(this.reino, this.lugar.regiao, lado);
       if (!destino) return false;
-      this.trocar(s, p, `regiao:${destino.id}`, chegadaPelaBorda(this.reino.tamanhoRegiao, lado, e), null);
+      this.trocar(s, p, `regiao:${destino.id}`, chegadaPelaBorda(destino.tamanho ?? this.reino.tamanhoRegiao, lado, { x: e.x + Math.floor((destino.tamanho ?? this.reino.tamanhoRegiao) / 2) - Math.floor(this.ctx.fase.largura / 2), y: e.y + Math.floor((destino.tamanho ?? this.reino.tamanhoRegiao) / 2) - Math.floor(this.ctx.fase.altura / 2) }), null);
       return true;
     }
     return false;

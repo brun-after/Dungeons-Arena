@@ -91,7 +91,7 @@ const CASA_VILA = { largura: 5, altura: 4 } as const;
 const CASA_ABANDONADA = { largura: 6, altura: 5 } as const;
 /** Os quatro quadrantes da vila (entre os caminhos em cruz), um por casa. */
 const QUADRANTES = [[1, 1], [-1, 1], [-1, -1], [1, -1]] as const;
-const CASAS_NA_VILA = 4;
+const CASAS_NA_VILA = 12;
 /** Desloca a semente das casas (o outro gerador de números). */
 const SEMENTE_CASAS = 7919;
 
@@ -131,8 +131,8 @@ function casasDaVila(g: Grade, vila: NonNullable<RegiaoDoMundo['vila']>, npcs: r
   const telhados: Telhado[] = [];
   // Uma casa por quadrante, na posição que cabe mais perto do meio do caminho entre o anel e o muro.
   const ideal = (anel + vila.raio) / 2;
-  for (const [sx, sy] of QUADRANTES) {
-    if (telhados.length >= CASAS_NA_VILA) break;
+  for (const [sx, sy] of [...QUADRANTES, ...QUADRANTES, ...QUADRANTES]) {
+    if (telhados.length >= Math.min(CASAS_NA_VILA, Math.floor(vila.raio / 3))) break;
     const candidatas: { x: number; y: number; erro: number }[] = [];
     for (let dy = 2; dy <= vila.raio; dy++) {
       for (let dx = 2; dx <= vila.raio; dx++) {
@@ -208,10 +208,12 @@ function erguerVila(g: Grade, vila: NonNullable<RegiaoDoMundo['vila']>, protegid
       if (!g.interna(x, y)) continue;
       const d = Math.hypot(x - cx, y - cy);
       const portao = Math.abs(x - cx) <= 1 || Math.abs(y - cy) <= 1;
-      if (d <= raio - 1) g.por(x, y, '.');
-      else if (d <= raio + 0.5) g.por(x, y, portao ? '=' : '#');
-      else g.por(x, y, ',');
-      if (d <= raio + 0.5) protegidas.add(y * g.n + x);
+      const ang = Math.atan2(y - cy, x - cx);
+      const limite = raio * (0.9 + 0.06 * Math.sin(3 * ang) + 0.04 * Math.cos(5 * ang));
+      if (d <= limite - 1) g.por(x, y, '.');
+      else if (d <= limite + 0.5) g.por(x, y, portao ? '=' : '#');
+      // 01/11/2026: o terreno externo permanece natural, sem recorte quadrado.
+      if (d <= limite + 0.5) protegidas.add(y * g.n + x);
     }
   }
   // Marco 31 (31/10/2026, D-130): o muro com uma célula de espessura (as que encostam na praça); com 1,5, os degraus
@@ -278,7 +280,7 @@ function chebyshev(a: Celula, b: Celula): number {
 
 /** Gera o exterior da região: terreno, vila, fachadas, passagens, coleta e inimigos. Determinístico pela semente. */
 export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGerado {
-  const n = reino.tamanhoRegiao;
+  const n = regiao.tamanho ?? reino.tamanhoRegiao;
   const rng = criarRng(regiao.semente);
   const perfil = PERFIS[regiao.bioma];
   const g = new Grade(n, '#');
@@ -288,7 +290,10 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     for (let x = 1; x < n - 1; x++) {
       const a = ruidoAgua(x, y);
       const r = ruidoRocha(x, y);
-      g.por(x, y, a > perfil.agua ? '~' : r > perfil.rocha ? '#' : perfil.chao);
+      // Costas orgânicas mantêm a grade técnica, mas quebram o contorno quadrado da terra.
+      const dx = (x - n / 2) / (n * 0.63), dy = (y - n / 2) / (n * 0.59);
+      const costa = Math.hypot(dx, dy) > 1 + 0.09 * Math.sin(Math.atan2(dy, dx) * 5 + regiao.semente);
+      g.por(x, y, costa || a > perfil.agua ? '~' : r > perfil.rocha ? '#' : perfil.chao);
     }
   }
   // Marco 29 (30/10/2026): o rochedo fica só com a borda; o miolo vira chão sem acesso. No isométrico, o miolo de
@@ -377,8 +382,20 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
 
   const total = Math.floor((livres.length * regras.densidadePor1000) / 1000);
   const inimigos: InimigoPosicionado[] = [];
+  let centroHorda: Celula | null = null;
+  let restantes = 0;
   for (let i = 0; i < total && regiao.inimigos.length > 0; i++) {
-    const c = sortearLivre((x) => !naVila(x) && spawns.every((s) => chebyshev(s, x) >= FOLGA_INIMIGOS));
+    const segura = (x: Celula) => !naVila(x) && spawns.every((s) => chebyshev(s, x) >= FOLGA_INIMIGOS);
+    let c: Celula | null = null;
+    if (centroHorda && restantes > 0) {
+      const candidatas = livres.filter(x => chebyshev(x, centroHorda as Celula) <= regras.raioHorda && segura(x) && !ocupadas.some(o => chebyshev(o, x) < 2));
+      if (candidatas.length) { c = escolher(rng, candidatas); ocupadas.push(c); restantes--; }
+    }
+    if (!c) {
+      c = sortearLivre(segura);
+      centroHorda = c;
+      restantes = inteiro(rng, regras.hordaMin, Math.max(regras.hordaMin, regras.hordaMax)) - 1;
+    }
     if (!c) continue;
     const preset = escolher(rng, regiao.inimigos);
     const nivel = inteiro(rng, regiao.nivel[0], regiao.nivel[1]);

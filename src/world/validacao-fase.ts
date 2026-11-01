@@ -36,7 +36,8 @@ export type ResultadoValidacao = { ok: true; fase: FaseJson; avisos: ErroFase[] 
 
 export const TAMANHO_MIN = 8;
 // Marco 29 (D-128): 160, para as regiões do Mundo (128×128) caberem; o editor continua no que já fazia.
-export const TAMANHO_MAX = 160;
+// 01/11/2026: regiões ampliadas e variadas do Mundo.
+export const TAMANHO_MAX = 256;
 const TIPOS = ['campanha', 'arena', 'ambas'] as const;
 
 function ehObjeto(v: unknown): v is Record<string, unknown> {

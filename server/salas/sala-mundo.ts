@@ -66,9 +66,11 @@ export class CoordenadorDoMundo {
   private readonly bilhetes = new Map<string, Bilhete>();
   /** Personagem -> a sala em que está (quem sai de uma sala velha não derruba a entrada na nova). */
   private readonly online = new Map<string, string>();
+  private readonly donosDaReserva = new Map<string, string>();
   private readonly salas = new Map<string, SalaDoCoordenador>();
   /** Personagem -> o texto da última ficha gravada (só enquanto está online). */
   private readonly gravadas = new Map<string, string>();
+  private readonly gravacoesPendentes = new Map<string, Promise<void>>();
   /** Personagem -> o lugar onde está (para o grupo) e o perfil (o convite pelo nome). */
   private readonly lugares = new Map<string, string>();
   private readonly perfis = new Map<string, Perfil>();
@@ -158,26 +160,43 @@ export class CoordenadorDoMundo {
 
   /** Há bilhete em aberto para o personagem (está trocando de sala: não conta como saída). */
   emTroca(identidade: string): boolean {
-    for (const b of this.bilhetes.values()) if (`${b.conta}#${String(b.slot)}` === identidade) return true;
+    for (const [id, b] of this.bilhetes) {
+      if (b.expira <= Date.now()) { this.bilhetes.delete(id); continue; }
+      if (`${b.conta}#${String(b.slot)}` === identidade) return true;
+    }
     return false;
   }
 
-  entrar(identidade: string, sala: string): boolean {
+  cancelarBilhetesDe(identidade: string): void {
+    for (const [id, b] of this.bilhetes) if (`${b.conta}#${String(b.slot)}` === identidade) this.bilhetes.delete(id);
+  }
+
+  entrar(identidade: string, sala: string, sessao = sala): boolean {
     if (this.online.has(identidade)) return false;
     this.online.set(identidade, sala);
+    this.donosDaReserva.set(identidade, sessao);
     return true;
   }
 
-  sair(identidade: string, sala: string | null = null): void {
-    if (sala !== null && this.online.get(identidade) !== sala) return;
+  sair(identidade: string, sala: string | null = null, sessao?: string): boolean {
+    if (sala !== null && this.online.get(identidade) !== sala) return false;
+    if (sessao !== undefined && this.donosDaReserva.get(identidade) !== sessao) return false;
+    this.donosDaReserva.delete(identidade);
     this.online.delete(identidade);
     // Sem guardar a última gravada de quem saiu (a troca de sala também passa aqui: custa uma gravação a mais).
     this.gravadas.delete(identidade);
+    return true;
   }
 
   registrarSala(id: string, sala: SalaDoCoordenador | null): void {
     if (sala) this.salas.set(id, sala);
-    else this.salas.delete(id);
+    else {
+      this.salas.delete(id);
+      for (const [identidade, salaId] of this.online) if (salaId === id) {
+        this.sair(identidade, id);
+        this.saiuDoJogo(identidade);
+      }
+    }
   }
 
   /**
@@ -200,10 +219,20 @@ export class CoordenadorDoMundo {
     const texto = JSON.stringify(ficha);
     if (this.gravadas.get(chave) === texto) return;
     this.gravadas.set(chave, texto);
-    this.persistencia.gravar(conta, slot, ficha).catch((e: unknown) => {
+    // 01/11/2026: saída e checkpoints gravam em ordem; reentrada aguarda o último save.
+    const copia = structuredClone(ficha);
+    const pendente = (this.gravacoesPendentes.get(chave) ?? Promise.resolve()).then(() => this.persistencia.gravar(conta, slot, copia)).catch((e: unknown) => {
       if (this.gravadas.get(chave) === texto) this.gravadas.delete(chave);
       registrarLog('mundo_gravacao_falhou', { motivo: e instanceof Error ? e.message : String(e) });
+    }).finally(() => {
+      if (this.gravacoesPendentes.get(chave) === pendente) this.gravacoesPendentes.delete(chave);
     });
+    this.gravacoesPendentes.set(chave, pendente);
+  }
+
+  async carregar(conta: string, slot: number): Promise<FichaDoMundo | null> {
+    await this.gravacoesPendentes.get(`${conta}#${String(slot)}`);
+    return this.persistencia.carregar(conta, slot);
   }
 }
 
@@ -310,12 +339,14 @@ export class SalaMundoColyseus extends SalaColyseusBase {
     if (!conta) throw new ServerError(401, 'sem_conta');
     const entrada = await this.prepararEntrada(conta, o);
     const identidade = `${conta}#${String(entrada.slot)}`;
-    if (!this.coordenador.entrar(identidade, this.roomId)) {
+    if (!this.coordenador.entrar(identidade, this.roomId, client.sessionId)) {
       // A página recarregada: a sessão velha caiu e ainda está na reserva; a entrada nova fica com a ficha dela.
       const ficha = this.coordenador.liberarCaida(identidade);
-      if (!ficha || !this.coordenador.entrar(identidade, this.roomId)) throw new ServerError(409, 'ja_jogando');
+      if (!ficha || !this.coordenador.entrar(identidade, this.roomId, client.sessionId)) throw new ServerError(409, 'ja_jogando');
       if (entrada.chegada === null) entrada.ficha = ficha;
     }
+    // Uma entrada pelo menu substitui qualquer transferência abandonada.
+    if (typeof o.bilhete !== 'string') this.coordenador.cancelarBilhetesDe(identidade);
     this.mundo.reservar(identidade, entrada.ficha, entrada.chegada, this.coordenador.grupos.grupoDe(identidade)?.id ?? null);
     this.coordenador.registrarPerfil(identidade, entrada.ficha, this.mundo.idLugar);
     this.identidades.set(client.sessionId, identidade);
@@ -328,8 +359,9 @@ export class SalaMundoColyseus extends SalaColyseusBase {
     this.processarPendencias();
     const identidade = this.identidades.get(client.sessionId);
     this.identidades.delete(client.sessionId);
-    if (identidade && !this.coordenador.emTroca(identidade)) {
-      this.coordenador.sair(identidade, this.roomId);
+    // 01/11/2026: bilhete guarda a transferência, não uma sessão fantasma.
+    // A sessão antiga nunca libera a reserva da nova, mesmo na mesma sala.
+    if (identidade && this.coordenador.sair(identidade, this.roomId, client.sessionId) && !this.coordenador.emTroca(identidade)) {
       this.coordenador.saiuDoJogo(identidade);
     }
   }
@@ -344,7 +376,7 @@ export class SalaMundoColyseus extends SalaColyseusBase {
     }
     if (!slotValido(o.slot)) throw new ServerError(400, 'slot_invalido');
     const slot = o.slot;
-    let ficha = await this.coordenador.persistencia.carregar(conta, slot);
+    let ficha = await this.coordenador.carregar(conta, slot);
     if (!ficha && ehObjeto(o.criar) && typeof o.criar.classeId === 'string') {
       const nome = typeof o.criar.nome === 'string' ? o.criar.nome : '';
       ficha = fichaNova({ conteudo: this.coordenador.conteudo, balance: BALANCE_PADRAO }, this.coordenador.reino, o.criar.classeId, nome, randomUUID());

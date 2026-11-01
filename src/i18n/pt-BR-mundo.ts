@@ -37,6 +37,8 @@ export const textosMundo = {
   'mundo.conectando': 'Entrando no Mundo...',
   'mundo.trocando': 'Viajando para {lugar}...',
   'mundo.falha': 'Não deu para entrar no Mundo. Tente de novo.',
+  'mundo.retorno.botao': 'Retornar à vila',
+  'mundo.retorno.dica': 'Consome uma Pedra de retorno para voltar à última vila salva, inclusive nesta região.',
   'mundo.sair': 'Sair',
   'mundo.sairRotulo': 'Sair do Mundo (a progressão fica; você volta na última vila salva)',
 

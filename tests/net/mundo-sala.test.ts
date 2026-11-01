@@ -87,11 +87,11 @@ describe('sala do Mundo', () => {
   it('a passagem pela borda troca para a vizinha, chegando do lado oposto', () => {
     const s = sala('regiao:vila_do_centro');
     const c = entrar(s, 'u1');
-    const meio = REINO.tamanhoRegiao / 2;
+    const meio = (REINO.regioes.find(r => r.id === 'vila_do_centro')?.tamanho ?? REINO.tamanhoRegiao) / 2;
     posicionar(c.e(), 0, meio);
     rodar(s);
     const p = s.retirarPendencias().find((x) => x.tipo === 'trocar');
-    expect(p).toMatchObject({ tipo: 'trocar', destino: 'regiao:campos_do_oeste', chegada: { x: REINO.tamanhoRegiao - 3, y: meio } });
+    expect(p).toMatchObject({ tipo: 'trocar', destino: 'regiao:campos_do_oeste', chegada: { x: (REINO.regioes.find(r => r.id === 'campos_do_oeste')?.tamanho ?? REINO.tamanhoRegiao) - 3, y: (REINO.regioes.find(r => r.id === 'campos_do_oeste')?.tamanho ?? REINO.tamanhoRegiao) / 2 } });
     s.despedir(c.bem.sessaoId, { tipo: 'trocarSala', lugar: 'regiao:campos_do_oeste', bilhete: 'b', instancia: null });
     expect(s.jogadores).toBe(0);
     // A troca não grava de novo (a ficha seguiu com a pendência).
@@ -180,4 +180,17 @@ describe('sala do Mundo', () => {
     const g = s.retirarPendencias().find((x) => x.tipo === 'gravar');
     expect(g?.ficha.personagem.bolsa.ouro).toBe(77);
   });
+});
+
+
+it('retorna à vila salva na mesma região e não consome duas pedras em pedidos repetidos', () => {
+  const s = sala('regiao:vila_do_centro');
+  const c = entrar(s, 'retorno');
+  const bolsa = obter(c.e().bolsa, 'bolsa');
+  guardarItem(bolsa, obter(CONTEUDO.itens.get('pergaminho_retorno'), 'pedra'), 2, BALANCE_PADRAO.inventario);
+  posicionar(c.e(), 40, 40);
+  c.enviar({ t: 'viajar', destino: 'ultima_vila_salva', pagamento: 'pergaminho' });
+  c.enviar({ t: 'viajar', destino: 'ultima_vila_salva', pagamento: 'pergaminho' });
+  expect(bolsa.mochila.find(m => m.itemId === 'pergaminho_retorno')?.qtd).toBe(1);
+  expect(s.retirarPendencias().filter(x => x.tipo === 'trocar')).toEqual([expect.objectContaining({ destino: 'regiao:vila_do_centro', chegada: null })]);
 });

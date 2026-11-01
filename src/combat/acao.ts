@@ -1,3 +1,4 @@
+import { tipoEm } from '../world/fase';
 import { consumirAtaque } from './reserva-necromante';
 import { clonarEntidade } from '../entities/entidade';
 import { velocidadeFrenesiPct } from './furia';
@@ -235,6 +236,7 @@ export function iniciarAcao(
   const hab = ultimate || habilidadeDisponivel(ator, habilidadeId) ? habilidadeDoAtor(ctx, ator, habilidadeId, estado.tick) : undefined;
   // Passiva não se conjura (marco 14): vale enquanto conhecida.
   if (!hab || hab.passiva) return recusar('sem_habilidade');
+  if (tipoEm(ctx.fase, ator.x, ator.y) === 'agua' && !deSuporte(hab)) return recusar('nadando');
   // Pedir uma habilidade durante a conjuração do ataque básico substitui o básico (D-020):
   // o automático nunca impede o jogador de usar habilidades.
   const substituiBasico = !!ator.acao && ehBasico(ator, ator.acao.habilidadeId) && !ehBasico(ator, habilidadeId);
@@ -422,6 +424,7 @@ function lancar(
   // Marco 27 (D-126): o básico com a variação da arma (o giro do Montante, o elemento emprestado do tomo).
   const hab = daFase ? habilidadeBase : basicoComVariacao(estado, ator, prepararSequencia(estado, ctx, ator, habilidadeBase, acaoId, alvo, mira));
   if (hab.formulaDano && !consumirAtaque(ator, acaoId)) return;
+  if (tipoEm(ctx.fase, ator.x, ator.y) === 'agua' && !deSuporte(hab)) return;
   const multiplos = multiplosDaVez(ator, hab);
   if (!daFase) contarBasico(ator, hab.id);
   if (hab.formulaDano) ator.efeitos = ator.efeitos.filter((f) => f.tipo !== 'veu_noturno');
@@ -567,7 +570,7 @@ function lancar(
 export function processarAutoAtaque(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
   if (estado.tick % Math.max(1, ticksDe(ctx.balance.combate.autoAtaqueMs)) !== 0) return;
   for (const ator of ordemRotativa(estado.entidades, estado.tick)) {
-    if (!ator.autoAtaque || !vivo(ator) || ator.acao) continue;
+    if (!ator.autoAtaque || !vivo(ator) || ator.acao || tipoEm(ctx.fase, ator.x, ator.y) === 'agua') continue;
     const hab = habilidadeDoAtor(ctx, ator, ator.ataqueBasico);
     if (!hab || recargaRestante(estado, ator.id, hab.id) > 0 || acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) {
       continue;

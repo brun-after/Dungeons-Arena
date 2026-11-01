@@ -1,3 +1,4 @@
+import { tipoEm } from '../world/fase';
 // Marcadores das entidades: modelo de criatura (ou a imagem do jogador), anel de equipe sob os pés, barra
 // de HP, sub-barra de recurso, **barra de conjuração** (a telegrafia, §2.15), anel de alvo, anéis de
 // invocação e o status principal. A cor de equipe vem da `relacao()` com o jogador local (§2.13).
@@ -374,6 +375,14 @@ export class CamadaEntidades {
       m.indicador.alpha = forcaDoIndicador(e, estado.tick);
       m.indicador.position.set(0, m.topo - 16);
       this.desenharAneis(m, e, estado, local?.alvoSelecionado === e.id ? (local.alvoTravado ? 'travado' : 'auto') : null);
+      // 01/11/2026: ondulações identificam o nado; a sombra de chão desaparece.
+      const nadando = !e.morto && tipoEm(ctx.fase, e.x, e.y) === 'agua';
+      m.chao.visible = !nadando;
+      if (nadando) {
+        const pulso = reduzido ? 0.5 : (agoraMs % 1200) / 1200;
+        const r = RAIO * m.escala * (1 + pulso);
+        m.aneis.ellipse(0, 0, r, r * m.achatamento).stroke({ width: 2, color: 0xb7ebf4, alpha: 0.7 * (1 - pulso) });
+      }
       this.desenharBarras(m, e, tickVisual, e.id === this.o.idLocal);
       if (m.runa) this.desenharRunaDe(m, e, coresRunas?.get(e.id) ?? null);
     }

@@ -1,3 +1,4 @@
+import { caminho } from '../../src/world/navegacao';
 // Marco 29 (30/10/2026, D-128): o Reino Central em dados e o exterior gerado pela semente da região.
 
 import { describe, expect, it } from 'vitest';
@@ -15,12 +16,12 @@ function reino(): Reino {
 }
 
 describe('Reino Central', () => {
-  it('carrega sem erros com 3×3 regiões, 2 vilas, 1 região perigosa, 4 masmorras e 3 covis', () => {
+  it('carrega sem erros com 3×3 regiões, 2 vilas, 1 região perigosa, 8 masmorras e 3 covis', () => {
     const r = reino();
     expect(r.regioes).toHaveLength(9);
     expect(r.regioes.filter((x) => x.vila)).toHaveLength(2);
     expect(r.regioes.filter((x) => x.perigo === 'perigoso')).toHaveLength(1);
-    expect(r.masmorras).toHaveLength(4);
+    expect(r.masmorras).toHaveLength(8);
     expect(r.covis.map((c) => c.boss).sort()).toEqual(['bruxa_do_pantano', 'dragao_das_ruinas', 'rei_goblin']);
     expect(r.perigos.perigoso.pvp).toBe(true);
     expect(r.perigos.normal.pvp).toBe(false);
@@ -76,7 +77,7 @@ describe('gerarExterior', () => {
     const presets = new Set(conteudoOficial().presets.keys());
     for (const regiao of r.regioes) {
       const { fase } = gerarExterior(r, regiao);
-      expect(fase.mapa).toHaveLength(r.tamanhoRegiao);
+      expect(fase.mapa).toHaveLength(regiao.tamanho ?? r.tamanhoRegiao);
       const v = validarFase(fase, presets);
       expect(v.ok ? [] : v.erros.slice(0, 3), regiao.id).toEqual([]);
       const f = carregarFase(fase);
@@ -135,6 +136,37 @@ describe('gerarExterior', () => {
     }
     const centro = regiaoPorId(r, 'vila_do_centro');
     if (!centro) throw new Error('sem vila');
-    expect(gerarExterior(r, centro).fase.telhados).toHaveLength(4);
+    expect((gerarExterior(r, centro).fase.telhados ?? []).length).toBeGreaterThanOrEqual(8);
   });
+});
+
+
+it('as regiões variam e ficam dentro de três vezes a área original', () => {
+  const r = reino();
+  expect(new Set(r.regioes.map(x => x.tamanho)).size).toBeGreaterThan(3);
+  for (const regiao of r.regioes) {
+    const n = regiao.tamanho ?? r.tamanhoRegiao;
+    expect(n * n).toBeGreaterThan(128 * 128);
+    expect(n * n).toBeLessThanOrEqual(3 * 128 * 128);
+    const ex = gerarExterior(r, regiao);
+    expect(ex.fase.mapa[1]?.[1]).toBe('~');
+    const inimigos = ex.fase.inimigos ?? [];
+    const agrupados = inimigos.filter(a => inimigos.some(b => a !== b && Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y)) <= 7));
+    expect(agrupados.length / inimigos.length, regiao.id).toBeGreaterThan(0.6);
+    for (const preset of regiao.inimigos) expect(r.materiais[preset]).toContainEqual({ itemId: 'pergaminho_retorno', chancePct: 6 });
+  }
+});
+
+
+it('todas as portas visíveis e NPCs são alcançáveis a partir da entrada', () => {
+  const r = reino();
+  for (const regiao of r.regioes) {
+    const ex = gerarExterior(r, regiao), fase = carregarFase(ex.fase), origem = ex.fase.spawns[0];
+    if (!origem) throw new Error('spawn');
+    for (const p of ex.pontos) {
+      if (p.tipo === 'coleta' || (p.tipo === 'estrutura' && p.escondida)) continue;
+      const destino = p.tipo === 'npc' ? p : p.frente;
+      expect(caminho(fase, origem, destino, fase.largura * fase.altura).status, `${regiao.id}: ${JSON.stringify(destino)}`).toBe('alcancado');
+    }
+  }
 });

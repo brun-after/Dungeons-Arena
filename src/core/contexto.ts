@@ -40,7 +40,7 @@ export interface Balance {
   versao: number;
   movimento: {
     /** Milissegundos por célula na destreza 10 (§2.3). */
-    velocidadeBaseMs: number;
+    velocidadeBaseMs: number; nadoMult: number;
     /** Tamanho máximo da fila de waypoints do jogador (§2.3). */
     filaMaxWaypoints: number;
     /** Marco 26 (D-104): o raio do corpo redondo, em células (dois corpos que se bloqueiam ficam a 2 raios). */
