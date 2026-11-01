@@ -1,3 +1,4 @@
+import { retirarVida } from './reserva-necromante';
 import { extraGuerreiro, protecaoInicial, pulsarAura } from './ajustes-classes';
 import { imuneAoEstado } from './afinidade';
 import { executarTatica, fato, muralhaEm, fluxoRestaurador } from './tatica';
@@ -156,8 +157,7 @@ export function absorverEscudo(e: Entidade, dano: number, tick: number): number 
 export function sofrerDano(e: Entidade, valor: number, tick: number, fator = 1): number {
   const bruto = Math.max(0, Math.round(valor * multiplicadorDanoRecebido(e, tick) * fator));
   const dano = Math.min(e.hp, absorverEscudo(e, bruto, tick));
-  e.hp -= dano;
-  return dano;
+  return retirarVida(e, dano);
 }
 
 function resultado(

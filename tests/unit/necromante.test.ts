@@ -1,3 +1,5 @@
+import { consumirAtaque, retirarVida } from '../../src/combat/reserva-necromante';
+import { invocar, processarFluxo } from '../../src/combat/efeitos-fluxo';
 import { describe, expect, it } from 'vitest';
 import { comKit, CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
@@ -65,7 +67,7 @@ describe('Necromante: passiva e colheita', () => {
     expect(c.meus()).toHaveLength(2);
     const a = obter(c.meus().find((e) => e.invocacao?.necromancia === 'reanimado'));
     expect(a.invocacao?.modeloOriginal).toBe('goblin');
-    expect(a.invocacao?.expiraTick).toBe(c.estado.tick + ticksDe(c.ctx.balance.necromancia.duracaoMortoMs));
+    expect(a.invocacao?.expiraTick).toBe(Number.MAX_SAFE_INTEGER);
     const xp = c.j.xp; c.matar(c.npc('b'), c.servo());
     expect(c.meus()).toHaveLength(3); expect(c.j.xp).toBeGreaterThan(xp);
     c.matar(a, c.j); expect(c.meus()).toHaveLength(2);
@@ -230,4 +232,69 @@ describe('rituais, combos e Trevas', () => {
     expect(lerIdItemBase(antigo.itemId)?.elemento).toBe('trevas'); expect(VERSAO_SCHEMA).toBe(28);
     expect(CONTEUDO.itens.get(antigo.itemId)).toMatchObject({ id: antigo.itemId, elemento: 'trevas' });
   });
+});
+
+
+describe('Reservas dos mortos (01/11/2026)', () => {
+  it('não expira com o tempo e conserva reservas no clone', () => {
+    const c = cena(); c.passiva(); c.matar(c.npc(), c.j);
+    c.estado.tick += ticksDe(120000);
+    processarFluxo(c.estado, () => {});
+    expect(c.meus()).toHaveLength(2);
+    const copia = clonarEstado(c.estado);
+    const m = c.servo();
+    expect(copia.entidades.find(e => e.id === m.id)?.invocacao).toEqual(m.invocacao);
+  });
+  it('conta ações, não dano nem alvos, e bloqueia o ataque excedente', () => {
+    const c = cena(); c.passiva(); const m = c.servo(); const alvo = c.npc();
+    obter(m.invocacao).ataquesRestantes = 2;
+    expect(consumirAtaque(m, 1)).toBe(true);
+    retirarVida(alvo, 1);
+    expect(consumirAtaque(m, 1)).toBe(true);
+    expect(m.invocacao?.ataquesRestantes).toBe(1);
+    expect(consumirAtaque(m, 2)).toBe(true);
+    expect(consumirAtaque(m, 3)).toBe(false);
+    processarFluxo(c.estado, () => {});
+    expect(m.hp).toBe(0);
+  });
+  it('cura não renova resistência, e dano zero não gasta', () => {
+    const c = cena(); c.passiva(); const m = c.servo(); const inv = obter(m.invocacao);
+    const total = obter(inv.resistenciaRestante);
+    retirarVida(m, 0); expect(inv.resistenciaRestante).toBe(total);
+    retirarVida(m, total - 1); m.hp = m.hpMax;
+    expect(inv.resistenciaRestante).toBe(1);
+    expect(retirarVida(m, 100)).toBe(1); expect(m.hp).toBe(0);
+  });
+  it('Sabedoria aumenta resistência sem aumentar orçamento ofensivo', () => {
+    const a = cena(); a.passiva(); const b = cena(); b.j.atributos.sabedoria += 50; b.passiva();
+    expect(b.servo().hpMax).toBeGreaterThan(a.servo().hpMax);
+    expect(b.servo().invocacao?.ataquesTotal).toBe(a.servo().invocacao?.ataquesTotal);
+  });
+});
+
+
+it('Levante do Necromante usa reservas e não acumula além do limite', () => {
+  const c = cena(); c.passiva();
+  for (let i = 0; i < 12; i++) invocar(c.estado, c.ctx, c.j, construirEfeito('invocar_temporario', { ref: 'esqueleto_profano', valor: 2, duracaoMs: 12000 }), c.eventos);
+  expect(c.meus().length).toBeLessThanOrEqual(10);
+  for (const m of c.meus()) {
+    expect(m.invocacao?.expiraTick).toBe(Number.MAX_SAFE_INTEGER);
+    expect(m.invocacao?.ataquesRestantes).toBeGreaterThan(0);
+  }
+});
+
+
+it('o lançamento real gasta o último ataque e só depois o servo desaparece', () => {
+  const c = cena(); c.passiva(); const m = c.servo(); const alvo = c.npc();
+  Object.assign(alvo, { x: m.x + 1, y: m.y, px: m.x + 1, py: m.y, hp: 10000, hpMax: 10000 });
+  obter(m.invocacao).ataquesRestantes = 1;
+  expect(iniciarAcao(c.estado, c.ctx, m, m.ataqueBasico, alvo.id, c.eventos)).toBe(true);
+  expect(m.invocacao?.ataquesRestantes).toBe(1);
+  c.estado.tick = obter(m.acao).lancamentoTick;
+  processarAcoes(c.estado, c.ctx, c.eventos);
+  expect(m.invocacao?.ataquesRestantes).toBe(0);
+  expect(c.eventos.some(e => e.t === 'impacto' && e.fonteId === m.id)).toBe(true);
+  processarFluxo(c.estado, () => {});
+  processarMortes(c.estado, c.ctx, c.eventos);
+  expect(c.estado.recargas[chaveServo(c.j.id)]).toBe(c.estado.tick + ticksDe(8000));
 });

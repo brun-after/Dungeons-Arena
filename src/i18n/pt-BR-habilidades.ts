@@ -3,7 +3,7 @@
 // dicionário principal (pt-BR.ts) por espalhamento, com as mesmas chaves tipadas.
 
 export const textosHabilidades = {
-  'classe.necromante.dom': 'Um servo morto-vivo retorna passivamente após 8 s. Seus abates reanimam inimigos por 20 s; aliados que caem perto deixam ecos independentes. Até 10 mortos: quanto maior o exército, menos cada um bate, e a sua Inteligência os fortalece. Mortos que se afastam demais voltam para o seu lado. Drene seus mortos para sobreviver; sem nenhum por perto, o Dízimo ergue um. Dano próprio reduzido e proteção contra grupos nos primeiros 5 s de combate.',
+  'classe.necromante.dom': 'Um servo morto-vivo retorna passivamente após 8 s. Seus abates reanimam inimigos; aliados que caem perto deixam ecos independentes. Servos, reanimados e ecos duram até esgotar a quantidade de ataques ou a resistência a dano recebido. Sabedoria e Ritual reforçam sua resistência; curas não repõem reservas. Até 10 mortos: quanto maior o exército, menos cada um bate, e a sua Inteligência os fortalece. Mortos que se afastam demais voltam para o seu lado. Drene seus mortos para sobreviver; sem nenhum por perto, o Dízimo ergue um. Dano próprio reduzido e proteção contra grupos nos primeiros 5 s de combate.',
   'efeito.definhando': 'Definhando',
   'desc.efeito.definhando': 'Reduz dano causado e cura recebida em {pct}% por {s} s',
   'efeito.drenar_invocacao': 'Dízimo vital',
@@ -201,7 +201,7 @@ export const textosHabilidades = {
   'classe.mago.estilo': 'Estilo: magias de área à distância. Trocar de elemento muda a encarnação; repetir o Dardo Arcano no mesmo alvo concentra poder.',
   'classe.arqueiro.descricao': 'Os Vigias da Fronteira aprenderam que o arco obedece ao silêncio. Um fôlego sem ferida enche a mira, e a flecha que nasce dele não erra nem para no primeiro corpo. O ruído de uma ferida desfaz tudo.',
   'classe.arqueiro.estilo': 'Estilo: distância e posição. Evitar dano enche a Mira firme; veneno e chuvas de flechas desfazem grupos.',
-  'classe.necromante.descricao': 'Todo morto guarda uma dívida, e o Necromante sabe cobrá-la. Os caídos se erguem por um tempo a seu serviço, mas um exército grande divide a mesma centelha. Quando a vida falta, são os mortos que pagam.',
+  'classe.necromante.descricao': 'Todo morto guarda uma dívida, e o Necromante sabe cobrá-la. Os caídos se erguem a seu serviço até consumir suas reservas de combate, mas um exército grande divide a mesma centelha. Quando a vida falta, são os mortos que pagam.',
   'classe.necromante.estilo': 'Estilo: lutar por trás dos servos. Abates erguem mortos; drenar os mortos cura quando a luta aperta.',
   'classe.domTitulo': 'Dom da classe',
   'classe.aventureiro.dom': 'Um pouco de tudo: golpe, magia e cura. Aprende de qualquer escola. Anda com um falcão que divide a vida com ele, persegue o mesmo alvo, lança as habilidades (o ataque básico sai do Aventureiro), recolhe ouro e revela armadilhas. Seta Arcana e Explosão causam 5% menos dano a partir do nível 20.',

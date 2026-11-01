@@ -1,3 +1,4 @@
+import { retirarVida } from './reserva-necromante';
 import { multiplicadorDardo, registrarDardo } from './concentracao-arcana';
 import { encherFuria } from './frenesi';
 import { entregaRemota, extraGuerreiro, multiplicadorDireto, protecaoInicial, pulsarAura, reflexoDoFalcao } from './ajustes-classes';
@@ -173,7 +174,8 @@ export function aplicarImpacto(
     const antesDoEscudo = defesa.esquivou || absorve > 0 ? 0 : Math.round(r.dano * defesa.fator);
     dano = absorverEscudo(alvo, antesDoEscudo, tick);
     absorvidoEscudo = antesDoEscudo - dano;
-    alvo.hp = Math.max(0, alvo.hp - dano);
+    const efetivo = retirarVida(alvo, dano);
+    if (alvo.invocacao?.resistenciaRestante !== undefined) dano = efetivo;
     if (dano > 0) {
       registrarParticipacao(alvo, fonte.id, tick, ctx);
       alvo.ultimoGolpe = { fonteId: fonte.id, chave: hab.chave };

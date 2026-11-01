@@ -1,6 +1,4 @@
-// O anel das invocações do Necromante (marco 25, 25/10/2026, D-103). Puro: roxo, e o arco é a contagem regressiva da
-// duração (cheio ao nascer, vazio ao sumir). No último terço, mistura para o branco e apaga até quase sumir. A
-// invocação permanente (o servo do ossuário) fica com o anel roxo inteiro.
+// 01/11/2026: mortos com reservas mostram o menor saldo; outras invocações mantêm o prazo.
 
 import type { DadosInvocacao } from '../entities/entidade';
 import { misturarCor } from './decoracao';
@@ -16,10 +14,11 @@ export interface AnelDaInvocacao {
   alpha: number;
 }
 
-export function anelDaInvocacao(inv: Pick<DadosInvocacao, 'criadoTick' | 'expiraTick'>, tick: number): AnelDaInvocacao {
+export function anelDaInvocacao(inv: Pick<DadosInvocacao, 'criadoTick' | 'expiraTick' | 'ataquesRestantes' | 'ataquesTotal' | 'resistenciaRestante' | 'resistenciaTotal'>, tick: number): AnelDaInvocacao {
   const total = inv.expiraTick - inv.criadoTick;
-  if (inv.expiraTick >= PERMANENTE_TICKS || total <= 0) return { fracao: 1, cor: COR_ANEL_NECROMANTE, alpha: 0.95 };
-  const fracao = Math.max(0, Math.min(1, (inv.expiraTick - tick) / total));
+  const reserva = inv.ataquesTotal && inv.resistenciaTotal ? Math.min((inv.ataquesRestantes ?? 0) / inv.ataquesTotal, (inv.resistenciaRestante ?? 0) / inv.resistenciaTotal) : undefined;
+  if (reserva === undefined && (inv.expiraTick >= PERMANENTE_TICKS || total <= 0)) return { fracao: 1, cor: COR_ANEL_NECROMANTE, alpha: 0.95 };
+  const fracao = Math.max(0, Math.min(1, reserva ?? ((inv.expiraTick - tick) / total)));
   // No último terço, de roxo a branco e de 0,95 a 0,25 de opacidade.
   const fim = fracao < 1 / 3 ? 1 - fracao * 3 : 0;
   return { fracao, cor: misturarCor(COR_ANEL_NECROMANTE, 0xffffff, fim), alpha: 0.95 - 0.7 * fim };

@@ -20,3 +20,11 @@ describe('anel das invocações do Necromante', () => {
     expect(anelDaInvocacao({ criadoTick: 10, expiraTick: Number.MAX_SAFE_INTEGER }, 99_999)).toEqual({ fracao: 1, cor: COR_ANEL_NECROMANTE, alpha: 0.95 });
   });
 });
+
+it('o anel acompanha a menor reserva, independentemente do tempo', () => {
+  const inv = { criadoTick: 0, expiraTick: Number.MAX_SAFE_INTEGER, ataquesTotal: 100, ataquesRestantes: 70, resistenciaTotal: 40, resistenciaRestante: 10 };
+  expect(anelDaInvocacao(inv, 0).fracao).toBe(0.25);
+  expect(anelDaInvocacao(inv, 999999).fracao).toBe(0.25);
+  inv.ataquesRestantes = 0;
+  expect(anelDaInvocacao(inv, 999999).fracao).toBe(0);
+});

@@ -1,3 +1,4 @@
+import { prepararReservas, retirarVida } from './reserva-necromante';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
@@ -61,6 +62,7 @@ function erguer(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade, tipo
   // Marco 24 (D-095): a sintonia da terra dá mais vida aos mortos.
   morto.hpMax = Math.max(1, Math.round(vidaDoMorto(ctx, dono, Math.round((r.vidaBase + dono.nivel * r.vidaPorNivel) * (tipo === 'servo' ? r.vidaServoPct / 100 : 1)), estado.tick) * servos));
   morto.hp = morto.hpMax;
+  prepararReservas(morto, dono, ctx);
   morto.aparencia = fonte?.aparencia ? { ...fonte.aparencia } : null;
   contarExercito(estado, dono);
   return true;
@@ -161,7 +163,7 @@ export function executarRitual(estado: EstadoJogo, ctx: ContextoSimulacao, dono:
     if (dono.hp >= dono.hpMax || fatorCura <= 0) return;
     const gasto = Math.max(0, Math.min(alvo.hp, ef.valor, Math.ceil((dono.hpMax - dono.hp) / fatorCura)));
     if (gasto <= 0) return;
-    alvo.hp -= gasto;
+    retirarVida(alvo, gasto);
     aplicar(dono, construirEfeito('cura', { valor: gasto }));
     fato(dono, 'drenou', alvo.id, acaoId);
     saida.push({ t: 'efeitoResultado', tick: estado.tick, alvoId: alvo.id, origemId: dono.id, tipo: ef.tipo, dano: gasto, cura: 0, mana: 0 });

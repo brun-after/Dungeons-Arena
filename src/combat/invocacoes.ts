@@ -18,7 +18,8 @@ export function rampaDeInvocacao(e: Entidade, tick: number, ctx: ContextoSimulac
   const inv = e.invocacao;
   if (!inv) return 1;
   const r = ctx.balance.invocacoes;
-  const minutos = Math.max(0, msDe(tick - inv.criadoTick)) / 60_000;
+  // 01/11/2026: esperar fora de combate não fortalece mortos sem prazo.
+  const minutos = inv.ataquesRestantes !== undefined ? 0 : Math.max(0, msDe(tick - inv.criadoTick)) / 60_000;
   const base = 1 + Math.min(r.rampaMaxPct, r.rampaPorMinutoPct * minutos + r.rampaPorAbatePct * inv.abates) / 100;
   if (!inv.necromancia) return base;
   // Marco 22 (D-090): quanto maior o exército, menos cada morto bate (`quantidade ^ -perdaPorQuantidade`).

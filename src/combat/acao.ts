@@ -1,3 +1,4 @@
+import { consumirAtaque } from './reserva-necromante';
 import { clonarEntidade } from '../entities/entidade';
 import { velocidadeFrenesiPct } from './furia';
 import { prepararSequencia, participaDeCombo } from './sequencias';
@@ -420,6 +421,7 @@ function lancar(
 ): void {
   // Marco 27 (D-126): o básico com a variação da arma (o giro do Montante, o elemento emprestado do tomo).
   const hab = daFase ? habilidadeBase : basicoComVariacao(estado, ator, prepararSequencia(estado, ctx, ator, habilidadeBase, acaoId, alvo, mira));
+  if (hab.formulaDano && !consumirAtaque(ator, acaoId)) return;
   const multiplos = multiplosDaVez(ator, hab);
   if (!daFase) contarBasico(ator, hab.id);
   if (hab.formulaDano) ator.efeitos = ator.efeitos.filter((f) => f.tipo !== 'veu_noturno');
