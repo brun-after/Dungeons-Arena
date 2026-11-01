@@ -330,6 +330,15 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
   mapa.setAttribute('aria-label', t('mundo.mapa.rotulo'));
   mapa.addEventListener('click', verMapa);
 
+  const retorno = document.createElement('button');
+  retorno.type = 'button';
+  retorno.className = 'botao-cabecalho';
+  retorno.textContent = t('mundo.retorno.botao');
+  retorno.title = t('mundo.retorno.dica');
+  retorno.addEventListener('click', () => {
+    eu.viajar('ultima_vila_salva', 'pergaminho');
+  });
+
   const idLocal = eu.entidadeId ?? 'p1';
   cena = await montarCena({
     raiz,
@@ -339,7 +348,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
     emitir: (cmd) => {
       eu.enviarComando(cmd);
     },
-    acoesExtras: [mapa, sair],
+    acoesExtras: [mapa, retorno, sair],
     pausaOJogo: false,
     acoesDaPausa: [{ rotulo: t('mundo.sairRotulo'), fazer: () => { sair.click(); } }],
   });

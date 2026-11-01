@@ -109,3 +109,20 @@ describe('Mundo (servidor real)', () => {
     expect((await coord.persistencia.carregar(token, 1))?.descobertas).toContain('regiao:campos_do_oeste');
   });
 });
+
+
+it('sair com bilhete pendente não deixa online fantasma e permite reentrar', async () => {
+  const token = 'local:reentrada-com-bilhete';
+  const a = await entrarNoLugar(token, { lugar: 'regiao:vila_do_centro', slot: 1, criar: { classeId: 'mago', nome: 'Voltei' } });
+  const coord = SalaMundoColyseus.coordenador;
+  if (!coord) throw new Error('sem coordenador');
+  const f = await coord.persistencia.carregar(token, 1);
+  if (!f) throw new Error('sem ficha');
+  const abandonado = coord.emitir({ conta: token, slot: 1, ficha: f, lugar: 'regiao:campos_do_oeste', chegada: null, instancia: null });
+  await a.conexao.encerrar();
+  const b = await entrarNoLugar(token, { lugar: 'regiao:vila_do_centro', slot: 1 });
+  expect(b.aviso('lugar')?.lugar).toBe('regiao:vila_do_centro');
+  await expect(conectarMundo(url(), token, { lugar: 'regiao:campos_do_oeste', bilhete: abandonado })).rejects.toThrow(/bilhete_invalido/);
+  await expect(conectarMundo(url(), token, { lugar: 'regiao:vila_do_centro', slot: 1 })).rejects.toThrow(/ja_jogando/);
+  await b.conexao.encerrar();
+});

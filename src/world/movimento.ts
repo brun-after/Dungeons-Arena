@@ -27,7 +27,7 @@ import { sincronizarPosicao, type Entidade } from '../entities/entidade';
 import { regenerarPorPasso } from '../progression/recursos';
 import { bloqueia, celulaLivrePara, ordemRotativa } from './colisao';
 import { corpoCabe, suavizarCaminho, type Barreira } from './corpo';
-import { passavel } from './fase';
+import { passavel, tipoEm } from './fase';
 import { barradoNoRefugio, emRefugio } from './refugio';
 import { GradeDeCorpos } from './grade-corpos';
 import { alcancavelMaisPerto, caminho, caminhoComCusto } from './navegacao';
@@ -214,7 +214,8 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
   sincronizarPosicao(e);
   // Quem conjura uma ação que trava ou está atordoado não anda (D-017, D-060).
   if (mobilidadeDaAcao(e, ctx) === 'trava' || movimentoBloqueado(e, estado.tick)) return;
-  const vel = velocidadeAgora(e, estado, ctx);
+  const nadando = tipoEm(ctx.fase, e.x, e.y) === 'agua';
+  const vel = velocidadeAgora(e, estado, ctx) * (nadando ? ctx.balance.movimento.nadoMult : 1);
   let restante = (dtMs / 1000) * vel;
 
   for (let guarda = 0; guarda < MAX_TRECHOS_POR_TICK && restante > EPS; guarda++) {

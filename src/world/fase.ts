@@ -9,7 +9,7 @@ import type { Refugio } from './refugio';
 import type { Celula } from '../core/comandos';
 
 /**
- * Marco 29 (30/10/2026, D-128): as células do exterior do Mundo. `agua` não se anda, mas o tiro passa por cima;
+ * Marco 29 (30/10/2026, D-128): as células do exterior do Mundo. `agua` permite nadar e o tiro passa por cima;
  * `mato` e `estrada` se andam (o chão do campo); `fachada` é o corpo de uma estrutura vista de fora (sólida, como a
  * parede, e desenhada alta pelo render das estruturas).
  */
@@ -293,7 +293,7 @@ export function tipoEm(fase: Fase, x: number, y: number): TipoCelula {
   return TIPO_POR_CODIGO[fase.celulas[y * fase.largura + x] ?? CODIGO.vazio] ?? 'vazio';
 }
 
-const ANDAVEIS: ReadonlySet<TipoCelula> = new Set(['piso', 'saida', 'mato', 'estrada']);
+const ANDAVEIS: ReadonlySet<TipoCelula> = new Set(['piso', 'saida', 'mato', 'estrada', 'agua']);
 
 /** Passável: piso e saída (§2.1); no exterior do Mundo, também o mato e a estrada (D-128). */
 export function passavel(fase: Fase, x: number, y: number): boolean {

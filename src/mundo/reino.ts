@@ -31,6 +31,9 @@ export interface RegrasDePerigo {
   pvp: boolean;
   /** Inimigos por 1000 células andáveis. */
   densidadePor1000: number;
+  hordaMin: number;
+  hordaMax: number;
+  raioHorda: number;
   elitePct: number;
   /** Marco 30 (D-129): a elite nasce estes níveis acima do topo da faixa da região. */
   eliteNiveis: number;
@@ -71,6 +74,7 @@ export interface VilaDoMundo {
 export interface RegiaoDoMundo {
   id: string;
   nome: string;
+  tamanho?: number;
   gx: number;
   gy: number;
   bioma: Bioma;
@@ -167,10 +171,12 @@ function lerEstrutura(l: Leitor, v: unknown, tamanho: number): EstruturaDoMundo 
 
 function lerRegiao(l: Leitor, v: unknown, tamanho: number): RegiaoDoMundo {
   const o = l.objeto(v, 'regiao');
+  tamanho = o.tamanho === undefined ? tamanho : l.numero(o, 'tamanho', { min: 64, max: 256, inteiro: true });
   const vila = o.vila === undefined || o.vila === null ? null : l.objeto(o.vila, 'vila');
   return {
     id: l.texto(o, 'id'),
     nome: l.texto(o, 'nome'),
+    tamanho,
     gx: l.numero(o, 'gx', { min: 0, max: 15, inteiro: true }),
     gy: l.numero(o, 'gy', { min: 0, max: 15, inteiro: true }),
     bioma: l.opcao(o, 'bioma', BIOMAS),
@@ -184,7 +190,7 @@ function lerRegiao(l: Leitor, v: unknown, tamanho: number): RegiaoDoMundo {
           nome: l.texto(vila, 'nome'),
           x: l.numero(vila, 'x', { min: 20, max: tamanho - 21, inteiro: true }),
           y: l.numero(vila, 'y', { min: 20, max: tamanho - 21, inteiro: true }),
-          raio: l.numero(vila, 'raio', { min: 10, max: 20, inteiro: true }),
+          raio: l.numero(vila, 'raio', { min: 10, max: 34, inteiro: true }),
           npcs: l.listaDeTextos(vila, 'npcs').map((p) => (PAPEIS_NPC.includes(p as PapelNpc) ? (p as PapelNpc) : (l.erro(`npc desconhecido "${p}"`), 'mercador'))),
         }
       : null,
@@ -203,6 +209,9 @@ function lerPerigos(l: Leitor, v: unknown): Record<Perigo, RegrasDePerigo> {
     return {
       pvp: l.booleano(r, 'pvp'),
       densidadePor1000: l.numero(r, 'densidadePor1000', { min: 0, max: 50 }),
+      hordaMin: r.hordaMin === undefined ? 1 : l.numero(r, 'hordaMin', { min: 1, max: 12, inteiro: true }),
+      hordaMax: r.hordaMax === undefined ? 1 : l.numero(r, 'hordaMax', { min: 1, max: 12, inteiro: true }),
+      raioHorda: r.raioHorda === undefined ? 6 : l.numero(r, 'raioHorda', { min: 2, max: 12, inteiro: true }),
       elitePct: l.numero(r, 'elitePct', { min: 0, max: 100 }),
       eliteNiveis: r.eliteNiveis === undefined ? 0 : l.numero(r, 'eliteNiveis', { min: 0, max: 30, inteiro: true }),
       lootPct: l.numero(r, 'lootPct', { min: 0, max: 500 }),

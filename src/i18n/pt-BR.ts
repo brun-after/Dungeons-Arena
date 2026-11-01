@@ -536,6 +536,7 @@ export const ptBR = {
   'recusa.vida_cheia': 'Sua vida já está cheia',
   'recusa.sem_invocacao': 'Nenhuma invocação sua no alcance do ritual',
   'recusa.fora_de_alcance': 'Alvo fora de alcance',
+  'recusa.nadando': 'Não é possível atacar enquanto nada. Volte à margem.',
   'recusa.bloqueado': 'Você não pode agir agora',
   'recusa.ocupado': 'Já está conjurando',
   'recusa.sem_habilidade': 'Habilidade indisponível',

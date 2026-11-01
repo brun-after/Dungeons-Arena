@@ -2532,9 +2532,9 @@
     },
     {
       "id": "pergaminho_retorno",
-      "nome": "Pergaminho de retorno",
+      "nome": "Pedra de retorno",
       "tipo": "chave",
-      "descricao": "Paga uma viagem pela pedra de portal no lugar do ouro. Feito pelo alquimista.",
+      "descricao": "No Mundo, use Retornar à vila para voltar ao último save. Consome uma pedra; também pode pagar viagens pelo portal. Obtida de monstros ou com o alquimista.",
       "icone": "pergaminho",
       "raridade": "incomum",
       "valorBase": 40,
