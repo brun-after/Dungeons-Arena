@@ -1,3 +1,4 @@
+import { retirarVida } from './reserva-necromante';
 // Ajustes de produção (18/10/2026). A aura resolve dano sem voltar ao dispatcher de acertos.
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
@@ -119,8 +120,7 @@ export function pulsarAura(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Ent
     const total = bruto + (fracoes[id] ?? 0);
     const inteiro = Math.floor(total + 1e-9);
     fracoes[id] = Math.max(0, total - inteiro);
-    const dano = Math.min(e.hp, absorverEscudo(e, inteiro, estado.tick));
-    e.hp -= dano;
+    const dano = retirarVida(e, absorverEscudo(e, inteiro, estado.tick));
     soma += dano;
     if (dano > 0) {
       registrarParticipacao(e, ator.id, estado.tick, ctx);

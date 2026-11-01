@@ -65,6 +65,12 @@ export interface DadosInvocacao {
   /** Cascata de dominação: 0 para invocações, 1 para dominados, 2 para quem um dominado dominou… */
   nivelDominacao: number;
   /** Mortos do Necromante têm atributos próprios; o modelo só guarda a semelhança visual. */
+  /** 01/11/2026: reservas cumulativas; curar HP não repõe estas reservas. */
+  ataquesRestantes?: number;
+  ataquesTotal?: number;
+  ultimoAtaqueId?: number;
+  resistenciaRestante?: number;
+  resistenciaTotal?: number;
   necromancia?: 'servo' | 'reanimado' | 'eco';
   /** Marco 22 (D-090): quantos mortos do mesmo Necromante estão de pé (o dano de cada um cai com a quantidade). */
   exercito?: number;

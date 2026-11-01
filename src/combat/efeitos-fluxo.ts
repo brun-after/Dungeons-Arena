@@ -1,3 +1,4 @@
+import { prepararReservas, retirarVida } from './reserva-necromante';
 import { extraGuerreiro, protecaoInicial, pulsarAura } from './ajustes-classes';
 // Efeitos de fluxo próprio (§2.8, §2.9, §2.11). Marco 8A-2 (14/10/2026), D-049.
 //   efeito_atrasado  -> estado.atrasados, dispara o efeito carregado no alvo depois do prazo;
@@ -24,7 +25,7 @@ import { celulaOcupada } from './geometria';
 import { registrarParticipacao } from './participacao';
 import { rolar } from './dados';
 import { REGISTRO_EFEITOS, type EfeitoCanonico } from './registro-efeitos';
-import { marcoDe } from '../progression/dominio';
+import { fatorDeDominio, marcoDe } from '../progression/dominio';
 
 export interface OrigemFluxo {
   id: EntidadeId;
@@ -70,7 +71,12 @@ export function excedeLimite(estado: EstadoJogo, ctx: ContextoSimulacao, ator: E
   let avatares = contarAvatares(estado, ator.id);
   let armadilhas = contarArmadilhas(estado, ator.id);
   for (const ef of efeitos) {
-    if (ef.tipo === 'invocar_temporario') continue;
+    if (ef.tipo === 'invocar_temporario') {
+      if ((ator.classeId ?? ator.bolsa?.classeId) !== 'necromante') continue;
+      invocacoes += Math.max(1, ef.valor);
+      if (invocacoes > limiteDeInvocacoes(ctx, ator) - 1) return true;
+      continue;
+    }
     const fluxo = REGISTRO_EFEITOS[ef.tipo].fluxo;
     const avatar = fluxo === 'invocar' && ef.ref !== null && ctx.conteudo.presets.get(ef.ref)?.invocacao?.avatar === true;
     if (avatar) avatares += Math.max(1, ef.valor);
@@ -142,6 +148,8 @@ export function invocar(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entida
   const preset = ef.ref ? ctx.conteudo.presets.get(ef.ref) : undefined;
   if (!preset) return;
   for (let i = 0; i < Math.max(1, ef.valor); i++) {
+    const mortoAtivo = ef.tipo === 'invocar_temporario' && (dono.classeId ?? dono.bolsa?.classeId) === 'necromante';
+    if (mortoAtivo && contarInvocacoes(estado, dono.id) >= limiteDeInvocacoes(ctx, dono) - 1) return;
     const e = criarInimigo(preset, `v${estado.proximoId++}`, dono.x, dono.y, ctx.balance);
     const p = preset.invocacao;
     if (p?.avatar) e.tipo = 'avatar';
@@ -157,7 +165,12 @@ export function invocar(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entida
       // Avatar (§2.9): golpesRestantes = rolar('1d4') (ou a fórmula do preset), pelo PRNG do estado.
       if (p.golpes) e.invocacao.golpesRestantes = Math.max(1, rolar(estado.rng, p.golpes).total);
     }
-    if (e.invocacao && ef.tipo === 'invocar_temporario') e.invocacao.extra = true;
+    if (e.invocacao && ef.tipo === 'invocar_temporario') e.invocacao.extra = !mortoAtivo;
+    if (mortoAtivo && e.invocacao) {
+      e.invocacao.necromancia = 'reanimado';
+      e.hpMax = Math.max(1, Math.round(e.hpMax * fatorDeDominio(ctx, dono, 'servos')));
+      prepararReservas(e, dono, ctx);
+    }
     posicionar(e, lugar.x, lugar.y);
     e.origemX = lugar.x;
     e.origemY = lugar.y;
@@ -228,7 +241,7 @@ export function processarFluxo(estado: EstadoJogo, aplicar: AplicarDireto): void
     if (!inv || !vivo(e)) continue;
     const dono = buscarEntidade(estado, inv.donoId);
     const semDono = !inv.dominado && (!dono || !vivo(dono));
-    if (tick >= inv.expiraTick || semDono) e.hp = 0;
+    if (tick >= inv.expiraTick || semDono || inv.ataquesRestantes === 0 || inv.resistenciaRestante === 0) e.hp = 0;
   }
   if (estado.rastros.length > 0) estado.rastros = estado.rastros.filter((r) => r.ateTick > tick);
   if (estado.armadilhas.length > 0) estado.armadilhas = estado.armadilhas.filter((a) => a.permanente || a.ateTick > tick);
@@ -310,8 +323,7 @@ export function causarDano(
   const imune = alvo.efeitos.some((f) => f.ateTick > estado.tick && REGISTRO_EFEITOS[f.tipo].imuneDano);
   const quem = buscarEntidade(estado, origemId);
   const fator = (quem ? extraGuerreiro(ctx, quem, alvo) : 1) * protecaoInicial(estado, ctx, alvo, quem);
-  const dano = imune ? 0 : Math.min(alvo.hp, Math.max(0, Math.round(valor * fator)));
-  alvo.hp -= dano;
+  const dano = retirarVida(alvo, imune ? 0 : Math.max(0, Math.round(valor * fator)));
   if (quem) pulsarAura(estado, ctx, quem, alvo, dano, saida);
   if (dano > 0) registrarParticipacao(alvo, origemId, estado.tick, ctx);
   saida.push({ t: 'efeitoResultado', tick: estado.tick, alvoId: alvo.id, origemId, tipo, dano, cura: 0, mana: 0 });

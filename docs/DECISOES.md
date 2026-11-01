@@ -3586,3 +3586,12 @@ marco 31 já pré-renderizou os objetos de modelos CC0 (D-130); o marco 32 faz o
   chão); pousado, fica na altura do ombro do modelo novo. No corte de um projétil (o dash da IA), desce até a altura
   em que os projéteis voam; no mergulho de ataque, até o tronco do alvo; nas skills, desce rápido para a trajetória.
   Na vista de cima, só um quarto da altura aparece.
+
+
+## Reservas do Necromante — 01/11/2026 (versão 2)
+
+A pedido do produto, passiva, Dízimo, colheita, ecos e Levante do Necromante duram por quantidade de ataques ou resistência recebida, sem prazo. Cada ação ofensiva lançada consome um ataque (inclusive erro/esquiva), independentemente do dano ou da quantidade de alvos/projéteis. Ações canceladas antes do lançamento não contam. Ao esgotar, cai no processamento de fluxo após o combate do tick; o último ataque mantém o dano integral.
+
+São 12 ataques por invocação, ponto de partida próximo dos 13 ataques possíveis em 20 segundos com intervalo de 1,5 segundo. A resistência parte da vida já calculada (nível, arma, sintonia e Ritual) e ganha 0,5% por ponto útil de Sabedoria acima de 10, limitado a 25%. Valores em balance.necromancia. Só HP efetivamente retirado consome resistência; curas não repõem o saldo. Dízimo também consome resistência.
+
+Mantidos retorno do servo e perda de dano por tamanho do exército. Esperar não aumenta a rampa dos mortos com reservas. O Levante passa a contar no teto, reservando uma vaga para o servo, para evitar acumulação ilimitada. Outras classes mantêm suas invocações temporárias. O anel indica a menor fração das reservas. Instâncias antigas sem reservas mantêm o ciclo anterior até serem substituídas. Exige validação automatizada e em partidas reais.
