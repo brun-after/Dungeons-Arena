@@ -16,7 +16,7 @@ function cena(distancia: number) {
   j.seguirAlvo = false;
   estado.entidades.push(j, criarInimigo(preset, 'alvo', 3 + distancia, 5, ctx.balance));
   const eventos: EventoSimulacao[] = [];
-  const tick = (selecionar = false) => simular(estado, ctx, selecionar ? [{ tick: estado.tick, entidadeId: 'j', cmd: { t: 'selecionarAlvo', alvo: 'alvo' } }] : [], eventos, DT_MS);
+  const tick = (selecionar = false) => { simular(estado, ctx, selecionar ? [{ tick: estado.tick, entidadeId: 'j', cmd: { t: 'selecionarAlvo', alvo: 'alvo' } }] : [], eventos, DT_MS); };
   const sons = () => eventos.flatMap(ev => sonsDoEvento(ev, 'j', id => resolverHabilidade(ctx, id)));
   return { estado, j, eventos, tick, sons };
 }
