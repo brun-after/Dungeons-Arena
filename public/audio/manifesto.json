@@ -1,5 +1,5 @@
 {
-  "versao": 1,
+  "versao": 2,
   "fontes": {
     "kenney-rpg": {
       "autor": "Kenney",
@@ -256,15 +256,6 @@
       "duracao": 0.42,
       "sha256": "b1043f4e3755725c11059b2a55349029b7cf4a44c9020bae343c8b8fadef949e",
       "originalSha256": "8a7451193c38bc05483aec25dd193e163a15d44cf7fff04ac7912573231b0201"
-    },
-    "conjuracao-1": {
-      "arquivo": "conjuracao-1.mp3",
-      "fonte": "electric",
-      "original": "charge.wav",
-      "tipo": "efeito",
-      "duracao": 4.13,
-      "sha256": "5e2872487466a163e76004dd791b695e83d36db3428d94baee4056eb100bf44d",
-      "originalSha256": "397e4a4da793558cc541d9fce3da5791cb21dddadf31c02442e67f3a58cbe1c8"
     },
     "magia-1": {
       "arquivo": "magia-1.mp3",
@@ -782,7 +773,8 @@
       "falha-2"
     ],
     "conjuracao": [
-      "conjuracao-1"
+      "magia-1",
+      "magia-2"
     ],
     "magia": [
       "magia-1",

@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 RAW, FFMPEG = Path(sys.argv[1]).resolve(), str(Path(sys.argv[2]).resolve())
 OUT = ROOT / 'public/audio'
 OUT.mkdir(parents=True, exist_ok=True)
+(OUT / 'conjuracao-1.mp3').unlink(missing_ok=True)  # Gravação elétrica antiga, retirada do pacote.
 SOURCES = {
  'kenney-rpg': ['Kenney', 'RPG Audio', 'https://kenney.nl/assets/rpg-audio', 'CC0-1.0'],
  'kenney-impact': ['Kenney', 'Impact Sounds', 'https://kenney.nl/assets/impact-sounds', 'CC0-1.0'],
@@ -45,8 +46,8 @@ series('acerto','kenney-impact',[f'impact/Audio/impactPunch_medium_00{i}.ogg' fo
 series('contundente','kenney-impact',[f'impact/Audio/impactPunch_heavy_00{i}.ogg' for i in range(3)])
 series('critico','kenney-impact',['impact/Audio/impactMetal_heavy_000.ogg','impact/Audio/impactMetal_heavy_001.ogg'])
 series('falha','kenney-rpg',['rpg/Audio/cloth1.ogg','rpg/Audio/cloth2.ogg'])
-series('conjuracao','electric',['electric-charge.wav'])
 series('magia','rubberduck-rpg',['rubberduck/spell_01.ogg','rubberduck/spell_02.ogg'])
+effects['conjuracao'] = effects['magia']  # Sem o antigo charge.wav elétrico de quatro segundos.
 series('arco','bow',['bow.ogg']); effects['projetil']=effects['arco']
 series('acerto_projetil','kenney-impact',['impact/Audio/impactWood_light_000.ogg','impact/Audio/impactWood_light_001.ogg'])
 series('lancamento_magico','rubberduck-rpg',['rubberduck/spell_02.ogg'])
@@ -99,7 +100,7 @@ def convert(item):
  h,m,sec=map(float,re.search(r'Duration: (\d+):(\d+):([\d.]+)',probe.stderr).groups())
  return item['id'],dict(arquivo=out.name,fonte=item['fonte'],original=item['original'],tipo=kind,duracao=round(h*3600+m*60+sec,3),sha256=hashlib.sha256(out.read_bytes()).hexdigest(),originalSha256=hashlib.sha256(src.read_bytes()).hexdigest())
 files=dict(ThreadPoolExecutor(4).map(convert,items))
-manifest=dict(versao=1,fontes={k:dict(autor=a,titulo=t,pagina=p,licenca=l,licencaUrl=LIC[l]) for k,(a,t,p,l) in SOURCES.items()},arquivos=files,efeitos=effects,ambientes={k:'ambiente-'+k for k in ['fogo','agua','vento','goteira']},musicas=dict(exploracao=['musica-jornada','musica-coro-1','musica-caverna'],combate=['musica-esperanca','musica-coro-3'],chefe=['musica-coro-2','musica-coro-3']))
+manifest=dict(versao=2,fontes={k:dict(autor=a,titulo=t,pagina=p,licenca=l,licencaUrl=LIC[l]) for k,(a,t,p,l) in SOURCES.items()},arquivos=files,efeitos=effects,ambientes={k:'ambiente-'+k for k in ['fogo','agua','vento','goteira']},musicas=dict(exploracao=['musica-jornada','musica-coro-1','musica-caverna'],combate=['musica-esperanca','musica-coro-3'],chefe=['musica-coro-2','musica-coro-3']))
 (OUT/'manifesto.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 credits=['# Créditos de áudio — Dungeons Arena','', 'Gravações de terceiros distribuídas com o jogo. As licenças abaixo aplicam-se aos arquivos de áudio indicados, independentemente da licença do código.','', 'Adaptações: conversão para MP3, ajuste de volume e fades curtos nas músicas. O áudio de arco adaptado mantém CC-BY-SA 3.0. Não há mudança de autoria.','']
 for key,(a,t,p,l) in SOURCES.items():
