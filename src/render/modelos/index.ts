@@ -5,7 +5,7 @@
 
 import type { EstiloCaminhada } from '../caminhada.ts';
 import { bipede, type OpcoesBipede } from './bipede.ts';
-import { aranha, falcao, lobo, slime } from './feras.ts';
+import { aranha, dragao, falcao, lobo, slime } from './feras.ts';
 import { QUADROS_MEMBROS } from './membros.ts';
 import type { Vista } from './svg.ts';
 
@@ -43,6 +43,10 @@ export const ARMA_DE_CLASSE: Readonly<Record<keyof typeof OPCOES_JOGAVEIS, { arm
 };
 
 export const MODELOS = {
+  dragao_fogo: { estilo: 'deslizar', quadros: QUADROS_MEMBROS, membros: true, desenhar: dragao(0xcf663f) },
+  dragao_gelo: { estilo: 'deslizar', quadros: QUADROS_MEMBROS, membros: true, desenhar: dragao(0x75cfff) },
+  dragao_raio: { estilo: 'deslizar', quadros: QUADROS_MEMBROS, membros: true, desenhar: dragao(0xb395e8) },
+  dragao_veneno: { estilo: 'deslizar', quadros: QUADROS_MEMBROS, membros: true, desenhar: dragao(0x77b85a) },
   necromante: { estilo: 'deslizar', quadros: QUADROS_MEMBROS, membros: true, desenhar: bipede(OPCOES_JOGAVEIS.necromante) },
   goblin: {
     estilo: 'passada',

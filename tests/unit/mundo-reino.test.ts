@@ -16,12 +16,12 @@ function reino(): Reino {
 }
 
 describe('Reino Central', () => {
-  it('carrega sem erros com 3×3 regiões, 2 vilas, 1 região perigosa, 8 masmorras e 3 covis', () => {
+  it('carrega sem erros com 3×3 regiões, 2 vilas, 1 região perigosa, 28 masmorras e 3 covis', () => {
     const r = reino();
     expect(r.regioes).toHaveLength(9);
     expect(r.regioes.filter((x) => x.vila)).toHaveLength(2);
     expect(r.regioes.filter((x) => x.perigo === 'perigoso')).toHaveLength(1);
-    expect(r.masmorras).toHaveLength(8);
+    expect(r.masmorras).toHaveLength(28);
     expect(r.covis.map((c) => c.boss).sort()).toEqual(['bruxa_do_pantano', 'dragao_das_ruinas', 'rei_goblin']);
     expect(r.perigos.perigoso.pvp).toBe(true);
     expect(r.perigos.normal.pvp).toBe(false);
@@ -141,13 +141,15 @@ describe('gerarExterior', () => {
 });
 
 
-it('as regiões variam e ficam dentro de três vezes a área original', () => {
+it('as regiões crescem entre 1,5 e 3 vezes a área da versão anterior', () => {
   const r = reino();
   expect(new Set(r.regioes.map(x => x.tamanho)).size).toBeGreaterThan(3);
+  const anteriores: Record<string, number> = { vila_do_centro: 192, campos_do_oeste: 176, encosta_do_leste: 160, floresta_antiga: 208, ruinas_do_norte: 216, pico_gelado: 184, pantano_sombrio: 200, bosque_do_sul: 192, colinas_do_sudeste: 168 };
   for (const regiao of r.regioes) {
     const n = regiao.tamanho ?? r.tamanhoRegiao;
-    expect(n * n).toBeGreaterThan(128 * 128);
-    expect(n * n).toBeLessThanOrEqual(3 * 128 * 128);
+    const anterior = anteriores[regiao.id] ?? 128;
+    expect(n * n).toBeGreaterThanOrEqual(1.5 * anterior * anterior);
+    expect(n * n).toBeLessThanOrEqual(3 * anterior * anterior);
     const ex = gerarExterior(r, regiao);
     expect(ex.fase.mapa[1]?.[1]).toBe('~');
     const inimigos = ex.fase.inimigos ?? [];
@@ -168,5 +170,37 @@ it('todas as portas visíveis e NPCs são alcançáveis a partir da entrada', ()
       const destino = p.tipo === 'npc' ? p : p.frente;
       expect(caminho(fase, origem, destino, fase.largura * fase.altura).status, `${regiao.id}: ${JSON.stringify(destino)}`).toBe('alcancado');
     }
+  }
+});
+
+
+it('as 20 novas dungeons têm missões próprias e entradas de cavernas e de construções', () => {
+  const r = reino();
+  const novas = r.masmorras.slice(8);
+  expect(novas).toHaveLength(20);
+  for (const m of novas) {
+    expect(r.missoes.some(q => q.alvo.tipo === 'masmorra' && q.alvo.masmorra === m.id), m.id).toBe(true);
+    const portas = r.regioes.flatMap(x => x.estruturas).filter(e => e.destino.id === m.id);
+    expect(portas, m.id).toHaveLength(1);
+  }
+  const tipos = r.regioes.flatMap(x => x.estruturas).filter(e => novas.some(m => m.id === e.destino.id)).map(e => e.tipo);
+  expect(tipos.filter(t => t === 'caverna')).toHaveLength(10);
+  expect(tipos.some(t => t !== 'caverna')).toBe(true);
+});
+
+it('os bosses externos respeitam chance zero/certa, os refúgios e os pontos de chegada', () => {
+  const r = reino();
+  const c = conteudoOficial();
+  for (const regiao of r.regioes) {
+    const encontro = { presets: ['necromante_ancestral', 'dragao_gelo'], quantidade: 2, chancePct: 100 };
+    const ex = gerarExterior(r, { ...regiao, bosses: encontro });
+    const bosses = (ex.fase.inimigos ?? []).filter(e => c.presets.get(e.preset)?.arquetipo === 'boss');
+    expect(bosses, regiao.id).toHaveLength(2);
+    for (const b of bosses) {
+      if (ex.vila) expect(Math.hypot(b.x - ex.vila.x, b.y - ex.vila.y)).toBeGreaterThan(ex.vila.raio + 5);
+      for (const s of ex.fase.spawns) expect(Math.max(Math.abs(b.x - s.x), Math.abs(b.y - s.y))).toBeGreaterThanOrEqual(10);
+    }
+    const sem = gerarExterior(r, { ...regiao, bosses: { ...encontro, chancePct: 0 } });
+    expect((sem.fase.inimigos ?? []).some(e => c.presets.get(e.preset)?.arquetipo === 'boss')).toBe(false);
   }
 });

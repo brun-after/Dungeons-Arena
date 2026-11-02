@@ -1,8 +1,9 @@
 # O Mundo: guia do modo
 
-**Versão:** 0.4 · **Data:** 01/11/2026
+**Versão:** 0.5 · **Data:** 02/11/2026
 
 > **Histórico**
+> - **0.5 (02/11/2026)**: marco 33: nove regiões com 1,5625x a área atual, 20 novas dungeons e missões, mapa com pontos pessoais e bosses elementais CC0.
 > - **0.4 (01/11/2026)**: reentrada sem reserva fantasma, geografia ampliada, natação, hordas e retorno ao save.
 > - **0.3 (31/10/2026)**: marco 31 (D-130): as casas com telhado (na vila e as abandonadas) e o visual sombrio.
 > - **0.2 (30/10/2026)**: marco 30 (D-129): o social, a economia, as missões, os eventos por região e o polimento.
@@ -152,3 +153,28 @@ A água pode ser atravessada a nado, a 55% da velocidade de terra. Não é poss�
 O botão **Retornar à vila** consome uma **Pedra de retorno** e leva à vila do último save, inclusive quando o personagem já está na região dela. O servidor determina o destino salvo. O item mantém o ID `pergaminho_retorno`, preservando inventários, receitas e viagens existentes. Os monstros comuns do Mundo têm 6% de chance de deixá-lo; continua disponível com o alquimista e em recompensas. Gruta das Nascentes, Cripta das Raízes, Ruínas Afogadas e Galerias de Prata ampliam as masmorras de quatro para oito.
 
 Ao sair, a reserva online é liberada mesmo com bilhete pendente. Uma sessão antiga não pode liberar a reserva de outra conexão, e bilhetes expirados deixam de indicar transferência ativa. Saves são serializados e a reentrada aguarda as gravações pendentes para carregar a ficha mais recente. A recusa de uma segunda sessão realmente ativa permanece.
+
+## Expansão do Reino Central (marco 33, 02/11/2026)
+
+As nove regiões preservam seus IDs, vizinhas e níveis. Cada lado cresceu 25%, de 160–216 para
+200–270 células: **1,5625 vezes a área da versão anterior**. Vilas e entradas anteriores foram
+reposicionadas proporcionalmente. Há **28 masmorras**, sendo 20 novas, cada uma com uma missão
+específica nos quadros das duas vilas. Dez entradas novas são cavernas; as demais são templos,
+torres e criptas. O título aparece sobre as portas descobertas nas duas projeções.
+
+O nome do lugar aparece ao entrar e desaparece gradualmente em cinco segundos. O aviso de PvP
+continua separado. Clique/toque no minimapa, use o botão do mapa ou M para ampliar. O fundo
+translúcido deixa o jogo visível; o Mundo continua rodando. O mapa mostra o nome atual, terreno,
+posição do jogador e nomes das entradas. Toque no terreno para pôr um ponto pessoal; toque perto
+dele para removê-lo (até 50 por lugar). Os botões dos nomes destacam regiões/dungeons. Pontos e
+destaques persistem neste navegador, separados por lugar/reino; não sincronizam entre aparelhos.
+
+Bosses novos: Necromante Ancestral (invoca esqueletos), dragões de fogo, gelo, raio e veneno,
+com habilidades, resistências e vulnerabilidades próprias. As novas masmorras distribuem os
+cinco tipos. No exterior, a região perigosa tem dois encontros; nas normais há 25% de chance de
+um encontro e nas seguras 5%, sempre fora das vilas e longe das chegadas. O sorteio é estável pela
+semente da região, para manter cliente/servidor iguais. Respawn segue o sistema de inimigos do Mundo.
+
+O dragão é o modelo CC0 animado de Quaternius, pré-renderizado em quatro variantes (3780×2304,
+abaixo de 4096 por dimensão); o necromante reutiliza o atlas CC0 existente. Fontes, hash do pacote,
+licença e comando reprodutível em `src/assets/personagens/LICENCAS.md`.

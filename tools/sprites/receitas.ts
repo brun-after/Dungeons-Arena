@@ -99,6 +99,7 @@ export interface Receita {
   cabeca?: string;
   /** A altura da pessoa em células (o jogador: 1,12). */
   altura: number;
+  pxCelula?: number;
   /** Largura extra (o orc, o troll): multiplica x e z. */
   largura?: number;
   /** Cor por material (o nome contém a chave): multiplica a cor do material. */
@@ -321,3 +322,10 @@ export const RECEITAS: Receita[] = [
     animacoes: ESQUELETO,
   },
 ];
+
+// 02/11/2026: variantes elementais do dragão CC0 de Quaternius.
+for (const [elemento, cor] of [['fogo', 0xff8a54], ['gelo', 0x75cfff], ['raio', 0xbda0ff], ['veneno', 0x8fda76]] as const) {
+  RECEITAS.push({ nome: `dragao_${elemento}`, corpo: 'dragao:Dragon.fbx', altura: 2.3, pxCelula: 36,
+    cores: { '': cor }, quadro: { largura: 5, altura: 4, baixo: 1.2 },
+    animacoes: { parado: 'dragao:DragonArmature|Dragon_Flying', andar: 'dragao:DragonArmature|Dragon_Flying', golpe: 'dragao:DragonArmature|Dragon_Attack', conjurar: 'dragao:DragonArmature|Dragon_Attack2', morte: 'dragao:DragonArmature|Dragon_Death' } });
+}

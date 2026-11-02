@@ -7972,6 +7972,41 @@
       },
       "basico": true,
       "mobilidade": "livre"
+    },
+    {
+      "tipoAtaque": "magico",
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "id": "invocar_ossuario",
+      "familiaEvolucao": "suporte",
+      "grau": "A",
+      "nome": "Erguer ossuário",
+      "icone": "invocar",
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "recargaMs": 15000,
+      "conjuracaoMs": 900,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "efeitos": [
+        {
+          "invocar": {
+            "valor": 1,
+            "duracaoMs": 20000,
+            "ref": "esqueleto"
+          }
+        }
+      ],
+      "visual": {
+        "cor": "#1abc9c",
+        "conjuracao": "anel",
+        "som": "invocacao",
+        "assinatura": "invocacao"
+      }
     }
   ]
 }

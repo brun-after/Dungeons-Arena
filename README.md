@@ -264,3 +264,12 @@ pessoas (7C) entra quando houver testadores.
 - Números de balanceamento ficam em `src/data/balance.json`, nunca espalhados pelo código.
 - Nenhum segredo no código nem no bundle do cliente.
 - Toda divergência em relação à especificação vai para `docs/DECISOES.md`, com justificativa.
+
+
+### Marco 33 — expansão do Reino Central (02/11/2026)
+
+Nove regiões com 1,5625x a área anterior; 20 novas dungeons (28 no total), dez entradas de cavernas,
+20 missões específicas, títulos sobre as entradas, faixa do lugar que desaparece em cinco segundos,
+mapa ampliado translúcido com pontos e destaques persistentes no aparelho. Necromante Ancestral e
+quatro dragões elementais nas dungeons e em encontros externos. Dragões animados CC0 de Quaternius.
+Detalhes e limites em [docs/MUNDO.md](docs/MUNDO.md).

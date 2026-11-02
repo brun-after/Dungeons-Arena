@@ -1,3 +1,6 @@
+import type { ContextoSimulacao } from '../core/contexto';
+import type { EstadoJogo } from '../core/estado';
+import { mapaDoLugar } from './mapa-lugar';
 // Os painéis do Mundo (marco 29, 30/10/2026, D-128): a faixa do lugar (nome, canal e o aviso de perigo), o diálogo
 // do portal (as vilas descobertas, com o custo em ouro e o pergaminho de retorno) e o mapa do reino com névoa (só
 // as regiões descobertas mostram o nome; a vila salva e o lugar atual ficam marcados). O quadro de missões, o banco
@@ -57,9 +60,17 @@ export function criarFaixaDoLugar(): { elemento: HTMLElement; mostrar: (aviso: E
   const nome = document.createElement('strong');
   const perigo = document.createElement('span');
   el.append(nome, perigo);
+  let lugarAnterior: string | null = null;
   return {
     elemento: el,
     mostrar: (a) => {
+      if (lugarAnterior === a.lugar) return;
+      lugarAnterior = a.lugar;
+      el.getAnimations().forEach(animacao => { animacao.cancel(); });
+      el.style.opacity = '1';
+      const animacao = el.animate([{ opacity: 1, offset: 0 }, { opacity: 1, offset: 0.4 }, { opacity: 0, offset: 1 }], { duration: 5000, fill: 'forwards' });
+      // Finaliza também por tempo de apresentação quando o navegador reduz os quadros.
+      window.setTimeout(() => { animacao.cancel(); el.style.opacity = '0'; }, 5000);
       nome.textContent = a.canal > 1 ? t('mundo.lugarCanal', { nome: a.nome, canal: a.canal }) : t('mundo.lugar', { nome: a.nome });
       perigo.textContent = textoDoPerigo(a);
       el.dataset.pvp = a.pvp ? '1' : '0';
@@ -68,8 +79,28 @@ export function criarFaixaDoLugar(): { elemento: HTMLElement; mostrar: (aviso: E
 }
 
 /** O mapa do reino: a grade das regiões, com névoa nas que o personagem ainda não viu. */
-export function abrirMapa(reino: Reino, lugar: string, descobertas: readonly string[], vilaSalva: string): void {
+export function abrirMapa(reino: Reino, lugar: string, descobertas: readonly string[], vilaSalva: string, terreno?: { ctx: ContextoSimulacao; estado: () => EstadoJogo | null; idLocal: string }): void {
+  if (document.querySelector('.mapa-expandido')) return;
   const d = dialogo(t('mundo.mapa.titulo'));
+  d.el.classList.add('mapa-expandido');
+  const atual = [...reino.regioes, ...reino.masmorras, ...reino.covis].find(x => lugar.endsWith(`:${x.id}`));
+  d.corpo.append(paragrafo(t('mundo.mapa.lugar', { nome: atual?.nome ?? lugar })));
+  d.corpo.append(paragrafo(t('mundo.mapa.instrucoes')));
+  const chave = `mapa:${reino.id}:marcas`;
+  let marcasSalvas: string[] = [];
+  try {
+    const valor: unknown = JSON.parse(localStorage.getItem(chave) ?? '[]');
+    if (Array.isArray(valor)) marcasSalvas = valor.filter((x): x is string => typeof x === 'string');
+  } catch { /* Armazenamento indisponível: marcas funcionam nesta abertura. */ }
+  const marcar = (b: HTMLButtonElement, id: string) => {
+    const atualizar = () => { b.setAttribute('aria-pressed', String(marcasSalvas.includes(id))); };
+    atualizar();
+    b.addEventListener('click', () => {
+      marcasSalvas = marcasSalvas.includes(id) ? marcasSalvas.filter(x => x !== id) : [...marcasSalvas, id];
+      atualizar();
+      try { localStorage.setItem(chave, JSON.stringify(marcasSalvas)); } catch { /* sem persistência local */ }
+    });
+  };
   const grade = document.createElement('div');
   grade.className = 'mapa-reino';
   grade.style.gridTemplateColumns = `repeat(${String(reino.largura)}, 1fr)`;
@@ -92,8 +123,21 @@ export function abrirMapa(reino: Reino, lugar: string, descobertas: readonly str
       if (lugar === `regiao:${r.id}`) marcas.push(t('mundo.mapa.aqui'));
       if (vilaSalva === r.id) marcas.push(t('mundo.mapa.vila'));
       if (vista) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'marcar-lugar';
+        b.textContent = t('mundo.mapa.marcar', { nome: r.nome });
+        marcar(b, `regiao:${r.id}`);
+        celula.append(b);
         // As estruturas descobertas (as escondidas só depois de achadas).
-        for (const e of r.estruturas) if (!e.escondida || descobertas.includes(`${e.destino.tipo}:${e.destino.id}`)) marcas.push(e.nome);
+        for (const e of r.estruturas) if (!e.escondida || descobertas.includes(`${e.destino.tipo}:${e.destino.id}`)) {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'marcar-lugar';
+          b.textContent = t('mundo.mapa.marcar', { nome: e.nome });
+          marcar(b, `${e.destino.tipo}:${e.destino.id}`);
+          celula.append(b);
+        }
       }
       if (marcas.length > 0) {
         const extra = document.createElement('small');
@@ -103,6 +147,7 @@ export function abrirMapa(reino: Reino, lugar: string, descobertas: readonly str
       grade.append(celula);
     }
   }
+  if (terreno) d.corpo.append(mapaDoLugar(terreno.ctx, terreno.estado, terreno.idLocal, lugar, descobertas));
   d.corpo.append(grade);
 }
 

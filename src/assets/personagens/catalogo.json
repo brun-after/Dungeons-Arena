@@ -15987,6 +15987,166 @@
     },
     "altura": 1.4
   },
+  "dragao_fogo": {
+    "quadroL": 180,
+    "quadroA": 144,
+    "ancoraX": 90,
+    "ancoraY": 100.8,
+    "pxCelula": 36,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 2.3
+  },
+  "dragao_gelo": {
+    "quadroL": 180,
+    "quadroA": 144,
+    "ancoraX": 90,
+    "ancoraY": 100.8,
+    "pxCelula": 36,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 2.3
+  },
+  "dragao_raio": {
+    "quadroL": 180,
+    "quadroA": 144,
+    "ancoraX": 90,
+    "ancoraY": 100.8,
+    "pxCelula": 36,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 2.3
+  },
+  "dragao_veneno": {
+    "quadroL": 180,
+    "quadroA": 144,
+    "ancoraX": 90,
+    "ancoraY": 100.8,
+    "pxCelula": 36,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 2.3
+  },
   "espantalho": {
     "quadroL": 108,
     "quadroA": 126,

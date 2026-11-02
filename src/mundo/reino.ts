@@ -75,6 +75,8 @@ export interface RegiaoDoMundo {
   id: string;
   nome: string;
   tamanho?: number;
+  /** 02/11/2026: encontros externos por canal, sempre fora das vilas. */
+  bosses?: { presets: readonly string[]; chancePct: number; quantidade: number };
   gx: number;
   gy: number;
   bioma: Bioma;
@@ -171,7 +173,7 @@ function lerEstrutura(l: Leitor, v: unknown, tamanho: number): EstruturaDoMundo 
 
 function lerRegiao(l: Leitor, v: unknown, tamanho: number): RegiaoDoMundo {
   const o = l.objeto(v, 'regiao');
-  tamanho = o.tamanho === undefined ? tamanho : l.numero(o, 'tamanho', { min: 64, max: 256, inteiro: true });
+  tamanho = o.tamanho === undefined ? tamanho : l.numero(o, 'tamanho', { min: 64, max: 384, inteiro: true });
   const vila = o.vila === undefined || o.vila === null ? null : l.objeto(o.vila, 'vila');
   return {
     id: l.texto(o, 'id'),
@@ -195,11 +197,17 @@ function lerRegiao(l: Leitor, v: unknown, tamanho: number): RegiaoDoMundo {
         }
       : null,
     estruturas: (o.estruturas === undefined ? [] : l.lista(o, 'estruturas')).map((x) => lerEstrutura(l, x, tamanho)),
+    ...(o.bosses === undefined ? {} : { bosses: lerBosses(l, o.bosses) }),
     coleta: (o.coleta === undefined ? [] : l.lista(o, 'coleta')).map((x) => {
       const c = l.objeto(x, 'coleta');
       return { itemId: l.texto(c, 'itemId'), quantidade: l.numero(c, 'quantidade', { min: 1, max: 40, inteiro: true }) };
     }),
   };
+}
+
+function lerBosses(l: Leitor, v: unknown): NonNullable<RegiaoDoMundo['bosses']> {
+  const b = l.objeto(v, 'bosses');
+  return { presets: l.listaDeTextos(b, 'presets'), chancePct: l.numero(b, 'chancePct', { min: 0, max: 100 }), quantidade: l.numero(b, 'quantidade', { min: 1, max: 3, inteiro: true }) };
 }
 
 function lerPerigos(l: Leitor, v: unknown): Record<Perigo, RegrasDePerigo> {
@@ -323,7 +331,7 @@ export function conferirReino(reino: Reino, existe: { preset: (id: string) => bo
     if (t !== null && !existe.tema(t)) erros.push(`${dono}: tema desconhecido "${t}"`);
   };
   for (const r of reino.regioes) {
-    presets(r.id, r.inimigos);
+    presets(r.id, [...r.inimigos, ...(r.bosses?.presets ?? [])]);
     itens(r.id, r.coleta.map((c) => c.itemId));
     tema(r.id, r.tema);
   }

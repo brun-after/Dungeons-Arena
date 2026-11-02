@@ -257,9 +257,10 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
     cena?.desmontar();
     cena = null;
     removeEventListener('keydown', teclaMapa);
+    document.querySelector('.mapa-expandido')?.remove();
   };
   const verMapa = () => {
-    if (ultimoLugar) abrirMapa(reino, ultimoLugar.lugar, ultimoLugar.descobertas, ultimoLugar.vilaSalva);
+    if (ultimoLugar) abrirMapa(reino, ultimoLugar.lugar, ultimoLugar.descobertas, ultimoLugar.vilaSalva, { ctx, estado: estadoAtual, idLocal: idDoJogador() });
   };
   const teclaMapa = (ev: KeyboardEvent) => {
     if ((ev.key === 'm' || ev.key === 'M') && !(ev.target instanceof HTMLInputElement)) verMapa();
@@ -355,6 +356,17 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
   if (!cena) return;
   const c = cena;
   raiz.querySelector('.camada-ui')?.append(faixa.elemento, social.elemento);
+  raiz.querySelector('.cabecalho h1')?.remove();
+  const mini = raiz.querySelector<HTMLElement>('.minimapa');
+  if (mini) {
+    mini.style.pointerEvents = 'auto';
+    mini.style.cursor = 'pointer';
+    mini.tabIndex = 0;
+    mini.setAttribute('role', 'button');
+    mini.setAttribute('aria-label', t('mundo.mapa.rotulo'));
+    mini.addEventListener('click', verMapa);
+    mini.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); verMapa(); } });
+  }
   social.ajustarAoToque();
   addEventListener('keydown', teclaMapa);
   eu.aoEventos = (eventos) => {
