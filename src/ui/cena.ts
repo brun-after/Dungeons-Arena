@@ -252,6 +252,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     o.tileset ? null : modelos3d,
     ctx.balance.visual.ouroMontes,
     personagens,
+    ref => [...ctx.conteudo.reinos.values()].flatMap(r => r.regioes).flatMap(r => r.estruturas).find(e => e.id === ref)?.nome,
   );
   bus.on('quebrou', (ev) => {
     ap.particulas.emitir(presetDaQuebra(ev.forma), ev.x, ev.y, 0x9ad8ff);

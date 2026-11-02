@@ -84,6 +84,7 @@ export class CamadaObjetos {
   /** Marco 31 (D-130): os objetos repintados, um sprite por objeto e a chave do desenho que ele mostra. */
   private readonly pinturas = new Map<string, { sprite: Sprite; chave: string }>();
   /** Os sprites dos modelos pré-renderizados, por objeto (o vendedor da loja leva o sufixo `#v`). */
+  private readonly titulos = new Map<string, Text>();
   private readonly modelos3d = new Map<string, Sprite>();
 
   /**
@@ -101,6 +102,7 @@ export class CamadaObjetos {
     private readonly modelos: ObjetosPreRenderizados | null = null,
     private readonly ouroMontes: readonly number[] = [],
     private readonly personagens: AtlasDePersonagens | null = null,
+    private readonly tituloDaEstrutura: (ref: string) => string | undefined = () => undefined,
   ) {
     this.camadaHalo = camada;
     camada.addChild(this.g);
@@ -361,6 +363,23 @@ export class CamadaObjetos {
         vistos.add(o.objetoId);
         continue;
       }
+      // 02/11/2026: título acima de cada dungeon visível nas duas projeções.
+      if (o.tipo === 'porta_estrutura') {
+        let titulo = this.titulos.get(o.objetoId);
+        if (!titulo && !o.escondido) {
+          titulo = new Text({ text: this.tituloDaEstrutura(o.ref ?? '') ?? '', style: { fontSize: 14, fill: 0xffe3a0, fontWeight: 'bold', stroke: { color: 0x10151c, width: 4 } } });
+          titulo.anchor.set(.5, 1);
+          this.titulos.set(o.objetoId, titulo);
+        }
+        if (titulo) {
+          const camada = iso && this.emPe ? this.emPe.camada : this.camadaHalo;
+          if (titulo.parent !== camada) camada.addChild(titulo);
+          const p = iso ? proj.projetar(cx, cy) : { x: cx, y: cy };
+          titulo.position.set(p.x, p.y - CELULA_PX * 3);
+          titulo.zIndex = p.y + 1;
+          titulo.visible = !o.escondido;
+        }
+      }
       if (o.tipo === 'quebravel') {
         vistos.add(o.objetoId);
         this.quebravel(o, iso ? proj : null);
@@ -411,6 +430,7 @@ export class CamadaObjetos {
       this.orbe(g, o, cx, cy, pulso);
     }
     this.halos_(estado, agoraMs, movimentoReduzido);
+    for (const [id, titulo] of this.titulos) if (!vistos.has(id)) { titulo.destroy(); this.titulos.delete(id); }
     for (const [id, alto] of this.altos) {
       if (vistos.has(id)) continue;
       alto.destroy();
@@ -569,6 +589,8 @@ export class CamadaObjetos {
 
   /** Esconde (fora da vista) ou volta a mostrar os desenhos próprios do objeto, sem destruí-los. */
   private mostrarProprios(id: string, visivel: boolean): void {
+    const titulo = this.titulos.get(id);
+    if (titulo) titulo.visible = visivel;
     const alto = this.altos.get(id);
     if (alto) alto.visible = visivel;
     const item = this.itens.get(id);
@@ -583,6 +605,8 @@ export class CamadaObjetos {
 
   /** Troca de visão: os objetos em pé voltam para o chão (ou o contrário) no próximo quadro. */
   reiniciarVisual(): void {
+    for (const titulo of this.titulos.values()) titulo.destroy();
+    this.titulos.clear();
     for (const alto of this.altos.values()) alto.destroy();
     this.altos.clear();
     for (const item of this.itens.values()) item.visual.destroy({ children: true });

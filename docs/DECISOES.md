@@ -3602,3 +3602,21 @@ Mantidos retorno do servo e perda de dano por tamanho do exército. Esperar não
 A solicitação do produto amplia o Mundo em até três vezes a área, com variação entre regiões (160–216 por lado), vilas orgânicas, mais dungeons e hordas. A grade retangular permanece como armazenamento; o terreno tem costas irregulares. As vilas preservam o refúgio existente, com expansão proporcional, e as hordas ficam nos arredores. Água integra a navegação e a colisão contínua; nadar reduz a velocidade a 55% e impede ataques, mas não concede imunidade. Quatro masmorras novas e drop de 6% da Pedra de retorno nos presets comuns do reino. O ID antigo do pergaminho é mantido por compatibilidade. Retorno direto ao último save conferido pelo servidor, inclusive na mesma região.
 
 Corrigido o caminho que mantinha online uma sessão encerrada com bilhete de troca pendente. Reservas pertencem à sessão, bilhetes vencidos são descartados e a saída não depende deles. Callback antigo não remove a sessão nova; descarte da sala limpa suas reservas. Gravações são serializadas e aguardadas na reentrada. Não há expulsão de outro navegador realmente conectado. Detalhes e regras de uso em MUNDO.md v0.4.
+
+
+## Expansão do reino e cartografia — 02/11/2026 (versão 1, marco 33)
+
+Solicitação explícita do produto substitui os tamanhos anteriores: ampliar cada uma das nove
+regiões atuais entre 1,5 e 3 vezes, acrescentar 20 dungeons e missões, mapa ampliado translúcido
+com marcações e bosses variados. Interpretado como área, a exemplo da decisão de 01/11: +25% por
+lado resulta em 1,5625x a área, preservando a grade, IDs e níveis. Validador aceita até 384 células
+por lado para comportar as regiões maiores. Sem mudança de protocolo nem migração da ficha.
+
+Os pontos pessoais são locais ao aparelho e ao lugar. A cartografia usa terreno do contexto e
+posição autoritativa/prevista existente, sem emitir movimento ao clicar no mapa. A faixa usa
+animação de apresentação em cinco segundos e não reinicia com atualização do mesmo lugar.
+
+Bosses externos usam RNG separado e configuração de encontro no reino. Spawn longe das vilas e
+chegadas; chance estável pela semente para não divergir entre cliente e servidor. Quatro dragões
+com ataques/resistências elementais e um necromante com invocação de esqueletos. Modelo CC0 do
+dragão verificado no pacote oficial de Quaternius; licença e hash registrados junto aos atlas.

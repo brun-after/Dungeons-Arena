@@ -155,7 +155,7 @@ describe('efeitos visuais como dado (D-055)', () => {
     // Marco 14: 16 do marco 12 e 22 do sistema de habilidades; marco 18: as 4 fusões e a Chuva de estrelas.
     // Marco 24: 120 em skills.json (7 internas) e as 140 ultimates com as 155 etapas e a resposta da Riposta ígnea. Marco 24 (D-095): mais as 3 etapas internas das marcas de Domínio.
     // Marco 27: mais 42 básicos de arma (40 armas, o solo amaldiçoado e o bumerangue).
-    expect(CONTEUDO.habilidades.size).toBe(120 + 140 + 156 + 3 + 42);
+    expect(CONTEUDO.habilidades.size).toBe(121 + 140 + 156 + 3 + 42);
     for (const h of CONTEUDO.habilidades.values()) {
       if (h.passiva) continue;
       expect(h.visual).not.toBeNull();

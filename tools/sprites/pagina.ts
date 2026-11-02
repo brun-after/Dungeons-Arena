@@ -1,3 +1,4 @@
+import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 // Página da ferramenta de personagens (marco 32, 31/10/2026, D-131): roda no Chromium do Playwright e renderiza cada
 // receita (receitas.ts) num atlas: 8 direções (linhas) e os quadros de cada estado (colunas), no ângulo do isométrico
 // do jogo e com a luz do clima sombrio, como os objetos (tools/objetos/pagina.ts). O traje da Quaternius não tem rosto:
@@ -16,7 +17,6 @@ import { asas, capa, elmo, peito, tiara } from './armaduras3d';
 import { criatura } from './criaturas3d';
 
 /** Pixels por célula no atlas (o jogo desenha a 48: 1,5× para ficar nítido sem pesar). */
-const PX_CELULA = 72;
 const ELEVACAO = Math.PI / 6;
 const QUADRO_PADRAO = { largura: 1.5, altura: 1.75, baixo: 0.35 };
 
@@ -55,11 +55,25 @@ export interface SaidaAtlas {
 }
 
 const carregador = new GLTFLoader();
+// 02/11/2026: dragão CC0 do Animated Monster Pack, distribuído em FBX.
+const carregadorFbx = new FBXLoader();
 const cache = new Map<string, Promise<{ cena: THREE.Group; animacoes: THREE.AnimationClip[] }>>();
 function carregar(url: string) {
   let p = cache.get(url);
   if (!p) {
-    p = carregador.loadAsync(url).then((g) => ({ cena: g.scene, animacoes: g.animations }));
+    p = url.endsWith('.fbx') ? carregadorFbx.loadAsync(url).then(cena => {
+      cena.traverse(o => { if (o instanceof THREE.Mesh) {
+        const converter = (m: THREE.Material) => {
+          const cores: Record<string, number> = { Main: 0xc5c0b5, Wings: 0x9d948a, Belly: 0xe9d2a4, Claws: 0xe6dfcf, Eyes: 0xffe09b };
+          const novo = new THREE.MeshStandardMaterial({ color: cores[m.name] ?? 0xc5c0b5, roughness: .8 });
+          novo.name = m.name;
+          return novo;
+        };
+        const material = o.material as Mats;
+        o.material = Array.isArray(material) ? material.map(converter) : converter(material);
+      } });
+      return { cena, animacoes: cena.animations };
+    }) : carregador.loadAsync(url).then((g) => ({ cena: g.scene, animacoes: g.animations }));
     cache.set(url, p);
   }
   return p;
@@ -382,6 +396,7 @@ async function montarCamada(mt: Montado, corpo: THREE.Mesh[], p: PedidoDeCamada,
  * pesam (um canvas do tamanho do atlas cada): o chamador reparte em lotes.
  */
 export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeCamada[] = [], comCorpo = true): Promise<SaidaAtlas> {
+  const PX_CELULA = r.pxCelula ?? 72;
   cinzas.clear();
   naFrente.clear();
   soProfundidade.clear();

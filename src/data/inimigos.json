@@ -496,7 +496,7 @@
       "hesitacaoS": 0.8,
       "deteccao": 9,
       "xp": 900,
-      "modelo": "demonio",
+      "modelo": "dragao_fogo",
       "arquetipo": "boss",
       "classe": "corpo_a_corpo",
       "defesa": 7,
@@ -509,6 +509,116 @@
       "resistencias": {
         "fogo": 75,
         "gelo": -25
+      }
+    },
+    {
+      "id": "dragao_fogo",
+      "nome": "Dragão de Fogo",
+      "hpBase": 3600,
+      "hesitacaoS": 0.8,
+      "deteccao": 9,
+      "xp": 900,
+      "modelo": "dragao_fogo",
+      "arquetipo": "boss",
+      "classe": "corpo_a_corpo",
+      "defesa": 7,
+      "ataqueBasico": "golpe_demoniaco",
+      "habilidades": [
+        "bola_de_fogo",
+        "marca_de_area"
+      ],
+      "intervaloAtaqueMs": 2800,
+      "resistencias": {
+        "fogo": 75,
+        "gelo": -25
+      }
+    },
+    {
+      "id": "dragao_gelo",
+      "nome": "Dragão de Gelo",
+      "hpBase": 3600,
+      "hesitacaoS": 0.8,
+      "deteccao": 9,
+      "xp": 900,
+      "modelo": "dragao_gelo",
+      "arquetipo": "boss",
+      "classe": "corpo_a_corpo",
+      "defesa": 7,
+      "ataqueBasico": "golpe_demoniaco",
+      "habilidades": [
+        "lanca_de_gelo",
+        "marca_de_area"
+      ],
+      "intervaloAtaqueMs": 2800,
+      "resistencias": {
+        "gelo": 75,
+        "fogo": -25
+      }
+    },
+    {
+      "id": "dragao_raio",
+      "nome": "Dragão de Raio",
+      "hpBase": 3600,
+      "hesitacaoS": 0.8,
+      "deteccao": 9,
+      "xp": 900,
+      "modelo": "dragao_raio",
+      "arquetipo": "boss",
+      "classe": "corpo_a_corpo",
+      "defesa": 7,
+      "ataqueBasico": "golpe_demoniaco",
+      "habilidades": [
+        "raio_em_cadeia",
+        "marca_de_area"
+      ],
+      "intervaloAtaqueMs": 2800,
+      "resistencias": {
+        "raio": 75,
+        "terra": -25
+      }
+    },
+    {
+      "id": "dragao_veneno",
+      "nome": "Dragão de Veneno",
+      "hpBase": 3600,
+      "hesitacaoS": 0.8,
+      "deteccao": 9,
+      "xp": 900,
+      "modelo": "dragao_veneno",
+      "arquetipo": "boss",
+      "classe": "corpo_a_corpo",
+      "defesa": 7,
+      "ataqueBasico": "golpe_demoniaco",
+      "habilidades": [
+        "nevoa_venenosa",
+        "marca_de_area"
+      ],
+      "intervaloAtaqueMs": 2800,
+      "resistencias": {
+        "veneno": 75,
+        "fogo": -25
+      }
+    },
+    {
+      "id": "necromante_ancestral",
+      "nome": "Necromante Ancestral",
+      "hpBase": 2800,
+      "hesitacaoS": 0.8,
+      "deteccao": 9,
+      "xp": 900,
+      "modelo": "necromante",
+      "arquetipo": "boss",
+      "classe": "conjurador",
+      "defesa": 7,
+      "ataqueBasico": "raio_vampirico",
+      "habilidades": [
+        "invocar_ossuario",
+        "marca_de_area"
+      ],
+      "intervaloAtaqueMs": 2800,
+      "resistencias": {
+        "trevas": 75,
+        "sagrado": -25
       }
     }
   ]

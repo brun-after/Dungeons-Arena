@@ -160,3 +160,22 @@ function falcaoCima(cor: number, quadro: number): string {
 }
 
 export const falcao = (cor: number) => (vista: Vista, quadro = 0) => (vista === '34' ? falcao34(cor, quadro) : falcaoCima(cor, quadro));
+
+// 02/11/2026: silhueta de dragão para vista de cima e fallback antes do atlas CC0 carregar.
+export function dragao(cor: number): (vista: Vista, quadro: number) => string {
+  return (vista, quadro) => {
+    const y = vista === 'cima' ? 32 : 43;
+    const asa = 3 * (BALANCO[quadro] ?? 0);
+    return [
+      poligono([28, y, 7, y - 22 + asa, 11, y - 3, 4, y + 10, 29, y + 4], escurecer(cor, .3)),
+      poligono([30, y, 49, y - 24 + asa, 54, y - 4, 60, y + 10, 32, y + 4], cor),
+      linha([28, y + 6, 14, y + 13, 6, y + 8], cor, 5),
+      elipse(31, y + 2, 12, 8, cor),
+      poligono([38, y, 45, y - 10, 56, y - 9, 58, y - 4, 46, y - 1], cor),
+      poligono([44, y - 9, 42, y - 17, 49, y - 11], 0xded5bb),
+      circulo(51, y - 8, 1.4, 0xffeb9a, false),
+      linha([25, y + 5, 22, y + 13, 28, y + 13], escurecer(cor, .25), 3),
+      linha([38, y + 5, 41, y + 13, 47, y + 13], escurecer(cor, .25), 3),
+    ].join('');
+  };
+}

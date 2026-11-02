@@ -18,6 +18,7 @@ const RAIZ = join(import.meta.dirname, '..', '..');
 const B = join(RAIZ, '.brutos');
 /** O prefixo de cada pacote e a pasta dos arquivos dele (as texturas da Quaternius às vezes ficam numa irmã). */
 const PASTAS: Record<string, string[]> = {
+  dragao: [join(B, 'monstros', 'x', 'Animated Monster Pack by @Quaternius', 'FBX')],
   base: [join(B, 'q-base', 'x', 'Universal Base Characters[Standard]', 'Base Characters', 'Godot - UE')],
   traje: [join(B, 'q-trajes', 'x', 'Modular Character Outfits - Fantasy[Standard]', 'Exports', 'glTF (Godot-Unreal)')],
   ual1: [join(B, 'q-anim', 'x', 'Universal Animation Library[Standard]', 'Unreal-Godot')],
@@ -35,6 +36,7 @@ const HOST = 'http://modelos.local/';
 function caminhoDe(ref: string): string {
   const [pacote = '', ...resto] = ref.split(':');
   const nome = resto.join(':');
+  if (pacote === 'dragao') return 'dragao/Dragon.fbx';
   if (pacote === 'ual1') return 'ual1/UAL1_Standard.glb';
   if (pacote === 'ual2') return 'ual2/UAL2_Standard.glb';
   if (pacote === 'kes-anim') return `kes/Animations/gltf/Rig_Medium/Rig_Medium_${nome === 'Movement' ? 'MovementBasic' : nome}.glb`;

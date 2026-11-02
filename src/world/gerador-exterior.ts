@@ -406,6 +406,17 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
   // Marco 31 (D-130): quem mora na casa abandonada (no topo da faixa: entrar é arriscado).
   for (const c of abandonadas.dentro) if (regiao.inimigos.length > 0) inimigos.push({ preset: escolher(rng, regiao.inimigos), x: c.x, y: c.y, nivel: regiao.nivel[1] });
 
+  // 02/11/2026: encontros de bosses fora das vilas e longe de todos os pontos de chegada.
+  // RNG próprio: mudar as probabilidades não altera terreno, hordas ou recursos.
+  const encontros = regiao.bosses;
+  const rngBoss = criarRng(regiao.semente + 104729);
+  if (encontros?.presets.length && aleatorio(rngBoss) * 100 < encontros.chancePct) {
+    for (let i = 0; i < encontros.quantidade; i++) {
+      const c = sortearLivre(x => longeDaVila(x) && spawns.every(s => chebyshev(s, x) >= FOLGA_INIMIGOS * 2));
+      if (c) inimigos.push({ preset: escolher(rngBoss, encontros.presets), x: c.x, y: c.y, nivel: regiao.nivel[1] });
+    }
+  }
+
   const fase: FaseJson = {
     id: `mundo_${reino.id}_${regiao.id}`,
     nome: regiao.nome,

@@ -3112,3 +3112,14 @@ body.toque .painel-social {
   top: calc(162px + var(--seguro-topo));
   max-height: calc(100dvh - 172px - var(--seguro-topo));
 }
+
+/* 02/11/2026: mapa ampliado translúcido e marcações persistentes. */
+.modal.mapa-expandido { width: min(94vw, 1100px); max-width: 1100px; background: rgba(16,21,28,.78); }
+.modal.mapa-expandido::backdrop { background: rgba(0,0,0,.18); backdrop-filter: none; }
+.mapa-expandido .regiao-mapa { background: rgba(25,32,42,.55); min-width: 0; }
+.marcar-lugar { background: rgba(20,26,36,.55); color: var(--texto-suave); border: 1px solid transparent; border-radius: 5px; padding: 8px; cursor: pointer; overflow-wrap: anywhere; }
+.marcar-lugar[aria-pressed='true'] { color: #ffdc73; border-color: #ffdc73; background: rgba(105,77,16,.55); }
+.marcar-lugar:focus-visible { outline: 2px solid #65d7ee; }
+@media (max-width: 600px) { .mapa-reino { gap: 3px; } .regiao-mapa { padding: 4px; font-size: .75rem; } .marcar-lugar { padding: 6px 2px; } }
+
+.mapa-terreno { display: block; width: min(100%, 700px); height: auto; margin: 0 auto 18px; cursor: crosshair; border: 1px solid var(--borda); touch-action: manipulation; }
