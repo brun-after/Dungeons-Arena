@@ -6,25 +6,13 @@ import type { SomId } from './mapeamento';
 
 /** Duração de cada som, para o teto de vozes do limitador. */
 export const DURACAO_MS: Readonly<Record<SomId, number>> = {
-  golpe: 120,
-  acerto: 140,
-  critico: 260,
-  falha: 160,
-  conjuracao: 320,
-  magia: 260,
-  projetil: 220,
-  explosao: 650,
-  cura: 360,
-  moeda: 140,
-  coleta: 180,
-  passo: 50,
-  porta: 420,
-  armadilha: 300,
-  invocacao: 520,
-  morte: 620,
-  nivel: 520,
-  clique: 30,
-  recusa: 220,
+  golpe: 600, acerto: 480, critico: 700, falha: 300, conjuracao: 700,
+  magia: 800, projetil: 400, explosao: 1000, cura: 1200, moeda: 500,
+  coleta: 650, passo: 160, porta: 900, armadilha: 650, invocacao: 1200,
+  morte: 1000, nivel: 1600, clique: 120, recusa: 300,
+  fogo: 950, gelo: 850, raio: 700, veneno: 900, psiquico: 1000,
+  terra: 1000, trevas: 1200, sagrado: 1200, lamina: 600,
+  contundente: 650, arco: 450, quebra: 800, teleporte: 1000,
 };
 
 const ruidos = new WeakMap<BaseAudioContext, AudioBuffer>();
@@ -37,7 +25,7 @@ export function ruido(ctx: BaseAudioContext): AudioBuffer {
   const dados = buffer.getChannelData(0);
   let semente = 12345;
   for (let i = 0; i < dados.length; i++) {
-    semente = (semente * 1103515245 + 12345) >>> 0;
+    semente = (Math.imul(semente, 1664525) + 1013904223) >>> 0;
     dados[i] = (semente / 4294967296) * 2 - 1;
   }
   ruidos.set(ctx, buffer);
@@ -85,78 +73,93 @@ function chiado(t: Tom, filtro: BiquadFilterType, de: number, para: number, dura
   fonte.stop(tt.t0 + duracao + 0.02);
 }
 
-/** Toca um efeito sonoro em `destino`, agora, com o fator de tom dado. */
+/** Ressonâncias inarmônicas: metal, madeira, vidro e pedra, sem bipes quadrados. */
+function ressoar(t: Tom, fundamental: number, parciais: readonly number[], duracao: number, volume: number): void {
+  parciais.forEach((razao, i) => { osc(t, 'sine', fundamental * razao, fundamental * razao * 0.997,
+    duracao / (1 + i * 0.38), volume / (1 + i * 1.7)); });
+}
+
+/** Cada ação combina transiente, corpo e cauda; pitch varia só entre execuções. */
 export function tocarEfeito(ctx: BaseAudioContext, destino: AudioNode, som: SomId, tom: number): void {
   const t: Tom = { ctx, destino, t0: ctx.currentTime, tom };
+  const impacto = (peso = 1) => {
+    chiado(t, 'lowpass', 1900, 180, 0.18, 0.28 * peso);
+    ressoar(t, 95, [1, 1.47, 2.09], 0.42, 0.22 * peso);
+  };
+  const cristal = (base: number, duracao = 0.65) => { ressoar(t, base, [1, 2.76, 5.4, 8.93], duracao, 0.12); };
   switch (som) {
-    case 'golpe':
-      chiado(t, 'bandpass', 1400, 600, 0.09, 0.5);
-      osc(t, 'sine', 140, 70, 0.11, 0.5);
+    case 'golpe': case 'lamina':
+      chiado(t, 'bandpass', 2600, 650, 0.2, 0.32);
+      ressoar({ ...t, t0: t.t0 + 0.045 }, 420, [1, 2.32, 4.7, 6.1], 0.48, 0.15);
       break;
-    case 'acerto':
-      osc(t, 'square', 220, 80, 0.13, 0.25);
-      chiado(t, 'lowpass', 2000, 400, 0.08, 0.3);
-      break;
+    case 'acerto': case 'contundente':
+      impacto(); break;
     case 'critico':
-      osc(t, 'square', 260, 70, 0.16, 0.3);
-      osc(t, 'triangle', 1320, 1320, 0.22, 0.25, 0.03);
-      chiado(t, 'highpass', 3000, 1500, 0.1, 0.25);
-      break;
+      impacto(1.4); chiado(t, 'highpass', 3200, 800, 0.35, 0.2);
+      ressoar(t, 185, [1, 2.4, 4.3], 0.65, 0.14); break;
     case 'falha':
-      chiado(t, 'highpass', 2500, 900, 0.15, 0.2);
+      chiado(t, 'bandpass', 1800, 450, 0.26, 0.18); break;
+    case 'conjuracao': case 'magia':
+      chiado(t, 'bandpass', 350, 2200, 0.6, 0.14);
+      ressoar(t, 185, [1, 1.5, 2.01, 3.02], 0.65, 0.1); break;
+    case 'projetil': case 'arco':
+      ressoar(t, 170, [1, 2.03, 3.9], 0.18, 0.14);
+      chiado(t, 'bandpass', 2800, 700, 0.32, 0.2, 0.025); break;
+    case 'fogo':
+      chiado(t, 'lowpass', 2800, 160, 0.9, 0.4);
+      osc(t, 'sine', 95, 38, 0.6, 0.24);
+      for (let i = 0; i < 6; i++) chiado(t, 'highpass', 1800 + i * 280, 900, 0.06, 0.12, i * 0.12);
       break;
-    case 'conjuracao':
-      osc(t, 'triangle', 300, 900, 0.3, 0.12);
+    case 'gelo':
+      for (let i = 0; i < 5; i++) cristal(780 + i * 173, 0.75 - i * 0.08);
+      chiado(t, 'highpass', 6500, 2400, 0.4, 0.13); break;
+    case 'raio':
+      for (let i = 0; i < 5; i++) chiado(t, 'bandpass', 6500, 700, 0.045, 0.5, i * 0.035);
+      chiado(t, 'lowpass', 650, 70, 0.65, 0.32); break;
+    case 'veneno':
+      for (let i = 0; i < 6; i++) osc({ ...t, t0: t.t0 + i * 0.105 }, 'sine', 210 + i * 41, 70, 0.18, 0.15);
+      chiado(t, 'bandpass', 900, 350, 0.8, 0.14); break;
+    case 'terra': case 'explosao':
+      chiado(t, 'lowpass', 1800, 65, 0.95, 0.42);
+      ressoar(t, 53, [1, 1.39, 2.71, 4.18], 0.9, 0.3);
+      for (let i = 0; i < 4; i++) chiado(t, 'bandpass', 1500, 350, 0.12, 0.15, i * 0.17);
       break;
-    case 'magia':
-      osc(t, 'sine', 660, 990, 0.25, 0.22);
-      osc(t, 'triangle', 330, 495, 0.25, 0.12);
-      break;
-    case 'projetil':
-      chiado(t, 'bandpass', 600, 3000, 0.2, 0.18);
-      break;
-    case 'explosao':
-      chiado(t, 'lowpass', 1600, 90, 0.62, 0.7);
-      osc(t, 'sine', 90, 40, 0.5, 0.6);
-      break;
-    case 'cura':
-      for (const [i, f] of [523, 659, 784].entries()) osc(t, 'triangle', f, f, 0.16, 0.18, i * 0.07);
-      break;
+    case 'psiquico': case 'trevas':
+      ressoar(t, som === 'trevas' ? 68 : 220, [1, 1.03, 1.49, 2.02], 0.95, 0.13);
+      chiado(t, 'bandpass', 1600, 180, 0.95, 0.16); break;
+    case 'cura': case 'sagrado':
+      [392, 587.33, 783.99].forEach((f, i) => { ressoar({ ...t, t0: t.t0 + i * 0.1 }, f, [1, 2.01, 3.98], 0.9, 0.08); });
+      chiado(t, 'highpass', 4200, 6500, 0.7, 0.045); break;
     case 'moeda':
-      osc(t, 'square', 988, 988, 0.06, 0.12);
-      osc(t, 'square', 1319, 1319, 0.08, 0.12, 0.06);
-      break;
+      cristal(2140, 0.42); cristal(2860, 0.34); break;
     case 'coleta':
-      osc(t, 'triangle', 660, 880, 0.16, 0.22);
-      break;
+      ressoar(t, 520, [1, 1.5, 2.02], 0.6, 0.1);
+      chiado(t, 'bandpass', 1700, 600, 0.16, 0.1); break;
     case 'passo':
-      chiado(t, 'lowpass', 500, 300, 0.045, 0.12);
-      break;
+      chiado(t, 'lowpass', 850, 220, 0.1, 0.16);
+      ressoar(t, 120, [1, 1.8], 0.12, 0.08); break;
     case 'porta':
-      osc(t, 'sawtooth', 110, 90, 0.4, 0.15);
-      chiado(t, 'lowpass', 700, 200, 0.35, 0.15);
-      break;
+      ressoar(t, 83, [1, 1.48, 2.73, 4.2], 0.85, 0.18);
+      chiado(t, 'bandpass', 650, 160, 0.65, 0.22); break;
     case 'armadilha':
-      osc(t, 'square', 180, 90, 0.12, 0.3);
-      chiado(t, 'highpass', 4000, 1500, 0.28, 0.25, 0.02);
-      break;
-    case 'invocacao':
-      osc(t, 'sine', 200, 800, 0.5, 0.25);
-      osc(t, 'triangle', 300, 1200, 0.5, 0.1);
-      break;
+      ressoar(t, 650, [1, 2.32, 4.1], 0.6, 0.18); impacto(0.7); break;
+    case 'invocacao': case 'teleporte':
+      chiado(t, 'bandpass', 180, 2800, 0.75, 0.23);
+      ressoar({ ...t, t0: t.t0 + 0.18 }, 146.83, [1, 1.5, 2.01], 0.75, 0.15); break;
     case 'morte':
-      osc(t, 'sawtooth', 220, 55, 0.6, 0.22);
-      break;
+      chiado(t, 'bandpass', 650, 95, 0.85, 0.22);
+      ressoar(t, 73, [1, 1.37, 2.13], 0.9, 0.16); break;
+    case 'quebra':
+      for (let i = 0; i < 5; i++) {
+        chiado(t, 'bandpass', 2500 - i * 300, 400, 0.18, 0.18, i * 0.1);
+        ressoar({ ...t, t0: t.t0 + i * 0.1 }, 320 + i * 79, [1, 2.17, 3.4], 0.25, 0.08);
+      } break;
     case 'nivel':
-      for (const [i, f] of [523, 659, 784, 1047].entries()) osc(t, 'triangle', f, f, 0.18, 0.22, i * 0.09);
-      break;
+      [293.66, 440, 587.33, 880].forEach((f, i) => { ressoar({ ...t, t0: t.t0 + i * 0.16 }, f, [1, 2.01, 3], 1, 0.1); }); break;
     case 'clique':
-      osc(t, 'sine', 1200, 1200, 0.025, 0.12);
-      break;
+      chiado(t, 'bandpass', 1600, 950, 0.05, 0.09); ressoar(t, 420, [1, 2.3], 0.08, 0.06); break;
     case 'recusa':
-      osc(t, 'square', 150, 150, 0.08, 0.15);
-      osc(t, 'square', 120, 120, 0.1, 0.15, 0.11);
-      break;
+      ressoar(t, 140, [1, 1.06, 1.48], 0.25, 0.12); break;
   }
 }
 
@@ -167,20 +170,28 @@ export function tocarNota(ctx: BaseAudioContext, destino: AudioNode, quando: num
 }
 
 /** Marco 11A: nota com passa-baixa (casual brilhante, dark abafado). */
-export function tocarNotaFiltrada(ctx: BaseAudioContext, destino: AudioNode, quando: number, freq: number, duracao: number, tipo: OscillatorType, pico: number, corte: number): void {
+export function tocarNotaFiltrada(ctx: BaseAudioContext, destino: AudioNode, quando: number, freq: number, duracao: number, _tipo: OscillatorType, pico: number, corte: number): void {
   const filtro = ctx.createBiquadFilter();
   filtro.type = 'lowpass';
-  filtro.frequency.setValueAtTime(corte, quando);
-  filtro.Q.value = 0.7;
+  filtro.frequency.value = corte;
+  filtro.Q.value = 0.5;
   filtro.connect(destino);
-  osc({ ctx, destino: filtro, t0: quando, tom: 1 }, tipo, freq, freq, duracao, pico);
-  setTimeout(() => {
-    filtro.disconnect();
-  }, (quando - ctx.currentTime + duracao + 0.2) * 1000);
+  const t: Tom = { ctx, destino: filtro, t0: quando, tom: 1 };
+  // Sopro/corda: harmônicos decrescentes, ataque suave e pequena desafinação.
+  for (const [i, amplitude] of [1, 0.32, 0.13, 0.06].entries()) {
+    const o = ctx.createOscillator();
+    o.type = 'sine';
+    o.frequency.value = freq * (i + 1);
+    o.detune.value = i % 2 ? -3 : 3;
+    o.connect(envelope(t, pico * amplitude, Math.min(0.16, duracao / 3), duracao));
+    o.start(quando); o.stop(quando + duracao + 0.02);
+  }
+  chiado(t, 'bandpass', freq * 2, freq, duracao, pico * 0.08);
+  setTimeout(() => { filtro.disconnect(); }, Math.max(0, quando - ctx.currentTime + duracao + 0.1) * 1000);
 }
 
 /** Marco 11A: pad — dois osciladores levemente desafinados por nota, com ataque e soltura lentos. */
-export function tocarPad(ctx: BaseAudioContext, destino: AudioNode, quando: number, freqs: readonly number[], duracao: number, tipo: OscillatorType, pico: number): void {
+export function tocarPad(ctx: BaseAudioContext, destino: AudioNode, quando: number, freqs: readonly number[], duracao: number, _tipo: OscillatorType, pico: number): void {
   const ganho = ctx.createGain();
   const filtro = ctx.createBiquadFilter();
   filtro.type = 'lowpass';
@@ -195,7 +206,7 @@ export function tocarPad(ctx: BaseAudioContext, destino: AudioNode, quando: numb
   for (const f of freqs) {
     for (const desafino of [-6, 6]) {
       const o = ctx.createOscillator();
-      o.type = tipo;
+      o.type = 'sine';
       o.frequency.value = f;
       o.detune.value = desafino;
       o.connect(ganho);
@@ -209,15 +220,17 @@ export function tocarPad(ctx: BaseAudioContext, destino: AudioNode, quando: numb
 }
 
 export function tocarBumbo(ctx: BaseAudioContext, destino: AudioNode, quando: number): void {
-  osc({ ctx, destino, t0: quando, tom: 1 }, 'sine', 150, 45, 0.18, 0.7);
+  ressoar({ ctx, destino, t0: quando, tom: 1 }, 58, [1, 1.59, 2.14, 2.92], 0.8, 0.24);
+  chiado({ ctx, destino, t0: quando, tom: 1 }, 'lowpass', 900, 110, 0.18, 0.18);
 }
 
 export function tocarCaixa(ctx: BaseAudioContext, destino: AudioNode, quando: number): void {
-  chiado({ ctx, destino, t0: quando, tom: 1 }, 'highpass', 1800, 1200, 0.12, 0.35);
+  ressoar({ ctx, destino, t0: quando, tom: 1 }, 150, [1, 1.47, 2.09], 0.38, 0.15);
+  chiado({ ctx, destino, t0: quando, tom: 1 }, 'bandpass', 1400, 600, 0.2, 0.12);
 }
 
 export function tocarChimbal(ctx: BaseAudioContext, destino: AudioNode, quando: number): void {
-  chiado({ ctx, destino, t0: quando, tom: 1 }, 'highpass', 7000, 7000, 0.035, 0.12);
+  chiado({ ctx, destino, t0: quando, tom: 1 }, 'highpass', 5200, 2800, 0.5, 0.045);
 }
 
 /** Som ambiente em laço (fontes sonoras da fase, §2.14): devolve o ganho e como parar. */
@@ -229,42 +242,40 @@ export function criarAmbiente(ctx: BaseAudioContext, destino: AudioNode, tipo: S
   ganho.gain.value = 0;
   ganho.connect(destino);
   const parar: (() => void)[] = [];
-  if (tipo === 'goteira') {
-    // Pingos esparsos, agendados em JS (o laço segue enquanto o contexto roda).
-    let vivo = true;
-    const pingar = () => {
-      if (!vivo) return;
-      osc({ ctx, destino: ganho, t0: ctx.currentTime, tom: 1 }, 'sine', 1300, 700, 0.12, 0.3);
-      setTimeout(pingar, 1200 + Math.random() * 1800);
-    };
-    pingar();
-    parar.push(() => {
-      vivo = false;
-    });
-  } else {
-    const fonte = ctx.createBufferSource();
-    fonte.buffer = ruido(ctx);
-    fonte.loop = true;
-    const filtro = ctx.createBiquadFilter();
-    filtro.type = tipo === 'vento' ? 'bandpass' : 'lowpass';
-    filtro.frequency.value = tipo === 'fogo' ? 900 : tipo === 'agua' ? 500 : 400;
-    const lfo = ctx.createOscillator();
-    const lfoGanho = ctx.createGain();
-    lfo.frequency.value = tipo === 'fogo' ? 7 : tipo === 'agua' ? 0.3 : 0.15;
-    lfoGanho.gain.value = tipo === 'fogo' ? 300 : 150;
-    lfo.connect(lfoGanho);
-    lfoGanho.connect(filtro.frequency);
-    const nivel = ctx.createGain();
-    nivel.gain.value = tipo === 'vento' ? 0.5 : 0.35;
-    fonte.connect(filtro);
-    filtro.connect(nivel);
-    nivel.connect(ganho);
-    fonte.start();
-    lfo.start();
-    parar.push(() => {
-      fonte.stop();
-      lfo.stop();
-    });
+  let vivo = true;
+  let timer: ReturnType<typeof setTimeout>;
+  const detalhe = () => {
+    if (!vivo) return;
+    const t: Tom = { ctx, destino: ganho, t0: ctx.currentTime, tom: 0.94 + Math.random() * 0.12 };
+    if (tipo === 'goteira') {
+      osc(t, 'sine', 1800, 720, 0.09, 0.15);
+      ressoar({ ...t, t0: t.t0 + 0.035 }, 680, [1, 2.71], 0.65, 0.045);
+    } else if (tipo === 'fogo') {
+      chiado(t, 'highpass', 2500 + Math.random() * 1800, 900, 0.04, 0.1);
+    } else if (tipo === 'agua') {
+      osc(t, 'sine', 280 + Math.random() * 450, 110, 0.14, 0.045);
+    }
+    timer = setTimeout(detalhe, tipo === 'goteira' ? 1100 + Math.random() * 2300 : 140 + Math.random() * 620);
+  };
+  detalhe();
+  parar.push(() => { vivo = false; clearTimeout(timer); });
+  if (tipo !== 'goteira') {
+    // Duas bandas com movimentos lentos: evita o antigo chiado uniforme de um segundo.
+    for (const [i, centro] of (tipo === 'fogo' ? [240, 1800] : tipo === 'agua' ? [420, 2400] : [220, 680]).entries()) {
+      const fonte = ctx.createBufferSource();
+      fonte.buffer = ruido(ctx);
+      fonte.loop = true;
+      fonte.playbackRate.value = 0.73 + i * 0.31;
+      const filtro = ctx.createBiquadFilter();
+      filtro.type = 'bandpass'; filtro.frequency.value = centro; filtro.Q.value = 0.65;
+      const nivel = ctx.createGain(); nivel.gain.value = tipo === 'vento' ? 0.16 : 0.12;
+      const lfo = ctx.createOscillator(); const modulacao = ctx.createGain();
+      lfo.frequency.value = 0.07 + i * 0.11; modulacao.gain.value = centro * 0.4;
+      lfo.connect(modulacao); modulacao.connect(filtro.frequency);
+      fonte.connect(filtro); filtro.connect(nivel); nivel.connect(ganho);
+      fonte.start(); lfo.start();
+      parar.push(() => { fonte.stop(); lfo.stop(); fonte.disconnect(); filtro.disconnect(); nivel.disconnect(); lfo.disconnect(); modulacao.disconnect(); });
+    }
   }
   return {
     ganho,

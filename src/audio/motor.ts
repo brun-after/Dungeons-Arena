@@ -84,7 +84,14 @@ export class MotorAudio {
       this.mestre = ctx.createGain();
       this.mestre.gain.setValueAtTime(0.0001, ctx.currentTime);
       this.mestre.gain.exponentialRampToValueAtTime(1, ctx.currentTime + FADE_INICIO_S);
-      this.mestre.connect(ctx.destination);
+      const compressor = ctx.createDynamicsCompressor();
+      compressor.threshold.value = -14;
+      compressor.knee.value = 18;
+      compressor.ratio.value = 4;
+      compressor.attack.value = 0.004;
+      compressor.release.value = 0.22;
+      this.mestre.connect(compressor);
+      compressor.connect(ctx.destination);
       this.musica = ctx.createGain();
       this.efeitos = ctx.createGain();
       this.musica.connect(this.mestre);
@@ -140,9 +147,9 @@ export class MotorAudio {
     if (!this.limitador.permitir(som, agora, DURACAO_MS[som])) return;
     try {
       const ganho = ctx.createGain();
-      ganho.gain.value = volume;
+      ganho.gain.value = Math.max(0, Math.min(1, volume));
       const painel = ctx.createStereoPanner();
-      painel.pan.value = pan;
+      painel.pan.value = Math.max(-1, Math.min(1, pan));
       ganho.connect(painel);
       painel.connect(this.efeitos);
       tocarEfeito(ctx, ganho, som, variacaoDeTom(Math.random()));
