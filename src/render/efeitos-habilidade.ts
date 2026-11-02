@@ -345,6 +345,17 @@ export class EfeitosDeHabilidade {
   }
 
   private auras(estado: EstadoJogo, agoraMs: number): void {
+    // 02/11/2026: a cor está na energia em volta das escamas negras, sem tingir o corpo.
+    const dragoes: Readonly<Record<string, NomePreset>> = { dragao_das_ruinas: 'aura_dragao_fogo', dragao_fogo: 'aura_dragao_fogo', dragao_gelo: 'aura_dragao_gelo', dragao_raio: 'aura_dragao_raio', dragao_veneno: 'aura_dragao_veneno' };
+    for (const e of estado.entidades) {
+      const aura = dragoes[e.preset];
+      if (e.morto || !aura) continue;
+      const chave = `dragao:${e.id}`;
+      if (agoraMs - (this.ultimaAura.get(chave) ?? -Infinity) < 360) continue;
+      this.ultimaAura.set(chave, agoraMs);
+      const pos = this.posicoes.get(e.id);
+      if (pos) this.o.particulas.emitir(aura, pos.x, pos.y, 0xffffff);
+    }
     for (const e of estado.entidades) {
       if (e.morto) continue;
       const status = e.efeitos.filter((f) => f.ateTick > estado.tick && REGISTRO_EFEITOS[f.tipo].ehStatus);
@@ -371,7 +382,7 @@ export class EfeitosDeHabilidade {
     // Marco 23 (D-092): o inimigo afim solta o elemento dele.
     for (const e of estado.entidades) {
       const a = e.afinidade;
-      if (e.morto || !a || !this.o.corElemento) continue;
+      if (e.morto || !a || dragoes[e.preset] || !this.o.corElemento) continue;
       const chave = `afinidade:${e.id}`;
       if (agoraMs - (this.ultimaAura.get(chave) ?? 0) < INTERVALO_AFINIDADE_MS) continue;
       this.ultimaAura.set(chave, agoraMs);

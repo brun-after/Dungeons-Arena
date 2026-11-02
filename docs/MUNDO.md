@@ -1,6 +1,6 @@
 # O Mundo: guia do modo
 
-**Versão:** 0.5 · **Data:** 02/11/2026
+**Versão:** 0.6 · **Data:** 02/11/2026
 
 > **Histórico**
 > - **0.5 (02/11/2026)**: marco 33: nove regiões com 1,5625x a área atual, 20 novas dungeons e missões, mapa com pontos pessoais e bosses elementais CC0.
@@ -175,6 +175,10 @@ cinco tipos. No exterior, a região perigosa tem dois encontros; nas normais há
 um encontro e nas seguras 5%, sempre fora das vilas e longe das chegadas. O sorteio é estável pela
 semente da região, para manter cliente/servidor iguais. Respawn segue o sistema de inimigos do Mundo.
 
-O dragão é o modelo CC0 animado de Quaternius, pré-renderizado em quatro variantes (3780×2304,
-abaixo de 4096 por dimensão); o necromante reutiliza o atlas CC0 existente. Fontes, hash do pacote,
+O dragão é o modelo CC0 animado de Cethiel/Drummyfish, com textura negra, porte de 3,3 células
+e energia elemental sutil ao redor do corpo, pré-renderizado em quatro atlas de 3969×2240
+(abaixo de 4096 por dimensão); o necromante reutiliza o atlas CC0 existente. Fontes, hash do pacote,
 licença e comando reprodutível em `src/assets/personagens/LICENCAS.md`.
+
+Revisão visual de 02/11/2026: servos do necromante jogador avermelhados e servos do boss negros,
+inclusive após o dono sair do recorte da rede. As relações e as regras de combate permanecem as mesmas.

@@ -43,10 +43,10 @@ export const ARMA_DE_CLASSE: Readonly<Record<keyof typeof OPCOES_JOGAVEIS, { arm
 };
 
 export const MODELOS = {
-  dragao_fogo: { estilo: 'deslizar', quadros: QUADROS_MEMBROS, membros: true, desenhar: dragao(0xcf663f) },
-  dragao_gelo: { estilo: 'deslizar', quadros: QUADROS_MEMBROS, membros: true, desenhar: dragao(0x75cfff) },
-  dragao_raio: { estilo: 'deslizar', quadros: QUADROS_MEMBROS, membros: true, desenhar: dragao(0xb395e8) },
-  dragao_veneno: { estilo: 'deslizar', quadros: QUADROS_MEMBROS, membros: true, desenhar: dragao(0x77b85a) },
+  dragao_fogo: { estilo: 'deslizar', quadros: QUADROS_MEMBROS, membros: true, desenhar: dragao(0x45474e) },
+  dragao_gelo: { estilo: 'deslizar', quadros: QUADROS_MEMBROS, membros: true, desenhar: dragao(0x45474e) },
+  dragao_raio: { estilo: 'deslizar', quadros: QUADROS_MEMBROS, membros: true, desenhar: dragao(0x45474e) },
+  dragao_veneno: { estilo: 'deslizar', quadros: QUADROS_MEMBROS, membros: true, desenhar: dragao(0x45474e) },
   necromante: { estilo: 'deslizar', quadros: QUADROS_MEMBROS, membros: true, desenhar: bipede(OPCOES_JOGAVEIS.necromante) },
   goblin: {
     estilo: 'passada',

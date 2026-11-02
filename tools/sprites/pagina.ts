@@ -1,4 +1,4 @@
-import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+import { ColladaLoader } from 'three/addons/loaders/ColladaLoader.js';
 // Página da ferramenta de personagens (marco 32, 31/10/2026, D-131): roda no Chromium do Playwright e renderiza cada
 // receita (receitas.ts) num atlas: 8 direções (linhas) e os quadros de cada estado (colunas), no ângulo do isométrico
 // do jogo e com a luz do clima sombrio, como os objetos (tools/objetos/pagina.ts). O traje da Quaternius não tem rosto:
@@ -55,24 +55,42 @@ export interface SaidaAtlas {
 }
 
 const carregador = new GLTFLoader();
-// 02/11/2026: dragão CC0 do Animated Monster Pack, distribuído em FBX.
-const carregadorFbx = new FBXLoader();
-const cache = new Map<string, Promise<{ cena: THREE.Group; animacoes: THREE.AnimationClip[] }>>();
+// 02/11/2026: dragão CC0 de Cethiel/Drummyfish, com animações em Collada.
+const carregadorCollada = new ColladaLoader();
+const cache = new Map<string, Promise<{ cena: THREE.Object3D; animacoes: THREE.AnimationClip[] }>>();
 function carregar(url: string) {
   let p = cache.get(url);
   if (!p) {
-    p = url.endsWith('.fbx') ? carregadorFbx.loadAsync(url).then(cena => {
-      cena.traverse(o => { if (o instanceof THREE.Mesh) {
+    p = url.endsWith('.dae') ? carregadorCollada.loadAsync(url).then(async g => {
+      if (!g) throw new Error(`Collada inválido: ${url}`);
+      // Os clipes Collada referem UUIDs de cada arquivo; nomes dos ossos permitem
+      // reutilizá-los no corpo clonado, inclusive nas animações exportadas separadamente.
+      const animacoes = g.scene.animations.map(original => {
+        const clip = original.clone();
+        clip.name = 'padrao';
+        for (const track of clip.tracks) {
+          const separador = track.name.lastIndexOf('.');
+          const id = track.name.slice(0, separador);
+          const alvo = g.scene.getObjectByProperty('uuid', id);
+          if (alvo) track.name = alvo.name + track.name.slice(separador);
+        }
+        return clip;
+      });
+      g.scene.traverse(o => { if (o instanceof THREE.Mesh) {
         const converter = (m: THREE.Material) => {
-          const cores: Record<string, number> = { Main: 0xc5c0b5, Wings: 0x9d948a, Belly: 0xe9d2a4, Claws: 0xe6dfcf, Eyes: 0xffe09b };
-          const novo = new THREE.MeshStandardMaterial({ color: cores[m.name] ?? 0xc5c0b5, roughness: .8 });
+          const novo = new THREE.MeshStandardMaterial({ color: m instanceof THREE.MeshPhongMaterial || m instanceof THREE.MeshLambertMaterial ? m.color : 0xffffff, map: m instanceof THREE.MeshPhongMaterial || m instanceof THREE.MeshLambertMaterial ? m.map : null, roughness: .85, side: THREE.DoubleSide });
           novo.name = m.name;
           return novo;
         };
         const material = o.material as Mats;
         o.material = Array.isArray(material) ? material.map(converter) : converter(material);
       } });
-      return { cena, animacoes: cena.animations };
+      await Promise.all(malhas(g.scene).flatMap(m => materiais(m).map(async material => {
+        if (!(material instanceof THREE.MeshStandardMaterial)) return;
+        const imagem: unknown = material.map?.source.data;
+        if (imagem instanceof HTMLImageElement) await imagem.decode();
+      })));
+      return { cena: g.scene, animacoes };
     }) : carregador.loadAsync(url).then((g) => ({ cena: g.scene, animacoes: g.animations }));
     cache.set(url, p);
   }

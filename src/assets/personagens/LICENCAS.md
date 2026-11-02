@@ -1,6 +1,6 @@
 # Personagens pré-renderizados
 
-**Versão:** 1.3 · **Data:** 02/11/2026 (1.1: as camadas de equipamento; 1.2: armas por desenho e grau, armadura por grau e as feras)
+**Versão:** 1.4 · **Data:** 02/11/2026 (1.1: as camadas de equipamento; 1.2: armas por desenho e grau, armadura por grau e as feras)
 
 Os atlas desta pasta são renderizados por `tools/sprites/render.ts` a partir de modelos 3D e animações de pacotes sob
 a licença **CC0 1.0 Universal** (domínio público). A licença está no arquivo de licença de cada pacote. Cada atlas tem
@@ -34,18 +34,29 @@ Lousberg (www.kaylousberg.com).
 | `armas/*` | geometria simples feita na ferramenta (`tools/sprites/armas3d.ts`), com as formas e cores dos desenhos do jogo |
 | `<classe>~cabeca-*`, `<classe>~corpo-*`, `<classe>~capa-*` | o capuz e o pano do traje (Quaternius) na cor da raridade; elmo, peitoral, ombreiras e capa feitos na ferramenta (`tools/sprites/armaduras3d.ts`) |
 
-## Dragões elementais (02/11/2026)
+## Dragões sombrios (02/11/2026, revisão 2)
 
-`dragao_fogo`, `dragao_gelo`, `dragao_raio` e `dragao_veneno` derivam de `FBX/Dragon.fbx`,
-**Animated Monster Pack by Quaternius**. Autor: Quaternius. Licença: CC0 1.0 Universal,
-confirmada no `License.txt` incluído no arquivo e nas páginas do autor:
-- https://quaternius.com/packs/animatedmonster.html
-- https://quaternius.itch.io/lowpoly-animated-monsters
-- https://opengameart.org/content/lowpoly-animated-monsters
+Os atlas `dragao_fogo`, `dragao_gelo`, `dragao_raio` e `dragao_veneno` agora derivam de
+**Cethiel's Dragon 3D**, substituindo o modelo anterior de Quaternius. Autores: **Drummyfish**
+(modelo, rig e animações 3D) e **Cethiel** (arte original e textura). Licença: **CC0 1.0**,
+confirmada na publicação do próprio autor e na ficha de sua animação no Wikimedia Commons:
+- https://opengameart.org/content/cethiels-dragon-3d
+- https://commons.wikimedia.org/wiki/File:3D_dragon_animation.gif
 
-Download: https://opengameart.org/sites/default/files/Animated%20Monster%20Pack%20by%20%40Quaternius.zip
-SHA-256 do pacote: acab2bddc5939f9b1b92c930507d73e0fd80037a39631cf2049bb6cfcaec1acd.
-As quatro variantes usam o mesmo rig com coloração distinta. Estados: voo parado/andar,
-Dragon_Attack (golpe), Dragon_Attack2 (conjurar), Dragon_Death (morte).
+Download: https://opengameart.org/sites/default/files/dragon_oga.zip
+SHA-256 do pacote: f6a8c25dd3b2abdb1e7830b0b88f9083052c0750e710e6439eceb320783a57c1.
+Arquivos usados: `dragon.dae`, `dragon_black.png`, `dragon_idle.dae`, `dragon_walk.dae`,
+`dragon_attack.dae` e `dragon_die.dae`. O pacote contém também os arquivos Blender de origem.
+O download não inclui um arquivo de licença separado; a declaração CC0 está na publicação do autor.
+Atribuição não é exigida; os créditos acima ficam registrados por cortesia.
+
+Porte de 3,3 células, escamas negras, energia elemental discreta adicionada em tempo real no
+renderizador do jogo. As quatro variantes compartilham a aparência do corpo; o elemento aparece
+nas brasas, névoa fria, arcos elétricos ou energia venenosa. Atlas de 3969×2240 pixels.
+Repouso, caminhada, ataque/conjuração e morte vêm dos respectivos arquivos Collada.
+A conversão preserva a textura e retargeteia as animações pelos nomes dos ossos, não pelos UUIDs.
 Geração: `npx tsx tools/sprites/render.ts --so dragao_fogo,dragao_gelo,dragao_raio,dragao_veneno --so-corpo`.
 O Necromante Ancestral reutiliza o atlas CC0 `necromante` já documentado acima.
+
+As invocações do necromante jogador recebem tonalidade avermelhada nas duas projeções;
+as do boss usam o preset exclusivo `esqueleto_do_ossuario`, negro mesmo sem o dono no recorte de rede.
