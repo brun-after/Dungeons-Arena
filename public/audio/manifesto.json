@@ -1,0 +1,908 @@
+{
+  "versao": 1,
+  "fontes": {
+    "kenney-rpg": {
+      "autor": "Kenney",
+      "titulo": "RPG Audio",
+      "pagina": "https://kenney.nl/assets/rpg-audio",
+      "licenca": "CC0-1.0",
+      "licencaUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    "kenney-impact": {
+      "autor": "Kenney",
+      "titulo": "Impact Sounds",
+      "pagina": "https://kenney.nl/assets/impact-sounds",
+      "licenca": "CC0-1.0",
+      "licencaUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    "rubberduck-rpg": {
+      "autor": "rubberduck",
+      "titulo": "80 CC0 RPG SFX",
+      "pagina": "https://opengameart.org/content/80-cc0-rpg-sfx",
+      "licenca": "CC0-1.0",
+      "licencaUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    "rubberduck-loops": {
+      "autor": "rubberduck",
+      "titulo": "30 CC0 SFX loops",
+      "pagina": "https://opengameart.org/content/30-cc0-sfx-loops",
+      "licenca": "CC0-1.0",
+      "licencaUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    "ice": {
+      "autor": "bart",
+      "titulo": "Ice spells",
+      "pagina": "https://opengameart.org/content/ice-spells",
+      "licenca": "CC0-1.0",
+      "licencaUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    "electric": {
+      "autor": "faxcorp",
+      "titulo": "Electricity Game Sound Pack",
+      "pagina": "https://opengameart.org/content/electricity-game-sound-pack",
+      "licenca": "CC0-1.0",
+      "licencaUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    "dark": {
+      "autor": "qubodup",
+      "titulo": "3 dark magic spells",
+      "pagina": "https://opengameart.org/content/3-dark-magic-spells",
+      "licenca": "CC0-1.0",
+      "licencaUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    "earth": {
+      "autor": "qubodup",
+      "titulo": "Earth Element Magic Spell",
+      "pagina": "https://opengameart.org/content/earth-element-magic-spell",
+      "licenca": "CC0-1.0",
+      "licencaUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    "heal": {
+      "autor": "DoKashiteru",
+      "titulo": "3 Heal Spells",
+      "pagina": "https://opengameart.org/content/3-heal-spells",
+      "licenca": "CC-BY-3.0",
+      "licencaUrl": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    "bow": {
+      "autor": "dorkster; gravações-base de qubodup",
+      "titulo": "Bow & Arrow Shot",
+      "pagina": "https://opengameart.org/content/bow-arrow-shot",
+      "licenca": "CC-BY-SA-3.0",
+      "licencaUrl": "https://creativecommons.org/licenses/by-sa/3.0/"
+    },
+    "fireloop": {
+      "autor": "qubodup",
+      "titulo": "Fire Loop",
+      "pagina": "https://opengameart.org/content/fire-loop",
+      "licenca": "CC-BY-3.0",
+      "licencaUrl": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    "waterdrips": {
+      "autor": "Blender Foundation",
+      "titulo": "Ambient water drips",
+      "pagina": "https://opengameart.org/content/ambient-water-drips",
+      "licenca": "CC-BY-3.0",
+      "licencaUrl": "https://creativecommons.org/licenses/by/3.0/"
+    },
+    "wind": {
+      "autor": "Lanea Zimmerman",
+      "titulo": "Breeze",
+      "pagina": "https://opengameart.org/content/breeze",
+      "licenca": "CC-BY-4.0",
+      "licencaUrl": "https://creativecommons.org/licenses/by/4.0/"
+    },
+    "choir": {
+      "autor": "César da Rocha (cesisco)",
+      "titulo": "Fantasy Choir-3 orchestral pieces",
+      "pagina": "https://opengameart.org/content/fantasy-choir-3-orchestral-pieces",
+      "licenca": "CC0-1.0",
+      "licencaUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    "hope": {
+      "autor": "MintoDog",
+      "titulo": "Hope (Orchestral battle music)",
+      "pagina": "https://opengameart.org/content/hopeorchestral-battle-music",
+      "licenca": "CC0-1.0",
+      "licencaUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    "cave": {
+      "autor": "Brandon75689 (publicado por HaelDB)",
+      "titulo": "Cave Theme",
+      "pagina": "https://opengameart.org/content/cave-theme",
+      "licenca": "CC0-1.0",
+      "licencaUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    "unexplored": {
+      "autor": "TAD e Bo Jingles",
+      "titulo": "Unexplored Expansion",
+      "pagina": "https://opengameart.org/content/unexplored-expansion",
+      "licenca": "CC0-1.0",
+      "licencaUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    }
+  },
+  "arquivos": {
+    "lamina-1": {
+      "arquivo": "lamina-1.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "blade_01.ogg",
+      "tipo": "efeito",
+      "duracao": 0.29,
+      "sha256": "bcd29ec46ec67ec15991442c551427c89adbc5677338175bc95e66e98a377676",
+      "originalSha256": "caf7a7cb9b25cda4bd487c1d12d18b74a34bb18c816fd67277cf3c8d7ef32a3a"
+    },
+    "lamina-2": {
+      "arquivo": "lamina-2.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "blade_02.ogg",
+      "tipo": "efeito",
+      "duracao": 0.31,
+      "sha256": "fd0e21045dc16d2619317e8c33a57427ee6f1bdc9b58845d5d1fa2873b6423f2",
+      "originalSha256": "c770afec8f62f14d3d082d5437c5cec28e2751d393df645ddd938eabc2588abd"
+    },
+    "lamina-3": {
+      "arquivo": "lamina-3.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "blade_03.ogg",
+      "tipo": "efeito",
+      "duracao": 0.4,
+      "sha256": "bcded2a1ae62c1d72225ba4a1e1f2f772951187a49cd7b779cbadac51ea19ff8",
+      "originalSha256": "2cd9e6926f4602a4350e703eeae4df520053e290f358ab692632d651ad368a7c"
+    },
+    "golpe-1": {
+      "arquivo": "golpe-1.mp3",
+      "fonte": "kenney-rpg",
+      "original": "knifeSlice.ogg",
+      "tipo": "efeito",
+      "duracao": 0.6,
+      "sha256": "ed4aca25abe381004e8da1467c13cc3268bc7a431209b3c56e061ef0ce80fac7",
+      "originalSha256": "4cd96dc630bed9840c15f1dd2306da2cc56a4da26a5d3f1a03c5a7265ac5e54f"
+    },
+    "golpe-2": {
+      "arquivo": "golpe-2.mp3",
+      "fonte": "kenney-rpg",
+      "original": "knifeSlice2.ogg",
+      "tipo": "efeito",
+      "duracao": 0.57,
+      "sha256": "3ef3f37cfe8727337bdb857968821927d4c7c6f27b193d36739c7f04a8030d8d",
+      "originalSha256": "6c2064d0ef988d1ec3d56868e823ea8823a5cac00f2742560052633529407def"
+    },
+    "acerto-1": {
+      "arquivo": "acerto-1.mp3",
+      "fonte": "kenney-impact",
+      "original": "impactPunch_medium_000.ogg",
+      "tipo": "efeito",
+      "duracao": 0.43,
+      "sha256": "2d50fc55399401f0af7f0fa1c523fbeb075f75a543da48e47e5e74ac7a2c5973",
+      "originalSha256": "486988aa2d6440ffc4c62a0e8ccf3c23673ba84424bd4723378d451b7255eb5c"
+    },
+    "acerto-2": {
+      "arquivo": "acerto-2.mp3",
+      "fonte": "kenney-impact",
+      "original": "impactPunch_medium_001.ogg",
+      "tipo": "efeito",
+      "duracao": 0.4,
+      "sha256": "82c65b6ed0ee1978f5229fa58c36b5cc4fd1a20b2ebaaae126ea7a5864800bfe",
+      "originalSha256": "e71d23abcc3f10d9d6bc9615b2a431fff70b12333a5fcdd9964457564ace4349"
+    },
+    "acerto-3": {
+      "arquivo": "acerto-3.mp3",
+      "fonte": "kenney-impact",
+      "original": "impactPunch_medium_002.ogg",
+      "tipo": "efeito",
+      "duracao": 0.54,
+      "sha256": "6a6d4b20a69c80f9d7da8caa489ede2aa03c25c2818d2a6b69c8db97fcbf975d",
+      "originalSha256": "6492f9ccbc8d24dcef607bb1b48790b7870961474561f7fe5601e1c73a3018ef"
+    },
+    "contundente-1": {
+      "arquivo": "contundente-1.mp3",
+      "fonte": "kenney-impact",
+      "original": "impactPunch_heavy_000.ogg",
+      "tipo": "efeito",
+      "duracao": 0.65,
+      "sha256": "fe263e6bf435a841f87fb5239bc02e261999c97c0785612eb7e41fdbbb4185d7",
+      "originalSha256": "b33a8f14068aec24ec69ba85e5e87fdc41228975f6a1a3e44a6e7d6fc3d9f8d8"
+    },
+    "contundente-2": {
+      "arquivo": "contundente-2.mp3",
+      "fonte": "kenney-impact",
+      "original": "impactPunch_heavy_001.ogg",
+      "tipo": "efeito",
+      "duracao": 0.54,
+      "sha256": "99a64a7e1ef4a672afe039be66ea2c8a8c72fa684f18726040a975c73e2b6870",
+      "originalSha256": "f92f5cb6ba4ff2766497292ffd90865654317eeca976f5652e0708dbdcdc0dd9"
+    },
+    "contundente-3": {
+      "arquivo": "contundente-3.mp3",
+      "fonte": "kenney-impact",
+      "original": "impactPunch_heavy_002.ogg",
+      "tipo": "efeito",
+      "duracao": 0.46,
+      "sha256": "65790db5300f318951148b6d9a938961db025137c1d74956768ca7f36af4d2d3",
+      "originalSha256": "7993dd4c156b9979ad69f17be5ebe31850b16039a3857f8477141be54dfee1b3"
+    },
+    "critico-1": {
+      "arquivo": "critico-1.mp3",
+      "fonte": "kenney-impact",
+      "original": "impactMetal_heavy_000.ogg",
+      "tipo": "efeito",
+      "duracao": 0.16,
+      "sha256": "0eb86173cddb697893c75b99b06d72eb9044dd114e638f2b5a62408c3f9d5dde",
+      "originalSha256": "e07045693e4a2b3d165c424e3dab4c781d9ff8880a386880ac89a51315d7f831"
+    },
+    "critico-2": {
+      "arquivo": "critico-2.mp3",
+      "fonte": "kenney-impact",
+      "original": "impactMetal_heavy_001.ogg",
+      "tipo": "efeito",
+      "duracao": 0.36,
+      "sha256": "6c4c9d96008835080fe66c9c04a9ba3005f97e343e11cdc3ed84230285b9c8b8",
+      "originalSha256": "83554049f81f4db9209379e103c30bfa63f65c42189a03f300b045c2c82e23ae"
+    },
+    "falha-1": {
+      "arquivo": "falha-1.mp3",
+      "fonte": "kenney-rpg",
+      "original": "cloth1.ogg",
+      "tipo": "efeito",
+      "duracao": 0.66,
+      "sha256": "1848526106245c5b0839dedcd5829837f6e33fb3996e3ed5ae00fd2c320149cb",
+      "originalSha256": "ddb93a3671233f95da0e0b10367f082f7eb42fa6caaddcf776410aa8833c747d"
+    },
+    "falha-2": {
+      "arquivo": "falha-2.mp3",
+      "fonte": "kenney-rpg",
+      "original": "cloth2.ogg",
+      "tipo": "efeito",
+      "duracao": 0.42,
+      "sha256": "b1043f4e3755725c11059b2a55349029b7cf4a44c9020bae343c8b8fadef949e",
+      "originalSha256": "8a7451193c38bc05483aec25dd193e163a15d44cf7fff04ac7912573231b0201"
+    },
+    "conjuracao-1": {
+      "arquivo": "conjuracao-1.mp3",
+      "fonte": "electric",
+      "original": "charge.wav",
+      "tipo": "efeito",
+      "duracao": 4.13,
+      "sha256": "5e2872487466a163e76004dd791b695e83d36db3428d94baee4056eb100bf44d",
+      "originalSha256": "397e4a4da793558cc541d9fce3da5791cb21dddadf31c02442e67f3a58cbe1c8"
+    },
+    "magia-1": {
+      "arquivo": "magia-1.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "spell_01.ogg",
+      "tipo": "efeito",
+      "duracao": 0.63,
+      "sha256": "b1b881829f0843335de41e8b39fb8d9b5107905e509a48666250099da7b321ab",
+      "originalSha256": "09821a53c418c5eeeac4fa25bada9d245e822fed302eeeae9ae4151522a45ae5"
+    },
+    "magia-2": {
+      "arquivo": "magia-2.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "spell_02.ogg",
+      "tipo": "efeito",
+      "duracao": 0.55,
+      "sha256": "5d0a04fc0ea38d92a77b3958922b5cf73fefbc1bda37b5bc9a4b865f4d6e3e57",
+      "originalSha256": "bf9c48b76921e56aa266172d969a2c08215d6ce0ffae7c3584f23fa05d3f8bd4"
+    },
+    "arco-1": {
+      "arquivo": "arco-1.mp3",
+      "fonte": "bow",
+      "original": "shoot.ogg",
+      "tipo": "efeito",
+      "duracao": 0.44,
+      "sha256": "0ef0a1f166fe65994ac64f2312047342afcc62415eba684c07fd6a61072f0171",
+      "originalSha256": "ac3e1f9868946cfd2fdfe00f65d7170d1e30d66ec626ba7767a5370dacedaba6"
+    },
+    "acerto_projetil-1": {
+      "arquivo": "acerto_projetil-1.mp3",
+      "fonte": "kenney-impact",
+      "original": "impactWood_light_000.ogg",
+      "tipo": "efeito",
+      "duracao": 0.26,
+      "sha256": "0c49345eb8ba0546c76b06da4e7ad452478f01b36b7ed488bf71f6feede3051a",
+      "originalSha256": "eb45e35b4bed784d3f120de4afec4b0d6ac09d9e143cce8cfcb7d739e1b1f3c3"
+    },
+    "acerto_projetil-2": {
+      "arquivo": "acerto_projetil-2.mp3",
+      "fonte": "kenney-impact",
+      "original": "impactWood_light_001.ogg",
+      "tipo": "efeito",
+      "duracao": 0.26,
+      "sha256": "37e023c8dd07cb509ed866c26580eb26603830f9e617ae2b27a290d1a9194952",
+      "originalSha256": "4b76bf3ccc8e60d19188f3165b778a7817786faa6887c55d9049bcbeef3b425f"
+    },
+    "lancamento_magico-1": {
+      "arquivo": "lancamento_magico-1.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "spell_02.ogg",
+      "tipo": "efeito",
+      "duracao": 0.55,
+      "sha256": "5d0a04fc0ea38d92a77b3958922b5cf73fefbc1bda37b5bc9a4b865f4d6e3e57",
+      "originalSha256": "bf9c48b76921e56aa266172d969a2c08215d6ce0ffae7c3584f23fa05d3f8bd4"
+    },
+    "fogo-1": {
+      "arquivo": "fogo-1.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "spell_fire_03.ogg",
+      "tipo": "efeito",
+      "duracao": 1.93,
+      "sha256": "b26b3d346e5dbb7eea4442b7147a7d0623c0832af1d20a266dcacecc26209bd4",
+      "originalSha256": "2e4edee4ff8d7898198f1ab5213e086965e14a665cb947d53759505e28ddd3e4"
+    },
+    "fogo-2": {
+      "arquivo": "fogo-2.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "spell_fire_05.ogg",
+      "tipo": "efeito",
+      "duracao": 1.24,
+      "sha256": "1f64e4a38140e1905ab1d28970e722b0ebcf2a983dd27db59318ceb821c11d75",
+      "originalSha256": "18025b21a4ecb3b41acc0dccb0697a8930262109ea198ff8c5ef0853d3ed1cfa"
+    },
+    "fogo-3": {
+      "arquivo": "fogo-3.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "spell_fire_07.ogg",
+      "tipo": "efeito",
+      "duracao": 0.65,
+      "sha256": "ab1eb78f7443b29acf79fa44c35e439bd52e0aa59ab6f78f3ad587929dee72a5",
+      "originalSha256": "bb13cef9c0b0b4ec7f9335c356b14814c88418abd85dd3747cb62469e9ada93f"
+    },
+    "gelo-1": {
+      "arquivo": "gelo-1.mp3",
+      "fonte": "ice",
+      "original": "ice.wav",
+      "tipo": "efeito",
+      "duracao": 1.16,
+      "sha256": "336f582c9037baa3dad23c1e73da65460442e00a29b4aaa62f368c67251a8e56",
+      "originalSha256": "c3039c864d056d0e4951b84b96a7bb0044ca8cb58aeae514fc256145872b6a94"
+    },
+    "gelo-2": {
+      "arquivo": "gelo-2.mp3",
+      "fonte": "ice",
+      "original": "coldsnap.wav",
+      "tipo": "efeito",
+      "duracao": 2.65,
+      "sha256": "5377e63217f0de4a51d403d5f09224b74c09aa5d01be60afba2597d2b1d58316",
+      "originalSha256": "090977264d65d90a50b04e9f0c1c4e02fb194e5b50d9fe244f0079a4da54158c"
+    },
+    "raio-1": {
+      "arquivo": "raio-1.mp3",
+      "fonte": "electric",
+      "original": "hit.wav",
+      "tipo": "efeito",
+      "duracao": 2.21,
+      "sha256": "a75a14935579545bfd9e06ab0f76fdcd23e79e9b604bf768c506aafe86c7994f",
+      "originalSha256": "03d05a1249c45d795382f840c35563c0f151423afd47c04a4af7a81bad2f32fc"
+    },
+    "veneno-1": {
+      "arquivo": "veneno-1.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "creature_slime_01.ogg",
+      "tipo": "efeito",
+      "duracao": 0.67,
+      "sha256": "cc164e9582d6fbf06bad2cec430644ad862491e3f9c241870799471fbe71a75d",
+      "originalSha256": "746d6ef073abfadd43fe184c50c6a2528350d4f566f2c0f54cd51ff0eb665118"
+    },
+    "veneno-2": {
+      "arquivo": "veneno-2.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "creature_slime_02.ogg",
+      "tipo": "efeito",
+      "duracao": 0.74,
+      "sha256": "eef883f4eb3c6f4ebb6cecb32fd3662fdf43a2dc88199405c178dbfe56ad5540",
+      "originalSha256": "8c26b66076752b712dad7be704a3e4e11d3a49847fbd804ba7f858024ff33c8d"
+    },
+    "psiquico-1": {
+      "arquivo": "psiquico-1.mp3",
+      "fonte": "dark",
+      "original": "fout-02.flac",
+      "tipo": "efeito",
+      "duracao": 1.22,
+      "sha256": "8d9418d70ca445b3f259fe0df607f20c9842211aa1f401d49ff1817f5bb2ad2c",
+      "originalSha256": "dbf01a5c9ccf10175038fb3a2ac5092f7d7745b1ab03a31edac221a0188459d1"
+    },
+    "trevas-1": {
+      "arquivo": "trevas-1.mp3",
+      "fonte": "dark",
+      "original": "fout-01.flac",
+      "tipo": "efeito",
+      "duracao": 2.84,
+      "sha256": "c7ce4cf795615f37453053dae44ce9533277ea95cf40afa07ac99801d897af57",
+      "originalSha256": "47a79f97cb3ac35219d02c0c0b7a2aeb09b260ce9eed3d316728be867e6ac0a9"
+    },
+    "trevas-2": {
+      "arquivo": "trevas-2.mp3",
+      "fonte": "dark",
+      "original": "fout-03.flac",
+      "tipo": "efeito",
+      "duracao": 3.92,
+      "sha256": "22e2a0a5b424e0b8d502f9075cd658d7bfb79b3eece905f4603840bc54557cdc",
+      "originalSha256": "ec55b77eb3096dcc083d219254d0a37a0ecf071477d7c47bc363092c2ca02d0d"
+    },
+    "terra-1": {
+      "arquivo": "terra-1.mp3",
+      "fonte": "earth",
+      "original": "Earth Element Magic Spell_3.ogg",
+      "tipo": "efeito",
+      "duracao": 1.89,
+      "sha256": "0c35ff8e9d7eeccbcc0adb3c06dffd4eecc86af37e8d1d160819634afee9e3d2",
+      "originalSha256": "8cd4f45a8e0ddeee0b9f9f576a560e4cd25b5533b555ee9968c554c2d0d3494f"
+    },
+    "explosao-1": {
+      "arquivo": "explosao-1.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "spell_fire_01.ogg",
+      "tipo": "efeito",
+      "duracao": 1.06,
+      "sha256": "0c30df513861bca48fed79cc07633217b7a115809a44014a09fb37fb826a1e6b",
+      "originalSha256": "02fa3a2c6e79e868e546802f45127c5cdda69aba6d5a24ac997ea66f81a816cb"
+    },
+    "explosao-2": {
+      "arquivo": "explosao-2.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "spell_fire_06.ogg",
+      "tipo": "efeito",
+      "duracao": 1.0,
+      "sha256": "6a1244f30faf5d9aa32a3c83461d1fd56978c1dd3a8bae2b037718fdc088485c",
+      "originalSha256": "66fa753e8033d08f3837d6ef1706b0450297db68c0d4b21782a03fd9ae960d63"
+    },
+    "cura-1": {
+      "arquivo": "cura-1.mp3",
+      "fonte": "heal",
+      "original": "healspell1.aif",
+      "tipo": "efeito",
+      "duracao": 3.2,
+      "sha256": "4d62869e93b78f039e5f4978bb8b22fa7508c1432c1c3bc89dd223231b08d478",
+      "originalSha256": "cb712b4b66cff08cc7792189d330407dc97d5c0b7a835e3d34ba96d494e0ebdd"
+    },
+    "cura-2": {
+      "arquivo": "cura-2.mp3",
+      "fonte": "heal",
+      "original": "healspell2.aif",
+      "tipo": "efeito",
+      "duracao": 3.2,
+      "sha256": "86dac22c6e37f68d8812b2dd51a1313c80c5edd6aa4cd933404c39f7e16d9386",
+      "originalSha256": "2b2c56c0652481f1c81aa4a5d43b68bfbe1754e47681768d9cd9af679e1f250f"
+    },
+    "sagrado-1": {
+      "arquivo": "sagrado-1.mp3",
+      "fonte": "heal",
+      "original": "healspell3.aif",
+      "tipo": "efeito",
+      "duracao": 3.2,
+      "sha256": "24555ced72feb8edd6ed9e0640f70a6bb6eb7180e56dcfd820fb9007ecd35316",
+      "originalSha256": "d76ab2f2a3fb70bb8d19a1debc266c1bc2b1c00381c4c15baa1a814a8611b82e"
+    },
+    "moeda-1": {
+      "arquivo": "moeda-1.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "item_coins_01.ogg",
+      "tipo": "efeito",
+      "duracao": 0.41,
+      "sha256": "8e56c83800e98b501975c3991564d9b654ad3f74b0f611b01f4bac0bb5df91ed",
+      "originalSha256": "4e701b281a4f88768beccbe87af4574d13ac5a4bc5cab6c522f0e79823d6e428"
+    },
+    "moeda-2": {
+      "arquivo": "moeda-2.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "item_coins_02.ogg",
+      "tipo": "efeito",
+      "duracao": 0.62,
+      "sha256": "f5d93a5baee21d64a4239f5af6f996efa1ca792115a761362d499af7a8bb4a0d",
+      "originalSha256": "c1124868c928ef06e9b95fd9bd314eb3aa9a2869cbfde7f5aadcc341fe3edca0"
+    },
+    "coleta-1": {
+      "arquivo": "coleta-1.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "item_gem_01.ogg",
+      "tipo": "efeito",
+      "duracao": 0.25,
+      "sha256": "d207d72b9cb790f208d43b42d09a978d52e65cb2efce031fedadec3073c7d612",
+      "originalSha256": "8a5d2964febb0c69cc4df2ee5257d173f2cae6960d9534df0001dbf356f27028"
+    },
+    "coleta-2": {
+      "arquivo": "coleta-2.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "item_gem_02.ogg",
+      "tipo": "efeito",
+      "duracao": 0.2,
+      "sha256": "e09c173c7edf4312c2c414d3a4685792133ec86486b039138384ef7348abc9f1",
+      "originalSha256": "a5f4b0b3ae0e272765619289ef6709513e0dfa0785d7559e8a223176a8bcf181"
+    },
+    "passo-1": {
+      "arquivo": "passo-1.mp3",
+      "fonte": "kenney-impact",
+      "original": "footstep_concrete_000.ogg",
+      "tipo": "efeito",
+      "duracao": 0.1,
+      "sha256": "e75687e93135116660ce6b8cd36f8bd65a782cf5518c20dd82bf6674e845bb5b",
+      "originalSha256": "d7267e183067757c92c169de2a379abea592cfca6b39bb2e8feea15221ad79fe"
+    },
+    "passo-2": {
+      "arquivo": "passo-2.mp3",
+      "fonte": "kenney-impact",
+      "original": "footstep_concrete_001.ogg",
+      "tipo": "efeito",
+      "duracao": 0.1,
+      "sha256": "68112a280befadb6ba2dd7e468f7bda0cbea09538697d9b14690af4ff4eceba8",
+      "originalSha256": "507a75eb19b897087855a3be3cf11a12d7fa37d143ad535eeebe0b8031c7325d"
+    },
+    "passo-3": {
+      "arquivo": "passo-3.mp3",
+      "fonte": "kenney-impact",
+      "original": "footstep_concrete_002.ogg",
+      "tipo": "efeito",
+      "duracao": 0.11,
+      "sha256": "8720e4b460e9b55652b4eb69e39812d3490d37ae93ce8161fe44a2248203451f",
+      "originalSha256": "b21fa546d74941196b25da8a20b7010abd8c05c4fcf93545d1f344e66a664e13"
+    },
+    "passo-4": {
+      "arquivo": "passo-4.mp3",
+      "fonte": "kenney-impact",
+      "original": "footstep_concrete_003.ogg",
+      "tipo": "efeito",
+      "duracao": 0.11,
+      "sha256": "46556ae65ffabf3f5862875f124552dc35e2201ec25804cd9862d8f3d2479f12",
+      "originalSha256": "8b513c2f0316324060b9174b8f28df6c2147418c506e6a53b77f18e149a5547b"
+    },
+    "porta-1": {
+      "arquivo": "porta-1.mp3",
+      "fonte": "kenney-rpg",
+      "original": "doorOpen_1.ogg",
+      "tipo": "efeito",
+      "duracao": 0.92,
+      "sha256": "59265ca1dbd73b0ca8ab5d3d7a21ee998e4d3ca43993a5805a93ce0ed0aa47a9",
+      "originalSha256": "4ab93bab96522d8eb109ff96dc57cb6765deb02448fe14c10472084be5bb2a0b"
+    },
+    "porta-2": {
+      "arquivo": "porta-2.mp3",
+      "fonte": "kenney-rpg",
+      "original": "doorOpen_2.ogg",
+      "tipo": "efeito",
+      "duracao": 1.41,
+      "sha256": "e9b1f5cfb4311f3ecb475695b279d06626b0fada436a867f607addedb72d907f",
+      "originalSha256": "68962fb0458c9bac59dec3adefa9849703c7c89d34712de03dd0075d095e79e9"
+    },
+    "armadilha-1": {
+      "arquivo": "armadilha-1.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "metal_01.ogg",
+      "tipo": "efeito",
+      "duracao": 0.58,
+      "sha256": "272d90f7ced4da3eea66154a100d2af149479bc64e57b16a79b82ebc506a4a24",
+      "originalSha256": "433d7adf123f9de425047f6dec3f7b4da510c0fd0208d4893a22be8bd22d9e34"
+    },
+    "armadilha-2": {
+      "arquivo": "armadilha-2.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "metal_02.ogg",
+      "tipo": "efeito",
+      "duracao": 0.56,
+      "sha256": "82d82cfde5cbfd8d81b2bae647f9d92d776637b758ee140c352ba4e4974087bc",
+      "originalSha256": "30fcaab83dc3fff5335b78f87f9df305f6f8bd7316e2b46e2a4eaed85ee21768"
+    },
+    "invocacao-1": {
+      "arquivo": "invocacao-1.mp3",
+      "fonte": "dark",
+      "original": "fout-03.flac",
+      "tipo": "efeito",
+      "duracao": 3.92,
+      "sha256": "22e2a0a5b424e0b8d502f9075cd658d7bfb79b3eece905f4603840bc54557cdc",
+      "originalSha256": "ec55b77eb3096dcc083d219254d0a37a0ecf071477d7c47bc363092c2ca02d0d"
+    },
+    "teleporte-1": {
+      "arquivo": "teleporte-1.mp3",
+      "fonte": "electric",
+      "original": "teleport_1.wav",
+      "tipo": "efeito",
+      "duracao": 0.79,
+      "sha256": "780ddbf45222bd4f0267634d0d54744b20b69b7fabbb67ea786ac948487168fa",
+      "originalSha256": "93d6e931e26b93827a8980a21f203d8ca9d03ccc6dc19129e3241b900c11de49"
+    },
+    "morte-1": {
+      "arquivo": "morte-1.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "creature_die_01.ogg",
+      "tipo": "efeito",
+      "duracao": 1.06,
+      "sha256": "01caa973f88fd0e1053ed054717c720b2740e405f4a8a345245132b486466b3a",
+      "originalSha256": "b34a816a401c5d80c77a61dabbedef7d1918a01320bbb67286c70f22db4acd43"
+    },
+    "quebra-1": {
+      "arquivo": "quebra-1.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "wood_01.ogg",
+      "tipo": "efeito",
+      "duracao": 0.24,
+      "sha256": "0ea5ea90de44a971e764677e883afb4d4633f5b4f9cc1e343f17602c093e422a",
+      "originalSha256": "55d4527a1f7d8e158eff0921f7a533340ab6be69a7b9b52fdac7a19b9d8e1cb2"
+    },
+    "quebra-2": {
+      "arquivo": "quebra-2.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "wood_02.ogg",
+      "tipo": "efeito",
+      "duracao": 0.19,
+      "sha256": "0fb8f8976dadaaf1e0e6ca0c653d2d28c336495abbb3610f0c6e69b47565fc4b",
+      "originalSha256": "e64b95a1ec7675f28f8837ee4e4e81aa8e5b28e272159a0b3ed124fed037fc4f"
+    },
+    "quebra-3": {
+      "arquivo": "quebra-3.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "stones_01.ogg",
+      "tipo": "efeito",
+      "duracao": 0.68,
+      "sha256": "4e637def92f9ccc3bc6ce5d70686a5e906d4daac503fb54ca378e4c5edb1b79c",
+      "originalSha256": "d11ce95031c2c36ae2a00979620fa95a7a3f5c6d6f2ac86962ed292aa556be8d"
+    },
+    "nivel-1": {
+      "arquivo": "nivel-1.mp3",
+      "fonte": "heal",
+      "original": "healspell3.aif",
+      "tipo": "efeito",
+      "duracao": 3.2,
+      "sha256": "24555ced72feb8edd6ed9e0640f70a6bb6eb7180e56dcfd820fb9007ecd35316",
+      "originalSha256": "d76ab2f2a3fb70bb8d19a1debc266c1bc2b1c00381c4c15baa1a814a8611b82e"
+    },
+    "clique-1": {
+      "arquivo": "clique-1.mp3",
+      "fonte": "kenney-rpg",
+      "original": "metalClick.ogg",
+      "tipo": "efeito",
+      "duracao": 0.45,
+      "sha256": "72e441d4356c24662597aea60d1256e25b3218c7a4fbefe02f406c71d736235b",
+      "originalSha256": "9851a69d0c613e13bceef08060ecc4148f098ef487927cbebe270d642398a3b3"
+    },
+    "recusa-1": {
+      "arquivo": "recusa-1.mp3",
+      "fonte": "rubberduck-rpg",
+      "original": "lock_02.ogg",
+      "tipo": "efeito",
+      "duracao": 0.4,
+      "sha256": "01e074152a038b887de654323e01b288043b7319d168eebb59bbfbc1608846c8",
+      "originalSha256": "e183464a4e28c1764c70e980465faaf6ea8c33c8ea4a2b636a3ae2c58e8740f5"
+    },
+    "musica-caverna": {
+      "arquivo": "musica-caverna.mp3",
+      "fonte": "cave",
+      "original": "cave themeb4.ogg",
+      "tipo": "musica",
+      "duracao": 280.0,
+      "sha256": "cf89e4a838f2d2dc87e1481e989422d68d4c7745178f9914cf139aca1a2bf854",
+      "originalSha256": "1ddf7a0845c808136edfda7ea829e48fa2b7c57793e008d706dadbb5917dff9c"
+    },
+    "musica-jornada": {
+      "arquivo": "musica-jornada.mp3",
+      "fonte": "unexplored",
+      "original": "tad_-_unexplored_-_expanded_1_by_bo_jingles_0.mp3",
+      "tipo": "musica",
+      "duracao": 88.06,
+      "sha256": "b3cc4593d7276dcfe3d85255bfbcff8ee5edc25a179b5f37bf28e0bf38ac85ff",
+      "originalSha256": "a39323b0cbc83dea018fb693fb5b89f5cce6f06761b05407a489f9ace6cc094e"
+    },
+    "musica-esperanca": {
+      "arquivo": "musica-esperanca.mp3",
+      "fonte": "hope",
+      "original": "hope_orchestral_battle_music_bpm165_0.ogg",
+      "tipo": "musica",
+      "duracao": 69.82,
+      "sha256": "7ae37f4019d56ad947655a49a936cd2e976ed1159a717c1aa9c3a98464099cef",
+      "originalSha256": "1615903236286af59d14b4d71da3fc2518a3091ecdd8f162a50215b9b3d0f320"
+    },
+    "musica-coro-1": {
+      "arquivo": "musica-coro-1.mp3",
+      "fonte": "choir",
+      "original": "Fantasy Choir 1.wav",
+      "tipo": "musica",
+      "duracao": 53.1,
+      "sha256": "b5be63929bcf14016a5702557493feb98b7f348ff32d6ab547d47edd6ef068bd",
+      "originalSha256": "2e1e507276d0058797bfd002768a512fca2a4ccc4f337bdfa49415b95ab623e4"
+    },
+    "musica-coro-2": {
+      "arquivo": "musica-coro-2.mp3",
+      "fonte": "choir",
+      "original": "Fantasy Choir 2.wav",
+      "tipo": "musica",
+      "duracao": 126.13,
+      "sha256": "26c3bca5925506e65a75f188250b80ff1417cf0acbe1c0a1c6139af48a84f51b",
+      "originalSha256": "594b5b90d5f51784864c4fe7724e1c6a43e2a0c0d330fe206896681f879a3f05"
+    },
+    "musica-coro-3": {
+      "arquivo": "musica-coro-3.mp3",
+      "fonte": "choir",
+      "original": "Fantasy Choir 3.wav",
+      "tipo": "musica",
+      "duracao": 91.24,
+      "sha256": "856d5d4fd0aaf44141cb3728ef4007f5af80401fd768528c920c72b595cf3bae",
+      "originalSha256": "98002f8f296e192bb8982010d4e31e4b403e471fc414467ec76cc0afd81e282a"
+    },
+    "ambiente-fogo": {
+      "arquivo": "ambiente-fogo.mp3",
+      "fonte": "fireloop",
+      "original": "qubodupFireLoop.ogg",
+      "tipo": "ambiente",
+      "duracao": 5.02,
+      "sha256": "70eca8c0a2f6bcfdc10177efe27c5cd9a7f2a9f75723d47e41b5854c37424126",
+      "originalSha256": "d3ff69b32c445fd4aec13a986394b03f0c36a20d8a4a0f930d05eb555b5f8681"
+    },
+    "ambiente-agua": {
+      "arquivo": "ambiente-agua.mp3",
+      "fonte": "rubberduck-loops",
+      "original": "water_flowing.ogg",
+      "tipo": "ambiente",
+      "duracao": 1.88,
+      "sha256": "f34c8d483a74eb9457c54a03fd3db2197fca14304667bd032c48502b0dbb66ea",
+      "originalSha256": "1a431f77d61661becdc87a5b1832d47f83a12a5c0b001077e41a202e739797a7"
+    },
+    "ambiente-vento": {
+      "arquivo": "ambiente-vento.mp3",
+      "fonte": "wind",
+      "original": "wind_0.ogg",
+      "tipo": "ambiente",
+      "duracao": 2.8,
+      "sha256": "7629a08470ac14d75f0f12f7d05c7e113b26bd599feaa77066558760af04b585",
+      "originalSha256": "4628b2dedd3a692f9d97b4c8c8f4a910464b764e83fab9739cbdbcda2365dbe2"
+    },
+    "ambiente-goteira": {
+      "arquivo": "ambiente-goteira.mp3",
+      "fonte": "waterdrips",
+      "original": "amb_waterdrip_1.flac",
+      "tipo": "ambiente",
+      "duracao": 1.66,
+      "sha256": "2081f93ca8abb035fcff4a03bf8234da78a265fd0e34ec83c47f3ca951cda7e5",
+      "originalSha256": "c19f99a1a9a6a2aecf294e3cdea87b223a4b165e3e23df9cea2985ab20a907d0"
+    }
+  },
+  "efeitos": {
+    "lamina": [
+      "lamina-1",
+      "lamina-2",
+      "lamina-3"
+    ],
+    "golpe": [
+      "golpe-1",
+      "golpe-2"
+    ],
+    "acerto": [
+      "acerto-1",
+      "acerto-2",
+      "acerto-3"
+    ],
+    "contundente": [
+      "contundente-1",
+      "contundente-2",
+      "contundente-3"
+    ],
+    "critico": [
+      "critico-1",
+      "critico-2"
+    ],
+    "falha": [
+      "falha-1",
+      "falha-2"
+    ],
+    "conjuracao": [
+      "conjuracao-1"
+    ],
+    "magia": [
+      "magia-1",
+      "magia-2"
+    ],
+    "arco": [
+      "arco-1"
+    ],
+    "projetil": [
+      "arco-1"
+    ],
+    "acerto_projetil": [
+      "acerto_projetil-1",
+      "acerto_projetil-2"
+    ],
+    "lancamento_magico": [
+      "lancamento_magico-1"
+    ],
+    "fogo": [
+      "fogo-1",
+      "fogo-2",
+      "fogo-3"
+    ],
+    "gelo": [
+      "gelo-1",
+      "gelo-2"
+    ],
+    "raio": [
+      "raio-1"
+    ],
+    "veneno": [
+      "veneno-1",
+      "veneno-2"
+    ],
+    "psiquico": [
+      "psiquico-1"
+    ],
+    "trevas": [
+      "trevas-1",
+      "trevas-2"
+    ],
+    "terra": [
+      "terra-1"
+    ],
+    "explosao": [
+      "explosao-1",
+      "explosao-2"
+    ],
+    "cura": [
+      "cura-1",
+      "cura-2"
+    ],
+    "sagrado": [
+      "sagrado-1"
+    ],
+    "moeda": [
+      "moeda-1",
+      "moeda-2"
+    ],
+    "coleta": [
+      "coleta-1",
+      "coleta-2"
+    ],
+    "passo": [
+      "passo-1",
+      "passo-2",
+      "passo-3",
+      "passo-4"
+    ],
+    "porta": [
+      "porta-1",
+      "porta-2"
+    ],
+    "armadilha": [
+      "armadilha-1",
+      "armadilha-2"
+    ],
+    "invocacao": [
+      "invocacao-1"
+    ],
+    "teleporte": [
+      "teleporte-1"
+    ],
+    "morte": [
+      "morte-1"
+    ],
+    "quebra": [
+      "quebra-1",
+      "quebra-2",
+      "quebra-3"
+    ],
+    "nivel": [
+      "nivel-1"
+    ],
+    "clique": [
+      "clique-1"
+    ],
+    "recusa": [
+      "recusa-1"
+    ]
+  },
+  "ambientes": {
+    "fogo": "ambiente-fogo",
+    "agua": "ambiente-agua",
+    "vento": "ambiente-vento",
+    "goteira": "ambiente-goteira"
+  },
+  "musicas": {
+    "exploracao": [
+      "musica-jornada",
+      "musica-coro-1",
+      "musica-caverna"
+    ],
+    "combate": [
+      "musica-esperanca",
+      "musica-coro-3"
+    ],
+    "chefe": [
+      "musica-coro-2",
+      "musica-coro-3"
+    ]
+  }
+}

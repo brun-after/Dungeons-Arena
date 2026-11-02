@@ -240,6 +240,7 @@ export const ptBR = {
   'config.qualidade': 'Qualidade',
   'config.efeitosDeTela': 'Tremor e flash',
   'config.audio': 'Áudio',
+  'config.creditosAudio': 'Ouvir a biblioteca e ver créditos de áudio',
   'config.volumeMusica': 'Volume da música',
   'config.volumeEfeitos': 'Volume dos efeitos',
   'config.mudo': 'Sem som',

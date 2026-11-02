@@ -1,269 +1,202 @@
-// Motor de áudio (§2.14, §4.11). Marco 12 (14/10/2026), D-056. O único lugar que toca Web Audio.
-// - O contexto só nasce no primeiro gesto (click, touchstart, keydown), com fade de 400 ms.
-// - Ganhos: mestre -> música (0,45) e efeitos (0,75), ajustáveis nas Configurações, com mudo.
-// - Música: sequenciador com olhar à frente (agenda 120 ms adiante a cada 25 ms); trocar de clima é um
-//   fade de 800 ms entre dois sequenciadores. Pausar suspende o contexto e retoma do ponto.
-// - Pausa sozinho quando a aba some (visibilitychange) e retoma ao voltar, se o jogo não estiver pausado.
-// - Qualquer falha deixa o jogo mudo e seguindo: nunca derruba a partida.
-// Marco 11A (16/10/2026, D-066): a música tem uma "sombra" (0 casual … 1 dark). A faixa (5 degraus) escolhe a
-// composição; dentro da faixa, a sombra mexe ao vivo no passa-baixa e na ambiência (eco), sem recompor. Trocar de
-// laço espera o fim do compasso e cruza em 1,5 s. Pad, arpejo e melodia filtrada pelos timbres da faixa.
-
-import { compor, faixaDaSombra, frequencia, PASSOS_POR_COMPASSO, PASSOS_POR_LACO, type Composicao } from './composicao';
+// Reprodução de gravações licenciadas, locais: sem síntese ou sequenciador procedural.
+// O AudioContext só nasce no primeiro gesto. Suspender preserva a posição de músicas e ambientes.
 import type { Clima } from './contexto-musical';
 import { LimitadorDeSom, variacaoDeTom } from './limitador';
 import type { SomId } from './mapeamento';
-import { criarAmbiente, DURACAO_MS, tocarBumbo, tocarCaixa, tocarChimbal, tocarEfeito, tocarNota, tocarNotaFiltrada, tocarPad, type SomAmbiente } from './sintetizador';
+import { AMBIENTES, BancoDeGravacoes, EFEITOS, musicaDaCena, type SomAmbiente } from './gravacoes';
 
-const OLHAR_A_FRENTE_S = 0.12;
-const INTERVALO_AGENDA_MS = 25;
-const FADE_CLIMA_S = 1.5;
-const FADE_INICIO_S = 0.4;
-/** Eco da ambiência: atraso e realimentação. */
-const ECO_S = 0.32;
-const ECO_REALIMENTACAO = 0.32;
+const FADE_MUSICA_S = 1.5;
+const GANHOS: Partial<Record<SomId, number>> = { passo: 0.25, clique: 0.35, critico: 0.65, conjuracao: 0.45, moeda: 0.6, recusa: 0.4 };
 
 export interface VolumesAudio {
   musica: number;
   efeitos: number;
   mudo: boolean;
 }
-
-interface Sequenciador {
+interface Voz {
+  fonte: AudioBufferSourceNode;
   ganho: GainNode;
-  timer: ReturnType<typeof setInterval>;
-  /** Para a troca no fim do compasso: em que passo está e quando cai o próximo. */
-  estado: { passo: number; proximoS: number };
-  duracaoPassoS: number;
-}
-
-interface Fonte {
-  ganho: GainNode;
-  painel: StereoPannerNode;
-  parar: () => void;
+  painel: StereoPannerNode | null;
 }
 
 export class MotorAudio {
   private ctx: AudioContext | null = null;
-  private mestre: GainNode | null = null;
+  private banco: BancoDeGravacoes | null = null;
   private musica: GainNode | null = null;
-  /** Marco 11A: entrada da música (antes do filtro), o passa-baixa da sombra e o ganho da ambiência. */
-  private entradaMusica: GainNode | null = null;
-  private filtroMusica: BiquadFilterNode | null = null;
-  private ambiencia: GainNode | null = null;
   private efeitos: GainNode | null = null;
-  private atual: { chave: string; seq: Sequenciador } | null = null;
+  private atual: (Voz & { chave: string }) | null = null;
+  private chavePedida: string | null = null;
   private pedidoMusica: { faseId: string; clima: Clima; sombra: number; variante: number } | null = null;
   private readonly limitador = new LimitadorDeSom();
-  private readonly fontes = new Map<string, Fonte>();
+  private readonly fontes = new Map<string, Voz>();
+  private readonly vozes = new Set<Voz>();
   private pausadoPeloJogo = false;
   private desligado = false;
-  private readonly aoGesto = () => {
-    this.iniciar();
-  };
-  private readonly aoVisibilidade = () => {
-    if (!this.ctx) return;
-    if (document.visibilityState === 'hidden') void this.ctx.suspend().catch(() => undefined);
-    else if (!this.pausadoPeloJogo) void this.ctx.resume().catch(() => undefined);
-  };
+  private readonly aoGesto = () => { this.iniciar(); };
+  private readonly aoVisibilidade = () => { this.sincronizarPausa(); };
 
   constructor(private volumes: VolumesAudio) {
     for (const ev of ['click', 'touchstart', 'keydown'] as const) addEventListener(ev, this.aoGesto, { passive: true });
     document.addEventListener('visibilitychange', this.aoVisibilidade);
   }
 
-  ativo(): boolean {
-    return this.ctx !== null && this.ctx.state === 'running';
-  }
+  ativo(): boolean { return this.ctx?.state === 'running'; }
 
   private iniciar(): void {
-    if (this.ctx || this.desligado) return;
+    if (this.desligado) return;
+    if (this.ctx) { this.sincronizarPausa(); return; }
     try {
       const ctx = new AudioContext();
       this.ctx = ctx;
-      this.mestre = ctx.createGain();
-      this.mestre.gain.setValueAtTime(0.0001, ctx.currentTime);
-      this.mestre.gain.exponentialRampToValueAtTime(1, ctx.currentTime + FADE_INICIO_S);
+      this.banco = new BancoDeGravacoes(ctx);
+      const mestre = ctx.createGain();
+      mestre.gain.setValueAtTime(0.0001, ctx.currentTime);
+      mestre.gain.exponentialRampToValueAtTime(0.85, ctx.currentTime + 0.4);
       const compressor = ctx.createDynamicsCompressor();
-      compressor.threshold.value = -14;
-      compressor.knee.value = 18;
-      compressor.ratio.value = 4;
-      compressor.attack.value = 0.004;
-      compressor.release.value = 0.22;
-      this.mestre.connect(compressor);
-      compressor.connect(ctx.destination);
-      this.musica = ctx.createGain();
-      this.efeitos = ctx.createGain();
-      this.musica.connect(this.mestre);
-      this.efeitos.connect(this.mestre);
-      // Música: entrada -> passa-baixa -> música; e um envio de eco (ambiência) que volta antes do filtro.
-      this.entradaMusica = ctx.createGain();
-      this.filtroMusica = ctx.createBiquadFilter();
-      this.filtroMusica.type = 'lowpass';
-      this.filtroMusica.frequency.value = 6000;
-      this.entradaMusica.connect(this.filtroMusica);
-      this.filtroMusica.connect(this.musica);
-      const eco = ctx.createDelay(1);
-      eco.delayTime.value = ECO_S;
-      const realimentacao = ctx.createGain();
-      realimentacao.gain.value = ECO_REALIMENTACAO;
-      this.ambiencia = ctx.createGain();
-      this.ambiencia.gain.value = 0.15;
-      this.entradaMusica.connect(eco);
-      eco.connect(realimentacao);
-      realimentacao.connect(eco);
-      eco.connect(this.ambiencia);
-      this.ambiencia.connect(this.filtroMusica);
+      compressor.threshold.value = -10;
+      compressor.knee.value = 12;
+      compressor.ratio.value = 5;
+      compressor.attack.value = 0.003;
+      compressor.release.value = 0.2;
+      mestre.connect(compressor); compressor.connect(ctx.destination);
+      this.musica = ctx.createGain(); this.efeitos = ctx.createGain();
+      this.musica.connect(mestre); this.efeitos.connect(mestre);
       this.aplicarVolumes();
-      void ctx.resume().catch(() => undefined);
+      this.sincronizarPausa();
       document.body.dataset.audio = 'ativo';
-      if (this.pedidoMusica) this.definirMusica(this.pedidoMusica.faseId, this.pedidoMusica.clima, this.pedidoMusica.sombra, this.pedidoMusica.variante);
-      if (this.pausadoPeloJogo) void ctx.suspend().catch(() => undefined);
+      void this.banco.prepararEfeitos();
+      if (this.pedidoMusica) {
+        const p = this.pedidoMusica;
+        this.definirMusica(p.faseId, p.clima, p.sombra, p.variante);
+      }
     } catch {
-      // Sem Web Audio: o jogo segue mudo.
       this.desligado = true;
       document.body.dataset.audio = 'indisponivel';
     }
-    for (const ev of ['click', 'touchstart', 'keydown'] as const) removeEventListener(ev, this.aoGesto);
   }
 
-  definirVolumes(v: VolumesAudio): void {
-    this.volumes = v;
-    this.aplicarVolumes();
-  }
+  definirVolumes(v: VolumesAudio): void { this.volumes = v; this.aplicarVolumes(); }
 
   private aplicarVolumes(): void {
-    if (!this.ctx || !this.musica || !this.efeitos) return;
-    const t = this.ctx.currentTime;
-    this.musica.gain.setTargetAtTime(this.volumes.mudo ? 0 : this.volumes.musica, t, 0.05);
-    this.efeitos.gain.setTargetAtTime(this.volumes.mudo ? 0 : this.volumes.efeitos, t, 0.05);
+    if (!this.ctx) return;
+    const nivel = (v: number) => this.volumes.mudo ? 0 : Math.max(0, Math.min(1, v));
+    this.musica?.gain.setTargetAtTime(nivel(this.volumes.musica), this.ctx.currentTime, 0.05);
+    this.efeitos?.gain.setTargetAtTime(nivel(this.volumes.efeitos), this.ctx.currentTime, 0.05);
   }
 
-  /** Efeito sonoro; `volume` já inclui a distância (0 = não toca), `pan` de -1 a 1. */
-  tocar(som: SomId, volume = 1, pan = 0): void {
+  /** Uma voz é desconectada no relógio do áudio, inclusive durante pausa e crossfade. */
+  private criarVoz(buffer: AudioBuffer, destino: AudioNode, volume: number, pan: number | null): Voz {
     const ctx = this.ctx;
-    if (!ctx || !this.efeitos || volume <= 0 || ctx.state !== 'running') return;
-    const agora = performance.now();
-    if (!this.limitador.permitir(som, agora, DURACAO_MS[som])) return;
+    if (!ctx) throw new Error('Áudio encerrado');
+    const fonte = ctx.createBufferSource(); fonte.buffer = buffer;
+    const ganho = ctx.createGain(); ganho.gain.value = volume;
+    const painel = pan === null ? null : ctx.createStereoPanner();
+    fonte.connect(ganho);
+    if (painel) { painel.pan.value = Math.max(-1, Math.min(1, pan ?? 0)); ganho.connect(painel); painel.connect(destino); }
+    else ganho.connect(destino);
+    const voz = { fonte, ganho, painel };
+    this.vozes.add(voz);
+    fonte.onended = () => {
+      fonte.disconnect(); ganho.disconnect(); painel?.disconnect(); this.vozes.delete(voz);
+    };
+    return voz;
+  }
+
+  tocar(som: SomId, volume = 1, pan = 0): void {
+    const ctx = this.ctx, banco = this.banco;
+    if (!ctx || !banco || !this.efeitos || volume <= 0 || this.volumes.mudo || ctx.state !== 'running' || this.vozes.size >= 40) return;
+    const lista = EFEITOS[som];
+    const id = lista[Math.floor(Math.random() * lista.length)];
+    if (!id) return;
+    const buffer = banco.pronto(id);
+    // Nunca reproduz uma ação velha quando um download termina atrasado.
+    if (!buffer) { void banco.carregar(id).catch(() => undefined); return; }
+    const tom = variacaoDeTom(Math.random());
+    if (!this.limitador.permitir(som, performance.now(), buffer.duration * 1000 / tom)) return;
     try {
-      const ganho = ctx.createGain();
-      ganho.gain.value = Math.max(0, Math.min(1, volume));
-      const painel = ctx.createStereoPanner();
-      painel.pan.value = Math.max(-1, Math.min(1, pan));
-      ganho.connect(painel);
-      painel.connect(this.efeitos);
-      tocarEfeito(ctx, ganho, som, variacaoDeTom(Math.random()));
-      setTimeout(() => {
-        painel.disconnect();
-      }, DURACAO_MS[som] + 200);
-    } catch {
-      // Um som que falha não interrompe nada.
-    }
+      const voz = this.criarVoz(buffer, this.efeitos, Math.min(1, volume) * (GANHOS[som] ?? 0.8), pan);
+      voz.fonte.playbackRate.value = tom;
+      voz.fonte.start();
+    } catch { /* Um efeito não interrompe a partida. */ }
   }
 
-  /** Passo de uma entidade (limitado por entidade e no total, §2.14). */
   passo(entidadeId: string, volume: number, pan: number): void {
-    if (volume <= 0 || !this.limitador.permitirPasso(entidadeId, performance.now())) return;
-    this.tocar('passo', volume, pan);
+    if (volume > 0 && this.limitador.permitirPasso(entidadeId, performance.now())) this.tocar('passo', volume, pan);
   }
 
-  /**
-   * Música da fase no clima e na sombra pedidos (marco 11A). A sombra mexe ao vivo no filtro e no eco; quando muda a
-   * faixa (ou o clima), o laço novo entra no fim do compasso do atual, cruzando em 1,5 s.
-   */
   definirMusica(faseId: string, clima: Clima, sombra = 0.5, variante = 0): void {
     this.pedidoMusica = { faseId, clima, sombra, variante };
-    const ctx = this.ctx;
-    if (!ctx || !this.entradaMusica) return;
-    const s = Math.max(0, Math.min(1, sombra));
-    this.filtroMusica?.frequency.setTargetAtTime(7000 - 5200 * s, ctx.currentTime, 0.8);
-    this.ambiencia?.gain.setTargetAtTime(0.1 + 0.3 * s, ctx.currentTime, 0.8);
-    const faixa = faixaDaSombra(s);
-    // Marco 24 (D-099): a variante troca a música de tempos em tempos (o mesmo cruzamento da troca de clima).
-    const chave = `${faseId}:${clima}:${faixa}:${variante}`;
-    if (this.atual?.chave === chave) return;
-    const anterior = this.atual;
-    // O começo do próximo compasso do laço atual (ou já, se não há música).
-    let inicio = ctx.currentTime + 0.05;
-    if (anterior) {
-      const { estado, duracaoPassoS } = anterior.seq;
-      const faltam = (PASSOS_POR_COMPASSO - (estado.passo % PASSOS_POR_COMPASSO)) % PASSOS_POR_COMPASSO;
-      inicio = Math.max(inicio, estado.proximoS + faltam * duracaoPassoS);
-    }
-    const seq = this.criarSequenciador(ctx, this.entradaMusica, compor(faseId, clima, faixa, variante), inicio);
-    seq.ganho.gain.setValueAtTime(0.0001, inicio);
-    seq.ganho.gain.exponentialRampToValueAtTime(1, inicio + FADE_CLIMA_S);
-    this.atual = { chave, seq };
-    if (anterior) {
-      anterior.seq.ganho.gain.setTargetAtTime(0.0001, inicio, FADE_CLIMA_S / 4);
-      setTimeout(
-        () => {
-          clearInterval(anterior.seq.timer);
-          anterior.seq.ganho.disconnect();
-        },
-        (inicio - ctx.currentTime + FADE_CLIMA_S) * 1000 + 200,
-      );
-    }
+    if (!this.ctx || !this.banco || !this.musica) return;
+    const chave = musicaDaCena(faseId, clima, sombra, variante);
+    if (this.chavePedida === chave) return;
+    this.chavePedida = chave;
+    void this.trocarMusica(chave);
   }
 
-  private criarSequenciador(ctx: AudioContext, destino: AudioNode, composicao: Composicao, inicio: number): Sequenciador {
-    const ganho = ctx.createGain();
-    ganho.connect(destino);
-    const estado = { passo: 0, proximoS: inicio };
-    const duracaoPassoS = 60 / composicao.bpm / 4;
-    const tim = composicao.timbres;
-    const timer = setInterval(() => {
-      if (ctx.state !== 'running') return;
-      while (estado.proximoS < ctx.currentTime + OLHAR_A_FRENTE_S) {
-        const p = composicao.passos[estado.passo];
-        const t = Math.max(estado.proximoS, ctx.currentTime);
-        if (p) {
-          if (p.melodia !== null) tocarNotaFiltrada(ctx, ganho, t, frequencia(p.melodia), duracaoPassoS * tim.sustentacao, tim.melodia, 0.1, tim.corte);
-          if (p.baixo !== null) tocarNota(ctx, ganho, t, frequencia(p.baixo), duracaoPassoS * (tim.drone ? PASSOS_POR_COMPASSO : 3), 'sine', 0.2);
-          if (p.pad) tocarPad(ctx, ganho, t, p.pad.map(frequencia), duracaoPassoS * PASSOS_POR_COMPASSO, tim.pad, tim.volumePad);
-          if (p.arpejo !== null) tocarNotaFiltrada(ctx, ganho, t, frequencia(p.arpejo), duracaoPassoS * 1.5, 'triangle', 0.05, 3000);
-          if (p.bumbo) tocarBumbo(ctx, ganho, t);
-          if (p.caixa) tocarCaixa(ctx, ganho, t);
-          if (p.chimbal) tocarChimbal(ctx, ganho, t);
-        }
-        estado.passo = (estado.passo + 1) % PASSOS_POR_LACO;
-        estado.proximoS += duracaoPassoS;
+  private async trocarMusica(chave: string): Promise<void> {
+    const ctx = this.ctx, banco = this.banco;
+    if (!ctx || !banco) return;
+    try {
+      const buffer = await banco.carregar(chave);
+      if (this.ctx !== ctx || this.chavePedida !== chave || !this.musica) return;
+      // Se o pedido voltou à música atual durante o download, deixa a reprodução continuar.
+      if (this.atual?.chave === chave) return;
+      const anterior = this.atual;
+      const voz = this.criarVoz(buffer, this.musica, 0, null);
+      const agora = ctx.currentTime;
+      voz.fonte.loop = true;
+      voz.ganho.gain.setValueAtTime(0, agora);
+      voz.ganho.gain.linearRampToValueAtTime(1, agora + FADE_MUSICA_S);
+      voz.fonte.start(agora);
+      this.atual = { ...voz, chave };
+      if (anterior) {
+        anterior.ganho.gain.cancelAndHoldAtTime(agora);
+        anterior.ganho.gain.linearRampToValueAtTime(0, agora + FADE_MUSICA_S);
+        anterior.fonte.stop(agora + FADE_MUSICA_S);
       }
-    }, INTERVALO_AGENDA_MS);
-    return { ganho, timer, estado, duracaoPassoS };
+    } catch { /* Mantém a música anterior se a nova gravação falhar. */ }
   }
 
-  /** Fontes sonoras da fase (§2.14): cria uma vez; o volume e o pan vêm de `atualizarFonte`. */
   definirFonte(id: string, tipo: SomAmbiente): void {
-    const ctx = this.ctx;
-    if (!ctx || !this.efeitos || this.fontes.has(id)) return;
-    const painel = ctx.createStereoPanner();
-    painel.connect(this.efeitos);
-    const { ganho, parar } = criarAmbiente(ctx, painel, tipo);
-    this.fontes.set(id, { ganho, painel, parar });
+    const ctx = this.ctx, banco = this.banco;
+    if (!ctx || !banco || !this.efeitos || this.fontes.has(id)) return;
+    // Reserva imediatamente; o loop começa só depois da decodificação.
+    const voz = this.criarVoz(ctx.createBuffer(1, 1, ctx.sampleRate), this.efeitos, 0, 0);
+    this.fontes.set(id, voz);
+    void banco.carregar(AMBIENTES[tipo]).then((buffer) => {
+      if (this.ctx !== ctx || this.fontes.get(id) !== voz) return;
+      voz.fonte.buffer = buffer; voz.fonte.loop = true; voz.fonte.start();
+    }).catch(() => {
+      this.fontes.delete(id); this.vozes.delete(voz);
+      voz.fonte.disconnect(); voz.ganho.disconnect(); voz.painel?.disconnect();
+    });
   }
 
   atualizarFonte(id: string, volume: number, pan: number): void {
     const f = this.fontes.get(id);
     if (!f || !this.ctx) return;
-    f.ganho.gain.setTargetAtTime(volume, this.ctx.currentTime, 0.2);
-    f.painel.pan.setTargetAtTime(pan, this.ctx.currentTime, 0.2);
+    f.ganho.gain.setTargetAtTime(Math.max(0, Math.min(1, volume)) * 0.5, this.ctx.currentTime, 0.2);
+    f.painel?.pan.setTargetAtTime(Math.max(-1, Math.min(1, pan)), this.ctx.currentTime, 0.2);
   }
 
-  /** Pausa do jogo (§2.14: os laços pausam com o jogo). */
-  pausar(pausado: boolean): void {
-    this.pausadoPeloJogo = pausado;
-    if (!this.ctx) return;
-    void (pausado ? this.ctx.suspend() : this.ctx.resume()).catch(() => undefined);
+  private sincronizarPausa(): void {
+    const ctx = this.ctx;
+    if (!ctx) return;
+    void (this.pausadoPeloJogo || document.visibilityState === 'hidden' ? ctx.suspend() : ctx.resume()).catch(() => undefined);
   }
+  pausar(pausado: boolean): void { this.pausadoPeloJogo = pausado; this.sincronizarPausa(); }
 
   destruir(): void {
+    this.desligado = true;
     for (const ev of ['click', 'touchstart', 'keydown'] as const) removeEventListener(ev, this.aoGesto);
     document.removeEventListener('visibilitychange', this.aoVisibilidade);
-    if (this.atual) clearInterval(this.atual.seq.timer);
-    for (const f of this.fontes.values()) f.parar();
-    this.fontes.clear();
+    this.banco?.destruir();
+    for (const voz of this.vozes) {
+      try { voz.fonte.stop(); } catch { /* Uma fonte em download ainda não iniciou. */ }
+      voz.fonte.disconnect(); voz.ganho.disconnect(); voz.painel?.disconnect();
+    }
+    this.vozes.clear(); this.fontes.clear(); this.atual = null;
     void this.ctx?.close().catch(() => undefined);
-    this.ctx = null;
+    this.ctx = null; this.banco = null;
   }
 }
