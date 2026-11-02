@@ -110,11 +110,16 @@ export function criarConfiguracoes(o: { toque: boolean; direcional?: boolean; ao
       campo(t('config.estiloNasGeradas'), marcador('estiloNasGeradas', p.estiloNasGeradas, (v) => { mudar({ estiloNasGeradas: v }); })),
     );
     secao(t('config.aparencia'), ...aparencia(p));
+    const creditosAudio = el('a', undefined, t('config.creditosAudio'));
+    creditosAudio.href = `${import.meta.env.BASE_URL}audio/index.html`;
+    creditosAudio.target = '_blank';
+    creditosAudio.rel = 'noopener';
     secao(
       t('config.audio'),
       campo(t('config.volumeMusica'), faixa('volumeMusica', Math.round(p.volumeMusica * 100), 0, 100, 5, (v) => { mudar({ volumeMusica: v / 100 }); })),
       campo(t('config.volumeEfeitos'), faixa('volumeEfeitos', Math.round(p.volumeEfeitos * 100), 0, 100, 5, (v) => { mudar({ volumeEfeitos: v / 100 }); })),
       campo(t('config.mudo'), marcador('mudo', p.mudo, (v) => { mudar({ mudo: v }); })),
+      creditosAudio,
     );
     secao(
       t('config.camera'),

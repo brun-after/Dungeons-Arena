@@ -17,7 +17,7 @@ describe('identidade sonora do combate', () => {
     expect(sonsDoEvento({ ...impacto, critico: true }, 'j', buscar)).toEqual([
       { som: elemento, origemId: 'g' }, { som: 'critico', origemId: 'g' },
     ]);
-    expect(sonsDoEvento({ t: 'projetilLancado', tick: 0, projetilId: 1, acaoId: 1, donoId: 'j', habilidadeId: 'golpe', chave: 'golpe' }, 'j', buscar)[0]?.som).toBe(elemento);
+    expect(sonsDoEvento({ t: 'projetilLancado', tick: 0, projetilId: 1, acaoId: 1, donoId: 'j', habilidadeId: 'golpe', chave: 'golpe' }, 'j', () => ({ ...base, elemento, tipoAtaque: 'magico' }))[0]?.som).toBe('lancamento_magico');
     expect(sonsDoEvento({ ...impacto, falha: true }, 'j', buscar)[0]?.som).toBe('falha');
     expect(sonsDoEvento({ ...impacto, imune: true }, 'j', buscar)).toEqual([]);
   });

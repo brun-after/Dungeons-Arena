@@ -8,6 +8,7 @@ import type { EventoSimulacao } from '../core/eventos-simulacao';
 export const SONS = [
   'fogo', 'gelo', 'raio', 'veneno', 'psiquico', 'terra', 'trevas', 'sagrado',
   'lamina', 'contundente', 'arco', 'quebra', 'teleporte',
+  'acerto_projetil', 'lancamento_magico',
   'golpe',
   'acerto',
   'critico',
@@ -82,13 +83,13 @@ export function sonsDoEvento(ev: EventoSimulacao, idLocal: string, habilidade: (
     case 'acaoIniciada': {
       const h = habilidade(ev.chave);
       if (!h) return [];
-      // O ataque básico só soa no impacto (evita dois sons por golpe); o resto anuncia a conjuração.
-      if (h.politicaImpacto === 'contato' && h.conjuracaoMs < 600) return [];
-      return [{ som: h.tipoAtaque === 'magico' ? 'conjuracao' : somDaHabilidade(h), origemId: ev.atorId }];
+      if (h.tipoAtaque === 'magico') return [{ som: 'conjuracao', origemId: ev.atorId }];
+      if (h.politicaImpacto === 'projetil') return [];
+      return [{ som: 'golpe', origemId: ev.atorId }];
     }
     case 'projetilLancado': {
       const h = habilidade(ev.chave);
-      return [{ som: h ? somDaHabilidade(h) : 'projetil', origemId: ev.donoId }];
+      return [{ som: h?.tipoAtaque === 'magico' ? 'lancamento_magico' : 'arco', origemId: ev.donoId }];
     }
     case 'impacto': {
       if (ev.cura > 0 && ev.dano === 0) return [{ som: 'cura', origemId: ev.alvoId }];
@@ -97,7 +98,8 @@ export function sonsDoEvento(ev: EventoSimulacao, idLocal: string, habilidade: (
       const h = habilidade(ev.chave);
       if (ev.imune) return [];
       const identidade = h ? somDaHabilidade(h) : 'acerto';
-      const base: SomId = identidade === 'golpe' ? 'acerto' : identidade;
+      const base: SomId = h?.politicaImpacto === 'projetil' && (identidade === 'arco' || identidade === 'projetil')
+        ? 'acerto_projetil' : identidade === 'golpe' ? 'acerto' : identidade;
       const sons: PedidoDeSom[] = [{ som: base, origemId: ev.alvoId }];
       if (ev.critico) sons.push({ som: 'critico', origemId: ev.alvoId });
       return sons;

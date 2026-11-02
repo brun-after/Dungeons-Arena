@@ -55,10 +55,12 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         cacheId: 'dungeons-arena',
         // Assets versionados pelo hash do build: precache (cache-first).
-        globPatterns: ['**/*.{js,css,html,png,svg,webp,webmanifest,json}'],
+        globPatterns: ['**/*.{js,css,html,png,svg,webp,webmanifest,json,mp3,md}'],
         // Marco 32 (31/10/2026, D-131): as camadas de equipamento dos personagens (`<classe>~<camada>`, cerca de 12 MB
         // ao todo) ficam fora do precache; cada uma entra no cache quando o jogo a usa (abaixo).
         globIgnores: ['**/*~*.webp'],
+        // A maior faixa tem 4,5 MB; todas ficam disponíveis offline após instalar o cache.
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         cleanupOutdatedCaches: true,
         // Navegação: rede primeiro; offline, cai no index.html do precache (D-013).
         navigateFallback: null,
