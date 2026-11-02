@@ -10,6 +10,8 @@ export type Relacao = 'proprio' | 'aliado' | 'neutro' | 'hostil';
 export interface Lado {
   id: EntidadeId;
   equipe: string;
+  /** Vínculo com o invocador, independente do fogo amigo da região. */
+  invocacao?: { donoId: EntidadeId } | null;
   /** Marco 30 (D-129): o grupo do Mundo; quem é do mesmo grupo nunca se fere, nem com fogo amigo. */
   grupo?: string | null;
 }
@@ -33,6 +35,10 @@ export function relacao(a: Lado, b: Lado, modo: Pick<ModoDeJogo, 'politicaRelaca
 
 /** Pode causar dano em `b`? Fogo amigo é parâmetro do modo (§2.5). */
 export function podeFerir(a: Lado, b: Lado, modo: Pick<ModoDeJogo, 'politicaRelacao' | 'fogoAmigo'>): boolean {
+  // Correção de 02/11/2026: PvP não torna o dono e seu próprio exército alvos entre si.
+  const donoA = a.invocacao?.donoId;
+  const donoB = b.invocacao?.donoId;
+  if (donoA === b.id || donoB === a.id || (donoA !== undefined && donoA === donoB)) return false;
   const r = relacao(a, b, modo);
   if (r === 'aliado' && !!a.grupo && a.grupo === b.grupo) return false;
   return r === 'hostil' || (r === 'aliado' && modo.fogoAmigo);
