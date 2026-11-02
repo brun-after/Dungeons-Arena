@@ -78,7 +78,7 @@ describe('áudio: mapeamento e música', () => {
     const impacto = { t: 'impacto', tick: 0, acaoId: 1, fonteId: 'j', alvoId: 'g', habilidadeId: 'golpe', chave: 'golpe', dano: 5, cura: 0, d20: 15, mult: 1.2, falha: false, critico: false, imune: false, indice: 0 } as const;
     const comSinergias = { ...impacto, sinergias: [] as string[] };
     expect(sonsDoEvento(comSinergias, 'j', hab)).toEqual([{ som: 'acerto', origemId: 'g' }]);
-    expect(sonsDoEvento({ ...comSinergias, critico: true }, 'j', hab)).toEqual([{ som: 'critico', origemId: 'g' }]);
+    expect(sonsDoEvento({ ...comSinergias, critico: true }, 'j', hab)).toEqual([{ som: 'acerto', origemId: 'g' }, { som: 'critico', origemId: 'g' }]);
     expect(sonsDoEvento({ ...comSinergias, falha: true }, 'j', hab)).toEqual([{ som: 'falha', origemId: 'g' }]);
   });
 

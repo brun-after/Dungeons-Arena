@@ -1,11 +1,13 @@
 // Mapeamento de som (§2.14). Marco 12 (14/10/2026), D-056. Puro: o que tocar para cada habilidade e
-// para cada evento da simulação. Por habilidade: o `visual.som` do conteúdo; senão, o prefixo do id;
-// senão, o tipo de ataque. Habilidade nova toca algo coerente sem mexer aqui.
+// para cada evento da simulação. Elemento e arma precedem os sons genéricos legados;
+// depois vêm o conteúdo, o prefixo e o tipo de ataque. Habilidade nova toca algo coerente sem mexer aqui.
 
 import type { Habilidade } from '../combat/habilidades';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 
 export const SONS = [
+  'fogo', 'gelo', 'raio', 'veneno', 'psiquico', 'terra', 'trevas', 'sagrado',
+  'lamina', 'contundente', 'arco', 'quebra', 'teleporte',
   'golpe',
   'acerto',
   'critico',
@@ -49,11 +51,16 @@ const PREFIXOS: readonly (readonly [string, SomId])[] = [
 ];
 
 /** O som da habilidade ao ser usada (conjuração ou lançamento). */
-export function somDaHabilidade(h: Pick<Habilidade, 'id' | 'tipoAtaque' | 'politicaImpacto' | 'formulaCura' | 'visual'>): SomId {
+export function somDaHabilidade(h: Pick<Habilidade, 'id' | 'tipoAtaque' | 'politicaImpacto' | 'formulaCura' | 'visual'> & Partial<Pick<Habilidade, 'elemento' | 'tags'>>): SomId {
+  if (h.formulaCura !== null && h.politicaImpacto === 'proprio') return 'cura';
+  if (h.elemento) return h.elemento;
+  const identidade = `${h.id} ${(h.tags ?? []).join(' ')}`;
+  if (/espada|lamina|corte|adaga|machado|lanca|montante|rapieira|chakram/.test(identidade)) return 'lamina';
+  if (/martelo|soco|punho|clava|escudo/.test(identidade)) return 'contundente';
+  if (/arco|besta/.test(identidade)) return 'arco';
   const doConteudo = h.visual?.som;
   if (ehSom(doConteudo)) return doConteudo;
   for (const [prefixo, som] of PREFIXOS) if (h.id.startsWith(prefixo)) return som;
-  if (h.formulaCura !== null && h.politicaImpacto === 'proprio') return 'cura';
   if (h.politicaImpacto === 'projetil') return 'projetil';
   if (h.politicaImpacto === 'area') return 'explosao';
   return h.tipoAtaque === 'magico' ? 'magia' : 'golpe';
@@ -79,15 +86,21 @@ export function sonsDoEvento(ev: EventoSimulacao, idLocal: string, habilidade: (
       if (h.politicaImpacto === 'contato' && h.conjuracaoMs < 600) return [];
       return [{ som: h.tipoAtaque === 'magico' ? 'conjuracao' : somDaHabilidade(h), origemId: ev.atorId }];
     }
-    case 'projetilLancado':
-      return [{ som: 'projetil', origemId: ev.donoId }];
+    case 'projetilLancado': {
+      const h = habilidade(ev.chave);
+      return [{ som: h ? somDaHabilidade(h) : 'projetil', origemId: ev.donoId }];
+    }
     case 'impacto': {
       if (ev.cura > 0 && ev.dano === 0) return [{ som: 'cura', origemId: ev.alvoId }];
       if (ev.d20 === 0) return [];
       if (ev.falha) return [{ som: 'falha', origemId: ev.alvoId }];
       const h = habilidade(ev.chave);
-      const base: SomId = ev.critico ? 'critico' : h?.politicaImpacto === 'area' ? 'explosao' : 'acerto';
-      return [{ som: base, origemId: ev.alvoId }];
+      if (ev.imune) return [];
+      const identidade = h ? somDaHabilidade(h) : 'acerto';
+      const base: SomId = identidade === 'golpe' ? 'acerto' : identidade;
+      const sons: PedidoDeSom[] = [{ som: base, origemId: ev.alvoId }];
+      if (ev.critico) sons.push({ som: 'critico', origemId: ev.alvoId });
+      return sons;
     }
     case 'esquivou':
       return [{ som: 'falha', origemId: ev.alvoId }];
@@ -103,13 +116,14 @@ export function sonsDoEvento(ev: EventoSimulacao, idLocal: string, habilidade: (
       return [{ som: 'coleta', origemId: ev.id }];
     // Marco 26 (D-113): o quebrável quebrando.
     case 'quebrou':
-      return [{ som: 'acerto', origemId: ev.porId }];
+      return [{ som: 'quebra', origemId: ev.porId }];
     case 'subiuNivel':
       return ev.id === idLocal ? [{ som: 'nivel', origemId: null }] : [];
     case 'itemRecusado':
     case 'acaoRecusada':
       return (ev.t === 'itemRecusado' ? ev.id : ev.atorId) === idLocal ? [{ som: 'recusa', origemId: null }] : [];
     case 'teleportou':
+      return [{ som: 'teleporte', origemId: ev.id }];
     case 'saidaAlcancada':
       return [{ som: 'porta', origemId: ev.id }];
     case 'saidaDestrancada':

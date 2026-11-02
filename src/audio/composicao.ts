@@ -77,23 +77,23 @@ const MODOS: readonly (readonly (readonly number[])[])[] = [
 ];
 
 const ANDAMENTO: Readonly<Record<Clima, readonly [number, number]>> = {
-  exploracao: [80, 94],
-  combate: [118, 132],
-  chefe: [136, 150],
+  exploracao: [62, 74],
+  combate: [92, 108],
+  chefe: [112, 126],
 };
 
 /** Quantos passos têm nota de melodia, por clima. */
-const DENSIDADE: Readonly<Record<Clima, number>> = { exploracao: 0.22, combate: 0.36, chefe: 0.46 };
+const DENSIDADE: Readonly<Record<Clima, number>> = { exploracao: 0.32, combate: 0.5, chefe: 0.6 };
 
 const TIMBRES: readonly Timbres[] = [
-  { melodia: 'square', corte: 2600, sustentacao: 1.2, pad: 'sine', volumePad: 0.04, drone: false },
-  { melodia: 'square', corte: 2000, sustentacao: 1.5, pad: 'triangle', volumePad: 0.05, drone: false },
-  { melodia: 'triangle', corte: 1800, sustentacao: 1.8, pad: 'triangle', volumePad: 0.06, drone: false },
-  { melodia: 'sawtooth', corte: 1100, sustentacao: 2.4, pad: 'sawtooth', volumePad: 0.06, drone: true },
-  { melodia: 'sawtooth', corte: 750, sustentacao: 3, pad: 'sawtooth', volumePad: 0.08, drone: true },
+  { melodia: 'triangle', corte: 2600, sustentacao: 5, pad: 'sine', volumePad: 0.04, drone: false },
+  { melodia: 'triangle', corte: 2000, sustentacao: 6, pad: 'triangle', volumePad: 0.05, drone: false },
+  { melodia: 'triangle', corte: 1800, sustentacao: 7, pad: 'triangle', volumePad: 0.06, drone: false },
+  { melodia: 'triangle', corte: 1100, sustentacao: 8, pad: 'triangle', volumePad: 0.06, drone: true },
+  { melodia: 'triangle', corte: 750, sustentacao: 9, pad: 'triangle', volumePad: 0.08, drone: true },
 ];
 
-const TIMBRE_MEIO: Timbres = { melodia: 'triangle', corte: 1800, sustentacao: 1.8, pad: 'triangle', volumePad: 0.06, drone: false };
+const TIMBRE_MEIO: Timbres = { melodia: 'triangle', corte: 1800, sustentacao: 7, pad: 'triangle', volumePad: 0.06, drone: false };
 
 function nota(escala: readonly number[], raiz: number, grau: number): number {
   const oitava = Math.floor(grau / escala.length);
@@ -112,7 +112,7 @@ export function faixaDaSombra(sombra: number): number {
  */
 export function compor(faseId: string, clima: Clima, faixa = 2, variante = 0): Composicao {
   const f = Math.max(0, Math.min(FAIXAS - 1, Math.round(faixa)));
-  const raiz = 45 + ((hashTexto(faseId) + variante * 3) % 8);
+  const raiz = 45 + (hashTexto(faseId) % 8);
   const rng = criarRng(hashTexto(`${faseId}:${clima}:${f}${variante ? `:${variante}` : ''}`));
   const escala = escolher(rng, MODOS[f] ?? MODOS[2] ?? [[0, 2, 3, 5, 7, 9, 10]]);
   const [min, max] = ANDAMENTO[clima];
@@ -125,24 +125,25 @@ export function compor(faseId: string, clima: Clima, faixa = 2, variante = 0): C
   const arpeja = clima === 'exploracao' && f >= 1 && f <= 3;
   const passos: Passo[] = [];
   let grauMelodia = 7;
+  const motivo = [0, 2, 1, -1, 0, 3, 2, 0];
   for (let i = 0; i < PASSOS_POR_LACO; i++) {
     const compasso = Math.floor(i / PASSOS_POR_COMPASSO);
     const noCompasso = i % PASSOS_POR_COMPASSO;
     const acorde = acordes[compasso] ?? 0;
     // Na seção B, a melodia sobe um grau e fica um pouco mais densa.
     const secaoB = compasso >= COMPASSOS / 2;
-    const temMelodia = aleatorio(rng) < DENSIDADE[clima] * (secaoB ? 1.2 : 1);
-    if (temMelodia) grauMelodia = Math.max(acorde + 4, Math.min(acorde + 11, grauMelodia + inteiro(rng, -2, 2)));
+    const temMelodia = noCompasso % 4 === 0 && aleatorio(rng) < DENSIDADE[clima] * (secaoB ? 1.2 : 1);
+    if (temMelodia) grauMelodia = Math.max(acorde + 4, Math.min(acorde + 11, acorde + 7 + (motivo[(compasso % 4) * 2 + Math.floor(noCompasso / 8)] ?? 0)));
     const ritmoBaixo = timbres.drone ? PASSOS_POR_COMPASSO : clima === 'exploracao' ? 8 : clima === 'combate' ? 4 : 2;
     const triade = [acorde, acorde + 2, acorde + 4].map((g) => nota(escala, raiz, g));
     passos.push({
       melodia: temMelodia ? nota(escala, raiz + 12, grauMelodia + (secaoB ? 1 : 0)) : null,
       baixo: noCompasso % ritmoBaixo === 0 ? nota(escala, raiz - 12, acorde) : null,
       bumbo: clima === 'exploracao' ? noCompasso === 0 : clima === 'combate' ? noCompasso % 8 === 0 : [0, 6, 8, 14].includes(noCompasso),
-      caixa: clima !== 'exploracao' && (noCompasso === 4 || noCompasso === 12),
-      chimbal: clima === 'exploracao' ? noCompasso % 8 === 4 : clima === 'combate' ? noCompasso % 2 === 0 : true,
+      caixa: clima !== 'exploracao' && noCompasso === 12,
+      chimbal: clima === 'chefe' && noCompasso === 14,
       pad: noCompasso === 0 ? triade : null,
-      arpejo: arpeja && noCompasso % 2 === 0 ? ((triade[(noCompasso / 2) % 3] ?? raiz) + 12) : null,
+      arpejo: arpeja && noCompasso % 8 === 4 ? ((triade[(noCompasso / 2) % 3] ?? raiz) + 12) : null,
     });
   }
   return { bpm, faixa: f, timbres, passos };
