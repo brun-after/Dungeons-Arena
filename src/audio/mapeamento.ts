@@ -84,8 +84,9 @@ export function sonsDoEvento(ev: EventoSimulacao, idLocal: string, habilidade: (
       const h = habilidade(ev.chave);
       if (!h) return [];
       if (h.tipoAtaque === 'magico') return [{ som: 'conjuracao', origemId: ev.atorId }];
-      if (h.politicaImpacto === 'projetil') return [];
-      return [{ som: 'golpe', origemId: ev.atorId }];
+      // Selecionar um alvo religa o básico automático. Não toca o chiado de preparação
+      // física em cada ciclo; a arma soa no impacto e os projéteis, no lançamento.
+      return [];
     }
     case 'projetilLancado': {
       const h = habilidade(ev.chave);
