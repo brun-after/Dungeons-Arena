@@ -93,7 +93,7 @@ export function lancarProjetil(
 }
 
 function alvoNaCelula(estado: EstadoJogo, ctx: ContextoSimulacao, p: Projetil, cx: number, cy: number): Entidade | null {
-  const dono = { id: p.donoId, equipe: p.equipeDono };
+  const dono = buscarEntidade(estado, p.donoId) ?? { id: p.donoId, equipe: p.equipeDono };
   let escolhido: Entidade | null = null;
   for (const e of estado.entidades) {
     if (e.id === p.donoId || !vivo(e) || !podeFerir(dono, e, ctx.modo) || p.atingidos.includes(e.id)) continue;
@@ -185,7 +185,7 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
         // Marco 28 (D-127): o Instinto do Arqueiro faz o tiro carregado que abate saltar (Caçada em cadeia).
         if (p.carregado) cacadaEmCadeia(estado, ctx, p, alvo, saida);
         // Marco 14: o primeiro acerto salta (os alvos do salto entram em `atingidos`).
-        if (saltos > 0) saltar(estado, ctx, { id: p.donoId, equipe: p.equipeDono }, hab, alvo, saltos, { acaoId: p.acaoId, fonte, hab }, p.atingidos, saida);
+        if (saltos > 0) saltar(estado, ctx, dono ?? { id: p.donoId, equipe: p.equipeDono }, hab, alvo, saltos, { acaoId: p.acaoId, fonte, hab }, p.atingidos, saida);
         // Marco 27 (D-126): a variação decide se o projétil segue (ricochete, órbita, volta do bumerangue).
         if (variacao && aoAcertarVariacao(estado, ctx, p, alvo, hab, saida) === 'continua') continue;
         // `atravessar` (§2.8): segue em frente e pode acertar o próximo da linha.

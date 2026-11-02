@@ -46,6 +46,21 @@ describe('relacao() (§2.5)', () => {
     expect(podeFerir(a, b, modo('por_equipe', true))).toBe(true);
     expect(podeFerir(a, a, modo('por_equipe', true))).toBe(false);
   });
+
+  it('fogo amigo preserva o dono e suas invocações, mas mantém PvP entre jogadores', () => {
+    const inv = { id: 'inv', equipe: a.equipe, invocacao: { donoId: a.id } };
+    const irma = { ...inv, id: 'irma' };
+    const rival = { ...inv, id: 'rival', invocacao: { donoId: b.id } };
+    for (const politica of ['por_equipe', 'todos_hostis', 'todos_aliados'] as const) {
+      const m = modo(politica, true);
+      expect(podeFerir(inv, a, m)).toBe(false);
+      expect(podeFerir(a, inv, m)).toBe(false);
+      expect(podeFerir(inv, irma, m)).toBe(false);
+      expect(podeFerir(a, b, m)).toBe(true);
+      expect(podeFerir(inv, b, m)).toBe(true);
+      expect(podeFerir(inv, rival, m)).toBe(true);
+    }
+  });
 });
 
 describe('conteúdo oficial (§3.9)', () => {

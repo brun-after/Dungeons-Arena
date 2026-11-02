@@ -1,7 +1,10 @@
 // Marco 10A-3 (14/10/2026): invocações completas, avatares e dominação (§2.9), D-054.
 
 import { describe, expect, it } from 'vitest';
-import { autoAlvo } from '../../src/combat/acao';
+import { autoAlvo, fonteDaHabilidade } from '../../src/combat/acao';
+import { habilidadeDoAtor } from '../../src/combat/perfil';
+import { lancarProjetil, moverProjeteis } from '../../src/combat/projeteis';
+import { erguerEmprestado, processarServosNecromantes } from '../../src/combat/necromancia';
 import { aplicarEfeito } from '../../src/combat/efeitos';
 import { rampaDeInvocacao } from '../../src/combat/invocacoes';
 import { registrarParticipacao } from '../../src/combat/participacao';
@@ -27,8 +30,9 @@ function obter<T>(v: T | undefined | null, nome: string): T {
 }
 
 /** Jogador em (2,5) na sala 12×12; `invocar` aplica o efeito do pergaminho direto, pelo dispatcher. */
-function cenario(balance: Balance = BALANCE_PADRAO, semente = 9) {
-  const ctx: ContextoSimulacao = contexto(faseDeTexto(SALA_ABERTA), balance);
+function cenario(balance: Balance = BALANCE_PADRAO, semente = 9, fogoAmigo = false) {
+  const base = contexto(faseDeTexto(SALA_ABERTA), balance);
+  const ctx: ContextoSimulacao = { ...base, modo: { ...base.modo, fogoAmigo } };
   const estado = criarEstado({ semente, faseId: 'teste' });
   estado.entidades.push(criarJogador(obter(CONTEUDO.classes.get('aventureiro'), 'classe'), 'j', 2, 5, balance));
   const eventos: EventoSimulacao[] = [];
@@ -59,6 +63,46 @@ function cenario(balance: Balance = BALANCE_PADRAO, semente = 9) {
 }
 
 describe('comportamentos (§2.9)', () => {
+  it('projétil de uma invocação atravessa o dono sem feri-lo em região com PvP', () => {
+    const c = cenario(BALANCE_PADRAO, 9, true);
+    const j = c.ent('j');
+    const inv = c.invocar('lobo_espiritual');
+    c.por(inv, 3, 5);
+    c.por(j, 4, 5);
+    const alvo = c.boneco('hostil', 6, 5);
+    const hab = obter(habilidadeDoAtor(c.ctx, inv, 'seta_arcana'), 'seta');
+    lancarProjetil(c.estado, inv, hab, 99, fonteDaHabilidade(inv, c.ctx, c.estado.tick, hab), alvo, c.eventos);
+    const hp = j.hp;
+    moverProjeteis(c.estado, c.ctx, c.eventos, 1000);
+    expect(j.hp).toBe(hp);
+    expect(c.estado.projeteis).toHaveLength(0);
+    expect(alvo.participacao.some((p) => p.id === inv.id)).toBe(true);
+  });
+
+  it.each(['necromante', 'cajado', 'pergaminho'])('%s não ataca o dono em região com PvP', (origem) => {
+    const c = cenario(BALANCE_PADRAO, 9, true);
+    const j = c.ent('j');
+    j.autoAtaque = false;
+    if (origem === 'necromante') {
+      j.classeId = 'necromante';
+      processarServosNecromantes(c.estado, c.ctx, c.eventos);
+    } else if (origem === 'cajado') {
+      const morto = criarInimigo(obter(CONTEUDO.presets.get('goblin'), 'goblin'), 'morto', 4, 5, c.ctx.balance);
+      expect(erguerEmprestado(c.estado, c.ctx, j, morto, 60_000, c.eventos)).toBe(true);
+    } else {
+      c.invocar('lobo_espiritual');
+    }
+    const inv = obter(c.estado.entidades.find((e) => e.invocacao?.donoId === j.id), 'invocação');
+    c.por(inv, 3, 5);
+    c.ticks(120);
+    expect(inv.ia?.alvoId).toBeNull();
+    expect(c.eventos.some((e) => e.t === 'acaoIniciada' && e.atorId === inv.id)).toBe(false);
+    c.boneco('hostil', 4, 5);
+    c.ticks(5);
+    expect(inv.ia?.alvoId).toBe('hostil');
+    expect(c.eventos.some((e) => e.t === 'acaoIniciada' && e.atorId === inv.id)).toBe(true);
+  });
+
   it('agressivo escolhe o mais próximo; assassino, o de menor HP', () => {
     for (const [ref, esperado] of [
       ['lobo_espiritual', 'perto'],
