@@ -32,7 +32,7 @@ Arquivos: gelo-1.mp3 (original: ice.wav), gelo-2.mp3 (original: coldsnap.wav)
 ## Electricity Game Sound Pack
 Autor: faxcorp. Fonte: https://opengameart.org/content/electricity-game-sound-pack
 Licença: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
-Arquivos: conjuracao-1.mp3 (original: charge.wav), raio-1.mp3 (original: hit.wav), teleporte-1.mp3 (original: teleport_1.wav)
+Arquivos: raio-1.mp3 (original: hit.wav), teleporte-1.mp3 (original: teleport_1.wav)
 
 ## 3 dark magic spells
 Autor: qubodup. Fonte: https://opengameart.org/content/3-dark-magic-spells

@@ -17,10 +17,10 @@ export class LimitadorDeSom {
   private ultimoPassoGlobal = -Infinity;
 
   /** O som pode tocar agora? Se sim, reserva uma voz até `agoraMs + duracaoMs`. */
-  permitir(som: string, agoraMs: number, duracaoMs: number): boolean {
-    if (agoraMs - (this.ultimo.get(som) ?? -Infinity) < INTERVALO_MESMO_SOM_MS) return false;
+  permitir(som: string, agoraMs: number, duracaoMs: number, maxVozes = VOZES_POR_SOM, intervaloMs = INTERVALO_MESMO_SOM_MS): boolean {
+    if (agoraMs - (this.ultimo.get(som) ?? -Infinity) < intervaloMs) return false;
     const ativas = (this.vozes.get(som) ?? []).filter((fim) => fim > agoraMs);
-    if (ativas.length >= VOZES_POR_SOM) {
+    if (ativas.length >= maxVozes) {
       this.vozes.set(som, ativas);
       return false;
     }

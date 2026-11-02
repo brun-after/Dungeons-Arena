@@ -6,7 +6,7 @@ import type { SomId } from './mapeamento';
 import { AMBIENTES, BancoDeGravacoes, EFEITOS, musicaDaCena, type SomAmbiente } from './gravacoes';
 
 const FADE_MUSICA_S = 1.5;
-const GANHOS: Partial<Record<SomId, number>> = { passo: 0.25, clique: 0.35, critico: 0.65, conjuracao: 0.45, moeda: 0.6, recusa: 0.4 };
+const GANHOS: Partial<Record<SomId, number>> = { passo: 0.25, clique: 0.35, critico: 0.65, conjuracao: 0.18, lancamento_magico: 0.25, magia: 0.4, moeda: 0.6, recusa: 0.4 };
 
 export interface VolumesAudio {
   musica: number;
@@ -112,11 +112,23 @@ export class MotorAudio {
     // Nunca reproduz uma ação velha quando um download termina atrasado.
     if (!buffer) { void banco.carregar(id).catch(() => undefined); return; }
     const tom = variacaoDeTom(Math.random());
-    if (!this.limitador.permitir(som, performance.now(), buffer.duration * 1000 / tom)) return;
+    const maxDuracao = som === 'conjuracao' ? 0.22 : som === 'lancamento_magico' ? 0.18 : som === 'magia' ? 0.5 : Infinity;
+    const duracao = Math.min(buffer.duration / tom, maxDuracao);
+    const generico = Number.isFinite(maxDuracao);
+    if (!this.limitador.permitir(som, ctx.currentTime * 1000, duracao * 1000, generico ? 1 : 4, som === 'conjuracao' ? 500 : generico ? 180 : 80)) return;
     try {
       const voz = this.criarVoz(buffer, this.efeitos, Math.min(1, volume) * (GANHOS[som] ?? 0.8), pan);
       voz.fonte.playbackRate.value = tom;
-      voz.fonte.start();
+      const inicio = ctx.currentTime;
+      if (generico) {
+        const pico = Math.min(1, volume) * (GANHOS[som] ?? 0.8);
+        voz.ganho.gain.setValueAtTime(0, inicio);
+        voz.ganho.gain.linearRampToValueAtTime(pico, inicio + Math.min(0.004, duracao / 4));
+        voz.ganho.gain.setValueAtTime(pico, inicio + duracao - Math.min(0.04, duracao / 4));
+        voz.ganho.gain.linearRampToValueAtTime(0, inicio + duracao);
+      }
+      voz.fonte.start(inicio);
+      if (generico) voz.fonte.stop(inicio + duracao);
     } catch { /* Um efeito não interrompe a partida. */ }
   }
 

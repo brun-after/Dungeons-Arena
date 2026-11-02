@@ -83,6 +83,9 @@ export function sonsDoEvento(ev: EventoSimulacao, idLocal: string, habilidade: (
     case 'acaoIniciada': {
       const h = habilidade(ev.chave);
       if (!h) return [];
+      // O básico da arma secundária também pode ser mágico (ex.: Guerreiro com tomo).
+      if (h.id === 'ataque_basico' || h.id.startsWith('basico_')) return [];
+      if (h.tipoAtaque === 'magico' && h.conjuracaoMs < 600) return [];
       if (h.tipoAtaque === 'magico') return [{ som: 'conjuracao', origemId: ev.atorId }];
       // Selecionar um alvo religa o básico automático. Não toca o chiado de preparação
       // física em cada ciclo; a arma soa no impacto e os projéteis, no lançamento.

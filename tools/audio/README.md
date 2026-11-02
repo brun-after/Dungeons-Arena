@@ -21,3 +21,7 @@ As fontes e nomes dentro dos arquivos estão em `SOURCES`, `series` e `ORIGINAIS
 ## Offline
 
 Todos os MP3, ambientes, manifesto e créditos entram no precache PWA. Após concluir a instalação do cache, a biblioteca inteira funciona offline. O download de áudio soma cerca de 11,6 MiB. No Android, os arquivos são incluídos no APK. Uma falha de download mantém a música anterior e nunca impede jogar.
+
+## Conjuração e armas secundárias
+
+Ataques básicos de arma (`basico_*`), inclusive o tomo na mão secundária do Guerreiro, não disparam preparação genérica. O antigo `charge.wav` de 4,13 segundos foi retirado da distribuição. Conjurações longas usam as gravações curtas de magia da rubberduck, com até 220 ms e intervalo mínimo de 500 ms; lançamentos genéricos usam até 180 ms. Esses efeitos e o impacto genérico mágico têm uma voz por tipo e saída suave, usando o relógio do áudio para preservar os limites durante pausas.
