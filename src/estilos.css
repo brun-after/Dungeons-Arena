@@ -3123,3 +3123,11 @@ body.toque .painel-social {
 @media (max-width: 600px) { .mapa-reino { gap: 3px; } .regiao-mapa { padding: 4px; font-size: .75rem; } .marcar-lugar { padding: 6px 2px; } }
 
 .mapa-terreno { display: block; width: min(100%, 700px); height: auto; margin: 0 auto 18px; cursor: crosshair; border: 1px solid var(--borda); touch-action: manipulation; }
+
+/* 02/11/2026: menus pessoais não cobrem as câmeras dos outros membros na TV. */
+body[data-party-visao='1'] dialog.modal {
+  position: fixed; inset: auto; left: 0; top: 52px; margin: 0;
+  width: min(480px, var(--party-pane-largura)); max-width: var(--party-pane-largura);
+  max-height: calc(var(--party-pane-altura) - 52px); box-sizing: border-box;
+}
+body[data-party-visao='1'] dialog.modal::backdrop { background: transparent; backdrop-filter: none; }

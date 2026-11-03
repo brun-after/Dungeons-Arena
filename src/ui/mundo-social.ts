@@ -91,6 +91,14 @@ export function criarPainelSocial(o: OpcoesDoSocial): PainelSocial {
   const desenharGrupo = () => {
     secaoGrupo.textContent = '';
     secaoGrupo.append(subtitulo(meuGrupo.id ? t('mundo.grupo.titulo', { n: meuGrupo.membros.length, max: regras.grupo.max }) : t('mundo.grupo.sem')));
+    if (meuGrupo.codigo) secaoGrupo.append(paragrafo(t('mundo.grupo.codigo', { codigo: meuGrupo.codigo })));
+    if (!meuGrupo.id) {
+      secaoGrupo.append(botao(t('mundo.grupo.criarCodigo'), () => { o.enviar({ a: 'grupo', op: 'criar_codigo' }); }));
+      const entrada = document.createElement('input');
+      entrada.maxLength = 12; entrada.placeholder = t('mundo.grupo.digitarCodigo');
+      entrada.setAttribute('aria-label', t('mundo.grupo.digitarCodigo'));
+      secaoGrupo.append(entrada, botao(t('mundo.grupo.entrarCodigo'), () => { o.enviar({ a: 'grupo', op: 'entrar_codigo', codigo: entrada.value.trim().toUpperCase() }); }));
+    }
     const minhaVez = eu()?.nome;
     const souLider = meuGrupo.membros.some((m) => m.lider && m.nome === minhaVez);
     const ul = lista('lista-grupo');

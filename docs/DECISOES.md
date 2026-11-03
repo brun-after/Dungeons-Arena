@@ -3630,3 +3630,16 @@ rig e animações Collada, textura negra. A energia dos quatro elementos é uma 
 em volta do corpo; as escamas ficam escuras. Porte de 3,3 células e atlas abaixo de 4096 pixels.
 Invocações do necromante jogador são avermelhadas; as do boss são negras. Um preset exclusivo
 de invocação preserva a cor do boss fora do recorte de rede, sem entrar no gerador de inimigos comuns.
+
+
+## Party do Mundo e TV — 02/11/2026 (versão 1, marco 35)
+
+Produto esclareceu que todos continuam jogando em seus próprios dispositivos; um notebook pode projetar
+na TV a visão conjunta simultaneamente. Não há novos comandos de gamepad ou celulares-controle.
+Reutilizar os grupos existentes com código criptográfico do servidor, limite seis e preferência local
+normalizada. Câmeras próximas se agrupam por diâmetro, com o jogador local no primeiro painel.
+Na mesma sala, ampliar o interesse para as vizinhanças dos membros; renderizar os painéis com um renderer.
+Outras salas enviam apenas estado público mediante filiação à party, com frequência limitada; observadores
+isolados renderizam esse estado sem conexão de jogador e sem comandos. Não enviar inventário privado.
+Diálogos são pessoais e não cobrem as outras câmeras. Marcações e telas normais dos outros aparelhos
+não são alteradas pela preferência do projetor. Grupos por convite continuam disponíveis.

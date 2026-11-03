@@ -65,6 +65,10 @@ export function mapaDoLugar(ctx: ContextoSimulacao, estado: () => EstadoJogo | n
       g.closePath(); g.fill();
     }
     const eu = atual?.entidades.find(e => e.id === idLocal);
+    for (const aliado of atual?.entidades ?? []) if (eu?.grupo && aliado.grupo === eu.grupo && aliado.arquetipo === 'jogador') {
+      g.fillStyle = '#65c6ff'; g.beginPath(); g.arc((aliado.x+.5)*escala,(aliado.y+.5)*escala,4,0,Math.PI*2); g.fill();
+      g.fillText(aliado.nome,(aliado.x+.5)*escala,(aliado.y+.5)*escala-8);
+    }
     if (eu) {
       g.fillStyle = '#ffffff'; g.strokeStyle = '#10151c'; g.lineWidth = 2;
       g.beginPath(); g.arc((eu.x + .5) * escala, (eu.y + .5) * escala, 5, 0, Math.PI * 2); g.fill(); g.stroke();

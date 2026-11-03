@@ -1,3 +1,6 @@
+import { criarPaineisParty } from './party-paineis';
+import { centroDaCelula } from '../render/projecao';
+import { agruparParty } from '../render/party-visao';
 // Cena de jogo no navegador, compartilhada pela campanha e pela arena: palco, câmera, camadas do
 // mundo, HUD, controles, cabeçalho, entrada e feedback. Quem chama decide de onde vem o estado
 // (simulação local ou cliente de rede) e para onde vão os comandos.
@@ -106,6 +109,9 @@ export interface OpcoesCena {
   portais?: TemasDosPortais;
   /** Marco 18: registrar a primeira descoberta do servidor na nuvem (a arena e os testes desligam). */
   nuvemDescobertas?: boolean;
+  partyMundo?: boolean;
+  partyVisaoForcada?: boolean;
+  visoesExternas?: () => readonly import('../mundo/avisos').VisaoExternaParty[];
 }
 
 export interface QuadroCena {
@@ -608,6 +614,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   });
 
   let ultimoQuadroMs = performance.now();
+  const paineisParty = criarPaineisParty(host,palco,camera);
+  let zoomAntesParty: number | null = null;
   let celulaCentralizada = false;
   const quadro = (q: QuadroCena) => {
     const estado = o.estado();
@@ -670,7 +678,44 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       sprites.desenhar(estado, ctx, ap.posicaoVisual(q.posicao), q.alpha, q.agoraMs, q.aoRemover);
       numeros.atualizar(q.agoraMs);
     }
-    palco.renderizar();
+    const aliados = o.partyMundo && (o.partyVisaoForcada || aparencia.visaoParty) && j?.grupo
+      ? estado.entidades.filter(e => e.id === idLocal || e.grupo === j.grupo && e.arquetipo === 'jogador') : [];
+    const grupos = agruparParty(aliados, idLocal);
+    if (grupos.length > 0) {
+      zoomAntesParty ??= camera.zoom;
+      const externas = o.visoesExternas?.() ?? [];
+      paineisParty.ajustar(grupos.length+externas.length);
+      paineisParty.externas(externas,grupos.length);
+      const desenharVista = (grupo: Entidade[]) => {
+        const x = grupo.reduce((v,e) => v+e.x,0)/grupo.length, y = grupo.reduce((v,e) => v+e.y,0)/grupo.length;
+        const pontos = grupo.map(e => { const c = centroDaCelula(e.x,e.y); return camera.projecaoAtual.projetar(c.x,c.y); });
+        const lx = Math.max(...pontos.map(p=>p.x))-Math.min(...pontos.map(p=>p.x))+160;
+        const ly = Math.max(...pontos.map(p=>p.y))-Math.min(...pontos.map(p=>p.y))+200;
+        camera.zoom = Math.min(zoomAntesParty ?? camera.zoom, palco.largura()/lx, palco.altura()/ly);
+        camera.centralizar({x,y}); ap.aplicarCamera(q.agoraMs);
+        // Cada painel revela paredes e telhados pelo seu próprio jogador, sem herdar a visão anterior.
+        visao.esmaecer(grupo[0] ? q.posicao(grupo[0]) : null, 10000);
+        const r = camera.retanguloVisivel(palco.altura());
+        terreno.atualizarVisibilidade(...r); objetos.desenhar(estado,q.agoraMs,reduzido,r);
+        sprites.desenhar(estado,ctx,ap.posicaoVisual(q.posicao),q.alpha,q.agoraMs);
+        palco.renderizar();
+      };
+      // Renderiza a câmera local por último: ponteiro e habilidades continuam referindo-se apenas a ela.
+      for (let i = grupos.length-1; i >= 0; i--) {
+        const g = grupos[i]; if (!g) continue;
+        desenharVista(g); paineisParty.copiar(i,g.map(e=>e.nome).join(' · '));
+      }
+    } else {
+      paineisParty.limpar();
+      if (zoomAntesParty !== null) { camera.zoom = zoomAntesParty; zoomAntesParty = null; }
+      if (palco.largura() !== host.clientWidth || palco.altura() !== host.clientHeight) {
+        palco.app.renderer.resize(host.clientWidth,host.clientHeight);
+        palco.canvas.style.width = '100%'; palco.canvas.style.height = '100%';
+        camera.definirVista({largura:host.clientWidth,altura:host.clientHeight});
+      }
+      palco.renderizar();
+    }
+
 
     diag?.quadro(q.agoraMs, () => {
       const p = j ? q.posicao(j) : { x: 0, y: 0 };
@@ -701,6 +746,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     quadroPermitido: ap.quadroPermitido,
     anotarSalvamento: ap.anotarSalvamento,
     desmontar: () => {
+      paineisParty.limpar();
       clearTimeout(releitura);
       teclado.desligar();
       encerrarSessaoDeTela();

@@ -274,3 +274,11 @@ mapa ampliado translúcido com pontos e destaques persistentes no aparelho. Necr
 quatro dragões elementais nas dungeons e em encontros externos. Dragões animados CC0 de Cethiel/Drummyfish, com escamas negras e energia elemental discreta;
 servos do necromante jogador avermelhados e servos do boss negros.
 Detalhes e limites em [docs/MUNDO.md](docs/MUNDO.md).
+
+
+### Marco 35 — party do Mundo e TV (02/11/2026)
+
+Party por código para até seis jogadores; visão conjunta opcional nas Configurações, agrupando quem está
+perto e dividindo em até seis câmeras. Cada pessoa continua jogando no próprio aparelho, com menus e mapa
+pessoais; um notebook pode projetar a visão conjunta na TV. Observadores entre regiões usam somente estado
+público da party e não controlam personagens. Detalhes em [docs/MUNDO.md](docs/MUNDO.md).

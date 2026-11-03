@@ -1,3 +1,4 @@
+import type { EstadoJogo } from '../core/estado';
 // Os avisos do Mundo (marco 29, 30/10/2026, D-128): o que a sala do Mundo manda só para uma sessão, fora do estado
 // do jogo. Vão na mensagem `{ t: 'mundo', aviso }` do protocolo. Puro.
 // Marco 30 (30/10/2026, D-129): o banco, o quadro de missões de verdade, o chat, o grupo, a troca e o mercado.
@@ -79,7 +80,10 @@ export interface AnuncioVisto {
   vendido?: boolean;
 }
 
+export interface VisaoExternaParty { lugar: string; idLocal: string; estado: EstadoJogo }
+
 export type AvisoDoMundo =
+  | { tipo: 'visoesParty'; visoes: VisaoExternaParty[] }
   /** Onde a sessão está: o nome, o perigo, se há PvP e o canal (a mesma região pode ter mais de uma sala). */
   | { tipo: 'lugar'; lugar: string; nome: string; perigo: Perigo | 'dungeon'; pvp: boolean; canal: number; vilaSalva: string; descobertas: string[] }
   | { tipo: 'salvo'; vila: string }
@@ -94,7 +98,7 @@ export type AvisoDoMundo =
   | { tipo: 'missao'; id: string; progresso: number; meta: number }
   | { tipo: 'banco'; itens: ItemNaMochila[]; ouro: number; slots: number }
   | { tipo: 'chat'; canal: CanalDoChat | 'sistema'; de: string; texto: string }
-  | { tipo: 'grupo'; id: string | null; membros: MembroVisto[] }
+  | { tipo: 'grupo'; id: string | null; codigo?: string; membros: MembroVisto[] }
   | { tipo: 'convite'; grupo: string; de: string }
   /**
    * A troca direta: `convite` (alguém propôs: aceitar com o `comId`), `aberta` (as duas ofertas e quem confirmou),

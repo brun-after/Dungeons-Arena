@@ -1,3 +1,4 @@
+import { criarEstado } from '../../src/core/estado';
 // Marco 30 (30/10/2026, D-129): os serviços do Mundo entre salas, no coordenador: o grupo (convite pelo nome,
 // aceite, chat do grupo, saída) com os membros em salas diferentes, e o mercado do reino (anunciar, comprar com o
 // preço certo, devolver a reserva quando falha, receber no banco, entregar na ficha guardada de quem saiu).
@@ -28,6 +29,7 @@ class SalaFalsa {
   readonly grupos = new Map<string, string | null>();
   readonly mercado = new Map<string, ResultadoDoMercado[]>();
   constructor(readonly presentes: Set<string>) {}
+  visaoParty(id: string) { return this.presentes.has(id) ? { lugar: 'regiao:campos_do_oeste', idLocal: 'entidade-opaca', estado: criarEstado({semente:0,faseId:'teste'}) } : null; }
   liberarCaida(): FichaDoMundo | null {
     return null;
   }
@@ -163,4 +165,35 @@ describe('o mercado do reino', () => {
     const f = await persistencia.carregar('local:ana', 1);
     expect(f?.banco.ouro).toBe(70);
   });
+});
+
+
+it('as câmeras entre regiões só são entregues aos membros da party', () => {
+  const {c,vila,social}=montar();
+  social(ANA,'Ana',{a:'grupo',op:'criar_codigo'});
+  const codigo=c.grupos.grupoDe(ANA)?.codigo;
+  if(!codigo)throw new Error('sem código');
+  social(BIA,'Bia',{a:'grupo',op:'entrar_codigo',codigo});
+  c.visoesParty(ANA);
+  expect(vila.ultimo(ANA,'visoesParty')?.visoes).toHaveLength(1);
+  expect(vila.ultimo(ANA,'visoesParty')?.visoes[0]?.idLocal).toBe('entidade-opaca');
+});
+
+it('não entrega câmeras externas a quem não pertence a uma party', () => {
+  const {c,vila}=montar();
+  c.visoesParty(ANA);
+  expect(vila.ultimo(ANA,'visoesParty')?.visoes).toEqual([]);
+});
+
+
+it('a consulta recupera código e membros ao trocar de região', () => {
+  const {c,vila,campos,social}=montar();
+  social(ANA,'Ana',{a:'grupo',op:'criar_codigo'});
+  const codigo=c.grupos.grupoDe(ANA)?.codigo;
+  if(!codigo)throw new Error('sem código');
+  social(BIA,'Bia',{a:'grupo',op:'entrar_codigo',codigo});
+  social(BIA,'Bia',{a:'grupo',op:'consultar'});
+  expect(campos.ultimo(BIA,'grupo')?.codigo).toBe(codigo);
+  expect(campos.ultimo(BIA,'grupo')?.membros).toHaveLength(2);
+  expect(vila.ultimo(ANA,'grupo')?.codigo).toBe(codigo);
 });

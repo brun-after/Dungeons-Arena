@@ -12,6 +12,7 @@ export interface GrupoDoMundo {
   lider: string;
   /** Identidades, na ordem de entrada. */
   membros: string[];
+  codigo?: string;
 }
 
 interface Convite {
@@ -35,6 +36,26 @@ export class GruposDoMundo {
   grupoDe(identidade: string): GrupoDoMundo | undefined {
     const id = this.deQuem.get(identidade);
     return id ? this.grupos.get(id) : undefined;
+  }
+
+  /** 02/11/2026: código gerado no servidor, independente das identidades das contas. */
+  criarPorCodigo(quem: string, codigo: string): GrupoDoMundo {
+    const existente = this.grupoDe(quem);
+    if (existente) { if (!existente.codigo && existente.lider === quem) existente.codigo = codigo; return existente; }
+    const g: GrupoDoMundo = { id: `g${String(this.proximo++)}`, lider: quem, membros: [quem], codigo };
+    this.grupos.set(g.id, g);
+    this.deQuem.set(quem, g.id);
+    return g;
+  }
+
+  entrarPorCodigo(quem: string, codigo: string): GrupoDoMundo | MotivoDoMundo {
+    if (this.grupoDe(quem)) return 'ja_em_grupo';
+    const g = [...this.grupos.values()].find(x => x.codigo === codigo);
+    if (!g) return 'nao_encontrado';
+    if (g.membros.length >= this.max) return 'grupo_cheio';
+    g.membros.push(quem);
+    this.deQuem.set(quem, g.id);
+    return g;
   }
 
   /** O convite (devolve o id dele) ou o motivo da recusa. */
@@ -75,7 +96,7 @@ export class GruposDoMundo {
     g.membros = g.membros.filter((m) => m !== quem);
     this.deQuem.delete(quem);
     if (g.lider === quem) g.lider = g.membros[0] ?? '';
-    if (g.membros.length <= 1) {
+    if (g.membros.length === 0 || g.membros.length === 1 && !g.codigo) {
       for (const m of g.membros) this.deQuem.delete(m);
       this.grupos.delete(g.id);
       return { grupo: g, desfeito: true };

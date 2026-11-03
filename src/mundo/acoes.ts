@@ -27,6 +27,10 @@ export type AcaoDoMundo =
   | { a: 'grupo'; op: 'convidar' | 'expulsar'; nome: string }
   | { a: 'grupo'; op: 'aceitar'; grupo: string }
   | { a: 'grupo'; op: 'sair' }
+  | { a: 'grupo'; op: 'criar_codigo' }
+  | { a: 'grupo'; op: 'visoes' }
+  | { a: 'grupo'; op: 'consultar' }
+  | { a: 'grupo'; op: 'entrar_codigo'; codigo: string }
   | { a: 'troca'; op: 'propor'; alvo: string }
   | { a: 'troca'; op: 'aceitar'; de: string }
   | { a: 'troca'; op: 'oferecer'; itens: OfertaDeItem[]; ouro: number }
@@ -77,6 +81,10 @@ export function lerAcaoDoMundo(v: unknown): AcaoDoMundo | null {
     case 'denunciar':
       return id(v.nome) && texto(v.motivo) ? { a: 'denunciar', nome: v.nome, motivo: v.motivo } : null;
     case 'grupo':
+      if (v.op === 'consultar') return { a: 'grupo', op: 'consultar' };
+      if (v.op === 'visoes') return { a: 'grupo', op: 'visoes' };
+      if (v.op === 'criar_codigo') return { a: 'grupo', op: 'criar_codigo' };
+      if (v.op === 'entrar_codigo' && typeof v.codigo === 'string' && /^[A-Z0-9]{12}$/.test(v.codigo)) return { a: 'grupo', op: 'entrar_codigo', codigo: v.codigo };
       if ((v.op === 'convidar' || v.op === 'expulsar') && id(v.nome)) return { a: 'grupo', op: v.op, nome: v.nome };
       if (v.op === 'aceitar' && id(v.grupo)) return { a: 'grupo', op: 'aceitar', grupo: v.grupo };
       return v.op === 'sair' ? { a: 'grupo', op: 'sair' } : null;

@@ -537,6 +537,12 @@ export class SalaMundo extends SalaArena {
     return true;
   }
 
+  /** 02/11/2026: apenas estado público; o coordenador verifica a filiação à party. */
+  visaoParty(identidade: string): import('./avisos').VisaoExternaParty | null {
+    const s = this.sessaoDaIdentidade(identidade);
+    return s ? { lugar: this.idLugar, idLocal: s.entidadeId, estado: this.visaoDe(s, this.estadoPublicoAtual()) } : null;
+  }
+
   private sessaoDaIdentidade(identidade: string): Sessao | undefined {
     for (const s of this.sessoes.values()) if (this.presencas.get(s.entidadeId)?.identidade === identidade) return s;
     return undefined;

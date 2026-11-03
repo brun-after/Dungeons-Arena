@@ -79,7 +79,7 @@ export function criarFaixaDoLugar(): { elemento: HTMLElement; mostrar: (aviso: E
 }
 
 /** O mapa do reino: a grade das regiões, com névoa nas que o personagem ainda não viu. */
-export function abrirMapa(reino: Reino, lugar: string, descobertas: readonly string[], vilaSalva: string, terreno?: { ctx: ContextoSimulacao; estado: () => EstadoJogo | null; idLocal: string }): void {
+export function abrirMapa(reino: Reino, lugar: string, descobertas: readonly string[], vilaSalva: string, terreno?: { ctx: ContextoSimulacao; estado: () => EstadoJogo | null; idLocal: string; membros?: readonly import('../mundo/avisos').MembroVisto[] }): void {
   if (document.querySelector('.mapa-expandido')) return;
   const d = dialogo(t('mundo.mapa.titulo'));
   d.el.classList.add('mapa-expandido');
@@ -120,6 +120,7 @@ export function abrirMapa(reino: Reino, lugar: string, descobertas: readonly str
       nome.textContent = vista ? r.nome : t('mundo.mapa.desconhecida');
       celula.append(nome);
       const marcas: string[] = [];
+      for (const m of terreno?.membros ?? []) if (m.lugar === `regiao:${r.id}` || r.estruturas.some(e => m.lugar === `${e.destino.tipo}:${e.destino.id}`)) marcas.push(m.nome);
       if (lugar === `regiao:${r.id}`) marcas.push(t('mundo.mapa.aqui'));
       if (vilaSalva === r.id) marcas.push(t('mundo.mapa.vila'));
       if (vista) {

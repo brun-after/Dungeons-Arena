@@ -194,3 +194,14 @@ it('retorna à vila salva na mesma região e não consome duas pedras em pedidos
   expect(bolsa.mochila.find(m => m.itemId === 'pergaminho_retorno')?.qtd).toBe(1);
   expect(s.retirarPendencias().filter(x => x.tipo === 'trocar')).toEqual([expect.objectContaining({ destino: 'regiao:vila_do_centro', chegada: null })]);
 });
+
+
+it('observação da party usa estado público sem inventários privados', () => {
+  const s=sala('regiao:vila_do_centro');
+  const a=entrar(s,'local:observado#1');
+  expect(a.e().bolsa).not.toBeNull();
+  const visao=s.visaoParty('local:observado#1');
+  expect(visao?.idLocal).toBe(a.bem.entidadeId);
+  expect(visao?.estado.entidades.every(e=>e.bolsa===null)).toBe(true);
+  expect(s.visaoParty('local:nao-logado#1')).toBeNull();
+});

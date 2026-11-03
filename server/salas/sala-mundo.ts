@@ -48,6 +48,7 @@ export const reinoDoMundo = (conteudo: Conteudo): Reino => reinoDoConteudo(conte
 
 /** O que o coordenador pede a uma sala: soltar a sessão caída e entregar a quem está nela (false = não está). */
 interface SalaDoCoordenador {
+  visaoParty?(identidade: string): import('../../src/mundo/avisos').VisaoExternaParty | null;
   liberarCaida(identidade: string): FichaDoMundo | null;
   entregar(identidade: string, aviso: AvisoDoMundo): boolean;
   definirGrupo(identidade: string, grupo: string | null): boolean;
@@ -91,6 +92,8 @@ export class CoordenadorDoMundo {
     const p = ficha.personagem;
     this.perfis.set(identidade, { nome: p.nome, classeId: p.bolsa.classeId, nivel: p.nivel });
     this.lugares.set(identidade, lugar);
+    const grupo = this.grupos.grupoDe(identidade);
+    if (grupo) publicarGrupo(this, grupo);
   }
 
   perfil(identidade: string): Perfil | undefined {
@@ -121,6 +124,24 @@ export class CoordenadorDoMundo {
     return this.salaDe(identidade)?.definirGrupo(identidade, grupo) ?? false;
   }
 
+  private readonly ultimaVisaoParty = new Map<string, number>();
+  visoesParty(quem: string): void {
+    const agora = Date.now();
+    if (agora - (this.ultimaVisaoParty.get(quem) ?? 0) < 200) return;
+    this.ultimaVisaoParty.set(quem, agora);
+    const grupo = this.grupos.grupoDe(quem);
+    const salas = new Set<string>();
+    const visoes: import('../../src/mundo/avisos').VisaoExternaParty[] = [];
+    for (const membro of grupo?.membros ?? []) {
+      const salaId = this.online.get(membro);
+      if (!salaId || salaId === this.online.get(quem) || salas.has(salaId)) continue;
+      salas.add(salaId);
+      const visao = this.salaDe(membro)?.visaoParty?.(membro);
+      if (visao) visoes.push(visao);
+    }
+    this.entregarA(quem, { tipo: 'visoesParty', visoes });
+  }
+
   /** Entrega o resultado do mercado na sala onde a pessoa está; se saiu do jogo, no banco da ficha guardada. */
   async concluirMercadoDe(identidade: string, r: ResultadoDoMercado): Promise<void> {
     if (this.salaDe(identidade)?.concluirMercado(identidade, r)) return;
@@ -137,6 +158,7 @@ export class CoordenadorDoMundo {
 
   /** Saiu do jogo de vez (não é troca de sala): sai do grupo, e os outros ficam sabendo. */
   saiuDoJogo(identidade: string): void {
+    this.ultimaVisaoParty.delete(identidade);
     const r = this.grupos.sair(identidade);
     if (r) publicarGrupo(this, r.desfeito ? null : r.grupo, r.desfeito ? r.grupo.membros : []);
     this.perfis.delete(identidade);
@@ -292,6 +314,10 @@ export class SalaMundoColyseus extends SalaColyseusBase {
 
   entregar(identidade: string, aviso: AvisoDoMundo): boolean {
     return this.mundo.entregar(identidade, aviso);
+  }
+
+  visaoParty(identidade: string): import('../../src/mundo/avisos').VisaoExternaParty | null {
+    return this.mundo.visaoParty(identidade);
   }
 
   definirGrupo(identidade: string, grupo: string | null): boolean {
