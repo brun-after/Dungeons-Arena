@@ -11,6 +11,10 @@ test('dois clientes entram por código e preservam mapas e configurações pesso
             await pagina.locator('#mundo-nome-1').fill(nome);
             await pagina.locator('#mundo-nome-1').locator('..').getByRole('button', { name: 'Começar' }).click();
             await expect(pagina.locator('.minimapa')).toBeVisible({ timeout: 30000 });
+            // 02/11/2026: no toque, o painel começa recolhido; abra-o como o jogador faria.
+            const social = pagina.locator('.painel-social');
+            if (await social.getAttribute('data-fechado') === '1')
+                await social.locator(':scope > button').click();
         }
         await p.getByRole('button', { name: 'Criar party por código' }).click();
         await expect(p.locator('.grupo-mundo')).toContainText('Código da party:');
@@ -21,6 +25,8 @@ test('dois clientes entram por código e preservam mapas e configurações pesso
         await q.getByRole('button', { name: 'Entrar na party', exact: true }).click();
         await expect(p.locator('.grupo-mundo')).toContainText('BiaParty');
         await expect(q.locator('.grupo-mundo')).toContainText('AnaParty');
+        for (const pagina of [p, q])
+            await pagina.locator('.painel-social > button[aria-expanded="true"]').click();
         await p.keyboard.press('Escape');
         await p.getByRole('button', { name: 'Configurações', exact: true }).click();
         await p.locator('[data-config="visaoParty"]').check();
