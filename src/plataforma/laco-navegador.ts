@@ -41,9 +41,12 @@ export function iniciarLaco(opcoes: OpcoesLaco): () => void {
       const orcamento = opcoes.orcamentoMs === undefined ? undefined : { ms: opcoes.orcamentoMs, relogio: () => relogio.agoraMs() };
       ultimoAlpha = avancarLaco(acumulador, relogio.agoraMs(), opcoes.simular, orcamento).alpha;
     }
-    opcoes.renderizar(ultimoAlpha);
-    // Marco 16: parar de dentro do próprio quadro não agenda o seguinte.
-    if (!parado) quadro = requestAnimationFrame(aoQuadro);
+    try {
+      opcoes.renderizar(ultimoAlpha);
+    } finally {
+      // Uma falha de desenho continua visível no console, mas não interrompe a rede e a predição.
+      if (!parado) quadro = requestAnimationFrame(aoQuadro);
+    }
   };
   quadro = requestAnimationFrame(aoQuadro);
 

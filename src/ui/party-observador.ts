@@ -4,9 +4,12 @@ import { conteudoOficial, modoPorId } from '../core/conteudo';
 import { reinoDoConteudo } from '../mundo/reino';
 import { lerLugar, montarLugar } from '../mundo/lugares';
 import { montarCena, type Cena } from './cena';
+import { PuladorDeQuadros } from '../render/desempenho';
 export function iniciarObservador(raiz: HTMLElement): void {
     const c = conteudoOficial(), reino = reinoDoConteudo(c);
     let recebido = 0;
+    let intervalo = 250;
+    const pulador = new PuladorDeQuadros();
     const posicoes = new Map<string, {
         x: number;
         y: number;
@@ -32,21 +35,30 @@ export function iniciarObservador(raiz: HTMLElement): void {
         for (const [id, p] of posicoes)
             anteriores.set(id, p);
         posicoes.clear();
-        recebido = performance.now();
+        const agora = performance.now();
+        if (recebido) intervalo = Math.max(100, Math.min(500, agora - recebido));
+        recebido = agora;
         atual = ev.data;
         rotulo.textContent = atual.estado.entidades.find(e=>e.id===atual?.idLocal)?.nome ?? '';
     });
     const quadro = async (agora: number) => {
+      try {
+        // O observador divide CPU/GPU com quem joga; obedece também ao teto configurado na cena.
+        if (document.hidden || agora - recebido > 2000 || !pulador.deveDesenhar(agora, 30)) return;
         if (atual && !cena && !montando) {
             montando = true;
-            const lugar = lerLugar(reino, atual.lugar);
-            if (lugar)
-                cena = await montarCena({ raiz, ctx: montarLugar(c, reino, lugar, modoPorId(c, 'mundo')).ctx, idLocal: atual.idLocal, estado: () => { if (!atual)
-                        throw new Error('visão ausente'); return atual.estado; }, emitir: () => { }, pausaOJogo: false, nuvemDescobertas: false, partyMundo: true, partyVisaoForcada: true });
+            try {
+                const lugar = lerLugar(reino, atual.lugar);
+                if (lugar)
+                    cena = await montarCena({ raiz, ctx: montarLugar(c, reino, lugar, modoPorId(c, 'mundo')).ctx, idLocal: atual.idLocal, estado: () => { if (!atual)
+                            throw new Error('visão ausente'); return atual.estado; }, emitir: () => { }, pausaOJogo: false, nuvemDescobertas: false, partyMundo: true, partyVisaoForcada: true });
+            } finally { montando = false; }
         }
-        if (cena && atual)
-            cena.quadro({ agoraMs: agora, alpha: 0, posicao: e => { const a = anteriores.get(e.id), f = Math.min(1, (agora - recebido) / 200); const p = a ? { x: a.x + (e.px - a.x) * f, y: a.y + (e.py - a.y) * f } : { x: e.px, y: e.py }; posicoes.set(e.id, p); return p; } });
+        if (cena && atual && cena.quadroPermitido(agora))
+            cena.quadro({ agoraMs: agora, alpha: 0, posicao: e => { const a = anteriores.get(e.id), f = Math.min(1, (agora - recebido) / intervalo); const p = a ? { x: a.x + (e.px - a.x) * f, y: a.y + (e.py - a.y) * f } : { x: e.px, y: e.py }; posicoes.set(e.id, p); return p; } });
+      } finally {
         requestAnimationFrame(t => { void quadro(t); });
+      }
     };
     document.body.dataset.partyObservador = 'pronto';
     requestAnimationFrame(t => { void quadro(t); });

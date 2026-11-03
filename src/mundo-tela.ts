@@ -1,4 +1,5 @@
 import { lerPreferencias } from './plataforma/preferencias';
+import { ConsultaParty } from './plataforma/consulta-party';
 // O modo Mundo no navegador (marco 29, 30/10/2026, D-128): `?jogo=mundo`. Exige a conta (o personagem mora no
 // servidor); sem nuvem no build, vale a conta local do servidor de desenvolvimento. Fluxo:
 // - a lista dos 3 personagens do Mundo (separados da campanha), com "Jogar" ou o formulário de criação;
@@ -222,6 +223,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
   const ctx = montarLugar(conteudo, reino, lugar, modo).ctx;
   const eu = new ClienteArena({ ctx, transporte: conexao.transporte, nome: '', pedidoFicha: null, agoraMs });
   let visoesExternas: Extract<AvisoDoMundo, { tipo: 'visoesParty' }>['visoes'] = [];
+  const consultaParty = new ConsultaParty();
   const pollingParty: { timer?: ReturnType<typeof setInterval> } = {};
   let membrosParty: Extract<AvisoDoMundo, { tipo: 'grupo' }>['membros'] = [];
   let ultimoLugar: Extract<AvisoDoMundo, { tipo: 'lugar' }> | null = null;
@@ -282,6 +284,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
         eu.viajar(destino, pagamento);
       });
     } else if (a.tipo === 'visoesParty') {
+      consultaParty.concluir();
       visoesExternas = a.visoes;
     } else if (a.tipo === 'quadro') {
       economia.quadro(a);
@@ -378,7 +381,13 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
     mini.addEventListener('click', verMapa);
     mini.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); verMapa(); } });
   }
-  pollingParty.timer = setInterval(() => { if (lerPreferencias().visaoParty && membrosParty.length) enviarAcao({a:'grupo',op:'visoes'}); else visoesExternas = []; },250);
+  pollingParty.timer = setInterval(() => {
+    if (!lerPreferencias().visaoParty || membrosParty.length < 2 || document.hidden) {
+      visoesExternas = [];
+      return;
+    }
+    if (consultaParty.podeConsultar(agoraMs())) enviarAcao({ a: 'grupo', op: 'visoes' });
+  }, 250);
   addEventListener('keydown', teclaMapa);
   eu.aoEventos = (eventos) => {
     for (const ev of eventos) {

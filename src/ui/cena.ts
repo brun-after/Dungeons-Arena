@@ -1,6 +1,5 @@
 import { criarPaineisParty } from './party-paineis';
-import { centroDaCelula } from '../render/projecao';
-import { agruparParty } from '../render/party-visao';
+import { agruparParty, enquadrarGrupoParty } from '../render/party-visao';
 // Cena de jogo no navegador, compartilhada pela campanha e pela arena: palco, câmera, camadas do
 // mundo, HUD, controles, cabeçalho, entrada e feedback. Quem chama decide de onde vem o estado
 // (simulação local ou cliente de rede) e para onde vão os comandos.
@@ -180,6 +179,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const bus = new Barramento<EventosDaSimulacao>();
   let controles: Controles | null = null;
   const ap = montarApresentacao({
+    observador: o.partyVisaoForcada === true,
     ctx,
     palco,
     camera,
@@ -664,48 +664,43 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     if (q.rede) hud.mostrarRede(q.rede);
     // Marco 12: efeitos, som, luz, minimapa e prompt; o congelamento de impacto só segura o desenho.
     const congelado = ap.quadro(estado, q.agoraMs, dtMs, q.posicao);
-    ap.aplicarCamera(q.agoraMs);
-    const vista = camera.retanguloVisivel(palco.altura());
-    terreno.atualizarVisibilidade(...vista);
     const reduzido = ap.movimentoReduzido();
-    terreno.animar(q.agoraMs, reduzido);
-    visao.esmaecer(j ? posicaoVisual : null, dtMs);
-    objetos.desenhar(estado, q.agoraMs, reduzido, vista);
     portas.desenhar(estado, q.agoraMs, reduzido);
     fluxo.desenhar(estado, idLocal, ap.movimentoReduzido());
     if (!congelado) {
       telegrafia.desenhar(estado, ctx, idLocal, q.alpha);
-      sprites.desenhar(estado, ctx, ap.posicaoVisual(q.posicao), q.alpha, q.agoraMs, q.aoRemover);
       numeros.atualizar(q.agoraMs);
     }
     const aliados = o.partyMundo && (o.partyVisaoForcada || aparencia.visaoParty) && j?.grupo
       ? estado.entidades.filter(e => e.id === idLocal || e.grupo === j.grupo && e.arquetipo === 'jogador') : [];
     const grupos = agruparParty(aliados, idLocal);
+    const desenharVista = (grupo?: Entidade[]) => {
+      if (grupo) enquadrarGrupoParty(camera, grupo, palco.largura(), palco.altura(), zoomAntesParty ?? camera.zoom, q.posicao);
+      ap.aplicarCamera(q.agoraMs);
+      const vista = camera.retanguloVisivel(palco.altura());
+      terreno.atualizarVisibilidade(...vista);
+      terreno.animar(q.agoraMs, reduzido);
+      visao.esmaecer(grupo?.[0] ? q.posicao(grupo[0]) : j ? posicaoVisual : null, grupo ? 10000 : dtMs);
+      objetos.desenhar(estado, q.agoraMs, reduzido, vista);
+      if (!congelado) sprites.desenhar(estado, ctx, ap.posicaoVisual(q.posicao), q.alpha, q.agoraMs, q.aoRemover);
+      palco.renderizar();
+    };
     if (grupos.length > 0) {
       zoomAntesParty ??= camera.zoom;
       const externas = o.visoesExternas?.() ?? [];
-      paineisParty.ajustar(grupos.length+externas.length);
+      paineisParty.ajustar(grupos.length+externas.length, grupos.length);
       paineisParty.externas(externas,grupos.length);
-      const desenharVista = (grupo: Entidade[]) => {
-        const x = grupo.reduce((v,e) => v+e.x,0)/grupo.length, y = grupo.reduce((v,e) => v+e.y,0)/grupo.length;
-        const pontos = grupo.map(e => { const c = centroDaCelula(e.x,e.y); return camera.projecaoAtual.projetar(c.x,c.y); });
-        const lx = Math.max(...pontos.map(p=>p.x))-Math.min(...pontos.map(p=>p.x))+160;
-        const ly = Math.max(...pontos.map(p=>p.y))-Math.min(...pontos.map(p=>p.y))+200;
-        camera.zoom = Math.min(zoomAntesParty ?? camera.zoom, palco.largura()/lx, palco.altura()/ly);
-        camera.centralizar({x,y}); ap.aplicarCamera(q.agoraMs);
-        // Cada painel revela paredes e telhados pelo seu próprio jogador, sem herdar a visão anterior.
-        visao.esmaecer(grupo[0] ? q.posicao(grupo[0]) : null, 10000);
-        const r = camera.retanguloVisivel(palco.altura());
-        terreno.atualizarVisibilidade(...r); objetos.desenhar(estado,q.agoraMs,reduzido,r);
-        sprites.desenhar(estado,ctx,ap.posicaoVisual(q.posicao),q.alpha,q.agoraMs);
-        palco.renderizar();
-      };
+      terreno.prepararVistas(grupos.map(grupo => {
+        enquadrarGrupoParty(camera, grupo, palco.largura(), palco.altura(), zoomAntesParty ?? camera.zoom, q.posicao);
+        return camera.retanguloVisivel(palco.altura());
+      }));
       // Renderiza a câmera local por último: ponteiro e habilidades continuam referindo-se apenas a ela.
       for (let i = grupos.length-1; i >= 0; i--) {
         const g = grupos[i]; if (!g) continue;
         desenharVista(g); paineisParty.copiar(i,g.map(e=>e.nome).join(' · '));
       }
     } else {
+      terreno.prepararVistas([]);
       paineisParty.limpar();
       if (zoomAntesParty !== null) { camera.zoom = zoomAntesParty; zoomAntesParty = null; }
       if (palco.largura() !== host.clientWidth || palco.altura() !== host.clientHeight) {
@@ -713,7 +708,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
         palco.canvas.style.width = '100%'; palco.canvas.style.height = '100%';
         camera.definirVista({largura:host.clientWidth,altura:host.clientHeight});
       }
-      palco.renderizar();
+      desenharVista();
     }
 
 
@@ -752,6 +747,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       encerrarSessaoDeTela();
       hud.destruir();
       visao.destruir();
+      terreno.destruir();
       pintor.destruir();
       modelos3d.destruir();
       personagens?.destruir();

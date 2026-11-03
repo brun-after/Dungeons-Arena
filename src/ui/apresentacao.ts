@@ -58,6 +58,8 @@ import { classeDaHabilidade } from './runa-dom';
 import { DiretorVfx } from '../render/vfx/diretor';
 
 export interface OpcoesApresentacao {
+  /** Câmera auxiliar sem áudio, com orçamento de 30 fps e resolução de no máximo um pixel por ponto CSS. */
+  observador?: boolean;
   ctx: ContextoSimulacao;
   palco: Palco;
   camera: Camera;
@@ -113,11 +115,11 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   const monitor = new MonitorDeQualidade(prefs.qualidade === 'auto' ? qualidadePadrao(toque) : prefs.qualidade);
   const nivel = (): NivelQualidade => (prefs.qualidade === 'auto' ? monitor.nivel : prefs.qualidade);
   const qualidade = () => PRESETS_QUALIDADE[nivel()];
-  const alvoFps = () => fpsAlvo(prefs.fps, nivel());
+  const alvoFps = () => o.observador ? 30 : fpsAlvo(prefs.fps, nivel());
   const pulador = new PuladorDeQuadros();
   const medidor = new Medidor();
 
-  const motor = new MotorAudio({ musica: prefs.volumeMusica, efeitos: prefs.volumeEfeitos, mudo: prefs.mudo });
+  const motor = new MotorAudio({ musica: prefs.volumeMusica, efeitos: prefs.volumeEfeitos, mudo: o.observador || prefs.mudo });
   const som = ligarSom({ motor, bus: o.bus, estado: o.estado, idLocal, habilidades: o.habilidades, fase: ctx.fase });
   const particulas = new SistemaParticulas(palco.efeitos, palco.app.renderer, () => camera.projecaoAtual);
   const impacto = new ControladorImpacto(() => prefs.efeitosDeTela && !reduzido() && qualidade().impacto);
@@ -228,7 +230,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     for (const n of ['minimo', 'baixo', 'medio', 'alto'] as const) document.body.classList.toggle(`qualidade-${n}`, nivel() === n);
     document.documentElement.style.setProperty('--escala-ui', String(prefs.escalaInterface));
     document.body.dataset.qualidade = nivel();
-    motor.definirVolumes({ musica: prefs.volumeMusica, efeitos: prefs.volumeEfeitos, mudo: prefs.mudo });
+    motor.definirVolumes({ musica: prefs.volumeMusica, efeitos: prefs.volumeEfeitos, mudo: o.observador || prefs.mudo });
     particulas.limite = qualidade().particulas;
     // Marco 11A: movimento reduzido também reduz as partículas (metade, sem giro).
     particulas.reduzido = reduzido();
@@ -236,7 +238,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
       particulas.limpar();
       diretor.limpar();
     }
-    palco.definirEscala(escalaDaResolucao(prefs.resolucao, toque));
+    palco.definirEscala(Math.min(escalaDaResolucao(prefs.resolucao, toque), o.observador ? 1 / Math.min(window.devicePixelRatio || 1, 2) : 1));
     medidor.mostrar(prefs.medidor);
   };
   aplicarPreferencias();
