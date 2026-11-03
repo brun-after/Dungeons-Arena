@@ -1,4 +1,4 @@
-import { retratoPersonagem, resumoPersonagem } from './ui/retrato-personagem';
+import { painelPersonagem } from './ui/retrato-personagem';
 import { lerPreferencias } from './plataforma/preferencias';
 import { ConsultaParty } from './plataforma/consulta-party';
 // O modo Mundo no navegador (marco 29, 30/10/2026, D-128): `?jogo=mundo`. Exige a conta (o personagem mora no
@@ -50,7 +50,9 @@ function tela(raiz: HTMLElement): HTMLElement {
   const sub = document.createElement('p');
   sub.className = 'subtitulo-menu';
   sub.textContent = t('mundo.subtitulo');
-  el.append(h, sub);
+  const voltar = voltarAoMenu();
+  voltar.classList.add('voltar-selecao');
+  el.append(voltar, h, sub);
   raiz.append(el);
   return el;
 }
@@ -77,7 +79,7 @@ function mostrarErro(raiz: HTMLElement, texto: string): void {
   const p = document.createElement('p');
   p.setAttribute('role', 'alert');
   p.textContent = texto;
-  el.append(p, voltarAoMenu());
+  el.append(p);
 }
 
 /** A conta local do servidor sem nuvem (desenvolvimento): um id por aparelho. */
@@ -119,7 +121,7 @@ export async function iniciarMundo(raiz: HTMLElement): Promise<void> {
     const el = tela(raiz);
     const p = document.createElement('p');
     p.textContent = t('mundo.precisaConta');
-    el.append(p, botao(t('mundo.entrarConta'), () => void nuvemDoBuild()?.entrar()), voltarAoMenu());
+    el.append(p, botao(t('mundo.entrarConta'), () => void nuvemDoBuild()?.entrar()));
     return;
   }
   const el = tela(raiz);
@@ -184,7 +186,7 @@ export async function iniciarMundo(raiz: HTMLElement): Promise<void> {
       const acoes = document.createElement('div');
       acoes.className = 'acoes-slot';
       acoes.append(jogar, excluir);
-      cartao.append(retratoPersonagem(p.classeId, p.previa), resumo, resumoPersonagem(p.classeId, p.previa), acoes);
+      cartao.append(resumo, painelPersonagem(p.classeId, p.previa ? { ...p.previa, nivel: p.nivel } : undefined), acoes);
 
     } else {
       cartao.append(formularioDeCriacao(slot, (classeId, nome) => {
@@ -193,7 +195,6 @@ export async function iniciarMundo(raiz: HTMLElement): Promise<void> {
     }
     el.append(cartao);
   }
-  el.append(voltarAoMenu());
 }
 
 function formularioDeCriacao(slot: number, criar: (classeId: string, nome: string) => void): HTMLElement {
@@ -221,7 +222,7 @@ function formularioDeCriacao(slot: number, criar: (classeId: string, nome: strin
   enviar.className = 'botao-menu';
   enviar.textContent = t('mundo.comecar');
   const previa = document.createElement('div');
-  const atualizarPrevia = () => { previa.replaceChildren(retratoPersonagem(classe.value), resumoPersonagem(classe.value)); };
+  const atualizarPrevia = () => { previa.replaceChildren(painelPersonagem(classe.value)); };
   classe.addEventListener('change', atualizarPrevia);
   atualizarPrevia();
   form.append(previa, rotuloNome, nome, rotuloClasse, classe, enviar);

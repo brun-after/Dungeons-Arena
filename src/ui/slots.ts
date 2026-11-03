@@ -1,4 +1,4 @@
-import { retratoPersonagem, resumoPersonagem } from './retrato-personagem';
+import { painelPersonagem } from './retrato-personagem';
 import { jogadorDoSave } from '../save/esquema';
 // Tela de slots da campanha (§3.5). Marco 6B (13/10/2026): três slots com continuar, jogo novo,
 // exportar, importar e excluir (com confirmação). Importar só em slot vazio, para nunca
@@ -119,7 +119,7 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
   titulo.id = 'titulo-slots';
   const status = el('p', 'erro-lobby');
   status.setAttribute('role', 'alert');
-  tela.append(titulo);
+  tela.append(link('./', t('menu.voltar'), 'link-menu voltar-selecao'), titulo);
   raiz.append(tela);
 
   let slots: EstadoSlot[];
@@ -128,7 +128,6 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
   } catch {
     // Sem IndexedDB: dá para jogar, só não salva.
     tela.append(el('p', 'subtitulo-menu', t('slots.semArmazenamento')), link('./?jogo=campanha&slot=0', t('slots.jogarSemSalvar')));
-    tela.append(link('./', t('menu.voltar'), 'link-menu'));
     return;
   }
 
@@ -152,7 +151,7 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
     if (s.tipo === 'ok') {
       const registro = await carregarSlot(s.slot);
       const personagem = registro && registro !== 'invalido' ? jogadorDoSave(registro.estado) : undefined;
-      if (personagem?.bolsa) cartao.append(retratoPersonagem(personagem.bolsa.classeId, personagem), resumoPersonagem(personagem.bolsa.classeId, personagem));
+      if (personagem?.bolsa) cartao.append(painelPersonagem(personagem.bolsa.classeId, personagem));
       cartao.append(
         el(
           'p',
@@ -266,6 +265,6 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
     if (grupoDoCartao) cartao.append(grupoDoCartao);
     grade.append(cartao);
   }
-  tela.append(status, link('./', t('menu.voltar'), 'link-menu'));
+  tela.append(status);
   void ligarNuvemNosSlots({ depoisDe: titulo, cartoes, locais: new Set(slots.filter((s) => s.tipo === 'ok').map((s) => s.slot)), status, recarregar });
 }

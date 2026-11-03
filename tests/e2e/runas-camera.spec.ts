@@ -2,7 +2,7 @@
 // e a câmera solta depois do arrasto, que só o toque duplo no botão de centralizar recentraliza.
 import { expect, test } from '@playwright/test';
 
-test('a seleção mostra runa e retrato de cada classe, e "Ver mais" abre a lore', async ({ page }) => {
+test('a seleção mostra runa, retrato, atributos e habilidades de cada classe', async ({ page }) => {
   const erros: string[] = [];
   page.on('pageerror', (e) => erros.push(e.message));
   await page.goto('./?jogo=campanha&slot=1&diag=1');
@@ -16,11 +16,8 @@ test('a seleção mostra runa e retrato de cada classe, e "Ver mais" abre a lore
   await expect.poll(() => page.locator('.classe-coluna canvas.retrato-3d').count()).toBe(5);
 
   const guerreiro = page.locator('[data-classe="guerreiro"]');
-  await expect(guerreiro.locator('.estilo-classe')).toContainText('Estilo:');
-  const mais = guerreiro.locator('details.mais-classe');
-  await expect(mais.locator('.detalhe-classe')).toBeHidden();
-  await mais.locator('summary').click();
-  await expect(mais.locator('.detalhe-classe')).toContainText('Começa com:');
+  await expect(guerreiro.getByRole('heading', { name: 'Atributos', exact: true })).toBeVisible();
+  await expect(guerreiro.getByRole('heading', { name: 'Habilidades habilitadas' })).toBeVisible();
 
   // As skills de classe levam a runa na aba Habilidades.
   await guerreiro.getByRole('link', { name: 'Jogar de Guerreiro' }).click();
