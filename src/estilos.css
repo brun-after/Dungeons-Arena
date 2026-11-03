@@ -1,10 +1,10 @@
 :root {
   color-scheme: dark;
-  --fundo: #14121a;
-  --painel: rgba(31, 28, 40, 0.85);
-  --texto: #ece8f4;
-  --texto-suave: #a59fb4;
-  --destaque: #f39c12;
+  --fundo: #080808;
+  --painel: rgba(16, 16, 16, 0.96);
+  --texto: #fafafa;
+  --texto-suave: #b8b8b8;
+  --destaque: #ff8a26;
   --borda: rgba(236, 232, 244, 0.25);
   --controle: rgba(236, 232, 244, 0.1);
   --controle-ativo: rgba(236, 232, 244, 0.3);
@@ -3133,3 +3133,50 @@ body[data-party-visao='1'] dialog.modal {
   max-height: calc(var(--party-pane-altura) - 52px); box-sizing: border-box;
 }
 body[data-party-visao='1'] dialog.modal::backdrop { background: transparent; backdrop-filter: none; }
+
+/* Navegacao persistente e paineis de inventario independentes. */
+.tela-menu, dialog.modal { background-color: #101010; color: #fafafa; }
+.cartao-slot { background: #171717; border-color: #444; border-top: 2px solid var(--destaque); }
+.botao-menu { background: #ff8a26; color: #080808; border: 1px solid #ffac65; border-radius: 2px 14px 2px 14px; font-weight: 750; }
+.botao-cabecalho { background: #202020; color: #fafafa; border: 1px solid #666; border-radius: 6px; }
+.botao-cabecalho:hover, .botao-cabecalho[aria-pressed='true'] { background: #3a281b; border-color: #ff8a26; }
+.modal-fechar { border-radius: 50%; }
+.link-menu { color: #ffac65; text-underline-offset: 4px; }
+button:focus-visible, a:focus-visible { outline: 2px solid #ff8a26; outline-offset: 3px; }
+dialog.mochila { width: min(1200px, 96vw); max-width: 96vw; height: min(800px, 92dvh); max-height: 92dvh; padding: 0; overflow: hidden; }
+dialog.mochila[open] { display: flex; flex-direction: column; }
+.mochila .modal-topo { flex: none; padding: 12px 18px; border-bottom: 1px solid #555; background: #080808; }
+.mochila .modal-corpo { display: grid; grid-template-columns: 160px minmax(0, 1fr); flex: 1; min-height: 0; overflow: hidden; padding: 0; }
+.mochila .abas-modal { display: flex; flex-direction: column; align-items: stretch; gap: 8px; margin: 0; padding: 16px 10px; background: #080808; border-right: 1px solid #555; overflow-y: auto; }
+.mochila .abas-modal button { min-height: 44px; text-align: left; flex-shrink: 0; }
+.mochila .conteudo-modal { min-width: 0; min-height: 0; overflow: auto; padding: 16px; overscroll-behavior: contain; }
+.mochila .inventario-paineis { display: grid; grid-template-columns: minmax(180px, .85fr) minmax(230px, 1.4fr); gap: 18px; overflow: hidden; }
+.equipamento-fixo, .bolsa-rolavel { min-width: 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 6px; }
+.equipamento-fixo { border-right: 1px solid #444; }
+.retrato-personagem { margin: 0; min-height: 130px; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 80%, #513019, #171717 65%); border-bottom: 1px solid #ff8a26; color: #bbb; }
+.retrato-personagem img, .retrato-personagem canvas { display: block; width: 180px; max-width: 100%; aspect-ratio: 1; object-fit: contain; }
+.resumo-personagem { line-height: 1.5; }
+.resumo-personagem p { color: #ccc; font-size: .9rem; }
+.atalhos-jogador { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 20px; }
+.atalhos-jogador button { min-height: 54px; border-left: 3px solid #ff8a26; }
+.equipamento-fixo .linha-item { flex-wrap: wrap; }
+@media (max-width: 700px), (max-height: 500px) {
+ .mochila .modal-corpo { grid-template-columns: 105px minmax(0, 1fr); }
+ .mochila .abas-modal { padding: 8px 5px; gap: 5px; }
+ .mochila .abas-modal button { padding: 8px 5px; font-size: .8rem; }
+ .mochila .inventario-paineis { grid-template-columns: minmax(130px, .85fr) minmax(150px, 1.2fr); gap: 6px; padding: 8px; }
+ .retrato-personagem img, .retrato-personagem canvas { width: 130px; }
+ .equipamento-fixo .detalhe-item { font-size: .72rem; }
+ .mochila .linha-item { flex-wrap: wrap; }
+}
+
+.preparando-cena { position: absolute; inset: 0; z-index: 100; display: grid; place-items: center; background: #080808; color: #fafafa; border-bottom: 3px solid #ff8a26; }
+
+@media (max-width: 480px) {
+ .mochila .modal-corpo { grid-template-columns: 88px minmax(0, 1fr); }
+ .mochila .inventario-paineis { grid-template-columns: minmax(95px, .8fr) minmax(0, 1fr); padding: 5px; gap: 4px; }
+ .mochila .conteudo-item { min-width: 0; overflow-wrap: anywhere; }
+ .mochila .icone-item { width: 24px; height: 24px; flex-basis: 24px; }
+ .atalhos-jogador { grid-template-columns: 1fr; }
+}
+.botao-menu.secundario { background: #202020; color: #fafafa; border-color: #666; border-radius: 6px; }

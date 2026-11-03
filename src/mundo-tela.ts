@@ -1,3 +1,4 @@
+import { retratoPersonagem, resumoPersonagem } from './ui/retrato-personagem';
 import { lerPreferencias } from './plataforma/preferencias';
 import { ConsultaParty } from './plataforma/consulta-party';
 // O modo Mundo no navegador (marco 29, 30/10/2026, D-128): `?jogo=mundo`. Exige a conta (o personagem mora no
@@ -144,7 +145,7 @@ export async function iniciarMundo(raiz: HTMLElement): Promise<void> {
         void jogarNoMundo(raiz, servidor, token, { lugar: `regiao:${p.vilaSalva}`, slot });
       });
       jogar.setAttribute('aria-label', t('mundo.jogarRotulo', { nome: p.nome }));
-      cartao.append(resumo, jogar);
+      cartao.append(retratoPersonagem(p.classeId, p.previa), resumo, resumoPersonagem(p.classeId, p.previa), jogar);
     } else {
       cartao.append(formularioDeCriacao(slot, (classeId, nome) => {
         void jogarNoMundo(raiz, servidor, token, { lugar: `regiao:${reino.inicio}`, slot, criar: { classeId, nome } });
@@ -179,7 +180,11 @@ function formularioDeCriacao(slot: number, criar: (classeId: string, nome: strin
   enviar.type = 'submit';
   enviar.className = 'botao-menu';
   enviar.textContent = t('mundo.comecar');
-  form.append(rotuloNome, nome, rotuloClasse, classe, enviar);
+  const previa = document.createElement('div');
+  const atualizarPrevia = () => { previa.replaceChildren(retratoPersonagem(classe.value), resumoPersonagem(classe.value)); };
+  classe.addEventListener('change', atualizarPrevia);
+  atualizarPrevia();
+  form.append(previa, rotuloNome, nome, rotuloClasse, classe, enviar);
   form.addEventListener('submit', (ev) => {
     ev.preventDefault();
     enviar.disabled = true;

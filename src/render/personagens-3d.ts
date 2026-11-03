@@ -94,6 +94,21 @@ export function maoNoQuadro(nome: string, lado: 'd' | 'e', direcao: number, colu
 
 export class AtlasDePersonagens {
   private readonly bases = new Map<string, Texture | 'carregando' | 'falhou'>();
+  carregando(nome: string): boolean { return this.bases.get(nome) === 'carregando'; }
+
+  async preparar(modelos: string[], armas: string[] = []): Promise<void> {
+    await Promise.all([
+      ...[...new Set(modelos)].filter(n => this.existe(n)).map(async n => {
+        const url = await urlDoAtlas(n);
+        if (url) this.bases.set(n, await Assets.load<Texture>(url));
+      }),
+      ...[...new Set(armas)].map(async n => {
+        const a = armaDe(n);
+        if (a) this.bases.set(`arma:${n}`, await Assets.load<Texture>(await a.url));
+      }),
+    ]);
+  }
+
   private readonly quadros = new Map<string, Texture>();
   private destruido = false;
 

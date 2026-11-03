@@ -1,3 +1,5 @@
+import { equipamento3d } from '../render/adornos';
+import { existeArma3d } from '../render/personagens-3d';
 import { criarPaineisParty } from './party-paineis';
 import { agruparParty, enquadrarGrupoParty } from '../render/party-visao';
 // Cena de jogo no navegador, compartilhada pela campanha e pela arena: palco, câmera, camadas do
@@ -160,7 +162,10 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const modaisDeAntes = new Set(document.querySelectorAll('dialog.modal'));
   const host = div('palco');
   const ui = div('camada-ui');
-  o.raiz.append(host, ui);
+  const preparando = div('preparando-cena');
+  preparando.setAttribute('role', 'status');
+  preparando.textContent = 'Preparando o mundo…';
+  o.raiz.append(host, ui, preparando);
   let palco: Palco;
   try {
     palco = await criarPalco(host);
@@ -225,6 +230,31 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
         texturas: carregarTexturasDoSolo([soloTema.base, soloTema.variacao, soloTema.parede, soloTema.mato, 'estrada', ...texturasDosAmbientes(fase.ambientes ?? [])]),
         pintor,
       };
+  if (solo) await solo.texturas;
+  if (personagens) {
+    const modelos = [...ctx.conteudo.classes.values()].map(c => c.modelo);
+    const armas: string[] = [];
+    for (const modelo of modelos) {
+      const eq = equipamento3d(modelo, null, existeArma3d);
+      if (eq?.arma) armas.push(eq.arma.modelo);
+      if (eq?.secundaria) armas.push(eq.secundaria.modelo);
+    }
+    for (const e of o.estado().entidades) {
+      const modelo = ctx.conteudo.classes.get(e.classeId ?? e.bolsa?.classeId ?? '')?.modelo ?? ctx.conteudo.presets.get(e.preset)?.modelo;
+      if (!modelo) continue;
+      modelos.push(modelo);
+      const eq = equipamento3d(modelo, e.aparencia, existeArma3d);
+      modelos.push(...(eq?.camadas.map(c => c.nome) ?? []));
+      if (eq?.arma) armas.push(eq.arma.modelo);
+      if (eq?.secundaria) armas.push(eq.secundaria.modelo);
+    }
+    try { await personagens.preparar(modelos, armas); }
+    catch {
+      preparando.textContent = 'Não foi possível carregar a aparência do mundo. Recarregue para tentar novamente.';
+      palco.destruir();
+      return null;
+    }
+  }
   const terreno = criarTerreno(palco.terreno, fase, o.tileset ?? null, temaDaFase(ctx), quebraveis, solo);
   const projecao = () => camera.projecaoAtual;
   const sprites = new CamadaEntidades(palco.entidades, {
@@ -247,6 +277,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   // Marco 31 (D-130): a telegrafia acima do escuro (a área do golpe inimigo se lê mesmo fora da luz).
   const telegrafia = new CamadaTelegrafia(palco.marcas, palco.voo, projecao, () => aparencia.areaExata, ap.particulas);
   await Promise.all([carregarTexturasDeIcones([...new Set([...ctx.conteudo.itens.values()].map((i) => i.icone)), 'pergaminho']), o.tileset ? null : modelos3d.carregar()]);
+  preparando.remove();
   const objetos = new CamadaObjetos(
     palco.chao,
     (id) => ctx.conteudo.itens.get(id)?.raridade,

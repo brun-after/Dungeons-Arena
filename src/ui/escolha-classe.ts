@@ -6,7 +6,7 @@
 
 import type { Conteudo } from '../core/conteudo';
 import { t, type ChaveTexto } from '../i18n';
-import { mioloDoRetrato, retrato3d } from '../render/retrato';
+import { retratoPersonagem, resumoPersonagem } from './retrato-personagem';
 import { svgDaRuna } from './runa-dom';
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, texto?: string): HTMLElementTagNameMap[K] {
@@ -20,29 +20,6 @@ function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, text
 export function primeiraFrase(texto: string): string {
   const fim = texto.search(/[.!?](\s|$)/);
   return fim < 0 ? texto : texto.slice(0, fim + 1);
-}
-
-/** O retrato como `<img>` de SVG (sem innerHTML: o SVG vem só de constantes do código). */
-function retrato(modelo: string, nome: string): HTMLElement | null {
-  const miolo = mioloDoRetrato(modelo);
-  if (!miolo) return null;
-  const img = el('img', 'retrato-classe');
-  img.alt = '';
-  img.width = 128;
-  img.height = 128;
-  img.decoding = 'async';
-  img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">${miolo}</svg>`)}`;
-  img.dataset.retrato = nome;
-  // Marco 32 (31/10/2026, D-131): o personagem pré-renderizado toma o lugar do desenho quando a imagem carrega.
-  const r3d = retrato3d(modelo);
-  if (r3d) {
-    r3d.canvas.className = 'retrato-classe retrato-3d';
-    r3d.canvas.dataset.retrato = nome;
-    void r3d.pronto.then((ok) => {
-      if (ok && img.isConnected) img.replaceWith(r3d.canvas);
-    });
-  }
-  return img;
 }
 
 /** `base`: o endereço do jogo novo (com slot e fase); cada classe acrescenta `&classe=<id>`. */
@@ -60,8 +37,9 @@ export function mostrarEscolhaDeClasse(raiz: HTMLElement, conteudo: Conteudo, ba
     const runa = svgDaRuna(c.id, 48);
     if (runa) coluna.append(runa);
     coluna.append(el('h2', undefined, c.nome));
-    const foto = retrato(c.modelo, c.id);
-    if (foto) coluna.append(foto);
+    const foto = retratoPersonagem(c.id);
+    foto.dataset.retrato = c.id;
+    coluna.append(foto, resumoPersonagem(c.id));
     coluna.append(el('p', 'estilo-classe', t(`classe.${c.id}.estilo` as ChaveTexto)));
     const lore = c.descricao ? t(c.descricao as ChaveTexto) : '';
     if (lore) coluna.append(el('p', 'lore-classe', primeiraFrase(lore)));

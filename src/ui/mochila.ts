@@ -1,3 +1,4 @@
+import { retratoPersonagem, resumoPersonagem } from './retrato-personagem';
 // Mochila e ficha (§2.10, §2.12). Marco 6 (13/10/2026). Só lê o estado e emite comandos.
 // No toque, tocar a linha inteira equipa, usa ou desequipa; equipar e desequipar mantêm o modal aberto. No desktop, cada linha
 // tem o seu botão. A lista é redesenhada só quando a bolsa, o nível ou o XP mudam.
@@ -54,7 +55,7 @@ export interface Mochila {
   atualizar: () => void;
 }
 
-type Aba = 'itens' | 'ficha' | 'habilidades' | 'diario';
+type Aba = 'geral' | 'itens' | 'ficha' | 'habilidades' | 'diario';
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, texto?: string): HTMLElementTagNameMap[K] {
   const e = document.createElement(tag);
@@ -120,6 +121,8 @@ export function criarMochila(o: OpcoesMochila): Mochila {
   let assinatura = '';
   const estadoHabilidades: EstadoAbaHabilidades = { escolhendo: null };
   let rotuloBotao = '';
+  let abaDesenhada: Aba = aba;
+  const rolagens = new Map<Aba, number[]>();
 
   const modal = criarModal({
     titulo: t('mochila.titulo'),
@@ -233,14 +236,18 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     const bolsa = j.bolsa;
     if (!bolsa) return;
     // A mochila vem primeiro: é onde estão as ações; os slots ficam numa grade compacta.
+    const bolsaPainel = el('section', 'bolsa-rolavel');
+    const equipamentoPainel = el('section', 'equipamento-fixo');
+    equipamentoPainel.append(retratoPersonagem(bolsa.classeId, j));
+    corpo.append(equipamentoPainel, bolsaPainel);
     const ouro = el('p', 'saldo-loja', t('loja.saldo', { ouro: bolsa.ouro }));
     ouro.dataset.ouro = String(bolsa.ouro);
-    corpo.append(
+    bolsaPainel.append(
       ouro,
       el('h3', 'subtitulo-modal', t('mochila.itens', { n: bolsa.mochila.length, max: ctx.balance.inventario.capacidade })),
     );
-    if (bolsa.mochila.length === 0) corpo.append(el('p', 'vazio-modal', t('mochila.semItens')));
-    if (ctx.modo.objetosDeFase && bolsa.mochila.length > 0) corpo.append(el('p', 'detalhe-item', t('mochila.dicaSoltar')));
+    if (bolsa.mochila.length === 0) bolsaPainel.append(el('p', 'vazio-modal', t('mochila.semItens')));
+    if (ctx.modo.objetosDeFase && bolsa.mochila.length > 0) bolsaPainel.append(el('p', 'detalhe-item', t('mochila.dicaSoltar')));
     const lista = el('ul', 'lista-itens');
     const atalhos = consumiveisComAtalho(bolsa, itens).map((i) => i.invId);
     bolsa.mochila.forEach((entrada, indice) => {
@@ -255,9 +262,9 @@ export function criarMochila(o: OpcoesMochila): Mochila {
         }, n >= 0 ? teclaDoAtalho(n) : undefined),
       );
     });
-    corpo.append(lista);
+    bolsaPainel.append(lista);
 
-    corpo.append(el('h3', 'subtitulo-modal', t('mochila.equipado')));
+    equipamentoPainel.append(el('h3', 'subtitulo-modal', t('mochila.equipado')));
     const slots = el('ul', 'lista-itens slots');
     for (const slot of SLOTS_DE_EQUIPAMENTO) {
       const entrada = bolsa.equipamento[slot];
@@ -276,7 +283,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
         }),
       );
     }
-    corpo.append(slots);
+    equipamentoPainel.append(slots);
   };
 
   const linhaDaMochila = (
@@ -429,7 +436,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
   const assinaturaDe = (j: Entidade): string => {
     const b = j.bolsa;
     const estudo = b?.estudo ? { id: b.estudo.id, velocidade12: b.estudo.velocidade12 } : null;
-    return JSON.stringify([b ? { ...b, estudo } : null, j.nivel, j.xp]);
+    return JSON.stringify([b ? { ...b, estudo } : null, j.nivel, j.xp, j.aparencia]);
   };
 
   const desenhar = () => {
@@ -441,9 +448,13 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     // A dica dos atributos é da aba Ficha: sai a cada redesenho (a ficha cria outra).
     dica?.destruir();
     dica = null;
+    rolagens.set(abaDesenhada, [...corpo.querySelectorAll<HTMLElement>('.conteudo-modal, .bolsa-rolavel, .equipamento-fixo')].map(e => e.scrollTop));
     corpo.textContent = '';
     const abas = el('div', 'abas-modal');
     abas.setAttribute('role', 'group');
+    const geral = botao('Visão geral', 'aba-geral', () => { aba = 'geral'; desenhar(); });
+    geral.setAttribute('aria-pressed', String(aba === 'geral'));
+    abas.append(geral);
     for (const [id, chave] of [
       ['itens', 'mochila.abaItens'],
       ['ficha', 'mochila.abaFicha'],
@@ -462,12 +473,22 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     }
     corpo.append(abas);
     const conteudo = el('div', 'conteudo-modal');
-    if (aba === 'itens') desenharItens(j, conteudo);
+    if (aba === 'geral') {
+      conteudo.append(retratoPersonagem(j.bolsa.classeId, j), resumoPersonagem(j.bolsa.classeId, j));
+      const atalhos = el('div', 'atalhos-jogador');
+      for (const [id, nome] of [['itens', 'Gerenciar equipamentos'], ['ficha', 'Evoluir ficha'], ['habilidades', 'Preparar habilidades'], ['diario', 'Consultar diário']] as const)
+        atalhos.append(botao(nome, `atalho-${id}`, () => { aba = id; desenhar(); }));
+      conteudo.append(atalhos);
+    }
+    else if (aba === 'itens') { conteudo.classList.add('inventario-paineis'); desenharItens(j, conteudo); }
     else if (aba === 'ficha') desenharFicha(j, conteudo);
     else if (aba === 'habilidades') desenharHabilidades(conteudo, j, ctx, emitir, estadoHabilidades, desenhar, o.estado?.().tick ?? 0);
     else desenharDiario(conteudo, j, ctx);
     corpo.append(conteudo);
-    if (focoAntes) corpo.querySelector<HTMLElement>(`[data-chave="${CSS.escape(focoAntes)}"]`)?.focus();
+    const posicoes = rolagens.get(aba) ?? [];
+    corpo.querySelectorAll<HTMLElement>('.conteudo-modal, .bolsa-rolavel, .equipamento-fixo').forEach((e, i) => { e.scrollTop = posicoes[i] ?? 0; });
+    abaDesenhada = aba;
+    if (focoAntes) corpo.querySelector<HTMLElement>(`[data-chave="${CSS.escape(focoAntes)}"]`)?.focus({ preventScroll: true });
   };
 
   const atualizar = () => {
