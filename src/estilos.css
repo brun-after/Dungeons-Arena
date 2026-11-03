@@ -2973,6 +2973,8 @@ body.movimento-reduzido .cinematica-ultimate {
 
 /* Marco 30 (30/10/2026, D-129): o painel social do Mundo (grupo e chat) e as linhas dos diálogos da economia. */
 .painel-social {
+  /* Toda a área recebe cliques/toques, inclusive campos e espaços entre controles. */
+  pointer-events: auto;
   position: absolute;
   left: calc(8px + var(--seguro-esq));
   top: calc(192px + var(--seguro-topo));

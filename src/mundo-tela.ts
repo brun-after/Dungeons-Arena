@@ -378,7 +378,6 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
     mini.addEventListener('click', verMapa);
     mini.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); verMapa(); } });
   }
-  social.ajustarAoToque();
   pollingParty.timer = setInterval(() => { if (lerPreferencias().visaoParty && membrosParty.length) enviarAcao({a:'grupo',op:'visoes'}); else visoesExternas = []; },250);
   addEventListener('keydown', teclaMapa);
   eu.aoEventos = (eventos) => {

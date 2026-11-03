@@ -18,7 +18,7 @@ it('clicar para cima substitui a direção mantida e termina olhando para cima',
   });
   cliente.entrar();
   const id = cliente.entidadeId;
-  if (!id) throw new Error('sem identidade');
+  if (!id) throw new Error('sem identidade do jogador');
   const e = buscarEntidade(sala.estado, id);
   if (!e) throw new Error('sem jogador');
   // Isola o movimento de ataques e colisões com NPCs.
@@ -33,7 +33,7 @@ it('clicar para cima substitui a direção mantida e termina olhando para cima',
   expect(e.py).toBeCloseTo(destino.y, 1);
   expect(e.olhando).toBe('N');
   const previsto = cliente.previsto;
-  if (!previsto) throw new Error('sem previsão');
+  if (!previsto) throw new Error('sem estado previsto');
   expect(buscarEntidade(previsto, e.id)?.olhando).toBe('N');
   expect(e.direcao).toBe('parado');
 });
