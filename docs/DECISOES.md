@@ -3620,3 +3620,13 @@ Bosses externos usam RNG separado e configuração de encontro no reino. Spawn l
 chegadas; chance estável pela semente para não divergir entre cliente e servidor. Quatro dragões
 com ataques/resistências elementais e um necromante com invocação de esqueletos. Modelo CC0 do
 dragão verificado no pacote oficial de Quaternius; licença e hash registrados junto aos atlas.
+
+
+## Dragão sombrio e cores dos servos — 02/11/2026 (versão 1)
+
+Revisão solicitada pelo produto: substituir o dragão de aparência cartunesca por uma anatomia
+mais detalhada. Selecionado Cethiel's Dragon 3D (Drummyfish/Cethiel), CC0 declarado pelo autor,
+rig e animações Collada, textura negra. A energia dos quatro elementos é uma emissão discreta
+em volta do corpo; as escamas ficam escuras. Porte de 3,3 células e atlas abaixo de 4096 pixels.
+Invocações do necromante jogador são avermelhadas; as do boss são negras. Um preset exclusivo
+de invocação preserva a cor do boss fora do recorte de rede, sem entrar no gerador de inimigos comuns.

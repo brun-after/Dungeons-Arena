@@ -620,6 +620,31 @@
         "trevas": 75,
         "sagrado": -25
       }
+    },
+    {
+      "id": "esqueleto_do_ossuario",
+      "nome": "Esqueleto do Ossuário",
+      "hpBase": 45,
+      "hesitacaoS": 6,
+      "deteccao": 3,
+      "xp": 10,
+      "modelo": "esqueleto",
+      "arquetipo": "atirador",
+      "classe": "corpo_a_corpo",
+      "defesa": 1,
+      "ataqueBasico": "flecha",
+      "habilidades": [],
+      "intervaloAtaqueMs": 3000,
+      "resistencias": {
+        "veneno": 100,
+        "gelo": 25
+      },
+      "imunidades": [
+        "envenenado"
+      ],
+      "invocacao": {
+        "comportamento": "agressivo"
+      }
     }
   ]
 }

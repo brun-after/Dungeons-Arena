@@ -7997,7 +7997,7 @@
           "invocar": {
             "valor": 1,
             "duracaoMs": 20000,
-            "ref": "esqueleto"
+            "ref": "esqueleto_do_ossuario"
           }
         }
       ],

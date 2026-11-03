@@ -1,3 +1,4 @@
+import { tintaDaInvocacao } from './cores-necromancia';
 import { tipoEm } from '../world/fase';
 // Marcadores das entidades: modelo de criatura (ou a imagem do jogador), anel de equipe sob os pés, barra
 // de HP, sub-barra de recurso, **barra de conjuração** (a telegrafia, §2.15), anel de alvo, anéis de
@@ -368,6 +369,10 @@ export class CamadaEntidades {
         direcao: { x: dtx / norma, y: dty / norma },
         angulo: Math.atan2(dty, dtx),
       });
+      const tintaInvocada = tintaDaInvocacao(e, estado);
+      if (m.figura3d) m.figura3d.raiz.tint = tintaInvocada ?? 0xffffff;
+      if (m.rig && tintaInvocada !== null) m.rig.raiz.tint = tintaInvocada;
+      m.silhueta.tint = tintaInvocada ?? 0xffffff;
       this.desenharChao(m, iso);
 
       const indicador = textoIndicador(e, estado.tick);
@@ -430,7 +435,8 @@ export class CamadaEntidades {
     m.rig.raiz.visible = true;
     if (!m.rig.raiz.parent) m.raiz.addChildAt(m.rig.raiz, m.raiz.getChildIndex(m.silhueta));
     // Marco 23 (D-092): o inimigo afim leva a cor do elemento (o extremo, mais forte).
-    const af = e.afinidade;
+    // Dragões mantêm as escamas negras mesmo quando o tema atribui afinidade.
+    const af = e.preset.startsWith('dragao_') ? undefined : e.afinidade;
     m.rig.raiz.tint = q.ajuste?.tinta != null ? misturarCor(0xffffff, q.ajuste.tinta, 0.75) : af && this.o.corElemento ? misturarCor(0xffffff, this.o.corElemento(af.elemento), af.extrema ? 0.6 : 0.42) : 0xffffff;
     // Marco 24 (D-098): o voo solto do falcão (altura, inclinação na curva e o tamanho no ombro).
     // Marco 32 (D-131): de cima, a altura do voo aparece menor (a câmera olha de cima; a sombra marca o chão).
@@ -515,7 +521,8 @@ export class CamadaEntidades {
     }
     const medidas = atlas.medidas(escolha.modelo);
     // Marco 23 (D-092): o inimigo afim leva a cor do elemento, como no token desenhado.
-    const af = e.afinidade;
+    // Dragões mantêm as escamas negras mesmo quando o tema atribui afinidade.
+    const af = e.preset.startsWith('dragao_') ? undefined : e.afinidade;
     const tinta = q.ajuste?.tinta != null ? misturarCor(0xffffff, q.ajuste.tinta, 0.75) : af && this.o.corElemento ? misturarCor(0xffffff, this.o.corElemento(af.elemento), af.extrema ? 0.6 : 0.42) : 0xffffff;
     const branca = !e.morto && (this.o.armaBranca?.(e, q.tick) ?? false);
     const pulso = q.reduzido ? 0.5 : 0.5 + 0.5 * Math.sin((2 * Math.PI * q.agoraMs) / PULSO_ARMA_MS);

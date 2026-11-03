@@ -15988,11 +15988,11 @@
     "altura": 1.4
   },
   "dragao_fogo": {
-    "quadroL": 180,
-    "quadroA": 144,
-    "ancoraX": 90,
-    "ancoraY": 100.8,
-    "pxCelula": 36,
+    "quadroL": 189,
+    "quadroA": 140,
+    "ancoraX": 94.5,
+    "ancoraY": 99.61538461538461,
+    "pxCelula": 27,
     "colunas": 42,
     "faixa": 21,
     "estados": {
@@ -16025,14 +16025,14 @@
         "n": 6
       }
     },
-    "altura": 2.3
+    "altura": 3.3
   },
   "dragao_gelo": {
-    "quadroL": 180,
-    "quadroA": 144,
-    "ancoraX": 90,
-    "ancoraY": 100.8,
-    "pxCelula": 36,
+    "quadroL": 189,
+    "quadroA": 140,
+    "ancoraX": 94.5,
+    "ancoraY": 99.61538461538461,
+    "pxCelula": 27,
     "colunas": 42,
     "faixa": 21,
     "estados": {
@@ -16065,14 +16065,14 @@
         "n": 6
       }
     },
-    "altura": 2.3
+    "altura": 3.3
   },
   "dragao_raio": {
-    "quadroL": 180,
-    "quadroA": 144,
-    "ancoraX": 90,
-    "ancoraY": 100.8,
-    "pxCelula": 36,
+    "quadroL": 189,
+    "quadroA": 140,
+    "ancoraX": 94.5,
+    "ancoraY": 99.61538461538461,
+    "pxCelula": 27,
     "colunas": 42,
     "faixa": 21,
     "estados": {
@@ -16105,14 +16105,14 @@
         "n": 6
       }
     },
-    "altura": 2.3
+    "altura": 3.3
   },
   "dragao_veneno": {
-    "quadroL": 180,
-    "quadroA": 144,
-    "ancoraX": 90,
-    "ancoraY": 100.8,
-    "pxCelula": 36,
+    "quadroL": 189,
+    "quadroA": 140,
+    "ancoraX": 94.5,
+    "ancoraY": 99.61538461538461,
+    "pxCelula": 27,
     "colunas": 42,
     "faixa": 21,
     "estados": {
@@ -16145,7 +16145,7 @@
         "n": 6
       }
     },
-    "altura": 2.3
+    "altura": 3.3
   },
   "espantalho": {
     "quadroL": 108,

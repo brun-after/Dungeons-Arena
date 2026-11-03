@@ -12,6 +12,7 @@ export type Material = (typeof MATERIAIS)[number];
 
 /** Os nomes dos presets deste arquivo: `mat_<material>` (impacto), `con_<material>` (conjuração), as auras e o resto. */
 export type NomePresetElemento =
+  | 'aura_dragao_fogo' | 'aura_dragao_gelo' | 'aura_dragao_raio' | 'aura_dragao_veneno'
   | `mat_${Material}`
   | `con_${Material}`
   | 'aura_queimando'
@@ -144,6 +145,11 @@ export const PRESETS_ELEMENTOS: Readonly<Record<NomePresetElemento, Lista>> = {
     { textura: 'faisca', quantidade: 14, vidaMs: [260, 420], velocidade: [140, 260], direcao: 'livre', gravidade: 60, escala: [0.8, 0.2], alpha: [1, 0], aditivo: true, raio: 4, cor: null, arrasto: 0.5 },
     { ...fumacaEscura, quantidade: 5 },
   ],
+  // 02/11/2026: energia elemental tênue ao redor do tronco dos dragões negros.
+  aura_dragao_fogo: [{ ...brasa, quantidade: 2, raio: 42, alturaInicial: 55, alpha: [.42, 0], escala: [.4, .06], velocidade: [5, 14], gravidade: -4, vidaMs: [800, 1200] }],
+  aura_dragao_gelo: [{ ...nevoaFria, quantidade: 1, raio: 42, alturaInicial: 55, alpha: [.18, 0], escala: [.65, 1.1], vidaMs: [900, 1400] }],
+  aura_dragao_raio: [{ ...arco, quantidade: 1, raio: 42, alturaInicial: 55, alpha: [.35, 0], escala: [.45, .3], vidaMs: [110, 200] }],
+  aura_dragao_veneno: [{ ...fumacaEscura, quantidade: 1, raio: 42, alturaInicial: 55, alpha: [.2, 0], escala: [.6, 1.1], cor: 0x6a9470, vidaMs: [900, 1400] }],
   // A Legião: a fumaça roxa que sobe do servo caído.
   dominio_legiao: [{ ...suga, quantidade: 10, raio: 24 }, { textura: 'runa', quantidade: 2, vidaMs: [700, 1000], velocidade: [8, 16], direcao: 'cima', gravidade: -6, escala: [0.5, 0.7], alpha: [0.8, 0], aditivo: true, raio: 10, cor: 0x9b59b6 }],
 };
