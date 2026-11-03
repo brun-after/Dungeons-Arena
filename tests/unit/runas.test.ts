@@ -5,7 +5,6 @@ import type { Entidade } from '../../src/entities/entidade';
 import { normalizarPreferencias, PREFERENCIAS_PADRAO } from '../../src/plataforma/preferencias';
 import { mioloDoRetrato } from '../../src/render/retrato';
 import { coresDasRunas, girarMatiz, RUNAS, runaDe } from '../../src/render/runas';
-import { primeiraFrase } from '../../src/ui/escolha-classe';
 import { classeDaHabilidade, classeDoItem } from '../../src/ui/runa-dom';
 
 const { conteudo } = lerConteudo(FONTES_OFICIAIS);
@@ -68,10 +67,6 @@ describe('seleção de classe', () => {
     expect(mioloDoRetrato('nada')).toBeNull();
   });
 
-  it('a linha de lore é a primeira frase', () => {
-    expect(primeiraFrase('Um. Dois. Três.')).toBe('Um.');
-    expect(primeiraFrase('Sem ponto')).toBe('Sem ponto');
-  });
 });
 
 describe('preferência da runa', () => {

@@ -174,7 +174,7 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
     const personagens = await Promise.all((await persistencia.listar(conta)).map(async resumo => {
       const ficha = await persistencia.carregar(conta, resumo.slot);
       const e = ficha ? conferirPersonagem(ficha.personagem, ctxCertificacao, 'previa', 'previa')?.entidade : null;
-      return { ...resumo, previa: e ? { aparencia: aparenciaDe(ctxCertificacao, e), nivel: e.nivel, hpMax: e.hpMax, defesa: e.defesa, habilidades: e.habilidades } : undefined };
+      return { ...resumo, previa: e ? { aparencia: aparenciaDe(ctxCertificacao, e), nivel: e.nivel, hpMax: e.hpMax, defesa: e.defesa, atributos: e.atributos, manaMax: e.manaMax, xp: e.xp, habilidades: e.habilidades } : undefined };
     }));
     return resposta(200, { ok: true, personagens });
   });
