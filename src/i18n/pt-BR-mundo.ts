@@ -65,7 +65,7 @@ export const textosMundo = {
   'mundo.excluirNome': 'Nome do personagem',
   'mundo.excluirConfirmar': 'Excluir permanentemente',
   'mundo.excluirOnline': 'Saia do Mundo com este personagem antes de excluí-lo.',
-  'mundo.excluirMercado': 'Cancele os anúncios e receba os itens e as vendas pendentes no mercado antes de excluir.',
+  'mundo.excluirMercado': 'Aguarde as operações do mercado terminarem. Cancele os anúncios e receba os itens e as vendas pendentes antes de excluir.',
   'mundo.excluirFalha': 'Não foi possível excluir. Confira o nome e tente novamente.',
   'mundo.jogarRotulo': 'Jogar com {nome}',
   'mundo.criar': 'Criar personagem',

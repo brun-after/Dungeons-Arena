@@ -27,6 +27,16 @@ function ficha(): FichaDoMundo {
 const esperar = () => new Promise((r) => setTimeout(r, 0));
 
 describe('exclusão de personagens', () => {
+  it('aguarda todas as operações do mercado em trânsito antes de permitir exclusão', async () => {
+    const p = new Contadora(), c = new CoordenadorDoMundo(p, CONTEUDO), f = ficha();
+    await p.gravar('local:comprador', 1, f);
+    const primeira = c.iniciarMercado('local:comprador#1'), segunda = c.iniciarMercado('local:comprador#1');
+    expect(await c.excluir('local:comprador', 1, f.personagem.nome)).toBe('mercado_pendente');
+    primeira();
+    expect(await c.excluir('local:comprador', 1, f.personagem.nome)).toBe('mercado_pendente');
+    segunda();
+    expect(await c.excluir('local:comprador', 1, f.personagem.nome)).toBeNull();
+  });
   it('aguarda o último save antes de excluir e libera o slot sem ressuscitar a ficha', async () => {
     const p = new Contadora(), c = new CoordenadorDoMundo(p, CONTEUDO), f = ficha();
     let liberar = () => {};

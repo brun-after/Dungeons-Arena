@@ -66,7 +66,7 @@ export function mapaDoLugar(ctx: ContextoSimulacao, estado: () => EstadoJogo | n
   const desenhar = () => {
     g.drawImage(fundo, 0, 0);
     const atual = estado(), eu = atual?.entidades.find(e => e.id === idLocal);
-    const etapa = orientacao?.destino && reino ? proximaEtapa(reino, lugar, orientacao.destino, fase) : null;
+    const etapa = orientacao?.destino ? proximaEtapa(reino, lugar, orientacao.destino, fase) : null;
     if (eu && etapa?.ponto) {
       const a = mapa.ponto(eu.x, eu.y), b = mapa.ponto(etapa.ponto.x, etapa.ponto.y);
       g.strokeStyle = '#f6ce78'; g.lineWidth = 2; g.setLineDash([7, 6]);

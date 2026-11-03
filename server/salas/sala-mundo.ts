@@ -73,6 +73,17 @@ export class CoordenadorDoMundo {
   private readonly gravadas = new Map<string, string>();
   private readonly gravacoesPendentes = new Map<string, Promise<void>>();
   private readonly operacoes = new Map<string, Promise<unknown>>();
+  private readonly operacoesMercado = new Map<string, number>();
+
+  /** Uma compra em trânsito também precisa terminar antes de apagar o personagem. */
+  iniciarMercado(identidade: string): () => void {
+    this.operacoesMercado.set(identidade, (this.operacoesMercado.get(identidade) ?? 0) + 1);
+    return () => {
+      const restantes = (this.operacoesMercado.get(identidade) ?? 1) - 1;
+      if (restantes > 0) this.operacoesMercado.set(identidade, restantes);
+      else this.operacoesMercado.delete(identidade);
+    };
+  }
 
   /** Entrada e exclusão do mesmo slot não podem atravessar uma à outra durante I/O. */
   async noSlot<T>(conta: string, slot: number, fazer: () => Promise<T>): Promise<T> {
@@ -90,11 +101,13 @@ export class CoordenadorDoMundo {
     return this.noSlot(conta, slot, async () => {
       const identidade = `${conta}#${String(slot)}`;
       if (this.online.has(identidade) || this.emTroca(identidade)) return 'ja_jogando';
+      if (this.operacoesMercado.has(identidade)) return 'mercado_pendente';
       const ficha = await this.carregar(conta, slot);
       if (!ficha) return 'sem_personagem';
       if (ficha.personagem.nome !== nome) return 'nome_diferente';
       // O mercado identifica o vendedor pelo slot. Evita herdar anúncios de um personagem apagado.
       if ((await this.mercado.doVendedor(identidade)).length) return 'mercado_pendente';
+      if (this.operacoesMercado.has(identidade)) return 'mercado_pendente';
       await this.persistencia.excluir(conta, slot);
       this.gravadas.delete(identidade);
       this.cancelarBilhetesDe(identidade);
