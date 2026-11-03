@@ -7,17 +7,19 @@ import { novaSala } from './apoio';
 it('clicar para cima substitui a direção mantida e termina olhando para cima', () => {
   const sala = novaSala();
   let receber: (texto: string) => void = () => {};
-  const conexao = sala.conectar((texto) => receber(texto));
+  const conexao = sala.conectar((texto) => { receber(texto); });
   const cliente = new ClienteArena({
     ctx: sala.ctx, nome: 'Teste', pedidoFicha: { classeId: 'aventureiro' }, agoraMs: () => 0,
     transporte: {
-      enviar: (texto) => conexao.receber(texto),
+      enviar: (texto) => { conexao.receber(texto); },
       aoReceber: (ouvinte) => { receber = ouvinte; },
-      fechar: () => conexao.fechar(),
+      fechar: () => { conexao.fechar(); },
     },
   });
   cliente.entrar();
-  const e = buscarEntidade(sala.estado, cliente.entidadeId!);
+  const id = cliente.entidadeId;
+  if (!id) throw new Error('sem identidade do jogador');
+  const e = buscarEntidade(sala.estado, id);
   if (!e) throw new Error('sem jogador');
   // Isola o movimento de ataques e colisões com NPCs.
   sala.estado.entidades = [e];
@@ -30,6 +32,8 @@ it('clicar para cima substitui a direção mantida e termina olhando para cima',
   for (let i = 0; i < 100; i++) passo();
   expect(e.py).toBeCloseTo(destino.y, 1);
   expect(e.olhando).toBe('N');
-  expect(buscarEntidade(cliente.previsto!, e.id)?.olhando).toBe('N');
+  const previsto = cliente.previsto;
+  if (!previsto) throw new Error('sem estado previsto');
+  expect(buscarEntidade(previsto, e.id)?.olhando).toBe('N');
   expect(e.direcao).toBe('parado');
 });
