@@ -3237,3 +3237,19 @@ dialog.mochila[open] { display: flex; flex-direction: column; }
 .botao-menu.secundario { background: #202020; color: #fafafa; border-color: #666; border-radius: 6px; }
 
 .equipamento-fixo .lista-itens.slots { grid-template-columns: minmax(0, 1fr); }
+
+/* O terreno isométrico ocupa a vista sem uma moldura retangular. */
+.mapa-terreno { border: 0; border-radius: 0; background: transparent; touch-action: pan-x pan-y; }
+.janela-cartografia { max-height: max(220px, calc(100dvh - 330px)); overscroll-behavior: contain; }
+.janela-cartografia .mapa-terreno {
+  width: calc(min(100%, max(220px, 100dvh - 330px) * 1.923) * var(--zoom-mapa, 1));
+  margin: 0 auto;
+}
+body .minimapa.minimapa-mundo {
+  width: 176px;
+  height: 106px;
+  border: 0;
+  background: transparent;
+  touch-action: none;
+}
+body.toque .minimapa.minimapa-mundo { width: 132px; height: 82px; }

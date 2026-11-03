@@ -1,3 +1,4 @@
+import { ligarZoomMapa } from './zoom-mapa';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import { mapaDoLugar } from './mapa-lugar';
@@ -206,12 +207,21 @@ export function abrirMapa(reino: Reino, lugar: string, descobertas: readonly str
     janela.append(canvas);
     const zoom = document.createElement('div'); zoom.className = 'acoes-slot zoom-cartografia';
     let escala = 1;
+    const aplicarZoom = (nova: number) => {
+      const anterior = canvas.offsetWidth;
+      const centroX = janela.scrollLeft + janela.clientWidth / 2;
+      const centroY = janela.scrollTop + janela.clientHeight / 2;
+      escala = Math.max(1, Math.min(4, nova));
+      canvas.style.setProperty('--zoom-mapa', String(escala));
+      const fator = canvas.offsetWidth / anterior;
+      janela.scrollLeft = centroX * fator - janela.clientWidth / 2;
+      janela.scrollTop = centroY * fator - janela.clientHeight / 2;
+    };
+    ligarZoomMapa(canvas, fator => { aplicarZoom(escala * fator); });
     for (const [rotulo, delta] of [['mundo.mapa.reduzir', -.5], ['mundo.mapa.ampliar', .5]] as const) {
       const b = document.createElement('button'); b.type = 'button'; b.className = 'botao-cabecalho'; b.textContent = t(rotulo);
       b.addEventListener('click', () => {
-        escala = Math.max(1, Math.min(4, escala + delta));
-        const base = Math.min(janela.clientWidth, Math.max(220, window.innerHeight - 330) * 1.515);
-        canvas.style.width = escala === 1 ? '' : `${base * escala}px`;
+        aplicarZoom(escala + delta);
       });
       zoom.append(b);
     }
