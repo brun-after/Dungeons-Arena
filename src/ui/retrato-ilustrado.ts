@@ -35,7 +35,12 @@ function arma(modelo: string | null, x: number, raridade: string | null | undefi
     </g>`;
   }
   const id = modeloDaArma3d(modelo, nome => ARMAS_BASE.has(nome) || armaDeClasse34(nome, 0, 0) !== null);
-  const desenho = ARMAS_BASE.has(id) ? arma34(id as Arma, 0, 0) : armaDeClasse34(id, 0, 0);
+  const desenho = id === 'espada' ? `
+    <path fill="#b8c3ca" stroke="#211a1a" stroke-width=".5" d="M-1.5-2-1.5-15 0-19 1.5-15 1.5-2Z"/>
+    <path fill="#edf0e8" d="M0-18.5 1.15-15 1.15-2.3H0Z"/>
+    <path fill="#775233" stroke="#211a1a" stroke-width=".45" d="M-1 .5H1V4.2Q0 5.4-1 4.2Z"/>
+    <path fill="#bd9358" stroke="#211a1a" stroke-width=".5" d="M-3.5-.8Q0 .1 3.5-.8L3.3 1Q0 2-3.3 1Z"/>`
+    : ARMAS_BASE.has(id) ? arma34(id as Arma, 0, 0) : armaDeClasse34(id, 0, 0);
   return `<g transform="translate(${x} 402) rotate(${x < 200 ? -14 : 14}) scale(9)">
     ${desenho ?? ''}<circle cx="0" cy="0" r="1.1" fill="${cor}" stroke="#171219" stroke-width=".5"/>
   </g>`;
