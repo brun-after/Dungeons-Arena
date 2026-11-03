@@ -3236,3 +3236,4 @@ dialog.mochila[open] { display: flex; flex-direction: column; }
 }
 .botao-menu.secundario { background: #202020; color: #fafafa; border-color: #666; border-radius: 6px; }
 
+.equipamento-fixo .lista-itens.slots { grid-template-columns: minmax(0, 1fr); }
