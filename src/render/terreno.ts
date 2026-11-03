@@ -139,6 +139,8 @@ function desenharCelula(g: Graphics, fase: Fase, paleta: Paleta, x: number, y: n
 }
 
 export interface Terreno {
+  /** Todas as câmeras do quadro: nenhuma delas pode descartar o chão usado pelas demais. */
+  prepararVistas: (vistas: readonly (readonly [number, number, number, number])[]) => void;
   /**
    * Marco 30 (30/10/2026, D-129): o retângulo visível (px de mundo). Os blocos são desenhados quando chegam perto da
    * vista e descartados quando ficam longe (a região do Mundo tem 128×128 células).
@@ -203,6 +205,8 @@ export function criarTerreno(
   // Marco 31 (D-130): o assador nasce quando as texturas chegam; os blocos desenhados entram na fila.
   let assador: AssadorDeSolo | null = null;
   const fila = new Set<Bloco>();
+  let vistas: readonly (readonly [number, number, number, number])[] = [];
+  let assouNoQuadro = false;
   let destruido = false;
   if (solo && !tileset) {
     void solo.texturas.then((texturas) => {
@@ -375,6 +379,7 @@ export function criarTerreno(
       ? undefined
       : blocos[Math.floor(y / BLOCO_CELULAS) * porLinha + Math.floor(x / BLOCO_CELULAS)];
   return {
+    prepararVistas: (novas) => { vistas = novas; assouNoQuadro = false; },
     redesenharCelula: (x, y) => {
       // O autotiling olha os 8 vizinhos: redesenha os blocos da vizinhança 3×3 (sem repetir).
       const tocados = new Set<Bloco>();
@@ -403,11 +408,12 @@ export function criarTerreno(
         }
         if (dentro(b, MARGEM_BLOCO)) {
           if (!b.desenhado) desenharBloco(b);
-        } else if (b.desenhado && !dentro(b, MARGEM_BLOCO * 3)) descartarBloco(b);
+        } else if (b.desenhado && !dentro(b, MARGEM_BLOCO * 3) && !vistas.some(([vx0, vy0, vx1, vy1]) =>
+          b.x1 > vx0 - MARGEM_BLOCO * 3 && b.x0 < vx1 + MARGEM_BLOCO * 3 && b.y1 > vy0 - MARGEM_BLOCO * 3 && b.y0 < vy1 + MARGEM_BLOCO * 3)) descartarBloco(b);
         b.c.visible = b.desenhado && dentro(b, 0);
       }
       // Marco 31 (D-130): um bloco assado por quadro, o visível primeiro.
-      if (fila.size > 0) {
+      if (fila.size > 0 && !assouNoQuadro) {
         let escolhido: Bloco | undefined;
         for (const b of fila) {
           if (b.c.visible) {
@@ -417,6 +423,7 @@ export function criarTerreno(
           escolhido ??= b;
         }
         if (escolhido) {
+          assouNoQuadro = vistas.length > 0;
           fila.delete(escolhido);
           assarBloco(escolhido);
         }

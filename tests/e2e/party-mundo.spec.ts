@@ -40,7 +40,8 @@ test('painel social começa recolhido e recebe cliques e toques sem atingir o mu
 });
 
 test('dois clientes entram por código e preservam mapas e configurações pessoais', async ({ browser }, testInfo) => {
-    test.setTimeout(180000);
+    // Dois contextos WebGL por software também precisam de tempo para montar e desmontar as cenas.
+    test.setTimeout(300000);
     const a = await browser.newContext(), b = await browser.newContext();
     try {
         const p = await a.newPage(), q = await b.newPage();
@@ -69,13 +70,15 @@ test('dois clientes entram por código e preservam mapas e configurações pesso
         await p.getByRole('button', { name: 'Configurações', exact: true }).click();
         await p.locator('[data-config="visaoParty"]').check();
         await p.keyboard.press('Escape');
-        await p.keyboard.press('Escape');
+        await expect(p.locator('dialog[open]')).toHaveCount(0);
         await expect(p.locator('.camera-party:visible')).toHaveCount(1);
         await expect(q.locator('.camera-party:visible')).toHaveCount(0);
         await q.locator('.minimapa').click();
         await expect(q.locator('.mapa-expandido')).toBeVisible();
         await expect(p.locator('.mapa-expandido')).toHaveCount(0);
-        await q.keyboard.press('Escape');
+        // O mapa não é um dialog: Esc também pode abrir a pausa e bloquear o movimento deste roteiro.
+        await q.locator('.mapa-expandido').getByRole('button', { name: 'Fechar', exact: true }).click();
+        await expect(q.locator('dialog[open]')).toHaveCount(0);
         await q.keyboard.down('d');
         try {
             await expect(p.locator('.camera-party:visible')).toHaveCount(2, { timeout: 25000 });

@@ -7,7 +7,7 @@ import { versaoDoConteudo, type MensagemServidor } from '../../src/arena/protoco
 import { BALANCE_PADRAO } from '../../src/core/contexto';
 import { buscarEntidade } from '../../src/core/estado';
 import { DT_MS } from '../../src/core/loop';
-import { posicionar, type Entidade } from '../../src/entities/entidade';
+import { criarEntidade, posicionar, type Entidade } from '../../src/entities/entidade';
 import type { AvisoDoMundo } from '../../src/mundo/avisos';
 import { fichaNova, type FichaDoMundo } from '../../src/mundo/ficha-mundo';
 import { lerLugar } from '../../src/mundo/lugares';
@@ -203,5 +203,17 @@ it('observação da party usa estado público sem inventários privados', () => 
   const visao=s.visaoParty('local:observado#1');
   expect(visao?.idLocal).toBe(a.bem.entidadeId);
   expect(visao?.estado.entidades.every(e=>e.bolsa===null)).toBe(true);
+  expect(a.e().bolsa).not.toBeNull();
   expect(s.visaoParty('local:nao-logado#1')).toBeNull();
+});
+
+it('observar outra vila recorta o interesse antes de copiar as entidades da região', () => {
+  const s = sala('regiao:vila_do_centro');
+  const a = entrar(s, 'local:observado#1');
+  posicionar(a.e(), 1, 1);
+  const distante = criarEntidade({ id: 'distante', tipo: 'inimigo', x: 120, y: 120 });
+  // Dados fora da visão não devem sequer ser lidos para construir o snapshot.
+  Object.defineProperty(distante, 'bolsa', { enumerable: true, get: () => { throw new Error('cópia fora do interesse'); } });
+  s.estado.entidades.push(distante);
+  expect(s.visaoParty('local:observado#1')?.estado.entidades.map(e => e.id)).not.toContain('distante');
 });

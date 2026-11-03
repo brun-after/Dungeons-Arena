@@ -10,6 +10,7 @@
 
 import { versaoDoConteudo, type MensagemCliente } from '../arena/protocolo';
 import { SalaArena, type EntradaDePersonagem, type OpcoesSala, type Sessao } from '../arena/sala';
+import { estadoPublico } from '../arena/estado-publico';
 import { celulaDeEntrada, colocarEm } from '../coop/sala-campanha';
 import { conferirPersonagem, previaDoPersonagem } from '../coop/personagem';
 import type { Celula, EntidadeId } from '../core/comandos';
@@ -540,7 +541,8 @@ export class SalaMundo extends SalaArena {
   /** 02/11/2026: apenas estado público; o coordenador verifica a filiação à party. */
   visaoParty(identidade: string): import('./avisos').VisaoExternaParty | null {
     const s = this.sessaoDaIdentidade(identidade);
-    return s ? { lugar: this.idLugar, idLocal: s.entidadeId, estado: this.visaoDe(s, this.estadoPublicoAtual()) } : null;
+    // Recorta antes de clonar: observar uma vila não deve copiar todos os monstros e inventários da região.
+    return s ? { lugar: this.idLugar, idLocal: s.entidadeId, estado: estadoPublico(this.visaoDe(s, this.estado)) } : null;
   }
 
   private sessaoDaIdentidade(identidade: string): Sessao | undefined {
