@@ -16,6 +16,11 @@ test('expande pelo minimapa, marca lugares e pontos e apaga a faixa em cinco seg
   const mapa = page.locator('.mapa-expandido');
   await expect(mapa).toBeVisible();
   await expect(mapa).toContainText('Você está em: Vila do Centro');
+  await expect(mapa).toContainText('Reino do Eclipse');
+  await mapa.getByRole('button',{name:'Reino do Eclipse',exact:true}).click();
+  await expect(mapa.locator('.regiao-mapa')).toHaveCount(12);
+  await mapa.getByRole('button',{name:'Reino Central',exact:true}).click();
+  await expect(mapa.locator('.regiao-mapa')).toHaveCount(9);
   const lugar = mapa.getByRole('button', { name: 'Marcar: Gruta do Orvalho', exact: true });
   await lugar.click();
   await expect(lugar).toHaveAttribute('aria-pressed', 'true');

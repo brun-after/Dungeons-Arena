@@ -98,7 +98,8 @@ export function criarTumulo(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entid
   const bolsa = e.bolsa;
   if (!bolsa) return;
   const itens: string[] = [];
-  for (const m of bolsa.mochila) for (let k = 0; k < m.qtd; k++) itens.push(m.itemId);
+  // 02/11/2026: pedras subsidiadas não se convertem em pedras revendáveis no loot do túmulo.
+  for (const m of bolsa.mochila) if (m.ref !== 'resgate_dungeon') for (let k = 0; k < m.qtd; k++) itens.push(m.itemId);
   for (const [slot, m] of Object.entries(bolsa.equipamento)) {
     if (!m) continue;
     itens.push(m.itemId);

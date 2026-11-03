@@ -3,6 +3,7 @@
 // estoque, saldo e espaço; só então cobra e entrega. Saldo nunca fica negativo. O estoque é
 // ilimitado na v1 (D-050): a loja é o dreno de ouro, não um recurso disputado.
 
+import { ofertasDoMundo } from '../mundo/lojas-mundo';
 import { precoDoItem } from './itens-progressao';
 import { hashTexto } from '../core/rng';
 import { estudoAvanca } from '../modos/regras';
@@ -31,7 +32,7 @@ export function estoqueDaLoja(estado: EstadoJogo, ctx: ContextoSimulacao, loja: 
   const livros = [...ctx.conteudo.itens.values()].filter((i) => i.ensina && ctx.conteudo.habilidades.get(i.ensina)?.tags.includes('expansao19'));
   livros.sort((a, b) => hashTexto(`${s}/${a.id}`) - hashTexto(`${s}/${b.id}`));
   extras.push(...livros.slice(0, 3).map((i) => i.id));
-  return [...new Set([...loja.itens, ...extras])];
+  return [...new Set([...loja.itens, ...extras, ...ofertasDoMundo(estado,ctx,loja)])];
 }
 
 export function comprar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, itemId: string, saida: EventoSimulacao[]): void {
@@ -50,9 +51,10 @@ function tentarComprar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, 
   // Marco 17: o Carisma acima de 10 dá desconto.
   const preco = precoDoItem(item, e, ctx);
   if (bolsa.ouro < preco) return 'sem_ouro';
-  if (!cabeNaMochila(bolsa, item, 1, ctx.balance.inventario)) return 'mochila_cheia';
+  const ref = preco === 0 && item.id === 'pergaminho_retorno' ? 'resgate_dungeon' : null;
+  if (!cabeNaMochila(bolsa, item, 1, ctx.balance.inventario, ref)) return 'mochila_cheia';
   bolsa.ouro -= preco;
-  guardarItem(bolsa, item, 1, ctx.balance.inventario);
+  guardarItem(bolsa, item, 1, ctx.balance.inventario, ref);
   if (item.progressao?.tipo === 'ponto') bolsa.tomosComprados = (bolsa.tomosComprados ?? 0) + 1;
   saida.push({ t: 'comprou', tick: estado.tick, id: e.id, itemId, preco });
   return null;
@@ -72,7 +74,7 @@ function tentarVender(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, i
   const entrada = bolsa.mochila[indice];
   const item = entrada ? ctx.conteudo.itens.get(entrada.itemId) : undefined;
   if (!entrada || !item) return 'nao_encontrado';
-  if (!vendavel(item)) return 'nao_vendavel';
+  if (!vendavel(item) || entrada.ref === 'resgate_dungeon') return 'nao_vendavel';
   const preco = precoDeVenda(item, ctx.balance.economia.vendaPct);
   entrada.qtd--;
   if (entrada.qtd <= 0) bolsa.mochila.splice(indice, 1);

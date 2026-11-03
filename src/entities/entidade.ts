@@ -71,6 +71,7 @@ export interface DadosInvocacao {
   ultimoAtaqueId?: number;
   resistenciaRestante?: number;
   resistenciaTotal?: number;
+  exercitoBoss?: boolean;
   necromancia?: 'servo' | 'reanimado' | 'eco';
   /** Marco 22 (D-090): quantos mortos do mesmo Necromante estão de pé (o dano de cada um cai com a quantidade). */
   exercito?: number;
@@ -214,6 +215,8 @@ export interface Bolsa {
   /** Marco 24 (D-095): as passivas gerais ligadas (até 3), trocadas só fora de combate. */
   passivasAtivas?: string[];
   /** D-075 (17/10/2026): origens permanentes dos ganhos por consumíveis e saldo fracionário de XP. */
+  /** 02/11/2026: assistência na dungeon atual; o servidor restaura da ficha ao entrar. */
+  mortesNaDungeon?: number;
   tomosComprados?: number;
   pontosPorItens?: number;
   ranksPorItens?: number;

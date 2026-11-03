@@ -7,6 +7,8 @@
 // normais e perigosas, as abandonadas (o telhado só some ao entrar, e há um monstro lá dentro). As casas usam um
 // gerador de números à parte, para não mexer no sorteio do resto.
 
+import { ehDragao, porteDoDragao } from './porte-dragoes';
+import { BALANCE_PADRAO } from '../core/contexto';
 import { aleatorio, criarRng, inteiro, escolher, type EstadoRng } from '../core/rng';
 import { LADOS, portaDa, vizinha, type Bioma, type LadoDaRegiao, type PapelNpc, type Reino, type RegiaoDoMundo } from '../mundo/reino';
 import type { Celula } from '../core/comandos';
@@ -380,7 +382,8 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     }
   }
 
-  const total = Math.floor((livres.length * regras.densidadePor1000) / 1000);
+  // 02/11/2026: reserva capacidade para exércitos de bosses e invocações dos jogadores.
+  const total = Math.min(BALANCE_PADRAO.mundo.populacaoMax, Math.floor((livres.length * regras.densidadePor1000) / 1000));
   const inimigos: InimigoPosicionado[] = [];
   let centroHorda: Celula | null = null;
   let restantes = 0;
@@ -412,8 +415,18 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
   const rngBoss = criarRng(regiao.semente + 104729);
   if (encontros?.presets.length && aleatorio(rngBoss) * 100 < encontros.chancePct) {
     for (let i = 0; i < encontros.quantidade; i++) {
-      const c = sortearLivre(x => longeDaVila(x) && spawns.every(s => chebyshev(s, x) >= FOLGA_INIMIGOS * 2));
-      if (c) inimigos.push({ preset: escolher(rngBoss, encontros.presets), x: c.x, y: c.y, nivel: regiao.nivel[1] });
+      const preset=escolher(rngBoss,encontros.presets);
+      const raio=ehDragao(preset)?Math.ceil(porteDoDragao(regiao.nivel[1],BALANCE_PADRAO).raio):0;
+      const cabe=(c:Celula)=>g.interna(c.x-raio,c.y-raio)&&g.interna(c.x+raio,c.y+raio)&&
+        ![...telhados,...regiao.estruturas].some(t=>c.x+raio>=t.x&&c.x-raio<t.x+t.largura&&c.y+raio>=t.y&&c.y-raio<t.y+t.altura);
+      const c = sortearLivre(x => longeDaVila(x) && cabe(x) && spawns.every(s => chebyshev(s, x) >= FOLGA_INIMIGOS * 2));
+      if(c) {
+        if(ehDragao(preset)) {
+          // Só alarga terreno natural: nunca apaga portas, casas, vila ou a moldura da região.
+          for(let dy=-raio;dy<=raio;dy++)for(let dx=-raio;dx<=raio;dx++)if(g.interna(c.x+dx,c.y+dy))g.por(c.x+dx,c.y+dy,perfil.chao);
+        }
+        inimigos.push({preset,x:c.x,y:c.y,nivel:regiao.nivel[1]});
+      }
     }
   }
 

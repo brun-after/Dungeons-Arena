@@ -1,4 +1,5 @@
 import { tintaDaInvocacao } from './cores-necromancia';
+import { ehDragao, porteDoDragao } from '../world/porte-dragoes';
 import { tipoEm } from '../world/fase';
 // Marcadores das entidades: modelo de criatura (ou a imagem do jogador), anel de equipe sob os pés, barra
 // de HP, sub-barra de recurso, **barra de conjuração** (a telegrafia, §2.15), anel de alvo, anéis de
@@ -214,6 +215,7 @@ interface Marcador {
   /** Marco 32 (D-131): a runa do elemento da última ação, acesa no tomo enquanto conjura. */
   runaGolpe: Runa | null;
   escala: number;
+  escalaAtlas: number;
   /** Altura do topo do desenho acima da origem (negativo), para barras e indicador. */
   topo: number;
   /** Achatamento dos anéis no chão: 1 de cima, 0,5 no isométrico. */
@@ -258,7 +260,7 @@ export class CamadaEntidades {
     return {
       raiz, sobre, chao, silhueta, seta, rig: null, figura3d: null, dono3d: null, morteDesdeMs: -1, barras, aneis, indicador, runa, runaDesenhada: '', cor,
       angulo: 0, sentido: 1, ultimoX: e.px, ultimoY: e.py, visualX: Number.NaN, visualY: Number.NaN,
-      andandoAteMs: 0, acaoId: null, ataqueDesdeMs: -Infinity, golpe: null, chaveGolpe: '', runaGolpe: null, escala, topo: -RAIO * escala, achatamento: 1, chaoDesenhado: '',
+      andandoAteMs: 0, acaoId: null, ataqueDesdeMs: -Infinity, golpe: null, chaveGolpe: '', runaGolpe: null, escala, escalaAtlas: escala, topo: -RAIO * escala, achatamento: 1, chaoDesenhado: '',
     };
   }
 
@@ -311,6 +313,11 @@ export class CamadaEntidades {
         m = this.criar(e, cor);
         this.marcadores.set(e.id, m);
       }
+      // 03/11/2026: o atlas do dragão já tem porte próprio; não somar o aumento genérico de boss.
+      const porte=ehDragao(e.invocacao?.modeloOriginal ?? e.preset)?porteDoDragao(e.nivel,ctx.balance):null;
+      const escala = porte ? porte.altura/ctx.balance.dragoes.alturaMin : e.arquetipo === 'boss' ? 1.35 : 1;
+      m.escalaAtlas=porte?.escala??escala;
+      if(m.escala!==escala){m.escala=escala;m.chaoDesenhado='';m.silhueta.scale.set(escala);m.seta.scale.set(escala);}
       // Marco 26 (D-104): o rumo é o quanto a posição contínua andou desde o último quadro.
       const dx = e.px - m.ultimoX;
       const dy = e.py - m.ultimoY;
@@ -533,7 +540,7 @@ export class CamadaEntidades {
         estado,
         direcao: direcaoDoAngulo(m.angulo),
         indice,
-        escala: medidas.escala * m.escala * (q.ajuste?.escala ?? 1),
+        escala: medidas.escala * m.escalaAtlas * (q.ajuste?.escala ?? 1),
         alturaPx: q.ajuste?.alturaPx ?? 0,
         tinta,
         equipamento,
@@ -545,7 +552,7 @@ export class CamadaEntidades {
     if (!pronto) return esconder();
     m.figura3d.raiz.visible = true;
     if (m.rig) m.rig.raiz.visible = false;
-    m.topo = -medidas.topo * m.escala * 1.02;
+    m.topo = -medidas.topo * m.escalaAtlas * 1.02;
     return true;
   }
 

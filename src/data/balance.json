@@ -1,4 +1,5 @@
 {
+  "dragoes": { "alturaAtlas": 3.3, "larguraAtlas": 8, "alturaMin": 1.1, "alturaMax": 2.2, "nivelMax": 100, "folgaCorredor": 1, "salaMin": 12, "salaPorCorredor": 3, "salaExtra": 4, "areaPorSala": 2 },
   "necromancia": { "ataquesPorInvocacao": 12, "resistenciaPorSabPct": 0.5, "resistenciaSabMaxPct": 25, "danoPct": 75, "servosExtras": 8, "retornoServoMs": 8000, "duracaoMortoMs": 20000, "raioColheita": 6, "ecoRecargaMs": 30000, "vidaBase": 24, "vidaPorNivel": 3, "vidaServoPct": 100, "alcanceRitual": 6, "distanciaRetorno": 10, "atributoPorInt": 1, "perdaPorQuantidade": 0.8 },
   "versao": 36,
   "ajustesClasses": {
@@ -563,6 +564,11 @@
     }
   },
   "mundo": {
+    "populacaoMax": 300,
+    "resgate": {"mortesDesconto": 5, "mortesGratis": 10},
+    "exercitoNecromante": {"minimo": 4, "maximo": 10, "niveisPorVaga": 5, "recargaMs": 12000, "duracaoMs": 90000, "presets": ["cavaleiro_profano", "piromante_profano", "arcanista_glacial", "espectro_tempestade"]},
+    "atencaoBatalha": {"raio": 16, "bonus": 10, "memoriaMs": 8000},
+    "ofertas": {"periodoS": 1800, "duracaoS": 600, "quantidade": 2, "centrais": ["couraca_expedicao", "capa_sombria", "anel_do_eco", "aceleracao_mente_rara", "essencia_fogo", "essencia_gelo"], "avancadas": ["couraca_trono", "manto_abismo", "livro_chuva_de_estrelas", "runa_de_fusao", "tomo_potencial"]},
     "tumulo": { "donoExclusivoS": 600, "duracaoS": 1800 },
     "portal": { "ouroBase": 20, "ouroPorRegiao": 30, "recargaS": 60 },
     "coleta": { "canalMs": 2500, "renascerS": 300, "raio": 1 },

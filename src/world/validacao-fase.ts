@@ -114,9 +114,9 @@ const MAX_OURO_OBJETO = 100_000;
 const normalizado = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 1;
 
 /** Lista de ids de item (conteúdo do baú, estoque da loja), conferidos no catálogo se houver. */
-function listaDeItens(v: unknown, campo: string, erros: ErroFase[], itens: ItensConhecidos | undefined): string[] | null {
-  if (!Array.isArray(v) || v.length > MAX_ITENS_OBJETO || !v.every((i): i is string => typeof i === 'string' && i !== '')) {
-    erros.push({ mensagem: `${campo} precisa ser uma lista de até ${MAX_ITENS_OBJETO} ids de item` });
+function listaDeItens(v: unknown, campo: string, erros: ErroFase[], itens: ItensConhecidos | undefined, maximo = MAX_ITENS_OBJETO): string[] | null {
+  if (!Array.isArray(v) || v.length > maximo || !v.every((i): i is string => typeof i === 'string' && i !== '')) {
+    erros.push({ mensagem: `${campo} precisa ser uma lista de até ${maximo} ids de item` });
     return null;
   }
   for (const id of v) if (itens && !itens.has(id)) erros.push({ mensagem: `${campo}: item desconhecido "${id}"` });
@@ -175,7 +175,7 @@ function objetoDeEconomia(o: Record<string, unknown>, erros: ErroFase[], itens: 
   if (o.tipo === 'armadilha') return armadilhaDeFase(o, x, y, erros);
   if (o.tipo === 'fonte_som') return fonteSonora(o, x, y, erros);
   if (o.tipo === 'loja') {
-    const estoque = listaDeItens(o.estoque, 'estoque da loja', erros, itens);
+    const estoque = listaDeItens(o.estoque, 'estoque da loja', erros, itens, 64);
     if (!estoque || estoque.length === 0) {
       if (estoque) erros.push({ mensagem: 'a loja precisa de ao menos um item no estoque' });
       return 'erro';

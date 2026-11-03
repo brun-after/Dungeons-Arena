@@ -14,6 +14,8 @@ import { contextoDaFase, estadoInicialDaFase } from '../save/fases-campanha';
 import { catalogoDeGeracao, gerarFase } from '../world/gerador';
 import { gerarExterior, type ExteriorGerado } from '../world/gerador-exterior';
 import { objetosDoExterior } from './objetos-mundo';
+import { territorioDoLugar } from './reino';
+import { estoqueDeDungeon } from './lojas-mundo';
 import type { CovilDoMundo, MasmorraDoMundo, Reino, RegiaoDoMundo, RegrasDePerigo } from './reino';
 
 export type Lugar =
@@ -61,9 +63,9 @@ export interface LugarMontado {
 
 /** O interior de uma masmorra ou covil: fase gerada com os inimigos e o chefe do reino. */
 function interior(conteudo: Conteudo, reino: Reino, d: MasmorraDoMundo | CovilDoMundo, prefixo: string) {
-  const catalogo = { ...catalogoDeGeracao(conteudo, reino.lojas.mercador ?? []), comuns: [...d.inimigos], boss: d.boss };
+  const catalogo = { ...catalogoDeGeracao(conteudo, estoqueDeDungeon(conteudo, territorioDoLugar(reino,d.id), d.nivel)), comuns: [...d.inimigos], boss: d.boss };
   return gerarFase(
-    { id: `mundo_${prefixo}_${d.id}`, nome: d.nome, semente: hashTexto(`${prefixo}:${d.id}`), salas: d.salas, nivelInimigos: d.nivel, matizGraus: 0, ...(d.tema && { tema: d.tema }) },
+    { id: `mundo_${prefixo}_${d.id}`, nome: d.nome, semente: hashTexto(`${prefixo}:${d.id}`), salas: d.salas, ...(d.salas >= 18 ? {largura: 96, altura: 80, formato: 'espiral' as const} : {}), nivelInimigos: d.nivel, matizGraus: 0, ...(d.tema && { tema: d.tema }) },
     catalogo,
   );
 }
@@ -83,7 +85,7 @@ export function montarLugar(conteudo: Conteudo, reino: Reino, lugar: Lugar, modo
     const fase = { ...r.ctx.fase, estruturas, exterior: true, telhados, ...(v && { refugios: [{ x: v.x, y: v.y, raio: v.raio + 0.5 }] }) };
     const ctx = { ...r.ctx, fase };
     const estado = estadoInicialDaFase(ctx);
-    estado.objetos.push(...objetosDoExterior(reino, exterior));
+    estado.objetos.push(...objetosDoExterior(territorioDoLugar(reino,lugar.regiao.id), exterior));
     return { ctx, estado, exterior };
   }
   const masmorra = lugar.tipo === 'masmorra';

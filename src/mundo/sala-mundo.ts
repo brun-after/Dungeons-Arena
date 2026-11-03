@@ -42,7 +42,7 @@ import { atenderChat, atenderTroca, cancelarTrocaDe, type Participante, type Sal
 import { TrocasDaSala } from './troca';
 import { descobrir, fichaAtualizada, type FichaDoMundo } from './ficha-mundo';
 import { idDoLugar, montarLugar, type Lugar } from './lugares';
-import { estruturaDoDestino, LADOS, ladoOposto, portaDa, vizinha, type LadoDaRegiao, type PapelNpc, type Reino, type RegiaoDoMundo } from './reino';
+import { capitalDoAtlas, territorioDoLugar, estruturaDoDestino, LADOS, ladoOposto, portaDa, vizinha, type LadoDaRegiao, type PapelNpc, type Reino, type RegiaoDoMundo } from './reino';
 import type { ExteriorGerado } from '../world/gerador-exterior';
 
 export const MODO_MUNDO = 'mundo';
@@ -150,6 +150,7 @@ export class SalaMundo extends SalaArena {
     this.reservas.delete(identidade);
     const e = r.entidade;
     e.controlador = 'remoto';
+    if(e.bolsa) e.bolsa.mortesNaDungeon = this.lugar.tipo === 'masmorra' ? reserva.ficha.mortesDungeon?.[this.lugar.masmorra.id] ?? 0 : 0;
     e.equipe = equipeDeEntrada(this.ctx.modo, jogadorId, this.estado);
     const origem = reserva.chegada ?? this.ctx.fase.spawns[0] ?? { x: 1, y: 1 };
     colocarEm(e, celulaDeEntrada(this.estado, this.ctx, e, origem));
@@ -227,7 +228,7 @@ export class SalaMundo extends SalaArena {
       this.ctx = { ...this.ctx, modo: { ...this.modoDaRegiao, lootPct } };
     } else if (agora?.evento === 'mercador_errante') {
       const c = this.celulaDoMercador();
-      if (c) this.estado.objetos.push(novoObjeto(ID_MERCADOR_ERRANTE, 'loja', c.x, c.y, { ref: 'mercador', itens: [...this.reino.mercadorErrante] }));
+      if (c) this.estado.objetos.push(novoObjeto(ID_MERCADOR_ERRANTE, 'loja', c.x, c.y, { ref: 'mercador', itens: [...territorioDoLugar(this.reino,this.regiaoAtual()?.id ?? "").mercadorErrante] }));
     }
     for (const s of this.sessoes.values()) this.avisar(s, { tipo: 'evento', evento: agora?.evento ?? null, fim: agora?.fim ?? 0 });
   }
@@ -279,7 +280,7 @@ export class SalaMundo extends SalaArena {
     const alvo = this.reino.regioes.find((r) => r.id === destino && r.vila);
     if (!alvo) return 'destino_invalido';
     if (this.lugar.tipo === 'regiao' && this.lugar.regiao.id === alvo.id && pagamento !== 'pergaminho') return 'mesmo_lugar';
-    if (!p.ficha.descobertas.includes(`regiao:${alvo.id}`)) return 'nao_descoberto';
+    if (!p.ficha.descobertas.includes(`regiao:${alvo.id}`) && !capitalDoAtlas(this.reino,alvo.id)) return 'nao_descoberto';
     const agora = this.opcoesMundo.agora();
     if (pagamento === 'pergaminho') {
       const i = bolsa.mochila.findIndex((m) => m.itemId === PERGAMINHO_RETORNO);
@@ -358,8 +359,8 @@ export class SalaMundo extends SalaArena {
       this.avisar(s, { tipo: 'salvo', vila: regiao.id });
     } else if (tipo === 'pedra_portal') {
       const destinos: DestinoDePortal[] = this.reino.regioes
-        .filter((r) => r.vila && r.id !== regiao?.id && p.ficha.descobertas.includes(`regiao:${r.id}`))
-        .map((r) => ({ regiao: r.id, nome: r.vila?.nome ?? r.nome, custo: this.custoDoPortal(r) }));
+        .filter((r) => r.vila && r.id !== regiao?.id && (p.ficha.descobertas.includes(`regiao:${r.id}`) || capitalDoAtlas(this.reino,r.id)))
+        .map((r) => ({ regiao: r.id, nome: `${territorioDoLugar(this.reino,r.id).nome} · ${r.vila?.nome ?? r.nome}`, custo: this.custoDoPortal(r) }));
       const temPergaminho = e.bolsa?.mochila.some((m) => m.itemId === PERGAMINHO_RETORNO) ?? false;
       this.avisar(s, { tipo: 'portais', destinos, livreEm: p.ficha.portalLivreEm, temPergaminho });
     } else if (tipo === 'porta_estrutura' && regiao) {
@@ -634,7 +635,7 @@ export class SalaMundo extends SalaArena {
       const i = bolsa.mochila.findIndex((m) => m.invId === acao.invId);
       const m = bolsa.mochila[i];
       const taxa = taxaDeAnuncio(acao.preco, regras);
-      const motivo: MotivoDoMundo | null = !m || m.qtd < acao.qtd ? 'sem_item' : acao.preco > regras.precoMax ? 'preco_invalido' : bolsa.ouro < taxa ? 'sem_ouro' : null;
+      const motivo: MotivoDoMundo | null = !m || m.ref === 'resgate_dungeon' || m.qtd < acao.qtd ? 'sem_item' : acao.preco > regras.precoMax ? 'preco_invalido' : bolsa.ouro < taxa ? 'sem_ouro' : null;
       if (motivo || !m) {
         this.avisar(s, { tipo: 'recusa', motivo: motivo ?? 'sem_item' });
         return;
@@ -657,6 +658,15 @@ export class SalaMundo extends SalaArena {
 
   /** Um monstro caiu: as missões de caça de quem o derrubou (ou do dono da invocação) e do grupo dele por perto. */
   private aoMorrer(id: EntidadeId, porId: EntidadeId | null): void {
+    const p = this.presencas.get(id), e = buscarEntidade(this.estado,id);
+    if (p && e?.bolsa && this.lugar.tipo === 'masmorra') {
+      const dungeon = this.lugar.masmorra.id;
+      p.ficha.mortesDungeon ??= {};
+      p.ficha.mortesDungeon[dungeon] = (p.ficha.mortesDungeon[dungeon] ?? 0) + 1;
+      e.bolsa.mortesNaDungeon = p.ficha.mortesDungeon[dungeon];
+      p.ficha = fichaAtualizada(p.ficha,e);
+      this.pendencias.push({tipo:'gravar',identidade:p.identidade,ficha:p.ficha});
+    }
     const preset = this.estado.respawns.find((r) => r.id === id)?.preset;
     const matador = porId ? buscarEntidade(this.estado, porId) : undefined;
     const dono = matador?.invocacao ? buscarEntidade(this.estado, matador.invocacao.donoId) : matador;

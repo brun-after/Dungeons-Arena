@@ -17,6 +17,7 @@
 //      tema e as salas grandes ganham pilares. Tudo em PRNGs próprios; sem `tema`, a fase é a mesma de antes.
 
 import { idItemBase } from '../progression/gerar-item-base';
+import { ehDragao, porteDoDragao } from './porte-dragoes';
 import { idGerada } from '../combat/chave-habilidade';
 import type { Celula } from '../core/comandos';
 import type { Conteudo } from '../core/conteudo';
@@ -137,11 +138,11 @@ function sobrepoe(a: Sala, b: Sala): boolean {
   return a.x < b.x + b.l + MARGEM && a.x + a.l + MARGEM > b.x && a.y < b.y + b.a + MARGEM && a.y + a.a + MARGEM > b.y;
 }
 
-function posicionarSalas(rng: EstadoRng, n: number, largura: number, altura: number): Sala[] {
+function posicionarSalas(rng: EstadoRng, n: number, largura: number, altura: number, salaMin?: number): Sala[] {
   const salas: Sala[] = [];
   for (let tentativa = 0; tentativa < n * 20 && salas.length < n; tentativa++) {
-    const l = inteiro(rng, 4, 10);
-    const a = inteiro(rng, 3, 8);
+    const l = inteiro(rng, salaMin ?? 4, salaMin ? salaMin+BALANCE_PADRAO.dragoes.salaExtra : 10);
+    const a = inteiro(rng, salaMin ?? 3, salaMin ? salaMin+BALANCE_PADRAO.dragoes.salaExtra : 8);
     if (l + 2 > largura || a + 2 > altura) continue;
     const s: Sala = { x: inteiro(rng, 1, largura - l - 1), y: inteiro(rng, 1, altura - a - 1), l, a };
     if (!salas.some((o) => sobrepoe(s, o))) salas.push(s);
@@ -150,6 +151,10 @@ function posicionarSalas(rng: EstadoRng, n: number, largura: number, altura: num
 }
 
 export function gerarFase(p: ParametrosGeracao, catalogo: CatalogoGeracao): FaseJson {
+  // 03/11/2026: o tamanho do recinto acompanha o nível do dragão, também nos covis antigos pequenos.
+  const porte=ehDragao(catalogo.boss)?porteDoDragao(p.nivelInimigos,BALANCE_PADRAO):null;
+  if(porte){const base=dimensoes(p),area=p.salas*(porte.sala+BALANCE_PADRAO.dragoes.salaExtra)**2*BALANCE_PADRAO.dragoes.areaPorSala;
+    p={...p,largura:Math.max(base.largura,Math.ceil(Math.sqrt(area*1.4))),altura:Math.max(base.altura,Math.ceil(Math.sqrt(area/1.4)))};}
   const rng = criarRng(p.semente);
   const { largura, altura } = dimensoes(p);
   const grade: string[][] = Array.from({ length: altura }, () => Array.from({ length: largura }, () => '#'));
@@ -158,7 +163,7 @@ export function gerarFase(p: ParametrosGeracao, catalogo: CatalogoGeracao): Fase
     if (linha && x > 0 && y > 0 && x < largura - 1 && y < altura - 1) linha[x] = '.';
   };
 
-  const salas = p.formato === 'espiral' ? salasEmEspiral(largura, altura, p.salas, cavar) : posicionarSalas(rng, Math.max(1, p.salas), largura, altura);
+  const salas = p.formato === 'espiral' ? salasEmEspiral(largura, altura, p.salas, cavar,porte) : posicionarSalas(rng, Math.max(1, p.salas), largura, altura,porte?.sala);
   for (const s of salas) for (let y = s.y; y < s.y + s.a; y++) for (let x = s.x; x < s.x + s.l; x++) cavar(x, y);
   // Corredores em L: horizontal e vertical, em ordem sorteada.
   for (let i = 1; p.formato !== 'espiral' && i < salas.length; i++) {
@@ -170,7 +175,9 @@ export function gerarFase(p: ParametrosGeracao, catalogo: CatalogoGeracao): Fase
       [de, curva],
       [curva, para],
     ] as const) {
-      for (let x = Math.min(a.x, b.x); x <= Math.max(a.x, b.x); x++) for (let y = Math.min(a.y, b.y); y <= Math.max(a.y, b.y); y++) cavar(x, y);
+      const raio=porte?Math.floor(porte.corredor/2):0;
+      for (let x = Math.min(a.x, b.x); x <= Math.max(a.x, b.x); x++) for (let y = Math.min(a.y, b.y); y <= Math.max(a.y, b.y); y++)
+        for(let dy=-raio;dy<=raio;dy++)for(let dx=-raio;dx<=raio;dx++)cavar(x+dx,y+dy);
     }
   }
 
@@ -256,7 +263,7 @@ export function gerarFase(p: ParametrosGeracao, catalogo: CatalogoGeracao): Fase
   if (p.ambientesVivos) enriquecerFase(json, geracao, catalogo, salas, livre, ocupar);
   if (tema) {
     json.tema = tema.id;
-    if (p.formato !== 'espiral') erguerPilares(grade, salas, (c) => !livre(c), criarRng(hashTexto(`${p.semente}:pilares`)));
+    if (p.formato !== 'espiral' && !porte) erguerPilares(grade, salas, (c) => !livre(c), criarRng(hashTexto(`${p.semente}:pilares`)));
     json.mapa = grade.map((l) => l.join(''));
   }
   const final = p.estilo && p.estilo.length > 0 ? aplicarEstilo(json, p.estilo, p.semente) : json;

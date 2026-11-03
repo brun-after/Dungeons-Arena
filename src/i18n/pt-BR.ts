@@ -355,6 +355,8 @@ export const ptBR = {
   'loja.titulo': 'Loja',
   'loja.fechar': 'Fechar a loja',
   'loja.saldo': '{ouro} de ouro',
+  'loja.ofertaTemporaria': 'Oferta temporária',
+  'loja.retornoDungeon': 'Pedra de Retorno: metade do preço após 5 mortes e gratuita após 10. Suas mortes nesta dungeon: {mortes}.',
   'loja.estoque': 'À venda',
   'loja.suaMochila': 'Sua mochila',
   'loja.comprar': 'Comprar ({preco})',

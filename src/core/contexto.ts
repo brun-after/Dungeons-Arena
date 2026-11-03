@@ -19,6 +19,7 @@ import type { DominioDaClasse } from '../progression/dominio';
 export type MomentoCargaClasse = 'furiaCheia' | 'encarnacao' | 'miraFirme' | 'servoCaiu' | 'falcao';
 
 export interface Balance {
+  dragoes: { alturaAtlas: number; larguraAtlas: number; alturaMin: number; alturaMax: number; nivelMax: number; folgaCorredor: number; salaMin: number; salaPorCorredor: number; salaExtra: number; areaPorSala: number };
   /** Ajustes de classes (18/10/2026): curvas e passivas de produção. */
   ajustesClasses: {
     guerreiro: { contatoMaxPct: number; contatoNivel: number; contatoExpoente: number; grupoReducaoMaxPct: number; grupoNivelPleno: number; grupoRaio: number; extraInicioNivel: number; extraMaxPct: number; auraMinPct: number; auraMaxPct: number; auraRaio: number; auraCuraMinPct: number; auraCuraMaxPct: number;
@@ -324,6 +325,11 @@ export interface Balance {
   };
   /** Marco 29 (30/10/2026, D-128): o modo Mundo (túmulo, portais, coleta, covis e o checkpoint). */
   mundo: {
+    populacaoMax: number;
+    resgate: { mortesDesconto: number; mortesGratis: number };
+    exercitoNecromante: { minimo: number; maximo: number; niveisPorVaga: number; recargaMs: number; duracaoMs: number; presets: string[] };
+    atencaoBatalha: { raio: number; bonus: number; memoriaMs: number };
+    ofertas: { periodoS: number; duracaoS: number; quantidade: number; centrais: string[]; avancadas: string[] };
     /** Só o dono abre o túmulo por `donoExclusivoS` (fora das regiões com PvP); some em `duracaoS`. */
     tumulo: { donoExclusivoS: number; duracaoS: number };
     /** Custo do portal: base + por região de distância (Chebyshev na grade do reino). */
