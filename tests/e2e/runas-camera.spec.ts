@@ -13,7 +13,7 @@ test('a seleção mostra runa, retrato, atributos e habilidades de cada classe',
   // Marco 32 (D-131): o retrato pré-renderizado (canvas) troca o desenho (img) quando carrega.
   const retratos = page.locator('.classe-coluna .retrato-classe');
   await expect(retratos).toHaveCount(5);
-  await expect.poll(() => page.locator('.classe-coluna canvas.retrato-3d').count()).toBe(5);
+  await expect.poll(() => page.locator('.classe-coluna canvas.retrato-ilustrado').count()).toBe(5);
 
   const guerreiro = page.locator('[data-classe="guerreiro"]');
   await expect(guerreiro.getByRole('heading', { name: 'Atributos', exact: true })).toBeVisible();

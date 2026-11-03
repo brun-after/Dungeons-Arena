@@ -7,6 +7,7 @@ test('menu mantém navegação e equipamento visíveis e atualiza o retrato ao d
   const modal = page.getByRole('dialog', { name: 'Mochila', exact: true });
   const retrato = modal.locator('.retrato-personagem');
   await expect(retrato).toHaveAttribute('data-pronto', '1');
+  await page.screenshot({ path: info.outputPath('retrato-equipado.png') });
   const antes = await retrato.locator('canvas').evaluate((c: HTMLCanvasElement) => c.toDataURL());
   const abas = modal.locator('.abas-modal');
   const pos = await abas.boundingBox();
