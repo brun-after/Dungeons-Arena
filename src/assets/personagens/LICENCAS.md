@@ -61,3 +61,11 @@ O Necromante Ancestral reutiliza o atlas CC0 `necromante` já documentado acima.
 
 As invocações do necromante jogador recebem tonalidade avermelhada nas duas projeções;
 as do boss usam o preset exclusivo `esqueleto_do_ossuario`, negro mesmo sem o dono no recorte de rede.
+
+## Classes com visual de mangá
+
+Os corpos jogáveis usam os mesmos rigs e clipes CC0 listados acima, com paletas inspiradas nos retratos e peças de cabelo, barba e capuz dos pacotes originais. O acabamento em faixas de luz e contorno é aplicado na geração do WebP.
+
+- Para reproduzir os corpos, com os pacotes Standard extraídos em `.brutos`: `npx tsx tools/sprites/render.ts --so-corpo --reusar-maos --so aventureiro,guerreiro,mago,arqueiro,necromante`.
+- Para exportar os cinco rigs montados e seus clipes de origem: `npx tsx tools/sprites/render.ts --modelos <diretório>`. O GLB contém a malha e as texturas. A iluminação do atlas é definida pelo gerador.
+- `--gpu` usa a aceleração gráfica local para a geração. A opção `--reusar-maos` é destinada a alterações que preservam os encaixes e a geometria do tronco. Quando só a origem de um golpe muda, o corpo é alinhado ao atlas de armadura. Se a pose divergir, o gerador pede a regeneração das camadas.

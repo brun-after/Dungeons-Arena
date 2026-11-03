@@ -8,6 +8,7 @@ import { ColladaLoader } from 'three/addons/loaders/ColladaLoader.js';
 // (esconde o que fica atrás dele) e a peça da camada pinta por cima; as peças tingidas saem em cinza.
 
 import * as THREE from 'three';
+import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { clone as clonarComEsqueleto } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { BASE, COLUNAS_POR_FAIXA, DIRECOES, ehVariante, estadosDe, QUADROS, VARIANTES, type Arma, type Estado, type EstadoBase, type Receita, type Variante } from './receitas';
@@ -145,6 +146,7 @@ interface Montado {
   ossos: Map<string, THREE.Bone>;
   /** A escala de ossos por nome, reaplicada depois de cada pose. */
   escalas: Record<string, number>;
+  adornosCabeca?: THREE.Mesh[];
   /** As criaturas de geometria (`proc:`): a pose de cada estado por deformação. */
   animar?: (estado: EstadoBase, f: number) => void;
 }
@@ -182,7 +184,9 @@ async function montar(r: Receita, urls: Urls): Promise<Montado> {
   const corpo = clonarComEsqueleto((await carregar(urlDe(urls, r.corpo))).cena);
   grupo.add(corpo);
   const ossos = ossosPorNome(corpo);
-  const temCapuz = malhas(corpo).some((m) => m.name.includes('Hood'));
+  const capuzes = malhas(corpo).filter(m => m.name.includes('Hood'));
+  if (r.semCapuz) for (const m of capuzes) m.visible = false;
+  const temCapuz = (!r.semCapuz && capuzes.length > 0) || r.adornosCabeca?.some(ref => ref.includes('Hood'));
   if (r.cabeca) {
     const pescoco = ossos.get('neck_01');
     const colapso = new THREE.Bone();
@@ -195,9 +199,11 @@ async function montar(r: Receita, urls: Urls): Promise<Montado> {
       grupo.add(m);
     }
   }
+  const adornosCabeca = (await Promise.all((r.adornosCabeca ?? []).map(ref => religadas(urlDe(urls, ref), ossos)))).flat();
+  if (adornosCabeca.length > 0) grupo.add(...adornosCabeca);
   colorir(grupo, r.cores, r.emissao);
   const mixer = new THREE.AnimationMixer(grupo);
-  return { grupo, mixer, ossos, escalas: r.ossos ?? {} };
+  return { grupo, mixer, ossos, escalas: r.ossos ?? {}, adornosCabeca };
 }
 
 async function clipe(nome: string, urls: Urls): Promise<THREE.AnimationClip> {
@@ -409,11 +415,38 @@ async function montarCamada(mt: Montado, corpo: THREE.Mesh[], p: PedidoDeCamada,
   return { pedido: p, mats, pinta, extras };
 }
 
+/** Quantiza só a luz. A textura, as cores e as máscaras de profundidade continuam nos materiais do rig. */
+function luzEmFaixas(): (mats: Mats) => Mats {
+  const cache = new Map<THREE.Material, THREE.Material>();
+  const converter = (mat: THREE.Material): THREE.Material => {
+    if (!(mat instanceof THREE.MeshStandardMaterial) || !mat.colorWrite) return mat;
+    const existente = cache.get(mat);
+    if (existente) return existente;
+    const tinta = mat.clone();
+    tinta.roughness = 0.95;
+    tinta.metalness = 0;
+    tinta.onBeforeCompile = (shader) => {
+      shader.fragmentShader = shader.fragmentShader.replace('#include <lights_fragment_end>', `
+        #include <lights_fragment_end>
+        vec3 luz = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse;
+        vec3 pesos = vec3(0.2126, 0.7152, 0.0722);
+        float intensidade = dot(luz, pesos) / max(dot(diffuseColor.rgb, pesos), 0.001);
+        float faixa = intensidade < 0.42 ? 0.41 : intensidade < 0.77 ? 0.78 : 1.27;
+        reflectedLight.directDiffuse = diffuseColor.rgb * faixa;
+        reflectedLight.indirectDiffuse = vec3(0.0);
+      `);
+    };
+    cache.set(mat, tinta);
+    return tinta;
+  };
+  return (mats) => Array.isArray(mats) ? mats.map(converter) : converter(mats);
+}
+
 /**
  * O atlas do corpo (com `comCorpo`) e o das camadas pedidas, na mesma pose de cada quadro. As camadas de uma vez
  * pesam (um canvas do tamanho do atlas cada): o chamador reparte em lotes.
  */
-export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeCamada[] = [], comCorpo = true): Promise<SaidaAtlas> {
+export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeCamada[] = [], comCorpo = true, referenciaMaos: SaidaAtlas['maos'] = null): Promise<SaidaAtlas> {
   const PX_CELULA = r.pxCelula ?? 72;
   cinzas.clear();
   naFrente.clear();
@@ -427,7 +460,11 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
 
   // A altura: a pessoa parada (o primeiro quadro do parado) mede `altura` células.
   pose(mt, clipes.parado, 0);
+  const adornos = mt.adornosCabeca ?? [];
+  // O cabelo muda a silhueta, mas não muda a escala, a âncora ou os encaixes.
+  mt.grupo.remove(...adornos);
   const caixa = new THREE.Box3().setFromObject(mt.grupo, !!r.apoiarNoChao);
+  if (adornos.length > 0) mt.grupo.add(...adornos);
   const k = r.altura / (caixa.max.y - caixa.min.y || 1);
   const largura = r.largura ?? 1;
   mt.grupo.scale.set(k * largura, k, k * largura);
@@ -503,10 +540,17 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
   const maos = comCorpo && r.equipamento ? { d: [] as number[], e: [] as number[] } : null;
   const telas = montadas.map(() => tela());
 
+  const estilo = r.manga ? luzEmFaixas() : null;
+  if (estilo) {
+    for (const cm of montadas) for (const extra of cm.extras) {
+      for (const m of malhas(extra)) m.material = estilo(m.material);
+    }
+  }
   const bacia = mt.ossos.get('pelvis') ?? (r.apoiarNoChao ? mt.ossos.get('base') : null) ?? null;
   const aplicar = (cm: CamadaMontada | null) => {
     for (const m of corpo) {
-      m.material = cm ? (cm.mats.get(m) ?? m.material) : (originais.get(m) ?? m.material);
+      const materiaisDoQuadro = (cm?.mats.get(m) ?? originais.get(m)) ?? m.material;
+      m.material = estilo ? estilo(materiaisDoQuadro) : materiaisDoQuadro;
       // O que a camada pinta vem depois da máscara do resto do corpo.
       m.renderOrder = cm?.pinta.has(m) ? 1 : 0;
     }
@@ -554,14 +598,45 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
         const coluna = estados[e].inicio + i;
         const x = (coluna % faixa) * quadroL;
         const y = (Math.floor(coluna / faixa) * DIRECOES + d) * quadroA;
+        let dx = 0;
+        let dy = 0;
         if (maos) {
-          maos.d.push(...medirMao(mt, 'r', camera, quadroL, quadroA, PX_CELULA, pele));
-          maos.e.push(...medirMao(mt, 'l', camera, quadroL, quadroA, PX_CELULA, pele));
+          const iMao = maos.d.length;
+          const dAnterior = referenciaMaos?.d.slice(iMao, iMao + 5);
+          const eAnterior = referenciaMaos?.e.slice(iMao, iMao + 5);
+          if (dAnterior?.length === 5 && eAnterior?.length === 5) {
+            const dAtual = medirMao(mt, 'r', camera, quadroL, quadroA, PX_CELULA);
+            const eAtual = medirMao(mt, 'l', camera, quadroL, quadroA, PX_CELULA);
+            dx = (dAnterior[0] ?? 0) - (dAtual[0] ?? 0);
+            dy = (dAnterior[1] ?? 0) - (dAtual[1] ?? 0);
+            // O UAL pode mudar a origem do golpe. A mesma translação nas duas mãos
+            // preserva o encaixe da armadura; mudança na pose pede um atlas novo.
+            const perto = (a: number, b: number) => Math.abs(a - b) <= 0.025;
+            if (!perto(dx, (eAnterior[0] ?? 0) - (eAtual[0] ?? 0)) || !perto(dy, (eAnterior[1] ?? 0) - (eAtual[1] ?? 0)) ||
+                !perto((dAnterior[2] ?? 0), (dAtual[2] ?? 0)) || !perto((eAnterior[2] ?? 0), (eAtual[2] ?? 0)) ||
+                !perto((dAnterior[3] ?? 0), (dAtual[3] ?? 0)) || !perto((eAnterior[3] ?? 0), (eAtual[3] ?? 0))) {
+              throw new Error(`Pose incompatível com a armadura: ${r.nome} / ${e} / ${d}:${i}`);
+            }
+            maos.d.push(...dAnterior);
+            maos.e.push(...eAnterior);
+          } else {
+            maos.d.push(...medirMao(mt, 'r', camera, quadroL, quadroA, PX_CELULA, pele));
+            maos.e.push(...medirMao(mt, 'l', camera, quadroL, quadroA, PX_CELULA, pele));
+          }
         }
         if (atlas) {
           aplicar(null);
           renderer.render(cena, camera);
-          atlas.g.drawImage(renderer.domElement, x, y);
+          if (dx || dy) {
+            atlas.g.save();
+            atlas.g.beginPath();
+            atlas.g.rect(x, y, quadroL, quadroA);
+            atlas.g.clip();
+            atlas.g.drawImage(renderer.domElement, x + dx, y + dy);
+            atlas.g.restore();
+          } else {
+            atlas.g.drawImage(renderer.domElement, x, y);
+          }
         }
         montadas.forEach((cm, j) => {
           aplicar(cm);
@@ -592,9 +667,28 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
   };
 }
 
+/** Exporta o rig já montado com os clipes de origem usados no atlas. */
+async function exportarModelo(r: Receita, urls: Urls): Promise<string> {
+  const { grupo } = await montar(r, urls);
+  const nomes = new Set([...Object.values(r.animacoes ?? {}), ...Object.values(VARIANTES)]);
+  const animations = await Promise.all([...nomes].map(nome => clipe(nome, urls)));
+  grupo.name = r.nome;
+  const glb = await new GLTFExporter().parseAsync(grupo, { binary: true, animations, maxTextureSize: 1024 });
+  if (!(glb instanceof ArrayBuffer)) throw new Error('Exportação GLB não retornou bytes');
+  return new Promise((resolve, reject) => {
+    const leitor = new FileReader();
+    leitor.onerror = () => { reject(new Error('Falha ao codificar o GLB')); };
+    leitor.onload = () => {
+      if (typeof leitor.result !== 'string') { reject(new Error('Codificação GLB inválida')); return; }
+      resolve(leitor.result.split(',')[1] ?? '');
+    };
+    leitor.readAsDataURL(new Blob([glb], { type: 'model/gltf-binary' }));
+  });
+}
+
 declare global {
   interface Window {
-    personagens: { renderizarAtlas: typeof renderizarAtlas; renderizarArmas: typeof renderizarArmas };
+    personagens: { renderizarAtlas: typeof renderizarAtlas; renderizarArmas: typeof renderizarArmas; exportarModelo: typeof exportarModelo };
   }
 }
-window.personagens = { renderizarAtlas, renderizarArmas };
+window.personagens = { renderizarAtlas, renderizarArmas, exportarModelo };

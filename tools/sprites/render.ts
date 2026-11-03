@@ -20,9 +20,16 @@ const B = join(RAIZ, '.brutos');
 const PASTAS: Record<string, string[]> = {
   cethiel: [join(B, 'dragao-realista', 'x')],
   base: [join(B, 'q-base', 'x', 'Universal Base Characters[Standard]', 'Base Characters', 'Godot - UE')],
+  cabelo: [
+    join(B, 'q-base', 'x', 'Universal Base Characters[Standard]', 'Hairstyles', 'Rigged to Head Bone', 'glTF (Godot -Unreal)'),
+    join(B, 'q-base', 'x', 'Universal Base Characters[Standard]', 'Hairstyles', 'Textures'),
+  ],
   traje: [join(B, 'q-trajes', 'x', 'Modular Character Outfits - Fantasy[Standard]', 'Exports', 'glTF (Godot-Unreal)')],
   ual1: [join(B, 'q-anim', 'x', 'Universal Animation Library[Standard]', 'Unreal-Godot')],
-  ual2: [join(B, 'q-anim2', 'x', 'Universal Animation Library 2 [Standard]', 'Unreal-Godot')],
+  ual2: [
+    join(B, 'q-anim2', 'x', 'Universal Animation Library 2[Standard]', 'Unreal-Godot'),
+    join(B, 'q-anim2', 'x', 'Universal Animation Library 2 [Standard]', 'Unreal-Godot'),
+  ],
   kes: [join(B, 'k-esqueletos', 'x', 'KayKit_Skeletons_1.1_FREE')],
   q: [join(B, 'quaternius-props', 'x', 'Exports', 'glTF'), join(B, 'quaternius-props', 'x', 'Textures')],
 };
@@ -41,7 +48,7 @@ function caminhoDe(ref: string): string {
   if (pacote === 'ual2') return 'ual2/UAL2_Standard.glb';
   if (pacote === 'kes-anim') return `kes/Animations/gltf/Rig_Medium/Rig_Medium_${nome === 'Movement' ? 'MovementBasic' : nome}.glb`;
   if (pacote === 'q') return `q/${nome}.gltf`;
-  if (pacote === 'base' || pacote === 'traje') return `${pacote}/${nome}.gltf`;
+  if (pacote === 'base' || pacote === 'traje' || pacote === 'cabelo') return `${pacote}/${nome}.gltf`;
   return `${pacote}/${nome}`;
 }
 
@@ -51,7 +58,9 @@ function arquivoNoDisco(caminho: string): string | null {
   const nome = resto[resto.length - 1] ?? '';
   if (pacote === 'cethiel' && nome === 'dragon.png') return join(B, 'dragao-realista', 'x', 'dragon_black.png');
   for (const pasta of PASTAS[pacote] ?? []) {
-    for (const f of [join(pasta, rel), join(pasta, nome)]) if (existsSync(f)) return f;
+    for (const f of [join(pasta, rel), join(pasta, nome), join(pasta, nome.replace(/_png\.png$/, '.png'))]) {
+      if (existsSync(f)) return f;
+    }
   }
   // As texturas do traje ficam ao lado de cada gltf (Outfits/ ou Modular Parts/).
   if (pacote === 'traje') for (const sub of ['Outfits', 'Modular Parts']) {
@@ -86,6 +95,7 @@ function urlsDe(r: Receita, camadas: PedidoDeCamada[]): Record<string, string> {
   const refs = [
     ...(r.corpo.startsWith('proc:') ? [] : [r.corpo]),
     ...(r.cabeca ? [r.cabeca] : []),
+    ...(r.adornosCabeca ?? []),
     ...(r.armas ?? []).map((a) => a.m),
     ...camadas.flatMap((c) => [...(c.pecas ?? []), ...(c.armas ?? []).map((a) => a.m)]),
   ];
@@ -104,11 +114,20 @@ const args = process.argv.slice(2);
 const iSo = args.indexOf('--so');
 const so = iSo >= 0 ? new Set((args[iSo + 1] ?? '').split(',')) : null;
 const soCorpo = args.includes('--so-corpo');
+// Use só em revisões que preservam os rigs, a arma, a pose e a geometria do tronco.
+const reusarMaos = soCorpo && args.includes('--reusar-maos');
 const comArmas = args.includes('--armas');
+const iModelos = args.indexOf('--modelos');
+const pastaModelos = iModelos >= 0 ? args[iModelos + 1] : undefined;
+if (iModelos >= 0 && (!pastaModelos || pastaModelos.startsWith('--'))) throw new Error('Use --modelos <diretório>');
+if (pastaModelos) mkdirSync(pastaModelos, { recursive: true });
 mkdirSync(DESTINO, { recursive: true });
 const pacote = await build({ entryPoints: [join(import.meta.dirname, 'pagina.ts')], bundle: true, format: 'iife', write: false, platform: 'browser' });
 const codigo = pacote.outputFiles[0]?.text ?? '';
-const navegador = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+// O padrão em software é reproduzível no CI. --gpu permite usar o driver local na geração, fora do jogo.
+const navegador = await chromium.launch({
+  args: args.includes('--gpu') ? ['--enable-gpu'] : ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
+});
 const pagina = await navegador.newPage();
 pagina.on('console', (m) => {
   if (m.type() === 'error') console.error('[página]', m.text());
@@ -167,6 +186,15 @@ if (comArmas) {
 const catalogo: Record<string, Entrada> = existsSync(caminhoCatalogo) ? (JSON.parse(readFileSync(caminhoCatalogo, 'utf8')) as Record<string, Entrada>) : {};
 for (const receita of RECEITAS) {
   if ((so && !so.has(receita.nome)) || (comArmas && !so)) continue;
+  if (pastaModelos) {
+    if (!receita.manga) continue;
+    const urls = urlsDe(receita, []);
+    const base64 = await pagina.evaluate(([r, u]) => window.personagens.exportarModelo(r, u), [receita, urls] as const);
+    const bytes = Buffer.from(base64, 'base64');
+    writeFileSync(join(pastaModelos, `${receita.nome}.glb`), bytes);
+    console.log(receita.nome, `${Math.round(bytes.length / 1024)} KB GLB`);
+    continue;
+  }
   const inicio = Date.now();
   const camadas = soCorpo ? [] : camadasDe(receita);
   const urls = urlsDe(receita, camadas);
@@ -174,9 +202,18 @@ for (const receita of RECEITAS) {
   for (let k = 0; k < Math.max(1, camadas.length); k += LOTE) lotes.push(camadas.slice(k, k + LOTE));
   let bytesTotal = 0;
   for (const [k, lote] of lotes.entries()) {
-    const saida = await pagina.evaluate(async ([r, u, c, corpo]) => window.personagens.renderizarAtlas(r, u, c, corpo), [receita, urls, lote, k === 0] as const);
+    const referencia = reusarMaos ? catalogo[receita.nome]?.maos ?? null : null;
+    const saida = await pagina.evaluate(([r, u, c, corpo, maos]) => window.personagens.renderizarAtlas(r, u, c, corpo, maos),
+      [receita, urls, lote, k === 0, referencia] as const);
     const { quadroL, quadroA, ancoraX, ancoraY, pxCelula, colunas, faixa, estados } = saida;
     const entrada = { quadroL, quadroA, ancoraX, ancoraY, pxCelula, colunas, faixa, estados, altura: receita.altura };
+    const anterior = catalogo[receita.nome];
+    if (soCorpo && receita.equipamento && anterior && (
+      quadroL !== anterior.quadroL || quadroA !== anterior.quadroA ||
+      ancoraX !== anterior.ancoraX || ancoraY !== anterior.ancoraY ||
+      pxCelula !== anterior.pxCelula || colunas !== anterior.colunas || faixa !== anterior.faixa ||
+      JSON.stringify(estados) !== JSON.stringify(anterior.estados)
+    )) throw new Error(`Regere também as camadas de ${receita.nome}: a geometria do atlas mudou.`);
     const gravar = async (nome: string, png: string) => {
       const bytes = await webpDe(png);
       writeFileSync(join(DESTINO, `${nome}.webp`), bytes);
@@ -192,5 +229,5 @@ for (const receita of RECEITAS) {
   }
   console.log(' ', receita.nome, `${camadas.length} camadas`, `${Math.round(bytesTotal / 1024)} KB`, `${Date.now() - inicio} ms`);
 }
-writeFileSync(caminhoCatalogo, `${JSON.stringify(Object.fromEntries(Object.entries(catalogo).sort(([a], [b]) => a.localeCompare(b))), null, 2)}\n`);
+if (!pastaModelos) writeFileSync(caminhoCatalogo, `${JSON.stringify(Object.fromEntries(Object.entries(catalogo).sort(([a], [b]) => a.localeCompare(b))), null, 2)}\n`);
 await navegador.close();
