@@ -234,13 +234,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       };
   if (solo) await solo.texturas;
   if (personagens) {
-    const modelos = [...ctx.conteudo.classes.values()].map(c => c.modelo);
+    const modelos: string[] = [];
     const armas: string[] = [];
-    for (const modelo of modelos) {
-      const eq = equipamento3d(modelo, null, existeArma3d);
-      if (eq?.arma) armas.push(eq.arma.modelo);
-      if (eq?.secundaria) armas.push(eq.secundaria.modelo);
-    }
     for (const e of o.estado().entidades) {
       const modelo = ctx.conteudo.classes.get(e.classeId ?? e.bolsa?.classeId ?? '')?.modelo ?? ctx.conteudo.presets.get(e.preset)?.modelo;
       if (!modelo) continue;
