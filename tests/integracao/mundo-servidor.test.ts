@@ -6,7 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { MensagemServidor } from '../../src/arena/protocolo';
 import { versaoDoConteudo } from '../../src/arena/protocolo';
 import type { AvisoDoMundo } from '../../src/mundo/avisos';
-import { conectarMundo, personagensDoMundo } from '../../src/plataforma/transporte-colyseus';
+import { conectarMundo, personagensDoMundo, excluirPersonagemDoMundo } from '../../src/plataforma/transporte-colyseus';
 import { SalaMundoColyseus } from '../../server/salas/sala-mundo';
 import { iniciarServidor } from '../../server/servidor';
 
@@ -47,6 +47,22 @@ async function entrarNoLugar(token: string, pedido: Parameters<typeof conectarMu
 }
 
 describe('Mundo (servidor real)', () => {
+  it('aceita o quinto personagem e só exclui o slot da conta, com nome correto e fora do jogo', async () => {
+    const token = 'local:cinco-slots';
+    const a = await entrarNoLugar(token, { lugar: 'regiao:vila_do_centro', slot: 5, criar: { classeId: 'mago', nome: 'Quinto' } });
+    try {
+      await expect(excluirPersonagemDoMundo(url(), token, 5, 'Quinto')).rejects.toThrow('ja_jogando');
+      await expect(excluirPersonagemDoMundo(url(), 'local:outra-conta', 5, 'Quinto')).rejects.toThrow('sem_personagem');
+      await expect(excluirPersonagemDoMundo(url(), 'invalido', 5, 'Quinto')).rejects.toThrow('sem_conta');
+    } finally { await a.conexao.encerrar(); }
+    await expect(excluirPersonagemDoMundo(url(), token, 5, 'Outro')).rejects.toThrow('nome_diferente');
+    expect(await personagensDoMundo(url(), token)).toEqual([expect.objectContaining({ slot: 5, nome: 'Quinto' })]);
+    await excluirPersonagemDoMundo(url(), token, 5, 'Quinto');
+    expect(await personagensDoMundo(url(), token)).toEqual([]);
+    const b = await entrarNoLugar(token, { lugar: 'regiao:vila_do_centro', slot: 5, criar: { classeId: 'guerreiro', nome: 'Novo' } });
+    await b.conexao.encerrar();
+    await expect(conectarMundo(url(), token, { lugar: 'regiao:vila_do_centro', slot: 6, criar: { classeId: 'mago', nome: 'Sexto' } })).rejects.toThrow('slot_invalido');
+  });
   it('cria o personagem na vila, lista na conta e não deixa entrar duas vezes', async () => {
     const token = 'local:conta-a';
     const a = await entrarNoLugar(token, { lugar: 'regiao:vila_do_centro', slot: 1, criar: { classeId: 'mago', nome: 'Merlin' } });

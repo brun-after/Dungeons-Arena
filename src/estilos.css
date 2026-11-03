@@ -3133,3 +3133,58 @@ body[data-party-visao='1'] dialog.modal {
   max-height: calc(var(--party-pane-altura) - 52px); box-sizing: border-box;
 }
 body[data-party-visao='1'] dialog.modal::backdrop { background: transparent; backdrop-filter: none; }
+
+/* Cartografia: orientação do cenário, contraste legível e atlas vetorial. */
+.modal.mapa-expandido { background: #101c24f5; border: 1px solid #627b7b; border-radius: 18px; box-shadow: 0 24px 90px #0009; }
+.mapa-expandido .modal-topo { border-bottom: 1px solid #355059; }
+.mapa-expandido .modal-topo h2 { color: #edddba; letter-spacing: .04em; }
+.mapa-expandido .vazio-modal { color: #b9cbce; }
+.mapa-expandido .modal-corpo > * { flex-shrink: 0; }
+.bussola-mapa { color: #e2cb98; font-size: .85rem; letter-spacing: .03em; margin: 4px 0 12px; }
+.bussola-mapa, .bussola-mapa > span { display: flex; align-items: center; gap: 6px; }
+.bussola-mapa { flex-wrap: wrap; gap: 16px; }
+.bussola-mapa .icone { width: 16px; height: 16px; }
+.titulo-cartografia { color: #d5e3df; font-size: .8rem; text-transform: uppercase; letter-spacing: .12em; border-top: 1px solid #355059; padding-top: 16px; margin-top: 20px; }
+.mapa-terreno { width: 100%; max-width: 1000px; background: #101e25; border: 1px solid #355059; border-radius: 12px; image-rendering: auto; margin-bottom: 8px; }
+.mapa-terreno:focus-visible { outline: 2px solid #f6ce78; }
+.janela-cartografia { overflow: auto; max-width: 100%; border-radius: 12px; }
+.janela-cartografia .mapa-terreno { max-width: none; width: min(100%, calc(max(220px, 100dvh - 330px) * 1.515)); }
+.painel-cartografia { min-width: 0; }
+.abas-cartografia { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+.abas-cartografia [aria-pressed='true'] { color: #ffe1a0; border-color: #b99f6c; background: #344b48; }
+.mapa-expandido .vazio-modal { margin: 4px 0; }
+.zoom-cartografia { margin-bottom: 8px; }
+.legenda-cartografia { color: #a6bdc3; font-size: .8rem; line-height: 1.6; }
+.destino-mapa { color: #ffdf9a; font-size: .85rem; min-height: 1.3em; }
+.destino-mapa:empty { display: none; }
+.atlas-reino { display: block; width: 100%; max-height: max(240px, calc(100dvh - 320px)); background: radial-gradient(ellipse at center, #243d43, #101e25 70%); border-radius: 12px; }
+.atlas-reino polygon { fill: #344e48; stroke: #82988a; stroke-width: 2; stroke-linejoin: round; }
+.atlas-reino [data-perigo='seguro'] polygon { fill: #365d51; }
+.atlas-reino [data-perigo='perigoso'] polygon { fill: #62413e; }
+.atlas-reino [data-perigo='desconhecido'] polygon { fill: #1b2b33; stroke: #364b52; }
+.atlas-reino [data-atual='true'] polygon { stroke: #f6ce78; stroke-width: 4; }
+.atlas-reino [role='button'] { cursor: pointer; }
+.atlas-reino [role='button']:hover polygon, .atlas-reino [role='button']:focus polygon { fill: #506c61; stroke: #f6ce78; }
+.atlas-reino text { fill: #e3e9dd; font: 600 15px sans-serif; text-anchor: middle; pointer-events: none; }
+.atlas-reino .atlas-detalhe { font-size: 12px; fill: #acc1bd; }
+.mapa-expandido summary { color: #edddba; cursor: pointer; padding: 12px 0; }
+.mapa-expandido .regiao-mapa { border-color: #355059; background: #172b32; border-radius: 10px; gap: 6px; }
+.mapa-expandido .regiao-mapa > span { color: #d3dfda; font-weight: 600; }
+.mapa-expandido .marcar-lugar { text-align: left; background: #102127; color: #b5cdcf; }
+body .minimapa.minimapa-mundo { opacity: .9; image-rendering: auto; background: #101e25e6; border-color: #627b7b; }
+.guia-mundo { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(124px + var(--seguro-base)); display: flex; align-items: center; gap: 12px; width: max-content; max-width: min(520px, calc(100% - 32px)); box-sizing: border-box; padding: 10px 12px; color: #ffdfa1; background: #101e25ed; border: 1px solid #a68f60; border-radius: 12px; font-size: .85rem; pointer-events: auto; zoom: var(--escala-ui, 1); }
+.guia-mundo[hidden] { display: none; }
+.guia-seta { display: inline-block; font-size: 1.6rem; flex-shrink: 0; }
+.guia-seta .icone { width: 28px; height: 28px; display: block; }
+.guia-mundo button { border: 0; background: transparent; color: #d1e0de; font-size: 1.5rem; min-width: 40px; min-height: 40px; cursor: pointer; }
+.guia-mundo[data-chegou='true'] { border-color: #73c797; color: #a1e3bb; }
+.botao-perigo { border-color: #a65c61; color: #efafb5; }
+body.toque .guia-mundo { bottom: calc(190px + var(--seguro-base)); max-width: calc(100% - 32px); font-size: .75rem; }
+@media (max-width: 600px) {
+  .modal.mapa-expandido { width: 96vw; border-radius: 12px; }
+  .mapa-expandido .modal-corpo { padding: 12px; }
+  .mapa-expandido .mapa-reino { grid-template-columns: 1fr !important; gap: 10px; }
+  .mapa-expandido .regiao-mapa { padding: 10px; }
+  .mapa-expandido .marcar-lugar { padding: 10px; min-height: 44px; }
+  .mapa-terreno { min-width: 0; }
+}

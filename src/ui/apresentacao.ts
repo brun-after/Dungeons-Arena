@@ -58,6 +58,7 @@ import { classeDaHabilidade } from './runa-dom';
 import { DiretorVfx } from '../render/vfx/diretor';
 
 export interface OpcoesApresentacao {
+  destinoMapa?: (() => { x: number; y: number } | null) | undefined;
   /** Câmera auxiliar sem áudio, com orçamento de 30 fps e resolução de no máximo um pixel por ponto CSS. */
   observador?: boolean;
   ctx: ContextoSimulacao;
@@ -218,7 +219,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   const flash = new Graphics();
   palco.tela.addChild(flash);
 
-  const minimapa = criarMinimapa(ctx, idLocal, toque);
+  const minimapa = criarMinimapa(ctx, idLocal, toque, o.destinoMapa);
   const prompt = criarPrompt(ctx, idLocal, toque, () => letraInteragir(prefs.teclasMovimento, camera.projecaoAtual.visao === 'iso'));
   const indicadorCombo = new IndicadorCombo();
   o.ui.append(minimapa.elemento, prompt.elemento, medidor.elemento);

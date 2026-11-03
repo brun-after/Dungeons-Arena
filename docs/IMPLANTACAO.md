@@ -130,6 +130,10 @@ Sem `ARENA_URL`, o workflow de deploy fica desligado e o Pages publica o jogo se
 
 ### Chave de serviço do Supabase (Mundo, marco 29)
 
+Para os cinco personagens do Mundo, a migração
+`supabase/migrations/20261103120000_cinco_personagens_mundo.sql` deve estar aplicada antes de liberar a criação
+nos slots 4 e 5. Ela amplia apenas a restrição do slot; não apaga fichas e mantém o RLS e a exclusão pelo servidor.
+
 O servidor grava o personagem do Mundo na tabela `personagens_mundo` com ela (o RLS deixa o jogador só ler). Em
 <https://supabase.com>, **Project Settings** › **API**, copie a chave **service_role** e cole **direto** no GitHub
 como o segredo `SUPABASE_SERVICE_KEY` (não cole no chat nem em arquivo: ela passa por cima do RLS). O deploy grava a

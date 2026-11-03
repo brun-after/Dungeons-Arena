@@ -116,6 +116,12 @@ async function avisoDoMercado(c: CoordenadorDoMundo, quem: string, pagina: numbe
 }
 
 export async function atenderMercado(c: CoordenadorDoMundo, p: PedidoDoMercado): Promise<void> {
+  const concluir = c.iniciarMercado(p.identidade);
+  try { await processarMercado(c, p); }
+  finally { concluir(); }
+}
+
+async function processarMercado(c: CoordenadorDoMundo, p: PedidoDoMercado): Promise<void> {
   const quem = p.identidade;
   const acao = p.acao;
   const regras = BALANCE_PADRAO.mundo.mercado;

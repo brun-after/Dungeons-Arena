@@ -25,7 +25,7 @@ import { SalaCampanhaColyseus } from './salas/sala-campanha';
 import { SalaLivreColyseus } from './salas/sala-livre';
 import { CoordenadorDoMundo, reinoDoMundo, SalaMundoColyseus } from './salas/sala-mundo';
 import { conteudoOficial } from '../src/core/conteudo';
-import { PersistenciaEmMemoria, PersistenciaSupabase, type PersistenciaMundo } from './persistencia-mundo';
+import { PersistenciaEmMemoria, PersistenciaSupabase, slotValido, type PersistenciaMundo } from './persistencia-mundo';
 
 export interface OpcoesServidor {
   porta: number;
@@ -172,6 +172,26 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
     return resposta(200, { ok: true, personagens: await persistencia.listar(conta) });
   });
 
+  const excluirPersonagemMundo = createEndpoint('/mundo/personagens/:slot/excluir', { method: 'POST', disableBody: true }, async (ctx) => {
+    const req = ctx.request;
+    const origem = req?.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'local';
+    if (!limiteMundo.permitir(origem, Date.now())) return resposta(429, { ok: false, motivo: 'muitas_tentativas' });
+    const token = req?.headers.get('authorization')?.replace(/^Bearer /, '') ?? '';
+    const conta = token ? await persistencia.autenticar(token) : null;
+    if (!conta) return resposta(401, { ok: false, motivo: 'sem_conta' });
+    const slot = Number(ctx.params.slot);
+    if (!slotValido(slot)) return resposta(400, { ok: false, motivo: 'slot_invalido' });
+    // Nome digitado na confirmação; texto simples dispensa serialização de uma ficha no cliente.
+    const nome = await req?.text() ?? '';
+    if (!nome || nome.length > 24) return resposta(400, { ok: false, motivo: 'nome_diferente' });
+    try {
+      const motivo = await coordenador.excluir(conta, slot, nome);
+      return resposta(motivo ? (motivo === 'sem_personagem' ? 404 : 409) : 200, motivo ? { ok: false, motivo } : { ok: true });
+    } catch {
+      return resposta(503, { ok: false, motivo: 'indisponivel' });
+    }
+  });
+
   const metricas = createEndpoint('/metricas', { method: 'GET' }, async () => {
     const salas = await matchMaker.query({});
     const mem = process.memoryUsage();
@@ -198,7 +218,7 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
       campanha: defineRoom(SalaCampanhaColyseus),
       mundo: defineRoom(SalaMundoColyseus).filterBy(['lugar', 'instancia']),
     },
-    routes: createRouter({ saude, buscarSala, listarSalas, relatorios, metricas, certificar, personagensMundo }),
+    routes: createRouter({ saude, buscarSala, listarSalas, relatorios, metricas, certificar, personagensMundo, excluirPersonagemMundo }),
     transport: new WebSocketTransport({ server: httpServer, maxPayload: o.maxPayload ?? MAX_BYTES_MENSAGEM + 4096 }),
     greet: false,
     gracefullyShutdown: false,

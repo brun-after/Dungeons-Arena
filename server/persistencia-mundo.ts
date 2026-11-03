@@ -23,6 +23,7 @@ export interface PersistenciaMundo {
   listar(conta: string): Promise<ResumoDoMundo[]>;
   carregar(conta: string, slot: number): Promise<FichaDoMundo | null>;
   gravar(conta: string, slot: number, ficha: FichaDoMundo): Promise<void>;
+  excluir(conta: string, slot: number): Promise<void>;
 }
 
 export function slotValido(v: unknown): v is number {
@@ -36,6 +37,11 @@ export function resumoDaFicha(slot: number, f: FichaDoMundo): ResumoDoMundo {
 
 export class PersistenciaEmMemoria implements PersistenciaMundo {
   private readonly fichas = new Map<string, FichaDoMundo>();
+
+  excluir(conta: string, slot: number): Promise<void> {
+    this.fichas.delete(`${conta}#${String(slot)}`);
+    return Promise.resolve();
+  }
 
   autenticar(token: string): Promise<string | null> {
     return Promise.resolve(/^local:[\w-]{1,40}$/.test(token) ? token : null);
@@ -93,6 +99,11 @@ export class PersistenciaSupabase implements PersistenciaMundo {
   async gravar(conta: string, slot: number, ficha: FichaDoMundo): Promise<void> {
     const linha = { user_id: conta, slot, ficha, resumo: resumoDaFicha(slot, ficha), vila_salva: ficha.vilaSalva, atualizado_em: new Date().toISOString() };
     const { error } = await this.cliente.from('personagens_mundo').upsert(linha);
+    if (error) throw new Error(`personagens_mundo: ${error.message}`);
+  }
+
+  async excluir(conta: string, slot: number): Promise<void> {
+    const { error } = await this.cliente.from('personagens_mundo').delete().eq('user_id', conta).eq('slot', slot);
     if (error) throw new Error(`personagens_mundo: ${error.message}`);
   }
 }
