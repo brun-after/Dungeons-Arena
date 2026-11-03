@@ -3198,42 +3198,47 @@ body.toque .guia-mundo { bottom: calc(190px + var(--seguro-base)); max-width: ca
 .modal-fechar { border-radius: 50%; }
 .link-menu { color: #ffac65; text-underline-offset: 4px; }
 button:focus-visible, a:focus-visible { outline: 2px solid #ff8a26; outline-offset: 3px; }
-dialog.mochila { width: min(1200px, 96vw); max-width: 96vw; height: min(800px, 92dvh); max-height: 92dvh; padding: 0; overflow: hidden; }
+dialog.mochila { width: min(1280px, 96vw); max-width: 96vw; height: min(840px, 94dvh); max-height: 94dvh; padding: 0; overflow: hidden; }
 dialog.mochila[open] { display: flex; flex-direction: column; }
-.mochila .modal-topo { flex: none; padding: 12px 18px; border-bottom: 1px solid #555; background: #080808; }
-.mochila .modal-corpo { display: grid; grid-template-columns: 160px minmax(0, 1fr); flex: 1; min-height: 0; overflow: hidden; padding: 0; }
-.mochila .abas-modal { display: flex; flex-direction: column; align-items: stretch; gap: 8px; margin: 0; padding: 16px 10px; background: #080808; border-right: 1px solid #555; overflow-y: auto; }
-.mochila .abas-modal button { min-height: 44px; text-align: left; flex-shrink: 0; }
-.mochila .conteudo-modal { min-width: 0; min-height: 0; overflow: auto; padding: 16px; overscroll-behavior: contain; }
-.mochila .inventario-paineis { display: grid; grid-template-columns: minmax(180px, .85fr) minmax(230px, 1.4fr); gap: 18px; overflow: hidden; }
-.equipamento-fixo, .bolsa-rolavel { min-width: 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 6px; }
-.equipamento-fixo { border-right: 1px solid #444; }
-.retrato-personagem { margin: 0; min-height: 130px; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 80%, #513019, #171717 65%); border-bottom: 1px solid #ff8a26; color: #bbb; }
-.retrato-personagem img, .retrato-personagem canvas { display: block; width: 180px; max-width: 100%; aspect-ratio: 1; object-fit: contain; }
-.resumo-personagem { line-height: 1.5; }
-.resumo-personagem p { color: #ccc; font-size: .9rem; }
+.mochila .modal-topo { flex: none; padding: 8px 16px; border-bottom: 1px solid #555; background: #080808; }
+.mochila .modal-corpo { display: grid; grid-template-rows: auto minmax(0, 1fr); flex: 1; min-height: 0; overflow: hidden; padding: 0; }
+.mochila .abas-modal { display: flex; flex-wrap: nowrap; gap: 6px; margin: 0; padding: 6px 10px; background: #080808; border-bottom: 1px solid #555; overflow-x: auto; }
+.mochila .abas-modal button { min-height: 40px; flex: 0 0 auto; }
+.mochila .conteudo-modal { min-width: 0; min-height: 0; overflow: auto; padding: 12px; overscroll-behavior: contain; }
+.mochila .inventario-paineis { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 1fr); gap: 12px; overflow: hidden; }
+.equipamento-fixo, .bolsa-rolavel { min-width: 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.equipamento-fixo .lista-itens.slots { grid-template-columns: minmax(0, 1fr); }
+.inventario-paineis .linha-item { padding: 5px; gap: 5px; }
+.inventario-paineis .conteudo-item, .inventario-paineis .linha-toque { flex-basis: 100%; overflow-wrap: anywhere; }
+.painel-personagem { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(12px, 3vw, 36px); align-items: center; width: 100%; text-align: left; }
+.retrato-personagem { margin: 0; min-width: 0; min-height: 240px; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 75%, #513019, #171717 72%); border-bottom: 1px solid #ff8a26; color: #bbb; }
+.retrato-personagem img, .retrato-personagem .retrato-classe.retrato-3d { display: block; width: 100%; height: clamp(240px, 38vh, 420px); object-fit: contain; padding: 12px; }
+.inventario-paineis .retrato-personagem { min-height: 0; align-self: stretch; overflow: hidden; }
+.inventario-paineis .retrato-personagem img, .inventario-paineis .retrato-classe.retrato-3d { height: 100%; max-height: 56vh; }
+.resumo-personagem { min-width: 0; }
+.resumo-personagem h3 { margin: 0 0 12px; color: var(--destaque); }
+.resumo-personagem h4 { margin: 12px 0 6px; }
+.metricas-personagem { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(96px, 100%), 1fr)); gap: 6px; margin: 0; }
+.metricas-personagem div, .skills-personagem li { background: #242424; padding: 6px 8px; border-radius: 5px; }
+.metricas-personagem dt { color: #ccc; font-size: .8rem; }
+.metricas-personagem dd { margin: 0; font-weight: 700; }
+.skills-personagem { display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: 0; list-style: none; font-size: .85rem; }
+.grade-slots, .colunas-classe { grid-template-columns: minmax(0, 1fr); width: min(100%, 980px); }
+.classe-coluna { background: #171717; padding: 12px; border: 1px solid #444; border-top-color: var(--destaque); border-radius: 8px; }
+.colunas-classe { display: grid; gap: 12px; overflow: visible; }
+.voltar-selecao { position: sticky; top: 0; align-self: start; justify-self: start; z-index: 3; background: #101010; padding: 8px 12px; border: 1px solid #666; border-radius: 6px; }
 .atalhos-jogador { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 20px; }
 .atalhos-jogador button { min-height: 54px; border-left: 3px solid #ff8a26; }
-.equipamento-fixo .linha-item { flex-wrap: wrap; }
-@media (max-width: 700px), (max-height: 500px) {
- .mochila .modal-corpo { grid-template-columns: 105px minmax(0, 1fr); }
- .mochila .abas-modal { padding: 8px 5px; gap: 5px; }
- .mochila .abas-modal button { padding: 8px 5px; font-size: .8rem; }
- .mochila .inventario-paineis { grid-template-columns: minmax(130px, .85fr) minmax(150px, 1.2fr); gap: 6px; padding: 8px; }
- .retrato-personagem img, .retrato-personagem canvas { width: 130px; }
- .equipamento-fixo .detalhe-item { font-size: .72rem; }
- .mochila .linha-item { flex-wrap: wrap; }
-}
-
 .preparando-cena { position: absolute; inset: 0; z-index: 100; display: grid; place-items: center; background: #080808; color: #fafafa; border-bottom: 3px solid #ff8a26; }
-
-@media (max-width: 480px) {
- .mochila .modal-corpo { grid-template-columns: 88px minmax(0, 1fr); }
- .mochila .inventario-paineis { grid-template-columns: minmax(95px, .8fr) minmax(0, 1fr); padding: 5px; gap: 4px; }
- .mochila .conteudo-item { min-width: 0; overflow-wrap: anywhere; }
- .mochila .icone-item { width: 24px; height: 24px; flex-basis: 24px; }
- .atalhos-jogador { grid-template-columns: 1fr; }
-}
 .botao-menu.secundario { background: #202020; color: #fafafa; border-color: #666; border-radius: 6px; }
+@media (max-width: 600px) {
+  .painel-personagem { grid-template-columns: minmax(0, .85fr) minmax(0, 1fr); gap: 8px; }
+  .mochila .inventario-paineis { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: minmax(120px, 40%) minmax(0, 1fr); gap: 6px; padding: 6px; }
+  .inventario-paineis .retrato-personagem { grid-area: 1 / 1 / 2 / -1; }
+  .inventario-paineis .retrato-personagem img, .inventario-paineis .retrato-classe.retrato-3d { min-height: 0; max-height: 100%; }
+  .metricas-personagem { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .metricas-personagem dt, .skills-personagem li { overflow-wrap: anywhere; }
+}
 
-.equipamento-fixo .lista-itens.slots { grid-template-columns: minmax(0, 1fr); }
+.tela-menu:has(> .voltar-selecao) { justify-content: flex-start; }
+.tela-menu:has(> .voltar-selecao) > .cartao-slot { width: min(100%, 980px); }

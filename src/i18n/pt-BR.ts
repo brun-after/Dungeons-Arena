@@ -374,7 +374,7 @@ export const ptBR = {
   'mochila.nivelCurto': 'Nv {nivel}',
   'mochila.abaItens': 'Itens',
   'mochila.abaFicha': 'Ficha',
-  'mochila.equipado': 'Equipado',
+  'mochila.equipado': 'Equipados',
   'mochila.itens': 'Mochila ({n}/{max})',
   'mochila.semItens': 'Nada na mochila. Derrote inimigos para encontrar itens.',
   'mochila.vazio': 'vazio',

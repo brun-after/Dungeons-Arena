@@ -1,4 +1,4 @@
-import { retratoPersonagem, resumoPersonagem } from './retrato-personagem';
+import { retratoPersonagem, painelPersonagem } from './retrato-personagem';
 // Mochila e ficha (§2.10, §2.12). Marco 6 (13/10/2026). Só lê o estado e emite comandos.
 // No toque, tocar a linha inteira equipa, usa ou desequipa; equipar e desequipar mantêm o modal aberto. No desktop, cada linha
 // tem o seu botão. A lista é redesenhada só quando a bolsa, o nível ou o XP mudam.
@@ -238,8 +238,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     // A mochila vem primeiro: é onde estão as ações; os slots ficam numa grade compacta.
     const bolsaPainel = el('section', 'bolsa-rolavel');
     const equipamentoPainel = el('section', 'equipamento-fixo');
-    equipamentoPainel.append(retratoPersonagem(bolsa.classeId, j));
-    corpo.append(equipamentoPainel, bolsaPainel);
+    corpo.append(bolsaPainel, retratoPersonagem(bolsa.classeId, j), equipamentoPainel);
     const ouro = el('p', 'saldo-loja', t('loja.saldo', { ouro: bolsa.ouro }));
     ouro.dataset.ouro = String(bolsa.ouro);
     bolsaPainel.append(
@@ -474,7 +473,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     corpo.append(abas);
     const conteudo = el('div', 'conteudo-modal');
     if (aba === 'geral') {
-      conteudo.append(retratoPersonagem(j.bolsa.classeId, j), resumoPersonagem(j.bolsa.classeId, j));
+      conteudo.append(painelPersonagem(j.bolsa.classeId, j));
       const atalhos = el('div', 'atalhos-jogador');
       for (const [id, nome] of [['itens', 'Gerenciar equipamentos'], ['ficha', 'Evoluir ficha'], ['habilidades', 'Preparar habilidades'], ['diario', 'Consultar diário']] as const)
         atalhos.append(botao(nome, `atalho-${id}`, () => { aba = id; desenhar(); }));
