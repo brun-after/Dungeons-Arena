@@ -1,6 +1,44 @@
 import { criarEstado } from '../../src/core/estado';
 import { criarEntidade } from '../../src/entities/entidade';
 import { expect, test } from '@playwright/test';
+test('painel social começa recolhido e recebe cliques e toques sem atingir o mundo', async ({ page, isMobile }) => {
+    await page.goto('./?jogo=mundo');
+    await page.locator('#mundo-nome-1').fill('ChatInteracao');
+    await page.locator('#mundo-nome-1').locator('..').getByRole('button', { name: 'Começar' }).click();
+    const social = page.locator('.painel-social');
+    const alternar = social.locator(':scope > button');
+    await expect(alternar).toHaveAttribute('aria-expanded', 'false', { timeout: 30000 });
+    await expect(social.locator('.form-chat')).toBeHidden();
+    // Registra os eventos no canvas real: nem o fundo, nem os controles devem atravessar o painel.
+    await page.evaluate(() => {
+        document.querySelectorAll('canvas').forEach(canvas => {
+            canvas.addEventListener('pointerdown', () => { document.body.dataset.cliquesNoMundo = '1'; });
+        });
+    });
+    const ativar = async (alvo: import('@playwright/test').Locator) => {
+        if (isMobile) await alvo.tap();
+        else await alvo.click();
+    };
+    await ativar(alternar);
+    await expect(alternar).toHaveAttribute('aria-expanded', 'true');
+    const codigo = social.getByRole('textbox', { name: 'Código da party', exact: true });
+    await ativar(codigo);
+    await expect(codigo).toBeFocused();
+    await page.keyboard.type('AB12CD34EF56');
+    await expect(codigo).toHaveValue('AB12CD34EF56');
+    const mensagem = social.locator('.form-chat input');
+    await ativar(mensagem);
+    await expect(mensagem).toBeFocused();
+    await page.keyboard.type('teste de chat');
+    await expect(mensagem).toHaveValue('teste de chat');
+    await ativar(social.locator('.form-chat select'));
+    await page.keyboard.press('Escape');
+    await ativar(social.locator('.grupo-mundo .subtitulo-modal'));
+    await expect(page.locator('body')).not.toHaveAttribute('data-cliques-no-mundo', '1');
+    await ativar(alternar);
+    await expect(alternar).toHaveAttribute('aria-expanded', 'false');
+});
+
 test('dois clientes entram por código e preservam mapas e configurações pessoais', async ({ browser }, testInfo) => {
     test.setTimeout(180000);
     const a = await browser.newContext(), b = await browser.newContext();
@@ -11,7 +49,7 @@ test('dois clientes entram por código e preservam mapas e configurações pesso
             await pagina.locator('#mundo-nome-1').fill(nome);
             await pagina.locator('#mundo-nome-1').locator('..').getByRole('button', { name: 'Começar' }).click();
             await expect(pagina.locator('.minimapa')).toBeVisible({ timeout: 30000 });
-            // 02/11/2026: no toque, o painel começa recolhido; abra-o como o jogador faria.
+            // O painel começa recolhido em qualquer dispositivo; abra-o como o jogador faria.
             const social = pagina.locator('.painel-social');
             if (await social.getAttribute('data-fechado') === '1')
                 await social.locator(':scope > button').click();

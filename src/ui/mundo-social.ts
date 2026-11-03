@@ -52,8 +52,6 @@ export interface PainelSocial {
   grupo(a: Aviso<'grupo'>): void;
   convite(a: Aviso<'convite'>): void;
   troca(a: Aviso<'troca'>): void;
-  /** Recolhe o painel quando a cena está no toque (a classe `toque` do body vem com a cena). */
-  ajustarAoToque(): void;
 }
 
 export function criarPainelSocial(o: OpcoesDoSocial): PainelSocial {
@@ -65,8 +63,7 @@ export function criarPainelSocial(o: OpcoesDoSocial): PainelSocial {
   const el = document.createElement('aside');
   el.className = 'painel-social';
   el.setAttribute('aria-label', t('mundo.social.rotulo'));
-  // Recolhido, o painel é só o botão, com as mensagens novas contadas. No toque começa recolhido (a tela deitada do
-  // celular não tem lugar para ele aberto o tempo todo): quem monta a tela chama `ajustarAoToque` com a cena pronta.
+  // Começa recolhido em qualquer dispositivo; o botão conta as mensagens novas.
   let novas = 0;
   const recolher = botao('', () => {
     mostrarAberto(el.dataset.fechado === '1');
@@ -77,7 +74,7 @@ export function criarPainelSocial(o: OpcoesDoSocial): PainelSocial {
     recolher.textContent = aberto ? t('mundo.social.recolher') : novas > 0 ? t('mundo.social.abrirNovas', { n: novas }) : t('mundo.social.abrir');
     recolher.setAttribute('aria-expanded', aberto ? 'true' : 'false');
   };
-  mostrarAberto(true);
+  mostrarAberto(false);
 
   // O grupo.
   const secaoGrupo = document.createElement('section');
@@ -330,8 +327,5 @@ export function criarPainelSocial(o: OpcoesDoSocial): PainelSocial {
     },
     convite,
     troca,
-    ajustarAoToque: () => {
-      if (document.body.classList.contains('toque')) mostrarAberto(false);
-    },
   };
 }
