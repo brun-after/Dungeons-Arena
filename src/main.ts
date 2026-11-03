@@ -41,6 +41,7 @@ function geradaComTema(tema: string): RefFase | undefined {
 
 function rotear(raiz: HTMLElement): void {
   const params = new URLSearchParams(location.search);
+  if (params.get('party-observador') === '1') { void import('./ui/party-observador').then(m => { m.iniciarObservador(raiz); }); return; }
   const arena = params.get('arena');
   if (arena === 'loopback') {
     void import('./arena-tela').then((m) => m.iniciarArenaLoopback(raiz));

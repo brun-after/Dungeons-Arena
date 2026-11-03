@@ -3,6 +3,11 @@
 // Marco 30 (30/10/2026, D-129): o quadro de missões, o banco, o mercado, o chat, o grupo e a troca.
 
 export const textosMundo = {
+  'mundo.party.visao': 'Visão da party no Mundo (até seis câmeras)',
+  'mundo.grupo.codigo': 'Código da party: {codigo}',
+  'mundo.grupo.criarCodigo': 'Criar party por código',
+  'mundo.grupo.digitarCodigo': 'Código da party',
+  'mundo.grupo.entrarCodigo': 'Entrar na party',
   'mundo.mapa.pontos': 'Mapa do lugar atual. Toque para adicionar uma estrela; toque nela para remover.',
   'mundo.mapa.lugar': 'Você está em: {nome}',
   'mundo.mapa.instrucoes': 'Toque no terreno para marcar um ponto ou numa estrela para removê-la. Toque num nome para destacar um lugar. Os destaques ficam salvos neste aparelho.',

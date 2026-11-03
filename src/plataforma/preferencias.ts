@@ -28,6 +28,7 @@ export type SentidoToken = 'direita' | 'esquerda';
 export type TeclasMovimento = 'wasd' | 'ewas';
 
 export interface Preferencias {
+  visaoParty: boolean;
   controle: TipoControle;
   teclasMovimento: TeclasMovimento;
   camera: ModoCamera;
@@ -72,6 +73,7 @@ export const QUALIDADES: readonly NivelQualidade[] = ['minimo', 'baixo', 'medio'
 const CHAVE_LOCAL = 'dungeons-arena:preferencias';
 const CHAVE_PERFIL = 'preferencias';
 export const PREFERENCIAS_PADRAO: Preferencias = {
+  visaoParty: false,
   controle: 'joystick',
   teclasMovimento: 'wasd',
   camera: 'janela',
@@ -108,6 +110,7 @@ let usarBanco = false;
 export function normalizarPreferencias(dados: unknown): Preferencias {
   const d = typeof dados === 'object' && dados !== null ? (dados as Partial<Record<keyof Preferencias, unknown>>) : {};
   return {
+    visaoParty: booleano(d.visaoParty, false),
     controle: d.controle === 'dpad' ? 'dpad' : 'joystick',
     teclasMovimento: opcao(d.teclasMovimento, ['wasd', 'ewas'] as const, PADRAO.teclasMovimento),
     camera: d.camera === 'centralizada' ? 'centralizada' : 'janela',

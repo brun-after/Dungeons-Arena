@@ -123,6 +123,7 @@ export function criarConfiguracoes(o: { toque: boolean; direcional?: boolean; ao
     );
     secao(
       t('config.camera'),
+      campo(t('mundo.party.visao'), marcador('visaoParty', p.visaoParty, v => { mudar({ visaoParty: v }); })),
       campo(t('config.modoCamera'), escolha('camera', p.camera, ['janela', 'centralizada'] as const, 'modoCamera', (v) => { mudar({ camera: v }); })),
       campo(t('config.enquadrarDois'), marcador('enquadrarDois', p.enquadrarDois, (v) => { mudar({ enquadrarDois: v }); })),
     );

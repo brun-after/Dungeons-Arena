@@ -18,7 +18,9 @@ function perto(a: Posicionado, b: Posicionado, raio: number): boolean {
 export function recortarPorInteresse(publico: EstadoJogo, propriaId: string, raio: number): EstadoJogo {
   const propria = publico.entidades.find((e) => e.id === propriaId);
   if (!propria) return { ...publico, entidades: [], objetos: [], projeteis: [], rastros: [], respawns: [] };
-  const ve = (p: Posicionado) => perto(p, propria, raio);
+  // A party recebe as vizinhanças de todos os aliados na mesma sala para as câmeras e o mapa.
+  const focos = propria.grupo ? publico.entidades.filter(e => e.id === propriaId || e.grupo === propria.grupo && e.arquetipo === 'jogador') : [propria];
+  const ve = (p: Posicionado) => focos.some(f => perto(p, f, raio));
   return {
     ...publico,
     entidades: publico.entidades.filter((e) => e.id === propriaId || ve(e)),

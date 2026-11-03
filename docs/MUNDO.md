@@ -1,6 +1,6 @@
 # O Mundo: guia do modo
 
-**Versão:** 0.6 · **Data:** 02/11/2026
+**Versão:** 0.7 · **Data:** 02/11/2026
 
 > **Histórico**
 > - **0.5 (02/11/2026)**: marco 33: nove regiões com 1,5625x a área atual, 20 novas dungeons e missões, mapa com pontos pessoais e bosses elementais CC0.
@@ -182,3 +182,31 @@ licença e comando reprodutível em `src/assets/personagens/LICENCAS.md`.
 
 Revisão visual de 02/11/2026: servos do necromante jogador avermelhados e servos do boss negros,
 inclusive após o dono sair do recorte da rede. As relações e as regras de combate permanecem as mesmas.
+
+
+## Party por código e projeção na TV (02/11/2026, marco 35)
+
+Todos jogam nos próprios celulares/computadores, com suas contas e personagens. No painel de grupo,
+use **Criar party por código** e compartilhe as 12 letras/números. Os outros usam **Entrar na party**.
+O limite continua sendo seis jogadores. O código vale enquanto a party existir no servidor.
+Uma party criada por código permanece com um único membro até ele sair.
+
+Em **Configurações > Câmera > Visão da party no Mundo**, cada pessoa decide se quer a visão conjunta.
+O notebook pode ativá-la e projetar sua janela na TV, enquanto os celulares continuam com a visão normal.
+Não é multiplayer local com vários controles ligados ao notebook: os comandos continuam vindo de cada aparelho.
+
+Jogadores próximos dividem a câmera; ao se afastarem, a apresentação passa para duas, três, quatro,
+cinco ou seis câmeras e reúne as visões ao se aproximarem. O agrupamento limita o diâmetro do conjunto,
+para não juntar uma corrente de personagens que não cabe no enquadramento. A primeira câmera sempre
+inclui o jogador local. Os demais painéis são de observação, sem comandos sobre outros personagens.
+
+O mapa local mostra os aliados e seus nomes, mesmo longe; o mapa do reino identifica a região/dungeon
+em que cada membro está. Menus, inventário e mapa continuam pessoais. Na projeção, os diálogos do jogador
+local ficam limitados ao seu painel e não escurecem as câmeras dos demais. O Mundo continua em tempo real.
+
+Em outra região/dungeon, um observador renderiza o estado público daquela sala. As atualizações externas
+são solicitadas somente com a preferência ligada, a cada 250 ms, com interpolação visual; não são vídeo
+streaming nem transferência do controle. O servidor confere a party antes de entregar as câmeras,
+limita a frequência e não envia bolsas/inventários privados. Áudio dos observadores fica desativado.
+Na mesma sala, as câmeras usam a atualização normal do jogo e um único renderer. A visão normal continua
+como padrão; múltiplas câmeras aumentam o trabalho gráfico no aparelho que as ativa.

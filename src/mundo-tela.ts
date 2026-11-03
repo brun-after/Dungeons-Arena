@@ -1,3 +1,4 @@
+import { lerPreferencias } from './plataforma/preferencias';
 // O modo Mundo no navegador (marco 29, 30/10/2026, D-128): `?jogo=mundo`. Exige a conta (o personagem mora no
 // servidor); sem nuvem no build, vale a conta local do servidor de desenvolvimento. Fluxo:
 // - a lista dos 3 personagens do Mundo (separados da campanha), com "Jogar" ou o formulário de criação;
@@ -220,6 +221,9 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
   }
   const ctx = montarLugar(conteudo, reino, lugar, modo).ctx;
   const eu = new ClienteArena({ ctx, transporte: conexao.transporte, nome: '', pedidoFicha: null, agoraMs });
+  let visoesExternas: Extract<AvisoDoMundo, { tipo: 'visoesParty' }>['visoes'] = [];
+  const pollingParty: { timer?: ReturnType<typeof setInterval> } = {};
+  let membrosParty: Extract<AvisoDoMundo, { tipo: 'grupo' }>['membros'] = [];
   let ultimoLugar: Extract<AvisoDoMundo, { tipo: 'lugar' }> | null = null;
   const avisosAntes: AvisoDoMundo[] = [];
   eu.aoMundo = (a) => avisosAntes.push(a);
@@ -253,6 +257,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
     agoraMs: () => Date.now(),
   });
   const desmontar = () => {
+    clearInterval(pollingParty.timer);
     pararLaco?.();
     cena?.desmontar();
     cena = null;
@@ -260,7 +265,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
     document.querySelector('.mapa-expandido')?.remove();
   };
   const verMapa = () => {
-    if (ultimoLugar) abrirMapa(reino, ultimoLugar.lugar, ultimoLugar.descobertas, ultimoLugar.vilaSalva, { ctx, estado: estadoAtual, idLocal: idDoJogador() });
+    if (ultimoLugar) abrirMapa(reino, ultimoLugar.lugar, ultimoLugar.descobertas, ultimoLugar.vilaSalva, { ctx, estado: estadoAtual, idLocal: idDoJogador(), membros: membrosParty });
   };
   const teclaMapa = (ev: KeyboardEvent) => {
     if ((ev.key === 'm' || ev.key === 'M') && !(ev.target instanceof HTMLInputElement)) verMapa();
@@ -269,12 +274,15 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
   const tratarAviso = (a: AvisoDoMundo) => {
     if (a.tipo === 'lugar') {
       ultimoLugar = a;
+      enviarAcao({a:'grupo',op:'consultar'});
       faixa.mostrar(a);
       if (a.pvp) avisar(t('mundo.perigo.perigoso'), 6000);
     } else if (a.tipo === 'portais') {
       abrirPortal(a, Date.now(), (destino, pagamento) => {
         eu.viajar(destino, pagamento);
       });
+    } else if (a.tipo === 'visoesParty') {
+      visoesExternas = a.visoes;
     } else if (a.tipo === 'quadro') {
       economia.quadro(a);
     } else if (a.tipo === 'banco') {
@@ -286,6 +294,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
     } else if (a.tipo === 'chat') {
       social.chat(a);
     } else if (a.tipo === 'grupo') {
+      membrosParty = a.membros;
       social.grupo(a);
     } else if (a.tipo === 'convite') {
       social.convite(a);
@@ -351,6 +360,8 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
     },
     acoesExtras: [mapa, retorno, sair],
     pausaOJogo: false,
+    partyMundo: true,
+    visoesExternas: () => visoesExternas,
     acoesDaPausa: [{ rotulo: t('mundo.sairRotulo'), fazer: () => { sair.click(); } }],
   });
   if (!cena) return;
@@ -368,6 +379,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
     mini.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); verMapa(); } });
   }
   social.ajustarAoToque();
+  pollingParty.timer = setInterval(() => { if (lerPreferencias().visaoParty && membrosParty.length) enviarAcao({a:'grupo',op:'visoes'}); else visoesExternas = []; },250);
   addEventListener('keydown', teclaMapa);
   eu.aoEventos = (eventos) => {
     for (const ev of eventos) {

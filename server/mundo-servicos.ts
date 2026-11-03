@@ -28,7 +28,7 @@ function avisoDoGrupo(c: CoordenadorDoMundo, g: GrupoDoMundo | null): AvisoDoMun
     const p = c.perfil(id);
     return { nome: p?.nome ?? '?', classeId: p?.classeId ?? '', nivel: p?.nivel ?? 1, lugar: c.lugarDe(id), lider: g?.lider === id };
   });
-  return { tipo: 'grupo', id: g?.id ?? null, membros };
+  return { tipo: 'grupo', id: g?.id ?? null, ...(g?.codigo && { codigo: g.codigo }), membros };
 }
 
 /** Avisa e marca a entidade de cada membro (e de quem saiu, sem grupo). */
@@ -62,7 +62,17 @@ export function atenderSocial(c: CoordenadorDoMundo, p: Social): void {
     c.entregarA(quem, recusa('denuncia_registrada'));
     return;
   }
-  if (acao.op === 'convidar') {
+  if (acao.op === 'consultar') {
+    c.entregarA(quem, avisoDoGrupo(c, c.grupos.grupoDe(quem) ?? null));
+  } else if (acao.op === 'visoes') {
+    c.visoesParty(quem);
+  } else if (acao.op === 'criar_codigo') {
+    const g = c.grupos.criarPorCodigo(quem, randomUUID().replaceAll('-', '').slice(0, 12).toUpperCase());
+    publicarGrupo(c, g);
+  } else if (acao.op === 'entrar_codigo') {
+    const g = c.grupos.entrarPorCodigo(quem, acao.codigo);
+    if (typeof g === 'string') c.entregarA(quem, recusa(g)); else publicarGrupo(c, g);
+  } else if (acao.op === 'convidar') {
     const alvo = c.porNome(acao.nome);
     const r = alvo ? c.grupos.convidar(quem, alvo, agora) : 'nao_encontrado';
     if (typeof r === 'string' || !alvo) c.entregarA(quem, recusa(typeof r === 'string' ? r : 'nao_encontrado'));
