@@ -21,6 +21,8 @@ import type { PatchDeEstado } from './patches';
 
 /** Teto de uma mensagem de comando (§3.6). Medido em unidades de texto, o que é conservador. */
 export const MAX_BYTES_MENSAGEM = 16 * 1024;
+/** Limite comum da agenda do servidor e da predição: não reaplicar segundos de movimento sem confirmação. */
+export const MAX_ADIANTAMENTO_TICKS = 30;
 const MAX_ID = 64;
 const MAX_COORDENADA = 10_000;
 

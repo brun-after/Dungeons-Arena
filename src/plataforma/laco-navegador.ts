@@ -30,21 +30,25 @@ export function iniciarLaco(opcoes: OpcoesLaco): () => void {
   let parado = false;
 
   const aoQuadro = (): void => {
-    if (opcoes.quadroPermitido && !opcoes.quadroPermitido(relogio.agoraMs())) {
-      if (!parado) quadro = requestAnimationFrame(aoQuadro);
-      return;
-    }
-    if (opcoes.pausado?.()) {
-      acumulador.anteriorMs = null;
-      acumulador.acumuladoMs = 0;
-    } else {
-      const orcamento = opcoes.orcamentoMs === undefined ? undefined : { ms: opcoes.orcamentoMs, relogio: () => relogio.agoraMs() };
-      ultimoAlpha = avancarLaco(acumulador, relogio.agoraMs(), opcoes.simular, orcamento).alpha;
-    }
     try {
+      if (opcoes.quadroPermitido && !opcoes.quadroPermitido(relogio.agoraMs())) return;
+      if (opcoes.pausado?.()) {
+        acumulador.anteriorMs = null;
+        acumulador.acumuladoMs = 0;
+      } else {
+        const orcamento = opcoes.orcamentoMs === undefined ? undefined : { ms: opcoes.orcamentoMs, relogio: () => relogio.agoraMs() };
+        try {
+          ultimoAlpha = avancarLaco(acumulador, relogio.agoraMs(), opcoes.simular, orcamento).alpha;
+        } catch (erro) {
+          // O passo pode ter falhado pela rede: não repetir uma fila crescente de tempo acumulado.
+          acumulador.anteriorMs = null;
+          acumulador.acumuladoMs = 0;
+          throw erro;
+        }
+      }
       opcoes.renderizar(ultimoAlpha);
     } finally {
-      // Uma falha de desenho continua visível no console, mas não interrompe a rede e a predição.
+      // Inclui o passo de rede e o limitador de quadros; o erro permanece visível no console.
       if (!parado) quadro = requestAnimationFrame(aoQuadro);
     }
   };
