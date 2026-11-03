@@ -39,6 +39,114 @@ function cone(r: number, a: number, m: THREE.Material): THREE.Mesh {
   return new THREE.Mesh(new THREE.ConeGeometry(r, a, 6), m);
 }
 
+/** Peças de cabeça com silhueta própria, presas ao mesmo osso do traje. */
+export function pecaDeCabeca(ossos: Ossos, classe: string, n: number, acento: number): THREE.Object3D[] {
+  const cabeca = ossos.get('Head');
+  const pescoco = ossos.get('neck_01');
+  if (!cabeca || !pescoco) return [];
+  const p = pos(cabeca);
+  const altura = p.distanceTo(pos(pescoco));
+  const r = altura * 1.85;
+  const grupo = new THREE.Group();
+  grupo.position.copy(p).add(new THREE.Vector3(0, altura * 0.86, 0));
+  if (classe === 'arqueiro') {
+    const tecido = mat(n >= 1 ? 0x5b6040 : 0x464d32, { roughness: 1, side: THREE.DoubleSide });
+    const concha = new THREE.Mesh(new THREE.SphereGeometry(r, 18, 12, Math.PI * 0.73, Math.PI * 1.54, 0, Math.PI * 0.84), tecido);
+    concha.scale.set(1.04, 1.2, 1.02);
+    grupo.add(concha);
+    const topo = new THREE.Mesh(new THREE.SphereGeometry(r, 18, 8, 0, Math.PI * 2, 0, Math.PI * 0.36), tecido);
+    topo.scale.copy(concha.scale);
+    grupo.add(topo);
+    const gola = new THREE.Mesh(new THREE.TorusGeometry(r * 0.82, r * 0.2, 7, 18), tecido);
+    gola.rotation.x = Math.PI / 2;
+    gola.position.y = -r * 0.88;
+    grupo.add(gola);
+    if (n >= 1) {
+      const fecho = new THREE.Mesh(new THREE.IcosahedronGeometry(r * 0.14, 0), enfeite(n));
+      fecho.position.set(r * 0.42, -r * 0.84, r * 0.75);
+      grupo.add(fecho);
+    }
+  } else if (classe === 'aventureiro') {
+    const ferro = mat(n >= 5 ? 0x38343c : 0x676767, { metalness: 0.44, roughness: 0.57 });
+    const casca = new THREE.Mesh(new THREE.SphereGeometry(r * 1.03, 20, 12, 0, Math.PI * 2, 0, Math.PI * 0.53), ferro);
+    casca.scale.y = 1.07;
+    casca.position.y = r * 0.11;
+    grupo.add(casca);
+    const aba = new THREE.Mesh(new THREE.CylinderGeometry(r * 1.02, r * 1.09, r * 0.15, 22), ferro);
+    aba.position.y = r * 0.04;
+    aba.scale.z = 0.92;
+    grupo.add(aba);
+    const couro = mat(0x523727, { roughness: 0.96 });
+    for (const lado of [-1, 1]) {
+      const tira = new THREE.Mesh(new THREE.BoxGeometry(r * 0.12, r * 0.73, r * 0.11), couro);
+      tira.position.set(lado * r * 0.72, -r * 0.48, r * 0.39);
+      tira.rotation.z = -lado * 0.26;
+      grupo.add(tira);
+    }
+  } else {
+    const liga = mat(n >= 5 ? 0x2d2939 : 0x444c65, { metalness: 0.42, roughness: 0.52, side: THREE.DoubleSide });
+    const perfis = [new THREE.Vector2(r * 0.64, -r * 0.83), new THREE.Vector2(r * 0.89, -r * 0.25), new THREE.Vector2(r * 0.89, r * 0.53), new THREE.Vector2(r * 0.62, r * 0.84), new THREE.Vector2(0, r * 0.91)];
+    grupo.add(new THREE.Mesh(new THREE.LatheGeometry(perfis, 7), liga));
+    const fenda = new THREE.Mesh(new THREE.BoxGeometry(r * 1.15, r * 0.19, r * 0.19), mat(0x100e16));
+    fenda.position.set(0, r * 0.07, r * 0.79);
+    grupo.add(fenda);
+    for (const lado of [-1, 1]) {
+      const peca = cone(r * 0.19, r * 0.59, liga);
+      peca.position.set(lado * r * 0.55, r * 0.78, r * 0.49);
+      peca.rotation.z = -lado * 0.43;
+      grupo.add(peca);
+    }
+    const gema = new THREE.Mesh(new THREE.OctahedronGeometry(r * 0.21), aceso(n >= 4 ? acento : 0x765ea2, 0.5));
+    gema.position.set(0, r * 0.5, r * 0.85);
+    grupo.add(gema);
+  }
+  const peca = prender(cabeca, grupo);
+  return peca ? [peca] : [];
+}
+
+/** Bacinete com viseira articulada e abertura horizontal para os olhos. */
+export function bacinete(ossos: Ossos, n: number, acento: number): THREE.Object3D[] {
+  const cabeca = ossos.get('Head');
+  const pescoco = ossos.get('neck_01');
+  if (!cabeca || !pescoco) return [];
+  const p = pos(cabeca);
+  const altura = p.distanceTo(pos(pescoco));
+  const r = altura * 1.92;
+  const grupo = new THREE.Group();
+  grupo.position.copy(p).add(new THREE.Vector3(0, altura * 0.9, 0));
+  const chapa = mat(n >= 5 ? 0x2b2731 : 0x51545c, { metalness: 0.42, roughness: 0.52 });
+  const perfil = [[0.66, -0.77], [0.9, -0.48], [0.98, 0.16], [0.8, 0.68], [0.44, 0.99], [0, 1.15]]
+    .map(([x = 0, y = 0]) => new THREE.Vector2(x * r, y * r));
+  grupo.add(new THREE.Mesh(new THREE.LatheGeometry(perfil, 18), chapa));
+
+  // Viseira em cunha. As duas placas deixam uma fenda real, com sombra atrás.
+  const placa = (pontos: readonly (readonly [number, number, number])[], material: THREE.Material) => {
+    const [a, b, c, d] = pontos;
+    if (!a || !b || !c || !d) return;
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute([...a, ...b, ...c, ...a, ...c, ...d].map(v => v * r), 3));
+    geo.computeVertexNormals();
+    grupo.add(new THREE.Mesh(geo, material));
+  };
+  const sombra = mat(0x131018, { side: THREE.DoubleSide, roughness: 1 });
+  const viseira = mat(n >= 5 ? 0x38323c : 0x686b72, { side: THREE.DoubleSide, metalness: 0.42, roughness: 0.48 });
+  placa([[-0.71, 0.25, 0.91], [0.71, 0.25, 0.91], [0.67, -0.09, 0.92], [-0.67, -0.09, 0.92]], sombra);
+  for (const s of [-1, 1]) {
+    placa([[0, 0.17, 1.13], [s * 0.79, 0.24, 0.73], [s * 0.71, 0.49, 0.68], [0, 0.53, 0.99]], viseira);
+    placa([[0, -0.065, 1.24], [s * 0.78, 0.018, 0.75], [s * 0.58, -0.59, 0.76], [0, -0.73, 1.01]], viseira);
+    const pino = new THREE.Mesh(new THREE.SphereGeometry(r * 0.105, 8, 5), enfeite(n));
+    pino.position.set(s * r * 0.83, 0.18 * r, 0.56 * r);
+    grupo.add(pino);
+  }
+  if (n >= 4) {
+    const crista = cone(r * 0.1, r * 0.56, n >= 5 ? aceso(acento, 0.45) : enfeite(n));
+    crista.position.set(0, r * 0.97, r * 0.27);
+    grupo.add(crista);
+  }
+  const o = prender(cabeca, grupo);
+  return o ? [o] : [];
+}
+
 /** O elmo (raro em diante). A cabeça olha para +z. */
 export function elmo(ossos: Ossos, n: number, acento: number): THREE.Object3D[] {
   const cabeca = ossos.get('Head');

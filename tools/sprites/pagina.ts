@@ -14,7 +14,7 @@ import { clone as clonarComEsqueleto } from 'three/examples/jsm/utils/SkeletonUt
 import { BASE, COLUNAS_POR_FAIXA, DIRECOES, ehVariante, estadosDe, QUADROS, VARIANTES, type Arma, type Estado, type EstadoBase, type Receita, type Variante } from './receitas';
 import { posProcessar } from './pos';
 import { renderizarArmas } from './icones';
-import { asas, capa, elmo, peito, tiara } from './armaduras3d';
+import { asas, bacinete, capa, elmo, pecaDeCabeca, peito, tiara } from './armaduras3d';
 import { criatura } from './criaturas3d';
 
 /** Pixels por célula no atlas (o jogo desenha a 48: 1,5× para ficar nítido sem pesar). */
@@ -368,7 +368,7 @@ const tingido = (m: THREE.Material, cor: number) => {
   return c;
 };
 
-async function montarCamada(mt: Montado, corpo: THREE.Mesh[], p: PedidoDeCamada, urls: Urls): Promise<CamadaMontada> {
+async function montarCamada(mt: Montado, corpo: THREE.Mesh[], p: PedidoDeCamada, urls: Urls, classe: string): Promise<CamadaMontada> {
   const mats = new Map<THREE.Mesh, Mats>();
   const pinta = new Set<THREE.Mesh>();
   const reMalha = p.malhas ? new RegExp(p.malhas) : null;
@@ -401,7 +401,14 @@ async function montarCamada(mt: Montado, corpo: THREE.Mesh[], p: PedidoDeCamada,
   }
   const a = p.armadura;
   if (a) {
-    if (a.peca === 'cabeca') extras.push(...(a.grau >= 2 ? elmo(mt.ossos, a.grau, a.acento) : a.grau === 1 ? tiara(mt.ossos, a.acento) : []));
+    if (a.peca === 'cabeca') {
+      if ((classe === 'arqueiro' && a.grau < 2) || (a.grau >= 2 && (classe === 'aventureiro' || classe === 'mago'))) {
+        extras.push(...pecaDeCabeca(mt.ossos, classe, a.grau, a.acento));
+      } else {
+        const montarElmo = classe === 'guerreiro' ? bacinete : elmo;
+        extras.push(...(a.grau >= 2 ? montarElmo(mt.ossos, a.grau, a.acento) : a.grau === 1 ? tiara(mt.ossos, a.acento) : []));
+      }
+    }
     if (a.peca === 'corpo') extras.push(...peito(mt.ossos, a.grau, a.acento));
     if (a.peca === 'capa') extras.push(...capa(mt.ossos, a.grau, a.acento));
   }
@@ -488,7 +495,7 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
   const pele = corpo.filter((m) => m instanceof THREE.SkinnedMesh);
   const originais = new Map<THREE.Mesh, Mats>(corpo.map((m) => [m, m.material]));
   const montadas: CamadaMontada[] = [];
-  for (const p of camadas) montadas.push(await montarCamada(mt, corpo, p, urls));
+  for (const p of camadas) montadas.push(await montarCamada(mt, corpo, p, urls, r.nome));
 
   const cena = new THREE.Scene();
   const pivo = new THREE.Group();

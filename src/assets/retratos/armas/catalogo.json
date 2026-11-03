@@ -1,9 +1,9 @@
 {
   "espada": {
-    "celL": 158,
-    "celA": 291,
-    "pegaX": 79,
-    "pegaY": 226
+    "celL": 123,
+    "celA": 358,
+    "pegaX": 61,
+    "pegaY": 277
   },
   "adaga": {
     "celL": 122,
@@ -252,10 +252,10 @@
     "pegaY": 89
   },
   "escudo": {
-    "celL": 237,
-    "celA": 229,
-    "pegaX": 107,
-    "pegaY": 82
+    "celL": 179,
+    "celA": 237,
+    "pegaX": 86,
+    "pegaY": 106
   },
   "tomo-fechado": {
     "celL": 114,

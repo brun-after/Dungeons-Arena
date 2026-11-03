@@ -85,6 +85,7 @@ function camadasDe(r: Receita): PedidoDeCamada[] {
       // O peito sempre tinge o pano do traje; a cabeça, só enquanto é capuz (o elmo entra no raro).
       if (peca === 'corpo') return { nome, tingir: false, armadura, ...eq.corpo, pecas: [] };
       // O elmo cobre o capuz e o cabelo: eles saem da máscara do corpo.
+      if (r.nome === 'arqueiro' && grau < 2) return { nome, tingir: false, armadura, esconder: 'Hood' };
       if (grau >= 2) return { nome, tingir: false, armadura, esconder: 'Hood|Hair' };
       return { nome, tingir: false, armadura, ...eq.cabeca };
     }),
@@ -114,6 +115,8 @@ const args = process.argv.slice(2);
 const iSo = args.indexOf('--so');
 const so = iSo >= 0 ? new Set((args[iSo + 1] ?? '').split(',')) : null;
 const soCorpo = args.includes('--so-corpo');
+// Regenera as peças de cabeça sem regravar os atlas de peitoral e capa.
+const soCabeca = args.includes('--so-cabeca');
 // Use só em revisões que preservam os rigs, a arma, a pose e a geometria do tronco.
 const reusarMaos = args.includes('--reusar-maos');
 const comArmas = args.includes('--armas');
@@ -198,7 +201,7 @@ for (const receita of RECEITAS) {
     continue;
   }
   const inicio = Date.now();
-  const camadas = soCorpo ? [] : camadasDe(receita);
+  const camadas = soCorpo ? [] : camadasDe(receita).filter(c => !soCabeca || c.armadura?.peca === 'cabeca');
   const urls = urlsDe(receita, camadas);
   const lotes: PedidoDeCamada[][] = [];
   for (let k = 0; k < Math.max(1, camadas.length); k += LOTE) lotes.push(camadas.slice(k, k + LOTE));
@@ -210,7 +213,7 @@ for (const receita of RECEITAS) {
     const { quadroL, quadroA, ancoraX, ancoraY, pxCelula, colunas, faixa, estados } = saida;
     const entrada = { quadroL, quadroA, ancoraX, ancoraY, pxCelula, colunas, faixa, estados, altura: receita.altura };
     const anterior = catalogo[receita.nome];
-    if ((soCorpo || reusarMaos) && receita.equipamento && anterior && (
+    if ((soCorpo || soCabeca || reusarMaos) && receita.equipamento && anterior && (
       quadroL !== anterior.quadroL || quadroA !== anterior.quadroA ||
       ancoraX !== anterior.ancoraX || ancoraY !== anterior.ancoraY ||
       pxCelula !== anterior.pxCelula || colunas !== anterior.colunas || faixa !== anterior.faixa ||

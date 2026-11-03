@@ -35,16 +35,17 @@ async function arma(ctx: CanvasRenderingContext2D, modelo: string | null, x: num
   const imagem = imagens.get(id) ?? url().then(carregar);
   imagens.set(id, imagem);
   const img = await imagem;
-  const escala = 0.81;
+  const escala = equipado === 'escudo' ? 1.13 : equipado === 'espada' ? 1.05 : livro ? 0.7 : 0.81;
   const { celL, celA, pegaX, pegaY } = medidas;
   ctx.save();
   ctx.translate(MARGEM + (livro ? (x < 200 ? 138 : 257) : x), livro ? 304 : 402);
-  if (livro || !SEM_GIRO.has(equipado)) ctx.rotate((x < 200 ? -1 : 1) * Math.PI / 16);
+  if (equipado === 'espada') ctx.rotate((x < 200 ? 1 : -1) * Math.PI * 0.72);
+  else if (livro || !SEM_GIRO.has(equipado)) ctx.rotate((x < 200 ? -1 : 1) * Math.PI / 16);
   ctx.drawImage(img, grauDe(raridade, forma) * celL, 0, celL, celA, -pegaX * escala, -pegaY * escala, celL * escala, celA * escala);
   ctx.restore();
 }
 
-function armadura(eq: AparenciaEquipada | null): string {
+function armadura(eq: AparenciaEquipada | null, classe: (typeof CLASSES)[number]): string {
   if (!eq) return '';
   const couraca = grauDe(eq.corpo) < 2;
   const capuz = grauDe(eq.cabeca) < 2;
@@ -58,6 +59,11 @@ function armadura(eq: AparenciaEquipada | null): string {
       <stop offset=".52" stop-color="#444654"/><stop offset="1" stop-color="#191923"/>
     </linearGradient>
     <linearGradient id="latao" x2=".3" y2="1"><stop stop-color="#e5c893"/><stop offset=".5" stop-color="#987342"/><stop offset="1" stop-color="#49301d"/></linearGradient>
+    <linearGradient id="viseira" x2="1" y2=".38"><stop stop-color="#1d2025"/><stop offset=".26" stop-color="#7d7b76"/><stop offset=".49" stop-color="#d7cfc0"/><stop offset=".51" stop-color="#66636a"/><stop offset=".79" stop-color="#42434b"/><stop offset="1" stop-color="#202027"/></linearGradient>
+    <linearGradient id="capuz" x2="1" y2=".6"><stop stop-color="#303323"/><stop offset=".23" stop-color="#7b7954"/><stop offset=".44" stop-color="#555b3d"/><stop offset=".67" stop-color="#393e2a"/><stop offset="1" stop-color="#25291e"/></linearGradient>
+    <mask id="abertura-capuz" maskUnits="userSpaceOnUse" x="130" y="0" width="140" height="155">
+      <path fill="white" d="M130 0h140v155H130Z"/><path fill="black" d="M169 105Q165 85 176 64Q185 48 196 44Q213 54 221 74Q230 94 225 109Q213 130 198 132Q181 127 169 105Z"/>
+    </mask>
     <pattern id="trama" width="7" height="7" patternUnits="userSpaceOnUse"><path d="M0 7 7 0M4 10 10 4" stroke="#121019" stroke-opacity=".45" stroke-width="1.15"/></pattern>
     <pattern id="marcas" width="51" height="37" patternUnits="userSpaceOnUse">
       <path d="m3 27 8-5m5-16 3-2m12 14 10-5m-13 18 4-3m14-22 2-1" fill="none" stroke="#e5cdb0" stroke-opacity=".42" stroke-width=".9"/>
@@ -79,10 +85,44 @@ function armadura(eq: AparenciaEquipada | null): string {
     <path fill="#f7dba4" stroke="none" d="M198 182 203 194 198 199 192 193Z"/>
     <path fill="#c5a771" stroke-width="1.5" d="M118 164a3 3 0 1 0 6 0a3 3 0 1 0-6 0M273 165a3 3 0 1 0 6 0a3 3 0 1 0-6 0"/>
     <path fill="none" stroke="#e1d9c8" stroke-width="1" opacity=".75" d="m151 184 14-9m-10 14 7-5m62 56 10-5m-92-76 8-5"/>` : '';
-  const elmo = !eq.cabeca ? '' : capuz ? `
+  const elmo = !eq.cabeca ? '' : classe === 'arqueiro' && capuz ? `
+    <g mask="url(#abertura-capuz)">
+    <path fill="#292c20" d="M135 135 145 101Q141 69 160 39Q174 15 195 10Q221 15 239 39Q255 62 251 96L263 129 238 148 196 147 159 150Z"/>
+    <path fill="url(#capuz)" d="M136 134 152 105Q148 70 165 41Q177 21 196 15Q217 21 232 41Q247 67 245 100L261 130 237 142 196 145 160 145Z"/>
+    <path fill="#25271b" d="M153 109Q150 73 170 45Q185 26 196 25Q216 32 231 52Q242 74 239 106L228 124Q226 99 219 79Q209 52 195 45Q175 55 166 85L165 119Z"/>
+    <path fill="#373a28" d="M140 133 159 114Q176 134 196 133Q221 134 242 111L260 130 237 142 196 145 158 144Z"/>
+    <path fill="none" stroke="#a29b6f" stroke-width="1.7" d="M152 101Q153 57 182 26M240 102Q239 62 212 33M148 134q21-5 35 3m53-7 12-8"/>
+    <path fill="url(#trama)" stroke="none" d="M140 133 159 114Q176 134 196 133Q221 134 242 111L260 130 237 142 196 145 158 144Z"/>
+    <circle cx="225" cy="135" r="5" fill="url(#latao)"/>
+    </g>
+  ` : capuz ? `
     <path fill="${metal(eq.cabeca)}" d="M141 116Q143 61 164 31Q183 6 204 17Q241 26 258 119L233 127 226 97Q225 55 199 39Q175 56 170 98L166 126Z"/>
     <path fill="url(#trama)" stroke="none" d="M203 18Q244 35 258 119L233 127 226 97Q225 55 199 39Z"/>
     <path fill="none" stroke="#c8b38a" stroke-width="1.5" d="M148 112Q155 59 181 34M233 65Q247 86 251 117"/>
+  ` : classe === 'aventureiro' ? `
+    <path fill="url(#viseira)" d="M151 71 152 51Q159 24 195 20Q228 23 242 52L246 73 236 87 225 82 220 70 176 70 169 85 156 85Z"/>
+    <path fill="#37312c" d="M152 74Q175 62 198 64Q222 62 244 74L242 82Q218 72 198 73Q176 73 153 83Z"/>
+    <path fill="none" stroke="#bcb3a1" stroke-width="2" d="M157 56Q168 32 193 26M196 23l1 37m-39 17q29-12 52-7"/>
+    <path fill="none" stroke="#513a2b" stroke-width="4" d="M158 81q1 29 17 40m64-39q-1 27-17 39"/>
+    <path fill="#a5906d" stroke-width="1" d="M164 70a2 2 0 1 0 4 0a2 2 0 1 0-4 0m65 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0"/>
+  ` : classe === 'mago' ? `
+    <path fill="url(#elmo)" d="M148 87 147 62Q146 31 166 18Q180 6 199 5Q219 7 234 22Q249 38 249 66L247 88Z"/>
+    <path fill="#262a36" d="M148 87 151 48 164 29 177 40 195 17 209 39 229 27 244 49 247 88 237 112 210 137 198 132 185 137 159 112Z"/>
+    <path fill="url(#elmo)" d="M152 65 165 42 178 51 195 31 211 51 228 42 243 65 238 83 217 76 198 86 178 76 157 83Z"/>
+    <path fill="url(#viseira)" d="M157 91 178 85 198 96 217 85 239 91 233 108 210 129 198 121 185 129 163 108Z"/>
+    <path fill="#171825" d="m165 88 13-4 16 8 4 21 4-21 15-8 14 4-10 10-13 3-10 20-10-20-13-3z"/>
+    <path fill="#756398" d="m195 47 8 12-8 12-8-12z"/>
+    <path fill="none" stroke="#a396af" stroke-width="1.6" d="m156 65 10-15 11 9 19-20 16 20 15-8 11 14m-75 38 23 21m45-21-21 21"/>
+  ` : classe === 'guerreiro' ? `
+    <path fill="#211b22" d="M149 70 148 54Q151 22 191 11Q219 11 242 37L249 63 250 99 238 126 209 144 184 142 159 122 150 98Z"/>
+    <path fill="url(#elmo)" d="M151 64 155 42Q166 18 195 10Q226 15 240 39L247 66 222 58 199 53 176 57Z"/>
+    <path fill="url(#trama)" stroke="none" d="M204 16q23 7 36 24l7 26-25-8-23-5z"/>
+    <path fill="url(#viseira)" d="M151 67 173 57 198 51 222 57 247 67 244 82 224 76 198 72 172 76 154 83Z"/>
+    <path fill="url(#viseira)" d="M154 86 174 80 198 78 222 80 244 86 240 107 227 124 200 142 175 126 160 108Z"/>
+    <path fill="none" stroke="#b3a594" stroke-width="1.6" d="M158 56q8-29 35-37m-36 51 18-8 23-6 24 6 20 8m-82 22 18-7 20-3 22 3 19 7m-39-8v52m-32-26 9 11 20 16"/>
+    <path fill="none" stroke="#19171b" stroke-width="2.6" d="m171 92 2 9m5-11 2 10m5-12 2 11m25-11-2 11m8-9-2 10m8-8-2 9"/>
+    <path fill="none" stroke="#d6c7af" stroke-width="1" d="m162 46 7-7m7-7 6-3m-13 88 7 5m47-7 8-6m-16-9 5-3"/>
+    <path fill="url(#latao)" stroke-width="1.3" d="M154 77a4 4 0 1 0 8 0a4 4 0 1 0-8 0m81 0a4 4 0 1 0 8 0a4 4 0 1 0-8 0"/>
   ` : `
     <path fill="url(#elmo)" d="M146 90 150 55Q159 24 191 17Q229 16 245 51L251 88 236 112 229 101 224 79 173 79 169 100 160 114Z"/>
     <path fill="url(#marcas)" stroke="none" d="M146 90 150 55Q159 24 191 17Q229 16 245 51L251 88 236 112 229 101 224 79 173 79 169 100 160 114Z"/>
@@ -124,7 +164,7 @@ export async function retratoIlustrado(modelo: string, eq: AparenciaEquipada | n
   }
   const larguraCelula = base.naturalWidth / CLASSES.length;
   ctx.drawImage(base, larguraCelula * indice, 0, larguraCelula, base.naturalHeight, MARGEM, 0, LARGURA, ALTURA);
-  await camada(ctx, armadura(eq));
+  await camada(ctx, armadura(eq, classe));
   await arma(ctx, eq ? eq.arma : padrao.arma, direita, eq?.raridadeArma, eq?.formaArma);
   await arma(ctx, eq ? eq.secundaria : padrao.secundaria, esquerda, eq?.raridadeSecundaria);
   return canvas;
