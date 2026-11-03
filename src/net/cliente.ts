@@ -8,7 +8,7 @@
 // para a mochila, a loja e a barra funcionarem como no solo) e `novaFase` troca o mundo e o contexto.
 
 import { aplicarPatch } from '../arena/patches';
-import { versaoDoConteudo, type MensagemServidor } from '../arena/protocolo';
+import { MAX_ADIANTAMENTO_TICKS, versaoDoConteudo, type MensagemServidor } from '../arena/protocolo';
 import type { Bolsa } from '../entities/entidade';
 import type { Certificado } from '../integridade/certificado';
 import type { RefFase } from '../save/esquema';
@@ -33,7 +33,9 @@ const MARGEM_TICKS = 2;
  * TCP no perfil degradado entregava tudo de uma vez, estourando o balde de 20 (D-047).
  */
 const RENOVACAO_MOVIMENTO_TICKS = 6;
-const INTERVALO_PING_TICKS = ticksDe(2000);
+const INTERVALO_PING_MS = 2000;
+const ESTADO_EXPIRADO_MS = 2000;
+const INTERVALO_RESSINCRONIZAR_MS = 1000;
 const ATRASO_REMOTOS_TICKS = ticksDe(100);
 const LIMITE_REPOSICIONAR = 2;
 const SUAVIZACAO_MS = 100;
@@ -69,6 +71,9 @@ export class ClienteArena {
   readonly motivosRejeicao: Record<string, number> = {};
   ressincronizacoes = 0;
   private aguardandoCompleto = false;
+  private ultimoAvancoEmMs = -Infinity;
+  private ultimoPedidoEmMs = -Infinity;
+  private proximoPingEmMs = 0;
   /** Recebe os eventos transitórios da sala (dano, coleta, mortes) para a apresentação. */
   aoEventos: ((eventos: EventoSimulacao[]) => void) | null;
   /** Marco 15 (cooperativo): a própria bolsa, pelo canal privado; e se esta sessão é a do anfitrião. */
@@ -114,16 +119,23 @@ export class ClienteArena {
   }
 
   get conectado(): boolean {
-    return this.previsto !== null;
+    return this.previsto !== null && this.tempoSemEstadoMs < ESTADO_EXPIRADO_MS;
+  }
+
+  /** Receber pong ou repetir um snapshot não prova que a simulação está avançando. */
+  get tempoSemEstadoMs(): number {
+    return Math.max(0, this.o.agoraMs() - this.ultimoAvancoEmMs);
   }
 
   /** Intenção do jogador: vai para a fila de pendentes e para o servidor. */
   enviarComando(cmd: Comando): void {
     if (!this.sessaoId) return;
-    const pacote: ComandoEmpacotado = { sessaoId: this.sessaoId, epocaSala: this.epoca, seq: ++this.seq, tickCliente: this.tickLocal, cmd };
-    this.pendentes.push(pacote);
     if (cmd.t === 'mover') this.direcaoMantida = cmd.dir === 'parado' ? null : cmd;
     else if (cmd.t === 'irPara') this.direcaoMantida = null;
+    // Não acumular ações nem fingir movimento durante a interrupção. Soltar o direcional ainda fica registrado.
+    if (!this.conectado) return;
+    const pacote: ComandoEmpacotado = { sessaoId: this.sessaoId, epocaSala: this.epoca, seq: ++this.seq, tickCliente: this.tickLocal, cmd };
+    this.pendentes.push(pacote);
     this.o.transporte.enviar(JSON.stringify({ t: 'cmd', pacote }));
   }
 
@@ -143,7 +155,17 @@ export class ClienteArena {
   }
 
   private ping(): void {
+    this.proximoPingEmMs = this.o.agoraMs() + INTERVALO_PING_MS;
     this.o.transporte.enviar(JSON.stringify({ t: 'ping', id: this.proximoPingId++, enviadoMs: this.o.agoraMs() }));
+  }
+
+  private pedirRessincronizacao(): void {
+    this.aguardandoCompleto = true;
+    const agora = this.o.agoraMs();
+    if (agora - this.ultimoPedidoEmMs < INTERVALO_RESSINCRONIZAR_MS) return;
+    this.ultimoPedidoEmMs = agora;
+    this.ressincronizacoes++;
+    this.o.transporte.enviar(JSON.stringify({ t: 'ressincronizar' }));
   }
 
   private receber(msg: MensagemServidor): void {
@@ -160,6 +182,8 @@ export class ClienteArena {
         this.reaplicar();
         break;
       case 'novaFase': {
+        this.ultimoAvancoEmMs = this.o.agoraMs();
+        this.ultimoPedidoEmMs = -Infinity;
         this.armadilhasProprias = null;
         // Mundo novo, relógio novo: nada da fase anterior vale (pendentes, histórico, interpolação).
         const ctx = this.o.contextoDe?.(msg.faseRef);
@@ -204,9 +228,7 @@ export class ClienteArena {
         if (msg.epocaSala !== this.epoca || this.aguardandoCompleto) return;
         // Furo na sequência (mensagem perdida ou base diferente): pede o estado completo.
         if (!this.base || this.baseTick !== msg.patch.base) {
-          this.aguardandoCompleto = true;
-          this.ressincronizacoes++;
-          this.o.transporte.enviar(JSON.stringify({ t: 'ressincronizar' }));
+          this.pedirRessincronizacao();
           return;
         }
         this.reconciliar(msg.tick, msg.ackSeq, aplicarPatch(this.base, msg.patch));
@@ -230,12 +252,13 @@ export class ClienteArena {
   }
 
   private adotarBase(tick: number, estado: EstadoJogo): void {
+    if (!this.base || tick > this.baseTick) this.ultimoAvancoEmMs = this.o.agoraMs();
     this.base = estado;
     this.baseTick = tick;
     this.remotos.registrar(tick, estado);
     this.ticksDesdeEstado = 0;
     // O cliente mira ficar RTT + margem à frente do servidor (D-033).
-    this.alvoTickLocal = tick + Math.ceil(this.rttMs / DT_MS) + MARGEM_TICKS;
+    this.alvoTickLocal = tick + Math.min(MAX_ADIANTAMENTO_TICKS, Math.ceil(this.rttMs / DT_MS) + MARGEM_TICKS);
   }
 
   /** Reconciliação contínua (§3.6): base autoritativa + reaplicação dos pendentes. */
@@ -251,6 +274,11 @@ export class ClienteArena {
       const real = posicaoNoPasso(autoritativa);
       this.erros.push(Math.hypot(real.x - prevista.x, real.y - prevista.y));
     }
+
+    // Pausa longa da aba ou RTT extremo: realinha o relógio sem um laço de milhares de ticks.
+    const alinhado = Math.max(tick, Math.min(this.tickLocal, tick + MAX_ADIANTAMENTO_TICKS));
+    if (alinhado !== this.tickLocal) this.historico.clear();
+    this.tickLocal = alinhado;
 
     this.previsto = clonarEstado(estado);
     this.reaplicar();
@@ -305,17 +333,20 @@ export class ClienteArena {
   /** Um quadro de 60 Hz do cliente: avança a predição, renova o movimento mantido e mede o RTT. */
   passo(): void {
     if (!this.previsto) return;
+    if (this.o.agoraMs() >= this.proximoPingEmMs) this.ping();
+    if (this.aguardandoCompleto || !this.conectado) this.pedirRessincronizacao();
+    if (!this.conectado) return;
     this.ticksDesdeEstado++;
-    this.alvoTickLocal++;
+    this.alvoTickLocal = Math.min(this.alvoTickLocal + 1, this.baseTick + MAX_ADIANTAMENTO_TICKS);
     // Ajuste fino do relógio: no máximo 1 tick a mais ou a menos por quadro.
     const diferenca = this.alvoTickLocal - this.tickLocal;
     const passos = diferenca > 1 ? 2 : diferenca < -1 ? 0 : 1;
     for (let i = 0; i < passos; i++) {
+      if (this.tickLocal >= this.baseTick + MAX_ADIANTAMENTO_TICKS) break;
       if (this.direcaoMantida && this.tickLocal % RENOVACAO_MOVIMENTO_TICKS === 0) this.enviarComando(this.direcaoMantida);
       this.tickLocal++;
       this.preverTick();
     }
-    if (this.tickLocal % INTERVALO_PING_TICKS === 0) this.ping();
     const decaimento = Math.exp(-DT_MS / SUAVIZACAO_MS);
     this.deslocamento = { x: this.deslocamento.x * decaimento, y: this.deslocamento.y * decaimento };
   }

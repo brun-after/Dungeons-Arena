@@ -17,6 +17,9 @@ export interface DadosRede {
   /** p95 do erro de correção (células) nas últimas reconciliações. */
   erroP95: number;
   conectado: boolean;
+  baseTick?: number;
+  tempoSemEstadoMs?: number;
+  ressincronizacoes?: number;
 }
 
 export interface DadosDiagnostico {
@@ -90,6 +93,9 @@ export class Diagnostico {
     if (d.rede) {
       this.elemento.dataset.rtt = d.rede.rttMs.toFixed(0);
       this.elemento.dataset.erroP95 = d.rede.erroP95.toFixed(3);
+      if (d.rede.baseTick !== undefined) this.elemento.dataset.baseTick = String(d.rede.baseTick);
+      if (d.rede.tempoSemEstadoMs !== undefined) this.elemento.dataset.semEstadoMs = d.rede.tempoSemEstadoMs.toFixed(0);
+      if (d.rede.ressincronizacoes !== undefined) this.elemento.dataset.ressincronizacoes = String(d.rede.ressincronizacoes);
     }
     this.elemento.dataset.tick = String(d.tick);
     this.elemento.dataset.celula = `${d.celula.x},${d.celula.y}`;

@@ -29,13 +29,12 @@ import { estadoPublico } from './estado-publico';
 import { GeradorDePatches, novoCacheDeCampos } from './patches';
 import { recortarPorInteresse } from './interesse';
 import { construirFichaDeSessao, type PreviaDeFicha } from './ficha-sessao';
-import { lerMensagemCliente, type MensagemCliente, type MensagemServidor, type MotivoErro, type MotivoRejeicao } from './protocolo';
+import { lerMensagemCliente, MAX_ADIANTAMENTO_TICKS, type MensagemCliente, type MensagemServidor, type MotivoErro, type MotivoRejeicao } from './protocolo';
+export { MAX_ADIANTAMENTO_TICKS } from './protocolo';
 
 export const COMANDOS_POR_SEGUNDO = 60;
 export const BURST_COMANDOS = 20;
 export const MAX_FILA_POR_SESSAO = 64;
-/** Quanto à frente do servidor um comando pode ser agendado. */
-export const MAX_ADIANTAMENTO_TICKS = 30;
 export const EXPIRACAO_MOVIMENTO_MS = 500;
 export const RESERVA_RECONEXAO_MS = 30_000;
 /** Estado público (completo ou patch) a 20 Hz: a cada 3 ticks de 60 Hz (§3.6). */
