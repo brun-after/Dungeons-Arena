@@ -1,8 +1,11 @@
 # O Mundo: guia do modo
 
-**Versão:** 0.7 · **Data:** 02/11/2026
+**Versão:** 0.8 · **Data:** 02/11/2026
 
 > **Histórico**
+> - **0.8 (02/11/2026)**: Reino do Eclipse, exército do necromante inimigo, atenção de batalha, dungeons ampliadas e assistência de retorno.
+
+Expansão atual: [Reino do Eclipse, lojas e assistência de dungeon](EXPANSAO-ECLIPSE.md).
 > - **0.5 (02/11/2026)**: marco 33: nove regiões com 1,5625x a área atual, 20 novas dungeons e missões, mapa com pontos pessoais e bosses elementais CC0.
 > - **0.4 (01/11/2026)**: reentrada sem reserva fantasma, geografia ampliada, natação, hordas e retorno ao save.
 > - **0.3 (31/10/2026)**: marco 31 (D-130): as casas com telhado (na vila e as abandonadas) e o visual sombrio.

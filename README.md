@@ -1,6 +1,6 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.33 · **Data:** 31/10/2026
+**Versão do documento:** 3.34 · **Data:** 02/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
@@ -282,3 +282,11 @@ Party por código para até seis jogadores; visão conjunta opcional nas Configu
 perto e dividindo em até seis câmeras. Cada pessoa continua jogando no próprio aparelho, com menus e mapa
 pessoais; um notebook pode projetar a visão conjunta na TV. Observadores entre regiões usam somente estado
 público da party e não controlam personagens. Detalhes em [docs/MUNDO.md](docs/MUNDO.md).
+
+### Marco 36 — Eclipse, exércitos e assistência de retorno (02/11/2026)
+
+Novo reino avançado com 12 regiões, 36 dungeons e oito domínios de boss, acessível pelos portais.
+Dez dungeons do Central ampliadas; lojas de dungeon superiores, Pedra de Retorno em todas e desconto
+individual após cinco mortes (gratuita após dez). Necromante inimigo com quatro a dez lacaios de tipos
+e magias próprias. Combates atraem inimigos próximos; lojas externas têm ofertas temporárias e novos
+equipamentos de nível 15 a 55. Detalhes em [docs/EXPANSAO-ECLIPSE.md](docs/EXPANSAO-ECLIPSE.md).

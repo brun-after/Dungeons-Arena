@@ -8,6 +8,7 @@ import type { EstadoJogo, ObjetoNoMundo } from '../core/estado';
 import type { Entidade } from '../entities/entidade';
 import { t } from '../i18n';
 import { precoDeVenda, vendavel, type Item } from '../progression/itens';
+import { ofertasDoMundo } from '../mundo/lojas-mundo';
 import { precoDoItem } from '../progression/itens-progressao';
 import { estoqueDaLoja, lojaAberta } from '../progression/loja';
 import { armaDoItem, molduraDoItem, resumoDoItem } from './mochila';
@@ -96,11 +97,12 @@ export function criarLoja(o: OpcoesLoja): Loja {
   const desenhar = (j: Entidade, loja: ObjetoNoMundo) => {
     const bolsa = j.bolsa;
     if (!bolsa) return;
-    assinatura = JSON.stringify([bolsa.mochila, bolsa.ouro, bolsa.tomosComprados, loja.objetoId]);
+    assinatura = JSON.stringify([bolsa.mochila, bolsa.ouro, bolsa.tomosComprados, loja.objetoId, ofertasDoMundo(o.estado(),o.ctx,loja)]);
     const focoAntes = document.activeElement instanceof HTMLElement ? document.activeElement.dataset.chave : undefined;
     saldo.textContent = t('loja.saldo', { ouro: bolsa.ouro });
     saldo.dataset.ouro = String(bolsa.ouro);
     listas.textContent = '';
+    if(ctx.fase.id.startsWith('mundo_masmorra_'))listas.append(el('p','detalhe-item',t('loja.retornoDungeon',{mortes:bolsa.mortesNaDungeon??0})));
 
     listas.append(el('h3', 'subtitulo-modal', t('loja.estoque')));
     const estoque = el('ul', 'lista-itens estoque-loja');
@@ -110,7 +112,7 @@ export function criarLoja(o: OpcoesLoja): Loja {
       // Marco 17: o preço já com o desconto do Carisma.
       const preco = precoDoItem(item, j, o.ctx);
       estoque.append(
-        linha(item, item.nome, 1, {
+        linha(item, ofertasDoMundo(o.estado(),o.ctx,loja).includes(id) ? `${item.nome} · ${t('loja.ofertaTemporaria')}` : item.nome, 1, {
           texto: t('loja.comprar', { preco }),
           chave: `comprar-${id}`,
           desligado: bolsa.ouro < preco,
@@ -125,7 +127,7 @@ export function criarLoja(o: OpcoesLoja): Loja {
     const mochila = el('ul', 'lista-itens');
     for (const entrada of bolsa.mochila) {
       const item = itens.get(entrada.itemId);
-      const pode = item ? vendavel(item) : false;
+      const pode = item ? vendavel(item) && entrada.ref !== 'resgate_dungeon' : false;
       const preco = item ? precoDeVenda(item, ctx.balance.economia.vendaPct) : 0;
       mochila.append(
         linha(
@@ -202,7 +204,7 @@ export function criarLoja(o: OpcoesLoja): Loja {
       modal.abrir();
     }
     const bolsa = j.bolsa;
-    if (bolsa && JSON.stringify([bolsa.mochila, bolsa.ouro, bolsa.tomosComprados, loja.objetoId]) !== assinatura) desenhar(j, loja);
+    if (bolsa && JSON.stringify([bolsa.mochila, bolsa.ouro, bolsa.tomosComprados, loja.objetoId, ofertasDoMundo(o.estado(),o.ctx,loja)]) !== assinatura) desenhar(j, loja);
   };
 
   return { aberta: modal.aberto, atualizar };

@@ -12,7 +12,7 @@ import type { AvisoDoMundo } from '../../src/mundo/avisos';
 import { fichaNova, type FichaDoMundo } from '../../src/mundo/ficha-mundo';
 import { lerLugar } from '../../src/mundo/lugares';
 import { SalaMundo } from '../../src/mundo/sala-mundo';
-import { portaDa, type Reino } from '../../src/mundo/reino';
+import { portaDa, reinoDoConteudo, type Reino } from '../../src/mundo/reino';
 import { guardarItem } from '../../src/progression/inventario';
 import { CONTEUDO } from '../apoio/fases';
 
@@ -60,6 +60,37 @@ function interagirCom(s: SalaMundo, c: ReturnType<typeof entrar>, tipo: string) 
 }
 
 describe('sala do Mundo', () => {
+  it('o portal oferece a capital do segundo reino e permite a primeira visita', () => {
+    const atlas = reinoDoConteudo(CONTEUDO);
+    const s = new SalaMundo(atlas, obter(lerLugar(atlas,'regiao:vila_do_centro'),'capital'),CONTEUDO,{semente:9,agora:()=>relogio});
+    const c = entrar(s,'viajante');
+    obter(c.e().bolsa,'bolsa').ouro=10000;
+    interagirCom(s,c,'pedra_portal');
+    const portal=c.avisos().find(a=>a.tipo==='portais');
+    if(portal?.tipo!=='portais')throw Error('portal ausente');
+    expect(portal.destinos.map(d=>d.regiao)).toContain('eclipse_baluarte');
+    c.enviar({t:'viajar',destino:'eclipse_baluarte',pagamento:'ouro'});
+    expect(s.retirarPendencias()).toContainEqual(expect.objectContaining({tipo:'trocar',destino:'regiao:eclipse_baluarte'}));
+  });
+
+  it('conta dez mortes reais na dungeon por personagem, grava e restaura a assistência', () => {
+    const s=sala('masmorra:toca_dos_goblins'), a=entrar(s,'u1'), b=entrar(s,'u2');
+    for(let i=1;i<=10;i++) {
+      a.e().hp=0;
+      rodar(s);
+      expect(a.e().bolsa?.mortesNaDungeon).toBe(i);
+      expect(b.e().bolsa?.mortesNaDungeon).toBe(0);
+      rodar(s,Math.max(1,a.e().reviverEmTick-s.estado.tick+1));
+      expect(a.e().morto).toBe(false);
+    }
+    const gravadas=s.retirarPendencias().flatMap(x=>x.tipo==='gravar'&&x.identidade==='u1'?[x.ficha]:[]);
+    const f=obter(gravadas.at(-1),'gravação');
+    expect(f.mortesDungeon?.toca_dos_goblins).toBe(10);
+    const nova=sala('masmorra:toca_dos_goblins'),c=entrar(nova,'u1',f);
+    expect(c.e().bolsa?.mortesNaDungeon).toBe(10);
+    const outra=sala('masmorra:catacumbas_pedravale'),d=entrar(outra,'u1',f);
+    expect(d.e().bolsa?.mortesNaDungeon).toBe(0);
+  });
   it('sem ficha reservada, a entrada é recusada', () => {
     const s = sala('regiao:vila_do_centro');
     const recebidas: MensagemServidor[] = [];

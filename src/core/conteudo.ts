@@ -30,6 +30,7 @@ import temasJson from '../data/temas.json';
 import afinidadesJson from '../data/afinidades.json';
 import armasJson from '../data/armas.json';
 import reinoCentralJson from '../data/mundo/reino-central.json';
+import reinoEclipseJson from '../data/mundo/reino-eclipse.json';
 import { conferirReino, lerReino, type Reino } from '../mundo/reino';
 import { lerArmas, type RegrasDeArmas } from '../progression/armas';
 import { lerUltimates, type Ultimate } from '../combat/ultimates';
@@ -322,7 +323,7 @@ export const FONTES_OFICIAIS: FontesDeConteudo = {
   afinidades: afinidadesJson,
   armas: armasJson,
   modos: { 'campanha.json': campanhaJson, 'cooperativo.json': cooperativoJson, 'livre.json': livreJson, 'mundo.json': mundoJson },
-  reinos: { 'reino-central.json': reinoCentralJson },
+  reinos: { 'reino-central.json': reinoCentralJson, 'reino-eclipse.json': reinoEclipseJson },
 };
 
 export function conteudoOficial(): Conteudo {

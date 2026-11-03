@@ -50,7 +50,7 @@ export function criarBolsa(classe: ClasseJogador, ouroInicial = 0): Bolsa {
  * conteúdo do livro raro; só empilha com o mesmo `ref`.
  */
 export function guardarItem(bolsa: Bolsa, item: Item, qtd: number, regras: Balance['inventario'], ref: string | null = null): boolean {
-  if (!cabeNaMochila(bolsa, item, qtd, regras)) return false;
+  if (!cabeNaMochila(bolsa, item, qtd, regras, ref)) return false;
   let restante = qtd;
   if (empilha(item)) {
     for (const entrada of bolsa.mochila) {
@@ -74,11 +74,11 @@ export function empilha(item: Item): boolean {
   return item.tipo === 'consumivel' || item.tipo === 'livro' || item.tipo === 'chave' || item.tipo === 'material';
 }
 
-export function cabeNaMochila(bolsa: Bolsa, item: Item, qtd: number, regras: Balance['inventario']): boolean {
+export function cabeNaMochila(bolsa: Bolsa, item: Item, qtd: number, regras: Balance['inventario'], ref: string | null = null): boolean {
   const porEntrada = empilha(item) ? regras.pilhaMax : 1;
   const sobraEmPilhas =
     item.tipo === 'consumivel'
-      ? bolsa.mochila.filter((i) => i.itemId === item.id).reduce((s, i) => s + (regras.pilhaMax - i.qtd), 0)
+      ? bolsa.mochila.filter((i) => i.itemId === item.id && i.ref === ref).reduce((s, i) => s + (regras.pilhaMax - i.qtd), 0)
       : 0;
   const novasEntradas = Math.ceil(Math.max(0, qtd - sobraEmPilhas) / porEntrada);
   return bolsa.mochila.length + novasEntradas <= regras.capacidade;

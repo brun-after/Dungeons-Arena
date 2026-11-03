@@ -324,6 +324,11 @@ export interface Balance {
   };
   /** Marco 29 (30/10/2026, D-128): o modo Mundo (túmulo, portais, coleta, covis e o checkpoint). */
   mundo: {
+    populacaoMax: number;
+    resgate: { mortesDesconto: number; mortesGratis: number };
+    exercitoNecromante: { minimo: number; maximo: number; niveisPorVaga: number; recargaMs: number; duracaoMs: number; presets: string[] };
+    atencaoBatalha: { raio: number; bonus: number; memoriaMs: number };
+    ofertas: { periodoS: number; duracaoS: number; quantidade: number; centrais: string[]; avancadas: string[] };
     /** Só o dono abre o túmulo por `donoExclusivoS` (fora das regiões com PvP); some em `duracaoS`. */
     tumulo: { donoExclusivoS: number; duracaoS: number };
     /** Custo do portal: base + por região de distância (Chebyshev na grade do reino). */

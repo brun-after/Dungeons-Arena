@@ -120,6 +120,8 @@ export interface CovilDoMundo {
 }
 
 export interface Reino {
+  /** 02/11/2026: atlas dos reinos; os catálogos originais conservam suas lojas e progressão. */
+  territorios?: readonly Reino[];
   id: string;
   nome: string;
   tamanhoRegiao: number;
@@ -394,5 +396,22 @@ export function portaDa(e: Pick<EstruturaDoMundo, 'x' | 'y' | 'largura' | 'altur
 export function reinoDoConteudo(conteudo: { reinos: ReadonlyMap<string, Reino> }): Reino {
   const reino = conteudo.reinos.get('reino_central');
   if (!reino) throw new Error('reino_central ausente');
-  return reino;
+  const outros = [...conteudo.reinos.values()].filter(r => r.id !== reino.id);
+  if (!outros.length) return reino;
+  let deslocamento = reino.largura + 1;
+  const regioes = [...reino.regioes];
+  for (const outro of outros) {
+    regioes.push(...outro.regioes.map(r => ({...r, gx: r.gx + deslocamento})));
+    deslocamento += outro.largura + 1;
+  }
+  return {...reino, territorios: [reino,...outros], largura: deslocamento - 1, altura: Math.max(reino.altura,...outros.map(r=>r.altura)), regioes,
+    masmorras: [reino,...outros].flatMap(r=>r.masmorras), covis: [reino,...outros].flatMap(r=>r.covis), missoes: [reino,...outros].flatMap(r=>r.missoes)};
+}
+
+/** Catálogo de origem de uma região, dungeon ou covil do atlas. */
+export function territorioDoLugar(reino: Reino, id: string): Reino {
+  return reino.territorios?.find(r=>[...r.regioes,...r.masmorras,...r.covis].some(l=>l.id===id)) ?? reino;
+}
+export function capitalDoAtlas(reino: Reino, regiao: string): boolean {
+  return (reino.territorios ?? [reino]).some(r=>r.inicio===regiao);
 }

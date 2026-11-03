@@ -9,7 +9,7 @@ import { mapaDoLugar } from './mapa-lugar';
 
 import { t, type ChaveTexto } from '../i18n';
 import type { AvisoDoMundo } from '../mundo/avisos';
-import type { Reino } from '../mundo/reino';
+import { territorioDoLugar, type Reino } from '../mundo/reino';
 import { dialogo, paragrafo } from './mundo-dialogos';
 
 /** O portal: um botão por vila descoberta (pagando ouro) e o pergaminho de retorno, quando há. */
@@ -103,10 +103,14 @@ export function abrirMapa(reino: Reino, lugar: string, descobertas: readonly str
   };
   const grade = document.createElement('div');
   grade.className = 'mapa-reino';
-  grade.style.gridTemplateColumns = `repeat(${String(reino.largura)}, 1fr)`;
-  for (let gy = 0; gy < reino.altura; gy++) {
-    for (let gx = 0; gx < reino.largura; gx++) {
-      const r = reino.regioes.find((x) => x.gx === gx && x.gy === gy);
+  const botoesReinos = new Map<string,HTMLButtonElement>();
+  const desenharReino = (mapa: Reino) => {
+  grade.textContent='';
+  for(const [id,b] of botoesReinos)b.setAttribute('aria-pressed',String(id===mapa.id));
+  grade.style.gridTemplateColumns = `repeat(${String(mapa.largura)}, 1fr)`;
+  for (let gy = 0; gy < mapa.altura; gy++) {
+    for (let gx = 0; gx < mapa.largura; gx++) {
+      const r = mapa.regioes.find((x) => x.gx === gx && x.gy === gy);
       const celula = document.createElement('div');
       celula.className = 'regiao-mapa';
       if (!r) {
@@ -117,7 +121,7 @@ export function abrirMapa(reino: Reino, lugar: string, descobertas: readonly str
       celula.dataset.vista = vista ? '1' : '0';
       celula.dataset.perigo = vista ? r.perigo : 'desconhecido';
       const nome = document.createElement('span');
-      nome.textContent = vista ? r.nome : t('mundo.mapa.desconhecida');
+      nome.textContent = vista ? `${territorioDoLugar(reino,r.id).nome} · ${r.nome}` : t('mundo.mapa.desconhecida');
       celula.append(nome);
       const marcas: string[] = [];
       for (const m of terreno?.membros ?? []) if (m.lugar === `regiao:${r.id}` || r.estruturas.some(e => m.lugar === `${e.destino.tipo}:${e.destino.id}`)) marcas.push(m.nome);
@@ -148,6 +152,16 @@ export function abrirMapa(reino: Reino, lugar: string, descobertas: readonly str
       grade.append(celula);
     }
   }
+  };
+  const escolhas=document.createElement('div');escolhas.className='acoes-slot';
+  for(const territorio of reino.territorios??[reino]) {
+    const b=document.createElement('button');b.type='button';b.className='botao-cabecalho';
+    const membros=(terreno?.membros??[]).filter(m=>[...territorio.regioes,...territorio.masmorras,...territorio.covis].some(l=>m.lugar?.endsWith(`:${l.id}`)));
+    b.textContent=territorio.nome+(membros.length?` · ${membros.map(m=>m.nome).join(', ')}`:'');
+    b.addEventListener('click',()=>{desenharReino(territorio);});botoesReinos.set(territorio.id,b);escolhas.append(b);
+  }
+  d.corpo.append(escolhas);
+  desenharReino(territorioDoLugar(reino,atual?.id??reino.inicio));
   if (terreno) d.corpo.append(mapaDoLugar(terreno.ctx, terreno.estado, terreno.idLocal, lugar, descobertas));
   d.corpo.append(grade);
 }

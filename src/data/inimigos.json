@@ -612,7 +612,7 @@
       "defesa": 7,
       "ataqueBasico": "raio_vampirico",
       "habilidades": [
-        "invocar_ossuario",
+        "raio_em_cadeia",
         "marca_de_area"
       ],
       "intervaloAtaqueMs": 2800,
@@ -645,6 +645,10 @@
       "invocacao": {
         "comportamento": "agressivo"
       }
-    }
+    },
+    {"id": "cavaleiro_profano", "nome": "Cavaleiro profano", "hpBase": 60, "hesitacaoS": 0.3, "deteccao": 12, "xp": 0, "modelo": "orc", "arquetipo": "perseguidor", "classe": "corpo_a_corpo", "defesa": 2, "ataqueBasico": "golpe_pesado", "habilidades": ["golpe_atordoante"], "intervaloAtaqueMs": 3000, "invocacao": {"comportamento": "agressivo"}},
+    {"id": "piromante_profano", "nome": "Piromante profano", "hpBase": 50, "hesitacaoS": 0.3, "deteccao": 12, "xp": 0, "modelo": "cultista", "arquetipo": "controlador", "classe": "conjurador", "defesa": 0, "ataqueBasico": "seta_arcana", "habilidades": ["bola_de_fogo", "marca_de_area"], "intervaloAtaqueMs": 4000, "resistencias": {"psiquico": 50}, "invocacao": {"comportamento": "agressivo"}},
+    {"id": "arcanista_glacial", "nome": "Arcanista glacial", "hpBase": 45, "hesitacaoS": 0.3, "deteccao": 12, "xp": 0, "modelo": "esqueleto", "arquetipo": "atirador", "classe": "corpo_a_corpo", "defesa": 1, "ataqueBasico": "flecha", "habilidades": ["lanca_de_gelo"], "intervaloAtaqueMs": 3000, "resistencias": {"veneno": 100, "gelo": 25}, "imunidades": ["envenenado"], "invocacao": {"comportamento": "agressivo"}},
+    {"id": "espectro_tempestade", "nome": "Espectro da tempestade", "hpBase": 55, "hesitacaoS": 0.3, "deteccao": 12, "xp": 0, "modelo": "vampiro", "arquetipo": "atirador", "classe": "conjurador", "defesa": 1, "ataqueBasico": "raio_vampirico", "habilidades": ["raio_em_cadeia"], "intervaloAtaqueMs": 2500, "resistencias": {"psiquico": 50, "fogo": -25}, "invocacao": {"comportamento": "agressivo"}}
   ]
 }

@@ -1,0 +1,3094 @@
+{
+  "versao": 4,
+  "id": "reino_eclipse",
+  "nome": "Reino do Eclipse",
+  "tamanhoRegiao": 128,
+  "largura": 4,
+  "altura": 3,
+  "inicio": "eclipse_baluarte",
+  "perigos": {
+    "seguro": {
+      "pvp": false,
+      "densidadePor1000": 3,
+      "elitePct": 0,
+      "lootPct": 100,
+      "hordaMin": 3,
+      "hordaMax": 5,
+      "raioHorda": 7
+    },
+    "normal": {
+      "pvp": false,
+      "densidadePor1000": 6,
+      "elitePct": 6,
+      "eliteNiveis": 4,
+      "lootPct": 110,
+      "casas": 2,
+      "hordaMin": 4,
+      "hordaMax": 7,
+      "raioHorda": 7
+    },
+    "perigoso": {
+      "pvp": true,
+      "densidadePor1000": 9,
+      "elitePct": 20,
+      "eliteNiveis": 6,
+      "lootPct": 180,
+      "casas": 3,
+      "hordaMin": 5,
+      "hordaMax": 9,
+      "raioHorda": 7
+    }
+  },
+  "lojas": {
+    "mercador": [
+      "pocao_vida_maior",
+      "pocao_mana_maior",
+      "pergaminho_retorno",
+      "capa_sombria",
+      "anel_do_eco",
+      "aceleracao_mente_rara",
+      "couraca_eclipse",
+      "manto_crepusculo"
+    ],
+    "ferreiro": [
+      "cota_malha",
+      "anel_sabio",
+      "amuleto_vigor",
+      "aljava_perfurante",
+      "capa_sombria",
+      "couraca_eclipse",
+      "manto_crepusculo"
+    ],
+    "alquimista": [
+      "pocao_vida_maior",
+      "pocao_mana_maior",
+      "pergaminho_retorno",
+      "essencia_fogo",
+      "essencia_gelo",
+      "essencia_raio",
+      "essencia_veneno",
+      "aceleracao_mente_rara"
+    ]
+  },
+  "mercadorErrante": [
+    "capa_sombria",
+    "anel_do_eco",
+    "livro_chuva_de_estrelas",
+    "runa_de_fusao",
+    "tomo_potencial"
+  ],
+  "regioes": [
+    {
+      "id": "eclipse_baluarte",
+      "nome": "Baluarte da Aurora",
+      "tamanho": 224,
+      "gx": 0,
+      "gy": 0,
+      "bioma": "campo",
+      "perigo": "normal",
+      "nivel": [
+        30,
+        37
+      ],
+      "tema": "mina",
+      "semente": 81001,
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "vila": {
+        "nome": "Baluarte da Aurora",
+        "x": 60,
+        "y": 60,
+        "raio": 18,
+        "npcs": [
+          "mercador",
+          "ferreiro",
+          "alquimista",
+          "missoes",
+          "portal",
+          "save",
+          "banco",
+          "mercado"
+        ]
+      },
+      "estruturas": [
+        {
+          "id": "eclipse_baluarte_1_entrada",
+          "nome": "Cavernas de Baluarte da Aurora",
+          "tipo": "caverna",
+          "x": 110,
+          "y": 100,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_baluarte_1"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_baluarte_2_entrada",
+          "nome": "Sepulcro de Baluarte da Aurora",
+          "tipo": "cripta",
+          "x": 140,
+          "y": 127,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_baluarte_2"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_baluarte_3_entrada",
+          "nome": "Fortaleza de Baluarte da Aurora",
+          "tipo": "torre",
+          "x": 170,
+          "y": 154,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_baluarte_3"
+          },
+          "escondida": false
+        }
+      ],
+      "coleta": [
+        {
+          "itemId": "erva_curativa",
+          "quantidade": 10
+        },
+        {
+          "itemId": "minerio_ferro",
+          "quantidade": 6
+        }
+      ],
+      "bosses": {
+        "presets": [
+          "necromante_ancestral",
+          "dragao_fogo",
+          "dragao_gelo",
+          "dragao_raio",
+          "dragao_veneno"
+        ],
+        "chancePct": 100,
+        "quantidade": 2
+      }
+    },
+    {
+      "id": "eclipse_obsidiana",
+      "nome": "Ermos de Obsidiana",
+      "tamanho": 248,
+      "gx": 1,
+      "gy": 0,
+      "bioma": "ruinas",
+      "perigo": "perigoso",
+      "nivel": [
+        33,
+        40
+      ],
+      "tema": "ruinas",
+      "semente": 88920,
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "vila": null,
+      "estruturas": [
+        {
+          "id": "eclipse_obsidiana_1_entrada",
+          "nome": "Cavernas de Ermos de Obsidiana",
+          "tipo": "caverna",
+          "x": 110,
+          "y": 100,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_obsidiana_1"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_obsidiana_2_entrada",
+          "nome": "Sepulcro de Ermos de Obsidiana",
+          "tipo": "cripta",
+          "x": 140,
+          "y": 127,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_obsidiana_2"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_obsidiana_3_entrada",
+          "nome": "Fortaleza de Ermos de Obsidiana",
+          "tipo": "torre",
+          "x": 170,
+          "y": 154,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_obsidiana_3"
+          },
+          "escondida": false
+        }
+      ],
+      "coleta": [
+        {
+          "itemId": "erva_curativa",
+          "quantidade": 10
+        },
+        {
+          "itemId": "minerio_ferro",
+          "quantidade": 6
+        }
+      ],
+      "bosses": {
+        "presets": [
+          "necromante_ancestral",
+          "dragao_fogo",
+          "dragao_gelo",
+          "dragao_raio",
+          "dragao_veneno"
+        ],
+        "chancePct": 100,
+        "quantidade": 2
+      }
+    },
+    {
+      "id": "eclipse_exilados",
+      "nome": "Floresta dos Exilados",
+      "tamanho": 272,
+      "gx": 2,
+      "gy": 0,
+      "bioma": "floresta",
+      "perigo": "normal",
+      "nivel": [
+        36,
+        43
+      ],
+      "tema": "floresta_antiga",
+      "semente": 96839,
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "vila": {
+        "nome": "Floresta dos Exilados",
+        "x": 60,
+        "y": 60,
+        "raio": 18,
+        "npcs": [
+          "mercador",
+          "ferreiro",
+          "alquimista",
+          "missoes",
+          "portal",
+          "save",
+          "banco",
+          "mercado"
+        ]
+      },
+      "estruturas": [
+        {
+          "id": "eclipse_exilados_1_entrada",
+          "nome": "Cavernas de Floresta dos Exilados",
+          "tipo": "caverna",
+          "x": 110,
+          "y": 100,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_exilados_1"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_exilados_2_entrada",
+          "nome": "Sepulcro de Floresta dos Exilados",
+          "tipo": "cripta",
+          "x": 140,
+          "y": 127,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_exilados_2"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_exilados_3_entrada",
+          "nome": "Fortaleza de Floresta dos Exilados",
+          "tipo": "torre",
+          "x": 170,
+          "y": 154,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_exilados_3"
+          },
+          "escondida": false
+        }
+      ],
+      "coleta": [
+        {
+          "itemId": "erva_curativa",
+          "quantidade": 10
+        },
+        {
+          "itemId": "minerio_ferro",
+          "quantidade": 6
+        }
+      ],
+      "bosses": {
+        "presets": [
+          "necromante_ancestral",
+          "dragao_fogo",
+          "dragao_gelo",
+          "dragao_raio",
+          "dragao_veneno"
+        ],
+        "chancePct": 100,
+        "quantidade": 2
+      }
+    },
+    {
+      "id": "eclipse_trovao",
+      "nome": "Marchas do Trovão",
+      "tamanho": 296,
+      "gx": 3,
+      "gy": 0,
+      "bioma": "colinas",
+      "perigo": "perigoso",
+      "nivel": [
+        39,
+        46
+      ],
+      "tema": "canion_cristal",
+      "semente": 104758,
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "vila": null,
+      "estruturas": [
+        {
+          "id": "eclipse_trovao_1_entrada",
+          "nome": "Cavernas de Marchas do Trovão",
+          "tipo": "caverna",
+          "x": 110,
+          "y": 100,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_trovao_1"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_trovao_2_entrada",
+          "nome": "Sepulcro de Marchas do Trovão",
+          "tipo": "cripta",
+          "x": 140,
+          "y": 127,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_trovao_2"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_trovao_3_entrada",
+          "nome": "Fortaleza de Marchas do Trovão",
+          "tipo": "torre",
+          "x": 170,
+          "y": 154,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_trovao_3"
+          },
+          "escondida": false
+        }
+      ],
+      "coleta": [
+        {
+          "itemId": "erva_curativa",
+          "quantidade": 10
+        },
+        {
+          "itemId": "minerio_ferro",
+          "quantidade": 6
+        }
+      ],
+      "bosses": {
+        "presets": [
+          "necromante_ancestral",
+          "dragao_fogo",
+          "dragao_gelo",
+          "dragao_raio",
+          "dragao_veneno"
+        ],
+        "chancePct": 100,
+        "quantidade": 2
+      }
+    },
+    {
+      "id": "eclipse_almas",
+      "nome": "Pântano das Almas",
+      "tamanho": 224,
+      "gx": 0,
+      "gy": 1,
+      "bioma": "pantano",
+      "perigo": "perigoso",
+      "nivel": [
+        42,
+        49
+      ],
+      "tema": "pantano",
+      "semente": 112677,
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "vila": null,
+      "estruturas": [
+        {
+          "id": "eclipse_almas_1_entrada",
+          "nome": "Cavernas de Pântano das Almas",
+          "tipo": "caverna",
+          "x": 110,
+          "y": 100,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_almas_1"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_almas_2_entrada",
+          "nome": "Sepulcro de Pântano das Almas",
+          "tipo": "cripta",
+          "x": 140,
+          "y": 127,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_almas_2"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_almas_3_entrada",
+          "nome": "Fortaleza de Pântano das Almas",
+          "tipo": "torre",
+          "x": 170,
+          "y": 154,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_almas_3"
+          },
+          "escondida": false
+        },
+        {
+          "id": "dominio_almas_entrada",
+          "nome": "Domínio: Pântano das Almas",
+          "tipo": "templo",
+          "x": 90,
+          "y": 180,
+          "largura": 7,
+          "altura": 5,
+          "destino": {
+            "tipo": "covil",
+            "id": "dominio_almas"
+          },
+          "escondida": false
+        }
+      ],
+      "coleta": [
+        {
+          "itemId": "erva_curativa",
+          "quantidade": 10
+        },
+        {
+          "itemId": "minerio_ferro",
+          "quantidade": 6
+        }
+      ],
+      "bosses": {
+        "presets": [
+          "necromante_ancestral",
+          "dragao_fogo",
+          "dragao_gelo",
+          "dragao_raio",
+          "dragao_veneno"
+        ],
+        "chancePct": 100,
+        "quantidade": 3
+      }
+    },
+    {
+      "id": "eclipse_crepusculo",
+      "nome": "Montes do Crepúsculo",
+      "tamanho": 248,
+      "gx": 1,
+      "gy": 1,
+      "bioma": "colinas",
+      "perigo": "normal",
+      "nivel": [
+        45,
+        52
+      ],
+      "tema": "tundra",
+      "semente": 120596,
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "vila": {
+        "nome": "Montes do Crepúsculo",
+        "x": 60,
+        "y": 60,
+        "raio": 18,
+        "npcs": [
+          "mercador",
+          "ferreiro",
+          "alquimista",
+          "missoes",
+          "portal",
+          "save",
+          "banco",
+          "mercado"
+        ]
+      },
+      "estruturas": [
+        {
+          "id": "eclipse_crepusculo_1_entrada",
+          "nome": "Cavernas de Montes do Crepúsculo",
+          "tipo": "caverna",
+          "x": 110,
+          "y": 100,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_crepusculo_1"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_crepusculo_2_entrada",
+          "nome": "Sepulcro de Montes do Crepúsculo",
+          "tipo": "cripta",
+          "x": 140,
+          "y": 127,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_crepusculo_2"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_crepusculo_3_entrada",
+          "nome": "Fortaleza de Montes do Crepúsculo",
+          "tipo": "torre",
+          "x": 170,
+          "y": 154,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_crepusculo_3"
+          },
+          "escondida": false
+        },
+        {
+          "id": "dominio_crepusculo_entrada",
+          "nome": "Domínio: Montes do Crepúsculo",
+          "tipo": "templo",
+          "x": 90,
+          "y": 180,
+          "largura": 7,
+          "altura": 5,
+          "destino": {
+            "tipo": "covil",
+            "id": "dominio_crepusculo"
+          },
+          "escondida": false
+        }
+      ],
+      "coleta": [
+        {
+          "itemId": "erva_curativa",
+          "quantidade": 10
+        },
+        {
+          "itemId": "minerio_ferro",
+          "quantidade": 6
+        }
+      ],
+      "bosses": {
+        "presets": [
+          "necromante_ancestral",
+          "dragao_fogo",
+          "dragao_gelo",
+          "dragao_raio",
+          "dragao_veneno"
+        ],
+        "chancePct": 100,
+        "quantidade": 3
+      }
+    },
+    {
+      "id": "eclipse_escamas",
+      "nome": "Vale das Escamas",
+      "tamanho": 272,
+      "gx": 2,
+      "gy": 1,
+      "bioma": "ruinas",
+      "perigo": "perigoso",
+      "nivel": [
+        48,
+        55
+      ],
+      "tema": "ruinas",
+      "semente": 128515,
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "vila": null,
+      "estruturas": [
+        {
+          "id": "eclipse_escamas_1_entrada",
+          "nome": "Cavernas de Vale das Escamas",
+          "tipo": "caverna",
+          "x": 110,
+          "y": 100,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_escamas_1"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_escamas_2_entrada",
+          "nome": "Sepulcro de Vale das Escamas",
+          "tipo": "cripta",
+          "x": 140,
+          "y": 127,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_escamas_2"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_escamas_3_entrada",
+          "nome": "Fortaleza de Vale das Escamas",
+          "tipo": "torre",
+          "x": 170,
+          "y": 154,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_escamas_3"
+          },
+          "escondida": false
+        },
+        {
+          "id": "dominio_escamas_entrada",
+          "nome": "Domínio: Vale das Escamas",
+          "tipo": "templo",
+          "x": 90,
+          "y": 180,
+          "largura": 7,
+          "altura": 5,
+          "destino": {
+            "tipo": "covil",
+            "id": "dominio_escamas"
+          },
+          "escondida": false
+        }
+      ],
+      "coleta": [
+        {
+          "itemId": "erva_curativa",
+          "quantidade": 10
+        },
+        {
+          "itemId": "minerio_ferro",
+          "quantidade": 6
+        }
+      ],
+      "bosses": {
+        "presets": [
+          "necromante_ancestral",
+          "dragao_fogo",
+          "dragao_gelo",
+          "dragao_raio",
+          "dragao_veneno"
+        ],
+        "chancePct": 100,
+        "quantidade": 3
+      }
+    },
+    {
+      "id": "eclipse_geleiras",
+      "nome": "Geleiras Eternas",
+      "tamanho": 296,
+      "gx": 3,
+      "gy": 1,
+      "bioma": "neve",
+      "perigo": "normal",
+      "nivel": [
+        51,
+        58
+      ],
+      "tema": "caverna_gelo",
+      "semente": 136434,
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "vila": {
+        "nome": "Geleiras Eternas",
+        "x": 60,
+        "y": 60,
+        "raio": 18,
+        "npcs": [
+          "mercador",
+          "ferreiro",
+          "alquimista",
+          "missoes",
+          "portal",
+          "save",
+          "banco",
+          "mercado"
+        ]
+      },
+      "estruturas": [
+        {
+          "id": "eclipse_geleiras_1_entrada",
+          "nome": "Cavernas de Geleiras Eternas",
+          "tipo": "caverna",
+          "x": 110,
+          "y": 100,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_geleiras_1"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_geleiras_2_entrada",
+          "nome": "Sepulcro de Geleiras Eternas",
+          "tipo": "cripta",
+          "x": 140,
+          "y": 127,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_geleiras_2"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_geleiras_3_entrada",
+          "nome": "Fortaleza de Geleiras Eternas",
+          "tipo": "torre",
+          "x": 170,
+          "y": 154,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_geleiras_3"
+          },
+          "escondida": false
+        },
+        {
+          "id": "dominio_geleiras_entrada",
+          "nome": "Domínio: Geleiras Eternas",
+          "tipo": "templo",
+          "x": 90,
+          "y": 180,
+          "largura": 7,
+          "altura": 5,
+          "destino": {
+            "tipo": "covil",
+            "id": "dominio_geleiras"
+          },
+          "escondida": false
+        }
+      ],
+      "coleta": [
+        {
+          "itemId": "erva_curativa",
+          "quantidade": 10
+        },
+        {
+          "itemId": "minerio_ferro",
+          "quantidade": 6
+        }
+      ],
+      "bosses": {
+        "presets": [
+          "necromante_ancestral",
+          "dragao_fogo",
+          "dragao_gelo",
+          "dragao_raio",
+          "dragao_veneno"
+        ],
+        "chancePct": 100,
+        "quantidade": 3
+      }
+    },
+    {
+      "id": "eclipse_cinza",
+      "nome": "Campos de Cinza",
+      "tamanho": 224,
+      "gx": 0,
+      "gy": 2,
+      "bioma": "ruinas",
+      "perigo": "perigoso",
+      "nivel": [
+        54,
+        61
+      ],
+      "tema": "ruinas",
+      "semente": 144353,
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "vila": null,
+      "estruturas": [
+        {
+          "id": "eclipse_cinza_1_entrada",
+          "nome": "Cavernas de Campos de Cinza",
+          "tipo": "caverna",
+          "x": 110,
+          "y": 100,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_cinza_1"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_cinza_2_entrada",
+          "nome": "Sepulcro de Campos de Cinza",
+          "tipo": "cripta",
+          "x": 140,
+          "y": 127,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_cinza_2"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_cinza_3_entrada",
+          "nome": "Fortaleza de Campos de Cinza",
+          "tipo": "torre",
+          "x": 170,
+          "y": 154,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_cinza_3"
+          },
+          "escondida": false
+        },
+        {
+          "id": "dominio_cinza_entrada",
+          "nome": "Domínio: Campos de Cinza",
+          "tipo": "templo",
+          "x": 90,
+          "y": 180,
+          "largura": 7,
+          "altura": 5,
+          "destino": {
+            "tipo": "covil",
+            "id": "dominio_cinza"
+          },
+          "escondida": false
+        }
+      ],
+      "coleta": [
+        {
+          "itemId": "erva_curativa",
+          "quantidade": 10
+        },
+        {
+          "itemId": "minerio_ferro",
+          "quantidade": 6
+        }
+      ],
+      "bosses": {
+        "presets": [
+          "necromante_ancestral",
+          "dragao_fogo",
+          "dragao_gelo",
+          "dragao_raio",
+          "dragao_veneno"
+        ],
+        "chancePct": 100,
+        "quantidade": 3
+      }
+    },
+    {
+      "id": "eclipse_mortos",
+      "nome": "Domínio dos Mortos",
+      "tamanho": 248,
+      "gx": 1,
+      "gy": 2,
+      "bioma": "ruinas",
+      "perigo": "perigoso",
+      "nivel": [
+        57,
+        64
+      ],
+      "tema": "catacumbas",
+      "semente": 152272,
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "vila": null,
+      "estruturas": [
+        {
+          "id": "eclipse_mortos_1_entrada",
+          "nome": "Cavernas de Domínio dos Mortos",
+          "tipo": "caverna",
+          "x": 110,
+          "y": 100,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_mortos_1"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_mortos_2_entrada",
+          "nome": "Sepulcro de Domínio dos Mortos",
+          "tipo": "cripta",
+          "x": 140,
+          "y": 127,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_mortos_2"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_mortos_3_entrada",
+          "nome": "Fortaleza de Domínio dos Mortos",
+          "tipo": "torre",
+          "x": 170,
+          "y": 154,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_mortos_3"
+          },
+          "escondida": false
+        },
+        {
+          "id": "dominio_mortos_entrada",
+          "nome": "Domínio: Domínio dos Mortos",
+          "tipo": "templo",
+          "x": 90,
+          "y": 180,
+          "largura": 7,
+          "altura": 5,
+          "destino": {
+            "tipo": "covil",
+            "id": "dominio_mortos"
+          },
+          "escondida": false
+        }
+      ],
+      "coleta": [
+        {
+          "itemId": "erva_curativa",
+          "quantidade": 10
+        },
+        {
+          "itemId": "minerio_ferro",
+          "quantidade": 6
+        }
+      ],
+      "bosses": {
+        "presets": [
+          "necromante_ancestral",
+          "dragao_fogo",
+          "dragao_gelo",
+          "dragao_raio",
+          "dragao_veneno"
+        ],
+        "chancePct": 100,
+        "quantidade": 3
+      }
+    },
+    {
+      "id": "eclipse_tempestade",
+      "nome": "Coroa da Tempestade",
+      "tamanho": 272,
+      "gx": 2,
+      "gy": 2,
+      "bioma": "neve",
+      "perigo": "perigoso",
+      "nivel": [
+        60,
+        67
+      ],
+      "tema": "tundra",
+      "semente": 160191,
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "vila": null,
+      "estruturas": [
+        {
+          "id": "eclipse_tempestade_1_entrada",
+          "nome": "Cavernas de Coroa da Tempestade",
+          "tipo": "caverna",
+          "x": 110,
+          "y": 100,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_tempestade_1"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_tempestade_2_entrada",
+          "nome": "Sepulcro de Coroa da Tempestade",
+          "tipo": "cripta",
+          "x": 140,
+          "y": 127,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_tempestade_2"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_tempestade_3_entrada",
+          "nome": "Fortaleza de Coroa da Tempestade",
+          "tipo": "torre",
+          "x": 170,
+          "y": 154,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_tempestade_3"
+          },
+          "escondida": false
+        },
+        {
+          "id": "dominio_tempestade_entrada",
+          "nome": "Domínio: Coroa da Tempestade",
+          "tipo": "templo",
+          "x": 90,
+          "y": 180,
+          "largura": 7,
+          "altura": 5,
+          "destino": {
+            "tipo": "covil",
+            "id": "dominio_tempestade"
+          },
+          "escondida": false
+        }
+      ],
+      "coleta": [
+        {
+          "itemId": "erva_curativa",
+          "quantidade": 10
+        },
+        {
+          "itemId": "minerio_ferro",
+          "quantidade": 6
+        }
+      ],
+      "bosses": {
+        "presets": [
+          "necromante_ancestral",
+          "dragao_fogo",
+          "dragao_gelo",
+          "dragao_raio",
+          "dragao_veneno"
+        ],
+        "chancePct": 100,
+        "quantidade": 3
+      }
+    },
+    {
+      "id": "eclipse_trono",
+      "nome": "Trono do Eclipse",
+      "tamanho": 296,
+      "gx": 3,
+      "gy": 2,
+      "bioma": "ruinas",
+      "perigo": "perigoso",
+      "nivel": [
+        63,
+        70
+      ],
+      "tema": "ruinas",
+      "semente": 168110,
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "vila": null,
+      "estruturas": [
+        {
+          "id": "eclipse_trono_1_entrada",
+          "nome": "Cavernas de Trono do Eclipse",
+          "tipo": "caverna",
+          "x": 110,
+          "y": 100,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_trono_1"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_trono_2_entrada",
+          "nome": "Sepulcro de Trono do Eclipse",
+          "tipo": "cripta",
+          "x": 140,
+          "y": 127,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_trono_2"
+          },
+          "escondida": false
+        },
+        {
+          "id": "eclipse_trono_3_entrada",
+          "nome": "Fortaleza de Trono do Eclipse",
+          "tipo": "torre",
+          "x": 170,
+          "y": 154,
+          "largura": 5,
+          "altura": 4,
+          "destino": {
+            "tipo": "masmorra",
+            "id": "eclipse_trono_3"
+          },
+          "escondida": false
+        },
+        {
+          "id": "dominio_trono_entrada",
+          "nome": "Domínio: Trono do Eclipse",
+          "tipo": "templo",
+          "x": 90,
+          "y": 180,
+          "largura": 7,
+          "altura": 5,
+          "destino": {
+            "tipo": "covil",
+            "id": "dominio_trono"
+          },
+          "escondida": false
+        }
+      ],
+      "coleta": [
+        {
+          "itemId": "erva_curativa",
+          "quantidade": 10
+        },
+        {
+          "itemId": "minerio_ferro",
+          "quantidade": 6
+        }
+      ],
+      "bosses": {
+        "presets": [
+          "necromante_ancestral",
+          "dragao_fogo",
+          "dragao_gelo",
+          "dragao_raio",
+          "dragao_veneno"
+        ],
+        "chancePct": 100,
+        "quantidade": 3
+      }
+    }
+  ],
+  "masmorras": [
+    {
+      "id": "eclipse_baluarte_1",
+      "nome": "Cavernas de Baluarte da Aurora",
+      "nivel": 33,
+      "salas": 18,
+      "tema": "mina",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "necromante_ancestral",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_baluarte_2",
+      "nome": "Sepulcro de Baluarte da Aurora",
+      "nivel": 34,
+      "salas": 19,
+      "tema": "mina",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_fogo",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_baluarte_3",
+      "nome": "Fortaleza de Baluarte da Aurora",
+      "nivel": 35,
+      "salas": 20,
+      "tema": "mina",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_gelo",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_obsidiana_1",
+      "nome": "Cavernas de Ermos de Obsidiana",
+      "nivel": 36,
+      "salas": 18,
+      "tema": "ruinas",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_fogo",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_obsidiana_2",
+      "nome": "Sepulcro de Ermos de Obsidiana",
+      "nivel": 37,
+      "salas": 19,
+      "tema": "ruinas",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_gelo",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_obsidiana_3",
+      "nome": "Fortaleza de Ermos de Obsidiana",
+      "nivel": 38,
+      "salas": 20,
+      "tema": "ruinas",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_raio",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_exilados_1",
+      "nome": "Cavernas de Floresta dos Exilados",
+      "nivel": 39,
+      "salas": 18,
+      "tema": "floresta_antiga",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_gelo",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_exilados_2",
+      "nome": "Sepulcro de Floresta dos Exilados",
+      "nivel": 40,
+      "salas": 19,
+      "tema": "floresta_antiga",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_raio",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_exilados_3",
+      "nome": "Fortaleza de Floresta dos Exilados",
+      "nivel": 41,
+      "salas": 20,
+      "tema": "floresta_antiga",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_veneno",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_trovao_1",
+      "nome": "Cavernas de Marchas do Trovão",
+      "nivel": 42,
+      "salas": 18,
+      "tema": "canion_cristal",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_raio",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_trovao_2",
+      "nome": "Sepulcro de Marchas do Trovão",
+      "nivel": 43,
+      "salas": 19,
+      "tema": "canion_cristal",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_veneno",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_trovao_3",
+      "nome": "Fortaleza de Marchas do Trovão",
+      "nivel": 44,
+      "salas": 20,
+      "tema": "canion_cristal",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "necromante_ancestral",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_almas_1",
+      "nome": "Cavernas de Pântano das Almas",
+      "nivel": 45,
+      "salas": 18,
+      "tema": "pantano",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_veneno",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_almas_2",
+      "nome": "Sepulcro de Pântano das Almas",
+      "nivel": 46,
+      "salas": 19,
+      "tema": "pantano",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "necromante_ancestral",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_almas_3",
+      "nome": "Fortaleza de Pântano das Almas",
+      "nivel": 47,
+      "salas": 20,
+      "tema": "pantano",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_fogo",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_crepusculo_1",
+      "nome": "Cavernas de Montes do Crepúsculo",
+      "nivel": 48,
+      "salas": 18,
+      "tema": "tundra",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "necromante_ancestral",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_crepusculo_2",
+      "nome": "Sepulcro de Montes do Crepúsculo",
+      "nivel": 49,
+      "salas": 19,
+      "tema": "tundra",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_fogo",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_crepusculo_3",
+      "nome": "Fortaleza de Montes do Crepúsculo",
+      "nivel": 50,
+      "salas": 20,
+      "tema": "tundra",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_gelo",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_escamas_1",
+      "nome": "Cavernas de Vale das Escamas",
+      "nivel": 51,
+      "salas": 18,
+      "tema": "ruinas",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_fogo",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_escamas_2",
+      "nome": "Sepulcro de Vale das Escamas",
+      "nivel": 52,
+      "salas": 19,
+      "tema": "ruinas",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_gelo",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_escamas_3",
+      "nome": "Fortaleza de Vale das Escamas",
+      "nivel": 53,
+      "salas": 20,
+      "tema": "ruinas",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_raio",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_geleiras_1",
+      "nome": "Cavernas de Geleiras Eternas",
+      "nivel": 54,
+      "salas": 18,
+      "tema": "caverna_gelo",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_gelo",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_geleiras_2",
+      "nome": "Sepulcro de Geleiras Eternas",
+      "nivel": 55,
+      "salas": 19,
+      "tema": "caverna_gelo",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_raio",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_geleiras_3",
+      "nome": "Fortaleza de Geleiras Eternas",
+      "nivel": 56,
+      "salas": 20,
+      "tema": "caverna_gelo",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_veneno",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_cinza_1",
+      "nome": "Cavernas de Campos de Cinza",
+      "nivel": 57,
+      "salas": 18,
+      "tema": "ruinas",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_raio",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_cinza_2",
+      "nome": "Sepulcro de Campos de Cinza",
+      "nivel": 58,
+      "salas": 19,
+      "tema": "ruinas",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_veneno",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_cinza_3",
+      "nome": "Fortaleza de Campos de Cinza",
+      "nivel": 59,
+      "salas": 20,
+      "tema": "ruinas",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "necromante_ancestral",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_mortos_1",
+      "nome": "Cavernas de Domínio dos Mortos",
+      "nivel": 60,
+      "salas": 18,
+      "tema": "catacumbas",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_veneno",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_mortos_2",
+      "nome": "Sepulcro de Domínio dos Mortos",
+      "nivel": 61,
+      "salas": 19,
+      "tema": "catacumbas",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "necromante_ancestral",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_mortos_3",
+      "nome": "Fortaleza de Domínio dos Mortos",
+      "nivel": 62,
+      "salas": 20,
+      "tema": "catacumbas",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_fogo",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_tempestade_1",
+      "nome": "Cavernas de Coroa da Tempestade",
+      "nivel": 63,
+      "salas": 18,
+      "tema": "tundra",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "necromante_ancestral",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_tempestade_2",
+      "nome": "Sepulcro de Coroa da Tempestade",
+      "nivel": 64,
+      "salas": 19,
+      "tema": "tundra",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_fogo",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_tempestade_3",
+      "nome": "Fortaleza de Coroa da Tempestade",
+      "nivel": 65,
+      "salas": 20,
+      "tema": "tundra",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_gelo",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_trono_1",
+      "nome": "Cavernas de Trono do Eclipse",
+      "nivel": 66,
+      "salas": 18,
+      "tema": "ruinas",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_fogo",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_trono_2",
+      "nome": "Sepulcro de Trono do Eclipse",
+      "nivel": 67,
+      "salas": 19,
+      "tema": "ruinas",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_gelo",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    },
+    {
+      "id": "eclipse_trono_3",
+      "nome": "Fortaleza de Trono do Eclipse",
+      "nivel": 68,
+      "salas": 20,
+      "tema": "ruinas",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_raio",
+      "recompensa": [
+        "pergaminho_retorno",
+        "aceleracao_mente_rara",
+        "cristal_arcano"
+      ],
+      "recargaH": 20
+    }
+  ],
+  "covis": [
+    {
+      "id": "dominio_almas",
+      "nome": "Domínio: Pântano das Almas",
+      "nivel": 48,
+      "salas": 12,
+      "tema": "pantano",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_veneno",
+      "dropExclusivo": "anel_do_eco",
+      "chanceDropPct": 30,
+      "renascerMin": 15
+    },
+    {
+      "id": "dominio_crepusculo",
+      "nome": "Domínio: Montes do Crepúsculo",
+      "nivel": 51,
+      "salas": 12,
+      "tema": "tundra",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "necromante_ancestral",
+      "dropExclusivo": "anel_do_eco",
+      "chanceDropPct": 30,
+      "renascerMin": 15
+    },
+    {
+      "id": "dominio_escamas",
+      "nome": "Domínio: Vale das Escamas",
+      "nivel": 54,
+      "salas": 12,
+      "tema": "ruinas",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_fogo",
+      "dropExclusivo": "anel_do_eco",
+      "chanceDropPct": 30,
+      "renascerMin": 15
+    },
+    {
+      "id": "dominio_geleiras",
+      "nome": "Domínio: Geleiras Eternas",
+      "nivel": 57,
+      "salas": 12,
+      "tema": "caverna_gelo",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_gelo",
+      "dropExclusivo": "anel_do_eco",
+      "chanceDropPct": 30,
+      "renascerMin": 15
+    },
+    {
+      "id": "dominio_cinza",
+      "nome": "Domínio: Campos de Cinza",
+      "nivel": 60,
+      "salas": 12,
+      "tema": "ruinas",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_raio",
+      "dropExclusivo": "anel_do_eco",
+      "chanceDropPct": 30,
+      "renascerMin": 15
+    },
+    {
+      "id": "dominio_mortos",
+      "nome": "Domínio: Domínio dos Mortos",
+      "nivel": 63,
+      "salas": 12,
+      "tema": "catacumbas",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_veneno",
+      "dropExclusivo": "anel_do_eco",
+      "chanceDropPct": 30,
+      "renascerMin": 15
+    },
+    {
+      "id": "dominio_tempestade",
+      "nome": "Domínio: Coroa da Tempestade",
+      "nivel": 66,
+      "salas": 12,
+      "tema": "tundra",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "necromante_ancestral",
+      "dropExclusivo": "anel_do_eco",
+      "chanceDropPct": 30,
+      "renascerMin": 15
+    },
+    {
+      "id": "dominio_trono",
+      "nome": "Domínio: Trono do Eclipse",
+      "nivel": 69,
+      "salas": 12,
+      "tema": "ruinas",
+      "inimigos": [
+        "orc",
+        "esqueleto",
+        "cultista",
+        "vampiro",
+        "troll"
+      ],
+      "boss": "dragao_fogo",
+      "dropExclusivo": "anel_do_eco",
+      "chanceDropPct": 30,
+      "renascerMin": 15
+    }
+  ],
+  "materiais": {
+    "goblin": [
+      {
+        "itemId": "orelha_de_goblin",
+        "chancePct": 35
+      },
+      {
+        "itemId": "pergaminho_retorno",
+        "chancePct": 6
+      }
+    ],
+    "lobo": [
+      {
+        "itemId": "presa_de_lobo",
+        "chancePct": 30
+      },
+      {
+        "itemId": "pergaminho_retorno",
+        "chancePct": 6
+      }
+    ],
+    "aranha": [
+      {
+        "itemId": "seda_de_aranha",
+        "chancePct": 30
+      },
+      {
+        "itemId": "pergaminho_retorno",
+        "chancePct": 6
+      }
+    ],
+    "slime": [
+      {
+        "itemId": "gosma_de_slime",
+        "chancePct": 30
+      },
+      {
+        "itemId": "pergaminho_retorno",
+        "chancePct": 6
+      }
+    ],
+    "esqueleto": [
+      {
+        "itemId": "osso_antigo",
+        "chancePct": 30
+      },
+      {
+        "itemId": "pergaminho_retorno",
+        "chancePct": 6
+      }
+    ],
+    "dragao_das_ruinas": [
+      {
+        "itemId": "escama_de_dragao",
+        "chancePct": 100
+      }
+    ],
+    "vampiro": [
+      {
+        "itemId": "escama_de_dragao",
+        "chancePct": 6
+      },
+      {
+        "itemId": "pergaminho_retorno",
+        "chancePct": 6
+      }
+    ],
+    "orc": [
+      {
+        "itemId": "pergaminho_retorno",
+        "chancePct": 6
+      }
+    ],
+    "cultista": [
+      {
+        "itemId": "pergaminho_retorno",
+        "chancePct": 6
+      }
+    ],
+    "troll": [
+      {
+        "itemId": "pergaminho_retorno",
+        "chancePct": 6
+      }
+    ]
+  },
+  "missoes": [
+    {
+      "id": "expedicao_eclipse_baluarte_1",
+      "nome": "Expedição: Cavernas de Baluarte da Aurora",
+      "texto": "Conclua Cavernas de Baluarte da Aurora.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_baluarte_1"
+      },
+      "recompensa": {
+        "ouro": 1500,
+        "xp": 5400,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_baluarte_2",
+      "nome": "Expedição: Sepulcro de Baluarte da Aurora",
+      "texto": "Conclua Sepulcro de Baluarte da Aurora.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_baluarte_2"
+      },
+      "recompensa": {
+        "ouro": 1500,
+        "xp": 5400,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_baluarte_3",
+      "nome": "Expedição: Fortaleza de Baluarte da Aurora",
+      "texto": "Conclua Fortaleza de Baluarte da Aurora.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_baluarte_3"
+      },
+      "recompensa": {
+        "ouro": 1500,
+        "xp": 5400,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_obsidiana_1",
+      "nome": "Expedição: Cavernas de Ermos de Obsidiana",
+      "texto": "Conclua Cavernas de Ermos de Obsidiana.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_obsidiana_1"
+      },
+      "recompensa": {
+        "ouro": 1650,
+        "xp": 5940,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_obsidiana_2",
+      "nome": "Expedição: Sepulcro de Ermos de Obsidiana",
+      "texto": "Conclua Sepulcro de Ermos de Obsidiana.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_obsidiana_2"
+      },
+      "recompensa": {
+        "ouro": 1650,
+        "xp": 5940,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_obsidiana_3",
+      "nome": "Expedição: Fortaleza de Ermos de Obsidiana",
+      "texto": "Conclua Fortaleza de Ermos de Obsidiana.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_obsidiana_3"
+      },
+      "recompensa": {
+        "ouro": 1650,
+        "xp": 5940,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_exilados_1",
+      "nome": "Expedição: Cavernas de Floresta dos Exilados",
+      "texto": "Conclua Cavernas de Floresta dos Exilados.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_exilados_1"
+      },
+      "recompensa": {
+        "ouro": 1800,
+        "xp": 6480,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_exilados_2",
+      "nome": "Expedição: Sepulcro de Floresta dos Exilados",
+      "texto": "Conclua Sepulcro de Floresta dos Exilados.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_exilados_2"
+      },
+      "recompensa": {
+        "ouro": 1800,
+        "xp": 6480,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_exilados_3",
+      "nome": "Expedição: Fortaleza de Floresta dos Exilados",
+      "texto": "Conclua Fortaleza de Floresta dos Exilados.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_exilados_3"
+      },
+      "recompensa": {
+        "ouro": 1800,
+        "xp": 6480,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_trovao_1",
+      "nome": "Expedição: Cavernas de Marchas do Trovão",
+      "texto": "Conclua Cavernas de Marchas do Trovão.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_trovao_1"
+      },
+      "recompensa": {
+        "ouro": 1950,
+        "xp": 7020,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_trovao_2",
+      "nome": "Expedição: Sepulcro de Marchas do Trovão",
+      "texto": "Conclua Sepulcro de Marchas do Trovão.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_trovao_2"
+      },
+      "recompensa": {
+        "ouro": 1950,
+        "xp": 7020,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_trovao_3",
+      "nome": "Expedição: Fortaleza de Marchas do Trovão",
+      "texto": "Conclua Fortaleza de Marchas do Trovão.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_trovao_3"
+      },
+      "recompensa": {
+        "ouro": 1950,
+        "xp": 7020,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_almas_1",
+      "nome": "Expedição: Cavernas de Pântano das Almas",
+      "texto": "Conclua Cavernas de Pântano das Almas.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_almas_1"
+      },
+      "recompensa": {
+        "ouro": 2100,
+        "xp": 7560,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_almas_2",
+      "nome": "Expedição: Sepulcro de Pântano das Almas",
+      "texto": "Conclua Sepulcro de Pântano das Almas.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_almas_2"
+      },
+      "recompensa": {
+        "ouro": 2100,
+        "xp": 7560,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_almas_3",
+      "nome": "Expedição: Fortaleza de Pântano das Almas",
+      "texto": "Conclua Fortaleza de Pântano das Almas.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_almas_3"
+      },
+      "recompensa": {
+        "ouro": 2100,
+        "xp": 7560,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_crepusculo_1",
+      "nome": "Expedição: Cavernas de Montes do Crepúsculo",
+      "texto": "Conclua Cavernas de Montes do Crepúsculo.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_crepusculo_1"
+      },
+      "recompensa": {
+        "ouro": 2250,
+        "xp": 8100,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_crepusculo_2",
+      "nome": "Expedição: Sepulcro de Montes do Crepúsculo",
+      "texto": "Conclua Sepulcro de Montes do Crepúsculo.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_crepusculo_2"
+      },
+      "recompensa": {
+        "ouro": 2250,
+        "xp": 8100,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_crepusculo_3",
+      "nome": "Expedição: Fortaleza de Montes do Crepúsculo",
+      "texto": "Conclua Fortaleza de Montes do Crepúsculo.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_crepusculo_3"
+      },
+      "recompensa": {
+        "ouro": 2250,
+        "xp": 8100,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_escamas_1",
+      "nome": "Expedição: Cavernas de Vale das Escamas",
+      "texto": "Conclua Cavernas de Vale das Escamas.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_escamas_1"
+      },
+      "recompensa": {
+        "ouro": 2400,
+        "xp": 8640,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_escamas_2",
+      "nome": "Expedição: Sepulcro de Vale das Escamas",
+      "texto": "Conclua Sepulcro de Vale das Escamas.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_escamas_2"
+      },
+      "recompensa": {
+        "ouro": 2400,
+        "xp": 8640,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_escamas_3",
+      "nome": "Expedição: Fortaleza de Vale das Escamas",
+      "texto": "Conclua Fortaleza de Vale das Escamas.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_escamas_3"
+      },
+      "recompensa": {
+        "ouro": 2400,
+        "xp": 8640,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_geleiras_1",
+      "nome": "Expedição: Cavernas de Geleiras Eternas",
+      "texto": "Conclua Cavernas de Geleiras Eternas.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_geleiras_1"
+      },
+      "recompensa": {
+        "ouro": 2550,
+        "xp": 9180,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_geleiras_2",
+      "nome": "Expedição: Sepulcro de Geleiras Eternas",
+      "texto": "Conclua Sepulcro de Geleiras Eternas.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_geleiras_2"
+      },
+      "recompensa": {
+        "ouro": 2550,
+        "xp": 9180,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_geleiras_3",
+      "nome": "Expedição: Fortaleza de Geleiras Eternas",
+      "texto": "Conclua Fortaleza de Geleiras Eternas.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_geleiras_3"
+      },
+      "recompensa": {
+        "ouro": 2550,
+        "xp": 9180,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_cinza_1",
+      "nome": "Expedição: Cavernas de Campos de Cinza",
+      "texto": "Conclua Cavernas de Campos de Cinza.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_cinza_1"
+      },
+      "recompensa": {
+        "ouro": 2700,
+        "xp": 9720,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_cinza_2",
+      "nome": "Expedição: Sepulcro de Campos de Cinza",
+      "texto": "Conclua Sepulcro de Campos de Cinza.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_cinza_2"
+      },
+      "recompensa": {
+        "ouro": 2700,
+        "xp": 9720,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_cinza_3",
+      "nome": "Expedição: Fortaleza de Campos de Cinza",
+      "texto": "Conclua Fortaleza de Campos de Cinza.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_cinza_3"
+      },
+      "recompensa": {
+        "ouro": 2700,
+        "xp": 9720,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_mortos_1",
+      "nome": "Expedição: Cavernas de Domínio dos Mortos",
+      "texto": "Conclua Cavernas de Domínio dos Mortos.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_mortos_1"
+      },
+      "recompensa": {
+        "ouro": 2850,
+        "xp": 10260,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_mortos_2",
+      "nome": "Expedição: Sepulcro de Domínio dos Mortos",
+      "texto": "Conclua Sepulcro de Domínio dos Mortos.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_mortos_2"
+      },
+      "recompensa": {
+        "ouro": 2850,
+        "xp": 10260,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_mortos_3",
+      "nome": "Expedição: Fortaleza de Domínio dos Mortos",
+      "texto": "Conclua Fortaleza de Domínio dos Mortos.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_mortos_3"
+      },
+      "recompensa": {
+        "ouro": 2850,
+        "xp": 10260,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_tempestade_1",
+      "nome": "Expedição: Cavernas de Coroa da Tempestade",
+      "texto": "Conclua Cavernas de Coroa da Tempestade.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_tempestade_1"
+      },
+      "recompensa": {
+        "ouro": 3000,
+        "xp": 10800,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_tempestade_2",
+      "nome": "Expedição: Sepulcro de Coroa da Tempestade",
+      "texto": "Conclua Sepulcro de Coroa da Tempestade.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_tempestade_2"
+      },
+      "recompensa": {
+        "ouro": 3000,
+        "xp": 10800,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_tempestade_3",
+      "nome": "Expedição: Fortaleza de Coroa da Tempestade",
+      "texto": "Conclua Fortaleza de Coroa da Tempestade.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_tempestade_3"
+      },
+      "recompensa": {
+        "ouro": 3000,
+        "xp": 10800,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_trono_1",
+      "nome": "Expedição: Cavernas de Trono do Eclipse",
+      "texto": "Conclua Cavernas de Trono do Eclipse.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_trono_1"
+      },
+      "recompensa": {
+        "ouro": 3150,
+        "xp": 11340,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_trono_2",
+      "nome": "Expedição: Sepulcro de Trono do Eclipse",
+      "texto": "Conclua Sepulcro de Trono do Eclipse.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_trono_2"
+      },
+      "recompensa": {
+        "ouro": 3150,
+        "xp": 11340,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    },
+    {
+      "id": "expedicao_eclipse_trono_3",
+      "nome": "Expedição: Fortaleza de Trono do Eclipse",
+      "texto": "Conclua Fortaleza de Trono do Eclipse.",
+      "vilas": [
+        "eclipse_baluarte",
+        "eclipse_exilados",
+        "eclipse_crepusculo",
+        "eclipse_geleiras"
+      ],
+      "alvo": {
+        "tipo": "masmorra",
+        "masmorra": "eclipse_trono_3"
+      },
+      "recompensa": {
+        "ouro": 3150,
+        "xp": 11340,
+        "itens": [
+          "aceleracao_mente_rara"
+        ]
+      }
+    }
+  ]
+}

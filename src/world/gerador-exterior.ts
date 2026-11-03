@@ -7,6 +7,7 @@
 // normais e perigosas, as abandonadas (o telhado só some ao entrar, e há um monstro lá dentro). As casas usam um
 // gerador de números à parte, para não mexer no sorteio do resto.
 
+import { BALANCE_PADRAO } from '../core/contexto';
 import { aleatorio, criarRng, inteiro, escolher, type EstadoRng } from '../core/rng';
 import { LADOS, portaDa, vizinha, type Bioma, type LadoDaRegiao, type PapelNpc, type Reino, type RegiaoDoMundo } from '../mundo/reino';
 import type { Celula } from '../core/comandos';
@@ -380,7 +381,8 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     }
   }
 
-  const total = Math.floor((livres.length * regras.densidadePor1000) / 1000);
+  // 02/11/2026: reserva capacidade para exércitos de bosses e invocações dos jogadores.
+  const total = Math.min(BALANCE_PADRAO.mundo.populacaoMax, Math.floor((livres.length * regras.densidadePor1000) / 1000));
   const inimigos: InimigoPosicionado[] = [];
   let centroHorda: Celula | null = null;
   let restantes = 0;

@@ -17,6 +17,7 @@ export const SLOTS_DO_MUNDO = 3;
 const MAX_NOME = 24;
 
 export interface FichaDoMundo {
+  mortesDungeon?: Record<string, number>;
   versao: number;
   personagem: PedidoDePersonagem;
   /** A região da vila onde salvou por último: é onde entra (e renasce) quem saiu sem salvar. */
@@ -103,6 +104,7 @@ export function lerFichaDoMundo(v: unknown, reino: Reino): FichaDoMundo | null {
     portalLivreEm: typeof v.portalLivreEm === 'number' && Number.isFinite(v.portalLivreEm) ? v.portalLivreEm : 0,
     banco: { itens: lerItens(ehObjeto(v.banco) ? v.banco.itens : null), ouro: inteiroNaoNegativo(ehObjeto(v.banco) ? v.banco.ouro : 0) },
     missoes: lerMissoes(v.missoes),
+    mortesDungeon: ehObjeto(v.mortesDungeon) ? Object.fromEntries(Object.entries(v.mortesDungeon).filter(([k])=>reino.masmorras.some(m=>m.id===k)).map(([k,n])=>[k,inteiroNaoNegativo(n)])) : {},
   };
 }
 

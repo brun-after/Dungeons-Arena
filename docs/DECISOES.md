@@ -1,6 +1,6 @@
 # Decisões de projeto
 
-**Versão:** 0.72 · **Data:** 31/10/2026
+**Versão:** 0.73 · **Data:** 02/11/2026
 
 > **Histórico**
 > - **0.72 (31/10/2026)**: D-131: o golpe de cada tipo de arma, a arma de arremesso em voo com a forma dela, o passo no golpe e na conjuração em movimento, a frente da arma por raios, a runa do elemento no tomo e o voo do falcão acima da cabeça.
@@ -3643,3 +3643,23 @@ Outras salas enviam apenas estado público mediante filiação à party, com fre
 isolados renderizam esse estado sem conexão de jogador e sem comandos. Não enviar inventário privado.
 Diálogos são pessoais e não cobrem as outras câmeras. Marcações e telas normais dos outros aparelhos
 não são alteradas pela preferência do projetor. Grupos por convite continuam disponíveis.
+
+## Expansão do Mundo — 02/11/2026 (versão 1, marco 36)
+
+Produto pediu um necromante inimigo independente do jogador, dungeons maiores com saída acessível,
+combates atraindo hordas, lojas com ofertas e um segundo reino avançado. Conservar catálogos separados
+por reino e montar um atlas com ids únicos: preserva fichas e a infraestrutura de salas/party, sem duplicar
+o servidor. Capitais são conhecidas pelos portais; demais vilas exigem descoberta. O Eclipse tem 12 regiões,
+36 dungeons e oito covis; encontros externos garantidos. Lojas são resolvidas pelo catálogo de origem.
+
+Exército passivo do boss: 4–10 lacaios por nível, sem cadáveres, teto de jogador nem reservas ofensivas.
+Presets exclusivos usam magias pela IA comum e ficam fora do gerador de inimigos. Relações, telegrafia das
+magias, ausência de XP/drop e desaparecimento com o dono usam as regras existentes. Limitar a população
+inicial das regiões para reservar capacidade de NPCs. Atenção aumenta só durante combate recente no exterior.
+
+Persistir mortes confirmadas por personagem/dungeon, restaurando a assistência na bolsa privada ao entrar.
+Preço de retorno reduzido depois de cinco mortes, zero depois de dez; referência de resgate impede revenda
+e anúncio lucrativo das pedras gratuitas. Capacidade de pilhas considera a referência para não exceder a mochila.
+Ofertas externas usam janelas em ticks e hash separado do RNG de combate; compra confere expiração no servidor.
+Dungeons oferecem estoque superior permanente e lojas geradas admitem até 64 itens, mantendo baús no limite
+existente. Detalhes e necessidade de avaliação com pessoas em `docs/EXPANSAO-ECLIPSE.md`.

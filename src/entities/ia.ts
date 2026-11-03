@@ -19,6 +19,7 @@ import { ordemRotativa } from '../world/colisao';
 import { passavel } from '../world/fase';
 import { celulaLivre, pararMovimento, planejarCaminho, VETOR_DIR } from '../world/movimento';
 import { emPasso, vivo, type Entidade, type EstadoIa, type ModoIa } from './entidade';
+import { processarExercitoNecromante, raioDeAtencao } from './ia-mundo';
 import { processarInvocacao } from './ia-invocacao';
 import { alvoMaisFerido, celulaDeCerco, destinoDeCura, fugaDoAviso, perigoDoCaminho } from './ia-tatica';
 import { emPerigo, naAreaAfim } from '../world/perigos';
@@ -120,10 +121,11 @@ export function processarIa(estado: EstadoJogo, ctx: ContextoSimulacao, saida: E
     e.ia ??= criarEstadoIa(estado, e, ctx.balance.ia);
     const ia = e.ia;
     // Marco 10A-3: invocações e dominados têm IA própria (§2.9).
-    if (e.invocacao) {
+    if (e.invocacao && !e.invocacao.exercitoBoss) {
       processarInvocacao(estado, ctx, e, ia, preset, saida);
       continue;
     }
+    processarExercitoNecromante(estado,ctx,e,saida);
     revidar(estado, ctx, e, ia, saida);
     if (reagirAoEstado(estado, ctx, e, ia, saida)) continue;
     switch (ia.modo) {
@@ -217,7 +219,7 @@ function tentarDetectar(
   preset: PresetInimigo,
   saida: EventoSimulacao[],
 ): boolean {
-  const alvo = detectar(estado, ctx, e, preset.deteccao);
+  const alvo = detectar(estado, ctx, e, raioDeAtencao(estado,ctx,e,preset.deteccao));
   if (!alvo) return false;
   pararMovimento(e);
   if (ia.detectados.includes(alvo.id)) {
@@ -250,7 +252,7 @@ function hesitar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: Es
     comecarPerseguicao(estado, ctx, e, ia, alvo.id, saida);
     return;
   }
-  if (manhattan(celulaOcupada(e), celulaOcupada(alvo)) > preset.deteccao) {
+  if (manhattan(celulaOcupada(e), celulaOcupada(alvo)) > raioDeAtencao(estado,ctx,e,preset.deteccao)) {
     ia.foraDaZonaTicks++;
     ia.hesitacaoAteTick++;
     if (ia.foraDaZonaTicks >= ticksDe(ctx.balance.ia.gracaForaDaZonaMs)) {
