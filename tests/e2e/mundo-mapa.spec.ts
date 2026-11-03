@@ -10,6 +10,7 @@ test('expande pelo minimapa, marca lugares e pontos e apaga a faixa em cinco seg
   await page.locator('#mundo-nome-1').locator('..').getByRole('button', { name: 'Começar' }).click();
   const mini = page.locator('.minimapa');
   await expect(mini).toBeVisible({ timeout: 30000 });
+  await expect(page.locator('.faixa-lugar')).toBeAttached({ timeout: 30000 });
   await page.clock.fastForward(5100);
   await expect(page.locator('.faixa-lugar')).toHaveCSS('opacity', '0');
   await mini.click();
