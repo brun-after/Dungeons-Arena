@@ -18,8 +18,18 @@ D-129 ([DECISOES.md](DECISOES.md)); aqui fica como jogar, como rodar e onde mexe
 
 ## Para jogar
 
-- Menu **Mundo** (ou `?jogo=mundo`). É preciso entrar com a conta Google. Cada conta tem 3 personagens, e todo
+- Menu **Mundo** (ou `?jogo=mundo`). É preciso entrar com a conta Google. Cada conta tem até 5 personagens, e todo
   personagem novo começa no nível 1, na Vila do Centro.
+- **Gerenciar personagens:** na seleção, **Excluir** pede o nome exato antes de apagar permanentemente o
+  personagem, incluindo mochila, equipamento, progresso e banco. É preciso sair do jogo e resolver os anúncios
+  e recebimentos do mercado antes. O espaço fica livre para criar outro personagem.
+- **Orientação:** mapa e minimapa seguem a projeção isométrica do cenário: norte ↗, leste ↘, sul ↙, oeste ↖.
+  O mapa ampliado tem cartografia do terreno, atlas vetorial e zoom até 4× com rolagem para ler os detalhes no celular.
+  Marcar um ponto ou um lugar ativa um guia com seta e distância em células, visível com o mapa fechado.
+  Para outra região, a seta aponta à próxima passagem; para outra dungeon, à porta da estrutura; entre reinos,
+  o guia pede o portal. A linha dourada indica o rumo direto: é preciso contornar os obstáculos do terreno.
+  O destino segue ativo nas trocas de sala e pode ser cancelado pelo **×**. As estrelas e os destaques ficam
+  guardados neste aparelho; o destino ativo dura a sessão de jogo.
 - **Vilas:** a pedra de save (salva a vila: ao sair ou morrer, você volta para ela), a pedra de portal, o mercador, o
   ferreiro, o alquimista, o banco, o mercado e o quadro de missões. Os monstros não passam dos muros nem acertam
   quem está dentro deles.

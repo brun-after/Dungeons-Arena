@@ -9,6 +9,7 @@ import type { Entidade } from '../entities/entidade';
 import { relacao } from '../modos/relacao';
 import { t } from '../i18n';
 import { tipoEm, type Fase } from '../world/fase';
+import { cartografia, rosaDosVentos } from './cartografia';
 
 // Marco 29 (D-128): o exterior do Mundo (mato, estrada, água e fachadas).
 const COR_TERRENO: Readonly<Record<string, string>> = { piso: '#3a3546', saida: '#c98a1a', parede: '#15131b', mato: '#3d5a2e', estrada: '#7a6448', agua: '#2b5f86', fachada: '#5a4a3c' };
@@ -35,7 +36,7 @@ function terrenoEmCanvas(fase: Fase): HTMLCanvasElement {
   return c;
 }
 
-export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: boolean): Minimapa {
+export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: boolean, destino?: () => { x: number; y: number } | null): Minimapa {
   const lado = toque ? 90 : 120;
   const intervalo = toque ? 333 : 100;
   const canvas = document.createElement('canvas');
@@ -46,19 +47,22 @@ export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: bo
   canvas.setAttribute('role', 'img');
   const g = canvas.getContext('2d');
   const fase = ctx.fase;
+  const mundo = ctx.modo.id === 'mundo';
+  canvas.classList.toggle('minimapa-mundo', mundo);
+  const mapa = cartografia(fase.largura, fase.altura, lado, lado, 7);
   const fundo = terrenoEmCanvas(fase);
   const escala = Math.min(lado / fase.largura, lado / fase.altura);
   const ox = (lado - fase.largura * escala) / 2;
   const oy = (lado - fase.altura * escala) / 2;
-  const px = (cx: number) => ox + (cx + 0.5) * escala;
-  const py = (cy: number) => oy + (cy + 0.5) * escala;
+  const px = (cx: number, cy: number) => mundo ? mapa.ponto(cx, cy).x : ox + (cx + 0.5) * escala;
+  const py = (cy: number, cx: number) => mundo ? mapa.ponto(cx, cy).y : oy + (cy + 0.5) * escala;
   let ultimo = -Infinity;
 
   const ponto = (x: number, y: number, r: number, cor: string) => {
     if (!g) return;
     g.fillStyle = cor;
     g.beginPath();
-    g.arc(px(x), py(y), r, 0, Math.PI * 2);
+    g.arc(px(x, y), py(y, x), r, 0, Math.PI * 2);
     g.fill();
   };
 
@@ -84,7 +88,14 @@ export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: bo
       ultimo = agoraMs;
       g.clearRect(0, 0, lado, lado);
       g.imageSmoothingEnabled = false;
-      g.drawImage(fundo, ox, oy, fase.largura * escala, fase.altura * escala);
+      if (mundo) {
+        g.save();
+        const m = mapa.matriz;
+        g.transform(m.a, m.b, m.c, m.d, m.e, m.f);
+        g.drawImage(fundo, 0, 0);
+        g.restore();
+        rosaDosVentos(g, lado / 2, 14, 12);
+      } else g.drawImage(fundo, ox, oy, fase.largura * escala, fase.altura * escala);
       // Portas e saída: pontos fixos, para a orientação.
       const volta = fase.portaRetorno;
       if (volta) ponto(volta.x, volta.y, 2.5, '#65d7ee');
@@ -93,6 +104,12 @@ export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: bo
         ponto(p.b.x, p.b.y, 1.5, '#bb8fce');
       }
       const eu = estado.entidades.find((e) => e.id === idLocal);
+      const alvo = destino?.();
+      if (alvo && eu) {
+        g.strokeStyle = '#ffdc73'; g.lineWidth = 1.5; g.setLineDash([3, 3]);
+        g.beginPath(); g.moveTo(px(eu.x, eu.y), py(eu.y, eu.x)); g.lineTo(px(alvo.x, alvo.y), py(alvo.y, alvo.x)); g.stroke();
+        g.setLineDash([]); ponto(alvo.x, alvo.y, 3, '#ffdc73');
+      }
       // Marco 22 (D-089): baús ainda fechados e as armadilhas que você já revelou.
       for (const o of estado.objetos) if (o.tipo === 'bau' && o.abertoTick === 0) ponto(o.x, o.y, 2, '#d4a017');
       for (const a of estado.armadilhas) if (a.reveladaPara.includes(idLocal)) ponto(a.x, a.y, 1.5, '#e67e22');

@@ -72,6 +72,36 @@ export class CoordenadorDoMundo {
   /** Personagem -> o texto da última ficha gravada (só enquanto está online). */
   private readonly gravadas = new Map<string, string>();
   private readonly gravacoesPendentes = new Map<string, Promise<void>>();
+  private readonly operacoes = new Map<string, Promise<unknown>>();
+
+  /** Entrada e exclusão do mesmo slot não podem atravessar uma à outra durante I/O. */
+  async noSlot<T>(conta: string, slot: number, fazer: () => Promise<T>): Promise<T> {
+    const chave = `${conta}#${String(slot)}`;
+    const anterior = this.operacoes.get(chave) ?? Promise.resolve();
+    const atual = anterior.catch(() => {}).then(fazer);
+    this.operacoes.set(chave, atual);
+    try { return await atual; }
+    finally { if (this.operacoes.get(chave) === atual) this.operacoes.delete(chave); }
+  }
+
+  slotDoBilhete(id: string): number | undefined { return this.bilhetes.get(id)?.slot; }
+
+  async excluir(conta: string, slot: number, nome: string): Promise<string | null> {
+    return this.noSlot(conta, slot, async () => {
+      const identidade = `${conta}#${String(slot)}`;
+      if (this.online.has(identidade) || this.emTroca(identidade)) return 'ja_jogando';
+      const ficha = await this.carregar(conta, slot);
+      if (!ficha) return 'sem_personagem';
+      if (ficha.personagem.nome !== nome) return 'nome_diferente';
+      // O mercado identifica o vendedor pelo slot. Evita herdar anúncios de um personagem apagado.
+      if ((await this.mercado.doVendedor(identidade)).length) return 'mercado_pendente';
+      await this.persistencia.excluir(conta, slot);
+      this.gravadas.delete(identidade);
+      this.cancelarBilhetesDe(identidade);
+      this.saiuDoJogo(identidade);
+      return null;
+    });
+  }
   /** Personagem -> o lugar onde está (para o grupo) e o perfil (o convite pelo nome). */
   private readonly lugares = new Map<string, string>();
   private readonly perfis = new Map<string, Perfil>();
@@ -146,14 +176,17 @@ export class CoordenadorDoMundo {
   async concluirMercadoDe(identidade: string, r: ResultadoDoMercado): Promise<void> {
     if (this.salaDe(identidade)?.concluirMercado(identidade, r)) return;
     const { conta, slot } = separar(identidade);
-    const ficha = await this.persistencia.carregar(conta, slot);
-    if (!ficha) {
-      registrarLog('mundo_mercado_entrega_perdida', { itens: r.itens.length, ouro: r.ouro + r.ouroNoBanco });
-      return;
-    }
-    depositarNoBanco(ficha.banco, r.itens, r.ouro + r.ouroNoBanco);
-    await this.persistencia.gravar(conta, slot, ficha);
-    this.gravadas.delete(identidade);
+    await this.noSlot(conta, slot, async () => {
+      if (this.salaDe(identidade)?.concluirMercado(identidade, r)) return;
+      const ficha = await this.carregar(conta, slot);
+      if (!ficha) {
+        registrarLog('mundo_mercado_entrega_perdida', { itens: r.itens.length, ouro: r.ouro + r.ouroNoBanco });
+        return;
+      }
+      depositarNoBanco(ficha.banco, r.itens, r.ouro + r.ouroNoBanco);
+      await this.persistencia.gravar(conta, slot, ficha);
+      this.gravadas.delete(identidade);
+    });
   }
 
   /** Saiu do jogo de vez (não é troca de sala): sai do grupo, e os outros ficam sabendo. */
@@ -363,21 +396,25 @@ export class SalaMundoColyseus extends SalaColyseusBase {
     const auth = client.auth as { conta?: unknown } | undefined;
     const conta = typeof auth?.conta === 'string' ? auth.conta : null;
     if (!conta) throw new ServerError(401, 'sem_conta');
-    const entrada = await this.prepararEntrada(conta, o);
-    const identidade = `${conta}#${String(entrada.slot)}`;
-    if (!this.coordenador.entrar(identidade, this.roomId, client.sessionId)) {
-      // A página recarregada: a sessão velha caiu e ainda está na reserva; a entrada nova fica com a ficha dela.
-      const ficha = this.coordenador.liberarCaida(identidade);
-      if (!ficha || !this.coordenador.entrar(identidade, this.roomId, client.sessionId)) throw new ServerError(409, 'ja_jogando');
-      if (entrada.chegada === null) entrada.ficha = ficha;
-    }
-    // Uma entrada pelo menu substitui qualquer transferência abandonada.
-    if (typeof o.bilhete !== 'string') this.coordenador.cancelarBilhetesDe(identidade);
-    this.mundo.reservar(identidade, entrada.ficha, entrada.chegada, this.coordenador.grupos.grupoDe(identidade)?.id ?? null);
-    this.coordenador.registrarPerfil(identidade, entrada.ficha, this.mundo.idLugar);
-    this.identidades.set(client.sessionId, identidade);
-    void super.onJoin(client);
-    registrarLog('mundo_entrada', { lugar: this.mundo.idLugar, canal: this.canal });
+    const slot = typeof o.bilhete === 'string' ? this.coordenador.slotDoBilhete(o.bilhete) : o.slot;
+    if (!slotValido(slot)) throw new ServerError(400, typeof o.bilhete === 'string' ? 'bilhete_invalido' : 'slot_invalido');
+    await this.coordenador.noSlot(conta, slot, async () => {
+      const entrada = await this.prepararEntrada(conta, o);
+      const identidade = `${conta}#${String(entrada.slot)}`;
+      if (!this.coordenador.entrar(identidade, this.roomId, client.sessionId)) {
+        // A página recarregada: a sessão velha caiu e ainda está na reserva; a entrada nova fica com a ficha dela.
+        const ficha = this.coordenador.liberarCaida(identidade);
+        if (!ficha || !this.coordenador.entrar(identidade, this.roomId, client.sessionId)) throw new ServerError(409, 'ja_jogando');
+        if (entrada.chegada === null) entrada.ficha = ficha;
+      }
+      // Uma entrada pelo menu substitui qualquer transferência abandonada.
+      if (typeof o.bilhete !== 'string') this.coordenador.cancelarBilhetesDe(identidade);
+      this.mundo.reservar(identidade, entrada.ficha, entrada.chegada, this.coordenador.grupos.grupoDe(identidade)?.id ?? null);
+      this.coordenador.registrarPerfil(identidade, entrada.ficha, this.mundo.idLugar);
+      this.identidades.set(client.sessionId, identidade);
+      void super.onJoin(client);
+      registrarLog('mundo_entrada', { lugar: this.mundo.idLugar, canal: this.canal });
+    });
   }
 
   override onLeave(client: Client): void {
