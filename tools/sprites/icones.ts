@@ -3,7 +3,7 @@
 // jogo prende o punho (a origem do modelo) na mão medida em cada quadro e gira a arma para o eixo dela.
 
 import * as THREE from 'three';
-import { ARMAS_3D, ESCALA_DO_GRAU, Kit } from './armas3d';
+import { ARMAS_3D, ESCALA_DO_GRAU, Kit, TOMOS_FECHADOS } from './armas3d';
 import { posProcessar } from './pos';
 
 /** A cor de destaque de cada grau: a da raridade (objetos.ts COR_RARIDADE). */
@@ -21,8 +21,9 @@ export interface SaidaArma {
 }
 
 function montar(nome: string, grau: number): THREE.Group {
-  const k = new Kit(grau, ACENTOS[grau] ?? 0x888888);
-  ARMAS_3D[nome]?.(k);
+  const aberto = TOMOS_FECHADOS.get(nome);
+  const k = new Kit(grau, ACENTOS[grau] ?? 0x888888, aberto !== undefined);
+  ARMAS_3D[aberto ?? nome]?.(k);
   const g = k.g;
   g.scale.setScalar(ESCALA_DO_GRAU[grau] ?? 1);
   // Um pouco de lado e de cima: o volume aparece sem perder a silhueta.

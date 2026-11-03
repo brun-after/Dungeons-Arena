@@ -8,6 +8,7 @@
 import { Assets, Rectangle, Texture } from 'pixi.js';
 import CATALOGO from '../assets/personagens/catalogo.json';
 import CATALOGO_ARMAS from '../assets/personagens/armas/catalogo.json';
+import { TOMOS, tomoFechado } from './equipamento-3d';
 import { CELULA_PX } from './camera-calculo';
 import { SEM_PASSO, type EstadoPersonagem } from './quadros-personagem';
 
@@ -102,7 +103,7 @@ export class AtlasDePersonagens {
         const url = await urlDoAtlas(n);
         if (url) this.bases.set(n, await Assets.load<Texture>(url));
       }),
-      ...[...new Set(armas)].map(async n => {
+      ...[...new Set(armas.flatMap(n => TOMOS.has(n) ? [n, tomoFechado(n)] : [n]))].map(async n => {
         const a = armaDe(n);
         if (a) this.bases.set(`arma:${n}`, await Assets.load<Texture>(await a.url));
       }),

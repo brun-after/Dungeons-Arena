@@ -256,5 +256,53 @@
     "celA": 58,
     "pegaX": 27,
     "pegaY": 21
+  },
+  "tomo-fechado": {
+    "celL": 29,
+    "celA": 35,
+    "pegaX": 14,
+    "pegaY": 7
+  },
+  "codice-fechado": {
+    "celL": 29,
+    "celA": 35,
+    "pegaX": 14,
+    "pegaY": 7
+  },
+  "mares-fechado": {
+    "celL": 29,
+    "celA": 35,
+    "pegaX": 14,
+    "pegaY": 7
+  },
+  "estelar-fechado": {
+    "celL": 29,
+    "celA": 35,
+    "pegaX": 14,
+    "pegaY": 7
+  },
+  "prisma-fechado": {
+    "celL": 29,
+    "celA": 35,
+    "pegaX": 14,
+    "pegaY": 7
+  },
+  "espelhos-fechado": {
+    "celL": 29,
+    "celA": 35,
+    "pegaX": 14,
+    "pegaY": 7
+  },
+  "orbital-fechado": {
+    "celL": 29,
+    "celA": 35,
+    "pegaX": 14,
+    "pegaY": 7
+  },
+  "vazio-fechado": {
+    "celL": 29,
+    "celA": 35,
+    "pegaX": 14,
+    "pegaY": 7
   }
 }

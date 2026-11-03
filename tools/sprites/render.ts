@@ -11,7 +11,7 @@ import { chromium } from '@playwright/test';
 import { build } from 'esbuild';
 import { RECEITAS, VARIANTES, type Receita } from './receitas';
 import type { PedidoDeCamada, SaidaAtlas } from './pagina';
-import { ARMAS_3D } from './armas3d';
+import { ARMAS_3D, TOMOS_FECHADOS } from './armas3d';
 import { GRAUS, nomeDaCamada, PECAS_DE_ARMADURA } from '../../src/render/equipamento-3d';
 
 const RAIZ = join(import.meta.dirname, '..', '..');
@@ -168,7 +168,7 @@ const caminhoCatalogo = join(DESTINO, 'catalogo.json');
 type Entrada = Omit<SaidaAtlas, 'png' | 'camadas' | 'maos'> & { altura: number; maos?: SaidaAtlas['maos'] };
 
 if (comArmas) {
-  const nomes = Object.keys(ARMAS_3D);
+  const nomes = [...Object.keys(ARMAS_3D), ...TOMOS_FECHADOS.keys()];
   for (const [pastaArmas, px] of [[join(DESTINO, 'armas'), 72], [join(RAIZ, 'src/assets/retratos/armas'), 288]] as const) {
     mkdirSync(pastaArmas, { recursive: true });
     const cat: Record<string, { celL: number; celA: number; pegaX: number; pegaY: number }> = {};

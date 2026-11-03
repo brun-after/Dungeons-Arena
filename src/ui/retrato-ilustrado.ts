@@ -1,6 +1,6 @@
 import arteUrl from '../assets/retratos/classes-manga.png?url';
 import type { AparenciaEquipada } from '../entities/entidade';
-import { grauDe, modeloDaArma3d, SEM_GIRO } from '../render/equipamento-3d';
+import { grauDe, modeloDaArma3d, SEM_GIRO, TOMOS, tomoFechado } from '../render/equipamento-3d';
 import { ARMA_DE_CLASSE } from '../render/modelos';
 import catalogo from '../assets/retratos/armas/catalogo.json';
 
@@ -26,7 +26,9 @@ function metal(raridade: string | null | undefined, forma?: string | null): stri
 
 async function arma(ctx: CanvasRenderingContext2D, modelo: string | null, x: number, raridade: string | null | undefined, forma?: string | null): Promise<void> {
   if (!modelo) return;
-  const id = modeloDaArma3d(modelo, nome => Object.hasOwn(catalogo, nome));
+  const equipado = modeloDaArma3d(modelo, nome => Object.hasOwn(catalogo, nome));
+  const livro = TOMOS.has(equipado);
+  const id = livro ? tomoFechado(equipado) : equipado;
   const medidas = catalogo[id as keyof typeof catalogo];
   const url = armas[`../assets/retratos/armas/${id}.webp`];
   if (!url) return;
@@ -36,8 +38,8 @@ async function arma(ctx: CanvasRenderingContext2D, modelo: string | null, x: num
   const escala = 0.81;
   const { celL, celA, pegaX, pegaY } = medidas;
   ctx.save();
-  ctx.translate(MARGEM + x, 402);
-  if (!SEM_GIRO.has(id)) ctx.rotate((x < 200 ? -1 : 1) * Math.PI / 16);
+  ctx.translate(MARGEM + (livro ? (x < 200 ? 138 : 257) : x), livro ? 304 : 402);
+  if (livro || !SEM_GIRO.has(equipado)) ctx.rotate((x < 200 ? -1 : 1) * Math.PI / 16);
   ctx.drawImage(img, grauDe(raridade, forma) * celL, 0, celL, celA, -pegaX * escala, -pegaY * escala, celL * escala, celA * escala);
   ctx.restore();
 }

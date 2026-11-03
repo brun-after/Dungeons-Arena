@@ -5,6 +5,7 @@
 // arma para +y, a face larga para +z (para a câmera).
 
 import * as THREE from 'three';
+import { TOMOS, tomoFechado } from '../../src/render/equipamento-3d';
 
 /** Quanto a arma cresce por grau (0 = comum … 5 = última). */
 export const ESCALA_DO_GRAU = [1, 1.05, 1.12, 1.2, 1.3, 1.42] as const;
@@ -25,6 +26,7 @@ export class Kit {
   constructor(
     readonly n: number,
     readonly acento: number,
+    readonly fechado = false,
   ) {}
 
   mat(cor: number, o: Partial<THREE.MeshStandardMaterialParameters> = {}): THREE.MeshStandardMaterial {
@@ -202,6 +204,19 @@ function arcoDe(k: Kit, alto: number, curva: number, cor: number, pontas = false
 }
 
 function livroDe(k: Kit, capa: number, simbolo: number): void {
+  if (k.fechado) {
+    const couro = k.mat(capa, { roughness: 0.89 });
+    const papel = k.mat(0xb6a081, { roughness: 0.95 });
+    k.caixa(0.18, 0.235, 0.048, papel, 0, -0.107);
+    for (const z of [-0.03, 0.03]) k.caixa(0.203, 0.252, 0.014, couro, 0, -0.107, z);
+    k.caixa(0.03, 0.25, 0.07, couro, -0.09, -0.107);
+    for (const y of [-0.16, -0.062]) {
+      k.caixa(0.203, 0.019, 0.076, k.mat(0x39291f), 0, y);
+      k.caixa(0.033, 0.022, 0.081, k.enfeite(), 0.065, y);
+    }
+    k.perfil([[0, -0.08], [0.027, -0.11], [0, -0.14], [-0.027, -0.11]], 0.004, k.mat(simbolo), 0.04);
+    return;
+  }
   // O livro abre sobre a mão e mostra a espessura do papel nas bordas.
   const l = 0.15;
   const a = 0.2;
@@ -347,24 +362,29 @@ export const ARMAS_3D: Readonly<Record<string, Construtor>> = {
   tomo: (k) => { livroDe(k, 0x5b2c6f, 0x9b8cff); },
   codice: (k) => {
     livroDe(k, 0x784212, 0xf39c12);
+    if (k.fechado) return;
     k.caixa(0.26, 0.012, 0.02, k.mat(OURO, { metalness: 0.5 }), 0, 0.17, -0.01);
   },
   mares: (k) => { livroDe(k, 0x1f618d, 0x5dade2); },
   estelar: (k) => {
     livroDe(k, 0x1b2631, 0xf7dc6f);
+    if (k.fechado) return;
     k.bola(0.012, k.brilho(0xf7dc6f, 1), 0.08, 0.2, 0.03);
   },
   prisma: (k) => {
     livroDe(k, 0x6c3483, 0xbb8fce);
+    if (k.fechado) return;
     k.add(new THREE.Mesh(new THREE.OctahedronGeometry(0.03), k.brilho(0xebdef0, 0.7)), 0, 0.23, 0.03).scale.y = 1.6;
   },
   espelhos: (k) => { livroDe(k, 0xaab7b8, 0xf5eef8); },
   orbital: (k) => {
     livroDe(k, 0x21618c, 0x85c1e9);
+    if (k.fechado) return;
     k.curva(0.07, Math.PI * 2, 0.004, k.brilho(0x85c1e9, 0.7), 0, 0.085, 0, 1).rotation.x = 1.1;
   },
   vazio: (k) => {
     livroDe(k, 0x17202a, 0x5b2c6f);
+    if (k.fechado) return;
     k.bola(0.035, k.mat(0x0d0b12, { roughness: 0.1 }), 0, 0.085, 0.035);
   },
   // --- Cajados do Necromante
@@ -482,3 +502,5 @@ export const ARMAS_3D: Readonly<Record<string, Construtor>> = {
     k.cristais(0, 0, r + 0.06);
   },
 };
+
+export const TOMOS_FECHADOS = new Map([...TOMOS].map(nome => [tomoFechado(nome), nome]));
