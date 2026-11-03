@@ -123,6 +123,7 @@ export class ClienteArena {
     const pacote: ComandoEmpacotado = { sessaoId: this.sessaoId, epocaSala: this.epoca, seq: ++this.seq, tickCliente: this.tickLocal, cmd };
     this.pendentes.push(pacote);
     if (cmd.t === 'mover') this.direcaoMantida = cmd.dir === 'parado' ? null : cmd;
+    else if (cmd.t === 'irPara') this.direcaoMantida = null;
     this.o.transporte.enviar(JSON.stringify({ t: 'cmd', pacote }));
   }
 

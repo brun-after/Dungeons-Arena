@@ -67,6 +67,7 @@ export interface Sessao {
 }
 
 interface ComandoAgendado {
+  seq?: number;
   tickAplicacao: number;
   ordem: number;
   sessaoId: string;
@@ -275,7 +276,7 @@ export class SalaArena {
         }
         sessao.fichas -= 1;
         const tick = Math.min(this.estado.tick + MAX_ADIANTAMENTO_TICKS, Math.max(this.estado.tick, p.tickCliente));
-        this.agendar(sessao, p.cmd, tick);
+        this.agendar(sessao, p.cmd, tick, p.seq);
         return null;
       }
     }
@@ -508,13 +509,22 @@ export class SalaArena {
     s.ultimaRecargaTick = this.estado.tick;
   }
 
-  private agendar(s: Sessao, cmd: Comando, tickAplicacao: number): void {
-    this.agenda.push({ tickAplicacao, ordem: this.ordemChegada++, sessaoId: s.sessaoId, entidadeId: s.entidadeId, cmd });
+  private agendar(s: Sessao, cmd: Comando, tickAplicacao: number, seq?: number): void {
+    this.agenda.push({ ...(seq !== undefined ? { seq } : {}), tickAplicacao, ordem: this.ordemChegada++, sessaoId: s.sessaoId, entidadeId: s.entidadeId, cmd });
     s.naFila++;
     if (cmd.t === 'mover') {
       s.direcao = cmd.dir;
       s.ultimoMoverTick = tickAplicacao;
     }
+  }
+
+  /** Confirma só o prefixo já resolvido: receber não significa executar um comando futuro. */
+  private ackSeq(s: Sessao): number {
+    let ack = s.ultimoSeq;
+    for (const c of this.agenda) {
+      if (c.sessaoId === s.sessaoId && c.seq !== undefined) ack = Math.min(ack, c.seq - 1);
+    }
+    return ack;
   }
 
   /** Um tick de 60 Hz: comandos vencidos -> simulação -> eventos; estado público a 20 Hz. */
@@ -560,7 +570,7 @@ export class SalaArena {
     let textoEstado: string | null = null;
     for (const s of this.sessoes.values()) {
       if (!s.conectada) continue;
-      const cabecalho = `"tick":${tick},"epocaSala":${this.epoca},"ackSeq":${s.ultimoSeq}`;
+      const cabecalho = `"tick":${tick},"epocaSala":${this.epoca},"ackSeq":${this.ackSeq(s)}`;
       if (s.precisaCompleto) {
         textoEstado ??= JSON.stringify(publico);
         s.enviar(`{"t":"estado",${cabecalho},"estado":${textoEstado}}`);
@@ -585,7 +595,7 @@ export class SalaArena {
     for (const s of this.sessoes.values()) {
       if (!s.conectada) continue;
       const visao = this.visaoDe(s, publico);
-      const cabecalho = `"tick":${tick},"epocaSala":${this.epoca},"ackSeq":${s.ultimoSeq}`;
+      const cabecalho = `"tick":${tick},"epocaSala":${this.epoca},"ackSeq":${this.ackSeq(s)}`;
       let gerador = this.patchesPorSessao.get(s.sessaoId);
       if (s.precisaCompleto || !gerador) {
         gerador = new GeradorDePatches();
