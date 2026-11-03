@@ -146,8 +146,19 @@ function lamina(k: Kit, y0: number, compr: number, larg: number, cor = ACO, curv
     [curva, y0 + compr],
     [-l + curva * 0.6, y0 + compr * 0.82],
   ];
-  k.perfil(pts, 0.016, k.aco(cor));
-  k.runas(y0 + compr * 0.1, y0 + compr * 0.75, 0.016, curva * 0.3);
+  k.perfil(pts, 0.006, k.mat(cor, { metalness: 0.35, roughness: 0.46 }));
+  // O fio claro aparece nas duas faces, ao redor do corpo escuro da lâmina.
+  const alma: P[] = [
+    [-l * 0.63, y0], [l * 0.63, y0],
+    [l * 0.6 + curva * 0.6, y0 + compr * 0.82],
+    [curva * 0.91, y0 + compr * 0.95],
+    [-l * 0.6 + curva * 0.6, y0 + compr * 0.82],
+  ];
+  k.perfil(alma, 0.015, k.mat(k.n >= 5 ? 0x302b38 : 0x55535a, { metalness: 0.34, roughness: 0.58 }));
+  for (const lado of [-1, 1]) {
+    k.caixa(larg * 0.11, compr * 0.64, 0.001, k.mat(0x39353a), curva * 0.24, y0 + compr * 0.35, lado * 0.009, -curva / compr * 0.75);
+  }
+  k.runas(y0 + compr * 0.1, y0 + compr * 0.75, 0.011, curva * 0.3);
 }
 
 function espadaComum(k: Kit, compr: number, larg: number, guarda: number, cor = ACO): void {
@@ -191,26 +202,29 @@ function arcoDe(k: Kit, alto: number, curva: number, cor: number, pontas = false
 }
 
 function livroDe(k: Kit, capa: number, simbolo: number): void {
-  // Aberto na mão, de frente: as duas capas um pouco dobradas, as páginas e o símbolo aceso no meio.
+  // O livro abre sobre a mão e mostra a espessura do papel nas bordas.
   const l = 0.15;
   const a = 0.2;
   for (const s of [-1, 1]) {
     const c = k.caixa(l, a, 0.02, k.mat(capa, { roughness: 0.7 }), (s * l) / 2, a / 2, -0.012);
     c.rotation.y = -s * 0.55;
-    const pag = k.caixa(l * 0.7, a * 0.78, 0.016, k.mat(0xcfc2a2, { roughness: 0.9 }), (s * l) / 2.4, a / 2, 0.006);
+    const pag = k.caixa(l * 0.76, a * 0.83, 0.029, k.mat(0xad9979, { roughness: 0.94 }), (s * l) / 2.4, a / 2, 0.006);
     pag.rotation.y = -s * 0.55;
     const tinta = k.mat(0x564138, { roughness: 0.9 });
     for (let linha = 0; linha < 6; linha++) {
       const letra = k.caixa(l * (linha % 3 === 1 ? 0.36 : 0.48), 0.0025, 0.002, tinta,
-        s * l / 2.4, a * 0.76 - linha * 0.018, 0.017);
+        s * l / 2.4, a * 0.76 - linha * 0.018, 0.023);
       letra.rotation.y = -s * 0.55;
     }
     if (k.n >= 3) k.caixa(0.014, a * 1.02, 0.024, k.enfeite(), s * l * 0.92, a / 2, -0.02);
   }
   k.caixa(0.03, a, 0.03, k.mat(capa, { roughness: 0.7 }), 0, a / 2, -0.03);
-  k.bola(0.02 + 0.004 * k.n, k.brilho(simbolo, 0.6 + 0.2 * k.n), 0, a / 2, 0.03);
-  if (k.n >= 2) k.curva(0.04 + 0.006 * k.n, Math.PI * 2, 0.004, k.brilho(simbolo, 0.8), 0, a / 2, 0);
-  k.cristais(0, a * 0.9, 0.16);
+  const fita = k.caixa(0.014, a * 0.66, 0.002, k.mat(simbolo, { roughness: 0.95 }), 0.015, a * 0.21, 0.026);
+  fita.rotation.z = -0.16;
+  const aberto = new THREE.Group();
+  aberto.add(...k.g.children);
+  aberto.rotation.set(-0.43, 0.2, -0.12);
+  k.g.add(aberto);
 }
 
 function cajadoDe(k: Kit, cor: number, cabeca: (y: number) => void, alto = 1.0): void {
@@ -427,7 +441,7 @@ export const ARMAS_3D: Readonly<Record<string, Construtor>> = {
   // --- A mão secundária
   escudo: (k) => {
     const r = 0.17 + 0.012 * k.n;
-    const madeira = k.mat(0x8a6a4a, { roughness: 0.8 });
+    const madeira = k.mat(0x593625, { roughness: 0.94 });
     if (k.n >= 2) {
       // Do raro em diante, o escudo em gota de aço com a borda e o emblema.
       const pts: P[] = [];
@@ -437,18 +451,29 @@ export const ARMAS_3D: Readonly<Record<string, Construtor>> = {
       }
       pts.push([0, -r * 1.3]);
       const menor = (escala: number): P[] => pts.map(([x, y]) => [x * escala, y * escala]);
-      k.perfil(pts, 0.029, k.aco(0x697782));
-      k.perfil(menor(0.92), 0.019, k.enfeite(), 0.016);
-      k.perfil(menor(0.82), 0.018, k.aco(0x435460), 0.027);
+      k.perfil(pts, 0.029, k.mat(0x5d534a, { roughness: 0.63, metalness: 0.35 }));
+      const face = menor(0.87);
+      k.perfil(face, 0.014, k.mat(k.n >= 4 ? 0x66302a : 0x3d4140, { roughness: 0.89 }), 0.016);
+      k.perfil(face, 0.012, madeira, -0.016);
+      const veio = k.mat(0x29201d, { roughness: 0.95 });
+      for (const passo of [-3, -2, -1, 1, 2, 3]) {
+        const x = passo * r * 0.2;
+        const baixo = -r * (1.03 - Math.abs(passo) * 0.23);
+        const alto = r * (0.49 - Math.abs(passo) * 0.04);
+        for (const z of [-0.023, 0.025]) k.caixa(r * 0.018, alto - baixo, 0.001, veio, x, (alto + baixo) / 2, z);
+      }
+      const couro = k.mat(0x332019, { roughness: 0.95 });
+      for (const x of [-0.24, 0.24]) {
+        k.caixa(r * 0.18, r * 0.81, r * 0.08, couro, x * r, -r * 0.11, -0.035, x * 0.3);
+        k.caixa(r * 0.22, r * 0.13, r * 0.07, k.enfeite(), x * r, -r * 0.34, -0.044);
+      }
       const insigne: P[] = [[0, r * 0.33], [r * 0.32, 0], [0, -r * 0.58], [-r * 0.32, 0]];
-      k.perfil(insigne, 0.012, k.enfeite(), 0.038);
-      k.perfil(insigne.map(([x, y]) => [x * 0.62, y * 0.72]), 0.008, k.mat(k.acento, { roughness: 0.45 }), 0.047);
+      k.perfil(insigne, 0.004, k.mat(0x886342, { roughness: 0.83 }), 0.026);
       for (const lado of [-1, 1]) {
         for (const [x, y] of [[0.76, 0.21], [0.56, -0.25], [0.33, -0.65]] as const) {
-          k.bola(r * 0.04, k.enfeite(), lado * x * r, y * r, 0.038, 0);
+          k.bola(r * 0.04, k.enfeite(), lado * x * r, y * r, 0.024, 0);
         }
       }
-      k.espinhos(0, 0, r * 0.95, 5);
     } else {
       k.add(new THREE.Mesh(new THREE.CylinderGeometry(r, r, 0.03, 20), madeira), 0, 0).rotation.x = Math.PI / 2;
       k.bola(0.035, k.enfeite(), 0, 0, 0.02, 0);

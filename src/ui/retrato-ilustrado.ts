@@ -8,7 +8,7 @@ const CLASSES = ['aventureiro', 'guerreiro', 'mago', 'arqueiro', 'necromante'] a
 const MAOS = [[85, 316], [77, 327], [82, 315], [98, 295], [84, 310]] as const;
 const armas = import.meta.glob<string>('../assets/retratos/armas/*.webp', { query: '?url', import: 'default' });
 const imagens = new Map<string, Promise<HTMLImageElement>>();
-const METAIS = ['#7b8790', '#77916c', '#6b93ac', '#9e82b5', '#c2a269', '#c67d88'];
+const METAIS = ['#686561', '#686e58', '#626a70', '#6c6171', '#817151', '#74575f'];
 const MARGEM = 75;
 const LARGURA = 397;
 const ALTURA = 793;
@@ -57,13 +57,20 @@ function armadura(eq: AparenciaEquipada | null): string {
     </linearGradient>
     <linearGradient id="latao" x2=".3" y2="1"><stop stop-color="#e5c893"/><stop offset=".5" stop-color="#987342"/><stop offset="1" stop-color="#49301d"/></linearGradient>
     <pattern id="trama" width="7" height="7" patternUnits="userSpaceOnUse"><path d="M0 7 7 0M4 10 10 4" stroke="#121019" stroke-opacity=".45" stroke-width="1.15"/></pattern>
+    <pattern id="marcas" width="51" height="37" patternUnits="userSpaceOnUse">
+      <path d="m3 27 8-5m5-16 3-2m12 14 10-5m-13 18 4-3m14-22 2-1" fill="none" stroke="#e5cdb0" stroke-opacity=".42" stroke-width=".9"/>
+      <path d="m7 25 2-1m5-12 3 1m12 11 3-1m12 10 3-1" fill="none" stroke="#201915" stroke-opacity=".8" stroke-width="1.4"/>
+    </pattern>
   </defs>`;
   const torso = 'M126 155 Q149 133 167 136 L198 163 231 136 Q254 136 273 155 L259 230 Q245 258 198 272 Q158 261 141 231Z';
   const peito = eq.corpo ? `
     <path fill="#30281f" d="M118 154Q151 129 169 133L198 151 232 132Q254 134 278 155L273 218Q260 262 198 283Q139 262 126 222Z"/>
     <path fill="url(#metal)" d="${torso}"/>
     <path fill="url(#trama)" stroke="none" d="${torso}" opacity=".55"/>
+    <path fill="url(#marcas)" stroke="none" d="${torso}"/>
     <path fill="url(#metal)" d="M107 159Q122 136 145 142L155 159 141 181Q118 173 104 181ZM245 158 255 143Q277 137 291 163L295 182Q274 175 260 184Z"/>
+    <path fill="#513429" d="M119 192 145 198 147 209 121 204ZM125 215 151 220 154 232 128 227ZM252 199 277 191 275 204 249 212ZM246 222 272 214 269 227 243 235Z"/>
+    <path fill="none" stroke="#aa8461" stroke-width="2" d="m130 194 11 2 3 13-11-2Zm7 23 10 2 3 13-11-2Zm118-19 11-3-3 13-11 3Zm-7 23 11-3-3 13-11 3Z"/>
     <path fill="#14131a" d="M146 205Q172 228 198 228Q227 222 250 201L246 217Q221 239 198 242Q165 236 150 222Z"/>
     <path fill="none" stroke="#cfc5ae" stroke-width="2" d="M145 161Q169 144 198 174L231 147M148 211Q169 229 198 233Q225 226 248 207M160 242 197 260 238 240"/>
     <path fill="url(#latao)" d="M198 176 213 195 198 216 183 195Z"/>
@@ -76,6 +83,7 @@ function armadura(eq: AparenciaEquipada | null): string {
     <path fill="none" stroke="#c8b38a" stroke-width="1.5" d="M148 112Q155 59 181 34M233 65Q247 86 251 117"/>
   ` : `
     <path fill="url(#elmo)" d="M146 90 150 55Q159 24 191 17Q229 16 245 51L251 88 236 112 229 101 224 79 173 79 169 100 160 114Z"/>
+    <path fill="url(#marcas)" stroke="none" d="M146 90 150 55Q159 24 191 17Q229 16 245 51L251 88 236 112 229 101 224 79 173 79 169 100 160 114Z"/>
     <path fill="url(#trama)" stroke="none" d="M220 29Q241 41 248 72L250 88 236 111 229 96 225 72Z"/>
     <path fill="url(#latao)" d="M150 69Q180 52 198 63Q218 55 248 72L248 79Q217 65 198 72Q175 63 149 79Z"/>
     <path fill="url(#elmo)" d="M194 61 202 61 204 88 198 96 192 88Z"/>

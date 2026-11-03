@@ -1,15 +1,15 @@
 {
   "espada": {
     "celL": 158,
-    "celA": 293,
+    "celA": 291,
     "pegaX": 79,
-    "pegaY": 229
+    "pegaY": 226
   },
   "adaga": {
     "celL": 122,
-    "celA": 189,
+    "celA": 187,
     "pegaX": 60,
-    "pegaY": 125
+    "pegaY": 122
   },
   "clava": {
     "celL": 139,
@@ -43,15 +43,15 @@
   },
   "montante": {
     "celL": 207,
-    "celA": 432,
+    "celA": 429,
     "pegaX": 103,
-    "pegaY": 337
+    "pegaY": 334
   },
   "sabre": {
     "celL": 122,
-    "celA": 281,
+    "celA": 279,
     "pegaX": 43,
-    "pegaY": 216
+    "pegaY": 214
   },
   "mangual": {
     "celL": 147,
@@ -61,9 +61,9 @@
   },
   "rapieira": {
     "celL": 100,
-    "celA": 318,
+    "celA": 316,
     "pegaX": 43,
-    "pegaY": 256
+    "pegaY": 253
   },
   "arco_longo": {
     "celL": 362,
@@ -114,52 +114,52 @@
     "pegaY": 175
   },
   "tomo": {
-    "celL": 157,
-    "celA": 153,
-    "pegaX": 72,
-    "pegaY": 132
+    "celL": 141,
+    "celA": 137,
+    "pegaX": 74,
+    "pegaY": 99
   },
   "codice": {
-    "celL": 157,
-    "celA": 153,
-    "pegaX": 72,
-    "pegaY": 132
+    "celL": 141,
+    "celA": 137,
+    "pegaX": 74,
+    "pegaY": 99
   },
   "mares": {
-    "celL": 157,
-    "celA": 153,
-    "pegaX": 72,
-    "pegaY": 132
+    "celL": 141,
+    "celA": 137,
+    "pegaX": 74,
+    "pegaY": 99
   },
   "estelar": {
-    "celL": 157,
-    "celA": 153,
-    "pegaX": 72,
-    "pegaY": 132
+    "celL": 141,
+    "celA": 137,
+    "pegaX": 74,
+    "pegaY": 99
   },
   "prisma": {
-    "celL": 157,
-    "celA": 153,
-    "pegaX": 72,
-    "pegaY": 132
+    "celL": 141,
+    "celA": 167,
+    "pegaX": 74,
+    "pegaY": 129
   },
   "espelhos": {
-    "celL": 157,
-    "celA": 153,
-    "pegaX": 72,
-    "pegaY": 132
+    "celL": 141,
+    "celA": 137,
+    "pegaX": 74,
+    "pegaY": 99
   },
   "orbital": {
-    "celL": 157,
-    "celA": 153,
-    "pegaX": 72,
-    "pegaY": 132
+    "celL": 141,
+    "celA": 137,
+    "pegaX": 74,
+    "pegaY": 99
   },
   "vazio": {
-    "celL": 157,
-    "celA": 153,
-    "pegaX": 72,
-    "pegaY": 132
+    "celL": 141,
+    "celA": 137,
+    "pegaX": 74,
+    "pegaY": 99
   },
   "cajado": {
     "celL": 157,
@@ -253,8 +253,8 @@
   },
   "escudo": {
     "celL": 237,
-    "celA": 251,
+    "celA": 229,
     "pegaX": 107,
-    "pegaY": 105
+    "pegaY": 82
   }
 }
