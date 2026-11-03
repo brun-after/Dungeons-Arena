@@ -111,6 +111,7 @@ export interface OpcoesCena {
   /** Marco 18: registrar a primeira descoberta do servidor na nuvem (a arena e os testes desligam). */
   nuvemDescobertas?: boolean;
   partyMundo?: boolean;
+  destinoMapa?: () => { x: number; y: number } | null;
   partyVisaoForcada?: boolean;
   visoesExternas?: () => readonly import('../mundo/avisos').VisaoExternaParty[];
 }
@@ -184,6 +185,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const bus = new Barramento<EventosDaSimulacao>();
   let controles: Controles | null = null;
   const ap = montarApresentacao({
+    destinoMapa: o.destinoMapa,
     observador: o.partyVisaoForcada === true,
     ctx,
     palco,

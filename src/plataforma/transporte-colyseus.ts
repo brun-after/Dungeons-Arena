@@ -107,6 +107,16 @@ export async function personagensDoMundo(url: string, token: string): Promise<Pe
   return Array.isArray(corpo.personagens) ? (corpo.personagens as PersonagemDoMundo[]) : [];
 }
 
+export async function excluirPersonagemDoMundo(url: string, token: string, slot: number, nome: string): Promise<void> {
+  const r = await fetch(`${url.replace(/^ws/, 'http')}/mundo/personagens/${slot}/excluir`, {
+    method: 'POST', headers: { authorization: `Bearer ${token}`, 'content-type': 'text/plain' }, body: nome,
+  });
+  if (!r.ok) {
+    const corpo = await r.json() as { motivo?: string };
+    throw new Error(corpo.motivo ?? 'indisponivel');
+  }
+}
+
 function embrulhar(sala: Room): Omit<ConexaoArena, 'fase'> {
   // Reconexão automática do SDK mesmo logo depois de entrar (o celular suspende a aba a qualquer hora).
   sala.reconnection.minUptime = 0;

@@ -3,7 +3,7 @@ import { lerPreferencias } from './plataforma/preferencias';
 import { ConsultaParty } from './plataforma/consulta-party';
 // O modo Mundo no navegador (marco 29, 30/10/2026, D-128): `?jogo=mundo`. Exige a conta (o personagem mora no
 // servidor); sem nuvem no build, vale a conta local do servidor de desenvolvimento. Fluxo:
-// - a lista dos 3 personagens do Mundo (separados da campanha), com "Jogar" ou o formulário de criação;
+// - a lista dos personagens do Mundo (separados da campanha), com jogar, excluir ou criar;
 // - a entrada na vila salva; a sala do servidor decide tudo (a mesma cena da campanha, com o estado da rede);
 // - a troca de sala (borda, porta, saída da dungeon, portal, renascer na vila) sem recarregar a página: a cena é
 //   desmontada, a conexão nova entra com o bilhete e o contexto do lugar é gerado aqui pela mesma semente.
@@ -23,13 +23,17 @@ import { iniciarLaco, relogioDoNavegador } from './plataforma/laco-navegador';
 import { nuvemDoBuild } from './plataforma/nuvem';
 import { enderecoDoServidor } from './plataforma/servidor';
 import { sairDaTelaCheia } from './plataforma/sessao-tela';
-import { conectarMundo, personagensDoMundo, type PedidoDoMundo, type PersonagemDoMundo } from './plataforma/transporte-colyseus';
+import { conectarMundo, personagensDoMundo, excluirPersonagemDoMundo, type PedidoDoMundo, type PersonagemDoMundo } from './plataforma/transporte-colyseus';
+import { SLOTS_DO_MUNDO } from './mundo/ficha-mundo';
+import { dialogo, paragrafo } from './ui/mundo-dialogos';
 import { mostrarAviso } from './ui/aviso';
 import { montarCena, type Cena } from './ui/cena';
 import { criarPaineisDaEconomia } from './ui/mundo-economia';
 import { abrirMapa, abrirPortal, criarFaixaDoLugar, textoDoAviso } from './ui/mundo-paineis';
 import { criarPainelSocial } from './ui/mundo-social';
 import { reinoDoConteudo } from './mundo/reino';
+import { criarGuiaMundo, criarOrientacaoMundo, type OrientacaoMundo } from './ui/orientacao-mundo';
+import { proximaEtapa } from './mundo/orientacao';
 
 const ESPERA_ENTRADA_MS = 10_000;
 const agoraMs = () => relogioDoNavegador.agoraMs();
@@ -130,7 +134,7 @@ export async function iniciarMundo(raiz: HTMLElement): Promise<void> {
     return;
   }
   carregando.remove();
-  for (let slot = 1; slot <= 3; slot++) {
+  for (let slot = 1; slot <= SLOTS_DO_MUNDO; slot++) {
     const p = lista.find((x) => x.slot === slot);
     const cartao = document.createElement('div');
     cartao.className = 'cartao-slot';
@@ -145,7 +149,43 @@ export async function iniciarMundo(raiz: HTMLElement): Promise<void> {
         void jogarNoMundo(raiz, servidor, token, { lugar: `regiao:${p.vilaSalva}`, slot });
       });
       jogar.setAttribute('aria-label', t('mundo.jogarRotulo', { nome: p.nome }));
-      cartao.append(retratoPersonagem(p.classeId, p.previa), resumo, resumoPersonagem(p.classeId, p.previa), jogar);
+      const excluir = botao(t('mundo.excluir'), () => {
+        const d = dialogo(t('mundo.excluirTitulo', { nome: p.nome }));
+        d.corpo.append(paragrafo(t('mundo.excluirAviso', { nome: p.nome })));
+        const rotulo = document.createElement('label');
+        rotulo.className = 'campo-mundo';
+        rotulo.textContent = t('mundo.excluirNome');
+        const nome = document.createElement('input');
+        nome.maxLength = 24;
+        nome.autocomplete = 'off';
+        rotulo.append(nome);
+        const erro = paragrafo('');
+        erro.setAttribute('role', 'alert');
+        const confirmar = botao(t('mundo.excluirConfirmar'), () => {
+          confirmar.disabled = true;
+          nome.disabled = true;
+          void excluirPersonagemDoMundo(servidor, token, slot, nome.value).then(() => {
+            d.fechar();
+            return iniciarMundo(raiz);
+          }).catch((e: unknown) => {
+            const motivo = e instanceof Error ? e.message : '';
+            const chave = motivo === 'ja_jogando' ? 'mundo.excluirOnline' : motivo === 'mercado_pendente' ? 'mundo.excluirMercado' : 'mundo.excluirFalha';
+            erro.textContent = t(chave);
+            nome.disabled = false;
+            confirmar.disabled = nome.value !== p.nome;
+          });
+        }, 'botao-menu botao-perigo');
+        confirmar.disabled = true;
+        nome.addEventListener('input', () => { confirmar.disabled = nome.value !== p.nome; });
+        d.corpo.append(rotulo, erro, confirmar);
+        nome.focus();
+      }, 'botao-menu botao-perigo');
+      excluir.setAttribute('aria-label', t('mundo.excluirTitulo', { nome: p.nome }));
+      const acoes = document.createElement('div');
+      acoes.className = 'acoes-slot';
+      acoes.append(jogar, excluir);
+      cartao.append(retratoPersonagem(p.classeId, p.previa), resumo, resumoPersonagem(p.classeId, p.previa), acoes);
+
     } else {
       cartao.append(formularioDeCriacao(slot, (classeId, nome) => {
         void jogarNoMundo(raiz, servidor, token, { lugar: `regiao:${reino.inicio}`, slot, criar: { classeId, nome } });
@@ -209,7 +249,7 @@ function motivoDoErro(e: unknown): string {
 }
 
 /** Entra num lugar e joga; a troca de sala chama de novo, com o bilhete. */
-async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, pedido: PedidoDoMundo): Promise<void> {
+async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, pedido: PedidoDoMundo, orientacao: OrientacaoMundo = criarOrientacaoMundo()): Promise<void> {
   const lugar = lerLugar(reino, pedido.lugar);
   if (!lugar) {
     mostrarErro(raiz, t('mundo.falha'));
@@ -272,7 +312,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
     document.querySelector('.mapa-expandido')?.remove();
   };
   const verMapa = () => {
-    if (ultimoLugar) abrirMapa(reino, ultimoLugar.lugar, ultimoLugar.descobertas, ultimoLugar.vilaSalva, { ctx, estado: estadoAtual, idLocal: idDoJogador(), membros: membrosParty });
+    if (ultimoLugar) abrirMapa(reino, ultimoLugar.lugar, ultimoLugar.descobertas, ultimoLugar.vilaSalva, { ctx, estado: estadoAtual, idLocal: idDoJogador(), membros: membrosParty, orientacao });
   };
   const teclaMapa = (ev: KeyboardEvent) => {
     if ((ev.key === 'm' || ev.key === 'M') && !(ev.target instanceof HTMLInputElement)) verMapa();
@@ -319,7 +359,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
       saindo = true;
       desmontar();
       void conexao.encerrar().finally(() => {
-        void jogarNoMundo(raiz, servidor, token, { lugar: a.lugar, bilhete: a.bilhete, instancia: a.instancia });
+        void jogarNoMundo(raiz, servidor, token, { lugar: a.lugar, bilhete: a.bilhete, instancia: a.instancia }, orientacao);
       });
     } else {
       const texto = textoDoAviso(a);
@@ -369,12 +409,14 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
     acoesExtras: [mapa, retorno, sair],
     pausaOJogo: false,
     partyMundo: true,
+    destinoMapa: () => orientacao.destino ? proximaEtapa(reino, pedido.lugar, orientacao.destino, ctx.fase)?.ponto ?? null : null,
     visoesExternas: () => visoesExternas,
     acoesDaPausa: [{ rotulo: t('mundo.sairRotulo'), fazer: () => { sair.click(); } }],
   });
   if (!cena) return;
   const c = cena;
-  raiz.querySelector('.camada-ui')?.append(faixa.elemento, social.elemento);
+  const guia = criarGuiaMundo(orientacao, reino, pedido.lugar, ctx, idLocal, () => ultimoLugar?.descobertas ?? []);
+  raiz.querySelector('.camada-ui')?.append(faixa.elemento, social.elemento, guia.elemento);
   raiz.querySelector('.cabecalho h1')?.remove();
   const mini = raiz.querySelector<HTMLElement>('.minimapa');
   if (mini) {
@@ -410,6 +452,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
       eu.passo();
     },
     renderizar: (alpha) => {
+      guia.atualizar(eu.previsto, agoraMs());
       const id = eu.entidadeId ?? idLocal;
       const conectado = eu.conectado && !!(eu.previsto && buscarEntidade(eu.previsto, id));
       if (monitor.atualizar(agoraMs(), eu.rttMs, conectado)) avisar(t('rede.instavel'));

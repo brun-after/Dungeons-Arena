@@ -26,6 +26,76 @@ function ficha(): FichaDoMundo {
 
 const esperar = () => new Promise((r) => setTimeout(r, 0));
 
+describe('exclusão de personagens', () => {
+  it('aguarda todas as operações do mercado em trânsito antes de permitir exclusão', async () => {
+    const p = new Contadora(), c = new CoordenadorDoMundo(p, CONTEUDO), f = ficha();
+    await p.gravar('local:comprador', 1, f);
+    const primeira = c.iniciarMercado('local:comprador#1'), segunda = c.iniciarMercado('local:comprador#1');
+    expect(await c.excluir('local:comprador', 1, f.personagem.nome)).toBe('mercado_pendente');
+    primeira();
+    expect(await c.excluir('local:comprador', 1, f.personagem.nome)).toBe('mercado_pendente');
+    segunda();
+    expect(await c.excluir('local:comprador', 1, f.personagem.nome)).toBeNull();
+  });
+  it('aguarda o último save antes de excluir e libera o slot sem ressuscitar a ficha', async () => {
+    const p = new Contadora(), c = new CoordenadorDoMundo(p, CONTEUDO), f = ficha();
+    let liberar = () => {};
+    const espera = new Promise<void>(r => { liberar = r; });
+    const gravar = p.gravar.bind(p);
+    vi.spyOn(p, 'gravar').mockImplementation(async (...args) => { await espera; return gravar(...args); });
+    c.gravar('local:apagar', 5, f);
+    const apagando = c.excluir('local:apagar', 5, f.personagem.nome);
+    await esperar();
+    liberar();
+    expect(await apagando).toBeNull();
+    expect(await c.carregar('local:apagar', 5)).toBeNull();
+    c.gravar('local:apagar', 5, f);
+    await esperar();
+    expect(await c.carregar('local:apagar', 5)).not.toBeNull();
+  });
+
+  it('recusa transferência com bilhete ainda válido e preserva o personagem', async () => {
+    const p = new Contadora(), c = new CoordenadorDoMundo(p, CONTEUDO), f = ficha();
+    await p.gravar('local:bilhete', 1, f);
+    c.emitir({ conta: 'local:bilhete', slot: 1, ficha: f, lugar: 'regiao:campos_do_oeste', chegada: null, instancia: null });
+    expect(await c.excluir('local:bilhete', 1, f.personagem.nome)).toBe('ja_jogando');
+    expect(await p.carregar('local:bilhete', 1)).not.toBeNull();
+  });
+
+  it('anúncio pendente impede exclusão e não é herdado por um slot novo', async () => {
+    const p = new Contadora(), c = new CoordenadorDoMundo(p, CONTEUDO), f = ficha();
+    await p.gravar('local:vendedor', 1, f);
+    await c.mercado.anunciar({ id: 'a', vendedor: 'local:vendedor#1', vendedorNome: 'Ana', item: { invId: 'i', itemId: 'pocao_vida', qtd: 1, ref: null }, preco: 10, liquido: 9, criadoEm: 1, expiraEm: 100000, estado: 'aberto' });
+    expect(await c.excluir('local:vendedor', 1, f.personagem.nome)).toBe('mercado_pendente');
+    await c.mercado.cancelar('a', 'local:vendedor#1');
+    expect(await c.excluir('local:vendedor', 1, f.personagem.nome)).toBeNull();
+  });
+
+  it('falha de armazenamento preserva a ficha e permite tentar de novo', async () => {
+    const p = new Contadora(), c = new CoordenadorDoMundo(p, CONTEUDO), f = ficha();
+    await p.gravar('local:falha', 1, f);
+    vi.spyOn(p, 'excluir').mockRejectedValueOnce(new Error('rede'));
+    await expect(c.excluir('local:falha', 1, f.personagem.nome)).rejects.toThrow('rede');
+    expect(await p.carregar('local:falha', 1)).not.toBeNull();
+    expect(await c.excluir('local:falha', 1, f.personagem.nome)).toBeNull();
+  });
+
+  it('entrada concorrente aguarda a exclusão terminar no mesmo slot', async () => {
+    const p = new Contadora(), c = new CoordenadorDoMundo(p, CONTEUDO), f = ficha();
+    await p.gravar('local:disputa', 1, f);
+    let liberar = () => {};
+    const espera = new Promise<void>(r => { liberar = r; });
+    const excluir = p.excluir.bind(p);
+    vi.spyOn(p, 'excluir').mockImplementation(async (...args) => { await espera; return excluir(...args); });
+    const apagando = c.excluir('local:disputa', 1, f.personagem.nome);
+    await esperar();
+    const entrando = c.noSlot('local:disputa', 1, () => c.carregar('local:disputa', 1));
+    liberar();
+    expect(await apagando).toBeNull();
+    expect(await entrando).toBeNull();
+  });
+});
+
 describe('coordenador do Mundo: gravação só com mudança', () => {
   it('a mesma ficha não grava de novo; a ficha mudada grava', async () => {
     const p = new Contadora();

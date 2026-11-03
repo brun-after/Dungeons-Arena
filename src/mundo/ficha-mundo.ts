@@ -13,7 +13,7 @@ import { pedidoDoPersonagem, type PedidoDePersonagem } from '../coop/personagem'
 import type { Reino } from './reino';
 
 export const VERSAO_FICHA_MUNDO = 2;
-export const SLOTS_DO_MUNDO = 3;
+export const SLOTS_DO_MUNDO = 5;
 const MAX_NOME = 24;
 
 export interface FichaDoMundo {
