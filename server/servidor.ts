@@ -1,3 +1,5 @@
+import { aparenciaDe } from '../src/progression/buffs';
+import { conferirPersonagem } from '../src/coop/personagem';
 // Servidor da arena (§3.1): Node + Colyseus sobre WebSocket. Rotas HTTP próprias:
 //   GET /saude          → { ok, versao, regiao, salas, tick } para o Caddy, o deploy, o lobby e a carga
 //                         (tick = pior p95/p99 entre as salas, da metadata de cada uma; marco 7B)
@@ -169,7 +171,12 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
     const token = req?.headers.get('authorization')?.replace(/^Bearer /, '') ?? '';
     const conta = token ? await persistencia.autenticar(token) : null;
     if (!conta) return resposta(401, { ok: false, motivo: 'sem_conta' });
-    return resposta(200, { ok: true, personagens: await persistencia.listar(conta) });
+    const personagens = await Promise.all((await persistencia.listar(conta)).map(async resumo => {
+      const ficha = await persistencia.carregar(conta, resumo.slot);
+      const e = ficha ? conferirPersonagem(ficha.personagem, ctxCertificacao, 'previa', 'previa')?.entidade : null;
+      return { ...resumo, previa: e ? { aparencia: aparenciaDe(ctxCertificacao, e), nivel: e.nivel, hpMax: e.hpMax, defesa: e.defesa, habilidades: e.habilidades } : undefined };
+    }));
+    return resposta(200, { ok: true, personagens });
   });
 
   const excluirPersonagemMundo = createEndpoint('/mundo/personagens/:slot/excluir', { method: 'POST', disableBody: true }, async (ctx) => {

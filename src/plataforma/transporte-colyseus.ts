@@ -91,6 +91,7 @@ export async function conectarMundo(url: string, token: string, pedido: PedidoDo
 }
 
 export interface PersonagemDoMundo {
+  previa?: Pick<import('../entities/entidade').Entidade, 'aparencia' | 'nivel' | 'hpMax' | 'defesa' | 'habilidades'>;
   slot: number;
   nome: string;
   classeId: string;

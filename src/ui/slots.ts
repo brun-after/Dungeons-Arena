@@ -1,3 +1,5 @@
+import { retratoPersonagem, resumoPersonagem } from './retrato-personagem';
+import { jogadorDoSave } from '../save/esquema';
 // Tela de slots da campanha (§3.5). Marco 6B (13/10/2026): três slots com continuar, jogo novo,
 // exportar, importar e excluir (com confirmação). Importar só em slot vazio, para nunca
 // sobrescrever um save sem querer. Textos sempre por textContent.
@@ -148,6 +150,9 @@ export async function mostrarSlots(raiz: HTMLElement): Promise<void> {
     const acoes = el('div', 'acoes-slot');
     let grupoDoCartao: HTMLElement | null = null;
     if (s.tipo === 'ok') {
+      const registro = await carregarSlot(s.slot);
+      const personagem = registro && registro !== 'invalido' ? jogadorDoSave(registro.estado) : undefined;
+      if (personagem?.bolsa) cartao.append(retratoPersonagem(personagem.bolsa.classeId, personagem), resumoPersonagem(personagem.bolsa.classeId, personagem));
       cartao.append(
         el(
           'p',

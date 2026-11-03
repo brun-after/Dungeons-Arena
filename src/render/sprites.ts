@@ -437,6 +437,10 @@ export class CamadaEntidades {
       return;
     }
     if (this.corpo3d(m, e, escolha, q)) return;
+    if (q.iso && !escolha.proprio && this.o.personagens?.carregando(escolha.modelo)) {
+      if (m.rig) m.rig.raiz.visible = false;
+      return;
+    }
     if (!m.rig) m.rig = new RigToken(escolha.fonte);
     else if (m.rig.fonteAtual !== escolha.fonte) m.rig.trocarFonte(escolha.fonte);
     m.rig.raiz.visible = true;

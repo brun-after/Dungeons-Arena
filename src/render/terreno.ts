@@ -212,7 +212,7 @@ export function criarTerreno(
     void solo.texturas.then((texturas) => {
       if (destruido || texturas.size === 0) return;
       assador = new AssadorDeSolo(texturas, solo.tema, solo.escala, fase.ambientes ?? [], solo.semente);
-      for (const b of blocos) if (b.desenhado) fila.add(b);
+      for (const b of blocos) if (b.desenhado) assarBloco(b);
     });
   }
   const paleta: Paleta = tema ? tema.paleta : paletaDe(fase.matizGraus);
@@ -264,7 +264,7 @@ export function criarTerreno(
     limparEnfeites(b);
     b.agua = null;
     b.desenhado = true;
-    if (assador && !b.solo) fila.add(b);
+    if (assador && !b.solo) { assarBloco(b); return; }
     const fimX = Math.min(fase.largura, b.bx + BLOCO_CELULAS);
     const fimY = Math.min(fase.altura, b.by + BLOCO_CELULAS);
     for (let y = b.by; y < fimY; y++) {

@@ -1,3 +1,4 @@
+import type { Entidade } from '../entities/entidade';
 // Retrato da classe (marco 26, 28/10/2026, D-116): o mesmo desenho do personagem no jogo (render/modelos, vista 3/4,
 // quadro parado), com a arma e a mão secundária da classe, para a tela de seleção. Só monta o SVG a partir das
 // constantes do código: nada de texto do jogador entra aqui.
@@ -45,22 +46,25 @@ function imagem(url: Promise<string>): Promise<HTMLImageElement> {
  * na mão), num canvas do tamanho do quadro. Null se a classe não tiver atlas; `pronto` resolve false se a imagem falhar
  * (quem chama mantém o desenho de antes).
  */
-export function retrato3d(modelo: string): { canvas: HTMLCanvasElement; pronto: Promise<boolean> } | null {
+export function retrato3d(modelo: string, aparencia: Entidade['aparencia'] = null): { canvas: HTMLCanvasElement; pronto: Promise<boolean> } | null {
   const corpo = atlasDe(modelo);
   const urlCorpo = urlDoAtlas(modelo);
   if (!corpo || !urlCorpo) return null;
   const canvas = document.createElement('canvas');
   canvas.width = corpo.quadroL;
   canvas.height = corpo.quadroA;
-  const eq = equipamento3d(modelo, null, existeArma3d);
+  const eq = equipamento3d(modelo, aparencia, existeArma3d);
   const armas = (['d', 'e'] as const).flatMap((lado) => {
     const a = lado === 'd' ? eq?.arma : eq?.secundaria;
     const dados = a ? armaDe(a.modelo) : null;
     const mao = maoNoQuadro(modelo, lado, DE_FRENTE, 0);
     return a && dados && mao ? [{ a, dados, mao }] : [];
   });
-  const pronto = Promise.all([imagem(urlCorpo), ...armas.map((x) => imagem(x.dados.url))]).then(
-    ([img, ...imgsArmas]) => {
+  const camadas = eq?.camadas.flatMap(c => { const u = urlDoAtlas(c.nome); return u ? [u] : []; }) ?? [];
+  const pronto = Promise.all([imagem(urlCorpo), ...armas.map((x) => imagem(x.dados.url)), ...camadas.map(u => imagem(u))]).then(
+    ([img, ...resto]) => {
+      const imgsArmas = resto.slice(0, armas.length);
+      const imgsCamadas = resto.slice(armas.length);
       const g = canvas.getContext('2d');
       if (!g) return false;
       const desenharArma = (j: number) => {
@@ -81,6 +85,7 @@ export function retrato3d(modelo: string): { canvas: HTMLCanvasElement; pronto: 
         if (!x.mao.frente) desenharArma(j);
       });
       g.drawImage(img, 0, DE_FRENTE * corpo.quadroA, corpo.quadroL, corpo.quadroA, 0, 0, corpo.quadroL, corpo.quadroA);
+      for (const im of imgsCamadas) g.drawImage(im, 0, DE_FRENTE * corpo.quadroA, corpo.quadroL, corpo.quadroA, 0, 0, corpo.quadroL, corpo.quadroA);
       armas.forEach((x, j) => {
         if (x.mao.frente) desenharArma(j);
       });

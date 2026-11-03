@@ -139,8 +139,8 @@ export function equipamento3d(modelo: string, aparencia: AparenciaEquipada | nul
   if (!Object.hasOwn(OPCOES_JOGAVEIS, modelo)) return null;
   const padrao = ARMA_DE_CLASSE[modelo as keyof typeof OPCOES_JOGAVEIS];
   const eq = aparencia;
-  const desenho = eq?.arma ?? padrao.arma;
-  const secundaria = eq?.arma ? eq.secundaria : (eq?.secundaria ?? padrao.secundaria);
+  const desenho = eq ? (eq.arma ?? '') : padrao.arma;
+  const secundaria = eq ? eq.secundaria : padrao.secundaria;
   const elemento = eq?.arma ? eq.elementoArma : null;
   const chave = `${modelo}|${desenho}|${secundaria}|${eq?.cabeca}|${eq?.corpo}|${eq?.capa}|${elemento}|${eq?.raridadeArma}|${eq?.raridadeSecundaria}|${eq?.formaArma}`;
   const pronto = cache3d.get(chave);
@@ -152,7 +152,7 @@ export function equipamento3d(modelo: string, aparencia: AparenciaEquipada | nul
   }
   const saida: Equipamento3d = {
     camadas,
-    arma: { modelo: modeloDaArma3d(desenho, existeArma), grau: eq?.arma ? grauDe(eq.raridadeArma, eq.formaArma) : 0 },
+    arma: { modelo: desenho ? modeloDaArma3d(desenho, existeArma) : '', grau: eq?.arma ? grauDe(eq.raridadeArma, eq.formaArma) : 0 },
     secundaria: secundaria ? { modelo: modeloDaArma3d(secundaria, existeArma), grau: grauDe(eq?.raridadeSecundaria) } : null,
     corElemento: elemento ? corDoElemento(elemento) : null,
   };

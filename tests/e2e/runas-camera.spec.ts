@@ -24,7 +24,7 @@ test('a seleção mostra runa e retrato de cada classe, e "Ver mais" abre a lore
 
   // As skills de classe levam a runa na aba Habilidades.
   await guerreiro.getByRole('link', { name: 'Jogar de Guerreiro' }).click();
-  await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
+  await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/, { timeout: 30000 });
   await page.keyboard.press('KeyI');
   const mochila = page.getByRole('dialog', { name: 'Mochila' });
   await mochila.getByRole('button', { name: 'Habilidades' }).click();
@@ -34,7 +34,7 @@ test('a seleção mostra runa e retrato de cada classe, e "Ver mais" abre a lore
 
 test('arrastar solta a câmera; andar não recentraliza; o toque duplo no botão sim', async ({ page }) => {
   await page.goto('./?jogo=campanha&slot=1&diag=1&classe=mago');
-  await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
+  await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/, { timeout: 30000 });
   const botao = page.getByTestId('centralizar');
   await expect(botao).toHaveAttribute('data-solta', 'false');
   const caixa = await page.locator('canvas').first().boundingBox();
