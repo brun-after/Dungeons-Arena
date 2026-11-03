@@ -60,6 +60,17 @@ export function elmo(ossos: Ossos, n: number, acento: number): THREE.Object3D[] 
   const nasal = new THREE.Mesh(new THREE.BoxGeometry(r * 0.16, r * 0.7, r * 0.12), m);
   nasal.position.set(0, -r * 0.1, r * 0.95);
   g.add(nasal);
+  // Sobrancelha reforçada e rebites dão leitura à face metálica mesmo no quadro pequeno.
+  for (const lado of [-1, 1]) {
+    const borda = new THREE.Mesh(new THREE.BoxGeometry(r * 0.57, r * 0.11, r * 0.12), enfeite(n));
+    borda.position.set(lado * r * 0.31, r * 0.19, r * 0.9);
+    borda.rotation.z = lado * 0.19;
+    g.add(borda);
+    const rebite = new THREE.Mesh(new THREE.SphereGeometry(r * 0.066, 8, 5), enfeite(n));
+    rebite.position.set(lado * r * 0.63, r * 0.11, r * 0.78);
+    g.add(rebite);
+  }
+
   if (n >= 3) {
     const crista = new THREE.Mesh(new THREE.BoxGeometry(r * 0.14, r * 0.45, r * 1.7), n >= 4 ? enfeite(n) : aceso(acento, 0.4));
     crista.position.y = r * 0.95;
@@ -138,6 +149,17 @@ export function peito(ossos: Ossos, n: number, acento: number): THREE.Object3D[]
     placa.material = m;
     (placa.material as THREE.MeshStandardMaterial).side = THREE.DoubleSide;
     g.add(placa);
+    // Nervura central, lâminas sobrepostas e rebites, em relevo no mesmo rig.
+    const nervura = new THREE.Mesh(new THREE.BoxGeometry(largura * 0.09, alto * 0.78, largura * 0.055), enfeite(n));
+    nervura.position.set(0, alto * 0.045, r * 0.995);
+    g.add(nervura);
+    for (const y of [-0.22, -0.39]) {
+      const faixa = new THREE.Mesh(new THREE.TorusGeometry(r * (0.95 + y * 0.09), largura * 0.027, 5, 18, Math.PI * 0.82), enfeite(n));
+      faixa.rotation.set(Math.PI / 2, 0, -Math.PI * 0.09);
+      faixa.position.y = y * alto;
+      g.add(faixa);
+    }
+
     if (n >= 3) {
       const faixa = new THREE.Mesh(new THREE.TorusGeometry(r * 0.9, largura * 0.035, 4, 16, Math.PI * 0.84), enfeite(n));
       faixa.rotation.set(Math.PI / 2, 0, Math.PI * 0.08);

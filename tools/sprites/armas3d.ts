@@ -64,7 +64,7 @@ export class Kit {
   /** Um perfil plano extrudado (a lâmina, a cabeça do machado), centrado na espessura. */
   perfil(pts: P[], esp: number, m: THREE.Material, z = 0): THREE.Mesh {
     const s = new THREE.Shape(pts.map(([x, y]) => new THREE.Vector2(x, y)));
-    const geo = new THREE.ExtrudeGeometry(s, { depth: esp, bevelEnabled: true, bevelThickness: esp * 0.35, bevelSize: esp * 0.3, bevelSegments: 1 });
+    const geo = new THREE.ExtrudeGeometry(s, { depth: esp, bevelEnabled: true, bevelThickness: esp * 0.35, bevelSize: esp * 0.3, bevelSegments: 3 });
     geo.translate(0, 0, -esp / 2);
     return this.add(new THREE.Mesh(geo, m), 0, 0, z);
   }
@@ -81,6 +81,13 @@ export class Kit {
   /** O cabo com o couro e, do incomum em diante, as faixas de metal. */
   cabo(y0: number, y1: number, r = 0.018, cor = COURO): void {
     this.cil(r, y0, y1, this.mat(cor, { roughness: 0.85 }));
+    const costura = this.mat(0x34241d, { roughness: 0.95 });
+    const passos = Math.min(12, Math.ceil((y1 - y0) / 0.018));
+    for (let i = 0; i < passos; i++) {
+      const y = y0 + (y1 - y0) * (i + 0.5) / passos;
+      const volta = this.add(new THREE.Mesh(new THREE.TorusGeometry(r * 1.01, r * 0.065, 5, 14), costura), 0, y);
+      volta.rotation.x = Math.PI / 2 + 0.16;
+    }
     if (this.n >= 1) for (const y of [y0 + 0.01, y1 - 0.01]) this.cil(r * 1.35, y - 0.008, y + 0.008, this.enfeite());
   }
   /** O pomo: uma bola de metal; do raro em diante, a gema da raridade. */
@@ -192,6 +199,12 @@ function livroDe(k: Kit, capa: number, simbolo: number): void {
     c.rotation.y = -s * 0.55;
     const pag = k.caixa(l * 0.7, a * 0.78, 0.016, k.mat(0xcfc2a2, { roughness: 0.9 }), (s * l) / 2.4, a / 2, 0.006);
     pag.rotation.y = -s * 0.55;
+    const tinta = k.mat(0x564138, { roughness: 0.9 });
+    for (let linha = 0; linha < 6; linha++) {
+      const letra = k.caixa(l * (linha % 3 === 1 ? 0.36 : 0.48), 0.0025, 0.002, tinta,
+        s * l / 2.4, a * 0.76 - linha * 0.018, 0.017);
+      letra.rotation.y = -s * 0.55;
+    }
     if (k.n >= 3) k.caixa(0.014, a * 1.02, 0.024, k.enfeite(), s * l * 0.92, a / 2, -0.02);
   }
   k.caixa(0.03, a, 0.03, k.mat(capa, { roughness: 0.7 }), 0, a / 2, -0.03);
@@ -202,7 +215,15 @@ function livroDe(k: Kit, capa: number, simbolo: number): void {
 
 function cajadoDe(k: Kit, cor: number, cabeca: (y: number) => void, alto = 1.0): void {
   haste(k, -0.35, alto - 0.35, cor, 0.017);
-  cabeca(alto - 0.3);
+  const y = alto - 0.3;
+  // A pedra fica encaixada no metal, com garras e um colar em torno da haste.
+  k.cil(0.025, y - 0.15, y - 0.09, k.enfeite(), 0, 0, 0.039);
+  for (const lado of [-1, 1]) {
+    k.perfil([[lado * 0.02, y - 0.12], [lado * 0.07, y - 0.055],
+      [lado * 0.087, y + 0.045], [lado * 0.066, y + 0.018], [lado * 0.05, y - 0.05]],
+      0.017, k.enfeite(), 0.027);
+  }
+  cabeca(y);
   k.espinhos(0, alto - 0.3, 0.07, 4);
   k.cristais(0, alto - 0.3, 0.13);
 }
@@ -333,7 +354,11 @@ export const ARMAS_3D: Readonly<Record<string, Construtor>> = {
     k.bola(0.035, k.mat(0x0d0b12, { roughness: 0.1 }), 0, 0.085, 0.035);
   },
   // --- Cajados do Necromante
-  cajado: (k) => { cajadoDe(k, MADEIRA, (y) => k.bola(0.085 + 0.008 * k.n, k.brilho(0x9b59b6, 0.5), 0, y)); },
+  cajado: (k) => { cajadoDe(k, MADEIRA, (y) => {
+    const gema = k.add(new THREE.Mesh(new THREE.OctahedronGeometry(0.082 + 0.007 * k.n), k.brilho(0x8652a1, 0.25)), 0, y);
+    gema.scale.y = 1.34;
+    gema.rotation.y = 0.21;
+  }); },
   praga: (k) => { cajadoDe(k, 0x4d5656, (y) => {
       k.bola(0.09, k.brilho(0x7dcea0, 0.6), 0, y);
       k.bola(0.026, k.mat(0xd5f5e3), -0.035, y + 0.035, 0.075);
@@ -411,9 +436,18 @@ export const ARMAS_3D: Readonly<Record<string, Construtor>> = {
         pts.push([Math.cos(a) * r, Math.sin(a) * r * 0.6]);
       }
       pts.push([0, -r * 1.3]);
-      k.perfil(pts, 0.03, k.aco(0x9aa4b0));
-      k.bola(0.035 + 0.004 * k.n, k.brilho(), 0, 0, 0.03);
-      if (k.n >= 3) k.perfil(pts.map(([x, y]) => [x * 0.78, y * 0.78] as P), 0.034, k.enfeite(), 0.004);
+      const menor = (escala: number): P[] => pts.map(([x, y]) => [x * escala, y * escala]);
+      k.perfil(pts, 0.029, k.aco(0x697782));
+      k.perfil(menor(0.92), 0.019, k.enfeite(), 0.016);
+      k.perfil(menor(0.82), 0.018, k.aco(0x435460), 0.027);
+      const insigne: P[] = [[0, r * 0.33], [r * 0.32, 0], [0, -r * 0.58], [-r * 0.32, 0]];
+      k.perfil(insigne, 0.012, k.enfeite(), 0.038);
+      k.perfil(insigne.map(([x, y]) => [x * 0.62, y * 0.72]), 0.008, k.mat(k.acento, { roughness: 0.45 }), 0.047);
+      for (const lado of [-1, 1]) {
+        for (const [x, y] of [[0.76, 0.21], [0.56, -0.25], [0.33, -0.65]] as const) {
+          k.bola(r * 0.04, k.enfeite(), lado * x * r, y * r, 0.038, 0);
+        }
+      }
       k.espinhos(0, 0, r * 0.95, 5);
     } else {
       k.add(new THREE.Mesh(new THREE.CylinderGeometry(r, r, 0.03, 20), madeira), 0, 0).rotation.x = Math.PI / 2;

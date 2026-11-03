@@ -2147,7 +2147,7 @@ svg.icone {
   height: 1.35em;
 }
 
-.icone-item svg.icone {
+.icone-item :is(svg,img).icone {
   width: 1.4em;
   height: 1.4em;
 }
@@ -2330,7 +2330,7 @@ body.toque .log-combate {
 .botao-consumivel:active {
   transform: scale(0.94);
 }
-.botao-consumivel svg.icone {
+.botao-consumivel :is(svg,img).icone {
   flex-shrink: 0;
   width: 24px;
   height: 24px;

@@ -273,7 +273,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   });
   // Marco 31 (D-130): a telegrafia acima do escuro (a área do golpe inimigo se lê mesmo fora da luz).
   const telegrafia = new CamadaTelegrafia(palco.marcas, palco.voo, projecao, () => aparencia.areaExata, ap.particulas);
-  await Promise.all([carregarTexturasDeIcones([...new Set([...ctx.conteudo.itens.values()].map((i) => i.icone)), 'pergaminho']), o.tileset ? null : modelos3d.carregar()]);
+  await Promise.all([carregarTexturasDeIcones([...new Set([...ctx.conteudo.itens.values()].map((i) => i.icone)), 'pergaminho'], 'item'), o.tileset ? null : modelos3d.carregar()]);
   preparando.remove();
   const objetos = new CamadaObjetos(
     palco.chao,

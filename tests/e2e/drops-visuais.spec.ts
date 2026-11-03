@@ -19,7 +19,7 @@ test('drops usam os desenhos dos itens nas duas projeções e limpam sprites col
       document.body.replaceChildren(); document.body.style.cssText = 'margin:0;background:#14121a';
       const itens = conteudoOficial().itens;
       const ids = ['espada_curta', 'escudo_madeira', 'elmo_ferro', 'pocao_vida', 'livro_raro', 'chave_ferro'];
-      await carregarTexturasDeIcones(ids.map(id => itens.get(id).icone));
+      await carregarTexturasDeIcones(ids.map(id => itens.get(id).icone), 'item');
       const app = new Application(); await app.init({ width: 1000, height: 850, background: '#14121a', antialias: true, autoStart: false });
       document.body.append(app.canvas);
       const fase = carregarFase({ id: 'visual', nome: 'Drops', ordem: 1, tipo: 'campanha',

@@ -600,8 +600,8 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
         const y = (Math.floor(coluna / faixa) * DIRECOES + d) * quadroA;
         let dx = 0;
         let dy = 0;
-        if (maos) {
-          const iMao = maos.d.length;
+        if (maos || referenciaMaos) {
+          const iMao = (d * colunas + coluna) * 5;
           const dAnterior = referenciaMaos?.d.slice(iMao, iMao + 5);
           const eAnterior = referenciaMaos?.e.slice(iMao, iMao + 5);
           if (dAnterior?.length === 5 && eAnterior?.length === 5) {
@@ -617,31 +617,35 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
                 !perto((dAnterior[3] ?? 0), (dAtual[3] ?? 0)) || !perto((eAnterior[3] ?? 0), (eAtual[3] ?? 0))) {
               throw new Error(`Pose incompatível com a armadura: ${r.nome} / ${e} / ${d}:${i}`);
             }
-            maos.d.push(...dAnterior);
-            maos.e.push(...eAnterior);
+            maos?.d.push(...dAnterior);
+            maos?.e.push(...eAnterior);
           } else {
-            maos.d.push(...medirMao(mt, 'r', camera, quadroL, quadroA, PX_CELULA, pele));
-            maos.e.push(...medirMao(mt, 'l', camera, quadroL, quadroA, PX_CELULA, pele));
+            maos?.d.push(...medirMao(mt, 'r', camera, quadroL, quadroA, PX_CELULA, pele));
+            maos?.e.push(...medirMao(mt, 'l', camera, quadroL, quadroA, PX_CELULA, pele));
           }
         }
+        const copiar = (g: CanvasRenderingContext2D) => {
+          if (dx || dy) {
+            g.save();
+            g.beginPath();
+            g.rect(x, y, quadroL, quadroA);
+            g.clip();
+            g.drawImage(renderer.domElement, x + dx, y + dy);
+            g.restore();
+          } else {
+            g.drawImage(renderer.domElement, x, y);
+          }
+        };
         if (atlas) {
           aplicar(null);
           renderer.render(cena, camera);
-          if (dx || dy) {
-            atlas.g.save();
-            atlas.g.beginPath();
-            atlas.g.rect(x, y, quadroL, quadroA);
-            atlas.g.clip();
-            atlas.g.drawImage(renderer.domElement, x + dx, y + dy);
-            atlas.g.restore();
-          } else {
-            atlas.g.drawImage(renderer.domElement, x, y);
-          }
+          copiar(atlas.g);
         }
         montadas.forEach((cm, j) => {
           aplicar(cm);
           renderer.render(cena, camera);
-          telas[j]?.g.drawImage(renderer.domElement, x, y);
+          const tela = telas[j];
+          if (tela) copiar(tela.g);
         });
       }
     }
@@ -649,8 +653,8 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
   renderer.dispose();
   if (atlas) posProcessar(atlas.g, atlas.c.width, atlas.c.height);
   const saidas = telas.map((t, j) => {
-    posProcessar(t.g, t.c.width, t.c.height, montadas[j]?.pedido.tingir ?? false);
-    return t.c.toDataURL('image/png');
+    return posProcessar(t.g, t.c.width, t.c.height, montadas[j]?.pedido.tingir ?? false)
+      ? t.c.toDataURL('image/png') : '';
   });
   return {
     png: atlas ? atlas.c.toDataURL('image/png') : '',

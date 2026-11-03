@@ -14,7 +14,7 @@ import { estoqueDaLoja, lojaAberta } from '../progression/loja';
 import { armaDoItem, molduraDoItem, resumoDoItem } from './mochila';
 import { motivoParaNaoForjar, receitaDaLoja } from '../progression/forja';
 import { criarModal } from './modal';
-import { icone } from './icones';
+import { iconeDoItem } from './icones';
 import { classeDoItem, comRuna } from './runa-dom';
 
 export interface OpcoesLoja {
@@ -72,7 +72,7 @@ export function criarLoja(o: OpcoesLoja): Loja {
     const li = el('li', 'linha-item');
     const conteudo = el('span', 'conteudo-item');
     const iconeItem = el('span', molduraDoItem(item));
-    iconeItem.append(icone(item?.icone ?? 'circulo'));
+    iconeItem.append(iconeDoItem(item?.icone ?? 'circulo'));
     iconeItem.setAttribute('aria-hidden', 'true');
     const textos = el('span', 'textos-item');
     // Marco 26 (28/10/2026, D-116): o livro de skill de classe leva a runa da classe.
