@@ -15989,10 +15989,10 @@
   },
   "dragao_fogo": {
     "quadroL": 189,
-    "quadroA": 140,
+    "quadroA": 151,
     "ancoraX": 94.5,
-    "ancoraY": 99.61538461538461,
-    "pxCelula": 27,
+    "ancoraY": 94.375,
+    "pxCelula": 21,
     "colunas": 42,
     "faixa": 21,
     "estados": {
@@ -16029,10 +16029,10 @@
   },
   "dragao_gelo": {
     "quadroL": 189,
-    "quadroA": 140,
+    "quadroA": 151,
     "ancoraX": 94.5,
-    "ancoraY": 99.61538461538461,
-    "pxCelula": 27,
+    "ancoraY": 94.375,
+    "pxCelula": 21,
     "colunas": 42,
     "faixa": 21,
     "estados": {
@@ -16069,10 +16069,10 @@
   },
   "dragao_raio": {
     "quadroL": 189,
-    "quadroA": 140,
+    "quadroA": 151,
     "ancoraX": 94.5,
-    "ancoraY": 99.61538461538461,
-    "pxCelula": 27,
+    "ancoraY": 94.375,
+    "pxCelula": 21,
     "colunas": 42,
     "faixa": 21,
     "estados": {
@@ -16109,10 +16109,10 @@
   },
   "dragao_veneno": {
     "quadroL": 189,
-    "quadroA": 140,
+    "quadroA": 151,
     "ancoraX": 94.5,
-    "ancoraY": 99.61538461538461,
-    "pxCelula": 27,
+    "ancoraY": 94.375,
+    "pxCelula": 21,
     "colunas": 42,
     "faixa": 21,
     "estados": {

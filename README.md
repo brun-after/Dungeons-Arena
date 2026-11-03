@@ -1,6 +1,6 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.34 · **Data:** 02/11/2026
+**Versão do documento:** 3.35 · **Data:** 03/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
@@ -290,3 +290,6 @@ Dez dungeons do Central ampliadas; lojas de dungeon superiores, Pedra de Retorno
 individual após cinco mortes (gratuita após dez). Necromante inimigo com quatro a dez lacaios de tipos
 e magias próprias. Combates atraem inimigos próximos; lojas externas têm ofertas temporárias e novos
 equipamentos de nível 15 a 55. Detalhes em [docs/EXPANSAO-ECLIPSE.md](docs/EXPANSAO-ECLIPSE.md).
+
+Revisão de 03/11/2026: dragões com porte proporcional ao nível, atlas apoiados no chão e sem quadros
+cortados. Salas, corredores, clareiras e navegação acompanham seu tamanho.

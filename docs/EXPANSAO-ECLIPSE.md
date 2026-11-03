@@ -1,6 +1,6 @@
 # Reino do Eclipse e revisão do Mundo
 
-**Versão:** 1.0 · **Data:** 02/11/2026 · **Marco:** 36
+**Versão:** 1.1 · **Data:** 03/11/2026 · **Marco:** 36
 
 O portal de qualquer vila oferece as capitais do Reino Central e do Reino do Eclipse, mesmo antes da
 primeira visita. A viagem mantém os custos e a recarga do portal; as demais vilas continuam exigindo descoberta.
@@ -12,7 +12,10 @@ domínios compartilhados de boss. Todas as regiões têm encontros externos gara
 fora das vilas e das chegadas. As oito regiões perigosas permitem PvP, conforme as regras já existentes.
 O Central conserva suas nove regiões, 28 dungeons e três covis. Dez de suas dungeons foram ampliadas.
 
-As dungeons ampliadas e todas as do Eclipse têm mapa de 96×80 células, com 18 a 20 salas em espiral.
+As dungeons ampliadas e todas as do Eclipse têm mapa de pelo menos 96×80 células, com 18 a 20 salas em espiral.
+Quando o chefe é um dragão, salas e corredores aumentam conforme seu nível, com passagem livre para
+o corpo completo. O porte visual cresce de 1,1 célula no nível 1 a 2,2 no nível 100, sem aumento adicional
+por ser boss. O atlas foi corrigido para apoiar a criatura no chão e preservar todas as poses.
 Todas as lojas de dungeon e covil oferecem Pedra de Retorno, consumíveis e estoque superior ao das vilas.
 O Eclipse vende Couraça do Eclipse (nível 30) e Manto do Crepúsculo (40); suas dungeons também oferecem
 Couraça do Trono Vazio e Manto do Abismo (55). No Central, a Couraça de Expedição (15) aparece nas ofertas

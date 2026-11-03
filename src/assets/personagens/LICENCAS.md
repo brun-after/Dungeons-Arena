@@ -50,9 +50,10 @@ Arquivos usados: `dragon.dae`, `dragon_black.png`, `dragon_idle.dae`, `dragon_wa
 O download não inclui um arquivo de licença separado; a declaração CC0 está na publicação do autor.
 Atribuição não é exigida; os créditos acima ficam registrados por cortesia.
 
-Porte de 3,3 células, escamas negras, energia elemental discreta adicionada em tempo real no
+Porte variável de 1,1 a 2,2 células por nível (atlas de referência: 3,3), escamas negras, energia elemental discreta adicionada em tempo real no
 renderizador do jogo. As quatro variantes compartilham a aparência do corpo; o elemento aparece
-nas brasas, névoa fria, arcos elétricos ou energia venenosa. Atlas de 3969×2240 pixels.
+nas brasas, névoa fria, arcos elétricos ou energia venenosa. Atlas de 3969×2416 pixels, revisado em 03/11/2026:
+origem centralizada, apoio no plano do chão e margem para todas as poses, incluindo a morte.
 Repouso, caminhada, ataque/conjuração e morte vêm dos respectivos arquivos Collada.
 A conversão preserva a textura e retargeteia as animações pelos nomes dos ossos, não pelos UUIDs.
 Geração: `npx tsx tools/sprites/render.ts --so dragao_fogo,dragao_gelo,dragao_raio,dragao_veneno --so-corpo`.

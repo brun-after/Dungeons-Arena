@@ -19,6 +19,7 @@ import type { DominioDaClasse } from '../progression/dominio';
 export type MomentoCargaClasse = 'furiaCheia' | 'encarnacao' | 'miraFirme' | 'servoCaiu' | 'falcao';
 
 export interface Balance {
+  dragoes: { alturaAtlas: number; larguraAtlas: number; alturaMin: number; alturaMax: number; nivelMax: number; folgaCorredor: number; salaMin: number; salaPorCorredor: number; salaExtra: number; areaPorSala: number };
   /** Ajustes de classes (18/10/2026): curvas e passivas de produção. */
   ajustesClasses: {
     guerreiro: { contatoMaxPct: number; contatoNivel: number; contatoExpoente: number; grupoReducaoMaxPct: number; grupoNivelPleno: number; grupoRaio: number; extraInicioNivel: number; extraMaxPct: number; auraMinPct: number; auraMaxPct: number; auraRaio: number; auraCuraMinPct: number; auraCuraMaxPct: number;

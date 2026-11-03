@@ -11,27 +11,29 @@ import { aleatorio } from '../core/rng';
 interface Sala { x: number; y: number; l: number; a: number }
 
 /** Corredor de três células em espiral, com parede entre voltas e pequenas câmaras ao longo dele. */
-export function salasEmEspiral(l: number, a: number, n: number, cavar: (x: number, y: number) => void): Sala[] {
+export function salasEmEspiral(l: number, a: number, n: number, cavar: (x: number, y: number) => void, porte?: {sala:number;corredor:number}|null): Sala[] {
   const trilha: Celula[] = [];
-  let x = 3, y = 3, esquerda = 3, topo = 3, direita = l - 4, fundo = a - 4;
+  const margem=porte?Math.ceil(porte.sala/2)+2:3,passo=porte?porte.sala+3:6,raio=porte?Math.floor(porte.corredor/2):1;
+  let x = margem, y = margem, esquerda = margem, topo = margem, direita = l - margem-1, fundo = a - margem-1;
   const ir = (tx: number, ty: number) => {
     while (x !== tx || y !== ty) {
       x += Math.sign(tx - x); y += Math.sign(ty - y);
       trilha.push({ x, y });
-      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) cavar(x + dx, y + dy);
+      for (let dy = -raio; dy <= raio; dy++) for (let dx = -raio; dx <= raio; dx++) cavar(x + dx, y + dy);
     }
   };
   trilha.push({ x, y });
   while (direita - esquerda >= 8 && fundo - topo >= 8) {
     ir(direita, topo); ir(direita, fundo); ir(esquerda, fundo);
-    topo += 6; ir(esquerda, topo); esquerda += 6;
-    direita -= 6; fundo -= 6;
+    topo += passo; ir(esquerda, Math.min(topo,fundo)); esquerda += passo;
+    direita -= passo; fundo -= passo;
   }
   const salas: Sala[] = [];
   const total = Math.min(Math.max(3, n), Math.floor(trilha.length / 8));
   for (let i = 0; i < total; i++) {
     const c = trilha[Math.floor(i * (trilha.length - 1) / Math.max(1, total - 1))];
-    if (c) salas.push({ x: c.x - 1, y: c.y - 1, l: 3, a: 3 });
+    const lado=porte?.sala??3,metade=Math.floor(lado/2);
+    if (c) salas.push({ x: c.x - metade, y: c.y - metade, l: lado, a: lado });
   }
   return salas;
 }

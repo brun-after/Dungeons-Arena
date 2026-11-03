@@ -1,3 +1,4 @@
+import { ehDragao, porteDoDragao } from './porte-dragoes';
 import { classeDe, progressoReforcosGuerreiro } from '../combat/ajustes-classes';
 import { velocidadeEncarnacao } from '../combat/encarnacao';
 import { celulaOcupada } from '../combat/geometria';
@@ -45,6 +46,9 @@ export const VETOR_DIR: Readonly<Record<Dir8, readonly [number, number]>> = {
 
 /** A escala da direção quantizada (o comando `mover` leva inteiros em ±ESCALA_RUMO). */
 export const ESCALA_RUMO = 1000;
+
+/** 03/11/2026: asas e pernas do dragão não atravessam paredes; colisão entre atores conserva as regras de combate. */
+export const raioNoTerreno = (e: Entidade, ctx: ContextoSimulacao): number => ehDragao(e.preset) ? porteDoDragao(e.nivel,ctx.balance).raio : ctx.balance.movimento.raioCorpo;
 /** O maior trecho andado de uma vez: menor que o raio do corpo, nenhuma quina passa no meio. */
 const SUBPASSO = 0.2;
 /** Chegou ao ponto (em células). */
@@ -101,12 +105,13 @@ export function planejarCaminho(
 ): boolean {
   const origem = { x: e.x, y: e.y };
   const celula = { x: Math.round(destino.x), y: Math.round(destino.y) };
-  const resultado = perigo ? caminhoComCusto(ctx.fase, origem, celula, maxPassos, perigo, ctx.balance.ia.custoPerigo) : caminho(ctx.fase, origem, celula, maxPassos);
+  const livre=ehDragao(e.preset)?(x:number,y:number)=>corpoCabe(ctx.fase,x,y,raioNoTerreno(e,ctx)):undefined;
+  const resultado = perigo ? caminhoComCusto(ctx.fase, origem, celula, maxPassos, perigo, ctx.balance.ia.custoPerigo,livre) : caminho(ctx.fase, origem, celula, maxPassos,livre);
   if (resultado.status !== 'alcancado') {
     saida.push({ t: 'caminhoFalhou', tick, id: e.id, status: resultado.status });
     return false;
   }
-  const r = ctx.balance.movimento.raioCorpo;
+  const r = raioNoTerreno(e,ctx);
   const largura = ctx.fase.largura;
   // Na suavização, o perigo que a IA evita conta como parede (o atalho não corta pelas brasas).
   const barreira: Barreira | null = perigo ? (x, y) => perigo[y * largura + x] === 1 : null;
@@ -143,7 +148,7 @@ export function planejarIrPara(e: Entidade, destino: Celula, ctx: ContextoSimula
   const dx = ponto.x - e.px;
   const dy = ponto.y - e.py;
   const d = Math.sqrt(dx * dx + dy * dy);
-  const r = ctx.balance.movimento.raioCorpo;
+  const r = raioNoTerreno(e,ctx);
   let alcance = 0;
   for (let s = PASSO_RETA; s <= d + EPS; s += PASSO_RETA) {
     if (!corpoCabe(fase, e.px + (dx / d) * s, e.py + (dy / d) * s, r)) break;
@@ -169,7 +174,7 @@ export function pararMovimento(e: Entidade): void {
 
 /** A entidade pode entrar na célula agora (terreno, muralha e a célula de outra entidade que a bloqueia)? */
 export function celulaLivre(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: ContextoSimulacao): boolean {
-  return !muralhaEm(estado, x, y) && passavel(ctx.fase, x, y) && celulaLivrePara(e, x, y, estado.entidades, ctx.balance.colisao);
+  return !muralhaEm(estado, x, y) && (ehDragao(e.preset)?corpoCabe(ctx.fase,x,y,raioNoTerreno(e,ctx)):passavel(ctx.fase,x,y)) && celulaLivrePara(e, x, y, estado.entidades, ctx.balance.colisao);
 }
 
 export function moverEntidades(
@@ -343,7 +348,7 @@ function contornar(e: Entidade, sx: number, sy: number, estado: EstadoJogo, ctx:
 
 /** O corpo da entidade cabe em (x, y): terreno, muralhas e quem a bloqueia (só barra quem se aproxima). */
 function cabe(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: ContextoSimulacao, grade?: GradeDeCorpos): boolean {
-  const r = ctx.balance.movimento.raioCorpo;
+  const r = raioNoTerreno(e,ctx);
   if (!corpoCabe(ctx.fase, x, y, r, (i, j) => muralhaEm(estado, i, j) !== undefined)) return false;
   // Marco 30 (30/10/2026, D-129): o monstro não entra no refúgio (os muros da vila do Mundo).
   if (barradoNoRefugio(e) && emRefugio(ctx.fase, x, y)) return false;

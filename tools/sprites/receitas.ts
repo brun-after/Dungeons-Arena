@@ -99,6 +99,8 @@ export interface Receita {
   cabeca?: string;
   /** A altura da pessoa em células (o jogador: 1,12). */
   altura: number;
+  /** 03/11/2026: centraliza criaturas cujo modelo de origem não tem os pés na origem. */
+  apoiarNoChao?: boolean;
   pxCelula?: number;
   /** Largura extra (o orc, o troll): multiplica x e z. */
   largura?: number;
@@ -326,7 +328,7 @@ export const RECEITAS: Receita[] = [
 // 02/11/2026: dragão CC0 de Cethiel/Drummyfish, textura negra e anatomia detalhada.
 // A cor elemental vem da energia em volta do corpo, não das escamas.
 for (const elemento of ['fogo', 'gelo', 'raio', 'veneno'] as const) {
-  RECEITAS.push({ nome: `dragao_${elemento}`, corpo: 'cethiel:dragon.dae', altura: 3.3, pxCelula: 27,
-    exposicao: 2, cores: { '': 0xd9dbe2 }, quadro: { largura: 7, altura: 5.2, baixo: 1.5 },
+  RECEITAS.push({ nome: `dragao_${elemento}`, corpo: 'cethiel:dragon.dae', altura: 3.3, pxCelula: 21, apoiarNoChao: true,
+    exposicao: 2, cores: { '': 0xd9dbe2 }, quadro: { largura: 9, altura: 7.2, baixo: 2.7 },
     animacoes: { parado: 'cethiel_idle:padrao', andar: 'cethiel_walk:padrao', golpe: 'cethiel_attack:padrao', conjurar: 'cethiel_attack:padrao', morte: 'cethiel_die:padrao' } });
 }

@@ -1,6 +1,6 @@
 # Decisões de projeto
 
-**Versão:** 0.73 · **Data:** 02/11/2026
+**Versão:** 0.74 · **Data:** 03/11/2026
 
 > **Histórico**
 > - **0.72 (31/10/2026)**: D-131: o golpe de cada tipo de arma, a arma de arremesso em voo com a forma dela, o passo no golpe e na conjuração em movimento, a frente da arma por raios, a runa do elemento no tomo e o voo do falcão acima da cabeça.
@@ -3663,3 +3663,17 @@ e anúncio lucrativo das pedras gratuitas. Capacidade de pilhas considera a refe
 Ofertas externas usam janelas em ticks e hash separado do RNG de combate; compra confere expiração no servidor.
 Dungeons oferecem estoque superior permanente e lojas geradas admitem até 64 itens, mantendo baús no limite
 existente. Detalhes e necessidade de avaliação com pessoas em `docs/EXPANSAO-ECLIPSE.md`.
+
+### Porte e apoio dos dragões — 03/11/2026
+
+O modelo Collada tinha origem deslocada e quadros cortados, e o atlas de 3,3 células ainda recebia
+o aumento genérico de boss. Normalizar a pele posada: centralizar no plano horizontal, apoiar a base
+no chão, retirar deslocamento horizontal da animação e impedir penetração no chão em todas as poses.
+Ampliar o enquadramento, incluindo a morte, mantendo cada dimensão do atlas abaixo de 4096 pixels.
+
+Uma regra pura em `world/porte-dragoes.ts`, com números em `balance.dragoes`, define o crescimento de
+1,1 a 2,2 células nos níveis 1 a 100. O render usa esse fator sem somar o aumento genérico de boss.
+Sombras e indicadores conservam escala própria. Interiores com dragão recebem salas e corredores
+proporcionais e deixam de colocar pilares no caminho. As clareiras externas preservam construções.
+Busca de caminho, suavização e integração verificam a folga do corpo contra o terreno; a colisão
+entre atores conserva as regras existentes. Não reduzir a arte para disfarçar recortes no atlas.

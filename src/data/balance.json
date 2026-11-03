@@ -1,4 +1,5 @@
 {
+  "dragoes": { "alturaAtlas": 3.3, "larguraAtlas": 8, "alturaMin": 1.1, "alturaMax": 2.2, "nivelMax": 100, "folgaCorredor": 1, "salaMin": 12, "salaPorCorredor": 3, "salaExtra": 4, "areaPorSala": 2 },
   "necromancia": { "ataquesPorInvocacao": 12, "resistenciaPorSabPct": 0.5, "resistenciaSabMaxPct": 25, "danoPct": 75, "servosExtras": 8, "retornoServoMs": 8000, "duracaoMortoMs": 20000, "raioColheita": 6, "ecoRecargaMs": 30000, "vidaBase": 24, "vidaPorNivel": 3, "vidaServoPct": 100, "alcanceRitual": 6, "distanciaRetorno": 10, "atributoPorInt": 1, "perdaPorQuantidade": 0.8 },
   "versao": 36,
   "ajustesClasses": {

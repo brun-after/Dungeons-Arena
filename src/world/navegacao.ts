@@ -20,9 +20,9 @@ const VIZINHOS: readonly (readonly [number, number])[] = [
   [-1, 0],
 ];
 
-export function caminho(fase: Fase, origem: Celula, destino: Celula, maxPassos = 60): ResultadoCaminho {
+export function caminho(fase: Fase, origem: Celula, destino: Celula, maxPassos = 60, livre?: (x: number,y: number)=>boolean): ResultadoCaminho {
   if (origem.x === destino.x && origem.y === destino.y) return { status: 'alcancado', passos: [] };
-  if (!passavel(fase, destino.x, destino.y)) return { status: 'inacessivel', passos: [] };
+  if ((!passavel(fase, destino.x, destino.y) || livre?.(destino.x,destino.y) === false)) return { status: 'inacessivel', passos: [] };
 
   const { largura } = fase;
   const indice = (x: number, y: number) => y * largura + x;
@@ -46,7 +46,7 @@ export function caminho(fase: Fase, origem: Celula, destino: Celula, maxPassos =
     for (const [dx, dy] of VIZINHOS) {
       const nx = cx + dx;
       const ny = cy + dy;
-      if (!passavel(fase, nx, ny)) continue;
+      if ((!passavel(fase, nx, ny) || livre?.(nx,ny) === false)) continue;
       const vizinho = indice(nx, ny);
       if (veioDe[vizinho] !== -1) continue;
       veioDe[vizinho] = atual;
@@ -157,9 +157,9 @@ export function alcancaveisComPortas(fase: Fase, origem: Celula): Uint8Array {
  * limite de passos do `caminho`; sem perigo no mapa, devolve o mesmo caminho que ele. Se só houver caminho pelo
  * perigo, atravessa (o custo só desempata).
  */
-export function caminhoComCusto(fase: Fase, origem: Celula, destino: Celula, maxPassos: number, perigo: Uint8Array, custoPerigo: number): ResultadoCaminho {
+export function caminhoComCusto(fase: Fase, origem: Celula, destino: Celula, maxPassos: number, perigo: Uint8Array, custoPerigo: number, livre?: (x: number,y: number)=>boolean): ResultadoCaminho {
   if (origem.x === destino.x && origem.y === destino.y) return { status: 'alcancado', passos: [] };
-  if (!passavel(fase, destino.x, destino.y)) return { status: 'inacessivel', passos: [] };
+  if ((!passavel(fase, destino.x, destino.y) || livre?.(destino.x,destino.y) === false)) return { status: 'inacessivel', passos: [] };
 
   const { largura } = fase;
   const total = largura * fase.altura;
@@ -190,7 +190,7 @@ export function caminhoComCusto(fase: Fase, origem: Celula, destino: Celula, max
       for (const [dx, dy] of VIZINHOS) {
         const nx = cx + dx;
         const ny = cy + dy;
-        if (!passavel(fase, nx, ny)) continue;
+        if ((!passavel(fase, nx, ny) || livre?.(nx,ny) === false)) continue;
         const vizinho = ny * largura + nx;
         const novo = c + 1 + (perigo[vizinho] === 1 ? custoPerigo : 0);
         const antigo = custo[vizinho] as number;

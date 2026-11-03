@@ -427,11 +427,18 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
 
   // A altura: a pessoa parada (o primeiro quadro do parado) mede `altura` células.
   pose(mt, clipes.parado, 0);
-  const caixa = new THREE.Box3().setFromObject(mt.grupo);
+  const caixa = new THREE.Box3().setFromObject(mt.grupo, !!r.apoiarNoChao);
   const k = r.altura / (caixa.max.y - caixa.min.y || 1);
   const largura = r.largura ?? 1;
   mt.grupo.scale.set(k * largura, k, k * largura);
   mt.grupo.updateMatrixWorld(true);
+  // 03/11/2026: o dragão Collada tem a origem deslocada. Medir a pele posada, não a caixa em bind pose.
+  const apoio = new THREE.Vector3();
+  if (r.apoiarNoChao) {
+    const limites = new THREE.Box3().setFromObject(mt.grupo, true);
+    limites.getCenter(apoio);
+    apoio.set(-apoio.x, -limites.min.y, -apoio.z);
+  }
   for (const a of r.armas ?? []) await armar(mt, a, urls);
   if (r.armadura) {
     const { cabeca, corpo: peitoral, acento } = r.armadura;
@@ -496,7 +503,7 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
   const maos = comCorpo && r.equipamento ? { d: [] as number[], e: [] as number[] } : null;
   const telas = montadas.map(() => tela());
 
-  const bacia = mt.ossos.get('pelvis') ?? null;
+  const bacia = mt.ossos.get('pelvis') ?? (r.apoiarNoChao ? mt.ossos.get('base') : null) ?? null;
   const aplicar = (cm: CamadaMontada | null) => {
     for (const m of corpo) {
       m.material = cm ? (cm.mats.get(m) ?? m.material) : (originais.get(m) ?? m.material);
@@ -527,11 +534,17 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
         else poseAndando(mt, clipes.andar, ((clipes.andar?.duration ?? 0) * i) / n, c, t);
         // Os golpes de arma avançam o corpo (o bote do corte pesado): a bacia fica no lugar do começo, no chão, para
         // o corpo não sair do quadro (o jogo já anda a entidade).
-        if (ehVariante(e) && bacia) {
+        if ((ehVariante(e) || r.apoiarNoChao) && bacia) {
           if (i === 0) inicioDaBacia = pivo.worldToLocal(bacia.getWorldPosition(new THREE.Vector3()));
           const agora = pivo.worldToLocal(bacia.getWorldPosition(new THREE.Vector3()));
           mt.grupo.position.set(inicioDaBacia.x - agora.x, 0, inicioDaBacia.z - agora.z);
           mt.grupo.updateMatrixWorld(true);
+        }
+        if (r.apoiarNoChao) {
+          mt.grupo.position.add(apoio);
+          pivo.updateMatrixWorld(true);
+          const limites = new THREE.Box3().setFromObject(mt.grupo,true);
+          if(limites.min.y<0)mt.grupo.position.y-=limites.min.y;
         }
         // As criaturas de geometria: o tronco do estado de base (o passo delas não se separa).
         mt.animar?.(base, ciclo ? i / n : i / Math.max(1, n - 1));
