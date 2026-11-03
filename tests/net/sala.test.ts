@@ -45,6 +45,24 @@ describe('entrada na sala', () => {
 });
 
 describe('validação de comandos (§3.6)', () => {
+  it('estado completo e patch só confirmam comandos depois da execução', () => {
+    const sala = novaSala();
+    const j = entrar(sala);
+    j.cmd({ t: 'mover', dir: 'N' }, { tickCliente: 9 });
+    // Um comando mais novo já executado não pode confirmar o anterior ainda na fila.
+    j.cmd({ t: 'mover', dir: 'S' });
+    for (let i = 0; i < 3; i++) sala.tick(DT_MS);
+    expect(j.de('estado').at(-1)?.ackSeq).toBe(0);
+    for (let i = 0; i < 3; i++) sala.tick(DT_MS);
+    expect(j.de('patch').at(-1)?.ackSeq).toBe(0);
+    j.enviar({ t: 'ressincronizar' });
+    for (let i = 0; i < 3; i++) sala.tick(DT_MS);
+    expect(j.de('estado').at(-1)?.ackSeq).toBe(0);
+    for (let i = 0; i < 3; i++) sala.tick(DT_MS);
+    expect(j.de('patch').at(-1)?.ackSeq).toBe(2);
+    expect(j.entidade()?.direcao).toBe('N');
+  });
+
   it('reenvio do mesmo seq não reaplica (deduplicação)', () => {
     const sala = novaSala();
     const j = entrar(sala);
