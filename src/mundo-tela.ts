@@ -68,7 +68,7 @@ function botao(texto: string, fazer: () => void, classe = 'botao-menu'): HTMLBut
 
 function voltarAoMenu(): HTMLAnchorElement {
   const a = document.createElement('a');
-  a.className = 'botao-menu';
+  a.className = 'link-menu';
   a.href = './';
   a.textContent = t('mundo.voltar');
   return a;
@@ -99,10 +99,6 @@ function contaLocal(): string {
 async function tokenDaConta(): Promise<string | null> {
   const nuvem = nuvemDoBuild();
   return nuvem ? await nuvem.token() : `local:${contaLocal()}`;
-}
-
-function nomeDaClasse(id: string): string {
-  return conteudo.classes.get(id)?.nome ?? id;
 }
 
 function nomeDaVila(id: string): string {
@@ -141,12 +137,12 @@ export async function iniciarMundo(raiz: HTMLElement): Promise<void> {
     const cartao = document.createElement('div');
     cartao.className = 'cartao-slot';
     const h = document.createElement('h2');
-    h.textContent = t('mundo.slot', { n: slot });
+    h.textContent = p?.nome ?? t('mundo.slot', { n: slot });
     cartao.append(h);
     if (p) {
       const resumo = document.createElement('p');
       resumo.className = 'resumo-slot';
-      resumo.textContent = t('mundo.resumo', { nome: p.nome, classe: nomeDaClasse(p.classeId), nivel: p.nivel, vila: nomeDaVila(p.vilaSalva) });
+      resumo.textContent = t('mundo.localDoPersonagem', { slot, vila: nomeDaVila(p.vilaSalva) });
       const jogar = botao(t('mundo.jogar'), () => {
         void jogarNoMundo(raiz, servidor, token, { lugar: `regiao:${p.vilaSalva}`, slot });
       });
@@ -186,8 +182,11 @@ export async function iniciarMundo(raiz: HTMLElement): Promise<void> {
       const acoes = document.createElement('div');
       acoes.className = 'acoes-slot';
       acoes.append(jogar, excluir);
-      cartao.append(resumo, painelPersonagem(p.classeId, p.previa ? { ...p.previa, nivel: p.nivel } : undefined), acoes);
-
+      cartao.append(resumo, painelPersonagem(p.classeId, p.previa ? { ...p.previa, nivel: p.nivel } : undefined));
+      if (!p.previa?.atributos) {
+        cartao.append(paragrafo('A ficha completa deste personagem ainda não está disponível no servidor.'));
+      }
+      cartao.append(acoes);
     } else {
       cartao.append(formularioDeCriacao(slot, (classeId, nome) => {
         void jogarNoMundo(raiz, servidor, token, { lugar: `regiao:${reino.inicio}`, slot, criar: { classeId, nome } });

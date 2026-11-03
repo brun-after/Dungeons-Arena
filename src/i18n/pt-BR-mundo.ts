@@ -57,7 +57,7 @@ export const textosMundo = {
   'mundo.falhaLista': 'Não deu para buscar os personagens. Tente de novo em instantes.',
   'mundo.slot': 'Personagem {n}',
   'mundo.vazio': 'Vazio',
-  'mundo.resumo': '{nome}, {classe} nível {nivel}. Salvo em {vila}.',
+  'mundo.localDoPersonagem': 'Personagem {slot} · Salvo em {vila}.',
   'mundo.jogar': 'Jogar',
   'mundo.excluir': 'Excluir',
   'mundo.excluirTitulo': 'Excluir {nome}',

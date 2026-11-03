@@ -1,37 +1,10 @@
 import { lerImagemToken } from '../plataforma/token';
 import { conteudoOficial } from '../core/conteudo';
-import { retrato3d } from '../render/retrato';
+import { retratoIlustrado } from './retrato-ilustrado';
 import type { Entidade } from '../entities/entidade';
 import classes from '../data/classes.json';
 import { NOMES_ATRIBUTOS } from '../progression/itens';
 import { nomeDoAtributo } from './dica-atributo';
-
-/** Aproveita a área do painel sem ampliar a margem transparente do atlas. */
-function recortarRetrato(origem: HTMLCanvasElement): HTMLCanvasElement {
-  const { width, height } = origem;
-  const ctx = origem.getContext('2d');
-  if (!ctx) return origem;
-  const pixels = ctx.getImageData(0, 0, width, height).data;
-  let esquerda = width;
-  let topo = height;
-  let direita = -1;
-  let base = -1;
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      if (!pixels[(y * width + x) * 4 + 3]) continue;
-      esquerda = Math.min(esquerda, x);
-      topo = Math.min(topo, y);
-      direita = Math.max(direita, x);
-      base = Math.max(base, y);
-    }
-  }
-  if (direita < esquerda) return origem;
-  const recorte = document.createElement('canvas');
-  recorte.width = direita - esquerda + 1;
-  recorte.height = base - topo + 1;
-  recorte.getContext('2d')?.drawImage(origem, esquerda, topo, recorte.width, recorte.height, 0, 0, recorte.width, recorte.height);
-  return recorte;
-}
 
 export function retratoPersonagem(classeId: string, personagem?: Pick<Entidade, 'aparencia'>): HTMLElement {
   const host = document.createElement('figure');
@@ -49,10 +22,8 @@ export function retratoPersonagem(classeId: string, personagem?: Pick<Entidade, 
       finally { URL.revokeObjectURL(url); }
       return;
     }
-    const retrato = retrato3d(modelo, personagem?.aparencia ?? null);
-    if (!retrato || !await retrato.pronto) throw new Error('retrato indisponível');
-    const canvas = recortarRetrato(retrato.canvas);
-    canvas.className = 'retrato-classe retrato-3d';
+    const canvas = await retratoIlustrado(modelo, personagem?.aparencia ?? null);
+    canvas.className = 'retrato-classe retrato-ilustrado';
     canvas.setAttribute('role', 'img');
     canvas.setAttribute('aria-label', `Aparência de ${classeId}`);
     host.replaceChildren(canvas);
