@@ -1,3 +1,4 @@
+import { marcadorDaEntidade } from './minimapa';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import { t } from '../i18n';
@@ -9,12 +10,12 @@ import type { OrientacaoMundo } from './orientacao-mundo';
 
 export function mapaDoLugar(ctx: ContextoSimulacao, estado: () => EstadoJogo | null, idLocal: string, lugar: string, descobertas: readonly string[], orientacao?: OrientacaoMundo): HTMLCanvasElement {
   const c = document.createElement('canvas');
-  c.className = 'mapa-terreno'; c.width = 1000; c.height = 660; c.tabIndex = 0;
+  c.className = 'mapa-terreno'; c.width = 1000; c.height = 520; c.tabIndex = 0;
   c.setAttribute('aria-label', t('mundo.mapa.pontos'));
   const g = c.getContext('2d');
   if (!g) return c;
   const fase = ctx.fase;
-  const mapa = cartografia(fase.largura, fase.altura, c.width, c.height, 48);
+  const mapa = cartografia(fase.largura, fase.altura, c.width, c.height, 10);
   const reino = reinoDoConteudo(ctx.conteudo);
   const regiao = reino.regioes.find(r => lugar === `regiao:${r.id}`);
   const entradas = regiao?.estruturas.filter(e => !e.escondida || descobertas.includes(`${e.destino.tipo}:${e.destino.id}`)) ?? [];
@@ -29,7 +30,6 @@ export function mapaDoLugar(ctx: ContextoSimulacao, estado: () => EstadoJogo | n
   const fg = fundo.getContext('2d');
   const m = mapa.matriz;
   if (fg) {
-    fg.fillStyle = '#101e25'; fg.fillRect(0, 0, c.width, c.height);
     fg.save(); fg.transform(m.a, m.b, m.c, m.d, m.e, m.f);
     const cores: Record<string, string> = { mato: '#3d6051', estrada: '#b5a17b', agua: '#28586c', piso: '#74736b', fachada: '#b3aa91', parede: '#263d39', saida: '#ecd395' };
     for (let y = 0; y < fase.altura; y++) for (let x = 0; x < fase.largura; x++) {
@@ -64,6 +64,7 @@ export function mapaDoLugar(ctx: ContextoSimulacao, estado: () => EstadoJogo | n
     g.fillStyle = cor; g.textAlign = 'center'; g.fillText(nome, tx, ty, largura - 12);
   };
   const desenhar = () => {
+    g.clearRect(0, 0, c.width, c.height);
     g.drawImage(fundo, 0, 0);
     const atual = estado(), eu = atual?.entidades.find(e => e.id === idLocal);
     const etapa = orientacao?.destino ? proximaEtapa(reino, lugar, orientacao.destino, fase) : null;
@@ -88,10 +89,15 @@ export function mapaDoLugar(ctx: ContextoSimulacao, estado: () => EstadoJogo | n
       }
       g.closePath(); g.fill();
     }
-    for (const aliado of atual?.entidades ?? []) if (aliado.id !== idLocal && eu?.grupo && aliado.grupo === eu.grupo && aliado.arquetipo === 'jogador') {
-      const p = mapa.ponto(aliado.x, aliado.y);
-      g.fillStyle = '#65c6ff'; g.beginPath(); g.arc(p.x, p.y, 4, 0, Math.PI * 2); g.fill();
-      rotulo(aliado.nome, p.x, p.y, '#65c6ff');
+    for (const entidade of atual?.entidades ?? []) {
+      if (entidade.id === idLocal) continue;
+      const marcador = marcadorDaEntidade(ctx, idLocal, entidade, eu);
+      if (!marcador) continue;
+      const p = mapa.ponto(entidade.x, entidade.y);
+      g.fillStyle = marcador.cor;
+      g.beginPath();
+      g.arc(p.x, p.y, marcador.r * 1.8, 0, Math.PI * 2);
+      g.fill();
     }
     if (eu) {
       const p = mapa.ponto(eu.x, eu.y);
@@ -129,6 +135,6 @@ export function mapaDoLugar(ctx: ContextoSimulacao, estado: () => EstadoJogo | n
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); marcar(cursor.x, cursor.y); }
   });
   desenhar();
-  const timer = window.setInterval(() => { if (c.isConnected) desenhar(); else clearInterval(timer); }, 200);
+  const timer = window.setInterval(() => { if (c.isConnected) desenhar(); else clearInterval(timer); }, 100);
   return c;
 }

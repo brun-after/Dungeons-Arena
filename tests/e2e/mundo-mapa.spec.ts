@@ -10,11 +10,28 @@ test('expande pelo minimapa, marca lugares e pontos e apaga a faixa em cinco seg
   await page.locator('#mundo-nome-1').locator('..').getByRole('button', { name: 'Começar' }).click();
   const mini = page.locator('.minimapa');
   await expect(mini).toBeVisible({ timeout: 30000 });
+  await expect(page.locator('.faixa-lugar')).toBeAttached({ timeout: 30000 });
   await page.clock.fastForward(5100);
   await expect(page.locator('.faixa-lugar')).toHaveCSS('opacity', '0');
   await mini.click();
   const mapa = page.locator('.mapa-expandido');
   await expect(mapa).toBeVisible();
+  const terreno = mapa.locator('.mapa-terreno');
+  const larguraInicial = await terreno.evaluate(canvas => canvas.clientWidth);
+  if (testInfo.project.name === 'celular') {
+    await terreno.evaluate(canvas => {
+      const tocar = (id: number, x: number) => new Touch({ identifier: id, target: canvas, clientX: x });
+      canvas.dispatchEvent(new TouchEvent('touchstart', { touches: [tocar(1, 20), tocar(2, 60)], cancelable: true }));
+      canvas.dispatchEvent(new TouchEvent('touchmove', { touches: [tocar(1, 20), tocar(2, 100)], cancelable: true }));
+      canvas.dispatchEvent(new TouchEvent('touchend'));
+    });
+  } else {
+    await terreno.hover();
+    await page.mouse.wheel(0, -120);
+  }
+  await expect.poll(() => terreno.evaluate(canvas => canvas.clientWidth)).toBeGreaterThan(larguraInicial);
+  await mapa.getByRole('button', { name: 'Fechar', exact: true }).click();
+  await mini.click();
   await expect(mapa).toContainText('Você está em: Vila do Centro');
   await expect(mapa).toContainText('Reino do Eclipse');
   await mapa.getByRole('button', { name: 'Geografia do reino', exact: true }).click();

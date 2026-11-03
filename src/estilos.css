@@ -3189,6 +3189,22 @@ body.toque .guia-mundo { bottom: calc(190px + var(--seguro-base)); max-width: ca
   .mapa-terreno { min-width: 0; }
 }
 
+/* O terreno isométrico ocupa a vista sem uma moldura retangular. */
+.mapa-terreno { border: 0; border-radius: 0; background: transparent; touch-action: pan-x pan-y; }
+.janela-cartografia { max-height: max(220px, calc(100dvh - 330px)); overscroll-behavior: contain; }
+.janela-cartografia .mapa-terreno {
+  width: calc(min(100%, max(220px, 100dvh - 330px) * 1.923) * var(--zoom-mapa, 1));
+  margin: 0 auto;
+}
+body .minimapa.minimapa-mundo {
+  width: 176px;
+  height: 106px;
+  border: 0;
+  background: transparent;
+  touch-action: none;
+}
+body.toque .minimapa.minimapa-mundo { width: 132px; height: 82px; }
+
 /* Navegacao persistente e paineis de inventario independentes. */
 .tela-menu, dialog.modal { background-color: #101010; color: #fafafa; }
 .cartao-slot { background: #171717; border-color: #444; border-top: 2px solid var(--destaque); }

@@ -39,8 +39,9 @@ test('Necromante é selecionável ao criar um personagem', async ({ page }) => {
   await page.goto('/?jogo=campanha&slot=1');
   const cartao = page.locator('[data-classe="necromante"]');
   await expect(cartao.getByRole('heading', { name: 'Necromante', exact: true })).toBeVisible();
-  // Marco 26 (D-110): a seleção mostra a lore e o estilo; as afinidades foram para o Dom da classe, na mochila.
-  await expect(cartao).toContainText('Estilo:');
+  await expect(cartao.getByRole('heading', { name: 'Atributos', exact: true })).toBeVisible();
+  await expect(cartao.getByRole('heading', { name: 'Habilidades habilitadas', exact: true })).toBeVisible();
+  await expect(cartao.getByText('Dízimo vital', { exact: true })).toBeVisible();
   await cartao.getByRole('link', { name: 'Jogar de Necromante' }).click();
   await expect(page.getByTestId('habilidade-dizimo_vital')).toBeVisible({ timeout: 30000 });
   // Marco 24 (D-094): o kit inicial é Dardo funesto e Dízimo vital (classe) e a Barreira (geral).

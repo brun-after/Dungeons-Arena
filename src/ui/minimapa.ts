@@ -9,6 +9,7 @@ import type { Entidade } from '../entities/entidade';
 import { relacao } from '../modos/relacao';
 import { t } from '../i18n';
 import { tipoEm, type Fase } from '../world/fase';
+import { ligarZoomMapa } from './zoom-mapa';
 import { cartografia, rosaDosVentos } from './cartografia';
 
 // Marco 29 (D-128): o exterior do Mundo (mato, estrada, água e fachadas).
@@ -36,37 +37,7 @@ function terrenoEmCanvas(fase: Fase): HTMLCanvasElement {
   return c;
 }
 
-export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: boolean, destino?: () => { x: number; y: number } | null): Minimapa {
-  const lado = toque ? 90 : 120;
-  const intervalo = toque ? 333 : 100;
-  const canvas = document.createElement('canvas');
-  canvas.className = 'minimapa';
-  canvas.width = lado;
-  canvas.height = lado;
-  canvas.setAttribute('aria-label', t('minimapa.rotulo'));
-  canvas.setAttribute('role', 'img');
-  const g = canvas.getContext('2d');
-  const fase = ctx.fase;
-  const mundo = ctx.modo.id === 'mundo';
-  canvas.classList.toggle('minimapa-mundo', mundo);
-  const mapa = cartografia(fase.largura, fase.altura, lado, lado, 7);
-  const fundo = terrenoEmCanvas(fase);
-  const escala = Math.min(lado / fase.largura, lado / fase.altura);
-  const ox = (lado - fase.largura * escala) / 2;
-  const oy = (lado - fase.altura * escala) / 2;
-  const px = (cx: number, cy: number) => mundo ? mapa.ponto(cx, cy).x : ox + (cx + 0.5) * escala;
-  const py = (cy: number, cx: number) => mundo ? mapa.ponto(cx, cy).y : oy + (cy + 0.5) * escala;
-  let ultimo = -Infinity;
-
-  const ponto = (x: number, y: number, r: number, cor: string) => {
-    if (!g) return;
-    g.fillStyle = cor;
-    g.beginPath();
-    g.arc(px(x, y), py(y, x), r, 0, Math.PI * 2);
-    g.fill();
-  };
-
-  const corDe = (e: Entidade, eu: Entidade | undefined): { cor: string; r: number } | null => {
+export function marcadorDaEntidade(ctx: ContextoSimulacao, idLocal: string, e: Entidade, eu: Entidade | undefined): { cor: string; r: number } | null {
     if (e.morto) return null;
     if (e.id === idLocal) return { cor: '#ffffff', r: 3 };
     // Marco 30 (30/10/2026, D-129): os do meu grupo do Mundo, em azul e maiores.
@@ -79,14 +50,58 @@ export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: bo
     if (e.arquetipo === 'boss') return { cor: '#f1c40f', r: 4 };
     const ativo = e.ia?.modo === 'perseguindo' || e.controlador !== 'ia';
     return { cor: '#e74c3c', r: ativo ? 2.5 : 1.5 };
+}
+
+export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: boolean, destino?: () => { x: number; y: number } | null): Minimapa {
+  const lado = toque ? 90 : 120;
+  const intervalo = toque ? 333 : 100;
+  const canvas = document.createElement('canvas');
+  canvas.className = 'minimapa';
+  const mundo = ctx.modo.id === 'mundo';
+  canvas.width = mundo ? (toque ? 132 : 176) : lado;
+  canvas.height = mundo ? (toque ? 82 : 106) : lado;
+  canvas.setAttribute('aria-label', t('minimapa.rotulo'));
+  canvas.setAttribute('role', 'img');
+  const g = canvas.getContext('2d');
+  const fase = ctx.fase;
+  canvas.classList.toggle('minimapa-mundo', mundo);
+  const mapa = cartografia(fase.largura, fase.altura, canvas.width, canvas.height, 3);
+  const fundo = terrenoEmCanvas(fase);
+  const escala = Math.min(lado / fase.largura, lado / fase.altura);
+  const ox = (lado - fase.largura * escala) / 2;
+  const oy = (lado - fase.altura * escala) / 2;
+  const px = (cx: number, cy: number) => mundo ? mapa.ponto(cx, cy).x : ox + (cx + 0.5) * escala;
+  const py = (cy: number, cx: number) => mundo ? mapa.ponto(cx, cy).y : oy + (cy + 0.5) * escala;
+  let ultimo = -Infinity;
+  let zoom = 1;
+  if (mundo) ligarZoomMapa(canvas, fator => {
+    zoom = Math.max(1, Math.min(4, zoom * fator));
+    ultimo = -Infinity;
+  });
+
+  const ponto = (x: number, y: number, r: number, cor: string) => {
+    if (!g) return;
+    g.fillStyle = cor;
+    g.beginPath();
+    g.arc(px(x, y), py(y, x), r / zoom, 0, Math.PI * 2);
+    g.fill();
   };
+
 
   return {
     elemento: canvas,
     atualizar: (estado, agoraMs) => {
       if (!g || agoraMs - ultimo < intervalo) return;
       ultimo = agoraMs;
-      g.clearRect(0, 0, lado, lado);
+      g.clearRect(0, 0, canvas.width, canvas.height);
+      const eu = estado.entidades.find(e => e.id === idLocal);
+      g.save();
+      if (mundo && zoom > 1) {
+        const centro = eu ? mapa.ponto(eu.x, eu.y) : { x: canvas.width / 2, y: canvas.height / 2 };
+        g.translate(canvas.width / 2, canvas.height / 2);
+        g.scale(zoom, zoom);
+        g.translate(-centro.x, -centro.y);
+      }
       g.imageSmoothingEnabled = false;
       if (mundo) {
         g.save();
@@ -94,7 +109,7 @@ export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: bo
         g.transform(m.a, m.b, m.c, m.d, m.e, m.f);
         g.drawImage(fundo, 0, 0);
         g.restore();
-        rosaDosVentos(g, lado / 2, 14, 12);
+
       } else g.drawImage(fundo, ox, oy, fase.largura * escala, fase.altura * escala);
       // Portas e saída: pontos fixos, para a orientação.
       const volta = fase.portaRetorno;
@@ -103,7 +118,6 @@ export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: bo
         ponto(p.a.x, p.a.y, 1.5, '#bb8fce');
         ponto(p.b.x, p.b.y, 1.5, '#bb8fce');
       }
-      const eu = estado.entidades.find((e) => e.id === idLocal);
       const alvo = destino?.();
       if (alvo && eu) {
         g.strokeStyle = '#ffdc73'; g.lineWidth = 1.5; g.setLineDash([3, 3]);
@@ -115,9 +129,11 @@ export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: bo
       for (const a of estado.armadilhas) if (a.reveladaPara.includes(idLocal)) ponto(a.x, a.y, 1.5, '#e67e22');
       // O jogador por último, por cima de todos.
       for (const e of [...estado.entidades].sort((a, b) => Number(a.id === idLocal) - Number(b.id === idLocal))) {
-        const c = corDe(e, eu);
+        const c = marcadorDaEntidade(ctx, idLocal, e, eu);
         if (c) ponto(e.x, e.y, c.r, c.cor);
       }
+      g.restore();
+      if (mundo) rosaDosVentos(g, 17, 13, 12);
       canvas.dataset.atualizado = String(estado.tick);
     },
   };
