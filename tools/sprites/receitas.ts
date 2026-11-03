@@ -114,6 +114,10 @@ export interface Receita {
   /** Escala de ossos por nome (a cabeça grande do esqueleto do KayKit encolhe). */
   ossos?: Record<string, number>;
   exposicao?: number;
+  /** Iluminação em faixas usada apenas durante a geração dos atlas. */
+  manga?: boolean;
+  semCapuz?: boolean;
+  adornosCabeca?: string[];
   /** O quadro (em células, em volta dos pés) quando o modelo é maior que o padrão. */
   quadro?: { largura: number; altura: number; baixo: number };
   /** Armadura fixa no corpo (a sentinela): o grau do elmo e do peito, com a cor de destaque. */
@@ -148,48 +152,59 @@ const CABECA_F = 'base:Superhero_Female_FullBody';
 export const RECEITAS: Receita[] = [
   {
     nome: 'guerreiro',
+    manga: true,
+    semCapuz: true,
+    adornosCabeca: ['cabelo:Hair_SimpleParted', 'cabelo:Hair_Beard'],
     corpo: RANGER_M,
     cabeca: CABECA_M,
     altura: 1.14,
-    cores: { Ranger: 0xc8ccd2, Hair: 0x3a2a1e },
+    cores: { Ranger: 0xa45145, Hair: 0x784628 },
     animacoes: ESPADA,
     equipamento: DO_RANGER,
   },
   {
     nome: 'mago',
+    manga: true,
+    adornosCabeca: ['cabelo:Hair_SimpleParted'],
     corpo: CAMPONES_M,
     cabeca: CABECA_M,
     altura: 1.12,
-    cores: { Peasant: 0x7a90e0, Hair: 0xb8b0a0 },
+    cores: { Peasant: 0x637bb3, Hair: 0x212533 },
     exposicao: 2.1,
     animacoes: MAGIA,
     equipamento: DO_CAMPONES,
   },
   {
     nome: 'arqueiro',
+    manga: true,
+    semCapuz: true,
+    adornosCabeca: ['cabelo:Hair_Long'],
     corpo: RANGER_F,
     cabeca: CABECA_F,
     altura: 1.08,
-    cores: { Ranger: 0x7d9a6a, Hair: 0x5a3a22 },
+    cores: { Ranger: 0x779555, Hair: 0x834832 },
     animacoes: MAGIA,
     equipamento: DO_RANGER,
   },
   {
     nome: 'necromante',
+    manga: true,
     corpo: RANGER_M,
     cabeca: CABECA_M,
     altura: 1.14,
-    cores: { Ranger: 0x8a70a8, Superhero: 0xc8d4c8, Regular: 0xc8d4c8, Hair: 0x1a1a1a },
+    cores: { Ranger: 0x746082, Superhero: 0xd5d1dc, Regular: 0xd5d1dc, Hair: 0xc3b8ce },
     exposicao: 1.8,
     animacoes: MAGIA,
     equipamento: DO_RANGER,
   },
   {
     nome: 'aventureiro',
+    manga: true,
+    adornosCabeca: ['traje:Modular Parts/Male_Ranger_Head_Hood'],
     corpo: CAMPONES_M,
     cabeca: CABECA_M,
     altura: 1.12,
-    cores: { Peasant: 0xa0b4d8, Hair: 0x6a4a2a },
+    cores: { Peasant: 0xa59a6e, Ranger: 0x979c65, Hair: 0x523921 },
     exposicao: 1.8,
     animacoes: HUMANO,
     equipamento: DO_CAMPONES,
