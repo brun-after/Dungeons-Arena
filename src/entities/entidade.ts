@@ -417,6 +417,9 @@ export interface AparenciaEquipada {
   cabeca: string | null;
   corpo: string | null;
   capa: string | null;
+  maos?: string | null;
+  pernas?: string | null;
+  pes?: string | null;
   /** Marco 18 (D-069): a forma da arma (null = sem forma) e o elemento dela. */
   formaArma: string | null;
   elementoArma: string | null;

@@ -7,8 +7,9 @@
 //   já recortadas pelo corpo: vão por cima dele.
 
 export const GRAUS = ['comum', 'incomum', 'raro', 'epico', 'lendario', 'ultima'] as const;
-export const PECAS_DE_ARMADURA = ['capa', 'corpo', 'cabeca'] as const;
+export const PECAS_DE_ARMADURA = ['capa', 'corpo', 'pernas', 'pes', 'maos', 'cabeca'] as const;
 export type PecaDeArmadura = (typeof PECAS_DE_ARMADURA)[number];
+export const pecaDeMembro = (peca: PecaDeArmadura): boolean => peca === 'maos' || peca === 'pernas' || peca === 'pes';
 
 /** As formas (D-069) contam como raridade: a épica, a lendária e a última puxam o grau para cima. */
 const GRAU_DA_FORMA: Readonly<Record<string, number>> = { epica: 3, lendaria: 4, ultima: 5 };

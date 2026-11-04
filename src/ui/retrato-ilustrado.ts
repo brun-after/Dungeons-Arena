@@ -35,10 +35,10 @@ async function arma(ctx: CanvasRenderingContext2D, modelo: string | null, x: num
   const imagem = imagens.get(id) ?? url().then(carregar);
   imagens.set(id, imagem);
   const img = await imagem;
-  const escala = equipado === 'escudo' ? 1.13 : equipado === 'espada' ? 1.05 : livro ? 0.7 : 0.81;
   const { celL, celA, pegaX, pegaY } = medidas;
+  const escala = equipado === 'escudo' ? 1.13 : equipado === 'espada' ? 1.05 : livro ? 91 / celA : 0.81;
   ctx.save();
-  ctx.translate(MARGEM + (livro ? (x < 200 ? 138 : 257) : x), livro ? 304 : 402);
+  ctx.translate(MARGEM + (livro ? (x < 200 ? 130 : 265) : x), livro ? 302 : 402);
   if (equipado === 'espada') ctx.rotate((x < 200 ? 1 : -1) * Math.PI * 0.72);
   else if (livro || !SEM_GIRO.has(equipado)) ctx.rotate((x < 200 ? -1 : 1) * Math.PI / 16);
   ctx.drawImage(img, grauDe(raridade, forma) * celL, 0, celL, celA, -pegaX * escala, -pegaY * escala, celL * escala, celA * escala);
@@ -71,7 +71,13 @@ function armadura(eq: AparenciaEquipada | null, classe: (typeof CLASSES)[number]
     </pattern>
   </defs>`;
   const torso = 'M126 155 Q149 133 167 136 L198 163 231 136 Q254 136 273 155 L259 230 Q245 258 198 272 Q158 261 141 231Z';
-  const peito = eq.corpo ? `
+  const peito = !eq.corpo ? '' : couraca ? `
+    <path fill="#362820" d="M126 150 157 136 177 149 198 174 218 150 242 138 268 151 253 194 260 259 237 281 198 268 161 281 139 261 144 195Z"/>
+    <path fill="url(#metal)" d="M138 151 155 145 176 160 194 190 194 262 162 273 147 254 151 192ZM258 151 240 146 221 161 202 190 202 263 235 273 251 255 245 192Z"/>
+    <path fill="none" stroke="#ba946a" stroke-width="1.7" d="M143 153 154 150 171 163 188 192v66l-26 9-9-14m101-100-13-2-16 14-17 28v65l26 9 11-14"/>
+    <path fill="#735036" d="M180 197h37v9h-37Zm0 21h37v9h-37Zm0 22h37v9h-37Z"/>
+    <path fill="url(#latao)" d="M193 195h11v13h-11Zm0 21h11v13h-11Zm0 22h11v13h-11Z"/>
+  ` : `
     <path fill="#30281f" d="M118 154Q151 129 169 133L198 151 232 132Q254 134 278 155L273 218Q260 262 198 283Q139 262 126 222Z"/>
     <path fill="url(#metal)" d="${torso}"/>
     <path fill="url(#trama)" stroke="none" d="${torso}" opacity=".55"/>
@@ -84,7 +90,8 @@ function armadura(eq: AparenciaEquipada | null, classe: (typeof CLASSES)[number]
     <path fill="url(#latao)" d="M198 176 213 195 198 216 183 195Z"/>
     <path fill="#f7dba4" stroke="none" d="M198 182 203 194 198 199 192 193Z"/>
     <path fill="#c5a771" stroke-width="1.5" d="M118 164a3 3 0 1 0 6 0a3 3 0 1 0-6 0M273 165a3 3 0 1 0 6 0a3 3 0 1 0-6 0"/>
-    <path fill="none" stroke="#e1d9c8" stroke-width="1" opacity=".75" d="m151 184 14-9m-10 14 7-5m62 56 10-5m-92-76 8-5"/>` : '';
+    <path fill="none" stroke="#e1d9c8" stroke-width="1" opacity=".75" d="m151 184 14-9m-10 14 7-5m62 56 10-5m-92-76 8-5"/>
+    ${grauDe(eq.corpo) >= 4 ? '<path fill="url(#metal)" d="M107 163 119 135 139 130 157 145 151 163 126 179 103 178ZM243 145l17-15 21 6 13 29 4 14-25 1-24-18Z"/><path fill="none" stroke="#c9ad7d" stroke-width="2" d="m109 169 15-7 24-15m102 0 25 15 16 8"/>' : ''}`;
   const elmo = !eq.cabeca ? '' : classe === 'arqueiro' && capuz ? `
     <g mask="url(#abertura-capuz)">
     <path fill="#292c20" d="M135 135 145 101Q141 69 160 39Q174 15 195 10Q221 15 239 39Q255 62 251 96L263 129 238 148 196 147 159 150Z"/>
@@ -100,11 +107,16 @@ function armadura(eq: AparenciaEquipada | null, classe: (typeof CLASSES)[number]
     <path fill="url(#trama)" stroke="none" d="M203 18Q244 35 258 119L233 127 226 97Q225 55 199 39Z"/>
     <path fill="none" stroke="#c8b38a" stroke-width="1.5" d="M148 112Q155 59 181 34M233 65Q247 86 251 117"/>
   ` : classe === 'aventureiro' ? `
-    <path fill="url(#viseira)" d="M151 71 152 51Q159 24 195 20Q228 23 242 52L246 73 236 87 225 82 220 70 176 70 169 85 156 85Z"/>
-    <path fill="#37312c" d="M152 74Q175 62 198 64Q222 62 244 74L242 82Q218 72 198 73Q176 73 153 83Z"/>
-    <path fill="none" stroke="#bcb3a1" stroke-width="2" d="M157 56Q168 32 193 26M196 23l1 37m-39 17q29-12 52-7"/>
-    <path fill="none" stroke="#513a2b" stroke-width="4" d="M158 81q1 29 17 40m64-39q-1 27-17 39"/>
-    <path fill="#a5906d" stroke-width="1" d="M164 70a2 2 0 1 0 4 0a2 2 0 1 0-4 0m65 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0"/>
+    <path fill="#30251f" d="M164 61 171 82 177 102 172 108 163 94 157 68ZM236 61 229 82 223 102 228 108 237 94 243 68Z"/>
+    <path fill="url(#elmo)" d="M163 60 165 43Q175 20 195 18Q218 20 232 44L234 60 223 65 176 65Z"/>
+    <path fill="url(#viseira)" d="M153 60 169 54Q197 50 230 54L245 61 242 68 228 70Q196 66 171 70L156 68Z"/>
+    <path fill="none" stroke="#c7b393" stroke-width="1.6" d="M168 49Q177 27 193 24M197 21l1 30m-39 13q30-9 62-5"/>
+    <path fill="#a5906d" stroke-width="1" d="M171 60a2 2 0 1 0 4 0a2 2 0 1 0-4 0m52 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0"/>
+  ` : classe === 'necromante' ? `
+    <path fill="#251d2a" d="M158 85 154 61 158 46 152 25 171 42 184 27 198 23 213 27 226 42 245 25 239 46 243 61 237 86 224 99 216 120 199 133 181 119 173 99Z"/>
+    <path fill="url(#elmo)" d="M163 67 173 48 190 39 198 29 207 39 226 48 234 68 229 85 218 91 214 111 199 125 183 111 179 91 168 85Z"/>
+    <path fill="#151119" d="m165 68 12-4 16 10-9 12-14-6zm67 0-12-4-16 10 9 12 14-6zm-34 11 7 16-7-3-6 3z"/>
+    <path fill="none" stroke="#ae9cac" stroke-width="1.7" d="m163 62 11-13 16-7m43 20-10-13-16-7m-26 53 6 16 12 10 12-11 4-15m-24 4 3 15m6-17v20m6-19-2 16"/>
   ` : classe === 'mago' ? `
     <path fill="url(#elmo)" d="M148 87 147 62Q146 31 166 18Q180 6 199 5Q219 7 234 22Q249 38 249 66L247 88Z"/>
     <path fill="#262a36" d="M148 87 151 48 164 29 177 40 195 17 209 39 229 27 244 49 247 88 237 112 210 137 198 132 185 137 159 112Z"/>
@@ -131,7 +143,9 @@ function armadura(eq: AparenciaEquipada | null, classe: (typeof CLASSES)[number]
     <path fill="url(#elmo)" d="M194 61 202 61 204 88 198 96 192 88Z"/>
     <path fill="none" stroke="#ece0c6" stroke-width="2" d="M155 59Q163 31 189 24M155 84 162 102M235 88 240 97"/>
     <path fill="#c5a771" stroke-width="1.5" d="M157 76a3 3 0 1 0 6 0a3 3 0 1 0-6 0M234 76a3 3 0 1 0 6 0a3 3 0 1 0-6 0"/>`;
-  return defs + `<g stroke="#1c161b" stroke-width="3.2" stroke-linejoin="round">${peito}${elmo}</g>`;
+  const ajuste = !capuz && classe === 'mago' ? 'translate(22 7) scale(.89 .9)'
+    : !capuz && classe === 'guerreiro' ? 'translate(18 5) scale(.91 .91)' : '';
+  return defs + `<g stroke="#1c161b" stroke-width="3.2" stroke-linejoin="round">${peito}<g transform="${ajuste}">${elmo}</g></g>`;
 }
 
 async function camada(ctx: CanvasRenderingContext2D, svg: string): Promise<void> {
@@ -144,6 +158,30 @@ async function camada(ctx: CanvasRenderingContext2D, svg: string): Promise<void>
   } finally {
     URL.revokeObjectURL(url);
   }
+}
+
+function membros(eq: AparenciaEquipada | null, direita: number, esquerda: number): string {
+  if (!eq) return '';
+  const peca = (raridade: string, path: string, reforco: string) => {
+    const grau = grauDe(raridade);
+    const material = grau < 2 ? 'couro-membro' : grau < 4 ? 'aco-membro' : 'escuro-membro';
+    return `<path fill="url(#${material})" stroke="#211a1c" stroke-width="3" d="${path}"/>
+      <path fill="none" stroke="${grau < 4 ? '#a79273' : '#b99b67'}" stroke-width="2.5" d="${reforco}"/>`;
+  };
+  const luvas = eq.maos ? [direita, esquerda].map((x, i) =>
+    `<g transform="translate(${x} 371) scale(${i === 0 ? 1 : -1} 1)">${peca(eq.maos ?? '', 'M-13-12 12-16 16 9 13 31 4 35-6 31-11 14Z', 'm-11-4 24-4m-21 13 21-4m-14 20 10-2')}</g>`,
+  ).join('') : '';
+  const calcas = eq.pernas ? peca(eq.pernas,
+    'M132 439 184 454 176 541 163 580 127 570 132 523ZM213 454 266 439 268 521 273 572 237 582 222 541Z',
+    'm137 461 41 11m-43 16 39 8m-42 42 36 9m51-74 41-12m-37 36 38-9m-30 61 37-9') : '';
+  const botas = eq.pes ? peca(eq.pes,
+    'M120 629Q137 637 153 629L152 652 147 695 148 722 135 728 115 720 117 683 120 652ZM244 630Q262 637 278 629L279 652 283 690 283 722 270 728 249 721 248 685 245 652Z',
+    'M121 644q13 7 30 0m-33 19q13 7 30 0m-31 19q12 8 30 1m99-40q14 7 31-1m-30 21q15 7 32 0m-30 20q15 7 31-1') : '';
+  return `<defs>
+    <linearGradient id="couro-membro"><stop stop-color="#352821"/><stop offset=".42" stop-color="#79563b"/><stop offset="1" stop-color="#38271e"/></linearGradient>
+    <linearGradient id="aco-membro"><stop stop-color="#35343b"/><stop offset=".38" stop-color="#737982"/><stop offset="1" stop-color="#2b2d36"/></linearGradient>
+    <linearGradient id="escuro-membro"><stop stop-color="#1e1a20"/><stop offset=".45" stop-color="#514855"/><stop offset="1" stop-color="#211d27"/></linearGradient>
+  </defs>` + calcas + botas + luvas;
 }
 
 /** Ilustração de menu em resolução própria, composta com o mesmo equipamento visual do jogo. */
@@ -164,6 +202,7 @@ export async function retratoIlustrado(modelo: string, eq: AparenciaEquipada | n
   }
   const larguraCelula = base.naturalWidth / CLASSES.length;
   ctx.drawImage(base, larguraCelula * indice, 0, larguraCelula, base.naturalHeight, MARGEM, 0, LARGURA, ALTURA);
+  await camada(ctx, membros(eq, direita, esquerda));
   await camada(ctx, armadura(eq, classe));
   await arma(ctx, eq ? eq.arma : padrao.arma, direita, eq?.raridadeArma, eq?.formaArma);
   await arma(ctx, eq ? eq.secundaria : padrao.secundaria, esquerda, eq?.raridadeSecundaria);

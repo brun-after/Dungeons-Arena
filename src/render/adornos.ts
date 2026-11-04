@@ -12,7 +12,7 @@ import { ARMA_DE_CLASSE, OPCOES_JOGAVEIS } from './modelos';
 import { LADO_QUADRO, type Vista } from './modelos/svg';
 import { COR_RARIDADE } from './objetos';
 import type { Raridade } from '../modos/modo';
-import { grauDe, modeloDaArma3d, nomeDaCamada, PECAS_DE_ARMADURA } from './equipamento-3d';
+import { grauDe, modeloDaArma3d, nomeDaCamada, pecaDeMembro, PECAS_DE_ARMADURA } from './equipamento-3d';
 
 export interface TexturasAdorno {
   atras: Texture | null;
@@ -142,13 +142,17 @@ export function equipamento3d(modelo: string, aparencia: AparenciaEquipada | nul
   const desenho = eq ? (eq.arma ?? '') : padrao.arma;
   const secundaria = eq ? eq.secundaria : padrao.secundaria;
   const elemento = eq?.arma ? eq.elementoArma : null;
-  const chave = `${modelo}|${desenho}|${secundaria}|${eq?.cabeca}|${eq?.corpo}|${eq?.capa}|${elemento}|${eq?.raridadeArma}|${eq?.raridadeSecundaria}|${eq?.formaArma}`;
+  const pecas = PECAS_DE_ARMADURA.map(peca => eq?.[peca] ?? '').join('|');
+  const chave = `${modelo}|${desenho}|${secundaria}|${pecas}|${elemento}|${eq?.raridadeArma}|${eq?.raridadeSecundaria}|${eq?.formaArma}`;
   const pronto = cache3d.get(chave);
   if (pronto) return pronto;
   const camadas: Camada3d[] = [];
   for (const peca of PECAS_DE_ARMADURA) {
     const raridade = eq?.[peca] ?? null;
-    if (raridade) camadas.push({ nome: nomeDaCamada(modelo, `${peca}-${grauDe(raridade)}`) });
+    if (!raridade) continue;
+    const grau = grauDe(raridade);
+    const visual = pecaDeMembro(peca) ? grau - grau % 2 : grau;
+    camadas.push({ nome: nomeDaCamada(modelo, `${peca}-${visual}`) });
   }
   const saida: Equipamento3d = {
     camadas,

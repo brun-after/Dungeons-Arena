@@ -14,8 +14,9 @@ import { clone as clonarComEsqueleto } from 'three/examples/jsm/utils/SkeletonUt
 import { BASE, COLUNAS_POR_FAIXA, DIRECOES, ehVariante, estadosDe, QUADROS, VARIANTES, type Arma, type Estado, type EstadoBase, type Receita, type Variante } from './receitas';
 import { posProcessar } from './pos';
 import { renderizarArmas } from './icones';
-import { asas, bacinete, capa, elmo, pecaDeCabeca, peito, tiara } from './armaduras3d';
+import { asas, bacinete, capa, elmo, pecaDeCabeca, peito, protegerMembros, tiara } from './armaduras3d';
 import { criatura } from './criaturas3d';
+import type { PecaDeArmadura } from '../../src/render/equipamento-3d';
 
 /** Pixels por célula no atlas (o jogo desenha a 48: 1,5× para ficar nítido sem pesar). */
 const ELEVACAO = Math.PI / 6;
@@ -31,7 +32,7 @@ export interface PedidoDeCamada {
   pecas?: string[];
   armas?: Arma[];
   /** A peça de armadura em 3D (armaduras3d.ts) e o grau dela; a cor da raridade também tinge as malhas do traje. */
-  armadura?: { peca: 'cabeca' | 'corpo' | 'capa'; grau: number; acento: number };
+  armadura?: { peca: PecaDeArmadura; grau: number; acento: number };
 }
 
 export interface SaidaAtlas {
@@ -402,7 +403,7 @@ async function montarCamada(mt: Montado, corpo: THREE.Mesh[], p: PedidoDeCamada,
   const a = p.armadura;
   if (a) {
     if (a.peca === 'cabeca') {
-      if ((classe === 'arqueiro' && a.grau < 2) || (a.grau >= 2 && (classe === 'aventureiro' || classe === 'mago'))) {
+      if ((classe === 'arqueiro' && a.grau < 2) || (a.grau >= 2 && (classe === 'aventureiro' || classe === 'mago' || classe === 'necromante'))) {
         extras.push(...pecaDeCabeca(mt.ossos, classe, a.grau, a.acento));
       } else {
         const montarElmo = classe === 'guerreiro' ? bacinete : elmo;
@@ -411,6 +412,7 @@ async function montarCamada(mt: Montado, corpo: THREE.Mesh[], p: PedidoDeCamada,
     }
     if (a.peca === 'corpo') extras.push(...peito(mt.ossos, a.grau, a.acento));
     if (a.peca === 'capa') extras.push(...capa(mt.ossos, a.grau, a.acento));
+    if (a.peca === 'maos' || a.peca === 'pernas' || a.peca === 'pes') extras.push(...protegerMembros(mt.ossos, a.peca, a.grau));
   }
   for (const x of extras) {
     x.visible = false;

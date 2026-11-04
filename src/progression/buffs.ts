@@ -114,6 +114,9 @@ export function aparenciaDe(ctx: ContextoSimulacao, e: Entidade): AparenciaEquip
     cabeca: raridade(eq.cabeca?.itemId),
     corpo: raridade(eq.corpo?.itemId),
     capa: raridade(eq.capa?.itemId),
+    maos: raridade(eq.maos?.itemId),
+    pernas: raridade(eq.pernas?.itemId),
+    pes: raridade(eq.pes?.itemId),
     formaArma: arma?.forma ?? null,
     elementoArma: arma?.elemento ?? null,
     formaMaxima,
@@ -125,6 +128,7 @@ export function aparenciaDe(ctx: ContextoSimulacao, e: Entidade): AparenciaEquip
 const iguais = (a: AparenciaEquipada | null, b: AparenciaEquipada | null) =>
   a === b ||
   (!!a && !!b && a.arma === b.arma && a.secundaria === b.secundaria && a.cabeca === b.cabeca && a.corpo === b.corpo && a.capa === b.capa &&
+    a.maos === b.maos && a.pernas === b.pernas && a.pes === b.pes &&
     a.formaArma === b.formaArma && a.elementoArma === b.elementoArma && a.formaMaxima === b.formaMaxima &&
     a.raridadeArma === b.raridadeArma && a.raridadeSecundaria === b.raridadeSecundaria);
 

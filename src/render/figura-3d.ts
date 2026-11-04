@@ -98,7 +98,7 @@ export class Figura3d {
     if (g.parent !== pai) pai.addChild(g);
     else pai.setChildIndex(g, pai.children.length - 1);
     const t = tomo.texture;
-    g.position.set(tomo.x + (0.5 - tomo.anchor.x) * t.width, tomo.y + (0.5 - tomo.anchor.y) * t.height);
+    g.position.set(tomo.x + (0.5 - tomo.anchor.x) * t.width * tomo.scale.x, tomo.y + (0.5 - tomo.anchor.y) * t.height * tomo.scale.y);
     g.alpha = 0.7 + 0.3 * q.pulso;
     g.visible = true;
   }
@@ -159,7 +159,8 @@ export class Figura3d {
       s.position.set(mao ? x + (mao.x - origem.x - x) * tomo.abertura : x,
         mao ? y + (mao.y - origem.y - y) * tomo.abertura : y);
       s.rotation = lateral * 0.16 * (1 - tomo.abertura);
-      s.scale.set(1);
+      // A altura do recorte acompanha o antebraço, inclusive nos graus maiores.
+      s.scale.set(origem.y * (aberto ? 0.23 : 0.24) / livro.textura.height);
       return aberto && lendo ? s : null;
     }
     tomo.abertura = 0;

@@ -12,7 +12,7 @@ import { build } from 'esbuild';
 import { RECEITAS, VARIANTES, type Receita } from './receitas';
 import type { PedidoDeCamada, SaidaAtlas } from './pagina';
 import { ARMAS_3D, TOMOS_FECHADOS } from './armas3d';
-import { GRAUS, nomeDaCamada, PECAS_DE_ARMADURA } from '../../src/render/equipamento-3d';
+import { GRAUS, nomeDaCamada, pecaDeMembro, PECAS_DE_ARMADURA } from '../../src/render/equipamento-3d';
 
 const RAIZ = join(import.meta.dirname, '..', '..');
 const B = join(RAIZ, '.brutos');
@@ -78,10 +78,12 @@ function camadasDe(r: Receita): PedidoDeCamada[] {
   const eq = r.equipamento;
   if (!eq) return [];
   return PECAS_DE_ARMADURA.flatMap((peca) =>
-    GRAUS.map((_, grau) => {
+    GRAUS.flatMap((_, grau) => {
+      if (pecaDeMembro(peca) && grau % 2 !== 0) return [];
       const armadura = { peca, grau, acento: ACENTOS[grau] ?? 0x888888 };
       const nome = `${peca}-${grau}`;
       if (peca === 'capa') return { nome, tingir: false, armadura };
+      if (pecaDeMembro(peca)) return { nome, tingir: false, armadura };
       // O peito sempre tinge o pano do traje; a cabeça, só enquanto é capuz (o elmo entra no raro).
       if (peca === 'corpo') return { nome, tingir: false, armadura, ...eq.corpo, pecas: [] };
       // O elmo cobre o capuz e o cabelo: eles saem da máscara do corpo.
@@ -117,6 +119,7 @@ const so = iSo >= 0 ? new Set((args[iSo + 1] ?? '').split(',')) : null;
 const soCorpo = args.includes('--so-corpo');
 // Regenera as peças de cabeça sem regravar os atlas de peitoral e capa.
 const soCabeca = args.includes('--so-cabeca');
+const soMembros = args.includes('--so-membros');
 // Use só em revisões que preservam os rigs, a arma, a pose e a geometria do tronco.
 const reusarMaos = args.includes('--reusar-maos');
 const comArmas = args.includes('--armas');
@@ -201,7 +204,10 @@ for (const receita of RECEITAS) {
     continue;
   }
   const inicio = Date.now();
-  const camadas = soCorpo ? [] : camadasDe(receita).filter(c => !soCabeca || c.armadura?.peca === 'cabeca');
+  const camadas = soCorpo ? [] : camadasDe(receita).filter(c => {
+    const peca = c.armadura?.peca;
+    return soCabeca ? peca === 'cabeca' : !soMembros || peca === 'maos' || peca === 'pernas' || peca === 'pes';
+  });
   const urls = urlsDe(receita, camadas);
   const lotes: PedidoDeCamada[][] = [];
   for (let k = 0; k < Math.max(1, camadas.length); k += LOTE) lotes.push(camadas.slice(k, k + LOTE));
@@ -213,7 +219,7 @@ for (const receita of RECEITAS) {
     const { quadroL, quadroA, ancoraX, ancoraY, pxCelula, colunas, faixa, estados } = saida;
     const entrada = { quadroL, quadroA, ancoraX, ancoraY, pxCelula, colunas, faixa, estados, altura: receita.altura };
     const anterior = catalogo[receita.nome];
-    if ((soCorpo || soCabeca || reusarMaos) && receita.equipamento && anterior && (
+    if ((soCorpo || soCabeca || soMembros || reusarMaos) && receita.equipamento && anterior && (
       quadroL !== anterior.quadroL || quadroA !== anterior.quadroA ||
       ancoraX !== anterior.ancoraX || ancoraY !== anterior.ancoraY ||
       pxCelula !== anterior.pxCelula || colunas !== anterior.colunas || faixa !== anterior.faixa ||

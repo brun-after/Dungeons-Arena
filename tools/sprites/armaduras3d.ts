@@ -39,6 +39,42 @@ function cone(r: number, a: number, m: THREE.Material): THREE.Mesh {
   return new THREE.Mesh(new THREE.ConeGeometry(r, a, 6), m);
 }
 
+export function protegerMembros(ossos: Ossos, peca: 'maos' | 'pernas' | 'pes', grau: number): THREE.Object3D[] {
+  const saida: THREE.Object3D[] = [];
+  const material = grau === 0 ? mat(0x684731, { roughness: 0.94 })
+    : grau === 2 ? mat(0x555b61, { metalness: 0.3, roughness: 0.68 })
+    : mat(0x34313c, { metalness: 0.38, roughness: 0.62 });
+  const borda = grau === 4 ? mat(0xa78a51, { roughness: 0.67 }) : material;
+  for (const lado of ['l', 'r']) {
+    const coxa = ossos.get(`thigh_${lado}`);
+    const canela = ossos.get(`calf_${lado}`);
+    const pe = ossos.get(`foot_${lado}`);
+    const braco = ossos.get(`lowerarm_${lado}`);
+    const mao = ossos.get(`hand_${lado}`);
+    if (!coxa || !canela || !pe || !braco || !mao) continue;
+    const osso = peca === 'maos' ? braco : peca === 'pernas' ? coxa : canela;
+    const ponta = peca === 'maos' ? mao : peca === 'pernas' ? canela : pe;
+    const de = pos(osso);
+    const vetor = pos(ponta).sub(de);
+    const tamanho = vetor.length();
+    const largura = tamanho * (peca === 'maos' ? 0.29 : peca === 'pernas' ? 0.25 : 0.21);
+    const grupo = new THREE.Group();
+    grupo.position.copy(de).addScaledVector(vetor, peca === 'pernas' ? 0.52 : 0.72);
+    grupo.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), vetor.normalize());
+    const comprimento = tamanho * (peca === 'pernas' ? 0.66 : 0.5);
+    const manga = new THREE.Mesh(new THREE.CylinderGeometry(largura * 0.88, largura, comprimento, grau === 0 ? 8 : 6), material);
+    grupo.add(manga);
+    if (grau >= 2) {
+      const reforco = new THREE.Mesh(new THREE.CylinderGeometry(largura * 0.93, largura * 0.94, comprimento * 0.16, 6), borda);
+      reforco.position.y = comprimento * 0.41;
+      grupo.add(reforco);
+    }
+    const montado = prender(osso, grupo);
+    if (montado) saida.push(montado);
+  }
+  return saida;
+}
+
 /** Peças de cabeça com silhueta própria, presas ao mesmo osso do traje. */
 export function pecaDeCabeca(ossos: Ossos, classe: string, n: number, acento: number): THREE.Object3D[] {
   const cabeca = ossos.get('Head');
@@ -69,12 +105,12 @@ export function pecaDeCabeca(ossos: Ossos, classe: string, n: number, acento: nu
   } else if (classe === 'aventureiro') {
     const ferro = mat(n >= 5 ? 0x38343c : 0x676767, { metalness: 0.44, roughness: 0.57 });
     const casca = new THREE.Mesh(new THREE.SphereGeometry(r * 1.03, 20, 12, 0, Math.PI * 2, 0, Math.PI * 0.53), ferro);
-    casca.scale.y = 1.07;
-    casca.position.y = r * 0.11;
+    casca.scale.set(0.9, 1.02, 0.94);
+    casca.position.y = r * 0.16;
     grupo.add(casca);
     const aba = new THREE.Mesh(new THREE.CylinderGeometry(r * 1.02, r * 1.09, r * 0.15, 22), ferro);
     aba.position.y = r * 0.04;
-    aba.scale.z = 0.92;
+    aba.scale.set(0.95, 1, 0.92);
     grupo.add(aba);
     const couro = mat(0x523727, { roughness: 0.96 });
     for (const lado of [-1, 1]) {
@@ -83,7 +119,29 @@ export function pecaDeCabeca(ossos: Ossos, classe: string, n: number, acento: nu
       tira.rotation.z = -lado * 0.26;
       grupo.add(tira);
     }
+  } else if (classe === 'necromante') {
+    const ferro = mat(0x342c3c, { metalness: 0.39, roughness: 0.59 });
+    const osso = mat(n >= 4 ? 0xa39990 : 0x827780, { roughness: 0.8 });
+    const concha = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.65), ferro);
+    concha.scale.set(0.91, 1.04, 0.93);
+    grupo.add(concha);
+    for (const lado of [-1, 1]) {
+      const chifre = cone(r * 0.16, r * 0.58, ferro);
+      chifre.position.set(lado * r * 0.69, r * 0.71, r * 0.34);
+      chifre.rotation.z = -lado * 0.45;
+      grupo.add(chifre);
+      const face = new THREE.Mesh(new THREE.BoxGeometry(r * 0.44, r * 0.16, r * 0.16), osso);
+      face.position.set(lado * r * 0.28, r * 0.12, r * 0.97);
+      face.rotation.z = lado * 0.32;
+      grupo.add(face);
+      for (const passo of [1, 2, 3]) {
+        const dente = new THREE.Mesh(new THREE.BoxGeometry(r * 0.085, r * (0.27 - passo * 0.035), r * 0.15), osso);
+        dente.position.set(lado * r * passo * 0.105, -r * 0.43, r * 0.96);
+        grupo.add(dente);
+      }
+    }
   } else {
+    grupo.scale.set(0.91, 0.94, 0.92);
     const liga = mat(n >= 5 ? 0x2d2939 : 0x444c65, { metalness: 0.42, roughness: 0.52, side: THREE.DoubleSide });
     const perfis = [new THREE.Vector2(r * 0.64, -r * 0.83), new THREE.Vector2(r * 0.89, -r * 0.25), new THREE.Vector2(r * 0.89, r * 0.53), new THREE.Vector2(r * 0.62, r * 0.84), new THREE.Vector2(0, r * 0.91)];
     grupo.add(new THREE.Mesh(new THREE.LatheGeometry(perfis, 7), liga));
@@ -111,7 +169,7 @@ export function bacinete(ossos: Ossos, n: number, acento: number): THREE.Object3
   if (!cabeca || !pescoco) return [];
   const p = pos(cabeca);
   const altura = p.distanceTo(pos(pescoco));
-  const r = altura * 1.92;
+  const r = altura * 1.76;
   const grupo = new THREE.Group();
   grupo.position.copy(p).add(new THREE.Vector3(0, altura * 0.9, 0));
   const chapa = mat(n >= 5 ? 0x2b2731 : 0x51545c, { metalness: 0.42, roughness: 0.52 });
