@@ -1,13 +1,13 @@
 {
   "espada": {
-    "celL": 40,
-    "celA": 74,
-    "pegaX": 20,
-    "pegaY": 57
+    "celL": 31,
+    "celA": 90,
+    "pegaX": 15,
+    "pegaY": 69
   },
   "adaga": {
     "celL": 31,
-    "celA": 48,
+    "celA": 47,
     "pegaX": 15,
     "pegaY": 31
   },
@@ -49,9 +49,9 @@
   },
   "sabre": {
     "celL": 31,
-    "celA": 71,
+    "celA": 70,
     "pegaX": 11,
-    "pegaY": 54
+    "pegaY": 53
   },
   "mangual": {
     "celL": 37,
@@ -61,9 +61,9 @@
   },
   "rapieira": {
     "celL": 25,
-    "celA": 80,
+    "celA": 79,
     "pegaX": 11,
-    "pegaY": 64
+    "pegaY": 63
   },
   "arco_longo": {
     "celL": 91,
@@ -114,58 +114,58 @@
     "pegaY": 44
   },
   "tomo": {
-    "celL": 40,
-    "celA": 39,
+    "celL": 36,
+    "celA": 35,
     "pegaX": 18,
-    "pegaY": 33
+    "pegaY": 25
   },
   "codice": {
-    "celL": 40,
-    "celA": 39,
+    "celL": 36,
+    "celA": 35,
     "pegaX": 18,
-    "pegaY": 33
+    "pegaY": 25
   },
   "mares": {
-    "celL": 40,
-    "celA": 39,
+    "celL": 36,
+    "celA": 35,
     "pegaX": 18,
-    "pegaY": 33
+    "pegaY": 25
   },
   "estelar": {
-    "celL": 40,
-    "celA": 39,
+    "celL": 36,
+    "celA": 35,
     "pegaX": 18,
-    "pegaY": 33
+    "pegaY": 25
   },
   "prisma": {
-    "celL": 40,
-    "celA": 39,
+    "celL": 36,
+    "celA": 42,
     "pegaX": 18,
-    "pegaY": 33
+    "pegaY": 32
   },
   "espelhos": {
-    "celL": 40,
-    "celA": 39,
+    "celL": 36,
+    "celA": 35,
     "pegaX": 18,
-    "pegaY": 33
+    "pegaY": 25
   },
   "orbital": {
-    "celL": 40,
-    "celA": 39,
+    "celL": 36,
+    "celA": 35,
     "pegaX": 18,
-    "pegaY": 33
+    "pegaY": 25
   },
   "vazio": {
-    "celL": 40,
-    "celA": 39,
+    "celL": 36,
+    "celA": 35,
     "pegaX": 18,
-    "pegaY": 33
+    "pegaY": 25
   },
   "cajado": {
     "celL": 40,
-    "celA": 128,
+    "celA": 131,
     "pegaX": 20,
-    "pegaY": 89
+    "pegaY": 92
   },
   "praga": {
     "celL": 34,
@@ -252,9 +252,57 @@
     "pegaY": 22
   },
   "escudo": {
-    "celL": 60,
-    "celA": 63,
-    "pegaX": 27,
-    "pegaY": 26
+    "celL": 45,
+    "celA": 60,
+    "pegaX": 21,
+    "pegaY": 27
+  },
+  "tomo-fechado": {
+    "celL": 29,
+    "celA": 35,
+    "pegaX": 14,
+    "pegaY": 7
+  },
+  "codice-fechado": {
+    "celL": 29,
+    "celA": 35,
+    "pegaX": 14,
+    "pegaY": 7
+  },
+  "mares-fechado": {
+    "celL": 29,
+    "celA": 35,
+    "pegaX": 14,
+    "pegaY": 7
+  },
+  "estelar-fechado": {
+    "celL": 29,
+    "celA": 35,
+    "pegaX": 14,
+    "pegaY": 7
+  },
+  "prisma-fechado": {
+    "celL": 29,
+    "celA": 35,
+    "pegaX": 14,
+    "pegaY": 7
+  },
+  "espelhos-fechado": {
+    "celL": 29,
+    "celA": 35,
+    "pegaX": 14,
+    "pegaY": 7
+  },
+  "orbital-fechado": {
+    "celL": 29,
+    "celA": 35,
+    "pegaX": 14,
+    "pegaY": 7
+  },
+  "vazio-fechado": {
+    "celL": 29,
+    "celA": 35,
+    "pegaX": 14,
+    "pegaY": 7
   }
 }

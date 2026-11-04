@@ -5,6 +5,7 @@
 // arma para +y, a face larga para +z (para a câmera).
 
 import * as THREE from 'three';
+import { TOMOS, tomoFechado } from '../../src/render/equipamento-3d';
 
 /** Quanto a arma cresce por grau (0 = comum … 5 = última). */
 export const ESCALA_DO_GRAU = [1, 1.05, 1.12, 1.2, 1.3, 1.42] as const;
@@ -25,6 +26,7 @@ export class Kit {
   constructor(
     readonly n: number,
     readonly acento: number,
+    readonly fechado = false,
   ) {}
 
   mat(cor: number, o: Partial<THREE.MeshStandardMaterialParameters> = {}): THREE.MeshStandardMaterial {
@@ -64,7 +66,7 @@ export class Kit {
   /** Um perfil plano extrudado (a lâmina, a cabeça do machado), centrado na espessura. */
   perfil(pts: P[], esp: number, m: THREE.Material, z = 0): THREE.Mesh {
     const s = new THREE.Shape(pts.map(([x, y]) => new THREE.Vector2(x, y)));
-    const geo = new THREE.ExtrudeGeometry(s, { depth: esp, bevelEnabled: true, bevelThickness: esp * 0.35, bevelSize: esp * 0.3, bevelSegments: 1 });
+    const geo = new THREE.ExtrudeGeometry(s, { depth: esp, bevelEnabled: true, bevelThickness: esp * 0.35, bevelSize: esp * 0.3, bevelSegments: 3 });
     geo.translate(0, 0, -esp / 2);
     return this.add(new THREE.Mesh(geo, m), 0, 0, z);
   }
@@ -81,6 +83,13 @@ export class Kit {
   /** O cabo com o couro e, do incomum em diante, as faixas de metal. */
   cabo(y0: number, y1: number, r = 0.018, cor = COURO): void {
     this.cil(r, y0, y1, this.mat(cor, { roughness: 0.85 }));
+    const costura = this.mat(0x34241d, { roughness: 0.95 });
+    const passos = Math.min(12, Math.ceil((y1 - y0) / 0.018));
+    for (let i = 0; i < passos; i++) {
+      const y = y0 + (y1 - y0) * (i + 0.5) / passos;
+      const volta = this.add(new THREE.Mesh(new THREE.TorusGeometry(r * 1.01, r * 0.065, 5, 14), costura), 0, y);
+      volta.rotation.x = Math.PI / 2 + 0.16;
+    }
     if (this.n >= 1) for (const y of [y0 + 0.01, y1 - 0.01]) this.cil(r * 1.35, y - 0.008, y + 0.008, this.enfeite());
   }
   /** O pomo: uma bola de metal; do raro em diante, a gema da raridade. */
@@ -139,8 +148,19 @@ function lamina(k: Kit, y0: number, compr: number, larg: number, cor = ACO, curv
     [curva, y0 + compr],
     [-l + curva * 0.6, y0 + compr * 0.82],
   ];
-  k.perfil(pts, 0.016, k.aco(cor));
-  k.runas(y0 + compr * 0.1, y0 + compr * 0.75, 0.016, curva * 0.3);
+  k.perfil(pts, 0.006, k.mat(cor, { metalness: 0.35, roughness: 0.46 }));
+  // O fio claro aparece nas duas faces, ao redor do corpo escuro da lâmina.
+  const alma: P[] = [
+    [-l * 0.63, y0], [l * 0.63, y0],
+    [l * 0.6 + curva * 0.6, y0 + compr * 0.82],
+    [curva * 0.91, y0 + compr * 0.95],
+    [-l * 0.6 + curva * 0.6, y0 + compr * 0.82],
+  ];
+  k.perfil(alma, 0.015, k.mat(k.n >= 5 ? 0x302b38 : 0x55535a, { metalness: 0.34, roughness: 0.58 }));
+  for (const lado of [-1, 1]) {
+    k.caixa(larg * 0.11, compr * 0.64, 0.001, k.mat(0x39353a), curva * 0.24, y0 + compr * 0.35, lado * 0.009, -curva / compr * 0.75);
+  }
+  k.runas(y0 + compr * 0.1, y0 + compr * 0.75, 0.011, curva * 0.3);
 }
 
 function espadaComum(k: Kit, compr: number, larg: number, guarda: number, cor = ACO): void {
@@ -184,25 +204,55 @@ function arcoDe(k: Kit, alto: number, curva: number, cor: number, pontas = false
 }
 
 function livroDe(k: Kit, capa: number, simbolo: number): void {
-  // Aberto na mão, de frente: as duas capas um pouco dobradas, as páginas e o símbolo aceso no meio.
+  if (k.fechado) {
+    const couro = k.mat(capa, { roughness: 0.89 });
+    const papel = k.mat(0xb6a081, { roughness: 0.95 });
+    k.caixa(0.18, 0.235, 0.048, papel, 0, -0.107);
+    for (const z of [-0.03, 0.03]) k.caixa(0.203, 0.252, 0.014, couro, 0, -0.107, z);
+    k.caixa(0.03, 0.25, 0.07, couro, -0.09, -0.107);
+    for (const y of [-0.16, -0.062]) {
+      k.caixa(0.203, 0.019, 0.076, k.mat(0x39291f), 0, y);
+      k.caixa(0.033, 0.022, 0.081, k.enfeite(), 0.065, y);
+    }
+    k.perfil([[0, -0.08], [0.027, -0.11], [0, -0.14], [-0.027, -0.11]], 0.004, k.mat(simbolo), 0.04);
+    return;
+  }
+  // O livro abre sobre a mão e mostra a espessura do papel nas bordas.
   const l = 0.15;
   const a = 0.2;
   for (const s of [-1, 1]) {
     const c = k.caixa(l, a, 0.02, k.mat(capa, { roughness: 0.7 }), (s * l) / 2, a / 2, -0.012);
     c.rotation.y = -s * 0.55;
-    const pag = k.caixa(l * 0.7, a * 0.78, 0.016, k.mat(0xcfc2a2, { roughness: 0.9 }), (s * l) / 2.4, a / 2, 0.006);
+    const pag = k.caixa(l * 0.76, a * 0.83, 0.029, k.mat(0xad9979, { roughness: 0.94 }), (s * l) / 2.4, a / 2, 0.006);
     pag.rotation.y = -s * 0.55;
+    const tinta = k.mat(0x564138, { roughness: 0.9 });
+    for (let linha = 0; linha < 6; linha++) {
+      const letra = k.caixa(l * (linha % 3 === 1 ? 0.36 : 0.48), 0.0025, 0.002, tinta,
+        s * l / 2.4, a * 0.76 - linha * 0.018, 0.023);
+      letra.rotation.y = -s * 0.55;
+    }
     if (k.n >= 3) k.caixa(0.014, a * 1.02, 0.024, k.enfeite(), s * l * 0.92, a / 2, -0.02);
   }
   k.caixa(0.03, a, 0.03, k.mat(capa, { roughness: 0.7 }), 0, a / 2, -0.03);
-  k.bola(0.02 + 0.004 * k.n, k.brilho(simbolo, 0.6 + 0.2 * k.n), 0, a / 2, 0.03);
-  if (k.n >= 2) k.curva(0.04 + 0.006 * k.n, Math.PI * 2, 0.004, k.brilho(simbolo, 0.8), 0, a / 2, 0);
-  k.cristais(0, a * 0.9, 0.16);
+  const fita = k.caixa(0.014, a * 0.66, 0.002, k.mat(simbolo, { roughness: 0.95 }), 0.015, a * 0.21, 0.026);
+  fita.rotation.z = -0.16;
+  const aberto = new THREE.Group();
+  aberto.add(...k.g.children);
+  aberto.rotation.set(-0.43, 0.2, -0.12);
+  k.g.add(aberto);
 }
 
 function cajadoDe(k: Kit, cor: number, cabeca: (y: number) => void, alto = 1.0): void {
   haste(k, -0.35, alto - 0.35, cor, 0.017);
-  cabeca(alto - 0.3);
+  const y = alto - 0.3;
+  // A pedra fica encaixada no metal, com garras e um colar em torno da haste.
+  k.cil(0.025, y - 0.15, y - 0.09, k.enfeite(), 0, 0, 0.039);
+  for (const lado of [-1, 1]) {
+    k.perfil([[lado * 0.02, y - 0.12], [lado * 0.07, y - 0.055],
+      [lado * 0.087, y + 0.045], [lado * 0.066, y + 0.018], [lado * 0.05, y - 0.05]],
+      0.017, k.enfeite(), 0.027);
+  }
+  cabeca(y);
   k.espinhos(0, alto - 0.3, 0.07, 4);
   k.cristais(0, alto - 0.3, 0.13);
 }
@@ -218,9 +268,69 @@ function bumerangueDe(k: Kit, cor: number, serrilha = false, x = 0, y = 0): void
 
 type Construtor = (k: Kit) => void;
 
+/** Espada longa, com seção losangular forjada e guarda curvada. */
+function espadaDeGuerra(k: Kit): void {
+  const secoes = [[0.06, 0.039, 0.012], [0.25, 0.034, 0.01], [0.53, 0.024, 0.007], [0.66, 0.001, 0.001]] as const;
+  const aco = k.mat(k.n >= 4 ? 0x695457 : 0x68676b, { metalness: 0.45, roughness: 0.47, side: THREE.DoubleSide });
+  const fio = k.mat(0xbeb3a6, { metalness: 0.38, roughness: 0.48, side: THREE.DoubleSide });
+  for (const lado of [-1, 1]) for (const face of [-1, 1]) {
+    const planos = [[], []] as [number[], number[]];
+    const cortes = secoes.map(([y, x, z]) => [
+      [0, y, face * z], [lado * x * 0.78, y, face * z * 0.52], [lado * x, y, 0],
+    ] as const);
+    for (const [i, a] of cortes.entries()) {
+      const b = cortes[i + 1];
+      if (!b) break;
+      for (const j of [0, 1] as const) {
+        const seguinte = j === 0 ? 1 : 2;
+        planos[j].push(...a[j], ...a[seguinte], ...b[seguinte], ...a[j], ...b[seguinte], ...b[j]);
+      }
+    }
+    for (const [i, vertices] of planos.entries()) {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+      geo.computeVertexNormals();
+      k.add(new THREE.Mesh(geo, i === 0 ? aco : fio));
+    }
+  }
+  k.cabo(-0.126, 0.032, 0.019, 0x4d2420);
+  k.perfil([[-0.021, -0.158], [0.021, -0.158], [0.03, -0.133], [0.019, -0.119], [-0.019, -0.119], [-0.03, -0.133]], 0.022, k.enfeite());
+  k.perfil([[-0.112, 0.066], [-0.087, 0.067], [-0.048, 0.047], [0.048, 0.047], [0.087, 0.067], [0.112, 0.066], [0.099, 0.04], [0.056, 0.023], [-0.056, 0.023], [-0.099, 0.04]], 0.025, k.enfeite());
+}
+
+/** Escudo ogival com dorso de madeira e face arqueada sobre o antebraço. */
+function escudoDeGuerra(k: Kit): void {
+  const contorno: P[] = [[0, 0.198], [0.075, 0.178], [0.177, 0.151], [0.163, 0.016], [0.124, -0.118], [0.065, -0.216], [0, -0.267], [-0.065, -0.216], [-0.124, -0.118], [-0.163, 0.016], [-0.177, 0.151], [-0.075, 0.178]];
+  const curvatura = (x: number) => 0.048 * (1 - (x / 0.18) ** 2);
+  const casca = (forma: P[], espessura: number, material: THREE.Material, frente = 0) => {
+    const malha = k.perfil(forma, espessura, material, frente);
+    const p = malha.geometry.getAttribute('position');
+    for (let i = 0; i < p.count; i++) p.setZ(i, p.getZ(i) + curvatura(p.getX(i)));
+    malha.geometry.computeVertexNormals();
+  };
+  const aro = k.mat(0x746357, { metalness: 0.37, roughness: 0.54 });
+  casca(contorno, 0.026, aro);
+  const face: P[] = contorno.map(([x, y]) => [x * 0.89, y * 0.91]);
+  casca(face, 0.014, k.mat(k.n >= 3 ? 0x763a33 : 0x514533, { roughness: 0.94 }), 0.013);
+  casca(face, 0.012, k.mat(0x523528, { roughness: 0.97 }), -0.014);
+  const tinta = k.mat(0xc9ad77, { roughness: 0.93 });
+  for (const lado of [-1, 1]) {
+    const asa: P[] = [[0.014, 0.004], [0.031, 0.051], [0.092, 0.096], [0.065, 0.036], [0.086, 0.044], [0.058, -0.009], [0.072, 0.001], [0.052, -0.042], [0.017, -0.06]];
+    casca(asa.map(([x, y]) => [x * lado, y]), 0.002, tinta, 0.021);
+  }
+  casca([[0, -0.11], [0.019, -0.074], [0.012, 0.035], [0.028, 0.07], [0, 0.059], [-0.014, 0.031], [-0.017, -0.074]], 0.002, tinta, 0.022);
+  const couro = k.mat(0x332019, { roughness: 0.96 });
+  for (const y of [-0.035, 0.066]) {
+    const arco = new THREE.Mesh(new THREE.TorusGeometry(0.055, 0.011, 5, 14, Math.PI), couro);
+    arco.rotation.x = -Math.PI / 2;
+    k.add(arco, 0, y, 0.016);
+  }
+  for (const [x, y] of contorno) k.bola(0.008, aro, x * 0.95, y * 0.95, curvatura(x * 0.95) + 0.017, 0);
+}
+
 export const ARMAS_3D: Readonly<Record<string, Construtor>> = {
   // --- As antigas (bipede.ts)
-  espada: (k) => { espadaComum(k, 0.48, 0.06, 0.16); },
+  espada: espadaDeGuerra,
   adaga: (k) => { espadaComum(k, 0.22, 0.05, 0.1); },
   clava: (k) => {
     haste(k, -0.12, 0.34, COURO, 0.024);
@@ -312,28 +422,37 @@ export const ARMAS_3D: Readonly<Record<string, Construtor>> = {
   tomo: (k) => { livroDe(k, 0x5b2c6f, 0x9b8cff); },
   codice: (k) => {
     livroDe(k, 0x784212, 0xf39c12);
+    if (k.fechado) return;
     k.caixa(0.26, 0.012, 0.02, k.mat(OURO, { metalness: 0.5 }), 0, 0.17, -0.01);
   },
   mares: (k) => { livroDe(k, 0x1f618d, 0x5dade2); },
   estelar: (k) => {
     livroDe(k, 0x1b2631, 0xf7dc6f);
+    if (k.fechado) return;
     k.bola(0.012, k.brilho(0xf7dc6f, 1), 0.08, 0.2, 0.03);
   },
   prisma: (k) => {
     livroDe(k, 0x6c3483, 0xbb8fce);
+    if (k.fechado) return;
     k.add(new THREE.Mesh(new THREE.OctahedronGeometry(0.03), k.brilho(0xebdef0, 0.7)), 0, 0.23, 0.03).scale.y = 1.6;
   },
   espelhos: (k) => { livroDe(k, 0xaab7b8, 0xf5eef8); },
   orbital: (k) => {
     livroDe(k, 0x21618c, 0x85c1e9);
+    if (k.fechado) return;
     k.curva(0.07, Math.PI * 2, 0.004, k.brilho(0x85c1e9, 0.7), 0, 0.085, 0, 1).rotation.x = 1.1;
   },
   vazio: (k) => {
     livroDe(k, 0x17202a, 0x5b2c6f);
+    if (k.fechado) return;
     k.bola(0.035, k.mat(0x0d0b12, { roughness: 0.1 }), 0, 0.085, 0.035);
   },
   // --- Cajados do Necromante
-  cajado: (k) => { cajadoDe(k, MADEIRA, (y) => k.bola(0.085 + 0.008 * k.n, k.brilho(0x9b59b6, 0.5), 0, y)); },
+  cajado: (k) => { cajadoDe(k, MADEIRA, (y) => {
+    const gema = k.add(new THREE.Mesh(new THREE.OctahedronGeometry(0.082 + 0.007 * k.n), k.brilho(0x8652a1, 0.25)), 0, y);
+    gema.scale.y = 1.34;
+    gema.rotation.y = 0.21;
+  }); },
   praga: (k) => { cajadoDe(k, 0x4d5656, (y) => {
       k.bola(0.09, k.brilho(0x7dcea0, 0.6), 0, y);
       k.bola(0.026, k.mat(0xd5f5e3), -0.035, y + 0.035, 0.075);
@@ -400,26 +519,7 @@ export const ARMAS_3D: Readonly<Record<string, Construtor>> = {
   },
   serrilhado: (k) => { bumerangueDe(k, 0x1e8449, true); },
   // --- A mão secundária
-  escudo: (k) => {
-    const r = 0.17 + 0.012 * k.n;
-    const madeira = k.mat(0x8a6a4a, { roughness: 0.8 });
-    if (k.n >= 2) {
-      // Do raro em diante, o escudo em gota de aço com a borda e o emblema.
-      const pts: P[] = [];
-      for (let i = 0; i <= 16; i++) {
-        const a = Math.PI * (i / 16);
-        pts.push([Math.cos(a) * r, Math.sin(a) * r * 0.6]);
-      }
-      pts.push([0, -r * 1.3]);
-      k.perfil(pts, 0.03, k.aco(0x9aa4b0));
-      k.bola(0.035 + 0.004 * k.n, k.brilho(), 0, 0, 0.03);
-      if (k.n >= 3) k.perfil(pts.map(([x, y]) => [x * 0.78, y * 0.78] as P), 0.034, k.enfeite(), 0.004);
-      k.espinhos(0, 0, r * 0.95, 5);
-    } else {
-      k.add(new THREE.Mesh(new THREE.CylinderGeometry(r, r, 0.03, 20), madeira), 0, 0).rotation.x = Math.PI / 2;
-      k.bola(0.035, k.enfeite(), 0, 0, 0.02, 0);
-      if (k.n >= 1) k.curva(r, Math.PI * 2, 0.01, k.enfeite(), 0, 0, 0);
-    }
-    k.cristais(0, 0, r + 0.06);
-  },
+  escudo: escudoDeGuerra,
 };
+
+export const TOMOS_FECHADOS = new Map([...TOMOS].map(nome => [tomoFechado(nome), nome]));

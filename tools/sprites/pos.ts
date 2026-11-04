@@ -3,11 +3,12 @@
 
 const DESSATURAR = 0.2;
 
-export function posProcessar(g: CanvasRenderingContext2D, l: number, a: number, cinza = false): void {
+export function posProcessar(g: CanvasRenderingContext2D, l: number, a: number, cinza = false): boolean {
   const img = g.getImageData(0, 0, l, a);
   const px = img.data;
   const alfa = (x: number, y: number) => (x < 0 || y < 0 || x >= l || y >= a ? 0 : (px[(y * l + x) * 4 + 3] ?? 0));
   const contorno: number[] = [];
+  let temPixels = false;
   for (let y = 0; y < a; y++) {
     for (let x = 0; x < l; x++) {
       const i = (y * l + x) * 4;
@@ -15,6 +16,7 @@ export function posProcessar(g: CanvasRenderingContext2D, l: number, a: number, 
         if (Math.max(alfa(x - 1, y), alfa(x + 1, y), alfa(x, y - 1), alfa(x, y + 1)) > 120) contorno.push(i);
         continue;
       }
+      temPixels = true;
       const r = px[i] ?? 0;
       const gg = px[i + 1] ?? 0;
       const b = px[i + 2] ?? 0;
@@ -38,4 +40,5 @@ export function posProcessar(g: CanvasRenderingContext2D, l: number, a: number, 
     px[i + 3] = 160;
   }
   g.putImageData(img, 0, 0);
+  return temPixels;
 }

@@ -8,7 +8,7 @@ import type { Entidade } from '../entities/entidade';
 import { t } from '../i18n';
 import type { Item } from '../progression/itens';
 import { ATALHOS_DE_CONSUMIVEL } from '../progression/inventario';
-import { icone } from './icones';
+import { iconeDoItem } from './icones';
 
 /** A tecla de cada posição da barra (as mesmas do teclado: 7–9 e 0 desde o marco 24, com 1–6 nas habilidades). */
 const TECLAS = ['7', '8', '9', '0'];
@@ -54,7 +54,7 @@ export function criarBarraConsumiveis(ctx: ContextoSimulacao, emitir: (c: Comand
       const rotulo = tecla ? t('consumiveis.usarComTecla', { nome: item.nome, tecla }) : t('consumiveis.usar', { nome: item.nome });
       b.title = rotulo;
       b.setAttribute('aria-label', rotulo);
-      b.append(icone(item.icone));
+      b.append(iconeDoItem(item.icone));
       if (j) {
         const nome = document.createElement('span');
         nome.className = 'nome';

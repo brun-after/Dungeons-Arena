@@ -2,6 +2,7 @@
 // Usado onde o Pixi desenha símbolos (marcadores do editor), no lugar dos emojis em `Text`.
 
 import { Texture } from 'pixi.js';
+import { svgDoItem } from '../data/arte-item';
 import { svgDoIcone } from '../data/icones';
 
 const cache = new Map<string, Texture>();
@@ -13,7 +14,7 @@ export async function carregarTexturasDeIcones(ids: readonly string[], cor = '#f
       const chave = `${id}:${cor}`;
       if (cache.has(chave)) return;
       const img = new Image();
-      img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgDoIcone(id, cor, tamanho))}`;
+      img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(cor === 'item' ? svgDoItem(id, tamanho) : svgDoIcone(id, cor, tamanho))}`;
       try {
         await img.decode();
         cache.set(chave, Texture.from(img));

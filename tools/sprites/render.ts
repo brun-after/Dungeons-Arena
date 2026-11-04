@@ -11,8 +11,8 @@ import { chromium } from '@playwright/test';
 import { build } from 'esbuild';
 import { RECEITAS, VARIANTES, type Receita } from './receitas';
 import type { PedidoDeCamada, SaidaAtlas } from './pagina';
-import { ARMAS_3D } from './armas3d';
-import { GRAUS, nomeDaCamada, PECAS_DE_ARMADURA } from '../../src/render/equipamento-3d';
+import { ARMAS_3D, TOMOS_FECHADOS } from './armas3d';
+import { GRAUS, nomeDaCamada, pecaDeMembro, PECAS_DE_ARMADURA } from '../../src/render/equipamento-3d';
 
 const RAIZ = join(import.meta.dirname, '..', '..');
 const B = join(RAIZ, '.brutos');
@@ -36,7 +36,7 @@ const PASTAS: Record<string, string[]> = {
 const DESTINO = join(RAIZ, 'src', 'assets', 'personagens');
 const QUALIDADE_WEBP = 0.85;
 /** Camadas por chamada da página (cada uma é um canvas do tamanho do atlas). */
-const LOTE = 8;
+const LOTE = 6;
 const HOST = 'http://modelos.local/';
 
 /** O caminho (no HOST) de cada referência da receita. */
@@ -78,13 +78,16 @@ function camadasDe(r: Receita): PedidoDeCamada[] {
   const eq = r.equipamento;
   if (!eq) return [];
   return PECAS_DE_ARMADURA.flatMap((peca) =>
-    GRAUS.map((_, grau) => {
+    GRAUS.flatMap((_, grau) => {
+      if (pecaDeMembro(peca) && grau % 2 !== 0) return [];
       const armadura = { peca, grau, acento: ACENTOS[grau] ?? 0x888888 };
       const nome = `${peca}-${grau}`;
       if (peca === 'capa') return { nome, tingir: false, armadura };
+      if (pecaDeMembro(peca)) return { nome, tingir: false, armadura };
       // O peito sempre tinge o pano do traje; a cabeça, só enquanto é capuz (o elmo entra no raro).
       if (peca === 'corpo') return { nome, tingir: false, armadura, ...eq.corpo, pecas: [] };
       // O elmo cobre o capuz e o cabelo: eles saem da máscara do corpo.
+      if (r.nome === 'arqueiro' && grau < 2) return { nome, tingir: false, armadura, esconder: 'Hood' };
       if (grau >= 2) return { nome, tingir: false, armadura, esconder: 'Hood|Hair' };
       return { nome, tingir: false, armadura, ...eq.cabeca };
     }),
@@ -114,8 +117,11 @@ const args = process.argv.slice(2);
 const iSo = args.indexOf('--so');
 const so = iSo >= 0 ? new Set((args[iSo + 1] ?? '').split(',')) : null;
 const soCorpo = args.includes('--so-corpo');
+// Regenera as peças de cabeça sem regravar os atlas de peitoral e capa.
+const soCabeca = args.includes('--so-cabeca');
+const soMembros = args.includes('--so-membros');
 // Use só em revisões que preservam os rigs, a arma, a pose e a geometria do tronco.
-const reusarMaos = soCorpo && args.includes('--reusar-maos');
+const reusarMaos = args.includes('--reusar-maos');
 const comArmas = args.includes('--armas');
 const iModelos = args.indexOf('--modelos');
 const pastaModelos = iModelos >= 0 ? args[iModelos + 1] : undefined;
@@ -168,20 +174,22 @@ const caminhoCatalogo = join(DESTINO, 'catalogo.json');
 type Entrada = Omit<SaidaAtlas, 'png' | 'camadas' | 'maos'> & { altura: number; maos?: SaidaAtlas['maos'] };
 
 if (comArmas) {
-  const pastaArmas = join(DESTINO, 'armas');
-  mkdirSync(pastaArmas, { recursive: true });
-  const saidas = await pagina.evaluate(([nomes, px, exp]) => window.personagens.renderizarArmas(nomes, px, exp), [Object.keys(ARMAS_3D), 72, 1.6] as const);
-  const cat: Record<string, { celL: number; celA: number; pegaX: number; pegaY: number }> = {};
-  let total = 0;
-  for (const a of saidas) {
-    const bytes = await webpDe(a.png);
-    total += bytes.length;
-    writeFileSync(join(pastaArmas, `${a.nome}.webp`), bytes);
-    cat[a.nome] = { celL: a.celL, celA: a.celA, pegaX: a.pegaX, pegaY: a.pegaY };
-  }
-  writeFileSync(join(pastaArmas, 'catalogo.json'), `${JSON.stringify(cat, null, 2)}
+  const nomes = [...Object.keys(ARMAS_3D), ...TOMOS_FECHADOS.keys()];
+  for (const [pastaArmas, px] of [[join(DESTINO, 'armas'), 72], [join(RAIZ, 'src/assets/retratos/armas'), 288]] as const) {
+    mkdirSync(pastaArmas, { recursive: true });
+    const cat: Record<string, { celL: number; celA: number; pegaX: number; pegaY: number }> = {};
+    for (let i = 0; i < nomes.length; i += LOTE) {
+      const saidas = await pagina.evaluate(([lote, escala]) => window.personagens.renderizarArmas(lote, escala, 1.25),
+        [nomes.slice(i, i + LOTE), px] as const);
+      for (const a of saidas) {
+        writeFileSync(join(pastaArmas, `${a.nome}.webp`), await webpDe(a.png));
+        cat[a.nome] = { celL: a.celL, celA: a.celA, pegaX: a.pegaX, pegaY: a.pegaY };
+      }
+    }
+    writeFileSync(join(pastaArmas, 'catalogo.json'), `${JSON.stringify(cat, null, 2)}
 `);
-  console.log('armas', saidas.length, `${Math.round(total / 1024)} KB`);
+    console.log('armas', px, nomes.length);
+  }
 }
 const catalogo: Record<string, Entrada> = existsSync(caminhoCatalogo) ? (JSON.parse(readFileSync(caminhoCatalogo, 'utf8')) as Record<string, Entrada>) : {};
 for (const receita of RECEITAS) {
@@ -196,7 +204,10 @@ for (const receita of RECEITAS) {
     continue;
   }
   const inicio = Date.now();
-  const camadas = soCorpo ? [] : camadasDe(receita);
+  const camadas = soCorpo ? [] : camadasDe(receita).filter(c => {
+    const peca = c.armadura?.peca;
+    return soCabeca ? peca === 'cabeca' : !soMembros || peca === 'maos' || peca === 'pernas' || peca === 'pes';
+  });
   const urls = urlsDe(receita, camadas);
   const lotes: PedidoDeCamada[][] = [];
   for (let k = 0; k < Math.max(1, camadas.length); k += LOTE) lotes.push(camadas.slice(k, k + LOTE));
@@ -208,7 +219,7 @@ for (const receita of RECEITAS) {
     const { quadroL, quadroA, ancoraX, ancoraY, pxCelula, colunas, faixa, estados } = saida;
     const entrada = { quadroL, quadroA, ancoraX, ancoraY, pxCelula, colunas, faixa, estados, altura: receita.altura };
     const anterior = catalogo[receita.nome];
-    if (soCorpo && receita.equipamento && anterior && (
+    if ((soCorpo || soCabeca || soMembros || reusarMaos) && receita.equipamento && anterior && (
       quadroL !== anterior.quadroL || quadroA !== anterior.quadroA ||
       ancoraX !== anterior.ancoraX || ancoraY !== anterior.ancoraY ||
       pxCelula !== anterior.pxCelula || colunas !== anterior.colunas || faixa !== anterior.faixa ||
@@ -224,7 +235,17 @@ for (const receita of RECEITAS) {
       await gravar(receita.nome, saida.png);
       if (saida.maos) catalogo[receita.nome] = { ...entrada, maos: saida.maos };
     }
-    for (const [j, png] of saida.camadas.entries()) await gravar(nomeDaCamada(receita.nome, lote[j]?.nome ?? ''), png);
+    for (const [j, png] of saida.camadas.entries()) {
+      const nome = nomeDaCamada(receita.nome, lote[j]?.nome ?? '');
+      if (!png) {
+        if (!reusarMaos || !catalogo[nome] || !existsSync(join(DESTINO, `${nome}.webp`))) {
+          throw new Error(`Camada de equipamento vazia: ${nome}`);
+        }
+        console.warn(`Camada vazia: preservando ${nome}.webp`);
+        continue;
+      }
+      await gravar(nome, png);
+    }
     if (k === 0) console.log(receita.nome, `${faixa * quadroL}×${Math.ceil(colunas / faixa) * 8 * quadroA}`);
   }
   console.log(' ', receita.nome, `${camadas.length} camadas`, `${Math.round(bytesTotal / 1024)} KB`, `${Date.now() - inicio} ms`);

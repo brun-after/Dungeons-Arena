@@ -3,12 +3,12 @@
 // jogo prende o punho (a origem do modelo) na mão medida em cada quadro e gira a arma para o eixo dela.
 
 import * as THREE from 'three';
-import { ARMAS_3D, ESCALA_DO_GRAU, Kit } from './armas3d';
+import { ARMAS_3D, ESCALA_DO_GRAU, Kit, TOMOS_FECHADOS } from './armas3d';
 import { posProcessar } from './pos';
 
 /** A cor de destaque de cada grau: a da raridade (objetos.ts COR_RARIDADE). */
 const ACENTOS = [0x888888, 0x2ecc71, 0x3498db, 0x9b59b6, 0xf39c12, 0xff4d6d] as const;
-const FOLGA = 3;
+
 
 export interface SaidaArma {
   nome: string;
@@ -21,8 +21,9 @@ export interface SaidaArma {
 }
 
 function montar(nome: string, grau: number): THREE.Group {
-  const k = new Kit(grau, ACENTOS[grau] ?? 0x888888);
-  ARMAS_3D[nome]?.(k);
+  const aberto = TOMOS_FECHADOS.get(nome);
+  const k = new Kit(grau, ACENTOS[grau] ?? 0x888888, aberto !== undefined);
+  ARMAS_3D[aberto ?? nome]?.(k);
   const g = k.g;
   g.scale.setScalar(ESCALA_DO_GRAU[grau] ?? 1);
   // Um pouco de lado e de cima: o volume aparece sem perder a silhueta.
@@ -41,15 +42,16 @@ export function renderizarArmas(nomes: string[], pxCelula: number, exposicao: nu
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.setClearColor(0x000000, 0);
   const saidas: SaidaArma[] = [];
+  const folga = Math.ceil(pxCelula / 24);
   for (const nome of nomes) {
     const graus = ESCALA_DO_GRAU.map((_, i) => montar(nome, i));
     // A caixa de todos os graus (o maior manda), com o punho na mesma posição em todos.
     const caixa = new THREE.Box3();
     for (const g of graus) caixa.union(new THREE.Box3().setFromObject(g));
-    const celL = Math.ceil((caixa.max.x - caixa.min.x) * pxCelula) + FOLGA * 2;
-    const celA = Math.ceil((caixa.max.y - caixa.min.y) * pxCelula) + FOLGA * 2;
-    const esq = caixa.min.x - FOLGA / pxCelula;
-    const topo = caixa.max.y + FOLGA / pxCelula;
+    const celL = Math.ceil((caixa.max.x - caixa.min.x) * pxCelula) + folga * 2;
+    const celA = Math.ceil((caixa.max.y - caixa.min.y) * pxCelula) + folga * 2;
+    const esq = caixa.min.x - folga / pxCelula;
+    const topo = caixa.max.y + folga / pxCelula;
     const camera = new THREE.OrthographicCamera(esq, esq + celL / pxCelula, topo, topo - celA / pxCelula, -10, 10);
     camera.position.set(0, 0, 5);
     renderer.setSize(celL, celA, false);
@@ -62,11 +64,11 @@ export function renderizarArmas(nomes: string[], pxCelula: number, exposicao: nu
       const cena = new THREE.Scene();
       cena.add(g);
       cena.add(new THREE.HemisphereLight(0x9aa6c0, 0x2a2018, 0.9));
-      const principal = new THREE.DirectionalLight(0xffd9a8, 2.6);
-      principal.position.set(-4, 9, 6);
-      const recorte = new THREE.DirectionalLight(0x7fa6ff, 1.4);
+      const principal = new THREE.DirectionalLight(0xffdfbc, 3.1);
+      principal.position.set(-5, 7, 5);
+      const recorte = new THREE.DirectionalLight(0xa4bdf0, 2.1);
       recorte.position.set(6, 5, -7);
-      const enchimento = new THREE.DirectionalLight(0xffffff, 0.5);
+      const enchimento = new THREE.DirectionalLight(0xffffff, 0.24);
       enchimento.position.set(5, 2, 6);
       cena.add(principal, recorte, enchimento);
       renderer.render(cena, camera);

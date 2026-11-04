@@ -496,7 +496,7 @@ export class CamadaObjetos {
 
   /** Usa o mesmo desenho da mochila; no isométrico ele fica legível, sem achatar com o piso. */
   private desenharItem(o: ObjetoNoMundo, cx: number, cy: number, proj?: Projecao): void {
-    const textura = texturaDoIcone((o.itemId && this.iconeDe(o.itemId)) || 'pergaminho');
+    const textura = texturaDoIcone((o.itemId && this.iconeDe(o.itemId)) || 'pergaminho', 'item');
     if (!textura) return;
     let item = this.itens.get(o.objetoId);
     if (!item) {
@@ -509,7 +509,6 @@ export class CamadaObjetos {
       const desenho = new Sprite(textura);
       desenho.anchor.set(0.5);
       desenho.width = desenho.height = 28;
-      desenho.tint = 0xffedca;
       const quantidade = new Text({ text: '', style: { fontSize: 12, fontWeight: 'bold', fill: 0xffffff, stroke: { color: 0x10151c, width: 3 } } });
       quantidade.position.set(8, 5);
       visual.addChild(sombra, desenho, quantidade);

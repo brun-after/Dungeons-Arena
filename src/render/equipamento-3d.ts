@@ -7,8 +7,9 @@
 //   já recortadas pelo corpo: vão por cima dele.
 
 export const GRAUS = ['comum', 'incomum', 'raro', 'epico', 'lendario', 'ultima'] as const;
-export const PECAS_DE_ARMADURA = ['capa', 'corpo', 'cabeca'] as const;
+export const PECAS_DE_ARMADURA = ['capa', 'corpo', 'pernas', 'pes', 'maos', 'cabeca'] as const;
 export type PecaDeArmadura = (typeof PECAS_DE_ARMADURA)[number];
+export const pecaDeMembro = (peca: PecaDeArmadura): boolean => peca === 'maos' || peca === 'pernas' || peca === 'pes';
 
 /** As formas (D-069) contam como raridade: a épica, a lendária e a última puxam o grau para cima. */
 const GRAU_DA_FORMA: Readonly<Record<string, number>> = { epica: 3, lendaria: 4, ultima: 5 };
@@ -40,6 +41,7 @@ export function modeloDaArma3d(desenho: string, existe: (m: string) => boolean):
 /** Os que ficam em pé na mão (não giram com o pulso): o escudo, os livros. */
 export const TOMOS: ReadonlySet<string> = new Set(['tomo', 'codice', 'mares', 'estelar', 'prisma', 'espelhos', 'orbital', 'vazio']);
 export const SEM_GIRO: ReadonlySet<string> = new Set(['escudo', ...TOMOS]);
+export const tomoFechado = (modelo: string): string => `${modelo}-fechado`;
 
 /** O nome do atlas da camada (o mesmo em tools/sprites/ e no catálogo). */
 export const nomeDaCamada = (modelo: string, camada: string): string => `${modelo}~${camada}`;

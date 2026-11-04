@@ -2,6 +2,7 @@
 // do texto (`currentColor`), o tamanho do CSS (1em por padrão). Os desenhos são constantes do código, não entrada do
 // jogador; mesmo assim o id é conferido e um id desconhecido vira o ícone genérico.
 
+import { svgDoItem } from '../data/arte-item';
 import { ehIcone, ICONES } from '../data/icones';
 
 export { svgDoIcone } from '../data/icones';
@@ -41,4 +42,13 @@ export function comIcone(el: HTMLElement, id: string, texto?: string): HTMLEleme
     el.append(s);
   }
   return el;
+}
+
+/** Arte colorida para itens; controles e habilidades conservam seus símbolos. */
+export function iconeDoItem(id: string): HTMLImageElement {
+  const img = document.createElement('img');
+  img.className = 'icone';
+  img.alt = '';
+  img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgDoItem(id))}`;
+  return img;
 }

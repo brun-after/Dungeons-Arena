@@ -552,6 +552,7 @@ export class CamadaEntidades {
         pulso,
         morto: e.morto,
         runa: m.runaGolpe,
+        agoraMs: q.agoraMs,
       });
     if (!pronto) return esconder();
     m.figura3d.raiz.visible = true;

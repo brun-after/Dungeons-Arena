@@ -14,8 +14,9 @@ import { clone as clonarComEsqueleto } from 'three/examples/jsm/utils/SkeletonUt
 import { BASE, COLUNAS_POR_FAIXA, DIRECOES, ehVariante, estadosDe, QUADROS, VARIANTES, type Arma, type Estado, type EstadoBase, type Receita, type Variante } from './receitas';
 import { posProcessar } from './pos';
 import { renderizarArmas } from './icones';
-import { asas, capa, elmo, peito, tiara } from './armaduras3d';
+import { asas, bacinete, capa, elmo, pecaDeCabeca, peito, protegerMembros, tiara } from './armaduras3d';
 import { criatura } from './criaturas3d';
+import type { PecaDeArmadura } from '../../src/render/equipamento-3d';
 
 /** Pixels por célula no atlas (o jogo desenha a 48: 1,5× para ficar nítido sem pesar). */
 const ELEVACAO = Math.PI / 6;
@@ -31,7 +32,7 @@ export interface PedidoDeCamada {
   pecas?: string[];
   armas?: Arma[];
   /** A peça de armadura em 3D (armaduras3d.ts) e o grau dela; a cor da raridade também tinge as malhas do traje. */
-  armadura?: { peca: 'cabeca' | 'corpo' | 'capa'; grau: number; acento: number };
+  armadura?: { peca: PecaDeArmadura; grau: number; acento: number };
 }
 
 export interface SaidaAtlas {
@@ -368,7 +369,7 @@ const tingido = (m: THREE.Material, cor: number) => {
   return c;
 };
 
-async function montarCamada(mt: Montado, corpo: THREE.Mesh[], p: PedidoDeCamada, urls: Urls): Promise<CamadaMontada> {
+async function montarCamada(mt: Montado, corpo: THREE.Mesh[], p: PedidoDeCamada, urls: Urls, classe: string): Promise<CamadaMontada> {
   const mats = new Map<THREE.Mesh, Mats>();
   const pinta = new Set<THREE.Mesh>();
   const reMalha = p.malhas ? new RegExp(p.malhas) : null;
@@ -401,9 +402,17 @@ async function montarCamada(mt: Montado, corpo: THREE.Mesh[], p: PedidoDeCamada,
   }
   const a = p.armadura;
   if (a) {
-    if (a.peca === 'cabeca') extras.push(...(a.grau >= 2 ? elmo(mt.ossos, a.grau, a.acento) : a.grau === 1 ? tiara(mt.ossos, a.acento) : []));
+    if (a.peca === 'cabeca') {
+      if ((classe === 'arqueiro' && a.grau < 2) || (a.grau >= 2 && (classe === 'aventureiro' || classe === 'mago' || classe === 'necromante'))) {
+        extras.push(...pecaDeCabeca(mt.ossos, classe, a.grau, a.acento));
+      } else {
+        const montarElmo = classe === 'guerreiro' ? bacinete : elmo;
+        extras.push(...(a.grau >= 2 ? montarElmo(mt.ossos, a.grau, a.acento) : a.grau === 1 ? tiara(mt.ossos, a.acento) : []));
+      }
+    }
     if (a.peca === 'corpo') extras.push(...peito(mt.ossos, a.grau, a.acento));
     if (a.peca === 'capa') extras.push(...capa(mt.ossos, a.grau, a.acento));
+    if (a.peca === 'maos' || a.peca === 'pernas' || a.peca === 'pes') extras.push(...protegerMembros(mt.ossos, a.peca, a.grau));
   }
   for (const x of extras) {
     x.visible = false;
@@ -488,7 +497,7 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
   const pele = corpo.filter((m) => m instanceof THREE.SkinnedMesh);
   const originais = new Map<THREE.Mesh, Mats>(corpo.map((m) => [m, m.material]));
   const montadas: CamadaMontada[] = [];
-  for (const p of camadas) montadas.push(await montarCamada(mt, corpo, p, urls));
+  for (const p of camadas) montadas.push(await montarCamada(mt, corpo, p, urls, r.nome));
 
   const cena = new THREE.Scene();
   const pivo = new THREE.Group();
@@ -600,8 +609,8 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
         const y = (Math.floor(coluna / faixa) * DIRECOES + d) * quadroA;
         let dx = 0;
         let dy = 0;
-        if (maos) {
-          const iMao = maos.d.length;
+        if (maos || referenciaMaos) {
+          const iMao = (d * colunas + coluna) * 5;
           const dAnterior = referenciaMaos?.d.slice(iMao, iMao + 5);
           const eAnterior = referenciaMaos?.e.slice(iMao, iMao + 5);
           if (dAnterior?.length === 5 && eAnterior?.length === 5) {
@@ -617,31 +626,35 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
                 !perto((dAnterior[3] ?? 0), (dAtual[3] ?? 0)) || !perto((eAnterior[3] ?? 0), (eAtual[3] ?? 0))) {
               throw new Error(`Pose incompatível com a armadura: ${r.nome} / ${e} / ${d}:${i}`);
             }
-            maos.d.push(...dAnterior);
-            maos.e.push(...eAnterior);
+            maos?.d.push(...dAnterior);
+            maos?.e.push(...eAnterior);
           } else {
-            maos.d.push(...medirMao(mt, 'r', camera, quadroL, quadroA, PX_CELULA, pele));
-            maos.e.push(...medirMao(mt, 'l', camera, quadroL, quadroA, PX_CELULA, pele));
+            maos?.d.push(...medirMao(mt, 'r', camera, quadroL, quadroA, PX_CELULA, pele));
+            maos?.e.push(...medirMao(mt, 'l', camera, quadroL, quadroA, PX_CELULA, pele));
           }
         }
+        const copiar = (g: CanvasRenderingContext2D) => {
+          if (dx || dy) {
+            g.save();
+            g.beginPath();
+            g.rect(x, y, quadroL, quadroA);
+            g.clip();
+            g.drawImage(renderer.domElement, x + dx, y + dy);
+            g.restore();
+          } else {
+            g.drawImage(renderer.domElement, x, y);
+          }
+        };
         if (atlas) {
           aplicar(null);
           renderer.render(cena, camera);
-          if (dx || dy) {
-            atlas.g.save();
-            atlas.g.beginPath();
-            atlas.g.rect(x, y, quadroL, quadroA);
-            atlas.g.clip();
-            atlas.g.drawImage(renderer.domElement, x + dx, y + dy);
-            atlas.g.restore();
-          } else {
-            atlas.g.drawImage(renderer.domElement, x, y);
-          }
+          copiar(atlas.g);
         }
         montadas.forEach((cm, j) => {
           aplicar(cm);
           renderer.render(cena, camera);
-          telas[j]?.g.drawImage(renderer.domElement, x, y);
+          const tela = telas[j];
+          if (tela) copiar(tela.g);
         });
       }
     }
@@ -649,8 +662,8 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
   renderer.dispose();
   if (atlas) posProcessar(atlas.g, atlas.c.width, atlas.c.height);
   const saidas = telas.map((t, j) => {
-    posProcessar(t.g, t.c.width, t.c.height, montadas[j]?.pedido.tingir ?? false);
-    return t.c.toDataURL('image/png');
+    return posProcessar(t.g, t.c.width, t.c.height, montadas[j]?.pedido.tingir ?? false)
+      ? t.c.toDataURL('image/png') : '';
   });
   return {
     png: atlas ? atlas.c.toDataURL('image/png') : '',

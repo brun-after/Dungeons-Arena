@@ -6,7 +6,7 @@
 
 import { Container, Graphics, Sprite } from 'pixi.js';
 import type { Equipamento3d } from './adornos';
-import { SEM_GIRO, TOMOS } from './equipamento-3d';
+import { SEM_GIRO, TOMOS, tomoFechado } from './equipamento-3d';
 import { maoNoQuadro, type AtlasDePersonagens } from './personagens-3d';
 import type { EstadoPersonagem } from './quadros-personagem';
 import type { Runa } from './runas';
@@ -16,6 +16,7 @@ import { desenharRunaDoElemento } from './runas-elementos';
 const LENDO: ReadonlySet<EstadoPersonagem> = new Set(['golpe', 'conjurar', 'andarGolpe', 'andarConjurar']);
 /** O lado da runa na página (px do atlas). */
 const TAMANHO_RUNA = 18;
+const MS_ABRIR_TOMO = 140;
 
 /** A cor de destaque dos graus altos (lendário e última: objetos.ts COR_RARIDADE). */
 const BRILHO_DO_GRAU: Readonly<Record<number, number>> = { 4: 0xf39c12, 5: 0xff4d6d };
@@ -36,6 +37,7 @@ export interface QuadroDaFigura {
   morto: boolean;
   /** A runa da magia em curso (o elemento dela), acesa no tomo enquanto lê; null sem magia. */
   runa: Runa | null;
+  agoraMs: number;
 }
 
 export class Figura3d {
@@ -45,6 +47,7 @@ export class Figura3d {
   private readonly frente = new Container();
   private readonly camadas: Sprite[] = [];
   private readonly maos = { d: new Sprite(), e: new Sprite() };
+  private readonly tomos = { d: { abertura: 0, tempo: 0 }, e: { abertura: 0, tempo: 0 } };
   private readonly brilho = new Sprite();
   private readonly runa = new Graphics();
   private runaDesenhada: Runa | null = null;
@@ -72,7 +75,7 @@ export class Figura3d {
     const principal = this.empunhar(atlas, q, 'd', eq?.arma ?? null, coluna, origem);
     const secundaria = this.empunhar(atlas, q, 'e', eq?.secundaria ?? null, coluna, origem);
     this.brilhar(principal, q, eq);
-    const tomo = eq && TOMOS.has(eq.secundaria?.modelo ?? '') ? secundaria : eq && TOMOS.has(eq.arma.modelo) ? principal : null;
+    const tomo = eq && TOMOS.has(eq.arma.modelo) ? principal : eq && TOMOS.has(eq.secundaria?.modelo ?? '') ? secundaria : null;
     this.ler(tomo, q);
     return true;
   }
@@ -95,7 +98,7 @@ export class Figura3d {
     if (g.parent !== pai) pai.addChild(g);
     else pai.setChildIndex(g, pai.children.length - 1);
     const t = tomo.texture;
-    g.position.set(tomo.x + (0.5 - tomo.anchor.x) * t.width, tomo.y + (0.5 - tomo.anchor.y) * t.height);
+    g.position.set(tomo.x + (0.5 - tomo.anchor.x) * t.width * tomo.scale.x, tomo.y + (0.5 - tomo.anchor.y) * t.height * tomo.scale.y);
     g.alpha = 0.7 + 0.3 * q.pulso;
     g.visible = true;
   }
@@ -131,6 +134,36 @@ export class Figura3d {
     origem: { x: number; y: number },
   ): Sprite | null {
     const s = this.maos[lado];
+    const tomo = this.tomos[lado];
+    const passo = Math.max(0, Math.min(1, (q.agoraMs - tomo.tempo) / MS_ABRIR_TOMO));
+    tomo.tempo = q.agoraMs;
+    if (arma && TOMOS.has(arma.modelo)) {
+      const outroTomoNaPrincipal = lado === 'e' && TOMOS.has(q.equipamento?.arma.modelo ?? '');
+      const lendo = !q.morto && !outroTomoNaPrincipal && LENDO.has(q.estado);
+      tomo.abertura = q.morto ? 0 : lendo ? Math.min(1, tomo.abertura + passo) : Math.max(0, tomo.abertura - passo);
+      const mao = tomo.abertura > 0 ? maoNoQuadro(q.modelo, lado, q.direcao, coluna) : null;
+      const aberto = mao !== null && tomo.abertura >= 0.5;
+      const livro = atlas.arma(aberto ? arma.modelo : tomoFechado(arma.modelo), arma.grau);
+      s.visible = livro !== null;
+      if (!livro) return null;
+      const angulo = q.direcao * Math.PI / 4;
+      const lateral = lado === 'd' ? -1 : 1;
+      const frente = Math.sin(angulo);
+      const x = lateral * (Math.abs(frente) * 0.1 + 0.035) * origem.y + Math.cos(angulo) * origem.y * 0.045;
+      const y = -origem.y * 0.43;
+      const visivel = mao && tomo.abertura >= 0.5 ? mao.frente : frente >= 0 || Math.sign(Math.cos(angulo)) === lateral;
+      const pai = visivel ? this.frente : this.atras;
+      if (s.parent !== pai) pai.addChild(s);
+      s.texture = livro.textura;
+      s.anchor.set(livro.pegaX, livro.pegaY);
+      s.position.set(mao ? x + (mao.x - origem.x - x) * tomo.abertura : x,
+        mao ? y + (mao.y - origem.y - y) * tomo.abertura : y);
+      s.rotation = lateral * 0.16 * (1 - tomo.abertura);
+      // A altura do recorte acompanha o antebraço, inclusive nos graus maiores.
+      s.scale.set(origem.y * (aberto ? 0.23 : 0.24) / livro.textura.height);
+      return aberto && lendo ? s : null;
+    }
+    tomo.abertura = 0;
     const mao = arma ? maoNoQuadro(q.modelo, lado, q.direcao, coluna) : null;
     const t = arma && mao ? atlas.arma(arma.modelo, arma.grau) : null;
     if (!arma || !mao || !t) {

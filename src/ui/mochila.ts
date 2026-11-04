@@ -29,7 +29,7 @@ import { desenharHabilidades, type EstadoAbaHabilidades } from './mochila-habili
 import { desenharDiario } from './mochila-diario';
 import { duracaoLegivel } from './tempo';
 import { criarModal } from './modal';
-import { icone } from './icones';
+import { icone, iconeDoItem } from './icones';
 import { classeDoItem, comRuna } from './runa-dom';
 
 export interface OpcoesMochila {
@@ -170,7 +170,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     const conteudo = el('span', 'conteudo-item');
     // D-067: o ícone do item é SVG do conjunto (o campo `icone` é um id).
     const iconeItem = el('span', molduraDoItem(opcoes.item));
-    iconeItem.append(icone(opcoes.item?.icone ?? 'circulo'));
+    iconeItem.append(iconeDoItem(opcoes.item?.icone ?? 'circulo'));
     iconeItem.setAttribute('aria-hidden', 'true');
     const textos = el('span', 'textos-item');
     const nome = el('span', `nome-item raridade-${opcoes.item?.raridade ?? 'comum'}`, opcoes.rotulo);
