@@ -79,6 +79,7 @@ import { QuadroAlvo } from './quadro-alvo';
 import { montarVisao, type ControleVisao } from './visao';
 import { ObjetosPreRenderizados } from '../render/objetos-3d';
 import { AtlasDePersonagens } from '../render/personagens-3d';
+import { PalcoVivo } from '../render/vivos/palco-vivo';
 import { criarGolpeNoQuebravel } from './golpe-quebravel';
 import { criarBotaoCentralizar } from './botao-centralizar';
 import { classeDaHabilidade } from './runa-dom';
@@ -222,6 +223,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const modelos3d = new ObjetosPreRenderizados();
   // Marco 32 (31/10/2026, D-131): os personagens pré-renderizados (cada atlas carrega quando o modelo aparece).
   const personagens = o.tileset ? null : new AtlasDePersonagens();
+  // Marco 37 (04/11/2026): os jogadores em 3D em tempo real, na densidade da tela (até 2×); o atlas fica de reserva.
+  const vivos = o.tileset ? null : new PalcoVivo(Math.min(2, Math.max(1, globalThis.devicePixelRatio || 1)));
   const solo: SoloDoTerreno | null = o.tileset
     ? null
     : {
@@ -258,6 +261,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     idLocal,
     rotulos: palco.rotulos,
     personagens,
+    vivos,
     projecao,
     biblioteca: () => visao?.biblioteca() ?? null,
     tokenProprio: () => visao?.tokenProprio() ?? null,
@@ -779,6 +783,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       pintor.destruir();
       modelos3d.destruir();
       personagens?.destruir();
+      vivos?.destruir();
       ap.encerrar();
       for (const d of document.querySelectorAll('dialog.modal')) if (!modaisDeAntes.has(d)) d.remove();
       palco.destruir();

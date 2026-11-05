@@ -1,9 +1,12 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.35 · **Data:** 03/11/2026
+**Versão do documento:** 3.39 · **Data:** 05/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.39 (05/11/2026)**: marco 37 (em andamento): golpes e magias em três tempos (carga, impacto no lançamento e volta), variados entre ataques seguidos e com o peso do corpo, nos jogadores, chefes e monstros (D-133, fase 3).
+> - **3.38 (04/11/2026)**: marco 37 (em andamento): as cinco classes e os chefes humanoides em 3D em tempo real, cada classe com o seu arquétipo sombrio; armas sóbrias; retratos dos menus renderizados do mesmo modelo 3D (D-133, fase 2).
+> - **3.37 (04/11/2026)**: marco 37 (em andamento): visual sombrio dos personagens. A armadura evolui por material e silhueta (couro, malha e tabardo, placas e capa rasgada) e o guerreiro joga em 3D em tempo real, na resolução da tela, com o atlas de reserva (D-133).
 > - **3.33 (31/10/2026)**: marco 32: golpe próprio de cada tipo de arma, passos ao golpear e conjurar andando, armas de arremesso voando com a forma delas, runa do elemento no tomo, armas na frente ou atrás do corpo por raios e o falcão voando acima da cabeça (D-131).
 > - **3.32 (31/10/2026)**: marco 32 (em andamento): personagens pré-renderizados de modelos 3D CC0 da Quaternius e do KayKit, com 8 direções e animações de parado, andar, golpe, conjuração e morte (D-131).
 > - **3.31 (31/10/2026)**: marco 31: o visual sombrio. Chão com texturas CC0 sem grade, escuridão com luz em volta do jogador e das tochas, paredes altas de pedra que esmaecem perto do jogador, telhados nas casas do Mundo (as abandonadas escondem quem está dentro), o jogo só isométrico, objetos e áreas elementais repintados, marcas discretas e barras com moldura (D-130).

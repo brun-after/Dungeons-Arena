@@ -15,6 +15,8 @@ import { BASE, COLUNAS_POR_FAIXA, DIRECOES, ehVariante, estadosDe, QUADROS, VARI
 import { posProcessar } from './pos';
 import { renderizarArmas } from './icones';
 import { asas, bacinete, capa, elmo, pecaDeCabeca, peito, protegerMembros, tiara } from './armaduras3d';
+import { KITS_SOMBRIOS, type PecaSombria } from '../../src/render/vivos/armaduras-sombrias';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { criatura } from './criaturas3d';
 import type { PecaDeArmadura } from '../../src/render/equipamento-3d';
 
@@ -372,12 +374,20 @@ const tingido = (m: THREE.Material, cor: number) => {
 async function montarCamada(mt: Montado, corpo: THREE.Mesh[], p: PedidoDeCamada, urls: Urls, classe: string): Promise<CamadaMontada> {
   const mats = new Map<THREE.Mesh, Mats>();
   const pinta = new Set<THREE.Mesh>();
+  // 04/11/2026 (marco 37): a classe com kit sombrio troca o pano tingido pela raridade pelo material do nível.
+  const kit = p.armadura ? KITS_SOMBRIOS[classe] : undefined;
+  const sombria: PecaSombria | null = kit && p.armadura ? kit(mt.ossos, p.armadura.peca, p.armadura.grau) : null;
+  const tecido = sombria?.tecido ? sombria.tecido.clone() : null;
+  if (tecido) igualOuFrente(tecido);
   const reMalha = p.malhas ? new RegExp(p.malhas) : null;
-  const reEsconder = p.esconder ? new RegExp(p.esconder) : null;
+  const esconder = [p.esconder, sombria?.esconder].filter(Boolean).join('|');
+  const reEsconder = esconder ? new RegExp(esconder) : null;
   for (const m of corpo) {
     const lista = materiais(m).map((mat) => {
+      if (reEsconder && sombria && (reEsconder.test(mat.name) || reEsconder.test(m.name))) return INVISIVEL;
       if (reMalha?.test(m.name) && (!p.material || mat.name.includes(p.material))) {
         pinta.add(m);
+        if (tecido) return tecido;
         if (p.armadura) return tingido(mat, p.armadura.acento);
         return p.tingir ? cinza(mat) : frente(mat);
       }
@@ -387,7 +397,8 @@ async function montarCamada(mt: Montado, corpo: THREE.Mesh[], p: PedidoDeCamada,
     mats.set(m, lista.length === 1 ? (lista[0] as THREE.Material) : lista);
   }
   const extras: THREE.Object3D[] = [];
-  for (const ref of p.pecas ?? []) {
+  // A classe com kit sombrio desenha a própria cabeça (o capuz tingido do traje sai).
+  for (const ref of sombria ? [] : p.pecas ?? []) {
     for (const m of await religadas(urlDe(urls, ref), mt.ossos)) {
       // As peças do traje (o capuz, as ombreiras de pano) na cor da raridade.
       const cor = p.armadura?.acento;
@@ -401,7 +412,10 @@ async function montarCamada(mt: Montado, corpo: THREE.Mesh[], p: PedidoDeCamada,
     if (arma) extras.push(arma);
   }
   const a = p.armadura;
-  if (a) {
+  if (sombria) {
+    // As peças já estão presas nos ossos do traje (seguem a pose de cada quadro).
+    extras.push(...sombria.extras);
+  } else if (a) {
     if (a.peca === 'cabeca') {
       if ((classe === 'arqueiro' && a.grau < 2) || (a.grau >= 2 && (classe === 'aventureiro' || classe === 'mago' || classe === 'necromante'))) {
         extras.push(...pecaDeCabeca(mt.ossos, classe, a.grau, a.acento));
@@ -503,14 +517,27 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
   const pivo = new THREE.Group();
   pivo.add(mt.grupo);
   cena.add(pivo);
-  cena.add(new THREE.HemisphereLight(0x9aa6c0, 0x2a2018, 0.9));
-  const principal = new THREE.DirectionalLight(0xffd9a8, 2.6);
-  principal.position.set(-4, 9, 6);
-  const recorte = new THREE.DirectionalLight(0x7fa6ff, 1.6);
-  recorte.position.set(-6, 5, -7);
-  const enchimento = new THREE.DirectionalLight(0xffffff, 0.4);
-  enchimento.position.set(6, 3, 4);
-  cena.add(principal, recorte, enchimento);
+  if (r.sombrio) {
+    // Marco 37 (04/11/2026): a luz de tocha vinda de cima e da frente, um recorte frio forte por trás (separa a
+    // silhueta do chão escuro) e um recorte quente do outro lado; o mapa de ambiente dá reflexo ao metal.
+    cena.add(new THREE.HemisphereLight(0x8a96b0, 0x1a1410, 0.45));
+    const chave = new THREE.DirectionalLight(0xffc98a, 3.4);
+    chave.position.set(-4, 9, 6);
+    const frio = new THREE.DirectionalLight(0x9fbcff, 4.2);
+    frio.position.set(-6, 5, -7);
+    const quente = new THREE.DirectionalLight(0xffa860, 2.0);
+    quente.position.set(7, 3, -4);
+    cena.add(chave, frio, quente);
+  } else {
+    cena.add(new THREE.HemisphereLight(0x9aa6c0, 0x2a2018, 0.9));
+    const principal = new THREE.DirectionalLight(0xffd9a8, 2.6);
+    principal.position.set(-4, 9, 6);
+    const recorte = new THREE.DirectionalLight(0x7fa6ff, 1.6);
+    recorte.position.set(-6, 5, -7);
+    const enchimento = new THREE.DirectionalLight(0xffffff, 0.4);
+    enchimento.position.set(6, 3, 4);
+    cena.add(principal, recorte, enchimento);
+  }
 
   const q = r.quadro ?? QUADRO_PADRAO;
   const quadroL = Math.round(q.largura * PX_CELULA);
@@ -528,6 +555,12 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
   renderer.toneMappingExposure = r.exposicao ?? 1.6;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.setClearColor(0x000000, 0);
+  if (r.sombrio) {
+    cena.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+    cena.environmentIntensity = 0.6;
+    // A mesma exposição do 3D em tempo real (palco-vivo.ts): o atlas de reserva e o modelo vivo saem iguais.
+    renderer.toneMappingExposure = 1.2;
+  }
 
   const estados = {} as Record<Estado, { inicio: number; n: number }>;
   let colunas = 0;
@@ -549,7 +582,7 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
   const maos = comCorpo && r.equipamento ? { d: [] as number[], e: [] as number[] } : null;
   const telas = montadas.map(() => tela());
 
-  const estilo = r.manga ? luzEmFaixas() : null;
+  const estilo = r.manga && !r.sombrio ? luzEmFaixas() : null;
   if (estilo) {
     for (const cm of montadas) for (const extra of cm.extras) {
       for (const m of malhas(extra)) m.material = estilo(m.material);
@@ -680,13 +713,30 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
   };
 }
 
+/** Os clipes que só o 3D em tempo real usa (as variações de golpe e a preparação das magias). */
+const CLIPES_DO_TEMPO_REAL = ['ual1:Sword_Attack', 'ual2:Sword_Regular_B', 'ual2:Sword_Regular_C', 'ual1:Punch_Cross', 'ual1:Punch_Jab',
+  'ual2:Melee_Hook', 'ual2:TreeChopping_Loop', 'ual1:Spell_Simple_Enter'];
+
 /** Exporta o rig já montado com os clipes de origem usados no atlas. */
 async function exportarModelo(r: Receita, urls: Urls): Promise<string> {
   const { grupo } = await montar(r, urls);
-  const nomes = new Set([...Object.values(r.animacoes ?? {}), ...Object.values(VARIANTES)]);
+  // Marco 37 (05/11/2026): mais os golpes alternados e a preparação das magias do 3D em tempo real (palco-vivo.ts).
+  const nomes = new Set([...Object.values(r.animacoes ?? {}), ...Object.values(VARIANTES), ...CLIPES_DO_TEMPO_REAL]);
   const animations = await Promise.all([...nomes].map(nome => clipe(nome, urls)));
   grupo.name = r.nome;
-  const glb = await new GLTFExporter().parseAsync(grupo, { binary: true, animations, maxTextureSize: 1024 });
+  // Marco 37 (04/11/2026): o modelo do jogo em tempo real tem 48 px × dpr na tela. Sem mapas de normal e com as
+  // texturas até 512 px, o GLB cai de 23 MB para poucos MB sem perda visível nesse tamanho.
+  for (const m of malhas(grupo)) {
+    for (const mat of materiais(m)) {
+      if (mat instanceof THREE.MeshStandardMaterial) {
+        mat.normalMap = null;
+        mat.needsUpdate = true;
+        // As texturas em WebP (EXT_texture_webp, lido pelo GLTFLoader): um quinto do PNG.
+        for (const t of [mat.map, mat.roughnessMap, mat.metalnessMap, mat.emissiveMap, mat.aoMap, mat.alphaMap]) if (t) t.userData.mimeType = 'image/webp';
+      }
+    }
+  }
+  const glb = await new GLTFExporter().parseAsync(grupo, { binary: true, animations, maxTextureSize: 512 });
   if (!(glb instanceof ArrayBuffer)) throw new Error('Exportação GLB não retornou bytes');
   return new Promise((resolve, reject) => {
     const leitor = new FileReader();

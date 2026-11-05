@@ -11,7 +11,7 @@ import { chromium } from '@playwright/test';
 import { build } from 'esbuild';
 import { RECEITAS, VARIANTES, type Receita } from './receitas';
 import type { PedidoDeCamada, SaidaAtlas } from './pagina';
-import { ARMAS_3D, TOMOS_FECHADOS } from './armas3d';
+import { ARMAS_3D, TOMOS_FECHADOS } from '../../src/render/vivos/armas3d';
 import { GRAUS, nomeDaCamada, pecaDeMembro, PECAS_DE_ARMADURA } from '../../src/render/equipamento-3d';
 
 const RAIZ = join(import.meta.dirname, '..', '..');
@@ -35,8 +35,8 @@ const PASTAS: Record<string, string[]> = {
 };
 const DESTINO = join(RAIZ, 'src', 'assets', 'personagens');
 const QUALIDADE_WEBP = 0.85;
-/** Camadas por chamada da página (cada uma é um canvas do tamanho do atlas). */
-const LOTE = 6;
+/** Camadas por chamada da página (cada uma é um canvas do tamanho do atlas); `LOTE_ATLAS` reduz com pouca memória. */
+const LOTE = Math.max(1, Number(process.env.LOTE_ATLAS) || 6);
 const HOST = 'http://modelos.local/';
 
 /** O caminho (no HOST) de cada referência da receita. */
@@ -94,7 +94,7 @@ function camadasDe(r: Receita): PedidoDeCamada[] {
   );
 }
 
-function urlsDe(r: Receita, camadas: PedidoDeCamada[]): Record<string, string> {
+function urlsDe(r: Receita, camadas: PedidoDeCamada[], comVariantes = !!r.equipamento): Record<string, string> {
   const refs = [
     ...(r.corpo.startsWith('proc:') ? [] : [r.corpo]),
     ...(r.cabeca ? [r.cabeca] : []),
@@ -105,7 +105,7 @@ function urlsDe(r: Receita, camadas: PedidoDeCamada[]): Record<string, string> {
   const urls: Record<string, string> = {};
   for (const ref of refs) urls[ref] = HOST + caminhoDe(ref);
   // Marco 32 (D-131): mais os golpes de cada arma das classes.
-  for (const nome of [...Object.values(r.animacoes ?? {}), ...(r.equipamento && r.animacoes ? Object.values(VARIANTES) : [])]) {
+  for (const nome of [...Object.values(r.animacoes ?? {}), ...(comVariantes && r.animacoes ? Object.values(VARIANTES) : [])]) {
     const [bib = '', grupo = ''] = nome.split(':');
     const chave = bib === 'kes' ? `kes-anim:${grupo}` : bib;
     urls[chave] = HOST + caminhoDe(chave);
@@ -195,8 +195,10 @@ const catalogo: Record<string, Entrada> = existsSync(caminhoCatalogo) ? (JSON.pa
 for (const receita of RECEITAS) {
   if ((so && !so.has(receita.nome)) || (comArmas && !so)) continue;
   if (pastaModelos) {
-    if (!receita.manga) continue;
-    const urls = urlsDe(receita, []);
+    // As classes (manga) e, pedidos com --so, os rigs dos chefes em tempo real (src/render/vivos/chefes-vivos.ts).
+    if (!receita.manga && !so?.has(receita.nome)) continue;
+    // O GLB leva os golpes de todas as armas (exportarModelo), também nos rigs dos chefes.
+    const urls = urlsDe(receita, [], true);
     const base64 = await pagina.evaluate(([r, u]) => window.personagens.exportarModelo(r, u), [receita, urls] as const);
     const bytes = Buffer.from(base64, 'base64');
     writeFileSync(join(pastaModelos, `${receita.nome}.glb`), bytes);

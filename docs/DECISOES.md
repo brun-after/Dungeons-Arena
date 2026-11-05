@@ -1,8 +1,11 @@
 # Decisões de projeto
 
-**Versão:** 0.74 · **Data:** 03/11/2026
+**Versão:** 0.78 · **Data:** 05/11/2026
 
 > **Histórico**
+> - **0.78 (05/11/2026)**: D-133, fase 3: golpes e magias em três tempos (carga, impacto e volta), variados e com o peso do corpo.
+> - **0.77 (04/11/2026)**: D-133, fase 2: o estilo sombrio em todas as classes, nas armas, nos chefes humanoides e nos retratos dos menus.
+> - **0.76 (04/11/2026)**: D-133: o visual sombrio dos personagens (armadura por material e silhueta) e os jogadores em 3D em tempo real (marco 37, fase 1: o guerreiro).
 > - **0.72 (31/10/2026)**: D-131: o golpe de cada tipo de arma, a arma de arremesso em voo com a forma dela, o passo no golpe e na conjuração em movimento, a frente da arma por raios, a runa do elemento no tomo e o voo do falcão acima da cabeça.
 > - **0.71 (31/10/2026)**: D-131: o equipamento nos personagens pré-renderizados (camadas por arma e peça) e o retrato 3D na escolha de classe.
 > - **0.70 (31/10/2026)**: D-131 (os personagens pré-renderizados de modelos 3D CC0, marco 32).
@@ -3677,3 +3680,86 @@ Sombras e indicadores conservam escala própria. Interiores com dragão recebem 
 proporcionais e deixam de colocar pilares no caminho. As clareiras externas preservam construções.
 Busca de caminho, suavização e integração verificam a folga do corpo contra o terreno; a colisão
 entre atores conserva as regras existentes. Não reduzir a arte para disfarçar recortes no atlas.
+
+
+## D-133 — Visual sombrio dos personagens e jogadores em 3D em tempo real (marco 37, 04/11/2026)
+
+**Contexto.** O usuário quer os personagens mais próximos de Elden Ring, no jogo e nos menus. O equipamento evoluía
+pela cor da raridade (o pano branco, azul, laranja e rosa) com peças de primitivas coladas por cima, e os sprites do
+atlas (72 px por célula, desenhados a 48) não aguentam o detalhe da proposta: subir para 160 px multiplicaria por 5 a
+memória de vídeo de cada camada (hoje cerca de 35 MB por camada de classe). Wild Rift, Honor of Kings e League of
+Legends desenham os personagens em 3D em tempo real, com modelos leves, poucas texturas e níveis de qualidade.
+
+**Decisão.**
+- **Armadura sombria** (`src/render/vivos/armaduras-sombrias.ts`): o equipamento evolui por material e silhueta, em
+  três níveis por peça (graus 0–1, 2–3 e 4–5): couro e gambeson; malha, aço e tabardo; placas com ombreiras em
+  lâminas, gorjal e capa longa rasgada. O grau ímpar acrescenta ornamento (latão); o 5 troca por ouro, com a coroa no
+  grande elmo. Peças torneadas com materiais PBR e texturas procedurais (riscos, malha, trama, barra rasgada). Primeira
+  classe: o guerreiro (`KITS_SOMBRIOS`); as outras seguem com `armaduras3d.ts` até ganharem o kit delas.
+- **Luz realista** na ferramenta de sprites (receita `sombrio`): mapa de ambiente e recortes quente e frio no lugar da
+  luz em faixas do mangá. O atlas do guerreiro foi gerado de novo com o kit (a reserva do 3D em tempo real).
+- **Jogadores em 3D em tempo real** (`src/render/vivos/palco-vivo.ts`): o rig da classe (GLB exportado pela ferramenta,
+  `src/assets/modelos/`, sem mapas de normal e com texturas até 512 px: 7,7 MB) é clonado por jogador, com as peças de
+  cada grau fundidas em malhas com pele (peso 1 no osso) e as armas 3D (`armas3d.ts`, movido de `tools/sprites/`) presas
+  no osso da mão. Todos saem numa passada só, cada um no quadrinho de um atlas dinâmico na densidade da tela (até 2×);
+  o Pixi mostra os quadrinhos como sprites, e a ordem de desenho com paredes e telhados continua a do jogo. Enquanto o
+  modelo carrega, o atlas pré-renderizado continua.
+- **Monstros continuam em sprite** (muitos ao mesmo tempo e sem variação); os **chefes** vão para o tempo real, como os
+  jogadores (pedido do usuário), numa fase seguinte. Os sprites dos monstros serão gerados de novo com a luz nova.
+
+**Medidas** (protótipo `?bench=modelos3d`, Intel UHD integrada; a cena padrão do jogo dá 32 fps na mesma máquina):
+20 guerreiros com uma passada por personagem, 32 ms de 3D por quadro; com uma passada só, 10 ms (60 fps); 40, 23 ms;
+40 na densidade 2, 27 ms. Cortar a armadura de 25 mil para 4 mil triângulos quase não mudou o tempo: o custo é por
+personagem (11 chamadas de desenho, uma por material). No jogo, a cena padrão com o guerreiro em 3D rodou a 45 fps.
+
+**Consequências e próximas fases.**
+- Kits das outras quatro classes; chefes em tempo real; retratos dos menus renderizados do mesmo modelo; sprites dos
+  monstros com a luz nova.
+- Otimização para o Mundo (40 jogadores): juntar os materiais numa textura (1 a 2 chamadas por personagem), cortar o
+  corpo escondido sob a armadura (12,5 mil dos 16 mil triângulos), redesenhar os distantes com menos frequência, tirar
+  as texturas duplicadas do GLB e passar para WebP; na qualidade mínima, os outros jogadores voltam ao atlas.
+- Pendências visíveis: as armas ainda usam o dourado saturado e o brilho antigos; o brilho de elemento, o branco da
+  mira cheia e a runa do tomo ainda não existem no 3D; a espada do grau 5 ficou comprida demais.
+- `&vestir=N` (só no desenvolvimento) veste todas as peças no grau N para revisar o visual.
+
+**Fase 2 (04/11/2026).**
+- **Base comum** (`sombrio-base.ts`): texturas, materiais (cache por chave) e geometria saíram do arquivo do guerreiro.
+  Membros e capa viraram peças gerais com o material de cada classe (`pecas-sombrias.ts`), com saia de veste presa nas
+  coxas, capuz pontudo com o rosto na sombra, máscaras (pano, osso, bico), chapéu, coroa, cristais, galhada, aljava,
+  costelas, gola alta e estola.
+- **Kits das outras classes** (`kits-classes.ts`), cada uma com o seu arquétipo: o feiticeiro da academia (lã
+  azul-cinza a azul profundo com barra dourada, capuz pontudo, coroa de cristais acesos), a caçadora (couro e
+  brigandina tachada, aljava, máscara de ave de rapina, pele nos ombros), o sacerdote da morte (trapos rasgados,
+  costelas e máscara de osso, galhada, véu, gola de penas, chama-fantasma no grau 5) e o andarilho (gambeson e bolsas,
+  brigandina, peito de ferro aberto, chapéu de ferro e de aba larga). As cinco classes estão no tempo real.
+- **Armas sóbrias** (`armas3d.ts`): cores dessaturadas e escurecidas, metal com a textura de riscos, grau por material
+  (ferro e aço gasto, latão, aço polido, ouro velho com runas, aço enegrecido com o fio em brasa). Os cristais
+  flutuantes saíram, e o crescimento por grau caiu de 42% para 18%. Cajados, lanças, foices e arcos ficam em pé com o
+  corpo, não no eixo da mão.
+- **Chefes em tempo real** (`chefes-vivos.ts`, chave `chefe:<preset>` só para o arquétipo boss): o rei goblin (coroa
+  de ferro com brasa, manto e ombros de pele, machado), a bruxa do pântano (capuz pontudo, trapos de lodo, cajado da
+  praga), o necromante ancestral (o kit do necromante no grau 5, coroa de osso e gadanha) e o demônio (pele
+  carbonizada, chifres longos, coração em brasa, ombreiras de ferro com espinhos). Os rigs são exportados das receitas
+  dos monstros, recoloridos no jogo. **Os dragões continuam no atlas**: o modelo de origem (Cethiel, CC0) não está
+  nesta máquina.
+- **Retratos dos menus** (`retrato-ilustrado.ts`): o mesmo modelo 3D, num palco só para os retratos, com as peças no
+  detalhe cheio, em perspectiva a três quartos e na densidade da tela. A ilustração antiga fica como reserva sem WebGL.
+- **GLB menor**: texturas em WebP (`EXT_texture_webp`), de 6–8 MB para 3,3–5,6 MB por modelo; os modelos entram no
+  cache do PWA quando usados (`dungeons-arena-modelos`).
+**Fase 3 (05/11/2026): golpes e magias legíveis.** O usuário achou o ataque um chacoalhão: o clipe inteiro da UAL
+(preparação, golpe e volta, 1 a 1,5 s) cabia em 0,3–0,5 s depois do lançamento e recomeçava do zero ao lançar.
+- **Três tempos** (`quadros-personagem.ts`, `progressoDoGolpe`): a carga cresce durante a conjuração, o golpe acelera
+  até o impacto, que cai no lançamento (quando o dano acontece), o impacto segura 70 ms e a volta sai em 260–620 ms. Os
+  pontos de carga e impacto de cada clipe foram medidos pela velocidade da mão. Vale para o 3D em tempo real e para os
+  atlas (os monstros e a reserva), e a criatura sem arma de classe agora prepara o golpe físico (antes não preparava).
+- **Golpes variados** (`palco-vivo.ts`): ataques seguidos alternam clipes (a espada: corte subindo, corte em diagonal e
+  golpe de cima; o machado: o golpe de lenhador e o golpe de cima; o demônio: direto, cruzado e gancho). As espadadas
+  da UAL andam com o corpo; ficam no lugar (o jogo já move a entidade). O combo C da UAL (salto e giro) ficou de fora.
+- **Da guarda e de volta a ela**: o golpe sai da pose parada no começo da carga e volta a ela no fim (sem o estalo de
+  trocar de clipe).
+- **Peso do corpo**: o tronco recua na carga e se lança no impacto; na magia, o catalisador (cajado, tomo) sobe na
+  carga e desce com a mão aberta no lançamento, depois da preparação com as mãos subindo (`Spell_Simple_Enter`).
+- Os GLB levam os clipes novos (cerca de 0,7 MB a mais cada).
+- Pendentes: os atlas de reserva e os ícones das armas ainda são os da fase 1 (gerá-los de novo leva cerca de uma hora);
+  os ícones dos itens de armadura ainda são os desenhos SVG; sprites dos monstros com a luz nova; dragões em tempo real.
+

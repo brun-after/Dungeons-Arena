@@ -3,7 +3,7 @@
 // jogo prende o punho (a origem do modelo) na mão medida em cada quadro e gira a arma para o eixo dela.
 
 import * as THREE from 'three';
-import { ARMAS_3D, ESCALA_DO_GRAU, Kit, TOMOS_FECHADOS } from './armas3d';
+import { ARMAS_3D, ESCALA_DO_GRAU, Kit, TOMOS_FECHADOS } from '../../src/render/vivos/armas3d';
 import { posProcessar } from './pos';
 
 /** A cor de destaque de cada grau: a da raridade (objetos.ts COR_RARIDADE). */

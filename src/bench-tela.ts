@@ -120,6 +120,11 @@ export async function iniciarBench(raiz: HTMLElement, params: URLSearchParams): 
     await iniciarTrocas(raiz);
     return;
   }
+  if (pedido === 'modelos3d') {
+    // Marco 37 (04/11/2026): protótipo dos personagens 3D em tempo real (só no servidor de desenvolvimento).
+    await (await import('./bench/modelos3d')).iniciarBenchModelos(raiz, params);
+    return;
+  }
   const tipo: TipoBench = pedido === 'carga' ? 'carga' : 'padrao';
   const segundos = Math.min(600, Math.max(5, Number(params.get('segundos')) || 60));
   const quadros: number[] = [];
