@@ -71,6 +71,14 @@ describe('áudio: mapeamento e música', () => {
     expect(somDaHabilidade(semVisual('xyz', { politicaImpacto: 'area', tipoArea: 'quadrado' }))).toBe('explosao');
   });
 
+  it('o básico com elemento toca o som curto do conteúdo, não o do elemento (05/11/2026)', () => {
+    const cajado = obter(CONTEUDO.habilidades.get('basico_cajado'), 'basico_cajado');
+    expect(cajado.elemento).toBe('trevas');
+    expect(CONTEUDO.definicoes.get('basico_cajado')?.basico).toBe(true);
+    expect(somDaHabilidade(cajado, true)).toBe('magia');
+    expect(somDaHabilidade(cajado)).toBe('trevas');
+  });
+
   it('eventos viram sons; coleta e nível só do jogador local, como som global', () => {
     const hab = (id: string) => CONTEUDO.habilidades.get(id);
     expect(sonsDoEvento({ t: 'coletou', tick: 0, id: 'j', objetoId: 'o', tipo: 'ouro', ganho: 5, itemId: null }, 'j', hab)).toEqual([{ som: 'moeda', origemId: null }]);

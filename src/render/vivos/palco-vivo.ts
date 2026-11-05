@@ -487,7 +487,8 @@ export class PalcoVivo {
       a.extras.push(g);
       if (EM_PE.has(arma.modelo)) {
         // Inclinada um pouco para a frente e virada para a câmera (o arco de perfil viraria um risco a 48 px).
-        const giro = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.18, ARCOS.test(arma.modelo) ? 0.35 : 0.4, 0));
+        // 05/11/2026: o arco meio giro em pé, a madeira para o alvo e a corda para quem atira (estava ao contrário).
+        const giro = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.18, ARCOS.test(arma.modelo) ? 0.35 + Math.PI : 0.4, 0));
         a.emPe.push({ g, giro });
       }
     }

@@ -494,7 +494,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     // A barra se redesenha inteira; a ultimate fica ao lado dela, numa fila própria.
     const fila = document.createElement('div');
     fila.className = 'fila-barra';
-    fila.append(barra.elemento, botaoUltimate.elemento);
+    // 05/11/2026: o d20 entra na fila, à esquerda da barra (fixo na tela, a barra crescida o cobria).
+    fila.append(dado.elemento, barra.elemento, botaoUltimate.elemento);
     ui.append(fila);
     centralizar.elemento.classList.add('flutuante');
     ui.append(centralizar.elemento);
