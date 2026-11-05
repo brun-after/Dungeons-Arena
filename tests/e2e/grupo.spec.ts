@@ -6,7 +6,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 async function personagemNoSlot(page: Page, classe: string): Promise<void> {
   await page.goto(`./?jogo=campanha&slot=1&diag=1&classe=${classe}`);
-  await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
+  await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/, { timeout: 30000 });
   await page.getByRole('button', { name: 'Salvar e voltar aos slots' }).click();
   await expect(page.locator('[data-slot="1"]')).toContainText('nível 1');
 }

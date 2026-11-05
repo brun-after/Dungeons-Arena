@@ -5,6 +5,7 @@ import { ARMA_DE_CLASSE } from '../render/modelos';
 import catalogo from '../assets/retratos/armas/catalogo.json';
 import { equipamento3d } from '../render/adornos';
 import { existeArma3d } from '../render/personagens-3d';
+import { webglAcelerado } from '../render/vivos/acelerado';
 
 const CLASSES = ['aventureiro', 'guerreiro', 'mago', 'arqueiro', 'necromante'] as const;
 const MAOS = [[85, 316], [77, 327], [82, 315], [98, 295], [84, 310]] as const;
@@ -191,6 +192,8 @@ function membros(eq: AparenciaEquipada | null, direita: number, esquerda: number
 // antiga (desenho com as camadas em SVG) fica como reserva quando não há WebGL ou o modelo falha.
 let palcoDosRetratos: Promise<import('../render/vivos/palco-vivo').PalcoVivo | null> | undefined;
 function palco(): Promise<import('../render/vivos/palco-vivo').PalcoVivo | null> {
+  // 05/11/2026: sem GPU (WebGL em software) fica a ilustração; o 3D travaria o menu.
+  if (!webglAcelerado()) return Promise.resolve(null);
   palcoDosRetratos ??= import('../render/vivos/palco-vivo').then((m) => new m.PalcoVivo(1, 1)).catch(() => null);
   return palcoDosRetratos;
 }
@@ -205,9 +208,19 @@ async function retrato3d(modelo: string, eq: AparenciaEquipada | null): Promise<
   return canvas;
 }
 
-/** O retrato de menu: o modelo 3D do jogo; sem ele, a ilustração composta com o mesmo equipamento visual. */
-export async function retratoIlustrado(modelo: string, eq: AparenciaEquipada | null): Promise<HTMLCanvasElement> {
-  return (await retrato3d(modelo, eq).catch(() => null)) ?? retratoDesenhado(modelo, eq);
+/**
+ * O retrato de menu em duas etapas: a ilustração composta aparece logo e o modelo 3D do jogo a substitui quando
+ * fica pronto (05/11/2026: o 3D pode levar segundos em aparelhos fracos e o menu não espera por ele).
+ */
+export async function retratoIlustrado(
+  modelo: string,
+  eq: AparenciaEquipada | null,
+  mostrar: (canvas: HTMLCanvasElement, vivo: boolean) => void,
+): Promise<void> {
+  const vivo = retrato3d(modelo, eq).catch(() => null);
+  mostrar(await retratoDesenhado(modelo, eq), false);
+  const canvas = await vivo;
+  if (canvas) mostrar(canvas, true);
 }
 
 /** Ilustração de menu em resolução própria, composta com o mesmo equipamento visual do jogo. */

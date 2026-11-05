@@ -80,6 +80,7 @@ import { montarVisao, type ControleVisao } from './visao';
 import { ObjetosPreRenderizados } from '../render/objetos-3d';
 import { AtlasDePersonagens } from '../render/personagens-3d';
 import { PalcoVivo } from '../render/vivos/palco-vivo';
+import { webglAcelerado } from '../render/vivos/acelerado';
 import { criarGolpeNoQuebravel } from './golpe-quebravel';
 import { criarBotaoCentralizar } from './botao-centralizar';
 import { classeDaHabilidade } from './runa-dom';
@@ -224,7 +225,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   // Marco 32 (31/10/2026, D-131): os personagens pré-renderizados (cada atlas carrega quando o modelo aparece).
   const personagens = o.tileset ? null : new AtlasDePersonagens();
   // Marco 37 (04/11/2026): os jogadores em 3D em tempo real, na densidade da tela (até 2×); o atlas fica de reserva.
-  const vivos = o.tileset ? null : new PalcoVivo(Math.min(2, Math.max(1, globalThis.devicePixelRatio || 1)));
+  // 05/11/2026: sem GPU (WebGL em software) o atlas desenha os jogadores.
+  const vivos = o.tileset || !webglAcelerado() ? null : new PalcoVivo(Math.min(2, Math.max(1, globalThis.devicePixelRatio || 1)));
   const solo: SoloDoTerreno | null = o.tileset
     ? null
     : {
