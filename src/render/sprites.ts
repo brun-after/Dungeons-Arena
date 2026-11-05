@@ -10,14 +10,15 @@ import { tipoEm } from '../world/fase';
 
 import type { Elemento } from '../combat/elementos';
 import { misturarCor } from './decoracao';
-import { Container, Graphics, Text } from 'pixi.js';
+import { Container, Graphics, Sprite, Text } from 'pixi.js';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import { efeitosAtivos } from '../combat/efeitos';
 import type { Arquetipo, Entidade } from '../entities/entidade';
 import { relacao } from '../modos/relacao';
 import { duracaoDoGolpe, pose, type EstiloCaminhada, type Golpe } from './caminhada';
-import { elementoDaAcao, golpeDaAcao } from './golpe-visual';
+import { acaoFisica, elementoDaAcao, golpeDaAcao } from './golpe-visual';
+import { msDe } from '../core/tempo';
 import { runaDoElemento } from './runas-elementos';
 import type { Runa } from './runas';
 import { CELULA_PX } from './camera-calculo';
@@ -28,8 +29,9 @@ import { equipamento3d, texturasDoAdorno } from './adornos';
 import { RigToken } from './rig-token';
 import { existeArma3d, type AtlasDePersonagens } from './personagens-3d';
 import { Figura3d } from './figura-3d';
+import { chaveDoChefe, pedidoVivo, type PalcoVivo } from './vivos/palco-vivo';
 import { ArmasEmVoo, type DonoDoProjetil } from './armas-em-voo';
-import { direcaoDoAngulo, estadoDoPersonagem, peloGolpe, quadroDoEstado, RECUO_DO_GOLPE } from './quadros-personagem';
+import { direcaoDoAngulo, duracaoVisualDoGolpe, estadoDoPersonagem, peloGolpe, perfilDoAtlas, progressoDoGolpe, quadroDoEstado } from './quadros-personagem';
 import { quadroDoToken, type MomentoDoQuadro } from './quadro-membros';
 import { anelDaInvocacao } from './anel-invocacao';
 import { coresDasRunas, desenharRuna } from './runas';
@@ -148,6 +150,8 @@ export interface OpcoesEntidades {
   ajuste?: (e: Entidade, agoraMs: number) => AjusteVisual | null;
   /** Marco 32 (D-131): os atlas dos personagens pré-renderizados (no isométrico, no lugar do token desenhado). */
   personagens?: AtlasDePersonagens | null;
+  /** Marco 37 (04/11/2026): os personagens 3D em tempo real (os jogadores), no lugar do atlas quando o modelo existe. */
+  vivos?: PalcoVivo | null;
   /** Marco 31 (D-130): quem está em (x, y) não aparece (dentro de uma casa fechada, para quem está fora). */
   oculto?: (x: number, y: number) => boolean;
   /** Marco 26 (28/10/2026, D-116): a runa da classe sobre a cabeça dos jogadores (preferência). */
@@ -189,6 +193,8 @@ interface Marcador {
   rig: RigToken | null;
   /** Marco 32 (D-131): a figura pré-renderizada, com a armadura e as armas (null: o token desenhado). */
   figura3d: Figura3d | null;
+  /** Marco 37: o quadrinho do personagem 3D em tempo real (null: atlas ou token). */
+  vivo: Sprite | null;
   /** Marco 32 (D-131): o modelo e a arma da figura 3D (o desenho do projétil das armas de arremesso). */
   dono3d: DonoDoProjetil | null;
   /** Quando a entidade caiu (para a animação de morte), ou -1. */
@@ -212,6 +218,14 @@ interface Marcador {
   /** Marco 24 (D-098): o golpe da última ação (pela chave), que a pose anima. */
   golpe: Golpe | null;
   chaveGolpe: string;
+  /**
+   * Marco 37 (05/11/2026): o tempo do golpe no corpo 3D e no atlas. Quantos golpes já começaram (alterna as
+   * variações), a conjuração da última ação (ms), se ela é física e quanto dela já passou.
+   */
+  golpes: number;
+  conjuraMs: number;
+  fisico: boolean;
+  preparoAcao: number | null;
   /** Marco 32 (D-131): a runa do elemento da última ação, acesa no tomo enquanto conjura. */
   runaGolpe: Runa | null;
   escala: number;
@@ -258,9 +272,9 @@ export class CamadaEntidades {
     if (runa) raiz.addChild(runa);
     this.camada.addChild(raiz);
     return {
-      raiz, sobre, chao, silhueta, seta, rig: null, figura3d: null, dono3d: null, morteDesdeMs: -1, barras, aneis, indicador, runa, runaDesenhada: '', cor,
+      raiz, sobre, chao, silhueta, seta, rig: null, figura3d: null, vivo: null, dono3d: null, morteDesdeMs: -1, barras, aneis, indicador, runa, runaDesenhada: '', cor,
       angulo: 0, sentido: 1, ultimoX: e.px, ultimoY: e.py, visualX: Number.NaN, visualY: Number.NaN,
-      andandoAteMs: 0, acaoId: null, ataqueDesdeMs: -Infinity, golpe: null, chaveGolpe: '', runaGolpe: null, escala, escalaAtlas: escala, topo: -RAIO * escala, achatamento: 1, chaoDesenhado: '',
+      andandoAteMs: 0, acaoId: null, ataqueDesdeMs: -Infinity, golpe: null, chaveGolpe: '', golpes: 0, conjuraMs: 0, fisico: false, preparoAcao: null, runaGolpe: null, escala, escalaAtlas: escala, topo: -RAIO * escala, achatamento: 1, chaoDesenhado: '',
     };
   }
 
@@ -329,6 +343,7 @@ export class CamadaEntidades {
       // O ataque sai no lançamento: a ação em curso some (ou troca) e o empurrão começa.
       const acaoAtual = e.acao?.acaoId ?? null;
       if (m.acaoId !== null && acaoAtual !== m.acaoId) m.ataqueDesdeMs = agoraMs;
+      if (acaoAtual !== null && acaoAtual !== m.acaoId) m.golpes++;
       m.acaoId = acaoAtual;
 
       const p = posicao(e);
@@ -366,11 +381,15 @@ export class CamadaEntidades {
       if (e.acao && escolha && m.chaveGolpe !== e.acao.chave) {
         m.golpe = golpeDaAcao(ctx, e, e.acao.chave, escolha.modelo);
         m.chaveGolpe = e.acao.chave;
+        m.fisico = acaoFisica(ctx, e.acao.chave);
         const el = elementoDaAcao(ctx, e, e.acao.chave);
         m.runaGolpe = runaDoElemento(el, el && this.o.corElemento ? this.o.corElemento(el) : null);
       }
       const conjura = e.acao ? e.acao.lancamentoTick - e.acao.inicioTick : 0;
-      const preparo = e.acao && m.golpe ? (conjura > 0 ? Math.min(1, Math.max(0, (tickVisual - e.acao.inicioTick) / conjura)) : 1) : null;
+      const preparoAcao = e.acao ? (conjura > 0 ? Math.min(1, Math.max(0, (tickVisual - e.acao.inicioTick) / conjura)) : 1) : null;
+      const preparo = m.golpe ? preparoAcao : null;
+      m.preparoAcao = preparoAcao;
+      if (e.acao) m.conjuraMs = msDe(conjura);
       this.desenharCorpo(m, e, escolha, {
         iso, usarTiras, reduzido, agoraMs, andando, aparencia, preparo, ajuste, tick: estado.tick,
         direcao: { x: dtx / norma, y: dty / norma },
@@ -378,6 +397,7 @@ export class CamadaEntidades {
       });
       const tintaInvocada = tintaDaInvocacao(e, estado);
       if (m.figura3d) m.figura3d.raiz.tint = tintaInvocada ?? 0xffffff;
+      if (m.vivo) m.vivo.tint = tintaInvocada ?? 0xffffff;
       if (m.rig && tintaInvocada !== null) m.rig.raiz.tint = tintaInvocada;
       m.silhueta.tint = tintaInvocada ?? 0xffffff;
       this.desenharChao(m, iso);
@@ -406,6 +426,7 @@ export class CamadaEntidades {
       this.marcadores.delete(id);
       aoRemover?.(id);
     }
+    this.o.vivos?.desenhar();
     this.armasEmVoo.desenhar(estado, ctx, alpha, agoraMs, proj, this.o.personagens ?? null, (id) => this.marcadores.get(id)?.dono3d ?? null);
   }
 
@@ -433,6 +454,7 @@ export class CamadaEntidades {
     if (!escolha) {
       m.rig?.raiz.removeFromParent();
       if (m.figura3d) m.figura3d.raiz.visible = false;
+      if (m.vivo) m.vivo.visible = false;
       m.topo = -RAIO * m.escala;
       return;
     }
@@ -510,21 +532,52 @@ export class CamadaEntidades {
     } else m.morteDesdeMs = -1;
     const esconder = () => {
       if (m.figura3d) m.figura3d.raiz.visible = false;
+      if (m.vivo) m.vivo.visible = false;
       return false;
     };
     // A arma na mão vale também de cima (o projétil das armas de arremesso tem a forma dela).
     const equipamento = equipamento3d(escolha.modelo, e.aparencia, existeArma3d);
     m.dono3d = { modelo: escolha.modelo, arma: equipamento?.arma ?? null };
-    if (!atlas || !q.iso || escolha.proprio || !atlas.existe(escolha.modelo)) return esconder();
+    if (!q.iso || escolha.proprio) return esconder();
+    // Marco 37 (05/11/2026): o golpe em três tempos (carga na conjuração, impacto no lançamento e volta), para todos os
+    // modelos; a criatura sem arma de classe prepara o golpe físico dela (não a pose de magia).
     const ataqueMs = q.agoraMs - m.ataqueDesdeMs;
-    const duracao = duracaoDoGolpe(m.golpe);
-    const golpeando = ataqueMs < duracao;
-    const estado = estadoDoPersonagem({ morto: e.morto, golpeando, conjurando: q.preparo !== null && q.preparo < 1, andando: q.andando, golpe: m.golpe });
-    const n = atlas.quadrosDe(escolha.modelo, estado);
+    const comPreparo = m.conjuraMs >= 150;
+    const preparando = m.preparoAcao !== null && m.preparoAcao < 1;
+    const estadoBase = estadoDoPersonagem({ morto: e.morto, golpeando: false, conjurando: preparando, andando: q.andando, golpe: m.golpe, fisico: m.fisico });
+    const perfil = perfilDoAtlas(peloGolpe(estadoBase) ? estadoBase : estadoDoPersonagem({ morto: false, golpeando: true, conjurando: false, andando: false, golpe: m.golpe }), escolha.modelo);
+    const golpeando = !preparando && ataqueMs < duracaoVisualDoGolpe(perfil, comPreparo);
+    const estado = golpeando ? estadoDoPersonagem({ morto: e.morto, golpeando: true, conjurando: false, andando: q.andando, golpe: m.golpe }) : estadoBase;
     const ciclo = q.reduzido && estado !== 'morte' && !peloGolpe(estado) ? 0 : q.agoraMs + faseDe(e.id) * 1000;
     const tempo = estado === 'morte' ? q.agoraMs - m.morteDesdeMs : ciclo;
-    // Marco 32 (D-131): na preparação de um golpe de arma, o recuo dele (o começo da animação) acompanha a conjuração.
-    const fracao = golpeando ? (duracao > 0 ? ataqueMs / duracao : 0) : (q.preparo ?? 0) * RECUO_DO_GOLPE;
+    const fracao = peloGolpe(estado)
+      ? progressoDoGolpe(perfil, m.preparoAcao, golpeando ? ataqueMs : null, comPreparo)
+      : estado === 'conjurar' || estado === 'andarConjurar' ? (m.preparoAcao ?? 0) : 0;
+    const golpe = { preparo: golpeando ? null : m.preparoAcao, desdeMs: golpeando ? ataqueMs : null, comPreparo, variacao: m.golpes };
+    // Marco 37 (04/11/2026): o jogador e o chefe com modelo em tempo real saem do palco 3D; enquanto carrega, o atlas
+    // continua. O chefe usa a chave própria (a veste e a arma dele), não o modelo do monstro comum.
+    const modeloVivo = (e.arquetipo === 'boss' ? chaveDoChefe(e.preset) : null) ?? escolha.modelo;
+    const vivo = this.o.vivos?.suporta(modeloVivo)
+      ? this.o.vivos.pedir(pedidoVivo(e.id, modeloVivo, e.aparencia, equipamento, estado, tempo, fracao, m.angulo, golpe))
+      : null;
+    if (vivo) {
+      if (!m.vivo) {
+        m.vivo = new Sprite();
+        m.raiz.addChildAt(m.vivo, m.raiz.getChildIndex(m.silhueta));
+      }
+      m.vivo.texture = vivo.textura;
+      m.vivo.anchor.set(vivo.ancoraX, vivo.ancoraY);
+      m.vivo.scale.set(vivo.escala * m.escalaAtlas * (q.ajuste?.escala ?? 1));
+      m.vivo.position.y = -(q.ajuste?.alturaPx ?? 0);
+      m.vivo.visible = true;
+      if (m.figura3d) m.figura3d.raiz.visible = false;
+      if (m.rig) m.rig.raiz.visible = false;
+      m.topo = -vivo.topo * m.escalaAtlas * 1.02;
+      return true;
+    }
+    if (m.vivo) m.vivo.visible = false;
+    if (!atlas || !atlas.existe(escolha.modelo)) return esconder();
+    const n = atlas.quadrosDe(escolha.modelo, estado);
     const indice = quadroDoEstado(estado, n, tempo, fracao);
     if (!m.figura3d) {
       m.figura3d = new Figura3d();

@@ -48,3 +48,10 @@ export function elementoDaAcao(ctx: ContextoSimulacao, e: Entidade, chave: strin
   const daArma = e.aparencia?.elementoArma ?? null;
   return h?.elemento ?? (daArma && ehElemento(daArma) ? daArma : null);
 }
+
+/**
+ * Marco 37 (05/11/2026): a ação é golpe físico (a criatura sem arma de classe prepara o golpe dela, não a pose de magia)?
+ */
+export function acaoFisica(ctx: ContextoSimulacao, chave: string): boolean {
+  return resolverHabilidade(ctx, chave)?.tipoAtaque === 'fisico';
+}

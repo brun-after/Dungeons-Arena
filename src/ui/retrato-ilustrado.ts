@@ -3,6 +3,9 @@ import type { AparenciaEquipada } from '../entities/entidade';
 import { grauDe, modeloDaArma3d, SEM_GIRO, TOMOS, tomoFechado } from '../render/equipamento-3d';
 import { ARMA_DE_CLASSE } from '../render/modelos';
 import catalogo from '../assets/retratos/armas/catalogo.json';
+import { equipamento3d } from '../render/adornos';
+import { existeArma3d } from '../render/personagens-3d';
+import { webglAcelerado } from '../render/vivos/acelerado';
 
 const CLASSES = ['aventureiro', 'guerreiro', 'mago', 'arqueiro', 'necromante'] as const;
 const MAOS = [[85, 316], [77, 327], [82, 315], [98, 295], [84, 310]] as const;
@@ -184,8 +187,44 @@ function membros(eq: AparenciaEquipada | null, direita: number, esquerda: number
   </defs>` + calcas + botas + luvas;
 }
 
+// 04/11/2026 (marco 37): o retrato dos menus é o personagem 3D do jogo (palco-vivo.ts), com as peças no detalhe
+// cheio, em perspectiva e na resolução da tela. Um palco só para os retratos, criado na primeira vez; a ilustração
+// antiga (desenho com as camadas em SVG) fica como reserva quando não há WebGL ou o modelo falha.
+let palcoDosRetratos: Promise<import('../render/vivos/palco-vivo').PalcoVivo | null> | undefined;
+function palco(): Promise<import('../render/vivos/palco-vivo').PalcoVivo | null> {
+  // 05/11/2026: sem GPU (WebGL em software) fica a ilustração; o 3D travaria o menu.
+  if (!webglAcelerado()) return Promise.resolve(null);
+  palcoDosRetratos ??= import('../render/vivos/palco-vivo').then((m) => new m.PalcoVivo(1, 1)).catch(() => null);
+  return palcoDosRetratos;
+}
+
+async function retrato3d(modelo: string, eq: AparenciaEquipada | null): Promise<HTMLCanvasElement | null> {
+  const p = await palco();
+  if (!p?.suporta(modelo)) return null;
+  const { pedidoVivo } = await import('../render/vivos/palco-vivo');
+  const pedido = pedidoVivo(`retrato:${modelo}`, modelo, eq, equipamento3d(modelo, eq, existeArma3d), 'parado', 0, 0, Math.PI / 2);
+  const escala = Math.min(2, Math.max(1, globalThis.devicePixelRatio || 1));
+  const canvas = await p.retrato(pedido, Math.round((LARGURA + MARGEM * 2) * escala), Math.round(ALTURA * escala));
+  return canvas;
+}
+
+/**
+ * O retrato de menu em duas etapas: a ilustração composta aparece logo e o modelo 3D do jogo a substitui quando
+ * fica pronto (05/11/2026: o 3D pode levar segundos em aparelhos fracos e o menu não espera por ele).
+ */
+export async function retratoIlustrado(
+  modelo: string,
+  eq: AparenciaEquipada | null,
+  mostrar: (canvas: HTMLCanvasElement, vivo: boolean) => void,
+): Promise<void> {
+  const vivo = retrato3d(modelo, eq).catch(() => null);
+  mostrar(await retratoDesenhado(modelo, eq), false);
+  const canvas = await vivo;
+  if (canvas) mostrar(canvas, true);
+}
+
 /** Ilustração de menu em resolução própria, composta com o mesmo equipamento visual do jogo. */
-export async function retratoIlustrado(modelo: string, eq: AparenciaEquipada | null): Promise<HTMLCanvasElement> {
+async function retratoDesenhado(modelo: string, eq: AparenciaEquipada | null): Promise<HTMLCanvasElement> {
   const indice = Math.max(0, CLASSES.findIndex(classe => classe === modelo));
   const classe = CLASSES[indice] ?? 'aventureiro';
   const [direita, esquerda] = MAOS[indice] ?? MAOS[0];

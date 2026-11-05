@@ -79,6 +79,12 @@ export default defineConfig(({ mode }) => ({
             handler: 'CacheFirst',
             options: { cacheName: 'dungeons-arena-equipamento', expiration: { maxEntries: 200 } },
           },
+          // Marco 37 (04/11/2026): os modelos 3D em tempo real (classes e chefes) entram no cache quando o jogo os usa.
+          {
+            urlPattern: ({ url }) => url.pathname.endsWith('.glb'),
+            handler: 'CacheFirst',
+            options: { cacheName: 'dungeons-arena-modelos', expiration: { maxEntries: 20 } },
+          },
         ],
       },
       devOptions: { enabled: false },

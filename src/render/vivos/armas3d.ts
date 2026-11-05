@@ -1,50 +1,83 @@
 // As armas em 3D (marco 32, 31/10/2026, D-131): cada desenho do jogo (modelos/armas-classe.ts e bipede.ts) vira um
-// modelo de geometria simples com as mesmas formas e cores, e cada grau de raridade o deixa maior e mais enfeitado:
-// faixas no cabo (incomum), a gema no punho (raro), a guarda com asas e o aço polido (épico), o ouro, as runas acesas
-// e os espinhos (lendário), e o aço negro com cristais flutuantes (última). Medidas em células; o cabo na origem, a
-// arma para +y, a face larga para +z (para a câmera).
+// modelo de geometria simples com as mesmas formas, e cada grau de raridade o deixa mais enfeitado. Medidas em
+// células; o cabo na origem, a arma para +y, a face larga para +z (para a câmera).
+//
+// 04/11/2026 (marco 37): no estilo sombrio. As cores dos desenhos saem dessaturadas e escurecidas (madeira gasta,
+// couro velho), o metal ganha a textura de riscos e a rugosidade do kit sombrio (sombrio-base.ts), e o grau muda o
+// material e o ornamento, não o tamanho: ferro e aço gasto (comum), latão nos enfeites (incomum), aço polido e a pedra
+// apagada (raro, épico), o ouro velho e as runas acesas (lendário), e o aço enegrecido com o fio em brasa (última).
+// Os cristais flutuantes e o ouro amarelo vivo saíram; o crescimento por grau caiu de 42% para 18%.
 
 import * as THREE from 'three';
-import { TOMOS, tomoFechado } from '../../src/render/equipamento-3d';
+import { TOMOS, tomoFechado } from '../equipamento-3d';
+import { metal } from './sombrio-base';
 
 /** Quanto a arma cresce por grau (0 = comum … 5 = última). */
-export const ESCALA_DO_GRAU = [1, 1.05, 1.12, 1.2, 1.3, 1.42] as const;
+export const ESCALA_DO_GRAU = [1, 1.03, 1.06, 1.1, 1.14, 1.18] as const;
+/** O brilho de cada grau: cinza, musgo, azul pálido, violeta pálido, ouro e brasa (o acento da raridade, sóbrio). */
+export const ACENTOS_SOMBRIOS = [0x8a8a8a, 0x9aa88a, 0x8fb0d8, 0xa890c8, 0xe0b060, 0xff8a3a] as const;
 
-const ACO = 0xaeb6c0;
-const ACO_ESCURO = 0x8a949e;
-const MADEIRA = 0x7a5230;
-const MADEIRA_ESCURA = 0x5a3d22;
-const COURO = 0x6e4b2a;
-const OSSO = 0xe8e2cf;
-const OURO = 0xd4ac0d;
-const LATAO = 0x8a6d3b;
+const ACO = 0x8a8d94;
+const ACO_ESCURO = 0x5a5e66;
+const MADEIRA = 0x5e4630;
+const MADEIRA_ESCURA = 0x3e2e22;
+const COURO = 0x4a3424;
+const OSSO = 0xcfc6b0;
+const OURO = 0x9a7a3e;
+const LATAO = 0x7e6236;
+const FERRO = 0x3a3836;
+
+/** A cor sóbria: menos saturada e mais escura (as cores vivas dos desenhos antigos). */
+function sobrio(cor: number, s = 0.45, l = 0.72): number {
+  const c = new THREE.Color(cor);
+  const hsl = { h: 0, s: 0, l: 0 };
+  c.getHSL(hsl);
+  c.setHSL(hsl.h, hsl.s * s, hsl.l * l);
+  return c.getHex();
+}
 
 type P = [number, number];
 
 export class Kit {
   readonly g = new THREE.Group();
+  /** O acento do grau (ACENTOS_SOMBRIOS); o `acento` pedido (a cor da raridade) fica só para quem não tem grau. */
+  readonly acento: number;
   constructor(
     readonly n: number,
-    readonly acento: number,
+    acento: number,
     readonly fechado = false,
-  ) {}
+  ) {
+    this.acento = ACENTOS_SOMBRIOS[n] ?? acento;
+  }
 
+  /** O material: as cores lisas ficam sóbrias; o metal (metalness ≥ 0,3) ganha os riscos e a rugosidade do kit. */
   mat(cor: number, o: Partial<THREE.MeshStandardMaterialParameters> = {}): THREE.MeshStandardMaterial {
-    return new THREE.MeshStandardMaterial({ color: cor, roughness: 0.55, ...o });
+    const metalico = (o.metalness ?? 0) >= 0.3;
+    const aceso = o.emissive !== undefined;
+    const base = aceso ? sobrio(cor, 0.6, 0.9) : metalico ? cor : sobrio(cor);
+    const m = new THREE.MeshStandardMaterial({ roughness: 0.6, ...o, color: base, ...(aceso ? { emissive: sobrio(cor, 0.6, 0.9) } : {}) });
+    if (metalico) {
+      const riscos = metal('#d0d0d0', 211, 0.9, 0.4);
+      m.map = riscos.map;
+      m.roughnessMap = riscos.roughnessMap;
+      m.metalness = Math.max(m.metalness, 0.8);
+    }
+    return m;
   }
-  /** O aço da lâmina pelo grau: comum, polido (épico), claro (lendário) e negro (última). */
+  /** O aço da lâmina pelo grau: gasto (comum), polido (raro e épico), escuro (lendário) e enegrecido (última). */
   aco(base = ACO): THREE.Material {
-    if (this.n >= 5) return this.mat(0x34303e, { metalness: 0.5, roughness: 0.3 });
-    if (this.n >= 4) return this.mat(0xc8d0d8, { metalness: 0.45, roughness: 0.25 });
-    if (this.n >= 3) return this.mat(base, { metalness: 0.4, roughness: 0.3 });
-    return this.mat(base, { metalness: 0.3, roughness: 0.45 });
+    const cor = sobrio(base, 0.35, 1);
+    if (this.n >= 5) return this.mat(0x2e2c30, { metalness: 0.85, roughness: 0.38 });
+    if (this.n >= 4) return this.mat(0x5a5a62, { metalness: 0.9, roughness: 0.3 });
+    if (this.n >= 2) return this.mat(cor, { metalness: 0.9, roughness: 0.28 });
+    return this.mat(cor, { metalness: 0.85, roughness: 0.5 });
   }
-  /** Os enfeites: latão, prata (épico) ou ouro (lendário em diante). */
+  /** Os enfeites: ferro (comum), latão (incomum a épico) e ouro velho (lendário em diante). */
   enfeite(): THREE.Material {
-    return this.mat(this.n >= 4 ? OURO : this.n >= 3 ? 0xc8d0d8 : LATAO, { metalness: 0.45, roughness: 0.35 });
+    return this.mat(this.n >= 4 ? OURO : this.n >= 1 ? LATAO : FERRO, { metalness: 0.9, roughness: 0.4 });
   }
-  brilho(cor = this.acento, forca = 0.5 + 0.25 * Math.max(0, this.n - 2)): THREE.Material {
-    return this.mat(cor, { emissive: cor, emissiveIntensity: forca, roughness: 0.2 });
+  brilho(cor = this.acento, forca = 0.35 + 0.25 * Math.max(0, this.n - 2)): THREE.Material {
+    return this.mat(cor, { emissive: cor, emissiveIntensity: forca, roughness: 0.3 });
   }
 
   add<T extends THREE.Object3D>(o: T, x = 0, y = 0, z = 0): T {
@@ -127,13 +160,12 @@ export class Kit {
       e.rotation.z = a - Math.PI / 2;
     }
   }
-  /** A última: cristais acesos flutuando em volta de um ponto. */
+  /** A última: em vez dos cristais flutuantes, três brasas cravadas perto do ponto (o fio aceso fica em `lamina`). */
   cristais(x: number, y: number, raio: number): void {
     if (this.n < 5) return;
     for (let i = 0; i < 3; i++) {
-      const a = (i / 3) * Math.PI * 2 + 0.4;
-      const c = this.add(new THREE.Mesh(new THREE.OctahedronGeometry(0.022), this.brilho(this.acento, 1.4)), x + Math.cos(a) * raio, y + Math.sin(a) * raio * 0.6, 0.03);
-      c.scale.y = 1.8;
+      const c = this.add(new THREE.Mesh(new THREE.OctahedronGeometry(0.012), this.brilho(this.acento, 1.2)), x + (i - 1) * raio * 0.15, y - i * raio * 0.2, 0.012);
+      c.scale.y = 1.6;
     }
   }
 }
@@ -161,6 +193,11 @@ function lamina(k: Kit, y0: number, compr: number, larg: number, cor = ACO, curv
     k.caixa(larg * 0.11, compr * 0.64, 0.001, k.mat(0x39353a), curva * 0.24, y0 + compr * 0.35, lado * 0.009, -curva / compr * 0.75);
   }
   k.runas(y0 + compr * 0.1, y0 + compr * 0.75, 0.011, curva * 0.3);
+  if (k.n >= 5) {
+    // a última: o fio em brasa, um contorno aceso logo atrás do aço
+    const contorno: P[] = pts.map(([x, y]) => [x * 1.18 + curva * 0.02, y0 + (y - y0) * 1.015]);
+    k.perfil(contorno, 0.003, k.brilho(k.acento, 0.9));
+  }
 }
 
 function espadaComum(k: Kit, compr: number, larg: number, guarda: number, cor = ACO): void {
@@ -272,7 +309,8 @@ type Construtor = (k: Kit) => void;
 function espadaDeGuerra(k: Kit): void {
   const secoes = [[0.06, 0.039, 0.012], [0.25, 0.034, 0.01], [0.53, 0.024, 0.007], [0.66, 0.001, 0.001]] as const;
   const aco = k.mat(k.n >= 4 ? 0x695457 : 0x68676b, { metalness: 0.45, roughness: 0.47, side: THREE.DoubleSide });
-  const fio = k.mat(0xbeb3a6, { metalness: 0.38, roughness: 0.48, side: THREE.DoubleSide });
+  // a última: o fio em brasa
+  const fio = k.n >= 5 ? k.brilho(k.acento, 0.9) : k.mat(0xbeb3a6, { metalness: 0.38, roughness: 0.48, side: THREE.DoubleSide });
   for (const lado of [-1, 1]) for (const face of [-1, 1]) {
     const planos = [[], []] as [number[], number[]];
     const cortes = secoes.map(([y, x, z]) => [
@@ -449,13 +487,13 @@ export const ARMAS_3D: Readonly<Record<string, Construtor>> = {
   },
   // --- Cajados do Necromante
   cajado: (k) => { cajadoDe(k, MADEIRA, (y) => {
-    const gema = k.add(new THREE.Mesh(new THREE.OctahedronGeometry(0.082 + 0.007 * k.n), k.brilho(0x8652a1, 0.25)), 0, y);
+    const gema = k.add(new THREE.Mesh(new THREE.OctahedronGeometry(0.06 + 0.005 * k.n), k.brilho(0x4a3a5a, 0.2 + 0.1 * k.n)), 0, y);
     gema.scale.y = 1.34;
     gema.rotation.y = 0.21;
   }); },
   praga: (k) => { cajadoDe(k, 0x4d5656, (y) => {
-      k.bola(0.09, k.brilho(0x7dcea0, 0.6), 0, y);
-      k.bola(0.026, k.mat(0xd5f5e3), -0.035, y + 0.035, 0.075);
+      k.bola(0.062, k.brilho(0x5a8a5a, 0.3 + 0.1 * k.n), 0, y);
+      k.bola(0.02, k.mat(0x9ab09a), -0.03, y + 0.03, 0.055);
     }); },
   cova: (k) => { cajadoDe(k, MADEIRA_ESCURA, (y) => {
       k.perfil([[-0.11, y - 0.05], [-0.08, y + 0.11], [0, y + 0.03], [0.08, y + 0.11], [0.11, y - 0.05]], 0.04, k.mat(OSSO, { roughness: 0.8 }));
@@ -483,7 +521,7 @@ export const ARMAS_3D: Readonly<Record<string, Construtor>> = {
     k.cristais(0.22, 0.66, 0.13);
   },
   // --- Arremessáveis do Aventureiro
-  bumerangue: (k) => { bumerangueDe(k, 0xc49a6c); },
+  bumerangue: (k) => { bumerangueDe(k, 0x7a5a3e); },
   chakram: (k) => {
     k.curva(0.13, Math.PI * 2, 0.018 + 0.002 * k.n, k.aco(0xf5b041), 0, 0.13, 0, 0.4);
     k.bola(0.016, k.mat(ACO), 0, 0.27);

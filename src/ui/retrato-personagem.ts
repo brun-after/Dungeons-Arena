@@ -22,12 +22,15 @@ export function retratoPersonagem(classeId: string, personagem?: Pick<Entidade, 
       finally { URL.revokeObjectURL(url); }
       return;
     }
-    const canvas = await retratoIlustrado(modelo, personagem?.aparencia ?? null);
-    canvas.className = 'retrato-classe retrato-ilustrado';
-    canvas.setAttribute('role', 'img');
-    canvas.setAttribute('aria-label', `Aparência de ${classeId}`);
-    host.replaceChildren(canvas);
-    host.dataset.pronto = '1';
+    // 05/11/2026: a ilustração marca o retrato pronto; o 3D troca o canvas depois e marca data-vivo.
+    await retratoIlustrado(modelo, personagem?.aparencia ?? null, (canvas, vivo) => {
+      canvas.className = 'retrato-classe retrato-ilustrado';
+      canvas.setAttribute('role', 'img');
+      canvas.setAttribute('aria-label', `Aparência de ${classeId}`);
+      host.replaceChildren(canvas);
+      host.dataset.pronto = '1';
+      if (vivo) host.dataset.vivo = '1';
+    });
   })().catch(() => { host.textContent = 'Prévia indisponível'; });
   return host;
 }

@@ -1,308 +1,308 @@
 {
   "espada": {
+    "celL": 27,
+    "celA": 76,
+    "pegaX": 13,
+    "pegaY": 58
+  },
+  "adaga": {
+    "celL": 27,
+    "celA": 40,
+    "pegaX": 13,
+    "pegaY": 26
+  },
+  "clava": {
+    "celL": 24,
+    "celA": 58,
+    "pegaX": 11,
+    "pegaY": 44
+  },
+  "machado": {
+    "celL": 37,
+    "celA": 65,
+    "pegaX": 15,
+    "pegaY": 51
+  },
+  "foice": {
+    "celL": 40,
+    "celA": 95,
+    "pegaX": 5,
+    "pegaY": 62
+  },
+  "arco": {
+    "celL": 70,
+    "celA": 79,
+    "pegaX": 34,
+    "pegaY": 39
+  },
+  "lanca": {
+    "celL": 19,
+    "celA": 133,
+    "pegaX": 9,
+    "pegaY": 95
+  },
+  "montante": {
+    "celL": 44,
+    "celA": 91,
+    "pegaX": 22,
+    "pegaY": 71
+  },
+  "sabre": {
+    "celL": 22,
+    "celA": 60,
+    "pegaX": 9,
+    "pegaY": 45
+  },
+  "mangual": {
+    "celL": 29,
+    "celA": 61,
+    "pegaX": 6,
+    "pegaY": 47
+  },
+  "rapieira": {
+    "celL": 16,
+    "celA": 68,
+    "pegaX": 8,
+    "pegaY": 54
+  },
+  "arco_longo": {
+    "celL": 76,
+    "celA": 86,
+    "pegaX": 37,
+    "pegaY": 43
+  },
+  "besta": {
+    "celL": 45,
+    "celA": 50,
+    "pegaX": 22,
+    "pegaY": 36
+  },
+  "composto": {
+    "celL": 60,
+    "celA": 69,
+    "pegaX": 28,
+    "pegaY": 34
+  },
+  "arcocurto": {
+    "celL": 52,
+    "celA": 59,
+    "pegaX": 24,
+    "pegaY": 29
+  },
+  "elfico": {
+    "celL": 69,
+    "celA": 78,
+    "pegaX": 33,
+    "pegaY": 39
+  },
+  "chifre": {
+    "celL": 52,
+    "celA": 66,
+    "pegaX": 21,
+    "pegaY": 33
+  },
+  "arcoguerra": {
+    "celL": 69,
+    "celA": 78,
+    "pegaX": 33,
+    "pegaY": 39
+  },
+  "arcocaca": {
+    "celL": 66,
+    "celA": 74,
+    "pegaX": 31,
+    "pegaY": 37
+  },
+  "tomo": {
     "celL": 31,
-    "celA": 90,
+    "celA": 30,
+    "pegaX": 16,
+    "pegaY": 21
+  },
+  "codice": {
+    "celL": 31,
+    "celA": 30,
+    "pegaX": 16,
+    "pegaY": 21
+  },
+  "mares": {
+    "celL": 31,
+    "celA": 30,
+    "pegaX": 16,
+    "pegaY": 21
+  },
+  "estelar": {
+    "celL": 31,
+    "celA": 30,
+    "pegaX": 16,
+    "pegaY": 21
+  },
+  "prisma": {
+    "celL": 31,
+    "celA": 36,
+    "pegaX": 16,
+    "pegaY": 27
+  },
+  "espelhos": {
+    "celL": 31,
+    "celA": 30,
+    "pegaX": 16,
+    "pegaY": 21
+  },
+  "orbital": {
+    "celL": 31,
+    "celA": 30,
+    "pegaX": 16,
+    "pegaY": 21
+  },
+  "vazio": {
+    "celL": 31,
+    "celA": 30,
+    "pegaX": 16,
+    "pegaY": 21
+  },
+  "cajado": {
+    "celL": 27,
+    "celA": 106,
+    "pegaX": 13,
+    "pegaY": 73
+  },
+  "praga": {
+    "celL": 23,
+    "celA": 102,
+    "pegaX": 11,
+    "pegaY": 69
+  },
+  "cova": {
+    "celL": 28,
+    "celA": 106,
+    "pegaX": 14,
+    "pegaY": 73
+  },
+  "cetro": {
+    "celL": 30,
+    "celA": 83,
     "pegaX": 15,
     "pegaY": 69
   },
-  "adaga": {
-    "celL": 31,
-    "celA": 47,
-    "pegaX": 15,
-    "pegaY": 31
-  },
-  "clava": {
-    "celL": 35,
-    "celA": 70,
-    "pegaX": 15,
-    "pegaY": 54
-  },
-  "machado": {
-    "celL": 45,
-    "celA": 77,
-    "pegaX": 17,
-    "pegaY": 61
-  },
-  "foice": {
-    "celL": 47,
-    "celA": 113,
-    "pegaX": 6,
-    "pegaY": 74
-  },
-  "arco": {
-    "celL": 84,
-    "celA": 94,
-    "pegaX": 40,
-    "pegaY": 47
-  },
-  "lanca": {
-    "celL": 29,
-    "celA": 158,
-    "pegaX": 12,
-    "pegaY": 114
-  },
-  "montante": {
-    "celL": 52,
-    "celA": 108,
-    "pegaX": 26,
-    "pegaY": 84
-  },
-  "sabre": {
-    "celL": 31,
-    "celA": 70,
-    "pegaX": 11,
-    "pegaY": 53
-  },
-  "mangual": {
-    "celL": 37,
-    "celA": 72,
-    "pegaX": 7,
-    "pegaY": 56
-  },
-  "rapieira": {
-    "celL": 25,
-    "celA": 79,
-    "pegaX": 11,
-    "pegaY": 63
-  },
-  "arco_longo": {
-    "celL": 91,
-    "celA": 102,
-    "pegaX": 43,
-    "pegaY": 51
-  },
-  "besta": {
-    "celL": 53,
-    "celA": 59,
-    "pegaX": 26,
-    "pegaY": 42
-  },
-  "composto": {
-    "celL": 76,
-    "celA": 82,
-    "pegaX": 33,
-    "pegaY": 41
-  },
-  "arcocurto": {
-    "celL": 63,
-    "celA": 70,
-    "pegaX": 28,
-    "pegaY": 35
-  },
-  "elfico": {
-    "celL": 84,
-    "celA": 92,
-    "pegaX": 39,
-    "pegaY": 46
-  },
-  "chifre": {
-    "celL": 70,
-    "celA": 78,
-    "pegaX": 25,
-    "pegaY": 39
-  },
-  "arcoguerra": {
-    "celL": 83,
-    "celA": 92,
-    "pegaX": 39,
-    "pegaY": 46
-  },
-  "arcocaca": {
-    "celL": 79,
-    "celA": 88,
-    "pegaX": 37,
-    "pegaY": 44
-  },
-  "tomo": {
-    "celL": 36,
-    "celA": 35,
-    "pegaX": 18,
-    "pegaY": 25
-  },
-  "codice": {
-    "celL": 36,
-    "celA": 35,
-    "pegaX": 18,
-    "pegaY": 25
-  },
-  "mares": {
-    "celL": 36,
-    "celA": 35,
-    "pegaX": 18,
-    "pegaY": 25
-  },
-  "estelar": {
-    "celL": 36,
-    "celA": 35,
-    "pegaX": 18,
-    "pegaY": 25
-  },
-  "prisma": {
-    "celL": 36,
-    "celA": 42,
-    "pegaX": 18,
-    "pegaY": 32
-  },
-  "espelhos": {
-    "celL": 36,
-    "celA": 35,
-    "pegaX": 18,
-    "pegaY": 25
-  },
-  "orbital": {
-    "celL": 36,
-    "celA": 35,
-    "pegaX": 18,
-    "pegaY": 25
-  },
-  "vazio": {
-    "celL": 36,
-    "celA": 35,
-    "pegaX": 18,
-    "pegaY": 25
-  },
-  "cajado": {
-    "celL": 40,
-    "celA": 131,
-    "pegaX": 20,
-    "pegaY": 92
-  },
-  "praga": {
-    "celL": 34,
-    "celA": 123,
-    "pegaX": 15,
-    "pegaY": 84
-  },
-  "cova": {
-    "celL": 35,
-    "celA": 126,
-    "pegaX": 16,
-    "pegaY": 87
-  },
-  "cetro": {
-    "celL": 35,
-    "celA": 99,
-    "pegaX": 17,
-    "pegaY": 83
-  },
   "sanguineo": {
-    "celL": 34,
-    "celA": 125,
-    "pegaX": 15,
-    "pegaY": 86
+    "celL": 24,
+    "celA": 105,
+    "pegaX": 12,
+    "pegaY": 72
   },
   "espectro": {
-    "celL": 34,
-    "celA": 123,
-    "pegaX": 15,
-    "pegaY": 84
+    "celL": 26,
+    "celA": 104,
+    "pegaX": 13,
+    "pegaY": 71
   },
   "gadanha": {
-    "celL": 52,
-    "celA": 119,
-    "pegaX": 8,
-    "pegaY": 80
+    "celL": 45,
+    "celA": 100,
+    "pegaX": 7,
+    "pegaY": 67
   },
   "bumerangue": {
-    "celL": 32,
-    "celA": 41,
-    "pegaX": 7,
-    "pegaY": 22
+    "celL": 27,
+    "celA": 36,
+    "pegaX": 6,
+    "pegaY": 19
   },
   "chakram": {
-    "celL": 45,
-    "celA": 42,
-    "pegaX": 20,
-    "pegaY": 34
+    "celL": 35,
+    "celA": 36,
+    "pegaX": 17,
+    "pegaY": 29
   },
   "machadinha": {
-    "celL": 45,
-    "celA": 57,
-    "pegaX": 17,
-    "pegaY": 41
+    "celL": 37,
+    "celA": 48,
+    "pegaX": 15,
+    "pegaY": 34
   },
   "shuriken": {
-    "celL": 45,
-    "celA": 37,
-    "pegaX": 20,
-    "pegaY": 31
+    "celL": 28,
+    "celA": 31,
+    "pegaX": 14,
+    "pegaY": 26
   },
   "duplo": {
-    "celL": 36,
-    "celA": 46,
-    "pegaX": 7,
-    "pegaY": 27
+    "celL": 31,
+    "celA": 39,
+    "pegaX": 6,
+    "pegaY": 23
   },
   "arpeu": {
-    "celL": 32,
-    "celA": 52,
-    "pegaX": 14,
-    "pegaY": 43
+    "celL": 20,
+    "celA": 40,
+    "pegaX": 10,
+    "pegaY": 32
   },
   "falcoeiro": {
-    "celL": 33,
-    "celA": 43,
-    "pegaX": 7,
-    "pegaY": 24
+    "celL": 28,
+    "celA": 37,
+    "pegaX": 6,
+    "pegaY": 20
   },
   "serrilhado": {
-    "celL": 32,
-    "celA": 41,
-    "pegaX": 7,
-    "pegaY": 22
+    "celL": 27,
+    "celA": 36,
+    "pegaX": 6,
+    "pegaY": 19
   },
   "escudo": {
-    "celL": 45,
-    "celA": 60,
-    "pegaX": 21,
-    "pegaY": 27
+    "celL": 39,
+    "celA": 51,
+    "pegaX": 18,
+    "pegaY": 23
   },
   "tomo-fechado": {
-    "celL": 29,
-    "celA": 35,
-    "pegaX": 14,
-    "pegaY": 7
+    "celL": 25,
+    "celA": 30,
+    "pegaX": 12,
+    "pegaY": 6
   },
   "codice-fechado": {
-    "celL": 29,
-    "celA": 35,
-    "pegaX": 14,
-    "pegaY": 7
+    "celL": 25,
+    "celA": 30,
+    "pegaX": 12,
+    "pegaY": 6
   },
   "mares-fechado": {
-    "celL": 29,
-    "celA": 35,
-    "pegaX": 14,
-    "pegaY": 7
+    "celL": 25,
+    "celA": 30,
+    "pegaX": 12,
+    "pegaY": 6
   },
   "estelar-fechado": {
-    "celL": 29,
-    "celA": 35,
-    "pegaX": 14,
-    "pegaY": 7
+    "celL": 25,
+    "celA": 30,
+    "pegaX": 12,
+    "pegaY": 6
   },
   "prisma-fechado": {
-    "celL": 29,
-    "celA": 35,
-    "pegaX": 14,
-    "pegaY": 7
+    "celL": 25,
+    "celA": 30,
+    "pegaX": 12,
+    "pegaY": 6
   },
   "espelhos-fechado": {
-    "celL": 29,
-    "celA": 35,
-    "pegaX": 14,
-    "pegaY": 7
+    "celL": 25,
+    "celA": 30,
+    "pegaX": 12,
+    "pegaY": 6
   },
   "orbital-fechado": {
-    "celL": 29,
-    "celA": 35,
-    "pegaX": 14,
-    "pegaY": 7
+    "celL": 25,
+    "celA": 30,
+    "pegaX": 12,
+    "pegaY": 6
   },
   "vazio-fechado": {
-    "celL": 29,
-    "celA": 35,
-    "pegaX": 14,
-    "pegaY": 7
+    "celL": 25,
+    "celA": 30,
+    "pegaX": 12,
+    "pegaY": 6
   }
 }

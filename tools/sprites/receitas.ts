@@ -116,6 +116,11 @@ export interface Receita {
   exposicao?: number;
   /** Iluminação em faixas usada apenas durante a geração dos atlas. */
   manga?: boolean;
+  /**
+   * 04/11/2026 (marco 37): luz realista (PBR com mapa de ambiente e recorte quente e frio) no lugar da luz em faixas,
+   * e a armadura do kit sombrio (armaduras-sombrias.ts).
+   */
+  sombrio?: boolean;
   semCapuz?: boolean;
   adornosCabeca?: string[];
   /** O quadro (em células, em volta dos pés) quando o modelo é maior que o padrão. */
@@ -153,12 +158,14 @@ export const RECEITAS: Receita[] = [
   {
     nome: 'guerreiro',
     manga: true,
+    sombrio: true,
     semCapuz: true,
     adornosCabeca: ['cabelo:Hair_SimpleParted', 'cabelo:Hair_Beard'],
     corpo: RANGER_M,
     cabeca: CABECA_M,
     altura: 1.14,
-    cores: { Ranger: 0xa45145, Hair: 0x784628 },
+    // 04/11/2026 (marco 37): o traje de baixo em vinho escuro e gasto, não o vermelho vivo do mangá.
+    cores: { Ranger: 0x7a4a3e, Hair: 0x5e3a22 },
     animacoes: ESPADA,
     equipamento: DO_RANGER,
   },
@@ -169,7 +176,9 @@ export const RECEITAS: Receita[] = [
     corpo: CAMPONES_M,
     cabeca: CABECA_M,
     altura: 1.12,
-    cores: { Peasant: 0x637bb3, Hair: 0x212533 },
+    sombrio: true,
+    // 04/11/2026 (marco 37): as cores sóbrias do estilo sombrio (a lã azul-cinza do feiticeiro).
+    cores: { Peasant: 0x4a5470, Hair: 0x1a1c24 },
     exposicao: 2.1,
     animacoes: MAGIA,
     equipamento: DO_CAMPONES,
@@ -182,7 +191,8 @@ export const RECEITAS: Receita[] = [
     corpo: RANGER_F,
     cabeca: CABECA_F,
     altura: 1.08,
-    cores: { Ranger: 0x779555, Hair: 0x834832 },
+    sombrio: true,
+    cores: { Ranger: 0x5a6644, Hair: 0x5a3424 },
     animacoes: MAGIA,
     equipamento: DO_RANGER,
   },
@@ -192,7 +202,8 @@ export const RECEITAS: Receita[] = [
     corpo: RANGER_M,
     cabeca: CABECA_M,
     altura: 1.14,
-    cores: { Ranger: 0x746082, Superhero: 0xd5d1dc, Regular: 0xd5d1dc, Hair: 0xc3b8ce },
+    sombrio: true,
+    cores: { Ranger: 0x3e3446, Superhero: 0xc4c0c8, Regular: 0xc4c0c8, Hair: 0x9c96a4 },
     exposicao: 1.8,
     animacoes: MAGIA,
     equipamento: DO_RANGER,
@@ -204,7 +215,8 @@ export const RECEITAS: Receita[] = [
     corpo: CAMPONES_M,
     cabeca: CABECA_M,
     altura: 1.12,
-    cores: { Peasant: 0xa59a6e, Ranger: 0x979c65, Hair: 0x523921 },
+    sombrio: true,
+    cores: { Peasant: 0x7a6c4e, Ranger: 0x666a46, Hair: 0x3e2a18 },
     exposicao: 1.8,
     animacoes: HUMANO,
     equipamento: DO_CAMPONES,
