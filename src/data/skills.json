@@ -7968,7 +7968,7 @@
       ],
       "variacao": {
         "retorna": true,
-        "voltaPct": 60
+        "voltaPct": 45
       },
       "basico": true,
       "mobilidade": "livre"

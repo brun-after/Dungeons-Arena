@@ -195,6 +195,7 @@ function voltarAPatrulhar(estado: EstadoJogo, e: Entidade, ia: EstadoIa): void {
   ia.alvoId = null;
   ia.falhasCaminho = 0;
   ia.direcaoPatrulha = null;
+  marcarCaca(estado, e, ia, null, false);
   pararMovimento(e);
 }
 
@@ -207,6 +208,7 @@ function comecarPerseguicao(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entid
   ia.falhasCaminho = 0;
   ia.alvoCacheX = -1;
   ia.alvoCacheY = -1;
+  marcarCaca(estado, e, ia, null, false);
   ia.proximaChecagemDesistenciaTick = estado.tick + ticksDe(ctx.balance.ia.checagemDesistenciaMs);
   saida.push({ t: 'iaPerseguindo', tick: estado.tick, id: e.id, alvoId });
 }
@@ -386,6 +388,7 @@ function perseguir(
   const ferido = e.hp * 100 < e.hpMax * perfil.recuaHpPct;
   const distanciaMin = ferido ? distanciaMax : regras.distanciaMinAtirador;
   const cura = destinoDeCura(estado, ctx, e, ia, perfil);
+  marcarCaca(estado, e, ia, alvo, !mantemDistancia && !cura && distancia > distanciaMax);
   let recuando = false;
   if (cura) {
     // O afim ferido vai à área do próprio elemento e fica nela (ataca se o alvo vier).
@@ -407,6 +410,22 @@ function perseguir(
       ia.ataquesFeitos++;
     }
   }
+}
+
+/**
+ * 04/11/2026 (D-132): o fôlego de caça. Marca desde quando o corpo a corpo persegue sem alcançar (e quantos níveis
+ * está acima do alvo); ao alcançar, trocar de alvo ou largar, zera (-1, nunca apagado: o patch leva o valor).
+ */
+function marcarCaca(estado: EstadoJogo, e: Entidade, ia: EstadoIa, alvo: Entidade | null, longe: boolean): void {
+  if (!longe || !alvo) {
+    if ((ia.cacaDesdeTick ?? -1) >= 0) {
+      ia.cacaDesdeTick = -1;
+      ia.cacaNiveis = 0;
+    }
+    return;
+  }
+  if ((ia.cacaDesdeTick ?? -1) < 0) ia.cacaDesdeTick = estado.tick;
+  ia.cacaNiveis = Math.max(0, e.nivel - alvo.nivel);
 }
 
 function aproximar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa, celulaAlvo: Celula, saida: EventoSimulacao[], perfil: PerfilIa): void {

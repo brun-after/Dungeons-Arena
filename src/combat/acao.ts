@@ -1,5 +1,6 @@
 import { tipoEm } from '../world/fase';
 import { consumirAtaque } from './reserva-necromante';
+import { classeDe } from './ajustes-classes';
 import { clonarEntidade } from '../entities/entidade';
 import { velocidadeFrenesiPct } from './furia';
 import { prepararSequencia, participaDeCombo } from './sequencias';
@@ -48,6 +49,7 @@ import { dispararGanchosDe, passivosDe } from '../progression/ganchos-do-portado
 import { comCombo, fazerCombo } from './combos';
 import { dizimoErgue, podeErguerNoDizimo } from './necromancia';
 import { agendarFase, fasesVencidas } from './fases';
+import { aplicarRecuoDeDistancia } from '../world/movimento';
 import { virarPara } from './orientacao';
 import { cargaDaClasse, medidorCheio, ultimateDe } from './carga-ultimate';
 import { fatorDeDominio, fatorDeSkillDeClasse } from '../progression/dominio';
@@ -133,7 +135,14 @@ function vooDoGolpe(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, 
 export function alcanceDe(ctx: ContextoSimulacao, ator: Entidade, hab: Habilidade, tick: number): number {
   const basico = ehBasico(ator, hab.id) ? bonusAtaqueBasico(ator, tick).alcance : 0;
   // Marco 27 (D-126): sem o arco, o básico do Arqueiro perde o alcance característico.
-  return Math.max(0, hab.alcanceCelulas + perfilPara(ctx, ator, hab).alcance + basico + alcanceSemArma(ctx, ator, hab));
+  const alcance = Math.max(0, hab.alcanceCelulas + perfilPara(ctx, ator, hab).alcance + basico + alcanceSemArma(ctx, ator, hab));
+  // 05/11/2026 (D-132): o Arqueiro andando alcança menos (parado, o alcance inteiro).
+  return !deSuporte(hab) && classeDe(ator) === 'arqueiro' && emMovimento(ator) ? (alcance * ctx.balance.ajustesClasses.arqueiro.alcanceAndandoPct) / 100 : alcance;
+}
+
+/** 05/11/2026 (D-132): anda agora (direção mantida ou um caminho a seguir). */
+export function emMovimento(e: Entidade): boolean {
+  return e.direcao !== 'parado' || e.waypoints.length > 0 || e.caminho.length > 0;
 }
 
 /** Alvo ofensivo válido: vivo, visível e passível de dano pela relação do modo (§2.5). */
@@ -425,6 +434,8 @@ function lancar(
   const hab = daFase ? habilidadeBase : basicoComVariacao(estado, ator, prepararSequencia(estado, ctx, ator, habilidadeBase, acaoId, alvo, mira));
   if (hab.formulaDano && !consumirAtaque(ator, acaoId)) return;
   if (tipoEm(ctx.fase, ator.x, ator.y) === 'agua' && !deSuporte(hab)) return;
+  // 04/11/2026 (D-132): atacar de longe deixa um pouco lento, mais quanto mais longe está o alvo.
+  if (!daFase && !falcaoChegou && hab.formulaDano && hab.politicaAlvo === 'hostil') aplicarRecuoDeDistancia(ator, mira, estado.tick, ctx);
   const multiplos = multiplosDaVez(ator, hab);
   if (!daFase) contarBasico(ator, hab.id);
   if (hab.formulaDano) ator.efeitos = ator.efeitos.filter((f) => f.tipo !== 'veu_noturno');

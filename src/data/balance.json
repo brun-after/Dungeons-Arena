@@ -1,7 +1,7 @@
 {
   "dragoes": { "alturaAtlas": 3.3, "larguraAtlas": 8, "alturaMin": 1.1, "alturaMax": 2.2, "nivelMax": 100, "folgaCorredor": 1, "salaMin": 12, "salaPorCorredor": 3, "salaExtra": 4, "areaPorSala": 2 },
   "necromancia": { "ataquesPorInvocacao": 12, "resistenciaPorSabPct": 0.5, "resistenciaSabMaxPct": 25, "danoPct": 75, "servosExtras": 8, "retornoServoMs": 8000, "duracaoMortoMs": 20000, "raioColheita": 6, "ecoRecargaMs": 30000, "vidaBase": 24, "vidaPorNivel": 3, "vidaServoPct": 100, "alcanceRitual": 6, "distanciaRetorno": 10, "atributoPorInt": 1, "perdaPorQuantidade": 0.8 },
-  "versao": 36,
+  "versao": 37,
   "ajustesClasses": {
     "guerreiro": {
       "contatoMaxPct": 15,
@@ -46,7 +46,7 @@
       "falcao": { "distanciaAlvo": 3, "raioPasseio": 3, "raioColeta": 7, "passeioMs": 1200, "raioCombate": 8, "reflexoInicioPct": 80, "reflexoFimPct": 60, "pousoMs": 6000, "velocidadeAtaque": { "n1": 1, "n20": 5, "n30": 7 }, "velocidadeDash": { "n1": 2, "n20": 6, "n30": 9 }, "atributoBonusPorPontoPct": 1.5, "atributoBonusMaxPct": 30, "vigiaCelulas": 8, "vigiaRaio": 0.6 }
     },
     "arqueiro": {
-      "secundariosMult": 1.15,
+      "secundariosMult": 1.15, "alcanceAndandoPct": 80,
       "mira": { "cargaMs": 6000, "reducaoPorDestrezaPct": 2, "reducaoMaxPct": 25, "d20Minimo": 16 }
     },
     "necromante": {
@@ -61,7 +61,9 @@
     "filaMaxWaypoints": 2,
     "raioCorpo": 0.32,
     "dashAtravessaParedes": true,
-    "velocidadeMaxMult": 2.5
+    "velocidadeMaxMult": 2.5,
+    "aceleracao": { "inicialPct": 70, "rampaMs": 500, "perdaPorLentidaoPorS": 4 },
+    "recuoDistancia": { "aPartirDeCelulas": 3, "porCelulaPct": 3, "maxPct": 18, "duracaoMs": 450 }
   },
   "navegacao": {
     "maxPassosToque": 60
@@ -400,7 +402,7 @@
     "checagemDesistenciaMs": 3000,
     "chanceDesistir": 0.1,
     "distanciaMinAtirador": 3,
-    "distanciaMaxAtirador": 5,
+    "distanciaMaxAtirador": 5, "caca": { "carenciaMs": 2000, "rampaMs": 3000, "maxPct": 10, "porNivelPct": 0.5, "nivelMaxPct": 5, "chefeMult": 0.3 },
     "custoPerigo": 8,
     "curaAfimRaio": 6,
     "curaAfimSaiPct": 90,

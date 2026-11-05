@@ -32,7 +32,7 @@ export interface Balance {
       /** Marco 22 (D-089): encarnação elemental. */
       encarnacao: { fogoDanoPct: number; fogoIntervaloMs: number; fogoRaio: number; fogoQueimaValor: number; fogoQueimaMs: number; geloReducaoPct: number; geloResfriarMs: number; raioVelocidadePct: number; duracaoMs: number; duplaJanelaMs: number; duplaDuracaoMs: number } };
     aventureiro: { nivelCorte: number; danoMult: number; /** Marco 24 (D-094): dano das skills do falcão. */ falcaoDanoMult: number; /** Marco 22 (D-089): passo do falcão. */ falcaoPassoMs: number; /** D-091: IA do falcão. */ falcao: { distanciaAlvo: number; raioPasseio: number; raioColeta: number; passeioMs: number; raioCombate: number; /** Marco 24 (D-098): o dano no falcão que chega ao dono, do nível 1 ao máximo, e a espera até pousar no ombro. */ reflexoInicioPct: number; reflexoFimPct: number; pousoMs: number; /** Marco 25 (D-102): velocidades do ataque e do dash (por nível) e o bônus do atributo; a vigia dos projéteis. */ velocidadeAtaque: CurvaPorNivel; velocidadeDash: CurvaPorNivel; atributoBonusPorPontoPct: number; atributoBonusMaxPct: number; vigiaCelulas: number; vigiaRaio: number } };
-    arqueiro: { secundariosMult: number; /** Marco 22 (D-089): Mira firme. */ mira: { cargaMs: number; reducaoPorDestrezaPct: number; reducaoMaxPct: number; d20Minimo: number } };
+    arqueiro: { secundariosMult: number; /** 05/11/2026 (D-132): o alcance que sobra andando, em %. */ alcanceAndandoPct: number; /** Marco 22 (D-089): Mira firme. */ mira: { cargaMs: number; reducaoPorDestrezaPct: number; reducaoMaxPct: number; d20Minimo: number } };
     necromante: { protecaoMs: number; doisPct: number; grupoPct: number };
   };
   necromancia: { ataquesPorInvocacao: number; resistenciaPorSabPct: number; resistenciaSabMaxPct: number; danoPct: number; servosExtras: number; retornoServoMs: number; duracaoMortoMs: number; raioColheita: number; ecoRecargaMs: number; vidaBase: number; vidaPorNivel: number; vidaServoPct: number; alcanceRitual: number; /** Marco 22 (D-090). */ distanciaRetorno: number; atributoPorInt: number; perdaPorQuantidade: number };
@@ -50,6 +50,17 @@ export interface Balance {
     dashAtravessaParedes: boolean;
     /** Marco 28 (D-127): teto do multiplicador de velocidade pela Destreza (atributos até 100). */
     velocidadeMaxMult: number;
+    /**
+     * 04/11/2026 (D-132): a aceleração. Quem começa a andar sai com `inicialPct` da velocidade e chega ao pico em
+     * `rampaMs` andando sem freio. Parar, travar ou ser atordoado zera o impulso; qualquer lentidão em curso (efeito,
+     * conjuração lenta, recuo do ataque de longe) o consome a `perdaPorLentidaoPorS` × a fração da lentidão por segundo.
+     */
+    aceleracao: { inicialPct: number; rampaMs: number; perdaPorLentidaoPorS: number };
+    /**
+     * 04/11/2026 (D-132): quem ataca de longe fica um pouco lento: `porCelulaPct` por célula além de
+     * `aPartirDeCelulas` até o alvo, no máximo `maxPct`, por `duracaoMs` a partir do lançamento.
+     */
+    recuoDistancia: { aPartirDeCelulas: number; porCelulaPct: number; maxPct: number; duracaoMs: number };
   };
   navegacao: {
     /** Limite da busca para toque no mapa (§2.3). */
@@ -481,6 +492,13 @@ export interface RegrasIa {
   chanceDesistir: number;
   distanciaMinAtirador: number;
   distanciaMaxAtirador: number;
+  /**
+   * 04/11/2026 (D-132): o fôlego de caça. O perseguidor corpo a corpo que segue fora do alcance por mais de
+   * `carenciaMs` ganha velocidade até `maxPct` em `rampaMs`, mais `porNivelPct` por nível acima do alvo (até
+   * `nivelMaxPct`). Zera ao chegar ao alcance, trocar de alvo ou largar a perseguição. Os chefes recebem só
+   * `chefeMult` do bônus (bem menos que os outros).
+   */
+  caca: { carenciaMs: number; rampaMs: number; maxPct: number; porNivelPct: number; nivelMaxPct: number; chefeMult: number };
   /**
    * Marco 25 (25/10/2026, D-100): quanto uma célula de perigo pesa no caminho de quem evita (em passos); o raio da
    * busca pela área do próprio elemento e a vida em que sai dela; o intervalo dos sorteios táticos (cura, foco); o
