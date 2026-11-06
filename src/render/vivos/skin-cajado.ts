@@ -1,17 +1,19 @@
-// O cajado retorcido da skin Sombra Rubra do mago (06/11/2026): um galho preto-arroxeado, nodoso e torto, que se abre no
-// alto numa coroa de galhos espinhosos, com veios vermelhos acesos correndo pelo tronco e pelos galhos (a arte de
-// referência). Medidas em células como as outras armas (armas3d.ts): o cabo na origem (a mão), a arma para +y.
-// Registrada em ARMAS_3D como `cajado_retorcido`.
+// O cajado retorcido da skin Sombra Rubra do mago (06/11/2026), montado a partir das medidas da arte
+// (skin-mago-medidas.ts, `CAJADO`). Uma haste única, nodosa e de contorno irregular, que engrossa para cima, solta duas
+// esporas e se abre em três pontas grossas e serrilhadas, com rachaduras vermelhas curtas na casca. Medidas em células
+// como as outras armas (armas3d.ts): o cabo na origem (a mão), a arma para +y. Registrada em ARMAS_3D como `cajado_retorcido`.
 
 import * as THREE from 'three';
 import type { Kit } from './armas3d';
+import { CAJADO, COMPRIMENTO_DO_CAJADO } from './skin-mago-medidas';
 import { sorteio } from './sombrio-base';
 
 const V3 = (x: number, y: number, z = 0) => new THREE.Vector3(x, y, z);
 
 /** Um tubo ao longo dos pontos, afinando até a ponta (`ponta` é a fração do raio que sobra) e com nós. */
-function ramo(pontos: THREE.Vector3[], raio: number, ponta: number, m: THREE.Material, nos = 0, lados = 6): THREE.Mesh {
-  const curva = new THREE.CatmullRomCurve3(pontos);
+function ramo(pontos: THREE.Vector3[], raio: number, ponta: number, m: THREE.Material, nos = 0, lados = 6, reto = false): THREE.Mesh {
+  // `reto`: os trechos entre os pontos ficam quase retos (o galho quebrado, não a curva)
+  const curva = new THREE.CatmullRomCurve3(pontos, false, 'catmullrom', reto ? 0.05 : 0.5);
   const passos = Math.max(8, pontos.length * 5);
   const g = new THREE.TubeGeometry(curva, passos, raio, lados, false);
   const p = g.getAttribute('position') as THREE.BufferAttribute;
@@ -25,70 +27,86 @@ function ramo(pontos: THREE.Vector3[], raio: number, ponta: number, m: THREE.Mat
   return new THREE.Mesh(g, m);
 }
 
+/** O comprimento do cajado em células do Kit: 1,05 vez a altura do personagem (a arte), calibrado no retrato. */
+const COMPRIMENTO = 1.46;
+
 export function cajadoRetorcido(k: Kit): void {
   const r = sorteio(2024);
-  const casca = k.mat(0x1c141f, { roughness: 0.92 });
-  const brasa = k.mat(0xff2a3c, { emissive: 0xff2a3c, emissiveIntensity: 1.5, roughness: 0.3 });
+  const casca = k.mat(0x241b28, { roughness: 0.9 });
+  const brasa = k.mat(0xe0162e, { emissive: 0xe0162e, emissiveIntensity: 1.2, roughness: 0.4 });
+  const L = COMPRIMENTO;
+  // `ao` (fração do comprimento a partir da base) e `de` (desvio lateral) da arte, em células com a mão na origem
+  const em = (ao: number, de = 0, z = 0) => V3(-de * L, (ao - CAJADO.mao) * L, z);
+  const grossura = (px: number) => (px / COMPRIMENTO_DO_CAJADO) * L * 0.5;
 
-  // o tronco: sobe torcendo, mais grosso embaixo, com nós
-  const tronco: THREE.Vector3[] = [];
-  const N = 9;
+  // a haste: da base à divisão, em trechos quase retos que quebram de leve, engrossando da base (15 px) até 25 px
+  const haste: THREE.Vector3[] = [];
+  const N = 16;
   for (let i = 0; i <= N; i++) {
-    const t = i / N;
-    tronco.push(V3(Math.sin(t * 7 + 0.5) * 0.02 * (0.4 + t), -0.42 + t * 1.0, Math.cos(t * 6) * 0.012));
+    const ao = (i / N) * CAJADO.divisao.ao;
+    const quebra = (i % 2 === 0 ? 1 : -1) * (0.004 + r() * 0.006);
+    haste.push(em(ao, (ao / CAJADO.divisao.ao) * CAJADO.divisao.de).add(V3(quebra, 0, (r() - 0.5) * 0.008)));
   }
-  k.add(ramo(tronco, 0.027, 0.62, casca, 5, 7));
-  const noTronco = new THREE.CatmullRomCurve3(tronco);
+  const raioBase = grossura(CAJADO.espessuraDaBase), raioAlto = grossura(CAJADO.espessura);
+  k.add(ramo(haste, raioBase, raioAlto / raioBase, casca, 7, 7, true));
+  const naHaste = new THREE.CatmullRomCurve3(haste, false, 'catmullrom', 0.05);
+  const raioEm = (t: number) => raioBase + (raioAlto - raioBase) * t;
 
-  // os veios vermelhos: uma espiral fina em volta do tronco e fios nos galhos
-  const veio: THREE.Vector3[] = [];
-  for (let i = 0; i <= 60; i++) {
-    const t = i / 60;
-    const c = noTronco.getPointAt(t);
-    const a = t * 30;
-    const rr = 0.0245 * (1 - t * 0.35);
-    veio.push(V3(c.x + Math.cos(a) * rr, c.y, c.z + Math.sin(a) * rr));
-  }
-  k.add(ramo(veio, 0.0042, 0.7, brasa, 0, 4));
-
-  // os espinhos do tronco
-  for (let i = 0; i < 12; i++) {
-    const t = 0.12 + (i / 12) * 0.78;
-    const c = noTronco.getPointAt(t);
+  // os nós: calombos achatados que quebram o contorno
+  for (let i = 0; i < 9; i++) {
+    const t = 0.1 + r() * 0.85;
+    const c = naHaste.getPointAt(t);
     const a = r() * Math.PI * 2;
-    const e = k.add(new THREE.Mesh(new THREE.ConeGeometry(0.0075, 0.045 + r() * 0.03, 4), casca), c.x + Math.cos(a) * 0.022, c.y, c.z + Math.sin(a) * 0.022);
-    e.rotation.set(Math.sin(a) * 1.1, 0, -Math.cos(a) * 1.1);
+    const no = k.add(new THREE.Mesh(new THREE.DodecahedronGeometry(raioEm(t) * (0.7 + r() * 0.4)), casca), c.x + Math.cos(a) * raioEm(t) * 0.6, c.y, c.z + Math.sin(a) * raioEm(t) * 0.6);
+    no.scale.set(1, 1.6 + r(), 0.8);
   }
 
-  // a coroa: galhos tortos que se abrem do alto, com ramos menores e brasas nas pontas
-  const topo = noTronco.getPointAt(1);
-  const direcoes: [number, number, number][] = [[-0.17, 0.24, 0.02], [0.19, 0.28, -0.02], [-0.06, 0.36, 0.03], [0.06, 0.4, -0.03], [-0.25, 0.13, -0.02], [0.25, 0.16, 0.03], [0.0, 0.27, -0.07]];
-  for (const [dx, dy, dz] of direcoes) {
-    const pts = [topo.clone()];
-    const passos = 5;
-    for (let i = 1; i <= passos; i++) {
+  // um galho serrilhado de `pts` (a ponta afina até 12%), com um dente na lateral
+  const galhos: THREE.Vector3[][] = [];
+  const galho = (pts: THREE.Vector3[], raio: number, dente: boolean) => {
+    const serra: THREE.Vector3[] = [];
+    const curva = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.3);
+    const passos = 6;
+    for (let i = 0; i <= passos; i++) {
       const t = i / passos;
-      const gira = Math.sin(t * 5 + dx * 9) * 0.045;
-      pts.push(V3(topo.x + dx * t + gira * (r() + 0.4), topo.y + dy * t + Math.cos(t * 4 + dy * 7) * 0.025, topo.z + dz * t + (r() - 0.5) * 0.03));
+      const quebra = i === 0 || i === passos ? 0 : (i % 2 === 0 ? 1 : -1) * (0.008 + r() * 0.01) * (1 - t * 0.5);
+      serra.push(curva.getPointAt(t).add(V3(quebra, 0, (r() - 0.5) * 0.01)));
     }
-    const fim = pts[pts.length - 1] as THREE.Vector3;
-    k.add(ramo(pts, 0.015, 0.12, casca, 2, 5));
-    const fio = pts.map((p, i) => V3(p.x, p.y, p.z + 0.011 * (1 - i / passos)));
-    k.add(ramo(fio, 0.0026, 0.5, brasa, 0, 4));
-    // um galhinho no meio e outro perto da ponta
-    for (const t of [0.45, 0.78]) {
-      const base = new THREE.CatmullRomCurve3(pts).getPointAt(t);
-      const lado = r() < 0.5 ? -1 : 1;
-      k.add(ramo([base, V3(base.x + lado * 0.04, base.y + 0.05, base.z), V3(base.x + lado * 0.07, base.y + 0.1 + r() * 0.04, base.z + (r() - 0.5) * 0.02)], 0.0065, 0.1, casca, 0, 4));
-    }
-    const pedra = k.add(new THREE.Mesh(new THREE.OctahedronGeometry(0.0085), brasa), fim.x, fim.y, fim.z + 0.004);
-    pedra.scale.y = 1.6;
-  }
-  // a brasa maior no coração da coroa
-  const miolo = k.add(new THREE.Mesh(new THREE.OctahedronGeometry(0.02), brasa), topo.x, topo.y + 0.03, topo.z + 0.01);
-  miolo.scale.y = 1.5;
+    k.add(ramo(serra, raio, 0.12, casca, 3, 6, true));
+    galhos.push(serra);
+    if (!dente) return;
+    const b = curva.getPointAt(0.45 + r() * 0.2);
+    const fora = Math.sign((pts[pts.length - 1] as THREE.Vector3).x - (pts[0] as THREE.Vector3).x) || 1;
+    k.add(ramo([b, V3(b.x + fora * 0.03, b.y + 0.012, b.z), V3(b.x + fora * 0.04, b.y + 0.04, b.z)], raio * 0.4, 0.1, casca, 0, 4, true));
+  };
+  // as duas esporas baixas
+  for (const e of CAJADO.esporas) galho([em(e.ao), em(e.ate.ao, e.ate.de)], grossura(CAJADO.espessuraDasPontas) * 0.6, false);
+  // as três pontas, da divisão até a ponta de cada uma passando pelo meio medido
+  const divisao = em(CAJADO.divisao.ao, CAJADO.divisao.de);
+  for (const [meio, fim] of CAJADO.pontas) galho([divisao.clone().add(V3(0, -0.02, 0)), em(meio.ao, meio.de), em(fim.ao, fim.de)], grossura(CAJADO.espessuraDasPontas), true);
 
-  // a ponteira: o galho termina em ponta, com duas raízes curtas
-  k.add(ramo([V3(0, -0.42), V3(0.012, -0.5), V3(-0.006, -0.57)], 0.017, 0.05, casca, 0, 5));
-  for (const lado of [-1, 1]) k.add(ramo([V3(0, -0.4), V3(lado * 0.03, -0.46), V3(lado * 0.055, -0.5)], 0.008, 0.1, casca, 0, 4));
+  // as rachaduras vermelhas: riscos curtos sobre a casca, mais densos na cabeça
+  const racha = (curva: THREE.Curve<THREE.Vector3>, t: number, raio: number) => {
+    const a = (r() - 0.5) * Math.PI * 1.4; // mais na frente, que é o lado que se vê
+    const pts: THREE.Vector3[] = [];
+    for (let i = 0; i < 3; i++) {
+      const tt = Math.min(1, t + i * (0.025 + r() * 0.02));
+      const c = curva.getPointAt(tt);
+      const aa = a + (r() - 0.5) * 0.6;
+      pts.push(V3(c.x + Math.sin(aa) * raio * 1.02, c.y, c.z + Math.cos(aa) * raio * 1.02));
+    }
+    k.add(ramo(pts, 0.0024, 0.6, brasa, 0, 4, true));
+  };
+  for (let i = 0; i < 18; i++) {
+    const t = 0.08 + r() * 0.86;
+    racha(naHaste, t, raioEm(t));
+  }
+  for (const pts of galhos) {
+    const curva = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.05);
+    for (let i = 0; i < 2; i++) racha(curva, r() * 0.6, grossura(CAJADO.espessuraDasPontas) * 0.8);
+  }
+
+  // a ponteira: a base termina em ponta curta
+  const base = haste[0] ?? em(0);
+  k.add(ramo([base, base.clone().add(V3(0.004, -0.04, 0)), base.clone().add(V3(-0.002, -0.07, 0))], raioBase, 0.1, casca, 0, 5, true));
 }

@@ -1,18 +1,74 @@
-// A skin Sombra Rubra do mago (06/11/2026): o mago da arte de referência em 3D, no lugar de qualquer equipamento. Um
-// vulto sem capuz, de rosto em sombra sob o cabelo, o cabelo comprido ao vento com as pontas rubras, o manto negro e rasgado
-// com a barra do roxo ao vermelho-sangue, a faixa vermelha na diagonal do peito, e o corpo todo em armadura escura
-// com runas vermelhas que brilham (braçadeiras, cinto, coxas, grevas). A arma é o cajado retorcido de skin-cajado.ts.
-// O pano (manto, forro, xale, cabelo, abas do cinto) voa para trás do rumo pelo vento de skin-pano.ts. Como o corpo
-// do rig fica escondido, as pernas e os braços também são feitos aqui.
+// A skin Sombra Rubra do mago (06/11/2026), refeita do zero a partir das medidas da arte (skin-mago-medidas.ts). Cada
+// peça sai da caixa ou dos pontos que ocupa na imagem:
+// - as alturas passam da arte ao rig por marcos (chão, joelho, virilha, ombro, queixo e topo da cabeça), porque a
+//   cabeça da arte é maior que a do rig;
+// - os tamanhos e o lado usam a altura do rig (H).
+// O desenho vai espelhado no lado: na arte o cajado está na mão esquerda, aqui na direita, que é a dos golpes.
+// As peças:
+// - a cabeça virada para o lado livre, com o rosto em sombra e o cabelo cinza-violeta que vira carmesim nas pontas ao
+//   vento;
+// - o cachecol cinza que cobre a boca e os ombros;
+// - o manto negro que abre em duas asas com ganchos de foice (o roxo embaixo, o vermelho só nos ganchos) e a borda
+//   vermelha do forro na diagonal da frente;
+// - as braçadeiras e as manoplas;
+// - a placa do cinto inclinada;
+// - a placa da coxa com a runa ᛉ, a joelheira sextavada, a greva com runas e a bota de placas.
+// O pano e o cabelo voam com o vento de skin-pano.ts. O corpo do rig fica escondido.
 
 import * as THREE from 'three';
+import { altura as alturaNaArte, ASAS, caixa, CABELO, COSTAS, FAISCAS, INCLINACAO_DO_CINTO, lado as ladoNaArte, MANTO, PECAS, tam } from './skin-mago-medidas';
 import type { Ossos, PecaSombria } from './sombrio-base';
-import { aoLongo, Corpo, esfera, grupoEm, sorteio, V } from './sombrio-base';
-import { dentes, eixosDoCorpo, mao, mix, perfilDe, pesosDoManto, suave, type Eixos } from './skin-ceifador';
-import { fita, rasgos, superficie, ventoso, type Anel } from './skin-pano';
+import { aoLongo, Corpo, grupoEm, sorteio, V } from './sombrio-base';
+import { dentes, eixosDoCorpo, mao, mix, pesosDoManto, suave, type Eixos } from './skin-ceifador';
+import { fita, flutuante, lamina, mecha, superficie, ventoso, type Anel } from './skin-pano';
 
 type Obj = THREE.Object3D;
 const DUPLO = THREE.DoubleSide;
+
+// ---------- a régua: da arte para o rig ----------
+interface Regua {
+  /** A altura do rig de uma fração de altura da arte (por marcos). */
+  y: (fracao: number) => number;
+  /** Um tamanho ou lado (fração de H da arte) no rig. */
+  m: (fracao: number) => number;
+}
+function regua(c: Corpo, e: Eixos): Regua {
+  const H = c.p('Head').y + 0.225 * c.u;
+  const queixo = c.p('Head').y + 0.022 * c.u;
+  // os marcos: [na arte (fração de H), no rig]
+  const marcos: [number, number][] = [
+    [0, 0],
+    [alturaNaArte(692), c.p('calf_l').y],
+    [alturaNaArte(515), c.p('thigh_l').y],
+    [alturaNaArte(320), e.topo],
+    [alturaNaArte(235), queixo],
+    // a cabeça da arte (com o volume do cabelo) é maior que a do rig: do queixo ao topo vale a proporção da arte
+    [1, queixo + (1 - alturaNaArte(235)) * H],
+  ];
+  return {
+    y: (f) => {
+      for (let i = 1; i < marcos.length; i++) {
+        const [a0, r0] = marcos[i - 1] as [number, number], [a1, r1] = marcos[i] as [number, number];
+        if (f <= a1 || i === marcos.length - 1) return mix(r0, r1, (f - a0) / (a1 - a0));
+      }
+      return H;
+    },
+    m: (f) => f * H,
+  };
+}
+
+/** Uma tabela [x, valor] interpolada em linha reta (x crescente). */
+function tabela(t: readonly (readonly [number, number])[]): (x: number) => number {
+  return (x) => {
+    const p0 = t[0] as readonly [number, number];
+    if (x <= p0[0]) return p0[1];
+    for (let i = 1; i < t.length; i++) {
+      const [x0, v0] = t[i - 1] as readonly [number, number], [x1, v1] = t[i] as readonly [number, number];
+      if (x <= x1) return mix(v0, v1, (x - x0) / (x1 - x0));
+    }
+    return (t[t.length - 1] as readonly [number, number])[1];
+  };
+}
 
 // ---------- texturas ----------
 function tela(): [HTMLCanvasElement, CanvasRenderingContext2D] {
@@ -22,150 +78,206 @@ function tela(): [HTMLCanvasElement, CanvasRenderingContext2D] {
   if (!g) throw new Error('sem canvas 2d');
   return [c, g];
 }
-const comoTextura = (c: HTMLCanvasElement, cor = true): THREE.CanvasTexture => {
+const comoTextura = (c: HTMLCanvasElement): THREE.CanvasTexture => {
   const t = new THREE.CanvasTexture(c);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
   t.anisotropy = 8;
-  if (cor) t.colorSpace = THREE.SRGBColorSpace;
+  t.colorSpace = THREE.SRGBColorSpace;
   return t;
 };
 
-/** As runas angulares em vermelho sobre a armadura escura: a cor (`map`) e o brilho (`emissiveMap`, só as linhas). */
-function runas(base: string, linha: string, semente: number, glifos = 4): { map: THREE.CanvasTexture; brilho: THREE.CanvasTexture } {
+/** A base gasta da armadura escura (manchas e riscos), comum às placas. */
+function placaGasta(g: CanvasRenderingContext2D, base: string, semente: number): void {
   const r = sorteio(semente);
+  g.fillStyle = base;
+  g.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 80; i++) {
+    const x = r() * 512, y = r() * 512, raio = 10 + r() * 50;
+    const grd = g.createRadialGradient(x, y, 0, x, y, raio);
+    grd.addColorStop(0, r() < 0.65 ? 'rgba(0,0,0,0.28)' : 'rgba(140,130,170,0.07)');
+    grd.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = grd;
+    g.fillRect(x - raio, y - raio, raio * 2, raio * 2);
+  }
+}
+
+/** As linhas de runa vermelho-escuras (a arte: vermelho fosco, não aceso) em `desenho`, sobre a placa gasta. */
+function gravura(base: string, semente: number, desenho: (g: CanvasRenderingContext2D) => void): { map: THREE.CanvasTexture; brilho: THREE.CanvasTexture } {
   const [cb, gb] = tela();
   const [ce, ge] = tela();
-  gb.fillStyle = base;
-  gb.fillRect(0, 0, 512, 512);
+  placaGasta(gb, base, semente);
   ge.fillStyle = '#000';
   ge.fillRect(0, 0, 512, 512);
-  for (let i = 0; i < 90; i++) {
-    const x = r() * 512, y = r() * 512, raio = 10 + r() * 50;
-    const grd = gb.createRadialGradient(x, y, 0, x, y, raio);
-    grd.addColorStop(0, r() < 0.65 ? 'rgba(0,0,0,0.3)' : 'rgba(120,110,150,0.06)');
-    grd.addColorStop(1, 'rgba(0,0,0,0)');
-    gb.fillStyle = grd;
-    gb.fillRect(x - raio, y - raio, raio * 2, raio * 2);
-  }
-  const passo = 512 / glifos;
-  for (const [g, cor, grosso] of [[gb, linha + '88', 3.5], [ge, linha, 3.5]] as const) {
+  for (const [g, cor] of [[gb, '#7a1e30'], [ge, '#a01830']] as const) {
     g.strokeStyle = cor;
-    g.lineWidth = grosso;
+    g.lineWidth = 14;
     g.lineCap = 'square';
-    const rr = sorteio(semente + 1);
-    for (let gx = 0; gx < glifos; gx++)
-      for (let gy = 0; gy < glifos; gy++) {
-        const x = (gx + 0.5) * passo, y = (gy + 0.5) * passo, s = passo * 0.3;
-        g.beginPath();
-        g.moveTo(x, y - s);
-        g.lineTo(x, y + s);
-        const ramos = 1 + Math.floor(rr() * 3);
-        for (let k = 0; k < ramos; k++) {
-          const yy = y - s + (k + 0.8) * s * 0.55;
-          g.moveTo(x, yy); g.lineTo(x - s * 0.6, yy - s * 0.45);
-          g.moveTo(x, yy); g.lineTo(x + s * 0.6, yy - s * 0.45);
-        }
-        if (rr() < 0.5) { g.moveTo(x, y - s * 0.35); g.lineTo(x + s * 0.4, y); g.lineTo(x, y + s * 0.35); g.lineTo(x - s * 0.4, y); g.closePath(); }
-        g.stroke();
-      }
-    g.strokeRect(10, 10, 492, 492);
-    g.strokeRect(22, 22, 468, 468);
+    g.lineJoin = 'miter';
+    g.beginPath();
+    desenho(g);
+    g.stroke();
   }
   return { map: comoTextura(cb), brilho: comoTextura(ce) };
 }
 
-/** O degradê do manto: negro-azulado no alto, roxo na altura da barra e o vermelho-sangue em manchas na ponta. */
-function degrade(cima: string, meio: string, roxo: string, sangue: string, semente: number): THREE.CanvasTexture {
+/** A runa ᛉ da coxa (a arte): o traço vertical, os braços para cima, a ponta em losango e os ganchos de baixo. */
+const RUNA_DA_COXA = (g: CanvasRenderingContext2D): void => {
+  g.moveTo(256, 70); g.lineTo(256, 450);
+  g.moveTo(256, 230); g.lineTo(150, 110); g.moveTo(256, 230); g.lineTo(362, 110);
+  g.moveTo(256, 70); g.lineTo(206, 140); g.moveTo(256, 70); g.lineTo(306, 140);
+  g.moveTo(256, 330); g.lineTo(170, 420); g.moveTo(256, 330); g.lineTo(342, 420);
+};
+/** As linhas angulares das braçadeiras, da greva e do cinto: chevrons e traços paralelos. */
+const LINHAS = (g: CanvasRenderingContext2D): void => {
+  for (let y = 40; y < 512; y += 110) {
+    g.moveTo(70, y); g.lineTo(256, y + 60); g.lineTo(442, y);
+    g.moveTo(120, y + 50); g.lineTo(120, y + 95); g.moveTo(392, y + 50); g.lineTo(392, y + 95);
+  }
+};
+/** O X da joelheira e a borda sextavada. */
+const XIS = (g: CanvasRenderingContext2D): void => {
+  g.moveTo(110, 110); g.lineTo(402, 402); g.moveTo(402, 110); g.lineTo(110, 402);
+  g.moveTo(256, 30); g.lineTo(470, 150); g.lineTo(470, 362); g.lineTo(256, 482); g.lineTo(42, 362); g.lineTo(42, 150); g.closePath();
+};
+
+/** As dobras do pano negro: faixas cinza e sombras quase verticais (a arte). */
+function dobras(g: CanvasRenderingContext2D, semente: number): void {
+  const r = sorteio(semente);
+  g.fillStyle = '#15141b';
+  g.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 90; i++) {
+    const x = r() * 512, w = 6 + r() * 26;
+    g.fillStyle = r() < 0.5 ? 'rgba(62,60,76,0.55)' : 'rgba(0,0,0,0.35)';
+    g.beginPath(); g.moveTo(x, 0); g.lineTo(x + w, 0); g.lineTo(x + w * 0.6 + (r() - 0.5) * 60, 512); g.lineTo(x + (r() - 0.5) * 60, 512); g.fill();
+  }
+}
+
+/**
+ * Uma asa do manto (ASAS): o negro com dobras; de `MANTO.roxo` para baixo, o roxo em blocos; de `MANTO.vermelho` para
+ * baixo, o vermelho do gancho com furos roxos (a arte, em pixels). `ys` é o y médio da arte em cada estação, e a linha
+ * da tela vai da primeira estação (alto) à última (baixo).
+ */
+function texturaDaAsa(ys: readonly number[], semente: number): THREE.CanvasTexture {
   const r = sorteio(semente);
   const [c, g] = tela();
-  const grd = g.createLinearGradient(0, 0, 0, 512);
-  grd.addColorStop(0, cima);
-  grd.addColorStop(0.55, meio);
-  grd.addColorStop(0.82, roxo);
-  grd.addColorStop(1, roxo);
-  g.fillStyle = grd;
-  g.fillRect(0, 0, 512, 512);
-  for (let x = 0; x < 512; x += 3) { g.fillStyle = `rgba(0,0,0,${r() * 0.09})`; g.fillRect(x, 0, 1, 512); }
-  for (let y = 0; y < 512; y += 2) { g.fillStyle = `rgba(0,0,0,${0.03 + r() * 0.05})`; g.fillRect(0, y, 512, 1); }
-  // o sangue: manchas grandes e irregulares no fim (mais densas para baixo) e respingos acima
-  for (let i = 0; i < 70; i++) {
-    const y = 512 - Math.pow(r(), 1.8) * 190;
-    const x = r() * 512, rx = 10 + r() * 46, ry = 6 + r() * 22;
-    g.fillStyle = r() < 0.75 ? sangue : '#7a1230';
-    g.globalAlpha = 0.55 + r() * 0.45;
-    g.beginPath(); g.ellipse(x, y, rx, ry, r() * 3, 0, Math.PI * 2); g.fill();
-  }
-  g.globalAlpha = 1;
-  for (let i = 0; i < 26; i++) { g.fillStyle = sangue; g.fillRect(r() * 512, 260 + r() * 160, 2 + r() * 4, 2 + r() * 4); }
+  dobras(g, semente);
+  const yDaLinha = (v: number) => {
+    const f = (v / 512) * (ys.length - 1), k = Math.min(ys.length - 2, Math.floor(f));
+    return mix(ys[k] as number, ys[k + 1] as number, f - k);
+  };
+  for (let v = 0; v < 512; v += 6)
+    for (let x = 0; x < 512; x += 6) {
+      const y = yDaLinha(v + r() * 30 - 15);
+      if (y >= MANTO.vermelho) g.fillStyle = r() < 0.86 ? '#d42a44' : '#5a4677';
+      else if (y >= MANTO.roxo) {
+        if (r() < 0.25) continue;
+        g.fillStyle = r() < 0.7 ? '#4f416c' : '#3c3256';
+      } else continue;
+      g.fillRect(x, v, 6 + Math.floor(r() * 2) * 6, 6);
+    }
   return comoTextura(c);
 }
 
-function gradeDoCabelo(): THREE.CanvasTexture {
+/** O pano de trás: só o negro com dobras. */
+function texturaDasCostas(): THREE.CanvasTexture {
+  const [c, g] = tela();
+  dobras(g, 603);
+  return comoTextura(c);
+}
+
+/**
+ * O pano que vira brasa (06/11/2026). Da fração `desde` para baixo, a barra se desfaz em furos cada vez mais densos
+ * (`recorte`, o alphaMap), e as bordas dos furos ficam em brasa vermelha e laranja (`brilho`, o emissiveMap). Com
+ * `borda`, a beira de fora (u perto de 1) também queima.
+ */
+function brasas(semente: number, desde: number, borda = false): { recorte: THREE.CanvasTexture; brilho: THREE.CanvasTexture } {
+  const r = sorteio(semente);
+  const [ca, ga] = tela();
+  const [cb, gb] = tela();
+  ga.fillStyle = '#fff';
+  ga.fillRect(0, 0, 512, 512);
+  gb.fillStyle = '#000';
+  gb.fillRect(0, 0, 512, 512);
+  const P = 6;
+  for (let v = 0; v < 512; v += P)
+    for (let x = 0; x < 512; x += P) {
+      const fundo = Math.max(0, (v / 512 - desde) / (1 - desde)), beira = borda ? suave(0.82, 1, x / 512) * 0.7 : 0;
+      const queima = Math.min(1, Math.pow(fundo, 1.4) + beira);
+      if (queima <= 0) continue;
+      const q = r();
+      if (q < queima * 0.78) { ga.fillStyle = '#000'; ga.fillRect(x, v, P, P); }
+      else if (q < queima * 1.25) {
+        gb.fillStyle = r() < 0.6 ? '#ff2a3a' : r() < 0.6 ? '#ff6a2a' : '#a01020';
+        gb.fillRect(x, v, P, P);
+      }
+    }
+  const recorte = new THREE.CanvasTexture(ca);
+  recorte.wrapS = recorte.wrapT = THREE.RepeatWrapping;
+  return { recorte, brilho: comoTextura(cb) };
+}
+
+/** O cachecol: cinza-ardósia com dobras mais claras e sombras fundas (a arte). */
+function texturaDoCachecol(): THREE.CanvasTexture {
+  const r = sorteio(641);
+  const [c, g] = tela();
+  g.fillStyle = '#2a2833';
+  g.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 40; i++) {
+    const y = r() * 512, h = 8 + r() * 30, inclina = (r() - 0.3) * 120;
+    g.fillStyle = r() < 0.5 ? 'rgba(78,76,92,0.6)' : 'rgba(8,8,12,0.55)';
+    g.beginPath(); g.moveTo(0, y); g.lineTo(512, y + inclina); g.lineTo(512, y + inclina + h); g.lineTo(0, y + h); g.fill();
+  }
+  return comoTextura(c);
+}
+
+/** O cabelo: cinza-violeta na raiz, escurece e vira carmesim a partir de `CABELO.carmesimDesde` (a arte). */
+function texturaDoCabelo(): THREE.CanvasTexture {
   const [c, g] = tela();
   const grd = g.createLinearGradient(0, 0, 0, 512);
-  grd.addColorStop(0, '#1f1722');
-  grd.addColorStop(0.5, '#3c2034');
-  grd.addColorStop(0.8, '#8a2038');
-  grd.addColorStop(1, '#e02a46');
+  grd.addColorStop(0, '#46404f');
+  grd.addColorStop(0.35, '#2e2836');
+  grd.addColorStop(CABELO.carmesimDesde, '#4a1a30');
+  grd.addColorStop(0.85, '#8e1f36');
+  grd.addColorStop(1, '#b8283f');
   g.fillStyle = grd;
   g.fillRect(0, 0, 512, 512);
   return comoTextura(c);
 }
 
 function materiais() {
-  const r1 = runas('#17141c', '#c01830', 501, 4);
-  const r2 = runas('#14121a', '#c01830', 521, 3);
-  const r3 = runas('#110f16', '#b01428', 541, 2);
-  const armadura = (t: ReturnType<typeof runas>, forca = 0.6, metal = 0.55) =>
-    new THREE.MeshStandardMaterial({ map: t.map, emissiveMap: t.brilho, emissive: 0xffffff, emissiveIntensity: forca, metalness: metal, roughness: 0.5, side: DUPLO });
-  const pano = (t: THREE.Texture, rasgo?: number, semente = 1) =>
-    new THREE.MeshStandardMaterial({ map: t, roughness: 0.88, side: DUPLO, ...(rasgo !== undefined ? { alphaMap: rasgos(semente, rasgo, 6), alphaTest: 0.5 } : {}) });
+  const emBrasa = (map: THREE.Texture, b: ReturnType<typeof brasas>) => ventoso(new THREE.MeshStandardMaterial({
+    map, roughness: 0.9, side: DUPLO, alphaMap: b.recorte, alphaTest: 0.5, emissive: 0xffffff, emissiveMap: b.brilho, emissiveIntensity: 1.1,
+  }));
+  const placa = (t: ReturnType<typeof gravura>, metal = 0.5) =>
+    new THREE.MeshStandardMaterial({ map: t.map, emissiveMap: t.brilho, emissive: 0xffffff, emissiveIntensity: 0.35, metalness: metal, roughness: 0.55, side: DUPLO });
   return {
-    capa: ventoso(pano(degrade('#13101b', '#1b1726', '#3a2658', '#b8102e', 601), 0.78, 611)),
-    forro: ventoso(pano(degrade('#3a1030', '#5a1230', '#7a1432', '#b8102e', 621), 0.8, 631)),
-    xale: ventoso(pano(degrade('#171321', '#201a2d', '#3a2658', '#c81c3a', 641), 0.86, 651)),
-    cabelo: ventoso(new THREE.MeshStandardMaterial({ map: gradeDoCabelo(), roughness: 0.55, side: DUPLO })),
-    abas: ventoso(pano(degrade('#14111a', '#1a1622', '#2c1c40', '#a01832', 661), 0.75, 671)),
-    tunica: pano(degrade('#14111b', '#17131e', '#17131e', '#17131e', 681)),
-    calca: pano(degrade('#100e16', '#13111a', '#13111a', '#13111a', 691)),
-    placa: armadura(r1),
-    placaCalca: armadura(r2, 0.75, 0.4),
-    cinto: armadura(r3, 0.8, 0.6),
-    faixa: new THREE.MeshStandardMaterial({ color: 0x8c1228, emissive: 0x9a1028, emissiveIntensity: 0.22, roughness: 0.7, side: DUPLO }),
-    luva: new THREE.MeshStandardMaterial({ color: 0x1b1a22, roughness: 0.75 }),
-    couro: new THREE.MeshStandardMaterial({ color: 0x15121a, roughness: 0.6, metalness: 0.2 }),
-    vazio: new THREE.MeshBasicMaterial({ color: 0x020203 }),
-    cabeloEscuro: ventoso(new THREE.MeshStandardMaterial({ color: 0x1b1420, roughness: 0.92, side: DUPLO })),
-    brasa: new THREE.MeshStandardMaterial({ color: 0xff2a3c, emissive: 0xff2a3c, emissiveIntensity: 1.6, roughness: 0.3 }),
+    costas: emBrasa(texturaDasCostas(), brasas(611, 0.68)),
+    asaLivre: emBrasa(texturaDaAsa(ASAS.livre.map(([a, b]) => (a[1] + b[1]) / 2), 613), brasas(615, 0.62, true)),
+    asaCajado: emBrasa(texturaDaAsa(ASAS.cajado.map(([a, b]) => (a[1] + b[1]) / 2), 617), brasas(619, 0.62, true)),
+    // o cabelo e a escuridão dele flutuam como em baixa gravidade (o shader de skin-pano.ts)
+    escuridao: flutuante(ventoso(new THREE.MeshBasicMaterial({ color: 0x08070c, side: DUPLO })), 0.045),
+    brasaPreta: ventoso(new THREE.MeshBasicMaterial({ color: 0x0c0a10, side: DUPLO })),
+    brasaAcesa: ventoso(new THREE.MeshBasicMaterial({ color: 0xff4a2a, side: DUPLO })),
+    frente: ventoso(new THREE.MeshStandardMaterial({ color: 0x17161d, roughness: 0.9, side: DUPLO })),
+    forro: ventoso(new THREE.MeshStandardMaterial({ color: 0xd42a44, emissive: 0x8a1024, emissiveIntensity: 0.25, roughness: 0.7, side: DUPLO })),
+    cachecol: ventoso(new THREE.MeshStandardMaterial({ map: texturaDoCachecol(), roughness: 0.92, side: DUPLO })),
+    cabelo: flutuante(ventoso(new THREE.MeshStandardMaterial({ map: texturaDoCabelo(), roughness: 0.8, side: DUPLO })), 0.06),
+    tunica: new THREE.MeshStandardMaterial({ color: 0x16151c, roughness: 0.9, side: DUPLO }),
+    calca: new THREE.MeshStandardMaterial({ color: 0x1c1b23, roughness: 0.85, side: DUPLO }),
+    coxa: placa(gravura('#2c2b36', 701, RUNA_DA_COXA), 0.4),
+    linhas: placa(gravura('#2a2934', 711, LINHAS)),
+    joelheira: placa(gravura('#34333f', 721, XIS), 0.6),
+    bota: new THREE.MeshStandardMaterial({ color: 0x2f2e39, metalness: 0.55, roughness: 0.5 }),
+    luva: new THREE.MeshStandardMaterial({ color: 0x3a3946, metalness: 0.35, roughness: 0.6 }),
+    couro: new THREE.MeshStandardMaterial({ color: 0x15131a, roughness: 0.6 }),
+    sombra: new THREE.MeshBasicMaterial({ color: 0x050407 }),
+    faisca: flutuante(ventoso(new THREE.MeshBasicMaterial({ color: 0xe0203a, side: DUPLO })), 0.08),
   };
 }
 type M = ReturnType<typeof materiais>;
 
-// ---------- o corpo por baixo: tronco, pernas e braços ----------
-interface Perfil { rx: (y: number) => number; rz: (y: number) => number }
-function perfilDoTronco(c: Corpo, e: Eixos): Perfil {
-  const u = c.u;
-  const s3 = c.p('spine_03').y, s2 = c.p('spine_02').y;
-  return {
-    rx: perfilDe([[e.topo, 0.125 * u], [(e.topo + s3) / 2, 0.205 * u], [s3, 0.2 * u], [s2, 0.165 * u], [e.bacia, 0.185 * u], [e.bacia - 0.2 * u, 0.2 * u]]),
-    rz: perfilDe([[e.topo, 0.11 * u], [(e.topo + s3) / 2, 0.135 * u], [s3, 0.14 * u], [s2, 0.12 * u], [e.bacia, 0.14 * u], [e.bacia - 0.2 * u, 0.15 * u]]),
-  };
-}
-
-function tunica(c: Corpo, e: Eixos, p: Perfil, m: M, extras: Obj[]): void {
-  const u = c.u;
-  const fim = e.bacia - 0.1 * u;
-  const N = 12;
-  const aneis: Anel[] = [];
-  for (let i = 0; i < N; i++) {
-    const y = mix(e.topo, fim, i / (N - 1));
-    aneis.push({ c: V(0, y, e.zDe(y)), rx: p.rx(y), rz: p.rz(y) });
-  }
-  extras.push(superficie({ aneis, colunas: 28, repete: [2, 1], pesos: pesosDoManto(c, e) }, m.tunica));
-}
-
-/** Um tubo de tecido ou placa por uma lista de pontos, com um osso por ponto de controle (mistura entre eles). */
-function tubo(pontos: THREE.Vector3[], raios: number[], ossos: string[], m: THREE.Material, extras: Obj[], colunas = 20, repete: [number, number] = [1, 1]): void {
+/** Um tubo pela lista de pontos, com um raio e um osso por ponto de controle (mistura entre eles). */
+function tubo(pontos: THREE.Vector3[], raios: number[], ossos: string[], m: THREE.Material, extras: Obj[], repete: [number, number] = [1, 1]): void {
   const curva = new THREE.CatmullRomCurve3(pontos);
   const N = 12;
   const aneis: Anel[] = [];
@@ -176,7 +288,7 @@ function tubo(pontos: THREE.Vector3[], raios: number[], ossos: string[], m: THRE
     aneis.push({ c: curva.getPointAt(i / (N - 1)), rx: rr, rz: rr * 0.95 });
   }
   extras.push(superficie({
-    aneis, colunas, repete,
+    aneis, colunas: 20, repete,
     pesos: (i) => {
       const f = (i / (N - 1)) * (ossos.length - 1);
       const k = Math.min(ossos.length - 2, Math.floor(f));
@@ -185,210 +297,364 @@ function tubo(pontos: THREE.Vector3[], raios: number[], ossos: string[], m: THRE
   }, m));
 }
 
-function pernas(c: Corpo, m: M, extras: Obj[]): void {
-  const u = c.u;
+/** O ponto do osso `a` ao osso `b` na altura `y` do rig. */
+function naAltura(a: THREE.Vector3, b: THREE.Vector3, y: number): THREE.Vector3 {
+  return a.clone().lerp(b, Math.min(1, Math.max(0, (a.y - y) / (a.y - b.y || 1))));
+}
+
+// ---------- o corpo: tronco, pernas, braços e cinto ----------
+function tronco(c: Corpo, e: Eixos, m: M, extras: Obj[]): void {
+  const N = 10;
+  const aneis: Anel[] = [];
+  for (let i = 0; i < N; i++) {
+    const y = mix(e.topo, e.bacia - 0.06 * c.u, i / (N - 1));
+    aneis.push({ c: V(0, y, e.zDe(y)), rx: e.rx(y) * 0.82, rz: e.rz(y) * 0.85 });
+  }
+  extras.push(superficie({ aneis, colunas: 24, pesos: pesosDoManto(c, e) }, m.tunica));
+}
+
+/** As pernas: a calça, a placa da coxa, a joelheira, a greva e a bota, cada uma na faixa de altura medida. */
+function pernas(c: Corpo, R: Regua, m: M, extras: Obj[]): void {
+  const coxa = caixa(PECAS.placaDaCoxa), joelheira = caixa(PECAS.joelheira), greva = caixa(PECAS.greva), bota = caixa(PECAS.bota);
+  const rCoxa = R.m(coxa.largura) / 2, rCanela = R.m(greva.largura) / 2 * 0.85, rBota = R.m(bota.largura) / 2;
   for (const lado of ['l', 'r'] as const) {
-    const coxa = c.p(`thigh_${lado}`), joelho = c.p(`calf_${lado}`), tornozelo = c.p(`foot_${lado}`), bola = c.p(`ball_${lado}`);
-    const meio1 = coxa.clone().lerp(joelho, 0.5), meio2 = joelho.clone().lerp(tornozelo, 0.5);
-    tubo([coxa.clone().add(V(0, 0.04 * u, 0)), meio1, joelho, meio2, tornozelo], [0.105 * u, 0.095 * u, 0.082 * u, 0.07 * u, 0.062 * u],
+    const quadril = c.p(`thigh_${lado}`), joelho = c.p(`calf_${lado}`), tornozelo = c.p(`foot_${lado}`), bola = c.p(`ball_${lado}`);
+    // a calça
+    tubo([quadril.clone().add(V(0, 0.03 * c.u, 0)), quadril.clone().lerp(joelho, 0.5), joelho, joelho.clone().lerp(tornozelo, 0.5), tornozelo],
+      [rCoxa * 0.95, rCoxa * 0.88, rCanela * 1.05, rCanela, rCanela * 0.9],
       [`thigh_${lado}`, `thigh_${lado}`, `calf_${lado}`, `calf_${lado}`, `foot_${lado}`], m.calca, extras);
-    // a coxote com a runa e a joelheira
-    tubo([coxa.clone().lerp(joelho, 0.12), meio1, coxa.clone().lerp(joelho, 0.88)], [0.1 * u, 0.098 * u, 0.088 * u], [`thigh_${lado}`, `thigh_${lado}`, `thigh_${lado}`], m.placaCalca, extras, 20, [1, 1]);
-    const joelheira = new THREE.Mesh(esfera(0.05, 14, 10), m.cinto);
-    joelheira.scale.set(1.05, 1.0, 0.5);
-    joelheira.position.copy(joelho).add(V(0, 0.01 * u, 0.065 * u));
-    c.prender(`thigh_${lado}`, joelheira, extras);
-    // a greva: placa do joelho ao tornozelo com as runas, e o cano da bota
-    tubo([joelho.clone().lerp(tornozelo, 0.1), meio2, tornozelo.clone().lerp(joelho, 0.08)], [0.088 * u, 0.082 * u, 0.072 * u], [`calf_${lado}`, `calf_${lado}`, `calf_${lado}`], m.placa, extras);
-    // o pé: o bloco da bota de placas, com a ponta e a sola
-    const ponta = bola.clone().add(bola.clone().sub(tornozelo).multiplyScalar(0.5));
-    const bota = new THREE.Mesh(new THREE.BoxGeometry(0.092 * u, 1, 0.075 * u), m.placa);
-    bota.scale.y = tornozelo.distanceTo(ponta);
-    aoLongo(bota, tornozelo, ponta, 0.5, V(0, 1, 0));
-    c.prender(`foot_${lado}`, bota, extras);
-    const bico = new THREE.Mesh(esfera(0.045, 10, 8), m.placa);
-    bico.scale.set(1.0, 0.8, 1.2);
-    bico.position.copy(ponta);
-    c.prender(`foot_${lado}`, bico, extras);
+    // a placa da coxa com a runa, na frente, de `y0` a `y1`
+    const y0 = R.y(alturaNaArte(PECAS.placaDaCoxa[1])), y1 = R.y(alturaNaArte(PECAS.placaDaCoxa[3]));
+    const topo = naAltura(quadril, joelho, y0), fim = naAltura(quadril, joelho, y1);
+    const placa = new THREE.Mesh(new THREE.CylinderGeometry(rCoxa * 1.12, rCoxa * 1.04, 1, 16, 1, true, -Math.PI * 0.42, Math.PI * 0.84), m.coxa);
+    placa.scale.y = topo.distanceTo(fim);
+    aoLongo(placa, topo, fim, 0.5);
+    c.prender(`thigh_${lado}`, placa, extras);
+    // a joelheira sextavada (a placa de 6 lados de frente), na altura medida
+    const yj = R.y(joelheira.altura);
+    const pj = naAltura(quadril, tornozelo, yj).setY(yj);
+    const jo = new THREE.Mesh(new THREE.CylinderGeometry(R.m(joelheira.largura) / 2, R.m(joelheira.largura) / 2 * 0.9, 0.02 * c.u, 6), m.joelheira);
+    jo.rotation.set(Math.PI / 2, Math.PI / 6, 0);
+    jo.scale.set(1, 1, R.m(joelheira.alto) / R.m(joelheira.largura));
+    jo.position.copy(pj).add(V(0, 0, rCanela * 1.25));
+    c.prender(`calf_${lado}`, jo, extras);
+    // a greva com as linhas de runa
+    const g0 = naAltura(joelho, tornozelo, R.y(alturaNaArte(PECAS.greva[1]))), g1 = naAltura(joelho, tornozelo, R.y(alturaNaArte(PECAS.greva[3])));
+    tubo([g0, g0.clone().lerp(g1, 0.5), g1], [rCanela * 1.25, rCanela * 1.2, rCanela * 1.15], [`calf_${lado}`, `calf_${lado}`, `calf_${lado}`], m.linhas, extras, [2, 1]);
+    // a bota de placas: do cano (altura medida) ao tornozelo, ao peito do pé e à ponta afilada
+    const cano = naAltura(joelho, tornozelo, R.y(alturaNaArte(PECAS.bota[1])));
+    const ponta = bola.clone().add(bola.clone().sub(tornozelo).setY(0).normalize().multiplyScalar(rBota * 1.3)).setY(0.012 * c.u);
+    tubo([cano, tornozelo, tornozelo.clone().lerp(bola, 0.55), bola, ponta], [rBota, rBota * 0.98, rBota * 0.85, rBota * 0.62, rBota * 0.12],
+      [`calf_${lado}`, `foot_${lado}`, `foot_${lado}`, `ball_${lado}`, `ball_${lado}`], m.bota, extras);
   }
 }
 
-function bracos(c: Corpo, m: M, extras: Obj[]): void {
-  const u = c.u;
+/** Os braços: a manga, a braçadeira (o comprimento medido) e a manopla grossa (a largura medida). */
+function bracos(c: Corpo, R: Regua, m: M, extras: Obj[]): void {
+  const livre = caixa(PECAS.bracadeiraLivre), manopla = caixa(PECAS.manopla);
+  const rBraco = R.m(livre.largura) / 2;
   for (const lado of ['l', 'r'] as const) {
     const ombro = c.p(`upperarm_${lado}`), cot = c.p(`lowerarm_${lado}`), pulso = c.p(`hand_${lado}`);
-    const o1 = ombro.clone().lerp(cot, 0.5), o2 = cot.clone().lerp(pulso, 0.5);
-    tubo([ombro.clone().add(V(0, 0.03 * u, 0)), o1, cot, o2, pulso], [0.075 * u, 0.07 * u, 0.066 * u, 0.06 * u, 0.052 * u],
+    tubo([ombro.clone().add(V(0, 0.03 * c.u, 0)), ombro.clone().lerp(cot, 0.5), cot, cot.clone().lerp(pulso, 0.5), pulso],
+      [rBraco * 1.3, rBraco * 1.15, rBraco * 1.05, rBraco * 0.95, rBraco * 0.85],
       [`upperarm_${lado}`, `upperarm_${lado}`, `lowerarm_${lado}`, `lowerarm_${lado}`, `hand_${lado}`], m.tunica, extras);
-    // a braçadeira com a runa
-    tubo([cot.clone().lerp(pulso, 0.18), o2, cot.clone().lerp(pulso, 0.96)], [0.07 * u, 0.066 * u, 0.058 * u], [`lowerarm_${lado}`, `lowerarm_${lado}`, `lowerarm_${lado}`], m.placa, extras, 20, [1, 1]);
-    mao(c, lado, { osso: m.luva }, extras, 1.5);
+    // a braçadeira: da arte, cobre do pulso até 3/4 do antebraço
+    const b0 = pulso.clone().lerp(cot, 0.78), b1 = pulso.clone().lerp(cot, 0.04);
+    tubo([b0, b0.clone().lerp(b1, 0.5), b1], [rBraco * 1.18, rBraco * 1.12, rBraco * 1.05], [`lowerarm_${lado}`, `lowerarm_${lado}`, `lowerarm_${lado}`], m.linhas, extras, [2, 1]);
+    // a manopla
+    mao(c, lado, { osso: m.luva }, extras, 2.4);
+    const dedos = c.p(`middle_01_${lado}`);
+    const dorso = new THREE.Mesh(new THREE.BoxGeometry(R.m(manopla.largura) * 0.8, 1, R.m(manopla.largura) * 0.4), m.luva);
+    dorso.scale.y = pulso.distanceTo(dedos) * 1.05;
+    aoLongo(dorso, pulso, dedos, 0.5);
+    c.prender(`hand_${lado}`, dorso, extras);
+    tubo([pulso.clone().lerp(cot, 0.12), pulso.clone().lerp(dedos, 0.15)], [rBraco * 1.3, rBraco * 1.2], [`lowerarm_${lado}`, `hand_${lado}`], m.luva, extras);
   }
 }
 
-// ---------- cinto, faixa, xale, capuz, cabelo ----------
-function cinto(c: Corpo, e: Eixos, p: Perfil, m: M, extras: Obj[]): void {
-  const u = c.u;
-  const y = e.bacia + 0.025 * u;
-  const tira = new THREE.Mesh(new THREE.TorusGeometry(1, 0.017 * u, 6, 36), m.couro);
+/** O cinto e a placa ornada, do tamanho e na inclinação medidos, um pouco para o lado do cajado. */
+function cinto(c: Corpo, e: Eixos, R: Regua, m: M, extras: Obj[]): void {
+  const pc = caixa(PECAS.placaDoCinto);
+  const y = R.y(pc.altura);
+  const tira = new THREE.Mesh(new THREE.TorusGeometry(1, 0.016 * c.u, 6, 36), m.couro);
   tira.rotation.x = Math.PI / 2;
-  tira.scale.set(p.rx(y) + 0.012 * u, p.rz(y) + 0.012 * u, 1);
-  tira.position.set(0, y, e.zDe(y));
+  tira.scale.set(e.rx(e.bacia) * 0.84, e.rz(e.bacia) * 0.88, 1);
+  tira.position.set(0, e.bacia + 0.02 * c.u, e.zDe(e.bacia));
   c.prender('pelvis', tira, extras);
-  const placa = new THREE.Mesh(new THREE.BoxGeometry(0.12 * u, 0.15 * u, 0.02 * u), m.cinto);
-  placa.position.set(0, y - 0.05 * u, e.zDe(y) + p.rz(y) + 0.02 * u);
+  // a placa: as medidas da arte são da caixa inclinada; o lado maior é o comprimento da diagonal
+  const angulo = (INCLINACAO_DO_CINTO * Math.PI) / 180;
+  const comprido = R.m(pc.alto) / Math.cos(angulo) * 0.78, largo = R.m(pc.largura) * 0.62;
+  const placa = new THREE.Mesh(new THREE.BoxGeometry(largo, comprido, 0.02 * c.u), m.linhas);
+  placa.position.set(R.m(pc.lado), y, e.zDe(y) + e.rz(y) * 0.92);
+  placa.rotation.set(-0.12, 0, -angulo);
   c.prender('pelvis', placa, extras);
-  // as abas de pano do cinto, curtas e soltas
-  for (const sx of [-1, 1]) {
-    const x = sx * 0.07 * u;
-    const z = e.zDe(y) + p.rz(y) * 0.95;
-    const pontos = Array.from({ length: 6 }, (_, i) => V(x + sx * i * 0.006 * u, y - 0.03 * u - i * 0.05 * u, z + i * 0.012 * u));
-    extras.push(fita(pontos, pontos.map((_, i) => (0.085 - i * 0.008) * u), 'pelvis', m.abas, 0.7));
+}
+
+// ---------- o pano: manto, forro, cachecol ----------
+/**
+ * O manto: o pano de trás (COSTAS, anéis só nas costas) e as duas asas (ASAS), lâminas entre a borda de dentro e a de
+ * fora medidas estação por estação. Entre o gancho e o corpo a arte fica vazia, por isso as asas não são uma parede.
+ * As asas recuam para trás conforme descem (o vento as abre), e a ponta do gancho é a parte mais solta.
+ */
+function manto(c: Corpo, e: Eixos, R: Regua, m: M, extras: Obj[]): void {
+  const pesos = pesosDoManto(c, e);
+  const yOmbro = R.y(alturaNaArte(COSTAS.ombro)), yBarra = R.y(alturaNaArte(COSTAS.barra));
+  // 06/11/2026: o manto abre em leque para fora em 240° em volta do corpo (os lados e as costas; só a frente fica livre),
+  // em ondas largas, e a barra se desfaz em brasas (o material). O raio cresce do ombro até a barra como o das asas.
+  const N = 22, COL = 60;
+  const LEQUE = (Math.PI * 4) / 3;
+  const aneis: Anel[] = [];
+  for (let i = 0; i < N; i++) {
+    const t = i / (N - 1), y = mix(yOmbro, yBarra, t) + suave(0.2, 1, t) * 0.32 * c.u;
+    const zy = e.zDe(Math.max(y, e.bacia));
+    const raio = mix(R.m(tam(COSTAS.larguraEmCima)) / 2, R.m(tam(640)), Math.pow(t, 0.6));
+    aneis.push({ c: V(0, y, zy), rx: raio, rz: raio * 0.92 });
+  }
+  const cortes = dentes(COL, 311, 0.09 * c.u);
+  extras.push(superficie({
+    aneis, colunas: COL, arco: [Math.PI / 2 + LEQUE / 4, LEQUE], repete: [2, 1],
+    ruga: (i, _j, a) => 1 + Math.sin(a * 7 + i * 0.35) * 0.12 * suave(2, N - 1, i) + Math.sin(a * 15 - i * 0.2) * 0.04 * suave(6, N - 1, i),
+    descer: (i, j, a) => Math.sin(a * 6 + 1.3) * 0.06 * c.u * suave(N / 2, N - 1, i) + (i >= N - 2 ? cortes[j] ?? 0 : 0),
+    solto: (i) => Math.pow(suave(1, N - 1, i), 1.1) * 1.3,
+    pesos,
+  }, m.costas));
+  // as asas
+  for (const [estacoes, material] of [[ASAS.livre, m.asaLivre], [ASAS.cajado, m.asaCajado]] as const) {
+    const pontos = estacoes.map(([dentro, fora], k) => {
+      const s = k / (estacoes.length - 1);
+      const pi = V(R.m(ladoNaArte(dentro[0])), R.y(alturaNaArte(dentro[1])), 0);
+      const po = V(R.m(ladoNaArte(fora[0])), R.y(alturaNaArte(fora[1])), 0);
+      const zc = e.zDe(Math.max(Math.min(pi.y, e.topo), e.bacia));
+      pi.z = zc - mix(0.02, 0.18, s) * c.u;
+      po.z = zc - mix(0.08, 0.34, s) * c.u;
+      return { i: pi, o: po };
+    });
+    extras.push(lamina({
+      estacoes: pontos, colunas: 14, barriga: 0.1,
+      dobra: (s, t) => V(0, Math.sin(t * Math.PI * 3 + s * 5) * 0.025 * c.u * s, Math.sin(t * Math.PI * 4 + s * 7) * 0.05 * c.u * s),
+      solto: (s, t) => Math.pow(suave(0.05, 1, s), 1.1) * (0.8 + t * 0.6),
+      pesos: (_s, _t, p) => pesos(0, 0, 0, p),
+    }, material));
+  }
+  // as brasas soltas: pedaços do pano que se desprendem da barra no mesmo leque de 240°, para fora e para cima
+  const r = sorteio(1777);
+  for (let i = 0; i < 90; i++) {
+    const t = r();
+    const a = Math.PI / 2 + LEQUE / 4 + r() * LEQUE;
+    const dist = R.m(tam(640)) * (1 + t * 0.35);
+    const p = V(Math.cos(a) * dist, mix(R.y(alturaNaArte(COSTAS.barra)), R.y(alturaNaArte(560)), r()) + t * 0.12 * c.u, e.zDe(e.bacia) + Math.sin(a) * dist);
+    const l = R.m(tam(4 + r() * 9));
+    const acesa = r() < 0.55;
+    extras.push(superficie({
+      aneis: [{ c: p, rx: l, rz: l * 0.3 }, { c: p.clone().add(V(0, -l * (0.8 + r()), 0)), rx: l * 0.5, rz: l * 0.2 }],
+      colunas: 4, solto: () => 1.1 + t * 0.5, pesos: () => ['pelvis', 'spine_02', 0.6],
+    }, acesa ? (r() < 0.7 ? m.faisca : m.brasaAcesa) : m.brasaPreta));
   }
 }
 
-function faixa(c: Corpo, e: Eixos, p: Perfil, m: M, extras: Obj[]): void {
-  const u = c.u;
-  const de = V(-0.15 * u, c.p('spine_03').y + 0.035 * u, 0), ate = V(0.17 * u, e.bacia - 0.02 * u, 0);
-  const pontos: THREE.Vector3[] = [];
-  const N = 9;
+
+/**
+ * A frente do manto: o painel que cruza o corpo na diagonal, do ombro do lado do cajado até a asa do lado livre (o
+ * lado de fora da linha), e a borda vermelha do forro nessa linha (`MANTO.forroDe` → `forroAte`, 12 px de largura).
+ */
+function frente(c: Corpo, e: Eixos, R: Regua, m: M, extras: Obj[]): void {
+  const de = V(R.m(ladoNaArte(MANTO.forroDe[0])), R.y(alturaNaArte(MANTO.forroDe[1])), 0);
+  const ate = V(R.m(ladoNaArte(MANTO.forroAte[0])), R.y(alturaNaArte(MANTO.forroAte[1])), 0);
+  const dir = ate.clone().sub(de).normalize();
+  const fora = V(-dir.y, dir.x, 0);
+  if (fora.x < 0) fora.negate();
+  const N = 10;
+  const linha: THREE.Vector3[] = [];
   for (let i = 0; i < N; i++) {
     const t = i / (N - 1);
-    const x = mix(de.x, ate.x, t), y = mix(de.y, ate.y, t);
-    const razao = Math.min(0.97, Math.abs(x) / p.rx(y));
-    pontos.push(V(x, y, e.zDe(y) + p.rz(y) * Math.sqrt(1 - razao * razao) + 0.016 * u));
+    const p = de.clone().lerp(ate, t);
+    const yy = Math.max(p.y, e.bacia);
+    p.z = e.zDe(yy) + e.rz(yy) * 0.98 + mix(0.03, 0.06, t) * c.u;
+    linha.push(p);
   }
-  extras.push(fita(pontos, pontos.map((_, i) => (0.075 - Math.abs(i / (N - 1) - 0.5) * 0.02) * u), 'spine_02', m.faixa, 0));
+  const largo = R.m(tam(60));
+  extras.push(fita(linha.map((p) => p.clone().addScaledVector(fora, largo / 2).add(V(0, 0, -0.008 * c.u))), linha.map(() => largo), 'spine_03', m.frente, 0.5));
+  extras.push(fita(linha, linha.map(() => R.m(tam(MANTO.larguraDoForro)) * 1.4), 'spine_03', m.forro, 0.5));
 }
 
 /**
- * A cabeça: sem capuz (como na arte). O rosto é só sombra, escondido pela massa de cabelo escuro que cai sobre ele
- * (o calote, as laterais e a franja); as mechas compridas ao vento saem de `cabelo`.
+ * O cachecol (PECAS.cachecol): sobe pelas laterais da cabeça, cobre a boca na frente (o queixo da arte) e desce em
+ * dobras até os ombros; a largura embaixo é a da caixa medida.
  */
-function capuz(c: Corpo, m: M, extras: Obj[]): void {
-  const u = c.u;
-  const g = grupoEm(c, c.p('Head'));
-  const vazio = new THREE.Mesh(new THREE.SphereGeometry(0.1, 18, 12), m.vazio);
-  vazio.scale.set(0.98, 1.15, 1.0);
-  vazio.position.set(0, 0.07, 0.012);
-  g.add(vazio);
-  // o calote de cabelo: cobre o alto, o fundo e as laterais da cabeça, deixando só a faixa da frente para a franja
-  const calote = new THREE.Mesh(new THREE.SphereGeometry(0.13, 26, 16, 0, Math.PI * 2, 0, Math.PI * 0.72), m.cabeloEscuro);
-  calote.scale.set(1.02, 1.12, 1.1);
-  calote.position.set(0, 0.075, -0.012);
-  g.add(calote);
-  // o cabelo caído nos lados do rosto e na nuca
-  for (const sx of [-1, 1]) {
-    const lado = new THREE.Mesh(new THREE.SphereGeometry(0.075, 14, 10), m.cabeloEscuro);
-    lado.scale.set(0.55, 1.25, 0.9);
-    lado.position.set(sx * 0.098, 0.03, 0.0);
-    g.add(lado);
-  }
-  c.prender('Head', g, extras);
-  // a franja: mechas que descem da testa sobre o rosto, balançando de leve
-  const r = sorteio(313);
-  const cab = c.p('Head');
-  for (let i = 0; i < 11; i++) {
-    const x = (i / 10 - 0.5) * 0.17 * u;
-    const topo = V(x, cab.y + 0.15 * u - Math.abs(x) * 0.25, cab.z + (0.105 - Math.abs(x) * 0.5 / u) * u);
-    const comp = (0.12 + r() * 0.07) * u;
-    const pontos = Array.from({ length: 5 }, (_, k) => {
-      const t = k / 4;
-      return topo.clone().add(V(Math.sin(t * 3 + i) * 0.012 * u + x * 0.15 * t, -t * comp, t * 0.025 * u));
-    });
-    extras.push(fita(pontos, pontos.map((_, k) => (0.04 - k * 0.006) * u), 'Head', m.cabeloEscuro, 0.5));
-  }
-}
-
-function xale(c: Corpo, m: M, extras: Obj[]): void {
-  const u = c.u;
-  const pesc = c.p('neck_01');
-  const N = 9;
+function cachecol(c: Corpo, R: Regua, m: M, extras: Obj[]): void {
+  const cx = caixa(PECAS.cachecol);
+  const cab = c.p('Head'), pesc = c.p('neck_01');
+  const yTopo = R.y(alturaNaArte(175)), yBoca = R.y(alturaNaArte(PECAS.rosto[3])), yBaixo = R.y(alturaNaArte(PECAS.cachecol[3]));
+  const N = 12;
   const aneis: Anel[] = [];
+  const largura = tabela([[0, R.m(tam(215)) / 2], [0.35, R.m(tam(235)) / 2], [1, R.m(cx.largura) / 2]]);
   for (let i = 0; i < N; i++) {
     const t = i / (N - 1);
-    aneis.push({ c: V(0, pesc.y + (0.07 - 0.2 * t) * u, pesc.z - 0.006 * u), rx: (0.14 + t * 0.17) * u, rz: (0.125 + t * 0.12) * u });
+    const y = mix(yTopo, yBaixo, Math.pow(t, 0.9));
+    const z = mix(cab.z, pesc.z, suave(0, 0.5, t));
+    aneis.push({ c: V(R.m(cx.lado) * t, y, z), rx: largura(t), rz: largura(t) * mix(1.02, 0.85, t) });
   }
-  const cortes = dentes(44, 77, 0.07 * u);
+  const descerFrente = yTopo - yBoca;
   extras.push(superficie({
-    aneis, colunas: 44, repete: [2, 1],
-    ruga: (i, _j, a) => 1 + Math.sin(a * 7) * 0.07 * suave(0, 0.7, i / (N - 1)),
-    descer: (i, j) => (i >= N - 2 ? cortes[j] ?? 0 : 0),
-    solto: (i) => suave(0.5, 1, i / (N - 1)) * 0.35,
-    pesos: () => ['spine_03', 'neck_01', 0.8],
-  }, m.xale));
+    aneis, colunas: 44,
+    ruga: (i, _j, a) => 1 + (Math.sin(a * 5 - i * 0.6) * 0.07 + Math.sin(a * 11) * 0.025) * suave(1, 6, i),
+    // a abertura do rosto: os primeiros anéis descem na frente até a boca
+    descer: (i, _j, a) => (i <= 2 ? Math.pow(Math.max(0, Math.sin(a)), 2) * descerFrente * (1 - i / 3) : 0),
+    solto: (i) => suave(5, N - 1, i) * 0.45,
+    pesos: (i) => (i <= 3 ? ['Head', 'neck_01', 0.7 - i * 0.18] : ['spine_03', 'neck_01', suave(3, 7, i)]),
+  }, m.cachecol));
 }
 
-function cabelo(c: Corpo, m: M, extras: Obj[]): void {
-  const u = c.u;
+// ---------- a cabeça, o cabelo e as faíscas ----------
+/**
+ * A cabeça (PECAS.cabeloMassa e PECAS.rosto). A massa de cabelo tem a largura medida. O rosto é sombra e fica virado para
+ * o lado livre, como na arte, onde o centro do rosto está 0,07 H para o lado oposto ao cajado.
+ */
+function cabeca(c: Corpo, R: Regua, m: M, extras: Obj[]): void {
+  const massa = caixa(PECAS.cabeloMassa), rosto = caixa(PECAS.rosto);
+  const cab = c.p('Head');
+  const g = grupoEm(c, cab);
+  const raio = R.m(massa.largura) / 2;
+  const yCentro = R.y(massa.altura) - cab.y;
+  const giro = Math.atan2(R.m(rosto.lado - massa.lado), raio);
+  g.rotation.y = giro;
+  const cranio = new THREE.Mesh(new THREE.SphereGeometry(raio, 28, 18), m.sombra);
+  cranio.scale.set(0.92, (R.y(1) - R.y(alturaNaArte(PECAS.cabeloMassa[3]))) / 2 / raio, 1);
+  cranio.position.set(0, yCentro, -0.01 * c.u);
+  g.add(cranio);
+  const sombra = new THREE.Mesh(new THREE.SphereGeometry(raio * 0.78, 20, 12), m.sombra);
+  sombra.scale.set(R.m(rosto.largura) / 2 / (raio * 0.78), 0.95, 0.6);
+  sombra.position.set(0, R.y(rosto.altura) - cab.y, raio * 0.55);
+  g.add(sombra);
+  c.prender('Head', g, extras);
+}
+
+/** Um caminho de mecha: da raiz até a ponta, ondulando, com a ponta caindo (`queda`). */
+function caminho(raiz: THREE.Vector3, ponta: THREE.Vector3, onda: number, fase: number, queda: number): THREE.Vector3[] {
+  return Array.from({ length: 9 }, (_, k) => {
+    const t = k / 8;
+    return raiz.clone().lerp(ponta, t).add(V(0, Math.sin(t * Math.PI * 1.6 + fase) * onda * t - queda * t * t * t, Math.cos(t * Math.PI * 1.3 + fase) * onda * 0.6 * t));
+  });
+}
+
+/**
+ * O cabelo (CABELO). As mechas saem da raiz medida e vão até a faixa das pontas, todas para o lado livre e um pouco para
+ * trás, com a ponta caindo. Os fios finos e enrolados ficam soltos no alto.
+ */
+function cabelo(c: Corpo, R: Regua, m: M, extras: Obj[]): void {
   const r = sorteio(909);
   const cab = c.p('Head');
-  // o volume do cabelo no alto e nos lados da cabeça: mechas curtas sobre o calote, escorrendo para trás e para baixo
-  for (let i = 0; i < 34; i++) {
-    const az = r() * Math.PI * 2, el = 0.15 + r() * 1.0;
-    const raiz = V(Math.sin(az) * Math.cos(el) * 0.125 * u, cab.y + (0.075 + Math.sin(el) * 0.13) * u, cab.z + (Math.cos(az) * Math.cos(el) * 0.125 - 0.012) * u);
-    if (Math.cos(az) > 0.55 && el < 0.7) continue; // a franja cuida da frente do rosto
-    const pontos = Array.from({ length: 5 }, (_, k) => {
-      const t = k / 4;
-      return raiz.clone().add(V(Math.sin(az) * 0.03 * u * t, -t * (0.07 + r() * 0.05) * u, -t * (0.07 + r() * 0.05) * u));
-    });
-    extras.push(fita(pontos, pontos.map((_, k) => (0.055 - k * 0.008) * u), 'Head', m.cabeloEscuro, 0.55));
+  const massa = caixa(PECAS.cabeloMassa);
+  const raio = R.m(massa.largura) / 2;
+  const centro = V(R.m(massa.lado), R.y(massa.altura), cab.z - 0.01 * c.u);
+  // a capa de mechas curtas sobre o crânio, deitando para o lado livre e para trás
+  for (let i = 0; i < 90; i++) {
+    const az = r() * Math.PI * 2, el = 0.15 + r() * 1.35;
+    const n = V(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el));
+    if (n.z > 0.55 && n.y < 0.5) continue; // não cobre o rosto
+    const p = centro.clone().add(n.clone().multiplyScalar(raio * 0.95));
+    const fim = p.clone().add(V(0.09 * c.u + r() * 0.06 * c.u, -0.04 * c.u - r() * 0.05 * c.u, -0.06 * c.u));
+    extras.push(mecha(caminho(p, fim, 0.01 * c.u, r() * 6, 0.02 * c.u), R.m(tam(26)), R.m(tam(7)), 'Head', m.cabelo, 0.25, n));
   }
-  for (let i = 0; i < 20; i++) {
-    const a = Math.PI * (0.62 + r() * 0.76) * (r() < 0.5 ? 1 : -1) + (r() < 0.5 ? 0 : 0);
-    const raio = 0.11 * u;
-    const raiz = V(Math.sin(a) * raio * 0.9, cab.y + (0.1 + r() * 0.1) * u, cab.z - Math.abs(Math.cos(a)) * raio - 0.03 * u);
-    const compr = (0.5 + r() * 0.45) * u;
-    const pontos: THREE.Vector3[] = [];
-    const largos: number[] = [];
-    const N = 8;
-    const fase = r() * 6;
-    for (let k = 0; k < N; k++) {
-      const t = k / (N - 1);
-      pontos.push(raiz.clone().add(V(Math.sin(a) * 0.24 * u * t + Math.sin(t * 6 + fase) * 0.06 * u * t, -t * 0.5 * u * (0.35 + r() * 0.45) + Math.sin(t * 4 + fase) * 0.05 * u, -t * compr)));
-      largos.push((0.042 - t * 0.032 + r() * 0.008) * u);
-    }
-    extras.push(fita(pontos, largos, 'Head', m.cabelo, 2.1));
-  }
-}
-
-function capa(c: Corpo, e: Eixos, m: M, extras: Obj[]): void {
-  const u = c.u;
-  const N = 26, COL = 52;
-  const cortes = dentes(COL, 311, 0.3 * u);
-  const raioX = perfilDe([[e.topo, 0.14 * u], [(e.topo + c.p('spine_03').y) / 2, 0.235 * u], [c.p('spine_03').y, 0.25 * u], [e.bacia, 0.36 * u], [e.barra + 0.4 * u, 0.62 * u], [e.barra, 1.05 * u]]);
-  const raioZ = perfilDe([[e.topo, 0.125 * u], [(e.topo + c.p('spine_03').y) / 2, 0.165 * u], [c.p('spine_03').y, 0.19 * u], [e.bacia, 0.28 * u], [e.barra + 0.4 * u, 0.48 * u], [e.barra, 0.8 * u]]);
-  for (const [escala, semente, solto, descer] of [[0.955, 2, 1.0, 0.82], [1, 1, 1.25, 1]] as const) {
+  // 06/11/2026: a escuridão que enche o vão entre o crânio e as mechas: massas negras que saem da cabeça na direção do
+  // vento (para o lado livre e para trás), da largura do crânio, e afinam até perto da metade das mechas
+  const rx = R.m(ladoNaArte(CABELO.raiz.x));
+  const rumo = V(R.m(ladoNaArte((CABELO.pontas.x0 + CABELO.pontas.x1) / 2)), R.y(alturaNaArte((CABELO.pontas.y0 + CABELO.pontas.y1) / 2)), cab.z - raio * 0.6 - 0.12 * c.u);
+  for (const [escala, ate, sobe] of [[1, 0.62, 0], [0.7, 0.8, 0.25], [0.6, 0.72, -0.3]] as const) {
     const aneis: Anel[] = [];
-    for (let i = 0; i < N; i++) {
-      const y = mix(e.topo - 0.01 * u, e.barra + (descer < 1 ? 0.1 * u : 0), i / (N - 1));
-      aneis.push({ c: V(0, y, e.zDe(y) - 0.02 * u), rx: raioX(y) * escala, rz: raioZ(y) * escala });
+    for (let k = 0; k < 8; k++) {
+      const t = k / 7;
+      const ctr = centro.clone().lerp(rumo, t * ate).add(V(0, sobe * raio * t, -raio * 0.15 * t));
+      const f = Math.pow(1 - t, 1.3) * 0.88 + 0.06;
+      aneis.push({ c: ctr, rx: raio * escala * f, rz: raio * escala * f * 0.85 });
     }
     extras.push(superficie({
-      aneis, colunas: COL, arco: [-Math.PI / 2 - 2.55, 5.1], repete: [2, 1],
-      ruga: (i, _j, a) => 1 + Math.sin(a * 6 + semente) * 0.06 * suave(0.15, 1, i / (N - 1)) + Math.sin(a * 13) * 0.02 * suave(0.5, 1, i / (N - 1)),
-      descer: (i, j) => (i >= N - 3 ? (cortes[j] ?? 0) * (semente === 1 ? 1 : 0.7) : 0),
-      solto: (i) => Math.pow(suave(0.08, 1, i / (N - 1)), 1.05) * solto,
-      pesos: pesosDoManto(c, e),
-    }, semente === 1 ? m.capa : m.forro));
+      aneis, colunas: 18, frente: V(1, 0, 0),
+      ruga: (i, _j, a) => 1 + Math.sin(a * 7 + i) * 0.12 * (i / 7),
+      solto: (i) => Math.pow(i / 7, 1.2) * 0.75,
+      pesos: () => ['Head', 'Head', 1],
+    }, m.escuridao));
+  }
+  // as mechas longas ao vento: da raiz medida até a faixa das pontas (lado livre = +x), com a ponta caindo
+  for (let i = 0; i < 72; i++) {
+    const yRaiz = R.y(alturaNaArte(mix(CABELO.raiz.y0, CABELO.raiz.y1, r())));
+    const raiz = V(rx + (r() - 0.5) * 0.14 * c.u, yRaiz, cab.z - raio * (0.1 + r() * 0.75));
+    const ponta = V(R.m(ladoNaArte(mix(CABELO.pontas.x0, CABELO.pontas.x1, r()))), R.y(alturaNaArte(mix(CABELO.pontas.y0, CABELO.pontas.y1, r()))), raiz.z - (0.08 + r() * 0.12) * c.u);
+    const grossa = r() < 0.5;
+    extras.push(mecha(caminho(raiz, ponta, (0.02 + r() * 0.03) * c.u, r() * 6, (0.03 + r() * 0.05) * c.u),
+      R.m(tam(grossa ? 28 : 16)), R.m(tam(grossa ? 9 : 5)), 'Head', m.cabelo, 0.8 + r() * 0.3, V(0, 1, 0)));
+  }
+  // 06/11/2026: a juba. O cabelo abre no mesmo leque de 240° do manto (os lados e as costas; a frente fica livre), com
+  // metade do alcance dele, caindo nas pontas. Por baixo, uma casca com a cor do cabelo e o mesmo formato fecha os vãos.
+  const LEQUE = (Math.PI * 4) / 3, a0 = Math.PI / 2 + LEQUE / 4;
+  const alcance = R.m(tam(640)) * 0.5;
+  const queda = 0.32 * c.u;
+  {
+    const N = 10;
+    const aneis: Anel[] = [];
+    for (let k = 0; k < N; k++) {
+      const t = k / (N - 1);
+      // a casca da juba, com a cor do cabelo: só a cabeça é o círculo preto. Desce mais depressa do que abre (sem aba no alto)
+      const rr = mix(raio * 0.9, alcance * 0.75, Math.pow(t, 1.4));
+      aneis.push({ c: V(centro.x, centro.y + raio * 0.2 - queda * 1.3 * Math.pow(t, 0.85), centro.z), rx: rr, rz: rr });
+    }
+    extras.push(superficie({
+      aneis, colunas: 40, arco: [a0, LEQUE],
+      ruga: (i, _j, a) => 1 + Math.sin(a * 9 + i * 0.7) * 0.1 * (i / (N - 1)),
+      descer: (i, _j, a) => Math.abs(Math.sin(a * 4.5)) * 0.06 * c.u * (i / (N - 1)),
+      solto: (i) => Math.pow(i / (N - 1), 1.1) * 0.8,
+      pesos: () => ['Head', 'Head', 1],
+    }, m.cabelo));
+  }
+  for (let i = 0; i < 150; i++) {
+    const a = a0 + r() * LEQUE, el = 0.25 + r() * 1.1;
+    const n = V(Math.cos(a) * Math.cos(el), Math.sin(el), Math.sin(a) * Math.cos(el));
+    const raiz = centro.clone().add(n.clone().multiplyScalar(raio * 0.92));
+    const longe = alcance * (0.65 + r() * 0.45);
+    const ponta = V(centro.x + Math.cos(a) * longe, centro.y + raio * 0.3 - queda * (0.5 + r() * 0.7), centro.z + Math.sin(a) * longe);
+    const grossa = r() < 0.55;
+    extras.push(mecha(caminho(raiz, ponta, (0.02 + r() * 0.04) * c.u, r() * 6, (0.04 + r() * 0.08) * c.u),
+      R.m(tam(grossa ? 30 : 17)), R.m(tam(grossa ? 9 : 5)), 'Head', m.cabelo, 0.7 + r() * 0.4, n));
+  }
+  // os fios soltos do alto: finos, em laço
+  for (let i = 0; i < 9; i++) {
+    const x = R.m(ladoNaArte(mix(CABELO.fiosDoAlto.x0, CABELO.fiosDoAlto.x1, r())));
+    const y = R.y(alturaNaArte(mix(CABELO.fiosDoAlto.y0, CABELO.fiosDoAlto.y1, r())));
+    const raiz = V(centro.x + (r() - 0.5) * raio, centro.y + raio * 0.7, centro.z - r() * raio * 0.4);
+    const pts = Array.from({ length: 8 }, (_, k) => {
+      const t = k / 7, a = t * Math.PI * 1.4;
+      return raiz.clone().lerp(V(x, y, raiz.z - 0.03 * c.u), t).add(V(0, Math.sin(a) * 0.035 * c.u, Math.cos(a) * 0.02 * c.u - 0.02 * c.u));
+    });
+    extras.push(mecha(pts, R.m(tam(5)), R.m(tam(3)), 'Head', m.cabelo, 0.6, V(0, 1, 0)));
+  }
+  // as faíscas: nas duas nuvens medidas
+  for (const [x0, y0, x1, y1] of FAISCAS) {
+    for (let i = 0; i < 9; i++) {
+      const p = V(R.m(ladoNaArte(mix(x0, x1, r()))), R.y(alturaNaArte(mix(y0, y1, r()))), cab.z - (r() * 0.25) * c.u);
+      const l = R.m(tam(5 + r() * 6));
+      extras.push(superficie({
+        aneis: [{ c: p, rx: l, rz: l * 0.25 }, { c: p.clone().add(V(0, -l, 0)), rx: l * 0.7, rz: l * 0.2 }],
+        colunas: 4, solto: () => 0.9 + r() * 0.3, pesos: () => ['Head', 'Head', 1],
+      }, m.faisca));
+    }
   }
 }
 
 /** A veste inteira da skin; o palco esconde o corpo do rig (`esconder`) e põe o cajado na mão direita. */
 export function vesteDaSombraRubra(ossos: Ossos): PecaSombria {
   const c = new Corpo(ossos);
-  const m = materiais();
   const e = eixosDoCorpo(c);
-  const p = perfilDoTronco(c, e);
+  const R = regua(c, e);
+  const m = materiais();
   const extras: Obj[] = [];
-  tunica(c, e, p, m, extras);
-  pernas(c, m, extras);
-  bracos(c, m, extras);
-  cinto(c, e, p, m, extras);
-  faixa(c, e, p, m, extras);
-  xale(c, m, extras);
-  capa(c, e, m, extras);
-  capuz(c, m, extras);
-  cabelo(c, m, extras);
+  tronco(c, e, m, extras);
+  pernas(c, R, m, extras);
+  bracos(c, R, m, extras);
+  cinto(c, e, R, m, extras);
+  manto(c, e, R, m, extras);
+  frente(c, e, R, m, extras);
+  cachecol(c, R, m, extras);
+  cabeca(c, R, m, extras);
+  cabelo(c, R, m, extras);
   return { extras, esconder: '.' };
 }
