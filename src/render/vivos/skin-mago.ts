@@ -245,8 +245,9 @@ function texturaDoCabelo(): THREE.CanvasTexture {
 }
 
 function materiais() {
+  // 06/11/2026: o lado de fora do manto 20% mais escuro (a cor multiplica a textura); o de dentro é o forro preto (`forrado`)
   const emBrasa = (map: THREE.Texture, b: ReturnType<typeof brasas>) => ventoso(new THREE.MeshStandardMaterial({
-    map, roughness: 0.9, side: DUPLO, alphaMap: b.recorte, alphaTest: 0.5, emissive: 0xffffff, emissiveMap: b.brilho, emissiveIntensity: 1.1,
+    map, color: new THREE.Color(0.8, 0.8, 0.8), roughness: 0.9, side: DUPLO, alphaMap: b.recorte, alphaTest: 0.5, emissive: 0xffffff, emissiveMap: b.brilho, emissiveIntensity: 1.1,
   }));
   const placa = (t: ReturnType<typeof gravura>, metal = 0.5) =>
     new THREE.MeshStandardMaterial({ map: t.map, emissiveMap: t.brilho, emissive: 0xffffff, emissiveIntensity: 0.35, metalness: metal, roughness: 0.55, side: DUPLO });
@@ -391,6 +392,21 @@ function cinto(c: Corpo, e: Eixos, R: Regua, m: M, extras: Obj[]): void {
 }
 
 // ---------- o pano: manto, forro, cachecol ----------
+/** O quanto o manto encolhe em relação ao corpo (06/11/2026: 15% menor, no comprimento e no raio do leque). */
+const MANTO_MENOR = 0.85;
+
+/**
+ * O pano forrado (06/11/2026): por fora o material da malha (só a face de fora) e por dentro todo preto (a face de
+ * dentro), com os mesmos furos das brasas. `dentro` diz qual face da malha fica virada para o corpo.
+ */
+function forrado(malha: THREE.Mesh, extras: Obj[], dentro: THREE.Side = THREE.BackSide): void {
+  const fora = malha.material as THREE.MeshStandardMaterial;
+  fora.side = dentro === THREE.BackSide ? THREE.FrontSide : THREE.BackSide;
+  const preto = ventoso(new THREE.MeshBasicMaterial({ color: 0x000000, side: dentro, alphaMap: fora.alphaMap, alphaTest: 0.5 }));
+  const verso = new THREE.Mesh(malha.geometry.clone(), preto);
+  Object.assign(verso.userData, malha.userData);
+  extras.push(malha, verso);
+}
 /**
  * O manto: o pano de trás (COSTAS, anéis só nas costas) e as duas asas (ASAS), lâminas entre a borda de dentro e a de
  * fora medidas estação por estação. Entre o gancho e o corpo a arte fica vazia, por isso as asas não são uma parede.
@@ -398,51 +414,53 @@ function cinto(c: Corpo, e: Eixos, R: Regua, m: M, extras: Obj[]): void {
  */
 function manto(c: Corpo, e: Eixos, R: Regua, m: M, extras: Obj[]): void {
   const pesos = pesosDoManto(c, e);
-  const yOmbro = R.y(alturaNaArte(COSTAS.ombro)), yBarra = R.y(alturaNaArte(COSTAS.barra));
+  const yOmbro = R.y(alturaNaArte(COSTAS.ombro));
+  const encolher = (y: number) => yOmbro + (y - yOmbro) * MANTO_MENOR;
+  const yBarra = encolher(R.y(alturaNaArte(COSTAS.barra)));
   // 06/11/2026: o manto abre em leque para fora em 240° em volta do corpo (os lados e as costas; só a frente fica livre),
   // em ondas largas, e a barra se desfaz em brasas (o material). O raio cresce do ombro até a barra como o das asas.
   const N = 22, COL = 60;
   const LEQUE = (Math.PI * 4) / 3;
   const aneis: Anel[] = [];
   for (let i = 0; i < N; i++) {
-    const t = i / (N - 1), y = mix(yOmbro, yBarra, t) + suave(0.2, 1, t) * 0.32 * c.u;
+    const t = i / (N - 1), y = mix(yOmbro, yBarra, t) + suave(0.2, 1, t) * 0.32 * c.u * MANTO_MENOR;
     const zy = e.zDe(Math.max(y, e.bacia));
-    const raio = mix(R.m(tam(COSTAS.larguraEmCima)) / 2, R.m(tam(640)), Math.pow(t, 0.6));
+    const raio = mix(R.m(tam(COSTAS.larguraEmCima)) / 2, R.m(tam(640)) * MANTO_MENOR, Math.pow(t, 0.6));
     aneis.push({ c: V(0, y, zy), rx: raio, rz: raio * 0.92 });
   }
   const cortes = dentes(COL, 311, 0.09 * c.u);
-  extras.push(superficie({
+  forrado(superficie({
     aneis, colunas: COL, arco: [Math.PI / 2 + LEQUE / 4, LEQUE], repete: [2, 1],
     ruga: (i, _j, a) => 1 + Math.sin(a * 7 + i * 0.35) * 0.12 * suave(2, N - 1, i) + Math.sin(a * 15 - i * 0.2) * 0.04 * suave(6, N - 1, i),
     descer: (i, j, a) => Math.sin(a * 6 + 1.3) * 0.06 * c.u * suave(N / 2, N - 1, i) + (i >= N - 2 ? cortes[j] ?? 0 : 0),
     solto: (i) => Math.pow(suave(1, N - 1, i), 1.1) * 1.3,
     pesos,
-  }, m.costas));
+  }, m.costas), extras, THREE.FrontSide);
   // as asas
   for (const [estacoes, material] of [[ASAS.livre, m.asaLivre], [ASAS.cajado, m.asaCajado]] as const) {
     const pontos = estacoes.map(([dentro, fora], k) => {
       const s = k / (estacoes.length - 1);
-      const pi = V(R.m(ladoNaArte(dentro[0])), R.y(alturaNaArte(dentro[1])), 0);
-      const po = V(R.m(ladoNaArte(fora[0])), R.y(alturaNaArte(fora[1])), 0);
+      const pi = V(R.m(ladoNaArte(dentro[0])) * MANTO_MENOR, encolher(R.y(alturaNaArte(dentro[1]))), 0);
+      const po = V(R.m(ladoNaArte(fora[0])) * MANTO_MENOR, encolher(R.y(alturaNaArte(fora[1]))), 0);
       const zc = e.zDe(Math.max(Math.min(pi.y, e.topo), e.bacia));
-      pi.z = zc - mix(0.02, 0.18, s) * c.u;
-      po.z = zc - mix(0.08, 0.34, s) * c.u;
+      pi.z = zc - mix(0.02, 0.18, s) * c.u * MANTO_MENOR;
+      po.z = zc - mix(0.08, 0.34, s) * c.u * MANTO_MENOR;
       return { i: pi, o: po };
     });
-    extras.push(lamina({
+    forrado(lamina({
       estacoes: pontos, colunas: 14, barriga: 0.1,
       dobra: (s, t) => V(0, Math.sin(t * Math.PI * 3 + s * 5) * 0.025 * c.u * s, Math.sin(t * Math.PI * 4 + s * 7) * 0.05 * c.u * s),
       solto: (s, t) => Math.pow(suave(0.05, 1, s), 1.1) * (0.8 + t * 0.6),
       pesos: (_s, _t, p) => pesos(0, 0, 0, p),
-    }, material));
+    }, material), extras);
   }
   // as brasas soltas: pedaços do pano que se desprendem da barra no mesmo leque de 240°, para fora e para cima
   const r = sorteio(1777);
   for (let i = 0; i < 90; i++) {
     const t = r();
     const a = Math.PI / 2 + LEQUE / 4 + r() * LEQUE;
-    const dist = R.m(tam(640)) * (1 + t * 0.35);
-    const p = V(Math.cos(a) * dist, mix(R.y(alturaNaArte(COSTAS.barra)), R.y(alturaNaArte(560)), r()) + t * 0.12 * c.u, e.zDe(e.bacia) + Math.sin(a) * dist);
+    const dist = R.m(tam(640)) * MANTO_MENOR * (1 + t * 0.35);
+    const p = V(Math.cos(a) * dist, encolher(mix(R.y(alturaNaArte(COSTAS.barra)), R.y(alturaNaArte(560)), r())) + t * 0.12 * c.u, e.zDe(e.bacia) + Math.sin(a) * dist);
     const l = R.m(tam(4 + r() * 9));
     const acesa = r() < 0.55;
     extras.push(superficie({

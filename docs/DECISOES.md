@@ -3870,5 +3870,10 @@ lançamento: `MAGO-SOMBRA-RUBRA-4KR7`. Os trechos em comum com o Ceifador (perfi
 - **Manto em leque e em brasa:** o pano das costas abre para fora em leque de 240° em volta do corpo (os lados e as costas; só a frente fica livre). As barras do manto e das asas se desfazem em brasas: furos que aumentam para baixo, bordas em vermelho aceso e pedaços soltos no mesmo arco.
 - **Cabelo:** a cabeça é uma esfera toda preta, e uma massa de escuridão sai dela na direção das mechas, preenchendo o vão até o cabelo. A juba abre no mesmo leque de 240° do manto, com metade do alcance dele, sobre uma casca com a cor do cabelo que fecha os vãos entre as mechas (preta, ela se juntava à cabeça e tirava o círculo).
 - **Baixa gravidade:** o cabelo, a escuridão dele e as faíscas flutuam como em baixa gravidade, mesmo parados. O shader faz isso nos materiais marcados com `flutuante` (`skin-pano.ts`): deriva lenta nos três eixos, uma onda que vai da raiz à ponta com atraso e um empuxo para cima. O vento do andar continua por cima.
+- **Mago adolescente que flutua:**
+  - **Corpo:** a skin é 20% mais baixa e 15% mais magra (`altura` e `largura` em `SKINS_VIVAS`).
+  - **Flutuação:** o corpo anda no ar, com a cabeça na altura de antes (`elevacao`), e sobe e desce suave, parado e andando.
+  - **Passo divino:** o ciclo do andar é três vezes mais longo (`passada`), então cada passo cobre o triplo do chão.
+  - **Manto:** 15% menor em relação ao corpo, por dentro todo preto (o forro) e por fora 20% mais escuro.
 
 As superfícies das skins (`superficie`, `mecha` em `skin-pano.ts`) passam por uma densidade global (`definirDensidadeDaSkin`, padrão 3) que reamostra os anéis. Assim, os polígonos podem ser reduzidos depois sem redesenhar as peças.
