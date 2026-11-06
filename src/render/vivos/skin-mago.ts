@@ -455,7 +455,7 @@ function manto(c: Corpo, e: Eixos, R: Regua, m: M, extras: Obj[]): void {
 
 /**
  * A frente do manto: o painel que cruza o corpo na diagonal, do ombro do lado do cajado até a asa do lado livre (o
- * lado de fora da linha), e a borda vermelha do forro nessa linha (`MANTO.forroDe` → `forroAte`, 12 px de largura).
+ * lado de fora da linha), e a borda vermelha do forro nessa linha (`MANTO.forroDe` até `forroAte`, 12 px de largura).
  */
 function frente(c: Corpo, e: Eixos, R: Regua, m: M, extras: Obj[]): void {
   const de = V(R.m(ladoNaArte(MANTO.forroDe[0])), R.y(alturaNaArte(MANTO.forroDe[1])), 0);
