@@ -27,8 +27,11 @@ function ramo(pontos: THREE.Vector3[], raio: number, ponta: number, m: THREE.Mat
   return new THREE.Mesh(g, m);
 }
 
-/** O comprimento do cajado em células do Kit: 1,05 vez a altura do personagem (a arte), calibrado no retrato. */
-const COMPRIMENTO = 1.46;
+/**
+ * O comprimento do cajado em células do Kit: 1,05 vez a altura do corpo (a arte). O corpo da skin mede 0,896 no mundo
+ * (`SKINS_VIVAS`), e a arma do grau 4 cresce 1,14 vez (06/11/2026: antes 1,46, que dava 1,42 vez o corpo).
+ */
+const COMPRIMENTO = (1.05 * 0.896) / 1.14;
 
 export function cajadoRetorcido(k: Kit): void {
   const r = sorteio(2024);

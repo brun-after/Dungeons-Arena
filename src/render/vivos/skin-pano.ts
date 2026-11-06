@@ -51,6 +51,39 @@ const CODIGO_DA_FLUTUACAO = /* glsl */ `
     transformed += boia * uFlutuar * sf;
   }`;
 
+/**
+ * Os pedaços que se desprendem (06/11/2026, o traje do Ceifador que se desfaz em trevas). Antes da pele, cada pedaço
+ * sai do lugar dele no pano (`centro`), segue o rumo (`deriva.xyz`, desacelerando) e cresce enquanto some, num ciclo de
+ * ~3 s com a fase própria (`deriva.w`): nasce colado na roupa, se afasta como fumaça e dá lugar ao próximo.
+ */
+const CODIGO_DO_DESPRENDER = /* glsl */ `
+  float ciclo = fract(uTempo * 0.33 + deriva.w);
+  float vai = 1.0 - (1.0 - ciclo) * (1.0 - ciclo);
+  transformed = centro + (transformed - centro) * (0.3 + 1.1 * ciclo) + deriva.xyz * vai + vec3(0.0, 0.05 * ciclo * ciclo, 0.0);
+  vDesfaz = smoothstep(0.0, 0.1, ciclo) * (1.0 - smoothstep(0.5, 1.0, ciclo));`;
+
+/** Marca o material dos pedaços que se desprendem do pano (os atributos `centro` e `deriva`, de skin-trevas.ts). */
+export function desprendido<T extends THREE.Material>(m: T): T {
+  m.userData = { ...m.userData, desprender: true };
+  return m;
+}
+
+/** Os atributos que a fusão das peças (palco-vivo.ts `fundir`) preserva. */
+export const ATRIBUTOS_DO_PANO: ReadonlySet<string> = new Set(['position', 'normal', 'uv', 'centro', 'deriva']);
+/** Leva a geometria ao espaço do rig: a posição e o `centro` como pontos, o rumo de `deriva` como vetor. */
+export function levarAoRig(g: THREE.BufferGeometry, m: THREE.Matrix4): void {
+  g.applyMatrix4(m);
+  const centro = g.getAttribute('centro');
+  if (centro instanceof THREE.BufferAttribute) centro.applyMatrix4(m);
+  const deriva = g.getAttribute('deriva');
+  if (!(deriva instanceof THREE.BufferAttribute)) return;
+  const giro = new THREE.Matrix3().setFromMatrix4(m), v = V();
+  for (let k = 0; k < deriva.count; k++) {
+    v.set(deriva.getX(k), deriva.getY(k), deriva.getZ(k)).applyMatrix3(giro);
+    deriva.setXYZ(k, v.x, v.y, v.z);
+  }
+}
+
 /** Marca o material para flutuar como em baixa gravidade, com a amplitude `amplitude` (unidades do rig). */
 export function flutuante<T extends THREE.Material>(m: T, amplitude: number): T {
   m.userData = { ...m.userData, flutuar: amplitude };
@@ -61,6 +94,7 @@ export function flutuante<T extends THREE.Material>(m: T, amplitude: number): T 
 export function aplicarVento<T extends THREE.Material>(m: T, u: UniformesDeVento): T {
   const c = m.clone();
   const flutuar = typeof m.userData.flutuar === 'number' ? m.userData.flutuar : 0;
+  const solta = m.userData.desprender === true;
   c.onBeforeCompile = (sombra) => {
     sombra.uniforms.uVento = u.uVento;
     sombra.uniforms.uTempo = u.uTempo;
@@ -68,8 +102,15 @@ export function aplicarVento<T extends THREE.Material>(m: T, u: UniformesDeVento
     sombra.vertexShader = sombra.vertexShader
       .replace('#include <common>', '#include <common>\nattribute float solto;\nuniform vec4 uVento;\nuniform float uTempo;\nuniform float uFlutuar;')
       .replace('#include <skinning_vertex>', `#include <skinning_vertex>\n${flutuar > 0 ? CODIGO_DA_FLUTUACAO : ''}\n${CODIGO_DO_VENTO}`);
+    if (!solta) return;
+    sombra.vertexShader = sombra.vertexShader
+      .replace('#include <common>', '#include <common>\nattribute vec3 centro;\nattribute vec4 deriva;\nvarying float vDesfaz;')
+      .replace('#include <begin_vertex>', `#include <begin_vertex>\n${CODIGO_DO_DESPRENDER}`);
+    sombra.fragmentShader = sombra.fragmentShader
+      .replace('#include <common>', '#include <common>\nvarying float vDesfaz;')
+      .replace('#include <alphatest_fragment>', 'diffuseColor.a *= vDesfaz;\n#include <alphatest_fragment>');
   };
-  c.customProgramCacheKey = () => (flutuar > 0 ? 'vento-skin-flutua' : 'vento-skin-1');
+  c.customProgramCacheKey = () => (solta ? 'vento-skin-desprende' : flutuar > 0 ? 'vento-skin-flutua' : 'vento-skin-1');
   return c;
 }
 

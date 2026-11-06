@@ -18,7 +18,7 @@
 import * as THREE from 'three';
 import { altura as alturaNaArte, ASAS, caixa, CABELO, COSTAS, FAISCAS, INCLINACAO_DO_CINTO, lado as ladoNaArte, MANTO, PECAS, tam } from './skin-mago-medidas';
 import type { Ossos, PecaSombria } from './sombrio-base';
-import { aoLongo, Corpo, grupoEm, sorteio, V } from './sombrio-base';
+import { aoLongo, Corpo, sorteio, V } from './sombrio-base';
 import { dentes, eixosDoCorpo, mao, mix, pesosDoManto, suave, type Eixos } from './skin-ceifador';
 import { fita, flutuante, lamina, mecha, superficie, ventoso, type Anel } from './skin-pano';
 
@@ -531,7 +531,9 @@ function cachecol(c: Corpo, R: Regua, m: M, extras: Obj[]): void {
 function cabeca(c: Corpo, R: Regua, m: M, extras: Obj[]): void {
   const massa = caixa(PECAS.cabeloMassa), rosto = caixa(PECAS.rosto);
   const cab = c.p('Head');
-  const g = grupoEm(c, cab);
+  // 06/11/2026: o grupo em metros do rig (o grupoEm reduzia a cabeça pela escala u)
+  const g = new THREE.Group();
+  g.position.copy(cab);
   const raio = R.m(massa.largura) / 2;
   const yCentro = R.y(massa.altura) - cab.y;
   const giro = Math.atan2(R.m(rosto.lado - massa.lado), raio);

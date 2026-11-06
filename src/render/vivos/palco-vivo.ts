@@ -22,8 +22,8 @@ import type { AparenciaEquipada } from '../../entities/entidade';
 import { definirDetalhe, KITS_SOMBRIOS, type PecaSombria } from './armaduras-sombrias';
 import { CHEFES } from './chefes-vivos';
 import { ARMAS_3D, ESCALA_DO_GRAU, Kit } from './armas3d';
-import { aplicarVento, avancarVento, novoEstadoDeVento, novosUniformes, ventoParado, type EstadoDoVento, type UniformesDeVento } from './skin-pano';
-import { vesteDoCeifador } from './skin-ceifador';
+import { aplicarVento, ATRIBUTOS_DO_PANO, levarAoRig, avancarVento, novoEstadoDeVento, novosUniformes, ventoParado, type EstadoDoVento, type UniformesDeVento } from './skin-pano';
+import { vesteDoCeifador } from './skin-ceifador'; import { ALTURA_DO_CEIFADOR } from './skin-ceifador-medidas';
 import { vesteDaSombraRubra } from './skin-mago';
 import { skinPorId } from '../../entities/skins';
 
@@ -76,7 +76,7 @@ const CLASSES: Record<string, Classe> = {
  * "classe" do palco com a chave `skin:<id>`: o rig da classe dela, a veste fixa e a arma própria, sem o equipamento.
  */
 const SKINS_VIVAS: Readonly<Record<string, Pick<Classe, 'altura' | 'veste' | 'arma' | 'elevacao' | 'passada'> & { classe: string; largura?: number }>> = {
-  'necromante-ceifador': { classe: 'necromante', altura: 1.2, veste: vesteDoCeifador, arma: { modelo: 'gadanha_ceifador', grau: 4 } },
+  'necromante-ceifador': { classe: 'necromante', altura: ALTURA_DO_CEIFADOR, largura: 0.9, veste: vesteDoCeifador, arma: { modelo: 'gadanha_ceifador', grau: 4 } }, // alto e esguio (06/11/2026)
   // o mago adolescente: 20% mais baixo e 15% mais magro, flutuando com a cabeça na altura de antes; o passo divino cobre 3x o chão
   'mago-sombra-rubra': { classe: 'mago', altura: 1.12 * 0.8, largura: 0.85, elevacao: 1.12 * 0.2, passada: 3, veste: vesteDaSombraRubra, arma: { modelo: 'cajado_retorcido', grau: 4 } },
 };
@@ -408,7 +408,7 @@ export class PalcoVivo {
       const indice = Math.max(0, nomes.indexOf(osso?.name ?? ''));
       for (const m of malhasDe(extra)) {
         const g = m.geometry.index ? m.geometry.toNonIndexed() : m.geometry.clone();
-        g.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inverso, m.matrixWorld));
+        levarAoRig(g, new THREE.Matrix4().multiplyMatrices(inverso, m.matrixWorld)); // com os pedaços que se desprendem
         // 06/11/2026 (skins): o pano leva dois ossos por vértice (`sa`, `sb`, `sw`, com a tabela de nomes na malha) e o
         // `solto` que o vento usa; as peças rígidas seguem com um osso só e solto 0.
         const tabela = m.userData.tabela as string[] | undefined;
@@ -423,7 +423,7 @@ export class PalcoVivo {
         const indA = doPano ? lerAttr('sa').map(noRig) : [];
         const indB = doPano ? lerAttr('sb').map(noRig) : [];
         const pesoA = doPano ? lerAttr('sw') : [];
-        for (const n of Object.keys(g.attributes)) if (n !== 'position' && n !== 'normal' && n !== 'uv') g.deleteAttribute(n);
+        for (const n of Object.keys(g.attributes)) if (!ATRIBUTOS_DO_PANO.has(n)) g.deleteAttribute(n);
         const qtd = g.getAttribute('position').count;
         if (!g.hasAttribute('uv')) g.setAttribute('uv', new THREE.Float32BufferAttribute(new Float32Array(qtd * 2), 2));
         g.setAttribute('solto', new THREE.Float32BufferAttribute(solto ?? new Float32Array(qtd), 1));
@@ -551,9 +551,9 @@ export class PalcoVivo {
       if (EM_PE.has(arma.modelo)) {
         // Inclinada um pouco para a frente e virada para a câmera (o arco de perfil viraria um risco a 48 px).
         // 05/11/2026: o arco meio giro em pé, a madeira para o alvo e a corda para quem atira (estava ao contrário).
-        // 06/11/2026: o cajado da Sombra Rubra vai na diagonal, à frente do manto (a arte).
+        // 06/11/2026: o cajado da Sombra Rubra vai na diagonal, à frente do manto, e a gadanha tomba para fora (a arte).
         const giro = new THREE.Quaternion().setFromEuler(arma.modelo === 'cajado_retorcido' ? new THREE.Euler(0.42, 0.4, 0.3)
-          : new THREE.Euler(0.18, ARCOS.test(arma.modelo) ? 0.35 + Math.PI : 0.4, 0));
+          : arma.modelo === 'gadanha_ceifador' ? new THREE.Euler(0.12, 0.4, 0.16) : new THREE.Euler(0.18, ARCOS.test(arma.modelo) ? 0.35 + Math.PI : 0.4, 0));
         a.emPe.push({ g, giro });
       }
     }
@@ -685,7 +685,7 @@ export class PalcoVivo {
       ancoraX: 0.5,
       ancoraY: (QA - BAIXO) / QA,
       escala: 1 / this.resolucao,
-      topo: (classe?.altura ?? 1.14) * CELULA_PX,
+      topo: ((classe?.altura ?? 1.14) + (classe?.elevacao ?? 0) * 1.15) * CELULA_PX, // quem flutua tem o topo mais alto (06/11/2026)
     };
   }
 
