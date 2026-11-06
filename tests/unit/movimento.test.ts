@@ -59,8 +59,9 @@ describe('velocidade (§2.3)', () => {
     expect(velocidade(10, 400, true)).toBeCloseTo(3.25); // dominado ×1.3
   });
 
-  it('em 1 s para leste, a destreza 10 anda 2,5 células e a célula acompanha', () => {
+  it('em 1 s para leste, no pico, a destreza 10 anda 2,5 células e a célula acompanha', () => {
     const c = cenario(SALA_ABERTA, 2, 5);
+    c.jogador().impulso = 1;
     c.tick({ t: 'mover', dir: 'E' });
     c.ticks(59);
     expect(c.jogador().px).toBeCloseTo(4.5, 5);
@@ -72,6 +73,7 @@ describe('velocidade (§2.3)', () => {
 describe('movimento livre (marco 26)', () => {
   it('a diagonal anda em linha reta, na mesma velocidade', () => {
     const c = cenario(SALA_ABERTA, 2, 2);
+    c.jogador().impulso = 1;
     c.tick({ t: 'mover', dir: 'SE' });
     c.ticks(59);
     const j = c.jogador();
@@ -181,7 +183,7 @@ describe('irPara em trechos retos', () => {
   it('clique na parede vai à célula livre mais perto dele, sem caminhoFalhou', () => {
     const c = cenario();
     c.tick({ t: 'irPara', x: 0, y: 0 });
-    c.ticks(120);
+    c.ticks(150);
     expect(c.jogador()).toMatchObject({ x: 1, y: 1 });
     expect(c.eventos.some((e) => e.t === 'caminhoFalhou')).toBe(false);
   });

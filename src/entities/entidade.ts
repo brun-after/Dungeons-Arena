@@ -161,6 +161,12 @@ export interface EstadoIa {
    */
   armadilhasVistas?: EntidadeId[];
   curando?: boolean;
+  /**
+   * 04/11/2026 (D-132): o fôlego de caça. Desde quando persegue fora do alcance (-1: não está) e quantos níveis está
+   * acima do alvo (para o bônus por nível).
+   */
+  cacaDesdeTick?: number;
+  cacaNiveis?: number;
 }
 
 /** Quem causou dano e quando, para dividir XP entre participantes (§2.7, morte). */
@@ -291,6 +297,14 @@ export interface Entidade {
   waypoints: Celula[];
   caminho: Celula[];
   relogioAndar: number;
+  /**
+   * 04/11/2026 (D-132): o impulso da aceleração, de 0 (acabou de sair) a 1 (no pico), em milésimos. Ausente vale 0.
+   * Nunca apagado: zera com 0 (o patch leva o valor; a chave apagada não iria).
+   */
+  impulso?: number;
+  /** 04/11/2026 (D-132): a lentidão de quem atacou de longe (%) e até quando vale. */
+  recuoPct?: number;
+  recuoAteTick?: number;
 
   atributos: Atributos;
   classe: ClasseCombate;

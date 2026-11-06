@@ -26,6 +26,7 @@ import { lentidaoPct, movimentoBloqueado } from '../combat/efeitos';
 import type { Mobilidade } from '../combat/habilidades';
 import { sincronizarPosicao, type Entidade } from '../entities/entidade';
 import { regenerarPorPasso } from '../progression/recursos';
+import { msDe, ticksDe } from '../core/tempo';
 import { bloqueia, celulaLivrePara, ordemRotativa } from './colisao';
 import { corpoCabe, suavizarCaminho, type Barreira } from './corpo';
 import { passavel, tipoEm } from './fase';
@@ -210,18 +211,102 @@ function velocidadeAgora(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao
   // Marco 22 (D-089): o Mago encarnado em raio anda mais rápido.
   const classe = (classeDe(e) === 'guerreiro' && !inv ? 1 + (r.movimentoMult - 1) * progressoReforcosGuerreiro(ctx, e.nivel) : 1) * velocidadeEncarnacao(ctx, e);
   const bonus = e.efeitos.reduce((pct, f) => f.ateTick > estado.tick && REGISTRO_EFEITOS[f.tipo].velocidade ? Math.max(pct, f.pct) : pct, 0);
-  return vel * (1 - lentidaoPct(e, estado.tick) / 100) * conjurando * classe * (1 + bonus / 100);
+  // 04/11/2026 (D-132): a aceleração dos personagens, o recuo de quem atacou de longe e o fôlego de caça.
+  const arranque = fatorDoImpulso(e, ctx);
+  return vel * (1 - lentidaoPct(e, estado.tick) / 100) * conjurando * classe * (1 + bonus / 100)
+    * arranque * (1 - recuoAgoraPct(e, estado.tick) / 100) * (1 + bonusDeCacaPct(e, estado, ctx) / 100);
+}
+
+/**
+ * 04/11/2026 (D-132): a aceleração e o recuo valem para os personagens (quem tem ficha). Monstros e invocações
+ * ficam de fora (a classe vem pela ficha ou, na rede, pelo `classeId`): o monstro para a cada golpe, e recomeçar devagar facilitaria fugir dele.
+ */
+export const temArranque = (e: Entidade): boolean => classeDe(e) !== '' && !e.invocacao;
+
+/** 04/11/2026 (D-132): a fração da velocidade de pico que o impulso libera (de `inicialPct` a 100%). */
+export function fatorDoImpulso(e: Entidade, ctx: ContextoSimulacao): number {
+  if (!temArranque(e)) return 1;
+  const inicial = ctx.balance.movimento.aceleracao.inicialPct / 100;
+  return inicial + (1 - inicial) * (e.impulso ?? 0);
+}
+
+/** 04/11/2026 (D-132): a lentidão de quem atacou de longe, enquanto vale. */
+export function recuoAgoraPct(e: Entidade, tick: number): number {
+  return (e.recuoAteTick ?? 0) > tick ? (e.recuoPct ?? 0) : 0;
+}
+
+/** 04/11/2026 (D-132): a lentidão do ataque de longe pela distância (em células, Chebyshev) até o alvo. */
+export function recuoDaDistanciaPct(ctx: ContextoSimulacao, distancia: number): number {
+  const r = ctx.balance.movimento.recuoDistancia;
+  return Math.min(r.maxPct, Math.max(0, distancia - r.aPartirDeCelulas) * r.porCelulaPct);
+}
+
+/** 04/11/2026 (D-132): quem lança um ataque de longe fica lento por um instante (o mais forte dos que valem). */
+export function aplicarRecuoDeDistancia(e: Entidade, mira: Celula, tick: number, ctx: ContextoSimulacao): void {
+  if (!temArranque(e)) return;
+  const origem = celulaOcupada(e);
+  const pct = recuoDaDistanciaPct(ctx, Math.max(Math.abs(mira.x - origem.x), Math.abs(mira.y - origem.y)));
+  if (pct <= 0) return;
+  const atual = recuoAgoraPct(e, tick);
+  e.recuoPct = Math.max(pct, atual);
+  e.recuoAteTick = Math.max(tick + ticksDe(ctx.balance.movimento.recuoDistancia.duracaoMs), atual > 0 ? (e.recuoAteTick ?? 0) : 0);
+}
+
+/** 04/11/2026 (D-132): o bônus de velocidade do perseguidor que não alcança o alvo (o fôlego de caça), em %. */
+export function bonusDeCacaPct(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao): number {
+  const ia = e.ia;
+  if (!ia || ia.modo !== 'perseguindo' || ia.cacaDesdeTick === undefined || ia.cacaDesdeTick < 0) return 0;
+  const c = ctx.balance.ia.caca;
+  const ms = msDe(estado.tick - ia.cacaDesdeTick);
+  if (ms < c.carenciaMs) return 0;
+  const folego = Math.min(1, (ms - c.carenciaMs) / c.rampaMs) * c.maxPct;
+  // O chefe já é forte por si: recebe bem menos do fôlego.
+  return (folego + Math.min(c.nivelMaxPct, (ia.cacaNiveis ?? 0) * c.porNivelPct)) * (e.arquetipo === 'boss' ? c.chefeMult : 1);
+}
+
+/** 04/11/2026 (D-132): o quanto a lentidão em curso freia (0 a 1): efeitos, conjuração lenta e o recuo. */
+function freioAgora(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao): number {
+  const conjurando = mobilidadeDaAcao(e, ctx) === 'lenta' ? 1 - ctx.balance.habilidades.velocidadeConjurandoLenta : 0;
+  return Math.max(lentidaoPct(e, estado.tick) / 100, recuoAgoraPct(e, estado.tick) / 100, conjurando);
+}
+
+/**
+ * 04/11/2026 (D-132): sobe o impulso de quem andou sem freio; com freio, o consome; parado, zera. Em milésimos, para o
+ * patch ficar curto e o cliente (predição) e o servidor chegarem ao mesmo valor.
+ */
+function ajustarImpulso(e: Entidade, andou: boolean, freio: number, dtMs: number, ctx: ContextoSimulacao): void {
+  if (!andou) {
+    if (e.impulso) e.impulso = 0;
+    return;
+  }
+  const a = ctx.balance.movimento.aceleracao;
+  const atual = e.impulso ?? 0;
+  const novo = freio > 0 ? atual - (dtMs / 1000) * a.perdaPorLentidaoPorS * freio : atual + dtMs / a.rampaMs;
+  e.impulso = Math.round(Math.min(1, Math.max(0, novo)) * 1000) / 1000;
 }
 
 /** Integra o movimento de uma única entidade por um tick (usado também pela predição do cliente). */
 export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[], dtMs: number, grade?: GradeDeCorpos) {
   if (e.morto) return;
   sincronizarPosicao(e);
-  // Quem conjura uma ação que trava ou está atordoado não anda (D-017, D-060).
-  if (mobilidadeDaAcao(e, ctx) === 'trava' || movimentoBloqueado(e, estado.tick)) return;
+  // Quem conjura uma ação que trava ou está atordoado não anda (D-017, D-060); e perde o impulso (D-132).
+  const arranque = temArranque(e);
+  if (mobilidadeDaAcao(e, ctx) === 'trava' || movimentoBloqueado(e, estado.tick)) {
+    if (arranque) ajustarImpulso(e, false, 0, dtMs, ctx);
+    return;
+  }
+  // O freio é lido antes de andar (a lentidão que valeu neste tick); só quem tem arranque precisa dele.
+  const freio = arranque ? freioAgora(e, estado, ctx) : 0;
+  const andou = andarNoTick(e, estado, ctx, saida, dtMs, grade);
+  if (arranque) ajustarImpulso(e, andou > EPS, freio, dtMs, ctx);
+}
+
+/** O trecho do tick: segue os pontos ou a direção mantida. Devolve quanto andou (0 parado ou preso). */
+function andarNoTick(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[], dtMs: number, grade?: GradeDeCorpos): number {
   const nadando = tipoEm(ctx.fase, e.x, e.y) === 'agua';
   const vel = velocidadeAgora(e, estado, ctx) * (nadando ? ctx.balance.movimento.nadoMult : 1);
   let restante = (dtMs / 1000) * vel;
+  let total = 0;
 
   for (let guarda = 0; guarda < MAX_TRECHOS_POR_TICK && restante > EPS; guarda++) {
     // Reabastece a fila curta a partir do caminho do irPara.
@@ -252,20 +337,22 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
       uy = rumo.dy / n;
       trecho = restante;
     } else {
-      return;
+      return total;
     }
     // Quem anda olha para onde vai (Marco 24, D-097), salvo se está golpeando alguém.
     const olhar = e.acao ? null : direcaoDe(ux, uy);
     if (olhar) e.olhando = olhar;
     const andou = andar(e, ux * trecho, uy * trecho, estado, ctx, saida, grade);
     e.relogioAndar += (1000 * andou) / vel;
+    total += andou;
     restante -= trecho;
     if (andou < EPS) {
       // Preso: atrás de quem bloqueia, espera mantendo o caminho; contra a parede, desiste do ponto.
       if (wp && !bloqueadoPorEntidade(e, e.px + ux * SUBPASSO, e.py + uy * SUBPASSO, estado, ctx, grade)) e.waypoints.shift();
-      return;
+      return total;
     }
   }
+  return total;
 }
 
 /**

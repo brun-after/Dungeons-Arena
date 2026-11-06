@@ -307,6 +307,7 @@ describe('botas ao cruzar inimigos e saves legados', () => {
     expect(CONTEUDO.itens.has(itemId)).toBe(true);
     obter(c.j.bolsa).equipamento.pes = { invId: 'b', itemId, qtd: 1, ref: null };
     c.j.direcao = 'E';
+    c.j.impulso = 1;
     integrarEntidade(c.j, c.estado, c.ctx, c.eventos, 220);
     const efeito = obter(c.j.efeitos.find(f => f.tipo === 'acelerado'));
     expect(efeito.pct).toBe(pct); expect(efeito.ateTick).toBe(ticksDe(ms));
@@ -315,7 +316,7 @@ describe('botas ao cruzar inimigos e saves legados', () => {
     integrarEntidade(c.j, c.estado, c.ctx, c.eventos, 500);
     expect(efeito.ateTick).toBe(ticksDe(ms));
     c.j.efeitos = []; c.j.x = 3;
-    c.alvo.equipe = c.j.equipe; c.j.direcao = 'E';
+    c.alvo.equipe = c.j.equipe; c.j.direcao = 'E'; c.j.impulso = 1;
     integrarEntidade(c.j, c.estado, c.ctx, c.eventos, 220);
     expect(c.j.efeitos).toEqual([]);
   });
@@ -337,6 +338,7 @@ describe('botas ao cruzar inimigos e saves legados', () => {
     const c = cena('aventureiro', 1);
     obter(c.j.bolsa).equipamento.pes = { invId: 'b', itemId: idItemBase('botas', 'lendaria', null, 1, 99), qtd: 1, ref: null };
     c.alvo.direcao = 'O';
+    c.alvo.impulso = 1;
     integrarEntidade(c.alvo, c.estado, c.ctx, c.eventos, 220);
     expect(c.j.efeitos.some(f => f.tipo === 'acelerado')).toBe(true);
   });

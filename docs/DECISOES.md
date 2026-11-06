@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.78 · **Data:** 05/11/2026
+**Versão:** 0.79 · **Data:** 05/11/2026
 
 > **Histórico**
+> - **0.79 (05/11/2026)**: D-132: aceleração dos personagens, lentidão de quem ataca de longe, o fôlego de caça dos perseguidores (menor no chefe), o alcance do Arqueiro 20% menor andando, a volta do Bumerangue básico em 45% e o PvP do ritmo com 9 lutas (balance 37).
 > - **0.78 (05/11/2026)**: D-133, fase 3: golpes e magias em três tempos (carga, impacto e volta), variados e com o peso do corpo.
 > - **0.77 (04/11/2026)**: D-133, fase 2: o estilo sombrio em todas as classes, nas armas, nos chefes humanoides e nos retratos dos menus.
 > - **0.76 (04/11/2026)**: D-133: o visual sombrio dos personagens (armadura por material e silhueta) e os jogadores em 3D em tempo real (marco 37, fase 1: o guerreiro).
@@ -3763,3 +3764,52 @@ personagem (11 chamadas de desenho, uma por material). No jogo, a cena padrão c
 - Pendentes: os atlas de reserva e os ícones das armas ainda são os da fase 1 (gerá-los de novo leva cerca de uma hora);
   os ícones dos itens de armadura ainda são os desenhos SVG; sprites dos monstros com a luz nova; dragões em tempo real.
 
+
+## D-132 — Aceleração, recuo do ataque de longe e fôlego de caça (04/11/2026)
+
+**Contexto.** No Mundo, o Arqueiro corre e atira sem arriscar nada, e vence monstros muito acima do nível dele. O
+tiro sai andando a 100% (`mobilidade: "livre"`), a Destreza dá velocidade (até 2,5×, por volta do nível 20) e cadência
+(o tiro a cada 750 ms), e a Mira firme premia quem nunca é tocado. O monstro só ganha +1 de Destreza por nível: um
+Arqueiro do 20 corre mais que um orc do 40. Pedido do produto: as lentidões e os controles valerem mais mesmo contra
+quem tem muita mobilidade, sem acabar com o kite.
+
+**Decisão** (números em `balance.movimento` e `balance.ia.caca`, balance 37).
+- **Aceleração dos personagens.** Quem começa a andar sai com 70% da velocidade e chega ao pico em 500 ms andando sem
+  freio (`impulso`, de 0 a 1, em milésimos, no estado da entidade e no patch).
+  - Parar, ficar preso na parede, travar numa conjuração ou ser atordoado zera o impulso.
+  - Qualquer lentidão em curso (efeito, conjuração lenta, o recuo abaixo) o consome a 4/s × a fração da lentidão: um
+    controle de 50% por 2 s zera o impulso, e o alvo ainda precisa reacelerar depois que ele acaba.
+  - Vale para quem tem classe (pela ficha ou, na rede, pelo `classeId`), para o cliente prever igual ao servidor.
+    Monstros e invocações ficam de fora: o monstro para a cada golpe, e recomeçar devagar facilitaria fugir dele (o
+    simulador mostrou o kite ficando mais fácil com a aceleração nos monstros).
+- **Recuo do ataque de longe.** Ao lançar um golpe ofensivo, o personagem fica lento por 450 ms: 3% por célula além
+  de 3 até o alvo, no máximo 18% (8 células: 15%). Vale o mais forte entre os que estiverem valendo. Não vale para
+  fases de combo nem para o golpe do falcão.
+- **Fôlego de caça.** O perseguidor corpo a corpo que segue fora do alcance por mais de 2 s ganha velocidade até
+  +10% em 3 s, mais 0,5% por nível acima do alvo (até +5%). Zera ao alcançar, trocar de alvo ou largar a perseguição.
+  Atiradores e controladores, que mantêm distância, não ganham. O chefe recebe só 30% desse bônus (`chefeMult`), a
+  pedido do produto: já é forte por si.
+- **O Arqueiro andando alcança 20% menos** (`ajustesClasses.arqueiro.alcanceAndandoPct`: 80), a pedido do produto.
+  Parado, o alcance é o de sempre. Vale para todo golpe ofensivo dele, enquanto mantém uma direção ou segue um caminho
+  (o seguir alvo também): com 8 células parado, alcança 6,4 andando. O kite segue possível, mas atirar de mais longe
+  pede parar.
+- **Volta do Bumerangue básico: de 60% para 45% do golpe.** Com a aceleração, quem arremessa se afasta menos durante o
+  kite, e a volta passa mais vezes pelo alvo (1,43 → 1,68 acerto por arremesso contra o chefe, com o dano total igual).
+  O Aventureiro sozinho caía para 22,8 s contra o chefe (meta 25–40 s, 40 sementes). As outras variações do bumerangue
+  ficam como estão.
+
+**Calibragem.**
+- **O arranque de 70%** é o único, entre os testados (60% a 75%, rampa de 400 a 500 ms), que passa nas 145 metas de
+  `npm run balancear` (8 sementes). Os outros deixavam uma ou duas de fora (o Necromante e o Aventureiro na fronteira
+  de 5 golpes, o chefe em grupo um pouco acima de 110%), lutas que mudam de faixa com qualquer detalhe.
+- **O teste de PvP do ritmo passa de 3 para 9 lutas** (`tests/sim/ritmo.test.ts`). No espelho de Guerreiros, a arrancada
+  muda o tick em que os bots chegam ao alcance e quem abre o duelo; com 3 lutas, duas viraram 4,75 s e a mediana caiu
+  abaixo do piso. Com 9 lutas, o Guerreiro fica em 6,25 s (6,87 s antes); com 15 ou 21, o mesmo.
+- Medição avulsa: o bot de duelo com o Arqueiro do nível 20 (Destreza 32) contra orcs do 20 ao 40 numa sala aberta de
+  70 células, 5 sementes, medida com 65% de arranque. Antes e depois, ele vence 5/5 sem levar golpe; as lutas contra os orcs do 30 ao 40 ficam
+  20% a 40% mais longas. O orc do 40 alcança o Arqueiro, mas os golpes viram esquiva: o `golpe_pesado` tem 600 ms
+  de preparação, e nesse tempo o Arqueiro sai das 2 células de alcance. A falta de risco vem mais da esquiva na
+  preparação do corpo a corpo do que da velocidade; mexer nisso fica para uma decisão à parte.
+
+**Consequências.** Não muda o save (o impulso e o recuo zeram sozinhos; a caça vive na IA). O `balance.versao` sobe
+para 37, como em toda mudança de regra; cliente e servidor precisam da mesma versão para preverem igual.

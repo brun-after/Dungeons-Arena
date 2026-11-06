@@ -8,6 +8,11 @@ import { CLASSES, aguenta, avisos, chefe, mediana, pvpLivre, sequencia } from '.
 
 const metas = BALANCE_PADRAO.metas;
 const SEMENTES = [1000, 8919, 16838];
+/**
+ * 05/11/2026 (D-132): o PvP espelhado depende de quem abre o duelo; com 3 lutas, a mediana era o resultado de uma só
+ * (a arrancada mudava o tick em que os bots chegavam ao alcance e a abertura). 9 lutas, no padrão do simulador.
+ */
+const SEMENTES_PVP = Array.from({ length: 9 }, (_, i) => 1000 + i * 7919);
 
 describe('ritmo médio (balance.metas)', () => {
   for (const classe of CLASSES) {
@@ -47,7 +52,7 @@ describe('ritmo médio (balance.metas)', () => {
 
   it('PvP no Livre: de 6 a 10 s para cair', () => {
     for (const classe of CLASSES) {
-      const t = mediana(SEMENTES.map((s) => pvpLivre(classe, s, metas.pvpLivre.nivel).tempoS));
+      const t = mediana(SEMENTES_PVP.map((s) => pvpLivre(classe, s, metas.pvpLivre.nivel).tempoS));
       expect(t, classe).toBeGreaterThanOrEqual(metas.pvpLivre.tempoMinS - 0.5);
       expect(t, classe).toBeLessThanOrEqual(metas.pvpLivre.tempoMaxS);
     }
