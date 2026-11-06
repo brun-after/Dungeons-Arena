@@ -244,6 +244,32 @@ function texturaDoCabelo(): THREE.CanvasTexture {
   return comoTextura(c);
 }
 
+/**
+ * O crânio sob as mechas (06/11/2026): fios ao longo dos meridianos da esfera, como penteados do alto para baixo, até a
+ * linha do cabelo. Abaixo dela é o preto do rosto. `testa` é a fração da altura da esfera (do alto) onde fica a linha na
+ * frente (u = 0,25 na SphereGeometry, +z); para os lados e atrás ela desce até a nuca.
+ */
+function texturaDoCranio(testa: number): THREE.CanvasTexture {
+  const [c, g] = tela();
+  const r = sorteio(907);
+  g.fillStyle = '#2a2531';
+  g.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 420; i++) {
+    const x = r() * 512, w = 1 + r() * 4;
+    g.fillStyle = r() < 0.5 ? `rgba(78,70,88,${0.25 + r() * 0.4})` : `rgba(14,12,18,${0.3 + r() * 0.4})`;
+    g.fillRect(x, 0, w, 512);
+  }
+  // abaixo da linha do cabelo, o rosto: preto (a linha desce da testa, na frente, até embaixo, atrás)
+  g.fillStyle = '#08070c';
+  for (let x = 0; x < 512; x += 2) {
+    let d = Math.abs(x / 512 - 0.25);
+    d = Math.min(d, 1 - d) / 0.5;
+    const linha = mix(testa, 1, Math.pow(Math.min(1, d / 0.6), 1.5)) + (r() - 0.5) * 0.02;
+    g.fillRect(x, linha * 512, 2, 512);
+  }
+  return comoTextura(c);
+}
+
 function materiais() {
   // 06/11/2026: o lado de fora do manto 20% mais escuro (a cor multiplica a textura); o de dentro é o forro preto (`forrado`)
   const emBrasa = (map: THREE.Texture, b: ReturnType<typeof brasas>) => ventoso(new THREE.MeshStandardMaterial({
@@ -263,6 +289,8 @@ function materiais() {
     forro: ventoso(new THREE.MeshStandardMaterial({ color: 0xd42a44, emissive: 0x8a1024, emissiveIntensity: 0.25, roughness: 0.7, side: DUPLO })),
     cachecol: ventoso(new THREE.MeshStandardMaterial({ map: texturaDoCachecol(), roughness: 0.92, side: DUPLO })),
     cabelo: flutuante(ventoso(new THREE.MeshStandardMaterial({ map: texturaDoCabelo(), roughness: 0.8, side: DUPLO })), 0.06),
+    // a franja (06/11/2026): as mechas são curtas, então usam só a parte cinza-violeta da textura (a raiz), sem carmesim
+    franja: flutuante(ventoso(new THREE.MeshStandardMaterial({ map: (() => { const t = texturaDoCabelo(); t.repeat.set(1, 0.45); t.offset.set(0, 0.55); return t; })(), roughness: 0.8, side: DUPLO })), 0.03),
     tunica: new THREE.MeshStandardMaterial({ color: 0x16151c, roughness: 0.9, side: DUPLO }),
     calca: new THREE.MeshStandardMaterial({ color: 0x1c1b23, roughness: 0.85, side: DUPLO }),
     coxa: placa(gravura('#2c2b36', 701, RUNA_DA_COXA), 0.4),
@@ -538,14 +566,20 @@ function cabeca(c: Corpo, R: Regua, m: M, extras: Obj[]): void {
   const yCentro = R.y(massa.altura) - cab.y;
   const giro = Math.atan2(R.m(rosto.lado - massa.lado), raio);
   g.rotation.y = giro;
-  const cranio = new THREE.Mesh(new THREE.SphereGeometry(raio, 28, 18), m.sombra);
-  cranio.scale.set(0.92, (R.y(1) - R.y(alturaNaArte(PECAS.cabeloMassa[3]))) / 2 / raio, 1);
+  // 06/11/2026: o crânio na cor do cabelo até a linha da testa (era todo preto e, com as mechas curtas por cima, o alto
+  // parecia calvo); abaixo dela, na frente, o rosto segue todo preto
+  const altoDoCranio = (R.y(1) - R.y(alturaNaArte(PECAS.cabeloMassa[3]))) / 2 / raio;
+  const testa = (Math.PI / 2 - ELEVACAO_DA_TESTA) / Math.PI;
+  const cranio = new THREE.Mesh(new THREE.SphereGeometry(raio, 28, 18), new THREE.MeshStandardMaterial({ map: texturaDoCranio(testa), roughness: 0.8 }));
+  cranio.scale.set(0.92, altoDoCranio, 1);
   cranio.position.set(0, yCentro, -0.01 * c.u);
   g.add(cranio);
-  const sombra = new THREE.Mesh(new THREE.SphereGeometry(raio * 0.78, 20, 12), m.sombra);
-  sombra.scale.set(R.m(rosto.largura) / 2 / (raio * 0.78), 0.95, 0.6);
-  sombra.position.set(0, R.y(rosto.altura) - cab.y, raio * 0.55);
-  g.add(sombra);
+  // o rosto: a frente do crânio abaixo da testa, preto sem luz (no crânio iluminado o preto ganhava brilho e virava cinza)
+  const face = new THREE.Mesh(new THREE.SphereGeometry(raio * 1.004, 28, 14, Math.PI / 2 - 1.25, 2.5, Math.PI / 2 - ELEVACAO_DA_TESTA, Math.PI * 0.42), m.sombra);
+  face.scale.copy(cranio.scale);
+  face.position.copy(cranio.position);
+  g.add(face);
+  // (a sombra oval do rosto de antes saiu: a frente preta do crânio já é o rosto, e ela furava o cachecol)
   c.prender('Head', g, extras);
 }
 
@@ -555,6 +589,47 @@ function caminho(raiz: THREE.Vector3, ponta: THREE.Vector3, onda: number, fase: 
     const t = k / 8;
     return raiz.clone().lerp(ponta, t).add(V(0, Math.sin(t * Math.PI * 1.6 + fase) * onda * t - queda * t * t * t, Math.cos(t * Math.PI * 1.3 + fase) * onda * 0.6 * t));
   });
+}
+
+/** Para que lado vai a maior parte da franja: +1 é o lado livre (o rumo do cabelo), -1 o lado do cajado. */
+const LADO_DA_FRANJA = 1;
+/** A linha do cabelo na frente: a elevação (rad) na esfera do crânio; abaixo dela o rosto é preto. */
+const ELEVACAO_DA_TESTA = 0.42;
+
+/**
+ * A franja jogada para o lado (06/11/2026). Vista de frente, a cabeça é ~65% rosto (preto) e ~35% franja. As mechas
+ * partem de uma risca no alto, um pouco para o lado menor, e correm rentes à testa em arco: 75% para o lado
+ * `LADO_DA_FRANJA` (descendo mais quanto mais longe vão, cobrindo o canto do rosto e a têmpora) e 25% para o outro,
+ * curtas. Os caminhos seguem a esfera do crânio (ângulos de lado e de elevação no referencial do rosto).
+ */
+function franja(c: Corpo, R: Regua, m: M, extras: Obj[], giro: number): void {
+  const rf = sorteio(913);
+  const cab = c.p('Head');
+  const massa = caixa(PECAS.cabeloMassa);
+  const raio = R.m(massa.largura) / 2;
+  const centro = V(cab.x, R.y(massa.altura), cab.z - 0.01 * c.u);
+  const naEsfera = (lado: number, el: number, r: number) =>
+    centro.clone().add(V(Math.sin(giro + lado) * Math.cos(el) * 0.92, Math.sin(el), Math.cos(giro + lado) * Math.cos(el)).multiplyScalar(r));
+  const s = LADO_DA_FRANJA;
+  for (let i = 0; i < 90; i++) {
+    const maior = rf() < 0.75;
+    const lado0 = -s * (0.25 + rf() * 0.2), el0 = 0.95 + rf() * 0.3;
+    // o lado maior vai longe e desce até o meio do rosto na ponta; o menor é mais curto. Todas passam da linha da
+    // testa (escondem a borda do preto), com as pontas desencontradas
+    const ate = rf();
+    const lado1 = maior ? s * mix(-0.25, 1.1, ate) : -s * mix(0.3, 1.1, ate);
+    const el1 = (maior ? mix(ELEVACAO_DA_TESTA - 0.12, -0.3, Math.pow(Math.max(0, ate - 0.15) / 0.85, 1.2)) : mix(ELEVACAO_DA_TESTA - 0.12, ELEVACAO_DA_TESTA - 0.3, ate)) + (rf() - 0.5) * 0.12;
+    const pts = Array.from({ length: 10 }, (_, k) => {
+      const t = k / 9;
+      // a curva desce devagar no começo (corre pela testa) e mais no fim (cai na têmpora)
+      return naEsfera(mix(lado0, lado1, Math.pow(t, 0.8)), mix(el0, el1, Math.pow(t, 1.4)), raio * (1.02 + 0.05 * t + (rf() - 0.5) * 0.006));
+    });
+    const n = pts[5]?.clone().sub(centro).normalize() ?? V(0, 1, 0);
+    const grossa = rf() < 0.6;
+    // poucas com a ponta carmesim, como na arte; as outras na cor da raiz
+    const material = rf() < 0.18 ? m.cabelo : m.franja;
+    extras.push(mecha(pts, R.m(tam(grossa ? 36 : 22)), R.m(tam(grossa ? 7 : 5)), 'Head', material, 0.25 + rf() * 0.1, n));
+  }
 }
 
 /**
@@ -568,14 +643,29 @@ function cabelo(c: Corpo, R: Regua, m: M, extras: Obj[]): void {
   const raio = R.m(massa.largura) / 2;
   const centro = V(R.m(massa.lado), R.y(massa.altura), cab.z - 0.01 * c.u);
   // a capa de mechas curtas sobre o crânio, deitando para o lado livre e para trás
+  // 06/11/2026: mais mechas e mais longas, deitadas rente ao crânio (o alto não fica calvo); na cor da raiz
+  // (os sorteios do laço antigo seguem consumidos, para o resto do cabelo, aprovado, não mudar)
   for (let i = 0; i < 90; i++) {
     const az = r() * Math.PI * 2, el = 0.15 + r() * 1.35;
-    const n = V(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el));
-    if (n.z > 0.55 && n.y < 0.5) continue; // não cobre o rosto
-    const p = centro.clone().add(n.clone().multiplyScalar(raio * 0.95));
-    const fim = p.clone().add(V(0.09 * c.u + r() * 0.06 * c.u, -0.04 * c.u - r() * 0.05 * c.u, -0.06 * c.u));
-    extras.push(mecha(caminho(p, fim, 0.01 * c.u, r() * 6, 0.02 * c.u), R.m(tam(26)), R.m(tam(7)), 'Head', m.cabelo, 0.25, n));
+    if (Math.cos(az) * Math.cos(el) > 0.55 && Math.sin(el) < 0.5) continue;
+    r(); r(); r();
   }
+  const rr = sorteio(911);
+  // o rosto olha para o lado livre (o giro de `cabeca`): na frente dele, só a franja cobre a testa
+  const giroDoRosto = Math.atan2(R.m(caixa(PECAS.rosto).lado - massa.lado), raio);
+  const frenteDoRosto = V(Math.sin(giroDoRosto), 0, Math.cos(giroDoRosto));
+  for (let i = 0; i < 200; i++) {
+    const az = rr() * Math.PI * 2, el = 0.15 + rr() * 1.4;
+    const n = V(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el));
+    if (n.dot(frenteDoRosto) > 0.3 && n.y < 0.8) continue; // não cobre o rosto (lá é a franja)
+    const p = centro.clone().add(n.clone().multiplyScalar(raio * 0.97));
+    // deita sobre o crânio: desce pela esfera para o lado livre e para trás, e fica rente (por fora do raio)
+    const fim = p.clone().add(V((0.08 + rr() * 0.07) * c.u, -(0.06 + rr() * 0.07) * c.u, -(0.05 + rr() * 0.05) * c.u));
+    const longe = Math.max(fim.distanceTo(centro), raio * 1.03);
+    fim.sub(centro).setLength(longe).add(centro);
+    extras.push(mecha(caminho(p, fim, 0.008 * c.u, rr() * 6, 0.015 * c.u), R.m(tam(30)), R.m(tam(7)), 'Head', rr() < 0.85 ? m.franja : m.cabelo, 0.25, n));
+  }
+  franja(c, R, m, extras, giroDoRosto);
   // 06/11/2026: a escuridão que enche o vão entre o crânio e as mechas: massas negras que saem da cabeça na direção do
   // vento (para o lado livre e para trás), da largura do crânio, e afinam até perto da metade das mechas
   const rx = R.m(ladoNaArte(CABELO.raiz.x));

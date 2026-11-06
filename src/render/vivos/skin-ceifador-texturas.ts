@@ -125,18 +125,6 @@ export function desfazer(semente: number, desde: number, borda: boolean, mapa: T
   return recorte;
 }
 
-/** O halo macio dos olhos (somado à luz, sem escrever na profundidade). */
-export function halo(): THREE.Material {
-  const [c, g] = tela(64);
-  const grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-  grd.addColorStop(0, 'rgba(255,255,255,0.95)');
-  grd.addColorStop(0.35, 'rgba(210,225,255,0.4)');
-  grd.addColorStop(1, 'rgba(180,200,255,0)');
-  g.fillStyle = grd;
-  g.fillRect(0, 0, 64, 64);
-  return new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: DUPLO });
-}
-
 /** Os materiais do Ceifador; `faixas` são as alturas (v da tela) das faixas de bordado do casaco. */
 export function materiaisDoCeifador(faixas: readonly (readonly [number, number])[]) {
   const pano = (escuro: string, claro: string, semente: number, rasgo?: number, dobras = 9) =>
@@ -169,9 +157,8 @@ export function materiaisDoCeifador(faixas: readonly (readonly [number, number])
     ferro: metal('#2c282d', 631, 0.85, 0.5),
     placa: new THREE.MeshStandardMaterial({ map: filigrana('#2e282d', '#958592', 401, { densidade: 1.1, manchas: 40 }), metalness: 0.85, roughness: 0.4, side: DUPLO }),
     osso: new THREE.MeshStandardMaterial({ color: 0xd8cdd0, roughness: 0.55 }),
+    // o rosto é só escuridão (06/11/2026: sem olhos nem dentes)
     vazio: new THREE.MeshBasicMaterial({ color: 0x030204, side: DUPLO }),
-    olho: new THREE.MeshBasicMaterial({ color: 0xffffff }),
-    dente: new THREE.MeshStandardMaterial({ color: 0xf0eadf, emissive: 0xcfc6b8, emissiveIntensity: 0.55, roughness: 0.35 }),
   };
 }
 export type MateriaisDoCeifador = ReturnType<typeof materiaisDoCeifador>;

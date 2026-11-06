@@ -53,14 +53,19 @@ const CODIGO_DA_FLUTUACAO = /* glsl */ `
 
 /**
  * Os pedaços que se desprendem (06/11/2026, o traje do Ceifador que se desfaz em trevas). Antes da pele, cada pedaço
- * sai do lugar dele no pano (`centro`), segue o rumo (`deriva.xyz`, desacelerando) e cresce enquanto some, num ciclo de
- * ~3 s com a fase própria (`deriva.w`): nasce colado na roupa, se afasta como fumaça e dá lugar ao próximo.
+ * sai do lugar dele no pano (`centro`) e cresce enquanto some, num ciclo de ~3 s com a fase própria (`deriva.w`).
+ * Só quando anda (a energia `uVento.w`; parado não há trevas, não é uma aura): o rumo é o oposto do movimento (-z, atrás
+ * da figura), com o espalhamento lateral e vertical de `deriva.xyz`, mais longo quanto mais rápido, e puxado para o lado
+ * de fora do giro (`uVento.x`).
  */
 const CODIGO_DO_DESPRENDER = /* glsl */ `
-  float ciclo = fract(uTempo * 0.33 + deriva.w);
+  float anda = smoothstep(0.35, 0.9, uVento.w);
+  float ciclo = fract(uTempo * 0.45 + deriva.w);
   float vai = 1.0 - (1.0 - ciclo) * (1.0 - ciclo);
-  transformed = centro + (transformed - centro) * (0.3 + 1.1 * ciclo) + deriva.xyz * vai + vec3(0.0, 0.05 * ciclo * ciclo, 0.0);
-  vDesfaz = smoothstep(0.0, 0.1, ciclo) * (1.0 - smoothstep(0.5, 1.0, ciclo));`;
+  float alcance = length(deriva.xyz) * (0.7 + 0.5 * min(uVento.w, 1.2));
+  vec3 rumo = vec3(deriva.x * 0.3 + uVento.x * alcance * 1.5, deriva.y * 0.35, -alcance);
+  transformed = centro + (transformed - centro) * (0.3 + 1.1 * ciclo) * (0.4 + 0.6 * anda) + rumo * vai + vec3(0.0, 0.05 * ciclo * ciclo, 0.0);
+  vDesfaz = anda * smoothstep(0.0, 0.08, ciclo) * (1.0 - smoothstep(0.6, 1.0, ciclo));`;
 
 /** Marca o material dos pedaços que se desprendem do pano (os atributos `centro` e `deriva`, de skin-trevas.ts). */
 export function desprendido<T extends THREE.Material>(m: T): T {
@@ -169,9 +174,11 @@ export function avancarVento(e: EstadoDoVento, u: UniformesDeVento, andando: boo
 /** A pose fixa (retratos dos menus): o pano num sopro leve, como se a figura acabasse de parar. */
 export function ventoParado(u: UniformesDeVento): void {
   u.uVento.value.set(0.03, 0.03, -0.14, 0.3);
-  // Só no servidor de desenvolvimento: `tempoDoRetrato` muda o instante do retrato, para revisar o movimento do pano.
-  const tempo = import.meta.env.DEV ? (globalThis as { tempoDoRetrato?: number }).tempoDoRetrato : undefined;
-  u.uTempo.value = tempo ?? 1.4;
+  // Só no servidor de desenvolvimento: `tempoDoRetrato` muda o instante do retrato e `andarNoRetrato` põe o vento de
+  // quem anda, para revisar o movimento do pano (e as trevas do Ceifador, que só saem andando).
+  const dev = import.meta.env.DEV ? (globalThis as { tempoDoRetrato?: number; andarNoRetrato?: boolean }) : {};
+  if (dev.andarNoRetrato === true) u.uVento.value.set(0, 0.065, -0.47, 1);
+  u.uTempo.value = dev.tempoDoRetrato ?? 1.4;
 }
 
 // ---------- superfície por anéis ----------

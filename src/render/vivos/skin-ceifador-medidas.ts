@@ -28,12 +28,9 @@ export const MARCOS = { ombro: 400, queixo: 300 } as const;
 
 /** As caixas de cada peça na arte (x0, y0, x1, y1), em px. */
 export const PECAS = {
-  // o capuz: a cúpula, o vazio do rosto (virado para a direita dele) e a boca
+  // o capuz: a cúpula e o vazio do rosto (virado para a direita dele; 06/11/2026: só escuridão, sem olhos nem boca)
   capuz: [325, 100, 565, 400],
   rosto: [330, 195, 470, 320],
-  olhoDireito: [355, 220, 382, 236],
-  olhoEsquerdo: [398, 205, 422, 222],
-  dentes: [378, 243, 446, 276],
   // a gola de pano em camadas, entre o queixo e os ombros
   gola: [318, 300, 485, 405],
   // a ombreira do ombro esquerdo (três placas) e o medalhão da frente

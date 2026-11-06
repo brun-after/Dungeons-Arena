@@ -1,8 +1,7 @@
 // A skin Ceifador do necromante (06/11/2026), refeita a partir das medidas da arte (skin-ceifador-medidas.ts), no
 // mesmo processo da Sombra Rubra. As alturas passam ao rig por marcos (chão, ombro e queixo; do queixo ao topo do capuz
 // vale a proporção da arte), e os tamanhos e o lado usam a altura do rig. As peças:
-// - o capuz grande com a ponta dobrada para o lado, o vazio do rosto virado para a direita dele, os olhos brancos
-//   inclinados com brilho e o sorriso de dentes pontudos;
+// - o capuz grande com a ponta dobrada para o lado e, dentro, o rosto só de escuridão (sem olhos nem dentes);
 // - a gola em camadas e a ombreira de três placas com o medalhão e a corrente;
 // - o espartilho laceado com as tachas em losango;
 // - o casaco longo aberto na frente, com as faixas de bordado em gavinhas nas bordas; por dentro, a túnica e o tabardo
@@ -16,11 +15,11 @@
 // pesos, mão de osso) também servem à Sombra Rubra.
 
 import * as THREE from 'three';
-import { altura as alturaNaArte, BORDADOS, caixa, FITAS, lado as ladoNaArte, MANTO, MARCOS, PECAS, TACHAS, tam } from './skin-ceifador-medidas';
+import { altura as alturaNaArte, BORDADOS, caixa, lado as ladoNaArte, MANTO, MARCOS, PECAS, TACHAS, tam } from './skin-ceifador-medidas';
 import type { Ossos, PecaSombria } from './sombrio-base';
 import { aoLongo, Corpo, esfera, sorteio, V } from './sombrio-base';
 import { fita, superficie, type Anel } from './skin-pano';
-import { halo, materiaisDoCeifador, type MateriaisDoCeifador as M } from './skin-ceifador-texturas';
+import { materiaisDoCeifador, type MateriaisDoCeifador as M } from './skin-ceifador-texturas';
 import { fiapos, materiaisDasTrevas, type Pedaco } from './skin-trevas';
 
 type Obj = THREE.Object3D;
@@ -376,34 +375,22 @@ function capa(c: Corpo, e: Eixos, R: Regua, m: M, extras: Obj[]): void {
     solto: (i) => Math.pow(suave(1, N - 1, i), 1.1) * 1.3,
     pesos: pesosDoManto(c, e),
   }, m.capa));
-  // as fitas da arte (06/11/2026): não são tiras ao vento, é o próprio traje se desfazendo em trevas. Os fiapos nascem
-  // no pano (a raiz de cada caminho da arte, e a barra em volta dos pés) e se afastam pelo caminho como fumaça, crescendo
-  // e sumindo, cada um na sua fase (skin-trevas.ts): o fluxo não para e nada estica e volta.
+  // o rastro de trevas (06/11/2026): não são tiras ao vento nem uma aura, é o próprio traje se desfazendo atrás de quem
+  // anda. Os fiapos nascem nas costas do pano (dentro da silhueta, mais na barra, onde o traje mais se desfaz) e vão reto
+  // para trás, quase sem abrir para os lados: visto de frente ou de costas é uma esteira estreita, não um halo. O
+  // shader (skin-trevas.ts) só os mostra andando, cada um na sua fase: o fluxo não para e nada estica e volta.
   const rr = sorteio(913);
   const trevas = materiaisDasTrevas();
   const densos: Pedaco[] = [], leves: Pedaco[] = [];
-  for (const [k, caminho] of FITAS.entries()) {
-    const pts = caminho.map(([x, y], i) => {
-      const p = ponto(R, x, y);
-      const yy = Math.max(p.y, e.bacia);
-      p.z = e.zDe(yy) - e.rz(yy) * 0.4 - i * 0.05 * c.u;
-      return p;
-    });
-    const raiz = pts[0] ?? V(), fim = pts[pts.length - 1] ?? V();
-    const osso = raiz.y > e.bacia + 0.1 * c.u ? 'spine_03' : 'pelvis';
-    for (let n = 0; n < 9; n++) {
-      const centro = raiz.clone().add(V((rr() - 0.5) * 0.06 * c.u, (rr() - 0.5) * R.m(tam(90)), (rr() - 0.5) * 0.05 * c.u));
-      const rumo = fim.clone().sub(raiz).multiplyScalar(1.4 + rr() * 0.8).add(V(0, (rr() - 0.4) * R.m(tam(80)), (rr() - 0.5) * 0.12 * c.u));
-      (rr() < 0.6 ? densos : leves).push({ centro, rumo, largura: R.m(tam((k < 5 ? 105 : 90) * (0.75 + rr() * 0.5))), fase: rr(), osso });
-    }
-  }
-  // a barra em volta dos pés: os fiapos saem para fora e descem um pouco
-  for (let n = 0; n < 26; n++) {
-    const a = rr() * Math.PI * 2, y = mix(0.03, 0.22, rr()) * c.u;
-    const r = larg(y) * 1.05;
-    const centro = V(Math.cos(a) * r, y, e.zDe(e.bacia) + Math.sin(a) * r * 0.85);
-    const rumo = V(Math.cos(a), -0.15 + rr() * 0.5, Math.sin(a) * 0.85).multiplyScalar((0.2 + rr() * 0.18) * c.u);
-    (rr() < 0.5 ? densos : leves).push({ centro, rumo, largura: R.m(tam(75 + rr() * 45)), fase: rr(), osso: 'pelvis' });
+  for (let n = 0; n < 160; n++) {
+    // mais embaixo: a barra se desfaz mais que os ombros
+    const t = Math.pow(rr(), 1.8), y = mix(0.04 * c.u, e.topo * 0.92, t);
+    const yy = Math.max(y, e.bacia);
+    const largura = Math.max(larg(y), e.rx(yy) * 0.9);
+    const x = (rr() - 0.5) * 2 * largura * mix(0.75, 0.45, t);
+    const centro = V(x, y, e.zDe(yy) - largura * 0.75);
+    const rumo = V(x * 0.15, (rr() - 0.35) * 0.06 * c.u, -(0.28 + rr() * 0.26) * c.u * mix(1.2, 0.7, t));
+    (rr() < 0.65 ? densos : leves).push({ centro, rumo, largura: R.m(tam((95 + rr() * 50) * mix(1.15, 0.75, t))), fase: rr(), osso: y > e.bacia + 0.1 * c.u ? 'spine_03' : 'pelvis' });
   }
   extras.push(fiapos(densos, trevas.densa), fiapos(leves, trevas.fumo));
   // a fumaça: fitas translúcidas e escuras, compridas e bem mais soltas
@@ -470,11 +457,11 @@ function manga(c: Corpo, R: Regua, lado: 'l' | 'r', m: M, extras: Obj[]): void {
   c.prender(`lowerarm_${lado}`, punho, extras);
 }
 
-// ---------- a cabeça: capuz, vazio, olhos, dentes ----------
+// ---------- a cabeça: capuz e o vazio ----------
 /**
  * O capuz (PECAS.capuz): a cúpula fechada do alto até a testa, com a ponta dobrada para o lado esquerdo dele, e a parte
- * aberta na frente da testa até os ombros, onde se abre sobre eles. Dentro, o vazio do rosto virado para a direita
- * dele (a arte), com os olhos e os dentes medidos.
+ * aberta na frente da testa até os ombros, onde se abre sobre eles. Dentro, só a escuridão do rosto, virada para a
+ * direita dele.
  */
 function cabeca(c: Corpo, e: Eixos, R: Regua, m: M, extras: Obj[]): void {
   const u = c.u;
@@ -512,7 +499,7 @@ function cabeca(c: Corpo, e: Eixos, R: Regua, m: M, extras: Obj[]): void {
     pesos: (i) => (i <= 2 ? ['Head', 'neck_01', 0.85 - i * 0.2] : ['spine_03', 'neck_01', 0.6]),
   }, m.capuz));
 
-  // o rosto: o vazio, virado para a direita dele, com os olhos e os dentes na superfície da frente
+  // o rosto: só o vazio, virado para a direita dele
   const rosto = caixa(PECAS.rosto);
   const g = new THREE.Group();
   g.position.set(x0, R.y(rosto.altura), zc + raio * 0.12);
@@ -521,42 +508,9 @@ function cabeca(c: Corpo, e: Eixos, R: Regua, m: M, extras: Obj[]): void {
   const vazio = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 16), m.vazio);
   vazio.scale.set(rx, ry, rz);
   g.add(vazio);
-  // o aro do capuz em volta do rosto: a borda de pano que arredonda a boca do capuz
-  const aro = new THREE.Mesh(new THREE.TorusGeometry(1, 0.16, 8, 36), m.capuz);
-  aro.scale.set(rx * 1.08, ry * 1.08, rx * 1.2);
-  aro.position.z = rz * 0.62;
-  g.add(aro);
-  const naFrente = (x: number, y: number) => rz * Math.sqrt(Math.max(0, 1 - (x / rx) ** 2 - (y / ry) ** 2)) + 0.0015;
-  const yRosto = R.y(rosto.altura);
-  const aureola = halo();
-  for (const [sx, cx] of [[-1, PECAS.olhoDireito], [1, PECAS.olhoEsquerdo]] as const) {
-    const olhoC = caixa(cx);
-    const x = sx * R.m(tam(22)), y = R.y(olhoC.altura) - yRosto;
-    const olho = new THREE.Mesh(new THREE.BoxGeometry(R.m(olhoC.largura), R.m(olhoC.alto) * 0.45, 0.004), m.olho);
-    olho.position.set(x, y, naFrente(x, y));
-    olho.rotation.z = sx * 0.42;
-    g.add(olho);
-    const brilho = new THREE.Mesh(new THREE.PlaneGeometry(R.m(tam(70)), R.m(tam(50))), aureola);
-    brilho.position.set(x, y, naFrente(x, y) + 0.003);
-    g.add(brilho);
-  }
-  // o sorriso: duas fileiras de dentes pontudos, as pontas para dentro, os cantos subindo
-  const dn = caixa(PECAS.dentes);
-  const larguraDaBoca = R.m(dn.largura), alturaDaBoca = R.m(dn.alto);
-  const yBoca = R.y(dn.altura) - yRosto;
-  const DENTES = 9;
-  for (let i = 0; i < DENTES; i++) {
-    const t = (i / (DENTES - 1)) * 2 - 1;
-    const x = t * larguraDaBoca / 2;
-    const sobe = t * t * alturaDaBoca * 0.45;
-    for (const [dy, apice] of [[alturaDaBoca * 0.22, Math.PI], [-alturaDaBoca * 0.22, 0]] as const) {
-      const dente = new THREE.Mesh(new THREE.ConeGeometry(larguraDaBoca / DENTES * 0.55, alturaDaBoca * (0.55 - Math.abs(t) * 0.15), 4), m.dente);
-      const y = yBoca + sobe + dy;
-      dente.position.set(x, y, naFrente(x, y));
-      dente.rotation.set(0, 0, apice - t * 0.2 * (apice === 0 ? -1 : 1));
-      g.add(dente);
-    }
-  }
+  // 06/11/2026: sem o aro de pano em volta do rosto (sem os olhos, ele virava um círculo cinza): a própria abertura do
+  // capuz emoldura a escuridão
+  // 06/11/2026: sem olhos nem dentes (deixou de imitar o rosto da arte): dentro do capuz só a escuridão
   c.prender('Head', g, extras);
 }
 
