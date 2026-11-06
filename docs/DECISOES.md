@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.79 · **Data:** 05/11/2026
+**Versão:** 0.80 · **Data:** 06/11/2026
 
 > **Histórico**
+> - **0.80 (06/11/2026)**: D-134: skins de personagem (liberadas por código, escolhidas por classe, que prevalecem sobre o equipamento) e a primeira, o Ceifador do necromante, com o pano que voa contra o movimento.
 > - **0.79 (05/11/2026)**: D-132: aceleração dos personagens, lentidão de quem ataca de longe, o fôlego de caça dos perseguidores (menor no chefe), o alcance do Arqueiro 20% menor andando, a volta do Bumerangue básico em 45% e o PvP do ritmo com 9 lutas (balance 37).
 > - **0.78 (05/11/2026)**: D-133, fase 3: golpes e magias em três tempos (carga, impacto e volta), variados e com o peso do corpo.
 > - **0.77 (04/11/2026)**: D-133, fase 2: o estilo sombrio em todas as classes, nas armas, nos chefes humanoides e nos retratos dos menus.
@@ -3813,3 +3814,39 @@ quem tem muita mobilidade, sem acabar com o kite.
 
 **Consequências.** Não muda o save (o impulso e o recuo zeram sozinhos; a caça vive na IA). O `balance.versao` sobe
 para 37, como em toda mudança de regra; cliente e servidor precisam da mesma versão para preverem igual.
+
+## D-134 — Skins de personagem e a skin Ceifador (06/11/2026)
+
+**Pedido.** Poder vestir skins nos personagens: com skin, o equipamento não aparece (prevalece a skin); a skin é de uma
+classe; o jogador a libera com um código e a escolhe para a classe quando quiser. A primeira, o necromante Ceifador
+(arte de referência), em 3D bem detalhado, com a roupa voando suave e fantasmagoricamente para o lado oposto ao do
+movimento.
+
+**Decisão.**
+- **Catálogo** (`src/data/skins.json`, `src/entities/skins.ts`): `id`, classe dona, nome e o *hash* do código (cyrb53;
+  o código em si não está no pacote). É um anti-curioso, não segurança: quem desmonta o pacote ainda chega ao hash.
+- **Liberação e escolha** ficam nas preferências deste aparelho (`skinsLiberadas`, `skinsEscolhidas` por classe, sempre
+  normalizadas: id desconhecido, escolha não liberada ou de outra classe caem). Configurações → Skins: campo de código
+  (maiúsculas, espaços e traços não importam) e um seletor por classe com skin liberada.
+- **Comando `skin`** (`{ t: 'skin', id | null }`, nos quatro modos): a simulação só aceita skin da classe do personagem;
+  é só visual. `Entidade.skin` vira `aparencia.skin` (`aparenciaDe`), que já vai pela rede: os outros jogadores veem.
+  O cliente manda o comando ao entrar na cena e quando a escolha muda (`ui/sincronizar-skin.ts`).
+- **Render** (`palco-vivo.ts`): a skin é uma "classe" do palco com a chave `skin:<id>`, o rig da classe, a veste fixa e a
+  arma própria; sem peças nem armas do equipamento. Os menus (slots, escolha de classe) mostram a skin escolhida.
+- **O pano** (`skin-pano.ts`): superfícies com dois ossos por vértice (o manto segue a bacia e as coxas sem fenda) e o
+  atributo `solto`. O shader empurra o pano depois da pele, para trás do rumo (mais nas costas que na frente), com leve
+  subida e ondulação; a mola é folgada (passa do alvo e volta) e o giro do personagem balança o pano para fora.
+  Parado, só respira. Cada ator tem o próprio vento (clones dos materiais com os uniformes dele).
+- **O Ceifador** (`skin-ceifador.ts`, `skin-gadanha.ts`): capuz de ponta curva com o rosto em vazio (olhos brancos com
+  halo, dentes), cachecol, manto longo rasgado com bordado de gavinhas, sobressaia, tabardo, mangas em sino, antebraços e
+  mãos de osso (as falanges seguem os dedos do rig), ombreira com medalhão e corrente, espartilho laceado com tachas em
+  losango, cinto, fitas e fiapos fantasmas translúcidos, e a gadanha (`gadanha_ceifador`) maior que o personagem.
+- Só no servidor de desenvolvimento: `&skin=<id>` veste a skin no jogador da classe dela, para revisar o visual.
+
+**Limites conhecidos.** A liberação vale por aparelho (não por conta) e o servidor não confere se o jogador a possui:
+o comando só confere a classe. Uma liberação por conta, validada no servidor, entra com a nuvem. Sem GPU (WebGL por
+software) o jogo desenha o atlas e a skin não aparece (como o resto do 3D em tempo real). O código do Ceifador de
+lançamento é `NECRO-CEIFADOR-9QX4`; para trocar, gere o hash com `hashDoCodigo` e ponha em `skins.json`.
+
+**Consequências.** O save não muda (`skin` é opcional na entidade; as preferências se normalizam). Não toca o balanceamento.
+

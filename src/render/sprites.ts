@@ -29,7 +29,7 @@ import { equipamento3d, texturasDoAdorno } from './adornos';
 import { RigToken } from './rig-token';
 import { existeArma3d, type AtlasDePersonagens } from './personagens-3d';
 import { Figura3d } from './figura-3d';
-import { chaveDoChefe, pedidoVivo, type PalcoVivo } from './vivos/palco-vivo';
+import { chaveDaSkin, chaveDoChefe, pedidoVivo, type PalcoVivo } from './vivos/palco-vivo';
 import { ArmasEmVoo, type DonoDoProjetil } from './armas-em-voo';
 import { direcaoDoAngulo, duracaoVisualDoGolpe, estadoDoPersonagem, peloGolpe, perfilDoAtlas, progressoDoGolpe, quadroDoEstado } from './quadros-personagem';
 import { quadroDoToken, type MomentoDoQuadro } from './quadro-membros';
@@ -556,7 +556,8 @@ export class CamadaEntidades {
     const golpe = { preparo: golpeando ? null : m.preparoAcao, desdeMs: golpeando ? ataqueMs : null, comPreparo, variacao: m.golpes };
     // Marco 37 (04/11/2026): o jogador e o chefe com modelo em tempo real saem do palco 3D; enquanto carrega, o atlas
     // continua. O chefe usa a chave própria (a veste e a arma dele), não o modelo do monstro comum.
-    const modeloVivo = (e.arquetipo === 'boss' ? chaveDoChefe(e.preset) : null) ?? escolha.modelo;
+    // 06/11/2026: a skin do jogador (aparencia.skin) troca o modelo e prevalece sobre o equipamento.
+    const modeloVivo = (e.arquetipo === 'boss' ? chaveDoChefe(e.preset) : null) ?? chaveDaSkin(e.aparencia?.skin, escolha.modelo) ?? escolha.modelo;
     const vivo = this.o.vivos?.suporta(modeloVivo)
       ? this.o.vivos.pedir(pedidoVivo(e.id, modeloVivo, e.aparencia, equipamento, estado, tempo, fracao, m.angulo, golpe))
       : null;

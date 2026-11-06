@@ -22,6 +22,9 @@ import type { AparenciaEquipada } from '../../entities/entidade';
 import { definirDetalhe, KITS_SOMBRIOS, type PecaSombria } from './armaduras-sombrias';
 import { CHEFES } from './chefes-vivos';
 import { ARMAS_3D, ESCALA_DO_GRAU, Kit } from './armas3d';
+import { aplicarVento, avancarVento, novoEstadoDeVento, novosUniformes, ventoParado, type EstadoDoVento, type UniformesDeVento } from './skin-pano';
+import { vesteDoCeifador } from './skin-ceifador';
+import { skinPorId } from '../../entities/skins';
 
 const URLS = import.meta.glob<string>('../../assets/modelos/*.glb', { query: '?url', import: 'default' });
 
@@ -53,7 +56,7 @@ const HUMANO: Classe['clipes'] = { parado: 'Idle_Loop', andar: 'Walk_Loop', golp
 const MAGIA: Classe['clipes'] = { ...HUMANO, golpe: 'Spell_Simple_Shoot' };
 /** As alturas e os clipes como nas receitas do atlas (tools/sprites/receitas.ts). */
 const classe = (glb: string, altura: number, clipes: Classe['clipes']): Classe => ({ glb, altura, largura: 1, clipes, veste: null, arma: null });
-const CLASSES: Readonly<Record<string, Classe>> = {
+const CLASSES: Record<string, Classe> = {
   guerreiro: classe('guerreiro', 1.14, { ...HUMANO, parado: 'Sword_Idle' }),
   mago: classe('mago', 1.12, MAGIA),
   arqueiro: classe('arqueiro', 1.08, MAGIA),
@@ -64,6 +67,25 @@ const CLASSES: Readonly<Record<string, Classe>> = {
     glb: c.glb, altura: c.altura, largura: c.largura ?? 1, clipes: { ...HUMANO, parado: c.parado, golpe: c.golpe }, veste: c.veste, arma: c.arma, tingir: c.tingir,
   } satisfies Classe])),
 };
+/**
+ * 06/11/2026: as skins com modelo em tempo real (entities/skins.ts tem o catálogo e o código de cada uma). Cada skin é uma
+ * "classe" do palco com a chave `skin:<id>`: o rig da classe dela, a veste fixa e a arma própria, sem o equipamento.
+ */
+const SKINS_VIVAS: Readonly<Record<string, { classe: string; altura: number; veste: Classe['veste']; arma: Classe['arma'] }>> = {
+  'necromante-ceifador': { classe: 'necromante', altura: 1.2, veste: vesteDoCeifador, arma: { modelo: 'gadanha_ceifador', grau: 4 } },
+};
+for (const [id, k] of Object.entries(SKINS_VIVAS)) {
+  const base = CLASSES[k.classe];
+  if (base) CLASSES[`skin:${id}`] = { ...base, altura: k.altura, veste: k.veste, arma: k.arma };
+}
+/** A chave do palco da skin (só se existir o modelo e a skin for da classe), ou null. */
+export function chaveDaSkin(skin: string | null | undefined, classe: string): string | null {
+  // Só no servidor de desenvolvimento: `&skin=<id>` veste a skin no jogador da classe dela, para revisar o visual.
+  skin ||= import.meta.env.DEV ? new URLSearchParams(location.search).get('skin') : null;
+  if (!skin) return null;
+  const k = Object.hasOwn(SKINS_VIVAS, skin) ? SKINS_VIVAS[skin] : undefined;
+  return k?.classe === classe && skinPorId(skin)?.classe === classe ? `skin:${skin}` : null;
+}
 /** A chave do modelo em tempo real do chefe (o preset), se houver. */
 export const chaveDoChefe = (preset: string): string | null => (Object.hasOwn(CHEFES, preset) ? `chefe:${preset}` : null);
 /**
@@ -91,7 +113,7 @@ const PREPARO_DA_MAGIA = 'Spell_Simple_Enter';
 /** A duração dos ciclos no atlas (quadros × ms, quadros-personagem.ts): o modelo anda no mesmo passo. */
 const CICLO_MS: Readonly<Partial<Record<EstadoPersonagem, number>>> = { parado: 880, andar: 760, conjurar: 660, andarConjurar: 660, morte: 660 };
 /** As armas longas que ficam em pé (o cajado, a lança, o arco): seguem o corpo, não o eixo da mão. */
-const EM_PE = new Set(['cajado', 'praga', 'cova', 'cetro', 'sanguineo', 'espectro', 'gadanha', 'lanca', 'foice',
+const EM_PE = new Set(['cajado', 'praga', 'cova', 'cetro', 'sanguineo', 'espectro', 'gadanha', 'gadanha_ceifador', 'lanca', 'foice',
   'arco', 'arco_longo', 'composto', 'arcocurto', 'elfico', 'chifre', 'arcoguerra', 'arcocaca']);
 const ARCOS = /^arco|composto|elfico|chifre/;
 const OSSOS_DAS_PERNAS = /^(root|pelvis|thigh|calf|foot|ball)/i;
@@ -151,6 +173,9 @@ interface Ator {
   /** As armas em pé e o giro delas no corpo (refeito a cada quadro, depois da pose). */
   emPe: { g: THREE.Object3D; giro: THREE.Quaternion }[];
   originais: Map<THREE.Mesh, THREE.Material | THREE.Material[]>;
+  /** O vento do pano da skin: os uniformes do ator, o estado da mola; `panos` são os materiais clonados com ele. */
+  vento: { u: UniformesDeVento; estado: EstadoDoVento } | null;
+  panos: THREE.Material[];
   vagas: number;
   vaga: number;
   textura: Texture;
@@ -378,14 +403,36 @@ export class PalcoVivo {
       for (const m of malhasDe(extra)) {
         const g = m.geometry.index ? m.geometry.toNonIndexed() : m.geometry.clone();
         g.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inverso, m.matrixWorld));
+        // 06/11/2026 (skins): o pano leva dois ossos por vértice (`sa`, `sb`, `sw`, com a tabela de nomes na malha) e o
+        // `solto` que o vento usa; as peças rígidas seguem com um osso só e solto 0.
+        const tabela = m.userData.tabela as string[] | undefined;
+        const doPano = !!tabela && g.hasAttribute('sa') && g.hasAttribute('sb') && g.hasAttribute('sw');
+        const lerAttr = (nome: string): number[] => {
+          if (!g.hasAttribute(nome)) return [];
+          const a = g.getAttribute(nome);
+          return Array.from({ length: a.count }, (_, k) => a.getX(k));
+        };
+        const noRig = (n: number) => Math.max(0, nomes.indexOf(tabela?.[Math.round(n)] ?? ''));
+        const solto = g.hasAttribute('solto') ? Float32Array.from(lerAttr('solto')) : null;
+        const indA = doPano ? lerAttr('sa').map(noRig) : [];
+        const indB = doPano ? lerAttr('sb').map(noRig) : [];
+        const pesoA = doPano ? lerAttr('sw') : [];
         for (const n of Object.keys(g.attributes)) if (n !== 'position' && n !== 'normal' && n !== 'uv') g.deleteAttribute(n);
         const qtd = g.getAttribute('position').count;
         if (!g.hasAttribute('uv')) g.setAttribute('uv', new THREE.Float32BufferAttribute(new Float32Array(qtd * 2), 2));
+        g.setAttribute('solto', new THREE.Float32BufferAttribute(solto ?? new Float32Array(qtd), 1));
         const si = new Uint16Array(qtd * 4);
         const sw = new Float32Array(qtd * 4);
         for (let k = 0; k < qtd; k++) {
-          si[k * 4] = indice;
-          sw[k * 4] = 1;
+          if (doPano) {
+            si[k * 4] = indA[k] ?? 0;
+            si[k * 4 + 1] = indB[k] ?? 0;
+            sw[k * 4] = pesoA[k] ?? 1;
+            sw[k * 4 + 1] = 1 - (pesoA[k] ?? 1);
+          } else {
+            si[k * 4] = indice;
+            sw[k * 4] = 1;
+          }
         }
         g.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(si, 4));
         g.setAttribute('skinWeight', new THREE.Float32BufferAttribute(sw, 4));
@@ -424,7 +471,7 @@ export class PalcoVivo {
     const vaga = this.livres.shift() ?? 0;
     const originais = new Map<THREE.Mesh, THREE.Material | THREE.Material[]>();
     for (const m of malhasDe(raiz)) originais.set(m, m.material);
-    return { base, raiz, mixer, ossos, esqueleto, roupa: '', extras: [], emPe: [], originais, vagas: 0, vaga, textura: this.recorte(vaga), pedido: null, semPedido: 0 };
+    return { base, raiz, mixer, ossos, esqueleto, roupa: '', extras: [], emPe: [], originais, vento: null, panos: [], vagas: 0, vaga, textura: this.recorte(vaga), pedido: null, semPedido: 0 };
   }
 
   /** Veste as peças e as armas do pedido (só quando mudam). */
@@ -435,6 +482,9 @@ export class PalcoVivo {
     for (const x of a.extras) x.removeFromParent();
     a.extras = [];
     a.emPe = [];
+    for (const x of a.panos) x.dispose();
+    a.panos = [];
+    a.vento = null;
     for (const [m, mat] of a.originais) {
       m.material = mat;
       m.visible = true;
@@ -454,7 +504,14 @@ export class PalcoVivo {
       const f = a.base.pecas.get(chave);
       if (!f) continue;
       for (const { geometria, material } of f.malhas) {
-        const s = new THREE.SkinnedMesh(geometria, material);
+        // o pano da skin leva o vento do ator (um clone do material, com os uniformes dele)
+        let mat = material;
+        if (material.userData.vento) {
+          a.vento ??= { u: novosUniformes(), estado: novoEstadoDeVento() };
+          mat = aplicarVento(material, a.vento.u);
+          a.panos.push(mat);
+        }
+        const s = new THREE.SkinnedMesh(geometria, mat);
         s.frustumCulled = false;
         a.raiz.add(s);
         s.updateMatrixWorld(true);
@@ -642,6 +699,7 @@ export class PalcoVivo {
       if (!p || !a.raiz.visible) continue;
       this.vestir(a, p);
       this.posar(a, p);
+      if (a.vento) avancarVento(a.vento.estado, a.vento.u, p.estado === 'andar' || p.estado === 'andarGolpe' || p.estado === 'andarConjurar', p.angulo, performance.now());
       const giro = p.estado === 'golpeGiro' ? 2 * Math.PI * p.fracao : 0;
       a.raiz.rotation.y = Math.atan2(Math.cos(p.angulo), Math.sin(p.angulo)) + giro;
       const col = a.vaga % COLUNAS;
@@ -668,10 +726,12 @@ export class PalcoVivo {
     for (const outro of this.atores.values()) outro.raiz.visible = false;
     this.vestir(a, p);
     this.posar(a, p);
+    if (a.vento) ventoParado(a.vento.u);
     a.raiz.position.set(0, 0, 0);
     a.raiz.rotation.y = -0.42;
     if (a.emPe.length > 0) this.endireitar(a);
-    const alto = CLASSES[p.modelo]?.altura ?? 1.14;
+    // a skin traz a arma maior que o personagem: o enquadramento abre um pouco
+    const alto = (CLASSES[p.modelo]?.altura ?? 1.14) * (p.modelo.startsWith('skin:') ? 1.22 : 1);
     const camera = new THREE.PerspectiveCamera(22, largura / altura, 0.1, 60);
     // a altura toda com folga para a arma e a coroa; o olho um pouco acima do peito, olhando de leve para baixo
     const distancia = (alto * 1.5) / (2 * Math.tan(THREE.MathUtils.degToRad(11)));
@@ -712,6 +772,8 @@ export function pedidoVivo(
   golpe?: PedidoVivo['golpe'],
 ): PedidoVivo {
   const pecas: Partial<Record<PecaDeArmadura, number>> = {};
+  // 06/11/2026: com skin (a chave `skin:<id>`), prevalece a skin: sem peças e sem armas do equipamento (a skin tem a dela).
+  if (modelo.startsWith('skin:')) return { id, modelo, pecas, estado, tempoMs, fracao, angulo, golpe, arma: null, secundaria: null };
   for (const peca of PECAS_DE_ARMADURA) {
     const raridade = aparencia?.[peca];
     if (raridade) pecas[peca] = grauDe(raridade);

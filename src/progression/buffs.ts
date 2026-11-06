@@ -122,6 +122,8 @@ export function aparenciaDe(ctx: ContextoSimulacao, e: Entidade): AparenciaEquip
     formaMaxima,
     raridadeArma: raridade(eq.arma_principal?.itemId),
     raridadeSecundaria: raridade(eq.arma_secundaria?.itemId),
+    // 06/11/2026: a skin vai na aparência pública (vai pela rede com ela); o equipamento segue no estado, só não aparece.
+    skin: e.skin ?? null,
   };
 }
 
@@ -130,7 +132,7 @@ const iguais = (a: AparenciaEquipada | null, b: AparenciaEquipada | null) =>
   (!!a && !!b && a.arma === b.arma && a.secundaria === b.secundaria && a.cabeca === b.cabeca && a.corpo === b.corpo && a.capa === b.capa &&
     a.maos === b.maos && a.pernas === b.pernas && a.pes === b.pes &&
     a.formaArma === b.formaArma && a.elementoArma === b.elementoArma && a.formaMaxima === b.formaMaxima &&
-    a.raridadeArma === b.raridadeArma && a.raridadeSecundaria === b.raridadeSecundaria);
+    a.raridadeArma === b.raridadeArma && a.raridadeSecundaria === b.raridadeSecundaria && (a.skin ?? null) === (b.skin ?? null));
 
 /** Etapa do tick: a aparência pública segue o equipamento de quem tem bolsa. */
 export function atualizarAparencias(estado: EstadoJogo, ctx: ContextoSimulacao): void {

@@ -9,6 +9,7 @@
 // Marco 20 (21/10/2026, D-087): modo de desempenho (teto de fps, escala da resolução, medidor) e o servidor da rede
 // local escolhido neste aparelho (o app Android não tem barra de endereço para o `?servidor=`).
 
+import { skinPorId, skinValida } from '../entities/skins';
 import { gravarNoBanco, lerDoBanco } from './banco';
 
 export type TipoControle = 'joystick' | 'dpad';
@@ -61,6 +62,10 @@ export interface Preferencias {
   seguirAlvo: boolean;
   /** Marco 26 (28/10/2026, D-116): a runa da classe sobre a cabeça dos jogadores. */
   runaDaClasse: boolean;
+  /** 06/11/2026: as skins liberadas por código neste aparelho (ids de entities/skins.ts). */
+  skinsLiberadas: string[];
+  /** A skin vestida em cada classe (classe -> id); sem entrada = o visual do equipamento. */
+  skinsEscolhidas: Record<string, string>;
 }
 
 /** ws(s)://host[:porta], sem caminho: o único formato aceito para o servidor (URL ou preferência). */
@@ -95,6 +100,8 @@ export const PREFERENCIAS_PADRAO: Preferencias = {
   servidor: '',
   seguirAlvo: true,
   runaDaClasse: true,
+  skinsLiberadas: [],
+  skinsEscolhidas: {},
 };
 const PADRAO = PREFERENCIAS_PADRAO;
 
@@ -132,7 +139,21 @@ export function normalizarPreferencias(dados: unknown): Preferencias {
     servidor: typeof d.servidor === 'string' && enderecoDeServidorValido(d.servidor.trim()) ? d.servidor.trim() : PADRAO.servidor,
     seguirAlvo: booleano(d.seguirAlvo, PADRAO.seguirAlvo),
     runaDaClasse: booleano(d.runaDaClasse, PADRAO.runaDaClasse),
+    ...normalizarSkins(d.skinsLiberadas, d.skinsEscolhidas),
   };
+}
+
+/** Só ids que existem; só escolhe a skin liberada e da classe (nada de skin de outra classe ou não liberada). */
+function normalizarSkins(liberadas: unknown, escolhidas: unknown): Pick<Preferencias, 'skinsLiberadas' | 'skinsEscolhidas'> {
+  const ids = Array.isArray(liberadas) ? liberadas.filter((x): x is string => typeof x === 'string' && skinPorId(x) !== null) : [];
+  const skinsLiberadas = [...new Set(ids)];
+  const skinsEscolhidas: Record<string, string> = {};
+  if (typeof escolhidas === 'object' && escolhidas !== null) {
+    for (const [classe, id] of Object.entries(escolhidas)) {
+      if (typeof id === 'string' && skinsLiberadas.includes(id) && skinValida(classe, id)) skinsEscolhidas[classe] = id;
+    }
+  }
+  return { skinsLiberadas, skinsEscolhidas };
 }
 
 function lerLocal(): Preferencias | null {
