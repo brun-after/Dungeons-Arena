@@ -52,9 +52,11 @@ const PREFIXOS: readonly (readonly [string, SomId])[] = [
 ];
 
 /** O som da habilidade ao ser usada (conjuração ou lançamento). */
-export function somDaHabilidade(h: Pick<Habilidade, 'id' | 'tipoAtaque' | 'politicaImpacto' | 'formulaCura' | 'visual'> & Partial<Pick<Habilidade, 'elemento' | 'tags'>>): SomId {
+export function somDaHabilidade(h: Pick<Habilidade, 'id' | 'tipoAtaque' | 'politicaImpacto' | 'formulaCura' | 'visual'> & Partial<Pick<Habilidade, 'elemento' | 'tags'>>, basico = false): SomId {
   if (h.formulaCura !== null && h.politicaImpacto === 'proprio') return 'cura';
-  if (h.elemento) return h.elemento;
+  // 05/11/2026: o básico se repete a cada segundo e meio; o som do elemento (as trevas duram 3 a 4 s) fica para as
+  // habilidades, e o básico toca o som curto do próprio conteúdo (o cajado do necromante: a magia curta).
+  if (h.elemento && !basico) return h.elemento;
   const identidade = `${h.id} ${(h.tags ?? []).join(' ')}`;
   if (/espada|lamina|corte|adaga|machado|lanca|montante|rapieira|chakram/.test(identidade)) return 'lamina';
   if (/martelo|soco|punho|clava|escudo/.test(identidade)) return 'contundente';
@@ -78,7 +80,12 @@ export interface PedidoDeSom {
  * Sons de um evento. `habilidade` traduz o id da habilidade; `idLocal` torna globais os sons que só
  * dizem respeito ao jogador local (coleta, nível, recusa).
  */
-export function sonsDoEvento(ev: EventoSimulacao, idLocal: string, habilidade: (id: string) => Habilidade | undefined): PedidoDeSom[] {
+export function sonsDoEvento(
+  ev: EventoSimulacao,
+  idLocal: string,
+  habilidade: (id: string) => Habilidade | undefined,
+  basico: (id: string) => boolean = () => false,
+): PedidoDeSom[] {
   switch (ev.t) {
     case 'acaoIniciada': {
       const h = habilidade(ev.chave);
@@ -101,7 +108,7 @@ export function sonsDoEvento(ev: EventoSimulacao, idLocal: string, habilidade: (
       if (ev.falha) return [{ som: 'falha', origemId: ev.alvoId }];
       const h = habilidade(ev.chave);
       if (ev.imune) return [];
-      const identidade = h ? somDaHabilidade(h) : 'acerto';
+      const identidade = h ? somDaHabilidade(h, basico(h.id)) : 'acerto';
       const base: SomId = h?.politicaImpacto === 'projetil' && (identidade === 'arco' || identidade === 'projetil')
         ? 'acerto_projetil' : identidade === 'golpe' ? 'acerto' : identidade;
       const sons: PedidoDeSom[] = [{ som: base, origemId: ev.alvoId }];

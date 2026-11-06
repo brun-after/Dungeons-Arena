@@ -634,6 +634,19 @@ body.toque .faixa-controles {
   }
 }
 
+/* 05/11/2026: no desktop o d20 é o primeiro item da fila da barra; oculto, guarda o lugar (a barra não pula). */
+.fila-barra .dado-d20 {
+  position: relative;
+  left: auto;
+  bottom: auto;
+  flex: none;
+}
+
+.fila-barra .dado-d20[hidden] {
+  display: grid;
+  visibility: hidden;
+}
+
 body.movimento-reduzido .dado-d20.girando {
   animation: none;
 }

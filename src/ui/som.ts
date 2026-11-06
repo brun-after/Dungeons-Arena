@@ -31,6 +31,8 @@ export interface OpcoesSom {
   estado: () => EstadoJogo;
   idLocal: string;
   habilidades: BuscaHabilidade;
+  /** 05/11/2026: se a habilidade é um ataque básico (o básico não toca o som longo do elemento). */
+  basico?: (id: string) => boolean;
   fase: Fase;
 }
 
@@ -55,7 +57,7 @@ export function ligarSom(o: OpcoesSom): { quadro: (ouvinte: PontoVisual | null, 
 
   // Um ouvinte genérico para todos os eventos: só traduz e toca.
   const aoEvento = (ev: Parameters<typeof sonsDoEvento>[0]) => {
-    for (const p of sonsDoEvento(ev, idLocal, o.habilidades)) tocarEm(p.som, p.origemId);
+    for (const p of sonsDoEvento(ev, idLocal, o.habilidades, o.basico)) tocarEm(p.som, p.origemId);
   };
   for (const t of [
     'acaoIniciada',

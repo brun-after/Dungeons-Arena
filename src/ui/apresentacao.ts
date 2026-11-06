@@ -121,7 +121,8 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   const medidor = new Medidor();
 
   const motor = new MotorAudio({ musica: prefs.volumeMusica, efeitos: prefs.volumeEfeitos, mudo: o.observador || prefs.mudo });
-  const som = ligarSom({ motor, bus: o.bus, estado: o.estado, idLocal, habilidades: o.habilidades, fase: ctx.fase });
+  const som = ligarSom({ motor, bus: o.bus, estado: o.estado, idLocal, habilidades: o.habilidades,
+    basico: (id) => ctx.conteudo.definicoes.get(id)?.basico === true, fase: ctx.fase });
   const particulas = new SistemaParticulas(palco.efeitos, palco.app.renderer, () => camera.projecaoAtual);
   const impacto = new ControladorImpacto(() => prefs.efeitosDeTela && !reduzido() && qualidade().impacto);
   // Marco 23 (D-092): o tema da fase dá as partículas do ar, a cor da luz e as tochas acesas.
