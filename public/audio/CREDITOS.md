@@ -92,3 +92,16 @@ Arquivos: musica-jornada.mp3 (original: tad_-_unexplored_-_expanded_1_by_bo_jing
 O manifesto JSON preserva a origem, duração e SHA-256 de cada original e arquivo convertido. Os pacotes completos não são necessários para executar o jogo.
 
 O arco de dorkster usa gravações-base de qubodup: https://opengameart.org/content/swish-bamboo-stick-weapon-swhoshes e https://opengameart.org/content/arrow-hit-twang. A adaptação distribuída permanece CC-BY-SA 3.0.
+
+## Adaptações no navegador
+Feitas por tools/audio/adaptar.mjs: velocidade (o tom da risada desce), recorte, pico de -5 dBFS e WAV mono de 32 kHz.
+
+### Swishes Sound Pack
+Autor: artisticdude. Fonte: https://opengameart.org/content/swishes-sound-pack
+Licença: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+Arquivos: zunido-1.wav (original: swish-4.wav), zunido-2.wav (original: swish-7.wav)
+
+### Evil Laugh 2
+Autor: AntumDeluge. Fonte: https://opengameart.org/node/129475
+Licença: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+Arquivos: invocacao-1.wav (original: evil_laugh_02.flac), invocacao-2.wav (original: evil_laugh_02.flac)

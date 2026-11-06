@@ -9,6 +9,8 @@ export const SONS = [
   'fogo', 'gelo', 'raio', 'veneno', 'psiquico', 'terra', 'trevas', 'sagrado',
   'lamina', 'contundente', 'arco', 'quebra', 'teleporte',
   'acerto_projetil', 'lancamento_magico',
+  // 06/11/2026: o zunido do básico mágico (cajado, tomo, cetro), no lançamento e no impacto.
+  'zunido',
   'golpe',
   'acerto',
   'critico',
@@ -55,7 +57,8 @@ const PREFIXOS: readonly (readonly [string, SomId])[] = [
 export function somDaHabilidade(h: Pick<Habilidade, 'id' | 'tipoAtaque' | 'politicaImpacto' | 'formulaCura' | 'visual'> & Partial<Pick<Habilidade, 'elemento' | 'tags'>>, basico = false): SomId {
   if (h.formulaCura !== null && h.politicaImpacto === 'proprio') return 'cura';
   // 05/11/2026: o básico se repete a cada segundo e meio; o som do elemento (as trevas duram 3 a 4 s) fica para as
-  // habilidades, e o básico toca o som curto do próprio conteúdo (o cajado do necromante: a magia curta).
+  // habilidades. 06/11/2026: o básico mágico é um zunido; o físico segue o som da arma.
+  if (basico && h.tipoAtaque === 'magico') return 'zunido';
   if (h.elemento && !basico) return h.elemento;
   const identidade = `${h.id} ${(h.tags ?? []).join(' ')}`;
   if (/espada|lamina|corte|adaga|machado|lanca|montante|rapieira|chakram/.test(identidade)) return 'lamina';
@@ -100,7 +103,8 @@ export function sonsDoEvento(
     }
     case 'projetilLancado': {
       const h = habilidade(ev.chave);
-      return [{ som: h?.tipoAtaque === 'magico' ? 'lancamento_magico' : 'arco', origemId: ev.donoId }];
+      if (h?.tipoAtaque !== 'magico') return [{ som: 'arco', origemId: ev.donoId }];
+      return [{ som: basico(h.id) ? 'zunido' : 'lancamento_magico', origemId: ev.donoId }];
     }
     case 'impacto': {
       if (ev.cura > 0 && ev.dano === 0) return [{ som: 'cura', origemId: ev.alvoId }];

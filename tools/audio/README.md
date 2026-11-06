@@ -25,3 +25,11 @@ Todos os MP3, ambientes, manifesto e créditos entram no precache PWA. Após con
 ## Conjuração e armas secundárias
 
 Ataques básicos de arma (`basico_*`), inclusive o tomo na mão secundária do Guerreiro, não disparam preparação genérica. O antigo `charge.wav` de 4,13 segundos foi retirado da distribuição. Conjurações longas usam as gravações curtas de magia da rubberduck, com até 220 ms e intervalo mínimo de 500 ms; lançamentos genéricos usam até 180 ms. Esses efeitos e o impacto genérico mágico têm uma voz por tipo e saída suave, usando o relógio do áudio para preservar os limites durante pausas.
+
+## Zunido e invocação (06/11/2026)
+
+O ataque básico mágico toca um zunido curto (Swishes Sound Pack, artisticdude, CC0) no lançamento e no impacto; o
+básico físico segue o som da arma e as habilidades, o do elemento. O surgimento da invocação é uma risada baixa
+(Evil Laugh 2, AntumDeluge, CC0) com o tom descido, uma por vez e no máximo uma a cada 1,5 s. Sem FFmpeg na
+máquina, estes quatro arquivos são WAV feitos no Chromium por `node tools/audio/adaptar.mjs CAMINHO_FONTES`
+(velocidade, recorte, pico de -5 dBFS, mono de 32 kHz); `importar.py` preserva as entradas com `adaptacao`.
