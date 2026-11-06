@@ -7,6 +7,14 @@
       "nome": "Ceifador",
       "descricao": "Uma figura encapuzada de mãos de osso, veste rasgada que voa como fumaça e a gadanha das almas.",
       "codigo": "21y8mtw1huv"
+    },
+    {
+      "id": "mago-sombra-rubra",
+      "classe": "mago",
+      "classeNome": "Mago",
+      "nome": "Sombra Rubra",
+      "descricao": "Um mago de rosto em sombra sob o cabelo, manto rasgado com a barra em sangue, runas vermelhas nas armas e no corpo e o cajado de galhos retorcidos.",
+      "codigo": "2a3ccb7tg9j"
     }
   ]
 }

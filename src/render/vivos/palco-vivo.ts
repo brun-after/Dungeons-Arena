@@ -24,6 +24,7 @@ import { CHEFES } from './chefes-vivos';
 import { ARMAS_3D, ESCALA_DO_GRAU, Kit } from './armas3d';
 import { aplicarVento, avancarVento, novoEstadoDeVento, novosUniformes, ventoParado, type EstadoDoVento, type UniformesDeVento } from './skin-pano';
 import { vesteDoCeifador } from './skin-ceifador';
+import { vesteDaSombraRubra } from './skin-mago';
 import { skinPorId } from '../../entities/skins';
 
 const URLS = import.meta.glob<string>('../../assets/modelos/*.glb', { query: '?url', import: 'default' });
@@ -51,6 +52,9 @@ interface Classe {
   veste: ((ossos: { get(nome: string): THREE.Bone | undefined }) => PecaSombria) | null;
   arma: { modelo: string; grau: number } | null;
   tingir?: Readonly<Record<string, number>> | undefined;
+  /** 06/11/2026: o corpo acima do chão (anda no ar) e o ciclo do andar mais longo (cada passo cobre `passada` vezes o chão). */
+  elevacao?: number | undefined;
+  passada?: number | undefined;
 }
 const HUMANO: Classe['clipes'] = { parado: 'Idle_Loop', andar: 'Walk_Loop', golpe: 'Sword_Attack', conjurar: 'Spell_Simple_Shoot', morte: 'Death01' };
 const MAGIA: Classe['clipes'] = { ...HUMANO, golpe: 'Spell_Simple_Shoot' };
@@ -71,12 +75,14 @@ const CLASSES: Record<string, Classe> = {
  * 06/11/2026: as skins com modelo em tempo real (entities/skins.ts tem o catálogo e o código de cada uma). Cada skin é uma
  * "classe" do palco com a chave `skin:<id>`: o rig da classe dela, a veste fixa e a arma própria, sem o equipamento.
  */
-const SKINS_VIVAS: Readonly<Record<string, { classe: string; altura: number; veste: Classe['veste']; arma: Classe['arma'] }>> = {
+const SKINS_VIVAS: Readonly<Record<string, Pick<Classe, 'altura' | 'veste' | 'arma' | 'elevacao' | 'passada'> & { classe: string; largura?: number }>> = {
   'necromante-ceifador': { classe: 'necromante', altura: 1.2, veste: vesteDoCeifador, arma: { modelo: 'gadanha_ceifador', grau: 4 } },
+  // o mago adolescente: 20% mais baixo e 15% mais magro, flutuando com a cabeça na altura de antes; o passo divino cobre 3x o chão
+  'mago-sombra-rubra': { classe: 'mago', altura: 1.12 * 0.8, largura: 0.85, elevacao: 1.12 * 0.2, passada: 3, veste: vesteDaSombraRubra, arma: { modelo: 'cajado_retorcido', grau: 4 } },
 };
 for (const [id, k] of Object.entries(SKINS_VIVAS)) {
   const base = CLASSES[k.classe];
-  if (base) CLASSES[`skin:${id}`] = { ...base, altura: k.altura, veste: k.veste, arma: k.arma };
+  if (base) CLASSES[`skin:${id}`] = { ...base, altura: k.altura, largura: k.largura ?? base.largura, elevacao: k.elevacao, passada: k.passada, veste: k.veste, arma: k.arma };
 }
 /** A chave do palco da skin (só se existir o modelo e a skin for da classe), ou null. */
 export function chaveDaSkin(skin: string | null | undefined, classe: string): string | null {
@@ -113,7 +119,7 @@ const PREPARO_DA_MAGIA = 'Spell_Simple_Enter';
 /** A duração dos ciclos no atlas (quadros × ms, quadros-personagem.ts): o modelo anda no mesmo passo. */
 const CICLO_MS: Readonly<Partial<Record<EstadoPersonagem, number>>> = { parado: 880, andar: 760, conjurar: 660, andarConjurar: 660, morte: 660 };
 /** As armas longas que ficam em pé (o cajado, a lança, o arco): seguem o corpo, não o eixo da mão. */
-const EM_PE = new Set(['cajado', 'praga', 'cova', 'cetro', 'sanguineo', 'espectro', 'gadanha', 'gadanha_ceifador', 'lanca', 'foice',
+const EM_PE = new Set(['cajado', 'praga', 'cova', 'cetro', 'sanguineo', 'espectro', 'gadanha', 'gadanha_ceifador', 'cajado_retorcido', 'lanca', 'foice',
   'arco', 'arco_longo', 'composto', 'arcocurto', 'elfico', 'chifre', 'arcoguerra', 'arcocaca']);
 const ARCOS = /^arco|composto|elfico|chifre/;
 const OSSOS_DAS_PERNAS = /^(root|pelvis|thigh|calf|foot|ball)/i;
@@ -545,7 +551,9 @@ export class PalcoVivo {
       if (EM_PE.has(arma.modelo)) {
         // Inclinada um pouco para a frente e virada para a câmera (o arco de perfil viraria um risco a 48 px).
         // 05/11/2026: o arco meio giro em pé, a madeira para o alvo e a corda para quem atira (estava ao contrário).
-        const giro = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.18, ARCOS.test(arma.modelo) ? 0.35 + Math.PI : 0.4, 0));
+        // 06/11/2026: o cajado da Sombra Rubra vai na diagonal, à frente do manto (a arte).
+        const giro = new THREE.Quaternion().setFromEuler(arma.modelo === 'cajado_retorcido' ? new THREE.Euler(0.42, 0.4, 0.3)
+          : new THREE.Euler(0.18, ARCOS.test(arma.modelo) ? 0.35 + Math.PI : 0.4, 0));
         a.emPe.push({ g, giro });
       }
     }
@@ -568,7 +576,8 @@ export class PalcoVivo {
     const clipe = a.base.clipes.get(nome);
     a.mixer.stopAllAction();
     if (!clipe) return;
-    const ciclo = preparaMagia || deGolpe ? undefined : CICLO_MS[p.estado];
+    const passo = p.estado.startsWith('andar') ? classe.passada ?? 1 : 1;
+    const ciclo = preparaMagia || deGolpe ? undefined : (CICLO_MS[p.estado] ?? Number.NaN) * passo || undefined;
     const tempo = (c: THREE.AnimationClip, ms: number | undefined) => {
       if (p.estado === 'morte') return Math.min(c.duration - 1e-3, (p.tempoMs / (ms ?? 660)) * c.duration);
       if (preparaMagia) return Math.min(c.duration - 1e-3, saida(g.preparo ?? 0) * c.duration);
@@ -599,7 +608,7 @@ export class PalcoVivo {
       const andar = a.base.pernas.get(classe.clipes.andar);
       const tronco = a.base.tronco.get(nome);
       const troncoParado = a.base.tronco.get(parado);
-      if (andar) tocar(andar, ((p.tempoMs % 760) / 760) * andar.duration);
+      if (andar) tocar(andar, ((p.tempoMs % (760 * passo)) / (760 * passo)) * andar.duration);
       if (tronco) tocar(tronco, tempo(clipe, ciclo), 1 - guarda);
       if (troncoParado && guarda > 0) tocar(troncoParado, tParado(troncoParado), guarda);
     } else {
@@ -705,6 +714,7 @@ export class PalcoVivo {
       const col = a.vaga % COLUNAS;
       const lin = Math.floor(a.vaga / COLUNAS);
       a.raiz.position.copy(this.direita).multiplyScalar(col * QL).addScaledVector(this.cima, -lin * QA);
+      a.raiz.position.y += (CLASSES[p.modelo]?.elevacao ?? 0) * (1 + 0.12 * Math.sin(performance.now() / 420)); // flutua sobe e desce (06/11/2026)
       if (a.emPe.length > 0) this.endireitar(a);
     }
     this.renderer.render(this.cena, this.camera);
@@ -727,11 +737,11 @@ export class PalcoVivo {
     this.vestir(a, p);
     this.posar(a, p);
     if (a.vento) ventoParado(a.vento.u);
-    a.raiz.position.set(0, 0, 0);
+    a.raiz.position.set(0, CLASSES[p.modelo]?.elevacao ?? 0, 0);
     a.raiz.rotation.y = -0.42;
     if (a.emPe.length > 0) this.endireitar(a);
     // a skin traz a arma maior que o personagem: o enquadramento abre um pouco
-    const alto = (CLASSES[p.modelo]?.altura ?? 1.14) * (p.modelo.startsWith('skin:') ? 1.22 : 1);
+    const alto = ((CLASSES[p.modelo]?.altura ?? 1.14) + (CLASSES[p.modelo]?.elevacao ?? 0)) * (p.modelo.startsWith('skin:') ? 1.22 : 1);
     const camera = new THREE.PerspectiveCamera(22, largura / altura, 0.1, 60);
     // a altura toda com folga para a arma e a coroa; o olho um pouco acima do peito, olhando de leve para baixo
     const distancia = (alto * 1.5) / (2 * Math.tan(THREE.MathUtils.degToRad(11)));

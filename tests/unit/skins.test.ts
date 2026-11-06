@@ -54,6 +54,13 @@ describe('catálogo de skins', () => {
     expect(hashDoCodigo(CODIGO)).toBe(skinPorId('necromante-ceifador')?.codigo);
   });
 
+  it('cada skin do catálogo abre com o próprio código, e só com ele', () => {
+    expect(skinDoCodigo('MAGO-SOMBRA-RUBRA-4KR7')?.id).toBe('mago-sombra-rubra');
+    expect(skinDoCodigo('mago sombra rubra 4kr7')?.classe).toBe('mago');
+    expect(skinDoCodigo(CODIGO)?.classe).toBe('necromante');
+    expect(JSON.stringify(SKINS).toUpperCase()).not.toContain('SOMBRARUBRA4KR7');
+  });
+
   it('código errado, curto ou vazio não libera nada', () => {
     for (const ruim of ['', '   ', 'abc', 'NECRO-CEIFADOR-0000', 'ceifador']) expect(skinDoCodigo(ruim)).toBeNull();
   });
@@ -61,6 +68,8 @@ describe('catálogo de skins', () => {
   it('a skin só vale para a classe dela', () => {
     expect(skinValida('necromante', 'necromante-ceifador')).toBe(true);
     expect(skinValida('guerreiro', 'necromante-ceifador')).toBe(false);
+    expect(skinValida('mago', 'mago-sombra-rubra')).toBe(true);
+    expect(skinValida('necromante', 'mago-sombra-rubra')).toBe(false);
     expect(skinValida('necromante', 'nao-existe')).toBe(false);
     expect(skinsDaClasse('necromante').map((s) => s.id)).toContain('necromante-ceifador');
     expect(skinsDaClasse('guerreiro')).toEqual([]);
@@ -82,6 +91,14 @@ describe('comando skin', () => {
     c.tick({ t: 'skin', id: 'necromante-ceifador' });
     expect(c.j().skin).toBe('necromante-ceifador');
     c.tick({ t: 'skin', id: null });
+    expect(c.j().skin ?? null).toBeNull();
+  });
+
+  it('o mago veste a skin dele e recusa a do necromante', () => {
+    const c = cena('mago');
+    c.tick({ t: 'skin', id: 'mago-sombra-rubra' });
+    expect(c.j().skin).toBe('mago-sombra-rubra');
+    c.tick({ t: 'skin', id: 'necromante-ceifador' });
     expect(c.j().skin ?? null).toBeNull();
   });
 
