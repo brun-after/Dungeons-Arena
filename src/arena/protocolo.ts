@@ -188,6 +188,8 @@ export function lerComando(v: unknown): Comando | null {
       return typeof v.ligado === 'boolean' ? { t: 'autoAtaque', ligado: v.ligado } : null;
     case 'seguirAlvo':
       return typeof v.ligado === 'boolean' ? { t: 'seguirAlvo', ligado: v.ligado } : null;
+    case 'skin':
+      return v.id === null || (typeof v.id === 'string' && v.id.length <= 64) ? { t: 'skin', id: v.id } : null;
     default:
       return null;
   }

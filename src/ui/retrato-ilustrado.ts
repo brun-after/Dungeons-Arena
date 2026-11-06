@@ -201,8 +201,11 @@ function palco(): Promise<import('../render/vivos/palco-vivo').PalcoVivo | null>
 async function retrato3d(modelo: string, eq: AparenciaEquipada | null): Promise<HTMLCanvasElement | null> {
   const p = await palco();
   if (!p?.suporta(modelo)) return null;
-  const { pedidoVivo } = await import('../render/vivos/palco-vivo');
-  const pedido = pedidoVivo(`retrato:${modelo}`, modelo, eq, equipamento3d(modelo, eq, existeArma3d), 'parado', 0, 0, Math.PI / 2);
+  const { pedidoVivo, chaveDaSkin } = await import('../render/vivos/palco-vivo');
+  // 06/11/2026: com skin vestida, o retrato é a skin (sem o equipamento).
+  const chave = chaveDaSkin(eq?.skin, modelo) ?? modelo;
+  if (chave !== modelo && !p.suporta(chave)) return null;
+  const pedido = pedidoVivo(`retrato:${chave}`, chave, eq, equipamento3d(modelo, eq, existeArma3d), 'parado', 0, 0, Math.PI / 2);
   const escala = Math.min(2, Math.max(1, globalThis.devicePixelRatio || 1));
   const canvas = await p.retrato(pedido, Math.round((LARGURA + MARGEM * 2) * escala), Math.round(ALTURA * escala));
   return canvas;

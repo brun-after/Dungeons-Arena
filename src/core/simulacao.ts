@@ -23,6 +23,7 @@ import { dispensarInvocacoes } from '../combat/invocacoes';
 import { moverProjeteis } from '../combat/projeteis';
 import { processarSolos } from '../combat/solos';
 import { vivo } from '../entities/entidade';
+import { skinValida } from '../entities/skins';
 import { processarIa } from '../entities/ia';
 import { desequipar, distribuirPonto, equipar, moverItem, usarItem } from '../progression/inventario';
 import { ehDificuldade } from '../modos/dificuldade';
@@ -160,6 +161,13 @@ function aplicarComandos(
         ator.seguirAlvo = cmd.ligado;
         if (!cmd.ligado) delete ator.seguindo;
         break;
+      case 'skin': {
+        // 06/11/2026: só visual. A skin precisa existir e ser da classe do personagem; senão volta ao equipamento.
+        const classe = ator.classeId ?? ator.bolsa?.classeId ?? '';
+        if (cmd.id !== null && skinValida(classe, cmd.id)) ator.skin = cmd.id;
+        else delete ator.skin;
+        break;
+      }
       case 'ativarPassiva':
       case 'desativarPassiva':
         definirPassiva(estado, ctx, ator, cmd.id, cmd.t === 'ativarPassiva', saida);

@@ -2,6 +2,7 @@
 // modal acessível (<dialog>). Cada mudança vale na hora (`aoMudar`) e é gravada (preferencias.ts).
 // Marco 13 (14/10/2026): a visão (de cima ou isométrica) e a aparência (imagem própria, sentido e tamanho).
 
+import { SKINS, skinDoCodigo } from '../entities/skins';
 import { t, type ChaveTexto } from '../i18n';
 import { gravarPreferencias, lerPreferencias, type Preferencias } from '../plataforma/preferencias';
 import { apagarImagemToken, gravarImagemToken } from '../plataforma/token';
@@ -110,6 +111,7 @@ export function criarConfiguracoes(o: { toque: boolean; direcional?: boolean; ao
       campo(t('config.estiloNasGeradas'), marcador('estiloNasGeradas', p.estiloNasGeradas, (v) => { mudar({ estiloNasGeradas: v }); })),
     );
     secao(t('config.aparencia'), ...aparencia(p));
+    secao(t('config.skins'), ...skins(p));
     const creditosAudio = el('a', undefined, t('config.creditosAudio'));
     creditosAudio.href = `${import.meta.env.BASE_URL}audio/index.html`;
     creditosAudio.target = '_blank';
@@ -141,6 +143,70 @@ export function criarConfiguracoes(o: { toque: boolean; direcional?: boolean; ao
       campo(t('config.escala'), faixa('escalaInterface', Math.round(p.escalaInterface * 100), 80, 150, 10, (v) => { mudar({ escalaInterface: v / 100 }); })),
       campo(t('config.movimentoReduzido'), escolha('movimentoReduzido', p.movimentoReduzido, ['sistema', 'sempre', 'nunca'] as const, 'movimento', (v) => { mudar({ movimentoReduzido: v }); })),
     );
+  };
+
+  // 06/11/2026: skins. O código libera a skin neste aparelho; a escolha é por classe e vale na hora (cena.ts manda o comando).
+  const skins = (p: Preferencias): HTMLElement[] => {
+    const campoCodigo = el('input');
+    campoCodigo.type = 'text';
+    campoCodigo.autocomplete = 'off';
+    campoCodigo.spellcheck = false;
+    campoCodigo.maxLength = 40;
+    campoCodigo.dataset.config = 'codigoSkin';
+    const situacao = el('p', 'dica-config');
+    situacao.setAttribute('role', 'status');
+    situacao.dataset.config = 'situacaoSkin';
+    const ativar = el('button', 'botao-config', t('config.skinsAtivar'));
+    ativar.type = 'button';
+    ativar.dataset.config = 'ativarSkin';
+    const resgatar = () => {
+      const s = skinDoCodigo(campoCodigo.value);
+      if (!s) {
+        situacao.dataset.resultado = 'invalido';
+        situacao.textContent = t('config.skinsInvalido');
+        return;
+      }
+      const atual = lerPreferencias();
+      const jaTinha = atual.skinsLiberadas.includes(s.id);
+      if (!jaTinha) mudar({ skinsLiberadas: [...atual.skinsLiberadas, s.id] });
+      desenhar();
+      const nova = corpoSituacao();
+      nova.dataset.resultado = jaTinha ? 'repetido' : 'ok';
+      nova.textContent = jaTinha ? t('config.skinsJaTem', { nome: s.nome }) : t('config.skinsOk', { nome: s.nome, classe: s.classeNome });
+    };
+    // O desenho refaz o corpo do modal: a mensagem vai na linha nova.
+    const corpoSituacao = (): HTMLElement => modal.corpo.querySelector<HTMLElement>('[data-config="situacaoSkin"]') ?? situacao;
+    ativar.addEventListener('click', resgatar);
+    campoCodigo.addEventListener('keydown', (ev) => {
+      if (ev.key !== 'Enter') return;
+      ev.preventDefault();
+      resgatar();
+    });
+    const linhas: HTMLElement[] = [el('p', 'dica-config', t('config.skinsDica')), campo(t('config.skinsCodigo'), campoCodigo), ativar, situacao];
+    const liberadas = SKINS.filter((s) => p.skinsLiberadas.includes(s.id));
+    if (liberadas.length === 0) linhas.push(el('p', 'dica-config', t('config.skinsNenhuma')));
+    for (const classe of new Set(liberadas.map((s) => s.classe))) {
+      const doClasse = liberadas.filter((s) => s.classe === classe);
+      const seletor = el('select');
+      seletor.dataset.config = `skin-${classe}`;
+      const padrao = el('option', undefined, t('config.skinsPadrao'));
+      padrao.value = '';
+      seletor.append(padrao);
+      for (const s of doClasse) {
+        const op = el('option', undefined, s.nome);
+        op.value = s.id;
+        op.selected = p.skinsEscolhidas[classe] === s.id;
+        seletor.append(op);
+      }
+      seletor.addEventListener('change', () => {
+        // sem a entrada da classe quando volta ao equipamento
+        const resto = Object.fromEntries(Object.entries(lerPreferencias().skinsEscolhidas).filter(([c]) => c !== classe));
+        if (seletor.value) resto[classe] = seletor.value;
+        mudar({ skinsEscolhidas: resto });
+      });
+      linhas.push(campo(t('config.skinsDe', { classe: doClasse[0]?.classeNome ?? classe }), seletor));
+    }
+    return linhas;
   };
 
   // Imagem do personagem: validada e recortada antes de gravar; recusada, o jogo segue com o modelo padrão.

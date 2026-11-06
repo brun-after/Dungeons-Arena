@@ -31,6 +31,7 @@ import { podeFerir } from '../modos/relacao';
 import { consumiveisComAtalho } from '../progression/inventario';
 import { detectarToque, mostrarDirecional, sinaisDoNavegador } from '../plataforma/dispositivo';
 import { lerPreferencias, type Preferencias } from '../plataforma/preferencias';
+import { sincronizarSkin as sincronizarSkinLocal } from './sincronizar-skin';
 import { prepararSessaoDeTela } from '../plataforma/sessao-tela';
 import { Camera } from '../render/camera';
 import { criarProjecao } from '../render/projecao';
@@ -159,6 +160,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const prefs: Preferencias = lerPreferencias();
   let aparencia: Preferencias = prefs;
   const jogador = () => o.estado().entidades.find((e) => e.id === idLocal);
+  const sincronizarSkin = (p: Preferencias) => { sincronizarSkinLocal(jogador(), p, emitir); }; // 06/11/2026
 
   o.raiz.textContent = '';
   // Marco 16: os modais vão para o <body> (modal.ts); ao desmontar, saem os que esta cena criou.
@@ -208,6 +210,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     aoMudarPreferencias: (p) => {
       camera.modo = p.camera;
       if (p.seguirAlvo !== aparencia.seguirAlvo) emitir({ t: 'seguirAlvo', ligado: p.seguirAlvo });
+      sincronizarSkin(p);
       controles?.trocarTipo(p.controle);
       if (p.sentidoToken !== aparencia.sentidoToken || p.tamanhoToken !== aparencia.tamanhoToken) sprites.reiniciarVisual();
       aparencia = p;
@@ -667,6 +670,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
         celulaCentralizada = true;
         // Marco 26 (D-121): a opção seguir alvo vai ao personagem assim que ele existe.
         if (j.seguirAlvo !== aparencia.seguirAlvo) emitir({ t: 'seguirAlvo', ligado: aparencia.seguirAlvo });
+        sincronizarSkin(aparencia);
       }
       camera.seguirCelula({ x: j.x, y: j.y });
       posicaoVisual = q.posicao(j);

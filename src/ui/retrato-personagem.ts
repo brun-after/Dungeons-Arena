@@ -1,4 +1,6 @@
 import { lerImagemToken } from '../plataforma/token';
+import { lerPreferencias } from '../plataforma/preferencias';
+import { skinEscolhida } from '../entities/skins';
 import { conteudoOficial } from '../core/conteudo';
 import { retratoIlustrado } from './retrato-ilustrado';
 import type { Entidade } from '../entities/entidade';
@@ -23,7 +25,11 @@ export function retratoPersonagem(classeId: string, personagem?: Pick<Entidade, 
       return;
     }
     // 05/11/2026: a ilustração marca o retrato pronto; o 3D troca o canvas depois e marca data-vivo.
-    await retratoIlustrado(modelo, personagem?.aparencia ?? null, (canvas, vivo) => {
+    // 06/11/2026: a skin escolhida para a classe aparece também nos menus (sem o equipamento).
+    const skin = skinEscolhida(lerPreferencias().skinsEscolhidas, classeId);
+    const vazio = { arma: null, secundaria: null, cabeca: null, corpo: null, capa: null, formaArma: null, elementoArma: null, formaMaxima: null };
+    const aparencia = skin ? { ...vazio, ...personagem?.aparencia, skin } : (personagem?.aparencia ?? null);
+    await retratoIlustrado(modelo, aparencia, (canvas, vivo) => {
       canvas.className = 'retrato-classe retrato-ilustrado';
       canvas.setAttribute('role', 'img');
       canvas.setAttribute('aria-label', `Aparência de ${classeId}`);

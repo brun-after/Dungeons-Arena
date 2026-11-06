@@ -329,6 +329,8 @@ export interface Entidade {
   autoAtaque: boolean;
   /** Marco 26 (28/10/2026, D-121): a opção seguir alvo do jogador (comando `seguirAlvo`); ausente = desligada. */
   seguirAlvo?: boolean;
+  /** 06/11/2026: a skin escolhida (entities/skins.ts, comando `skin`); ausente ou null = o visual do equipamento. */
+  skin?: string | null;
   /** O alvo que a automação segue, a célula onde o caminho foi planejado e se ela está andando atrás dele. */
   seguindo?: { id: EntidadeId; x: number; y: number; andando: boolean };
   /** O alvo cuja automação o direcional cancelou (até outro ser escolhido). */
@@ -442,6 +444,8 @@ export interface AparenciaEquipada {
   /** Marco 32 (31/10/2026, D-131): a raridade da arma de cada mão (o modelo 3D cresce e se enfeita com ela). */
   raridadeArma?: string | null;
   raridadeSecundaria?: string | null;
+  /** 06/11/2026: a skin ativa; com ela, o equipamento não aparece no personagem (palco-vivo.ts). */
+  skin?: string | null;
 }
 
 export const ATRIBUTOS_NEUTROS: Readonly<Atributos> = {

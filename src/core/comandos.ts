@@ -53,6 +53,8 @@ export type Comando =
   | { t: 'autoAtaque'; ligado: boolean }
   /** Marco 26 (28/10/2026, D-121): liga ou desliga o seguir alvo (a opção das Configurações). */
   | { t: 'seguirAlvo'; ligado: boolean }
+  /** 06/11/2026: veste uma skin da classe (id) ou volta ao visual do equipamento (null). Só visual. */
+  | { t: 'skin'; id: string | null }
   /** Marco 24 (D-094): a ultimate do par nas teclas 1 e 2, com o medidor cheio (o botão grande e a tecla R). */
   | { t: 'usarUltimate'; alvo?: EntidadeId | Celula }
   /** Marco 24 (D-095): liga ou desliga uma passiva geral conhecida (até 3, fora de combate). */
@@ -85,6 +87,7 @@ export const TIPOS_DE_COMANDO: readonly Comando['t'][] = [
   'definirDificuldade',
   'autoAtaque',
   'seguirAlvo',
+  'skin',
   'usarUltimate',
   'ativarPassiva',
   'desativarPassiva',

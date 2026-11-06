@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.40 · **Data:** 05/11/2026
+**Versão do documento:** 3.41 · **Data:** 06/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.41 (06/11/2026)**: skins de personagem: liberadas por código, escolhidas por classe em Configurações e que prevalecem sobre o equipamento; a primeira é o Ceifador do necromante, em 3D, com o manto voando contra o movimento (D-134).
 > - **3.40 (05/11/2026)**: personagens aceleram (saem com 70% da velocidade, pico em 0,5 s) e perdem o impulso sob lentidão; atacar de longe deixa um pouco lento; perseguidores ganham um fôlego sutil quando não alcançam (bem menor no chefe); o Arqueiro andando alcança 20% menos; a volta do Bumerangue básico cai para 45% (D-132).
 > - **3.39 (05/11/2026)**: marco 37 (em andamento): golpes e magias em três tempos (carga, impacto no lançamento e volta), variados entre ataques seguidos e com o peso do corpo, nos jogadores, chefes e monstros (D-133, fase 3).
 > - **3.38 (04/11/2026)**: marco 37 (em andamento): as cinco classes e os chefes humanoides em 3D em tempo real, cada classe com o seu arquétipo sombrio; armas sóbrias; retratos dos menus renderizados do mesmo modelo 3D (D-133, fase 2).
