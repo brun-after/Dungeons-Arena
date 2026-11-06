@@ -24,6 +24,7 @@ import { CHEFES } from './chefes-vivos';
 import { ARMAS_3D, ESCALA_DO_GRAU, Kit } from './armas3d';
 import { aplicarVento, avancarVento, novoEstadoDeVento, novosUniformes, ventoParado, type EstadoDoVento, type UniformesDeVento } from './skin-pano';
 import { vesteDoCeifador } from './skin-ceifador';
+import { vesteDaSombraRubra } from './skin-mago';
 import { skinPorId } from '../../entities/skins';
 
 const URLS = import.meta.glob<string>('../../assets/modelos/*.glb', { query: '?url', import: 'default' });
@@ -73,6 +74,7 @@ const CLASSES: Record<string, Classe> = {
  */
 const SKINS_VIVAS: Readonly<Record<string, { classe: string; altura: number; veste: Classe['veste']; arma: Classe['arma'] }>> = {
   'necromante-ceifador': { classe: 'necromante', altura: 1.2, veste: vesteDoCeifador, arma: { modelo: 'gadanha_ceifador', grau: 4 } },
+  'mago-sombra-rubra': { classe: 'mago', altura: 1.12, veste: vesteDaSombraRubra, arma: { modelo: 'cajado_retorcido', grau: 4 } },
 };
 for (const [id, k] of Object.entries(SKINS_VIVAS)) {
   const base = CLASSES[k.classe];
@@ -113,7 +115,7 @@ const PREPARO_DA_MAGIA = 'Spell_Simple_Enter';
 /** A duração dos ciclos no atlas (quadros × ms, quadros-personagem.ts): o modelo anda no mesmo passo. */
 const CICLO_MS: Readonly<Partial<Record<EstadoPersonagem, number>>> = { parado: 880, andar: 760, conjurar: 660, andarConjurar: 660, morte: 660 };
 /** As armas longas que ficam em pé (o cajado, a lança, o arco): seguem o corpo, não o eixo da mão. */
-const EM_PE = new Set(['cajado', 'praga', 'cova', 'cetro', 'sanguineo', 'espectro', 'gadanha', 'gadanha_ceifador', 'lanca', 'foice',
+const EM_PE = new Set(['cajado', 'praga', 'cova', 'cetro', 'sanguineo', 'espectro', 'gadanha', 'gadanha_ceifador', 'cajado_retorcido', 'lanca', 'foice',
   'arco', 'arco_longo', 'composto', 'arcocurto', 'elfico', 'chifre', 'arcoguerra', 'arcocaca']);
 const ARCOS = /^arco|composto|elfico|chifre/;
 const OSSOS_DAS_PERNAS = /^(root|pelvis|thigh|calf|foot|ball)/i;

@@ -13,14 +13,14 @@ import { filigrana, fita, rasgos, superficie, ventoso, type Anel } from './skin-
 import { sorteio } from './sombrio-base';
 
 type Obj = THREE.Object3D;
-const suave = (a: number, b: number, x: number): number => {
+export const suave = (a: number, b: number, x: number): number => {
   const t = Math.min(1, Math.max(0, (x - a) / (b - a || 1)));
   return t * t * (3 - 2 * t);
 };
-const mix = (a: number, b: number, t: number): number => a + (b - a) * t;
+export const mix = (a: number, b: number, t: number): number => a + (b - a) * t;
 
 /** A interpolação suave de uma tabela [y, valor] (y decrescente: do alto para baixo). */
-function perfilDe(tabela: readonly (readonly [number, number])[]): (y: number) => number {
+export function perfilDe(tabela: readonly (readonly [number, number])[]): (y: number) => number {
   return (y) => {
     if (y >= (tabela[0] as readonly [number, number])[0]) return (tabela[0] as readonly [number, number])[1];
     for (let i = 1; i < tabela.length; i++) {
@@ -83,7 +83,7 @@ function halo(): THREE.Material {
 
 // ---------- o manto, a sobressaia e o tabardo ----------
 /** Os dentes da barra: o quanto cada coluna desce (em metros do rig). */
-function dentes(colunas: number, semente: number, fundo: number): number[] {
+export function dentes(colunas: number, semente: number, fundo: number): number[] {
   const r = sorteio(semente);
   const lista: number[] = [];
   let atual = 0;
@@ -95,7 +95,7 @@ function dentes(colunas: number, semente: number, fundo: number): number[] {
   return lista;
 }
 
-interface Eixos {
+export interface Eixos {
   topo: number;
   barra: number;
   bacia: number;
@@ -104,7 +104,7 @@ interface Eixos {
   rz: (y: number) => number;
 }
 
-function eixosDoCorpo(c: Corpo): Eixos {
+export function eixosDoCorpo(c: Corpo): Eixos {
   const u = c.u;
   const pesc = c.p('neck_01'), s3 = c.p('spine_03'), s2 = c.p('spine_02'), bacia = c.p('pelvis'), joelho = c.p('calf_l');
   const barra = Math.min(c.p('ball_l').y, c.p('ball_r').y) + 0.01 * u;
@@ -115,7 +115,7 @@ function eixosDoCorpo(c: Corpo): Eixos {
 }
 
 /** Os pesos do pano que desce do corpo: o tronco segue a coluna; abaixo da bacia, mistura bacia e a coxa do lado. */
-function pesosDoManto(c: Corpo, e: Eixos): (i: number, j: number, a: number, p: THREE.Vector3) => readonly [string, string, number] {
+export function pesosDoManto(c: Corpo, e: Eixos): (i: number, j: number, a: number, p: THREE.Vector3) => readonly [string, string, number] {
   const s2 = c.p('spine_02').y;
   return (_i, _j, _a, p) => {
     if (p.y >= s2) return ['spine_03', 'spine_02', suave(s2, s2 + 0.2 * c.u, p.y)];
@@ -235,18 +235,18 @@ function manga(c: Corpo, lado: 'l' | 'r', m: M, extras: Obj[]): void {
 }
 
 /** A mão de osso: os metacarpos presos na mão e cada dedo em falanges presas aos ossos dele (dobram com a animação). */
-function mao(c: Corpo, lado: 'l' | 'r', m: M, extras: Obj[]): void {
+export function mao(c: Corpo, lado: 'l' | 'r', m: Pick<M, 'osso'>, extras: Obj[], grosso = 1): void {
   const u = c.u;
   const pulso = c.p(`hand_${lado}`);
   const dedos = ['index', 'middle', 'ring', 'pinky'] as const;
   for (const d of dedos) {
     const base = c.p(`${d}_01_${lado}`);
-    const meta = new THREE.Mesh(new THREE.CylinderGeometry(0.007 * u, 0.0085 * u, 1, 6), m.osso);
+    const meta = new THREE.Mesh(new THREE.CylinderGeometry(0.007 * u * grosso, 0.0085 * u * grosso, 1, 6), m.osso);
     meta.scale.y = pulso.distanceTo(base);
     aoLongo(meta, pulso, base, 0.5);
     c.prender(`hand_${lado}`, meta, extras);
   }
-  const palma = new THREE.Mesh(new THREE.BoxGeometry(0.06 * u, 0.012 * u, 0.012 * u), m.osso);
+  const palma = new THREE.Mesh(new THREE.BoxGeometry(0.06 * u, 0.012 * u * grosso, 0.012 * u * grosso), m.osso);
   palma.position.copy(pulso.clone().lerp(c.p(`middle_01_${lado}`), 0.55));
   palma.rotation.z = lado === 'l' ? 0.2 : -0.2;
   c.prender(`hand_${lado}`, palma, extras);
@@ -255,12 +255,12 @@ function mao(c: Corpo, lado: 'l' | 'r', m: M, extras: Obj[]): void {
     pontos.push(c.p(`${d}_04_leaf_${lado}`));
     for (let k = 0; k < 3; k++) {
       const a = pontos[k] as THREE.Vector3, b = pontos[k + 1] as THREE.Vector3;
-      const falange = new THREE.Mesh(new THREE.CylinderGeometry(0.0055 * u * (k === 2 ? 0.55 : 0.85), 0.0075 * u, 1, 6), m.osso);
+      const falange = new THREE.Mesh(new THREE.CylinderGeometry(0.0055 * u * grosso * (k === 2 ? 0.55 : 0.85), 0.0075 * u * grosso, 1, 6), m.osso);
       falange.scale.y = a.distanceTo(b);
       aoLongo(falange, a, b, 0.5);
       c.prender(`${d}_0${k + 1}_${lado}`, falange, extras);
       const junta = new THREE.Mesh(esfera(0.0085, 8, 6), m.osso);
-      junta.scale.setScalar(u);
+      junta.scale.setScalar(u * grosso);
       junta.position.copy(a);
       c.prender(`${d}_0${k + 1}_${lado}`, junta, extras);
     }

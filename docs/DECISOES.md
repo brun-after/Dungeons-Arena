@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.80 · **Data:** 06/11/2026
+**Versão:** 0.81 · **Data:** 06/11/2026
 
 > **Histórico**
+> - **0.81 (06/11/2026)**: D-134: a segunda skin, a Sombra Rubra do mago.
 > - **0.80 (06/11/2026)**: D-134: skins de personagem (liberadas por código, escolhidas por classe, que prevalecem sobre o equipamento) e a primeira, o Ceifador do necromante, com o pano que voa contra o movimento.
 > - **0.79 (05/11/2026)**: D-132: aceleração dos personagens, lentidão de quem ataca de longe, o fôlego de caça dos perseguidores (menor no chefe), o alcance do Arqueiro 20% menor andando, a volta do Bumerangue básico em 45% e o PvP do ritmo com 9 lutas (balance 37).
 > - **0.78 (05/11/2026)**: D-133, fase 3: golpes e magias em três tempos (carga, impacto e volta), variados e com o peso do corpo.
@@ -3850,3 +3851,9 @@ lançamento é `NECRO-CEIFADOR-9QX4`; para trocar, gere o hash com `hashDoCodigo
 
 **Consequências.** O save não muda (`skin` é opcional na entidade; as preferências se normalizam). Não toca o balanceamento.
 
+**Segunda skin: Sombra Rubra (mago).** Sem capuz (o rosto fica em sombra sob o cabelo escuro e a franja), mechas compridas de pontas
+rubras ao vento, xale e manto rasgado com a barra do roxo ao vermelho-sangue, faixa vermelha na diagonal, corpo todo em
+armadura escura com runas vermelhas que brilham e o cajado de galhos retorcidos com veios vermelhos
+(`skin-mago.ts`, `skin-cajado.ts`). Como o corpo do rig fica escondido, pernas e braços são feitos na skin. Código de
+lançamento: `MAGO-SOMBRA-RUBRA-4KR7`. Os trechos em comum com o Ceifador (perfil do manto, pesos, mão) são importados de
+`skin-ceifador.ts`.
