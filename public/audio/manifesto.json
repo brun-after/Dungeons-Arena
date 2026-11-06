@@ -119,6 +119,20 @@
       "pagina": "https://opengameart.org/content/unexplored-expansion",
       "licenca": "CC0-1.0",
       "licencaUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    "swishes": {
+      "autor": "artisticdude",
+      "titulo": "Swishes Sound Pack",
+      "pagina": "https://opengameart.org/content/swishes-sound-pack",
+      "licenca": "CC0-1.0",
+      "licencaUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    "risada": {
+      "autor": "AntumDeluge",
+      "titulo": "Evil Laugh 2",
+      "pagina": "https://opengameart.org/node/129475",
+      "licenca": "CC0-1.0",
+      "licencaUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
     }
   },
   "arquivos": {
@@ -433,7 +447,7 @@
       "fonte": "rubberduck-rpg",
       "original": "spell_fire_06.ogg",
       "tipo": "efeito",
-      "duracao": 1.0,
+      "duracao": 1,
       "sha256": "6a1244f30faf5d9aa32a3c83461d1fd56978c1dd3a8bae2b037718fdc088485c",
       "originalSha256": "66fa753e8033d08f3837d6ef1706b0450297db68c0d4b21782a03fd9ae960d63"
     },
@@ -573,13 +587,14 @@
       "originalSha256": "30fcaab83dc3fff5335b78f87f9df305f6f8bd7316e2b46e2a4eaed85ee21768"
     },
     "invocacao-1": {
-      "arquivo": "invocacao-1.mp3",
-      "fonte": "dark",
-      "original": "fout-03.flac",
+      "arquivo": "invocacao-1.wav",
+      "fonte": "risada",
+      "original": "evil_laugh_02.flac",
       "tipo": "efeito",
-      "duracao": 3.92,
-      "sha256": "22e2a0a5b424e0b8d502f9075cd658d7bfb79b3eece905f4603840bc54557cdc",
-      "originalSha256": "ec55b77eb3096dcc083d219254d0a37a0ecf071477d7c47bc363092c2ca02d0d"
+      "duracao": 1.688,
+      "sha256": "f6e261ffe0cea7d1742abd946b803e6126df99e1f46f6a0117b9f6b0138aebc8",
+      "originalSha256": "ce3147253164f9509a6ca134c457b3968f0d119eb9dbb8a396900f8757eb2cd2",
+      "adaptacao": "navegador: velocidade 0.8, primeiros 1.35 s, pico -5 dBFS, saída de 300 ms"
     },
     "teleporte-1": {
       "arquivo": "teleporte-1.mp3",
@@ -658,7 +673,7 @@
       "fonte": "cave",
       "original": "cave themeb4.ogg",
       "tipo": "musica",
-      "duracao": 280.0,
+      "duracao": 280,
       "sha256": "cf89e4a838f2d2dc87e1481e989422d68d4c7745178f9914cf139aca1a2bf854",
       "originalSha256": "1ddf7a0845c808136edfda7ea829e48fa2b7c57793e008d706dadbb5917dff9c"
     },
@@ -742,6 +757,36 @@
       "duracao": 1.66,
       "sha256": "2081f93ca8abb035fcff4a03bf8234da78a265fd0e34ec83c47f3ca951cda7e5",
       "originalSha256": "c19f99a1a9a6a2aecf294e3cdea87b223a4b165e3e23df9cea2985ab20a907d0"
+    },
+    "zunido-1": {
+      "arquivo": "zunido-1.wav",
+      "fonte": "swishes",
+      "original": "swish-4.wav",
+      "tipo": "efeito",
+      "duracao": 0.146,
+      "sha256": "1f6556d1afea7557779ab7c574cc123c60974c53ef1c918984ee327a85ef147b",
+      "originalSha256": "0060f4a7040edce4cc50d1daa10a9cb76764128a942e4688339e69cd1d5d784c",
+      "adaptacao": "navegador: velocidade 1, pico -5 dBFS, saída de 25 ms"
+    },
+    "zunido-2": {
+      "arquivo": "zunido-2.wav",
+      "fonte": "swishes",
+      "original": "swish-7.wav",
+      "tipo": "efeito",
+      "duracao": 0.188,
+      "sha256": "4c52f1a5afe8239173d6e915dc44082d4d6ee013e9527e6521fd9bf65edf6a4c",
+      "originalSha256": "e6de737a34de16afed094d6170d7679149022f149e0a8356d2f029b0e8f4a4d7",
+      "adaptacao": "navegador: velocidade 1, pico -5 dBFS, saída de 25 ms"
+    },
+    "invocacao-2": {
+      "arquivo": "invocacao-2.wav",
+      "fonte": "risada",
+      "original": "evil_laugh_02.flac",
+      "tipo": "efeito",
+      "duracao": 1.875,
+      "sha256": "354165cb5f5212aba15dcaa51d7166abdebdca74db25698f4b67f7c8de658799",
+      "originalSha256": "ce3147253164f9509a6ca134c457b3968f0d119eb9dbb8a396900f8757eb2cd2",
+      "adaptacao": "navegador: velocidade 0.72, primeiros 1.35 s, pico -5 dBFS, saída de 300 ms"
     }
   },
   "efeitos": {
@@ -853,7 +898,8 @@
       "armadilha-2"
     ],
     "invocacao": [
-      "invocacao-1"
+      "invocacao-1",
+      "invocacao-2"
     ],
     "teleporte": [
       "teleporte-1"
@@ -874,6 +920,10 @@
     ],
     "recusa": [
       "recusa-1"
+    ],
+    "zunido": [
+      "zunido-1",
+      "zunido-2"
     ]
   },
   "ambientes": {

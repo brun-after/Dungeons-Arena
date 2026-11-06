@@ -13,7 +13,7 @@ const servidor = createServer(async (req, res) => {
   if (!caminho.startsWith(publico + sep)) { res.writeHead(404).end(); return; }
   try {
     const dados = await readFile(caminho);
-    res.setHeader('Content-Type', caminho.endsWith('.mp3') ? 'audio/mpeg' : caminho.endsWith('.json') ? 'application/json' : 'text/html; charset=utf-8');
+    res.setHeader('Content-Type', caminho.endsWith('.mp3') ? 'audio/mpeg' : caminho.endsWith('.wav') ? 'audio/wav' : caminho.endsWith('.json') ? 'application/json' : 'text/html; charset=utf-8');
     res.end(dados);
   } catch { res.writeHead(404).end(); }
 });

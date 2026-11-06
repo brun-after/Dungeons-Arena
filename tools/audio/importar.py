@@ -66,7 +66,6 @@ series('coleta','rubberduck-rpg',['rubberduck/item_gem_01.ogg','rubberduck/item_
 series('passo','kenney-impact',[f'impact/Audio/footstep_concrete_00{i}.ogg' for i in range(4)])
 series('porta','kenney-rpg',['rpg/Audio/doorOpen_1.ogg','rpg/Audio/doorOpen_2.ogg'])
 series('armadilha','rubberduck-rpg',['rubberduck/metal_01.ogg','rubberduck/metal_02.ogg'])
-series('invocacao','dark',['dark/dark_magic/fout-03.flac'])
 series('teleporte','electric',['electric-teleport.wav'])
 series('morte','rubberduck-rpg',['rubberduck/creature_die_01.ogg'])
 series('quebra','rubberduck-rpg',['rubberduck/wood_01.ogg','rubberduck/wood_02.ogg','rubberduck/stones_01.ogg'])
@@ -100,7 +99,13 @@ def convert(item):
  h,m,sec=map(float,re.search(r'Duration: (\d+):(\d+):([\d.]+)',probe.stderr).groups())
  return item['id'],dict(arquivo=out.name,fonte=item['fonte'],original=item['original'],tipo=kind,duracao=round(h*3600+m*60+sec,3),sha256=hashlib.sha256(out.read_bytes()).hexdigest(),originalSha256=hashlib.sha256(src.read_bytes()).hexdigest())
 files=dict(ThreadPoolExecutor(4).map(convert,items))
-manifest=dict(versao=2,fontes={k:dict(autor=a,titulo=t,pagina=p,licenca=l,licencaUrl=LIC[l]) for k,(a,t,p,l) in SOURCES.items()},arquivos=files,efeitos=effects,ambientes={k:'ambiente-'+k for k in ['fogo','agua','vento','goteira']},musicas=dict(exploracao=['musica-jornada','musica-coro-1','musica-caverna'],combate=['musica-esperanca','musica-coro-3'],chefe=['musica-coro-2','musica-coro-3']))
+# 06/11/2026: o zunido e a invocação vêm de tools/audio/adaptar.mjs (WAV feito no navegador); ficam como estão.
+antigo=json.loads((OUT/'manifesto.json').read_text(encoding='utf-8')) if (OUT/'manifesto.json').exists() else {}
+adaptados={k:v for k,v in antigo.get('arquivos',{}).items() if 'adaptacao' in v}
+files.update(adaptados)
+for som in ['zunido','invocacao']:
+ if som in antigo.get('efeitos',{}): effects[som]=antigo['efeitos'][som]
+manifest=dict(versao=2,fontes={**{k:dict(autor=a,titulo=t,pagina=p,licenca=l,licencaUrl=LIC[l]) for k,(a,t,p,l) in SOURCES.items()},**{k:v for k,v in antigo.get('fontes',{}).items() if k in {a['fonte'] for a in adaptados.values()}}},arquivos=files,efeitos=effects,ambientes={k:'ambiente-'+k for k in ['fogo','agua','vento','goteira']},musicas=dict(exploracao=['musica-jornada','musica-coro-1','musica-caverna'],combate=['musica-esperanca','musica-coro-3'],chefe=['musica-coro-2','musica-coro-3']))
 (OUT/'manifesto.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 credits=['# Créditos de áudio — Dungeons Arena','', 'Gravações de terceiros distribuídas com o jogo. As licenças abaixo aplicam-se aos arquivos de áudio indicados, independentemente da licença do código.','', 'Adaptações: conversão para MP3, ajuste de volume e fades curtos nas músicas. O áudio de arco adaptado mantém CC-BY-SA 3.0. Não há mudança de autoria.','']
 for key,(a,t,p,l) in SOURCES.items():

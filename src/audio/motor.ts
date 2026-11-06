@@ -6,7 +6,7 @@ import type { SomId } from './mapeamento';
 import { AMBIENTES, BancoDeGravacoes, EFEITOS, musicaDaCena, type SomAmbiente } from './gravacoes';
 
 const FADE_MUSICA_S = 1.5;
-const GANHOS: Partial<Record<SomId, number>> = { passo: 0.25, clique: 0.35, critico: 0.65, conjuracao: 0.18, lancamento_magico: 0.25, magia: 0.4, moeda: 0.6, recusa: 0.4 };
+const GANHOS: Partial<Record<SomId, number>> = { passo: 0.25, clique: 0.35, critico: 0.65, conjuracao: 0.18, lancamento_magico: 0.25, magia: 0.4, zunido: 0.45, invocacao: 0.6, moeda: 0.6, recusa: 0.4 };
 
 export interface VolumesAudio {
   musica: number;
@@ -115,7 +115,11 @@ export class MotorAudio {
     const maxDuracao = som === 'conjuracao' ? 0.22 : som === 'lancamento_magico' ? 0.18 : som === 'magia' ? 0.5 : Infinity;
     const duracao = Math.min(buffer.duration / tom, maxDuracao);
     const generico = Number.isFinite(maxDuracao);
-    if (!this.limitador.permitir(som, ctx.currentTime * 1000, duracao * 1000, generico ? 1 : 4, som === 'conjuracao' ? 500 : generico ? 180 : 80)) return;
+    // 06/11/2026: a risada da invocação toca uma por vez (vários servos surgem juntos e não se empilham).
+    const unica = som === 'invocacao';
+    const vozesMax = generico || unica ? 1 : 4;
+    const intervalo = som === 'conjuracao' ? 500 : unica ? 1500 : generico ? 180 : 80;
+    if (!this.limitador.permitir(som, ctx.currentTime * 1000, duracao * 1000, vozesMax, intervalo)) return;
     try {
       const voz = this.criarVoz(buffer, this.efeitos, Math.min(1, volume) * (GANHOS[som] ?? 0.8), pan);
       voz.fonte.playbackRate.value = tom;
