@@ -1,8 +1,10 @@
 # Decisões de projeto
 
-**Versão:** 0.82 · **Data:** 06/11/2026
+**Versão:** 0.84 · **Data:** 06/11/2026
 
 > **Histórico**
+> - **0.84 (06/11/2026)**: D-134: as trevas do Ceifador só saem andando, no rumo oposto ao movimento, e o rosto dele é só escuridão; a franja da Sombra Rubra.
+> - **0.83 (06/11/2026)**: D-134: o Ceifador remontado a partir de medidas da arte, em camadas e se desfazendo em trevas; correções do topo da barra de vida e das escalas da Sombra Rubra.
 > - **0.82 (06/11/2026)**: D-134: a Sombra Rubra remontada do zero a partir de medidas da arte, e a densidade das superfícies das skins.
 > - **0.81 (06/11/2026)**: D-134: a segunda skin, a Sombra Rubra do mago.
 > - **0.80 (06/11/2026)**: D-134: skins de personagem (liberadas por código, escolhidas por classe, que prevalecem sobre o equipamento) e a primeira, o Ceifador do necromante, com o pano que voa contra o movimento.
@@ -3875,5 +3877,31 @@ lançamento: `MAGO-SOMBRA-RUBRA-4KR7`. Os trechos em comum com o Ceifador (perfi
   - **Flutuação:** o corpo anda no ar, com a cabeça na altura de antes (`elevacao`), e sobe e desce suave, parado e andando.
   - **Passo divino:** o ciclo do andar é três vezes mais longo (`passada`), então cada passo cobre o triplo do chão.
   - **Manto:** 15% menor em relação ao corpo, por dentro todo preto (o forro) e por fora 20% mais escuro.
+
+**Ceifador remontado a partir de medidas da arte (0.83).** O mesmo processo da Sombra Rubra: as medidas da arte (H = 1200 px, do alto do capuz à sola) ficam em `skin-ceifador-medidas.ts`. As texturas e os materiais ficam em `skin-ceifador-texturas.ts`.
+- **Proporções:** alto e esguio como a arte (`ALTURA_DO_CEIFADOR` = 1,4 e `largura` 0,9; era 1,2 e parecia atarracado). Por baixo da roupa é um humano alto. O rosto segue sendo trevas, com os olhos acesos e o sorriso de dentes pontudos. (0.84) O rosto deixou de imitar a arte: dentro do capuz é só escuridão, sem olhos nem dentes, e sem o aro de pano em volta do rosto (virava um círculo cinza).
+- **Capuz:** o pano em gota, arredondado em volta da cabeça, com a ponta curta caindo para trás. Não é um cilindro de topo chato (a cabeça ficava quadrada) nem um crânio.
+- **Camadas:** a roupa segue o estilo de pano pesado e gasto.
+  - Pano: a túnica, o casaco aberto com os acabamentos bordados em relevo nas bordas, a sobressaia de quatro painéis com o cinto e a fivela, a capeleta dupla com a barra bordada, a gola em três camadas e a capa.
+  - Couro e metal: o boldrié com as fivelas e as tachas, o espartilho laceado e a ombreira de três placas com o medalhão.
+  - Mangas: as de fora em sino, sobre as de dentro justas, com o punho bordado.
+  - Paleta: fria, com o tecido em dobras de luz e sombra e manchas de desgaste.
+- **Mãos:** 1,22× as do rig. A medida da arte (≈3×) roubava o destaque da roupa e da gadanha.
+- **O traje se desfaz em trevas:** as fitas da arte não são tiras ao vento.
+  - O casaco, a capa, a capeleta e a sobressaia se esburacam cada vez mais para baixo e nas beiras (`desfazer`). As bordas dos furos escurecem.
+  - Nos caminhos das fitas e em volta dos pés, fiapos de trevas (`skin-trevas.ts`) nascem colados no pano, se afastam como fumaça, crescem e somem. Cada um tem a fase própria, num ciclo de ~3 s, então o fluxo não para.
+  - O movimento é do shader (`desprendido` em `skin-pano.ts`, com os atributos `centro` e `deriva`, que a fusão do palco preserva e leva ao espaço do rig com `levarAoRig`). Não usa o vento, então nada estica e volta.
+  - Os fiapos são grandes e de textura macia (a cabeça densa e a cauda que se esfiapa), para não pixelar. A fumaça é escura.
+  - (0.84) As trevas saem só quando ele anda, não são uma aura: aparecem com a energia do vento (`uVento.w`) e somem quando ele para. O rumo é sempre o oposto do movimento (atrás da figura), mais longo quanto mais rápido, e puxa para fora nas curvas. No DEV, `andarNoRetrato` mostra o retrato com o vento de quem anda.
+  - (0.84) Um rastro, não um halo: os fiapos (160) nascem nas costas do pano, dentro da silhueta e mais na barra, e vão reto para trás, quase sem abrir para os lados. Cada fiapo são dois quadros cruzados ao longo do rumo, para ter volume visto de qualquer lado. A textura e a fumaça ficaram mais opacas, para o rastro não ficar ralo. A cor é a do pano do traje, não preto, e o material é iluminado como o pano (escurece com ele no escuro do jogo, sem brilhar).
+- **Gadanha prateada:** todo o metal é prata polida, o gume é espelhado e a gravura é prata fosca. O cabo fica em madeira quente. Ela tomba um pouco para fora do corpo, para o cabo não sumir atrás do casaco.
+
+**Correções da Sombra Rubra (0.83).**
+- **Barra de vida:** o topo considera a `elevacao`, então quem flutua tem a barra acima da cabeça.
+- **Cabeça:** é montada em unidades do rig. O `grupoEm` a encolhia, e agora ela ficou um pouco maior.
+- **Cajado:** mede 1,05× o corpo, como na arte. Antes eram 1,42×.
+- **Franja (0.84):** jogada para o lado. Vista de frente, a cabeça é ~65% rosto (preto) e ~35% franja. As mechas partem de uma risca no alto e correm rentes à testa em arco, seguindo a esfera do crânio: 75% para o lado livre (`LADO_DA_FRANJA`, o rumo do cabelo), descendo mais quanto mais longe vão, e 25% para o lado do cajado, mais curtas. Todas passam da linha da testa (`ELEVACAO_DA_TESTA`) com as pontas desencontradas, escondendo a borda do preto. Usam só a cor da raiz (cinza-violeta), com algumas pontas carmesim.
+- **Rosto (0.84):** a frente do crânio abaixo da testa é uma casca preta sem luz (no crânio iluminado, o preto ganhava brilho e virava cinza). A sombra oval de antes saiu: furava o cachecol.
+- **Alto da cabeça (0.84):** o crânio era uma esfera preta e, com as mechas curtas e finas por cima, o mago parecia calvo. Agora o crânio tem a cor da raiz do cabelo, com fios ao longo dos meridianos, até a linha do cabelo (na testa, na frente, e descendo até a nuca atrás); abaixo dela é preto. Por cima há 200 mechas rentes e mais longas, que evitam o rosto na direção para onde ele olha. A franja e essas mechas usam geradores próprios: o cabelo de trás, já aprovado, não muda.
 
 As superfícies das skins (`superficie`, `mecha` em `skin-pano.ts`) passam por uma densidade global (`definirDensidadeDaSkin`, padrão 3) que reamostra os anéis. Assim, os polígonos podem ser reduzidos depois sem redesenhar as peças.
