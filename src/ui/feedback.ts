@@ -163,7 +163,7 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number; conf
     hud.registrar(t('log.dominou', { alvo: nome(ev.id), dono: nome(ev.donoId) }));
   });
   bus.on('armadilhaDisparou', (ev) => {
-    if (ev.alvoId === idLocal || ev.donoId === idLocal) hud.registrar(t('log.armadilha', { alvo: nome(ev.alvoId) }));
+    if (ev.alvoId === idLocal || ev.donoId === idLocal) hud.registrar(t(ev.protegido ? 'log.armadilhaProtegida' : 'log.armadilha', { alvo: nome(ev.alvoId) }));
   });
   bus.on('efeitoResultado', (ev) => {
     const alvo = posicao(ev.alvoId);

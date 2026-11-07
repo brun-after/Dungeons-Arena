@@ -179,7 +179,8 @@ describe('armadilha de fase (§2.11)', () => {
     c.tick({ t: 'irPara', x: 3, y: 2 });
     c.andar(60);
     expect(c.disparos()).toBe(1);
-    expect(c.j().hp).toBe(hp - 7);
+    // 06/11/2026 (D-135): o valor mais 12% da vida atual.
+    expect(c.j().hp).toBe(hp - Math.round(7 + hp * 0.12));
     expect(c.estado.armadilhas).toHaveLength(0);
   });
 

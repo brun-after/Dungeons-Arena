@@ -126,7 +126,7 @@ export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: bo
       }
       // Marco 22 (D-089): baús ainda fechados e as armadilhas que você já revelou.
       for (const o of estado.objetos) if (o.tipo === 'bau' && o.abertoTick === 0) ponto(o.x, o.y, 2, '#d4a017');
-      for (const a of estado.armadilhas) if (a.reveladaPara.includes(idLocal)) ponto(a.x, a.y, 1.5, '#e67e22');
+      for (const a of estado.armadilhas) if (a.runa || a.reveladaPara.includes(idLocal)) ponto(a.x, a.y, 1.5, '#e67e22');
       // O jogador por último, por cima de todos.
       for (const e of [...estado.entidades].sort((a, b) => Number(a.id === idLocal) - Number(b.id === idLocal))) {
         const c = marcadorDaEntidade(ctx, idLocal, e, eu);

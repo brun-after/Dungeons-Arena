@@ -56,6 +56,7 @@ import { fatorDeDominio, fatorDeSkillDeClasse } from '../progression/dominio';
 import { alcanceDoTiroCarregado } from './marcos-arqueiro';
 import { ressonanciaArcana } from './marcos-mago';
 import { barradoNoRefugio, emRefugio } from '../world/refugio';
+import { semLinha } from './linha-de-tiro';
 
 export function chaveRecarga(entidadeId: EntidadeId, habilidadeId: string): string {
   return `${entidadeId}_${habilidadeId}`;
@@ -290,6 +291,14 @@ export function iniciarAcao(
     alvo = perto;
     mira = celulaOcupada(perto);
     if (!deSuporte(hab)) ator.alvoSelecionado = perto.id;
+  }
+  // 06/11/2026 (D-135): o básico de projétil contra quem está atrás da parede conta como fora do alcance.
+  if (alvo && alvo !== ator && semLinha(estado, ctx, ator, hab, alvo, origem)) {
+    const visivel = ator.controlador !== 'ia' ? autoAlvo(estado, ctx, ator, alcance, (e) => !semLinha(estado, ctx, ator, hab, e, origem), origem) : null;
+    if (!visivel) return recusar('fora_de_alcance');
+    alvo = visivel;
+    mira = celulaOcupada(visivel);
+    ator.alvoSelecionado = visivel.id;
   }
 
   if (substituiBasico) cancelar(ator, estado, 'substituido', saida);
@@ -588,12 +597,13 @@ export function processarAutoAtaque(estado: EstadoJogo, ctx: ContextoSimulacao, 
     }
     const alcance = alcanceDe(ctx, ator, hab, estado.tick);
     const atual = alvoAtual(estado, ctx, ator);
-    const noAlcance = !!atual && chebyshev(celulaOcupada(ator), celulaOcupada(atual)) <= alcance;
+    // 06/11/2026 (D-135): atrás da parede, o alvo do básico de projétil está fora do alcance.
+    const noAlcance = !!atual && chebyshev(celulaOcupada(ator), celulaOcupada(atual)) <= alcance && !semLinha(estado, ctx, ator, hab, atual);
     if (ator.alvoTravado && ator.alvoSelecionado) {
       if (atual && noAlcance) iniciarAcao(estado, ctx, ator, hab.id, atual.id, saida);
       continue;
     }
-    const alvo = atual && noAlcance ? atual : autoAlvo(estado, ctx, ator, alcance, (e) => e.ia?.modo === 'perseguindo' && e.ia.alvoId === ator.id);
+    const alvo = atual && noAlcance ? atual : autoAlvo(estado, ctx, ator, alcance, (e) => e.ia?.modo === 'perseguindo' && e.ia.alvoId === ator.id && !semLinha(estado, ctx, ator, hab, e));
     if (!alvo) continue;
     ator.alvoSelecionado = alvo.id;
     iniciarAcao(estado, ctx, ator, hab.id, alvo.id, saida);

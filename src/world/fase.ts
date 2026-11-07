@@ -4,6 +4,7 @@
 
 import type { Afinidade } from '../combat/afinidade';
 import type { EfeitoCanonico } from '../combat/registro-efeitos';
+import type { Elemento } from '../combat/elementos';
 import type { AreaAmbiente } from './ambiente-tipos';
 import type { Refugio } from './refugio';
 import type { Celula } from '../core/comandos';
@@ -89,7 +90,8 @@ export type ObjetoPosicionadoJson =
   | { tipo: 'loja'; x: number; y: number; estoque: string[] }
   | { tipo: 'loot'; x: number; y: number; itemId: string; quantidade: number }
   /** Invisível; dano fixo (`valor`) e efeito opcional. `rearmeMs` só com `modo: 'rearme'`. */
-  | { tipo: 'armadilha'; x: number; y: number; valor: number; efeito?: EfeitoCanonico; modo: 'unica' | 'rearme'; rearmeMs?: number }
+  /** 06/11/2026 (D-135): `elemento` faz o círculo elemental; sem ele, a armadilha é de explosão. */
+  | { tipo: 'armadilha'; x: number; y: number; valor: number; efeito?: EfeitoCanonico; modo: 'unica' | 'rearme'; rearmeMs?: number; elemento?: Elemento }
   /** Marco 12: fonte sonora em laço; só a apresentação a lê (não entra no estado da simulação). */
   | { tipo: 'fonte_som'; x: number; y: number; sfxId: SomDeFonte; raio: number; volume: number };
 
@@ -109,6 +111,8 @@ export interface ObjetoPosicionado {
   itemId: string | null;
   /** Armadilha de fase: 0 = disparo único. */
   rearmeMs: number;
+  /** 06/11/2026 (D-135): o elemento do círculo da armadilha (null: explosão). */
+  elemento: Elemento | null;
   /** Fonte sonora: o som (o volume vai em `valor` e o alcance em células em `raio`). */
   som: SomDeFonte | null;
   raio: number;
@@ -129,6 +133,7 @@ function objetoCarregado(o: ObjetoPosicionadoJson, largura: number, altura: numb
     rearmeMs: 0,
     som: null,
     raio: 0,
+    elemento: null,
   };
   switch (o.tipo) {
     case 'santuario': return base;
@@ -139,7 +144,7 @@ function objetoCarregado(o: ObjetoPosicionadoJson, largura: number, altura: numb
     case 'loot':
       return { ...base, valor: o.quantidade, itemId: o.itemId };
     case 'armadilha':
-      return { ...base, valor: o.valor, efeito: o.efeito ? { ...o.efeito } : null, rearmeMs: o.modo === 'rearme' ? (o.rearmeMs ?? 0) : 0 };
+      return { ...base, valor: o.valor, efeito: o.efeito ? { ...o.efeito } : null, rearmeMs: o.modo === 'rearme' ? (o.rearmeMs ?? 0) : 0, elemento: o.elemento ?? null };
     case 'fonte_som':
       return { ...base, valor: o.volume, som: o.sfxId, raio: o.raio };
     default:

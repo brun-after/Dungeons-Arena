@@ -154,13 +154,19 @@ function armadilhaDeFase(o: Record<string, unknown>, x: number, y: number, erros
       return 'erro';
     }
   }
-  if (o.modo === 'unica') return { tipo: 'armadilha', x, y, valor, modo: 'unica', ...(efeito && { efeito }) };
+  // 06/11/2026 (D-135): o elemento do círculo (opcional; sem ele, explosão).
+  const elemento = o.elemento === undefined ? undefined : (ELEMENTOS as readonly unknown[]).includes(o.elemento) ? (o.elemento as Elemento) : null;
+  if (elemento === null) {
+    erros.push({ mensagem: 'armadilha: elemento desconhecido' });
+    return 'erro';
+  }
+  if (o.modo === 'unica') return { tipo: 'armadilha', x, y, valor, modo: 'unica', ...(efeito && { efeito }), ...(elemento && { elemento }) };
   const rearme = o.rearmeMs;
   if (!ehInteiro(rearme) || rearme < 100 || rearme > 600_000) {
     erros.push({ mensagem: 'armadilha com rearme precisa de rearmeMs inteiro entre 100 e 600000' });
     return 'erro';
   }
-  return { tipo: 'armadilha', x, y, valor, modo: 'rearme', rearmeMs: rearme, ...(efeito && { efeito }) };
+  return { tipo: 'armadilha', x, y, valor, modo: 'rearme', rearmeMs: rearme, ...(efeito && { efeito }), ...(elemento && { elemento }) };
 }
 
 /** Baú, loja, loot (marco 9A) e armadilha (9A-2). Devolve null quando o objeto não é de um desses tipos. */

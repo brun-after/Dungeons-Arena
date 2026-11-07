@@ -8007,6 +8007,9 @@
         "som": "invocacao",
         "assinatura": "invocacao"
       }
-    }
+    },
+    {"id": "pedra_arremessada", "familiaEvolucao": "tecnica", "grau": "B", "nome": "Pedra arremessada", "icone": "pedra", "tipoAtaque": "fisico", "formulaDano": "1d8", "formulaCura": null, "alcanceCelulas": 5, "tipoArea": "nenhuma", "raioArea": 0, "custoRecurso": 0, "recargaMs": 0, "conjuracaoMs": 750, "politicaAlvo": "hostil", "politicaImpacto": "projetil", "interrupcao": "interrompivel", "velocidadeProjetil": 7, "efeitos": [], "tags": ["encantavel"], "visual": {"cor": "#8d8173", "viagem": "esteira", "impacto": "pedra", "som": "projetil", "assinatura": "pedregulho"}},
+    {"id": "salto_do_duende", "mobilidade": "livre", "familiaEvolucao": "tecnica", "grau": "B", "nome": "Salto do duende", "icone": "investida", "tipoAtaque": "fisico", "formulaDano": "1d10", "formulaCura": null, "alcanceCelulas": 5, "tipoArea": "linha", "raioArea": 0, "custoRecurso": 0, "recargaMs": 4500, "conjuracaoMs": 550, "politicaAlvo": "hostil", "politicaImpacto": "area", "interrupcao": "interrompivel", "velocidadeProjetil": 0, "efeitos": [{"tipo": "avanco", "valor": 5, "em": "conjurador"}, {"sem_movimento": 500}], "tags": ["movimento"], "visual": {"cor": "#b5c46a", "impacto": "pedra", "camera": "leve", "som": "golpe", "assinatura": "salto_esmagador"}},
+    {"id": "runa_do_medroso", "familiaEvolucao": "suporte", "grau": "B", "nome": "Runa do medroso", "icone": "runa", "tipoAtaque": "magico", "formulaDano": null, "formulaCura": null, "alcanceCelulas": 2, "tipoArea": "quadrado", "raioArea": 0, "custoRecurso": 0, "recargaMs": 350, "conjuracaoMs": 150, "politicaAlvo": "celula", "politicaImpacto": "area", "interrupcao": "interrompivel", "velocidadeProjetil": 0, "efeitos": [{"armadilha": {"valor": 8, "duracaoMs": 22000, "efeito": {"atordoar": 350}}}], "visual": {"cor": "#c9a36b", "conjuracao": "fumaca", "som": "armadilha", "assinatura": "campo_minado"}}
   ]
 }

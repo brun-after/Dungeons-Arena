@@ -96,7 +96,8 @@ export interface ModoDeJogo {
     /** Marco 17: o spawner põe baú e loot no mundo (a arena tem itens só dos abates). */
     economiaDoSpawner: boolean;
   };
-  limites: { npcs: number; invocacoesPorJogador: number; invocacoesDePergaminho: number; avataresPorJogador: number; armadilhasPorJogador: number; projeteis: number };
+  /** 06/11/2026 (D-135): `armadilhasPorInimigo` é o teto do monstro que planta runas (ausente: o do jogador). */
+  limites: { npcs: number; invocacoesPorJogador: number; invocacoesDePergaminho: number; avataresPorJogador: number; armadilhasPorJogador: number; armadilhasPorInimigo?: number; projeteis: number };
   /** Sempre false na v1 (§3.7): o schema rejeita true. */
   progressaoContaParaCampanha: false;
   fasesPermitidas: string[] | 'qualquer';
@@ -251,6 +252,7 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
       invocacoesDePergaminho: l.numero(limites, 'invocacoesDePergaminho', { min: 0, inteiro: true }),
       avataresPorJogador: l.numero(limites, 'avataresPorJogador', { min: 0, inteiro: true }),
       armadilhasPorJogador: l.numero(limites, 'armadilhasPorJogador', { min: 0, inteiro: true }),
+      ...(limites.armadilhasPorInimigo !== undefined && { armadilhasPorInimigo: l.numero(limites, 'armadilhasPorInimigo', { min: 0, inteiro: true }) }),
       projeteis: l.numero(limites, 'projeteis', { min: 0, inteiro: true }),
     },
     progressaoContaParaCampanha: false,

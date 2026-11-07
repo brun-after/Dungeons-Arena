@@ -6,6 +6,7 @@ import type { Dificuldade } from '../modos/dificuldade';
 import type { EntidadeId } from './comandos';
 import type { TipoObjeto } from './estado';
 import type { TipoEfeito } from '../combat/registro-efeitos';
+import type { Elemento } from '../combat/elementos';
 import type { Slot } from '../modos/modo';
 import type { StatusCaminho } from '../world/navegacao';
 
@@ -213,7 +214,8 @@ export type EventoSimulacao =
   | { t: 'explodiu'; tick: number; id: EntidadeId; x: number; y: number; raio: number }
   | { t: 'dispensou'; tick: number; id: EntidadeId; quantidade: number }
   | { t: 'armadilhaArmada'; tick: number; donoId: EntidadeId; armadilhaId: number; x: number; y: number }
-  | { t: 'armadilhaDisparou'; tick: number; donoId: EntidadeId; armadilhaId: number; alvoId: EntidadeId; x?: number; y?: number }
+  // 06/11/2026 (D-135): o elemento do círculo (sem ele, explosão), se era a runa de pé e se o Passo leve protegeu.
+  | { t: 'armadilhaDisparou'; tick: number; donoId: EntidadeId; armadilhaId: number; alvoId: EntidadeId; x?: number; y?: number; elemento?: Elemento; runa?: boolean; protegido?: boolean }
   // Marco 18 (D-068): a Sabedoria revela e desarma armadilhas.
   | { t: 'armadilhaRevelada'; tick: number; id: EntidadeId; armadilhaId: number; x: number; y: number }
   | { t: 'armadilhaDesarmada'; tick: number; id: EntidadeId; armadilhaId: number; sucesso: boolean }

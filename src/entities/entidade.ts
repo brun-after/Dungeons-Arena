@@ -167,6 +167,14 @@ export interface EstadoIa {
    */
   cacaDesdeTick?: number;
   cacaNiveis?: number;
+  /**
+   * 06/11/2026 (D-135): a fase do comportamento especial (entities/ia-especiais.ts) e até quando ela vai; o sentido do
+   * giro do armadilheiro em volta do alvo e onde ele plantou a última runa.
+   */
+  especial?: 'corrida' | 'fuga' | 'descanso';
+  especialAteTick?: number;
+  sentidoCerco?: number;
+  ultimaRuna?: Celula;
 }
 
 /** Quem causou dano e quando, para dividir XP entre participantes (§2.7, morte). */
@@ -408,6 +416,8 @@ export interface Entidade {
   habilidadeAnterior?: { id: string; tick: number };
   /** Marco 24 (D-096): a próxima skill de classe não gasta mana (ressonância Eco ancestral). */
   classeSemMana?: boolean;
+  /** 06/11/2026 (D-135): a fração de cura do vínculo dos mortos que ainda não virou ponto de vida (Necromante). */
+  vinculoResto?: number;
   /** Marco 24 (D-095): marcas da sintonia por alvo (`id/geração` para tick), como o desafio que já enraizou (Carcereiro). */
   sintoniaVistos?: Record<string, number>;
   /** Marco 24 (24/10/2026, D-097): para onde olha (último passo ou quem ataca); ausente = sul. Decide o "pelas costas". */
@@ -643,6 +653,7 @@ export function clonarEntidade(e: Entidade): Entidade {
           recentes: copiarCelulas(e.ia.recentes),
           rng: clonarRng(e.ia.rng),
           ...(e.ia.armadilhasVistas ? { armadilhasVistas: [...e.ia.armadilhasVistas] } : {}),
+          ...(e.ia.ultimaRuna ? { ultimaRuna: { ...e.ia.ultimaRuna } } : {}),
         }
       : null,
     bolsa: e.bolsa ? clonarBolsa(e.bolsa) : null,

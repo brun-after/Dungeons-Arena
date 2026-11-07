@@ -21,6 +21,7 @@ import { podeFerir } from '../modos/relacao';
 import { celulaLivrePara, ordemRotativa, reservaCelula } from '../world/colisao';
 import { passavel } from '../world/fase';
 import { aprenderArmadilha } from '../world/perigos';
+import { danoDaArmadilha, efeitoDoDisparo, estiloDaArmadilha, gastarPassoLeve, puxarAoHostil } from './armadilhas-disparo';
 import { celulaOcupada } from './geometria';
 import { registrarParticipacao } from './participacao';
 import { rolar } from './dados';
@@ -84,7 +85,9 @@ export function excedeLimite(estado: EstadoJogo, ctx: ContextoSimulacao, ator: E
     if (fluxo === 'armadilha') armadilhas += 1;
   }
   // Marco 28 (D-127): o Engenho do Aventureiro abre vagas a mais para pergaminhos.
-  return invocacoes > (pergaminho ? lim.invocacoesDePergaminho + marcoDe(ctx, ator, 'pergaminhosExtras') : limiteDeInvocacoes(ctx, ator)) || avatares > lim.avataresPorJogador || armadilhas > lim.armadilhasPorJogador;
+  // 06/11/2026 (D-135): o monstro (sem ficha) tem o teto próprio de armadilhas, quando o modo o dá.
+  const tetoArmadilhas = !ator.bolsa && ator.controlador === 'ia' ? (lim.armadilhasPorInimigo ?? lim.armadilhasPorJogador) : lim.armadilhasPorJogador;
+  return invocacoes > (pergaminho ? lim.invocacoesDePergaminho + marcoDe(ctx, ator, 'pergaminhosExtras') : limiteDeInvocacoes(ctx, ator)) || avatares > lim.avataresPorJogador || armadilhas > tetoArmadilhas;
 }
 
 export function agendarAtrasado(estado: EstadoJogo, alvo: Entidade, ef: EfeitoCanonico, origem: OrigemFluxo): void {
@@ -110,14 +113,18 @@ export function armarArmadilha(
   const c = mira ?? { x: dono.x, y: dono.y };
   if (!passavel(ctx.fase, c.x, c.y) || estado.armadilhas.some((a) => a.x === c.x && a.y === c.y)) return;
   const id = estado.proximoId++;
+  // 06/11/2026 (D-135): a runa de pé do armadilheiro leva o elemento dele (o estado do elemento no lugar do interno).
+  const estilo = estiloDaArmadilha(ctx, dono);
   estado.armadilhas.push({
+    ...(estilo.runa && { runa: true }),
+    ...(estilo.elemento && { elemento: estilo.elemento }),
     id,
     donoId: dono.id,
     equipeDono: dono.equipe,
     x: c.x,
     y: c.y,
     valor: ef.valor,
-    interno: ef.interno ? { ...ef.interno, interno: null } : null,
+    interno: estilo.elemento ? null : ef.interno ? { ...ef.interno, interno: null } : null,
     ateTick: estado.tick + ticksDe(ef.duracaoMs),
     origem: 'habilidade',
     permanente: false,
@@ -283,11 +290,20 @@ export function processarGatilhos(estado: EstadoJogo, ctx: ContextoSimulacao, ap
     }
   }
   const disparadas = new Set<number>();
+  // 06/11/2026 (D-135): quem está em cada célula, uma vez por tick (o Mundo tem centenas de armadilhas e entidades).
+  const porCelula = new Map<number, Entidade[]>();
+  for (const e of ordem) {
+    if (!vivo(e) || e.invocacao?.companheiro) continue;
+    const chave = e.y * ctx.fase.largura + e.x;
+    const lista = porCelula.get(chave);
+    if (lista) lista.push(e);
+    else porCelula.set(chave, [e]);
+  }
   for (const a of estado.armadilhas) {
     // Marco 9A-2: com rearme, a armadilha fica inerte depois de disparar.
     if (a.inerteAteTick > tick) continue;
     const dono = { id: a.donoId, equipe: a.equipeDono };
-    const alvo = ordem.find((e) => vivo(e) && !e.invocacao?.companheiro && e.x === a.x && e.y === a.y && podeFerir(dono, e, ctx.modo));
+    const alvo = porCelula.get(a.y * ctx.fase.largura + a.x)?.find((e) => vivo(e) && e.x === a.x && e.y === a.y && podeFerir(dono, e, ctx.modo));
     if (!alvo) continue;
     if (dispararArmadilha(estado, ctx, a, alvo, aplicar, saida)) disparadas.add(a.id);
   }
@@ -302,9 +318,21 @@ export function dispararArmadilha(estado: EstadoJogo, ctx: ContextoSimulacao, a:
   const tick = estado.tick;
   const some = a.rearmeTicks <= 0;
   if (!some) a.inerteAteTick = tick + a.rearmeTicks;
-  causarDano(estado, ctx, alvo, a.valor, a.donoId, 'armadilha', saida);
-  if (a.interno) aplicar(alvo, a.interno, { id: a.donoId, x: a.x, y: a.y }, null);
-  saida.push({ t: 'armadilhaDisparou', tick, donoId: a.donoId, armadilhaId: a.id, alvoId: alvo.id, x: a.x, y: a.y });
+  const visual = { ...(a.elemento && { elemento: a.elemento }), ...(a.runa && { runa: true }) };
+  // 06/11/2026 (D-135): o Passo leve gasta-se aqui; a armadilha some (ou rearma) sem ferir.
+  if (gastarPassoLeve(estado, alvo)) {
+    saida.push({ t: 'armadilhaDisparou', tick, donoId: a.donoId, armadilhaId: a.id, alvoId: alvo.id, x: a.x, y: a.y, ...visual, protegido: true });
+    return some;
+  }
+  // 06/11/2026 (D-135): o valor mais uma parte da vida atual; o estado do elemento (ou o atordoar da explosão) e o
+  // puxão na direção do hostil mais perto de quem pisou.
+  causarDano(estado, ctx, alvo, danoDaArmadilha(ctx, a, alvo), a.donoId, 'armadilha', saida);
+  const origem = { id: a.donoId, x: a.x, y: a.y };
+  if (a.interno && vivo(alvo)) aplicar(alvo, a.interno, origem, null);
+  const doDisparo = efeitoDoDisparo(ctx, a);
+  if (doDisparo && vivo(alvo)) aplicar(alvo, doDisparo, origem, null);
+  saida.push({ t: 'armadilhaDisparou', tick, donoId: a.donoId, armadilhaId: a.id, alvoId: alvo.id, x: a.x, y: a.y, ...visual });
+  puxarAoHostil(estado, ctx, alvo, a.donoId, saida);
   // Marco 25 (25/10/2026, D-100): quem viu disparar pode aprender a contornar as armadilhas desse dono.
   aprenderArmadilha(estado, ctx, a);
   return some;

@@ -110,7 +110,8 @@ describe('armadilha (§2.11)', () => {
     c.por(c.ent('b'), 6, 5);
     const hp = c.ent('b').hp;
     c.tick();
-    expect(c.ent('b').hp).toBe(hp - 5);
+    // 06/11/2026 (D-135): o valor mais 12% da vida atual.
+    expect(c.ent('b').hp).toBe(hp - Math.round(5 + hp * 0.12));
     expect(c.ent('b').efeitos.map((f) => f.tipo)).toEqual(['atordoar']);
     expect(c.estado.armadilhas).toHaveLength(0);
     c.aplicar('j', c.ef('armadilha', { duracaoMs: 300 }), 'j', { x: 9, y: 9 });

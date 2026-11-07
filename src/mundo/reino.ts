@@ -41,6 +41,8 @@ export interface RegrasDePerigo {
   lootPct: number;
   /** Marco 31 (D-130): casas abandonadas com telhado (`dentro`) e um monstro lá dentro, por região. */
   casas: number;
+  /** 06/11/2026 (D-135): armadilhas escondidas por 1000 células andáveis do exterior. */
+  armadilhasPor1000: number;
 }
 
 export interface DestinoDeEstrutura {
@@ -226,6 +228,7 @@ function lerPerigos(l: Leitor, v: unknown): Record<Perigo, RegrasDePerigo> {
       eliteNiveis: r.eliteNiveis === undefined ? 0 : l.numero(r, 'eliteNiveis', { min: 0, max: 30, inteiro: true }),
       lootPct: l.numero(r, 'lootPct', { min: 0, max: 500 }),
       casas: r.casas === undefined ? 0 : l.numero(r, 'casas', { min: 0, max: 8, inteiro: true }),
+      armadilhasPor1000: r.armadilhasPor1000 === undefined ? 0 : l.numero(r, 'armadilhasPor1000', { min: 0, max: 30 }),
     };
   };
   return { seguro: ler('seguro'), normal: ler('normal'), perigoso: ler('perigoso') };

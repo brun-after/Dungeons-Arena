@@ -55,7 +55,7 @@ export function variantesDoAtor(ctx: ContextoPerfil, ator: Entidade, def: Defini
 /** A chave compilada da habilidade para este ator. */
 export function chaveDoAtor(ctx: ContextoPerfil, ator: Entidade, id: string, tick?: number): string {
   const bolsa = ator.bolsa;
-  if (!bolsa) return formatarChave({ id, rank: 1, caminhos: [], mods: [], variantes: variantesDoAtor(ctx, ator, definicaoDe(ctx, id), tick) });
+  if (!bolsa) return formatarChave({ id, rank: 1, caminhos: caminhoAfim(ctx, ator, id), mods: [], variantes: variantesDoAtor(ctx, ator, definicaoDe(ctx, id), tick) });
   const conhecida = bolsa.conhecidas.find((c) => c.id === id);
   const tags = definicaoDe(ctx, id)?.base.tags ?? [];
   const mods: Modificador[] = [];
@@ -66,6 +66,17 @@ export function chaveDoAtor(ctx: ContextoPerfil, ator: Entidade, id: string, tic
   // Marco 18 (D-069): os conjuntos completos também dão modificadores (a Vigília do caçador faz as flechas ecoarem).
   for (const m of modificadoresDosConjuntos(ctx, bolsa)) if ((m.tag === null || tags.includes(m.tag)) && !mods.includes(m.mod)) mods.push(m.mod);
   return formatarChave({ id, rank: conhecida?.rank ?? 1, caminhos: conhecida?.caminhos ?? [], mods, variantes: variantesDoAtor(ctx, ator, definicaoDe(ctx, id), tick) });
+}
+
+/**
+ * 06/11/2026 (D-135): a habilidade `encantavel` do inimigo afim (a pedra do Arremessador) sai com o elemento dele, pelo
+ * caminho elemental do catálogo (o que muda o elemento para o dele).
+ */
+function caminhoAfim(ctx: ContextoPerfil, ator: Entidade, id: string): string[] {
+  const el = ator.afinidade?.elemento;
+  if (!el || !definicaoDe(ctx, id)?.base.tags.includes('encantavel')) return [];
+  for (const c of ctx.conteudo.caminhos.values()) if (c.elemento === el && c.id.startsWith('elemental_')) return [c.id];
+  return [];
 }
 
 /** A habilidade compilada que este ator usa (com `tick`, as variantes conferem o prazo dos estados). */

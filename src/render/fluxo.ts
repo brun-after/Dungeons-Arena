@@ -6,16 +6,18 @@ import { Graphics, type Container } from 'pixi.js';
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import type { EstadoJogo } from '../core/estado';
 import { CELULA_PX } from './camera-calculo';
+import { anelDoDesarme, armadilhaExposta, circuloDeConjuracao, graficosDoChao, RunasDePe } from './armadilhas-visual';
+import type { OpcoesEmPe } from './objetos';
 
 const cor = (hex: string) => Number.parseInt(hex.slice(1), 16);
-/** Marco 18: armadilha alheia revelada pela Sabedoria, e o anel do desarme. */
-const COR_REVELADA = 0xe74c3c;
-const COR_DESARME = 0xf1c40f;
 /** Marco 24 (D-099): o anel da espera na porta de fase. */
 const COR_PORTA = 0x9cf0b0;
 
 export class CamadaFluxo {
   private readonly g = new Graphics();
+  /** 06/11/2026 (D-135): os círculos de conjuração das armadilhas (o traço e o brilho aditivo) e as runas de pé. */
+  private readonly armadilhas: { g: Graphics; brilho: Graphics };
+  private readonly runas: RunasDePe;
   private readonly disparos: { x: number; y: number; tick: number }[] = [];
 
   disparou(x: number, y: number, tick: number): void {
@@ -31,8 +33,12 @@ export class CamadaFluxo {
     private readonly ticksDesarme: () => number = () => 90,
     /** Marco 24 (D-099): a espera na porta de fase, em ticks. */
     private readonly ticksPorta: () => number = () => 180,
+    /** 06/11/2026 (D-135): onde a runa de pé do armadilheiro fica (a camada das entidades, no isométrico). */
+    emPe: OpcoesEmPe | null = null,
   ) {
     camada.addChild(this.g);
+    this.armadilhas = graficosDoChao(camada);
+    this.runas = new RunasDePe(emPe);
   }
 
   desenhar(estado: EstadoJogo, idLocal: string, reduzido = false): void {
@@ -53,42 +59,23 @@ export class CamadaFluxo {
     for (const r of this.comParticulas() ? [] : estado.rastros) {
       g.rect(r.x * CELULA_PX + 4, r.y * CELULA_PX + 4, CELULA_PX - 8, CELULA_PX - 8).fill({ color: cor(REGISTRO_EFEITOS[r.tipo].cor), alpha: 0.28 });
     }
-    // Armadilha: cantos marcados, só para quem armou — e, desde o marco 18 (D-068), para quem a revelou com a
-    // Sabedoria (em vermelho, com o "x" no meio). O desarme em curso mostra o progresso num anel.
+    // 06/11/2026 (D-135): a armadilha exposta (sua, da equipe, revelada pela Sabedoria ou a runa de pé) é um círculo
+    // de conjuração no chão, na cor do elemento (ou de brasa, a de explosão). O desarme em curso mostra o progresso.
     const p = CELULA_PX;
-    const c = 10;
     const local = estado.entidades.find((e) => e.id === idLocal);
+    const tMs = reduzido ? 0 : performance.now();
+    const traco = this.armadilhas.g.clear();
+    const brilho = this.armadilhas.brilho.clear();
     for (const a of estado.armadilhas) {
-      const minha = a.donoId === idLocal || (local !== undefined && a.equipeDono === local.equipe);
-      if (!minha && !a.reveladaPara.includes(idLocal)) continue;
-      const inerte = a.inerteAteTick > estado.tick;
-      const cx = (a.x + 0.5) * p, cy = (a.y + 0.5) * p;
-      g.circle(cx, cy, p * 0.38).fill({ color: minha ? 0x50e3c2 : COR_REVELADA, alpha: inerte ? 0.05 : 0.16 });
-      g.circle(cx, cy, p * 0.28).stroke({ width: 1.5, color: inerte ? 0x7c858c : minha ? 0x50e3c2 : 0xffa36c, alpha: 0.7 });
-      const x = a.x * p + 3;
-      const y = a.y * p + 3;
-      const l = p - 6;
-      g.moveTo(x, y + c).lineTo(x, y).lineTo(x + c, y);
-      g.moveTo(x + l - c, y).lineTo(x + l, y).lineTo(x + l, y + c);
-      g.moveTo(x + l, y + l - c).lineTo(x + l, y + l).lineTo(x + l - c, y + l);
-      g.moveTo(x + c, y + l).lineTo(x, y + l).lineTo(x, y + l - c);
-      g.stroke({ width: 3, color: minha ? 0x50e3c2 : COR_REVELADA, alpha: 0.9 });
-      if (minha) continue;
-      const m = p / 2;
-      g.moveTo(x - 3 + m - 7, y - 3 + m - 7).lineTo(x - 3 + m + 7, y - 3 + m + 7);
-      g.moveTo(x - 3 + m + 7, y - 3 + m - 7).lineTo(x - 3 + m - 7, y - 3 + m + 7);
-      g.stroke({ width: 3, color: COR_REVELADA, alpha: 0.75 });
+      const exposta = armadilhaExposta(a, idLocal, local);
+      if (!exposta) continue;
+      circuloDeConjuracao(traco, brilho, a, tMs, exposta === 'propria', a.inerteAteTick > estado.tick);
       const i = local?.interacao;
-      if (i?.tipo === 'desarme' && i.objetoId === String(a.id)) {
-        const total = Math.max(1, this.ticksDesarme());
-        const fracao = Math.max(0, Math.min(1, 1 - (i.ateTick - estado.tick) / total));
-        const cx = (a.x + 0.5) * p;
-        const cy = (a.y + 0.5) * p;
-        const inicio = -Math.PI / 2;
-        g.moveTo(cx + Math.cos(inicio) * p * 0.48, cy + Math.sin(inicio) * p * 0.48);
-        g.arc(cx, cy, p * 0.48, inicio, inicio + Math.PI * 2 * fracao).stroke({ width: 3, color: COR_DESARME, alpha: 0.95 });
+      if (exposta === 'hostil' && i?.tipo === 'desarme' && i.objetoId === String(a.id)) {
+        anelDoDesarme(traco, a, Math.max(0, Math.min(1, 1 - (i.ateTick - estado.tick) / Math.max(1, this.ticksDesarme()))));
       }
     }
+    this.runas.desenhar(estado, tMs);
     // Marco 24 (25/10/2026, D-099): parado na porta de fase, o anel enche até sair.
     if (local?.naPortaDesdeTick !== undefined) {
       const fracao = Math.max(0, Math.min(1, (estado.tick - local.naPortaDesdeTick) / Math.max(1, this.ticksPorta())));
@@ -115,5 +102,8 @@ export class CamadaFluxo {
 
   destruir(): void {
     this.g.destroy();
+    this.armadilhas.g.destroy();
+    this.armadilhas.brilho.destroy();
+    this.runas.destruir();
   }
 }

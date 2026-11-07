@@ -1,4 +1,5 @@
 import { tintaDaInvocacao } from './cores-necromancia';
+import { desenharPorteDoNivel, escalaDoNivel, tintaDoNivel } from './porte-nivel';
 import { ehDragao, porteDoDragao } from '../world/porte-dragoes';
 import { tipoEm } from '../world/fase';
 // Marcadores das entidades: modelo de criatura (ou a imagem do jogador), anel de equipe sob os pés, barra
@@ -104,7 +105,7 @@ function textoIndicador(e: Entidade, tick: number): string {
   if (!e.ia || e.morto) return '';
   if (e.ia.modo === 'hesitando') return '?';
   if (e.ia.modo === 'perseguindo' && tick - e.ia.modoDesdeTick < 60) return '!';
-  return '';
+  return e.ia.especial === 'descanso' ? 'z' : ''; // D-135: o armadilheiro descansando (a hora de bater nele).
 }
 
 /**
@@ -343,7 +344,7 @@ export class CamadaEntidades {
       }
       // 03/11/2026: o atlas do dragão já tem porte próprio; não somar o aumento genérico de boss.
       const porte=ehDragao(e.invocacao?.modeloOriginal ?? e.preset)?porteDoDragao(e.nivel,ctx.balance):null;
-      const escala = porte ? porte.altura/ctx.balance.dragoes.alturaMin : e.arquetipo === 'boss' ? 1.35 : 1;
+      const escala = porte ? porte.altura/ctx.balance.dragoes.alturaMin : (e.arquetipo === 'boss' ? 1.35 : 1) * escalaDoNivel(e); // D-135: o porte do nível.
       m.escalaAtlas=porte?.escala??escala;
       if(m.escala!==escala){m.escala=escala;m.chaoDesenhado='';m.silhueta.scale.set(escala);m.seta.scale.set(escala);}
       // Marco 26 (D-104): o rumo é o quanto a posição contínua andou desde o último quadro.
@@ -485,7 +486,7 @@ export class CamadaEntidades {
     // Marco 23 (D-092): o inimigo afim leva a cor do elemento (o extremo, mais forte).
     // Dragões mantêm as escamas negras mesmo quando o tema atribui afinidade.
     const af = e.preset.startsWith('dragao_') ? undefined : e.afinidade;
-    m.rig.raiz.tint = q.ajuste?.tinta != null ? misturarCor(0xffffff, q.ajuste.tinta, 0.75) : af && this.o.corElemento ? misturarCor(0xffffff, this.o.corElemento(af.elemento), af.extrema ? 0.6 : 0.42) : 0xffffff;
+    m.rig.raiz.tint = tintaDoNivel(e, q.ajuste?.tinta != null ? misturarCor(0xffffff, q.ajuste.tinta, 0.75) : af && this.o.corElemento ? misturarCor(0xffffff, this.o.corElemento(af.elemento), af.extrema ? 0.6 : 0.42) : 0xffffff);
     // Marco 24 (D-098): o voo solto do falcão (altura, inclinação na curva e o tamanho no ombro).
     // Marco 32 (D-131): de cima, a altura do voo aparece menor (a câmera olha de cima; a sombra marca o chão).
     m.rig.raiz.position.y = -(q.ajuste?.alturaPx ?? 0) * (q.iso ? 1 : ALTURA_VISTA_DE_CIMA);
@@ -603,7 +604,7 @@ export class CamadaEntidades {
     // Marco 23 (D-092): o inimigo afim leva a cor do elemento, como no token desenhado.
     // Dragões mantêm as escamas negras mesmo quando o tema atribui afinidade.
     const af = e.preset.startsWith('dragao_') ? undefined : e.afinidade;
-    const tinta = q.ajuste?.tinta != null ? misturarCor(0xffffff, q.ajuste.tinta, 0.75) : af && this.o.corElemento ? misturarCor(0xffffff, this.o.corElemento(af.elemento), af.extrema ? 0.6 : 0.42) : 0xffffff;
+    const tinta = tintaDoNivel(e, q.ajuste?.tinta != null ? misturarCor(0xffffff, q.ajuste.tinta, 0.75) : af && this.o.corElemento ? misturarCor(0xffffff, this.o.corElemento(af.elemento), af.extrema ? 0.6 : 0.42) : 0xffffff);
     const branca = !e.morto && (this.o.armaBranca?.(e, q.tick) ?? false);
     const pulso = q.reduzido ? 0.5 : 0.5 + 0.5 * Math.sin((2 * Math.PI * q.agoraMs) / PULSO_ARMA_MS);
     const pronto =
@@ -683,6 +684,7 @@ export class CamadaEntidades {
   private desenharAneis(m: Marcador, e: Entidade, estado: EstadoJogo, selecao: 'auto' | 'travado' | null): void {
     const g = m.aneis.clear();
     const k = m.achatamento;
+    desenharPorteDoNivel(g, e, m.escala, k, m.topo, this.o.reduzido() ? 0 : performance.now()); // D-135: o grau do nível.
     const anel = (r: number) => g.ellipse(0, 0, r, r * k);
     // Ajuste de 15/10/2026 (D-065): automático, o anel amarelo fino; travado, laranja-avermelhado e grosso, com as
     // quatro marcas da mira.

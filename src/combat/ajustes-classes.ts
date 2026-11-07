@@ -71,6 +71,8 @@ export function multiplicadorDireto(ctx: ContextoSimulacao, ator: Entidade, hab:
   // Marco 28 (D-127): o Engenho fortalece o falcão.
   if (classe === 'aventureiro' && hab.tags.includes('falcao')) return ctx.balance.ajustesClasses.aventureiro.falcaoDanoMult * fatorDeDominio(ctx, ator, 'falcao');
   if (classe === 'arqueiro' && secundario && ['chuva_de_flechas', 'tiro_em_leque'].includes(hab.id)) return ctx.balance.ajustesClasses.arqueiro.secundariosMult;
+  // 06/11/2026 (D-135): o Necromante bate mais com as próprias mãos (os mortos dele não entram aqui).
+  if (classe === 'necromante' && !ator.invocacao) return 1 + ctx.balance.ajustesClasses.necromante.danoProprioPct / 100;
   return 1;
 }
 

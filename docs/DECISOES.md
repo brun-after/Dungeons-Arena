@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.85 · **Data:** 06/11/2026
+**Versão:** 0.86 · **Data:** 06/11/2026
 
 > **Histórico**
+> - **0.86 (06/11/2026)**: D-135: três inimigos novos (Arremessador, Duende saltador e Runista medroso, só no Mundo), o porte por nível a cada 10 níveis, as armadilhas como círculos de conjuração (dano pela vida atual, puxão, Passo leve, mais no Mundo), o dano e o vínculo do Necromante e o básico de projétil que não atira na parede.
 > - **0.85 (06/11/2026)**: D-134: a skin Mágico do aventureiro (a cartola e o pombo), a cabeça menor e mais escura da Sombra Rubra, o pouso do falcão na metade do tempo e o grito saindo do falcão.
 > - **0.84 (06/11/2026)**: D-134: as trevas do Ceifador só saem andando, no rumo oposto ao movimento, e o rosto dele é só escuridão; a franja da Sombra Rubra.
 > - **0.83 (06/11/2026)**: D-134: o Ceifador remontado a partir de medidas da arte, em camadas e se desfazendo em trevas; correções do topo da barra de vida e das escalas da Sombra Rubra.
@@ -3923,3 +3924,47 @@ O falcão é desenhado como uma cartola que voa (`voo-falcao.ts`, só apresenta�
 - O efeito das skills com a tag `falcao`, como o grito, sai da posição visual do falcão, e não mais do jogador (`efeitos-habilidade.ts`).
 
 As superfícies das skins (`superficie`, `mecha` em `skin-pano.ts`) passam por uma densidade global (`definirDensidadeDaSkin`, padrão 3) que reamostra os anéis. Assim, os polígonos podem ser reduzidos depois sem redesenhar as peças.
+
+## D-135 — Inimigos novos, porte por nível, armadilhas e linha de tiro (06/11/2026)
+
+**Linha de tiro.** O básico que é projétil não sai contra quem está atrás de uma parede ou muralha: vale como fora do
+alcance (`combat/linha-de-tiro.ts`, a mesma integração de 0,25 célula do projétil). O jogador troca para outro alvo
+visível no alcance ou espera (travado); o seguir alvo continua andando; a IA dá a volta (`perseguir`). O projétil que já
+saiu antes de o alvo se esconder bate na parede, como antes. Exceção em dados: `armas.tiroPorCimaDe` (o cajado do
+Necromante, cujo básico cai sob o alvo). Só o básico; as skills continuam como eram.
+
+**Necromante.** +15% de dano nos golpes do próprio Necromante (`ajustesClasses.necromante.danoProprioPct`, os mortos
+não contam) e o vínculo dos mortos: ele se cura com 8% do dano que um morto dele causa e 6% do que um morto leva
+(`vinculoCausadoPct`, `vinculoLevadoPct`; a fração fica guardada em `vinculoResto`).
+
+**Inimigos novos** (`inimigos.json`, comportamento em `entities/ia-especiais.ts`, números em `balance.ia`):
+- **Arremessador** (atirador, alcance 5 como o do esqueleto): a pedra tem a etiqueta `encantavel`; no inimigo afim, a
+  chave dela ganha o caminho elemental do elemento dele (`perfil.ts`).
+- **Duende saltador** (`comportamento: saltador`): de 2 a 7 células, corre (acelerado 80% por 0,65 s) e salta
+  (`salto_do_duende`, linha de 5 com avanço e 0,5 s sem movimento). Feito para que o kiting não baste.
+- **Runista medroso** (`comportamento: armadilheiro`, `soMundo`): foge girando a 4 células do alvo (110% mais rápido)
+  e larga uma runa a cada 2 células (`runa_do_medroso`), cercando quem caça; descansa 1,5 s (um "z" sobre ele) e foge de
+  novo. Não ataca. Só nas listas do Mundo; `soMundo` o tira da geração da campanha. O modo Mundo dá 10 armadilhas por
+  inimigo (`limites.armadilhasPorInimigo`).
+- Os três reaproveitam modelos (troll, goblin, cultista) com tinta e tamanho próprios (`render/porte-nivel.ts`); modelos
+  próprios ficam para quando houver arte.
+
+**Porte por nível** (`render/porte-nivel.ts`, só apresentação): a cada 10 níveis o inimigo sobe um grau (até 10): +3% de
+tamanho e um pouco mais escuro por grau; selo rubro sob os pés com uma marca por grau (1+); brasas subindo (3+); coroa
+de espinhos de ferro (5+, mais pontas a cada dois graus); brilho e selo duplo (7+); chamas na coroa e selo aceso (9+);
+coroa de ouro em brasa no nível 100.
+
+**Armadilhas.**
+- Expostas (suas, da equipe, reveladas pela Sabedoria ou a runa de pé), são círculos de conjuração na célula: anéis com
+  runas girando e o sinal do elemento no meio, com brilho aditivo (`render/armadilhas-visual.ts`). A runa do
+  armadilheiro é ainda uma pedra de pé, à vista de todos (vai no `privado` da sala e no minimapa).
+- O disparo (`combat/armadilhas-disparo.ts`) fere o valor mais 12% da vida atual (menos nos chefes), aplica o estado do
+  elemento (ou, na de explosão, atordoa 0,4 s) e puxa a vítima até 3 células na direção do hostil a ela mais perto (até
+  8): o jogador cai perto do inimigo e o inimigo atraído cai perto do jogador. O efeito visual é o do elemento (ou a
+  explosão de fogo).
+- O dano base subiu (fase: 26 + 3 por nível, até 150; spawner: 14). 55% das de fase são elementais (o elemento do tema
+  na maior parte das vezes), com RNG próprio (o resto da fase gerada sai igual).
+- Mundo: cada sala de masmorra tem 2 (`armadilhas.mundoPorSala`) e o exterior tem `armadilhasPor1000` pelo perigo da
+  região (0,8, 2 e 3,5 no Central; 0,8, 2,5 e 4 no Eclipse).
+- Orbe **Passo leve** (`passo_leve`, 60 s): a próxima armadilha em que se pisa, de fase ou de monstro, some sem ferir.
+- Os gatilhos indexam quem está em cada célula uma vez por tick (antes era armadilhas × entidades).

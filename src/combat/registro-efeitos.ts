@@ -73,6 +73,8 @@ export const TIPOS_EFEITO = [
   'cego', 'aterrorizado', 'confuso', 'desafiado', 'marca_cacador', 'frenesi', 'esquiva', 'intercepta', 'contragolpe', 'presagio',
   'critico_garantido', 'sobrecarga', 'escudo_acumulado', 'invisivel', 'dissipar', 'consumir', 'detonar_invocacao', 'arremessar',
   'zerar_recarga', 'libertar', 'furia', 'carga_ultimate', 'fase', 'invocar_temporario', 'reflexo', 'executar',
+  // 06/11/2026 (D-135): o orbe que deixa imune à próxima armadilha.
+  'passo_leve',
 ] as const;
 export type TipoEfeito = (typeof TIPOS_EFEITO)[number];
 
@@ -175,6 +177,8 @@ export interface DefinicaoEfeito {
   somaAteTeto: boolean;
   /** Marco 24: quem golpeia o portador de perto recebe o efeito carregado (Seiva corrosiva, Égide flamejante). */
   reflexo: boolean;
+  /** 06/11/2026 (D-135): a próxima armadilha em que o portador pisar some sem ferir (e o efeito sai). */
+  protegeDeArmadilha: boolean;
 }
 
 type Def = Omit<DefinicaoEfeito, 'id'>;
@@ -215,6 +219,7 @@ const BASE: Omit<Def, 'icone' | 'cor' | 'positivo' | 'padrao' | 'campos'> = {
   someAoLancar: null,
   somaAteTeto: false,
   reflexo: false,
+  protegeDeArmadilha: false,
 };
 
 const negativo = (icone: string, cor: string, campos: readonly CampoEfeito[], padrao: Def['padrao'], extra: Partial<Def>): Def => ({
@@ -336,6 +341,7 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   fase: { ...BASE, icone: 'ampulheta', cor: '#f5b041', positivo: true, ehStatus: false, campos: [], padrao: { duracaoMs: 0, valor: 0, pct: 0 }, fluxo: 'fase', aoLancar: true, exige: ['ref'] },
   reflexo: { ...BASE, icone: 'escudo', cor: '#58d68d', positivo: true, campos: [], padrao: { duracaoMs: 5000, valor: 0, pct: 0 }, reflexo: true, exige: ['interno'] },
   executar: instantaneo('caveira', '#c0392b', ['pct'], { duracaoMs: 0, valor: 0, pct: 20 }, 'executar', false),
+  passo_leve: positivo('botas', '#9be7c4', 6, [], { duracaoMs: 60_000, valor: 0, pct: 0 }, { protegeDeArmadilha: true }),
   invocar_temporario: { ...BASE, icone: 'invocar', cor: '#48c9b0', positivo: true, ehStatus: false, campos: ['valor'], padrao: { duracaoMs: 12_000, valor: 1, pct: 0 }, fluxo: 'invocar', aoLancar: true, exige: ['ref'] },
 };
 

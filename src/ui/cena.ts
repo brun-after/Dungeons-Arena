@@ -300,7 +300,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   bus.on('quebrou', (ev) => {
     ap.particulas.emitir(presetDaQuebra(ev.forma), ev.x, ev.y, 0x9ad8ff);
   });
-  const fluxo = new CamadaFluxo(palco.chao, () => ap.particulas.limite > 0, () => ticksDe(ctx.balance.armadilhas.desarmeMs), () => ticksDe(ctx.balance.portas.esperaMs));
+  const fluxo = new CamadaFluxo(palco.chao, () => ap.particulas.limite > 0, () => ticksDe(ctx.balance.armadilhas.desarmeMs), () => ticksDe(ctx.balance.portas.esperaMs), { camada: palco.entidades, projecao });
   bus.on('armadilhaDisparou', (ev) => {
     if (ev.x !== undefined && ev.y !== undefined) fluxo.disparou(ev.x, ev.y, ev.tick);
   });

@@ -12,7 +12,8 @@ import { BALANCE_PADRAO } from '../core/contexto';
 import { aleatorio, criarRng, inteiro, escolher, type EstadoRng } from '../core/rng';
 import { LADOS, portaDa, vizinha, type Bioma, type LadoDaRegiao, type PapelNpc, type Reino, type RegiaoDoMundo } from '../mundo/reino';
 import type { Celula } from '../core/comandos';
-import type { FaseJson, InimigoPosicionado, SpawnJson, Telhado } from './fase';
+import type { FaseJson, InimigoPosicionado, ObjetoPosicionadoJson, SpawnJson, Telhado } from './fase';
+import { armadilhaDeFase } from './armadilhas-de-fase';
 
 /** Largura da abertura na borda que leva à região vizinha. */
 export const LARGURA_PASSAGEM = 6;
@@ -96,6 +97,8 @@ const QUADRANTES = [[1, 1], [-1, 1], [-1, -1], [1, -1]] as const;
 const CASAS_NA_VILA = 12;
 /** Desloca a semente das casas (o outro gerador de números). */
 const SEMENTE_CASAS = 7919;
+/** 06/11/2026 (D-135): o RNG das armadilhas do exterior (separado: mudar a densidade não mexe no resto). */
+const SEMENTE_ARMADILHAS = 15_013;
 
 /**
  * Cabe a casa em (x, y)? A casa só sobre o chão `chao`; a volta de uma célula em `margem` (por onde se passa em
@@ -430,6 +433,19 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     }
   }
 
+  // 06/11/2026 (D-135): os círculos escondidos do exterior, pela densidade do perigo (fora da vila e longe das chegadas).
+  // RNG próprio: o resto da região sai igual.
+  const rngArmadilhas = criarRng(regiao.semente + SEMENTE_ARMADILHAS);
+  const armadilhas: ObjetoPosicionadoJson[] = [];
+  const quantasArmadilhas = Math.floor((livres.length * regras.armadilhasPor1000) / 1000);
+  const usadas = new Set<number>();
+  for (let t = 0; t < quantasArmadilhas * 4 && armadilhas.length < quantasArmadilhas && livres.length > 0; t++) {
+    const c = escolher(rngArmadilhas, livres);
+    if (usadas.has(c.y * n + c.x) || naVila(c) || spawns.some((s) => chebyshev(s, c) < FOLGA_INIMIGOS)) continue;
+    usadas.add(c.y * n + c.x);
+    armadilhas.push(armadilhaDeFase(rngArmadilhas, c, { largura: n, altura: n }, inteiro(rngArmadilhas, regiao.nivel[0], regiao.nivel[1]), null));
+  }
+
   const fase: FaseJson = {
     id: `mundo_${reino.id}_${regiao.id}`,
     nome: regiao.nome,
@@ -440,6 +456,7 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     inimigos,
     ...(regiao.tema && { tema: regiao.tema }),
     ...(telhados.length > 0 && { telhados }),
+    ...(armadilhas.length > 0 && { objetos: armadilhas }),
   };
   return { fase, pontos, passagens, vila: regiao.vila ? { x: regiao.vila.x, y: regiao.vila.y, raio: regiao.vila.raio } : null };
 }

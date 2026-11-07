@@ -31,7 +31,19 @@ export interface PresetInimigo {
   /** Marco 14: resistência por elemento, em % (−100 a 100; 100 = imune), e tipos de efeito que não pegam. */
   resistencias: Readonly<Partial<Record<Elemento, number>>>;
   imunidades: readonly TipoEfeito[];
+  /**
+   * 06/11/2026 (D-135): o jeito próprio de caçar (entities/ia-especiais.ts) — o saltador corre e pula no alvo; o
+   * armadilheiro foge em volta dele plantando runas e para para descansar. null: a IA do arquétipo.
+   */
+  comportamento: ComportamentoEspecial | null;
+  /** 06/11/2026 (D-135): só nasce onde os dados do Mundo o põem (fora da geração da campanha). */
+  soMundo: boolean;
+  /** 06/11/2026 (D-135): só entra na geração pelos pesos do tema (as fases sem tema, já salvas, saem iguais). */
+  soPorTema: boolean;
 }
+
+export type ComportamentoEspecial = 'saltador' | 'armadilheiro';
+const COMPORTAMENTOS_ESPECIAIS: readonly ComportamentoEspecial[] = ['saltador', 'armadilheiro'];
 
 export interface PresetInvocacao {
   comportamento: ComportamentoInvocacao;
@@ -128,6 +140,9 @@ export function lerPresets(json: unknown): { presets: Map<string, PresetInimigo>
         l.erro(`imunidades: tipo de efeito desconhecido "${t}"`);
         return false;
       }),
+      comportamento: o.comportamento === undefined ? null : l.opcao(o, 'comportamento', COMPORTAMENTOS_ESPECIAIS),
+      soMundo: o.soMundo === undefined ? false : l.booleano(o, 'soMundo'),
+      soPorTema: o.soPorTema === undefined ? false : l.booleano(o, 'soPorTema'),
     };
     if (presets.has(p.id)) l.erro('id repetido');
     erros.push(...l.erros);

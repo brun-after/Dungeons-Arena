@@ -6,7 +6,7 @@
 // Puro.
 
 import type { Conteudo } from '../core/conteudo';
-import type { ContextoSimulacao } from '../core/contexto';
+import { BALANCE_PADRAO, type ContextoSimulacao } from '../core/contexto';
 import { hashTexto } from '../core/rng';
 import type { EstadoJogo } from '../core/estado';
 import type { ModoDeJogo } from '../modos/modo';
@@ -65,7 +65,9 @@ export interface LugarMontado {
 function interior(conteudo: Conteudo, reino: Reino, d: MasmorraDoMundo | CovilDoMundo, prefixo: string) {
   const catalogo = { ...catalogoDeGeracao(conteudo, estoqueDeDungeon(conteudo, territorioDoLugar(reino,d.id), d.nivel)), comuns: [...d.inimigos], boss: d.boss };
   return gerarFase(
-    { id: `mundo_${prefixo}_${d.id}`, nome: d.nome, semente: hashTexto(`${prefixo}:${d.id}`), salas: d.salas, ...(d.salas >= 18 ? {largura: 96, altura: 80, formato: 'espiral' as const} : {}), nivelInimigos: d.nivel, matizGraus: 0, ...(d.tema && { tema: d.tema }) },
+    { id: `mundo_${prefixo}_${d.id}`, nome: d.nome, semente: hashTexto(`${prefixo}:${d.id}`), salas: d.salas, ...(d.salas >= 18 ? {largura: 96, altura: 80, formato: 'espiral' as const} : {}), nivelInimigos: d.nivel, matizGraus: 0, ...(d.tema && { tema: d.tema }),
+      // 06/11/2026 (D-135): no Mundo, as armadilhas são parte do perigo de cada sala.
+      armadilhasPorSala: BALANCE_PADRAO.armadilhas.mundoPorSala },
     catalogo,
   );
 }
