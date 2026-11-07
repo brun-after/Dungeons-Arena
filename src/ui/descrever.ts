@@ -105,6 +105,10 @@ export function descreverHabilidade(h: Habilidade, o: OpcoesDescricao = {}): str
   linhas.push(custos.length > 0 ? custos.join(' · ') : t('desc.semCusto'));
   linhas.push(t(`desc.mobilidade.${h.mobilidade}`));
   linhas.push(h.recargaMs > 0 ? t('desc.tempo', { conj: segundos(h.conjuracaoMs), recarga: segundos(h.recargaMs) }) : t('desc.tempoSemRecarga', { conj: segundos(h.conjuracaoMs) }));
+  // 07/11/2026 (D-136): cargas, o círculo no ar e a lança dos mortos.
+  if (h.cargas) linhas.push(t('desc.cargas', { n: h.cargas }));
+  if (h.disparoMs) linhas.push(t('desc.disparo', { s: segundos(h.disparoMs) }));
+  if (h.lanca) linhas.push(t('desc.lanca', { n: h.lanca.alem }), ...(h.lanca.lados ? [t('desc.lancaLados')] : []));
   if (o.rankMax !== undefined) linhas.push(t('desc.rank', { rank: h.rank, max: o.rankMax }));
   const codigo = ehGerada(h.id) ? codigoDaGerada(h.id) : null;
   if (codigo) linhas.push(t('desc.codigo', { codigo }));
@@ -115,6 +119,11 @@ export function descreverHabilidade(h: Habilidade, o: OpcoesDescricao = {}): str
 export function descreverCaminho(c: Caminho): string[] {
   const linhas = [...c.mods.map((m) => t(`mod.${m}` as ChaveTexto)), ...descreverBonus(c)];
   if (c.elemento) linhas.push(t('desc.bonus.elemento', { nome: nomeDoElemento(c.elemento) }));
+  // 07/11/2026 (D-136)
+  if (c.cargas) linhas.push(t('desc.bonus.cargas', { n: c.cargas }));
+  if (c.disparoPct) linhas.push(t('desc.bonus.disparo', { v: c.disparoPct }));
+  if (c.lancaAlem) linhas.push(t('desc.bonus.lancaAlem', { n: c.lancaAlem }));
+  if (c.lancaLados) linhas.push(t('desc.bonus.lancaLados'));
   for (const ef of c.efeitos) linhas.push(descreverEfeito(ef));
   return linhas;
 }

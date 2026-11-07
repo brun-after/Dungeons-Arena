@@ -19,14 +19,15 @@ import { alcanceDe, alvoAtual, autoAlvo, custoDaHabilidade, podePagar, recargaRe
 import { celulaOcupada } from './geometria';
 import type { Habilidade } from './habilidades';
 import { habilidadeDoAtor } from './perfil';
+import { semLinha } from './linha-de-tiro';
 
 const chebyshev = (a: { x: number; y: number }, b: { x: number; y: number }) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
 
 /** O alcance do básico agora e se a arma é de ataque à distância (o básico sai em projétil: arco, cajado…). */
-function alcanceDoBasico(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade): { alcance: number; distancia: boolean } | null {
+function alcanceDoBasico(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade): { alcance: number; distancia: boolean; hab: Habilidade } | null {
   const hab = habilidadeDoAtor(ctx, e, e.ataqueBasico, estado.tick);
   if (!hab) return null;
-  return { alcance: alcanceDe(ctx, e, hab, estado.tick), distancia: hab.politicaImpacto === 'projetil' };
+  return { alcance: alcanceDe(ctx, e, hab, estado.tick), distancia: hab.politicaImpacto === 'projetil', hab };
 }
 
 /** O alcance que vale para usar a skill: o da mira, ou o raio dela quando a área é em volta de quem conjura. */
@@ -107,7 +108,9 @@ export function processarSeguirAlvo(estado: EstadoJogo, ctx: ContextoSimulacao, 
     // O direcional manual tem a vez; e o alvo cancelado não é mais seguido.
     if (e.direcao !== 'parado' || e.seguirCanceladoDe === alvo.id) continue;
     const d = chebyshev(celulaOcupada(e), cel);
-    if (d <= alcanceDeAproximar(estado, ctx, e, basico.alcance) || d > limiteDeSeguir(ctx, basico.alcance, basico.distancia)) {
+    // 06/11/2026 (D-135): atrás da parede, o alvo do básico de projétil não está "no alcance": segue andando até ele.
+    const perto = d <= alcanceDeAproximar(estado, ctx, e, basico.alcance) && !semLinha(estado, ctx, e, basico.hab, alvo);
+    if (perto || d > limiteDeSeguir(ctx, basico.alcance, basico.distancia)) {
       if (s.andando) pararMovimento(e);
       s.andando = false;
       continue;

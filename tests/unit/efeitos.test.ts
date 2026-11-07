@@ -61,7 +61,8 @@ function cenario(balance: Balance = BALANCE_PADRAO) {
 describe('registro (§2.8)', () => {
   it('tem os 26 tipos da spec, os 10 do marco 14 e o bônus de movimento, com os pesos de orbe', () => {
     // Marco 24: mais 24 (estados, instantâneos e fluxos novos).
-    expect(TIPOS_EFEITO).toHaveLength(81);
+    // 06/11/2026 (D-135): mais o Passo leve.
+    expect(TIPOS_EFEITO).toHaveLength(83);
     const pesos = Object.fromEntries(elegiveisParaOrbe().map((d) => [d.id, d.pesoOrbe]));
     expect(pesos).toEqual({
       cura_periodica: 20,
@@ -76,6 +77,8 @@ describe('registro (§2.8)', () => {
       atravessar: 2,
       rastro_dano: 2,
       engenho: 4,
+      passo_leve: 6,
+      vista_de_armadilha: 8,
     });
   });
 

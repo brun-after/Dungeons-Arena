@@ -52,7 +52,11 @@
     "necromante": {
       "protecaoMs": 5000,
       "doisPct": 10,
-      "grupoPct": 20
+      "grupoPct": 20,
+      "danoProprioPct": 15,
+      "vinculoCausadoPct": 8,
+      "vinculoLevadoPct": 6,
+      "lanca": { "alcanceAlvo": 6, "perfuradoPct": 50 }
     }
   },
   "progressaoItens": { "tomoPrecoBase": 10000, "aceleracaoIncomumChancePct": 30, "aceleracaoRaraChancePct": 10, "essenciaChancePct": 2, "essenciaBossChancePct": 20 },
@@ -193,7 +197,7 @@
     "pesoOrbe": { "hp": 55, "recurso": 25, "efeito": 25 },
     "itensBau": [1, 2],
     "ouroBau": [10, 30],
-    "danoArmadilha": 8,
+    "danoArmadilha": 14,
     "armadilhaExpiraS": 180
   },
   "populacao": { "reforcoPorFasePct": 10, "areaReferencia": 545, "tetoMult": 3, "tetoInimigos": 60 },
@@ -377,7 +381,15 @@
     "desarmePorPontoPct": 5,
     "desarmeMaxPct": 95,
     "desarmeMs": 1500,
-    "xpDesarme": 5
+    "xpDesarme": 5,
+    "vidaAtualPct": 12,
+    "semPctArquetipos": ["boss"],
+    "puxaoCelulas": 3,
+    "puxaoRaio": 8,
+    "explosaoAtordoarMs": 400,
+    "elementalPct": 55,
+    "mundoPorSala": 2,
+    "vistaRaio": 8
   },
   "ia": {
     "revide": true,
@@ -409,7 +421,9 @@
     "sorteioTaticoMs": 3000,
     "armadilhaVistaRaio": 6,
     "armadilhasLembradas": 8,
-    "arquetiposFirmes": ["boss"]
+    "arquetiposFirmes": ["boss"],
+    "saltador": { "distanciaMin": 2, "folgaCorrida": 2, "corridaMs": 650, "corridaPct": 80 },
+    "armadilheiro": { "fugaMs": 3800, "descansoMs": 1500, "fugaPct": 110, "raioCerco": 4, "passoRad": 0.9, "plantarACadaCelulas": 2 }
   },
   "tatica": {
     "janelaEtapaMs": 3000,
@@ -448,9 +462,9 @@
     "queimadura": 4,
     "veneno": 3,
     "duracaoMs": 1800,
-    "danoArmadilhaBase": 18,
-    "danoArmadilhaPorNivel": 2,
-    "danoArmadilhaMax": 90,
+    "danoArmadilhaBase": 26,
+    "danoArmadilhaPorNivel": 3,
+    "danoArmadilhaMax": 150,
     "rearmeMs": 4500,
     "sangramento": 2,
     "sangramentoMs": 3000,
@@ -492,6 +506,7 @@
   },
   "armas": {
     "secundariaACada": 3,
+    "tiroPorCimaDe": ["cajado"],
     "carregadoAlcanceMult": 3,
     "semFamiliaridade": { "curaPct": -50, "alcance": -2, "velocidadePct": -50, "elementalPct": -30, "servosPct": -35 },
     "emprestimo": {

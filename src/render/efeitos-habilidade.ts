@@ -40,7 +40,15 @@ import type { Habilidade } from '../combat/habilidades';
 import type { DiretorVfx } from './vfx/diretor';
 import { assinaturaDe } from './vfx/resolver';
 import { ligarSolos, tierDaArma } from './solos-visual';
+import { ligarLancas } from './lancas-visual';
 import { DT_MS } from '../core/loop';
+import { corDaArmadilha } from './armadilhas-visual';
+
+/** 06/11/2026 (D-135): o efeito que cada elemento solta quando o círculo de conjuração dispara. */
+const ASSINATURA_DA_ARMADILHA: Readonly<Record<Elemento, AssinaturaVisual>> = {
+  fogo: 'bola_de_fogo', gelo: 'nova_glacial', raio: 'relampago', veneno: 'nevoa_venenosa',
+  psiquico: 'mente_partida', terra: 'abalo_sismico', trevas: 'golpe_sombrio', sagrado: 'lanca_radiante',
+};
 
 const INTERVALO_CONJURACAO_MS = 120;
 const INTERVALO_RASTRO_MS = 30;
@@ -175,12 +183,17 @@ export class EfeitosDeHabilidade {
       this.areas.delete(ev.acaoId);
       this.conjurando.delete(ev.acaoId);
     });
-    // D-124: a armadilha disparada fecha a mandíbula dentada; a isca que explode é uma bola de fogo.
+    // 06/11/2026 (D-135): o círculo disparado explode em brasa ou solta o efeito do elemento; o Passo leve o dissipa.
     bus.on('armadilhaDisparou', (ev) => {
       const p = ev.x !== undefined && ev.y !== undefined ? { x: ev.x, y: ev.y } : pos(ev.alvoId);
       if (!p) return;
-      this.o.diretor.area('armadilha_de_caca', { chave: '', atorId: ev.donoId, origem: p, mira: p, centro: p, celulas: [p], cor: 0xb9770e, escala: 1, tipoArea: 'quadrado', raio: 0 }, undefined);
-      if (ev.alvoId === this.o.idLocal) this.o.impacto.pedir('forte', agora());
+      const nome = ev.protegido ? 'dissipar' : ev.elemento ? ASSINATURA_DA_ARMADILHA[ev.elemento] : 'explosao_de_fogo';
+      const raio = ev.protegido ? 0 : 1;
+      const celulas = [];
+      for (let dy = -raio; dy <= raio; dy++) for (let dx = -raio; dx <= raio; dx++) celulas.push({ x: p.x + dx, y: p.y + dy });
+      const area = { chave: '', atorId: ev.donoId, origem: p, mira: p, centro: p, celulas, cor: corDaArmadilha(ev), escala: 1, tipoArea: 'quadrado' as const, raio };
+      if (!this.o.diretor.area(nome, area, undefined)) this.o.diretor.rajada(nome, area);
+      if (ev.alvoId === this.o.idLocal && !ev.protegido) this.o.impacto.pedir('forte', agora());
     });
     bus.on('explodiu', (ev) => {
       const p = { x: ev.x, y: ev.y };
@@ -226,6 +239,8 @@ export class EfeitosDeHabilidade {
     });
     // Marco 27 (D-126): o solo amaldiçoado e a runa.
     ligarSolos(bus, estado, this.o.diretor, (chave) => this.o.habilidades(chave));
+    // 07/11/2026 (D-136): as lanças de osso dos mortos do Necromante.
+    ligarLancas(bus, this.o.diretor, (chave) => this.o.habilidades(chave));
     bus.on('projetilLancado', (ev) => {
       if (this.carregadoDe === ev.donoId) {
         this.carregados.add(ev.projetilId);

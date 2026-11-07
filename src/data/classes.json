@@ -202,7 +202,7 @@
     {
       "id": "necromante",
       "nome": "Necromante",
-      "hpBase": 50,
+      "hpBase": 62,
       "defesa": 1,
       "classe": "conjurador",
       "atributos": {
@@ -248,7 +248,7 @@
         "dardo_funesto",
         "dizimo_vital"
       ],
-      "geralInicial": "barreira"
+      "geralInicial": "dissipar"
     }
   ]
 }

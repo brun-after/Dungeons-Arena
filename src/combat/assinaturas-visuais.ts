@@ -22,6 +22,8 @@ export const ASSINATURAS_VISUAIS = [
   'dardo_toxico', 'nevoa_venenosa', 'seiva_corrosiva', 'golpe_viscoso', 'cone_toxico', 'poca_toxica',
   // Trevas e necromancia.
   'cranio', 'garras_do_ossuario', 'ceifa_de_almas', 'mortalha', 'explosao_cadaverica', 'levante_profano', 'fios_de_vida',
+  // 07/11/2026 (D-136): a lança de osso que sai do peito do morto.
+  'lanca_de_osso',
   'comando_sepulcral', 'golpe_sombrio', 'raio_vampirico', 'passo_sombrio', 'veu_da_noite', 'troca_sombria', 'invocacao',
   'campo_de_ossos', 'hoste_espectral', 'marca_sombria', 'peste',
   // Arcano e psíquico.

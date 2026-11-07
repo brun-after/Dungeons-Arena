@@ -6,6 +6,7 @@ import type { Dificuldade } from '../modos/dificuldade';
 import type { EntidadeId } from './comandos';
 import type { TipoObjeto } from './estado';
 import type { TipoEfeito } from '../combat/registro-efeitos';
+import type { Elemento } from '../combat/elementos';
 import type { Slot } from '../modos/modo';
 import type { StatusCaminho } from '../world/navegacao';
 
@@ -131,6 +132,8 @@ export type EventoSimulacao =
   | { t: 'soloCriado'; tick: number; soloId: number; acaoId: number; donoId: EntidadeId; habilidadeId: string; chave: string; x: number; y: number; raio: number; forma: 'quadrado' | 'cone'; atrasoMs: number }
   | { t: 'soloPulsou'; tick: number; soloId: number; x: number; y: number; raio: number; atingidos: number }
   | { t: 'soloFim'; tick: number; soloId: number }
+  /** 07/11/2026 (D-136): uma lança de osso saiu do peito de um morto (o render desenha da origem ao fim). */
+  | { t: 'lancaDeOsso'; tick: number; acaoId: number; chave: string; donoId: EntidadeId; mortoId: EntidadeId; deX: number; deY: number; paraX: number; paraY: number }
   /** Marco 28 (D-127): um marco do atributo de classe disparou (o render desenha pelas células). */
   | { t: 'marcoDeClasse'; tick: number; id: EntidadeId; marco: string; celulas: { x: number; y: number }[]; itemId?: string }
   | {
@@ -213,7 +216,8 @@ export type EventoSimulacao =
   | { t: 'explodiu'; tick: number; id: EntidadeId; x: number; y: number; raio: number }
   | { t: 'dispensou'; tick: number; id: EntidadeId; quantidade: number }
   | { t: 'armadilhaArmada'; tick: number; donoId: EntidadeId; armadilhaId: number; x: number; y: number }
-  | { t: 'armadilhaDisparou'; tick: number; donoId: EntidadeId; armadilhaId: number; alvoId: EntidadeId; x?: number; y?: number }
+  // 06/11/2026 (D-135): o elemento do círculo (sem ele, explosão), se era a runa de pé e se o Passo leve protegeu.
+  | { t: 'armadilhaDisparou'; tick: number; donoId: EntidadeId; armadilhaId: number; alvoId: EntidadeId; x?: number; y?: number; elemento?: Elemento; runa?: boolean; protegido?: boolean }
   // Marco 18 (D-068): a Sabedoria revela e desarma armadilhas.
   | { t: 'armadilhaRevelada'; tick: number; id: EntidadeId; armadilhaId: number; x: number; y: number }
   | { t: 'armadilhaDesarmada'; tick: number; id: EntidadeId; armadilhaId: number; sucesso: boolean }

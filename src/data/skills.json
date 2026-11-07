@@ -2916,14 +2916,14 @@
       "nome": "Dardo funesto",
       "icone": "runa",
       "tipoAtaque": "magico",
-      "formulaDano": "1d8",
+      "formulaDano": "1d4",
       "formulaCura": null,
       "alcanceCelulas": 6,
       "tipoArea": "nenhuma",
       "raioArea": 0,
       "custoRecurso": 3,
-      "recargaMs": 3500,
-      "conjuracaoMs": 400,
+      "recargaMs": 4000,
+      "conjuracaoMs": 300,
       "politicaAlvo": "hostil",
       "politicaImpacto": "projetil",
       "interrupcao": "interrompivel",
@@ -2950,12 +2950,74 @@
       ],
       "marcos": {
         "2": {
-          "texto": "Custa 15% menos mana",
-          "custoPct": -15
+          "texto": "Acumula 3 cargas",
+          "cargas": 1
         },
         "4": {
-          "texto": "Recarga 15% menor",
-          "recargaPct": -15
+          "texto": "Acumula mais 1 carga",
+          "cargas": 1
+        }
+      },
+      "evolucoes": {
+        "3": [
+          "acumulo",
+          "pressa"
+        ],
+        "5": [
+          "arsenal",
+          "gatilho"
+        ]
+      },
+      "elemento": "trevas",
+      "disparoMs": 2000,
+      "cargas": 2
+    },
+    {
+      "id": "dizimo_vital",
+      "familiaEvolucao": "sombra",
+      "grau": "B",
+      "nome": "Lança de ossos",
+      "icone": "espada",
+      "tipoAtaque": "magico",
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 4,
+      "recargaMs": 8000,
+      "conjuracaoMs": 700,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "sangrando",
+          "valor": 2,
+          "duracaoMs": 3000
+        }
+      ],
+      "visual": {
+        "cor": "#e8dcc4",
+        "conjuracao": "runas",
+        "impacto": "pedra",
+        "som": "golpe",
+        "assinatura": "lanca_de_osso"
+      },
+      "mobilidade": "trava",
+      "nivelMinimo": 1,
+      "tags": [
+        "necromancia"
+      ],
+      "marcos": {
+        "2": {
+          "texto": "A lança perfura até 2 células além do alvo",
+          "lancaAlem": 1
+        },
+        "4": {
+          "texto": "Cada morto também crava uma lança para cada lado",
+          "lancaLados": true
         }
       },
       "evolucoes": {
@@ -2964,68 +3026,13 @@
           "controle"
         ],
         "5": [
-          "fortificado",
-          "longo_alcance"
+          "brutal",
+          "elemental_veneno"
         ]
       },
-      "elemento": "trevas"
-    },
-    {
-      "id": "dizimo_vital",
-      "familiaEvolucao": "sombra",
-      "grau": "B",
-      "nome": "Dízimo vital",
-      "icone": "cura",
-      "tipoAtaque": "magico",
-      "formulaDano": null,
-      "formulaCura": null,
-      "alcanceCelulas": 6,
-      "tipoArea": "nenhuma",
-      "raioArea": 0,
-      "custoRecurso": 3,
-      "recargaMs": 9000,
-      "conjuracaoMs": 400,
-      "politicaAlvo": "proprio",
-      "politicaImpacto": "proprio",
-      "interrupcao": "interrompivel",
-      "velocidadeProjetil": 0,
-      "efeitos": [
-        {
-          "tipo": "drenar_invocacao",
-          "valor": 18
-        }
-      ],
-      "visual": {
-        "cor": "#7ee0bb",
-        "conjuracao": "sombra",
-        "impacto": "brilho",
-        "som": "cura",
-        "assinatura": "fios_de_vida"
-      },
-      "mobilidade": "lenta",
-      "nivelMinimo": 1,
-      "tags": [
-        "necromancia"
-      ],
-      "marcos": {
-        "2": {
-          "texto": "Custa 15% menos mana",
-          "custoPct": -15
-        },
-        "4": {
-          "texto": "Recarga 15% menor",
-          "recargaPct": -15
-        }
-      },
-      "evolucoes": {
-        "3": [
-          "eficiente",
-          "fortificado"
-        ],
-        "5": [
-          "sanguessuga",
-          "evasivo"
-        ]
+      "elemento": "trevas",
+      "lanca": {
+        "alem": 1
       }
     },
     {
@@ -3209,38 +3216,40 @@
       "id": "mortalha_funebre",
       "familiaEvolucao": "sombra",
       "grau": "B",
-      "nome": "Mortalha fúnebre",
-      "icone": "fantasma",
+      "nome": "Praga sepulcral",
+      "icone": "veneno",
       "tipoAtaque": "magico",
-      "formulaDano": null,
+      "formulaDano": "1d6",
       "formulaCura": null,
       "alcanceCelulas": 6,
-      "tipoArea": "nenhuma",
-      "raioArea": 0,
+      "tipoArea": "quadrado",
+      "raioArea": 1,
       "custoRecurso": 5,
-      "recargaMs": 14000,
+      "recargaMs": 11000,
       "conjuracaoMs": 400,
-      "politicaAlvo": "proprio",
-      "politicaImpacto": "proprio",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
       "efeitos": [
         {
-          "tipo": "escudo",
-          "valor": 10,
-          "duracaoMs": 6000
+          "tipo": "envenenado",
+          "valor": 3,
+          "pct": 50,
+          "duracaoMs": 5000
         },
         {
-          "tipo": "fantasma",
-          "duracaoMs": 2000
+          "tipo": "exposto",
+          "pct": 20,
+          "duracaoMs": 5000
         }
       ],
       "visual": {
-        "cor": "#8b68d9",
+        "cor": "#7fb069",
         "conjuracao": "sombra",
         "impacto": "sombra",
         "som": "magia",
-        "assinatura": "mortalha"
+        "assinatura": "garras_do_ossuario"
       },
       "mobilidade": "lenta",
       "nivelMinimo": 3,
@@ -3253,20 +3262,21 @@
           "custoPct": -15
         },
         "4": {
-          "texto": "Recarga 15% menor",
-          "recargaPct": -15
+          "texto": "A praga dura 25% mais",
+          "duracaoPct": 25
         }
       },
       "evolucoes": {
         "3": [
           "eficiente",
-          "controle"
+          "amplo"
         ],
         "5": [
-          "sanguessuga",
-          "evasivo"
+          "brutal",
+          "longo_alcance"
         ]
-      }
+      },
+      "elemento": "trevas"
     },
     {
       "formulaDano": "1d8",
@@ -8007,6 +8017,9 @@
         "som": "invocacao",
         "assinatura": "invocacao"
       }
-    }
+    },
+    {"id": "pedra_arremessada", "familiaEvolucao": "tecnica", "grau": "B", "nome": "Pedra arremessada", "icone": "pedra", "tipoAtaque": "fisico", "formulaDano": "1d8", "formulaCura": null, "alcanceCelulas": 5, "tipoArea": "nenhuma", "raioArea": 0, "custoRecurso": 0, "recargaMs": 0, "conjuracaoMs": 750, "politicaAlvo": "hostil", "politicaImpacto": "projetil", "interrupcao": "interrompivel", "velocidadeProjetil": 7, "efeitos": [], "tags": ["encantavel"], "visual": {"cor": "#8d8173", "viagem": "esteira", "impacto": "pedra", "som": "projetil", "assinatura": "pedregulho"}},
+    {"id": "salto_do_duende", "mobilidade": "livre", "familiaEvolucao": "tecnica", "grau": "B", "nome": "Salto do duende", "icone": "investida", "tipoAtaque": "fisico", "formulaDano": "1d10", "formulaCura": null, "alcanceCelulas": 5, "tipoArea": "linha", "raioArea": 0, "custoRecurso": 0, "recargaMs": 4500, "conjuracaoMs": 550, "politicaAlvo": "hostil", "politicaImpacto": "area", "interrupcao": "interrompivel", "velocidadeProjetil": 0, "efeitos": [{"tipo": "avanco", "valor": 5, "em": "conjurador"}, {"sem_movimento": 500}], "tags": ["movimento"], "visual": {"cor": "#b5c46a", "impacto": "pedra", "camera": "leve", "som": "golpe", "assinatura": "salto_esmagador"}},
+    {"id": "runa_do_medroso", "familiaEvolucao": "suporte", "grau": "B", "nome": "Runa do medroso", "icone": "runa", "tipoAtaque": "magico", "formulaDano": null, "formulaCura": null, "alcanceCelulas": 2, "tipoArea": "quadrado", "raioArea": 0, "custoRecurso": 0, "recargaMs": 350, "conjuracaoMs": 150, "politicaAlvo": "celula", "politicaImpacto": "area", "interrupcao": "interrompivel", "velocidadeProjetil": 0, "efeitos": [{"armadilha": {"valor": 8, "duracaoMs": 22000, "efeito": {"atordoar": 350}}}], "visual": {"cor": "#c9a36b", "conjuracao": "fumaca", "som": "armadilha", "assinatura": "campo_minado"}}
   ]
 }

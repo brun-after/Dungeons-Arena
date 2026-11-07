@@ -46,6 +46,8 @@ export interface ParametrosGeracao {
   enxameConcluido?: boolean;
   ambientesVivos?: boolean;
   formato?: 'salas' | 'espiral';
+  /** 06/11/2026 (D-135): armadilhas por sala (o Mundo pede mais); ausente, uma a cada duas salas, como antes. */
+  armadilhasPorSala?: number;
   /** Marco 23 (D-092): o tema da fase (data/temas.json); ausente nas fases geradas antes dele. */
   tema?: string;
 }
@@ -69,7 +71,8 @@ export interface CatalogoGeracao {
 /** Presets comuns (sem chefe, boneco de treino nem invocações, marco 10A-3) e o chefe, tirados do catálogo. */
 export function catalogoDeGeracao(conteudo: Conteudo, estoque: readonly string[], geracao: Balance['geracao'] = BALANCE_PADRAO.geracao): CatalogoGeracao {
   const presets = [...conteudo.presets.values()].filter((p) => p.invocacao === null);
-  const comuns = presets.filter((p) => p.arquetipo !== 'boss' && p.arquetipo !== 'boneco').map((p) => p.id);
+  // 06/11/2026 (D-135): quem é só do Mundo não entra na geração da campanha; quem é só por tema, só pelos pesos dele.
+  const comuns = presets.filter((p) => p.arquetipo !== 'boss' && p.arquetipo !== 'boneco' && !p.soMundo && !p.soPorTema).map((p) => p.id);
   const boss = presets.find((p) => p.arquetipo === 'boss')?.id ?? comuns[0] ?? '';
   const livrosRaros = [...conteudo.itens.values()]
     .filter((i) => i.tipo === 'livro' && i.dropavel && i.ensina !== null && conteudo.definicoes.get(i.ensina)?.base.grau === 'S')

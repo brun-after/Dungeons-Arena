@@ -851,6 +851,16 @@ body.toque .log-combate.aberto {
   color: var(--texto-suave);
 }
 
+/* 07/11/2026 (D-136): as cargas prontas da skill (o Dardo funesto). */
+.botao-habilidade .cargas {
+  position: absolute;
+  left: 4px;
+  top: 2px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--destaque);
+}
+
 .botao-habilidade:focus-visible {
   outline: 2px solid var(--destaque);
   outline-offset: 2px;

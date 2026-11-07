@@ -2,7 +2,7 @@
 import { BALANCE_PADRAO } from '../core/contexto';
 import { criarRng, escolher, inteiro, hashTexto } from '../core/rng';
 import type { Celula } from '../core/comandos';
-import { construirEfeito } from '../combat/registro-efeitos';
+import { armadilhaDeFase } from './armadilhas-de-fase';
 import type { FaseJson } from './fase';
 import type { CatalogoGeracao, ParametrosGeracao } from './gerador';
 import { TIPOS_AMBIENTE_CLASSICOS } from './ambiente-tipos';
@@ -40,6 +40,7 @@ export function salasEmEspiral(l: number, a: number, n: number, cavar: (x: numbe
 
 export function enriquecerFase(f: FaseJson, p: ParametrosGeracao, catalogo: CatalogoGeracao, salas: readonly Sala[], livre: (c: Celula) => boolean, ocupar: (c: Celula) => void): void {
   const rng = criarRng(hashTexto(`${p.semente}:ambiente`));
+  const rngArmadilhas = criarRng(hashTexto(`${p.semente}:armadilhas`));
   const l = f.mapa[0]?.length ?? 1, a = f.mapa.length;
   const objetos = f.objetos ??= [];
   const b = BALANCE_PADRAO.ambiente;
@@ -65,11 +66,12 @@ export function enriquecerFase(f: FaseJson, p: ParametrosGeracao, catalogo: Cata
       if (c && tema) f.ambientes.push({ ...c, tipo: escolher(rng, tema.ambientes.tipos), raio: inteiro(rng, 1, Math.max(1, Math.min(tema.ambientes.raioMax, Math.floor(Math.min(s.l, s.a) / 3)))) });
       else if (c) f.ambientes.push({ ...c, tipo: escolher(rng, TIPOS_AMBIENTE_CLASSICOS), raio: 1 });
     }
-    if (i % 2 === 0) {
+    // 06/11/2026 (D-135): círculos elementais ou de explosão (RNG próprio: o resto da fase sai igual). Uma a cada duas
+    // salas, ou `armadilhasPorSala` em cada uma (as masmorras do Mundo pedem mais).
+    const quantas = p.armadilhasPorSala ?? (i % 2 === 0 ? 1 : 0);
+    for (let k = 0; k < quantas; k++) {
       const c = ponto(s);
-      if (c) objetos.push({ tipo: 'armadilha', x: (c.x + 0.5) / l, y: (c.y + 0.5) / a,
-        valor: Math.min(b.danoArmadilhaMax, b.danoArmadilhaBase + p.nivelInimigos * b.danoArmadilhaPorNivel),
-        efeito: construirEfeito('sangrando', { duracaoMs: b.sangramentoMs, valor: b.sangramento }), modo: 'rearme', rearmeMs: b.rearmeMs });
+      if (c) objetos.push(armadilhaDeFase(rngArmadilhas, c, { largura: l, altura: a }, p.nivelInimigos, tema?.elemento ?? null));
     }
   }
   if (!p.eventos?.includes('enxame')) return;

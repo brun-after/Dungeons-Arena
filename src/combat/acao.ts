@@ -56,6 +56,9 @@ import { fatorDeDominio, fatorDeSkillDeClasse } from '../progression/dominio';
 import { alcanceDoTiroCarregado } from './marcos-arqueiro';
 import { ressonanciaArcana } from './marcos-mago';
 import { barradoNoRefugio, emRefugio } from '../world/refugio';
+import { semLinha } from './linha-de-tiro';
+import { registrarRecarga } from './cargas';
+import { lancasDosMortos, temMortos } from './lanca-de-ossos';
 
 export function chaveRecarga(entidadeId: EntidadeId, habilidadeId: string): string {
   return `${entidadeId}_${habilidadeId}`;
@@ -279,6 +282,8 @@ export function iniciarAcao(
       if (!podeErguerNoDizimo(estado, ctx, ator)) return recusar('sem_invocacao');
     } else if (ator.hp >= ator.hpMax) return recusar('vida_cheia');
   }
+  // 07/11/2026 (D-136): sem morto, a Lança de ossos não tem de onde sair.
+  if (hab.lanca && !temMortos(estado, ator)) return recusar('sem_invocacao');
   // Em volta de quem conjura (ao redor, aliados): a mira é a própria célula.
   let mira = hab.tipoArea === 'ao_redor' ? origem : (celula ?? celulaOcupada(alvo as Entidade));
   const alcance = alcanceDe(ctx, ator, hab, estado.tick);
@@ -290,6 +295,14 @@ export function iniciarAcao(
     alvo = perto;
     mira = celulaOcupada(perto);
     if (!deSuporte(hab)) ator.alvoSelecionado = perto.id;
+  }
+  // 06/11/2026 (D-135): o básico de projétil contra quem está atrás da parede conta como fora do alcance.
+  if (alvo && alvo !== ator && semLinha(estado, ctx, ator, hab, alvo, origem)) {
+    const visivel = ator.controlador !== 'ia' ? autoAlvo(estado, ctx, ator, alcance, (e) => !semLinha(estado, ctx, ator, hab, e, origem), origem) : null;
+    if (!visivel) return recusar('fora_de_alcance');
+    alvo = visivel;
+    mira = celulaOcupada(visivel);
+    ator.alvoSelecionado = visivel.id;
   }
 
   if (substituiBasico) cancelar(ator, estado, 'substituido', saida);
@@ -308,7 +321,8 @@ export function iniciarAcao(
     // Marco 27 (D-126): sem o arco, o Arqueiro perde parte da cadência da Destreza; o arco de outra classe é lento.
     const reducao = ehBasico(ator, hab.id) ? Math.min(75, bonusAtaqueBasico(ator, estado.tick).recargaPct + reducaoRecargaBasicoPct(ator.atributos, ctx.balance, perfilDestreza(ctx, ator)) * fatorDaVelocidade(ctx, ator) + velocidadeFrenesiPct(ctx, ator, estado.tick)) : 0;
     const ms = hab.recargaMs * (1 - reducao / 100) * (1 + perfil.recargaPct / 100) * (1 + recargaDoBasicoPct(ctx, ator, hab) / 100);
-    estado.recargas[chave] = Math.max(estado.recargas[chave] ?? 0, estado.tick + ticksDe(ms));
+    // 07/11/2026 (D-136): a skill com cargas acumula usos (combat/cargas.ts).
+    registrarRecarga(estado, chave, ms, hab);
   }
   // Marco 15: na dificuldade fácil, os golpes de quem não é do lado do jogador avisam mais cedo.
   const avisoExtra = ladoDoJogador(estado, ator) ? 0 : fatoresDoMundo(estado, ctx).avisoExtraMs;
@@ -380,7 +394,8 @@ function processarFases(estado: EstadoJogo, ctx: ContextoSimulacao, saida: Event
     const valido = alvo && vivo(alvo) ? alvo : null;
     const mira = valido && hab.politicaImpacto !== 'area' ? celulaOcupada(valido) : { x: f.x, y: f.y };
     // Marco 25 (D-102): o golpe do falcão que chegou ao alvo é o lançamento completo da ação (só adiado).
-    if (f.acaoId !== undefined) lancar(estado, ctx, ator, hab, f.acaoId, mira, valido, saida, false, true);
+    const origem = f.origemX !== undefined && f.origemY !== undefined ? { x: f.origemX, y: f.origemY } : undefined;
+    if (f.acaoId !== undefined) lancar(estado, ctx, ator, hab, f.acaoId, mira, valido, saida, false, true, origem);
     else lancar(estado, ctx, ator, hab, novoId(estado), mira, valido, saida, true);
   }
 }
@@ -429,8 +444,18 @@ function lancar(
   daFase = false,
   /** Marco 25 (D-102): o golpe do falcão que chegou ao alvo — o alcance já valeu na conjuração; o dono pode ter andado. */
   falcaoChegou = false,
+  /** 07/11/2026 (D-136): de onde o tiro sai (o círculo no ar do Dardo funesto, parado onde foi conjurado). */
+  origemFixa?: Celula,
 ): void {
   // Marco 27 (D-126): o básico com a variação da arma (o giro do Montante, o elemento emprestado do tomo).
+  // 07/11/2026 (D-136): o projétil com `disparoMs` fica no círculo no ar e sai depois (o lançamento inteiro, adiado,
+  // como o golpe do falcão: o alcance já valeu na conjuração; quem conjurou pode andar enquanto isso).
+  if (!daFase && !falcaoChegou && (habilidadeBase.disparoMs ?? 0) > 0 && habilidadeBase.politicaImpacto === 'projetil') {
+    agendarFase(estado, ator, habilidadeBase.chave, alvo ?? mira, habilidadeBase.disparoMs ?? 0);
+    const f = estado.fases?.at(-1);
+    if (f) Object.assign(f, { acaoId, origemX: ator.x, origemY: ator.y });
+    return;
+  }
   const hab = daFase ? habilidadeBase : basicoComVariacao(estado, ator, prepararSequencia(estado, ctx, ator, habilidadeBase, acaoId, alvo, mira));
   if (hab.formulaDano && !consumirAtaque(ator, acaoId)) return;
   if (tipoEm(ctx.fase, ator.x, ator.y) === 'agua' && !deSuporte(hab)) return;
@@ -471,7 +496,7 @@ function lancar(
   const alcance = alcanceDe(ctx, ator, hab, estado.tick);
   const base = { acaoId, fonte, hab, mira, ...(basico && basico.dano > 0 && { danoExtra: basico.dano }) };
   // Marco 26 (29/10/2026, D-125): a célula de onde a habilidade sai, antes de quem conjura avançar.
-  const partida = origemDaHabilidade(estado, ator, hab);
+  const partida = origemFixa ?? origemDaHabilidade(estado, ator, hab);
   // Efeitos de lançamento (armadilha, invocação): uma vez, sobre quem conjura, na célula mirada. D-125: o avanço e o
   // teleporte de quem conjura também (antes, só saíam a cada alvo atingido: sem ninguém na linha, nada de avanço).
   for (const ef of hab.efeitos) {
@@ -498,6 +523,11 @@ function lancar(
     alvosDaForma(estado, ctx, ator, hab, linha).forEach((e, indice) => {
       aplicarImpacto(estado, ctx, e, { ...base, fonte: cheia, indice, secundario: indice > 0 }, saida);
     });
+    return;
+  }
+  // 07/11/2026 (D-136): a Lança de ossos sai dos mortos do Necromante, não de quem conjura.
+  if (hab.lanca) {
+    lancasDosMortos(estado, ctx, ator, hab, base, saida);
     return;
   }
   switch (hab.politicaImpacto) {
@@ -559,7 +589,7 @@ function lancar(
       }
       const fonteTiro = carregado ? { ...fonte, d20Minimo: Math.max(fonte.d20Minimo ?? 0, ctx.balance.ajustesClasses.arqueiro.mira.d20Minimo) } : fonte;
       // Marco 27 (D-126): a variação pode lançar vários (leque, salva, imagem); cada um leva o que vale para o tiro.
-      const tiros = lancarProjetil(estado, ator, hab, acaoId, fonteTiro, alvo ? celulaOcupada(alvo) : mira, saida, origemDaHabilidade(estado, ator, hab), carregado ? { alcance: alcanceCarregado(ctx, ator, alcance) } : null, multiplos);
+      const tiros = lancarProjetil(estado, ator, hab, acaoId, fonteTiro, alvo ? celulaOcupada(alvo) : mira, saida, partida, carregado ? { alcance: alcanceCarregado(ctx, ator, alcance) } : null, multiplos);
       // Marco 24 (D-096): a ressonância Engenhoso faz o projétil mágico atravessar.
       const atravessa = hab.tipoAtaque === 'magico' && ator.bolsa ? passivosDe(ctx, ator).atravessaMagico : 0;
       for (const tiro of tiros) {
@@ -588,12 +618,13 @@ export function processarAutoAtaque(estado: EstadoJogo, ctx: ContextoSimulacao, 
     }
     const alcance = alcanceDe(ctx, ator, hab, estado.tick);
     const atual = alvoAtual(estado, ctx, ator);
-    const noAlcance = !!atual && chebyshev(celulaOcupada(ator), celulaOcupada(atual)) <= alcance;
+    // 06/11/2026 (D-135): atrás da parede, o alvo do básico de projétil está fora do alcance.
+    const noAlcance = !!atual && chebyshev(celulaOcupada(ator), celulaOcupada(atual)) <= alcance && !semLinha(estado, ctx, ator, hab, atual);
     if (ator.alvoTravado && ator.alvoSelecionado) {
       if (atual && noAlcance) iniciarAcao(estado, ctx, ator, hab.id, atual.id, saida);
       continue;
     }
-    const alvo = atual && noAlcance ? atual : autoAlvo(estado, ctx, ator, alcance, (e) => e.ia?.modo === 'perseguindo' && e.ia.alvoId === ator.id);
+    const alvo = atual && noAlcance ? atual : autoAlvo(estado, ctx, ator, alcance, (e) => e.ia?.modo === 'perseguindo' && e.ia.alvoId === ator.id && !semLinha(estado, ctx, ator, hab, e));
     if (!alvo) continue;
     ator.alvoSelecionado = alvo.id;
     iniciarAcao(estado, ctx, ator, hab.id, alvo.id, saida);

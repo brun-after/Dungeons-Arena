@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.85 · **Data:** 06/11/2026
+**Versão:** 0.88 · **Data:** 07/11/2026
 
 > **Histórico**
+> - **0.86 (06/11/2026)**: D-135: três inimigos novos (Arremessador, Duende saltador e Runista medroso, só no Mundo), o porte por nível a cada 10 níveis, as armadilhas como círculos de conjuração (dano pela vida atual, puxão, Passo leve, mais no Mundo), o dano e o vínculo do Necromante e o básico de projétil que não atira na parede.
 > - **0.85 (06/11/2026)**: D-134: a skin Mágico do aventureiro (a cartola e o pombo), a cabeça menor e mais escura da Sombra Rubra, o pouso do falcão na metade do tempo e o grito saindo do falcão.
 > - **0.84 (06/11/2026)**: D-134: as trevas do Ceifador só saem andando, no rumo oposto ao movimento, e o rosto dele é só escuridão; a franja da Sombra Rubra.
 > - **0.83 (06/11/2026)**: D-134: o Ceifador remontado a partir de medidas da arte, em camadas e se desfazendo em trevas; correções do topo da barra de vida e das escalas da Sombra Rubra.
@@ -3923,3 +3924,90 @@ O falcão é desenhado como uma cartola que voa (`voo-falcao.ts`, só apresenta�
 - O efeito das skills com a tag `falcao`, como o grito, sai da posição visual do falcão, e não mais do jogador (`efeitos-habilidade.ts`).
 
 As superfícies das skins (`superficie`, `mecha` em `skin-pano.ts`) passam por uma densidade global (`definirDensidadeDaSkin`, padrão 3) que reamostra os anéis. Assim, os polígonos podem ser reduzidos depois sem redesenhar as peças.
+
+## D-135 — Inimigos novos, porte por nível, armadilhas e linha de tiro (06/11/2026)
+
+**Linha de tiro.** O básico que é projétil não sai contra quem está atrás de uma parede ou muralha: vale como fora do
+alcance (`combat/linha-de-tiro.ts`, a mesma integração de 0,25 célula do projétil). O jogador troca para outro alvo
+visível no alcance ou espera (travado); o seguir alvo continua andando; a IA dá a volta (`perseguir`). O projétil que já
+saiu antes de o alvo se esconder bate na parede, como antes. Exceção em dados: `armas.tiroPorCimaDe` (o cajado do
+Necromante, cujo básico cai sob o alvo). Só o básico; as skills continuam como eram.
+
+**Necromante.** +15% de dano nos golpes do próprio Necromante (`ajustesClasses.necromante.danoProprioPct`, os mortos
+não contam) e o vínculo dos mortos: ele se cura com 8% do dano que um morto dele causa e 6% do que um morto leva
+(`vinculoCausadoPct`, `vinculoLevadoPct`; a fração fica guardada em `vinculoResto`).
+
+**Inimigos novos** (`inimigos.json`, comportamento em `entities/ia-especiais.ts`, números em `balance.ia`):
+- **Arremessador** (atirador, alcance 5 como o do esqueleto): a pedra tem a etiqueta `encantavel`; no inimigo afim, a
+  chave dela ganha o caminho elemental do elemento dele (`perfil.ts`).
+- **Duende saltador** (`comportamento: saltador`): de 2 a 7 células, corre (acelerado 80% por 0,65 s) e salta
+  (`salto_do_duende`, linha de 5 com avanço e 0,5 s sem movimento). Feito para que o kiting não baste.
+- **Runista medroso** (`comportamento: armadilheiro`, `soMundo`): foge girando a 4 células do alvo (110% mais rápido)
+  e larga uma runa a cada 2 células (`runa_do_medroso`), cercando quem caça; descansa 1,5 s (um "z" sobre ele) e foge de
+  novo. Não ataca. Só nas listas do Mundo; `soMundo` o tira da geração da campanha. O modo Mundo dá 10 armadilhas por
+  inimigo (`limites.armadilhasPorInimigo`).
+- Os três reaproveitam modelos (troll, goblin, cultista) com tinta e tamanho próprios (`render/porte-nivel.ts`); modelos
+  próprios ficam para quando houver arte.
+
+**Porte por nível** (`render/porte-nivel.ts`, só apresentação): a cada 10 níveis o inimigo sobe um grau (até 10): +3% de
+tamanho e um pouco mais escuro por grau; selo rubro sob os pés com uma marca por grau (1+); brasas subindo (3+); coroa
+de espinhos de ferro (5+, mais pontas a cada dois graus); brilho e selo duplo (7+); chamas na coroa e selo aceso (9+);
+coroa de ouro em brasa no nível 100.
+
+**Armadilhas.**
+- Expostas (suas, da equipe, reveladas pela Sabedoria ou a runa de pé), são círculos de conjuração na célula: anéis com
+  runas girando e o sinal do elemento no meio, com brilho aditivo (`render/armadilhas-visual.ts`). A runa do
+  armadilheiro é ainda uma pedra de pé, à vista de todos (vai no `privado` da sala e no minimapa).
+- O disparo (`combat/armadilhas-disparo.ts`) fere o valor mais 12% da vida atual (menos nos chefes), aplica o estado do
+  elemento (ou, na de explosão, atordoa 0,4 s) e puxa a vítima até 3 células na direção do hostil a ela mais perto (até
+  8): o jogador cai perto do inimigo e o inimigo atraído cai perto do jogador. O efeito visual é o do elemento (ou a
+  explosão de fogo).
+- O dano base subiu (fase: 26 + 3 por nível, até 150; spawner: 14). 55% das de fase são elementais (o elemento do tema
+  na maior parte das vezes), com RNG próprio (o resto da fase gerada sai igual).
+- Mundo: cada sala de masmorra tem 2 (`armadilhas.mundoPorSala`) e o exterior tem `armadilhasPor1000` pelo perigo da
+  região (0,8, 2 e 3,5 no Central; 0,8, 2,5 e 4 no Eclipse).
+- Orbe **Passo leve** (`passo_leve`, 60 s): a próxima armadilha em que se pisa, de fase ou de monstro, some sem ferir.
+- Os gatilhos indexam quem está em cada célula uma vez por tick (antes era armadilhas × entidades).
+
+### D-135, adendo (07/11/2026): ver armadilhas, Mundo sem espiral e Necromante sem suporte
+
+- Orbe **Vista de armadilha** (`vista_de_armadilha`, 45 s, peso 8 no sorteio de orbes): enquanto dura, as armadilhas
+  escondidas a até `armadilhas.vistaRaio` (8) células se revelam sem o teste de Sabedoria (o raio é o maior entre os dois).
+- **Pó revelador** (`po_revelador`, consumível comum, 18 de ouro): aplica o mesmo efeito por 90 s. Está à venda no
+  mercador e no alquimista dos dois reinos do Mundo; fora do estoque da campanha, para não mudar as fases já geradas.
+- Mundo: nenhuma masmorra em espiral. As de 18+ salas não ganham mais o 96×80 em espiral: saem de salas e corredores,
+  no tamanho que as salas pedem. O corredor sem fim era só andar. A campanha continua podendo ter espirais.
+- Necromante: com o vínculo dos mortos curando, a classe perdeu as skills de cura e escudo próprios. Os ids continuam,
+  por causa dos saves, livros, combos e ultimates.
+  - `dizimo_vital` virou a **Lança de ossos** (o desenho final está na D-136).
+  - `mortalha_funebre` virou a **Praga sepulcral**: 3×3 a até 6 células, 1d6, veneno e exposto (+20% de dano recebido).
+  - A geral inicial passou de Barreira para Dissipar.
+  - Os combos que curavam ou davam escudo ficaram ofensivos (Tributo da legião, Peste da legião, Ossada explosiva,
+    Colheita eterna).
+  - O dreno de invocação (`drenar_invocacao`) continua existindo só nas ultimates.
+
+## D-136 — Lança de ossos dos mortos, Dardo funesto com círculo no ar e cargas (07/11/2026)
+
+- **Cargas** (`cargas` na skill, até 6; `combat/cargas.ts`): cada uso empurra o tick em que todas ficam cheias
+  (`<chave>#cheio` em `recargas`), e a chave de sempre guarda quando a próxima fica pronta. Quem só lê a recarga
+  (IA, bot, barra) continua certo. A barra mostra o número de cargas prontas.
+- **Disparo atrasado** (`disparoMs`): o projétil vira uma fase agendada com a ação inteira (como o golpe do falcão) e
+  a célula de onde foi conjurado (`origemX`, `origemY`). O círculo fica parado no ar ali, e o tiro sai dele quando
+  vence, mesmo que o Necromante tenha andado.
+- **Dardo funesto**: conjuração de 0,3 s, círculo no ar por 2 s, 2 cargas de 4 s cada, 1d4. O nível 2 e o nível 4
+  dão +1 carga cada. Nos níveis 3 e 5, a escolha é entre Acúmulo e Arsenal (+1 carga cada, até 6) ou Pressa e
+  Gatilho (−35% de espera cada, até menos de 1 s).
+- **Lança de ossos** (`lanca` na skill; `combat/lanca-de-ossos.ts`): o Necromante para (`trava`) e conjura 0,7 s sobre
+  um círculo de trevas. No lançamento, uma lança de osso sai de cada morto dele: do servo, do reanimado e do eco.
+  - O alvo de cada morto é o que ele persegue; sem ele, o alvo selecionado do Necromante; sem esse, o hostil mais
+    perto, a até 6 células e à vista.
+  - A lança perfura até `alem` células atrás do alvo: 1 no nível 1 e 2 no nível 2. No nível 4, cada morto também
+    crava uma lança para cada lado.
+  - Na mesma lança, quem vem depois do primeiro leva `perfuradoPct` (50%) do dano. Quem leva mais de uma lança leva
+    1/k na k-ésima.
+  - Sem nenhum morto, a skill é recusada sem gastar mana.
+  - Visual: a assinatura `lanca_de_osso`, com espinhos de osso irrompendo em sequência do morto até a ponta.
+- O orçamento conta a espera do círculo como metade de uma conjuração e soma 10% de poder por carga a mais.
+- Balanceamento: sem cura nem escudo próprios, o duelo de Necromantes no Livre caía para 5,5 s (a meta é de 6 a
+  10 s). A vida base do Necromante foi de 50 para 62, e as 147 metas passam. A ficha passa a ler a vida base do catálogo da
+  classe (`progression/derivados.ts`), então o ajuste vale também para os personagens já criados (no save e no Mundo).

@@ -148,6 +148,7 @@ export function povoarFase(estado: EstadoJogo, ctx: ContextoSimulacao, saida: Ev
             rearmeTicks: ticksDe(o.rearmeMs),
             inerteAteTick: 0,
             reveladaPara: [],
+            ...(o.elemento && { elemento: o.elemento }),
           });
           break;
       }

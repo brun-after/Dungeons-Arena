@@ -40,6 +40,29 @@ export const TREVAS = {
       });
     },
   },
+  /**
+   * 07/11/2026 (D-136): Lança de ossos. Do peito do morto, espinhos de osso irrompem um atrás do outro pela linha até
+   * a ponta (a maior), com lascas de osso voando no fim e névoa onde a lança nasce.
+   */
+  lanca_de_osso: {
+    familia: 'trevas',
+    conjuracao: CONJURA_TREVAS,
+    impacto: [OSSOS(3), SOMBRA(1)],
+    naArea: (c, a) => {
+      const de = c.tela(a.origem);
+      const ate = c.tela(a.mira);
+      const giro = Math.atan2(ate.y - de.y, ate.x - de.x) + Math.PI / 2;
+      const n = a.celulas.length;
+      a.celulas.forEach((cel, i) => {
+        const ponta = i === n - 1;
+        const s = (ponta ? 1.25 : 0.8 + 0.3 * (i / Math.max(1, n))) * a.escala;
+        tween(c, { textura: 'espinho', de: cel, s: [0.25 * s, s], sy: [0.2 * s, 1.5 * s], a: [1, 0], rot: [giro, giro], cor: 0xece4d0, ms: 560, atrasoMs: i * 35, curva: sai, subir: -10 });
+      });
+      c.particulas.emitirLista([SOMBRA(2, { raio: 6 })], a.origem.x, a.origem.y, a.cor);
+      const fim = a.celulas.at(-1);
+      if (fim) c.particulas.emitirLista([OSSOS(c.reduzido ? 2 : 5)], fim.x, fim.y, a.cor);
+    },
+  },
   /** Ceifa de almas: a foice espectral varre o cone e arranca almas que sobem. */
   ceifa_de_almas: {
     familia: 'trevas',

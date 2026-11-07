@@ -527,34 +527,29 @@ test.describe('desktop', () => {
     expect(erros).toEqual([]);
   });
 
-  // Marco 24 (25/10/2026, D-094): 1 e 2 são de classe; a barreira (geral inicial do Necromante) começa na 3 e vai para a 4.
-  test('habilidades: escolher o necromante, pôr a barreira na tecla 4, lançar e ler o efeito no cartão', async ({ page }) => {
+  // Marco 24 (25/10/2026, D-094): 1 e 2 são de classe; a geral inicial do Necromante começa na 3 e vai para a 4.
+  // 07/11/2026 (D-135): a geral inicial passou de Barreira a Dissipar.
+  test('habilidades: escolher o necromante, pôr o Dissipar na tecla 4 e ler o cartão', async ({ page }) => {
     const erros: string[] = [];
     page.on('pageerror', (e) => erros.push(e.message));
     await page.goto('./?jogo=campanha&slot=1&diag=1');
     await expect(page.getByRole('heading', { name: 'Escolha a classe' })).toBeVisible();
     await page.getByRole('link', { name: 'Jogar de Necromante' }).click();
     await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
-    await expect(page.getByTestId('habilidade-barreira')).toBeVisible();
+    await expect(page.getByTestId('habilidade-dissipar')).toBeVisible();
 
     await page.keyboard.press('KeyI');
     const mochila = page.getByRole('dialog', { name: 'Mochila' });
     await mochila.getByRole('button', { name: 'Habilidades' }).click();
     await expect(mochila.getByTestId('painel-sintonia')).toBeVisible();
     // Ajuste de 16/10/2026 (D-067): o botão da carta põe direto na tecla (aqui, a 4).
-    await mochila.locator('[data-chave="tecla-barreira-3"]').click();
-    await expect(mochila.locator('[data-tecla="4"]')).toContainText('Barreira');
+    await mochila.locator('[data-chave="tecla-dissipar-3"]').click();
+    await expect(mochila.locator('[data-tecla="4"]')).toContainText('Dissipar');
     await page.keyboard.press('Escape');
-    // A barra é posicional: com a 3 vazia, a barreira segue na tecla 4.
-    await expect(page.getByTestId('habilidade-barreira').locator('.tecla')).toHaveText('4');
-
-    // Sem aliado por perto, a barreira cai no próprio necromante: o escudo aparece com o anel de duração.
-    await page.keyboard.press('Digit4');
-    const chip = page.locator('.chip-efeito[data-efeito="escudo"]');
-    await expect(chip).toBeVisible({ timeout: 10_000 });
-    await expect(chip.locator('.restante')).toHaveText(/^\d/);
-    await chip.hover();
-    await expect(page.locator('.cartao-efeito')).toContainText('Escudo que absorve');
+    // A barra é posicional: com a 3 vazia, o Dissipar segue na tecla 4.
+    await expect(page.getByTestId('habilidade-dissipar').locator('.tecla')).toHaveText('4');
+    // 07/11/2026 (D-136): o Dardo funesto mostra as cargas prontas.
+    await expect(page.getByTestId('habilidade-dardo_funesto').locator('.cargas')).toHaveText('2');
     expect(erros).toEqual([]);
   });
 
@@ -563,9 +558,9 @@ test.describe('desktop', () => {
     page.on('pageerror', (e) => erros.push(e.message));
     await page.goto('./?jogo=campanha&slot=1&diag=1&classe=necromante');
     await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
-    // Numpad3 = tecla 3 do necromante (barreira, a geral inicial; marco 24): o escudo cai nele mesmo.
-    await page.keyboard.press('Numpad3');
-    await expect(page.locator('.chip-efeito[data-efeito="escudo"]')).toBeVisible({ timeout: 10_000 });
+    // 07/11/2026 (D-136): Numpad1 = tecla 1 do necromante (o Dardo funesto): sai uma carga, a outra fica pronta.
+    await page.keyboard.press('Numpad1');
+    await expect(page.getByTestId('habilidade-dardo_funesto').locator('.cargas')).toHaveText('1', { timeout: 10_000 });
     // O dardo básico no boneco rola o d20: o dado ao lado da barra mostra o número.
     await page.keyboard.press('Space');
     await expect(page.locator('.dado-d20')).toHaveAttribute('data-valor', /^\d+$/, { timeout: 10_000 });

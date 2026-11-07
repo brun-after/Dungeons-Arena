@@ -194,3 +194,26 @@ function tempoDeRetorno(ctx: ContextoSimulacao, dono: Entidade | undefined, ms: 
   if (!dono) return ms;
   return (ms / fatorDeDominio(ctx, dono, 'retornoServo')) * (1 - marcoDe(ctx, dono, 'retornoServoPct') / 100);
 }
+
+/**
+ * 06/11/2026 (D-135): o vínculo dos mortos. O Necromante se cura com `vinculoCausadoPct` do dano que um morto dele
+ * causa e `vinculoLevadoPct` do dano que um morto dele leva (o que sobra de fração fica guardado para o próximo).
+ */
+export function vinculoDosMortos(estado: EstadoJogo, ctx: ContextoSimulacao, atacante: Entidade | undefined, alvo: Entidade, dano: number, saida: EventoSimulacao[]): void {
+  if (dano <= 0) return;
+  const r = ctx.balance.ajustesClasses.necromante;
+  const curar = (servo: Entidade, pct: number) => {
+    const inv = servo.invocacao;
+    const dono = inv && !inv.companheiro ? buscarEntidade(estado, inv.donoId) : undefined;
+    if (!dono || !necromante(dono) || dono.invocacao || pct <= 0) return;
+    const bruto = (dono.vinculoResto ?? 0) + (dano * pct) / 100;
+    const inteiro = Math.floor(bruto);
+    dono.vinculoResto = bruto - inteiro;
+    const cura = Math.min(dono.hpMax - dono.hp, inteiro);
+    if (cura <= 0) return;
+    dono.hp += cura;
+    saida.push({ t: 'efeitoResultado', tick: estado.tick, alvoId: dono.id, origemId: servo.id, tipo: 'cura', dano: 0, cura, mana: 0 });
+  };
+  if (atacante && atacante !== alvo) curar(atacante, r.vinculoCausadoPct);
+  curar(alvo, r.vinculoLevadoPct);
+}

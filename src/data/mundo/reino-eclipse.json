@@ -10,6 +10,7 @@
     "seguro": {
       "pvp": false,
       "densidadePor1000": 3,
+      "armadilhasPor1000": 0.8,
       "elitePct": 0,
       "lootPct": 100,
       "hordaMin": 3,
@@ -19,6 +20,7 @@
     "normal": {
       "pvp": false,
       "densidadePor1000": 6,
+      "armadilhasPor1000": 2.5,
       "elitePct": 6,
       "eliteNiveis": 4,
       "lootPct": 110,
@@ -30,6 +32,7 @@
     "perigoso": {
       "pvp": true,
       "densidadePor1000": 9,
+      "armadilhasPor1000": 4,
       "elitePct": 20,
       "eliteNiveis": 6,
       "lootPct": 180,
@@ -48,7 +51,8 @@
       "anel_do_eco",
       "aceleracao_mente_rara",
       "couraca_eclipse",
-      "manto_crepusculo"
+      "manto_crepusculo",
+      "po_revelador"
     ],
     "ferreiro": [
       "cota_malha",
@@ -67,7 +71,8 @@
       "essencia_gelo",
       "essencia_raio",
       "essencia_veneno",
-      "aceleracao_mente_rara"
+      "aceleracao_mente_rara",
+      "po_revelador"
     ]
   },
   "mercadorErrante": [
@@ -92,13 +97,7 @@
       ],
       "tema": "mina",
       "semente": 81001,
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador", "runista_medroso"],
       "vila": {
         "nome": "Baluarte da Aurora",
         "x": 60,
@@ -195,13 +194,7 @@
       ],
       "tema": "ruinas",
       "semente": 88920,
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador", "runista_medroso"],
       "vila": null,
       "estruturas": [
         {
@@ -283,13 +276,7 @@
       ],
       "tema": "floresta_antiga",
       "semente": 96839,
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador", "runista_medroso"],
       "vila": {
         "nome": "Floresta dos Exilados",
         "x": 60,
@@ -386,13 +373,7 @@
       ],
       "tema": "canion_cristal",
       "semente": 104758,
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador", "runista_medroso"],
       "vila": null,
       "estruturas": [
         {
@@ -474,13 +455,7 @@
       ],
       "tema": "pantano",
       "semente": 112677,
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador", "runista_medroso"],
       "vila": null,
       "estruturas": [
         {
@@ -576,13 +551,7 @@
       ],
       "tema": "tundra",
       "semente": 120596,
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador", "runista_medroso"],
       "vila": {
         "nome": "Montes do Crepúsculo",
         "x": 60,
@@ -693,13 +662,7 @@
       ],
       "tema": "ruinas",
       "semente": 128515,
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador", "runista_medroso"],
       "vila": null,
       "estruturas": [
         {
@@ -795,13 +758,7 @@
       ],
       "tema": "caverna_gelo",
       "semente": 136434,
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador", "runista_medroso"],
       "vila": {
         "nome": "Geleiras Eternas",
         "x": 60,
@@ -912,13 +869,7 @@
       ],
       "tema": "ruinas",
       "semente": 144353,
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador", "runista_medroso"],
       "vila": null,
       "estruturas": [
         {
@@ -1014,13 +965,7 @@
       ],
       "tema": "catacumbas",
       "semente": 152272,
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador", "runista_medroso"],
       "vila": null,
       "estruturas": [
         {
@@ -1116,13 +1061,7 @@
       ],
       "tema": "tundra",
       "semente": 160191,
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador", "runista_medroso"],
       "vila": null,
       "estruturas": [
         {
@@ -1218,13 +1157,7 @@
       ],
       "tema": "ruinas",
       "semente": 168110,
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador", "runista_medroso"],
       "vila": null,
       "estruturas": [
         {
@@ -1314,13 +1247,7 @@
       "nivel": 33,
       "salas": 18,
       "tema": "mina",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador"],
       "boss": "necromante_ancestral",
       "recompensa": [
         "pergaminho_retorno",
@@ -1335,13 +1262,7 @@
       "nivel": 34,
       "salas": 19,
       "tema": "mina",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "runista_medroso"],
       "boss": "dragao_fogo",
       "recompensa": [
         "pergaminho_retorno",
@@ -1356,13 +1277,7 @@
       "nivel": 35,
       "salas": 20,
       "tema": "mina",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador"],
       "boss": "dragao_gelo",
       "recompensa": [
         "pergaminho_retorno",
@@ -1377,13 +1292,7 @@
       "nivel": 36,
       "salas": 18,
       "tema": "ruinas",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "runista_medroso"],
       "boss": "dragao_fogo",
       "recompensa": [
         "pergaminho_retorno",
@@ -1398,13 +1307,7 @@
       "nivel": 37,
       "salas": 19,
       "tema": "ruinas",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador"],
       "boss": "dragao_gelo",
       "recompensa": [
         "pergaminho_retorno",
@@ -1419,13 +1322,7 @@
       "nivel": 38,
       "salas": 20,
       "tema": "ruinas",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "runista_medroso"],
       "boss": "dragao_raio",
       "recompensa": [
         "pergaminho_retorno",
@@ -1440,13 +1337,7 @@
       "nivel": 39,
       "salas": 18,
       "tema": "floresta_antiga",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador"],
       "boss": "dragao_gelo",
       "recompensa": [
         "pergaminho_retorno",
@@ -1461,13 +1352,7 @@
       "nivel": 40,
       "salas": 19,
       "tema": "floresta_antiga",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "runista_medroso"],
       "boss": "dragao_raio",
       "recompensa": [
         "pergaminho_retorno",
@@ -1482,13 +1367,7 @@
       "nivel": 41,
       "salas": 20,
       "tema": "floresta_antiga",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador"],
       "boss": "dragao_veneno",
       "recompensa": [
         "pergaminho_retorno",
@@ -1503,13 +1382,7 @@
       "nivel": 42,
       "salas": 18,
       "tema": "canion_cristal",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "runista_medroso"],
       "boss": "dragao_raio",
       "recompensa": [
         "pergaminho_retorno",
@@ -1524,13 +1397,7 @@
       "nivel": 43,
       "salas": 19,
       "tema": "canion_cristal",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador"],
       "boss": "dragao_veneno",
       "recompensa": [
         "pergaminho_retorno",
@@ -1545,13 +1412,7 @@
       "nivel": 44,
       "salas": 20,
       "tema": "canion_cristal",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "runista_medroso"],
       "boss": "necromante_ancestral",
       "recompensa": [
         "pergaminho_retorno",
@@ -1566,13 +1427,7 @@
       "nivel": 45,
       "salas": 18,
       "tema": "pantano",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador"],
       "boss": "dragao_veneno",
       "recompensa": [
         "pergaminho_retorno",
@@ -1587,13 +1442,7 @@
       "nivel": 46,
       "salas": 19,
       "tema": "pantano",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "runista_medroso"],
       "boss": "necromante_ancestral",
       "recompensa": [
         "pergaminho_retorno",
@@ -1608,13 +1457,7 @@
       "nivel": 47,
       "salas": 20,
       "tema": "pantano",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador"],
       "boss": "dragao_fogo",
       "recompensa": [
         "pergaminho_retorno",
@@ -1629,13 +1472,7 @@
       "nivel": 48,
       "salas": 18,
       "tema": "tundra",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "runista_medroso"],
       "boss": "necromante_ancestral",
       "recompensa": [
         "pergaminho_retorno",
@@ -1650,13 +1487,7 @@
       "nivel": 49,
       "salas": 19,
       "tema": "tundra",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador"],
       "boss": "dragao_fogo",
       "recompensa": [
         "pergaminho_retorno",
@@ -1671,13 +1502,7 @@
       "nivel": 50,
       "salas": 20,
       "tema": "tundra",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "runista_medroso"],
       "boss": "dragao_gelo",
       "recompensa": [
         "pergaminho_retorno",
@@ -1692,13 +1517,7 @@
       "nivel": 51,
       "salas": 18,
       "tema": "ruinas",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador"],
       "boss": "dragao_fogo",
       "recompensa": [
         "pergaminho_retorno",
@@ -1713,13 +1532,7 @@
       "nivel": 52,
       "salas": 19,
       "tema": "ruinas",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "runista_medroso"],
       "boss": "dragao_gelo",
       "recompensa": [
         "pergaminho_retorno",
@@ -1734,13 +1547,7 @@
       "nivel": 53,
       "salas": 20,
       "tema": "ruinas",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador"],
       "boss": "dragao_raio",
       "recompensa": [
         "pergaminho_retorno",
@@ -1755,13 +1562,7 @@
       "nivel": 54,
       "salas": 18,
       "tema": "caverna_gelo",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "runista_medroso"],
       "boss": "dragao_gelo",
       "recompensa": [
         "pergaminho_retorno",
@@ -1776,13 +1577,7 @@
       "nivel": 55,
       "salas": 19,
       "tema": "caverna_gelo",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador"],
       "boss": "dragao_raio",
       "recompensa": [
         "pergaminho_retorno",
@@ -1797,13 +1592,7 @@
       "nivel": 56,
       "salas": 20,
       "tema": "caverna_gelo",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "runista_medroso"],
       "boss": "dragao_veneno",
       "recompensa": [
         "pergaminho_retorno",
@@ -1818,13 +1607,7 @@
       "nivel": 57,
       "salas": 18,
       "tema": "ruinas",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador"],
       "boss": "dragao_raio",
       "recompensa": [
         "pergaminho_retorno",
@@ -1839,13 +1622,7 @@
       "nivel": 58,
       "salas": 19,
       "tema": "ruinas",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "runista_medroso"],
       "boss": "dragao_veneno",
       "recompensa": [
         "pergaminho_retorno",
@@ -1860,13 +1637,7 @@
       "nivel": 59,
       "salas": 20,
       "tema": "ruinas",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador"],
       "boss": "necromante_ancestral",
       "recompensa": [
         "pergaminho_retorno",
@@ -1881,13 +1652,7 @@
       "nivel": 60,
       "salas": 18,
       "tema": "catacumbas",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "runista_medroso"],
       "boss": "dragao_veneno",
       "recompensa": [
         "pergaminho_retorno",
@@ -1902,13 +1667,7 @@
       "nivel": 61,
       "salas": 19,
       "tema": "catacumbas",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador"],
       "boss": "necromante_ancestral",
       "recompensa": [
         "pergaminho_retorno",
@@ -1923,13 +1682,7 @@
       "nivel": 62,
       "salas": 20,
       "tema": "catacumbas",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "runista_medroso"],
       "boss": "dragao_fogo",
       "recompensa": [
         "pergaminho_retorno",
@@ -1944,13 +1697,7 @@
       "nivel": 63,
       "salas": 18,
       "tema": "tundra",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador"],
       "boss": "necromante_ancestral",
       "recompensa": [
         "pergaminho_retorno",
@@ -1965,13 +1712,7 @@
       "nivel": 64,
       "salas": 19,
       "tema": "tundra",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "runista_medroso"],
       "boss": "dragao_fogo",
       "recompensa": [
         "pergaminho_retorno",
@@ -1986,13 +1727,7 @@
       "nivel": 65,
       "salas": 20,
       "tema": "tundra",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador"],
       "boss": "dragao_gelo",
       "recompensa": [
         "pergaminho_retorno",
@@ -2007,13 +1742,7 @@
       "nivel": 66,
       "salas": 18,
       "tema": "ruinas",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "runista_medroso"],
       "boss": "dragao_fogo",
       "recompensa": [
         "pergaminho_retorno",
@@ -2028,13 +1757,7 @@
       "nivel": 67,
       "salas": 19,
       "tema": "ruinas",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "duende_saltador"],
       "boss": "dragao_gelo",
       "recompensa": [
         "pergaminho_retorno",
@@ -2049,13 +1772,7 @@
       "nivel": 68,
       "salas": 20,
       "tema": "ruinas",
-      "inimigos": [
-        "orc",
-        "esqueleto",
-        "cultista",
-        "vampiro",
-        "troll"
-      ],
+      "inimigos": ["orc", "esqueleto", "cultista", "vampiro", "troll", "arremessador", "runista_medroso"],
       "boss": "dragao_raio",
       "recompensa": [
         "pergaminho_retorno",
@@ -2212,6 +1929,9 @@
     }
   ],
   "materiais": {
+    "arremessador": [{ "itemId": "pergaminho_retorno", "chancePct": 6 }],
+    "duende_saltador": [{ "itemId": "pergaminho_retorno", "chancePct": 6 }],
+    "runista_medroso": [{ "itemId": "pergaminho_retorno", "chancePct": 6 }],
     "goblin": [
       {
         "itemId": "orelha_de_goblin",

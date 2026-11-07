@@ -57,7 +57,7 @@ describe('Reino do Eclipse',()=>{
    for(const loja of lojas)expect(estoqueDaLoja(lugar.estado,lugar.ctx,loja),m.id).toContain('pergaminho_retorno');
    const reino=territorioDoLugar(atlas,m.id);
    for(const id of Object.values(reino.lojas).flat())expect(lojas[0]?.itens,m.id).toContain(id);
-   if(m.salas>=18){expect(lugar.ctx.fase.largura).toBeGreaterThanOrEqual(96);expect(lugar.ctx.fase.altura).toBeGreaterThanOrEqual(80);}
+   // 07/11/2026 (D-135): sem espiral no Mundo; as grandes ficam no tamanho que as salas pedem (sem o 96×80 fixo).
   }
  },30000);
 });

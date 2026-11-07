@@ -79,7 +79,9 @@ export function derivarFicha(bolsa: Bolsa, nivel: number, ctx: Pick<ContextoSimu
   const defesaPct = mults.reduce((s, m) => s + m.defesaPct, 0);
   const defesaBruta = bolsa.defesaBase + equipados.reduce((s, i) => s + i.bonusDefesa, 0) + soma((p) => p.defesa);
   const defesa = Math.max(0, Math.round(defesaBruta * (1 + defesaPct / 100)));
-  const hpBase = bolsa.hpBase + (nivel - 1) * balance.xp.hpPorNivel;
+  // 07/11/2026 (D-136): a vida base segue o catálogo da classe (um ajuste dela vale também para quem já existe, no
+  // save e no Mundo); a da bolsa fica só para quem não tem classe no catálogo.
+  const hpBase = (ctx.conteudo.classes.get(bolsa.classeId)?.hpBase ?? bolsa.hpBase) + (nivel - 1) * balance.xp.hpPorNivel;
   // Marco 28 (D-127): acima de 30, a Constituição e a Sabedoria rendem menos na vida e na mana.
   const hp = hpMaximo(hpBase, pontosUteis(atributos.constituicao, balance), balance.hp.hpAtributoMult, balance.hp.dificuldadeMult);
   const mana = manaMaxima(pontosUteis(atributos.sabedoria, balance));

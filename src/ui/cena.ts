@@ -10,12 +10,12 @@ import { agruparParty, enquadrarGrupoParty } from '../render/party-visao';
 // Marco 14 (14/10/2026): a barra de habilidades segue a barra escolhida do jogador (compilada pela chave dele)
 // e os efeitos do HUD ganham duração e cartão.
 
-import { proximoHostil, recargaRestante } from '../combat/acao';
+import { chaveRecarga, proximoHostil, recargaRestante } from '../combat/acao';
 import { celulaOcupada } from '../combat/geometria';
 import type { Habilidade } from '../combat/habilidades';
 import { resolverHabilidade } from '../combat/compilar-habilidade';
 import { habilidadeDoAtor } from '../combat/perfil';
-import { dizimoErgue } from '../combat/necromancia';
+import { cargasProntas } from '../combat/cargas';
 import type { Celula, Comando } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
@@ -300,7 +300,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   bus.on('quebrou', (ev) => {
     ap.particulas.emitir(presetDaQuebra(ev.forma), ev.x, ev.y, 0x9ad8ff);
   });
-  const fluxo = new CamadaFluxo(palco.chao, () => ap.particulas.limite > 0, () => ticksDe(ctx.balance.armadilhas.desarmeMs), () => ticksDe(ctx.balance.portas.esperaMs));
+  const fluxo = new CamadaFluxo(palco.chao, () => ap.particulas.limite > 0, () => ticksDe(ctx.balance.armadilhas.desarmeMs), () => ticksDe(ctx.balance.portas.esperaMs), { camada: palco.entidades, projecao }, (chave) => resolverHabilidade(ctx, chave));
   bus.on('armadilhaDisparou', (ev) => {
     if (ev.x !== undefined && ev.y !== undefined) fluxo.disparou(ev.x, ev.y, ev.tick);
   });
@@ -679,8 +679,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       barra.atualizar((h) => ({
         recarga: h.recargaMs > 0 ? recargaRestante(estado, j.id, h.id) / ticksDe(h.recargaMs) : 0,
         semMana: j.mana < h.custoRecurso,
-        // Marco 22 (D-090): sem morto ao alcance, o Dízimo vital ergue um; o botão mostra o ícone de invocar.
-        ...(h.efeitos.some((ef) => ef.tipo === 'drenar_invocacao') && dizimoErgue(estado, ctx, j) && { icone: 'invocar', dica: t('habilidades.dizimoErgue') }),
+        // 07/11/2026 (D-136): as cargas prontas (o Dardo funesto); o Dízimo que erguia um morto virou a Lança de ossos.
+        ...(h.cargas && { cargas: cargasProntas(estado, chaveRecarga(j.id, h.id), h) }),
       }));
     }
     ponteiro.atualizar(q.agoraMs);

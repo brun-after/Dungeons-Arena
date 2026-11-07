@@ -15,7 +15,7 @@
       "densidade": 0.105,
       "pilar": "coluna",
       "ambientes": { "tipos": ["agua", "brasas", "miasma"], "aCada": 3, "raioMax": 1 },
-      "inimigos": { "goblin": 2, "esqueleto": 2, "orc": 2, "aranha": 1, "slime": 1, "cultista": 1 },
+      "inimigos": { "goblin": 2, "esqueleto": 2, "orc": 2, "aranha": 1, "slime": 1, "cultista": 1, "duende_saltador": 1 },
       "elementosInimigos": ["fogo", "gelo", "veneno"],
       "chanceElemental": 0.1
     },
@@ -69,7 +69,7 @@
       "densidade": 0.15,
       "pilar": "coluna",
       "ambientes": { "tipos": ["agua", "lama"], "aCada": 3, "raioMax": 1 },
-      "inimigos": { "goblin": 2, "lobo": 2, "aranha": 2, "troll": 1, "esqueleto": 1 },
+      "inimigos": { "goblin": 2, "lobo": 2, "aranha": 2, "troll": 1, "esqueleto": 1, "arremessador": 1, "duende_saltador": 1 },
       "elementosInimigos": ["terra"],
       "chanceElemental": 0.12
     },
@@ -105,7 +105,7 @@
       "densidade": 0.12,
       "pilar": "escora",
       "ambientes": { "tipos": ["lama", "agua"], "aCada": 3, "raioMax": 1 },
-      "inimigos": { "goblin": 3, "troll": 2, "aranha": 1, "orc": 1, "slime": 1 },
+      "inimigos": { "goblin": 3, "troll": 2, "aranha": 1, "orc": 1, "slime": 1, "arremessador": 1 },
       "elementosInimigos": ["terra", "raio"],
       "chanceElemental": 0.12
     },
@@ -123,7 +123,7 @@
       "densidade": 0.135,
       "pilar": "coluna",
       "ambientes": { "tipos": ["agua", "miasma"], "aCada": 2, "raioMax": 1 },
-      "inimigos": { "slime": 3, "aranha": 2, "goblin": 2, "troll": 1 },
+      "inimigos": { "slime": 3, "aranha": 2, "goblin": 2, "troll": 1, "duende_saltador": 1 },
       "elementosInimigos": ["veneno"],
       "chanceElemental": 0.15
     },
@@ -159,7 +159,7 @@
       "densidade": 0.135,
       "pilar": "coluna",
       "ambientes": { "tipos": ["brasas"], "aCada": 1, "raioMax": 1 },
-      "inimigos": { "orc": 3, "goblin": 2, "esqueleto": 1, "troll": 1 },
+      "inimigos": { "orc": 3, "goblin": 2, "esqueleto": 1, "troll": 1, "arremessador": 1 },
       "elementosInimigos": ["fogo"],
       "chanceElemental": 0.5
     },
@@ -177,7 +177,7 @@
       "densidade": 0.135,
       "pilar": "cacto",
       "ambientes": { "tipos": ["brasas"], "aCada": 2, "raioMax": 2 },
-      "inimigos": { "esqueleto": 2, "lobo": 2, "aranha": 2, "goblin": 1 },
+      "inimigos": { "esqueleto": 2, "lobo": 2, "aranha": 2, "goblin": 1, "arremessador": 1 },
       "elementosInimigos": ["fogo", "terra"],
       "chanceElemental": 0.45
     },
@@ -213,7 +213,7 @@
       "densidade": 0.135,
       "pilar": "pinheiro",
       "ambientes": { "tipos": ["gelo_fino"], "aCada": 2, "raioMax": 2 },
-      "inimigos": { "lobo": 3, "orc": 2, "troll": 1, "goblin": 1 },
+      "inimigos": { "lobo": 3, "orc": 2, "troll": 1, "goblin": 1, "arremessador": 1 },
       "elementosInimigos": ["gelo"],
       "chanceElemental": 0.5
     },
@@ -267,7 +267,7 @@
       "densidade": 0.18,
       "pilar": "arvore_morta",
       "ambientes": { "tipos": ["miasma", "agua"], "aCada": 1, "raioMax": 2 },
-      "inimigos": { "slime": 2, "aranha": 2, "troll": 2, "goblin": 1 },
+      "inimigos": { "slime": 2, "aranha": 2, "troll": 2, "goblin": 1, "duende_saltador": 1 },
       "elementosInimigos": ["veneno"],
       "chanceElemental": 0.55
     },
@@ -285,7 +285,7 @@
       "densidade": 0.18,
       "pilar": "cogumelo_gigante",
       "ambientes": { "tipos": ["miasma"], "aCada": 1, "raioMax": 1 },
-      "inimigos": { "aranha": 2, "slime": 2, "goblin": 2, "cultista": 1 },
+      "inimigos": { "aranha": 2, "slime": 2, "goblin": 2, "cultista": 1, "duende_saltador": 1 },
       "elementosInimigos": ["veneno", "psiquico"],
       "chanceElemental": 0.5
     },
@@ -303,7 +303,7 @@
       "densidade": 0.18,
       "pilar": "arvore",
       "ambientes": { "tipos": ["lama", "agua"], "aCada": 1, "raioMax": 2 },
-      "inimigos": { "lobo": 3, "aranha": 2, "troll": 2, "goblin": 1 },
+      "inimigos": { "lobo": 3, "aranha": 2, "troll": 2, "goblin": 1, "duende_saltador": 2 },
       "elementosInimigos": ["terra"],
       "chanceElemental": 0.5
     },
@@ -321,7 +321,7 @@
       "densidade": 0.15,
       "pilar": "cristal",
       "ambientes": { "tipos": ["lama"], "aCada": 1, "raioMax": 2 },
-      "inimigos": { "troll": 2, "goblin": 2, "esqueleto": 1, "orc": 2 },
+      "inimigos": { "troll": 2, "goblin": 2, "esqueleto": 1, "orc": 2, "arremessador": 2 },
       "elementosInimigos": ["terra"],
       "chanceElemental": 0.5
     },

@@ -24,6 +24,9 @@ import { processarInvocacao } from './ia-invocacao';
 import { alvoMaisFerido, celulaDeCerco, destinoDeCura, fugaDoAviso, perigoDoCaminho } from './ia-tatica';
 import { emPerigo, naAreaAfim } from '../world/perigos';
 import type { PresetInimigo } from './presets';
+import { perseguirEspecial } from './ia-especiais';
+import { semLinha } from '../combat/linha-de-tiro';
+import { ehBasico } from '../combat/basico';
 
 const CARDINAIS: readonly Dir8[] = ['N', 'E', 'S', 'O'];
 const REVERSA: Readonly<Partial<Record<Dir8, Dir8>>> = { N: 'S', S: 'N', E: 'O', O: 'E' };
@@ -324,8 +327,9 @@ function escolherDirecaoPatrulha(estado: EstadoJogo, ctx: ContextoSimulacao, e: 
  * Revezamento (marco 8A-2): ataques ímpares usam as habilidades do preset em rodízio; se a da vez
  * estiver em recarga ou estourar o limite do modo, usa o ataque básico (nunca trava tentando).
  */
-function habilidadeDaVez(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa): string {
-  if (e.habilidades.length === 0 || ia.ataquesFeitos % 2 === 0) return e.ataqueBasico;
+function habilidadeDaVez(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa, preset: PresetInimigo): string {
+  // 06/11/2026 (D-135): quem tem comportamento próprio usa as habilidades dele por lá (o salto, a runa).
+  if (e.habilidades.length === 0 || ia.ataquesFeitos % 2 === 0 || preset.comportamento) return e.ataqueBasico;
   const id = e.habilidades[Math.floor(ia.ataquesFeitos / 2) % e.habilidades.length];
   const hab = id ? resolverHabilidade(ctx, id) : undefined;
   if (!hab || recargaRestante(estado, e.id, hab.id) > 0 || excedeLimite(estado, ctx, e, hab.efeitos)) return e.ataqueBasico;
@@ -372,7 +376,9 @@ function perseguir(
     return;
   }
 
-  const hab = resolverHabilidade(ctx, habilidadeDaVez(estado, ctx, e, ia));
+  // 06/11/2026 (D-135): o saltador e o armadilheiro (entities/ia-especiais.ts).
+  if (preset.comportamento && perseguirEspecial(estado, ctx, e, ia, preset, alvo, saida)) return;
+  const hab = resolverHabilidade(ctx, habilidadeDaVez(estado, ctx, e, ia, preset));
   const basico = resolverHabilidade(ctx, e.ataqueBasico);
   if (!hab || !basico) return;
   // O deslocamento segue o alcance do ataque básico; habilidade em si mesmo vale de qualquer distância.
@@ -380,6 +386,8 @@ function perseguir(
   const origem = celulaOcupada(e);
   const celulaAlvo = celulaOcupada(alvo);
   const distancia = chebyshev(origem, celulaAlvo);
+  // 06/11/2026 (D-135): com o alvo atrás da parede, o básico de projétil não sai: o atirador dá a volta até vê-lo.
+  const semVisao = semLinha(estado, ctx, e, basico, alvo);
   const mantemDistancia = e.arquetipo === 'atirador' || e.arquetipo === 'controlador';
   const distanciaMax = mantemDistancia ? Math.min(regras.distanciaMaxAtirador, basico.alcanceCelulas) : basico.alcanceCelulas;
 
@@ -396,7 +404,7 @@ function perseguir(
     else if (!emPasso(e)) pararMovimento(e);
   } else if (mantemDistancia && distancia < distanciaMin) {
     recuando = recuar(estado, ctx, e, celulaAlvo);
-  } else if (distancia > distanciaMax) {
+  } else if (distancia > distanciaMax || semVisao) {
     // O corpo a corpo cerca: cada perseguidor do alvo mira uma célula em volta dele.
     const cerco = perfil.cercar && !mantemDistancia ? celulaDeCerco(estado, ctx, e, alvo) : null;
     aproximar(estado, ctx, e, ia, cerco ?? celulaAlvo, saida, perfil);
@@ -404,7 +412,7 @@ function perseguir(
     pararMovimento(e);
   }
 
-  if (!recuando && distancia <= alcanceAtaque && !e.acao && estado.tick >= ia.proximoAtaqueTick) {
+  if (!recuando && distancia <= alcanceAtaque && !(semVisao && ehBasico(e, hab.id)) && !e.acao && estado.tick >= ia.proximoAtaqueTick) {
     if (iniciarAcao(estado, ctx, e, hab.id, alvo.id, saida)) {
       ia.proximoAtaqueTick = estado.tick + ticksDe(preset.intervaloAtaqueMs);
       ia.ataquesFeitos++;

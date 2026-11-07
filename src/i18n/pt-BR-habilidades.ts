@@ -3,10 +3,10 @@
 // dicionário principal (pt-BR.ts) por espalhamento, com as mesmas chaves tipadas.
 
 export const textosHabilidades = {
-  'classe.necromante.dom': 'Um servo morto-vivo retorna passivamente após 8 s. Seus abates reanimam inimigos; aliados que caem perto deixam ecos independentes. Servos, reanimados e ecos duram até esgotar a quantidade de ataques ou a resistência a dano recebido. Sabedoria e Ritual reforçam sua resistência; curas não repõem reservas. Até 10 mortos: quanto maior o exército, menos cada um bate, e a sua Inteligência os fortalece. Mortos que se afastam demais voltam para o seu lado. Drene seus mortos para sobreviver; sem nenhum por perto, o Dízimo ergue um. Dano próprio reduzido e proteção contra grupos nos primeiros 5 s de combate.',
+  'classe.necromante.dom': 'Um servo morto-vivo retorna passivamente após 8 s. Seus abates reanimam inimigos; aliados que caem perto deixam ecos independentes. Servos, reanimados e ecos duram até esgotar a quantidade de ataques ou a resistência a dano recebido. Sabedoria e Ritual reforçam sua resistência; curas não repõem reservas. Até 10 mortos: quanto maior o exército, menos cada um bate, e a sua Inteligência os fortalece. Mortos que se afastam demais voltam para o seu lado. O vínculo com os mortos cura você com parte do dano que eles causam e levam, e a Lança de ossos sai do peito de cada um. Dano próprio reduzido e proteção contra grupos nos primeiros 5 s de combate.',
   'efeito.definhando': 'Definhando',
   'desc.efeito.definhando': 'Reduz dano causado e cura recebida em {pct}% por {s} s',
-  'efeito.drenar_invocacao': 'Dízimo vital',
+  'efeito.drenar_invocacao': 'Dreno dos mortos',
   'desc.efeito.drenar_invocacao': 'Consome até {valor} de vida da invocação própria mais próxima, a até 6 células, para curar você; nunca drena um aliado jogador. Sem invocação ao alcance, ergue um morto (o servo, se ele caiu)',
   'efeito.comandar_mortos': 'Comando sepulcral',
   'desc.efeito.comandar_mortos': 'Suas invocações a até 6 células ganham +{pct}% de dano e 20% de redução da recarga do básico por {s} s',
@@ -152,6 +152,15 @@ export const textosHabilidades = {
   'desc.bonus.manaMaxPct': '{sinal}{v}% de mana máxima',
   'desc.bonus.defesa': '{sinal}{v} de defesa',
   'desc.bonus.elemento': 'Passa a ser de {nome}',
+  // 07/11/2026 (D-136): cargas, o círculo no ar e a lança dos mortos.
+  'desc.cargas': 'Acumula até {n} cargas',
+  'desc.disparo': 'O círculo no ar dispara depois de {s} s',
+  'desc.lanca': 'Uma lança de osso sai de cada morto seu e perfura o alvo dele e até {n} célula(s) atrás',
+  'desc.lancaLados': 'Cada morto também crava uma lança para cada lado',
+  'desc.bonus.cargas': '+{n} carga(s)',
+  'desc.bonus.disparo': 'Disparo do círculo {v}%',
+  'desc.bonus.lancaAlem': 'A lança vai +{n} célula(s) além',
+  'desc.bonus.lancaLados': 'Lanças também para os lados',
   'desc.bonus.comTag': '{bonus} em habilidades {tag}',
   'tag.elemental': 'elementais',
   'tag.projetil': 'de projétil',

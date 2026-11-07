@@ -7,6 +7,7 @@ import type { Solo } from '../combat/solos';
 
 import type { Dificuldade } from '../modos/dificuldade';
 import type { EfeitoCanonico } from '../combat/registro-efeitos';
+import type { Elemento } from '../combat/elementos';
 import type { EntidadeId } from './comandos';
 import { clonarEntidade, type Entidade } from '../entities/entidade';
 import { clonarRng, criarRng, type EstadoRng } from './rng';
@@ -150,6 +151,12 @@ export interface Armadilha {
   inerteAteTick: number;
   /** Marco 18 (D-068): quem já a vê (revelada pela Sabedoria; o dono sempre vê a dele). */
   reveladaPara: EntidadeId[];
+  /**
+   * 06/11/2026 (D-135): o elemento do círculo (sem ele, a armadilha é de explosão) e se é a runa de pé do
+   * armadilheiro (à vista de todos).
+   */
+  elemento?: Elemento;
+  runa?: boolean;
 }
 
 /** Efeito agendado para disparar numa entidade (§2.8, `efeito_atrasado`). */
@@ -178,6 +185,9 @@ export interface FaseAgendada {
    * só adiado até o falcão chegar ao alvo.
    */
   acaoId?: number;
+  /** 07/11/2026 (D-136): o círculo no ar do Dardo funesto fica onde foi conjurado, e o tiro sai dele. */
+  origemX?: number;
+  origemY?: number;
 }
 
 /** Respawn agendado de um inimigo (§2.5): o id continua estável e a geração incrementa. */

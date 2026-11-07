@@ -33,7 +33,11 @@ export interface Balance {
       encarnacao: { fogoDanoPct: number; fogoIntervaloMs: number; fogoRaio: number; fogoQueimaValor: number; fogoQueimaMs: number; geloReducaoPct: number; geloResfriarMs: number; raioVelocidadePct: number; duracaoMs: number; duplaJanelaMs: number; duplaDuracaoMs: number } };
     aventureiro: { nivelCorte: number; danoMult: number; /** Marco 24 (D-094): dano das skills do falcão. */ falcaoDanoMult: number; /** Marco 22 (D-089): passo do falcão. */ falcaoPassoMs: number; /** D-091: IA do falcão. */ falcao: { distanciaAlvo: number; raioPasseio: number; raioColeta: number; passeioMs: number; raioCombate: number; /** Marco 24 (D-098): o dano no falcão que chega ao dono, do nível 1 ao máximo, e a espera até pousar no ombro. */ reflexoInicioPct: number; reflexoFimPct: number; pousoMs: number; /** Marco 25 (D-102): velocidades do ataque e do dash (por nível) e o bônus do atributo; a vigia dos projéteis. */ velocidadeAtaque: CurvaPorNivel; velocidadeDash: CurvaPorNivel; atributoBonusPorPontoPct: number; atributoBonusMaxPct: number; vigiaCelulas: number; vigiaRaio: number } };
     arqueiro: { secundariosMult: number; /** 05/11/2026 (D-132): o alcance que sobra andando, em %. */ alcanceAndandoPct: number; /** Marco 22 (D-089): Mira firme. */ mira: { cargaMs: number; reducaoPorDestrezaPct: number; reducaoMaxPct: number; d20Minimo: number } };
-    necromante: { protecaoMs: number; doisPct: number; grupoPct: number };
+    /**
+     * 06/11/2026 (D-135): o Necromante bate mais com as próprias mãos e se cura com uma parte do dano que os mortos
+     * dele causam e levam.
+     */
+    necromante: { protecaoMs: number; doisPct: number; grupoPct: number; danoProprioPct: number; vinculoCausadoPct: number; vinculoLevadoPct: number; lanca: { alcanceAlvo: number; perfuradoPct: number } };
   };
   necromancia: { ataquesPorInvocacao: number; resistenciaPorSabPct: number; resistenciaSabMaxPct: number; danoPct: number; servosExtras: number; retornoServoMs: number; duracaoMortoMs: number; raioColheita: number; ecoRecargaMs: number; vidaBase: number; vidaPorNivel: number; vidaServoPct: number; alcanceRitual: number; /** Marco 22 (D-090). */ distanciaRetorno: number; atributoPorInt: number; perdaPorQuantidade: number };
   tatica: { respostaPct: number; respostaMs: number; aparoJanelaMaxMs: number; veuJanelaMaxMs: number; muralhaMaxMs: number; campoMaxMs: number; janelaEtapaMs: number; janelaTotalMs: number; tetoCampos: number; escudoMaxHpPct: number; fluxoIntervaloMs: number; fluxoDuracaoMs: number; fluxoTeto: number; consumoTeto: number; consumoPct: number; colisaoDano: number; colisaoAtordoarMs: number; tenacidadeMaxPct: number; removiveis: string[] };
@@ -301,6 +305,8 @@ export interface Balance {
   armas: {
     /** O n-ésimo básico sai pela arma da mão secundária. */
     secundariaACada: number;
+    /** 06/11/2026 (D-135): as famílias cujo básico de projétil não precisa de linha livre (cai sob o alvo). */
+    tiroPorCimaDe: readonly string[];
     /** O tiro carregado do Arqueiro por uma arma corpo a corpo vira uma linha com este multiplicador do alcance. */
     carregadoAlcanceMult: number;
     /** O que a classe perde sem a arma natural. */
@@ -379,6 +385,21 @@ export interface Balance {
     desarmeMaxPct: number;
     desarmeMs: number;
     xpDesarme: number;
+    /**
+     * 06/11/2026 (D-135): o disparo fere o valor da armadilha mais `vidaAtualPct` da vida atual (menos nos arquétipos
+     * de `semPctArquetipos`) e puxa a vítima até `puxaoCelulas` na direção do hostil a ela mais perto (até
+     * `puxaoRaio`). A de explosão ainda atordoa; `elementalPct` das de fase são elementais; no Mundo, cada sala de
+     * masmorra tem `mundoPorSala`.
+     */
+    vidaAtualPct: number;
+    semPctArquetipos: readonly string[];
+    puxaoCelulas: number;
+    puxaoRaio: number;
+    explosaoAtordoarMs: number;
+    elementalPct: number;
+    mundoPorSala: number;
+    /** 07/11/2026 (D-135): o raio em que a Vista de armadilha revela sem teste. */
+    vistaRaio: number;
   };
   inventario: {
     /** Entradas na mochila; consumíveis iguais empilham até `pilhaMax`. */
@@ -512,6 +533,16 @@ export interface RegrasIa {
   armadilhasLembradas: number;
   /** Marco 25 (D-100): arquétipos que não largam a posição para se esquivar da telegrafia (o chefe segura o lugar). */
   arquetiposFirmes: string[];
+  /**
+   * 06/11/2026 (D-135): o saltador (entities/ia-especiais.ts) começa a corrida a partir de `distanciaMin` células e até
+   * `folgaCorrida` além do alcance do salto; a corrida dura `corridaMs` com `corridaPct` de velocidade e acaba no salto.
+   */
+  saltador: { distanciaMin: number; folgaCorrida: number; corridaMs: number; corridaPct: number };
+  /**
+   * 06/11/2026 (D-135): o armadilheiro foge por `fugaMs` (com `fugaPct` de velocidade) girando em volta do alvo a
+   * `raioCerco` células (`passoRad` por trecho), planta uma runa a cada `plantarACadaCelulas` e descansa `descansoMs`.
+   */
+  armadilheiro: { fugaMs: number; descansoMs: number; fugaPct: number; raioCerco: number; passoRad: number; plantarACadaCelulas: number };
 }
 
 // O JSON importado tipa `raridadeMinBoss` como string e as tuplas como listas; o leitor de conteúdo e os testes

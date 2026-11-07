@@ -17,6 +17,7 @@ import { podeFerir } from '../modos/relacao';
 import { chanceDeDesarmarPct, chanceDeRevelarPct, raioDeRevelar } from '../progression/efeitos-atributo';
 import { aplicarSubidas } from '../progression/nivel';
 import { passivosDe } from '../progression/ganchos-do-portador';
+import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 
 /** A armadilha é perigosa para `e` (do dono hostil) — só essas contam para revelar e desarmar. */
 function ameaca(ctx: ContextoSimulacao, a: Armadilha, e: Entidade): boolean {
@@ -30,16 +31,18 @@ export function revelarArmadilhas(estado: EstadoJogo, ctx: ContextoSimulacao, sa
   if (estado.tick % intervalo !== 0) return;
   for (const e of estado.entidades) {
     if (!e.bolsa || !vivo(e)) continue;
-    const raio = raioDeRevelar(e.atributos, ctx.balance);
+    // 07/11/2026 (D-135): com a Vista de armadilha (orbe ou Pó revelador), tudo no raio dela aparece, sem teste.
+    const vista = e.efeitos.some((f) => f.ateTick > estado.tick && REGISTRO_EFEITOS[f.tipo].revelaArmadilhas);
+    const raio = vista ? Math.max(ctx.balance.armadilhas.vistaRaio, raioDeRevelar(e.atributos, ctx.balance)) : raioDeRevelar(e.atributos, ctx.balance);
     // Marco 18 (D-069): o Elmo Lendário revela mais.
-    const chance = Math.min(1, (chanceDeRevelarPct(e.atributos, ctx.balance) * (1 + passivosDe(ctx, e).revelarPct / 100)) / 100);
+    const chance = vista ? 1 : Math.min(1, (chanceDeRevelarPct(e.atributos, ctx.balance) * (1 + passivosDe(ctx, e).revelarPct / 100)) / 100);
     // Marco 22 (D-089): o falcão do Aventureiro procura junto, com a Sabedoria do dono.
     const origens = [celulaOcupada(e)];
     const falcao = celulaDoCompanheiro(estado, e);
     if (falcao) origens.push(falcao);
     for (const a of estado.armadilhas) {
       if (a.reveladaPara.includes(e.id) || origens.every((o) => chebyshev(o, a) > raio) || !ameaca(ctx, a, e)) continue;
-      if (aleatorio(estado.rng) >= chance) continue;
+      if (!vista && aleatorio(estado.rng) >= chance) continue;
       a.reveladaPara.push(e.id);
       saida.push({ t: 'armadilhaRevelada', tick: estado.tick, id: e.id, armadilhaId: a.id, x: a.x, y: a.y });
     }
