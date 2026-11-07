@@ -94,7 +94,7 @@ function placaGasta(g: CanvasRenderingContext2D, base: string, semente: number):
   for (let i = 0; i < 80; i++) {
     const x = r() * 512, y = r() * 512, raio = 10 + r() * 50;
     const grd = g.createRadialGradient(x, y, 0, x, y, raio);
-    grd.addColorStop(0, r() < 0.65 ? 'rgba(0,0,0,0.28)' : 'rgba(140,130,170,0.07)');
+    grd.addColorStop(0, r() < 0.65 ? 'rgba(0,0,0,0.28)' : 'rgba(98,91,119,0.07)');
     grd.addColorStop(1, 'rgba(0,0,0,0)');
     g.fillStyle = grd;
     g.fillRect(x - raio, y - raio, raio * 2, raio * 2);
@@ -143,11 +143,11 @@ const XIS = (g: CanvasRenderingContext2D): void => {
 /** As dobras do pano negro: faixas cinza e sombras quase verticais (a arte). */
 function dobras(g: CanvasRenderingContext2D, semente: number): void {
   const r = sorteio(semente);
-  g.fillStyle = '#15141b';
+  g.fillStyle = '#0f0e13';
   g.fillRect(0, 0, 512, 512);
   for (let i = 0; i < 90; i++) {
     const x = r() * 512, w = 6 + r() * 26;
-    g.fillStyle = r() < 0.5 ? 'rgba(62,60,76,0.55)' : 'rgba(0,0,0,0.35)';
+    g.fillStyle = r() < 0.5 ? 'rgba(43,42,53,0.55)' : 'rgba(0,0,0,0.35)';
     g.beginPath(); g.moveTo(x, 0); g.lineTo(x + w, 0); g.lineTo(x + w * 0.6 + (r() - 0.5) * 60, 512); g.lineTo(x + (r() - 0.5) * 60, 512); g.fill();
   }
 }
@@ -168,10 +168,10 @@ function texturaDaAsa(ys: readonly number[], semente: number): THREE.CanvasTextu
   for (let v = 0; v < 512; v += 6)
     for (let x = 0; x < 512; x += 6) {
       const y = yDaLinha(v + r() * 30 - 15);
-      if (y >= MANTO.vermelho) g.fillStyle = r() < 0.86 ? '#d42a44' : '#5a4677';
+      if (y >= MANTO.vermelho) g.fillStyle = r() < 0.86 ? '#d42a44' : '#3f3153';
       else if (y >= MANTO.roxo) {
         if (r() < 0.25) continue;
-        g.fillStyle = r() < 0.7 ? '#4f416c' : '#3c3256';
+        g.fillStyle = r() < 0.7 ? '#372e4c' : '#2a233c';
       } else continue;
       g.fillRect(x, v, 6 + Math.floor(r() * 2) * 6, 6);
     }
@@ -220,11 +220,11 @@ function brasas(semente: number, desde: number, borda = false): { recorte: THREE
 function texturaDoCachecol(): THREE.CanvasTexture {
   const r = sorteio(641);
   const [c, g] = tela();
-  g.fillStyle = '#2a2833';
+  g.fillStyle = '#1d1c24';
   g.fillRect(0, 0, 512, 512);
   for (let i = 0; i < 40; i++) {
     const y = r() * 512, h = 8 + r() * 30, inclina = (r() - 0.3) * 120;
-    g.fillStyle = r() < 0.5 ? 'rgba(78,76,92,0.6)' : 'rgba(8,8,12,0.55)';
+    g.fillStyle = r() < 0.5 ? 'rgba(55,53,64,0.6)' : 'rgba(6,6,8,0.55)';
     g.beginPath(); g.moveTo(0, y); g.lineTo(512, y + inclina); g.lineTo(512, y + inclina + h); g.lineTo(0, y + h); g.fill();
   }
   return comoTextura(c);
@@ -234,8 +234,8 @@ function texturaDoCachecol(): THREE.CanvasTexture {
 function texturaDoCabelo(): THREE.CanvasTexture {
   const [c, g] = tela();
   const grd = g.createLinearGradient(0, 0, 0, 512);
-  grd.addColorStop(0, '#46404f');
-  grd.addColorStop(0.35, '#2e2836');
+  grd.addColorStop(0, '#312d37');
+  grd.addColorStop(0.35, '#201c26');
   grd.addColorStop(CABELO.carmesimDesde, '#4a1a30');
   grd.addColorStop(0.85, '#8e1f36');
   grd.addColorStop(1, '#b8283f');
@@ -252,15 +252,15 @@ function texturaDoCabelo(): THREE.CanvasTexture {
 function texturaDoCranio(testa: number): THREE.CanvasTexture {
   const [c, g] = tela();
   const r = sorteio(907);
-  g.fillStyle = '#2a2531';
+  g.fillStyle = '#1d1a22';
   g.fillRect(0, 0, 512, 512);
   for (let i = 0; i < 420; i++) {
     const x = r() * 512, w = 1 + r() * 4;
-    g.fillStyle = r() < 0.5 ? `rgba(78,70,88,${0.25 + r() * 0.4})` : `rgba(14,12,18,${0.3 + r() * 0.4})`;
+    g.fillStyle = r() < 0.5 ? `rgba(55,49,62,${0.25 + r() * 0.4})` : `rgba(10,8,13,${0.3 + r() * 0.4})`;
     g.fillRect(x, 0, w, 512);
   }
   // abaixo da linha do cabelo, o rosto: preto (a linha desce da testa, na frente, até embaixo, atrás)
-  g.fillStyle = '#08070c';
+  g.fillStyle = '#060508';
   for (let x = 0; x < 512; x += 2) {
     let d = Math.abs(x / 512 - 0.25);
     d = Math.min(d, 1 - d) / 0.5;
@@ -271,6 +271,9 @@ function texturaDoCranio(testa: number): THREE.CanvasTexture {
 }
 
 /**
+ * 06/11/2026 (2): tudo o que não é preto absoluto ficou 30% mais escuro (cinzas e violetas das texturas, tecidos,
+ * botas, luvas e placas), para não se misturar com o chão; os vermelhos do cabelo, do forro e das brasas ficam como
+ * estavam. Por isso as cores literais deste arquivo já estão multiplicadas por 0,7.
  * 06/11/2026: o cabelo e o manto 20% mais escuros (a cor multiplica a textura). O manto já era 0,8 por fora; agora
  * 0,8 × 0,8. O forro vermelho fica como está (é o acento da arte).
  */
@@ -289,24 +292,24 @@ function materiais() {
     asaLivre: emBrasa(texturaDaAsa(ASAS.livre.map(([a, b]) => (a[1] + b[1]) / 2), 613), brasas(615, 0.62, true)),
     asaCajado: emBrasa(texturaDaAsa(ASAS.cajado.map(([a, b]) => (a[1] + b[1]) / 2), 617), brasas(619, 0.62, true)),
     // o cabelo e a escuridão dele flutuam como em baixa gravidade (o shader de skin-pano.ts)
-    escuridao: flutuante(ventoso(new THREE.MeshBasicMaterial({ color: 0x08070c, side: DUPLO })), 0.045),
-    brasaPreta: ventoso(new THREE.MeshBasicMaterial({ color: 0x0c0a10, side: DUPLO })),
+    escuridao: flutuante(ventoso(new THREE.MeshBasicMaterial({ color: 0x060508, side: DUPLO })), 0.045),
+    brasaPreta: ventoso(new THREE.MeshBasicMaterial({ color: 0x08070b, side: DUPLO })),
     brasaAcesa: ventoso(new THREE.MeshBasicMaterial({ color: 0xff4a2a, side: DUPLO })),
-    frente: ventoso(new THREE.MeshStandardMaterial({ color: new THREE.Color(0x17161d).multiplyScalar(0.8), roughness: 0.9, side: DUPLO })),
+    frente: ventoso(new THREE.MeshStandardMaterial({ color: new THREE.Color(0x100f14).multiplyScalar(0.8), roughness: 0.9, side: DUPLO })),
     forro: ventoso(new THREE.MeshStandardMaterial({ color: 0xd42a44, emissive: 0x8a1024, emissiveIntensity: 0.25, roughness: 0.7, side: DUPLO })),
     cachecol: ventoso(new THREE.MeshStandardMaterial({ map: texturaDoCachecol(), roughness: 0.92, side: DUPLO })),
     cabelo: flutuante(ventoso(new THREE.MeshStandardMaterial({ map: texturaDoCabelo(), color: ESCURECER_CABELO, roughness: 0.8, side: DUPLO })), 0.06),
     // a franja (06/11/2026): as mechas são curtas, então usam só a parte cinza-violeta da textura (a raiz), sem carmesim
     franja: flutuante(ventoso(new THREE.MeshStandardMaterial({ map: (() => { const t = texturaDoCabelo(); t.repeat.set(1, 0.45); t.offset.set(0, 0.55); return t; })(), color: ESCURECER_CABELO, roughness: 0.8, side: DUPLO })), 0.03),
-    tunica: new THREE.MeshStandardMaterial({ color: 0x16151c, roughness: 0.9, side: DUPLO }),
-    calca: new THREE.MeshStandardMaterial({ color: 0x1c1b23, roughness: 0.85, side: DUPLO }),
-    coxa: placa(gravura('#2c2b36', 701, RUNA_DA_COXA), 0.4),
-    linhas: placa(gravura('#2a2934', 711, LINHAS)),
-    joelheira: placa(gravura('#34333f', 721, XIS), 0.6),
-    bota: new THREE.MeshStandardMaterial({ color: 0x2f2e39, metalness: 0.55, roughness: 0.5 }),
-    luva: new THREE.MeshStandardMaterial({ color: 0x3a3946, metalness: 0.35, roughness: 0.6 }),
-    couro: new THREE.MeshStandardMaterial({ color: 0x15131a, roughness: 0.6 }),
-    sombra: new THREE.MeshBasicMaterial({ color: 0x050407 }),
+    tunica: new THREE.MeshStandardMaterial({ color: 0x0f0f14, roughness: 0.9, side: DUPLO }),
+    calca: new THREE.MeshStandardMaterial({ color: 0x141318, roughness: 0.85, side: DUPLO }),
+    coxa: placa(gravura('#1f1e26', 701, RUNA_DA_COXA), 0.4),
+    linhas: placa(gravura('#1d1d24', 711, LINHAS)),
+    joelheira: placa(gravura('#24242c', 721, XIS), 0.6),
+    bota: new THREE.MeshStandardMaterial({ color: 0x212028, metalness: 0.55, roughness: 0.5 }),
+    luva: new THREE.MeshStandardMaterial({ color: 0x292831, metalness: 0.35, roughness: 0.6 }),
+    couro: new THREE.MeshStandardMaterial({ color: 0x0f0d12, roughness: 0.6 }),
+    sombra: new THREE.MeshBasicMaterial({ color: 0x040305 }),
     faisca: flutuante(ventoso(new THREE.MeshBasicMaterial({ color: 0xe0203a, side: DUPLO })), 0.08),
   };
 }
