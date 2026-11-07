@@ -15,6 +15,14 @@
       "nome": "Sombra Rubra",
       "descricao": "Um mago de rosto em sombra sob o cabelo, manto rasgado com a barra em sangue, runas vermelhas nas armas e no corpo e o cajado de galhos retorcidos.",
       "codigo": "2a3ccb7tg9j"
+    },
+    {
+      "id": "aventureiro-magico",
+      "classe": "aventureiro",
+      "classeNome": "Aventureiro",
+      "nome": "Mágico",
+      "descricao": "Um mágico de terno branco com a cabeça de yin-yang. O falcão é a cartola dele, que voa, tira a varinha nas magias e vira pombo num puff de fumaça.",
+      "codigo": "znnbtwz9hu"
     }
   ]
 }

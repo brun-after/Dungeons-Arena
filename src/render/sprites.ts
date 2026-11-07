@@ -171,7 +171,19 @@ export interface AjusteVisual {
   quadro: number | null;
   /** Soma à profundidade (o falcão no ombro fica na frente do dono). */
   zMais: number;
+  /** 06/11/2026: outro modelo no lugar do da entidade (o falcão da skin do Mágico é a cartola). */
+  modelo?: string;
+  /** 06/11/2026: o giro da figura 3D em volta do meio dela, em rad (a cartola do Mágico virando). */
+  gira?: number;
+  /** 06/11/2026: uma segunda figura 3D solta, na própria posição (o pombo que sai da cartola). */
+  acompanhante?: Acompanhante | null;
 }
+
+/** A segunda figura do ajuste: o modelo do atlas, a posição na grade, a altura, o rumo e a tinta. */
+export interface Acompanhante { modelo: string; x: number; y: number; alturaPx: number; angulo: number; tinta: number | null }
+
+/** O meio da figura do atlas acima da âncora (px do atlas), em volta do qual o `gira` roda: o da cartola que voa. */
+const MEIO_DO_GIRO_PX = 15;
 
 /** O que desenhar no token: a fonte, o estilo de passo e (Marco 26, D-108) o quadro de membros escolhido. */
 interface EscolhaDeFonte {
@@ -193,6 +205,8 @@ interface Marcador {
   rig: RigToken | null;
   /** Marco 32 (D-131): a figura pré-renderizada, com a armadura e as armas (null: o token desenhado). */
   figura3d: Figura3d | null;
+  /** 06/11/2026: a figura do acompanhante do ajuste (o pombo do Mágico). */
+  acomp3d: Figura3d | null;
   /** Marco 37: o quadrinho do personagem 3D em tempo real (null: atlas ou token). */
   vivo: Sprite | null;
   /** Marco 32 (D-131): o modelo e a arma da figura 3D (o desenho do projétil das armas de arremesso). */
@@ -272,14 +286,14 @@ export class CamadaEntidades {
     if (runa) raiz.addChild(runa);
     this.camada.addChild(raiz);
     return {
-      raiz, sobre, chao, silhueta, seta, rig: null, figura3d: null, vivo: null, dono3d: null, morteDesdeMs: -1, barras, aneis, indicador, runa, runaDesenhada: '', cor,
+      raiz, sobre, chao, silhueta, seta, rig: null, figura3d: null, acomp3d: null, vivo: null, dono3d: null, morteDesdeMs: -1, barras, aneis, indicador, runa, runaDesenhada: '', cor,
       angulo: 0, sentido: 1, ultimoX: e.px, ultimoY: e.py, visualX: Number.NaN, visualY: Number.NaN,
       andandoAteMs: 0, acaoId: null, ataqueDesdeMs: -Infinity, golpe: null, chaveGolpe: '', golpes: 0, conjuraMs: 0, fisico: false, preparoAcao: null, runaGolpe: null, escala, escalaAtlas: escala, topo: -RAIO * escala, achatamento: 1, chaoDesenhado: '',
     };
   }
 
   /** Modelo e fonte de desenho da entidade na visão atual (null: silhueta). Marco 26 (D-108): e o quadro dos membros. */
-  private fonteDe(e: Entidade, ctx: ContextoSimulacao, iso: boolean, momento: Omit<MomentoDoQuadro, 'fase'>): EscolhaDeFonte | null {
+  private fonteDe(e: Entidade, ctx: ContextoSimulacao, iso: boolean, momento: Omit<MomentoDoQuadro, 'fase'>, trocado?: string): EscolhaDeFonte | null {
     const vista = iso ? '34' : 'cima';
     const token = e.id === this.o.idLocal ? this.o.tokenProprio() : null;
     if (token) return { fonte: iso ? token.emPe : token.cima, estilo: 'passada', proprio: true, modelo: '', quadro: 0, membros: false };
@@ -287,7 +301,7 @@ export class CamadaEntidades {
     if (!biblioteca) return null;
     // Marco 14: o jogador usa o modelo da classe (sem bolsa — arena — o aventureiro).
     const classe = ctx.conteudo.classes.get(e.classeId ?? e.bolsa?.classeId ?? '')?.modelo;
-    const nome = e.invocacao?.modeloOriginal ?? ctx.conteudo.presets.get(e.preset)?.modelo ?? (e.arquetipo === 'jogador' ? (classe ?? MODELO_JOGADOR) : '');
+    const nome = trocado ?? e.invocacao?.modeloOriginal ?? ctx.conteudo.presets.get(e.preset)?.modelo ?? (e.arquetipo === 'jogador' ? (classe ?? MODELO_JOGADOR) : '');
     if (!ehModelo(nome)) return null;
     const m = MODELOS[nome];
     const quadro = quadroDoToken(m, { ...momento, fase: faseDe(e.id) });
@@ -376,7 +390,7 @@ export class CamadaEntidades {
 
       const andando = agoraMs < m.andandoAteMs && !e.morto;
       const golpeando = agoraMs - m.ataqueDesdeMs < duracaoDoGolpe(m.golpe) && !e.morto;
-      const escolha = this.fonteDe(e, ctx, iso, { tMs: agoraMs, andando, golpeando, reduzido: reduzido || e.morto, fixo: ajuste?.quadro ?? null });
+      const escolha = this.fonteDe(e, ctx, iso, { tMs: agoraMs, andando, golpeando, reduzido: reduzido || e.morto, fixo: ajuste?.quadro ?? null }, ajuste?.modelo);
       // Marco 24 (D-098): o golpe da arma (ou o giro) da ação em curso, e quanto da conjuração já passou.
       if (e.acao && escolha && m.chaveGolpe !== e.acao.chave) {
         m.golpe = golpeDaAcao(ctx, e, e.acao.chave, escolha.modelo);
@@ -395,6 +409,7 @@ export class CamadaEntidades {
         direcao: { x: dtx / norma, y: dty / norma },
         angulo: Math.atan2(dty, dtx),
       });
+      this.acompanhar(m, ajuste?.acompanhante ?? null, pt, proj, iso, agoraMs);
       const tintaInvocada = tintaDaInvocacao(e, estado);
       if (m.figura3d) m.figura3d.raiz.tint = tintaInvocada ?? 0xffffff;
       if (m.vivo) m.vivo.tint = tintaInvocada ?? 0xffffff;
@@ -609,10 +624,42 @@ export class CamadaEntidades {
         agoraMs: q.agoraMs,
       });
     if (!pronto) return esconder();
+    // 06/11/2026: o giro em volta do meio da figura (não dos pés).
+    const gira = q.ajuste?.gira ?? 0;
+    m.figura3d.raiz.rotation = gira;
+    m.figura3d.raiz.pivot.y = gira ? -MEIO_DO_GIRO_PX : 0;
+    if (gira) m.figura3d.raiz.position.y -= MEIO_DO_GIRO_PX * m.figura3d.raiz.scale.y;
     m.figura3d.raiz.visible = true;
     if (m.rig) m.rig.raiz.visible = false;
     m.topo = -medidas.topo * m.escalaAtlas * 1.02;
     return true;
+  }
+
+  /** 06/11/2026: a segunda figura do ajuste (o pombo do Mágico), na posição dela, dentro do marcador de quem a leva. */
+  private acompanhar(m: Marcador, a: Acompanhante | null, pt: { x: number; y: number }, proj: Projecao, iso: boolean, agoraMs: number): void {
+    const atlas = this.o.personagens;
+    const medidas = a && iso && atlas?.existe(a.modelo) ? atlas.medidas(a.modelo) : null;
+    if (!a || !atlas || !medidas) {
+      if (m.acomp3d) m.acomp3d.raiz.visible = false;
+      return;
+    }
+    if (!m.acomp3d) {
+      m.acomp3d = new Figura3d();
+      m.raiz.addChild(m.acomp3d.raiz);
+    }
+    const c = centroDaCelula(a.x, a.y);
+    const onde = proj.projetar(c.x, c.y);
+    const frente = proj.projetar(c.x + Math.cos(a.angulo), c.y + Math.sin(a.angulo));
+    const estado = 'andar';
+    const pronto = m.acomp3d.atualizar(atlas, {
+      modelo: a.modelo, estado, direcao: direcaoDoAngulo(Math.atan2(frente.y - onde.y, frente.x - onde.x)),
+      indice: quadroDoEstado(estado, atlas.quadrosDe(a.modelo, estado), agoraMs, 0),
+      escala: medidas.escala * m.escalaAtlas, alturaPx: a.alturaPx, tinta: a.tinta != null ? misturarCor(0xffffff, a.tinta, 0.75) : 0xffffff,
+      equipamento: null, branca: 0, pulso: 0, morto: false, runa: null, agoraMs,
+    });
+    m.acomp3d.raiz.visible = pronto;
+    m.acomp3d.raiz.position.x = onde.x - pt.x;
+    m.acomp3d.raiz.position.y += onde.y - pt.y;
   }
 
   /**

@@ -4,6 +4,7 @@
 import * as THREE from 'three';
 import type { EstadoBase as Estado } from './receitas';
 import { aranha, falcao, lobo } from './feras3d';
+import { cartola, cartolaMagica, pombo } from './magico3d';
 
 export interface Criatura {
   grupo: THREE.Group;
@@ -83,7 +84,7 @@ function slime(): Criatura {
   };
 }
 
-const CRIATURAS: Readonly<Record<string, () => Criatura>> = { slime, lobo, aranha, falcao };
+const CRIATURAS: Readonly<Record<string, () => Criatura>> = { slime, lobo, aranha, falcao, cartola, cartola_magica: cartolaMagica, pombo };
 
 export function criatura(tipo: string): Criatura | null {
   return CRIATURAS[tipo]?.() ?? null;

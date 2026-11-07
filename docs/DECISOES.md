@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.84 · **Data:** 06/11/2026
+**Versão:** 0.85 · **Data:** 06/11/2026
 
 > **Histórico**
+> - **0.85 (06/11/2026)**: D-134: a skin Mágico do aventureiro (a cartola e o pombo), a cabeça menor e mais escura da Sombra Rubra, o pouso do falcão na metade do tempo e o grito saindo do falcão.
 > - **0.84 (06/11/2026)**: D-134: as trevas do Ceifador só saem andando, no rumo oposto ao movimento, e o rosto dele é só escuridão; a franja da Sombra Rubra.
 > - **0.83 (06/11/2026)**: D-134: o Ceifador remontado a partir de medidas da arte, em camadas e se desfazendo em trevas; correções do topo da barra de vida e das escalas da Sombra Rubra.
 > - **0.82 (06/11/2026)**: D-134: a Sombra Rubra remontada do zero a partir de medidas da arte, e a densidade das superfícies das skins.
@@ -3903,5 +3904,22 @@ lançamento: `MAGO-SOMBRA-RUBRA-4KR7`. Os trechos em comum com o Ceifador (perfi
 - **Franja (0.84):** jogada para o lado. Vista de frente, a cabeça é ~65% rosto (preto) e ~35% franja. As mechas partem de uma risca no alto e correm rentes à testa em arco, seguindo a esfera do crânio: 75% para o lado livre (`LADO_DA_FRANJA`, o rumo do cabelo), descendo mais quanto mais longe vão, e 25% para o lado do cajado, mais curtas. Todas passam da linha da testa (`ELEVACAO_DA_TESTA`) com as pontas desencontradas, escondendo a borda do preto. Usam só a cor da raiz (cinza-violeta), com algumas pontas carmesim.
 - **Rosto (0.84):** a frente do crânio abaixo da testa é uma casca preta sem luz (no crânio iluminado, o preto ganhava brilho e virava cinza). A sombra oval de antes saiu: furava o cachecol.
 - **Alto da cabeça (0.84):** o crânio era uma esfera preta e, com as mechas curtas e finas por cima, o mago parecia calvo. Agora o crânio tem a cor da raiz do cabelo, com fios ao longo dos meridianos, até a linha do cabelo (na testa, na frente, e descendo até a nuca atrás); abaixo dela é preto. Por cima há 200 mechas rentes e mais longas, que evitam o rosto na direção para onde ele olha. A franja e essas mechas usam geradores próprios: o cabelo de trás, já aprovado, não muda.
+
+- **Cabeça e cores (0.85):** a parte 100% escura do rosto ficou 20% menor (`CABECA_MENOR`), encolhendo a partir do queixo; parecia uma cabeça grande demais. O cabelo e o manto ficaram 20% mais escuros (`ESCURECER_CABELO`, `ESCURECER_MANTO`).
+
+**Terceira skin: Mágico (aventureiro, 0.85).** Código `AVENT-MAGICO-6TQ2`. O corpo (`skin-magico.ts`):
+- um mágico de palco de terno preto, na cor do feltro da cartola;
+- a camisa e a gola brancas, as lapelas de cetim preto e a gravata-borboleta vermelha, como a fita da cartola;
+- as luvas brancas e a cabeça, que é uma esfera com o símbolo do yin-yang.
+
+O falcão é desenhado como uma cartola que voa (`voo-falcao.ts`, só apresentação; a regra do falcão não muda):
+- **Movimentos do pássaro.** São o voo das skills (menos o grito) e o dash e o mergulho da IA. A cartola para no ar e um pombo sai de dentro dela num puff de fumaça, desenhado como uma segunda figura do ajuste (`AjusteVisual.acompanhante`, em `sprites.ts`). O pombo faz o movimento. Depois de uma pausa curta (`ESPERA_DA_VOLTA_MS`), os dois vão um de encontro ao outro com uma mola mansa e se encontram no caminho; a cartola não vai até o alvo. Ao se tocarem, o pombo entra noutro puff.
+- **O que sai do pássaro sem ser ele** (o grito) **e as magias do dono** saem da cartola, que é a posição visual do falcão.
+- **Ao conjurar**, a cartola gira de boca para cima, em volta do próprio meio (`AjusteVisual.gira`). Quase no fim da volta, troca para o modelo `cartola_magica`: virada, com a mão de luva e a varinha saindo da boca. Ela fica nessa preparação por 3 s depois do impacto (`PREPARO_MS`); outra magia renova o tempo.
+- **Pousada**, a cartola fica vestida na cabeça do dono, com a aba cobrindo um quarto da esfera. A altura vem da cabeça medida no corpo 3D já projetado: o meio da esfera fica a 0,874 célula de tela e o raio é 0,075. Dessa altura sai a elevação própria do modelo no atlas (`ELEVACAO_DA_CARTOLA`). A primeira medida, 1,12, era a altura do corpo usada para as barras, e a cartola flutuava.
+
+**Falcão em geral (0.85):**
+- O tempo até o falcão pousar caiu pela metade (`pousoMs` de 6000 para 3000).
+- O efeito das skills com a tag `falcao`, como o grito, sai da posição visual do falcão, e não mais do jogador (`efeitos-habilidade.ts`).
 
 As superfícies das skins (`superficie`, `mecha` em `skin-pano.ts`) passam por uma densidade global (`definirDensidadeDaSkin`, padrão 3) que reamostra os anéis. Assim, os polígonos podem ser reduzidos depois sem redesenhar as peças.
