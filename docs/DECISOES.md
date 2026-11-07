@@ -1,6 +1,6 @@
 # Decisões de projeto
 
-**Versão:** 0.87 · **Data:** 07/11/2026
+**Versão:** 0.88 · **Data:** 07/11/2026
 
 > **Histórico**
 > - **0.86 (06/11/2026)**: D-135: três inimigos novos (Arremessador, Duende saltador e Runista medroso, só no Mundo), o porte por nível a cada 10 níveis, as armadilhas como círculos de conjuração (dano pela vida atual, puxão, Passo leve, mais no Mundo), o dano e o vínculo do Necromante e o básico de projétil que não atira na parede.
@@ -3979,10 +3979,35 @@ coroa de ouro em brasa no nível 100.
   no tamanho que as salas pedem. O corredor sem fim era só andar. A campanha continua podendo ter espirais.
 - Necromante: com o vínculo dos mortos curando, a classe perdeu as skills de cura e escudo próprios. Os ids continuam,
   por causa dos saves, livros, combos e ultimates.
-  - `dizimo_vital` virou a **Lança de ossos**: linha de 6 células, 1d8 de trevas, sangramento, e quem cair em 3 s luta
-    do lado do Necromante.
+  - `dizimo_vital` virou a **Lança de ossos** (o desenho final está na D-136).
   - `mortalha_funebre` virou a **Praga sepulcral**: 3×3 a até 6 células, 1d6, veneno e exposto (+20% de dano recebido).
   - A geral inicial passou de Barreira para Dissipar.
   - Os combos que curavam ou davam escudo ficaram ofensivos (Tributo da legião, Peste da legião, Ossada explosiva,
     Colheita eterna).
   - O dreno de invocação (`drenar_invocacao`) continua existindo só nas ultimates.
+
+## D-136 — Lança de ossos dos mortos, Dardo funesto com círculo no ar e cargas (07/11/2026)
+
+- **Cargas** (`cargas` na skill, até 6; `combat/cargas.ts`): cada uso empurra o tick em que todas ficam cheias
+  (`<chave>#cheio` em `recargas`), e a chave de sempre guarda quando a próxima fica pronta. Quem só lê a recarga
+  (IA, bot, barra) continua certo. A barra mostra o número de cargas prontas.
+- **Disparo atrasado** (`disparoMs`): o projétil vira uma fase agendada com a ação inteira (como o golpe do falcão) e
+  a célula de onde foi conjurado (`origemX`, `origemY`). O círculo fica parado no ar ali, e o tiro sai dele quando
+  vence, mesmo que o Necromante tenha andado.
+- **Dardo funesto**: conjuração de 0,3 s, círculo no ar por 2 s, 2 cargas de 4 s cada, 1d4. O nível 2 e o nível 4
+  dão +1 carga cada. Nos níveis 3 e 5, a escolha é entre Acúmulo e Arsenal (+1 carga cada, até 6) ou Pressa e
+  Gatilho (−35% de espera cada, até menos de 1 s).
+- **Lança de ossos** (`lanca` na skill; `combat/lanca-de-ossos.ts`): o Necromante para (`trava`) e conjura 0,7 s sobre
+  um círculo de trevas. No lançamento, uma lança de osso sai de cada morto dele: do servo, do reanimado e do eco.
+  - O alvo de cada morto é o que ele persegue; sem ele, o alvo selecionado do Necromante; sem esse, o hostil mais
+    perto, a até 6 células e à vista.
+  - A lança perfura até `alem` células atrás do alvo: 1 no nível 1 e 2 no nível 2. No nível 4, cada morto também
+    crava uma lança para cada lado.
+  - Na mesma lança, quem vem depois do primeiro leva `perfuradoPct` (50%) do dano. Quem leva mais de uma lança leva
+    1/k na k-ésima.
+  - Sem nenhum morto, a skill é recusada sem gastar mana.
+  - Visual: a assinatura `lanca_de_osso`, com espinhos de osso irrompendo em sequência do morto até a ponta.
+- O orçamento conta a espera do círculo como metade de uma conjuração e soma 10% de poder por carga a mais.
+- Balanceamento: sem cura nem escudo próprios, o duelo de Necromantes no Livre caía para 5,5 s (a meta é de 6 a
+  10 s). A vida base do Necromante foi de 50 para 62, e as 147 metas passam. A ficha passa a ler a vida base do catálogo da
+  classe (`progression/derivados.ts`), então o ajuste vale também para os personagens já criados (no save e no Mundo).

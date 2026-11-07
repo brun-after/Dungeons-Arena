@@ -32,6 +32,11 @@ export interface Caminho {
   raio: number;
   elemento: Elemento | null;
   efeitos: readonly EfeitoCanonico[];
+  /** 07/11/2026 (D-136): os mesmos ajustes de cargas, disparo e lança dos marcos. */
+  cargas: number;
+  disparoPct: number;
+  lancaAlem: number;
+  lancaLados: boolean;
 }
 
 export interface RegrasRank {
@@ -86,6 +91,10 @@ export function lerCaminhos(json: unknown): { caminhos: Map<string, Caminho>; er
       raio: n('raio', -2, 2),
       elemento,
       efeitos: o.efeitos === undefined ? [] : normalizarEfeitos(l.lista(o, 'efeitos'), l),
+      cargas: n('cargas', 0, 4),
+      disparoPct: n('disparoPct', -75, 100),
+      lancaAlem: n('lancaAlem', 0, 3),
+      lancaLados: o.lancaLados === undefined ? false : l.booleano(o, 'lancaLados'),
     };
     if (!/^[a-z0-9_]+$/.test(c.id)) l.erro(`id "${c.id}" só aceita a–z, 0–9 e _`);
     if (caminhos.has(c.id)) l.erro('id repetido');
@@ -154,6 +163,17 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
   let elemento = b.elemento;
   const extras: EfeitoCanonico[] = [];
   const mods = new Set<Modificador>([...def.mods, ...op.mods]);
+  // 07/11/2026 (D-136): cargas, disparo do círculo no ar e lança dos mortos somam por marco e caminho.
+  let cargas = b.cargas ?? 1;
+  let disparo = 1;
+  let lancaAlem = b.lanca?.alem ?? 0;
+  let lancaLados = b.lanca?.lados ?? false;
+  const somar = (x: { cargas: number; disparoPct: number; lancaAlem: number; lancaLados: boolean }) => {
+    cargas += x.cargas;
+    disparo *= 1 + x.disparoPct / 100;
+    lancaAlem += x.lancaAlem;
+    lancaLados ||= x.lancaLados;
+  };
   // Marco 18 (D-068): os marcos dos níveis alcançados (o toque do 2, a assinatura do 4) valem como caminhos fixos.
   for (const [nivel, m] of Object.entries(def.marcos)) {
     if (Number(nivel) > rank) continue;
@@ -166,6 +186,7 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
     if (b.politicaImpacto === 'area') raio += m.raio;
     extras.push(...m.efeitos);
     for (const x of m.mods) mods.add(x);
+    somar(m);
   }
   const caminhosValidos: string[] = [];
   for (const id of op.caminhos) {
@@ -182,6 +203,7 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
     if (c.elemento) elemento = c.elemento;
     extras.push(...c.efeitos);
     for (const m of c.mods) mods.add(m);
+    somar(c);
   }
   // Marco 24 (24/10/2026, D-094): as variantes ligadas valem como marcos, e ainda mudam conjuração, elemento e trocam
   // efeitos do mesmo tipo. Só entram na chave as que a definição tem.
@@ -224,6 +246,10 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
     saltos: null,
     escalaVisual: 1 + 0.15 * (rank - 1),
   };
+  if (cargas > 1) h.cargas = Math.min(6, cargas);
+  else delete h.cargas;
+  if (b.disparoMs) h.disparoMs = Math.max(0, Math.round(b.disparoMs * disparo));
+  if (b.lanca) h.lanca = { alem: Math.min(4, lancaAlem), lados: lancaLados };
   // Marco 19 (17/10/2026): a distância real do passo acompanha alcance de rank e caminho.
   for (const efeito of h.efeitos) if (efeito.tipo === 'passo_sombrio') efeito.valor = h.alcanceCelulas;
   const aplicados = [...mods].filter((m) => modificadorCabe(h, m)).sort();

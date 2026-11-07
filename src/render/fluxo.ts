@@ -8,6 +8,8 @@ import type { EstadoJogo } from '../core/estado';
 import { CELULA_PX } from './camera-calculo';
 import { anelDoDesarme, armadilhaExposta, circuloDeConjuracao, graficosDoChao, RunasDePe } from './armadilhas-visual';
 import type { OpcoesEmPe } from './objetos';
+import type { Habilidade } from '../combat/habilidades';
+import { CirculosNoAr, circulosDoNecromante } from './circulos-necromante';
 
 const cor = (hex: string) => Number.parseInt(hex.slice(1), 16);
 /** Marco 24 (D-099): o anel da espera na porta de fase. */
@@ -18,6 +20,7 @@ export class CamadaFluxo {
   /** 06/11/2026 (D-135): os círculos de conjuração das armadilhas (o traço e o brilho aditivo) e as runas de pé. */
   private readonly armadilhas: { g: Graphics; brilho: Graphics };
   private readonly runas: RunasDePe;
+  private readonly noAr: CirculosNoAr;
   private readonly disparos: { x: number; y: number; tick: number }[] = [];
 
   disparou(x: number, y: number, tick: number): void {
@@ -35,10 +38,13 @@ export class CamadaFluxo {
     private readonly ticksPorta: () => number = () => 180,
     /** 06/11/2026 (D-135): onde a runa de pé do armadilheiro fica (a camada das entidades, no isométrico). */
     emPe: OpcoesEmPe | null = null,
+    /** 07/11/2026 (D-136): a skill de uma chave (os círculos da Lança de ossos e do Dardo funesto). */
+    private readonly habilidade: (chave: string) => Habilidade | undefined = () => undefined,
   ) {
     camada.addChild(this.g);
     this.armadilhas = graficosDoChao(camada);
     this.runas = new RunasDePe(emPe);
+    this.noAr = new CirculosNoAr(emPe);
   }
 
   desenhar(estado: EstadoJogo, idLocal: string, reduzido = false): void {
@@ -76,6 +82,8 @@ export class CamadaFluxo {
       }
     }
     this.runas.desenhar(estado, tMs);
+    circulosDoNecromante(traco, brilho, estado, this.habilidade, tMs);
+    this.noAr.desenhar(estado, this.habilidade, tMs);
     // Marco 24 (25/10/2026, D-099): parado na porta de fase, o anel enche até sair.
     if (local?.naPortaDesdeTick !== undefined) {
       const fracao = Math.max(0, Math.min(1, (estado.tick - local.naPortaDesdeTick) / Math.max(1, this.ticksPorta())));
@@ -105,5 +113,6 @@ export class CamadaFluxo {
     this.armadilhas.g.destroy();
     this.armadilhas.brilho.destroy();
     this.runas.destruir();
+    this.noAr.destruir();
   }
 }

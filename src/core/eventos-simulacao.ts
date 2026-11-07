@@ -132,6 +132,8 @@ export type EventoSimulacao =
   | { t: 'soloCriado'; tick: number; soloId: number; acaoId: number; donoId: EntidadeId; habilidadeId: string; chave: string; x: number; y: number; raio: number; forma: 'quadrado' | 'cone'; atrasoMs: number }
   | { t: 'soloPulsou'; tick: number; soloId: number; x: number; y: number; raio: number; atingidos: number }
   | { t: 'soloFim'; tick: number; soloId: number }
+  /** 07/11/2026 (D-136): uma lança de osso saiu do peito de um morto (o render desenha da origem ao fim). */
+  | { t: 'lancaDeOsso'; tick: number; acaoId: number; chave: string; donoId: EntidadeId; mortoId: EntidadeId; deX: number; deY: number; paraX: number; paraY: number }
   /** Marco 28 (D-127): um marco do atributo de classe disparou (o render desenha pelas células). */
   | { t: 'marcoDeClasse'; tick: number; id: EntidadeId; marco: string; celulas: { x: number; y: number }[]; itemId?: string }
   | {

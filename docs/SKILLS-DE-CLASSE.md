@@ -2,7 +2,7 @@
 
 **Versão:** 1.3 · **Data:** 07/11/2026
 
-> 1.3 (07/11/2026, D-135): o Necromante ficou sem cura e escudo próprios. O Dízimo vital virou a Lança de ossos, a
+> 1.3 (07/11/2026, D-135, D-136): o Necromante ficou sem cura e escudo próprios. O Dízimo vital virou a Lança de ossos, a
 > Mortalha fúnebre virou a Praga sepulcral, a geral inicial passou a ser Dissipar e os combos delas ficaram ofensivos.
 > Os ids (`dizimo_vital`, `mortalha_funebre`) continuam, por causa dos saves, livros, combos e ultimates.
 
@@ -262,8 +262,8 @@ Invocações, definhar e dreno. Geral inicial (tecla 3): Dissipar.
 
 | Skill | Id | O que faz | Visual |
 |---|---|---|---|
-| ★ Dardo funesto | `dardo_funesto` | Definha o alvo. | ao conjurar, fumaça roxa; no impacto, fumaça roxa. |
-| ★ Lança de ossos | `dizimo_vital` | Lança de ossos em linha: dano, sangramento, e quem cair em 3 s luta do seu lado. | ao conjurar, fumaça roxa; no impacto, luz dourada subindo. |
+| ★ Dardo funesto | `dardo_funesto` | Conjura um círculo no ar que dispara o dardo depois de 2 s e definha o alvo; 2 cargas (até 6 evoluindo). | ao conjurar, fumaça roxa; no impacto, fumaça roxa. |
+| ★ Lança de ossos | `dizimo_vital` | Você para e conjura; uma lança de osso sai de cada morto seu e perfura o alvo dele e 1 célula atrás (2 no nível 2; para os lados no 4). | ao conjurar, fumaça roxa; no impacto, luz dourada subindo. |
 | Garras do ossuário | `garras_do_ossuario` | Enraíza. | ao conjurar, fumaça roxa; no impacto, lascas de pedra. |
 | Comando sepulcral | `comando_sepulcral` | Seus mortos atacam o seu alvo e ganham +30% de velocidade por 4 s. Os que estão longe voltam para o seu lado. | ao conjurar, fumaça roxa; no impacto, fumaça roxa. |
 | Ceifa de almas | `ceifa_de_almas` | Puxa o alvo. | ao conjurar, fumaça roxa; no impacto, fumaça roxa. |

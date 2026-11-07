@@ -72,7 +72,8 @@ function sinal(g: Graphics, cx: number, cy: number, r: number, el: Elemento | un
       return;
     }
     case 'trevas':
-      g.arc(cx, cy, r, giro + 0.6, giro + Math.PI * 2 - 0.6).stroke(traco);
+      // 07/11/2026: o moveTo antes do arco (sem ele, o Pixi liga o ponto anterior ao arco com uma linha).
+      g.moveTo(...pt(0.6, r)).arc(cx, cy, r, giro + 0.6, giro + Math.PI * 2 - 0.6).stroke(traco);
       g.circle(...pt(0, r * 0.35), r * 0.55).stroke(traco);
       return;
     case 'sagrado':
@@ -89,29 +90,30 @@ function sinal(g: Graphics, cx: number, cy: number, r: number, el: Elemento | un
 }
 
 /** O círculo de conjuração no chão (coordenadas do plano). */
-export function circuloDeConjuracao(g: Graphics, brilho: Graphics, a: Armadilha, tMs: number, propria: boolean, inerte: boolean): void {
-  const cx = (a.x + 0.5) * P;
-  const cy = (a.y + 0.5) * P;
+export function circuloDeConjuracao(g: Graphics, brilho: Graphics, a: Pick<Armadilha, 'x' | 'y' | 'id' | 'elemento'>, tMs: number, propria: boolean, inerte: boolean, escala = 1): void {
+  const cx = (a.x + 0.5) * CELULA_PX;
+  const cy = (a.y + 0.5) * CELULA_PX;
+  const R = CELULA_PX * escala;
   const cor = inerte ? COR_INERTE : corDaArmadilha(a);
   const pulso = inerte ? 0 : 0.5 + 0.5 * Math.sin(tMs / 320 + a.id);
   const giro = tMs / 2600;
   const forca = inerte ? 0.35 : 0.85;
-  if (!inerte) brilho.circle(cx, cy, P * 0.5).fill({ color: cor, alpha: 0.1 + 0.12 * pulso });
-  g.circle(cx, cy, P * 0.46).stroke({ width: 2, color: propria ? COR_PROPRIA : cor, alpha: forca });
-  g.circle(cx, cy, P * 0.36).stroke({ width: 1.2, color: cor, alpha: forca * 0.8 });
+  if (!inerte) brilho.circle(cx, cy, R * 0.5).fill({ color: cor, alpha: 0.1 + 0.12 * pulso });
+  g.circle(cx, cy, R * 0.46).stroke({ width: 2, color: propria ? COR_PROPRIA : cor, alpha: forca });
+  g.circle(cx, cy, R * 0.36).stroke({ width: 1.2, color: cor, alpha: forca * 0.8 });
   // As runas entre os anéis, girando devagar.
   for (let i = 0; i < 8; i++) {
     const ang = giro + (i * Math.PI) / 4;
-    const x = cx + Math.cos(ang) * P * 0.41;
-    const y = cy + Math.sin(ang) * P * 0.41;
+    const x = cx + Math.cos(ang) * R * 0.41;
+    const y = cy + Math.sin(ang) * R * 0.41;
     const t = ang + Math.PI / 2;
     const dx = Math.cos(t) * 3;
     const dy = Math.sin(t) * 3;
     g.moveTo(x - dx, y - dy).lineTo(x + dx, y + dy).stroke({ width: 1.4, color: cor, alpha: forca });
     if (i % 2 === 0) g.circle(x + Math.cos(ang) * 0.1, y, 1.1).fill({ color: cor, alpha: forca });
   }
-  sinal(g, cx, cy, P * 0.25, a.elemento, -giro * 1.6, cor, forca);
-  if (!inerte) sinal(brilho, cx, cy, P * 0.25, a.elemento, -giro * 1.6, cor, 0.25 + 0.35 * pulso);
+  sinal(g, cx, cy, R * 0.25, a.elemento, -giro * 1.6, cor, forca);
+  if (!inerte) sinal(brilho, cx, cy, R * 0.25, a.elemento, -giro * 1.6, cor, 0.25 + 0.35 * pulso);
 }
 
 /** O anel do desarme em curso (o progresso da Sabedoria). */

@@ -37,7 +37,7 @@ export interface Balance {
      * 06/11/2026 (D-135): o Necromante bate mais com as próprias mãos e se cura com uma parte do dano que os mortos
      * dele causam e levam.
      */
-    necromante: { protecaoMs: number; doisPct: number; grupoPct: number; danoProprioPct: number; vinculoCausadoPct: number; vinculoLevadoPct: number };
+    necromante: { protecaoMs: number; doisPct: number; grupoPct: number; danoProprioPct: number; vinculoCausadoPct: number; vinculoLevadoPct: number; lanca: { alcanceAlvo: number; perfuradoPct: number } };
   };
   necromancia: { ataquesPorInvocacao: number; resistenciaPorSabPct: number; resistenciaSabMaxPct: number; danoPct: number; servosExtras: number; retornoServoMs: number; duracaoMortoMs: number; raioColheita: number; ecoRecargaMs: number; vidaBase: number; vidaPorNivel: number; vidaServoPct: number; alcanceRitual: number; /** Marco 22 (D-090). */ distanciaRetorno: number; atributoPorInt: number; perdaPorQuantidade: number };
   tatica: { respostaPct: number; respostaMs: number; aparoJanelaMaxMs: number; veuJanelaMaxMs: number; muralhaMaxMs: number; campoMaxMs: number; janelaEtapaMs: number; janelaTotalMs: number; tetoCampos: number; escudoMaxHpPct: number; fluxoIntervaloMs: number; fluxoDuracaoMs: number; fluxoTeto: number; consumoTeto: number; consumoPct: number; colisaoDano: number; colisaoAtordoarMs: number; tenacidadeMaxPct: number; removiveis: string[] };

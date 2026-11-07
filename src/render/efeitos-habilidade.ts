@@ -40,6 +40,7 @@ import type { Habilidade } from '../combat/habilidades';
 import type { DiretorVfx } from './vfx/diretor';
 import { assinaturaDe } from './vfx/resolver';
 import { ligarSolos, tierDaArma } from './solos-visual';
+import { ligarLancas } from './lancas-visual';
 import { DT_MS } from '../core/loop';
 import { corDaArmadilha } from './armadilhas-visual';
 
@@ -238,6 +239,8 @@ export class EfeitosDeHabilidade {
     });
     // Marco 27 (D-126): o solo amaldiçoado e a runa.
     ligarSolos(bus, estado, this.o.diretor, (chave) => this.o.habilidades(chave));
+    // 07/11/2026 (D-136): as lanças de osso dos mortos do Necromante.
+    ligarLancas(bus, this.o.diretor, (chave) => this.o.habilidades(chave));
     bus.on('projetilLancado', (ev) => {
       if (this.carregadoDe === ev.donoId) {
         this.carregados.add(ev.projetilId);

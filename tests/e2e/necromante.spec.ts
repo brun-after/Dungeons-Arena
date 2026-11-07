@@ -41,15 +41,16 @@ test('Necromante é selecionável ao criar um personagem', async ({ page }) => {
   await expect(cartao.getByRole('heading', { name: 'Necromante', exact: true })).toBeVisible();
   await expect(cartao.getByRole('heading', { name: 'Atributos', exact: true })).toBeVisible();
   await expect(cartao.getByRole('heading', { name: 'Habilidades habilitadas', exact: true })).toBeVisible();
-  await expect(cartao.getByText('Dízimo vital', { exact: true })).toBeVisible();
+  await expect(cartao.getByText('Lança de ossos', { exact: true })).toBeVisible();
   await cartao.getByRole('link', { name: 'Jogar de Necromante' }).click();
   await expect(page.getByTestId('habilidade-dizimo_vital')).toBeVisible({ timeout: 30000 });
-  // Marco 24 (D-094): o kit inicial é Dardo funesto e Dízimo vital (classe) e a Barreira (geral).
+  // Marco 24 (D-094): o kit inicial é Dardo funesto e a Lança de ossos (`dizimo_vital`, classe) e, desde 07/11/2026
+  // (D-135), o Dissipar (geral).
   await expect(page.getByTestId('habilidade-dardo_funesto')).toBeVisible();
-  await expect(page.getByTestId('habilidade-barreira')).toBeVisible();
+  await expect(page.getByTestId('habilidade-dissipar')).toBeVisible();
 });
 
-test('passiva, reanimado, eco e Dízimo funcionam e persistem no save', async ({ page }, info) => {
+test('passiva, reanimado e eco funcionam e persistem no save', async ({ page }, info) => {
   const erros: string[] = []; page.on('pageerror', (e) => erros.push(e.message));
   await page.goto('/'); await page.addScriptTag({ content: semear });
   await expect(page.locator('body')).toHaveAttribute('data-semeado', 'sim');
@@ -57,7 +58,6 @@ test('passiva, reanimado, eco e Dízimo funcionam e persistem no save', async ({
   await expect(page.getByTestId('habilidade-dizimo_vital')).toBeVisible({ timeout: 30000 });
   await expect.poll(async () => Number(await page.locator('#diag').getAttribute('data-tick'))).toBeGreaterThan(100);
   await page.screenshot({ path: info.outputPath('necromante-e-mortos.png') });
-  await page.getByTestId('habilidade-dizimo_vital').click();
   await page.getByRole('button', { name: /Abrir a mochila/ }).click();
   const mochila = page.getByRole('dialog', { name: 'Mochila' });
   await mochila.getByRole('button', { name: /^Habilidades/ }).click();
@@ -75,7 +75,6 @@ test('passiva, reanimado, eco e Dízimo funcionam e persistem no save', async ({
   const { registro } = JSON.parse(await readFile(arquivo, 'utf8')) as { registro: RegistroProgresso };
   const mortos = registro.estado.entidades.filter((e) => e.invocacao?.donoId === 'j1');
   expect(mortos.map((e) => e.invocacao?.necromancia).sort()).toEqual(['eco', 'reanimado', 'servo']);
-  expect(mortos.some((e) => e.hp < e.hpMax)).toBe(true);
   expect(mortos.find((e) => e.invocacao?.necromancia === 'eco')?.invocacao?.modeloOriginal).toBe('mago');
   expect(registro.estado.entidades.find((e) => e.id === 'aliado')?.morto).toBe(false);
   await page.goto('/?jogo=campanha&slot=1');

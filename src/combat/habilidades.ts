@@ -166,6 +166,18 @@ export interface Habilidade {
   variacao?: VariacaoBasico;
   /** D-126: os atributos que escalam a rolagem do básico da arma (ausente = Força e Inteligência, ou Destreza). */
   escalaRolagem?: readonly AtributoDeEscala[];
+  /** 07/11/2026 (D-136): quantos usos se acumulam na recarga (ausente = 1). */
+  cargas?: number;
+  /** D-136: o projétil espera este tempo no círculo no ar antes de sair (ausente = sai no lançamento). */
+  disparoMs?: number;
+  /** D-136: a Lança de ossos — a lança sai de cada morto do Necromante (combat/lanca-de-ossos.ts). */
+  lanca?: LancaDosMortos;
+}
+
+/** D-136: a lança vai do morto até o alvo dele e `alem` células adiante; com `lados`, também para os dois lados. */
+export interface LancaDosMortos {
+  alem: number;
+  lados: boolean;
 }
 
 // Marco 11A (D-066): um preset por fantasia (corte, runas, cristais, bolhas, sombra, sangue, sagrado, pedra, vento,
@@ -259,6 +271,11 @@ export interface MarcoDeNivel {
   raio: number;
   efeitos: readonly EfeitoCanonico[];
   mods: readonly Modificador[];
+  /** 07/11/2026 (D-136): cargas a mais, o disparo do círculo mais curto (%) e a lança mais longa e para os lados. */
+  cargas: number;
+  disparoPct: number;
+  lancaAlem: number;
+  lancaLados: boolean;
 }
 
 function lerMarcos(l: Leitor, v: unknown): Record<number, MarcoDeNivel> {
@@ -280,6 +297,10 @@ function lerMarcos(l: Leitor, v: unknown): Record<number, MarcoDeNivel> {
       raio: n('raio', -1, 2),
       efeitos: m.efeitos === undefined ? [] : normalizarEfeitos(l.lista(m, 'efeitos'), l),
       mods: m.mods === undefined ? [] : l.listaDeTextos(m, 'mods').filter((x): x is Modificador => (MODIFICADORES as readonly string[]).includes(x)),
+      cargas: n('cargas', 0, 4),
+      disparoPct: n('disparoPct', -75, 100),
+      lancaAlem: n('lancaAlem', 0, 3),
+      lancaLados: m.lancaLados === undefined ? false : l.booleano(m, 'lancaLados'),
     };
   }
   return saida;
@@ -488,6 +509,13 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
     escalaVisual: 1,
   };
   base.escalaCom = o.escalaCom === undefined ? escalaPadrao(base.tipoAtaque) : l.opcao(o, 'escalaCom', ATRIBUTOS_DE_ESCALA);
+  // 07/11/2026 (D-136): cargas, o disparo do círculo no ar e a lança dos mortos.
+  if (o.cargas !== undefined) base.cargas = l.numero(o, 'cargas', { min: 1, max: 6, inteiro: true });
+  if (o.disparoMs !== undefined) base.disparoMs = l.numero(o, 'disparoMs', { min: 0, max: 5000 });
+  if (o.lanca !== undefined) {
+    const la = l.objeto(o.lanca, 'lanca');
+    base.lanca = { alem: l.numero(la, 'alem', { min: 0, max: 4, inteiro: true }), lados: la.lados === undefined ? false : l.booleano(la, 'lados') };
+  }
   const variacao = lerVariacao(l, o.variacao);
   if (variacao) base.variacao = variacao;
   if (o.escalaRolagem !== undefined) base.escalaRolagem = l.listaDeTextos(o, 'escalaRolagem').map((a) => {
@@ -541,6 +569,8 @@ const CAMPOS_DEFINICAO = [
   'variantes', 'interna', 'familiaGeral',
   // Marco 27 (D-126)
   'variacao', 'escalaRolagem',
+  // 07/11/2026 (D-136)
+  'cargas', 'disparoMs', 'lanca',
 ];
 
 /** Marco 18 (D-068): sem `escalaCom`, o físico escala com Força e o mágico com Inteligência. */

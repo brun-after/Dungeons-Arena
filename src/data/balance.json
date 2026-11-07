@@ -55,7 +55,8 @@
       "grupoPct": 20,
       "danoProprioPct": 15,
       "vinculoCausadoPct": 8,
-      "vinculoLevadoPct": 6
+      "vinculoLevadoPct": 6,
+      "lanca": { "alcanceAlvo": 6, "perfuradoPct": 50 }
     }
   },
   "progressaoItens": { "tomoPrecoBase": 10000, "aceleracaoIncomumChancePct": 30, "aceleracaoRaraChancePct": 10, "essenciaChancePct": 2, "essenciaBossChancePct": 20 },

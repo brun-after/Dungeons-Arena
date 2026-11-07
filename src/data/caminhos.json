@@ -21,6 +21,10 @@
     { "id": "elemental_sagrado", "nome": "Luz", "icone": "estrela", "elemento": "sagrado", "danoPct": 5 },
     {"id": "aparador", "nome": "Aparador", "icone": "escudo", "efeitos": [{"tipo": "aparando", "duracaoMs": 1800, "pct": 75, "em": "conjurador"}]},
     {"id": "evasivo", "nome": "Evasivo", "icone": "fantasma", "efeitos": [{"tipo": "veu_noturno", "duracaoMs": 3000, "pct": 45, "em": "conjurador"}]},
-    {"id": "passo_longo", "nome": "Passo longo", "icone": "teleporte", "alcance": 2}
+    {"id": "passo_longo", "nome": "Passo longo", "icone": "teleporte", "alcance": 2},
+    {"id": "acumulo", "nome": "Acúmulo", "icone": "runa", "cargas": 1},
+    {"id": "pressa", "nome": "Pressa", "icone": "ampulheta", "disparoPct": -35},
+    {"id": "arsenal", "nome": "Arsenal", "icone": "multi", "cargas": 1},
+    {"id": "gatilho", "nome": "Gatilho", "icone": "relogio", "disparoPct": -35}
   ]
 }

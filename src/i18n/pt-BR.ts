@@ -170,7 +170,6 @@ export const ptBR = {
   'log.buffInteragiu': '{nome}: o buff mudou a habilidade',
   'log.ressonancia': 'Ressonância despertada: {nome}. {texto}',
   'numero.tiroCarregado': 'Tiro carregado',
-  'habilidades.dizimoErgue': 'Sem um morto por perto: o Dízimo vital ergue um',
   'log.invocacaoRetornou': 'Um morto longe demais voltou para o seu lado',
   'log.renasceu': 'Você renasceu (uma vez por fase)',
   'log.missao': 'Missão concluída: {nome}. Recompensa: {item}',

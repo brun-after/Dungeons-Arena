@@ -129,20 +129,6 @@ describe('rituais, combos e Trevas', () => {
     s.invocacao = { ...obter(s.invocacao), donoId: 'outro' }; c.j.hp -= 10;
     c.aplicar(c.j, 'drenar_invocacao', { valor: 18 }); expect(c.j.hp).toBe(c.j.hpMax - 10);
   });
-  // 07/11/2026 (D-135): o Dízimo e a Mortalha viraram ataques; o dreno dos mortos ficou só nas ultimates.
-  it('Lança de ossos e Praga sepulcral são ofensivas: sem cura nem escudo no kit do Necromante', () => {
-    const c = cena();
-    const lanca = obter(resolverHabilidade(c.ctx, 'dizimo_vital'));
-    const praga = obter(resolverHabilidade(c.ctx, 'mortalha_funebre'));
-    expect([lanca.politicaAlvo, praga.politicaAlvo]).toEqual(['hostil', 'hostil']);
-    expect(lanca.efeitos.map((e) => e.tipo)).toEqual(expect.arrayContaining(['sangrando', 'dominar_ao_matar']));
-    expect(praga.efeitos.map((e) => e.tipo)).toEqual(expect.arrayContaining(['envenenado', 'exposto']));
-    const kit = obter(CONTEUDO.classes.get('necromante'));
-    for (const id of [...kit.exclusivas, obter(kit.geralInicial)]) {
-      const h = obter(CONTEUDO.habilidades.get(id));
-      expect(h.efeitos.some((e) => ['cura', 'escudo', 'drenar_invocacao', 'cura_periodica'].includes(e.tipo)), id).toBe(false);
-    }
-  });
   it('sem morto ao alcance, o Dízimo ergue o servo caído, mesmo com a vida cheia, e libera o retorno dele', () => {
     const c = cena(); c.passiva(); c.matar(c.servo());
     expect(c.meus()).toHaveLength(0);

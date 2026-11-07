@@ -123,7 +123,8 @@ export function poderDaHabilidade(h: Habilidade, r: RegrasOrcamento): number {
   const efeitos = h.efeitos.reduce((soma, ef) => soma + pesoDoEfeito(ef, r), 0);
   const recargaS = h.recargaMs / 1000;
   const tempo = 5 / (5 + recargaS);
-  const conjuracao = 1 - Math.min(0.5, (h.conjuracaoMs / 1000) * 0.1);
+  // 07/11/2026 (D-136): a espera do círculo no ar pesa como metade de uma conjuração; cada carga a mais, 10%.
+  const conjuracao = (1 - Math.min(0.5, ((h.conjuracaoMs + (h.disparoMs ?? 0) / 2) / 1000) * 0.1)) * (1 + 0.1 * ((h.cargas ?? 1) - 1));
   const custo = 1 + h.custoRecurso / 10 + h.custoVida / 15;
   const mobilidade = 1 + (h.mobilidade === 'trava' ? 0 : r.mobilidade[h.mobilidade]);
   return ((dano + cura + efeitos) * tempo * conjuracao * mobilidade) / custo;

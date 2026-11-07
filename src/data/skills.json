@@ -2916,14 +2916,14 @@
       "nome": "Dardo funesto",
       "icone": "runa",
       "tipoAtaque": "magico",
-      "formulaDano": "1d8",
+      "formulaDano": "1d4",
       "formulaCura": null,
       "alcanceCelulas": 6,
       "tipoArea": "nenhuma",
       "raioArea": 0,
       "custoRecurso": 3,
-      "recargaMs": 3500,
-      "conjuracaoMs": 400,
+      "recargaMs": 4000,
+      "conjuracaoMs": 300,
       "politicaAlvo": "hostil",
       "politicaImpacto": "projetil",
       "interrupcao": "interrompivel",
@@ -2950,25 +2950,27 @@
       ],
       "marcos": {
         "2": {
-          "texto": "Custa 15% menos mana",
-          "custoPct": -15
+          "texto": "Acumula 3 cargas",
+          "cargas": 1
         },
         "4": {
-          "texto": "Recarga 15% menor",
-          "recargaPct": -15
+          "texto": "Acumula mais 1 carga",
+          "cargas": 1
         }
       },
       "evolucoes": {
         "3": [
-          "eficiente",
-          "controle"
+          "acumulo",
+          "pressa"
         ],
         "5": [
-          "fortificado",
-          "longo_alcance"
+          "arsenal",
+          "gatilho"
         ]
       },
-      "elemento": "trevas"
+      "elemento": "trevas",
+      "disparoMs": 2000,
+      "cargas": 2
     },
     {
       "id": "dizimo_vital",
@@ -2979,14 +2981,14 @@
       "tipoAtaque": "magico",
       "formulaDano": "1d8",
       "formulaCura": null,
-      "alcanceCelulas": 6,
-      "tipoArea": "linha",
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
       "raioArea": 0,
       "custoRecurso": 4,
       "recargaMs": 8000,
-      "conjuracaoMs": 400,
-      "politicaAlvo": "hostil",
-      "politicaImpacto": "area",
+      "conjuracaoMs": 700,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
       "efeitos": [
@@ -2994,32 +2996,28 @@
           "tipo": "sangrando",
           "valor": 2,
           "duracaoMs": 3000
-        },
-        {
-          "tipo": "dominar_ao_matar",
-          "duracaoMs": 3000
         }
       ],
       "visual": {
-        "cor": "#d8cfc0",
-        "conjuracao": "sombra",
+        "cor": "#e8dcc4",
+        "conjuracao": "runas",
         "impacto": "pedra",
         "som": "golpe",
-        "assinatura": "ceifa_de_almas"
+        "assinatura": "lanca_de_osso"
       },
-      "mobilidade": "lenta",
+      "mobilidade": "trava",
       "nivelMinimo": 1,
       "tags": [
         "necromancia"
       ],
       "marcos": {
         "2": {
-          "texto": "Custa 15% menos mana",
-          "custoPct": -15
+          "texto": "A lança perfura até 2 células além do alvo",
+          "lancaAlem": 1
         },
         "4": {
-          "texto": "Recarga 15% menor",
-          "recargaPct": -15
+          "texto": "Cada morto também crava uma lança para cada lado",
+          "lancaLados": true
         }
       },
       "evolucoes": {
@@ -3028,11 +3026,14 @@
           "controle"
         ],
         "5": [
-          "fortificado",
-          "longo_alcance"
+          "brutal",
+          "elemental_veneno"
         ]
       },
-      "elemento": "trevas"
+      "elemento": "trevas",
+      "lanca": {
+        "alem": 1
+      }
     },
     {
       "id": "garras_do_ossuario",

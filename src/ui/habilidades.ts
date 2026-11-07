@@ -19,6 +19,8 @@ export interface EstadoBotao {
   icone?: string;
   /** O que a habilidade faz nesse outro modo (dica e leitor de tela). */
   dica?: string;
+  /** 07/11/2026 (D-136): as cargas prontas (só nas skills com mais de uma). */
+  cargas?: number;
 }
 
 export interface BarraHabilidades {
@@ -131,7 +133,7 @@ export function criarBarraHabilidades(
     atualizar: (estado) => {
       for (const item of botoes) {
         const s = estado(item.h);
-        const chave = `${s.recarga.toFixed(2)}/${s.semMana}/${s.icone ?? ''}`;
+        const chave = `${s.recarga.toFixed(2)}/${s.semMana}/${s.icone ?? ''}/${s.cargas ?? ''}`;
         if (chave === item.ultimo) continue;
         const iconeAntes = item.ultimo.split('/')[2] ?? '';
         item.ultimo = chave;
@@ -143,7 +145,18 @@ export function criarBarraHabilidades(
           else item.b.removeAttribute('aria-description');
         }
         item.b.style.setProperty('--recarga', s.recarga.toFixed(3));
-        item.b.classList.toggle('em-recarga', s.recarga > 0);
+        // 07/11/2026 (D-136): com carga pronta, a skill sai mesmo com a próxima recarregando.
+        item.b.classList.toggle('em-recarga', s.recarga > 0 && !(s.cargas !== undefined && s.cargas > 0));
+        if (s.cargas !== undefined) {
+          let n = item.b.querySelector<HTMLElement>('.cargas');
+          if (!n) {
+            n = document.createElement('span');
+            n.className = 'cargas';
+            item.b.append(n);
+          }
+          n.textContent = String(s.cargas);
+          item.b.dataset.cargas = String(s.cargas);
+        }
         item.b.classList.toggle('sem-mana', s.semMana);
       }
     },

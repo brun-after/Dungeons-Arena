@@ -185,6 +185,9 @@ export interface FaseAgendada {
    * só adiado até o falcão chegar ao alvo.
    */
   acaoId?: number;
+  /** 07/11/2026 (D-136): o círculo no ar do Dardo funesto fica onde foi conjurado, e o tiro sai dele. */
+  origemX?: number;
+  origemY?: number;
 }
 
 /** Respawn agendado de um inimigo (§2.5): o id continua estável e a geração incrementa. */
