@@ -167,3 +167,20 @@ describe('vínculo do Necromante (D-135)', () => {
     expect(n.hp).toBe(n.hpMax - 50 + 14);
   });
 });
+
+describe('Vista de armadilha (D-135)', () => {
+  it('o efeito revela sem teste no raio; o Pó revelador o aplica e está nas lojas do Mundo', () => {
+    const { ctx, estado, eventos, tick } = cena(SALA_ABERTA);
+    const j = criarJogador(obter(CONTEUDO.classes.get('guerreiro')), 'j', 2, 2, ctx.balance);
+    j.autoAtaque = false;
+    estado.entidades.push(j);
+    estado.armadilhas.push(armadilha(600, 8, 8));
+    j.efeitos.push({ ...construirEfeito('vista_de_armadilha'), ateTick: 10_000, origemId: 'j', desdeTick: 0 } as unknown as Entidade['efeitos'][number]);
+    tick(70);
+    expect(estado.armadilhas[0]?.reveladaPara).toContain('j');
+    expect(eventos.some((e) => e.t === 'armadilhaRevelada')).toBe(true);
+    const po = obter(CONTEUDO.itens.get('po_revelador'));
+    expect(po.efeitos.map((f) => f.tipo)).toEqual(['vista_de_armadilha']);
+    for (const r of CONTEUDO.reinos.values()) expect(Object.values(r.lojas).flat()).toContain('po_revelador');
+  });
+});

@@ -51,7 +51,8 @@
       "anel_do_eco",
       "aceleracao_mente_rara",
       "couraca_eclipse",
-      "manto_crepusculo"
+      "manto_crepusculo",
+      "po_revelador"
     ],
     "ferreiro": [
       "cota_malha",
@@ -70,7 +71,8 @@
       "essencia_gelo",
       "essencia_raio",
       "essencia_veneno",
-      "aceleracao_mente_rara"
+      "aceleracao_mente_rara",
+      "po_revelador"
     ]
   },
   "mercadorErrante": [

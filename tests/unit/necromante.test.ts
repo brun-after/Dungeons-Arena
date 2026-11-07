@@ -129,23 +129,25 @@ describe('rituais, combos e Trevas', () => {
     s.invocacao = { ...obter(s.invocacao), donoId: 'outro' }; c.j.hp -= 10;
     c.aplicar(c.j, 'drenar_invocacao', { valor: 18 }); expect(c.j.hp).toBe(c.j.hpMax - 10);
   });
-  it('recusa Dízimo sem gastar mana ou recarga com vida cheia (havendo morto) ou sem vaga para erguer', () => {
-    const c = cena(); c.passiva(); const mana = c.j.mana;
-    expect(iniciarAcao(c.estado, c.ctx, c.j, 'dizimo_vital', undefined, c.eventos)).toBe(false);
-    // Marco 22 (D-090): sem morto ao alcance, o Dízimo ergue um; sem vaga, recusa.
-    c.servo().x = 30;
-    // Uma vaga só, ocupada pelo servo distante.
-    const ctxSemVaga = { ...c.ctx, modo: { ...c.ctx.modo, limites: { ...c.ctx.modo.limites, invocacoesPorJogador: 1 } }, balance: { ...c.ctx.balance, necromancia: { ...c.ctx.balance.necromancia, servosExtras: 0 } } };
-    c.j.hp--; expect(iniciarAcao(c.estado, ctxSemVaga, c.j, 'dizimo_vital', undefined, c.eventos)).toBe(false);
-    expect(c.eventos.filter((e) => e.t === 'acaoRecusada').map((e) => e.motivo)).toEqual(['vida_cheia', 'sem_invocacao']);
-    expect(c.j.mana).toBe(mana); expect(c.estado.recargas).toEqual({});
+  // 07/11/2026 (D-135): o Dízimo e a Mortalha viraram ataques; o dreno dos mortos ficou só nas ultimates.
+  it('Lança de ossos e Praga sepulcral são ofensivas: sem cura nem escudo no kit do Necromante', () => {
+    const c = cena();
+    const lanca = obter(resolverHabilidade(c.ctx, 'dizimo_vital'));
+    const praga = obter(resolverHabilidade(c.ctx, 'mortalha_funebre'));
+    expect([lanca.politicaAlvo, praga.politicaAlvo]).toEqual(['hostil', 'hostil']);
+    expect(lanca.efeitos.map((e) => e.tipo)).toEqual(expect.arrayContaining(['sangrando', 'dominar_ao_matar']));
+    expect(praga.efeitos.map((e) => e.tipo)).toEqual(expect.arrayContaining(['envenenado', 'exposto']));
+    const kit = obter(CONTEUDO.classes.get('necromante'));
+    for (const id of [...kit.exclusivas, obter(kit.geralInicial)]) {
+      const h = obter(CONTEUDO.habilidades.get(id));
+      expect(h.efeitos.some((e) => ['cura', 'escudo', 'drenar_invocacao', 'cura_periodica'].includes(e.tipo)), id).toBe(false);
+    }
   });
   it('sem morto ao alcance, o Dízimo ergue o servo caído, mesmo com a vida cheia, e libera o retorno dele', () => {
     const c = cena(); c.passiva(); c.matar(c.servo());
     expect(c.meus()).toHaveLength(0);
     expect(c.estado.recargas[chaveServo(c.j.id)]).toBeGreaterThan(c.estado.tick);
-    expect(iniciarAcao(c.estado, c.ctx, c.j, 'dizimo_vital', undefined, c.eventos)).toBe(true);
-    c.estado.tick = obter(c.j.acao).lancamentoTick; processarAcoes(c.estado, c.ctx, c.eventos);
+    c.aplicar(c.j, 'drenar_invocacao', { valor: 18 });
     expect(c.servo().invocacao?.necromancia).toBe('servo');
     expect(c.estado.recargas[chaveServo(c.j.id)]).toBeLessThanOrEqual(c.estado.tick);
     expect(c.j.hp).toBe(c.j.hpMax);
@@ -168,8 +170,7 @@ describe('rituais, combos e Trevas', () => {
   });
   it('conjuração real do Dízimo pode consumir um servo e arma seu retorno', () => {
     const c = cena(); c.passiva(); c.servo().hp = 4; c.j.hp -= 20;
-    expect(iniciarAcao(c.estado, c.ctx, c.j, 'dizimo_vital', undefined, c.eventos)).toBe(true);
-    c.estado.tick = obter(c.j.acao).lancamentoTick; processarAcoes(c.estado, c.ctx, c.eventos);
+    c.aplicar(c.j, 'drenar_invocacao', { valor: 18 });
     processarMortes(c.estado, c.ctx, c.eventos);
     expect(c.meus()).toHaveLength(0); expect(c.estado.recargas[chaveServo(c.j.id)]).toBe(c.estado.tick + ticksDe(8000));
   });

@@ -1,6 +1,10 @@
 # Skills de classe, ultimates, sintonia e combos
 
-**Versão:** 1.2 · **Data:** 24/10/2026
+**Versão:** 1.3 · **Data:** 07/11/2026
+
+> 1.3 (07/11/2026, D-135): o Necromante ficou sem cura e escudo próprios. O Dízimo vital virou a Lança de ossos, a
+> Mortalha fúnebre virou a Praga sepulcral, a geral inicial passou a ser Dissipar e os combos delas ficaram ofensivos.
+> Os ids (`dizimo_vital`, `mortalha_funebre`) continuam, por causa dos saves, livros, combos e ultimates.
 
 Gerado por `tools/grimorio/gerar-doc.mjs` a partir do Grimório das Classes (`tools/grimorio/grimorio-das-classes.html`), o
 desenho aprovado do marco 24 (D-094 a D-097). Os números finais de cada skill ficam em `src/data`; aqui está a
@@ -247,7 +251,7 @@ Linguagem visual das ultimates: Precisão: uma linha de mira dourada antes do di
 
 ### Necromante
 
-Invocações, definhar e dreno. Geral inicial (tecla 3): Barreira.
+Invocações, definhar e dreno. Geral inicial (tecla 3): Dissipar.
 
 **Passiva: Exército dos mortos.**
 
@@ -259,11 +263,11 @@ Invocações, definhar e dreno. Geral inicial (tecla 3): Barreira.
 | Skill | Id | O que faz | Visual |
 |---|---|---|---|
 | ★ Dardo funesto | `dardo_funesto` | Definha o alvo. | ao conjurar, fumaça roxa; no impacto, fumaça roxa. |
-| ★ Dízimo vital | `dizimo_vital` | Drena uma invocação; sem invocação, ergue uma. | ao conjurar, fumaça roxa; no impacto, luz dourada subindo. |
+| ★ Lança de ossos | `dizimo_vital` | Lança de ossos em linha: dano, sangramento, e quem cair em 3 s luta do seu lado. | ao conjurar, fumaça roxa; no impacto, luz dourada subindo. |
 | Garras do ossuário | `garras_do_ossuario` | Enraíza. | ao conjurar, fumaça roxa; no impacto, lascas de pedra. |
 | Comando sepulcral | `comando_sepulcral` | Seus mortos atacam o seu alvo e ganham +30% de velocidade por 4 s. Os que estão longe voltam para o seu lado. | ao conjurar, fumaça roxa; no impacto, fumaça roxa. |
 | Ceifa de almas | `ceifa_de_almas` | Puxa o alvo. | ao conjurar, fumaça roxa; no impacto, fumaça roxa. |
-| Mortalha fúnebre | `mortalha_funebre` | Escudo, e você fica fantasma. | ao conjurar, fumaça roxa; no impacto, fumaça roxa. |
+| Praga sepulcral | `mortalha_funebre` | Nuvem de peste 3×3: dano, veneno e exposto (+20% de dano recebido). | ao conjurar, fumaça roxa; no impacto, fumaça roxa. |
 | Explosão cadavérica | `explosao_cadaverica` | Detona uma invocação sua: dano de trevas em área, proporcional à vida dela. | A invocação incha em luz roxa e estoura em lascas de osso e fumaça escura. |
 | Levante profano | `levante_profano` | Ergue 2 esqueletos temporários (12 s), além do limite normal. | Mãos de sombra rompem o chão, poeira de osso sobe e olhos verdes acendem. |
 
@@ -578,7 +582,7 @@ Linguagem visual das ultimates: Céu aberto: a sombra do falcão cruza a tela, e
 | Convergência arcana | mago | Seta arcana › Mente partida › Explosão | Dois acertos no mesmo alvo preparam uma explosão com 1 célula adicional de raio. |
 | Resgate entre sombras | geral | Véu da noite › Passo sombrio › Curar | Após esquivar e deslocar, curar efetivamente outro aliado concede escudo de 6. |
 | Sepultura aberta | necromante | Dardo funesto › Garras do ossuário | Dardo funesto e Garras do ossuário no mesmo alvo definhando: +25% de dano nas garras. |
-| Tributo da legião | necromante | Comando sepulcral › Dízimo vital | Comande uma invocação e drene vida efetivamente: ganha escudo de 8 por 3 s. |
+| Tributo da legião | necromante | Comando sepulcral › Lança de ossos | Comande uma invocação e lance os ossos: o sangramento da lança fica mais forte. |
 | Crematório | necromante | Garras do ossuário › Bola de fogo | Bola de fogo no mesmo alvo ainda enraizado pelas garras causa +20% de dano. |
 | Absolvição funesta | necromante | Dardo funesto › Lança radiante | Lança radiante no mesmo alvo definhando pelo dardo causa +15% de dano além das reações de Trevas e luz. |
 | Grito imperioso | guerreiro | Desafio › Brado | Aliados perto ganham escudo de 6 enquanto os hostis estão desafiados. |
@@ -610,10 +614,10 @@ Linguagem visual das ultimates: Céu aberto: a sombra do falcão cruza a tela, e
 | Cadáver-bomba | necromante | Comando sepulcral › Explosão cadavérica | +1 de raio. |
 | Levante funesto | necromante | Dardo funesto › Levante profano | Os erguidos definham quem tocam. |
 | Ceifa detonante | necromante | Ceifa de almas › Explosão cadavérica | Puxa para dentro da explosão, com +30%. |
-| Mortalha da legião | necromante | Mortalha fúnebre › Comando sepulcral | As invocações ganham escudo de 6. |
+| Peste da legião | necromante | Praga sepulcral › Comando sepulcral | As invocações por perto causam +20% de dano por 4 s. |
 | Túmulo aberto | necromante | Garras do ossuário › Levante profano | Os erguidos surgem em volta do enraizado. |
-| Dízimo explosivo | necromante | Dízimo vital › Explosão cadavérica | A explosão cura você em 20% do dano. |
-| Colheita eterna | necromante | Ceifa de almas › Dízimo vital | O dreno rende +50%. |
+| Ossada explosiva | necromante | Lança de ossos › Explosão cadavérica | A explosão causa +25% de dano. |
+| Colheita eterna | necromante | Ceifa de almas › Lança de ossos | A lança de ossos fere 25% mais. |
 | Marcha fúnebre | necromante | Levante profano › Comando sepulcral › Ceifa de almas | As invocações batem +25% por 5 s. |
 | Coro dos mortos | necromante | Comando sepulcral › Ultimate | As invocações repetem o último golpe da ultimate (50%). |
 | Mergulho cegante | aventureiro | Garras cegantes › Mergulho | Atordoa por 1 s. |
@@ -653,8 +657,8 @@ Linguagem visual das ultimates: Céu aberto: a sombra do falcão cruza a tela, e
 | Égide da legião | necromante | Barreira › Comando sepulcral | A barreira se divide entre os mortos comandados. |
 | Nuvem pestilenta | necromante | Explosão cadavérica › Névoa venenosa | A explosão vira uma névoa que definha em vez de envenenar. |
 | Prensa | necromante | Ceifa de almas › Muralha de pedra | A foice puxa o alvo contra a muralha: dano de colisão e atordoamento. |
-| Assombração | necromante | Mortalha fúnebre › Passo sombrio | Como fantasma, o passo atravessa os hostis e definha quem atravessa. |
-| Transbordo | necromante | Dízimo vital › Curar | A cura que passar da sua vida máxima vai para os mortos próximos. |
+| Assombração | necromante | Praga sepulcral › Passo sombrio | Saindo da praga, o passo definha quem está em volta. |
+| Transbordo | necromante | Lança de ossos › Curar | Os mortos próximos se curam em 6. |
 | Mortos consagrados | necromante | Levante profano › Lança radiante | Os erguidos explodem em luz ao expirar, disparando a reação Trevas e luz. |
 | Bote | aventureiro | Mergulho › Investida | Você avança até o alvo atordoado, e o golpe é crítico. |
 | Golpe às cegas | aventureiro | Garras cegantes › Punhal das sombras | O alvo cego leva o punhal como se fosse pelas costas. |

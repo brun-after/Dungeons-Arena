@@ -1,6 +1,6 @@
 # Decisões de projeto
 
-**Versão:** 0.86 · **Data:** 06/11/2026
+**Versão:** 0.87 · **Data:** 07/11/2026
 
 > **Histórico**
 > - **0.86 (06/11/2026)**: D-135: três inimigos novos (Arremessador, Duende saltador e Runista medroso, só no Mundo), o porte por nível a cada 10 níveis, as armadilhas como círculos de conjuração (dano pela vida atual, puxão, Passo leve, mais no Mundo), o dano e o vínculo do Necromante e o básico de projétil que não atira na parede.
@@ -3968,3 +3968,21 @@ coroa de ouro em brasa no nível 100.
   região (0,8, 2 e 3,5 no Central; 0,8, 2,5 e 4 no Eclipse).
 - Orbe **Passo leve** (`passo_leve`, 60 s): a próxima armadilha em que se pisa, de fase ou de monstro, some sem ferir.
 - Os gatilhos indexam quem está em cada célula uma vez por tick (antes era armadilhas × entidades).
+
+### D-135, adendo (07/11/2026): ver armadilhas, Mundo sem espiral e Necromante sem suporte
+
+- Orbe **Vista de armadilha** (`vista_de_armadilha`, 45 s, peso 8 no sorteio de orbes): enquanto dura, as armadilhas
+  escondidas a até `armadilhas.vistaRaio` (8) células se revelam sem o teste de Sabedoria (o raio é o maior entre os dois).
+- **Pó revelador** (`po_revelador`, consumível comum, 18 de ouro): aplica o mesmo efeito por 90 s. Está à venda no
+  mercador e no alquimista dos dois reinos do Mundo; fora do estoque da campanha, para não mudar as fases já geradas.
+- Mundo: nenhuma masmorra em espiral. As de 18+ salas não ganham mais o 96×80 em espiral: saem de salas e corredores,
+  no tamanho que as salas pedem. O corredor sem fim era só andar. A campanha continua podendo ter espirais.
+- Necromante: com o vínculo dos mortos curando, a classe perdeu as skills de cura e escudo próprios. Os ids continuam,
+  por causa dos saves, livros, combos e ultimates.
+  - `dizimo_vital` virou a **Lança de ossos**: linha de 6 células, 1d8 de trevas, sangramento, e quem cair em 3 s luta
+    do lado do Necromante.
+  - `mortalha_funebre` virou a **Praga sepulcral**: 3×3 a até 6 células, 1d6, veneno e exposto (+20% de dano recebido).
+  - A geral inicial passou de Barreira para Dissipar.
+  - Os combos que curavam ou davam escudo ficaram ofensivos (Tributo da legião, Peste da legião, Ossada explosiva,
+    Colheita eterna).
+  - O dreno de invocação (`drenar_invocacao`) continua existindo só nas ultimates.

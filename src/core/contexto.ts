@@ -398,6 +398,8 @@ export interface Balance {
     explosaoAtordoarMs: number;
     elementalPct: number;
     mundoPorSala: number;
+    /** 07/11/2026 (D-135): o raio em que a Vista de armadilha revela sem teste. */
+    vistaRaio: number;
   };
   inventario: {
     /** Entradas na mochila; consumíveis iguais empilham até `pilhaMax`. */

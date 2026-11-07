@@ -2974,33 +2974,38 @@
       "id": "dizimo_vital",
       "familiaEvolucao": "sombra",
       "grau": "B",
-      "nome": "Dízimo vital",
-      "icone": "cura",
+      "nome": "Lança de ossos",
+      "icone": "espada",
       "tipoAtaque": "magico",
-      "formulaDano": null,
+      "formulaDano": "1d8",
       "formulaCura": null,
       "alcanceCelulas": 6,
-      "tipoArea": "nenhuma",
+      "tipoArea": "linha",
       "raioArea": 0,
-      "custoRecurso": 3,
-      "recargaMs": 9000,
+      "custoRecurso": 4,
+      "recargaMs": 8000,
       "conjuracaoMs": 400,
-      "politicaAlvo": "proprio",
-      "politicaImpacto": "proprio",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
       "efeitos": [
         {
-          "tipo": "drenar_invocacao",
-          "valor": 18
+          "tipo": "sangrando",
+          "valor": 2,
+          "duracaoMs": 3000
+        },
+        {
+          "tipo": "dominar_ao_matar",
+          "duracaoMs": 3000
         }
       ],
       "visual": {
-        "cor": "#7ee0bb",
+        "cor": "#d8cfc0",
         "conjuracao": "sombra",
-        "impacto": "brilho",
-        "som": "cura",
-        "assinatura": "fios_de_vida"
+        "impacto": "pedra",
+        "som": "golpe",
+        "assinatura": "ceifa_de_almas"
       },
       "mobilidade": "lenta",
       "nivelMinimo": 1,
@@ -3020,13 +3025,14 @@
       "evolucoes": {
         "3": [
           "eficiente",
-          "fortificado"
+          "controle"
         ],
         "5": [
-          "sanguessuga",
-          "evasivo"
+          "fortificado",
+          "longo_alcance"
         ]
-      }
+      },
+      "elemento": "trevas"
     },
     {
       "id": "garras_do_ossuario",
@@ -3209,38 +3215,40 @@
       "id": "mortalha_funebre",
       "familiaEvolucao": "sombra",
       "grau": "B",
-      "nome": "Mortalha fúnebre",
-      "icone": "fantasma",
+      "nome": "Praga sepulcral",
+      "icone": "veneno",
       "tipoAtaque": "magico",
-      "formulaDano": null,
+      "formulaDano": "1d6",
       "formulaCura": null,
       "alcanceCelulas": 6,
-      "tipoArea": "nenhuma",
-      "raioArea": 0,
+      "tipoArea": "quadrado",
+      "raioArea": 1,
       "custoRecurso": 5,
-      "recargaMs": 14000,
+      "recargaMs": 11000,
       "conjuracaoMs": 400,
-      "politicaAlvo": "proprio",
-      "politicaImpacto": "proprio",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
       "efeitos": [
         {
-          "tipo": "escudo",
-          "valor": 10,
-          "duracaoMs": 6000
+          "tipo": "envenenado",
+          "valor": 3,
+          "pct": 50,
+          "duracaoMs": 5000
         },
         {
-          "tipo": "fantasma",
-          "duracaoMs": 2000
+          "tipo": "exposto",
+          "pct": 20,
+          "duracaoMs": 5000
         }
       ],
       "visual": {
-        "cor": "#8b68d9",
+        "cor": "#7fb069",
         "conjuracao": "sombra",
         "impacto": "sombra",
         "som": "magia",
-        "assinatura": "mortalha"
+        "assinatura": "garras_do_ossuario"
       },
       "mobilidade": "lenta",
       "nivelMinimo": 3,
@@ -3253,20 +3261,21 @@
           "custoPct": -15
         },
         "4": {
-          "texto": "Recarga 15% menor",
-          "recargaPct": -15
+          "texto": "A praga dura 25% mais",
+          "duracaoPct": 25
         }
       },
       "evolucoes": {
         "3": [
           "eficiente",
-          "controle"
+          "amplo"
         ],
         "5": [
-          "sanguessuga",
-          "evasivo"
+          "brutal",
+          "longo_alcance"
         ]
-      }
+      },
+      "elemento": "trevas"
     },
     {
       "formulaDano": "1d8",

@@ -1127,14 +1127,13 @@
       "janelaMs": 3000,
       "mesmoAlvo": false,
       "condicoes": [
-        "comandou",
-        "drenou"
+        "comandou"
       ],
       "danoPct": 0,
       "visual": {
         "cor": "#9e86d8",
         "formas": [
-          "escudo",
+          "lascas",
           "gota"
         ],
         "movimento": "subir",
@@ -1144,8 +1143,8 @@
           "ator"
         ]
       },
-      "recompensa": "escudo_curto",
-      "texto": "Comande uma invocação e drene vida efetivamente: ganha escudo de 8 por 3 s."
+      "recompensa": "sangramento_forte",
+      "texto": "Comande uma invocação e lance os ossos: o sangramento da lança fica mais forte."
     },
     {
       "id": "crematorio",
@@ -2203,18 +2202,18 @@
     },
     {
       "id": "mortalha_da_legiao",
-      "nome": "Mortalha da legião",
+      "nome": "Peste da legião",
       "janelaMs": 2000,
       "mesmoAlvo": false,
-      "texto": "As invocações ganham escudo de 6.",
+      "texto": "As invocações por perto causam +20% de dano por 4 s.",
       "danoPct": 0,
       "emVolta": {
         "raio": 4,
         "efeitos": [
           {
-            "tipo": "escudo",
-            "valor": 6,
-            "duracaoMs": 5000
+            "tipo": "bonus_dano",
+            "pct": 20,
+            "duracaoMs": 4000
           }
         ]
       },
@@ -2227,7 +2226,7 @@
         "cor": "#8b68d9",
         "formas": [
           "coroa",
-          "fumaca"
+          "esporos"
         ],
         "movimento": "cair",
         "duracaoMs": 800,
@@ -2276,17 +2275,11 @@
     },
     {
       "id": "dizimo_explosivo",
-      "nome": "Dízimo explosivo",
+      "nome": "Ossada explosiva",
       "janelaMs": 2000,
       "mesmoAlvo": false,
-      "texto": "A explosão cura você em 20% do dano.",
-      "danoPct": 0,
-      "noProprio": [
-        {
-          "tipo": "cura",
-          "valor": 10
-        }
-      ],
+      "texto": "A explosão causa +25% de dano.",
+      "danoPct": 25,
       "sequencia": [
         "dizimo_vital",
         "explosao_cadaverica"
@@ -2311,14 +2304,8 @@
       "nome": "Colheita eterna",
       "janelaMs": 2000,
       "mesmoAlvo": false,
-      "texto": "O dreno rende +50%.",
-      "danoPct": 0,
-      "noProprio": [
-        {
-          "tipo": "cura",
-          "valor": 8
-        }
-      ],
+      "texto": "A lança de ossos fere 25% mais.",
+      "danoPct": 25,
       "sequencia": [
         "ceifa_de_almas",
         "dizimo_vital"
@@ -3510,7 +3497,7 @@
       "nome": "Assombração",
       "janelaMs": 2000,
       "mesmoAlvo": false,
-      "texto": "Como fantasma, o passo atravessa os hostis e definha quem atravessa.",
+      "texto": "Saindo da praga, o passo definha quem está em volta.",
       "danoPct": 0,
       "emVolta": {
         "raio": 1,
@@ -3546,7 +3533,7 @@
       "nome": "Transbordo",
       "janelaMs": 2000,
       "mesmoAlvo": false,
-      "texto": "A cura que passar da sua vida máxima vai para os mortos próximos.",
+      "texto": "Os mortos próximos se curam em 6.",
       "danoPct": 0,
       "emVolta": {
         "raio": 3,

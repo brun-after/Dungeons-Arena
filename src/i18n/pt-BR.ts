@@ -103,6 +103,8 @@ export const ptBR = {
   // 06/11/2026 (D-135): o orbe que protege da próxima armadilha.
   'efeito.passo_leve': 'Passo leve',
   'desc.efeito.passo_leve': 'Por {s} s, a próxima armadilha em que você pisar (do chão ou de um monstro) se desfaz sem ferir',
+  'efeito.vista_de_armadilha': 'Vista de armadilha',
+  'desc.efeito.vista_de_armadilha': 'Por {s} s, você vê as armadilhas escondidas por perto, sem depender da Sabedoria',
   'log.armadilhaProtegida': 'O Passo leve desfez a armadilha',
   'efeito.fantasma': 'Fantasma',
   'efeito.atravessar': 'Projéteis perfurantes',
@@ -348,7 +350,7 @@ export const ptBR = {
   'guia.portas.titulo': 'Portas e fases',
   'guia.portas.texto': 'Anéis violeta são atalhos. A porta azul volta à fase anterior; a saída pode exigir uma chave ou a derrota do chefe. Baús e inimigos mantêm seu estado nas revisitas. Voltar não recupera vida ou mana. Em grupo, todos os vivos precisam chegar à mesma porta. Depois das fases da campanha, o jogo cria novas fases, cada uma mais difícil.',
   'guia.ambiente.titulo': 'A masmorra também luta',
-  'guia.ambiente.texto': 'Água molha e permite reações com raios e terra; brasas queimam e miasma envenena jogadores e inimigos. Use esses pontos para preparar emboscadas. A Sabedoria permite perceber e desarmar armadilhas. Revelada, a armadilha vira um círculo de conjuração no chão (na cor do elemento, ou de brasa quando explode): ela fere mais quanto mais vida você tem e joga você na direção do inimigo mais próximo — e joga o inimigo que pisa nela na sua direção, então atraia-os para lá. As runas de pé que o Runista medroso planta ficam à vista. O orbe Passo leve desfaz a próxima armadilha. Ative um santuário de Engenho: durante 20 segundos, interagir com uma armadilha revelada a converte para sua equipe, mantendo o dano e o rearme. Algumas profundezas têm enxames em levas, mapas maiores ou corredores em espiral; a maioria conserva as salas e os corredores habituais.',
+  'guia.ambiente.texto': 'Água molha e permite reações com raios e terra; brasas queimam e miasma envenena jogadores e inimigos. Use esses pontos para preparar emboscadas. A Sabedoria permite perceber e desarmar armadilhas. Revelada, a armadilha vira um círculo de conjuração no chão (na cor do elemento, ou de brasa quando explode): ela fere mais quanto mais vida você tem e joga você na direção do inimigo mais próximo — e joga o inimigo que pisa nela na sua direção, então atraia-os para lá. As runas de pé que o Runista medroso planta ficam à vista. O orbe Passo leve desfaz a próxima armadilha; o orbe Vista de armadilha e o Pó revelador, vendido nas lojas do Mundo, mostram as escondidas por perto. Ative um santuário de Engenho: durante 20 segundos, interagir com uma armadilha revelada a converte para sua equipe, mantendo o dano e o rearme. Algumas profundezas têm enxames em levas, mapas maiores ou corredores em espiral (nunca no Mundo); a maioria conserva as salas e os corredores habituais.',
   'guia.invocacoes.titulo': 'Invocações',
   'guia.invocacoes.texto': 'Pergaminhos chamam aliados: o lobo ataca, a sombra caça o mais fraco, a sentinela protege você, a fada cura e o espantalho atrai os inimigos e explode.',
   'guia.arena.titulo': 'Arena',

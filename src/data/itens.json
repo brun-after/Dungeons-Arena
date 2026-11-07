@@ -1562,9 +1562,9 @@
     },
     {
       "id": "livro_dizimo_vital",
-      "nome": "Livro: Dízimo vital",
+      "nome": "Livro: Lança de ossos",
       "tipo": "livro",
-      "descricao": "Ensina Dízimo vital (rank 1). Só Necromante pode ler.",
+      "descricao": "Ensina Lança de ossos (rank 1). Só Necromante pode ler.",
       "icone": "livro",
       "raridade": "raro",
       "valorBase": 110,
@@ -1626,9 +1626,9 @@
     },
     {
       "id": "livro_mortalha_funebre",
-      "nome": "Livro: Mortalha fúnebre",
+      "nome": "Livro: Praga sepulcral",
       "tipo": "livro",
-      "descricao": "Ensina Mortalha fúnebre (rank 1). Só Necromante pode ler.",
+      "descricao": "Ensina Praga sepulcral (rank 1). Só Necromante pode ler.",
       "icone": "livro",
       "raridade": "raro",
       "valorBase": 200,
@@ -2647,6 +2647,7 @@
     {"id": "manto_crepusculo", "nome": "Manto do Crepúsculo", "tipo": "equipamento", "descricao": "Equipamento forjado para expedições em territórios hostis.", "icone": "capa", "raridade": "epico", "valorBase": 4200, "slotPadrao": "capa", "nivelMinimo": 40, "bonusAtributos": {"inteligencia": {"modo": "pct", "valor": 18}, "sabedoria": {"modo": "pct", "valor": 15}}, "bonusDefesa": 5, "efeitos": [], "dropavel": false},
     {"id": "couraca_trono", "nome": "Couraça do Trono Vazio", "tipo": "equipamento", "descricao": "Equipamento forjado para expedições em territórios hostis.", "icone": "peitoral", "raridade": "lendario", "valorBase": 9000, "slotPadrao": "corpo", "nivelMinimo": 55, "bonusAtributos": {"constituicao": {"modo": "pct", "valor": 25}, "forca": {"modo": "pct", "valor": 15}}, "bonusDefesa": 12, "efeitos": [], "dropavel": false},
     {"id": "manto_abismo", "nome": "Manto do Abismo", "tipo": "equipamento", "descricao": "Equipamento forjado para expedições em territórios hostis.", "icone": "capa", "raridade": "lendario", "valorBase": 9500, "slotPadrao": "capa", "nivelMinimo": 55, "bonusAtributos": {"inteligencia": {"modo": "pct", "valor": 25}, "sabedoria": {"modo": "pct", "valor": 20}}, "bonusDefesa": 8, "efeitos": [], "dropavel": false},
-    {"id": "couraca_expedicao", "nome": "Couraça de Expedição", "tipo": "equipamento", "descricao": "Equipamento forjado para expedições em territórios hostis.", "icone": "peitoral", "raridade": "epico", "valorBase": 1200, "slotPadrao": "corpo", "nivelMinimo": 15, "bonusAtributos": {"constituicao": {"modo": "pct", "valor": 15}}, "bonusDefesa": 5, "efeitos": [], "dropavel": false}
+    {"id": "couraca_expedicao", "nome": "Couraça de Expedição", "tipo": "equipamento", "descricao": "Equipamento forjado para expedições em territórios hostis.", "icone": "peitoral", "raridade": "epico", "valorBase": 1200, "slotPadrao": "corpo", "nivelMinimo": 15, "bonusAtributos": {"constituicao": {"modo": "pct", "valor": 15}}, "bonusDefesa": 5, "efeitos": [], "dropavel": false},
+    {"id": "po_revelador", "nome": "Pó revelador", "tipo": "consumivel", "descricao": "Soprado no ar, mostra por 90 s as armadilhas escondidas a até 8 células.", "icone": "olho", "raridade": "comum", "valorBase": 18, "slotPadrao": null, "nivelMinimo": 1, "bonusAtributos": {}, "bonusDefesa": 0, "efeitos": [{"tipo": "vista_de_armadilha", "duracaoMs": 90000}], "dropavel": true}
   ]
 }

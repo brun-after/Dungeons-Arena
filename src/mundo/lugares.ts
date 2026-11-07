@@ -64,8 +64,10 @@ export interface LugarMontado {
 /** O interior de uma masmorra ou covil: fase gerada com os inimigos e o chefe do reino. */
 function interior(conteudo: Conteudo, reino: Reino, d: MasmorraDoMundo | CovilDoMundo, prefixo: string) {
   const catalogo = { ...catalogoDeGeracao(conteudo, estoqueDeDungeon(conteudo, territorioDoLugar(reino,d.id), d.nivel)), comuns: [...d.inimigos], boss: d.boss };
+  // 07/11/2026 (D-135): no Mundo, nenhuma masmorra em espiral (o corredor sem fim era só andar); todas são de salas,
+  // no tamanho que as salas pedem.
   return gerarFase(
-    { id: `mundo_${prefixo}_${d.id}`, nome: d.nome, semente: hashTexto(`${prefixo}:${d.id}`), salas: d.salas, ...(d.salas >= 18 ? {largura: 96, altura: 80, formato: 'espiral' as const} : {}), nivelInimigos: d.nivel, matizGraus: 0, ...(d.tema && { tema: d.tema }),
+    { id: `mundo_${prefixo}_${d.id}`, nome: d.nome, semente: hashTexto(`${prefixo}:${d.id}`), salas: d.salas, nivelInimigos: d.nivel, matizGraus: 0, ...(d.tema && { tema: d.tema }),
       // 06/11/2026 (D-135): no Mundo, as armadilhas são parte do perigo de cada sala.
       armadilhasPorSala: BALANCE_PADRAO.armadilhas.mundoPorSala },
     catalogo,

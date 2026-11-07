@@ -49,7 +49,8 @@
       "pergaminho_lobo",
       "pergaminho_espantalho",
       "chave_ferro",
-      "kit_de_engenho"
+      "kit_de_engenho",
+      "po_revelador"
     ],
     "ferreiro": [
       "espada_curta",
@@ -68,7 +69,8 @@
       "pocao_mana",
       "pocao_vida_maior",
       "pocao_mana_maior",
-      "pergaminho_retorno"
+      "pergaminho_retorno",
+      "po_revelador"
     ]
   },
   "mercadorErrante": ["pocao_vida_maior", "pocao_mana_maior", "pergaminho_retorno", "cota_malha", "botas_rapidas", "essencia_arcana"],

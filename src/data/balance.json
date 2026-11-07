@@ -387,7 +387,8 @@
     "puxaoRaio": 8,
     "explosaoAtordoarMs": 400,
     "elementalPct": 55,
-    "mundoPorSala": 2
+    "mundoPorSala": 2,
+    "vistaRaio": 8
   },
   "ia": {
     "revide": true,
