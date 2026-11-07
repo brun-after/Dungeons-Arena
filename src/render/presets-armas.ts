@@ -26,7 +26,8 @@ export type NomePresetArma =
   | 'falcao_rastro'
   | 'falcao_velocidade'
   | 'falcao_penas'
-  | 'falcao_grito';
+  | 'falcao_grito'
+  | 'puff_magico';
 
 /** A lâmina do corte: meia-lua que cresce e some, orientada pelo golpe (com `abertura`, um leque). */
 const lamina = (quantidade: number, escala: readonly [number, number], abertura: number, vidaMs: readonly [number, number]): Emissao => ({
@@ -80,6 +81,11 @@ export const PRESETS_ARMAS: Readonly<Record<NomePresetArma, readonly Emissao[]>>
   falcao_rastro: [{ textura: 'brilho', quantidade: 1, vidaMs: [260, 380], velocidade: [0, 8], direcao: 'livre', gravidade: 0, escala: [0.55, 0.1], alpha: [0.75, 0], aditivo: true, raio: 2, cor: null }],
   falcao_velocidade: [{ textura: 'faisca', quantidade: 2, vidaMs: [140, 200], velocidade: [30, 60], direcao: 'cima', gravidade: 0, escala: [1.4, 0.4], alpha: [0.9, 0], aditivo: true, raio: 6, cor: null }],
   falcao_penas: [{ textura: 'lasca', quantidade: 6, vidaMs: [600, 900], velocidade: [40, 90], direcao: 'fora', gravidade: 60, escala: [0.6, 0.45], alpha: [1, 0], aditivo: false, raio: 6, cor: 0xc8a165, giro: [-5, 5], arrasto: 0.8 }],
+  // 06/11/2026: o puff da skin Mágico (a cartola vira pombo e volta): a nuvem branca que estoura e os brilhos.
+  puff_magico: [
+    { textura: 'fumaca', quantidade: 12, vidaMs: [380, 620], velocidade: [30, 70], direcao: 'fora', gravidade: -12, escala: [0.6, 1.5], alpha: [0.95, 0], aditivo: false, raio: 4, cor: null, arrasto: 0.85 },
+    { textura: 'estrela', quantidade: 4, vidaMs: [300, 500], velocidade: [40, 80], direcao: 'fora', gravidade: 0, escala: [0.6, 0.2], alpha: [1, 0], aditivo: true, raio: 3, cor: 0xfff3c4, giro: [-4, 4] },
+  ],
   falcao_grito: [{ textura: 'anel', quantidade: 3, vidaMs: [380, 560], velocidade: [0, 0], direcao: 'livre', gravidade: 0, escala: [0.3, 2.2], alpha: [0.8, 0], aditivo: true, raio: 0, cor: null }],
   laminas_giro: [{ textura: 'corte', quantidade: 10, vidaMs: [200, 280], velocidade: [10, 30], direcao: 'fora', gravidade: 0, escala: [1.2, 1.8], alpha: [1, 0], aditivo: true, raio: 40, cor: null, forma: 'espiral' }],
 };

@@ -148,7 +148,9 @@ export class EfeitosDeHabilidade {
       const alvo = pos(ev.alvoId);
       if (!h || !alvo) return;
       const v = visualDe(h);
-      const fonte = pos(ev.fonteId);
+      // 06/11/2026: as skills do falcão (o grito, por exemplo) saem do falcão, onde ele está desenhado (no voo), não do dono
+      const falcao = h.tags.includes('falcao') ? estado().entidades.find((e) => e.invocacao?.companheiro === true && e.invocacao.donoId === ev.fonteId && !e.morto) : undefined;
+      const fonte = (falcao ? (this.posicoes.get(falcao.id) ?? pos(falcao.id)) : null) ?? pos(ev.fonteId);
       // Marco 26 (D-124): a assinatura desenha o acerto (silhueta, matéria, marca e o toque da variante). O golpe de
       // arma continua desenhando o próprio rastro no lugar do golpe genérico.
       const nome = assinaturaDe(h);

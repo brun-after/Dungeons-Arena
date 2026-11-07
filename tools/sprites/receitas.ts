@@ -263,6 +263,10 @@ export const RECEITAS: Receita[] = [
   { nome: 'lobo', corpo: 'proc:lobo', altura: 0.78, animacoes: null, exposicao: 1.3, quadro: { largura: 1.8, altura: 1.6, baixo: 0.5 } },
   { nome: 'aranha', corpo: 'proc:aranha', altura: 0.55, animacoes: null, exposicao: 1.8, quadro: { largura: 1.8, altura: 1.4, baixo: 0.5 } },
   { nome: 'falcao', corpo: 'proc:falcao', altura: 0.216, animacoes: null, exposicao: 1.5 },
+  // 06/11/2026: o falcão da skin Mágico (tools/sprites/magico3d.ts): a cartola, a cartola virada com a varinha e o pombo.
+  { nome: 'cartola', corpo: 'proc:cartola', altura: 0.22, animacoes: null, exposicao: 1.6 },
+  { nome: 'cartola_magica', corpo: 'proc:cartola_magica', altura: 0.362, animacoes: null, exposicao: 1.6 },
+  { nome: 'pombo', corpo: 'proc:pombo', altura: 0.2, animacoes: null, exposicao: 1.4 },
   // O slime: geometria feita na ferramenta (criaturas3d.ts), animada por deformação.
   { nome: 'slime', corpo: 'proc:slime', altura: 0.62, animacoes: null, exposicao: 1.4 },
   // O boneco de treino (o único que usa `generico`) e o espantalho: o boneco da Quaternius, parado.

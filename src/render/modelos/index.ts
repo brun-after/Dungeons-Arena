@@ -6,6 +6,7 @@
 import type { EstiloCaminhada } from '../caminhada.ts';
 import { bipede, type OpcoesBipede } from './bipede.ts';
 import { aranha, dragao, falcao, lobo, slime } from './feras.ts';
+import { cartola, pombo } from './magico.ts';
 import { QUADROS_MEMBROS } from './membros.ts';
 import type { Vista } from './svg.ts';
 
@@ -89,6 +90,10 @@ export const MODELOS = {
   // Marco 22 (D-089): o falcão do Aventureiro.
   // Marco 24 (D-098): 3 quadros de asas (abertas, batendo e fechadas no ombro).
   falcao: { estilo: 'flutuar', quadros: 3, membros: false, desenhar: falcao(0x8b5a2b) },
+  // 06/11/2026: o falcão da skin Mágico (render/voo-falcao.ts): a cartola, a cartola virada com a varinha e o pombo.
+  cartola: { estilo: 'flutuar', quadros: 3, membros: false, desenhar: cartola(false) },
+  cartola_magica: { estilo: 'flutuar', quadros: 3, membros: false, desenhar: cartola(true) },
+  pombo: { estilo: 'flutuar', quadros: 3, membros: false, desenhar: pombo() },
   cultista: {
     estilo: 'deslizar',
     quadros: QUADROS_MEMBROS, membros: true,

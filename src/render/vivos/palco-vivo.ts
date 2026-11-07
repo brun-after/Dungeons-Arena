@@ -24,8 +24,7 @@ import { CHEFES } from './chefes-vivos';
 import { ARMAS_3D, ESCALA_DO_GRAU, Kit } from './armas3d';
 import { aplicarVento, ATRIBUTOS_DO_PANO, levarAoRig, avancarVento, novoEstadoDeVento, novosUniformes, ventoParado, type EstadoDoVento, type UniformesDeVento } from './skin-pano';
 import { vesteDoCeifador } from './skin-ceifador'; import { ALTURA_DO_CEIFADOR } from './skin-ceifador-medidas';
-import { vesteDaSombraRubra } from './skin-mago';
-import { skinPorId } from '../../entities/skins';
+import { vesteDaSombraRubra } from './skin-mago'; import { vesteDoMagico } from './skin-magico'; import { skinPorId } from '../../entities/skins';
 
 const URLS = import.meta.glob<string>('../../assets/modelos/*.glb', { query: '?url', import: 'default' });
 
@@ -79,6 +78,7 @@ const SKINS_VIVAS: Readonly<Record<string, Pick<Classe, 'altura' | 'veste' | 'ar
   'necromante-ceifador': { classe: 'necromante', altura: ALTURA_DO_CEIFADOR, largura: 0.9, veste: vesteDoCeifador, arma: { modelo: 'gadanha_ceifador', grau: 4 } }, // alto e esguio (06/11/2026)
   // o mago adolescente: 20% mais baixo e 15% mais magro, flutuando com a cabeça na altura de antes; o passo divino cobre 3x o chão
   'mago-sombra-rubra': { classe: 'mago', altura: 1.12 * 0.8, largura: 0.85, elevacao: 1.12 * 0.2, passada: 3, veste: vesteDaSombraRubra, arma: { modelo: 'cajado_retorcido', grau: 4 } },
+  'aventureiro-magico': { classe: 'aventureiro', altura: 1.12, veste: vesteDoMagico, arma: null }, // de mãos livres: a magia é a cartola
 };
 for (const [id, k] of Object.entries(SKINS_VIVAS)) {
   const base = CLASSES[k.classe];
