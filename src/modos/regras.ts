@@ -34,6 +34,11 @@ export function estudoAvanca(modo: ModoDeJogo): boolean {
   return modo.sobrevivencia.estudoAvanca;
 }
 
+/** 08/11/2026 (D-140): o XP base acumulado na fase cansa o ganho das criaturas abaixo do nível? (o Mundo, não) */
+export function temFadigaDeXp(modo: ModoDeJogo): boolean {
+  return modo.fadigaDeXpPorFase ?? true;
+}
+
 export function podeRespawnar(modo: ModoDeJogo): boolean {
   return modo.respawn.ativo;
 }

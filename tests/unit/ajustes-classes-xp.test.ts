@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { multiplicadorDardo, registrarDardo } from '../../src/combat/concentracao-arcana';
 import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 import { criarJogador } from '../../src/entities/fabrica';
+import { BALANCE_PADRAO } from '../../src/core/contexto';
 import { criarEntidade } from '../../src/entities/entidade';
 import { clonarEstado, criarEstado } from '../../src/core/estado';
 import type { EventoSimulacao } from '../../src/core/eventos-simulacao';
@@ -204,6 +205,16 @@ describe('XP de criaturas inferiores', () => {
     for (let i = 0; i < 1000; i++) expect(xpDeCriatura(c.estado, c.ctx, c.j, c.alvo, h)).toBeGreaterThanOrEqual(1);
     expect(xpDeCriatura(c.estado, c.ctx, c.j, c.alvo, h)).toBe(1);
     expect(c.j.bolsa?.xpPorFase?.['fase-02']?.xpBaseAcumulado).toBe(h * 1004);
+  });
+  // 08/11/2026 (D-140): no Mundo não há fadiga por fase; só a diferença de nível reduz, e nada é acumulado.
+  it('no Mundo, abates repetidos abaixo do nível rendem sempre o mesmo XP', () => {
+    const c = cena('aventureiro', 20); c.alvo.nivel = 10;
+    const ctx = contexto(faseDeTexto(SALA_ABERTA, 'fase-02'), BALANCE_PADRAO, 'mundo');
+    expect(ctx.modo.fadigaDeXpPorFase).toBe(false);
+    const h = obter(ctx.balance.xp.tabela[9]);
+    for (let i = 0; i < 10; i++) expect(xpDeCriatura(c.estado, ctx, c.j, c.alvo, h)).toBe(h * .5);
+    expect(c.j.bolsa?.xpPorFase).toBeUndefined();
+    expect(xpDeCriatura(c.estado, ctx, c.j, c.alvo, .1)).toBe(1);
   });
   it('avançar, ganhar XP sem diferença e voltar preserva cada fase independentemente', () => {
     const c = cena('aventureiro', 20); c.alvo.nivel = 10;

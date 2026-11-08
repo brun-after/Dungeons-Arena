@@ -26,6 +26,7 @@
   "faixas": [],
   "recompensaJogador": null,
   "partilhaXp": { "aliadoPct": 75, "raio": 12, "exigeGrupo": true },
+  "fadigaDeXpPorFase": false,
   "sobrevivencia": {
     "regenPorCelula": true,
     "revelarArmadilhas": true,
