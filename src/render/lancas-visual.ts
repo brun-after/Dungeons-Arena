@@ -1,4 +1,4 @@
-// A Lança de ossos no render (07/11/2026, D-136). Só lê eventos: cada `lancaDeOsso` vira a área da assinatura da skill
+// A Lanças da escuridão no render (07/11/2026, D-136). Só lê eventos: cada `lancaDeOsso` vira a área da assinatura da skill
 // (os espinhos de osso irrompendo em sequência) pelas células da lança, do peito do morto até a ponta.
 
 import { bresenham } from '../combat/formas';

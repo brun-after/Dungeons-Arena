@@ -1144,7 +1144,7 @@
         ]
       },
       "recompensa": "sangramento_forte",
-      "texto": "Comande uma invocação e lance os ossos: o sangramento da lança fica mais forte."
+      "texto": "Comande uma invocação e lance as lanças da escuridão: o sangramento delas fica mais forte."
     },
     {
       "id": "crematorio",
@@ -2304,7 +2304,7 @@
       "nome": "Colheita eterna",
       "janelaMs": 2000,
       "mesmoAlvo": false,
-      "texto": "A lança de ossos fere 25% mais.",
+      "texto": "As lanças da escuridão ferem 25% mais.",
       "danoPct": 25,
       "sequencia": [
         "ceifa_de_almas",

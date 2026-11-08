@@ -14,6 +14,8 @@ const OSSOS = (n: number, o: Partial<Emissao> = {}) => em({ textura: 'osso', qua
 const SANGUE = (n: number, o: Partial<Emissao> = {}) => em({ textura: 'gota_viva', quantidade: n, vidaMs: [300, 500], velocidade: [80, 180], direcao: 'cima', abertura: 1.2, gravidade: 600, escala: [0.22, 0.14], alpha: [1, 0.3], raio: 4, cores: [0xd83040, 0x7a1020], esticar: 0.2, ...o });
 /** 07/11/2026: quanto a lança de osso fica inteira e opaca antes de sumir. */
 const VIDA_DA_LANCA_MS = 900;
+/** 08/11/2026: a aura roxa das Lanças da escuridão. */
+const COR_AURA_LANCA = 0x9b4dff;
 const NASCER_MS = 180;
 const SUMIR_MS = 420;
 const CONJURA_TREVAS = [SOMBRA(1, { raio: 8, escala: [0.3, 0.8] }), em({ textura: 'runa1', quantidade: 1, vidaMs: [400, 600], velocidade: [10, 20], direcao: 'cima', escala: [0.3, 0.4], alpha: [0.8, 0], aditivo: true, raio: 12, cor: null })];
@@ -45,13 +47,13 @@ export const TREVAS = {
     },
   },
   /**
-   * 07/11/2026 (D-136): Lança de ossos. Do peito do morto, espinhos de osso irrompem um atrás do outro pela linha até
+   * 07/11/2026 (D-136): Lanças da escuridão. Do peito do morto, espinhos de osso irrompem um atrás do outro pela linha até
    * a ponta (a maior), com lascas de osso voando no fim e névoa onde a lança nasce.
    */
   lanca_de_osso: {
     familia: 'trevas',
     conjuracao: CONJURA_TREVAS,
-    impacto: [OSSOS(3), SOMBRA(1)],
+    impacto: [SOMBRA(3, { cor: COR_AURA_LANCA }), ALMAS(2, { cor: COR_AURA_LANCA })],
     naArea: (c, a) => {
       const de = c.tela(a.origem);
       const ate = c.tela(a.mira);
@@ -73,14 +75,16 @@ export const TREVAS = {
             const alpha = 1 - some;
             const sx = s * (0.25 + 0.75 * nasce) * (1 - 0.15 * some);
             const sy = s * (0.2 + 1.3 * nasce) * (1 - 0.2 * some);
-            p.desenhar('espinho', q.x, q.y, { sx: sx * 1.18, sy: sy * 1.12, alpha: alpha * 0.75, rot: giro, cor: 0x1a1018, aditivo: false });
-            p.desenhar('espinho', q.x, q.y, { sx, sy, alpha, rot: giro, cor: 0xf4ecd8, aditivo: false });
+            // 08/11/2026: Lanças da escuridão — a lança preta com a aura roxa (aditiva, pulsando) em volta.
+            const pulso = 0.8 + 0.2 * Math.sin(ms / 90);
+            p.desenhar('espinho', q.x, q.y, { sx: sx * 1.45, sy: sy * 1.25, alpha: alpha * 0.7 * pulso, rot: giro, cor: COR_AURA_LANCA, aditivo: true });
+            p.desenhar('espinho', q.x, q.y, { sx, sy, alpha, rot: giro, cor: 0x18121c, aditivo: false });
           },
         });
       });
       c.particulas.emitirLista([SOMBRA(2, { raio: 6 })], a.origem.x, a.origem.y, a.cor);
       const fim = a.celulas.at(-1);
-      if (fim) c.particulas.emitirLista([OSSOS(c.reduzido ? 2 : 5)], fim.x, fim.y, a.cor);
+      if (fim) c.particulas.emitirLista([SOMBRA(c.reduzido ? 2 : 4, { cor: COR_AURA_LANCA })], fim.x, fim.y, COR_AURA_LANCA);
     },
   },
   /** Ceifa de almas: a foice espectral varre o cone e arranca almas que sobem. */

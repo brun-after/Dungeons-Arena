@@ -2,7 +2,7 @@
 
 **Versão:** 1.3 · **Data:** 07/11/2026
 
-> 1.3 (07/11/2026, D-135, D-136): o Necromante ficou sem cura e escudo próprios. O Dízimo vital virou a Lança de ossos, a
+> 1.3 (07/11/2026, D-135, D-136): o Necromante ficou sem cura e escudo próprios. O Dízimo vital virou a Lanças da escuridão, a
 > Mortalha fúnebre virou a Praga sepulcral, a geral inicial passou a ser Dissipar e os combos delas ficaram ofensivos.
 > Os ids (`dizimo_vital`, `mortalha_funebre`) continuam, por causa dos saves, livros, combos e ultimates.
 
@@ -263,7 +263,7 @@ Invocações, definhar e dreno. Geral inicial (tecla 3): Dissipar.
 | Skill | Id | O que faz | Visual |
 |---|---|---|---|
 | ★ Dardo funesto | `dardo_funesto` | Conjura um círculo no ar que dispara o dardo depois de 2 s e definha o alvo; 2 cargas (até 6 evoluindo). | ao conjurar, fumaça roxa; no impacto, fumaça roxa. |
-| ★ Lança de ossos | `dizimo_vital` | Você para e conjura; uma lança de osso sai de cada morto seu e perfura o alvo dele e 1 célula atrás (2 no nível 2; para os lados no 4). | ao conjurar, fumaça roxa; no impacto, luz dourada subindo. |
+| ★ Lanças da escuridão | `dizimo_vital` | Você para e conjura; uma lança de osso sai de cada morto seu e perfura o alvo dele e 1 célula atrás (2 no nível 2; para os lados no 4). | ao conjurar, fumaça roxa; no impacto, luz dourada subindo. |
 | Garras do ossuário | `garras_do_ossuario` | Enraíza. | ao conjurar, fumaça roxa; no impacto, lascas de pedra. |
 | Comando sepulcral | `comando_sepulcral` | Seus mortos atacam o seu alvo e ganham +30% de velocidade por 4 s. Os que estão longe voltam para o seu lado. | ao conjurar, fumaça roxa; no impacto, fumaça roxa. |
 | Ceifa de almas | `ceifa_de_almas` | Puxa o alvo. | ao conjurar, fumaça roxa; no impacto, fumaça roxa. |
@@ -275,7 +275,7 @@ Linguagem visual das ultimates: Trevas e vida: névoa roxa rente ao chão, fluxo
 
 | Par | Ultimate | O que faz |
 |---|---|---|
-| Dardo funesto + Dízimo vital | Banquete funesto | Um dardo cinematográfico atravessa a fila de hostis. Depois, uma energia flui de cada atingido e de cada invocação sua até você, tirando vida de todos e curando você. |
+| Dardo funesto + Lanças da escuridão | Juízo das trevas | Um dardo cinematográfico atravessa a fila de hostis e, no mesmo instante, cada morto seu crava uma lança da escuridão no alvo dele e outra para cada lado. Os atingidos definham (D-137, 08/11/2026). |
 | Dardo funesto + Garras do ossuário | Ossário faminto | O dardo crava no chão e abre um poço de ossos. Mãos esqueléticas enraízam e definham quem está ali. |
 | Dardo funesto + Comando sepulcral | Ordem da praga | Todas as suas invocações lançam dardos funestos no seu alvo ao mesmo tempo. |
 | Dardo funesto + Ceifa de almas | Colheita sombria | Definha tudo em área. Três segundos depois, a foice passa, e bate mais em quem está definhando. |
@@ -582,7 +582,7 @@ Linguagem visual das ultimates: Céu aberto: a sombra do falcão cruza a tela, e
 | Convergência arcana | mago | Seta arcana › Mente partida › Explosão | Dois acertos no mesmo alvo preparam uma explosão com 1 célula adicional de raio. |
 | Resgate entre sombras | geral | Véu da noite › Passo sombrio › Curar | Após esquivar e deslocar, curar efetivamente outro aliado concede escudo de 6. |
 | Sepultura aberta | necromante | Dardo funesto › Garras do ossuário | Dardo funesto e Garras do ossuário no mesmo alvo definhando: +25% de dano nas garras. |
-| Tributo da legião | necromante | Comando sepulcral › Lança de ossos | Comande uma invocação e lance os ossos: o sangramento da lança fica mais forte. |
+| Tributo da legião | necromante | Comando sepulcral › Lanças da escuridão | Comande uma invocação e lance as lanças da escuridão: o sangramento delas fica mais forte. |
 | Crematório | necromante | Garras do ossuário › Bola de fogo | Bola de fogo no mesmo alvo ainda enraizado pelas garras causa +20% de dano. |
 | Absolvição funesta | necromante | Dardo funesto › Lança radiante | Lança radiante no mesmo alvo definhando pelo dardo causa +15% de dano além das reações de Trevas e luz. |
 | Grito imperioso | guerreiro | Desafio › Brado | Aliados perto ganham escudo de 6 enquanto os hostis estão desafiados. |
@@ -616,8 +616,8 @@ Linguagem visual das ultimates: Céu aberto: a sombra do falcão cruza a tela, e
 | Ceifa detonante | necromante | Ceifa de almas › Explosão cadavérica | Puxa para dentro da explosão, com +30%. |
 | Peste da legião | necromante | Praga sepulcral › Comando sepulcral | As invocações por perto causam +20% de dano por 4 s. |
 | Túmulo aberto | necromante | Garras do ossuário › Levante profano | Os erguidos surgem em volta do enraizado. |
-| Ossada explosiva | necromante | Lança de ossos › Explosão cadavérica | A explosão causa +25% de dano. |
-| Colheita eterna | necromante | Ceifa de almas › Lança de ossos | A lança de ossos fere 25% mais. |
+| Ossada explosiva | necromante | Lanças da escuridão › Explosão cadavérica | A explosão causa +25% de dano. |
+| Colheita eterna | necromante | Ceifa de almas › Lanças da escuridão | As lanças da escuridão ferem 25% mais. |
 | Marcha fúnebre | necromante | Levante profano › Comando sepulcral › Ceifa de almas | As invocações batem +25% por 5 s. |
 | Coro dos mortos | necromante | Comando sepulcral › Ultimate | As invocações repetem o último golpe da ultimate (50%). |
 | Mergulho cegante | aventureiro | Garras cegantes › Mergulho | Atordoa por 1 s. |
@@ -658,7 +658,7 @@ Linguagem visual das ultimates: Céu aberto: a sombra do falcão cruza a tela, e
 | Nuvem pestilenta | necromante | Explosão cadavérica › Névoa venenosa | A explosão vira uma névoa que definha em vez de envenenar. |
 | Prensa | necromante | Ceifa de almas › Muralha de pedra | A foice puxa o alvo contra a muralha: dano de colisão e atordoamento. |
 | Assombração | necromante | Praga sepulcral › Passo sombrio | Saindo da praga, o passo definha quem está em volta. |
-| Transbordo | necromante | Lança de ossos › Curar | Os mortos próximos se curam em 6. |
+| Transbordo | necromante | Lanças da escuridão › Curar | Os mortos próximos se curam em 6. |
 | Mortos consagrados | necromante | Levante profano › Lança radiante | Os erguidos explodem em luz ao expirar, disparando a reação Trevas e luz. |
 | Bote | aventureiro | Mergulho › Investida | Você avança até o alvo atordoado, e o golpe é crítico. |
 | Golpe às cegas | aventureiro | Garras cegantes › Punhal das sombras | O alvo cego leva o punhal como se fosse pelas costas. |

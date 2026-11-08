@@ -26,6 +26,8 @@ import { descreverBonus, descreverCaminho, descreverHabilidade, linhasDeEscala }
 import { icone } from './icones';
 import { classeDaHabilidade, comRuna } from './runa-dom';
 import { desenharPassivasGerais, desenharSintonia } from './painel-sintonia';
+import { ultimateDe } from '../combat/carga-ultimate';
+import { ID_RUNA_DE_FUSAO } from '../progression/habilidades-personagem';
 
 export interface EstadoAbaHabilidades {
   /** Mantido para a mochila (D-067: a escolha agora é direta, pelos botões 1 2 3 4 da carta). */
@@ -69,6 +71,8 @@ export function desenharHabilidades(
   const pontos = el('p', 'linha-pontos', t('habilidades.pontos', { n: bolsa.pontosHabilidade }));
   pontos.dataset.pontosHabilidade = String(bolsa.pontosHabilidade);
   corpo.append(pontos);
+  // 08/11/2026: a ultimate de agora (o par das teclas 1 e 2) no topo, explicada como uma skill.
+  if (!ui.essenciaInvId) desenharUltimate(corpo, j, ctx);
   const essenciaSelecionada = ui.essenciaInvId ? bolsa.mochila.find((i) => i.invId === ui.essenciaInvId) : undefined;
   const familiaSelecionada = essenciaSelecionada ? ctx.conteudo.itens.get(essenciaSelecionada.itemId)?.progressao : undefined;
   if (ui.essenciaInvId) {
@@ -154,6 +158,9 @@ export function desenharHabilidades(
     const primeira = desc.firstElementChild;
     if (primeira instanceof HTMLElement) comRuna(primeira, classeDona, 12);
     textos.append(desc);
+    // 08/11/2026: a fusão mostra a receita (as duas partes no nível máximo e a runa de fusão).
+    const partes = definicaoDe(ctx, id)?.fusao;
+    if (partes) textos.append(el('p', 'detalhe-item receita-fusao', receitaDaFusao(ctx, partes)));
     // Marco 18 (D-068): os marcos de nível (o do 2 e o do 4); os já alcançados aparecem acesos.
     const marcos = definicaoDe(ctx, id)?.marcos ?? {};
     const listaMarcos = Object.entries(marcos);
@@ -244,4 +251,38 @@ export function desenharHabilidades(
   // Marco 18 (camada 7): as fusões aparecem quando as duas partes são conhecidas.
   const fusoes = (ui.essenciaInvId ? [] : fusoesVisiveis(ctx, bolsa)).filter((id) => !bolsa.conhecidas.some((c) => c.id === id));
   secao(t('habilidades.fusoes'), fusoes.map((id) => cartao(id, null)));
+}
+
+/** 08/11/2026: a receita de uma fusão, com os nomes das partes. */
+function receitaDaFusao(ctx: ContextoSimulacao, partes: readonly string[]): string {
+  const nomes = partes.map((p) => resolverHabilidade(ctx, p)?.nome ?? p).join(' + ');
+  return t('habilidades.receitaFusao', { partes: nomes, nivel: ctx.balance.habilidades.rankMax, runa: ctx.conteudo.itens.get(ID_RUNA_DE_FUSAO)?.nome ?? ID_RUNA_DE_FUSAO });
+}
+
+/** 08/11/2026: a ultimate de agora no topo da aba, como a carta de uma skill (o texto, o que faz e o par). */
+function desenharUltimate(corpo: HTMLElement, j: Entidade, ctx: ContextoSimulacao): void {
+  corpo.append(el('h3', 'subtitulo-modal', t('habilidades.ultimate')));
+  const u = ultimateDe(ctx, j);
+  const h = u ? resolverHabilidade(ctx, u.id) : undefined;
+  if (!u || !h) {
+    corpo.append(el('p', 'detalhe-item', t('habilidades.semUltimate')));
+    return;
+  }
+  const ul = el('ul', 'lista-itens');
+  const li = el('li', 'linha-item cartao-habilidade cartao-ultimate');
+  li.dataset.habilidade = u.id;
+  li.dataset.testid = 'cartao-ultimate';
+  const textos = el('div', 'textos-item');
+  const titulo = el('strong', 'nome-item');
+  titulo.append(icone(h.icone), ` ${h.nome}`);
+  const cor = h.elemento ? ctx.conteudo.elementos.get(h.elemento)?.cor : undefined;
+  if (cor) titulo.style.color = cor;
+  textos.append(titulo, el('p', 'detalhe-item', u.texto));
+  const desc = el('ul', 'descricao-habilidade');
+  const nome = (id: string) => resolverHabilidade(ctx, id)?.nome ?? id;
+  for (const linha of [...descreverHabilidade(h, {}), t('habilidades.ultimatePar', { a: nome(u.par[0]), b: nome(u.par[1]) }), t('habilidades.ultimateCarga')]) desc.append(el('li', undefined, linha));
+  textos.append(desc);
+  li.append(textos);
+  ul.append(li);
+  corpo.append(ul);
 }

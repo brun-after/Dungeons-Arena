@@ -1562,9 +1562,9 @@
     },
     {
       "id": "livro_dizimo_vital",
-      "nome": "Livro: Lança de ossos",
+      "nome": "Livro: Lanças da escuridão",
       "tipo": "livro",
-      "descricao": "Ensina Lança de ossos (rank 1). Só Necromante pode ler.",
+      "descricao": "Ensina Lanças da escuridão (rank 1). Só Necromante pode ler.",
       "icone": "livro",
       "raridade": "raro",
       "valorBase": 110,

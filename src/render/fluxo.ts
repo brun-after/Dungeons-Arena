@@ -38,7 +38,7 @@ export class CamadaFluxo {
     private readonly ticksPorta: () => number = () => 180,
     /** 06/11/2026 (D-135): onde a runa de pé do armadilheiro fica (a camada das entidades, no isométrico). */
     emPe: OpcoesEmPe | null = null,
-    /** 07/11/2026 (D-136): a skill de uma chave (os círculos da Lança de ossos e do Dardo funesto). */
+    /** 07/11/2026 (D-136): a skill de uma chave (os círculos da Lanças da escuridão e do Dardo funesto). */
     private readonly habilidade: (chave: string) => Habilidade | undefined = () => undefined,
   ) {
     camada.addChild(this.g);

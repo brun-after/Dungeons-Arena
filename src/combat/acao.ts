@@ -282,8 +282,8 @@ export function iniciarAcao(
       if (!podeErguerNoDizimo(estado, ctx, ator)) return recusar('sem_invocacao');
     } else if (ator.hp >= ator.hpMax) return recusar('vida_cheia');
   }
-  // 07/11/2026 (D-136): sem morto, a Lança de ossos não tem de onde sair.
-  if (hab.lanca && !temMortos(estado, ator)) return recusar('sem_invocacao');
+  // 07/11/2026 (D-136): sem morto, a Lanças da escuridão não tem de onde sair.
+  if (hab.lanca && !hab.lanca.junto && !temMortos(estado, ator)) return recusar('sem_invocacao');
   // Em volta de quem conjura (ao redor, aliados): a mira é a própria célula.
   let mira = hab.tipoArea === 'ao_redor' ? origem : (celula ?? celulaOcupada(alvo as Entidade));
   const alcance = alcanceDe(ctx, ator, hab, estado.tick);
@@ -525,10 +525,11 @@ function lancar(
     });
     return;
   }
-  // 07/11/2026 (D-136): a Lança de ossos sai dos mortos do Necromante, não de quem conjura.
+  // 07/11/2026 (D-136): a Lanças da escuridão sai dos mortos do Necromante, não de quem conjura.
   if (hab.lanca) {
     lancasDosMortos(estado, ctx, ator, hab, base, saida);
-    return;
+    // 08/11/2026 (D-137): com `junto` (o Juízo das trevas), o impacto normal vem depois das lanças.
+    if (!hab.lanca.junto) return;
   }
   switch (hab.politicaImpacto) {
     case 'proprio':

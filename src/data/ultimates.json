@@ -764,7 +764,7 @@
         "dardo_funesto",
         "dizimo_vital"
       ],
-      "texto": "Um dardo cinematográfico atravessa a fila de hostis. Depois, uma energia flui de cada atingido e de cada invocação sua até você, tirando vida de todos e curando você."
+      "texto": "Um dardo cinematográfico atravessa a fila de hostis e, no mesmo instante, cada morto seu crava uma lança da escuridão no alvo dele e outra para cada lado. Os atingidos definham."
     },
     {
       "id": "ult_ossario_faminto",
@@ -8276,20 +8276,15 @@
           "tipo": "definhando",
           "pct": 25,
           "duracaoMs": 4000
-        },
-        {
-          "tipo": "cura",
-          "pct": 15,
-          "em": "conjurador"
-        },
-        {
-          "tipo": "drenar_invocacao",
-          "valor": 10,
-          "em": "conjurador"
         }
       ],
+      "lanca": {
+        "alem": 2,
+        "lados": true,
+        "junto": true
+      },
       "id": "ult_banquete_funesto",
-      "nome": "Banquete funesto",
+      "nome": "Juízo das trevas",
       "icone": "coroa",
       "grau": "S",
       "tipoAtaque": "magico",

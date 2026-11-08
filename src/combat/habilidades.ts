@@ -170,7 +170,7 @@ export interface Habilidade {
   cargas?: number;
   /** D-136: o projétil espera este tempo no círculo no ar antes de sair (ausente = sai no lançamento). */
   disparoMs?: number;
-  /** D-136: a Lança de ossos — a lança sai de cada morto do Necromante (combat/lanca-de-ossos.ts). */
+  /** D-136: a Lanças da escuridão — a lança sai de cada morto do Necromante (combat/lanca-de-ossos.ts). */
   lanca?: LancaDosMortos;
 }
 
@@ -178,6 +178,8 @@ export interface Habilidade {
 export interface LancaDosMortos {
   alem: number;
   lados: boolean;
+  /** 08/11/2026 (D-137): as lanças vêm junto do impacto normal da skill, e sem mortos ela não é recusada (a ultimate). */
+  junto?: boolean;
 }
 
 // Marco 11A (D-066): um preset por fantasia (corte, runas, cristais, bolhas, sombra, sangue, sagrado, pedra, vento,
@@ -514,7 +516,7 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
   if (o.disparoMs !== undefined) base.disparoMs = l.numero(o, 'disparoMs', { min: 0, max: 5000 });
   if (o.lanca !== undefined) {
     const la = l.objeto(o.lanca, 'lanca');
-    base.lanca = { alem: l.numero(la, 'alem', { min: 0, max: 4, inteiro: true }), lados: la.lados === undefined ? false : l.booleano(la, 'lados') };
+    base.lanca = { alem: l.numero(la, 'alem', { min: 0, max: 4, inteiro: true }), lados: la.lados === undefined ? false : l.booleano(la, 'lados'), ...(la.junto === undefined ? {} : { junto: l.booleano(la, 'junto') }) };
   }
   const variacao = lerVariacao(l, o.variacao);
   if (variacao) base.variacao = variacao;
