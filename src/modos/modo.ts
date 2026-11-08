@@ -120,6 +120,11 @@ export interface ModoDeJogo {
    */
   /** Marco 30 (D-129): `exigeGrupo` limita a partilha aos do mesmo grupo (no Mundo, todos os jogadores são aliados). */
   partilhaXp: { aliadoPct: number; raio: number; exigeGrupo: boolean } | null;
+  /**
+   * 08/11/2026 (D-140): a fadiga de XP por fase (cada H de XP base acumulado na fase corta à metade o XP das criaturas
+   * abaixo do nível). Ausente = true (campanha e cooperativo); o Mundo desliga. A diferença de nível vale sempre.
+   */
+  fadigaDeXpPorFase?: boolean;
   /** Marco 10A-2 (§2.12): regeneração por célula e penalidade de morte (null = sem). O descanso saiu (D-067). */
   sobrevivencia: {
     regenPorCelula: boolean;
@@ -295,6 +300,7 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
     ...(o.areaDeInteresse === undefined ? {} : { areaDeInteresse: { raio: l.numero(l.objeto(o.areaDeInteresse, 'areaDeInteresse'), 'raio', { min: 8, max: 64, inteiro: true }) } }),
     ...(o.iaRaioAtivacao === undefined ? {} : { iaRaioAtivacao: l.numero(o, 'iaRaioAtivacao', { min: 8, max: 128, inteiro: true }) }),
     ...(o.tumuloNaMorte === undefined ? {} : { tumuloNaMorte: l.booleano(o, 'tumuloNaMorte') }),
+    ...(o.fadigaDeXpPorFase === undefined ? {} : { fadigaDeXpPorFase: l.booleano(o, 'fadigaDeXpPorFase') }),
   };
   if (modo.fim.tipo !== 'nenhum' && modo.fim.alvo === null && modo.fim.tempoLimiteS === null) {
     l.erro('fim com tipo diferente de "nenhum" precisa de alvo ou tempo limite');

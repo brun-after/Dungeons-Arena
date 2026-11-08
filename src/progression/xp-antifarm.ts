@@ -4,6 +4,7 @@ import type { EstadoJogo } from '../core/estado';
 import type { Bolsa, Entidade } from '../entities/entidade';
 import { ehObjeto } from '../core/validar';
 import { xpParaProximo } from './nivel';
+import { temFadigaDeXp } from '../modos/regras';
 
 /** Confere fichas cooperativas e migra o rascunho anterior sem apagar os valores registrados. */
 export function lerHistoricoXp(v: unknown): NonNullable<Bolsa['xpPorFase']> {
@@ -55,6 +56,10 @@ export function xpDeCriatura(estado: EstadoJogo, ctx: ContextoSimulacao, jogador
   const d = jogador.nivel - nivel;
   // Mesmo com desgaste anterior, inimigos do mesmo nível ou acima dão XP integral sem alterar A.
   if (d <= 0) return bruto;
+  const r = ctx.balance.xp.criaturasInferiores;
+  const fatorNivel = 0.5 ** (d / r.niveisPorMeiaVida);
+  // 08/11/2026 (D-140): sem fadiga (o Mundo), só a diferença de nível; nada é acumulado na ficha.
+  if (!temFadigaDeXp(ctx.modo)) return Math.max(r.xpMinimo, bruto * fatorNivel);
   const historico = jogador.bolsa.xpPorFase ??= {};
   let registro = Object.hasOwn(historico, estado.faseId) ? historico[estado.faseId] : undefined;
   if (!registro) {
@@ -63,8 +68,6 @@ export function xpDeCriatura(estado: EstadoJogo, ctx: ContextoSimulacao, jogador
   }
   // H nunca depende do nível futuro do jogador e não muda com reajustes da tabela após ser fixado.
   const h = registro.meiaVidaXp ??= xpParaProximo(nivel, ctx.balance.xp);
-  const r = ctx.balance.xp.criaturasInferiores;
-  const fatorNivel = 0.5 ** (d / r.niveisPorMeiaVida);
   const fatorFadiga = 0.5 ** (registro.xpBaseAcumulado / h);
   const ganho = Math.max(r.xpMinimo, bruto * fatorNivel * fatorFadiga);
   // A soma usa a cota ANTES das duas reduções, inclusive quando já se atingiu o piso de 1 XP.

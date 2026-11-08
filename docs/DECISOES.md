@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.95 · **Data:** 08/11/2026
+**Versão:** 0.96 · **Data:** 08/11/2026
 
 > **Histórico**
+> - **0.96 (08/11/2026)**: D-140: o Mundo sem a fadiga de XP por fase (só a diferença de nível reduz o XP das criaturas inferiores).
 > - **0.95 (08/11/2026)**: D-139: os inimigos atacam sem parar quando estão em alcance, mais rápido e com mais skills conforme o nível (a skill fora de alcance não trava mais o ataque).
 > - **0.94 (08/11/2026)**: D-138: a área da aura sem a linha reta, mais sutil, do amarelo ao vermelho pela Bravura, e o fogo nos inimigos da Bravura 75.
 > - **0.93 (08/11/2026)**: D-138: a área da aura e as marcas no chão das skills no lugar certo no isométrico (a projeção era aplicada duas vezes).
@@ -4190,4 +4191,15 @@ sobe com o nível; as skills ganham espaço com o nível; e a skill mais curta q
 Dois testes antigos mudaram com o ritmo novo: o goblin do Pesadelo agora mata o aventureiro em 12 s (o teste dá
 vida de sobra para medir só o dano), e a morte simultânea do diagnóstico usa outra semente (o mago, nível 1, Pesadelo).
 O `balancear` segue com 147/147 metas aprovadas (docs/BALANCEAMENTO.md regravado).
+
+## D-140 — O Mundo sem fadiga de XP por fase (08/11/2026)
+
+**Problema.** O antifarm das criaturas inferiores (18/10/2026) tem dois fatores: a diferença de nível
+(`0,5^(d / niveisPorMeiaVida)`) e a fadiga por fase (`0,5^(XP base acumulado na fase / H)`, com H o XP do próximo
+nível da fase). A fadiga foi pensada para fases fechadas da campanha. No Mundo, a "fase" é a região inteira e o
+personagem fica nela por horas, então poucos abates bastavam para o XP da região cair à metade de novo e de novo.
+
+**Decisão.** Regra de modo `fadigaDeXpPorFase` (ausente = true; `temFadigaDeXp()` em `modos/regras.ts`). O Mundo põe
+`false`: abaixo do nível, só a diferença de nível reduz o XP, com o mesmo piso de 1 XP, e `xpPorFase` não é acumulado
+na ficha. A campanha e o cooperativo seguem como antes. Teste em `tests/unit/ajustes-classes-xp.test.ts`.
 
