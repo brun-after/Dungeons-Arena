@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.91 · **Data:** 08/11/2026
+**Versão:** 0.92 · **Data:** 08/11/2026
 
 > **Histórico**
+> - **0.92 (08/11/2026)**: D-138: a aura do Guerreiro só acende quando atinge alguém, como uma área no chão que se fecha sobre ele (não mais pontos de luz).
 > - **0.91 (08/11/2026)**: D-138: um som de golpe por arma e por criatura (o baque surdo dos mortos do Necromante) a aura do Guerreiro como um anel visível no chão, também no online e no Mundo, os portais usados com o E, os terrenos elementais vivos e os focos do Mundo, o XP do chefe da masmorra repetida pela metade, 3/4 do ouro perdidos na morte, o espólio de 5 min e a vila que não esconde quem luta.
 > - **0.90 (08/11/2026)**: D-137: as Lanças da escuridão (pretas com aura roxa), a ultimate no topo da aba de habilidades, a receita nas fusões e o Juízo das trevas no lugar do Banquete funesto.
 > - **0.86 (06/11/2026)**: D-135: três inimigos novos (Arremessador, Duende saltador e Runista medroso, só no Mundo), o porte por nível a cada 10 níveis, as armadilhas como círculos de conjuração (dano pela vida atual, puxão, Passo leve, mais no Mundo), o dano e o vínculo do Necromante e o básico de projétil que não atira na parede.
@@ -4072,12 +4073,16 @@ coroa de ouro em brasa no nível 100.
     com um `visual.som` próprio (que não seja o genérico "golpe") continua com o dela. Arma ou criatura nova cai no
     timbre da natureza do golpe (`golpe` da arma) ou no soco. Os de longe (arco, bumerangue) seguem como estavam.
 - **Aura do Guerreiro.** Com a Bravura 25+, a borda da aura eram três pontos pequenos e fracos a cada 140 ms, numa borda
-  quadrada à altura do peito: sumiam no escuro. Agora a aura só aparece **em ação** (em combate) e é uma **área que
-  pulsa puxando a energia para o Guerreiro**: a cada 0,7 s, uma onda de brilhos nasce pelo raio da aura (dois terços na
-  borda, o resto pelo meio) e converge para ele no chão, mais densa a cada marco (25, 50, 75, 100). A cada pulso de
-  verdade (o evento `auraPulsou`, com quem ela feriu), filetes de brilhos e faíscas saem de cada inimigo atingido e voam
-  até o Guerreiro, junto com uma onda reforçada. O raio cresce com os marcos, como antes (a área segue medida por
-  Chebyshev). Uma primeira versão, um anel fixo à vista o tempo todo, foi trocada por esta a pedido do usuário.
+  quadrada à altura do peito: sumiam no escuro. Agora a aura só aparece **quando atinge alguém**: o evento
+  `auraPulsou` sai do pulso da simulação só com inimigos dentro do raio, e é ele que acende o visual (só perseguir, que
+  já conta como combate, não acende nada). E é uma **área no chão, não pontos** (`render/area-aura.ts`): o disco da
+  aura inteiro acende numa luz macia (textura `brilho`, achatada como o chão no isométrico) e se encolhe um pouco,
+  enquanto três faixas de luz (textura `choque`) nascem na borda e se fecham sobre o Guerreiro, acelerando no fim, como
+  se puxassem a energia de quem está dentro; o miolo acende com o que chega. A área segue o Guerreiro enquanto ele
+  anda e fica mais acesa a cada marco (25, 50, 75, 100). De cada inimigo atingido, filetes de energia (faíscas
+  esticadas no voo) vão até ele. O raio cresce com os marcos, como antes (a área segue medida por Chebyshev). Duas
+  versões anteriores foram trocadas a pedido do usuário: um anel fixo à vista o tempo todo, e ondas de pontos de luz
+  que apareciam a cada 0,7 s em combate, mesmo sem ninguém ao alcance.
   - A aura (e os orbes do Mago) exigia a bolsa, que não vem no online nem no Mundo (a dos outros nunca vem): o marco
     passou a ser lido pelo que é público (`marcoAMostra`: a classe, o atributo e a arma à mostra). Com a bolsa, é o
     `marcoDe` de sempre. A regra de jogo não mudou.
