@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { pararNaPorta } from './porta';
+import { pararNaPorta, usarPorta } from './porta';
 
 async function abrir(page: Page) {
   const erros: string[] = [];
@@ -346,7 +346,7 @@ test.describe('desktop', () => {
     const download = page.waitForEvent('download');
     await slot1.getByRole('button', { name: 'Exportar' }).click();
     const caminho = await (await download).path();
-    // Save preparado: boss fora do mundo, saída aberta e o jogador já no S (36,24), onde fica parado os 3 s (D-099).
+    // Save preparado: boss fora do mundo, saída aberta e o jogador já no S (36,24), onde usa a porta com o E (D-138).
     type Ent = { bolsa: unknown; preset: string; x: number; y: number };
     const arquivo = JSON.parse(await readFile(caminho, 'utf8')) as { registro: { estado: { saidaAberta: boolean; entidades: Ent[] } } };
     const estado = arquivo.registro.estado;
@@ -358,6 +358,7 @@ test.describe('desktop', () => {
     await expect(page.locator('[data-slot="2"]')).toContainText('Salões da entrada');
     await page.goto('./?jogo=campanha&slot=2&diag=1');
     await expect(page.locator('#diag')).toHaveAttribute('data-celula', '36,24');
+    await usarPorta(page);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Catacumbas', { timeout: 30_000 });
     await expect(page.locator('#diag')).toHaveAttribute('data-celula', '4,4');
 
@@ -376,6 +377,7 @@ test.describe('desktop', () => {
     await expect(page.locator('[data-slot="3"]')).toContainText('Catacumbas');
     await page.goto('./?jogo=campanha&slot=3&diag=1');
     await expect(page.locator('#diag')).toHaveAttribute('data-celula', '36,26');
+    await usarPorta(page);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(/^Profundezas 1(?: · .+)?$/, { timeout: 30_000 });
     expect(erros).toEqual([]);
   });

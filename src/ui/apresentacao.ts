@@ -22,6 +22,7 @@ import type { Camera } from '../render/camera';
 import { EfeitosDeHabilidade } from '../render/efeitos-habilidade';
 import { EfeitosDeClasse } from '../render/efeitos-classe';
 import { EfeitosDeDominio } from '../render/efeitos-dominio';
+import { emCombate } from '../progression/buffs';
 import { TerrenosVivosVisual } from '../render/terrenos-vivos-visual';
 import { raioDaAura } from '../combat/ajustes-classes';
 import { marcoAMostra } from '../progression/dominio';
@@ -183,8 +184,9 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     particulas,
     // 08/11/2026 (D-138): pelo que é público (sem a bolsa, no online e no Mundo, a aura sumia); a força conta os
     // marcos alcançados (25, 50, 75 e 100: o anel fica mais denso e mais claro).
+    // Só com a aura em ação (em combate); fora dele, nada à mostra.
     auraDe: (e, tick) => {
-      if (marcoAMostra(ctx, e, 'auraVisivel') <= 0) return null;
+      if (marcoAMostra(ctx, e, 'auraVisivel') <= 0 || !emCombate(o.estado(), e)) return null;
       const raio = e.bolsa ? raioDaAura(ctx, e, tick) : ctx.balance.ajustesClasses.guerreiro.auraRaio + marcoAMostra(ctx, e, 'auraRaio');
       const cor = (marcoAMostra(ctx, e, 'auraElementalPct') > 0 ? corDoElemento(e.aparencia?.elementoArma) : null) ?? 0xffd86b;
       return { raio, cor, forca: Math.min(4, Math.max(1, Math.floor(e.atributos.dominio / 25))) };

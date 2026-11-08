@@ -50,7 +50,9 @@ describe('ajustes das classes (18/10/2026)', () => {
     expect(c.alvo.hp).toBe(997); expect(c.j.auraCuraFracao).toBeCloseTo(.5);
     expect(c.j.hp).toBe(c.j.hpMax - 19);
     expect(c.eventos.filter(e => e.t === 'efeitoResultado' && e.dano > 0)).toHaveLength(3);
-    expect(c.eventos.every(e => e.t === 'efeitoResultado')).toBe(true);
+    // 08/11/2026 (D-138): cada pulso que pega alguém também avisa a apresentação (`auraPulsou`).
+    expect(c.eventos.every(e => e.t === 'efeitoResultado' || e.t === 'auraPulsou')).toBe(true);
+    expect(c.eventos.filter(e => e.t === 'auraPulsou')).toHaveLength(10);
   });
   it('aura respeita defesa, escudo, imunidade, limite inclusivo e não guarda sobrecura inteira', () => {
     const c = cena(); c.alvo.x = 5; c.alvo.defesa = 2;

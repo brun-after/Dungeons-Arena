@@ -238,6 +238,8 @@ export type EventoSimulacao =
   | { t: 'itemRecusado'; tick: number; id: EntidadeId; motivo: MotivoItem }
   /** Marco 24 (D-099): o santuário de Engenho entregou o kit. */
   | { t: 'santuarioUsado'; tick: number; id: EntidadeId; itemId: string }
+  /** 08/11/2026 (D-138): a aura do Guerreiro pulsou (o centro, o raio e quem ela feriu). */
+  | { t: 'auraPulsou'; tick: number; id: EntidadeId; x: number; y: number; raio: number; atingidos: EntidadeId[] }
   /** 08/11/2026 (D-138): uma área reagiu a um elemento (a água congelou, virou vapor, lama…). */
   | { t: 'terrenoReagiu'; tick: number; x: number; y: number; raio: number; de: TipoTerrenoVivo; para: TipoTerrenoVivo }
   /** Marco 9A: baú e loja. `ateTick` é o fim do congelamento (anel de progresso, contagem da janela). */
