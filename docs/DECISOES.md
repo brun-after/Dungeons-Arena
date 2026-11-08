@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.89 · **Data:** 07/11/2026
+**Versão:** 0.90 · **Data:** 08/11/2026
 
 > **Histórico**
+> - **0.90 (08/11/2026)**: D-137: as Lanças da escuridão (pretas com aura roxa), a ultimate no topo da aba de habilidades, a receita nas fusões e o Juízo das trevas no lugar do Banquete funesto.
 > - **0.86 (06/11/2026)**: D-135: três inimigos novos (Arremessador, Duende saltador e Runista medroso, só no Mundo), o porte por nível a cada 10 níveis, as armadilhas como círculos de conjuração (dano pela vida atual, puxão, Passo leve, mais no Mundo), o dano e o vínculo do Necromante e o básico de projétil que não atira na parede.
 > - **0.85 (06/11/2026)**: D-134: a skin Mágico do aventureiro (a cartola e o pombo), a cabeça menor e mais escura da Sombra Rubra, o pouso do falcão na metade do tempo e o grito saindo do falcão.
 > - **0.84 (06/11/2026)**: D-134: as trevas do Ceifador só saem andando, no rumo oposto ao movimento, e o rosto dele é só escuridão; a franja da Sombra Rubra.
@@ -4033,3 +4034,24 @@ coroa de ouro em brasa no nível 100.
     lança que irrompe.
   - O surgimento dos mortos continua com a risada (`invocacao`), como o usuário pediu. O básico continua com o
     zunido.
+
+## D-137 — Lanças da escuridão, a ultimate no menu e a receita das fusões (08/11/2026)
+
+- A Lança de ossos passou a se chamar **Lanças da escuridão** (o id segue `dizimo_vital`). Cada lança tem o corpo
+  preto com uma aura roxa aditiva que pulsa; o impacto e o rastro também ficaram roxos.
+- A aba de habilidades mostra a **ultimate de agora** no topo, como a carta de uma skill: o texto, o que ela faz, o par
+  das teclas 1 e 2 e como enche. Sem par, mostra a dica de pôr duas skills da classe nas teclas 1 e 2.
+- As **fusões** mostram a receita na carta: as duas partes no nível máximo e a Runa de fusão.
+- O **Banquete funesto** (Dardo funesto + Lanças da escuridão) drenava e curava, o que não combina com o Necromante sem
+  suporte (D-135). Ele virou o **Juízo das trevas**: o dardo atravessa a fila de hostis e, junto, cada morto crava uma
+  lança no alvo dele e outra para cada lado (`lanca.junto`: sem mortos, só o dardo, e a ultimate não é recusada). O
+  definhamento continua; a cura e a drenagem saíram. O id segue `ult_banquete_funesto`.
+- Ajuste (08/11/2026): o texto da ultimate não fala mais de "dardo cinematográfico" (é um dardo de trevas, como no
+  mundo do jogo). A Lança comum tem o interior preto sólido e a aura roxa só na borda. A ultimate ganhou a assinatura
+  própria `juizo_das_trevas`: o dardo preto atravessa a linha soltando fumaça roxa em cada célula (antes usava o raio
+  vampírico, que quase não aparecia na linha); as lanças dos mortos nela seguem o desenho das Lanças da escuridão.
+- Servo do ossuário (08/11/2026): a invocação da passiva do Necromante deixou o esqueleto do atlas (a caveira de cabeça
+  grande) e virou o vulto encapuzado da arte de referência, em tempo real como os chefes (`chefe:servo_ossuario`,
+  `render/vivos/servo-vivo.ts`): o corte do Ceifador sem enfeites (capuz, casaco longo, capa rasgada, capeleta, mangas),
+  todo preto liso, com os olhos pálidos acesos e as presas no escuro do capuz. Os reanimados e ecos seguem com a
+  aparência de quem morreu. Sem GPU, cai no atlas como os outros modelos em tempo real.

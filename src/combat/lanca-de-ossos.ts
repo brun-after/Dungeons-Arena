@@ -1,4 +1,4 @@
-// A Lança de ossos (07/11/2026, D-136). O Necromante para e conjura; no lançamento, uma lança de osso sai do peito de
+// A Lanças da escuridão (07/11/2026, D-136). O Necromante para e conjura; no lançamento, uma lança de osso sai do peito de
 // cada morto dele (servo, reanimado, eco) e perfura o alvo do morto e `lanca.alem` células atrás dele. Com
 // `lanca.lados` (a última evolução), cada morto também crava uma lança para cada lado. Regras do dano:
 // - na mesma lança, o primeiro perfurado leva o golpe inteiro e os seguintes, `necromancia.lanca.perfuradoPct`;

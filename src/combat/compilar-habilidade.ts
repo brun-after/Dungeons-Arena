@@ -249,7 +249,7 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
   if (cargas > 1) h.cargas = Math.min(6, cargas);
   else delete h.cargas;
   if (b.disparoMs) h.disparoMs = Math.max(0, Math.round(b.disparoMs * disparo));
-  if (b.lanca) h.lanca = { alem: Math.min(4, lancaAlem), lados: lancaLados };
+  if (b.lanca) h.lanca = { alem: Math.min(4, lancaAlem), lados: lancaLados, ...(b.lanca.junto ? { junto: true } : {}) };
   // Marco 19 (17/10/2026): a distância real do passo acompanha alcance de rank e caminho.
   for (const efeito of h.efeitos) if (efeito.tipo === 'passo_sombrio') efeito.valor = h.alcanceCelulas;
   const aplicados = [...mods].filter((m) => modificadorCabe(h, m)).sort();

@@ -1,5 +1,5 @@
 // Os círculos de conjuração do Necromante (07/11/2026, D-136). Só lê o estado:
-// - Lança de ossos: enquanto conjura (parado), o círculo de trevas largo sob os pés;
+// - Lanças da escuridão: enquanto conjura (parado), o círculo de trevas largo sob os pés;
 // - Dardo funesto: cada dardo à espera do disparo é um círculo no ar, parado onde foi conjurado (um ao lado do outro,
 //   quando há vários no mesmo lugar), de frente para a tela, na camada das entidades; some quando o dardo sai dele.
 

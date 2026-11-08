@@ -41,10 +41,10 @@ test('Necromante é selecionável ao criar um personagem', async ({ page }) => {
   await expect(cartao.getByRole('heading', { name: 'Necromante', exact: true })).toBeVisible();
   await expect(cartao.getByRole('heading', { name: 'Atributos', exact: true })).toBeVisible();
   await expect(cartao.getByRole('heading', { name: 'Habilidades habilitadas', exact: true })).toBeVisible();
-  await expect(cartao.getByText('Lança de ossos', { exact: true })).toBeVisible();
+  await expect(cartao.getByText('Lanças da escuridão', { exact: true })).toBeVisible();
   await cartao.getByRole('link', { name: 'Jogar de Necromante' }).click();
   await expect(page.getByTestId('habilidade-dizimo_vital')).toBeVisible({ timeout: 30000 });
-  // Marco 24 (D-094): o kit inicial é Dardo funesto e a Lança de ossos (`dizimo_vital`, classe) e, desde 07/11/2026
+  // Marco 24 (D-094): o kit inicial é Dardo funesto e as Lanças da escuridão (`dizimo_vital`, classe) e, desde 07/11/2026
   // (D-135), o Dissipar (geral).
   await expect(page.getByTestId('habilidade-dardo_funesto')).toBeVisible();
   await expect(page.getByTestId('habilidade-dissipar')).toBeVisible();

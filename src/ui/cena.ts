@@ -679,7 +679,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       barra.atualizar((h) => ({
         recarga: h.recargaMs > 0 ? recargaRestante(estado, j.id, h.id) / ticksDe(h.recargaMs) : 0,
         semMana: j.mana < h.custoRecurso,
-        // 07/11/2026 (D-136): as cargas prontas (o Dardo funesto); o Dízimo que erguia um morto virou a Lança de ossos.
+        // 07/11/2026 (D-136): as cargas prontas (o Dardo funesto); o Dízimo que erguia um morto virou a Lanças da escuridão.
         ...(h.cargas && { cargas: cargasProntas(estado, chaveRecarga(j.id, h.id), h) }),
       }));
     }

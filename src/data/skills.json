@@ -2976,7 +2976,7 @@
       "id": "dizimo_vital",
       "familiaEvolucao": "sombra",
       "grau": "B",
-      "nome": "Lança de ossos",
+      "nome": "Lanças da escuridão",
       "icone": "espada",
       "tipoAtaque": "magico",
       "formulaDano": "1d8",
@@ -2999,7 +2999,7 @@
         }
       ],
       "visual": {
-        "cor": "#e8dcc4",
+        "cor": "#9b4dff",
         "conjuracao": "runas",
         "impacto": "pedra",
         "som": "golpe",

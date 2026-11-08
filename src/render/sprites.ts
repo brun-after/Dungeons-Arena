@@ -573,7 +573,7 @@ export class CamadaEntidades {
     // Marco 37 (04/11/2026): o jogador e o chefe com modelo em tempo real saem do palco 3D; enquanto carrega, o atlas
     // continua. O chefe usa a chave própria (a veste e a arma dele), não o modelo do monstro comum.
     // 06/11/2026: a skin do jogador (aparencia.skin) troca o modelo e prevalece sobre o equipamento.
-    const modeloVivo = (e.arquetipo === 'boss' ? chaveDoChefe(e.preset) : null) ?? chaveDaSkin(e.aparencia?.skin, escolha.modelo) ?? escolha.modelo;
+    const modeloVivo = (e.arquetipo === 'boss' || e.invocacao?.necromancia === 'servo' ? chaveDoChefe(e.preset) : null) ?? chaveDaSkin(e.aparencia?.skin, escolha.modelo) ?? escolha.modelo;
     const vivo = this.o.vivos?.suporta(modeloVivo)
       ? this.o.vivos.pedir(pedidoVivo(e.id, modeloVivo, e.aparencia, equipamento, estado, tempo, fracao, m.angulo, golpe))
       : null;

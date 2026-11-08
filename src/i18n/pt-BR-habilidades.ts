@@ -3,7 +3,7 @@
 // dicionário principal (pt-BR.ts) por espalhamento, com as mesmas chaves tipadas.
 
 export const textosHabilidades = {
-  'classe.necromante.dom': 'Um servo morto-vivo retorna passivamente após 8 s. Seus abates reanimam inimigos; aliados que caem perto deixam ecos independentes. Servos, reanimados e ecos duram até esgotar a quantidade de ataques ou a resistência a dano recebido. Sabedoria e Ritual reforçam sua resistência; curas não repõem reservas. Até 10 mortos: quanto maior o exército, menos cada um bate, e a sua Inteligência os fortalece. Mortos que se afastam demais voltam para o seu lado. O vínculo com os mortos cura você com parte do dano que eles causam e levam, e a Lança de ossos sai do peito de cada um. Dano próprio reduzido e proteção contra grupos nos primeiros 5 s de combate.',
+  'classe.necromante.dom': 'Um servo morto-vivo retorna passivamente após 8 s. Seus abates reanimam inimigos; aliados que caem perto deixam ecos independentes. Servos, reanimados e ecos duram até esgotar a quantidade de ataques ou a resistência a dano recebido. Sabedoria e Ritual reforçam sua resistência; curas não repõem reservas. Até 10 mortos: quanto maior o exército, menos cada um bate, e a sua Inteligência os fortalece. Mortos que se afastam demais voltam para o seu lado. O vínculo com os mortos cura você com parte do dano que eles causam e levam, e as Lanças da escuridão saem do peito de cada um. Dano próprio reduzido e proteção contra grupos nos primeiros 5 s de combate.',
   'efeito.definhando': 'Definhando',
   'desc.efeito.definhando': 'Reduz dano causado e cura recebida em {pct}% por {s} s',
   'efeito.drenar_invocacao': 'Dreno dos mortos',
@@ -262,6 +262,12 @@ export const textosHabilidades = {
   'habilidades.motivo.fusao_niveis': 'As duas habilidades precisam estar no nível máximo',
   'habilidades.motivo.fusao_unica': 'Cada personagem tem uma fusão só',
   'habilidades.fusoes': 'Fusões',
+  // 08/11/2026: a ultimate no topo da aba e a receita das fusões.
+  'habilidades.ultimate': 'Ultimate',
+  'habilidades.ultimatePar': 'Do par nas teclas 1 e 2: {a} + {b}',
+  'habilidades.ultimateCarga': 'Enche lutando com as skills da classe; sai pela tecla da ultimate quando a barra está cheia',
+  'habilidades.semUltimate': 'Ponha duas skills da classe nas teclas 1 e 2: o par decide a sua ultimate.',
+  'habilidades.receitaFusao': 'Receita: {partes} no nível {nivel} e uma {runa}',
   'habilidades.fusaoDe': 'Fusão de {a} e {b}',
   'habilidades.marco': 'Nível {n}: {texto}',
   'habilidades.grau': 'Rank {grau}',

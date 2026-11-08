@@ -1,4 +1,4 @@
-// 07/11/2026 (D-135, D-136): o Necromante sem cura nem escudo próprios; a Lança de ossos sai dos mortos; o Dardo
+// 07/11/2026 (D-135, D-136): o Necromante sem cura nem escudo próprios; as Lanças da escuridão saem dos mortos; o Dardo
 // funesto espera no círculo no ar e acumula cargas.
 import { describe, expect, it } from 'vitest';
 import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
@@ -11,6 +11,9 @@ import { resolverHabilidade } from '../../src/combat/compilar-habilidade';
 import { cargasProntas } from '../../src/combat/cargas';
 import { ticksDe } from '../../src/core/tempo';
 import { somDaHabilidade, sonsDoEvento } from '../../src/audio/mapeamento';
+import { lerComando } from '../../src/arena/protocolo';
+import { DT_MS } from '../../src/core/loop';
+import { simular } from '../../src/core/simulacao';
 
 function obter<T>(v: T | null | undefined): T { if (v == null) throw Error('ausente'); return v; }
 function cena() {
@@ -41,7 +44,7 @@ describe('Necromante sem suporte (D-135)', () => {
   });
 });
 
-describe('Lança de ossos (D-136)', () => {
+describe('Lanças da escuridão (D-136)', () => {
   it('sem morto, é recusada sem gastar mana', () => {
     const c = cena(); const mana = c.j.mana;
     expect(iniciarAcao(c.estado, c.ctx, c.j, 'dizimo_vital', undefined, c.eventos)).toBe(false);
@@ -123,5 +126,24 @@ describe('Sons do Necromante (D-136)', () => {
     expect(pedir({ t: 'acaoIniciada', tick: 1, acaoId: 1, atorId: 'j', habilidadeId: 'dardo_funesto', chave: 'dardo_funesto', alvoId: null, alvoX: 0, alvoY: 0, inicioTick: 1, lancamentoTick: 2, impactoPrevistoTick: 3 })).toEqual(['necro_conjura']);
     expect(pedir({ t: 'invocou', tick: 1, donoId: 'j', id: 's' })).toEqual(['invocacao']);
     expect(pedir({ t: 'lancaDeOsso', tick: 1, acaoId: 1, chave: 'dizimo_vital', donoId: 'j', mortoId: 's', deX: 0, deY: 0, paraX: 1, paraY: 0 })).toEqual(['necro_ossos']);
+  });
+});
+
+describe('Juízo das trevas (D-137)', () => {
+  it('sem cura; o dardo fere a linha e cada morto crava a lança e as dos lados junto', () => {
+    const c = cena(); processarServosNecromantes(c.estado, c.ctx, c.eventos);
+    const h = obter(resolverHabilidade(c.ctx, 'ult_banquete_funesto'));
+    expect(h.nome).toBe('Juízo das trevas');
+    expect(h.efeitos.some((e) => ['cura', 'drenar_invocacao'].includes(e.tipo))).toBe(false);
+    expect(h.lanca).toEqual({ alem: 2, lados: true, junto: true });
+    const s = c.servo(); s.x = 5; s.y = 8; s.ia = null;
+    c.npc('a', 8, 5);
+    const b = obter(c.j.bolsa); b.barra[0] = 'dardo_funesto'; b.barra[1] = 'dizimo_vital';
+    c.j.cargaUltimate = c.ctx.balance.ultimate.max;
+    const tick = (cmd?: Parameters<typeof lerComando>[0]) => { simular(c.estado, c.ctx, cmd ? [{ tick: c.estado.tick, entidadeId: 'j', cmd: obter(lerComando(cmd)) }] : [], c.eventos, DT_MS); };
+    tick({ t: 'usarUltimate', alvo: 'a' });
+    for (let i = 0; i < 60; i++) tick();
+    expect(c.eventos.filter((e) => e.t === 'lancaDeOsso' && e.chave.includes('ult_banquete_funesto')).length).toBe(3);
+    expect(c.eventos.some((e) => e.t === 'impacto' && e.habilidadeId === 'ult_banquete_funesto' && e.alvoId === 'a')).toBe(true);
   });
 });
