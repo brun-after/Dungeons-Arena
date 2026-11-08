@@ -22,7 +22,7 @@ import type { Camera } from '../render/camera';
 import { EfeitosDeHabilidade } from '../render/efeitos-habilidade';
 import { EfeitosDeClasse } from '../render/efeitos-classe';
 import { EfeitosDeDominio } from '../render/efeitos-dominio';
-import { emCombate } from '../progression/buffs';
+import { AreaDaAura } from '../render/area-aura';
 import { TerrenosVivosVisual } from '../render/terrenos-vivos-visual';
 import { raioDaAura } from '../combat/ajustes-classes';
 import { marcoAMostra } from '../progression/dominio';
@@ -180,13 +180,16 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     const def = ehElemento(el) ? ctx.conteudo.elementos.get(el) : undefined;
     return def ? Number.parseInt(def.cor.slice(1), 16) : null;
   };
+  // 08/11/2026 (D-138): a área da aura no chão, acesa só pelo pulso que atinge alguém.
+  const areaDaAura = new AreaDaAura({ chao: palco.chao, textura: (n) => particulas.textura(n), noChao: (x, y) => particulas.noChao(x, y), iso: () => particulas.iso });
   const efeitosDominio = new EfeitosDeDominio({
     particulas,
+    area: areaDaAura,
     // 08/11/2026 (D-138): pelo que é público (sem a bolsa, no online e no Mundo, a aura sumia); a força conta os
     // marcos alcançados (25, 50, 75 e 100: o anel fica mais denso e mais claro).
-    // Só com a aura em ação (em combate); fora dele, nada à mostra.
+    // Quando ela aparece quem decide é o pulso (`auraPulsou`, só com alguém atingido); aqui, o raio, a cor e a força.
     auraDe: (e, tick) => {
-      if (marcoAMostra(ctx, e, 'auraVisivel') <= 0 || !emCombate(o.estado(), e)) return null;
+      if (marcoAMostra(ctx, e, 'auraVisivel') <= 0) return null;
       const raio = e.bolsa ? raioDaAura(ctx, e, tick) : ctx.balance.ajustesClasses.guerreiro.auraRaio + marcoAMostra(ctx, e, 'auraRaio');
       const cor = (marcoAMostra(ctx, e, 'auraElementalPct') > 0 ? corDoElemento(e.aparencia?.elementoArma) : null) ?? 0xffd86b;
       return { raio, cor, forca: Math.min(4, Math.max(1, Math.floor(e.atributos.dominio / 25))) };
@@ -326,6 +329,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     encerrar: () => {
       combos.destruir();
       diretor.destruir();
+      areaDaAura.destruir();
       motor.destruir();
       sistema.removeEventListener('change', aplicarPreferencias);
     },
