@@ -33,3 +33,11 @@ básico físico segue o som da arma e as habilidades, o do elemento. O surgiment
 (Evil Laugh 2, AntumDeluge, CC0) com o tom descido, uma por vez e no máximo uma a cada 1,5 s. Sem FFmpeg na
 máquina, estes quatro arquivos são WAV feitos no Chromium por `node tools/audio/adaptar.mjs CAMINHO_FONTES`
 (velocidade, recorte, pico de -5 dBFS, mono de 32 kHz); `importar.py` preserva as entradas com `adaptacao`.
+
+## Sons do Necromante (07/11/2026, D-136)
+
+As skills do Necromante (a etiqueta `necromancia` ou as assinaturas dele, também nas ultimates) soam graves e
+levemente macabras, sem voz: `necro_conjura` ao começar, `necro_sombra` no lançamento e no acerto das trevas e
+`necro_ossos` na Lança de ossos, nas Garras e na Explosão cadavérica. O surgimento dos mortos continua a risada
+(`invocacao`). Os seis WAV são sintetizados por `python tools/audio/necromancia.py` (só a biblioteca padrão), que
+também atualiza o manifesto; as entradas levam `adaptacao`, então `importar.py` as preserva.

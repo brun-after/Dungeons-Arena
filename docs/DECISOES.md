@@ -1,6 +1,6 @@
 # Decisões de projeto
 
-**Versão:** 0.88 · **Data:** 07/11/2026
+**Versão:** 0.89 · **Data:** 07/11/2026
 
 > **Histórico**
 > - **0.86 (06/11/2026)**: D-135: três inimigos novos (Arremessador, Duende saltador e Runista medroso, só no Mundo), o porte por nível a cada 10 níveis, as armadilhas como círculos de conjuração (dano pela vida atual, puxão, Passo leve, mais no Mundo), o dano e o vínculo do Necromante e o básico de projétil que não atira na parede.
@@ -4011,3 +4011,25 @@ coroa de ouro em brasa no nível 100.
 - Balanceamento: sem cura nem escudo próprios, o duelo de Necromantes no Livre caía para 5,5 s (a meta é de 6 a
   10 s). A vida base do Necromante foi de 50 para 62, e as 147 metas passam. A ficha passa a ler a vida base do catálogo da
   classe (`progression/derivados.ts`), então o ajuste vale também para os personagens já criados (no save e no Mundo).
+
+### D-136, adendo (07/11/2026): o Necromante no celular, a lança visível e os sons graves
+
+- **Travamento no celular**: a densidade das skins 3D (`skin-pano.ts`) tinha ficado em 3, a do visual fiel, que o
+  próprio comentário dizia ser provisória. O manto do Ceifador passava de 147 mil triângulos, e a Sombra Rubra do Mago
+  de 560 mil, redesenhados a cada quadro pelo palco 3D. Agora a densidade é 1 nos aparelhos de toque
+  (`pointer: coarse`) e 2 no computador.
+  - Ceifador: de cerca de 158 mil para 42 mil triângulos no celular e 81 mil no computador.
+  - Sombra Rubra: de 563 mil para 68 mil no celular e 253 mil no computador.
+  - A simulação e o desenho do exército de mortos foram medidos na cena nova `?bench=necromante` (o servo e 9
+    reanimados) e ficaram no nível das outras cenas.
+- **Lança de ossos visível**: cada espinho nasce em 0,18 s, fica inteiro e opaco por 0,9 s e some em 0,42 s, com uma
+  sombra escura por baixo. É um efeito só por espinho, com a sombra e o osso no mesmo quadro, para não pesar com
+  muitos mortos.
+- **Sons graves e levemente macabros** nas skills do Necromante, sem voz nem grito. São seis WAV sintetizados por
+  `tools/audio/necromancia.py`, sob CC0:
+  - `necro_conjura`, um zumbido grave que cresce, ao começar a skill;
+  - `necro_sombra`, um "vum" abafado com sub-grave, no lançamento e no acerto das trevas;
+  - `necro_ossos`, uma pancada grave com estalos de osso, na Lança, nas Garras, na Explosão cadavérica e em cada
+    lança que irrompe.
+  - O surgimento dos mortos continua com a risada (`invocacao`), como o usuário pediu. O básico continua com o
+    zunido.

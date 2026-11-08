@@ -3,6 +3,8 @@
 // - `carga`: 120×120, 60 NPCs, 10 avatares (o jogador e 9 bots), 20 invocações (2 por avatar), 30 armadilhas e os
 //   projéteis que a luta produz (a meta da §5.6 é 100; a tela registra o pico).
 // - `padrao`: 60×40, 20 NPCs, 5 avatares e 10 invocações.
+// - `necromante` (07/11/2026): 60×40, 20 NPCs e o Necromante com o exército cheio (o servo e 9 reanimados de
+//   modelos variados), para medir o custo dos mortos no aparelho.
 // A fase é gerada com semente fixa; o resto é posto em células livres sorteadas pela mesma semente.
 
 import type { Comando } from '../core/comandos';
@@ -21,8 +23,9 @@ import { contextoDaFase, estadoInicialDaFase } from '../save/fases-campanha';
 import { passavel } from '../world/fase';
 import { catalogoDeGeracao, gerarFase } from '../world/gerador';
 import { BotDeDuelo } from './bot-duelo';
+import { erguerEmprestado, processarServosNecromantes } from '../combat/necromancia';
 
-export type TipoBench = 'carga' | 'padrao';
+export type TipoBench = 'carga' | 'padrao' | 'necromante';
 
 export interface RequisitosBench {
   largura: number;
@@ -39,6 +42,7 @@ export interface RequisitosBench {
 export const CENAS_BENCH: Readonly<Record<TipoBench, RequisitosBench>> = {
   carga: { largura: 120, altura: 120, salas: 20, npcs: 60, avatares: 10, pergaminhos: 2, armadilhas: 30 },
   padrao: { largura: 60, altura: 40, salas: 10, npcs: 20, avatares: 5, pergaminhos: 2, armadilhas: 0 },
+  necromante: { largura: 60, altura: 40, salas: 10, npcs: 20, avatares: 1, pergaminhos: 0, armadilhas: 0 },
 };
 
 /** As classes dos avatares, em rodízio: atiradores e conjuradores para haver projéteis no ar. */
@@ -96,7 +100,7 @@ export function montarCenaBench(tipo: TipoBench, conteudo: Conteudo): CenaBench 
   const iniciais: CenaBench['iniciais'] = [];
   const pergaminho = conteudo.itens.get('pergaminho_lobo');
   for (let i = 0; i < r.avatares; i++) {
-    const classe = conteudo.classes.get(CLASSES[i % CLASSES.length] ?? 'aventureiro');
+    const classe = conteudo.classes.get(tipo === 'necromante' ? 'necromante' : (CLASSES[i % CLASSES.length] ?? 'aventureiro'));
     if (!classe) continue;
     const c = i === 0 ? spawn : livre();
     const e: Entidade = criarJogador(classe, `j${i + 1}`, c.x, c.y, ctx.balance);
@@ -109,6 +113,15 @@ export function montarCenaBench(tipo: TipoBench, conteudo: Conteudo): CenaBench 
     }
   }
 
+  // O exército do Necromante: o servo e reanimados com os modelos dos NPCs da cena.
+  if (tipo === 'necromante') {
+    const dono = estado.entidades.find((e) => e.id === 'j1');
+    const saida: EventoSimulacao[] = [];
+    if (dono) {
+      processarServosNecromantes(estado, ctx, saida);
+      for (const fonte of estado.entidades.filter((e) => e.controlador === 'ia' && !e.invocacao).slice(0, 9)) erguerEmprestado(estado, ctx, dono, fonte, 600_000, saida);
+    }
+  }
   // Armadilhas de fase, permanentes, espalhadas.
   for (let i = 0; i < r.armadilhas; i++) {
     const c = livre();
@@ -132,7 +145,7 @@ export function montarCenaBench(tipo: TipoBench, conteudo: Conteudo): CenaBench 
 }
 
 /** Projéteis no ar que a cena mantém (§5.6). A luta sozinha produz poucos; o benchmark completa com tiros de avatares. */
-export const PROJETEIS_BENCH: Readonly<Record<TipoBench, number>> = { carga: 100, padrao: 10 };
+export const PROJETEIS_BENCH: Readonly<Record<TipoBench, number>> = { carga: 100, padrao: 10, necromante: 0 };
 
 /**
  * Completa os projéteis no ar até `alvo`: tiros de avatares vivos em direções sorteadas (8 células). Fica fora do

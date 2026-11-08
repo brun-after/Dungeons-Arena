@@ -125,7 +125,7 @@ export async function iniciarBench(raiz: HTMLElement, params: URLSearchParams): 
     await (await import('./bench/modelos3d')).iniciarBenchModelos(raiz, params);
     return;
   }
-  const tipo: TipoBench = pedido === 'carga' ? 'carga' : 'padrao';
+  const tipo: TipoBench = pedido === 'carga' || pedido === 'necromante' ? pedido : 'padrao';
   const segundos = Math.min(600, Math.max(5, Number(params.get('segundos')) || 60));
   const quadros: number[] = [];
   const pico = { npcs: 0, invocacoes: 0, avatares: 0, armadilhas: 0, projeteis: 0 };
