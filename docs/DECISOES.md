@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.92 · **Data:** 08/11/2026
+**Versão:** 0.93 · **Data:** 08/11/2026
 
 > **Histórico**
+> - **0.93 (08/11/2026)**: D-138: a área da aura e as marcas no chão das skills no lugar certo no isométrico (a projeção era aplicada duas vezes).
 > - **0.92 (08/11/2026)**: D-138: a aura do Guerreiro só acende quando atinge alguém, como uma área no chão que se fecha sobre ele (não mais pontos de luz).
 > - **0.91 (08/11/2026)**: D-138: um som de golpe por arma e por criatura (o baque surdo dos mortos do Necromante) a aura do Guerreiro como um anel visível no chão, também no online e no Mundo, os portais usados com o E, os terrenos elementais vivos e os focos do Mundo, o XP do chefe da masmorra repetida pela metade, 3/4 do ouro perdidos na morte, o espólio de 5 min e a vila que não esconde quem luta.
 > - **0.90 (08/11/2026)**: D-137: as Lanças da escuridão (pretas com aura roxa), a ultimate no topo da aba de habilidades, a receita nas fusões e o Juízo das trevas no lugar do Banquete funesto.
@@ -4083,6 +4084,11 @@ coroa de ouro em brasa no nível 100.
   esticadas no voo) vão até ele. O raio cresce com os marcos, como antes (a área segue medida por Chebyshev). Duas
   versões anteriores foram trocadas a pedido do usuário: um anel fixo à vista o tempo todo, e ondas de pontos de luz
   que apareciam a cada 0,7 s em combate, mesmo sem ninguém ao alcance.
+  - Correção (0.93): a área caía num lugar qualquer da tela. A camada do chão já leva a matriz da projeção do plano,
+    e o sprite ia com o ponto já projetado: no isométrico (o padrão), projetado duas vezes. A área passou a ir em
+    coordenadas do plano (`centroDaCelula`) na camada da telegrafia (`palco.marcas`, acima do escuro). As marcas no
+    chão das skills (`vfx/marcas.ts`: cratera, geada, rachadura, poças) tinham o mesmo erro, e só ficavam certas na
+    visão de cima; também foram corrigidas.
   - A aura (e os orbes do Mago) exigia a bolsa, que não vem no online nem no Mundo (a dos outros nunca vem): o marco
     passou a ser lido pelo que é público (`marcoAMostra`: a classe, o atributo e a arma à mostra). Com a bolsa, é o
     `marcoDe` de sempre. A regra de jogo não mudou.
