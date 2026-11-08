@@ -73,6 +73,8 @@ describe('as alavancas da dificuldade', () => {
     const perdido = (d: Dificuldade) => {
       const s = cena(c, d, [[3, 3]], [['goblin', 3, 4]]);
       s.ent('j').autoAtaque = false;
+      // 08/11/2026 (D-139): com a cadência nova, o goblin do Pesadelo mata em 12 s; vida de sobra mede só o dano.
+      s.ent('j').hpMax = s.ent('j').hp = 10_000;
       const antes = s.ent('j').hp;
       s.ticks(60 * 12);
       return antes - s.ent('j').hp;

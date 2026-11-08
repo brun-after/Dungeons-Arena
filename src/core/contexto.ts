@@ -539,6 +539,21 @@ export interface RegrasIa {
    */
   caca: { carenciaMs: number; rampaMs: number; maxPct: number; porNivelPct: number; nivelMaxPct: number; chefeMult: number };
   /**
+   * 08/11/2026 (D-139): a cadência pelo nível (entities/ia-cadencia.ts). O intervalo do preset encurta `porNivelPct`
+   * por nível acima do 1 (até `maxPct` mais rápido, nunca abaixo de `intervaloMinMs`); a fração dos ataques que viram
+   * skill parte de `habilidadeBasePct` e sobe `habilidadePorNivelPct` por nível (até `habilidadeMaxPct`). Os chefes
+   * recebem só `chefeMult` dos bônus.
+   */
+  cadencia: {
+    porNivelPct: number;
+    maxPct: number;
+    intervaloMinMs: number;
+    habilidadeBasePct: number;
+    habilidadePorNivelPct: number;
+    habilidadeMaxPct: number;
+    chefeMult: number;
+  };
+  /**
    * Marco 25 (25/10/2026, D-100): quanto uma célula de perigo pesa no caminho de quem evita (em passos); o raio da
    * busca pela área do próprio elemento e a vida em que sai dela; o intervalo dos sorteios táticos (cura, foco); o
    * raio em que se vê uma armadilha disparar e quantos donos de armadilha a IA lembra.

@@ -26,6 +26,8 @@ export interface PresetInimigo {
   ataqueBasico: string;
   habilidades: string[];
   intervaloAtaqueMs: number;
+  /** 08/11/2026 (D-139): skills que o inimigo ganha a partir de um nível (somadas às `habilidades` ao nascer). */
+  habilidadesPorNivel: readonly HabilidadePorNivel[];
   /** Marco 10A-3: presets feitos para serem invocados (§2.9); null nos inimigos comuns. */
   invocacao: PresetInvocacao | null;
   /** Marco 14: resistência por elemento, em % (−100 a 100; 100 = imune), e tipos de efeito que não pegam. */
@@ -40,6 +42,11 @@ export interface PresetInimigo {
   soMundo: boolean;
   /** 06/11/2026 (D-135): só entra na geração pelos pesos do tema (as fases sem tema, já salvas, saem iguais). */
   soPorTema: boolean;
+}
+
+export interface HabilidadePorNivel {
+  aPartirDoNivel: number;
+  id: string;
 }
 
 export type ComportamentoEspecial = 'saltador' | 'armadilheiro';
@@ -133,6 +140,7 @@ export function lerPresets(json: unknown): { presets: Map<string, PresetInimigo>
       ataqueBasico: l.texto(o, 'ataqueBasico'),
       habilidades: l.listaDeTextos(o, 'habilidades'),
       intervaloAtaqueMs: l.numero(o, 'intervaloAtaqueMs', { min: 0 }),
+      habilidadesPorNivel: lerHabilidadesPorNivel(l, o.habilidadesPorNivel),
       invocacao: lerInvocacao(l, o.invocacao),
       resistencias: lerResistencias(l, o.resistencias),
       imunidades: o.imunidades === undefined ? [] : l.listaDeTextos(o, 'imunidades').filter((t): t is TipoEfeito => {
@@ -149,6 +157,14 @@ export function lerPresets(json: unknown): { presets: Map<string, PresetInimigo>
     presets.set(p.id, p);
   }
   return { presets, erros };
+}
+
+function lerHabilidadesPorNivel(l: Leitor, v: unknown): HabilidadePorNivel[] {
+  if (v === undefined) return [];
+  return l.lista({ habilidadesPorNivel: v }, 'habilidadesPorNivel').map((item) => {
+    const o = l.objeto(item, 'habilidadesPorNivel');
+    return { aPartirDoNivel: l.numero(o, 'aPartirDoNivel', { min: 1, max: 100, inteiro: true }), id: l.texto(o, 'id') };
+  });
 }
 
 function lerResistencias(l: Leitor, v: unknown): Partial<Record<Elemento, number>> {

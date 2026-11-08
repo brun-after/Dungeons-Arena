@@ -196,7 +196,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const conferir = (dono: string, ids: readonly string[]) => {
     for (const id of ids) if (!h.definicoes.has(id)) erros.push(`${dono}: habilidade desconhecida "${id}"`);
   };
-  for (const preset of p.presets.values()) conferir(`preset ${preset.id}`, [preset.ataqueBasico, ...preset.habilidades]);
+  for (const preset of p.presets.values()) conferir(`preset ${preset.id}`, [preset.ataqueBasico, ...preset.habilidades, ...preset.habilidadesPorNivel.map((h) => h.id)]);
   for (const classe of c.classes.values()) {
     conferir(`classe ${classe.id}`, [classe.ataqueBasico, ...classe.habilidades, ...classe.exclusivas]);
     if (classe.iniciais.length !== 2) erros.push(`classe ${classe.id}: são 2 skills de classe iniciais (as teclas 1 e 2)`);

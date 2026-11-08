@@ -60,6 +60,11 @@ export function atributosDoInimigo(nivel: number, balance: Balance): Atributos {
   return a;
 }
 
+/** 08/11/2026 (D-139): as skills do preset liberadas até este nível. */
+export function habilidadesDoNivel(preset: PresetInimigo, nivel: number): string[] {
+  return preset.habilidadesPorNivel.filter((h) => nivel >= h.aPartirDoNivel).map((h) => h.id);
+}
+
 export function criarInimigo(
   preset: PresetInimigo,
   id: EntidadeId,
@@ -85,7 +90,8 @@ export function criarInimigo(
     hpMax: Math.max(1, Math.round((hpMaximo(opcoes.hpBase ?? preset.hpBase, atributos.constituicao, balance.hp.hpAtributoMult, balance.hp.dificuldadeMult) * vidaPct) / 100)),
     manaMax: manaMaxima(atributos.sabedoria),
     ataqueBasico: preset.ataqueBasico,
-    habilidades: [...new Set([...preset.habilidades, ...(opcoes.habilidadesExtras ?? []), ...(af ? [af.habilidade] : [])])],
+    // 08/11/2026 (D-139): as skills que o preset ganha com o nível entram junto das fixas.
+    habilidades: [...new Set([...preset.habilidades, ...habilidadesDoNivel(preset, nivel), ...(opcoes.habilidadesExtras ?? []), ...(af ? [af.habilidade] : [])])],
     autoAtaque: false,
     preset: preset.id,
     arquetipo: preset.arquetipo,
