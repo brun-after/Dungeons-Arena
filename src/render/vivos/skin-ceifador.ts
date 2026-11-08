@@ -678,3 +678,24 @@ export function vesteDoCeifador(ossos: Ossos): PecaSombria {
   cabeca(c, e, R, m, extras);
   return { extras, esconder: '.' };
 }
+
+/**
+ * 08/11/2026 (D-137): o Servo do ossuário (servo-vivo.ts) veste o corte do Ceifador sem os enfeites: o casaco longo, a
+ * capa rasgada, a capeleta nos ombros, as mangas e o capuz com o rosto de escuridão; sem espartilho, tabardo, cintos,
+ * gola, ombreira nem mãos.
+ */
+export function vesteDoServoBase(ossos: Ossos): PecaSombria & { corpo: Corpo } {
+  const c = new Corpo(ossos);
+  const e = eixosDoCorpo(c);
+  const R = regua(c, e);
+  // liso como na arte: sem as gavinhas do casaco, o acabamento bordado vira pano escuro e os punhos de osso somem no breu
+  const base = materiaisDoCeifador([]);
+  const m: M = { ...base, acabamento: base.tunica, osso: base.mangaDentro };
+  const extras: Obj[] = [];
+  casaco(c, e, R, m, extras);
+  capa(c, e, R, m, extras);
+  for (const lado of ['l', 'r'] as const) manga(c, R, lado, m, extras);
+  capeleta(c, e, m, extras);
+  cabeca(c, e, R, m, extras);
+  return { extras, esconder: '.', corpo: c };
+}

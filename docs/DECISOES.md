@@ -4050,3 +4050,8 @@ coroa de ouro em brasa no nível 100.
   mundo do jogo). A Lança comum tem o interior preto sólido e a aura roxa só na borda. A ultimate ganhou a assinatura
   própria `juizo_das_trevas`: o dardo preto atravessa a linha soltando fumaça roxa em cada célula (antes usava o raio
   vampírico, que quase não aparecia na linha); as lanças dos mortos nela seguem o desenho das Lanças da escuridão.
+- Servo do ossuário (08/11/2026): a invocação da passiva do Necromante deixou o esqueleto do atlas (a caveira de cabeça
+  grande) e virou o vulto encapuzado da arte de referência, em tempo real como os chefes (`chefe:servo_ossuario`,
+  `render/vivos/servo-vivo.ts`): o corte do Ceifador sem enfeites (capuz, casaco longo, capa rasgada, capeleta, mangas),
+  todo preto liso, com os olhos pálidos acesos e as presas no escuro do capuz. Os reanimados e ecos seguem com a
+  aparência de quem morreu. Sem GPU, cai no atlas como os outros modelos em tempo real.

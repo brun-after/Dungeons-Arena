@@ -12,6 +12,7 @@ import { aceso, comuns, Corpo, chifre, grupoEm, liso, pano, type Ossos, type Pec
 import { capa, capuz, cinto, coroa, estola, membros, ombreira, pingente, saia } from './pecas-sombrias';
 import { KITS_DAS_CLASSES } from './kits-classes';
 import { PECAS_DE_ARMADURA } from '../equipamento-3d';
+import { vesteDoServo } from './servo-vivo';
 
 export interface Chefe {
   /** O GLB do rig (src/assets/modelos/<glb>.glb) e a altura em células (antes do aumento de chefe do jogo). */
@@ -120,6 +121,8 @@ function demonio(ossos: Ossos): PecaSombria {
 
 /** Os chefes humanoides com modelo em tempo real, pelo preset (inimigos.json). */
 export const CHEFES: Readonly<Record<string, Chefe>> = {
+  // 08/11/2026 (D-137): o Servo do ossuário (a passiva do Necromante), o vulto encapuzado; sem arma, golpeia com as mãos.
+  servo_ossuario: { glb: 'necromante', altura: 1.05, parado: 'Idle_Loop', golpe: 'Punch_Cross', arma: null, veste: vesteDoServo },
   rei_goblin: { glb: 'goblin', altura: 0.95, parado: 'Sword_Idle', golpe: 'Sword_Attack', arma: { modelo: 'machado', grau: 3 }, veste: reiGoblin },
   bruxa_do_pantano: {
     glb: 'cultista', altura: 1.12, parado: 'Idle_Loop', golpe: 'Spell_Simple_Shoot', arma: { modelo: 'praga', grau: 4 }, veste: bruxa,
