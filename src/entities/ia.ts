@@ -27,6 +27,8 @@ import type { PresetInimigo } from './presets';
 import { perseguirEspecial } from './ia-especiais';
 import { semLinha } from '../combat/linha-de-tiro';
 import { ehBasico } from '../combat/basico';
+import { fracaoHabilidadePct, intervaloDeAtaqueMs, vezDaHabilidade } from './ia-cadencia';
+import type { Habilidade } from '../combat/habilidades';
 
 const CARDINAIS: readonly Dir8[] = ['N', 'E', 'S', 'O'];
 const REVERSA: Readonly<Partial<Record<Dir8, Dir8>>> = { N: 'S', S: 'N', E: 'O', O: 'E' };
@@ -322,15 +324,17 @@ function escolherDirecaoPatrulha(estado: EstadoJogo, ctx: ContextoSimulacao, e: 
   return opcoes.length > 0 ? escolher(ia.rng, opcoes) : null;
 }
 
-/** Qual habilidade a IA usa agora: o boss alterna o golpe com a área (§2.6). */
 /**
- * Revezamento (marco 8A-2): ataques ímpares usam as habilidades do preset em rodízio; se a da vez
- * estiver em recarga ou estourar o limite do modo, usa o ataque básico (nunca trava tentando).
+ * Qual habilidade a IA usa agora (§2.6). Revezamento (marco 8A-2): parte dos ataques usa as habilidades do preset em
+ * rodízio; se a da vez estiver em recarga ou estourar o limite do modo, usa o ataque básico (nunca trava tentando).
+ * 08/11/2026 (D-139): a parte que vira skill sobe com o nível (`balance.ia.cadencia`; no nível 1, os ímpares, como antes).
  */
 function habilidadeDaVez(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa, preset: PresetInimigo): string {
   // 06/11/2026 (D-135): quem tem comportamento próprio usa as habilidades dele por lá (o salto, a runa).
-  if (e.habilidades.length === 0 || ia.ataquesFeitos % 2 === 0 || preset.comportamento) return e.ataqueBasico;
-  const id = e.habilidades[Math.floor(ia.ataquesFeitos / 2) % e.habilidades.length];
+  if (e.habilidades.length === 0 || preset.comportamento) return e.ataqueBasico;
+  const vez = vezDaHabilidade(ia.ataquesFeitos, fracaoHabilidadePct(e, ctx.balance.ia.cadencia));
+  if (!vez.habilidade) return e.ataqueBasico;
+  const id = e.habilidades[vez.indice % e.habilidades.length];
   const hab = id ? resolverHabilidade(ctx, id) : undefined;
   if (!hab || recargaRestante(estado, e.id, hab.id) > 0 || excedeLimite(estado, ctx, e, hab.efeitos)) return e.ataqueBasico;
   return hab.id;
@@ -378,16 +382,19 @@ function perseguir(
 
   // 06/11/2026 (D-135): o saltador e o armadilheiro (entities/ia-especiais.ts).
   if (preset.comportamento && perseguirEspecial(estado, ctx, e, ia, preset, alvo, saida)) return;
-  const hab = resolverHabilidade(ctx, habilidadeDaVez(estado, ctx, e, ia, preset));
+  const daVez = resolverHabilidade(ctx, habilidadeDaVez(estado, ctx, e, ia, preset));
   const basico = resolverHabilidade(ctx, e.ataqueBasico);
-  if (!hab || !basico) return;
-  // O deslocamento segue o alcance do ataque básico; habilidade em si mesmo vale de qualquer distância.
-  const alcanceAtaque = hab.politicaAlvo === 'proprio' ? Infinity : hab.alcanceCelulas;
+  if (!daVez || !basico) return;
   const origem = celulaOcupada(e);
   const celulaAlvo = celulaOcupada(alvo);
   const distancia = chebyshev(origem, celulaAlvo);
   // 06/11/2026 (D-135): com o alvo atrás da parede, o básico de projétil não sai: o atirador dá a volta até vê-lo.
   const semVisao = semLinha(estado, ctx, e, basico, alvo);
+  // 08/11/2026 (D-139): a skill da vez que não alcança (o deslocamento segue o básico, de alcance maior) ou não vê o
+  // alvo cede a vez ao básico. Antes, o inimigo ficava parado no alcance do básico esperando a skill, sem atacar.
+  const hab = daVez.id !== basico.id && !alcancaAlvo(estado, ctx, e, daVez, alvo, distancia) ? basico : daVez;
+  // O deslocamento segue o alcance do ataque básico; habilidade em si mesmo vale de qualquer distância.
+  const alcanceAtaque = hab.politicaAlvo === 'proprio' ? Infinity : hab.alcanceCelulas;
   const mantemDistancia = e.arquetipo === 'atirador' || e.arquetipo === 'controlador';
   const distanciaMax = mantemDistancia ? Math.min(regras.distanciaMaxAtirador, basico.alcanceCelulas) : basico.alcanceCelulas;
 
@@ -413,11 +420,20 @@ function perseguir(
   }
 
   if (!recuando && distancia <= alcanceAtaque && !(semVisao && ehBasico(e, hab.id)) && !e.acao && estado.tick >= ia.proximoAtaqueTick) {
-    if (iniciarAcao(estado, ctx, e, hab.id, alvo.id, saida)) {
-      ia.proximoAtaqueTick = estado.tick + ticksDe(preset.intervaloAtaqueMs);
+    // 08/11/2026 (D-139): a skill recusada (sem mana, por exemplo) dá lugar ao básico no mesmo tick; o intervalo
+    // encurta com o nível do inimigo (entities/ia-cadencia.ts).
+    const iniciou = iniciarAcao(estado, ctx, e, hab.id, alvo.id, saida) || (hab.id !== basico.id && distancia <= basico.alcanceCelulas && !semVisao && iniciarAcao(estado, ctx, e, basico.id, alvo.id, saida));
+    if (iniciou) {
+      ia.proximoAtaqueTick = estado.tick + ticksDe(intervaloDeAtaqueMs(e, preset.intervaloAtaqueMs, regras.cadencia));
       ia.ataquesFeitos++;
     }
   }
+}
+
+/** 08/11/2026 (D-139): se a skill sai agora contra o alvo — em si mesmo, sempre; senão, no alcance e com linha. */
+function alcancaAlvo(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, hab: Habilidade, alvo: Entidade, distancia: number): boolean {
+  if (hab.politicaAlvo === 'proprio') return true;
+  return distancia <= hab.alcanceCelulas && !semLinha(estado, ctx, e, hab, alvo);
 }
 
 /**

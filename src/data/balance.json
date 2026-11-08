@@ -415,6 +415,7 @@
     "chanceDesistir": 0.1,
     "distanciaMinAtirador": 3,
     "distanciaMaxAtirador": 5, "caca": { "carenciaMs": 2000, "rampaMs": 3000, "maxPct": 10, "porNivelPct": 0.5, "nivelMaxPct": 5, "chefeMult": 0.3 },
+    "cadencia": { "porNivelPct": 2, "maxPct": 120, "intervaloMinMs": 800, "habilidadeBasePct": 50, "habilidadePorNivelPct": 1, "habilidadeMaxPct": 80, "chefeMult": 0.5 },
     "custoPerigo": 8,
     "curaAfimRaio": 6,
     "curaAfimSaiPct": 90,

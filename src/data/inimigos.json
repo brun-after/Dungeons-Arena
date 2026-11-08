@@ -14,7 +14,8 @@
       "defesa": 0,
       "ataqueBasico": "golpe",
       "habilidades": [],
-      "intervaloAtaqueMs": 2500
+      "intervaloAtaqueMs": 2200,
+      "habilidadesPorNivel": [{ "aPartirDoNivel": 15, "id": "corte_dilacerante" }, { "aPartirDoNivel": 35, "id": "golpe_atordoante" }]
     },
     {
       "id": "esqueleto",
@@ -29,7 +30,8 @@
       "defesa": 1,
       "ataqueBasico": "flecha",
       "habilidades": [],
-      "intervaloAtaqueMs": 3000,
+      "intervaloAtaqueMs": 2600,
+      "habilidadesPorNivel": [{ "aPartirDoNivel": 15, "id": "flecha_perfurante" }, { "aPartirDoNivel": 35, "id": "chuva_de_flechas" }],
       "resistencias": {
         "veneno": 100,
         "gelo": 25
@@ -51,7 +53,8 @@
       "defesa": 2,
       "ataqueBasico": "golpe_pesado",
       "habilidades": [],
-      "intervaloAtaqueMs": 3000
+      "intervaloAtaqueMs": 2600,
+      "habilidadesPorNivel": [{ "aPartirDoNivel": 15, "id": "golpe_atordoante" }, { "aPartirDoNivel": 35, "id": "investida" }]
     },
     {
       "id": "troll",
@@ -66,7 +69,8 @@
       "defesa": 2,
       "ataqueBasico": "golpe",
       "habilidades": [],
-      "intervaloAtaqueMs": 5000,
+      "intervaloAtaqueMs": 3800,
+      "habilidadesPorNivel": [{ "aPartirDoNivel": 15, "id": "golpe_atordoante" }, { "aPartirDoNivel": 35, "id": "estaca_de_pedra" }],
       "resistencias": {
         "veneno": 25,
         "fogo": -25
@@ -85,7 +89,8 @@
       "defesa": 1,
       "ataqueBasico": "raio_vampirico",
       "habilidades": [],
-      "intervaloAtaqueMs": 2500,
+      "intervaloAtaqueMs": 2300,
+      "habilidadesPorNivel": [{ "aPartirDoNivel": 15, "id": "dardo_funesto" }, { "aPartirDoNivel": 35, "id": "mente_partida" }],
       "resistencias": {
         "psiquico": 50,
         "fogo": -25
@@ -104,7 +109,8 @@
       "defesa": 0,
       "ataqueBasico": "marca_de_area",
       "habilidades": [],
-      "intervaloAtaqueMs": 4000,
+      "intervaloAtaqueMs": 3400,
+      "habilidadesPorNivel": [{ "aPartirDoNivel": 15, "id": "bola_de_fogo" }, { "aPartirDoNivel": 35, "id": "cadeia_sombria" }],
       "resistencias": {
         "psiquico": 50
       }
@@ -122,7 +128,8 @@
       "defesa": 0,
       "ataqueBasico": "golpe",
       "habilidades": [],
-      "intervaloAtaqueMs": 2000
+      "intervaloAtaqueMs": 1800,
+      "habilidadesPorNivel": [{ "aPartirDoNivel": 15, "id": "corte_dilacerante" }, { "aPartirDoNivel": 35, "id": "investida" }]
     },
     {
       "id": "aranha",
@@ -139,7 +146,8 @@
       "habilidades": [
         "armar_teia"
       ],
-      "intervaloAtaqueMs": 3000
+      "intervaloAtaqueMs": 2600,
+      "habilidadesPorNivel": [{ "aPartirDoNivel": 20, "id": "dardo_toxico" }]
     },
     {
       "id": "slime",
@@ -154,7 +162,8 @@
       "defesa": 0,
       "ataqueBasico": "golpe_viscoso",
       "habilidades": [],
-      "intervaloAtaqueMs": 4000,
+      "intervaloAtaqueMs": 3200,
+      "habilidadesPorNivel": [{ "aPartirDoNivel": 20, "id": "nevoa_venenosa" }],
       "resistencias": {
         "fogo": -50,
         "gelo": 50

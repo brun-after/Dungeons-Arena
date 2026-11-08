@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.94 · **Data:** 08/11/2026
+**Versão:** 0.95 · **Data:** 08/11/2026
 
 > **Histórico**
+> - **0.95 (08/11/2026)**: D-139: os inimigos atacam sem parar quando estão em alcance, mais rápido e com mais skills conforme o nível (a skill fora de alcance não trava mais o ataque).
 > - **0.94 (08/11/2026)**: D-138: a área da aura sem a linha reta, mais sutil, do amarelo ao vermelho pela Bravura, e o fogo nos inimigos da Bravura 75.
 > - **0.93 (08/11/2026)**: D-138: a área da aura e as marcas no chão das skills no lugar certo no isométrico (a projeção era aplicada duas vezes).
 > - **0.92 (08/11/2026)**: D-138: a aura do Guerreiro só acende quando atinge alguém, como uma área no chão que se fecha sobre ele (não mais pontos de luz).
@@ -4134,4 +4135,59 @@ coroa de ouro em brasa no nível 100.
   o ataca lá, e o jogador pode revidar de dentro; sem combate, o monstro não entra nem ataca quem está dentro, e quem
   está dentro não fere o monstro de fora (nem com habilidade de área). Para começar uma luta é preciso sair da vila. O
   monstro que entrou sai livre; passada a janela, ele perde o alvo e volta.
+
+## D-139 — Inimigos que atacam: cadência e skills pelo nível (08/11/2026)
+
+**Problema.** Os inimigos atacavam pouco: às vezes pareciam não ter básico, e dava para golpeá-los várias vezes enquanto
+eles só andavam, mesmo acima do nível 30. Medido na simulação (30 s com o alvo em alcance): o guerreiro de nível 1
+golpeava 20 vezes; o goblin, 12; o troll, 6. O nível do inimigo não mudava nada.
+
+**Causas.**
+- **Bug: a skill da vez fora de alcance travava o ataque.** No revezamento (marco 8A-2), a vez da skill esperava o alvo
+  entrar no alcance *dela*, mas o inimigo se posiciona pelo alcance do básico. Com a skill mais curta que o básico (o
+  esqueleto com a afinidade de veneno: `dardo_toxico`, alcance 4, contra a flecha, alcance 5), o inimigo parava a 5
+  células e não atacava mais, até o jogador chegar mais perto. Também não havia volta para o básico quando a skill
+  era recusada (sem mana, por exemplo).
+- **A cadência era fixa por preset** (`intervaloAtaqueMs`, de 2 a 5 s) e não subia com o nível. O básico dos inimigos
+  não tem recarga própria; o intervalo é o que manda.
+- **Os inimigos comuns não tinham skill nenhuma**, e quem tinha usava uma a cada dois ataques, em qualquer nível.
+
+As outras hipóteses não se confirmaram: a perseguição não reinicia o intervalo (trocar de alvo ou voltar a perseguir
+não mexe em `proximoAtaqueTick`), e o inimigo em alcance para de andar e ataca no primeiro tick livre.
+
+**Decisão.**
+- **A skill que não alcança cede a vez ao básico** (`entities/ia.ts`): sem alcance ou sem linha de tiro, a vez sai
+  com o básico. Se a skill for recusada, o básico sai no mesmo tick. O rodízio anda nos dois casos, então o inimigo
+  nunca fica parado esperando.
+- **Cadência pelo nível em dados** (`balance.ia.cadencia`, `entities/ia-cadencia.ts`): o intervalo do preset fica
+  `porNivelPct` (2%) mais rápido por nível acima do 1, até `maxPct` (120%, ou seja, 2,2× no nível 61+), sem descer
+  de `intervaloMinMs` (800 ms). A fração dos ataques que vira skill parte de `habilidadeBasePct` (50%, os ímpares, o
+  revezamento antigo) e sobe `habilidadePorNivelPct` (1 ponto) por nível, até `habilidadeMaxPct` (80%). Os chefes
+  recebem só `chefeMult` (metade) dos dois bônus. A vez da skill sai da contagem de ataques já feitos
+  (`ataquesFeitos`), sem estado novo no save nem no patch. Vale para todo modo, sem regra por modo.
+- **Skills por nível nos inimigos comuns** (`habilidadesPorNivel` no preset, somadas ao nascer):
+
+  | Inimigo | Nível 15 (20 na aranha e no slime) | Nível 35 |
+  |---|---|---|
+  | Goblin | Corte dilacerante | Golpe atordoante |
+  | Esqueleto | Flecha perfurante | Chuva de flechas |
+  | Orc | Golpe atordoante | Investida |
+  | Troll | Golpe atordoante | Estaca de pedra |
+  | Vampiro | Dardo funesto | Mente partida |
+  | Cultista | Bola de fogo | Cadeia sombria |
+  | Lobo | Corte dilacerante | Investida |
+  | Aranha | Dardo tóxico | — |
+  | Slime | Névoa venenosa | — |
+
+- **Intervalos base mais curtos** nos comuns mais lentos: goblin 2,5→2,2 s, esqueleto 3→2,6 s, orc 3→2,6 s, troll
+  5→3,8 s, vampiro 2,5→2,3 s, cultista 4→3,4 s, lobo 2→1,8 s, aranha 3→2,6 s, slime 4→3,2 s.
+
+**Resultado** (30 s com o alvo em alcance, ataques iniciados nos níveis 1 / 30 / 60): goblin 14 / 22 / 29 (eram 12 em
+todos), troll 8 / 13 / 17 (eram 6), esqueleto 12 / 18 / 25 (eram 10), lobo 17 / 26 / 36 (eram 15).
+
+Testes em `tests/unit/ia-cadencia.test.ts`: o ritmo em alcance segue o intervalo, sem pausas maiores que ele; o ritmo
+sobe com o nível; as skills ganham espaço com o nível; e a skill mais curta que o básico não trava mais o ataque.
+Dois testes antigos mudaram com o ritmo novo: o goblin do Pesadelo agora mata o aventureiro em 12 s (o teste dá
+vida de sobra para medir só o dano), e a morte simultânea do diagnóstico usa outra semente (o mago, nível 1, Pesadelo).
+O `balancear` segue com 147/147 metas aprovadas (docs/BALANCEAMENTO.md regravado).
 
