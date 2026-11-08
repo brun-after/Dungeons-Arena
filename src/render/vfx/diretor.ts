@@ -37,7 +37,7 @@ export class DiretorVfx {
     const p = o.particulas;
     this.pincel = new Pincel(o.efeitos, (n) => p.textura(n));
     this.anim = new Animacoes(this.pincel);
-    this.marcas = new Marcas(o.chao, (n) => p.textura(n), (x, y) => p.noChao(x, y), () => p.iso);
+    this.marcas = new Marcas(o.chao, (n) => p.textura(n));
   }
 
   definirPosicoes(f: (id: string) => PontoVisual | null): void {

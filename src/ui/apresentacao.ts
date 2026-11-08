@@ -181,7 +181,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     return def ? Number.parseInt(def.cor.slice(1), 16) : null;
   };
   // 08/11/2026 (D-138): a área da aura no chão, acesa só pelo pulso que atinge alguém.
-  const areaDaAura = new AreaDaAura({ chao: palco.chao, textura: (n) => particulas.textura(n), noChao: (x, y) => particulas.noChao(x, y), iso: () => particulas.iso });
+  const areaDaAura = new AreaDaAura({ plano: palco.marcas, textura: (n) => particulas.textura(n) });
   const efeitosDominio = new EfeitosDeDominio({
     particulas,
     area: areaDaAura,
