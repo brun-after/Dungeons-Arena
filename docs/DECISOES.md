@@ -1,9 +1,10 @@
 # Decisões de projeto
 
-**Versão:** 0.94 · **Data:** 08/11/2026
+**Versão:** 0.95 · **Data:** 08/11/2026
 
 > **Histórico**
-> - **0.94 (08/11/2026)**: D-139: os inimigos atacam sem parar quando estão em alcance, mais rápido e com mais skills conforme o nível (a skill fora de alcance não trava mais o ataque).
+> - **0.95 (08/11/2026)**: D-139: os inimigos atacam sem parar quando estão em alcance, mais rápido e com mais skills conforme o nível (a skill fora de alcance não trava mais o ataque).
+> - **0.94 (08/11/2026)**: D-138: a área da aura sem a linha reta, mais sutil, do amarelo ao vermelho pela Bravura, e o fogo nos inimigos da Bravura 75.
 > - **0.93 (08/11/2026)**: D-138: a área da aura e as marcas no chão das skills no lugar certo no isométrico (a projeção era aplicada duas vezes).
 > - **0.92 (08/11/2026)**: D-138: a aura do Guerreiro só acende quando atinge alguém, como uma área no chão que se fecha sobre ele (não mais pontos de luz).
 > - **0.91 (08/11/2026)**: D-138: um som de golpe por arma e por criatura (o baque surdo dos mortos do Necromante) a aura do Guerreiro como um anel visível no chão, também no online e no Mundo, os portais usados com o E, os terrenos elementais vivos e os focos do Mundo, o XP do chefe da masmorra repetida pela metade, 3/4 do ouro perdidos na morte, o espólio de 5 min e a vila que não esconde quem luta.
@@ -4090,6 +4091,13 @@ coroa de ouro em brasa no nível 100.
     coordenadas do plano (`centroDaCelula`) na camada da telegrafia (`palco.marcas`, acima do escuro). As marcas no
     chão das skills (`vfx/marcas.ts`: cratera, geada, rachadura, poças) tinham o mesmo erro, e só ficavam certas na
     visão de cima; também foram corrigidas.
+  - Ajuste (0.94): uma linha reta riscava o alto da área. As texturas do atlas (`brilho` e `choque`), esticadas sete
+    vezes, puxavam a borda da vizinha; a área passou a ter texturas próprias, pintadas com margem transparente. Ficou
+    mais sutil (opacidade menor). A cor segue a Bravura, do amarelo (25) ao laranja (50) e ao vermelho (75+, mais
+    fundo no 100), fechando o ciclo; a cor do elemento da arma deixou de tingir a área (a regra da aura elemental não
+    mudou). Da Bravura 75, quem a aura atinge parece pegar fogo e segue ardendo 1,4 s depois do pulso, com chamas mais
+    seguidas quanto menor a diferença de nível para o Guerreiro (`fogoNaAura`: 1 no mesmo nível, 0,15 a 15 níveis ou
+    mais); perto do nível, também brasas.
   - A aura (e os orbes do Mago) exigia a bolsa, que não vem no online nem no Mundo (a dos outros nunca vem): o marco
     passou a ser lido pelo que é público (`marcoAMostra`: a classe, o atributo e a arma à mostra). Com a bolsa, é o
     `marcoDe` de sempre. A regra de jogo não mudou.

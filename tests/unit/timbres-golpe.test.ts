@@ -96,8 +96,9 @@ describe('aura em ação', () => {
       emitirNaTela: (lista: readonly { textura: string; esticar?: number }[], x: number, y: number, _cor: number, _ate: unknown, angulo = 0) => {
         voos.push({ x, y, angulo, textura: lista[0]?.textura ?? '', esticar: lista[0]?.esticar ?? 0 });
       },
-      emitir: () => undefined,
+      emitir: (nome: string) => { emitidos.push(nome); },
     };
+    const emitidos: string[] = [];
     // A área falsa: guarda cada pulso e onde ele está (segue o Guerreiro).
     const pulsos: { onde: () => { x: number; y: number } | null; raio: number }[] = [];
     const area = { pulsar: (onde: () => { x: number; y: number } | null, a: { raio: number }) => { pulsos.push({ onde, raio: a.raio }); }, quadro: () => undefined };
@@ -110,7 +111,7 @@ describe('aura em ação', () => {
     const bus = new Barramento() as never;
     ef.ligar(bus, () => estado, () => 0);
     const posicao = (e: { x: number; y: number }) => ({ x: e.x, y: e.y });
-    return { ef, bus: bus as { emitir: (t: string, ev: unknown) => void }, estado, voos, pulsos, posicao, g };
+    return { ef, bus: bus as { emitir: (t: string, ev: unknown) => void }, estado, voos, pulsos, posicao, g, inimigo, emitidos };
   };
 
   it('sem pulso (perseguindo, em combate, sem ninguém atingido), nada aparece', async () => {
@@ -145,6 +146,50 @@ describe('aura em ação', () => {
     m.ef.quadro(m.estado, 0, m.posicao);
     expect(m.pulsos).toHaveLength(0);
     expect(m.voos).toHaveLength(0);
+  });
+
+  describe('a aura pela Bravura (D-138)', () => {
+    it('a cor vai do amarelo (25) ao vermelho (75+), passando pelo laranja', async () => {
+      const { corDaAura } = await import('../../src/render/area-aura');
+      const vermelho = (c: number) => (c >> 16) & 0xff;
+      const verde = (c: number) => (c >> 8) & 0xff;
+      expect(corDaAura(25)).toBe(0xffd86b);
+      expect(corDaAura(50)).toBe(0xff9a3c);
+      expect(corDaAura(75)).toBe(0xe8402a);
+      // O verde cai sem voltar: o amarelo vira vermelho.
+      let antes = verde(corDaAura(25));
+      for (let b = 26; b <= 100; b++) {
+        expect(verde(corDaAura(b))).toBeLessThanOrEqual(antes);
+        antes = verde(corDaAura(b));
+      }
+      expect(vermelho(corDaAura(100))).toBeGreaterThan(verde(corDaAura(100)) * 3);
+    });
+
+    it('o fogo é maior quanto menor a diferença de nível', async () => {
+      const { fogoNaAura } = await import('../../src/render/area-aura');
+      expect(fogoNaAura(40, 40)).toBe(1);
+      expect(fogoNaAura(40, 35)).toBeGreaterThan(fogoNaAura(40, 30));
+      expect(fogoNaAura(40, 45)).toBe(fogoNaAura(40, 35));
+      expect(fogoNaAura(40, 1)).toBe(0.15);
+    });
+
+    it('da Bravura 75 (força 3), o atingido arde; antes, não', async () => {
+      const contar = async (forca: number, nivelAlvo: number) => {
+        const m = await montar({ raio: 2, cor: 0xe8402a, forca });
+        m.g.nivel = 40;
+        m.inimigo.nivel = nivelAlvo;
+        m.ef.quadro(m.estado, 0, m.posicao);
+        m.bus.emitir('auraPulsou', { t: 'auraPulsou', tick: 0, id: 'g', x: 5, y: 5, raio: 2, atingidos: ['m'] });
+        // Segue ardendo pelos quadros seguintes.
+        for (let ms = 16; ms < 1000; ms += 16) m.ef.quadro(m.estado, ms, m.posicao);
+        return m.emitidos.filter((n) => n === 'aura_queimando').length;
+      };
+      expect(await contar(2, 40)).toBe(0);
+      const perto = await contar(3, 40);
+      const longe = await contar(3, 10);
+      expect(longe).toBeGreaterThan(0);
+      expect(perto).toBeGreaterThan(longe);
+    });
   });
 });
 

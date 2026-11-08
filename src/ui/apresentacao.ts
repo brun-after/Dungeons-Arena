@@ -22,7 +22,7 @@ import type { Camera } from '../render/camera';
 import { EfeitosDeHabilidade } from '../render/efeitos-habilidade';
 import { EfeitosDeClasse } from '../render/efeitos-classe';
 import { EfeitosDeDominio } from '../render/efeitos-dominio';
-import { AreaDaAura } from '../render/area-aura';
+import { AreaDaAura, corDaAura } from '../render/area-aura';
 import { TerrenosVivosVisual } from '../render/terrenos-vivos-visual';
 import { raioDaAura } from '../combat/ajustes-classes';
 import { marcoAMostra } from '../progression/dominio';
@@ -181,7 +181,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     return def ? Number.parseInt(def.cor.slice(1), 16) : null;
   };
   // 08/11/2026 (D-138): a área da aura no chão, acesa só pelo pulso que atinge alguém.
-  const areaDaAura = new AreaDaAura({ plano: palco.marcas, textura: (n) => particulas.textura(n) });
+  const areaDaAura = new AreaDaAura({ plano: palco.marcas });
   const efeitosDominio = new EfeitosDeDominio({
     particulas,
     area: areaDaAura,
@@ -191,8 +191,8 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     auraDe: (e, tick) => {
       if (marcoAMostra(ctx, e, 'auraVisivel') <= 0) return null;
       const raio = e.bolsa ? raioDaAura(ctx, e, tick) : ctx.balance.ajustesClasses.guerreiro.auraRaio + marcoAMostra(ctx, e, 'auraRaio');
-      const cor = (marcoAMostra(ctx, e, 'auraElementalPct') > 0 ? corDoElemento(e.aparencia?.elementoArma) : null) ?? 0xffd86b;
-      return { raio, cor, forca: Math.min(4, Math.max(1, Math.floor(e.atributos.dominio / 25))) };
+      // 08/11/2026 (D-138): a cor segue a Bravura, do amarelo (25) ao vermelho (75+); o fogo nos inimigos sai da força 3.
+      return { raio, cor: corDaAura(e.atributos.dominio), forca: Math.min(4, Math.max(1, Math.floor(e.atributos.dominio / 25))) };
     },
     orbesDe: (e) => {
       const n = e.encarnacao ? marcoAMostra(ctx, e, 'orbes') : 0;
