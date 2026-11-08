@@ -6,7 +6,7 @@ import type { SomId } from './mapeamento';
 import { AMBIENTES, BancoDeGravacoes, EFEITOS, musicaDaCena, type SomAmbiente } from './gravacoes';
 
 const FADE_MUSICA_S = 1.5;
-const GANHOS: Partial<Record<SomId, number>> = { passo: 0.25, clique: 0.35, critico: 0.65, conjuracao: 0.18, lancamento_magico: 0.25, magia: 0.4, zunido: 0.45, invocacao: 0.6, moeda: 0.6, recusa: 0.4 };
+const GANHOS: Partial<Record<SomId, number>> = { passo: 0.25, clique: 0.35, critico: 0.65, conjuracao: 0.18, lancamento_magico: 0.25, magia: 0.4, zunido: 0.45, invocacao: 0.6, moeda: 0.6, recusa: 0.4, necro_conjura: 0.55, necro_sombra: 0.7, necro_ossos: 0.75 };
 
 export interface VolumesAudio {
   musica: number;

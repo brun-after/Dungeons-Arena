@@ -210,7 +210,10 @@ export interface OpcoesDaSuperficie {
  * A densidade das skins (06/11/2026): quantas vezes cada intervalo entre anéis e entre colunas é subdividido. Começa
  * alta (o visual fiel, com muitos polígonos) para depois baixar até o equilíbrio com o desempenho; 1 = a malha desenhada.
  */
-let densidade = 3;
+// 07/11/2026: a densidade 3 nunca tinha baixado e a skin passava de 150 mil triângulos (o manto do Ceifador sozinho,
+// 147 mil), redesenhados a cada quadro: no celular, o jogo travava. Agora 1 nos aparelhos de toque e 2 no computador.
+const emToque = (): boolean => typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+let densidade = emToque() ? 1 : 2;
 export function definirDensidadeDaSkin(k: number): void {
   densidade = Math.max(1, Math.min(6, Math.round(k)));
 }

@@ -12,6 +12,10 @@ const SOMBRA = (n: number, o: Partial<Emissao> = {}) => nevoa(n, { cor: 0x3a1a5a
 const ALMAS = (n: number, o: Partial<Emissao> = {}) => em({ textura: 'alma', quantidade: n, vidaMs: [600, 1000], velocidade: [30, 70], direcao: 'cima', abertura: 0.5, gravidade: -50, escala: [0.35, 0.55], alpha: [0.9, 0], curvaAlpha: 'entra', aditivo: true, raio: 8, cor: null, turbulencia: 20, ...o });
 const OSSOS = (n: number, o: Partial<Emissao> = {}) => em({ textura: 'osso', quantidade: n, vidaMs: [450, 750], velocidade: [100, 220], direcao: 'cima', abertura: 1.1, gravidade: 600, escala: [0.3, 0.25], alpha: [1, 0.6], raio: 6, cor: 0xece4d0, giro: [-10, 10], ...o });
 const SANGUE = (n: number, o: Partial<Emissao> = {}) => em({ textura: 'gota_viva', quantidade: n, vidaMs: [300, 500], velocidade: [80, 180], direcao: 'cima', abertura: 1.2, gravidade: 600, escala: [0.22, 0.14], alpha: [1, 0.3], raio: 4, cores: [0xd83040, 0x7a1020], esticar: 0.2, ...o });
+/** 07/11/2026: quanto a lança de osso fica inteira e opaca antes de sumir. */
+const VIDA_DA_LANCA_MS = 900;
+const NASCER_MS = 180;
+const SUMIR_MS = 420;
 const CONJURA_TREVAS = [SOMBRA(1, { raio: 8, escala: [0.3, 0.8] }), em({ textura: 'runa1', quantidade: 1, vidaMs: [400, 600], velocidade: [10, 20], direcao: 'cima', escala: [0.3, 0.4], alpha: [0.8, 0], aditivo: true, raio: 12, cor: null })];
 
 export const TREVAS = {
@@ -56,7 +60,23 @@ export const TREVAS = {
       a.celulas.forEach((cel, i) => {
         const ponta = i === n - 1;
         const s = (ponta ? 1.25 : 0.8 + 0.3 * (i / Math.max(1, n))) * a.escala;
-        tween(c, { textura: 'espinho', de: cel, s: [0.25 * s, s], sy: [0.2 * s, 1.5 * s], a: [1, 0], rot: [giro, giro], cor: 0xece4d0, ms: 560, atrasoMs: i * 35, curva: sai, subir: -10 });
+        // 07/11/2026: nasce rápido (0,18 s), fica inteiro e opaco por quase 1 s e só então some (0,42 s); a sombra escura
+        // por baixo destaca o osso do chão. Um efeito só por espinho (a sombra e o osso no mesmo quadro).
+        const total = NASCER_MS + VIDA_DA_LANCA_MS + SUMIR_MS;
+        c.tocar({
+          ms: total,
+          atrasoMs: i * 35,
+          desenhar: (_t, ms, p) => {
+            const q = c.tela(cel);
+            const nasce = sai(Math.min(1, ms / NASCER_MS));
+            const some = Math.max(0, (ms - NASCER_MS - VIDA_DA_LANCA_MS) / SUMIR_MS);
+            const alpha = 1 - some;
+            const sx = s * (0.25 + 0.75 * nasce) * (1 - 0.15 * some);
+            const sy = s * (0.2 + 1.3 * nasce) * (1 - 0.2 * some);
+            p.desenhar('espinho', q.x, q.y, { sx: sx * 1.18, sy: sy * 1.12, alpha: alpha * 0.75, rot: giro, cor: 0x1a1018, aditivo: false });
+            p.desenhar('espinho', q.x, q.y, { sx, sy, alpha, rot: giro, cor: 0xf4ecd8, aditivo: false });
+          },
+        });
       });
       c.particulas.emitirLista([SOMBRA(2, { raio: 6 })], a.origem.x, a.origem.y, a.cor);
       const fim = a.celulas.at(-1);
