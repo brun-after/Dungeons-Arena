@@ -2,6 +2,7 @@
 // barramento (events.ts) depois do tick; a simulação nunca chama a interface.
 // Eventos visuais não são autoridade sobre HP: o estado basta para reconstruir a tela (§3.6).
 
+import type { TipoTerrenoVivo } from '../world/ambiente-tipos';
 import type { Dificuldade } from '../modos/dificuldade';
 import type { EntidadeId } from './comandos';
 import type { TipoObjeto } from './estado';
@@ -237,6 +238,8 @@ export type EventoSimulacao =
   | { t: 'itemRecusado'; tick: number; id: EntidadeId; motivo: MotivoItem }
   /** Marco 24 (D-099): o santuário de Engenho entregou o kit. */
   | { t: 'santuarioUsado'; tick: number; id: EntidadeId; itemId: string }
+  /** 08/11/2026 (D-138): uma área reagiu a um elemento (a água congelou, virou vapor, lama…). */
+  | { t: 'terrenoReagiu'; tick: number; x: number; y: number; raio: number; de: TipoTerrenoVivo; para: TipoTerrenoVivo }
   /** Marco 9A: baú e loja. `ateTick` é o fim do congelamento (anel de progresso, contagem da janela). */
   | { t: 'interacaoIniciada'; tick: number; id: EntidadeId; objetoId: string; tipo: 'bau' | 'loja' | 'desarme' | 'coleta'; ateTick: number }
   /** Marco 29 (D-128): o Mundo. O pedido vai ao servidor (salvar, portal, entrar na estrutura, o quadro de missões). */

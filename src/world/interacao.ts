@@ -5,6 +5,7 @@
 // arma a recarga dela para aquele jogador; morrer fecha e também arma (§2.12).
 // Baú compartilhado tem um abridor por vez (§3.6): a reserva sai com a entrega, a morte ou a saída.
 
+import { usarPortal } from './portas';
 import { usarRefugio } from '../progression/buffs';
 import { perseguido } from '../progression/recursos';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
@@ -82,6 +83,8 @@ export function interagir(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidad
 
 function tentarInteragir(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): MotivoItem | null {
   const tick = estado.tick;
+  // 08/11/2026 (D-138): parado num portal, o E usa o portal (antes de baús e lojas ao lado).
+  if (!e.interacao && usarPortal(estado, ctx, e, saida)) return null;
   if (!e.bolsa) return 'sem_mochila';
   if (e.interacao) return 'congelado';
   const o = alvoDeInteracao(estado, ctx, e);

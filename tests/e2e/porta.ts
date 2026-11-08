@@ -1,7 +1,8 @@
 // Marco 24 (25/10/2026, D-099): sair da fase pede ficar parado na porta por 3 s. Pela tecla não dá para parar numa
 // célula exata (o comando chega alguns ticks depois e o passo seguinte já começou), então o teste clica na célula da
 // porta: o #diag (com ?diag=1) dá a célula do jogador e onde ela e as vizinhas (+x, +y) caem na tela. O caminho termina
-// na porta e o jogador fica parado em cima.
+// na porta e o jogador fica parado em cima. 08/11/2026 (D-138): parado em cima, usa a porta com a tecla de interagir
+// (o E; no toque, o botão da mão).
 import { expect, type Page } from '@playwright/test';
 
 export async function pararNaPorta(page: Page, alvo: string): Promise<void> {
@@ -20,4 +21,6 @@ export async function pararNaPorta(page: Page, alvo: string): Promise<void> {
   await page.mouse.click(x, y);
   await expect(diag).toHaveAttribute('data-celula', alvo, { timeout: 20_000 });
   await expect(diag).toHaveAttribute('data-destino', alvo);
+  if (await page.getByTestId('interagir').isVisible()) await page.getByTestId('interagir').click();
+  else await page.keyboard.press('KeyE');
 }

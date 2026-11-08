@@ -59,6 +59,25 @@ export function marcoDe(ctx: Ctx, e: Entidade, chave: string): number {
   return valor;
 }
 
+/**
+ * 08/11/2026 (D-138): o marco pelo que é público (a classe e a arma à mostra), para a apresentação: no online e no
+ * Mundo o estado chega sem a bolsa (a dos outros nunca vem), e a aura e os orbes sumiam. Com a bolsa, é o `marcoDe`.
+ */
+export function marcoAMostra(ctx: Ctx, e: Entidade, chave: string): number {
+  if (e.bolsa || e.invocacao) return e.invocacao ? 0 : marcoDe(ctx, e, chave);
+  const classe = e.classeId ?? '';
+  const lista = ctx.balance.dominio.classes[classe]?.marcos[chave];
+  if (!lista) return 0;
+  const natural = ctx.conteudo.armas.naturalDaClasse.get(classe);
+  const familia = (desenho: string | null | undefined) => (desenho ? ctx.conteudo.armas.familias.get(desenho) : undefined);
+  const naMao = !natural || familia(e.aparencia?.arma) === natural
+    || (ctx.conteudo.armas.porFamilia[natural].maos === 'qualquer' && familia(e.aparencia?.secundaria) === natural);
+  if (!naMao) return 0;
+  let valor = 0;
+  for (const m of lista) if (e.atributos.dominio >= m.em) valor = m.valor;
+  return valor;
+}
+
 /** A skill é de classe para quem a lança: exclusiva da classe ou ultimate (e etapa dela) da própria classe. */
 export function ehSkillDeClasse(ctx: Ctx, e: Entidade, habId: string): boolean {
   const classe = classeDe(e);

@@ -21,7 +21,7 @@ import { guardarItem } from '../../src/progression/inventario';
 import { ticksDe } from '../../src/core/tempo';
 import { alcancaveis } from '../../src/world/navegacao';
 import { povoarFase } from '../../src/world/populacao';
-import { processarPortas } from '../../src/world/portas';
+import { processarPortas, usarPortal } from '../../src/world/portas';
 import { validarFase } from '../../src/world/validacao-fase';
 import { CONTEUDO, contexto, SALA_ABERTA } from '../apoio/fases';
 
@@ -93,12 +93,13 @@ describe('fases vivas e preservação da campanha', () => {
     const fase = comRetorno(c.ctx.fase, { tipo: 'oficial', id: 'fase-02' });
     expect(faseAnterior({ tipo: 'oficial', id: 'fase-02' })).toEqual({ tipo: 'oficial', id: 'fase-01' });
     expect(faseAnterior({ tipo: 'aventura', id: 'a', indice: 3 })).toMatchObject({ indice: 2 });
-    // Marco 24 (D-099): parado na porta azul pela espera inteira, volta (uma vez só).
+    // D-138: parado na porta azul não volta sozinho; o E volta (uma vez só).
     const eventos: EventoSimulacao[] = [{ t: 'moveu', tick: 0, id: c.j.id, x: 2, y: 2 }];
     processarPortas(c.estado, { ...c.ctx, fase }, eventos);
-    expect(eventos.some((e) => e.t === 'saidaAlcancada')).toBe(false);
     c.estado.tick += ticksDe(c.ctx.balance.portas.esperaMs);
     processarPortas(c.estado, { ...c.ctx, fase }, eventos);
+    expect(eventos.some((e) => e.t === 'saidaAlcancada')).toBe(false);
+    expect(usarPortal(c.estado, { ...c.ctx, fase }, c.j, eventos)).toBe(true);
     expect(eventos.some((e) => e.t === 'saidaAlcancada' && e.retorno)).toBe(true);
     const parada: EventoSimulacao[] = [];
     c.estado.tick++;

@@ -12,11 +12,12 @@ import { hashTexto } from '../core/rng';
 import { vivo, type Entidade } from '../entities/entidade';
 import { perfilDaIa } from '../modos/dificuldade';
 import { podeFerir } from '../modos/relacao';
-import { AMBIENTE_FERE, ELEMENTO_DO_AMBIENTE, dentroDaArea, type AreaAmbiente } from './ambiente-tipos';
+import { AMBIENTE_FERE, ELEMENTO_DO_AMBIENTE, dentroDaArea, type AreaAmbiente, type TipoTerrenoVivo } from './ambiente-tipos';
+import { areasEfetivas } from './terrenos-vivos';
 import { passavel } from './fase';
 
 /** A área fere a entidade (fere e não é do elemento dela)? */
-export function ambienteFere(e: Pick<Entidade, 'afinidade'>, a: AreaAmbiente): boolean {
+export function ambienteFere(e: Pick<Entidade, 'afinidade'>, a: Pick<AreaAmbiente, 'tipo'> | { tipo: TipoTerrenoVivo }): boolean {
   return AMBIENTE_FERE[a.tipo] && e.afinidade?.elemento !== ELEMENTO_DO_AMBIENTE[a.tipo];
 }
 
@@ -31,7 +32,8 @@ function armadilhaTemida(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade
 
 /** A célula é perigo para a entidade agora? */
 export function emPerigo(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, x: number, y: number): boolean {
-  if (ctx.fase.ambientes?.some((a) => ambienteFere(e, a) && dentroDaArea(a, x, y))) return true;
+  // 08/11/2026 (D-138): com os terrenos vivos (a água congelada fere; a área apagada não).
+  if (areasEfetivas(estado, ctx.fase.ambientes ?? []).some((a) => ambienteFere(e, a) && dentroDaArea(a, x, y))) return true;
   if (estado.rastros.some((r) => r.x === x && r.y === y && r.ateTick > estado.tick && podeFerir({ id: r.donoId, equipe: r.equipeDono }, e, ctx.modo))) return true;
   if (estado.camposTaticos?.some((c) => c.tipo === 'veneno' && c.ateTick > estado.tick && Math.max(Math.abs(c.x - x), Math.abs(c.y - y)) <= c.raio && podeFerir({ id: c.donoId, equipe: c.equipe }, e, ctx.modo))) return true;
   return estado.armadilhas.some((a) => a.x === x && a.y === y && armadilhaTemida(estado, ctx, e, a));
@@ -46,7 +48,7 @@ export function mapaDePerigo(estado: EstadoJogo, ctx: ContextoSimulacao, e: Enti
     mapa ??= new Uint8Array(largura * altura);
     mapa[y * largura + x] = 1;
   };
-  for (const a of ctx.fase.ambientes ?? []) {
+  for (const a of areasEfetivas(estado, ctx.fase.ambientes ?? [])) {
     if (!ambienteFere(e, a)) continue;
     const r = Math.ceil(a.raio);
     for (let y = a.y - r; y <= a.y + r; y++) for (let x = a.x - r; x <= a.x + r; x++) if (dentroDaArea(a, x, y)) marcar(x, y);

@@ -41,3 +41,10 @@ levemente macabras, sem voz: `necro_conjura` ao começar, `necro_sombra` no lan�
 `necro_ossos` na Lança de ossos, nas Garras e na Explosão cadavérica. O surgimento dos mortos continua a risada
 (`invocacao`). Os seis WAV são sintetizados por `python tools/audio/necromancia.py` (só a biblioteca padrão), que
 também atualiza o manifesto; as entradas levam `adaptacao`, então `importar.py` as preserva.
+
+## Golpes corpo a corpo (08/11/2026, D-138)
+
+O impacto corpo a corpo soa por quem bate (`src/audio/timbres.ts`): a arma do básico ou a da mão, ou o corpo da
+criatura. Os 19 timbres (`golpe_espada`, `golpe_machado`, `golpe_baque`…) são 38 WAV sintetizados por
+`python tools/audio/golpes.py` (só a biblioteca padrão; reaproveita o filtro e a gravação de `necromancia.py`), que
+também atualiza o manifesto (fonte `golpes`, CC0). As entradas levam `adaptacao`, então `importar.py` as preserva.

@@ -1,6 +1,7 @@
 import type { CampoTatico } from '../combat/estado-tatico';
 import type { EstadoVariacao } from '../combat/projeteis-variacoes';
 import type { Solo } from '../combat/solos';
+import type { TerrenoVivo } from '../world/ambiente-tipos';
 // Estado raiz da simulação (§3.3). Um único objeto tipado, só com dados: sem classes,
 // sem funções e sem referências cíclicas, para clonar, comparar (digest) e gravar em checkpoint.
 // O terreno da fase é conteúdo imutável e fica no contexto (D-007); aqui só o `faseId`.
@@ -208,6 +209,8 @@ export interface EstadoJogo {
   camposTaticos?: CampoTatico[];
   /** Marco 27 (29/10/2026, D-126): o solo amaldiçoado do Necromante e a runa do Mago (combat/solos.ts). */
   solos?: Solo[];
+  /** 08/11/2026 (D-138): os terrenos vivos (reações dos elementos e focos do Mundo, world/terrenos-vivos.ts). */
+  terrenos?: TerrenoVivo[];
   /** Marco 24: fases agendadas (ausente = nenhuma). */
   fases?: FaseAgendada[];
   versao: 1;
@@ -276,6 +279,7 @@ export function clonarEstado(estado: EstadoJogo): EstadoJogo {
   return {
     ...(estado.fases ? { fases: estado.fases.map((x) => ({ ...x })) } : {}),
     ...(estado.solos ? { solos: estado.solos.map((s) => ({ ...s })) } : {}),
+    ...(estado.terrenos ? { terrenos: estado.terrenos.map((t) => ({ ...t })) } : {}),
     ...(estado.camposTaticos ? { camposTaticos: estado.camposTaticos.map((c) => ({ ...c, efeito: copiaEfeito(c.efeito) })) } : {}),
     versao: estado.versao,
     faseId: estado.faseId,

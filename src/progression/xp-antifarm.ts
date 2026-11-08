@@ -36,6 +36,19 @@ export function aplicaAntifarmDeFase(ctx: ContextoSimulacao, jogador: Entidade, 
   return !!jogador.bolsa && ctx.modo.sobrevivencia.estudoAvanca && !morto.invocacao && morto.controlador === 'ia';
 }
 
+/**
+ * 08/11/2026 (D-138): o XP do chefe da masmorra do Mundo para quem já a fez: metade a cada vez (até 1 XP) e pela
+ * diferença de nível (o chefe acima rende mais; abaixo, cada vez menos). Os outros abates ficam como estão.
+ */
+export function xpDoChefeDaDungeon(ctx: ContextoSimulacao, jogador: Entidade, morto: Entidade, xp: number): number {
+  const chefe = jogador.bolsa?.dungeonChefe;
+  if (!chefe || chefe.preset !== morto.preset || xp <= 0) return xp;
+  const r = ctx.balance.mundo.repeticaoDungeon;
+  const d = morto.nivel - jogador.nivel;
+  const nivel = d >= 0 ? 1 + Math.min(r.bonusMaxPct, d * r.bonusPorNivelPct) / 100 : 0.5 ** (-d / Math.max(1, r.niveisPorMetade));
+  return Math.max(1, Math.round(xp * r.fatorPorVez ** chefe.vezes * nivel));
+}
+
 export function xpDeCriatura(estado: EstadoJogo, ctx: ContextoSimulacao, jogador: Entidade, morto: Entidade, bruto: number): number {
   if (!aplicaAntifarmDeFase(ctx, jogador, morto) || !jogador.bolsa || bruto <= 0) return bruto;
   const nivel = nivelDaFase(ctx, morto);

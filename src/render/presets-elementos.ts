@@ -39,6 +39,7 @@ export type NomePresetElemento =
   | 'rachadura'
   | 'aparo'
   | 'dominio_aura'
+  | 'dominio_aura_faisca'
   | 'dominio_orbe'
   | 'dominio_explosao'
   | 'dominio_legiao';
@@ -132,8 +133,10 @@ export const PRESETS_ELEMENTOS: Readonly<Record<NomePresetElemento, Lista>> = {
     { textura: 'faisca', quantidade: 10, vidaMs: [160, 260], velocidade: [180, 300], direcao: 'livre', gravidade: 0, escala: [0.8, 0.2], alpha: [1, 0], aditivo: true, raio: 2, cor: 0xffffff, arrasto: 0.6 },
   ],
   // Marco 28 (30/10/2026, D-127): os marcos do atributo de classe (render/efeitos-dominio.ts).
-  // A borda da aura do Guerreiro: um ponto de luz que sobe devagar em cada célula da borda.
-  dominio_aura: [{ textura: 'brilho', quantidade: 1, vidaMs: [700, 1000], velocidade: [4, 10], direcao: 'cima', gravidade: -4, escala: [0.35, 0.05], alpha: [0.55, 0], aditivo: true, raio: 6, cor: null, curvaAlpha: 'sino' }],
+  // A borda da aura do Guerreiro. Ajuste de 08/11/2026 (D-138): o anel no chão, de brilhos juntos que quase não sobem
+  // (eram pontos pequenos e fracos, sumiam no escuro); nos marcos mais altos, faíscas sobem do anel.
+  dominio_aura: [{ textura: 'brilho', quantidade: 1, vidaMs: [650, 900], velocidade: [0, 4], direcao: 'cima', gravidade: -2, escala: [0.6, 0.4], alpha: [0.85, 0], aditivo: true, raio: 1, cor: null, curvaAlpha: 'sino' }],
+  dominio_aura_faisca: [{ textura: 'faisca', quantidade: 1, vidaMs: [500, 750], velocidade: [18, 34], direcao: 'cima', gravidade: -10, escala: [0.6, 0.15], alpha: [0.9, 0], aditivo: true, raio: 2, cor: null, abertura: 0.2 }],
   // O orbe do Mago: um núcleo brilhante com um rastro curto.
   dominio_orbe: [
     { textura: 'brilho', quantidade: 1, vidaMs: [160, 220], velocidade: [0, 0], direcao: 'livre', gravidade: 0, escala: [0.7, 0.4], alpha: [1, 0], aditivo: true, raio: 0, cor: null },

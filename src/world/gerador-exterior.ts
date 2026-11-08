@@ -14,6 +14,7 @@ import { LADOS, portaDa, vizinha, type Bioma, type LadoDaRegiao, type PapelNpc, 
 import type { Celula } from '../core/comandos';
 import type { FaseJson, InimigoPosicionado, ObjetoPosicionadoJson, SpawnJson, Telhado } from './fase';
 import { armadilhaDeFase } from './armadilhas-de-fase';
+import type { AreaAmbiente, TipoAmbiente } from './ambiente-tipos';
 
 /** Largura da abertura na borda que leva à região vizinha. */
 export const LARGURA_PASSAGEM = 6;
@@ -99,6 +100,18 @@ const CASAS_NA_VILA = 12;
 const SEMENTE_CASAS = 7919;
 /** 06/11/2026 (D-135): o RNG das armadilhas do exterior (separado: mudar a densidade não mexe no resto). */
 const SEMENTE_ARMADILHAS = 15_013;
+const SEMENTE_TERRENOS = 21_011;
+/** As áreas que a fase aceita (world/validacao-ambientes.ts). */
+const MAX_AREAS = 48;
+
+/**
+ * 08/11/2026 (D-138): o terreno que o chefe do elemento deixa em volta do covil (a lava do dragão de fogo, o gelo do
+ * de gelo…). O chefe sem elemento não deixa nada.
+ */
+export const TERRENO_DO_CHEFE: Readonly<Record<string, TipoAmbiente>> = {
+  dragao_fogo: 'brasas', dragao_das_ruinas: 'brasas', dragao_gelo: 'gelo_fino', dragao_raio: 'campo_eletrico',
+  dragao_veneno: 'miasma', necromante_ancestral: 'nevoa_sombria', bruxa_do_pantano: 'miasma',
+};
 
 /**
  * Cabe a casa em (x, y)? A casa só sobre o chão `chao`; a volta de uma célula em `margem` (por onde se passa em
@@ -415,6 +428,7 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
   // 02/11/2026: encontros de bosses fora das vilas e longe de todos os pontos de chegada.
   // RNG próprio: mudar as probabilidades não altera terreno, hordas ou recursos.
   const encontros = regiao.bosses;
+  const chefes: { preset: string; c: Celula; raio: number }[] = [];
   const rngBoss = criarRng(regiao.semente + 104729);
   if (encontros?.presets.length && aleatorio(rngBoss) * 100 < encontros.chancePct) {
     for (let i = 0; i < encontros.quantidade; i++) {
@@ -424,6 +438,7 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
         ![...telhados,...regiao.estruturas].some(t=>c.x+raio>=t.x&&c.x-raio<t.x+t.largura&&c.y+raio>=t.y&&c.y-raio<t.y+t.altura);
       const c = sortearLivre(x => longeDaVila(x) && cabe(x) && spawns.every(s => chebyshev(s, x) >= FOLGA_INIMIGOS * 2));
       if(c) {
+        chefes.push({ preset, c, raio });
         if(ehDragao(preset)) {
           // Só alarga terreno natural: nunca apaga portas, casas, vila ou a moldura da região.
           for(let dy=-raio;dy<=raio;dy++)for(let dx=-raio;dx<=raio;dx++)if(g.interna(c.x+dx,c.y+dy))g.por(c.x+dx,c.y+dy,perfil.chao);
@@ -446,6 +461,8 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     armadilhas.push(armadilhaDeFase(rngArmadilhas, c, { largura: n, altura: n }, inteiro(rngArmadilhas, regiao.nivel[0], regiao.nivel[1]), null));
   }
 
+  const ambientes = terrenosDaRegiao(g, regiao, livres, chefes, naVila, spawns);
+
   const fase: FaseJson = {
     id: `mundo_${reino.id}_${regiao.id}`,
     nome: regiao.nome,
@@ -457,6 +474,55 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     ...(regiao.tema && { tema: regiao.tema }),
     ...(telhados.length > 0 && { telhados }),
     ...(armadilhas.length > 0 && { objetos: armadilhas }),
+    ...(ambientes.length > 0 && { ambientes }),
   };
   return { fase, pontos, passagens, vila: regiao.vila ? { x: regiao.vila.x, y: regiao.vila.y, raio: regiao.vila.raio } : null };
 }
+
+/**
+ * 08/11/2026 (D-138): os terrenos fixos da região, sempre perto do que os explica: em volta do covil do chefe do
+ * elemento (TERRENO_DO_CHEFE), na frente das estruturas do tipo pedido (a névoa na cripta, a luz no templo) ou livres
+ * pelo bioma (a nascente no campo, o lago gelado na neve). Fora da vila os que ferem; RNG próprio (o resto sai igual).
+ */
+function terrenosDaRegiao(g: Grade, regiao: RegiaoDoMundo, livres: readonly Celula[], chefes: readonly { preset: string; c: Celula; raio: number }[], naVila: (c: Celula) => boolean, spawns: readonly Celula[]): AreaAmbiente[] {
+  const rng = criarRng(regiao.semente + SEMENTE_TERRENOS);
+  const areas: AreaAmbiente[] = [];
+  const pode = (c: Celula, tipo: TipoAmbiente, raio: number) => areas.length < MAX_AREAS && g.interna(c.x - raio, c.y - raio) && g.interna(c.x + raio, c.y + raio)
+    && ANDA.has(g.em(c.x, c.y)) && g.em(c.x, c.y) !== '=' && spawns.every((s) => chebyshev(s, c) > raio + 2)
+    && (!naVila(c) || tipo === 'agua' || tipo === 'luz_sagrada') && areas.every((a) => chebyshev(a, c) > a.raio + raio);
+  const por = (c: Celula, tipo: TipoAmbiente, raio: number): boolean => {
+    if (!pode(c, tipo, raio)) return false;
+    // A validação pede o centro em piso ('.'): a grama do centro vira piso.
+    g.por(c.x, c.y, '.');
+    areas.push({ tipo, x: c.x, y: c.y, raio });
+    return true;
+  };
+  /** Perto de um ponto: as células livres entre `de` e `ate` passos dele. */
+  const perto = (centro: Celula, de: number, ate: number) => livres.filter((c) => { const d = chebyshev(c, centro); return d >= de && d <= ate; });
+  const tentar = (candidatas: readonly Celula[], tipo: TipoAmbiente, raio: number) => {
+    for (let t = 0; t < 30 && candidatas.length > 0; t++) if (por(escolher(rng, candidatas), tipo, raio)) return true;
+    return false;
+  };
+  // O covil do chefe do elemento: três poças em volta.
+  for (const chefe of chefes) {
+    const tipo = TERRENO_DO_CHEFE[chefe.preset];
+    if (!tipo) continue;
+    const anel = perto(chefe.c, chefe.raio + 2, chefe.raio + 6);
+    for (let i = 0; i < 3; i++) tentar(anel, tipo, 2);
+  }
+  for (const t of regiao.terrenos ?? []) {
+    for (let i = 0; i < t.quantidade; i++) {
+      if (t.perto === 'livre') tentar(livres, t.tipo, t.raio);
+      else if (t.perto === 'boss') {
+        const chefe = chefes.find((c) => TERRENO_DO_CHEFE[c.preset] === t.tipo);
+        if (chefe) tentar(perto(chefe.c, chefe.raio + 2, chefe.raio + 8), t.tipo, t.raio);
+      } else {
+        const portas = regiao.estruturas.filter((e) => e.tipo === t.perto).map((e) => portaDa(e).frente);
+        const porta = portas[i % Math.max(1, portas.length)];
+        if (porta) tentar(perto(porta, 3, 8), t.tipo, t.raio);
+      }
+    }
+  }
+  return areas;
+}
+

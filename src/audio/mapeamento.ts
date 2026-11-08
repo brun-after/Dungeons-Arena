@@ -34,6 +34,12 @@ export const SONS = [
   'necro_conjura',
   'necro_sombra',
   'necro_ossos',
+  // 08/11/2026 (D-138): os golpes corpo a corpo, um por arma e por criatura (tools/audio/golpes.py, audio/timbres.ts).
+  'golpe_espada', 'golpe_sabre', 'golpe_faca', 'golpe_machado', 'golpe_montante', 'golpe_lanca', 'golpe_rapieira',
+  'golpe_maca', 'golpe_mangual', 'golpe_cajado', 'golpe_foice', 'golpe_livro', 'golpe_soco', 'golpe_baque',
+  'golpe_mordida', 'golpe_garra', 'golpe_garra_pesada', 'golpe_gosma', 'golpe_sombra',
+  // O acerto da flecha (e da seta da besta): o baque surdo, um pouco mais agudo que o dos mortos.
+  'golpe_flecha',
 ] as const;
 export type SomId = (typeof SONS)[number];
 
@@ -90,6 +96,21 @@ export function somDaHabilidade(h: Pick<Habilidade, 'id' | 'tipoAtaque' | 'polit
   return h.tipoAtaque === 'magico' ? 'magia' : 'golpe';
 }
 
+/** 08/11/2026 (D-138): os sons de `visual.som` que só dizem "golpe" (o timbre do atacante fica no lugar deles). */
+const SONS_DE_GOLPE_GENERICOS: readonly SomId[] = ['golpe', 'acerto', 'lamina', 'contundente'];
+
+/** O timbre do golpe corpo a corpo de quem bate (audio/timbres.ts) e se é o básico dele; null: não é corpo a corpo. */
+export type TimbreDoGolpe = (fonteId: string, h: Habilidade) => { som: SomId; basico: boolean } | null;
+
+/** O golpe soa pelo atacante? O básico sempre; a skill só sem elemento nem som próprio. */
+function somPeloAtacante(h: Habilidade, timbre: { som: SomId; basico: boolean } | null): SomId | null {
+  if (!timbre) return null;
+  if (timbre.basico) return timbre.som;
+  const proprio = h.visual?.som;
+  if (h.elemento || somDoNecromante(h) || (ehSom(proprio) && !SONS_DE_GOLPE_GENERICOS.includes(proprio))) return null;
+  return timbre.som;
+}
+
 /** Um som a tocar: global (interface, o próprio jogador) ou numa entidade/posição. */
 export interface PedidoDeSom {
   som: SomId;
@@ -106,6 +127,7 @@ export function sonsDoEvento(
   idLocal: string,
   habilidade: (id: string) => Habilidade | undefined,
   basico: (id: string) => boolean = () => false,
+  timbre: TimbreDoGolpe = () => null,
 ): PedidoDeSom[] {
   switch (ev.t) {
     case 'acaoIniciada': {
@@ -133,6 +155,9 @@ export function sonsDoEvento(
       if (ev.falha) return [{ som: 'falha', origemId: ev.alvoId }];
       const h = habilidade(ev.chave);
       if (ev.imune) return [];
+      // 08/11/2026 (D-138): o golpe corpo a corpo soa pela arma ou pela criatura que bate.
+      const peloAtacante = h ? somPeloAtacante(h, timbre(ev.fonteId, h)) : null;
+      if (peloAtacante) return [{ som: peloAtacante, origemId: ev.alvoId }, ...(ev.critico ? [{ som: 'critico' as const, origemId: ev.alvoId }] : [])];
       const identidade = h ? somDaHabilidade(h, basico(h.id)) : 'acerto';
       const base: SomId = h?.politicaImpacto === 'projetil' && (identidade === 'arco' || identidade === 'projetil')
         ? 'acerto_projetil' : identidade === 'golpe' ? 'acerto' : identidade;

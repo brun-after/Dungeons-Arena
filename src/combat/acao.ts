@@ -55,7 +55,7 @@ import { cargaDaClasse, medidorCheio, ultimateDe } from './carga-ultimate';
 import { fatorDeDominio, fatorDeSkillDeClasse } from '../progression/dominio';
 import { alcanceDoTiroCarregado } from './marcos-arqueiro';
 import { ressonanciaArcana } from './marcos-mago';
-import { barradoNoRefugio, emRefugio } from '../world/refugio';
+import { refugioProtege } from '../world/refugio';
 import { semLinha } from './linha-de-tiro';
 import { registrarRecarga } from './cargas';
 import { lancasDosMortos, temMortos } from './lanca-de-ossos';
@@ -154,8 +154,9 @@ export function alvoOfensivoValido(estado: EstadoJogo, ctx: ContextoSimulacao, a
   const visivel = alvo.invisivelAteTick <= estado.tick || alvo.efeitos.some((f) => f.ateTick > estado.tick && f.origemId === ator.id && REGISTRO_EFEITOS[f.tipo].revela);
   // Marco 24 (25/10/2026, D-098): o falcão não atrai ninguém; só vira alvo de quem já está perseguindo.
   const falcaoFora = !!alvo.invocacao?.companheiro && ator.controlador === 'ia' && ator.ia?.modo !== 'perseguindo';
-  // Marco 30 (30/10/2026, D-129): quem está no refúgio (a vila do Mundo) não é alvo dos monstros.
-  const refugiado = barradoNoRefugio(ator) && emRefugio(ctx.fase, alvo.x, alvo.y);
+  // Marco 30 (30/10/2026, D-129): quem está no refúgio (a vila do Mundo) não é alvo dos monstros. D-138: salvo em
+  // combate com eles; e quem está dentro, sem combate, não fere o monstro de fora.
+  const refugiado = refugioProtege(estado, ctx, ator, alvo);
   return vivo(alvo) && visivel && !falcaoFora && !refugiado && podeFerir(ator, alvo, ctx.modo);
 }
 

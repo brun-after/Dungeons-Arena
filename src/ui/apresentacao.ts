@@ -22,8 +22,9 @@ import type { Camera } from '../render/camera';
 import { EfeitosDeHabilidade } from '../render/efeitos-habilidade';
 import { EfeitosDeClasse } from '../render/efeitos-classe';
 import { EfeitosDeDominio } from '../render/efeitos-dominio';
+import { TerrenosVivosVisual } from '../render/terrenos-vivos-visual';
 import { raioDaAura } from '../combat/ajustes-classes';
-import { marcoDe } from '../progression/dominio';
+import { marcoAMostra } from '../progression/dominio';
 import { EfeitosDeArma } from '../render/efeitos-arma';
 import type { AjusteVisual } from '../render/sprites';
 import { VooDoFalcao } from '../render/voo-falcao';
@@ -53,7 +54,7 @@ import { criarMinimapa } from './minimapa';
 import { criarPausa, type AcaoDaPausa, type OpcaoDificuldade } from './pausa';
 import { criarPrompt } from './prompt';
 import { letraInteragir } from '../input/teclas';
-import { ligarSom } from './som';
+import { ligarSom, timbrePeloEstado } from './som';
 import { classeDaHabilidade } from './runa-dom';
 import { DiretorVfx } from '../render/vfx/diretor';
 
@@ -121,8 +122,9 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   const medidor = new Medidor();
 
   const motor = new MotorAudio({ musica: prefs.volumeMusica, efeitos: prefs.volumeEfeitos, mudo: o.observador || prefs.mudo });
+  const ehBasico = (id: string) => ctx.conteudo.definicoes.get(id)?.basico === true;
   const som = ligarSom({ motor, bus: o.bus, estado: o.estado, idLocal, habilidades: o.habilidades,
-    basico: (id) => ctx.conteudo.definicoes.get(id)?.basico === true, fase: ctx.fase });
+    basico: ehBasico, timbre: timbrePeloEstado(ctx, o.estado, ehBasico), fase: ctx.fase });
   const particulas = new SistemaParticulas(palco.efeitos, palco.app.renderer, () => camera.projecaoAtual);
   const impacto = new ControladorImpacto(() => prefs.efeitosDeTela && !reduzido() && qualidade().impacto);
   // Marco 23 (D-092): o tema da fase dá as partículas do ar, a cor da luz e as tochas acesas.
@@ -179,15 +181,23 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   };
   const efeitosDominio = new EfeitosDeDominio({
     particulas,
-    auraDe: (e, tick) => marcoDe(ctx, e, 'auraVisivel') > 0
-      ? { raio: raioDaAura(ctx, e, tick), cor: (marcoDe(ctx, e, 'auraElementalPct') > 0 ? corDoElemento(e.aparencia?.elementoArma) : null) ?? 0xffd86b }
-      : null,
+    // 08/11/2026 (D-138): pelo que é público (sem a bolsa, no online e no Mundo, a aura sumia); a força conta os
+    // marcos alcançados (25, 50, 75 e 100: o anel fica mais denso e mais claro).
+    auraDe: (e, tick) => {
+      if (marcoAMostra(ctx, e, 'auraVisivel') <= 0) return null;
+      const raio = e.bolsa ? raioDaAura(ctx, e, tick) : ctx.balance.ajustesClasses.guerreiro.auraRaio + marcoAMostra(ctx, e, 'auraRaio');
+      const cor = (marcoAMostra(ctx, e, 'auraElementalPct') > 0 ? corDoElemento(e.aparencia?.elementoArma) : null) ?? 0xffd86b;
+      return { raio, cor, forca: Math.min(4, Math.max(1, Math.floor(e.atributos.dominio / 25))) };
+    },
     orbesDe: (e) => {
-      const n = e.encarnacao ? marcoDe(ctx, e, 'orbes') : 0;
+      const n = e.encarnacao ? marcoAMostra(ctx, e, 'orbes') : 0;
       return n > 0 ? { n, cor: corDoElemento(e.encarnacao) ?? 0xffffff } : null;
     },
   });
   efeitosDominio.ligar(o.bus, o.estado);
+  // 08/11/2026 (D-138): os terrenos vivos (a água congelada, o vapor, os focos do Mundo).
+  const terrenosVivos = new TerrenosVivosVisual(particulas);
+  terrenosVivos.ligar(o.bus);
   const combos = new CamadaCombosTaticos(palco.efeitos, () => camera.projecaoAtual, reduzido, () => qualidade().particulas === 0, 24, particulas);
   combos.ligar(o.bus, o.estado, () => performance.now());
   const luz = new CamadaLuz(palco.luz);
@@ -357,6 +367,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
       efeitos.quadro(estado, agoraMs, posicao);
       efeitosClasse.quadro(estado, agoraMs, posicao);
       efeitosDominio.quadro(estado, agoraMs, posicao);
+      terrenosVivos.quadro(estado, agoraMs, pos);
       efeitosArma.quadro(estado, agoraMs, posicao);
       combos.desenhar(estado, agoraMs);
       particulas.atualizar(Math.min(100, dtMs));

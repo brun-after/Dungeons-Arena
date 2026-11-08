@@ -140,6 +140,13 @@
       "pagina": "https://github.com/brun-after/Dungeons-Arena/blob/main/tools/audio/necromancia.py",
       "licenca": "CC0-1.0",
       "licencaUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    "golpes": {
+      "autor": "Dungeons Arena",
+      "titulo": "Golpes corpo a corpo (sintetizados por tools/audio/golpes.py)",
+      "pagina": "https://github.com/brun-after/Dungeons-Arena/blob/main/tools/audio/golpes.py",
+      "licenca": "CC0-1.0",
+      "licencaUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
     }
   },
   "arquivos": {
@@ -854,6 +861,406 @@
       "sha256": "732da36089761848e2f151dcd668cbe45edc771bf29da5da7577455b33ae6318",
       "originalSha256": "6b00382a0414006479333cc95bbc0a913e75c83e4aeb2b7f1c538c63072f7235",
       "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_espada-1": {
+      "arquivo": "golpe_espada-1.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.42,
+      "sha256": "b94667485badfeddecd98088dfc22095f0114ba9807ddbb6c930522e584f3cfe",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_espada-2": {
+      "arquivo": "golpe_espada-2.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.42,
+      "sha256": "acf670a12c39cb4b79afb57e2bd3c7b234a5cc98ea758c69e459eb4c90981113",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_sabre-1": {
+      "arquivo": "golpe_sabre-1.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.36,
+      "sha256": "56253e9e78b772f603697f7c48c5a41d95b0e639020c64b90032f6e56b8434e5",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_sabre-2": {
+      "arquivo": "golpe_sabre-2.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.36,
+      "sha256": "a0512bee62194fee17e954a4b525c4e8f30493ae21ed1dac12b7f539ae641394",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_faca-1": {
+      "arquivo": "golpe_faca-1.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.26,
+      "sha256": "9264ee8329cd9b68d11d8be50afa34b45cc517561c5c11ca6841aba0c7f3d114",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_faca-2": {
+      "arquivo": "golpe_faca-2.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.26,
+      "sha256": "602434d88c25a88628d01180c8303baeb758331cf20e14179cd91df3217b6f2c",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_machado-1": {
+      "arquivo": "golpe_machado-1.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.5,
+      "sha256": "96a91df4cc964fd4389729a7bc02d6793986cf11a5bf483a732ef2f1e3146be8",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_machado-2": {
+      "arquivo": "golpe_machado-2.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.5,
+      "sha256": "02624e3844ae1f0d5768f6f497fef0c464f40295c2d6440fbaa5db07af6f0b87",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_montante-1": {
+      "arquivo": "golpe_montante-1.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.6,
+      "sha256": "2fe33b545ae2e12f78ffd1c64a053165c4265dca5aa9a940937755150098b988",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_montante-2": {
+      "arquivo": "golpe_montante-2.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.6,
+      "sha256": "8a16dc3fa8760524f06f5300f2f720687055d4a86ead7ca8534c24ea6af0a003",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_lanca-1": {
+      "arquivo": "golpe_lanca-1.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.32,
+      "sha256": "f27a02e2d62291e40ec5c49915ec3f4f63435bb94b6eb0c932c1aa73faf193da",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_lanca-2": {
+      "arquivo": "golpe_lanca-2.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.32,
+      "sha256": "24f1258ab581fb683718a395d9e4913850375d2b6ffbee6ddbe95ace69fad527",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_rapieira-1": {
+      "arquivo": "golpe_rapieira-1.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.26,
+      "sha256": "2f3e2daf4b645ea029c97ba7477a84a561d3aadf8c1c8414026e827b6e02e0e4",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_rapieira-2": {
+      "arquivo": "golpe_rapieira-2.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.26,
+      "sha256": "71eecb8933bd31f50dbc04bf3abd7882e584f1cc6cd6984a2c5ae8930a6dd078",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_maca-1": {
+      "arquivo": "golpe_maca-1.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.55,
+      "sha256": "c2df0fe18cc8163689df78405aa866cd0a75823c1e9c03137699b0f718ef3e3b",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_maca-2": {
+      "arquivo": "golpe_maca-2.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.55,
+      "sha256": "053038c0a5a5769d2cfc10ebf0921bc60c4c19f887ff0ef92f9de29d74b84f4b",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_mangual-1": {
+      "arquivo": "golpe_mangual-1.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.6,
+      "sha256": "ffb882a6b43f952e919908c85002088f5734f661fabe66b789da4fa8fe1f378f",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_mangual-2": {
+      "arquivo": "golpe_mangual-2.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.6,
+      "sha256": "6b01efd19157cf564bd2e302c607c4a1f1974d85c62ce0ae76aca3b2d8e3f81c",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_cajado-1": {
+      "arquivo": "golpe_cajado-1.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.36,
+      "sha256": "a6d0a7f077472a87ef29ff113cdf6230a5c56e149a84f880d7d0550117555092",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_cajado-2": {
+      "arquivo": "golpe_cajado-2.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.36,
+      "sha256": "14b3d29f408ef470c31a78baa02c1b6f3d09e9d17984f0df8a35faa88b3b917a",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_foice-1": {
+      "arquivo": "golpe_foice-1.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.5,
+      "sha256": "342900f0998a8aa8e92998ff96dddf52ac2304f46922431253de32c09f440f48",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_foice-2": {
+      "arquivo": "golpe_foice-2.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.5,
+      "sha256": "12fdce3ce1b17c1a0e79474ba74d13d3bcbd3f6826f7e3d02c8f7472ae6b2c18",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_livro-1": {
+      "arquivo": "golpe_livro-1.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.3,
+      "sha256": "e66d68e689416e92692de2625c1be70789760187d39134bdfbc46c0fcfbbea11",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_livro-2": {
+      "arquivo": "golpe_livro-2.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.3,
+      "sha256": "5308a6d3418028756eb8b601b00d6d127f3b52aa87025a9549ee20b90739e121",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_soco-1": {
+      "arquivo": "golpe_soco-1.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.32,
+      "sha256": "c27f90a354a4345954a2b811bc2dffe65d8d9633b48d1d2a05f0bb9786e51e75",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_soco-2": {
+      "arquivo": "golpe_soco-2.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.32,
+      "sha256": "ab1e78b7852c31ada0b7cf19bceac9b1f52ec94d4bc1c2875268cac591c7f51e",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_baque-1": {
+      "arquivo": "golpe_baque-1.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.55,
+      "sha256": "6b34ee58fe15bfbe4bd151b4a9e119ec817675c1edb8b187005644cb8603f50c",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_baque-2": {
+      "arquivo": "golpe_baque-2.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.55,
+      "sha256": "d2cee9575796dd08f260f8384d94777d1d8107e3d7c9c44a19c2bd3054c369af",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_mordida-1": {
+      "arquivo": "golpe_mordida-1.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.36,
+      "sha256": "57935455840a9abd5905a05f1528186d90ce84564b064eb2efe63f60618c283a",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_mordida-2": {
+      "arquivo": "golpe_mordida-2.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.36,
+      "sha256": "420c05b9ea8bd4e85851e26daf9c8d822acaa9054e64a7d874c6884a282925ab",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_garra-1": {
+      "arquivo": "golpe_garra-1.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.3,
+      "sha256": "72f34c5a7a4d6e3e5c31f4fcda4ac8207df3b676b3a01f8c0ea6d6da40ac13f5",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_garra-2": {
+      "arquivo": "golpe_garra-2.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.3,
+      "sha256": "49de3ae9a9f1bd4858e3c0bdc0334cbc66af699d49a367837fd30b611d078089",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_garra_pesada-1": {
+      "arquivo": "golpe_garra_pesada-1.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.7,
+      "sha256": "603942a24ce6812237a482d2209b28fb6ab906ed9578e90ae8d4bbcbc3e38155",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_garra_pesada-2": {
+      "arquivo": "golpe_garra_pesada-2.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.7,
+      "sha256": "ed6323c5f8b3f1aacd6305f43b55cc9ab6b8c8afc08f11f686d2560a79e5adc4",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_gosma-1": {
+      "arquivo": "golpe_gosma-1.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.4,
+      "sha256": "0fb32db52fc33b6860efe320e12ed88f180b916afde20240e410f5b646a029a1",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_gosma-2": {
+      "arquivo": "golpe_gosma-2.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.4,
+      "sha256": "6bd24a720729d406dce01851887cd2e638bbc98dd9ab2be86c3f49be441902ba",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_sombra-1": {
+      "arquivo": "golpe_sombra-1.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.5,
+      "sha256": "5d82937a64478b3bac72f9a5b4f55ddf25ab7e7ea7ccbc0f3a7c824b6427abef",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_sombra-2": {
+      "arquivo": "golpe_sombra-2.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.5,
+      "sha256": "249826dda3a3cf692226c5039f279f6a489cf9ee9236ce655a484701026c8aa1",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_flecha-1": {
+      "arquivo": "golpe_flecha-1.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.4,
+      "sha256": "1c4eed373b65447e448f5874df392523dfb4821b001bcbd15063c133272c6f66",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "golpe_flecha-2": {
+      "arquivo": "golpe_flecha-2.wav",
+      "fonte": "golpes",
+      "original": "golpes.py",
+      "tipo": "efeito",
+      "duracao": 0.4,
+      "sha256": "5d055402a66629ae07d0cf7f3bf5794ca6e4460e860df1bc72c8b99c07c0be32",
+      "originalSha256": "545189fe2ab2483c8d59665abe4ee8499e71af09edc5dcced0313521986204ea",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
     }
   },
   "efeitos": {
@@ -1003,6 +1410,86 @@
     "necro_ossos": [
       "necro_ossos-1",
       "necro_ossos-2"
+    ],
+    "golpe_espada": [
+      "golpe_espada-1",
+      "golpe_espada-2"
+    ],
+    "golpe_sabre": [
+      "golpe_sabre-1",
+      "golpe_sabre-2"
+    ],
+    "golpe_faca": [
+      "golpe_faca-1",
+      "golpe_faca-2"
+    ],
+    "golpe_machado": [
+      "golpe_machado-1",
+      "golpe_machado-2"
+    ],
+    "golpe_montante": [
+      "golpe_montante-1",
+      "golpe_montante-2"
+    ],
+    "golpe_lanca": [
+      "golpe_lanca-1",
+      "golpe_lanca-2"
+    ],
+    "golpe_rapieira": [
+      "golpe_rapieira-1",
+      "golpe_rapieira-2"
+    ],
+    "golpe_maca": [
+      "golpe_maca-1",
+      "golpe_maca-2"
+    ],
+    "golpe_mangual": [
+      "golpe_mangual-1",
+      "golpe_mangual-2"
+    ],
+    "golpe_cajado": [
+      "golpe_cajado-1",
+      "golpe_cajado-2"
+    ],
+    "golpe_foice": [
+      "golpe_foice-1",
+      "golpe_foice-2"
+    ],
+    "golpe_livro": [
+      "golpe_livro-1",
+      "golpe_livro-2"
+    ],
+    "golpe_soco": [
+      "golpe_soco-1",
+      "golpe_soco-2"
+    ],
+    "golpe_baque": [
+      "golpe_baque-1",
+      "golpe_baque-2"
+    ],
+    "golpe_mordida": [
+      "golpe_mordida-1",
+      "golpe_mordida-2"
+    ],
+    "golpe_garra": [
+      "golpe_garra-1",
+      "golpe_garra-2"
+    ],
+    "golpe_garra_pesada": [
+      "golpe_garra_pesada-1",
+      "golpe_garra_pesada-2"
+    ],
+    "golpe_gosma": [
+      "golpe_gosma-1",
+      "golpe_gosma-2"
+    ],
+    "golpe_sombra": [
+      "golpe_sombra-1",
+      "golpe_sombra-2"
+    ],
+    "golpe_flecha": [
+      "golpe_flecha-1",
+      "golpe_flecha-2"
     ]
   },
   "ambientes": {

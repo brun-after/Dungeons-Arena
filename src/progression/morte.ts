@@ -1,4 +1,4 @@
-import { aplicaAntifarmDeFase, xpDeCriatura } from './xp-antifarm';
+import { aplicaAntifarmDeFase, xpDeCriatura, xpDoChefeDaDungeon } from './xp-antifarm';
 import { criarTumulo } from '../mundo/objetos-mundo';
 import { novaMemoria } from '../combat/estado-tatico';
 import { colherMorto } from '../combat/necromancia';
@@ -102,7 +102,8 @@ function concederXp(estado: EstadoJogo, ctx: ContextoSimulacao, morto: Entidade,
     const bruto = aplicaAntifarmDeFase(ctx, p, morto) ? morto.xpBase * recompensa * parte(p)
       : p.nivel >= faixa.nivelInicio && ctx.modo.sobrevivencia.estudoAvanca
         ? morto.xpBase * ctx.balance.xp.decaimentoAntifarm ** morto.abates * recompensa * parte(p) : cota(p);
-    concederXpDeProgressao(p, ctx, xpDeCriatura(estado, ctx, p, morto, bruto * fator), estado.tick, saida);
+    // D-138: o chefe da masmorra do Mundo rende menos a cada repetição e pela diferença de nível.
+    concederXpDeProgressao(p, ctx, xpDoChefeDaDungeon(ctx, p, morto, xpDeCriatura(estado, ctx, p, morto, bruto * fator)), estado.tick, saida);
   }
 }
 

@@ -90,7 +90,9 @@
       "estruturas": [{"id": "porta_gruta_das_nascentes", "nome": "Gruta das Nascentes", "tipo": "caverna", "x": 38, "y": 52, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "gruta_das_nascentes"}}, {"id": "porta_gruta_do_orvalho", "nome": "Gruta do Orvalho", "tipo": "caverna", "x": 43, "y": 173, "largura": 7, "altura": 4, "destino": {"tipo": "masmorra", "id": "gruta_do_orvalho"}}, {"id": "porta_fornalha_do_dragao", "nome": "Fornalha do Dragão", "tipo": "templo", "x": 173, "y": 175, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "fornalha_do_dragao"}}, {"id": "porta_caverna_dos_ecos", "nome": "Caverna dos Ecos", "tipo": "caverna", "x": 173, "y": 43, "largura": 7, "altura": 4, "destino": {"tipo": "masmorra", "id": "caverna_dos_ecos"}}],
       "coleta": [{"itemId": "erva_curativa", "quantidade": 10}, {"itemId": "minerio_ferro", "quantidade": 6}],
       "tamanho": 240,
-      "bosses": {"presets": ["necromante_ancestral", "dragao_fogo", "dragao_gelo", "dragao_raio", "dragao_veneno"], "chancePct": 5, "quantidade": 1}
+      "bosses": {"presets": ["necromante_ancestral", "dragao_fogo", "dragao_gelo", "dragao_raio", "dragao_veneno"], "chancePct": 5, "quantidade": 1},
+      "terrenos": [{"tipo": "agua", "perto": "livre", "quantidade": 3, "raio": 2}, {"tipo": "agua", "perto": "caverna", "quantidade": 1, "raio": 2}, {"tipo": "luz_sagrada", "perto": "templo", "quantidade": 1, "raio": 2}],
+      "focos": []
     },
     {
       "id": "campos_do_oeste",
@@ -106,7 +108,11 @@
       "estruturas": [{"id": "porta_toca_goblins", "nome": "Toca dos Goblins", "tipo": "caverna", "x": 51, "y": 62, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "toca_dos_goblins"}}, {"id": "porta_santuario_das_fontes", "nome": "Santuário das Fontes", "tipo": "torre", "x": 40, "y": 158, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "santuario_das_fontes"}}, {"id": "porta_abismo_glacial", "nome": "Abismo Glacial", "tipo": "caverna", "x": 158, "y": 161, "largura": 7, "altura": 4, "destino": {"tipo": "masmorra", "id": "abismo_glacial"}}, {"id": "porta_santuario_das_escamas", "nome": "Santuário das Escamas", "tipo": "torre", "x": 158, "y": 40, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "santuario_das_escamas"}}],
       "coleta": [{"itemId": "erva_curativa", "quantidade": 12}, {"itemId": "minerio_ferro", "quantidade": 8}],
       "tamanho": 220,
-      "bosses": {"presets": ["necromante_ancestral", "dragao_fogo", "dragao_gelo", "dragao_raio", "dragao_veneno"], "chancePct": 25, "quantidade": 1}
+      "bosses": {"presets": ["dragao_raio"], "chancePct": 25, "quantidade": 1},
+      "terrenos": [{"tipo": "agua", "perto": "livre", "quantidade": 3, "raio": 2}, {"tipo": "campo_eletrico", "perto": "torre", "quantidade": 2, "raio": 1}],
+      "focos": [
+        {"id": "tempestade_da_torre", "tipo": "campo_eletrico", "perto": "torre", "raio": 2, "areas": 3, "chancePct": 35, "janelaMin": 30, "duracaoMin": 8, "boss": {"preset": "dragao_raio", "chancePct": 30}}
+      ]
     },
     {
       "id": "encosta_do_leste",
@@ -123,7 +129,11 @@
       "estruturas": [{"id": "porta_catacumbas", "nome": "Catacumbas de Pedravale", "tipo": "cripta", "x": 144, "y": 40, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "catacumbas_pedravale"}}, {"id": "porta_cavernas_do_uivo", "nome": "Cavernas do Uivo", "tipo": "caverna", "x": 36, "y": 144, "largura": 7, "altura": 4, "destino": {"tipo": "masmorra", "id": "cavernas_do_uivo"}}, {"id": "porta_torre_da_nevasca", "nome": "Torre da Nevasca", "tipo": "cripta", "x": 144, "y": 146, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "torre_da_nevasca"}}],
       "coleta": [{"itemId": "minerio_ferro", "quantidade": 10}, {"itemId": "minerio_prata", "quantidade": 4}],
       "tamanho": 200,
-      "bosses": {"presets": ["necromante_ancestral", "dragao_fogo", "dragao_gelo", "dragao_raio", "dragao_veneno"], "chancePct": 5, "quantidade": 1}
+      "bosses": {"presets": ["necromante_ancestral"], "chancePct": 5, "quantidade": 1},
+      "terrenos": [{"tipo": "nevoa_sombria", "perto": "cripta", "quantidade": 2, "raio": 2}, {"tipo": "agua", "perto": "livre", "quantidade": 1, "raio": 2}],
+      "focos": [
+        {"id": "sombra_da_cripta", "tipo": "nevoa_sombria", "perto": "cripta", "raio": 2, "areas": 3, "chancePct": 30, "janelaMin": 30, "duracaoMin": 8, "boss": {"preset": "necromante_ancestral", "chancePct": 20}}
+      ]
     },
     {
       "id": "floresta_antiga",
@@ -139,7 +149,11 @@
       "estruturas": [{"id": "porta_cripta_das_raizes", "nome": "Cripta das Raízes", "tipo": "cripta", "x": 55, "y": 158, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "cripta_das_raizes"}}, {"id": "porta_torre_dos_saqueadores", "nome": "Torre dos Saqueadores", "tipo": "templo", "x": 47, "y": 187, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "torre_dos_saqueadores"}}, {"id": "porta_caverna_da_peconha", "nome": "Caverna da Peçonha", "tipo": "caverna", "x": 187, "y": 190, "largura": 7, "altura": 4, "destino": {"tipo": "masmorra", "id": "caverna_da_peconha"}}],
       "coleta": [{"itemId": "erva_curativa", "quantidade": 8}, {"itemId": "erva_lunar", "quantidade": 6}],
       "tamanho": 260,
-      "bosses": {"presets": ["necromante_ancestral", "dragao_fogo", "dragao_gelo", "dragao_raio", "dragao_veneno"], "chancePct": 25, "quantidade": 1}
+      "bosses": {"presets": ["dragao_veneno"], "chancePct": 25, "quantidade": 1},
+      "terrenos": [{"tipo": "agua", "perto": "livre", "quantidade": 2, "raio": 2}, {"tipo": "lama", "perto": "livre", "quantidade": 2, "raio": 2}, {"tipo": "luz_sagrada", "perto": "templo", "quantidade": 1, "raio": 2}, {"tipo": "nevoa_sombria", "perto": "cripta", "quantidade": 1, "raio": 2}],
+      "focos": [
+        {"id": "luz_do_templo", "tipo": "luz_sagrada", "perto": "templo", "raio": 2, "areas": 3, "chancePct": 30, "janelaMin": 30, "duracaoMin": 8, "boss": null}
+      ]
     },
     {
       "id": "ruinas_do_norte",
@@ -155,7 +169,11 @@
       "estruturas": [{"id": "porta_ninho_dragao", "nome": "Ninho do Dragão", "tipo": "castelo", "x": 122, "y": 46, "largura": 9, "altura": 6, "destino": {"tipo": "covil", "id": "ninho_do_dragao"}}, {"id": "porta_cripta_do_silencio", "nome": "Cripta do Silêncio", "tipo": "caverna", "x": 49, "y": 194, "largura": 7, "altura": 4, "destino": {"tipo": "masmorra", "id": "cripta_do_silencio"}}, {"id": "porta_sepulcro_afogado", "nome": "Sepulcro Afogado", "tipo": "torre", "x": 194, "y": 197, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "sepulcro_afogado"}}],
       "coleta": [{"itemId": "cristal_arcano", "quantidade": 6}, {"itemId": "minerio_prata", "quantidade": 6}],
       "tamanho": 270,
-      "bosses": {"presets": ["necromante_ancestral", "dragao_fogo", "dragao_gelo", "dragao_raio", "dragao_veneno"], "chancePct": 100, "quantidade": 2}
+      "bosses": {"presets": ["dragao_fogo", "dragao_das_ruinas"], "chancePct": 100, "quantidade": 2},
+      "terrenos": [{"tipo": "brasas", "perto": "livre", "quantidade": 4, "raio": 2}, {"tipo": "brasas", "perto": "castelo", "quantidade": 2, "raio": 2}, {"tipo": "brasas", "perto": "boss", "quantidade": 2, "raio": 2}],
+      "focos": [
+        {"id": "erupcao", "tipo": "brasas", "perto": "livre", "raio": 3, "areas": 4, "chancePct": 40, "janelaMin": 25, "duracaoMin": 10, "boss": {"preset": "dragao_fogo", "chancePct": 45}}
+      ]
     },
     {
       "id": "pico_gelado",
@@ -171,7 +189,11 @@
       "estruturas": [{"id": "porta_caverna_gelo", "nome": "Caverna de Gelo", "tipo": "caverna", "x": 151, "y": 65, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "caverna_de_gelo"}, "escondida": true}, {"id": "porta_gruta_de_ambar", "nome": "Gruta de Âmbar", "tipo": "cripta", "x": 41, "y": 166, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "gruta_de_ambar"}}, {"id": "porta_galerias_da_tempestade", "nome": "Galerias da Tempestade", "tipo": "caverna", "x": 166, "y": 168, "largura": 7, "altura": 4, "destino": {"tipo": "masmorra", "id": "galerias_da_tempestade"}}],
       "coleta": [{"itemId": "minerio_prata", "quantidade": 8}, {"itemId": "cristal_arcano", "quantidade": 3}],
       "tamanho": 230,
-      "bosses": {"presets": ["necromante_ancestral", "dragao_fogo", "dragao_gelo", "dragao_raio", "dragao_veneno"], "chancePct": 25, "quantidade": 1}
+      "bosses": {"presets": ["dragao_gelo"], "chancePct": 25, "quantidade": 1},
+      "terrenos": [{"tipo": "gelo_fino", "perto": "livre", "quantidade": 4, "raio": 2}, {"tipo": "agua", "perto": "livre", "quantidade": 1, "raio": 2}, {"tipo": "gelo_fino", "perto": "caverna", "quantidade": 1, "raio": 2}, {"tipo": "nevoa_sombria", "perto": "cripta", "quantidade": 1, "raio": 2}],
+      "focos": [
+        {"id": "nevasca", "tipo": "gelo_fino", "perto": "livre", "raio": 3, "areas": 4, "chancePct": 40, "janelaMin": 25, "duracaoMin": 10, "boss": {"preset": "dragao_gelo", "chancePct": 45}}
+      ]
     },
     {
       "id": "pantano_sombrio",
@@ -187,7 +209,11 @@
       "estruturas": [{"id": "porta_cabana_bruxa", "nome": "Cabana da Bruxa", "tipo": "torre", "x": 66, "y": 156, "largura": 5, "altura": 5, "destino": {"tipo": "covil", "id": "cabana_da_bruxa"}}, {"id": "porta_ruinas_afogadas", "nome": "Ruínas Afogadas", "tipo": "templo", "x": 180, "y": 55, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "ruinas_afogadas"}}, {"id": "porta_caverna_das_esporas", "nome": "Caverna das Esporas", "tipo": "caverna", "x": 45, "y": 180, "largura": 7, "altura": 4, "destino": {"tipo": "masmorra", "id": "caverna_das_esporas"}}, {"id": "porta_bastiao_das_cinzas", "nome": "Bastião das Cinzas", "tipo": "templo", "x": 180, "y": 182, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "bastiao_das_cinzas"}}],
       "coleta": [{"itemId": "flor_de_fogo", "quantidade": 6}, {"itemId": "erva_lunar", "quantidade": 8}],
       "tamanho": 250,
-      "bosses": {"presets": ["necromante_ancestral", "dragao_fogo", "dragao_gelo", "dragao_raio", "dragao_veneno"], "chancePct": 25, "quantidade": 1}
+      "bosses": {"presets": ["dragao_veneno"], "chancePct": 25, "quantidade": 1},
+      "terrenos": [{"tipo": "miasma", "perto": "livre", "quantidade": 3, "raio": 2}, {"tipo": "lama", "perto": "livre", "quantidade": 3, "raio": 2}, {"tipo": "agua", "perto": "livre", "quantidade": 2, "raio": 2}, {"tipo": "nevoa_sombria", "perto": "torre", "quantidade": 1, "raio": 2}, {"tipo": "luz_sagrada", "perto": "templo", "quantidade": 1, "raio": 2}],
+      "focos": [
+        {"id": "brejo_podre", "tipo": "miasma", "perto": "livre", "raio": 2, "areas": 4, "chancePct": 40, "janelaMin": 25, "duracaoMin": 10, "boss": {"preset": "dragao_veneno", "chancePct": 40}}
+      ]
     },
     {
       "id": "bosque_do_sul",
@@ -203,7 +229,11 @@
       "estruturas": [{"id": "porta_mina_abandonada", "nome": "Mina Abandonada", "tipo": "mina", "x": 68, "y": 165, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "mina_abandonada"}}, {"id": "porta_minas_rei_goblin", "nome": "Minas do Rei Goblin", "tipo": "mina", "x": 165, "y": 161, "largura": 7, "altura": 5, "destino": {"tipo": "covil", "id": "minas_do_rei_goblin"}}, {"id": "porta_templo_das_raizes", "nome": "Templo das Raízes", "tipo": "torre", "x": 43, "y": 173, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "templo_das_raizes"}}, {"id": "porta_gruta_dos_cristais", "nome": "Gruta dos Cristais", "tipo": "caverna", "x": 173, "y": 175, "largura": 7, "altura": 4, "destino": {"tipo": "masmorra", "id": "gruta_dos_cristais"}}],
       "coleta": [{"itemId": "erva_curativa", "quantidade": 8}, {"itemId": "minerio_ferro", "quantidade": 8}],
       "tamanho": 240,
-      "bosses": {"presets": ["necromante_ancestral", "dragao_fogo", "dragao_gelo", "dragao_raio", "dragao_veneno"], "chancePct": 25, "quantidade": 1}
+      "bosses": {"presets": ["dragao_veneno"], "chancePct": 25, "quantidade": 1},
+      "terrenos": [{"tipo": "miasma", "perto": "mina", "quantidade": 2, "raio": 2}, {"tipo": "lama", "perto": "livre", "quantidade": 2, "raio": 2}, {"tipo": "agua", "perto": "livre", "quantidade": 1, "raio": 2}],
+      "focos": [
+        {"id": "esporos", "tipo": "miasma", "perto": "mina", "raio": 2, "areas": 3, "chancePct": 30, "janelaMin": 30, "duracaoMin": 8, "boss": {"preset": "dragao_veneno", "chancePct": 20}}
+      ]
     },
     {
       "id": "colinas_do_sudeste",
@@ -219,7 +249,11 @@
       "estruturas": [{"id": "porta_galerias_de_prata", "nome": "Galerias de Prata", "tipo": "mina", "x": 142, "y": 130, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "galerias_de_prata"}}, {"id": "porta_cripta_do_necromante", "nome": "Cripta do Necromante", "tipo": "caverna", "x": 38, "y": 151, "largura": 7, "altura": 4, "destino": {"tipo": "masmorra", "id": "cripta_do_necromante"}}, {"id": "porta_torre_do_eclipse", "nome": "Torre do Eclipse", "tipo": "cripta", "x": 151, "y": 153, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "torre_do_eclipse"}}],
       "coleta": [{"itemId": "minerio_prata", "quantidade": 8}, {"itemId": "cristal_arcano", "quantidade": 2}],
       "tamanho": 210,
-      "bosses": {"presets": ["necromante_ancestral", "dragao_fogo", "dragao_gelo", "dragao_raio", "dragao_veneno"], "chancePct": 25, "quantidade": 1}
+      "bosses": {"presets": ["dragao_raio"], "chancePct": 25, "quantidade": 1},
+      "terrenos": [{"tipo": "campo_eletrico", "perto": "mina", "quantidade": 2, "raio": 2}, {"tipo": "campo_eletrico", "perto": "livre", "quantidade": 2, "raio": 2}, {"tipo": "nevoa_sombria", "perto": "cripta", "quantidade": 1, "raio": 2}],
+      "focos": [
+        {"id": "tempestade_de_cristal", "tipo": "campo_eletrico", "perto": "livre", "raio": 2, "areas": 4, "chancePct": 40, "janelaMin": 25, "duracaoMin": 10, "boss": {"preset": "dragao_raio", "chancePct": 45}}
+      ]
     }
   ],
   "masmorras": [
