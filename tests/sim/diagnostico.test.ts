@@ -169,10 +169,12 @@ describe('integridade da execução completa', () => {
     expect(() => { validarAmostras([base], 1); }).toThrow('vida restaurada entre ondas');
   });
   it('mantém morte simultânea como derrota sem contar a onda como concluída', () => {
-    // 08/11/2026 (D-139): com a cadência nova o orc vence o arqueiro antes da troca; o mago desta semente troca o golpe letal.
-    const base = simularDiagnostico({ ...configuracao, classe: 'mago', nivel: 1, dificuldade: 'pesadelo', semente: 30295, intervencao: 'sem_pocoes' });
+    // 08/11/2026 (D-141): com o peso 35/65 nenhum duelo da faixa buscada troca o golpe letal; no atrito, o arqueiro
+    // desta semente cai junto com o inimigo da terceira onda (3 abates, só 2 ondas concluídas).
+    const base = simularDiagnostico({ ...configuracao, cenario: 'atrito', classe: 'arqueiro', nivel: 1, dificuldade: 'pesadelo', semente: 18, intervencao: 'sem_pocoes' });
     expect(base.resultado).toBe('morte');
-    expect(base.ondasConcluidas).toBe(0);
+    expect(base.abates).toBe(3);
+    expect(base.ondasConcluidas).toBe(2);
     const controle = simularDiagnostico({ ...base.configuracao, intervencao: 'base' });
     expect(() => { validarAmostras([controle, base], 2); }).not.toThrow();
   });

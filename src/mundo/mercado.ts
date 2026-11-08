@@ -6,7 +6,7 @@
 
 import type { Balance } from '../core/contexto';
 import type { ItemNaMochila } from '../entities/entidade';
-import type { AnuncioVisto } from './avisos';
+import type { AnuncioVisto, MotivoDoMundo } from './avisos';
 
 export type EstadoDoAnuncio = 'aberto' | 'vendido' | 'cancelado' | 'recebido';
 
@@ -56,4 +56,36 @@ export function casaBusca(a: Anuncio, busca: string, nomeDoItem: string): boolea
   const normal = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
   const b = normal(busca.trim());
   return normal(a.item.itemId).includes(b) || normal(nomeDoItem).includes(b);
+}
+
+/**
+ * Marco 38 (08/11/2026, D-142; saiu da sala): o que a sala reserva para o pedido ir ao servidor: o item e a taxa do
+ * anúncio, o ouro da compra, ou nada (listar, cancelar, receber). A recusa volta como motivo.
+ */
+export function reservaDoMercado(
+  bolsa: { mochila: ItemNaMochila[]; ouro: number },
+  acao: { op: string; invId?: string; qtd?: number; preco?: number },
+  r: RegrasDoMercado,
+): { item: ItemNaMochila | null; ouro: number } | MotivoDoMundo {
+  if (acao.op === 'anunciar') {
+    const i = bolsa.mochila.findIndex((m) => m.invId === acao.invId);
+    const m = bolsa.mochila[i];
+    const qtd = acao.qtd ?? 1;
+    const preco = acao.preco ?? 0;
+    const taxa = taxaDeAnuncio(preco, r);
+    if (!m || m.ref === 'resgate_dungeon' || m.qtd < qtd) return 'sem_item';
+    if (preco > r.precoMax) return 'preco_invalido';
+    if (bolsa.ouro < taxa) return 'sem_ouro';
+    m.qtd -= qtd;
+    if (m.qtd <= 0) bolsa.mochila.splice(i, 1);
+    bolsa.ouro -= taxa;
+    return { item: { ...m, qtd }, ouro: taxa };
+  }
+  if (acao.op === 'comprar') {
+    const preco = acao.preco ?? 0;
+    if (bolsa.ouro < preco) return 'sem_ouro';
+    bolsa.ouro -= preco;
+    return { item: null, ouro: preco };
+  }
+  return { item: null, ouro: 0 };
 }

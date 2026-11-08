@@ -83,7 +83,8 @@ const rodar = (s: SalaMundo, n = 1) => {
 };
 
 function irAoNpc(s: SalaMundo, c: ReturnType<typeof entrar>, papel: string) {
-  const o = obter(s.estado.objetos.find((x) => x.tipo === 'npc' && x.ref === papel), papel);
+  // Marco 38 (D-142): o mercado é uma loja (com balcão), não mais um NPC solto.
+  const o = obter(s.estado.objetos.find((x) => (x.tipo === 'npc' || x.tipo === 'loja') && x.ref === papel), papel);
   posicionar(c.e(), o.x, o.y + 1);
   return o;
 }

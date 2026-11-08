@@ -7,6 +7,8 @@
 // Marco 30 (30/10/2026, D-129): as ações do Mundo (quadro de missões, banco, chat, troca; o grupo, o chat do grupo e
 // o mercado vão ao servidor como pendências), os materiais que os monstros deixam, o progresso das missões e o grupo
 // (a entidade leva o `grupo`; a masmorra de quem está em grupo é a instância do grupo).
+// Marco 38 (08/11/2026, D-142): os mercadores errantes andando, as escoltas, os andarilhos que dão missão, a pedra de
+// save no centro das regiões sem vila e a Pedra de retorno com conjuração (mundo/retorno.ts).
 
 import { versaoDoConteudo, type MensagemCliente } from '../arena/protocolo';
 import { SalaArena, type EntradaDePersonagem, type OpcoesSala, type Sessao } from '../arena/sala';
@@ -36,13 +38,18 @@ import type { AcaoDoMundo } from './acoes';
 import type { AvisoDoMundo, DestinoDePortal, MotivoDoMundo } from './avisos';
 import { atenderBanco, atenderMissao, avisoDoBanco, avisoDoQuadro, missoesPorId, type Balcao } from './balcao';
 import { LimiteDoChat } from './chat';
-import { taxaDeAnuncio } from './mercado';
+import { reservaDoMercado } from './mercado';
+import { ErrantesDaRegiao } from './errantes';
+import { EscoltasDaRegiao } from './escoltas';
+import { RetornosDaSala } from './retorno';
+import { chegadaNaPedra, fonteDeMissoesPerto, lugarAoAcaso } from './sala-viagem';
 import { progredirMissoes, type FatoDeMissao } from './missoes-mundo';
 import type { AcaoSocial, PendenciaDoMundo, ResultadoDoMercado } from './pendencias';
 import { atenderChat, atenderTroca, cancelarTrocaDe, type Participante, type SalaSocial } from './sala-social';
 import { TrocasDaSala } from './troca';
 import { descobrir, fichaAtualizada, type FichaDoMundo } from './ficha-mundo';
 import { idDoLugar, montarLugar, type Lugar } from './lugares';
+import { REF_ERRANTE } from './objetos-mundo';
 import { capitalDoAtlas, territorioDoLugar, estruturaDoDestino, LADOS, ladoOposto, portaDa, vizinha, type LadoDaRegiao, type PapelNpc, type Reino, type RegiaoDoMundo } from './reino';
 import type { ExteriorGerado } from '../world/gerador-exterior';
 
@@ -99,6 +106,9 @@ export class SalaMundo extends SalaArena {
   private proximoCheckpoint: number;
   private readonly trocas = new TrocasDaSala();
   private readonly limiteDoChat: LimiteDoChat;
+  private readonly errantes: ErrantesDaRegiao;
+  private readonly escoltas: EscoltasDaRegiao;
+  private readonly retornos = new RetornosDaSala();
 
   constructor(
     readonly reino: Reino,
@@ -116,6 +126,8 @@ export class SalaMundo extends SalaArena {
     const chat = this.ctx.balance.mundo.chat;
     this.limiteDoChat = new LimiteDoChat(chat.porJanela, chat.janelaS * 1000);
     this.modoDaRegiao = this.ctx.modo;
+    this.errantes = new ErrantesDaRegiao(this.exterior?.rotas ?? []);
+    this.escoltas = new EscoltasDaRegiao(lugar.tipo === 'regiao' ? lugar.regiao : null);
   }
 
   get idLugar(): string {
@@ -156,7 +168,7 @@ export class SalaMundo extends SalaArena {
     if (e.bolsa && this.lugar.tipo === 'masmorra') e.bolsa.dungeonChefe = { preset: this.lugar.masmorra.boss, vezes: reserva.ficha.chefesDungeon?.[this.lugar.masmorra.id] ?? 0 };
     else if (e.bolsa) delete e.bolsa.dungeonChefe;
     e.equipe = equipeDeEntrada(this.ctx.modo, jogadorId, this.estado);
-    const origem = reserva.chegada ?? this.ctx.fase.spawns[0] ?? { x: 1, y: 1 };
+    const origem = reserva.chegada ?? chegadaNaPedra(this.exterior) ?? this.ctx.fase.spawns[0] ?? { x: 1, y: 1 };
     colocarEm(e, celulaDeEntrada(this.estado, this.ctx, e, origem));
     this.estado.entidades.push(e);
     const ficha = { ...reserva.ficha, descobertas: [...reserva.ficha.descobertas] };
@@ -189,6 +201,7 @@ export class SalaMundo extends SalaArena {
 
   protected override aoRemoverSessao(s: Sessao): void {
     cancelarTrocaDe(this.social(), s.entidadeId, this.trocas);
+    this.retornos.esquecer(this.estado, s.entidadeId);
     const p = this.presencas.get(s.entidadeId);
     if (p) this.limiteDoChat.esquecer(p.identidade);
     this.presencas.delete(s.entidadeId);
@@ -213,6 +226,7 @@ export class SalaMundo extends SalaArena {
       this.conferirEvento();
       this.conferirFocos();
     }
+    this.servicosDoTick();
     if (this.estado.tick >= this.proximoCheckpoint) {
       this.proximoCheckpoint = this.estado.tick + ticksDe(this.ctx.balance.mundo.checkpointS * 1000);
       for (const p of this.presencas.values()) this.pendencias.push({ tipo: 'gravar', identidade: p.identidade, ficha: p.ficha });
@@ -235,7 +249,7 @@ export class SalaMundo extends SalaArena {
       this.ctx = { ...this.ctx, modo: { ...this.modoDaRegiao, lootPct } };
     } else if (agora?.evento === 'mercador_errante') {
       const c = this.celulaDoMercador();
-      if (c) this.estado.objetos.push(novoObjeto(ID_MERCADOR_ERRANTE, 'loja', c.x, c.y, { ref: 'mercador', itens: [...territorioDoLugar(this.reino,this.regiaoAtual()?.id ?? "").mercadorErrante] }));
+      if (c) this.estado.objetos.push(novoObjeto(ID_MERCADOR_ERRANTE, 'loja', c.x, c.y, { ref: REF_ERRANTE, itens: [...territorioDoLugar(this.reino,this.regiaoAtual()?.id ?? "").mercadorErrante] }));
     }
     for (const s of this.sessoes.values()) this.avisar(s, { tipo: 'evento', evento: agora?.evento ?? null, fim: agora?.fim ?? 0 });
   }
@@ -249,6 +263,41 @@ export class SalaMundo extends SalaArena {
       const aceso = focoAceso(regiao.id, foco, agora);
       if (aceso) acenderFoco(this.estado, this.ctx, regiao, foco, aceso, agora);
       else apagarFoco(this.estado, foco);
+    }
+  }
+
+  /** Marco 38 (D-142): os errantes andam, as escoltas são conferidas e as conjurações da Pedra de retorno acabam. */
+  private servicosDoTick(): void {
+    this.errantes.andar(this.estado, this.ctx);
+    if (this.estado.tick % 15 === 0) {
+      this.escoltas.conferir(this.estado, this.ctx, {
+        avisarChegada: (id, missao) => {
+          const s = this.sessaoDaEntidade(id);
+          const p = this.presencas.get(id);
+          if (s && p) this.progredir(s, p, { tipo: 'escolta', missao });
+        },
+        avisarFalha: (id, missao) => {
+          const s = this.sessaoDaEntidade(id);
+          const p = this.presencas.get(id);
+          if (!s || !p) return;
+          p.ficha.missoes.ativas = p.ficha.missoes.ativas.filter((a) => a.id !== missao);
+          this.avisar(s, { tipo: 'recusa', motivo: 'escolta_falhou' });
+        },
+      });
+    }
+    for (const { entidadeId, fim } of this.retornos.conferir(this.estado, this.ctx)) {
+      const s = this.sessaoDaEntidade(entidadeId);
+      const p = this.presencas.get(entidadeId);
+      const e = buscarEntidade(this.estado, entidadeId);
+      if (!s || !p || !e) continue;
+      this.avisar(s, { tipo: 'retorno', fim });
+      if (fim !== 'concluido') this.dar(e, PERGAMINHO_RETORNO);
+      p.ficha = fichaAtualizada(p.ficha, e);
+      if (fim === 'concluido') this.trocar(s, p, `regiao:${p.ficha.vilaSalva}`, null, null);
+      else if (fim === 'desviado') {
+        const destino = lugarAoAcaso(this.reino, this.regiaoAtual()?.id ?? p.ficha.vilaSalva, `${p.identidade}:${this.estado.tick}`);
+        if (destino) this.trocar(s, p, `regiao:${destino.regiao.id}`, destino.chegada, null);
+      }
     }
   }
 
@@ -296,7 +345,8 @@ export class SalaMundo extends SalaArena {
     if (!e || !p || !bolsa || !vivo(e)) return null;
     if (this.despedidos.has(s.sessaoId) || this.pendencias.some(x => x.tipo === 'trocar' && x.sessaoId === s.sessaoId)) return null;
     if (pagamento === 'pergaminho' && destino === 'ultima_vila_salva') destino = p.ficha.vilaSalva;
-    const alvo = this.reino.regioes.find((r) => r.id === destino && r.vila);
+    // Marco 38 (D-142): a pedra de retorno vai à pedra de save de qualquer região; o portal, só às vilas.
+    const alvo = this.reino.regioes.find((r) => r.id === destino && (r.vila || pagamento === 'pergaminho'));
     if (!alvo) return 'destino_invalido';
     if (this.lugar.tipo === 'regiao' && this.lugar.regiao.id === alvo.id && pagamento !== 'pergaminho') return 'mesmo_lugar';
     if (!p.ficha.descobertas.includes(`regiao:${alvo.id}`) && !capitalDoAtlas(this.reino,alvo.id)) return 'nao_descoberto';
@@ -305,8 +355,14 @@ export class SalaMundo extends SalaArena {
       const i = bolsa.mochila.findIndex((m) => m.itemId === PERGAMINHO_RETORNO);
       const m = bolsa.mochila[i];
       if (!m || m.qtd <= 0) return 'sem_item';
+      if (this.retornos.conjurando(e.id)) return null;
       m.qtd--;
       if (m.qtd <= 0) bolsa.mochila.splice(i, 1);
+      // Marco 38 (D-142): a viagem sai no fim da conjuração (servicosDoTick), se ele ficar no círculo.
+      this.retornos.iniciar(this.estado, this.ctx, e, this.eventosDoTick);
+      p.ficha = fichaAtualizada(p.ficha, e);
+      this.avisar(s, { tipo: 'retorno', fim: null });
+      return null;
     } else {
       if (!this.pertoDe(e, 'pedra_portal')) return 'destino_invalido';
       if (agora < p.ficha.portalLivreEm) return 'portal_em_recarga';
@@ -372,7 +428,7 @@ export class SalaMundo extends SalaArena {
     const e = buscarEntidade(this.estado, entidadeId);
     if (!s || !p || !e) return;
     const regiao = this.lugar.tipo === 'regiao' ? this.lugar.regiao : null;
-    if (tipo === 'pedra_save' && regiao?.vila) {
+    if (tipo === 'pedra_save' && regiao) {
       p.ficha.vilaSalva = regiao.id;
       this.pendencias.push({ tipo: 'gravar', identidade: p.identidade, ficha: p.ficha });
       this.avisar(s, { tipo: 'salvo', vila: regiao.id });
@@ -393,8 +449,10 @@ export class SalaMundo extends SalaArena {
       // Marco 30: o NPC atende pelo papel (o quadro de missões, o banco e o quadro de mercado).
       const b = this.balcao(s, e, p);
       if (!b) return;
-      if (ref === 'missoes') this.avisar(s, avisoDoQuadro(b));
-      else if (ref === 'banco') this.avisar(s, avisoDoBanco(b));
+      if (ref === 'missoes' || b.falante) {
+        this.escoltas.garantir(this.estado, this.ctx, e, p.ficha, missoesPorId(this.reino));
+        this.avisar(s, avisoDoQuadro(b));
+      } else if (ref === 'banco') this.avisar(s, avisoDoBanco(b));
       else if (ref === 'mercado') this.pedirMercado(p, e, { a: 'mercado', op: 'listar', pagina: 0, busca: '' }, { item: null, ouro: 0 });
     }
   }
@@ -501,6 +559,9 @@ export class SalaMundo extends SalaArena {
     switch (acao.a) {
       case 'missao':
         if (b) atenderMissao(b, acao);
+        // Marco 38 (D-142): aceitar a escolta chama o protegido; abandonar o dispensa.
+        if (acao.op === 'aceitar') this.escoltas.garantir(this.estado, this.ctx, e, p.ficha, missoesPorId(this.reino));
+        if (acao.op === 'abandonar') this.escoltas.dispensar(this.estado, e.id, acao.id);
         break;
       case 'banco':
       case 'bancoOuro':
@@ -575,6 +636,8 @@ export class SalaMundo extends SalaArena {
     const bolsa = e.bolsa;
     if (!bolsa) return null;
     const vila = this.lugar.tipo === 'regiao' && this.lugar.regiao.vila ? this.lugar.regiao.id : null;
+    const fonte = fonteDeMissoesPerto(this.estado, e, this.ctx.balance.economia.alcanceInteracao, vila);
+    const andarilho = fonte?.andarilho && this.lugar.tipo === 'regiao' ? this.lugar.regiao.andarilhos?.find((a) => a.id === fonte.andarilho) : undefined;
     return {
       ctx: this.ctx,
       reino: this.reino,
@@ -582,6 +645,8 @@ export class SalaMundo extends SalaArena {
       bolsa,
       ficha: p.ficha,
       vila,
+      fonte: fonte?.fonte ?? null,
+      ...(andarilho ? { falante: { nome: andarilho.nome, fala: andarilho.fala } } : {}),
       agora: this.opcoesMundo.agora(),
       perto: (papel) => this.pertoDoNpc(e, papel),
       avisar: (a) => {
@@ -599,7 +664,8 @@ export class SalaMundo extends SalaArena {
 
   private pertoDoNpc(e: Entidade, papel: PapelNpc): boolean {
     const alcance = this.ctx.balance.economia.alcanceInteracao;
-    return this.estado.objetos.some((o) => o.tipo === 'npc' && o.ref === papel && Math.max(Math.abs(o.x - e.x), Math.abs(o.y - e.y)) <= alcance);
+    // Marco 38 (D-142): o mercado é uma loja (a do reino e os anúncios no mesmo balcão).
+    return this.estado.objetos.some((o) => (o.tipo === 'npc' || o.tipo === 'loja') && o.ref === papel && Math.max(Math.abs(o.x - e.x), Math.abs(o.y - e.y)) <= alcance);
   }
 
   private participante(s: Sessao, e: Entidade, p: Presenca): Participante {
@@ -650,30 +716,9 @@ export class SalaMundo extends SalaArena {
       this.avisar(s, { tipo: 'recusa', motivo: 'longe' });
       return;
     }
-    const regras = this.ctx.balance.mundo.mercado;
-    if (acao.op === 'anunciar') {
-      const i = bolsa.mochila.findIndex((m) => m.invId === acao.invId);
-      const m = bolsa.mochila[i];
-      const taxa = taxaDeAnuncio(acao.preco, regras);
-      const motivo: MotivoDoMundo | null = !m || m.ref === 'resgate_dungeon' || m.qtd < acao.qtd ? 'sem_item' : acao.preco > regras.precoMax ? 'preco_invalido' : bolsa.ouro < taxa ? 'sem_ouro' : null;
-      if (motivo || !m) {
-        this.avisar(s, { tipo: 'recusa', motivo: motivo ?? 'sem_item' });
-        return;
-      }
-      m.qtd -= acao.qtd;
-      if (m.qtd <= 0) bolsa.mochila.splice(i, 1);
-      bolsa.ouro -= taxa;
-      this.pedirMercado(p, e, acao, { item: { ...m, qtd: acao.qtd }, ouro: taxa });
-    } else if (acao.op === 'comprar') {
-      if (bolsa.ouro < acao.preco) {
-        this.avisar(s, { tipo: 'recusa', motivo: 'sem_ouro' });
-        return;
-      }
-      bolsa.ouro -= acao.preco;
-      this.pedirMercado(p, e, acao, { item: null, ouro: acao.preco });
-    } else {
-      this.pedirMercado(p, e, acao, { item: null, ouro: 0 });
-    }
+    const reserva = reservaDoMercado(bolsa, acao, this.ctx.balance.mundo.mercado);
+    if (typeof reserva === 'string') this.avisar(s, { tipo: 'recusa', motivo: reserva });
+    else this.pedirMercado(p, e, acao, reserva);
   }
 
   /** Um monstro caiu: as missões de caça de quem o derrubou (ou do dono da invocação) e do grupo dele por perto. */

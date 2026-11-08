@@ -15,6 +15,8 @@ import type { Celula } from '../core/comandos';
 import type { FaseJson, InimigoPosicionado, ObjetoPosicionadoJson, SpawnJson, Telhado } from './fase';
 import { armadilhaDeFase } from './armadilhas-de-fase';
 import type { AreaAmbiente, TipoAmbiente } from './ambiente-tipos';
+import { erguerPredios, PREDIO_DO_PAPEL } from './vila-predios';
+import { abrigoDoCentro, andarilhosDaRegiao, entradasDosLados, escavarCorredor, nivelDoMonstro, rotasDosErrantes } from './exterior-extras';
 
 /** Largura da abertura na borda que leva à região vizinha. */
 export const LARGURA_PASSAGEM = 6;
@@ -37,10 +39,14 @@ const PERFIS: Readonly<Record<Bioma, PerfilDeBioma>> = {
   colinas: { chao: ',', agua: 0.88, rocha: 0.66 },
   ruinas: { chao: '.', agua: 0.9, rocha: 0.7 },
   neve: { chao: '.', agua: 0.86, rocha: 0.7 },
+  // Marco 38 (D-142): o deserto, quase sem água (um oásis raro) e com rochedos de arenito.
+  deserto: { chao: '.', agua: 0.95, rocha: 0.74 },
 };
 
 export type PontoDoExterior =
   | { tipo: 'npc'; papel: PapelNpc; x: number; y: number }
+  /** Marco 38 (D-142): quem dá missão fora da vila, com a aparência de um preset (ou `gente`). */
+  | { tipo: 'andarilho'; id: string; aparencia: string; x: number; y: number }
   | { tipo: 'coleta'; itemId: string; x: number; y: number }
   | { tipo: 'estrutura'; estruturaId: string; porta: Celula; frente: Celula; escondida: boolean };
 
@@ -51,6 +57,10 @@ export interface ExteriorGerado {
   passagens: Readonly<Record<LadoDaRegiao, readonly Celula[]>>;
   /** A área segura da vila (sem monstros nem PvP), ou null. */
   vila: { x: number; y: number; raio: number } | null;
+  /** Marco 38 (D-142): o abrigo da pedra de save no centro das regiões sem vila (os monstros não entram), ou null. */
+  abrigo: { x: number; y: number; raio: number } | null;
+  /** Marco 38: as rotas dos mercadores errantes (células de estrada em ordem, de ida e volta). */
+  rotas: readonly (readonly Celula[])[];
 }
 
 /** Ruído de valor suave (0–1): valores sorteados na grade grossa, interpolados entre os quatro vizinhos. */
@@ -218,8 +228,11 @@ function abrirPassagens(g: Grade, reino: Reino, regiao: RegiaoDoMundo): { passag
   return { passagens, entradas };
 }
 
-/** A vila: praça de piso, muro circular com quatro portões e os NPCs em anel em volta do centro. */
-function erguerVila(g: Grade, vila: NonNullable<RegiaoDoMundo['vila']>, protegidas: Set<number>): PontoDoExterior[] {
+/**
+ * A vila: praça de piso, muro circular com quatro portões e os NPCs em volta do centro. Marco 38 (D-142): quem atende
+ * fica no seu prédio (vila-predios.ts); a pedra de save no centro da praça e os outros em anel, como antes.
+ */
+function erguerVila(g: Grade, vila: NonNullable<RegiaoDoMundo['vila']>, protegidas: Set<number>, telhados: Telhado[]): PontoDoExterior[] {
   const { x: cx, y: cy, raio } = vila;
   for (let y = cy - raio - 1; y <= cy + raio + 1; y++) {
     for (let x = cx - raio - 1; x <= cx + raio + 1; x++) {
@@ -255,13 +268,21 @@ function erguerVila(g: Grade, vila: NonNullable<RegiaoDoMundo['vila']>, protegid
     g.por(cx, cy + i, '=');
   }
   const anel = Math.max(4, Math.floor(raio * 0.55));
-  return vila.npcs.map((papel, i) => {
-    const ang = (i / vila.npcs.length) * Math.PI * 2 + Math.PI / 4;
-    const x = Math.round(cx + Math.cos(ang) * anel);
-    const y = Math.round(cy + Math.sin(ang) * anel);
+  const predios = erguerPredios(g, { x: cx, y: cy }, raio, anel + 2, vila.npcs, new Set<number>());
+  telhados.push(...predios.map((p) => p.telhado));
+  const naPraca = vila.npcs.filter((p) => p !== 'save' && !predios.some((f) => f.papel === p || (PREDIO_DO_PAPEL[f.papel] === 'mercado' && PREDIO_DO_PAPEL[p] === 'mercado')));
+  const pontos: PontoDoExterior[] = predios.map((p) => ({ tipo: 'npc' as const, papel: p.papel, x: p.atendente.x, y: p.atendente.y }));
+  if (vila.npcs.includes('save')) pontos.push({ tipo: 'npc', papel: 'save', x: cx, y: cy });
+  // Os que ficam na praça (o portal e quem não coube num prédio): no anel pequeno, nas diagonais.
+  const raioPraca = Math.min(anel, 4);
+  naPraca.forEach((papel, i) => {
+    const ang = (i / Math.max(1, naPraca.length)) * Math.PI * 2 + Math.PI / 4;
+    const x = Math.round(cx + Math.cos(ang) * raioPraca);
+    const y = Math.round(cy + Math.sin(ang) * raioPraca);
     g.por(x, y, '.');
-    return { tipo: 'npc' as const, papel, x, y };
+    pontos.push({ tipo: 'npc', papel, x, y });
   });
+  return pontos;
 }
 
 /** As células andáveis alcançáveis a partir de `origem` (busca em largura, 4 vizinhos). */
@@ -314,6 +335,8 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
       g.por(x, y, costa || a > perfil.agua ? '~' : r > perfil.rocha ? '#' : perfil.chao);
     }
   }
+  // Marco 38 (D-142): a região estreita é um corredor entre as passagens, com paredões de arenito dos lados.
+  if (regiao.estreita) escavarCorredor(g, entradasDosLados(reino, regiao, n), perfil.chao, regiao.semente);
   // Marco 29 (30/10/2026): o rochedo fica só com a borda; o miolo vira chão sem acesso. No isométrico, o miolo de
   // parede é a base escura das masmorras, que fora parece um buraco.
   const miolo: Celula[] = [];
@@ -345,10 +368,13 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
   }
   const telhados: Telhado[] = [];
   if (regiao.vila) {
-    const npcs = erguerVila(g, regiao.vila, protegidas);
+    const npcs = erguerVila(g, regiao.vila, protegidas, telhados);
     pontos.push(...npcs);
     telhados.push(...casasDaVila(g, regiao.vila, npcs.flatMap((p) => (p.tipo === 'npc' ? [p] : []))));
   }
+  // Marco 38 (D-142): toda região sem vila tem a pedra de save no centro, numa clareira abrigada.
+  const abrigo = regiao.vila ? null : abrigoDoCentro(g, centro, protegidas);
+  if (abrigo) pontos.push({ tipo: 'npc', papel: 'save', x: centro.x, y: centro.y });
   const { passagens, entradas } = abrirPassagens(g, reino, regiao);
   // Das portas da vila (ou do centro) até cada passagem e cada porta de estrutura.
   const saidaDaVila = (alvo: Celula): Celula => {
@@ -371,14 +397,14 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
       : [{ x: centro.x, y: centro.y }];
   for (const s of spawns) if (!ANDA.has(g.em(s.x, s.y))) g.por(s.x, s.y, regiao.vila ? '.' : '=');
   const regras = reino.perigos[regiao.perigo];
-  const longeDaVila = (c: Celula) => !regiao.vila || Math.hypot(c.x - regiao.vila.x, c.y - regiao.vila.y) > regiao.vila.raio + FOLGA_INIMIGOS;
+  const longeDaVila = (c: Celula) => (!regiao.vila || Math.hypot(c.x - regiao.vila.x, c.y - regiao.vila.y) > regiao.vila.raio + FOLGA_INIMIGOS) && (!abrigo || chebyshev(c, abrigo) > abrigo.raio + FOLGA_INIMIGOS);
   const abandonadas = casasAbandonadas(g, criarRng(regiao.semente + SEMENTE_CASAS), regiao.inimigos.length > 0 ? regras.casas : 0, perfil.chao, (c) => longeDaVila(c) && spawns.every((s) => chebyshev(s, c) >= FOLGA_INIMIGOS), protegidas);
   telhados.push(...abandonadas.telhados);
 
   const alcance = alcancaveis(g, spawns[0] as Celula);
   const livres: Celula[] = [];
   for (let y = 1; y < n - 1; y++) for (let x = 1; x < n - 1; x++) if (alcance[y * n + x] && !protegidas.has(y * n + x) && g.em(x, y) !== '=') livres.push({ x, y });
-  const naVila = (c: Celula) => regiao.vila !== null && Math.hypot(c.x - regiao.vila.x, c.y - regiao.vila.y) <= regiao.vila.raio + FOLGA_INIMIGOS;
+  const naVila = (c: Celula) => (regiao.vila !== null && Math.hypot(c.x - regiao.vila.x, c.y - regiao.vila.y) <= regiao.vila.raio + FOLGA_INIMIGOS) || (abrigo !== null && chebyshev(c, abrigo) <= abrigo.raio + FOLGA_INIMIGOS);
 
   const ocupadas: Celula[] = [];
   const sortearLivre = (ok: (c: Celula) => boolean): Celula | null => {
@@ -417,7 +443,7 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     }
     if (!c) continue;
     const preset = escolher(rng, regiao.inimigos);
-    const nivel = inteiro(rng, regiao.nivel[0], regiao.nivel[1]);
+    const nivel = nivelDoMonstro(rng, regiao);
     // Marco 30 (D-129): a elite do perigo nasce acima do topo da faixa (mais forte e com mais XP e loot).
     const elite = aleatorio(rng) * 100 < regras.elitePct;
     inimigos.push({ preset, x: c.x, y: c.y, nivel: elite ? Math.min(100, regiao.nivel[1] + regras.eliteNiveis) : nivel });
@@ -462,6 +488,9 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
   }
 
   const ambientes = terrenosDaRegiao(g, regiao, livres, chefes, naVila, spawns);
+  // Marco 38 (D-142): os andarilhos perto das estradas e as rotas dos errantes (RNG próprio: o resto sai igual).
+  pontos.push(...andarilhosDaRegiao(g, regiao, (c) => !naVila(c) && spawns.every((s) => chebyshev(s, c) >= 6), ocupadas));
+  const rotas = rotasDosErrantes(g, regiao, centro, entradas);
 
   const fase: FaseJson = {
     id: `mundo_${reino.id}_${regiao.id}`,
@@ -476,7 +505,7 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     ...(armadilhas.length > 0 && { objetos: armadilhas }),
     ...(ambientes.length > 0 && { ambientes }),
   };
-  return { fase, pontos, passagens, vila: regiao.vila ? { x: regiao.vila.x, y: regiao.vila.y, raio: regiao.vila.raio } : null };
+  return { fase, pontos, passagens, vila: regiao.vila ? { x: regiao.vila.x, y: regiao.vila.y, raio: regiao.vila.raio } : null, abrigo, rotas };
 }
 
 /**

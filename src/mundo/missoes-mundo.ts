@@ -17,7 +17,9 @@ export type AlvoDeMissao =
   | { tipo: 'cacar'; preset: string; regiao: string | null; qtd: number }
   | { tipo: 'entregar'; itemId: string; qtd: number }
   | { tipo: 'covil'; covil: string }
-  | { tipo: 'masmorra'; masmorra: string };
+  | { tipo: 'masmorra'; masmorra: string }
+  /** Marco 38 (08/11/2026, D-142): levar o protegido (um preset que segue o jogador) até a porta da estrutura. */
+  | { tipo: 'escoltar'; protegido: string; estrutura: string };
 
 export interface MissaoDoMundo {
   id: string;
@@ -30,7 +32,11 @@ export interface MissaoDoMundo {
 }
 
 /** O que aconteceu no jogo e pode andar uma missão. */
-export type FatoDeMissao = { tipo: 'abate'; preset: string; regiao: string | null } | { tipo: 'covil'; covil: string } | { tipo: 'masmorra'; masmorra: string };
+export type FatoDeMissao =
+  | { tipo: 'abate'; preset: string; regiao: string | null }
+  | { tipo: 'covil'; covil: string }
+  | { tipo: 'masmorra'; masmorra: string }
+  | { tipo: 'escolta'; missao: string };
 
 const DIA_MS = 86_400_000;
 
@@ -45,7 +51,7 @@ export function lerMissaoDoMundo(l: Leitor, v: unknown): MissaoDoMundo {
   const o: Objeto = l.objeto(v, 'missao');
   const id = l.texto(o, 'id');
   const a = l.objeto(o.alvo, `${id}.alvo`);
-  const tipo = l.opcao(a, 'tipo', ['cacar', 'entregar', 'covil', 'masmorra'] as const);
+  const tipo = l.opcao(a, 'tipo', ['cacar', 'entregar', 'covil', 'masmorra', 'escoltar'] as const);
   const qtd = () => l.numero(a, 'qtd', { min: 1, max: 999, inteiro: true });
   const alvo: AlvoDeMissao =
     tipo === 'cacar'
@@ -54,7 +60,9 @@ export function lerMissaoDoMundo(l: Leitor, v: unknown): MissaoDoMundo {
         ? { tipo, itemId: l.texto(a, 'itemId'), qtd: qtd() }
         : tipo === 'covil'
           ? { tipo, covil: l.texto(a, 'covil') }
-          : { tipo, masmorra: l.texto(a, 'masmorra') };
+          : tipo === 'escoltar'
+            ? { tipo, protegido: l.texto(a, 'protegido'), estrutura: l.texto(a, 'estrutura') }
+            : { tipo, masmorra: l.texto(a, 'masmorra') };
   const r = l.objeto(o.recompensa, `${id}.recompensa`);
   return {
     id,
@@ -111,6 +119,7 @@ function anda(m: MissaoDoMundo, fato: FatoDeMissao): boolean {
   const a = m.alvo;
   if (fato.tipo === 'abate') return a.tipo === 'cacar' && a.preset === fato.preset && (a.regiao === null || a.regiao === fato.regiao);
   if (fato.tipo === 'covil') return a.tipo === 'covil' && a.covil === fato.covil;
+  if (fato.tipo === 'escolta') return a.tipo === 'escoltar' && m.id === fato.missao;
   return a.tipo === 'masmorra' && a.masmorra === fato.masmorra;
 }
 
@@ -161,7 +170,7 @@ export function entregarMissao(ficha: FichaDoMundo, missoes: ReadonlyMap<string,
 /** Confere os ids das missões contra o reino e o catálogo. */
 export function conferirMissoes(
   missoes: readonly MissaoDoMundo[],
-  existe: { preset: (id: string) => boolean; item: (id: string) => boolean; regiao: (id: string) => boolean; vila: (id: string) => boolean; covil: (id: string) => boolean; masmorra: (id: string) => boolean },
+  existe: { preset: (id: string) => boolean; item: (id: string) => boolean; regiao: (id: string) => boolean; vila: (id: string) => boolean; covil: (id: string) => boolean; masmorra: (id: string) => boolean; estrutura: (id: string) => boolean; protegido: (id: string) => boolean },
 ): string[] {
   const erros: string[] = [];
   const ids = new Set<string>();
@@ -177,6 +186,8 @@ export function conferirMissoes(
     if (a.tipo === 'entregar' && !existe.item(a.itemId)) erros.push(`missão ${m.id}: item desconhecido "${a.itemId}"`);
     if (a.tipo === 'covil' && !existe.covil(a.covil)) erros.push(`missão ${m.id}: covil desconhecido "${a.covil}"`);
     if (a.tipo === 'masmorra' && !existe.masmorra(a.masmorra)) erros.push(`missão ${m.id}: masmorra desconhecida "${a.masmorra}"`);
+    if (a.tipo === 'escoltar' && !existe.protegido(a.protegido)) erros.push(`missão ${m.id}: protegido desconhecido "${a.protegido}"`);
+    if (a.tipo === 'escoltar' && !existe.estrutura(a.estrutura)) erros.push(`missão ${m.id}: estrutura desconhecida "${a.estrutura}"`);
   }
   return erros;
 }

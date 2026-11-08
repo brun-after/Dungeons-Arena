@@ -1,11 +1,11 @@
 # Reino do Eclipse e revisão do Mundo
 
-**Versão:** 1.1 · **Data:** 03/11/2026 · **Marco:** 36
+**Versão:** 1.2 · **Data:** 08/11/2026 · **Marco:** 36
 
 O portal de qualquer vila oferece as capitais do Reino Central e do Reino do Eclipse, mesmo antes da
 primeira visita. A viagem mantém os custos e a recarga do portal; as demais vilas continuam exigindo descoberta.
 As fichas existentes permanecem válidas. O mapa permite alternar entre os dois reinos, com os integrantes
-da party identificados em cada botão. Não há passagem de borda entre os reinos.
+da party identificados em cada botão. Desde o marco 38 (D-142), a Travessia das Areias liga os dois reinos a pé.
 
 O Eclipse tem 12 regiões de 224 a 296 células de lado, níveis de 30 a 70, quatro vilas, 36 dungeons e oito
 domínios compartilhados de boss. Todas as regiões têm encontros externos garantidos: dois ou três bosses,

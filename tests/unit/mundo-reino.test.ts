@@ -167,7 +167,7 @@ it('todas as portas visíveis e NPCs são alcançáveis a partir da entrada', ()
     if (!origem) throw new Error('spawn');
     for (const p of ex.pontos) {
       if (p.tipo === 'coleta' || (p.tipo === 'estrutura' && p.escondida)) continue;
-      const destino = p.tipo === 'npc' ? p : p.frente;
+      const destino = p.tipo === 'estrutura' ? p.frente : p;
       expect(caminho(fase, origem, destino, fase.largura * fase.altura).status, `${regiao.id}: ${JSON.stringify(destino)}`).toBe('alcancado');
     }
   }

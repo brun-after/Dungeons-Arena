@@ -48,7 +48,8 @@ export interface EfeitoAtivo {
 
 /** Comportamento da invocação (§2.9, marco 10A-3). */
 // Marco 22 (D-089): `companheiro` (o falcão do Aventureiro) ataca sempre o alvo selecionado do dono.
-export type ComportamentoInvocacao = 'agressivo' | 'assassino' | 'protetor' | 'curador' | 'isca' | 'companheiro' | 'torre';
+// Marco 38 (08/11/2026, D-142): `escoltado`, o protegido da missão de escolta (só segue o dono, nunca ataca).
+export type ComportamentoInvocacao = 'agressivo' | 'assassino' | 'protetor' | 'curador' | 'isca' | 'companheiro' | 'torre' | 'escoltado';
 
 /** Invocação ou dominado (§2.9): de quem é, até quando, e se foi dominado (sobrevive ao dono). */
 export interface DadosInvocacao {
@@ -329,6 +330,8 @@ export interface Entidade {
   mana: number;
   manaMax: number;
   ataqueBasico: string;
+  /** 08/11/2026 (D-141): o tick em que o último básico começou (o encadeio do guerreiro lê). */
+  ultimoBasicoTick?: number;
   /** Marco 27 (29/10/2026, D-126): as armas de classe (o 3º golpe pela mão secundária e as frações de passiva). */
   armas?: EstadoArmas;
   /** Marco 27 (D-126): caiu num solo da Colheita; na morte, se ergue como morto deste dono. */

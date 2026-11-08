@@ -45,7 +45,9 @@ describe('Reino do Eclipse',()=>{
   expect(a.regioes.every(r=>r.nivel[0]>=30&&r.bosses?.chancePct===100)).toBe(true);
   expect(territorioDoLugar(atlas,a.inicio).id).toBe(a.id);
   expect(capitalDoAtlas(atlas,a.inicio)).toBe(true);
-  expect(atlas.regioes).toHaveLength(a.regioes.length+c.regioes.length);
+  // Marco 38 (D-142): mais as três regiões do deserto da travessia, entre os dois.
+  const t=obter(CONTEUDO.reinos.get('travessia_das_areias'));
+  expect(atlas.regioes).toHaveLength(a.regioes.length+c.regioes.length+t.regioes.length);
   expect(new Set(atlas.regioes.map(r=>`${r.gx},${r.gy}`)).size).toBe(atlas.regioes.length);
  });
  it('dungeons ampliadas e todas as lojas de dungeon têm retorno e estoque superior',()=>{

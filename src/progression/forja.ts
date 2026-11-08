@@ -3,6 +3,8 @@
 // origens raras. Receitas em data/forja.json; o comando `forjar` só vale com a loja aberta.
 // Marco 30 (30/10/2026, D-129): a receita pode ter `oficio` (ferreiro, alquimista): só vale na loja daquele papel no
 // Mundo (o `ref` da loja). A sem ofício é a da campanha, nas lojas sem papel.
+// Marco 38 (08/11/2026, D-142): o grau da receita (I a V, quanto mais alto, mais raros os materiais) e a saída
+// `fundir`: o troféu elemental de um chefe entra numa peça equipável escolhida da mochila (progression/fusao-elemental.ts).
 
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo, ObjetoNoMundo } from '../core/estado';
@@ -10,6 +12,8 @@ import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { Leitor } from '../core/validar';
 import type { Entidade } from '../entities/entidade';
 import { idItemBase, lerIdItemBase } from './gerar-item-base';
+import { ehElemento, type Elemento } from '../combat/elementos';
+import { fundivel, idFundido } from './fusao-elemental';
 import { guardarItem, recusarItem } from './inventario';
 import { lojaAberta } from './loja';
 
@@ -25,7 +29,9 @@ export interface ReceitaDeForja {
   /** A loja que faz a receita (o papel do NPC no Mundo); null = a forja da campanha. */
   oficio: Oficio | null;
   /** `item`: dá este item; `ascender`: a peça Lendária escolhida vira Última (mesma base, elemento, nível e semente). */
-  saida: { tipo: 'item'; item: string } | { tipo: 'ascender' };
+  saida: { tipo: 'item'; item: string } | { tipo: 'ascender' } | { tipo: 'fundir'; elemento: Elemento; grau: number };
+  /** Marco 38: o grau da receita (1 a 5). */
+  grau: number;
 }
 
 export function lerForja(json: unknown): { receitas: Map<string, ReceitaDeForja>; erros: string[] } {
@@ -35,7 +41,9 @@ export function lerForja(json: unknown): { receitas: Map<string, ReceitaDeForja>
     const o = l.objeto(bruto, 'receita');
     const id = l.texto(o, 'id');
     const s = l.objeto(o.saida, `${id}.saida`);
-    const tipo = l.opcao(s, 'tipo', ['item', 'ascender'] as const);
+    const tipo = l.opcao(s, 'tipo', ['item', 'ascender', 'fundir'] as const);
+    const elemento = s.elemento;
+    if (tipo === 'fundir' && !ehElemento(elemento)) l.erro(`${id}: elemento desconhecido`);
     receitas.set(id, {
       id,
       nome: l.texto(o, 'nome'),
@@ -46,7 +54,13 @@ export function lerForja(json: unknown): { receitas: Map<string, ReceitaDeForja>
       }),
       ouro: o.ouro === undefined ? 0 : l.numero(o, 'ouro', { min: 0, max: 100_000, inteiro: true }),
       oficio: o.oficio === undefined ? null : l.opcao(o, 'oficio', OFICIOS),
-      saida: tipo === 'item' ? { tipo, item: l.texto(s, 'item') } : { tipo },
+      saida:
+        tipo === 'item'
+          ? { tipo, item: l.texto(s, 'item') }
+          : tipo === 'fundir'
+            ? { tipo, elemento: ehElemento(elemento) ? elemento : 'fogo', grau: l.numero(s, 'grau', { min: 1, max: 3, inteiro: true }) }
+            : { tipo },
+      grau: o.grau === undefined ? 1 : l.numero(o, 'grau', { min: 1, max: 5, inteiro: true }),
     });
   }
   return { receitas, erros: l.erros };
@@ -86,6 +100,11 @@ export function motivoParaNaoForjar(estado: EstadoJogo, ctx: ContextoSimulacao, 
     if (p?.forma !== 'lendaria') return 'nao_encontrado';
     if (!ctx.conteudo.itens.get(idItemBase(p.base, 'ultima', p.elemento, p.nivel, p.semente))) return 'nao_encontrado';
   }
+  if (r.saida.tipo === 'fundir') {
+    const entrada = invId ? e.bolsa.mochila.find((i) => i.invId === invId) : undefined;
+    if (!entrada || !fundivel(ctx.conteudo.itens.get(entrada.itemId))) return 'nao_encontrado';
+    if (!ctx.conteudo.itens.get(idFundido(r.saida.elemento, r.saida.grau, entrada.itemId))) return 'nao_encontrado';
+  }
   return null;
 }
 
@@ -108,6 +127,12 @@ export function forjar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, 
     const p = entrada ? lerIdItemBase(entrada.itemId) : null;
     if (!entrada || !p) return;
     itemId = idItemBase(p.base, 'ultima', p.elemento, p.nivel, p.semente);
+    entrada.itemId = itemId;
+  } else if (r.saida.tipo === 'fundir') {
+    // Marco 38 (D-142): a peça escolhida vira a fundida (o mesmo lugar na mochila).
+    const entrada = bolsa.mochila.find((i) => i.invId === invId);
+    if (!entrada) return;
+    itemId = idFundido(r.saida.elemento, r.saida.grau, entrada.itemId);
     entrada.itemId = itemId;
   } else {
     itemId = r.saida.item;

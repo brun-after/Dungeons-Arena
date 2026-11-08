@@ -1,0 +1,103 @@
+{
+  "versao": 1,
+  "id": "travessia_das_areias",
+  "nome": "Travessia das Areias",
+  "travessia": true,
+  "tamanhoRegiao": 128,
+  "largura": 1,
+  "altura": 3,
+  "inicio": "dunas_do_poente",
+  "perigos": {
+    "seguro": {"pvp": false, "densidadePor1000": 3, "armadilhasPor1000": 0.8, "elitePct": 0, "lootPct": 100, "hordaMin": 3, "hordaMax": 5, "raioHorda": 7},
+    "normal": {"pvp": false, "densidadePor1000": 7, "armadilhasPor1000": 2.5, "elitePct": 8, "eliteNiveis": 4, "lootPct": 130, "casas": 2, "hordaMin": 4, "hordaMax": 7, "raioHorda": 7},
+    "perigoso": {"pvp": true, "densidadePor1000": 9, "armadilhasPor1000": 4, "elitePct": 20, "eliteNiveis": 6, "lootPct": 180, "casas": 3, "hordaMin": 5, "hordaMax": 9, "raioHorda": 7}
+  },
+  "lojas": {},
+  "mercadorErrante": ["pocao_vida_maior", "pocao_mana_maior", "pergaminho_retorno", "po_revelador", "essencia_fogo", "couraca_expedicao"],
+  "regioes": [
+    {
+      "id": "dunas_do_poente",
+      "nome": "Dunas do Poente",
+      "tamanho": 220,
+      "gx": 0,
+      "gy": 2,
+      "bioma": "deserto",
+      "perigo": "normal",
+      "nivel": [10, 28],
+      "faixas": [[10, 16], [22, 28]],
+      "estreita": true,
+      "passagens": ["oeste", "norte"],
+      "tema": "deserto",
+      "semente": 3301,
+      "terrenos": [{"tipo": "brasas", "perto": "livre", "quantidade": 3, "raio": 2}, {"tipo": "nevoa_sombria", "perto": "cripta", "quantidade": 1, "raio": 2}],
+      "inimigos": ["orc", "troll", "lobo", "arremessador", "esqueleto", "cultista"],
+      "mercadoresErrantes": 1,
+      "andarilhos": [{"id": "caravaneiro_perdido", "nome": "Aldo, caravaneiro perdido", "aparencia": "gente", "fala": "A caravana seguiu sem mim. Se você me levar até a Tumba de Arenito, eu encontro o caminho dali."}],
+      "estruturas": [
+        {"id": "porta_tumba_de_arenito", "nome": "Tumba de Arenito", "tipo": "cripta", "x": 104, "y": 52, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "tumba_de_arenito"}}
+      ],
+      "coleta": [{"itemId": "areia_vitrea", "quantidade": 12}, {"itemId": "flor_de_fogo", "quantidade": 6}]
+    },
+    {
+      "id": "mar_de_areia",
+      "nome": "Mar de Areia",
+      "tamanho": 220,
+      "gx": 0,
+      "gy": 1,
+      "bioma": "deserto",
+      "perigo": "normal",
+      "nivel": [14, 34],
+      "faixas": [[14, 20], [27, 34]],
+      "estreita": true,
+      "passagens": ["sul", "norte"],
+      "tema": "deserto",
+      "semente": 3302,
+      "terrenos": [{"tipo": "brasas", "perto": "livre", "quantidade": 3, "raio": 2}, {"tipo": "agua", "perto": "caverna", "quantidade": 1, "raio": 2}],
+      "inimigos": ["orc", "troll", "arremessador", "esqueleto", "cultista", "vampiro", "runista_medroso"],
+      "mercadoresErrantes": 1,
+      "bosses": {"presets": ["dragao_fogo"], "chancePct": 60, "quantidade": 1},
+      "andarilhos": [{"id": "vulto_das_dunas", "nome": "Xuá, o slime do deserto", "aparencia": "slime", "fala": "Aqui é seco demais para um slime. Me traga alguma coisa molhada e eu conto um segredo da areia."}],
+      "estruturas": [
+        {"id": "porta_oasis_soterrado", "nome": "Oásis Soterrado", "tipo": "caverna", "x": 116, "y": 150, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "oasis_soterrado"}}
+      ],
+      "coleta": [{"itemId": "areia_vitrea", "quantidade": 14}, {"itemId": "cristal_arcano", "quantidade": 4}]
+    },
+    {
+      "id": "garganta_do_sol",
+      "nome": "Garganta do Sol",
+      "tamanho": 220,
+      "gx": 0,
+      "gy": 0,
+      "bioma": "deserto",
+      "perigo": "normal",
+      "nivel": [18, 38],
+      "faixas": [[18, 24], [31, 38]],
+      "estreita": true,
+      "passagens": ["sul", "leste"],
+      "tema": "deserto",
+      "semente": 3303,
+      "terrenos": [{"tipo": "brasas", "perto": "livre", "quantidade": 4, "raio": 2}, {"tipo": "luz_sagrada", "perto": "templo", "quantidade": 1, "raio": 2}],
+      "inimigos": ["troll", "arremessador", "esqueleto", "cultista", "vampiro", "runista_medroso", "duende_saltador"],
+      "mercadoresErrantes": 1,
+      "andarilhos": [{"id": "guarda_do_sol", "nome": "Sentinela Ravi", "aparencia": "gente", "fala": "Esta garganta separa o Centro do Eclipse. Quem passa por aqui ajuda a mantê-la limpa."}],
+      "estruturas": [
+        {"id": "porta_templo_do_sol", "nome": "Templo do Sol Partido", "tipo": "templo", "x": 150, "y": 100, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "templo_do_sol_partido"}}
+      ],
+      "coleta": [{"itemId": "areia_vitrea", "quantidade": 10}, {"itemId": "minerio_obsidiana", "quantidade": 4}, {"itemId": "flor_de_fogo", "quantidade": 4}]
+    }
+  ],
+  "masmorras": [
+    {"id": "tumba_de_arenito", "nome": "Tumba de Arenito", "nivel": 20, "salas": 14, "tema": "deserto", "inimigos": ["esqueleto", "cultista", "arremessador"], "boss": "necromante_ancestral", "recompensa": ["pergaminho_retorno", "areia_vitrea", "cristal_arcano"], "recargaH": 20},
+    {"id": "oasis_soterrado", "nome": "Oásis Soterrado", "nivel": 28, "salas": 16, "tema": "deserto", "inimigos": ["troll", "vampiro", "arremessador"], "boss": "dragao_veneno", "recompensa": ["pocao_vida_maior", "essencia_veneno", "areia_vitrea"], "recargaH": 20},
+    {"id": "templo_do_sol_partido", "nome": "Templo do Sol Partido", "nivel": 35, "salas": 18, "tema": "deserto", "inimigos": ["cultista", "vampiro", "runista_medroso", "esqueleto"], "boss": "dragao_fogo", "recompensa": ["essencia_fogo", "minerio_obsidiana", "pergaminho_retorno"], "recargaH": 20}
+  ],
+  "covis": [],
+  "materiais": {},
+  "missoes": [
+    {"id": "escolta_tumba_de_arenito", "nome": "A caravana de Aldo", "texto": "Leve Aldo vivo até a porta da Tumba de Arenito.", "vilas": ["npc:caravaneiro_perdido"], "alvo": {"tipo": "escoltar", "protegido": "peregrino", "estrutura": "porta_tumba_de_arenito"}, "recompensa": {"ouro": 260, "xp": 700, "itens": ["pocao_vida_maior"]}},
+    {"id": "areia_molhada", "nome": "Alguma coisa molhada", "texto": "Xuá quer 6 gosmas de slime. É o que há de mais molhado por aqui.", "vilas": ["npc:vulto_das_dunas"], "alvo": {"tipo": "entregar", "itemId": "gosma_de_slime", "qtd": 6}, "recompensa": {"ouro": 300, "xp": 900, "itens": ["areia_vitrea", "cristal_arcano"]}},
+    {"id": "cacar_trolls_do_mar", "nome": "Trolls no mar de areia", "texto": "Derrote 10 trolls no Mar de Areia.", "vilas": ["npc:vulto_das_dunas"], "alvo": {"tipo": "cacar", "preset": "troll", "qtd": 10, "regiao": "mar_de_areia"}, "recompensa": {"ouro": 350, "xp": 1100}},
+    {"id": "limpar_a_garganta", "nome": "Limpar a garganta", "texto": "Derrote 12 vampiros na Garganta do Sol.", "vilas": ["npc:guarda_do_sol"], "alvo": {"tipo": "cacar", "preset": "vampiro", "qtd": 12, "regiao": "garganta_do_sol"}, "recompensa": {"ouro": 500, "xp": 1600, "itens": ["pocao_vida_maior"]}},
+    {"id": "templo_partido", "nome": "O sol partido", "texto": "Conclua o Templo do Sol Partido.", "vilas": ["npc:guarda_do_sol"], "alvo": {"tipo": "masmorra", "masmorra": "templo_do_sol_partido"}, "recompensa": {"ouro": 700, "xp": 2200, "itens": ["minerio_obsidiana"]}}
+  ]
+}

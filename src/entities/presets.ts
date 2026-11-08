@@ -63,7 +63,7 @@ export interface PresetInvocacao {
   explosao: { raio: number; dano: number } | null;
 }
 
-const COMPORTAMENTOS: readonly ComportamentoInvocacao[] = ['agressivo', 'assassino', 'protetor', 'curador', 'isca', 'companheiro', 'torre'];
+const COMPORTAMENTOS: readonly ComportamentoInvocacao[] = ['agressivo', 'assassino', 'protetor', 'curador', 'isca', 'companheiro', 'torre', 'escoltado'];
 
 function lerInvocacao(l: Leitor, v: unknown): PresetInvocacao | null {
   if (v === undefined || v === null) return null;

@@ -29,7 +29,11 @@ export interface Balance {
       auraDefesaPct: number;
       /** Marco 21 (D-088): parte da vida que falta recuperada ao derrubar um hostil (não invocação). */
       curaAoAbaterPct: number;
-      furia: { max: number; porBasico: number; carenciaMs: number; perdaPorS: number; curaMult: number; /** Marco 24 (D-094): a fúria cheia liga o Frenesi. */ frenesi: { duracaoMs: number; danoPct: number; velocidadeAtaquePct: number } }; reforcosInicioNivel: number; reforcosPlenosNivel: number; movimentoMult: number };
+      furia: { max: number; porBasico: number; carenciaMs: number; perdaPorS: number; curaMult: number; /** Marco 24 (D-094): a fúria cheia liga o Frenesi. */ frenesi: { duracaoMs: number; danoPct: number; velocidadeAtaquePct: number } }; reforcosInicioNivel: number; reforcosPlenosNivel: number; movimentoMult: number;
+      /** 08/11/2026 (D-141): o guerreiro conjura andando (o `trava` vira `lenta`) e sofre só esta fração da lentidão. */
+      conjuraAndando: boolean; lentidaoConjuracaoMult: number;
+      /** 08/11/2026 (D-141): a skill logo depois do básico (até `encadeioMs`) carrega `encadeioVelocidade` vezes mais rápido. */
+      encadeioMs: number; encadeioVelocidade: number };
     mago: { inicialPct: number; intermediarioPct: number; nivelIntermediario: number; fimIntermediario: number; nivelFinal: number; dardoInicioMult: number; dardoRecuperacaoNivel: number; dardoPlenoNivel: number; concentracaoAcertos: number; concentracaoJanelaMs: number; concentracaoExtraPct: number;
       /** Marco 22 (D-089): encarnação elemental. */
       encarnacao: { fogoDanoPct: number; fogoIntervaloMs: number; fogoRaio: number; fogoQueimaValor: number; fogoQueimaMs: number; geloReducaoPct: number; geloResfriarMs: number; raioVelocidadePct: number; duracaoMs: number; duplaJanelaMs: number; duplaDuracaoMs: number } };
@@ -258,8 +262,10 @@ export interface Balance {
       regenPorCelulaPorConstituicaoPct: number;
       descontoPorCarismaPct: number;
       descontoMaxPct: number;
-      /** Marco 18 (D-068): a rolagem escala com FOR e INT (meio a meio) e a INT dá a potência dos efeitos. */
+      /** Marco 18 (D-068): a rolagem escala com FOR e INT e a INT dá a potência dos efeitos. */
       rolagemPorPontoPct: number;
+      /** 08/11/2026 (D-141): o peso da Força na rolagem das habilidades que somam FOR e INT (o resto é a INT). */
+      rolagemPesoForcaPct: number;
       especializacaoInicio: number;
       especializacaoPorPonto: number;
       especializacaoMax: number;
@@ -376,6 +382,17 @@ export interface Balance {
     checkpointS: number;
     /** Invisível para inimigos por alguns segundos depois de passar de região. */
     passagemProtecaoS: number;
+    /** Marco 38 (08/11/2026, D-142): o passo do mercador errante e a distância em que ele para perto de alguém. */
+    errantes: { passoMs: number; pausaPertoCelulas: number };
+    /** Marco 38: a escolta chega a `raioChegada` células da porta; o protegido dura `duracaoMin`. */
+    escolta: { raioChegada: number; duracaoMin: number };
+    /**
+     * Marco 38: a Pedra de retorno conjura por `conjuracaoMs` num círculo de `raioCirculo` células. Sair antes de
+     * `cancelaAteMs` cancela; sair depois leva a um lugar ao acaso do reino (e devolve a pedra).
+     */
+    retorno: { conjuracaoMs: number; cancelaAteMs: number; raioCirculo: number };
+    /** Marco 38: a fusão elemental: o efeito na arma e a resistência nas peças, por grau (1 a 3). */
+    fusao: { chanceArmaPct: number[]; resistenciaPct: number[]; valorPct: number[] };
     /** Marco 30 (D-129): o baú do banco (por personagem, em qualquer vila). */
     banco: { slots: number };
     /** Missões aceitas ao mesmo tempo e quantas o quadro oferece por dia. */

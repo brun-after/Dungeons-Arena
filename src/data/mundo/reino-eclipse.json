@@ -43,7 +43,7 @@
     }
   },
   "lojas": {
-    "mercador": [
+    "mercado": [
       "pocao_vida_maior",
       "pocao_mana_maior",
       "pergaminho_retorno",
@@ -85,6 +85,8 @@
   "regioes": [
     {
       "id": "eclipse_baluarte",
+      "andarilhos": [],
+      "mercadoresErrantes": 1,
       "nome": "Baluarte da Aurora",
       "tamanho": 224,
       "gx": 0,
@@ -104,7 +106,6 @@
         "y": 60,
         "raio": 18,
         "npcs": [
-          "mercador",
           "ferreiro",
           "alquimista",
           "missoes",
@@ -215,6 +216,8 @@
     },
     {
       "id": "eclipse_obsidiana",
+      "andarilhos": [{"id": "tobias_mineiro", "nome": "Tobias, mineiro errante", "aparencia": "gente", "fala": "Obsidiana, amigo! Os ferreiros do Eclipse pagam o que for por ela."}],
+      "mercadoresErrantes": 1,
       "nome": "Ermos de Obsidiana",
       "tamanho": 248,
       "gx": 1,
@@ -274,6 +277,7 @@
         }
       ],
       "coleta": [
+        {"itemId": "minerio_obsidiana", "quantidade": 10},
         {
           "itemId": "erva_curativa",
           "quantidade": 10
@@ -324,6 +328,8 @@
     },
     {
       "id": "eclipse_exilados",
+      "andarilhos": [{"id": "vulto_do_troll", "nome": "Gruff, troll eremita", "aparencia": "troll", "fala": "Gruff só quer paz. Os orcs não deixam. Gruff paga em pedras bonitas."}],
+      "mercadoresErrantes": 1,
       "nome": "Floresta dos Exilados",
       "tamanho": 272,
       "gx": 2,
@@ -343,7 +349,6 @@
         "y": 60,
         "raio": 18,
         "npcs": [
-          "mercador",
           "ferreiro",
           "alquimista",
           "missoes",
@@ -398,6 +403,7 @@
         }
       ],
       "coleta": [
+        {"itemId": "madeira_antiga", "quantidade": 8},
         {
           "itemId": "erva_curativa",
           "quantidade": 10
@@ -563,6 +569,7 @@
     },
     {
       "id": "eclipse_almas",
+      "andarilhos": [{"id": "ossos_educado", "nome": "Sir Ossos, cavaleiro sem carne", "aparencia": "esqueleto", "fala": "Saudações. Os cultistas me reergueram sem pedir licença. Ajude-me a ensinar boas maneiras a eles."}],
       "nome": "Pântano das Almas",
       "tamanho": 224,
       "gx": 0,
@@ -636,6 +643,7 @@
         }
       ],
       "coleta": [
+        {"itemId": "resina_negra", "quantidade": 8},
         {
           "itemId": "erva_curativa",
           "quantidade": 10
@@ -717,7 +725,6 @@
         "y": 60,
         "raio": 18,
         "npcs": [
-          "mercador",
           "ferreiro",
           "alquimista",
           "missoes",
@@ -915,6 +922,7 @@
         }
       ],
       "coleta": [
+        {"itemId": "minerio_obsidiana", "quantidade": 8},
         {
           "itemId": "erva_curativa",
           "quantidade": 10
@@ -990,7 +998,6 @@
         "y": 60,
         "raio": 18,
         "npcs": [
-          "mercador",
           "ferreiro",
           "alquimista",
           "missoes",
@@ -1059,6 +1066,7 @@
         }
       ],
       "coleta": [
+        {"itemId": "cristal_de_gelo", "quantidade": 10},
         {
           "itemId": "erva_curativa",
           "quantidade": 10
@@ -1580,6 +1588,7 @@
         }
       ],
       "coleta": [
+        {"itemId": "minerio_obsidiana", "quantidade": 8}, {"itemId": "pedra_runica", "quantidade": 4},
         {
           "itemId": "erva_curativa",
           "quantidade": 10
@@ -2413,6 +2422,10 @@
     ]
   },
   "missoes": [
+    {"id": "boas_maneiras", "nome": "Boas maneiras", "texto": "Sir Ossos quer 12 cultistas derrotados no Vale das Almas.", "vilas": ["npc:ossos_educado"], "alvo": {"tipo": "cacar", "preset": "cultista", "qtd": 12, "regiao": "eclipse_almas"}, "recompensa": {"ouro": 600, "xp": 2400, "itens": ["pocao_vida_maior"]}},
+    {"id": "obsidiana_do_tobias", "nome": "Obsidiana para Tobias", "texto": "Tobias compra 8 minérios de obsidiana.", "vilas": ["npc:tobias_mineiro"], "alvo": {"tipo": "entregar", "itemId": "minerio_obsidiana", "qtd": 8}, "recompensa": {"ouro": 700, "xp": 2200}},
+    {"id": "paz_do_gruff", "nome": "A paz de Gruff", "texto": "Derrote 12 orcs nos Exilados para Gruff ter sossego.", "vilas": ["npc:vulto_do_troll"], "alvo": {"tipo": "cacar", "preset": "orc", "qtd": 12, "regiao": "eclipse_exilados"}, "recompensa": {"ouro": 650, "xp": 2500, "itens": ["pedra_runica"]}},
+    {"id": "escolta_baluarte", "nome": "Peregrino do Baluarte", "texto": "Leve o peregrino do Baluarte até as Cavernas do Baluarte.", "vilas": ["eclipse_baluarte"], "alvo": {"tipo": "escoltar", "protegido": "peregrino", "estrutura": "eclipse_baluarte_1_entrada"}, "recompensa": {"ouro": 500, "xp": 2000, "itens": ["pocao_vida_maior"]}},
     {
       "id": "expedicao_eclipse_baluarte_1",
       "nome": "Expedição: Cavernas de Baluarte da Aurora",

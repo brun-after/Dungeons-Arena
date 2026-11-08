@@ -157,6 +157,9 @@ describe('sala do Mundo', () => {
     expect(guardarItem(bolsa, obter(CONTEUDO.itens.get('pergaminho_retorno'), 'pergaminho'), 1, BALANCE_PADRAO.inventario)).toBe(true);
     c.enviar({ t: 'viajar', destino: 'vila_do_centro', pagamento: 'pergaminho' });
     expect(bolsa.mochila.some((m) => m.itemId === 'pergaminho_retorno')).toBe(false);
+    // Marco 38 (D-142): a pedra conjura por 5 s dentro do círculo antes de levar.
+    expect(s.retirarPendencias().find((x) => x.tipo === 'trocar')).toBeUndefined();
+    rodar(s, Math.ceil(BALANCE_PADRAO.mundo.retorno.conjuracaoMs / DT_MS) + 2);
     expect(s.retirarPendencias().find((x) => x.tipo === 'trocar')).toMatchObject({ destino: 'regiao:vila_do_centro' });
   });
 
@@ -227,6 +230,8 @@ it('retorna à vila salva na mesma região e não consome duas pedras em pedidos
   c.enviar({ t: 'viajar', destino: 'ultima_vila_salva', pagamento: 'pergaminho' });
   c.enviar({ t: 'viajar', destino: 'ultima_vila_salva', pagamento: 'pergaminho' });
   expect(bolsa.mochila.find(m => m.itemId === 'pergaminho_retorno')?.qtd).toBe(1);
+  // Marco 38 (D-142): a conjuração de 5 s.
+  rodar(s, Math.ceil(BALANCE_PADRAO.mundo.retorno.conjuracaoMs / DT_MS) + 2);
   expect(s.retirarPendencias().filter(x => x.tipo === 'trocar')).toEqual([expect.objectContaining({ destino: 'regiao:vila_do_centro', chegada: null })]);
 });
 

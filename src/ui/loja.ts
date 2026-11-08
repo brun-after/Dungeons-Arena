@@ -13,6 +13,7 @@ import { precoDoItem } from '../progression/itens-progressao';
 import { estoqueDaLoja, lojaAberta } from '../progression/loja';
 import { armaDoItem, molduraDoItem, resumoDoItem } from './mochila';
 import { motivoParaNaoForjar, receitaDaLoja } from '../progression/forja';
+import { fundivel } from '../progression/fusao-elemental';
 import { criarModal } from './modal';
 import { iconeDoItem } from './icones';
 import { classeDoItem, comRuna } from './runa-dom';
@@ -24,6 +25,8 @@ export interface OpcoesLoja {
   emitir: (cmd: Comando) => void;
   /** Ao abrir: fecha outros modais e solta as teclas. */
   aoAbrir: () => void;
+  /** Marco 38 (08/11/2026, D-142): no mercado do Mundo, abre os anúncios dos jogadores. */
+  abrirAnuncios?: () => void;
 }
 
 export interface Loja {
@@ -103,6 +106,15 @@ export function criarLoja(o: OpcoesLoja): Loja {
     saldo.dataset.ouro = String(bolsa.ouro);
     listas.textContent = '';
     if(ctx.fase.id.startsWith('mundo_masmorra_'))listas.append(el('p','detalhe-item',t('loja.retornoDungeon',{mortes:bolsa.mortesNaDungeon??0})));
+    // Marco 38 (D-142): o mercado da vila vende o estoque do reino e, pelo botão, os anúncios dos jogadores.
+    if (loja.ref === 'mercado' && o.abrirAnuncios) {
+      const b = el('button', 'botao-cabecalho', t('loja.anunciosDoReino'));
+      b.type = 'button';
+      b.dataset.chave = 'anuncios-do-reino';
+      const abrir = o.abrirAnuncios;
+      b.addEventListener('click', () => { abrir(); });
+      listas.append(b);
+    }
 
     listas.append(el('h3', 'subtitulo-modal', t('loja.estoque')));
     const estoque = el('ul', 'lista-itens estoque-loja');
@@ -151,12 +163,24 @@ export function criarLoja(o: OpcoesLoja): Loja {
   const desenharForja = (j: Entidade, loja: ObjetoNoMundo) => {
     const bolsa = j.bolsa;
     // Marco 30 (30/10/2026, D-129): só as receitas do ofício da loja (no Mundo, o ferreiro e o alquimista).
-    const receitas = [...ctx.conteudo.forja.values()].filter((r) => receitaDaLoja(r, loja));
+    // Marco 38 (D-142): em ordem de grau, com o grau no começo de cada linha.
+    const receitas = [...ctx.conteudo.forja.values()].filter((r) => receitaDaLoja(r, loja)).sort((a, b) => a.grau - b.grau);
     if (!bolsa || receitas.length === 0) return;
     listas.append(el('h3', 'subtitulo-modal', t('loja.forja')));
     const ul = el('ul', 'lista-itens forja-loja');
     for (const r of receitas) {
-      const materiais = r.entrada.map((x) => `${itens.get(x.item)?.nome ?? x.item} ×${x.qtd}`).concat(r.ouro > 0 ? [t('loja.forjaOuro', { ouro: r.ouro })] : []).join(' · ');
+      const materiais = [t('loja.grau', { grau: ['I', 'II', 'III', 'IV', 'V'][r.grau - 1] ?? r.grau }), ...r.entrada.map((x) => `${itens.get(x.item)?.nome ?? x.item} ×${x.qtd}`)].concat(r.ouro > 0 ? [t('loja.forjaOuro', { ouro: r.ouro })] : []).join(' · ');
+      if (r.saida.tipo === 'fundir') {
+        // A fusão lista as peças da mochila que a aceitam, uma linha para cada.
+        const pecas = bolsa.mochila.filter((i) => fundivel(itens.get(i.itemId)));
+        if (pecas.length === 0) ul.append(linha(undefined, r.nome, 1, null, `${r.texto} (${materiais}) · ${t('loja.fundirSemPeca')}`));
+        for (const entrada of pecas) {
+          const item = itens.get(entrada.itemId);
+          const motivo = motivoParaNaoForjar(o.estado(), ctx, j, r, entrada.invId);
+          ul.append(linha(item, `${r.nome}: ${item?.nome ?? entrada.itemId}`, 1, { texto: t('loja.forjar'), chave: `forjar-${r.id}-${entrada.invId}`, desligado: motivo !== null, fazer: () => { emitir({ t: 'forjar', receita: r.id, invId: entrada.invId }); } }, `${r.texto} (${materiais})`));
+        }
+        continue;
+      }
       if (r.saida.tipo === 'item') {
         const item = itens.get(r.saida.item);
         const motivo = motivoParaNaoForjar(o.estado(), ctx, j, r, null);

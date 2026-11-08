@@ -412,6 +412,11 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
     destinoMapa: () => orientacao.destino ? proximaEtapa(reino, pedido.lugar, orientacao.destino, ctx.fase)?.ponto ?? null : null,
     visoesExternas: () => visoesExternas,
     acoesDaPausa: [{ rotulo: t('mundo.sairRotulo'), fazer: () => { sair.click(); } }],
+    // Marco 38 (D-142): o mercado é uma loja só; o botão fecha a loja e pede os anúncios do reino.
+    abrirAnuncios: () => {
+      eu.enviarComando({ t: 'fecharLoja' });
+      enviarAcao({ a: 'mercado', op: 'listar', pagina: 0, busca: '' });
+    },
   });
   if (!cena) return;
   const c = cena;

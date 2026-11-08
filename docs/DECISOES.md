@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.96 · **Data:** 08/11/2026
+**Versão:** 0.97 · **Data:** 08/11/2026
 
 > **Histórico**
+> - **0.97 (08/11/2026)**: D-141 (habilidades por 35% FOR e 65% INT; o guerreiro conjura andando e encadeia com o básico) e D-142 (marco 38: prédios das vilas, andarilhos, escolta, errantes, forja em graus, troféus, fusão, pedra de retorno com círculo, save em toda região e o deserto entre os reinos).
 > - **0.96 (08/11/2026)**: D-140: o Mundo sem a fadiga de XP por fase (só a diferença de nível reduz o XP das criaturas inferiores).
 > - **0.95 (08/11/2026)**: D-139: os inimigos atacam sem parar quando estão em alcance, mais rápido e com mais skills conforme o nível (a skill fora de alcance não trava mais o ataque).
 > - **0.94 (08/11/2026)**: D-138: a área da aura sem a linha reta, mais sutil, do amarelo ao vermelho pela Bravura, e o fogo nos inimigos da Bravura 75.
@@ -4203,3 +4204,60 @@ personagem fica nela por horas, então poucos abates bastavam para o XP da regi�
 `false`: abaixo do nível, só a diferença de nível reduz o XP, com o mesmo piso de 1 XP, e `xpPorFase` não é acumulado
 na ficha. A campanha e o cooperativo seguem como antes. Teste em `tests/unit/ajustes-classes-xp.test.ts`.
 
+
+## D-141 — Habilidades por 35% FOR e 65% INT; o guerreiro conjura andando (08/11/2026)
+
+**Problema.** A rolagem das habilidades pesava Força e Inteligência meio a meio, e o guerreiro, que investe em
+Força, pagava a mesma lentidão de conjuração de um mago: parava para conjurar e errava o alvo que se mexia.
+
+**Decisão.**
+- **Peso 35/65.** `multiplicadorDeRolagem` (progression/efeitos-atributo.ts) faz
+  `(FOR−10)·0,35 + (INT−10)·0,65` (`atributos.efeitos.rolagemPesoForcaPct: 35` no balance). As skills de Destreza
+  seguem meio a meio entre FOR e DES, e o básico das armas segue com os atributos do item (D-126).
+- **O guerreiro conjura andando.** Em `ajustesClasses.guerreiro`, `conjuraAndando: true` faz a mobilidade
+  `trava` virar `lenta` (world/movimento.ts) e `lentidaoConjuracaoMult: 0,5` corta pela metade o freio da conjuração.
+- **Encadear com o básico.** A habilidade usada até `encadeioMs` (1 s) depois do ataque básico tem a animação antes
+  do dano e o próprio dano `encadeioVelocidade` (2×) mais rápidos: `encadeioDoGuerreiro` (combat/acao.ts) divide a
+  conjuração e a viagem não projétil. O render usa o tempo de lançamento, então a animação acelera junto. A entidade
+  guarda `ultimoBasicoTick`.
+
+Testes em `tests/unit/mundo-vilas-viagem.test.ts` (peso e encadeio), e os de `atributos-m18` e `pvp-classe`
+passaram para o peso novo. O diagnóstico de morte simultânea usa outra semente.
+
+## D-142 — Vilas com prédios, missões de NPC, escolta, errantes, forja em graus, fusão, retorno e o deserto (08/11/2026)
+
+**Problema.** As missões só vinham do quadro das vilas; os NPCs eram desenhos soltos na praça; o banco e as lojas não
+pareciam o que eram; os reinos só se ligavam pelo portal; a pedra de retorno era instantânea; e a forja só usava
+materiais simples.
+
+**Decisão.**
+- **Prédios.** Toda vila tem mercado, ferreiro e alquimista (`PAPEIS_OBRIGATORIOS`, validado em `lerReino`). Cada
+  papel ganha um prédio narrativo (world/vila-predios.ts): taverna com o balconista das missões, banco de pedra com
+  colunas, mercado em pavilhão com toldo listrado, forja com chaminé, botica com o caldeirão. A porta fica ao sul, o
+  atendente logo à frente, e a placa (render/predios-iso.ts) não some com o telhado. Os obrigatórios são erguidos
+  primeiro. O mercador antigo virou o **mercado**: o estoque do reino e os anúncios dos jogadores no mesmo balcão.
+- **Andarilhos.** NPCs com cara de inimigo (o slime que só quer conversar, o goblin, o esqueleto educado, o troll)
+  ou de gente, perto das estradas, dão missões próprias (`vilas: ["npc:<id>"]`).
+- **Escolta.** Alvo `escoltar` (`protegido`, `estrutura`): o protegido é uma invocação `escoltado` que segue quem
+  aceitou e nunca ataca (mundo/escoltas.ts). Chegar à porta conclui; a morte dele falha a missão.
+- **Mercadores errantes.** Homens de mochila enorme andam pela rota da região (de uma passagem ao centro) e param
+  quando alguém chega perto (mundo/errantes.ts).
+- **Forja em graus e troféus.** As receitas têm grau I a V; o ferreiro e o alquimista usam materiais mais variados
+  (minério + seda de aranha = couraça). Os chefes deixam troféus próprios com chance (o chifre do demônio, o amuleto
+  do necromante, as escamas e o núcleo do dragão do seu elemento), às vezes mais de um.
+- **Fusão elemental.** A receita `fundir` põe o troféu elemental numa peça da mochila (`fu_<elemento>_<grau>__<id>`,
+  progression/fusao-elemental.ts): na arma, o golpe aplica o estado do elemento por chance; nas outras peças, a
+  resistência ao elemento. Graus I a III, sem fundir duas vezes.
+- **Pedra de retorno com círculo** (mundo/retorno.ts). 5 s de conjuração num círculo rúnico, inalvejável e imune a
+  dano. Sair nos primeiros 4 s cancela e devolve a pedra. Sair no último segundo desvia para um lugar ao acaso do
+  reino e também devolve a pedra. Ficar até o fim leva à pedra de save.
+- **Save em toda região.** As regiões sem vila têm a pedra de save no centro, numa clareira que os monstros não ocupam.
+  O save vale em qualquer região, e a chegada cai na pedra.
+- **O deserto entre os reinos.** O território `travessia_das_areias` (3 regiões estreitas, na coluna entre o Centro
+  e o Eclipse) liga Colinas do Sudeste a Baluarte a pé. `passagens` limita os lados abertos, `estreita` cava o
+  corredor entre paredões, e `faixas` mistura os níveis dos dois reinos. Tem 3 dungeons, 5 missões e um dragão de fogo.
+- **Visual.** O portal entre reinos é um arco rúnico com vórtice num tablado. A pedra de save é um obelisco com runas e
+  um cristal que flutua.
+
+Não precisa de migração no Supabase: a ficha só guarda ids (os fundidos se resolvem pelo id) e `vilaSalva`, que já era
+texto. Testes em `tests/unit/mundo-vilas-viagem.test.ts`, e os da sala passaram a esperar a conjuração.

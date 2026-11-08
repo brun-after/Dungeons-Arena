@@ -78,7 +78,9 @@ export function multiplicadorDeRolagem(atributos: Atributos, b: Balance, escala?
   const e = b.atributos.efeitos;
   const segundo = escala === 'destreza' ? atributos.destreza : atributos.inteligencia;
   // Marco 27 (29/10/2026, D-126): o básico de cada arma escala com os atributos do item (a média deles), não só Força.
-  const pontos = rolagem?.length ? rolagem.reduce((s, k) => s + atributos[k] - 10, 0) / rolagem.length : (atributos.forca - 10 + (segundo - 10)) / 2;
+  // 08/11/2026 (D-141): FOR e INT pesam 35/65 (`rolagemPesoForcaPct`); com a Destreza, continua meio a meio.
+  const pesoFor = escala === 'destreza' ? 0.5 : e.rolagemPesoForcaPct / 100;
+  const pontos = rolagem?.length ? rolagem.reduce((s, k) => s + atributos[k] - 10, 0) / rolagem.length : (atributos.forca - 10) * pesoFor + (segundo - 10) * (1 - pesoFor);
   return Math.max(e.rolagemMin, 1 + (pontos * e.rolagemPorPontoPct) / 100);
 }
 

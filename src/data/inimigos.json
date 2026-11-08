@@ -207,6 +207,23 @@
       "intervaloAtaqueMs": 5000
     },
     {
+      "id": "peregrino",
+      "nome": "Peregrino",
+      "hpBase": 60,
+      "hesitacaoS": 0,
+      "deteccao": 0,
+      "xp": 0,
+      "modelo": "generico",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 2,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 5000,
+      "soMundo": true,
+      "invocacao": { "comportamento": "escoltado" }
+    },
+    {
       "id": "lobo_espiritual",
       "nome": "Lobo espiritual",
       "hpBase": 40,

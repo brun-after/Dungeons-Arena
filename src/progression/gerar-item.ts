@@ -13,6 +13,7 @@ import { RARIDADES, SLOTS_DE_EQUIPAMENTO, type Raridade, type Slot } from '../mo
 import { NOMES_ATRIBUTOS, type Bonus, type Item, type NomeAtributo } from './itens';
 import type { DefinicaoElemento, Elemento } from '../combat/elementos';
 import { ehIdItemBase, gerarItemBase, type ItensComFormas } from './gerar-item-base';
+import { ehIdFundido, gerarItemFundido, type RegrasDeFusao } from './fusao-elemental';
 
 export interface BaseDeItem {
   base: string;
@@ -175,6 +176,8 @@ export class CatalogoDeItens extends Map<string, Item> {
     /** Marco 18 (D-069): os itens com forma (`ib_`) e os elementos (o gancho elemental). */
     private readonly comFormas: ItensComFormas | null = null,
     private readonly elementos: ReadonlyMap<Elemento, DefinicaoElemento> = new Map(),
+    /** Marco 38 (08/11/2026, D-142): as peças fundidas (`fu_`) com um troféu elemental. */
+    private readonly fusao: RegrasDeFusao | null = null,
   ) {
     super(fixos);
     this.gerados = new Map();
@@ -186,9 +189,15 @@ export class CatalogoDeItens extends Map<string, Item> {
     const fixo = super.get(id);
     if (fixo) return fixo;
     const comForma = ehIdItemBase(id);
-    if (!comForma && !id.startsWith(PREFIXO)) return undefined;
+    const fundido = this.fusao !== null && ehIdFundido(id);
+    if (!comForma && !fundido && !id.startsWith(PREFIXO)) return undefined;
     const pronto = this.gerados.get(id);
     if (pronto) return pronto;
+    if (fundido) {
+      const item = gerarItemFundido(id, (b) => this.get(b), this.elementos, this.fusao);
+      if (item) this.gerados.set(id, item);
+      return item ?? undefined;
+    }
     const item = comForma ? (this.comFormas ? gerarItemBase(id, this.comFormas, this.regras, this.elementos) : null) : gerarItem(id, this.bases, this.regras);
     if (item) this.gerados.set(id, item);
     return item ?? undefined;

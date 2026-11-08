@@ -43,7 +43,7 @@
     }
   },
   "lojas": {
-    "mercador": [
+    "mercado": [
       "pocao_vida",
       "pocao_mana",
       "pergaminho_lobo",
@@ -86,7 +86,7 @@
       "tema": null,
       "semente": 1101,
       "inimigos": ["slime", "goblin"],
-      "vila": {"nome": "Vila do Centro", "x": 120, "y": 120, "raio": 27, "npcs": ["save", "portal", "mercador", "ferreiro", "alquimista", "missoes", "banco", "mercado"]},
+      "vila": {"nome": "Vila do Centro", "x": 120, "y": 120, "raio": 27, "npcs": ["save", "portal", "ferreiro", "alquimista", "missoes", "banco", "mercado"]},
       "estruturas": [{"id": "porta_gruta_das_nascentes", "nome": "Gruta das Nascentes", "tipo": "caverna", "x": 38, "y": 52, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "gruta_das_nascentes"}}, {"id": "porta_gruta_do_orvalho", "nome": "Gruta do Orvalho", "tipo": "caverna", "x": 43, "y": 173, "largura": 7, "altura": 4, "destino": {"tipo": "masmorra", "id": "gruta_do_orvalho"}}, {"id": "porta_fornalha_do_dragao", "nome": "Fornalha do Dragão", "tipo": "templo", "x": 173, "y": 175, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "fornalha_do_dragao"}}, {"id": "porta_caverna_dos_ecos", "nome": "Caverna dos Ecos", "tipo": "caverna", "x": 173, "y": 43, "largura": 7, "altura": 4, "destino": {"tipo": "masmorra", "id": "caverna_dos_ecos"}}],
       "coleta": [{"itemId": "erva_curativa", "quantidade": 10}, {"itemId": "minerio_ferro", "quantidade": 6}],
       "tamanho": 240,
@@ -96,6 +96,8 @@
     },
     {
       "id": "campos_do_oeste",
+      "andarilhos": [{"id": "gelatino", "nome": "Gelatino, o slime que só quer conversar", "aparencia": "slime", "fala": "Ei, ei! Não bate! Eu só quero conversar... Os goblins roubaram o meu chapéu e riem de mim."}],
+      "mercadoresErrantes": 1,
       "nome": "Campos do Oeste",
       "gx": 0,
       "gy": 1,
@@ -116,6 +118,8 @@
     },
     {
       "id": "encosta_do_leste",
+      "andarilhos": [],
+      "mercadoresErrantes": 1,
       "nome": "Encosta do Leste",
       "gx": 2,
       "gy": 1,
@@ -125,7 +129,7 @@
       "tema": null,
       "semente": 1301,
       "inimigos": ["orc", "goblin", "lobo", "arremessador"],
-      "vila": {"nome": "Pedravale", "x": 100, "y": 110, "raio": 19, "npcs": ["save", "portal", "mercador", "ferreiro", "alquimista", "missoes", "banco", "mercado"]},
+      "vila": {"nome": "Pedravale", "x": 100, "y": 110, "raio": 19, "npcs": ["save", "portal", "ferreiro", "alquimista", "missoes", "banco", "mercado"]},
       "estruturas": [{"id": "porta_catacumbas", "nome": "Catacumbas de Pedravale", "tipo": "cripta", "x": 144, "y": 40, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "catacumbas_pedravale"}}, {"id": "porta_cavernas_do_uivo", "nome": "Cavernas do Uivo", "tipo": "caverna", "x": 36, "y": 144, "largura": 7, "altura": 4, "destino": {"tipo": "masmorra", "id": "cavernas_do_uivo"}}, {"id": "porta_torre_da_nevasca", "nome": "Torre da Nevasca", "tipo": "cripta", "x": 144, "y": 146, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "torre_da_nevasca"}}],
       "coleta": [{"itemId": "minerio_ferro", "quantidade": 10}, {"itemId": "minerio_prata", "quantidade": 4}],
       "tamanho": 200,
@@ -137,6 +141,8 @@
     },
     {
       "id": "floresta_antiga",
+      "andarilhos": [{"id": "irma_celina", "nome": "Irmã Celina, peregrina", "aparencia": "gente", "fala": "Vou rezar na Cripta das Raízes, mas os lobos não me deixam passar. Você me acompanha?"}],
+      "mercadoresErrantes": 1,
       "nome": "Floresta Antiga",
       "gx": 0,
       "gy": 0,
@@ -147,7 +153,7 @@
       "semente": 1001,
       "inimigos": ["lobo", "aranha", "goblin", "duende_saltador", "runista_medroso"],
       "estruturas": [{"id": "porta_cripta_das_raizes", "nome": "Cripta das Raízes", "tipo": "cripta", "x": 55, "y": 158, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "cripta_das_raizes"}}, {"id": "porta_torre_dos_saqueadores", "nome": "Torre dos Saqueadores", "tipo": "templo", "x": 47, "y": 187, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "torre_dos_saqueadores"}}, {"id": "porta_caverna_da_peconha", "nome": "Caverna da Peçonha", "tipo": "caverna", "x": 187, "y": 190, "largura": 7, "altura": 4, "destino": {"tipo": "masmorra", "id": "caverna_da_peconha"}}],
-      "coleta": [{"itemId": "erva_curativa", "quantidade": 8}, {"itemId": "erva_lunar", "quantidade": 6}],
+      "coleta": [{"itemId": "madeira_antiga", "quantidade": 10}, {"itemId": "erva_curativa", "quantidade": 8}, {"itemId": "erva_lunar", "quantidade": 6}],
       "tamanho": 260,
       "bosses": {"presets": ["dragao_veneno"], "chancePct": 25, "quantidade": 1},
       "terrenos": [{"tipo": "agua", "perto": "livre", "quantidade": 2, "raio": 2}, {"tipo": "lama", "perto": "livre", "quantidade": 2, "raio": 2}, {"tipo": "luz_sagrada", "perto": "templo", "quantidade": 1, "raio": 2}, {"tipo": "nevoa_sombria", "perto": "cripta", "quantidade": 1, "raio": 2}],
@@ -167,7 +173,7 @@
       "semente": 1011,
       "inimigos": ["esqueleto", "cultista", "vampiro", "troll", "arremessador", "runista_medroso"],
       "estruturas": [{"id": "porta_ninho_dragao", "nome": "Ninho do Dragão", "tipo": "castelo", "x": 122, "y": 46, "largura": 9, "altura": 6, "destino": {"tipo": "covil", "id": "ninho_do_dragao"}}, {"id": "porta_cripta_do_silencio", "nome": "Cripta do Silêncio", "tipo": "caverna", "x": 49, "y": 194, "largura": 7, "altura": 4, "destino": {"tipo": "masmorra", "id": "cripta_do_silencio"}}, {"id": "porta_sepulcro_afogado", "nome": "Sepulcro Afogado", "tipo": "torre", "x": 194, "y": 197, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "sepulcro_afogado"}}],
-      "coleta": [{"itemId": "cristal_arcano", "quantidade": 6}, {"itemId": "minerio_prata", "quantidade": 6}],
+      "coleta": [{"itemId": "pedra_runica", "quantidade": 6}, {"itemId": "cristal_arcano", "quantidade": 6}, {"itemId": "minerio_prata", "quantidade": 6}],
       "tamanho": 270,
       "bosses": {"presets": ["dragao_fogo", "dragao_das_ruinas"], "chancePct": 100, "quantidade": 2},
       "terrenos": [{"tipo": "brasas", "perto": "livre", "quantidade": 4, "raio": 2}, {"tipo": "brasas", "perto": "castelo", "quantidade": 2, "raio": 2}, {"tipo": "brasas", "perto": "boss", "quantidade": 2, "raio": 2}],
@@ -187,7 +193,7 @@
       "semente": 1021,
       "inimigos": ["troll", "orc", "lobo", "arremessador"],
       "estruturas": [{"id": "porta_caverna_gelo", "nome": "Caverna de Gelo", "tipo": "caverna", "x": 151, "y": 65, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "caverna_de_gelo"}, "escondida": true}, {"id": "porta_gruta_de_ambar", "nome": "Gruta de Âmbar", "tipo": "cripta", "x": 41, "y": 166, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "gruta_de_ambar"}}, {"id": "porta_galerias_da_tempestade", "nome": "Galerias da Tempestade", "tipo": "caverna", "x": 166, "y": 168, "largura": 7, "altura": 4, "destino": {"tipo": "masmorra", "id": "galerias_da_tempestade"}}],
-      "coleta": [{"itemId": "minerio_prata", "quantidade": 8}, {"itemId": "cristal_arcano", "quantidade": 3}],
+      "coleta": [{"itemId": "cristal_de_gelo", "quantidade": 8}, {"itemId": "minerio_prata", "quantidade": 8}, {"itemId": "cristal_arcano", "quantidade": 3}],
       "tamanho": 230,
       "bosses": {"presets": ["dragao_gelo"], "chancePct": 25, "quantidade": 1},
       "terrenos": [{"tipo": "gelo_fino", "perto": "livre", "quantidade": 4, "raio": 2}, {"tipo": "agua", "perto": "livre", "quantidade": 1, "raio": 2}, {"tipo": "gelo_fino", "perto": "caverna", "quantidade": 1, "raio": 2}, {"tipo": "nevoa_sombria", "perto": "cripta", "quantidade": 1, "raio": 2}],
@@ -197,6 +203,7 @@
     },
     {
       "id": "pantano_sombrio",
+      "andarilhos": [{"id": "ossinho", "nome": "Ossinho, esqueleto educado", "aparencia": "esqueleto", "fala": "Perdão por assustar. Eu era alquimista em vida e ainda preciso de resina para os meus estudos."}],
       "nome": "Pântano Sombrio",
       "gx": 0,
       "gy": 2,
@@ -207,7 +214,7 @@
       "semente": 1401,
       "inimigos": ["slime", "aranha", "cultista", "runista_medroso", "duende_saltador"],
       "estruturas": [{"id": "porta_cabana_bruxa", "nome": "Cabana da Bruxa", "tipo": "torre", "x": 66, "y": 156, "largura": 5, "altura": 5, "destino": {"tipo": "covil", "id": "cabana_da_bruxa"}}, {"id": "porta_ruinas_afogadas", "nome": "Ruínas Afogadas", "tipo": "templo", "x": 180, "y": 55, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "ruinas_afogadas"}}, {"id": "porta_caverna_das_esporas", "nome": "Caverna das Esporas", "tipo": "caverna", "x": 45, "y": 180, "largura": 7, "altura": 4, "destino": {"tipo": "masmorra", "id": "caverna_das_esporas"}}, {"id": "porta_bastiao_das_cinzas", "nome": "Bastião das Cinzas", "tipo": "templo", "x": 180, "y": 182, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "bastiao_das_cinzas"}}],
-      "coleta": [{"itemId": "flor_de_fogo", "quantidade": 6}, {"itemId": "erva_lunar", "quantidade": 8}],
+      "coleta": [{"itemId": "resina_negra", "quantidade": 8}, {"itemId": "flor_de_fogo", "quantidade": 6}, {"itemId": "erva_lunar", "quantidade": 8}],
       "tamanho": 250,
       "bosses": {"presets": ["dragao_veneno"], "chancePct": 25, "quantidade": 1},
       "terrenos": [{"tipo": "miasma", "perto": "livre", "quantidade": 3, "raio": 2}, {"tipo": "lama", "perto": "livre", "quantidade": 3, "raio": 2}, {"tipo": "agua", "perto": "livre", "quantidade": 2, "raio": 2}, {"tipo": "nevoa_sombria", "perto": "torre", "quantidade": 1, "raio": 2}, {"tipo": "luz_sagrada", "perto": "templo", "quantidade": 1, "raio": 2}],
@@ -217,6 +224,8 @@
     },
     {
       "id": "bosque_do_sul",
+      "andarilhos": [{"id": "grik", "nome": "Grik, goblin desertor", "aparencia": "goblin", "fala": "Grik não quer mais brigar. Grik quer pagar as dívidas com o reino. Grik ajuda, você ajuda?"}],
+      "mercadoresErrantes": 1,
       "nome": "Bosque do Sul",
       "gx": 1,
       "gy": 2,
@@ -227,7 +236,7 @@
       "semente": 1501,
       "inimigos": ["aranha", "lobo", "goblin", "duende_saltador", "runista_medroso"],
       "estruturas": [{"id": "porta_mina_abandonada", "nome": "Mina Abandonada", "tipo": "mina", "x": 68, "y": 165, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "mina_abandonada"}}, {"id": "porta_minas_rei_goblin", "nome": "Minas do Rei Goblin", "tipo": "mina", "x": 165, "y": 161, "largura": 7, "altura": 5, "destino": {"tipo": "covil", "id": "minas_do_rei_goblin"}}, {"id": "porta_templo_das_raizes", "nome": "Templo das Raízes", "tipo": "torre", "x": 43, "y": 173, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "templo_das_raizes"}}, {"id": "porta_gruta_dos_cristais", "nome": "Gruta dos Cristais", "tipo": "caverna", "x": 173, "y": 175, "largura": 7, "altura": 4, "destino": {"tipo": "masmorra", "id": "gruta_dos_cristais"}}],
-      "coleta": [{"itemId": "erva_curativa", "quantidade": 8}, {"itemId": "minerio_ferro", "quantidade": 8}],
+      "coleta": [{"itemId": "madeira_antiga", "quantidade": 6}, {"itemId": "erva_curativa", "quantidade": 8}, {"itemId": "minerio_ferro", "quantidade": 8}],
       "tamanho": 240,
       "bosses": {"presets": ["dragao_veneno"], "chancePct": 25, "quantidade": 1},
       "terrenos": [{"tipo": "miasma", "perto": "mina", "quantidade": 2, "raio": 2}, {"tipo": "lama", "perto": "livre", "quantidade": 2, "raio": 2}, {"tipo": "agua", "perto": "livre", "quantidade": 1, "raio": 2}],
@@ -237,6 +246,8 @@
     },
     {
       "id": "colinas_do_sudeste",
+      "andarilhos": [{"id": "caravaneiro_toma", "nome": "Tomás, caravaneiro", "aparencia": "gente", "fala": "Daqui o caminho a pé para o Eclipse é pelo deserto, a leste. Quem volta de lá traz areia nas botas e histórias."}],
+      "mercadoresErrantes": 1,
       "nome": "Colinas do Sudeste",
       "gx": 2,
       "gy": 2,
@@ -247,7 +258,7 @@
       "semente": 1601,
       "inimigos": ["orc", "troll", "esqueleto", "arremessador", "runista_medroso"],
       "estruturas": [{"id": "porta_galerias_de_prata", "nome": "Galerias de Prata", "tipo": "mina", "x": 142, "y": 130, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "galerias_de_prata"}}, {"id": "porta_cripta_do_necromante", "nome": "Cripta do Necromante", "tipo": "caverna", "x": 38, "y": 151, "largura": 7, "altura": 4, "destino": {"tipo": "masmorra", "id": "cripta_do_necromante"}}, {"id": "porta_torre_do_eclipse", "nome": "Torre do Eclipse", "tipo": "cripta", "x": 151, "y": 153, "largura": 5, "altura": 4, "destino": {"tipo": "masmorra", "id": "torre_do_eclipse"}}],
-      "coleta": [{"itemId": "minerio_prata", "quantidade": 8}, {"itemId": "cristal_arcano", "quantidade": 2}],
+      "coleta": [{"itemId": "areia_vitrea", "quantidade": 4}, {"itemId": "minerio_prata", "quantidade": 8}, {"itemId": "cristal_arcano", "quantidade": 2}],
       "tamanho": 210,
       "bosses": {"presets": ["dragao_raio"], "chancePct": 25, "quantidade": 1},
       "terrenos": [{"tipo": "campo_eletrico", "perto": "mina", "quantidade": 2, "raio": 2}, {"tipo": "campo_eletrico", "perto": "livre", "quantidade": 2, "raio": 2}, {"tipo": "nevoa_sombria", "perto": "cripta", "quantidade": 1, "raio": 2}],
@@ -292,6 +303,15 @@
     {"id": "ninho_do_dragao", "nome": "Ninho do Dragão", "nivel": 28, "salas": 6, "tema": "vulcao", "inimigos": ["cultista", "vampiro", "troll"], "boss": "dragao_das_ruinas", "dropExclusivo": "manto_de_escamas", "chanceDropPct": 25, "renascerMin": 40}
   ],
   "materiais": {
+    "boss": [{ "itemId": "chifre_de_demonio", "chancePct": 60 }, { "itemId": "coracao_infernal", "chancePct": 18 }],
+    "rei_goblin": [{ "itemId": "dente_de_ouro", "chancePct": 50 }],
+    "bruxa_do_pantano": [{ "itemId": "olho_da_bruxa", "chancePct": 45 }, { "itemId": "seiva_venenosa", "chancePct": 35 }],
+    "dragao_das_ruinas": [{ "itemId": "escama_de_dragao", "chancePct": 60 }, { "itemId": "escama_ignea", "chancePct": 50 }, { "itemId": "nucleo_igneo", "chancePct": 25 }],
+    "dragao_fogo": [{ "itemId": "escama_ignea", "chancePct": 55 }, { "itemId": "nucleo_igneo", "chancePct": 22 }, { "itemId": "escama_de_dragao", "chancePct": 15 }],
+    "dragao_gelo": [{ "itemId": "escama_glacial", "chancePct": 55 }, { "itemId": "nucleo_glacial", "chancePct": 22 }, { "itemId": "escama_de_dragao", "chancePct": 15 }],
+    "dragao_raio": [{ "itemId": "escama_trovejante", "chancePct": 55 }, { "itemId": "nucleo_trovejante", "chancePct": 22 }, { "itemId": "escama_de_dragao", "chancePct": 15 }],
+    "dragao_veneno": [{ "itemId": "escama_peconhenta", "chancePct": 55 }, { "itemId": "nucleo_peconhento", "chancePct": 22 }, { "itemId": "escama_de_dragao", "chancePct": 15 }],
+    "necromante_ancestral": [{ "itemId": "cinza_de_alma", "chancePct": 55 }, { "itemId": "filacterio_rachado", "chancePct": 15 }, { "itemId": "amuleto_do_necromante", "chancePct": 12 }],
     "arremessador": [{ "itemId": "pergaminho_retorno", "chancePct": 6 }],
     "duende_saltador": [{ "itemId": "pergaminho_retorno", "chancePct": 6 }],
     "runista_medroso": [{ "itemId": "pergaminho_retorno", "chancePct": 6 }],
@@ -351,7 +371,7 @@
         "chancePct": 100
       }
     ],
-    "vampiro": [
+    "vampiro": [{ "itemId": "presa_de_vampiro", "chancePct": 20 }, 
       {
         "itemId": "escama_de_dragao",
         "chancePct": 6
@@ -361,19 +381,19 @@
         "chancePct": 6
       }
     ],
-    "orc": [
+    "orc": [{ "itemId": "presa_de_orc", "chancePct": 30 }, 
       {
         "itemId": "pergaminho_retorno",
         "chancePct": 6
       }
     ],
-    "cultista": [
+    "cultista": [{ "itemId": "pano_cultista", "chancePct": 30 }, 
       {
         "itemId": "pergaminho_retorno",
         "chancePct": 6
       }
     ],
-    "troll": [
+    "troll": [{ "itemId": "couro_de_troll", "chancePct": 25 }, 
       {
         "itemId": "pergaminho_retorno",
         "chancePct": 6
@@ -381,6 +401,16 @@
     ]
   },
   "missoes": [
+    {"id": "chapeu_do_gelatino", "nome": "O chapéu do Gelatino", "texto": "Gelatino quer o chapéu de volta: derrote 8 goblins nos Campos do Oeste.", "vilas": ["npc:gelatino"], "alvo": {"tipo": "cacar", "preset": "goblin", "qtd": 8, "regiao": "campos_do_oeste"}, "recompensa": {"ouro": 70, "xp": 120, "itens": ["pocao_vida"]}},
+    {"id": "amigos_do_gelatino", "nome": "Amigos de geleia", "texto": "Gelatino quer gosma para \"fazer amigos\". Melhor não perguntar. Traga 6.", "vilas": ["npc:gelatino"], "alvo": {"tipo": "entregar", "itemId": "gosma_de_slime", "qtd": 6}, "recompensa": {"ouro": 60, "xp": 100}},
+    {"id": "escolta_cripta_das_raizes", "nome": "A peregrina da floresta", "texto": "Leve a Irmã Celina viva até a porta da Cripta das Raízes.", "vilas": ["npc:irma_celina"], "alvo": {"tipo": "escoltar", "protegido": "peregrino", "estrutura": "porta_cripta_das_raizes"}, "recompensa": {"ouro": 160, "xp": 260, "itens": ["pocao_vida_maior"]}},
+    {"id": "dividas_do_grik", "nome": "As dívidas do Grik", "texto": "Grik pede 6 presas de lobo para pagar quem ele roubou.", "vilas": ["npc:grik"], "alvo": {"tipo": "entregar", "itemId": "presa_de_lobo", "qtd": 6}, "recompensa": {"ouro": 90, "xp": 150, "itens": ["minerio_prata"]}},
+    {"id": "primos_do_grik", "nome": "Os primos do Grik", "texto": "Os primos do Grik ainda roubam no bosque: derrote 10 goblins no Bosque do Sul.", "vilas": ["npc:grik"], "alvo": {"tipo": "cacar", "preset": "goblin", "qtd": 10, "regiao": "bosque_do_sul"}, "recompensa": {"ouro": 110, "xp": 180}},
+    {"id": "resina_do_ossinho", "nome": "A resina do Ossinho", "texto": "Ossinho precisa de 5 resinas negras do pântano.", "vilas": ["npc:ossinho"], "alvo": {"tipo": "entregar", "itemId": "resina_negra", "qtd": 5}, "recompensa": {"ouro": 150, "xp": 260, "itens": ["essencia_arcana"]}},
+    {"id": "caravana_de_tomas", "nome": "Areia nas botas", "texto": "Tomás paga bem por 6 areias vítreas da travessia.", "vilas": ["npc:caravaneiro_toma"], "alvo": {"tipo": "entregar", "itemId": "areia_vitrea", "qtd": 6}, "recompensa": {"ouro": 220, "xp": 400, "itens": ["pergaminho_retorno"]}},
+    {"id": "escolta_gruta_das_nascentes", "nome": "O peregrino das nascentes", "texto": "Leve o peregrino da vila até a porta da Gruta das Nascentes.", "vilas": ["vila_do_centro"], "alvo": {"tipo": "escoltar", "protegido": "peregrino", "estrutura": "porta_gruta_das_nascentes"}, "recompensa": {"ouro": 80, "xp": 140, "itens": ["pocao_vida"]}},
+    {"id": "escolta_catacumbas", "nome": "Velório nas Catacumbas", "texto": "Leve o peregrino de Pedravale até a porta das Catacumbas.", "vilas": ["encosta_do_leste"], "alvo": {"tipo": "escoltar", "protegido": "peregrino", "estrutura": "porta_catacumbas"}, "recompensa": {"ouro": 120, "xp": 200, "itens": ["pocao_vida_maior"]}},
+    {"id": "couro_de_troll_pedravale", "nome": "Couro para o ferreiro", "texto": "O ferreiro de Pedravale quer 4 couros de troll.", "vilas": ["encosta_do_leste"], "alvo": {"tipo": "entregar", "itemId": "couro_de_troll", "qtd": 4}, "recompensa": {"ouro": 140, "xp": 220}},
     {"id": "limpar_os_campos", "nome": "Limpar os campos", "texto": "Derrote 10 slimes perto da Vila do Centro.", "vilas": ["vila_do_centro"], "alvo": {"tipo": "cacar", "preset": "slime", "qtd": 10, "regiao": "vila_do_centro"}, "recompensa": {"ouro": 40, "xp": 60}},
     {"id": "orelhas_de_goblin", "nome": "Orelhas de goblin", "texto": "Traga 6 orelhas de goblin: só os goblins as deixam.", "vilas": ["vila_do_centro"], "alvo": {"tipo": "entregar", "itemId": "orelha_de_goblin", "qtd": 6}, "recompensa": {"ouro": 60, "xp": 90}},
     {"id": "bando_do_oeste", "nome": "O bando do oeste", "texto": "Derrote 12 goblins nos Campos do Oeste.", "vilas": ["vila_do_centro"], "alvo": {"tipo": "cacar", "preset": "goblin", "qtd": 12, "regiao": "campos_do_oeste"}, "recompensa": {"ouro": 70, "xp": 120}},

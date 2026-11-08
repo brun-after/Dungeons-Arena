@@ -146,7 +146,8 @@ describe('pedidos ao servidor e objetos do exterior', () => {
     const regiao = obter(reino.regioes.find((r) => r.id === 'vila_do_centro'), 'região');
     const objetos = objetosDoExterior(reino, gerarExterior(reino, regiao));
     const lojas = objetos.filter((o) => o.tipo === 'loja');
-    expect(lojas.map((o) => o.ref).sort()).toEqual(['alquimista', 'ferreiro', 'mercador']);
+    // Marco 38 (D-142): o mercado (estoque do reino e anúncios) no lugar do mercador.
+    expect(lojas.map((o) => o.ref).sort()).toEqual(['alquimista', 'ferreiro', 'mercado']);
     expect(lojas.find((o) => o.ref === 'alquimista')?.itens).toContain('pergaminho_retorno');
     expect(objetos.some((o) => o.tipo === 'pedra_save')).toBe(true);
     expect(objetos.some((o) => o.tipo === 'pedra_portal')).toBe(true);

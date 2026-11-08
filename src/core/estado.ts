@@ -72,7 +72,9 @@ export interface Projetil {
 /** Marco 29 (D-128): os do Mundo: `npc`, `coleta`, `tumulo`, `porta_estrutura`, `pedra_portal` e `pedra_save`. */
 export type TipoObjeto =
   | 'orbe_hp' | 'orbe_recurso' | 'orbe_efeito' | 'orbe_refugio' | 'item' | 'ouro' | 'bau' | 'loja' | 'saida' | 'santuario' | 'quebravel'
-  | 'npc' | 'coleta' | 'tumulo' | 'porta_estrutura' | 'pedra_portal' | 'pedra_save';
+  | 'npc' | 'coleta' | 'tumulo' | 'porta_estrutura' | 'pedra_portal' | 'pedra_save'
+  // Marco 38 (08/11/2026, D-142): o círculo da Pedra de retorno (`ref`: quem conjura; `abertoTick` e `valor`: início e fim).
+  | 'circulo_retorno';
 
 /**
  * Objeto coletável no mundo (§2.1). `objetoId` é estável; a coleta é uma transação dentro do

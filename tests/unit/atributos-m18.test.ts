@@ -37,17 +37,19 @@ describe('dano e potência (D-068)', () => {
   it('a especialização recompensa concentração ofensiva, inclusive híbrida, e respeita o teto', () => {
     const especializada = atr({ forca: 22, inteligencia: 10 });
     const dispersa = atr({ forca: 16, inteligencia: 16 });
-    expect(multiplicadorDeRolagem(especializada, b)).toBe(multiplicadorDeRolagem(dispersa, b));
+    // 08/11/2026 (D-141): com o peso 35/65, a mesma soma rende mais quando vai para a Inteligência.
+    expect(multiplicadorDeRolagem(atr({ forca: 10, inteligencia: 22 }), b)).toBeGreaterThan(multiplicadorDeRolagem(dispersa, b));
+    expect(multiplicadorDeRolagem(dispersa, b)).toBeGreaterThan(multiplicadorDeRolagem(especializada, b));
     expect(bonusDeEspecializacao(especializada, 'forca', b)).toBeGreaterThan(bonusDeEspecializacao(dispersa, 'forca', b));
     expect(bonusDeEspecializacao(especializada, 'destreza', b)).toBe(0);
     expect(bonusDeEspecializacao(atr({ forca: 19, inteligencia: 19 }), 'inteligencia', b)).toBe(bonusDeEspecializacao(especializada, 'forca', b));
     expect(bonusDeEspecializacao(atr({ forca: 30 }), 'forca', b)).toBe(b.atributos.efeitos.especializacaoMax);
   });
-  it('a rolagem escala com FOR e INT, metade de cada', () => {
+  it('a rolagem escala com FOR e INT, 35% e 65% (D-141)', () => {
     const k = b.atributos.efeitos.rolagemPorPontoPct / 100;
     expect(multiplicadorDeRolagem(atr({}), b)).toBe(1);
-    expect(multiplicadorDeRolagem(atr({ forca: 14 }), b)).toBeCloseTo(1 + 2 * k);
-    expect(multiplicadorDeRolagem(atr({ inteligencia: 14 }), b)).toBeCloseTo(1 + 2 * k);
+    expect(multiplicadorDeRolagem(atr({ forca: 14 }), b)).toBeCloseTo(1 + 4 * 0.35 * k);
+    expect(multiplicadorDeRolagem(atr({ inteligencia: 14 }), b)).toBeCloseTo(1 + 4 * 0.65 * k);
     expect(multiplicadorDeRolagem(atr({ forca: 14, inteligencia: 14 }), b)).toBeCloseTo(1 + 4 * k);
     expect(multiplicadorDeRolagem(atr({ forca: 1, inteligencia: 1 }), b)).toBe(b.atributos.efeitos.rolagemMin);
   });

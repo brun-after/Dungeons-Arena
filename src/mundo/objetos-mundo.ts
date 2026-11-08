@@ -18,8 +18,15 @@ import { novoObjeto } from '../world/objeto-novo';
 import type { ExteriorGerado } from '../world/gerador-exterior';
 import type { PapelNpc, Reino } from './reino';
 
-/** Os papéis que atendem como loja (o estoque vem de `reino.lojas`). */
-const PAPEIS_DE_LOJA: ReadonlySet<PapelNpc> = new Set(['mercador', 'ferreiro', 'alquimista']);
+/**
+ * Os papéis que atendem como loja (o estoque vem de `reino.lojas`). Marco 38 (08/11/2026, D-142): o mercado é uma
+ * loja só, com o estoque do reino (o do antigo mercador) e, pelo botão, os anúncios dos jogadores.
+ */
+const PAPEIS_DE_LOJA: ReadonlySet<PapelNpc> = new Set(['mercador', 'ferreiro', 'alquimista', 'mercado']);
+/** Marco 38: o prefixo do `ref` do andarilho (o `itemId` guarda a aparência, para o render). */
+export const PREFIXO_ANDARILHO = 'andarilho:';
+/** Marco 38: o `ref` da loja do mercador errante que anda pela região. */
+export const REF_ERRANTE = 'errante';
 /** O objeto de cada papel que não é loja. */
 const OBJETO_DO_PAPEL: Readonly<Partial<Record<PapelNpc, TipoObjeto>>> = { missoes: 'npc', save: 'pedra_save', portal: 'pedra_portal' };
 /** Os que só pedem ao servidor (sem efeito no tick). */
@@ -37,11 +44,20 @@ export function objetosDoExterior(reino: Reino, exterior: ExteriorGerado): Objet
       objetos.push(novoObjeto(id, 'porta_estrutura', p.porta.x, p.porta.y, { ref: p.estruturaId, ...(p.escondida && { escondido: true }) }));
     } else if (p.tipo === 'coleta') {
       objetos.push(novoObjeto(id, 'coleta', p.x, p.y, { itemId: p.itemId }));
+    } else if (p.tipo === 'andarilho') {
+      objetos.push(novoObjeto(id, 'npc', p.x, p.y, { ref: `${PREFIXO_ANDARILHO}${p.id}`, itemId: p.aparencia }));
     } else if (PAPEIS_DE_LOJA.has(p.papel)) {
-      objetos.push(novoObjeto(id, 'loja', p.x, p.y, { ref: p.papel, itens: [...(reino.lojas[p.papel] ?? [])] }));
+      const papel = p.papel === 'mercador' ? 'mercado' : p.papel;
+      const estoque = papel === 'mercado' ? (reino.lojas.mercado ?? reino.lojas.mercador ?? []) : (reino.lojas[papel] ?? []);
+      objetos.push(novoObjeto(id, 'loja', p.x, p.y, { ref: papel, itens: [...estoque] }));
     } else {
       objetos.push(novoObjeto(id, OBJETO_DO_PAPEL[p.papel] ?? 'npc', p.x, p.y, { ref: p.papel }));
     }
+  }
+  // Marco 38: os mercadores errantes começam no início da rota (a sala os faz andar).
+  for (const [i, rota] of exterior.rotas.entries()) {
+    const c = rota[0];
+    if (c) objetos.push(novoObjeto(`errante-${i}`, 'loja', c.x, c.y, { ref: REF_ERRANTE, itens: [...reino.mercadorErrante] }));
   }
   return objetos;
 }

@@ -245,6 +245,9 @@ export function textoDoAviso(a: AvisoDoMundo): string | null {
     }
     case 'recusa':
       return t(`mundo.recusa.${a.motivo}` as ChaveTexto);
+    // Marco 38 (D-142): a conjuração da Pedra de retorno.
+    case 'retorno':
+      return t(`mundo.retorno.${a.fim ?? 'inicio'}` as ChaveTexto);
     default:
       return null;
   }
