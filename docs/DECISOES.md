@@ -4072,10 +4072,12 @@ coroa de ouro em brasa no nível 100.
     com um `visual.som` próprio (que não seja o genérico "golpe") continua com o dela. Arma ou criatura nova cai no
     timbre da natureza do golpe (`golpe` da arma) ou no soco. Os de longe (arco, bumerangue) seguem como estavam.
 - **Aura do Guerreiro.** Com a Bravura 25+, a borda da aura eram três pontos pequenos e fracos a cada 140 ms, numa borda
-  quadrada à altura do peito: sumiam no escuro. Agora é um **anel no chão**, no raio da aura mais meia célula (a borda
-  das células que ela alcança; a área segue medida por Chebyshev), com brilhos juntos que cobrem a volta por igual
-  (passo áureo); a cada marco (25, 50, 75, 100) o anel fica mais denso e, de 50 em diante, solta faíscas. O raio cresce
-  com os marcos, como antes.
+  quadrada à altura do peito: sumiam no escuro. Agora a aura só aparece **em ação** (em combate) e é uma **área que
+  pulsa puxando a energia para o Guerreiro**: a cada 0,7 s, uma onda de brilhos nasce pelo raio da aura (dois terços na
+  borda, o resto pelo meio) e converge para ele no chão, mais densa a cada marco (25, 50, 75, 100). A cada pulso de
+  verdade (o evento `auraPulsou`, com quem ela feriu), filetes de brilhos e faíscas saem de cada inimigo atingido e voam
+  até o Guerreiro, junto com uma onda reforçada. O raio cresce com os marcos, como antes (a área segue medida por
+  Chebyshev). Uma primeira versão, um anel fixo à vista o tempo todo, foi trocada por esta a pedido do usuário.
   - A aura (e os orbes do Mago) exigia a bolsa, que não vem no online nem no Mundo (a dos outros nunca vem): o marco
     passou a ser lido pelo que é público (`marcoAMostra`: a classe, o atributo e a arma à mostra). Com a bolsa, é o
     `marcoDe` de sempre. A regra de jogo não mudou.

@@ -1,7 +1,7 @@
 // 17/10/2026: visual nativo e ida/volta reais, com dados gravados pelo mesmo código do jogo.
 import { expect, test } from '@playwright/test';
 import { build } from 'esbuild';
-import { pararNaPorta } from './porta';
+import { pararNaPorta, usarPorta } from './porta';
 
 let semear = '';
 let galeria = '';
@@ -24,7 +24,7 @@ test.beforeAll(async () => {
       // A primeira fase já foi concluída: a revisita deve manter a saída aberta e o baú consumido.
       anterior.saidaAberta = true; anterior.entidades = []; anterior.objetos = [];
       const classe = conteudo.classes.get('aventureiro');
-      // Marco 24 (D-099): já em cima da porta azul (o retorno pede 3 s parado nela).
+      // Marco 24 (D-099): já em cima da porta azul (D-138: o retorno pede o E nela).
       estado.entidades.unshift(criarJogador(classe, 'j1', 4, 4, r.ctx.balance));
       await gravarRegistro({ versaoSchema: VERSAO_SCHEMA, slot: 1, criadoEm: 1, atualizadoEm: 1, faseRef,
         nomeFase: r.ctx.fase.nome, estado, estatisticas: { mortes: 0, inimigosDerrotados: 1 },
@@ -69,9 +69,11 @@ test('porta azul retorna e a saída reabre a fase seguinte, sem perder o mundo v
   await expect(page.locator('body')).toHaveAttribute('data-semeado', 'sim');
   await page.goto('/?jogo=campanha&slot=1&diag=1');
   await expect(page.locator('#diag')).toHaveAttribute('data-celula', '4,4', { timeout: 30000 });
-  // Marco 24 (D-099): a porta só leva depois de 3 s parado nela; antes, a contagem no prompt.
-  await expect(page.locator('.prompt-interacao')).toContainText('Fique parado na porta');
+  // 08/11/2026 (D-138): parado na porta azul não volta sozinho; o prompt pede o E (no toque, o botão da mão).
+  await expect(page.locator('.prompt-interacao')).toContainText('Porta azul');
   await page.screenshot({ path: info.outputPath('porta-retorno.png') });
+  await expect(page.locator('#diag')).toHaveAttribute('data-celula', '4,4');
+  await usarPorta(page);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Salões da entrada', { timeout: 30000 });
   await expect(page.locator('#diag')).toHaveAttribute('data-celula', '36,25');
   await pararNaPorta(page, '36,24');

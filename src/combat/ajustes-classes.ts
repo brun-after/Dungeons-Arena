@@ -131,6 +131,8 @@ export function pulsarAura(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Ent
       saida.push({ t: 'efeitoResultado', tick: estado.tick, alvoId: e.id, origemId: ator.id, tipo: 'dano_direto', dano, cura: 0, mana: 0 });
     }
   }
+  // 08/11/2026 (D-138): o pulso à vista (a energia dos atingidos converge para o Guerreiro).
+  if (atingidos.length > 0) saida.push({ t: 'auraPulsou', tick: estado.tick, id: ator.id, x: centro.x, y: centro.y, raio, atingidos: atingidos.map((e) => e.id) });
   efeitosDoPulso(estado, ctx, ator, atingidos, saida);
   auraElemental(estado, ctx, ator, atingidos, saida);
   prolongarFrenesi(estado, ctx, ator, atingidos);

@@ -84,34 +84,70 @@ describe('aura do Guerreiro à mostra', () => {
   });
 });
 
-describe('anel da aura', () => {
-  it('desenha um anel no chão, no raio + meia célula, mais denso com a força', async () => {
+describe('aura em ação', () => {
+  /** Partículas falsas: a tela é a própria grade; guarda de onde cada brilho sai e para onde aponta. */
+  const montar = async (aura: { raio: number; cor: number; forca: number } | null) => {
     const { EfeitosDeDominio } = await import('../../src/render/efeitos-dominio');
-    const pontos: { x: number; y: number }[] = [];
-    let faiscas = 0;
+    const { Barramento } = await import('../../src/core/events');
+    const voos: { x: number; y: number; angulo: number; textura: string }[] = [];
     const particulas = {
       noChao: (x: number, y: number) => ({ x, y }),
-      emitirNaTela: (lista: readonly unknown[], x: number, y: number) => {
-        if (lista.length && (lista[0] as { textura: string }).textura === 'faisca') faiscas++;
-        else pontos.push({ x, y });
+      naTela: (x: number, y: number) => ({ x, y }),
+      emitirNaTela: (lista: readonly { textura: string }[], x: number, y: number, _cor: number, _ate: unknown, angulo = 0) => {
+        voos.push({ x, y, angulo, textura: lista[0]?.textura ?? '' });
       },
       emitir: () => undefined,
     };
     const g = criarJogador(obter(CONTEUDO.classes.get('guerreiro')), 'g', 5, 5, ctx.balance);
-    const estado = { tick: 0, entidades: [g] } as unknown as Parameters<InstanceType<typeof EfeitosDeDominio>['quadro']>[0];
-    const contar = (forca: number) => {
-      pontos.length = 0; faiscas = 0;
-      const ef = new EfeitosDeDominio({ particulas: particulas as never, auraDe: () => ({ raio: 2, cor: 0xffffff, forca }), orbesDe: () => null });
-      for (let ms = 0; ms < 1000; ms += 16) ef.quadro(estado, ms, () => ({ x: 5, y: 5 }));
-      return pontos.length;
+    const inimigo = criatura('goblin');
+    inimigo.x = 7; inimigo.y = 5;
+    const estado = { tick: 0, entidades: [g, inimigo] } as unknown as Parameters<InstanceType<typeof EfeitosDeDominio>['quadro']>[0];
+    // Só o Guerreiro tem a aura.
+    const ef = new EfeitosDeDominio({ particulas: particulas as never, auraDe: (e) => (e.id === 'g' ? aura : null), orbesDe: () => null });
+    const bus = new Barramento() as never;
+    ef.ligar(bus, () => estado);
+    const posicao = (e: { x: number; y: number }) => ({ x: e.x, y: e.y });
+    return { ef, bus: bus as { emitir: (t: string, ev: unknown) => void }, estado, voos, posicao };
+  };
+
+  it('fora de ação (sem combate), nada aparece', async () => {
+    const m = await montar(null);
+    for (let ms = 0; ms < 2000; ms += 16) m.ef.quadro(m.estado, ms, m.posicao);
+    expect(m.voos).toHaveLength(0);
+  });
+
+  it('em ação, a área pulsa em ondas que convergem para o Guerreiro, mais densas com a força', async () => {
+    const contar = async (forca: number) => {
+      const m = await montar({ raio: 2, cor: 0xffffff, forca });
+      m.ef.quadro(m.estado, 0, m.posicao);
+      return m.voos;
     };
-    const fraca = contar(1);
-    for (const p of pontos) expect(Math.hypot(p.x - 5, p.y - 5)).toBeCloseTo(2.5, 5);
-    // Os pontos cobrem o anel inteiro (os quatro quadrantes).
-    expect(new Set(pontos.map((p) => `${Math.sign(p.x - 5)}${Math.sign(p.y - 5)}`)).size).toBe(4);
-    expect(faiscas).toBe(0);
-    expect(contar(4)).toBeGreaterThan(fraca);
-    expect(faiscas).toBeGreaterThan(0);
+    const fraca = await contar(1);
+    expect(fraca.length).toBeGreaterThan(0);
+    for (const v of fraca) {
+      // Saem dentro da área e apontam para o centro (5, 5).
+      expect(Math.hypot(v.x - 5, v.y - 5)).toBeLessThanOrEqual(2.5 + 1e-9);
+      const paraOCentro = Math.atan2(5 - v.y, 5 - v.x);
+      expect(Math.abs(Math.atan2(Math.sin(v.angulo - paraOCentro), Math.cos(v.angulo - paraOCentro)))).toBeLessThan(1e-6);
+    }
+    expect((await contar(4)).length).toBeGreaterThan(fraca.length);
+  });
+
+  it('a cada pulso, filetes saem do inimigo atingido para o Guerreiro', async () => {
+    const m = await montar({ raio: 2, cor: 0xffffff, forca: 2 });
+    m.ef.quadro(m.estado, 0, m.posicao);
+    m.voos.length = 0;
+    const doGoblin = m.voos;
+    m.bus.emitir('auraPulsou', { t: 'auraPulsou', tick: 0, id: 'g', x: 5, y: 5, raio: 2, atingidos: ['m'] });
+    // Os filetes saem primeiro (3 + a força), um pouco espalhados em volta do goblin, e apontam para o Guerreiro;
+    // depois vem a onda reforçada da área.
+    const filetes = doGoblin.slice(0, 5);
+    expect(doGoblin.length).toBeGreaterThan(5);
+    for (const v of filetes) {
+      const paraOGuerreiro = Math.atan2(5 - v.y, 5 - v.x);
+      expect(Math.abs(Math.atan2(Math.sin(v.angulo - paraOGuerreiro), Math.cos(v.angulo - paraOGuerreiro)))).toBeLessThan(1e-6);
+    }
+    expect(filetes.some((v) => v.textura === 'faisca')).toBe(true);
   });
 });
 
