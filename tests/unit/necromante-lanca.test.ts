@@ -140,8 +140,7 @@ describe('Juízo das trevas (D-137)', () => {
     c.npc('a', 8, 5);
     const b = obter(c.j.bolsa); b.barra[0] = 'dardo_funesto'; b.barra[1] = 'dizimo_vital';
     c.j.cargaUltimate = c.ctx.balance.ultimate.max;
-    const tick = (cmd?: Parameters<typeof lerComando>[0]) =>
-      simular(c.estado, c.ctx, cmd ? [{ tick: c.estado.tick, entidadeId: 'j', cmd: obter(lerComando(cmd)) }] : [], c.eventos, DT_MS);
+    const tick = (cmd?: Parameters<typeof lerComando>[0]) => { simular(c.estado, c.ctx, cmd ? [{ tick: c.estado.tick, entidadeId: 'j', cmd: obter(lerComando(cmd)) }] : [], c.eventos, DT_MS); };
     tick({ t: 'usarUltimate', alvo: 'a' });
     for (let i = 0; i < 60; i++) tick();
     expect(c.eventos.filter((e) => e.t === 'lancaDeOsso' && e.chave.includes('ult_banquete_funesto')).length).toBe(3);
