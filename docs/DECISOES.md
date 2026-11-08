@@ -4046,3 +4046,7 @@ coroa de ouro em brasa no nível 100.
   suporte (D-135). Ele virou o **Juízo das trevas**: o dardo atravessa a fila de hostis e, junto, cada morto crava uma
   lança no alvo dele e outra para cada lado (`lanca.junto`: sem mortos, só o dardo, e a ultimate não é recusada). O
   definhamento continua; a cura e a drenagem saíram. O id segue `ult_banquete_funesto`.
+- Ajuste (08/11/2026): o texto da ultimate não fala mais de "dardo cinematográfico" (é um dardo de trevas, como no
+  mundo do jogo). A Lança comum tem o interior preto sólido e a aura roxa só na borda. A ultimate ganhou a assinatura
+  própria `juizo_das_trevas`: o dardo preto atravessa a linha soltando fumaça roxa em cada célula (antes usava o raio
+  vampírico, que quase não aparecia na linha); as lanças dos mortos nela seguem o desenho das Lanças da escuridão.

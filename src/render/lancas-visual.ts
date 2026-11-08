@@ -16,6 +16,8 @@ export function ligarLancas(bus: Barramento<EventosDaSimulacao>, diretor: Direto
     const de = { x: ev.deX, y: ev.deY };
     const ate = { x: ev.paraX, y: ev.paraY };
     const area = { chave: ev.chave, atorId: ev.mortoId, origem: de, mira: ate, centro: ate, celulas: bresenham(de, ate).slice(1), cor: visualDe(h).cor, escala: 1, tipoArea: 'linha', raio: 0 };
-    if (!diretor.area(assinaturaDe(h), area, h.visual?.variante)) diretor.rajada(assinaturaDe(h), area);
+    // 08/11/2026 (D-137): na ultimate (`junto`), a assinatura dela é o dardo; as lanças dos mortos seguem as da escuridão.
+    const nome = h.lanca?.junto ? 'lanca_de_osso' : assinaturaDe(h);
+    if (!diretor.area(nome, area, h.visual?.variante)) diretor.rajada(nome, area);
   });
 }

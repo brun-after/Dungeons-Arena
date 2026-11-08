@@ -764,7 +764,7 @@
         "dardo_funesto",
         "dizimo_vital"
       ],
-      "texto": "Um dardo cinematográfico atravessa a fila de hostis e, no mesmo instante, cada morto seu crava uma lança da escuridão no alvo dele e outra para cada lado. Os atingidos definham."
+      "texto": "Um dardo de trevas atravessa a fila de hostis e, no mesmo instante, cada morto seu crava uma lança da escuridão no alvo dele e outra para cada lado. Os atingidos definham."
     },
     {
       "id": "ult_ossario_faminto",
@@ -8302,8 +8302,7 @@
         "impacto": "sombra",
         "camera": "forte",
         "som": "nivel",
-        "assinatura": "raio_vampirico",
-        "variante": "sangue"
+        "assinatura": "juizo_das_trevas"
       },
       "variantes": {
         "dom_tecnica": {

@@ -77,14 +77,49 @@ export const TREVAS = {
             const sy = s * (0.2 + 1.3 * nasce) * (1 - 0.2 * some);
             // 08/11/2026: Lanças da escuridão — a lança preta com a aura roxa (aditiva, pulsando) em volta.
             const pulso = 0.8 + 0.2 * Math.sin(ms / 90);
-            p.desenhar('espinho', q.x, q.y, { sx: sx * 1.45, sy: sy * 1.25, alpha: alpha * 0.7 * pulso, rot: giro, cor: COR_AURA_LANCA, aditivo: true });
-            p.desenhar('espinho', q.x, q.y, { sx, sy, alpha, rot: giro, cor: 0x18121c, aditivo: false });
+            // 08/11/2026: o interior é preto sólido (duas camadas opacas); a aura roxa fica só na borda.
+            p.desenhar('espinho', q.x, q.y, { sx: sx * 1.3, sy: sy * 1.15, alpha: alpha * 0.6 * pulso, rot: giro, cor: COR_AURA_LANCA, aditivo: true });
+            p.desenhar('espinho', q.x, q.y, { sx, sy, alpha, rot: giro, cor: 0x000000, aditivo: false });
+            p.desenhar('espinho', q.x, q.y, { sx: sx * 0.75, sy: sy * 0.9, alpha, rot: giro, cor: 0x000000, aditivo: false });
           },
         });
       });
       c.particulas.emitirLista([SOMBRA(2, { raio: 6 })], a.origem.x, a.origem.y, a.cor);
       const fim = a.celulas.at(-1);
       if (fim) c.particulas.emitirLista([SOMBRA(c.reduzido ? 2 : 4, { cor: COR_AURA_LANCA })], fim.x, fim.y, COR_AURA_LANCA);
+    },
+  },
+  /**
+   * 08/11/2026 (D-137): Juízo das trevas — o dardo preto com a aura roxa atravessa a linha inteira, deixando um rastro de
+   * trevas; em cada célula por onde passa, a sombra roxa irrompe. As lanças dos mortos vêm pelo `lancaDeOsso`.
+   */
+  juizo_das_trevas: {
+    familia: 'trevas',
+    conjuracao: CONJURA_TREVAS,
+    impacto: [SOMBRA(4, { cor: COR_AURA_LANCA }), ALMAS(2, { cor: COR_AURA_LANCA })],
+    naArea: (c, a) => {
+      const fim = a.celulas.at(-1);
+      if (!fim) return;
+      const de = c.tela(a.origem);
+      const ate = c.tela(fim);
+      const giro = Math.atan2(ate.y - de.y, ate.x - de.x) + Math.PI / 2;
+      const voo = 120 + 40 * a.celulas.length;
+      c.tocar({
+        ms: voo + 200,
+        desenhar: (_t, ms, p) => {
+          const k = Math.min(1, ms / voo);
+          const alpha = ms <= voo ? 1 : 1 - (ms - voo) / 200;
+          const x = de.x + (ate.x - de.x) * k;
+          const y = de.y + (ate.y - de.y) * k;
+          // 08/11/2026: o dardo é preto; a fumaça roxa sai dele pelo caminho (as emissões por célula, abaixo).
+          p.desenhar('espinho', x, y, { sx: 1.05 * a.escala, sy: 2.1 * a.escala, alpha: alpha * 0.45, rot: giro, cor: COR_AURA_LANCA, aditivo: true });
+          p.desenhar('espinho', x, y, { sx: 0.85 * a.escala, sy: 1.9 * a.escala, alpha, rot: giro, cor: 0x000000, aditivo: false });
+          p.desenhar('espinho', x, y, { sx: 0.6 * a.escala, sy: 1.6 * a.escala, alpha, rot: giro, cor: 0x000000, aditivo: false });
+        },
+      });
+      a.celulas.forEach((cel, i) => {
+        c.tocar({ ms: 1, atrasoMs: 120 + 40 * i, desenhar: () => undefined, aoFim: () => { c.particulas.emitirLista([fumacaEscura(c.reduzido ? 2 : 5, { cor: COR_AURA_LANCA, raio: 8, velocidade: [10, 30], direcao: 'cima' }), SOMBRA(c.reduzido ? 1 : 2, { cor: COR_AURA_LANCA, raio: 6 })], cel.x, cel.y, COR_AURA_LANCA); } });
+      });
     },
   },
   /** Ceifa de almas: a foice espectral varre o cone e arranca almas que sobem. */

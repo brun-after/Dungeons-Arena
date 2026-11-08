@@ -275,7 +275,7 @@ Linguagem visual das ultimates: Trevas e vida: névoa roxa rente ao chão, fluxo
 
 | Par | Ultimate | O que faz |
 |---|---|---|
-| Dardo funesto + Lanças da escuridão | Juízo das trevas | Um dardo cinematográfico atravessa a fila de hostis e, no mesmo instante, cada morto seu crava uma lança da escuridão no alvo dele e outra para cada lado. Os atingidos definham (D-137, 08/11/2026). |
+| Dardo funesto + Lanças da escuridão | Juízo das trevas | Um dardo de trevas atravessa a fila de hostis e, no mesmo instante, cada morto seu crava uma lança da escuridão no alvo dele e outra para cada lado. Os atingidos definham (D-137, 08/11/2026). |
 | Dardo funesto + Garras do ossuário | Ossário faminto | O dardo crava no chão e abre um poço de ossos. Mãos esqueléticas enraízam e definham quem está ali. |
 | Dardo funesto + Comando sepulcral | Ordem da praga | Todas as suas invocações lançam dardos funestos no seu alvo ao mesmo tempo. |
 | Dardo funesto + Ceifa de almas | Colheita sombria | Definha tudo em área. Três segundos depois, a foice passa, e bate mais em quem está definhando. |

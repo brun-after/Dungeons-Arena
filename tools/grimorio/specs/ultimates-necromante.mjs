@@ -6,7 +6,7 @@ const trevas = { el: 'trevas' };
 
 export const TIPO = 'magico';
 export default [
-  // 0 Dardo funesto + Dízimo vital: Banquete funesto
+  // 0 Dardo funesto + Lanças da escuridão: Juízo das trevas
   { ...forma.linha(8), ...trevas, d: '4d6', ef: [ef.definha(25, 4), eu(ef.curaPct(15)), eu(ef.drenar(10))], impacto: 'sombra', camera: 'forte' },
   // 1 Dardo funesto + Garras do ossuário: Ossário faminto
   { ...forma.area(6, 2), ...trevas, d: '2d6', ef: [ef.enraiza(2), ef.definha(25, 4)], impacto: 'pedra',
