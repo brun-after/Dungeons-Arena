@@ -133,6 +133,13 @@
       "pagina": "https://opengameart.org/node/129475",
       "licenca": "CC0-1.0",
       "licencaUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    "necromancia": {
+      "autor": "Dungeons Arena",
+      "titulo": "Sons do Necromante (sintetizados por tools/audio/necromancia.py)",
+      "pagina": "https://github.com/brun-after/Dungeons-Arena/blob/main/tools/audio/necromancia.py",
+      "licenca": "CC0-1.0",
+      "licencaUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
     }
   },
   "arquivos": {
@@ -787,6 +794,66 @@
       "sha256": "354165cb5f5212aba15dcaa51d7166abdebdca74db25698f4b67f7c8de658799",
       "originalSha256": "ce3147253164f9509a6ca134c457b3968f0d119eb9dbb8a396900f8757eb2cd2",
       "adaptacao": "navegador: velocidade 0.72, primeiros 1.35 s, pico -5 dBFS, saída de 300 ms"
+    },
+    "necro_conjura-1": {
+      "arquivo": "necro_conjura-1.wav",
+      "fonte": "necromancia",
+      "original": "necromancia.py",
+      "tipo": "efeito",
+      "duracao": 1.1,
+      "sha256": "f40a9ca1379bb138d1eac612f621f9092ea3312c4fb67f8ca40984840414a594",
+      "originalSha256": "6b00382a0414006479333cc95bbc0a913e75c83e4aeb2b7f1c538c63072f7235",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "necro_conjura-2": {
+      "arquivo": "necro_conjura-2.wav",
+      "fonte": "necromancia",
+      "original": "necromancia.py",
+      "tipo": "efeito",
+      "duracao": 1.1,
+      "sha256": "e638afc562ca7dbb8a1b045375a9232ce21b6ddaae9e6d91afbda708c8299cdb",
+      "originalSha256": "6b00382a0414006479333cc95bbc0a913e75c83e4aeb2b7f1c538c63072f7235",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "necro_sombra-1": {
+      "arquivo": "necro_sombra-1.wav",
+      "fonte": "necromancia",
+      "original": "necromancia.py",
+      "tipo": "efeito",
+      "duracao": 1.23,
+      "sha256": "5395f33af7b2fac72a78bddc56801eb15c1f2c89a7e44940278f8a4f4cac29e5",
+      "originalSha256": "6b00382a0414006479333cc95bbc0a913e75c83e4aeb2b7f1c538c63072f7235",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "necro_sombra-2": {
+      "arquivo": "necro_sombra-2.wav",
+      "fonte": "necromancia",
+      "original": "necromancia.py",
+      "tipo": "efeito",
+      "duracao": 1.23,
+      "sha256": "734878872a6251ad988e5460e846065a8cc73abf5e4d3e454b9be85da7e1c227",
+      "originalSha256": "6b00382a0414006479333cc95bbc0a913e75c83e4aeb2b7f1c538c63072f7235",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "necro_ossos-1": {
+      "arquivo": "necro_ossos-1.wav",
+      "fonte": "necromancia",
+      "original": "necromancia.py",
+      "tipo": "efeito",
+      "duracao": 0.89,
+      "sha256": "09823ba7679fb16b70e67c9ce43f6209190b1105ac148c2ea56082b825e383fd",
+      "originalSha256": "6b00382a0414006479333cc95bbc0a913e75c83e4aeb2b7f1c538c63072f7235",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
+    },
+    "necro_ossos-2": {
+      "arquivo": "necro_ossos-2.wav",
+      "fonte": "necromancia",
+      "original": "necromancia.py",
+      "tipo": "efeito",
+      "duracao": 0.89,
+      "sha256": "732da36089761848e2f151dcd668cbe45edc771bf29da5da7577455b33ae6318",
+      "originalSha256": "6b00382a0414006479333cc95bbc0a913e75c83e4aeb2b7f1c538c63072f7235",
+      "adaptacao": "sintetizado: WAV mono de 32 kHz, pico de -5 dBFS"
     }
   },
   "efeitos": {
@@ -924,6 +991,18 @@
     "zunido": [
       "zunido-1",
       "zunido-2"
+    ],
+    "necro_conjura": [
+      "necro_conjura-1",
+      "necro_conjura-2"
+    ],
+    "necro_sombra": [
+      "necro_sombra-1",
+      "necro_sombra-2"
+    ],
+    "necro_ossos": [
+      "necro_ossos-1",
+      "necro_ossos-2"
     ]
   },
   "ambientes": {

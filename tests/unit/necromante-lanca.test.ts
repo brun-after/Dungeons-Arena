@@ -10,6 +10,7 @@ import { iniciarAcao, processarAcoes, recargaRestante } from '../../src/combat/a
 import { resolverHabilidade } from '../../src/combat/compilar-habilidade';
 import { cargasProntas } from '../../src/combat/cargas';
 import { ticksDe } from '../../src/core/tempo';
+import { somDaHabilidade, sonsDoEvento } from '../../src/audio/mapeamento';
 
 function obter<T>(v: T | null | undefined): T { if (v == null) throw Error('ausente'); return v; }
 function cena() {
@@ -107,5 +108,20 @@ describe('Dardo funesto (D-136)', () => {
     expect(iniciarAcao(c.estado, c.ctx, c.j, 'dardo_funesto', 'a', c.eventos)).toBe(false);
     c.ate(c.estado.tick + ticksDe(h.recargaMs));
     expect(cargasProntas(c.estado, chave, h)).toBe(1);
+  });
+});
+
+describe('Sons do Necromante (D-136)', () => {
+  it('as skills soam graves (sombra ou ossos); o surgimento dos mortos segue a risada', () => {
+    const c = cena();
+    const h = (id: string) => obter(resolverHabilidade(c.ctx, id));
+    expect(somDaHabilidade(h('dardo_funesto'))).toBe('necro_sombra');
+    expect(somDaHabilidade(h('dizimo_vital'))).toBe('necro_ossos');
+    expect(somDaHabilidade(h('explosao_cadaverica'))).toBe('necro_ossos');
+    expect(somDaHabilidade(h('basico_cajado'), true)).toBe('zunido');
+    const pedir = (ev: EventoSimulacao) => sonsDoEvento(ev, 'j', (chave) => resolverHabilidade(c.ctx, chave)).map((s) => s.som);
+    expect(pedir({ t: 'acaoIniciada', tick: 1, acaoId: 1, atorId: 'j', habilidadeId: 'dardo_funesto', chave: 'dardo_funesto', alvoId: null, alvoX: 0, alvoY: 0, inicioTick: 1, lancamentoTick: 2, impactoPrevistoTick: 3 })).toEqual(['necro_conjura']);
+    expect(pedir({ t: 'invocou', tick: 1, donoId: 'j', id: 's' })).toEqual(['invocacao']);
+    expect(pedir({ t: 'lancaDeOsso', tick: 1, acaoId: 1, chave: 'dizimo_vital', donoId: 'j', mortoId: 's', deX: 0, deY: 0, paraX: 1, paraY: 0 })).toEqual(['necro_ossos']);
   });
 });

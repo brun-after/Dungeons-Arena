@@ -30,6 +30,10 @@ export const SONS = [
   'nivel',
   'clique',
   'recusa',
+  // 07/11/2026 (D-136): as skills do Necromante, graves e levemente macabras (tools/audio/necromancia.py).
+  'necro_conjura',
+  'necro_sombra',
+  'necro_ossos',
 ] as const;
 export type SomId = (typeof SONS)[number];
 
@@ -53,12 +57,26 @@ const PREFIXOS: readonly (readonly [string, SomId])[] = [
   ['teia', 'armadilha'],
 ];
 
+/** 07/11/2026 (D-136): as assinaturas dos ossos (o resto do Necromante soa como sombra). */
+const ASSINATURAS_DE_OSSO: readonly string[] = ['lanca_de_osso', 'garras_do_ossuario', 'explosao_cadaverica'];
+/** As assinaturas próprias do Necromante (as ultimates dele também as usam). */
+const ASSINATURAS_DO_NECROMANTE: readonly string[] = [...ASSINATURAS_DE_OSSO, 'cranio', 'ceifa_de_almas', 'mortalha', 'levante_profano', 'fios_de_vida', 'comando_sepulcral'];
+
+/** O som próprio da skill do Necromante (pela etiqueta `necromancia` ou pela assinatura dele), ou null. */
+export function somDoNecromante(h: Pick<Habilidade, 'visual'> & Partial<Pick<Habilidade, 'tags'>>): SomId | null {
+  const assinatura = h.visual?.assinatura ?? '';
+  if (!(h.tags ?? []).includes('necromancia') && !ASSINATURAS_DO_NECROMANTE.includes(assinatura)) return null;
+  return ASSINATURAS_DE_OSSO.includes(assinatura) ? 'necro_ossos' : 'necro_sombra';
+}
+
 /** O som da habilidade ao ser usada (conjuração ou lançamento). */
 export function somDaHabilidade(h: Pick<Habilidade, 'id' | 'tipoAtaque' | 'politicaImpacto' | 'formulaCura' | 'visual'> & Partial<Pick<Habilidade, 'elemento' | 'tags'>>, basico = false): SomId {
   if (h.formulaCura !== null && h.politicaImpacto === 'proprio') return 'cura';
   // 05/11/2026: o básico se repete a cada segundo e meio; o som do elemento (as trevas duram 3 a 4 s) fica para as
   // habilidades. 06/11/2026: o básico mágico é um zunido; o físico segue o som da arma.
   if (basico && h.tipoAtaque === 'magico') return 'zunido';
+  const necro = basico ? null : somDoNecromante(h);
+  if (necro) return necro;
   if (h.elemento && !basico) return h.elemento;
   const identidade = `${h.id} ${(h.tags ?? []).join(' ')}`;
   if (/espada|lamina|corte|adaga|machado|lanca|montante|rapieira|chakram/.test(identidade)) return 'lamina';
@@ -95,6 +113,8 @@ export function sonsDoEvento(
       if (!h) return [];
       // O básico da arma secundária também pode ser mágico (ex.: Guerreiro com tomo).
       if (h.id === 'ataque_basico' || h.id.startsWith('basico_')) return [];
+      // 07/11/2026 (D-136): toda skill do Necromante começa com o zumbido grave (o surgimento dos mortos segue a risada).
+      if (!basico(h.id) && somDoNecromante(h)) return [{ som: 'necro_conjura', origemId: ev.atorId }];
       if (h.tipoAtaque === 'magico' && h.conjuracaoMs < 600) return [];
       if (h.tipoAtaque === 'magico') return [{ som: 'conjuracao', origemId: ev.atorId }];
       // Selecionar um alvo religa o básico automático. Não toca o chiado de preparação
@@ -104,6 +124,7 @@ export function sonsDoEvento(
     case 'projetilLancado': {
       const h = habilidade(ev.chave);
       if (h?.tipoAtaque !== 'magico') return [{ som: 'arco', origemId: ev.donoId }];
+      if (!basico(h.id) && somDoNecromante(h)) return [{ som: 'necro_sombra', origemId: ev.donoId }];
       return [{ som: basico(h.id) ? 'zunido' : 'lancamento_magico', origemId: ev.donoId }];
     }
     case 'impacto': {
@@ -150,6 +171,9 @@ export function sonsDoEvento(
     case 'invocou':
     case 'dominou':
       return [{ som: 'invocacao', origemId: ev.id }];
+    // 07/11/2026 (D-136): cada lança de osso que irrompe de um morto.
+    case 'lancaDeOsso':
+      return [{ som: 'necro_ossos', origemId: ev.mortoId }];
     case 'explodiu':
       return [{ som: 'explosao', origemId: ev.id }];
     case 'invocacaoCurou':

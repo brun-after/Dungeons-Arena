@@ -105,3 +105,11 @@ Arquivos: zunido-1.wav (original: swish-4.wav), zunido-2.wav (original: swish-7.
 Autor: AntumDeluge. Fonte: https://opengameart.org/node/129475
 Licença: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
 Arquivos: invocacao-1.wav (original: evil_laugh_02.flac), invocacao-2.wav (original: evil_laugh_02.flac)
+
+## Sons do Necromante (07/11/2026)
+Sintetizados pelo próprio projeto em `tools/audio/necromancia.py` (só a biblioteca padrão do Python; WAV mono de
+32 kHz, pico de -5 dBFS), graves e levemente macabros, sem voz: o zumbido da conjuração, o "vum" das trevas e a
+pancada com estalos de osso.
+Licença: CC0-1.0 — https://creativecommons.org/publicdomain/zero/1.0/
+Arquivos: necro_conjura-1.wav, necro_conjura-2.wav, necro_sombra-1.wav, necro_sombra-2.wav, necro_ossos-1.wav,
+necro_ossos-2.wav
