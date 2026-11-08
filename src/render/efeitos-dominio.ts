@@ -1,7 +1,8 @@
 // Os efeitos visuais dos marcos do atributo de classe (marco 28, 30/10/2026, D-127). Só leem eventos e estado:
 // - a aura do Guerreiro (Bravura 25+), só quando ela atinge alguém (ajuste de 08/11/2026, D-138: só perseguir não
 //   acende nada): a cada pulso (`auraPulsou`), a área no chão acende e se fecha sobre ele (area-aura.ts) e filetes
-//   saem de cada inimigo atingido em direção a ele. Com a aura elemental, na cor do elemento da arma;
+//   saem de cada inimigo atingido em direção a ele. A cor vai do amarelo (25) ao vermelho (75+); da Bravura 75, quem
+//   está dentro parece pegar fogo, mais quanto menor a diferença de nível para o Guerreiro;
 // - os orbes do Mago (Arcano 75+): um ou dois núcleos que giram em volta, na cor da encarnação;
 // - os eventos `marcoDeClasse`: a explosão (Disparo explosivo e Ressonância), a chuva da Tempestade de aço pelas
 //   células, o brilho dos orbes em quem eles ferem, a fumaça da Legião e as estrelas do Faro do falcão.
@@ -13,10 +14,15 @@ import type { EventosDaSimulacao } from '../core/eventos-simulacao';
 import type { Entidade, PontoVisual } from '../entities/entidade';
 import type { SistemaParticulas } from './particulas';
 import type { Emissao } from './presets-particula';
-import type { AuraEmPulso } from './area-aura';
+import { fogoNaAura, type AuraEmPulso } from './area-aura';
 
 /** Quanto o filete de energia leva do inimigo até o Guerreiro. */
 const VOO_FILETE_MS = 420;
+/** O fogo da aura (Bravura 75+, força 3): quanto cada atingido segue ardendo depois do pulso, e o intervalo das chamas. */
+const FORCA_DO_FOGO = 3;
+const ARDE_MS = 1400;
+const CHAMA_MAX_MS = 320;
+const CHAMA_MIN_MS = 70;
 
 /** Um risco de energia que voa de `de` até `para` (em px de tela) no tempo `vidaMs`, esticado no voo, sumindo ao chegar. */
 function voo(textura: 'brilho' | 'faisca', escala: readonly [number, number], de: { x: number; y: number }, para: { x: number; y: number }, vidaMs: number): { lista: Emissao[]; angulo: number } {
@@ -43,6 +49,8 @@ export interface OpcoesEfeitosDominio {
 
 export class EfeitosDeDominio {
   private readonly ultimo = new Map<string, number>();
+  /** Quem arde dentro da aura (Bravura 75+): até quando e quanto (pela diferença de nível para o Guerreiro). */
+  private readonly ardendo = new Map<string, { ateMs: number; intensidade: number }>();
 
   constructor(private readonly o: OpcoesEfeitosDominio) {}
 
@@ -71,6 +79,12 @@ export class EfeitosDeDominio {
         if (!alvo) continue;
         const onde = pos(alvo);
         const de = p.naTela(onde.x, onde.y);
+        // 08/11/2026 (D-138): com a Bravura 75+, quem está dentro parece pegar fogo (mais, quanto mais perto o nível).
+        if (aura.forca >= FORCA_DO_FOGO) {
+          const intensidade = fogoNaAura(dono.nivel, alvo.nivel);
+          this.ardendo.set(id, { ateMs: agora() + ARDE_MS, intensidade });
+          for (let k = 0; k < Math.round(1 + 3 * intensidade); k++) p.emitir('aura_queimando', onde.x, onde.y, aura.cor);
+        }
         for (let k = 0; k < 3 + aura.forca; k++) {
           // Os brilhos do filete saem um pouco espalhados e chegam juntos.
           const j = { x: de.x + (k - 2) * 3, y: de.y + ((k * 7) % 5) - 2 };
@@ -104,6 +118,18 @@ export class EfeitosDeDominio {
     this.o.area?.quadro(agoraMs);
     if (this.ultimo.size > 4 * estado.entidades.length + 64) {
       for (const [chave, ms] of this.ultimo) if (agoraMs - ms > 10_000) this.ultimo.delete(chave);
+    }
+    // O fogo de quem arde na aura: chamas mais seguidas quanto maior a intensidade.
+    for (const [id, f] of this.ardendo) {
+      const e = agoraMs < f.ateMs ? estado.entidades.find((x) => x.id === id) : undefined;
+      if (!e || e.morto) {
+        this.ardendo.delete(id);
+        continue;
+      }
+      if (!this.vez(`fogo:${id}`, agoraMs, CHAMA_MAX_MS - (CHAMA_MAX_MS - CHAMA_MIN_MS) * f.intensidade)) continue;
+      const onde = posicao(e);
+      p.emitir('aura_queimando', onde.x, onde.y, 0xff7a2a);
+      if (f.intensidade > 0.6) p.emitir('brasas', onde.x, onde.y, 0xffb347);
     }
     for (const e of estado.entidades) {
       // 08/11/2026 (D-138): sem exigir a bolsa (no online e no Mundo ela não chega). A aura não sai daqui: só do pulso.
