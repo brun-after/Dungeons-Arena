@@ -45,7 +45,7 @@ function cenario(modoId = 'campanha', semente = 3) {
 }
 
 describe('penalidade de morte (§2.12)', () => {
-  it('na campanha: −50 XP (sem baixar de 0) e de 10% a 50% do ouro', () => {
+  it('na campanha: −50 XP (sem baixar de 0) e 3/4 do ouro (D-138)', () => {
     for (let semente = 1; semente <= 20; semente++) {
       const c = cenario('campanha', semente);
       const bolsa = obter(c.j().bolsa, 'bolsa');
@@ -54,8 +54,7 @@ describe('penalidade de morte (§2.12)', () => {
       c.j().hp = 0;
       c.tick();
       expect(c.j().xp).toBe(30);
-      expect(bolsa.ouro).toBeGreaterThanOrEqual(100);
-      expect(bolsa.ouro).toBeLessThanOrEqual(180);
+      expect(bolsa.ouro).toBe(50);
       expect(c.de('penalidadeMorte')).toMatchObject([{ xp: 50, ouro: 200 - bolsa.ouro, niveis: 0 }]);
     }
     const c = cenario();

@@ -9,6 +9,8 @@ import type { Dificuldade, RegrasDificuldade, RegrasGrupo } from '../modos/dific
 import type { ModoDeJogo, Raridade } from '../modos/modo';
 import type { RegrasColisao } from '../world/colisao';
 import type { Fase } from '../world/fase';
+import type { TipoTerrenoVivo } from '../world/ambiente-tipos';
+import type { Elemento } from '../combat/elementos';
 import type { RegrasDeEventos } from '../mundo/eventos-mundo';
 import type { Atributos } from '../entities/entidade';
 import type { RegrasItensGerados } from '../progression/gerar-item';
@@ -278,6 +280,14 @@ export interface Balance {
     /** Marco 25 (D-100): a área do próprio elemento cura o inimigo afim, por pulso. */
     curaAfim: number;
   };
+  /**
+   * 08/11/2026 (D-138): os terrenos vivos. A reação dura `duracaoMs` (o vapor, `vaporMs`, e cega por `cegoMs`); o raio
+   * na água fere quem mais está nela com `conducaoPct` do golpe; no máximo `maxVivos` por fase.
+   */
+  terrenos: {
+    duracaoMs: number; vaporMs: number; cegoMs: number; conducaoPct: number; maxVivos: number;
+    reacoes: readonly { sobre: TipoTerrenoVivo; elemento: Elemento; vira: TipoTerrenoVivo; conduz?: boolean }[];
+  };
   /** Marco 23 (24/10/2026, D-092): o clima da fase de tema elemental (combat/clima.ts). */
   clima: {
     /** O elemento do tema bate mais forte, e o estado que ele aplica dura mais… */
@@ -344,6 +354,14 @@ export interface Balance {
   mundo: {
     populacaoMax: number;
     resgate: { mortesDesconto: number; mortesGratis: number };
+    /**
+     * 08/11/2026 (D-138): o XP do chefe da masmorra para quem repete: × `fatorPorVez` a cada vez já feita (até 1 XP); o
+     * chefe acima do jogador dá `bonusPorNivelPct` por nível (até `bonusMaxPct`); abaixo, cai pela metade a cada
+     * `niveisPorMetade` níveis.
+     */
+    /** 08/11/2026 (D-138): quanto tempo depois do último golpe entre os dois o refúgio ainda não protege. */
+    refugio: { combateS: number };
+    repeticaoDungeon: { fatorPorVez: number; bonusPorNivelPct: number; bonusMaxPct: number; niveisPorMetade: number };
     exercitoNecromante: { minimo: number; maximo: number; niveisPorVaga: number; recargaMs: number; duracaoMs: number; presets: string[] };
     atencaoBatalha: { raio: number; bonus: number; memoriaMs: number };
     ofertas: { periodoS: number; duracaoS: number; quantidade: number; centrais: string[]; avancadas: string[] };

@@ -8,6 +8,9 @@
 // numa fase sem saída deixa uma porta temporária (objeto `saida`) onde caiu.
 // Marco 24 (25/10/2026, D-099): sair da fase (pela saída aberta ou pela porta de retorno) pede ficar parado em cima
 // por `portas.esperaMs`; andar zera a espera. As trancas continuam avisando (e a chave abrindo) ao pisar.
+// 08/11/2026 (D-138): o jogador usa os portais com `interagir` (o E), parado em cima: o atalho teleporta e a porta de
+// fase sai na hora (a espera fica completa enquanto ele continuar parado nela, o que o grupo confere). Pisar não leva
+// mais o jogador; a IA segue cruzando os atalhos ao pisar, com a chance do modo.
 
 import type { Celula, EntidadeId } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -117,20 +120,39 @@ export function esperouNaPorta(estado: EstadoJogo, ctx: ContextoSimulacao, e: En
   return esperaNaPorta(estado, ctx, e) === 1;
 }
 
-/** Marco 24 (D-099): conta a espera de quem está parado na porta de fase e, ao completar, sai (uma vez). */
-function aguardarNaPorta(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
+/** Marco 24 (D-099): desfaz a espera de quem saiu da porta de fase ou andou (D-138: quem a começa é o E). */
+function aguardarNaPorta(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade): void {
   const retorno = naPortaDeRetorno(ctx, e);
   const parado = !emPasso(e) && e.direcao === 'parado' && e.caminho.length === 0;
   if (!parado || (!retorno && !naSaidaAberta(estado, ctx, e))) {
     delete e.naPortaDesdeTick;
     return;
   }
-  e.naPortaDesdeTick ??= estado.tick;
-  if (estado.tick - e.naPortaDesdeTick !== ticksDe(ctx.balance.portas.esperaMs)) return;
-  saida.push({ t: 'saidaAlcancada', tick: estado.tick, id: e.id, ...(retorno && { retorno: true }) });
 }
 
-/** Ao pisar numa saída: a tranca avisa (boss) ou a chave abre. Sair mesmo é com a espera (`aguardarNaPorta`). */
+/**
+ * 08/11/2026 (D-138): o E do jogador parado num portal. O atalho (porta interna) teleporta; a porta de retorno e a saída
+ * aberta saem (a tranca avisa, e a chave abre, como ao pisar). Devolve se havia um portal sob os pés.
+ */
+export function usarPortal(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): boolean {
+  if (!vivo(e) || e.invocacao) return false;
+  if (destinoDaPorta(ctx.fase.portasInternas, e.x, e.y)) {
+    teleportar(estado, ctx, e, saida);
+    return true;
+  }
+  const retorno = naPortaDeRetorno(ctx, e);
+  if (!retorno && !ehSaida(estado, ctx, e.x, e.y)) return false;
+  if (!retorno) chegarNaSaida(estado, ctx, e, saida);
+  if (!retorno && !naSaidaAberta(estado, ctx, e)) return true;
+  e.naPortaDesdeTick = estado.tick - ticksDe(ctx.balance.portas.esperaMs);
+  e.direcao = 'parado';
+  e.caminho = [];
+  e.waypoints = [];
+  saida.push({ t: 'saidaAlcancada', tick: estado.tick, id: e.id, ...(retorno && { retorno: true }) });
+  return true;
+}
+
+/** Ao pisar numa saída: a tranca avisa (boss) ou a chave abre. Sair mesmo é com o E (`usarPortal`). */
 function chegarNaSaida(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
   if (naPortaDeRetorno(ctx, e)) return;
   const tipo = ehSaida(estado, ctx, e.x, e.y);
@@ -157,17 +179,18 @@ function chegarNaSaida(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, 
   }
 }
 
-/** Etapa 7 (gatilhos por célula alcançada): porta interna e, para jogadores, porta de saída e a espera nela. */
+/** Etapa 7 (gatilhos por célula alcançada): porta interna da IA e, para jogadores, o aviso da tranca e a espera. */
 export function processarPortas(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
   const chegaram = chegaramNesteTick(saida, estado.tick);
   for (const e of ordemRotativa(estado.entidades, estado.tick)) {
     // Ajuste de 24/10/2026 (D-091): o falcão não usa portas (o retorno ao dono é a passiva dele).
     if (!vivo(e) || e.invocacao?.companheiro) continue;
     if (chegaram.has(e.id)) {
-      if (teleportar(estado, ctx, e, saida)) continue;
+      // D-138: só a IA cruza o atalho ao pisar; o jogador usa o E (`usarPortal`).
+      if (e.controlador === 'ia' && teleportar(estado, ctx, e, saida)) continue;
       if (e.controlador !== 'ia') chegarNaSaida(estado, ctx, e, saida);
     }
-    if (e.controlador !== 'ia') aguardarNaPorta(estado, ctx, e, saida);
+    if (e.controlador !== 'ia') aguardarNaPorta(estado, ctx, e);
   }
 }
 

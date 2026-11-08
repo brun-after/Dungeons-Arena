@@ -178,6 +178,10 @@ describe('sala do Mundo', () => {
     const saida = obter(dentro.ctx.fase.portaSaida, 'porta de saída');
     posicionar(d.e(), saida.x, saida.y);
     rodar(dentro, 2);
+    // D-138: parado na saída não volta sozinho; o E volta.
+    expect(dentro.retirarPendencias().some((x) => x.tipo === 'trocar')).toBe(false);
+    d.enviar({ t: 'cmd', pacote: { sessaoId: d.bem.sessaoId, seq: ++d.seq.n, epocaSala: dentro.epoca, tickCliente: dentro.estado.tick, cmd: { t: 'interagir' } } });
+    rodar(dentro, 4);
     const volta = dentro.retirarPendencias().find((x) => x.tipo === 'trocar');
     const estrutura = obter(REINO.regioes.find((r) => r.id === 'campos_do_oeste')?.estruturas[0], 'estrutura');
     expect(volta).toMatchObject({ destino: 'regiao:campos_do_oeste', chegada: portaDa(estrutura).frente });

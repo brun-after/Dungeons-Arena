@@ -15,7 +15,7 @@ import { chaveDaFase, lerRegistro, VERSAO_SCHEMA, type RegistroProgresso } from 
 import { avancarFase } from '../../src/save/transicao';
 import { carregarFase, type FaseJson } from '../../src/world/fase';
 import { povoarFase } from '../../src/world/populacao';
-import { chaveRecargaPorta, processarPortas } from '../../src/world/portas';
+import { chaveRecargaPorta, esperouNaPorta, processarPortas } from '../../src/world/portas';
 import { validarFase } from '../../src/world/validacao-fase';
 import fase02 from '../../src/data/fases/fase-02.json';
 import { CONTEUDO, contexto, faseOficial01, SALA_ABERTA } from '../apoio/fases';
@@ -57,18 +57,22 @@ const ESPERA = ticksDe(BALANCE_PADRAO.portas.esperaMs);
 const PAR = [{ numero: 1, nome: 'atalho', a: { x: 4, y: 2 }, b: { x: 8, y: 8 } }];
 
 describe('porta interna (§2.1)', () => {
-  it('pisar num extremo leva ao outro; parado em cima não volta', () => {
+  it('pisar não leva o jogador; o E em cima leva ao outro extremo (D-138)', () => {
     const c = cenario({ portasInternas: PAR });
     c.ir(4, 2, 120);
+    expect([c.j().x, c.j().y]).toEqual([4, 2]);
+    expect(c.de('teleportou')).toHaveLength(0);
+    c.tick({ t: 'interagir' });
     expect([c.j().x, c.j().y]).toEqual([8, 8]);
     expect(c.de('teleportou')).toMatchObject([{ id: 'j', numero: 1, x: 8, y: 8 }]);
     expect(c.estado.recargas[chaveRecargaPorta('j')]).toBeGreaterThan(c.estado.tick - 120);
   });
 
-  it('com a recarga ativa, chegar à porta não teleporta', () => {
+  it('com a recarga ativa, o E na porta não teleporta', () => {
     const c = cenario({ portasInternas: PAR });
     c.estado.recargas[chaveRecargaPorta('j')] = 10_000;
     c.ir(4, 2, 120);
+    c.tick({ t: 'interagir' });
     expect([c.j().x, c.j().y]).toEqual([4, 2]);
     expect(c.de('teleportou')).toHaveLength(0);
   });
@@ -95,29 +99,24 @@ describe('porta interna (§2.1)', () => {
 });
 
 describe('porta de saída (§2.1)', () => {
-  it('sair pede 3 s parado na porta: antes não sai, andar zera a espera e a saída sai uma vez só (marco 24)', () => {
+  it('sair pede o E na porta: parado não sai sozinho, o E sai uma vez e andar desfaz (D-138)', () => {
     const c = cenario();
-    const chegar = (x: number, y: number) => {
-      c.ir(x, y, 0);
-      for (let i = 0; i < 600 && (c.j().x !== x || c.j().y !== y || c.j().naPortaDesdeTick === undefined); i++) c.tick();
-    };
-    chegar(10, 10);
-    const chegou = obter(c.j().naPortaDesdeTick, 'espera');
+    c.ir(10, 10);
+    for (let i = 0; i < ESPERA * 2; i++) c.tick();
     expect(c.de('saidaAlcancada')).toHaveLength(0);
-    // Sai da porta e volta: a espera recomeça.
-    c.ir(9, 10, 30);
-    expect(c.j().naPortaDesdeTick).toBeUndefined();
-    chegar(10, 10);
-    expect(obter(c.j().naPortaDesdeTick, 'espera')).toBeGreaterThan(chegou);
-    for (let i = 0; i < ESPERA; i++) c.tick();
+    c.tick({ t: 'interagir' });
     expect(c.de('saidaAlcancada')).toMatchObject([{ id: 'j' }]);
+    expect(esperouNaPorta(c.estado, c.ctx, c.j())).toBe(true);
     for (let i = 0; i < ESPERA; i++) c.tick();
     expect(c.de('saidaAlcancada')).toHaveLength(1);
+    c.ir(9, 10, 30);
+    expect(c.j().naPortaDesdeTick).toBeUndefined();
   });
 
   it('sem portaSaida, toda célula S é saída livre', () => {
     const c = cenario();
     c.ir(10, 10);
+    c.tick({ t: 'interagir' });
     expect(c.de('saidaAlcancada')).toMatchObject([{ id: 'j' }]);
   });
 
@@ -129,7 +128,8 @@ describe('porta de saída (§2.1)', () => {
     const chave = obter(CONTEUDO.itens.get('chave_cripta'), 'chave');
     guardarItem(obter(c.j().bolsa, 'bolsa'), chave, 1, c.ctx.balance.inventario);
     c.ir(9, 10, 60);
-    c.ir(10, 10, 60 + ESPERA);
+    c.ir(10, 10, 60);
+    c.tick({ t: 'interagir' });
     expect(c.de('saidaAlcancada')).toHaveLength(1);
     expect(c.estado.saidaAberta).toBe(true);
     expect(c.j().bolsa?.mochila.some((i) => i.itemId === 'chave_cripta')).toBe(false);
@@ -144,7 +144,8 @@ describe('porta de saída (§2.1)', () => {
     expect(c.estado.saidaAberta).toBe(true);
     expect(c.de('saidaDestrancada')).toMatchObject([{ motivo: 'boss' }]);
     c.ir(9, 10, 60);
-    c.ir(10, 10, 60 + ESPERA);
+    c.ir(10, 10, 60);
+    c.tick({ t: 'interagir' });
     expect(c.de('saidaAlcancada')).toHaveLength(1);
   });
 
@@ -157,6 +158,7 @@ describe('porta de saída (§2.1)', () => {
     const porta = obter(c.estado.objetos.find((o) => o.tipo === 'saida'), 'porta');
     expect([porta.x, porta.y]).toEqual([6, 6]);
     c.ir(6, 6);
+    c.tick({ t: 'interagir' });
     expect(c.de('saidaAlcancada')).toHaveLength(1);
     expect(c.estado.objetos.some((o) => o.tipo === 'saida')).toBe(true);
   });

@@ -28,9 +28,10 @@ import { guardarItem } from '../progression/inventario';
 import { passavel, tipoEm } from '../world/fase';
 import { novoObjeto } from '../world/objeto-novo';
 import { eventoDaRegiao, type EventoAtivo } from './eventos-mundo';
+import { acenderFoco, apagarFoco, focoAceso } from './focos';
 import type { ModoDeJogo } from '../modos/modo';
 import { largarItem, largarPerto } from '../world/objetos';
-import { naSaidaAberta } from '../world/portas';
+import { esperouNaPorta, naSaidaAberta } from '../world/portas';
 import type { AcaoDoMundo } from './acoes';
 import type { AvisoDoMundo, DestinoDePortal, MotivoDoMundo } from './avisos';
 import { atenderBanco, atenderMissao, avisoDoBanco, avisoDoQuadro, missoesPorId, type Balcao } from './balcao';
@@ -151,6 +152,9 @@ export class SalaMundo extends SalaArena {
     const e = r.entidade;
     e.controlador = 'remoto';
     if(e.bolsa) e.bolsa.mortesNaDungeon = this.lugar.tipo === 'masmorra' ? reserva.ficha.mortesDungeon?.[this.lugar.masmorra.id] ?? 0 : 0;
+    // 08/11/2026 (D-138): o chefe desta masmorra e quantas vezes já caiu para o personagem (o XP dele cai pela metade).
+    if (e.bolsa && this.lugar.tipo === 'masmorra') e.bolsa.dungeonChefe = { preset: this.lugar.masmorra.boss, vezes: reserva.ficha.chefesDungeon?.[this.lugar.masmorra.id] ?? 0 };
+    else if (e.bolsa) delete e.bolsa.dungeonChefe;
     e.equipe = equipeDeEntrada(this.ctx.modo, jogadorId, this.estado);
     const origem = reserva.chegada ?? this.ctx.fase.spawns[0] ?? { x: 1, y: 1 };
     colocarEm(e, celulaDeEntrada(this.estado, this.ctx, e, origem));
@@ -205,7 +209,10 @@ export class SalaMundo extends SalaArena {
       this.conferirSaidaDoInterior(s, e, p);
       this.conferirEscondidas(s, e, p);
     }
-    if (this.estado.tick % CONFERIR_EVENTO_TICKS === 0) this.conferirEvento();
+    if (this.estado.tick % CONFERIR_EVENTO_TICKS === 0) {
+      this.conferirEvento();
+      this.conferirFocos();
+    }
     if (this.estado.tick >= this.proximoCheckpoint) {
       this.proximoCheckpoint = this.estado.tick + ticksDe(this.ctx.balance.mundo.checkpointS * 1000);
       for (const p of this.presencas.values()) this.pendencias.push({ tipo: 'gravar', identidade: p.identidade, ficha: p.ficha });
@@ -231,6 +238,18 @@ export class SalaMundo extends SalaArena {
       if (c) this.estado.objetos.push(novoObjeto(ID_MERCADOR_ERRANTE, 'loja', c.x, c.y, { ref: 'mercador', itens: [...territorioDoLugar(this.reino,this.regiaoAtual()?.id ?? "").mercadorErrante] }));
     }
     for (const s of this.sessoes.values()) this.avisar(s, { tipo: 'evento', evento: agora?.evento ?? null, fim: agora?.fim ?? 0 });
+  }
+
+  /** 08/11/2026 (D-138): os focos elementais da região acendem e apagam pela janela (mundo/focos.ts), sem aviso. */
+  private conferirFocos(): void {
+    const regiao = this.lugar.tipo === 'regiao' ? this.lugar.regiao : null;
+    if (!regiao?.focos?.length) return;
+    const agora = this.opcoesMundo.agora();
+    for (const foco of regiao.focos) {
+      const aceso = focoAceso(regiao.id, foco, agora);
+      if (aceso) acenderFoco(this.estado, this.ctx, regiao, foco, aceso, agora);
+      else apagarFoco(this.estado, foco);
+    }
   }
 
   /** Uma célula andável e sem objeto, a poucos passos da entrada da região. */
@@ -410,7 +429,8 @@ export class SalaMundo extends SalaArena {
 
   /** Na saída aberta do interior, volta à frente da porta da estrutura (e a masmorra concluída entrega a recompensa). */
   private conferirSaidaDoInterior(s: Sessao, e: Entidade, p: Presenca): void {
-    if (this.lugar.tipo === 'regiao' || tipoEm(this.ctx.fase, e.x, e.y) !== 'saida' || !naSaidaAberta(this.estado, this.ctx, e)) return;
+    // 08/11/2026 (D-138): só com o E na saída (a espera completa vem de `usarPortal`).
+    if (this.lugar.tipo === 'regiao' || tipoEm(this.ctx.fase, e.x, e.y) !== 'saida' || !naSaidaAberta(this.estado, this.ctx, e) || !esperouNaPorta(this.estado, this.ctx, e)) return;
     const id = this.lugar.tipo === 'masmorra' ? this.lugar.masmorra.id : this.lugar.covil.id;
     const porta = estruturaDoDestino(this.reino, id);
     if (!porta) return;
@@ -667,6 +687,7 @@ export class SalaMundo extends SalaArena {
       p.ficha = fichaAtualizada(p.ficha,e);
       this.pendencias.push({tipo:'gravar',identidade:p.identidade,ficha:p.ficha});
     }
+    this.contarChefeDaDungeon(id);
     const preset = this.estado.respawns.find((r) => r.id === id)?.preset;
     const matador = porId ? buscarEntidade(this.estado, porId) : undefined;
     const dono = matador?.invocacao ? buscarEntidade(this.estado, matador.invocacao.donoId) : matador;
@@ -679,6 +700,24 @@ export class SalaMundo extends SalaArena {
       if (!e || !p) continue;
       const doGrupo = !!dono.grupo && e.grupo === dono.grupo && Math.max(Math.abs(e.x - dono.x), Math.abs(e.y - dono.y)) <= raio;
       if (e === dono || doGrupo) this.progredir(s, p, fato);
+    }
+  }
+
+  /** 08/11/2026 (D-138): o chefe da masmorra caiu: conta mais uma vez para cada um na instância (o XP já foi dado). */
+  private contarChefeDaDungeon(id: EntidadeId): void {
+    if (this.lugar.tipo !== 'masmorra') return;
+    const masmorra = this.lugar.masmorra;
+    if (buscarEntidade(this.estado, id)?.preset !== masmorra.boss) return;
+    for (const s of this.sessoes.values()) {
+      const e = buscarEntidade(this.estado, s.entidadeId);
+      const p = this.presencas.get(s.entidadeId);
+      if (!e?.bolsa || !p) continue;
+      p.ficha.chefesDungeon ??= {};
+      const vezes = (p.ficha.chefesDungeon[masmorra.id] ?? 0) + 1;
+      p.ficha.chefesDungeon[masmorra.id] = vezes;
+      e.bolsa.dungeonChefe = { preset: masmorra.boss, vezes };
+      p.ficha = fichaAtualizada(p.ficha, e);
+      this.pendencias.push({ tipo: 'gravar', identidade: p.identidade, ficha: p.ficha });
     }
   }
 

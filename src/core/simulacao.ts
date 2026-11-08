@@ -1,4 +1,5 @@
 import { processarAmbientes } from '../world/ambientes';
+import { processarTerrenosVivos } from '../world/terrenos-vivos';
 import { processarEnxame } from '../world/enxame';
 import { processarPantanos } from '../combat/sequencias';
 import { processarCampos } from '../combat/tatica';
@@ -102,6 +103,8 @@ export function simular(
   processarBuffsArmados(estado, ctx, saida);
   atualizarAparencias(estado, ctx);
   atualizarRessonancias(estado, ctx, saida);
+  // 08/11/2026 (D-138): os terrenos vivos reagem aos golpes do tick antes de as áreas valerem.
+  processarTerrenosVivos(estado, ctx, saida, inicio);
   processarAmbientes(estado, ctx, saida, inicio);
   // Marco 23 (D-092): o pulso do clima da fase de tema elemental.
   processarClima(estado, ctx, saida);

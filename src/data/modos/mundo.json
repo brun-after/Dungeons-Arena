@@ -30,7 +30,7 @@
     "regenPorCelula": true,
     "revelarArmadilhas": true,
     "estudoAvanca": true,
-    "penalidadeMorte": null
+    "penalidadeMorte": { "xp": 0, "perdeNivel": false, "ouroPctMin": 75, "ouroPctMax": 75 }
   },
   "pvp": { "danoClassePct": 60 },
   "areaDeInteresse": { "raio": 24 },

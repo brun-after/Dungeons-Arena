@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.90 · **Data:** 08/11/2026
+**Versão:** 0.91 · **Data:** 08/11/2026
 
 > **Histórico**
+> - **0.91 (08/11/2026)**: D-138: um som de golpe por arma e por criatura (o baque surdo dos mortos do Necromante) a aura do Guerreiro como um anel visível no chão, também no online e no Mundo, os portais usados com o E, os terrenos elementais vivos e os focos do Mundo, o XP do chefe da masmorra repetida pela metade, 3/4 do ouro perdidos na morte, o espólio de 5 min e a vila que não esconde quem luta.
 > - **0.90 (08/11/2026)**: D-137: as Lanças da escuridão (pretas com aura roxa), a ultimate no topo da aba de habilidades, a receita nas fusões e o Juízo das trevas no lugar do Banquete funesto.
 > - **0.86 (06/11/2026)**: D-135: três inimigos novos (Arremessador, Duende saltador e Runista medroso, só no Mundo), o porte por nível a cada 10 níveis, as armadilhas como círculos de conjuração (dano pela vida atual, puxão, Passo leve, mais no Mundo), o dano e o vínculo do Necromante e o básico de projétil que não atira na parede.
 > - **0.85 (06/11/2026)**: D-134: a skin Mágico do aventureiro (a cartola e o pombo), a cabeça menor e mais escura da Sombra Rubra, o pouso do falcão na metade do tempo e o grito saindo do falcão.
@@ -4055,3 +4056,61 @@ coroa de ouro em brasa no nível 100.
   `render/vivos/servo-vivo.ts`): o corte do Ceifador sem enfeites (capuz, casaco longo, capa rasgada, capeleta, mangas),
   todo preto liso, com os olhos pálidos acesos e as presas no escuro do capuz. Os reanimados e ecos seguem com a
   aparência de quem morreu. Sem GPU, cai no atlas como os outros modelos em tempo real.
+
+## D-138 — O som de cada golpe e o anel da aura (08/11/2026)
+
+- **Golpes corpo a corpo.** O golpe tocava o mesmo `acerto`/`lamina`/`contundente` para tudo, escolhido pelo id da
+  habilidade (as criaturas usam `golpe`, então todas soavam igual). Agora o impacto corpo a corpo soa por quem bate
+  (`audio/timbres.ts`): o básico pela arma de onde ele sai (o da mão secundária também), a skill física de perto pela
+  arma na mão e a criatura sem arma pelo corpo (o modelo). São 19 timbres, dois WAV cada, sintetizados por
+  `tools/audio/golpes.py` (CC0): espada (corte agudo com tinir), sabre e faca (mais leves), machado (corte mais grave e
+  pesado), montante (o mais longo), lança e rapieira (estocadas), maça e mangual (pancada; o mangual com a corrente),
+  cajado (madeira), foice, livro, soco, mordida (lobo, aranha), garras (falcão, vampiro, fada), garra pesada (demônio,
+  dragões), gosma (slime) e sombra. Os mortos do Necromante (os marcados pela necromancia, os invocados por quem tem a
+  passiva dos servos e o exército do Necromante do Mundo) dão o **baque surdo**, sem nada acima de uns 300 Hz.
+  - O básico sempre soa pela arma (inclusive a onda curta da espada). A skill com elemento, com som do Necromante ou
+    com um `visual.som` próprio (que não seja o genérico "golpe") continua com o dela. Arma ou criatura nova cai no
+    timbre da natureza do golpe (`golpe` da arma) ou no soco. Os de longe (arco, bumerangue) seguem como estavam.
+- **Aura do Guerreiro.** Com a Bravura 25+, a borda da aura eram três pontos pequenos e fracos a cada 140 ms, numa borda
+  quadrada à altura do peito: sumiam no escuro. Agora é um **anel no chão**, no raio da aura mais meia célula (a borda
+  das células que ela alcança; a área segue medida por Chebyshev), com brilhos juntos que cobrem a volta por igual
+  (passo áureo); a cada marco (25, 50, 75, 100) o anel fica mais denso e, de 50 em diante, solta faíscas. O raio cresce
+  com os marcos, como antes.
+  - A aura (e os orbes do Mago) exigia a bolsa, que não vem no online nem no Mundo (a dos outros nunca vem): o marco
+    passou a ser lido pelo que é público (`marcoAMostra`: a classe, o atributo e a arma à mostra). Com a bolsa, é o
+    `marcoDe` de sempre. A regra de jogo não mudou.
+- **Portais com o E.** Na campanha e nas dungeons (também na saída das masmorras do Mundo), o jogador não é mais levado
+  ao pisar: parado em cima, usa o portal com a tecla de interagir (o E, ou o D no EWAS; no toque, o botão da mão). O
+  atalho (porta interna) teleporta com a recarga de sempre; a saída aberta e a porta azul de retorno saem na hora (a
+  espera de 3 s do D-099 saiu: o E é o gesto de querer sair). No grupo, cada um aperta o E na mesma porta e fica parado
+  nela; quando o último aperta, todos passam. Pisar na saída trancada continua avisando, e a chave continua abrindo ao
+  pisar (ou com o E). O E num portal vem antes do baú ou da loja ao lado. Os inimigos seguem cruzando os atalhos ao
+  pisar, com a chance do modo. O aviso na tela diz "E: atravessar o portal" e "E: sair pela porta".
+- **A flecha.** O acerto da flecha (o tiro do arco, a seta da besta, as flechas dos esqueletos) é um baque surdo um pouco
+  mais agudo e curto que o dos mortos do Necromante (`golpe_flecha`, ~100 Hz contra ~50 Hz).
+- **Terrenos vivos** (`world/terrenos-vivos.ts`). As áreas da fase reagem aos golpes com elemento que acertam alguém
+  dentro delas, por `balance.terrenos.duracaoMs` (15 s): a água congela com o gelo (gelo fino), vira vapor com o fogo
+  (6 s; o vapor cega por um instante), vira lama com a terra (lenta, mas deixa atacar) e conduz o raio (vira campo
+  elétrico, e quem mais está na água leva 35% do golpe e fica eletrizado). O gelo derrete com o fogo, a lama seca, o
+  miasma pega fogo, a névoa vira luz com o sagrado e a luz vira névoa com as trevas. Sobre a área fixa, o vivo a cobre
+  até o prazo; voltar ao tipo dela desfaz o vivo. Os vivos vão pela rede (patches), a IA os evita como perigo e o
+  visual é de partículas no chão, com o detalhe de cada tipo e uma rajada na reação.
+- **Terrenos e focos do Mundo.** Cada região ganhou os terrenos fixos do seu tema, sempre perto do que os explica (o
+  gerador põe em volta do covil do chefe do elemento, na frente da estrutura pedida ou livres pelo bioma): as Ruínas do
+  Norte viraram região vulcânica (lava e o dragão de fogo); o Pico Gelado tem lagos congelados e o dragão de gelo; o
+  Pântano, miasma e lama; as Colinas e o cânion, campos elétricos; a cripta tem névoa de trevas e o templo, luz; a
+  nascente fica na vila. Os chefes de encontro de cada região passaram a ser os do elemento dela. Os focos (`focos` da
+  região, `mundo/focos.ts`) acendem por chance numa janela de tempo (igual em todos os canais), duram alguns minutos e
+  somem; às vezes trazem o chefe do elemento, que vai embora no fim se ninguém o feriu. Sem aviso no chat.
+- **Prêmio da masmorra repetida.** O XP do chefe da masmorra do Mundo cai pela metade a cada vez que o mesmo personagem
+  já o derrubou (`chefesDungeon` na ficha), até 1 XP. Também varia com a diferença de nível: o chefe acima dá +8% por
+  nível (até +80%); abaixo, cai pela metade a cada 4 níveis (`balance.mundo.repeticaoDungeon`).
+- **Morte.** Morrer custa 3/4 do ouro da mochila na campanha, no cooperativo e no Mundo (no Mundo, sem perder XP, como
+  antes). O espólio deixado no Mundo (o túmulo) some em 5 min; só o dono abre nos primeiros 2,5 min (eram 10 de 30).
+- **A vila não esconde quem luta** (`world/refugio.ts`). Havia quem ficasse na beirada da vila do Mundo batendo nos
+  monstros de fora, sem risco. Agora o refúgio olha o combate entre os dois (um golpe dado ou levado, deles ou das
+  invocações, nos últimos 8 s, `balance.mundo.refugio.combateS`): em combate, o monstro segue quem fugiu para dentro e
+  o ataca lá, e o jogador pode revidar de dentro; sem combate, o monstro não entra nem ataca quem está dentro, e quem
+  está dentro não fere o monstro de fora (nem com habilidade de área). Para começar uma luta é preciso sair da vila. O
+  monstro que entrou sai livre; passada a janela, ele perde o alvo e volta.
+

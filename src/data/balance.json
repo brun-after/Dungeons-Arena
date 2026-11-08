@@ -456,6 +456,24 @@
     "muralhaMaxMs": 8000,
     "campoMaxMs": 10000
   },
+  "terrenos": {
+    "duracaoMs": 15000, "vaporMs": 6000, "cegoMs": 1200, "conducaoPct": 35, "maxVivos": 60,
+    "reacoes": [
+      { "sobre": "agua", "elemento": "gelo", "vira": "gelo_fino" },
+      { "sobre": "agua", "elemento": "fogo", "vira": "vapor" },
+      { "sobre": "agua", "elemento": "raio", "vira": "campo_eletrico", "conduz": true },
+      { "sobre": "agua", "elemento": "terra", "vira": "lama" },
+      { "sobre": "gelo_fino", "elemento": "fogo", "vira": "agua" },
+      { "sobre": "brasas", "elemento": "gelo", "vira": "vapor" },
+      { "sobre": "lama", "elemento": "fogo", "vira": "seco" },
+      { "sobre": "lama", "elemento": "gelo", "vira": "gelo_fino" },
+      { "sobre": "miasma", "elemento": "fogo", "vira": "brasas" },
+      { "sobre": "campo_eletrico", "elemento": "terra", "vira": "seco" },
+      { "sobre": "nevoa_sombria", "elemento": "sagrado", "vira": "luz_sagrada" },
+      { "sobre": "luz_sagrada", "elemento": "trevas", "vira": "nevoa_sombria" },
+      { "sobre": "vapor", "elemento": "gelo", "vira": "gelo_fino" }
+    ]
+  },
   "ambiente": {
     "intervaloMs": 1000,
     "curaAfim": 6,
@@ -583,10 +601,12 @@
   "mundo": {
     "populacaoMax": 300,
     "resgate": {"mortesDesconto": 5, "mortesGratis": 10},
+    "refugio": { "combateS": 8 },
+    "repeticaoDungeon": { "fatorPorVez": 0.5, "bonusPorNivelPct": 8, "bonusMaxPct": 80, "niveisPorMetade": 4 },
     "exercitoNecromante": {"minimo": 4, "maximo": 10, "niveisPorVaga": 5, "recargaMs": 12000, "duracaoMs": 90000, "presets": ["cavaleiro_profano", "piromante_profano", "arcanista_glacial", "espectro_tempestade"]},
     "atencaoBatalha": {"raio": 16, "bonus": 10, "memoriaMs": 8000},
     "ofertas": {"periodoS": 1800, "duracaoS": 600, "quantidade": 2, "centrais": ["couraca_expedicao", "capa_sombria", "anel_do_eco", "aceleracao_mente_rara", "essencia_fogo", "essencia_gelo"], "avancadas": ["couraca_trono", "manto_abismo", "livro_chuva_de_estrelas", "runa_de_fusao", "tomo_potencial"]},
-    "tumulo": { "donoExclusivoS": 600, "duracaoS": 1800 },
+    "tumulo": { "donoExclusivoS": 150, "duracaoS": 300 },
     "portal": { "ouroBase": 20, "ouroPorRegiao": 30, "recargaS": 60 },
     "coleta": { "canalMs": 2500, "renascerS": 300, "raio": 1 },
     "covil": { "contribuicaoMinPct": 10 },

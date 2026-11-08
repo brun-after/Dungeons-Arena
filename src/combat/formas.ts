@@ -12,6 +12,7 @@ import type { EstadoJogo } from '../core/estado';
 import { vivo, type Entidade } from '../entities/entidade';
 import { podeAjudar, podeFerir } from '../modos/relacao';
 import { passavel, type Fase } from '../world/fase';
+import { refugioProtege } from '../world/refugio';
 import { celulaOcupada, chebyshev } from './geometria';
 import type { Habilidade } from './habilidades';
 import { REGISTRO_EFEITOS } from './registro-efeitos';
@@ -124,7 +125,8 @@ export function alvosDaForma(estado: EstadoJogo, ctx: ContextoSimulacao, ator: E
   const origem = celulaOcupada(ator);
   const naArea = estado.entidades.filter((e) => {
     const c = celulaOcupada(e);
-    return chaves.has(`${c.x},${c.y}`) && afetavel(ctx, ator, e, hab);
+    // D-138: a área também respeita o muro da vila (sem combate entre os dois, não passa).
+    return chaves.has(`${c.x},${c.y}`) && afetavel(ctx, ator, e, hab) && (deSuporte(hab) || !refugioProtege(estado, ctx, ator, e));
   });
   // Marco 22 (D-089): o golpe no falcão cai no dono; com os dois na área, o dono é atingido uma vez só.
   const dentro = naArea.filter((e) => !e.invocacao?.companheiro || !naArea.some((d) => d.id === e.invocacao?.donoId));

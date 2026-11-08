@@ -8,7 +8,7 @@ import { t, type ChaveTexto } from '../i18n';
 import { TIPOS_DO_MUNDO } from '../mundo/objetos-mundo';
 import { armadilhaParaDesarmar } from '../world/armadilhas-ocultas';
 import { alvoDeInteracao, podeConverterArmadilha, recargaLojaRestante } from '../world/interacao';
-import { esperaNaPorta } from '../world/portas';
+import { destinoDaPorta, esperaNaPorta, naSaidaAberta } from '../world/portas';
 
 const INTERVALO_MS = 200;
 
@@ -44,8 +44,11 @@ export function criarPrompt(ctx: ContextoSimulacao, idLocal: string, toque: bool
     // Marco 24 (D-099): parado na porta de fase, a contagem até sair.
     const espera = esperaNaPorta(estado, ctx, eu);
     if (espera !== null && espera < 1) return t('prompt.esperaPorta', { s: Math.ceil((1 - espera) * (ctx.balance.portas.esperaMs / 1000)) });
+    // 08/11/2026 (D-138): os portais pedem o E (o atalho, a saída aberta e a porta de retorno).
+    if (destinoDaPorta(ctx.fase.portasInternas, eu.x, eu.y)) return t('prompt.portal', { tecla: tecla() });
     const volta = ctx.fase.portaRetorno;
-    if (volta && Math.max(Math.abs(volta.x - eu.x), Math.abs(volta.y - eu.y)) <= 1) return t('prompt.retorno');
+    if (volta && Math.max(Math.abs(volta.x - eu.x), Math.abs(volta.y - eu.y)) <= 1) return t('prompt.retorno', { tecla: tecla() });
+    if (naSaidaAberta(estado, ctx, eu)) return t('prompt.saida', { tecla: tecla() });
     const s = ctx.fase.portaSaida;
     if (s && s.x === eu.x && s.y === eu.y && s.tranca !== 'livre' && !estado.saidaAberta) {
       return t(s.tranca === 'chave' ? 'prompt.saidaChave' : 'prompt.saidaBoss');

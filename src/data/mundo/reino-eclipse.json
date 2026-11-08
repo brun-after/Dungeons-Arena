@@ -170,15 +170,48 @@
       ],
       "bosses": {
         "presets": [
-          "necromante_ancestral",
-          "dragao_fogo",
-          "dragao_gelo",
           "dragao_raio",
-          "dragao_veneno"
+          "necromante_ancestral"
         ],
         "chancePct": 100,
         "quantidade": 2
-      }
+      },
+      "terrenos": [
+        {
+          "tipo": "campo_eletrico",
+          "perto": "mina",
+          "quantidade": 2,
+          "raio": 2
+        },
+        {
+          "tipo": "agua",
+          "perto": "livre",
+          "quantidade": 2,
+          "raio": 2
+        },
+        {
+          "tipo": "nevoa_sombria",
+          "perto": "cripta",
+          "quantidade": 1,
+          "raio": 2
+        }
+      ],
+      "focos": [
+        {
+          "id": "tempestade",
+          "tipo": "campo_eletrico",
+          "perto": "livre",
+          "raio": 3,
+          "areas": 4,
+          "chancePct": 40,
+          "janelaMin": 25,
+          "duracaoMin": 10,
+          "boss": {
+            "preset": "dragao_raio",
+            "chancePct": 40
+          }
+        }
+      ]
     },
     {
       "id": "eclipse_obsidiana",
@@ -252,15 +285,42 @@
       ],
       "bosses": {
         "presets": [
-          "necromante_ancestral",
           "dragao_fogo",
-          "dragao_gelo",
-          "dragao_raio",
-          "dragao_veneno"
+          "necromante_ancestral"
         ],
         "chancePct": 100,
         "quantidade": 2
-      }
+      },
+      "terrenos": [
+        {
+          "tipo": "brasas",
+          "perto": "livre",
+          "quantidade": 4,
+          "raio": 2
+        },
+        {
+          "tipo": "nevoa_sombria",
+          "perto": "cripta",
+          "quantidade": 1,
+          "raio": 2
+        }
+      ],
+      "focos": [
+        {
+          "id": "erupcao",
+          "tipo": "brasas",
+          "perto": "livre",
+          "raio": 3,
+          "areas": 4,
+          "chancePct": 40,
+          "janelaMin": 25,
+          "duracaoMin": 10,
+          "boss": {
+            "preset": "dragao_fogo",
+            "chancePct": 40
+          }
+        }
+      ]
     },
     {
       "id": "eclipse_exilados",
@@ -349,15 +409,48 @@
       ],
       "bosses": {
         "presets": [
-          "necromante_ancestral",
-          "dragao_fogo",
-          "dragao_gelo",
-          "dragao_raio",
-          "dragao_veneno"
+          "dragao_veneno",
+          "necromante_ancestral"
         ],
         "chancePct": 100,
         "quantidade": 2
-      }
+      },
+      "terrenos": [
+        {
+          "tipo": "agua",
+          "perto": "livre",
+          "quantidade": 2,
+          "raio": 2
+        },
+        {
+          "tipo": "lama",
+          "perto": "livre",
+          "quantidade": 2,
+          "raio": 2
+        },
+        {
+          "tipo": "nevoa_sombria",
+          "perto": "cripta",
+          "quantidade": 1,
+          "raio": 2
+        }
+      ],
+      "focos": [
+        {
+          "id": "lamacal",
+          "tipo": "lama",
+          "perto": "livre",
+          "raio": 3,
+          "areas": 4,
+          "chancePct": 40,
+          "janelaMin": 25,
+          "duracaoMin": 10,
+          "boss": {
+            "preset": "dragao_veneno",
+            "chancePct": 40
+          }
+        }
+      ]
     },
     {
       "id": "eclipse_trovao",
@@ -431,15 +524,42 @@
       ],
       "bosses": {
         "presets": [
-          "necromante_ancestral",
-          "dragao_fogo",
-          "dragao_gelo",
           "dragao_raio",
-          "dragao_veneno"
+          "necromante_ancestral"
         ],
         "chancePct": 100,
         "quantidade": 2
-      }
+      },
+      "terrenos": [
+        {
+          "tipo": "campo_eletrico",
+          "perto": "livre",
+          "quantidade": 4,
+          "raio": 2
+        },
+        {
+          "tipo": "nevoa_sombria",
+          "perto": "cripta",
+          "quantidade": 1,
+          "raio": 2
+        }
+      ],
+      "focos": [
+        {
+          "id": "tempestade",
+          "tipo": "campo_eletrico",
+          "perto": "livre",
+          "raio": 3,
+          "areas": 4,
+          "chancePct": 40,
+          "janelaMin": 25,
+          "duracaoMin": 10,
+          "boss": {
+            "preset": "dragao_raio",
+            "chancePct": 40
+          }
+        }
+      ]
     },
     {
       "id": "eclipse_almas",
@@ -527,15 +647,54 @@
       ],
       "bosses": {
         "presets": [
-          "necromante_ancestral",
-          "dragao_fogo",
-          "dragao_gelo",
-          "dragao_raio",
-          "dragao_veneno"
+          "dragao_veneno",
+          "necromante_ancestral"
         ],
         "chancePct": 100,
         "quantidade": 3
-      }
+      },
+      "terrenos": [
+        {
+          "tipo": "miasma",
+          "perto": "livre",
+          "quantidade": 3,
+          "raio": 2
+        },
+        {
+          "tipo": "lama",
+          "perto": "livre",
+          "quantidade": 2,
+          "raio": 2
+        },
+        {
+          "tipo": "nevoa_sombria",
+          "perto": "cripta",
+          "quantidade": 1,
+          "raio": 2
+        },
+        {
+          "tipo": "luz_sagrada",
+          "perto": "templo",
+          "quantidade": 1,
+          "raio": 2
+        }
+      ],
+      "focos": [
+        {
+          "id": "brejo_podre",
+          "tipo": "miasma",
+          "perto": "livre",
+          "raio": 3,
+          "areas": 4,
+          "chancePct": 40,
+          "janelaMin": 25,
+          "duracaoMin": 10,
+          "boss": {
+            "preset": "dragao_veneno",
+            "chancePct": 40
+          }
+        }
+      ]
     },
     {
       "id": "eclipse_crepusculo",
@@ -638,15 +797,48 @@
       ],
       "bosses": {
         "presets": [
-          "necromante_ancestral",
-          "dragao_fogo",
           "dragao_gelo",
-          "dragao_raio",
-          "dragao_veneno"
+          "necromante_ancestral"
         ],
         "chancePct": 100,
         "quantidade": 3
-      }
+      },
+      "terrenos": [
+        {
+          "tipo": "gelo_fino",
+          "perto": "livre",
+          "quantidade": 4,
+          "raio": 2
+        },
+        {
+          "tipo": "nevoa_sombria",
+          "perto": "cripta",
+          "quantidade": 1,
+          "raio": 2
+        },
+        {
+          "tipo": "luz_sagrada",
+          "perto": "templo",
+          "quantidade": 1,
+          "raio": 2
+        }
+      ],
+      "focos": [
+        {
+          "id": "nevasca",
+          "tipo": "gelo_fino",
+          "perto": "livre",
+          "raio": 3,
+          "areas": 4,
+          "chancePct": 40,
+          "janelaMin": 25,
+          "duracaoMin": 10,
+          "boss": {
+            "preset": "dragao_gelo",
+            "chancePct": 40
+          }
+        }
+      ]
     },
     {
       "id": "eclipse_escamas",
@@ -734,15 +926,48 @@
       ],
       "bosses": {
         "presets": [
-          "necromante_ancestral",
           "dragao_fogo",
-          "dragao_gelo",
-          "dragao_raio",
-          "dragao_veneno"
+          "necromante_ancestral"
         ],
         "chancePct": 100,
         "quantidade": 3
-      }
+      },
+      "terrenos": [
+        {
+          "tipo": "brasas",
+          "perto": "livre",
+          "quantidade": 4,
+          "raio": 2
+        },
+        {
+          "tipo": "nevoa_sombria",
+          "perto": "cripta",
+          "quantidade": 1,
+          "raio": 2
+        },
+        {
+          "tipo": "luz_sagrada",
+          "perto": "templo",
+          "quantidade": 1,
+          "raio": 2
+        }
+      ],
+      "focos": [
+        {
+          "id": "erupcao",
+          "tipo": "brasas",
+          "perto": "livre",
+          "raio": 3,
+          "areas": 4,
+          "chancePct": 40,
+          "janelaMin": 25,
+          "duracaoMin": 10,
+          "boss": {
+            "preset": "dragao_fogo",
+            "chancePct": 40
+          }
+        }
+      ]
     },
     {
       "id": "eclipse_geleiras",
@@ -845,15 +1070,54 @@
       ],
       "bosses": {
         "presets": [
-          "necromante_ancestral",
-          "dragao_fogo",
           "dragao_gelo",
-          "dragao_raio",
-          "dragao_veneno"
+          "necromante_ancestral"
         ],
         "chancePct": 100,
         "quantidade": 3
-      }
+      },
+      "terrenos": [
+        {
+          "tipo": "gelo_fino",
+          "perto": "livre",
+          "quantidade": 4,
+          "raio": 2
+        },
+        {
+          "tipo": "agua",
+          "perto": "livre",
+          "quantidade": 1,
+          "raio": 2
+        },
+        {
+          "tipo": "nevoa_sombria",
+          "perto": "cripta",
+          "quantidade": 1,
+          "raio": 2
+        },
+        {
+          "tipo": "luz_sagrada",
+          "perto": "templo",
+          "quantidade": 1,
+          "raio": 2
+        }
+      ],
+      "focos": [
+        {
+          "id": "nevasca",
+          "tipo": "gelo_fino",
+          "perto": "livre",
+          "raio": 3,
+          "areas": 4,
+          "chancePct": 40,
+          "janelaMin": 25,
+          "duracaoMin": 10,
+          "boss": {
+            "preset": "dragao_gelo",
+            "chancePct": 40
+          }
+        }
+      ]
     },
     {
       "id": "eclipse_cinza",
@@ -941,15 +1205,48 @@
       ],
       "bosses": {
         "presets": [
-          "necromante_ancestral",
           "dragao_fogo",
-          "dragao_gelo",
-          "dragao_raio",
-          "dragao_veneno"
+          "necromante_ancestral"
         ],
         "chancePct": 100,
         "quantidade": 3
-      }
+      },
+      "terrenos": [
+        {
+          "tipo": "brasas",
+          "perto": "livre",
+          "quantidade": 4,
+          "raio": 2
+        },
+        {
+          "tipo": "nevoa_sombria",
+          "perto": "cripta",
+          "quantidade": 1,
+          "raio": 2
+        },
+        {
+          "tipo": "luz_sagrada",
+          "perto": "templo",
+          "quantidade": 1,
+          "raio": 2
+        }
+      ],
+      "focos": [
+        {
+          "id": "erupcao",
+          "tipo": "brasas",
+          "perto": "livre",
+          "raio": 3,
+          "areas": 4,
+          "chancePct": 40,
+          "janelaMin": 25,
+          "duracaoMin": 10,
+          "boss": {
+            "preset": "dragao_fogo",
+            "chancePct": 40
+          }
+        }
+      ]
     },
     {
       "id": "eclipse_mortos",
@@ -1037,15 +1334,47 @@
       ],
       "bosses": {
         "presets": [
-          "necromante_ancestral",
-          "dragao_fogo",
-          "dragao_gelo",
-          "dragao_raio",
-          "dragao_veneno"
+          "necromante_ancestral"
         ],
         "chancePct": 100,
         "quantidade": 3
-      }
+      },
+      "terrenos": [
+        {
+          "tipo": "nevoa_sombria",
+          "perto": "livre",
+          "quantidade": 4,
+          "raio": 2
+        },
+        {
+          "tipo": "nevoa_sombria",
+          "perto": "cripta",
+          "quantidade": 1,
+          "raio": 2
+        },
+        {
+          "tipo": "luz_sagrada",
+          "perto": "templo",
+          "quantidade": 1,
+          "raio": 2
+        }
+      ],
+      "focos": [
+        {
+          "id": "sombra",
+          "tipo": "nevoa_sombria",
+          "perto": "livre",
+          "raio": 2,
+          "areas": 4,
+          "chancePct": 40,
+          "janelaMin": 25,
+          "duracaoMin": 10,
+          "boss": {
+            "preset": "necromante_ancestral",
+            "chancePct": 40
+          }
+        }
+      ]
     },
     {
       "id": "eclipse_tempestade",
@@ -1133,15 +1462,48 @@
       ],
       "bosses": {
         "presets": [
-          "necromante_ancestral",
-          "dragao_fogo",
           "dragao_gelo",
-          "dragao_raio",
-          "dragao_veneno"
+          "necromante_ancestral"
         ],
         "chancePct": 100,
         "quantidade": 3
-      }
+      },
+      "terrenos": [
+        {
+          "tipo": "gelo_fino",
+          "perto": "livre",
+          "quantidade": 4,
+          "raio": 2
+        },
+        {
+          "tipo": "nevoa_sombria",
+          "perto": "cripta",
+          "quantidade": 1,
+          "raio": 2
+        },
+        {
+          "tipo": "luz_sagrada",
+          "perto": "templo",
+          "quantidade": 1,
+          "raio": 2
+        }
+      ],
+      "focos": [
+        {
+          "id": "nevasca",
+          "tipo": "gelo_fino",
+          "perto": "livre",
+          "raio": 3,
+          "areas": 4,
+          "chancePct": 40,
+          "janelaMin": 25,
+          "duracaoMin": 10,
+          "boss": {
+            "preset": "dragao_gelo",
+            "chancePct": 40
+          }
+        }
+      ]
     },
     {
       "id": "eclipse_trono",
@@ -1229,15 +1591,48 @@
       ],
       "bosses": {
         "presets": [
-          "necromante_ancestral",
           "dragao_fogo",
-          "dragao_gelo",
-          "dragao_raio",
-          "dragao_veneno"
+          "necromante_ancestral"
         ],
         "chancePct": 100,
         "quantidade": 3
-      }
+      },
+      "terrenos": [
+        {
+          "tipo": "brasas",
+          "perto": "livre",
+          "quantidade": 4,
+          "raio": 2
+        },
+        {
+          "tipo": "nevoa_sombria",
+          "perto": "cripta",
+          "quantidade": 1,
+          "raio": 2
+        },
+        {
+          "tipo": "luz_sagrada",
+          "perto": "templo",
+          "quantidade": 1,
+          "raio": 2
+        }
+      ],
+      "focos": [
+        {
+          "id": "erupcao",
+          "tipo": "brasas",
+          "perto": "livre",
+          "raio": 3,
+          "areas": 4,
+          "chancePct": 40,
+          "janelaMin": 25,
+          "duracaoMin": 10,
+          "boss": {
+            "preset": "dragao_fogo",
+            "chancePct": 40
+          }
+        }
+      ]
     }
   ],
   "masmorras": [

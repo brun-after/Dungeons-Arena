@@ -231,6 +231,11 @@ export interface Bolsa {
   /** D-075 (17/10/2026): origens permanentes dos ganhos por consumíveis e saldo fracionário de XP. */
   /** 02/11/2026: assistência na dungeon atual; o servidor restaura da ficha ao entrar. */
   mortesNaDungeon?: number;
+  /**
+   * 08/11/2026 (D-138): na masmorra do Mundo, o chefe dela e quantas vezes o personagem já o derrubou (o XP do chefe cai
+   * pela metade a cada vez, até 1). A sala põe ao entrar e tira fora da masmorra.
+   */
+  dungeonChefe?: { preset: string; vezes: number };
   tomosComprados?: number;
   pontosPorItens?: number;
   ranksPorItens?: number;

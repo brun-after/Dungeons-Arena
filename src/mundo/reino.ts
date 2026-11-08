@@ -5,6 +5,7 @@
 // Marco 30 (30/10/2026, D-129): as missões do quadro, os materiais que os monstros deixam e os NPCs do banco e do
 // mercado.
 
+import { TIPOS_AMBIENTE, type TipoAmbiente } from '../world/ambiente-tipos';
 import { ehObjeto, Leitor, type Objeto } from '../core/validar';
 import { conferirMissoes, lerMissaoDoMundo, type MissaoDoMundo } from './missoes-mundo';
 
@@ -91,6 +92,36 @@ export interface RegiaoDoMundo {
   estruturas: readonly EstruturaDoMundo[];
   /** Os pontos de coleta: o material e quantos espalhados pela região. */
   coleta: readonly { itemId: string; quantidade: number }[];
+  /** 08/11/2026 (D-138): os terrenos fixos (a nascente, o lago gelado, a lava), perto do que os explica. */
+  terrenos?: readonly TerrenoDaRegiao[];
+  /** 08/11/2026 (D-138): os focos elementais que surgem por chance e expiram (às vezes com o chefe do elemento). */
+  focos?: readonly FocoDaRegiao[];
+}
+
+/** 08/11/2026 (D-138): onde o terreno nasce: livre pela região, em volta do chefe do elemento ou na porta da estrutura. */
+export const PERTOS = ['livre', 'boss', ...TIPOS_ESTRUTURA] as const;
+export type PertoDe = (typeof PERTOS)[number];
+
+export interface TerrenoDaRegiao {
+  tipo: TipoAmbiente;
+  perto: PertoDe;
+  quantidade: number;
+  raio: number;
+}
+
+export interface FocoDaRegiao {
+  id: string;
+  tipo: TipoAmbiente;
+  perto: PertoDe;
+  /** O raio de cada área e quantas áreas o foco junta. */
+  raio: number;
+  areas: number;
+  /** A chance de surgir em cada janela, o tamanho da janela e quanto dura. */
+  chancePct: number;
+  janelaMin: number;
+  duracaoMin: number;
+  /** O chefe do elemento que às vezes vem junto (some com o foco se ninguém lutou com ele). */
+  boss: { preset: string; chancePct: number } | null;
 }
 
 /** Dungeon com objetivo: instanciada por grupo; derrotar o chefe conclui e entrega a recompensa. */
@@ -202,10 +233,33 @@ function lerRegiao(l: Leitor, v: unknown, tamanho: number): RegiaoDoMundo {
       : null,
     estruturas: (o.estruturas === undefined ? [] : l.lista(o, 'estruturas')).map((x) => lerEstrutura(l, x, tamanho)),
     ...(o.bosses === undefined ? {} : { bosses: lerBosses(l, o.bosses) }),
+    ...(o.terrenos === undefined ? {} : { terrenos: l.lista(o, 'terrenos').map((x) => lerTerreno(l, x)) }),
+    ...(o.focos === undefined ? {} : { focos: l.lista(o, 'focos').map((x) => lerFoco(l, x)) }),
     coleta: (o.coleta === undefined ? [] : l.lista(o, 'coleta')).map((x) => {
       const c = l.objeto(x, 'coleta');
       return { itemId: l.texto(c, 'itemId'), quantidade: l.numero(c, 'quantidade', { min: 1, max: 40, inteiro: true }) };
     }),
+  };
+}
+
+function lerTerreno(l: Leitor, v: unknown): TerrenoDaRegiao {
+  const t = l.objeto(v, 'terrenos');
+  return { tipo: l.opcao(t, 'tipo', TIPOS_AMBIENTE), perto: l.opcao(t, 'perto', PERTOS), quantidade: l.numero(t, 'quantidade', { min: 1, max: 8, inteiro: true }), raio: l.numero(t, 'raio', { min: 1, max: 3, inteiro: true }) };
+}
+
+function lerFoco(l: Leitor, v: unknown): FocoDaRegiao {
+  const f = l.objeto(v, 'focos');
+  const boss = f.boss === undefined || f.boss === null ? null : l.objeto(f.boss, 'boss');
+  return {
+    id: l.texto(f, 'id'),
+    tipo: l.opcao(f, 'tipo', TIPOS_AMBIENTE),
+    perto: l.opcao(f, 'perto', PERTOS),
+    raio: l.numero(f, 'raio', { min: 1, max: 3, inteiro: true }),
+    areas: l.numero(f, 'areas', { min: 1, max: 6, inteiro: true }),
+    chancePct: l.numero(f, 'chancePct', { min: 0, max: 100 }),
+    janelaMin: l.numero(f, 'janelaMin', { min: 1, max: 1440 }),
+    duracaoMin: l.numero(f, 'duracaoMin', { min: 1, max: 1440 }),
+    boss: boss ? { preset: l.texto(boss, 'preset'), chancePct: l.numero(boss, 'chancePct', { min: 0, max: 100 }) } : null,
   };
 }
 
@@ -336,7 +390,7 @@ export function conferirReino(reino: Reino, existe: { preset: (id: string) => bo
     if (t !== null && !existe.tema(t)) erros.push(`${dono}: tema desconhecido "${t}"`);
   };
   for (const r of reino.regioes) {
-    presets(r.id, [...r.inimigos, ...(r.bosses?.presets ?? [])]);
+    presets(r.id, [...r.inimigos, ...(r.bosses?.presets ?? []), ...(r.focos ?? []).flatMap((f) => (f.boss ? [f.boss.preset] : []))]);
     itens(r.id, r.coleta.map((c) => c.itemId));
     tema(r.id, r.tema);
   }
