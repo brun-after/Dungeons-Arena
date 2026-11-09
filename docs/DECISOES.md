@@ -4304,3 +4304,8 @@ quando alguém entra, troca presa, perseguição que não acaba e lojas bloquead
   invocação por perto com a menor vida, jogadores primeiro; tocar ou clicar num aliado (ou invocação) antes da
   habilidade a manda nele (o jeito do celular), até tocar em outro lugar. A escolha mora no cliente
   (ui/alvo-suporte.ts) e vai como o alvo do comando; a seleção do núcleo continua só para hostis.
+- **Descrição das skills e o retrato da seleção.** O clique direito (ou o toque longo) numa tecla segue abrindo o
+  seletor da barra, que agora mostra no alto a descrição da skill da tecla (a mesma do menu de habilidades, com rank,
+  perfil e escala) e troca para a de cada opção ao passar o mouse ou o foco (ui/descricao-skill.ts). Na seleção de
+  personagem, o retrato não mostra mais a ilustração antes do 3D: espera o modelo 3D; a ilustração fica só para quem
+  não tem o 3D (sem GPU) ou se o modelo falhar.

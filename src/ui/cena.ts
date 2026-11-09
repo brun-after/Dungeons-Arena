@@ -28,7 +28,7 @@ import { ligarPonteiro } from '../input/ponteiro';
 import { comandoMover } from '../input/direcao';
 import { ligarTeclado, type Teclado } from '../input/teclado';
 import { podeFerir } from '../modos/relacao';
-import { criarAlvoDeSuporte } from './alvo-suporte';
+import { criarAlvoDeSuporte } from './alvo-suporte'; import { linhasDaSkill } from './descricao-skill';
 import { consumiveisComAtalho } from '../progression/inventario';
 import { detectarToque, mostrarDirecional, sinaisDoNavegador } from '../plataforma/dispositivo';
 import { lerPreferencias, type Preferencias } from '../plataforma/preferencias';
@@ -383,14 +383,14 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   // D-067: o seletor rápido põe uma habilidade ativa conhecida na tecla do botão (clique direito ou toque longo).
   const seletor = criarSeletorBarra(ui, (slot, id) => { emitir({ t: 'equiparHabilidade', id, slot }); });
   const pedirTroca = (id: string | null, ancora: HTMLElement) => {
-    const bolsa = jogador()?.bolsa;
-    if (!bolsa) return;
+    const j = jogador(); const bolsa = j?.bolsa;
+    if (!j || !bolsa) return;
     const slot = id ? bolsa.barra.indexOf(id) : bolsa.barra.indexOf(null);
     if (slot < 0) return;
     const opcoes = bolsa.conhecidas
       .map((c) => resolverHabilidade(ctx, c.id))
       .filter((h): h is Habilidade => !!h && !h.passiva)
-      .map((h) => ({ id: h.id, nome: h.nome, icone: h.icone, classe: classeDaHabilidade(ctx.conteudo, h.id) }));
+      .map((h) => ({ id: h.id, nome: h.nome, icone: h.icone, classe: classeDaHabilidade(ctx.conteudo, h.id), descricao: linhasDaSkill(ctx, j, h.id) }));
     seletor.abrir(slot, id, opcoes, ancora);
   };
   const barra = criarBarraHabilidades(usarHabilidade, corDoElemento, pedirTroca);
