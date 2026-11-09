@@ -354,6 +354,12 @@ function perseguir(
     voltarAPatrulhar(estado, e, ia);
     return;
   }
+  // 09/11/2026 (D-144): o alvo que se afasta mais de `perseguicaoMaxCelulas` escapa (a perseguição acaba).
+  if (chebyshev(celulaOcupada(e), celulaOcupada(alvo)) > regras.perseguicaoMaxCelulas) {
+    saida.push({ t: 'iaDesistiu', tick: estado.tick, id: e.id, alvoId: alvo.id });
+    voltarAPatrulhar(estado, e, ia);
+    return;
+  }
   // Desiste após um tempo sem interação, checando periodicamente com uma chance (§2.6).
   if (estado.tick >= ia.proximaChecagemDesistenciaTick) {
     ia.proximaChecagemDesistenciaTick = estado.tick + ticksDe(regras.checagemDesistenciaMs);

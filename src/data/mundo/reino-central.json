@@ -365,12 +365,6 @@
         "chancePct": 6
       }
     ],
-    "dragao_das_ruinas": [
-      {
-        "itemId": "escama_de_dragao",
-        "chancePct": 100
-      }
-    ],
     "vampiro": [{ "itemId": "presa_de_vampiro", "chancePct": 20 }, 
       {
         "itemId": "escama_de_dragao",

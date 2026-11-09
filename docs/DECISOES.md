@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.97 · **Data:** 08/11/2026
+**Versão:** 0.98 · **Data:** 09/11/2026
 
 > **Histórico**
+> - **0.98 (09/11/2026)**: D-144: estabilidade e ajustes de jogo do Mundo (viagem entre salas sem queda, perseguição, lojas, troca, invocações, alvo dos buffs, descrições).
 > - **0.97 (08/11/2026)**: D-141 (habilidades por 35% FOR e 65% INT; o guerreiro conjura andando e encadeia com o básico) e D-142 (marco 38: prédios das vilas, andarilhos, escolta, errantes, forja em graus, troféus, fusão, pedra de retorno com círculo, save em toda região e o deserto entre os reinos).
 > - **0.96 (08/11/2026)**: D-140: o Mundo sem a fadiga de XP por fase (só a diferença de nível reduz o XP das criaturas inferiores).
 > - **0.95 (08/11/2026)**: D-139: os inimigos atacam sem parar quando estão em alcance, mais rápido e com mais skills conforme o nível (a skill fora de alcance não trava mais o ataque).
@@ -4261,3 +4262,54 @@ materiais simples.
 
 Não precisa de migração no Supabase: a ficha só guarda ids (os fundidos se resolvem pelo id) e `vilaSalva`, que já era
 texto. Testes em `tests/unit/mundo-vilas-viagem.test.ts`, e os da sala passaram a esperar a conjuração.
+
+## D-144 — Estabilidade do Mundo e ajustes de jogo (09/11/2026)
+
+Relatos dos jogadores no Mundo: quedas e "sessão expirada" ao trocar de reino ou usar a pedra de retorno, ping subindo
+quando alguém entra, troca presa, perseguição que não acaba e lojas bloqueadas. Cada ajuste entra nesta decisão.
+
+- **Viagem entre salas.** O token da conta era lido uma vez ao abrir o Mundo e vencia em 1 h; a troca de sala seguinte
+  era recusada (`sem_conta`). Agora o bilhete da troca (UUID de uso único, 60 s) autentica a viagem sozinho, o cliente
+  renova o token a cada entrada e o servidor tenta a nuvem duas vezes antes de recusar. A saída da sala antiga tem prazo
+  de 1,5 s (o `leave` do SDK nunca resolvia com a conexão caída), a entrada tenta 3 vezes e, se a viagem falhar de vez,
+  o personagem volta pela vila salva em vez de cair na tela de erro. A sessão caída já despedida solta o personagem
+  (antes a entrada nova recebia `ja_jogando`).
+- **Perseguição que não acabava.** A IA só roda perto de algum jogador; o monstro deixado para trás dormia ainda
+  marcado como perseguindo, e o jogador seguia "perseguido" (em combate, sem regenerar). Agora só conta quem persegue a
+  até `ia.perseguicaoMaxCelulas` (20) células, a IA desiste quando o alvo passa dessa distância e a morte limpa sempre
+  a perseguição (em todos os modos, a campanha incluída).
+- **Lojas.** Abrem mesmo em perseguição, a perseguição não as fecha e não há mais espera para reabrir
+  (`economia.recargaLojaMs` = 0). Levar dano com a loja aberta faz a janela tremer, sem fechá-la.
+- **Troca presa.** Fechar a janela da troca (X, Esc ou ignorar o convite) não avisava o servidor: a troca ficava aberta
+  e o jogador seguia "ocupado". Agora fechar cancela, a sala desfaz a cada segundo as trocas e convites em que um dos
+  dois saiu, morreu ou se afastou mais que o dobro do raio, e a troca aberta tem prioridade sobre um convite pendente.
+- **Ping que sobe quando alguém chega.** Medido no servidor: montar uma região (mapa, população, objetos) custa de 450
+  a 920 ms de CPU, e o Node tem um laço só; cada sala nova (uma região sem ninguém, a dungeon de um grupo, o canal 2)
+  travava todas as outras pelo mesmo tempo. O mapa não depende da semente, então o coordenador guarda o lugar montado
+  (o molde) e cada sala nova só clona o estado inicial (1 a 3 ms). O servidor monta as 24 regiões logo ao subir, uma a
+  cada 250 ms (`aquecerMundo`, ligado só no `main`). No navegador, o personagem 3D de uma classe ainda não vista
+  montava as 36 peças de armadura (6 peças × 6 graus) de uma vez; agora cada peça é montada quando alguém a veste.
+- **Invocações acompanham a viagem.** Ao trocar de sala (borda, porta de dungeon, portal, pedra de retorno), a sala
+  guarda o retrato das invocações do dono (preset, vida, atributos, aparência e os dados da invocação, com o prazo
+  como o tempo que falta), tira-as da sala antiga e manda o retrato no bilhete; a sala de chegada as cria de novo ao
+  lado do dono (mundo/comitiva.ts). O retrato não vai para a ficha gravada: quem sai do jogo e volta não traz mortos.
+  O falcão (companheiro) e os avatares ficam de fora.
+- **Lojas das dungeons.** Eram iguais em todas as dungeons do reino (as lojas da vila mais 8 raros fixos). Agora cada
+  dungeon (masmorra ou covil) tem o próprio estoque, sorteado pela dungeon e pela semana: a pedra de retorno, alguns
+  itens da vila da região, incomuns e raros garantidos, 30% de um raro a mais, 40% de um épico e 6% de um lendário,
+  só itens até o nível da dungeon + 10 (`mundo.lojaDungeon`). A semana vira na quarta-feira à meia-noite de Brasília,
+  pelo relógio do servidor; a sala aplica o estoque ao nascer e na virada, e o cliente o recebe na loja.
+- **Alvo do suporte de alvo único.** Buffs, curas e escudos de alvo único iam no aliado mais ferido no alcance. Agora,
+  sem pedido, o do jogador vai nele mesmo (a IA segue no mais ferido). Com Shift, a interface pede o aliado ou a
+  invocação por perto com a menor vida, jogadores primeiro; tocar ou clicar num aliado (ou invocação) antes da
+  habilidade a manda nele (o jeito do celular), até tocar em outro lugar. A escolha mora no cliente
+  (ui/alvo-suporte.ts) e vai como o alvo do comando; a seleção do núcleo continua só para hostis.
+- **Descrição das skills e o retrato da seleção.** O clique direito (ou o toque longo) numa tecla segue abrindo o
+  seletor da barra, que agora mostra no alto a descrição da skill da tecla (a mesma do menu de habilidades, com rank,
+  perfil e escala) e troca para a de cada opção ao passar o mouse ou o foco (ui/descricao-skill.ts). Na seleção de
+  personagem, o retrato não mostra mais a ilustração antes do 3D: espera o modelo 3D; a ilustração fica só para quem
+  não tem o 3D (sem GPU) ou se o modelo falhar.
+- **Materiais do Dragão das ruínas.** O marco 38 acrescentou ao `reino-central.json` o espólio novo do dragão (escama
+  60%, escama ígnea 50%, núcleo ígneo 25%, os materiais da forja de fogo) sem tirar a entrada antiga (escama 100%). A
+  chave repetida fazia valer a antiga, e o dragão nunca deixava a escama ígnea nem o núcleo; o esbuild avisava no CI.
+  A entrada antiga saiu.

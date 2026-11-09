@@ -2421,8 +2421,8 @@ body.toque .botao-consumivel {
   flex-direction: column;
   gap: 4px;
   min-width: 180px;
-  max-width: min(260px, calc(100% - 16px));
-  max-height: 50vh;
+  max-width: min(320px, calc(100% - 16px));
+  max-height: 60vh;
   padding: 8px;
   overflow-y: auto;
   border: 1px solid var(--borda);
@@ -3286,3 +3286,48 @@ dialog.mochila[open] { display: flex; flex-direction: column; }
 .tela-menu .voltar-selecao:hover { color: var(--destaque); }
 .acoes-slot .botao-menu.botao-perigo { background: #251a1c; border-color: #a65c61; color: #f7bec1; }
 .acoes-slot .botao-menu.botao-perigo { flex: 0 1 auto; }
+
+/* 09/11/2026 (D-144): levar dano com a loja aberta faz a janela tremer (a loja não fecha mais na perseguição). */
+.modal.tremor-loja {
+  animation: tremor-loja 0.32s ease-out;
+}
+
+@keyframes tremor-loja {
+  0%, 100% { translate: 0 0; }
+  20% { translate: -7px 2px; }
+  40% { translate: 6px -3px; }
+  60% { translate: -4px 2px; }
+  80% { translate: 3px -1px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal.tremor-loja {
+    animation: none;
+    outline: 3px solid #c0392b;
+  }
+}
+
+/* 09/11/2026 (D-144): a descrição da habilidade no seletor da barra (a da tecla e a da opção sob o mouse). */
+.seletor-barra .descricao-seletor {
+  max-width: 22rem;
+  margin: 0 0 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #1c1822;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  list-style: none;
+  /* fica à vista enquanto a lista rola */
+  position: sticky;
+  top: -8px;
+  z-index: 1;
+}
+
+.seletor-barra .descricao-seletor[hidden] {
+  display: none;
+}
+
+.seletor-barra .descricao-seletor .titulo-descricao {
+  font-weight: 700;
+  margin-bottom: 2px;
+}

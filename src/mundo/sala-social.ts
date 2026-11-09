@@ -136,3 +136,19 @@ export function cancelarTrocaDe(sala: SalaSocial, id: EntidadeId, trocas: Trocas
   const t = trocas.cancelar(id);
   if (t) avisarTroca(sala, t, 'cancelada');
 }
+
+/**
+ * 09/11/2026 (D-144): desfaz as trocas e os convites em que um dos dois saiu, morreu ou se afastou mais que o dobro do
+ * raio da troca (a sala chama a cada segundo). Sem isso, a troca abandonada deixava o jogador "ocupado" até sair.
+ */
+export function limparTrocas(sala: SalaSocial, trocas: TrocasDaSala): void {
+  const ps = sala.participantes();
+  const max = sala.ctx.balance.mundo.troca.raio * 2;
+  for (const t of [...trocas.todas()]) {
+    const ea = ps.find((p) => p.e.id === t.a.id)?.e;
+    const eb = ps.find((p) => p.e.id === t.b.id)?.e;
+    if (ea && eb && vivo(ea) && vivo(eb) && distancia(ea, eb) <= max) continue;
+    trocas.remover(t);
+    avisarTroca(sala, t, 'cancelada');
+  }
+}

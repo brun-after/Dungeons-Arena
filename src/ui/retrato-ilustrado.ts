@@ -212,18 +212,18 @@ async function retrato3d(modelo: string, eq: AparenciaEquipada | null): Promise<
 }
 
 /**
- * O retrato de menu em duas etapas: a ilustração composta aparece logo e o modelo 3D do jogo a substitui quando
- * fica pronto (05/11/2026: o 3D pode levar segundos em aparelhos fracos e o menu não espera por ele).
+ * O retrato de menu. 09/11/2026 (D-144): só o modelo 3D do jogo, sem a ilustração antes (ela aparecia e depois era
+ * trocada pelo 3D). A ilustração fica para quem não tem o 3D: sem GPU (o `palco` responde null na hora) ou se o
+ * modelo falhar.
  */
 export async function retratoIlustrado(
   modelo: string,
   eq: AparenciaEquipada | null,
   mostrar: (canvas: HTMLCanvasElement, vivo: boolean) => void,
 ): Promise<void> {
-  const vivo = retrato3d(modelo, eq).catch(() => null);
-  mostrar(await retratoDesenhado(modelo, eq), false);
-  const canvas = await vivo;
-  if (canvas) mostrar(canvas, true);
+  const vivo = await retrato3d(modelo, eq).catch(() => null);
+  if (vivo) mostrar(vivo, true);
+  else mostrar(await retratoDesenhado(modelo, eq), false);
 }
 
 /** Ilustração de menu em resolução própria, composta com o mesmo equipamento visual do jogo. */

@@ -30,7 +30,7 @@ class SalaFalsa {
   readonly mercado = new Map<string, ResultadoDoMercado[]>();
   constructor(readonly presentes: Set<string>) {}
   visaoParty(id: string) { return this.presentes.has(id) ? { lugar: 'regiao:campos_do_oeste', idLocal: 'entidade-opaca', estado: criarEstado({semente:0,faseId:'teste'}) } : null; }
-  liberarCaida(): FichaDoMundo | null {
+  liberarCaida(): { ficha: FichaDoMundo | null } | null {
     return null;
   }
   entregar(id: string, aviso: AvisoDoMundo): boolean {

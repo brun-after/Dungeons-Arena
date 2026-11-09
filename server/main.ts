@@ -24,6 +24,7 @@ const { encerrar } = await iniciarServidor({
   chaveCertificado: process.env.CHAVE_CERTIFICADO,
   supabaseUrl: process.env.SUPABASE_URL,
   supabaseChaveServico: process.env.SUPABASE_SERVICE_KEY,
+  aquecerMundo: true,
 });
 
 for (const sinal of ['SIGINT', 'SIGTERM'] as const) {

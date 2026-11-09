@@ -12,6 +12,8 @@ export interface OpcaoSeletor {
   icone: string;
   /** Marco 26 (28/10/2026, D-116): a classe da skill de classe (leva a runa), ou null. */
   classe?: string | null;
+  /** 09/11/2026 (D-144): a descrição (a mesma do menu de habilidades), mostrada ao passar o mouse ou o foco. */
+  descricao?: readonly string[];
 }
 
 export interface SeletorBarra {
@@ -43,7 +45,25 @@ export function criarSeletorBarra(raiz: HTMLElement, aoEscolher: (slot: number, 
     }
   };
 
-  const opcao = (texto: string, idIcone: string, chave: string, marcado: boolean, aoClicar: () => void, classe: string | null = null) => {
+  // 09/11/2026 (D-144): o quadro da descrição, no alto da lista: a da tecla clicada e, ao passar por uma opção, a dela.
+  const descricao = document.createElement('ul');
+  descricao.className = 'descricao-habilidade descricao-seletor';
+  descricao.setAttribute('aria-live', 'polite');
+  const descrever = (nome: string, linhas: readonly string[] | undefined) => {
+    descricao.textContent = '';
+    descricao.hidden = !linhas?.length;
+    const titulo = document.createElement('li');
+    titulo.className = 'titulo-descricao';
+    titulo.textContent = nome;
+    descricao.append(titulo);
+    for (const l of linhas ?? []) {
+      const li = document.createElement('li');
+      li.textContent = l;
+      descricao.append(li);
+    }
+  };
+
+  const opcao = (texto: string, idIcone: string, chave: string, marcado: boolean, aoClicar: () => void, classe: string | null = null, linhas?: readonly string[]) => {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'opcao-seletor';
@@ -58,6 +78,11 @@ export function criarSeletorBarra(raiz: HTMLElement, aoEscolher: (slot: number, 
       aoClicar();
       fechar();
     });
+    if (linhas) {
+      const mostrar = () => { descrever(texto, linhas); };
+      b.addEventListener('pointerenter', mostrar);
+      b.addEventListener('focus', mostrar);
+    }
     return b;
   };
 
@@ -66,8 +91,10 @@ export function criarSeletorBarra(raiz: HTMLElement, aoEscolher: (slot: number, 
     const titulo = document.createElement('p');
     titulo.className = 'titulo-seletor';
     titulo.textContent = t('habilidades.escolherNaBarra', { n: slot + 1 });
-    caixa.append(titulo);
-    for (const o of opcoes) caixa.append(opcao(o.nome, o.icone, `barra-${o.id}`, o.id === atual, () => { aoEscolher(slot, o.id); }, o.classe ?? null));
+    const daTecla = opcoes.find((o) => o.id === atual);
+    descrever(daTecla?.nome ?? '', daTecla?.descricao);
+    caixa.append(titulo, descricao);
+    for (const o of opcoes) caixa.append(opcao(o.nome, o.icone, `barra-${o.id}`, o.id === atual, () => { aoEscolher(slot, o.id); }, o.classe ?? null, o.descricao));
     if (atual) caixa.append(opcao(t('habilidades.tirarDaTecla', { n: slot + 1 }), 'fechar', 'barra-tirar', false, () => { aoEscolher(slot, null); }));
     caixa.hidden = false;
     // Acima do botão, sem sair da tela.

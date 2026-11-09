@@ -10,7 +10,8 @@ export interface Dialogo {
   fechar: () => void;
 }
 
-export function dialogo(titulo: string): Dialogo {
+/** `aoFecharPeloJogador`: o jogador fechou pelo X ou pelo Esc (09/11/2026, D-144: a troca avisa o servidor). */
+export function dialogo(titulo: string, aoFecharPeloJogador?: () => void): Dialogo {
   const el = document.createElement('dialog');
   el.className = 'modal';
   const topo = document.createElement('div');
@@ -29,8 +30,12 @@ export function dialogo(titulo: string): Dialogo {
     el.close();
     el.remove();
   };
-  x.addEventListener('click', fechar);
-  el.addEventListener('cancel', fechar);
+  const fecharPeloJogador = () => {
+    fechar();
+    aoFecharPeloJogador?.();
+  };
+  x.addEventListener('click', fecharPeloJogador);
+  el.addEventListener('cancel', fecharPeloJogador);
   document.body.append(el);
   el.showModal();
   return { el, corpo, fechar };
@@ -111,7 +116,7 @@ export interface Painel {
  */
 const REDESENHO_MS = 250;
 
-export function painel(titulo: string): Painel {
+export function painel(titulo: string, aoFecharPeloJogador?: () => void): Painel {
   let d: Dialogo | null = null;
   let ultimo: ((corpo: HTMLElement, fechar: () => void) => void) | null = null;
   const aberto = () => d?.el.isConnected === true;
@@ -131,7 +136,7 @@ export function painel(titulo: string): Painel {
     aberto,
     fechar,
     mostrar: (desenhar) => {
-      if (!aberto()) d = dialogo(titulo);
+      if (!aberto()) d = dialogo(titulo, aoFecharPeloJogador);
       ultimo = desenhar;
       desenharAgora(desenhar);
       setTimeout(() => {

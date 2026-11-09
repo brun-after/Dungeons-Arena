@@ -5,6 +5,7 @@
 //   o ouro da compra): o servidor devolve ou entrega pela sala onde a pessoa estiver (ou no banco, se saiu). Puro.
 
 import type { Celula } from '../core/comandos';
+import type { InvocacaoQueViaja } from './comitiva';
 import type { ItemNaMochila } from '../entities/entidade';
 import type { AcaoDoMundo } from './acoes';
 import type { FichaDoMundo } from './ficha-mundo';
@@ -13,7 +14,9 @@ export type AcaoSocial = Extract<AcaoDoMundo, { a: 'grupo' } | { a: 'denunciar' 
 
 export type PendenciaDoMundo =
   | { tipo: 'gravar'; identidade: string; ficha: FichaDoMundo }
-  | { tipo: 'trocar'; identidade: string; sessaoId: string; ficha: FichaDoMundo; destino: string; chegada: Celula | null; instancia: string | null }
+  | { tipo: 'trocar'; identidade: string; sessaoId: string; ficha: FichaDoMundo; destino: string; chegada: Celula | null; instancia: string | null;
+      /** 09/11/2026 (D-144): as invocações que viajam com o dono. */
+      comitiva: InvocacaoQueViaja[] }
   | { tipo: 'social'; identidade: string; nome: string; lugar: string; acao: AcaoSocial }
   | {
       tipo: 'mercado';

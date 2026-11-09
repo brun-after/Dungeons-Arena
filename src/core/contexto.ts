@@ -371,6 +371,12 @@ export interface Balance {
     exercitoNecromante: { minimo: number; maximo: number; niveisPorVaga: number; recargaMs: number; duracaoMs: number; presets: string[] };
     atencaoBatalha: { raio: number; bonus: number; memoriaMs: number };
     ofertas: { periodoS: number; duracaoS: number; quantidade: number; centrais: string[]; avancadas: string[] };
+    /**
+     * 09/11/2026 (D-144): a loja de cada dungeon renova toda semana no `diaRenovacao` (0 = domingo; 3 = quarta), à
+     * meia-noite no `fusoHoras`. Leva `basicos` itens da vila da região, `incomuns` e `raros` garantidos, um raro a
+     * mais, um épico e um lendário por chance; só itens até o nível da dungeon mais `nivelFolga`.
+     */
+    lojaDungeon: { diaRenovacao: number; fusoHoras: number; basicos: number; incomuns: number; raros: number; raroExtraChancePct: number; epicoChancePct: number; lendarioChancePct: number; nivelFolga: number };
     /** Só o dono abre o túmulo por `donoExclusivoS` (fora das regiões com PvP); some em `duracaoS`. */
     tumulo: { donoExclusivoS: number; duracaoS: number };
     /** Custo do portal: base + por região de distância (Chebyshev na grade do reino). */
@@ -544,6 +550,8 @@ export interface RegrasIa {
   recalcularDistancia: number;
   maxFalhasCaminho: number;
   desistirAposMs: number;
+  /** 09/11/2026 (D-144): mais longe que isso do alvo, a perseguição acaba (e não conta como perseguido). */
+  perseguicaoMaxCelulas: number;
   checagemDesistenciaMs: number;
   chanceDesistir: number;
   distanciaMinAtirador: number;
