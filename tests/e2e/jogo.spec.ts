@@ -231,7 +231,7 @@ test.describe('desktop', () => {
     await expect.poll(async () => ler(diag, 'celula'), { timeout: 15_000 }).toEqual([x, y]);
   }
 
-  test('loja: comprar uma poção desconta o ouro; fechar arma a recarga; a tecla 7 usa a poção', async ({ page }) => {
+  test('loja: comprar uma poção desconta o ouro; reabre na hora; a tecla 7 usa a poção', async ({ page }) => {
     const { diag, erros } = await abrir(page);
     // 17/10/2026: a loja permanece aberta até o jogador fechar; falhas no clique não podem ser ignoradas.
     const mochila = page.getByRole('dialog', { name: 'Mochila' });
@@ -249,13 +249,15 @@ test.describe('desktop', () => {
     await loja.getByRole('button', { name: 'Comprar (10): Poção de vida' }).click();
     const log = page.locator('.log-combate');
     await expect(log).toContainText('Comprou Poção de vida por 10 de ouro');
-    // Fechada pelo botão ou pelo fim da janela, a recarga é armada do mesmo jeito.
     const fechar = loja.getByRole('button', { name: 'Fechar a loja' });
     await fechar.click();
     await expect(loja).toBeHidden();
     await ouroNaMochila('5');
+    // 09/11/2026 (D-144): sem recarga, a loja reabre na hora.
     await page.keyboard.press('KeyE');
-    await expect(log).toContainText('A loja ainda não atende você de novo');
+    await expect(loja).toBeVisible();
+    await fechar.click();
+    await expect(loja).toBeHidden();
     // Vida cheia: a poção do atalho 7 (marco 24) é recusada sem gastar (prova que a tecla chegou ao item).
     await page.keyboard.press('Digit7');
     await expect(log).toContainText('Não teria efeito agora');
