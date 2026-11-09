@@ -6,9 +6,15 @@ import { portaDa, reinoDoConteudo } from '../mundo/reino';
 import { proximaEtapa } from '../mundo/orientacao';
 import { tipoEm } from '../world/fase';
 import { cartografia, rosaDosVentos } from './cartografia';
-import type { OrientacaoMundo } from './orientacao-mundo';
+import { lapideAtiva, type OrientacaoMundo } from './orientacao-mundo';
 
-export function mapaDoLugar(ctx: ContextoSimulacao, estado: () => EstadoJogo | null, idLocal: string, lugar: string, descobertas: readonly string[], orientacao?: OrientacaoMundo): HTMLCanvasElement {
+/** 09/11/2026 (D-143): o modo de escolher um ponto (o destino do Portal temporário), no lugar de marcar. */
+export interface EscolhaNoMapa {
+  escolher: (c: { x: number; y: number }) => void;
+  escolhido: () => { x: number; y: number } | null;
+}
+
+export function mapaDoLugar(ctx: ContextoSimulacao, estado: () => EstadoJogo | null, idLocal: string, lugar: string, descobertas: readonly string[], orientacao?: OrientacaoMundo, escolha?: EscolhaNoMapa): HTMLCanvasElement {
   const c = document.createElement('canvas');
   c.className = 'mapa-terreno'; c.width = 1000; c.height = 520; c.tabIndex = 0;
   c.setAttribute('aria-label', t('mundo.mapa.pontos'));
@@ -105,10 +111,31 @@ export function mapaDoLugar(ctx: ContextoSimulacao, estado: () => EstadoJogo | n
       g.beginPath(); g.arc(p.x, p.y, 7, 0, Math.PI * 2); g.fill(); g.stroke();
       g.strokeStyle = '#ffffff77'; g.lineWidth = 1; g.beginPath(); g.arc(p.x, p.y, 12, 0, Math.PI * 2); g.stroke();
     }
+    // 09/11/2026 (D-143): a lápide de quem morreu (5 min) e o ponto escolhido para o portal.
+    const lapide = lapideAtiva(orientacao, Date.now());
+    if (lapide?.lugar === lugar) {
+      const q = mapa.ponto(lapide.ponto.x, lapide.ponto.y);
+      g.fillStyle = '#d9d4ff'; g.strokeStyle = '#1b1530'; g.lineWidth = 2;
+      g.beginPath(); g.roundRect(q.x - 6, q.y - 12, 12, 16, [6, 6, 1, 1]); g.fill(); g.stroke();
+      g.strokeStyle = '#1b1530'; g.beginPath(); g.moveTo(q.x, q.y - 9); g.lineTo(q.x, q.y); g.moveTo(q.x - 3, q.y - 6); g.lineTo(q.x + 3, q.y - 6); g.stroke();
+      rotulo(t('mundo.lapide.nome'), q.x, q.y - 8, '#d9d4ff');
+    }
+    const alvo = escolha?.escolhido();
+    if (alvo) {
+      const q = mapa.ponto(alvo.x, alvo.y);
+      g.strokeStyle = '#5ce1ff'; g.lineWidth = 3;
+      g.beginPath(); g.ellipse(q.x, q.y, 11, 6, 0, 0, Math.PI * 2); g.stroke();
+      g.beginPath(); g.ellipse(q.x, q.y - 12, 6, 11, 0, 0, Math.PI * 2); g.stroke();
+    }
     if (mostrarCursor) { const p = mapa.ponto(cursor.x, cursor.y); g.strokeStyle = '#ffffff'; g.strokeRect(p.x - 8, p.y - 8, 16, 16); }
   };
   const marcar = (x: number, y: number) => {
     if (x < 0 || y < 0 || x >= fase.largura || y >= fase.altura) return;
+    if (escolha) {
+      escolha.escolher({ x, y });
+      desenhar();
+      return;
+    }
     const q = mapa.ponto(x, y);
     const perto = pontos.findIndex(p => { const a = mapa.ponto(p.x, p.y); return Math.hypot(a.x - q.x, a.y - q.y) < 14; });
     if (perto >= 0) {

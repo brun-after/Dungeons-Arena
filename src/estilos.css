@@ -3308,3 +3308,16 @@ dialog.mochila[open] { display: flex; flex-direction: column; }
 .tela-menu .voltar-selecao:hover { color: var(--destaque); }
 .acoes-slot .botao-menu.botao-perigo { background: #251a1c; border-color: #a65c61; color: #f7bec1; }
 .acoes-slot .botao-menu.botao-perigo { flex: 0 1 auto; }
+
+/* 09/11/2026 (D-143): o mapa do Mundo no celular. A ajuda fica recolhida; ampliado, o mapa ocupa a tela toda. */
+.ajuda-mapa summary { padding: 4px 0; color: #edddba; cursor: pointer; }
+@media (max-width: 700px) {
+  .modal.mapa-expandido { width: 100%; max-width: 100%; height: 100dvh; max-height: 100dvh; border-radius: 0; }
+  .mapa-expandido .modal-corpo { padding: 6px 8px calc(8px + var(--seguro-base)); }
+  .mapa-expandido .abas-cartografia { margin-bottom: 6px; }
+  .mapa-expandido[data-zoom='1'] .modal-corpo { overflow: hidden; }
+  .mapa-expandido[data-zoom='1'] .modal-corpo > :not(.painel-cartografia):not(.botao-menu) { display: none; }
+  .mapa-expandido[data-zoom='1'] .painel-cartografia > :not(.zoom-cartografia):not(.janela-cartografia) { display: none; }
+  .mapa-expandido[data-zoom='1'] .zoom-cartografia { margin-bottom: 4px; }
+  .mapa-expandido[data-zoom='1'] .janela-cartografia { height: calc(100dvh - 140px - var(--seguro-topo) - var(--seguro-base)); }
+}

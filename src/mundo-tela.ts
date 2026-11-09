@@ -32,7 +32,10 @@ import { criarPaineisDaEconomia } from './ui/mundo-economia';
 import { abrirMapa, abrirPortal, criarFaixaDoLugar, textoDoAviso } from './ui/mundo-paineis';
 import { criarPainelSocial } from './ui/mundo-social';
 import { reinoDoConteudo } from './mundo/reino';
-import { criarGuiaMundo, criarOrientacaoMundo, type OrientacaoMundo } from './ui/orientacao-mundo';
+import { criarGuiaMundo, criarOrientacaoMundo, marcarLapide, type OrientacaoMundo } from './ui/orientacao-mundo';
+import { abrirPortalTemporario } from './ui/portal-mapa';
+import { PORTAL_TEMPORARIO } from './mundo/objetos-mundo';
+import type { ContextoSimulacao } from './core/contexto';
 import { proximaEtapa } from './mundo/orientacao';
 
 const ESPERA_ENTRADA_MS = 10_000;
@@ -40,6 +43,18 @@ const agoraMs = () => relogioDoNavegador.agoraMs();
 const conteudo = conteudoOficial();
 const modo = modoPorId(conteudo, MODO_MUNDO);
 const reino = reinoDoConteudo(conteudo);
+/** 09/11/2026 (D-143): o terreno das outras regiões para o mapa do Portal temporário (gerado pela mesma semente). */
+const terrenos = new Map<string, ContextoSimulacao>();
+function terrenoDe(id: string): ContextoSimulacao | null {
+  const guardado = terrenos.get(id);
+  if (guardado) return guardado;
+  const l = lerLugar(reino, id);
+  if (l?.tipo !== 'regiao') return null;
+  const ctx = montarLugar(conteudo, reino, l, modo).ctx;
+  if (terrenos.size > 6) terrenos.clear();
+  terrenos.set(id, ctx);
+  return ctx;
+}
 
 function tela(raiz: HTMLElement): HTMLElement {
   raiz.textContent = '';
@@ -354,6 +369,9 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
       const texto = a.evento ? t(`mundo.evento.${a.evento}` as ChaveTexto, { min, pct: ctx.balance.mundo.eventos.luaLootPct }) : t('mundo.evento.fim');
       social.chat({ tipo: 'chat', canal: 'sistema', de: '', texto });
       avisar(texto, 6000);
+    } else if (a.tipo === 'portalAberto') {
+      const nome = reino.regioes.find((r) => a.destino === `regiao:${r.id}`)?.nome ?? a.destino;
+      avisar(t('mundo.portalT.aberto', { nome, s: Math.max(1, Math.round((a.fim - Date.now()) / 1000)) }), 5000);
     } else if (a.tipo === 'trocarSala') {
       if (saindo) return;
       saindo = true;
@@ -388,6 +406,22 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
   mapa.setAttribute('aria-label', t('mundo.mapa.rotulo'));
   mapa.addEventListener('click', verMapa);
 
+  // 09/11/2026 (D-143): o Portal temporário: escolhe a região e o ponto no mapa e confirma.
+  const portal = document.createElement('button');
+  portal.type = 'button';
+  portal.className = 'botao-cabecalho';
+  portal.textContent = t('mundo.portalT.botao');
+  portal.title = t('mundo.portalT.dica');
+  portal.addEventListener('click', () => {
+    const j = eu.previsto ? buscarEntidade(eu.previsto, idDoJogador()) : undefined;
+    const quantos = j?.bolsa?.mochila.filter((m) => m.itemId === PORTAL_TEMPORARIO).reduce((s, m) => s + m.qtd, 0) ?? 0;
+    abrirPortalTemporario({
+      reino, lugar: pedido.lugar, descobertas: ultimoLugar?.descobertas ?? [], orientacao, idLocal: idDoJogador(), estado: estadoAtual, quantos,
+      ctxDe: (id) => (id === pedido.lugar ? ctx : terrenoDe(id)),
+      abrir: (lugar, x, y) => { enviarAcao({ a: 'portal', lugar, x, y }); },
+    });
+  });
+
   const retorno = document.createElement('button');
   retorno.type = 'button';
   retorno.className = 'botao-cabecalho';
@@ -406,7 +440,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
     emitir: (cmd) => {
       eu.enviarComando(cmd);
     },
-    acoesExtras: [mapa, retorno, sair],
+    acoesExtras: [mapa, portal, retorno, sair],
     pausaOJogo: false,
     partyMundo: true,
     destinoMapa: () => orientacao.destino ? proximaEtapa(reino, pedido.lugar, orientacao.destino, ctx.fase)?.ponto ?? null : null,
@@ -444,7 +478,11 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
   eu.aoEventos = (eventos) => {
     for (const ev of eventos) {
       c.bus.emitir(ev.t, ev);
-      if (ev.t === 'tumuloCriado' && ev.id === eu.entidadeId) avisar(t('mundo.tumulo'), 6000);
+      if (ev.t === 'tumuloCriado' && ev.id === eu.entidadeId) {
+        // 09/11/2026 (D-143): a lápide fica marcada no mapa e vira o destino da rota.
+        marcarLapide(orientacao, pedido.lugar, { x: ev.x, y: ev.y }, ctx.balance.mundo.portalTemporario.lapideMin, Date.now());
+        avisar(t('mundo.tumulo'), 6000);
+      }
     }
   };
   eu.aoMundo = tratarAviso;
