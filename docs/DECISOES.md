@@ -4309,3 +4309,7 @@ quando alguém entra, troca presa, perseguição que não acaba e lojas bloquead
   perfil e escala) e troca para a de cada opção ao passar o mouse ou o foco (ui/descricao-skill.ts). Na seleção de
   personagem, o retrato não mostra mais a ilustração antes do 3D: espera o modelo 3D; a ilustração fica só para quem
   não tem o 3D (sem GPU) ou se o modelo falhar.
+- **Materiais do Dragão das ruínas.** O marco 38 acrescentou ao `reino-central.json` o espólio novo do dragão (escama
+  60%, escama ígnea 50%, núcleo ígneo 25%, os materiais da forja de fogo) sem tirar a entrada antiga (escama 100%). A
+  chave repetida fazia valer a antiga, e o dragão nunca deixava a escama ígnea nem o núcleo; o esbuild avisava no CI.
+  A entrada antiga saiu.
