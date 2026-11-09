@@ -4294,3 +4294,8 @@ quando alguém entra, troca presa, perseguição que não acaba e lojas bloquead
   como o tempo que falta), tira-as da sala antiga e manda o retrato no bilhete; a sala de chegada as cria de novo ao
   lado do dono (mundo/comitiva.ts). O retrato não vai para a ficha gravada: quem sai do jogo e volta não traz mortos.
   O falcão (companheiro) e os avatares ficam de fora.
+- **Lojas das dungeons.** Eram iguais em todas as dungeons do reino (as lojas da vila mais 8 raros fixos). Agora cada
+  dungeon (masmorra ou covil) tem o próprio estoque, sorteado pela dungeon e pela semana: a pedra de retorno, alguns
+  itens da vila da região, incomuns e raros garantidos, 30% de um raro a mais, 40% de um épico e 6% de um lendário,
+  só itens até o nível da dungeon + 10 (`mundo.lojaDungeon`). A semana vira na quarta-feira à meia-noite de Brasília,
+  pelo relógio do servidor; a sala aplica o estoque ao nascer e na virada, e o cliente o recebe na loja.

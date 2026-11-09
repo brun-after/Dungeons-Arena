@@ -51,6 +51,7 @@ import { TrocasDaSala } from './troca';
 import { descobrir, fichaAtualizada, type FichaDoMundo } from './ficha-mundo';
 import { idDoLugar, montarLugar, type Lugar, type LugarMontado } from './lugares';
 import { REF_ERRANTE } from './objetos-mundo';
+import { estoqueSemanalDaDungeon, semanaDaLoja } from './lojas-mundo';
 import { capitalDoAtlas, territorioDoLugar, estruturaDoDestino, LADOS, ladoOposto, portaDa, vizinha, type LadoDaRegiao, type PapelNpc, type Reino, type RegiaoDoMundo } from './reino';
 import type { ExteriorGerado } from '../world/gerador-exterior';
 
@@ -115,6 +116,7 @@ export class SalaMundo extends SalaArena {
   private readonly errantes: ErrantesDaRegiao;
   private readonly escoltas: EscoltasDaRegiao;
   private readonly retornos = new RetornosDaSala();
+  private semanaDaLoja = Number.NaN; // D-144: a semana do estoque aplicado à loja da dungeon
 
   constructor(
     readonly reino: Reino,
@@ -135,6 +137,7 @@ export class SalaMundo extends SalaArena {
     this.modoDaRegiao = this.ctx.modo;
     this.errantes = new ErrantesDaRegiao(this.exterior?.rotas ?? []);
     this.escoltas = new EscoltasDaRegiao(lugar.tipo === 'regiao' ? lugar.regiao : null);
+    this.renovarLojaDaDungeon();
   }
 
   get idLugar(): string {
@@ -232,8 +235,8 @@ export class SalaMundo extends SalaArena {
       this.conferirEscondidas(s, e, p);
     }
     if (this.estado.tick % CONFERIR_EVENTO_TICKS === 0) {
-      // 09/11/2026 (D-144): a troca abandonada (longe, morto, fora da sala) não prende mais ninguém.
-      if (this.trocas.todas().length > 0) limparTrocas(this.social(), this.trocas);
+      if (this.trocas.todas().length > 0) limparTrocas(this.social(), this.trocas); // D-144: a troca abandonada
+      this.renovarLojaDaDungeon();
       this.conferirEvento();
       this.conferirFocos();
     }
@@ -310,6 +313,17 @@ export class SalaMundo extends SalaArena {
         if (destino) this.trocar(s, p, `regiao:${destino.regiao.id}`, destino.chegada, null);
       }
     }
+  }
+
+  /** 09/11/2026 (D-144): a loja da dungeon com o estoque da semana dela (renova na quarta, mundo/lojas-mundo.ts). */
+  private renovarLojaDaDungeon(): void {
+    if (this.lugar.tipo === 'regiao') return;
+    const r = this.ctx.balance.mundo.lojaDungeon;
+    const semana = semanaDaLoja(this.opcoesMundo.agora(), r);
+    if (semana === this.semanaDaLoja) return;
+    this.semanaDaLoja = semana;
+    const d = this.lugar.tipo === 'masmorra' ? this.lugar.masmorra : this.lugar.covil;
+    for (const o of this.estado.objetos) if (o.tipo === 'loja') o.itens = estoqueSemanalDaDungeon(this.ctx.conteudo, territorioDoLugar(this.reino, d.id), d, semana, r);
   }
 
   /** Uma célula andável e sem objeto, a poucos passos da entrada da região. */

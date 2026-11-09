@@ -612,6 +612,7 @@
     "repeticaoDungeon": { "fatorPorVez": 0.5, "bonusPorNivelPct": 8, "bonusMaxPct": 80, "niveisPorMetade": 4 },
     "exercitoNecromante": {"minimo": 4, "maximo": 10, "niveisPorVaga": 5, "recargaMs": 12000, "duracaoMs": 90000, "presets": ["cavaleiro_profano", "piromante_profano", "arcanista_glacial", "espectro_tempestade"]},
     "atencaoBatalha": {"raio": 16, "bonus": 10, "memoriaMs": 8000},
+    "lojaDungeon": { "diaRenovacao": 3, "fusoHoras": -3, "basicos": 4, "incomuns": 3, "raros": 4, "raroExtraChancePct": 30, "epicoChancePct": 40, "lendarioChancePct": 6, "nivelFolga": 10 },
     "ofertas": {"periodoS": 1800, "duracaoS": 600, "quantidade": 2, "centrais": ["couraca_expedicao", "capa_sombria", "anel_do_eco", "aceleracao_mente_rara", "essencia_fogo", "essencia_gelo"], "avancadas": ["couraca_trono", "manto_abismo", "livro_chuva_de_estrelas", "runa_de_fusao", "tomo_potencial"]},
     "tumulo": { "donoExclusivoS": 150, "duracaoS": 300 },
     "portal": { "ouroBase": 20, "ouroPorRegiao": 30, "recargaS": 60 },
