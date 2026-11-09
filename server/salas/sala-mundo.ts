@@ -26,6 +26,7 @@ import { modoPorId } from '../../src/core/conteudo';
 import { MODO_MUNDO } from '../../src/mundo/sala-mundo';
 import { reinoDoConteudo, type Reino } from '../../src/mundo/reino';
 import { SalaMundo, type PendenciaDoMundo, type ResultadoDoMercado } from '../../src/mundo/sala-mundo';
+import { PortaisTemporarios } from '../../src/mundo/portais-temporarios';
 import type { InvocacaoQueViaja } from '../../src/mundo/comitiva';
 import { MercadoEmMemoria, type LojaDoMercado } from '../mercado-mundo';
 import { registrarLog } from '../metricas';
@@ -80,6 +81,8 @@ export class CoordenadorDoMundo {
   private readonly gravacoesPendentes = new Map<string, Promise<void>>();
   private readonly operacoes = new Map<string, Promise<unknown>>();
   private readonly operacoesMercado = new Map<string, number>();
+  /** 09/11/2026 (D-143): os Portais temporários abertos (as duas pontas podem estar em salas diferentes). */
+  readonly portais = new PortaisTemporarios();
 
   /** Uma compra em trânsito também precisa terminar antes de apagar o personagem. */
   iniciarMercado(identidade: string): () => void {
@@ -393,6 +396,7 @@ export class SalaMundoColyseus extends SalaColyseusBase {
       canal: this.canal,
       agora: () => Date.now(),
       versaoConteudo: versaoDoConteudo(),
+      portais: this.coordenador.portais,
     });
     this.clock.setInterval(() => {
       this.processarPendencias();

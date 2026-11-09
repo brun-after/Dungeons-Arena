@@ -257,3 +257,35 @@ it('observar outra vila recorta o interesse antes de copiar as entidades da regi
   s.estado.entidades.push(distante);
   expect(s.visaoParty('local:observado#1')?.estado.entidades.map(e => e.id)).not.toContain('distante');
 });
+
+// 09/11/2026 (D-143): o Portal temporário pela sala: abrir gasta o item, a ponta aparece no chão, o dono atravessa
+// (troca de sala) e quem não é do grupo é recusado.
+it('o Portal temporário abre com o item, põe a ponta no chão e leva o dono à outra região', () => {
+  const s = sala('regiao:vila_do_centro');
+  const dono = entrar(s, 'dono');
+  const outro = entrar(s, 'outro');
+  const f = dono.e();
+  obter(f.bolsa, 'bolsa').mochila.push({ invId: 'pt1', itemId: 'portal_temporario', qtd: 1, ref: null });
+  const vizinha = obter(REINO.regioes.find((r) => r.id !== 'vila_do_centro'), 'vizinha');
+  // Sem ter descoberto a região: recusa e não gasta.
+  dono.enviar({ t: 'acaoMundo', acao: { a: 'portal', lugar: `regiao:${vizinha.id}`, x: 20, y: 20 } });
+  expect(dono.avisos()).toContainEqual({ tipo: 'recusa', motivo: 'nao_descoberto' });
+  // Na própria região: abre, gasta e a ponta aparece no chão.
+  dono.enviar({ t: 'acaoMundo', acao: { a: 'portal', lugar: 'regiao:vila_do_centro', x: 30, y: 30 } });
+  expect(dono.avisos().some((a) => a.tipo === 'portalAberto')).toBe(true);
+  expect(f.bolsa?.mochila.some((m) => m.itemId === 'portal_temporario')).toBe(false);
+  const pontas = s.estado.objetos.filter((o) => o.tipo === 'portal_temporario');
+  expect(pontas).toHaveLength(2);
+  // Quem não é do grupo não atravessa.
+  const ponta = obter(pontas[0], 'ponta');
+  posicionar(outro.e(), ponta.x, ponta.y + 1);
+  outro.enviar({ t: 'cmd', pacote: { sessaoId: outro.bem.sessaoId, seq: ++outro.seq.n, epocaSala: s.epoca, tickCliente: s.estado.tick, cmd: { t: 'interagir' } } });
+  rodar(s, 4);
+  expect(outro.avisos()).toContainEqual({ tipo: 'recusa', motivo: 'portal_alheio' });
+  // O dono atravessa: a outra ponta é nesta mesma região, então ele só muda de lugar.
+  posicionar(f, ponta.x, ponta.y + 1);
+  dono.enviar({ t: 'cmd', pacote: { sessaoId: dono.bem.sessaoId, seq: ++dono.seq.n, epocaSala: s.epoca, tickCliente: s.estado.tick, cmd: { t: 'interagir' } } });
+  rodar(s, 4);
+  const outraPonta = obter(pontas[1], 'outra ponta');
+  expect(Math.max(Math.abs(dono.e().x - outraPonta.x), Math.abs(dono.e().y - outraPonta.y))).toBeLessThanOrEqual(3);
+});

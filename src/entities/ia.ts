@@ -28,6 +28,7 @@ import { perseguirEspecial } from './ia-especiais';
 import { semLinha } from '../combat/linha-de-tiro';
 import { ehBasico } from '../combat/basico';
 import { fracaoHabilidadePct, intervaloDeAtaqueMs, vezDaHabilidade } from './ia-cadencia';
+import { alvoDaIa, sortearEstranhamento } from './ia-estranhamento';
 import type { Habilidade } from '../combat/habilidades';
 
 const CARDINAIS: readonly Dir8[] = ['N', 'E', 'S', 'O'];
@@ -96,7 +97,7 @@ function detectar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, raio:
   let melhor: Entidade | null = null;
   let melhorDist = Infinity;
   for (const outro of estado.entidades) {
-    if (outro.id === e.id || !alvoOfensivoValido(estado, ctx, e, outro)) continue;
+    if (outro.id === e.id || !alvoDaIa(estado, ctx, e, outro)) continue;
     const d = manhattan(origem, celulaOcupada(outro));
     if (d > raio) continue;
     // Avatar hostil primeiro (§2.9, marco 10A-3); depois o mais próximo, menor HP e id.
@@ -132,6 +133,9 @@ export function processarIa(estado: EstadoJogo, ctx: ContextoSimulacao, saida: E
     }
     processarExercitoNecromante(estado,ctx,e,saida);
     revidar(estado, ctx, e, ia, saida);
+    // 09/11/2026 (D-143): onde há fogo amigo, às vezes dois monstros se estranham e brigam.
+    const estranho = sortearEstranhamento(estado, ctx, e, ia);
+    if (estranho) comecarPerseguicao(estado, ctx, e, ia, estranho.id, saida);
     if (reagirAoEstado(estado, ctx, e, ia, saida)) continue;
     switch (ia.modo) {
       case 'patrulha':
@@ -170,7 +174,7 @@ function revidar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: Es
   ia.ultimaAgressaoVista = ultimo.tick;
   if (ia.modo === 'perseguindo' && ia.alvoId === ultimo.id) return;
   const agressor = buscarEntidade(estado, ultimo.id);
-  if (!agressor || !alvoOfensivoValido(estado, ctx, e, agressor)) return;
+  if (!agressor || !alvoDaIa(estado, ctx, e, agressor)) return;
   comecarPerseguicao(estado, ctx, e, ia, agressor.id, saida);
 }
 
@@ -251,7 +255,7 @@ function tentarDetectar(
 function hesitar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa, preset: PresetInimigo, saida: EventoSimulacao[]): void {
   const alvo = ia.alvoId ? buscarEntidade(estado, ia.alvoId) : undefined;
   // Desarmada se o alvo sumir, morrer ou ficar invisível (§2.6).
-  if (!alvo || !alvoOfensivoValido(estado, ctx, e, alvo)) {
+  if (!alvo || !alvoDaIa(estado, ctx, e, alvo)) {
     voltarAPatrulhar(estado, e, ia);
     return;
   }
@@ -350,7 +354,7 @@ function perseguir(
 ): void {
   const regras = ctx.balance.ia;
   const alvo = ia.alvoId ? buscarEntidade(estado, ia.alvoId) : undefined;
-  if (!alvo || !alvoOfensivoValido(estado, ctx, e, alvo)) {
+  if (!alvo || !alvoDaIa(estado, ctx, e, alvo)) {
     voltarAPatrulhar(estado, e, ia);
     return;
   }

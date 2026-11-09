@@ -1,4 +1,4 @@
-import { ligarZoomMapa } from './zoom-mapa';
+import { janelaComZoom } from './zoom-mapa';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import { mapaDoLugar } from './mapa-lugar';
@@ -88,13 +88,16 @@ export function abrirMapa(reino: Reino, lugar: string, descobertas: readonly str
   const d = dialogo(t('mundo.mapa.titulo'));
   d.el.classList.add('mapa-expandido');
   const atual = [...reino.regioes, ...reino.masmorras, ...reino.covis].find(x => lugar.endsWith(`:${x.id}`));
-  d.corpo.append(paragrafo(t('mundo.mapa.lugar', { nome: atual?.nome ?? lugar })));
-  d.corpo.append(paragrafo(t('mundo.mapa.instrucoes')));
+  // 09/11/2026 (D-143): as instruções e a bússola recolhidas (no celular, tomavam meia tela antes do mapa).
+  const ajuda = document.createElement('details'); ajuda.className = 'ajuda-mapa';
+  const resumo = document.createElement('summary'); resumo.textContent = t('mundo.mapa.lugar', { nome: atual?.nome ?? lugar });
+  ajuda.append(resumo, paragrafo(t('mundo.mapa.instrucoes')));
   const bussola = document.createElement('div'); bussola.className = 'bussola-mapa';
   for (const [direcao, seta] of [['norte', 'seta_ne'], ['leste', 'seta_se'], ['sul', 'seta_so'], ['oeste', 'seta_no']] as const) {
     const eixo = document.createElement('span'); eixo.append(icone(seta), t(`mundo.mapa.${direcao}`)); bussola.append(eixo);
   }
-  d.corpo.append(bussola);
+  ajuda.append(bussola);
+  d.corpo.append(ajuda);
   const statusDestino = paragrafo('', 'destino-mapa');
   statusDestino.setAttribute('role', 'status');
   const selecionar = (id: string, nome: string) => {
@@ -203,28 +206,8 @@ export function abrirMapa(reino: Reino, lugar: string, descobertas: readonly str
   };
   if (terreno) {
     const canvas = mapaDoLugar(terreno.ctx, terreno.estado, terreno.idLocal, lugar, descobertas, terreno.orientacao);
-    const janela = document.createElement('div'); janela.className = 'janela-cartografia';
-    janela.append(canvas);
-    const zoom = document.createElement('div'); zoom.className = 'acoes-slot zoom-cartografia';
-    let escala = 1;
-    const aplicarZoom = (nova: number) => {
-      const anterior = canvas.offsetWidth;
-      const centroX = janela.scrollLeft + janela.clientWidth / 2;
-      const centroY = janela.scrollTop + janela.clientHeight / 2;
-      escala = Math.max(1, Math.min(4, nova));
-      canvas.style.setProperty('--zoom-mapa', String(escala));
-      const fator = canvas.offsetWidth / anterior;
-      janela.scrollLeft = centroX * fator - janela.clientWidth / 2;
-      janela.scrollTop = centroY * fator - janela.clientHeight / 2;
-    };
-    ligarZoomMapa(canvas, fator => { aplicarZoom(escala * fator); });
-    for (const [rotulo, delta] of [['mundo.mapa.reduzir', -.5], ['mundo.mapa.ampliar', .5]] as const) {
-      const b = document.createElement('button'); b.type = 'button'; b.className = 'botao-cabecalho'; b.textContent = t(rotulo);
-      b.addEventListener('click', () => {
-        aplicarZoom(escala + delta);
-      });
-      zoom.append(b);
-    }
+    // 09/11/2026 (D-143): a janela com zoom é a mesma do Portal temporário (ampliada no celular, o mapa ocupa a tela).
+    const { janela, zoom } = janelaComZoom(canvas, d.el, { reduzir: t('mundo.mapa.reduzir'), ampliar: t('mundo.mapa.ampliar') });
     local.append(zoom, janela, paragrafo(t('mundo.mapa.legenda'), 'legenda-cartografia'));
   }
   d.corpo.append(abas, escolhas, local, geografia, lista);

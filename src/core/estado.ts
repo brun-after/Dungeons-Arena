@@ -74,7 +74,9 @@ export type TipoObjeto =
   | 'orbe_hp' | 'orbe_recurso' | 'orbe_efeito' | 'orbe_refugio' | 'item' | 'ouro' | 'bau' | 'loja' | 'saida' | 'santuario' | 'quebravel'
   | 'npc' | 'coleta' | 'tumulo' | 'porta_estrutura' | 'pedra_portal' | 'pedra_save'
   // Marco 38 (08/11/2026, D-142): o círculo da Pedra de retorno (`ref`: quem conjura; `abertoTick` e `valor`: início e fim).
-  | 'circulo_retorno';
+  | 'circulo_retorno'
+  // 09/11/2026 (D-143): a ponta de um Portal temporário (`ref`: `<portal>:<ponta>`; mundo/portais-temporarios.ts).
+  | 'portal_temporario';
 
 /**
  * Objeto coletável no mundo (§2.1). `objetoId` é estável; a coleta é uma transação dentro do

@@ -8,6 +8,8 @@
 // veneno, trevas e luz (`sagrado`); trocar de elemento até `duplaJanelaMs` depois da última magia do anterior funde os
 // dois numa encarnação dupla por `duplaDuracaoMs`. A sintonia psíquica estende, a arcana e a técnica renovam e a
 // vertente Arquimago dobra a duração. O efeito das novas e das duplas fica em combat/encarnacao-efeitos.ts.
+// 09/11/2026 (D-143): a carga elemental dura 10 s e pesa: o Mago anda `lentidaoPct` mais devagar enquanto encarnado.
+// Qualquer skill recomeça a contagem; o ataque básico descarrega metade do que falta.
 // Números em balance.ajustesClasses.mago.encarnacao.
 
 import type { ContextoSimulacao } from '../core/contexto';
@@ -133,9 +135,22 @@ export function protecaoEncarnacao(ctx: ContextoSimulacao, e: Entidade): number 
   return encarnacaoDe(e) === 'gelo' ? 1 - ctx.balance.ajustesClasses.mago.encarnacao.geloReducaoPct / 100 : 1;
 }
 
-/** Raio: multiplicador do movimento. */
+/** Raio: multiplicador do movimento. D-143: a canalização da carga deixa o Mago encarnado mais lento. */
 export function velocidadeEncarnacao(ctx: ContextoSimulacao, e: Entidade): number {
-  return encarnacaoDe(e) === 'raio' ? 1 + ctx.balance.ajustesClasses.mago.encarnacao.raioVelocidadePct / 100 : 1;
+  const r = ctx.balance.ajustesClasses.mago.encarnacao;
+  const encarnado = encarnacaoDe(e);
+  if (!encarnado) return 1;
+  return (encarnado === 'raio' ? 1 + r.raioVelocidadePct / 100 : 1) * (1 - r.lentidaoPct / 100);
+}
+
+/**
+ * 09/11/2026 (D-143): o que a ação faz com a carga elemental já encarnada. A skill recomeça a contagem; o ataque
+ * básico corta pela metade o que falta (e a lentidão junto).
+ */
+export function aoAgirEncarnado(ctx: ContextoSimulacao, e: Entidade, basico: boolean, tick: number): void {
+  if (!encarnacaoDe(e) || e.encarnacaoAteTick === undefined) return;
+  if (basico) e.encarnacaoAteTick = tick + Math.ceil(Math.max(0, e.encarnacaoAteTick - tick) / 2);
+  else e.encarnacaoAteTick = Math.max(e.encarnacaoAteTick, tick + ticksDe(duracaoDaEncarnacao(ctx, e, tick)));
 }
 
 /** Raio: saltos extras das magias com projétil ou que já saltam. Marco 24: as duplas Plasma e Relâmpago negro somam. */

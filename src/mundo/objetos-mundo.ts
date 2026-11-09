@@ -27,10 +27,13 @@ const PAPEIS_DE_LOJA: ReadonlySet<PapelNpc> = new Set(['mercador', 'ferreiro', '
 export const PREFIXO_ANDARILHO = 'andarilho:';
 /** Marco 38: o `ref` da loja do mercador errante que anda pela região. */
 export const REF_ERRANTE = 'errante';
+/** 09/11/2026 (D-143): os itens do Portal temporário (mundo/portais-temporarios.ts). */
+export const PORTAL_TEMPORARIO = 'portal_temporario';
+export const FRAGMENTO_DE_PORTAL = 'fragmento_portal';
 /** O objeto de cada papel que não é loja. */
 const OBJETO_DO_PAPEL: Readonly<Partial<Record<PapelNpc, TipoObjeto>>> = { missoes: 'npc', save: 'pedra_save', portal: 'pedra_portal' };
 /** Os que só pedem ao servidor (sem efeito no tick). */
-const PEDIDOS: ReadonlySet<TipoObjeto> = new Set(['npc', 'pedra_save', 'pedra_portal', 'porta_estrutura']);
+const PEDIDOS: ReadonlySet<TipoObjeto> = new Set(['npc', 'pedra_save', 'pedra_portal', 'porta_estrutura', 'portal_temporario']);
 /** Interagíveis do Mundo sempre disponíveis (sem reserva nem estado de aberto). */
 export const SEMPRE_DISPONIVEIS: ReadonlySet<TipoObjeto> = new Set([...PEDIDOS, 'tumulo']);
 export const TIPOS_DO_MUNDO: ReadonlySet<TipoObjeto> = new Set([...SEMPRE_DISPONIVEIS, 'coleta']);

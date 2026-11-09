@@ -10,11 +10,30 @@ import { icone } from './icones';
 export interface OrientacaoMundo {
   destino: DestinoNoMapa | null;
   definir: (destino: DestinoNoMapa | null) => void;
+  /** 09/11/2026 (D-143): onde o jogador morreu (o túmulo), marcado no mapa até `ateMs` (relógio do navegador). */
+  lapide: LapideNoMapa | null;
+}
+
+export interface LapideNoMapa {
+  lugar: string;
+  ponto: { x: number; y: number };
+  ateMs: number;
 }
 
 export function criarOrientacaoMundo(): OrientacaoMundo {
-  const guia: OrientacaoMundo = { destino: null, definir: destino => { guia.destino = destino; } };
+  const guia: OrientacaoMundo = { destino: null, lapide: null, definir: destino => { guia.destino = destino; } };
   return guia;
+}
+
+/** A lápide ainda marcada agora (null depois do prazo). */
+export function lapideAtiva(guia: OrientacaoMundo | undefined, agoraMs: number): LapideNoMapa | null {
+  return guia?.lapide && guia.lapide.ateMs > agoraMs ? guia.lapide : null;
+}
+
+/** 09/11/2026 (D-143): morreu no Mundo: a lápide fica marcada por `minutos` e vira o destino da rota. */
+export function marcarLapide(guia: OrientacaoMundo, lugar: string, ponto: { x: number; y: number }, minutos: number, agoraMs: number): void {
+  guia.lapide = { lugar, ponto: { ...ponto }, ateMs: agoraMs + minutos * 60_000 };
+  guia.definir({ lugar, nome: t('mundo.lapide.nome'), ponto: { ...ponto } });
 }
 
 export function criarGuiaMundo(guia: OrientacaoMundo, reino: Reino, lugar: string, ctx: ContextoSimulacao, idLocal: string, descobertas: () => readonly string[]) {

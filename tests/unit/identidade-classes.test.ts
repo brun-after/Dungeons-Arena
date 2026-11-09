@@ -7,6 +7,7 @@ import { aplicarImpacto } from '../../src/combat/golpe';
 import { companheiroDe, sincronizarCompanheiros } from '../../src/combat/companheiro';
 import { contarInvocacoes } from '../../src/combat/efeitos-fluxo';
 import {
+  aoAgirEncarnado,
   encarnar,
   multiplicadorEncarnacao,
   processarEncarnacoes,
@@ -286,17 +287,20 @@ describe('encarnação elemental do Mago', () => {
     expect(a.boneco.efeitos.some((f) => f.tipo === 'resfriado')).toBe(true);
   });
 
-  it('raio: +15% de velocidade e um salto a mais', () => {
+  it('raio: +15% de velocidade (menos a lentidão da carga, D-143) e um salto a mais', () => {
     const a = arena('mago');
     a.j.encarnacao = 'raio';
-    expect(velocidadeEncarnacao(ctx, a.j)).toBeCloseTo(1.15);
+    expect(velocidadeEncarnacao(ctx, a.j)).toBeCloseTo(1.15 * 0.8);
     expect(saltosEncarnacao(a.j, hab('raio_em_cadeia', a.j))).toBe(1);
     a.j.encarnacao = 'fogo';
+    expect(velocidadeEncarnacao(ctx, a.j)).toBeCloseTo(0.8);
+    delete a.j.encarnacao;
     expect(velocidadeEncarnacao(ctx, a.j)).toBe(1);
+    a.j.encarnacao = 'fogo';
     expect(saltosEncarnacao(a.j, hab('raio_em_cadeia', a.j))).toBe(0);
   });
 
-  it('dura 12 s desde a última magia do elemento; renova ao relançar e depois se apaga', () => {
+  it('dura 10 s desde a última magia do elemento; renova ao relançar e depois se apaga', () => {
     const a = arena('mago');
     const duracao = ticksDe(ctx.balance.ajustesClasses.mago.encarnacao.duracaoMs);
     encarnar(ctx, a.j, hab('bola_de_fogo', a.j), 0);
@@ -310,6 +314,16 @@ describe('encarnação elemental do Mago', () => {
     processarEncarnacoes(a.estado, ctx, a.eventos);
     expect(a.j.encarnacao).toBeUndefined();
     expect(a.de('encarnacaoAcabou')).toEqual([expect.objectContaining({ id: 'j' })]);
+  });
+
+  it('D-143: a skill recomeça a carga e o ataque básico descarrega metade do que falta', () => {
+    const a = arena('mago');
+    const duracao = ctx.balance.ajustesClasses.mago.encarnacao.duracaoMs;
+    encarnar(ctx, a.j, hab('bola_de_fogo', a.j), 0);
+    aoAgirEncarnado(ctx, a.j, true, ticksDe(2000));
+    expect(restanteEncarnacaoMs(a.j, ticksDe(2000))).toBeCloseTo((duracao - 2000) / 2, -2);
+    aoAgirEncarnado(ctx, a.j, false, ticksDe(3000));
+    expect(restanteEncarnacaoMs(a.j, ticksDe(3000))).toBeCloseTo(duracao, -2);
   });
 
   it('lançar a magia emite `encarnou`; a fase nova zera', () => {

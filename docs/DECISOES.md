@@ -4263,6 +4263,28 @@ materiais simples.
 Não precisa de migração no Supabase: a ficha só guarda ids (os fundidos se resolvem pelo id) e `vilaSalva`, que já era
 texto. Testes em `tests/unit/mundo-vilas-viagem.test.ts`, e os da sala passaram a esperar a conjuração.
 
+## D-143 — Monstros que se estranham, mortos do Necromante no HUD, carga do Mago, lápide e Portal temporário (09/11/2026)
+
+**Problema.** Nas regiões PvP do Mundo, o fogo amigo fazia os monstros se tratarem como alvo e brigarem o tempo todo.
+O Necromante não via quantos mortos tinha de pé. A encarnação do Mago não pesava nada. Quem morria no Mundo não
+sabia voltar ao túmulo. Não havia como encurtar a volta.
+
+**Decisão.**
+- **Estranhamento** (entities/ia-estranhamento.ts). A IA só mira outro monstro (aliado pela relação, ferível pelo fogo
+  amigo) com quem se estranhou. A cada `ia.estranhamento.intervaloMs`, com outro monstro a até `raio`, sorteia 10%
+  (fora de perseguição) ou 20% (perseguindo um jogador) e briga com ele por `duracaoMs`. O golpe em área ainda pega
+  quem estiver perto, mas não vira revide.
+- **Contador do Necromante.** Um chip ao lado da vida: os mortos no teto / o teto, e `+n` dos de fora dele
+  (temporários e de pergaminho).
+- **Carga elemental do Mago.** A encarnação dura 10 s (era 12). Enquanto encarnado, o Mago anda `lentidaoPct` (20%)
+  mais devagar (o raio ainda soma os 15%). Qualquer skill recomeça a contagem; o ataque básico descarrega metade do
+  que falta (e da lentidão junto).
+- **Portal temporário** (mundo/portais-temporarios.ts). Item de 2000 de ouro, bem raro no loot (`inteiroChancePct`);
+  o comum é o fragmento (`fragmentoChancePct`), e 5 fragmentos viram um portal no alquimista. Abre por 60 s entre onde
+  o jogador está e o ponto marcado no mapa (região descoberta, nunca dungeon); atravessam o dono e o grupo dele. O
+  registro é do processo, com o relógio do servidor (como a recarga do portal das vilas), porque as pontas podem
+  estar em salas diferentes; cada sala põe no chão as pontas dela.
+
 ## D-144 — Estabilidade do Mundo e ajustes de jogo (09/11/2026)
 
 Relatos dos jogadores no Mundo: quedas e "sessão expirada" ao trocar de reino ou usar a pedra de retorno, ping subindo

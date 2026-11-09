@@ -5,7 +5,8 @@
 // - o chat (local, região, grupo) e a denúncia;
 // - o grupo (convidar pelo nome, aceitar, sair, expulsar);
 // - a troca direta (propor, aceitar, oferecer, confirmar, cancelar);
-// - o mercado do reino (listar, anunciar, comprar, cancelar, receber as vendas).
+// - o mercado do reino (listar, anunciar, comprar, cancelar, receber as vendas);
+// - o Portal temporário (09/11/2026, D-143): abrir daqui até o ponto marcado no mapa.
 // Aqui só a forma: as regras ficam em cada módulo. Puro.
 
 import { ehObjeto } from '../core/validar';
@@ -40,7 +41,9 @@ export type AcaoDoMundo =
   /** Comprar leva o preço que o cliente viu: a sala reserva esse ouro e o servidor recusa se o anúncio mudou. */
   | { a: 'mercado'; op: 'comprar'; id: string; preco: number }
   | { a: 'mercado'; op: 'cancelar'; id: string }
-  | { a: 'mercado'; op: 'receber' };
+  | { a: 'mercado'; op: 'receber' }
+  /** 09/11/2026 (D-143): abrir o Portal temporário daqui até o ponto marcado no mapa. */
+  | { a: 'portal'; lugar: string; x: number; y: number };
 
 const MAX_ID = 64;
 const MAX_TEXTO = 500;
@@ -103,6 +106,8 @@ export function lerAcaoDoMundo(v: unknown): AcaoDoMundo | null {
       if (v.op === 'comprar' && id(v.id) && inteiro(v.preco, 1, MAX_OURO)) return { a: 'mercado', op: 'comprar', id: v.id, preco: v.preco };
       if (v.op === 'cancelar' && id(v.id)) return { a: 'mercado', op: 'cancelar', id: v.id };
       return v.op === 'receber' ? { a: 'mercado', op: 'receber' } : null;
+    case 'portal':
+      return id(v.lugar) && inteiro(v.x, 0, 1000) && inteiro(v.y, 0, 1000) ? { a: 'portal', lugar: v.lugar, x: v.x, y: v.y } : null;
     default:
       return null;
   }

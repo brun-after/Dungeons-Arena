@@ -28,6 +28,7 @@ import { fatoresDoMundo, ladoDoJogador } from '../modos/dificuldade';
 import { podeAjudar, podeFerir } from '../modos/relacao';
 import { chebyshev } from '../combat/geometria';
 import { cargaDaClasse, cargaPorMomento } from '../combat/carga-ultimate';
+import { QUALQUER_PRESET } from '../modos/modo';
 import { atrasoDeRespawnTicks, localDeRespawn, penalidadeDeMorte, podeRespawnar, protecaoDeRespawnTicks } from '../modos/regras';
 import { celulaLivrePara } from '../world/colisao';
 import { passavel } from '../world/fase';
@@ -297,8 +298,9 @@ function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
  * instância (não desloca o RNG do combate nem o do loot).
  */
 function largarMateriais(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
-  const lista = ctx.modo.materiaisDeInimigos?.[e.preset];
-  if (!lista) return;
+  // 09/11/2026 (D-143): a lista do preset e a de todos (`*`, o fragmento de portal do Mundo).
+  const lista = [...(ctx.modo.materiaisDeInimigos?.[e.preset] ?? []), ...(ctx.modo.materiaisDeInimigos?.[QUALQUER_PRESET] ?? [])];
+  if (lista.length === 0) return;
   const rng = criarRng(hashTexto(`${estado.faseId}/${e.id}/${String(e.geracao)}/material`));
   for (const m of lista) {
     if (aleatorio(rng) * 100 < m.chancePct) largarPerto(ctx, e.x, e.y, (x, y) => largarItem(estado, m.itemId, x, y, saida));

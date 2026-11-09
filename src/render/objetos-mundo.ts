@@ -162,6 +162,11 @@ export function desenharObjetoDoMundo(g: Graphics, o: ObjetoNoMundo, cx: number,
     case 'pedra_portal':
       portalDoReino(g, cx, cy, 0xc77dff, tMs);
       return true;
+    // 09/11/2026 (D-143): o Portal temporário: só o arco rúnico com o vórtice ciano, sem tablado.
+    case 'portal_temporario':
+      g.ellipse(cx, cy, 26, 9).fill({ color: 0x5ce1ff, alpha: 0.16 + pulso * 0.01 });
+      portalEmPe(g, cx, cy - 1, { estilo: 'psiquico', cor: 0x5ce1ff, tMs, aceso: true });
+      return true;
     case 'porta_estrutura':
       // Marco 30 (D-129): a porta escondida não aparece (quem chega perto acha pelo prompt e pela descoberta).
       if (!o.escondido) porta(g, cx, cy);

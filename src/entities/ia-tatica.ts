@@ -10,7 +10,8 @@ import type { Celula } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import { ticksDe } from '../core/tempo';
-import { alvoOfensivoValido, origemDaHabilidade } from '../combat/acao';
+import { origemDaHabilidade } from '../combat/acao';
+import { alvoDaIa } from './ia-estranhamento';
 import { celulasDaForma } from '../combat/formas';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
 import { habilidadeDoAtor } from '../combat/perfil';
@@ -113,7 +114,7 @@ export function alvoMaisFerido(estado: EstadoJogo, ctx: ContextoSimulacao, e: En
   const fracao = (x: Entidade) => x.hp / Math.max(1, x.hpMax);
   let melhor: Entidade | null = null;
   for (const o of estado.entidades) {
-    if (o === atual || o === e || chebyshev(o, e) > raio || !alvoOfensivoValido(estado, ctx, e, o)) continue;
+    if (o === atual || o === e || chebyshev(o, e) > raio || !alvoDaIa(estado, ctx, e, o)) continue;
     if (fracao(o) < fracao(melhor ?? atual)) melhor = o;
   }
   return melhor;

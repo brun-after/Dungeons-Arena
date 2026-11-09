@@ -176,6 +176,10 @@ export interface EstadoIa {
   especialAteTick?: number;
   sentidoCerco?: number;
   ultimaRuna?: Celula;
+  /** 09/11/2026 (D-143): o monstro com quem se estranhou (entities/ia-estranhamento.ts), até quando, e o próximo sorteio. */
+  estranhoId?: EntidadeId;
+  estranhoAteTick?: number;
+  proximoEstranhamentoTick?: number;
 }
 
 /** Quem causou dano e quando, para dividir XP entre participantes (§2.7, morte). */

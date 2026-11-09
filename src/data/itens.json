@@ -2531,6 +2531,36 @@
       "dropavel": false
     },
     {
+      "id": "portal_temporario",
+      "nome": "Portal temporário",
+      "tipo": "chave",
+      "descricao": "No Mundo, use o botão Portal e marque no mapa um ponto de uma região descoberta: por 1 minuto, um portal liga onde você está a esse ponto, para você e o seu grupo. Não abre em dungeons. Raro de achar inteiro; cinco fragmentos viram um no alquimista.",
+      "icone": "teleporte",
+      "raridade": "epico",
+      "valorBase": 2000,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false
+    },
+    {
+      "id": "fragmento_portal",
+      "nome": "Fragmento de portal",
+      "tipo": "material",
+      "descricao": "Um caco de runa que ainda vibra. Cinco deles, no alquimista, viram um Portal temporário.",
+      "icone": "runa",
+      "raridade": "raro",
+      "valorBase": 300,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "efeitos": [],
+      "dropavel": false
+    },
+    {
       "id": "pergaminho_retorno",
       "nome": "Pedra de retorno",
       "tipo": "chave",

@@ -40,7 +40,7 @@ import { lancarProjetil } from './projeteis';
 import { alcanceSemArma, aoUsarSkill, basicoComVariacao, basicoDaVez, chaveDoBasico, consumirRiposta, contarBasico, ehBasico, fatorDaVelocidade, multiplosDaVez, recargaDoBasicoPct } from './basico';
 import { lancarSolo } from './solos';
 import { celulaDoCompanheiro, ticksDoVooDoFalcao } from './companheiro';
-import { encarnar } from './encarnacao';
+import { aoAgirEncarnado, encarnar } from './encarnacao';
 import { consumirMira } from './mira';
 import { prepararTiroCheio } from './sintonia-arqueiro';
 import { raioAreaDaEncarnacao } from './encarnacao-efeitos';
@@ -507,6 +507,8 @@ function lancar(
       // Marco 24 (D-094): trocar de encarnação enche a ultimate (no máximo uma vez a cada 4 s).
       cargaDaClasse(ctx, ator, 'encarnacao', estado.tick, saida);
     }
+    // 09/11/2026 (D-143): a skill recomeça a carga elemental; o básico descarrega metade do que falta.
+    if (encarnadoAntes) aoAgirEncarnado(ctx, ator, ehBasico(ator, hab.id), estado.tick);
   }
   const basico = ehBasico(ator, hab.id) ? bonusAtaqueBasico(ator, estado.tick) : null;
   const alcance = alcanceDe(ctx, ator, hab, estado.tick);

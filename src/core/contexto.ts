@@ -36,7 +36,7 @@ export interface Balance {
       encadeioMs: number; encadeioVelocidade: number };
     mago: { inicialPct: number; intermediarioPct: number; nivelIntermediario: number; fimIntermediario: number; nivelFinal: number; dardoInicioMult: number; dardoRecuperacaoNivel: number; dardoPlenoNivel: number; concentracaoAcertos: number; concentracaoJanelaMs: number; concentracaoExtraPct: number;
       /** Marco 22 (D-089): encarnação elemental. */
-      encarnacao: { fogoDanoPct: number; fogoIntervaloMs: number; fogoRaio: number; fogoQueimaValor: number; fogoQueimaMs: number; geloReducaoPct: number; geloResfriarMs: number; raioVelocidadePct: number; duracaoMs: number; duplaJanelaMs: number; duplaDuracaoMs: number } };
+      encarnacao: { fogoDanoPct: number; fogoIntervaloMs: number; fogoRaio: number; fogoQueimaValor: number; fogoQueimaMs: number; geloReducaoPct: number; geloResfriarMs: number; raioVelocidadePct: number; duracaoMs: number; lentidaoPct: number; duplaJanelaMs: number; duplaDuracaoMs: number } };
     aventureiro: { nivelCorte: number; danoMult: number; /** Marco 24 (D-094): dano das skills do falcão. */ falcaoDanoMult: number; /** Marco 22 (D-089): passo do falcão. */ falcaoPassoMs: number; /** D-091: IA do falcão. */ falcao: { distanciaAlvo: number; raioPasseio: number; raioColeta: number; passeioMs: number; raioCombate: number; /** Marco 24 (D-098): o dano no falcão que chega ao dono, do nível 1 ao máximo, e a espera até pousar no ombro. */ reflexoInicioPct: number; reflexoFimPct: number; pousoMs: number; /** Marco 25 (D-102): velocidades do ataque e do dash (por nível) e o bônus do atributo; a vigia dos projéteis. */ velocidadeAtaque: CurvaPorNivel; velocidadeDash: CurvaPorNivel; atributoBonusPorPontoPct: number; atributoBonusMaxPct: number; vigiaCelulas: number; vigiaRaio: number } };
     arqueiro: { secundariosMult: number; /** 05/11/2026 (D-132): o alcance que sobra andando, em %. */ alcanceAndandoPct: number; /** Marco 22 (D-089): Mira firme. */ mira: { cargaMs: number; reducaoPorDestrezaPct: number; reducaoMaxPct: number; d20Minimo: number } };
     /**
@@ -397,6 +397,11 @@ export interface Balance {
      * `cancelaAteMs` cancela; sair depois leva a um lugar ao acaso do reino (e devolve a pedra).
      */
     retorno: { conjuracaoMs: number; cancelaAteMs: number; raioCirculo: number };
+    /**
+     * 09/11/2026 (D-143): o Portal temporário (aberto por `duracaoS`), a chance de cada monstro do Mundo deixar o
+     * fragmento ou o portal inteiro, e quantos minutos a lápide de quem morreu fica marcada no mapa.
+     */
+    portalTemporario: { duracaoS: number; fragmentoChancePct: number; inteiroChancePct: number; lapideMin: number };
     /** Marco 38: a fusão elemental: o efeito na arma e a resistência nas peças, por grau (1 a 3). */
     fusao: { chanceArmaPct: number[]; resistenciaPct: number[]; valorPct: number[] };
     /** Marco 30 (D-129): o baú do banco (por personagem, em qualquer vila). */
@@ -578,6 +583,12 @@ export interface RegrasIa {
     habilidadeMaxPct: number;
     chefeMult: number;
   };
+  /**
+   * 09/11/2026 (D-143): onde há fogo amigo (as regiões PvP do Mundo), os monstros só se veem como alvo quando se
+   * estranham. A cada `intervaloMs`, com outro monstro a até `raio` células, sorteia `foraPct` (sem perseguir jogador)
+   * ou `perseguindoPct` (perseguindo um); quem sorteia briga com ele por `duracaoMs`.
+   */
+  estranhamento: { foraPct: number; perseguindoPct: number; intervaloMs: number; duracaoMs: number; raio: number };
   /**
    * Marco 25 (25/10/2026, D-100): quanto uma célula de perigo pesa no caminho de quem evita (em passos); o raio da
    * busca pela área do próprio elemento e a vida em que sai dela; o intervalo dos sorteios táticos (cura, foco); o

@@ -66,7 +66,7 @@ export const COR_RARIDADE: Readonly<Record<Raridade, number>> = {
 
 /** Os que ficam em pé no isométrico (D-058: baú e loja; D-109: ouro, orbes e santuário). */
 // Marco 29 (D-128): os objetos do Mundo também ficam em pé no isométrico.
-const EM_PE: ReadonlySet<TipoObjeto> = new Set<TipoObjeto>(['bau', 'loja', 'ouro', 'santuario', 'orbe_hp', 'orbe_recurso', 'orbe_efeito', 'orbe_refugio', 'npc', 'coleta', 'tumulo', 'pedra_save', 'pedra_portal', 'porta_estrutura']);
+const EM_PE: ReadonlySet<TipoObjeto> = new Set<TipoObjeto>(['bau', 'loja', 'ouro', 'santuario', 'orbe_hp', 'orbe_recurso', 'orbe_efeito', 'orbe_refugio', 'npc', 'coleta', 'tumulo', 'pedra_save', 'pedra_portal', 'porta_estrutura', 'portal_temporario']);
 
 /** Onde desenhar os objetos altos no isométrico. */
 export interface OpcoesEmPe {
@@ -446,6 +446,11 @@ export class CamadaObjetos {
         const r = BALANCE_PADRAO.mundo.retorno;
         const { fracao, perigo } = progressoDoCirculo(o, estado.tick, ticksDe(r.conjuracaoMs - r.cancelaAteMs));
         desenharCirculoDeRetorno(g, cx, cy, r.raioCirculo, fracao, perigo, movimentoReduzido ? 0 : agoraMs);
+        continue;
+      }
+      // 09/11/2026 (D-143): o Portal temporário, visto de cima (no isométrico, fica em pé como os outros).
+      if (o.tipo === 'portal_temporario' && !(iso && this.emPe)) {
+        desenharObjetoDoMundo(g, o, cx, cy, pulso, movimentoReduzido ? 0 : agoraMs);
         continue;
       }
       if (iso && this.emPe && EM_PE.has(o.tipo)) {
