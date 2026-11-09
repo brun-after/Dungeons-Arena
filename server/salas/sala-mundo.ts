@@ -26,6 +26,7 @@ import { modoPorId } from '../../src/core/conteudo';
 import { MODO_MUNDO } from '../../src/mundo/sala-mundo';
 import { reinoDoConteudo, type Reino } from '../../src/mundo/reino';
 import { SalaMundo, type PendenciaDoMundo, type ResultadoDoMercado } from '../../src/mundo/sala-mundo';
+import type { InvocacaoQueViaja } from '../../src/mundo/comitiva';
 import { MercadoEmMemoria, type LojaDoMercado } from '../mercado-mundo';
 import { registrarLog } from '../metricas';
 import { atenderMercado, atenderSocial, publicarGrupo } from '../mundo-servicos';
@@ -42,6 +43,8 @@ interface Bilhete {
   lugar: string;
   chegada: Celula | null;
   instancia: string | null;
+  /** 09/11/2026 (D-144): as invocações que viajam com o personagem. */
+  comitiva?: InvocacaoQueViaja[];
   expira: number;
 }
 
@@ -483,7 +486,7 @@ export class SalaMundoColyseus extends SalaColyseusBase {
       }
       // Uma entrada pelo menu substitui qualquer transferência abandonada.
       if (typeof o.bilhete !== 'string') this.coordenador.cancelarBilhetesDe(identidade);
-      this.mundo.reservar(identidade, entrada.ficha, entrada.chegada, this.coordenador.grupos.grupoDe(identidade)?.id ?? null);
+      this.mundo.reservar(identidade, entrada.ficha, entrada.chegada, this.coordenador.grupos.grupoDe(identidade)?.id ?? null, entrada.comitiva);
       this.coordenador.registrarPerfil(identidade, entrada.ficha, this.mundo.idLugar);
       this.identidades.set(client.sessionId, identidade);
       void super.onJoin(client);
@@ -504,12 +507,12 @@ export class SalaMundoColyseus extends SalaColyseusBase {
   }
 
   /** Pelo bilhete (troca de sala) ou pelo slot (entrar no jogo, sempre na vila salva; ou criar o personagem). */
-  private async prepararEntrada(conta: string, o: Record<string, unknown>): Promise<{ slot: number; ficha: FichaDoMundo; chegada: Celula | null }> {
+  private async prepararEntrada(conta: string, o: Record<string, unknown>): Promise<{ slot: number; ficha: FichaDoMundo; chegada: Celula | null; comitiva: InvocacaoQueViaja[] }> {
     if (typeof o.bilhete === 'string') {
       const b = this.coordenador.usar(o.bilhete, conta, this.mundo.idLugar);
       if (!b) throw new ServerError(403, 'bilhete_invalido');
       this.coordenador.sair(`${conta}#${String(b.slot)}`);
-      return { slot: b.slot, ficha: b.ficha, chegada: b.chegada };
+      return { slot: b.slot, ficha: b.ficha, chegada: b.chegada, comitiva: b.comitiva ?? [] };
     }
     if (!slotValido(o.slot)) throw new ServerError(400, 'slot_invalido');
     const slot = o.slot;
@@ -521,7 +524,7 @@ export class SalaMundoColyseus extends SalaColyseusBase {
     }
     if (!ficha) throw new ServerError(404, 'sem_personagem');
     if (this.mundo.idLugar !== `regiao:${ficha.vilaSalva}`) throw new ServerError(409, 'fora_da_vila_salva');
-    return { slot, ficha, chegada: null };
+    return { slot, ficha, chegada: null, comitiva: [] };
   }
 
   private processarPendencias(): void {
@@ -543,7 +546,7 @@ export class SalaMundoColyseus extends SalaColyseusBase {
     const destino = lerLugar(this.coordenador.reino, p.destino);
     if (!destino) return;
     const lugar = idDoLugar(destino);
-    const bilhete = this.coordenador.emitir({ conta, slot, ficha: p.ficha, lugar, chegada: p.chegada, instancia: p.instancia });
+    const bilhete = this.coordenador.emitir({ conta, slot, ficha: p.ficha, lugar, chegada: p.chegada, instancia: p.instancia, comitiva: p.comitiva });
     this.mundo.despedir(p.sessaoId, { tipo: 'trocarSala', lugar, bilhete, instancia: p.instancia });
     registrarLog('mundo_troca', { de: this.mundo.idLugar, para: lugar });
   }

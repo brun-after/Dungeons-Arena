@@ -14,6 +14,7 @@ import { versaoDoConteudo, type MensagemCliente } from '../arena/protocolo';
 import { SalaArena, type EntradaDePersonagem, type OpcoesSala, type Sessao } from '../arena/sala';
 import { estadoPublico } from '../arena/estado-publico';
 import { celulaDeEntrada, colocarEm } from '../coop/sala-campanha';
+import { recolherComitiva, retirarComitiva, soltarComitiva, type InvocacaoQueViaja } from './comitiva';
 import { conferirPersonagem, previaDoPersonagem } from '../coop/personagem';
 import type { Celula, EntidadeId } from '../core/comandos';
 import { modoPorId, type Conteudo } from '../core/conteudo';
@@ -98,7 +99,7 @@ export class SalaMundo extends SalaArena {
   readonly lugar: Lugar;
   readonly canal: number;
   private readonly exterior: ExteriorGerado | null;
-  private readonly reservas = new Map<string, { ficha: FichaDoMundo; chegada: Celula | null; grupo: string | null }>();
+  private readonly reservas = new Map<string, { ficha: FichaDoMundo; chegada: Celula | null; grupo: string | null; comitiva: readonly InvocacaoQueViaja[] }>();
   /** Por entidade: quem é e a ficha que entrou (a progressão vem da entidade na hora de gravar). */
   private readonly presencas = new Map<EntidadeId, Presenca>();
   /** Marco 30: o evento da região em curso e o modo sem ele (a lua sangrenta troca o modo enquanto dura). */
@@ -141,8 +142,8 @@ export class SalaMundo extends SalaArena {
   }
 
   /** O servidor guarda a ficha de quem vai entrar por esta identidade (e onde chega, ou o spawn). */
-  reservar(identidade: string, ficha: FichaDoMundo, chegada: Celula | null = null, grupo: string | null = null): void {
-    this.reservas.set(identidade, { ficha, chegada, grupo });
+  reservar(identidade: string, ficha: FichaDoMundo, chegada: Celula | null = null, grupo: string | null = null, comitiva: readonly InvocacaoQueViaja[] = []): void {
+    this.reservas.set(identidade, { ficha, chegada, grupo, comitiva });
   }
 
   /** As pendências desde a última retirada (o servidor grava e troca as sessões de sala). */
@@ -158,6 +159,7 @@ export class SalaMundo extends SalaArena {
     if (!s) return;
     this.enviarPara(s, { t: 'mundo', aviso });
     this.despedidos.add(sessaoId);
+    retirarComitiva(this.estado, s.entidadeId); // D-144: as invocações seguiram com o dono
     this.removerSessao(s);
   }
 
@@ -177,6 +179,7 @@ export class SalaMundo extends SalaArena {
     const origem = reserva.chegada ?? chegadaNaPedra(this.exterior) ?? this.ctx.fase.spawns[0] ?? { x: 1, y: 1 };
     colocarEm(e, celulaDeEntrada(this.estado, this.ctx, e, origem));
     this.estado.entidades.push(e);
+    soltarComitiva(this.estado, this.ctx, e, reserva.comitiva, this.eventosDoTick); // D-144: as invocações chegam junto
     const ficha = { ...reserva.ficha, descobertas: [...reserva.ficha.descobertas] };
     this.presencas.set(entidadeId, { identidade, ficha, morreu: false, grupo: reserva.grupo });
     if (reserva.grupo) e.grupo = reserva.grupo;
@@ -394,7 +397,7 @@ export class SalaMundo extends SalaArena {
 
   private trocar(s: Sessao, p: Presenca, destino: string, chegada: Celula | null, instancia: string | null): void {
     if (this.despedidos.has(s.sessaoId) || this.pendencias.some((x) => x.tipo === 'trocar' && x.sessaoId === s.sessaoId)) return;
-    this.pendencias.push({ tipo: 'trocar', identidade: p.identidade, sessaoId: s.sessaoId, ficha: p.ficha, destino, chegada, instancia });
+    this.pendencias.push({ tipo: 'trocar', identidade: p.identidade, sessaoId: s.sessaoId, ficha: p.ficha, destino, chegada, instancia, comitiva: recolherComitiva(this.estado, s.entidadeId) });
   }
 
   private pertoDe(e: Entidade, tipo: string): boolean {

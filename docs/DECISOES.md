@@ -4289,3 +4289,8 @@ quando alguém entra, troca presa, perseguição que não acaba e lojas bloquead
   (o molde) e cada sala nova só clona o estado inicial (1 a 3 ms). O servidor monta as 24 regiões logo ao subir, uma a
   cada 250 ms (`aquecerMundo`, ligado só no `main`). No navegador, o personagem 3D de uma classe ainda não vista
   montava as 36 peças de armadura (6 peças × 6 graus) de uma vez; agora cada peça é montada quando alguém a veste.
+- **Invocações acompanham a viagem.** Ao trocar de sala (borda, porta de dungeon, portal, pedra de retorno), a sala
+  guarda o retrato das invocações do dono (preset, vida, atributos, aparência e os dados da invocação, com o prazo
+  como o tempo que falta), tira-as da sala antiga e manda o retrato no bilhete; a sala de chegada as cria de novo ao
+  lado do dono (mundo/comitiva.ts). O retrato não vai para a ficha gravada: quem sai do jogo e volta não traz mortos.
+  O falcão (companheiro) e os avatares ficam de fora.
