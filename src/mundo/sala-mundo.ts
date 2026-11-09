@@ -19,7 +19,7 @@ import type { Celula, EntidadeId } from '../core/comandos';
 import { modoPorId, type Conteudo } from '../core/conteudo';
 import { aplicarEfeito } from '../combat/efeitos';
 import { construirEfeito } from '../combat/registro-efeitos';
-import { buscarEntidade } from '../core/estado';
+import { buscarEntidade, clonarEstado } from '../core/estado';
 import { aleatorio, criarRng, hashTexto } from '../core/rng';
 import { ticksDe } from '../core/tempo';
 import { vivo, type Entidade, type ItemNaMochila } from '../entities/entidade';
@@ -48,7 +48,7 @@ import type { AcaoSocial, PendenciaDoMundo, ResultadoDoMercado } from './pendenc
 import { atenderChat, atenderTroca, cancelarTrocaDe, limparTrocas, type Participante, type SalaSocial } from './sala-social';
 import { TrocasDaSala } from './troca';
 import { descobrir, fichaAtualizada, type FichaDoMundo } from './ficha-mundo';
-import { idDoLugar, montarLugar, type Lugar } from './lugares';
+import { idDoLugar, montarLugar, type Lugar, type LugarMontado } from './lugares';
 import { REF_ERRANTE } from './objetos-mundo';
 import { capitalDoAtlas, territorioDoLugar, estruturaDoDestino, LADOS, ladoOposto, portaDa, vizinha, type LadoDaRegiao, type PapelNpc, type Reino, type RegiaoDoMundo } from './reino';
 import type { ExteriorGerado } from '../world/gerador-exterior';
@@ -61,6 +61,11 @@ export interface OpcoesSalaMundo {
   canal?: number;
   /** Relógio de parede do servidor (ms): as recargas das masmorras e do portal valem entre sessões. */
   agora: () => number;
+  /**
+   * 09/11/2026 (D-144): o lugar já montado (o mapa não depende da semente). Montar uma região custa de 0,4 a 0,9 s de
+   * CPU e travava o servidor inteiro (o ping de todos subia) a cada sala nova; com o molde, a sala só clona o estado.
+   */
+  molde?: LugarMontado;
   versaoConteudo?: string;
 }
 
@@ -116,7 +121,8 @@ export class SalaMundo extends SalaArena {
     conteudo: Conteudo,
     private readonly opcoesMundo: OpcoesSalaMundo,
   ) {
-    const montado = montarLugar(conteudo, reino, lugar, modoPorId(conteudo, MODO_MUNDO));
+    const molde = opcoesMundo.molde;
+    const montado = molde ? { ...molde, estado: clonarEstado(molde.estado) } : montarLugar(conteudo, reino, lugar, modoPorId(conteudo, MODO_MUNDO));
     const opcoes: OpcoesSala = { semente: opcoesMundo.semente, versaoConteudo: opcoesMundo.versaoConteudo ?? versaoDoConteudo() };
     super(montado.ctx, opcoes, montado.estado);
     this.lugar = lugar;

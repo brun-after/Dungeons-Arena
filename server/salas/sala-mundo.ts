@@ -21,7 +21,9 @@ import type { AvisoDoMundo } from '../../src/mundo/avisos';
 import { depositarNoBanco } from '../../src/mundo/banco';
 import { fichaNova, type FichaDoMundo } from '../../src/mundo/ficha-mundo';
 import { GruposDoMundo } from '../../src/mundo/grupos';
-import { idDoLugar, lerLugar } from '../../src/mundo/lugares';
+import { idDoLugar, lerLugar, montarLugar, type Lugar, type LugarMontado } from '../../src/mundo/lugares';
+import { modoPorId } from '../../src/core/conteudo';
+import { MODO_MUNDO } from '../../src/mundo/sala-mundo';
 import { reinoDoConteudo, type Reino } from '../../src/mundo/reino';
 import { SalaMundo, type PendenciaDoMundo, type ResultadoDoMercado } from '../../src/mundo/sala-mundo';
 import { MercadoEmMemoria, type LojaDoMercado } from '../mercado-mundo';
@@ -125,6 +127,35 @@ export class CoordenadorDoMundo {
       return null;
     });
   }
+  /** 09/11/2026 (D-144): cada lugar montado uma vez (as salas novas clonam o estado inicial). */
+  private readonly moldes = new Map<string, LugarMontado>();
+
+  moldeDe(lugar: Lugar): LugarMontado {
+    const id = idDoLugar(lugar);
+    let m = this.moldes.get(id);
+    if (!m) {
+      m = montarLugar(this.conteudo, this.reino, lugar, modoPorId(this.conteudo, MODO_MUNDO));
+      this.moldes.set(id, m);
+    }
+    return m;
+  }
+
+  /**
+   * 09/11/2026 (D-144): monta as regiões logo que o servidor sobe, uma por vez com folga entre elas, para a primeira
+   * entrada em cada região não travar quem já está jogando.
+   */
+  aquecer(intervaloMs = 250): void {
+    const ids = this.reino.regioes.map((r) => `regiao:${r.id}`);
+    const proxima = () => {
+      const id = ids.shift();
+      if (id === undefined) return;
+      const lugar = lerLugar(this.reino, id);
+      if (lugar && !this.moldes.has(id)) this.moldeDe(lugar);
+      setTimeout(proxima, intervaloMs).unref();
+    };
+    setTimeout(proxima, intervaloMs).unref();
+  }
+
   /** Personagem -> o lugar onde está (para o grupo) e o perfil (o convite pelo nome). */
   private readonly lugares = new Map<string, string>();
   private readonly perfis = new Map<string, Perfil>();
@@ -354,6 +385,7 @@ export class SalaMundoColyseus extends SalaColyseusBase {
     if (!lugar) throw new ServerError(400, 'lugar_invalido');
     this.instancia = typeof o.instancia === 'string' ? o.instancia.slice(0, 120) : '';
     this.mundo = new SalaMundo(this.coordenador.reino, lugar, this.coordenador.conteudo, {
+      molde: this.coordenador.moldeDe(lugar),
       semente: Math.floor(Math.random() * 2 ** 31),
       canal: this.canal,
       agora: () => Date.now(),

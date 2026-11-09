@@ -4283,3 +4283,9 @@ quando alguém entra, troca presa, perseguição que não acaba e lojas bloquead
 - **Troca presa.** Fechar a janela da troca (X, Esc ou ignorar o convite) não avisava o servidor: a troca ficava aberta
   e o jogador seguia "ocupado". Agora fechar cancela, a sala desfaz a cada segundo as trocas e convites em que um dos
   dois saiu, morreu ou se afastou mais que o dobro do raio, e a troca aberta tem prioridade sobre um convite pendente.
+- **Ping que sobe quando alguém chega.** Medido no servidor: montar uma região (mapa, população, objetos) custa de 450
+  a 920 ms de CPU, e o Node tem um laço só; cada sala nova (uma região sem ninguém, a dungeon de um grupo, o canal 2)
+  travava todas as outras pelo mesmo tempo. O mapa não depende da semente, então o coordenador guarda o lugar montado
+  (o molde) e cada sala nova só clona o estado inicial (1 a 3 ms). O servidor monta as 24 regiões logo ao subir, uma a
+  cada 250 ms (`aquecerMundo`, ligado só no `main`). No navegador, o personagem 3D de uma classe ainda não vista
+  montava as 36 peças de armadura (6 peças × 6 graus) de uma vez; agora cada peça é montada quando alguém a veste.

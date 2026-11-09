@@ -6,6 +6,8 @@ import { BALANCE_PADRAO } from '../../src/core/contexto';
 import { fichaNova, type FichaDoMundo } from '../../src/mundo/ficha-mundo';
 import { PersistenciaEmMemoria } from '../../server/persistencia-mundo';
 import { CoordenadorDoMundo } from '../../server/salas/sala-mundo';
+import { lerLugar } from '../../src/mundo/lugares';
+import { SalaMundo } from '../../src/mundo/sala-mundo';
 import { CONTEUDO } from '../apoio/fases';
 
 class Contadora extends PersistenciaEmMemoria {
@@ -199,5 +201,24 @@ describe('viagem pelo bilhete', () => {
     expect(c.entrar('local:caiu#1', 'sala-velha', 's1')).toBe(true);
     expect(c.liberarCaida('local:caiu#1')).toEqual({ ficha: null });
     expect(c.entrar('local:caiu#1', 'sala-nova', 's2')).toBe(true);
+  });
+});
+
+// 09/11/2026 (D-144): montar o lugar travava o servidor de 0,4 a 0,9 s a cada sala nova; agora vem do molde.
+describe('molde do lugar', () => {
+  it('monta uma vez; cada sala clona o estado (uma não mexe na outra)', () => {
+    const c = new CoordenadorDoMundo(new Contadora(), CONTEUDO);
+    const lugar = lerLugar(c.reino, 'regiao:campos_do_oeste');
+    if (!lugar) throw new Error('lugar');
+    const molde = c.moldeDe(lugar);
+    expect(c.moldeDe(lugar)).toBe(molde);
+    const nova = () => new SalaMundo(c.reino, lugar, CONTEUDO, { semente: 1, agora: () => 0, molde });
+    const a = nova();
+    const b = nova();
+    const total = b.estado.entidades.length;
+    expect(total).toBe(molde.estado.entidades.length);
+    a.estado.entidades.pop();
+    expect(b.estado.entidades).toHaveLength(total);
+    expect(molde.estado.entidades).toHaveLength(total);
   });
 });
