@@ -4274,3 +4274,12 @@ quando alguém entra, troca presa, perseguição que não acaba e lojas bloquead
   de 1,5 s (o `leave` do SDK nunca resolvia com a conexão caída), a entrada tenta 3 vezes e, se a viagem falhar de vez,
   o personagem volta pela vila salva em vez de cair na tela de erro. A sessão caída já despedida solta o personagem
   (antes a entrada nova recebia `ja_jogando`).
+- **Perseguição que não acabava.** A IA só roda perto de algum jogador; o monstro deixado para trás dormia ainda
+  marcado como perseguindo, e o jogador seguia "perseguido" (em combate, sem regenerar). Agora só conta quem persegue a
+  até `ia.perseguicaoMaxCelulas` (20) células, a IA desiste quando o alvo passa dessa distância e a morte limpa sempre
+  a perseguição (em todos os modos, a campanha incluída).
+- **Lojas.** Abrem mesmo em perseguição, a perseguição não as fecha e não há mais espera para reabrir
+  (`economia.recargaLojaMs` = 0). Levar dano com a loja aberta faz a janela tremer, sem fechá-la.
+- **Troca presa.** Fechar a janela da troca (X, Esc ou ignorar o convite) não avisava o servidor: a troca ficava aberta
+  e o jogador seguia "ocupado". Agora fechar cancela, a sala desfaz a cada segundo as trocas e convites em que um dos
+  dois saiu, morreu ou se afastou mais que o dobro do raio, e a troca aberta tem prioridade sobre um convite pendente.

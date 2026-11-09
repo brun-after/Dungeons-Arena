@@ -45,7 +45,7 @@ import { RetornosDaSala } from './retorno';
 import { chegadaNaPedra, fonteDeMissoesPerto, lugarAoAcaso } from './sala-viagem';
 import { progredirMissoes, type FatoDeMissao } from './missoes-mundo';
 import type { AcaoSocial, PendenciaDoMundo, ResultadoDoMercado } from './pendencias';
-import { atenderChat, atenderTroca, cancelarTrocaDe, type Participante, type SalaSocial } from './sala-social';
+import { atenderChat, atenderTroca, cancelarTrocaDe, limparTrocas, type Participante, type SalaSocial } from './sala-social';
 import { TrocasDaSala } from './troca';
 import { descobrir, fichaAtualizada, type FichaDoMundo } from './ficha-mundo';
 import { idDoLugar, montarLugar, type Lugar } from './lugares';
@@ -223,6 +223,8 @@ export class SalaMundo extends SalaArena {
       this.conferirEscondidas(s, e, p);
     }
     if (this.estado.tick % CONFERIR_EVENTO_TICKS === 0) {
+      // 09/11/2026 (D-144): a troca abandonada (longe, morto, fora da sala) não prende mais ninguém.
+      if (this.trocas.todas().length > 0) limparTrocas(this.social(), this.trocas);
       this.conferirEvento();
       this.conferirFocos();
     }

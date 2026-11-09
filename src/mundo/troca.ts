@@ -33,8 +33,10 @@ const lado = (id: EntidadeId): LadoDaTroca => ({ id, itens: [], ouro: 0, confirm
 export class TrocasDaSala {
   private readonly trocas: Troca[] = [];
 
+  /** A troca de `id`: a aberta primeiro (09/11/2026, D-144: um convite pendente escondia a troca aberta). */
   de(id: EntidadeId): Troca | undefined {
-    return this.trocas.find((t) => t.a.id === id || t.b.id === id);
+    const doId = (t: Troca) => t.a.id === id || t.b.id === id;
+    return this.trocas.find((t) => t.aberta && doId(t)) ?? this.trocas.find(doId);
   }
 
   propor(de: EntidadeId, para: EntidadeId): MotivoDoMundo | null {

@@ -240,7 +240,10 @@ export function criarPainelSocial(o: OpcoesDoSocial): PainelSocial {
   };
 
   // A troca.
-  const pTroca = painel(t('mundo.troca.titulo'));
+  // 09/11/2026 (D-144): fechar a janela da troca (X, Esc ou ignorar o convite) desfaz a troca no servidor. Antes ela
+  // ficava aberta lá e o jogador seguia "em uma troca" até sair do jogo.
+  const cancelarTroca = () => { o.enviar({ a: 'troca', op: 'cancelar' }); };
+  const pTroca = painel(t('mundo.troca.titulo'), cancelarTroca);
   /** O que eu ainda não mandei: invId -> quantidade (vazio = a oferta como está na sala). */
   let rascunho = new Map<string, number>();
   const textoDaOferta = (of: OfertaVista) => {
@@ -278,7 +281,7 @@ export function criarPainelSocial(o: OpcoesDoSocial): PainelSocial {
         corpo.append(
           linhaDeAcoes(
             botao(t('mundo.troca.aceitar'), () => { o.enviar({ a: 'troca', op: 'aceitar', de: a.comId }); }),
-            botao(t('mundo.grupo.ignorar'), fechar),
+            botao(t('mundo.grupo.ignorar'), () => { fechar(); cancelarTroca(); }),
           ),
         );
         return;
