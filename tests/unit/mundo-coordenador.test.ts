@@ -180,3 +180,24 @@ it('reentrada aguarda gravações em ordem e preserva o save mais recente', asyn
   expect((await carregando)?.vilaSalva).toBe('encosta_do_leste');
   expect(chamadas).toBe(2);
 });
+
+// 09/11/2026 (D-144): a troca de sala não depende do token da conta (vence em 1 h): o bilhete identifica quem viaja.
+describe('viagem pelo bilhete', () => {
+  it('o bilhete válido dá a conta; usado ou desconhecido, não', () => {
+    const c = new CoordenadorDoMundo(new Contadora(), CONTEUDO), f = ficha();
+    const id = c.emitir({ conta: 'local:viajante', slot: 2, ficha: f, lugar: 'regiao:campos_do_oeste', chegada: null, instancia: null });
+    expect(c.contaDoBilhete(id)).toBe('local:viajante');
+    expect(c.contaDoBilhete('outro')).toBeNull();
+    expect(c.usar(id, 'local:viajante', 'regiao:campos_do_oeste')).not.toBeNull();
+    expect(c.contaDoBilhete(id)).toBeNull();
+  });
+
+  it('a sessão caída já despedida solta o personagem (antes ficava "já jogando")', () => {
+    const c = new CoordenadorDoMundo(new Contadora(), CONTEUDO);
+    const sala = { liberarCaida: () => ({ ficha: null }), entregar: () => false, definirGrupo: () => false, concluirMercado: () => false };
+    c.registrarSala('sala-velha', sala);
+    expect(c.entrar('local:caiu#1', 'sala-velha', 's1')).toBe(true);
+    expect(c.liberarCaida('local:caiu#1')).toEqual({ ficha: null });
+    expect(c.entrar('local:caiu#1', 'sala-nova', 's2')).toBe(true);
+  });
+});

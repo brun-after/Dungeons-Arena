@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.97 · **Data:** 08/11/2026
+**Versão:** 0.98 · **Data:** 09/11/2026
 
 > **Histórico**
+> - **0.98 (09/11/2026)**: D-144: estabilidade e ajustes de jogo do Mundo (viagem entre salas sem queda, perseguição, lojas, troca, invocações, alvo dos buffs, descrições).
 > - **0.97 (08/11/2026)**: D-141 (habilidades por 35% FOR e 65% INT; o guerreiro conjura andando e encadeia com o básico) e D-142 (marco 38: prédios das vilas, andarilhos, escolta, errantes, forja em graus, troféus, fusão, pedra de retorno com círculo, save em toda região e o deserto entre os reinos).
 > - **0.96 (08/11/2026)**: D-140: o Mundo sem a fadiga de XP por fase (só a diferença de nível reduz o XP das criaturas inferiores).
 > - **0.95 (08/11/2026)**: D-139: os inimigos atacam sem parar quando estão em alcance, mais rápido e com mais skills conforme o nível (a skill fora de alcance não trava mais o ataque).
@@ -4261,3 +4262,15 @@ materiais simples.
 
 Não precisa de migração no Supabase: a ficha só guarda ids (os fundidos se resolvem pelo id) e `vilaSalva`, que já era
 texto. Testes em `tests/unit/mundo-vilas-viagem.test.ts`, e os da sala passaram a esperar a conjuração.
+
+## D-144 — Estabilidade do Mundo e ajustes de jogo (09/11/2026)
+
+Relatos dos jogadores no Mundo: quedas e "sessão expirada" ao trocar de reino ou usar a pedra de retorno, ping subindo
+quando alguém entra, troca presa, perseguição que não acaba e lojas bloqueadas. Cada ajuste entra nesta decisão.
+
+- **Viagem entre salas.** O token da conta era lido uma vez ao abrir o Mundo e vencia em 1 h; a troca de sala seguinte
+  era recusada (`sem_conta`). Agora o bilhete da troca (UUID de uso único, 60 s) autentica a viagem sozinho, o cliente
+  renova o token a cada entrada e o servidor tenta a nuvem duas vezes antes de recusar. A saída da sala antiga tem prazo
+  de 1,5 s (o `leave` do SDK nunca resolvia com a conexão caída), a entrada tenta 3 vezes e, se a viagem falhar de vez,
+  o personagem volta pela vila salva em vez de cair na tela de erro. A sessão caída já despedida solta o personagem
+  (antes a entrada nova recebia `ja_jogando`).

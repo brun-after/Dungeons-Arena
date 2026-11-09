@@ -49,7 +49,8 @@ export const reinoDoMundo = (conteudo: Conteudo): Reino => reinoDoConteudo(conte
 /** O que o coordenador pede a uma sala: soltar a sessão caída e entregar a quem está nela (false = não está). */
 interface SalaDoCoordenador {
   visaoParty?(identidade: string): import('../../src/mundo/avisos').VisaoExternaParty | null;
-  liberarCaida(identidade: string): FichaDoMundo | null;
+  /** null: a sessão está ativa; senão, a ficha que estava pendente (null se a sessão já tinha sido despedida). */
+  liberarCaida(identidade: string): { ficha: FichaDoMundo | null } | null;
   entregar(identidade: string, aviso: AvisoDoMundo): boolean;
   definirGrupo(identidade: string, grupo: string | null): boolean;
   concluirMercado(identidade: string, r: ResultadoDoMercado): boolean;
@@ -96,6 +97,15 @@ export class CoordenadorDoMundo {
   }
 
   slotDoBilhete(id: string): number | undefined { return this.bilhetes.get(id)?.slot; }
+
+  /**
+   * 09/11/2026 (D-144): a conta de um bilhete ainda válido. O bilhete (UUID de uso único, 60 s) já prova quem viaja:
+   * a troca de sala não depende do token da conta, que vence em 1 h, nem de a nuvem responder naquele instante.
+   */
+  contaDoBilhete(id: string): string | null {
+    const b = this.bilhetes.get(id);
+    return b && b.expira >= Date.now() ? b.conta : null;
+  }
 
   async excluir(conta: string, slot: number, nome: string): Promise<string | null> {
     return this.noSlot(conta, slot, async () => {
@@ -271,11 +281,11 @@ export class CoordenadorDoMundo {
    * Marco 29 (30/10/2026): o personagem que está online por uma sessão caída (a página recarregada fica 30 s na
    * reserva de reconexão) é solto, com a ficha atual, para a entrada nova. null quando a sessão está ativa.
    */
-  liberarCaida(identidade: string): FichaDoMundo | null {
+  liberarCaida(identidade: string): { ficha: FichaDoMundo | null } | null {
     const sala = this.online.get(identidade);
-    const ficha = sala === undefined ? null : (this.salas.get(sala)?.liberarCaida(identidade) ?? null);
-    if (ficha) this.sair(identidade);
-    return ficha;
+    const solta = sala === undefined ? null : (this.salas.get(sala)?.liberarCaida(identidade) ?? null);
+    if (solta) this.sair(identidade);
+    return solta;
   }
 
   /**
@@ -302,6 +312,20 @@ export class CoordenadorDoMundo {
     await this.gravacoesPendentes.get(`${conta}#${String(slot)}`);
     return this.persistencia.carregar(conta, slot);
   }
+}
+
+/** 09/11/2026 (D-144): uma falha passageira da nuvem não vira "sessão expirada": tenta mais uma vez. */
+async function autenticarComRetentativa(p: PersistenciaMundo, token: string): Promise<string | null> {
+  for (let tentativa = 0; tentativa < 2; tentativa++) {
+    try {
+      const conta = await p.autenticar(token);
+      if (conta) return conta;
+    } catch {
+      // a próxima tentativa decide
+    }
+    if (tentativa === 0) await new Promise((r) => setTimeout(r, 300));
+  }
+  return null;
 }
 
 const separar = (identidade: string): { conta: string; slot: number } => {
@@ -374,7 +398,7 @@ export class SalaMundoColyseus extends SalaColyseusBase {
     return this.mundo.concluirMercado(identidade, r);
   }
 
-  liberarCaida(identidade: string): FichaDoMundo | null {
+  liberarCaida(identidade: string): { ficha: FichaDoMundo | null } | null {
     for (const [sessionId, id] of this.identidades) {
       if (id !== identidade || !this.caidas.has(sessionId)) continue;
       this.identidades.delete(sessionId);
@@ -384,7 +408,8 @@ export class SalaMundoColyseus extends SalaColyseusBase {
         if (p.identidade === identidade && (p.tipo === 'gravar' || p.tipo === 'trocar')) ficha = p.ficha;
         this.atender(p);
       }
-      return ficha;
+      // 09/11/2026 (D-144): a sessão despedida numa troca (sem pendência) também solta; antes ficava 'ja_jogando'.
+      return { ficha };
     }
     return null;
   }
@@ -394,8 +419,12 @@ export class SalaMundoColyseus extends SalaColyseusBase {
     return { tipo: 'mundo', lugar: this.mundo.idLugar, instancia: this.instancia, canal: this.canal };
   }
 
-  override async onAuth(_client: Client, _opcoes: unknown, contexto: AuthContext): Promise<{ conta: string }> {
-    const conta = contexto.token ? await this.coordenador.persistencia.autenticar(contexto.token) : null;
+  override async onAuth(_client: Client, opcoes: unknown, contexto: AuthContext): Promise<{ conta: string }> {
+    // 09/11/2026 (D-144): na troca de sala, o bilhete basta (o token venceu em 1 h e derrubava quem viajava).
+    const o = ehObjeto(opcoes) ? opcoes : {};
+    const doBilhete = typeof o.bilhete === 'string' ? this.coordenador.contaDoBilhete(o.bilhete) : null;
+    if (doBilhete) return { conta: doBilhete };
+    const conta = contexto.token ? await autenticarComRetentativa(this.coordenador.persistencia, contexto.token) : null;
     if (!conta) throw new ServerError(401, 'sem_conta');
     return { conta };
   }
@@ -416,9 +445,9 @@ export class SalaMundoColyseus extends SalaColyseusBase {
       const identidade = `${conta}#${String(entrada.slot)}`;
       if (!this.coordenador.entrar(identidade, this.roomId, client.sessionId)) {
         // A página recarregada: a sessão velha caiu e ainda está na reserva; a entrada nova fica com a ficha dela.
-        const ficha = this.coordenador.liberarCaida(identidade);
-        if (!ficha || !this.coordenador.entrar(identidade, this.roomId, client.sessionId)) throw new ServerError(409, 'ja_jogando');
-        if (entrada.chegada === null) entrada.ficha = ficha;
+        const solta = this.coordenador.liberarCaida(identidade);
+        if (!solta || !this.coordenador.entrar(identidade, this.roomId, client.sessionId)) throw new ServerError(409, 'ja_jogando');
+        if (entrada.chegada === null && solta.ficha) entrada.ficha = solta.ficha;
       }
       // Uma entrada pelo menu substitui qualquer transferência abandonada.
       if (typeof o.bilhete !== 'string') this.coordenador.cancelarBilhetesDe(identidade);
