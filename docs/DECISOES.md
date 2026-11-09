@@ -4299,3 +4299,8 @@ quando alguém entra, troca presa, perseguição que não acaba e lojas bloquead
   itens da vila da região, incomuns e raros garantidos, 30% de um raro a mais, 40% de um épico e 6% de um lendário,
   só itens até o nível da dungeon + 10 (`mundo.lojaDungeon`). A semana vira na quarta-feira à meia-noite de Brasília,
   pelo relógio do servidor; a sala aplica o estoque ao nascer e na virada, e o cliente o recebe na loja.
+- **Alvo do suporte de alvo único.** Buffs, curas e escudos de alvo único iam no aliado mais ferido no alcance. Agora,
+  sem pedido, o do jogador vai nele mesmo (a IA segue no mais ferido). Com Shift, a interface pede o aliado ou a
+  invocação por perto com a menor vida, jogadores primeiro; tocar ou clicar num aliado (ou invocação) antes da
+  habilidade a manda nele (o jeito do celular), até tocar em outro lugar. A escolha mora no cliente
+  (ui/alvo-suporte.ts) e vai como o alvo do comando; a seleção do núcleo continua só para hostis.
