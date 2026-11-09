@@ -40,7 +40,7 @@
       "concentracaoAcertos": 4,
       "concentracaoJanelaMs": 12000,
       "concentracaoExtraPct": 25,
-      "encarnacao": { "fogoDanoPct": 5, "fogoIntervaloMs": 1000, "fogoRaio": 1, "fogoQueimaValor": 2, "fogoQueimaMs": 2000, "geloReducaoPct": 10, "geloResfriarMs": 2000, "raioVelocidadePct": 15, "duracaoMs": 12000, "duplaJanelaMs": 3000, "duplaDuracaoMs": 6000 }
+      "encarnacao": { "fogoDanoPct": 5, "fogoIntervaloMs": 1000, "fogoRaio": 1, "fogoQueimaValor": 2, "fogoQueimaMs": 2000, "geloReducaoPct": 10, "geloResfriarMs": 2000, "raioVelocidadePct": 15, "duracaoMs": 10000, "lentidaoPct": 20, "duplaJanelaMs": 3000, "duplaDuracaoMs": 6000 }
     },
     "aventureiro": {
       "nivelCorte": 20,
@@ -421,6 +421,7 @@
     "distanciaMinAtirador": 3,
     "distanciaMaxAtirador": 5, "caca": { "carenciaMs": 2000, "rampaMs": 3000, "maxPct": 10, "porNivelPct": 0.5, "nivelMaxPct": 5, "chefeMult": 0.3 },
     "cadencia": { "porNivelPct": 2, "maxPct": 120, "intervaloMinMs": 800, "habilidadeBasePct": 50, "habilidadePorNivelPct": 1, "habilidadeMaxPct": 80, "chefeMult": 0.5 },
+    "estranhamento": { "foraPct": 10, "perseguindoPct": 20, "intervaloMs": 6000, "duracaoMs": 8000, "raio": 6 },
     "custoPerigo": 8,
     "curaAfimRaio": 6,
     "curaAfimSaiPct": 90,
@@ -621,6 +622,7 @@
     "errantes": { "passoMs": 650, "pausaPertoCelulas": 2 },
     "escolta": { "raioChegada": 3, "duracaoMin": 30 },
     "retorno": { "conjuracaoMs": 5000, "cancelaAteMs": 4000, "raioCirculo": 1.5 },
+    "portalTemporario": { "duracaoS": 60, "fragmentoChancePct": 1.5, "inteiroChancePct": 0.05, "lapideMin": 5 },
     "fusao": { "chanceArmaPct": [12, 20, 30], "resistenciaPct": [12, 20, 30], "valorPct": [25, 50, 90] },
     "banco": { "slots": 40 },
     "missoes": { "ativasMax": 5, "ofertasPorQuadro": 6 },

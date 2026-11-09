@@ -1,4 +1,5 @@
 // O que a sala do Mundo usa para levar alguém a outro lugar (marco 38, 08/11/2026, D-142):
+// - a chegada pela borda na vizinha (09/11/2026: veio da sala do Mundo);
 // - a chegada na pedra de save das regiões sem vila (ao lado da pedra, no centro);
 // - o lugar ao acaso do reino da Pedra de retorno desviada: uma região do mesmo reino e uma célula onde o gerador pôs
 //   um monstro ou um ponto de coleta (sempre alcançável a pé), sorteadas pela semente da sala.
@@ -12,7 +13,7 @@ import type { Entidade } from '../entities/entidade';
 import type { ExteriorGerado } from '../world/gerador-exterior';
 import { gerarExterior } from '../world/gerador-exterior';
 import { PREFIXO_ANDARILHO } from './objetos-mundo';
-import { fonteDoAndarilho, territorioDoLugar, type Reino, type RegiaoDoMundo } from './reino';
+import { fonteDoAndarilho, ladoOposto, territorioDoLugar, type LadoDaRegiao, type Reino, type RegiaoDoMundo } from './reino';
 
 /** Onde chega quem não veio por uma passagem: ao lado da pedra de save do centro (null: o spawn da região). */
 export function chegadaNaPedra(exterior: ExteriorGerado | null): Celula | null {
@@ -44,4 +45,14 @@ export function fonteDeMissoesPerto(estado: EstadoJogo, e: Entidade, alcance: nu
     if (o.ref === 'missoes' && vila) return { fonte: vila, andarilho: null };
   }
   return null;
+}
+
+/** A célula de chegada na vizinha: o mesmo ponto da borda, duas células para dentro do lado oposto. */
+export function chegadaPelaBorda(tamanho: number, lado: LadoDaRegiao, c: Celula): Celula {
+  const dentro = 2;
+  const oposto = ladoOposto(lado);
+  if (oposto === 'norte') return { x: c.x, y: dentro };
+  if (oposto === 'sul') return { x: c.x, y: tamanho - 1 - dentro };
+  if (oposto === 'oeste') return { x: dentro, y: c.y };
+  return { x: tamanho - 1 - dentro, y: c.y };
 }

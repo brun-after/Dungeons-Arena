@@ -12,6 +12,18 @@
       "saida": { "tipo": "item", "item": "anel_do_eco" }
     },
     {
+      "id": "alquimista_portal_temporario",
+      "nome": "Portal temporário",
+      "texto": "Cinco fragmentos de portal viram um Portal temporário.",
+      "oficio": "alquimista",
+      "grau": 1,
+      "entrada": [
+        { "item": "fragmento_portal", "qtd": 5 }
+      ],
+      "ouro": 100,
+      "saida": { "tipo": "item", "item": "portal_temporario" }
+    },
+    {
       "id": "ultima_forma",
       "nome": "Última forma",
       "texto": "Uma peça Lendária sobe para a Última forma: 3 fragmentos de eco e 400 de ouro.",

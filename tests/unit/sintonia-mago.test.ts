@@ -134,7 +134,8 @@ describe('sintonia do Mago (D-095)', () => {
     const arc = cena(['seta_arcana', 'explosao']);
     arc.lancar('bola_de_fogo', 0);
     arc.lancar('seta_arcana', ticksDe(11_000));
-    expect(restanteEncarnacaoMs(arc.j, ticksDe(11_000))).toBeCloseTo(12_000, 3);
+    // 09/11/2026 (D-143): a encarnação dura 10 s.
+    expect(restanteEncarnacaoMs(arc.j, ticksDe(11_000))).toBeCloseTo(10_000, 3);
     expect(concentracaoExtra(arc.ctx, arc.j, 0)).toBe(2);
   });
 
@@ -153,8 +154,8 @@ describe('sintonia do Mago (D-095)', () => {
     expect(duplaDe(alq.j, 1)).toBe('miasma_ardente');
     const arq = cena(['seta_arcana', 'explosao', 'agulha_mental', 'telecinese']);
     arq.lancar('bola_de_fogo', 0);
-    expect(restanteEncarnacaoMs(arq.j, 0)).toBeCloseTo(24_000, 3);
+    expect(restanteEncarnacaoMs(arq.j, 0)).toBeCloseTo(20_000, 3);
     arq.lancar('agulha_mental', ticksDe(20_000));
-    expect(restanteEncarnacaoMs(arq.j, ticksDe(20_000))).toBeCloseTo(24_000, 3);
+    expect(restanteEncarnacaoMs(arq.j, ticksDe(20_000))).toBeCloseTo(20_000, 3);
   });
 });

@@ -75,7 +75,7 @@ import { DadoD20 } from './dado';
 import { criarBarraHabilidades } from './habilidades';
 import { criarSeletorBarra } from './seletor-barra';
 import { Hud } from './hud';
-import { identidadeDaClasse } from './barra-classe';
+import { identidadeDaClasse, invocacoesDoNecromante } from './barra-classe';
 import { QuadroAlvo } from './quadro-alvo';
 import { montarVisao, type ControleVisao } from './visao';
 import { ObjetosPreRenderizados } from '../render/objetos-3d';
@@ -687,7 +687,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     ponteiro.atualizar(q.agoraMs);
     golpeQuebravel.atualizar(performance.now());
     centralizar.marcar(camera.estaSolta);
-    hud.atualizar(j, estado.tick, identidadeDaClasse(ctx, j, estado.tick));
+    hud.atualizar(j, estado.tick, { ...identidadeDaClasse(ctx, j, estado.tick), invocacoes: invocacoesDoNecromante(estado, ctx, j) });
     feedback.conferirBasico();
     const alvo = j?.alvoSelecionado ? estado.entidades.find((e) => e.id === j.alvoSelecionado) : undefined;
     quadroAlvo.atualizar(j, alvo);

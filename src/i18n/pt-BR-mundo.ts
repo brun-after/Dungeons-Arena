@@ -44,6 +44,7 @@ export const textosMundo = {
   'prompt.mundo.tumulo': '{tecla}: abrir o túmulo',
   'prompt.mundo.pedra_save': '{tecla}: salvar aqui (você volta a esta pedra)',
   'prompt.mundo.pedra_portal': '{tecla}: usar o portal',
+  'prompt.mundo.portal_temporario': '{tecla}: atravessar o portal temporário',
   'prompt.mundo.porta_estrutura': '{tecla}: entrar',
 
   'menu.mundo': 'Mundo',
@@ -117,6 +118,9 @@ export const textosMundo = {
   'mundo.recusa.mesmo_lugar': 'Você já está aqui.',
   'mundo.recusa.longe': 'Chegue mais perto.',
   'mundo.recusa.escolta_falhou': 'Quem você escoltava caiu. A missão falhou.',
+  'mundo.recusa.portal_dungeon': 'O Portal temporário não abre dentro de dungeons.',
+  'mundo.recusa.portal_fechado': 'Este portal já se fechou.',
+  'mundo.recusa.portal_alheio': 'Só quem abriu e o grupo dele atravessam este portal.',
   'mundo.retorno.inicio': 'A Pedra de retorno conjura: fique dentro do círculo por 5 segundos.',
   'mundo.retorno.cancelado': 'Você saiu do círculo: o retorno foi cancelado e a pedra voltou para a mochila.',
   'mundo.retorno.desviado': 'Você saiu do círculo no último instante: a magia desviou! A pedra voltou para a mochila.',

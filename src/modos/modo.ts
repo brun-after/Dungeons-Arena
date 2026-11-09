@@ -157,6 +157,9 @@ export interface ModoDeJogo {
   materiaisDeInimigos?: Readonly<Record<string, readonly { itemId: string; chancePct: number }[]>>;
 }
 
+/** 09/11/2026 (D-143): a chave de `materiaisDeInimigos` que vale para qualquer preset. */
+export const QUALQUER_PRESET = '*';
+
 export interface PenalidadeMorte {
   xp: number;
   /** Perder XP pode baixar o nível (revogando pontos); desligado na campanha padrão (§2.12). */

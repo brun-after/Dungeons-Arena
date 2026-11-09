@@ -25,6 +25,10 @@ export type MotivoDoMundo =
   | 'mesmo_lugar'
   // Marco 38 (08/11/2026, D-142): o protegido da escolta morreu.
   | 'escolta_falhou'
+  // 09/11/2026 (D-143): o Portal temporário.
+  | 'portal_dungeon'
+  | 'portal_fechado'
+  | 'portal_alheio'
   // Marco 30.
   | 'longe'
   | 'sem_item'
@@ -112,4 +116,6 @@ export type AvisoDoMundo =
   | { tipo: 'evento'; evento: EventoDaRegiao | null; fim: number }
   | { tipo: 'recusa'; motivo: MotivoDoMundo }
   /** Marco 38 (D-142): a Pedra de retorno começou a conjurar (`fim` null) ou acabou (concluída, cancelada, desviada). */
-  | { tipo: 'retorno'; fim: 'concluido' | 'cancelado' | 'desviado' | null };
+  | { tipo: 'retorno'; fim: 'concluido' | 'cancelado' | 'desviado' | null }
+  /** 09/11/2026 (D-143): o Portal temporário abriu até `fim` (ms), daqui até o `destino` (o lugar). */
+  | { tipo: 'portalAberto'; destino: string; fim: number };

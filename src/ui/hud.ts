@@ -41,6 +41,8 @@ export class Hud {
   /** Marco 22 (D-089): o elemento encarnado do Mago. */
   private readonly encarnacao = document.createElement('span');
   private readonly tema = document.createElement('span');
+  /** 09/11/2026 (D-143): quantos mortos o Necromante tem de pé, ao lado da vida. */
+  private readonly invocacoes = document.createElement('span');
   private readonly numeros = document.createElement('span');
   private readonly rede = document.createElement('span');
   /** Marco 8A: ícones dos efeitos ativos, na cor do registro; marco 14: com duração e cartão. */
@@ -72,9 +74,12 @@ export class Hud {
     this.encarnacao.hidden = true;
     this.efeitos.className = 'chips-efeito';
     this.efeitos.setAttribute('aria-label', t('hud.efeitos'));
+    this.invocacoes.className = 'chip-invocacoes';
+    this.invocacoes.hidden = true;
+    this.invocacoes.setAttribute('role', 'status');
     this.tema.className = 'chip-tema';
     this.tema.hidden = true;
-    this.status.append(barras, this.numeros, this.tema, this.encarnacao, this.efeitos, this.pendentes.elemento, this.rede);
+    this.status.append(barras, this.numeros, this.invocacoes, this.tema, this.encarnacao, this.efeitos, this.pendentes.elemento, this.rede);
     this.chips = new ChipsEfeito(this.efeitos, nomeDe);
 
     this.log = document.createElement('ol');
@@ -116,9 +121,10 @@ export class Hud {
     if (!jogador) return;
     this.chips.atualizar(jogador, tick);
     this.pendentes.atualizar(jogador, tick);
-    const { barra: bc, encarnacao, encarnacaoS = 0 } = identidade;
+    const { barra: bc, encarnacao, encarnacaoS = 0, invocacoes: inv = null } = identidade;
     const pct = bc ? Math.round(bc.fracao * 100) : -1;
-    const chave = `${jogador.hp}/${jogador.hpMax}/${jogador.mana}/${jogador.manaMax}/${jogador.morto}/${bc?.tipo ?? ''}${pct}/${encarnacao ?? ''}${encarnacaoS}`;
+    const textoInv = inv ? `${inv.vivas}/${inv.limite}${inv.extras > 0 ? ` +${inv.extras}` : ''}` : '';
+    const chave = `${jogador.hp}/${jogador.hpMax}/${jogador.mana}/${jogador.manaMax}/${jogador.morto}/${bc?.tipo ?? ''}${pct}/${encarnacao ?? ''}${encarnacaoS}/${textoInv}`;
     if (chave === this.ultimo) return;
     this.ultimo = chave;
     const fracaoVida = jogador.hp / Math.max(1, jogador.hpMax);
@@ -145,9 +151,17 @@ export class Hud {
     if (encarnacao) {
       this.encarnacao.dataset.elemento = encarnacao;
       this.encarnacao.textContent = t('hud.encarnacaoTempo', { nome: t(`hud.encarnacao.${encarnacao}`), s: encarnacaoS });
-      this.encarnacao.title = t(`hud.encarnacaoDica.${encarnacao}`);
+      this.encarnacao.title = `${t(`hud.encarnacaoDica.${encarnacao}`)}. ${t('hud.encarnacaoCarga')}`;
     }
     this.numeros.textContent = `${jogador.hp}/${jogador.hpMax}`;
+    this.invocacoes.hidden = !inv;
+    if (inv) {
+      this.invocacoes.replaceChildren(icone('caveira'), document.createTextNode(textoInv));
+      const dica = t('hud.invocacoes', { vivas: inv.vivas, limite: inv.limite, extras: inv.extras });
+      this.invocacoes.title = dica;
+      this.invocacoes.setAttribute('aria-label', dica);
+      this.invocacoes.dataset.cheio = String(inv.vivas >= inv.limite);
+    }
     this.morte.hidden = !jogador.morto;
   }
 

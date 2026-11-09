@@ -452,6 +452,28 @@ body.toque .faixa-controles {
   background: #555;
 }
 
+/* 09/11/2026 (D-143): a contagem de mortos do Necromante, ao lado da vida. */
+.chip-invocacoes {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 6px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  color: #e6dcff;
+  background: #3b2b5a;
+}
+
+.chip-invocacoes[hidden] {
+  display: none;
+}
+
+.chip-invocacoes[data-cheio='true'] {
+  background: #5d3a8c;
+}
+
 .chip-encarnacao[data-elemento='fogo'] {
   background: #c0392b;
 }

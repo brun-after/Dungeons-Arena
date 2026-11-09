@@ -9,11 +9,11 @@ import type { Conteudo } from '../core/conteudo';
 import { BALANCE_PADRAO, type ContextoSimulacao } from '../core/contexto';
 import { hashTexto } from '../core/rng';
 import type { EstadoJogo } from '../core/estado';
-import type { ModoDeJogo } from '../modos/modo';
+import { QUALQUER_PRESET, type ModoDeJogo } from '../modos/modo';
 import { contextoDaFase, estadoInicialDaFase } from '../save/fases-campanha';
 import { catalogoDeGeracao, gerarFase } from '../world/gerador';
 import { gerarExterior, type ExteriorGerado } from '../world/gerador-exterior';
-import { objetosDoExterior } from './objetos-mundo';
+import { FRAGMENTO_DE_PORTAL, objetosDoExterior, PORTAL_TEMPORARIO } from './objetos-mundo';
 import { territorioDoLugar } from './reino';
 import { estoqueDeDungeon } from './lojas-mundo';
 import type { CovilDoMundo, MasmorraDoMundo, MaterialDeInimigo, Reino, RegiaoDoMundo, RegrasDePerigo } from './reino';
@@ -64,6 +64,9 @@ function comMateriais(modo: ModoDeJogo, reino: Reino, lugarId: string): ModoDeJo
       materiais[preset] = [...atual, ...lista.filter((m) => !atual.some((a) => a.itemId === m.itemId))];
     }
   }
+  // 09/11/2026 (D-143): qualquer monstro do Mundo pode deixar o fragmento de portal e, bem raro, o portal inteiro.
+  const pt = BALANCE_PADRAO.mundo.portalTemporario;
+  materiais[QUALQUER_PRESET] = [{ itemId: FRAGMENTO_DE_PORTAL, chancePct: pt.fragmentoChancePct }, { itemId: PORTAL_TEMPORARIO, chancePct: pt.inteiroChancePct }];
   return { ...modo, materiaisDeInimigos: materiais };
 }
 
