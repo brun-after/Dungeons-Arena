@@ -7,7 +7,6 @@
 
 import { usarPortal } from './portas';
 import { usarRefugio } from '../progression/buffs';
-import { perseguido } from '../progression/recursos';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type Armadilha, type EstadoJogo, type ObjetoNoMundo } from '../core/estado';
@@ -125,8 +124,7 @@ function tentarInteragir(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade
   let ateTick: number;
   if (o.tipo === 'loja') {
     if (recargaLojaRestante(estado, o.objetoId, e.id) > 0) return 'em_recarga';
-    // Ajuste de 16/10/2026 (D-067): a loja não atende sendo perseguido, e não fecha sozinha (sem prazo).
-    if (perseguido(estado, e)) return 'em_perigo';
+    // D-067: a loja não fecha sozinha (sem prazo). 09/11/2026 (D-144): atende mesmo sendo perseguido.
     ateTick = LOJA_SEM_PRAZO;
   } else {
     if (o.chave && !temItem(e, o.chave)) return 'trancado';
@@ -212,11 +210,7 @@ export function processarInteracoes(
 ): void {
   for (const e of estado.entidades) {
     const i = e.interacao;
-    // D-067: a loja fecha se um hostil começar a perseguir (e só por isso, ou pelo jogador).
-    if (i?.tipo === 'loja' && perseguido(estado, e)) {
-      fecharLoja(estado, ctx, e, saida, true);
-      continue;
-    }
+    // 09/11/2026 (D-144): a perseguição não fecha mais a loja (quem é atacado nela vê a tela tremer, no cliente).
     if (!i || estado.tick < i.ateTick) continue;
     if (i.tipo === 'loja') fecharLoja(estado, ctx, e, saida);
     else if (i.tipo === 'desarme') concluirDesarme(estado, ctx, e, Number(i.objetoId), disparar, saida);

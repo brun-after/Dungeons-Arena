@@ -544,6 +544,8 @@ export interface RegrasIa {
   recalcularDistancia: number;
   maxFalhasCaminho: number;
   desistirAposMs: number;
+  /** 09/11/2026 (D-144): mais longe que isso do alvo, a perseguição acaba (e não conta como perseguido). */
+  perseguicaoMaxCelulas: number;
   checagemDesistenciaMs: number;
   chanceDesistir: number;
   distanciaMinAtirador: number;

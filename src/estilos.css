@@ -3286,3 +3286,23 @@ dialog.mochila[open] { display: flex; flex-direction: column; }
 .tela-menu .voltar-selecao:hover { color: var(--destaque); }
 .acoes-slot .botao-menu.botao-perigo { background: #251a1c; border-color: #a65c61; color: #f7bec1; }
 .acoes-slot .botao-menu.botao-perigo { flex: 0 1 auto; }
+
+/* 09/11/2026 (D-144): levar dano com a loja aberta faz a janela tremer (a loja não fecha mais na perseguição). */
+.modal.tremor-loja {
+  animation: tremor-loja 0.32s ease-out;
+}
+
+@keyframes tremor-loja {
+  0%, 100% { translate: 0 0; }
+  20% { translate: -7px 2px; }
+  40% { translate: 6px -3px; }
+  60% { translate: -4px 2px; }
+  80% { translate: 3px -1px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal.tremor-loja {
+    animation: none;
+    outline: 3px solid #c0392b;
+  }
+}

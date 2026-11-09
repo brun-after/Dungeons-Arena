@@ -36,7 +36,7 @@ export function definirPassiva(estado: EstadoJogo, ctx: Ctx, e: Entidade, id: st
   if (!ehPassivaGeral(ctx, id)) return recusar('nao_passiva');
   const ativas = bolsa.passivasAtivas ?? [];
   if (ativas.includes(id) === ligada) return true;
-  if (emCombate(estado, e)) return recusar('em_combate');
+  if (emCombate(estado, ctx, e)) return recusar('em_combate');
   if (ligada && ativas.length >= ctx.balance.passivasGerais.maxAtivas) return recusar('limite_passivas');
   bolsa.passivasAtivas = ligada ? [...ativas, id] : ativas.filter((x) => x !== id);
   recalcularFicha(e, ctx);

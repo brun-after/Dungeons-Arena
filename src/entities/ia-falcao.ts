@@ -168,7 +168,7 @@ export function processarFalcao(estado: EstadoJogo, ctx: ContextoSimulacao, e: E
   ia.alvoId = hostil?.id ?? null;
   if (hostil) mudarModo(ia, 'perseguindo', estado.tick, false);
   else {
-    const calmo = donoQuieto(dono) && !emCombate(estado, dono) && !coletavelMaisPerto(estado, ctx, e, dono);
+    const calmo = donoQuieto(dono) && !emCombate(estado, ctx, dono) && !coletavelMaisPerto(estado, ctx, e, dono);
     const quieto = ia.modoDesdeTick !== EM_ATIVIDADE && estado.tick - ia.modoDesdeTick >= ticksDe(r.pousoMs);
     const pousa = calmo && (ia.modo === 'pousado' || (ia.modo === 'patrulha' && quieto));
     mudarModo(ia, pousa ? 'pousado' : 'patrulha', estado.tick, !calmo);
@@ -186,7 +186,7 @@ export function processarFalcao(estado: EstadoJogo, ctx: ContextoSimulacao, e: E
     passear(estado, ctx, e, ia, celulaOcupada(hostil), r.distanciaAlvo, false, saida);
     return;
   }
-  if (!emCombate(estado, dono)) {
+  if (!emCombate(estado, ctx, dono)) {
     const objeto = coletavelMaisPerto(estado, ctx, e, dono);
     if (objeto) {
       irPara(estado, ctx, e, ia, objeto, saida);

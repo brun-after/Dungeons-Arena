@@ -8,7 +8,7 @@ import { DT_MS } from '../../src/core/loop';
 import { simular, type EventoSimulacao } from '../../src/core/simulacao';
 import type { Entidade } from '../../src/entities/entidade';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
-import { regenerarPorPasso } from '../../src/progression/recursos';
+import { perseguido, regenerarPorPasso } from '../../src/progression/recursos';
 import { perderXp } from '../../src/progression/nivel';
 import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 
@@ -132,5 +132,26 @@ describe('regeneração por célula caminhada (§2.12)', () => {
     l.tick({ t: 'irPara', x: 6, y: 5 });
     l.avancar(120);
     expect(jl.hp).toBe(10);
+  });
+});
+
+// 09/11/2026 (D-144): a perseguição que não acabava (monstro dormindo longe, ou depois de morrer).
+describe('fim da perseguição (D-144)', () => {
+  it('quem persegue a mais de 20 células não conta (o monstro longe dorme sem rodar a IA)', () => {
+    const c = cenario();
+    const g = c.perseguidor();
+    expect(perseguido(c.estado, c.ctx, c.j())).toBe(true);
+    g.x = c.j().x + BALANCE_PADRAO.ia.perseguicaoMaxCelulas + 1;
+    expect(perseguido(c.estado, c.ctx, c.j())).toBe(false);
+  });
+
+  it('morrer limpa a perseguição', () => {
+    const c = cenario();
+    const g = c.perseguidor();
+    c.j().hp = 0;
+    c.tick();
+    expect(g.ia?.alvoId).toBeNull();
+    expect(g.ia?.modo).not.toBe('perseguindo');
+    expect(perseguido(c.estado, c.ctx, c.j())).toBe(false);
   });
 });

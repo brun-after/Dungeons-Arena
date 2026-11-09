@@ -51,6 +51,8 @@ export function criarLoja(o: OpcoesLoja): Loja {
   // Fechado pelo jogador: não reabre enquanto o `fecharLoja` não chega à simulação.
   let janelaFechada = -1;
   let janelaAtual = -1;
+  /** 09/11/2026 (D-144): a vida no quadro anterior; perder vida com a loja aberta faz a janela tremer. */
+  let vidaAntes = -1;
 
   const modal = criarModal({
     titulo: t('loja.titulo'),
@@ -68,7 +70,13 @@ export function criarLoja(o: OpcoesLoja): Loja {
 
   const saldo = el('p', 'saldo-loja');
   const listas = el('div', 'conteudo-modal');
-  // D-067: a loja não tem prazo (fecha pelo jogador ou se um inimigo começar a perseguir).
+  // D-067: a loja não tem prazo (fecha pelo jogador). D-144: a perseguição não a fecha mais; levar dano faz tremer.
+  const tremer = () => {
+    modal.dialogo.classList.remove('tremor-loja');
+    modal.dialogo.getBoundingClientRect(); // reinicia a animação
+    modal.dialogo.classList.add('tremor-loja');
+  };
+  modal.dialogo.addEventListener('animationend', () => { modal.dialogo.classList.remove('tremor-loja'); });
   modal.corpo.append(saldo, listas);
 
   const linha = (item: Item | undefined, rotulo: string, qtd: number, acao: { texto: string; chave: string; desligado: boolean; fazer: () => void } | null, nota?: string) => {
@@ -213,6 +221,7 @@ export function criarLoja(o: OpcoesLoja): Loja {
     const estado = o.estado();
     const loja = j ? lojaAberta(estado, j) : null;
     if (!j || !loja) {
+      vidaAntes = -1;
       // ateTick é sempre LOJA_SEM_PRAZO; a confirmação libera a próxima abertura.
       janelaFechada = -1;
       if (modal.aberto()) {
@@ -222,6 +231,8 @@ export function criarLoja(o: OpcoesLoja): Loja {
       return;
     }
     janelaAtual = j.interacao?.ateTick ?? -1;
+    if (modal.aberto() && vidaAntes >= 0 && j.hp < vidaAntes) tremer();
+    vidaAntes = j.hp;
     if (!modal.aberto()) {
       if (janelaAtual === janelaFechada) return;
       o.aoAbrir();

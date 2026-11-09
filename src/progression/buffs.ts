@@ -23,8 +23,8 @@ export const EFEITOS_OFENSIVOS: ReadonlySet<TipoEfeito> = new Set<TipoEfeito>(['
 const JANELA_COMBATE_MS = 3000;
 
 /** Em combate: um hostil persegue, ou houve golpe recente dado ou levado. */
-export function emCombate(estado: EstadoJogo, e: Entidade): boolean {
-  if (perseguido(estado, e)) return true;
+export function emCombate(estado: EstadoJogo, ctx: Pick<ContextoSimulacao, 'balance'>, e: Entidade): boolean {
+  if (perseguido(estado, ctx, e)) return true;
   const janela = ticksDe(JANELA_COMBATE_MS);
   const recente = (tick: number) => estado.tick - tick <= janela;
   if (e.participacao.some((p) => recente(p.tick))) return true;
@@ -48,7 +48,7 @@ export function processarBuffsArmados(estado: EstadoJogo, ctx: ContextoSimulacao
       e.buffsArmados = [];
       continue;
     }
-    if (emCombate(estado, e)) {
+    if (emCombate(estado, ctx, e)) {
       const armados = e.buffsArmados;
       e.buffsArmados = [];
       const duracao = 1 + passivosDe(ctx, e).buffArmadoDuracaoPct / 100;
