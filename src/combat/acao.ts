@@ -378,7 +378,9 @@ function escolherAlvo(
     const e = buscarEntidade(estado, pedido);
     if (e && alvoValido(estado, ctx, ator, e, hab)) return e;
   }
-  if (deSuporte(hab)) return aliadoMaisFerido(estado, ctx, ator, alcance, origem);
+  // 09/11/2026 (D-144): sem pedido, o suporte de alvo único do jogador vai nele mesmo (o aliado vem pedido pela
+  // interface: Shift ou o aliado tocado antes); a IA segue no aliado mais ferido.
+  if (deSuporte(hab)) return ator.controlador === 'ia' ? aliadoMaisFerido(estado, ctx, ator, alcance, origem) : ator;
   // Ajuste de 15/10/2026 (D-065): travado, a habilidade vai no travado mesmo fora do alcance (a validação recusa),
   // nunca em outro; destravado, o hostil escolhido pelo auto-alvo passa a ser o selecionado (o anel acompanha).
   const atual = alvoAtual(estado, ctx, ator);

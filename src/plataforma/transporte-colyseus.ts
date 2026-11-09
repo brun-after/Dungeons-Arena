@@ -117,6 +117,9 @@ export async function excluirPersonagemDoMundo(url: string, token: string, slot:
   }
 }
 
+/** 09/11/2026 (D-144): quanto a saída espera a confirmação do servidor antes de fechar a conexão à força. */
+const PRAZO_SAIDA_MS = 1500;
+
 function embrulhar(sala: Room): Omit<ConexaoArena, 'fase'> {
   // Reconexão automática do SDK mesmo logo depois de entrar (o celular suspende a aba a qualquer hora).
   sala.reconnection.minUptime = 0;
@@ -144,9 +147,20 @@ function embrulhar(sala: Room): Omit<ConexaoArena, 'fase'> {
   });
 
   // 19/10/2026: saída voluntária não reconecta se a rede cair durante o fechamento.
+  // 09/11/2026 (D-144): o `leave` só resolve quando o servidor responde; com a conexão caída no meio (comum na troca
+  // de sala), a promessa nunca voltava e a viagem travava até o bilhete expirar. Depois do prazo, fecha à força.
   const encerrar = () => {
     sala.reconnection.enabled = false;
-    return sala.leave(true).then(() => {});
+    return new Promise<void>((resolve) => {
+      const prazo = setTimeout(() => {
+        try { sala.connection.close(); } catch { /* já fechada */ }
+        resolve();
+      }, PRAZO_SAIDA_MS);
+      void sala.leave(true).then(() => {
+        clearTimeout(prazo);
+        resolve();
+      });
+    });
   };
 
   return {

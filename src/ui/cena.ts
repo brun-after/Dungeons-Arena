@@ -28,6 +28,7 @@ import { ligarPonteiro } from '../input/ponteiro';
 import { comandoMover } from '../input/direcao';
 import { ligarTeclado, type Teclado } from '../input/teclado';
 import { podeFerir } from '../modos/relacao';
+import { criarAlvoDeSuporte } from './alvo-suporte'; import { linhasDaSkill } from './descricao-skill';
 import { consumiveisComAtalho } from '../progression/inventario';
 import { detectarToque, mostrarDirecional, sinaisDoNavegador } from '../plataforma/dispositivo';
 import { lerPreferencias, type Preferencias } from '../plataforma/preferencias';
@@ -331,10 +332,8 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     },
   });
   const isometrico = () => camera.projecaoAtual.visao === 'iso';
-  const usarHabilidade = (id: string) => {
-    emitir({ t: 'usarHabilidade', id });
-  };
-
+  const suporte = criarAlvoDeSuporte({ ctx, estado: o.estado, jogador, aoEscolher: (nome) => { hud.registrar(nome ? t('log.aliadoEscolhido', { nome }) : t('log.aliadoEsquecido')); } });
+  const usarHabilidade = (id: string) => { const alvo = suporte.alvoPara(id); emitir({ t: 'usarHabilidade', id, ...(alvo && { alvo }) }); };
   // Toque ou clique num hostil seleciona e trava o alvo (no travado, destrava: D-065); em outra célula, vai até ela.
   // Marco 26 (D-115): devolve se andou (o mouse segurado só guia quando o clique não foi num alvo).
   const golpeQuebravel = criarGolpeNoQuebravel({ ctx, estado: o.estado, jogador, emitir });
@@ -348,6 +347,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       return oc.x === c.x && oc.y === c.y && !!local && podeFerir(local, e, ctx.modo) && !e.morto;
     });
     if (!hostil) {
+      if (suporte.tocar(c)) return false;
       emitir({ t: 'irPara', x: ponto.x, y: ponto.y });
       return true;
     }
@@ -383,14 +383,14 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   // D-067: o seletor rápido põe uma habilidade ativa conhecida na tecla do botão (clique direito ou toque longo).
   const seletor = criarSeletorBarra(ui, (slot, id) => { emitir({ t: 'equiparHabilidade', id, slot }); });
   const pedirTroca = (id: string | null, ancora: HTMLElement) => {
-    const bolsa = jogador()?.bolsa;
-    if (!bolsa) return;
+    const j = jogador(); const bolsa = j?.bolsa;
+    if (!j || !bolsa) return;
     const slot = id ? bolsa.barra.indexOf(id) : bolsa.barra.indexOf(null);
     if (slot < 0) return;
     const opcoes = bolsa.conhecidas
       .map((c) => resolverHabilidade(ctx, c.id))
       .filter((h): h is Habilidade => !!h && !h.passiva)
-      .map((h) => ({ id: h.id, nome: h.nome, icone: h.icone, classe: classeDaHabilidade(ctx.conteudo, h.id) }));
+      .map((h) => ({ id: h.id, nome: h.nome, icone: h.icone, classe: classeDaHabilidade(ctx.conteudo, h.id), descricao: linhasDaSkill(ctx, j, h.id) }));
     seletor.abrir(slot, id, opcoes, ancora);
   };
   const barra = criarBarraHabilidades(usarHabilidade, corDoElemento, pedirTroca);
@@ -782,7 +782,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     desmontar: () => {
       paineisParty.limpar();
       clearTimeout(releitura);
-      teclado.desligar();
+      teclado.desligar(); suporte.destruir();
       encerrarSessaoDeTela();
       hud.destruir();
       visao.destruir();

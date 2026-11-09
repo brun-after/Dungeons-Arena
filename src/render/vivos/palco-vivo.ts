@@ -10,9 +10,9 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { clone as clonarComEsqueleto } from 'three/addons/utils/SkeletonUtils.js';
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { Rectangle, Texture } from 'pixi.js';
 import { CELULA_PX } from '../camera-calculo';
+import { fundirPecas, malhasDe } from './fundir-pecas';
 import { PAUSA_DO_IMPACTO_MS, peloGolpe, PERFIL_PADRAO, PERFIS_DE_GOLPE, progressoDoGolpe, voltaDoGolpe, type EstadoPersonagem, type PerfilDoGolpe } from '../quadros-personagem';
 
 const saida = (t: number) => 1 - (1 - Math.min(1, Math.max(0, t))) ** 2;
@@ -22,7 +22,7 @@ import type { AparenciaEquipada } from '../../entities/entidade';
 import { definirDetalhe, KITS_SOMBRIOS, type PecaSombria } from './armaduras-sombrias';
 import { CHEFES } from './chefes-vivos';
 import { ARMAS_3D, ESCALA_DO_GRAU, Kit } from './armas3d';
-import { aplicarVento, ATRIBUTOS_DO_PANO, levarAoRig, avancarVento, novoEstadoDeVento, novosUniformes, ventoParado, type EstadoDoVento, type UniformesDeVento } from './skin-pano';
+import { aplicarVento, avancarVento, novoEstadoDeVento, novosUniformes, ventoParado, type EstadoDoVento, type UniformesDeVento } from './skin-pano';
 import { vesteDoCeifador } from './skin-ceifador'; import { ALTURA_DO_CEIFADOR } from './skin-ceifador-medidas';
 import { vesteDaSombraRubra } from './skin-mago'; import { vesteDoMagico } from './skin-magico'; import { skinPorId } from '../../entities/skins';
 
@@ -161,7 +161,10 @@ interface Base {
   pernas: Map<string, THREE.AnimationClip>;
   tronco: Map<string, THREE.AnimationClip>;
   nomesDosOssos: string[];
-  pecas: Map<string, PecaFundida>;
+  /** As peças já montadas (`null`: a peça não existe no kit). */
+  pecas: Map<string, PecaFundida | null>;
+  /** 09/11/2026 (D-144): monta uma peça de armadura quando alguém a veste pela primeira vez. */
+  montarPeca: (chave: string) => PecaFundida | null;
 }
 interface PecaFundida {
   malhas: { geometria: THREE.BufferGeometry; material: THREE.Material }[];
@@ -189,13 +192,6 @@ interface Ator {
   semPedido: number;
 }
 
-function malhasDe(o: THREE.Object3D): THREE.Mesh[] {
-  const lista: THREE.Mesh[] = [];
-  o.traverse((x) => {
-    if (x instanceof THREE.Mesh) lista.push(x as THREE.Mesh);
-  });
-  return lista;
-}
 
 /** O clipe só com as faixas dos ossos que passam no teste (o passo nas pernas, o golpe no resto). */
 /**
@@ -363,99 +359,53 @@ export class PalcoVivo {
     modelo.traverse((o) => {
       if (o instanceof THREE.Bone) nomesDosOssos.push(o.name);
     });
-    const base: Base = {
-      nome, modelo, escala, largura: classe.largura, clipes, nomesDosOssos, pecas: new Map(),
+    // As peças: montadas no modelo de referência em repouso, já na escala do jogo. 09/11/2026 (D-144): só quando
+    // alguém veste cada uma (antes, as 36 peças de todos os graus saíam juntas e o jogo travava quando chegava um
+    // jogador de uma classe ainda não vista; o ping medido subia junto).
+    const kit = Object.hasOwn(KITS_SOMBRIOS, nome) ? KITS_SOMBRIOS[nome] : undefined;
+    const ossos = { get: (n: string) => modelo.getObjectByName(n) as THREE.Bone | undefined };
+    const emRepouso = (montar: (inverso: THREE.Matrix4) => PecaFundida | null): PecaFundida | null => {
+      if (parado) {
+        mixer.clipAction(parado).play();
+        mixer.setTime(0);
+      }
+      modelo.scale.set(escala * classe.largura, escala, escala * classe.largura);
+      modelo.updateMatrixWorld(true);
+      definirDetalhe(this.detalhe);
+      try {
+        return montar(modelo.matrixWorld.clone().invert());
+      } finally {
+        definirDetalhe(1);
+        mixer.stopAllAction();
+        modelo.scale.setScalar(1);
+        modelo.updateMatrixWorld(true);
+      }
+    };
+    const fundida = (r: PecaSombria, inverso: THREE.Matrix4): PecaFundida => ({
+      malhas: fundirPecas(r.extras, nomesDosOssos, inverso),
+      tecido: r.tecido ?? null,
+      esconder: r.esconder ? new RegExp(r.esconder) : null,
+    });
+    const pecas = new Map<string, PecaFundida | null>();
+    const montarPeca = (chave: string): PecaFundida | null => {
+      const pronta = pecas.get(chave);
+      if (pronta !== undefined) return pronta;
+      const [peca, grauTexto] = chave.split('-');
+      const grau = Number(grauTexto);
+      const valida = (PECAS_DE_ARMADURA as readonly string[]).includes(peca ?? '') && Number.isInteger(grau) && grau >= 0 && grau < GRAUS.length;
+      const f = valida && kit ? emRepouso((inverso) => fundida(kit(ossos, peca as PecaDeArmadura, grau), inverso)) : null;
+      pecas.set(chave, f);
+      return f;
+    };
+    mixer.stopAllAction();
+    modelo.updateMatrixWorld(true);
+    const veste = classe.veste;
+    if (veste) pecas.set('veste', emRepouso((inverso) => fundida(veste(ossos), inverso)));
+    return {
+      nome, modelo, escala, largura: classe.largura, clipes, nomesDosOssos, pecas, montarPeca,
       pernas: new Map(animacoes.map((c) => [c.name, recortar(c, true)])),
       tronco: new Map(animacoes.map((c) => [c.name, recortar(c, false)])),
     };
-    // As peças: montadas uma vez por grau no modelo de referência em repouso, já na escala do jogo.
-    modelo.scale.set(escala * classe.largura, escala, escala * classe.largura);
-    modelo.updateMatrixWorld(true);
-    const kit = Object.hasOwn(KITS_SOMBRIOS, nome) ? KITS_SOMBRIOS[nome] : undefined;
-    const ossos = { get: (n: string) => modelo.getObjectByName(n) as THREE.Bone | undefined };
-    const inverso = modelo.matrixWorld.clone().invert();
-    definirDetalhe(this.detalhe);
-    if (kit) {
-      for (const peca of PECAS_DE_ARMADURA) {
-        for (let grau = 0; grau < GRAUS.length; grau++) {
-          const r = kit(ossos, peca, grau);
-          base.pecas.set(`${peca}-${grau}`, {
-            malhas: this.fundir(r.extras, nomesDosOssos, inverso),
-            tecido: r.tecido ?? null,
-            esconder: r.esconder ? new RegExp(r.esconder) : null,
-          });
-        }
-      }
-    }
-    if (classe.veste) {
-      const r = classe.veste(ossos);
-      base.pecas.set('veste', { malhas: this.fundir(r.extras, nomesDosOssos, inverso), tecido: r.tecido ?? null, esconder: r.esconder ? new RegExp(r.esconder) : null });
-    }
-    definirDetalhe(1);
-    mixer.stopAllAction();
-    modelo.scale.setScalar(1);
-    modelo.updateMatrixWorld(true);
-    return base;
-  }
-
-  /** As peças rígidas presas nos ossos viram geometria com pele (peso 1 no osso), fundida por material. */
-  private fundir(extras: THREE.Object3D[], nomes: string[], inverso: THREE.Matrix4): PecaFundida['malhas'] {
-    const porMaterial = new Map<THREE.Material, THREE.BufferGeometry[]>();
-    for (const extra of extras) {
-      extra.updateMatrixWorld(true);
-      let osso: THREE.Object3D | null = extra.parent;
-      while (osso && !(osso instanceof THREE.Bone)) osso = osso.parent;
-      const indice = Math.max(0, nomes.indexOf(osso?.name ?? ''));
-      for (const m of malhasDe(extra)) {
-        const g = m.geometry.index ? m.geometry.toNonIndexed() : m.geometry.clone();
-        levarAoRig(g, new THREE.Matrix4().multiplyMatrices(inverso, m.matrixWorld)); // com os pedaços que se desprendem
-        // 06/11/2026 (skins): o pano leva dois ossos por vértice (`sa`, `sb`, `sw`, com a tabela de nomes na malha) e o
-        // `solto` que o vento usa; as peças rígidas seguem com um osso só e solto 0.
-        const tabela = m.userData.tabela as string[] | undefined;
-        const doPano = !!tabela && g.hasAttribute('sa') && g.hasAttribute('sb') && g.hasAttribute('sw');
-        const lerAttr = (nome: string): number[] => {
-          if (!g.hasAttribute(nome)) return [];
-          const a = g.getAttribute(nome);
-          return Array.from({ length: a.count }, (_, k) => a.getX(k));
-        };
-        const noRig = (n: number) => Math.max(0, nomes.indexOf(tabela?.[Math.round(n)] ?? ''));
-        const solto = g.hasAttribute('solto') ? Float32Array.from(lerAttr('solto')) : null;
-        const indA = doPano ? lerAttr('sa').map(noRig) : [];
-        const indB = doPano ? lerAttr('sb').map(noRig) : [];
-        const pesoA = doPano ? lerAttr('sw') : [];
-        for (const n of Object.keys(g.attributes)) if (!ATRIBUTOS_DO_PANO.has(n)) g.deleteAttribute(n);
-        const qtd = g.getAttribute('position').count;
-        if (!g.hasAttribute('uv')) g.setAttribute('uv', new THREE.Float32BufferAttribute(new Float32Array(qtd * 2), 2));
-        g.setAttribute('solto', new THREE.Float32BufferAttribute(solto ?? new Float32Array(qtd), 1));
-        const si = new Uint16Array(qtd * 4);
-        const sw = new Float32Array(qtd * 4);
-        for (let k = 0; k < qtd; k++) {
-          if (doPano) {
-            si[k * 4] = indA[k] ?? 0;
-            si[k * 4 + 1] = indB[k] ?? 0;
-            sw[k * 4] = pesoA[k] ?? 1;
-            sw[k * 4 + 1] = 1 - (pesoA[k] ?? 1);
-          } else {
-            si[k * 4] = indice;
-            sw[k * 4] = 1;
-          }
-        }
-        g.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(si, 4));
-        g.setAttribute('skinWeight', new THREE.Float32BufferAttribute(sw, 4));
-        const mat = Array.isArray(m.material) ? m.material[0] : m.material;
-        if (!mat) continue;
-        const lista = porMaterial.get(mat) ?? [];
-        lista.push(g);
-        porMaterial.set(mat, lista);
-      }
-      extra.removeFromParent();
-    }
-    const saida: PecaFundida['malhas'] = [];
-    for (const [material, geos] of porMaterial) {
-      const geometria = mergeGeometries(geos) as THREE.BufferGeometry | null;
-      if (geometria) saida.push({ geometria, material });
-    }
-    return saida;
   }
 
   private novoAtor(base: Base): Ator {
@@ -505,9 +455,9 @@ export class PalcoVivo {
       const grau = p.pecas[peca];
       return grau === undefined ? [] : [[`${peca}-${grau}`, peca === 'corpo'] as [string, boolean]];
     });
-    if (a.base.pecas.has('veste')) vestidas.push(['veste', true]);
+    if (a.base.pecas.get('veste')) vestidas.push(['veste', true]);
     for (const [chave, doCorpo] of vestidas) {
-      const f = a.base.pecas.get(chave);
+      const f = a.base.montarPeca(chave);
       if (!f) continue;
       for (const { geometria, material } of f.malhas) {
         // o pano da skin leva o vento do ator (um clone do material, com os uniformes dele)

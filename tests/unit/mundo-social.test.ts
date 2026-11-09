@@ -14,6 +14,8 @@ import { aReceber, liquidoDaVenda, taxaDeAnuncio, type Anuncio } from '../../src
 import { aceitarMissao, diaDe, entregarMissao, ofertasDoQuadro, progredirMissoes, type MissaoDoMundo } from '../../src/mundo/missoes-mundo';
 import type { Reino } from '../../src/mundo/reino';
 import { executarTroca, TrocasDaSala } from '../../src/mundo/troca';
+import type { AvisoDoMundo } from '../../src/mundo/avisos';
+import { limparTrocas } from '../../src/mundo/sala-social';
 import { guardarItem } from '../../src/progression/inventario';
 import { CONTEUDO } from '../apoio/fases';
 
@@ -235,5 +237,36 @@ describe('ações do Mundo', () => {
     expect(lerAcaoDoMundo({ a: 'mercado', op: 'comprar', id: 'x', preco: 10 })).toMatchObject({ preco: 10 });
     expect(lerAcaoDoMundo({ a: 'grupo', op: 'sair' })).toEqual({ a: 'grupo', op: 'sair' });
     expect(lerAcaoDoMundo('nada')).toBeNull();
+  });
+});
+
+// 09/11/2026 (D-144): a troca abandonada deixava o jogador "em uma troca" até sair do jogo.
+describe('troca abandonada (D-144)', () => {
+  const jogador = (id: string, x: number) => criarJogador(obter(CONTEUDO.classes.get('guerreiro'), 'classe'), id, x, 0, BALANCE_PADRAO);
+
+  it('a troca aberta aparece antes do convite pendente', () => {
+    const t = new TrocasDaSala();
+    expect(t.propor('a', 'b')).toBeNull();
+    expect(t.aceitar('b', 'a')).not.toBe('convite_expirado');
+    expect(t.propor('c', 'a')).toBe('troca_ocupado');
+    expect(t.de('a')?.aberta).toBe(true);
+  });
+
+  it('quem se afastou, morreu ou saiu da sala desfaz a troca, e os dois ficam sabendo', () => {
+    const a = jogador('a', 0);
+    const b = jogador('b', 1);
+    const avisos: string[] = [];
+    const participantes = [a, b].map((e) => ({ sessaoId: e.id, e, identidade: e.id, avisar: (x: AvisoDoMundo) => { if (x.tipo === 'troca') avisos.push(`${e.id}:${x.estado}`); } }));
+    const sala = { ctx: CTX, agora: 0, participantes: () => participantes, pedirAoServidor: () => undefined };
+    const t = new TrocasDaSala();
+    t.propor('a', 'b');
+    t.aceitar('b', 'a');
+    limparTrocas(sala, t);
+    expect(t.todas()).toHaveLength(1);
+    b.x = 1 + BALANCE_PADRAO.mundo.troca.raio * 2 + 1;
+    limparTrocas(sala, t);
+    expect(t.todas()).toHaveLength(0);
+    expect(avisos.sort()).toEqual(['a:cancelada', 'b:cancelada']);
+    expect(t.propor('a', 'b')).toBeNull();
   });
 });

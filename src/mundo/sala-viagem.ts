@@ -1,5 +1,6 @@
 // O que a sala do Mundo usa para levar alguém a outro lugar (marco 38, 08/11/2026, D-142):
-// - a chegada pela borda na vizinha (09/11/2026: veio da sala do Mundo);
+// - a chegada pela borda na vizinha, a célula do mercador do evento e as estruturas escondidas que quem passa perto
+//   descobre (09/11/2026: vieram da sala do Mundo);
 // - a chegada na pedra de save das regiões sem vila (ao lado da pedra, no centro);
 // - o lugar ao acaso do reino da Pedra de retorno desviada: uma região do mesmo reino e uma célula onde o gerador pôs
 //   um monstro ou um ponto de coleta (sempre alcançável a pé), sorteadas pela semente da sala.
@@ -8,12 +9,16 @@
 
 import type { Celula } from '../core/comandos';
 import type { EstadoJogo } from '../core/estado';
+import { passavel } from '../world/fase';
+import type { Balance, ContextoSimulacao } from '../core/contexto';
+import { raioDeRevelar } from '../progression/efeitos-atributo';
+import { descobrir, type FichaDoMundo } from './ficha-mundo';
 import { aleatorio, criarRng, hashTexto } from '../core/rng';
 import type { Entidade } from '../entities/entidade';
 import type { ExteriorGerado } from '../world/gerador-exterior';
 import { gerarExterior } from '../world/gerador-exterior';
 import { PREFIXO_ANDARILHO } from './objetos-mundo';
-import { fonteDoAndarilho, ladoOposto, territorioDoLugar, type LadoDaRegiao, type Reino, type RegiaoDoMundo } from './reino';
+import { fonteDoAndarilho, ladoOposto, portaDa, territorioDoLugar, type LadoDaRegiao, type Reino, type RegiaoDoMundo } from './reino';
 
 /** Onde chega quem não veio por uma passagem: ao lado da pedra de save do centro (null: o spawn da região). */
 export function chegadaNaPedra(exterior: ExteriorGerado | null): Celula | null {
@@ -55,4 +60,35 @@ export function chegadaPelaBorda(tamanho: number, lado: LadoDaRegiao, c: Celula)
   if (oposto === 'sul') return { x: c.x, y: tamanho - 1 - dentro };
   if (oposto === 'oeste') return { x: dentro, y: c.y };
   return { x: tamanho - 1 - dentro, y: c.y };
+}
+
+/** Uma célula andável e sem objeto, a poucos passos da entrada da região (o mercador errante do evento). */
+export function celulaDoMercador(estado: EstadoJogo, ctx: ContextoSimulacao): Celula | null {
+  const origem = ctx.fase.spawns[0];
+  if (!origem) return null;
+  for (let d = 3; d <= 8; d++) {
+    for (const [dx, dy] of [[d, 0], [-d, 0], [0, d], [0, -d], [d, d], [-d, -d]] as const) {
+      const x = origem.x + dx;
+      const y = origem.y + dy;
+      if (passavel(ctx.fase, x, y) && !estado.objetos.some((o) => o.x === x && o.y === y)) return { x, y };
+    }
+  }
+  return null;
+}
+
+/**
+ * Marco 30 (30/10/2026, D-129): as estruturas escondidas que `e` descobre agora (a porta a até o raio de revelar da
+ * Sabedoria, o mesmo das armadilhas). Já anota na ficha; devolve o lugar e o nome de cada uma, para o aviso.
+ */
+export function escondidasReveladas(regiao: RegiaoDoMundo, e: Entidade, ficha: FichaDoMundo, balance: Balance): { lugar: string; nome: string }[] {
+  const raio = raioDeRevelar(e.atributos, balance);
+  const novas: { lugar: string; nome: string }[] = [];
+  for (const estrutura of regiao.estruturas) {
+    if (!estrutura.escondida) continue;
+    const { porta } = portaDa(estrutura);
+    if (Math.max(Math.abs(porta.x - e.x), Math.abs(porta.y - e.y)) > raio) continue;
+    const lugar = `${estrutura.destino.tipo}:${estrutura.destino.id}`;
+    if (descobrir(ficha, lugar)) novas.push({ lugar, nome: estrutura.nome });
+  }
+  return novas;
 }

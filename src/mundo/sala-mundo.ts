@@ -14,20 +14,20 @@ import { versaoDoConteudo, type MensagemCliente } from '../arena/protocolo';
 import { SalaArena, type EntradaDePersonagem, type OpcoesSala, type Sessao } from '../arena/sala';
 import { estadoPublico } from '../arena/estado-publico';
 import { celulaDeEntrada, colocarEm } from '../coop/sala-campanha';
+import { recolherComitiva, retirarComitiva, soltarComitiva, type InvocacaoQueViaja } from './comitiva';
 import { conferirPersonagem, previaDoPersonagem } from '../coop/personagem';
 import type { Celula, EntidadeId } from '../core/comandos';
 import { modoPorId, type Conteudo } from '../core/conteudo';
 import { aplicarEfeito } from '../combat/efeitos';
 import { construirEfeito } from '../combat/registro-efeitos';
-import { buscarEntidade } from '../core/estado';
+import { buscarEntidade, clonarEstado } from '../core/estado';
 import { aleatorio, criarRng, hashTexto } from '../core/rng';
 import { ticksDe } from '../core/tempo';
 import { vivo, type Entidade, type ItemNaMochila } from '../entities/entidade';
 import { equipeDeEntrada } from '../modos/regras';
-import { raioDeRevelar } from '../progression/efeitos-atributo';
 import { concederXpDeProgressao } from '../progression/nivel';
 import { guardarItem } from '../progression/inventario';
-import { passavel, tipoEm } from '../world/fase';
+import { tipoEm } from '../world/fase';
 import { novoObjeto } from '../world/objeto-novo';
 import { eventoDaRegiao, type EventoAtivo } from './eventos-mundo';
 import { acenderFoco, apagarFoco, focoAceso } from './focos';
@@ -43,15 +43,16 @@ import { ErrantesDaRegiao } from './errantes';
 import { EscoltasDaRegiao } from './escoltas';
 import { RetornosDaSala } from './retorno';
 import { celulaDoPortal, destinoDaPonta, gastarPortal, PortaisTemporarios, recusaDoPortal, sincronizarPortais } from './portais-temporarios';
-import { chegadaNaPedra, chegadaPelaBorda, fonteDeMissoesPerto, lugarAoAcaso } from './sala-viagem';
+import { celulaDoMercador, chegadaNaPedra, escondidasReveladas, chegadaPelaBorda, fonteDeMissoesPerto, lugarAoAcaso } from './sala-viagem';
 export { chegadaPelaBorda } from './sala-viagem';
 import { progredirMissoes, type FatoDeMissao } from './missoes-mundo';
 import type { AcaoSocial, PendenciaDoMundo, ResultadoDoMercado } from './pendencias';
-import { atenderChat, atenderTroca, cancelarTrocaDe, type Participante, type SalaSocial } from './sala-social';
+import { atenderChat, atenderTroca, cancelarTrocaDe, limparTrocas, type Participante, type SalaSocial } from './sala-social';
 import { TrocasDaSala } from './troca';
 import { descobrir, fichaAtualizada, type FichaDoMundo } from './ficha-mundo';
-import { idDoLugar, montarLugar, type Lugar } from './lugares';
+import { idDoLugar, montarLugar, type Lugar, type LugarMontado } from './lugares';
 import { REF_ERRANTE } from './objetos-mundo';
+import { estoqueSemanalDaDungeon, semanaDaLoja } from './lojas-mundo';
 import { capitalDoAtlas, territorioDoLugar, estruturaDoDestino, LADOS, portaDa, vizinha, type PapelNpc, type Reino, type RegiaoDoMundo } from './reino';
 import type { ExteriorGerado } from '../world/gerador-exterior';
 
@@ -63,6 +64,11 @@ export interface OpcoesSalaMundo {
   canal?: number;
   /** Relógio de parede do servidor (ms): as recargas das masmorras e do portal valem entre sessões. */
   agora: () => number;
+  /**
+   * 09/11/2026 (D-144): o lugar já montado (o mapa não depende da semente). Montar uma região custa de 0,4 a 0,9 s de
+   * CPU e travava o servidor inteiro (o ping de todos subia) a cada sala nova; com o molde, a sala só clona o estado.
+   */
+  molde?: LugarMontado;
   versaoConteudo?: string;
   /** 09/11/2026 (D-143): os Portais temporários do processo (o coordenador passa o mesmo a todas as salas). */
   portais?: PortaisTemporarios;
@@ -87,7 +93,7 @@ export class SalaMundo extends SalaArena {
   readonly lugar: Lugar;
   readonly canal: number;
   private readonly exterior: ExteriorGerado | null;
-  private readonly reservas = new Map<string, { ficha: FichaDoMundo; chegada: Celula | null; grupo: string | null }>();
+  private readonly reservas = new Map<string, { ficha: FichaDoMundo; chegada: Celula | null; grupo: string | null; comitiva: readonly InvocacaoQueViaja[] }>();
   /** Por entidade: quem é e a ficha que entrou (a progressão vem da entidade na hora de gravar). */
   private readonly presencas = new Map<EntidadeId, Presenca>();
   /** Marco 30: o evento da região em curso e o modo sem ele (a lua sangrenta troca o modo enquanto dura). */
@@ -104,6 +110,7 @@ export class SalaMundo extends SalaArena {
   private readonly escoltas: EscoltasDaRegiao;
   private readonly retornos = new RetornosDaSala();
   private readonly portais: PortaisTemporarios;
+  private semanaDaLoja = Number.NaN; // D-144: a semana do estoque aplicado à loja da dungeon
 
   constructor(
     readonly reino: Reino,
@@ -111,7 +118,8 @@ export class SalaMundo extends SalaArena {
     conteudo: Conteudo,
     private readonly opcoesMundo: OpcoesSalaMundo,
   ) {
-    const montado = montarLugar(conteudo, reino, lugar, modoPorId(conteudo, MODO_MUNDO));
+    const molde = opcoesMundo.molde;
+    const montado = molde ? { ...molde, estado: clonarEstado(molde.estado) } : montarLugar(conteudo, reino, lugar, modoPorId(conteudo, MODO_MUNDO));
     const opcoes: OpcoesSala = { semente: opcoesMundo.semente, versaoConteudo: opcoesMundo.versaoConteudo ?? versaoDoConteudo() };
     super(montado.ctx, opcoes, montado.estado);
     this.lugar = lugar;
@@ -124,6 +132,7 @@ export class SalaMundo extends SalaArena {
     this.errantes = new ErrantesDaRegiao(this.exterior?.rotas ?? []);
     this.escoltas = new EscoltasDaRegiao(lugar.tipo === 'regiao' ? lugar.regiao : null);
     this.portais = opcoesMundo.portais ?? new PortaisTemporarios();
+    this.renovarLojaDaDungeon();
   }
 
   get idLugar(): string {
@@ -131,8 +140,8 @@ export class SalaMundo extends SalaArena {
   }
 
   /** O servidor guarda a ficha de quem vai entrar por esta identidade (e onde chega, ou o spawn). */
-  reservar(identidade: string, ficha: FichaDoMundo, chegada: Celula | null = null, grupo: string | null = null): void {
-    this.reservas.set(identidade, { ficha, chegada, grupo });
+  reservar(identidade: string, ficha: FichaDoMundo, chegada: Celula | null = null, grupo: string | null = null, comitiva: readonly InvocacaoQueViaja[] = []): void {
+    this.reservas.set(identidade, { ficha, chegada, grupo, comitiva });
   }
 
   /** As pendências desde a última retirada (o servidor grava e troca as sessões de sala). */
@@ -148,6 +157,7 @@ export class SalaMundo extends SalaArena {
     if (!s) return;
     this.enviarPara(s, { t: 'mundo', aviso });
     this.despedidos.add(sessaoId);
+    retirarComitiva(this.estado, s.entidadeId); // D-144: as invocações seguiram com o dono
     this.removerSessao(s);
   }
 
@@ -167,6 +177,7 @@ export class SalaMundo extends SalaArena {
     const origem = reserva.chegada ?? chegadaNaPedra(this.exterior) ?? this.ctx.fase.spawns[0] ?? { x: 1, y: 1 };
     colocarEm(e, celulaDeEntrada(this.estado, this.ctx, e, origem));
     this.estado.entidades.push(e);
+    soltarComitiva(this.estado, this.ctx, e, reserva.comitiva, this.eventosDoTick); // D-144: as invocações chegam junto
     const ficha = { ...reserva.ficha, descobertas: [...reserva.ficha.descobertas] };
     this.presencas.set(entidadeId, { identidade, ficha, morreu: false, grupo: reserva.grupo });
     if (reserva.grupo) e.grupo = reserva.grupo;
@@ -219,6 +230,8 @@ export class SalaMundo extends SalaArena {
       this.conferirEscondidas(s, e, p);
     }
     if (this.estado.tick % CONFERIR_EVENTO_TICKS === 0) {
+      if (this.trocas.todas().length > 0) limparTrocas(this.social(), this.trocas); // D-144: a troca abandonada
+      this.renovarLojaDaDungeon();
       this.conferirEvento();
       this.conferirFocos();
     }
@@ -244,7 +257,7 @@ export class SalaMundo extends SalaArena {
       const lootPct = ((this.modoDaRegiao.lootPct ?? 100) * this.ctx.balance.mundo.eventos.luaLootPct) / 100;
       this.ctx = { ...this.ctx, modo: { ...this.modoDaRegiao, lootPct } };
     } else if (agora?.evento === 'mercador_errante') {
-      const c = this.celulaDoMercador();
+      const c = celulaDoMercador(this.estado, this.ctx);
       if (c) this.estado.objetos.push(novoObjeto(ID_MERCADOR_ERRANTE, 'loja', c.x, c.y, { ref: REF_ERRANTE, itens: [...territorioDoLugar(this.reino,this.regiaoAtual()?.id ?? "").mercadorErrante] }));
     }
     for (const s of this.sessoes.values()) this.avisar(s, { tipo: 'evento', evento: agora?.evento ?? null, fim: agora?.fim ?? 0 });
@@ -298,35 +311,21 @@ export class SalaMundo extends SalaArena {
     }
   }
 
-  /** Uma célula andável e sem objeto, a poucos passos da entrada da região. */
-  private celulaDoMercador(): Celula | null {
-    const origem = this.ctx.fase.spawns[0];
-    if (!origem) return null;
-    for (let d = 3; d <= 8; d++) {
-      for (const [dx, dy] of [[d, 0], [-d, 0], [0, d], [0, -d], [d, d], [-d, -d]] as const) {
-        const x = origem.x + dx;
-        const y = origem.y + dy;
-        if (passavel(this.ctx.fase, x, y) && !this.estado.objetos.some((o) => o.x === x && o.y === y)) return { x, y };
-      }
-    }
-    return null;
+  /** 09/11/2026 (D-144): a loja da dungeon com o estoque da semana dela (renova na quarta, mundo/lojas-mundo.ts). */
+  private renovarLojaDaDungeon(): void {
+    if (this.lugar.tipo === 'regiao') return;
+    const r = this.ctx.balance.mundo.lojaDungeon;
+    const semana = semanaDaLoja(this.opcoesMundo.agora(), r);
+    if (semana === this.semanaDaLoja) return;
+    this.semanaDaLoja = semana;
+    const d = this.lugar.tipo === 'masmorra' ? this.lugar.masmorra : this.lugar.covil;
+    for (const o of this.estado.objetos) if (o.tipo === 'loja') o.itens = estoqueSemanalDaDungeon(this.ctx.conteudo, territorioDoLugar(this.reino, d.id), d, semana, r);
   }
 
-  /**
-   * Marco 30 (30/10/2026, D-129): a estrutura escondida é descoberta por quem passa perto da porta (o raio de revelar
-   * da Sabedoria, o mesmo das armadilhas): entra no mapa do reino e dá o aviso.
-   */
+  /** Marco 30 (D-129): a estrutura escondida perto de quem passa entra no mapa (mundo/sala-viagem.ts). */
   private conferirEscondidas(s: Sessao, e: Entidade, p: Presenca): void {
     if (this.lugar.tipo !== 'regiao') return;
-    const raio = raioDeRevelar(e.atributos, this.ctx.balance);
-    for (const estrutura of this.lugar.regiao.estruturas) {
-      if (!estrutura.escondida) continue;
-      const { porta } = portaDa(estrutura);
-      if (Math.max(Math.abs(porta.x - e.x), Math.abs(porta.y - e.y)) > raio) continue;
-      if (descobrir(p.ficha, `${estrutura.destino.tipo}:${estrutura.destino.id}`)) {
-        this.avisar(s, { tipo: 'descoberta', lugar: `${estrutura.destino.tipo}:${estrutura.destino.id}`, nome: estrutura.nome });
-      }
-    }
+    for (const d of escondidasReveladas(this.lugar.regiao, e, p.ficha, this.ctx.balance)) this.avisar(s, { tipo: 'descoberta', ...d });
   }
 
   protected override aoViajar(s: Sessao, destino: string, pagamento: 'ouro' | 'pergaminho'): void {
@@ -403,7 +402,7 @@ export class SalaMundo extends SalaArena {
 
   private trocar(s: Sessao, p: Presenca, destino: string, chegada: Celula | null, instancia: string | null): void {
     if (this.despedidos.has(s.sessaoId) || this.pendencias.some((x) => x.tipo === 'trocar' && x.sessaoId === s.sessaoId)) return;
-    this.pendencias.push({ tipo: 'trocar', identidade: p.identidade, sessaoId: s.sessaoId, ficha: p.ficha, destino, chegada, instancia });
+    this.pendencias.push({ tipo: 'trocar', identidade: p.identidade, sessaoId: s.sessaoId, ficha: p.ficha, destino, chegada, instancia, comitiva: recolherComitiva(this.estado, s.entidadeId) });
   }
 
   private pertoDe(e: Entidade, tipo: string): boolean {

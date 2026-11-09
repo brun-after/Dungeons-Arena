@@ -38,7 +38,8 @@ import { PORTAL_TEMPORARIO } from './mundo/objetos-mundo';
 import type { ContextoSimulacao } from './core/contexto';
 import { proximaEtapa } from './mundo/orientacao';
 
-const ESPERA_ENTRADA_MS = 10_000;
+// 09/11/2026 (D-144): 20 s (a sala nova pode estar nascendo: gerar a região leva tempo no servidor).
+const ESPERA_ENTRADA_MS = 20_000;
 const agoraMs = () => relogioDoNavegador.agoraMs();
 const conteudo = conteudoOficial();
 const modo = modoPorId(conteudo, MODO_MUNDO);
@@ -263,20 +264,55 @@ function motivoDoErro(e: unknown): string {
   return conhecido ? t(`mundo.erro.${conhecido}` as ChaveTexto) : t('mundo.falha');
 }
 
-/** Entra num lugar e joga; a troca de sala chama de novo, com o bilhete. */
-async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, pedido: PedidoDoMundo, orientacao: OrientacaoMundo = criarOrientacaoMundo()): Promise<void> {
+/** 09/11/2026 (D-144): as recusas que não melhoram tentando de novo (o resto é rede, sala nascendo ou saindo). */
+const RECUSAS_DEFINITIVAS = ['sem_conta', 'sem_personagem', 'fora_da_vila_salva', 'bilhete_invalido'];
+const TENTATIVAS_DE_ENTRADA = 3;
+
+/**
+ * 09/11/2026 (D-144): conecta com novas tentativas. A troca de sala caía na tela de erro por uma falha passageira
+ * (a sala antiga ainda soltando o personagem, a nova nascendo, a rede do celular piscando).
+ */
+async function conectarComTentativas(servidor: string, token: string, pedido: PedidoDoMundo): Promise<Awaited<ReturnType<typeof conectarMundo>>> {
+  let ultimoErro: unknown = null;
+  for (let tentativa = 0; tentativa < TENTATIVAS_DE_ENTRADA; tentativa++) {
+    if (tentativa > 0) await new Promise((r) => setTimeout(r, 600 * tentativa));
+    try {
+      return await conectarMundo(servidor, token, pedido);
+    } catch (e) {
+      ultimoErro = e;
+      const texto = e instanceof Error ? e.message : '';
+      if (RECUSAS_DEFINITIVAS.some((m) => texto.includes(m))) break;
+    }
+  }
+  throw ultimoErro instanceof Error ? ultimoErro : new Error('falha');
+}
+
+/**
+ * Entra num lugar e joga; a troca de sala chama de novo, com o bilhete. 09/11/2026 (D-144): o token é renovado a
+ * cada entrada (o da nuvem vence em 1 h) e, se a viagem pelo bilhete falhar de vez, o personagem volta pela vila
+ * salva (`vilaSalva`) em vez de cair na tela de erro.
+ */
+async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: string, pedido: PedidoDoMundo, orientacao: OrientacaoMundo = criarOrientacaoMundo(), vilaSalva: string | null = null): Promise<void> {
   const lugar = lerLugar(reino, pedido.lugar);
   if (!lugar) {
     mostrarErro(raiz, t('mundo.falha'));
     return;
   }
+  const token = (await tokenDaConta().catch(() => null)) ?? tokenAntigo;
   raiz.textContent = '';
   const nomeDoLugar = lugar.tipo === 'regiao' ? lugar.regiao.nome : lugar.tipo === 'masmorra' ? lugar.masmorra.nome : lugar.covil.nome;
   mostrarAviso(raiz, pedido.bilhete ? t('mundo.trocando', { lugar: nomeDoLugar }) : t('mundo.conectando'), ESPERA_ENTRADA_MS);
+  // Sem a viagem, a volta pela vila salva (a ficha já foi gravada pela sala anterior).
+  const voltarPelaVila = (): boolean => {
+    if (!pedido.bilhete || pedido.slot === undefined || !vilaSalva) return false;
+    void jogarNoMundo(raiz, servidor, token, { lugar: `regiao:${vilaSalva}`, slot: pedido.slot }, orientacao);
+    return true;
+  };
   let conexao: Awaited<ReturnType<typeof conectarMundo>>;
   try {
-    conexao = await conectarMundo(servidor, token, pedido);
+    conexao = await conectarComTentativas(servidor, token, pedido);
   } catch (e) {
+    if (voltarPelaVila()) return;
     mostrarErro(raiz, motivoDoErro(e));
     return;
   }
@@ -291,7 +327,8 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
   eu.aoMundo = (a) => avisosAntes.push(a);
   eu.entrar();
   if (!(await esperarEntrada(eu))) {
-    conexao.transporte.fechar();
+    await conexao.encerrar();
+    if (voltarPelaVila()) return;
     mostrarErro(raiz, t('mundo.falha'));
     return;
   }
@@ -377,7 +414,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, token: string, 
       saindo = true;
       desmontar();
       void conexao.encerrar().finally(() => {
-        void jogarNoMundo(raiz, servidor, token, { lugar: a.lugar, bilhete: a.bilhete, instancia: a.instancia }, orientacao);
+        void jogarNoMundo(raiz, servidor, token, { lugar: a.lugar, bilhete: a.bilhete, instancia: a.instancia, ...(pedido.slot !== undefined && { slot: pedido.slot }) }, orientacao, ultimoLugar?.vilaSalva ?? vilaSalva);
       });
     } else {
       const texto = textoDoAviso(a);

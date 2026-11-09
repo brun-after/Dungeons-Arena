@@ -32,6 +32,8 @@ import { PersistenciaEmMemoria, PersistenciaSupabase, slotValido, type Persisten
 export interface OpcoesServidor {
   porta: number;
   regiao: string;
+  /** 09/11/2026 (D-144): montar as regiões do Mundo logo ao subir (o main liga; os testes não). */
+  aquecerMundo?: boolean;
   /** Margem sobre o teto de 16 KiB por mensagem (envelope do Colyseus). */
   maxPayload?: number;
   /** Pasta dos relatórios do teste com pessoas (volume `dados` no Docker). */
@@ -85,6 +87,8 @@ export async function iniciarServidor(o: OpcoesServidor): Promise<{ porta: numbe
   const mercado: LojaDoMercado = o.supabaseUrl && o.supabaseChaveServico ? new MercadoSupabase(o.supabaseUrl, o.supabaseChaveServico) : new MercadoEmMemoria();
   const coordenador = new CoordenadorDoMundo(persistencia, conteudoMundo, mercado);
   SalaMundoColyseus.coordenador = coordenador;
+  // 09/11/2026 (D-144): as regiões montadas de antemão (a primeira sala de cada uma não trava o servidor).
+  if (o.aquecerMundo) coordenador.aquecer();
   const limiteMundo = new LimiteDeTentativas(30, 60_000);
   const httpServer = http.createServer();
   const inicio = Date.now();

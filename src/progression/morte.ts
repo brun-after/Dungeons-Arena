@@ -35,6 +35,7 @@ import { passavel } from '../world/fase';
 import { ehCelulaDePorta } from '../world/portas';
 import { tentarDominar } from '../combat/efeitos-fluxo';
 import { explodirSeIsca } from '../combat/invocacoes';
+import { esquecerPerseguidores } from './recursos';
 import { sortearEfeitoDeOrbe } from '../combat/registro-efeitos';
 import { encerrarInteracao } from '../world/interacao';
 import { aoMorrerBoss } from '../world/portas';
@@ -129,6 +130,8 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
       null,
     );
     e.morto = true;
+    // 09/11/2026 (D-144): a morte limpa sempre a perseguição (antes ela seguia depois do renascimento).
+    esquecerPerseguidores(estado, e);
     delete e.concentracaoArcana;
     if (e.tatica) e.tatica = novaMemoria();
     zerarMovimento(e);
