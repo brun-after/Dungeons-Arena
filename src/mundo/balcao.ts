@@ -20,6 +20,12 @@ export interface Balcao {
   ficha: FichaDoMundo;
   /** A região com vila onde a sessão está (null fora delas). */
   vila: string | null;
+  /**
+   * Marco 38 (08/11/2026, D-142): de quem são as missões que a sessão vê: a vila (perto da balconista da taverna) ou
+   * o andarilho (`npc:<id>`) perto dela; null longe de todos. O falante, quando é um andarilho.
+   */
+  fonte: string | null;
+  falante?: { nome: string; fala: string };
   /** Relógio de parede do servidor (ms). */
   agora: number;
   perto: (papel: PapelNpc) => boolean;
@@ -45,12 +51,18 @@ export function missoesPorId(reino: Reino): ReadonlyMap<string, MissaoDoMundo> {
 }
 
 function ofertas(b: Balcao): string[] {
-  return b.vila ? ofertasDoQuadro(b.reino.missoes, b.vila, diaDe(b.agora), b.ctx.balance.mundo.missoes.ofertasPorQuadro) : [];
+  return b.fonte ? ofertasDoQuadro(b.reino.missoes, b.fonte, diaDe(b.agora), b.ctx.balance.mundo.missoes.ofertasPorQuadro) : [];
 }
 
-/** O quadro da vila: as ofertas do dia, as aceitas e as já entregues hoje. */
+/** O quadro da vila (ou do andarilho): as ofertas do dia, as aceitas e as já entregues hoje. */
 export function avisoDoQuadro(b: Balcao): AvisoDoMundo {
-  return { tipo: 'quadro', ofertas: ofertas(b), ativas: b.ficha.missoes.ativas.map((a) => ({ ...a })), feitasHoje: feitasNoDia(b.ficha, diaDe(b.agora)) };
+  return {
+    tipo: 'quadro',
+    ofertas: ofertas(b),
+    ativas: b.ficha.missoes.ativas.map((a) => ({ ...a })),
+    feitasHoje: feitasNoDia(b.ficha, diaDe(b.agora)),
+    ...(b.falante ? { falante: { ...b.falante } } : {}),
+  };
 }
 
 export function avisoDoBanco(b: Balcao): AvisoDoMundo {
@@ -58,7 +70,7 @@ export function avisoDoBanco(b: Balcao): AvisoDoMundo {
 }
 
 export function atenderMissao(b: Balcao, acao: Extract<AcaoDoMundo, { a: 'missao' }>): void {
-  if (!b.perto('missoes')) {
+  if (!b.fonte) {
     recusar(b, 'longe');
     return;
   }

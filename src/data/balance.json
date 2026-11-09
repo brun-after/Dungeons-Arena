@@ -1,7 +1,7 @@
 {
   "dragoes": { "alturaAtlas": 3.3, "larguraAtlas": 8, "alturaMin": 1.1, "alturaMax": 2.2, "nivelMax": 100, "folgaCorredor": 1, "salaMin": 12, "salaPorCorredor": 3, "salaExtra": 4, "areaPorSala": 2 },
   "necromancia": { "ataquesPorInvocacao": 12, "resistenciaPorSabPct": 0.5, "resistenciaSabMaxPct": 25, "danoPct": 75, "servosExtras": 8, "retornoServoMs": 8000, "duracaoMortoMs": 20000, "raioColheita": 6, "ecoRecargaMs": 30000, "vidaBase": 24, "vidaPorNivel": 3, "vidaServoPct": 100, "alcanceRitual": 6, "distanciaRetorno": 10, "atributoPorInt": 1, "perdaPorQuantidade": 0.8 },
-  "versao": 37,
+  "versao": 38,
   "ajustesClasses": {
     "guerreiro": {
       "contatoMaxPct": 15,
@@ -22,7 +22,11 @@
       "furia": { "max": 100, "porBasico": 12, "carenciaMs": 3000, "perdaPorS": 20, "curaMult": 2, "frenesi": { "duracaoMs": 6000, "danoPct": 20, "velocidadeAtaquePct": 15 } },
       "reforcosInicioNivel": 16,
       "reforcosPlenosNivel": 20,
-      "movimentoMult": 1.15
+      "movimentoMult": 1.15,
+      "conjuraAndando": true,
+      "lentidaoConjuracaoMult": 0.5,
+      "encadeioMs": 1000,
+      "encadeioVelocidade": 2
     },
     "mago": {
       "inicialPct": 35,
@@ -229,6 +233,7 @@
       "descontoPorCarismaPct": 2,
       "descontoMaxPct": 30,
       "rolagemPorPontoPct": 7,
+      "rolagemPesoForcaPct": 35,
       "especializacaoInicio": 16,
       "especializacaoPorPonto": 2,
       "especializacaoMax": 20,
@@ -613,6 +618,10 @@
     "covil": { "contribuicaoMinPct": 10 },
     "checkpointS": 60,
     "passagemProtecaoS": 3,
+    "errantes": { "passoMs": 650, "pausaPertoCelulas": 2 },
+    "escolta": { "raioChegada": 3, "duracaoMin": 30 },
+    "retorno": { "conjuracaoMs": 5000, "cancelaAteMs": 4000, "raioCirculo": 1.5 },
+    "fusao": { "chanceArmaPct": [12, 20, 30], "resistenciaPct": [12, 20, 30], "valorPct": [25, 50, 90] },
     "banco": { "slots": 40 },
     "missoes": { "ativasMax": 5, "ofertasPorQuadro": 6 },
     "chat": { "raioLocal": 20, "maxTexto": 160, "porJanela": 5, "janelaS": 10, "historico": 50 },

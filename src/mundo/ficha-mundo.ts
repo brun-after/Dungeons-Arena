@@ -93,7 +93,8 @@ export function fichaNova(ctx: Pick<ContextoSimulacao, 'conteudo' | 'balance'>, 
 /** Lê a ficha guardada; o que faltar ou vier torto volta ao padrão (o personagem é conferido ao entrar). */
 export function lerFichaDoMundo(v: unknown, reino: Reino): FichaDoMundo | null {
   if (!ehObjeto(v) || !ehObjeto(v.personagem) || !ehObjeto(v.personagem.bolsa)) return null;
-  const vila = typeof v.vilaSalva === 'string' && reino.regioes.some((r) => r.id === v.vilaSalva && r.vila) ? v.vilaSalva : reino.inicio;
+  // Marco 38 (08/11/2026, D-142): toda região tem a pedra de save (a das sem vila fica no centro).
+  const vila = typeof v.vilaSalva === 'string' && reino.regioes.some((r) => r.id === v.vilaSalva) ? v.vilaSalva : reino.inicio;
   const descobertas = Array.isArray(v.descobertas) ? v.descobertas.filter((x): x is string => typeof x === 'string').slice(0, 500) : [];
   const recargas: Record<string, number> = {};
   if (ehObjeto(v.recargas)) for (const [k, x] of Object.entries(v.recargas)) if (typeof x === 'number' && Number.isFinite(x)) recargas[k] = x;

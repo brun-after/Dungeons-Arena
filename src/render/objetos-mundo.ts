@@ -6,6 +6,7 @@
 
 import type { Graphics } from 'pixi.js';
 import type { ObjetoNoMundo } from '../core/estado';
+import { portalEmPe } from './molduras-portal';
 
 const ROUPA_DO_PAPEL: Readonly<Record<string, number>> = {
   mercador: 0xc9a227,
@@ -99,11 +100,43 @@ function tumulo(g: Graphics, cx: number, cy: number): void {
   g.rect(cx - 5, cy - 15, 10, 2.4).fill(0x2d2a27);
 }
 
-function pedra(g: Graphics, cx: number, cy: number, brilho: number, pulso: number): void {
-  g.ellipse(cx, cy, 14, 6).fill({ color: brilho, alpha: 0.18 + pulso * 0.03 });
-  g.poly([cx - 8, cy, cx - 6, cy - 26, cx, cy - 32, cx + 6, cy - 26, cx + 8, cy]).fill(0x4d4a57).stroke({ width: 1.4, color: 0x1f1d24 });
-  g.poly([cx - 3, cy - 10, cx, cy - 22, cx + 3, cy - 10]).fill({ color: brilho, alpha: 0.85 });
-  g.circle(cx, cy - 26, 5 + pulso / 2).fill({ color: brilho, alpha: 0.25 });
+/**
+ * Marco 38 (08/11/2026, D-142): a pedra de save é um obelisco de três blocos num degrau redondo, com runas acesas
+ * nas faces e um cristal que flutua e gira acima da ponta. O anel do degrau pulsa na cor da pedra.
+ */
+function pedraDeSave(g: Graphics, cx: number, cy: number, brilho: number, pulso: number, tMs: number): void {
+  g.ellipse(cx, cy, 20, 8).fill({ color: 0x000000, alpha: 0.32 });
+  g.ellipse(cx, cy - 1, 18, 7).fill(0x3a3741).stroke({ width: 1.2, color: 0x1f1d24 });
+  g.ellipse(cx, cy - 3, 14, 5.4).fill(0x4d4a57).stroke({ width: 1, color: brilho, alpha: 0.35 + pulso * 0.08 });
+  // Os três blocos do obelisco, cada um um pouco mais estreito.
+  const blocos: readonly (readonly [number, number, number])[] = [[7.5, 0, 12], [6.2, 12, 11], [5, 23, 10]];
+  for (const [w, de, alto] of blocos) {
+    const y0 = cy - 3 - de;
+    g.poly([cx - w, y0, cx - w + 0.8, y0 - alto, cx + w - 0.8, y0 - alto, cx + w, y0]).fill(0x57535f).stroke({ width: 1.1, color: 0x1f1d24 });
+    g.poly([cx, y0, cx, y0 - alto, cx + w - 0.8, y0 - alto, cx + w, y0]).fill({ color: 0x000000, alpha: 0.18 });
+  }
+  g.poly([cx - 4.2, cy - 36, cx, cy - 42, cx + 4.2, cy - 36]).fill(0x6a6573).stroke({ width: 1, color: 0x1f1d24 });
+  // As runas nas faces.
+  for (const y of [cy - 9, cy - 20, cy - 30]) {
+    g.moveTo(cx - 2.5, y + 2).lineTo(cx, y - 2).lineTo(cx + 2.5, y + 2).stroke({ width: 1.4, color: brilho, alpha: 0.75 + pulso * 0.05 });
+  }
+  // O cristal que flutua acima da ponta (um losango que gira, o brilho em volta).
+  const sobe = Math.sin(tMs / 520) * 2;
+  const larg = 3.6 * Math.abs(Math.cos(tMs / 700)) + 1.2;
+  const yc = cy - 50 + sobe;
+  g.circle(cx, yc, 8 + pulso).fill({ color: brilho, alpha: 0.18 });
+  g.poly([cx, yc - 6, cx + larg, yc, cx, yc + 6, cx - larg, yc]).fill({ color: brilho, alpha: 0.95 }).stroke({ width: 1, color: 0xffffff, alpha: 0.7 });
+}
+
+/**
+ * Marco 38 (D-142): o portal entre reinos é um arco de pedra com runas em órbita (a moldura dos portais das fases,
+ * render/molduras-portal.ts) num tablado de duas pedras, com o vórtice girando na cor do portal.
+ */
+function portalDoReino(g: Graphics, cx: number, cy: number, cor: number, tMs: number): void {
+  g.ellipse(cx, cy + 1, 26, 9).fill({ color: 0x000000, alpha: 0.32 });
+  g.ellipse(cx, cy, 24, 8).fill(0x3a3741).stroke({ width: 1.2, color: 0x1f1d24 });
+  g.ellipse(cx, cy - 2, 20, 6.5).fill(0x4d4a57).stroke({ width: 1, color: cor, alpha: 0.5 });
+  portalEmPe(g, cx, cy - 3, { estilo: 'psiquico', cor, tMs, aceso: true });
 }
 
 function porta(g: Graphics, cx: number, cy: number): void {
@@ -111,8 +144,8 @@ function porta(g: Graphics, cx: number, cy: number): void {
   g.rect(cx - 9, cy - 2, 18, 2).fill(0x6d5a40);
 }
 
-/** Desenha o objeto do Mundo com a base em (cx, cy); devolve false se o tipo não é do Mundo. */
-export function desenharObjetoDoMundo(g: Graphics, o: ObjetoNoMundo, cx: number, cy: number, pulso: number): boolean {
+/** Desenha o objeto do Mundo com a base em (cx, cy); devolve false se o tipo não é do Mundo. `tMs` 0: parado. */
+export function desenharObjetoDoMundo(g: Graphics, o: ObjetoNoMundo, cx: number, cy: number, pulso: number, tMs = 0): boolean {
   switch (o.tipo) {
     case 'npc':
       pessoa(g, cx, cy, ROUPA_DO_PAPEL[o.ref ?? ''] ?? 0x777777);
@@ -124,10 +157,10 @@ export function desenharObjetoDoMundo(g: Graphics, o: ObjetoNoMundo, cx: number,
       tumulo(g, cx, cy);
       return true;
     case 'pedra_save':
-      pedra(g, cx, cy, 0x6fd3ff, pulso);
+      pedraDeSave(g, cx, cy, 0x6fd3ff, pulso, tMs);
       return true;
     case 'pedra_portal':
-      pedra(g, cx, cy, 0xc77dff, pulso);
+      portalDoReino(g, cx, cy, 0xc77dff, tMs);
       return true;
     case 'porta_estrutura':
       // Marco 30 (D-129): a porta escondida não aparece (quem chega perto acha pelo prompt e pela descoberta).

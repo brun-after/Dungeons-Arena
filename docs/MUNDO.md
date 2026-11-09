@@ -1,8 +1,9 @@
 # O Mundo: guia do modo
 
-**Versão:** 0.9 · **Data:** 03/11/2026
+**Versão:** 1.0 · **Data:** 08/11/2026
 
 > **Histórico**
+> - **1.0 (08/11/2026)**: marco 38: prédios das vilas, andarilhos, escolta, mercadores errantes, forja em graus, troféus de chefe, fusão elemental, pedra de retorno com círculo, save em toda região e o deserto entre os reinos.
 > - **0.8 (02/11/2026)**: Reino do Eclipse, exército do necromante inimigo, atenção de batalha, dungeons ampliadas e assistência de retorno.
 
 Expansão atual: [Reino do Eclipse, lojas e assistência de dungeon](EXPANSAO-ECLIPSE.md).
@@ -130,8 +131,11 @@ npm run dev
   - `acoes.ts` e `avisos.ts` são as mensagens; `banco.ts`, `missoes-mundo.ts`, `chat.ts`, `troca.ts`, `grupos.ts`,
     `mercado.ts`, `balcao.ts` e `eventos-mundo.ts` são as regras puras de cada um;
   - `objetos-mundo.ts` cuida dos NPCs, da coleta e do túmulo;
-  - `ficha-mundo.ts` é a ficha guardada.
-- **Gerador:** `src/world/gerador-exterior.ts`.
+  - `ficha-mundo.ts` é a ficha guardada;
+  - marco 38: `errantes.ts` (os mercadores que andam), `escoltas.ts` (o protegido da missão), `retorno.ts` (a
+    conjuração da pedra de retorno) e `sala-viagem.ts` (a chegada na pedra e o lugar ao acaso do desvio).
+- **Gerador:** `src/world/gerador-exterior.ts`; os prédios da vila em `vila-predios.ts`; o corredor do deserto, o
+  abrigo do save, as faixas de nível, os andarilhos e as rotas em `exterior-extras.ts`.
 - **Rede:** `src/arena/interesse.ts` (o recorte por sessão) e `src/arena/patches.ts` (`CacheDeCampos`).
 - **Servidor:**
   - `server/salas/sala-mundo.ts`: a sala Colyseus, o coordenador, os bilhetes e quem está online;
@@ -227,3 +231,20 @@ streaming nem transferência do controle. O servidor confere a party antes de en
 limita a frequência e não envia bolsas/inventários privados. Áudio dos observadores fica desativado.
 Na mesma sala, as câmeras usam a atualização normal do jogo e um único renderer. A visão normal continua
 como padrão; múltiplas câmeras aumentam o trabalho gráfico no aparelho que as ativa.
+
+## Vilas, viagem e forja (marco 38, 08/11/2026)
+
+- **Vilas.** Toda vila tem mercado, ferreiro e alquimista, cada um no seu prédio, com o atendente no balcão: a
+  taverna (missões), o banco de pedra, o mercado em pavilhão (o estoque do reino e os anúncios dos jogadores), a
+  forja e a botica. A pedra de save fica no centro da praça e o portal num tablado ao lado.
+- **Fontes de missão.** Além do quadro da taverna, andarilhos perto das estradas (um slime que só quer conversar, um
+  goblin, um esqueleto educado, gente perdida) dão as próprias missões. As de escolta põem um protegido que segue o
+  jogador até a porta da estrutura; se ele morrer, a missão falha.
+- **Mercadores errantes.** Andam de uma passagem até o centro da região e param quando alguém se aproxima.
+- **Forja.** Receitas em graus I a V. Os troféus dos chefes caem com chance; os elementais podem ser fundidos numa
+  peça (efeito na arma, resistência nas outras).
+- **Pedra de retorno.** 5 s dentro do círculo, inalvejável. Sair cedo cancela; sair no último segundo leva a um lugar
+  ao acaso do reino e devolve a pedra.
+- **Save em toda região**, no centro.
+- **A pé entre os reinos.** A Travessia das Areias (Dunas do Poente, Mar de Areia, Garganta do Sol) liga as Colinas
+  do Sudeste ao Baluarte do Eclipse por um corredor estreito, com monstros nas faixas de nível dos dois reinos.

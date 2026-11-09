@@ -11,8 +11,12 @@ import type { Fase, Telhado } from '../world/fase';
 import { CELULA_PX } from './camera-calculo';
 import { clarear, escurecer } from './modelos/svg';
 import { profundidade, type Projecao } from './projecao';
+import { desenharFrenteDoPredio } from './predios-iso';
 
-const CORES: Readonly<Record<Telhado['estilo'], number>> = { telha: 0x6b3a2a, palha: 0x4d4434 };
+// Marco 38 (08/11/2026, D-142): a ardósia do banco, o toldo listrado do mercado e o cobre da botica; a placa do prédio
+// fica num Graphics à parte, que não some com o telhado.
+const CORES: Readonly<Record<Telhado['estilo'], number>> = { telha: 0x6b3a2a, palha: 0x4d4434, ardosia: 0x3c4652, toldo: 0x9c3a30, cobre: 0x4f8a76 };
+const LISTRA_DO_TOLDO = 0xe9dcc0;
 /** Quanto o beiral passa da parede, em células. */
 const BEIRAL = 0.2;
 /** A altura da cumeeira acima das paredes, por célula de profundidade da casa. */
@@ -53,12 +57,21 @@ export interface OpcoesTelhados {
 
 export function criarTelhados(camada: Container, fase: Fase, p: Projecao, o: OpcoesTelhados): Telhados {
   const iso = p.visao === 'iso';
+  const frentes: Graphics[] = [];
   const itens = (fase.telhados ?? []).map((t) => {
     const g = new Graphics();
     desenhar(g, t, p, iso ? o.altura * CELULA_PX : 0, iso);
     g.zIndex = profundidade(p, t.x + t.largura - 1, t.y + t.altura - 1) + 0.005;
     g.label = `telhado-${t.x}-${t.y}`;
     camada.addChild(g);
+    if (t.predio) {
+      const f = new Graphics();
+      desenharFrenteDoPredio(f, t, p, iso ? o.altura * CELULA_PX : 0, 1);
+      f.zIndex = g.zIndex + 0.001;
+      f.label = `predio-${t.predio}`;
+      camada.addChild(f);
+      frentes.push(f);
+    }
     return { t, g, fechado: true };
   });
   return {
@@ -73,7 +86,9 @@ export function criarTelhados(camada: Container, fase: Fase, p: Projecao, o: Opc
     oculto: (x, y) => itens.some((i) => i.fechado && i.t.revela === 'dentro' && dentroDoTelhado(i.t, x, y)),
     destruir: () => {
       for (const i of itens) i.g.destroy();
+      for (const f of frentes) f.destroy();
       itens.length = 0;
+      frentes.length = 0;
     },
   };
 }
@@ -104,6 +119,14 @@ function desenhar(g: Graphics, t: Telhado, p: Projecao, h: number, iso: boolean)
       const e = pt(x0, yBeiral + (ym - yBeiral) * f, h + subida * f);
       const s = pt(x1, yBeiral + (ym - yBeiral) * f, h + subida * f);
       g.moveTo(e.x, e.y).lineTo(s.x, s.y).stroke({ width: 1.2, color: escurecer(tom, 0.35), alpha: 0.6 });
+    }
+    // O toldo do mercado: listras claras de cima a baixo em cada água.
+    if (t.estilo === 'toldo') {
+      for (let xs = x0; xs < x1; xs += 1.2) {
+        const xe = Math.min(x1, xs + 0.6);
+        const q = [pt(xs, yBeiral, h), pt(xe, yBeiral, h), pt(xe, ym, h + subida), pt(xs, ym, h + subida)];
+        g.poly(q.flatMap((v) => [v.x, v.y])).fill({ color: LISTRA_DO_TOLDO, alpha: 0.85 });
+      }
     }
   };
   if (iso) {

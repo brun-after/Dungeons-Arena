@@ -181,6 +181,7 @@ describe('Vista de armadilha (D-135)', () => {
     expect(eventos.some((e) => e.t === 'armadilhaRevelada')).toBe(true);
     const po = obter(CONTEUDO.itens.get('po_revelador'));
     expect(po.efeitos.map((f) => f.tipo)).toEqual(['vista_de_armadilha']);
-    for (const r of CONTEUDO.reinos.values()) expect(Object.values(r.lojas).flat()).toContain('po_revelador');
+    // Marco 38 (D-142): o deserto da travessia não tem vila; lá, o pó é do mercador errante.
+    for (const r of CONTEUDO.reinos.values()) expect(r.travessia ? r.mercadorErrante : Object.values(r.lojas).flat()).toContain('po_revelador');
   });
 });

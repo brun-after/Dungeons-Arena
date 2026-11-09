@@ -35,6 +35,10 @@ import type { ObjetosPreRenderizados } from './objetos-3d';
 import type { AtlasDePersonagens } from './personagens-3d';
 import { quadroDoEstado } from './quadros-personagem';
 import { varianteEmPassos, type PintorDeDesenhos } from './pintura';
+import { desenharAviso, desenharBalcao, desenharMochila, direcaoDoPasso, figuraDoNpc, type FiguraDeNpc } from './npcs-mundo';
+import { desenharCirculoDeRetorno, progressoDoCirculo } from './circulo-retorno';
+import { BALANCE_PADRAO } from '../core/contexto';
+import { ticksDe } from '../core/tempo';
 
 const COR_ORBE: Readonly<Record<'orbe_hp' | 'orbe_recurso', number>> = {
   orbe_hp: 0x2ecc71,
@@ -86,6 +90,8 @@ export class CamadaObjetos {
   /** Os sprites dos modelos pré-renderizados, por objeto (o vendedor da loja leva o sufixo `#v`). */
   private readonly titulos = new Map<string, Text>();
   private readonly modelos3d = new Map<string, Sprite>();
+  /** Marco 38 (D-142): onde a figura do NPC está desenhada (o errante desliza entre as células) e para onde olha. */
+  private readonly posicoesDeFigura = new Map<string, { x: number; y: number; direcao: number }>();
 
   /**
    * `raridadeDe` traduz o item do chão para a cor; item desconhecido aparece como comum.
@@ -229,6 +235,56 @@ export class CamadaObjetos {
     s.height = pintura.altura;
     s.zIndex = p.y;
     s.visible = true;
+  }
+
+  /**
+   * Marco 38 (08/11/2026, D-142): a figura pré-renderizada do NPC (render/npcs-mundo.ts), com o balcão, a mochila ou o
+   * balão desenhados em `alto`. false enquanto o atlas carrega (quem chama desenha como antes).
+   */
+  private figuraDoMundo(o: ObjetoNoMundo, fig: FiguraDeNpc, proj: Projecao, camada: Container, alto: Graphics, tMs: number, pulso: number): boolean {
+    const atlas = this.personagens;
+    const medidas = atlas?.medidas(fig.atlas);
+    if (!atlas || !medidas) return false;
+    const alvo = centroDaCelula(o.x, o.y);
+    const antes = this.posicoesDeFigura.get(o.objetoId) ?? { x: alvo.x, y: alvo.y, direcao: 1 };
+    const dx = alvo.x - antes.x;
+    const dy = alvo.y - antes.y;
+    const andando = Math.hypot(dx, dy) > 0.5;
+    // Desliza até a célula (um passo de 0,6 s fica contínuo); longe demais (teleporte), chega de uma vez.
+    const salto = Math.hypot(dx, dy) > CELULA_PX * 3;
+    const pos = { x: salto ? alvo.x : antes.x + dx * 0.12, y: salto ? alvo.y : antes.y + dy * 0.12, direcao: andando ? direcaoDoPasso(dx, dy) : antes.direcao };
+    this.posicoesDeFigura.set(o.objetoId, pos);
+    const estadoAtlas = andando ? 'andar' : 'parado';
+    const quadro = atlas.quadro(fig.atlas, estadoAtlas, fig.balcao ? 1 : pos.direcao, quadroDoEstado(estadoAtlas, atlas.quadrosDe(fig.atlas, estadoAtlas), tMs + o.x * 137, null));
+    if (!quadro) return false;
+    const p = proj.projetar(pos.x, pos.y);
+    let v = this.modelos3d.get(o.objetoId);
+    if (!v) {
+      v = new Sprite(quadro);
+      this.modelos3d.set(o.objetoId, v);
+    }
+    if (v.parent !== camada) camada.addChild(v);
+    v.texture = quadro;
+    v.anchor.set(medidas.ancoraX, medidas.ancoraY);
+    v.scale.set(medidas.escala);
+    v.position.set(p.x, p.y - (fig.balcao ? 4 : 0));
+    v.zIndex = p.y;
+    v.visible = true;
+    alto.clear();
+    alto.position.set(p.x, p.y);
+    if (fig.balcao) {
+      // O balcão fica à frente de quem atende.
+      alto.zIndex = p.y + 0.002;
+      desenharBalcao(alto, o.ref ?? '');
+    } else if (fig.mochila) {
+      alto.zIndex = p.y - 0.002;
+      alto.ellipse(0, 0, 14, 6).fill({ color: 0x000000, alpha: 0.3 });
+      desenharMochila(alto, medidas.topo);
+    } else {
+      alto.zIndex = p.y + 0.002;
+      desenharAviso(alto, medidas.topo, pulso / 2);
+    }
+    return true;
   }
 
   /** A chave do desenho repintado do objeto (o que muda o desenho entra nela), ou null para os que animam. */
@@ -385,6 +441,13 @@ export class CamadaObjetos {
         this.quebravel(o, iso ? proj : null);
         continue;
       }
+      // Marco 38 (D-142): o círculo da Pedra de retorno, no chão.
+      if (o.tipo === 'circulo_retorno') {
+        const r = BALANCE_PADRAO.mundo.retorno;
+        const { fracao, perigo } = progressoDoCirculo(o, estado.tick, ticksDe(r.conjuracaoMs - r.cancelaAteMs));
+        desenharCirculoDeRetorno(g, cx, cy, r.raioCirculo, fracao, perigo, movimentoReduzido ? 0 : agoraMs);
+        continue;
+      }
       if (iso && this.emPe && EM_PE.has(o.tipo)) {
         vistos.add(o.objetoId);
         this.desenharEmPe(o, estado, proj, this.emPe.camada, movimentoReduzido ? 0 : agoraMs, pulso);
@@ -420,7 +483,7 @@ export class CamadaObjetos {
         desenharVendedor(g, o, cx, cy);
         continue;
       }
-      if (desenharObjetoDoMundo(g, o, cx, cy + CELULA_PX * 0.3, pulso)) continue;
+      if (desenharObjetoDoMundo(g, o, cx, cy + CELULA_PX * 0.3, pulso, movimentoReduzido ? 0 : agoraMs)) continue;
       // A porta temporária do boss é desenhada com as outras portas (render/portas.ts).
       if (o.tipo === 'santuario') {
         this.santuario(g, o, cx, cy);
@@ -538,6 +601,9 @@ export class CamadaObjetos {
     alto.zIndex = p.y;
     // Desenhado acima da origem (os pés do objeto ficam no centro da célula).
     const flutua = Math.sin(tMs / 380 + o.x * 1.7 + o.y) * 2.5;
+    // Marco 38 (D-142): balconista, banqueiro, andarilhos e o mercador errante com as figuras pré-renderizadas.
+    const fig = figuraDoNpc(o);
+    if (fig && this.figuraDoMundo(o, fig, proj, camada, alto, tMs, pulso)) return;
     // Ajuste de 31/10/2026 (D-130): o modelo pré-renderizado, com a sombra macia no Graphics.
     const nome = this.nomeModelo(o);
     const medidas = nome ? this.modelos?.medidas(nome) : null;
@@ -576,7 +642,7 @@ export class CamadaObjetos {
     } else if (o.tipo === 'santuario') {
       alto.clear().ellipse(0, 0, 18, 8).fill({ color: 0x000000, alpha: 0.3 });
       this.santuario(alto, o, 0, -14);
-    } else if (desenharObjetoDoMundo(alto.clear(), o, 0, 0, pulso)) {
+    } else if (desenharObjetoDoMundo(alto.clear(), o, 0, 0, pulso, tMs)) {
       // Marco 29 (D-128): NPC, coleta, túmulo, pedras e a porta da estrutura.
     } else {
       // O orbe flutua sobre a sombra (a sombra encolhe quando ele sobe).
@@ -616,6 +682,7 @@ export class CamadaObjetos {
     this.pinturas.clear();
     for (const s of this.modelos3d.values()) s.destroy();
     this.modelos3d.clear();
+    this.posicoesDeFigura.clear();
   }
 
   destruir(): void {

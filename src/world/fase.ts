@@ -177,13 +177,18 @@ export interface PortaInterna {
  * O retângulo cobre a casa com as paredes. `perto`: some quando o jogador chega perto. `dentro`: some só quando ele
  * entra, e quem está fora não vê quem está dentro (entrar é um risco).
  */
+/** Marco 38 (08/11/2026, D-142): os prédios da vila do Mundo (o render desenha a placa e os detalhes de cada um). */
+export type TipoPredio = 'taverna' | 'banco' | 'mercado' | 'ferreiro' | 'alquimista';
+
 export interface Telhado {
   x: number;
   y: number;
   largura: number;
   altura: number;
   revela: 'perto' | 'dentro';
-  estilo: 'telha' | 'palha';
+  /** Marco 38 (D-142): a ardósia do banco, o toldo do mercado e o cobre da botica. */
+  estilo: 'telha' | 'palha' | 'ardosia' | 'toldo' | 'cobre';
+  predio?: TipoPredio;
 }
 
 /** Formato da fase no JSON oficial e no editor (validado por `validarFase`). */

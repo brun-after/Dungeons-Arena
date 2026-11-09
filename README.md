@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.41 · **Data:** 06/11/2026
+**Versão do documento:** 3.42 · **Data:** 08/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.42 (08/11/2026)**: marco 38: vilas com prédios (taverna, banco, mercado, forja e botica), andarilhos e escoltas, mercadores errantes, forja em graus com troféus de chefe e fusão elemental, pedra de retorno com círculo, save em toda região e a Travessia das Areias entre os reinos (D-142); habilidades por 35% FOR e 65% INT e o guerreiro que conjura andando (D-141).
 > - **3.41 (06/11/2026)**: skins de personagem: liberadas por código, escolhidas por classe em Configurações e que prevalecem sobre o equipamento; a primeira é o Ceifador do necromante, em 3D, com o manto voando contra o movimento (D-134).
 > - **3.40 (05/11/2026)**: personagens aceleram (saem com 70% da velocidade, pico em 0,5 s) e perdem o impulso sob lentidão; atacar de longe deixa um pouco lento; perseguidores ganham um fôlego sutil quando não alcançam (bem menor no chefe); o Arqueiro andando alcança 20% menos; a volta do Bumerangue básico cai para 45% (D-132).
 > - **3.39 (05/11/2026)**: marco 37 (em andamento): golpes e magias em três tempos (carga, impacto no lançamento e volta), variados entre ataques seguidos e com o peso do corpo, nos jogadores, chefes e monstros (D-133, fase 3).
@@ -298,3 +299,12 @@ equipamentos de nível 15 a 55. Detalhes em [docs/EXPANSAO-ECLIPSE.md](docs/EXPA
 
 Revisão de 03/11/2026: dragões com porte proporcional ao nível, atlas apoiados no chão e sem quadros
 cortados. Salas, corredores, clareiras e navegação acompanham seu tamanho.
+
+### Marco 38 — vilas, viagem e forja (08/11/2026)
+
+Toda vila tem mercado, ferreiro e alquimista, cada um no seu prédio, com o atendente no balcão. O mercado junta o
+estoque do reino e os anúncios dos jogadores. Andarilhos com cara de monstro dão missões, inclusive de escolta, e
+mercadores errantes andam pelas regiões. A forja tem graus I a V com materiais variados; os chefes deixam troféus,
+e os elementais se fundem às peças. A pedra de retorno conjura 5 s num círculo, a pedra de save fica no centro de
+toda região, e a Travessia das Areias liga os dois reinos a pé. O guerreiro conjura andando, e as habilidades pesam
+35% Força e 65% Inteligência. Detalhes em [docs/MUNDO.md](docs/MUNDO.md) e em D-141 e D-142.

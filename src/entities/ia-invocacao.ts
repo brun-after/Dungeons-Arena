@@ -136,6 +136,12 @@ export function processarInvocacao(estado: EstadoJogo, ctx: ContextoSimulacao, e
     atirarDaTorre(estado, ctx, e, ia, preset, saida);
     return;
   }
+  // Marco 38 (08/11/2026, D-142): o protegido da escolta só acompanha quem o leva.
+  if (inv.comportamento === 'escoltado') {
+    mudarModo(ia, 'patrulha', null, estado.tick);
+    seguirDono(estado, ctx, e, dono);
+    return;
+  }
   if (inv.comportamento === 'curador') {
     if (preset.invocacao) curarDono(estado, ctx, e, dono, preset.invocacao, saida);
     mudarModo(ia, 'patrulha', null, estado.tick);

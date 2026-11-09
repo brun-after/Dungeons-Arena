@@ -117,6 +117,7 @@ export interface OpcoesCena {
   destinoMapa?: () => { x: number; y: number } | null;
   partyVisaoForcada?: boolean;
   visoesExternas?: () => readonly import('../mundo/avisos').VisaoExternaParty[];
+  abrirAnuncios?: () => void; // Marco 38 (08/11/2026, D-142): os anúncios dos jogadores no mercado do Mundo.
 }
 
 export interface QuadroCena {
@@ -437,7 +438,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     ctx,
     estado: o.estado,
     jogador,
-    emitir,
+    emitir, ...(o.abrirAnuncios ? { abrirAnuncios: o.abrirAnuncios } : {}),
     aoAbrir: () => {
       if (mochila.aberta()) mochila.alternar();
       teclado?.soltarTudo();
@@ -749,7 +750,6 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       }
       desenharVista();
     }
-
 
     diag?.quadro(q.agoraMs, () => {
       const p = j ? q.posicao(j) : { x: 0, y: 0 };

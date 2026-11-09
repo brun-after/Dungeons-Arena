@@ -206,7 +206,7 @@ function velocidadeAgora(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao
         : 1000 / ctx.balance.invocacoes.passoMs
       : velocidade(e.atributos.destreza, ctx.balance.movimento.velocidadeBaseMs, inv?.dominado ?? false, ctx.balance.movimento.velocidadeMaxMult);
   // Marco 14: o frio (resfriado) deixa mais lento. Ajuste de 15/10/2026: conjurar uma habilidade `lenta` também.
-  const conjurando = mobilidadeDaAcao(e, ctx) === 'lenta' ? ctx.balance.habilidades.velocidadeConjurandoLenta : 1;
+  const conjurando = 1 - freioDaConjuracao(e, ctx);
   const r = ctx.balance.ajustesClasses.guerreiro;
   // Marco 22 (D-089): o Mago encarnado em raio anda mais rápido.
   const classe = (classeDe(e) === 'guerreiro' && !inv ? 1 + (r.movimentoMult - 1) * progressoReforcosGuerreiro(ctx, e.nivel) : 1) * velocidadeEncarnacao(ctx, e);
@@ -266,7 +266,7 @@ export function bonusDeCacaPct(e: Entidade, estado: EstadoJogo, ctx: ContextoSim
 
 /** 04/11/2026 (D-132): o quanto a lentidão em curso freia (0 a 1): efeitos, conjuração lenta e o recuo. */
 function freioAgora(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao): number {
-  const conjurando = mobilidadeDaAcao(e, ctx) === 'lenta' ? 1 - ctx.balance.habilidades.velocidadeConjurandoLenta : 0;
+  const conjurando = freioDaConjuracao(e, ctx);
   return Math.max(lentidaoPct(e, estado.tick) / 100, recuoAgoraPct(e, estado.tick) / 100, conjurando);
 }
 
@@ -475,7 +475,19 @@ function trocarDeCelula(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao,
 /** Como a ação em curso deixa andar (sem ação: livre). */
 function mobilidadeDaAcao(e: Entidade, ctx: ContextoSimulacao): Mobilidade {
   if (!e.acao) return 'livre';
-  return resolverHabilidade(ctx, e.acao.chave)?.mobilidade ?? 'trava';
+  const m = resolverHabilidade(ctx, e.acao.chave)?.mobilidade ?? 'trava';
+  // 08/11/2026 (D-141): o guerreiro nunca para para conjurar (o que travaria anda devagar).
+  return m === 'trava' && guerreiroConjuraAndando(e, ctx) ? 'lenta' : m;
+}
+
+const guerreiroConjuraAndando = (e: Entidade, ctx: ContextoSimulacao): boolean =>
+  !e.invocacao && classeDe(e) === 'guerreiro' && ctx.balance.ajustesClasses.guerreiro.conjuraAndando;
+
+/** O quanto a conjuração em curso freia (0 a 1); 08/11/2026 (D-141): o guerreiro sofre só parte dela. */
+function freioDaConjuracao(e: Entidade, ctx: ContextoSimulacao): number {
+  if (mobilidadeDaAcao(e, ctx) !== 'lenta') return 0;
+  const freio = 1 - ctx.balance.habilidades.velocidadeConjurandoLenta;
+  return guerreiroConjuraAndando(e, ctx) ? freio * ctx.balance.ajustesClasses.guerreiro.lentidaoConjuracaoMult : freio;
 }
 
 /** 18/10/2026: dispara ao mudar de célula ocupada, inclusive se o inimigo cruzar o portador parado. */

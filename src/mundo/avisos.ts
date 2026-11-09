@@ -23,6 +23,8 @@ export type MotivoDoMundo =
   | 'destino_invalido'
   | 'masmorra_em_recarga'
   | 'mesmo_lugar'
+  // Marco 38 (08/11/2026, D-142): o protegido da escolta morreu.
+  | 'escolta_falhou'
   // Marco 30.
   | 'longe'
   | 'sem_item'
@@ -93,7 +95,7 @@ export type AvisoDoMundo =
   | { tipo: 'trocarSala'; lugar: string; bilhete: string; instancia: string | null }
   | { tipo: 'recompensa'; nome: string; itens: string[]; ouro?: number; xp?: number }
   /** Marco 30: o quadro da vila: as ofertas do dia, as aceitas (com o progresso) e as já entregues hoje. */
-  | { tipo: 'quadro'; ofertas: string[]; ativas: MissaoAtiva[]; feitasHoje: string[] }
+  | { tipo: 'quadro'; ofertas: string[]; ativas: MissaoAtiva[]; feitasHoje: string[]; falante?: { nome: string; fala: string } }
   /** Marco 30: uma missão aceita andou (o cliente atualiza o painel e avisa quando completa). */
   | { tipo: 'missao'; id: string; progresso: number; meta: number }
   | { tipo: 'banco'; itens: ItemNaMochila[]; ouro: number; slots: number }
@@ -108,4 +110,6 @@ export type AvisoDoMundo =
   | { tipo: 'mercado'; anuncios: AnuncioVisto[]; pagina: number; total: number; meus: AnuncioVisto[]; aReceber: number }
   /** Marco 30: o evento da região começou (até `fim`, em ms) ou acabou (null). */
   | { tipo: 'evento'; evento: EventoDaRegiao | null; fim: number }
-  | { tipo: 'recusa'; motivo: MotivoDoMundo };
+  | { tipo: 'recusa'; motivo: MotivoDoMundo }
+  /** Marco 38 (D-142): a Pedra de retorno começou a conjurar (`fim` null) ou acabou (concluída, cancelada, desviada). */
+  | { tipo: 'retorno'; fim: 'concluido' | 'cancelado' | 'desviado' | null };

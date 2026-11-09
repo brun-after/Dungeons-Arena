@@ -31,6 +31,8 @@ import afinidadesJson from '../data/afinidades.json';
 import armasJson from '../data/armas.json';
 import reinoCentralJson from '../data/mundo/reino-central.json';
 import reinoEclipseJson from '../data/mundo/reino-eclipse.json';
+// Marco 38 (08/11/2026, D-142): o deserto a pé entre o Centro e o Eclipse.
+import travessiaJson from '../data/mundo/travessia-das-areias.json';
 import { conferirReino, lerReino, type Reino } from '../mundo/reino';
 import { lerArmas, type RegrasDeArmas } from '../progression/armas';
 import { lerUltimates, type Ultimate } from '../combat/ultimates';
@@ -186,7 +188,13 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
     erros.push(...r.erros.map((e) => `mundo/${arquivo}: ${e}`));
     if (!r.reino) continue;
     // Marco 30 (D-129): invocação (xp 0, comportamento de servo) não serve de monstro do Mundo.
-    const existe = { preset: (id: string) => p.presets.get(id)?.invocacao === null, item: (id: string) => it.itens.has(id), tema: (id: string) => tm.temas.has(id) };
+    const existe = {
+      preset: (id: string) => p.presets.get(id)?.invocacao === null,
+      item: (id: string) => it.itens.has(id),
+      tema: (id: string) => tm.temas.has(id),
+      // Marco 38 (D-142): o protegido da escolta é uma invocação que só segue (comportamento `escoltado`).
+      protegido: (id: string) => p.presets.get(id)?.invocacao?.comportamento === 'escoltado',
+    };
     erros.push(...conferirReino(r.reino, existe).map((e) => `mundo/${arquivo}: ${e}`));
     reinos.set(r.reino.id, r.reino);
   }
@@ -255,7 +263,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       classes: c.classes,
       modos,
       modoCampanha: modoCampanha ?? lerModo(campanhaJson, 'campanha').modo,
-      itens: new CatalogoDeItens(it.itens, ib.bases, BALANCE_PADRAO.itensGerados, fo.dados, el.elementos),
+      itens: new CatalogoDeItens(it.itens, ib.bases, BALANCE_PADRAO.itensGerados, fo.dados, el.elementos, BALANCE_PADRAO.mundo.fusao),
       itensBase: ib.bases,
       elementos: el.elementos,
       interacoes: ia.interacoes,
@@ -323,7 +331,7 @@ export const FONTES_OFICIAIS: FontesDeConteudo = {
   afinidades: afinidadesJson,
   armas: armasJson,
   modos: { 'campanha.json': campanhaJson, 'cooperativo.json': cooperativoJson, 'livre.json': livreJson, 'mundo.json': mundoJson },
-  reinos: { 'reino-central.json': reinoCentralJson, 'reino-eclipse.json': reinoEclipseJson },
+  reinos: { 'reino-central.json': reinoCentralJson, 'travessia-das-areias.json': travessiaJson, 'reino-eclipse.json': reinoEclipseJson },
 };
 
 export function conteudoOficial(): Conteudo {

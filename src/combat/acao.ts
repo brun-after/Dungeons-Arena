@@ -327,9 +327,12 @@ export function iniciarAcao(
   }
   // Marco 15: na dificuldade fácil, os golpes de quem não é do lado do jogador avisam mais cedo.
   const avisoExtra = ladoDoJogador(estado, ator) ? 0 : fatoresDoMundo(estado, ctx).avisoExtraMs;
-  const lancamentoTick = estado.tick + ticksDe(hab.conjuracaoMs + avisoExtra);
+  // 08/11/2026 (D-141): a skill do guerreiro logo depois do básico carrega (e chega, fora o voo do projétil) mais rápido.
+  const pressa = encadeioDoGuerreiro(estado, ctx, ator, hab);
+  const lancamentoTick = estado.tick + ticksDe((hab.conjuracaoMs + avisoExtra) / pressa);
   const viagem =
-    hab.politicaImpacto === 'projetil' ? ticksDe((Math.hypot(mira.x - origem.x, mira.y - origem.y) / hab.velocidadeProjetil) * 1000) : vooDoGolpe(estado, ctx, ator, hab, mira);
+    hab.politicaImpacto === 'projetil' ? ticksDe((Math.hypot(mira.x - origem.x, mira.y - origem.y) / hab.velocidadeProjetil) * 1000) : Math.round(vooDoGolpe(estado, ctx, ator, hab, mira) / pressa);
+  if (ehBasico(ator, hab.id)) ator.ultimoBasicoTick = estado.tick;
   const alvoId = hab.politicaImpacto === 'area' ? null : (alvo?.id ?? null);
   ator.acao = {
     acaoId: novoId(estado),
@@ -349,6 +352,16 @@ export function iniciarAcao(
   // Diagnóstico (18/10/2026): registra o custo real, inclusive de ações canceladas depois da cobrança.
   saida.push({ t: 'acaoIniciada', tick: estado.tick, atorId: ator.id, ...ator.acao, custoMana, custoVida });
   return true;
+}
+
+/**
+ * 08/11/2026 (D-141): quanto mais rápido a skill do guerreiro sai (1 = normal): a que começa até `encadeioMs` depois do
+ * início do básico tem a preparação e o golpe `encadeioVelocidade` vezes mais rápidos.
+ */
+export function encadeioDoGuerreiro(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, hab: Habilidade): number {
+  const r = ctx.balance.ajustesClasses.guerreiro;
+  if (ator.invocacao || classeDe(ator) !== 'guerreiro' || ehBasico(ator, hab.id) || ator.ultimoBasicoTick === undefined) return 1;
+  return estado.tick - ator.ultimoBasicoTick <= ticksDe(r.encadeioMs) ? Math.max(1, r.encadeioVelocidade) : 1;
 }
 
 function escolherAlvo(

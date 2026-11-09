@@ -4,6 +4,9 @@
 // (`masmorras`, instanciadas por grupo) e os covis de boss (compartilhados) ficam em listas próprias. Puro.
 // Marco 30 (30/10/2026, D-129): as missões do quadro, os materiais que os monstros deixam e os NPCs do banco e do
 // mercado.
+// Marco 38 (08/11/2026, D-142): os andarilhos (quem dá missão fora das vilas, com a cara de um monstro ou de gente),
+// os mercadores errantes que andam pela região, o deserto, as passagens restritas (a travessia entre os reinos), as
+// faixas de nível mistas e o reino de travessia no atlas, na coluna entre os outros dois.
 
 import { TIPOS_AMBIENTE, type TipoAmbiente } from '../world/ambiente-tipos';
 import { ehObjeto, Leitor, type Objeto } from '../core/validar';
@@ -21,8 +24,25 @@ export interface MaterialDeInimigo {
   chancePct: number;
 }
 
-export type Bioma = 'campo' | 'floresta' | 'pantano' | 'colinas' | 'ruinas' | 'neve';
-export const BIOMAS: readonly Bioma[] = ['campo', 'floresta', 'pantano', 'colinas', 'ruinas', 'neve'];
+export type Bioma = 'campo' | 'floresta' | 'pantano' | 'colinas' | 'ruinas' | 'neve' | 'deserto';
+export const BIOMAS: readonly Bioma[] = ['campo', 'floresta', 'pantano', 'colinas', 'ruinas', 'neve', 'deserto'];
+
+/** Marco 38 (D-142): os papéis que toda vila precisa ter (o mercado, o ferreiro e o alquimista). */
+export const PAPEIS_OBRIGATORIOS: readonly PapelNpc[] = ['mercado', 'ferreiro', 'alquimista'];
+
+/**
+ * Marco 38 (D-142): quem dá missão fora do quadro: um slime que só quer conversar, um peregrino, um mercador. A
+ * `aparencia` é o preset de quem ele parece (ou `gente`); as missões que o listam em `vilas` como `npc:<id>` são dele.
+ */
+export interface AndarilhoDoMundo {
+  id: string;
+  nome: string;
+  aparencia: string;
+  fala: string;
+}
+
+/** O id da fonte de missão do andarilho (o que as missões põem em `vilas`). */
+export const fonteDoAndarilho = (id: string): string => `npc:${id}`;
 
 export type TipoEstrutura = 'caverna' | 'castelo' | 'torre' | 'mina' | 'templo' | 'cripta';
 export const TIPOS_ESTRUTURA: readonly TipoEstrutura[] = ['caverna', 'castelo', 'torre', 'mina', 'templo', 'cripta'];
@@ -96,6 +116,16 @@ export interface RegiaoDoMundo {
   terrenos?: readonly TerrenoDaRegiao[];
   /** 08/11/2026 (D-138): os focos elementais que surgem por chance e expiram (às vezes com o chefe do elemento). */
   focos?: readonly FocoDaRegiao[];
+  /** Marco 38 (D-142): só estes lados têm passagem (ausente = todos os que têm vizinha). */
+  passagens?: readonly LadoDaRegiao[];
+  /** Marco 38: as faixas de nível dos monstros (cada um sorteia uma); ausente = só `nivel`. */
+  faixas?: readonly (readonly [number, number])[];
+  /** Marco 38: a região estreita, um corredor entre as passagens (o deserto da travessia). */
+  estreita?: boolean;
+  /** Marco 38: os andarilhos que dão missão nesta região. */
+  andarilhos?: readonly AndarilhoDoMundo[];
+  /** Marco 38: quantos mercadores errantes andam pelas estradas da região. */
+  mercadoresErrantes?: number;
 }
 
 /** 08/11/2026 (D-138): onde o terreno nasce: livre pela região, em volta do chefe do elemento ou na porta da estrutura. */
@@ -155,6 +185,8 @@ export interface CovilDoMundo {
 export interface Reino {
   /** 02/11/2026: atlas dos reinos; os catálogos originais conservam suas lojas e progressão. */
   territorios?: readonly Reino[];
+  /** Marco 38 (D-142): o reino de travessia fica no atlas na coluna vazia entre o anterior e o seguinte. */
+  travessia?: boolean;
   id: string;
   nome: string;
   tamanhoRegiao: number;
@@ -239,7 +271,24 @@ function lerRegiao(l: Leitor, v: unknown, tamanho: number): RegiaoDoMundo {
       const c = l.objeto(x, 'coleta');
       return { itemId: l.texto(c, 'itemId'), quantidade: l.numero(c, 'quantidade', { min: 1, max: 40, inteiro: true }) };
     }),
+    ...lerExtrasDaRegiao(l, o),
   };
+}
+
+/** Marco 38 (D-142): passagens, faixas, corredor, andarilhos e mercadores errantes. */
+function lerExtrasDaRegiao(l: Leitor, o: Objeto): Partial<RegiaoDoMundo> {
+  const r: Partial<RegiaoDoMundo> = {};
+  if (o.passagens !== undefined) r.passagens = l.listaDeTextos(o, 'passagens').map((x) => (LADOS.includes(x as LadoDaRegiao) ? (x as LadoDaRegiao) : (l.erro(`lado desconhecido "${x}"`), 'norte')));
+  if (o.faixas !== undefined) r.faixas = l.lista(o, 'faixas').map((x) => lerNivel(l, { nivel: x }));
+  if (o.estreita !== undefined) r.estreita = l.booleano(o, 'estreita');
+  if (o.mercadoresErrantes !== undefined) r.mercadoresErrantes = l.numero(o, 'mercadoresErrantes', { min: 0, max: 4, inteiro: true });
+  if (o.andarilhos !== undefined) {
+    r.andarilhos = l.lista(o, 'andarilhos').map((x) => {
+      const a = l.objeto(x, 'andarilho');
+      return { id: l.texto(a, 'id'), nome: l.texto(a, 'nome'), aparencia: l.texto(a, 'aparencia'), fala: l.texto(a, 'fala') };
+    });
+  }
+  return r;
 }
 
 function lerTerreno(l: Leitor, v: unknown): TerrenoDaRegiao {
@@ -300,6 +349,7 @@ export function lerReino(json: unknown): { reino: Reino | null; erros: string[] 
     largura: l.numero(o, 'largura', { min: 1, max: 16, inteiro: true }),
     altura: l.numero(o, 'altura', { min: 1, max: 16, inteiro: true }),
     inicio: l.texto(o, 'inicio'),
+    ...(o.travessia === undefined ? {} : { travessia: l.booleano(o, 'travessia') }),
     perigos: lerPerigos(l, o.perigos),
     lojas: ehObjeto(o.lojas) ? Object.fromEntries(Object.entries(o.lojas).filter(([k]) => PAPEIS_NPC.includes(k as PapelNpc)).map(([k, v]) => [k, Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []])) : {},
     mercadorErrante: o.mercadorErrante === undefined ? [] : l.listaDeTextos(o, 'mercadorErrante'),
@@ -350,13 +400,23 @@ export function lerReino(json: unknown): { reino: Reino | null; erros: string[] 
       if (!lista.some((x) => x.id === e.destino.id)) erros.push(`estrutura ${e.id}: destino desconhecido "${e.destino.id}"`);
     }
   }
-  if (!reino.regioes.some((r) => r.id === reino.inicio && r.vila)) erros.push('inicio: precisa ser uma região com vila');
+  if (!reino.travessia && !reino.regioes.some((r) => r.id === reino.inicio && r.vila)) erros.push('inicio: precisa ser uma região com vila');
+  if (reino.travessia && reino.largura !== 1) erros.push('travessia: o reino de travessia tem uma coluna só');
+  for (const r of reino.regioes) {
+    for (const papel of r.vila ? PAPEIS_OBRIGATORIOS : []) if (!r.vila?.npcs.includes(papel)) erros.push(`vila ${r.id}: falta o ${papel}`);
+    for (const a of r.andarilhos ?? []) {
+      if (ids.has(fonteDoAndarilho(a.id))) erros.push(`andarilho repetido "${a.id}"`);
+      ids.add(fonteDoAndarilho(a.id));
+    }
+  }
   erros.push(
     ...conferirMissoes(reino.missoes, {
       preset: () => true,
       item: () => true,
       regiao: (id) => reino.regioes.some((r) => r.id === id),
-      vila: (id) => reino.regioes.some((r) => r.id === id && r.vila),
+      vila: (id) => reino.regioes.some((r) => (r.id === id && r.vila) || (r.andarilhos ?? []).some((a) => fonteDoAndarilho(a.id) === id)),
+      estrutura: (id) => reino.regioes.some((r) => r.estruturas.some((e) => e.id === id)),
+      protegido: () => true,
       covil: (id) => reino.covis.some((c) => c.id === id),
       masmorra: (id) => reino.masmorras.some((m) => m.id === id),
     }),
@@ -378,7 +438,7 @@ function lerMateriais(l: Leitor, v: unknown): Record<string, readonly MaterialDe
 }
 
 /** Confere os ids contra o catálogo (presets, itens e temas). */
-export function conferirReino(reino: Reino, existe: { preset: (id: string) => boolean; item: (id: string) => boolean; tema: (id: string) => boolean }): string[] {
+export function conferirReino(reino: Reino, existe: { preset: (id: string) => boolean; item: (id: string) => boolean; tema: (id: string) => boolean; protegido?: (id: string) => boolean }): string[] {
   const erros: string[] = [];
   const presets = (dono: string, lista: readonly string[]) => {
     for (const p of lista) if (!existe.preset(p)) erros.push(`${dono}: preset desconhecido ou de invocação "${p}"`);
@@ -391,6 +451,7 @@ export function conferirReino(reino: Reino, existe: { preset: (id: string) => bo
   };
   for (const r of reino.regioes) {
     presets(r.id, [...r.inimigos, ...(r.bosses?.presets ?? []), ...(r.focos ?? []).flatMap((f) => (f.boss ? [f.boss.preset] : []))]);
+    for (const a of r.andarilhos ?? []) if (a.aparencia !== 'gente' && !existe.preset(a.aparencia)) erros.push(`andarilho ${a.id}: aparência desconhecida "${a.aparencia}"`);
     itens(r.id, r.coleta.map((c) => c.itemId));
     tema(r.id, r.tema);
   }
@@ -411,7 +472,7 @@ export function conferirReino(reino: Reino, existe: { preset: (id: string) => bo
     itens(`materiais ${preset}`, lista.map((m) => m.itemId));
   }
   erros.push(
-    ...conferirMissoes(reino.missoes, { preset: existe.preset, item: existe.item, regiao: () => true, vila: () => true, covil: () => true, masmorra: () => true }),
+    ...conferirMissoes(reino.missoes, { preset: existe.preset, item: existe.item, regiao: () => true, vila: () => true, covil: () => true, masmorra: () => true, estrutura: () => true, protegido: existe.protegido ?? (() => true) }),
   );
   return erros;
 }
@@ -424,10 +485,17 @@ export function regiaoEm(reino: Reino, gx: number, gy: number): RegiaoDoMundo | 
   return reino.regioes.find((r) => r.gx === gx && r.gy === gy);
 }
 
-/** A região vizinha pelo lado (undefined na borda do reino). */
+/**
+ * A região vizinha pelo lado (undefined na borda do reino). Marco 38 (D-142): só quando os dois lados aceitam a
+ * passagem (`passagens`): a travessia do deserto só abre para onde o caminho segue.
+ */
 export function vizinha(reino: Reino, r: RegiaoDoMundo, lado: LadoDaRegiao): RegiaoDoMundo | undefined {
   const [dx, dy] = PASSO[lado];
-  return regiaoEm(reino, r.gx + dx, r.gy + dy);
+  const v = regiaoEm(reino, r.gx + dx, r.gy + dy);
+  if (!v) return undefined;
+  if (r.passagens && !r.passagens.includes(lado)) return undefined;
+  if (v.passagens && !v.passagens.includes(ladoOposto(lado))) return undefined;
+  return v;
 }
 
 export function ladoOposto(lado: LadoDaRegiao): LadoDaRegiao {
@@ -458,6 +526,11 @@ export function reinoDoConteudo(conteudo: { reinos: ReadonlyMap<string, Reino> }
   let deslocamento = reino.largura + 1;
   const regioes = [...reino.regioes];
   for (const outro of outros) {
+    // Marco 38 (D-142): a travessia ocupa a coluna vazia que separa o anterior do seguinte.
+    if (outro.travessia) {
+      regioes.push(...outro.regioes.map(r => ({...r, gx: r.gx + deslocamento - 1})));
+      continue;
+    }
     regioes.push(...outro.regioes.map(r => ({...r, gx: r.gx + deslocamento})));
     deslocamento += outro.largura + 1;
   }

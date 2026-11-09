@@ -56,6 +56,8 @@ export function criarPaineisDaEconomia(o: OpcoesDaEconomia): PaineisDaEconomia {
     ultimoQuadro = a;
     pQuadro.mostrar((corpo) => {
       const regras = o.ctx.balance.mundo.missoes;
+      // Marco 38 (D-142): o andarilho fala antes das missões dele.
+      if (a.falante) corpo.append(paragrafo(t('mundo.quadro.falante', { nome: a.falante.nome, fala: a.falante.fala })));
       corpo.append(paragrafo(t('mundo.quadro.texto', { ativas: a.ativas.length, max: regras.ativasMax })));
       corpo.append(subtitulo(t('mundo.quadro.aceitas')));
       const ul = lista();
