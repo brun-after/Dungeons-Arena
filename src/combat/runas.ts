@@ -19,6 +19,7 @@ import type { DefinicaoElemento, Elemento } from './elementos';
 import type { Habilidade } from './habilidades';
 import { idDoEncaixe, levaRuna, runaPadraoDaSkill } from './encaixe-runa';
 import { construirEfeito } from './registro-efeitos';
+import { aplicarSecundario, type TabelaDePapeis } from './papeis';
 
 export { levaRuna, runaPadrao, runaPadraoDaSkill } from './encaixe-runa';
 
@@ -79,7 +80,7 @@ export function fracaoElemental(r: RegrasRunas, faixa: number): number {
 }
 
 /** A skill compilada com a runa: o elemento, a parte elemental, o estado do elemento e a função secundária. */
-export function aplicarRuna(h: Habilidade, runa: PontaElemental, faixa: number, elementos: ReadonlyMap<Elemento, DefinicaoElemento>, r: RegrasRunas): Habilidade {
+export function aplicarRuna(h: Habilidade, runa: PontaElemental, faixa: number, elementos: ReadonlyMap<Elemento, DefinicaoElemento>, r: RegrasRunas, papeis?: TabelaDePapeis): Habilidade {
   const elemento: Elemento | null = runa === 'fisico' ? null : runa;
   const v = faixa / FAIXAS_DE_VINCULO;
   // O estado do elemento antigo da skill sai (a skill de classe fica neutra); o da runa entra, se a skill fere.
@@ -90,6 +91,11 @@ export function aplicarRuna(h: Habilidade, runa: PontaElemental, faixa: number, 
     efeitos = [...efeitos, { ...estado, duracaoMs: Math.round((estado.duracaoMs * (r.duracaoMinPct + (100 - r.duracaoMinPct) * v)) / 100) }];
   }
   let multCura = h.multCura;
+  const tags = [...new Set([...h.tags.filter((t) => t !== 'elemental'), ...(elemento ? ['elemental'] : [])])];
+  // Marco 40 (12/11/2026, D-157): a skill com papel tira a função secundária da tabela papel × elemento.
+  if (h.papel && papeis?.get(h.papel)) {
+    return aplicarSecundario({ ...h, elemento, efeitos, tags, runa, faixaRuna: faixa, fracaoElemental: fracaoElemental(r, faixa) }, papeis, runa, faixa);
+  }
   // A cura ganha a função secundária do elemento (sem deixar de curar).
   if (h.formulaCura !== null && h.formulaDano === null) {
     if (runa === 'sagrado') multCura *= 1 + (r.curaSagradoPct * v) / 100;
@@ -97,7 +103,6 @@ export function aplicarRuna(h: Habilidade, runa: PontaElemental, faixa: number, 
       efeitos = [...efeitos, construirEfeito('escudo', { valor: Math.round(r.escudoBase + r.escudoPorFaixa * faixa), duracaoMs: r.escudoMs })];
     }
   }
-  const tags = [...new Set([...h.tags.filter((t) => t !== 'elemental'), ...(elemento ? ['elemental'] : [])])];
   return { ...h, elemento, efeitos, multCura, tags, runa, faixaRuna: faixa, fracaoElemental: fracaoElemental(r, faixa) };
 }
 

@@ -1,0 +1,56 @@
+{
+  "versao": 1,
+  "_doc": "Marco 40 (12/11/2026, D-157): a função secundária de cada papel por elemento, cheia na faixa 10 da sintonia (ou da runa). Os números valem na faixa 10 e caem na proporção da faixa; com `desde`, o efeito só entra a partir daquela faixa, inteiro. `curaPct` é a cura a mais da própria skill. O estado do elemento continua vindo de elementos.json. O papel de invocação ganha as criaturas por elemento na etapa 3.",
+  "papeis": {
+    "dano": {
+      "fisico": { "efeitos": [{ "tipo": "empurrao", "valor": 1, "desde": 5 }] },
+      "trevas": { "efeitos": [{ "tipo": "cura", "valor": 4, "em": "conjurador" }] },
+      "sagrado": { "efeitos": [{ "tipo": "cura", "valor": 4, "em": "aliados" }] }
+    },
+    "controle": {
+      "fisico": { "efeitos": [{ "tipo": "atordoar", "duracaoMs": 800 }] },
+      "fogo": { "efeitos": [{ "tipo": "aterrorizado", "duracaoMs": 2000 }] },
+      "gelo": { "efeitos": [{ "tipo": "congelado", "duracaoMs": 1500 }] },
+      "raio": { "efeitos": [{ "tipo": "silenciar", "duracaoMs": 1500 }] },
+      "veneno": { "efeitos": [{ "tipo": "modificar_dano", "pct": 25, "duracaoMs": 4000 }] },
+      "psiquico": { "efeitos": [{ "tipo": "confuso", "duracaoMs": 2000 }] },
+      "terra": { "efeitos": [{ "tipo": "enraizado", "duracaoMs": 2000 }] },
+      "trevas": { "efeitos": [{ "tipo": "cego", "pct": 30, "duracaoMs": 3000 }] },
+      "sagrado": { "efeitos": [{ "tipo": "silenciar", "duracaoMs": 2000 }] }
+    },
+    "cura": {
+      "fisico": { "efeitos": [{ "tipo": "cura_periodica", "valor": 2, "duracaoMs": 4000 }] },
+      "fogo": { "efeitos": [{ "tipo": "purificar", "desde": 5 }] },
+      "gelo": { "efeitos": [{ "tipo": "escudo", "valor": 16, "duracaoMs": 6000 }] },
+      "raio": { "efeitos": [{ "tipo": "acelerado", "pct": 30, "duracaoMs": 3000 }] },
+      "veneno": { "efeitos": [{ "tipo": "purificar", "desde": 3 }] },
+      "psiquico": { "efeitos": [{ "tipo": "recuperar_recurso", "valor": 10, "duracaoMs": 0 }] },
+      "terra": { "efeitos": [{ "tipo": "escudo", "valor": 16, "duracaoMs": 6000 }] },
+      "trevas": { "efeitos": [{ "tipo": "cura_periodica", "valor": 3, "duracaoMs": 4000 }] },
+      "sagrado": { "curaPct": 25, "efeitos": [{ "tipo": "purificar", "desde": 8 }] }
+    },
+    "defesa": {
+      "fisico": { "efeitos": [{ "tipo": "reflexo", "duracaoMs": 6000, "interno": { "tipo": "dano_direto", "valor": 4 } }] },
+      "fogo": { "efeitos": [{ "tipo": "reflexo", "duracaoMs": 6000, "interno": { "tipo": "queimando", "valor": 3, "duracaoMs": 3000 } }] },
+      "gelo": { "efeitos": [{ "tipo": "reflexo", "duracaoMs": 6000, "interno": { "tipo": "resfriado", "pct": 30, "duracaoMs": 3000 } }] },
+      "raio": { "efeitos": [{ "tipo": "reflexo", "duracaoMs": 6000, "interno": { "tipo": "eletrizado", "duracaoMs": 2500 } }] },
+      "veneno": { "efeitos": [{ "tipo": "reflexo", "duracaoMs": 6000, "interno": { "tipo": "envenenado", "valor": 2, "pct": 50, "duracaoMs": 5000 } }] },
+      "psiquico": { "efeitos": [{ "tipo": "reflexo", "duracaoMs": 6000, "interno": { "tipo": "exposto", "pct": 15, "duracaoMs": 3000 } }] },
+      "terra": { "efeitos": [{ "tipo": "escudo", "valor": 10, "duracaoMs": 8000 }] },
+      "trevas": { "efeitos": [{ "tipo": "cura_periodica", "valor": 2, "duracaoMs": 6000 }] },
+      "sagrado": { "efeitos": [{ "tipo": "escudo", "valor": 8, "duracaoMs": 6000, "em": "aliados" }] }
+    },
+    "mobilidade": {
+      "fisico": { "efeitos": [{ "tipo": "atordoar", "duracaoMs": 500 }] },
+      "fogo": { "efeitos": [{ "tipo": "rastro_dano", "valor": 3, "duracaoMs": 2000, "em": "conjurador" }] },
+      "gelo": { "efeitos": [{ "tipo": "acelerado", "pct": 20, "duracaoMs": 2000, "em": "conjurador" }] },
+      "raio": { "efeitos": [{ "tipo": "acelerado", "pct": 40, "duracaoMs": 1500, "em": "conjurador" }] },
+      "veneno": { "efeitos": [{ "tipo": "rastro_efeito", "duracaoMs": 2000, "em": "conjurador", "interno": { "tipo": "envenenado", "valor": 2, "pct": 50, "duracaoMs": 3000 } }] },
+      "psiquico": { "efeitos": [{ "tipo": "invisivel", "duracaoMs": 800, "em": "conjurador", "desde": 5 }] },
+      "terra": { "efeitos": [{ "tipo": "escudo", "valor": 8, "duracaoMs": 3000, "em": "conjurador" }] },
+      "trevas": { "efeitos": [{ "tipo": "invisivel", "duracaoMs": 1500, "em": "conjurador", "desde": 3 }] },
+      "sagrado": { "efeitos": [{ "tipo": "cura", "valor": 4, "em": "aliados" }] }
+    },
+    "invocacao": {}
+  }
+}

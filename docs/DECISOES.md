@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.03 · **Data:** 12/11/2026
+**Versão:** 1.04 · **Data:** 12/11/2026
 
 > **Histórico**
+> - **1.04 (12/11/2026)**: D-157: marco 40, o sistema novo de skills; etapa 1 (núcleo, papel, os nove eixos, as cinco formas novas, o destino aliados, a marca que acumula e a tabela papel × elemento).
 > - **1.03 (12/11/2026)**: D-156: a forma do estilo fica gradual. Ela aparece com 10% da ponta e cresce em 10 faixas até 100%, na mecânica, no custo e no visual, em vez de despertar inteira num limite.
 > - **1.02 (12/11/2026)**: D-153: a inclinação (o estilo que lidera sente-se desde o nível 1), a forma desperta em 35% e o teto pelo valor inicial da classe. D-154: o foco (a marca de cada estilo cresce quanto mais ele se destaca). D-155: o atributo de classe sai e a classe cresce nos estilos, um degrau a cada 5% de cada ponta.
 > - **1.01 (12/11/2026)**: D-152: a forma desperta dos estilos (o estilo muda o comportamento das skills da etiqueta, com dano por alvo menor). D-151: o par de runas nos combos.
@@ -4674,4 +4675,39 @@ agora para montar a build nova sem se sentir lesado.
   - **Aura do Guerreiro:** o teto foi para +50%.
   - **Atravessar:** o custo cheio foi para −8% (antes −10%). Nas faixas baixas, contra um alvo só, o tiro que passa
     pagava sem ter o que atravessar.
+
+## D-157 — Marco 40: núcleo, papel e os nove eixos das skills (12/11/2026)
+
+**Contexto.** O usuário pediu para recriar o sistema de skills: em algum grau, toda skill deve ter um núcleo e uma
+conexão com a classe, o estilo e o elemento. O desenho foi fechado com ele no catálogo "Grimório das Skills" (artefato,
+versão 1.6), e as etapas estão em [MARCO-40-SKILLS.md](MARCO-40-SKILLS.md). As skills atuais serão substituídas, e o
+motor muda onde não servir ao desenho (pedido do usuário). Esta decisão cobre a etapa 1.
+
+**Decisão.**
+- **O núcleo.** A definição da skill ganha `nucleo` (o verbo comum às variantes), `papel` (dano, controle, cura, defesa,
+  mobilidade ou invocação) e `eixos`, os eixos que os estilos podem empurrar (`combat/eixos.ts`).
+- **Os eixos e os estilos.** São nove eixos. Os quatro antigos usam a forma dos modificadores (área, alvos, perfuração e
+  eco); os cinco novos têm forma própria. Cada estilo tem um eixo principal e um secundário (`estilos.json → eixos`). Na
+  skill com núcleo, entra a forma do principal se a skill tem o eixo; senão, a do secundário, na metade da faixa
+  (arredondada para cima). As skills sem núcleo seguem a forma pela etiqueta (D-152, D-156) até a etapa 2.
+- **O custo é da forma**, não do estilo: `balance.habilidades.eixos.custoPct`, cheio na faixa 10 e proporcional abaixo.
+- **As formas novas** (números em `balance.habilidades.eixos`):
+  - **controle:** só nas skills com estado de controle. Os estados que prendem ou atrapalham duram +5% por faixa e, da
+    faixa 5, pegam também no inimigo mais perto do alvo (raio 2), com metade da duração;
+  - **sustento:** 2,5% do golpe médio por faixa vira escudo acumulado em quem usa (teto de 3 golpes);
+  - **marca:** cada acerto deixa a `marca_estilo`, que acumula até 5; cada marca soma até 2% ao dano recebido;
+  - **grupo:** 3% por faixa da cura e do escudo vão aos aliados em volta (raio 3), e as skills de dano dão a eles +1,5%
+    de dano por faixa por 3 s;
+  - **invocação:** só nas skills que invocam; as invocações duram +5% por faixa.
+- **O destino `aliados`.** Um efeito com `em: "aliados"` cai em cada aliado vivo em volta de quem conjurou (sem ele),
+  pela `relacao()` do modo, nunca pelo tipo da entidade.
+- **Papel × elemento.** `papeis.json` guarda a função secundária de cada papel em cada um dos nove elementos (incluindo o
+  Físico), cheia na faixa 10 e proporcional abaixo; com `desde`, o efeito entra inteiro a partir da faixa. O estado do
+  elemento continua vindo de elementos.json. Na skill comum, a faixa vem da sintonia com o elemento dela (`%N` na chave)
+  e também alonga o estado, como a runa. Na skill de classe com papel, a runa usa a tabela no lugar das regras fixas de
+  D-151. O papel de invocação ganha as criaturas por elemento na etapa 3.
+
+**Consequências.** Nenhuma skill atual tem núcleo ainda, então o jogo e o balanceamento não mudam nesta etapa. O custo
+das quatro formas antigas é o mesmo de antes, agora na tabela. A forma de cada estilo aparece na ficha pelo eixo principal,
+com o secundário entre parênteses; os onze estilos sem forma passam a mostrar a sua.
 

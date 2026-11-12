@@ -16,6 +16,7 @@ import { MODIFICADORES, type Modificador } from '../combat/habilidades';
 import { Leitor } from '../core/validar';
 import type { Atributos, Bolsa, Entidade } from '../entities/entidade';
 import { faixaDaForma } from '../combat/forma-do-estilo';
+import { ehEixo, formaDoEixo, type Eixo } from '../combat/eixos';
 import { lerGanchos, type Gancho, type PassivosDeGancho } from './ganchos';
 import { NOMES_ATRIBUTOS, type NomeAtributo } from './itens';
 
@@ -38,6 +39,11 @@ export interface Estilo {
    * `formaPlenaPct`, e cobra até `danoPct` por alvo, na fração da faixa (o orçamento se conserva).
    */
   forma?: FormaDoEstilo;
+  /**
+   * Marco 40 (12/11/2026, D-157): o eixo principal e o secundário do estilo. A forma empurra o principal nas skills que o
+   * têm; nas que não têm, o secundário, na metade da faixa. Quem tem núcleo usa os eixos; as skills antigas, a `forma`.
+   */
+  eixos: readonly [Eixo, Eixo];
   /** Marco 39 (12/11/2026, D-155): as melhorias de classe que o estilo traz, uma a cada degrau da ponta. */
   melhorias: MelhoriaDeClasse[];
 }
@@ -54,10 +60,10 @@ export interface MelhoriaDeClasse {
   inteiro: boolean;
 }
 
+/** D-152/D-156: a forma pela etiqueta, das skills sem núcleo (as antigas, até a etapa 2 do marco 40). O custo é por forma (`balance.habilidades.eixos.custoPct`). */
 export interface FormaDoEstilo {
   tag: string | null;
   mod: Modificador;
-  danoPct: number;
 }
 
 export interface RegrasEstilos {
@@ -120,10 +126,14 @@ export function lerEstilos(json: unknown): { estilos: Map<string, Estilo[]>; err
         inteiro: mo.inteiro === true,
       };
     });
-    const e: Estilo = { id, classe, nome: l.texto(o, 'nome'), pesos, efeitos, texto: l.texto(o, 'texto'), ganchos: lerGanchos(l, o.ganchos), melhorias };
+    const eixos = l.listaDeTextos(o, 'eixos');
+    const [principal, secundario] = eixos;
+    if (eixos.length !== 2 || !ehEixo(principal) || !ehEixo(secundario) || principal === secundario) l.erro(`${id}: eixos precisa de dois eixos diferentes (principal e secundário)`);
+    const e: Estilo = { id, classe, nome: l.texto(o, 'nome'), pesos, efeitos, texto: l.texto(o, 'texto'), ganchos: lerGanchos(l, o.ganchos), eixos: [ehEixo(principal) ? principal : 'area', ehEixo(secundario) ? secundario : 'eco'], melhorias };
     if (o.forma !== undefined) {
       const f = l.objeto(o.forma, `${id}.forma`);
-      e.forma = { tag: f.tag === undefined ? null : l.texto(f, 'tag'), mod: l.opcao(f, 'mod', MODIFICADORES), danoPct: l.numero(f, 'danoPct', { min: -90, max: 0 }) };
+      e.forma = { tag: f.tag === undefined ? null : l.texto(f, 'tag'), mod: l.opcao(f, 'mod', MODIFICADORES) };
+      if (formaDoEixo(e.eixos[0]) !== e.forma.mod) l.erro(`${id}: a forma das skills antigas precisa ser a do eixo principal`);
     }
     estilos.set(classe, [...(estilos.get(classe) ?? []), e]);
   }
@@ -292,15 +302,15 @@ export function ganchosDosEstilos(ctx: CtxEstilos, e: Entidade): Gancho[] {
   return saida;
 }
 
-/** D-156: uma forma de estilo em curso e a faixa dela (1 a 10). */
+/** D-156: um estilo com a forma em curso e a faixa dela (1 a 10). */
 export interface FormaAtiva {
-  forma: FormaDoEstilo;
+  estilo: Estilo;
   faixa: number;
 }
 
 /**
  * D-156: as formas dos estilos que valem agora, cada uma na faixa da sua ponta (com os itens e a inclinação). Começa em
- * `formaInicioPct` e cresce até `formaPlenaPct`.
+ * `formaInicioPct` e cresce até `formaPlenaPct`. Marco 40 (D-157): todo estilo tem forma (a dos eixos dele).
  */
 export function formasDosEstilos(ctx: CtxEstilos, e: Pick<Entidade, 'bolsa' | 'atributos' | 'nivel'>): FormaAtiva[] {
   if (!e.bolsa) return [];
@@ -311,7 +321,7 @@ export function formasDosEstilos(ctx: CtxEstilos, e: Pick<Entidade, 'bolsa' | 'a
   m.formas = radar
     ? radar.estilos.flatMap((est, k) => {
         const faixa = faixaDaForma(radar.total[k] ?? 0, r.formaInicioPct / 100, r.formaPlenaPct / 100);
-        return est.forma && faixa > 0 ? [{ forma: est.forma, faixa }] : [];
+        return faixa > 0 ? [{ estilo: est, faixa }] : [];
       })
     : [];
   return m.formas;

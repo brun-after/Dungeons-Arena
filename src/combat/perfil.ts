@@ -14,6 +14,8 @@ import { modificadoresDosConjuntos } from '../progression/ganchos-do-portador';
 import { sintoniaDe } from '../progression/sintonia';
 import { formasDosEstilos } from '../progression/estilos';
 import { bonusDePar, runaDoAtor, ultimoTickDeUso } from './runas';
+import { formaDoEixo, type FormaId } from './eixos';
+import { vinculoDe } from '../progression/vinculo';
 
 export type ContextoPerfil = Pick<ContextoSimulacao, 'conteudo' | 'balance'>;
 
@@ -59,7 +61,8 @@ export function chaveDoAtor(ctx: ContextoPerfil, ator: Entidade, id: string, tic
   const bolsa = ator.bolsa;
   if (!bolsa) return formatarChave({ id, rank: 1, caminhos: caminhoAfim(ctx, ator, id), mods: [], variantes: variantesDoAtor(ctx, ator, definicaoDe(ctx, id), tick) });
   const conhecida = bolsa.conhecidas.find((c) => c.id === id);
-  const tags = definicaoDe(ctx, id)?.base.tags ?? [];
+  const def = definicaoDe(ctx, id);
+  const tags = def?.base.tags ?? [];
   const mods: Modificador[] = [];
   for (const entrada of Object.values(bolsa.equipamento)) {
     const item = entrada ? ctx.conteudo.itens.get(entrada.itemId) : undefined;
@@ -68,17 +71,28 @@ export function chaveDoAtor(ctx: ContextoPerfil, ator: Entidade, id: string, tic
   // Marco 18 (D-069): os conjuntos completos também dão modificadores (a Vigília do caçador faz as flechas ecoarem).
   for (const m of modificadoresDosConjuntos(ctx, bolsa)) if ((m.tag === null || tags.includes(m.tag)) && !mods.includes(m.mod)) mods.push(m.mod);
   // Marco 39 (D-156): as formas dos estilos, cada uma na sua faixa (o que já vem do equipamento não se repete; com duas
-  // pontas no mesmo modificador, vale a faixa maior).
-  const formas: { mod: Modificador; faixa: number }[] = [];
+  // pontas na mesma forma, vale a faixa maior). Marco 40 (12/11/2026, D-157): a skill com núcleo recebe a forma do eixo
+  // principal de cada estilo que ela tem, ou a do secundário, na metade da faixa; as antigas seguem a etiqueta.
+  const formas: { mod: FormaId; faixa: number }[] = [];
+  const juntar = (mod: FormaId, faixa: number) => {
+    if (faixa <= 0 || (mods as readonly string[]).includes(mod)) return;
+    const ja = formas.find((x) => x.mod === mod);
+    if (ja) ja.faixa = Math.max(ja.faixa, faixa);
+    else formas.push({ mod, faixa });
+  };
   for (const f of formasDosEstilos(ctx, ator)) {
-    if ((f.forma.tag !== null && !tags.includes(f.forma.tag)) || mods.includes(f.forma.mod)) continue;
-    const ja = formas.find((x) => x.mod === f.forma.mod);
-    if (ja) ja.faixa = Math.max(ja.faixa, f.faixa);
-    else formas.push({ mod: f.forma.mod, faixa: f.faixa });
+    const [principal, secundario] = f.estilo.eixos;
+    if (def?.eixos) {
+      if (def.eixos.includes(principal)) juntar(formaDoEixo(principal), f.faixa);
+      else if (def.eixos.includes(secundario)) juntar(formaDoEixo(secundario), Math.ceil(f.faixa / 2));
+    } else if (f.estilo.forma && (f.estilo.forma.tag === null || tags.includes(f.estilo.forma.tag))) juntar(f.estilo.forma.mod, f.faixa);
   }
   // Marco 39 (D-151): a runa do encaixe (sem tick, vale o último uso registrado, como na ficha).
-  const runa = runaDoAtor(ctx, ator, id, tick ?? ultimoTickDeUso(bolsa));
-  return formatarChave({ id, rank: conhecida?.rank ?? 1, caminhos: conhecida?.caminhos ?? [], mods, variantes: variantesDoAtor(ctx, ator, definicaoDe(ctx, id), tick), ...(formas.length > 0 && { formas }), ...(runa && { runa }) });
+  const quando = tick ?? ultimoTickDeUso(bolsa);
+  const runa = runaDoAtor(ctx, ator, id, quando);
+  // Marco 40 (D-157): a skill comum com papel leva a faixa da sintonia com o elemento dela.
+  const sintonia = !runa && def?.base.papel ? Math.max(0, Math.min(10, Math.round(vinculoDe(ctx, ator, quando)[def.base.elemento ?? 'fisico'] * 10))) : undefined;
+  return formatarChave({ id, rank: conhecida?.rank ?? 1, caminhos: conhecida?.caminhos ?? [], mods, variantes: variantesDoAtor(ctx, ator, def, tick), ...(formas.length > 0 && { formas }), ...(sintonia !== undefined && { sintonia }), ...(runa && { runa }) });
 }
 
 
@@ -157,12 +171,8 @@ export function perfilPara(ctx: ContextoPerfil, ator: Entidade, hab: Habilidade)
     p.recargaPct += f.recargaPct;
   }
   // Marco 39 (D-156): a forma cobra dano por alvo na fração da faixa, quando entrou de fato na skill (a chave compilada
-  // só leva as que couberam). Com duas pontas no mesmo modificador, cobra a de maior custo.
-  for (const naChave of hab.formas ?? []) {
-    let custo = 0;
-    for (const f of formasDosEstilos(ctx, ator)) if (f.forma.mod === naChave.mod && (f.forma.tag === null || hab.tags.includes(f.forma.tag))) custo = Math.min(custo, f.forma.danoPct);
-    p.danoPct += (custo * naChave.faixa) / 10;
-  }
+  // só leva as que couberam). Marco 40 (D-157): o custo é da forma (`balance.habilidades.eixos.custoPct`).
+  for (const naChave of hab.formas ?? []) p.danoPct += (ctx.balance.habilidades.eixos.custoPct[naChave.mod] * naChave.faixa) / 10;
   // Marco 39 (D-151): o bônus de par da ultimate com a runa das duas skills do par.
   p.danoPct += bonusDePar(ctx, ator, hab, ultimoTickDeUso(bolsa));
   p.custoPct = Math.max(-90, p.custoPct);

@@ -13,6 +13,7 @@ import itensBaseJson from '../data/itens-base.json';
 import itensFormasJson from '../data/itens-formas.json';
 import conjuntosJson from '../data/conjuntos.json';
 import estilosJson from '../data/estilos.json';
+import papeisJson from '../data/papeis.json';
 import combosJson from '../data/combos.json';
 import interacoesBuffJson from '../data/interacoes-buff.json';
 import missoesJson from '../data/missoes.json';
@@ -52,6 +53,7 @@ import { CatalogoDeItens, lerBasesDeItem, type BasesDeItem } from '../progressio
 import { lerItensComFormas, type ItensComFormas } from '../progression/gerar-item-base';
 import { lerConjuntos, type Conjunto } from '../progression/conjuntos';
 import { lerEstilos, type Estilo } from '../progression/estilos';
+import { lerPapeis, type TabelaDePapeis } from '../combat/papeis';
 import { lerCombos, lerRegrasDeBuff, type Combo, type RegraDeBuff } from '../combat/combos';
 import { lerMissoes, lerOrigens, type Missao, type OrigemRara } from '../progression/missoes';
 import { lerForja, type ReceitaDeForja } from '../progression/forja';
@@ -80,6 +82,8 @@ export interface Conteudo {
   /** Marco 18 (D-068): as ressonâncias de atributo. */
   /** Marco 39 (D-147): os cinco estilos de cada classe (o pentagrama), na ordem do radar. */
   estilos: ReadonlyMap<string, readonly Estilo[]>;
+  /** Marco 40 (D-157): a função secundária do elemento pelo papel do núcleo. */
+  papeis: TabelaDePapeis;
   /** Marco 18 (D-068): os combos de sequência. */
   combos: Catalogo<Combo>;
   /** Marco 18 (camada 6): as regras de buff × habilidade. */
@@ -121,6 +125,8 @@ export interface FontesDeConteudo {
   itensFormas: unknown;
   conjuntos: unknown;
   estilos: unknown;
+  /** Marco 40: data/papeis.json (opcional: sem ele, a tabela fica vazia). */
+  papeis?: unknown;
   combos: unknown;
   interacoesBuff: unknown;
   missoes: unknown;
@@ -154,6 +160,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const fo = lerItensComFormas(fontes.itensFormas);
   const cj = lerConjuntos(fontes.conjuntos);
   const es = lerEstilos(fontes.estilos);
+  const pa = lerPapeis(fontes.papeis ?? papeisJson);
   const cb = lerCombos(fontes.combos);
   const rb = lerRegrasDeBuff(fontes.interacoesBuff);
   const mi = lerMissoes(fontes.missoes);
@@ -162,11 +169,11 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const tm = lerTemas(fontes.temas, new Set([...p.presets.values()].filter((x) => x.invocacao === null).map((x) => x.id)));
   const af = lerAfinidades(fontes.afinidades);
   const ar = lerArmas(fontes.armas);
-  const erros = [...ul.erros, ...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...es.erros, ...cb.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
+  const erros = [...ul.erros, ...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...es.erros, ...pa.erros, ...cb.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
   for (const conj of cj.conjuntos.values()) {
     for (const peca of conj.pecas) if (!fo.dados.bases.has(peca)) erros.push(`conjunto ${conj.id}: base desconhecida "${peca}"`);
   }
-  const fontesCompilacao = { caminhos: cm.caminhos, elementos: el.elementos };
+  const fontesCompilacao = { caminhos: cm.caminhos, elementos: el.elementos, papeis: pa.papeis };
   const habilidades = new Map<string, Habilidade>();
   for (const [id, def] of h.definicoes) {
     habilidades.set(id, compilarHabilidade(def, { rank: 1, caminhos: [], mods: [] }, fontesCompilacao, BALANCE_PADRAO.habilidades));
@@ -271,6 +278,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       itensComFormas: fo.dados,
       conjuntos: cj.conjuntos,
       estilos: es.estilos,
+      papeis: pa.papeis,
       combos: cb.combos,
       regrasDeBuff: rb.regras,
       missoes: mi.missoes,
@@ -323,6 +331,7 @@ export const FONTES_OFICIAIS: FontesDeConteudo = {
   itensFormas: itensFormasJson,
   conjuntos: conjuntosJson,
   estilos: estilosJson,
+  papeis: papeisJson,
   combos: combosJson,
   interacoesBuff: interacoesBuffJson,
   missoes: missoesJson,

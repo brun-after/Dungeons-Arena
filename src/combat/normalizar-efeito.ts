@@ -13,7 +13,7 @@ import { ehObjeto, type Leitor, type Objeto } from '../core/validar';
 import { construirEfeito, ehTipoEfeito, REGISTRO_EFEITOS, type DestinoEfeito, type EfeitoCanonico, type TipoEfeito } from './registro-efeitos';
 
 const CHAVES_COMUNS = new Set(['duracaoMs', 'em']);
-const DESTINOS: readonly DestinoEfeito[] = ['alvo', 'conjurador'];
+const DESTINOS: readonly DestinoEfeito[] = ['alvo', 'conjurador', 'aliados'];
 
 function numeroOpcional(l: Leitor, o: Objeto, campo: string, min: number, max: number): number | undefined {
   if (o[campo] === undefined) return undefined;

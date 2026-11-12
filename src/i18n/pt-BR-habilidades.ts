@@ -48,6 +48,8 @@ export const textosHabilidades = {
   'efeito.eletrizado': 'Eletrizado',
   'efeito.envenenado': 'Envenenado',
   'efeito.exposto': 'Exposto',
+  // Marco 40 (D-157): a marca da forma do estilo.
+  'efeito.marca_estilo': 'Marcado pelo estilo',
   'efeito.escudo': 'Escudo',
   'efeito.puxao': 'Puxão',
   'efeito.trocar_lugar': 'Troca de lugar',
@@ -92,6 +94,7 @@ export const textosHabilidades = {
   'desc.efeito.eletrizado': 'Eletriza por {s} s: o próximo raio salta mais uma vez',
   'desc.efeito.envenenado': 'Envenena: {valor} por segundo por {s} s e −{pct}% de cura recebida',
   'desc.efeito.exposto': '+{pct}% de dano recebido por {s} s',
+  'desc.efeito.marca_estilo': 'Marca que acumula: +{pct}% de dano recebido por marca, por {s} s',
   'desc.efeito.escudo': 'Escudo que absorve {valor} de dano por {s} s',
   'desc.efeito.puxao': 'Puxa {valor} células',
   'desc.efeito.trocar_lugar': 'Troca de lugar com o alvo',

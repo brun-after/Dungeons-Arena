@@ -20,6 +20,8 @@ import { etiquetasDe, MODIFICADORES, type Catalogo, type DefinicaoHabilidade, ty
 import { normalizarEfeitos } from './normalizar-efeito';
 import { construirEfeito, REGISTRO_EFEITOS, type EfeitoCanonico } from './registro-efeitos';
 import { aplicarRuna, type RegrasRunas } from './runas';
+import { aplicarFormasNovas, ehFormaNova, formaNovaCabe, type FormaId, type FormaNova, type RegrasEixos } from './eixos';
+import { aplicarSecundario, type TabelaDePapeis } from './papeis';
 
 export interface Caminho {
   id: string;
@@ -58,12 +60,16 @@ export interface RegrasHabilidades {
   estudo: { B: number; A: number; S: number; reducaoPorIntPct: number; reducaoMaxPct: number };
   /** Marco 39 (D-151): a parte elemental das runas e a função secundária delas (combat/runas.ts). */
   runas: RegrasRunas;
+  /** Marco 40 (D-157): as formas dos nove eixos (combat/eixos.ts). */
+  eixos: RegrasEixos;
 }
 
 /** O que a compilação consulta do conteúdo. */
 export interface FontesCompilacao {
   caminhos: Catalogo<Caminho>;
   elementos: ReadonlyMap<Elemento, DefinicaoElemento>;
+  /** Marco 40 (D-157): a função secundária do elemento pelo papel (papeis.json). */
+  papeis?: TabelaDePapeis;
 }
 
 export function lerCaminhos(json: unknown): { caminhos: Map<string, Caminho>; erros: string[] } {
@@ -153,7 +159,9 @@ export interface OpcoesCompilacao {
   /** Marco 39 (D-151): a runa do encaixe e a faixa do vínculo com ela. */
   runa?: { runa: 'fisico' | Elemento; faixa: number };
   /** Marco 39 (D-156): as formas dos estilos, cada uma na sua faixa. */
-  formas?: readonly { mod: Modificador; faixa: number }[];
+  formas?: readonly { mod: FormaId; faixa: number }[];
+  /** Marco 40 (D-157): a faixa da sintonia com o elemento da skill comum. */
+  sintonia?: number;
 }
 
 export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilacao, fontes: FontesCompilacao, regras: RegrasHabilidades): Habilidade {
@@ -271,7 +279,8 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
     }
   }
   // Marco 39 (12/11/2026, D-156): as formas dos estilos, na faixa de cada uma (o que o equipamento já dá vale inteiro).
-  const formas = (op.formas ?? []).filter((f) => f.faixa > 0 && !aplicados.includes(f.mod) && modificadorCabe(h, f.mod));
+  // Marco 40 (D-157): as formas dos eixos novos entram se a skill tem aquilo que o eixo empurra.
+  const formas = (op.formas ?? []).filter((f) => f.faixa > 0 && (ehFormaNova(f.mod) ? formaNovaCabe(h, f.mod) : !aplicados.includes(f.mod) && modificadorCabe(h, f.mod)));
   let ecoFracao = aplicados.includes('ecoar') ? 0.5 : 0;
   for (const f of formas) {
     if (f.mod === 'atravessar') h.perfuraAlvos = perfuracaoDaForma(f.faixa);
@@ -285,6 +294,13 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
     }
   }
   if (formas.length > 0) h.formas = formas.map((f) => ({ mod: f.mod, faixa: f.faixa }));
+  const novas = formas.filter((f): f is { mod: FormaNova; faixa: number } => ehFormaNova(f.mod));
+  if (novas.length > 0) {
+    const media = h.formulaDano !== null ? mediaDe(h.formulaDano) * multDano : mediaDe(h.formulaCura) * multCura;
+    const comNovas = aplicarFormasNovas(h, novas, media, regras.eixos);
+    h.efeitos = comNovas.efeitos;
+    if (comNovas.controleVizinho) h.controleVizinho = comNovas.controleVizinho;
+  }
   if (ecoFracao > 0) {
     const eco = Math.max(1, Math.round(mediaDe(h.formulaDano) * multDano * ecoFracao));
     h.efeitos.push(construirEfeito('efeito_atrasado', { duracaoMs: 600, interno: construirEfeito('dano_direto', { valor: eco }) }));
@@ -293,9 +309,18 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
   h.multCura = multCura;
   h.tags = etiquetasDe(h, b.tags);
   // Na chave só entram os modificadores de fora (equipamento): os da definição e dos caminhos já estão implícitos.
-  h.chave = formatarChave({ id: b.id, rank, caminhos: caminhosValidos, mods: op.mods.filter((m) => aplicados.includes(m)), variantes, ...(formas.length > 0 && { formas }), ...(op.runa && { runa: op.runa }) });
+  h.chave = formatarChave({ id: b.id, rank, caminhos: caminhosValidos, mods: op.mods.filter((m) => aplicados.includes(m)), variantes, ...(formas.length > 0 && { formas }), ...(op.sintonia !== undefined && !op.runa && { sintonia: op.sintonia }), ...(op.runa && { runa: op.runa }) });
+  // Marco 40 (12/11/2026, D-157): na skill comum, a função secundária do papel no elemento dela, na faixa da sintonia, e
+  // o estado do elemento dura de `duracaoMinPct` a 100% por ela (como a runa).
+  if (op.sintonia !== undefined && !op.runa && h.papel) {
+    const g = Math.max(0, Math.min(10, op.sintonia)) / 10;
+    const k = (regras.runas.duracaoMinPct + (100 - regras.runas.duracaoMinPct) * g) / 100;
+    const tipoEstado = h.elemento ? fontes.elementos.get(h.elemento)?.estado.tipo : undefined;
+    const comEstado = tipoEstado ? { ...h, efeitos: h.efeitos.map((e) => (e.tipo === tipoEstado ? { ...e, duracaoMs: Math.round(e.duracaoMs * k) } : e)) } : h;
+    return aplicarSecundario(comEstado, fontes.papeis, h.elemento ?? 'fisico', op.sintonia);
+  }
   // Marco 39 (12/11/2026, D-151): a runa troca o elemento e põe a parte elemental (por último, sobre tudo o que veio antes).
-  return op.runa ? aplicarRuna(h, op.runa.runa, op.runa.faixa, fontes.elementos, regras.runas) : h;
+  return op.runa ? aplicarRuna(h, op.runa.runa, op.runa.faixa, fontes.elementos, regras.runas, fontes.papeis) : h;
 }
 
 /** O contexto que a resolução precisa (conteúdo e regras de rank). */

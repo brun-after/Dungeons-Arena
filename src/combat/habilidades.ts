@@ -14,6 +14,7 @@ import { ehElemento, type Elemento } from './elementos';
 import { normalizarEfeitos } from './normalizar-efeito';
 import type { Atributos } from '../entities/entidade';
 import { ehTipoEfeito, type EfeitoCanonico, type TipoEfeito } from './registro-efeitos';
+import { EIXOS, PAPEIS, type Eixo, type FormaId, type Papel } from './eixos';
 import { ASSINATURAS_VISUAIS, VARIANTES_VISUAIS, type AssinaturaVisual, type VarianteVisual } from './assinaturas-visuais';
 
 export type TipoAtaque = 'fisico' | 'magico';
@@ -179,7 +180,11 @@ export interface Habilidade {
   /** D-151: a parte elemental do dano (0 a 1); o resto é neutro (só a elemental sente resistência e absorção). */
   fracaoElemental?: number;
   /** Marco 39 (12/11/2026, D-156): as formas dos estilos que entraram na skill, com a faixa (combat/forma-do-estilo.ts). */
-  formas?: readonly { mod: Modificador; faixa: number }[];
+  formas?: readonly { mod: FormaId; faixa: number }[];
+  /** Marco 40 (12/11/2026, D-157): o papel do núcleo (a função secundária do elemento sai dele). */
+  papel?: Papel;
+  /** D-157: a forma de controle passa os estados de controle a um vizinho do alvo (raio e duração em %). */
+  controleVizinho?: { raio: number; duracaoPct: number };
   /** D-156: quantos alvos o projétil atravessa (a forma gradual do atravessar; `perfura` atravessa todos). */
   perfuraAlvos?: number;
 }
@@ -270,6 +275,9 @@ export interface DefinicaoHabilidade {
   interna: boolean;
   /** Marco 24 (D-095): a família da sintonia de uma skill geral (tecnica, arcana, suporte, fogo, …). */
   familiaGeral?: string;
+  /** Marco 40 (12/11/2026, D-157): o núcleo da skill (o verbo comum às variantes) e os eixos que os estilos empurram. */
+  nucleo?: string;
+  eixos?: readonly Eixo[];
 }
 
 /** Marco 18: um marco de nível — os mesmos ajustes de um caminho, com o texto que a carta mostra. */
@@ -530,6 +538,8 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
   }
   const variacao = lerVariacao(l, o.variacao);
   if (variacao) base.variacao = variacao;
+  // Marco 40 (D-157): o papel do núcleo.
+  if (o.papel !== undefined) base.papel = l.opcao(o, 'papel', PAPEIS);
   if (o.escalaRolagem !== undefined) base.escalaRolagem = l.listaDeTextos(o, 'escalaRolagem').map((a) => {
     if ((ATRIBUTOS_DE_ESCALA as readonly string[]).includes(a)) return a as AtributoDeEscala;
     l.erro(`escalaRolagem: atributo desconhecido "${a}"`);
@@ -569,7 +579,19 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
     variantes: lerVariantes(l, o.variantes),
     interna: o.interna === undefined ? false : l.booleano(o, 'interna'),
     ...(o.familiaGeral !== undefined ? { familiaGeral: l.texto(o, 'familiaGeral') } : {}),
+    ...(o.nucleo !== undefined ? { nucleo: l.texto(o, 'nucleo') } : {}),
+    ...(o.eixos !== undefined ? { eixos: lerEixos(l, o) } : {}),
   };
+}
+
+/** Marco 40 (D-157): os eixos da skill, sem repetição. */
+function lerEixos(l: Leitor, o: Objeto): Eixo[] {
+  const saida: Eixo[] = [];
+  for (const x of l.listaDeTextos(o, 'eixos')) {
+    if (!(EIXOS as readonly string[]).includes(x)) l.erro(`eixo desconhecido "${x}"`);
+    else if (!saida.includes(x as Eixo)) saida.push(x as Eixo);
+  }
+  return saida;
 }
 
 const CAMPOS_DEFINICAO = [
@@ -583,6 +605,8 @@ const CAMPOS_DEFINICAO = [
   'variacao', 'escalaRolagem',
   // 07/11/2026 (D-136)
   'cargas', 'disparoMs', 'lanca',
+  // Marco 40 (D-157)
+  'nucleo', 'papel', 'eixos',
 ];
 
 /** Marco 18 (D-068): sem `escalaCom`, o físico escala com Força e o mágico com Inteligência. */
