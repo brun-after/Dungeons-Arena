@@ -24,7 +24,7 @@
       "arma": "machado",
       "defesa": 0,
       "atributos": [
-        ["forca"]
+        ["vontade"]
       ],
       "elementos": ["fogo"],
       "formas": {
@@ -59,7 +59,7 @@
       "arma": "lanca",
       "defesa": 0,
       "atributos": [
-        ["forca", "destreza"]
+        ["vontade", "destreza"]
       ],
       "elementos": [],
       "formas": {
@@ -103,7 +103,7 @@
       "arma": "montante",
       "defesa": 0,
       "atributos": [
-        ["forca", "constituicao"]
+        ["vontade", "constituicao"]
       ],
       "elementos": ["terra"],
       "formas": {
@@ -145,7 +145,7 @@
       "arma": "espada",
       "defesa": 0,
       "atributos": [
-        ["forca", "constituicao"]
+        ["vontade", "constituicao"]
       ],
       "elementos": ["fogo", "raio"],
       "formas": {
@@ -183,7 +183,7 @@
       "arma": "clava",
       "defesa": 0,
       "atributos": [
-        ["forca", "constituicao"]
+        ["vontade", "constituicao"]
       ],
       "elementos": ["terra"],
       "formas": {
@@ -223,7 +223,7 @@
       "arma": "sabre",
       "defesa": 0,
       "atributos": [
-        ["destreza", "forca"]
+        ["destreza", "vontade"]
       ],
       "elementos": ["raio"],
       "formas": {
@@ -261,7 +261,7 @@
       "arma": "mangual",
       "defesa": 0,
       "atributos": [
-        ["forca", "dominio"]
+        ["vontade", "dominio"]
       ],
       "elementos": ["trevas"],
       "formas": {
@@ -339,7 +339,7 @@
       "arma": "besta",
       "defesa": 0,
       "atributos": [
-        ["destreza", "forca"]
+        ["destreza", "vontade"]
       ],
       "elementos": ["raio"],
       "formas": {
@@ -458,7 +458,7 @@
       "arma": "arco",
       "defesa": 0,
       "atributos": [
-        ["destreza", "forca"]
+        ["destreza", "vontade"]
       ],
       "elementos": ["gelo", "veneno"],
       "formas": {
@@ -536,7 +536,7 @@
       "arma": "chifre",
       "defesa": 0,
       "atributos": [
-        ["destreza", "forca"]
+        ["destreza", "vontade"]
       ],
       "elementos": ["terra"],
       "formas": {
@@ -576,7 +576,7 @@
       "arma": "arcoguerra",
       "defesa": 0,
       "atributos": [
-        ["forca", "destreza"]
+        ["vontade", "destreza"]
       ],
       "elementos": ["fogo"],
       "formas": {
@@ -1053,7 +1053,7 @@
       "arma": "foice",
       "defesa": 0,
       "atributos": [
-        ["inteligencia", "forca"]
+        ["inteligencia", "vontade"]
       ],
       "elementos": ["trevas"],
       "formas": {
@@ -1328,7 +1328,7 @@
       "arma": "adaga",
       "defesa": 0,
       "atributos": [
-        ["destreza", "forca"]
+        ["destreza", "vontade"]
       ],
       "elementos": ["veneno", "trevas"],
       "formas": {
@@ -1371,7 +1371,7 @@
       "arma": "machadinha",
       "defesa": 0,
       "atributos": [
-        ["forca", "destreza"]
+        ["vontade", "destreza"]
       ],
       "elementos": ["fogo"],
       "formas": {
@@ -1495,7 +1495,7 @@
       "arma": "arpeu",
       "defesa": 0,
       "atributos": [
-        ["forca", "destreza"]
+        ["vontade", "destreza"]
       ],
       "elementos": [],
       "formas": {
@@ -1575,7 +1575,7 @@
       "arma": "serrilhado",
       "defesa": 0,
       "atributos": [
-        ["destreza", "forca"]
+        ["destreza", "vontade"]
       ],
       "elementos": ["veneno"],
       "formas": {
@@ -1768,7 +1768,7 @@
       "icone": "peitoral",
       "defesa": 2,
       "atributos": [
-        ["constituicao", "forca"]
+        ["constituicao", "vontade"]
       ],
       "elementos": [],
       "formas": {
@@ -1830,7 +1830,7 @@
       "icone": "manopla",
       "defesa": 0,
       "atributos": [
-        ["forca", "destreza"],
+        ["vontade", "destreza"],
         ["destreza", "inteligencia"]
       ],
       "elementos": [],
@@ -1940,7 +1940,7 @@
       "defesa": 0,
       "atributos": [
         ["sabedoria", "inteligencia"],
-        ["forca", "constituicao"],
+        ["vontade", "constituicao"],
         ["destreza", "carisma"]
       ],
       "elementos": ["trevas"],

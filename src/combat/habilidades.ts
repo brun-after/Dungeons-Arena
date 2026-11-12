@@ -38,7 +38,7 @@ export type Grau = (typeof GRAUS)[number];
 
 /** Marco 18 (D-068): o atributo do bônus fixo de dano. Sem `escalaCom`, físico usa Força e mágico, Inteligência. */
 export type AtributoDeEscala = keyof Atributos;
-const ATRIBUTOS_DE_ESCALA: readonly AtributoDeEscala[] = ['forca', 'destreza', 'constituicao', 'inteligencia', 'sabedoria', 'carisma', 'dominio'];
+const ATRIBUTOS_DE_ESCALA: readonly AtributoDeEscala[] = ['vontade', 'destreza', 'constituicao', 'inteligencia', 'sabedoria', 'carisma', 'dominio'];
 export type Mobilidade = (typeof MOBILIDADES)[number];
 
 /** Marco 14: modificadores de evolução e de equipamento (D-057). */
@@ -500,7 +500,7 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
     nivelMinimo: o.nivelMinimo === undefined ? 1 : l.numero(o, 'nivelMinimo', { min: 1, max: 100, inteiro: true }),
     passiva: lerPassiva(l, o.passiva),
     mobilidade: o.mobilidade === undefined ? 'trava' : l.opcao(o, 'mobilidade', MOBILIDADES),
-    escalaCom: 'forca',
+    escalaCom: 'vontade',
     grau: o.grau === undefined ? 'B' : l.opcao(o, 'grau', GRAUS),
     rank: 1,
     chave: '',
@@ -523,7 +523,7 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
   if (o.escalaRolagem !== undefined) base.escalaRolagem = l.listaDeTextos(o, 'escalaRolagem').map((a) => {
     if ((ATRIBUTOS_DE_ESCALA as readonly string[]).includes(a)) return a as AtributoDeEscala;
     l.erro(`escalaRolagem: atributo desconhecido "${a}"`);
-    return 'forca';
+    return 'vontade';
   });
   base.tags = etiquetasDe(base, o.tags === undefined ? [] : l.listaDeTextos(o, 'tags'));
   base.chave = base.id;
@@ -577,7 +577,7 @@ const CAMPOS_DEFINICAO = [
 
 /** Marco 18 (D-068): sem `escalaCom`, o físico escala com Força e o mágico com Inteligência. */
 export function escalaPadrao(tipo: TipoAtaque): AtributoDeEscala {
-  return tipo === 'magico' ? 'inteligencia' : 'forca';
+  return tipo === 'magico' ? 'inteligencia' : 'vontade';
 }
 
 export function lerHabilidades(json: unknown): { definicoes: Map<string, DefinicaoHabilidade>; erros: string[] } {

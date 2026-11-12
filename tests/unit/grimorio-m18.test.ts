@@ -137,12 +137,12 @@ describe('conjuntos', () => {
 
 describe('ressonâncias de atributo', () => {
   it('atributo alto destrava a individual; o par em 14+ destrava a combinada', () => {
-    const base = { forca: 10, destreza: 10, constituicao: 10, inteligencia: 10, sabedoria: 10, carisma: 10, dominio: 10 };
+    const base = { vontade: 10, destreza: 10, constituicao: 10, inteligencia: 10, sabedoria: 10, carisma: 10, dominio: 10 };
     const ids = (a: typeof base) => ressonanciasDe(CONTEUDO.ressonancias, a).map((r) => r.id);
     expect(ids(base)).toEqual([]);
-    expect(ids({ ...base, forca: 16 })).toEqual(['impacto']);
-    expect(ids({ ...base, forca: 14, inteligencia: 14 })).toEqual(['lamina_runica']);
-    expect(ids({ ...base, forca: 16, constituicao: 16 })).toEqual(expect.arrayContaining(['impacto', 'muralha', 'inamovivel']));
+    expect(ids({ ...base, vontade: 16 })).toEqual(['impacto']);
+    expect(ids({ ...base, vontade: 14, inteligencia: 14 })).toEqual(['lamina_runica']);
+    expect(ids({ ...base, vontade: 16, constituicao: 16 })).toEqual(expect.arrayContaining(['impacto', 'muralha', 'inamovivel']));
   });
 });
 

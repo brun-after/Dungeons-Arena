@@ -116,8 +116,8 @@ describe('ficha (§2.5, §2.12)', () => {
   });
 
   it('bônus de atributo: o atributo da habilidade (marco 18)', () => {
-    const a = { ...ATRIBUTOS_NEUTROS, forca: 14, inteligencia: 9 };
-    expect(bonusDeAtributo(a, 'forca', 0.5)).toBe(7);
+    const a = { ...ATRIBUTOS_NEUTROS, vontade: 14, inteligencia: 9 };
+    expect(bonusDeAtributo(a, 'vontade', 0.5)).toBe(7);
     expect(bonusDeAtributo(a, 'inteligencia', 0.5)).toBe(4);
   });
 });

@@ -41,8 +41,8 @@ export function atributosDeFormula(e: Pick<Entidade, 'atributos' | 'bolsa'>, b: 
 /** D-071 (17/10/2026): pontos ofensivos acima do patamar de ressonância, incluindo builds híbridas FOR/INT. */
 export function bonusDeEspecializacao(atributos: Atributos, atributo: keyof Atributos, b: Balance): number {
   const e = b.atributos.efeitos;
-  if (atributo !== 'forca' && atributo !== 'inteligencia') return 0;
-  const pontos = Math.max(0, atributos.forca - e.especializacaoInicio) + Math.max(0, atributos.inteligencia - e.especializacaoInicio);
+  if (atributo !== 'vontade' && atributo !== 'inteligencia') return 0;
+  const pontos = Math.max(0, atributos.vontade - e.especializacaoInicio) + Math.max(0, atributos.inteligencia - e.especializacaoInicio);
   return Math.min(e.especializacaoMax, Math.floor(pontos * e.especializacaoPorPonto));
 }
 
@@ -80,7 +80,7 @@ export function multiplicadorDeRolagem(atributos: Atributos, b: Balance, escala?
   // Marco 27 (29/10/2026, D-126): o básico de cada arma escala com os atributos do item (a média deles), não só Força.
   // 08/11/2026 (D-141): FOR e INT pesam 35/65 (`rolagemPesoForcaPct`); com a Destreza, continua meio a meio.
   const pesoFor = escala === 'destreza' ? 0.5 : e.rolagemPesoForcaPct / 100;
-  const pontos = rolagem?.length ? rolagem.reduce((s, k) => s + atributos[k] - 10, 0) / rolagem.length : (atributos.forca - 10) * pesoFor + (segundo - 10) * (1 - pesoFor);
+  const pontos = rolagem?.length ? rolagem.reduce((s, k) => s + atributos[k] - 10, 0) / rolagem.length : (atributos.vontade - 10) * pesoFor + (segundo - 10) * (1 - pesoFor);
   return Math.max(e.rolagemMin, 1 + (pontos * e.rolagemPorPontoPct) / 100);
 }
 

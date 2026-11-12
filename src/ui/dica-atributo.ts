@@ -31,8 +31,8 @@ export function linhasDaDica(nome: NomeAtributo, a: Atributos, ctx: ContextoSimu
   const b = ctx.balance;
   const rolagem = fmt(multiplicadorDeRolagem(a, b), 2);
   switch (nome) {
-    case 'forca':
-      return [t('dica.forca.1', { rolagem }), t('dica.forca.2', { bonus: a.forca + bonusDeEspecializacao(a, 'forca', b) }), t('dica.especializacao', { inicio: b.atributos.efeitos.especializacaoInicio, ponto: b.atributos.efeitos.especializacaoPorPonto, max: b.atributos.efeitos.especializacaoMax })];
+    case 'vontade':
+      return [t('dica.vontade.1', { rolagem }), t('dica.vontade.2', { bonus: a.vontade + bonusDeEspecializacao(a, 'vontade', b) }), t('dica.especializacao', { inicio: b.atributos.efeitos.especializacaoInicio, ponto: b.atributos.efeitos.especializacaoPorPonto, max: b.atributos.efeitos.especializacaoMax })];
     case 'destreza': {
       const perfil = perfilDestreza(ctx, j);
       return [

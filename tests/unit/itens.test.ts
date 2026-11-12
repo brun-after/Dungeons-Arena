@@ -102,18 +102,18 @@ describe('equipamento derivado (§2.10)', () => {
     c.j().nivel = 2;
     // Marco 27: o Aventureiro já começa com o bumerangue de madeira na mão principal.
     const adaga = c.dar('adaga');
-    const forcaBase = c.j().atributos.forca;
+    const forcaBase = c.j().atributos.vontade;
     const destrezaBase = c.j().atributos.destreza;
     c.tick({ t: 'equipar', invId: adaga, slot: 'arma_principal' });
     expect(c.j().atributos.destreza).toBe(destrezaBase + 2);
     expect(c.j().bolsa?.mochila.some((i) => i.itemId === 'bumerangue_madeira')).toBe(true);
     const machado = c.dar('machado_orc');
     c.tick({ t: 'equipar', invId: machado, slot: 'arma_principal' });
-    expect(c.j().atributos.forca).toBe(forcaBase + 4);
+    expect(c.j().atributos.vontade).toBe(forcaBase + 4);
     expect(c.j().atributos.destreza).toBe(destrezaBase);
     expect(c.j().bolsa?.mochila.some((i) => i.itemId === 'adaga')).toBe(true);
     c.tick({ t: 'desequipar', slot: 'arma_principal' });
-    expect(c.j().atributos.forca).toBe(forcaBase);
+    expect(c.j().atributos.vontade).toBe(forcaBase);
     expect(c.j().bolsa?.equipamento.arma_principal).toBeNull();
   });
 
@@ -268,14 +268,14 @@ describe('rede e privacidade', () => {
     expect(lerComando({ t: 'equipar', invId: 'i1', slot: 'cabeca' })).toEqual({ t: 'equipar', invId: 'i1', slot: 'cabeca' });
     expect(lerComando({ t: 'equipar', invId: 'i1', slot: 'bolso' })).toBeNull();
     expect(lerComando({ t: 'desequipar', slot: 'anel' })).toEqual({ t: 'desequipar', slot: 'anel' });
-    expect(lerComando({ t: 'distribuirPonto', atributo: 'forca' })).toEqual({ t: 'distribuirPonto', atributo: 'forca' });
+    expect(lerComando({ t: 'distribuirPonto', atributo: 'vontade' })).toEqual({ t: 'distribuirPonto', atributo: 'vontade' });
     expect(lerComando({ t: 'distribuirPonto', atributo: 'sorte' })).toBeNull();
   });
 
   it('jogador da arena não tem bolsa: comandos de item são recusados', () => {
     const c = cenario(BALANCE_PADRAO, 'livre');
     c.j().bolsa = null;
-    c.tick({ t: 'distribuirPonto', atributo: 'forca' });
+    c.tick({ t: 'distribuirPonto', atributo: 'vontade' });
     expect(c.de('itemRecusado')).toMatchObject([{ motivo: 'sem_mochila' }]);
   });
 });

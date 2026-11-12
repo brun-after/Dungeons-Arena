@@ -18,7 +18,7 @@ export type ClasseCombate = 'corpo_a_corpo' | 'conjurador' | 'atirador';
 export type Arquetipo = 'jogador' | 'perseguidor' | 'atirador' | 'controlador' | 'boss' | 'boneco';
 
 export interface Atributos {
-  forca: number;
+  vontade: number;
   destreza: number;
   constituicao: number;
   inteligencia: number;
@@ -213,6 +213,9 @@ export interface HabilidadeConhecida {
  * `atributos`, `defesa`, `hpMax` e `manaMax` da entidade são sempre derivados daqui
  * (`recalcularFicha`), nunca guardados como deltas.
  */
+/** Marco 39 (D-146): a versão atual do sistema de personagem (estilos, vínculo elemental e runas). */
+export const SISTEMA_DO_PERSONAGEM = 39;
+
 export interface Bolsa {
   atributosBase: Atributos;
   defesaBase: number;
@@ -253,6 +256,11 @@ export interface Bolsa {
    * jogo dar uma. O certificado da arena se prende a ela.
    */
   personagemId: string;
+  /**
+   * Marco 39 (12/11/2026, D-146): o sistema de personagem em que a build foi montada (`SISTEMA_DO_PERSONAGEM`).
+   * Ausente = anterior ao marco 39: o jogo mostra a tela de atualização, que devolve os pontos.
+   */
+  sistema?: number;
   /** Marco 18 (17/10/2026, D-068): a habilidade sendo estudada (aprender não é instantâneo); null = nenhuma. */
   estudo: Estudo | null;
   /** Marco 18 (D-070): a contagem de cada missão (as que zeram por fase usam `id@fase`) e as concluídas. */
@@ -471,7 +479,7 @@ export interface AparenciaEquipada {
 }
 
 export const ATRIBUTOS_NEUTROS: Readonly<Atributos> = {
-  forca: 10,
+  vontade: 10,
   destreza: 10,
   constituicao: 10,
   inteligencia: 10,

@@ -26,9 +26,9 @@ function entrar(sala: ReturnType<typeof novaSala>, pedidoFicha: unknown = { clas
 describe('entrada na sala', () => {
   it('ficha adulterada é cortada e a prévia lista o que mudou', () => {
     const sala = novaSala();
-    const j = entrar(sala, { classeId: 'aventureiro', atributos: { forca: 99 }, hpMax: 9999 });
-    expect(j.bem.previa.alteracoes.map((a) => a.campo)).toEqual(expect.arrayContaining(['atributos.forca', 'hpMax']));
-    expect(j.entidade()?.atributos.forca).toBeLessThanOrEqual(16);
+    const j = entrar(sala, { classeId: 'aventureiro', atributos: { vontade: 99 }, hpMax: 9999 });
+    expect(j.bem.previa.alteracoes.map((a) => a.campo)).toEqual(expect.arrayContaining(['atributos.vontade', 'hpMax']));
+    expect(j.entidade()?.atributos.vontade).toBeLessThanOrEqual(16);
     expect(j.entidade()?.equipe).toBe(`jogador:jogador-1`);
   });
 

@@ -92,7 +92,7 @@
       "slotPadrao": "arma_principal",
       "nivelMinimo": 2,
       "bonusAtributos": {
-        "forca": 4
+        "vontade": 4
       },
       "bonusDefesa": 0,
       "efeitos": [],
@@ -2627,7 +2627,7 @@
       "slotPadrao": "cabeca",
       "nivelMinimo": 10,
       "bonusAtributos": {
-        "forca": 3,
+        "vontade": 3,
         "constituicao": 2,
         "dominio": 2
       },
@@ -2666,7 +2666,7 @@
       "nivelMinimo": 26,
       "bonusAtributos": {
         "constituicao": 5,
-        "forca": 3,
+        "vontade": 3,
         "dominio": 4
       },
       "bonusDefesa": 6,
@@ -2675,7 +2675,7 @@
     },
     {"id": "couraca_eclipse", "nome": "Couraça do Eclipse", "tipo": "equipamento", "descricao": "Equipamento forjado para expedições em territórios hostis.", "icone": "peitoral", "raridade": "epico", "valorBase": 2800, "slotPadrao": "corpo", "nivelMinimo": 30, "bonusAtributos": {"constituicao": {"modo": "pct", "valor": 20}}, "bonusDefesa": 8, "efeitos": [], "dropavel": false},
     {"id": "manto_crepusculo", "nome": "Manto do Crepúsculo", "tipo": "equipamento", "descricao": "Equipamento forjado para expedições em territórios hostis.", "icone": "capa", "raridade": "epico", "valorBase": 4200, "slotPadrao": "capa", "nivelMinimo": 40, "bonusAtributos": {"inteligencia": {"modo": "pct", "valor": 18}, "sabedoria": {"modo": "pct", "valor": 15}}, "bonusDefesa": 5, "efeitos": [], "dropavel": false},
-    {"id": "couraca_trono", "nome": "Couraça do Trono Vazio", "tipo": "equipamento", "descricao": "Equipamento forjado para expedições em territórios hostis.", "icone": "peitoral", "raridade": "lendario", "valorBase": 9000, "slotPadrao": "corpo", "nivelMinimo": 55, "bonusAtributos": {"constituicao": {"modo": "pct", "valor": 25}, "forca": {"modo": "pct", "valor": 15}}, "bonusDefesa": 12, "efeitos": [], "dropavel": false},
+    {"id": "couraca_trono", "nome": "Couraça do Trono Vazio", "tipo": "equipamento", "descricao": "Equipamento forjado para expedições em territórios hostis.", "icone": "peitoral", "raridade": "lendario", "valorBase": 9000, "slotPadrao": "corpo", "nivelMinimo": 55, "bonusAtributos": {"constituicao": {"modo": "pct", "valor": 25}, "vontade": {"modo": "pct", "valor": 15}}, "bonusDefesa": 12, "efeitos": [], "dropavel": false},
     {"id": "manto_abismo", "nome": "Manto do Abismo", "tipo": "equipamento", "descricao": "Equipamento forjado para expedições em territórios hostis.", "icone": "capa", "raridade": "lendario", "valorBase": 9500, "slotPadrao": "capa", "nivelMinimo": 55, "bonusAtributos": {"inteligencia": {"modo": "pct", "valor": 25}, "sabedoria": {"modo": "pct", "valor": 20}}, "bonusDefesa": 8, "efeitos": [], "dropavel": false},
     {"id": "couraca_expedicao", "nome": "Couraça de Expedição", "tipo": "equipamento", "descricao": "Equipamento forjado para expedições em territórios hostis.", "icone": "peitoral", "raridade": "epico", "valorBase": 1200, "slotPadrao": "corpo", "nivelMinimo": 15, "bonusAtributos": {"constituicao": {"modo": "pct", "valor": 15}}, "bonusDefesa": 5, "efeitos": [], "dropavel": false},
     {"id": "po_revelador", "nome": "Pó revelador", "tipo": "consumivel", "descricao": "Soprado no ar, mostra por 90 s as armadilhas escondidas a até 8 células.", "icone": "olho", "raridade": "comum", "valorBase": 18, "slotPadrao": null, "nivelMinimo": 1, "bonusAtributos": {}, "bonusDefesa": 0, "efeitos": [{"tipo": "vista_de_armadilha", "duracaoMs": 90000}], "dropavel": true},
@@ -2707,13 +2707,13 @@
     {"id": "amuleto_do_necromante", "nome": "Amuleto do Necromante", "tipo": "equipamento", "descricao": "Do Necromante Ancestral: a corrente ainda sussurra os nomes dos mortos.", "icone": "amuleto", "raridade": "lendario", "valorBase": 2600, "slotPadrao": "amuleto", "nivelMinimo": 30, "bonusAtributos": {"inteligencia": {"modo": "pct", "valor": 15}, "dominio": 4}, "bonusDefesa": 2, "efeitos": [], "dropavel": false},
     {"id": "couraca_de_seda", "nome": "Couraça de seda férrea", "tipo": "equipamento", "descricao": "Placas de ferro costuradas com seda de aranha: leve e firme.", "icone": "peitoral", "raridade": "incomum", "valorBase": 120, "slotPadrao": "corpo", "nivelMinimo": 5, "bonusAtributos": {"constituicao": 2}, "bonusDefesa": 3, "efeitos": [], "dropavel": false},
     {"id": "arco_de_madeira_antiga", "nome": "Arco de madeira antiga", "tipo": "equipamento", "descricao": "Madeira que não verga, corda de seda.", "icone": "arco", "raridade": "incomum", "valorBase": 110, "slotPadrao": "arma_principal", "nivelMinimo": 6, "bonusAtributos": {"destreza": 3}, "bonusDefesa": 0, "efeitos": [], "dropavel": false},
-    {"id": "elmo_de_presas", "nome": "Elmo de presas", "tipo": "equipamento", "descricao": "Presas de lobo e de orc cravadas no aço.", "icone": "elmo", "raridade": "raro", "valorBase": 260, "slotPadrao": "cabeca", "nivelMinimo": 12, "bonusAtributos": {"forca": 2, "constituicao": 2}, "bonusDefesa": 3, "efeitos": [], "dropavel": false},
+    {"id": "elmo_de_presas", "nome": "Elmo de presas", "tipo": "equipamento", "descricao": "Presas de lobo e de orc cravadas no aço.", "icone": "elmo", "raridade": "raro", "valorBase": 260, "slotPadrao": "cabeca", "nivelMinimo": 12, "bonusAtributos": {"vontade": 2, "constituicao": 2}, "bonusDefesa": 3, "efeitos": [], "dropavel": false},
     {"id": "botas_de_couro_de_troll", "nome": "Botas de couro de troll", "tipo": "equipamento", "descricao": "Não gastam: o couro se refaz.", "icone": "botas", "raridade": "raro", "valorBase": 280, "slotPadrao": "pes", "nivelMinimo": 14, "bonusAtributos": {"destreza": 2, "constituicao": 2}, "bonusDefesa": 2, "efeitos": [], "dropavel": false},
-    {"id": "couraca_de_escamas", "nome": "Couraça de escamas", "tipo": "equipamento", "descricao": "Escamas de dragão sobre a malha de prata.", "icone": "peitoral", "raridade": "epico", "valorBase": 900, "slotPadrao": "corpo", "nivelMinimo": 22, "bonusAtributos": {"constituicao": {"modo": "pct", "valor": 15}, "forca": 2}, "bonusDefesa": 6, "efeitos": [], "dropavel": false},
-    {"id": "elmo_chifrudo", "nome": "Elmo chifrudo", "tipo": "equipamento", "descricao": "Os chifres do Demônio no seu elmo. Ninguém vai rir.", "icone": "elmo", "raridade": "epico", "valorBase": 1100, "slotPadrao": "cabeca", "nivelMinimo": 24, "bonusAtributos": {"forca": {"modo": "pct", "valor": 12}, "constituicao": 3}, "bonusDefesa": 5, "efeitos": [], "dropavel": false},
+    {"id": "couraca_de_escamas", "nome": "Couraça de escamas", "tipo": "equipamento", "descricao": "Escamas de dragão sobre a malha de prata.", "icone": "peitoral", "raridade": "epico", "valorBase": 900, "slotPadrao": "corpo", "nivelMinimo": 22, "bonusAtributos": {"constituicao": {"modo": "pct", "valor": 15}, "vontade": 2}, "bonusDefesa": 6, "efeitos": [], "dropavel": false},
+    {"id": "elmo_chifrudo", "nome": "Elmo chifrudo", "tipo": "equipamento", "descricao": "Os chifres do Demônio no seu elmo. Ninguém vai rir.", "icone": "elmo", "raridade": "epico", "valorBase": 1100, "slotPadrao": "cabeca", "nivelMinimo": 24, "bonusAtributos": {"vontade": {"modo": "pct", "valor": 12}, "constituicao": 3}, "bonusDefesa": 5, "efeitos": [], "dropavel": false},
     {"id": "anel_de_dente_de_ouro", "nome": "Anel de dente de ouro", "tipo": "equipamento", "descricao": "O dente do Rei Goblin num aro de pedra rúnica.", "icone": "anel", "raridade": "epico", "valorBase": 1000, "slotPadrao": "anel", "nivelMinimo": 26, "bonusAtributos": {"carisma": 4, "sabedoria": 3}, "bonusDefesa": 0, "efeitos": [], "dropavel": false},
     {"id": "manto_da_bruxa", "nome": "Manto da Bruxa", "tipo": "equipamento", "descricao": "Panos cultistas tingidos de resina, com o olho no fecho.", "icone": "capa", "raridade": "epico", "valorBase": 1300, "slotPadrao": "capa", "nivelMinimo": 30, "bonusAtributos": {"inteligencia": {"modo": "pct", "valor": 14}, "sabedoria": 3}, "bonusDefesa": 3, "efeitos": [], "dropavel": false},
-    {"id": "couraca_de_obsidiana", "nome": "Couraça de obsidiana", "tipo": "equipamento", "descricao": "Vidro negro forjado no fogo de um núcleo de dragão.", "icone": "peitoral", "raridade": "lendario", "valorBase": 5200, "slotPadrao": "corpo", "nivelMinimo": 45, "bonusAtributos": {"constituicao": {"modo": "pct", "valor": 22}, "forca": {"modo": "pct", "valor": 10}}, "bonusDefesa": 9, "efeitos": [], "dropavel": false},
-    {"id": "luvas_do_trovao", "nome": "Luvas do trovão", "tipo": "equipamento", "descricao": "Escamas trovejantes nas palmas: o golpe estala.", "icone": "luvas", "raridade": "lendario", "valorBase": 4800, "slotPadrao": "maos", "nivelMinimo": 45, "bonusAtributos": {"forca": {"modo": "pct", "valor": 14}, "destreza": {"modo": "pct", "valor": 10}}, "bonusDefesa": 4, "efeitos": [], "dropavel": false}
+    {"id": "couraca_de_obsidiana", "nome": "Couraça de obsidiana", "tipo": "equipamento", "descricao": "Vidro negro forjado no fogo de um núcleo de dragão.", "icone": "peitoral", "raridade": "lendario", "valorBase": 5200, "slotPadrao": "corpo", "nivelMinimo": 45, "bonusAtributos": {"constituicao": {"modo": "pct", "valor": 22}, "vontade": {"modo": "pct", "valor": 10}}, "bonusDefesa": 9, "efeitos": [], "dropavel": false},
+    {"id": "luvas_do_trovao", "nome": "Luvas do trovão", "tipo": "equipamento", "descricao": "Escamas trovejantes nas palmas: o golpe estala.", "icone": "luvas", "raridade": "lendario", "valorBase": 4800, "slotPadrao": "maos", "nivelMinimo": 45, "bonusAtributos": {"vontade": {"modo": "pct", "valor": 14}, "destreza": {"modo": "pct", "valor": 10}}, "bonusDefesa": 4, "efeitos": [], "dropavel": false}
   ]
 }

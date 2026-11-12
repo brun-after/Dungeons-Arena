@@ -5,7 +5,7 @@
       "id": "impacto",
       "nome": "Impacto",
       "exige": {
-        "forca": 16
+        "vontade": 16
       },
       "texto": "Golpe corpo a corpo crítico empurra 1 célula.",
       "ganchos": [
@@ -131,7 +131,7 @@
       "id": "lamina_runica",
       "nome": "Lâmina rúnica",
       "exige": {
-        "forca": 14,
+        "vontade": 14,
         "inteligencia": 14
       },
       "texto": "Golpes físicos de contato aplicam o elemento da sua última magia (até 5 s depois).",
@@ -189,7 +189,7 @@
       "id": "inamovivel",
       "nome": "Inamovível",
       "exige": {
-        "forca": 14,
+        "vontade": 14,
         "constituicao": 14
       },
       "texto": "Imune a empurrão e puxão.",
@@ -249,7 +249,7 @@
       "id": "impeto",
       "nome": "Ímpeto",
       "exige": {
-        "forca": 14,
+        "vontade": 14,
         "destreza": 14
       },
       "texto": "Crítico corpo a corpo reduz em 0,5 s a recarga das skills de classe que ferem.",
@@ -270,7 +270,7 @@
       "id": "disciplina_interior",
       "nome": "Disciplina interior",
       "exige": {
-        "forca": 14,
+        "vontade": 14,
         "sabedoria": 14
       },
       "texto": "Golpe corpo a corpo devolve 1 de mana.",
@@ -290,7 +290,7 @@
       "id": "comandante",
       "nome": "Comandante",
       "exige": {
-        "forca": 14,
+        "vontade": 14,
         "carisma": 14
       },
       "texto": "Seu abate dá +10 de carga de ultimate aos aliados a até 6 células.",
@@ -359,7 +359,7 @@
       "id": "gladiador",
       "nome": "Gladiador",
       "exige": {
-        "forca": 13,
+        "vontade": 13,
         "destreza": 13,
         "constituicao": 13
       },
@@ -400,7 +400,7 @@
       "id": "senhor_da_guerra",
       "nome": "Senhor da guerra",
       "exige": {
-        "forca": 13,
+        "vontade": 13,
         "constituicao": 13,
         "carisma": 13
       },

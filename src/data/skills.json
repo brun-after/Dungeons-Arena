@@ -6302,9 +6302,9 @@
         "cor": "#c0392b",
         "assinatura": "arma_machado"
       },
-      "escalaCom": "forca",
+      "escalaCom": "vontade",
       "escalaRolagem": [
-        "forca"
+        "vontade"
       ],
       "basico": true,
       "mobilidade": "livre"
@@ -6335,9 +6335,9 @@
         "cor": "#7f8c8d",
         "assinatura": "arma_lanca"
       },
-      "escalaCom": "forca",
+      "escalaCom": "vontade",
       "escalaRolagem": [
-        "forca",
+        "vontade",
         "destreza"
       ],
       "basico": true,
@@ -6369,9 +6369,9 @@
         "cor": "#95a5a6",
         "assinatura": "arma_montante"
       },
-      "escalaCom": "forca",
+      "escalaCom": "vontade",
       "escalaRolagem": [
-        "forca",
+        "vontade",
         "constituicao"
       ],
       "variacao": {
@@ -6409,9 +6409,9 @@
       "mods": [
         "atravessar"
       ],
-      "escalaCom": "forca",
+      "escalaCom": "vontade",
       "escalaRolagem": [
-        "forca",
+        "vontade",
         "constituicao"
       ],
       "basico": true,
@@ -6448,9 +6448,9 @@
         "cor": "#a04000",
         "assinatura": "arma_maca"
       },
-      "escalaCom": "forca",
+      "escalaCom": "vontade",
       "escalaRolagem": [
-        "forca",
+        "vontade",
         "constituicao"
       ],
       "basico": true,
@@ -6491,7 +6491,7 @@
       "escalaCom": "destreza",
       "escalaRolagem": [
         "destreza",
-        "forca"
+        "vontade"
       ],
       "basico": true,
       "mobilidade": "livre"
@@ -6527,9 +6527,9 @@
         "cor": "#5d6d7e",
         "assinatura": "arma_mangual"
       },
-      "escalaCom": "forca",
+      "escalaCom": "vontade",
       "escalaRolagem": [
-        "forca"
+        "vontade"
       ],
       "basico": true,
       "mobilidade": "livre"
@@ -6606,7 +6606,7 @@
       "escalaCom": "destreza",
       "escalaRolagem": [
         "destreza",
-        "forca"
+        "vontade"
       ],
       "basico": true,
       "mobilidade": "livre"
@@ -6734,7 +6734,7 @@
       "escalaCom": "destreza",
       "escalaRolagem": [
         "destreza",
-        "forca"
+        "vontade"
       ],
       "variacao": {
         "porCima": true
@@ -6816,7 +6816,7 @@
       "escalaCom": "destreza",
       "escalaRolagem": [
         "destreza",
-        "forca"
+        "vontade"
       ],
       "variacao": {
         "ricocheteParede": 1
@@ -6854,9 +6854,9 @@
       "tags": [
         "flechas"
       ],
-      "escalaCom": "forca",
+      "escalaCom": "vontade",
       "escalaRolagem": [
-        "forca",
+        "vontade",
         "destreza"
       ],
       "variacao": {
@@ -7602,7 +7602,7 @@
       "escalaCom": "destreza",
       "escalaRolagem": [
         "destreza",
-        "forca"
+        "vontade"
       ],
       "variacao": {
         "retorna": true,
@@ -7643,7 +7643,7 @@
       "escalaCom": "destreza",
       "escalaRolagem": [
         "destreza",
-        "forca"
+        "vontade"
       ],
       "variacao": {
         "retorna": true,
@@ -7680,9 +7680,9 @@
         "cor": "#a04000",
         "assinatura": "arma_machadinha"
       },
-      "escalaCom": "forca",
+      "escalaCom": "vontade",
       "escalaRolagem": [
-        "forca",
+        "vontade",
         "destreza"
       ],
       "variacao": {
@@ -7724,7 +7724,7 @@
       "escalaCom": "destreza",
       "escalaRolagem": [
         "destreza",
-        "forca"
+        "vontade"
       ],
       "variacao": {
         "retorna": true,
@@ -7768,7 +7768,7 @@
       "escalaCom": "destreza",
       "escalaRolagem": [
         "destreza",
-        "forca"
+        "vontade"
       ],
       "variacao": {
         "retorna": true,
@@ -7805,9 +7805,9 @@
         "cor": "#717d7e",
         "assinatura": "arma_arpeu"
       },
-      "escalaCom": "forca",
+      "escalaCom": "vontade",
       "escalaRolagem": [
-        "forca",
+        "vontade",
         "destreza"
       ],
       "variacao": {
@@ -7888,7 +7888,7 @@
       "escalaCom": "destreza",
       "escalaRolagem": [
         "destreza",
-        "forca"
+        "vontade"
       ],
       "variacao": {
         "retorna": true,
@@ -7974,7 +7974,7 @@
       "escalaCom": "destreza",
       "escalaRolagem": [
         "destreza",
-        "forca"
+        "vontade"
       ],
       "variacao": {
         "retorna": true,

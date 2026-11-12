@@ -58,7 +58,7 @@ function erguer(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade, tipo
   // Marco 28 (D-127): o Ritual fortalece o ataque e a vida dos mortos.
   const servos = fatorDosServos(ctx, dono) * fatorDeDominio(ctx, dono, 'servos');
   const poder = Math.max(1, Math.round((8 + Math.floor(dono.nivel / 2) + Math.floor(Math.max(0, pontosUteis(dono.atributos.inteligencia, ctx.balance) - 10) * r.atributoPorInt)) * servos));
-  morto.atributos = { ...morto.atributos, forca: poder, inteligencia: poder };
+  morto.atributos = { ...morto.atributos, vontade: poder, inteligencia: poder };
   // Marco 24 (D-095): a sintonia da terra dá mais vida aos mortos.
   morto.hpMax = Math.max(1, Math.round(vidaDoMorto(ctx, dono, Math.round((r.vidaBase + dono.nivel * r.vidaPorNivel) * (tipo === 'servo' ? r.vidaServoPct / 100 : 1)), estado.tick) * servos));
   morto.hp = morto.hpMax;

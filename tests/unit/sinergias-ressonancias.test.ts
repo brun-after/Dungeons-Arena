@@ -80,7 +80,7 @@ describe('sinergias passivas (D-096)', () => {
 
 describe('ressonâncias novas (D-096)', () => {
   it('Gladiador, Maestro e Eco ancestral pelos eventos do tick', () => {
-    const c = cena('guerreiro', { forca: 13, destreza: 13, constituicao: 13, inteligencia: 14, carisma: 14, sabedoria: 13 });
+    const c = cena('guerreiro', { vontade: 13, destreza: 13, constituicao: 13, inteligencia: 14, carisma: 14, sabedoria: 13 });
     dispararGanchosDosEventos(c.estado, c.ctx, [{ t: 'ultimateUsada', tick: 0, id: 'j', ultimateId: 'x', acaoId: 1 }], c.eventos);
     expect(c.tem(c.j, 'escudo')).toBe(true);
     dispararGanchosDosEventos(c.estado, c.ctx, [{ t: 'comboFeito', tick: 0, id: 'j', combo: 'moedor', alvoId: null }], c.eventos);
@@ -90,7 +90,7 @@ describe('ressonâncias novas (D-096)', () => {
   });
 
   it('Comandante: o abate enche a ultimate dos aliados; Senhor da guerra: a ultimate fortalece os aliados', () => {
-    const c = cena('guerreiro', { forca: 14, carisma: 14, constituicao: 13 });
+    const c = cena('guerreiro', { vontade: 14, carisma: 14, constituicao: 13 });
     dispararGanchosDe(c.estado, c.ctx, c.j, 'aoMatar', { outro: c.b }, c.eventos);
     expect(c.aliado.cargaUltimate).toBe(10);
     expect(c.j.cargaUltimate ?? 0).toBe(0);
@@ -111,7 +111,7 @@ describe('ressonâncias novas (D-096)', () => {
   });
 
   it('Ímpeto: crítico corpo a corpo tira 0,5 s da recarga das skills de classe; Arcano preciso expõe no crítico mágico', () => {
-    const c = cena('guerreiro', { forca: 14, destreza: 14, inteligencia: 13, sabedoria: 13 });
+    const c = cena('guerreiro', { vontade: 14, destreza: 14, inteligencia: 13, sabedoria: 13 });
     c.estado.recargas[chaveRecarga('j', 'redemoinho')] = ticksDe(5000);
     dispararGanchosDe(c.estado, c.ctx, c.j, 'aoCritico', { outro: c.b, hab: c.hab('ataque_basico') }, c.eventos);
     expect(c.estado.recargas[chaveRecarga('j', 'redemoinho')]).toBe(ticksDe(4500));

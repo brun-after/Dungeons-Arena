@@ -368,7 +368,7 @@
     "crescimento": [
       { "atributo": "constituicao", "porNivel": 4, "aPartirDoNivel": 2 },
       { "atributo": "constituicao", "porNivel": 2, "aPartirDoNivel": 6 },
-      { "atributo": "forca", "porNivel": 1, "aPartirDoNivel": 2 },
+      { "atributo": "vontade", "porNivel": 1, "aPartirDoNivel": 2 },
       { "atributo": "inteligencia", "porNivel": 1, "aPartirDoNivel": 3 },
       { "atributo": "destreza", "porNivel": 1, "aPartirDoNivel": 7 },
       { "atributo": "sabedoria", "porNivel": 1, "aPartirDoNivel": 10 }

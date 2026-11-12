@@ -45,12 +45,12 @@ export function marcarPergaminhos(estado: EstadoJogo, ctx: ContextoSimulacao, do
     if (pct > 0) inv.expiraTick += Math.round(((inv.expiraTick - estado.tick) * pct) / 100);
     e.hpMax = Math.max(1, Math.round(e.hpMax * engenho));
     e.hp = e.hpMax;
-    e.atributos = { ...e.atributos, forca: Math.round(e.atributos.forca * engenho) };
+    e.atributos = { ...e.atributos, vontade: Math.round(e.atributos.vontade * engenho) };
     // Mestre de feras: a chance de a criatura vir Primordial (o dobro de vida e de força).
     if (aleatorio(estado.rng) * 100 < marcoDe(ctx, dono, 'primordialChancePct')) {
       e.hpMax *= 2;
       e.hp = e.hpMax;
-      e.atributos = { ...e.atributos, forca: e.atributos.forca * 2 };
+      e.atributos = { ...e.atributos, vontade: e.atributos.vontade * 2 };
       e.nome = `${e.nome} primordial`;
     }
   }

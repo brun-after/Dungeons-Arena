@@ -84,17 +84,17 @@ describe('nível 100 e o teto nível+20', () => {
     const bolsa = obter(j.bolsa);
     j.nivel = 5;
     bolsa.pontosAtributo = 5;
-    bolsa.atributosBase.forca = 25;
+    bolsa.atributosBase.vontade = 25;
     const saida: EventoSimulacao[] = [];
-    distribuirPonto(j, ctx, 'forca', 0, saida);
-    expect(bolsa.atributosBase.forca).toBe(25);
+    distribuirPonto(j, ctx, 'vontade', 0, saida);
+    expect(bolsa.atributosBase.vontade).toBe(25);
     expect(saida.some((e) => e.t === 'itemRecusado' && e.motivo === 'atributo_acima_do_nivel')).toBe(true);
     distribuirPonto(j, ctx, 'destreza', 0, saida);
     expect(bolsa.pontosAtributo).toBe(4);
-    const anel = { ...obter(CONTEUDO.itens.get('anel_sabio')), id: 'anel_t', bonusAtributos: { forca: { modo: 'abs' as const, valor: 5 } } };
+    const anel = { ...obter(CONTEUDO.itens.get('anel_sabio')), id: 'anel_t', bonusAtributos: { vontade: { modo: 'abs' as const, valor: 5 } } };
     const ctxAnel = { ...ctx, conteudo: { ...CONTEUDO, itens: new Map([...CONTEUDO.itens, ['anel_t', anel]]) } };
     bolsa.equipamento.anel = { invId: 'a', itemId: 'anel_t', qtd: 1, ref: null };
-    expect(derivarFicha(bolsa, 5, ctxAnel).atributos.forca).toBe(30);
+    expect(derivarFicha(bolsa, 5, ctxAnel).atributos.vontade).toBe(30);
   });
 
   it('acima de 30 o ponto rende menos; até 30 é igual', () => {

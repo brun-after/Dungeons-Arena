@@ -7,7 +7,7 @@ import { REGISTRO_EFEITOS, type EfeitoCanonico } from '../combat/registro-efeito
 import type { Balance, ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import type { EventoSimulacao, MotivoItem } from '../core/eventos-simulacao';
-import { type Bolsa, type Entidade, type ItemNaMochila } from '../entities/entidade';
+import { SISTEMA_DO_PERSONAGEM, type Bolsa, type Entidade, type ItemNaMochila } from '../entities/entidade';
 import { barraInicial } from './habilidades-classe';
 import type { ClasseJogador } from '../entities/presets';
 import { SLOTS_DE_EQUIPAMENTO, type Slot } from '../modos/modo';
@@ -34,6 +34,8 @@ export function criarBolsa(classe: ClasseJogador, ouroInicial = 0): Bolsa {
     barra: barraInicial(classe.iniciais, classe.geralInicial),
     pontosHabilidade: 0,
     personagemId: '',
+    // Marco 39 (D-146): o personagem novo já nasce no sistema atual (sem a tela de atualização).
+    sistema: SISTEMA_DO_PERSONAGEM,
     estudo: null,
     missoes: {},
     missoesConcluidas: [],

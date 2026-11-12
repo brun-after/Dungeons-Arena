@@ -25,7 +25,7 @@ export interface EscalaDaHabilidade {
 }
 
 export function escalaDaHabilidade(ctx: Ctx, e: Entidade, hab: Pick<Habilidade, 'id' | 'escalaCom' | 'escalaRolagem'>): EscalaDaHabilidade {
-  const lista: (keyof Atributos)[] = hab.escalaRolagem?.length ? [...hab.escalaRolagem] : ['forca', hab.escalaCom === 'destreza' ? 'destreza' : 'inteligencia'];
+  const lista: (keyof Atributos)[] = hab.escalaRolagem?.length ? [...hab.escalaRolagem] : ['vontade', hab.escalaCom === 'destreza' ? 'destreza' : 'inteligencia'];
   const pesos = new Map<keyof Atributos, number>();
   for (const a of lista) pesos.set(a, (pesos.get(a) ?? 0) + 100 / lista.length);
   const classe = fatorDeSkillDeClasse(ctx, e, hab.id);

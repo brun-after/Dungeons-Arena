@@ -3,7 +3,7 @@
 **Versão:** 0.99 · **Data:** 12/11/2026
 
 > **Histórico**
-> - **0.99 (12/11/2026)**: D-145: marco 39, o nível 100 sem travas (ids de item e de skill gerada, recompensa de missão) e o loot do inimigo renascido no Mundo.
+> - **0.99 (12/11/2026)**: D-146: a Força vira Vontade (save 29, a ficha antiga e a marca do sistema). D-145: marco 39, o nível 100 sem travas (ids de item e de skill gerada, recompensa de missão) e o loot do inimigo renascido no Mundo.
 > - **0.98 (09/11/2026)**: D-144: estabilidade e ajustes de jogo do Mundo (viagem entre salas sem queda, perseguição, lojas, troca, invocações, alvo dos buffs, descrições).
 > - **0.97 (08/11/2026)**: D-141 (habilidades por 35% FOR e 65% INT; o guerreiro conjura andando e encadeia com o básico) e D-142 (marco 38: prédios das vilas, andarilhos, escolta, errantes, forja em graus, troféus, fusão, pedra de retorno com círculo, save em toda região e o deserto entre os reinos).
 > - **0.96 (08/11/2026)**: D-140: o Mundo sem a fadiga de XP por fase (só a diferença de nível reduz o XP das criaturas inferiores).
@@ -4353,4 +4353,22 @@ saem as travas que deixavam o nível 100 pela metade.
   primeira vez. A regra de modo `dropsDeRenascido` (ligada só em `modos/mundo.json`) deixa o renascido soltar, com o
   ouro e a chance de item reduzidos pelo mesmo desgaste do XP (`0,8^abates`), com piso de 25%
   (`drops.pisoRenascidoPct`). Arena e campanha seguem a §3.6.
+
+## D-146 — A Força vira Vontade e a marca do sistema do personagem (12/11/2026)
+
+No modelo novo (documento de design v1.4, seção 2), o corpo físico deixa de ser atributo e vira um elemento (o Físico,
+no eneágono), e a Força vira **Vontade** (VON): resistir a controle, não ser interrompido, fúria e canalização. Nesta
+etapa a troca é só de nome, e a Vontade faz o que a Força fazia. Os papéis novos chegam com o pentagrama de estilos.
+
+- **Save 28 › 29** (`save/migracao-39.ts`): a chave `forca` vira `vontade` nos atributos de toda entidade gravada e na
+  base da ficha, no estado e nas fases visitadas. A migração não devolve pontos.
+- **Ficha antiga fora do save.** O pedido de personagem (grupo, Mundo, certificado) ainda pode trazer `forca`: a
+  conferência (`conferirAtributos`) o lê como Vontade. Antes, um atributo ausente caía em silêncio na base da classe,
+  e o jogador perderia os pontos postos nele. A ficha do Mundo não muda de versão, porque passa por essa mesma
+  conferência ao carregar.
+- **Marca do sistema** (`bolsa.sistema`, hoje `SISTEMA_DO_PERSONAGEM = 39`). O personagem criado agora já nasce com
+  ela. O antigo não tem a marca, e o jogo lhe mostra a tela de atualização (que devolve os pontos no orçamento novo).
+  A conferência só aceita o valor atual: qualquer outro pede a tela de novo.
+- **Certificados.** O retrato assinado tem `forca`, então deixa de bater com o personagem; a arena o trata como ficha
+  editada (treino) até uma nova certificação, como já acontece com qualquer mudança da ficha.
 

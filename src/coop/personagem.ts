@@ -9,7 +9,7 @@ import type { ContextoSimulacao } from '../core/contexto';
 import { hash53, serializarCanonico } from '../core/digest';
 import { clonarEntidade, clonarEstado } from '../core/estado';
 import { ehObjeto, type Objeto } from '../core/validar';
-import { SLOTS_BARRA, type Bolsa, type Entidade, type HabilidadeConhecida, type ItemNaMochila } from '../entities/entidade';
+import { SISTEMA_DO_PERSONAGEM, SLOTS_BARRA, type Bolsa, type Entidade, type HabilidadeConhecida, type ItemNaMochila } from '../entities/entidade';
 import { criarJogador } from '../entities/fabrica';
 import type { Alteracao, PreviaDeFicha } from '../arena/ficha-sessao';
 import { SLOTS_DE_EQUIPAMENTO } from '../modos/modo';
@@ -20,6 +20,7 @@ import { empilha } from '../progression/inventario';
 import { cabeNoSlot, NOMES_ATRIBUTOS } from '../progression/itens';
 import { ticksDe } from '../core/tempo';
 import { jogadorDoSave, type RegistroProgresso } from '../save/esquema';
+import { vontadeNoLugarDaForca } from '../save/migracao-39';
 import { pontosAteONivel, tetoDoAtributo, xpParaProximo } from '../progression/nivel';
 
 const MAX_NOME = 24;
@@ -52,7 +53,9 @@ const lista = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
  */
 function conferirAtributos(b: Objeto, bolsa: Bolsa, nivel: number, ctx: ContextoSimulacao, classeBase: Bolsa['atributosBase']): void {
   const { minimo, maximo } = ctx.balance.atributos;
-  const pedidos = ehObjeto(b.atributosBase) ? b.atributosBase : {};
+  // Marco 39 (D-146): a ficha antiga (Mundo, grupo, certificado) traz `forca`, que agora é a Vontade.
+  const atributos = vontadeNoLugarDaForca(b.atributosBase);
+  const pedidos = ehObjeto(atributos) ? atributos : {};
   // Marco 28 (D-127): nenhum atributo-base acima de nível + folga (a base da classe sempre vale).
   const teto = (nome: (typeof NOMES_ATRIBUTOS)[number]) => Math.max(classeBase[nome], Math.min(maximo, tetoDoAtributo(nivel, ctx.balance)));
   for (const nome of NOMES_ATRIBUTOS) bolsa.atributosBase[nome] = limitar(inteiro(pedidos[nome]) ?? classeBase[nome], minimo, teto(nome));
@@ -189,6 +192,9 @@ export function conferirPersonagem(pedido: unknown, ctx: ContextoSimulacao, id: 
   conferirItens(b, bolsa, e.nivel, ctx);
   // Marco 17: a identidade do personagem passa adiante (o certificado se prende a ela).
   bolsa.personagemId = typeof b.personagemId === 'string' && /^[0-9a-zA-Z-]{8,64}$/.test(b.personagemId) ? b.personagemId : '';
+  // Marco 39 (D-146): só o sistema atual vale; qualquer outro valor pede a tela de atualização de novo.
+  if (b.sistema === SISTEMA_DO_PERSONAGEM) bolsa.sistema = SISTEMA_DO_PERSONAGEM;
+  else delete bolsa.sistema;
   recalcularFicha(e, ctx);
   const estudoPedido = b.estudo;
   if (ehObjeto(estudoPedido) && typeof estudoPedido.id === 'string' && definicaoDe(ctx, estudoPedido.id) && !bolsa.conhecidas.some((c) => c.id === estudoPedido.id)) {
