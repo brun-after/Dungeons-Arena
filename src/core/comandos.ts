@@ -3,6 +3,7 @@
 
 import type { Dificuldade } from '../modos/dificuldade';
 import type { Atributos } from '../entities/entidade';
+import type { Elemento } from '../combat/elementos';
 import type { Slot } from '../modos/modo';
 
 export type EntidadeId = string;
@@ -55,6 +56,10 @@ export type Comando =
   | { t: 'seguirAlvo'; ligado: boolean }
   /** 06/11/2026: veste uma skin da classe (id) ou volta ao visual do equipamento (null). Só visual. */
   | { t: 'skin'; id: string | null }
+  /** Marco 39 (D-149): a tela de atualização confirma a build nova (os pontos pedidos sobre a base da classe). */
+  | { t: 'atualizarSistema'; pontos: Partial<Record<keyof Atributos, number>> }
+  /** Marco 39 (D-151): a runa do encaixe de uma skill de classe ou ultimate (null = volta para a padrão). */
+  | { t: 'escolherRuna'; habilidade: string; runa: 'fisico' | Elemento | null }
   /** Marco 24 (D-094): a ultimate do par nas teclas 1 e 2, com o medidor cheio (o botão grande e a tecla R). */
   | { t: 'usarUltimate'; alvo?: EntidadeId | Celula }
   /** Marco 24 (D-095): liga ou desliga uma passiva geral conhecida (até 3, fora de combate). */
@@ -88,6 +93,8 @@ export const TIPOS_DE_COMANDO: readonly Comando['t'][] = [
   'autoAtaque',
   'seguirAlvo',
   'skin',
+  'atualizarSistema',
+  'escolherRuna',
   'usarUltimate',
   'ativarPassiva',
   'desativarPassiva',

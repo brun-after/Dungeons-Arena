@@ -53,7 +53,7 @@ describe('assinatura', () => {
 
   it('ficha que não fecha não é certificada; sem identidade também não', () => {
     const c = new Certificador('chave-de-teste-com-tamanho');
-    expect(c.certificar(personagem((p) => (p.bolsa.atributosBase.forca = 30)), null, ctx, 1)).toEqual({ ok: false, motivo: 'ficha_invalida' });
+    expect(c.certificar(personagem((p) => (p.bolsa.atributosBase.vontade = 30)), null, ctx, 1)).toEqual({ ok: false, motivo: 'ficha_invalida' });
     expect(c.certificar(personagem((p) => (p.bolsa.personagemId = '')), null, ctx, 1)).toEqual({ ok: false, motivo: 'sem_id' });
   });
 

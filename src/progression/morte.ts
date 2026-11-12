@@ -184,8 +184,9 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
       concederXp(estado, ctx, e, saida, quemAbateu);
       // Boss morto abre a passagem (§2.1, marco 10A-1).
       aoMorrerBoss(estado, ctx, e, saida);
-      // Invocações não soltam nada nem voltam (§2.9).
-      if (e.abates === 0 && !e.invocacao) largarDrops(estado, ctx, e, saida, quemAbateu);
+      // Invocações não soltam nada nem voltam (§2.9). Marco 39 (12/11/2026, D-145): onde o modo manda (o Mundo), o
+      // renascido também solta, com o ouro e os itens reduzidos pelo desgaste do XP.
+      if (!e.invocacao && (e.abates === 0 || ctx.modo.dropsDeRenascido)) largarDrops(estado, ctx, e, saida, quemAbateu);
       // Dominação (§2.9, marco 8A-2): volta do lado de quem a marcou, em vez de sair do mundo.
       if (tentarDominar(estado, ctx, e, saida)) {
         e.morto = false;
@@ -266,7 +267,8 @@ function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
   if (!ctx.modo.loot.itens) return;
   // Ouro (marco 9A): só onde o modo solta itens, proporcional ao XP do inimigo.
   // Marco 30 (D-129): o loot do lugar (no Mundo, pelo perigo da região).
-  const lootMult = (ctx.modo.lootPct ?? 100) / 100;
+  const renascido = Math.max(d.pisoRenascidoPct / 100, ctx.balance.xp.decaimentoAntifarm ** e.abates);
+  const lootMult = ((ctx.modo.lootPct ?? 100) / 100) * renascido;
   const ouro = Math.round(e.xpBase * d.ouroPorXp * (0.5 + aleatorio(estado.rng)) * fatoresDoMundo(estado, ctx).recompensa * lootMult);
   if (ouro > 0) largarPerto(ctx, e.x, e.y, (x, y) => largarOuro(estado, ouro, x, y, saida));
   // Marco 14: livro raro, com uma habilidade gerada pela semente no nível do inimigo (D-057).

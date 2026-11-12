@@ -83,7 +83,7 @@ describe('entrada com o personagem do slot', () => {
       personagem('arqueiro', (e) => {
         const bolsa = obter(e.bolsa, 'bolsa');
         e.nivel = 1;
-        bolsa.atributosBase.forca = 30;
+        bolsa.atributosBase.vontade = 30;
         bolsa.ouro = 10 ** 9;
         bolsa.pontosHabilidade = 50;
         bolsa.mochila.push({ invId: 'i99', itemId: 'nao_existe', qtd: 1, ref: null });
@@ -95,7 +95,7 @@ describe('entrada com o personagem do slot', () => {
     expect(b.entidade().bolsa?.classeId).toBe('mago');
     const t = trapaceiro.entidade();
     const classe = obter(CONTEUDO.classes.get('arqueiro'), 'arqueiro');
-    expect(t.bolsa?.atributosBase.forca).toBe(classe.atributos.forca);
+    expect(t.bolsa?.atributosBase.vontade).toBe(classe.atributos.vontade);
     expect(t.bolsa?.atributosBase.destreza).toBe(classe.atributos.destreza);
     expect(t.bolsa?.ouro).toBe(s.ctx.balance.economia.ouroMax);
     expect(t.bolsa?.pontosHabilidade).toBe(0);

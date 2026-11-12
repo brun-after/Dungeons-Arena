@@ -162,14 +162,18 @@ export class EfeitosDeHabilidade {
       // Marco 26 (D-124): a assinatura desenha o acerto (silhueta, matéria, marca e o toque da variante). O golpe de
       // arma continua desenhando o próprio rastro no lugar do golpe genérico.
       const nome = assinaturaDe(h);
-      const daArma = GENERICOS.has(nome) && !!this.o.golpeDeArma?.(estado().entidades.find((e) => e.id === ev.fonteId), ev.chave);
+      const quem = estado().entidades.find((e) => e.id === ev.fonteId);
+      const daArma = GENERICOS.has(nome) && !!this.o.golpeDeArma?.(quem, ev.chave);
+      const comParticulas = ev.dano > 0 || ev.cura > 0 || ev.d20 === 0;
+      const acerto = { chave: ev.chave, fonteId: ev.fonteId, alvoId: ev.alvoId, de: fonte, ate: alvo, cor: v.cor, escala: escalaDe(h, !!this.o.classeDaUltimate?.(ev.habilidadeId)), critico: ev.critico, indice: ev.indice };
       if (!daArma) {
-        const comParticulas = ev.dano > 0 || ev.cura > 0 || ev.d20 === 0;
         const corEtapa = h.elemento && this.o.corElemento ? { corEtapa: this.o.corElemento(h.elemento) } : {};
         // Marco 27 (D-126): o básico da arma fica mais bonito com a raridade dela.
-        const tier = nome.startsWith('arma_') ? { tier: tierDaArma(estado().entidades.find((e) => e.id === ev.fonteId)) } : {};
-        this.o.diretor.acertar(nome, { chave: ev.chave, fonteId: ev.fonteId, alvoId: ev.alvoId, de: fonte, ate: alvo, cor: v.cor, escala: escalaDe(h, !!this.o.classeDaUltimate?.(ev.habilidadeId)), critico: ev.critico, indice: ev.indice, ...corEtapa, ...tier }, h.visual?.variante, comParticulas);
+        const tier = nome.startsWith('arma_') ? { tier: tierDaArma(quem) } : {};
+        this.o.diretor.acertar(nome, { ...acerto, ...corEtapa, ...tier }, h.visual?.variante, comParticulas);
       }
+      // Marco 39 (D-151): a runa conta de que a skill é feita agora, na intensidade do vínculo.
+      if (h.runa && h.faixaRuna !== undefined) this.o.diretor.runaNoAcerto(quem?.classeId ?? quem?.bolsa?.classeId, h.runa, h.faixaRuna, acerto, comParticulas);
       if (ev.indice > 0) return;
       const agoraMs = agora();
       const camera = this.o.diretor.def(nome).camera ?? (v.camera === 'nenhum' ? null : v.camera);
@@ -279,6 +283,8 @@ export class EfeitosDeHabilidade {
       const h = this.o.habilidades(c.chave);
       const v = h ? visualDe(h) : null;
       if (!pos || !h || !v) continue;
+      // Marco 39 (D-151): o fio da runa na mão, além da conjuração da assinatura.
+      if (h.runa && h.faixaRuna !== undefined) this.o.diretor.runaNaConjuracao(h.runa, h.faixaRuna, pos);
       // D-124: a conjuração da assinatura (a mão em chamas, a geada, os arcos); sem ela, o preset antigo.
       if (this.o.diretor.conjurar(assinaturaDe(h), pos, v.cor)) continue;
       if (v.conjuracao) p.emitir(v.conjuracao, pos.x, pos.y, v.cor);

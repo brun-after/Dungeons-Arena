@@ -132,11 +132,12 @@ export function descreverCaminho(c: Caminho): string[] {
 export function linhasDeEscala(ctx: ContextoSimulacao, e: Entidade, h: Habilidade): string[] {
   const s = escalaDaHabilidade(ctx, e, h);
   const classeId = e.bolsa?.classeId;
-  const nomes = s.rolagem.map((r) => `${nomeDoAtributo(r.atributo, classeId)} ${String(r.pesoPct)}%`);
-  nomes.push(t('desc.escalaBonus', { atributo: nomeDoAtributo(s.bonusCom, classeId) }));
+  // Marco 39 (D-148): o nível (poder base), os estilos e, nas de classe, o atributo de classe.
+  const nomes = [t('desc.escalaNivel'), t('desc.escalaEstilos')];
   if (s.deClasse) nomes.push(nomeDoAtributo('dominio', classeId));
   const sinal = (v: number) => `${v >= 0 ? '+' : ''}${String(v)}`;
   const partes = [t('desc.escalaRolagem', { v: sinal(s.rolagemPct) })];
+  if (s.estilosPct !== 0) partes.push(t('desc.escalaDosEstilos', { v: sinal(s.estilosPct) }));
   if (s.deClasse) partes.push(t('desc.escalaClasse', { v: sinal(s.classePct), atributo: nomeDoAtributo('dominio', classeId) }));
   if (s.itensPct > 0) partes.push(t('desc.escalaItens', { v: sinal(s.itensPct) }));
   return [t('desc.escala', { atributos: nomes.join(' · ') }), t('desc.escalaAtual', { partes: partes.join(', ') })];

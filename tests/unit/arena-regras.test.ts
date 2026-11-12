@@ -56,7 +56,7 @@ describe('ficha de sessão (§3.7)', () => {
     expect(ficha.habilidades).toEqual(['mergulho']);
     expect(ficha.nivel).toBe(clamp.nivelMax);
     expect(ficha.hpMax).toBeLessThan(9999);
-    expect(alteracoes.map((a) => a.campo)).toEqual(expect.arrayContaining(['hpMax', 'nivel', 'habilidades', 'atributos.forca']));
+    expect(alteracoes.map((a) => a.campo)).toEqual(expect.arrayContaining(['hpMax', 'nivel', 'habilidades', 'atributos.vontade']));
   });
 
   it('pedido honesto (a ficha da classe) não sofre alterações', () => {
@@ -66,7 +66,7 @@ describe('ficha de sessão (§3.7)', () => {
   });
 
   it('a redução é determinística e usa a ordem do modo no desempate', () => {
-    const pedido = { classeId: 'aventureiro', atributos: { forca: 16, destreza: 16, constituicao: 16, inteligencia: 16, sabedoria: 16, carisma: 16 } };
+    const pedido = { classeId: 'aventureiro', atributos: { vontade: 16, destreza: 16, constituicao: 16, inteligencia: 16, sabedoria: 16, carisma: 16 } };
     const a = construirFichaDeSessao(pedido, LIVRE, CONTEUDO, BALANCE_PADRAO).ficha.atributos;
     const b = construirFichaDeSessao(pedido, LIVRE, CONTEUDO, BALANCE_PADRAO).ficha.atributos;
     expect(a).toEqual(b);
@@ -75,17 +75,17 @@ describe('ficha de sessão (§3.7)', () => {
 
   it('modo escalar reescala com arredondamento determinístico', () => {
     const escalar: ModoDeJogo = { ...LIVRE, clamp: { ...obter(LIVRE.clamp ?? undefined, 'clamp'), modo: 'escalar', orcamentoAtributos: 100 } };
-    const pedido = { classeId: 'aventureiro', atributos: { forca: 16, destreza: 15, constituicao: 14, inteligencia: 13, sabedoria: 12, carisma: 11 } };
+    const pedido = { classeId: 'aventureiro', atributos: { vontade: 16, destreza: 15, constituicao: 14, inteligencia: 13, sabedoria: 12, carisma: 11 } };
     const r1 = construirFichaDeSessao(pedido, escalar, CONTEUDO, BALANCE_PADRAO).ficha.atributos;
     const r2 = construirFichaDeSessao(pedido, escalar, CONTEUDO, BALANCE_PADRAO).ficha.atributos;
     expect(r1).toEqual(r2);
     expect(soma(r1)).toBe(82); // Marco 28: 7 atributos, com o de classe
-    expect(r1.forca).toBeGreaterThanOrEqual(r1.carisma);
+    expect(r1.vontade).toBeGreaterThanOrEqual(r1.carisma);
   });
 
   it('preset dá a mesma ficha a qualquer pedido (acesso simétrico, Duelo)', () => {
     const preset: ModoDeJogo = { ...LIVRE, clamp: { ...obter(LIVRE.clamp ?? undefined, 'clamp'), modo: 'preset', presetClasse: 'aventureiro' } };
-    const a = construirFichaDeSessao({ atributos: { forca: 99 } }, preset, CONTEUDO, BALANCE_PADRAO).ficha;
+    const a = construirFichaDeSessao({ atributos: { vontade: 99 } }, preset, CONTEUDO, BALANCE_PADRAO).ficha;
     const b = construirFichaDeSessao({ classeId: 'x', habilidades: [] }, preset, CONTEUDO, BALANCE_PADRAO).ficha;
     expect(a).toEqual(b);
   });

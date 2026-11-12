@@ -72,13 +72,13 @@ describe('penalidade de morte (§2.12)', () => {
     j.nivel = 3;
     j.xp = 10;
     bolsa.pontosAtributo = 1;
-    bolsa.atributosBase.forca = 14;
+    bolsa.atributosBase.vontade = 14;
     const niveis = perderXp(j, c.ctx, 50, true);
     expect(niveis).toBe(1);
     expect(j.nivel).toBe(2);
     expect(j.xp).toBe(10 - 50 + obter(BALANCE_PADRAO.xp.tabela[1], 'tabela'));
     expect(bolsa.pontosAtributo).toBe(0);
-    expect(bolsa.atributosBase.forca).toBe(12);
+    expect(bolsa.atributosBase.vontade).toBe(12);
   });
 
   it('no modo Livre a morte não custa nada', () => {

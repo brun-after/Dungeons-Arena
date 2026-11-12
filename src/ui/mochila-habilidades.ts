@@ -28,6 +28,7 @@ import { classeDaHabilidade, comRuna } from './runa-dom';
 import { desenharPassivasGerais, desenharSintonia } from './painel-sintonia';
 import { ultimateDe } from '../combat/carga-ultimate';
 import { ID_RUNA_DE_FUSAO } from '../progression/habilidades-personagem';
+import { seletorDeRuna } from './seletor-runa';
 
 export interface EstadoAbaHabilidades {
   /** Mantido para a mochila (D-067: a escolha agora é direta, pelos botões 1 2 3 4 da carta). */
@@ -72,7 +73,7 @@ export function desenharHabilidades(
   pontos.dataset.pontosHabilidade = String(bolsa.pontosHabilidade);
   corpo.append(pontos);
   // 08/11/2026: a ultimate de agora (o par das teclas 1 e 2) no topo, explicada como uma skill.
-  if (!ui.essenciaInvId) desenharUltimate(corpo, j, ctx);
+  if (!ui.essenciaInvId) desenharUltimate(corpo, j, ctx, tick, emitir, redesenhar);
   const essenciaSelecionada = ui.essenciaInvId ? bolsa.mochila.find((i) => i.invId === ui.essenciaInvId) : undefined;
   const familiaSelecionada = essenciaSelecionada ? ctx.conteudo.itens.get(essenciaSelecionada.itemId)?.progressao : undefined;
   if (ui.essenciaInvId) {
@@ -176,6 +177,9 @@ export function desenharHabilidades(
       const nomes = conhecida.caminhos.map((c) => ctx.conteudo.caminhos.get(c)?.nome ?? c).join(', ');
       textos.append(el('p', 'detalhe-item', t('habilidades.caminhosEscolhidos', { lista: nomes })));
     }
+    // Marco 39 (D-151): o encaixe de runa das skills de classe conhecidas.
+    const runa = conhecida ? seletorDeRuna(ctx, j, id, tick, emitir, redesenhar) : null;
+    if (runa) textos.append(runa);
     li.append(textos);
 
     const acoes = el('div', 'acoes-habilidade');
@@ -260,10 +264,10 @@ function receitaDaFusao(ctx: ContextoSimulacao, partes: readonly string[]): stri
 }
 
 /** 08/11/2026: a ultimate de agora no topo da aba, como a carta de uma skill (o texto, o que faz e o par). */
-function desenharUltimate(corpo: HTMLElement, j: Entidade, ctx: ContextoSimulacao): void {
+function desenharUltimate(corpo: HTMLElement, j: Entidade, ctx: ContextoSimulacao, tick: number, emitir: (cmd: Comando) => void, redesenhar: () => void): void {
   corpo.append(el('h3', 'subtitulo-modal', t('habilidades.ultimate')));
   const u = ultimateDe(ctx, j);
-  const h = u ? resolverHabilidade(ctx, u.id) : undefined;
+  const h = u ? resolverHabilidade(ctx, chaveDoAtor(ctx, j, u.id, tick)) : undefined;
   if (!u || !h) {
     corpo.append(el('p', 'detalhe-item', t('habilidades.semUltimate')));
     return;
@@ -282,6 +286,8 @@ function desenharUltimate(corpo: HTMLElement, j: Entidade, ctx: ContextoSimulaca
   const nome = (id: string) => resolverHabilidade(ctx, id)?.nome ?? id;
   for (const linha of [...descreverHabilidade(h, {}), t('habilidades.ultimatePar', { a: nome(u.par[0]), b: nome(u.par[1]) }), t('habilidades.ultimateCarga')]) desc.append(el('li', undefined, linha));
   textos.append(desc);
+  const runa = seletorDeRuna(ctx, j, u.id, tick, emitir, redesenhar);
+  if (runa) textos.append(runa);
   li.append(textos);
   ul.append(li);
   corpo.append(ul);

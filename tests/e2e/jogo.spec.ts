@@ -157,8 +157,8 @@ test.describe('desktop', () => {
     await mochila.getByRole('button', { name: 'Equipar: Bumerangue de madeira' }).click();
     await expect(diag).toHaveAttribute('data-equipados', '1');
     await mochila.getByRole('button', { name: 'Ficha' }).click();
-    // Marco 18: o aventureiro começa com Força 13 (a arma de partida não dá atributo).
-    await expect(mochila.locator('tr[data-atributo="forca"]')).toHaveAttribute('data-efetivo', '13');
+    // Marco 18: o aventureiro começa com Vontade (antes, Força) 13 (a arma de partida não dá atributo).
+    await expect(mochila.locator('tr[data-atributo="vontade"]')).toHaveAttribute('data-efetivo', '13');
     await page.keyboard.press('Escape');
     await expect(mochila).toBeHidden();
     // Com o modal fechado, o teclado volta a mover o jogador.

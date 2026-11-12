@@ -14,10 +14,11 @@ import type { Dificuldade } from '../modos/dificuldade';
 import { basicoDoPersonagem, basicoSecundario } from '../progression/armas';
 import { migrarMovimentoLivre } from './migracao-25';
 import { migrarSkillsDeClasse } from './migracao-24';
+import { migrarForcaParaVontade } from './migracao-39';
 import { MAX_REGRAS, RE_REGRA_ESTILO } from '../world/estilo';
 import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 28;
+export const VERSAO_SCHEMA = 29;
 // Marco 23 (24/10/2026, D-092): dez slots de personagem por jogador (eram três).
 export const MAX_SLOTS = 10;
 export const SLOTS: readonly number[] = Array.from({ length: MAX_SLOTS }, (_, i) => i + 1);
@@ -314,7 +315,7 @@ function v13ParaV14(r: Objeto): Objeto {
 /** Marco 18: os campos novos da entidade (preenchidos ao longo do marco). */
 function v14Entidade(x: Objeto): Objeto {
   const aparencia = ehObjeto(x.aparencia) ? { formaArma: null, elementoArma: null, formaMaxima: null, ...x.aparencia } : x.aparencia;
-  return { ressonancias: [], ultimoGolpe: null, ultimaHabilidade: null, renascerFase: '', ultimaSinergia: null, ...x, aparencia };
+  return { ressonancias: [], estilos: [], ultimoGolpe: null, ultimaHabilidade: null, renascerFase: '', ultimaSinergia: null, ...x, aparencia };
 }
 
 /** Marco 18: os campos novos da ficha (preenchidos ao longo do marco). */
@@ -405,6 +406,8 @@ export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   26: (r) => migrarArmasDeClasse(r),
   // Marco 28 (30/10/2026, D-127): o atributo de classe (`dominio`) começa neutro, em 10, sem devolver pontos.
   27: (r) => migrarAtributoDeClasse(r),
+  // Marco 39 (12/11/2026, D-146): a Força vira Vontade; os pontos voltam na tela de atualização.
+  28: (r) => migrarForcaParaVontade(r),
 };
 
 /** D-127: toda entidade ganha `dominio: 10` nos atributos (e na base da ficha, quem tem bolsa). */
@@ -471,7 +474,7 @@ function migrarHpNecromante(r: Objeto, de: number, para: number, xp: boolean): O
         e.bolsa.hpBase = para;
         // A migração precede a validação do registro importado: não consultar fichas incompletas.
         const b = e.bolsa;
-        const atributos = ['forca', 'destreza', 'constituicao', 'inteligencia', 'sabedoria', 'carisma'] as const;
+        const atributos = ['vontade', 'destreza', 'constituicao', 'inteligencia', 'sabedoria', 'carisma'] as const;
         const fichaCompleta = ehObjeto(b.atributosBase) && atributos.every(k => typeof b.atributosBase[k] === 'number')
           && ehObjeto(b.equipamento) && Object.values(b.equipamento).every(i => i === null || (ehObjeto(i) && typeof i.itemId === 'string'))
           && Array.isArray(b.conhecidas) && b.conhecidas.every(c => ehObjeto(c) && typeof c.id === 'string' && typeof c.rank === 'number')

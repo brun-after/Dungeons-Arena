@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.42 · **Data:** 08/11/2026
+**Versão do documento:** 3.43 · **Data:** 12/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.43 (12/11/2026)**: marco 39: o personagem do nível 30 ao 100 (a Vontade no lugar da Força, pontos escassos com teto 10 + 2 × nível, o pentagrama de 5 estilos por classe, o poder base no dano, o vínculo elemental com resistências e penetração, as runas nas skills de classe e nas ultimates, a manifestação da runa no visual e a tela de atualização dos personagens antigos; D-145 a D-151).
 > - **3.42 (08/11/2026)**: marco 38: vilas com prédios (taverna, banco, mercado, forja e botica), andarilhos e escoltas, mercadores errantes, forja em graus com troféus de chefe e fusão elemental, pedra de retorno com círculo, save em toda região e a Travessia das Areias entre os reinos (D-142); habilidades por 35% FOR e 65% INT e o guerreiro que conjura andando (D-141).
 > - **3.41 (06/11/2026)**: skins de personagem: liberadas por código, escolhidas por classe em Configurações e que prevalecem sobre o equipamento; a primeira é o Ceifador do necromante, em 3D, com o manto voando contra o movimento (D-134).
 > - **3.40 (05/11/2026)**: personagens aceleram (saem com 70% da velocidade, pico em 0,5 s) e perdem o impulso sob lentidão; atacar de longe deixa um pouco lento; perseguidores ganham um fôlego sutil quando não alcançam (bem menor no chefe); o Arqueiro andando alcança 20% menos; a volta do Bumerangue básico cai para 45% (D-132).
@@ -308,3 +309,29 @@ mercadores errantes andam pelas regiões. A forja tem graus I a V com materiais 
 e os elementais se fundem às peças. A pedra de retorno conjura 5 s num círculo, a pedra de save fica no centro de
 toda região, e a Travessia das Areias liga os dois reinos a pé. O guerreiro conjura andando, e as habilidades pesam
 35% Força e 65% Inteligência. Detalhes em [docs/MUNDO.md](docs/MUNDO.md) e em D-141 e D-142.
+
+### Marco 39 — personagem e skills do nível 30 ao 100 (12/11/2026)
+
+**Atributos e dano**
+- A Força vira **Vontade**. Os pontos ficam escassos: 3 por nível até o 30 e 2 depois, com teto de 10 + 2 × nível.
+- Os atributos alimentam o **pentagrama**, com 5 estilos por classe; os itens são uma camada no radar.
+- O dano vem do **poder base**: nível, arma, itens e domínio.
+
+**Elementos**
+- O **vínculo elemental** é um eneágono: o Físico e os 8 elementos.
+- Ele se forma pela barra, pelo uso e pelos itens.
+- Ele dá resistência (e fraqueza a quem não tem vínculo) e penetração no próprio elemento.
+
+**Runas**
+- As skills de classe e as ultimates ganham **runas**. A padrão vem da classe ou da própria skill, e o jogador pode
+  trocá-la por qualquer elemento com vínculo.
+- A parte elemental vai de 20% a 60% do dano, e a runa some quando o vínculo esfria.
+- A ultimate ganha bônus de par.
+- No visual, a runa aparece sobre a assinatura da skill: a matéria do elemento, o veículo da classe e o floreio do
+  especialista.
+
+**Personagens antigos**
+- Ao entrar, o personagem antigo vê uma **tela de atualização**. Ela devolve todos os pontos no orçamento novo e propõe
+  a build anterior nas proporções novas.
+
+Detalhes em D-145 a D-151 e em [docs/BALANCEAMENTO.md](docs/BALANCEAMENTO.md) (147/147 metas).

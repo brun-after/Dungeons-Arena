@@ -5,6 +5,7 @@
 import { lerAcaoDoMundo, type AcaoDoMundo } from '../mundo/acoes';
 import type { AvisoDoMundo } from '../mundo/avisos';
 import type { Celula, Comando, ComandoEmpacotado, Dir8 } from '../core/comandos';
+import { ehPonta } from '../combat/runas';
 import { FONTES_OFICIAIS } from '../core/conteudo';
 import { hash53, serializarCanonico } from '../core/digest';
 import type { Armadilha, EstadoJogo } from '../core/estado';
@@ -143,6 +144,16 @@ export function lerComando(v: unknown): Comando | null {
       return ehSlot(v.slot) ? { t: 'desequipar', slot: v.slot } : null;
     case 'distribuirPonto':
       return ehAtributo(v.atributo) ? { t: 'distribuirPonto', atributo: v.atributo } : null;
+    // Marco 39 (D-149): só atributos conhecidos, inteiros e não negativos (a simulação confere o orçamento e o teto).
+    case 'atualizarSistema': {
+      if (typeof v.pontos !== 'object' || v.pontos === null || Array.isArray(v.pontos)) return null;
+      const pontos: Partial<Record<NomeAtributo, number>> = {};
+      for (const [k, n] of Object.entries(v.pontos as Record<string, unknown>)) {
+        if (!ehAtributo(k) || !inteiro(n) || n < 0 || n > 1000) return null;
+        pontos[k] = n;
+      }
+      return { t: 'atualizarSistema', pontos };
+    }
     case 'interagir':
       return { t: 'interagir' };
     case 'abrirMenu':
@@ -190,6 +201,9 @@ export function lerComando(v: unknown): Comando | null {
       return typeof v.ligado === 'boolean' ? { t: 'seguirAlvo', ligado: v.ligado } : null;
     case 'skin':
       return v.id === null || (typeof v.id === 'string' && v.id.length <= 64) ? { t: 'skin', id: v.id } : null;
+    // Marco 39 (D-151): a simulação confere se a skill tem encaixe e se há vínculo com a runa.
+    case 'escolherRuna':
+      return id(v.habilidade) && (v.runa === null || ehPonta(v.runa)) ? { t: 'escolherRuna', habilidade: v.habilidade, runa: v.runa } : null;
     default:
       return null;
   }

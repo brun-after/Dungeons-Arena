@@ -14,7 +14,7 @@ export const textosDiario = {
   'diario.reacaoAplica': 'deixa o alvo {estados}',
   'diario.reacaoEmVolta': 'espalha a até {raio} células',
   'diario.reacaoCura': 'cura quem lançou em {valor}',
-  'diario.ressonanciaComo': 'Atributos: {lista}',
+  'diario.estiloComo': 'Pontos em {lista}',
   'diario.marcoComo': '{nome} chega ao nível {n}',
   'diario.fusaoComo': '{a} + {b} no nível máximo',
   'diario.itemComo': '{base}, forma {forma}{elemento}',

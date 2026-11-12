@@ -50,11 +50,11 @@ export function contextoDoCenario(modoId = 'campanha', balance: Balance = BALANC
  * Destreza do arqueiro é cadência, não dano). Os pontos do "principal" se dividem por igual entre os da lista.
  */
 export const ATRIBUTOS_TIPICOS: Readonly<Record<string, readonly (keyof Atributos)[]>> = {
-  aventureiro: ['forca', 'destreza'],
-  guerreiro: ['forca'],
+  aventureiro: ['vontade', 'destreza'],
+  guerreiro: ['vontade', 'destreza'],
   mago: ['inteligencia'],
   necromante: ['inteligencia'],
-  arqueiro: ['forca', 'destreza'],
+  arqueiro: ['vontade', 'destreza'],
 };
 
 /**
@@ -69,7 +69,7 @@ export function jogadorTipico(ctx: ContextoSimulacao, classeId: string, nivel: n
   if (!bolsa) throw new Error('sem bolsa');
   e.nivel = nivel;
   const pontos = pontosAteONivel(nivel, ctx.balance.xp);
-  const principais = ATRIBUTOS_TIPICOS[classe.id] ?? ['forca'];
+  const principais = ATRIBUTOS_TIPICOS[classe.id] ?? ['vontade'];
   const noPrincipal = Math.round((pontos * 2) / 3);
   principais.forEach((a, i) => {
     bolsa.atributosBase[a] += Math.floor(noPrincipal / principais.length) + (i < noPrincipal % principais.length ? 1 : 0);
@@ -87,7 +87,7 @@ export function jogadorTipico(ctx: ContextoSimulacao, classeId: string, nivel: n
     excedentes += Math.max(0, bolsa.atributosBase[nome] - teto);
     bolsa.atributosBase[nome] = Math.min(teto, bolsa.atributosBase[nome]);
   }
-  for (const nome of ['constituicao', 'sabedoria', 'destreza', 'inteligencia', 'forca', 'carisma', 'dominio'] as const) {
+  for (const nome of ['constituicao', 'sabedoria', 'destreza', 'inteligencia', 'vontade', 'carisma', 'dominio'] as const) {
     const dar = Math.min(excedentes, teto - bolsa.atributosBase[nome]);
     bolsa.atributosBase[nome] += dar;
     excedentes -= dar;

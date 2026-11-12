@@ -68,33 +68,33 @@ describe('invocações iguais', () => {
   });
 });
 
-describe('nível 100 e o teto nível+20', () => {
-  it('a curva até o 30 é a de antes e cresce depois', () => {
+describe('nível 100 e o teto 10 + 2 × nível (marco 39)', () => {
+  it('a curva até o 30 é a de antes; os pontos ficam escassos depois (3 até o 30, 2 depois)', () => {
     for (let n = 1; n <= 30; n++) expect(xpParaProximo(n, b.xp)).toBe(b.xp.tabela[n - 1] ?? n * b.xp.fallbackPorNivel);
     expect(xpParaProximo(31, b.xp)).toBeGreaterThan(31 * b.xp.fallbackPorNivel);
     expect(xpParaProximo(99, b.xp)).toBeGreaterThan(xpParaProximo(50, b.xp) * 2);
     expect(pontosAteONivel(30, b.xp)).toBe(29 * b.xp.pontosPorNivel);
-    expect(pontosAteONivel(100, b.xp)).toBe(447);
+    expect(pontosAteONivel(100, b.xp)).toBe(227);
   });
 
-  it('o ponto gasto para em nível+20; o item leva acima', () => {
-    expect(tetoDoAtributo(5, b)).toBe(25);
+  it('o ponto gasto para em 10 + 2 × nível; o item leva acima', () => {
+    expect(tetoDoAtributo(5, b)).toBe(20);
     expect(tetoDoAtributo(95, b)).toBe(b.atributos.maximo);
     const j = jogador('guerreiro');
     const bolsa = obter(j.bolsa);
     j.nivel = 5;
     bolsa.pontosAtributo = 5;
-    bolsa.atributosBase.forca = 25;
+    bolsa.atributosBase.vontade = 20;
     const saida: EventoSimulacao[] = [];
-    distribuirPonto(j, ctx, 'forca', 0, saida);
-    expect(bolsa.atributosBase.forca).toBe(25);
+    distribuirPonto(j, ctx, 'vontade', 0, saida);
+    expect(bolsa.atributosBase.vontade).toBe(20);
     expect(saida.some((e) => e.t === 'itemRecusado' && e.motivo === 'atributo_acima_do_nivel')).toBe(true);
     distribuirPonto(j, ctx, 'destreza', 0, saida);
     expect(bolsa.pontosAtributo).toBe(4);
-    const anel = { ...obter(CONTEUDO.itens.get('anel_sabio')), id: 'anel_t', bonusAtributos: { forca: { modo: 'abs' as const, valor: 5 } } };
+    const anel = { ...obter(CONTEUDO.itens.get('anel_sabio')), id: 'anel_t', bonusAtributos: { vontade: { modo: 'abs' as const, valor: 5 } } };
     const ctxAnel = { ...ctx, conteudo: { ...CONTEUDO, itens: new Map([...CONTEUDO.itens, ['anel_t', anel]]) } };
     bolsa.equipamento.anel = { invId: 'a', itemId: 'anel_t', qtd: 1, ref: null };
-    expect(derivarFicha(bolsa, 5, ctxAnel).atributos.forca).toBe(30);
+    expect(derivarFicha(bolsa, 5, ctxAnel).atributos.vontade).toBe(25);
   });
 
   it('acima de 30 o ponto rende menos; até 30 é igual', () => {

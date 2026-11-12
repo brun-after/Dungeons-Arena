@@ -173,7 +173,7 @@ export function pvpLivre(classe: string, semente: number, nivel: number): { temp
   const ctx = contextoDoCenario('livre');
   const c = CONTEUDO.classes.get(classe);
   if (!c) throw new Error(classe);
-  const principais = ATRIBUTOS_TIPICOS[classe] ?? ['forca'];
+  const principais = ATRIBUTOS_TIPICOS[classe] ?? ['vontade'];
   const atributos = { ...c.atributos, constituicao: c.atributos.constituicao + 6 };
   for (const a of principais) atributos[a] += 8 / principais.length;
   const ficha = construirFichaDeSessao({ classeId: classe, nivel, atributos }, ctx.modo, ctx.conteudo, ctx.balance).ficha;

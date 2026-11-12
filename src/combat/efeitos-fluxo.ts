@@ -27,6 +27,7 @@ import { registrarParticipacao } from './participacao';
 import { rolar } from './dados';
 import { REGISTRO_EFEITOS, type EfeitoCanonico } from './registro-efeitos';
 import { fatorDeDominio, marcoDe } from '../progression/dominio';
+import { efeitosDeEstiloDe } from '../progression/estilos';
 
 export interface OrigemFluxo {
   id: EntidadeId;
@@ -173,6 +174,13 @@ export function invocar(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entida
       if (p.golpes) e.invocacao.golpesRestantes = Math.max(1, rolar(estado.rng, p.golpes).total);
     }
     if (e.invocacao && ef.tipo === 'invocar_temporario') e.invocacao.extra = !mortoAtivo;
+    // Marco 39 (D-148): a força das invocações do estilo do dono (dano e vida), fixada ao invocar.
+    const estiloInvoc = efeitosDeEstiloDe(ctx, dono).invoc;
+    if (e.invocacao && estiloInvoc > 0) {
+      e.invocacao.estiloPct = Math.round(estiloInvoc * 100);
+      e.hpMax = Math.max(1, Math.round(e.hpMax * (1 + estiloInvoc)));
+      e.hp = e.hpMax;
+    }
     if (mortoAtivo && e.invocacao) {
       e.invocacao.necromancia = 'reanimado';
       e.hpMax = Math.max(1, Math.round(e.hpMax * fatorDeDominio(ctx, dono, 'servos')));

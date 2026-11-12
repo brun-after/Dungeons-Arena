@@ -16,6 +16,9 @@ import type { Atributos } from '../entities/entidade';
 import type { RegrasItensGerados } from '../progression/gerar-item';
 import type { Conteudo } from './conteudo';
 import type { DominioDaClasse } from '../progression/dominio';
+import type { RegrasEstilos } from '../progression/estilos';
+import type { RegrasPoderBase } from '../combat/poder-base';
+import type { RegrasVinculo } from '../progression/vinculo';
 
 /** Marco 24 (24/10/2026, D-094): os momentos de cada classe que enchem o medidor da ultimate (balance.ultimate.classe). */
 export type MomentoCargaClasse = 'furiaCheia' | 'encarnacao' | 'miraFirme' | 'servoCaiu' | 'falcao';
@@ -120,6 +123,8 @@ export interface Balance {
   /** Drops na primeira morte de um inimigo (§2.10). */
   drops: {
     chanceOrbeHp: number;
+    /** Marco 39: piso do loot (ouro e itens) de um inimigo renascido, em % do original. */
+    pisoRenascidoPct: number;
     chanceOrbeRecurso: number;
     orbeHpPct: number;
     orbeRecursoPct: number;
@@ -246,12 +251,18 @@ export interface Balance {
     rampaMaxPct: number;
     cascataDominacao: number;
   };
+  /** Marco 39 (D-150): o vínculo elemental do personagem (progression/vinculo.ts). */
+  vinculo: RegrasVinculo;
+  /** Marco 39 (D-148): o poder base do golpe de quem tem ficha (combat/poder-base.ts). */
+  poderBase: RegrasPoderBase;
+  /** Marco 39 (D-147): o pentagrama de estilos (progression/estilos.ts) e o aviso de estilo desperto. */
+  estilos: RegrasEstilos & { despertarPct: number };
   /** Limites do atributo efetivo (§2.10, equipamento derivado). */
   atributos: {
     minimo: number;
     maximo: number;
-    /** Marco 28 (D-127): o ponto gasto não leva o atributo-base acima de nível + folga. */
-    folgaSobreNivel: number;
+    /** Marco 39 (D-147): o ponto gasto não leva o atributo-base acima de `base + porNivel × nível` (era nível + 20). */
+    teto: { base: number; porNivel: number };
     /** Marco 28 (D-127): acima de `aPartirDe`, cada ponto rende `pct`% nas fórmulas sem teto. */
     rendimentoAcima: { aPartirDe: number; pct: number };
     /** Marco 17 (D-063): o que cada ponto acima de 10 faz (progression/efeitos-atributo.ts). */
@@ -488,7 +499,11 @@ export interface Balance {
     grupo: { tempoMinPctDoSolo: number; tempoMaxPctDoSolo: number };
     invocacao: { fatiaMinPct: number; fatiaMaxPct: number };
     /** Marco 17: na arena com a ficha inteira, a build focada e o equipado vencem a maioria dos duelos. */
-    build: { nivel: number; vitoriasMinPct: number };
+    /**
+     * Marco 39 (D-148): o equipado vence o sem equipamento (`vitoriasMinPct`); a build focada e a dispersa ficam no mesmo
+     * patamar (nenhuma vence sempre: `focadaMinPct` a `focadaMaxPct`), porque os estilos premiam os dois caminhos.
+     */
+    build: { nivel: number; vitoriasMinPct: number; focadaMinPct: number; focadaMaxPct: number };
     /** Marco 28 (D-127): a luta nos níveis altos e o tempo do 30 ao 100 (em vezes o do 1 ao 30). */
     nivelAlto: { niveis: number[]; vitoriasMinPct: number; tempoMinS: number; tempoMaxS: number; ritmoNiveis: number[]; razaoTempoMin: number; razaoTempoMax: number };
     /** Marco 30 (D-129): o ritmo das regiões do Mundo e o tempo dos covis de boss (tools/balanceamento/mundo.ts). */

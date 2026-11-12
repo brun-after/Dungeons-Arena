@@ -1,8 +1,10 @@
 # Decisões de projeto
 
-**Versão:** 0.98 · **Data:** 09/11/2026
+**Versão:** 1.00 · **Data:** 12/11/2026
 
 > **Histórico**
+> - **1.00 (12/11/2026)**: D-151: as runas nas skills de classe e nas ultimates (a parte elemental de 20% a 60% pelo vínculo, a função secundária, o bônus de par e a runa que some).
+> - **0.99 (12/11/2026)**: D-147 (pontos escassos, teto 10 + 2 × nível e o pentagrama de estilos no lugar das ressonâncias) e D-148 (poder base no dano de quem tem ficha, os efeitos dos estilos no combate e a calibragem). D-149: a tela de atualização dos personagens antigos. D-150: o vínculo elemental (eneágono), as resistências e a penetração. D-146: a Força vira Vontade (save 29, a ficha antiga e a marca do sistema). D-145: marco 39, o nível 100 sem travas (ids de item e de skill gerada, recompensa de missão) e o loot do inimigo renascido no Mundo.
 > - **0.98 (09/11/2026)**: D-144: estabilidade e ajustes de jogo do Mundo (viagem entre salas sem queda, perseguição, lojas, troca, invocações, alvo dos buffs, descrições).
 > - **0.97 (08/11/2026)**: D-141 (habilidades por 35% FOR e 65% INT; o guerreiro conjura andando e encadeia com o básico) e D-142 (marco 38: prédios das vilas, andarilhos, escolta, errantes, forja em graus, troféus, fusão, pedra de retorno com círculo, save em toda região e o deserto entre os reinos).
 > - **0.96 (08/11/2026)**: D-140: o Mundo sem a fadiga de XP por fase (só a diferença de nível reduz o XP das criaturas inferiores).
@@ -4335,3 +4337,174 @@ quando alguém entra, troca presa, perseguição que não acaba e lojas bloquead
   60%, escama ígnea 50%, núcleo ígneo 25%, os materiais da forja de fogo) sem tirar a entrada antiga (escama 100%). A
   chave repetida fazia valer a antiga, e o dragão nunca deixava a escama ígnea nem o núcleo; o esbuild avisava no CI.
   A entrada antiga saiu.
+
+## D-145 — Marco 39: o nível 100 sem travas e o loot do renascido no Mundo (12/11/2026)
+
+Primeira parte do marco 39 (atributos, estilos, elementos e skills no sistema novo). Antes de mexer no modelo,
+saem as travas que deixavam o nível 100 pela metade.
+
+- **Ids no nível 100.** Os ids de item gerado (`gi_`) e de item base (`ib_`) só aceitavam nível de dois dígitos, e o
+  de skill gerada (`g_`) recusava acima de 99. Com o nível máximo 100, um drop, um livro raro ou um item da forja
+  (ascender) no 100 virava nada; o simulador de balanceamento também equipava nada no 100, e as linhas do 100 em
+  `docs/BALANCEAMENTO.md` foram medidas sem equipamento. Os três agora aceitam três dígitos.
+- **Recompensa de missão.** Saía no máximo no nível 30. Agora sai no nível de quem recebe, até o nível máximo dos
+  itens gerados (`itensGerados.nivelMax`).
+- **Loot do renascido.** A especificação (§3.6) diz que o inimigo só solta na primeira morte, o que faz sentido numa
+  fase. No Mundo, quase tudo que se mata é renascido, e chefes e focos de região não davam espólio depois da
+  primeira vez. A regra de modo `dropsDeRenascido` (ligada só em `modos/mundo.json`) deixa o renascido soltar, com o
+  ouro e a chance de item reduzidos pelo mesmo desgaste do XP (`0,8^abates`), com piso de 25%
+  (`drops.pisoRenascidoPct`). Arena e campanha seguem a §3.6.
+
+## D-146 — A Força vira Vontade e a marca do sistema do personagem (12/11/2026)
+
+No modelo novo (documento de design v1.4, seção 2), o corpo físico deixa de ser atributo e vira um elemento (o Físico,
+no eneágono), e a Força vira **Vontade** (VON): resistir a controle, não ser interrompido, fúria e canalização. Nesta
+etapa a troca é só de nome, e a Vontade faz o que a Força fazia. Os papéis novos chegam com o pentagrama de estilos.
+
+- **Save 28 › 29** (`save/migracao-39.ts`): a chave `forca` vira `vontade` nos atributos de toda entidade gravada e na
+  base da ficha, no estado e nas fases visitadas. A migração não devolve pontos.
+- **Ficha antiga fora do save.** O pedido de personagem (grupo, Mundo, certificado) ainda pode trazer `forca`: a
+  conferência (`conferirAtributos`) o lê como Vontade. Antes, um atributo ausente caía em silêncio na base da classe,
+  e o jogador perderia os pontos postos nele. A ficha do Mundo não muda de versão, porque passa por essa mesma
+  conferência ao carregar.
+- **Marca do sistema** (`bolsa.sistema`, hoje `SISTEMA_DO_PERSONAGEM = 39`). O personagem criado agora já nasce com
+  ela. O antigo não tem a marca, e o jogo lhe mostra a tela de atualização (que devolve os pontos no orçamento novo).
+  A conferência só aceita o valor atual: qualquer outro pede a tela de novo.
+- **Certificados.** O retrato assinado tem `forca`, então deixa de bater com o personagem; a arena o trata como ficha
+  editada (treino) até uma nova certificação, como já acontece com qualquer mudança da ficha.
+
+## D-147 — Pontos escassos, teto novo e o pentagrama de estilos (12/11/2026)
+
+O documento de design (v1.4, seção 2) e o simulador "Pentagrama de Estilos" fecharam o modelo; esta é a parte dos
+atributos.
+
+- **Pontos.** 3 por nível até o 30 e 2 depois (eram 4, 5 e 6 depois do 30): 227 pontos no 100, em vez de 447. Com 447,
+  todo personagem enchia quase tudo no 100. A escassez faz a build ser uma escolha também no fim (`xp.pontosPorFaixa`).
+- **Teto.** O atributo-base vai até `10 + 2 × nível` (era nível + 20), até 100 (`atributos.teto`). Isso deixa seguir
+  um estilo ponto a ponto desde o nível 2 sem fechar o caminho de outro.
+- **Pentagrama** (`data/estilos.json`, `progression/estilos.ts`). Cada classe tem cinco estilos; cada um usa um par de
+  atributos (0,65 e 0,35). A intensidade é linear nos pontos acima de 10 nesses atributos (o que a classe já traz acima
+  de 10 conta), dividida por 90. Cada ponto move o radar na hora; não há marcos distantes.
+- **Itens como camada.** O que os afixos de atributo dos itens somam entra pelos mesmos pesos, numa camada limitada a
+  20 p.p. por ponta. O teto da camada sobe de 30% (no nível 1) a 100% (no 100) e pode levar a ponta até 120%
+  (`balance.estilos`). Nenhum formato de item mudou: os afixos de hoje já movem o radar.
+- **O que o estilo entrega.** Efeitos numéricos (dano, cadência, área, invocações, vida, recuperação, reforço aos
+  aliados; ver D-148) e uma mecânica em ganchos (o formato dos itens e conjuntos), com a chance ou o valor do passivo
+  vezes a intensidade da ponta. As mecânicas reaproveitam o vocabulário das ressonâncias (expor em área, herdar o
+  elemento, escudo mais forte, carga de ultimate, recarga das skills de classe, cura por acerto...).
+- **As ressonâncias saem.** Arquivo, módulo, evento e lista pública dão lugar aos estilos: `estiloDespertou` (o diário e
+  o HUD avisam quando uma ponta chega a 25%, `estilos.despertarPct`) e `Entidade.estilos` (os despertos). A migração do
+  save tira a lista antiga.
+- **Ficha.** A aba Ficha mostra o radar (a parte dos pontos e a dos itens), cada estilo com o efeito de agora ao lado do
+  máximo e a mecânica. O "+" de cada atributo diz qual ponta o próximo ponto sobe e quanto.
+- **Desempenho.** O combate consulta o radar a cada golpe, cura e gancho. O resultado fica guardado por ficha, com a
+  assinatura da classe, do nível e dos atributos (memória fraca). O harness de 10.000 ticks ficou no tempo de antes.
+
+## D-148 — Poder base no dano e os estilos no combate (12/11/2026)
+
+- **Poder base** (`combat/poder-base.ts`, `balance.poderBase`). Quem tem ficha não soma mais o atributo ao golpe nem
+  multiplica a rolagem por Força e Inteligência (D-068, D-141). O bônus fixo segue uma curva do nível (pontos ligados em
+  linha reta: 14 no 1, 28 no 5, 42 no 10, 54 no 20, 65 no 30 e 86 no 100). A rolagem cresce 3% por nível até o 30, e a
+  potência dos efeitos 2% por nível até 1,6×. A arma (o dado e a cadência), os itens (o % de dano) e o atributo de
+  classe seguem como estavam. A curva imita a build focada de antes: sobe rápido no começo e devagar depois do 30, onde
+  entram os itens e o domínio.
+- **Poder da classe** (`classes.json → poderPct`). As skills de cada classe partiam de atributos diferentes (o
+  Aventureiro bate pela Destreza do falcão, por exemplo), e o bônus igual para todos deixava o Aventureiro forte demais
+  no começo. Aventureiro 60%, Arqueiro 95%, os outros 100%.
+- **Inimigos, invocações e mortos** seguem a fórmula de atributos: o equilíbrio deles está medido, e os mortos e as
+  criaturas de pergaminho já herdam do dono pelos atributos.
+- **Os efeitos dos estilos.** Dano multiplica todo golpe; dano em área, os golpes de área. A cadência divide a recarga
+  do básico. A força das invocações vai, ao invocar, para o dano e a vida da invocação (`invocacao.estiloPct`). A vida
+  multiplica a vida máxima, e a recuperação, a cura recebida. O reforço aos aliados multiplica as curas e metade dele
+  vira potência dos efeitos.
+- **O que saiu:** a especialização ofensiva, o multiplicador de rolagem por atributo e a potência pela Inteligência, para
+  quem tem ficha. Continuam a Destreza (velocidade e recarga do básico), a Constituição (vida), a Sabedoria (mana e
+  armadilhas), o Carisma (d20, hesitação e loja) e a Inteligência no estudo.
+- **Meta nova de build.** "A focada vence a dispersa em 60%" vinha do modelo em que o atributo era dano. Com os estilos,
+  os dois caminhos são viáveis: a meta passa a "nenhuma vence sempre" (35% a 85%, `metas.build.focadaMinPct/MaxPct`).
+  "O equipado vence o sem equipamento" continua em 60%.
+- **Calibragem.** `npm run balancear` chegou a 147/147. As linhas do nível 100 agora têm equipamento (D-145). O
+  simulador monta o guerreiro típico em Vontade e Destreza (Duelista e Carniceiro), não só em Vontade.
+- **Telas.** A ficha, as dicas dos atributos e o "escala com" das skills mostram o nível, os estilos, o domínio e os
+  itens, não mais a Força e a Inteligência.
+
+## D-149 — A tela de atualização dos personagens antigos (12/11/2026)
+
+Pedido do usuário: quem entra com um personagem antigo vê uma tela de atualização, com recursos equivalentes aos de
+agora para montar a build nova sem se sentir lesado.
+
+- **Quando aparece.** Ao entrar no jogo (campanha, grupo, Mundo ou arena) com um personagem sem `bolsa.sistema`
+  (D-146). Fechar sem confirmar só adia: a tela volta no quadro seguinte, porque o personagem antigo não deve jogar
+  com o orçamento velho (que, no 100, era quase o dobro do novo).
+- **O que devolve.** Todos os pontos de atributo, atributo de classe incluído: a base volta à da classe, e o orçamento
+  inteiro do nível no sistema novo fica para distribuir. Nível, XP, itens, ouro, habilidades e ranks não mudam.
+- **Por que é equivalente.** O orçamento novo tem menos pontos, mas o jogo foi recalibrado nele (D-148): um personagem
+  com o orçamento novo tem a força que a build focada tinha no antigo. A tela mostra os dois números e diz isso.
+- **A build de antes como ponto de partida.** A tela abre com os pontos que o jogador tinha posto, na mesma proporção
+  do orçamento novo (com o teto do nível), e oferece "Começar do zero". Os "−" e "+" de cada atributo mexem no
+  pentagrama ao vivo (com os itens já equipados).
+- **Comando `atualizarSistema`** (aceito pela rede em todos os modos). A simulação confere cada ponto (teto e
+  orçamento); o que sobrar fica livre, e o personagem recebe a marca. O protocolo recusa atributo desconhecido ou valor
+  que não seja inteiro e não negativo. No Mundo, quem grava é o servidor, como qualquer mudança da ficha.
+
+## D-150 — O vínculo elemental: o eneágono, as resistências e a penetração (12/11/2026)
+
+- **Nome.** "Afinidade" já é o elemento dos inimigos (D-092) e "sintonia" as famílias de skills (D-095); a afinidade
+  elemental do personagem se chama **vínculo** (`progression/vinculo.ts`, `balance.vinculo`).
+- **Nove pontas independentes:** o Físico (o golpe sem elemento) e os oito elementos. Cada ponta vai de 0 a 1 e soma a
+  barra (50%: a fração das teclas com skills do elemento), o uso (30%: um contador por elemento que sobe a cada skill
+  usada, satura em 12 usos e cai pela metade a cada 240 s parado, calculado na leitura) e os itens (20%: a fração das
+  peças equipadas com o elemento). O básico não conta como uso.
+- **Resistência pelo vínculo:** `−10% + 40% × vínculo^0,6`, somada à do preset e à do equipamento, com o teto de 90%.
+  Sem vínculo com um elemento, o personagem leva 10% a mais dele; o generalista fica perto do neutro; o especialista
+  resiste 30%. **O Físico não dá fraqueza nem resistência:** quase todo inimigo bate físico, e com 8% de teto o
+  Aventureiro já passava da meta de quanto aguenta (9 golpes contra 6 a 8).
+- **Penetração no próprio elemento:** `60% × vínculo^1,5`. Fura a resistência positiva do alvo e, além de 100%, a
+  absorção dos inimigos afins (a absorção de 50% vira 40% de dano no especialista cheio). A imunidade exata (os
+  Primordiais) não é furada: eles continuam caindo só pelo oposto. Sem a penetração, o simulador mostrava o especialista
+  com piso de 0,22 contra quem absorve o seu elemento.
+- **Clima:** a resistência do vínculo conta para o pulso do clima (o especialista no elemento da região não sofre o
+  pulso, como quem tem 20% do equipamento).
+- **Ficha:** o eneágono ao lado do pentagrama, com o vínculo e a resistência de cada ponta.
+- **O que fica para as skills (próximas etapas):** a parte elemental das skills de classe pela runa, o bônus de par nas
+  ultimates e combos e o visual que cresce com o vínculo.
+- **Desempenho:** o vínculo fica guardado por ficha (memória fraca), com a assinatura da barra, do equipado, do uso e do
+  tick.
+
+## D-151 — As runas nas skills de classe e nas ultimates (12/11/2026)
+
+- **Encaixe:** as skills exclusivas das classes e as ultimates (com as etapas delas) têm um encaixe de runa
+  (`combat/runas.ts`, `combat/encaixe-runa.ts`, `balance.habilidades.runas`). As skills gerais e as geradas não têm.
+- **Runa padrão:** a da classe (`classes.json → runaPadrao`): Mago Fogo, Necromante Trevas, Guerreiro Físico, Arqueiro
+  Raio, Aventureiro Terra. **A skill que já tem elemento no catálogo vem com a runa dele** (a Lança de gelo do Mago fica
+  de gelo, a Lâmina em brasa do Guerreiro fica de fogo): a encarnação e a sintonia do Mago (D-094, D-095) dependem do
+  elemento de cada magia e continuam inteiras. A padrão da classe preenche as skills neutras.
+- **Trocar:** o comando `escolherRuna` (a seleção na carta da skill e na da ultimate) aceita a padrão ou qualquer
+  elemento com vínculo de pelo menos `vinculoMinPct` (1%). A escolha fica na ficha (`Bolsa.runas`). **A runa some
+  quando o vínculo esfria:** abaixo do mínimo, o encaixe volta para a padrão (a escolha fica guardada e vale de novo se
+  o vínculo voltar). Como o uso cai pela metade a cada 240 s e nunca chega a zero, o mínimo é o "zerou".
+- **Vínculo e barra:** na barra, a skill com encaixe conta pela runa padrão. Se contasse pela escolhida, a runa
+  sustentaria o próprio vínculo e nunca sumiria; a escolhida se sustenta pelo uso (cada lançamento registra o elemento
+  da runa).
+- **Duas partes no golpe:** a parte elemental vai de 20% (vínculo 0) a 60% (vínculo cheio) do dano, em 11 faixas
+  (`fracaoElemental`). A parte neutra sente só a resistência física; a elemental, a do elemento (com a penetração de
+  D-150). Contra o inimigo afim que absorve o elemento, a parte elemental é anulada (não cura) e a neutra ainda fere;
+  contra a imunidade exata (os Primordiais), a neutra também passa. Sem runa, tudo continua do elemento, como antes.
+- **O papel não muda:** a skill de dano ganha o estado do elemento, com a duração de 50% (vínculo 0) a 100% (cheio) da
+  do catálogo; a do Físico não ganha estado. A cura ganha a função secundária: sagrado cura até 25% a mais, gelo e
+  terra deixam um escudo de `4 + 1,2 × faixa` por 6 s; as outras runas só dão o elemento.
+- **Chave:** `!<runa><faixa>` no fim da chave da skill (`redemoinho@2!gelo7`), para a memória das skills compiladas
+  continuar valendo; o resto da compilação não muda.
+- **Bônus de par:** a ultimate bate 15% a mais quando as duas skills do par estão com a runa dela. Os combos (D-097)
+  ficam sem bônus de runa por enquanto: eles já premiam a ordem das skills, e o simulador não mede combos por runa.
+- **Visual (narrativo):** a assinatura da skill continua contando o que ela é; por cima, a manifestação da runa
+  (`render/vfx/manifestacao-runa.ts`) conta de que ela é feita agora. Ela tem duas camadas feitas à mão:
+  - a matéria de cada um dos 9 elementos, com o que ele deixa no mundo;
+  - o veículo de cada classe: a lâmina do Guerreiro, o círculo rúnico do Mago, o traço da flecha do Arqueiro, as almas do
+    Necromante e as penas do falcão do Aventureiro.
+
+  Tudo cresce com a faixa do vínculo, que vem na chave: a quantidade e o tamanho, a marca no chão a partir da faixa 5 e
+  o floreio do especialista a partir da faixa 8. No floreio, o raio salta de volta para quem lançou e a terra racha e
+  treme. O que dura no alvo é a aura do estado, que vale enquanto ele vale (`materiais.ts`).
+- **Calibragem:** a parte neutra pesa menos as resistências da Bruxa do Pântano (psíquico 50%), e o covil dela em grupo
+  de 3 passou a cair em 29 s (meta 30–60 s; antes 30,4 s). A vida dela subiu de 2.800 para 3.100: 147/147 metas.

@@ -93,7 +93,7 @@ export function aoPararOTiroCarregado(estado: EstadoJogo, ctx: ContextoSimulacao
         torre.origemX = fim.x;
         torre.origemY = fim.y;
       }
-      torre.atributos = { ...torre.atributos, destreza: dono.atributos.destreza, forca: dono.atributos.forca };
+      torre.atributos = { ...torre.atributos, destreza: dono.atributos.destreza, vontade: dono.atributos.vontade };
       torre.nivel = dono.nivel;
     }
   }

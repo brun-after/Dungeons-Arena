@@ -42,11 +42,11 @@ export function ligarFeedbackGrimorio(o: OpcoesFeedbackGrimorio): void {
     const r = ctx.conteudo.regrasDeBuff.get(ev.regra);
     if (r && ev.id === idLocal) hud.registrar(t('log.buffInteragiu', { nome: r.nome }));
   });
-  bus.on('ressonanciaAtiva', (ev) => {
-    const r = ctx.conteudo.ressonancias.get(ev.ressonancia);
+  bus.on('estiloDespertou', (ev) => {
+    const r = [...ctx.conteudo.estilos.values()].flat().find((s) => s.id === ev.estilo);
     if (!r || ev.id !== idLocal) return;
-    hud.registrar(t('log.ressonancia', { nome: r.nome, texto: r.texto }));
-    o.aviso(t('log.ressonancia', { nome: r.nome, texto: r.texto }));
+    hud.registrar(t('log.estilo', { nome: r.nome, texto: r.texto }));
+    o.aviso(t('log.estilo', { nome: r.nome, texto: r.texto }));
   });
   // Marco 22 (23/10/2026, D-089): a encarnação do Mago e o tiro carregado do Arqueiro.
   bus.on('encarnou', (ev) => {

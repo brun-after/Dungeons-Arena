@@ -169,9 +169,9 @@ describe('integridade da execução completa', () => {
     expect(() => { validarAmostras([base], 1); }).toThrow('vida restaurada entre ondas');
   });
   it('mantém morte simultânea como derrota sem contar a onda como concluída', () => {
-    // 08/11/2026 (D-141): com o peso 35/65 nenhum duelo da faixa buscada troca o golpe letal; no atrito, o arqueiro
-    // desta semente cai junto com o inimigo da terceira onda (3 abates, só 2 ondas concluídas).
-    const base = simularDiagnostico({ ...configuracao, cenario: 'atrito', classe: 'arqueiro', nivel: 1, dificuldade: 'pesadelo', semente: 18, intervencao: 'sem_pocoes' });
+    // 08/11/2026 (D-141): no atrito, o arqueiro desta semente cai junto com o inimigo da terceira onda (3 abates, só 2
+    // ondas concluídas). Marco 39 (12/11/2026, D-148): com o poder base, o caso está no nível 2, semente 54.
+    const base = simularDiagnostico({ ...configuracao, cenario: 'atrito', classe: 'arqueiro', nivel: 2, dificuldade: 'pesadelo', semente: 54, intervencao: 'sem_pocoes' });
     expect(base.resultado).toBe('morte');
     expect(base.abates).toBe(3);
     expect(base.ondasConcluidas).toBe(2);

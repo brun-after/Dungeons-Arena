@@ -27,6 +27,7 @@ import { vivo } from '../entities/entidade';
 import { skinValida } from '../entities/skins';
 import { processarIa } from '../entities/ia';
 import { desequipar, distribuirPonto, equipar, moverItem, usarItem } from '../progression/inventario';
+import { aplicarAtualizacao } from '../progression/atualizacao-39';
 import { ehDificuldade } from '../modos/dificuldade';
 import { acelerarEstudo, avancarEstudos, equiparHabilidade, subirRank } from '../progression/habilidades-personagem';
 import { definirPassiva } from '../progression/passivas-gerais';
@@ -38,7 +39,7 @@ import { definirDirecao, moverEntidades, planejarIrPara, rumoDe } from '../world
 import { aoMovimentoManual, processarSeguirAlvo } from '../combat/seguir-alvo';
 import { fecharLoja, interagir, processarInteracoes } from '../world/interacao';
 import { revelarArmadilhas } from '../world/armadilhas-ocultas';
-import { atualizarRessonancias } from '../progression/ressonancias';
+import { atualizarEstilosDespertos } from '../progression/estilos-despertos';
 import { forjar } from '../progression/forja';
 import { processarServosNecromantes } from '../combat/necromancia';
 import { processarCompanheiros, sincronizarCompanheiros } from '../combat/companheiro';
@@ -49,6 +50,7 @@ import { registrarDescobertas } from '../progression/diario';
 import { coletarObjetos, expirarDrops } from '../world/objetos';
 import { processarPortas } from '../world/portas';
 import { processarSpawner } from '../world/spawner';
+import { escolherRuna } from '../combat/runas';
 import type { ComandoDoTick } from './comandos';
 import type { ContextoSimulacao } from './contexto';
 import { buscarEntidade, limparRecargasVencidas, type EstadoJogo } from './estado';
@@ -102,7 +104,7 @@ export function simular(
   // Ajuste de 16/10/2026 (D-067): buffs armados começam em combate; a aparência segue o equipamento.
   processarBuffsArmados(estado, ctx, saida);
   atualizarAparencias(estado, ctx);
-  atualizarRessonancias(estado, ctx, saida);
+  atualizarEstilosDespertos(estado, ctx, saida);
   // 08/11/2026 (D-138): os terrenos vivos reagem aos golpes do tick antes de as áreas valerem.
   processarTerrenosVivos(estado, ctx, saida, inicio);
   processarAmbientes(estado, ctx, saida, inicio);
@@ -190,6 +192,12 @@ function aplicarComandos(
         break;
       case 'soltarItem':
         soltarItem(estado, ctx, ator, cmd.invId, cmd.qtd, saida);
+        break;
+      case 'atualizarSistema':
+        aplicarAtualizacao(ator, ctx, cmd.pontos, estado.tick, saida);
+        break;
+      case 'escolherRuna':
+        escolherRuna(ctx, ator, cmd.habilidade, cmd.runa, estado.tick);
         break;
       case 'distribuirPonto':
         distribuirPonto(ator, ctx, cmd.atributo, estado.tick, saida);

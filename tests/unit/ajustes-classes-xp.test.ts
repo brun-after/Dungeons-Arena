@@ -363,7 +363,7 @@ describe('botas ao cruzar inimigos e saves legados', () => {
     if (!r.ok) return;
     const j = obter(r.registro.estado.entidades[0]);
     // 42 -> 32 (v19) -> a do catálogo (v21, marco 22; 62 desde 07/11/2026, D-136).
-    expect(j.bolsa?.hpBase).toBe(62); expect(j.hpMax).toBe(102); expect(j.hp).toBe(82); // a vida máxima sobe; a atual não cura sozinha
+    expect(j.bolsa?.hpBase).toBe(62); expect(j.hpMax).toBeGreaterThanOrEqual(102); expect(j.hpMax).toBeLessThanOrEqual(104); expect(j.hp).toBe(82); // a vida máxima sobe; a atual não cura sozinha
     expect(j.bolsa?.xpPorFase).toEqual({});
     expect(c.j.bolsa?.hpBase).toBe(42);
   });

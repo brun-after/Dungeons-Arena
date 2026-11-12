@@ -11,7 +11,7 @@ import { bonusAtivos } from './conjuntos';
 import { variacoesDeItem } from './gerar-item-base';
 
 // Marco 26 (26/10/2026, D-111): as sinergias passivas (data/sinergias.json) também entram.
-export const TIPOS_DE_ENTRADA = ['reacao', 'combo', 'sinergia', 'ressonancia', 'marco', 'fusao', 'item', 'conjunto', 'buff', 'missao', 'origem', 'evento'] as const;
+export const TIPOS_DE_ENTRADA = ['reacao', 'combo', 'sinergia', 'estilo', 'marco', 'fusao', 'item', 'conjunto', 'buff', 'missao', 'origem', 'evento'] as const;
 export type TipoDeEntrada = (typeof TIPOS_DE_ENTRADA)[number];
 
 export interface EntradaDoDiario {
@@ -31,7 +31,7 @@ export function entradasDoDiario(ctx: Pick<ContextoSimulacao, 'conteudo'>): Entr
   for (const s of c.interacoes.sinergias) saida.push(e('reacao', s.id));
   for (const id of c.combos.keys()) saida.push(e('combo', id));
   for (const s of c.sinergias) saida.push(e('sinergia', s.id));
-  for (const id of c.ressonancias.keys()) saida.push(e('ressonancia', id));
+  for (const lista of c.estilos.values()) for (const s of lista) saida.push(e('estilo', s.id));
   for (const d of c.definicoes.values()) {
     for (const n of Object.keys(d.marcos)) saida.push(e('marco', `${d.base.id}:${n}`));
     if (d.fusao) saida.push(e('fusao', d.base.id));
@@ -75,9 +75,9 @@ export function registrarDescobertas(estado: EstadoJogo, ctx: ContextoSimulacao,
         if (quem) anotar(estado, quem, `sinergia:${ev.sinergia}`, saida);
         break;
       }
-      case 'ressonanciaAtiva': {
+      case 'estiloDespertou': {
         const quem = porId(ev.id);
-        if (quem) anotar(estado, quem, `ressonancia:${ev.ressonancia}`, saida);
+        if (quem) anotar(estado, quem, `estilo:${ev.estilo}`, saida);
         break;
       }
       case 'habilidadeMudou': {

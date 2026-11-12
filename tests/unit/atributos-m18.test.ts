@@ -35,31 +35,31 @@ function obter<T>(v: T | undefined, nome: string): T {
 
 describe('dano e potência (D-068)', () => {
   it('a especialização recompensa concentração ofensiva, inclusive híbrida, e respeita o teto', () => {
-    const especializada = atr({ forca: 22, inteligencia: 10 });
-    const dispersa = atr({ forca: 16, inteligencia: 16 });
+    const especializada = atr({ vontade: 22, inteligencia: 10 });
+    const dispersa = atr({ vontade: 16, inteligencia: 16 });
     // 08/11/2026 (D-141): com o peso 35/65, a mesma soma rende mais quando vai para a Inteligência.
-    expect(multiplicadorDeRolagem(atr({ forca: 10, inteligencia: 22 }), b)).toBeGreaterThan(multiplicadorDeRolagem(dispersa, b));
+    expect(multiplicadorDeRolagem(atr({ vontade: 10, inteligencia: 22 }), b)).toBeGreaterThan(multiplicadorDeRolagem(dispersa, b));
     expect(multiplicadorDeRolagem(dispersa, b)).toBeGreaterThan(multiplicadorDeRolagem(especializada, b));
-    expect(bonusDeEspecializacao(especializada, 'forca', b)).toBeGreaterThan(bonusDeEspecializacao(dispersa, 'forca', b));
+    expect(bonusDeEspecializacao(especializada, 'vontade', b)).toBeGreaterThan(bonusDeEspecializacao(dispersa, 'vontade', b));
     expect(bonusDeEspecializacao(especializada, 'destreza', b)).toBe(0);
-    expect(bonusDeEspecializacao(atr({ forca: 19, inteligencia: 19 }), 'inteligencia', b)).toBe(bonusDeEspecializacao(especializada, 'forca', b));
-    expect(bonusDeEspecializacao(atr({ forca: 30 }), 'forca', b)).toBe(b.atributos.efeitos.especializacaoMax);
+    expect(bonusDeEspecializacao(atr({ vontade: 19, inteligencia: 19 }), 'inteligencia', b)).toBe(bonusDeEspecializacao(especializada, 'vontade', b));
+    expect(bonusDeEspecializacao(atr({ vontade: 30 }), 'vontade', b)).toBe(b.atributos.efeitos.especializacaoMax);
   });
   it('a rolagem escala com FOR e INT, 35% e 65% (D-141)', () => {
     const k = b.atributos.efeitos.rolagemPorPontoPct / 100;
     expect(multiplicadorDeRolagem(atr({}), b)).toBe(1);
-    expect(multiplicadorDeRolagem(atr({ forca: 14 }), b)).toBeCloseTo(1 + 4 * 0.35 * k);
+    expect(multiplicadorDeRolagem(atr({ vontade: 14 }), b)).toBeCloseTo(1 + 4 * 0.35 * k);
     expect(multiplicadorDeRolagem(atr({ inteligencia: 14 }), b)).toBeCloseTo(1 + 4 * 0.65 * k);
-    expect(multiplicadorDeRolagem(atr({ forca: 14, inteligencia: 14 }), b)).toBeCloseTo(1 + 4 * k);
-    expect(multiplicadorDeRolagem(atr({ forca: 1, inteligencia: 1 }), b)).toBe(b.atributos.efeitos.rolagemMin);
+    expect(multiplicadorDeRolagem(atr({ vontade: 14, inteligencia: 14 }), b)).toBeCloseTo(1 + 4 * k);
+    expect(multiplicadorDeRolagem(atr({ vontade: 1, inteligencia: 1 }), b)).toBe(b.atributos.efeitos.rolagemMin);
   });
 
   it('o bônus fixo segue a habilidade: arco com Força, magia com Inteligência', () => {
     const flecha = obter(CONTEUDO.habilidades.get('flecha_perfurante'), 'flecha');
     const seta = obter(CONTEUDO.habilidades.get('seta_arcana'), 'seta');
-    expect(flecha.escalaCom).toBe('forca');
+    expect(flecha.escalaCom).toBe('vontade');
     expect(seta.escalaCom).toBe('inteligencia');
-    const a = atr({ forca: 15, destreza: 20, inteligencia: 12 });
+    const a = atr({ vontade: 15, destreza: 20, inteligencia: 12 });
     expect(bonusDeAtributo(a, flecha.escalaCom, 1)).toBe(15);
     expect(bonusDeAtributo(a, seta.escalaCom, 1)).toBe(12);
   });

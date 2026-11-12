@@ -38,7 +38,7 @@ export type Grau = (typeof GRAUS)[number];
 
 /** Marco 18 (D-068): o atributo do bônus fixo de dano. Sem `escalaCom`, físico usa Força e mágico, Inteligência. */
 export type AtributoDeEscala = keyof Atributos;
-const ATRIBUTOS_DE_ESCALA: readonly AtributoDeEscala[] = ['forca', 'destreza', 'constituicao', 'inteligencia', 'sabedoria', 'carisma', 'dominio'];
+const ATRIBUTOS_DE_ESCALA: readonly AtributoDeEscala[] = ['vontade', 'destreza', 'constituicao', 'inteligencia', 'sabedoria', 'carisma', 'dominio'];
 export type Mobilidade = (typeof MOBILIDADES)[number];
 
 /** Marco 14: modificadores de evolução e de equipamento (D-057). */
@@ -172,6 +172,12 @@ export interface Habilidade {
   disparoMs?: number;
   /** D-136: a Lanças da escuridão — a lança sai de cada morto do Necromante (combat/lanca-de-ossos.ts). */
   lanca?: LancaDosMortos;
+  /** Marco 39 (12/11/2026, D-151): a runa do encaixe (as skills de classe e as ultimates; combat/runas.ts). */
+  runa?: 'fisico' | Elemento;
+  /** D-151: a faixa do vínculo com a runa (0 a 10; só apresentação e a duração do estado). */
+  faixaRuna?: number;
+  /** D-151: a parte elemental do dano (0 a 1); o resto é neutro (só a elemental sente resistência e absorção). */
+  fracaoElemental?: number;
 }
 
 /** D-136: a lança vai do morto até o alvo dele e `alem` células adiante; com `lados`, também para os dois lados. */
@@ -500,7 +506,7 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
     nivelMinimo: o.nivelMinimo === undefined ? 1 : l.numero(o, 'nivelMinimo', { min: 1, max: 100, inteiro: true }),
     passiva: lerPassiva(l, o.passiva),
     mobilidade: o.mobilidade === undefined ? 'trava' : l.opcao(o, 'mobilidade', MOBILIDADES),
-    escalaCom: 'forca',
+    escalaCom: 'vontade',
     grau: o.grau === undefined ? 'B' : l.opcao(o, 'grau', GRAUS),
     rank: 1,
     chave: '',
@@ -523,7 +529,7 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
   if (o.escalaRolagem !== undefined) base.escalaRolagem = l.listaDeTextos(o, 'escalaRolagem').map((a) => {
     if ((ATRIBUTOS_DE_ESCALA as readonly string[]).includes(a)) return a as AtributoDeEscala;
     l.erro(`escalaRolagem: atributo desconhecido "${a}"`);
-    return 'forca';
+    return 'vontade';
   });
   base.tags = etiquetasDe(base, o.tags === undefined ? [] : l.listaDeTextos(o, 'tags'));
   base.chave = base.id;
@@ -577,7 +583,7 @@ const CAMPOS_DEFINICAO = [
 
 /** Marco 18 (D-068): sem `escalaCom`, o físico escala com Força e o mágico com Inteligência. */
 export function escalaPadrao(tipo: TipoAtaque): AtributoDeEscala {
-  return tipo === 'magico' ? 'inteligencia' : 'forca';
+  return tipo === 'magico' ? 'inteligencia' : 'vontade';
 }
 
 export function lerHabilidades(json: unknown): { definicoes: Map<string, DefinicaoHabilidade>; erros: string[] } {

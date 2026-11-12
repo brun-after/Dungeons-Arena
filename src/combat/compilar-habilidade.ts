@@ -18,6 +18,7 @@ import { gerarDefinicao } from './gerar-habilidade';
 import { etiquetasDe, MODIFICADORES, type Catalogo, type DefinicaoHabilidade, type Habilidade, type Modificador, type Variante } from './habilidades';
 import { normalizarEfeitos } from './normalizar-efeito';
 import { construirEfeito, REGISTRO_EFEITOS, type EfeitoCanonico } from './registro-efeitos';
+import { aplicarRuna, type RegrasRunas } from './runas';
 
 export interface Caminho {
   id: string;
@@ -54,6 +55,8 @@ export interface RegrasHabilidades {
   ranks: readonly RegrasRank[];
   /** Marco 18 (D-068): tempo de estudo por grau (ms), a redução pela Inteligência e quantas acelerações cabem. */
   estudo: { B: number; A: number; S: number; reducaoPorIntPct: number; reducaoMaxPct: number };
+  /** Marco 39 (D-151): a parte elemental das runas e a função secundária delas (combat/runas.ts). */
+  runas: RegrasRunas;
 }
 
 /** O que a compilação consulta do conteúdo. */
@@ -146,6 +149,8 @@ export interface OpcoesCompilacao {
   mods: readonly Modificador[];
   /** Marco 24: as variantes ligadas (Frenesi, fúria alta, elemento encarnado). */
   variantes?: readonly Variante[];
+  /** Marco 39 (D-151): a runa do encaixe e a faixa do vínculo com ela. */
+  runa?: { runa: 'fisico' | Elemento; faixa: number };
 }
 
 export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilacao, fontes: FontesCompilacao, regras: RegrasHabilidades): Habilidade {
@@ -270,8 +275,9 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
   h.multCura = multCura;
   h.tags = etiquetasDe(h, b.tags);
   // Na chave só entram os modificadores de fora (equipamento): os da definição e dos caminhos já estão implícitos.
-  h.chave = formatarChave({ id: b.id, rank, caminhos: caminhosValidos, mods: op.mods.filter((m) => aplicados.includes(m)), variantes });
-  return h;
+  h.chave = formatarChave({ id: b.id, rank, caminhos: caminhosValidos, mods: op.mods.filter((m) => aplicados.includes(m)), variantes, ...(op.runa && { runa: op.runa }) });
+  // Marco 39 (12/11/2026, D-151): a runa troca o elemento e põe a parte elemental (por último, sobre tudo o que veio antes).
+  return op.runa ? aplicarRuna(h, op.runa.runa, op.runa.faixa, fontes.elementos, regras.runas) : h;
 }
 
 /** O contexto que a resolução precisa (conteúdo e regras de rank). */
