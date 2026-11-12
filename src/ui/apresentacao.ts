@@ -191,8 +191,10 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     auraDe: (e, tick) => {
       if (marcoAMostra(ctx, e, 'auraVisivel') <= 0) return null;
       const raio = e.bolsa ? raioDaAura(ctx, e, tick) : ctx.balance.ajustesClasses.guerreiro.auraRaio + marcoAMostra(ctx, e, 'auraRaio');
-      // 08/11/2026 (D-138): a cor segue a Bravura, do amarelo (25) ao vermelho (75+); o fogo nos inimigos sai da força 3.
-      return { raio, cor: corDaAura(e.atributos.dominio), forca: Math.min(4, Math.max(1, Math.floor(e.atributos.dominio / 25))) };
+      // 08/11/2026 (D-138): a cor vai do amarelo ao vermelho; o fogo nos inimigos sai da força 3. Marco 39 (12/11/2026,
+      // D-155): sem o atributo de classe, segue os degraus da trilha de classe (4 por quarto da escala antiga).
+      const brilho = Math.min(100, (e.trilhaClasse?.degraus ?? 0) * 4);
+      return { raio, cor: corDaAura(brilho), forca: Math.min(4, Math.max(1, Math.floor(brilho / 25))) };
     },
     orbesDe: (e) => {
       const n = e.encarnacao ? marcoAMostra(ctx, e, 'orbes') : 0;

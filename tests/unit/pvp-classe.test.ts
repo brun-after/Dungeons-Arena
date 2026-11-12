@@ -15,7 +15,7 @@ describe('skills de classe entre personagens (marco 25)', () => {
   });
 
   it('a skill de Destreza rola com Força e Destreza; as outras, com Força e Inteligência (35/65, D-141)', () => {
-    const a = { vontade: 22, destreza: 17, constituicao: 17, inteligencia: 13, sabedoria: 10, carisma: 10, dominio: 10 };
+    const a = { vontade: 22, destreza: 17, constituicao: 17, inteligencia: 13, sabedoria: 10, carisma: 10 };
     const k = BALANCE_PADRAO.atributos.efeitos.rolagemPorPontoPct / 100;
     expect(multiplicadorDeRolagem(a, BALANCE_PADRAO, 'destreza')).toBeCloseTo(1 + ((12 + 7) / 2) * k);
     expect(multiplicadorDeRolagem(a, BALANCE_PADRAO, 'vontade')).toBeCloseTo(1 + (12 * 0.35 + 3 * 0.65) * k);

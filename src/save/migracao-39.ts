@@ -24,6 +24,31 @@ function migrarEntidades(v: unknown): unknown {
   }) };
 }
 
+/** D-155: tira o atributo de classe (`dominio`) de um objeto de atributos. */
+export function semAtributoDeClasse(a: unknown): unknown {
+  if (!ehObjeto(a) || !('dominio' in a)) return a;
+  return Object.fromEntries(Object.entries(a).filter(([k]) => k !== 'dominio'));
+}
+
+function semDominioNasEntidades(v: unknown): unknown {
+  if (!ehObjeto(v) || !Array.isArray(v.entidades)) return v;
+  return { ...v, entidades: v.entidades.map((x: unknown) => {
+    if (!ehObjeto(x)) return x;
+    const bolsa = ehObjeto(x.bolsa) ? { ...x.bolsa, atributosBase: semAtributoDeClasse(x.bolsa.atributosBase) } : x.bolsa;
+    return { ...x, atributos: semAtributoDeClasse(x.atributos), ...(bolsa !== undefined && { bolsa }) };
+  }) };
+}
+
+/**
+ * Marco 39 (12/11/2026, D-155): a migração 29 › 30 tira o atributo de classe. Os pontos que estavam nele voltam na tela de
+ * atualização (o sistema do personagem passou a 40, então ela aparece de novo e devolve o orçamento inteiro).
+ */
+export function migrarSemAtributoDeClasse(r: Objeto): Objeto {
+  const fasesVisitadas = ehObjeto(r.fasesVisitadas)
+    ? Object.fromEntries(Object.entries(r.fasesVisitadas).map(([id, fase]) => [id, semDominioNasEntidades(fase)])) : r.fasesVisitadas;
+  return { ...r, estado: semDominioNasEntidades(r.estado), fasesVisitadas };
+}
+
 export function migrarForcaParaVontade(r: Objeto): Objeto {
   const fasesVisitadas = ehObjeto(r.fasesVisitadas)
     ? Object.fromEntries(Object.entries(r.fasesVisitadas).map(([id, fase]) => [id, migrarEntidades(fase)])) : r.fasesVisitadas;

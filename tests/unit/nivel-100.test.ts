@@ -1,5 +1,5 @@
 // Marco 28 (30/10/2026, D-127): invocações iguais lado a lado, nível 100 com o teto nível+20, o rendimento acima de
-// 30, o atributo de classe (fatores e marcos), o multiplicador dos itens e a migração 27 › 28.
+// 30, a classe nos estilos (D-155, no lugar do atributo de classe), o multiplicador dos itens e a migração 29 › 30.
 import { describe, expect, it } from 'vitest';
 import { criarEstado } from '../../src/core/estado';
 import { DT_MS } from '../../src/core/loop';
@@ -25,6 +25,19 @@ function obter<T>(v: T | null | undefined): T {
   return v;
 }
 const jogador = (classe: string) => criarJogador(obter(CONTEUDO.classes.get(classe)), 'j', 2, 5, b);
+
+/** D-155: leva o personagem ao nível 100 com `pontos` no par do estilo (2 no principal para 1 no secundário). */
+function noEstilo(e: ReturnType<typeof jogador>, estiloId: string, pontos: number): void {
+  const bolsa = obter(e.bolsa);
+  const estilo = obter((CONTEUDO.estilos.get(bolsa.classeId) ?? []).find((x) => x.id === estiloId));
+  const [p1, p2] = Object.entries(estilo.pesos).sort((x, y) => y[1] - x[1]).map(([k]) => k as keyof typeof bolsa.atributosBase);
+  const base = obter(CONTEUDO.classes.get(bolsa.classeId)).atributos;
+  e.nivel = 100;
+  bolsa.atributosBase = { ...base };
+  bolsa.atributosBase[obter(p1)] = Math.min(100, base[obter(p1)] + Math.round((pontos * 2) / 3));
+  bolsa.atributosBase[obter(p2)] = Math.min(100, base[obter(p2)] + Math.round(pontos / 3));
+  recalcularFicha(e, ctx);
+}
 
 describe('invocações iguais', () => {
   it('três lobos de pergaminho ficam em células diferentes, seguindo e em combate', () => {
@@ -84,17 +97,19 @@ describe('nível 100 e o teto 10 + 2 × nível (marco 39)', () => {
     const bolsa = obter(j.bolsa);
     j.nivel = 5;
     bolsa.pontosAtributo = 5;
-    bolsa.atributosBase.vontade = 20;
+    // Marco 39 (D-153): o teto também conta do valor inicial da classe.
+    const tetoV = tetoDoAtributo(5, b, obter(CONTEUDO.classes.get('guerreiro')).atributos.vontade);
+    bolsa.atributosBase.vontade = tetoV;
     const saida: EventoSimulacao[] = [];
     distribuirPonto(j, ctx, 'vontade', 0, saida);
-    expect(bolsa.atributosBase.vontade).toBe(20);
+    expect(bolsa.atributosBase.vontade).toBe(tetoV);
     expect(saida.some((e) => e.t === 'itemRecusado' && e.motivo === 'atributo_acima_do_nivel')).toBe(true);
     distribuirPonto(j, ctx, 'destreza', 0, saida);
     expect(bolsa.pontosAtributo).toBe(4);
     const anel = { ...obter(CONTEUDO.itens.get('anel_sabio')), id: 'anel_t', bonusAtributos: { vontade: { modo: 'abs' as const, valor: 5 } } };
     const ctxAnel = { ...ctx, conteudo: { ...CONTEUDO, itens: new Map([...CONTEUDO.itens, ['anel_t', anel]]) } };
     bolsa.equipamento.anel = { invId: 'a', itemId: 'anel_t', qtd: 1, ref: null };
-    expect(derivarFicha(bolsa, 5, ctxAnel).atributos.vontade).toBe(25);
+    expect(derivarFicha(bolsa, 5, ctxAnel).atributos.vontade).toBe(tetoV + 5);
   });
 
   it('acima de 30 o ponto rende menos; até 30 é igual', () => {
@@ -104,34 +119,37 @@ describe('nível 100 e o teto 10 + 2 × nível (marco 39)', () => {
   });
 });
 
-describe('atributo de classe', () => {
-  it('o domínio fortalece a passiva e as skills de classe, e os marcos destravam nos degraus', () => {
+// Marco 39 (12/11/2026, D-155): o atributo de classe saiu; a classe cresce nos estilos.
+describe('classe nos estilos', () => {
+  it('cada estilo dá as suas melhorias de classe, crescendo a cada degrau da ponta', () => {
     const g = jogador('guerreiro');
-    expect(fatorDeDominio(ctx, g, 'aura')).toBe(1);
-    expect(marcoDe(ctx, g, 'auraRaio')).toBe(0);
-    g.atributos.dominio = 50;
-    expect(fatorDeDominio(ctx, g, 'aura')).toBeGreaterThan(1);
     expect(fatorDeDominio(ctx, g, 'carga')).toBe(1);
+    noEstilo(g, 'carniceiro', 30);
+    const pouco = fatorDeDominio(ctx, g, 'furia');
+    expect(pouco).toBeGreaterThan(1);
     expect(marcoDe(ctx, g, 'auraVisivel')).toBe(1);
-    expect(marcoDe(ctx, g, 'auraRaio')).toBe(1);
     expect(marcoDe(ctx, g, 'estandartePct')).toBe(0);
-    g.atributos.dominio = 100;
+    noEstilo(g, 'carniceiro', 200);
+    expect(fatorDeDominio(ctx, g, 'furia')).toBeGreaterThan(pouco);
     expect(marcoDe(ctx, g, 'auraRaio')).toBe(2);
+    const c = jogador('guerreiro');
+    noEstilo(c, 'comandante', 200);
+    expect(marcoDe(ctx, c, 'estandartePct')).toBeGreaterThan(marcoDe(ctx, g, 'estandartePct'));
     const n = jogador('necromante');
-    n.atributos.dominio = 75;
+    noEstilo(n, 'senhor_da_horda', 200);
     expect(marcoDe(ctx, n, 'servosDaPassiva')).toBe(3);
     expect(marcoDe(ctx, n, 'auraRaio')).toBe(0);
   });
 
-  it('só a skill de classe ganha com o domínio', () => {
+  it('as skills de classe crescem com os degraus de todos os estilos', () => {
     const m = jogador('mago');
     const classe = obter(CONTEUDO.classes.get('mago'));
     const exclusiva = obter(classe.exclusivas[0]);
-    m.atributos.dominio = 60;
+    const hab = obter(resolverHabilidade(ctx, exclusiva));
+    const antes = fonteDaHabilidade(m, ctx, 0, hab).multDano;
+    noEstilo(m, 'ocultista', 100);
     expect(fatorDeSkillDeClasse(ctx, m, exclusiva)).toBeGreaterThan(1);
     expect(fatorDeSkillDeClasse(ctx, m, 'pedregulho')).toBe(1);
-    const hab = obter(resolverHabilidade(ctx, exclusiva));
-    const antes = fonteDaHabilidade({ ...m, atributos: { ...m.atributos, dominio: 10 } }, ctx, 0, hab).multDano;
     expect(fonteDaHabilidade(m, ctx, 0, hab).multDano).toBeGreaterThan(antes);
   });
 });
@@ -159,16 +177,12 @@ describe('itens: valor base + % de dano', () => {
 });
 
 describe('save', () => {
-  it('a migração 27 › 28 dá domínio 10 a todos', () => {
+  it('a migração 29 › 30 tira o atributo de classe', () => {
     const j = jogador('mago');
-    const semDominio: Partial<typeof j.atributos> = { ...j.atributos };
-    delete semDominio.dominio;
     const bolsa = obter(j.bolsa);
-    const baseSem: Partial<typeof j.atributos> = { ...bolsa.atributosBase };
-    delete baseSem.dominio;
-    const r = obter(MIGRACOES[27])({ versaoSchema: 27, estado: { entidades: [{ ...j, atributos: semDominio, bolsa: { ...bolsa, atributosBase: baseSem } }] }, fasesVisitadas: {} });
-    const e = (r.estado as { entidades: { atributos: { dominio: number }; bolsa: { atributosBase: { dominio: number } } }[] }).entidades[0];
-    expect(obter(e).atributos.dominio).toBe(10);
-    expect(obter(e).bolsa.atributosBase.dominio).toBe(10);
+    const r = obter(MIGRACOES[29])({ versaoSchema: 29, estado: { entidades: [{ ...j, atributos: { ...j.atributos, dominio: 40 }, bolsa: { ...bolsa, atributosBase: { ...bolsa.atributosBase, dominio: 40 } } }] }, fasesVisitadas: {} });
+    const e = obter((r.estado as { entidades: { atributos: object; bolsa: { atributosBase: object } }[] }).entidades[0]);
+    expect('dominio' in e.atributos).toBe(false);
+    expect('dominio' in e.bolsa.atributosBase).toBe(false);
   });
 });

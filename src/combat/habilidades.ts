@@ -38,7 +38,7 @@ export type Grau = (typeof GRAUS)[number];
 
 /** Marco 18 (D-068): o atributo do bônus fixo de dano. Sem `escalaCom`, físico usa Força e mágico, Inteligência. */
 export type AtributoDeEscala = keyof Atributos;
-const ATRIBUTOS_DE_ESCALA: readonly AtributoDeEscala[] = ['vontade', 'destreza', 'constituicao', 'inteligencia', 'sabedoria', 'carisma', 'dominio'];
+const ATRIBUTOS_DE_ESCALA: readonly AtributoDeEscala[] = ['vontade', 'destreza', 'constituicao', 'inteligencia', 'sabedoria', 'carisma'];
 export type Mobilidade = (typeof MOBILIDADES)[number];
 
 /** Marco 14: modificadores de evolução e de equipamento (D-057). */

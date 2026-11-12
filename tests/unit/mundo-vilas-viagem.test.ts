@@ -35,7 +35,7 @@ function cena(classe = 'guerreiro') {
 
 describe('D-141: peso dos atributos e o guerreiro', () => {
   it('a rolagem das habilidades pesa 35% Força e 65% Inteligência', () => {
-    const base = { vontade: 10, destreza: 10, constituicao: 10, inteligencia: 10, sabedoria: 10, carisma: 10, dominio: 10 };
+    const base = { vontade: 10, destreza: 10, constituicao: 10, inteligencia: 10, sabedoria: 10, carisma: 10 };
     const comFor = multiplicadorDeRolagem({ ...base, vontade: 30 }, BALANCE_PADRAO);
     const comInt = multiplicadorDeRolagem({ ...base, inteligencia: 30 }, BALANCE_PADRAO);
     const k = BALANCE_PADRAO.atributos.efeitos.rolagemPorPontoPct / 100;

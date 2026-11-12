@@ -18,7 +18,6 @@ import {
   vidaPorCelula,
 } from '../progression/efeitos-atributo';
 import type { NomeAtributo } from '../progression/itens';
-import { fatorDeDominio, fatorDeSkillDeClasse, marcoDe, marcosDaClasse } from '../progression/dominio';
 import { velocidade } from '../world/movimento';
 import { radarDe } from '../progression/estilos';
 
@@ -27,7 +26,7 @@ const fmt = (v: number, casas = 1) => v.toFixed(casas).replace('.', ',');
 /** As linhas do cartão de um atributo, com os números do personagem. */
 export function linhasDaDica(nome: NomeAtributo, a: Atributos, ctx: ContextoSimulacao, j: Entidade, hpMax: number, manaMax: number): string[] {
   const proprias = linhasProprias(nome, a, ctx, j, hpMax, manaMax);
-  return nome === 'dominio' ? proprias : [...proprias, ...linhasDosEstilos(nome, a, ctx, j)];
+  return [...proprias, ...linhasDosEstilos(nome, a, ctx, j)];
 }
 
 /**
@@ -75,8 +74,6 @@ function linhasProprias(nome: NomeAtributo, a: Atributos, ctx: ContextoSimulacao
         t('dica.sabedoria.2', { raio: raioDeRevelar(a, b), revelar: fmt(chanceDeRevelarPct(a, b), 0), desarmar: fmt(chanceDeDesarmarPct(a, b), 0) }),
       ];
     }
-    case 'dominio':
-      return linhasDoDominio(ctx, j);
     case 'carisma':
       return [
         t('dica.carisma.1', { d20: fmt(chanceDeVinte(a.carisma, b.combate.carismaNeutro) * 100) }),
@@ -86,27 +83,9 @@ function linhasProprias(nome: NomeAtributo, a: Atributos, ctx: ContextoSimulacao
   }
 }
 
-/** Marco 28 (D-127): o nome do atributo para quem vê (o de classe leva o nome da classe). */
-export function nomeDoAtributo(nome: NomeAtributo, classeId: string | undefined, curto = false): string {
-  if (nome === 'dominio' && classeId) return t(`${curto ? 'atributoClasseCurto' : 'atributoClasse'}.${classeId}` as ChaveTexto);
+/** O nome do atributo para quem vê. Marco 39 (12/11/2026, D-155): o atributo de classe saiu; a classe vive nos estilos. */
+export function nomeDoAtributo(nome: NomeAtributo, _classeId?: string, curto = false): string {
   return t(`${curto ? 'atributoCurto' : 'atributo'}.${nome}` as ChaveTexto);
-}
-
-/** Marco 28 (D-127): o que o atributo de classe dá agora e os marcos (os alcançados marcados). */
-function linhasDoDominio(ctx: ContextoSimulacao, j: Entidade): string[] {
-  const classe = j.bolsa?.classeId ?? '';
-  const regras = ctx.balance.dominio.classes[classe];
-  if (!regras) return [];
-  const fmt2 = (v: number) => v.toFixed(2).replace('.', ',');
-  const skills = Math.round((fatorDeSkillDeClasse(ctx, j, ctx.conteudo.classes.get(classe)?.exclusivas[0] ?? '') - 1) * 100);
-  const linhas = [t('dica.dominio.skills', { pct: skills })];
-  for (const chave of Object.keys(regras.porPonto)) linhas.push(t('dica.dominio.porPonto', { efeito: t(`dominio.porPonto.${chave}` as ChaveTexto), fator: fmt2(fatorDeDominio(ctx, j, chave)) }));
-  linhas.push(t('dica.dominio.semArma', { pct: ctx.balance.dominio.semFamiliaridadePct }), t('dica.dominio.marcos'));
-  for (const m of marcosDaClasse(ctx, classe)) {
-    const texto = t(`marco.${m.chave}` as ChaveTexto, { valor: m.valor, s: m.valor / 1000 });
-    linhas.push(t('dica.dominio.marco', { em: m.em, texto, ativo: j.atributos.dominio >= m.em && marcoDe(ctx, j, m.chave) >= m.valor ? t('dica.dominio.ativo') : '' }));
-  }
-  return linhas;
 }
 
 export interface DicaAtributo {

@@ -7,6 +7,7 @@ import { habilidadeDoAtor } from '../../src/combat/perfil';
 import { lancarProjetil } from '../../src/combat/projeteis';
 import { buscarEntidade, criarEstado } from '../../src/core/estado';
 import { DT_MS } from '../../src/core/loop';
+import { fatorDeDominio } from '../../src/progression/dominio';
 import { simular, type EventoSimulacao } from '../../src/core/simulacao';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import { celulaDeInterceptacao } from '../../src/entities/ia-falcao';
@@ -60,13 +61,15 @@ describe('falcão protetor (marco 25)', () => {
     const j = arena(20).j;
     j.atributos.sabedoria = 10;
     j.atributos.carisma = 10;
-    expect(velocidadeDoAtaqueDoFalcao(ctx, j)).toBeCloseTo(5);
+    // Marco 39 (D-155): mexer nos atributos efetivos enche a camada dos estilos; a classe no estilo acelera o falcão.
+    const engenho = () => 1 + (fatorDeDominio(ctx, j, 'falcao') - 1) / 2;
+    expect(velocidadeDoAtaqueDoFalcao(ctx, j)).toBeCloseTo(5 * engenho());
     expect(velocidadeDoDash(ctx, j)).toBeCloseTo(6);
     j.atributos.sabedoria = 20;
-    expect(velocidadeDoAtaqueDoFalcao(ctx, j)).toBeCloseTo(5 * (1 + (10 * r.atributoBonusPorPontoPct) / 100));
+    expect(velocidadeDoAtaqueDoFalcao(ctx, j)).toBeCloseTo(5 * (1 + (10 * r.atributoBonusPorPontoPct) / 100) * engenho());
     j.atributos.sabedoria = 99;
     j.atributos.carisma = 99;
-    expect(velocidadeDoAtaqueDoFalcao(ctx, j)).toBeCloseTo(5 * 1.3);
+    expect(velocidadeDoAtaqueDoFalcao(ctx, j)).toBeCloseTo(5 * 1.3 * engenho());
     expect(velocidadeDoDash(ctx, j)).toBeCloseTo(6 * 1.3);
   });
 

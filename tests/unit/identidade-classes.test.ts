@@ -26,6 +26,7 @@ import { buscarEntidade, clonarEstado, criarEstado } from '../../src/core/estado
 import { DT_MS } from '../../src/core/loop';
 import { simular, type EventoSimulacao } from '../../src/core/simulacao';
 import { ticksDe } from '../../src/core/tempo';
+import { fatorDeDominio } from '../../src/progression/dominio';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import type { Entidade } from '../../src/entities/entidade';
 import { personagemNoInicio } from '../../src/save/transicao';
@@ -341,7 +342,8 @@ describe('Mira firme do Arqueiro', () => {
     a.j.atributos.destreza = 10;
     expect(ticksParaCarregar(ctx, a.j)).toBe(Math.round(6000 / DT_MS));
     a.j.atributos.destreza = 40;
-    expect(ticksParaCarregar(ctx, a.j)).toBe(Math.round(4500 / DT_MS));
+    // Marco 39 (D-155): a Destreza efetiva também enche os estilos, e a classe no estilo carrega mais rápido.
+    expect(ticksParaCarregar(ctx, a.j)).toBe(Math.max(1, ticksDe(4500 / fatorDeDominio(ctx, a.j, 'carga'))));
     a.j.mira = { desdeTick: 0 };
     expect(fracaoMira(ctx, a.j, ticksParaCarregar(ctx, a.j))).toBe(1);
     registrarParticipacao(a.j, 'b', 50, ctx);

@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.01 · **Data:** 12/11/2026
+**Versão:** 1.02 · **Data:** 12/11/2026
 
 > **Histórico**
+> - **1.02 (12/11/2026)**: D-153: a inclinação (o estilo que lidera sente-se desde o nível 1), a forma desperta em 35% e o teto pelo valor inicial da classe. D-154: o foco (a marca de cada estilo cresce quanto mais ele se destaca). D-155: o atributo de classe sai e a classe cresce nos estilos, um degrau a cada 5% de cada ponta.
 > - **1.01 (12/11/2026)**: D-152: a forma desperta dos estilos (o estilo muda o comportamento das skills da etiqueta, com dano por alvo menor). D-151: o par de runas nos combos.
 > - **1.00 (12/11/2026)**: D-151: as runas nas skills de classe e nas ultimates (a parte elemental de 20% a 60% pelo vínculo, a função secundária, o bônus de par e a runa que some).
 > - **0.99 (12/11/2026)**: D-147 (pontos escassos, teto 10 + 2 × nível e o pentagrama de estilos no lugar das ressonâncias) e D-148 (poder base no dano de quem tem ficha, os efeitos dos estilos no combate e a calibragem). D-149: a tela de atualização dos personagens antigos. D-150: o vínculo elemental (eneágono), as resistências e a penetração. D-146: a Força vira Vontade (save 29, a ficha antiga e a marca do sistema). D-145: marco 39, o nível 100 sem travas (ids de item e de skill gerada, recompensa de missão) e o loot do inimigo renascido no Mundo.
@@ -4530,3 +4531,105 @@ agora para montar a build nova sem se sentir lesado.
 - **Chave:** o modificador entra na chave da skill como o do equipamento; o que o equipamento já dá não se repete.
 - **Ficha:** cada estilo mostra a sua forma, apagada até o limite e acesa depois.
 - **Balanceamento:** 147/147 metas com a forma no jogo.
+
+## D-153 — A inclinação: o estilo se sente desde o começo (12/11/2026)
+
+- **O problema:** com o radar linear, no começo todas as pontas ficam baixas e parecidas. Quem se dirige a um estilo só
+  sentia a diferença perto da forma desperta (60%), e o jogador generalista nunca chegava a ela.
+- **A inclinação:** a ponta que lidera ganha `inclinacaoPct` (15 p.p.) a mais desde o nível 1. Lidera o estilo que mais
+  subiu pelos pontos postos, ou seja, o rumo que o jogador escolheu. Sem pontos postos, lidera o estilo que a classe já
+  favorece. A inclinação não leva os pontos além de 100%; só os itens passam disso. O generalista também lidera alguma
+  ponta e tem a sua inclinação.
+- **A forma desperta em 35%** (antes 60%). Com a inclinação, quem se dirige a um estilo a acende por volta do nível 8. O
+  generalista ainda pode acender a do estilo que lidera.
+- **O teto pelo valor inicial da classe:** o atributo principal da classe já nasce acima de 10 + 2 × nível no nível 2.
+  O teto passa a ser o maior entre 10 + 2 × nível e o inicial da classe + 2 por nível acima do 1 (`tetoDoAtributo`),
+  sempre até 100. Antes, o guerreiro não podia pôr nenhum ponto em Vontade nos primeiros níveis.
+- **Correção no caminho:** os mortos do Necromante perdiam a vida extra que o estilo dá às invocações quando voltavam
+  (`necromancia.ts`).
+
+## D-154 — O foco: a marca do estilo cresce quando ele se destaca (12/11/2026)
+
+- **O desequilíbrio:** a build espalhada somava efeitos parecidos com os de quem se dirige a um estilo, porque cada
+  atributo enche vários estilos. Dirigir-se a um estilo não pagava.
+- **A compensação pelo que cada estilo tem de mais marcante:**
+  - o foco de uma ponta é ela menos a média das outras quatro, entre 0 e 1;
+  - a marca do estilo, o componente de efeito em que ele é mais forte (a área do Artilheiro, a vida do Inabalável, as
+    invocações do Mestre de Elite), cresce `focoMarcaPct` (200%) × foco;
+  - a mecânica própria do estilo (os ganchos) cresce `focoGanchoPct` (100%) × foco, até 100% de chance.
+
+  O generalista tem foco perto de zero e fica como estava.
+- **Simulador:** a meta de build passou a comparar a build dirigida a cada um dos cinco estilos contra a espalhada, nos
+  níveis 8, 30 e 60. Um estilo de área não precisa vencer um duelo, então a meta tem dois lados:
+  - o foco compensa: o melhor estilo vence a espalhada em pelo menos 35% dos duelos;
+  - o generalista não é esmagado: a média dos dois melhores fica até 90%.
+
+  A média dos dois tira o viés do máximo de cinco amostras ruidosas: baixar o dano de um estilo também baixa o da
+  espalhada, e o resultado do duelo não acompanha o ajuste de forma estável.
+
+## D-155 — O atributo de classe sai; a classe cresce nos estilos (12/11/2026)
+
+- **Antes (D-127):** o atributo de classe (`dominio`: Bravura, Instinto, Arcano, Ritual, Engenho) melhorava a classe do
+  mesmo jeito para qualquer build, em quatro marcos de 25 em 25 pontos, e ficava fora do pentagrama.
+- **Agora a classe se manifesta nos estilos.** Cada estilo traz as suas melhorias de classe (`estilos.json → melhorias`),
+  e a cada 5% da ponta (`balance.dominio.degrauPct`, uns 5 pontos postos no par do estilo) ganha um degrau. Cada
+  melhoria vale `base + porDegrau × degraus` a partir do degrau `desde`. As inteiras (raio, orbes, servos) arredondam
+  para baixo e chegam ao máximo em 80% da ponta. O ganho é linear: um pouco a cada degrau, em vez de saltos a cada 25
+  pontos.
+- **Os degraus contam os pontos e os itens, não a inclinação** (D-153). A primeira melhoria vem com os primeiros pontos
+  postos no estilo, não já no nível 1.
+- **As melhorias reaproveitam os marcos antigos e vão para o estilo que conta a mesma história:**
+
+  | Classe | Estilo | Melhorias |
+  |---|---|---|
+  | Guerreiro | Carniceiro | fúria; a aura aparece e alarga (raio +1, +2) |
+  | | Duelista | fúria |
+  | | Rúnico | aura; aura elemental (chance do estado do elemento da arma) |
+  | | Comandante | aura; estandarte (os aliados recebem parte da cura da aura) |
+  | | Baluarte | aura; a aura alarga |
+  | Necromante | Senhor da Horda | servos; até 3 servos da passiva |
+  | | Mestre de Elite | servos (ataque e vida); volta do servo |
+  | | Pestilento | volta do servo; Legião (solo amaldiçoado onde o morto cai) a partir de 20% |
+  | | Pacto de Sangue | servos; o servo volta mais cedo |
+  | | Ceifador | volta do servo; o servo volta mais cedo |
+  | Arqueiro | Atirador | carga da Mira firme; caçada em cadeia a partir de 20% |
+  | | Mira firme | alcance do tiro carregado; carga |
+  | | Inabalável | carga; flecha-âncora a partir de 20% |
+  | | Caçador | alcance; caçada em cadeia a partir de 10% |
+  | | Flecheiro arcano | disparo explosivo a partir de 20%; tempestade de aço a partir de 70% |
+  | Mago | Artilheiro arcano | magias com elemento; ressonância a partir de 20% |
+  | | Ocultista | magias com elemento; rastro elemental a partir de 20% |
+  | | Encantador | duração da encarnação; Arquimago (a encarnação dupla dura mais) |
+  | | Guardião arcano | duração da encarnação; orbes (1 e 2) |
+  | | Lâmina rúnica | magias com elemento; rastro elemental a partir de 10% |
+  | Aventureiro | Mestre de Feras | dano do falcão; matilha |
+  | | Batedor | dano do falcão; faro do falcão |
+  | | Implacável | dano do falcão |
+  | | Sobrevivente | criaturas de pergaminho |
+  | | Pergaminhista | criaturas de pergaminho; bolsa funda (+1, +2); criatura primordial a partir de 20% |
+
+- **Soma e teto:** como os estilos dividem atributos, a mesma chave pode vir de mais de um. Ela soma e para no teto de
+  `balance.dominio.tetos` (+100% nos fatores e o valor do marco antigo, ou um pouco acima, nos marcos). O generalista
+  tem degraus em várias pontas e recebe melhorias de vários estilos; não fica sem classe.
+- **Skills de classe e ultimates:** crescem `skillsPorDegrauPct` (0,75%) por degrau somado das cinco pontas, então não
+  dependem da forma da build. Sem a arma da classe, os fatores rendem 50% e os marcos travam, como antes.
+- **API mantida:** `fatorDeDominio`, `marcoDe`, `marcoAMostra` e `fatorDeSkillDeClasse` continuam com a mesma assinatura;
+  só a fonte mudou (o radar, em `progression/dominio.ts`). A trilha vai publicada na entidade (`trilhaClasse`) para quem
+  vê os outros sem a bolsa: a aura e os orbes no online e no Mundo. O brilho da aura segue os degraus.
+- **Itens:** os afixos de atributo de classe viraram Carisma, Constituição, Destreza ou Sabedoria, e os itens fixos que o
+  davam passaram a dar Carisma ou Destreza.
+- **Saves e fichas:** o save vai para a versão 30 (a migração tira o campo). O sistema do personagem passa a 40, e quem
+  já tinha passado pela tela de atualização a vê de novo, com o orçamento inteiro de volta, inclusive os pontos que
+  estavam no atributo de classe. Fichas do Mundo e do grupo com o campo antigo o ignoram e passam pela mesma tela.
+- **Ficha:** cada estilo mostra a sua linha de classe: o degrau de agora, o que cada melhoria dá, o que vem depois e o
+  próximo degrau. Sem degrau ainda, mostra o que o primeiro traz.
+- **Calibragem (172/172 metas):**
+  - **Fatores:** as chaves de fator começam em 0,5% a 3% por degrau, com teto de +100% (fúria +60%, aura +70%). Como
+    os estilos dividem atributos, a mesma chave somava de vários e passava do dobro do que o atributo antigo dava.
+  - **Estilos que dominavam o duelo:** Mestre de Elite (invocações 0,45), Duelista (dano 0,25), Inabalável (vida 0,6),
+    Carniceiro (área 0,2), Atirador (cadência 0,25) e Mira firme (dano 0,3).
+  - **Estilos que ficavam para trás no nível 60:** Guardião arcano (vida 0,75) e Batedor (vida 0,35).
+  - **Arqueiro:** poder base de 88% (antes 95%); com mais Destreza logo cedo, ele limpava os comuns rápido demais.
+  - **Covis em grupo:** a Bruxa do Pântano foi para 3.750 de vida e o Dragão das Ruínas, para 4.400. A classe nos estilos
+    soma força nos níveis 18 a 28, onde o atributo antigo ainda não pesava.
+

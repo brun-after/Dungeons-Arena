@@ -25,7 +25,7 @@
     "hpMaxAbsoluto": null,
     "vidaPct": 120,
     "orcamentoEquipamento": 100,
-    "ordemReducao": ["dominio", "carisma", "sabedoria", "inteligencia", "destreza", "constituicao", "vontade"],
+    "ordemReducao": ["carisma", "sabedoria", "inteligencia", "destreza", "constituicao", "vontade"],
     "presetClasse": null
   },
   "loot": { "politica": "compartilhado", "janelaParticipacaoS": 15, "itens": true, "economiaDoSpawner": false },

@@ -29,7 +29,7 @@ export const textosEstilos = {
   'vinculo.ponta': '{nome}: {pct}% · resistência {res}%',
   'atualizacao.titulo': 'Seu personagem no sistema novo',
   'atualizacao.fechar': 'Fechar (a tela volta até você confirmar)',
-  'atualizacao.texto': 'Os atributos mudaram. A Força agora é Vontade; o dano vem do nível, da arma, dos itens e do atributo de classe; e cada ponto enche os estilos da sua classe no pentagrama. Todos os seus pontos voltaram para você montar a build: nível, itens, ouro e habilidades continuam os mesmos.',
+  'atualizacao.texto': 'Os atributos mudaram. A Força agora é Vontade; o dano vem do nível, da arma e dos itens; e cada ponto enche os estilos da sua classe no pentagrama. O atributo de classe deixou de existir: a classe agora cresce nos estilos, com uma melhoria a cada 5% de cada ponta. Todos os seus pontos voltaram para você montar a build: nível, itens, ouro e habilidades continuam os mesmos.',
   'atualizacao.orcamento': 'Antes: {antes} pontos. Agora: {agora} pontos, no orçamento novo (3 por nível até o 30 e 2 depois). O jogo foi recalibrado para esse orçamento, então a força do personagem fica a mesma.',
   'atualizacao.livres': 'Pontos livres: {n}',
   'atualizacao.menos': 'Tirar um ponto de {atributo}',

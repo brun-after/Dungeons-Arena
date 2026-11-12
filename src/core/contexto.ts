@@ -15,7 +15,6 @@ import type { RegrasDeEventos } from '../mundo/eventos-mundo';
 import type { Atributos } from '../entities/entidade';
 import type { RegrasItensGerados } from '../progression/gerar-item';
 import type { Conteudo } from './conteudo';
-import type { DominioDaClasse } from '../progression/dominio';
 import type { RegrasEstilos } from '../progression/estilos';
 import type { RegrasPoderBase } from '../combat/poder-base';
 import type { RegrasVinculo } from '../progression/vinculo';
@@ -352,11 +351,16 @@ export interface Balance {
     /** A passiva do Aventureiro, com o arremessável na mão principal. */
     aventureiro: { descontoPergaminhoPct: number; sortePergaminhoPct: number; duracaoInvocacaoPct: number; danoBasicoPct: number };
   };
-  /** Marco 28 (30/10/2026, D-127): o atributo de classe (progression/dominio.ts). */
+  /**
+   * Marco 28 (30/10/2026, D-127), refeito no marco 39 (12/11/2026, D-155): a classe que se manifesta nos estilos
+   * (progression/dominio.ts). Cada `degrauPct` de uma ponta do radar é um degrau das melhorias de classe daquele estilo;
+   * `tetos` limita a soma de cada chave entre os estilos.
+   */
   dominio: {
-    skillsPorPontoPct: number;
+    degrauPct: number;
+    skillsPorDegrauPct: number;
     semFamiliaridadePct: number;
-    classes: Readonly<Record<string, DominioDaClasse>>;
+    tetos: Readonly<Record<string, number>>;
     efeitos: {
       rastroIntervaloMs: number; rastroPct: number;
       ressonanciaRaio: number;
@@ -503,7 +507,8 @@ export interface Balance {
      * Marco 39 (D-148): o equipado vence o sem equipamento (`vitoriasMinPct`); a build focada e a dispersa ficam no mesmo
      * patamar (nenhuma vence sempre: `focadaMinPct` a `focadaMaxPct`), porque os estilos premiam os dois caminhos.
      */
-    build: { nivel: number; vitoriasMinPct: number; focadaMinPct: number; focadaMaxPct: number };
+    /** Marco 39 (D-153): `niveisDispersa`, os níveis em que a focada enfrenta a dispersa (o generalista não fica para trás). */
+    build: { nivel: number; niveisDispersa: number[]; vitoriasMinPct: number; focadaMinPct: number; focadaMaxPct: number };
     /** Marco 28 (D-127): a luta nos níveis altos e o tempo do 30 ao 100 (em vezes o do 1 ao 30). */
     nivelAlto: { niveis: number[]; vitoriasMinPct: number; tempoMinS: number; tempoMaxS: number; ritmoNiveis: number[]; razaoTempoMin: number; razaoTempoMax: number };
     /** Marco 30 (D-129): o ritmo das regiões do Mundo e o tempo dos covis de boss (tools/balanceamento/mundo.ts). */

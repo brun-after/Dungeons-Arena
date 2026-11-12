@@ -136,6 +136,7 @@ export const textosHabilidades = {
   'desc.escalaAtual': 'Agora: {partes}',
   'desc.escalaRolagem': '{v}% pelo nível',
   'desc.escalaClasse': '{v}% por {atributo}',
+  'desc.escalaClasseNome': 'classe nos estilos',
   'desc.escalaItens': '{v}% pelos itens',
   'desc.passiva': 'Passiva: vale enquanto você a conhece',
   'desc.nivelMinimo': 'A partir do nível {nivel}',

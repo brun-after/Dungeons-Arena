@@ -22,7 +22,7 @@ describe('Força › Vontade', () => {
   });
 
   it('a migração 28 › 29 troca a chave em toda entidade e na base da ficha, também nas fases visitadas (e as ressonâncias dão lugar aos estilos)', () => {
-    expect(VERSAO_SCHEMA).toBe(29);
+    expect(VERSAO_SCHEMA).toBe(30);
     const entidade = { atributos: { forca: 20, destreza: 10 }, bolsa: { atributosBase: { forca: 18, destreza: 10 } } };
     const r = obter(MIGRACOES[28])({ estado: { entidades: [entidade, { atributos: { forca: 11 } }] }, fasesVisitadas: { f1: { entidades: [entidade] } } });
     expect(r).toEqual({

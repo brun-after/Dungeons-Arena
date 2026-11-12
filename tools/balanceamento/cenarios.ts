@@ -75,20 +75,17 @@ export function jogadorTipico(ctx: ContextoSimulacao, classeId: string, nivel: n
     bolsa.atributosBase[a] += Math.floor(noPrincipal / principais.length) + (i < noPrincipal % principais.length ? 1 : 0);
   });
   bolsa.atributosBase.constituicao += pontos - noPrincipal;
-  // Marco 28 (D-127): acima do 30, o típico põe um terço dos pontos novos no atributo de classe (até o 30, nada muda).
-  const noDominio = Math.round(Math.max(0, pontos - pontosAteONivel(ctx.balance.xp.nivelPlenoDasClasses, ctx.balance.xp)) / 3);
-  bolsa.atributosBase.dominio += noDominio;
-  bolsa.atributosBase.constituicao -= noDominio;
   // D-075: redistribui excedentes do teto como o jogador pode fazer na ficha, sem desperdiçar pontos.
   // Marco 28 (D-127): o teto é nível + 20 (até 100), não mais o 30 fixo.
-  const teto = tetoDoAtributo(nivel, ctx.balance);
+  // Marco 39 (D-153): o teto de cada atributo também conta do valor inicial da classe nele.
+  const teto = (nome: keyof Atributos) => tetoDoAtributo(nivel, ctx.balance, classe.atributos[nome]);
   let excedentes = 0;
   for (const nome of Object.keys(bolsa.atributosBase) as (keyof Atributos)[]) {
-    excedentes += Math.max(0, bolsa.atributosBase[nome] - teto);
-    bolsa.atributosBase[nome] = Math.min(teto, bolsa.atributosBase[nome]);
+    excedentes += Math.max(0, bolsa.atributosBase[nome] - teto(nome));
+    bolsa.atributosBase[nome] = Math.min(teto(nome), bolsa.atributosBase[nome]);
   }
-  for (const nome of ['constituicao', 'sabedoria', 'destreza', 'inteligencia', 'vontade', 'carisma', 'dominio'] as const) {
-    const dar = Math.min(excedentes, teto - bolsa.atributosBase[nome]);
+  for (const nome of ['constituicao', 'sabedoria', 'destreza', 'inteligencia', 'vontade', 'carisma'] as const) {
+    const dar = Math.min(excedentes, teto(nome) - bolsa.atributosBase[nome]);
     bolsa.atributosBase[nome] += dar;
     excedentes -= dar;
   }

@@ -36,6 +36,20 @@ export interface Estilo {
    * das skills da etiqueta (`tag`; null = todas) com um modificador, e cobra `danoPct` por alvo (o orçamento se conserva).
    */
   forma?: FormaDoEstilo;
+  /** Marco 39 (12/11/2026, D-155): as melhorias de classe que o estilo traz, uma a cada degrau da ponta. */
+  melhorias: MelhoriaDeClasse[];
+}
+
+/**
+ * D-155: uma melhoria de classe. Do degrau `desde` em diante, a chave vale `base + porDegrau × degraus` (arredondada
+ * para baixo se `inteiro`). As chaves de fator (fúria, aura, servos...) são em %; as de marco, no valor do marco.
+ */
+export interface MelhoriaDeClasse {
+  chave: string;
+  porDegrau: number;
+  desde: number;
+  base: number;
+  inteiro: boolean;
 }
 
 export interface FormaDoEstilo {
@@ -45,6 +59,18 @@ export interface FormaDoEstilo {
 }
 
 export interface RegrasEstilos {
+  /**
+   * Marco 39 (12/11/2026, D-153): a inclinação. O estilo que lidera o radar ganha esta intensidade (em %) a mais, desde o
+   * nível 1: quem se dirige a um estilo o sente desde o primeiro ponto, e o generalista também tem o seu.
+   */
+  inclinacaoPct: number;
+  /**
+   * Marco 39 (12/11/2026, D-154): o foco. O quanto um estilo se destaca dos outros (a ponta dele menos a média das outras
+   * quatro, de 0 a 1) amplifica a marca dele: o maior componente de efeito cresce `focoMarcaPct` × foco e a mecânica
+   * própria (os ganchos), `focoGanchoPct` × foco. O generalista tem foco perto de zero e fica como está.
+   */
+  focoMarcaPct: number;
+  focoGanchoPct: number;
   /** D-152: a intensidade (em %) em que a forma desperta do estilo liga. */
   formaPct: number;
   /** Pontos acima de 10 que levam um estilo a 100% (90: de 10 a 100). */
@@ -80,7 +106,17 @@ export function lerEstilos(json: unknown): { estilos: Map<string, Estilo[]>; err
       if (!(COMPONENTES_DE_ESTILO as readonly string[]).includes(k)) l.erro(`${id}: efeito desconhecido "${k}"`);
       else efeitos[k as ComponenteDeEstilo] = l.numero(eo, k, { min: 0, max: 2 });
     }
-    const e: Estilo = { id, classe, nome: l.texto(o, 'nome'), pesos, efeitos, texto: l.texto(o, 'texto'), ganchos: lerGanchos(l, o.ganchos) };
+    const melhorias = (o.melhorias === undefined ? [] : l.lista(o, 'melhorias')).map((m): MelhoriaDeClasse => {
+      const mo = l.objeto(m, `${id}.melhorias`);
+      return {
+        chave: l.texto(mo, 'chave'),
+        porDegrau: l.numero(mo, 'porDegrau', { min: 0, max: 1000 }),
+        desde: mo.desde === undefined ? 1 : l.numero(mo, 'desde', { min: 1, max: 30 }),
+        base: mo.base === undefined ? 0 : l.numero(mo, 'base', { min: 0, max: 1000 }),
+        inteiro: mo.inteiro === true,
+      };
+    });
+    const e: Estilo = { id, classe, nome: l.texto(o, 'nome'), pesos, efeitos, texto: l.texto(o, 'texto'), ganchos: lerGanchos(l, o.ganchos), melhorias };
     if (o.forma !== undefined) {
       const f = l.objeto(o.forma, `${id}.forma`);
       e.forma = { tag: f.tag === undefined ? null : l.texto(f, 'tag'), mod: l.opcao(f, 'mod', MODIFICADORES), danoPct: l.numero(f, 'danoPct', { min: -90, max: 0 }) };
@@ -118,9 +154,28 @@ export interface RadarDeEstilos {
   base: number[];
   /** A camada dos itens (0 a `itemTetoPct`/100). */
   itens: number[];
-  /** O total de cada ponta (0 a 1 + `itemTetoPct`/100). */
+  /** O total de cada ponta (0 a 1 + `itemTetoPct`/100), com a inclinação na que lidera. */
   total: number[];
+  /** D-153: a ponta que lidera (a de maior base + itens; no empate, a primeira) e quanto a inclinação somou nela. */
+  lider: number;
+  inclinacao: number;
+  /** D-154: o foco de cada ponta (0 a 1): o quanto ela passa da média das outras. */
+  foco: number[];
   efeitos: EfeitosDeEstilo;
+}
+
+/** D-154: a marca do estilo, o componente de efeito em que ele é mais forte (o primeiro, no empate). */
+export function marcaDoEstilo(e: Estilo): ComponenteDeEstilo | null {
+  let melhor: ComponenteDeEstilo | null = null;
+  for (const [c, v] of Object.entries(e.efeitos) as [ComponenteDeEstilo, number][]) if (melhor === null || v > (e.efeitos[melhor] ?? 0)) melhor = c;
+  return melhor;
+}
+
+/** D-154: o foco de cada ponta: ela menos a média das outras, entre 0 e 1. */
+export function focoDasPontas(total: readonly number[]): number[] {
+  const n = total.length;
+  const soma = total.reduce((s, v) => s + v, 0);
+  return total.map((v) => (n > 1 ? Math.max(0, Math.min(1, v - (soma - v) / (n - 1))) : 0));
 }
 
 export function somarEfeitos(estilos: readonly Estilo[], intensidades: readonly number[]): EfeitosDeEstilo {
@@ -168,8 +223,22 @@ function calcularRadar(ctx: CtxEstilos, bolsa: Bolsa, efetivos: Atributos, nivel
   const regras = ctx.balance.estilos;
   const base = intensidadesBase(estilos, bolsa.atributosBase, regras);
   const itens = camadaDosItens(estilos, bolsa.atributosBase, efetivos, nivel, ctx.balance.xp.nivelMax, regras);
-  const total = base.map((v, k) => v + (itens[k] ?? 0));
-  return { estilos, base, itens, total, efeitos: somarEfeitos(estilos, total) };
+  // D-153: lidera a ponta que mais subiu pelos pontos postos (o rumo que o jogador escolheu); sem pontos, a que a classe
+  // já favorece. A inclinação não leva a parte dos pontos além de 100% (só os itens passam disso).
+  const daClasse = ctx.conteudo.classes.get(bolsa.classeId)?.atributos;
+  const postos = daClasse ? intensidadesBase(estilos, daClasse, regras).map((v, k) => (base[k] ?? 0) - v) : base;
+  const rumo = postos.some((v) => v > 1e-9) ? postos : base;
+  const lider = rumo.reduce((m, v, k) => (v > (rumo[m] ?? 0) + 1e-9 ? k : m), 0);
+  const inclinacao = Math.max(0, Math.min(regras.inclinacaoPct / 100, 1 - (base[lider] ?? 0)));
+  const total = base.map((v, k) => v + (itens[k] ?? 0) + (k === lider ? inclinacao : 0));
+  // D-154: a marca de cada estilo cresce com o foco dele.
+  const foco = focoDasPontas(total);
+  const efeitos = somarEfeitos(estilos, total);
+  estilos.forEach((e, k) => {
+    const marca = marcaDoEstilo(e);
+    if (marca) efeitos[marca] += (total[k] ?? 0) * (e.efeitos[marca] ?? 0) * (foco[k] ?? 0) * (regras.focoMarcaPct / 100);
+  });
+  return { estilos, base, itens, total, lider, inclinacao, foco, efeitos };
 }
 
 /** Os efeitos numéricos dos estilos da entidade (sem ficha: neutros). */
@@ -210,7 +279,8 @@ export function ganchosDosEstilos(ctx: CtxEstilos, e: Entidade): Gancho[] {
   const saida: Gancho[] = [];
   radar.estilos.forEach((est, k) => {
     for (const g of est.ganchos) {
-      const escalado = escalarGancho(g, Math.min(1, radar.total[k] ?? 0));
+      // D-154: a mecânica própria do estilo cresce com o foco (a chance passa de 100% da base, até o teto de 100%).
+      const escalado = escalarGancho(g, Math.min(1, radar.total[k] ?? 0) * (1 + ((radar.foco[k] ?? 0) * ctx.balance.estilos.focoGanchoPct) / 100));
       if (escalado) saida.push(escalado);
     }
   });

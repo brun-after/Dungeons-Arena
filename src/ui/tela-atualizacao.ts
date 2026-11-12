@@ -40,18 +40,18 @@ export function proporcaoDeAntes(ctx: Pick<ContextoSimulacao, 'conteudo' | 'bala
   const postos = Object.fromEntries(NOMES_ATRIBUTOS.map((a) => [a, Math.max(0, bolsa.atributosBase[a] - base[a])])) as Pontos;
   const soma = NOMES_ATRIBUTOS.reduce((s, a) => s + postos[a], 0);
   const novo = pontosDaAtualizacao({ nivel }, ctx);
-  const teto = tetoDoAtributo(nivel, ctx.balance);
+  const teto = (a: NomeAtributo) => tetoDoAtributo(nivel, ctx.balance, base[a]);
   const saida = Object.fromEntries(NOMES_ATRIBUTOS.map((a) => [a, 0])) as Pontos;
   if (soma <= 0) return saida;
   const partes = NOMES_ATRIBUTOS.map((a) => ({ a, v: (postos[a] * novo) / soma }));
   let usados = 0;
   for (const p of partes) {
-    saida[p.a] = Math.min(Math.floor(p.v), teto - base[p.a]);
+    saida[p.a] = Math.min(Math.floor(p.v), teto(p.a) - base[p.a]);
     usados += saida[p.a];
   }
   for (const p of [...partes].sort((x, y) => (y.v % 1) - (x.v % 1))) {
     if (usados >= novo) break;
-    if (base[p.a] + saida[p.a] < teto && p.v > 0) {
+    if (base[p.a] + saida[p.a] < teto(p.a) && p.v > 0) {
       saida[p.a]++;
       usados++;
     }
@@ -74,7 +74,7 @@ export function criarTelaAtualizacao(o: OpcoesTelaAtualizacao): { atualizar: () 
     const base = ctx.conteudo.classes.get(bolsa.classeId)?.atributos ?? bolsa.atributosBase;
     const total = pontosDaAtualizacao(j, ctx);
     const usados = NOMES_ATRIBUTOS.reduce((s, a) => s + r[a], 0);
-    const teto = tetoDoAtributo(j.nivel, ctx.balance);
+    const teto = (a: NomeAtributo) => tetoDoAtributo(j.nivel, ctx.balance, base[a]);
     const corpo = modal.corpo;
     corpo.replaceChildren();
     corpo.append(
@@ -93,7 +93,7 @@ export function criarTelaAtualizacao(o: OpcoesTelaAtualizacao): { atualizar: () 
       menos.addEventListener('click', () => { r[a]--; desenhar(j, bolsa); });
       const mais = el('button', 'botao-pequeno', '+');
       mais.type = 'button';
-      mais.disabled = usados >= total || base[a] + r[a] >= teto;
+      mais.disabled = usados >= total || base[a] + r[a] >= teto(a);
       mais.setAttribute('aria-label', t('atualizacao.mais', { atributo: nomeDoAtributo(a, bolsa.classeId) }));
       mais.addEventListener('click', () => { r[a]++; desenhar(j, bolsa); });
       const celula = el('td');

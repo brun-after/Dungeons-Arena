@@ -8,7 +8,7 @@ import type { Habilidade } from '../combat/habilidades';
 import { multiplicadorDosEstilos, poderBase } from '../combat/poder-base';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { Entidade } from '../entities/entidade';
-import { fatorDeSkillDeClasse } from './dominio';
+import { ehSkillDeClasse, fatorDeSkillDeClasse } from './dominio';
 import { efeitosDeEstiloDe } from './estilos';
 
 type Ctx = Pick<ContextoSimulacao, 'balance' | 'conteudo'>;
@@ -28,7 +28,7 @@ export function escalaDaHabilidade(ctx: Ctx, e: Entidade, hab: Pick<Habilidade, 
   const pct = (f: number) => Math.round((f - 1) * 100);
   const poder = poderBase(e.nivel, ctx.balance, e.bolsa ? ctx.conteudo.classes.get(e.bolsa.classeId)?.poderPct : undefined);
   return {
-    deClasse: classe > 1 || fatorDeSkillDeClasse(ctx, { ...e, atributos: { ...e.atributos, dominio: 100 } }, hab.id) > 1,
+    deClasse: ehSkillDeClasse(ctx, e, hab.id),
     rolagemPct: pct(poder.multRolagem),
     estilosPct: pct(multiplicadorDosEstilos(efeitosDeEstiloDe(ctx, e), hab)),
     classePct: pct(classe),

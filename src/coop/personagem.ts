@@ -54,10 +54,11 @@ const lista = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
 function conferirAtributos(b: Objeto, bolsa: Bolsa, nivel: number, ctx: ContextoSimulacao, classeBase: Bolsa['atributosBase']): void {
   const { minimo, maximo } = ctx.balance.atributos;
   // Marco 39 (D-146): a ficha antiga (Mundo, grupo, certificado) traz `forca`, que agora é a Vontade.
+  // D-155: e o atributo de classe, que saiu, é ignorado (a tela de atualização devolve os pontos).
   const atributos = vontadeNoLugarDaForca(b.atributosBase);
   const pedidos = ehObjeto(atributos) ? atributos : {};
   // Marco 28 (D-127): nenhum atributo-base acima de nível + folga (a base da classe sempre vale).
-  const teto = (nome: (typeof NOMES_ATRIBUTOS)[number]) => Math.max(classeBase[nome], Math.min(maximo, tetoDoAtributo(nivel, ctx.balance)));
+  const teto = (nome: (typeof NOMES_ATRIBUTOS)[number]) => Math.max(classeBase[nome], Math.min(maximo, tetoDoAtributo(nivel, ctx.balance, classeBase[nome])));
   for (const nome of NOMES_ATRIBUTOS) bolsa.atributosBase[nome] = limitar(inteiro(pedidos[nome]) ?? classeBase[nome], minimo, teto(nome));
   bolsa.pontosAtributo = Math.max(0, inteiro(b.pontosAtributo) ?? 0);
   const orcamento = NOMES_ATRIBUTOS.reduce((s, n) => s + classeBase[n], 0) + pontosAteONivel(nivel, ctx.balance.xp);
