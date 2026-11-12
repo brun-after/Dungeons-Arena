@@ -37,6 +37,8 @@ export interface RegrasRunas {
   escudoMs: number;
   /** O dano a mais da ultimate quando as duas skills do par estão com a runa dela, em %. */
   parPct: number;
+  /** O dano a mais do combo quando as duas skills da sequência estão com a mesma runa, em %. */
+  parComboPct: number;
 }
 
 export const FAIXAS_DE_VINCULO = 10;

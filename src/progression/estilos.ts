@@ -12,6 +12,7 @@
 // Os números do modelo foram medidos no simulador "Pentagrama de Estilos" (paridade ≤ 1,15× entre estilos). Puro.
 
 import type { ContextoSimulacao } from '../core/contexto';
+import { MODIFICADORES, type Modificador } from '../combat/habilidades';
 import { Leitor } from '../core/validar';
 import type { Atributos, Bolsa, Entidade } from '../entities/entidade';
 import { lerGanchos, type Gancho, type PassivosDeGancho } from './ganchos';
@@ -30,9 +31,22 @@ export interface Estilo {
   efeitos: Partial<EfeitosDeEstilo>;
   texto: string;
   ganchos: Gancho[];
+  /**
+   * Marco 39 (12/11/2026, D-152): a forma desperta. Da intensidade `formaPct` em diante, o estilo muda o comportamento
+   * das skills da etiqueta (`tag`; null = todas) com um modificador, e cobra `danoPct` por alvo (o orçamento se conserva).
+   */
+  forma?: FormaDoEstilo;
+}
+
+export interface FormaDoEstilo {
+  tag: string | null;
+  mod: Modificador;
+  danoPct: number;
 }
 
 export interface RegrasEstilos {
+  /** D-152: a intensidade (em %) em que a forma desperta do estilo liga. */
+  formaPct: number;
   /** Pontos acima de 10 que levam um estilo a 100% (90: de 10 a 100). */
   pontosMax: number;
   /** A camada dos itens: até tantos p.p. por ponta no nível máximo... */
@@ -67,6 +81,10 @@ export function lerEstilos(json: unknown): { estilos: Map<string, Estilo[]>; err
       else efeitos[k as ComponenteDeEstilo] = l.numero(eo, k, { min: 0, max: 2 });
     }
     const e: Estilo = { id, classe, nome: l.texto(o, 'nome'), pesos, efeitos, texto: l.texto(o, 'texto'), ganchos: lerGanchos(l, o.ganchos) };
+    if (o.forma !== undefined) {
+      const f = l.objeto(o.forma, `${id}.forma`);
+      e.forma = { tag: f.tag === undefined ? null : l.texto(f, 'tag'), mod: l.opcao(f, 'mod', MODIFICADORES), danoPct: l.numero(f, 'danoPct', { min: -90, max: 0 }) };
+    }
     estilos.set(classe, [...(estilos.get(classe) ?? []), e]);
   }
   for (const [classe, l5] of estilos) if (l5.length !== 5) l.erro(`${classe}: precisa de 5 estilos (tem ${String(l5.length)})`);
@@ -121,7 +139,7 @@ type CtxEstilos = Pick<ContextoSimulacao, 'conteudo' | 'balance'>;
  * nível e dos atributos, então fica guardado por ficha, catálogo e balance, com essa assinatura. A memória é fraca: some
  * com a ficha. Não muda o resultado, só evita refazer a conta.
  */
-interface Memoria { conteudo: object; balance: object; chave: string; radar: RadarDeEstilos | null; ganchos?: Gancho[] }
+interface Memoria { conteudo: object; balance: object; chave: string; radar: RadarDeEstilos | null; ganchos?: Gancho[]; formas?: FormaDoEstilo[] }
 const MEMORIA = new WeakMap<Bolsa, Memoria>();
 
 function assinatura(bolsa: Bolsa, efetivos: Atributos, nivel: number): string {
@@ -198,4 +216,15 @@ export function ganchosDosEstilos(ctx: CtxEstilos, e: Entidade): Gancho[] {
   });
   m.ganchos = saida;
   return saida;
+}
+
+/** D-152: as formas despertas que valem agora (a ponta do estilo em `formaPct` ou mais, com os itens). */
+export function formasDespertas(ctx: CtxEstilos, e: Pick<Entidade, 'bolsa' | 'atributos' | 'nivel'>): FormaDoEstilo[] {
+  if (!e.bolsa) return [];
+  const m = memorizado(ctx, e.bolsa, e.atributos, e.nivel);
+  if (m.formas) return m.formas;
+  const radar = m.radar;
+  const limite = ctx.balance.estilos.formaPct / 100;
+  m.formas = radar ? radar.estilos.flatMap((est, k) => (est.forma && (radar.total[k] ?? 0) >= limite ? [est.forma] : [])) : [];
+  return m.formas;
 }

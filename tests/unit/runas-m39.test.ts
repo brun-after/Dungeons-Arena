@@ -8,7 +8,9 @@ import { habilidadeDoAtor } from '../../src/combat/perfil';
 import { aplicarRuna, bonusDePar, escolherRuna, fracaoElemental, levaRuna, runaDoAtor, runasDisponiveis } from '../../src/combat/runas';
 import { lerComando } from '../../src/arena/protocolo';
 import { ticksDe } from '../../src/core/tempo';
-import { criarJogador } from '../../src/entities/fabrica';
+import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
+import { criarEstado } from '../../src/core/estado';
+import { fazerCombo } from '../../src/combat/combos';
 import { registrarUso } from '../../src/progression/vinculo';
 import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 
@@ -88,6 +90,24 @@ describe('runas nas skills de classe (D-151)', () => {
     expect(bonusDePar(ctx, g, { id: u.id, runa: 'fisico' }, 0)).toBe(r.parPct);
     expect(bonusDePar(ctx, g, { id: u.id, runa: 'fogo' }, 0)).toBe(0);
     expect(bonusDePar(ctx, g, { id: 'redemoinho', runa: 'fisico' }, 0)).toBe(0);
+  });
+
+  it('o combo com as duas skills na mesma runa bate mais; com runas diferentes, não', () => {
+    const estado = criarEstado({ semente: 7, faseId: 'teste' });
+    const g = jogador('guerreiro');
+    const alvo = criarInimigo(obter(CONTEUDO.presets.get('goblin')), 'a', 3, 2, ctx.balance);
+    estado.entidades.push(g, alvo);
+    const redemoinho = obter(habilidadeDoAtor(ctx, g, 'redemoinho', 0));
+    const fazer = () => {
+      g.ultimaHabilidade = { id: 'corrente', chave: 'corrente', tick: estado.tick, alvoId: alvo.id };
+      return obter(fazerCombo(estado, ctx, g, redemoinho, alvo, { x: 3, y: 2 }, [])).danoPct;
+    };
+    const mesma = fazer();
+    // A corrente com runa de gelo: as pontas do combo não combinam mais.
+    obter(g.bolsa).conhecidas.push({ id: 'corrente', rank: 1, caminhos: [] });
+    for (let i = 0; i < 6; i++) registrarUso(ctx, obter(g.bolsa), 'gelo', 0);
+    expect(escolherRuna(ctx, g, 'corrente', 'gelo', 0)).toBe(true);
+    expect(mesma - fazer()).toBeCloseTo(r.parComboPct);
   });
 
   it('o protocolo só aceita runas conhecidas', () => {

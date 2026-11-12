@@ -14,6 +14,7 @@ import type { FonteDeDano } from './dano';
 import { aplicarEfeito } from './efeitos';
 import { chebyshev } from './geometria';
 import type { Habilidade } from './habilidades';
+import { runaDoAtor } from './runas';
 import { normalizarEfeitos } from './normalizar-efeito';
 import { ehTipoEfeito, type EfeitoCanonico, type TipoEfeito } from './registro-efeitos';
 
@@ -117,6 +118,9 @@ export function lerCombos(json: unknown): { combos: Map<string, Combo>; erros: s
   return { combos, erros: l.erros };
 }
 
+/** Um bônus vazio (o par de runas do combo só soma dano). */
+const SEM_BONUS: BonusDeLancamento = { danoPct: 0, d20Minimo: 0, noAlvo: [], noProprio: [], emVolta: null, naMira: null };
+
 /** O que o combo muda no lançamento (null: não houve combo). */
 export interface EfeitoDoCombo {
   danoPct: number;
@@ -146,6 +150,8 @@ export function fazerCombo(
   const combo = u ? [...ctx.conteudo.combos.values()].find((c) => c.antes === u.id && c.depois === hab.id) : undefined;
   if (reconhecerSequencia && u && combo && estado.tick - u.tick <= ticksDe(combo.janelaMs) && !(combo.mesmoAlvo && alvo && u.alvoId && u.alvoId !== alvo.id)) {
     somar(combo);
+    // Marco 39 (12/11/2026, D-151): as duas pontas do combo com a mesma runa batem `parComboPct` a mais.
+    if (hab.runa && runaDoAtor(ctx, ator, combo.antes, estado.tick)?.runa === hab.runa) somar({ ...SEM_BONUS, danoPct: ctx.balance.habilidades.runas.parComboPct });
     saida.push({ t: 'comboFeito', tick: estado.tick, id: ator.id, combo: combo.id, alvoId: alvo?.id ?? null });
   }
   // Marco 18 (camada 6): com o buff certo ativo, a habilidade ganha o bônus da regra.
