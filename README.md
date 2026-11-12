@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.44 · **Data:** 12/11/2026
+**Versão do documento:** 3.45 · **Data:** 12/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.45 (12/11/2026)**: marco 39: a forma do estilo fica gradual. Ela aparece com 10% da ponta e cresce em 10 faixas até 100%, na mecânica e no visual (D-156).
 > - **3.44 (12/11/2026)**: marco 39: a forma desperta dos estilos e o par de runas nos combos (D-152); a inclinação, que faz o estilo escolhido se sentir desde o começo (D-153); o foco, que reforça a marca de quem se dirige a um estilo (D-154); e o atributo de classe trocado pela classe nos estilos, com uma melhoria a cada 5% de cada ponta (D-155).
 > - **3.43 (12/11/2026)**: marco 39: o personagem do nível 30 ao 100 (a Vontade no lugar da Força, pontos escassos com teto 10 + 2 × nível, o pentagrama de 5 estilos por classe, o poder base no dano, o vínculo elemental com resistências e penetração, as runas nas skills de classe e nas ultimates, a manifestação da runa no visual e a tela de atualização dos personagens antigos; D-145 a D-151).
 > - **3.42 (08/11/2026)**: marco 38: vilas com prédios (taverna, banco, mercado, forja e botica), andarilhos e escoltas, mercadores errantes, forja em graus com troféus de chefe e fusão elemental, pedra de retorno com círculo, save em toda região e a Travessia das Areias entre os reinos (D-142); habilidades por 35% FOR e 65% INT e o guerreiro que conjura andando (D-141).
@@ -317,8 +318,8 @@ toda região, e a Travessia das Areias liga os dois reinos a pé. O guerreiro co
 - A Força vira **Vontade**. Os pontos ficam escassos: 3 por nível até o 30 e 2 depois, com teto de 10 + 2 × nível.
 - Os atributos alimentam o **pentagrama**, com 5 estilos por classe; os itens são uma camada no radar.
 - O dano vem do **poder base**: nível, arma e itens.
-- O estilo que lidera ganha uma **inclinação** desde o nível 1, e a **forma desperta** (o estilo muda o comportamento
-  das skills) acende em 35%. O **foco** reforça a marca de quem se destaca num estilo; o generalista fica como está.
+- O estilo que lidera ganha uma **inclinação** desde o nível 1. A **forma do estilo** (eco, encadear, atravessar,
+  área maior) aparece com 10% da ponta e cresce em 10 faixas até 100%, na mecânica e no visual. O **foco** reforça a marca de quem se destaca num estilo; o generalista fica como está.
 - **A classe cresce nos estilos:** o atributo de classe saiu. A cada 5% de uma ponta, uma pequena melhoria de classe na
   direção do estilo (o Carniceiro alarga a aura, o Comandante ergue o estandarte, o Senhor da Horda chama mais servos).
 
@@ -340,4 +341,4 @@ toda região, e a Travessia das Areias liga os dois reinos a pé. O guerreiro co
   a build anterior nas proporções novas. Com a saída do atributo de classe, ela volta uma vez para quem já tinha passado
   por ela (os pontos dele também voltam).
 
-Detalhes em D-145 a D-155 e em [docs/BALANCEAMENTO.md](docs/BALANCEAMENTO.md) (172/172 metas).
+Detalhes em D-145 a D-156 e em [docs/BALANCEAMENTO.md](docs/BALANCEAMENTO.md) (172/172 metas).

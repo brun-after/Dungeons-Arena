@@ -3391,5 +3391,9 @@ dialog.mochila[open] { display: flex; flex-direction: column; }
 .dica-runa { flex-basis: 100%; opacity: 0.8; }
 
 /* Marco 39 (D-152): a forma desperta do estilo (apagada até o limite; acesa depois). */
-.estilo-forma { font-size: 0.85em; opacity: 0.6; margin-top: 0.15rem; }
-.estilo-forma.acesa { opacity: 1; color: var(--destaque); }
+.estilo-forma { font-size: 0.85em; opacity: 0.6; margin-top: 0.15rem; --forma: 0; }
+/* Marco 39 (12/11/2026, D-156): a forma cresce em 10 faixas; o texto ganha força e o medidor enche com ela. */
+.estilo-forma.acesa { opacity: calc(0.7 + 0.3 * var(--forma)); color: var(--destaque); text-shadow: 0 0 calc(6px * var(--forma)) color-mix(in srgb, var(--destaque) 60%, transparent); }
+.forma-medidor { display: inline-flex; gap: 2px; margin-right: 0.4rem; vertical-align: middle; }
+.forma-medidor i { width: 5px; height: 9px; border-radius: 1px; background: color-mix(in srgb, currentColor 22%, transparent); }
+.forma-medidor i.cheia { background: currentColor; box-shadow: 0 0 calc(5px * var(--forma)) currentColor; }

@@ -15,6 +15,7 @@ import type { ContextoSimulacao } from '../core/contexto';
 import { MODIFICADORES, type Modificador } from '../combat/habilidades';
 import { Leitor } from '../core/validar';
 import type { Atributos, Bolsa, Entidade } from '../entities/entidade';
+import { faixaDaForma } from '../combat/forma-do-estilo';
 import { lerGanchos, type Gancho, type PassivosDeGancho } from './ganchos';
 import { NOMES_ATRIBUTOS, type NomeAtributo } from './itens';
 
@@ -32,8 +33,9 @@ export interface Estilo {
   texto: string;
   ganchos: Gancho[];
   /**
-   * Marco 39 (12/11/2026, D-152): a forma desperta. Da intensidade `formaPct` em diante, o estilo muda o comportamento
-   * das skills da etiqueta (`tag`; null = todas) com um modificador, e cobra `danoPct` por alvo (o orçamento se conserva).
+   * Marco 39 (12/11/2026, D-152; gradual desde D-156): a forma do estilo. De `formaInicioPct` da ponta em diante, o
+   * estilo muda o comportamento das skills da etiqueta (`tag`; null = todas) com um modificador que cresce em faixas até
+   * `formaPlenaPct`, e cobra até `danoPct` por alvo, na fração da faixa (o orçamento se conserva).
    */
   forma?: FormaDoEstilo;
   /** Marco 39 (12/11/2026, D-155): as melhorias de classe que o estilo traz, uma a cada degrau da ponta. */
@@ -71,8 +73,10 @@ export interface RegrasEstilos {
    */
   focoMarcaPct: number;
   focoGanchoPct: number;
-  /** D-152: a intensidade (em %) em que a forma desperta do estilo liga. */
-  formaPct: number;
+  /** D-156: a forma do estilo aparece nesta intensidade (em %, faixa 1)... */
+  formaInicioPct: number;
+  /** ...e chega ao máximo (faixa 10) nesta. */
+  formaPlenaPct: number;
   /** Pontos acima de 10 que levam um estilo a 100% (90: de 10 a 100). */
   pontosMax: number;
   /** A camada dos itens: até tantos p.p. por ponta no nível máximo... */
@@ -194,7 +198,7 @@ type CtxEstilos = Pick<ContextoSimulacao, 'conteudo' | 'balance'>;
  * nível e dos atributos, então fica guardado por ficha, catálogo e balance, com essa assinatura. A memória é fraca: some
  * com a ficha. Não muda o resultado, só evita refazer a conta.
  */
-interface Memoria { conteudo: object; balance: object; chave: string; radar: RadarDeEstilos | null; ganchos?: Gancho[]; formas?: FormaDoEstilo[] }
+interface Memoria { conteudo: object; balance: object; chave: string; radar: RadarDeEstilos | null; ganchos?: Gancho[]; formas?: FormaAtiva[] }
 const MEMORIA = new WeakMap<Bolsa, Memoria>();
 
 function assinatura(bolsa: Bolsa, efetivos: Atributos, nivel: number): string {
@@ -288,13 +292,27 @@ export function ganchosDosEstilos(ctx: CtxEstilos, e: Entidade): Gancho[] {
   return saida;
 }
 
-/** D-152: as formas despertas que valem agora (a ponta do estilo em `formaPct` ou mais, com os itens). */
-export function formasDespertas(ctx: CtxEstilos, e: Pick<Entidade, 'bolsa' | 'atributos' | 'nivel'>): FormaDoEstilo[] {
+/** D-156: uma forma de estilo em curso e a faixa dela (1 a 10). */
+export interface FormaAtiva {
+  forma: FormaDoEstilo;
+  faixa: number;
+}
+
+/**
+ * D-156: as formas dos estilos que valem agora, cada uma na faixa da sua ponta (com os itens e a inclinação). Começa em
+ * `formaInicioPct` e cresce até `formaPlenaPct`.
+ */
+export function formasDosEstilos(ctx: CtxEstilos, e: Pick<Entidade, 'bolsa' | 'atributos' | 'nivel'>): FormaAtiva[] {
   if (!e.bolsa) return [];
   const m = memorizado(ctx, e.bolsa, e.atributos, e.nivel);
   if (m.formas) return m.formas;
   const radar = m.radar;
-  const limite = ctx.balance.estilos.formaPct / 100;
-  m.formas = radar ? radar.estilos.flatMap((est, k) => (est.forma && (radar.total[k] ?? 0) >= limite ? [est.forma] : [])) : [];
+  const r = ctx.balance.estilos;
+  m.formas = radar
+    ? radar.estilos.flatMap((est, k) => {
+        const faixa = faixaDaForma(radar.total[k] ?? 0, r.formaInicioPct / 100, r.formaPlenaPct / 100);
+        return est.forma && faixa > 0 ? [{ forma: est.forma, faixa }] : [];
+      })
+    : [];
   return m.formas;
 }

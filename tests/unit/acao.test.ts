@@ -149,7 +149,8 @@ describe('ciclo de uma ação (§2.7)', () => {
       a.tick([['j', { t: 'usarHabilidade', id: 'golpe_atordoante', alvo: 'b' }]]);
       for (let i = 0; i < 600 && a.de('impacto').length === 0 && a.de('esquivou').length === 0; i++) a.tick();
       if (a.de('impacto')[0]?.falha !== false) continue;
-      expect(a.de('efeitoAplicado')).toMatchObject([{ tipo: 'atordoar', alvoId: 'b' }]);
+      // Marco 39 (D-156): a forma do estilo pode somar o eco ao golpe; o atordoar vem nele.
+      expect(a.de('efeitoAplicado')).toEqual(expect.arrayContaining([expect.objectContaining({ tipo: 'atordoar', alvoId: 'b' })]));
       a.tick([['b', { t: 'mover', dir: 'E' }]]);
       a.ticks(40);
       expect(a.ent('b').x).toBe(4);

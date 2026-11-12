@@ -276,7 +276,7 @@
       ],
       "forma": {
         "mod": "atravessar",
-        "danoPct": -10,
+        "danoPct": -8,
         "tag": "projetil"
       },
       "melhorias": [
@@ -414,7 +414,7 @@
         "constituicao": 0.35
       },
       "efeitos": {
-        "area": 0.2,
+        "area": 0.12,
         "sustain": 0.15
       },
       "texto": "Cada inimigo atingido por golpe de contato cura até 1% da sua vida.",
@@ -858,7 +858,7 @@
       ],
       "forma": {
         "mod": "atravessar",
-        "danoPct": -10,
+        "danoPct": -8,
         "tag": "projetil"
       },
       "melhorias": [

@@ -174,6 +174,8 @@ export class EfeitosDeHabilidade {
       }
       // Marco 39 (D-151): a runa conta de que a skill é feita agora, na intensidade do vínculo.
       if (h.runa && h.faixaRuna !== undefined) this.o.diretor.runaNoAcerto(quem?.classeId ?? quem?.bolsa?.classeId, h.runa, h.faixaRuna, acerto, comParticulas);
+      // Marco 39 (D-156): a forma do estilo conta o que faz com o golpe, mais forte a cada faixa.
+      if (h.formas) this.o.diretor.formaNoAcerto(h.formas, acerto);
       if (ev.indice > 0) return;
       const agoraMs = agora();
       const camera = this.o.diretor.def(nome).camera ?? (v.camera === 'nenhum' ? null : v.camera);
@@ -285,6 +287,7 @@ export class EfeitosDeHabilidade {
       if (!pos || !h || !v) continue;
       // Marco 39 (D-151): o fio da runa na mão, além da conjuração da assinatura.
       if (h.runa && h.faixaRuna !== undefined) this.o.diretor.runaNaConjuracao(h.runa, h.faixaRuna, pos);
+      if (h.formas) this.o.diretor.formaNaConjuracao(h.formas, pos, v.cor);
       // D-124: a conjuração da assinatura (a mão em chamas, a geada, os arcos); sem ela, o preset antigo.
       if (this.o.diretor.conjurar(assinaturaDe(h), pos, v.cor)) continue;
       if (v.conjuracao) p.emitir(v.conjuracao, pos.x, pos.y, v.cor);
@@ -348,6 +351,8 @@ export class EfeitosDeHabilidade {
     };
     // Marco 24 (25/10/2026, D-098): o giro (Redemoinho) corre as lâminas da arma em volta de quem gira.
     if (h.visual?.animacao === 'giro') this.o.aoGirar?.(a.origem, v.cor);
+    // Marco 39 (D-156): o anel pesado da forma de área maior, por cima da área da assinatura.
+    if (h.formas) this.o.diretor.formaNaArea(h.formas, { chave: a.chave, atorId: a.atorId, origem: a.origem, mira: a.mira, centro, celulas, cor: v.cor, escala, tipoArea: h.tipoArea, raio: h.raioArea });
     // D-124: a área da assinatura (a bola de fogo voando, o meteoro, a nova, a chuva, o leque…).
     if (this.o.diretor.area(nome, { chave: a.chave, atorId: a.atorId, origem: a.origem, mira: a.mira, centro, celulas, cor: v.cor, escala, tipoArea: h.tipoArea, raio: h.raioArea }, h.visual?.variante)) return;
     if (h.visual?.animacao === 'giro') return;

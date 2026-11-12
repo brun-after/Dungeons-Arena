@@ -82,6 +82,8 @@ export function lancarProjetil(
       multCura: fonte.multCura,
       atravessa: !!carregado || hab.perfura || projeteisAtravessam(ator, estado.tick),
       ...(fonte.d20Minimo ? { d20Minimo: fonte.d20Minimo } : {}),
+      // Marco 39 (D-156): a forma gradual do atravessar passa por tantos alvos.
+      ...(hab.perfuraAlvos ? { perfuraExtra: hab.perfuraAlvos } : {}),
       atingidos: [],
     };
     prepararVariacao(p, hab, mira, graus, esperaAte);

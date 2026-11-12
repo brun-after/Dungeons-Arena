@@ -37,7 +37,8 @@ function cena(classe = 'guerreiro', nivel = 30) {
 describe('ajustes das classes (18/10/2026)', () => {
   it.each([[1,35],[2,32.5],[3,30],[4,27.5],[5,25],[15,25],[16,27],[17,29],[18,31],[19,33],[20,35],[30,35]])('Mago nível %i: afinidade %s sem duplicar elemento', (nivel, pct) => {
     const c = cena('mago', nivel);
-    expect(perfilPara(c.ctx, c.j, c.hab('bola_de_fogo'))).toMatchObject({ danoPct: pct, custoPct: -20 });
+    // Marco 39 (D-156): sem a forma do estilo que lidera (o custo dela é medido à parte).
+    expect(perfilPara(c.ctx, c.j, { ...c.hab('bola_de_fogo'), formas: [] })).toMatchObject({ danoPct: pct, custoPct: -20 });
   });
   it.each([1,5,10,15,20,25,30])('Guerreiro nível %i: contato absoluto e multiplicador separado', nivel => {
     const c = cena('guerreiro', nivel);

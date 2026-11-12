@@ -234,7 +234,8 @@ describe('progressão de habilidades', () => {
     // A barra usa a habilidade compilada no rank e caminho do personagem.
     c.ent('j').mana = 50;
     c.tick([['j', { t: 'usarHabilidade', id: 'bola_de_fogo', alvo: { x: 5, y: 5 } }]]);
-    expect(c.ent('j').acao?.chave).toBe('bola_de_fogo@3/amplo');
+    // Marco 39 (D-156): sem a parte da forma do estilo (`^mod`), que depende da build.
+    expect(c.ent('j').acao?.chave.replace(/\^[^!]*/, '')).toBe('bola_de_fogo@3/amplo');
     // Rank 4 pede nível 10.
     c.ticks(200);
     c.tick([['j', { t: 'subirRank', id: 'bola_de_fogo' }]]);

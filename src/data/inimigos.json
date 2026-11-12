@@ -518,7 +518,7 @@
     {
       "id": "dragao_das_ruinas",
       "nome": "Dragão das Ruínas",
-      "hpBase": 4400,
+      "hpBase": 4800,
       "hesitacaoS": 0.8,
       "deteccao": 9,
       "xp": 900,

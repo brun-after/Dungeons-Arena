@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.02 · **Data:** 12/11/2026
+**Versão:** 1.03 · **Data:** 12/11/2026
 
 > **Histórico**
+> - **1.03 (12/11/2026)**: D-156: a forma do estilo fica gradual. Ela aparece com 10% da ponta e cresce em 10 faixas até 100%, na mecânica, no custo e no visual, em vez de despertar inteira num limite.
 > - **1.02 (12/11/2026)**: D-153: a inclinação (o estilo que lidera sente-se desde o nível 1), a forma desperta em 35% e o teto pelo valor inicial da classe. D-154: o foco (a marca de cada estilo cresce quanto mais ele se destaca). D-155: o atributo de classe sai e a classe cresce nos estilos, um degrau a cada 5% de cada ponta.
 > - **1.01 (12/11/2026)**: D-152: a forma desperta dos estilos (o estilo muda o comportamento das skills da etiqueta, com dano por alvo menor). D-151: o par de runas nos combos.
 > - **1.00 (12/11/2026)**: D-151: as runas nas skills de classe e nas ultimates (a parte elemental de 20% a 60% pelo vínculo, a função secundária, o bônus de par e a runa que some).
@@ -4632,4 +4633,45 @@ agora para montar a build nova sem se sentir lesado.
   - **Arqueiro:** poder base de 88% (antes 95%); com mais Destreza logo cedo, ele limpava os comuns rápido demais.
   - **Covis em grupo:** a Bruxa do Pântano foi para 3.750 de vida e o Dragão das Ruínas, para 4.400. A classe nos estilos
     soma força nos níveis 18 a 28, onde o atributo antigo ainda não pesava.
+
+## D-156 — A forma do estilo, gradual (12/11/2026)
+
+- **Antes (D-152, com o limite de 35% da D-153):** a forma desperta ligava inteira quando a ponta passava do limite.
+  Abaixo dele, nada; acima, o modificador cheio.
+- **Agora ela se percebe desde 10% e se intensifica até 100%.** A forma tem 10 faixas: a faixa 1 em
+  `formaInicioPct` (10%) e a 10 em `formaPlenaPct` (100%), contando os itens e a inclinação. Assim, o estilo que lidera
+  já tem a faixa 1 no nível 1. A faixa vai na chave da skill (`^ecoar4`, como a runa) e a mecânica cresce com ela
+  (`combat/forma-do-estilo.ts`):
+
+  | Forma | Faixa 1 | Faixa 10 (igual ao modificador do equipamento) |
+  |---|---|---|
+  | Eco | repete o golpe com 5% do dano | 50% (5% por faixa) |
+  | Encadear | 1 salto com 5% | 2 saltos com 50% (o segundo da faixa 5; 5% por faixa) |
+  | Atravessar | passa por 1 alvo | por 4 (mais 1 a cada 3 faixas) |
+  | Área maior | dano ×1,025, conjuração ×1,05 | ×1,25 e ×1,5; o raio +1 vem na faixa 4 |
+
+- **O custo cresce junto:** o dano por alvo que a forma cobra é a fração da faixa do custo cheio (a faixa 5 cobra a
+  metade). O orçamento se conserva em todas as faixas.
+- **O que o equipamento dá vale inteiro.** A forma do mesmo modificador não entra, nem cobra. Com duas pontas no mesmo
+  modificador, vale a faixa maior.
+- **O visual conta o que a forma faz e cresce com ela** (`render/vfx/manifestacao-forma.ts`, feito à mão):
+  - **Eco:** na hora do eco, o golpe reaparece pálido e saem ondas de som do alvo; as ondas passam de 1 a 3, e nas
+    faixas altas o fantasma se repete.
+  - **Encadear:** elos giram em volta do alvo, mais e maiores a cada faixa; da faixa 5, a faísca do salto acende.
+  - **Atravessar:** o traço da flecha continua além do alvo, mais longo e claro; da faixa 5, ele arranca estilhaços.
+  - **Área maior:** na conjuração, a força se junta em anéis que fecham sobre a mão; no estouro, um anel pesado passa
+    da área; da faixa 5, ele racha o chão; da 8, a terra treme.
+- **Ficha:** cada forma tem um medidor de 10 faixas que enche e brilha mais. Ao lado, o efeito de agora (por exemplo,
+  "o golpe ecoa com 14% do dano"), ou, antes de 10%, onde ela começa e até onde vai.
+- **Correção no caminho:** a forma desperta antiga cobrava o custo mesmo quando a skill já tinha o modificador pelo
+  caminho. O Redemoinho "amplo", por exemplo, já é maior e pagava −20% sem ganhar nada. Agora a forma só entra, e só
+  cobra, quando muda a skill.
+- **Calibragem (172/172), provisória:** os números abaixo só mantêm as metas com as skills de hoje, que serão refeitas.
+  Eles devem ser recalibrados quando o catálogo novo entrar; a forma gradual em si não depende das skills.
+  - **Carniceiro:** a área do estilo foi para 0,12. Sem a cobrança indevida, o Guerreiro do nível 100 limpava os comuns
+    em 1,2 s.
+  - **Dragão das Ruínas:** 4.800 de vida, para o covil em grupo de 3.
+  - **Aura do Guerreiro:** o teto foi para +50%.
+  - **Atravessar:** o custo cheio foi para −8% (antes −10%). Nas faixas baixas, contra um alvo só, o tiro que passa
+    pagava sem ter o que atravessar.
 
