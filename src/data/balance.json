@@ -222,6 +222,7 @@
     "cascataDominacao": 1
   },
   "poderBase": { "curvaBonus": [[1, 14], [5, 28], [10, 42], [20, 54], [30, 65], [100, 86]], "rolagemPorNivelPct": 3, "potenciaPorNivelPct": 2, "potenciaMax": 1.6, "nivelPleno": 30, "acimaPct": 0, "suporteNaPotenciaPct": 50 },
+  "vinculo": { "barraPct": 50, "usoPct": 30, "itensPct": 20, "usoSaturacao": 12, "usoMeiaVidaS": 240, "fraquezaPct": 10, "resistenciaMaxPct": 30, "resistenciaMaxFisicoPct": 0, "expoente": 0.6, "penetracaoPct": 60 },
   "estilos": { "pontosMax": 90, "itemTetoPct": 20, "itemEscalaMinPct": 30, "despertarPct": 25 },
   "atributos": {
     "minimo": 1,

@@ -20,6 +20,7 @@ import { multiplicadorDosEstilos, poderBase } from '../combat/poder-base';
 import { EFEITOS_NEUTROS, radarDe } from '../progression/estilos';
 import { painelDeEstilos, previaDoPonto } from './radar-estilos';
 import { criarTelaAtualizacao } from './tela-atualizacao';
+import { painelDoVinculo } from './radar-vinculo';
 import { criarDicaAtributo, linhasDaDica, nomeDoAtributo, type DicaAtributo } from './dica-atributo';
 import { faixaDaFormula } from '../combat/dados';
 import { habilidadeDoAtor } from '../combat/perfil';
@@ -395,6 +396,9 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     // Marco 39 (12/11/2026, D-147): o pentagrama de estilos, desde o nível 2 (substitui as ressonâncias).
     const estilos = painelDeEstilos(ctx, bolsa, efetiva.atributos, j.nivel);
     if (estilos) corpo.append(estilos);
+    // Marco 39 (D-150): o eneágono do vínculo elemental, com a resistência de cada ponta.
+    const vinculo = painelDoVinculo(ctx, j, o.estado?.().tick ?? 0);
+    if (vinculo) corpo.append(vinculo);
     // Marco 17 (D-063): o que os atributos dão, para o jogador ver o efeito do que escolheu.
     const basico = habilidadeDoAtor(ctx, j, j.ataqueBasico);
     if (basico?.formulaDano) {

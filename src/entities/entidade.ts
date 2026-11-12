@@ -263,6 +263,8 @@ export interface Bolsa {
    * Ausente = anterior ao marco 39: o jogo mostra a tela de atualização, que devolve os pontos.
    */
   sistema?: number;
+  /** Marco 39 (D-150): o uso de cada elemento para o vínculo (valor no `tick`; esfria na leitura). */
+  vinculoUso?: Partial<Record<'fisico' | Elemento, { valor: number; tick: number }>>;
   /** Marco 18 (17/10/2026, D-068): a habilidade sendo estudada (aprender não é instantâneo); null = nenhuma. */
   estudo: Estudo | null;
   /** Marco 18 (D-070): a contagem de cada missão (as que zeram por fase usam `id@fase`) e as concluídas. */
@@ -643,6 +645,7 @@ function clonarBolsa(b: Bolsa): Bolsa {
     missoes: { ...b.missoes },
     missoesConcluidas: [...b.missoesConcluidas],
     diario: [...b.diario],
+    ...(b.vinculoUso ? { vinculoUso: Object.fromEntries(Object.entries(b.vinculoUso).map(([k, r]) => [k, { ...r }])) } : {}),
   };
 }
 

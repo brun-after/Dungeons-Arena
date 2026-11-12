@@ -16,7 +16,10 @@ test('ficha: a dica rápida do atributo e a aba Diário', async ({ page }) => {
   await mochila.locator('[data-chave="dica-inteligencia"]').click();
   const dica = mochila.locator('.dica-atributo');
   await expect(dica).toBeVisible();
-  await expect(dica).toContainText('Potência dos efeitos');
+  // Marco 39 (D-148): a Inteligência enche os estilos (o dano vem do poder base); a ficha mostra os dois radares.
+  await expect(dica).toContainText('pentagrama');
+  await expect(mochila.locator('.radar-estilos')).toHaveCount(2);
+  await expect(mochila.locator('.lista-estilos li[data-estilo]')).toHaveCount(5);
   await expect(dica).toContainText('Estudo de habilidades');
   await mochila.locator('[data-chave="dica-sabedoria"]').click();
   await expect(dica).toContainText('Armadilhas');

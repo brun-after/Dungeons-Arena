@@ -44,6 +44,7 @@ import { aoAcertarComFalcao, criticoDoFalcao, falcaoGuardiaoAbsorve } from './si
 import { aoAcertarMagia, multiplicadorDaEncarnacao } from './encarnacao-efeitos';
 import { aoFecharSequencia, efeitoDaSinergia } from './sinergias-passivas';
 import { vinculoDosMortos } from './necromancia';
+import { penetracaoPct } from '../progression/vinculo';
 
 export interface Impacto {
   acaoId: number;
@@ -76,9 +77,21 @@ export function comPotencia(ef: EfeitoCanonico, potencia: number): EfeitoCanonic
 }
 
 /** Multiplicador do dano recebido: exposto, resistência ao elemento e as sinergias. 0 = imune ao elemento. */
-function multiplicadorRecebido(estado: EstadoJogo, ctx: ContextoSimulacao, alvo: Entidade, hab: Habilidade, tick: number, sinergiaPct: number, ignorarPct = 0): number {
+/**
+ * Marco 39 (12/11/2026, D-150): a penetração do especialista fura a resistência do alvo ao próprio elemento e, além de
+ * 100%, a absorção: o multiplicador `1 − r` anda `pen` do caminho até 1 (a absorção de 50% com penetração de 60% vira
+ * 40% de dano).
+ */
+export function comPenetracao(resistencia: number, penPct: number): number {
+  // A imunidade exata (os Primordiais, 100%) não é furada: só cai pelo oposto.
+  if (penPct <= 0 || resistencia <= 0 || resistencia === 100) return resistencia;
+  const m = 1 - resistencia / 100;
+  return (1 - (m + (penPct / 100) * (1 - m))) * 100;
+}
+
+function multiplicadorRecebido(estado: EstadoJogo, ctx: ContextoSimulacao, alvo: Entidade, hab: Habilidade, tick: number, sinergiaPct: number, ignorarPct = 0, penPct = 0): number {
   // Marco 24 (D-095): o Zelo ignora parte da resistência (só a positiva).
-  const bruta = resistenciaPct(ctx, alvo, hab.elemento);
+  const bruta = comPenetracao(resistenciaPct(ctx, alvo, hab.elemento, tick), penPct);
   const resistencia = bruta > 0 && bruta < 100 ? bruta * (1 - ignorarPct / 100) : bruta;
   if (resistencia >= 100) return 0;
   return multiplicadorDanoRecebido(alvo, tick) * (1 - resistencia / 100) * (1 + sinergiaPct / 100) * (1 - auraDeDefesaPct(estado, ctx, alvo) / 100);
@@ -147,10 +160,13 @@ export function aplicarImpacto(
     // Marco 18: o dano extra das sinergias cresce com a potência (Inteligência) de quem lança.
     const extraPct = sinergias.reduce((s, x) => s + x.danoExtraPct, 0) * fonte.potencia;
     // Marco 23 (D-092): o inimigo afim absorve o próprio elemento — o golpe rola igual, mas cura em vez de ferir.
-    const absorve = absorcaoPct(ctx, alvo, hab.elemento);
+    // Marco 39 (D-150): a penetração do especialista no próprio elemento fura parte da absorção.
+    const pen = penetracaoPct(ctx, atacante, hab.elemento, tick);
+    const absorvido = absorcaoPct(ctx, alvo, hab.elemento);
+    const absorve = absorvido > 0 ? Math.max(0, comPenetracao(100 + absorvido, pen) - 100) : 0;
     // Marco 25 (25/10/2026, D-102): entre personagens, as skills de classe batem menos no modo que pede (arena).
     const pvp = atacante?.bolsa && alvo.bolsa && ehDeAlgumaClasse(ctx, hab.id) ? fatorDeClasseEntrePersonagens(ctx.modo) : 1;
-    const recebido = (absorve > 0 ? absorve / 100 : multiplicadorRecebido(estado, ctx, alvo, hab, tick, extraPct, resistenciaIgnorada(ctx, atacante)) * multiplicadorMarco24(ctx, atacante, alvo, hab, costas, tick)) * fatorDoGolpe(estado, ctx, fonte, alvo) * protecaoInicial(estado, ctx, alvo, atacante) * pvp;
+    const recebido = (absorve > 0 ? absorve / 100 : multiplicadorRecebido(estado, ctx, alvo, hab, tick, extraPct, resistenciaIgnorada(ctx, atacante), pen) * multiplicadorMarco24(ctx, atacante, alvo, hab, costas, tick)) * fatorDoGolpe(estado, ctx, fonte, alvo) * protecaoInicial(estado, ctx, alvo, atacante) * pvp;
     const r = resolverGolpe(
       estado.rng,
       hab.formulaDano,

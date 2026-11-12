@@ -58,7 +58,7 @@ export function processarClima(estado: EstadoJogo, ctx: ContextoSimulacao, saida
   if (!pulso || !ehTipoEfeito(pulso.tipo)) return;
   const ef = construirEfeito(pulso.tipo, { duracaoMs: pulso.duracaoMs, valor: pulso.valor, pct: pulso.pct });
   for (const e of estado.entidades) {
-    if (!vivo(e) || !e.bolsa || resistenciaPct(ctx, e, c.elemento) >= b.resistenciaImunePct) continue;
+    if (!vivo(e) || !e.bolsa || resistenciaPct(ctx, e, c.elemento, estado.tick) >= b.resistenciaImunePct) continue;
     // Sem aviso a cada pulso (o ícone do estado basta; o clima já foi anunciado ao entrar).
     aplicarEfeito(estado, ctx, e, ef, { id: DONO_FASE, x: e.x, y: e.y }, null, saida, false);
   }

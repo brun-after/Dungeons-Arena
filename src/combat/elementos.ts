@@ -11,6 +11,7 @@ import { PRESETS_VISUAIS, type PresetVisual } from './habilidades';
 import type { EfeitoCanonico, TipoEfeito } from './registro-efeitos';
 import { resistenciaDaAfinidade } from './afinidade';
 import { passivosDe } from '../progression/ganchos-do-portador';
+import { resistenciaPeloVinculo } from '../progression/vinculo';
 
 export const ELEMENTOS = ['fogo', 'gelo', 'raio', 'veneno', 'psiquico', 'terra', 'trevas', 'sagrado'] as const;
 export type Elemento = (typeof ELEMENTOS)[number];
@@ -80,14 +81,17 @@ export function lerElementos(json: unknown): { elementos: Map<Elemento, Definica
  * Resistência do alvo ao elemento, em % (−100 a 100; 100 = imune), pelo preset. Marco 23 (D-092): a afinidade do
  * inimigo decide antes (passa de 100 no próprio elemento: o golpe vira cura, combat/golpe.ts).
  */
-export function resistenciaPct(ctx: ContextoSimulacao, alvo: Entidade, elemento: Elemento | null): number {
-  if (!elemento) return 0;
+export function resistenciaPct(ctx: ContextoSimulacao, alvo: Entidade, elemento: Elemento | null, tick?: number): number {
+  // Marco 39 (12/11/2026, D-150): o vínculo de quem tem ficha resiste (ou é fraco) a cada elemento, o Físico incluído
+  // (o golpe sem elemento); fora do golpe (sem `tick`), não conta.
+  const doVinculo = tick === undefined ? 0 : resistenciaPeloVinculo(ctx, alvo, elemento, tick);
+  if (!elemento) return Math.min(90, doVinculo);
   const daAfinidade = resistenciaDaAfinidade(ctx, alvo, elemento);
   if (daAfinidade !== null) return daAfinidade;
   const doPreset = ctx.conteudo.presets.get(alvo.preset)?.resistencias[elemento] ?? 0;
   // Marco 18 (D-069): o equipamento resiste a todo elemento ou a um só.
   const doEquipamento = alvo.bolsa ? passivosDe(ctx, alvo).resistencias.filter((r) => r.elemento === null || r.elemento === elemento).reduce((s, r) => s + r.pct, 0) : 0;
-  return Math.min(90, doPreset + doEquipamento);
+  return Math.min(90, doPreset + doEquipamento + doVinculo);
 }
 
 export interface Sinergia {

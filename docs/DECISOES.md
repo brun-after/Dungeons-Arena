@@ -3,7 +3,7 @@
 **Versão:** 0.99 · **Data:** 12/11/2026
 
 > **Histórico**
-> - **0.99 (12/11/2026)**: D-147 (pontos escassos, teto 10 + 2 × nível e o pentagrama de estilos no lugar das ressonâncias) e D-148 (poder base no dano de quem tem ficha, os efeitos dos estilos no combate e a calibragem). D-149: a tela de atualização dos personagens antigos. D-146: a Força vira Vontade (save 29, a ficha antiga e a marca do sistema). D-145: marco 39, o nível 100 sem travas (ids de item e de skill gerada, recompensa de missão) e o loot do inimigo renascido no Mundo.
+> - **0.99 (12/11/2026)**: D-147 (pontos escassos, teto 10 + 2 × nível e o pentagrama de estilos no lugar das ressonâncias) e D-148 (poder base no dano de quem tem ficha, os efeitos dos estilos no combate e a calibragem). D-149: a tela de atualização dos personagens antigos. D-150: o vínculo elemental (eneágono), as resistências e a penetração. D-146: a Força vira Vontade (save 29, a ficha antiga e a marca do sistema). D-145: marco 39, o nível 100 sem travas (ids de item e de skill gerada, recompensa de missão) e o loot do inimigo renascido no Mundo.
 > - **0.98 (09/11/2026)**: D-144: estabilidade e ajustes de jogo do Mundo (viagem entre salas sem queda, perseguição, lojas, troca, invocações, alvo dos buffs, descrições).
 > - **0.97 (08/11/2026)**: D-141 (habilidades por 35% FOR e 65% INT; o guerreiro conjura andando e encadeia com o básico) e D-142 (marco 38: prédios das vilas, andarilhos, escolta, errantes, forja em graus, troféus, fusão, pedra de retorno com círculo, save em toda região e o deserto entre os reinos).
 > - **0.96 (08/11/2026)**: D-140: o Mundo sem a fadiga de XP por fase (só a diferença de nível reduz o XP das criaturas inferiores).
@@ -4445,4 +4445,28 @@ agora para montar a build nova sem se sentir lesado.
 - **Comando `atualizarSistema`** (aceito pela rede em todos os modos). A simulação confere cada ponto (teto e
   orçamento); o que sobrar fica livre, e o personagem recebe a marca. O protocolo recusa atributo desconhecido ou valor
   que não seja inteiro e não negativo. No Mundo, quem grava é o servidor, como qualquer mudança da ficha.
+
+## D-150 — O vínculo elemental: o eneágono, as resistências e a penetração (12/11/2026)
+
+- **Nome.** "Afinidade" já é o elemento dos inimigos (D-092) e "sintonia" as famílias de skills (D-095); a afinidade
+  elemental do personagem se chama **vínculo** (`progression/vinculo.ts`, `balance.vinculo`).
+- **Nove pontas independentes:** o Físico (o golpe sem elemento) e os oito elementos. Cada ponta vai de 0 a 1 e soma a
+  barra (50%: a fração das teclas com skills do elemento), o uso (30%: um contador por elemento que sobe a cada skill
+  usada, satura em 12 usos e cai pela metade a cada 240 s parado, calculado na leitura) e os itens (20%: a fração das
+  peças equipadas com o elemento). O básico não conta como uso.
+- **Resistência pelo vínculo:** `−10% + 40% × vínculo^0,6`, somada à do preset e à do equipamento, com o teto de 90%.
+  Sem vínculo com um elemento, o personagem leva 10% a mais dele; o generalista fica perto do neutro; o especialista
+  resiste 30%. **O Físico não dá fraqueza nem resistência:** quase todo inimigo bate físico, e com 8% de teto o
+  Aventureiro já passava da meta de quanto aguenta (9 golpes contra 6 a 8).
+- **Penetração no próprio elemento:** `60% × vínculo^1,5`. Fura a resistência positiva do alvo e, além de 100%, a
+  absorção dos inimigos afins (a absorção de 50% vira 40% de dano no especialista cheio). A imunidade exata (os
+  Primordiais) não é furada: eles continuam caindo só pelo oposto. Sem a penetração, o simulador mostrava o especialista
+  com piso de 0,22 contra quem absorve o seu elemento.
+- **Clima:** a resistência do vínculo conta para o pulso do clima (o especialista no elemento da região não sofre o
+  pulso, como quem tem 20% do equipamento).
+- **Ficha:** o eneágono ao lado do pentagrama, com o vínculo e a resistência de cada ponta.
+- **O que fica para as skills (próximas etapas):** a parte elemental das skills de classe pela runa, o bônus de par nas
+  ultimates e combos e o visual que cresce com o vínculo.
+- **Desempenho:** o vínculo fica guardado por ficha (memória fraca), com a assinatura da barra, do equipado, do uso e do
+  tick.
 

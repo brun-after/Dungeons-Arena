@@ -18,6 +18,7 @@ import type { Conteudo } from './conteudo';
 import type { DominioDaClasse } from '../progression/dominio';
 import type { RegrasEstilos } from '../progression/estilos';
 import type { RegrasPoderBase } from '../combat/poder-base';
+import type { RegrasVinculo } from '../progression/vinculo';
 
 /** Marco 24 (24/10/2026, D-094): os momentos de cada classe que enchem o medidor da ultimate (balance.ultimate.classe). */
 export type MomentoCargaClasse = 'furiaCheia' | 'encarnacao' | 'miraFirme' | 'servoCaiu' | 'falcao';
@@ -250,6 +251,8 @@ export interface Balance {
     rampaMaxPct: number;
     cascataDominacao: number;
   };
+  /** Marco 39 (D-150): o vínculo elemental do personagem (progression/vinculo.ts). */
+  vinculo: RegrasVinculo;
   /** Marco 39 (D-148): o poder base do golpe de quem tem ficha (combat/poder-base.ts). */
   poderBase: RegrasPoderBase;
   /** Marco 39 (D-147): o pentagrama de estilos (progression/estilos.ts) e o aviso de estilo desperto. */
