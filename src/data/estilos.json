@@ -29,7 +29,12 @@
             }
           }
         }
-      ]
+      ],
+      "forma": {
+        "mod": "maior_e_mais_lenta",
+        "danoPct": -20,
+        "tag": "area"
+      }
     },
     {
       "id": "ocultista",
@@ -51,7 +56,12 @@
             "potenciaPct": 30
           }
         }
-      ]
+      ],
+      "forma": {
+        "mod": "ecoar",
+        "danoPct": -25,
+        "tag": "magico"
+      }
     },
     {
       "id": "encantador",
@@ -129,7 +139,12 @@
             "herdarElemento": 5000
           }
         }
-      ]
+      ],
+      "forma": {
+        "mod": "encadear",
+        "danoPct": -15,
+        "tag": "contato"
+      }
     },
     {
       "id": "atirador",
@@ -159,7 +174,12 @@
             "raio": 3
           }
         }
-      ]
+      ],
+      "forma": {
+        "mod": "encadear",
+        "danoPct": -15,
+        "tag": "projetil"
+      }
     },
     {
       "id": "mira_firme",
@@ -187,7 +207,12 @@
             }
           }
         }
-      ]
+      ],
+      "forma": {
+        "mod": "atravessar",
+        "danoPct": -10,
+        "tag": "projetil"
+      }
     },
     {
       "id": "inabalavel",
@@ -263,7 +288,12 @@
             "herdarElemento": 5000
           }
         }
-      ]
+      ],
+      "forma": {
+        "mod": "maior_e_mais_lenta",
+        "danoPct": -20,
+        "tag": "area"
+      }
     },
     {
       "id": "carniceiro",
@@ -288,7 +318,12 @@
             "curarPct": 1
           }
         }
-      ]
+      ],
+      "forma": {
+        "mod": "maior_e_mais_lenta",
+        "danoPct": -20,
+        "tag": "area"
+      }
     },
     {
       "id": "duelista",
@@ -313,7 +348,12 @@
             "recargaClasseMs": 500
           }
         }
-      ]
+      ],
+      "forma": {
+        "mod": "ecoar",
+        "danoPct": -25,
+        "tag": "contato"
+      }
     },
     {
       "id": "runico",
@@ -344,7 +384,12 @@
             }
           }
         }
-      ]
+      ],
+      "forma": {
+        "mod": "encadear",
+        "danoPct": -15,
+        "tag": "contato"
+      }
     },
     {
       "id": "comandante",
@@ -468,7 +513,12 @@
             }
           }
         }
-      ]
+      ],
+      "forma": {
+        "mod": "maior_e_mais_lenta",
+        "danoPct": -20,
+        "tag": "area"
+      }
     },
     {
       "id": "pacto_de_sangue",
@@ -515,7 +565,11 @@
             "recargaClasseMs": 1000
           }
         }
-      ]
+      ],
+      "forma": {
+        "mod": "ecoar",
+        "danoPct": -25
+      }
     },
     {
       "id": "mestre_de_feras",
@@ -559,7 +613,12 @@
             "escudoPct": 40
           }
         }
-      ]
+      ],
+      "forma": {
+        "mod": "atravessar",
+        "danoPct": -10,
+        "tag": "projetil"
+      }
     },
     {
       "id": "implacavel",
@@ -586,7 +645,12 @@
             }
           }
         }
-      ]
+      ],
+      "forma": {
+        "mod": "ecoar",
+        "danoPct": -25,
+        "tag": "contato"
+      }
     },
     {
       "id": "sobrevivente",
@@ -630,7 +694,12 @@
             "estudoPct": 25
           }
         }
-      ]
+      ],
+      "forma": {
+        "mod": "maior_e_mais_lenta",
+        "danoPct": -20,
+        "tag": "area"
+      }
     }
   ]
 }

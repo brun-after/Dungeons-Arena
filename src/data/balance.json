@@ -223,7 +223,7 @@
   },
   "poderBase": { "curvaBonus": [[1, 14], [5, 28], [10, 42], [20, 54], [30, 65], [100, 86]], "rolagemPorNivelPct": 3, "potenciaPorNivelPct": 2, "potenciaMax": 1.6, "nivelPleno": 30, "acimaPct": 0, "suporteNaPotenciaPct": 50 },
   "vinculo": { "barraPct": 50, "usoPct": 30, "itensPct": 20, "usoSaturacao": 12, "usoMeiaVidaS": 240, "fraquezaPct": 10, "resistenciaMaxPct": 30, "resistenciaMaxFisicoPct": 0, "expoente": 0.6, "penetracaoPct": 60 },
-  "estilos": { "pontosMax": 90, "itemTetoPct": 20, "itemEscalaMinPct": 30, "despertarPct": 25 },
+  "estilos": { "pontosMax": 90, "itemTetoPct": 20, "itemEscalaMinPct": 30, "despertarPct": 25, "formaPct": 60 },
   "atributos": {
     "minimo": 1,
     "maximo": 100,
@@ -255,7 +255,7 @@
     "pontosPorNivel": 1,
     "estudo": { "B": 900000, "A": 1800000, "S": 3600000, "reducaoPorIntPct": 2, "reducaoMaxPct": 40 },
     "velocidadeConjurandoLenta": 0.5,
-    "runas": { "vinculoMinPct": 1, "fracaoMinPct": 20, "fracaoMaxPct": 60, "duracaoMinPct": 50, "curaSagradoPct": 25, "escudoBase": 4, "escudoPorFaixa": 1.2, "escudoMs": 6000, "parPct": 15 },
+    "runas": { "vinculoMinPct": 1, "fracaoMinPct": 20, "fracaoMaxPct": 60, "duracaoMinPct": 50, "curaSagradoPct": 25, "escudoBase": 4, "escudoPorFaixa": 1.2, "escudoMs": 6000, "parPct": 15, "parComboPct": 10 },
     "rankMax": 5,
     "ranksEvolucao": [3, 5],
     "ranks": [

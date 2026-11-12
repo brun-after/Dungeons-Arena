@@ -12,6 +12,8 @@ import type { DefinicaoHabilidade, Habilidade, Modificador, Passiva, Variante } 
 import { furiaAtual } from './furia';
 import { modificadoresDosConjuntos } from '../progression/ganchos-do-portador';
 import { sintoniaDe } from '../progression/sintonia';
+import { formasDespertas } from '../progression/estilos';
+import { lerChave } from './chave-habilidade';
 import { bonusDePar, runaDoAtor, ultimoTickDeUso } from './runas';
 
 export type ContextoPerfil = Pick<ContextoSimulacao, 'conteudo' | 'balance'>;
@@ -66,6 +68,8 @@ export function chaveDoAtor(ctx: ContextoPerfil, ator: Entidade, id: string, tic
   }
   // Marco 18 (D-069): os conjuntos completos também dão modificadores (a Vigília do caçador faz as flechas ecoarem).
   for (const m of modificadoresDosConjuntos(ctx, bolsa)) if ((m.tag === null || tags.includes(m.tag)) && !mods.includes(m.mod)) mods.push(m.mod);
+  // Marco 39 (D-152): a forma desperta dos estilos (o que já vem do equipamento não se repete).
+  for (const f of formasDespertas(ctx, ator)) if ((f.tag === null || tags.includes(f.tag)) && !mods.includes(f.mod)) mods.push(f.mod);
   // Marco 39 (D-151): a runa do encaixe (sem tick, vale o último uso registrado, como na ficha).
   const runa = runaDoAtor(ctx, ator, id, tick ?? ultimoTickDeUso(bolsa));
   return formatarChave({ id, rank: conhecida?.rank ?? 1, caminhos: conhecida?.caminhos ?? [], mods, variantes: variantesDoAtor(ctx, ator, definicaoDe(ctx, id), tick), ...(runa && { runa }) });
@@ -146,6 +150,9 @@ export function perfilPara(ctx: ContextoPerfil, ator: Entidade, hab: Habilidade)
     p.custoPct += f.custoPct;
     p.recargaPct += f.recargaPct;
   }
+  // Marco 39 (D-152): a forma desperta cobra dano por alvo quando o modificador dela entrou de fato na skill.
+  const aplicados = lerChave(hab.chave)?.mods ?? [];
+  for (const f of formasDespertas(ctx, ator)) if ((f.tag === null || hab.tags.includes(f.tag)) && aplicados.includes(f.mod)) p.danoPct += f.danoPct;
   // Marco 39 (D-151): o bônus de par da ultimate com a runa das duas skills do par.
   p.danoPct += bonusDePar(ctx, ator, hab, ultimoTickDeUso(bolsa));
   p.custoPct = Math.max(-90, p.custoPct);

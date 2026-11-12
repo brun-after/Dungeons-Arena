@@ -3387,3 +3387,7 @@ dialog.mochila[open] { display: flex; flex-direction: column; }
 .encaixe-runa { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin-top: 0.35rem; }
 .seletor-runa { background: var(--fundo-campo, #1d1a17); color: inherit; border: 1px solid var(--borda, #5a4a3a); border-radius: 4px; padding: 0.15rem 0.35rem; font: inherit; }
 .dica-runa { flex-basis: 100%; opacity: 0.8; }
+
+/* Marco 39 (D-152): a forma desperta do estilo (apagada até o limite; acesa depois). */
+.estilo-forma { font-size: 0.85em; opacity: 0.6; margin-top: 0.15rem; }
+.estilo-forma.acesa { opacity: 1; color: var(--destaque); }

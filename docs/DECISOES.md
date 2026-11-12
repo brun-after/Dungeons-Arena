@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.00 · **Data:** 12/11/2026
+**Versão:** 1.01 · **Data:** 12/11/2026
 
 > **Histórico**
+> - **1.01 (12/11/2026)**: D-152: a forma desperta dos estilos (o estilo muda o comportamento das skills da etiqueta, com dano por alvo menor). D-151: o par de runas nos combos.
 > - **1.00 (12/11/2026)**: D-151: as runas nas skills de classe e nas ultimates (a parte elemental de 20% a 60% pelo vínculo, a função secundária, o bônus de par e a runa que some).
 > - **0.99 (12/11/2026)**: D-147 (pontos escassos, teto 10 + 2 × nível e o pentagrama de estilos no lugar das ressonâncias) e D-148 (poder base no dano de quem tem ficha, os efeitos dos estilos no combate e a calibragem). D-149: a tela de atualização dos personagens antigos. D-150: o vínculo elemental (eneágono), as resistências e a penetração. D-146: a Força vira Vontade (save 29, a ficha antiga e a marca do sistema). D-145: marco 39, o nível 100 sem travas (ids de item e de skill gerada, recompensa de missão) e o loot do inimigo renascido no Mundo.
 > - **0.98 (09/11/2026)**: D-144: estabilidade e ajustes de jogo do Mundo (viagem entre salas sem queda, perseguição, lojas, troca, invocações, alvo dos buffs, descrições).
@@ -4495,8 +4496,8 @@ agora para montar a build nova sem se sentir lesado.
   terra deixam um escudo de `4 + 1,2 × faixa` por 6 s; as outras runas só dão o elemento.
 - **Chave:** `!<runa><faixa>` no fim da chave da skill (`redemoinho@2!gelo7`), para a memória das skills compiladas
   continuar valendo; o resto da compilação não muda.
-- **Bônus de par:** a ultimate bate 15% a mais quando as duas skills do par estão com a runa dela. Os combos (D-097)
-  ficam sem bônus de runa por enquanto: eles já premiam a ordem das skills, e o simulador não mede combos por runa.
+- **Bônus de par:** a ultimate bate 15% a mais quando as duas skills do par estão com a runa dela. O combo de sequência
+  (D-068) bate 10% a mais quando a primeira e a última skill estão com a mesma runa.
 - **Visual (narrativo):** a assinatura da skill continua contando o que ela é; por cima, a manifestação da runa
   (`render/vfx/manifestacao-runa.ts`) conta de que ela é feita agora. Ela tem duas camadas feitas à mão:
   - a matéria de cada um dos 9 elementos, com o que ele deixa no mundo;
@@ -4508,3 +4509,24 @@ agora para montar a build nova sem se sentir lesado.
   treme. O que dura no alvo é a aura do estado, que vale enquanto ele vale (`materiais.ts`).
 - **Calibragem:** a parte neutra pesa menos as resistências da Bruxa do Pântano (psíquico 50%), e o covil dela em grupo
   de 3 passou a cair em 29 s (meta 30–60 s; antes 30,4 s). A vida dela subiu de 2.800 para 3.100: 147/147 metas.
+
+## D-152 — A forma desperta dos estilos (12/11/2026)
+
+- **O estilo também muda o comportamento.** Na matriz do documento de design, o estilo é o dono do comportamento da
+  skill. Os efeitos numéricos e os ganchos dos estilos (D-147) não mudavam a forma dela; a forma desperta muda.
+- **Como funciona:** cada estilo de ataque tem uma forma (`estilos.json → forma`), que é um modificador nas skills de uma
+  etiqueta. Ela liga quando a ponta do estilo passa de `formaPct` (60%), contando os itens.
+  - Área maior e mais lenta: Artilheiro, Flecheiro arcano, Carniceiro, Pestilento e Pergaminhista, nas skills de área.
+  - Ecoar: Ocultista nas mágicas; Duelista e Implacável no corpo a corpo; Ceifador em todas.
+  - Encadear: Lâmina rúnica e Rúnico no corpo a corpo; Atirador nos projéteis.
+  - Atravessar: Mira firme e Batedor, nos projéteis.
+
+  Os estilos de apoio e de defesa (Encantador, Guardião, Inabalável, Caçador, Comandante, Baluarte, Senhor da Horda,
+  Mestre de Elite, Pacto de Sangue, Mestre de Feras, Sobrevivente) não têm forma: o papel deles não passa por mudar a
+  skill.
+- **Orçamento conservado:** a forma cobra dano por alvo no perfil de quem usa: −20% na área maior (que já dá ×1,25),
+  −25% no eco, −15% no encadear e −10% no atravessar. A skill ganha alcance de alvos e perde força em cada um. A cobrança
+  só vale quando o modificador entrou de fato na skill.
+- **Chave:** o modificador entra na chave da skill como o do equipamento; o que o equipamento já dá não se repete.
+- **Ficha:** cada estilo mostra a sua forma, apagada até o limite e acesa depois.
+- **Balanceamento:** 147/147 metas com a forma no jogo.

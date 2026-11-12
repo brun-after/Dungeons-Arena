@@ -70,6 +70,15 @@ export function painelDeEstilos(ctx: Pick<ContextoSimulacao, 'conteudo' | 'balan
     const efeitos = (Object.entries(e.efeitos) as [ComponenteDeEstilo, number][])
       .map(([comp, max]) => t('estilos.efeito', { nome: t(`estilos.comp.${comp}` as ChaveTexto), agora: Math.round(max * i * 100), max: Math.round(max * 100) }));
     li.append(el('div', 'estilo-efeitos', efeitos.join(' · ')), el('div', 'estilo-mecanica', e.texto));
+    // Marco 39 (D-152): a forma desperta, acesa quando a ponta passa do limite.
+    if (e.forma) {
+      const limite = ctx.balance.estilos.formaPct;
+      const acesa = pct(i) >= limite;
+      const alvo = e.forma.tag ? t('estilos.formaTag', { tag: t(`tag.${e.forma.tag}` as ChaveTexto) }) : t('estilos.formaTodas');
+      const forma = el('div', acesa ? 'estilo-forma acesa' : 'estilo-forma', t(acesa ? 'estilos.formaAcesa' : 'estilos.forma', { pct: limite, mod: t(`mod.${e.forma.mod}` as ChaveTexto), alvo, dano: -e.forma.danoPct }));
+      forma.dataset.forma = acesa ? 'acesa' : 'apagada';
+      li.append(forma);
+    }
     lista.append(li);
   });
   painel.append(lista);
