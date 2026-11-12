@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.98 · **Data:** 09/11/2026
+**Versão:** 0.99 · **Data:** 12/11/2026
 
 > **Histórico**
+> - **0.99 (12/11/2026)**: D-145: marco 39, o nível 100 sem travas (ids de item e de skill gerada, recompensa de missão) e o loot do inimigo renascido no Mundo.
 > - **0.98 (09/11/2026)**: D-144: estabilidade e ajustes de jogo do Mundo (viagem entre salas sem queda, perseguição, lojas, troca, invocações, alvo dos buffs, descrições).
 > - **0.97 (08/11/2026)**: D-141 (habilidades por 35% FOR e 65% INT; o guerreiro conjura andando e encadeia com o básico) e D-142 (marco 38: prédios das vilas, andarilhos, escolta, errantes, forja em graus, troféus, fusão, pedra de retorno com círculo, save em toda região e o deserto entre os reinos).
 > - **0.96 (08/11/2026)**: D-140: o Mundo sem a fadiga de XP por fase (só a diferença de nível reduz o XP das criaturas inferiores).
@@ -4335,3 +4336,21 @@ quando alguém entra, troca presa, perseguição que não acaba e lojas bloquead
   60%, escama ígnea 50%, núcleo ígneo 25%, os materiais da forja de fogo) sem tirar a entrada antiga (escama 100%). A
   chave repetida fazia valer a antiga, e o dragão nunca deixava a escama ígnea nem o núcleo; o esbuild avisava no CI.
   A entrada antiga saiu.
+
+## D-145 — Marco 39: o nível 100 sem travas e o loot do renascido no Mundo (12/11/2026)
+
+Primeira parte do marco 39 (atributos, estilos, elementos e skills no sistema novo). Antes de mexer no modelo,
+saem as travas que deixavam o nível 100 pela metade.
+
+- **Ids no nível 100.** Os ids de item gerado (`gi_`) e de item base (`ib_`) só aceitavam nível de dois dígitos, e o
+  de skill gerada (`g_`) recusava acima de 99. Com o nível máximo 100, um drop, um livro raro ou um item da forja
+  (ascender) no 100 virava nada; o simulador de balanceamento também equipava nada no 100, e as linhas do 100 em
+  `docs/BALANCEAMENTO.md` foram medidas sem equipamento. Os três agora aceitam três dígitos.
+- **Recompensa de missão.** Saía no máximo no nível 30. Agora sai no nível de quem recebe, até o nível máximo dos
+  itens gerados (`itensGerados.nivelMax`).
+- **Loot do renascido.** A especificação (§3.6) diz que o inimigo só solta na primeira morte, o que faz sentido numa
+  fase. No Mundo, quase tudo que se mata é renascido, e chefes e focos de região não davam espólio depois da
+  primeira vez. A regra de modo `dropsDeRenascido` (ligada só em `modos/mundo.json`) deixa o renascido soltar, com o
+  ouro e a chance de item reduzidos pelo mesmo desgaste do XP (`0,8^abates`), com piso de 25%
+  (`drops.pisoRenascidoPct`). Arena e campanha seguem a §3.6.
+

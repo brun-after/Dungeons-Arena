@@ -113,11 +113,14 @@ export function lerOrigens(json: unknown): { origens: Map<string, OrigemRara>; e
   return { origens, erros: l.erros };
 }
 
-/** O id concreto do item (a variação de item base sai no nível de quem recebe, com semente do momento). */
-export function idDaRecompensa(r: ItemDeRecompensa, nivel: number, semente: string): string {
+/**
+ * O id concreto do item (a variação de item base sai no nível de quem recebe, com semente do momento).
+ * Marco 39 (12/11/2026): o teto é o nível máximo dos itens gerados (antes, fixo no 30).
+ */
+export function idDaRecompensa(r: ItemDeRecompensa, nivel: number, semente: string, nivelMax: number): string {
   if ('id' in r) return r.id;
   const rng = criarRng(hashTexto(semente));
-  return idItemBase(r.base, r.forma, r.elemento, Math.max(1, Math.min(30, nivel)), inteiro(rng, 0, 0x7fffffff));
+  return idItemBase(r.base, r.forma, r.elemento, Math.max(1, Math.min(nivelMax, nivel)), inteiro(rng, 0, 0x7fffffff));
 }
 
 /** Entrega o item na mochila; sem espaço, cai ao lado. */
@@ -154,7 +157,7 @@ export function sortearOrigensRaras(estado: EstadoJogo, ctx: ContextoSimulacao, 
     if (se.comBuffOfensivo && !a.quem.efeitos.some((f) => f.ateTick > estado.tick && EFEITOS_OFENSIVOS.has(f.tipo))) continue;
     if (se.comEco && !temEco(a.golpe)) continue;
     if (aleatorio(estado.rng) * 100 >= o.chancePct) continue;
-    const itemId = idDaRecompensa(o.item, a.quem.nivel, `${o.id}:${estado.tick}:${a.morto.id}`);
+    const itemId = idDaRecompensa(o.item, a.quem.nivel, `${o.id}:${estado.tick}:${a.morto.id}`, ctx.balance.itensGerados.nivelMax);
     largarPerto(ctx, a.morto.x, a.morto.y, (x, y) => largarItem(estado, itemId, x, y, saida));
     saida.push({ t: 'origemRara', tick: estado.tick, id: a.quem.id, origem: o.id, itemId });
   }
@@ -174,7 +177,7 @@ function avancar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, m: Mis
   if (valor < m.meta) return;
   bolsa.missoesConcluidas.push(m.id);
   bolsa.missoes = semChaves(bolsa.missoes, (k) => k === m.id || k.startsWith(`${m.id}@`));
-  const itemId = idDaRecompensa(m.recompensa, e.nivel, `${m.id}:${e.id}`);
+  const itemId = idDaRecompensa(m.recompensa, e.nivel, `${m.id}:${e.id}`, ctx.balance.itensGerados.nivelMax);
   entregar(estado, ctx, e, itemId, saida);
   saida.push({ t: 'missaoConcluida', tick: estado.tick, id: e.id, missao: m.id, itemId });
 }

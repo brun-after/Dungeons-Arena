@@ -130,6 +130,7 @@
   },
   "drops": {
     "chanceOrbeHp": 0.15,
+    "pisoRenascidoPct": 25,
     "chanceOrbeRecurso": 0.08,
     "orbeHpPct": 25,
     "orbeRecursoPct": 50,

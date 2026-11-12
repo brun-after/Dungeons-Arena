@@ -149,6 +149,11 @@ export interface ModoDeJogo {
   /** Marco 29 (D-128): a morte do jogador deixa a mochila e o equipado num túmulo (o Mundo, fora das dungeons). */
   tumuloNaMorte?: boolean;
   /**
+   * Marco 39 (12/11/2026, D-145): o inimigo renascido também solta loot, com o ouro e os itens reduzidos pelo
+   * desgaste do XP (o Mundo). Ausente = só na primeira morte (§3.6).
+   */
+  dropsDeRenascido?: boolean;
+  /**
    * Marco 30 (D-129): o loot do lugar em % (o ouro e a chance de item); o Mundo põe o do perigo da região. Ausente =
    * 100.
    */
@@ -303,6 +308,7 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
     ...(o.areaDeInteresse === undefined ? {} : { areaDeInteresse: { raio: l.numero(l.objeto(o.areaDeInteresse, 'areaDeInteresse'), 'raio', { min: 8, max: 64, inteiro: true }) } }),
     ...(o.iaRaioAtivacao === undefined ? {} : { iaRaioAtivacao: l.numero(o, 'iaRaioAtivacao', { min: 8, max: 128, inteiro: true }) }),
     ...(o.tumuloNaMorte === undefined ? {} : { tumuloNaMorte: l.booleano(o, 'tumuloNaMorte') }),
+    ...(o.dropsDeRenascido === undefined ? {} : { dropsDeRenascido: l.booleano(o, 'dropsDeRenascido') }),
     ...(o.fadigaDeXpPorFase === undefined ? {} : { fadigaDeXpPorFase: l.booleano(o, 'fadigaDeXpPorFase') }),
   };
   if (modo.fim.tipo !== 'nenhum' && modo.fim.alvo === null && modo.fim.tempoLimiteS === null) {

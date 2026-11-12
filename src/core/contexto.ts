@@ -120,6 +120,8 @@ export interface Balance {
   /** Drops na primeira morte de um inimigo (§2.10). */
   drops: {
     chanceOrbeHp: number;
+    /** Marco 39: piso do loot (ouro e itens) de um inimigo renascido, em % do original. */
+    pisoRenascidoPct: number;
     chanceOrbeRecurso: number;
     orbeHpPct: number;
     orbeRecursoPct: number;

@@ -54,12 +54,15 @@ export function idGerada(semente: number, nivel: number): string {
   return `${PREFIXO_GERADA}${(semente >>> 0).toString(36)}_${Math.max(1, Math.floor(nivel))}`;
 }
 
+/** 12/11/2026 (marco 39): o id aceita o nível 100 (antes recusava acima de 99). */
+const NIVEL_MAX_GERADA = 999;
+
 export function lerIdGerada(id: string): { semente: number; nivel: number } | null {
   const m = /^g_([0-9a-z]+)_(\d+)$/.exec(id);
   if (!m?.[1] || !m[2]) return null;
   const semente = Number.parseInt(m[1], 36);
   const nivel = Number(m[2]);
-  if (!Number.isFinite(semente) || semente < 0 || semente > 0xffffffff || nivel < 1 || nivel > 99) return null;
+  if (!Number.isFinite(semente) || semente < 0 || semente > 0xffffffff || nivel < 1 || nivel > NIVEL_MAX_GERADA) return null;
   return { semente, nivel };
 }
 

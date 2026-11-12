@@ -93,7 +93,7 @@ export function idItemGerado(base: string, nivel: number, raridade: Raridade, se
 }
 
 export function lerIdItemGerado(id: string): { base: string; nivel: number; raridade: Raridade; semente: number } | null {
-  const m = /^gi_([a-z]+)_(\d{1,2})_([a-z]+)_([0-9a-z]{1,7})$/.exec(id);
+  const m = /^gi_([a-z]+)_(\d{1,3})_([a-z]+)_([0-9a-z]{1,7})$/.exec(id);
   if (!m?.[1] || !m[2] || !m[3] || !m[4]) return null;
   const raridade = RARIDADES.find((r) => r === m[3]);
   const semente = parseInt(m[4], 36);
