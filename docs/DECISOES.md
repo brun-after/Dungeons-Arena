@@ -3,7 +3,7 @@
 **Versão:** 0.99 · **Data:** 12/11/2026
 
 > **Histórico**
-> - **0.99 (12/11/2026)**: D-147 (pontos escassos, teto 10 + 2 × nível e o pentagrama de estilos no lugar das ressonâncias) e D-148 (poder base no dano de quem tem ficha, os efeitos dos estilos no combate e a calibragem). D-146: a Força vira Vontade (save 29, a ficha antiga e a marca do sistema). D-145: marco 39, o nível 100 sem travas (ids de item e de skill gerada, recompensa de missão) e o loot do inimigo renascido no Mundo.
+> - **0.99 (12/11/2026)**: D-147 (pontos escassos, teto 10 + 2 × nível e o pentagrama de estilos no lugar das ressonâncias) e D-148 (poder base no dano de quem tem ficha, os efeitos dos estilos no combate e a calibragem). D-149: a tela de atualização dos personagens antigos. D-146: a Força vira Vontade (save 29, a ficha antiga e a marca do sistema). D-145: marco 39, o nível 100 sem travas (ids de item e de skill gerada, recompensa de missão) e o loot do inimigo renascido no Mundo.
 > - **0.98 (09/11/2026)**: D-144: estabilidade e ajustes de jogo do Mundo (viagem entre salas sem queda, perseguição, lojas, troca, invocações, alvo dos buffs, descrições).
 > - **0.97 (08/11/2026)**: D-141 (habilidades por 35% FOR e 65% INT; o guerreiro conjura andando e encadeia com o básico) e D-142 (marco 38: prédios das vilas, andarilhos, escolta, errantes, forja em graus, troféus, fusão, pedra de retorno com círculo, save em toda região e o deserto entre os reinos).
 > - **0.96 (08/11/2026)**: D-140: o Mundo sem a fadiga de XP por fase (só a diferença de nível reduz o XP das criaturas inferiores).
@@ -4426,4 +4426,23 @@ atributos.
   simulador monta o guerreiro típico em Vontade e Destreza (Duelista e Carniceiro), não só em Vontade.
 - **Telas.** A ficha, as dicas dos atributos e o "escala com" das skills mostram o nível, os estilos, o domínio e os
   itens, não mais a Força e a Inteligência.
+
+## D-149 — A tela de atualização dos personagens antigos (12/11/2026)
+
+Pedido do usuário: quem entra com um personagem antigo vê uma tela de atualização, com recursos equivalentes aos de
+agora para montar a build nova sem se sentir lesado.
+
+- **Quando aparece.** Ao entrar no jogo (campanha, grupo, Mundo ou arena) com um personagem sem `bolsa.sistema`
+  (D-146). Fechar sem confirmar só adia: a tela volta no quadro seguinte, porque o personagem antigo não deve jogar
+  com o orçamento velho (que, no 100, era quase o dobro do novo).
+- **O que devolve.** Todos os pontos de atributo, atributo de classe incluído: a base volta à da classe, e o orçamento
+  inteiro do nível no sistema novo fica para distribuir. Nível, XP, itens, ouro, habilidades e ranks não mudam.
+- **Por que é equivalente.** O orçamento novo tem menos pontos, mas o jogo foi recalibrado nele (D-148): um personagem
+  com o orçamento novo tem a força que a build focada tinha no antigo. A tela mostra os dois números e diz isso.
+- **A build de antes como ponto de partida.** A tela abre com os pontos que o jogador tinha posto, na mesma proporção
+  do orçamento novo (com o teto do nível), e oferece "Começar do zero". Os "−" e "+" de cada atributo mexem no
+  pentagrama ao vivo (com os itens já equipados).
+- **Comando `atualizarSistema`** (aceito pela rede em todos os modos). A simulação confere cada ponto (teto e
+  orçamento); o que sobrar fica livre, e o personagem recebe a marca. O protocolo recusa atributo desconhecido ou valor
+  que não seja inteiro e não negativo. No Mundo, quem grava é o servidor, como qualquer mudança da ficha.
 

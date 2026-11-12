@@ -19,6 +19,7 @@ import { descontoNaLojaPct, pontosUteis, perfilDestreza, reducaoRecargaBasicoPct
 import { multiplicadorDosEstilos, poderBase } from '../combat/poder-base';
 import { EFEITOS_NEUTROS, radarDe } from '../progression/estilos';
 import { painelDeEstilos, previaDoPonto } from './radar-estilos';
+import { criarTelaAtualizacao } from './tela-atualizacao';
 import { criarDicaAtributo, linhasDaDica, nomeDoAtributo, type DicaAtributo } from './dica-atributo';
 import { faixaDaFormula } from '../combat/dados';
 import { habilidadeDoAtor } from '../combat/perfil';
@@ -116,6 +117,8 @@ export function resumoDoItem(item: Item, arma?: { familia: string; basico: strin
 
 export function criarMochila(o: OpcoesMochila): Mochila {
   const { ctx, emitir } = o;
+  // Marco 39 (12/11/2026, D-149): o personagem antigo monta a build no sistema novo antes de jogar.
+  const telaAtualizacao = criarTelaAtualizacao({ ctx, jogador: o.jogador, emitir });
   const itens = ctx.conteudo.itens;
   let aba: Aba = 'itens';
   let dica: DicaAtributo | null = null;
@@ -487,6 +490,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
   };
 
   const atualizar = () => {
+    telaAtualizacao.atualizar();
     const j = o.jogador();
     if (!j?.bolsa) {
       botaoAbrir.hidden = true;

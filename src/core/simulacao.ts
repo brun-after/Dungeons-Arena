@@ -27,6 +27,7 @@ import { vivo } from '../entities/entidade';
 import { skinValida } from '../entities/skins';
 import { processarIa } from '../entities/ia';
 import { desequipar, distribuirPonto, equipar, moverItem, usarItem } from '../progression/inventario';
+import { aplicarAtualizacao } from '../progression/atualizacao-39';
 import { ehDificuldade } from '../modos/dificuldade';
 import { acelerarEstudo, avancarEstudos, equiparHabilidade, subirRank } from '../progression/habilidades-personagem';
 import { definirPassiva } from '../progression/passivas-gerais';
@@ -190,6 +191,9 @@ function aplicarComandos(
         break;
       case 'soltarItem':
         soltarItem(estado, ctx, ator, cmd.invId, cmd.qtd, saida);
+        break;
+      case 'atualizarSistema':
+        aplicarAtualizacao(ator, ctx, cmd.pontos, estado.tick, saida);
         break;
       case 'distribuirPonto':
         distribuirPonto(ator, ctx, cmd.atributo, estado.tick, saida);

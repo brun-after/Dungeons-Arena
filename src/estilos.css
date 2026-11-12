@@ -3378,3 +3378,7 @@ dialog.mochila[open] { display: flex; flex-direction: column; }
 .lista-estilos li { margin: 6px 0; }
 .estilo-pesos, .estilo-itens { color: var(--texto-suave); }
 .estilo-mecanica { color: var(--texto-suave); font-style: italic; }
+
+/* Marco 39 (12/11/2026, D-149): a tela de atualização do personagem. */
+.modal-atualizacao .acoes-atualizacao { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; justify-content: flex-end; }
+.modal-atualizacao .botao-pequeno { min-width: 32px; }

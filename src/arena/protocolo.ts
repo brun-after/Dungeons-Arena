@@ -143,6 +143,16 @@ export function lerComando(v: unknown): Comando | null {
       return ehSlot(v.slot) ? { t: 'desequipar', slot: v.slot } : null;
     case 'distribuirPonto':
       return ehAtributo(v.atributo) ? { t: 'distribuirPonto', atributo: v.atributo } : null;
+    // Marco 39 (D-149): só atributos conhecidos, inteiros e não negativos (a simulação confere o orçamento e o teto).
+    case 'atualizarSistema': {
+      if (typeof v.pontos !== 'object' || v.pontos === null || Array.isArray(v.pontos)) return null;
+      const pontos: Partial<Record<NomeAtributo, number>> = {};
+      for (const [k, n] of Object.entries(v.pontos as Record<string, unknown>)) {
+        if (!ehAtributo(k) || !inteiro(n) || n < 0 || n > 1000) return null;
+        pontos[k] = n;
+      }
+      return { t: 'atualizarSistema', pontos };
+    }
     case 'interagir':
       return { t: 'interagir' };
     case 'abrirMenu':
