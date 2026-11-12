@@ -12,6 +12,7 @@ import { ASSINATURAS, VARIANTES } from './assinaturas';
 import { circuloNoChao, clarao, ondaDeChoque, sortear } from './blocos';
 import type { Acerto, AreaVfx, CenaVfx, DefAssinatura, EmSi, P } from './cena';
 import { Deslizes } from './deslizes';
+import { ehClasseComRuna, manifestarNaConjuracao, manifestarNoAcerto, type Runa } from './manifestacao-runa';
 import { Marcas } from './marcas';
 import { Animacoes, Pincel } from './pincel';
 import type { TexturaRica } from './texturas';
@@ -110,6 +111,17 @@ export class DiretorVfx {
     def.aoAcertar?.(c, a);
     if (def.marca && a.indice < 3) c.marca(def.marca, a.ate.x, a.ate.y, MARCAS_COR[def.marca] ?? a.cor, 1, 2400, def.marca === 'geada');
     if (variante && a.indice < 3) this.o.particulas.emitirLista(VARIANTES[variante], a.ate.x, a.ate.y, a.cor);
+  }
+
+  /** Marco 39 (12/11/2026, D-151): a runa da skill no acerto, por cima da assinatura (manifestacao-runa.ts). */
+  runaNoAcerto(classe: string | undefined, runa: Runa, faixa: number, a: Acerto, comParticulas: boolean): void {
+    if (!this.ativo || !ehClasseComRuna(classe)) return;
+    manifestarNoAcerto(this.cena(), classe, runa, faixa, a, comParticulas);
+  }
+
+  /** D-151: a runa na mão de quem conjura. */
+  runaNaConjuracao(runa: Runa, faixa: number, pos: P): void {
+    if (this.ativo) manifestarNaConjuracao(this.cena(), runa, faixa, pos);
   }
 
   /** A área no lançamento. Devolve false quando a assinatura não desenha área (quem chama faz a rajada padrão). */

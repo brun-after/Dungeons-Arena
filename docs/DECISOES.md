@@ -4497,5 +4497,14 @@ agora para montar a build nova sem se sentir lesado.
   continuar valendo; o resto da compilação não muda.
 - **Bônus de par:** a ultimate bate 15% a mais quando as duas skills do par estão com a runa dela. Os combos (D-097)
   ficam sem bônus de runa por enquanto: eles já premiam a ordem das skills, e o simulador não mede combos por runa.
+- **Visual (narrativo):** a assinatura da skill continua contando o que ela é; por cima, a manifestação da runa
+  (`render/vfx/manifestacao-runa.ts`) conta de que ela é feita agora. Ela tem duas camadas feitas à mão:
+  - a matéria de cada um dos 9 elementos, com o que ele deixa no mundo;
+  - o veículo de cada classe: a lâmina do Guerreiro, o círculo rúnico do Mago, o traço da flecha do Arqueiro, as almas do
+    Necromante e as penas do falcão do Aventureiro.
+
+  Tudo cresce com a faixa do vínculo, que vem na chave: a quantidade e o tamanho, a marca no chão a partir da faixa 5 e
+  o floreio do especialista a partir da faixa 8. No floreio, o raio salta de volta para quem lançou e a terra racha e
+  treme. O que dura no alvo é a aura do estado, que vale enquanto ele vale (`materiais.ts`).
 - **Calibragem:** a parte neutra pesa menos as resistências da Bruxa do Pântano (psíquico 50%), e o covil dela em grupo
   de 3 passou a cair em 29 s (meta 30–60 s; antes 30,4 s). A vida dela subiu de 2.800 para 3.100: 147/147 metas.
