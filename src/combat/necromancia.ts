@@ -60,7 +60,10 @@ function erguer(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade, tipo
   const poder = Math.max(1, Math.round((8 + Math.floor(dono.nivel / 2) + Math.floor(Math.max(0, pontosUteis(dono.atributos.inteligencia, ctx.balance) - 10) * r.atributoPorInt)) * servos));
   morto.atributos = { ...morto.atributos, vontade: poder, inteligencia: poder };
   // Marco 24 (D-095): a sintonia da terra dá mais vida aos mortos.
-  morto.hpMax = Math.max(1, Math.round(vidaDoMorto(ctx, dono, Math.round((r.vidaBase + dono.nivel * r.vidaPorNivel) * (tipo === 'servo' ? r.vidaServoPct / 100 : 1)), estado.tick) * servos));
+  // Marco 39 (12/11/2026, D-154): a força das invocações dos estilos também vale na vida do morto (antes, o cálculo da
+  // vida aqui apagava o que `invocar` tinha posto).
+  const doEstilo = 1 + (morto.invocacao.estiloPct ?? 0) / 100;
+  morto.hpMax = Math.max(1, Math.round(vidaDoMorto(ctx, dono, Math.round((r.vidaBase + dono.nivel * r.vidaPorNivel) * (tipo === 'servo' ? r.vidaServoPct / 100 : 1)), estado.tick) * servos * doEstilo));
   morto.hp = morto.hpMax;
   prepararReservas(morto, dono, ctx);
   morto.aparencia = fonte?.aparencia ? { ...fonte.aparencia } : null;

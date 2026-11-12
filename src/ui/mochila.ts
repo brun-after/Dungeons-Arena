@@ -374,9 +374,11 @@ export function criarMochila(o: OpcoesMochila): Mochila {
         const mais = botao('+', `ponto-${nome}`, () => { emitir({ t: 'distribuirPonto', atributo: nome }); });
         mais.setAttribute('aria-label', t('ficha.aumentar', { atributo: rotulo }));
         // Marco 28 (D-127): no teto do nível (nível + 20), o "+" trava e diz por quê.
-        if (base >= teto) {
+        // Marco 39 (D-153): o teto também conta do valor inicial da classe no atributo.
+        const tetoDele = tetoDoAtributo(j.nivel, ctx.balance, ctx.conteudo.classes.get(bolsa.classeId)?.atributos[nome]);
+        if (base >= tetoDele) {
           mais.disabled = true;
-          mais.title = t('ficha.noTeto', { teto });
+          mais.title = t('ficha.noTeto', { teto: tetoDele });
         } else {
           // Marco 39 (D-147): a prévia do ponto (qual estilo sobe e quanto).
           const previa = previaDoPonto(ctx, bolsa, efetiva.atributos, j.nivel, nome);

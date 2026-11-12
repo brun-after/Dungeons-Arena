@@ -14,11 +14,11 @@ import type { Dificuldade } from '../modos/dificuldade';
 import { basicoDoPersonagem, basicoSecundario } from '../progression/armas';
 import { migrarMovimentoLivre } from './migracao-25';
 import { migrarSkillsDeClasse } from './migracao-24';
-import { migrarForcaParaVontade } from './migracao-39';
+import { migrarForcaParaVontade, migrarSemAtributoDeClasse } from './migracao-39';
 import { MAX_REGRAS, RE_REGRA_ESTILO } from '../world/estilo';
 import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 29;
+export const VERSAO_SCHEMA = 30;
 // Marco 23 (24/10/2026, D-092): dez slots de personagem por jogador (eram três).
 export const MAX_SLOTS = 10;
 export const SLOTS: readonly number[] = Array.from({ length: MAX_SLOTS }, (_, i) => i + 1);
@@ -408,6 +408,8 @@ export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   27: (r) => migrarAtributoDeClasse(r),
   // Marco 39 (12/11/2026, D-146): a Força vira Vontade; os pontos voltam na tela de atualização.
   28: (r) => migrarForcaParaVontade(r),
+  // 12/11/2026 (D-155): o atributo de classe sai; os pontos dele voltam na tela de atualização.
+  29: (r) => migrarSemAtributoDeClasse(r),
 };
 
 /** D-127: toda entidade ganha `dominio: 10` nos atributos (e na base da ficha, quem tem bolsa). */

@@ -39,7 +39,7 @@ describe('tela de atualização (D-149)', () => {
     const { e, b } = antigo();
     const classe = obter(CONTEUDO.classes.get('mago'));
     const saida: EventoSimulacao[] = [];
-    const teto = tetoDoAtributo(40, ctx.balance);
+    const teto = tetoDoAtributo(40, ctx.balance, classe.atributos.inteligencia);
     expect(aplicarAtualizacao(e, ctx, { inteligencia: 500, sabedoria: 20 }, 0, saida)).toBe(true);
     expect(b.atributosBase.inteligencia).toBe(teto);
     expect(b.atributosBase.sabedoria).toBe(classe.atributos.sabedoria + 20);

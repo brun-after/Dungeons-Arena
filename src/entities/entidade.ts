@@ -24,8 +24,15 @@ export interface Atributos {
   inteligencia: number;
   sabedoria: number;
   carisma: number;
-  /** Marco 28 (30/10/2026, D-127): o atributo de classe (Bravura, Instinto, Arcano, Ritual, Engenho): passiva e skills de classe. */
-  dominio: number;
+}
+
+/**
+ * Marco 39 (12/11/2026, D-155): a classe que se manifesta nos estilos (progression/dominio.ts): o valor de cada chave de
+ * melhoria e os degraus somados das cinco pontas.
+ */
+export interface TrilhaDeClasse {
+  chaves: Record<string, number>;
+  degraus: number;
 }
 
 export interface EfeitoAtivo {
@@ -215,8 +222,12 @@ export interface HabilidadeConhecida {
  * `atributos`, `defesa`, `hpMax` e `manaMax` da entidade são sempre derivados daqui
  * (`recalcularFicha`), nunca guardados como deltas.
  */
-/** Marco 39 (D-146): a versão atual do sistema de personagem (estilos, vínculo elemental e runas). */
-export const SISTEMA_DO_PERSONAGEM = 39;
+/**
+ * Marco 39 (D-146): a versão atual do sistema de personagem (estilos, vínculo elemental e runas). 12/11/2026 (D-155): 40,
+ * sem o atributo de classe (a classe vive nos estilos); quem montou a build no 39 passa pela tela de novo e recebe de
+ * volta também os pontos que tinha posto nele.
+ */
+export const SISTEMA_DO_PERSONAGEM = 40;
 
 export interface Bolsa {
   atributosBase: Atributos;
@@ -435,6 +446,11 @@ export interface Entidade {
   /** Marco 21 (D-088): fúria do Guerreiro, valor no `ultimoTick` (o esvaziamento é calculado na leitura). */
   /** Marco 24 (D-094): `frenesiAteTick`, o fim do Frenesi (a barra fica cheia até lá e zera no fim). */
   /** Marco 24 (D-095): `frenesiExtraTicks`, quanto o Frenesi já foi prolongado (Berserker, até o teto). */
+  /**
+   * D-155: a trilha de classe, publicada pela ficha (`recalcularFicha`) para quem não tem a bolsa dos outros (a aura e os
+   * orbes na apresentação). Quem tem a bolsa recalcula pelo radar.
+   */
+  trilhaClasse?: TrilhaDeClasse;
   furia?: { valor: number; ultimoTick: number; frenesiAteTick?: number; frenesiExtraTicks?: number };
   /** Marco 24 (D-095): a sintonia da sombra do Guerreiro deixou o próximo golpe como pelas costas. */
   costasGarantidas?: boolean;
@@ -491,7 +507,6 @@ export const ATRIBUTOS_NEUTROS: Readonly<Atributos> = {
   inteligencia: 10,
   sabedoria: 10,
   carisma: 10,
-  dominio: 10,
 };
 
 export interface NovaEntidade {
@@ -660,6 +675,7 @@ export function clonarEntidade(e: Entidade): Entidade {
     ...(e.concentracaoArcana ? { concentracaoArcana: { ...e.concentracaoArcana } } : {}),
     ...(e.auraFracoes ? { auraFracoes: { ...e.auraFracoes } } : {}),
     ...(e.furia ? { furia: { ...e.furia } } : {}),
+    ...(e.trilhaClasse ? { trilhaClasse: { chaves: { ...e.trilhaClasse.chaves }, degraus: e.trilhaClasse.degraus } } : {}),
     ...(e.mira ? { mira: { ...e.mira } } : {}),
     ...(e.afinidade ? { afinidade: { ...e.afinidade } } : {}),
     ...(e.cargaClasseTick ? { cargaClasseTick: { ...e.cargaClasseTick } } : {}),

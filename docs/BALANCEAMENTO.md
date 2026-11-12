@@ -8,7 +8,7 @@
 
 Sementes: 8 por cenário (1000, 8919, 16838, 24757, 32676, 40595, 48514, 56433). Balance versão 39.
 
-## Resultado: 147/147 metas aprovadas
+## Resultado: 172/172 metas aprovadas
 
 
 ## Tabelas
@@ -17,39 +17,39 @@ Sementes: 8 por cenário (1000, 8919, 16838, 24757, 32676, 40595, 48514, 56433).
 
 | Classe | Nível | Golpes | Tempo | Derrotas do jogador |
 |---|---|---|---|---|
-| aventureiro | 1 | 5 | 5,9 s | 0 |
-| aventureiro | 5 | 5 | 5,1 s | 0 |
-| aventureiro | 10 | 5 | 6,6 s | 0 |
-| guerreiro | 1 | 5 | 5,3 s | 0 |
-| guerreiro | 5 | 4 | 4,5 s | 0 |
-| guerreiro | 10 | 4 | 4,5 s | 0 |
-| mago | 1 | 4 | 5,2 s | 0 |
-| mago | 5 | 4 | 5,6 s | 0 |
-| mago | 10 | 4 | 5,1 s | 0 |
-| arqueiro | 1 | 5 | 5 s | 0 |
+| aventureiro | 1 | 4 | 5,2 s | 0 |
+| aventureiro | 5 | 4 | 5,2 s | 0 |
+| aventureiro | 10 | 5 | 5,1 s | 0 |
+| guerreiro | 1 | 5 | 5,5 s | 0 |
+| guerreiro | 5 | 4 | 4,3 s | 0 |
+| guerreiro | 10 | 4 | 4,2 s | 0 |
+| mago | 1 | 4 | 5 s | 0 |
+| mago | 5 | 4 | 5,2 s | 0 |
+| mago | 10 | 3 | 5 s | 0 |
+| arqueiro | 1 | 5 | 5,1 s | 0 |
 | arqueiro | 5 | 4 | 4,4 s | 0 |
 | arqueiro | 10 | 4 | 4 s | 0 |
-| necromante | 1 | 4 | 5,4 s | 0 |
+| necromante | 1 | 4 | 4,5 s | 0 |
 | necromante | 5 | 4 | 4,7 s | 0 |
-| necromante | 10 | 5 | 5,4 s | 0 |
+| necromante | 10 | 4 | 5,1 s | 0 |
 
 ### Quanto o jogador aguenta de um comum (mediana)
 
 | Classe | Nível | Golpes recebidos | Tempo |
 |---|---|---|---|
-| aventureiro | 1 | 8 | 22,4 s |
+| aventureiro | 1 | 8 | 19,2 s |
 | aventureiro | 5 | 8 | 20,8 s |
 | aventureiro | 10 | 8 | 19 s |
 | guerreiro | 1 | 8 | 18,2 s |
 | guerreiro | 5 | 8 | 16,9 s |
 | guerreiro | 10 | 8 | 15,5 s |
-| mago | 1 | 7 | 18,2 s |
-| mago | 5 | 8 | 16,9 s |
-| mago | 10 | 8 | 15,5 s |
-| arqueiro | 1 | 8 | 19,2 s |
+| mago | 1 | 7 | 15,6 s |
+| mago | 5 | 7 | 14,5 s |
+| mago | 10 | 7 | 13,3 s |
+| arqueiro | 1 | 7 | 18,2 s |
 | arqueiro | 5 | 8 | 16,9 s |
 | arqueiro | 10 | 8 | 15,5 s |
-| necromante | 1 | 8 | 18,2 s |
+| necromante | 1 | 7 | 18,2 s |
 | necromante | 5 | 8 | 16,9 s |
 | necromante | 10 | 8 | 15,5 s |
 
@@ -57,35 +57,35 @@ Sementes: 8 por cenário (1000, 8919, 16838, 24757, 32676, 40595, 48514, 56433).
 
 | Classe | Grupo | Tempo | Derrotas do grupo |
 |---|---|---|---|
-| aventureiro | 1 | 37,4 s | 2 |
-| aventureiro | 2 | 28,7 s | 0 |
-| aventureiro | 4 | 26,3 s | 0 |
-| aventureiro | 6 | 22,3 s | 0 |
+| aventureiro | 1 | 35,7 s | 2 |
+| aventureiro | 2 | 31,9 s | 0 |
+| aventureiro | 4 | 25,3 s | 0 |
+| aventureiro | 6 | 24,6 s | 0 |
 | guerreiro | 1 | 33,5 s | 0 |
-| guerreiro | 2 | 27,8 s | 0 |
-| guerreiro | 4 | 25,5 s | 0 |
-| guerreiro | 6 | 21,9 s | 0 |
-| mago | 1 | 31,7 s | 1 |
-| mago | 2 | 20,2 s | 0 |
-| mago | 4 | 24,9 s | 0 |
-| mago | 6 | 23,3 s | 0 |
-| arqueiro | 1 | 31,4 s | 0 |
-| arqueiro | 2 | 28,9 s | 0 |
-| arqueiro | 4 | 23,8 s | 0 |
-| arqueiro | 6 | 23 s | 0 |
-| necromante | 1 | 36,3 s | 0 |
-| necromante | 2 | 25,9 s | 0 |
-| necromante | 4 | 27,3 s | 0 |
-| necromante | 6 | 22,5 s | 0 |
+| guerreiro | 2 | 24,3 s | 0 |
+| guerreiro | 4 | 28,5 s | 0 |
+| guerreiro | 6 | 20,4 s | 0 |
+| mago | 1 | 33,7 s | 1 |
+| mago | 2 | 26 s | 0 |
+| mago | 4 | 25,3 s | 0 |
+| mago | 6 | 21,8 s | 0 |
+| arqueiro | 1 | 26,6 s | 0 |
+| arqueiro | 2 | 25,7 s | 0 |
+| arqueiro | 4 | 25,4 s | 0 |
+| arqueiro | 6 | 21,5 s | 0 |
+| necromante | 1 | 30,3 s | 0 |
+| necromante | 2 | 25,4 s | 0 |
+| necromante | 4 | 26,6 s | 0 |
+| necromante | 6 | 21,3 s | 0 |
 
 ### Dificuldades (aventureiro; comum no nível 5, chefe sozinho)
 
 | Dificuldade | Tempo no comum | Golpes que aguenta | Chefe (vitórias) | Derrotas no chefe |
 |---|---|---|---|---|
-| facil | 4,6 s | 12 | 24,5 s | 0/4 |
-| normal | 5,3 s | 8 | 32,8 s | 1/4 |
-| dificil | 6,7 s | 7 | — | 4/4 |
-| pesadelo | 9,8 s | 6 | — | 4/4 |
+| facil | 3,7 s | 12 | 26,5 s | 0/4 |
+| normal | 5,1 s | 8 | 33,3 s | 1/4 |
+| dificil | 6,6 s | 7 | — | 4/4 |
+| pesadelo | 8,6 s | 6 | — | 4/4 |
 
 ### PvP no Livre (nível 10, com o clamp do modo)
 
@@ -117,148 +117,148 @@ Sementes: 8 por cenário (1000, 8919, 16838, 24757, 32676, 40595, 48514, 56433).
 | bola_de_fogo | dragao_fogo, piromante_profano | 1000 ms | 723 ms | 523 ms |
 | marca_de_area | cultista, boss, rei_goblin, bruxa_do_pantano, dragao_das_ruinas, dragao_fogo, dragao_gelo, dragao_raio, dragao_veneno, necromante_ancestral, piromante_profano | 1200 ms | 923 ms | 723 ms |
 
-### Builds na arena (ficha inteira, nível 8)
+### Builds na arena (ficha inteira)
 
-| Classe | Focada vence a dispersa | Equipado (raro) vence o sem equipamento |
-|---|---|---|
-| aventureiro | 46,9% | 89,1% |
-| guerreiro | 70,3% | 100% |
-| mago | 48,4% | 98,4% |
-| arqueiro | 62,5% | 100% |
-| necromante | 40,6% | 98,4% |
+| Classe | Dirigida vence a dispersa (nível 8) | Dirigida vence a dispersa (nível 30) | Dirigida vence a dispersa (nível 60) | Equipado (raro) vence o sem equipamento (nível 8) |
+|---|---|---|---|---|
+| aventureiro | Mestre de Feras 48,4% · Batedor 62,5% · Implacável 43,8% · Sobrevivente 62,5% · Pergaminhista 36,7% | Mestre de Feras 26,6% · Batedor 70,3% · Implacável 29,7% · Sobrevivente 29,7% · Pergaminhista 7,8% | Mestre de Feras 0% · Batedor 48,4% · Implacável 37,5% · Sobrevivente 18,8% · Pergaminhista 0% | 85,9% |
+| guerreiro | Carniceiro 67,2% · Duelista 42,2% · Rúnico 12,5% · Comandante 82,8% · Baluarte 78,1% | Carniceiro 78,1% · Duelista 79,7% · Rúnico 0% · Comandante 7,8% · Baluarte 7,8% | Carniceiro 75% · Duelista 10,9% · Rúnico 79,7% · Comandante 0% · Baluarte 0% | 98,4% |
+| mago | Artilheiro arcano 50% · Ocultista 51,6% · Encantador 60,9% · Guardião arcano 70,3% · Lâmina rúnica 39,1% | Artilheiro arcano 23,4% · Ocultista 16,4% · Encantador 45,3% · Guardião arcano 41,4% · Lâmina rúnica 9,4% | Artilheiro arcano 0% · Ocultista 0% · Encantador 0% · Guardião arcano 35,9% · Lâmina rúnica 0% | 93,8% |
+| arqueiro | Atirador 50% · Mira firme 36,7% · Inabalável 75,8% · Caçador 27,3% · Flecheiro arcano 30,5% | Atirador 35,9% · Mira firme 50,8% · Inabalável 68,8% · Caçador 18,8% · Flecheiro arcano 31,3% | Atirador 90,6% · Mira firme 71,9% · Inabalável 70,3% · Caçador 62,5% · Flecheiro arcano 82,8% | 98,4% |
+| necromante | Senhor da Horda 57,8% · Mestre de Elite 60,9% · Pestilento 32% · Pacto de Sangue 28,1% · Ceifador 18,8% | Senhor da Horda 32% · Mestre de Elite 57% · Pestilento 0% · Pacto de Sangue 0% · Ceifador 0% | Senhor da Horda 37,5% · Mestre de Elite 98,4% · Pestilento 0% · Pacto de Sangue 1,6% · Ceifador 0% | 98,4% |
 
 ### Economia (nível 5, comuns em sequência)
 
 | Classe | XP por minuto | Ouro por minuto (estimado) |
 |---|---|---|
 | aventureiro | 199,4 | 119,7 |
-| guerreiro | 251,6 | 151 |
-| mago | 137,1 | 82,2 |
+| guerreiro | 228,3 | 137 |
+| mago | 109,2 | 65,5 |
 | arqueiro | 206,7 | 124 |
-| necromante | 172,5 | 103,5 |
-| invocação | 27,3% do dano | — |
+| necromante | 189,1 | 113,4 |
+| invocação | 25,2% do dano | — |
 
 ### Faixa avançada (equipamento raro, Normal, duas sementes; informativo)
 
 | Classe | Nível | Build | Tempo no comum (s) | Vitórias |
 |---|---|---|---|---|
-| aventureiro | 20 | focada | 8,4 | 12/12 |
-| aventureiro | 20 | dispersa | 5,8 | 12/12 |
-| aventureiro | 25 | focada | 8,1 | 12/12 |
-| aventureiro | 25 | dispersa | 5,9 | 12/12 |
-| aventureiro | 30 | focada | 8 | 12/12 |
-| aventureiro | 30 | dispersa | 4,4 | 12/12 |
-| guerreiro | 20 | focada | 4,2 | 12/12 |
-| guerreiro | 20 | dispersa | 3,3 | 12/12 |
-| guerreiro | 25 | focada | 3,1 | 12/12 |
-| guerreiro | 25 | dispersa | 3 | 12/12 |
-| guerreiro | 30 | focada | 3,5 | 12/12 |
-| guerreiro | 30 | dispersa | 1,9 | 12/12 |
-| mago | 20 | focada | 4,6 | 12/12 |
-| mago | 20 | dispersa | 3,7 | 12/12 |
-| mago | 25 | focada | 5,4 | 12/12 |
-| mago | 25 | dispersa | 4,7 | 12/12 |
-| mago | 30 | focada | 4,9 | 12/12 |
-| mago | 30 | dispersa | 3,6 | 12/12 |
-| arqueiro | 20 | focada | 3,9 | 12/12 |
-| arqueiro | 20 | dispersa | 3,1 | 12/12 |
-| arqueiro | 25 | focada | 5,2 | 12/12 |
-| arqueiro | 25 | dispersa | 2,8 | 12/12 |
-| arqueiro | 30 | focada | 4 | 12/12 |
-| arqueiro | 30 | dispersa | 2 | 12/12 |
-| necromante | 20 | focada | 6,9 | 12/12 |
-| necromante | 20 | dispersa | 6,1 | 12/12 |
-| necromante | 25 | focada | 7,3 | 12/12 |
-| necromante | 25 | dispersa | 6,5 | 12/12 |
-| necromante | 30 | focada | 6,8 | 12/12 |
-| necromante | 30 | dispersa | 5,7 | 12/12 |
+| aventureiro | 20 | focada | 4,7 | 12/12 |
+| aventureiro | 20 | dispersa | 4,4 | 12/12 |
+| aventureiro | 25 | focada | 5,6 | 12/12 |
+| aventureiro | 25 | dispersa | 5,1 | 12/12 |
+| aventureiro | 30 | focada | 5,9 | 12/12 |
+| aventureiro | 30 | dispersa | 3,1 | 12/12 |
+| guerreiro | 20 | focada | 3,8 | 12/12 |
+| guerreiro | 20 | dispersa | 3,8 | 12/12 |
+| guerreiro | 25 | focada | 3,2 | 12/12 |
+| guerreiro | 25 | dispersa | 2,4 | 12/12 |
+| guerreiro | 30 | focada | 4,3 | 12/12 |
+| guerreiro | 30 | dispersa | 2,6 | 12/12 |
+| mago | 20 | focada | 5,6 | 12/12 |
+| mago | 20 | dispersa | 4,2 | 12/12 |
+| mago | 25 | focada | 5,5 | 12/12 |
+| mago | 25 | dispersa | 2,4 | 12/12 |
+| mago | 30 | focada | 6 | 12/12 |
+| mago | 30 | dispersa | 2,4 | 12/12 |
+| arqueiro | 20 | focada | 3,2 | 12/12 |
+| arqueiro | 20 | dispersa | 2,8 | 12/12 |
+| arqueiro | 25 | focada | 3 | 12/12 |
+| arqueiro | 25 | dispersa | 2 | 12/12 |
+| arqueiro | 30 | focada | 3,8 | 12/12 |
+| arqueiro | 30 | dispersa | 2,1 | 12/12 |
+| necromante | 20 | focada | 5,6 | 12/12 |
+| necromante | 20 | dispersa | 7,2 | 12/12 |
+| necromante | 25 | focada | 5,7 | 12/12 |
+| necromante | 25 | dispersa | 5,6 | 12/12 |
+| necromante | 30 | focada | 6,6 | 12/12 |
+| necromante | 30 | dispersa | 6,1 | 12/12 |
 
 ### XP por minuto na faixa avançada (build focada, equipamento raro)
 
 | Classe | Nível | Fácil | Normal | Difícil | Pesadelo |
 |---|---|---|---|---|---|
-| aventureiro | 20 | 22,5 | 46,1 | 142,6 | 460,1 |
-| aventureiro | 25 | 29,7 | 63,6 | 145,7 | 512,9 |
-| aventureiro | 30 | 37,9 | 75,6 | 177 | 667,3 |
-| guerreiro | 20 | 101,7 | 71,5 | 177 | 507,8 |
-| guerreiro | 25 | 142,4 | 111,8 | 215,4 | 468,5 |
-| guerreiro | 30 | 200 | 157,4 | 208 | 607,5 |
-| mago | 20 | 24,5 | 43,5 | 134,7 | 442,1 |
-| mago | 25 | 34,4 | 55,1 | 156,6 | 550,6 |
-| mago | 30 | 48,6 | 59,4 | 198,6 | 676,2 |
-| arqueiro | 20 | 30,1 | 83,6 | 188,8 | 613,6 |
-| arqueiro | 25 | 36,8 | 111,1 | 201,9 | 630,5 |
-| arqueiro | 30 | 55 | 135,9 | 303 | 766,3 |
-| necromante | 20 | 23,6 | 42,5 | 116,7 | 391,8 |
-| necromante | 25 | 29 | 55,9 | 139,4 | 473,3 |
-| necromante | 30 | 38,4 | 68 | 148,4 | 466,5 |
+| aventureiro | 20 | 31,6 | 46,9 | 191,1 | 589 |
+| aventureiro | 25 | 45,1 | 65,7 | 226,7 | 725,7 |
+| aventureiro | 30 | 52,9 | 78 | 273,8 | 888,7 |
+| guerreiro | 20 | 102,9 | 66,5 | 176 | 441,9 |
+| guerreiro | 25 | 141,2 | 110,5 | 213,1 | 753,1 |
+| guerreiro | 30 | 197,7 | 149 | 147,1 | 381,5 |
+| mago | 20 | 35 | 50,6 | 137,1 | 519,9 |
+| mago | 25 | 42,6 | 68,8 | 166,4 | 554 |
+| mago | 30 | 62,5 | 77,9 | 182,3 | 649,1 |
+| arqueiro | 20 | 30,1 | 97,3 | 247,4 | 679,5 |
+| arqueiro | 25 | 40,4 | 134,5 | 257,5 | 740,9 |
+| arqueiro | 30 | 60,9 | 167,7 | 324,1 | 795 |
+| necromante | 20 | 24,8 | 50,1 | 142,4 | 444 |
+| necromante | 25 | 34,6 | 67,4 | 175,6 | 706,6 |
+| necromante | 30 | 47 | 78,3 | 214,4 | 703,5 |
 
 ### Níveis altos (equipamento raro do nível, Normal, duas sementes)
 
 | Classe | Nível | Vitórias | Tempo no comum (s) |
 |---|---|---|---|
-| aventureiro | 50 | 100% | 8,4 |
-| aventureiro | 75 | 100% | 7,6 |
-| aventureiro | 100 | 100% | 6,6 |
-| guerreiro | 50 | 100% | 2,3 |
-| guerreiro | 75 | 100% | 3 |
-| guerreiro | 100 | 100% | 2,4 |
-| mago | 50 | 100% | 4,3 |
-| mago | 75 | 100% | 5,7 |
-| mago | 100 | 100% | 3,2 |
-| arqueiro | 50 | 100% | 3,4 |
-| arqueiro | 75 | 100% | 2,4 |
+| aventureiro | 50 | 100% | 5,9 |
+| aventureiro | 75 | 100% | 3,9 |
+| aventureiro | 100 | 100% | 4,6 |
+| guerreiro | 50 | 100% | 3,9 |
+| guerreiro | 75 | 100% | 3,2 |
+| guerreiro | 100 | 100% | 3 |
+| mago | 50 | 100% | 3,9 |
+| mago | 75 | 100% | 5,6 |
+| mago | 100 | 100% | 4,9 |
+| arqueiro | 50 | 100% | 3 |
+| arqueiro | 75 | 100% | 3,1 |
 | arqueiro | 100 | 100% | 2,2 |
-| necromante | 50 | 100% | 6,4 |
-| necromante | 75 | 100% | 6,8 |
-| necromante | 100 | 100% | 7,4 |
+| necromante | 50 | 100% | 5,9 |
+| necromante | 75 | 100% | 6,6 |
+| necromante | 100 | 100% | 5,8 |
 
 ### Ritmo até o 100 (só combate, mediana das classes)
 
 | Trecho | Minutos de combate |
 |---|---|
-| 1 › 30 | 522,5 |
-| 30 › 100 | 6248,2 |
+| 1 › 30 | 490,8 |
+| 30 › 100 | 4893,3 |
 
 ### Mundo: regiões (meio da faixa, equipamento incomum; informativo além das vitórias)
 
 | Região | Nível | Vitórias | XP por hora de combate | Min de combate por nível |
 |---|---|---|---|---|
-| vila_do_centro | 3 | 100% | 10615 | 0,6 |
-| campos_do_oeste | 4 | 100% | 11561 | 0,8 |
-| encosta_do_leste | 7 | 100% | 16765 | 1,4 |
-| floresta_antiga | 7 | 100% | 14809 | 1,6 |
-| ruinas_do_norte | 23 | 98,3% | 3661 | 37,7 |
-| pico_gelado | 13 | 100% | 30288 | 2,6 |
-| pantano_sombrio | 15 | 100% | 24013 | 3,7 |
-| bosque_do_sul | 8 | 100% | 13401 | 2,3 |
-| colinas_do_sudeste | 11 | 100% | 21141 | 3,1 |
+| vila_do_centro | 3 | 100% | 9996 | 0,6 |
+| campos_do_oeste | 4 | 100% | 13252 | 0,7 |
+| encosta_do_leste | 7 | 100% | 19142 | 1,3 |
+| floresta_antiga | 7 | 100% | 15501 | 1,5 |
+| ruinas_do_norte | 23 | 100% | 4027 | 34,3 |
+| pico_gelado | 13 | 100% | 32315 | 2,4 |
+| pantano_sombrio | 15 | 100% | 27940 | 3,2 |
+| bosque_do_sul | 8 | 100% | 15879 | 2 |
+| colinas_do_sudeste | 11 | 100% | 24637 | 2,7 |
 
 ### Mundo: covis de boss (no nível do covil; grupo de 3 com classes misturadas)
 
 | Covil | Boss | Nível | Sozinho | Em grupo | Vitórias do grupo |
 |---|---|---|---|---|---|
-| minas_do_rei_goblin | rei_goblin | 12 | 42,5 s | 36,8 s | 100% |
-| cabana_da_bruxa | bruxa_do_pantano | 18 | 39,5 s | 31,5 s | 100% |
-| ninho_do_dragao | dragao_das_ruinas | 28 | 38,8 s | 32,5 s | 100% |
+| minas_do_rei_goblin | rei_goblin | 12 | 43,5 s | 36,2 s | 100% |
+| cabana_da_bruxa | bruxa_do_pantano | 18 | 54,6 s | 32,5 s | 100% |
+| ninho_do_dragao | dragao_das_ruinas | 28 | 47,9 s | 30,6 s | 100% |
 
 ### Ouro por minuto e custo do primeiro tomo (sem desconto; só ouro direto, sem venda de loot)
 
 | Classe | Nível | Fácil | Normal | Difícil | Pesadelo | Tomo no Normal (min) | Tomo no Pesadelo (min) |
 |---|---|---|---|---|---|---|---|
-| aventureiro | 20 | 270,3 | 288,3 | 261,9 | 255 | 34,7 | 39,2 |
-| aventureiro | 25 | 275,6 | 368,3 | 358,8 | 303,2 | 27,2 | 33 |
-| aventureiro | 30 | 302,8 | 457,5 | 365,4 | 396,1 | 21,9 | 25,2 |
-| guerreiro | 20 | 1454,2 | 447 | 368,5 | 210,5 | 22,4 | 47,5 |
-| guerreiro | 25 | 1759,3 | 643,5 | 510,1 | 214,9 | 15,5 | 46,5 |
-| guerreiro | 30 | 2189,5 | 996,9 | 444,1 | 274,2 | 10 | 36,5 |
-| mago | 20 | 289,6 | 353,5 | 305,2 | 245 | 28,3 | 40,8 |
-| mago | 25 | 350,9 | 382 | 397,5 | 277,2 | 26,2 | 36,1 |
-| mago | 30 | 437,5 | 432,5 | 469 | 396,5 | 23,1 | 25,2 |
-| arqueiro | 20 | 348,6 | 501,4 | 412,2 | 358 | 19,9 | 27,9 |
-| arqueiro | 25 | 373,4 | 653,3 | 441,8 | 351 | 15,3 | 28,5 |
-| arqueiro | 30 | 521,3 | 721,4 | 657,7 | 462,7 | 13,9 | 21,6 |
-| necromante | 20 | 342,3 | 307,8 | 245,4 | 258,8 | 32,5 | 38,6 |
-| necromante | 25 | 294,3 | 375,9 | 324,1 | 331 | 26,6 | 30,2 |
-| necromante | 30 | 381,8 | 451,3 | 322,1 | 277,6 | 22,2 | 36 |
+| aventureiro | 20 | 363,5 | 298,7 | 403,7 | 311,7 | 33,5 | 32,1 |
+| aventureiro | 25 | 460,5 | 304,5 | 437,9 | 411,5 | 32,8 | 24,3 |
+| aventureiro | 30 | 475,7 | 436,2 | 557,3 | 557,2 | 22,9 | 17,9 |
+| guerreiro | 20 | 1501,7 | 410,2 | 364,7 | 220,1 | 24,4 | 45,4 |
+| guerreiro | 25 | 1774,8 | 619,5 | 498,9 | 385,6 | 16,1 | 25,9 |
+| guerreiro | 30 | 2060,1 | 913,4 | 280,7 | 234,2 | 10,9 | 42,7 |
+| mago | 20 | 500,8 | 393,9 | 279,7 | 230,7 | 25,4 | 43,3 |
+| mago | 25 | 459,9 | 364,8 | 389,7 | 288,4 | 27,4 | 34,7 |
+| mago | 30 | 588,5 | 459,5 | 448,5 | 423 | 21,8 | 23,6 |
+| arqueiro | 20 | 348,6 | 709,5 | 499,9 | 378 | 14,1 | 26,5 |
+| arqueiro | 25 | 423,7 | 864,3 | 539,1 | 384,4 | 11,6 | 26 |
+| arqueiro | 30 | 605,9 | 1019,4 | 733,3 | 373,8 | 9,8 | 26,7 |
+| necromante | 20 | 309,7 | 367,1 | 348,8 | 278,4 | 27,2 | 35,9 |
+| necromante | 25 | 402,7 | 457,4 | 397,8 | 435,9 | 21,9 | 22,9 |
+| necromante | 30 | 477,2 | 586,3 | 495,6 | 431,9 | 17,1 | 23,2 |
 

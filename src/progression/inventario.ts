@@ -230,7 +230,7 @@ export function distribuirPonto(e: Entidade, ctx: ContextoSimulacao, atributo: N
     if (bolsa.pontosAtributo <= 0) return recusa('sem_pontos');
     if (bolsa.atributosBase[atributo] >= ctx.balance.atributos.maximo) return recusa('atributo_no_maximo');
     // Marco 28 (D-127): o ponto gasto não leva o atributo acima de nível + 20 (itens podem levar).
-    if (bolsa.atributosBase[atributo] >= tetoDoAtributo(e.nivel, ctx.balance)) return recusa('atributo_acima_do_nivel');
+    if (bolsa.atributosBase[atributo] >= tetoDoAtributo(e.nivel, ctx.balance, ctx.conteudo.classes.get(bolsa.classeId)?.atributos[atributo])) return recusa('atributo_acima_do_nivel');
     bolsa.pontosAtributo--;
     bolsa.atributosBase[atributo]++;
     recalcularFicha(e, ctx);

@@ -32,8 +32,11 @@ export function pontosDoNivel(nivel: number, xp: Balance['xp']): number {
  * Marco 28 (D-127): o teto do atributo-base pelos pontos gastos, até o máximo. Marco 39 (D-147): `10 + 2 × nível`, o
  * que permite seguir um estilo ponto a ponto desde o nível 2 sem fechar o caminho do outro.
  */
-export function tetoDoAtributo(nivel: number, b: Balance): number {
-  return Math.min(b.atributos.maximo, b.atributos.teto.base + b.atributos.teto.porNivel * nivel);
+export function tetoDoAtributo(nivel: number, b: Balance, inicial = 0): number {
+  // Marco 39 (12/11/2026, D-153): também `inicial + porNivel × (nível − 1)`, o valor da classe no atributo. Os principais
+  // das classes começam em 14 ou 15, acima de `10 + 2 × 2`: sem isso, o primeiro ponto não podia ir para o rumo escolhido.
+  const pelaClasse = inicial > 0 ? inicial + b.atributos.teto.porNivel * Math.max(0, nivel - 1) : 0;
+  return Math.min(b.atributos.maximo, Math.max(b.atributos.teto.base + b.atributos.teto.porNivel * nivel, pelaClasse));
 }
 
 /** Marco 28 (D-127): todos os pontos de atributo do nível 2 até `nivel`. */

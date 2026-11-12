@@ -9,6 +9,7 @@
 // Modificador que não combina com a habilidade é ignorado e não entra na chave compilada. A memória é por
 // conteúdo e regras de rank: como compilar é puro, ela não muda o digest.
 
+import { areaDaForma, ecoDaForma, perfuracaoDaForma, saltosDaForma } from './forma-do-estilo';
 import type { ContextoSimulacao } from '../core/contexto';
 import { Leitor, ehObjeto } from '../core/validar';
 import { formatarChave, lerChave } from './chave-habilidade';
@@ -151,6 +152,8 @@ export interface OpcoesCompilacao {
   variantes?: readonly Variante[];
   /** Marco 39 (D-151): a runa do encaixe e a faixa do vínculo com ela. */
   runa?: { runa: 'fisico' | Elemento; faixa: number };
+  /** Marco 39 (D-156): as formas dos estilos, cada uma na sua faixa. */
+  formas?: readonly { mod: Modificador; faixa: number }[];
 }
 
 export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilacao, fontes: FontesCompilacao, regras: RegrasHabilidades): Habilidade {
@@ -267,15 +270,30 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
       multDano *= 1.25;
     }
   }
-  if (aplicados.includes('ecoar')) {
-    const eco = Math.max(1, Math.round(mediaDe(h.formulaDano) * multDano * 0.5));
+  // Marco 39 (12/11/2026, D-156): as formas dos estilos, na faixa de cada uma (o que o equipamento já dá vale inteiro).
+  const formas = (op.formas ?? []).filter((f) => f.faixa > 0 && !aplicados.includes(f.mod) && modificadorCabe(h, f.mod));
+  let ecoFracao = aplicados.includes('ecoar') ? 0.5 : 0;
+  for (const f of formas) {
+    if (f.mod === 'atravessar') h.perfuraAlvos = perfuracaoDaForma(f.faixa);
+    if (f.mod === 'encadear') h.saltos = saltosDaForma(f.faixa);
+    if (f.mod === 'ecoar') ecoFracao = ecoDaForma(f.faixa);
+    if (f.mod === 'maior_e_mais_lenta') {
+      const a = areaDaForma(f.faixa);
+      h.raioArea = Math.min(5, h.raioArea + a.raioExtra);
+      h.conjuracaoMs = Math.round(h.conjuracaoMs * a.conjuracaoMult);
+      multDano *= a.danoMult;
+    }
+  }
+  if (formas.length > 0) h.formas = formas.map((f) => ({ mod: f.mod, faixa: f.faixa }));
+  if (ecoFracao > 0) {
+    const eco = Math.max(1, Math.round(mediaDe(h.formulaDano) * multDano * ecoFracao));
     h.efeitos.push(construirEfeito('efeito_atrasado', { duracaoMs: 600, interno: construirEfeito('dano_direto', { valor: eco }) }));
   }
   h.multDano = multDano;
   h.multCura = multCura;
   h.tags = etiquetasDe(h, b.tags);
   // Na chave só entram os modificadores de fora (equipamento): os da definição e dos caminhos já estão implícitos.
-  h.chave = formatarChave({ id: b.id, rank, caminhos: caminhosValidos, mods: op.mods.filter((m) => aplicados.includes(m)), variantes, ...(op.runa && { runa: op.runa }) });
+  h.chave = formatarChave({ id: b.id, rank, caminhos: caminhosValidos, mods: op.mods.filter((m) => aplicados.includes(m)), variantes, ...(formas.length > 0 && { formas }), ...(op.runa && { runa: op.runa }) });
   // Marco 39 (12/11/2026, D-151): a runa troca o elemento e põe a parte elemental (por último, sobre tudo o que veio antes).
   return op.runa ? aplicarRuna(h, op.runa.runa, op.runa.faixa, fontes.elementos, regras.runas) : h;
 }

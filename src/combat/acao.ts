@@ -623,7 +623,7 @@ function lancar(
       for (const tiro of tiros) {
         // Marco 24 (D-095): a sintonia do Arqueiro marca o tiro cheio (mágico, ricochetes, invisível).
         if (carregado) prepararTiroCheio(ctx, ator, tiro, estado.tick);
-        if (atravessa > 0) tiro.perfuraExtra = atravessa;
+        if (atravessa > 0) tiro.perfuraExtra = Math.max(tiro.perfuraExtra ?? 0, atravessa);
       }
       break;
     }

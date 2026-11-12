@@ -2,6 +2,7 @@
 // elementais (120 variações), os ganchos, os conjuntos, as ressonâncias de atributo, os combos de sequência e as
 // reações novas dos elementos.
 
+import { lerChave } from '../../src/combat/chave-habilidade';
 import { describe, expect, it } from 'vitest';
 import { fonteDaHabilidade } from '../../src/combat/acao';
 import { fazerCombo } from '../../src/combat/combos';
@@ -126,11 +127,12 @@ describe('conjuntos', () => {
     vestir('cabeca', 'capuz');
     vestir('capa', 'capa');
     expect(bonusAtivos(CONTEUDO.conjuntos, bolsa, CONTEUDO.itens).map((a) => a.pecas)).toEqual([2]);
-    expect(chaveDoAtor(c.ctx, c.j, 'chuva_de_flechas')).not.toContain('ecoar');
+    expect(lerChave(chaveDoAtor(c.ctx, c.j, 'chuva_de_flechas'))?.mods).not.toContain('ecoar');
     vestir('arma_secundaria', 'aljava');
     expect(bonusAtivos(CONTEUDO.conjuntos, bolsa, CONTEUDO.itens)[0]?.bonus).toHaveLength(2);
-    expect(chaveDoAtor(c.ctx, c.j, 'chuva_de_flechas')).toContain('ecoar');
-    expect(chaveDoAtor(c.ctx, c.j, 'bola_de_fogo')).not.toContain('ecoar');
+    expect(lerChave(chaveDoAtor(c.ctx, c.j, 'chuva_de_flechas'))?.mods).toContain('ecoar');
+    // Marco 39 (D-156): o conjunto dá o eco inteiro (mods); a forma gradual do estilo pode existir à parte.
+    expect(lerChave(chaveDoAtor(c.ctx, c.j, 'bola_de_fogo'))?.mods).not.toContain('ecoar');
   });
 });
 

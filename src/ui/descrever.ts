@@ -14,7 +14,6 @@ import type { Entidade } from '../entities/entidade';
 import { t, type ChaveTexto } from '../i18n';
 import { escalaDaHabilidade } from '../progression/escala-habilidade';
 import { descreverPassivaGeral } from './descrever-passivas';
-import { nomeDoAtributo } from './dica-atributo';
 
 /** Segundos com vírgula, sem casas inúteis: 1500 -> "1,5"; 3000 -> "3". */
 export function segundos(ms: number): string {
@@ -131,14 +130,13 @@ export function descreverCaminho(c: Caminho): string[] {
 /** Marco 28 (30/10/2026, D-127): "Escala com" e o efeito atual, a partir de `escalaDaHabilidade`. */
 export function linhasDeEscala(ctx: ContextoSimulacao, e: Entidade, h: Habilidade): string[] {
   const s = escalaDaHabilidade(ctx, e, h);
-  const classeId = e.bolsa?.classeId;
-  // Marco 39 (D-148): o nível (poder base), os estilos e, nas de classe, o atributo de classe.
+  // Marco 39 (D-148): o nível (poder base), os estilos e, nas de classe, a classe nos estilos (D-155).
   const nomes = [t('desc.escalaNivel'), t('desc.escalaEstilos')];
-  if (s.deClasse) nomes.push(nomeDoAtributo('dominio', classeId));
+  if (s.deClasse) nomes.push(t('desc.escalaClasseNome'));
   const sinal = (v: number) => `${v >= 0 ? '+' : ''}${String(v)}`;
   const partes = [t('desc.escalaRolagem', { v: sinal(s.rolagemPct) })];
   if (s.estilosPct !== 0) partes.push(t('desc.escalaDosEstilos', { v: sinal(s.estilosPct) }));
-  if (s.deClasse) partes.push(t('desc.escalaClasse', { v: sinal(s.classePct), atributo: nomeDoAtributo('dominio', classeId) }));
+  if (s.deClasse) partes.push(t('desc.escalaClasse', { v: sinal(s.classePct), atributo: t('desc.escalaClasseNome') }));
   if (s.itensPct > 0) partes.push(t('desc.escalaItens', { v: sinal(s.itensPct) }));
   return [t('desc.escala', { atributos: nomes.join(' · ') }), t('desc.escalaAtual', { partes: partes.join(', ') })];
 }

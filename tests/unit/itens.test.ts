@@ -191,7 +191,8 @@ describe('nível e pontos (§2.12)', () => {
     expect(bolsa.atributosBase.constituicao).toBe(11);
     // Marco 39 (D-148): a Constituição também enche a ponta de vida do estilo (um pouco mais que o ponto puro).
     expect(c.j().hpMax).toBeGreaterThanOrEqual(hpMax + BALANCE_PADRAO.hp.hpAtributoMult);
-    expect(c.j().hpMax).toBeLessThanOrEqual(hpMax + BALANCE_PADRAO.hp.hpAtributoMult + 2);
+    // D-153: o primeiro ponto escolhe o rumo, e a inclinação vai para a ponta de vida (o salto é a inclinação inteira).
+    expect(c.j().hpMax).toBeLessThanOrEqual(Math.round(hpMax * 1.3));
     expect(bolsa.pontosAtributo).toBe(0);
   });
 

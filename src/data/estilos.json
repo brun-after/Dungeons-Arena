@@ -29,6 +29,22 @@
             }
           }
         }
+      ],
+      "forma": {
+        "mod": "maior_e_mais_lenta",
+        "danoPct": -20,
+        "tag": "area"
+      },
+      "melhorias": [
+        {
+          "chave": "elemental",
+          "porDegrau": 1.5
+        },
+        {
+          "chave": "ressonanciaPct",
+          "porDegrau": 4,
+          "desde": 4
+        }
       ]
     },
     {
@@ -50,6 +66,22 @@
           "efeito": {
             "potenciaPct": 30
           }
+        }
+      ],
+      "forma": {
+        "mod": "ecoar",
+        "danoPct": -25,
+        "tag": "magico"
+      },
+      "melhorias": [
+        {
+          "chave": "elemental",
+          "porDegrau": 2.5
+        },
+        {
+          "chave": "rastroMs",
+          "porDegrau": 100,
+          "desde": 4
         }
       ]
     },
@@ -82,6 +114,17 @@
             "raio": 4
           }
         }
+      ],
+      "melhorias": [
+        {
+          "chave": "encarnacao",
+          "porDegrau": 2.5
+        },
+        {
+          "chave": "arquimagoDuracaoMult",
+          "porDegrau": 0.05,
+          "base": 1
+        }
       ]
     },
     {
@@ -93,7 +136,7 @@
         "sabedoria": 0.35
       },
       "efeitos": {
-        "ehp": 0.65,
+        "ehp": 0.75,
         "dano": 0.15
       },
       "texto": "Escudos recebidos duram e absorvem até 60% mais.",
@@ -103,6 +146,17 @@
           "efeito": {
             "escudoPct": 60
           }
+        }
+      ],
+      "melhorias": [
+        {
+          "chave": "encarnacao",
+          "porDegrau": 1.0
+        },
+        {
+          "chave": "orbes",
+          "porDegrau": 0.125,
+          "inteiro": true
         }
       ]
     },
@@ -129,6 +183,22 @@
             "herdarElemento": 5000
           }
         }
+      ],
+      "forma": {
+        "mod": "encadear",
+        "danoPct": -15,
+        "tag": "contato"
+      },
+      "melhorias": [
+        {
+          "chave": "elemental",
+          "porDegrau": 1.5
+        },
+        {
+          "chave": "rastroMs",
+          "porDegrau": 100,
+          "desde": 2
+        }
       ]
     },
     {
@@ -140,7 +210,7 @@
         "carisma": 0.35
       },
       "efeitos": {
-        "cadencia": 0.3,
+        "cadencia": 0.25,
         "dano": 0.2
       },
       "texto": "A flecha que abate tem até 30% de chance de saltar para o hostil mais perto.",
@@ -159,6 +229,22 @@
             "raio": 3
           }
         }
+      ],
+      "forma": {
+        "mod": "encadear",
+        "danoPct": -15,
+        "tag": "projetil"
+      },
+      "melhorias": [
+        {
+          "chave": "carga",
+          "porDegrau": 1
+        },
+        {
+          "chave": "cadeiaPct",
+          "porDegrau": 5,
+          "desde": 4
+        }
       ]
     },
     {
@@ -170,7 +256,7 @@
         "destreza": 0.35
       },
       "efeitos": {
-        "dano": 0.35
+        "dano": 0.3
       },
       "texto": "Crítico de projétil deixa o alvo exposto (+15% de dano recebido) por 2 s.",
       "ganchos": [
@@ -187,6 +273,21 @@
             }
           }
         }
+      ],
+      "forma": {
+        "mod": "atravessar",
+        "danoPct": -8,
+        "tag": "projetil"
+      },
+      "melhorias": [
+        {
+          "chave": "alcanceCarregado",
+          "porDegrau": 2.5
+        },
+        {
+          "chave": "carga",
+          "porDegrau": 1
+        }
       ]
     },
     {
@@ -198,7 +299,7 @@
         "vontade": 0.35
       },
       "efeitos": {
-        "ehp": 0.75,
+        "ehp": 0.6,
         "dano": 0.2
       },
       "texto": "Estados negativos duram até 50% menos em você.",
@@ -208,6 +309,17 @@
           "efeito": {
             "negativosMenosPct": 50
           }
+        }
+      ],
+      "melhorias": [
+        {
+          "chave": "carga",
+          "porDegrau": 0.5
+        },
+        {
+          "chave": "ancoraMs",
+          "porDegrau": 200,
+          "desde": 4
         }
       ]
     },
@@ -238,6 +350,17 @@
             "revelarPct": 30
           }
         }
+      ],
+      "melhorias": [
+        {
+          "chave": "alcanceCarregado",
+          "porDegrau": 1.0
+        },
+        {
+          "chave": "cadeiaPct",
+          "porDegrau": 5,
+          "desde": 2
+        }
       ]
     },
     {
@@ -263,6 +386,23 @@
             "herdarElemento": 5000
           }
         }
+      ],
+      "forma": {
+        "mod": "maior_e_mais_lenta",
+        "danoPct": -20,
+        "tag": "area"
+      },
+      "melhorias": [
+        {
+          "chave": "explosaoPct",
+          "porDegrau": 3,
+          "desde": 4
+        },
+        {
+          "chave": "tempestadePct",
+          "porDegrau": 1.75,
+          "desde": 14
+        }
       ]
     },
     {
@@ -274,7 +414,7 @@
         "constituicao": 0.35
       },
       "efeitos": {
-        "area": 0.25,
+        "area": 0.12,
         "sustain": 0.15
       },
       "texto": "Cada inimigo atingido por golpe de contato cura até 1% da sua vida.",
@@ -288,6 +428,27 @@
             "curarPct": 1
           }
         }
+      ],
+      "forma": {
+        "mod": "maior_e_mais_lenta",
+        "danoPct": -20,
+        "tag": "area"
+      },
+      "melhorias": [
+        {
+          "chave": "furia",
+          "porDegrau": 2.0
+        },
+        {
+          "chave": "auraVisivel",
+          "porDegrau": 0,
+          "base": 1
+        },
+        {
+          "chave": "auraRaio",
+          "porDegrau": 0.125,
+          "inteiro": true
+        }
       ]
     },
     {
@@ -299,7 +460,7 @@
         "vontade": 0.35
       },
       "efeitos": {
-        "dano": 0.4,
+        "dano": 0.25,
         "cadencia": 0.25
       },
       "texto": "Crítico corpo a corpo reduz em 0,5 s a recarga das skills de classe.",
@@ -312,6 +473,17 @@
           "efeito": {
             "recargaClasseMs": 500
           }
+        }
+      ],
+      "forma": {
+        "mod": "ecoar",
+        "danoPct": -25,
+        "tag": "contato"
+      },
+      "melhorias": [
+        {
+          "chave": "furia",
+          "porDegrau": 2
         }
       ]
     },
@@ -344,6 +516,26 @@
             }
           }
         }
+      ],
+      "forma": {
+        "mod": "encadear",
+        "danoPct": -15,
+        "tag": "contato"
+      },
+      "melhorias": [
+        {
+          "chave": "aura",
+          "porDegrau": 1.5
+        },
+        {
+          "chave": "auraVisivel",
+          "porDegrau": 0,
+          "base": 1
+        },
+        {
+          "chave": "auraElementalPct",
+          "porDegrau": 1.25
+        }
       ]
     },
     {
@@ -367,6 +559,21 @@
             "raio": 6
           }
         }
+      ],
+      "melhorias": [
+        {
+          "chave": "aura",
+          "porDegrau": 2.0
+        },
+        {
+          "chave": "auraVisivel",
+          "porDegrau": 0,
+          "base": 1
+        },
+        {
+          "chave": "estandartePct",
+          "porDegrau": 2.5
+        }
       ]
     },
     {
@@ -388,6 +595,22 @@
           "efeito": {
             "auraDefesaPct": 15
           }
+        }
+      ],
+      "melhorias": [
+        {
+          "chave": "aura",
+          "porDegrau": 1.5
+        },
+        {
+          "chave": "auraVisivel",
+          "porDegrau": 0,
+          "base": 1
+        },
+        {
+          "chave": "auraRaio",
+          "porDegrau": 0.125,
+          "inteiro": true
         }
       ]
     },
@@ -416,6 +639,18 @@
             "raio": 6
           }
         }
+      ],
+      "melhorias": [
+        {
+          "chave": "servos",
+          "porDegrau": 1.0
+        },
+        {
+          "chave": "servosDaPassiva",
+          "porDegrau": 0.125,
+          "base": 1,
+          "inteiro": true
+        }
       ]
     },
     {
@@ -427,7 +662,7 @@
         "carisma": 0.35
       },
       "efeitos": {
-        "invoc": 0.7,
+        "invoc": 0.45,
         "ehp": 0.15
       },
       "texto": "Seus efeitos ficam até 20% mais fortes.",
@@ -437,6 +672,16 @@
           "efeito": {
             "potenciaPct": 20
           }
+        }
+      ],
+      "melhorias": [
+        {
+          "chave": "servos",
+          "porDegrau": 1
+        },
+        {
+          "chave": "retornoServo",
+          "porDegrau": 1
         }
       ]
     },
@@ -468,6 +713,23 @@
             }
           }
         }
+      ],
+      "forma": {
+        "mod": "maior_e_mais_lenta",
+        "danoPct": -20,
+        "tag": "area"
+      },
+      "melhorias": [
+        {
+          "chave": "retornoServo",
+          "porDegrau": 1.5
+        },
+        {
+          "chave": "legiao",
+          "porDegrau": 0,
+          "desde": 4,
+          "base": 1
+        }
       ]
     },
     {
@@ -493,6 +755,16 @@
             "curarPct": 1
           }
         }
+      ],
+      "melhorias": [
+        {
+          "chave": "servos",
+          "porDegrau": 1.5
+        },
+        {
+          "chave": "retornoServoPct",
+          "porDegrau": 1.5
+        }
       ]
     },
     {
@@ -514,6 +786,20 @@
           "efeito": {
             "recargaClasseMs": 1000
           }
+        }
+      ],
+      "forma": {
+        "mod": "ecoar",
+        "danoPct": -25
+      },
+      "melhorias": [
+        {
+          "chave": "retornoServo",
+          "porDegrau": 2.5
+        },
+        {
+          "chave": "retornoServoPct",
+          "porDegrau": 0.75
         }
       ]
     },
@@ -537,6 +823,16 @@
             "cargaUltimatePct": 20
           }
         }
+      ],
+      "melhorias": [
+        {
+          "chave": "falcao",
+          "porDegrau": 2.5
+        },
+        {
+          "chave": "matilhaPct",
+          "porDegrau": 0.5
+        }
       ]
     },
     {
@@ -549,7 +845,7 @@
       },
       "efeitos": {
         "cadencia": 0.3,
-        "ehp": 0.3
+        "ehp": 0.35
       },
       "texto": "Escudos recebidos duram e absorvem até 40% mais.",
       "ganchos": [
@@ -558,6 +854,21 @@
           "efeito": {
             "escudoPct": 40
           }
+        }
+      ],
+      "forma": {
+        "mod": "atravessar",
+        "danoPct": -8,
+        "tag": "projetil"
+      },
+      "melhorias": [
+        {
+          "chave": "falcao",
+          "porDegrau": 1.5
+        },
+        {
+          "chave": "faroChancePct",
+          "porDegrau": 0.4
         }
       ]
     },
@@ -586,6 +897,17 @@
             }
           }
         }
+      ],
+      "forma": {
+        "mod": "ecoar",
+        "danoPct": -25,
+        "tag": "contato"
+      },
+      "melhorias": [
+        {
+          "chave": "falcao",
+          "porDegrau": 3.0
+        }
       ]
     },
     {
@@ -608,6 +930,12 @@
             "cargaVidaBaixaPct": 100
           }
         }
+      ],
+      "melhorias": [
+        {
+          "chave": "pergaminho",
+          "porDegrau": 2.5
+        }
       ]
     },
     {
@@ -629,6 +957,27 @@
           "efeito": {
             "estudoPct": 25
           }
+        }
+      ],
+      "forma": {
+        "mod": "maior_e_mais_lenta",
+        "danoPct": -20,
+        "tag": "area"
+      },
+      "melhorias": [
+        {
+          "chave": "pergaminho",
+          "porDegrau": 1.0
+        },
+        {
+          "chave": "pergaminhosExtras",
+          "porDegrau": 0.125,
+          "inteiro": true
+        },
+        {
+          "chave": "primordialChancePct",
+          "porDegrau": 1.25,
+          "desde": 4
         }
       ]
     }

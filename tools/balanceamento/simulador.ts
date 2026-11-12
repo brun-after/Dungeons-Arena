@@ -17,7 +17,8 @@ import { idItemGerado } from '../../src/progression/gerar-item';
 import type { Raridade } from '../../src/modos/modo';
 import perfis from '../rede/perfis.json';
 import { ATRIBUTOS_TIPICOS, BotDeDuelo, CONTEUDO, contextoDoCenario, inimigo, jogadorTipico, mundo, TICKS_POR_S } from './cenarios';
-import { pontosAteONivel } from '../../src/progression/nivel';
+import { pontosAteONivel, tetoDoAtributo } from '../../src/progression/nivel';
+import type { Atributos } from '../../src/entities/entidade';
 
 // Marco 22 (23/10/2026, D-090): o Necromante entra nas metas (antes só no diagnóstico).
 export const CLASSES = ['aventureiro', 'guerreiro', 'mago', 'arqueiro', 'necromante'] as const;
@@ -302,7 +303,7 @@ export function dueloDeFichas(classe: string, nivel: number, semente: number, mo
   return morte?.t === 'morreu' && morte.id === 'b' ? 1 : 0;
 }
 
-/** A build dispersa: os pontos dos níveis espalhados por igual nos seis atributos (em vez do principal e da Constituição). */
+/** A build dispersa: os pontos dos níveis espalhados por igual nos seis atributos. */
 export function dispersar(e: Entidade, ctx: ContextoSimulacao): void {
   const bolsa = e.bolsa;
   const classe = bolsa ? CONTEUDO.classes.get(bolsa.classeId) : undefined;
@@ -340,6 +341,36 @@ export function desequipar(e: Entidade, ctx: ContextoSimulacao): void {
   for (const slot of Object.keys(bolsa.equipamento) as (keyof typeof bolsa.equipamento)[]) bolsa.equipamento[slot] = null;
   recalcularFicha(e, ctx);
 }
+
+/**
+ * Marco 39 (12/11/2026, D-153): a build dirigida a um estilo — quem escolhe um rumo no pentagrama. Os pontos vão para o
+ * par do estilo pedido, 2 no principal para 1 no secundário, dentro do teto; o que não cabe vai para a Constituição e
+ * depois para os outros.
+ */
+export const dirigirPara = (estiloId: string) => (e: Entidade, ctx: ContextoSimulacao): void => {
+  const bolsa = e.bolsa;
+  const classe = bolsa ? CONTEUDO.classes.get(bolsa.classeId) : undefined;
+  const alvo = bolsa ? (ctx.conteudo.estilos.get(bolsa.classeId) ?? []).find((x) => x.id === estiloId) : undefined;
+  if (!bolsa || !classe || !alvo) return;
+  const par = Object.entries(alvo.pesos).sort((a, b) => b[1] - a[1]).map(([k]) => k as keyof Atributos);
+  const ordem: (keyof Atributos)[] = [...par, 'constituicao', 'destreza', 'sabedoria', 'carisma', 'vontade', 'inteligencia'];
+  const teto = (n: keyof Atributos) => tetoDoAtributo(e.nivel, ctx.balance, classe.atributos[n]);
+  bolsa.atributosBase = { ...classe.atributos };
+  let resto = pontosAteONivel(e.nivel, ctx.balance.xp);
+  const por = (n: keyof Atributos, quanto: number) => {
+    const dar = Math.max(0, Math.min(quanto, resto, teto(n) - bolsa.atributosBase[n]));
+    bolsa.atributosBase[n] += dar;
+    resto -= dar;
+  };
+  while (resto > 0) {
+    const antes = resto;
+    if (par[0]) por(par[0], 2);
+    if (par[1]) por(par[1], 1);
+    if (resto === antes) for (const n of ordem) por(n, resto);
+    if (resto === antes) break;
+  }
+  recalcularFicha(e, ctx);
+};
 
 /** O personagem como o simulador o monta (sem ajuste). */
 export function semAjuste(): void {

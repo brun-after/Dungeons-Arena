@@ -41,12 +41,12 @@ export function aplicarAtualizacao(e: Entidade, ctx: ContextoSimulacao, pedido: 
   if (!bolsa || !precisaDaAtualizacao(bolsa)) return false;
   const classe = ctx.conteudo.classes.get(bolsa.classeId);
   if (!classe) return false;
-  const teto = tetoDoAtributo(e.nivel, ctx.balance);
+  const teto = (a: NomeAtributo) => tetoDoAtributo(e.nivel, ctx.balance, classe.atributos[a]);
   let livres = pontosDaAtualizacao(e, ctx);
   const base = { ...classe.atributos };
   for (const a of NOMES_ATRIBUTOS) {
     const quer = Math.max(0, Math.floor(pedido[a] ?? 0));
-    const cabe = Math.max(0, Math.min(quer, livres, teto - base[a], ctx.balance.atributos.maximo - base[a]));
+    const cabe = Math.max(0, Math.min(quer, livres, teto(a) - base[a], ctx.balance.atributos.maximo - base[a]));
     base[a] += cabe;
     livres -= cabe;
   }

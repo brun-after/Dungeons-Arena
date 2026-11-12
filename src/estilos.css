@@ -3378,6 +3378,8 @@ dialog.mochila[open] { display: flex; flex-direction: column; }
 .lista-estilos li { margin: 6px 0; }
 .estilo-pesos, .estilo-itens { color: var(--texto-suave); }
 .estilo-mecanica { color: var(--texto-suave); font-style: italic; }
+/* Marco 39 (12/11/2026, D-155): a classe nos estilos. */
+.estilo-classe { color: var(--destaque, #e8c66a); font-size: 0.92em; }
 
 /* Marco 39 (12/11/2026, D-149): a tela de atualização do personagem. */
 .modal-atualizacao .acoes-atualizacao { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; justify-content: flex-end; }
@@ -3387,3 +3389,11 @@ dialog.mochila[open] { display: flex; flex-direction: column; }
 .encaixe-runa { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin-top: 0.35rem; }
 .seletor-runa { background: var(--fundo-campo, #1d1a17); color: inherit; border: 1px solid var(--borda, #5a4a3a); border-radius: 4px; padding: 0.15rem 0.35rem; font: inherit; }
 .dica-runa { flex-basis: 100%; opacity: 0.8; }
+
+/* Marco 39 (D-152): a forma desperta do estilo (apagada até o limite; acesa depois). */
+.estilo-forma { font-size: 0.85em; opacity: 0.6; margin-top: 0.15rem; --forma: 0; }
+/* Marco 39 (12/11/2026, D-156): a forma cresce em 10 faixas; o texto ganha força e o medidor enche com ela. */
+.estilo-forma.acesa { opacity: calc(0.7 + 0.3 * var(--forma)); color: var(--destaque); text-shadow: 0 0 calc(6px * var(--forma)) color-mix(in srgb, var(--destaque) 60%, transparent); }
+.forma-medidor { display: inline-flex; gap: 2px; margin-right: 0.4rem; vertical-align: middle; }
+.forma-medidor i { width: 5px; height: 9px; border-radius: 1px; background: color-mix(in srgb, currentColor 22%, transparent); }
+.forma-medidor i.cheia { background: currentColor; box-shadow: 0 0 calc(5px * var(--forma)) currentColor; }

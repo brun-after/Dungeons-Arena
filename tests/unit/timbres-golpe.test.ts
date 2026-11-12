@@ -5,6 +5,7 @@ import { timbreDoGolpe, type AtacanteSonoro } from '../../src/audio/timbres';
 import { EFEITOS } from '../../src/audio/gravacoes';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import { marcoAMostra, marcoDe } from '../../src/progression/dominio';
+import { recalcularFicha } from '../../src/progression/derivados';
 import { atacanteSonoro } from '../../src/ui/som';
 import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 
@@ -72,15 +73,18 @@ describe('som do golpe corpo a corpo', () => {
 });
 
 describe('aura do Guerreiro à mostra', () => {
-  it('sem a bolsa (online e Mundo), o marco vem da classe, do atributo e da arma à mostra', () => {
+  // Marco 39 (12/11/2026, D-155): a aura vem da trilha de classe publicada (o Carniceiro a acende).
+  it('sem a bolsa (online e Mundo), o marco vem da trilha publicada e da arma à mostra', () => {
     const g = criarJogador(obter(CONTEUDO.classes.get('guerreiro')), 'g', 1, 1, ctx.balance);
-    g.atributos.dominio = 30;
+    const bolsa = obter(g.bolsa);
+    g.nivel = 30;
+    bolsa.atributosBase = { ...bolsa.atributosBase, vontade: bolsa.atributosBase.vontade + 20, constituicao: bolsa.atributosBase.constituicao + 10 };
+    recalcularFicha(g, ctx);
     expect(marcoDe(ctx, g, 'auraVisivel')).toBe(1);
     const publico = { ...g, bolsa: null, classeId: 'guerreiro', aparencia: { arma: 'machado', secundaria: null, cabeca: null, corpo: null, capa: null, formaArma: null, elementoArma: null, formaMaxima: null } };
-    expect(marcoDe(ctx, publico, 'auraVisivel')).toBe(0);
     expect(marcoAMostra(ctx, publico, 'auraVisivel')).toBe(1);
     expect(marcoAMostra(ctx, { ...publico, aparencia: { ...publico.aparencia, arma: 'arco' } }, 'auraVisivel')).toBe(0);
-    expect(marcoAMostra(ctx, { ...publico, atributos: { ...publico.atributos, dominio: 20 } }, 'auraVisivel')).toBe(0);
+    expect(marcoAMostra(ctx, { ...publico, trilhaClasse: { chaves: {}, degraus: 0 } }, 'auraVisivel')).toBe(0);
   });
 });
 

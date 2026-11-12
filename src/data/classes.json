@@ -156,7 +156,7 @@
     {
       "id": "arqueiro",
       "runaPadrao": "raio",
-      "poderPct": 95,
+      "poderPct": 88,
       "nome": "Arqueiro",
       "hpBase": 55,
       "defesa": 2,

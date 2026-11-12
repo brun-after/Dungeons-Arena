@@ -6,8 +6,9 @@ import { writeFileSync } from 'node:fs';
 import { BALANCE_PADRAO } from '../../src/core/contexto';
 import { DIFICULDADES } from '../../src/modos/dificuldade';
 import { xpParaProximo } from '../../src/progression/nivel';
-import { CLASSES, aguenta, avisos, chefe, desequipar, dispersar, dueloDeFichas, equipar, fatiaDaInvocacao, mediana, economiaPorMinuto, pvpLivre, semAjuste, sequencia, xpPorMinuto } from './simulador';
+import { CLASSES, aguenta, avisos, chefe, desequipar, dirigirPara, dispersar, dueloDeFichas, equipar, fatiaDaInvocacao, mediana, economiaPorMinuto, pvpLivre, sequencia, xpPorMinuto } from './simulador';
 import { ritmoDasRegioes, tempoDosCovis } from './mundo';
+import { CONTEUDO } from './cenarios';
 
 const args = process.argv.slice(2);
 // Diagnóstico ampliado (18/10/2026): preserva o contrato e as metas do relatório histórico.
@@ -157,16 +158,25 @@ tabela('Aviso útil das habilidades inimigas (p95 aproximado da rede)', ['Habili
 // 7. Marco 17: quem upou bem chega forte (arena com a ficha inteira, mesma classe e nível).
 const corpoBuild: string[][] = [];
 for (const classe of CLASSES) {
-  const pct = (montarA: Parameters<typeof dueloDeFichas>[3], montarB: Parameters<typeof dueloDeFichas>[4]) =>
-    (100 * SEMENTES_DUELO.reduce((soma, s) => soma + dueloDeFichas(classe, metas.build.nivel, s, montarA, montarB), 0)) / SEMENTES_DUELO.length;
-  const focada = pct(semAjuste, dispersar);
-  const equipado = pct(equipar('raro'), desequipar);
-  // Marco 39 (D-148): a focada e a dispersa no mesmo patamar (o pentagrama premia os dois caminhos).
-  conferir(`build: ${classe} focada contra a dispersa`, focada, metas.build.focadaMinPct, metas.build.focadaMaxPct, '%');
+  const pct = (nivel: number, montarA: Parameters<typeof dueloDeFichas>[3], montarB: Parameters<typeof dueloDeFichas>[4]) =>
+    (100 * SEMENTES_DUELO.reduce((soma, s) => soma + dueloDeFichas(classe, nivel, s, montarA, montarB), 0)) / SEMENTES_DUELO.length;
+  // Marco 39 (D-148, D-153, D-154): quem se dirige a um estilo e o generalista no mesmo patamar, em vários níveis. A meta
+  // vale para os estilos de duelo da classe (quem escolhe bem), com dois lados (D-155): o foco compensa (o melhor estilo
+  // vence a dispersa ao menos `focadaMinPct`) e o generalista não é esmagado (a média dos dois melhores, que tira o viés
+  // do máximo de cinco amostras ruidosas, fica até `focadaMaxPct`). A tabela mostra os cinco.
+  const estilosDaClasse = CONTEUDO.estilos.get(classe) ?? [];
+  const focadas = metas.build.niveisDispersa.map((nivel) => {
+    const porEstilo = estilosDaClasse.map((est) => ({ est, v: pct(nivel, dirigirPara(est.id), dispersar) }));
+    const [p1 = 0, p2 = p1] = porEstilo.map((x) => x.v).sort((a, b) => b - a);
+    conferir(`build: ${classe} melhor estilo dirigido contra a dispersa (nível ${String(nivel)})`, p1, metas.build.focadaMinPct, 100, '%');
+    conferir(`build: ${classe} dois melhores estilos contra a dispersa (nível ${String(nivel)})`, (p1 + p2) / 2, 0, metas.build.focadaMaxPct, '%');
+    return porEstilo.map((x) => `${x.est.nome} ${br(x.v)}%`).join(' · ');
+  });
+  const equipado = pct(metas.build.nivel, equipar('raro'), desequipar);
   conferir(`build: ${classe} equipado vence o sem equipamento`, equipado, metas.build.vitoriasMinPct, 100, '%');
-  corpoBuild.push([classe, `${br(focada)}%`, `${br(equipado)}%`]);
+  corpoBuild.push([classe, ...focadas, `${br(equipado)}%`]);
 }
-tabela(`Builds na arena (ficha inteira, nível ${metas.build.nivel})`, ['Classe', 'Focada vence a dispersa', 'Equipado (raro) vence o sem equipamento'], corpoBuild);
+tabela('Builds na arena (ficha inteira)', ['Classe', ...metas.build.niveisDispersa.map((n) => `Dirigida vence a dispersa (nível ${String(n)})`), `Equipado (raro) vence o sem equipamento (nível ${String(metas.build.nivel)})`], corpoBuild);
 
 // 7. Invocação e economia (informativos e a fatia da invocação).
 const fatia = mediana(SEMENTES.map((s) => fatiaDaInvocacao(5, s)));

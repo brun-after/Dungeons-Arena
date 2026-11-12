@@ -11,6 +11,7 @@ import type { ContextoSimulacao } from '../core/contexto';
 import type { Atributos, Bolsa, Entidade } from '../entities/entidade';
 import { basicoDoPersonagem, basicoSecundario } from './armas';
 import { pontosUteis } from './efeitos-atributo';
+import { trilhaDe } from './dominio';
 import { radarDe } from './estilos';
 import { hpMaximo, manaMaxima } from './ficha';
 import { NOMES_ATRIBUTOS, type Item } from './itens';
@@ -110,6 +111,9 @@ export function recalcularFicha(e: Entidade, ctx: Pick<ContextoSimulacao, 'balan
   else delete e.danoItensPct;
   e.hp = Math.min(e.hp, e.hpMax);
   e.mana = Math.min(e.mana, e.manaMax);
+  // Marco 39 (12/11/2026, D-155): a trilha de classe vai publicada, para quem vê sem a bolsa.
+  const trilha = trilhaDe(ctx, e);
+  e.trilhaClasse = { chaves: { ...trilha.chaves }, degraus: trilha.degraus };
   // Marco 14: as teclas 1–4 são as habilidades da entidade.
   e.habilidades = e.bolsa.barra.filter((id): id is string => id !== null && e.bolsa?.conhecidas.some((c) => c.id === id) === true);
   // Marco 27 (D-126): o básico vem da arma principal; o da mão secundária sai a cada 3º (progression/armas.ts).

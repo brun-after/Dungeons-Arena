@@ -12,6 +12,7 @@ import { ASSINATURAS, VARIANTES } from './assinaturas';
 import { circuloNoChao, clarao, ondaDeChoque, sortear } from './blocos';
 import type { Acerto, AreaVfx, CenaVfx, DefAssinatura, EmSi, P } from './cena';
 import { Deslizes } from './deslizes';
+import { formaNaArea, formaNaConjuracao, formaNoAcerto, type FormaVisual } from './manifestacao-forma';
 import { ehClasseComRuna, manifestarNaConjuracao, manifestarNoAcerto, type Runa } from './manifestacao-runa';
 import { Marcas } from './marcas';
 import { Animacoes, Pincel } from './pincel';
@@ -117,6 +118,21 @@ export class DiretorVfx {
   runaNoAcerto(classe: string | undefined, runa: Runa, faixa: number, a: Acerto, comParticulas: boolean): void {
     if (!this.ativo || !ehClasseComRuna(classe)) return;
     manifestarNoAcerto(this.cena(), classe, runa, faixa, a, comParticulas);
+  }
+
+  /** Marco 39 (12/11/2026, D-156): a forma do estilo no acerto, na intensidade da faixa (manifestacao-forma.ts). */
+  formaNoAcerto(formas: readonly FormaVisual[], a: Acerto): void {
+    if (this.ativo) formaNoAcerto(this.cena(), formas, a);
+  }
+
+  /** D-156: a forma na mão de quem conjura. */
+  formaNaConjuracao(formas: readonly FormaVisual[], pos: P, cor: number): void {
+    if (this.ativo) formaNaConjuracao(this.cena(), formas, pos, cor);
+  }
+
+  /** D-156: a forma no estouro da área. */
+  formaNaArea(formas: readonly FormaVisual[], a: AreaVfx): void {
+    if (this.ativo) formaNaArea(this.cena(), formas, a);
   }
 
   /** D-151: a runa na mão de quem conjura. */

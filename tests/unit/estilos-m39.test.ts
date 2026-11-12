@@ -15,7 +15,7 @@ function obter<T>(v: T | null | undefined): T {
   if (v === null || v === undefined) throw Error('ausente');
   return v;
 }
-const NEUTRO = { vontade: 10, destreza: 10, constituicao: 10, inteligencia: 10, sabedoria: 10, carisma: 10, dominio: 10 };
+const NEUTRO = { vontade: 10, destreza: 10, constituicao: 10, inteligencia: 10, sabedoria: 10, carisma: 10 };
 
 describe('pentagrama de estilos', () => {
   it('cada classe tem 5 estilos, cada um com um par de pesos que soma 1', () => {

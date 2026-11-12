@@ -38,7 +38,7 @@ export type Grau = (typeof GRAUS)[number];
 
 /** Marco 18 (D-068): o atributo do bônus fixo de dano. Sem `escalaCom`, físico usa Força e mágico, Inteligência. */
 export type AtributoDeEscala = keyof Atributos;
-const ATRIBUTOS_DE_ESCALA: readonly AtributoDeEscala[] = ['vontade', 'destreza', 'constituicao', 'inteligencia', 'sabedoria', 'carisma', 'dominio'];
+const ATRIBUTOS_DE_ESCALA: readonly AtributoDeEscala[] = ['vontade', 'destreza', 'constituicao', 'inteligencia', 'sabedoria', 'carisma'];
 export type Mobilidade = (typeof MOBILIDADES)[number];
 
 /** Marco 14: modificadores de evolução e de equipamento (D-057). */
@@ -178,6 +178,10 @@ export interface Habilidade {
   faixaRuna?: number;
   /** D-151: a parte elemental do dano (0 a 1); o resto é neutro (só a elemental sente resistência e absorção). */
   fracaoElemental?: number;
+  /** Marco 39 (12/11/2026, D-156): as formas dos estilos que entraram na skill, com a faixa (combat/forma-do-estilo.ts). */
+  formas?: readonly { mod: Modificador; faixa: number }[];
+  /** D-156: quantos alvos o projétil atravessa (a forma gradual do atravessar; `perfura` atravessa todos). */
+  perfuraAlvos?: number;
 }
 
 /** D-136: a lança vai do morto até o alvo dele e `alem` células adiante; com `lados`, também para os dois lados. */

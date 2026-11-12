@@ -6,7 +6,10 @@
 import type { ContextoSimulacao } from '../core/contexto';
 import type { Atributos, Bolsa } from '../entities/entidade';
 import { t, type ChaveTexto } from '../i18n';
-import { radarDe, type ComponenteDeEstilo, type RadarDeEstilos } from '../progression/estilos';
+import { degrausDaPonta, pontaConquistada, trilhaDoRadar, valorDaMelhoria } from '../progression/dominio';
+import { areaDaForma, ecoDaForma, faixaDaForma, perfuracaoDaForma, saltosDaForma } from '../combat/forma-do-estilo';
+import type { Modificador } from '../combat/habilidades';
+import { radarDe, type ComponenteDeEstilo, type Estilo, type FormaDoEstilo, type MelhoriaDeClasse, type RadarDeEstilos } from '../progression/estilos';
 import type { NomeAtributo } from '../progression/itens';
 
 const SVG = 'http://www.w3.org/2000/svg';
@@ -52,12 +55,86 @@ function desenho(radar: RadarDeEstilos): SVGSVGElement {
   return raiz;
 }
 
+type CtxPainel = Pick<ContextoSimulacao, 'conteudo' | 'balance'>;
+
+/** Marco 39 (12/11/2026, D-155): o texto de uma melhoria de classe com tal valor (fator em %, marco no seu texto). */
+function textoDaMelhoria(m: MelhoriaDeClasse, v: number): string {
+  if (m.chave in FATORES) return t('estilos.classeFator', { efeito: t(`dominio.porPonto.${m.chave}` as ChaveTexto), v: Math.round(v) });
+  const virgula = (n: number) => String(n).replace('.', ',');
+  return t(`marco.${m.chave}` as ChaveTexto, { valor: virgula(Math.round(v * 100) / 100), s: virgula(Math.round(v / 100) / 10) });
+}
+
+/** As chaves de fator (as outras são marcos). */
+const FATORES: Readonly<Record<string, true>> = {
+  furia: true, aura: true, servos: true, retornoServo: true, carga: true, alcanceCarregado: true, encarnacao: true, elemental: true, falcao: true, pergaminho: true,
+};
+
+/** D-155: a linha da classe do estilo: o degrau de agora, o que cada melhoria dá e quando vem o próximo. */
+function linhaDaClasse(ctx: CtxPainel, e: Estilo, intensidade: number): string {
+  const passo = ctx.balance.dominio.degrauPct;
+  const d = degrausDaPonta(ctx, intensidade);
+  const proximo = t('estilos.classeProximo', { pct: (d + 1) * passo });
+  // Sem degrau ainda, mostra o que o primeiro traz (a prévia de para onde o estilo leva a classe).
+  const olhar = Math.max(1, d);
+  const itens = e.melhorias.map((m) => {
+    const v = valorDaMelhoria(m, olhar);
+    if (v > 0) return textoDaMelhoria(m, v);
+    // O primeiro degrau em que ela vale algo (as inteiras esperam chegar a 1).
+    const primeiro = Math.max(m.desde, m.inteiro && m.porDegrau > 0 ? Math.ceil((1 - m.base) / m.porDegrau - 1e-9) : m.desde);
+    return t('estilos.classeEmBreve', { pct: primeiro * passo, texto: textoDaMelhoria(m, valorDaMelhoria(m, primeiro)) });
+  }).join(' · ');
+  if (d <= 0) return t('estilos.classeNada', { pct: passo, itens });
+  return `${t('estilos.classe', { d, itens })} ${proximo}`;
+}
+
+/** D-156: o que a forma faz agora, na faixa. */
+function efeitoDaForma(mod: Modificador, faixa: number): string {
+  switch (mod) {
+    case 'ecoar':
+      return t('estilos.formaEco', { pct: Math.round(ecoDaForma(faixa) * 100) });
+    case 'encadear': {
+      const s = saltosDaForma(faixa);
+      return t('estilos.formaSaltos', { n: s.quantidade, pct: s.pct });
+    }
+    case 'atravessar':
+      return t('estilos.formaAtravessa', { n: perfuracaoDaForma(faixa) });
+    case 'maior_e_mais_lenta': {
+      const a = areaDaForma(faixa);
+      return t('estilos.formaArea', { pct: Math.round((a.danoMult - 1) * 100), conj: Math.round((a.conjuracaoMult - 1) * 100), raio: a.raioExtra > 0 ? t('estilos.formaAreaRaio') : '' });
+    }
+  }
+}
+
+/** D-156: a linha da forma, com o medidor de 10 faixas. */
+function linhaDaForma(ctx: CtxPainel, forma: FormaDoEstilo, intensidade: number): HTMLElement {
+  const r = ctx.balance.estilos;
+  const faixa = faixaDaForma(intensidade, r.formaInicioPct / 100, r.formaPlenaPct / 100);
+  const alvo = forma.tag ? t('estilos.formaTag', { tag: t(`tag.${forma.tag}` as ChaveTexto) }) : t('estilos.formaTodas');
+  const mod = t(`forma.mod.${forma.mod}` as ChaveTexto);
+  const texto = faixa > 0
+    ? t('estilos.formaAtiva', { faixa, mod, alvo, agora: efeitoDaForma(forma.mod, faixa), dano: Math.round((-forma.danoPct * faixa) / 10) })
+    : t('estilos.forma', { mod, alvo, inicio: r.formaInicioPct, plena: r.formaPlenaPct, dano: -forma.danoPct });
+  const div = el('div', faixa > 0 ? 'estilo-forma acesa' : 'estilo-forma');
+  div.dataset.forma = String(faixa);
+  div.style.setProperty('--forma', String(faixa / 10));
+  const medidor = el('span', 'forma-medidor');
+  medidor.setAttribute('aria-hidden', 'true');
+  for (let k = 1; k <= 10; k++) medidor.append(el('i', k <= faixa ? 'cheia' : undefined));
+  div.append(medidor, el('span', undefined, texto));
+  return div;
+}
+
 /** O radar e a lista de estilos para a ficha (null: a classe não tem estilos). */
-export function painelDeEstilos(ctx: Pick<ContextoSimulacao, 'conteudo' | 'balance'>, bolsa: Bolsa, efetivos: Atributos, nivel: number): HTMLElement | null {
+export function painelDeEstilos(ctx: CtxPainel, bolsa: Bolsa, efetivos: Atributos, nivel: number): HTMLElement | null {
   const radar = radarDe(ctx, bolsa, efetivos, nivel);
   if (!radar) return null;
   const painel = el('section', 'painel-estilos');
   painel.append(el('h3', 'subtitulo-modal', t('ficha.estilos')), el('p', 'detalhe-item', t('estilos.explicacao')), desenho(radar));
+  // D-155: a classe nos estilos (o atributo de classe saiu).
+  const trilha = trilhaDoRadar(ctx, radar);
+  painel.append(el('p', 'detalhe-item estilo-classe-resumo', t('estilos.classeSkills', {
+    passo: ctx.balance.dominio.degrauPct, pct: Math.round(trilha.degraus * ctx.balance.dominio.skillsPorDegrauPct), d: trilha.degraus, sem: ctx.balance.dominio.semFamiliaridadePct,
+  })));
   const lista = el('ul', 'lista-estilos');
   radar.estilos.forEach((e, k) => {
     const i = radar.total[k] ?? 0;
@@ -70,6 +147,9 @@ export function painelDeEstilos(ctx: Pick<ContextoSimulacao, 'conteudo' | 'balan
     const efeitos = (Object.entries(e.efeitos) as [ComponenteDeEstilo, number][])
       .map(([comp, max]) => t('estilos.efeito', { nome: t(`estilos.comp.${comp}` as ChaveTexto), agora: Math.round(max * i * 100), max: Math.round(max * 100) }));
     li.append(el('div', 'estilo-efeitos', efeitos.join(' · ')), el('div', 'estilo-mecanica', e.texto));
+    if (e.melhorias.length > 0) li.append(el('div', 'estilo-classe', linhaDaClasse(ctx, e, pontaConquistada(radar, k))));
+    // Marco 39 (D-156): a forma do estilo, que aparece com 10% e cresce em faixas até 100% (o medidor enche).
+    if (e.forma) li.append(linhaDaForma(ctx, e.forma, i));
     lista.append(li);
   });
   painel.append(lista);

@@ -2629,7 +2629,7 @@
       "bonusAtributos": {
         "vontade": 3,
         "constituicao": 2,
-        "dominio": 2
+        "carisma": 2
       },
       "bonusDefesa": 3,
       "efeitos": [],
@@ -2648,7 +2648,7 @@
       "bonusAtributos": {
         "inteligencia": 4,
         "sabedoria": 3,
-        "dominio": 3
+        "carisma": 3
       },
       "bonusDefesa": 0,
       "efeitos": [],
@@ -2667,7 +2667,7 @@
       "bonusAtributos": {
         "constituicao": 5,
         "vontade": 3,
-        "dominio": 4
+        "destreza": 4
       },
       "bonusDefesa": 6,
       "efeitos": [],
@@ -2704,7 +2704,7 @@
     {"id": "nucleo_peconhento", "nome": "Núcleo peçonhento", "tipo": "material", "descricao": "Do coração de um dragão de veneno: troféu de veneno do grau alto.", "icone": "gota", "raridade": "lendario", "valorBase": 300, "slotPadrao": null, "nivelMinimo": 1, "bonusAtributos": {}, "bonusDefesa": 0, "efeitos": [], "dropavel": false},
     {"id": "cinza_de_alma", "nome": "Cinza de alma", "tipo": "material", "descricao": "Do Necromante Ancestral: troféu de trevas para a fusão.", "icone": "caveira", "raridade": "raro", "valorBase": 90, "slotPadrao": null, "nivelMinimo": 1, "bonusAtributos": {}, "bonusDefesa": 0, "efeitos": [], "dropavel": false},
     {"id": "filacterio_rachado", "nome": "Filactério rachado", "tipo": "material", "descricao": "Do Necromante Ancestral: o que guardava a alma dele. Troféu de trevas do grau alto.", "icone": "caveira", "raridade": "lendario", "valorBase": 380, "slotPadrao": null, "nivelMinimo": 1, "bonusAtributos": {}, "bonusDefesa": 0, "efeitos": [], "dropavel": false},
-    {"id": "amuleto_do_necromante", "nome": "Amuleto do Necromante", "tipo": "equipamento", "descricao": "Do Necromante Ancestral: a corrente ainda sussurra os nomes dos mortos.", "icone": "amuleto", "raridade": "lendario", "valorBase": 2600, "slotPadrao": "amuleto", "nivelMinimo": 30, "bonusAtributos": {"inteligencia": {"modo": "pct", "valor": 15}, "dominio": 4}, "bonusDefesa": 2, "efeitos": [], "dropavel": false},
+    {"id": "amuleto_do_necromante", "nome": "Amuleto do Necromante", "tipo": "equipamento", "descricao": "Do Necromante Ancestral: a corrente ainda sussurra os nomes dos mortos.", "icone": "amuleto", "raridade": "lendario", "valorBase": 2600, "slotPadrao": "amuleto", "nivelMinimo": 30, "bonusAtributos": {"inteligencia": {"modo": "pct", "valor": 15}, "carisma": 4}, "bonusDefesa": 2, "efeitos": [], "dropavel": false},
     {"id": "couraca_de_seda", "nome": "Couraça de seda férrea", "tipo": "equipamento", "descricao": "Placas de ferro costuradas com seda de aranha: leve e firme.", "icone": "peitoral", "raridade": "incomum", "valorBase": 120, "slotPadrao": "corpo", "nivelMinimo": 5, "bonusAtributos": {"constituicao": 2}, "bonusDefesa": 3, "efeitos": [], "dropavel": false},
     {"id": "arco_de_madeira_antiga", "nome": "Arco de madeira antiga", "tipo": "equipamento", "descricao": "Madeira que não verga, corda de seda.", "icone": "arco", "raridade": "incomum", "valorBase": 110, "slotPadrao": "arma_principal", "nivelMinimo": 6, "bonusAtributos": {"destreza": 3}, "bonusDefesa": 0, "efeitos": [], "dropavel": false},
     {"id": "elmo_de_presas", "nome": "Elmo de presas", "tipo": "equipamento", "descricao": "Presas de lobo e de orc cravadas no aço.", "icone": "elmo", "raridade": "raro", "valorBase": 260, "slotPadrao": "cabeca", "nivelMinimo": 12, "bonusAtributos": {"vontade": 2, "constituicao": 2}, "bonusDefesa": 3, "efeitos": [], "dropavel": false},
