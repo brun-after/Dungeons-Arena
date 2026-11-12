@@ -20,16 +20,39 @@ import {
 import type { NomeAtributo } from '../progression/itens';
 import { fatorDeDominio, fatorDeSkillDeClasse, marcoDe, marcosDaClasse } from '../progression/dominio';
 import { velocidade } from '../world/movimento';
+import { radarDe } from '../progression/estilos';
 
 const fmt = (v: number, casas = 1) => v.toFixed(casas).replace('.', ',');
 
 /** As linhas do cartão de um atributo, com os números do personagem. */
 export function linhasDaDica(nome: NomeAtributo, a: Atributos, ctx: ContextoSimulacao, j: Entidade, hpMax: number, manaMax: number): string[] {
+  const proprias = linhasProprias(nome, a, ctx, j, hpMax, manaMax);
+  return nome === 'dominio' ? proprias : [...proprias, ...linhasDosEstilos(nome, a, ctx, j)];
+}
+
+/**
+ * Marco 39 (12/11/2026, D-148): os estilos da classe que o atributo enche, com o peso dele em cada um e quanto o estilo
+ * está cheio agora. Os atributos não somam dano direto; é por aqui que eles pesam no combate.
+ */
+function linhasDosEstilos(nome: NomeAtributo, a: Atributos, ctx: ContextoSimulacao, j: Entidade): string[] {
+  const bolsa = j.bolsa;
+  const radar = bolsa ? radarDe(ctx, bolsa, a, j.nivel) : null;
+  if (!radar) return [];
+  const linhas: string[] = [];
+  radar.estilos.forEach((e, k) => {
+    const peso = e.pesos[nome];
+    if (!peso) return;
+    linhas.push(t('dica.estilo', { estilo: e.nome, peso: Math.round(peso * 100), pct: Math.round((radar.total[k] ?? 0) * 100) }));
+  });
+  return linhas.length > 0 ? [t('dica.estilosDoAtributo'), ...linhas] : [t('dica.semEstilo')];
+}
+
+function linhasProprias(nome: NomeAtributo, a: Atributos, ctx: ContextoSimulacao, j: Entidade, hpMax: number, manaMax: number): string[] {
   const b = ctx.balance;
   switch (nome) {
     // Marco 39 (D-148): os atributos não somam dano direto; enchem os estilos.
     case 'vontade':
-      return [t('dica.vontade.1'), t('dica.estilos')];
+      return [t('dica.vontade.1'), ...(j.bolsa?.classeId === 'arqueiro' ? [t('dica.vontade.torre')] : [])];
     case 'destreza': {
       const perfil = perfilDestreza(ctx, j);
       return [
@@ -41,7 +64,10 @@ export function linhasDaDica(nome: NomeAtributo, a: Atributos, ctx: ContextoSimu
     case 'constituicao':
       return [t('dica.constituicao.1', { hp: hpMax }), t('dica.constituicao.2', { vida: vidaPorCelula(a, b) })];
     case 'inteligencia':
-      return [t('dica.inteligencia.1'), t('dica.inteligencia.3', { pct: fmt(reducaoEstudoPct(a, b), 0) })];
+      return [
+        t('dica.inteligencia.3', { pct: fmt(reducaoEstudoPct(a, b), 0) }),
+        ...(j.bolsa?.classeId === 'necromante' ? [t('dica.inteligencia.mortos')] : []),
+      ];
     case 'sabedoria': {
       const regen = b.recursos.regenManaPorSegundo * (1 + (Math.max(0, a.sabedoria - 10) * b.atributos.efeitos.regenManaPorSabedoriaPct) / 100);
       return [
