@@ -161,7 +161,8 @@ for (const classe of CLASSES) {
     (100 * SEMENTES_DUELO.reduce((soma, s) => soma + dueloDeFichas(classe, metas.build.nivel, s, montarA, montarB), 0)) / SEMENTES_DUELO.length;
   const focada = pct(semAjuste, dispersar);
   const equipado = pct(equipar('raro'), desequipar);
-  conferir(`build: ${classe} focada vence a dispersa`, focada, metas.build.vitoriasMinPct, 100, '%');
+  // Marco 39 (D-148): a focada e a dispersa no mesmo patamar (o pentagrama premia os dois caminhos).
+  conferir(`build: ${classe} focada contra a dispersa`, focada, metas.build.focadaMinPct, metas.build.focadaMaxPct, '%');
   conferir(`build: ${classe} equipado vence o sem equipamento`, equipado, metas.build.vitoriasMinPct, 100, '%');
   corpoBuild.push([classe, `${br(focada)}%`, `${br(equipado)}%`]);
 }

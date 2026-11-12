@@ -3,6 +3,7 @@
   "classes": [
     {
       "id": "aventureiro",
+      "poderPct": 60,
       "nome": "Aventureiro",
       "hpBase": 60,
       "defesa": 2,
@@ -49,6 +50,7 @@
     },
     {
       "id": "guerreiro",
+      "poderPct": 100,
       "nome": "Guerreiro",
       "hpBase": 45,
       "defesa": 3,
@@ -150,6 +152,7 @@
     },
     {
       "id": "arqueiro",
+      "poderPct": 95,
       "nome": "Arqueiro",
       "hpBase": 55,
       "defesa": 2,

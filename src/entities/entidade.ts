@@ -67,6 +67,8 @@ export interface DadosInvocacao {
   nivelDominacao: number;
   /** Mortos do Necromante têm atributos próprios; o modelo só guarda a semelhança visual. */
   /** 01/11/2026: reservas cumulativas; curar HP não repõe estas reservas. */
+  /** Marco 39 (D-148): o estilo de invocação do dono ao invocar (% de dano a mais). */
+  estiloPct?: number;
   ataquesRestantes?: number;
   ataquesTotal?: number;
   ultimoAtaqueId?: number;
@@ -397,8 +399,8 @@ export interface Entidade {
   refugio: boolean;
   /** D-067: o que está equipado, para o token (público: a arena mostra para todos). */
   aparencia: AparenciaEquipada | null;
-  /** Marco 18 (D-068): as ressonâncias de atributo ativas (ids). */
-  ressonancias: string[];
+  /** Marco 39 (D-147): os estilos que já despertaram (ids; ponta com a intensidade mínima do diário). */
+  estilos: string[];
   /** Marco 18: o último golpe com dano que a entidade levou (quem e com qual habilidade) — o "ao abater" lê. */
   ultimoGolpe: { fonteId: EntidadeId; chave: string } | null;
   /** Marco 18: a última habilidade que usou (combos e a Lâmina rúnica). */
@@ -566,7 +568,7 @@ export function criarEntidade(n: NovaEntidade): Entidade {
     buffsArmados: [],
     refugio: false,
     aparencia: null,
-    ressonancias: [],
+    estilos: [],
     ultimoGolpe: null,
     ultimaHabilidade: null,
     renascerFase: '',
@@ -681,7 +683,7 @@ export function clonarEntidade(e: Entidade): Entidade {
     interacao: e.interacao ? { ...e.interacao } : null,
     buffsArmados: e.buffsArmados.map((b) => ({ ateTick: b.ateTick, efeito: { ...b.efeito, interno: b.efeito.interno ? { ...b.efeito.interno } : null } })),
     aparencia: e.aparencia ? { ...e.aparencia } : null,
-    ressonancias: [...e.ressonancias],
+    estilos: [...e.estilos],
     ultimoGolpe: e.ultimoGolpe ? { ...e.ultimoGolpe } : null,
     ...(e.tatica ? { tatica: { ...e.tatica, aparou: e.tatica.aparou ? { ...e.tatica.aparou } : null, etapas: e.tatica.etapas.map((a) => ({ ...a, alvos: [...a.alvos], fatos: [...a.fatos], concluidos: [...a.concluidos] })) } } : {}),
     ultimaHabilidade: e.ultimaHabilidade ? { ...e.ultimaHabilidade } : null,

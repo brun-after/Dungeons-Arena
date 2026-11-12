@@ -18,16 +18,22 @@ export function xpParaProximo(nivel: number, xp: Balance['xp']): number {
   return Math.round(base * (1 + (acima * xp.curvaLonga.crescimentoPct) / 100));
 }
 
-/** Marco 28 (D-127): os pontos de atributo que chegar ao nível `nivel` dá (crescem por faixa depois do 30). */
+/**
+ * Marco 28 (D-127): os pontos de atributo que chegar ao nível `nivel` dá, por faixa. Marco 39 (12/11/2026, D-147): a
+ * escassez — 3 por nível até o 30 e 2 depois (eram 4, 5 e 6), para a build ser uma escolha também no 100.
+ */
 export function pontosDoNivel(nivel: number, xp: Balance['xp']): number {
   let pontos = xp.pontosPorNivel;
   for (const f of xp.pontosPorFaixa) if (nivel >= f.aPartirDe) pontos = f.pontos;
   return pontos;
 }
 
-/** Marco 28 (30/10/2026, D-127): o teto do atributo-base pelos pontos gastos: nível + folga, até o máximo. */
+/**
+ * Marco 28 (D-127): o teto do atributo-base pelos pontos gastos, até o máximo. Marco 39 (D-147): `10 + 2 × nível`, o
+ * que permite seguir um estilo ponto a ponto desde o nível 2 sem fechar o caminho do outro.
+ */
 export function tetoDoAtributo(nivel: number, b: Balance): number {
-  return Math.min(b.atributos.maximo, nivel + b.atributos.folgaSobreNivel);
+  return Math.min(b.atributos.maximo, b.atributos.teto.base + b.atributos.teto.porNivel * nivel);
 }
 
 /** Marco 28 (D-127): todos os pontos de atributo do nível 2 até `nivel`. */

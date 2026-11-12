@@ -38,7 +38,7 @@ import { definirDirecao, moverEntidades, planejarIrPara, rumoDe } from '../world
 import { aoMovimentoManual, processarSeguirAlvo } from '../combat/seguir-alvo';
 import { fecharLoja, interagir, processarInteracoes } from '../world/interacao';
 import { revelarArmadilhas } from '../world/armadilhas-ocultas';
-import { atualizarRessonancias } from '../progression/ressonancias';
+import { atualizarEstilosDespertos } from '../progression/estilos-despertos';
 import { forjar } from '../progression/forja';
 import { processarServosNecromantes } from '../combat/necromancia';
 import { processarCompanheiros, sincronizarCompanheiros } from '../combat/companheiro';
@@ -102,7 +102,7 @@ export function simular(
   // Ajuste de 16/10/2026 (D-067): buffs armados começam em combate; a aparência segue o equipamento.
   processarBuffsArmados(estado, ctx, saida);
   atualizarAparencias(estado, ctx);
-  atualizarRessonancias(estado, ctx, saida);
+  atualizarEstilosDespertos(estado, ctx, saida);
   // 08/11/2026 (D-138): os terrenos vivos reagem aos golpes do tick antes de as áreas valerem.
   processarTerrenosVivos(estado, ctx, saida, inicio);
   processarAmbientes(estado, ctx, saida, inicio);

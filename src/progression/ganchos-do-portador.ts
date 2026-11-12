@@ -16,9 +16,9 @@ import { somarCarga } from '../combat/carga-ultimate';
 import { chaveRecarga } from '../combat/acao';
 import { vivo } from '../entities/entidade';
 import type { ModificadorDeItem } from './itens';
-import { ganchosDasRessonancias } from './ressonancias';
+import { ganchosDosEstilos } from './estilos';
 
-type ContextoGancho = Pick<ContextoSimulacao, 'conteudo'>;
+type ContextoGancho = Pick<ContextoSimulacao, 'conteudo' | 'balance'>;
 
 /** Todos os ganchos que valem para a entidade agora (sem ficha: nenhum). */
 export function ganchosDe(ctx: ContextoGancho, e: Entidade): Gancho[] {
@@ -30,7 +30,8 @@ export function ganchosDe(ctx: ContextoGancho, e: Entidade): Gancho[] {
     if (item) saida.push(...item.ganchos);
   }
   for (const a of bonusAtivos(ctx.conteudo.conjuntos, bolsa, ctx.conteudo.itens)) for (const b of a.bonus) saida.push(...b.ganchos);
-  saida.push(...ganchosDasRessonancias(ctx, e));
+  // Marco 39 (D-147): as mecânicas dos estilos, na força de cada ponta (substituem as ressonâncias).
+  saida.push(...ganchosDosEstilos(ctx, e));
   return saida;
 }
 

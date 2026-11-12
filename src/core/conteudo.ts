@@ -12,7 +12,7 @@ import itensJson from '../data/itens.json';
 import itensBaseJson from '../data/itens-base.json';
 import itensFormasJson from '../data/itens-formas.json';
 import conjuntosJson from '../data/conjuntos.json';
-import ressonanciasJson from '../data/ressonancias.json';
+import estilosJson from '../data/estilos.json';
 import combosJson from '../data/combos.json';
 import interacoesBuffJson from '../data/interacoes-buff.json';
 import missoesJson from '../data/missoes.json';
@@ -51,7 +51,7 @@ import { lerModo, RARIDADES, type ModoDeJogo } from '../modos/modo';
 import { CatalogoDeItens, lerBasesDeItem, type BasesDeItem } from '../progression/gerar-item';
 import { lerItensComFormas, type ItensComFormas } from '../progression/gerar-item-base';
 import { lerConjuntos, type Conjunto } from '../progression/conjuntos';
-import { lerRessonancias, type Ressonancia } from '../progression/ressonancias';
+import { lerEstilos, type Estilo } from '../progression/estilos';
 import { lerCombos, lerRegrasDeBuff, type Combo, type RegraDeBuff } from '../combat/combos';
 import { lerMissoes, lerOrigens, type Missao, type OrigemRara } from '../progression/missoes';
 import { lerForja, type ReceitaDeForja } from '../progression/forja';
@@ -78,7 +78,8 @@ export interface Conteudo {
   itensComFormas: ItensComFormas;
   conjuntos: Catalogo<Conjunto>;
   /** Marco 18 (D-068): as ressonâncias de atributo. */
-  ressonancias: Catalogo<Ressonancia>;
+  /** Marco 39 (D-147): os cinco estilos de cada classe (o pentagrama), na ordem do radar. */
+  estilos: ReadonlyMap<string, readonly Estilo[]>;
   /** Marco 18 (D-068): os combos de sequência. */
   combos: Catalogo<Combo>;
   /** Marco 18 (camada 6): as regras de buff × habilidade. */
@@ -119,7 +120,7 @@ export interface FontesDeConteudo {
   /** Marco 18: data/itens-formas.json e data/conjuntos.json. */
   itensFormas: unknown;
   conjuntos: unknown;
-  ressonancias: unknown;
+  estilos: unknown;
   combos: unknown;
   interacoesBuff: unknown;
   missoes: unknown;
@@ -152,7 +153,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const cm = lerCaminhos(fontes.caminhos);
   const fo = lerItensComFormas(fontes.itensFormas);
   const cj = lerConjuntos(fontes.conjuntos);
-  const rs = lerRessonancias(fontes.ressonancias);
+  const es = lerEstilos(fontes.estilos);
   const cb = lerCombos(fontes.combos);
   const rb = lerRegrasDeBuff(fontes.interacoesBuff);
   const mi = lerMissoes(fontes.missoes);
@@ -161,7 +162,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const tm = lerTemas(fontes.temas, new Set([...p.presets.values()].filter((x) => x.invocacao === null).map((x) => x.id)));
   const af = lerAfinidades(fontes.afinidades);
   const ar = lerArmas(fontes.armas);
-  const erros = [...ul.erros, ...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...rs.erros, ...cb.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
+  const erros = [...ul.erros, ...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...es.erros, ...cb.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
   for (const conj of cj.conjuntos.values()) {
     for (const peca of conj.pecas) if (!fo.dados.bases.has(peca)) erros.push(`conjunto ${conj.id}: base desconhecida "${peca}"`);
   }
@@ -269,7 +270,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       interacoes: ia.interacoes,
       itensComFormas: fo.dados,
       conjuntos: cj.conjuntos,
-      ressonancias: rs.ressonancias,
+      estilos: es.estilos,
       combos: cb.combos,
       regrasDeBuff: rb.regras,
       missoes: mi.missoes,
@@ -321,7 +322,7 @@ export const FONTES_OFICIAIS: FontesDeConteudo = {
   caminhos: caminhosJson,
   itensFormas: itensFormasJson,
   conjuntos: conjuntosJson,
-  ressonancias: ressonanciasJson,
+  estilos: estilosJson,
   combos: combosJson,
   interacoesBuff: interacoesBuffJson,
   missoes: missoesJson,

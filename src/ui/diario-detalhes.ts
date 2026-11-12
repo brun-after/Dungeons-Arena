@@ -65,10 +65,11 @@ export function descreverEntrada(ctx: Ctx, id: string): DetalheDaEntrada {
       const k = conteudo.combos.get(a);
       return k ? { nome: k.nome, como: comoFazerCombo(ctx, k), efeito: k.texto } : { nome: a, como: [], efeito: '' };
     }
-    case 'ressonancia': {
-      const r = conteudo.ressonancias.get(a);
-      const exige = Object.entries(r?.exige ?? {}).map(([at, n]) => `${t(`atributo.${at}` as ChaveTexto)} ${n}`);
-      return { nome: r?.nome ?? a, como: exige.length > 0 ? [t('diario.ressonanciaComo', { lista: lista(exige) })] : [], efeito: r?.texto ?? '' };
+    case 'estilo': {
+      // Marco 39 (D-147): o estilo desperta quando a ponta dele chega à intensidade do diário.
+      const r = [...conteudo.estilos.values()].flat().find((s) => s.id === a);
+      const pesos = Object.keys(r?.pesos ?? {}).map((at) => t(`atributo.${at}` as ChaveTexto));
+      return { nome: r?.nome ?? a, como: pesos.length > 0 ? [t('diario.estiloComo', { lista: lista(pesos) })] : [], efeito: r?.texto ?? '' };
     }
     case 'marco': {
       const d = conteudo.definicoes.get(a);

@@ -205,8 +205,8 @@ describe('nível 30 e faixa avançada', () => {
     const c = cena();
     expect(c.ctx.conteudo.itens.get('gi_espada_30_raro_7')?.nivelMinimo).toBe(30);
   });
-  // Marco 28 (D-127): o teto passou a 100; depois do 30 o nível dá mais pontos (balance.xp.pontosPorFaixa).
-  it('100 é o teto e os pontos por nível crescem depois do 30', () => {
+  // Marco 28 (D-127): o teto passou a 100. Marco 39 (D-147): depois do 30 o nível dá 2 pontos (balance.xp.pontosPorFaixa).
+  it('100 é o teto e os pontos por nível caem para 2 depois do 30', () => {
     const c = cena(); c.j.nivel = 29;
     c.j.xp = xpParaProximo(29, c.ctx.balance.xp);
     aplicarSubidas(c.j, c.ctx, 0, c.eventos);
@@ -216,7 +216,7 @@ describe('nível 30 e faixa avançada', () => {
     c.j.xp = xpParaProximo(30, c.ctx.balance.xp);
     aplicarSubidas(c.j, c.ctx, 0, c.eventos);
     expect(c.j.nivel).toBe(31);
-    expect(c.b.pontosAtributo).toBe(7);
+    expect(c.b.pontosAtributo).toBe(5);
     c.j.nivel = 99; c.j.xp = 999999999;
     aplicarSubidas(c.j, c.ctx, 0, c.eventos);
     expect(c.j.nivel).toBe(100);

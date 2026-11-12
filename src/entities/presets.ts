@@ -108,6 +108,8 @@ export interface ClasseJogador {
   descricao: string;
   /** Marco 18 (D-068): o quanto a Destreza rende na recarga do básico (o arqueiro rende mais); null = o padrão. */
   destreza: PerfilDestreza | null;
+  /** Marco 39 (D-148): o poder base da classe em % (o dano das skills de cada classe parte de bases diferentes). */
+  poderPct: number;
   /** Marco 24 (D-094): as 8 skills exclusivas (teclas 1–2), as 2 que a classe já sabe e a geral inicial. */
   exclusivas: string[];
   iniciais: string[];
@@ -223,6 +225,7 @@ export function lerClasses(json: unknown): { classes: Map<string, ClasseJogador>
       modelo: o.modelo === undefined ? 'aventureiro' : l.texto(o, 'modelo'),
       descricao: o.descricao === undefined ? '' : l.texto(o, 'descricao'),
       destreza: o.destreza === undefined ? null : lerPerfilDestreza(l, o.destreza),
+      poderPct: o.poderPct === undefined ? 100 : l.numero(o, 'poderPct', { min: 10, max: 300 }),
       exclusivas: o.exclusivas === undefined ? [] : l.listaDeTextos(o, 'exclusivas'),
       iniciais: o.iniciais === undefined ? [] : l.listaDeTextos(o, 'iniciais'),
       geralInicial: o.geralInicial === undefined ? null : l.texto(o, 'geralInicial'),

@@ -1,0 +1,636 @@
+{
+  "versao": 1,
+  "estilos": [
+    {
+      "id": "artilheiro",
+      "classe": "mago",
+      "nome": "Artilheiro arcano",
+      "pesos": {
+        "inteligencia": 0.65,
+        "destreza": 0.35
+      },
+      "efeitos": {
+        "area": 0.55,
+        "dano": 0.2
+      },
+      "texto": "Magias de área deixam os atingidos expostos (+10% de dano recebido) por 3 s.",
+      "ganchos": [
+        {
+          "quando": "aoAcertar",
+          "se": {
+            "tag": "area",
+            "tipoAtaque": "magico"
+          },
+          "efeito": {
+            "aplicar": {
+              "tipo": "exposto",
+              "duracaoMs": 3000,
+              "pct": 10
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ocultista",
+      "classe": "mago",
+      "nome": "Ocultista",
+      "pesos": {
+        "sabedoria": 0.65,
+        "inteligencia": 0.35
+      },
+      "efeitos": {
+        "dano": 0.2,
+        "sustain": 0.3
+      },
+      "texto": "Seus efeitos (campos, estados e reações) ficam até 30% mais fortes.",
+      "ganchos": [
+        {
+          "quando": "passivo",
+          "efeito": {
+            "potenciaPct": 30
+          }
+        }
+      ]
+    },
+    {
+      "id": "encantador",
+      "classe": "mago",
+      "nome": "Encantador",
+      "pesos": {
+        "carisma": 0.65,
+        "sabedoria": 0.35
+      },
+      "efeitos": {
+        "suporte": 0.55,
+        "ehp": 0.2,
+        "dano": 0.15
+      },
+      "texto": "Suas curas dão aos aliados a até 4 células +10% de dano por 3 s.",
+      "ganchos": [
+        {
+          "quando": "aoUsarHabilidade",
+          "se": {
+            "tag": "cura"
+          },
+          "efeito": {
+            "aplicarAliados": {
+              "tipo": "bonus_dano",
+              "pct": 10,
+              "duracaoMs": 3000
+            },
+            "raio": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": "guardiao",
+      "classe": "mago",
+      "nome": "Guardião arcano",
+      "pesos": {
+        "constituicao": 0.65,
+        "sabedoria": 0.35
+      },
+      "efeitos": {
+        "ehp": 0.65,
+        "dano": 0.15
+      },
+      "texto": "Escudos recebidos duram e absorvem até 60% mais.",
+      "ganchos": [
+        {
+          "quando": "passivo",
+          "efeito": {
+            "escudoPct": 60
+          }
+        }
+      ]
+    },
+    {
+      "id": "lamina_runica",
+      "classe": "mago",
+      "nome": "Lâmina rúnica",
+      "pesos": {
+        "destreza": 0.65,
+        "vontade": 0.35
+      },
+      "efeitos": {
+        "cadencia": 0.7,
+        "ehp": 0.25
+      },
+      "texto": "Golpes de contato aplicam o elemento da sua última magia (até 5 s depois).",
+      "ganchos": [
+        {
+          "quando": "aoAcertar",
+          "se": {
+            "tag": "contato"
+          },
+          "efeito": {
+            "herdarElemento": 5000
+          }
+        }
+      ]
+    },
+    {
+      "id": "atirador",
+      "classe": "arqueiro",
+      "nome": "Atirador",
+      "pesos": {
+        "destreza": 0.65,
+        "carisma": 0.35
+      },
+      "efeitos": {
+        "cadencia": 0.3,
+        "dano": 0.2
+      },
+      "texto": "A flecha que abate tem até 30% de chance de saltar para o hostil mais perto.",
+      "ganchos": [
+        {
+          "quando": "aoMatar",
+          "se": {
+            "tag": "projetil",
+            "chancePct": 30
+          },
+          "efeito": {
+            "aplicarNoProximo": {
+              "tipo": "dano_direto",
+              "valor": 8
+            },
+            "raio": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "mira_firme",
+      "classe": "arqueiro",
+      "nome": "Mira firme",
+      "pesos": {
+        "vontade": 0.65,
+        "destreza": 0.35
+      },
+      "efeitos": {
+        "dano": 0.35
+      },
+      "texto": "Crítico de projétil deixa o alvo exposto (+15% de dano recebido) por 2 s.",
+      "ganchos": [
+        {
+          "quando": "aoCritico",
+          "se": {
+            "tag": "projetil"
+          },
+          "efeito": {
+            "aplicar": {
+              "tipo": "exposto",
+              "duracaoMs": 2000,
+              "pct": 15
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "inabalavel",
+      "classe": "arqueiro",
+      "nome": "Inabalável",
+      "pesos": {
+        "constituicao": 0.65,
+        "vontade": 0.35
+      },
+      "efeitos": {
+        "ehp": 0.75,
+        "dano": 0.2
+      },
+      "texto": "Estados negativos duram até 50% menos em você.",
+      "ganchos": [
+        {
+          "quando": "passivo",
+          "efeito": {
+            "negativosMenosPct": 50
+          }
+        }
+      ]
+    },
+    {
+      "id": "cacador",
+      "classe": "arqueiro",
+      "nome": "Caçador",
+      "pesos": {
+        "sabedoria": 0.65,
+        "destreza": 0.35
+      },
+      "efeitos": {
+        "area": 0.3,
+        "dano": 0.25,
+        "sustain": 0.25
+      },
+      "texto": "Abater devolve até 4 de mana, e você revela armadilhas com mais facilidade.",
+      "ganchos": [
+        {
+          "quando": "aoMatar",
+          "efeito": {
+            "mana": 4
+          }
+        },
+        {
+          "quando": "passivo",
+          "efeito": {
+            "revelarPct": 30
+          }
+        }
+      ]
+    },
+    {
+      "id": "flecheiro_arcano",
+      "classe": "arqueiro",
+      "nome": "Flecheiro arcano",
+      "pesos": {
+        "inteligencia": 0.65,
+        "destreza": 0.35
+      },
+      "efeitos": {
+        "area": 0.6,
+        "dano": 0.25
+      },
+      "texto": "Flechas aplicam o elemento da sua última magia (até 5 s depois).",
+      "ganchos": [
+        {
+          "quando": "aoAcertar",
+          "se": {
+            "tag": "projetil"
+          },
+          "efeito": {
+            "herdarElemento": 5000
+          }
+        }
+      ]
+    },
+    {
+      "id": "carniceiro",
+      "classe": "guerreiro",
+      "nome": "Carniceiro",
+      "pesos": {
+        "vontade": 0.65,
+        "constituicao": 0.35
+      },
+      "efeitos": {
+        "area": 0.25,
+        "sustain": 0.15
+      },
+      "texto": "Cada inimigo atingido por golpe de contato cura até 1% da sua vida.",
+      "ganchos": [
+        {
+          "quando": "aoAcertar",
+          "se": {
+            "tag": "contato"
+          },
+          "efeito": {
+            "curarPct": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "duelista",
+      "classe": "guerreiro",
+      "nome": "Duelista",
+      "pesos": {
+        "destreza": 0.65,
+        "vontade": 0.35
+      },
+      "efeitos": {
+        "dano": 0.4,
+        "cadencia": 0.25
+      },
+      "texto": "Crítico corpo a corpo reduz em 0,5 s a recarga das skills de classe.",
+      "ganchos": [
+        {
+          "quando": "aoCritico",
+          "se": {
+            "tag": "contato"
+          },
+          "efeito": {
+            "recargaClasseMs": 500
+          }
+        }
+      ]
+    },
+    {
+      "id": "runico",
+      "classe": "guerreiro",
+      "nome": "Rúnico",
+      "pesos": {
+        "inteligencia": 0.65,
+        "vontade": 0.35
+      },
+      "efeitos": {
+        "dano": 0.35,
+        "area": 0.4,
+        "suporte": 0.15
+      },
+      "texto": "O golpe tem até 50% de chance de deixar o alvo exposto (+10% de dano recebido) por 3 s.",
+      "ganchos": [
+        {
+          "quando": "aoAcertar",
+          "se": {
+            "tag": "contato",
+            "chancePct": 50
+          },
+          "efeito": {
+            "aplicar": {
+              "tipo": "exposto",
+              "duracaoMs": 3000,
+              "pct": 10
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "comandante",
+      "classe": "guerreiro",
+      "nome": "Comandante",
+      "pesos": {
+        "carisma": 0.65,
+        "constituicao": 0.35
+      },
+      "efeitos": {
+        "suporte": 0.55,
+        "ehp": 0.2
+      },
+      "texto": "Seu abate dá até +10 de carga de ultimate aos aliados a até 6 células.",
+      "ganchos": [
+        {
+          "quando": "aoMatar",
+          "efeito": {
+            "cargaUltimate": 10,
+            "raio": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "baluarte",
+      "classe": "guerreiro",
+      "nome": "Baluarte",
+      "pesos": {
+        "constituicao": 0.65,
+        "sabedoria": 0.35
+      },
+      "efeitos": {
+        "ehp": 0.6,
+        "suporte": 0.15
+      },
+      "texto": "Aliados a até 3 células levam até 15% menos dano.",
+      "ganchos": [
+        {
+          "quando": "passivo",
+          "efeito": {
+            "auraDefesaPct": 15
+          }
+        }
+      ]
+    },
+    {
+      "id": "senhor_da_horda",
+      "classe": "necromante",
+      "nome": "Senhor da Horda",
+      "pesos": {
+        "carisma": 0.65,
+        "sabedoria": 0.35
+      },
+      "efeitos": {
+        "invoc": 0.35,
+        "area": 0.1
+      },
+      "texto": "Ao usar a ultimate, servos e aliados a até 6 células batem até +15% por 4 s.",
+      "ganchos": [
+        {
+          "quando": "aoUsarUltimate",
+          "efeito": {
+            "aplicarAliados": {
+              "tipo": "bonus_dano",
+              "pct": 15,
+              "duracaoMs": 4000
+            },
+            "raio": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "mestre_de_elite",
+      "classe": "necromante",
+      "nome": "Mestre de Elite",
+      "pesos": {
+        "inteligencia": 0.65,
+        "carisma": 0.35
+      },
+      "efeitos": {
+        "invoc": 0.7,
+        "ehp": 0.15
+      },
+      "texto": "Seus efeitos ficam até 20% mais fortes.",
+      "ganchos": [
+        {
+          "quando": "passivo",
+          "efeito": {
+            "potenciaPct": 20
+          }
+        }
+      ]
+    },
+    {
+      "id": "pestilento",
+      "classe": "necromante",
+      "nome": "Pestilento",
+      "pesos": {
+        "sabedoria": 0.65,
+        "inteligencia": 0.35
+      },
+      "efeitos": {
+        "area": 0.25,
+        "dano": 0.1,
+        "sustain": 0.05
+      },
+      "texto": "Magias de área deixam os atingidos expostos (+10% de dano recebido) por 3 s.",
+      "ganchos": [
+        {
+          "quando": "aoAcertar",
+          "se": {
+            "tag": "area"
+          },
+          "efeito": {
+            "aplicar": {
+              "tipo": "exposto",
+              "duracaoMs": 3000,
+              "pct": 10
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "pacto_de_sangue",
+      "classe": "necromante",
+      "nome": "Pacto de Sangue",
+      "pesos": {
+        "constituicao": 0.65,
+        "sabedoria": 0.35
+      },
+      "efeitos": {
+        "ehp": 0.4,
+        "sustain": 0.45
+      },
+      "texto": "Cada acerto tem até 50% de chance de curar 1% da sua vida.",
+      "ganchos": [
+        {
+          "quando": "aoAcertar",
+          "se": {
+            "chancePct": 50
+          },
+          "efeito": {
+            "curarPct": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "ceifador",
+      "classe": "necromante",
+      "nome": "Ceifador",
+      "pesos": {
+        "destreza": 0.65,
+        "vontade": 0.35
+      },
+      "efeitos": {
+        "dano": 0.7,
+        "area": 0.25
+      },
+      "texto": "Abater reduz em até 1 s a recarga das skills de classe.",
+      "ganchos": [
+        {
+          "quando": "aoMatar",
+          "efeito": {
+            "recargaClasseMs": 1000
+          }
+        }
+      ]
+    },
+    {
+      "id": "mestre_de_feras",
+      "classe": "aventureiro",
+      "nome": "Mestre de Feras",
+      "pesos": {
+        "sabedoria": 0.65,
+        "carisma": 0.35
+      },
+      "efeitos": {
+        "invoc": 0.4,
+        "suporte": 0.1
+      },
+      "texto": "A ultimate enche até 20% mais rápido.",
+      "ganchos": [
+        {
+          "quando": "passivo",
+          "efeito": {
+            "cargaUltimatePct": 20
+          }
+        }
+      ]
+    },
+    {
+      "id": "batedor",
+      "classe": "aventureiro",
+      "nome": "Batedor",
+      "pesos": {
+        "destreza": 0.65,
+        "carisma": 0.35
+      },
+      "efeitos": {
+        "cadencia": 0.3,
+        "ehp": 0.3
+      },
+      "texto": "Escudos recebidos duram e absorvem até 40% mais.",
+      "ganchos": [
+        {
+          "quando": "passivo",
+          "efeito": {
+            "escudoPct": 40
+          }
+        }
+      ]
+    },
+    {
+      "id": "implacavel",
+      "classe": "aventureiro",
+      "nome": "Implacável",
+      "pesos": {
+        "vontade": 0.65,
+        "destreza": 0.35
+      },
+      "efeitos": {
+        "dano": 0.3
+      },
+      "texto": "Crítico corpo a corpo empurra o alvo 1 célula.",
+      "ganchos": [
+        {
+          "quando": "aoCritico",
+          "se": {
+            "tag": "contato"
+          },
+          "efeito": {
+            "aplicar": {
+              "tipo": "empurrao",
+              "valor": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "sobrevivente",
+      "classe": "aventureiro",
+      "nome": "Sobrevivente",
+      "pesos": {
+        "constituicao": 0.65,
+        "vontade": 0.35
+      },
+      "efeitos": {
+        "ehp": 0.45,
+        "sustain": 0.3
+      },
+      "texto": "Abaixo de 30% de vida, a ultimate enche até o dobro.",
+      "ganchos": [
+        {
+          "quando": "passivo",
+          "efeito": {
+            "cargaVidaBaixaPct": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "pergaminhista",
+      "classe": "aventureiro",
+      "nome": "Pergaminhista",
+      "pesos": {
+        "inteligencia": 0.65,
+        "sabedoria": 0.35
+      },
+      "efeitos": {
+        "dano": 0.4,
+        "area": 0.45
+      },
+      "texto": "Seu estudo de habilidades fica até 25% mais curto.",
+      "ganchos": [
+        {
+          "quando": "passivo",
+          "efeito": {
+            "estudoPct": 25
+          }
+        }
+      ]
+    }
+  ]
+}

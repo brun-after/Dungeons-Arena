@@ -13,7 +13,9 @@ import { prepararSequencia, participaDeCombo } from './sequencias';
 // formas.ts), custo em vida, saltos (saltos.ts) e o perfil da classe e das passivas (dano, alcance, custo,
 // recarga).
 
-import { atributosDeFormula, bonusDeEspecializacao, multiplicadorDeRolagem, perfilDestreza, potenciaDeEfeito, reducaoRecargaBasicoPct } from '../progression/efeitos-atributo';
+import { atributosDeFormula, multiplicadorDeRolagem, perfilDestreza, potenciaDeEfeito, reducaoRecargaBasicoPct } from '../progression/efeitos-atributo';
+import { estilosNaFonte, poderBase } from './poder-base';
+import { efeitosDeEstiloDe } from '../progression/estilos';
 import type { Celula, EntidadeId } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, novoId, type EstadoJogo } from '../core/estado';
@@ -87,20 +89,22 @@ export function recargaRestante(estado: EstadoJogo, entidadeId: EntidadeId, habi
 }
 
 export function fonteDe(e: Entidade, ctx: ContextoSimulacao, tick: number, hab: Habilidade): FonteDeDano {
+  // Marco 39 (12/11/2026, D-148): quem tem ficha bate pelo poder base (nível, arma, itens, domínio) e pelos estilos;
+  // inimigos, invocações e mortos seguem a fórmula de atributos (D-068), com o estilo de invocação do dono.
+  const estilos = estilosNaFonte(ctx, e, hab);
+  const poder = e.bolsa ? poderBase(e.nivel, ctx.balance, ctx.conteudo.classes.get(e.bolsa.classeId)?.poderPct) : null;
   return {
     id: e.id,
     equipe: e.equipe,
-    // Marco 18 (D-068): o bônus fixo segue o atributo da habilidade; a rolagem escala com Força e Inteligência.
-    // Marco 28 (D-127): acima de 30, o ponto de atributo do jogador rende menos (atributosDeFormula).
-    bonusAtributo: bonusDeAtributo(atributosDeFormula(e, ctx.balance), hab.escalaCom, ctx.balance.combate.multiplicadorAtributoPadrao) + (e.bolsa ? bonusDeEspecializacao(e.atributos, hab.escalaCom, ctx.balance) : 0),
-    multRolagem: multiplicadorDeRolagem(atributosDeFormula(e, ctx.balance), ctx.balance, hab.escalaCom, hab.escalaRolagem),
-    // Marco 18: a Inteligência e os passivos (Mente dupla) dão a potência dos efeitos.
-    potencia: potenciaDeEfeito(e.atributos, ctx.balance) * (1 + passivosDe(ctx, e).potenciaPct / 100),
+    bonusAtributo: poder ? poder.bonus : bonusDeAtributo(atributosDeFormula(e, ctx.balance), hab.escalaCom, ctx.balance.combate.multiplicadorAtributoPadrao),
+    multRolagem: poder ? poder.multRolagem : multiplicadorDeRolagem(atributosDeFormula(e, ctx.balance), ctx.balance, hab.escalaCom, hab.escalaRolagem),
+    // Marco 18: os passivos (as mecânicas dos estilos, os itens) somam à potência dos efeitos.
+    potencia: (poder ? poder.potencia * estilos.potencia : potenciaDeEfeito(e.atributos, ctx.balance)) * (1 + passivosDe(ctx, e).potenciaPct / 100),
     carisma: e.atributos.carisma,
     // Marco 10A-3: a rampa da invocação multiplica junto com os efeitos (§2.9).
     // Marco 28 (D-127): o % de dano dos itens vale para básico, skill e ultimate.
-    multDano: multiplicadorDanoCausado(e, tick) * rampaDeInvocacao(e, tick, ctx) * (1 + (e.danoItensPct ?? 0) / 100),
-    multCura: 1,
+    multDano: multiplicadorDanoCausado(e, tick) * rampaDeInvocacao(e, tick, ctx) * (1 + (e.danoItensPct ?? 0) / 100) * estilos.multDano,
+    multCura: estilos.multCura,
   };
 }
 
@@ -110,7 +114,7 @@ export function fonteDaHabilidade(e: Entidade, ctx: ContextoSimulacao, tick: num
   const p = perfilPara(ctx, e, hab);
   // Marco 28 (D-127): o atributo de classe fortalece as skills de classe e as ultimates (dano, cura e potência).
   const classe = fatorDeSkillDeClasse(ctx, e, hab.id);
-  return { ...f, potencia: f.potencia * classe, multDano: f.multDano * hab.multDano * (1 + p.danoPct / 100) * classe, multCura: hab.multCura * (1 + p.curaPct / 100) * classe };
+  return { ...f, potencia: f.potencia * classe, multDano: f.multDano * hab.multDano * (1 + p.danoPct / 100) * classe, multCura: f.multCura * hab.multCura * (1 + p.curaPct / 100) * classe };
 }
 
 /**
@@ -321,7 +325,9 @@ export function iniciarAcao(
     // Marco 18: o teto passa a 75% só somando buff; a Destreza do arqueiro chega a 50% sozinha.
     // Marco 27 (D-126): sem o arco, o Arqueiro perde parte da cadência da Destreza; o arco de outra classe é lento.
     const reducao = ehBasico(ator, hab.id) ? Math.min(75, bonusAtaqueBasico(ator, estado.tick).recargaPct + reducaoRecargaBasicoPct(ator.atributos, ctx.balance, perfilDestreza(ctx, ator)) * fatorDaVelocidade(ctx, ator) + velocidadeFrenesiPct(ctx, ator, estado.tick)) : 0;
-    const ms = hab.recargaMs * (1 - reducao / 100) * (1 + perfil.recargaPct / 100) * (1 + recargaDoBasicoPct(ctx, ator, hab) / 100);
+    // Marco 39 (D-148): a cadência dos estilos acelera o básico (×1/(1 + cadência)).
+    const cadencia = ehBasico(ator, hab.id) ? 1 + efeitosDeEstiloDe(ctx, ator).cadencia : 1;
+    const ms = (hab.recargaMs * (1 - reducao / 100) * (1 + perfil.recargaPct / 100) * (1 + recargaDoBasicoPct(ctx, ator, hab) / 100)) / cadencia;
     // 07/11/2026 (D-136): a skill com cargas acumula usos (combat/cargas.ts).
     registrarRecarga(estado, chave, ms, hab);
   }

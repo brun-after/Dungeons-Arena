@@ -2586,14 +2586,14 @@ body.toque .botao-consumivel {
   font-size: 0.82rem;
   line-height: 1.4;
 }
-.lista-ressonancias,
+.lista-estilos,
 .marcos-habilidade {
   margin: 4px 0;
   padding-left: 18px;
   font-size: 0.82rem;
   color: var(--texto-suave);
 }
-.lista-ressonancias strong {
+.lista-estilos strong {
   color: var(--destaque);
 }
 .marcos-habilidade .marco.alcancado {
@@ -3366,3 +3366,15 @@ dialog.mochila[open] { display: flex; flex-direction: column; }
   .mapa-expandido[data-zoom='1'] .zoom-cartografia { margin-bottom: 4px; }
   .mapa-expandido[data-zoom='1'] .janela-cartografia { height: calc(100dvh - 140px - var(--seguro-topo) - var(--seguro-base)); }
 }
+
+/* Marco 39 (12/11/2026, D-147): o radar do pentagrama de estilos na ficha. */
+.painel-estilos { margin-top: 10px; }
+.radar-estilos { display: block; width: min(100%, 300px); margin: 4px auto; overflow: visible; }
+.radar-grade { fill: none; stroke: var(--borda, #444); stroke-width: 0.6; opacity: 0.6; }
+.radar-borda { fill: none; stroke: var(--texto-suave, #999); stroke-width: 1; }
+.radar-itens { fill: var(--destaque, #d8a04a); fill-opacity: 0.18; stroke: var(--destaque, #d8a04a); stroke-dasharray: 3 2; stroke-width: 1; }
+.radar-pontos { fill: var(--destaque, #d8a04a); fill-opacity: 0.42; stroke: var(--destaque, #d8a04a); stroke-width: 1.4; }
+.radar-rotulo { fill: var(--texto, #ddd); font-size: 9px; }
+.lista-estilos li { margin: 6px 0; }
+.estilo-pesos, .estilo-itens { color: var(--texto-suave); }
+.estilo-mecanica { color: var(--texto-suave); font-style: italic; }

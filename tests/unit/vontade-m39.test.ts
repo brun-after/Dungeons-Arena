@@ -21,13 +21,13 @@ describe('Força › Vontade', () => {
     expect(vontadeNoLugarDaForca(null)).toBeNull();
   });
 
-  it('a migração 28 › 29 troca a chave em toda entidade e na base da ficha, também nas fases visitadas', () => {
+  it('a migração 28 › 29 troca a chave em toda entidade e na base da ficha, também nas fases visitadas (e as ressonâncias dão lugar aos estilos)', () => {
     expect(VERSAO_SCHEMA).toBe(29);
     const entidade = { atributos: { forca: 20, destreza: 10 }, bolsa: { atributosBase: { forca: 18, destreza: 10 } } };
     const r = obter(MIGRACOES[28])({ estado: { entidades: [entidade, { atributos: { forca: 11 } }] }, fasesVisitadas: { f1: { entidades: [entidade] } } });
     expect(r).toEqual({
-      estado: { entidades: [{ atributos: { vontade: 20, destreza: 10 }, bolsa: { atributosBase: { vontade: 18, destreza: 10 } } }, { atributos: { vontade: 11 } }] },
-      fasesVisitadas: { f1: { entidades: [{ atributos: { vontade: 20, destreza: 10 }, bolsa: { atributosBase: { vontade: 18, destreza: 10 } } }] } },
+      estado: { entidades: [{ atributos: { vontade: 20, destreza: 10 }, bolsa: { atributosBase: { vontade: 18, destreza: 10 } }, estilos: [] }, { atributos: { vontade: 11 }, estilos: [] }] },
+      fasesVisitadas: { f1: { entidades: [{ atributos: { vontade: 20, destreza: 10 }, bolsa: { atributosBase: { vontade: 18, destreza: 10 } }, estilos: [] }] } },
     });
   });
 
@@ -35,7 +35,7 @@ describe('Força › Vontade', () => {
     const e = criarJogador(obter(CONTEUDO.classes.get('guerreiro')), 'j', 1, 1, ctx.balance);
     e.nivel = 5;
     const b = obter(e.bolsa);
-    b.atributosBase.vontade += 8;
+    b.atributosBase.vontade += 4;
     const pedido = JSON.parse(JSON.stringify(pedidoDoPersonagem(e))) as { bolsa: { atributosBase: Record<string, number>; sistema?: number } };
     const { vontade, ...resto } = pedido.bolsa.atributosBase;
     pedido.bolsa.atributosBase = { ...resto, forca: obter(vontade) };

@@ -167,7 +167,8 @@ describe('nível e pontos (§2.12)', () => {
     expect(e.nivel).toBe(3);
     expect(e.xp).toBe(7);
     expect(e.bolsa?.pontosAtributo).toBe(2 * BALANCE_PADRAO.xp.pontosPorNivel);
-    expect(e.hpMax).toBe(hpAntes + 2 * BALANCE_PADRAO.xp.hpPorNivel);
+    // Marco 39 (D-148): a vida dos estilos multiplica; a classe já traz pontos acima de 10 (±1 de arredondamento).
+    expect(Math.abs(e.hpMax - (hpAntes + 2 * BALANCE_PADRAO.xp.hpPorNivel))).toBeLessThanOrEqual(1);
     expect(c.de('subiuNivel').map((x) => x.nivel)).toEqual([2, 3]);
   });
 
@@ -188,7 +189,9 @@ describe('nível e pontos (§2.12)', () => {
     const hpMax = c.j().hpMax;
     c.tick({ t: 'distribuirPonto', atributo: 'constituicao' });
     expect(bolsa.atributosBase.constituicao).toBe(11);
-    expect(c.j().hpMax).toBe(hpMax + BALANCE_PADRAO.hp.hpAtributoMult);
+    // Marco 39 (D-148): a Constituição também enche a ponta de vida do estilo (um pouco mais que o ponto puro).
+    expect(c.j().hpMax).toBeGreaterThanOrEqual(hpMax + BALANCE_PADRAO.hp.hpAtributoMult);
+    expect(c.j().hpMax).toBeLessThanOrEqual(hpMax + BALANCE_PADRAO.hp.hpAtributoMult + 2);
     expect(bolsa.pontosAtributo).toBe(0);
   });
 

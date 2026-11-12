@@ -3,7 +3,7 @@
 **Versão:** 0.99 · **Data:** 12/11/2026
 
 > **Histórico**
-> - **0.99 (12/11/2026)**: D-146: a Força vira Vontade (save 29, a ficha antiga e a marca do sistema). D-145: marco 39, o nível 100 sem travas (ids de item e de skill gerada, recompensa de missão) e o loot do inimigo renascido no Mundo.
+> - **0.99 (12/11/2026)**: D-147 (pontos escassos, teto 10 + 2 × nível e o pentagrama de estilos no lugar das ressonâncias) e D-148 (poder base no dano de quem tem ficha, os efeitos dos estilos no combate e a calibragem). D-146: a Força vira Vontade (save 29, a ficha antiga e a marca do sistema). D-145: marco 39, o nível 100 sem travas (ids de item e de skill gerada, recompensa de missão) e o loot do inimigo renascido no Mundo.
 > - **0.98 (09/11/2026)**: D-144: estabilidade e ajustes de jogo do Mundo (viagem entre salas sem queda, perseguição, lojas, troca, invocações, alvo dos buffs, descrições).
 > - **0.97 (08/11/2026)**: D-141 (habilidades por 35% FOR e 65% INT; o guerreiro conjura andando e encadeia com o básico) e D-142 (marco 38: prédios das vilas, andarilhos, escolta, errantes, forja em graus, troféus, fusão, pedra de retorno com círculo, save em toda região e o deserto entre os reinos).
 > - **0.96 (08/11/2026)**: D-140: o Mundo sem a fadiga de XP por fase (só a diferença de nível reduz o XP das criaturas inferiores).
@@ -4371,4 +4371,59 @@ etapa a troca é só de nome, e a Vontade faz o que a Força fazia. Os papéis n
   A conferência só aceita o valor atual: qualquer outro pede a tela de novo.
 - **Certificados.** O retrato assinado tem `forca`, então deixa de bater com o personagem; a arena o trata como ficha
   editada (treino) até uma nova certificação, como já acontece com qualquer mudança da ficha.
+
+## D-147 — Pontos escassos, teto novo e o pentagrama de estilos (12/11/2026)
+
+O documento de design (v1.4, seção 2) e o simulador "Pentagrama de Estilos" fecharam o modelo; esta é a parte dos
+atributos.
+
+- **Pontos.** 3 por nível até o 30 e 2 depois (eram 4, 5 e 6 depois do 30): 227 pontos no 100, em vez de 447. Com 447,
+  todo personagem enchia quase tudo no 100. A escassez faz a build ser uma escolha também no fim (`xp.pontosPorFaixa`).
+- **Teto.** O atributo-base vai até `10 + 2 × nível` (era nível + 20), até 100 (`atributos.teto`). Isso deixa seguir
+  um estilo ponto a ponto desde o nível 2 sem fechar o caminho de outro.
+- **Pentagrama** (`data/estilos.json`, `progression/estilos.ts`). Cada classe tem cinco estilos; cada um usa um par de
+  atributos (0,65 e 0,35). A intensidade é linear nos pontos acima de 10 nesses atributos (o que a classe já traz acima
+  de 10 conta), dividida por 90. Cada ponto move o radar na hora; não há marcos distantes.
+- **Itens como camada.** O que os afixos de atributo dos itens somam entra pelos mesmos pesos, numa camada limitada a
+  20 p.p. por ponta. O teto da camada sobe de 30% (no nível 1) a 100% (no 100) e pode levar a ponta até 120%
+  (`balance.estilos`). Nenhum formato de item mudou: os afixos de hoje já movem o radar.
+- **O que o estilo entrega.** Efeitos numéricos (dano, cadência, área, invocações, vida, recuperação, reforço aos
+  aliados; ver D-148) e uma mecânica em ganchos (o formato dos itens e conjuntos), com a chance ou o valor do passivo
+  vezes a intensidade da ponta. As mecânicas reaproveitam o vocabulário das ressonâncias (expor em área, herdar o
+  elemento, escudo mais forte, carga de ultimate, recarga das skills de classe, cura por acerto...).
+- **As ressonâncias saem.** Arquivo, módulo, evento e lista pública dão lugar aos estilos: `estiloDespertou` (o diário e
+  o HUD avisam quando uma ponta chega a 25%, `estilos.despertarPct`) e `Entidade.estilos` (os despertos). A migração do
+  save tira a lista antiga.
+- **Ficha.** A aba Ficha mostra o radar (a parte dos pontos e a dos itens), cada estilo com o efeito de agora ao lado do
+  máximo e a mecânica. O "+" de cada atributo diz qual ponta o próximo ponto sobe e quanto.
+- **Desempenho.** O combate consulta o radar a cada golpe, cura e gancho. O resultado fica guardado por ficha, com a
+  assinatura da classe, do nível e dos atributos (memória fraca). O harness de 10.000 ticks ficou no tempo de antes.
+
+## D-148 — Poder base no dano e os estilos no combate (12/11/2026)
+
+- **Poder base** (`combat/poder-base.ts`, `balance.poderBase`). Quem tem ficha não soma mais o atributo ao golpe nem
+  multiplica a rolagem por Força e Inteligência (D-068, D-141). O bônus fixo segue uma curva do nível (pontos ligados em
+  linha reta: 14 no 1, 28 no 5, 42 no 10, 54 no 20, 65 no 30 e 86 no 100). A rolagem cresce 3% por nível até o 30, e a
+  potência dos efeitos 2% por nível até 1,6×. A arma (o dado e a cadência), os itens (o % de dano) e o atributo de
+  classe seguem como estavam. A curva imita a build focada de antes: sobe rápido no começo e devagar depois do 30, onde
+  entram os itens e o domínio.
+- **Poder da classe** (`classes.json → poderPct`). As skills de cada classe partiam de atributos diferentes (o
+  Aventureiro bate pela Destreza do falcão, por exemplo), e o bônus igual para todos deixava o Aventureiro forte demais
+  no começo. Aventureiro 60%, Arqueiro 95%, os outros 100%.
+- **Inimigos, invocações e mortos** seguem a fórmula de atributos: o equilíbrio deles está medido, e os mortos e as
+  criaturas de pergaminho já herdam do dono pelos atributos.
+- **Os efeitos dos estilos.** Dano multiplica todo golpe; dano em área, os golpes de área. A cadência divide a recarga
+  do básico. A força das invocações vai, ao invocar, para o dano e a vida da invocação (`invocacao.estiloPct`). A vida
+  multiplica a vida máxima, e a recuperação, a cura recebida. O reforço aos aliados multiplica as curas e metade dele
+  vira potência dos efeitos.
+- **O que saiu:** a especialização ofensiva, o multiplicador de rolagem por atributo e a potência pela Inteligência, para
+  quem tem ficha. Continuam a Destreza (velocidade e recarga do básico), a Constituição (vida), a Sabedoria (mana e
+  armadilhas), o Carisma (d20, hesitação e loja) e a Inteligência no estudo.
+- **Meta nova de build.** "A focada vence a dispersa em 60%" vinha do modelo em que o atributo era dano. Com os estilos,
+  os dois caminhos são viáveis: a meta passa a "nenhuma vence sempre" (35% a 85%, `metas.build.focadaMinPct/MaxPct`).
+  "O equipado vence o sem equipamento" continua em 60%.
+- **Calibragem.** `npm run balancear` chegou a 147/147. As linhas do nível 100 agora têm equipamento (D-145). O
+  simulador monta o guerreiro típico em Vontade e Destreza (Duelista e Carniceiro), não só em Vontade.
+- **Telas.** A ficha, as dicas dos atributos e o "escala com" das skills mostram o nível, os estilos, o domínio e os
+  itens, não mais a Força e a Inteligência.
 

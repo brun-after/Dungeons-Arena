@@ -11,6 +11,7 @@ import type { Habilidade } from './habilidades';
 import { pelasCostas } from './orientacao';
 import { passivasDaBolsa } from './perfil';
 import { REGISTRO_EFEITOS, type EfeitoCanonico, type TipoEfeito } from './registro-efeitos';
+import { efeitosDeEstiloDe } from '../progression/estilos';
 
 const passivas = (ctx: ContextoSimulacao, e: Entidade | undefined) => (e?.bolsa ? passivasDaBolsa(ctx, e.bolsa) : []);
 
@@ -84,5 +85,6 @@ export function reforcarEstado(ctx: ContextoSimulacao, conjurador: Entidade | un
 
 /** Cura recebida a mais pelas passivas (Graça). */
 export function curaRecebidaPassivas(ctx: ContextoSimulacao, alvo: Entidade): number {
-  return 1 + passivas(ctx, alvo).reduce((s, p) => s + (p.curaRecebidaPct ?? 0), 0) / 100;
+  // Marco 39 (D-148): a recuperação dos estilos aumenta a cura recebida.
+  return (1 + passivas(ctx, alvo).reduce((s, p) => s + (p.curaRecebidaPct ?? 0), 0) / 100) * (1 + efeitosDeEstiloDe(ctx, alvo).sustain);
 }

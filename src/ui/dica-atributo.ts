@@ -8,13 +8,10 @@ import type { ContextoSimulacao } from '../core/contexto';
 import type { Atributos, Entidade } from '../entities/entidade';
 import { t, type ChaveTexto } from '../i18n';
 import {
-  bonusDeEspecializacao,
   chanceDeDesarmarPct,
   chanceDeRevelarPct,
   descontoNaLojaPct,
-  multiplicadorDeRolagem,
   perfilDestreza,
-  potenciaDeEfeito,
   raioDeRevelar,
   reducaoEstudoPct,
   reducaoRecargaBasicoPct,
@@ -29,10 +26,10 @@ const fmt = (v: number, casas = 1) => v.toFixed(casas).replace('.', ',');
 /** As linhas do cartão de um atributo, com os números do personagem. */
 export function linhasDaDica(nome: NomeAtributo, a: Atributos, ctx: ContextoSimulacao, j: Entidade, hpMax: number, manaMax: number): string[] {
   const b = ctx.balance;
-  const rolagem = fmt(multiplicadorDeRolagem(a, b), 2);
   switch (nome) {
+    // Marco 39 (D-148): os atributos não somam dano direto; enchem os estilos.
     case 'vontade':
-      return [t('dica.vontade.1', { rolagem }), t('dica.vontade.2', { bonus: a.vontade + bonusDeEspecializacao(a, 'vontade', b) }), t('dica.especializacao', { inicio: b.atributos.efeitos.especializacaoInicio, ponto: b.atributos.efeitos.especializacaoPorPonto, max: b.atributos.efeitos.especializacaoMax })];
+      return [t('dica.vontade.1'), t('dica.estilos')];
     case 'destreza': {
       const perfil = perfilDestreza(ctx, j);
       return [
@@ -44,12 +41,7 @@ export function linhasDaDica(nome: NomeAtributo, a: Atributos, ctx: ContextoSimu
     case 'constituicao':
       return [t('dica.constituicao.1', { hp: hpMax }), t('dica.constituicao.2', { vida: vidaPorCelula(a, b) })];
     case 'inteligencia':
-      return [
-        t('dica.inteligencia.1', { rolagem, bonus: a.inteligencia + bonusDeEspecializacao(a, 'inteligencia', b) }),
-        t('dica.especializacao', { inicio: b.atributos.efeitos.especializacaoInicio, ponto: b.atributos.efeitos.especializacaoPorPonto, max: b.atributos.efeitos.especializacaoMax }),
-        t('dica.inteligencia.2', { potencia: fmt(potenciaDeEfeito(a, b), 2) }),
-        t('dica.inteligencia.3', { pct: fmt(reducaoEstudoPct(a, b), 0) }),
-      ];
+      return [t('dica.inteligencia.1'), t('dica.inteligencia.3', { pct: fmt(reducaoEstudoPct(a, b), 0) })];
     case 'sabedoria': {
       const regen = b.recursos.regenManaPorSegundo * (1 + (Math.max(0, a.sabedoria - 10) * b.atributos.efeitos.regenManaPorSabedoriaPct) / 100);
       return [

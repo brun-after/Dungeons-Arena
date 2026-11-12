@@ -18,7 +18,7 @@ import { simular } from '../../src/core/simulacao';
 function obter<T>(v: T | null | undefined): T { if (v == null) throw Error('ausente'); return v; }
 function cena() {
   const ctx = contexto(faseDeTexto(SALA_ABERTA), undefined, 'cooperativo');
-  const estado = criarEstado({ faseId: 'teste', semente: 9 });
+  const estado = criarEstado({ faseId: 'teste', semente: 1 }); // marco 39: as mecânicas dos estilos também sorteiam; esta semente não tira falha crítica na lança
   const j = criarJogador(obter(CONTEUDO.classes.get('necromante')), 'j', 5, 5, ctx.balance);
   j.equipe = 'grupo'; j.autoAtaque = false; j.mana = 999;
   estado.entidades.push(j);

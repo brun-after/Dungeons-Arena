@@ -1,4 +1,4 @@
-// Marco 39 (12/11/2026, D-146): a Força vira Vontade. A migração 28 › 29 troca a chave `forca` por `vontade` nos
+// Marco 39 (12/11/2026, D-146): a Força vira Vontade (e, D-147, as ressonâncias dão lugar aos estilos). A migração 28 › 29 troca a chave `forca` por `vontade` nos
 // atributos de toda entidade gravada (e na base da ficha, quem tem bolsa). Ela não devolve pontos nem mexe na build:
 // quem ainda não passou pelo sistema novo (sem `bolsa.sistema`) vê a tela de atualização ao entrar no jogo, e é lá
 // que os pontos voltam. Puro.
@@ -14,8 +14,11 @@ export function vontadeNoLugarDaForca(a: unknown): unknown {
 
 function migrarEntidades(v: unknown): unknown {
   if (!ehObjeto(v) || !Array.isArray(v.entidades)) return v;
-  return { ...v, entidades: v.entidades.map((x: unknown) => {
-    if (!ehObjeto(x)) return x;
+  return { ...v, entidades: v.entidades.map((bruto: unknown) => {
+    if (!ehObjeto(bruto)) return bruto;
+    // D-147: as ressonâncias saem; a lista dos estilos despertos começa vazia (o tick a preenche).
+    const x: Objeto = Object.fromEntries(Object.entries(bruto).filter(([k]) => k !== 'ressonancias'));
+    x.estilos = Array.isArray(bruto.estilos) ? bruto.estilos : [];
     const bolsa = ehObjeto(x.bolsa) ? { ...x.bolsa, atributosBase: vontadeNoLugarDaForca(x.bolsa.atributosBase) } : x.bolsa;
     return { ...x, atributos: vontadeNoLugarDaForca(x.atributos), ...(bolsa !== undefined && { bolsa }) };
   }) };

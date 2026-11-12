@@ -11,6 +11,7 @@ import type { ContextoSimulacao } from '../core/contexto';
 import type { Atributos, Bolsa, Entidade } from '../entities/entidade';
 import { basicoDoPersonagem, basicoSecundario } from './armas';
 import { pontosUteis } from './efeitos-atributo';
+import { radarDe } from './estilos';
 import { hpMaximo, manaMaxima } from './ficha';
 import { NOMES_ATRIBUTOS, type Item } from './itens';
 
@@ -85,10 +86,12 @@ export function derivarFicha(bolsa: Bolsa, nivel: number, ctx: Pick<ContextoSimu
   // Marco 28 (D-127): acima de 30, a Constituição e a Sabedoria rendem menos na vida e na mana.
   const hp = hpMaximo(hpBase, pontosUteis(atributos.constituicao, balance), balance.hp.hpAtributoMult, balance.hp.dificuldadeMult);
   const mana = manaMaxima(pontosUteis(atributos.sabedoria, balance));
+  // Marco 39 (D-148): a vida dos estilos (pelos pontos e pela camada dos itens).
+  const ehp = radarDe(ctx, bolsa, atributos, nivel)?.efeitos.ehp ?? 0;
   return {
     atributos,
     defesa,
-    hpMax: Math.max(1, Math.round(hp * (1 + soma((p) => p.hpMaxPct) / 100))),
+    hpMax: Math.max(1, Math.round(hp * (1 + soma((p) => p.hpMaxPct) / 100) * (1 + ehp))),
     manaMax: Math.max(1, Math.round(mana * (1 + soma((p) => p.manaMaxPct) / 100))),
     danoPct,
     defesaPct,

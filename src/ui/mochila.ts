@@ -15,10 +15,11 @@ import { SLOTS_DE_EQUIPAMENTO, type Slot } from '../modos/modo';
 import { DT_MS } from '../core/loop';
 import { ticksRestantesDoEstudo } from '../progression/habilidades-personagem';
 import { derivarFicha, multiplicadoresDoItem } from '../progression/derivados';
-import { atributosUteis, bonusDeEspecializacao, descontoNaLojaPct, pontosUteis, multiplicadorDeRolagem, perfilDestreza, reducaoRecargaBasicoPct, vidaPorCelula } from '../progression/efeitos-atributo';
-import { ressonanciasDe } from '../progression/ressonancias';
+import { descontoNaLojaPct, pontosUteis, perfilDestreza, reducaoRecargaBasicoPct, vidaPorCelula } from '../progression/efeitos-atributo';
+import { multiplicadorDosEstilos, poderBase } from '../combat/poder-base';
+import { EFEITOS_NEUTROS, radarDe } from '../progression/estilos';
+import { painelDeEstilos, previaDoPonto } from './radar-estilos';
 import { criarDicaAtributo, linhasDaDica, nomeDoAtributo, type DicaAtributo } from './dica-atributo';
-import { bonusDeAtributo } from '../progression/ficha';
 import { faixaDaFormula } from '../combat/dados';
 import { habilidadeDoAtor } from '../combat/perfil';
 import { cabeNoSlot, NOMES_ATRIBUTOS, type Item } from '../progression/itens';
@@ -333,7 +334,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
       el('p', 'linha-nivel', nivelMax ? t('ficha.nivelMax', { nivel: j.nivel }) : t('ficha.nivel', { nivel: j.nivel, xp: j.xp, proximo })),
     );
     const teto = tetoDoAtributo(j.nivel, ctx.balance);
-    corpo.append(el('p', 'detalhe-item', t('ficha.teto', { teto, nivel: j.nivel, folga: ctx.balance.atributos.folgaSobreNivel, maximo: ctx.balance.atributos.maximo })));
+    corpo.append(el('p', 'detalhe-item', t('ficha.teto', { teto, nivel: j.nivel, base: ctx.balance.atributos.teto.base, porNivel: ctx.balance.atributos.teto.porNivel, maximo: ctx.balance.atributos.maximo })));
     const pontos = el('p', 'linha-pontos', t('ficha.pontos', { n: bolsa.pontosAtributo }));
     pontos.dataset.pontos = String(bolsa.pontosAtributo);
     corpo.append(pontos);
@@ -372,6 +373,10 @@ export function criarMochila(o: OpcoesMochila): Mochila {
         if (base >= teto) {
           mais.disabled = true;
           mais.title = t('ficha.noTeto', { teto });
+        } else {
+          // Marco 39 (D-147): a prévia do ponto (qual estilo sobe e quanto).
+          const previa = previaDoPonto(ctx, bolsa, efetiva.atributos, j.nivel, nome);
+          if (previa) mais.title = previa;
         }
         celulaMais.append(mais);
       }
@@ -384,27 +389,18 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     corpo.append(
       el('p', 'resumo-ficha', t('ficha.resumo', { defesa: efetiva.defesa, hp: efetiva.hpMax, mana: efetiva.manaMax })),
     );
-    // Marco 18 (D-068): as ressonâncias que os atributos despertaram (as outras ficam para o diário).
-    const ativas = ressonanciasDe(ctx.conteudo.ressonancias, efetiva.atributos);
-    if (ativas.length > 0) {
-      corpo.append(el('h3', 'subtitulo-modal', t('ficha.ressonancias')));
-      const lista = el('ul', 'lista-ressonancias');
-      for (const r of ativas) {
-        const li = el('li');
-        li.append(el('strong', undefined, r.nome), ` ${r.texto}`);
-        li.dataset.ressonancia = r.id;
-        lista.append(li);
-      }
-      corpo.append(lista);
-    }
+    // Marco 39 (12/11/2026, D-147): o pentagrama de estilos, desde o nível 2 (substitui as ressonâncias).
+    const estilos = painelDeEstilos(ctx, bolsa, efetiva.atributos, j.nivel);
+    if (estilos) corpo.append(estilos);
     // Marco 17 (D-063): o que os atributos dão, para o jogador ver o efeito do que escolheu.
     const basico = habilidadeDoAtor(ctx, j, j.ataqueBasico);
     if (basico?.formulaDano) {
-      // Marco 18: a rolagem já com o multiplicador de Força e Inteligência.
+      // Marco 39 (D-148): a rolagem e o bônus fixo do poder base (nível e classe), com os estilos e os itens por cima.
       const faixaBruta = faixaDaFormula(basico.formulaDano);
-      const mult = multiplicadorDeRolagem(atributosUteis(efetiva.atributos, ctx.balance), ctx.balance);
-      const faixa = { min: Math.round(faixaBruta.min * mult), max: Math.round(faixaBruta.max * mult) };
-      const bonus = bonusDeAtributo(atributosUteis(efetiva.atributos, ctx.balance), basico.escalaCom, ctx.balance.combate.multiplicadorAtributoPadrao) + bonusDeEspecializacao(efetiva.atributos, basico.escalaCom, ctx.balance);
+      const poder = poderBase(j.nivel, ctx.balance, ctx.conteudo.classes.get(bolsa.classeId)?.poderPct);
+      const extra = (1 + efetiva.danoPct / 100) * multiplicadorDosEstilos(radarDe(ctx, bolsa, efetiva.atributos, j.nivel)?.efeitos ?? EFEITOS_NEUTROS, basico);
+      const faixa = { min: Math.round(faixaBruta.min * poder.multRolagem * extra), max: Math.round(faixaBruta.max * poder.multRolagem * extra) };
+      const bonus = Math.round(poder.bonus * extra);
       const recarga = (basico.recargaMs * (1 - reducaoRecargaBasicoPct(efetiva.atributos, ctx.balance, perfilDestreza(ctx, j)) / 100)) / 1000;
       const manaPorSegundo =
         ctx.balance.recursos.regenManaPorSegundo * (1 + (Math.max(0, pontosUteis(efetiva.atributos.sabedoria, ctx.balance) - 10) * ctx.balance.atributos.efeitos.regenManaPorSabedoriaPct) / 100);

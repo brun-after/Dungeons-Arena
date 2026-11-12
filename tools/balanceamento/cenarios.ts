@@ -51,7 +51,7 @@ export function contextoDoCenario(modoId = 'campanha', balance: Balance = BALANC
  */
 export const ATRIBUTOS_TIPICOS: Readonly<Record<string, readonly (keyof Atributos)[]>> = {
   aventureiro: ['vontade', 'destreza'],
-  guerreiro: ['vontade'],
+  guerreiro: ['vontade', 'destreza'],
   mago: ['inteligencia'],
   necromante: ['inteligencia'],
   arqueiro: ['vontade', 'destreza'],
