@@ -1,6 +1,6 @@
 # Dungeons Arena: guia para quem trabalha no código
 
-**Versão:** 0.6 · **Data:** 30/10/2026
+**Versão:** 0.7 · **Data:** 12/11/2026
 
 A especificação normativa é [`docs/PROMPT-PROJETO-v4.0.md`](docs/PROMPT-PROJETO-v4.0.md). Leia a Parte 1
 antes de decisões técnicas. Divergências vão para [`docs/DECISOES.md`](docs/DECISOES.md), com justificativa.
@@ -38,6 +38,8 @@ O roteiro e o estado de cada marco ficam no [`README.md`](README.md).
 - **Hostilidade só por `relacao()`**, nunca olhando o `tipo` da entidade (§2.5, aceite 7).
 - **Regras de modo em dados**, consultadas por funções pequenas; nada de `if (modo === 'x')` (§2.13).
 - **Números em `src/data/balance.json`**, não chutados no código.
+- **Dano de quem tem ficha pelo poder base e pelos estilos** (marco 39, D-148): atributo não vira bônus fixo de dano;
+  elemento de skill de classe vem da runa (`combat/runas.ts`, D-151).
 - **Clone explícito** do estado (sem ida e volta por JSON); estado só com dados.
 - TypeScript estrito, sem `any`, até 800 linhas por arquivo, sem globais, HTML sempre escapado.
 - Textos de interface no dicionário `src/i18n/`.
