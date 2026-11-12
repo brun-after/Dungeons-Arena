@@ -3,6 +3,7 @@
   "classes": [
     {
       "id": "aventureiro",
+      "runaPadrao": "terra",
       "poderPct": 60,
       "nome": "Aventureiro",
       "hpBase": 60,
@@ -50,6 +51,7 @@
     },
     {
       "id": "guerreiro",
+      "runaPadrao": "fisico",
       "poderPct": 100,
       "nome": "Guerreiro",
       "hpBase": 45,
@@ -101,6 +103,7 @@
     },
     {
       "id": "mago",
+      "runaPadrao": "fogo",
       "nome": "Mago",
       "hpBase": 55,
       "defesa": 1,
@@ -152,6 +155,7 @@
     },
     {
       "id": "arqueiro",
+      "runaPadrao": "raio",
       "poderPct": 95,
       "nome": "Arqueiro",
       "hpBase": 55,
@@ -204,6 +208,7 @@
     },
     {
       "id": "necromante",
+      "runaPadrao": "trevas",
       "nome": "Necromante",
       "hpBase": 62,
       "defesa": 1,

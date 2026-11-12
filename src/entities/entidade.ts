@@ -265,6 +265,8 @@ export interface Bolsa {
   sistema?: number;
   /** Marco 39 (D-150): o uso de cada elemento para o vínculo (valor no `tick`; esfria na leitura). */
   vinculoUso?: Partial<Record<'fisico' | Elemento, { valor: number; tick: number }>>;
+  /** Marco 39 (D-151): a runa escolhida em cada encaixe (id da skill de classe ou da ultimate); ausente = a padrão. */
+  runas?: Partial<Record<string, 'fisico' | Elemento>>;
   /** Marco 18 (17/10/2026, D-068): a habilidade sendo estudada (aprender não é instantâneo); null = nenhuma. */
   estudo: Estudo | null;
   /** Marco 18 (D-070): a contagem de cada missão (as que zeram por fase usam `id@fase`) e as concluídas. */
@@ -645,6 +647,7 @@ function clonarBolsa(b: Bolsa): Bolsa {
     missoes: { ...b.missoes },
     missoesConcluidas: [...b.missoesConcluidas],
     diario: [...b.diario],
+    ...(b.runas ? { runas: { ...b.runas } } : {}),
     ...(b.vinculoUso ? { vinculoUso: Object.fromEntries(Object.entries(b.vinculoUso).map(([k, r]) => [k, { ...r }])) } : {}),
   };
 }

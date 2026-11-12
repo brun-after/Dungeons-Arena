@@ -255,6 +255,7 @@
     "pontosPorNivel": 1,
     "estudo": { "B": 900000, "A": 1800000, "S": 3600000, "reducaoPorIntPct": 2, "reducaoMaxPct": 40 },
     "velocidadeConjurandoLenta": 0.5,
+    "runas": { "vinculoMinPct": 1, "fracaoMinPct": 20, "fracaoMaxPct": 60, "duracaoMinPct": 50, "curaSagradoPct": 25, "escudoBase": 4, "escudoPorFaixa": 1.2, "escudoMs": 6000, "parPct": 15 },
     "rankMax": 5,
     "ranksEvolucao": [3, 5],
     "ranks": [

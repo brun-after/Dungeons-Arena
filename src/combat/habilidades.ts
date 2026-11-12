@@ -172,6 +172,12 @@ export interface Habilidade {
   disparoMs?: number;
   /** D-136: a Lanças da escuridão — a lança sai de cada morto do Necromante (combat/lanca-de-ossos.ts). */
   lanca?: LancaDosMortos;
+  /** Marco 39 (12/11/2026, D-151): a runa do encaixe (as skills de classe e as ultimates; combat/runas.ts). */
+  runa?: 'fisico' | Elemento;
+  /** D-151: a faixa do vínculo com a runa (0 a 10; só apresentação e a duração do estado). */
+  faixaRuna?: number;
+  /** D-151: a parte elemental do dano (0 a 1); o resto é neutro (só a elemental sente resistência e absorção). */
+  fracaoElemental?: number;
 }
 
 /** D-136: a lança vai do morto até o alvo dele e `alem` células adiante; com `lados`, também para os dois lados. */

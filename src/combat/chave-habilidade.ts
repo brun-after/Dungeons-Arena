@@ -7,7 +7,11 @@
 // semente em maiúsculas.
 
 // Marco 24 (24/10/2026): `~variante` no fim — a variante que o estado de quem usa liga (`redemoinho@3~frenesi`).
+// Marco 39 (12/11/2026, D-151): `!runaN` no fim — a runa do encaixe e a faixa do vínculo com ela (`chamas@2!gelo7`).
 import { MODIFICADORES, VARIANTES, type Modificador, type Variante } from './habilidades';
+import type { Elemento } from './elementos';
+
+const RUNAS = ['fisico', 'fogo', 'gelo', 'raio', 'veneno', 'psiquico', 'terra', 'trevas', 'sagrado'] as const;
 
 export interface PartesChave {
   id: string;
@@ -15,6 +19,7 @@ export interface PartesChave {
   caminhos: readonly string[];
   mods: readonly Modificador[];
   variantes?: readonly Variante[];
+  runa?: { runa: 'fisico' | Elemento; faixa: number };
 }
 
 export function formatarChave(p: PartesChave): string {
@@ -25,6 +30,7 @@ export function formatarChave(p: PartesChave): string {
   if (mods.length > 0) s += `+${mods.join(',')}`;
   const variantes = [...new Set(p.variantes ?? [])].sort();
   if (variantes.length > 0) s += `~${variantes.join(',')}`;
+  if (p.runa) s += `!${p.runa.runa}${String(Math.max(0, Math.min(10, Math.round(p.runa.faixa))))}`;
   return s;
 }
 
@@ -32,7 +38,7 @@ const ehModificador = (v: string): v is Modificador => (MODIFICADORES as readonl
 const ehVariante = (v: string): v is Variante => (VARIANTES as readonly string[]).includes(v);
 
 export function lerChave(chave: string): PartesChave | null {
-  const m = /^([a-z0-9_]+)(?:@(\d+))?(?:\/([a-z0-9_,]+))?(?:\+([a-z_,]+))?(?:~([a-z_,]+))?$/.exec(chave);
+  const m = /^([a-z0-9_]+)(?:@(\d+))?(?:\/([a-z0-9_,]+))?(?:\+([a-z_,]+))?(?:~([a-z_,]+))?(?:!([a-z]+)(\d+))?$/.exec(chave);
   if (!m?.[1]) return null;
   const mods = (m[4] ?? '').split(',').filter((x) => x !== '');
   if (!mods.every(ehModificador)) return null;
@@ -40,7 +46,14 @@ export function lerChave(chave: string): PartesChave | null {
   if (!variantes.every(ehVariante)) return null;
   const rank = m[2] === undefined ? 1 : Number(m[2]);
   if (!Number.isInteger(rank) || rank < 1) return null;
-  return { id: m[1], rank, caminhos: (m[3] ?? '').split(',').filter((x) => x !== ''), mods, ...(variantes.length > 0 && { variantes }) };
+  let runa: PartesChave['runa'];
+  if (m[6] !== undefined) {
+    const r = RUNAS.find((x) => x === m[6]);
+    const faixa = Number(m[7]);
+    if (!r || faixa > 10) return null;
+    runa = { runa: r, faixa };
+  }
+  return { id: m[1], rank, caminhos: (m[3] ?? '').split(',').filter((x) => x !== ''), mods, ...(variantes.length > 0 && { variantes }), ...(runa && { runa }) };
 }
 
 const PREFIXO_GERADA = 'g_';

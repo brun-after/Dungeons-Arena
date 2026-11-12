@@ -3382,3 +3382,8 @@ dialog.mochila[open] { display: flex; flex-direction: column; }
 /* Marco 39 (12/11/2026, D-149): a tela de atualização do personagem. */
 .modal-atualizacao .acoes-atualizacao { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; justify-content: flex-end; }
 .modal-atualizacao .botao-pequeno { min-width: 32px; }
+
+/* Marco 39 (12/11/2026, D-151): o encaixe de runa na carta da skill. */
+.encaixe-runa { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin-top: 0.35rem; }
+.seletor-runa { background: var(--fundo-campo, #1d1a17); color: inherit; border: 1px solid var(--borda, #5a4a3a); border-radius: 4px; padding: 0.15rem 0.35rem; font: inherit; }
+.dica-runa { flex-basis: 100%; opacity: 0.8; }

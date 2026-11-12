@@ -495,7 +495,7 @@
     {
       "id": "bruxa_do_pantano",
       "nome": "Bruxa do Pântano",
-      "hpBase": 2800,
+      "hpBase": 3100,
       "hesitacaoS": 1,
       "deteccao": 8,
       "xp": 320,

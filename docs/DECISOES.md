@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 0.99 · **Data:** 12/11/2026
+**Versão:** 1.00 · **Data:** 12/11/2026
 
 > **Histórico**
+> - **1.00 (12/11/2026)**: D-151: as runas nas skills de classe e nas ultimates (a parte elemental de 20% a 60% pelo vínculo, a função secundária, o bônus de par e a runa que some).
 > - **0.99 (12/11/2026)**: D-147 (pontos escassos, teto 10 + 2 × nível e o pentagrama de estilos no lugar das ressonâncias) e D-148 (poder base no dano de quem tem ficha, os efeitos dos estilos no combate e a calibragem). D-149: a tela de atualização dos personagens antigos. D-150: o vínculo elemental (eneágono), as resistências e a penetração. D-146: a Força vira Vontade (save 29, a ficha antiga e a marca do sistema). D-145: marco 39, o nível 100 sem travas (ids de item e de skill gerada, recompensa de missão) e o loot do inimigo renascido no Mundo.
 > - **0.98 (09/11/2026)**: D-144: estabilidade e ajustes de jogo do Mundo (viagem entre salas sem queda, perseguição, lojas, troca, invocações, alvo dos buffs, descrições).
 > - **0.97 (08/11/2026)**: D-141 (habilidades por 35% FOR e 65% INT; o guerreiro conjura andando e encadeia com o básico) e D-142 (marco 38: prédios das vilas, andarilhos, escolta, errantes, forja em graus, troféus, fusão, pedra de retorno com círculo, save em toda região e o deserto entre os reinos).
@@ -4470,3 +4471,31 @@ agora para montar a build nova sem se sentir lesado.
 - **Desempenho:** o vínculo fica guardado por ficha (memória fraca), com a assinatura da barra, do equipado, do uso e do
   tick.
 
+## D-151 — As runas nas skills de classe e nas ultimates (12/11/2026)
+
+- **Encaixe:** as skills exclusivas das classes e as ultimates (com as etapas delas) têm um encaixe de runa
+  (`combat/runas.ts`, `combat/encaixe-runa.ts`, `balance.habilidades.runas`). As skills gerais e as geradas não têm.
+- **Runa padrão:** a da classe (`classes.json → runaPadrao`): Mago Fogo, Necromante Trevas, Guerreiro Físico, Arqueiro
+  Raio, Aventureiro Terra. **A skill que já tem elemento no catálogo vem com a runa dele** (a Lança de gelo do Mago fica
+  de gelo, a Lâmina em brasa do Guerreiro fica de fogo): a encarnação e a sintonia do Mago (D-094, D-095) dependem do
+  elemento de cada magia e continuam inteiras. A padrão da classe preenche as skills neutras.
+- **Trocar:** o comando `escolherRuna` (a seleção na carta da skill e na da ultimate) aceita a padrão ou qualquer
+  elemento com vínculo de pelo menos `vinculoMinPct` (1%). A escolha fica na ficha (`Bolsa.runas`). **A runa some
+  quando o vínculo esfria:** abaixo do mínimo, o encaixe volta para a padrão (a escolha fica guardada e vale de novo se
+  o vínculo voltar). Como o uso cai pela metade a cada 240 s e nunca chega a zero, o mínimo é o "zerou".
+- **Vínculo e barra:** na barra, a skill com encaixe conta pela runa padrão. Se contasse pela escolhida, a runa
+  sustentaria o próprio vínculo e nunca sumiria; a escolhida se sustenta pelo uso (cada lançamento registra o elemento
+  da runa).
+- **Duas partes no golpe:** a parte elemental vai de 20% (vínculo 0) a 60% (vínculo cheio) do dano, em 11 faixas
+  (`fracaoElemental`). A parte neutra sente só a resistência física; a elemental, a do elemento (com a penetração de
+  D-150). Contra o inimigo afim que absorve o elemento, a parte elemental é anulada (não cura) e a neutra ainda fere;
+  contra a imunidade exata (os Primordiais), a neutra também passa. Sem runa, tudo continua do elemento, como antes.
+- **O papel não muda:** a skill de dano ganha o estado do elemento, com a duração de 50% (vínculo 0) a 100% (cheio) da
+  do catálogo; a do Físico não ganha estado. A cura ganha a função secundária: sagrado cura até 25% a mais, gelo e
+  terra deixam um escudo de `4 + 1,2 × faixa` por 6 s; as outras runas só dão o elemento.
+- **Chave:** `!<runa><faixa>` no fim da chave da skill (`redemoinho@2!gelo7`), para a memória das skills compiladas
+  continuar valendo; o resto da compilação não muda.
+- **Bônus de par:** a ultimate bate 15% a mais quando as duas skills do par estão com a runa dela. Os combos (D-097)
+  ficam sem bônus de runa por enquanto: eles já premiam a ordem das skills, e o simulador não mede combos por runa.
+- **Calibragem:** a parte neutra pesa menos as resistências da Bruxa do Pântano (psíquico 50%), e o covil dela em grupo
+  de 3 passou a cair em 29 s (meta 30–60 s; antes 30,4 s). A vida dela subiu de 2.800 para 3.100: 147/147 metas.

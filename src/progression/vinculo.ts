@@ -15,6 +15,7 @@
 
 import { resolverHabilidade } from '../combat/compilar-habilidade';
 import type { Elemento } from '../combat/elementos';
+import { levaRuna, runaPadraoDaSkill } from '../combat/encaixe-runa';
 import type { ContextoSimulacao } from '../core/contexto';
 import { msDe } from '../core/tempo';
 import type { Bolsa, Entidade } from '../entities/entidade';
@@ -93,7 +94,10 @@ function calcularVinculo(ctx: CtxVinculo, bolsa: Bolsa, tick: number): Vinculo {
   const r = ctx.balance.vinculo;
   const barra = vazio();
   const teclas = bolsa.barra.filter((id): id is string => id !== null);
-  for (const id of teclas) barra[pontaDe(resolverHabilidade(ctx, id)?.elemento ?? null)] += 1 / Math.max(1, teclas.length);
+  // Marco 39 (D-151): a skill com encaixe de runa conta pela runa padrão na barra (a escolhida se sustenta pelo uso; se
+  // contasse na barra, nunca sumiria).
+  const ponta = (id: string) => (levaRuna(ctx, id) ? runaPadraoDaSkill(ctx, bolsa, id) : pontaDe(resolverHabilidade(ctx, id)?.elemento ?? null));
+  for (const id of teclas) barra[ponta(id)] += 1 / Math.max(1, teclas.length);
   const itens = vazio();
   const pecas = itensEquipados(bolsa, ctx.conteudo.itens).filter((i) => i.tipo === 'equipamento');
   for (const i of pecas) if (i.elemento) itens[i.elemento] += 1 / Math.max(1, pecas.length);

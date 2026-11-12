@@ -12,6 +12,7 @@ import type { DefinicaoHabilidade, Habilidade, Modificador, Passiva, Variante } 
 import { furiaAtual } from './furia';
 import { modificadoresDosConjuntos } from '../progression/ganchos-do-portador';
 import { sintoniaDe } from '../progression/sintonia';
+import { bonusDePar, runaDoAtor, ultimoTickDeUso } from './runas';
 
 export type ContextoPerfil = Pick<ContextoSimulacao, 'conteudo' | 'balance'>;
 
@@ -65,8 +66,11 @@ export function chaveDoAtor(ctx: ContextoPerfil, ator: Entidade, id: string, tic
   }
   // Marco 18 (D-069): os conjuntos completos também dão modificadores (a Vigília do caçador faz as flechas ecoarem).
   for (const m of modificadoresDosConjuntos(ctx, bolsa)) if ((m.tag === null || tags.includes(m.tag)) && !mods.includes(m.mod)) mods.push(m.mod);
-  return formatarChave({ id, rank: conhecida?.rank ?? 1, caminhos: conhecida?.caminhos ?? [], mods, variantes: variantesDoAtor(ctx, ator, definicaoDe(ctx, id), tick) });
+  // Marco 39 (D-151): a runa do encaixe (sem tick, vale o último uso registrado, como na ficha).
+  const runa = runaDoAtor(ctx, ator, id, tick ?? ultimoTickDeUso(bolsa));
+  return formatarChave({ id, rank: conhecida?.rank ?? 1, caminhos: conhecida?.caminhos ?? [], mods, variantes: variantesDoAtor(ctx, ator, definicaoDe(ctx, id), tick), ...(runa && { runa }) });
 }
+
 
 /**
  * 06/11/2026 (D-135): a habilidade `encantavel` do inimigo afim (a pedra do Arremessador) sai com o elemento dele, pelo
@@ -142,6 +146,8 @@ export function perfilPara(ctx: ContextoPerfil, ator: Entidade, hab: Habilidade)
     p.custoPct += f.custoPct;
     p.recargaPct += f.recargaPct;
   }
+  // Marco 39 (D-151): o bônus de par da ultimate com a runa das duas skills do par.
+  p.danoPct += bonusDePar(ctx, ator, hab, ultimoTickDeUso(bolsa));
   p.custoPct = Math.max(-90, p.custoPct);
   p.recargaPct = Math.max(-75, p.recargaPct);
   return p;
