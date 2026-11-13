@@ -39,7 +39,7 @@ import reinoEclipseJson from '../data/mundo/reino-eclipse.json';
 import travessiaJson from '../data/mundo/travessia-das-areias.json';
 import { conferirReino, lerReino, type Reino } from '../mundo/reino';
 import { lerArmas, type RegrasDeArmas } from '../progression/armas';
-import { lerUltimates, type Ultimate } from '../combat/ultimates';
+import { lerUltimates, type Fusao, type Ultimate } from '../combat/ultimates';
 import { lerSintonia, type RegrasSintonia } from '../progression/sintonia';
 import { lerSinergias, type SinergiaPassiva } from '../progression/sinergias-passivas';
 import { conferirClassesEUltimates } from './conteudo-classes';
@@ -100,8 +100,10 @@ export interface Conteudo {
   afinidades: CatalogoAfinidades;
   /** Marco 23 (D-093): as famílias de arma e o básico de cada uma. */
   armas: RegrasDeArmas;
-  /** Marco 24 (D-094): as 140 ultimates (as definições delas e das etapas ficam em `definicoes`). */
+  /** Marco 24 (D-094): as ultimates (as definições delas e das etapas ficam em `definicoes`). Marco 40 (D-160): as 21 famílias. */
   ultimates: Catalogo<Ultimate>;
+  /** Marco 40 (D-160): as fusões de eixos das ultimates, pela chave `eixoA+eixoB`. */
+  fusoes: Catalogo<Fusao>;
   /** Marco 24 (D-095): data/sintonia.json (Domínios, sintonias por classe, vertentes e encarnações duplas). */
   sintonia: RegrasSintonia;
   /** Marco 24 (D-096): data/sinergias.json (as sinergias passivas). */
@@ -301,6 +303,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       afinidades: af.afinidades,
       armas: ar.armas,
       ultimates: ul.ultimates,
+      fusoes: ul.fusoes,
       sintonia: si.sintonia,
       sinergias: sg.sinergias,
       reinos,

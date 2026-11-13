@@ -1,8 +1,6 @@
 // Marco 24 (24/10/2026, D-095): a sintonia pelas gerais das teclas 3 a 6 — Domínio com 2 da mesma família (marca a
 // ultimate), vertente com 2 + 2 das famílias certas da classe.
 import { describe, expect, it } from 'vitest';
-import { cargaDe } from '../../src/combat/carga-ultimate';
-import { chaveDoAtor } from '../../src/combat/perfil';
 import { lerComando } from '../../src/arena/protocolo';
 import { criarEstado } from '../../src/core/estado';
 import { DT_MS } from '../../src/core/loop';
@@ -62,25 +60,5 @@ describe('sintonia (D-095)', () => {
     expect(sintoniaDasGerais(ctx, 'mago', ['lanca_radiante', 'circulo_de_amparo', 'curar', 'barreira']).vertente).toBeNull();
   });
 
-  it('o Domínio marca a ultimate (técnica: os atingidos sangram)', () => {
-    const { ctx, estado, j, eventos, tick } = cena('guerreiro', ['investida', 'golpe_atordoante', null, null]);
-    const u = obter(CONTEUDO.ultimates.get('ult_ciclone_de_aco'));
-    expect(chaveDoAtor(ctx, j, u.id, estado.tick)).toContain('dom_tecnica');
-    j.cargaUltimate = ctx.balance.ultimate.max;
-    j.autoAtaque = false;
-    tick({ t: 'usarUltimate', alvo: 'b' });
-    expect(cargaDe(j)).toBe(0);
-    for (let i = 0; i < 120; i++) tick();
-    expect(eventos.some((e) => e.t === 'efeitoAplicado' && e.alvoId === 'b' && e.tipo === 'sangrando')).toBe(true);
-  });
-
-  it('o Domínio do suporte põe escudo em você pela etapa interna', () => {
-    const { ctx, j, eventos, tick } = cena('guerreiro', ['curar', 'barreira', null, null]);
-    j.cargaUltimate = ctx.balance.ultimate.max;
-    j.autoAtaque = false;
-    tick({ t: 'usarUltimate', alvo: 'b' });
-    for (let i = 0; i < 60; i++) tick();
-    expect(eventos.some((e) => e.t === 'impacto' && e.habilidadeId === 'dom_suporte')).toBe(true);
-    expect(j.efeitos.some((f) => f.tipo === 'escudo')).toBe(true);
-  });
+  // Marco 40 (13/11/2026, D-160): as marcas de Domínio eram variantes das ultimates antigas, que saíram.
 });

@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.06 · **Data:** 13/11/2026
+**Versão:** 1.07 · **Data:** 13/11/2026
 
 > **Histórico**
+> - **1.07 (13/11/2026)**: D-160: marco 40, etapa 4 (primeira parte). As 140 ultimates por par de skills dão lugar a 21 famílias pelos papéis do par, com os fios de estilo e de elemento, o par de elementos, a runa no par e as 36 fusões de eixos.
 > - **1.06 (13/11/2026)**: D-159: marco 40, etapa 3. As 30 skills de classe do catálogo (6 por classe), com papel e a leitura de cada estilo; duas skills por classe saem do kit (`saidas`), e o save tira essas skills sem devolver pontos.
 > - **1.05 (12/11/2026)**: D-158: marco 40, etapa 2. As 89 skills comuns saem dos 20 núcleos (`nucleos.json`), com livros novos e a geral inicial de cada classe. As 54 gerais antigas deixam o jogador (save 31 e fichas) e ficam só para inimigos, ultimates e combos até as etapas 3 e 4.
 > - **1.04 (12/11/2026)**: D-157: marco 40, o sistema novo de skills; etapa 1 (núcleo, papel, os nove eixos, as cinco formas novas, o destino aliados, a marca que acumula e a tabela papel × elemento).
@@ -4785,3 +4786,29 @@ de quem usa (a "leitura" do estilo).
 - **O balanceamento completo não foi rodado de novo** (pedido do usuário, 13/11/2026). A última rodada completa deu
   171 de 172 metas; a que faltava (Aventureiro contra o chefe) e o PvP do Aventureiro foram medidos à parte com o
   Mergulho em 2d6+3 e passaram. A medição completa fica para o fechamento do marco.
+
+## D-160 — Marco 40: as ultimates por família e os fios (13/11/2026)
+
+**Contexto.** Etapa 4 do marco 40, ampliada a pedido do usuário (ultimates, combos, reações, ressonâncias e o visual
+no mesmo PR). O desenho está no catálogo "Códex do Combate" (artefato, versão 1.0) e no Grimório das Skills.
+
+**Decisão.**
+- **A família vem dos papéis.** A ultimate é a da família dos papéis das duas skills das teclas 1 e 2, em qualquer
+  ordem (`ultimate-do-par.ts`). São 21 famílias (`ultimates.json`, versão 2), de todas as classes. A skill sem papel,
+  como as dos inimigos, não forma par. As 140 ultimates antigas, as etapas delas e as marcas de Domínio saem.
+- **Os fios.**
+  - **Estilo:** todo estilo com ponta empurra o eixo principal dele na ultimate, na faixa da ponta (`perfil.ts`).
+  - **Elemento:** o elemento de cada skill do par entra com o estado dele e com a função secundária do papel, na faixa
+    da sintonia (`fios-ultimate.ts`). A runa da ultimate continua dando o elemento principal e a parte elemental.
+  - **Par de elementos:** dois elementos diferentes no par somam +1,5% de dano por faixa do mais fraco
+    (`balance.habilidades.runas.parPorFaixaPct`, que substitui o +15% fixo do `parPct`). Se a runa é um dos dois, a
+    reação cresce até o dobro, pela menor faixa entre a runa e o elemento mais forte.
+  - **Par de estilos:** os eixos dos dois estilos mais fortes (com eixos principais diferentes) se fundem, na faixa do
+    mais fraco. As 36 fusões ficam em `ultimates.json`, campo `fusoes`, como efeitos graduais.
+- **Na chave.** Os fios entram na chave compilada (`#fogo6.gelo3*area.eco3`), para a memória das skills continuar
+  valendo.
+- **Aproximações desta parte**, a refinar no visual e no balanceamento da etapa:
+  - as invocações das famílias usam o `espectro` em todas as classes;
+  - o Renascer cura e protege, mas ainda não levanta quem caiu;
+  - os Carcereiros prendem, mas não puxam o preso;
+  - várias fusões entram como efeito extra simples, em vez da mudança de forma descrita no catálogo.

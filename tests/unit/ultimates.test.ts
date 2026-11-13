@@ -1,7 +1,9 @@
 // Marco 24 (24/10/2026, D-094): a ultimate do par das teclas 1 e 2, o medidor de carga e os ganhos de cada classe.
+// Marco 40 (13/11/2026, D-160): a ultimate vem da família dos papéis das duas skills do par.
 import { describe, expect, it } from 'vitest';
 import { cargaDaClasse, cargaDe, somarCarga, ultimateDe } from '../../src/combat/carga-ultimate';
-import { ultimateDoPar } from '../../src/combat/ultimates';
+import { chaveDosPapeis } from '../../src/combat/ultimates';
+import type { Papel } from '../../src/combat/eixos';
 import { lerComando } from '../../src/arena/protocolo';
 import { criarEstado } from '../../src/core/estado';
 import { DT_MS } from '../../src/core/loop';
@@ -29,14 +31,18 @@ function cena(classe = 'guerreiro') {
 }
 
 describe('ultimate do par (D-094)', () => {
-  it('as duas skills iniciais formam a ultimate da classe, em qualquer ordem', () => {
+  it('as duas skills iniciais formam a família dos papéis delas, em qualquer ordem', () => {
     for (const c of CONTEUDO.classes.values()) {
       const { ctx, j } = cena(c.id);
-      const [a, b] = c.iniciais;
+      const [a, b] = c.iniciais.map((id) => obter(CONTEUDO.definicoes.get(obter(id))?.base.papel, id));
       const u = obter(ultimateDe(ctx, j), c.id);
-      expect(u.classe).toBe(c.id);
-      expect(ultimateDoPar(CONTEUDO.ultimates, obter(b), obter(a))?.id).toBe(u.id);
+      expect(chaveDosPapeis(u.papeis[0], u.papeis[1])).toBe(chaveDosPapeis(obter(b), obter(a)));
     }
+  });
+
+  it('as 21 famílias cobrem todos os pares de papéis, uma por par', () => {
+    const chaves = [...CONTEUDO.ultimates.values()].map((u) => chaveDosPapeis(u.papeis[0], u.papeis[1]));
+    expect(new Set(chaves).size).toBe(21);
   });
 
   it('sem par nas teclas 1 e 2, ou com o medidor vazio, recusa', () => {
@@ -96,25 +102,30 @@ describe('ultimate do par (D-094)', () => {
     expect(cargaDe(j)).toBeGreaterThanOrEqual(ctx.balance.ultimate.classe.furiaCheia.valor);
   });
 
-  it('cada uma das 140 ultimates sai e acerta (ou age) sem quebrar a simulação', () => {
+  it('cada uma das 21 famílias sai e acerta (ou age) sem quebrar a simulação, em todas as classes', () => {
     const falhas: string[] = [];
-    for (const u of CONTEUDO.ultimates.values()) {
-      const { ctx, j, eventos, tick } = cena(u.classe);
+    const comPapel = (p: Papel, fora?: string) => obter([...CONTEUDO.definicoes.values()].find((d) => d.base.papel === p && d.base.id !== fora && !d.base.tags.includes('ultimate') && !d.interna)?.base.id, p);
+    for (const u of CONTEUDO.ultimates.values()) for (const classe of CONTEUDO.classes.keys()) {
+      const { ctx, j, eventos, tick } = cena(classe);
       const bolsa = obter(j.bolsa);
-      bolsa.barra[0] = u.par[0];
-      bolsa.barra[1] = u.par[1];
+      bolsa.barra[0] = comPapel(u.papeis[0]);
+      bolsa.barra[1] = comPapel(u.papeis[1], bolsa.barra[0]);
+      if (ultimateDe(ctx, j)?.id !== u.id) {
+        falhas.push(`${u.id}/${classe}: o par não forma a família`);
+        continue;
+      }
       j.cargaUltimate = ctx.balance.ultimate.max;
       j.mana = j.manaMax = 999;
       j.hp = j.hpMax = 999;
       j.autoAtaque = false;
       tick({ t: 'usarUltimate', alvo: 'b' });
       if (!eventos.some((e) => e.t === 'ultimateUsada')) {
-        falhas.push(`${u.id}: ${JSON.stringify(eventos.find((e) => e.t === 'acaoRecusada'))}`);
+        falhas.push(`${u.id}/${classe}: ${JSON.stringify(eventos.find((e) => e.t === 'acaoRecusada'))}`);
         continue;
       }
       for (let i = 0; i < 600; i++) tick();
       const agiu = eventos.some((e) => (e.t === 'impacto' || e.t === 'efeitoAplicado' || e.t === 'invocou') && e.tick > 0);
-      if (!agiu) falhas.push(`${u.id}: sem impacto nem efeito`);
+      if (!agiu) falhas.push(`${u.id}/${classe}: sem impacto nem efeito`);
     }
     expect(falhas).toEqual([]);
   });

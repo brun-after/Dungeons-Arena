@@ -20,6 +20,7 @@ import type { Habilidade } from './habilidades';
 import { idDoEncaixe, levaRuna, runaPadraoDaSkill } from './encaixe-runa';
 import { construirEfeito } from './registro-efeitos';
 import { aplicarSecundario, type TabelaDePapeis } from './papeis';
+import { ultimateDe } from './ultimate-do-par';
 
 export { levaRuna, runaPadrao, runaPadraoDaSkill } from './encaixe-runa';
 
@@ -36,8 +37,8 @@ export interface RegrasRunas {
   escudoBase: number;
   escudoPorFaixa: number;
   escudoMs: number;
-  /** O dano a mais da ultimate quando as duas skills do par estão com a runa dela, em %. */
-  parPct: number;
+  /** Marco 40 (D-160): o dano a mais da ultimate por faixa do elemento mais fraco do par, quando os dois diferem, em %. */
+  parPorFaixaPct: number;
   /** O dano a mais do combo quando as duas skills da sequência estão com a mesma runa, em %. */
   parComboPct: number;
 }
@@ -110,11 +111,12 @@ export function aplicarRuna(h: Habilidade, runa: PontaElemental, faixa: number, 
  * O comando `escolherRuna`: troca a runa do encaixe de uma skill que o personagem conhece. Só aceita a padrão ou um
  * elemento com vínculo; `null` (ou a padrão) apaga a escolha. Fora disso, nada muda.
  */
-export function escolherRuna(ctx: Ctx, e: Pick<Entidade, 'bolsa'>, habilidade: string, runa: PontaElemental | null, tick: number): boolean {
+export function escolherRuna(ctx: Ctx, e: Pick<Entidade, 'bolsa' | 'habilidades'>, habilidade: string, runa: PontaElemental | null, tick: number): boolean {
   const bolsa = e.bolsa;
   if (!bolsa || !levaRuna(ctx, habilidade)) return false;
   const id = idDoEncaixe(ctx, habilidade);
-  const conhece = bolsa.conhecidas.some((c) => c.id === id) || ctx.conteudo.ultimates.get(id)?.classe === bolsa.classeId;
+  // Marco 40 (D-160): a ultimate que o personagem tem é a da família do par dele.
+  const conhece = bolsa.conhecidas.some((c) => c.id === id) || ultimateDe(ctx, e)?.id === id;
   if (!conhece) return false;
   if (runa === null || runa === runaPadraoDaSkill(ctx, bolsa, id)) {
     if (bolsa.runas) bolsa.runas = Object.fromEntries(Object.entries(bolsa.runas).filter(([k]) => k !== id));
@@ -128,14 +130,4 @@ export function escolherRuna(ctx: Ctx, e: Pick<Entidade, 'bolsa'>, habilidade: s
 /** O último tick em que o uso foi registrado (a referência da ficha, que não tem o tick do jogo). */
 export function ultimoTickDeUso(bolsa: Pick<Bolsa, 'vinculoUso'>): number {
   return Math.max(0, ...Object.values(bolsa.vinculoUso ?? {}).map((u) => u.tick));
-}
-
-/**
- * O bônus de par: a ultimate (e as etapas dela) bate `parPct` a mais quando as duas skills do par estão com a mesma
- * runa dela. Em %, para o perfil de quem usa.
- */
-export function bonusDePar(ctx: Ctx, e: Pick<Entidade, 'bolsa'>, hab: Pick<Habilidade, 'id' | 'runa'>, tick: number): number {
-  const u = ctx.conteudo.ultimates.get(idDoEncaixe(ctx, hab.id));
-  if (!u || !hab.runa || !e.bolsa) return 0;
-  return u.par.every((id) => runaDoAtor(ctx, e, id, tick)?.runa === hab.runa) ? ctx.balance.habilidades.runas.parPct : 0;
 }

@@ -98,6 +98,6 @@ describe('Investida (D-125)', () => {
 
   it('toda skill que avança ou teleporta quem conjura sai pelo lançamento', () => {
     const ids = [...CONTEUDO.habilidades.values()].filter(deslocaQuemConjura).map((h) => h.id);
-    for (const id of ['investida', 'investida_de_escudo', 'asas_da_aurora', 'ult_impacto_vulcanico', 'ult_eco_do_vazio']) expect(ids, id).toContain(id);
+    for (const id of ['investida', 'investida_de_escudo', 'asas_da_aurora', 'ult_cometa', 'ult_avanco_blindado', 'ult_tempestade_de_passos']) expect(ids, id).toContain(id);
   });
 });

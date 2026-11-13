@@ -113,8 +113,8 @@ export function ehSkillDeClasse(ctx: Ctx, e: Entidade, habId: string): boolean {
   const classe = e.bolsa?.classeId;
   if (!classe) return false;
   if (ctx.conteudo.classes.get(classe)?.exclusivas.includes(habId)) return true;
-  const ult = ctx.conteudo.ultimates.get(habId) ?? ctx.conteudo.ultimates.get(habId.replace(/_\d+$/, ''));
-  return ult?.classe === classe;
+  // Marco 40 (D-160): a ultimate é sempre da classe de quem a lança (a família vem do par dela).
+  return ctx.conteudo.ultimates.has(habId) || ctx.conteudo.ultimates.has(habId.replace(/_\d+$/, ''));
 }
 
 /** O multiplicador das skills de classe e ultimates (dano, cura e potência): cresce com os degraus de todos os estilos. */

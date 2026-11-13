@@ -149,14 +149,20 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   // Marco 24 (25/10/2026, D-098): o falcão voa solto, bate as asas, pousa no ombro e tem o voo de cada skill.
   const voo = new VooDoFalcao({
     particulas, habilidades: o.habilidades, reduzido,
-    parDaUltimate: (id) => ctx.conteudo.ultimates.get(id.replace(/_\d+$/, ''))?.par ?? null,
+    // Marco 40 (D-160): a ultimate é da família do par; o falcão voa com ela só pelo voo genérico (a etapa 4 refaz o visual).
+    parDaUltimate: () => null,
   });
   voo.ligar(o.bus, o.estado, () => performance.now());
   // Marco 26 (29/10/2026, D-124): as assinaturas das skills (silhuetas acima, marcas no chão, corpos que deslizam).
   const diretor = new DiretorVfx({ efeitos: palco.efeitos, chao: palco.chao, particulas, impacto, reduzido });
   const efeitos = new EfeitosDeHabilidade({
     particulas, impacto, habilidades: o.habilidades, idLocal, qualidade, fase: ctx.fase, diretor,
-    classeDaUltimate: (id) => ctx.conteudo.ultimates.get(id.replace(/_\d+$/, ''))?.classe ?? null,
+    // Marco 40 (D-160): a classe da ultimate é a de quem a lança (a família vem do par dele).
+    classeDaUltimate: (id, atorId) => {
+      if (!ctx.conteudo.ultimates.has(id.replace(/_\d+$/, ''))) return null;
+      const e = o.estado().entidades.find((x) => x.id === atorId);
+      return e?.bolsa?.classeId ?? e?.classeId ?? null;
+    },
     miraCheia: (e, tick) => fracaoMira(ctx, e, tick) === 1,
     clima: tema?.particulas ?? null,
     corElemento,

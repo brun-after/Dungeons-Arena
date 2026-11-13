@@ -61,8 +61,8 @@ describe('35 combos de resultados confirmados', () => {
         // preparadas antes do último passo, como faria a luta de verdade.
         const ESTADO_DA_CONDICAO: Record<string, string> = { atordoado: 'atordoar', envenenado: 'envenenado', sangrando: 'sangrando', consagrado: 'consagrado', enraizado: 'enraizado', definhando: 'definhando' };
         const ultimo = combo.sequencia.at(-1);
-        // O passo `@ultimate` usa uma ultimate do par da skill anterior.
-        const comUltimate = combo.sequencia.map((s, i) => s !== '@ultimate' ? s : obter([...CONTEUDO.ultimates.values()].find((u) => u.par.includes(combo.sequencia[i - 1] ?? ''))).id);
+        // O passo `@ultimate` casa com qualquer ultimate (marco 40, D-160: as famílias não têm mais par de skills).
+        const comUltimate = combo.sequencia.map((s) => s !== '@ultimate' ? s : obter([...CONTEUDO.ultimates.values()][0]).id);
         for (const skill of comUltimate) {
             if (skill === comUltimate.at(-1) && ultimo) {
                 for (const cond of combo.condicoes) {

@@ -12,8 +12,11 @@
 // Marco 40 (12/11/2026, D-157): as formas aceitam os nove eixos (`^controle4,marca7`), e `%N` antes da runa leva a faixa
 // da sintonia com o elemento de uma skill comum (a função secundária do papel cresce com ela). D-159: `&estiloN` depois
 // das formas leva as leituras de estilo de uma skill de classe e a faixa de cada uma (`redemoinho&carniceiro6`).
+// Marco 40 (13/11/2026, D-160): na ultimate, `#a6.b3` leva os elementos das duas skills do par com a faixa da sintonia
+// de cada um, e `*eixoA.eixoB4` a fusão dos dois estilos mais fortes, na faixa do mais fraco (`ult_cometa#fogo6.gelo3*area.eco3`).
 import { MODIFICADORES, VARIANTES, type Modificador, type Variante } from './habilidades';
-import { ehForma, type FormaId } from './eixos';
+import { ehEixo, ehForma, type FormaId } from './eixos';
+import type { FiosDaUltimate } from './fios-ultimate';
 import type { Elemento } from './elementos';
 
 const RUNAS = ['fisico', 'fogo', 'gelo', 'raio', 'veneno', 'psiquico', 'terra', 'trevas', 'sagrado'] as const;
@@ -30,6 +33,8 @@ export interface PartesChave {
   sintonia?: number;
   /** D-159: as leituras de estilo ativas numa skill de classe, cada uma na faixa do seu estilo. */
   leituras?: readonly { estilo: string; faixa: number }[];
+  /** D-160: os fios da ultimate (os elementos do par e a fusão dos estilos). */
+  fios?: FiosDaUltimate;
 }
 
 export function formatarChave(p: PartesChave): string {
@@ -44,6 +49,11 @@ export function formatarChave(p: PartesChave): string {
   if (formas.length > 0) s += `^${formas.map((f) => `${f.mod}${String(Math.min(10, Math.round(f.faixa)))}`).join(',')}`;
   const leituras = [...(p.leituras ?? [])].filter((l) => l.faixa > 0).sort((a, b) => a.estilo.localeCompare(b.estilo));
   if (leituras.length > 0) s += `&${leituras.map((l) => `${l.estilo}${String(Math.min(10, Math.round(l.faixa)))}`).join(',')}`;
+  const fx = (n: number) => String(Math.max(0, Math.min(10, Math.round(n))));
+  if (p.fios) {
+    s += `#${p.fios.par.map((f) => `${f.el}${fx(f.faixa)}`).join('.')}`;
+    if (p.fios.fusao && p.fios.fusao.faixa > 0) s += `*${p.fios.fusao.eixos.join('.')}${fx(p.fios.fusao.faixa)}`;
+  }
   if (p.sintonia !== undefined) s += `%${String(Math.max(0, Math.min(10, Math.round(p.sintonia))))}`;
   if (p.runa) s += `!${p.runa.runa}${String(Math.max(0, Math.min(10, Math.round(p.runa.faixa))))}`;
   return s;
@@ -53,7 +63,7 @@ const ehModificador = (v: string): v is Modificador => (MODIFICADORES as readonl
 const ehVariante = (v: string): v is Variante => (VARIANTES as readonly string[]).includes(v);
 
 export function lerChave(chave: string): PartesChave | null {
-  const m = /^([a-z0-9_]+)(?:@(\d+))?(?:\/([a-z0-9_,]+))?(?:\+([a-z_,]+))?(?:~([a-z_,]+))?(?:\^([a-z_0-9,]+))?(?:&([a-z_0-9,]+))?(?:%(\d+))?(?:!([a-z]+)(\d+))?$/.exec(chave);
+  const m = /^([a-z0-9_]+)(?:@(\d+))?(?:\/([a-z0-9_,]+))?(?:\+([a-z_,]+))?(?:~([a-z_,]+))?(?:\^([a-z_0-9,]+))?(?:&([a-z_0-9,]+))?(?:#([a-z]+)(\d+)\.([a-z]+)(\d+))?(?:\*([a-z]+)\.([a-z]+)(\d+))?(?:%(\d+))?(?:!([a-z]+)(\d+))?$/.exec(chave);
   if (!m?.[1]) return null;
   const mods = (m[4] ?? '').split(',').filter((x) => x !== '');
   if (!mods.every(ehModificador)) return null;
@@ -78,18 +88,34 @@ export function lerChave(chave: string): PartesChave | null {
     if (!estilo || !(faixa >= 1 && faixa <= 10)) return null;
     leituras.push({ estilo, faixa });
   }
-  let sintonia: number | undefined;
+  let fios: FiosDaUltimate | undefined;
   if (m[8] !== undefined) {
-    sintonia = Number(m[8]);
+    const a = RUNAS.find((x) => x === m[8]);
+    const b = RUNAS.find((x) => x === m[10]);
+    const fa = Number(m[9]);
+    const fb = Number(m[11]);
+    if (!a || !b || fa > 10 || fb > 10) return null;
+    fios = { par: [{ el: a, faixa: fa }, { el: b, faixa: fb }] };
+    if (m[12] !== undefined) {
+      const ea = m[12];
+      const eb = m[13];
+      const ff = Number(m[14]);
+      if (!ehEixo(ea) || !ehEixo(eb) || ea === eb || !(ff >= 1 && ff <= 10)) return null;
+      fios.fusao = { eixos: [ea, eb], faixa: ff };
+    }
+  } else if (m[12] !== undefined) return null;
+  let sintonia: number | undefined;
+  if (m[15] !== undefined) {
+    sintonia = Number(m[15]);
     if (sintonia > 10) return null;
   }
-  if (m[9] !== undefined) {
-    const r = RUNAS.find((x) => x === m[9]);
-    const faixa = Number(m[10]);
+  if (m[16] !== undefined) {
+    const r = RUNAS.find((x) => x === m[16]);
+    const faixa = Number(m[17]);
     if (!r || faixa > 10) return null;
     runa = { runa: r, faixa };
   }
-  return { id: m[1], rank, caminhos: (m[3] ?? '').split(',').filter((x) => x !== ''), mods, ...(variantes.length > 0 && { variantes }), ...(formas.length > 0 && { formas }), ...(leituras.length > 0 && { leituras }), ...(sintonia !== undefined && { sintonia }), ...(runa && { runa }) };
+  return { id: m[1], rank, caminhos: (m[3] ?? '').split(',').filter((x) => x !== ''), mods, ...(variantes.length > 0 && { variantes }), ...(formas.length > 0 && { formas }), ...(leituras.length > 0 && { leituras }), ...(fios && { fios }), ...(sintonia !== undefined && { sintonia }), ...(runa && { runa }) };
 }
 
 const PREFIXO_GERADA = 'g_';

@@ -188,6 +188,12 @@ export interface Habilidade {
   controleVizinho?: { raio: number; duracaoPct: number };
   /** D-156: quantos alvos o projétil atravessa (a forma gradual do atravessar; `perfura` atravessa todos). */
   perfuraAlvos?: number;
+  /** Marco 40 (13/11/2026, D-160): o dano a mais da ultimate pelo par de elementos (e pela runa no par), em %. */
+  bonusFiosPct?: number;
+  /** D-160: os dois elementos do par que reagem na ultimate (`a+b`, em ordem alfabética), para o visual. */
+  reacaoPar?: string;
+  /** D-160: a fusão dos eixos dos dois estilos mais fortes que entrou na ultimate (`eixoA+eixoB`). */
+  fusao?: string;
 }
 
 /** D-136: a lança vai do morto até o alvo dele e `alem` células adiante; com `lados`, também para os dois lados. */

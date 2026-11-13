@@ -47,11 +47,14 @@ function grupos(): { grupos: Grupo[]; habilidade: (id: string) => Habilidade | u
   const lista: Grupo[] = [];
   for (const classe of c.classes.values()) {
     const ids = [classe.ataqueBasico, ...classe.exclusivas].filter((id): id is string => !!id && !!habilidade(id));
-    const ults = [...c.ultimates.values()].filter((u) => u.classe === classe.id).map((u) => u.id);
-    const etapas = [...c.habilidades.keys()].filter((id) => ults.some((u) => id.startsWith(`${u}_`) && /_\d+$/.test(id)));
-    lista.push({ titulo: classe.nome, ids: [...ids, ...ults, ...etapas] });
-    for (const id of [...ids, ...ults, ...etapas]) usados.add(id);
+    lista.push({ titulo: classe.nome, ids });
+    for (const id of ids) usados.add(id);
   }
+  // Marco 40 (D-160): as 21 famílias de ultimate são de todas as classes (o veículo é de quem lança).
+  const ults = [...c.ultimates.keys()];
+  const etapas = [...c.habilidades.keys()].filter((id) => ults.some((u) => id.startsWith(`${u}_`) && /_\d+$/.test(id)));
+  lista.push({ titulo: 'Ultimates', ids: [...ults, ...etapas] });
+  for (const id of [...ults, ...etapas]) usados.add(id);
   const resto = [...c.habilidades.values()].filter((h) => !usados.has(h.id) && !h.passiva).map((h) => h.id);
   lista.push({ titulo: 'Gerais e inimigos', ids: resto });
   // Uma gerada por elemento e forma (as sementes que cobrem as combinações).

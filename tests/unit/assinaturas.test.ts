@@ -55,16 +55,15 @@ describe('assinaturas visuais', () => {
     }
   });
 
-  it('entre as ultimates de cada classe, nenhuma repete a assinatura com a mesma variante', () => {
-    const porClasse = new Map<string, Map<string, string>>();
+  // Marco 40 (13/11/2026, D-160): as 21 famílias de ultimate são de todas as classes; nenhuma repete a assinatura.
+  it('entre as famílias de ultimate, nenhuma repete a assinatura com a mesma variante', () => {
+    const mapa = new Map<string, string>();
     for (const u of CONTEUDO.ultimates.values()) {
       const h = CONTEUDO.habilidades.get(u.id);
       expect(h, u.id).toBeDefined();
       if (!h) continue;
-      const mapa = porClasse.get(u.classe) ?? new Map<string, string>();
-      porClasse.set(u.classe, mapa);
       const chave = `${assinaturaDe(h)}|${h.visual?.variante ?? ''}`;
-      expect(mapa.get(chave), `${u.classe}: ${u.id} repete ${mapa.get(chave) ?? ''}`).toBeUndefined();
+      expect(mapa.get(chave), `${u.id} repete ${mapa.get(chave) ?? ''}`).toBeUndefined();
       mapa.set(chave, u.id);
     }
   });
@@ -80,13 +79,7 @@ describe('assinaturas visuais', () => {
     }
   });
 
-  it('as etapas de vários elementos mostram o elemento da etapa', () => {
-    const etapa = (id: string) => CONTEUDO.habilidades.get(id);
-    expect(etapa('ult_lanca_dos_quatro_ventos_1')?.visual?.assinatura).toBe('mao_em_chamas');
-    expect(etapa('ult_lanca_dos_quatro_ventos_2')?.visual?.assinatura).toBe('toque_eletrico');
-    expect(etapa('ult_lanca_dos_quatro_ventos_3')?.visual?.assinatura).toBe('golpe_pesado');
-    expect(etapa('ult_danca_dos_elementos_1')?.visual?.assinatura).toBe('tempestade_de_gelo');
-  });
+  // Marco 40 (13/11/2026, D-160): as etapas de vários elementos eram das ultimates antigas, que saíram.
 
   it('as skills geradas deduzem pelo elemento e pela forma (nunca o genérico)', () => {
     const vistas = new Set<string>();
@@ -106,7 +99,7 @@ describe('assinaturas visuais', () => {
     expect(h('marca_de_area')?.visual?.assinatura).toBe('marca_sombria');
     expect(h('lanca_tempestuosa')?.visual?.cor).not.toBe('#a0d8ef');
     expect(h('chuva_de_estrelas')?.visual?.assinatura).toBe('chuva_de_estrelas');
-    for (const id of ['ciclone_flamejante', 'contragolpe_giro', 'ult_olho_do_furacao', 'ult_turbilhao_de_correntes']) expect(h(id)?.visual?.animacao, id).toBe('giro');
+    for (const id of ['ciclone_flamejante', 'contragolpe_giro']) expect(h(id)?.visual?.animacao, id).toBe('giro');
     // As ultimates conjuram no círculo da classe: o preset de runas genérico saiu.
     for (const u of CONTEUDO.ultimates.values()) expect(h(u.id)?.visual?.conjuracao ?? null, u.id).toBeNull();
   });

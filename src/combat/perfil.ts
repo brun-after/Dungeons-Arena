@@ -13,7 +13,8 @@ import { furiaAtual } from './furia';
 import { modificadoresDosConjuntos } from '../progression/ganchos-do-portador';
 import { sintoniaDe } from '../progression/sintonia';
 import { formasDosEstilos } from '../progression/estilos';
-import { bonusDePar, runaDoAtor, ultimoTickDeUso } from './runas';
+import { runaDoAtor, ultimoTickDeUso } from './runas';
+import { fiosDoAtor } from './fios-do-ator';
 import { formaDoEixo, type FormaId } from './eixos';
 import { vinculoDe } from '../progression/vinculo';
 
@@ -81,8 +82,14 @@ export function chaveDoAtor(ctx: ContextoPerfil, ator: Entidade, id: string, tic
     else formas.push({ mod, faixa });
   };
   const leituras: { estilo: string; faixa: number }[] = [];
+  const ehUltimate = tags.includes('ultimate');
   for (const f of formasDosEstilos(ctx, ator)) {
     const [principal, secundario] = f.estilo.eixos;
+    // Marco 40 (13/11/2026, D-160): na ultimate, todo estilo com ponta é um fio: empurra o eixo principal, na faixa dele.
+    if (ehUltimate) {
+      juntar(formaDoEixo(principal), f.faixa);
+      continue;
+    }
     // Marco 40 (D-159): na skill de classe, cada estilo empurra o eixo da leitura dele, na faixa inteira.
     const leitura = def?.leituras?.[f.estilo.id];
     if (def?.leituras) {
@@ -100,7 +107,9 @@ export function chaveDoAtor(ctx: ContextoPerfil, ator: Entidade, id: string, tic
   const runa = runaDoAtor(ctx, ator, id, quando);
   // Marco 40 (D-157): a skill comum com papel leva a faixa da sintonia com o elemento dela.
   const sintonia = !runa && def?.base.papel ? Math.max(0, Math.min(10, Math.round(vinculoDe(ctx, ator, quando)[def.base.elemento ?? 'fisico'] * 10))) : undefined;
-  return formatarChave({ id, rank: conhecida?.rank ?? 1, caminhos: conhecida?.caminhos ?? [], mods, variantes: variantesDoAtor(ctx, ator, def, tick), ...(formas.length > 0 && { formas }), ...(leituras.length > 0 && { leituras }), ...(sintonia !== undefined && { sintonia }), ...(runa && { runa }) });
+  // D-160: os fios de elemento (o par) e a fusão dos dois estilos mais fortes.
+  const fios = ehUltimate ? fiosDoAtor(ctx, ator, quando) : null;
+  return formatarChave({ id, rank: conhecida?.rank ?? 1, caminhos: conhecida?.caminhos ?? [], mods, variantes: variantesDoAtor(ctx, ator, def, tick), ...(formas.length > 0 && { formas }), ...(leituras.length > 0 && { leituras }), ...(fios && { fios }), ...(sintonia !== undefined && { sintonia }), ...(runa && { runa }) });
 }
 
 
@@ -181,8 +190,8 @@ export function perfilPara(ctx: ContextoPerfil, ator: Entidade, hab: Habilidade)
   // Marco 39 (D-156): a forma cobra dano por alvo na fração da faixa, quando entrou de fato na skill (a chave compilada
   // só leva as que couberam). Marco 40 (D-157): o custo é da forma (`balance.habilidades.eixos.custoPct`).
   for (const naChave of hab.formas ?? []) p.danoPct += (ctx.balance.habilidades.eixos.custoPct[naChave.mod] * naChave.faixa) / 10;
-  // Marco 39 (D-151): o bônus de par da ultimate com a runa das duas skills do par.
-  p.danoPct += bonusDePar(ctx, ator, hab, ultimoTickDeUso(bolsa));
+  // Marco 40 (13/11/2026, D-160): o par de elementos da ultimate (e a runa no par), que vem compilado nos fios.
+  p.danoPct += hab.bonusFiosPct ?? 0;
   p.custoPct = Math.max(-90, p.custoPct);
   p.recargaPct = Math.max(-75, p.recargaPct);
   return p;

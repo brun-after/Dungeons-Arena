@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { formatarChave, lerChave } from '../../src/combat/chave-habilidade';
 import { resolverHabilidade } from '../../src/combat/compilar-habilidade';
 import { habilidadeDoAtor } from '../../src/combat/perfil';
-import { aplicarRuna, bonusDePar, escolherRuna, fracaoElemental, levaRuna, runaDoAtor, runasDisponiveis } from '../../src/combat/runas';
+import { aplicarRuna, escolherRuna, fracaoElemental, levaRuna, runaDoAtor, runasDisponiveis } from '../../src/combat/runas';
 import { lerComando } from '../../src/arena/protocolo';
 import { ticksDe } from '../../src/core/tempo';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
@@ -84,13 +84,7 @@ describe('runas nas skills de classe (D-151)', () => {
     expect(gelo.efeitos.some((e) => e.tipo === 'resfriado')).toBe(false);
   });
 
-  it('a ultimate ganha o bônus de par quando as duas skills do par estão com a runa dela', () => {
-    const g = jogador('guerreiro');
-    const u = obter([...CONTEUDO.ultimates.values()].find((x) => x.classe === 'guerreiro' && x.par.every((id) => !CONTEUDO.definicoes.get(id)?.base.elemento)));
-    expect(bonusDePar(ctx, g, { id: u.id, runa: 'fisico' }, 0)).toBe(r.parPct);
-    expect(bonusDePar(ctx, g, { id: u.id, runa: 'fogo' }, 0)).toBe(0);
-    expect(bonusDePar(ctx, g, { id: 'redemoinho', runa: 'fisico' }, 0)).toBe(0);
-  });
+  // Marco 40 (13/11/2026, D-160): o bônus de par da ultimate virou o fio do par de elementos (ultimates-m40.test.ts).
 
   it('o combo com as duas skills na mesma runa bate mais; com runas diferentes, não', () => {
     const estado = criarEstado({ semente: 7, faseId: 'teste' });
