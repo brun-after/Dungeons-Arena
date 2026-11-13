@@ -47,7 +47,7 @@ describe('Diário detalhado', () => {
   });
 
   it('a reação diz o elemento, os estados e o que faz', () => {
-    const d = descreverEntrada(ctx, 'reacao:derreter');
+    const d = descreverEntrada(ctx, 'reacao:vapor');
     expect(d.como[0]).toMatch(/Fogo/);
     expect(d.efeito).toMatch(/50%/);
   });

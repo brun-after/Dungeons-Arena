@@ -11,7 +11,8 @@ import type { ContextoSimulacao } from '../core/contexto';
 import { ticksDe } from '../core/tempo';
 import { Leitor } from '../core/validar';
 import type { EfeitoAtivo, Entidade } from '../entities/entidade';
-import { ehElemento, type Sinergia } from './elementos';
+import type { Sinergia } from './elementos';
+import { PONTAS_ELEMENTAIS, type PontaElemental } from '../progression/vinculo';
 import { normalizarEfeito, normalizarEfeitos } from './normalizar-efeito';
 import { ehTipoEfeito, REGISTRO_EFEITOS, TIPOS_EFEITO, type EfeitoCanonico, type TipoEfeito } from './registro-efeitos';
 
@@ -73,21 +74,30 @@ export function lerInteracoes(json: unknown): { interacoes: Interacoes; erros: s
   const sinergias = l.lista(o, 'sinergias').flatMap((x): Sinergia[] => {
     const so = l.objeto(x, 'sinergia');
     const elemento = so.elemento;
-    if (!ehElemento(elemento)) {
+    if (typeof elemento !== 'string' || !(PONTAS_ELEMENTAIS as readonly string[]).includes(elemento)) {
       l.erro(`sinergia: elemento desconhecido "${String(elemento)}"`);
       return [];
     }
+    const estado = (k: string) => (so[k] === undefined || so[k] === null ? null : (tiposDe(l, { x: [so[k]] }, 'x')[0] ?? null));
     return [
       {
         id: l.texto(so, 'id'),
-        elemento,
+        elemento: elemento as PontaElemental,
         sobre: tiposDe(l, so, 'sobre'),
         remove: tiposDe(l, so, 'remove'),
         danoExtraPct: l.numero(so, 'danoExtraPct', { min: 0, max: 500 }),
         aplicar: normalizarEfeitos(l.lista(so, 'aplicar'), l),
         raio: so.raio === undefined ? 0 : l.numero(so, 'raio', { min: 0, max: 6, inteiro: true }),
-        soComEstado: so.soComEstado === undefined ? null : (tiposDe(l, { x: [so.soComEstado] }, 'x')[0] ?? null),
+        soComEstado: estado('soComEstado'),
         curarFonte: so.curarFonte === undefined ? 0 : l.numero(so, 'curarFonte', { min: 0, max: 100, inteiro: true }),
+        // Marco 40 (13/11/2026, D-162): os campos das reações da matriz.
+        d20Minimo: so.d20Minimo === undefined ? 0 : l.numero(so, 'd20Minimo', { min: 0, max: 20, inteiro: true }),
+        roubarPct: so.roubarPct === undefined ? 0 : l.numero(so, 'roubarPct', { min: 0, max: 100 }),
+        aliados: so.aliados === undefined ? [] : normalizarEfeitos(l.lista(so, 'aliados'), l),
+        soAliados: so.soAliados === undefined ? false : l.booleano(so, 'soAliados'),
+        soVizinhos: so.soVizinhos === undefined ? false : l.booleano(so, 'soVizinhos'),
+        maxOutros: so.maxOutros === undefined ? 0 : l.numero(so, 'maxOutros', { min: 0, max: 10, inteiro: true }),
+        ticar: estado('ticar'),
       },
     ];
   });

@@ -180,6 +180,8 @@ export interface Balance {
   /** Efeitos (§2.8): dano, cura e recurso periódicos aplicam a cada intervalo. */
   efeitos: {
     intervaloPeriodicoMs: number;
+    /** Marco 40 (13/11/2026, D-162): a mesma reação só volta a disparar no mesmo alvo depois deste intervalo. */
+    reacaoIntervaloMs: number;
     /** Quanto dura cada célula de rastro (§2.8). */
     rastroCelulaMs: number;
     /** Dominação (§2.9): duração e HP com que o dominado volta. */

@@ -133,10 +133,10 @@ export function multiplicadorCuraRecebida(e: Entidade, tick: number): number {
 /** Marco 14: exposto aumenta todo dano recebido. */
 export function multiplicadorDanoRecebido(e: Entidade, tick: number): number {
   let mais = 0;
-  for (const [f, d] of comDefinicao(e, tick)) if (d.danoRecebido > 0) mais += f.pct;
+  for (const [f, d] of comDefinicao(e, tick)) if (d.danoRecebido !== 0) mais += d.danoRecebido * f.pct;
   // Marco 40 (D-157): cada marca da forma do estilo soma o seu `pct`.
   for (const [f, d] of comDefinicao(e, tick)) if (d.marcas) mais += f.valor * f.pct;
-  return 1 + mais / 100;
+  return Math.max(0.1, 1 + mais / 100);
 }
 
 /** Marco 14: o escudo absorve dano antes da vida e se gasta; devolve o dano que sobra. */

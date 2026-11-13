@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.08 · **Data:** 13/11/2026
+**Versão:** 1.09 · **Data:** 13/11/2026
 
 > **Histórico**
+> - **1.09 (13/11/2026)**: D-162: as reações elementais viram a matriz de 36 pares das 9 pontas (o golpe físico reage), com o intervalo por alvo e o estado petrificado.
 > - **1.08 (13/11/2026)**: D-161: as leituras de estilo, as fusões e as famílias fazem o que o texto promete (ajustes da skill, efeitos ao abater, etapas internas, estados novos), o veículo da classe nas ultimates, o Renascer que levanta, a Vontade contra o controle e as armadilhas postas no campo.
 > - **1.07 (13/11/2026)**: D-160: marco 40, etapa 4 (primeira parte). As 140 ultimates por par de skills dão lugar a 21 famílias pelos papéis do par, com os fios de estilo e de elemento, o par de elementos, a runa no par e as 36 fusões de eixos.
 > - **1.06 (13/11/2026)**: D-159: marco 40, etapa 3. As 30 skills de classe do catálogo (6 por classe), com papel e a leitura de cada estilo; duas skills por classe saem do kit (`saidas`), e o save tira essas skills sem devolver pontos.
@@ -4855,3 +4856,39 @@ hostil mais perto) e lança a etapa do golpe (o Comando do Ceifador); o atrasado
 guarda a célula de partida (a Investida do Duelista volta); a etapa com `runaDe` usa o encaixe de runa de outra skill
 (a onda do Brado rúnico leva a runa do Brado); e `guardar_absorvido` soma o que os escudos absorvem para
 `devolver_absorvido` (o Contragolpe devolve 60% do absorvido em volta, além de um golpe menor).
+
+## D-162 — Marco 40: a matriz das reações elementais (13/11/2026)
+
+**Contexto.** Eram 17 reações soltas, só entre elementos; o golpe físico não reagia, e as que não consumiam o estado
+disparavam a cada golpe. O Códex do combate (marco 40, etapa 4) fechou uma reação para cada par das 9 pontas do
+eneágono: 36 pares, cada um com nome, gatilho e efeito.
+
+**Decisão.**
+- **36 pares e mais quatro**: `interacoes.json → sinergias` traz uma reação para cada par (Forja, Estilhaçar, Condutor,
+  Ferida aberta, Golpe certeiro, Esmagar, Quebra-alma, Aço sagrado, Vapor, Plasma, Combustão, Pânico em chamas, Magma,
+  Pira fúnebre, Fogo purificador, Cristal carregado, Veneno gelado, Mente congelada, Fossilizar, Gelo negro, Orvalho,
+  Neurotoxina, Sobrecarga, Aterramento, Tempestade negra, Juízo, Delírio, Lama ácida, Putrefação, Purgar, Peso da
+  mente, Pesadelo, Revelação, Túmulo, Solo consagrado, Eclipse; Plasma e Eclipse nos dois sentidos). Ficam as do
+  molhado e do definhando (Eletrocutar, Lama, Peste, Absolvição). O Derreter virou o Vapor (fogo em resfriado,
+  congelado ou molhado); o Pânico virou o Pesadelo; a Corrosão saiu (o par veneno × psíquico é o Delírio).
+- **O golpe físico reage**: a skill de tipo físico sem elemento entra como a ponta Física; a mágica sem elemento não
+  reage.
+- **Campos novos** na reação: `d20Minimo` (o Golpe certeiro não erra; o Juízo é crítico), `roubarPct` (Quebra-alma,
+  Aço sagrado), `aliados` com `soAliados` (Fogo purificador, Orvalho, Purgar, Solo consagrado), `soVizinhos` (a Forja
+  passa a queimadura adiante; o Plasma explode em volta), `maxOutros` (a Sobrecarga salta para o eletrizado mais perto)
+  e `ticar` (a Ferida aberta faz o veneno ferir uma vez a mais, na hora).
+- **Estado novo** `petrificado` (Fossilizar): não anda nem age, e o dano recebido cai `pct`%. O `danoRecebido` do
+  registro aceita −1.
+- **Consome só quem a narrativa diz**: quebrar o gelo, consumir a marca, descarregar a carga, derreter, explodir. As
+  outras deixam o estado, porque os combos e as sintonias contam com ele.
+- **Intervalo por alvo**: a mesma reação só volta a disparar no mesmo alvo depois de `efeitos.reacaoIntervaloMs`
+  (2,5 s), guardado em `Entidade.reacoesAte`.
+- **Onde vive**: o que a reação faz depois do golpe saiu de `golpe.ts` para `combat/reacoes.ts`; os nomes e os textos
+  ficam em `i18n/pt-BR-reacoes.ts`, e o Diário mostra o texto de cada reação.
+
+**Calibragem** (`npm run balancear`, 172/172): a Forja ficou em +15%, o Esmagar em +15% sem consumir o preso, o
+Condutor tira o ataque por 0,5 s em vez de atordoar, o Golpe certeiro garante o acerto em vez de dano a mais, e o
+Plasma fere só quem está em volta.
+
+**Consequências.** `tests/unit/reacoes.test.ts` confere que cada par das 9 pontas tem a sua reação e o que as novas fazem
+no golpe. O registro de efeitos passa a 94 tipos.

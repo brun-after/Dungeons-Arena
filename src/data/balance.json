@@ -169,6 +169,7 @@
   },
   "efeitos": {
     "intervaloPeriodicoMs": 1000,
+    "reacaoIntervaloMs": 2500,
     "rastroCelulaMs": 3000,
     "dominacaoMs": 60000,
     "dominacaoHpPct": 50,

@@ -420,6 +420,8 @@ export interface Entidade {
   ultimoGolpe: { fonteId: EntidadeId; chave: string } | null;
   /** Marco 40 (13/11/2026, D-161): o que os escudos quebrados neste tick deixam (aplicado no ciclo dos efeitos). */
   aoQuebrarEscudo?: EfeitoCanonico[];
+  /** Marco 40 (13/11/2026, D-162): até que tick cada reação elemental espera para disparar de novo neste alvo. */
+  reacoesAte?: Record<string, number>;
   /** Marco 18: a última habilidade que usou (combos e a Lâmina rúnica). */
   tatica?: MemoriaTatica;
   ultimaHabilidade: { id: string; chave: string; tick: number; alvoId: EntidadeId | null } | null;
@@ -677,6 +679,7 @@ export function clonarEntidade(e: Entidade): Entidade {
     ...(e.concentracaoArcana ? { concentracaoArcana: { ...e.concentracaoArcana } } : {}),
     ...(e.auraFracoes ? { auraFracoes: { ...e.auraFracoes } } : {}),
     ...(e.furia ? { furia: { ...e.furia } } : {}),
+    ...(e.reacoesAte ? { reacoesAte: { ...e.reacoesAte } } : {}),
     ...(e.trilhaClasse ? { trilhaClasse: { chaves: { ...e.trilhaClasse.chaves }, degraus: e.trilhaClasse.degraus } } : {}),
     ...(e.mira ? { mira: { ...e.mira } } : {}),
     ...(e.afinidade ? { afinidade: { ...e.afinidade } } : {}),

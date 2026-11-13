@@ -84,6 +84,8 @@ export const TIPOS_EFEITO = [
   'levantar', 'area_ampliada', 'ecoando', 'apavorar', 'explodir_ao_cair',
   // D-161: o Contragolpe guarda o absorvido e devolve; a Investida volta ao ponto de partida; o Ceifador salta ao alvo.
   'guardar_absorvido', 'devolver_absorvido', 'retornar', 'saltar_ao_alvo',
+  // Marco 40 (13/11/2026, D-162): virar pedra (a reação Fossilizar).
+  'petrificado',
 ] as const;
 export type TipoEfeito = (typeof TIPOS_EFEITO)[number];
 
@@ -161,8 +163,8 @@ export interface DefinicaoEfeito {
   velocidade: boolean;
   /** Marco 14: −1 = o `pct` reduz a cura recebida (envenenado). */
   curaRecebida: -1 | 0;
-  /** Marco 14: +1 = o `pct` aumenta o dano recebido (exposto). */
-  danoRecebido: 1 | 0;
+  /** Marco 14: +1 = o `pct` aumenta o dano recebido (exposto). Marco 40 (D-162): −1 = reduz (petrificado). */
+  danoRecebido: 1 | 0 | -1;
   /** Marco 14: o `valor` absorve dano antes da vida e se gasta. */
   escudo: boolean;
   /** Marco 18 (D-068): sai no primeiro golpe que o alvo leva (marcado). */
@@ -336,6 +338,7 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   dano_direto: instantaneo('runa', '#e74c3c', ['valor'], { duracaoMs: 0, valor: 5, pct: 0 }, 'dano', false),
 
   cego: negativo('olho', '#5b5b6e', ['pct'], { duracaoMs: 3000, valor: 0, pct: 30 }, { erroPct: true }),
+  petrificado: negativo('pedra', '#95a5a6', ['pct'], { duracaoMs: 1500, valor: 0, pct: 50 }, { bloqueiaMovimento: true, bloqueiaAcoes: 'todas', danoRecebido: -1 }),
   aterrorizado: negativo('caveira', '#6c3483', [], { duracaoMs: 1500, valor: 0, pct: 0 }, { bloqueiaAcoes: 'todas', ia: 'foge' }),
   confuso: negativo('estrela', '#c39bd3', [], { duracaoMs: 2000, valor: 0, pct: 0 }, { bloqueiaAcoes: 'todas', ia: 'vaga' }),
   desafiado: negativo('alvo', '#e74c3c', ['pct'], { duracaoMs: 3000, valor: 0, pct: 15 }, { ia: 'persegue', danoDaOrigem: true }),

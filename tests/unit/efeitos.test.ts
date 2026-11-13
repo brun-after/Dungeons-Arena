@@ -63,8 +63,9 @@ describe('registro (§2.8)', () => {
     // Marco 24: mais 24 (estados, instantâneos e fluxos novos).
     // 06/11/2026 (D-135): mais o Passo leve.
     // Marco 40 (D-157): mais a marca da forma do estilo.
+    // Marco 40 (D-162): mais o petrificado do Fossilizar.
     // Marco 40 (D-161): mais o levantar do Renascer e os estados das leituras (área ampliada, eco, apavorar, explodir ao cair, guardar e devolver o absorvido, retornar, saltar ao alvo).
-    expect(TIPOS_EFEITO).toHaveLength(93);
+    expect(TIPOS_EFEITO).toHaveLength(94);
     const pesos = Object.fromEntries(elegiveisParaOrbe().map((d) => [d.id, d.pesoOrbe]));
     expect(pesos).toEqual({
       cura_periodica: 20,

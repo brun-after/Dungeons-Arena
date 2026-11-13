@@ -152,7 +152,7 @@ describe('combos de sequência', () => {
 });
 
 describe('reações novas', () => {
-  it('derreter deixa molhado; raio em molhado eletrocuta o alvo e os molhados perto', () => {
+  it('o vapor deixa molhado; raio em molhado eletrocuta o alvo e os molhados perto', () => {
     const c = cena();
     const a = c.inimigo('a', 5, 5);
     const b = c.inimigo('b', 6, 6);
@@ -174,7 +174,7 @@ describe('reações novas', () => {
     expect(impacto?.t === 'impacto' && impacto.sinergias).toContain('eletrocutar');
     expect(obter(buscarEntidade(c.estado, 'b'), 'b').efeitos.some((f) => f.tipo === 'atordoar')).toBe(true);
     expect(obter(buscarEntidade(c.estado, 'c'), 'c').efeitos.some((f) => f.tipo === 'atordoar')).toBe(false);
-    const derreter = CONTEUDO.interacoes.sinergias.find((s) => s.id === 'derreter');
-    expect(derreter?.aplicar.map((e) => e.tipo)).toContain('molhado');
+    const vapor = CONTEUDO.interacoes.sinergias.find((s) => s.id === 'vapor');
+    expect(vapor?.aplicar.map((e) => e.tipo)).toContain('molhado');
   });
 });

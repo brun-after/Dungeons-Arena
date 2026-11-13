@@ -49,12 +49,16 @@ export function descreverEntrada(ctx: Ctx, id: string): DetalheDaEntrada {
     case 'reacao': {
       const s = conteudo.interacoes.sinergias.find((x) => x.id === a);
       if (!s) return { nome: t(`sinergia.${a}` as ChaveTexto), como: [], efeito: '' };
-      const efeito: string[] = [];
-      if (s.danoExtraPct > 0) efeito.push(t('diario.reacaoDano', { pct: s.danoExtraPct }));
-      if (s.remove.length > 0) efeito.push(t('diario.reacaoRemove', { estados: lista(s.remove.map(nomeDoEfeito)) }));
-      if (s.aplicar.length > 0) efeito.push(t('diario.reacaoAplica', { estados: lista(s.aplicar.map((e) => nomeDoEfeito(e.tipo))) }));
-      if (s.raio > 0) efeito.push(t('diario.reacaoEmVolta', { raio: s.raio }));
-      if (s.curarFonte > 0) efeito.push(t('diario.reacaoCura', { valor: s.curarFonte }));
+      // Marco 40 (13/11/2026, D-162): o texto da reação diz o que ela faz; a lista montada fica de reserva.
+      const texto = t(`reacao.${a}` as ChaveTexto);
+      const efeito: string[] = texto === `reacao.${a}` ? [] : [texto];
+      if (efeito.length === 0) {
+        if (s.danoExtraPct > 0) efeito.push(t('diario.reacaoDano', { pct: s.danoExtraPct }));
+        if (s.remove.length > 0) efeito.push(t('diario.reacaoRemove', { estados: lista(s.remove.map(nomeDoEfeito)) }));
+        if (s.aplicar.length > 0) efeito.push(t('diario.reacaoAplica', { estados: lista(s.aplicar.map((e) => nomeDoEfeito(e.tipo))) }));
+        if (s.raio > 0) efeito.push(t('diario.reacaoEmVolta', { raio: s.raio }));
+        if (s.curarFonte > 0) efeito.push(t('diario.reacaoCura', { valor: s.curarFonte }));
+      }
       return {
         nome: t(`sinergia.${a}` as ChaveTexto),
         como: [t('diario.reacaoComo', { elemento: nomeDoElemento(s.elemento), estados: s.sobre.map(nomeDoEfeito).join(' ou ') })],

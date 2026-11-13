@@ -4,6 +4,8 @@
 export const textosClasses = {
   'efeito.cego': 'Cego',
   'desc.efeito.cego': 'Erra {pct}% dos golpes por {s} s',
+  'efeito.petrificado': 'Petrificado',
+  'desc.efeito.petrificado': 'Virou pedra: não age nem anda por {s} s, e o dano recebido cai {pct}%',
   'efeito.aterrorizado': 'Aterrorizado',
   'desc.efeito.aterrorizado': 'Foge de quem aterrorizou e não ataca por {s} s',
   'efeito.confuso': 'Confuso',

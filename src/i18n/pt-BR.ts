@@ -5,6 +5,7 @@ import { textosMundo } from './pt-BR-mundo';
 import { textosHabilidades } from './pt-BR-habilidades';
 import { textosClasses } from './pt-BR-classes';
 import { textosDiario } from './pt-BR-diario';
+import { textosReacoes } from './pt-BR-reacoes';
 import { textosEstilos } from './pt-BR-estilos';
 
 export const ptBR = {
@@ -724,6 +725,7 @@ export const ptBR = {
   ...textosClasses,
   // Marco 26 (26/10/2026): Diário detalhado e combos da build.
   ...textosDiario,
+  ...textosReacoes,
   ...textosEstilos,
 } as const;
 
