@@ -80,9 +80,17 @@ export function chaveDoAtor(ctx: ContextoPerfil, ator: Entidade, id: string, tic
     if (ja) ja.faixa = Math.max(ja.faixa, faixa);
     else formas.push({ mod, faixa });
   };
+  const leituras: { estilo: string; faixa: number }[] = [];
   for (const f of formasDosEstilos(ctx, ator)) {
     const [principal, secundario] = f.estilo.eixos;
-    if (def?.eixos) {
+    // Marco 40 (D-159): na skill de classe, cada estilo empurra o eixo da leitura dele, na faixa inteira.
+    const leitura = def?.leituras?.[f.estilo.id];
+    if (def?.leituras) {
+      if (leitura) {
+        juntar(formaDoEixo(leitura.eixo), f.faixa);
+        if (leitura.efeitos.length > 0) leituras.push({ estilo: f.estilo.id, faixa: f.faixa });
+      }
+    } else if (def?.eixos) {
       if (def.eixos.includes(principal)) juntar(formaDoEixo(principal), f.faixa);
       else if (def.eixos.includes(secundario)) juntar(formaDoEixo(secundario), Math.ceil(f.faixa / 2));
     } else if (f.estilo.forma && (f.estilo.forma.tag === null || tags.includes(f.estilo.forma.tag))) juntar(f.estilo.forma.mod, f.faixa);
@@ -92,7 +100,7 @@ export function chaveDoAtor(ctx: ContextoPerfil, ator: Entidade, id: string, tic
   const runa = runaDoAtor(ctx, ator, id, quando);
   // Marco 40 (D-157): a skill comum com papel leva a faixa da sintonia com o elemento dela.
   const sintonia = !runa && def?.base.papel ? Math.max(0, Math.min(10, Math.round(vinculoDe(ctx, ator, quando)[def.base.elemento ?? 'fisico'] * 10))) : undefined;
-  return formatarChave({ id, rank: conhecida?.rank ?? 1, caminhos: conhecida?.caminhos ?? [], mods, variantes: variantesDoAtor(ctx, ator, def, tick), ...(formas.length > 0 && { formas }), ...(sintonia !== undefined && { sintonia }), ...(runa && { runa }) });
+  return formatarChave({ id, rank: conhecida?.rank ?? 1, caminhos: conhecida?.caminhos ?? [], mods, variantes: variantesDoAtor(ctx, ator, def, tick), ...(formas.length > 0 && { formas }), ...(leituras.length > 0 && { leituras }), ...(sintonia !== undefined && { sintonia }), ...(runa && { runa }) });
 }
 
 

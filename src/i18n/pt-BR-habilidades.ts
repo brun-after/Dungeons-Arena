@@ -276,6 +276,10 @@ export const textosHabilidades = {
   'habilidades.receitaFusao': 'Receita: {partes} no nível {nivel} e uma {runa}',
   'habilidades.fusaoDe': 'Fusão de {a} e {b}',
   'habilidades.marco': 'Nível {n}: {texto}',
+  // Marco 40 (D-159): as leituras de estilo das skills de classe.
+  'habilidades.leituras': 'O que cada estilo faz nesta skill',
+  'habilidades.leitura': '{estilo}: {texto}',
+  'habilidades.leituraAtiva': '{estilo} ({pct}%): {texto}',
   'habilidades.grau': 'Rank {grau}',
   'habilidades.grauDica': 'Rank {grau}: estudo de {min} min (com sua Inteligência)',
   'habilidades.estudar': 'Estudar ({tempo})',

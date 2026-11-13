@@ -123,8 +123,8 @@ describe('papel × elemento (D-157)', () => {
   it('`desde`: o efeito entra inteiro a partir da faixa', () => {
     const def = comPapel('dano', null);
     const empurra = (s: number) => compilarHabilidade(def, { rank: 1, caminhos: [], mods: [], sintonia: s }, CONTEUDO, ctx.balance.habilidades).efeitos.some((e) => e.tipo === 'empurrao');
-    expect(empurra(4)).toBe(false);
-    expect(empurra(5)).toBe(true);
+    expect(empurra(9)).toBe(false);
+    expect(empurra(10)).toBe(true);
   });
 
   it('com runa, a skill com papel tira a função secundária da tabela', () => {

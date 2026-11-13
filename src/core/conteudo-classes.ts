@@ -48,7 +48,8 @@ export function conferirClassesEUltimates(
   for (const u of ultimates.values()) {
     const c = classes.get(u.classe);
     if (!c) erros.push(`ultimate ${u.id}: classe desconhecida "${u.classe}"`);
-    else for (const id of u.par) if (!c.exclusivas.includes(id)) erros.push(`ultimate ${u.id}: "${id}" não é exclusiva de ${c.id}`);
+    // Marco 40 (D-159): até a etapa 4, a ultimate pode ter no par uma skill que saiu do kit (fica fora do alcance).
+    else for (const id of u.par) if (!c.exclusivas.includes(id) && !c.saidas.includes(id)) erros.push(`ultimate ${u.id}: "${id}" não é exclusiva de ${c.id}`);
   }
   for (const def of definicoes.values()) {
     for (const id of def.fusao ?? []) if (!definicoes.has(id)) erros.push(`habilidade ${def.base.id}: fusão com a habilidade desconhecida "${id}"`);

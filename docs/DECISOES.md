@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.05 · **Data:** 12/11/2026
+**Versão:** 1.06 · **Data:** 13/11/2026
 
 > **Histórico**
+> - **1.06 (13/11/2026)**: D-159: marco 40, etapa 3. As 30 skills de classe do catálogo (6 por classe), com papel e a leitura de cada estilo; duas skills por classe saem do kit (`saidas`), e o save tira essas skills sem devolver pontos.
 > - **1.05 (12/11/2026)**: D-158: marco 40, etapa 2. As 89 skills comuns saem dos 20 núcleos (`nucleos.json`), com livros novos e a geral inicial de cada classe. As 54 gerais antigas deixam o jogador (save 31 e fichas) e ficam só para inimigos, ultimates e combos até as etapas 3 e 4.
 > - **1.04 (12/11/2026)**: D-157: marco 40, o sistema novo de skills; etapa 1 (núcleo, papel, os nove eixos, as cinco formas novas, o destino aliados, a marca que acumula e a tabela papel × elemento).
 > - **1.03 (12/11/2026)**: D-156: a forma do estilo fica gradual. Ela aparece com 10% da ponta e cresce em 10 faixas até 100%, na mecânica, no custo e no visual, em vez de despertar inteira num limite.
@@ -4753,3 +4754,34 @@ com o secundário entre parênteses; os onze estilos sem forma passam a mostrar 
 - Os combos e as sinergias que pedem gerais antigas ficam fora do alcance do jogador até a etapa 4.
 - As assinaturas visuais das variantes reaproveitam as existentes, e o fogo leva o toque de brasas. O visual próprio de
   cada uma vem na etapa 7.
+
+## D-159 — Marco 40: as skills de classe com leituras por estilo (13/11/2026)
+
+**Contexto.** Etapa 3 do marco 40. O catálogo dá a cada classe 6 skills de classe, e cada uma muda conforme o estilo
+de quem usa (a "leitura" do estilo).
+
+**Decisão.**
+- **Os ids ficam.** Cada skill nova ocupa o id da skill antiga mais próxima, para não quebrar save, ultimates e
+  combos. Por cima vêm o nome do catálogo, o papel, as leituras e os ajustes de mecânica (por exemplo, a Execução, o
+  Círculo rúnico, o Chamado da matilha e o Instinto de sobrevivência).
+- **As leituras** (`skills.json → leituras`, `combat/leituras.ts`). Cada estilo da classe tem uma leitura com um eixo,
+  um texto e, se preciso, efeitos graduais. Quando o estilo está ativo, a forma do eixo da leitura entra na skill na
+  faixa do estilo, no lugar da regra geral dos eixos. Os efeitos entram pela faixa e só se cabem no alvo da skill
+  (`cabeNaSkill`). As leituras com efeito vão na chave da skill compilada (`&estiloN`). A mochila mostra a lista das
+  leituras e marca as ativas com a porcentagem.
+- **As que saem** (`classes.json → saidas`): duas por classe, as 10 que não têm lugar no catálogo. Os livros delas
+  saem. Elas continuam no skills.json e contam como de classe para as ultimates até a etapa 4, que refaz as ultimates.
+  O save 31 e as fichas tiram essas skills da barra, das conhecidas, do estudo, das liberadas e da mochila, sem
+  devolver pontos (a troca cabe no respec da etapa 8).
+- **Os iniciais mudam:** o Aventureiro começa com o Ataque do companheiro e a Ordem: agarrar, e o Necromante com a Seta
+  de almas e a Colheita.
+- **Calibragem:**
+  - O empurrão do papel dano no Físico entra só na faixa 10, porque deixava o guerreiro sem equipamento à frente do
+    equipado.
+  - As formas novas custam menos dano: controle 5%, sustento 8%, marca 5%, grupo 8% e invocação 5%.
+  - O Mergulho cai para 2d6+3 (PvP do Aventureiro abaixo de 6 s).
+  - A leitura do Atirador no Tiro carregado vira eco em vez de ricochete. A build focada passava da meta contra a
+    dispersa.
+- **O balanceamento completo não foi rodado de novo** (pedido do usuário, 13/11/2026). A última rodada completa deu
+  171 de 172 metas; a que faltava (Aventureiro contra o chefe) e o PvP do Aventureiro foram medidos à parte com o
+  Mergulho em 2d6+3 e passaram. A medição completa fica para o fechamento do marco.

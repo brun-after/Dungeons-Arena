@@ -44,7 +44,9 @@ describe('migração 23 para 24', () => {
     const { e, bolsa, recargas } = migrado();
     expect(VERSAO_SCHEMA).toBe(31);
     const ids = (bolsa.conhecidas as { id: string }[]).map((c) => c.id);
-    expect(ids).toEqual(expect.arrayContaining(['brado', 'investida_de_escudo', 'redemoinho', 'corrente', 'investida', 'pele_de_pedra']));
+    // Marco 40 (D-159): a Corrente saiu do kit do Guerreiro e não entra mais.
+    expect(ids).toEqual(expect.arrayContaining(['brado', 'investida_de_escudo', 'redemoinho', 'investida', 'pele_de_pedra']));
+    expect(ids).not.toContain('corrente');
     expect(ids).not.toContain('grito_de_guerra');
     // Skill exclusiva de outra classe sai.
     expect(ids).not.toContain('lanca_de_gelo');

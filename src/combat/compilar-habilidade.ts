@@ -22,6 +22,7 @@ import { construirEfeito, REGISTRO_EFEITOS, type EfeitoCanonico } from './regist
 import { aplicarRuna, type RegrasRunas } from './runas';
 import { aplicarFormasNovas, ehFormaNova, formaNovaCabe, type FormaId, type FormaNova, type RegrasEixos } from './eixos';
 import { aplicarSecundario, type TabelaDePapeis } from './papeis';
+import { aplicarLeituras } from './leituras';
 
 export interface Caminho {
   id: string;
@@ -162,6 +163,8 @@ export interface OpcoesCompilacao {
   formas?: readonly { mod: FormaId; faixa: number }[];
   /** Marco 40 (D-157): a faixa da sintonia com o elemento da skill comum. */
   sintonia?: number;
+  /** Marco 40 (D-159): as leituras de estilo ativas (skills de classe). */
+  leituras?: readonly { estilo: string; faixa: number }[];
 }
 
 export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilacao, fontes: FontesCompilacao, regras: RegrasHabilidades): Habilidade {
@@ -308,8 +311,11 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
   h.multDano = multDano;
   h.multCura = multCura;
   h.tags = etiquetasDe(h, b.tags);
+  // Marco 40 (12/11/2026, D-159): as leituras de estilo da skill de classe, cada uma na faixa do seu estilo.
+  const leituras = def.leituras ? (op.leituras ?? []).filter((l) => l.faixa > 0 && def.leituras?.[l.estilo]) : [];
+  if (leituras.length > 0) h.efeitos = aplicarLeituras(h, def.leituras, leituras).efeitos;
   // Na chave só entram os modificadores de fora (equipamento): os da definição e dos caminhos já estão implícitos.
-  h.chave = formatarChave({ id: b.id, rank, caminhos: caminhosValidos, mods: op.mods.filter((m) => aplicados.includes(m)), variantes, ...(formas.length > 0 && { formas }), ...(op.sintonia !== undefined && !op.runa && { sintonia: op.sintonia }), ...(op.runa && { runa: op.runa }) });
+  h.chave = formatarChave({ id: b.id, rank, caminhos: caminhosValidos, mods: op.mods.filter((m) => aplicados.includes(m)), variantes, ...(formas.length > 0 && { formas }), ...(leituras.length > 0 && { leituras }), ...(op.sintonia !== undefined && !op.runa && { sintonia: op.sintonia }), ...(op.runa && { runa: op.runa }) });
   // Marco 40 (12/11/2026, D-157): na skill comum, a função secundária do papel no elemento dela, na faixa da sintonia, e
   // o estado do elemento dura de `duracaoMinPct` a 100% por ela (como a runa).
   if (op.sintonia !== undefined && !op.runa && h.papel) {

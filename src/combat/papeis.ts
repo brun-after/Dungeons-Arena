@@ -42,14 +42,7 @@ export function lerPapeis(json: unknown): { papeis: Map<Papel, Map<PontaElementa
         continue;
       }
       const e = l.objeto(o[el], `${k}.${el}`);
-      const efeitos: EfeitoSecundario[] = [];
-      for (const bruto of l.lista(e, 'efeitos')) {
-        if (!ehObjeto(bruto)) continue;
-        const { desde, ...resto } = bruto;
-        const d = desde === undefined ? 1 : Number(desde);
-        if (!Number.isInteger(d) || d < 1 || d > 10) l.erro(`${k}.${el}: desde inválido`);
-        for (const efeito of normalizarEfeitos([resto], l)) efeitos.push({ efeito, desde: d });
-      }
+      const efeitos = lerEfeitosGraduais(l, l.lista(e, 'efeitos'), `${k}.${el}`);
       porElemento.set(el as PontaElemental, { curaPct: e.curaPct === undefined ? 0 : l.numero(e, 'curaPct', { min: 0, max: 100 }), efeitos });
     }
     papeis.set(k as Papel, porElemento);
@@ -58,7 +51,7 @@ export function lerPapeis(json: unknown): { papeis: Map<Papel, Map<PontaElementa
 }
 
 /** O efeito na faixa: com `desde` > 1, inteiro a partir dela; senão, valor e pct (ou a duração) na fração da faixa. */
-function naFaixa(s: EfeitoSecundario, faixa: number): EfeitoCanonico | null {
+export function naFaixa(s: EfeitoSecundario, faixa: number): EfeitoCanonico | null {
   if (faixa < s.desde) return null;
   if (s.desde > 1) return s.efeito;
   const g = Math.max(0, Math.min(10, faixa)) / 10;
@@ -67,18 +60,37 @@ function naFaixa(s: EfeitoSecundario, faixa: number): EfeitoCanonico | null {
   return { ...e, duracaoMs: Math.round(e.duracaoMs * g) };
 }
 
+/**
+ * Marco 40 (D-158): o efeito "no alvo" só entra quando o alvo é quem ele serve — o ruim, num golpe em inimigo; o bom,
+ * numa skill em aliado ou em si. Assim um campo ou uma postura não congela quem conjura.
+ */
+export function cabeNaSkill(h: Habilidade, e: EfeitoCanonico): boolean {
+  if (e.em !== 'alvo') return true;
+  const feriAlvo = h.politicaAlvo === 'hostil' || (h.politicaImpacto === 'area' && h.politicaAlvo !== 'aliados');
+  return REGISTRO_EFEITOS[e.tipo].positivo !== feriAlvo;
+}
+
+/** Lê os efeitos graduais (com `desde` opcional) de uma lista crua. */
+export function lerEfeitosGraduais(l: Leitor, lista: readonly unknown[], onde: string): EfeitoSecundario[] {
+  const efeitos: EfeitoSecundario[] = [];
+  for (const bruto of lista) {
+    if (!ehObjeto(bruto)) continue;
+    const { desde, ...resto } = bruto;
+    const d = desde === undefined ? 1 : Number(desde);
+    if (!Number.isInteger(d) || d < 1 || d > 10) l.erro(`${onde}: desde inválido`);
+    for (const efeito of normalizarEfeitos([resto], l)) efeitos.push({ efeito, desde: d });
+  }
+  return efeitos;
+}
+
 /** A habilidade com a função secundária do papel no elemento, na faixa (0 = nada). Não repete um efeito que ela já tem. */
 export function aplicarSecundario(h: Habilidade, tabela: TabelaDePapeis | undefined, ponta: PontaElemental, faixa: number): Habilidade {
   const sec = h.papel ? tabela?.get(h.papel)?.get(ponta) : undefined;
   if (!sec || faixa <= 0) return h;
   const efeitos = [...h.efeitos];
-  // Marco 40 (D-158): o efeito "no alvo" só entra quando o alvo é quem ele serve — o ruim, num golpe em inimigo; o bom,
-  // numa skill em aliado ou em si. Assim um campo ou uma postura não congela quem conjura.
-  const feriAlvo = h.politicaAlvo === 'hostil' || (h.politicaImpacto === 'area' && h.politicaAlvo !== 'aliados');
   for (const s of sec.efeitos) {
     const e = naFaixa(s, faixa);
-    if (e && e.em === 'alvo' && REGISTRO_EFEITOS[e.tipo].positivo === feriAlvo) continue;
-    if (e && !efeitos.some((x) => x.tipo === e.tipo && x.em === e.em)) efeitos.push(e);
+    if (e && cabeNaSkill(h, e) && !efeitos.some((x) => x.tipo === e.tipo && x.em === e.em)) efeitos.push(e);
   }
   const multCura = h.formulaCura !== null ? h.multCura * (1 + (sec.curaPct * faixa) / 1000) : h.multCura;
   return { ...h, efeitos, multCura };

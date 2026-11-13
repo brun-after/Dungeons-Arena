@@ -174,7 +174,7 @@ function conferirItens(b: Objeto, bolsa: Bolsa, nivel: number, ctx: ContextoSimu
 export function conferirPersonagem(pedido: unknown, ctx: ContextoSimulacao, id: string, jogadorId: string): PersonagemConferido | null {
   if (!ehObjeto(pedido) || !ehObjeto(pedido.bolsa)) return null;
   // Marco 40 (D-158): a ficha antiga (Mundo, grupo, certificado) troca as gerais antigas pelas skills de núcleo.
-  const b = semSkillsDoLegado(pedido.bolsa, ctx.conteudo.legadoDeSkills);
+  const b = semSkillsDoLegado(pedido.bolsa, ctx.conteudo.legadoDeSkills, ctx.conteudo.skillsQueSairam);
   const classe = typeof b.classeId === 'string' ? ctx.conteudo.classes.get(b.classeId) : undefined;
   if (!classe) return null;
   const e = criarJogador(classe, id, 0, 0, ctx.balance, jogadorId);

@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.47 · **Data:** 12/11/2026
+**Versão do documento:** 3.48 · **Data:** 13/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.48 (13/11/2026)**: marco 40, etapa 3: as 30 skills de classe, cada uma com a leitura de cada estilo; duas por classe saem do kit (D-159).
 > - **3.47 (12/11/2026)**: marco 40, etapa 2: as 89 skills comuns dos 20 núcleos, com livros novos e a geral inicial de cada classe; as gerais antigas saem do personagem (save 31 e fichas) (D-158).
 > - **3.46 (12/11/2026)**: marco 40 (em andamento): o sistema novo de skills. Etapa 1: núcleo, papel e os nove eixos das skills, as cinco formas novas dos estilos (controle, sustento, marca, grupo e invocação), efeitos para os aliados em volta, a marca que acumula e a função secundária do elemento pelo papel (D-157).
 > - **3.45 (12/11/2026)**: marco 39: a forma do estilo fica gradual. Ela aparece com 10% da ponta e cresce em 10 faixas até 100%, na mecânica e no visual (D-156).
@@ -380,4 +381,14 @@ Detalhes em D-157.
   etapas 3 e 4.
 
 Detalhes em D-158.
+
+**Etapa 3: as skills de classe**
+- **6 skills por classe**, com os nomes do catálogo. Exemplos: Golpe furioso e Execução (Guerreiro), Tiro carregado
+  (Arqueiro), Círculo rúnico e Cataclismo (Mago), Erguer mortos e Colheita (Necromante), Ataque do companheiro e
+  Chamado da matilha (Aventureiro).
+- **Cada estilo lê a skill do seu jeito:** a leitura dá a forma de um eixo e, às vezes, um efeito que cresce com o
+  estilo. A mochila mostra a lista e marca as ativas.
+- **Duas skills por classe saem do kit**, entre elas a Corrente, o Rolamento, o Piscar e as Lanças da escuridão.
+
+Detalhes em D-159.
 

@@ -21,6 +21,8 @@ function cena() {
   const estado = criarEstado({ faseId: 'teste', semente: 1 }); // marco 39: as mecânicas dos estilos também sorteiam; esta semente não tira falha crítica na lança
   const j = criarJogador(obter(CONTEUDO.classes.get('necromante')), 'j', 5, 5, ctx.balance);
   j.equipe = 'grupo'; j.autoAtaque = false; j.mana = 999;
+  // Marco 40 (D-159): as Lanças saíram do kit; a mecânica segue no motor, e o teste dá a skill ao Necromante.
+  const bolsa = obter(j.bolsa); bolsa.conhecidas.push({ id: 'dizimo_vital', rank: 1, caminhos: [] }); bolsa.barra[1] = 'dizimo_vital'; j.habilidades = bolsa.barra.filter((x): x is string => x !== null);
   estado.entidades.push(j);
   const eventos: EventoSimulacao[] = [];
   const npc = (id: string, x: number, y: number) => {
@@ -40,7 +42,8 @@ describe('Necromante sem suporte (D-135)', () => {
       const h = obter(resolverHabilidade(c.ctx, id));
       expect(h.efeitos.some((e) => ['cura', 'escudo', 'drenar_invocacao', 'cura_periodica'].includes(e.tipo)), id).toBe(false);
     }
-    expect(obter(resolverHabilidade(c.ctx, 'mortalha_funebre')).politicaAlvo).toBe('hostil');
+    // Marco 40 (D-159): a Praga sepulcral virou o Véu sombrio, que intercepta e envenena quem bate (sem escudo nem cura).
+    expect(obter(resolverHabilidade(c.ctx, 'mortalha_funebre')).efeitos.map((e) => e.tipo)).toEqual(['intercepta', 'reflexo']);
   });
 });
 

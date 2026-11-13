@@ -86,7 +86,8 @@ describe('compilador (D-059)', () => {
   it('modificadores: os que não combinam são ignorados e saem da chave compilada', () => {
     expect(hab('seta_arcana+maior_e_mais_lenta').chave).toBe('seta_arcana');
     expect(hab('seta_arcana+atravessar').perfura).toBe(true);
-    expect(hab('raio_em_cadeia').saltos).toEqual({ quantidade: 2, raio: 3, pct: 50 });
+    // Marco 40 (D-159): o Raio em cadeia virou o Míssil arcano; a cadeia de nascença está no núcleo Cadeia.
+    expect(hab('cadeia_raio').saltos).toEqual({ quantidade: 2, raio: 3, pct: 50 });
     const eco = hab('seta_arcana+ecoar').efeitos.find((e) => e.tipo === 'efeito_atrasado');
     expect(eco?.interno?.tipo).toBe('dano_direto');
     expect(hab('curar+ecoar').efeitos.some((e) => e.tipo === 'efeito_atrasado')).toBe(false);

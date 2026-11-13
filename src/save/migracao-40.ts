@@ -3,33 +3,38 @@
 // zerados (os caminhos antigos não existem nela), e os pontos dos ranks acima do 1 voltam. A barra, as liberadas, o
 // estudo e os livros na mochila seguem o mesmo mapa. As passivas gerais saem das ligadas. Puro e idempotente: uma
 // bolsa sem gerais antigas sai igual. Vale para o save (migração 30 › 31) e para as fichas que chegam ao servidor
-// (Mundo, grupo, arena e certificado, por `conferirPersonagem`).
+// (Mundo, grupo, arena e certificado, por `conferirPersonagem`). D-159: as skills de classe que saíram do kit
+// (`classes.json`, campo `saidas`) saem das conhecidas, da barra, do estudo e da mochila (o livro), sem devolver ponto: skill
+// de classe não custa ponto.
 
 import { ehObjeto, type Objeto } from '../core/validar';
 
 const PREFIXO_LIVRO = 'livro_';
 
 /** A bolsa crua sem as gerais antigas (ou ela mesma, quando não há nada a trocar). */
-export function semSkillsDoLegado(b: Objeto, legado: ReadonlyMap<string, string>): Objeto {
+export function semSkillsDoLegado(b: Objeto, legado: ReadonlyMap<string, string>, removidas: ReadonlySet<string> = new Set()): Objeto {
   const novo = (id: unknown): unknown => (typeof id === 'string' ? (legado.get(id) ?? id) : id);
   const antiga = (id: unknown): boolean => typeof id === 'string' && legado.has(id);
+  const saiu = (id: unknown): boolean => typeof id === 'string' && removidas.has(id);
+  const livroQueSaiu = (itemId: unknown): boolean => typeof itemId === 'string' && itemId.startsWith(PREFIXO_LIVRO) && removidas.has(itemId.slice(PREFIXO_LIVRO.length));
   const livroNovo = (itemId: unknown): unknown => {
     if (typeof itemId !== 'string' || !itemId.startsWith(PREFIXO_LIVRO)) return itemId;
     const n = legado.get(itemId.slice(PREFIXO_LIVRO.length));
     return n ? `${PREFIXO_LIVRO}${n}` : itemId;
   };
   const conhecidasBrutas = Array.isArray(b.conhecidas) ? b.conhecidas : [];
-  const temLegado = conhecidasBrutas.some((c) => ehObjeto(c) && antiga(c.id))
-    || [b.barra, b.liberadas, b.passivasAtivas].some((l) => Array.isArray(l) && l.some(antiga))
-    || (ehObjeto(b.estudo) && antiga(b.estudo.id))
-    || (Array.isArray(b.mochila) && b.mochila.some((i) => ehObjeto(i) && (livroNovo(i.itemId) !== i.itemId || antiga(i.ref))));
+  const velha = (id: unknown): boolean => antiga(id) || saiu(id);
+  const temLegado = conhecidasBrutas.some((c) => ehObjeto(c) && velha(c.id))
+    || [b.barra, b.liberadas, b.passivasAtivas].some((l) => Array.isArray(l) && l.some(velha))
+    || (ehObjeto(b.estudo) && velha(b.estudo.id))
+    || (Array.isArray(b.mochila) && b.mochila.some((i) => ehObjeto(i) && (livroNovo(i.itemId) !== i.itemId || livroQueSaiu(i.itemId) || antiga(i.ref))));
   if (!temLegado) return b;
 
   let devolvidos = 0;
   const conhecidas: unknown[] = [];
   const vistas = new Set<string>();
   for (const c of conhecidasBrutas) {
-    if (!ehObjeto(c) || typeof c.id !== 'string') continue;
+    if (!ehObjeto(c) || typeof c.id !== 'string' || saiu(c.id)) continue;
     const rank = typeof c.rank === 'number' && Number.isFinite(c.rank) ? Math.max(1, Math.round(c.rank)) : 1;
     if (!antiga(c.id)) {
       if (!vistas.has(c.id)) { vistas.add(c.id); conhecidas.push(c); }
@@ -42,19 +47,19 @@ export function semSkillsDoLegado(b: Objeto, legado: ReadonlyMap<string, string>
     conhecidas.push({ id, rank: 1, caminhos: [] });
   }
   const unicos = (l: unknown): unknown[] => [...new Set((Array.isArray(l) ? l : []).map(novo))];
-  const barra = Array.isArray(b.barra) ? b.barra.map(novo).map((id, i, todos) => (id !== null && todos.indexOf(id) !== i ? null : id)) : b.barra;
-  const estudo = ehObjeto(b.estudo) && antiga(b.estudo.id)
+  const barra = Array.isArray(b.barra) ? b.barra.map((id) => (saiu(id) ? null : novo(id))).map((id, i, todos) => (id !== null && todos.indexOf(id) !== i ? null : id)) : b.barra;
+  const estudo = ehObjeto(b.estudo) && saiu(b.estudo.id) ? null : ehObjeto(b.estudo) && antiga(b.estudo.id)
     ? (vistas.has(String(novo(b.estudo.id))) ? null : { ...b.estudo, id: novo(b.estudo.id) })
     : b.estudo;
   const mochila = Array.isArray(b.mochila)
-    ? b.mochila.map((i: unknown) => (ehObjeto(i) ? { ...i, itemId: livroNovo(i.itemId), ...(antiga(i.ref) && { ref: novo(i.ref) }) } : i))
+    ? b.mochila.filter((i: unknown) => !(ehObjeto(i) && livroQueSaiu(i.itemId))).map((i: unknown) => (ehObjeto(i) ? { ...i, itemId: livroNovo(i.itemId), ...(antiga(i.ref) && { ref: novo(i.ref) }) } : i))
     : b.mochila;
   const pontos = typeof b.pontosHabilidade === 'number' && Number.isFinite(b.pontosHabilidade) ? b.pontosHabilidade : 0;
   return {
     ...b,
     conhecidas,
     barra,
-    liberadas: unicos(b.liberadas),
+    liberadas: unicos(b.liberadas).filter((id) => !saiu(id)),
     // As passivas gerais viraram skills ativas: nenhuma fica ligada.
     passivasAtivas: (Array.isArray(b.passivasAtivas) ? b.passivasAtivas : []).filter((id) => !antiga(id)),
     estudo,
@@ -63,11 +68,11 @@ export function semSkillsDoLegado(b: Objeto, legado: ReadonlyMap<string, string>
   };
 }
 
-function migrarEntidades(v: unknown, legado: ReadonlyMap<string, string>): unknown {
+function migrarEntidades(v: unknown, legado: ReadonlyMap<string, string>, removidas: ReadonlySet<string>): unknown {
   if (!ehObjeto(v) || !Array.isArray(v.entidades)) return v;
   return { ...v, entidades: v.entidades.map((x: unknown) => {
     if (!ehObjeto(x) || !ehObjeto(x.bolsa)) return x;
-    const bolsa = semSkillsDoLegado(x.bolsa, legado);
+    const bolsa = semSkillsDoLegado(x.bolsa, legado, removidas);
     if (bolsa === x.bolsa) return x;
     const habilidades = Array.isArray(bolsa.barra) ? bolsa.barra.filter((id): id is string => typeof id === 'string') : x.habilidades;
     return { ...x, bolsa, habilidades, tatica: undefined };
@@ -75,8 +80,8 @@ function migrarEntidades(v: unknown, legado: ReadonlyMap<string, string>): unkno
 }
 
 /** A migração 30 › 31: as gerais antigas de todo jogador gravado (na fase atual e nas visitadas) viram skills comuns. */
-export function migrarSkillsDeNucleo(r: Objeto, legado: ReadonlyMap<string, string>): Objeto {
+export function migrarSkillsDeNucleo(r: Objeto, legado: ReadonlyMap<string, string>, removidas: ReadonlySet<string> = new Set()): Objeto {
   const fasesVisitadas = ehObjeto(r.fasesVisitadas)
-    ? Object.fromEntries(Object.entries(r.fasesVisitadas).map(([id, fase]) => [id, migrarEntidades(fase, legado)])) : r.fasesVisitadas;
-  return { ...r, estado: migrarEntidades(r.estado, legado), fasesVisitadas };
+    ? Object.fromEntries(Object.entries(r.fasesVisitadas).map(([id, fase]) => [id, migrarEntidades(fase, legado, removidas)])) : r.fasesVisitadas;
+  return { ...r, estado: migrarEntidades(r.estado, legado, removidas), fasesVisitadas };
 }

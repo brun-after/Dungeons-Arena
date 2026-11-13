@@ -6,21 +6,21 @@ import { CONTEUDO } from '../apoio/fases';
 import { ultimateDoPar } from '../../src/combat/ultimates';
 
 describe('skills de classe e ultimates (Grimório v1.2)', () => {
-  it('cada classe tem as 8 exclusivas, as 2 iniciais e a geral inicial do Grimório', () => {
+  // Marco 40 (D-159): das 8 do Grimório, 6 seguem no kit (com o nome e as leituras do catálogo novo) e 2 saíram.
+  it('cada classe tem as 8 do Grimório entre as 6 exclusivas e as 2 que saíram, e a geral inicial', () => {
     for (const c of catalogo.classes) {
       const classe = CONTEUDO.classes.get(c.id);
-      expect(classe?.exclusivas, c.id).toEqual(c.skills);
-      expect(classe?.iniciais, c.id).toEqual(c.iniciais);
+      expect([...(classe?.exclusivas ?? []), ...(classe?.saidas ?? [])].sort(), c.id).toEqual([...c.skills].sort());
       expect(classe?.geralInicial, c.id).toBe(c.geralInicial);
       expect(new Set(c.skills).size).toBe(8);
     }
   });
 
-  it('nenhuma skill de classe é de duas classes, e todas têm livro só da classe', () => {
+  it('nenhuma skill de classe é de duas classes, e as do kit têm livro só da classe', () => {
     const todas = catalogo.classes.flatMap((c) => c.skills);
     expect(new Set(todas).size).toBe(todas.length);
     for (const c of catalogo.classes) {
-      for (const id of c.skills) {
+      for (const id of c.skills.filter((x) => CONTEUDO.classes.get(c.id)?.exclusivas.includes(x))) {
         const livro = CONTEUDO.itens.get(`livro_${id}`);
         expect(livro?.ensina, id).toBe(id);
         expect(livro?.classe, id).toBe(c.id);

@@ -22,7 +22,7 @@ test.beforeAll(async () => {
       const aliado = criarJogador(conteudo.classes.get('mago'), 'aliado', 6, 5, r.ctx.balance);
       const inimigo = criarInimigo(conteudo.presets.get('goblin'), 'inimigo', 7, 5, r.ctx.balance);
       // Marco 24 (D-094): as skills de classe dos combos conferidos abaixo (fora do kit inicial).
-      j.bolsa.conhecidas.push({ id: 'garras_do_ossuario', rank: 1, caminhos: [] }, { id: 'comando_sepulcral', rank: 1, caminhos: [] });
+      j.bolsa.conhecidas.push({ id: 'explosao_cadaverica', rank: 1, caminhos: [] }, { id: 'comando_sepulcral', rank: 1, caminhos: [] });
       j.hp -= 40; j.autoAtaque = false; aliado.equipe = j.equipe; aliado.hp = 0;
       inimigo.hp = 0; inimigo.participacao = [{ id: j.id, tick: estado.tick }];
       estado.entidades = [j, aliado, inimigo]; estado.objetos = []; estado.armadilhas = [];
@@ -41,11 +41,12 @@ test('Necromante é selecionável ao criar um personagem', async ({ page }) => {
   await expect(cartao.getByRole('heading', { name: 'Necromante', exact: true })).toBeVisible();
   await expect(cartao.getByRole('heading', { name: 'Atributos', exact: true })).toBeVisible();
   await expect(cartao.getByRole('heading', { name: 'Habilidades habilitadas', exact: true })).toBeVisible();
-  await expect(cartao.getByText('Lanças da escuridão', { exact: true })).toBeVisible();
+  await expect(cartao.getByText('Colheita', { exact: true })).toBeVisible();
   await cartao.getByRole('link', { name: 'Jogar de Necromante' }).click();
-  await expect(page.getByTestId('habilidade-dizimo_vital')).toBeVisible({ timeout: 30000 });
+  await expect(page.getByTestId('habilidade-ceifa_de_almas')).toBeVisible({ timeout: 30000 });
   // Marco 24 (D-094): o kit inicial é Dardo funesto e as Lanças da escuridão (`dizimo_vital`, classe) e, desde 07/11/2026
-  // (D-135), o Dissipar (geral); no marco 40 (D-158), a Maldição, skill comum de núcleo.
+  // (D-135), o Dissipar (geral); no marco 40 (D-158), a Maldição, skill comum de núcleo; e (D-159) a Colheita
+  // (`ceifa_de_almas`) no lugar das Lanças, que saíram do kit.
   await expect(page.getByTestId('habilidade-dardo_funesto')).toBeVisible();
   await expect(page.getByTestId('habilidade-maldicao_trevas')).toBeVisible();
 });
@@ -55,7 +56,7 @@ test('passiva, reanimado e eco funcionam e persistem no save', async ({ page }, 
   await page.goto('/'); await page.addScriptTag({ content: semear });
   await expect(page.locator('body')).toHaveAttribute('data-semeado', 'sim');
   await page.goto('/?jogo=campanha&slot=1&diag=1');
-  await expect(page.getByTestId('habilidade-dizimo_vital')).toBeVisible({ timeout: 30000 });
+  await expect(page.getByTestId('habilidade-ceifa_de_almas')).toBeVisible({ timeout: 30000 });
   await expect.poll(async () => Number(await page.locator('#diag').getAttribute('data-tick'))).toBeGreaterThan(100);
   await page.screenshot({ path: info.outputPath('necromante-e-mortos.png') });
   await page.getByRole('button', { name: /Abrir a mochila/ }).click();
@@ -78,6 +79,6 @@ test('passiva, reanimado e eco funcionam e persistem no save', async ({ page }, 
   expect(mortos.find((e) => e.invocacao?.necromancia === 'eco')?.invocacao?.modeloOriginal).toBe('mago');
   expect(registro.estado.entidades.find((e) => e.id === 'aliado')?.morto).toBe(false);
   await page.goto('/?jogo=campanha&slot=1');
-  await expect(page.getByTestId('habilidade-dizimo_vital')).toBeVisible({ timeout: 30000 });
+  await expect(page.getByTestId('habilidade-ceifa_de_almas')).toBeVisible({ timeout: 30000 });
   expect(erros).toEqual([]);
 });

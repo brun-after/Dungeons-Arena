@@ -116,6 +116,11 @@ export interface ClasseJogador {
   exclusivas: string[];
   iniciais: string[];
   geralInicial: string | null;
+  /**
+   * Marco 40 (12/11/2026, D-159): as skills de classe que saíram do kit. Seguem da classe (para as ultimates antigas até a
+   * etapa 4 e para não virarem gerais), mas o jogador não as tem mais.
+   */
+  saidas: string[];
 }
 
 function idDe(item: unknown): string {
@@ -238,7 +243,9 @@ export function lerClasses(json: unknown): { classes: Map<string, ClasseJogador>
       exclusivas: o.exclusivas === undefined ? [] : l.listaDeTextos(o, 'exclusivas'),
       iniciais: o.iniciais === undefined ? [] : l.listaDeTextos(o, 'iniciais'),
       geralInicial: o.geralInicial === undefined ? null : l.texto(o, 'geralInicial'),
+      saidas: o.saidas === undefined ? [] : l.listaDeTextos(o, 'saidas'),
     };
+    if (c.saidas.some((id) => c.exclusivas.includes(id))) l.erro('uma skill que saiu não pode estar entre as exclusivas');
     if (c.iniciais.some((id) => !c.exclusivas.includes(id))) l.erro('as iniciais precisam estar entre as exclusivas');
     c.habilidades = [...c.iniciais, ...(c.geralInicial ? [c.geralInicial] : [])];
     if (classes.has(c.id)) l.erro('id repetido');

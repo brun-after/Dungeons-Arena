@@ -1,6 +1,6 @@
 # Marco 40: o sistema novo de skills
 
-**Versão:** 1.1 · **Data:** 12/11/2026
+**Versão:** 1.2 · **Data:** 13/11/2026
 
 O desenho completo está no catálogo "Grimório das Skills" (artefato, versão 1.6), revisado com o usuário em
 12/11/2026. Este documento guarda as etapas da implementação e o que cada uma entrega. As skills atuais são
@@ -54,6 +54,15 @@ Os pesos das conexões têm faixa por tipo de skill (classe 40/30/15/15, comum 6
   os pontos de volta.
 - As gerais antigas seguem no skills.json só para inimigos, ultimates e combos (etapas 3 e 4).
 
+## Etapa 3 (13/11/2026)
+
+- 30 skills de classe (6 por classe) nos ids das antigas, com nome, papel e a leitura de cada estilo
+  (`combat/leituras.ts`). Na chave compilada, as leituras com efeito entram como `&estiloN`.
+- `classes.json → saidas`: as 10 que saem do kit e perdem o livro; o save 31 e as fichas tiram essas skills.
+- A mochila lista as leituras e marca as ativas.
+- O balanceamento completo fica para o fechamento (D-159).
+
 > **Histórico**
+> - **1.2 (13/11/2026)**: etapa 3, as skills de classe.
 > - **1.1 (12/11/2026)**: etapa 2, as skills comuns.
 > - **1.0 (12/11/2026)**: as etapas e a etapa 1.

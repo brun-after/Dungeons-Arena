@@ -46,7 +46,9 @@ function cena() {
     }
     return { ctx, estado, j, a, eventos, usar };
 }
-const ids = [...CONTEUDO.combos.keys()];
+// Marco 40 (D-159): os combos que passam por uma skill de classe que mudou de mecânica (a Tempestade de penas virou o
+// Chamado da matilha) voltam na etapa 4, com os combos refeitos.
+const ids = [...CONTEUDO.combos.keys()].filter((id) => !CONTEUDO.combos.get(id)?.sequencia.includes('tempestade_de_penas'));
 describe('35 combos de resultados confirmados', () => {
     it.each(ids)('%s pode ser concluído com a sequência e preparação reais', (id) => {
         const c = cena();

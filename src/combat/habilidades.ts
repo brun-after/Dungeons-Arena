@@ -15,6 +15,7 @@ import { normalizarEfeitos } from './normalizar-efeito';
 import type { Atributos } from '../entities/entidade';
 import { ehTipoEfeito, type EfeitoCanonico, type TipoEfeito } from './registro-efeitos';
 import { EIXOS, PAPEIS, type Eixo, type FormaId, type Papel } from './eixos';
+import { lerLeituras, type Leituras } from './leituras';
 import { ASSINATURAS_VISUAIS, VARIANTES_VISUAIS, type AssinaturaVisual, type VarianteVisual } from './assinaturas-visuais';
 
 export type TipoAtaque = 'fisico' | 'magico';
@@ -278,6 +279,8 @@ export interface DefinicaoHabilidade {
   /** Marco 40 (12/11/2026, D-157): o núcleo da skill (o verbo comum às variantes) e os eixos que os estilos empurram. */
   nucleo?: string;
   eixos?: readonly Eixo[];
+  /** Marco 40 (D-159): nas skills de classe, o que cada estilo da classe faz nela (eixo, efeitos e texto). */
+  leituras?: Leituras;
 }
 
 /** Marco 18: um marco de nível — os mesmos ajustes de um caminho, com o texto que a carta mostra. */
@@ -581,6 +584,7 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
     ...(o.familiaGeral !== undefined ? { familiaGeral: l.texto(o, 'familiaGeral') } : {}),
     ...(o.nucleo !== undefined ? { nucleo: l.texto(o, 'nucleo') } : {}),
     ...(o.eixos !== undefined ? { eixos: lerEixos(l, o) } : {}),
+    ...(o.leituras !== undefined ? { leituras: lerLeituras(l, o.leituras) } : {}),
   };
 }
 
@@ -605,8 +609,8 @@ const CAMPOS_DEFINICAO = [
   'variacao', 'escalaRolagem',
   // 07/11/2026 (D-136)
   'cargas', 'disparoMs', 'lanca',
-  // Marco 40 (D-157)
-  'nucleo', 'papel', 'eixos',
+  // Marco 40 (D-157, D-159)
+  'nucleo', 'papel', 'eixos', 'leituras',
 ];
 
 /** Marco 18 (D-068): sem `escalaCom`, o físico escala com Força e o mágico com Inteligência. */
