@@ -418,6 +418,8 @@ export interface Entidade {
   estilos: string[];
   /** Marco 18: o último golpe com dano que a entidade levou (quem e com qual habilidade) — o "ao abater" lê. */
   ultimoGolpe: { fonteId: EntidadeId; chave: string } | null;
+  /** Marco 40 (13/11/2026, D-161): o que os escudos quebrados neste tick deixam (aplicado no ciclo dos efeitos). */
+  aoQuebrarEscudo?: EfeitoCanonico[];
   /** Marco 18: a última habilidade que usou (combos e a Lâmina rúnica). */
   tatica?: MemoriaTatica;
   ultimaHabilidade: { id: string; chave: string; tick: number; alvoId: EntidadeId | null } | null;

@@ -166,8 +166,8 @@ describe('efeitos visuais como dado (D-055)', () => {
     // 06/11/2026 (D-135): mais 3 dos inimigos novos (pedra, salto, runa).
     // Marco 40 (D-158): mais as 89 skills comuns de núcleo.
     // Marco 40 (13/11/2026, D-160): as 140 ultimates, as etapas e as marcas de Domínio dão lugar às 21 famílias e 7 etapas.
-    // Marco 40 (D-161): mais as 12 etapas das leituras de estilo e a da fusão perfuração + invocação.
-    expect(CONTEUDO.habilidades.size).toBe(121 + 21 + 7 + 42 + 3 + 89 + 13);
+    // Marco 40 (D-161): mais as 14 etapas das leituras de estilo e a da fusão perfuração + invocação.
+    expect(CONTEUDO.habilidades.size).toBe(121 + 21 + 7 + 42 + 3 + 89 + 15);
     for (const h of CONTEUDO.habilidades.values()) {
       if (h.passiva) continue;
       expect(h.visual).not.toBeNull();

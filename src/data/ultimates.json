@@ -1093,6 +1093,11 @@
       "papel": "defesa",
       "efeitos": [
         {
+          "tipo": "guardar_absorvido",
+          "em": "conjurador",
+          "duracaoMs": 3500
+        },
+        {
           "tipo": "escudo_acumulado",
           "em": "conjurador",
           "valor": 4,
@@ -1121,7 +1126,7 @@
       }
     },
     {
-      "formulaDano": "4d6",
+      "formulaDano": "2d6",
       "formulaCura": null,
       "custoRecurso": 0,
       "recargaMs": 0,
@@ -1143,6 +1148,10 @@
       "nome": "Contragolpe (devolução)",
       "papel": "dano",
       "efeitos": [
+        {
+          "tipo": "devolver_absorvido",
+          "pct": 60
+        },
         {
           "tipo": "empurrao",
           "valor": 1

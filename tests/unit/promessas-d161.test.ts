@@ -4,7 +4,8 @@
 import { describe, expect, it } from 'vitest';
 import { comBuffsDeLeitura } from '../../src/combat/buffs-de-leitura';
 import { resolverHabilidade } from '../../src/combat/compilar-habilidade';
-import { aplicarEfeito } from '../../src/combat/efeitos';
+import { aplicarEfeito, processarEfeitos, sofrerDano } from '../../src/combat/efeitos';
+import { chaveDoAtor } from '../../src/combat/perfil';
 import { armarArmadilha, dispararArmadilha } from '../../src/combat/efeitos-fluxo';
 import { construirEfeito } from '../../src/combat/registro-efeitos';
 import { criarEstado } from '../../src/core/estado';
@@ -78,5 +79,52 @@ describe('as promessas das leituras (D-161)', () => {
   it('o Exército em fúria marca as invocações para explodir ao cair; a fusão área + alvos salta', () => {
     expect(hab('ult_exercito_em_furia').efeitos.some((e) => e.tipo === 'explodir_ao_cair' && e.em === 'aliados')).toBe(true);
     expect(hab('ult_aniquilacao#fogo6.gelo3*area.alvos6!fogo6').saltos?.quantidade).toBe(1);
+  });
+
+  it('a Mortalha do Ceifador vira sombra quando o escudo quebra', () => {
+    const { estado, j } = cena();
+    const ef = obter(hab('mortalha_funebre^ecoar10&ceifador10').efeitos.find((e) => e.tipo === 'escudo' && e.interno));
+    aplicarEfeito(estado, ctx, j, ef, { id: j.id, x: j.x, y: j.y }, null, []);
+    sofrerDano(j, 3, estado.tick);
+    expect(j.aoQuebrarEscudo).toBeUndefined();
+    sofrerDano(j, 50, estado.tick);
+    expect(j.aoQuebrarEscudo?.[0]?.tipo).toBe('fase');
+    processarEfeitos(estado, ctx, []);
+    expect(estado.fases?.some((f) => f.chave.startsWith('leitura_sombra'))).toBe(true);
+  });
+
+  it('o Contragolpe devolve o que a casca absorveu', () => {
+    const { estado, j, inimigo } = cena();
+    const origem = { id: j.id, x: j.x, y: j.y };
+    aplicarEfeito(estado, ctx, j, construirEfeito('guardar_absorvido', { duracaoMs: 3500 }), origem, null, []);
+    aplicarEfeito(estado, ctx, j, construirEfeito('escudo', { valor: 20, duracaoMs: 3000 }), origem, null, []);
+    sofrerDano(j, 10, estado.tick);
+    const antes = inimigo.hp;
+    aplicarEfeito(estado, ctx, inimigo, construirEfeito('devolver_absorvido', { pct: 60 }), origem, null, []);
+    expect(antes - inimigo.hp).toBe(6);
+  });
+
+  it('a Investida do Duelista volta ao ponto de partida', () => {
+    const { estado, j } = cena();
+    const retorno = obter(hab('investida_de_escudo^ecoar10&duelista10').efeitos.find((e) => e.interno?.tipo === 'retornar'));
+    expect(retorno.em).toBe('conjurador');
+    j.x = 6;
+    aplicarEfeito(estado, ctx, j, construirEfeito('retornar', {}), { id: j.id, x: 3, y: 3 }, null, []);
+    expect([j.x, j.y]).toEqual([3, 3]);
+  });
+
+  it('o Comando do Ceifador salta até o alvo e golpeia', () => {
+    const { estado, j, inimigo } = cena();
+    inimigo.x = 7;
+    j.alvoSelecionado = inimigo.id;
+    const ef = obter(hab('comando_sepulcral^ecoar10&ceifador10').efeitos.find((e) => e.tipo === 'saltar_ao_alvo'));
+    aplicarEfeito(estado, ctx, j, ef, { id: j.id, x: j.x, y: j.y }, null, []);
+    expect(j.x).toBeGreaterThan(3);
+    expect(estado.fases?.some((f) => f.chave.startsWith('leitura_golpe_ceifador'))).toBe(true);
+  });
+
+  it('a onda do Brado rúnico leva a runa do Brado', () => {
+    const g = criarJogador(obter(CONTEUDO.classes.get('guerreiro')), 'g', 3, 3, ctx.balance);
+    expect(chaveDoAtor(ctx, g, 'leitura_onda_runa', 0)).toMatch(/!/);
   });
 });

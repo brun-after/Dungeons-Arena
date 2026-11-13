@@ -1,3 +1,4 @@
+import { ehRetorno } from './buffs-de-leitura';
 import { retirarVida } from './reserva-necromante';
 import { multiplicadorDardo, registrarDardo } from './concentracao-arcana';
 import { encherFuria } from './frenesi';
@@ -331,7 +332,7 @@ export function aplicarImpacto(
   for (const efeito of hab.efeitos) {
     // Armadilha e invocação saem uma vez no lançamento (acao.ts), não por alvo atingido.
     // Marco 26 (D-125): nem o avanço e o teleporte de quem conjura (saem uma vez, no lançamento).
-    if (REGISTRO_EFEITOS[efeito.tipo].aoLancar || (efeito.em === 'conjurador' && REGISTRO_EFEITOS[efeito.tipo].deslocaConjurador)) continue;
+    if (REGISTRO_EFEITOS[efeito.tipo].aoLancar || (efeito.em === 'conjurador' && REGISTRO_EFEITOS[efeito.tipo].deslocaConjurador) || ehRetorno(efeito)) continue;
     // Marco 23 (D-092): no clima do elemento, o estado dele dura mais.
     const reforco = efeito.tipo === 'escudo' || efeito.tipo === 'escudo_acumulado' ? reforcoDaGeral(ctx, conjurador, hab, tick) : 1;
     // Marco 24 (D-096): a sinergia passiva alonga o estado (Disciplina férrea).

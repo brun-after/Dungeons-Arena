@@ -5,7 +5,7 @@
 import type { Entidade } from '../entities/entidade';
 import { faixaDaFormula } from './dados';
 import type { Habilidade } from './habilidades';
-import { construirEfeito } from './registro-efeitos';
+import { construirEfeito, type EfeitoCanonico } from './registro-efeitos';
 
 export function comBuffsDeLeitura(ator: Entidade, hab: Habilidade, tick: number): Habilidade {
   if (hab.tipoAtaque !== 'magico') return hab;
@@ -19,4 +19,9 @@ export function comBuffsDeLeitura(ator: Entidade, hab: Habilidade, tick: number)
     saida = { ...saida, efeitos: [...saida.efeitos, construirEfeito('efeito_atrasado', { duracaoMs: 600, interno: construirEfeito('dano_direto', { valor }) })] };
   }
   return saida;
+}
+
+/** D-161: o atrasado que traz quem conjura de volta (sai uma vez, no lançamento, e guarda a célula de partida). */
+export function ehRetorno(ef: EfeitoCanonico): boolean {
+  return ef.tipo === 'efeito_atrasado' && ef.em === 'conjurador' && ef.interno?.tipo === 'retornar';
 }

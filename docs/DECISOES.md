@@ -4849,7 +4849,9 @@ mecânica fazia (D-160 listava as aproximações). O pedido foi fazer a mecânic
   dentro do alcance; o núcleo recebe a célula no comando, como qualquer mira.
 - **Teste de guarda**: toda leitura muda a skill compilada (`leituras-fieis.test.ts`).
 
-**Ainda aproximado.** Algumas promessas dependem de sistemas que não existem e ficam no mais próximo: a Mortalha do
-Ceifador vira sombra rápida ao subir (não ao quebrar); o Comando do Ceifador dá crítico e pressa em vez do salto junto;
-a Investida do Duelista ecoa, sem voltar ao ponto de partida; o Brado rúnico solta uma onda que só leva o
-elemento quando a runa entra na etapa; o Contragolpe devolve um golpe fixo, não o absorvido.
+**As cinco que faltavam** (na mesma decisão): o escudo com efeito interno solta o efeito quando quebra (a Mortalha
+do Ceifador vira sombra rápida: pressa, fantasma e véu); `saltar_ao_alvo` leva quem usa até o alvo selecionado (ou o
+hostil mais perto) e lança a etapa do golpe (o Comando do Ceifador); o atrasado de `retornar` sai no lançamento e
+guarda a célula de partida (a Investida do Duelista volta); a etapa com `runaDe` usa o encaixe de runa de outra skill
+(a onda do Brado rúnico leva a runa do Brado); e `guardar_absorvido` soma o que os escudos absorvem para
+`devolver_absorvido` (o Contragolpe devolve 60% do absorvido em volta, além de um golpe menor).

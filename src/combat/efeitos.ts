@@ -148,7 +148,13 @@ export function absorverEscudo(e: Entidade, dano: number, tick: number): number 
     const absorvido = Math.min(f.valor, resto);
     f.valor -= absorvido;
     resto -= absorvido;
+    // Marco 40 (13/11/2026, D-161): o escudo que quebra solta o efeito dele (a Mortalha do Ceifador vira sombra).
+    if (f.valor <= 0 && f.interno) e.aoQuebrarEscudo = [...(e.aoQuebrarEscudo ?? []), f.interno];
   }
+  // D-161: o que absorveu fica guardado para devolver (o Contragolpe).
+  const guardado = dano - resto;
+  const guarda = guardado > 0 ? e.efeitos.find((f) => f.tipo === 'guardar_absorvido' && f.ateTick > tick) : undefined;
+  if (guarda) guarda.valor += guardado;
   e.efeitos = e.efeitos.filter((f) => !REGISTRO_EFEITOS[f.tipo].escudo || f.valor > 0);
   return resto;
 }
@@ -370,6 +376,12 @@ export function processarEfeitos(estado: EstadoJogo, ctx: ContextoSimulacao, sai
   const tick = estado.tick;
   const intervalo = ticksDe(ctx.balance.efeitos.intervaloPeriodicoMs);
   for (const e of estado.entidades) {
+    // Marco 40 (D-161): os escudos que quebraram soltam o que levavam.
+    if (e.aoQuebrarEscudo && vivo(e)) {
+      const fila = e.aoQuebrarEscudo;
+      delete e.aoQuebrarEscudo;
+      for (const ef of fila) aplicarEfeito(estado, ctx, e, ef, { id: e.id, x: e.x, y: e.y }, { x: e.x, y: e.y }, saida);
+    }
     if (e.efeitos.length === 0) continue;
     if (vivo(e)) {
       for (const f of e.efeitos) {

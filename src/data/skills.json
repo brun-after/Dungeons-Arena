@@ -3793,15 +3793,11 @@
           "texto": "Você salta junto e golpeia.",
           "efeitos": [
             {
-              "tipo": "critico_garantido",
+              "tipo": "saltar_ao_alvo",
+              "valor": 5,
+              "ref": "leitura_golpe_ceifador",
               "em": "conjurador",
-              "duracaoMs": 4000
-            },
-            {
-              "tipo": "acelerado",
-              "em": "conjurador",
-              "pct": 40,
-              "duracaoMs": 2000
+              "desde": 4
             }
           ]
         }
@@ -4050,15 +4046,15 @@
           "texto": "Ao quebrar, você vira sombra rápida.",
           "efeitos": [
             {
-              "tipo": "fantasma",
+              "tipo": "escudo",
+              "valor": 6,
+              "duracaoMs": 6000,
               "em": "conjurador",
-              "duracaoMs": 6000
-            },
-            {
-              "tipo": "acelerado",
-              "em": "conjurador",
-              "pct": 30,
-              "duracaoMs": 6000
+              "efeito": {
+                "tipo": "fase",
+                "ref": "leitura_sombra",
+                "duracaoMs": 0
+              }
             }
           ]
         }
@@ -4181,6 +4177,15 @@
                 "tipo": "dano_direto",
                 "valor": 4
               }
+            },
+            {
+              "tipo": "efeito_atrasado",
+              "duracaoMs": 900,
+              "em": "conjurador",
+              "interno": {
+                "tipo": "retornar"
+              },
+              "desde": 4
             }
           ]
         },
@@ -10012,7 +10017,8 @@
         "impacto": "explosao",
         "som": "golpe",
         "assinatura": "supernova"
-      }
+      },
+      "runaDe": "brado"
     },
     {
       "formulaDano": null,
@@ -10220,6 +10226,82 @@
       "tipoArea": "nenhuma",
       "raioArea": 0,
       "alcanceCelulas": 0,
+      "interna": true,
+      "visual": {
+        "cor": "#c9a24a",
+        "impacto": "explosao",
+        "som": "golpe",
+        "assinatura": "supernova"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 200,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "acelerado",
+          "pct": 40,
+          "duracaoMs": 3000,
+          "em": "conjurador"
+        },
+        {
+          "tipo": "fantasma",
+          "duracaoMs": 3000,
+          "em": "conjurador"
+        },
+        {
+          "tipo": "veu_noturno",
+          "pct": 35,
+          "duracaoMs": 2000,
+          "em": "conjurador"
+        }
+      ],
+      "id": "leitura_sombra",
+      "nome": "Sombra rápida",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "fantasma",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 0,
+      "interna": true,
+      "visual": {
+        "cor": "#c9a24a",
+        "impacto": "explosao",
+        "som": "golpe",
+        "assinatura": "supernova"
+      }
+    },
+    {
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 200,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "id": "leitura_golpe_ceifador",
+      "nome": "Golpe do Ceifador",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "foice",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 0,
+      "alcanceCelulas": 12,
       "interna": true,
       "visual": {
         "cor": "#c9a24a",

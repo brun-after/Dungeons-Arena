@@ -47,7 +47,7 @@ import { aoAgirEncarnado, encarnar } from './encarnacao';
 import { consumirMira } from './mira';
 import { prepararTiroCheio } from './sintonia-arqueiro';
 import { raioAreaDaEncarnacao } from './encarnacao-efeitos';
-import { comBuffsDeLeitura } from './buffs-de-leitura';
+import { comBuffsDeLeitura, ehRetorno } from './buffs-de-leitura';
 import { quantidadeDeSaltos, saltar } from './saltos';
 import { dispararGanchosDe, passivosDe } from '../progression/ganchos-do-portador';
 import { comCombo, fazerCombo } from './combos';
@@ -530,11 +530,13 @@ function lancar(
   // teleporte de quem conjura também (antes, só saíam a cada alvo atingido: sem ninguém na linha, nada de avanço).
   for (const ef of hab.efeitos) {
     const desloca = ef.em === 'conjurador' && REGISTRO_EFEITOS[ef.tipo].deslocaConjurador;
-    if (!REGISTRO_EFEITOS[ef.tipo].aoLancar && !desloca) continue;
+    if (!REGISTRO_EFEITOS[ef.tipo].aoLancar && !desloca && !ehRetorno(ef)) continue;
     // Marco 24: a fase guarda o alvo da ação (o resto do lançamento cai em quem conjura, na célula mirada).
     // `em: conjurador` guarda a célula de onde quem lançou saiu (o eco do Piscar); a fase herda as variantes de agora.
     if (REGISTRO_EFEITOS[ef.tipo].fluxo === 'fase' && ef.ref) agendarFase(estado, ator, chaveDoAtor(ctx, ator, ef.ref, estado.tick), ef.em === 'conjurador' ? celulaOcupada(ator) : (alvo ?? mira), ef.duracaoMs);
     // D-125: quem avança sobre um alvo vai até onde ele está agora (ele pode ter andado durante a conjuração).
+    // Marco 40 (13/11/2026, D-161): o retorno de quem conjura guarda a célula de partida (a Investida do Duelista).
+    else if (ehRetorno(ef)) aplicarEfeito(estado, ctx, ator, ef, { id: ator.id, x: partida.x, y: partida.y }, mira, saida);
     else aplicarEfeito(estado, ctx, ator, ef, { id: ator.id, x: ator.x, y: ator.y, ...(desloca && { acaoId }) }, desloca && alvo && alvo !== ator && vivo(alvo) ? celulaOcupada(alvo) : mira, saida);
   }
   // Marco 27 (D-126): o solo amaldiçoado (Necromante) e a runa (Mago) caem sob o alvo e pulsam (combat/solos.ts).

@@ -11,13 +11,16 @@ type Ctx = Pick<ContextoSimulacao, 'conteudo'>;
 /** O id da ultimate de uma etapa (`<ultimate>_N`), ou o próprio id. */
 export function idDoEncaixe(ctx: Ctx, id: string): string {
   if (ctx.conteudo.ultimates.has(id)) return id;
+  // Marco 40 (13/11/2026, D-161): a etapa interna que leva a runa de outra skill (`runaDe`).
+  const de = ctx.conteudo.definicoes.get(id)?.base.runaDe;
+  if (de) return de;
   const m = /^(.+)_\d+$/.exec(id);
   return m?.[1] && ctx.conteudo.ultimates.has(m[1]) ? m[1] : id;
 }
 
 /** A skill tem encaixe de runa? (as exclusivas das classes e as ultimates, com as etapas delas) */
 export function levaRuna(ctx: Ctx, id: string): boolean {
-  return ehDeAlgumaClasse(ctx, id) || ctx.conteudo.ultimates.has(idDoEncaixe(ctx, id));
+  return ehDeAlgumaClasse(ctx, idDoEncaixe(ctx, id)) || ctx.conteudo.ultimates.has(idDoEncaixe(ctx, id));
 }
 
 /** A runa padrão da classe. */

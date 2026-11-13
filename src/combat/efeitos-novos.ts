@@ -12,7 +12,8 @@ import { passivosDe } from '../progression/ganchos-do-portador';
 import { somarCarga } from './carga-ultimate';
 import { encherFuria } from './frenesi';
 import { anotarDeslocamento, aplicarEfeito, imuneADano, sofrerDano, type OrigemDoEfeito } from './efeitos';
-import { arremessar } from './efeitos-instantaneos';
+import { arremessar, avancar, teleportar } from './efeitos-instantaneos';
+import { agendarFase } from './fases';
 import { acumularFuria } from './furia';
 import { chebyshev } from './geometria';
 import { registrarParticipacao } from './participacao';
@@ -41,6 +42,30 @@ export function aplicarInstantaneoNovo(
 ): void {
   const tick = estado.tick;
   switch (tipo) {
+    case 'devolver_absorvido': {
+      // Marco 40 (13/11/2026, D-161): o Contragolpe devolve o que a casca absorveu.
+      const dono = buscarEntidade(estado, origem.id);
+      const guardado = dono?.efeitos.filter((f) => f.tipo === 'guardar_absorvido').reduce((s, f) => s + f.valor, 0) ?? 0;
+      ferir(estado, ctx, alvo, Math.round((guardado * ef.pct) / 100), origem.id, ef.tipo, saida);
+      break;
+    }
+    case 'retornar': {
+      // D-161: volta à célula de onde o atrasado saiu (a Investida do Duelista volta ao ponto de partida).
+      const { x, y } = alvo;
+      if (teleportar(estado, ctx, alvo, { x: origem.x, y: origem.y })) anotarDeslocamento(saida, tick, alvo, x, y, origem, 'teleporte');
+      break;
+    }
+    case 'saltar_ao_alvo': {
+      // D-161: o Ceifador salta junto dos mortos até o alvo e golpeia (a etapa `ref`).
+      const ok = (e: Entidade | undefined): e is Entidade => !!e && vivo(e) && podeFerir(alvo, e, ctx.modo) && chebyshev(e, alvo) <= ef.valor;
+      const selecionado = alvo.alvoSelecionado ? buscarEntidade(estado, alvo.alvoSelecionado) : undefined;
+      const presa = ok(selecionado) ? selecionado : estado.entidades.filter(ok).sort((a, b) => chebyshev(a, alvo) - chebyshev(b, alvo) || (a.id < b.id ? -1 : 1))[0];
+      if (!presa) break;
+      const { x, y } = alvo;
+      if (avancar(estado, ctx, alvo, { x: presa.x, y: presa.y }, ef.valor)) anotarDeslocamento(saida, tick, alvo, x, y, origem, 'avanco');
+      if (ef.ref) agendarFase(estado, alvo, ef.ref, { x: presa.x, y: presa.y }, 0);
+      break;
+    }
     case 'apavorar':
       // Marco 40 (13/11/2026, D-161): só os feridos (abaixo de `pct`% da vida) fogem.
       if (alvo.hp * 100 < alvo.hpMax * ef.pct) aplicarEfeito(estado, ctx, alvo, construirEfeito('aterrorizado', { duracaoMs: ef.duracaoMs }), origem, null, saida);

@@ -82,6 +82,8 @@ export const TIPOS_EFEITO = [
   // Marco 40 (13/11/2026, D-161): o Renascer levanta um aliado caído por perto; e as promessas das leituras de estilo:
   // a próxima magia com área maior, as magias que ecoam e o medo dos feridos.
   'levantar', 'area_ampliada', 'ecoando', 'apavorar', 'explodir_ao_cair',
+  // D-161: o Contragolpe guarda o absorvido e devolve; a Investida volta ao ponto de partida; o Ceifador salta ao alvo.
+  'guardar_absorvido', 'devolver_absorvido', 'retornar', 'saltar_ao_alvo',
 ] as const;
 export type TipoEfeito = (typeof TIPOS_EFEITO)[number];
 
@@ -113,7 +115,7 @@ export type Fluxo = 'atrasado' | 'armadilha' | 'invocar' | 'fase';
 
 export type Periodico = 'dano' | 'cura' | 'recurso';
 export type Instantaneo = 'drenar_invocacao' | 'comandar_mortos' | 'purificar' | 'passo_sombrio' | 'muralha_pedra' | 'campo_cura' | 'campo_veneno' | 'cura' | 'recurso' | 'teleporte' | 'avanco' | 'empurrao' | 'puxao' | 'trocar' | 'dano'
-  | 'invisivel' | 'dissipar' | 'consumir' | 'detonar' | 'arremessar' | 'zerar_recarga' | 'libertar' | 'furia' | 'carga_ultimate' | 'executar' | 'levantar' | 'apavorar';
+  | 'invisivel' | 'dissipar' | 'consumir' | 'detonar' | 'arremessar' | 'zerar_recarga' | 'libertar' | 'furia' | 'carga_ultimate' | 'executar' | 'levantar' | 'apavorar' | 'devolver_absorvido' | 'retornar' | 'saltar_ao_alvo';
 export type BonusDeAtaqueBasico = 'dano' | 'recarga' | 'alcance' | 'alvos';
 
 export interface DefinicaoEfeito {
@@ -361,6 +363,13 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   // Marco 40 (D-161): levanta o aliado caído mais perto, até `valor` células, com `pct` da vida (um por uso).
   area_ampliada: { ...BASE, icone: 'anel', cor: '#5dade2', positivo: true, campos: ['valor'], padrao: { duracaoMs: 8000, valor: 1, pct: 0 }, someAoLancar: 'magico' },
   ecoando: { ...BASE, icone: 'relogio', cor: '#af7ac5', positivo: true, campos: ['pct'], padrao: { duracaoMs: 8000, valor: 0, pct: 40 } },
+  guardar_absorvido: { ...BASE, icone: 'escudo', cor: '#d5dbdb', positivo: true, campos: [], padrao: { duracaoMs: 3500, valor: 0, pct: 0 } },
+  // D-161: `pct`% do que o escudo de quem lançou absorveu, em dano no alvo.
+  devolver_absorvido: instantaneo('explosao', '#e67e22', ['pct'], { duracaoMs: 0, valor: 0, pct: 60 }, 'devolver_absorvido', false),
+  // D-161: no atrasado, quem lançou volta à célula de onde o atrasado saiu.
+  retornar: instantaneo('teleporte', '#85c1e9', [], { duracaoMs: 0, valor: 0, pct: 0 }, 'retornar', true),
+  // D-161: quem usa salta até o alvo selecionado (ou o hostil mais perto) a até `valor` células e lança a etapa `ref` nele.
+  saltar_ao_alvo: instantaneo('investida', '#b03a2e', ['valor'], { duracaoMs: 0, valor: 5, pct: 0 }, 'saltar_ao_alvo', true),
   // D-161: a invocação que explode ao cair (`valor` de dano em volta), enquanto dura.
   explodir_ao_cair: { ...BASE, icone: 'explosao', cor: '#e67e22', positivo: true, campos: ['valor'], padrao: { duracaoMs: 4000, valor: 8, pct: 0 } },
   // D-161: quem está abaixo de `pct`% da vida foge de medo por `duracaoMs`.
