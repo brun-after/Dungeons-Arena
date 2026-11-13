@@ -29,6 +29,7 @@ import { desenharPassivasGerais, desenharSintonia } from './painel-sintonia';
 import { ultimateDe } from '../combat/carga-ultimate';
 import { ID_RUNA_DE_FUSAO } from '../progression/habilidades-personagem';
 import { seletorDeRuna } from './seletor-runa';
+import { listaDeLeituras } from './leituras-skill';
 
 export interface EstadoAbaHabilidades {
   /** Mantido para a mochila (D-067: a escolha agora é direta, pelos botões 1 2 3 4 da carta). */
@@ -173,6 +174,9 @@ export function desenharHabilidades(
       }
       textos.append(ul);
     }
+    // Marco 40 (D-159): o que cada estilo da classe faz nesta skill.
+    const leituras = listaDeLeituras(ctx, j, id);
+    if (leituras) textos.append(leituras);
     if (conhecida && conhecida.caminhos.length > 0) {
       const nomes = conhecida.caminhos.map((c) => ctx.conteudo.caminhos.get(c)?.nome ?? c).join(', ');
       textos.append(el('p', 'detalhe-item', t('habilidades.caminhosEscolhidos', { lista: nomes })));

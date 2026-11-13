@@ -15,9 +15,9 @@ export function ehDaClasse(ctx: Pick<ContextoSimulacao, 'conteudo'>, bolsa: Pick
   return ctx.conteudo.classes.get(bolsa.classeId)?.exclusivas.includes(id) ?? false;
 }
 
-/** A skill é exclusiva de alguma classe (de qualquer uma). */
+/** A skill é exclusiva de alguma classe (de qualquer uma). Marco 40 (D-159): as que saíram do kit também contam. */
 export function ehDeAlgumaClasse(ctx: Pick<ContextoSimulacao, 'conteudo'>, id: string): boolean {
-  return [...ctx.conteudo.classes.values()].some((c) => c.exclusivas.includes(id));
+  return [...ctx.conteudo.classes.values()].some((c) => c.exclusivas.includes(id) || c.saidas.includes(id));
 }
 
 /** Por que a tecla não aceita a skill (null = aceita): 1–2 só de classe, 3–6 só ativas gerais (ou fusões). */

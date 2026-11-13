@@ -55,7 +55,8 @@ describe('sintonia do Mago (D-095)', () => {
     expect(c.lancar('estaca_de_pedra', 0)).toBe(true);
     expect(c.j.encarnacao).toBe('terra');
     expect(magoInamovivel(c.ctx, c.j, 0)).toBe(true);
-    expect(raioAreaDaEncarnacao(c.ctx, c.j, c.hab('nova_glacial'), 0).raioArea).toBe(3);
+    // Marco 40 (D-159): a Nova glacial virou o Círculo rúnico (quadrado de raio 1); a terra soma 1.
+    expect(raioAreaDaEncarnacao(c.ctx, c.j, c.hab('nova_glacial'), 0).raioArea).toBe(2);
   });
 
   it('trocar de elemento em até 3 s funde os dois (Vapor) por 6 s; depois da janela, não', () => {

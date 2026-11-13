@@ -412,7 +412,8 @@ export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   // 12/11/2026 (D-155): o atributo de classe sai; os pontos dele voltam na tela de atualização.
   29: (r) => migrarSemAtributoDeClasse(r),
   // Marco 40 (12/11/2026, D-158): as gerais antigas viram as skills comuns de núcleo; os ranks acima do 1 voltam.
-  30: (r) => migrarSkillsDeNucleo(r, conteudoOficial().legadoDeSkills),
+  // D-159: e as skills de classe que saíram do kit deixam o personagem.
+  30: (r) => migrarSkillsDeNucleo(r, conteudoOficial().legadoDeSkills, conteudoOficial().skillsQueSairam),
 };
 
 /** D-127: toda entidade ganha `dominio: 10` nos atributos (e na base da ficha, quem tem bolsa). */

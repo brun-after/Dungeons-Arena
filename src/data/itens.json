@@ -647,22 +647,6 @@
       "classe": "guerreiro"
     },
     {
-      "id": "livro_corrente",
-      "nome": "Livro: Corrente",
-      "tipo": "livro",
-      "descricao": "Ensina Corrente (rank 1). Só Guerreiro pode ler.",
-      "icone": "livro",
-      "raridade": "raro",
-      "valorBase": 110,
-      "slotPadrao": null,
-      "nivelMinimo": 1,
-      "bonusAtributos": {},
-      "bonusDefesa": 0,
-      "dropavel": true,
-      "ensina": "corrente",
-      "classe": "guerreiro"
-    },
-    {
       "id": "livro_lamina_em_brasa",
       "nome": "Livro: Lâmina em brasa",
       "tipo": "livro",
@@ -724,22 +708,6 @@
       "bonusDefesa": 0,
       "dropavel": true,
       "ensina": "nova_glacial",
-      "classe": "mago"
-    },
-    {
-      "id": "livro_mente_partida",
-      "nome": "Livro: Mente partida",
-      "tipo": "livro",
-      "descricao": "Ensina Mente partida (rank 1). Só Mago pode ler.",
-      "icone": "livro",
-      "raridade": "raro",
-      "valorBase": 110,
-      "slotPadrao": null,
-      "nivelMinimo": 1,
-      "bonusAtributos": {},
-      "bonusDefesa": 0,
-      "dropavel": true,
-      "ensina": "mente_partida",
       "classe": "mago"
     },
     {
@@ -1230,38 +1198,6 @@
       "classe": "necromante"
     },
     {
-      "id": "livro_dizimo_vital",
-      "nome": "Livro: Lanças da escuridão",
-      "tipo": "livro",
-      "descricao": "Ensina Lanças da escuridão (rank 1). Só Necromante pode ler.",
-      "icone": "livro",
-      "raridade": "raro",
-      "valorBase": 110,
-      "slotPadrao": null,
-      "nivelMinimo": 1,
-      "bonusAtributos": {},
-      "bonusDefesa": 0,
-      "dropavel": true,
-      "ensina": "dizimo_vital",
-      "classe": "necromante"
-    },
-    {
-      "id": "livro_garras_do_ossuario",
-      "nome": "Livro: Garras do ossuário",
-      "tipo": "livro",
-      "descricao": "Ensina Garras do ossuário (rank 1). Só Necromante pode ler.",
-      "icone": "livro",
-      "raridade": "raro",
-      "valorBase": 110,
-      "slotPadrao": null,
-      "nivelMinimo": 1,
-      "bonusAtributos": {},
-      "bonusDefesa": 0,
-      "dropavel": true,
-      "ensina": "garras_do_ossuario",
-      "classe": "necromante"
-    },
-    {
       "id": "livro_comando_sepulcral",
       "nome": "Livro: Comando sepulcral",
       "tipo": "livro",
@@ -1342,22 +1278,6 @@
       "classe": "guerreiro"
     },
     {
-      "id": "livro_contragolpe",
-      "nome": "Livro: Contragolpe",
-      "tipo": "livro",
-      "descricao": "Ensina Contragolpe (rank 1). Só Guerreiro pode ler.",
-      "icone": "livro",
-      "raridade": "raro",
-      "valorBase": 110,
-      "slotPadrao": null,
-      "nivelMinimo": 1,
-      "bonusAtributos": {},
-      "bonusDefesa": 0,
-      "dropavel": true,
-      "ensina": "contragolpe",
-      "classe": "guerreiro"
-    },
-    {
       "id": "livro_sobrecarga_arcana",
       "nome": "Livro: Sobrecarga arcana",
       "tipo": "livro",
@@ -1371,22 +1291,6 @@
       "bonusDefesa": 0,
       "dropavel": true,
       "ensina": "sobrecarga_arcana",
-      "classe": "mago"
-    },
-    {
-      "id": "livro_piscar",
-      "nome": "Livro: Piscar",
-      "tipo": "livro",
-      "descricao": "Ensina Piscar (rank 1). Só Mago pode ler.",
-      "icone": "livro",
-      "raridade": "raro",
-      "valorBase": 110,
-      "slotPadrao": null,
-      "nivelMinimo": 1,
-      "bonusAtributos": {},
-      "bonusDefesa": 0,
-      "dropavel": true,
-      "ensina": "piscar",
       "classe": "mago"
     },
     {
@@ -1406,22 +1310,6 @@
       "classe": "mago"
     },
     {
-      "id": "livro_armadilha_de_caca",
-      "nome": "Livro: Armadilha de caça",
-      "tipo": "livro",
-      "descricao": "Ensina Armadilha de caça (rank 1). Só Arqueiro pode ler.",
-      "icone": "livro",
-      "raridade": "raro",
-      "valorBase": 110,
-      "slotPadrao": null,
-      "nivelMinimo": 1,
-      "bonusAtributos": {},
-      "bonusDefesa": 0,
-      "dropavel": true,
-      "ensina": "armadilha_de_caca",
-      "classe": "arqueiro"
-    },
-    {
       "id": "livro_flecha_explosiva",
       "nome": "Livro: Flecha explosiva",
       "tipo": "livro",
@@ -1435,22 +1323,6 @@
       "bonusDefesa": 0,
       "dropavel": true,
       "ensina": "flecha_explosiva",
-      "classe": "arqueiro"
-    },
-    {
-      "id": "livro_rolamento",
-      "nome": "Livro: Rolamento",
-      "tipo": "livro",
-      "descricao": "Ensina Rolamento (rank 1). Só Arqueiro pode ler.",
-      "icone": "livro",
-      "raridade": "raro",
-      "valorBase": 110,
-      "slotPadrao": null,
-      "nivelMinimo": 1,
-      "bonusAtributos": {},
-      "bonusDefesa": 0,
-      "dropavel": true,
-      "ensina": "rolamento",
       "classe": "arqueiro"
     },
     {
@@ -1515,22 +1387,6 @@
       "bonusDefesa": 0,
       "dropavel": true,
       "ensina": "mergulho",
-      "classe": "aventureiro"
-    },
-    {
-      "id": "livro_grito_do_falcao",
-      "nome": "Livro: Grito do falcão",
-      "tipo": "livro",
-      "descricao": "Ensina Grito do falcão (rank 1). Só Aventureiro pode ler.",
-      "icone": "livro",
-      "raridade": "raro",
-      "valorBase": 110,
-      "slotPadrao": null,
-      "nivelMinimo": 1,
-      "bonusAtributos": {},
-      "bonusDefesa": 0,
-      "dropavel": true,
-      "ensina": "grito_do_falcao",
       "classe": "aventureiro"
     },
     {
@@ -1611,22 +1467,6 @@
       "bonusDefesa": 0,
       "dropavel": true,
       "ensina": "retorno_ao_punho",
-      "classe": "aventureiro"
-    },
-    {
-      "id": "livro_presa_dupla",
-      "nome": "Livro: Presa dupla",
-      "tipo": "livro",
-      "descricao": "Ensina Presa dupla (rank 1). Só Aventureiro pode ler.",
-      "icone": "livro",
-      "raridade": "raro",
-      "valorBase": 110,
-      "slotPadrao": null,
-      "nivelMinimo": 1,
-      "bonusAtributos": {},
-      "bonusDefesa": 0,
-      "dropavel": true,
-      "ensina": "presa_dupla",
       "classe": "aventureiro"
     },
     {

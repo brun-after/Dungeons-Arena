@@ -834,6 +834,50 @@
             }
           ]
         }
+      },
+      "papel": "dano",
+      "leituras": {
+        "carniceiro": {
+          "eixo": "area",
+          "texto": "Raio maior; cura por alvo.",
+          "efeitos": [
+            {
+              "tipo": "cura",
+              "valor": 2,
+              "em": "conjurador"
+            }
+          ]
+        },
+        "duelista": {
+          "eixo": "eco",
+          "texto": "Raio menor, mais voltas."
+        },
+        "runico": {
+          "eixo": "alvos",
+          "texto": "Lâminas da runa orbitam e saltam."
+        },
+        "comandante": {
+          "eixo": "grupo",
+          "texto": "Cada volta dá defesa aos aliados no raio.",
+          "efeitos": [
+            {
+              "tipo": "escudo",
+              "valor": 4,
+              "duracaoMs": 3000,
+              "em": "aliados"
+            }
+          ]
+        },
+        "baluarte": {
+          "eixo": "sustento",
+          "texto": "Puxa os inimigos para perto.",
+          "efeitos": [
+            {
+              "tipo": "puxao",
+              "valor": 1
+            }
+          ]
+        }
       }
     },
     {
@@ -995,7 +1039,7 @@
       "id": "lanca_de_gelo",
       "familiaEvolucao": "gelo",
       "grau": "A",
-      "nome": "Lança de gelo",
+      "nome": "Descarga",
       "icone": "gelo",
       "tipoAtaque": "magico",
       "formulaDano": "2d6",
@@ -1044,13 +1088,49 @@
           "eco",
           "longo_alcance"
         ]
+      },
+      "papel": "dano",
+      "leituras": {
+        "artilheiro": {
+          "eixo": "area",
+          "texto": "O feixe alarga."
+        },
+        "ocultista": {
+          "eixo": "eco",
+          "texto": "O feixe ecoa ao terminar."
+        },
+        "encantador": {
+          "eixo": "controle",
+          "texto": "Puxa os atingidos para o centro.",
+          "efeitos": [
+            {
+              "tipo": "puxao",
+              "valor": 1
+            }
+          ]
+        },
+        "guardiao": {
+          "eixo": "grupo",
+          "texto": "O feixe cura os aliados que cruza.",
+          "efeitos": [
+            {
+              "tipo": "cura",
+              "valor": 3,
+              "em": "aliados"
+            }
+          ]
+        },
+        "lamina_runica": {
+          "eixo": "alvos",
+          "texto": "O feixe se divide."
+        }
       }
     },
     {
       "id": "raio_em_cadeia",
       "familiaEvolucao": "raio",
       "grau": "S",
-      "nome": "Raio em cadeia",
+      "nome": "Míssil arcano",
       "icone": "raio",
       "tipoAtaque": "magico",
       "formulaDano": "1d8",
@@ -1058,8 +1138,8 @@
       "alcanceCelulas": 6,
       "tipoArea": "nenhuma",
       "raioArea": 0,
-      "custoRecurso": 5,
-      "recargaMs": 7000,
+      "custoRecurso": 4,
+      "recargaMs": 6000,
       "conjuracaoMs": 875,
       "politicaAlvo": "hostil",
       "politicaImpacto": "projetil",
@@ -1076,9 +1156,7 @@
         "assinatura": "raio_em_cadeia"
       },
       "elemento": "raio",
-      "mods": [
-        "encadear"
-      ],
+      "mods": [],
       "marcos": {
         "2": {
           "texto": "+1 de alcance",
@@ -1103,6 +1181,41 @@
           "eco",
           "longo_alcance"
         ]
+      },
+      "papel": "dano",
+      "leituras": {
+        "artilheiro": {
+          "eixo": "area",
+          "texto": "Estoura em área."
+        },
+        "ocultista": {
+          "eixo": "eco",
+          "texto": "Volta, como eco, e deixa uma maldição."
+        },
+        "encantador": {
+          "eixo": "controle",
+          "texto": "O alvo fica lento e confuso.",
+          "efeitos": [
+            {
+              "tipo": "resfriado",
+              "pct": 20,
+              "duracaoMs": 2000
+            },
+            {
+              "tipo": "confuso",
+              "duracaoMs": 1000,
+              "desde": 5
+            }
+          ]
+        },
+        "guardiao": {
+          "eixo": "sustento",
+          "texto": "Cada acerto dá escudo."
+        },
+        "lamina_runica": {
+          "eixo": "alvos",
+          "texto": "Salta entre alvos."
+        }
       }
     },
     {
@@ -1169,22 +1282,28 @@
       "id": "nova_glacial",
       "familiaEvolucao": "gelo",
       "grau": "S",
-      "nome": "Nova glacial",
+      "nome": "Círculo rúnico",
       "icone": "nova",
       "tipoAtaque": "magico",
       "formulaDano": "1d8",
       "formulaCura": null,
-      "alcanceCelulas": 2,
-      "tipoArea": "ao_redor",
-      "raioArea": 2,
+      "alcanceCelulas": 5,
+      "tipoArea": "quadrado",
+      "raioArea": 1,
       "custoRecurso": 5,
       "recargaMs": 9000,
       "conjuracaoMs": 600,
-      "politicaAlvo": "hostil",
+      "politicaAlvo": "celula",
       "politicaImpacto": "area",
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
-      "efeitos": [],
+      "efeitos": [
+        {
+          "tipo": "resfriado",
+          "pct": 30,
+          "duracaoMs": 3000
+        }
+      ],
       "visual": {
         "cor": "#a0d8ef",
         "conjuracao": "brilho",
@@ -1213,6 +1332,37 @@
           "brutal",
           "eficiente"
         ]
+      },
+      "papel": "controle",
+      "leituras": {
+        "artilheiro": {
+          "eixo": "area",
+          "texto": "Maior e mais lento; explode ao fim."
+        },
+        "ocultista": {
+          "eixo": "eco",
+          "texto": "Pulsa de novo e drena."
+        },
+        "encantador": {
+          "eixo": "controle",
+          "texto": "Quem entra fica encantado; no alto, luta pelo grupo."
+        },
+        "guardiao": {
+          "eixo": "sustento",
+          "texto": "Aliados dentro ganham escudo.",
+          "efeitos": [
+            {
+              "tipo": "escudo",
+              "valor": 4,
+              "duracaoMs": 4000,
+              "em": "aliados"
+            }
+          ]
+        },
+        "lamina_runica": {
+          "eixo": "alvos",
+          "texto": "Lâminas giram dentro do círculo."
+        }
       }
     },
     {
@@ -1292,7 +1442,7 @@
         }
       ],
       "id": "afinidade_elemental",
-      "nome": "Afinidade elemental",
+      "nome": "Encarnar",
       "grau": "S",
       "nivelMinimo": 1,
       "familiaEvolucao": "suporte",
@@ -1338,13 +1488,43 @@
           "fortificado",
           "eco"
         ]
+      },
+      "papel": "defesa",
+      "leituras": {
+        "artilheiro": {
+          "eixo": "area",
+          "texto": "A próxima magia tem área maior."
+        },
+        "ocultista": {
+          "eixo": "eco",
+          "texto": "As magias ecoam enquanto durar."
+        },
+        "encantador": {
+          "eixo": "controle",
+          "texto": "Inimigos próximos hesitam."
+        },
+        "guardiao": {
+          "eixo": "sustento",
+          "texto": "Vira armadura elemental.",
+          "efeitos": [
+            {
+              "tipo": "escudo",
+              "valor": 8,
+              "duracaoMs": 6000
+            }
+          ]
+        },
+        "lamina_runica": {
+          "eixo": "alvos",
+          "texto": "O básico vira lâmina rúnica que salta."
+        }
       }
     },
     {
       "id": "flecha_perfurante",
       "familiaEvolucao": "tecnica",
       "grau": "B",
-      "nome": "Flecha perfurante",
+      "nome": "Tiro carregado",
       "icone": "flecha",
       "tipoAtaque": "fisico",
       "formulaDano": "2d6",
@@ -1399,7 +1579,30 @@
           "eficiente"
         ]
       },
-      "mobilidade": "lenta"
+      "mobilidade": "lenta",
+      "papel": "dano",
+      "leituras": {
+        "atirador": {
+          "eixo": "eco",
+          "texto": "O disparo ecoa num segundo tiro, mais fraco."
+        },
+        "mira_firme": {
+          "eixo": "perfuracao",
+          "texto": "Atravessa a linha inteira."
+        },
+        "inabalavel": {
+          "eixo": "sustento",
+          "texto": "A carga não é interrompida e dá escudo."
+        },
+        "cacador": {
+          "eixo": "marca",
+          "texto": "Marca a presa; as marcas acumulam."
+        },
+        "flecheiro_arcano": {
+          "eixo": "area",
+          "texto": "Estoura em área no fim."
+        }
+      }
     },
     {
       "id": "chuva_de_flechas",
@@ -1456,6 +1659,29 @@
           "brutal",
           "elemental_fogo"
         ]
+      },
+      "papel": "dano",
+      "leituras": {
+        "atirador": {
+          "eixo": "alvos",
+          "texto": "As flechas buscam alvos."
+        },
+        "mira_firme": {
+          "eixo": "perfuracao",
+          "texto": "Vira uma rajada concentrada em linha."
+        },
+        "inabalavel": {
+          "eixo": "sustento",
+          "texto": "Você fica fincado e a chuva dura mais."
+        },
+        "cacador": {
+          "eixo": "marca",
+          "texto": "Deixa armadilhas onde as flechas caem."
+        },
+        "flecheiro_arcano": {
+          "eixo": "area",
+          "texto": "Área maior e lenta; as flechas viram runas."
+        }
       }
     },
     {
@@ -1530,7 +1756,7 @@
       "id": "tiro_em_leque",
       "familiaEvolucao": "tecnica",
       "grau": "A",
-      "nome": "Tiro em leque",
+      "nome": "Saraivada",
       "icone": "leque",
       "tipoAtaque": "fisico",
       "formulaDano": "1d8",
@@ -1579,6 +1805,36 @@
           "eficiente",
           "elemental_gelo"
         ]
+      },
+      "papel": "dano",
+      "leituras": {
+        "atirador": {
+          "eixo": "alvos",
+          "texto": "O leque ricocheteia."
+        },
+        "mira_firme": {
+          "eixo": "perfuracao",
+          "texto": "O leque se fecha num feixe único que perfura."
+        },
+        "inabalavel": {
+          "eixo": "controle",
+          "texto": "O leque empurra.",
+          "efeitos": [
+            {
+              "tipo": "empurrao",
+              "valor": 1,
+              "desde": 5
+            }
+          ]
+        },
+        "cacador": {
+          "eixo": "marca",
+          "texto": "Cada flecha aplica marca."
+        },
+        "flecheiro_arcano": {
+          "eixo": "area",
+          "texto": "O leque explode no fim."
+        }
       }
     },
     {
@@ -1664,7 +1920,7 @@
         }
       ],
       "id": "olho_de_aguia",
-      "nome": "Olho de águia",
+      "nome": "Olho da tempestade",
       "grau": "S",
       "nivelMinimo": 1,
       "familiaEvolucao": "suporte",
@@ -1701,6 +1957,36 @@
           "fortificado",
           "eco"
         ]
+      },
+      "papel": "defesa",
+      "leituras": {
+        "atirador": {
+          "eixo": "alvos",
+          "texto": "Atira rápido nos vizinhos."
+        },
+        "mira_firme": {
+          "eixo": "perfuracao",
+          "texto": "A Mira sobe mais rápido e as flechas atravessam."
+        },
+        "inabalavel": {
+          "eixo": "sustento",
+          "texto": "Imune a interrupção, menos dano recebido.",
+          "efeitos": [
+            {
+              "tipo": "escudo",
+              "valor": 6,
+              "duracaoMs": 6000
+            }
+          ]
+        },
+        "cacador": {
+          "eixo": "marca",
+          "texto": "Revela e marca tudo no raio."
+        },
+        "flecheiro_arcano": {
+          "eixo": "area",
+          "texto": "Cada flecha cai como um relâmpago em área."
+        }
       }
     },
     {
@@ -2913,7 +3199,7 @@
       "id": "dardo_funesto",
       "familiaEvolucao": "sombra",
       "grau": "B",
-      "nome": "Dardo funesto",
+      "nome": "Seta de almas",
       "icone": "runa",
       "tipoAtaque": "magico",
       "formulaDano": "1d4",
@@ -2970,7 +3256,45 @@
       },
       "elemento": "trevas",
       "disparoMs": 2000,
-      "cargas": 2
+      "cargas": 2,
+      "papel": "dano",
+      "leituras": {
+        "senhor_da_horda": {
+          "eixo": "grupo",
+          "texto": "Cada morte solta mais setas."
+        },
+        "mestre_de_elite": {
+          "eixo": "marca",
+          "texto": "A seta manda o elite atacar o alvo."
+        },
+        "pestilento": {
+          "eixo": "marca",
+          "texto": "Deixa praga.",
+          "efeitos": [
+            {
+              "tipo": "envenenado",
+              "valor": 2,
+              "pct": 50,
+              "duracaoMs": 4000
+            }
+          ]
+        },
+        "pacto_de_sangue": {
+          "eixo": "sustento",
+          "texto": "Devolve vida.",
+          "efeitos": [
+            {
+              "tipo": "cura",
+              "valor": 2,
+              "em": "conjurador"
+            }
+          ]
+        },
+        "ceifador": {
+          "eixo": "eco",
+          "texto": "A seta volta."
+        }
+      }
     },
     {
       "id": "dizimo_vital",
@@ -3110,7 +3434,7 @@
         }
       ],
       "id": "comando_sepulcral",
-      "nome": "Comando sepulcral",
+      "nome": "Ordem",
       "grau": "B",
       "nivelMinimo": 1,
       "familiaEvolucao": "sombra",
@@ -3151,13 +3475,36 @@
           "fortificado",
           "amplo"
         ]
+      },
+      "papel": "invocacao",
+      "leituras": {
+        "senhor_da_horda": {
+          "eixo": "invocacao",
+          "texto": "A horda converge e ganha velocidade."
+        },
+        "mestre_de_elite": {
+          "eixo": "invocacao",
+          "texto": "O elite usa o golpe especial."
+        },
+        "pestilento": {
+          "eixo": "marca",
+          "texto": "Os servos espalham contágio ao bater."
+        },
+        "pacto_de_sangue": {
+          "eixo": "sustento",
+          "texto": "Os servos se sacrificam para curar você."
+        },
+        "ceifador": {
+          "eixo": "eco",
+          "texto": "Você salta junto e golpeia."
+        }
       }
     },
     {
       "id": "ceifa_de_almas",
       "familiaEvolucao": "sombra",
       "grau": "B",
-      "nome": "Ceifa de almas",
+      "nome": "Colheita",
       "icone": "espada",
       "tipoAtaque": "magico",
       "formulaDano": "2d6",
@@ -3210,38 +3557,73 @@
           "longo_alcance"
         ]
       },
-      "elemento": "trevas"
+      "elemento": "trevas",
+      "papel": "dano",
+      "leituras": {
+        "senhor_da_horda": {
+          "eixo": "invocacao",
+          "texto": "Cada alma colhida levanta um servo."
+        },
+        "mestre_de_elite": {
+          "eixo": "invocacao",
+          "texto": "As almas fortalecem o elite."
+        },
+        "pestilento": {
+          "eixo": "area",
+          "texto": "A área apodrece o chão."
+        },
+        "pacto_de_sangue": {
+          "eixo": "sustento",
+          "texto": "Cura por alma.",
+          "efeitos": [
+            {
+              "tipo": "cura",
+              "valor": 3,
+              "em": "conjurador"
+            }
+          ]
+        },
+        "ceifador": {
+          "eixo": "eco",
+          "texto": "Duas voltas da foice."
+        }
+      }
     },
     {
       "id": "mortalha_funebre",
       "familiaEvolucao": "sombra",
       "grau": "B",
-      "nome": "Praga sepulcral",
-      "icone": "veneno",
+      "nome": "Véu sombrio",
+      "icone": "escudo",
       "tipoAtaque": "magico",
-      "formulaDano": "1d6",
+      "formulaDano": null,
       "formulaCura": null,
-      "alcanceCelulas": 6,
-      "tipoArea": "quadrado",
-      "raioArea": 1,
-      "custoRecurso": 5,
-      "recargaMs": 11000,
+      "alcanceCelulas": 0,
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "custoRecurso": 4,
+      "recargaMs": 12000,
       "conjuracaoMs": 400,
-      "politicaAlvo": "hostil",
-      "politicaImpacto": "area",
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
       "efeitos": [
         {
-          "tipo": "envenenado",
-          "valor": 3,
-          "pct": 50,
-          "duracaoMs": 5000
+          "tipo": "intercepta",
+          "valor": 5,
+          "duracaoMs": 6000
         },
         {
-          "tipo": "exposto",
-          "pct": 20,
-          "duracaoMs": 5000
+          "tipo": "reflexo",
+          "duracaoMs": 6000,
+          "efeito": {
+            "envenenado": {
+              "valor": 2,
+              "pct": 50,
+              "duracaoMs": 4000
+            }
+          }
         }
       ],
       "visual": {
@@ -3276,7 +3658,30 @@
           "longo_alcance"
         ]
       },
-      "elemento": "trevas"
+      "elemento": "trevas",
+      "papel": "defesa",
+      "leituras": {
+        "senhor_da_horda": {
+          "eixo": "grupo",
+          "texto": "Os servos absorvem dano por você."
+        },
+        "mestre_de_elite": {
+          "eixo": "invocacao",
+          "texto": "O elite vira guarda-costas."
+        },
+        "pestilento": {
+          "eixo": "marca",
+          "texto": "Quem bate é envenenado."
+        },
+        "pacto_de_sangue": {
+          "eixo": "sustento",
+          "texto": "O escudo vira vida."
+        },
+        "ceifador": {
+          "eixo": "eco",
+          "texto": "Ao quebrar, você vira sombra rápida."
+        }
+      }
     },
     {
       "formulaDano": "1d8",
@@ -3311,7 +3716,7 @@
         }
       ],
       "id": "investida_de_escudo",
-      "nome": "Investida de escudo",
+      "nome": "Investida brutal",
       "grau": "B",
       "nivelMinimo": 1,
       "familiaEvolucao": "tecnica",
@@ -3374,6 +3779,43 @@
             {
               "tipo": "atordoar",
               "duracaoMs": 500
+            }
+          ]
+        }
+      },
+      "papel": "mobilidade",
+      "leituras": {
+        "carniceiro": {
+          "eixo": "area",
+          "texto": "Atropela todos na linha."
+        },
+        "duelista": {
+          "eixo": "eco",
+          "texto": "Atravessa e volta ao ponto de partida."
+        },
+        "runico": {
+          "eixo": "alvos",
+          "texto": "Deixa uma trilha da runa no chão."
+        },
+        "comandante": {
+          "eixo": "grupo",
+          "texto": "Aliados ganham velocidade atrás de você.",
+          "efeitos": [
+            {
+              "tipo": "acelerado",
+              "pct": 20,
+              "duracaoMs": 3000,
+              "em": "aliados"
+            }
+          ]
+        },
+        "baluarte": {
+          "eixo": "controle",
+          "texto": "Empurra o alvo contra a parede e o prende.",
+          "efeitos": [
+            {
+              "tipo": "sem_movimento",
+              "duracaoMs": 1500
             }
           ]
         }
@@ -3459,6 +3901,44 @@
             }
           ]
         }
+      },
+      "papel": "controle",
+      "leituras": {
+        "carniceiro": {
+          "eixo": "controle",
+          "texto": "Os feridos (abaixo de 30%) fogem de medo."
+        },
+        "duelista": {
+          "eixo": "eco",
+          "texto": "Desafio: o próximo golpe é crítico.",
+          "efeitos": [
+            {
+              "tipo": "critico_garantido",
+              "duracaoMs": 4000,
+              "em": "conjurador"
+            }
+          ]
+        },
+        "runico": {
+          "eixo": "area",
+          "texto": "O grito carrega o estado da runa em área."
+        },
+        "comandante": {
+          "eixo": "grupo",
+          "texto": "Aura de dano para os aliados."
+        },
+        "baluarte": {
+          "eixo": "sustento",
+          "texto": "Provoca todos em volta e reduz o dano recebido.",
+          "efeitos": [
+            {
+              "tipo": "escudo",
+              "valor": 6,
+              "duracaoMs": 5000,
+              "em": "conjurador"
+            }
+          ]
+        }
       }
     },
     {
@@ -3540,7 +4020,7 @@
       "velocidadeProjetil": 0,
       "efeitos": [],
       "id": "lamina_em_brasa",
-      "nome": "Lâmina em brasa",
+      "nome": "Golpe furioso",
       "grau": "A",
       "nivelMinimo": 1,
       "familiaEvolucao": "fogo",
@@ -3604,40 +4084,71 @@
           "texto": "Sai sem tempo de carga",
           "conjuracaoPct": -100
         }
+      },
+      "papel": "dano",
+      "leituras": {
+        "carniceiro": {
+          "eixo": "area",
+          "texto": "Abre em cone e cura por inimigo atingido.",
+          "efeitos": [
+            {
+              "tipo": "cura",
+              "valor": 3,
+              "em": "conjurador"
+            }
+          ]
+        },
+        "duelista": {
+          "eixo": "eco",
+          "texto": "Vira dois cortes rápidos; o segundo erra menos."
+        },
+        "runico": {
+          "eixo": "alvos",
+          "texto": "A lâmina descarrega a runa, que salta a 1 ou 2 vizinhos."
+        },
+        "comandante": {
+          "eixo": "grupo",
+          "texto": "O impacto dá fúria aos aliados próximos."
+        },
+        "baluarte": {
+          "eixo": "controle",
+          "texto": "Atordoa e provoca o alvo.",
+          "efeitos": [
+            {
+              "tipo": "desafiado",
+              "pct": 15,
+              "duracaoMs": 3000
+            }
+          ]
+        }
       }
     },
     {
-      "formulaDano": null,
+      "formulaDano": "2d8",
       "formulaCura": null,
       "custoRecurso": 3,
-      "recargaMs": 12000,
+      "recargaMs": 10000,
       "conjuracaoMs": 200,
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
       "efeitos": [
         {
-          "tipo": "desafiado",
-          "pct": 15,
-          "duracaoMs": 3000
-        },
-        {
-          "tipo": "furia",
-          "valor": 6,
-          "em": "conjurador"
+          "tipo": "executar",
+          "pct": 20
         }
       ],
       "id": "desafio",
-      "nome": "Desafio",
+      "nome": "Execução",
       "grau": "A",
       "nivelMinimo": 1,
       "familiaEvolucao": "psiquico",
-      "icone": "grito",
+      "icone": "caveira",
       "tipoAtaque": "fisico",
       "politicaAlvo": "hostil",
-      "politicaImpacto": "area",
-      "tipoArea": "ao_redor",
-      "raioArea": 3,
-      "alcanceCelulas": 3,
+      "politicaImpacto": "contato",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 2,
       "visual": {
         "cor": "#e74c3c",
         "impacto": "anel",
@@ -3684,6 +4195,44 @@
             }
           ]
         }
+      },
+      "papel": "dano",
+      "leituras": {
+        "carniceiro": {
+          "eixo": "area",
+          "texto": "Em área; cada morte devolve fúria."
+        },
+        "duelista": {
+          "eixo": "eco",
+          "texto": "Ignora parte da defesa e repete se matar."
+        },
+        "runico": {
+          "eixo": "marca",
+          "texto": "Marca o alvo e salta para o próximo ao matar."
+        },
+        "comandante": {
+          "eixo": "grupo",
+          "texto": "A morte cura o grupo.",
+          "efeitos": [
+            {
+              "tipo": "cura",
+              "valor": 3,
+              "em": "aliados"
+            }
+          ]
+        },
+        "baluarte": {
+          "eixo": "sustento",
+          "texto": "Troca o dano por um escudo enorme.",
+          "efeitos": [
+            {
+              "tipo": "escudo",
+              "valor": 8,
+              "duracaoMs": 5000,
+              "em": "conjurador"
+            }
+          ]
+        }
       }
     },
     {
@@ -3701,7 +4250,7 @@
         }
       ],
       "id": "salto_esmagador",
-      "nome": "Salto esmagador",
+      "nome": "Terremoto",
       "grau": "S",
       "nivelMinimo": 1,
       "familiaEvolucao": "terra",
@@ -3752,6 +4301,44 @@
               "duracaoMs": 1000
             }
           ]
+        }
+      },
+      "papel": "controle",
+      "leituras": {
+        "carniceiro": {
+          "eixo": "area",
+          "texto": "Onda em cone que racha o chão.",
+          "efeitos": [
+            {
+              "tipo": "atolado",
+              "pct": 25,
+              "duracaoMs": 2500
+            }
+          ]
+        },
+        "duelista": {
+          "eixo": "perfuracao",
+          "texto": "Estocada que abre uma fenda em linha."
+        },
+        "runico": {
+          "eixo": "alvos",
+          "texto": "As runas explodem em sequência pela fenda."
+        },
+        "comandante": {
+          "eixo": "grupo",
+          "texto": "Ergue um estandarte: aliados no raio resistem.",
+          "efeitos": [
+            {
+              "tipo": "escudo",
+              "valor": 4,
+              "duracaoMs": 4000,
+              "em": "aliados"
+            }
+          ]
+        },
+        "baluarte": {
+          "eixo": "sustento",
+          "texto": "Ergue uma muralha atrás de você."
         }
       }
     },
@@ -3883,32 +4470,26 @@
       }
     },
     {
-      "formulaDano": null,
+      "formulaDano": "3d6",
       "formulaCura": null,
-      "custoRecurso": 0,
-      "recargaMs": 10000,
-      "conjuracaoMs": 150,
+      "custoRecurso": 6,
+      "recargaMs": 14000,
+      "conjuracaoMs": 1800,
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
-      "efeitos": [
-        {
-          "tipo": "sobrecarga",
-          "pct": 40,
-          "duracaoMs": 10000
-        }
-      ],
+      "efeitos": [],
       "id": "sobrecarga_arcana",
-      "nome": "Sobrecarga arcana",
+      "nome": "Cataclismo",
       "grau": "A",
       "nivelMinimo": 1,
       "familiaEvolucao": "arcana",
-      "icone": "raio",
+      "icone": "cometa",
       "tipoAtaque": "magico",
-      "politicaAlvo": "proprio",
-      "politicaImpacto": "proprio",
-      "tipoArea": "nenhuma",
-      "raioArea": 0,
-      "alcanceCelulas": 0,
+      "politicaAlvo": "celula",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 2,
+      "alcanceCelulas": 6,
       "custoVida": 6,
       "visual": {
         "cor": "#a569bd",
@@ -3941,6 +4522,43 @@
           "controle",
           "eco"
         ]
+      },
+      "papel": "dano",
+      "leituras": {
+        "artilheiro": {
+          "eixo": "area",
+          "texto": "Impacto maior e mais lento."
+        },
+        "ocultista": {
+          "eixo": "eco",
+          "texto": "Deixa um campo que repete o impacto."
+        },
+        "encantador": {
+          "eixo": "controle",
+          "texto": "Atrai e prende.",
+          "efeitos": [
+            {
+              "tipo": "sem_movimento",
+              "duracaoMs": 1500
+            }
+          ]
+        },
+        "guardiao": {
+          "eixo": "sustento",
+          "texto": "Vira uma cúpula que protege o grupo.",
+          "efeitos": [
+            {
+              "tipo": "escudo",
+              "valor": 6,
+              "duracaoMs": 5000,
+              "em": "aliados"
+            }
+          ]
+        },
+        "lamina_runica": {
+          "eixo": "alvos",
+          "texto": "Chuva de lâminas em vários alvos."
+        }
       }
     },
     {
@@ -4075,7 +4693,7 @@
       "velocidadeProjetil": 0,
       "efeitos": [],
       "id": "orbe_instavel",
-      "nome": "Orbe instável",
+      "nome": "Orbe errante",
       "grau": "S",
       "nivelMinimo": 1,
       "familiaEvolucao": "arcana",
@@ -4144,6 +4762,36 @@
           "texto": "Carrega o elemento sagrado",
           "elemento": "sagrado"
         }
+      },
+      "papel": "dano",
+      "leituras": {
+        "artilheiro": {
+          "eixo": "area",
+          "texto": "Orbe maior, que estoura no fim."
+        },
+        "ocultista": {
+          "eixo": "eco",
+          "texto": "O orbe volta e repete."
+        },
+        "encantador": {
+          "eixo": "controle",
+          "texto": "Quem é atingido fica confuso.",
+          "efeitos": [
+            {
+              "tipo": "confuso",
+              "duracaoMs": 1000,
+              "desde": 5
+            }
+          ]
+        },
+        "guardiao": {
+          "eixo": "sustento",
+          "texto": "O orbe gira em volta de você e bloqueia projéteis."
+        },
+        "lamina_runica": {
+          "eixo": "alvos",
+          "texto": "O orbe se divide em lâminas que saltam."
+        }
       }
     },
     {
@@ -4156,12 +4804,17 @@
       "velocidadeProjetil": 0,
       "efeitos": [
         {
-          "tipo": "empurrao",
-          "valor": 1
+          "tipo": "resfriado",
+          "pct": 30,
+          "duracaoMs": 2000
+        },
+        {
+          "tipo": "silenciar",
+          "duracaoMs": 600
         }
       ],
       "id": "flecha_explosiva",
-      "nome": "Flecha explosiva",
+      "nome": "Tiro de supressão",
       "grau": "A",
       "nivelMinimo": 1,
       "escalaCom": "destreza",
@@ -4209,6 +4862,29 @@
           "elemental_fogo",
           "eco"
         ]
+      },
+      "papel": "controle",
+      "leituras": {
+        "atirador": {
+          "eixo": "alvos",
+          "texto": "Os tiros ricocheteiam."
+        },
+        "mira_firme": {
+          "eixo": "perfuracao",
+          "texto": "Atravessa a fila inteira."
+        },
+        "inabalavel": {
+          "eixo": "sustento",
+          "texto": "Você não é interrompido enquanto atira."
+        },
+        "cacador": {
+          "eixo": "marca",
+          "texto": "Marca cada atingido."
+        },
+        "flecheiro_arcano": {
+          "eixo": "area",
+          "texto": "Cobre uma área."
+        }
       }
     },
     {
@@ -4296,7 +4972,7 @@
         }
       ],
       "id": "marca_do_cacador",
-      "nome": "Marca do caçador",
+      "nome": "Flecha marcadora",
       "grau": "A",
       "nivelMinimo": 1,
       "familiaEvolucao": "tecnica",
@@ -4338,6 +5014,36 @@
           "longo_alcance",
           "eco"
         ]
+      },
+      "papel": "controle",
+      "leituras": {
+        "atirador": {
+          "eixo": "alvos",
+          "texto": "Ao morrer o alvo, a marca salta."
+        },
+        "mira_firme": {
+          "eixo": "perfuracao",
+          "texto": "A marca revela e atravessa cobertura."
+        },
+        "inabalavel": {
+          "eixo": "controle",
+          "texto": "O marcado causa menos dano a você.",
+          "efeitos": [
+            {
+              "tipo": "modificar_dano",
+              "pct": 20,
+              "duracaoMs": 6000
+            }
+          ]
+        },
+        "cacador": {
+          "eixo": "marca",
+          "texto": "Acumula até 5 e expõe."
+        },
+        "flecheiro_arcano": {
+          "eixo": "area",
+          "texto": "A marca explode em área."
+        }
       }
     },
     {
@@ -4413,7 +5119,7 @@
         }
       ],
       "id": "explosao_cadaverica",
-      "nome": "Explosão cadavérica",
+      "nome": "Explosão de cadáver",
       "grau": "A",
       "nivelMinimo": 1,
       "familiaEvolucao": "sombra",
@@ -4461,6 +5167,44 @@
           "eficiente",
           "eco"
         ]
+      },
+      "papel": "dano",
+      "leituras": {
+        "senhor_da_horda": {
+          "eixo": "grupo",
+          "texto": "Explode vários em cadeia."
+        },
+        "mestre_de_elite": {
+          "eixo": "invocacao",
+          "texto": "O elite absorve o cadáver e fica mais forte."
+        },
+        "pestilento": {
+          "eixo": "area",
+          "texto": "Vira uma nuvem maior e mais longa.",
+          "efeitos": [
+            {
+              "tipo": "envenenado",
+              "valor": 2,
+              "pct": 50,
+              "duracaoMs": 4000
+            }
+          ]
+        },
+        "pacto_de_sangue": {
+          "eixo": "sustento",
+          "texto": "Cura você pelo total.",
+          "efeitos": [
+            {
+              "tipo": "cura",
+              "valor": 3,
+              "em": "conjurador"
+            }
+          ]
+        },
+        "ceifador": {
+          "eixo": "eco",
+          "texto": "Explode duas vezes."
+        }
       }
     },
     {
@@ -4480,7 +5224,7 @@
         }
       ],
       "id": "levante_profano",
-      "nome": "Levante profano",
+      "nome": "Erguer mortos",
       "grau": "S",
       "nivelMinimo": 1,
       "familiaEvolucao": "sombra",
@@ -4520,10 +5264,33 @@
           "fortificado",
           "eco"
         ]
+      },
+      "papel": "invocacao",
+      "leituras": {
+        "senhor_da_horda": {
+          "eixo": "invocacao",
+          "texto": "Ergue mais servos, menores."
+        },
+        "mestre_de_elite": {
+          "eixo": "invocacao",
+          "texto": "Ergue um só, maior, com golpe próprio."
+        },
+        "pestilento": {
+          "eixo": "area",
+          "texto": "Servos podres que explodem em nuvem."
+        },
+        "pacto_de_sangue": {
+          "eixo": "sustento",
+          "texto": "Custa vida; os servos drenam para você."
+        },
+        "ceifador": {
+          "eixo": "eco",
+          "texto": "Servos rápidos que somem e voltam."
+        }
       }
     },
     {
-      "formulaDano": "2d6+4",
+      "formulaDano": "2d6+3",
       "formulaCura": null,
       "custoRecurso": 3,
       "recargaMs": 4000,
@@ -4537,7 +5304,7 @@
         }
       ],
       "id": "mergulho",
-      "nome": "Mergulho",
+      "nome": "Ataque do companheiro",
       "grau": "B",
       "nivelMinimo": 1,
       "escalaCom": "destreza",
@@ -4584,6 +5351,36 @@
           "eco",
           "longo_alcance"
         ]
+      },
+      "papel": "dano",
+      "leituras": {
+        "mestre_de_feras": {
+          "eixo": "invocacao",
+          "texto": "O segundo companheiro ataca junto."
+        },
+        "batedor": {
+          "eixo": "perfuracao",
+          "texto": "Atravessa uma linha até o alvo."
+        },
+        "implacavel": {
+          "eixo": "eco",
+          "texto": "O ataque se repete."
+        },
+        "sobrevivente": {
+          "eixo": "sustento",
+          "texto": "O companheiro traz cura ao voltar.",
+          "efeitos": [
+            {
+              "tipo": "cura",
+              "valor": 3,
+              "em": "conjurador"
+            }
+          ]
+        },
+        "pergaminhista": {
+          "eixo": "area",
+          "texto": "O espírito da fera estoura em área com o elemento da runa."
+        }
       }
     },
     {
@@ -4660,13 +5457,16 @@
       "velocidadeProjetil": 0,
       "efeitos": [
         {
-          "tipo": "cego",
-          "pct": 50,
-          "duracaoMs": 3000
+          "tipo": "sem_movimento",
+          "duracaoMs": 1000
+        },
+        {
+          "tipo": "puxao",
+          "valor": 2
         }
       ],
       "id": "garras_cegantes",
-      "nome": "Garras cegantes",
+      "nome": "Ordem: Agarrar",
       "grau": "A",
       "nivelMinimo": 1,
       "escalaCom": "destreza",
@@ -4712,6 +5512,36 @@
           "eficiente",
           "eco"
         ]
+      },
+      "papel": "controle",
+      "leituras": {
+        "mestre_de_feras": {
+          "eixo": "invocacao",
+          "texto": "Agarra dois alvos."
+        },
+        "batedor": {
+          "eixo": "perfuracao",
+          "texto": "Arrasta o alvo através dos que estão no caminho."
+        },
+        "implacavel": {
+          "eixo": "eco",
+          "texto": "Agarra de novo ao soltar."
+        },
+        "sobrevivente": {
+          "eixo": "sustento",
+          "texto": "O alvo agarrado causa menos dano.",
+          "efeitos": [
+            {
+              "tipo": "modificar_dano",
+              "pct": 20,
+              "duracaoMs": 4000
+            }
+          ]
+        },
+        "pergaminhista": {
+          "eixo": "area",
+          "texto": "Ao soltar, estoura em área."
+        }
       }
     },
     {
@@ -4724,13 +5554,16 @@
       "velocidadeProjetil": 0,
       "efeitos": [
         {
-          "tipo": "intercepta",
-          "valor": 5,
-          "duracaoMs": 5000
+          "tipo": "armadilha",
+          "valor": 6,
+          "duracaoMs": 30000,
+          "efeito": {
+            "enraizado": 1500
+          }
         }
       ],
       "id": "vigia",
-      "nome": "Vigia",
+      "nome": "Armadilha do explorador",
       "grau": "A",
       "nivelMinimo": 1,
       "escalaCom": "destreza",
@@ -4739,12 +5572,12 @@
       "tags": [
         "falcao"
       ],
-      "icone": "escudo",
-      "politicaAlvo": "proprio",
-      "politicaImpacto": "proprio",
-      "tipoArea": "nenhuma",
+      "icone": "aviso",
+      "politicaAlvo": "celula",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
       "raioArea": 0,
-      "alcanceCelulas": 0,
+      "alcanceCelulas": 4,
       "visual": {
         "cor": "#7fbde8",
         "impacto": "vento",
@@ -4777,6 +5610,29 @@
           "fortificado",
           "eco"
         ]
+      },
+      "papel": "controle",
+      "leituras": {
+        "mestre_de_feras": {
+          "eixo": "invocacao",
+          "texto": "O companheiro atrai inimigos para ela."
+        },
+        "batedor": {
+          "eixo": "alvos",
+          "texto": "Armadilhas em linha."
+        },
+        "implacavel": {
+          "eixo": "eco",
+          "texto": "Arma de novo sozinha uma vez."
+        },
+        "sobrevivente": {
+          "eixo": "sustento",
+          "texto": "Dá escudo ao aliado que pisar."
+        },
+        "pergaminhista": {
+          "eixo": "area",
+          "texto": "Vira um círculo grande do elemento."
+        }
       }
     },
     {
@@ -4789,7 +5645,7 @@
       "velocidadeProjetil": 0,
       "efeitos": [],
       "id": "rasante",
-      "nome": "Rasante",
+      "nome": "Carga montada",
       "grau": "A",
       "nivelMinimo": 1,
       "escalaCom": "destreza",
@@ -4836,30 +5692,57 @@
           "longo_alcance",
           "eco"
         ]
+      },
+      "papel": "dano",
+      "leituras": {
+        "mestre_de_feras": {
+          "eixo": "invocacao",
+          "texto": "O companheiro e as feras do Chamado carregam juntos."
+        },
+        "batedor": {
+          "eixo": "perfuracao",
+          "texto": "Atravessa a linha inteira."
+        },
+        "implacavel": {
+          "eixo": "eco",
+          "texto": "A carga se repete na volta."
+        },
+        "sobrevivente": {
+          "eixo": "sustento",
+          "texto": "Escudo durante a carga.",
+          "efeitos": [
+            {
+              "tipo": "escudo",
+              "valor": 6,
+              "duracaoMs": 4000,
+              "em": "conjurador"
+            }
+          ]
+        },
+        "pergaminhista": {
+          "eixo": "area",
+          "texto": "Deixa um rastro do elemento que estoura."
+        }
       }
     },
     {
-      "formulaDano": "1d6",
+      "formulaDano": null,
       "formulaCura": null,
       "custoRecurso": 5,
-      "recargaMs": 10000,
+      "recargaMs": 16000,
       "conjuracaoMs": 500,
       "interrupcao": "interrompivel",
       "velocidadeProjetil": 0,
       "efeitos": [
         {
-          "tipo": "resfriado",
-          "pct": 30,
-          "duracaoMs": 2000
-        },
-        {
-          "tipo": "sangrando",
-          "valor": 1,
-          "duracaoMs": 3000
+          "tipo": "invocar_temporario",
+          "ref": "lobo_espiritual",
+          "valor": 2,
+          "duracaoMs": 12000
         }
       ],
       "id": "tempestade_de_penas",
-      "nome": "Tempestade de penas",
+      "nome": "Chamado da matilha",
       "grau": "S",
       "nivelMinimo": 1,
       "escalaCom": "destreza",
@@ -4868,12 +5751,12 @@
       "tags": [
         "falcao"
       ],
-      "icone": "redemoinho",
-      "politicaAlvo": "hostil",
-      "politicaImpacto": "area",
-      "tipoArea": "quadrado",
-      "raioArea": 1,
-      "alcanceCelulas": 8,
+      "icone": "invocar",
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 0,
       "visual": {
         "cor": "#d6eaf8",
         "impacto": "vento",
@@ -4901,6 +5784,29 @@
           "eficiente",
           "eco"
         ]
+      },
+      "papel": "invocacao",
+      "leituras": {
+        "mestre_de_feras": {
+          "eixo": "invocacao",
+          "texto": "Mais feras, e duram mais."
+        },
+        "batedor": {
+          "eixo": "perfuracao",
+          "texto": "Feras rápidas que correm em linha e atravessam."
+        },
+        "implacavel": {
+          "eixo": "eco",
+          "texto": "Cada fera que cai volta uma vez."
+        },
+        "sobrevivente": {
+          "eixo": "sustento",
+          "texto": "As feras cercam você e absorvem golpes."
+        },
+        "pergaminhista": {
+          "eixo": "area",
+          "texto": "Uma única fera-espírito grande, do elemento da runa."
+        }
       }
     },
     {
@@ -4913,13 +5819,12 @@
       "velocidadeProjetil": 0,
       "efeitos": [
         {
-          "tipo": "zerar_recarga",
-          "ref": "mergulho",
-          "em": "conjurador"
+          "tipo": "imune_dano",
+          "duracaoMs": 800
         }
       ],
       "id": "retorno_ao_punho",
-      "nome": "Retorno ao punho",
+      "nome": "Instinto de sobrevivência",
       "grau": "A",
       "nivelMinimo": 1,
       "escalaCom": "destreza",
@@ -4929,11 +5834,11 @@
         "falcao"
       ],
       "icone": "cura",
-      "politicaAlvo": "aliado",
-      "politicaImpacto": "contato",
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
       "tipoArea": "nenhuma",
       "raioArea": 0,
-      "alcanceCelulas": 6,
+      "alcanceCelulas": 0,
       "visual": {
         "cor": "#a9dfbf",
         "impacto": "sagrado",
@@ -4965,6 +5870,34 @@
           "controle",
           "eco"
         ]
+      },
+      "papel": "cura",
+      "leituras": {
+        "mestre_de_feras": {
+          "eixo": "invocacao",
+          "texto": "O companheiro recebe o golpe."
+        },
+        "batedor": {
+          "eixo": "perfuracao",
+          "texto": "Dispara para longe."
+        },
+        "implacavel": {
+          "eixo": "eco",
+          "texto": "Contra-ataca o próximo golpe."
+        },
+        "sobrevivente": {
+          "eixo": "sustento",
+          "texto": "Cura grande e imunidade breve.",
+          "efeitos": [
+            {
+              "tipo": "purificar"
+            }
+          ]
+        },
+        "pergaminhista": {
+          "eixo": "area",
+          "texto": "O espírito da fera vira armadura do elemento."
+        }
       }
     },
     {

@@ -746,9 +746,9 @@ test.describe('celular (emulação)', () => {
     await abrir(page);
     const viewport = page.viewportSize();
     const joystick = await page.getByTestId('joystick').boundingBox();
-    // Marco 24: o kit inicial do Aventureiro (2 de classe e a geral) e a ultimate no botão grande.
+    // Marco 24: o kit inicial do Aventureiro (2 de classe e a geral; no marco 40, D-159, Ataque do companheiro e Ordem: agarrar) e a ultimate no botão grande.
     await expect(page.getByTestId('ultimate')).toBeVisible();
-    for (const id of ['mergulho', 'grito_do_falcao', 'cura_sagrado']) {
+    for (const id of ['mergulho', 'garras_cegantes', 'cura_sagrado']) {
       const caixa = await page.getByTestId(`habilidade-${id}`).boundingBox();
       expect(caixa, id).not.toBeNull();
       if (!caixa || !viewport || !joystick) continue;

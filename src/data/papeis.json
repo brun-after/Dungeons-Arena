@@ -3,7 +3,7 @@
   "_doc": "Marco 40 (12/11/2026, D-157): a função secundária de cada papel por elemento, cheia na faixa 10 da sintonia (ou da runa). Os números valem na faixa 10 e caem na proporção da faixa; com `desde`, o efeito só entra a partir daquela faixa, inteiro. `curaPct` é a cura a mais da própria skill. O estado do elemento continua vindo de elementos.json. O papel de invocação ganha as criaturas por elemento na etapa 3.",
   "papeis": {
     "dano": {
-      "fisico": { "efeitos": [{ "tipo": "empurrao", "valor": 1, "desde": 5 }] },
+      "fisico": { "efeitos": [{ "tipo": "exposto", "pct": 10, "duracaoMs": 3000 }, { "tipo": "empurrao", "valor": 1, "desde": 10 }] },
       "trevas": { "efeitos": [{ "tipo": "cura", "valor": 4, "em": "conjurador" }] },
       "sagrado": { "efeitos": [{ "tipo": "cura", "valor": 4, "em": "aliados" }] }
     },

@@ -123,7 +123,8 @@ describe('ajustes das classes (18/10/2026)', () => {
   it('Necromante soma -75 pontos à afinidade de Trevas e a proteção expira sem renovar por onda', () => {
     const c = cena('necromante', 1);
     expect(c.j.bolsa?.hpBase).toBe(62);
-    expect(perfilPara(c.ctx, c.j, c.hab('dardo_funesto')).danoPct).toBe(-65);
+    // Marco 40 (D-159): com a Colheita no lugar das Lanças na barra inicial, o vínculo de Trevas muda (de -65 a -65,5).
+    expect(perfilPara(c.ctx, c.j, c.hab('dardo_funesto')).danoPct).toBe(-65.5);
     expect(protecaoInicial(c.estado, c.ctx, c.j, c.alvo)).toBe(1);
     c.estado.entidades.push(criarEntidade({ id: 'b', tipo: 'inimigo', x: 9, y: 9 }));
     expect(protecaoInicial(c.estado, c.ctx, c.j, c.alvo)).toBe(.9);

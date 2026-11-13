@@ -1,5 +1,5 @@
 {
-  "versao": 5,
+  "versao": 6,
   "classes": [
     {
       "id": "aventureiro",
@@ -35,19 +35,21 @@
       ],
       "exclusivas": [
         "mergulho",
-        "grito_do_falcao",
         "garras_cegantes",
         "vigia",
         "rasante",
         "tempestade_de_penas",
-        "retorno_ao_punho",
-        "presa_dupla"
+        "retorno_ao_punho"
       ],
       "iniciais": [
         "mergulho",
-        "grito_do_falcao"
+        "garras_cegantes"
       ],
-      "geralInicial": "cura_sagrado"
+      "geralInicial": "cura_sagrado",
+      "saidas": [
+        "grito_do_falcao",
+        "presa_dupla"
+      ]
     },
     {
       "id": "guerreiro",
@@ -89,17 +91,19 @@
         "redemoinho",
         "investida_de_escudo",
         "brado",
-        "corrente",
         "lamina_em_brasa",
         "desafio",
-        "salto_esmagador",
-        "contragolpe"
+        "salto_esmagador"
       ],
       "iniciais": [
         "redemoinho",
         "investida_de_escudo"
       ],
-      "geralInicial": "investida_fisico"
+      "geralInicial": "investida_fisico",
+      "saidas": [
+        "corrente",
+        "contragolpe"
+      ]
     },
     {
       "id": "mago",
@@ -141,17 +145,19 @@
         "lanca_de_gelo",
         "raio_em_cadeia",
         "nova_glacial",
-        "mente_partida",
         "afinidade_elemental",
         "sobrecarga_arcana",
-        "piscar",
         "orbe_instavel"
       ],
       "iniciais": [
         "lanca_de_gelo",
         "raio_em_cadeia"
       ],
-      "geralInicial": "projetil_fogo"
+      "geralInicial": "projetil_fogo",
+      "saidas": [
+        "mente_partida",
+        "piscar"
+      ]
     },
     {
       "id": "arqueiro",
@@ -194,17 +200,19 @@
         "flecha_perfurante",
         "chuva_de_flechas",
         "tiro_em_leque",
-        "armadilha_de_caca",
         "olho_de_aguia",
         "flecha_explosiva",
-        "rolamento",
         "marca_do_cacador"
       ],
       "iniciais": [
         "flecha_perfurante",
         "chuva_de_flechas"
       ],
-      "geralInicial": "armadilha_fisico"
+      "geralInicial": "armadilha_fisico",
+      "saidas": [
+        "armadilha_de_caca",
+        "rolamento"
+      ]
     },
     {
       "id": "necromante",
@@ -244,8 +252,6 @@
       ],
       "exclusivas": [
         "dardo_funesto",
-        "dizimo_vital",
-        "garras_do_ossuario",
         "comando_sepulcral",
         "ceifa_de_almas",
         "mortalha_funebre",
@@ -254,9 +260,13 @@
       ],
       "iniciais": [
         "dardo_funesto",
-        "dizimo_vital"
+        "ceifa_de_almas"
       ],
-      "geralInicial": "maldicao_trevas"
+      "geralInicial": "maldicao_trevas",
+      "saidas": [
+        "dizimo_vital",
+        "garras_do_ossuario"
+      ]
     }
   ]
 }

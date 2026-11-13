@@ -110,6 +110,8 @@ export interface Conteudo {
   reinos: Catalogo<Reino>;
   /** Marco 40 (D-158): geral antiga -> skill comum que a substitui (saves, fichas e livros). */
   legadoDeSkills: ReadonlyMap<string, string>;
+  /** Marco 40 (D-159): as skills de classe que saíram do kit (saem do personagem sem devolver ponto). */
+  skillsQueSairam: ReadonlySet<string>;
 }
 
 export interface FontesDeConteudo {
@@ -303,6 +305,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       sinergias: sg.sinergias,
       reinos,
       legadoDeSkills: nu.legado,
+      skillsQueSairam: new Set([...c.classes.values()].flatMap((k) => k.saidas)),
     },
     erros,
   };

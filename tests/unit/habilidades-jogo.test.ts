@@ -307,7 +307,7 @@ describe('progressão de habilidades', () => {
     const bolsa = obter(c.ent('j').bolsa, 'bolsa');
     const raro = obter(CONTEUDO.itens.get('livro_raro'), 'livro raro');
     const gerada = idGerada(4242, 3);
-    for (const id of ['livro_projetil_fogo', 'livro_rolamento', 'livro_redemoinho']) guardarItem(bolsa, obter(CONTEUDO.itens.get(id), id), 2, c.ctx.balance.inventario);
+    for (const id of ['livro_projetil_fogo', 'livro_tiro_em_leque', 'livro_redemoinho']) guardarItem(bolsa, obter(CONTEUDO.itens.get(id), id), 2, c.ctx.balance.inventario);
     guardarItem(bolsa, raro, 1, c.ctx.balance.inventario, gerada);
     const inv = (itemId: string) => obter(bolsa.mochila.find((i) => i.itemId === itemId), itemId).invId;
     bolsa.pontosHabilidade = 6;
@@ -323,8 +323,8 @@ describe('progressão de habilidades', () => {
     terminar();
     expect(bolsa.conhecidas.some((x) => x.id === 'projetil_fogo')).toBe(true);
     // O livro de classe ensina na hora; o de outra classe é recusado sem gastar.
-    c.tick([['j', { t: 'usarItem', invId: inv('livro_rolamento') }]]);
-    expect(bolsa.conhecidas.find((x) => x.id === 'rolamento')).toMatchObject({ rank: 1 });
+    c.tick([['j', { t: 'usarItem', invId: inv('livro_tiro_em_leque') }]]);
+    expect(bolsa.conhecidas.find((x) => x.id === 'tiro_em_leque')).toMatchObject({ rank: 1 });
     c.tick([['j', { t: 'usarItem', invId: inv('livro_redemoinho') }]]);
     expect(c.eventos.at(-1)).toMatchObject({ t: 'itemRecusado', motivo: 'outra_classe' });
     expect(bolsa.mochila.find((i) => i.itemId === 'livro_redemoinho')?.qtd).toBe(2);

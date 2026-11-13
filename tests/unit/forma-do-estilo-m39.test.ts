@@ -81,7 +81,8 @@ describe('forma do estilo, gradual (D-156)', () => {
     expect(hm.multDano).toBeGreaterThan(hp.multDano);
     expect(hm.conjuracaoMs).toBeGreaterThan(hp.conjuracaoMs);
     // Uma skill de outra etiqueta não muda.
-    const outra = obter(['raio_em_cadeia', 'mente_partida', 'bola_de_fogo', 'lanca_de_gelo'].find((id) => !(habilidadeDoAtor(ctx, muito, id)?.tags ?? ['area']).includes('area')));
+    // Marco 40 (D-159): as skills de classe novas seguem a leitura do estilo, não a etiqueta; a Mente partida (que saiu) não.
+    const outra = obter(['mente_partida', 'bola_de_fogo'].find((id) => !(habilidadeDoAtor(ctx, muito, id)?.tags ?? ['area']).includes('area')));
     expect(lerChave(chaveDoAtor(ctx, muito, outra))?.formas ?? []).not.toContainEqual(expect.objectContaining({ mod: 'maior_e_mais_lenta' }));
     // O custo por alvo cresce com a faixa: na faixa f, f/10 do custo cheio.
     const custo = ctx.balance.habilidades.eixos.custoPct.maior_e_mais_lenta;

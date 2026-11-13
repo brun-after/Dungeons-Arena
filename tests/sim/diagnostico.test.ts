@@ -172,11 +172,12 @@ describe('integridade da execução completa', () => {
     // 08/11/2026 (D-141): no atrito, o arqueiro desta semente cai junto com o inimigo da terceira onda (3 abates, só 2
     // ondas concluídas). Marco 39 (12/11/2026, D-148): com o poder base, o caso está no nível 2; com a classe nos estilos
     // e o arqueiro recalibrado (D-155), na semente 25. Marco 40 (D-158): com as gerais iniciais novas, o caso é o do
-    // aventureiro no nível 2, no Difícil, semente 53 (4 abates, só 3 ondas concluídas).
-    const base = simularDiagnostico({ ...configuracao, cenario: 'atrito', classe: 'aventureiro', nivel: 2, dificuldade: 'dificil', semente: 53, intervencao: 'sem_pocoes' });
+    // aventureiro no nível 2, no Difícil, semente 53. Com as skills de classe novas (D-159), no Normal, semente 26
+    // (5 abates, só 4 ondas concluídas).
+    const base = simularDiagnostico({ ...configuracao, cenario: 'atrito', classe: 'aventureiro', nivel: 2, dificuldade: 'normal', semente: 26, intervencao: 'sem_pocoes' });
     expect(base.resultado).toBe('morte');
-    expect(base.abates).toBe(4);
-    expect(base.ondasConcluidas).toBe(3);
+    expect(base.abates).toBe(5);
+    expect(base.ondasConcluidas).toBe(4);
     const controle = simularDiagnostico({ ...base.configuracao, intervencao: 'base' });
     expect(() => { validarAmostras([controle, base], 2); }).not.toThrow();
   });
