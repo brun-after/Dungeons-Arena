@@ -4824,7 +4824,9 @@ mecânica fazia (D-160 listava as aproximações). O pedido foi fazer a mecânic
   uma faixa (`ajustes`: raio, alcance, forma da área, saltos, perfuração, conjuração, dano, recarga, ininterrupta,
   número de invocações, rearmes e escudo de aliado na armadilha) e traz `aoAbater` (aplicado por `combat/ao-abater.ts`
   quando o golpe da skill derruba alguém: em quem abateu, nos aliados em volta ou no hostil mais perto do abatido).
-  Ecos e fases somam; os outros efeitos não se repetem. O que cai no lugar (fase, armadilha, invocação, campo) sempre
+  Os ajustes entram do meio da ponta (faixa 5) e as fases e os efeitos ao abater da faixa 4, para a build espalhada
+  não levar as cinco leituras inteiras com poucos pontos (o simulador de balanceamento mostrou isso). Ecos e fases
+  somam; os outros efeitos não se repetem. O que cai no lugar (fase, armadilha, invocação, campo) sempre
   cabe na skill.
 - **Etapas internas das leituras** (`skills.json`, `leitura_*`), lançadas por `fase`: o estouro em área, o golpe em
   área, a hesitação, o medo, a provocação, a onda da runa, a revelação, o contágio, a detonação, a atração, a armadilha
@@ -4849,5 +4851,5 @@ mecânica fazia (D-160 listava as aproximações). O pedido foi fazer a mecânic
 
 **Ainda aproximado.** Algumas promessas dependem de sistemas que não existem e ficam no mais próximo: a Mortalha do
 Ceifador vira sombra rápida ao subir (não ao quebrar); o Comando do Ceifador dá crítico e pressa em vez do salto junto;
-a Investida do Duelista ecoa e alcança mais, sem voltar ao ponto de partida; o Brado rúnico solta uma onda que só leva o
+a Investida do Duelista ecoa, sem voltar ao ponto de partida; o Brado rúnico solta uma onda que só leva o
 elemento quando a runa entra na etapa; o Contragolpe devolve um golpe fixo, não o absorvido.

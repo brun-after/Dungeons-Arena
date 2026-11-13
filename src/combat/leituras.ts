@@ -54,7 +54,8 @@ export function lerAjustes(l: Leitor, v: unknown, onde: string): AjustesLeitura 
   const o = l.objeto(v, `${onde}.ajustes`);
   for (const k of Object.keys(o)) if (!CAMPOS_AJUSTE.includes(k)) l.erro(`${onde}.ajustes: campo desconhecido "${k}"`);
   const n = (k: string, min: number, max: number) => (o[k] === undefined ? undefined : l.numero(o, k, { min, max }));
-  const a: AjustesLeitura = { desde: n('desde', 1, 10) ?? 1 };
+  // D-161: os ajustes mudam a forma da skill; entram do meio da ponta (faixa 5), salvo quando a leitura diz outra.
+  const a: AjustesLeitura = { desde: n('desde', 1, 10) ?? 5 };
   const raio = n('raio', -3, 3);
   const alcance = n('alcance', -5, 5);
   const saltos = n('saltos', 1, 4);
