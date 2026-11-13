@@ -86,6 +86,8 @@ export const TIPOS_EFEITO = [
   'guardar_absorvido', 'devolver_absorvido', 'retornar', 'saltar_ao_alvo',
   // Marco 40 (13/11/2026, D-162): virar pedra (a reação Fossilizar).
   'petrificado',
+  // Marco 40 (13/11/2026, D-163): resistir ao controle (a Prisão dupla) e o golpe que leva um estado (o Cerco).
+  'firme', 'acerto_carregado',
 ] as const;
 export type TipoEfeito = (typeof TIPOS_EFEITO)[number];
 
@@ -338,6 +340,8 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   dano_direto: instantaneo('runa', '#e74c3c', ['valor'], { duracaoMs: 0, valor: 5, pct: 0 }, 'dano', false),
 
   cego: negativo('olho', '#5b5b6e', ['pct'], { duracaoMs: 3000, valor: 0, pct: 30 }, { erroPct: true }),
+  firme: { ...BASE, icone: 'escudo', cor: '#b7950b', positivo: true, campos: ['pct'], padrao: { duracaoMs: 2000, valor: 0, pct: 100 } },
+  acerto_carregado: { ...BASE, icone: 'pedra', cor: '#8d6e63', positivo: true, campos: [], padrao: { duracaoMs: 3000, valor: 0, pct: 0 }, exige: ['interno'] },
   petrificado: negativo('pedra', '#95a5a6', ['pct'], { duracaoMs: 1500, valor: 0, pct: 50 }, { bloqueiaMovimento: true, bloqueiaAcoes: 'todas', danoRecebido: -1 }),
   aterrorizado: negativo('caveira', '#6c3483', [], { duracaoMs: 1500, valor: 0, pct: 0 }, { bloqueiaAcoes: 'todas', ia: 'foge' }),
   confuso: negativo('estrela', '#c39bd3', [], { duracaoMs: 2000, valor: 0, pct: 0 }, { bloqueiaAcoes: 'todas', ia: 'vaga' }),

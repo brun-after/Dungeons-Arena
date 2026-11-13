@@ -43,6 +43,11 @@ export function formaDoEixo(e: Eixo): FormaId {
   return MOD_DO_EIXO[e];
 }
 
+/** Marco 40 (13/11/2026, D-163): o eixo de uma forma (o inverso de `formaDoEixo`). */
+export function eixoDaForma(f: FormaId): Eixo {
+  return EIXOS.find((e) => MOD_DO_EIXO[e] === f) ?? 'area';
+}
+
 export function ehEixo(v: unknown): v is Eixo {
   return typeof v === 'string' && (EIXOS as readonly string[]).includes(v);
 }

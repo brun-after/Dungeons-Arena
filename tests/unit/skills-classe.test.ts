@@ -41,10 +41,11 @@ describe('skills de classe e ultimates (Grimório v1.2)', () => {
     }
   });
 
-  it(`os ${catalogo.combos.length} combos do Grimório, sem cruzar classes`, () => {
-    expect(CONTEUDO.combos.size).toBe(catalogo.combos.length);
-    const nomes = new Set([...CONTEUDO.combos.values()].map((c) => c.nome));
-    for (const c of catalogo.combos) expect(nomes.has(c.nome), c.nome).toBe(true);
+  // Marco 40 (13/11/2026, D-163): os 48 combos feitos só de skills de uma classe saíram (os assinados ficam no lugar).
+  it('os 119 combos que ficaram do Grimório, sem cruzar classes', () => {
+    expect(CONTEUDO.combos.size).toBe(119);
+    const doCatalogo = new Set(catalogo.combos.map((c) => c.nome));
+    for (const c of CONTEUDO.combos.values()) expect(doCatalogo.has(c.nome), c.nome).toBe(true);
     const dona = new Map(catalogo.classes.flatMap((c) => c.skills.map((s) => [s, c.id] as const)));
     for (const combo of CONTEUDO.combos.values()) {
       const classes = new Set(combo.sequencia.flatMap((s) => dona.get(s) ?? []));

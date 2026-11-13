@@ -48,6 +48,8 @@ import { consumirMira } from './mira';
 import { prepararTiroCheio } from './sintonia-arqueiro';
 import { raioAreaDaEncarnacao } from './encarnacao-efeitos';
 import { comBuffsDeLeitura, ehRetorno } from './buffs-de-leitura';
+import { papelDe } from './combos-papel';
+import { comCombosDoLancamento, fatorDeConjuracaoDoCombo } from './combos-assinados';
 import { quantidadeDeSaltos, saltar } from './saltos';
 import { dispararGanchosDe, passivosDe } from '../progression/ganchos-do-portador';
 import { comCombo, fazerCombo } from './combos';
@@ -337,7 +339,8 @@ export function iniciarAcao(
   const avisoExtra = ladoDoJogador(estado, ator) ? 0 : fatoresDoMundo(estado, ctx).avisoExtraMs;
   // 08/11/2026 (D-141): a skill do guerreiro logo depois do básico carrega (e chega, fora o voo do projétil) mais rápido.
   const pressa = encadeioDoGuerreiro(estado, ctx, ator, hab);
-  const lancamentoTick = estado.tick + ticksDe((hab.conjuracaoMs + avisoExtra) / pressa);
+  // Marco 40 (13/11/2026, D-163): o combo assinado que sai sem conjuração.
+  const lancamentoTick = estado.tick + ticksDe((hab.conjuracaoMs * (ehBasico(ator, hab.id) ? 1 : fatorDeConjuracaoDoCombo(estado, ctx, ator, hab)) + avisoExtra) / pressa);
   const viagem =
     hab.politicaImpacto === 'projetil' ? ticksDe((Math.hypot(mira.x - origem.x, mira.y - origem.y) / hab.velocidadeProjetil) * 1000) : Math.round(vooDoGolpe(estado, ctx, ator, hab, mira) / pressa);
   if (ehBasico(ator, hab.id)) ator.ultimoBasicoTick = estado.tick;
@@ -481,7 +484,10 @@ function lancar(
     return;
   }
   // Marco 40 (13/11/2026, D-161): a área ampliada e o eco (os estados das leituras de estilo) mudam a magia de agora.
-  const hab = comBuffsDeLeitura(ator, daFase ? habilidadeBase : basicoComVariacao(estado, ator, prepararSequencia(estado, ctx, ator, habilidadeBase, acaoId, alvo, mira)), estado.tick);
+  const lida = comBuffsDeLeitura(ator, daFase ? habilidadeBase : basicoComVariacao(estado, ator, prepararSequencia(estado, ctx, ator, habilidadeBase, acaoId, alvo, mira)), estado.tick);
+  // Marco 40 (13/11/2026, D-163): o combo de papel (a skill anterior de um papel, esta de outro) muda esta.
+  const semPapel = daFase || ehBasico(ator, lida.id);
+  const hab = semPapel ? lida : comCombosDoLancamento(estado, ctx, ator, lida, alvo, mira, saida);
   if (hab.formulaDano && !consumirAtaque(ator, acaoId)) return;
   if (tipoEm(ctx.fase, ator.x, ator.y) === 'agua' && !deSuporte(hab)) return;
   // 04/11/2026 (D-132): atacar de longe deixa um pouco lento, mais quanto mais longe está o alvo.
@@ -507,6 +513,7 @@ function lancar(
     // Marco 24 (D-096): a anterior fica para as sinergias de sequência.
     if (ator.ultimaHabilidade) ator.habilidadeAnterior = { id: ator.ultimaHabilidade.id, tick: ator.ultimaHabilidade.tick };
     ator.ultimaHabilidade = { id: hab.id, chave: hab.chave, tick: estado.tick, alvoId: alvo?.id ?? null };
+    if (!semPapel) ator.ultimaDePapel = { id: hab.id, papel: papelDe(hab), tick: estado.tick, alvoId: alvo?.id ?? null, atingidos: 0, abateu: false, alvos: [], miraX: mira.x, miraY: mira.y };
     // Marco 27 (D-126): o tomo de outra classe deixa o próximo básico com o elemento da skill.
     aoUsarSkill(estado, ctx, ator, hab);
     // Marco 22 (D-089): a magia de fogo, gelo ou raio troca a encarnação do Mago.

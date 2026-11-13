@@ -33,7 +33,8 @@ export function ligarFeedbackGrimorio(o: OpcoesFeedbackGrimorio): void {
     if (p) o.numeros.mostrar(texto, 'critico', p.x, p.y, o.agora());
   };
   bus.on('comboFeito', (ev) => {
-    const combo = ctx.conteudo.combos.get(ev.combo);
+    // Marco 40 (D-163): ou um combo de papel.
+    const combo = ctx.conteudo.combos.get(ev.combo) ?? ctx.conteudo.combosDePapel.combos.get(ev.combo) ?? ctx.conteudo.combosAssinados.get(ev.combo);
     if (!combo) return;
     flutuar(ev.alvoId ?? ev.id, t('numero.combo', { nome: combo.nome }));
     if (ev.id === idLocal) hud.registrar(t('log.combo', { nome: combo.nome }));

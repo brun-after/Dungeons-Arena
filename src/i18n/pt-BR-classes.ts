@@ -4,6 +4,10 @@
 export const textosClasses = {
   'efeito.cego': 'Cego',
   'desc.efeito.cego': 'Erra {pct}% dos golpes por {s} s',
+  'efeito.firme': 'Firme',
+  'desc.efeito.firme': 'Por {s} s, o controle recebido dura {pct}% menos',
+  'efeito.acerto_carregado': 'Golpe que prende',
+  'desc.efeito.acerto_carregado': 'Por {s} s, quem leva o golpe fica com o efeito carregado',
   'efeito.petrificado': 'Petrificado',
   'desc.efeito.petrificado': 'Virou pedra: não age nem anda por {s} s, e o dano recebido cai {pct}%',
   'efeito.aterrorizado': 'Aterrorizado',

@@ -175,6 +175,8 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
       dispararGanchosDe(estado, ctx, quemAbateu, 'aoMatar', { outro: e, hab: abate.golpe ?? null }, saida);
       // Marco 40 (13/11/2026, D-161): o que a skill do golpe faz ao abater (as leituras de estilo).
       aplicarAoAbater(estado, ctx, quemAbateu, e, abate.golpe, saida);
+      // Marco 40 (D-163): a skill que abateu conta para o Fôlego (combos de papel).
+      if (quemAbateu.ultimaDePapel && abate.golpe?.id === quemAbateu.ultimaDePapel.id) quemAbateu.ultimaDePapel.abateu = true;
       // Marco 18 (D-070): os drops que só existem nesta situação.
       sortearOrigensRaras(estado, ctx, abate, saida);
     }

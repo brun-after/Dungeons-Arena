@@ -425,6 +425,11 @@ export interface Entidade {
   /** Marco 18: a última habilidade que usou (combos e a Lâmina rúnica). */
   tatica?: MemoriaTatica;
   ultimaHabilidade: { id: string; chave: string; tick: number; alvoId: EntidadeId | null } | null;
+  /**
+   * Marco 40 (13/11/2026, D-163): a última skill (sem o básico) para os combos de papel: o papel dela, o alvo, quantos
+   * inimigos atingiu e se abateu.
+   */
+  ultimaDePapel?: { id: string; papel: string; tick: number; alvoId: EntidadeId | null; atingidos: number; abateu: boolean; alvos: EntidadeId[]; miraX: number; miraY: number };
   /** Marco 18 (D-069): a fase em que o renascer do item já foi usado ('' = disponível). */
   renascerFase: string;
   /** Marco 18 (D-070): a última reação que a entidade sofreu (as origens raras olham ao cair). */
@@ -680,6 +685,7 @@ export function clonarEntidade(e: Entidade): Entidade {
     ...(e.auraFracoes ? { auraFracoes: { ...e.auraFracoes } } : {}),
     ...(e.furia ? { furia: { ...e.furia } } : {}),
     ...(e.reacoesAte ? { reacoesAte: { ...e.reacoesAte } } : {}),
+    ...(e.ultimaDePapel ? { ultimaDePapel: { ...e.ultimaDePapel, alvos: [...e.ultimaDePapel.alvos] } } : {}),
     ...(e.trilhaClasse ? { trilhaClasse: { chaves: { ...e.trilhaClasse.chaves }, degraus: e.trilhaClasse.degraus } } : {}),
     ...(e.mira ? { mira: { ...e.mira } } : {}),
     ...(e.afinidade ? { afinidade: { ...e.afinidade } } : {}),

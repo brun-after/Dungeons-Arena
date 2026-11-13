@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.09 · **Data:** 13/11/2026
+**Versão:** 1.10 · **Data:** 13/11/2026
 
 > **Histórico**
+> - **1.10 (13/11/2026)**: D-163: os combos de papel (17, com o desdobramento pelo eixo) e os 30 combos assinados das classes.
 > - **1.09 (13/11/2026)**: D-162: as reações elementais viram a matriz de 36 pares das 9 pontas (o golpe físico reage), com o intervalo por alvo e o estado petrificado.
 > - **1.08 (13/11/2026)**: D-161: as leituras de estilo, as fusões e as famílias fazem o que o texto promete (ajustes da skill, efeitos ao abater, etapas internas, estados novos), o veículo da classe nas ultimates, o Renascer que levanta, a Vontade contra o controle e as armadilhas postas no campo.
 > - **1.07 (13/11/2026)**: D-160: marco 40, etapa 4 (primeira parte). As 140 ultimates por par de skills dão lugar a 21 famílias pelos papéis do par, com os fios de estilo e de elemento, o par de elementos, a runa no par e as 36 fusões de eixos.
@@ -4892,3 +4893,36 @@ Plasma fere só quem está em volta.
 
 **Consequências.** `tests/unit/reacoes.test.ts` confere que cada par das 9 pontas tem a sua reação e o que as novas fazem
 no golpe. O registro de efeitos passa a 94 tipos.
+
+## D-163 — Marco 40: combos de papel e combos assinados (13/11/2026)
+
+**Contexto.** Os combos eram pares fixos de skills (`combos.json`), sem regra geral: duas skills que combinam pela
+narrativa (prender e bater, curar e proteger) só combinavam se alguém tivesse escrito o par. O Códex do combate pediu
+duas camadas: uma genérica, pelo papel das skills, e uma assinada, seis pares por classe.
+
+**Decisão.**
+- **Combos de papel** (`data/combos-papel.json → combos`, 17): a skill anterior de um papel e a de agora de outro, até
+  `janelaMs` (2,5 s), fecham o combo (Golpe no preso, Prender o ferido, Prisão dupla, Embalo, Bater e sair, Emboscada,
+  Revide, Fôlego, Bênção ofensiva, Sangue por sangue, Vigília, Cuidado, Ataque coordenado, Presa entregue, Cerco, Ritmo,
+  Provocação). O papel vem do núcleo; sem núcleo, dos efeitos da skill (`papelDe`). O básico não entra.
+- **O combo muda a skill de agora** no lançamento (dano, duração do controle, escudos, cura, efeitos a mais) e tudo segue
+  pelo caminho normal do golpe. O que não cabe na skill vai pelos especiais (`combat/combos-especiais.ts`): estender o
+  controle do alvo, deixar o alvo firme depois, prender em volta da chegada, gastar o escudo em dano, curar o mais
+  ferido, invocar junto do preso, o golpe que prende das invocações, devolver custo.
+- **Desdobramento pelo eixo** mais forte da skill de agora (`desdobramentos`, 9): área espalha o bônus, alvos salta,
+  perfuração passa ao de trás, eco repete com 30%, controle dura mais (e passa ao vizinho da faixa 5), sustento vira
+  escudo, marca deixa uma marca, grupo dá parte ao aliado mais perto, invocação faz as criaturas atacarem.
+- **Combos assinados** (`assinados`, 30, seis por classe): pares de skills de classe. Usam os mesmos ajustes das
+  leituras de estilo, efeitos, efeitos em quem a anterior atingiu, especiais e etapas internas agendadas (a saraivada
+  central, o míssil do orbe, o pulso do orbe). Os que saem sem conjuração entram no início da ação. Quando o assinado
+  fecha, o de papel não entra junto.
+- **Estados novos**: `firme` (o controle recebido dura menos, em qualquer um) e `acerto_carregado` (o golpe do portador
+  aplica o efeito carregado).
+- **Memória**: `Entidade.ultimaDePapel` guarda a última skill sem o básico, o papel, o alvo, a mira, quem ela atingiu e
+  se abateu.
+- **Diário**: os 47 combos novos se descobrem; o detalhe diz os papéis ou as duas skills.
+- **Textos ajustados ao que fazem**: Grito de guerra enche a fúria de uma vez; o Escudo de ossos apara os próximos três
+  projéteis; a Sepultura aberta explode os recém-erguidos em volta deles.
+
+**Combos antigos.** Saem de `combos.json` os 48 feitos só de skills de uma classe (167 → 119): os seis assinados de
+cada classe ficam no lugar deles. Ficam os que ligam skills gerais, ou uma geral e uma de classe.

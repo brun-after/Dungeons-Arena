@@ -30,6 +30,9 @@ export function entradasDoDiario(ctx: Pick<ContextoSimulacao, 'conteudo'>): Entr
   const saida: EntradaDoDiario[] = [];
   for (const s of c.interacoes.sinergias) saida.push(e('reacao', s.id));
   for (const id of c.combos.keys()) saida.push(e('combo', id));
+  // Marco 40 (13/11/2026, D-163): os combos de papel também se descobrem.
+  for (const id of c.combosDePapel.combos.keys()) saida.push(e('combo', id));
+  for (const id of c.combosAssinados.keys()) saida.push(e('combo', id));
   for (const s of c.sinergias) saida.push(e('sinergia', s.id));
   for (const lista of c.estilos.values()) for (const s of lista) saida.push(e('estilo', s.id));
   for (const d of c.definicoes.values()) {

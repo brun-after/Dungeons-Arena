@@ -67,7 +67,14 @@ export function descreverEntrada(ctx: Ctx, id: string): DetalheDaEntrada {
     }
     case 'combo': {
       const k = conteudo.combos.get(a);
-      return k ? { nome: k.nome, como: comoFazerCombo(ctx, k), efeito: k.texto } : { nome: a, como: [], efeito: '' };
+      if (k) return { nome: k.nome, como: comoFazerCombo(ctx, k), efeito: k.texto };
+      // Marco 40 (13/11/2026, D-163): o combo de papel diz os dois papéis.
+      const p = conteudo.combosDePapel.combos.get(a);
+      if (p) return { nome: p.nome, como: [t('diario.comboPapel', { antes: t(`papel.${p.antes}` as ChaveTexto), depois: t(`papel.${p.depois}` as ChaveTexto) })], efeito: p.texto };
+      // D-163: o assinado diz as duas skills da classe.
+      const s = conteudo.combosAssinados.get(a);
+      const nome = (id: string) => conteudo.definicoes.get(id)?.base.nome ?? id;
+      return s ? { nome: s.nome, como: [t('diario.comboAssinado', { antes: nome(s.antes), depois: nome(s.depois) })], efeito: s.texto } : { nome: a, como: [], efeito: '' };
     }
     case 'estilo': {
       // Marco 39 (D-147): o estilo desperta quando a ponta dele chega à intensidade do diário.

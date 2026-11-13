@@ -299,6 +299,15 @@ export function aplicarImpacto(
     if (dano > 0 && conjurador !== alvo && hab.tags.includes('falcao')) cargaDaClasse(ctx, conjurador, 'falcao', estado.tick, saida);
     if (cura > 0) cargaPorMomento(ctx, conjurador, 'cura', estado.tick, saida);
   }
+  // Marco 40 (13/11/2026, D-163): o que a skill atingiu conta para os combos de papel; o golpe carregado (o Cerco) pega.
+  const dePapel = conjurador?.ultimaDePapel;
+  if (dePapel && dePapel.id === hab.id && dano > 0 && conjurador !== alvo && !dePapel.alvos.includes(alvo.id)) {
+    dePapel.atingidos += 1;
+    if (dePapel.alvos.length < 10) dePapel.alvos.push(alvo.id);
+  }
+  for (const f of conjurador?.efeitos ?? []) {
+    if (f.tipo === 'acerto_carregado' && f.ateTick > tick && f.interno && dano > 0) aplicarEfeito(estado, ctx, alvo, f.interno, origem, null, saida);
+  }
   // Sinergias (marco 14): as reações do golpe (combat/reacoes.ts), antes dos efeitos da habilidade.
   reagir(estado, ctx, { alvo, conjurador, fonte, origem, danoEfetivo: Math.min(hpAntes, dano), comPotencia }, sinergias, saida);
   // Marco 18: o marcado sai no golpe; o consagrado cura quem acerta.

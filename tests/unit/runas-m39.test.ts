@@ -10,7 +10,7 @@ import { lerComando } from '../../src/arena/protocolo';
 import { ticksDe } from '../../src/core/tempo';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import { criarEstado } from '../../src/core/estado';
-import { fazerCombo } from '../../src/combat/combos';
+import { comCombosDoLancamento } from '../../src/combat/combos-assinados';
 import { registrarUso } from '../../src/progression/vinculo';
 import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 
@@ -91,17 +91,17 @@ describe('runas nas skills de classe (D-151)', () => {
     const g = jogador('guerreiro');
     const alvo = criarInimigo(obter(CONTEUDO.presets.get('goblin')), 'a', 3, 2, ctx.balance);
     estado.entidades.push(g, alvo);
-    const redemoinho = obter(habilidadeDoAtor(ctx, g, 'redemoinho', 0));
+    // Marco 40 (D-163): o par é o do Aríete (Investida brutal e depois Terremoto), um combo assinado.
+    const terremoto = obter(habilidadeDoAtor(ctx, g, 'salto_esmagador', 0));
     const fazer = () => {
-      g.ultimaHabilidade = { id: 'corrente', chave: 'corrente', tick: estado.tick, alvoId: alvo.id };
-      return obter(fazerCombo(estado, ctx, g, redemoinho, alvo, { x: 3, y: 2 }, [])).danoPct;
+      g.ultimaDePapel = { id: 'investida_de_escudo', papel: 'mobilidade', tick: estado.tick, alvoId: alvo.id, atingidos: 0, abateu: false, alvos: [], miraX: 3, miraY: 2 };
+      return comCombosDoLancamento(estado, ctx, g, terremoto, alvo, { x: 3, y: 2 }, []).multDano;
     };
     const mesma = fazer();
-    // A corrente com runa de gelo: as pontas do combo não combinam mais.
-    obter(g.bolsa).conhecidas.push({ id: 'corrente', rank: 1, caminhos: [] });
+    // A investida com runa de gelo: as pontas do combo não combinam mais.
     for (let i = 0; i < 6; i++) registrarUso(ctx, obter(g.bolsa), 'gelo', 0);
-    expect(escolherRuna(ctx, g, 'corrente', 'gelo', 0)).toBe(true);
-    expect(mesma - fazer()).toBeCloseTo(r.parComboPct);
+    expect(escolherRuna(ctx, g, 'investida_de_escudo', 'gelo', 0)).toBe(true);
+    expect(mesma / fazer()).toBeCloseTo(1 + r.parComboPct / 100);
   });
 
   it('o protocolo só aceita runas conhecidas', () => {

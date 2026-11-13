@@ -18,6 +18,7 @@ import nucleosJson from '../data/nucleos.json';
 import { expandirNucleos } from '../combat/nucleos';
 import { ehObjeto } from './validar';
 import combosJson from '../data/combos.json';
+import combosPapelJson from '../data/combos-papel.json';
 import interacoesBuffJson from '../data/interacoes-buff.json';
 import missoesJson from '../data/missoes.json';
 import origensJson from '../data/origens.json';
@@ -58,6 +59,8 @@ import { lerConjuntos, type Conjunto } from '../progression/conjuntos';
 import { lerEstilos, type Estilo } from '../progression/estilos';
 import { lerPapeis, type TabelaDePapeis } from '../combat/papeis';
 import { lerCombos, lerRegrasDeBuff, type Combo, type RegraDeBuff } from '../combat/combos';
+import { lerCombosDePapel, type CombosDePapel } from '../combat/combos-papel';
+import { lerAssinados, type ComboAssinado } from '../combat/combos-assinados';
 import { lerMissoes, lerOrigens, type Missao, type OrigemRara } from '../progression/missoes';
 import { lerForja, type ReceitaDeForja } from '../progression/forja';
 import { lerItens, type Item } from '../progression/itens';
@@ -89,6 +92,10 @@ export interface Conteudo {
   papeis: TabelaDePapeis;
   /** Marco 18 (D-068): os combos de sequência. */
   combos: Catalogo<Combo>;
+  /** Marco 40 (13/11/2026, D-163): os combos de papel e os desdobramentos por eixo. */
+  combosDePapel: CombosDePapel;
+  /** D-163: os combos assinados das classes (seis por classe). */
+  combosAssinados: ReadonlyMap<string, ComboAssinado>;
   /** Marco 18 (camada 6): as regras de buff × habilidade. */
   regrasDeBuff: Catalogo<RegraDeBuff>;
   /** Marco 18 (D-070): missões, origens raras e as receitas da forja. */
@@ -141,6 +148,8 @@ export interface FontesDeConteudo {
   /** Marco 40 (D-158): data/nucleos.json, as skills comuns (opcional: sem ele, o oficial). */
   nucleos?: unknown;
   combos: unknown;
+  /** Marco 40 (D-163): data/combos-papel.json (opcional: sem ele, o oficial). */
+  combosPapel?: unknown;
   interacoesBuff: unknown;
   missoes: unknown;
   origens: unknown;
@@ -179,6 +188,8 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const es = lerEstilos(fontes.estilos);
   const pa = lerPapeis(fontes.papeis ?? papeisJson);
   const cb = lerCombos(fontes.combos);
+  const cp = lerCombosDePapel(fontes.combosPapel ?? combosPapelJson);
+  const ca = lerAssinados(fontes.combosPapel ?? combosPapelJson);
   const rb = lerRegrasDeBuff(fontes.interacoesBuff);
   const mi = lerMissoes(fontes.missoes);
   const og = lerOrigens(fontes.origens);
@@ -186,7 +197,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const tm = lerTemas(fontes.temas, new Set([...p.presets.values()].filter((x) => x.invocacao === null).map((x) => x.id)));
   const af = lerAfinidades(fontes.afinidades);
   const ar = lerArmas(fontes.armas);
-  const erros = [...nu.erros, ...ul.erros, ...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...es.erros, ...pa.erros, ...cb.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
+  const erros = [...nu.erros, ...ul.erros, ...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...es.erros, ...pa.erros, ...cb.erros, ...cp.erros, ...ca.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
   for (const conj of cj.conjuntos.values()) {
     for (const peca of conj.pecas) if (!fo.dados.bases.has(peca)) erros.push(`conjunto ${conj.id}: base desconhecida "${peca}"`);
   }
@@ -240,6 +251,8 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   }
   for (const item of it.itens.values()) if (item.ensina !== null) conferir(`item ${item.id}`, [item.ensina]);
   for (const combo of cb.combos.values()) conferir(`combo ${combo.id}`, combo.sequencia.filter((s) => s !== '@ultimate'));
+  // Marco 40 (D-163): os assinados ligam skills e etapas que existem.
+  for (const k of ca.assinados.values()) conferir(`combo assinado ${k.id}`, [k.antes, k.depois, ...k.fases.map((f) => f.ref)]);
   erros.push(...conferirClassesEUltimates(h.definicoes, c.classes, ul.ultimates, p.presets, it.itens, ul.veiculos));
   erros.push(...si.erros, ...sg.erros);
   for (const s of sg.sinergias) {
@@ -297,6 +310,8 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       estilos: es.estilos,
       papeis: pa.papeis,
       combos: cb.combos,
+      combosDePapel: cp.combosDePapel,
+      combosAssinados: ca.assinados,
       regrasDeBuff: rb.regras,
       missoes: mi.missoes,
       origens: og.origens,

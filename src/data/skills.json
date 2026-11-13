@@ -10309,6 +10309,93 @@
         "som": "golpe",
         "assinatura": "supernova"
       }
+    },
+    {
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 200,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "id": "combo_saraivada_central",
+      "nome": "Saraivada central",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "flecha",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 2,
+      "alcanceCelulas": 12,
+      "interna": true,
+      "visual": {
+        "cor": "#bdc3c7",
+        "impacto": "explosao",
+        "som": "golpe",
+        "assinatura": "supernova"
+      }
+    },
+    {
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 200,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "id": "combo_missil_do_orbe",
+      "nome": "Míssil do orbe",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "raio",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 0,
+      "alcanceCelulas": 12,
+      "interna": true,
+      "visual": {
+        "cor": "#a569bd",
+        "impacto": "explosao",
+        "som": "golpe",
+        "assinatura": "supernova"
+      }
+    },
+    {
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 200,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "id": "combo_pulso_orbe",
+      "nome": "Pulso do orbe",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "explosao",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 1,
+      "alcanceCelulas": 12,
+      "interna": true,
+      "visual": {
+        "cor": "#a569bd",
+        "impacto": "explosao",
+        "som": "golpe",
+        "assinatura": "supernova"
+      }
     }
   ]
 }

@@ -143,7 +143,7 @@ export function armarArmadilha(
 }
 
 /** Células livres ao redor do dono, das mais próximas às mais distantes (até 2), em ordem fixa. */
-function vizinhasLivres(estado: EstadoJogo, ctx: ContextoSimulacao, quem: Entidade, centro: Celula): Celula[] {
+export function vizinhasLivres(estado: EstadoJogo, ctx: ContextoSimulacao, quem: Entidade, centro: Celula): Celula[] {
   const livres: Celula[] = [];
   for (let r = 1; r <= 2; r++) {
     for (let dy = -r; dy <= r; dy++) {

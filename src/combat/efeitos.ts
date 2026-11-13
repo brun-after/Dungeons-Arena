@@ -218,6 +218,9 @@ export function aplicarEfeito(
   ef = escudoComFalcao(ctx, alvo, ef, tick);
   if (ef.tipo === 'aparando') ef = { ...ef, duracaoMs: Math.min(ef.duracaoMs, ctx.balance.tatica.aparoJanelaMaxMs) };
   if (ef.tipo === 'veu_noturno') ef = { ...ef, duracaoMs: Math.min(ef.duracaoMs, ctx.balance.tatica.veuJanelaMaxMs) };
+  // Marco 40 (13/11/2026, D-163): o firme (depois da Prisão dupla) encurta o controle que chega, em quem for.
+  const firme = def.bloqueiaMovimento || def.bloqueiaAcoes !== 'nenhuma' ? alvo.efeitos.find((f) => f.tipo === 'firme' && f.ateTick > tick) : undefined;
+  if (firme) ef = { ...ef, duracaoMs: Math.round(ef.duracaoMs * Math.max(0, 1 - firme.pct / 100)) };
   if (alvo.bolsa && (def.bloqueiaMovimento || def.bloqueiaAcoes !== 'nenhuma')) {
     // Marco 40 (13/11/2026, D-161): a Vontade também resiste ao controle.
     const vontade = tenacidadeDaVontadePct(alvo.atributos, ctx.balance);

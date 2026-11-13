@@ -117,10 +117,10 @@ describe('diário de descobertas', () => {
     const todas = entradasDoDiario(c.ctx);
     expect(todas.length).toBeGreaterThan(150);
     expect(new Set(todas.map((e) => e.id)).size).toBe(todas.length);
-    const evs: EventoSimulacao[] = [{ t: 'comboFeito', tick: 0, id: 'j', combo: 'saraivada', alvoId: null }];
+    const evs: EventoSimulacao[] = [{ t: 'comboFeito', tick: 0, id: 'j', combo: 'chuva_acida', alvoId: null }];
     registrarDescobertas(c.estado, c.ctx, evs, c.eventos);
     registrarDescobertas(c.estado, c.ctx, evs, c.eventos);
-    expect(c.bolsa.diario).toEqual(['combo:saraivada']);
+    expect(c.bolsa.diario).toEqual(['combo:chuva_acida']);
     expect(c.eventos.filter((e) => e.t === 'descoberta')).toHaveLength(1);
   });
 
