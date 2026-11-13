@@ -57,7 +57,7 @@ describe('contabilidade real do combate', () => {
     const j = jogadorTipico(ctx, 'mago', 1), alvo = inimigo(ctx, 'orc', 1, 'i1', 5, 9);
     estado.entidades.push(j, alvo);
     const antes = j.mana, eventos: EventoSimulacao[] = [];
-    expect(iniciarAcao(estado, ctx, j, 'bola_de_fogo', alvo.id, eventos)).toBe(true);
+    expect(iniciarAcao(estado, ctx, j, 'projetil_fogo', alvo.id, eventos)).toBe(true);
     const custo = antes - j.mana;
     expect(custo).toBeGreaterThan(0);
     eventos.push({ t: 'acaoCancelada', tick: 1, acaoId: obter(j.acao).acaoId, atorId: j.id, motivo: 'interrompido' });
@@ -171,11 +171,12 @@ describe('integridade da execução completa', () => {
   it('mantém morte simultânea como derrota sem contar a onda como concluída', () => {
     // 08/11/2026 (D-141): no atrito, o arqueiro desta semente cai junto com o inimigo da terceira onda (3 abates, só 2
     // ondas concluídas). Marco 39 (12/11/2026, D-148): com o poder base, o caso está no nível 2; com a classe nos estilos
-    // e o arqueiro recalibrado (D-155), na semente 25.
-    const base = simularDiagnostico({ ...configuracao, cenario: 'atrito', classe: 'arqueiro', nivel: 2, dificuldade: 'pesadelo', semente: 25, intervencao: 'sem_pocoes' });
+    // e o arqueiro recalibrado (D-155), na semente 25. Marco 40 (D-158): com as gerais iniciais novas, o caso é o do
+    // aventureiro no nível 2, no Difícil, semente 53 (4 abates, só 3 ondas concluídas).
+    const base = simularDiagnostico({ ...configuracao, cenario: 'atrito', classe: 'aventureiro', nivel: 2, dificuldade: 'dificil', semente: 53, intervencao: 'sem_pocoes' });
     expect(base.resultado).toBe('morte');
-    expect(base.abates).toBe(3);
-    expect(base.ondasConcluidas).toBe(2);
+    expect(base.abates).toBe(4);
+    expect(base.ondasConcluidas).toBe(3);
     const controle = simularDiagnostico({ ...base.configuracao, intervencao: 'base' });
     expect(() => { validarAmostras([controle, base], 2); }).not.toThrow();
   });

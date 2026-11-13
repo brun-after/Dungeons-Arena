@@ -164,7 +164,8 @@ describe('efeitos visuais como dado (D-055)', () => {
     // Marco 24: 120 em skills.json (7 internas) e as 140 ultimates com as 155 etapas e a resposta da Riposta ígnea. Marco 24 (D-095): mais as 3 etapas internas das marcas de Domínio.
     // Marco 27: mais 42 básicos de arma (40 armas, o solo amaldiçoado e o bumerangue).
     // 06/11/2026 (D-135): mais 3 dos inimigos novos (pedra, salto, runa).
-    expect(CONTEUDO.habilidades.size).toBe(121 + 140 + 156 + 3 + 42 + 3);
+    // Marco 40 (D-158): mais as 89 skills comuns de núcleo.
+    expect(CONTEUDO.habilidades.size).toBe(121 + 140 + 156 + 3 + 42 + 3 + 89);
     for (const h of CONTEUDO.habilidades.values()) {
       if (h.passiva) continue;
       expect(h.visual).not.toBeNull();

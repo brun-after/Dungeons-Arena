@@ -36,8 +36,9 @@ export function conferirClassesEUltimates(
       if (outra) erros.push(`skill "${id}" exclusiva de ${outra} e de ${c.id}`);
       dona.set(id, c.id);
     }
-    if (c.geralInicial !== null && (!definicoes.has(c.geralInicial) || !definicoes.get(c.geralInicial)?.familiaGeral)) {
-      erros.push(`classe ${c.id}: a geral inicial "${c.geralInicial}" precisa ser uma skill geral`);
+    // Marco 40 (D-158): a geral inicial é uma skill comum de núcleo.
+    if (c.geralInicial !== null && !definicoes.get(c.geralInicial)?.nucleo) {
+      erros.push(`classe ${c.id}: a geral inicial "${c.geralInicial}" precisa ser uma skill comum de núcleo`);
     }
   }
   for (const it of itens.values()) {

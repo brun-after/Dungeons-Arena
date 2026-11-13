@@ -2,7 +2,7 @@
   "versao": 1,
   "estilos": [
     {
-      "id": "artilheiro",
+      "id": "artilheiro", "eixos": ["area", "alvos"],
       "classe": "mago",
       "nome": "Artilheiro arcano",
       "pesos": {
@@ -32,7 +32,6 @@
       ],
       "forma": {
         "mod": "maior_e_mais_lenta",
-        "danoPct": -20,
         "tag": "area"
       },
       "melhorias": [
@@ -48,7 +47,7 @@
       ]
     },
     {
-      "id": "ocultista",
+      "id": "ocultista", "eixos": ["eco", "controle"],
       "classe": "mago",
       "nome": "Ocultista",
       "pesos": {
@@ -70,7 +69,6 @@
       ],
       "forma": {
         "mod": "ecoar",
-        "danoPct": -25,
         "tag": "magico"
       },
       "melhorias": [
@@ -86,7 +84,7 @@
       ]
     },
     {
-      "id": "encantador",
+      "id": "encantador", "eixos": ["controle", "grupo"],
       "classe": "mago",
       "nome": "Encantador",
       "pesos": {
@@ -128,7 +126,7 @@
       ]
     },
     {
-      "id": "guardiao",
+      "id": "guardiao", "eixos": ["sustento", "grupo"],
       "classe": "mago",
       "nome": "Guardião arcano",
       "pesos": {
@@ -161,7 +159,7 @@
       ]
     },
     {
-      "id": "lamina_runica",
+      "id": "lamina_runica", "eixos": ["alvos", "perfuracao"],
       "classe": "mago",
       "nome": "Lâmina rúnica",
       "pesos": {
@@ -186,7 +184,6 @@
       ],
       "forma": {
         "mod": "encadear",
-        "danoPct": -15,
         "tag": "contato"
       },
       "melhorias": [
@@ -202,7 +199,7 @@
       ]
     },
     {
-      "id": "atirador",
+      "id": "atirador", "eixos": ["alvos", "eco"],
       "classe": "arqueiro",
       "nome": "Atirador",
       "pesos": {
@@ -232,7 +229,6 @@
       ],
       "forma": {
         "mod": "encadear",
-        "danoPct": -15,
         "tag": "projetil"
       },
       "melhorias": [
@@ -248,7 +244,7 @@
       ]
     },
     {
-      "id": "mira_firme",
+      "id": "mira_firme", "eixos": ["perfuracao", "marca"],
       "classe": "arqueiro",
       "nome": "Mira firme",
       "pesos": {
@@ -276,7 +272,6 @@
       ],
       "forma": {
         "mod": "atravessar",
-        "danoPct": -8,
         "tag": "projetil"
       },
       "melhorias": [
@@ -291,7 +286,7 @@
       ]
     },
     {
-      "id": "inabalavel",
+      "id": "inabalavel", "eixos": ["sustento", "controle"],
       "classe": "arqueiro",
       "nome": "Inabalável",
       "pesos": {
@@ -324,7 +319,7 @@
       ]
     },
     {
-      "id": "cacador",
+      "id": "cacador", "eixos": ["marca", "alvos"],
       "classe": "arqueiro",
       "nome": "Caçador",
       "pesos": {
@@ -364,7 +359,7 @@
       ]
     },
     {
-      "id": "flecheiro_arcano",
+      "id": "flecheiro_arcano", "eixos": ["area", "perfuracao"],
       "classe": "arqueiro",
       "nome": "Flecheiro arcano",
       "pesos": {
@@ -389,7 +384,6 @@
       ],
       "forma": {
         "mod": "maior_e_mais_lenta",
-        "danoPct": -20,
         "tag": "area"
       },
       "melhorias": [
@@ -406,7 +400,7 @@
       ]
     },
     {
-      "id": "carniceiro",
+      "id": "carniceiro", "eixos": ["area", "sustento"],
       "classe": "guerreiro",
       "nome": "Carniceiro",
       "pesos": {
@@ -431,7 +425,6 @@
       ],
       "forma": {
         "mod": "maior_e_mais_lenta",
-        "danoPct": -20,
         "tag": "area"
       },
       "melhorias": [
@@ -452,7 +445,7 @@
       ]
     },
     {
-      "id": "duelista",
+      "id": "duelista", "eixos": ["eco", "perfuracao"],
       "classe": "guerreiro",
       "nome": "Duelista",
       "pesos": {
@@ -477,7 +470,6 @@
       ],
       "forma": {
         "mod": "ecoar",
-        "danoPct": -25,
         "tag": "contato"
       },
       "melhorias": [
@@ -488,7 +480,7 @@
       ]
     },
     {
-      "id": "runico",
+      "id": "runico", "eixos": ["alvos", "area"],
       "classe": "guerreiro",
       "nome": "Rúnico",
       "pesos": {
@@ -519,7 +511,6 @@
       ],
       "forma": {
         "mod": "encadear",
-        "danoPct": -15,
         "tag": "contato"
       },
       "melhorias": [
@@ -539,7 +530,7 @@
       ]
     },
     {
-      "id": "comandante",
+      "id": "comandante", "eixos": ["grupo", "sustento"],
       "classe": "guerreiro",
       "nome": "Comandante",
       "pesos": {
@@ -577,7 +568,7 @@
       ]
     },
     {
-      "id": "baluarte",
+      "id": "baluarte", "eixos": ["controle", "sustento"],
       "classe": "guerreiro",
       "nome": "Baluarte",
       "pesos": {
@@ -615,7 +606,7 @@
       ]
     },
     {
-      "id": "senhor_da_horda",
+      "id": "senhor_da_horda", "eixos": ["invocacao", "grupo"],
       "classe": "necromante",
       "nome": "Senhor da Horda",
       "pesos": {
@@ -654,7 +645,7 @@
       ]
     },
     {
-      "id": "mestre_de_elite",
+      "id": "mestre_de_elite", "eixos": ["invocacao", "marca"],
       "classe": "necromante",
       "nome": "Mestre de Elite",
       "pesos": {
@@ -686,7 +677,7 @@
       ]
     },
     {
-      "id": "pestilento",
+      "id": "pestilento", "eixos": ["area", "marca"],
       "classe": "necromante",
       "nome": "Pestilento",
       "pesos": {
@@ -716,7 +707,6 @@
       ],
       "forma": {
         "mod": "maior_e_mais_lenta",
-        "danoPct": -20,
         "tag": "area"
       },
       "melhorias": [
@@ -733,7 +723,7 @@
       ]
     },
     {
-      "id": "pacto_de_sangue",
+      "id": "pacto_de_sangue", "eixos": ["sustento", "eco"],
       "classe": "necromante",
       "nome": "Pacto de Sangue",
       "pesos": {
@@ -768,7 +758,7 @@
       ]
     },
     {
-      "id": "ceifador",
+      "id": "ceifador", "eixos": ["eco", "area"],
       "classe": "necromante",
       "nome": "Ceifador",
       "pesos": {
@@ -789,8 +779,7 @@
         }
       ],
       "forma": {
-        "mod": "ecoar",
-        "danoPct": -25
+        "mod": "ecoar"
       },
       "melhorias": [
         {
@@ -804,7 +793,7 @@
       ]
     },
     {
-      "id": "mestre_de_feras",
+      "id": "mestre_de_feras", "eixos": ["invocacao", "alvos"],
       "classe": "aventureiro",
       "nome": "Mestre de Feras",
       "pesos": {
@@ -836,7 +825,7 @@
       ]
     },
     {
-      "id": "batedor",
+      "id": "batedor", "eixos": ["perfuracao", "alvos"],
       "classe": "aventureiro",
       "nome": "Batedor",
       "pesos": {
@@ -858,7 +847,6 @@
       ],
       "forma": {
         "mod": "atravessar",
-        "danoPct": -8,
         "tag": "projetil"
       },
       "melhorias": [
@@ -873,7 +861,7 @@
       ]
     },
     {
-      "id": "implacavel",
+      "id": "implacavel", "eixos": ["eco", "marca"],
       "classe": "aventureiro",
       "nome": "Implacável",
       "pesos": {
@@ -900,7 +888,6 @@
       ],
       "forma": {
         "mod": "ecoar",
-        "danoPct": -25,
         "tag": "contato"
       },
       "melhorias": [
@@ -911,7 +898,7 @@
       ]
     },
     {
-      "id": "sobrevivente",
+      "id": "sobrevivente", "eixos": ["sustento", "controle"],
       "classe": "aventureiro",
       "nome": "Sobrevivente",
       "pesos": {
@@ -939,7 +926,7 @@
       ]
     },
     {
-      "id": "pergaminhista",
+      "id": "pergaminhista", "eixos": ["area", "invocacao"],
       "classe": "aventureiro",
       "nome": "Pergaminhista",
       "pesos": {
@@ -961,7 +948,6 @@
       ],
       "forma": {
         "mod": "maior_e_mais_lenta",
-        "danoPct": -20,
         "tag": "area"
       },
       "melhorias": [

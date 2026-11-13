@@ -8,8 +8,8 @@ import type { Atributos, Bolsa } from '../entities/entidade';
 import { t, type ChaveTexto } from '../i18n';
 import { degrausDaPonta, pontaConquistada, trilhaDoRadar, valorDaMelhoria } from '../progression/dominio';
 import { areaDaForma, ecoDaForma, faixaDaForma, perfuracaoDaForma, saltosDaForma } from '../combat/forma-do-estilo';
-import type { Modificador } from '../combat/habilidades';
-import { radarDe, type ComponenteDeEstilo, type Estilo, type FormaDoEstilo, type MelhoriaDeClasse, type RadarDeEstilos } from '../progression/estilos';
+import { formaDoEixo, type FormaId } from '../combat/eixos';
+import { radarDe, type ComponenteDeEstilo, type Estilo, type MelhoriaDeClasse, type RadarDeEstilos } from '../progression/estilos';
 import type { NomeAtributo } from '../progression/itens';
 
 const SVG = 'http://www.w3.org/2000/svg';
@@ -87,9 +87,20 @@ function linhaDaClasse(ctx: CtxPainel, e: Estilo, intensidade: number): string {
   return `${t('estilos.classe', { d, itens })} ${proximo}`;
 }
 
-/** D-156: o que a forma faz agora, na faixa. */
-function efeitoDaForma(mod: Modificador, faixa: number): string {
+/** D-156: o que a forma faz agora, na faixa. Marco 40 (D-157): também as cinco formas novas. */
+function efeitoDaForma(ctx: CtxPainel, mod: FormaId, faixa: number): string {
+  const r = ctx.balance.habilidades.eixos;
   switch (mod) {
+    case 'controle':
+      return t('estilos.formaControle', { pct: Math.round(r.controle.duracaoPorFaixaPct * faixa), viz: faixa >= r.controle.vizinhoDesde ? t('estilos.formaControleVizinho') : '' });
+    case 'sustento':
+      return t('estilos.formaSustento', { pct: Math.round(r.sustento.fracaoPorFaixaPct * faixa) });
+    case 'marca':
+      return t('estilos.formaMarca', { max: r.marca.max, pct: Math.round(r.marca.pctPorMarcaMax * faixa) / 10 });
+    case 'grupo':
+      return t('estilos.formaGrupo', { pct: Math.round(r.grupo.fracaoPorFaixaPct * faixa), dano: Math.round(r.grupo.danoPorFaixaPct * faixa) });
+    case 'invocacao':
+      return t('estilos.formaInvocacao', { pct: Math.round(r.invocacao.duracaoPorFaixaPct * faixa) });
     case 'ecoar':
       return t('estilos.formaEco', { pct: Math.round(ecoDaForma(faixa) * 100) });
     case 'encadear': {
@@ -106,14 +117,18 @@ function efeitoDaForma(mod: Modificador, faixa: number): string {
 }
 
 /** D-156: a linha da forma, com o medidor de 10 faixas. */
-function linhaDaForma(ctx: CtxPainel, forma: FormaDoEstilo, intensidade: number): HTMLElement {
+function linhaDaForma(ctx: CtxPainel, estilo: Estilo, intensidade: number): HTMLElement {
   const r = ctx.balance.estilos;
   const faixa = faixaDaForma(intensidade, r.formaInicioPct / 100, r.formaPlenaPct / 100);
-  const alvo = forma.tag ? t('estilos.formaTag', { tag: t(`tag.${forma.tag}` as ChaveTexto) }) : t('estilos.formaTodas');
-  const mod = t(`forma.mod.${forma.mod}` as ChaveTexto);
+  // Marco 40 (D-157): a forma é a do eixo principal; o secundário vale na metade nas skills sem o principal.
+  const [principal, secundario] = estilo.eixos;
+  const forma = formaDoEixo(principal);
+  const custo = -ctx.balance.habilidades.eixos.custoPct[forma];
+  const alvo = t('estilos.formaEixos', { eixo: t(`eixo.${principal}` as ChaveTexto), sec: t(`eixo.${secundario}` as ChaveTexto) });
+  const mod = t(`forma.mod.${forma}` as ChaveTexto);
   const texto = faixa > 0
-    ? t('estilos.formaAtiva', { faixa, mod, alvo, agora: efeitoDaForma(forma.mod, faixa), dano: Math.round((-forma.danoPct * faixa) / 10) })
-    : t('estilos.forma', { mod, alvo, inicio: r.formaInicioPct, plena: r.formaPlenaPct, dano: -forma.danoPct });
+    ? t('estilos.formaAtiva', { faixa, mod, alvo, agora: efeitoDaForma(ctx, forma, faixa), dano: Math.round((custo * faixa) / 10) })
+    : t('estilos.forma', { mod, alvo, inicio: r.formaInicioPct, plena: r.formaPlenaPct, dano: custo });
   const div = el('div', faixa > 0 ? 'estilo-forma acesa' : 'estilo-forma');
   div.dataset.forma = String(faixa);
   div.style.setProperty('--forma', String(faixa / 10));
@@ -149,7 +164,7 @@ export function painelDeEstilos(ctx: CtxPainel, bolsa: Bolsa, efetivos: Atributo
     li.append(el('div', 'estilo-efeitos', efeitos.join(' · ')), el('div', 'estilo-mecanica', e.texto));
     if (e.melhorias.length > 0) li.append(el('div', 'estilo-classe', linhaDaClasse(ctx, e, pontaConquistada(radar, k))));
     // Marco 39 (D-156): a forma do estilo, que aparece com 10% e cresce em faixas até 100% (o medidor enche).
-    if (e.forma) li.append(linhaDaForma(ctx, e.forma, i));
+    li.append(linhaDaForma(ctx, e, i));
     lista.append(li);
   });
   painel.append(lista);

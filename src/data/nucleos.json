@@ -1,0 +1,2962 @@
+{
+ "versao": 1,
+ "descricao": "Marco 40 (12/11/2026, D-158): os 20 núcleos e as 89 skills comuns (id = núcleo_elemento).",
+ "nucleos": [
+  {
+   "id": "projetil",
+   "papel": "dano",
+   "eixos": [
+    "alvos",
+    "perfuracao",
+    "eco",
+    "marca",
+    "area"
+   ],
+   "base": {
+    "tipoAtaque": "magico",
+    "formulaDano": "1d8",
+    "formulaCura": null,
+    "alcanceCelulas": 6,
+    "tipoArea": "nenhuma",
+    "raioArea": 0,
+    "custoRecurso": 3,
+    "recargaMs": 4000,
+    "conjuracaoMs": 600,
+    "politicaAlvo": "hostil",
+    "politicaImpacto": "projetil",
+    "interrupcao": "interrompivel",
+    "velocidadeProjetil": 12,
+    "efeitos": [],
+    "grau": "B",
+    "mobilidade": "lenta",
+    "marcos": {
+     "2": {
+      "texto": "+1 de alcance",
+      "alcance": 1
+     },
+     "4": {
+      "texto": "Custa 20% menos",
+      "custoPct": -20
+     }
+    },
+    "evolucoes": {
+     "3": [
+      "brutal",
+      "eficiente"
+     ],
+     "5": [
+      "perfurante",
+      "eco"
+     ]
+    }
+   },
+   "variantes": [
+    {
+     "elemento": "fogo",
+     "nome": "Bola de fogo",
+     "icone": "cometa",
+     "visual": {
+      "cor": "#ff7b39",
+      "conjuracao": "chamas",
+      "impacto": "explosao",
+      "som": "fogo",
+      "viagem": "brasas",
+      "assinatura": "bola_de_fogo_projetil",
+      "variante": "brasas"
+     }
+    },
+    {
+     "elemento": "gelo",
+     "nome": "Lança de gelo",
+     "icone": "gelo",
+     "visual": {
+      "cor": "#74b9ff",
+      "conjuracao": "cristais",
+      "impacto": "cristais",
+      "som": "gelo",
+      "viagem": "cristais",
+      "assinatura": "estilhaco_de_gelo"
+     },
+     "sobre": {
+      "velocidadeProjetil": 16
+     }
+    },
+    {
+     "elemento": "raio",
+     "nome": "Dardo voltaico",
+     "icone": "raio",
+     "visual": {
+      "cor": "#f7dc6f",
+      "conjuracao": "relampago",
+      "impacto": "raio",
+      "som": "raio",
+      "viagem": "relampago",
+      "assinatura": "relampago"
+     },
+     "sobre": {
+      "velocidadeProjetil": 20,
+      "formulaDano": "1d6",
+      "recargaMs": 3000
+     }
+    },
+    {
+     "elemento": "trevas",
+     "nome": "Seta sombria",
+     "icone": "caveira",
+     "visual": {
+      "cor": "#765b9e",
+      "conjuracao": "sombra",
+      "impacto": "sombra",
+      "som": "trevas",
+      "viagem": "sombra",
+      "assinatura": "golpe_sombrio"
+     },
+     "sobre": {
+      "velocidadeProjetil": 8,
+      "alcanceCelulas": 7
+     }
+    },
+    {
+     "elemento": "fisico",
+     "nome": "Lâmina arremessada",
+     "icone": "espada",
+     "visual": {
+      "cor": "#d5d8dc",
+      "conjuracao": "corte",
+      "impacto": "corte",
+      "som": "lamina",
+      "viagem": "esteira",
+      "assinatura": "arma_bumerangue",
+      "projetil": "flecha"
+     },
+     "sobre": {
+      "alcanceCelulas": 5,
+      "tipoAtaque": "fisico"
+     }
+    }
+   ]
+  },
+  {
+   "id": "explosao",
+   "papel": "dano",
+   "eixos": [
+    "area",
+    "eco",
+    "controle",
+    "marca"
+   ],
+   "base": {
+    "tipoAtaque": "magico",
+    "formulaDano": "2d6",
+    "formulaCura": null,
+    "alcanceCelulas": 6,
+    "tipoArea": "quadrado",
+    "raioArea": 1,
+    "custoRecurso": 4,
+    "recargaMs": 7000,
+    "conjuracaoMs": 900,
+    "politicaAlvo": "celula",
+    "politicaImpacto": "area",
+    "interrupcao": "interrompivel",
+    "velocidadeProjetil": 0,
+    "efeitos": [],
+    "grau": "A",
+    "mobilidade": "lenta",
+    "marcos": {
+     "2": {
+      "texto": "+1 de alcance",
+      "alcance": 1
+     },
+     "4": {
+      "texto": "Custa 20% menos",
+      "custoPct": -20
+     }
+    },
+    "evolucoes": {
+     "3": [
+      "amplo",
+      "eficiente"
+     ],
+     "5": [
+      "eco",
+      "brutal"
+     ]
+    }
+   },
+   "variantes": [
+    {
+     "elemento": "fogo",
+     "nome": "Estouro de brasas",
+     "icone": "cometa",
+     "visual": {
+      "cor": "#ff7b39",
+      "conjuracao": "chamas",
+      "impacto": "explosao",
+      "som": "fogo",
+      "camera": "forte",
+      "assinatura": "explosao_de_fogo",
+      "variante": "brasas"
+     }
+    },
+    {
+     "elemento": "raio",
+     "nome": "Trovão",
+     "icone": "raio",
+     "visual": {
+      "cor": "#f7dc6f",
+      "conjuracao": "relampago",
+      "impacto": "raio",
+      "som": "raio",
+      "camera": "leve",
+      "assinatura": "mergulho_do_trovao"
+     },
+     "sobre": {
+      "conjuracaoMs": 1100,
+      "formulaDano": "2d8"
+     }
+    },
+    {
+     "elemento": "psiquico",
+     "nome": "Onda mental",
+     "icone": "runa",
+     "visual": {
+      "cor": "#c39bd3",
+      "conjuracao": "runas",
+      "impacto": "estrelas",
+      "som": "psiquico",
+      "assinatura": "mente_partida"
+     }
+    },
+    {
+     "elemento": "sagrado",
+     "nome": "Clarão",
+     "icone": "estrela",
+     "visual": {
+      "cor": "#f7e9a0",
+      "conjuracao": "sagrado",
+      "impacto": "sagrado",
+      "som": "sagrado",
+      "assinatura": "chuva_de_estrelas"
+     }
+    },
+    {
+     "elemento": "fisico",
+     "nome": "Abalo",
+     "icone": "pedra",
+     "visual": {
+      "cor": "#d5d8dc",
+      "conjuracao": "corte",
+      "impacto": "pedra",
+      "som": "lamina",
+      "camera": "leve",
+      "assinatura": "abalo_sismico"
+     },
+     "sobre": {
+      "alcanceCelulas": 5,
+      "tipoAtaque": "fisico"
+     }
+    }
+   ]
+  },
+  {
+   "id": "feixe",
+   "papel": "dano",
+   "eixos": [
+    "perfuracao",
+    "alvos",
+    "eco",
+    "sustento"
+   ],
+   "base": {
+    "tipoAtaque": "magico",
+    "formulaDano": "2d6",
+    "formulaCura": null,
+    "alcanceCelulas": 5,
+    "tipoArea": "linha",
+    "raioArea": 0,
+    "custoRecurso": 4,
+    "recargaMs": 5000,
+    "conjuracaoMs": 800,
+    "politicaAlvo": "hostil",
+    "politicaImpacto": "area",
+    "interrupcao": "interrompivel",
+    "velocidadeProjetil": 0,
+    "efeitos": [],
+    "grau": "A",
+    "mobilidade": "trava",
+    "marcos": {
+     "2": {
+      "texto": "+1 de alcance",
+      "alcance": 1
+     },
+     "4": {
+      "texto": "Custa 20% menos",
+      "custoPct": -20
+     }
+    },
+    "evolucoes": {
+     "3": [
+      "brutal",
+      "eficiente"
+     ],
+     "5": [
+      "longo_alcance",
+      "eco"
+     ]
+    }
+   },
+   "variantes": [
+    {
+     "elemento": "fogo",
+     "nome": "Jato de chamas",
+     "icone": "fogo",
+     "visual": {
+      "cor": "#ff7b39",
+      "conjuracao": "chamas",
+      "impacto": "explosao",
+      "som": "fogo",
+      "assinatura": "lanca_chamas",
+      "variante": "brasas"
+     },
+     "sobre": {
+      "alcanceCelulas": 3,
+      "formulaDano": "2d8",
+      "recargaMs": 6300
+     }
+    },
+    {
+     "elemento": "gelo",
+     "nome": "Sopro gélido",
+     "icone": "gelo",
+     "visual": {
+      "cor": "#74b9ff",
+      "conjuracao": "cristais",
+      "impacto": "cristais",
+      "som": "gelo",
+      "assinatura": "cone_de_gelo"
+     }
+    },
+    {
+     "elemento": "raio",
+     "nome": "Arco elétrico",
+     "icone": "raio",
+     "visual": {
+      "cor": "#f7dc6f",
+      "conjuracao": "relampago",
+      "impacto": "raio",
+      "som": "raio",
+      "assinatura": "feixe_eletrico"
+     },
+     "sobre": {
+      "alcanceCelulas": 6,
+      "formulaDano": "1d10"
+     }
+    },
+    {
+     "elemento": "sagrado",
+     "nome": "Feixe de luz",
+     "icone": "estrela",
+     "visual": {
+      "cor": "#f7e9a0",
+      "conjuracao": "sagrado",
+      "impacto": "sagrado",
+      "som": "sagrado",
+      "assinatura": "lanca_radiante"
+     }
+    }
+   ]
+  },
+  {
+   "id": "cadeia",
+   "papel": "dano",
+   "eixos": [
+    "alvos",
+    "eco",
+    "marca",
+    "controle"
+   ],
+   "base": {
+    "tipoAtaque": "magico",
+    "formulaDano": "1d8",
+    "formulaCura": null,
+    "alcanceCelulas": 6,
+    "tipoArea": "nenhuma",
+    "raioArea": 0,
+    "custoRecurso": 4,
+    "recargaMs": 6000,
+    "conjuracaoMs": 800,
+    "politicaAlvo": "hostil",
+    "politicaImpacto": "projetil",
+    "interrupcao": "interrompivel",
+    "velocidadeProjetil": 16,
+    "efeitos": [],
+    "grau": "A",
+    "mobilidade": "lenta",
+    "marcos": {
+     "2": {
+      "texto": "+1 de alcance",
+      "alcance": 1
+     },
+     "4": {
+      "texto": "Custa 20% menos",
+      "custoPct": -20
+     }
+    },
+    "evolucoes": {
+     "3": [
+      "brutal",
+      "eficiente"
+     ],
+     "5": [
+      "eco",
+      "longo_alcance"
+     ]
+    },
+    "mods": [
+     "encadear"
+    ]
+   },
+   "variantes": [
+    {
+     "elemento": "raio",
+     "nome": "Raio em cadeia",
+     "icone": "raio",
+     "visual": {
+      "cor": "#f7dc6f",
+      "conjuracao": "relampago",
+      "impacto": "raio",
+      "som": "raio",
+      "viagem": "relampago",
+      "assinatura": "raio_em_cadeia"
+     }
+    },
+    {
+     "elemento": "trevas",
+     "nome": "Corrente de almas",
+     "icone": "corrente",
+     "visual": {
+      "cor": "#765b9e",
+      "conjuracao": "sombra",
+      "impacto": "sombra",
+      "som": "trevas",
+      "viagem": "sombra",
+      "assinatura": "corrente_sombria"
+     }
+    },
+    {
+     "elemento": "veneno",
+     "nome": "Contágio",
+     "icone": "veneno",
+     "visual": {
+      "cor": "#60aa79",
+      "conjuracao": "bolhas",
+      "impacto": "bolhas",
+      "som": "veneno",
+      "viagem": "bolhas",
+      "assinatura": "peste"
+     }
+    },
+    {
+     "elemento": "psiquico",
+     "nome": "Eco mental",
+     "icone": "runa",
+     "visual": {
+      "cor": "#c39bd3",
+      "conjuracao": "runas",
+      "impacto": "estrelas",
+      "som": "psiquico",
+      "viagem": "runas",
+      "assinatura": "eco_arcano"
+     }
+    }
+   ]
+  },
+  {
+   "id": "campo",
+   "papel": "controle",
+   "eixos": [
+    "area",
+    "controle",
+    "marca",
+    "grupo"
+   ],
+   "base": {
+    "tipoAtaque": "magico",
+    "formulaDano": null,
+    "formulaCura": null,
+    "alcanceCelulas": 5,
+    "tipoArea": "nenhuma",
+    "raioArea": 0,
+    "custoRecurso": 5,
+    "recargaMs": 11000,
+    "conjuracaoMs": 500,
+    "politicaAlvo": "celula",
+    "politicaImpacto": "proprio",
+    "interrupcao": "interrompivel",
+    "velocidadeProjetil": 0,
+    "efeitos": [
+     {
+      "tipo": "campo_veneno",
+      "valor": 2,
+      "duracaoMs": 6000
+     }
+    ],
+    "grau": "A",
+    "mobilidade": "lenta",
+    "marcos": {
+     "2": {
+      "texto": "+1 de alcance",
+      "alcance": 1
+     },
+     "4": {
+      "texto": "Custa 20% menos",
+      "custoPct": -20
+     }
+    },
+    "evolucoes": {
+     "3": [
+      "eficiente",
+      "controle"
+     ],
+     "5": [
+      "fortificado",
+      "longo_alcance"
+     ]
+    }
+   },
+   "variantes": [
+    {
+     "elemento": "fogo",
+     "nome": "Chão em brasa",
+     "icone": "fogo",
+     "visual": {
+      "cor": "#ff7b39",
+      "conjuracao": "chamas",
+      "impacto": "explosao",
+      "som": "fogo",
+      "assinatura": "pilar_de_fogo",
+      "variante": "brasas"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "campo_veneno",
+        "valor": 3,
+        "duracaoMs": 4000,
+        "efeito": {
+         "queimando": {
+          "valor": 3,
+          "duracaoMs": 1500
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "gelo",
+     "nome": "Geada",
+     "icone": "gelo",
+     "visual": {
+      "cor": "#74b9ff",
+      "conjuracao": "cristais",
+      "impacto": "cristais",
+      "som": "gelo",
+      "assinatura": "chao_congelado"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "campo_veneno",
+        "valor": 1,
+        "duracaoMs": 6000,
+        "efeito": {
+         "resfriado": {
+          "pct": 35,
+          "duracaoMs": 1500
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "veneno",
+     "nome": "Pântano tóxico",
+     "icone": "veneno",
+     "visual": {
+      "cor": "#60aa79",
+      "conjuracao": "bolhas",
+      "impacto": "bolhas",
+      "som": "veneno",
+      "assinatura": "poca_toxica"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "campo_veneno",
+        "valor": 2,
+        "duracaoMs": 7000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "sagrado",
+     "nome": "Solo consagrado",
+     "icone": "cura",
+     "visual": {
+      "cor": "#f7e9a0",
+      "conjuracao": "sagrado",
+      "impacto": "sagrado",
+      "som": "sagrado",
+      "assinatura": "circulo_de_amparo"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "campo_cura",
+        "valor": 3,
+        "duracaoMs": 6000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "trevas",
+     "nome": "Poça de sombra",
+     "icone": "caveira",
+     "visual": {
+      "cor": "#765b9e",
+      "conjuracao": "sombra",
+      "impacto": "sombra",
+      "som": "trevas",
+      "assinatura": "campo_de_ossos"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "campo_veneno",
+        "valor": 1,
+        "duracaoMs": 6000,
+        "efeito": {
+         "definhando": {
+          "pct": 20,
+          "duracaoMs": 1500
+         }
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "nova",
+   "papel": "dano",
+   "eixos": [
+    "area",
+    "controle",
+    "sustento",
+    "eco"
+   ],
+   "base": {
+    "tipoAtaque": "magico",
+    "formulaDano": "1d8",
+    "formulaCura": null,
+    "alcanceCelulas": 0,
+    "tipoArea": "ao_redor",
+    "raioArea": 2,
+    "custoRecurso": 4,
+    "recargaMs": 8000,
+    "conjuracaoMs": 400,
+    "politicaAlvo": "proprio",
+    "politicaImpacto": "area",
+    "interrupcao": "interrompivel",
+    "velocidadeProjetil": 0,
+    "efeitos": [],
+    "grau": "B",
+    "mobilidade": "lenta",
+    "marcos": {
+     "2": {
+      "texto": "Custa 20% menos",
+      "custoPct": -20
+     },
+     "4": {
+      "texto": "Recarrega 15% mais rápido",
+      "recargaPct": -15
+     }
+    },
+    "evolucoes": {
+     "3": [
+      "amplo",
+      "eficiente"
+     ],
+     "5": [
+      "brutal",
+      "controle"
+     ]
+    }
+   },
+   "variantes": [
+    {
+     "elemento": "gelo",
+     "nome": "Nova glacial",
+     "icone": "nova",
+     "visual": {
+      "cor": "#74b9ff",
+      "conjuracao": "cristais",
+      "impacto": "cristais",
+      "som": "gelo",
+      "assinatura": "nova_glacial"
+     }
+    },
+    {
+     "elemento": "raio",
+     "nome": "Pulso",
+     "icone": "raio",
+     "visual": {
+      "cor": "#f7dc6f",
+      "conjuracao": "relampago",
+      "impacto": "raio",
+      "som": "raio",
+      "assinatura": "cone_eletrico"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "silenciar",
+        "duracaoMs": 800
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "terra",
+     "nome": "Tremor",
+     "icone": "pedra",
+     "visual": {
+      "cor": "#ad885d",
+      "conjuracao": "pedra",
+      "impacto": "pedra",
+      "som": "terra",
+      "camera": "leve",
+      "assinatura": "abalo_sismico"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "atolado",
+        "duracaoMs": 2500,
+        "pct": 25
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "fisico",
+     "nome": "Redemoinho de aço",
+     "icone": "redemoinho",
+     "visual": {
+      "cor": "#d5d8dc",
+      "conjuracao": "corte",
+      "impacto": "corte",
+      "som": "lamina",
+      "assinatura": "redemoinho",
+      "animacao": "giro"
+     },
+     "sobre": {
+      "raioArea": 1,
+      "formulaDano": "2d6",
+      "tipoAtaque": "fisico"
+     }
+    },
+    {
+     "elemento": "sagrado",
+     "nome": "Coroa de luz",
+     "icone": "estrela",
+     "visual": {
+      "cor": "#f7e9a0",
+      "conjuracao": "sagrado",
+      "impacto": "sagrado",
+      "som": "sagrado",
+      "assinatura": "bencao"
+     },
+     "sobre": {
+      "formulaDano": "1d6",
+      "efeitos": [
+       {
+        "tipo": "cura",
+        "valor": 4,
+        "em": "aliados"
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "investida",
+   "papel": "mobilidade",
+   "eixos": [
+    "alvos",
+    "controle",
+    "area",
+    "perfuracao"
+   ],
+   "base": {
+    "tipoAtaque": "magico",
+    "formulaDano": "1d8",
+    "formulaCura": null,
+    "alcanceCelulas": 3,
+    "tipoArea": "linha",
+    "raioArea": 0,
+    "custoRecurso": 3,
+    "recargaMs": 7000,
+    "conjuracaoMs": 350,
+    "politicaAlvo": "hostil",
+    "politicaImpacto": "area",
+    "interrupcao": "interrompivel",
+    "velocidadeProjetil": 0,
+    "efeitos": [
+     {
+      "tipo": "avanco",
+      "valor": 3,
+      "em": "conjurador"
+     }
+    ],
+    "grau": "B",
+    "mobilidade": "livre",
+    "marcos": {
+     "2": {
+      "texto": "+1 de alcance",
+      "alcance": 1
+     },
+     "4": {
+      "texto": "Custa 20% menos",
+      "custoPct": -20
+     }
+    },
+    "evolucoes": {
+     "3": [
+      "brutal",
+      "eficiente"
+     ],
+     "5": [
+      "eco",
+      "longo_alcance"
+     ]
+    },
+    "tags": [
+     "movimento"
+    ]
+   },
+   "variantes": [
+    {
+     "elemento": "fisico",
+     "nome": "Investida",
+     "icone": "investida",
+     "visual": {
+      "cor": "#d5d8dc",
+      "conjuracao": "corte",
+      "impacto": "corte",
+      "som": "lamina",
+      "camera": "leve",
+      "assinatura": "investida"
+     },
+     "sobre": {
+      "tipoAtaque": "fisico"
+     }
+    },
+    {
+     "elemento": "raio",
+     "nome": "Relâmpago",
+     "icone": "raio",
+     "visual": {
+      "cor": "#f7dc6f",
+      "conjuracao": "relampago",
+      "impacto": "raio",
+      "som": "raio",
+      "assinatura": "mergulho_do_trovao"
+     },
+     "sobre": {
+      "conjuracaoMs": 200,
+      "alcanceCelulas": 4,
+      "efeitos": [
+       {
+        "tipo": "avanco",
+        "valor": 4,
+        "em": "conjurador"
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "terra",
+     "nome": "Avalanche",
+     "icone": "pedra",
+     "visual": {
+      "cor": "#ad885d",
+      "conjuracao": "pedra",
+      "impacto": "pedra",
+      "som": "terra",
+      "camera": "leve",
+      "assinatura": "salto_esmagador"
+     },
+     "sobre": {
+      "conjuracaoMs": 600,
+      "formulaDano": "1d10"
+     }
+    },
+    {
+     "elemento": "fogo",
+     "nome": "Cometa",
+     "icone": "cometa",
+     "visual": {
+      "cor": "#ff7b39",
+      "conjuracao": "chamas",
+      "impacto": "explosao",
+      "som": "fogo",
+      "assinatura": "rastro_de_fogo",
+      "variante": "brasas"
+     }
+    }
+   ]
+  },
+  {
+   "id": "recuo",
+   "papel": "mobilidade",
+   "eixos": [
+    "controle",
+    "sustento",
+    "eco",
+    "marca"
+   ],
+   "base": {
+    "tipoAtaque": "magico",
+    "formulaDano": null,
+    "formulaCura": null,
+    "alcanceCelulas": 3,
+    "tipoArea": "nenhuma",
+    "raioArea": 0,
+    "custoRecurso": 3,
+    "recargaMs": 8000,
+    "conjuracaoMs": 350,
+    "politicaAlvo": "celula",
+    "politicaImpacto": "proprio",
+    "interrupcao": "interrompivel",
+    "velocidadeProjetil": 0,
+    "efeitos": [
+     {
+      "tipo": "passo_sombrio",
+      "valor": 3
+     }
+    ],
+    "grau": "B",
+    "mobilidade": "lenta",
+    "marcos": {
+     "2": {
+      "texto": "+1 de alcance",
+      "alcance": 1
+     },
+     "4": {
+      "texto": "Custa 20% menos",
+      "custoPct": -20
+     }
+    },
+    "evolucoes": {
+     "3": [
+      "eficiente",
+      "fortificado"
+     ],
+     "5": [
+      "eficiente",
+      "passo_longo"
+     ]
+    }
+   },
+   "variantes": [
+    {
+     "elemento": "gelo",
+     "nome": "Deslize",
+     "icone": "gelo",
+     "visual": {
+      "cor": "#74b9ff",
+      "conjuracao": "cristais",
+      "impacto": "cristais",
+      "som": "gelo",
+      "assinatura": "piscar"
+     },
+     "sobre": {
+      "alcanceCelulas": 4,
+      "efeitos": [
+       {
+        "tipo": "passo_sombrio",
+        "valor": 4
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "trevas",
+     "nome": "Passo sombrio",
+     "icone": "teleporte",
+     "visual": {
+      "cor": "#765b9e",
+      "conjuracao": "sombra",
+      "impacto": "sombra",
+      "som": "trevas",
+      "assinatura": "passo_sombrio"
+     }
+    },
+    {
+     "elemento": "psiquico",
+     "nome": "Desvio",
+     "icone": "teleporte",
+     "visual": {
+      "cor": "#c39bd3",
+      "conjuracao": "runas",
+      "impacto": "estrelas",
+      "som": "psiquico",
+      "assinatura": "piscar"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "passo_sombrio",
+        "valor": 3
+       },
+       {
+        "tipo": "invisivel",
+        "duracaoMs": 800,
+        "em": "conjurador"
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "fisico",
+     "nome": "Cambalhota",
+     "icone": "botas",
+     "visual": {
+      "cor": "#d5d8dc",
+      "conjuracao": "corte",
+      "impacto": "corte",
+      "som": "lamina",
+      "assinatura": "rolamento"
+     },
+     "sobre": {
+      "alcanceCelulas": 2,
+      "custoRecurso": 2,
+      "recargaMs": 4000,
+      "efeitos": [
+       {
+        "tipo": "passo_sombrio",
+        "valor": 2
+       }
+      ],
+      "tipoAtaque": "fisico"
+     }
+    }
+   ]
+  },
+  {
+   "id": "maldicao",
+   "papel": "controle",
+   "eixos": [
+    "marca",
+    "alvos",
+    "eco",
+    "controle"
+   ],
+   "base": {
+    "tipoAtaque": "magico",
+    "formulaDano": null,
+    "formulaCura": null,
+    "alcanceCelulas": 6,
+    "tipoArea": "nenhuma",
+    "raioArea": 0,
+    "custoRecurso": 3,
+    "recargaMs": 9000,
+    "conjuracaoMs": 500,
+    "politicaAlvo": "hostil",
+    "politicaImpacto": "contato",
+    "interrupcao": "interrompivel",
+    "velocidadeProjetil": 0,
+    "efeitos": [],
+    "grau": "B",
+    "mobilidade": "lenta",
+    "marcos": {
+     "2": {
+      "texto": "+1 de alcance",
+      "alcance": 1
+     },
+     "4": {
+      "texto": "Custa 20% menos",
+      "custoPct": -20
+     }
+    },
+    "evolucoes": {
+     "3": [
+      "eficiente",
+      "controle"
+     ],
+     "5": [
+      "longo_alcance",
+      "eco"
+     ]
+    }
+   },
+   "variantes": [
+    {
+     "elemento": "trevas",
+     "nome": "Maldição",
+     "icone": "caveira",
+     "visual": {
+      "cor": "#765b9e",
+      "conjuracao": "sombra",
+      "impacto": "sombra",
+      "som": "trevas",
+      "assinatura": "marca_sombria"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "exposto",
+        "pct": 10,
+        "duracaoMs": 6000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "veneno",
+     "nome": "Praga",
+     "icone": "veneno",
+     "visual": {
+      "cor": "#60aa79",
+      "conjuracao": "bolhas",
+      "impacto": "bolhas",
+      "som": "veneno",
+      "assinatura": "peste"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "envenenado",
+        "valor": 2,
+        "pct": 50,
+        "duracaoMs": 6000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "psiquico",
+     "nome": "Pesadelo",
+     "icone": "runa",
+     "visual": {
+      "cor": "#c39bd3",
+      "conjuracao": "runas",
+      "impacto": "estrelas",
+      "som": "psiquico",
+      "assinatura": "mente_partida"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "cego",
+        "pct": 25,
+        "duracaoMs": 5000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "sagrado",
+     "nome": "Julgamento",
+     "icone": "estrela",
+     "visual": {
+      "cor": "#f7e9a0",
+      "conjuracao": "sagrado",
+      "impacto": "sagrado",
+      "som": "sagrado",
+      "assinatura": "juizo_das_trevas"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "marcado",
+        "pct": 25,
+        "duracaoMs": 6000
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "prisao",
+   "papel": "controle",
+   "eixos": [
+    "controle",
+    "area",
+    "marca",
+    "alvos"
+   ],
+   "base": {
+    "tipoAtaque": "magico",
+    "formulaDano": "1d4",
+    "formulaCura": null,
+    "alcanceCelulas": 5,
+    "tipoArea": "nenhuma",
+    "raioArea": 0,
+    "custoRecurso": 3,
+    "recargaMs": 10000,
+    "conjuracaoMs": 500,
+    "politicaAlvo": "hostil",
+    "politicaImpacto": "contato",
+    "interrupcao": "interrompivel",
+    "velocidadeProjetil": 0,
+    "efeitos": [],
+    "grau": "B",
+    "mobilidade": "lenta",
+    "marcos": {
+     "2": {
+      "texto": "+1 de alcance",
+      "alcance": 1
+     },
+     "4": {
+      "texto": "Custa 20% menos",
+      "custoPct": -20
+     }
+    },
+    "evolucoes": {
+     "3": [
+      "eficiente",
+      "controle"
+     ],
+     "5": [
+      "longo_alcance",
+      "fortificado"
+     ]
+    }
+   },
+   "variantes": [
+    {
+     "elemento": "gelo",
+     "nome": "Túmulo de gelo",
+     "icone": "gelo",
+     "visual": {
+      "cor": "#74b9ff",
+      "conjuracao": "cristais",
+      "impacto": "cristais",
+      "som": "gelo",
+      "assinatura": "toque_de_gelo"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "congelado",
+        "duracaoMs": 1500
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "terra",
+     "nome": "Raízes",
+     "icone": "pedra",
+     "visual": {
+      "cor": "#ad885d",
+      "conjuracao": "pedra",
+      "impacto": "pedra",
+      "som": "terra",
+      "assinatura": "estaca_de_pedra"
+     },
+     "sobre": {
+      "politicaAlvo": "celula",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 1,
+      "efeitos": [
+       {
+        "tipo": "enraizado",
+        "duracaoMs": 1200
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "trevas",
+     "nome": "Grilhões",
+     "icone": "corrente",
+     "visual": {
+      "cor": "#765b9e",
+      "conjuracao": "sombra",
+      "impacto": "sombra",
+      "som": "trevas",
+      "assinatura": "grilhoes"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "puxao",
+        "valor": 2
+       },
+       {
+        "tipo": "sem_movimento",
+        "duracaoMs": 1000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "psiquico",
+     "nome": "Paralisia mental",
+     "icone": "runa",
+     "visual": {
+      "cor": "#c39bd3",
+      "conjuracao": "runas",
+      "impacto": "estrelas",
+      "som": "psiquico",
+      "assinatura": "telecinese"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "atordoar",
+        "duracaoMs": 1200
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "muro",
+   "papel": "defesa",
+   "eixos": [
+    "area",
+    "controle",
+    "sustento",
+    "grupo"
+   ],
+   "base": {
+    "tipoAtaque": "magico",
+    "formulaDano": null,
+    "formulaCura": null,
+    "alcanceCelulas": 4,
+    "tipoArea": "nenhuma",
+    "raioArea": 0,
+    "custoRecurso": 5,
+    "recargaMs": 14000,
+    "conjuracaoMs": 500,
+    "politicaAlvo": "celula",
+    "politicaImpacto": "proprio",
+    "interrupcao": "interrompivel",
+    "velocidadeProjetil": 0,
+    "efeitos": [
+     {
+      "tipo": "muralha_pedra",
+      "valor": 1,
+      "duracaoMs": 5000
+     }
+    ],
+    "grau": "A",
+    "mobilidade": "lenta",
+    "marcos": {
+     "2": {
+      "texto": "+1 de alcance",
+      "alcance": 1
+     },
+     "4": {
+      "texto": "Custa 20% menos",
+      "custoPct": -20
+     }
+    },
+    "evolucoes": {
+     "3": [
+      "eficiente",
+      "fortificado"
+     ],
+     "5": [
+      "longo_alcance",
+      "eficiente"
+     ]
+    }
+   },
+   "variantes": [
+    {
+     "elemento": "terra",
+     "nome": "Muralha",
+     "icone": "pedra",
+     "visual": {
+      "cor": "#ad885d",
+      "conjuracao": "pedra",
+      "impacto": "pedra",
+      "som": "terra",
+      "assinatura": "muralha_de_pedra"
+     }
+    },
+    {
+     "elemento": "fogo",
+     "nome": "Muro de fogo",
+     "icone": "fogo",
+     "visual": {
+      "cor": "#ff7b39",
+      "conjuracao": "chamas",
+      "impacto": "explosao",
+      "som": "fogo",
+      "assinatura": "anel_de_chamas",
+      "variante": "brasas"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "campo_veneno",
+        "valor": 3,
+        "duracaoMs": 5000,
+        "efeito": {
+         "queimando": {
+          "valor": 3,
+          "duracaoMs": 1500
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "gelo",
+     "nome": "Parede de gelo",
+     "icone": "gelo",
+     "visual": {
+      "cor": "#74b9ff",
+      "conjuracao": "cristais",
+      "impacto": "cristais",
+      "som": "gelo",
+      "assinatura": "estilhaco_de_gelo"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "muralha_pedra",
+        "valor": 1,
+        "duracaoMs": 4000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "sagrado",
+     "nome": "Barreira de luz",
+     "icone": "barreira",
+     "visual": {
+      "cor": "#f7e9a0",
+      "conjuracao": "sagrado",
+      "impacto": "sagrado",
+      "som": "sagrado",
+      "assinatura": "barreira"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "muralha_pedra",
+        "valor": 1,
+        "duracaoMs": 4000
+       },
+       {
+        "tipo": "campo_cura",
+        "valor": 2,
+        "duracaoMs": 4000
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "escudo",
+   "papel": "defesa",
+   "eixos": [
+    "sustento",
+    "grupo",
+    "eco",
+    "controle"
+   ],
+   "base": {
+    "tipoAtaque": "magico",
+    "formulaDano": null,
+    "formulaCura": null,
+    "alcanceCelulas": 0,
+    "tipoArea": "nenhuma",
+    "raioArea": 0,
+    "custoRecurso": 4,
+    "recargaMs": 10000,
+    "conjuracaoMs": 300,
+    "politicaAlvo": "proprio",
+    "politicaImpacto": "proprio",
+    "interrupcao": "interrompivel",
+    "velocidadeProjetil": 0,
+    "efeitos": [
+     {
+      "tipo": "escudo",
+      "valor": 12,
+      "duracaoMs": 8000
+     }
+    ],
+    "grau": "B",
+    "mobilidade": "lenta",
+    "marcos": {
+     "2": {
+      "texto": "Custa 20% menos",
+      "custoPct": -20
+     },
+     "4": {
+      "texto": "Recarrega 15% mais rápido",
+      "recargaPct": -15
+     }
+    },
+    "evolucoes": {
+     "3": [
+      "eficiente",
+      "fortificado"
+     ],
+     "5": [
+      "controle",
+      "eficiente"
+     ]
+    }
+   },
+   "variantes": [
+    {
+     "elemento": "terra",
+     "nome": "Pele de pedra",
+     "icone": "escudo",
+     "visual": {
+      "cor": "#ad885d",
+      "conjuracao": "pedra",
+      "impacto": "pedra",
+      "som": "terra",
+      "assinatura": "pele_de_pedra"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "escudo",
+        "valor": 16,
+        "duracaoMs": 8000
+       },
+       {
+        "tipo": "atolado",
+        "pct": 20,
+        "duracaoMs": 4000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "gelo",
+     "nome": "Armadura de gelo",
+     "icone": "escudo",
+     "visual": {
+      "cor": "#74b9ff",
+      "conjuracao": "cristais",
+      "impacto": "cristais",
+      "som": "gelo",
+      "assinatura": "toque_de_gelo"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "escudo",
+        "valor": 12,
+        "duracaoMs": 8000
+       },
+       {
+        "tipo": "reflexo",
+        "duracaoMs": 6000,
+        "efeito": {
+         "resfriado": {
+          "pct": 30,
+          "duracaoMs": 2000
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "sagrado",
+     "nome": "Égide",
+     "icone": "barreira",
+     "visual": {
+      "cor": "#f7e9a0",
+      "conjuracao": "sagrado",
+      "impacto": "sagrado",
+      "som": "sagrado",
+      "assinatura": "barreira"
+     },
+     "sobre": {
+      "politicaAlvo": "aliado",
+      "politicaImpacto": "contato",
+      "alcanceCelulas": 5,
+      "marcos": {
+       "2": {
+        "texto": "+1 de alcance",
+        "alcance": 1
+       },
+       "4": {
+        "texto": "Custa 20% menos",
+        "custoPct": -20
+       }
+      }
+     }
+    },
+    {
+     "elemento": "trevas",
+     "nome": "Manto de sombras",
+     "icone": "escudo",
+     "visual": {
+      "cor": "#765b9e",
+      "conjuracao": "sombra",
+      "impacto": "sombra",
+      "som": "trevas",
+      "assinatura": "mortalha"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "escudo",
+        "valor": 10,
+        "duracaoMs": 8000
+       },
+       {
+        "tipo": "cura_periodica",
+        "valor": 2,
+        "duracaoMs": 5000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "raio",
+     "nome": "Escudo estático",
+     "icone": "escudo",
+     "visual": {
+      "cor": "#f7dc6f",
+      "conjuracao": "relampago",
+      "impacto": "raio",
+      "som": "raio",
+      "assinatura": "esfera_de_plasma"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "escudo",
+        "valor": 10,
+        "duracaoMs": 8000
+       },
+       {
+        "tipo": "reflexo",
+        "duracaoMs": 6000,
+        "efeito": {
+         "eletrizado": {
+          "duracaoMs": 2000
+         }
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "cura",
+   "papel": "cura",
+   "eixos": [
+    "sustento",
+    "grupo",
+    "eco",
+    "area"
+   ],
+   "base": {
+    "tipoAtaque": "magico",
+    "formulaDano": null,
+    "formulaCura": "2d6+2",
+    "alcanceCelulas": 5,
+    "tipoArea": "nenhuma",
+    "raioArea": 0,
+    "custoRecurso": 3,
+    "recargaMs": 8000,
+    "conjuracaoMs": 700,
+    "politicaAlvo": "aliado",
+    "politicaImpacto": "contato",
+    "interrupcao": "interrompivel",
+    "velocidadeProjetil": 0,
+    "efeitos": [],
+    "grau": "B",
+    "mobilidade": "lenta",
+    "marcos": {
+     "2": {
+      "texto": "+1 de alcance",
+      "alcance": 1
+     },
+     "4": {
+      "texto": "Custa 20% menos",
+      "custoPct": -20
+     }
+    },
+    "evolucoes": {
+     "3": [
+      "eficiente",
+      "fortificado"
+     ],
+     "5": [
+      "controle",
+      "eficiente"
+     ]
+    }
+   },
+   "variantes": [
+    {
+     "elemento": "sagrado",
+     "nome": "Prece",
+     "icone": "cura",
+     "visual": {
+      "cor": "#f7e9a0",
+      "conjuracao": "sagrado",
+      "impacto": "sagrado",
+      "som": "sagrado",
+      "assinatura": "cura"
+     },
+     "sobre": {
+      "formulaCura": "2d6+4",
+      "conjuracaoMs": 900
+     }
+    },
+    {
+     "elemento": "fisico",
+     "nome": "Fôlego",
+     "icone": "cura",
+     "visual": {
+      "cor": "#d5d8dc",
+      "conjuracao": "brilho",
+      "impacto": "brilho",
+      "som": "cura",
+      "assinatura": "retorno"
+     },
+     "sobre": {
+      "tipoAtaque": "magico",
+      "formulaCura": null,
+      "conjuracaoMs": 100,
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "alcanceCelulas": 0,
+      "marcos": {
+       "2": {
+        "texto": "Custa 20% menos",
+        "custoPct": -20
+       },
+       "4": {
+        "texto": "Recarrega 15% mais rápido",
+        "recargaPct": -15
+       }
+      },
+      "efeitos": [
+       {
+        "tipo": "cura_periodica",
+        "valor": 3,
+        "duracaoMs": 6000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "veneno",
+     "nome": "Antídoto",
+     "icone": "cura",
+     "visual": {
+      "cor": "#60aa79",
+      "conjuracao": "bolhas",
+      "impacto": "bolhas",
+      "som": "veneno",
+      "assinatura": "purificacao"
+     },
+     "sobre": {
+      "formulaCura": "1d6",
+      "efeitos": [
+       {
+        "tipo": "purificar"
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "trevas",
+     "nome": "Sangue roubado",
+     "icone": "cura",
+     "visual": {
+      "cor": "#765b9e",
+      "conjuracao": "sombra",
+      "impacto": "sombra",
+      "som": "trevas",
+      "assinatura": "raio_vampirico"
+     },
+     "sobre": {
+      "formulaCura": null,
+      "formulaDano": "1d6",
+      "politicaAlvo": "hostil",
+      "efeitos": [
+       {
+        "tipo": "cura",
+        "valor": 5,
+        "em": "conjurador"
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "fogo",
+     "nome": "Cauterizar",
+     "icone": "cura",
+     "visual": {
+      "cor": "#ff7b39",
+      "conjuracao": "chamas",
+      "impacto": "explosao",
+      "som": "fogo",
+      "assinatura": "mao_em_chamas",
+      "variante": "brasas"
+     },
+     "sobre": {
+      "formulaCura": "2d6",
+      "efeitos": [
+       {
+        "tipo": "purificar"
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "dreno",
+   "papel": "dano",
+   "eixos": [
+    "sustento",
+    "alvos",
+    "eco",
+    "marca"
+   ],
+   "base": {
+    "tipoAtaque": "magico",
+    "formulaDano": "1d8",
+    "formulaCura": null,
+    "alcanceCelulas": 5,
+    "tipoArea": "nenhuma",
+    "raioArea": 0,
+    "custoRecurso": 3,
+    "recargaMs": 6000,
+    "conjuracaoMs": 600,
+    "politicaAlvo": "hostil",
+    "politicaImpacto": "contato",
+    "interrupcao": "interrompivel",
+    "velocidadeProjetil": 0,
+    "efeitos": [],
+    "grau": "B",
+    "mobilidade": "lenta",
+    "marcos": {
+     "2": {
+      "texto": "+1 de alcance",
+      "alcance": 1
+     },
+     "4": {
+      "texto": "Custa 20% menos",
+      "custoPct": -20
+     }
+    },
+    "evolucoes": {
+     "3": [
+      "brutal",
+      "eficiente"
+     ],
+     "5": [
+      "sanguessuga",
+      "longo_alcance"
+     ]
+    }
+   },
+   "variantes": [
+    {
+     "elemento": "trevas",
+     "nome": "Drenar vida",
+     "icone": "caveira",
+     "visual": {
+      "cor": "#765b9e",
+      "conjuracao": "sombra",
+      "impacto": "sombra",
+      "som": "trevas",
+      "assinatura": "raio_vampirico"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "cura",
+        "valor": 4,
+        "em": "conjurador"
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "veneno",
+     "nome": "Sanguessuga",
+     "icone": "veneno",
+     "visual": {
+      "cor": "#60aa79",
+      "conjuracao": "bolhas",
+      "impacto": "bolhas",
+      "som": "veneno",
+      "assinatura": "fios_de_vida"
+     },
+     "sobre": {
+      "formulaDano": "1d4",
+      "efeitos": [
+       {
+        "tipo": "envenenado",
+        "valor": 2,
+        "pct": 50,
+        "duracaoMs": 6000
+       },
+       {
+        "tipo": "cura_periodica",
+        "valor": 1,
+        "duracaoMs": 6000,
+        "em": "conjurador"
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "psiquico",
+     "nome": "Drenar mente",
+     "icone": "runa",
+     "visual": {
+      "cor": "#c39bd3",
+      "conjuracao": "runas",
+      "impacto": "estrelas",
+      "som": "psiquico",
+      "assinatura": "agulha_mental"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "recuperar_recurso",
+        "valor": 4,
+        "duracaoMs": 0,
+        "em": "conjurador"
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "invocar",
+   "papel": "invocacao",
+   "eixos": [
+    "invocacao",
+    "grupo",
+    "sustento",
+    "eco"
+   ],
+   "base": {
+    "tipoAtaque": "magico",
+    "formulaDano": null,
+    "formulaCura": null,
+    "alcanceCelulas": 0,
+    "tipoArea": "nenhuma",
+    "raioArea": 0,
+    "custoRecurso": 6,
+    "recargaMs": 20000,
+    "conjuracaoMs": 700,
+    "politicaAlvo": "proprio",
+    "politicaImpacto": "proprio",
+    "interrupcao": "interrompivel",
+    "velocidadeProjetil": 0,
+    "efeitos": [],
+    "grau": "A",
+    "mobilidade": "lenta",
+    "marcos": {
+     "2": {
+      "texto": "Custa 20% menos",
+      "custoPct": -20
+     },
+     "4": {
+      "texto": "Recarrega 15% mais rápido",
+      "recargaPct": -15
+     }
+    },
+    "evolucoes": {
+     "3": [
+      "eficiente",
+      "fortificado"
+     ],
+     "5": [
+      "eficiente",
+      "controle"
+     ]
+    }
+   },
+   "variantes": [
+    {
+     "elemento": "fisico",
+     "nome": "Esqueleto",
+     "icone": "invocar",
+     "visual": {
+      "cor": "#d5d8dc",
+      "conjuracao": "corte",
+      "impacto": "corte",
+      "som": "invocacao",
+      "assinatura": "levante_profano"
+     },
+     "sobre": {
+      "tipoAtaque": "magico",
+      "efeitos": [
+       {
+        "tipo": "invocar_temporario",
+        "ref": "esqueleto_profano",
+        "valor": 2,
+        "duracaoMs": 12000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "fogo",
+     "nome": "Elemental de fogo",
+     "icone": "invocar",
+     "visual": {
+      "cor": "#ff7b39",
+      "conjuracao": "chamas",
+      "impacto": "explosao",
+      "som": "invocacao",
+      "assinatura": "invocacao",
+      "variante": "brasas"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "invocar_temporario",
+        "ref": "piromante_profano",
+        "valor": 1,
+        "duracaoMs": 12000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "terra",
+     "nome": "Golem",
+     "icone": "invocar",
+     "visual": {
+      "cor": "#ad885d",
+      "conjuracao": "pedra",
+      "impacto": "pedra",
+      "som": "invocacao",
+      "assinatura": "invocacao"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "invocar_temporario",
+        "ref": "sentinela",
+        "valor": 1,
+        "duracaoMs": 15000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "trevas",
+     "nome": "Sombra",
+     "icone": "invocar",
+     "visual": {
+      "cor": "#765b9e",
+      "conjuracao": "sombra",
+      "impacto": "sombra",
+      "som": "invocacao",
+      "assinatura": "invocacao"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "invocar_temporario",
+        "ref": "sombra",
+        "valor": 1,
+        "duracaoMs": 12000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "sagrado",
+     "nome": "Espírito guardião",
+     "icone": "invocar",
+     "visual": {
+      "cor": "#f7e9a0",
+      "conjuracao": "sagrado",
+      "impacto": "sagrado",
+      "som": "invocacao",
+      "assinatura": "invocacao"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "invocar_temporario",
+        "ref": "fada",
+        "valor": 1,
+        "duracaoMs": 15000
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "armadilha",
+   "papel": "controle",
+   "eixos": [
+    "area",
+    "controle",
+    "marca",
+    "alvos"
+   ],
+   "base": {
+    "tipoAtaque": "fisico",
+    "formulaDano": null,
+    "formulaCura": null,
+    "alcanceCelulas": 4,
+    "tipoArea": "quadrado",
+    "raioArea": 0,
+    "custoRecurso": 3,
+    "recargaMs": 9000,
+    "conjuracaoMs": 400,
+    "politicaAlvo": "celula",
+    "politicaImpacto": "area",
+    "interrupcao": "interrompivel",
+    "velocidadeProjetil": 0,
+    "efeitos": [],
+    "grau": "B",
+    "mobilidade": "lenta",
+    "marcos": {
+     "2": {
+      "texto": "+1 de alcance",
+      "alcance": 1
+     },
+     "4": {
+      "texto": "Custa 20% menos",
+      "custoPct": -20
+     }
+    },
+    "evolucoes": {
+     "3": [
+      "eficiente",
+      "controle"
+     ],
+     "5": [
+      "longo_alcance",
+      "fortificado"
+     ]
+    }
+   },
+   "variantes": [
+    {
+     "elemento": "fisico",
+     "nome": "Armadilha de dentes",
+     "icone": "aviso",
+     "visual": {
+      "cor": "#d5d8dc",
+      "conjuracao": "corte",
+      "impacto": "corte",
+      "som": "lamina",
+      "assinatura": "armadilha_de_caca"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "armadilha",
+        "valor": 6,
+        "duracaoMs": 30000,
+        "efeito": {
+         "sangrando": {
+          "valor": 2,
+          "duracaoMs": 4000
+         }
+        }
+       }
+      ],
+      "tipoAtaque": "fisico"
+     }
+    },
+    {
+     "elemento": "fogo",
+     "nome": "Mina",
+     "icone": "aviso",
+     "visual": {
+      "cor": "#ff7b39",
+      "conjuracao": "chamas",
+      "impacto": "explosao",
+      "som": "fogo",
+      "assinatura": "campo_minado",
+      "variante": "brasas"
+     },
+     "sobre": {
+      "tipoAtaque": "magico",
+      "efeitos": [
+       {
+        "tipo": "armadilha",
+        "valor": 8,
+        "duracaoMs": 30000,
+        "efeito": {
+         "queimando": {
+          "valor": 3,
+          "duracaoMs": 3000
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "gelo",
+     "nome": "Runa de geada",
+     "icone": "aviso",
+     "visual": {
+      "cor": "#74b9ff",
+      "conjuracao": "cristais",
+      "impacto": "cristais",
+      "som": "gelo",
+      "assinatura": "chao_congelado"
+     },
+     "sobre": {
+      "tipoAtaque": "magico",
+      "efeitos": [
+       {
+        "tipo": "armadilha",
+        "valor": 4,
+        "duracaoMs": 30000,
+        "efeito": {
+         "congelado": 1200
+        }
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "veneno",
+     "nome": "Espinhos",
+     "icone": "aviso",
+     "visual": {
+      "cor": "#60aa79",
+      "conjuracao": "bolhas",
+      "impacto": "bolhas",
+      "som": "veneno",
+      "assinatura": "poca_toxica"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "armadilha",
+        "valor": 4,
+        "duracaoMs": 30000,
+        "efeito": {
+         "envenenado": {
+          "valor": 2,
+          "pct": 50,
+          "duracaoMs": 5000
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "raio",
+     "nome": "Fio elétrico",
+     "icone": "aviso",
+     "visual": {
+      "cor": "#f7dc6f",
+      "conjuracao": "relampago",
+      "impacto": "raio",
+      "som": "raio",
+      "assinatura": "toque_eletrico"
+     },
+     "sobre": {
+      "tipoAtaque": "magico",
+      "efeitos": [
+       {
+        "tipo": "armadilha",
+        "valor": 5,
+        "duracaoMs": 30000,
+        "efeito": {
+         "atordoar": 800
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "marca",
+   "papel": "dano",
+   "eixos": [
+    "marca",
+    "alvos",
+    "eco",
+    "grupo"
+   ],
+   "base": {
+    "tipoAtaque": "magico",
+    "formulaDano": null,
+    "formulaCura": null,
+    "alcanceCelulas": 6,
+    "tipoArea": "nenhuma",
+    "raioArea": 0,
+    "custoRecurso": 2,
+    "recargaMs": 8000,
+    "conjuracaoMs": 300,
+    "politicaAlvo": "hostil",
+    "politicaImpacto": "contato",
+    "interrupcao": "interrompivel",
+    "velocidadeProjetil": 0,
+    "efeitos": [],
+    "grau": "B",
+    "mobilidade": "lenta",
+    "marcos": {
+     "2": {
+      "texto": "+1 de alcance",
+      "alcance": 1
+     },
+     "4": {
+      "texto": "Custa 20% menos",
+      "custoPct": -20
+     }
+    },
+    "evolucoes": {
+     "3": [
+      "eficiente",
+      "controle"
+     ],
+     "5": [
+      "longo_alcance",
+      "eco"
+     ]
+    }
+   },
+   "variantes": [
+    {
+     "elemento": "trevas",
+     "nome": "Marca da morte",
+     "icone": "alvo",
+     "visual": {
+      "cor": "#765b9e",
+      "conjuracao": "sombra",
+      "impacto": "sombra",
+      "som": "trevas",
+      "assinatura": "marca_sombria"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "marcado",
+        "pct": 25,
+        "duracaoMs": 6000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "psiquico",
+     "nome": "Exposição",
+     "icone": "alvo",
+     "visual": {
+      "cor": "#c39bd3",
+      "conjuracao": "runas",
+      "impacto": "estrelas",
+      "som": "psiquico",
+      "assinatura": "olho_de_aguia"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "exposto",
+        "pct": 15,
+        "duracaoMs": 6000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "raio",
+     "nome": "Para-raios",
+     "icone": "alvo",
+     "visual": {
+      "cor": "#f7dc6f",
+      "conjuracao": "relampago",
+      "impacto": "raio",
+      "som": "raio",
+      "assinatura": "toque_eletrico"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "eletrizado",
+        "duracaoMs": 6000
+       },
+       {
+        "tipo": "exposto",
+        "pct": 10,
+        "duracaoMs": 6000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "fogo",
+     "nome": "Pavio",
+     "icone": "alvo",
+     "visual": {
+      "cor": "#ff7b39",
+      "conjuracao": "chamas",
+      "impacto": "explosao",
+      "som": "fogo",
+      "assinatura": "risco_de_fogo",
+      "variante": "brasas"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "efeito_atrasado",
+        "duracaoMs": 3000,
+        "efeito": {
+         "dano_direto": 10
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "grito",
+   "papel": "controle",
+   "eixos": [
+    "grupo",
+    "area",
+    "controle",
+    "sustento"
+   ],
+   "base": {
+    "tipoAtaque": "magico",
+    "formulaDano": null,
+    "formulaCura": null,
+    "alcanceCelulas": 3,
+    "tipoArea": "ao_redor",
+    "raioArea": 3,
+    "custoRecurso": 4,
+    "recargaMs": 12000,
+    "conjuracaoMs": 300,
+    "politicaAlvo": "aliados",
+    "politicaImpacto": "area",
+    "interrupcao": "interrompivel",
+    "velocidadeProjetil": 0,
+    "efeitos": [],
+    "grau": "B",
+    "mobilidade": "lenta",
+    "marcos": {
+     "2": {
+      "texto": "Custa 20% menos",
+      "custoPct": -20
+     },
+     "4": {
+      "texto": "Recarrega 15% mais rápido",
+      "recargaPct": -15
+     }
+    },
+    "evolucoes": {
+     "3": [
+      "eficiente",
+      "fortificado"
+     ],
+     "5": [
+      "amplo",
+      "eficiente"
+     ]
+    }
+   },
+   "variantes": [
+    {
+     "elemento": "fisico",
+     "nome": "Grito de guerra",
+     "icone": "grito",
+     "visual": {
+      "cor": "#d5d8dc",
+      "conjuracao": "corte",
+      "impacto": "corte",
+      "som": "golpe",
+      "assinatura": "brado"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "bonus_dano",
+        "pct": 15,
+        "duracaoMs": 8000
+       }
+      ],
+      "tipoAtaque": "fisico"
+     }
+    },
+    {
+     "elemento": "psiquico",
+     "nome": "Intimidar",
+     "icone": "runa",
+     "visual": {
+      "cor": "#c39bd3",
+      "conjuracao": "runas",
+      "impacto": "estrelas",
+      "som": "psiquico",
+      "assinatura": "onda_de_brado"
+     },
+     "sobre": {
+      "politicaAlvo": "proprio",
+      "raioArea": 2,
+      "alcanceCelulas": 0,
+      "formulaDano": null,
+      "efeitos": [
+       {
+        "tipo": "aterrorizado",
+        "duracaoMs": 1200
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "sagrado",
+     "nome": "Hino",
+     "icone": "estrela",
+     "visual": {
+      "cor": "#f7e9a0",
+      "conjuracao": "sagrado",
+      "impacto": "sagrado",
+      "som": "sagrado",
+      "assinatura": "bencao"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "cura_periodica",
+        "valor": 2,
+        "duracaoMs": 6000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "trevas",
+     "nome": "Lamento",
+     "icone": "caveira",
+     "visual": {
+      "cor": "#765b9e",
+      "conjuracao": "sombra",
+      "impacto": "sombra",
+      "som": "trevas",
+      "assinatura": "hoste_espectral"
+     },
+     "sobre": {
+      "politicaAlvo": "proprio",
+      "raioArea": 2,
+      "alcanceCelulas": 0,
+      "efeitos": [
+       {
+        "tipo": "resfriado",
+        "pct": 30,
+        "duracaoMs": 3000
+       },
+       {
+        "tipo": "marcado",
+        "pct": 15,
+        "duracaoMs": 4000
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "chuva",
+   "papel": "dano",
+   "eixos": [
+    "area",
+    "alvos",
+    "eco",
+    "marca"
+   ],
+   "base": {
+    "tipoAtaque": "magico",
+    "formulaDano": "1d6",
+    "formulaCura": null,
+    "alcanceCelulas": 6,
+    "tipoArea": "quadrado",
+    "raioArea": 2,
+    "custoRecurso": 5,
+    "recargaMs": 9000,
+    "conjuracaoMs": 1000,
+    "politicaAlvo": "celula",
+    "politicaImpacto": "area",
+    "interrupcao": "interrompivel",
+    "velocidadeProjetil": 0,
+    "efeitos": [],
+    "grau": "A",
+    "mobilidade": "lenta",
+    "marcos": {
+     "2": {
+      "texto": "+1 de alcance",
+      "alcance": 1
+     },
+     "4": {
+      "texto": "Custa 20% menos",
+      "custoPct": -20
+     }
+    },
+    "evolucoes": {
+     "3": [
+      "amplo",
+      "eficiente"
+     ],
+     "5": [
+      "eco",
+      "brutal"
+     ]
+    }
+   },
+   "variantes": [
+    {
+     "elemento": "fogo",
+     "nome": "Chuva de meteoros",
+     "icone": "chuva",
+     "visual": {
+      "cor": "#ff7b39",
+      "conjuracao": "chamas",
+      "impacto": "explosao",
+      "som": "fogo",
+      "camera": "forte",
+      "assinatura": "meteoro",
+      "variante": "brasas"
+     },
+     "sobre": {
+      "raioArea": 1,
+      "formulaDano": "2d6"
+     }
+    },
+    {
+     "elemento": "gelo",
+     "nome": "Granizo",
+     "icone": "gelo",
+     "visual": {
+      "cor": "#74b9ff",
+      "conjuracao": "cristais",
+      "impacto": "cristais",
+      "som": "gelo",
+      "assinatura": "tempestade_de_gelo"
+     }
+    },
+    {
+     "elemento": "raio",
+     "nome": "Tempestade",
+     "icone": "raio",
+     "visual": {
+      "cor": "#f7dc6f",
+      "conjuracao": "relampago",
+      "impacto": "raio",
+      "som": "raio",
+      "camera": "leve",
+      "assinatura": "tempestade_de_raios"
+     }
+    },
+    {
+     "elemento": "veneno",
+     "nome": "Chuva ácida",
+     "icone": "veneno",
+     "visual": {
+      "cor": "#60aa79",
+      "conjuracao": "bolhas",
+      "impacto": "bolhas",
+      "som": "veneno",
+      "assinatura": "cone_toxico"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "exposto",
+        "pct": 10,
+        "duracaoMs": 3000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "fisico",
+     "nome": "Chuva de lâminas",
+     "icone": "espada",
+     "visual": {
+      "cor": "#d5d8dc",
+      "conjuracao": "corte",
+      "impacto": "corte",
+      "som": "lamina",
+      "assinatura": "chuva_de_laminas"
+     },
+     "sobre": {
+      "conjuracaoMs": 600,
+      "tipoAtaque": "fisico"
+     }
+    }
+   ]
+  },
+  {
+   "id": "postura",
+   "papel": "defesa",
+   "eixos": [
+    "sustento",
+    "eco",
+    "controle",
+    "grupo"
+   ],
+   "base": {
+    "tipoAtaque": "magico",
+    "formulaDano": null,
+    "formulaCura": null,
+    "alcanceCelulas": 0,
+    "tipoArea": "nenhuma",
+    "raioArea": 0,
+    "custoRecurso": 3,
+    "recargaMs": 14000,
+    "conjuracaoMs": 300,
+    "politicaAlvo": "proprio",
+    "politicaImpacto": "proprio",
+    "interrupcao": "interrompivel",
+    "velocidadeProjetil": 0,
+    "efeitos": [],
+    "grau": "B",
+    "mobilidade": "lenta",
+    "marcos": {
+     "2": {
+      "texto": "Custa 20% menos",
+      "custoPct": -20
+     },
+     "4": {
+      "texto": "Recarrega 15% mais rápido",
+      "recargaPct": -15
+     }
+    },
+    "evolucoes": {
+     "3": [
+      "eficiente",
+      "fortificado"
+     ],
+     "5": [
+      "eficiente",
+      "controle"
+     ]
+    }
+   },
+   "variantes": [
+    {
+     "elemento": "fogo",
+     "nome": "Fúria ardente",
+     "icone": "fogo",
+     "visual": {
+      "cor": "#ff7b39",
+      "conjuracao": "chamas",
+      "impacto": "explosao",
+      "som": "fogo",
+      "assinatura": "mao_em_chamas",
+      "variante": "brasas"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "bonus_dano",
+        "pct": 20,
+        "duracaoMs": 8000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "terra",
+     "nome": "Forma de pedra",
+     "icone": "escudo",
+     "visual": {
+      "cor": "#ad885d",
+      "conjuracao": "pedra",
+      "impacto": "pedra",
+      "som": "terra",
+      "assinatura": "pele_de_pedra"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "escudo",
+        "valor": 14,
+        "duracaoMs": 6000
+       },
+       {
+        "tipo": "atolado",
+        "pct": 30,
+        "duracaoMs": 6000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "raio",
+     "nome": "Sobrecarga",
+     "icone": "raio",
+     "visual": {
+      "cor": "#f7dc6f",
+      "conjuracao": "relampago",
+      "impacto": "raio",
+      "som": "raio",
+      "assinatura": "sobrecarga_arcana"
+     },
+     "sobre": {
+      "custoVida": 5,
+      "efeitos": [
+       {
+        "tipo": "acelerado",
+        "pct": 30,
+        "duracaoMs": 6000
+       },
+       {
+        "tipo": "ab_recarga",
+        "pct": 20,
+        "duracaoMs": 6000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "trevas",
+     "nome": "Forma espectral",
+     "icone": "fantasma",
+     "visual": {
+      "cor": "#765b9e",
+      "conjuracao": "sombra",
+      "impacto": "sombra",
+      "som": "trevas",
+      "assinatura": "veu_da_noite"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "fantasma",
+        "duracaoMs": 5000
+       },
+       {
+        "tipo": "esquiva",
+        "pct": 20,
+        "duracaoMs": 5000
+       }
+      ]
+     }
+    },
+    {
+     "elemento": "sagrado",
+     "nome": "Avatar",
+     "icone": "estrela",
+     "visual": {
+      "cor": "#f7e9a0",
+      "conjuracao": "sagrado",
+      "impacto": "sagrado",
+      "som": "sagrado",
+      "assinatura": "asas_da_aurora"
+     },
+     "sobre": {
+      "efeitos": [
+       {
+        "tipo": "cura_periodica",
+        "valor": 2,
+        "duracaoMs": 8000
+       },
+       {
+        "tipo": "bonus_dano",
+        "pct": 10,
+        "duracaoMs": 8000
+       }
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "legado": {
+  "seta_arcana": "projetil_raio",
+  "explosao": "explosao_fogo",
+  "curar": "cura_sagrado",
+  "golpe_atordoante": "prisao_psiquico",
+  "investida": "investida_fisico",
+  "pele_de_pedra": "escudo_terra",
+  "bola_de_fogo": "projetil_fogo",
+  "barreira": "escudo_sagrado",
+  "flecha_venenosa": "maldicao_veneno",
+  "troca_sombria": "recuo_psiquico",
+  "chuva_de_estrelas": "explosao_sagrado",
+  "estaca_de_pedra": "prisao_terra",
+  "abalo_sismico": "nova_terra",
+  "muralha_de_pedra": "muro_terra",
+  "passo_sombrio": "recuo_trevas",
+  "punhal_das_sombras": "dreno_trevas",
+  "veu_da_noite": "postura_trevas",
+  "lanca_radiante": "feixe_sagrado",
+  "circulo_de_amparo": "campo_sagrado",
+  "purificacao": "cura_veneno",
+  "dardo_toxico": "dreno_veneno",
+  "nevoa_venenosa": "campo_veneno",
+  "corte_dilacerante": "armadilha_fisico",
+  "postura_de_aparo": "postura_terra",
+  "onda_de_repulsao": "explosao_fisico",
+  "tenacidade": "grito_fisico",
+  "disciplina_marcial": "grito_fisico",
+  "fluxo_restaurador": "cura_fisico",
+  "dissipar": "maldicao_sagrado",
+  "runa_amplificadora": "grito_sagrado",
+  "impulso": "investida_raio",
+  "rastro_igneo": "investida_fogo",
+  "anel_de_chamas": "muro_fogo",
+  "incinerar": "marca_fogo",
+  "seiva_corrosiva": "escudo_raio",
+  "pedregulho": "investida_terra",
+  "asas_da_aurora": "cura_fogo",
+  "agulha_mental": "marca_psiquico",
+  "telecinese": "prisao_trevas",
+  "pressagio": "recuo_fisico",
+  "couraca_treinada": "escudo_terra",
+  "manto_runico": "escudo_gelo",
+  "foco_arcano": "feixe_raio",
+  "sangue_quente": "postura_fogo",
+  "brasa_interior": "campo_fogo",
+  "imunidade_adquirida": "cura_veneno",
+  "toxinas_potentes": "chuva_veneno",
+  "peso_da_rocha": "nova_terra",
+  "silhueta_esquiva": "recuo_gelo",
+  "golpe_traicoeiro": "marca_trevas",
+  "graca": "cura_sagrado",
+  "zelo": "grito_sagrado",
+  "mente_blindada": "maldicao_psiquico",
+  "pressao_mental": "explosao_psiquico"
+ }
+}

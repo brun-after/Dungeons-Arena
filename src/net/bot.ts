@@ -25,7 +25,7 @@ export class BotDeArena {
     if (u < 0.02) this.cliente.enviarComando({ t: 'mover', dir: aleatorio(this.rng) < 0.15 ? 'parado' : escolher(this.rng, DIRECOES) });
     else if (u < 0.02 + 0.01 * this.agressividade) this.cliente.enviarComando({ t: 'ataqueBasico' });
     else if (u < 0.03 + 0.015 * this.agressividade) {
-      this.cliente.enviarComando({ t: 'usarHabilidade', id: escolher(this.rng, ['seta_arcana', 'explosao', 'curar', 'golpe_atordoante']) });
+      this.cliente.enviarComando({ t: 'usarHabilidade', id: escolher(this.rng, ['projetil_raio', 'explosao_fogo', 'cura_sagrado', 'prisao_psiquico']) });
     }
   }
 }

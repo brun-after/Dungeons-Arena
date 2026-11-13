@@ -48,10 +48,10 @@ test('progressão: acelerar estudo por item, consumir tomo e escolher evolução
   j.nivel = 20;
   j.bolsa.pontosHabilidade = 3;
   // Estudo curto para testar conclusão sem aguardar minutos de tempo real.
-  // Marco 24 (D-094): a Seta arcana é geral; o estudo só aparece para a geral que um livro liberou.
-  j.bolsa.liberadas = [...(j.bolsa.liberadas ?? []), 'seta_arcana'];
-  j.bolsa.estudo = { id: 'seta_arcana', totalTicks: 18000, restanteTicks: 18000, aceleracoes: 0, velocidade12: 12, fracao12: 0 };
-  const bola = j.bolsa.conhecidas.find(h => h.id === 'bola_de_fogo');
+  // Marco 24 (D-094): a Seta arcana (marco 40: o Dardo voltaico) é geral; o estudo só aparece para a geral que um livro liberou.
+  j.bolsa.liberadas = [...(j.bolsa.liberadas ?? []), 'projetil_raio'];
+  j.bolsa.estudo = { id: 'projetil_raio', totalTicks: 18000, restanteTicks: 18000, aceleracoes: 0, velocidade12: 12, fracao12: 0 };
+  const bola = j.bolsa.conhecidas.find(h => h.id === 'projetil_fogo');
   if (!bola) throw new Error('Bola de fogo ausente');
   bola.rank = 2;
   j.bolsa.mochila.push(
@@ -77,8 +77,8 @@ test('progressão: acelerar estudo por item, consumir tomo e escolher evolução
   await mochila.getByRole('button', { name: 'Itens', exact: true }).click();
   await mochila.locator('[data-chave="inv-teste-essencia"]').click();
   await expect(mochila.getByText('Escolha uma habilidade compatível', { exact: false })).toBeVisible();
-  await mochila.locator('[data-chave="caminho-bola_de_fogo-eficiente-teste-essencia"]').click();
-  await expect(mochila.locator('[data-habilidade="bola_de_fogo"]')).toContainText('Eficiente');
+  await mochila.locator('[data-chave="caminho-projetil_fogo-eficiente-teste-essencia"]').click();
+  await expect(mochila.locator('[data-habilidade="projetil_fogo"]')).toContainText('Eficiente');
   await expect(mochila.locator('[data-pontos-habilidade]')).toHaveAttribute('data-pontos-habilidade', '4');
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Salvar e voltar aos slots' }).click();
@@ -95,7 +95,7 @@ test('progressão: acelerar estudo por item, consumir tomo e escolher evolução
   expect(b.estudo.velocidade12).toBe(12);
   expect(b.pontosHabilidade).toBe(4);
   expect(b.ranksPorItens).toBe(1);
-  expect(b.conhecidas.find(h => h.id === 'bola_de_fogo')?.caminhos).toContain('eficiente');
+  expect(b.conhecidas.find(h => h.id === 'projetil_fogo')?.caminhos).toContain('eficiente');
   b.estudo.restanteTicks = 60;
   await page.locator('[data-slot="3"] input[type="file"]').setInputFiles({
     name: 'estudo-curto.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(final)),
@@ -104,11 +104,11 @@ test('progressão: acelerar estudo por item, consumir tomo e escolher evolução
   await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
   await page.keyboard.press('KeyI');
   await mochila.getByRole('button', { name: /^Habilidades/ }).click();
-  await expect(mochila.locator('[data-habilidade="bola_de_fogo"]')).toContainText('Eficiente');
-  await expect(mochila.locator('[data-estudo-restante="seta_arcana"]')).toHaveCount(0, { timeout: 30000 });
+  await expect(mochila.locator('[data-habilidade="projetil_fogo"]')).toContainText('Eficiente');
+  await expect(mochila.locator('[data-estudo-restante="projetil_raio"]')).toHaveCount(0, { timeout: 30000 });
   // As teclas 1 e 2 são de classe: a geral estudada entra na primeira geral livre (a 4) e o botão a leva para a 5.
-  await expect(mochila.locator('[data-tecla="4"]')).toContainText('Seta arcana');
-  await mochila.locator('[data-chave="tecla-seta_arcana-4"]').click();
-  await expect(mochila.locator('[data-tecla="5"]')).toContainText('Seta arcana');
+  await expect(mochila.locator('[data-tecla="4"]')).toContainText('Dardo voltaico');
+  await mochila.locator('[data-chave="tecla-projetil_raio-4"]').click();
+  await expect(mochila.locator('[data-tecla="5"]')).toContainText('Dardo voltaico');
   expect(erros).toEqual([]);
 });

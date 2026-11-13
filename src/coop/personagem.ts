@@ -21,6 +21,7 @@ import { cabeNoSlot, NOMES_ATRIBUTOS } from '../progression/itens';
 import { ticksDe } from '../core/tempo';
 import { jogadorDoSave, type RegistroProgresso } from '../save/esquema';
 import { vontadeNoLugarDaForca } from '../save/migracao-39';
+import { semSkillsDoLegado } from '../save/migracao-40';
 import { pontosAteONivel, tetoDoAtributo, xpParaProximo } from '../progression/nivel';
 
 const MAX_NOME = 24;
@@ -172,7 +173,8 @@ function conferirItens(b: Objeto, bolsa: Bolsa, nivel: number, ctx: ContextoSimu
  */
 export function conferirPersonagem(pedido: unknown, ctx: ContextoSimulacao, id: string, jogadorId: string): PersonagemConferido | null {
   if (!ehObjeto(pedido) || !ehObjeto(pedido.bolsa)) return null;
-  const b = pedido.bolsa;
+  // Marco 40 (D-158): a ficha antiga (Mundo, grupo, certificado) troca as gerais antigas pelas skills de núcleo.
+  const b = semSkillsDoLegado(pedido.bolsa, ctx.conteudo.legadoDeSkills);
   const classe = typeof b.classeId === 'string' ? ctx.conteudo.classes.get(b.classeId) : undefined;
   if (!classe) return null;
   const e = criarJogador(classe, id, 0, 0, ctx.balance, jogadorId);

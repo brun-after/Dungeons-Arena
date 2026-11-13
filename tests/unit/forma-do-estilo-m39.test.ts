@@ -9,6 +9,7 @@ import { resolverHabilidade } from '../../src/combat/compilar-habilidade';
 import { criarJogador } from '../../src/entities/fabrica';
 import type { Entidade } from '../../src/entities/entidade';
 import { formasDosEstilos, radarDe } from '../../src/progression/estilos';
+import { formaDoEixo } from '../../src/combat/eixos';
 import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 
 const ctx = contexto(faseDeTexto(SALA_ABERTA));
@@ -26,13 +27,16 @@ function mago(nivel: number, inteligencia: number, destreza: number): Entidade {
   j.atributos = { ...b.atributosBase };
   return j;
 }
-const faixaDoArtilheiro = (j: Entidade) => formasDosEstilos(ctx, j).find((f) => f.forma.mod === 'maior_e_mais_lenta')?.faixa ?? 0;
+const faixaDoArtilheiro = (j: Entidade) => formasDosEstilos(ctx, j).find((f) => f.estilo.id === 'artilheiro')?.faixa ?? 0;
 
 describe('forma do estilo, gradual (D-156)', () => {
-  it('todo estilo com forma tem modificador conhecido e custo de dano', () => {
-    const formas = [...CONTEUDO.estilos.values()].flat().filter((e) => e.forma);
-    expect(formas.length).toBeGreaterThanOrEqual(10);
-    for (const e of formas) expect(obter(e.forma).danoPct).toBeLessThan(0);
+  it('todo estilo tem dois eixos, e a forma de cada eixo cobra dano (marco 40, D-157)', () => {
+    const estilos = [...CONTEUDO.estilos.values()].flat();
+    expect(estilos).toHaveLength(25);
+    for (const e of estilos) {
+      expect(e.eixos[0]).not.toBe(e.eixos[1]);
+      for (const x of e.eixos) expect(ctx.balance.habilidades.eixos.custoPct[formaDoEixo(x)]).toBeLessThan(0);
+    }
   });
 
   it('a faixa: 0 antes de 10%, 1 em 10% e 10 em 100% ou acima', () => {
@@ -80,7 +84,7 @@ describe('forma do estilo, gradual (D-156)', () => {
     const outra = obter(['raio_em_cadeia', 'mente_partida', 'bola_de_fogo', 'lanca_de_gelo'].find((id) => !(habilidadeDoAtor(ctx, muito, id)?.tags ?? ['area']).includes('area')));
     expect(lerChave(chaveDoAtor(ctx, muito, outra))?.formas ?? []).not.toContainEqual(expect.objectContaining({ mod: 'maior_e_mais_lenta' }));
     // O custo por alvo cresce com a faixa: na faixa f, f/10 do custo cheio.
-    const custo = obter([...CONTEUDO.estilos.get('mago') ?? []].find((e) => e.id === 'artilheiro')?.forma).danoPct;
+    const custo = ctx.balance.habilidades.eixos.custoPct.maior_e_mais_lenta;
     // Só a área maior sai (o eco do Ocultista também vale nas magias e continua).
     const outras = (h: typeof hm) => (h.formas ?? []).filter((f) => f.mod !== 'maior_e_mais_lenta');
     const semForma = (h: typeof hm) => ({ ...h, chave: formatarChave({ ...obter(lerChave(h.chave)), formas: outras(h) }), formas: outras(h) });

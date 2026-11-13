@@ -48,7 +48,9 @@ function criarCampo(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, 
   if (meus.length >= ctx.balance.tatica.tetoCampos) return false;
   campos.push({ id: novoId(estado), tipo, donoId: ator.id, equipe: ator.equipe, x: p.x, y: p.y, raio: tipo === 'muralha' ? 0 : 1,
     ateTick: estado.tick + ticksDe(Math.min(ef.duracaoMs, tipo === 'muralha' ? ctx.balance.tatica.muralhaMaxMs : ctx.balance.tatica.campoMaxMs)), proximoPulso: estado.tick, intervaloTicks: ticksDe(1000),
-    efeito: tipo === 'muralha' ? null : construirEfeito(tipo === 'cura' ? 'cura' : 'envenenado', { valor: ef.valor, duracaoMs: tipo === 'cura' ? 0 : 2000, pct: tipo === 'cura' ? 0 : 30 }) });
+    // Marco 40 (12/11/2026, D-158): o campo hostil pode levar o estado do elemento (`efeito`); sem ele, o veneno.
+    efeito: tipo === 'muralha' ? null : tipo === 'veneno' && ef.interno ? ef.interno
+      : construirEfeito(tipo === 'cura' ? 'cura' : 'envenenado', { valor: ef.valor, duracaoMs: tipo === 'cura' ? 0 : 2000, pct: tipo === 'cura' ? 0 : 30 }) });
   return true;
 }
 

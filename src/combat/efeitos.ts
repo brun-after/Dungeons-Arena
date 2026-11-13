@@ -133,6 +133,8 @@ export function multiplicadorCuraRecebida(e: Entidade, tick: number): number {
 export function multiplicadorDanoRecebido(e: Entidade, tick: number): number {
   let mais = 0;
   for (const [f, d] of comDefinicao(e, tick)) if (d.danoRecebido > 0) mais += f.pct;
+  // Marco 40 (D-157): cada marca da forma do estilo soma o seu `pct`.
+  for (const [f, d] of comDefinicao(e, tick)) if (d.marcas) mais += f.valor * f.pct;
   return 1 + mais / 100;
 }
 
@@ -337,6 +339,18 @@ export function aplicarEfeito(
       return;
     }
     ef = { ...ef, valor: Math.min(ef.valor, ef.pct) };
+  }
+  // Marco 40 (12/11/2026, D-157): as marcas da forma do estilo somam até o teto; a mais forte vale e a duração renova.
+  if (def.marcas) {
+    const atual = alvo.efeitos.find((f) => f.tipo === ef.tipo && f.ateTick > tick);
+    const max = ctx.balance.habilidades.eixos.marca.max;
+    if (atual) {
+      atual.valor = Math.min(max, atual.valor + ef.valor);
+      atual.pct = Math.max(atual.pct, ef.pct);
+      atual.ateTick = Math.max(atual.ateTick, tick + ticksDe(ef.duracaoMs));
+      return;
+    }
+    ef = { ...ef, valor: Math.min(max, ef.valor) };
   }
   // Marco 14: acúmulo, oposições, transformação, teto e imunidade vêm das interações (acumulo.ts).
   const ativo = registrarEfeitoAtivo(ctx, alvo, ef, origem.id, tick, (vira) => {

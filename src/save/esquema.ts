@@ -15,10 +15,11 @@ import { basicoDoPersonagem, basicoSecundario } from '../progression/armas';
 import { migrarMovimentoLivre } from './migracao-25';
 import { migrarSkillsDeClasse } from './migracao-24';
 import { migrarForcaParaVontade, migrarSemAtributoDeClasse } from './migracao-39';
+import { migrarSkillsDeNucleo } from './migracao-40';
 import { MAX_REGRAS, RE_REGRA_ESTILO } from '../world/estilo';
 import type { ParametrosGeracao } from '../world/gerador';
 
-export const VERSAO_SCHEMA = 30;
+export const VERSAO_SCHEMA = 31;
 // Marco 23 (24/10/2026, D-092): dez slots de personagem por jogador (eram três).
 export const MAX_SLOTS = 10;
 export const SLOTS: readonly number[] = Array.from({ length: MAX_SLOTS }, (_, i) => i + 1);
@@ -410,6 +411,8 @@ export const MIGRACOES: Readonly<Record<number, Migracao>> = {
   28: (r) => migrarForcaParaVontade(r),
   // 12/11/2026 (D-155): o atributo de classe sai; os pontos dele voltam na tela de atualização.
   29: (r) => migrarSemAtributoDeClasse(r),
+  // Marco 40 (12/11/2026, D-158): as gerais antigas viram as skills comuns de núcleo; os ranks acima do 1 voltam.
+  30: (r) => migrarSkillsDeNucleo(r, conteudoOficial().legadoDeSkills),
 };
 
 /** D-127: toda entidade ganha `dominio: 10` nos atributos (e na base da ficha, quem tem bolsa). */

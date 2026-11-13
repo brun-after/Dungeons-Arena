@@ -66,7 +66,7 @@ describe('validação de comandos (§3.6)', () => {
   it('reenvio do mesmo seq não reaplica (deduplicação)', () => {
     const sala = novaSala();
     const j = entrar(sala);
-    const pacote = { sessaoId: j.bem.sessaoId, epocaSala: 1, seq: 1, tickCliente: 0, cmd: { t: 'usarHabilidade', id: 'curar' } };
+    const pacote = { sessaoId: j.bem.sessaoId, epocaSala: 1, seq: 1, tickCliente: 0, cmd: { t: 'usarHabilidade', id: 'cura_sagrado' } };
     j.enviar({ t: 'cmd', pacote });
     j.enviar({ t: 'cmd', pacote });
     sala.tick(DT_MS);

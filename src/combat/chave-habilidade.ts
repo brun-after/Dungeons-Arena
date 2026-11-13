@@ -9,7 +9,10 @@
 // Marco 24 (24/10/2026): `~variante` no fim — a variante que o estado de quem usa liga (`redemoinho@3~frenesi`).
 // Marco 39 (12/11/2026, D-151): `!runaN` no fim — a runa do encaixe e a faixa do vínculo com ela (`chamas@2!gelo7`).
 // D-156: `^modN` antes da runa — as formas dos estilos e a faixa de cada uma (`chamas@2^ecoar4,encadear7!gelo7`).
+// Marco 40 (12/11/2026, D-157): as formas aceitam os nove eixos (`^controle4,marca7`), e `%N` antes da runa leva a faixa
+// da sintonia com o elemento de uma skill comum (a função secundária do papel cresce com ela).
 import { MODIFICADORES, VARIANTES, type Modificador, type Variante } from './habilidades';
+import { ehForma, type FormaId } from './eixos';
 import type { Elemento } from './elementos';
 
 const RUNAS = ['fisico', 'fogo', 'gelo', 'raio', 'veneno', 'psiquico', 'terra', 'trevas', 'sagrado'] as const;
@@ -21,7 +24,9 @@ export interface PartesChave {
   mods: readonly Modificador[];
   variantes?: readonly Variante[];
   runa?: { runa: 'fisico' | Elemento; faixa: number };
-  formas?: readonly { mod: Modificador; faixa: number }[];
+  formas?: readonly { mod: FormaId; faixa: number }[];
+  /** D-157: a faixa da sintonia com o elemento da skill comum (0 a 10). */
+  sintonia?: number;
 }
 
 export function formatarChave(p: PartesChave): string {
@@ -34,6 +39,7 @@ export function formatarChave(p: PartesChave): string {
   if (variantes.length > 0) s += `~${variantes.join(',')}`;
   const formas = [...(p.formas ?? [])].filter((f) => f.faixa > 0).sort((a, b) => a.mod.localeCompare(b.mod));
   if (formas.length > 0) s += `^${formas.map((f) => `${f.mod}${String(Math.min(10, Math.round(f.faixa)))}`).join(',')}`;
+  if (p.sintonia !== undefined) s += `%${String(Math.max(0, Math.min(10, Math.round(p.sintonia))))}`;
   if (p.runa) s += `!${p.runa.runa}${String(Math.max(0, Math.min(10, Math.round(p.runa.faixa))))}`;
   return s;
 }
@@ -42,7 +48,7 @@ const ehModificador = (v: string): v is Modificador => (MODIFICADORES as readonl
 const ehVariante = (v: string): v is Variante => (VARIANTES as readonly string[]).includes(v);
 
 export function lerChave(chave: string): PartesChave | null {
-  const m = /^([a-z0-9_]+)(?:@(\d+))?(?:\/([a-z0-9_,]+))?(?:\+([a-z_,]+))?(?:~([a-z_,]+))?(?:\^([a-z_0-9,]+))?(?:!([a-z]+)(\d+))?$/.exec(chave);
+  const m = /^([a-z0-9_]+)(?:@(\d+))?(?:\/([a-z0-9_,]+))?(?:\+([a-z_,]+))?(?:~([a-z_,]+))?(?:\^([a-z_0-9,]+))?(?:%(\d+))?(?:!([a-z]+)(\d+))?$/.exec(chave);
   if (!m?.[1]) return null;
   const mods = (m[4] ?? '').split(',').filter((x) => x !== '');
   if (!mods.every(ehModificador)) return null;
@@ -51,21 +57,26 @@ export function lerChave(chave: string): PartesChave | null {
   const rank = m[2] === undefined ? 1 : Number(m[2]);
   if (!Number.isInteger(rank) || rank < 1) return null;
   let runa: PartesChave['runa'];
-  const formas: { mod: Modificador; faixa: number }[] = [];
+  const formas: { mod: FormaId; faixa: number }[] = [];
   for (const parte of (m[6] ?? '').split(',').filter((x) => x !== '')) {
     const f = /^([a-z_]+?)(\d+)$/.exec(parte);
     const mod = f?.[1];
     const faixa = Number(f?.[2]);
-    if (!mod || !ehModificador(mod) || !(faixa >= 1 && faixa <= 10)) return null;
+    if (!mod || !ehForma(mod) || !(faixa >= 1 && faixa <= 10)) return null;
     formas.push({ mod, faixa });
   }
+  let sintonia: number | undefined;
   if (m[7] !== undefined) {
-    const r = RUNAS.find((x) => x === m[7]);
-    const faixa = Number(m[8]);
+    sintonia = Number(m[7]);
+    if (sintonia > 10) return null;
+  }
+  if (m[8] !== undefined) {
+    const r = RUNAS.find((x) => x === m[8]);
+    const faixa = Number(m[9]);
     if (!r || faixa > 10) return null;
     runa = { runa: r, faixa };
   }
-  return { id: m[1], rank, caminhos: (m[3] ?? '').split(',').filter((x) => x !== ''), mods, ...(variantes.length > 0 && { variantes }), ...(formas.length > 0 && { formas }), ...(runa && { runa }) };
+  return { id: m[1], rank, caminhos: (m[3] ?? '').split(',').filter((x) => x !== ''), mods, ...(variantes.length > 0 && { variantes }), ...(formas.length > 0 && { formas }), ...(sintonia !== undefined && { sintonia }), ...(runa && { runa }) };
 }
 
 const PREFIXO_GERADA = 'g_';

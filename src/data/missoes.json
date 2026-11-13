@@ -8,7 +8,7 @@
       "conta": { "evento": "abate", "preset": "esqueleto", "tag": "flechas" },
       "meta": 30,
       "zeraAo": ["dano_recebido", "fase_nova"],
-      "recompensa": { "id": "livro_chuva_de_estrelas" }
+      "recompensa": { "id": "livro_explosao_sagrado" }
     },
     {
       "id": "duas_escolas",

@@ -9,24 +9,35 @@
 //   para cima ele arranca estilhaços ao sair;
 // - maior e mais lenta: o peso. Na conjuração, a força se junta em anéis que fecham sobre a mão. No estouro, um anel
 //   externo pesado passa da área; nas faixas altas a terra treme.
+// Marco 40 (12/11/2026, D-157): as cinco formas novas, também à mão:
+// - controle: correntes que se apertam em volta do alvo; com a faixa, mais elos, e no alto a algema fecha;
+// - sustento: fios de luz voltam do alvo para quem usa; do meio para cima, a casca aparece nele e brilha;
+// - marca: um sigilo de mira pousa sobre o alvo; do meio para cima ele gira, e no alto arde;
+// - grupo: um pulso sai de quem usa para os aliados em volta; com a faixa, maior, com penas de luz subindo;
+// - invocação: o círculo do chamado se abre na conjuração; do meio para cima as almas sobem dele.
 // Só desenho; a intensidade vem da faixa na chave da skill.
 
-import type { Modificador } from '../../combat/habilidades';
+import type { FormaId } from '../../combat/eixos';
 import { clarao, clarear, orbitar, ondaDeChoque, tween } from './blocos';
 import type { Acerto, AreaVfx, CenaVfx, P } from './cena';
 import { cintilar, em } from './emissoes';
 
 export interface FormaVisual {
-  mod: Modificador;
+  mod: FormaId;
   faixa: number;
 }
 
 /** O tom de cada forma, misturado à cor da skill: o eco é pálido e violeta, o elo é azul de faísca, o traço é claro. */
-const TOM: Readonly<Record<Modificador, number>> = {
+const TOM: Readonly<Record<FormaId, number>> = {
   ecoar: 0xd2c4ff,
   encadear: 0x9fe4ff,
   atravessar: 0xfff2c8,
   maior_e_mais_lenta: 0xffb070,
+  controle: 0xb8c4d6,
+  sustento: 0xc8ffe0,
+  marca: 0xff9a8a,
+  grupo: 0xffe6a0,
+  invocacao: 0xb6a6ff,
 };
 
 /** A intensidade (0,3 a 1) pela faixa: a faixa 1 já se nota; a 10 é o estilo inteiro. */
@@ -70,6 +81,39 @@ function traco(c: CenaVfx, a: Acerto, cor: number, f: FormaVisual, i: number): v
   if (f.faixa >= 5) c.particulas.emitirLista([em({ textura: 'estilhaco', quantidade: Math.round(2 + 4 * i), vidaMs: [250, 420], velocidade: [90, 180], direcao: 'orientada', abertura: 0.5, escala: [0.35, 0.1], alpha: [1, 0], aditivo: true, raio: 4, cor })], a.ate.x, a.ate.y, cor, undefined, { x: dx / d, y: dy / d });
 }
 
+function correntes(c: CenaVfx, a: Acerto, f: FormaVisual, cor: number, i: number): void {
+  const alvo = a.alvoId;
+  const onde = (): P | null => c.ondeEsta(alvo) ?? a.ate;
+  // O anel aperta: começa largo e fecha sobre o alvo.
+  tween(c, { textura: 'choque', de: a.ate, s: [1.5 + 0.6 * i, 0.45], sy: [(1.5 + 0.6 * i) * (c.iso ? 0.5 : 1), 0.45 * (c.iso ? 0.5 : 1)], a: [0.15, 0.45 + 0.4 * i], cor, aditivo: true, ms: 360, noChao: true });
+  orbitar(c, onde, f.faixa >= 4 ? 'elo' : 'elo_lado', cor, { n: 2 + Math.floor(f.faixa / 3), raio: 0.35 + 0.15 * i, ms: 480 + 140 * i, voltas: 0.5 + 0.3 * i, tamanho: 0.3 + 0.3 * i, aditivo: false, tangente: true });
+  if (f.faixa >= 8 && !c.reduzido) tween(c, { textura: 'algema', de: a.ate, s: [0.9, 0.55], a: [0, 0.9], cor: clarear(cor, 0.2), aditivo: false, ms: 300, atrasoMs: 260 });
+}
+
+function fiosDeVolta(c: CenaVfx, a: Acerto, f: FormaVisual, cor: number, i: number): void {
+  const quem = a.de;
+  if (!quem) return;
+  // O fio sai do alvo e volta para quem usa.
+  tween(c, { textura: 'feixe', de: a.ate, para: quem, s: [0.15 + 0.2 * i, 0.05], a: [0.4 + 0.5 * i, 0], cor, aditivo: true, ms: 260 + 80 * i, atrasoMs: 60 });
+  c.particulas.emitirLista([cintilar(Math.round(1 + 3 * i), { velocidade: [10, 30], direcao: 'cima', cor })], quem.x, quem.y, cor);
+  if (f.faixa >= 5) tween(c, { textura: 'hexagono', de: quem, s: [0.6, 1 + 0.4 * i], a: [0.25 + 0.35 * i, 0], cor, aditivo: true, ms: 420, atrasoMs: 220 });
+  if (f.faixa >= 8) clarao(c, quem, cor, 0.8 + 0.6 * i, 200);
+}
+
+function sigilo(c: CenaVfx, a: Acerto, f: FormaVisual, cor: number, i: number): void {
+  tween(c, { textura: 'mira_alvo', de: a.ate, s: [1.2, 0.45 + 0.35 * i], a: [0, 0.6 + 0.35 * i], rot: f.faixa >= 5 ? [0, 1.2] : [0, 0], cor, aditivo: true, ms: 420 });
+  tween(c, { textura: 'mira_alvo', de: a.ate, s: [0.45 + 0.35 * i, 0.5 + 0.35 * i], a: [0.6 + 0.35 * i, 0], cor, aditivo: true, ms: 900, atrasoMs: 420 });
+  if (f.faixa >= 8) tween(c, { textura: 'runa1', de: a.ate, s: [0.3, 0.7], a: [0.9, 0], cor: clarear(cor, 0.3), aditivo: true, ms: 380, atrasoMs: 300 });
+}
+
+function pulsoDoGrupo(c: CenaVfx, a: Acerto, f: FormaVisual, cor: number, i: number): void {
+  const quem = a.de;
+  if (!quem) return;
+  ondaDeChoque(c, quem, cor, 1.6 + 1.6 * i, 420 + 160 * i);
+  if (f.faixa >= 5) c.particulas.emitirLista([em({ textura: 'pena', quantidade: Math.round(2 + 4 * i), vidaMs: [600, 900], velocidade: [20, 45], direcao: 'cima', escala: [0.35, 0.15], alpha: [0.9, 0], aditivo: true, raio: 14, cor })], quem.x, quem.y, cor);
+  if (f.faixa >= 8) ondaDeChoque(c, quem, clarear(cor, 0.3), 1.2 + 1.4 * i, 360, 'choque');
+}
+
 /** A forma no acerto: o eco, os elos ou o traço, na intensidade da faixa. Só os três primeiros alvos desenham. */
 export function formaNoAcerto(c: CenaVfx, formas: readonly FormaVisual[], a: Acerto): void {
   if (a.indice >= 3) return;
@@ -79,11 +123,23 @@ export function formaNoAcerto(c: CenaVfx, formas: readonly FormaVisual[], a: Ace
     if (f.mod === 'ecoar' && a.indice === 0) eco(c, a, f, cor, i);
     if (f.mod === 'encadear') elos(c, a, f, cor, i);
     if (f.mod === 'atravessar') traco(c, a, cor, f, i);
+    if (f.mod === 'controle') correntes(c, a, f, cor, i);
+    if (f.mod === 'sustento' && a.indice === 0) fiosDeVolta(c, a, f, cor, i);
+    if (f.mod === 'marca') sigilo(c, a, f, cor, i);
+    if (f.mod === 'grupo' && a.indice === 0) pulsoDoGrupo(c, a, f, cor, i);
   }
 }
 
-/** A forma na mão de quem conjura: o peso da área maior se junta em anéis que fecham. */
+/** A forma na mão de quem conjura: o peso da área maior se junta em anéis que fecham; o chamado abre o círculo. */
 export function formaNaConjuracao(c: CenaVfx, formas: readonly FormaVisual[], pos: P, cor: number): void {
+  const inv = formas.find((x) => x.mod === 'invocacao');
+  if (inv) {
+    const i = intensidadeDaForma(inv.faixa);
+    const tom = mistura(cor, TOM.invocacao);
+    tween(c, { textura: 'circulo_runico', de: pos, s: [0.4, 1 + 0.8 * i], sy: [0.4 * (c.iso ? 0.5 : 1), (1 + 0.8 * i) * (c.iso ? 0.5 : 1)], a: [0.7 * i + 0.2, 0], rot: [0, 0.6], cor: tom, aditivo: true, ms: 560, noChao: true });
+    if (inv.faixa >= 5) c.particulas.emitirLista([em({ textura: 'alma', quantidade: Math.round(1 + 3 * i), vidaMs: [700, 1000], velocidade: [25, 50], direcao: 'cima', escala: [0.4, 0.2], alpha: [0.85, 0], aditivo: true, raio: 10, cor: tom })], pos.x, pos.y, tom);
+    if (inv.faixa >= 8) clarao(c, pos, tom, 1 + 0.6 * i, 220);
+  }
   const f = formas.find((x) => x.mod === 'maior_e_mais_lenta');
   if (!f) return;
   const i = intensidadeDaForma(f.faixa);

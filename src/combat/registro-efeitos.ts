@@ -77,6 +77,8 @@ export const TIPOS_EFEITO = [
   'passo_leve',
   // 07/11/2026 (D-135): o orbe (e o Pó revelador) que mostra as armadilhas por perto.
   'vista_de_armadilha',
+  // Marco 40 (12/11/2026, D-157): a marca da forma do estilo, que acumula (combat/eixos.ts).
+  'marca_estilo',
 ] as const;
 export type TipoEfeito = (typeof TIPOS_EFEITO)[number];
 
@@ -84,7 +86,8 @@ export type TipoEfeito = (typeof TIPOS_EFEITO)[number];
 export type CampoEfeito = 'valor' | 'pct';
 
 /** Sobre quem o efeito de uma habilidade cai: o alvo do impacto (padrão) ou quem conjurou. */
-export type DestinoEfeito = 'alvo' | 'conjurador';
+/** Marco 40 (12/11/2026, D-157): `aliados` cai nos aliados em volta de quem conjurou (a forma de grupo). */
+export type DestinoEfeito = 'alvo' | 'conjurador' | 'aliados';
 
 /** Forma canônica: uma entrada por componente, só com os campos do tipo (§2.8, normalização). */
 export interface EfeitoCanonico {
@@ -183,6 +186,8 @@ export interface DefinicaoEfeito {
   protegeDeArmadilha: boolean;
   /** 07/11/2026 (D-135): enquanto ativo, o portador vê sem teste as armadilhas hostis em `armadilhas.vistaRaio`. */
   revelaArmadilhas: boolean;
+  /** Marco 40 (D-157): o `valor` conta as marcas (somam até `balance.habilidades.eixos.marca.max`); cada uma soma `pct` ao dano recebido. */
+  marcas: boolean;
 }
 
 type Def = Omit<DefinicaoEfeito, 'id'>;
@@ -225,6 +230,7 @@ const BASE: Omit<Def, 'icone' | 'cor' | 'positivo' | 'padrao' | 'campos'> = {
   reflexo: false,
   protegeDeArmadilha: false,
   revelaArmadilhas: false,
+  marcas: false,
 };
 
 const negativo = (icone: string, cor: string, campos: readonly CampoEfeito[], padrao: Def['padrao'], extra: Partial<Def>): Def => ({
@@ -307,6 +313,7 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   congelado: negativo('gelo', '#a0d8ef', [], { duracaoMs: 1500, valor: 0, pct: 0 }, { bloqueiaMovimento: true, bloqueiaAcoes: 'todas' }),
   eletrizado: negativo('raio', '#f7dc6f', [], { duracaoMs: 2500, valor: 0, pct: 0 }, {}),
   envenenado: negativo('veneno', '#58d68d', ['valor', 'pct'], { duracaoMs: 5000, valor: 2, pct: 50 }, { periodico: 'dano', curaRecebida: -1 }),
+  marca_estilo: negativo('alvo', '#c0392b', ['valor', 'pct'], { duracaoMs: 6000, valor: 1, pct: 2 }, { marcas: true }),
   exposto: negativo('olho', '#d980fa', ['pct'], { duracaoMs: 4000, valor: 0, pct: 20 }, { danoRecebido: 1 }),
   enraizado: negativo('pedra', '#8d6e63', [], { duracaoMs: 1000, valor: 0, pct: 0 }, { bloqueiaMovimento: true }),
   marcado: negativo('alvo', '#8e44ad', ['pct'], { duracaoMs: 4000, valor: 0, pct: 25 }, { danoRecebido: 1, someAoLevarGolpe: true }),

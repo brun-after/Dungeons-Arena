@@ -532,26 +532,26 @@ test.describe('desktop', () => {
   });
 
   // Marco 24 (25/10/2026, D-094): 1 e 2 são de classe; a geral inicial do Necromante começa na 3 e vai para a 4.
-  // 07/11/2026 (D-135): a geral inicial passou de Barreira a Dissipar.
-  test('habilidades: escolher o necromante, pôr o Dissipar na tecla 4 e ler o cartão', async ({ page }) => {
+  // 07/11/2026 (D-135): a geral inicial passou de Barreira a Dissipar; marco 40 (D-158), à Maldição (skill de núcleo).
+  test('habilidades: escolher o necromante, pôr a Maldição na tecla 4 e ler o cartão', async ({ page }) => {
     const erros: string[] = [];
     page.on('pageerror', (e) => erros.push(e.message));
     await page.goto('./?jogo=campanha&slot=1&diag=1');
     await expect(page.getByRole('heading', { name: 'Escolha a classe' })).toBeVisible();
     await page.getByRole('link', { name: 'Jogar de Necromante' }).click();
     await expect(page.locator('#diag')).toHaveAttribute('data-celula', /^\d+,\d+$/);
-    await expect(page.getByTestId('habilidade-dissipar')).toBeVisible();
+    await expect(page.getByTestId('habilidade-maldicao_trevas')).toBeVisible();
 
     await page.keyboard.press('KeyI');
     const mochila = page.getByRole('dialog', { name: 'Mochila' });
     await mochila.getByRole('button', { name: 'Habilidades' }).click();
     await expect(mochila.getByTestId('painel-sintonia')).toBeVisible();
     // Ajuste de 16/10/2026 (D-067): o botão da carta põe direto na tecla (aqui, a 4).
-    await mochila.locator('[data-chave="tecla-dissipar-3"]').click();
-    await expect(mochila.locator('[data-tecla="4"]')).toContainText('Dissipar');
+    await mochila.locator('[data-chave="tecla-maldicao_trevas-3"]').click();
+    await expect(mochila.locator('[data-tecla="4"]')).toContainText('Maldição');
     await page.keyboard.press('Escape');
-    // A barra é posicional: com a 3 vazia, o Dissipar segue na tecla 4.
-    await expect(page.getByTestId('habilidade-dissipar').locator('.tecla')).toHaveText('4');
+    // A barra é posicional: com a 3 vazia, a Maldição segue na tecla 4.
+    await expect(page.getByTestId('habilidade-maldicao_trevas').locator('.tecla')).toHaveText('4');
     // 07/11/2026 (D-136): o Dardo funesto mostra as cargas prontas.
     await expect(page.getByTestId('habilidade-dardo_funesto').locator('.cargas')).toHaveText('2');
     expect(erros).toEqual([]);
@@ -676,7 +676,7 @@ test.describe('celular (emulação)', () => {
     const { diag, erros } = await abrir(page);
     const [x0] = await ler(diag, 'celula');
     const j = await centro(page.getByTestId('joystick'));
-    const h = await centro(page.getByTestId('habilidade-curar'));
+    const h = await centro(page.getByTestId('habilidade-cura_sagrado'));
     const cdp = await page.context().newCDPSession(page);
     const dedo1 = { x: j.x + 45, y: j.y, id: 1 };
 
@@ -748,7 +748,7 @@ test.describe('celular (emulação)', () => {
     const joystick = await page.getByTestId('joystick').boundingBox();
     // Marco 24: o kit inicial do Aventureiro (2 de classe e a geral) e a ultimate no botão grande.
     await expect(page.getByTestId('ultimate')).toBeVisible();
-    for (const id of ['mergulho', 'grito_do_falcao', 'curar']) {
+    for (const id of ['mergulho', 'grito_do_falcao', 'cura_sagrado']) {
       const caixa = await page.getByTestId(`habilidade-${id}`).boundingBox();
       expect(caixa, id).not.toBeNull();
       if (!caixa || !viewport || !joystick) continue;

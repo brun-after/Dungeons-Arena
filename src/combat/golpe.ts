@@ -45,6 +45,7 @@ import { aoAcertarMagia, multiplicadorDaEncarnacao } from './encarnacao-efeitos'
 import { aoFecharSequencia, efeitoDaSinergia } from './sinergias-passivas';
 import { vinculoDosMortos } from './necromancia';
 import { penetracaoPct } from '../progression/vinculo';
+import { ESTADOS_DE_CONTROLE } from './eixos';
 
 export interface Impacto {
   acaoId: number;
@@ -331,13 +332,21 @@ export function aplicarImpacto(
     // Armadilha e invocação saem uma vez no lançamento (acao.ts), não por alvo atingido.
     // Marco 26 (D-125): nem o avanço e o teleporte de quem conjura (saem uma vez, no lançamento).
     if (REGISTRO_EFEITOS[efeito.tipo].aoLancar || (efeito.em === 'conjurador' && REGISTRO_EFEITOS[efeito.tipo].deslocaConjurador)) continue;
-    const sobre = efeito.em === 'conjurador' ? conjurador : alvo;
     // Marco 23 (D-092): no clima do elemento, o estado dele dura mais.
     const reforco = efeito.tipo === 'escudo' || efeito.tipo === 'escudo_acumulado' ? reforcoDaGeral(ctx, conjurador, hab, tick) : 1;
     // Marco 24 (D-096): a sinergia passiva alonga o estado (Disciplina férrea).
     const final = efeitoDaSinergia(ctx, conjurador, hab, reforco > 1 ? { ...efeito, valor: Math.round(efeito.valor * reforco) } : efeito);
-    if (sobre) aplicarEfeito(estado, ctx, sobre, estenderNoClima(ctx, hab, reforcarEstado(ctx, conjurador, comPotencia(final, fonte.potencia))), origem, mira, saida);
+    const pronto = estenderNoClima(ctx, hab, reforcarEstado(ctx, conjurador, comPotencia(final, fonte.potencia)));
+    // Marco 40 (12/11/2026, D-157): `aliados` cai em cada aliado em volta de quem conjurou (pela relação, nunca pelo tipo).
+    if (efeito.em === 'aliados') {
+      for (const a of aliadosEmVolta(estado, ctx, conjurador ?? null)) aplicarEfeito(estado, ctx, a, { ...pronto, em: 'alvo' }, origem, mira, saida);
+      continue;
+    }
+    const sobre = efeito.em === 'conjurador' ? conjurador : alvo;
+    if (sobre) aplicarEfeito(estado, ctx, sobre, pronto, origem, mira, saida);
   }
+  // Marco 40 (D-157): a forma de controle passa os estados de controle ao vizinho hostil mais perto do alvo.
+  if (hab.controleVizinho && conjurador && conjurador !== alvo) controleNoVizinho(estado, ctx, conjurador, alvo, hab, origem, mira, saida);
   if (conjurador) {
     if (resposta && conjurador.tatica) { conjurador.tatica.respostaConsumida = true; conjurador.efeitos = conjurador.efeitos.filter((f) => f.tipo !== 'resposta_aparo'); }
     fluxoRestaurador(estado, ctx, conjurador, alvo, cura, saida, hab);
@@ -348,5 +357,28 @@ export function aplicarImpacto(
     dispararGanchosDe(estado, ctx, conjurador, 'aoAcertar', { outro: alvo, hab, estadosDoOutro: estadosAntes }, saida);
     if (critico) dispararGanchosDe(estado, ctx, conjurador, 'aoCritico', { outro: alvo, hab, estadosDoOutro: estadosAntes }, saida);
     if (dano > 0) dispararGanchosDe(estado, ctx, alvo, 'aoReceberGolpe', { outro: conjurador, hab }, saida);
+  }
+}
+
+/** Marco 40 (12/11/2026, D-157): os aliados vivos em volta de quem conjurou (sem ele), no raio da forma de grupo. */
+function aliadosEmVolta(estado: EstadoJogo, ctx: ContextoSimulacao, conjurador: Entidade | null): Entidade[] {
+  if (!conjurador) return [];
+  const raio = ctx.balance.habilidades.eixos.grupo.raio;
+  return estado.entidades.filter((e) => e !== conjurador && vivo(e) && chebyshev(e, conjurador) <= raio && podeAjudar(conjurador, e, ctx.modo));
+}
+
+/** D-157: os estados de controle da skill pegam também no vizinho hostil mais perto do alvo, com parte da duração. */
+function controleNoVizinho(estado: EstadoJogo, ctx: ContextoSimulacao, conjurador: Entidade, alvo: Entidade, hab: Habilidade, origem: Parameters<typeof aplicarEfeito>[4], mira: Parameters<typeof aplicarEfeito>[5], saida: EventoSimulacao[]): void {
+  const v = hab.controleVizinho;
+  if (!v) return;
+  let melhor: Entidade | null = null;
+  for (const e of estado.entidades) {
+    if (e === alvo || e === conjurador || !vivo(e) || chebyshev(e, alvo) > v.raio || !podeFerir(conjurador, e, ctx.modo)) continue;
+    if (!melhor || chebyshev(e, alvo) < chebyshev(melhor, alvo) || (chebyshev(e, alvo) === chebyshev(melhor, alvo) && e.id < melhor.id)) melhor = e;
+  }
+  if (!melhor) return;
+  for (const ef of hab.efeitos) {
+    if (ef.em !== 'alvo' || !ESTADOS_DE_CONTROLE.includes(ef.tipo)) continue;
+    aplicarEfeito(estado, ctx, melhor, { ...ef, duracaoMs: Math.round((ef.duracaoMs * v.duracaoPct) / 100) }, origem, mira, saida);
   }
 }
