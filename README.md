@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.46 · **Data:** 12/11/2026
+**Versão do documento:** 3.47 · **Data:** 12/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.47 (12/11/2026)**: marco 40, etapa 2: as 89 skills comuns dos 20 núcleos, com livros novos e a geral inicial de cada classe; as gerais antigas saem do personagem (save 31 e fichas) (D-158).
 > - **3.46 (12/11/2026)**: marco 40 (em andamento): o sistema novo de skills. Etapa 1: núcleo, papel e os nove eixos das skills, as cinco formas novas dos estilos (controle, sustento, marca, grupo e invocação), efeitos para os aliados em volta, a marca que acumula e a função secundária do elemento pelo papel (D-157).
 > - **3.45 (12/11/2026)**: marco 39: a forma do estilo fica gradual. Ela aparece com 10% da ponta e cresce em 10 faixas até 100%, na mecânica e no visual (D-156).
 > - **3.44 (12/11/2026)**: marco 39: a forma desperta dos estilos e o par de runas nos combos (D-152); a inclinação, que faz o estilo escolhido se sentir desde o começo (D-153); o foco, que reforça a marca de quem se dirige a um estilo (D-154); e o atributo de classe trocado pela classe nos estilos, com uma melhoria a cada 5% de cada ponta (D-155).
@@ -367,4 +368,16 @@ papel). As skills atuais serão substituídas. O plano, em 8 etapas, está em
 - **No motor:** efeitos com destino `aliados` (pela relação, nunca pelo tipo) e a marca que acumula.
 
 Detalhes em D-157.
+
+**Etapa 2: as skills comuns**
+- **89 skills em 20 núcleos** (`nucleos.json`): projétil, explosão, feixe, cadeia, campo, nova, investida, recuo,
+  maldição, prisão, muro, escudo, cura, dreno, invocação, armadilha, marca, grito, chuva e postura, cada um em quatro
+  ou cinco elementos. Cada uma tem um livro que qualquer classe lê.
+- **A geral inicial nova:** Prece (Aventureiro), Investida (Guerreiro), Bola de fogo (Mago), Armadilha de
+  dentes (Arqueiro) e Maldição (Necromante).
+- **As 54 gerais antigas saem do personagem** (save 31 e fichas do Mundo, do grupo e da arena). Cada uma vira a
+  variante mais próxima, no rank 1, e os pontos voltam. Elas ficam só nos inimigos, nas ultimates e nos combos até as
+  etapas 3 e 4.
+
+Detalhes em D-158.
 

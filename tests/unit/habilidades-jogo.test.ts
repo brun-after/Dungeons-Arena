@@ -164,7 +164,7 @@ describe('elementos e sinergias no golpe', () => {
     const c = cenario('mago');
     c.aplicar('a', 'resfriado');
     c.ent('j').mana = 50;
-    c.tick([['j', { t: 'usarHabilidade', id: 'bola_de_fogo', alvo: { x: 5, y: 5 } }]]);
+    c.tick([['j', { t: 'usarHabilidade', id: 'projetil_fogo', alvo: { x: 5, y: 5 } }]]);
     c.ticks(80);
     const impacto = c.eventos.find((e) => e.t === 'impacto' && e.alvoId === 'a' && !e.falha);
     if (impacto?.t !== 'impacto') throw new Error('sem impacto');
@@ -216,29 +216,29 @@ describe('progressão de habilidades', () => {
     const c = cenario('mago');
     const j = c.ent('j');
     const bolsa = obter(j.bolsa, 'bolsa');
-    c.tick([['j', { t: 'subirRank', id: 'bola_de_fogo' }]]);
+    c.tick([['j', { t: 'subirRank', id: 'projetil_fogo' }]]);
     expect(c.eventos.at(-1)).toMatchObject({ t: 'habilidadeRecusada', motivo: 'sem_pontos' });
     j.xp = xpParaProximo(1, c.ctx.balance.xp) + xpParaProximo(2, c.ctx.balance.xp) + xpParaProximo(3, c.ctx.balance.xp) + xpParaProximo(4, c.ctx.balance.xp) + xpParaProximo(5, c.ctx.balance.xp);
     aplicarSubidas(j, c.ctx, c.estado.tick, c.eventos);
     expect(j.nivel).toBe(6);
     expect(bolsa.pontosHabilidade).toBe(5);
-    c.tick([['j', { t: 'subirRank', id: 'bola_de_fogo' }]]);
-    expect(bolsa.conhecidas.find((x) => x.id === 'bola_de_fogo')?.rank).toBe(2);
+    c.tick([['j', { t: 'subirRank', id: 'projetil_fogo' }]]);
+    expect(bolsa.conhecidas.find((x) => x.id === 'projetil_fogo')?.rank).toBe(2);
     // Rank 3 pede um caminho entre os oferecidos.
-    c.tick([['j', { t: 'subirRank', id: 'bola_de_fogo' }]]);
+    c.tick([['j', { t: 'subirRank', id: 'projetil_fogo' }]]);
     expect(c.eventos.at(-1)).toMatchObject({ t: 'habilidadeRecusada', motivo: 'caminho_invalido' });
-    c.tick([['j', { t: 'subirRank', id: 'bola_de_fogo', caminho: 'brutal' }]]);
+    c.tick([['j', { t: 'subirRank', id: 'projetil_fogo', caminho: 'amplo' }]]);
     expect(c.eventos.at(-1)).toMatchObject({ t: 'habilidadeRecusada', motivo: 'caminho_invalido' });
-    c.tick([['j', { t: 'subirRank', id: 'bola_de_fogo', caminho: 'amplo' }]]);
-    expect(bolsa.conhecidas.find((x) => x.id === 'bola_de_fogo')).toMatchObject({ rank: 3, caminhos: ['amplo'] });
+    c.tick([['j', { t: 'subirRank', id: 'projetil_fogo', caminho: 'brutal' }]]);
+    expect(bolsa.conhecidas.find((x) => x.id === 'projetil_fogo')).toMatchObject({ rank: 3, caminhos: ['brutal'] });
     // A barra usa a habilidade compilada no rank e caminho do personagem.
     c.ent('j').mana = 50;
-    c.tick([['j', { t: 'usarHabilidade', id: 'bola_de_fogo', alvo: { x: 5, y: 5 } }]]);
-    // Marco 39 (D-156): sem a parte da forma do estilo (`^mod`), que depende da build.
-    expect(c.ent('j').acao?.chave.replace(/\^[^!]*/, '')).toBe('bola_de_fogo@3/amplo');
+    c.tick([['j', { t: 'usarHabilidade', id: 'projetil_fogo', alvo: { x: 5, y: 5 } }]]);
+    // Marco 39 (D-156): sem a parte da forma do estilo (`^mod`) nem a da sintonia (`%N`, marco 40), que dependem da build.
+    expect(c.ent('j').acao?.chave.replace(/\^[^%!]*/, '').replace(/%\d+/, '')).toBe('projetil_fogo@3/brutal');
     // Rank 4 pede nível 10.
     c.ticks(200);
-    c.tick([['j', { t: 'subirRank', id: 'bola_de_fogo' }]]);
+    c.tick([['j', { t: 'subirRank', id: 'projetil_fogo' }]]);
     expect(c.eventos.at(-1)).toMatchObject({ t: 'habilidadeRecusada', motivo: 'nivel_baixo' });
   });
 
@@ -307,21 +307,21 @@ describe('progressão de habilidades', () => {
     const bolsa = obter(c.ent('j').bolsa, 'bolsa');
     const raro = obter(CONTEUDO.itens.get('livro_raro'), 'livro raro');
     const gerada = idGerada(4242, 3);
-    for (const id of ['livro_bola_de_fogo', 'livro_rolamento', 'livro_redemoinho']) guardarItem(bolsa, obter(CONTEUDO.itens.get(id), id), 2, c.ctx.balance.inventario);
+    for (const id of ['livro_projetil_fogo', 'livro_rolamento', 'livro_redemoinho']) guardarItem(bolsa, obter(CONTEUDO.itens.get(id), id), 2, c.ctx.balance.inventario);
     guardarItem(bolsa, raro, 1, c.ctx.balance.inventario, gerada);
     const inv = (itemId: string) => obter(bolsa.mochila.find((i) => i.itemId === itemId), itemId).invId;
     bolsa.pontosHabilidade = 6;
     const terminar = () => { if (bolsa.estudo) bolsa.estudo.restanteTicks = 1; c.tick(); };
-    c.tick([['j', { t: 'usarItem', invId: inv('livro_bola_de_fogo') }]]);
+    c.tick([['j', { t: 'usarItem', invId: inv('livro_projetil_fogo') }]]);
     c.tick([['j', { t: 'usarItem', invId: inv('livro_raro') }]]);
-    expect(bolsa.liberadas).toEqual(['bola_de_fogo', gerada]);
-    expect(bolsa.conhecidas.some((x) => x.id === 'bola_de_fogo')).toBe(false);
-    c.tick([['j', { t: 'usarItem', invId: inv('livro_bola_de_fogo') }]]);
+    expect(bolsa.liberadas).toEqual(['projetil_fogo', gerada]);
+    expect(bolsa.conhecidas.some((x) => x.id === 'projetil_fogo')).toBe(false);
+    c.tick([['j', { t: 'usarItem', invId: inv('livro_projetil_fogo') }]]);
     expect(c.eventos.at(-1)).toMatchObject({ t: 'itemRecusado', motivo: 'ja_conhece' });
     // Liberada, aprende com ponto (e o estudo de sempre).
-    c.tick([['j', { t: 'subirRank', id: 'bola_de_fogo' }]]);
+    c.tick([['j', { t: 'subirRank', id: 'projetil_fogo' }]]);
     terminar();
-    expect(bolsa.conhecidas.some((x) => x.id === 'bola_de_fogo')).toBe(true);
+    expect(bolsa.conhecidas.some((x) => x.id === 'projetil_fogo')).toBe(true);
     // O livro de classe ensina na hora; o de outra classe é recusado sem gastar.
     c.tick([['j', { t: 'usarItem', invId: inv('livro_rolamento') }]]);
     expect(bolsa.conhecidas.find((x) => x.id === 'rolamento')).toMatchObject({ rank: 1 });
@@ -415,10 +415,10 @@ describe('determinismo com o sistema de habilidades', () => {
   it('um mago lançando de tudo dá o mesmo digest com a mesma semente', () => {
     const rodada = () => {
       const c = cenario('mago');
-      const ids = ['bola_de_fogo', 'lanca_de_gelo', 'raio_em_cadeia', 'barreira'];
+      const ids = ['projetil_fogo', 'lanca_de_gelo', 'raio_em_cadeia', 'barreira'];
       for (let i = 0; i < 1500; i++) {
         c.ent('j').mana = 50;
-        c.tick(i % 30 === 0 ? [['j', { t: 'usarHabilidade', id: ids[(i / 30) % 4] ?? 'bola_de_fogo', alvo: i % 60 === 0 ? { x: 5, y: 5 } : 'a' }]] : []);
+        c.tick(i % 30 === 0 ? [['j', { t: 'usarHabilidade', id: ids[(i / 30) % 4] ?? 'projetil_fogo', alvo: i % 60 === 0 ? { x: 5, y: 5 } : 'a' }]] : []);
       }
       return digest(c.estado);
     };

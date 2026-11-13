@@ -1,6 +1,6 @@
 # Marco 40: o sistema novo de skills
 
-**Versão:** 1.0 · **Data:** 12/11/2026
+**Versão:** 1.1 · **Data:** 12/11/2026
 
 O desenho completo está no catálogo "Grimório das Skills" (artefato, versão 1.6), revisado com o usuário em
 12/11/2026. Este documento guarda as etapas da implementação e o que cada uma entrega. As skills atuais são
@@ -43,3 +43,17 @@ Os pesos das conexões têm faixa por tipo de skill (classe 40/30/15/15, comum 6
 - `skills.json`: campos `nucleo`, `papel` e `eixos` na definição.
 - Efeitos com `em: "aliados"`: caem nos aliados em volta de quem conjura (`relacao()`, nunca o tipo).
 - `papeis.json`: a função secundária de cada papel por elemento, cheia na faixa 10 da sintonia.
+
+## Etapa 2 (12/11/2026)
+
+- `nucleos.json`: os 20 núcleos (papel, eixos e molde) e as 89 variantes; a expansão em `combat/nucleos.ts` gera
+  `<núcleo>_<elemento>` no catálogo das skills.
+- O campo tático hostil leva o estado do elemento (`efeito`); a função secundária só cai em quem ela serve.
+- 89 livros novos no lugar dos 54 das gerais; a geral inicial de cada classe é uma variante.
+- `save/migracao-40.ts` (save 31 e as fichas do servidor): gerais antigas para a variante do `legado`, no rank 1 e com
+  os pontos de volta.
+- As gerais antigas seguem no skills.json só para inimigos, ultimates e combos (etapas 3 e 4).
+
+> **Histórico**
+> - **1.1 (12/11/2026)**: etapa 2, as skills comuns.
+> - **1.0 (12/11/2026)**: as etapas e a etapa 1.

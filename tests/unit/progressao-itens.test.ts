@@ -79,19 +79,19 @@ describe('consumíveis de progressão', () => {
   it('essência preserva requisitos e exige escolha; uma confirmação antiga não sobe outro rank', () => {
     const c = cena();
     const id = c.dar('essencia_fogo', 3);
-    expect(subirRank(c.j, c.ctx, 'bola_de_fogo', undefined, 0, c.eventos, id)).toBe(false);
+    expect(subirRank(c.j, c.ctx, 'projetil_fogo', undefined, 0, c.eventos, id)).toBe(false);
     c.j.nivel = 20;
-    expect(subirRank(c.j, c.ctx, 'bola_de_fogo', undefined, 0, c.eventos, id, 2)).toBe(true);
+    expect(subirRank(c.j, c.ctx, 'projetil_fogo', undefined, 0, c.eventos, id, 2)).toBe(true);
     expect(c.b.pontosHabilidade).toBe(0);
-    expect(subirRank(c.j, c.ctx, 'bola_de_fogo', undefined, 0, c.eventos, id, 2)).toBe(false);
-    expect(subirRank(c.j, c.ctx, 'bola_de_fogo', undefined, 0, c.eventos, id, 3)).toBe(false);
-    expect(subirRank(c.j, c.ctx, 'bola_de_fogo', 'eficiente', 0, c.eventos, id, 3)).toBe(true);
+    expect(subirRank(c.j, c.ctx, 'projetil_fogo', undefined, 0, c.eventos, id, 2)).toBe(false);
+    expect(subirRank(c.j, c.ctx, 'projetil_fogo', undefined, 0, c.eventos, id, 3)).toBe(false);
+    expect(subirRank(c.j, c.ctx, 'projetil_fogo', 'eficiente', 0, c.eventos, id, 3)).toBe(true);
     expect(c.b.mochila.find((i) => i.invId === id)?.qtd).toBe(1);
     expect(c.b.ranksPorItens).toBe(2);
     expect(subirRank(c.j, c.ctx, 'lanca_de_gelo', undefined, 0, c.eventos, id)).toBe(false);
     expect(subirRank(c.j, c.ctx, 'explosao', undefined, 0, c.eventos, id)).toBe(false);
     expect(c.b.mochila.find((i) => i.invId === id)?.qtd).toBe(1);
-    expect(familiaDaHabilidade(c.ctx, 'bola_de_fogo')).toBe('fogo');
+    expect(familiaDaHabilidade(c.ctx, 'projetil_fogo')).toBe('fogo');
     expect(familiaDaHabilidade(c.ctx, 'explosao')).toBe('arcana');
   });
 
@@ -135,15 +135,15 @@ describe('consumíveis de progressão', () => {
   it('coop preserva estudo já iniciado, inclusive velocidade e trabalho calculado antes de trocar equipamento', () => {
     const c = cena();
     c.b.estudo = { id: 'nova_glacial', totalTicks: 10000, restanteTicks: 8000, aceleracoes: 0, velocidade12: 25, fracao12: 7 };
-    c.b.conhecidas.push({ id: 'pele_de_pedra', rank: 5, caminhos: [] });
+    c.b.conhecidas.push({ id: 'escudo_terra', rank: 5, caminhos: ['eficiente', 'controle'] });
     c.b.ranksPorItens = 4;
     const r = conferirPersonagem(pedidoDoPersonagem(c.j), c.ctx, 'coop', 'p');
     // O nível também limita o rank, independentemente do pagamento por item.
-    expect(r?.entidade.bolsa?.conhecidas.find((h) => h.id === 'pele_de_pedra')?.rank).toBe(1);
+    expect(r?.entidade.bolsa?.conhecidas.find((h) => h.id === 'escudo_terra')?.rank).toBe(1);
     expect(r?.entidade.bolsa?.estudo).toEqual(c.b.estudo);
     c.j.nivel = 20;
     const adulto = conferirPersonagem(pedidoDoPersonagem(c.j), c.ctx, 'coop', 'p');
-    expect(adulto?.entidade.bolsa?.conhecidas.find((h) => h.id === 'pele_de_pedra')?.rank).toBe(5);
+    expect(adulto?.entidade.bolsa?.conhecidas.find((h) => h.id === 'escudo_terra')?.rank).toBe(5);
   });
   it('certificação exige que a compra de tomos caiba no ouro disponível', () => {
     const c = cena();

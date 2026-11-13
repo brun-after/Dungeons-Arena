@@ -45,9 +45,9 @@ test('Necromante é selecionável ao criar um personagem', async ({ page }) => {
   await cartao.getByRole('link', { name: 'Jogar de Necromante' }).click();
   await expect(page.getByTestId('habilidade-dizimo_vital')).toBeVisible({ timeout: 30000 });
   // Marco 24 (D-094): o kit inicial é Dardo funesto e as Lanças da escuridão (`dizimo_vital`, classe) e, desde 07/11/2026
-  // (D-135), o Dissipar (geral).
+  // (D-135), o Dissipar (geral); no marco 40 (D-158), a Maldição, skill comum de núcleo.
   await expect(page.getByTestId('habilidade-dardo_funesto')).toBeVisible();
-  await expect(page.getByTestId('habilidade-dissipar')).toBeVisible();
+  await expect(page.getByTestId('habilidade-maldicao_trevas')).toBeVisible();
 });
 
 test('passiva, reanimado e eco funcionam e persistem no save', async ({ page }, info) => {

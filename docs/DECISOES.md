@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.04 · **Data:** 12/11/2026
+**Versão:** 1.05 · **Data:** 12/11/2026
 
 > **Histórico**
+> - **1.05 (12/11/2026)**: D-158: marco 40, etapa 2. As 89 skills comuns saem dos 20 núcleos (`nucleos.json`), com livros novos e a geral inicial de cada classe. As 54 gerais antigas deixam o jogador (save 31 e fichas) e ficam só para inimigos, ultimates e combos até as etapas 3 e 4.
 > - **1.04 (12/11/2026)**: D-157: marco 40, o sistema novo de skills; etapa 1 (núcleo, papel, os nove eixos, as cinco formas novas, o destino aliados, a marca que acumula e a tabela papel × elemento).
 > - **1.03 (12/11/2026)**: D-156: a forma do estilo fica gradual. Ela aparece com 10% da ponta e cresce em 10 faixas até 100%, na mecânica, no custo e no visual, em vez de despertar inteira num limite.
 > - **1.02 (12/11/2026)**: D-153: a inclinação (o estilo que lidera sente-se desde o nível 1), a forma desperta em 35% e o teto pelo valor inicial da classe. D-154: o foco (a marca de cada estilo cresce quanto mais ele se destaca). D-155: o atributo de classe sai e a classe cresce nos estilos, um degrau a cada 5% de cada ponta.
@@ -4711,3 +4712,44 @@ motor muda onde não servir ao desenho (pedido do usuário). Esta decisão cobre
 das quatro formas antigas é o mesmo de antes, agora na tabela. A forma de cada estilo aparece na ficha pelo eixo principal,
 com o secundário entre parênteses; os onze estilos sem forma passam a mostrar a sua.
 
+## D-158 — Marco 40: as skills comuns saem dos núcleos (12/11/2026)
+
+**Contexto.** Etapa 2 do marco 40. No catálogo revisado com o usuário, as skills comuns são as variantes elementais de
+20 núcleos, 89 ao todo. Elas ficam no lugar das 54 gerais do marco 24, que tinham família, domínio e passivas próprias.
+
+**Decisão.**
+- **Os núcleos em dados.** `src/data/nucleos.json` guarda cada núcleo: papel, eixos, o molde da skill e as variantes
+  (elemento, nome, ícone, visual e o que o elemento muda no molde). A expansão (`combat/nucleos.ts`) gera as skills no
+  formato do skills.json, com id `<núcleo>_<elemento>`. O Físico não leva `elemento`, porque a ponta física do vínculo
+  vem da ausência dele. As variantes usam as mecânicas do motor, entre elas armadilha, invocação temporária, efeito
+  atrasado, empurrão, puxão, escudo, campo e muralha.
+- **O campo com estado.** O campo tático hostil (`campo_veneno`) pode levar o estado do elemento (`efeito`), e não só o
+  veneno. É assim que funcionam o Chão em brasa, a Geada, a Poça de sombra e o Muro de fogo.
+- **A função secundária no lugar certo.** O efeito do papel que vai "no alvo" só entra quando esse alvo é o certo: o
+  efeito ruim num golpe em inimigo, e o bom numa skill em aliado ou em si. Assim um campo ou uma postura não congela nem
+  queima quem conjura.
+- **Os livros.** Cada skill comum tem um livro que qualquer classe pode ler: incomum para o grau B e raro para o A. Os
+  54 livros das gerais saem do catálogo. A recompensa e as lojas que davam a Chuva de estrelas passam a dar o Clarão.
+- **A geral inicial.**
+  - Aventureiro: Prece (`cura_sagrado`).
+  - Guerreiro: Investida (`investida_fisico`).
+  - Mago: Bola de fogo (`projetil_fogo`).
+  - Arqueiro: Armadilha de dentes (`armadilha_fisico`). Com um projétil, o Arqueiro passava da meta de tempo contra o
+    inimigo comum, porque a Mira firme reforça qualquer disparo de alvo único.
+  - Necromante: Maldição (`maldicao_trevas`), que mantém o Necromante sem cura nem escudo próprio (D-135).
+- **O legado** (`nucleos.json → legado`) leva cada geral antiga à variante mais próxima.
+  - **Save 30 › 31** (`save/migracao-40.ts`) e toda ficha que chega ao servidor (`conferirPersonagem`: Mundo, grupo,
+    arena e certificado) trocam as conhecidas, a barra, as liberadas, o estudo e os livros na mochila.
+  - A skill nova entra no rank 1 sem caminhos, porque os caminhos antigos não existem nela. Os pontos dos ranks acima do
+    1 voltam, e as passivas gerais saem das ligadas.
+  - A troca é idempotente.
+- **As gerais antigas ficam, por enquanto.** As definições continuam no skills.json para os inimigos, as ultimates e os
+  combos que as citam, até as etapas 3 e 4. O jogador não as alcança mais. O sistema de famílias e domínios do marco 24
+  fica sem skills de jogador e sai junto com elas.
+
+**Consequências.**
+- A geral inicial nova muda o diagnóstico do Arqueiro. O caso de morte simultânea do teste mudou de semente.
+- Calibragem pelas metas: o Projétil base tem 1d8 e recarga de 4 s, e o Dardo voltaico tem 1d6. A Maldição expõe 10%.
+- Os combos e as sinergias que pedem gerais antigas ficam fora do alcance do jogador até a etapa 4.
+- As assinaturas visuais das variantes reaproveitam as existentes, e o fogo leva o toque de brasas. O visual próprio de
+  cada uma vem na etapa 7.

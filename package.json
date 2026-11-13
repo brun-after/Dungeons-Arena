@@ -20,7 +20,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.nucleo.json --noEmit",
-    "lint": "eslint .",
+    "lint": "node --max-old-space-size=4096 node_modules/eslint/bin/eslint.js .",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",

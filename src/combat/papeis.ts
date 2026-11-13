@@ -8,7 +8,7 @@ import { ehObjeto, Leitor } from '../core/validar';
 import { PAPEIS, type Papel } from './eixos';
 import type { Habilidade } from './habilidades';
 import { normalizarEfeitos } from './normalizar-efeito';
-import type { EfeitoCanonico } from './registro-efeitos';
+import { REGISTRO_EFEITOS, type EfeitoCanonico } from './registro-efeitos';
 import { PONTAS_ELEMENTAIS, type PontaElemental } from '../progression/vinculo';
 
 export interface EfeitoSecundario {
@@ -72,8 +72,12 @@ export function aplicarSecundario(h: Habilidade, tabela: TabelaDePapeis | undefi
   const sec = h.papel ? tabela?.get(h.papel)?.get(ponta) : undefined;
   if (!sec || faixa <= 0) return h;
   const efeitos = [...h.efeitos];
+  // Marco 40 (D-158): o efeito "no alvo" só entra quando o alvo é quem ele serve — o ruim, num golpe em inimigo; o bom,
+  // numa skill em aliado ou em si. Assim um campo ou uma postura não congela quem conjura.
+  const feriAlvo = h.politicaAlvo === 'hostil' || (h.politicaImpacto === 'area' && h.politicaAlvo !== 'aliados');
   for (const s of sec.efeitos) {
     const e = naFaixa(s, faixa);
+    if (e && e.em === 'alvo' && REGISTRO_EFEITOS[e.tipo].positivo === feriAlvo) continue;
     if (e && !efeitos.some((x) => x.tipo === e.tipo && x.em === e.em)) efeitos.push(e);
   }
   const multCura = h.formulaCura !== null ? h.multCura * (1 + (sec.curaPct * faixa) / 1000) : h.multCura;

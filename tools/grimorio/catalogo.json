@@ -17,7 +17,7 @@
         "redemoinho",
         "investida_de_escudo"
       ],
-      "geralInicial": "investida",
+      "geralInicial": "investida_fisico",
       "ultimates": [
         {
           "par": [
@@ -233,7 +233,7 @@
         "lanca_de_gelo",
         "raio_em_cadeia"
       ],
-      "geralInicial": "bola_de_fogo",
+      "geralInicial": "projetil_fogo",
       "ultimates": [
         {
           "par": [
@@ -449,7 +449,7 @@
         "flecha_perfurante",
         "chuva_de_flechas"
       ],
-      "geralInicial": "flecha_venenosa",
+      "geralInicial": "armadilha_fisico",
       "ultimates": [
         {
           "par": [
@@ -665,7 +665,7 @@
         "dardo_funesto",
         "dizimo_vital"
       ],
-      "geralInicial": "dissipar",
+      "geralInicial": "maldicao_trevas",
       "ultimates": [
         {
           "par": [
@@ -881,7 +881,7 @@
         "mergulho",
         "grito_do_falcao"
       ],
-      "geralInicial": "curar",
+      "geralInicial": "cura_sagrado",
       "ultimates": [
         {
           "par": [

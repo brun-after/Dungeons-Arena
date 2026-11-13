@@ -51,7 +51,7 @@ test.describe('campanha em grupo', () => {
       const mochila = convidado.getByRole('dialog', { name: 'Mochila' });
       await expect(mochila).toBeVisible();
       await mochila.getByRole('button', { name: 'Habilidades' }).click();
-      await expect(mochila.locator('[data-habilidade="bola_de_fogo"]')).toBeVisible();
+      await expect(mochila.locator('[data-habilidade="projetil_fogo"]')).toBeVisible();
       await convidado.keyboard.press('Escape');
 
       // Só o anfitrião troca a dificuldade (online, o menu não pausa a partida).

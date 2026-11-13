@@ -14,6 +14,9 @@ import itensFormasJson from '../data/itens-formas.json';
 import conjuntosJson from '../data/conjuntos.json';
 import estilosJson from '../data/estilos.json';
 import papeisJson from '../data/papeis.json';
+import nucleosJson from '../data/nucleos.json';
+import { expandirNucleos } from '../combat/nucleos';
+import { ehObjeto } from './validar';
 import combosJson from '../data/combos.json';
 import interacoesBuffJson from '../data/interacoes-buff.json';
 import missoesJson from '../data/missoes.json';
@@ -105,6 +108,8 @@ export interface Conteudo {
   sinergias: readonly SinergiaPassiva[];
   /** Marco 29 (D-128): os reinos do modo Mundo (src/data/mundo). */
   reinos: Catalogo<Reino>;
+  /** Marco 40 (D-158): geral antiga -> skill comum que a substitui (saves, fichas e livros). */
+  legadoDeSkills: ReadonlyMap<string, string>;
 }
 
 export interface FontesDeConteudo {
@@ -127,6 +132,8 @@ export interface FontesDeConteudo {
   estilos: unknown;
   /** Marco 40: data/papeis.json (opcional: sem ele, a tabela fica vazia). */
   papeis?: unknown;
+  /** Marco 40 (D-158): data/nucleos.json, as skills comuns (opcional: sem ele, o oficial). */
+  nucleos?: unknown;
   combos: unknown;
   interacoesBuff: unknown;
   missoes: unknown;
@@ -142,7 +149,11 @@ export interface FontesDeConteudo {
 }
 
 export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; erros: string[] } {
-  const h = lerHabilidades(fontes.skills);
+  // Marco 40 (12/11/2026, D-158): as skills comuns saem dos núcleos e entram junto das do skills.json.
+  const nu = expandirNucleos(fontes.nucleos ?? nucleosJson);
+  const skills = ehObjeto(fontes.skills) && Array.isArray(fontes.skills.habilidades)
+    ? { ...fontes.skills, habilidades: [...(fontes.skills.habilidades as unknown[]), ...nu.habilidades] } : fontes.skills;
+  const h = lerHabilidades(skills);
   const ul = lerUltimates(fontes.ultimates);
   const si = lerSintonia(fontes.sintonia);
   const sg = lerSinergias(fontes.sinergias);
@@ -169,7 +180,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const tm = lerTemas(fontes.temas, new Set([...p.presets.values()].filter((x) => x.invocacao === null).map((x) => x.id)));
   const af = lerAfinidades(fontes.afinidades);
   const ar = lerArmas(fontes.armas);
-  const erros = [...ul.erros, ...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...es.erros, ...pa.erros, ...cb.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
+  const erros = [...nu.erros, ...ul.erros, ...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...es.erros, ...pa.erros, ...cb.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
   for (const conj of cj.conjuntos.values()) {
     for (const peca of conj.pecas) if (!fo.dados.bases.has(peca)) erros.push(`conjunto ${conj.id}: base desconhecida "${peca}"`);
   }
@@ -291,6 +302,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       sintonia: si.sintonia,
       sinergias: sg.sinergias,
       reinos,
+      legadoDeSkills: nu.legado,
     },
     erros,
   };
@@ -332,6 +344,7 @@ export const FONTES_OFICIAIS: FontesDeConteudo = {
   conjuntos: conjuntosJson,
   estilos: estilosJson,
   papeis: papeisJson,
+  nucleos: nucleosJson,
   combos: combosJson,
   interacoesBuff: interacoesBuffJson,
   missoes: missoesJson,

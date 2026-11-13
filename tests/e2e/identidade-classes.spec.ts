@@ -11,10 +11,12 @@ test('o Arqueiro começa com a Mira firme no HUD', async ({ page }) => {
 
 test('o Mago encarna o elemento da magia lançada', async ({ page }) => {
   await page.goto('/?jogo=campanha&slot=2&dificuldade=normal&classe=mago');
-  await expect(page.getByTestId('habilidade-bola_de_fogo')).toBeVisible({ timeout: 30000 });
+  // Marco 40 (D-158): a geral inicial é a Bola de fogo de núcleo (projétil): o Q escolhe o boneco antes.
+  await expect(page.getByTestId('habilidade-projetil_fogo')).toBeVisible({ timeout: 30000 });
   const chip = page.locator('.chip-encarnacao');
   await expect(chip).toBeHidden();
-  await page.getByTestId('habilidade-bola_de_fogo').click();
+  await page.keyboard.press('KeyQ');
+  await page.getByTestId('habilidade-projetil_fogo').click();
   await expect(chip).toBeVisible({ timeout: 10000 });
   await expect(chip).toHaveAttribute('data-elemento', 'fogo');
 });
