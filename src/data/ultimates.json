@@ -49,7 +49,7 @@
         "dano",
         "mobilidade"
       ],
-      "texto": "Salta até a mira batendo na linha; onde cai, fica a cratera."
+      "texto": "Salta até a mira batendo na linha; onde cai, fica uma cratera da matéria da runa por 4 s."
     },
     {
       "id": "ult_exercito_em_furia",
@@ -59,7 +59,8 @@
         "dano",
         "invocacao"
       ],
-      "texto": "As invocações atacam juntas e explodem ao cair."
+      "texto": "As invocações atacam juntas e explodem ao cair.",
+      "invocacao": "ataque"
     },
     {
       "id": "ult_carcere",
@@ -109,7 +110,8 @@
         "controle",
         "invocacao"
       ],
-      "texto": "Invocações que prendem quem tocam."
+      "texto": "Duas criaturas da classe surgem arrastando correntes: puxam os inimigos em volta para perto e os prendem.",
+      "invocacao": "guarda"
     },
     {
       "id": "ult_renascer",
@@ -119,7 +121,7 @@
         "cura",
         "cura"
       ],
-      "texto": "Cura grande no grupo e protege quem estava caindo."
+      "texto": "Cura grande no grupo em volta e levanta o aliado caído mais perto com 30% da vida."
     },
     {
       "id": "ult_bastiao",
@@ -149,7 +151,8 @@
         "cura",
         "invocacao"
       ],
-      "texto": "Espíritos que seguem e curam os aliados."
+      "texto": "Espíritos que seguem e curam os aliados.",
+      "invocacao": "cura"
     },
     {
       "id": "ult_inabalavel",
@@ -179,7 +182,8 @@
         "defesa",
         "invocacao"
       ],
-      "texto": "Invocações em fila que interceptam os golpes."
+      "texto": "Invocações em fila que interceptam os golpes.",
+      "invocacao": "guarda"
     },
     {
       "id": "ult_tempestade_de_passos",
@@ -199,7 +203,8 @@
         "invocacao",
         "mobilidade"
       ],
-      "texto": "Uma onda de criaturas corre e atropela."
+      "texto": "Uma onda de criaturas corre e atropela.",
+      "invocacao": "ataque"
     },
     {
       "id": "ult_legiao",
@@ -209,9 +214,50 @@
         "invocacao",
         "invocacao"
       ],
-      "texto": "Um exército de curta duração."
+      "texto": "Um exército de curta duração.",
+      "invocacao": "ataque"
     }
   ],
+  "veiculos": {
+    "mago": {
+      "invocacoes": {
+        "ataque": "espectro_tempestade",
+        "cura": "fada",
+        "guarda": "copia_ilusoria"
+      }
+    },
+    "necromante": {
+      "invocacoes": {
+        "ataque": "esqueleto_profano",
+        "cura": "espectro",
+        "guarda": "servo_ossuario"
+      },
+      "lanca": {
+        "alem": 1
+      }
+    },
+    "guerreiro": {
+      "invocacoes": {
+        "ataque": "guerreiro_espectral",
+        "cura": "fada",
+        "guarda": "sentinela"
+      }
+    },
+    "arqueiro": {
+      "invocacoes": {
+        "ataque": "falcao_espectral",
+        "cura": "fada",
+        "guarda": "lobo_espiritual"
+      }
+    },
+    "aventureiro": {
+      "invocacoes": {
+        "ataque": "lobo_espiritual",
+        "cura": "fada",
+        "guarda": "sentinela"
+      }
+    }
+  },
   "fusoes": [
     {
       "eixos": [
@@ -225,10 +271,14 @@
           "duracaoMs": 400,
           "interno": {
             "tipo": "dano_direto",
-            "valor": 6
+            "valor": 4
           }
         }
-      ]
+      ],
+      "ajustes": {
+        "saltos": 1,
+        "saltoPct": 50
+      }
     },
     {
       "eixos": [
@@ -239,10 +289,14 @@
       "efeitos": [
         {
           "tipo": "empurrao",
-          "valor": 1,
-          "desde": 5
+          "valor": 1
         }
-      ]
+      ],
+      "ajustes": {
+        "tipoArea": "linha",
+        "raio": 1,
+        "desde": 5
+      }
     },
     {
       "eixos": [
@@ -252,12 +306,9 @@
       "texto": "A área pulsa de novo, menor, no mesmo lugar.",
       "efeitos": [
         {
-          "tipo": "efeito_atrasado",
-          "duracaoMs": 600,
-          "interno": {
-            "tipo": "dano_direto",
-            "valor": 8
-          }
+          "tipo": "fase",
+          "ref": "leitura_estouro",
+          "duracaoMs": 600
         }
       ]
     },
@@ -270,7 +321,7 @@
       "efeitos": [
         {
           "tipo": "enraizado",
-          "duracaoMs": 800
+          "duracaoMs": 1200
         }
       ]
     },
@@ -298,9 +349,10 @@
       "texto": "Cada atingido ganha uma marca.",
       "efeitos": [
         {
-          "tipo": "marcado",
-          "pct": 10,
-          "duracaoMs": 4000
+          "tipo": "marca_estilo",
+          "valor": 1,
+          "pct": 4,
+          "duracaoMs": 6000
         }
       ]
     },
@@ -316,6 +368,12 @@
           "pct": 10,
           "duracaoMs": 4000,
           "em": "aliados"
+        },
+        {
+          "tipo": "escudo",
+          "valor": 4,
+          "duracaoMs": 4000,
+          "em": "aliados"
         }
       ]
     },
@@ -327,11 +385,17 @@
       "texto": "As invocações chegam pelo centro e estouram ao surgir.",
       "efeitos": [
         {
-          "tipo": "detonar_invocacao",
+          "tipo": "invocar_temporario",
+          "ref": "espectro",
           "valor": 1,
-          "pct": 40,
+          "duracaoMs": 5000,
           "em": "conjurador",
           "desde": 5
+        },
+        {
+          "tipo": "fase",
+          "ref": "leitura_estouro",
+          "duracaoMs": 300
         }
       ]
     },
@@ -341,16 +405,12 @@
         "perfuracao"
       ],
       "texto": "Atravessa a fila e, no último, salta para fora dela.",
-      "efeitos": [
-        {
-          "tipo": "efeito_atrasado",
-          "duracaoMs": 300,
-          "interno": {
-            "tipo": "dano_direto",
-            "valor": 6
-          }
-        }
-      ]
+      "efeitos": [],
+      "ajustes": {
+        "perfura": true,
+        "saltos": 1,
+        "saltoPct": 50
+      }
     },
     {
       "eixos": [
@@ -367,7 +427,11 @@
             "valor": 6
           }
         }
-      ]
+      ],
+      "ajustes": {
+        "saltos": 1,
+        "saltoPct": 40
+      }
     },
     {
       "eixos": [
@@ -380,7 +444,11 @@
           "tipo": "sem_movimento",
           "duracaoMs": 600
         }
-      ]
+      ],
+      "ajustes": {
+        "saltos": 1,
+        "saltoPct": 40
+      }
     },
     {
       "eixos": [
@@ -396,7 +464,11 @@
           "duracaoMs": 4000,
           "em": "conjurador"
         }
-      ]
+      ],
+      "ajustes": {
+        "saltos": 1,
+        "saltoPct": 40
+      }
     },
     {
       "eixos": [
@@ -410,7 +482,11 @@
           "pct": 10,
           "duracaoMs": 4000
         }
-      ]
+      ],
+      "ajustes": {
+        "saltos": 1,
+        "saltoPct": 40
+      }
     },
     {
       "eixos": [
@@ -424,7 +500,11 @@
           "valor": 5,
           "em": "aliados"
         }
-      ]
+      ],
+      "ajustes": {
+        "saltos": 1,
+        "saltoPct": 40
+      }
     },
     {
       "eixos": [
@@ -439,7 +519,11 @@
           "duracaoMs": 3000,
           "em": "conjurador"
         }
-      ]
+      ],
+      "ajustes": {
+        "saltos": 1,
+        "saltoPct": 40
+      }
     },
     {
       "eixos": [
@@ -496,9 +580,10 @@
       "texto": "Cada atravessado ganha uma marca.",
       "efeitos": [
         {
-          "tipo": "marcado",
-          "pct": 10,
-          "duracaoMs": 4000
+          "tipo": "marca_estilo",
+          "valor": 1,
+          "pct": 4,
+          "duracaoMs": 6000
         }
       ]
     },
@@ -525,12 +610,9 @@
       "texto": "A invocação nasce no fim do traço.",
       "efeitos": [
         {
-          "tipo": "invocar_temporario",
-          "ref": "espectro",
-          "valor": 1,
-          "duracaoMs": 5000,
-          "em": "conjurador",
-          "desde": 5
+          "tipo": "fase",
+          "ref": "fusao_invocacao_no_fim",
+          "duracaoMs": 300
         }
       ]
     },
@@ -574,9 +656,13 @@
       "texto": "O eco bate mais forte em quem tem marcas.",
       "efeitos": [
         {
-          "tipo": "exposto",
-          "pct": 10,
-          "duracaoMs": 3000
+          "tipo": "efeito_atrasado",
+          "duracaoMs": 600,
+          "interno": {
+            "tipo": "consumir",
+            "ref": "marca_estilo",
+            "pct": 50
+          }
         }
       ]
     },
@@ -587,6 +673,11 @@
       ],
       "texto": "O eco sai de um aliado próximo.",
       "efeitos": [
+        {
+          "tipo": "fase",
+          "ref": "leitura_estouro",
+          "duracaoMs": 600
+        },
         {
           "tipo": "bonus_dano",
           "pct": 8,
@@ -634,9 +725,10 @@
       "texto": "O preso ganha marcas.",
       "efeitos": [
         {
-          "tipo": "marcado",
-          "pct": 15,
-          "duracaoMs": 4000
+          "tipo": "marca_estilo",
+          "valor": 1,
+          "pct": 6,
+          "duracaoMs": 6000
         }
       ]
     },
@@ -648,8 +740,8 @@
       "texto": "Os presos atraem os golpes dos outros.",
       "efeitos": [
         {
-          "tipo": "desafiado",
-          "pct": 20,
+          "tipo": "exposto",
+          "pct": 15,
           "duracaoMs": 3000
         }
       ]
@@ -663,8 +755,14 @@
       "efeitos": [
         {
           "tipo": "exposto",
-          "pct": 15,
+          "pct": 10,
           "duracaoMs": 3000
+        },
+        {
+          "tipo": "comandar_mortos",
+          "pct": 15,
+          "duracaoMs": 3000,
+          "em": "conjurador"
         }
       ]
     },
@@ -675,6 +773,11 @@
       ],
       "texto": "Consumir marcas dá escudo.",
       "efeitos": [
+        {
+          "tipo": "consumir",
+          "ref": "marca_estilo",
+          "pct": 0
+        },
         {
           "tipo": "escudo",
           "valor": 8,
@@ -721,6 +824,11 @@
       "texto": "Os aliados que batem em marcados ganham dano.",
       "efeitos": [
         {
+          "tipo": "marcado",
+          "pct": 15,
+          "duracaoMs": 4000
+        },
+        {
           "tipo": "bonus_dano",
           "pct": 10,
           "duracaoMs": 4000,
@@ -736,9 +844,16 @@
       "texto": "As invocações miram os marcados e marcam.",
       "efeitos": [
         {
-          "tipo": "marcado",
-          "pct": 10,
-          "duracaoMs": 4000
+          "tipo": "marca_estilo",
+          "valor": 1,
+          "pct": 4,
+          "duracaoMs": 6000
+        },
+        {
+          "tipo": "comandar_mortos",
+          "pct": 15,
+          "duracaoMs": 3000,
+          "em": "conjurador"
         }
       ]
     },
@@ -749,6 +864,12 @@
       ],
       "texto": "As invocações passam o bônus de grupo adiante.",
       "efeitos": [
+        {
+          "tipo": "bonus_dano",
+          "pct": 10,
+          "duracaoMs": 4000,
+          "em": "aliados"
+        },
         {
           "tipo": "acelerado",
           "pct": 15,
@@ -1153,10 +1274,10 @@
           "duracaoMs": 4000
         },
         {
-          "tipo": "detonar_invocacao",
-          "em": "conjurador",
-          "valor": 2,
-          "pct": 60
+          "tipo": "explodir_ao_cair",
+          "em": "aliados",
+          "valor": 10,
+          "duracaoMs": 4000
         }
       ],
       "visual": {
@@ -1363,15 +1484,25 @@
       "papel": "mobilidade",
       "efeitos": [
         {
+          "tipo": "armadilha",
+          "em": "conjurador",
+          "valor": 8,
+          "duracaoMs": 12000,
+          "efeito": {
+            "enraizado": {
+              "duracaoMs": 1500
+            }
+          }
+        },
+        {
           "tipo": "avanco",
           "em": "conjurador",
           "valor": 5
         },
         {
-          "tipo": "armadilha",
+          "tipo": "rastro_efeito",
           "em": "conjurador",
-          "valor": 8,
-          "duracaoMs": 12000,
+          "duracaoMs": 3000,
           "efeito": {
             "enraizado": {
               "duracaoMs": 1500
@@ -1398,10 +1529,10 @@
       "icone": "coroa",
       "grau": "S",
       "tipoAtaque": "magico",
-      "politicaAlvo": "proprio",
-      "politicaImpacto": "proprio",
-      "tipoArea": "nenhuma",
-      "raioArea": 0,
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 3,
       "alcanceCelulas": 0,
       "tags": [
         "ultimate"
@@ -1418,14 +1549,12 @@
           "duracaoMs": 8000
         },
         {
-          "tipo": "reflexo",
-          "em": "conjurador",
-          "duracaoMs": 8000,
-          "efeito": {
-            "enraizado": {
-              "duracaoMs": 1000
-            }
-          }
+          "tipo": "puxao",
+          "valor": 2
+        },
+        {
+          "tipo": "enraizado",
+          "duracaoMs": 1500
         }
       ],
       "visual": {
@@ -1467,6 +1596,12 @@
         {
           "tipo": "imune_dano",
           "duracaoMs": 1000
+        },
+        {
+          "tipo": "levantar",
+          "em": "conjurador",
+          "valor": 3,
+          "pct": 30
         }
       ],
       "visual": {
@@ -1599,6 +1734,16 @@
           "tipo": "campo_cura",
           "valor": 3,
           "duracaoMs": 5000
+        },
+        {
+          "tipo": "rastro_efeito",
+          "em": "conjurador",
+          "duracaoMs": 5000,
+          "efeito": {
+            "cura": {
+              "valor": 3
+            }
+          }
         }
       ],
       "visual": {
@@ -1792,6 +1937,45 @@
         "som": "nivel",
         "assinatura": "muralha_de_aco"
       }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "icone": "coroa",
+      "grau": "S",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "celula",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 0,
+      "alcanceCelulas": 6,
+      "tags": [
+        "ultimate"
+      ],
+      "id": "fusao_invocacao_no_fim",
+      "nome": "Invocação no fim do traço",
+      "papel": "invocacao",
+      "efeitos": [
+        {
+          "tipo": "invocar_temporario",
+          "ref": "espectro",
+          "valor": 1,
+          "duracaoMs": 5000
+        }
+      ],
+      "visual": {
+        "cor": "#c9a24a",
+        "impacto": "runas",
+        "camera": "leve",
+        "som": "golpe",
+        "assinatura": "invocacao"
+      },
+      "interna": true
     },
     {
       "formulaDano": "2d6",

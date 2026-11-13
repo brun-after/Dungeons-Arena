@@ -6,7 +6,8 @@
 
 import { Leitor } from '../core/validar';
 import { EIXOS, PAPEIS, type Eixo, type Papel } from './eixos';
-import { lerHabilidades, type DefinicaoHabilidade } from './habilidades';
+import { lerHabilidades, type DefinicaoHabilidade, type LancaDosMortos } from './habilidades';
+import { lerAjustes, type AjustesLeitura } from './leituras';
 import { lerEfeitosGraduais, type EfeitoSecundario } from './papeis';
 
 export interface Ultimate {
@@ -18,6 +19,17 @@ export interface Ultimate {
   papeis: readonly [Papel, Papel];
   /** O que a ultimate faz, na língua do jogo. */
   texto: string;
+  /** D-161: a função das invocações dela, que a classe de quem usa veste (`veiculos`). */
+  invocacao?: FuncaoInvocacao;
+}
+
+/** Marco 40 (13/11/2026, D-161): o que a classe dá à ultimate — as criaturas de cada função e, no Necromante, as lanças. */
+export const FUNCOES_INVOCACAO = ['ataque', 'cura', 'guarda'] as const;
+export type FuncaoInvocacao = (typeof FUNCOES_INVOCACAO)[number];
+export interface Veiculo {
+  invocacoes: Readonly<Record<FuncaoInvocacao, string>>;
+  /** As lanças dos mortos vêm junto de toda ultimate que fere. */
+  lanca?: LancaDosMortos;
 }
 
 /** Marco 40 (D-160): o que o par dos dois estilos mais fortes junta na ultimate, gradual pela faixa do mais fraco. */
@@ -25,6 +37,8 @@ export interface Fusao {
   eixos: readonly [Eixo, Eixo];
   texto: string;
   efeitos: readonly EfeitoSecundario[];
+  /** D-161: o que a fusão muda na ultimate (saltos, forma da área...), a partir da faixa `desde`. */
+  ajustes?: AjustesLeitura;
 }
 
 /** A chave da fusão: os dois eixos na ordem de EIXOS, juntos por `+`. */
@@ -41,6 +55,7 @@ export interface UltimatesLidas {
   ultimates: Map<string, Ultimate>;
   fusoes: Map<string, Fusao>;
   definicoes: Map<string, DefinicaoHabilidade>;
+  veiculos: Map<string, Veiculo>;
   erros: string[];
 }
 
@@ -63,7 +78,10 @@ export function lerUltimates(json: unknown): UltimatesLidas {
     if (porPapeis.has(chave)) l.erro(`${id}: a família ${chave} já existe`);
     porPapeis.add(chave);
     if (ultimates.has(id)) l.erro(`ultimate "${id}" repetida`);
-    ultimates.set(id, { id, familia: l.texto(o, 'familia'), nome: l.texto(o, 'nome'), papeis: [a, b], texto: l.texto(o, 'texto') });
+    const invocacao = o.invocacao === undefined ? undefined : l.texto(o, 'invocacao');
+    const funcao = FUNCOES_INVOCACAO.find((f) => f === invocacao);
+    if (invocacao !== undefined && !funcao) l.erro(`${id}: invocação "${invocacao}" desconhecida`);
+    ultimates.set(id, { id, familia: l.texto(o, 'familia'), nome: l.texto(o, 'nome'), papeis: [a, b], texto: l.texto(o, 'texto'), ...(funcao && { invocacao: funcao }) });
   }
   const fusoes = new Map<string, Fusao>();
   for (const bruto of raiz.fusoes === undefined ? [] : l.lista(raiz, 'fusoes')) {
@@ -76,7 +94,21 @@ export function lerUltimates(json: unknown): UltimatesLidas {
     }
     const chave = chaveDaFusao(a, b);
     if (fusoes.has(chave)) l.erro(`fusão ${chave} repetida`);
-    fusoes.set(chave, { eixos: [a, b], texto: l.texto(o, 'texto'), efeitos: lerEfeitosGraduais(l, l.lista(o, 'efeitos'), `fusão ${chave}`) });
+    const ajustes = o.ajustes === undefined ? undefined : lerAjustes(l, o.ajustes, `fusão ${chave}`);
+    fusoes.set(chave, { eixos: [a, b], texto: l.texto(o, 'texto'), efeitos: lerEfeitosGraduais(l, l.lista(o, 'efeitos'), `fusão ${chave}`), ...(ajustes && { ajustes }) });
+  }
+  const veiculos = new Map<string, Veiculo>();
+  const brutoV = raiz.veiculos === undefined ? {} : l.objeto(raiz.veiculos, 'veiculos');
+  for (const [classe, v] of Object.entries(brutoV)) {
+    const o = l.objeto(v, `veículo ${classe}`);
+    const inv = l.objeto(o.invocacoes, `veículo ${classe}: invocacoes`);
+    const invocacoes = { ataque: l.texto(inv, 'ataque'), cura: l.texto(inv, 'cura'), guarda: l.texto(inv, 'guarda') };
+    let lanca: LancaDosMortos | undefined;
+    if (o.lanca !== undefined) {
+      const la = l.objeto(o.lanca, 'lanca');
+      lanca = { alem: l.numero(la, 'alem', { min: 0, max: 4, inteiro: true }), lados: la.lados === undefined ? false : l.booleano(la, 'lados'), junto: true };
+    }
+    veiculos.set(classe, { invocacoes, ...(lanca && { lanca }) });
   }
   const h = lerHabilidades({ versao: raiz.versao, habilidades: raiz.habilidades });
   for (const u of ultimates.values()) {
@@ -84,7 +116,7 @@ export function lerUltimates(json: unknown): UltimatesLidas {
     if (!def) l.erro(`${u.id}: sem definição em "habilidades"`);
     else if (!def.base.tags.includes('ultimate')) l.erro(`${u.id}: a definição precisa da etiqueta "ultimate"`);
   }
-  return { ultimates, fusoes, definicoes: h.definicoes, erros: [...l.erros, ...h.erros.map((e) => `ultimates.json: ${e}`)] };
+  return { ultimates, fusoes, definicoes: h.definicoes, veiculos, erros: [...l.erros, ...h.erros.map((e) => `ultimates.json: ${e}`)] };
 }
 
 /** A ultimate da família de dois papéis, em qualquer ordem (null se nenhuma família tem o par). */

@@ -33,7 +33,8 @@ export function fiosDoAtor(ctx: Ctx, ator: Entidade, tick: number): FiosDaUltima
   const primeiro = fortes[0];
   const segundo = fortes.find((f) => primeiro && f.estilo.eixos[0] !== primeiro.estilo.eixos[0]);
   const fusao = primeiro && segundo ? ordenar(primeiro.estilo.eixos[0], segundo.estilo.eixos[0], segundo.faixa) : undefined;
-  return { par: [fio(par[0]), fio(par[1])], ...(fusao && { fusao }) };
+  // D-161: a classe dá o veículo (as criaturas e, no Necromante, as lanças dos mortos).
+  return { par: [fio(par[0]), fio(par[1])], ...(fusao && { fusao }), classe: ator.bolsa.classeId };
 }
 
 function ordenar(a: Eixo, b: Eixo, faixa: number): { eixos: readonly [Eixo, Eixo]; faixa: number } {

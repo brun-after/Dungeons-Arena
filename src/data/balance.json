@@ -235,6 +235,7 @@
       "recargaBasicoMaxPct": 30,
       "regenPorCelulaPorConstituicaoPct": 8,
       "descontoPorCarismaPct": 2,
+      "tenacidadePorVontadePct": 0.3,
       "descontoMaxPct": 30,
       "rolagemPorPontoPct": 7,
       "rolagemPesoForcaPct": 35,

@@ -270,6 +270,8 @@ export interface Balance {
       recargaBasicoPorDestrezaPct: number;
       recargaBasicoMaxPct: number;
       regenPorCelulaPorConstituicaoPct: number;
+      /** Marco 40 (13/11/2026, D-161): cada ponto de Vontade acima de 10 encurta os controles recebidos (tenacidade). */
+      tenacidadePorVontadePct: number;
       descontoPorCarismaPct: number;
       descontoMaxPct: number;
       /** Marco 18 (D-068): a rolagem escala com FOR e INT e a INT dá a potência dos efeitos. */

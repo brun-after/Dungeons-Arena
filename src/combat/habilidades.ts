@@ -194,6 +194,8 @@ export interface Habilidade {
   reacaoPar?: string;
   /** D-160: a fusão dos eixos dos dois estilos mais fortes que entrou na ultimate (`eixoA+eixoB`). */
   fusao?: string;
+  /** Marco 40 (13/11/2026, D-161): o que a skill faz quando abate (as leituras de estilo); progression/morte.ts aplica. */
+  aoAbater?: readonly EfeitoCanonico[];
 }
 
 /** D-136: a lança vai do morto até o alvo dele e `alem` células adiante; com `lados`, também para os dois lados. */

@@ -24,7 +24,7 @@ import { aplicarFormasNovas, ehFormaNova, formaNovaCabe, type FormaId, type Form
 import { aplicarSecundario, type TabelaDePapeis } from './papeis';
 import { aplicarLeituras } from './leituras';
 import { aplicarFios, type FiosDaUltimate } from './fios-ultimate';
-import type { Fusao } from './ultimates';
+import type { Fusao, Ultimate, Veiculo } from './ultimates';
 
 export interface Caminho {
   id: string;
@@ -75,6 +75,9 @@ export interface FontesCompilacao {
   papeis?: TabelaDePapeis;
   /** Marco 40 (D-160): as fusões de eixos das ultimates. */
   fusoes?: ReadonlyMap<string, Fusao>;
+  /** Marco 40 (D-161): as famílias (a função das invocações) e o que cada classe dá às ultimates. */
+  ultimates?: ReadonlyMap<string, Ultimate>;
+  veiculos?: ReadonlyMap<string, Veiculo>;
 }
 
 export function lerCaminhos(json: unknown): { caminhos: Map<string, Caminho>; erros: string[] } {
@@ -319,7 +322,8 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
   h.tags = etiquetasDe(h, b.tags);
   // Marco 40 (12/11/2026, D-159): as leituras de estilo da skill de classe, cada uma na faixa do seu estilo.
   const leituras = def.leituras ? (op.leituras ?? []).filter((l) => l.faixa > 0 && def.leituras?.[l.estilo]) : [];
-  if (leituras.length > 0) h.efeitos = aplicarLeituras(h, def.leituras, leituras).efeitos;
+  // D-161: e os ajustes da skill (raio, saltos, conjuração...) e os efeitos ao abater que elas prometem.
+  if (leituras.length > 0) Object.assign(h, aplicarLeituras(h, def.leituras, leituras));
   const fios = op.fios && b.tags.includes('ultimate') ? op.fios : undefined;
   // Na chave só entram os modificadores de fora (equipamento): os da definição e dos caminhos já estão implícitos.
   h.chave = formatarChave({ id: b.id, rank, caminhos: caminhosValidos, mods: op.mods.filter((m) => aplicados.includes(m)), variantes, ...(formas.length > 0 && { formas }), ...(leituras.length > 0 && { leituras }), ...(fios && { fios }), ...(op.sintonia !== undefined && !op.runa && { sintonia: op.sintonia }), ...(op.runa && { runa: op.runa }) });

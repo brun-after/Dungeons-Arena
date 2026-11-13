@@ -6,6 +6,7 @@ import { aoAbaterComEncarnacao } from '../combat/encarnacao-efeitos';
 import { multiplicadorFuria, temFuria } from '../combat/furia';
 import { fatorDeCura } from '../combat/basico';
 import { aoAbaterComArmas } from '../combat/emprestimos';
+import { aplicarAoAbater } from '../combat/ao-abater';
 import { marcosNaMorte } from '../combat/marcos-abate';
 import { sorteDePergaminhoPct } from './passiva-aventureiro';
 // Mortes, XP, revivescência e respawn (§2.7 "Morte", §2.12) — etapa 8 do tick.
@@ -172,6 +173,8 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
       const abate = abateDe(ctx, quemAbateu, e);
       abates.push(abate);
       dispararGanchosDe(estado, ctx, quemAbateu, 'aoMatar', { outro: e, hab: abate.golpe ?? null }, saida);
+      // Marco 40 (13/11/2026, D-161): o que a skill do golpe faz ao abater (as leituras de estilo).
+      aplicarAoAbater(estado, ctx, quemAbateu, e, abate.golpe, saida);
       // Marco 18 (D-070): os drops que só existem nesta situação.
       sortearOrigensRaras(estado, ctx, abate, saida);
     }

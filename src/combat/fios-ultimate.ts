@@ -15,7 +15,9 @@ import type { DefinicaoElemento, Elemento } from './elementos';
 import type { Habilidade } from './habilidades';
 import { aplicarSecundario, cabeNaSkill, naFaixa, type TabelaDePapeis } from './papeis';
 import { FAIXAS_DE_VINCULO, type RegrasRunas } from './runas';
-import { chaveDaFusao, type Fusao } from './ultimates';
+import { ajustar } from './leituras';
+import { construirEfeito } from './registro-efeitos';
+import { chaveDaFusao, type Fusao, type Ultimate, type Veiculo } from './ultimates';
 
 export interface FioDeElemento {
   el: PontaElemental;
@@ -27,12 +29,16 @@ export interface FiosDaUltimate {
   par: readonly [FioDeElemento, FioDeElemento];
   /** A fusão dos dois estilos mais fortes (eixos na ordem de EIXOS) e a faixa do mais fraco. */
   fusao?: { eixos: readonly [Eixo, Eixo]; faixa: number };
+  /** D-161: a classe de quem usa, que dá o veículo (as criaturas e as lanças). */
+  classe?: string;
 }
 
 export interface FontesDosFios {
   elementos: ReadonlyMap<Elemento, DefinicaoElemento>;
   papeis?: TabelaDePapeis;
   fusoes?: ReadonlyMap<string, Fusao>;
+  ultimates?: ReadonlyMap<string, Ultimate>;
+  veiculos?: ReadonlyMap<string, Veiculo>;
 }
 
 /** A ultimate compilada com os fios (depois da runa, que já deu o elemento principal e a parte elemental). */
@@ -66,7 +72,32 @@ export function aplicarFios(h: Habilidade, fios: FiosDaUltimate, fontes: FontesD
       const e = naFaixa(s, fios.fusao.faixa);
       if (e && cabeNaSkill(saida, e) && !saida.efeitos.some((x) => x.tipo === e.tipo && x.em === e.em)) saida.efeitos.push(e);
     }
+    // D-161: e os ajustes da fusão (a área que salta, a onda em linha...), da faixa `desde`.
+    if (fusao?.ajustes && fios.fusao.faixa >= fusao.ajustes.desde) saida = ajustar(saida, fusao.ajustes);
     if (fusao) saida.fusao = chaveDaFusao(fios.fusao.eixos[0], fios.fusao.eixos[1]);
   }
-  return saida;
+  return vestir(saida, fios.classe, fontes);
+}
+
+/**
+ * Marco 40 (13/11/2026, D-161): o veículo da classe e a matéria da runa.
+ * - As invocações viram as criaturas da classe para a função da família (ataque, cura ou guarda).
+ * - No Necromante, os mortos lançam as lanças de osso junto de toda ultimate que fere (a identidade do Juízo).
+ * - O campo que a ultimate deixa (a cratera do Cometa) leva o estado do elemento da runa; no Físico, o chão revolvido
+ *   atola.
+ */
+function vestir(h: Habilidade, classe: string | undefined, fontes: FontesDosFios): Habilidade {
+  const veiculo = classe ? fontes.veiculos?.get(classe) : undefined;
+  const familia = fontes.ultimates?.get(h.id.replace(/_\d+$/, ''));
+  // As invocações que a fusão traz (sem família de invocação) vêm como as de ataque da classe.
+  const criatura = veiculo ? veiculo.invocacoes[familia?.invocacao ?? 'ataque'] : undefined;
+  const runa = h.runa ?? 'fisico';
+  const estado = runa === 'fisico' ? construirEfeito('atolado', { pct: 40, duracaoMs: 2000 }) : fontes.elementos.get(runa)?.estado;
+  const efeitos = h.efeitos.map((e) => {
+    if (e.tipo === 'invocar_temporario' && criatura) return { ...e, ref: criatura };
+    if (e.tipo === 'campo_veneno' && !e.interno && estado) return { ...e, interno: { ...estado, interno: null } };
+    return e;
+  });
+  const lanca = veiculo?.lanca && h.formulaDano !== null && !h.lanca ? veiculo.lanca : undefined;
+  return { ...h, efeitos, ...(lanca && { lanca }) };
 }

@@ -53,6 +53,7 @@ export function formatarChave(p: PartesChave): string {
   if (p.fios) {
     s += `#${p.fios.par.map((f) => `${f.el}${fx(f.faixa)}`).join('.')}`;
     if (p.fios.fusao && p.fios.fusao.faixa > 0) s += `*${p.fios.fusao.eixos.join('.')}${fx(p.fios.fusao.faixa)}`;
+    if (p.fios.classe) s += `$${p.fios.classe}`;
   }
   if (p.sintonia !== undefined) s += `%${String(Math.max(0, Math.min(10, Math.round(p.sintonia))))}`;
   if (p.runa) s += `!${p.runa.runa}${String(Math.max(0, Math.min(10, Math.round(p.runa.faixa))))}`;
@@ -63,7 +64,7 @@ const ehModificador = (v: string): v is Modificador => (MODIFICADORES as readonl
 const ehVariante = (v: string): v is Variante => (VARIANTES as readonly string[]).includes(v);
 
 export function lerChave(chave: string): PartesChave | null {
-  const m = /^([a-z0-9_]+)(?:@(\d+))?(?:\/([a-z0-9_,]+))?(?:\+([a-z_,]+))?(?:~([a-z_,]+))?(?:\^([a-z_0-9,]+))?(?:&([a-z_0-9,]+))?(?:#([a-z]+)(\d+)\.([a-z]+)(\d+))?(?:\*([a-z]+)\.([a-z]+)(\d+))?(?:%(\d+))?(?:!([a-z]+)(\d+))?$/.exec(chave);
+  const m = /^([a-z0-9_]+)(?:@(\d+))?(?:\/([a-z0-9_,]+))?(?:\+([a-z_,]+))?(?:~([a-z_,]+))?(?:\^([a-z_0-9,]+))?(?:&([a-z_0-9,]+))?(?:#([a-z]+)(\d+)\.([a-z]+)(\d+))?(?:\*([a-z]+)\.([a-z]+)(\d+))?(?:\$([a-z]+))?(?:%(\d+))?(?:!([a-z]+)(\d+))?$/.exec(chave);
   if (!m?.[1]) return null;
   const mods = (m[4] ?? '').split(',').filter((x) => x !== '');
   if (!mods.every(ehModificador)) return null;
@@ -103,15 +104,16 @@ export function lerChave(chave: string): PartesChave | null {
       if (!ehEixo(ea) || !ehEixo(eb) || ea === eb || !(ff >= 1 && ff <= 10)) return null;
       fios.fusao = { eixos: [ea, eb], faixa: ff };
     }
-  } else if (m[12] !== undefined) return null;
+    if (m[15] !== undefined) fios.classe = m[15];
+  } else if (m[12] !== undefined || m[15] !== undefined) return null;
   let sintonia: number | undefined;
-  if (m[15] !== undefined) {
-    sintonia = Number(m[15]);
+  if (m[16] !== undefined) {
+    sintonia = Number(m[16]);
     if (sintonia > 10) return null;
   }
-  if (m[16] !== undefined) {
-    const r = RUNAS.find((x) => x === m[16]);
-    const faixa = Number(m[17]);
+  if (m[17] !== undefined) {
+    const r = RUNAS.find((x) => x === m[17]);
+    const faixa = Number(m[18]);
     if (!r || faixa > 10) return null;
     runa = { runa: r, faixa };
   }

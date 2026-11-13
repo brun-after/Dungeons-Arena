@@ -47,6 +47,7 @@ import { aoAgirEncarnado, encarnar } from './encarnacao';
 import { consumirMira } from './mira';
 import { prepararTiroCheio } from './sintonia-arqueiro';
 import { raioAreaDaEncarnacao } from './encarnacao-efeitos';
+import { comBuffsDeLeitura } from './buffs-de-leitura';
 import { quantidadeDeSaltos, saltar } from './saltos';
 import { dispararGanchosDe, passivosDe } from '../progression/ganchos-do-portador';
 import { comCombo, fazerCombo } from './combos';
@@ -479,7 +480,8 @@ function lancar(
     if (f) Object.assign(f, { acaoId, origemX: ator.x, origemY: ator.y });
     return;
   }
-  const hab = daFase ? habilidadeBase : basicoComVariacao(estado, ator, prepararSequencia(estado, ctx, ator, habilidadeBase, acaoId, alvo, mira));
+  // Marco 40 (13/11/2026, D-161): a área ampliada e o eco (os estados das leituras de estilo) mudam a magia de agora.
+  const hab = comBuffsDeLeitura(ator, daFase ? habilidadeBase : basicoComVariacao(estado, ator, prepararSequencia(estado, ctx, ator, habilidadeBase, acaoId, alvo, mira)), estado.tick);
   if (hab.formulaDano && !consumirAtaque(ator, acaoId)) return;
   if (tipoEm(ctx.fase, ator.x, ator.y) === 'agua' && !deSuporte(hab)) return;
   // 04/11/2026 (D-132): atacar de longe deixa um pouco lento, mais quanto mais longe está o alvo.
@@ -605,6 +607,8 @@ function lancar(
       atingidos.forEach((e, indice) => {
         aplicarImpacto(estado, ctx, e, { ...base, indice, secundario: e !== principal }, saida);
       });
+      // Marco 40 (13/11/2026, D-161): a área que salta (as leituras de estilo) pula do alvo principal para os de fora.
+      if (principal && hab.saltos) saltar(estado, ctx, ator, hab, principal, hab.saltos.quantidade, base, atingidos.map((e) => e.id), saida);
       break;
     }
     case 'projetil': {

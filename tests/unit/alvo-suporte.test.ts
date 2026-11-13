@@ -8,7 +8,7 @@ import { DT_MS } from '../../src/core/loop';
 import { simular, type EventoSimulacao } from '../../src/core/simulacao';
 import type { Entidade } from '../../src/entities/entidade';
 import { criarJogador } from '../../src/entities/fabrica';
-import { aliadoMaisFeridoPerto } from '../../src/ui/alvo-suporte';
+import { aliadoMaisFeridoPerto, dentroDoAlcance } from '../../src/ui/alvo-suporte';
 import { comKit, CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 
 const ctx = contexto(faseDeTexto(SALA_ABERTA), undefined, 'campanha');
@@ -61,5 +61,13 @@ describe('alvo das habilidades de suporte (D-144)', () => {
     c.estado.entidades = c.estado.entidades.filter((e) => e.id !== 'k');
     expect(aliadoMaisFeridoPerto(c.estado, ctx, j, 6)?.id).toBe('s');
     expect(aliadoMaisFeridoPerto(c.estado, ctx, j, 0)).toBeNull();
+  });
+});
+
+// Marco 40 (13/11/2026): as armadilhas vão na célula do cursor, puxada para dentro do alcance.
+describe('armadilha no campo', () => {
+  it('a célula longe demais vem na linha até o alcance', () => {
+    expect(dentroDoAlcance({ x: 0, y: 0 }, { x: 3, y: 1 }, 4)).toEqual({ x: 3, y: 1 });
+    expect(dentroDoAlcance({ x: 0, y: 0 }, { x: 8, y: 4 }, 4)).toEqual({ x: 4, y: 2 });
   });
 });

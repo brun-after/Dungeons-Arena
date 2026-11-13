@@ -17,7 +17,7 @@ import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { posicionar, vivo, type Entidade } from '../entities/entidade';
 import { criarInimigo } from '../entities/fabrica';
-import { podeFerir } from '../modos/relacao';
+import { podeAjudar, podeFerir } from '../modos/relacao';
 import { celulaLivrePara, ordemRotativa, reservaCelula } from '../world/colisao';
 import { passavel } from '../world/fase';
 import { aprenderArmadilha } from '../world/perigos';
@@ -111,8 +111,11 @@ export function armarArmadilha(
   mira: Celula | null,
   saida: EventoSimulacao[],
 ): void {
-  const c = mira ?? { x: dono.x, y: dono.y };
-  if (!passavel(ctx.fase, c.x, c.y) || estado.armadilhas.some((a) => a.x === c.x && a.y === c.y)) return;
+  const ocupada = (x: number, y: number) => estado.armadilhas.some((a) => a.x === x && a.y === y);
+  let c = mira ?? { x: dono.x, y: dono.y };
+  // Marco 40 (13/11/2026, D-161): na célula que já tem armadilha, a nova vai na seguinte da linha (armadilhas em linha).
+  if (ocupada(c.x, c.y)) c = { x: c.x + Math.sign(c.x - dono.x), y: c.y + Math.sign(c.y - dono.y) };
+  if (!passavel(ctx.fase, c.x, c.y) || ocupada(c.x, c.y)) return;
   const id = estado.proximoId++;
   // 06/11/2026 (D-135): a runa de pé do armadilheiro leva o elemento dele (o estado do elemento no lugar do interno).
   const estilo = estiloDaArmadilha(ctx, dono);
@@ -132,6 +135,9 @@ export function armarArmadilha(
     rearmeTicks: 0,
     inerteAteTick: 0,
     reveladaPara: [],
+    // Marco 40 (13/11/2026, D-161): os rearmes (`pct`) e o presente ao aliado que pisa.
+    ...(ef.pct > 0 && { rearmes: Math.round(ef.pct) }),
+    ...(ef.aliado && { aoAliado: { ...ef.aliado } }),
   });
   saida.push({ t: 'armadilhaArmada', tick: estado.tick, donoId: dono.id, armadilhaId: id, x: c.x, y: c.y });
 }
@@ -311,7 +317,16 @@ export function processarGatilhos(estado: EstadoJogo, ctx: ContextoSimulacao, ap
     // Marco 9A-2: com rearme, a armadilha fica inerte depois de disparar.
     if (a.inerteAteTick > tick) continue;
     const dono = { id: a.donoId, equipe: a.equipeDono };
-    const alvo = porCelula.get(a.y * ctx.fase.largura + a.x)?.find((e) => vivo(e) && e.x === a.x && e.y === a.y && podeFerir(dono, e, ctx.modo));
+    const naCelula = porCelula.get(a.y * ctx.fase.largura + a.x);
+    const alvo = naCelula?.find((e) => vivo(e) && e.x === a.x && e.y === a.y && podeFerir(dono, e, ctx.modo));
+    // Marco 40 (D-161): o aliado que pisa ganha o presente dela, uma vez.
+    if (!alvo && a.aoAliado) {
+      const amigo = naCelula?.find((e) => vivo(e) && e.x === a.x && e.y === a.y && !e.invocacao && podeAjudar(dono, e, ctx.modo));
+      if (amigo) {
+        aplicar(amigo, a.aoAliado, { id: a.donoId, x: a.x, y: a.y }, null);
+        delete a.aoAliado;
+      }
+    }
     if (!alvo) continue;
     if (dispararArmadilha(estado, ctx, a, alvo, aplicar, saida)) disparadas.add(a.id);
   }
@@ -324,8 +339,13 @@ export function processarGatilhos(estado: EstadoJogo, ctx: ContextoSimulacao, ap
  */
 export function dispararArmadilha(estado: EstadoJogo, ctx: ContextoSimulacao, a: Armadilha, alvo: Entidade, aplicar: AplicarDireto, saida: EventoSimulacao[]): boolean {
   const tick = estado.tick;
-  const some = a.rearmeTicks <= 0;
-  if (!some) a.inerteAteTick = tick + a.rearmeTicks;
+  // Marco 40 (D-161): com rearmes, fica inerte 1 s e volta (gasta um rearme).
+  const rearma = (a.rearmes ?? 0) > 0;
+  const some = a.rearmeTicks <= 0 && !rearma;
+  if (rearma) {
+    a.rearmes = (a.rearmes ?? 0) - 1;
+    a.inerteAteTick = tick + ticksDe(1000);
+  } else if (!some) a.inerteAteTick = tick + a.rearmeTicks;
   const visual = { ...(a.elemento && { elemento: a.elemento }), ...(a.runa && { runa: true }) };
   // 06/11/2026 (D-135): o Passo leve gasta-se aqui; a armadilha some (ou rearma) sem ferir.
   if (gastarPassoLeve(estado, alvo)) {

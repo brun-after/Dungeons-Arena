@@ -39,7 +39,7 @@ import reinoEclipseJson from '../data/mundo/reino-eclipse.json';
 import travessiaJson from '../data/mundo/travessia-das-areias.json';
 import { conferirReino, lerReino, type Reino } from '../mundo/reino';
 import { lerArmas, type RegrasDeArmas } from '../progression/armas';
-import { lerUltimates, type Fusao, type Ultimate } from '../combat/ultimates';
+import { lerUltimates, type Fusao, type Ultimate, type Veiculo } from '../combat/ultimates';
 import { lerSintonia, type RegrasSintonia } from '../progression/sintonia';
 import { lerSinergias, type SinergiaPassiva } from '../progression/sinergias-passivas';
 import { conferirClassesEUltimates } from './conteudo-classes';
@@ -104,6 +104,8 @@ export interface Conteudo {
   ultimates: Catalogo<Ultimate>;
   /** Marco 40 (D-160): as fusões de eixos das ultimates, pela chave `eixoA+eixoB`. */
   fusoes: Catalogo<Fusao>;
+  /** Marco 40 (D-161): o que cada classe dá às ultimates (as criaturas e as lanças). */
+  veiculos: Catalogo<Veiculo>;
   /** Marco 24 (D-095): data/sintonia.json (Domínios, sintonias por classe, vertentes e encarnações duplas). */
   sintonia: RegrasSintonia;
   /** Marco 24 (D-096): data/sinergias.json (as sinergias passivas). */
@@ -238,7 +240,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   }
   for (const item of it.itens.values()) if (item.ensina !== null) conferir(`item ${item.id}`, [item.ensina]);
   for (const combo of cb.combos.values()) conferir(`combo ${combo.id}`, combo.sequencia.filter((s) => s !== '@ultimate'));
-  erros.push(...conferirClassesEUltimates(h.definicoes, c.classes, ul.ultimates, p.presets, it.itens));
+  erros.push(...conferirClassesEUltimates(h.definicoes, c.classes, ul.ultimates, p.presets, it.itens, ul.veiculos));
   erros.push(...si.erros, ...sg.erros);
   for (const s of sg.sinergias) {
     if (!h.definicoes.get(s.passiva)?.base.passiva) erros.push(`sinergias.json: ${s.id} pede a passiva "${s.passiva}"`);
@@ -304,6 +306,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       armas: ar.armas,
       ultimates: ul.ultimates,
       fusoes: ul.fusoes,
+      veiculos: ul.veiculos,
       sintonia: si.sintonia,
       sinergias: sg.sinergias,
       reinos,

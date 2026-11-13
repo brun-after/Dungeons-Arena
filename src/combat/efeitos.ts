@@ -15,6 +15,7 @@ import type { Celula, EntidadeId } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type Armadilha, type EstadoJogo } from '../core/estado';
 import { passivosDe } from '../progression/ganchos-do-portador';
+import { tenacidadeDaVontadePct } from '../progression/efeitos-atributo';
 import { inamovivelPelaSintonia } from './sintonia-guerreiro';
 import { mortoInamovivel } from './sintonia-necromante';
 import { escudoComFalcao } from './sintonia-aventureiro';
@@ -212,7 +213,9 @@ export function aplicarEfeito(
   if (ef.tipo === 'aparando') ef = { ...ef, duracaoMs: Math.min(ef.duracaoMs, ctx.balance.tatica.aparoJanelaMaxMs) };
   if (ef.tipo === 'veu_noturno') ef = { ...ef, duracaoMs: Math.min(ef.duracaoMs, ctx.balance.tatica.veuJanelaMaxMs) };
   if (alvo.bolsa && (def.bloqueiaMovimento || def.bloqueiaAcoes !== 'nenhuma')) {
-    const pct = Math.min(ctx.balance.tatica.tenacidadeMaxPct, passivasDaBolsa(ctx, alvo.bolsa).reduce((s, p) => s + (p.tenacidadePct ?? 0), 0));
+    // Marco 40 (13/11/2026, D-161): a Vontade também resiste ao controle.
+    const vontade = tenacidadeDaVontadePct(alvo.atributos, ctx.balance);
+    const pct = Math.min(ctx.balance.tatica.tenacidadeMaxPct, vontade + passivasDaBolsa(ctx, alvo.bolsa).reduce((s, p) => s + (p.tenacidadePct ?? 0), 0));
     if (pct > 0) ef = { ...ef, duracaoMs: Math.round(ef.duracaoMs * (1 - pct / 100)) };
   }
   // Marco 24 (D-095): as passivas gerais tiram estados (Mente blindada) e encurtam os que pegam (Sangue quente).

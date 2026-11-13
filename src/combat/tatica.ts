@@ -63,8 +63,10 @@ export function executarTatica(estado: EstadoJogo, ctx: ContextoSimulacao, alvo:
   } else if (ef.tipo === 'passo_sombrio') {
     if (mira && avancar(estado, ctx, ator, mira, ef.valor)) fato(ator, 'deslocou', undefined, origem.acaoId);
   } else if (ef.tipo === 'muralha_pedra' && mira) {
-    const horizontal = Math.abs(mira.x - ator.x) < Math.abs(mira.y - ator.y);
-    const candidatos = [-1, 0, 1].map((d) => ({ x: mira.x + (horizontal ? d : 0), y: mira.y + (horizontal ? 0 : d) }));
+    // Marco 40 (13/11/2026, D-161): a muralha de quem usa (`em: conjurador`) sai atrás dele, do lado oposto da mira.
+    const m: Celula = ef.em === 'conjurador' ? { x: ator.x - Math.sign(mira.x - ator.x) * 2, y: ator.y - Math.sign(mira.y - ator.y) * 2 } : mira;
+    const horizontal = Math.abs(m.x - ator.x) < Math.abs(m.y - ator.y);
+    const candidatos = [-1, 0, 1].map((d) => ({ x: m.x + (horizontal ? d : 0), y: m.y + (horizontal ? 0 : d) }));
     const livres = candidatos.filter((p) => passavel(ctx.fase, p.x, p.y) && !muralhaEm(estado, p.x, p.y)
       && !estado.entidades.some((e) => vivo(e) && reservaCelula(e, p.x, p.y))
       && !estado.objetos.some((o) => o.x === p.x && o.y === p.y)

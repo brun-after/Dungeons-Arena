@@ -79,6 +79,9 @@ export const TIPOS_EFEITO = [
   'vista_de_armadilha',
   // Marco 40 (12/11/2026, D-157): a marca da forma do estilo, que acumula (combat/eixos.ts).
   'marca_estilo',
+  // Marco 40 (13/11/2026, D-161): o Renascer levanta um aliado caído por perto; e as promessas das leituras de estilo:
+  // a próxima magia com área maior, as magias que ecoam e o medo dos feridos.
+  'levantar', 'area_ampliada', 'ecoando', 'apavorar', 'explodir_ao_cair',
 ] as const;
 export type TipoEfeito = (typeof TIPOS_EFEITO)[number];
 
@@ -101,6 +104,8 @@ export interface EfeitoCanonico {
   interno: EfeitoCanonico | null;
   /** Referência a conteúdo: o preset do `invocar`. */
   ref: string | null;
+  /** Marco 40 (13/11/2026, D-161): na armadilha, o que ela dá ao aliado que pisa (uma vez); `pct` são os rearmes. */
+  aliado?: EfeitoCanonico;
 }
 
 /** Fluxos próprios de um disparo só: agendar, armar ou invocar (não ficam como status). */
@@ -108,7 +113,7 @@ export type Fluxo = 'atrasado' | 'armadilha' | 'invocar' | 'fase';
 
 export type Periodico = 'dano' | 'cura' | 'recurso';
 export type Instantaneo = 'drenar_invocacao' | 'comandar_mortos' | 'purificar' | 'passo_sombrio' | 'muralha_pedra' | 'campo_cura' | 'campo_veneno' | 'cura' | 'recurso' | 'teleporte' | 'avanco' | 'empurrao' | 'puxao' | 'trocar' | 'dano'
-  | 'invisivel' | 'dissipar' | 'consumir' | 'detonar' | 'arremessar' | 'zerar_recarga' | 'libertar' | 'furia' | 'carga_ultimate' | 'executar';
+  | 'invisivel' | 'dissipar' | 'consumir' | 'detonar' | 'arremessar' | 'zerar_recarga' | 'libertar' | 'furia' | 'carga_ultimate' | 'executar' | 'levantar' | 'apavorar';
 export type BonusDeAtaqueBasico = 'dano' | 'recarga' | 'alcance' | 'alvos';
 
 export interface DefinicaoEfeito {
@@ -353,6 +358,14 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   fase: { ...BASE, icone: 'ampulheta', cor: '#f5b041', positivo: true, ehStatus: false, campos: [], padrao: { duracaoMs: 0, valor: 0, pct: 0 }, fluxo: 'fase', aoLancar: true, exige: ['ref'] },
   reflexo: { ...BASE, icone: 'escudo', cor: '#58d68d', positivo: true, campos: [], padrao: { duracaoMs: 5000, valor: 0, pct: 0 }, reflexo: true, exige: ['interno'] },
   executar: instantaneo('caveira', '#c0392b', ['pct'], { duracaoMs: 0, valor: 0, pct: 20 }, 'executar', false),
+  // Marco 40 (D-161): levanta o aliado caído mais perto, até `valor` células, com `pct` da vida (um por uso).
+  area_ampliada: { ...BASE, icone: 'anel', cor: '#5dade2', positivo: true, campos: ['valor'], padrao: { duracaoMs: 8000, valor: 1, pct: 0 }, someAoLancar: 'magico' },
+  ecoando: { ...BASE, icone: 'relogio', cor: '#af7ac5', positivo: true, campos: ['pct'], padrao: { duracaoMs: 8000, valor: 0, pct: 40 } },
+  // D-161: a invocação que explode ao cair (`valor` de dano em volta), enquanto dura.
+  explodir_ao_cair: { ...BASE, icone: 'explosao', cor: '#e67e22', positivo: true, campos: ['valor'], padrao: { duracaoMs: 4000, valor: 8, pct: 0 } },
+  // D-161: quem está abaixo de `pct`% da vida foge de medo por `duracaoMs`.
+  apavorar: instantaneo('caveira', '#6c3483', ['pct'], { duracaoMs: 1500, valor: 0, pct: 30 }, 'apavorar', false),
+  levantar: instantaneo('cura', '#f7dc6f', ['valor', 'pct'], { duracaoMs: 0, valor: 3, pct: 30 }, 'levantar', true),
   vista_de_armadilha: positivo('olho', '#f0b27a', 8, [], { duracaoMs: 45_000, valor: 0, pct: 0 }, { revelaArmadilhas: true }),
   passo_leve: positivo('botas', '#9be7c4', 6, [], { duracaoMs: 60_000, valor: 0, pct: 0 }, { protegeDeArmadilha: true }),
   invocar_temporario: { ...BASE, icone: 'invocar', cor: '#48c9b0', positivo: true, ehStatus: false, campos: ['valor'], padrao: { duracaoMs: 12_000, valor: 1, pct: 0 }, fluxo: 'invocar', aoLancar: true, exige: ['ref'] },

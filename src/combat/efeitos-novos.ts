@@ -7,7 +7,7 @@ import { buscarEntidade, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { vivo, type Entidade } from '../entities/entidade';
-import { podeFerir } from '../modos/relacao';
+import { podeAjudar, podeFerir } from '../modos/relacao';
 import { passivosDe } from '../progression/ganchos-do-portador';
 import { somarCarga } from './carga-ultimate';
 import { encherFuria } from './frenesi';
@@ -41,6 +41,24 @@ export function aplicarInstantaneoNovo(
 ): void {
   const tick = estado.tick;
   switch (tipo) {
+    case 'apavorar':
+      // Marco 40 (13/11/2026, D-161): só os feridos (abaixo de `pct`% da vida) fogem.
+      if (alvo.hp * 100 < alvo.hpMax * ef.pct) aplicarEfeito(estado, ctx, alvo, construirEfeito('aterrorizado', { duracaoMs: ef.duracaoMs }), origem, null, saida);
+      break;
+    case 'levantar': {
+      // Marco 40 (13/11/2026, D-161): o aliado caído mais perto (com ficha, esperando renascer) volta onde caiu.
+      const caido = estado.entidades
+        .filter((e) => e.morto && e.bolsa && e.id !== alvo.id && chebyshev(e, alvo) <= ef.valor && podeAjudar(alvo, e, ctx.modo))
+        .sort((a, b) => chebyshev(a, alvo) - chebyshev(b, alvo) || (a.id < b.id ? -1 : 1))[0];
+      if (!caido) break;
+      caido.morto = false;
+      caido.reviverEmTick = 0;
+      caido.hp = Math.max(1, Math.round((caido.hpMax * ef.pct) / 100));
+      caido.efeitos = [];
+      caido.participacao = [];
+      saida.push({ t: 'reviveu', tick, id: caido.id });
+      break;
+    }
     case 'invisivel':
       alvo.invisivelAteTick = Math.max(alvo.invisivelAteTick, tick + ticksDe(ef.duracaoMs));
       break;

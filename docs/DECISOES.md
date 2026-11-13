@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.07 · **Data:** 13/11/2026
+**Versão:** 1.08 · **Data:** 13/11/2026
 
 > **Histórico**
+> - **1.08 (13/11/2026)**: D-161: as leituras de estilo, as fusões e as famílias fazem o que o texto promete (ajustes da skill, efeitos ao abater, etapas internas, estados novos), o veículo da classe nas ultimates, o Renascer que levanta, a Vontade contra o controle e as armadilhas postas no campo.
 > - **1.07 (13/11/2026)**: D-160: marco 40, etapa 4 (primeira parte). As 140 ultimates por par de skills dão lugar a 21 famílias pelos papéis do par, com os fios de estilo e de elemento, o par de elementos, a runa no par e as 36 fusões de eixos.
 > - **1.06 (13/11/2026)**: D-159: marco 40, etapa 3. As 30 skills de classe do catálogo (6 por classe), com papel e a leitura de cada estilo; duas skills por classe saem do kit (`saidas`), e o save tira essas skills sem devolver pontos.
 > - **1.05 (12/11/2026)**: D-158: marco 40, etapa 2. As 89 skills comuns saem dos 20 núcleos (`nucleos.json`), com livros novos e a geral inicial de cada classe. As 54 gerais antigas deixam o jogador (save 31 e fichas) e ficam só para inimigos, ultimates e combos até as etapas 3 e 4.
@@ -4812,3 +4813,41 @@ no mesmo PR). O desenho está no catálogo "Códex do Combate" (artefato, versã
   - o Renascer cura e protege, mas ainda não levanta quem caiu;
   - os Carcereiros prendem, mas não puxam o preso;
   - várias fusões entram como efeito extra simples, em vez da mudança de forma descrita no catálogo.
+
+## D-161 — Marco 40: o que a carta promete, a skill faz (13/11/2026)
+
+**Contexto.** Na revisão dos artefatos, várias leituras de estilo, fusões e famílias de ultimate prometiam mais do que a
+mecânica fazia (D-160 listava as aproximações). O pedido foi fazer a mecânica cumprir o texto, sem baixar o texto.
+
+**Decisão.**
+- **Leitura com ajustes e efeitos ao abater** (`combat/leituras.ts`). Além dos efeitos, a leitura muda a skill a partir de
+  uma faixa (`ajustes`: raio, alcance, forma da área, saltos, perfuração, conjuração, dano, recarga, ininterrupta,
+  número de invocações, rearmes e escudo de aliado na armadilha) e traz `aoAbater` (aplicado por `combat/ao-abater.ts`
+  quando o golpe da skill derruba alguém: em quem abateu, nos aliados em volta ou no hostil mais perto do abatido).
+  Ecos e fases somam; os outros efeitos não se repetem. O que cai no lugar (fase, armadilha, invocação, campo) sempre
+  cabe na skill.
+- **Etapas internas das leituras** (`skills.json`, `leitura_*`), lançadas por `fase`: o estouro em área, o golpe em
+  área, a hesitação, o medo, a provocação, a onda da runa, a revelação, o contágio, a detonação, a atração, a armadilha
+  em linha e as feras que voltam.
+- **Estados novos**: `area_ampliada` (a próxima magia de área com mais raio), `ecoando` (as magias que ferem ecoam),
+  `apavorar` (só os feridos fogem), `explodir_ao_cair` (a invocação do Exército em fúria) e `levantar` (o Renascer
+  levanta o aliado caído mais perto com 30% da vida).
+- **A área também salta** (`acao.ts`): a área com `saltos` pula do alvo principal para os hostis de fora dela.
+- **Armadilha**: `pct` são os rearmes (fica inerte 1 s e volta); `aliado` é o que ela dá ao aliado que pisa (uma vez);
+  na célula que já tem armadilha, a nova vai na seguinte da linha. A muralha `em: conjurador` sai atrás de quem usa.
+- **Fusões com ajustes** (`ultimates.json`): a área que salta, a onda em linha, o pulso no mesmo lugar, a invocação no
+  fim do traço, o eco que consome as marcas.
+- **O veículo da classe** (`ultimates.json → veiculos`, a classe entra na chave como `$classe`): as invocações das
+  famílias viram as criaturas da classe por função (ataque, cura, guarda; o Guerreiro ganha o `guerreiro_espectral`); no
+  Necromante, toda ultimate que fere traz as lanças dos mortos (a identidade do Juízo). A cratera do Cometa leva o
+  estado da runa (no Físico, atola). Os Carcereiros puxam e prendem.
+- **Vontade contra o controle**: cada ponto acima de 10 encurta `tenacidadePorVontadePct` (0,3%) os controles recebidos,
+  somado às passivas, com o teto de 40%.
+- **Armadilhas no campo**: as skills de armadilha miram a célula do cursor (no celular, o último toque), puxada para
+  dentro do alcance; o núcleo recebe a célula no comando, como qualquer mira.
+- **Teste de guarda**: toda leitura muda a skill compilada (`leituras-fieis.test.ts`).
+
+**Ainda aproximado.** Algumas promessas dependem de sistemas que não existem e ficam no mais próximo: a Mortalha do
+Ceifador vira sombra rápida ao subir (não ao quebrar); o Comando do Ceifador dá crítico e pressa em vez do salto junto;
+a Investida do Duelista ecoa e alcança mais, sem voltar ao ponto de partida; o Brado rúnico solta uma onda que só leva o
+elemento quando a runa entra na etapa; o Contragolpe devolve um golpe fixo, não o absorvido.

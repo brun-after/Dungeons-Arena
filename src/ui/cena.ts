@@ -332,7 +332,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     },
   });
   const isometrico = () => camera.projecaoAtual.visao === 'iso';
-  const suporte = criarAlvoDeSuporte({ ctx, estado: o.estado, jogador, aoEscolher: (nome) => { hud.registrar(nome ? t('log.aliadoEscolhido', { nome }) : t('log.aliadoEsquecido')); } });
+  const suporte = criarAlvoDeSuporte({ ctx, estado: o.estado, jogador, cursor: () => ponteiro.celulaDoCursor(), aoEscolher: (nome) => { hud.registrar(nome ? t('log.aliadoEscolhido', { nome }) : t('log.aliadoEsquecido')); } });
   const usarHabilidade = (id: string) => { const alvo = suporte.alvoPara(id); emitir({ t: 'usarHabilidade', id, ...(alvo && { alvo }) }); };
   // Toque ou clique num hostil seleciona e trava o alvo (no travado, destrava: D-065); em outra célula, vai até ela.
   // Marco 26 (D-115): devolve se andou (o mouse segurado só guia quando o clique não foi num alvo).

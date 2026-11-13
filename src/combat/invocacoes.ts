@@ -37,7 +37,9 @@ export function contarGolpe(alvo: Entidade): void {
 
 /** Isca explosiva caindo: dano em área aos hostis, uma vez. */
 export function explodirSeIsca(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
-  const explosao = e.invocacao ? ctx.conteudo.presets.get(e.preset)?.invocacao?.explosao : undefined;
+  // Marco 40 (13/11/2026, D-161): a invocação marcada para explodir ao cair (o Exército em fúria) também explode.
+  const marcada = e.invocacao ? e.efeitos.find((f) => f.tipo === 'explodir_ao_cair' && f.ateTick > estado.tick) : undefined;
+  const explosao = e.invocacao ? (ctx.conteudo.presets.get(e.preset)?.invocacao?.explosao ?? (marcada && { raio: 1, dano: marcada.valor })) : undefined;
   if (!explosao) return;
   saida.push({ t: 'explodiu', tick: estado.tick, id: e.id, x: e.x, y: e.y, raio: explosao.raio });
   const centro = celulaOcupada(e);
