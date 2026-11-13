@@ -19,7 +19,7 @@ test('a galeria toca uma skill de cada família sem erro', async ({ page }) => {
   await page.goto('./?galeria=efeitos');
   await expect(page.locator('body')).toHaveAttribute('data-galeria', 'pronta');
   expect(await page.evaluate(() => (window as unknown as { __galeria: Galeria }).__galeria.ids.length)).toBeGreaterThan(400);
-  const amostra = ['corrente', 'bola_de_fogo', 'raio_em_cadeia', 'nova_glacial', 'abalo_sismico', 'dardo_toxico', 'garras_do_ossuario', 'orbe_instavel', 'barreira', 'golpe_atordoante', 'chuva_de_flechas', 'mergulho', 'ult_impacto_vulcanico'];
+  const amostra = ['corrente', 'bola_de_fogo', 'raio_em_cadeia', 'nova_glacial', 'abalo_sismico', 'dardo_toxico', 'garras_do_ossuario', 'orbe_instavel', 'barreira', 'golpe_atordoante', 'chuva_de_flechas', 'mergulho', 'ult_cometa'];
   for (const id of amostra) {
     const vivas = await page.evaluate((skill) => {
       const g = (window as unknown as { __galeria: Galeria }).__galeria;
