@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.12 · **Data:** 13/11/2026
+**Versão:** 1.13 · **Data:** 14/11/2026
 
 > **Histórico**
+> - **1.13 (14/11/2026)**: D-166: a caça marcada do Aventureiro (o básico marca, o companheiro ataca) e o bote do lobo e do urso.
 > - **1.12 (13/11/2026)**: D-165: os companheiros do Aventureiro (falcão, lobo e urso), a Troca de companheiro fixa na tecla 1 e as skills de classe pelo companheiro ativo (o Rosnar e o Rugido).
 > - **1.11 (13/11/2026)**: D-164: o movimento da classe (três mecânicas por classe, Shift e G), o alcance que cresce com o nível, as viagens limitadas por espaço e tempo, o Salto de Guerra e o Posto dos Mortos.
 > - **1.10 (13/11/2026)**: D-163: os combos de papel (17, com o desdobramento pelo eixo) e os 30 combos assinados das classes.
@@ -5005,3 +5006,26 @@ veículo das skills de classe. Até aqui só existia o falcão; o lobo e o urso 
 
 **Fica para depois.** O G trocar o companheiro fora de combate (hoje o G troca só o movimento) e o modelo próprio do
 urso.
+
+## D-166 — Marco 40: a caça marcada do Aventureiro (14/11/2026)
+
+**Contexto.** Com o lobo e o urso (D-165), as skills de classe saíam da célula do companheiro, mas o golpe chegava de
+longe sem que ele se mexesse: parecia que o lobo e o urso não atacavam. E o dano do Aventureiro vinha do básico dele,
+não da fera que é o centro da classe.
+
+**Decisão.**
+- **O básico do Aventureiro marca a caça**: o golpe segue (com os efeitos e as variações da arma), mas sem dano, e o
+  alvo atingido vira a caça (`Entidade.cacaMarcada`, no dono: o companheiro que chega na troca segue caçando);
+  acertar o companheiro de outro marca o dono dele. Usar uma skill do companheiro num inimigo também o marca. A velocidade de ataque do básico cai
+  pela metade (`ajustesClasses.aventureiro.marca.recargaBasicoPct`, +100% na recarga).
+- **O companheiro caça**: o falcão, o lobo e o urso vão até a caça na velocidade deles, com +60% enquanto caçam
+  (`marca.velocidadePct`), e atacam a cada 1 s; a mordida tem a fórmula do básico do dono (a arma, o nível, os itens e
+  os estilos), para crescer como o básico crescia, com 70% da força (`marca.danoPct`: com a marca também pela skill,
+  a força inteira deixava o PvP em 5,6 s e o chefe em 24 s). O simulador conta o básico que marca como golpe do
+  jogador; o companheiro permanente não conta como invocação. Balanceamento: 172/172. A caça morta apaga a marca; sem caça,
+  cada um volta ao comportamento de antes (o falcão passeia, o lobo e o urso seguem o dono).
+- **O bote do lobo e do urso**: nas skills de contato, o companheiro corre até a célula livre ao lado do alvo, na
+  velocidade dele (com a pressa da caça), e o golpe chega quando ele chega; o alvo da skill vira a caça. O desenho
+  desliza o corpo no tempo do bote (`deslocado.ms`). O falcão continua com o voo dele.
+- **O lobo afinado**: o peito fundo e estreito, a barriga recolhida, as pernas longas, o focinho comprido, o cinza de
+  lobo e um arreio leve no lugar da manta e da sela inteira (o fazia parecer um pônei).

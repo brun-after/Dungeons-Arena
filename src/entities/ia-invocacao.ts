@@ -10,7 +10,7 @@
 // Ao engajar, a invocação fica em `perseguindo` (a regeneração enxerga o perigo).
 
 import { postoDormente } from '../combat/movimento-classe';
-import { petDoCompanheiro } from '../combat/pets';
+import { cacaDoPet, petDoCompanheiro } from '../combat/pets';
 import { alvoOfensivoValido, iniciarAcao, prioridadeDeAlvo } from '../combat/acao';
 import { aplicarEfeito } from '../combat/efeitos';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
@@ -154,6 +154,13 @@ export function processarInvocacao(estado: EstadoJogo, ctx: ContextoSimulacao, e
   }
   // Ajuste de 24/10/2026 (D-091): o falcão do Aventureiro tem IA própria (passeia, mergulha e recolhe).
   if (inv.comportamento === 'companheiro') {
+    // Marco 40 (14/11/2026, D-166): a caça marcada pelo básico do dono: o companheiro vai até ela e ataca com o básico dele.
+    const caca = cacaDoPet(estado, e);
+    if (caca && alvoOfensivoValido(estado, ctx, e, caca)) {
+      mudarModo(ia, 'perseguindo', caca.id, estado.tick);
+      perseguirEAtacar(estado, ctx, e, ia, preset, caca, 1, e.ataqueBasico, saida);
+      return;
+    }
     // Marco 40 (D-165): o lobo e o urso andam junto do dono (o lobo, colado; as skills saem deles).
     if (petDoCompanheiro(e) === 'falcao') processarFalcao(estado, ctx, e, ia, dono, saida);
     else seguirDono(estado, ctx, e, dono);
@@ -168,10 +175,15 @@ export function processarInvocacao(estado: EstadoJogo, ctx: ContextoSimulacao, e
     return;
   }
   mudarModo(ia, 'perseguindo', alvo.id, estado.tick);
-  const celulaAlvo = celulaOcupada(alvo);
   // Marco 24 (D-095): com a vertente Lich, os mortos atiram de longe.
   const lich = ataqueDoMorto(estado, ctx, e);
-  if (chebyshev(celulaOcupada(e), celulaAlvo) <= (lich?.alcance ?? 1)) {
+  perseguirEAtacar(estado, ctx, e, ia, preset, alvo, lich?.alcance ?? 1, lich?.habilidade ?? e.ataqueBasico, saida);
+}
+
+/** Vai até o alvo (sem empilhar com as irmãs) e, no alcance, ataca no intervalo do preset. */
+function perseguirEAtacar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: EstadoIa, preset: PresetInimigo, alvo: Entidade, alcance: number, habilidade: string, saida: EventoSimulacao[]): void {
+  const celulaAlvo = celulaOcupada(alvo);
+  if (chebyshev(celulaOcupada(e), celulaAlvo) <= alcance) {
     // Na mesma célula de uma irmã: dá um passo para outra vizinha do alvo antes de golpear.
     if (!emPasso(e) && e.caminho.length === 0 && empilhada(estado, e)) {
       const lugar = lugarProprio(estado, ctx, e, celulaAlvo, VIZINHAS);
@@ -181,7 +193,7 @@ export function processarInvocacao(estado: EstadoJogo, ctx: ContextoSimulacao, e
       }
     }
     if (!emPasso(e) && e.caminho.length === 0) pararMovimento(e);
-    if (!e.acao && estado.tick >= ia.proximoAtaqueTick && iniciarAcao(estado, ctx, e, lich?.habilidade ?? e.ataqueBasico, alvo.id, saida)) {
+    if (!e.acao && estado.tick >= ia.proximoAtaqueTick && iniciarAcao(estado, ctx, e, habilidade, alvo.id, saida)) {
       ia.proximoAtaqueTick = estado.tick + ticksDe(preset.intervaloAtaqueMs);
       ia.ataquesFeitos++;
     }

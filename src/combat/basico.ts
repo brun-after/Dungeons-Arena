@@ -14,6 +14,7 @@ import { basicoEmprestado, passivaAtiva, passivaSemArma, temEmprestimo } from '.
 import { celulaOcupada, chebyshev } from './geometria';
 import type { Habilidade } from './habilidades';
 import type { Multiplos } from './variacoes';
+import { marcaComOBasico } from './pets';
 
 /** É o básico (o da mão principal ou o da secundária)? Os ganchos do básico valem para os dois. */
 export function ehBasico(e: Pick<Entidade, 'ataqueBasico' | 'armas'>, habilidadeId: string): boolean {
@@ -110,7 +111,9 @@ export function aoUsarSkill(estado: EstadoJogo, ctx: ContextoSimulacao, ator: En
 /** Quanto a recarga do básico muda pela arma: o arco de outra classe é lento; sem o arco, o Arqueiro perde a cadência. */
 export function recargaDoBasicoPct(ctx: ContextoSimulacao, ator: Entidade, hab: Habilidade): number {
   if (!ehBasico(ator, hab.id)) return 0;
-  return basicoEmprestado(ctx, ator, hab.id, 'recargaLenta') ? ctx.balance.armas.emprestimo.arcoRecargaPct : 0;
+  // Marco 40 (14/11/2026, D-166): o Aventureiro marca a caça com metade da velocidade de ataque.
+  const marca = marcaComOBasico(ator) ? ctx.balance.ajustesClasses.aventureiro.marca.recargaBasicoPct : 0;
+  return marca + (basicoEmprestado(ctx, ator, hab.id, 'recargaLenta') ? ctx.balance.armas.emprestimo.arcoRecargaPct : 0);
 }
 
 /** O quanto da redução de recarga pela Destreza fica (sem o arco, o Arqueiro perde parte do multiplicador). */

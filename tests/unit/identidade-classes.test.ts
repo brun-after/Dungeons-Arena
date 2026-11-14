@@ -217,15 +217,14 @@ describe('IA do falcão (ajuste de 24/10/2026, D-091)', () => {
     expect(a.de('coletou').every((ev) => ev.id === 'j')).toBe(true);
   });
 
-  it('em combate, mantém distância do alvo em vez de grudar nele', () => {
-    const a = arena('aventureiro', 8);
+  it('em combate, vai até a caça marcada pelo básico do dono e ataca (marco 40, D-166)', () => {
+    const a = arena('aventureiro', 5);
     a.tick([['j', { t: 'selecionarAlvo', alvo: 'b' }]]);
-    const distancias: number[] = [];
-    for (let i = 0; i < 300; i++) {
-      a.tick();
-      distancias.push(chebyshev(falcaoDe(a), a.boneco));
-    }
-    expect(distancias.slice(120).filter((d) => d <= 1).length).toBeLessThan(30);
+    a.ticks(600);
+    const falcao = falcaoDe(a);
+    expect(a.j.cacaMarcada).toBe('b');
+    expect(chebyshev(falcao, a.boneco)).toBeLessThanOrEqual(1);
+    expect(a.de('impacto').some((ev) => ev.fonteId === falcao.id && ev.alvoId === 'b' && ev.dano > 0)).toBe(true);
   });
 
   it('não volta a um combate longe do dono (ao renascer, o alvo antigo não puxa o falcão)', () => {

@@ -1,6 +1,6 @@
 import { ehRetorno } from './buffs-de-leitura';
 import { aoSerAtingido, noAr } from './movimento-classe';
-import { golpeAlcancaOPet, loboIntercepta, petDoCompanheiro, reflexoDoPet } from './pets';
+import { golpeAlcancaOPet, loboIntercepta, marcarACaca, petDoCompanheiro, reflexoDoPet } from './pets';
 import { retirarVida } from './reserva-necromante';
 import { multiplicadorDardo, registrarDardo } from './concentracao-arcana';
 import { encherFuria } from './frenesi';
@@ -154,6 +154,11 @@ export function aplicarImpacto(
   }
   const { hab } = impacto;
   const atacante = buscarEntidade(estado, impacto.fonte.id);
+  // Marco 40 (14/11/2026, D-166): o básico do Aventureiro não fere: marca a caça para o companheiro (o golpe segue, sem
+  // dano, para os efeitos e as variações da arma).
+  if (atacante && atacante !== alvo && hab.formulaDano !== null && ehBasico(atacante, hab.id) && marcarACaca(estado, atacante, alvo, saida)) {
+    impacto = { ...impacto, fonte: { ...impacto.fonte, multDano: 0 }, danoExtra: 0 };
+  }
   // D-165: o lobo colado no Aventureiro toma para si o golpe de perto, de tempos em tempos.
   const lobo = atacante && atacante !== alvo ? loboIntercepta(estado, ctx, alvo, hab) : null;
   if (lobo) {

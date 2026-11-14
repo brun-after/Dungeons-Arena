@@ -43,6 +43,7 @@ import { lancarProjetil } from './projeteis';
 import { alcanceSemArma, aoUsarSkill, basicoComVariacao, basicoDaVez, chaveDoBasico, consumirRiposta, contarBasico, ehBasico, fatorDaVelocidade, multiplosDaVez, recargaDoBasicoPct } from './basico';
 import { lancarSolo } from './solos';
 import { celulaDoCompanheiro, ticksDoVooDoFalcao } from './companheiro';
+import { boteDoPet, marcaComOBasico } from './pets';
 import { aoAgirEncarnado, encarnar } from './encarnacao';
 import { consumirMira } from './mira';
 import { prepararTiroCheio } from './sintonia-arqueiro';
@@ -137,8 +138,11 @@ export function origemDaHabilidade(estado: EstadoJogo, ator: Entidade, hab: Habi
  * Marco 25 (25/10/2026, D-102): o golpe de contato que sai do falcão voa até o alvo — o impacto vem quando ele chega,
  * na velocidade de ataque do falcão (nível e Sabedoria). Devolve os ticks do voo (0: não é golpe do falcão).
  */
-function vooDoGolpe(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, hab: Habilidade, mira: Celula): number {
+function vooDoGolpe(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, hab: Habilidade, mira: Celula, alvoId: string | null, saida: EventoSimulacao[]): number {
   if (hab.politicaImpacto !== 'contato' || hab.politicaAlvo !== 'hostil' || ehBasico(ator, hab.id)) return 0;
+  // Marco 40 (14/11/2026, D-166): o lobo e o urso correm até o alvo (o bote); o golpe chega com eles.
+  const bote = boteDoPet(estado, ctx, ator, mira, alvoId, saida);
+  if (bote !== null) return bote;
   const falcao = celulaDoCompanheiro(estado, ator);
   return falcao ? ticksDoVooDoFalcao(ctx, ator, falcao, mira) : 0;
 }
@@ -347,9 +351,11 @@ export function iniciarAcao(
   // D-164: atacar tira o bônus de viagem do movimento da classe.
   aoAgir(estado, ator, hab, saida);
   const viagem =
-    hab.politicaImpacto === 'projetil' ? ticksDe((Math.hypot(mira.x - origem.x, mira.y - origem.y) / hab.velocidadeProjetil) * 1000) : Math.round(vooDoGolpe(estado, ctx, ator, hab, mira) / pressa);
+    hab.politicaImpacto === 'projetil' ? ticksDe((Math.hypot(mira.x - origem.x, mira.y - origem.y) / hab.velocidadeProjetil) * 1000) : Math.round(vooDoGolpe(estado, ctx, ator, hab, mira, hab.politicaImpacto === 'area' ? null : (alvo?.id ?? null), saida) / pressa);
   if (ehBasico(ator, hab.id)) ator.ultimoBasicoTick = estado.tick;
   const alvoId = hab.politicaImpacto === 'area' ? null : (alvo?.id ?? null);
+  // Marco 40 (14/11/2026, D-166): a skill do companheiro num inimigo também marca a caça (o companheiro segue nele).
+  if (alvoId && alvo && alvo !== ator && hab.politicaAlvo === 'hostil' && hab.tags.includes('falcao') && marcaComOBasico(ator)) ator.cacaMarcada = alvo.invocacao?.companheiro ? alvo.invocacao.donoId : alvoId;
   ator.acao = {
     acaoId: novoId(estado),
     habilidadeId: hab.id,
@@ -463,6 +469,23 @@ export function processarAcoes(estado: EstadoJogo, ctx: ContextoSimulacao, saida
   }
 }
 
+/**
+ * Marco 40 (14/11/2026, D-166): o básico do Aventureiro só marca a caça; quem fere é o companheiro, e o golpe dele tem a
+ * fórmula e a fonte do básico do dono (a arma, o nível, os itens e os estilos), para crescer como o básico crescia.
+ */
+function forcaDoDono(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, hab: Habilidade): { hab: Habilidade; fonte: FonteDeDano } | null {
+  const inv = ator.invocacao;
+  if (!inv?.companheiro || !ehBasico(ator, hab.id) || hab.formulaDano === null) return null;
+  const dono = buscarEntidade(estado, inv.donoId);
+  if (!dono || !vivo(dono)) return null;
+  const doDono = habilidadeDoAtor(ctx, dono, dono.ataqueBasico, estado.tick);
+  if (!doDono?.formulaDano) return null;
+  const fonte = fonteDaHabilidade(dono, ctx, estado.tick, doDono);
+  // 14/11/2026 (D-166): a mordida leva uma fração do básico do dono (o companheiro também segue a skill).
+  const fracao = ctx.balance.ajustesClasses.aventureiro.marca.danoPct / 100;
+  return { hab: { ...hab, formulaDano: doDono.formulaDano, multDano: doDono.multDano }, fonte: { ...fonte, multDano: fonte.multDano * fracao } };
+}
+
 function lancar(
   estado: EstadoJogo,
   ctx: ContextoSimulacao,
@@ -492,7 +515,10 @@ function lancar(
   const lida = comBuffsDeLeitura(ator, daFase ? habilidadeBase : basicoComVariacao(estado, ator, prepararSequencia(estado, ctx, ator, habilidadeBase, acaoId, alvo, mira)), estado.tick);
   // Marco 40 (13/11/2026, D-163): o combo de papel (a skill anterior de um papel, esta de outro) muda esta.
   const semPapel = daFase || ehBasico(ator, lida.id);
-  const hab = semPapel ? lida : comCombosDoLancamento(estado, ctx, ator, lida, alvo, mira, saida);
+  const habLida = semPapel ? lida : comCombosDoLancamento(estado, ctx, ator, lida, alvo, mira, saida);
+  // Marco 40 (14/11/2026, D-166): a mordida do companheiro na caça bate com a força do básico do dono.
+  const doDono = daFase ? null : forcaDoDono(estado, ctx, ator, habLida);
+  const hab = doDono ? doDono.hab : habLida;
   if (hab.formulaDano && !consumirAtaque(ator, acaoId)) return;
   if (tipoEm(ctx.fase, ator.x, ator.y) === 'agua' && !deSuporte(hab)) return;
   // 04/11/2026 (D-132): atacar de longe deixa um pouco lento, mais quanto mais longe está o alvo.
@@ -503,6 +529,7 @@ function lancar(
   // Marco 18 (D-068, D-069): o combo (a habilidade anterior em até a janela) fortalece esta; os ganchos "ao usar"
   // disparam; e esta vira a última.
   let fonte = daFase ? fonteDaHabilidade(ator, ctx, estado.tick, hab) : comCombo(fonteDaHabilidade(ator, ctx, estado.tick, hab), fazerCombo(estado, ctx, ator, hab, alvo, mira, saida, false));
+  if (doDono) fonte = { ...doDono.fonte, id: ator.id, equipe: ator.equipe };
   // Marco 24 (D-095): o crítico garantido (Presságio) sai no próximo golpe; a sobrecarga sai na magia que fortaleceu.
   if (hab.formulaDano) {
     const tick = estado.tick;

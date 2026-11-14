@@ -60,8 +60,12 @@ export interface ResultadoDuelo {
  * os pulsos do solo amaldiçoado são um golpe só.
  */
 function golpesDe(eventos: readonly EventoSimulacao[], fonte: string, alvo: string): number {
+  // Marco 40 (14/11/2026, D-166): o básico do Aventureiro não fere (marca a caça e o companheiro morde no lugar dele),
+  // mas é golpe do jogador.
+  const marcas = new Set<number>();
+  for (const ev of eventos) if (ev.t === 'cacaMarcada' && ev.id === fonte && ev.alvoId === alvo) marcas.add(ev.tick);
   const acoes = new Set<number>();
-  for (const ev of eventos) if (ev.t === 'impacto' && ev.fonteId === fonte && ev.alvoId === alvo && (ev.dano > 0 || ev.falha)) acoes.add(ev.acaoId);
+  for (const ev of eventos) if (ev.t === 'impacto' && ev.fonteId === fonte && ev.alvoId === alvo && (ev.dano > 0 || ev.falha || marcas.has(ev.tick))) acoes.add(ev.acaoId);
   return acoes.size;
 }
 
@@ -204,7 +208,9 @@ export function fatiaDaInvocacao(nivel: number, semente: number): number {
   if (invId) m.comandar('j1', { t: 'usarItem', invId });
   const acabou = () => m.eventos.some((e) => e.t === 'morreu' && (e.id === 'i1' || e.id === 'j1'));
   m.rodar(LIMITE_S * TICKS_POR_S, acabou);
-  const invocados = new Set(m.eventos.filter((e) => e.t === 'invocou' && e.donoId === 'j1').map((e) => (e.t === 'invocou' ? e.id : '')));
+  // Marco 40 (14/11/2026, D-166): o companheiro permanente (que caça a marca do básico) é o ataque da classe, não invocação.
+  const companheiros = new Set(m.estado.entidades.filter((e) => e.invocacao?.companheiro).map((e) => e.id));
+  const invocados = new Set(m.eventos.filter((e) => e.t === 'invocou' && e.donoId === 'j1' && !companheiros.has(e.id)).map((e) => (e.t === 'invocou' ? e.id : '')));
   let total = 0;
   let daInvocacao = 0;
   for (const e of m.eventos) {
