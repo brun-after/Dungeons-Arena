@@ -44,7 +44,7 @@ import { lancarProjetil } from './projeteis';
 import { alcanceSemArma, aoUsarSkill, basicoComVariacao, basicoDaVez, chaveDoBasico, consumirRiposta, contarBasico, ehBasico, fatorDaVelocidade, multiplosDaVez, recargaDoBasicoPct } from './basico';
 import { lancarSolo } from './solos';
 import { celulaDoCompanheiro, ticksDoVooDoFalcao } from './companheiro';
-import { boteDoPet, marcaComOBasico } from './pets';
+import { boteDoPet, marcaComOBasico, marcar, petDoCompanheiro } from './pets';
 import { aoAgirEncarnado, encarnar } from './encarnacao';
 import { adiantarMiraPorSkill, consumirMira, miraCheia, temMira } from './mira';
 import { prepararTiroCheio } from './sintonia-arqueiro';
@@ -155,7 +155,7 @@ export function alcanceDe(ctx: ContextoSimulacao, ator: Entidade, hab: Habilidad
   // Marco 27 (D-126): sem o arco, o básico do Arqueiro perde o alcance característico.
   const alcance = Math.max(0, hab.alcanceCelulas + perfilPara(ctx, ator, hab).alcance + basico + alcanceSemArma(ctx, ator, hab));
   // 05/11/2026 (D-132): o Arqueiro andando alcança menos (parado, o alcance inteiro).
-  // 14/11/2026 (D-170): sem a Mira cheia, alcança 30% menos; cheia (o tiro carregado), o alcance inteiro, andando ou não.
+  // 14/11/2026 (D-171): sem a Mira cheia, alcança 30% menos; cheia (o tiro carregado), o alcance inteiro, andando ou não.
   if (deSuporte(hab) || !temMira(ator) || miraCheia(ctx, ator, tick)) return alcance;
   const a = ctx.balance.ajustesClasses.arqueiro;
   return (alcance * a.alcanceSemMiraPct * (emMovimento(ator) ? a.alcanceAndandoPct : 100)) / 10000;
@@ -276,7 +276,7 @@ export function iniciarAcao(
   if (acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) return recusar('bloqueado');
   // Marco 40 (D-164): no meio do salto e esperando a âncora não se ataca.
   if (motivoDoMovimento(ator)) return recusar('movimento');
-  // 14/11/2026 (D-170): no meio do deslize próprio também não (o comando do jogador sai no fim, combat/deslize.ts).
+  // 14/11/2026 (D-171): no meio do deslize próprio também não (o comando do jogador sai no fim, combat/deslize.ts).
   if (noDeslize(ator, estado.tick)) return recusar('movimento');
   if (recargaRestante(estado, ator.id, chaveDoBasico(ator, hab.id)) > 0) return recusar('recarga');
   const perfil = perfilPara(ctx, ator, hab);
@@ -355,9 +355,9 @@ export function iniciarAcao(
   // 08/11/2026 (D-141): a skill do guerreiro logo depois do básico carrega (e chega, fora o voo do projétil) mais rápido.
   const pressa = encadeioDoGuerreiro(estado, ctx, ator, hab);
   // Marco 40 (13/11/2026, D-163): o combo assinado que sai sem conjuração.
-  // 14/11/2026 (D-170): o Arqueiro conjura as skills mais rápido (menos que o encadeio do guerreiro).
+  // 14/11/2026 (D-171): o Arqueiro conjura as skills mais rápido (menos que o encadeio do guerreiro).
   const lancamentoTick = estado.tick + ticksDe((hab.conjuracaoMs * (ehBasico(ator, hab.id) ? 1 : fatorDeConjuracaoDoCombo(estado, ctx, ator, hab) * conjuracaoDaClasse(ctx, ator)) + avisoExtra) / pressa);
-  // D-170: a skill fora da classe enche a Mira firme.
+  // D-171: a skill fora da classe enche a Mira firme.
   if (!ultimate) adiantarMiraPorSkill(ctx, ator, hab.id, ehBasico(ator, hab.id), estado.tick);
   // D-164: atacar tira o bônus de viagem do movimento da classe.
   aoAgir(estado, ctx, ator, hab, saida);
@@ -366,7 +366,7 @@ export function iniciarAcao(
   if (ehBasico(ator, hab.id)) ator.ultimoBasicoTick = estado.tick;
   const alvoId = hab.politicaImpacto === 'area' ? null : (alvo?.id ?? null);
   // Marco 40 (14/11/2026, D-166): a skill do companheiro num inimigo também marca a caça (o companheiro segue nele).
-  if (alvoId && alvo && alvo !== ator && hab.politicaAlvo === 'hostil' && hab.tags.includes('falcao') && marcaComOBasico(ator)) ator.cacaMarcada = alvo.invocacao?.companheiro ? alvo.invocacao.donoId : alvoId;
+  if (alvoId && alvo && alvo !== ator && hab.politicaAlvo === 'hostil' && hab.tags.includes('falcao') && marcaComOBasico(ator)) marcar(estado, ctx, ator, alvo.invocacao?.companheiro ? alvo.invocacao.donoId : alvoId);
   ator.acao = {
     acaoId: novoId(estado),
     habilidadeId: hab.id,
@@ -485,7 +485,12 @@ export function processarAcoes(estado: EstadoJogo, ctx: ContextoSimulacao, saida
  * fórmula e a fonte do básico do dono (a arma, o nível, os itens e os estilos), para crescer como o básico crescia.
  */
 /** 14/11/2026 (D-164): nada quem está na água e não está no ar (voo, salto) nem na tirolesa. */
-const nadando = (ctx: ContextoSimulacao, e: Entidade): boolean => tipoEm(ctx.fase, e.x, e.y) === 'agua' && !noAr(e) && !naTirolesa(e);
+// D-170: o urso do Aventureiro luta nadando (`pets.urso.nadaLutando`).
+const nadaLutando = (ctx: ContextoSimulacao, e: Entidade): boolean => {
+  const pet = e.invocacao?.companheiro ? petDoCompanheiro(e) : null;
+  return (pet === 'lobo' || pet === 'urso') && ctx.balance.ajustesClasses.aventureiro.pets[pet].nadaLutando === true;
+};
+const nadando = (ctx: ContextoSimulacao, e: Entidade): boolean => tipoEm(ctx.fase, e.x, e.y) === 'agua' && !noAr(e) && !naTirolesa(e) && !nadaLutando(ctx, e);
 
 function forcaDoDono(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, hab: Habilidade): { hab: Habilidade; fonte: FonteDeDano } | null {
   const inv = ator.invocacao;

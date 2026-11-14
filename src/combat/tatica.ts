@@ -66,7 +66,7 @@ export function executarTatica(estado: EstadoJogo, ctx: ContextoSimulacao, alvo:
     const { x, y } = ator;
     if (mira && avancar(estado, ctx, ator, mira, ef.valor)) {
       fato(ator, 'deslocou', undefined, origem.acaoId);
-      // 14/11/2026 (D-170): o passo curto também respeita a chegada antes de andar ou golpear.
+      // 14/11/2026 (D-171): o passo curto também respeita a chegada antes de andar ou golpear.
       comecarDeslize(ctx, ator, estado.tick, 'teleporte', x, y);
     }
   } else if (ef.tipo === 'muralha_pedra' && mira) {

@@ -20,7 +20,7 @@ import { curarAliadosDaAura, efeitosDoPulso, pesoDoHostil, prolongarFrenesi, rai
 
 export const classeDe = (e: Entidade): string => e.bolsa?.classeId ?? e.classeId ?? '';
 
-/** 14/11/2026 (D-170): o multiplicador da conjuração das skills da classe (o Arqueiro conjura mais rápido). */
+/** 14/11/2026 (D-171): o multiplicador da conjuração das skills da classe (o Arqueiro conjura mais rápido). */
 export function conjuracaoDaClasse(ctx: ContextoSimulacao, e: Entidade): number {
   return classeDe(e) === 'arqueiro' && !e.invocacao ? ctx.balance.ajustesClasses.arqueiro.conjuracaoMult : 1;
 }

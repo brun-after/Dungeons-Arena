@@ -1,4 +1,4 @@
-// O Arqueiro mais dependente de movimento e o deslize que respeita a animação (14/11/2026, D-170).
+// O Arqueiro mais dependente de movimento e o deslize que respeita a animação (14/11/2026, D-171).
 import { describe, expect, it } from 'vitest';
 import { alcanceDe } from '../../src/combat/acao';
 import { adiantarMiraPorSkill, fracaoMira, perderMiraPorDano, ticksParaCarregar } from '../../src/combat/mira';
@@ -25,7 +25,7 @@ const arq = ctx.balance.ajustesClasses.arqueiro;
 const arqueiro = (x = 5, y = 5): Entidade => criarJogador(obter(CONTEUDO.classes.get('arqueiro'), 'classe'), 'j', x, y, ctx.balance);
 const encher = (e: Entidade, tick: number) => { e.mira = { desdeTick: tick - ticksParaCarregar(ctx, e) }; };
 
-describe('alcance do Arqueiro pela Mira firme (D-170)', () => {
+describe('alcance do Arqueiro pela Mira firme (D-171)', () => {
   const alcanceDoBasico = (e: Entidade, tick: number) => alcanceDe(ctx, e, obter(habilidadeDoAtor(ctx, e, e.ataqueBasico), 'básico'), tick);
 
   it('sem a Mira cheia, 30% menos; cheia, o alcance inteiro, andando ou não', () => {
@@ -41,7 +41,7 @@ describe('alcance do Arqueiro pela Mira firme (D-170)', () => {
   });
 });
 
-describe('a Mira firme pelas skills de fora da classe (D-170)', () => {
+describe('a Mira firme pelas skills de fora da classe (D-171)', () => {
   it('a skill de fora enche um pedaço; a de classe e o básico, não', () => {
     const j = arqueiro();
     j.mira = { desdeTick: 50 };
@@ -61,12 +61,12 @@ describe('a Mira firme pelas skills de fora da classe (D-170)', () => {
   });
 });
 
-describe('o salto para trás respeita a animação (D-170)', () => {
+describe('o salto para trás respeita a animação (D-171)', () => {
   function cena() {
     const estado = criarEstado({ semente: 3, faseId: ctx.fase.id });
     const j = arqueiro(6, 5);
     j.movimentoClasse = { ativo: 'salto_atras', cargas: {} };
-    const boneco = criarInimigo(obter(CONTEUDO.presets.get('boneco'), 'boneco'), 'b', 9, 5, ctx.balance);
+    const boneco = criarInimigo(obter(CONTEUDO.presets.get('boneco'), 'boneco'), 'b', 8, 5, ctx.balance);
     estado.entidades.push(j, boneco);
     const eventos: EventoSimulacao[] = [];
     return { estado, j, eventos };

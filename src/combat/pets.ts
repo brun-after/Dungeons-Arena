@@ -103,24 +103,33 @@ const companheiroVivo = (estado: EstadoJogo, dono: Entidade): Entidade | undefin
   estado.entidades.find((c) => vivo(c) && c.invocacao?.companheiro === true && c.invocacao.donoId === dono.id);
 
 /** O básico do Aventureiro acertou: marca o alvo para o companheiro (e não fere). */
-export function marcarACaca(estado: EstadoJogo, dono: Entidade, alvo: Entidade, saida: EventoSimulacao[]): boolean {
+export function marcarACaca(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade, alvo: Entidade, saida: EventoSimulacao[]): boolean {
   if (!marcaComOBasico(dono)) return false;
   // Marcar o companheiro de outro marca o dono dele (o falcão no ar nem leva mordida; a caça é quem o comanda). A marca
   // fica no dono: o companheiro que chega na troca segue caçando.
   const presa = alvo.invocacao?.companheiro ? (buscarEntidade(estado, alvo.invocacao.donoId) ?? alvo) : alvo;
-  dono.cacaMarcada = presa.id;
+  marcar(estado, ctx, dono, presa.id);
   saida.push({ t: 'cacaMarcada', tick: estado.tick, id: dono.id, alvoId: presa.id });
   return true;
 }
 
-/** O alvo marcado do companheiro, se ainda vivo (o morto apaga a marca). */
+/** D-170: marca (ou renova) a caça do dono por `marca.duracaoMs`. */
+export function marcar(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade, id: string): void {
+  dono.cacaMarcada = id;
+  dono.cacaAteTick = estado.tick + ticksDe(ctx.balance.ajustesClasses.aventureiro.marca.duracaoMs);
+}
+
+/**
+ * O alvo marcado do companheiro, se ainda vivo (o morto apaga a marca). D-170: a marca também acaba com o dono morto e
+ * 5 s depois do último golpe que a renovou.
+ */
 export function cacaDoPet(estado: EstadoJogo, pet: Entidade): Entidade | null {
   if (!pet.invocacao?.companheiro) return null;
   const dono = buscarEntidade(estado, pet.invocacao.donoId);
   const id = dono?.cacaMarcada;
   if (!dono || !id) return null;
   const alvo = buscarEntidade(estado, id);
-  if (alvo && vivo(alvo)) return alvo;
+  if (alvo && vivo(alvo) && vivo(dono) && (dono.cacaAteTick ?? Infinity) > estado.tick) return alvo;
   dono.cacaMarcada = null; // null, não delete: o patch da arena não remove campos (14/11/2026).
   return null;
 }
@@ -156,7 +165,7 @@ export function boteDoPet(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Enti
   pet.py = melhor.y;
   pet.caminho = [];
   pet.waypoints = [];
-  if (alvoId) dono.cacaMarcada = alvoId;
+  if (alvoId) marcar(estado, ctx, dono, alvoId);
   if (celulas > 0) saida.push({ t: 'deslocado', tick: estado.tick, id: pet.id, deX: de.x, deY: de.y, paraX: melhor.x, paraY: melhor.y, origemId: pet.id, causa: 'avanco', ms });
   return ticksDe(ms);
 }

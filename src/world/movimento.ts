@@ -311,7 +311,7 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
     if (arranque) ajustarImpulso(e, false, 0, dtMs, ctx);
     return;
   }
-  // 14/11/2026 (D-170): no deslize próprio (recuo, avanço, teleporte curto), não anda contra o rumo dele; a intenção
+  // 14/11/2026 (D-171): no deslize próprio (recuo, avanço, teleporte curto), não anda contra o rumo dele; a intenção
   // (o caminho, a direção) fica e volta quando a animação acaba.
   const rumo = rumoPretendido(e);
   if (rumo && !andarCabeNoDeslize(ctx, e, estado.tick, rumo.dx, rumo.dy)) {
@@ -324,7 +324,7 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
   if (arranque) ajustarImpulso(e, andou > EPS, freio, dtMs, ctx);
 }
 
-/** D-170: para onde o corpo quer andar agora (o próximo ponto do caminho ou a direção), sem andar; null parado. */
+/** D-171: para onde o corpo quer andar agora (o próximo ponto do caminho ou a direção), sem andar; null parado. */
 function rumoPretendido(e: Entidade): { dx: number; dy: number } | null {
   const wp = e.waypoints[0] ?? e.caminho[0];
   if (wp) return { dx: wp.x - e.px, dy: wp.y - e.py };

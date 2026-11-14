@@ -54,7 +54,7 @@ export interface OrigemDoEfeito {
  */
 export function anotarDeslocamento(saida: EventoSimulacao[], tick: number, e: Entidade, deX: number, deY: number, origem: OrigemDoEfeito, causa: CausaDeslocamento, ctx?: Pick<ContextoSimulacao, 'balance'>): void {
   if (e.x === deX && e.y === deY) return;
-  // 14/11/2026 (D-170): quem se move sozinho (avanço, teleporte curto) respeita o deslize até o fim.
+  // 14/11/2026 (D-171): quem se move sozinho (avanço, teleporte curto) respeita o deslize até o fim.
   if (ctx && origem.id === e.id) comecarDeslize(ctx, e, tick, causa, deX, deY);
   saida.push({ t: 'deslocado', tick, id: e.id, deX, deY, paraX: e.x, paraY: e.y, origemId: origem.id, causa, ...(origem.acaoId === undefined ? {} : { acaoId: origem.acaoId }) });
 }

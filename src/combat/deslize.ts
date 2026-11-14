@@ -1,4 +1,4 @@
-// O deslize de quem se move sozinho (14/11/2026, D-170). A simulação põe o corpo no destino de uma vez (o recuo do
+// O deslize de quem se move sozinho (14/11/2026, D-171). A simulação põe o corpo no destino de uma vez (o recuo do
 // Arqueiro, a Arremetida do Guerreiro, os avanços e teleportes curtos das skills) e o desenho desliza do ponto de
 // partida até lá. Antes, no tick seguinte o corpo já andava (o clique ou a tecla para a frente, o seguir alvo) ou
 // começava um golpe virando para o alvo, e a animação era cortada no meio. Enquanto dura o deslize:

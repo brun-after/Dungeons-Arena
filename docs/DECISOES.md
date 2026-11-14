@@ -1,9 +1,10 @@
 # Decisões de projeto
 
-**Versão:** 1.18 · **Data:** 14/11/2026
+**Versão:** 1.19 · **Data:** 14/11/2026
 
 > **Histórico**
-> - **1.18 (14/11/2026)**: D-170: o Arqueiro mais dependente de movimento (alcance 30% menor sem a Mira cheia, salto para trás com recarga menor, conjuração 10% mais rápida, skills de fora da classe enchem a Mira, os estilos adaptados) e o deslize que respeita a animação (recuo, avanço e teleportes curtos).
+> - **1.19 (14/11/2026)**: D-171: o Arqueiro mais dependente de movimento (alcance 30% menor sem a Mira cheia, salto para trás com recarga menor, conjuração 10% mais rápida, skills de fora da classe enchem a Mira, os estilos adaptados) e o deslize que respeita a animação (recuo, avanço e teleportes curtos).
+> - **1.18 (14/11/2026)**: D-170: as correções do movimento da classe (o círculo do Acelerar à frente, entre a distância mínima e a máxima, as linhas de alcance da Âncora e do Posto, a nuvem única da névoa, a Chegada em pêndulo, a camuflagem em combate e a armadilha com retardo sob o Arqueiro) e dos companheiros (a caça marcada que acaba, o urso que luta nadando e o falcão que passa perto).
 > - **1.17 (14/11/2026)**: D-169: a região vizinha desenhada além da borda (sem o vazio no fim do mapa) e a troca sem a travada (o chão assado aos poucos e guardado entre as cenas, as teclas mantidas que seguem para a cena nova).
 > - **1.16 (14/11/2026)**: D-169: as passagens entre as regiões do Mundo (a troca de sala sem tela preta, a trégua e o tipo pelo par de biomas) e o que segue com o personagem na troca (vida, mana, recargas, efeitos, movimento escolhido e as invocações com os prazos).
 > - **1.15 (14/11/2026)**: D-168: as mecânicas de movimento refeitas (o Acelerar no lugar do Piscar, a Âncora com o totem e o eco, a Chegada, o Posto em duas ativações, a névoa que reúne os servos, a montaria que precisa do companheiro perto, os marcos elementais e o botão no celular).
@@ -5200,7 +5201,58 @@ elas, onde os inimigos nunca entram.
 borda, muda o modelo do servidor do Mundo e custa um marco inteiro. As passagens entregam a troca invisível com uma
 sala por região. As dungeons, os covis e os portais continuam trocando de sala, agora também sem tela preta.
 
-## D-170 — Marco 41: o Arqueiro de movimento e o deslize que respeita a animação (14/11/2026)
+## D-170 — Marco 40: as correções do movimento da classe e dos companheiros (14/11/2026)
+
+**Contexto.** Testando o D-168, o usuário encontrou vários problemas.
+- O círculo do Acelerar aparecia oval, num lugar ao lado, e a pressa pegava o Mago na hora, estivesse ele dentro ou
+  não. Os desenhos do chão usavam pontos já projetados dentro do plano, que o isométrico projeta de novo (o mesmo erro do
+  D-138).
+- A Âncora não mostrava até onde a volta valia.
+- Os companheiros seguiam a caça marcada depois da morte do Aventureiro, e o urso não lutava na água.
+- A névoa virava bolinhas, com uma linha solta até o canto da tela (um `arc` sem `moveTo`).
+- A camuflagem em combate fazia quem já perseguia o Arqueiro desistir.
+
+**Decisão.**
+- **Desenho no chão.** Tudo que fica no chão vai em `render/movimento/chao-movimento.ts`, nas coordenadas do plano
+  (`centroDaCelula`) e com círculos de verdade. O que sobe no ar segue projetado (`rastros-movimento.ts`).
+- **Acelerar.**
+  - O círculo vai à frente do Mago, no ponto mirado (`mira`: o Shift usa o cursor; no celular, duas ativações).
+  - A distância fica entre 5 e 7 células no começo. A cada 20 níveis (`acelerar.aproximaPorNiveis`), a mínima cai 1 e
+    a máxima sobe 1, até ele conjurar nos próprios pés no nível 100. Sem ponto mirado, usa a mínima; perto de uma
+    parede, recua.
+  - O círculo se forma em 0,5 s (`formarMs`), traçado do topo, e só então acelera.
+  - A área é um círculo de verdade (a distância euclidiana), e a pressa dura um pulso: quem sai perde logo.
+  - O desenho é parente do da pedra de retorno, com o anel duplo, as divisas correndo, as espirais de vento e a runa no
+    meio.
+- **Âncora.** Uma linha azul fina e translúcida marca o alcance em volta do totem, vista pelo Mago e pelos aliados. O
+  alcance da volta passa a ser um círculo (era um quadrado).
+- **Guerreiro.** A Arremetida desenhada 20% mais lenta (84 ms por célula), para acompanhar os quadros.
+- **Arqueiro.**
+  - O Salto para Trás vai mais longe (3 células no nível 1) e é desenhado mais alto e mais longo (560 ms).
+  - A Chegada é um pêndulo: a corda presa no alto, esticada até as mãos. O corpo desce pelo círculo da corda até o meio
+    do arco e sobe do outro lado, inclinado ao longo dela.
+  - A **camuflagem** em combate só impede que novos inimigos o vejam e o esconde dos jogadores hostis. Quem já o
+    perseguia segue atrás, mas não consegue atacá-lo.
+  - **Armadilha sob o Arqueiro** (`armadilhas.retardoPorClasse`: 260 ms).
+    - Ela se revela para ele e espera antes de disparar.
+    - Se ele saltar para trás nesse meio-tempo, ela dispara no vazio (a animação de sempre, `protegido`) e some: ele
+      se salvou por um triz. Sem o salto, ela o pega onde estiver.
+    - Logo depois de um salto (1 s), a armadilha onde ele cai fere na hora, sem retardo.
+- **Necromante.**
+  - O Posto dos Mortos sempre deixa o servo da passiva.
+  - O limite é de 30 células (`movimentoClasse.posto.limite`): passado ele, o servo volta para perto do Necromante e
+    deixa o posto. Uma linha roxa fina marca o limite.
+  - A névoa é uma nuvem etérea só, para o Necromante e os servos: blocos grandes que se fundem, com mais blocos ligando
+    cada servo a ele, e um rastro de trevas mesclado com a cor da ponta da afinidade.
+- **Aventureiro.**
+  - A caça marcada dura 5 s depois do último golpe que a renovou (`marca.duracaoMs`) e acaba com a morte dele.
+  - O urso luta nadando (`pets.urso.nadaLutando`).
+  - Com um inimigo por perto, o falcão passa junto do dono a cada 2 voltas (`falcao.passaPertoACada`), para ele poder
+    usar o Falcão Carrega.
+
+Balanceamento: 172/172.
+
+## D-171 — Marco 41: o Arqueiro de movimento e o deslize que respeita a animação (14/11/2026)
 
 **Contexto.** O Arqueiro era um atirador de longe que funcionava em qualquer situação: parado no fundo, alcançava
 tudo. O pedido foi deixá-lo mais dependente de movimento quando não pode ficar parado, com o alcance longo guardado

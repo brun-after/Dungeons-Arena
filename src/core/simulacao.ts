@@ -77,7 +77,7 @@ export function simular(
   processarCompanheiros(estado, ctx, saida);
   // Marco 41 (14/11/2026, D-169): a trégua de quem está numa passagem entre as regiões do Mundo.
   processarPassagens(estado, ctx);
-  // 14/11/2026 (D-170): o fim do deslize próprio solta a skill pedida no meio dele.
+  // 14/11/2026 (D-171): o fim do deslize próprio solta a skill pedida no meio dele.
   for (const e of estado.entidades) {
     const pedido = pedidoAoFimDoDeslize(e, estado.tick);
     if (pedido) iniciarAcao(estado, ctx, e, pedido.id, pedido.alvo, saida);
@@ -164,7 +164,7 @@ function aplicarComandos(
         iniciarAcao(estado, ctx, ator, ator.ataqueBasico, cmd.alvo, saida);
         break;
       case 'usarHabilidade':
-        // D-170: no meio do deslize próprio, a skill espera o fim dele.
+        // D-171: no meio do deslize próprio, a skill espera o fim dele.
         if (noDeslize(ator, estado.tick)) guardarPedido(ator, cmd.id, cmd.alvo);
         else iniciarAcao(estado, ctx, ator, cmd.id, cmd.alvo, saida);
         break;

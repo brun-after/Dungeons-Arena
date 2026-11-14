@@ -122,7 +122,7 @@ describe('recuo de quem ataca de longe (D-132)', () => {
     const estado = criarEstado({ semente: 9, faseId: ctx.fase.id });
     const j = criarJogador(obter(CONTEUDO.classes.get('arqueiro'), 'classe'), 'j', 1, 5, ctx.balance);
     const boneco = criarInimigo(obter(CONTEUDO.presets.get('boneco'), 'boneco'), 'b', 6, 5, ctx.balance);
-    // D-170: sem a Mira cheia, o arco alcança 30% menos; o alvo fica a 5 células.
+    // D-171: sem a Mira cheia, o arco alcança 30% menos; o alvo fica a 5 células.
     estado.entidades.push(j, boneco);
     const eventos: EventoSimulacao[] = [];
     simular(estado, ctx, [{ tick: estado.tick, entidadeId: 'j', cmd: { t: 'selecionarAlvo', alvo: 'b' } }], eventos, DT_MS);

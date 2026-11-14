@@ -3,12 +3,12 @@
   "classes": {
     "mago": [
       { "id": "voo_arcano", "nivel": 1, "tipo": "voo", "alcance": 10, "crescimento": 1, "recargaMs": 5000, "icone": "asas", "cor": "#a569bd" },
-      { "id": "acelerar", "nivel": 1, "tipo": "acelerar", "raio": 2, "duracaoMs": 8000, "velocidadePct": 80, "recargaMs": 16000, "icone": "botas", "cor": "#c39bd3", "marcos": { "30": { "elemental": 1 } } },
+      { "id": "acelerar", "nivel": 1, "tipo": "acelerar", "raio": 2, "duracaoMs": 8000, "velocidadePct": 80, "recargaMs": 16000, "icone": "botas", "cor": "#c39bd3", "mira": true, "marcos": { "30": { "elemental": 1 } } },
       { "id": "ancora_runica", "nivel": 1, "tipo": "ancora", "alcance": 8, "crescimento": 1.2, "duracaoMs": 30000, "recargaMs": 8000, "icone": "runa", "cor": "#85c1e9", "marcos": { "30": { "eco": 1 } } }
     ],
     "arqueiro": [
       { "id": "chegada", "nivel": 1, "tipo": "tirolesa", "alcance": 10, "crescimento": 1, "velocidade": 12, "recargaMs": 3000, "icone": "flecha", "cor": "#a3e4d7", "marcos": { "30": { "elemental": 1 } } },
-      { "id": "salto_atras", "nivel": 1, "tipo": "recuo", "alcance": 2, "crescimento": 0.5, "recargaMs": 3500, "cargas": 1, "icone": "botas", "cor": "#d5f5e3", "marcos": { "30": { "cargas": 2, "armadilha": 1 }, "90": { "cargas": 3 } } },
+      { "id": "salto_atras", "nivel": 1, "tipo": "recuo", "alcance": 3, "crescimento": 0.5, "recargaMs": 3500, "cargas": 1, "icone": "botas", "cor": "#d5f5e3", "marcos": { "30": { "cargas": 2, "armadilha": 1 }, "90": { "cargas": 3 } } },
       { "id": "camuflagem", "nivel": 1, "tipo": "camuflagem", "duracaoMs": 6000, "lentidaoPct": 50, "recargaMs": 12000, "icone": "fantasma", "cor": "#7dcea0", "marcos": { "30": { "lentidaoPct": 30, "elemental": 1 } } }
     ],
     "guerreiro": [

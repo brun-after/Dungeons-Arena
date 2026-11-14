@@ -1,7 +1,7 @@
 // Deslocamentos visíveis (marco 26, 29/10/2026, D-124). A simulação move o corpo de uma vez (puxão, empurrão,
 // arremesso, avanço, troca) e o interpolador pula saltos grandes. Com o evento `deslocado`, o desenho desliza o corpo
 // de onde estava até onde foi, em ~220 ms (o puxão espera a corrente chegar: `atrasoMs`). Só apresentação: a posição
-// da simulação não muda. As durações do recuo e do avanço são as de balance.movimento.deslize (D-170), em que a simulação
+// da simulação não muda. As durações do recuo e do avanço são as de balance.movimento.deslize (D-171), em que a simulação
 // segura o corpo.
 
 import type { PontoVisual } from '../../entities/entidade';
@@ -16,7 +16,7 @@ const DURACAO_MS: Record<CausaDeslocamento, number> = {
   teleporte: 0,
   recuo: 380,
 };
-/** D-170: até quanto (células) o corpo pode ter andado além do destino no meio do deslize. */
+/** D-171: até quanto (células) o corpo pode ter andado além do destino no meio do deslize. */
 const DERIVA_MAX = 1.5;
 /** Marco 40 (13/11/2026): o avanço do movimento da classe atravessa o caminho no tempo da distância. */
 const MS_POR_CELULA_AVANCO = 70;
@@ -59,7 +59,7 @@ export class Deslizes {
     const f = andamento(d.causa, t);
     // O arremesso sobe num arco (a altura em células, na tela vira o pulo).
     const arco = d.causa === 'arremesso' ? Math.sin(t * Math.PI) * 0.45 : 0;
-    // 14/11/2026 (D-170): quem segue andando no mesmo rumo durante o deslize (recuar depois do salto para trás) leva o
+    // 14/11/2026 (D-171): quem segue andando no mesmo rumo durante o deslize (recuar depois do salto para trás) leva o
     // deslize junto, sem o pulo no fim. Longe demais do destino (o estado ainda não chegou), não soma.
     const ex = base.x - d.para.x;
     const ey = base.y - d.para.y;

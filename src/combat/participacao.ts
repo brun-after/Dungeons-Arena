@@ -16,6 +16,6 @@ export function registrarParticipacao(alvo: Entidade, fonteId: string, tick: num
   contarGolpe(alvo);
   // Marco 22 (D-089): levar dano zera a Mira firme do Arqueiro.
   // Marco 24 (D-095): com a sintonia do suporte, o escudo ativo protege a Mira.
-  // 14/11/2026 (D-170): no Inabalável, parte do que já encheu fica.
+  // 14/11/2026 (D-171): no Inabalável, parte do que já encheu fica.
   if (!miraProtegida(ctx, alvo, tick)) perderMiraPorDano(ctx, alvo, tick);
 }

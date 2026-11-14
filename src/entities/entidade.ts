@@ -266,7 +266,9 @@ export interface EstadoMovimento {
   /** A Âncora Rúnica do Mago: o totem no ponto de volta, até `ateTick`; `raio` é o alcance para voltar (D-168). */
   ancora?: { x: number; y: number; ateTick: number; raio: number };
   /** Marco 40 (14/11/2026, D-168): o círculo do Acelerar (o Mago), com a ponta quando é elemental. */
-  circulo?: { x: number; y: number; raio: number; pct: number; ateTick: number; ponta?: PontaElemental };
+  circulo?: { x: number; y: number; raio: number; pct: number; desdeTick: number; ateTick: number; ponta?: PontaElemental };
+  /** D-170: o tick do último Salto para Trás (a armadilha sob o Arqueiro não dispara se ele saltou a tempo). */
+  recuoTick?: number;
   /** D-168: os tiros do Arqueiro levam a ponta até o tick (depois de sair da camuflagem). */
   tiroElemental?: { ponta: PontaElemental; ateTick: number };
 }
@@ -382,6 +384,8 @@ export interface Entidade {
   direcao: Dir8 | 'parado';
   /** Marco 40 (14/11/2026, D-166): a caça que o básico do Aventureiro marcou; o companheiro ativo (qualquer um, mesmo depois da troca) vai até ela e ataca. */
   cacaMarcada?: EntidadeId | null;
+  /** D-170: até quando a caça marcada vale (5 s depois do último golpe que a marcou; a morte do dono apaga). */
+  cacaAteTick?: number;
   /** Marco 40 (D-166): o companheiro ativo também na entidade (na arena, a ficha não tem bolsa). */
   petAtivo?: 'falcao' | 'lobo' | 'urso';
   rumoX: number;
@@ -411,7 +415,7 @@ export interface Entidade {
   ataqueBasico: string;
   /** 08/11/2026 (D-141): o tick em que o último básico começou (o encadeio do guerreiro lê). */
   ultimoBasicoTick?: number;
-  /** 14/11/2026 (D-170): o deslize próprio em curso (recuo, avanço, teleporte curto): o fim, o rumo e a skill pedida no meio. */
+  /** 14/11/2026 (D-171): o deslize próprio em curso (recuo, avanço, teleporte curto): o fim, o rumo e a skill pedida no meio. */
   deslize?: { ateTick: number; dx: number; dy: number; pedido?: { id: string; alvo?: EntidadeId | Celula } };
   /** Marco 27 (29/10/2026, D-126): as armas de classe (o 3º golpe pela mão secundária e as frações de passiva). */
   armas?: EstadoArmas;
@@ -746,6 +750,7 @@ export function clonarEntidade(e: Entidade): Entidade {
       ...(e.movimentoClasse.ancora ? { ancora: { ...e.movimentoClasse.ancora } } : {}),
       ...(e.movimentoClasse.circulo ? { circulo: { ...e.movimentoClasse.circulo } } : {}),
       ...(e.movimentoClasse.tiroElemental ? { tiroElemental: { ...e.movimentoClasse.tiroElemental } } : {}),
+      ...(e.movimentoClasse.recuoTick !== undefined ? { recuoTick: e.movimentoClasse.recuoTick } : {}),
     } } : {}),
     ...(e.ultimaDePapel ? { ultimaDePapel: { ...e.ultimaDePapel, alvos: [...e.ultimaDePapel.alvos] } } : {}),
     ...(e.trilhaClasse ? { trilhaClasse: { chaves: { ...e.trilhaClasse.chaves }, degraus: e.trilhaClasse.degraus } } : {}),
