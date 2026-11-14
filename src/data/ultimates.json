@@ -317,11 +317,12 @@
         "area",
         "controle"
       ],
-      "texto": "A borda da área prende quem tenta sair.",
+      "texto": "A borda da área se fecha e prende quem tenta sair.",
       "efeitos": [
         {
-          "tipo": "enraizado",
-          "duracaoMs": 1200
+          "tipo": "fase",
+          "ref": "fusao_borda",
+          "duracaoMs": 700
         }
       ]
     },
@@ -540,21 +541,29 @@
             "valor": 7
           }
         }
-      ]
+      ],
+      "ajustes": {
+        "perfura": true,
+        "desde": 3
+      }
     },
     {
       "eixos": [
         "perfuracao",
         "controle"
       ],
-      "texto": "Cada atravessado fica lento.",
+      "texto": "Atravessa a fila: cada atravessado fica lento.",
       "efeitos": [
         {
           "tipo": "resfriado",
           "pct": 30,
           "duracaoMs": 2000
         }
-      ]
+      ],
+      "ajustes": {
+        "perfura": true,
+        "desde": 3
+      }
     },
     {
       "eixos": [
@@ -570,7 +579,11 @@
           "duracaoMs": 4000,
           "em": "conjurador"
         }
-      ]
+      ],
+      "ajustes": {
+        "perfura": true,
+        "desde": 3
+      }
     },
     {
       "eixos": [
@@ -585,7 +598,11 @@
           "pct": 4,
           "duracaoMs": 6000
         }
-      ]
+      ],
+      "ajustes": {
+        "perfura": true,
+        "desde": 3
+      }
     },
     {
       "eixos": [
@@ -600,7 +617,11 @@
           "duracaoMs": 4000,
           "em": "aliados"
         }
-      ]
+      ],
+      "ajustes": {
+        "perfura": true,
+        "desde": 3
+      }
     },
     {
       "eixos": [
@@ -614,7 +635,11 @@
           "ref": "fusao_invocacao_no_fim",
           "duracaoMs": 300
         }
-      ]
+      ],
+      "ajustes": {
+        "perfura": true,
+        "desde": 3
+      }
     },
     {
       "eixos": [
@@ -2150,6 +2175,42 @@
         "som": "nivel",
         "assinatura": "levante_profano"
       }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 0,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "icone": "coroa",
+      "grau": "S",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "celula",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 2,
+      "alcanceCelulas": 6,
+      "tags": [
+        "ultimate"
+      ],
+      "id": "fusao_borda",
+      "nome": "Borda que prende",
+      "papel": "controle",
+      "efeitos": [
+        {
+          "tipo": "enraizado",
+          "duracaoMs": 1200
+        }
+      ],
+      "visual": {
+        "cor": "#c9a24a",
+        "impacto": "runas",
+        "som": "golpe",
+        "assinatura": "corrente"
+      },
+      "interna": true
     }
   ]
 }

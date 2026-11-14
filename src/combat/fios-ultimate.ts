@@ -70,7 +70,8 @@ export function aplicarFios(h: Habilidade, fios: FiosDaUltimate, fontes: FontesD
     const fusao = fontes.fusoes?.get(chaveDaFusao(fios.fusao.eixos[0], fios.fusao.eixos[1]));
     for (const s of fusao?.efeitos ?? []) {
       const e = naFaixa(s, fios.fusao.faixa);
-      if (e && cabeNaSkill(saida, e) && !saida.efeitos.some((x) => x.tipo === e.tipo && x.em === e.em)) saida.efeitos.push(e);
+      // D-173: duas fases com etapas diferentes (a da família e a da fusão) convivem; antes, a da fusão se perdia.
+      if (e && cabeNaSkill(saida, e) && !saida.efeitos.some((x) => x.tipo === e.tipo && x.em === e.em && x.ref === e.ref)) saida.efeitos.push(e);
     }
     // D-161: e os ajustes da fusão (a área que salta, a onda em linha...), da faixa `desde`.
     if (fusao?.ajustes && fios.fusao.faixa >= fusao.ajustes.desde) saida = ajustar(saida, fusao.ajustes);

@@ -51,8 +51,11 @@ describe('fios da ultimate (D-160)', () => {
   it('a fusão dos dois estilos entra pela faixa do mais fraco', () => {
     const sem = ult('ult_aniquilacao#fogo6.fogo6!fogo6');
     const com = ult('ult_aniquilacao#fogo6.fogo6*area.controle4!fogo6');
-    expect(sem.efeitos.some((e) => e.tipo === 'enraizado')).toBe(false);
-    expect(com.efeitos.some((e) => e.tipo === 'enraizado')).toBe(true);
+    expect(sem.efeitos.some((e) => e.tipo === 'fase' && e.ref === 'fusao_borda')).toBe(false);
+    // D-173: a borda se fecha (a fase que prende quem ficou perto) em vez de enraizar todos de uma vez.
+    expect(com.efeitos.some((e) => e.tipo === 'fase' && e.ref === 'fusao_borda')).toBe(true);
+    // A fusão de perfuração faz a ultimate atravessar a fila.
+    expect(ult('ult_aniquilacao#fogo6.fogo6*perfuracao.controle4!fogo6').perfura).toBe(true);
     expect(com.fusao).toBe('area+controle');
     expect(CONTEUDO.fusoes.size).toBe(36);
   });
