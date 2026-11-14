@@ -83,10 +83,11 @@ describe('variações do básico', () => {
   });
 
   it('o arco composto lança três flechas em leque; o arco curto, três em fila', () => {
-    const leque = cena('arqueiro', 'composto', [[7, 5]]);
+    // D-170: sem a Mira cheia, o arco alcança 30% menos; os bonecos ficam a 4 células.
+    const leque = cena('arqueiro', 'composto', [[6, 5]]);
     leque.basico('b0');
     expect(leque.de('projetilLancado').filter((e) => e.habilidadeId === 'basico_composto')).toHaveLength(3);
-    const salva = cena('arqueiro', 'arcocurto', [[7, 5]]);
+    const salva = cena('arqueiro', 'arcocurto', [[6, 5]]);
     salva.basico('b0');
     expect(salva.de('impacto').filter((e) => e.alvoId === 'b0')).toHaveLength(3);
   });

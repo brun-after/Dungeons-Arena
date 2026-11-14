@@ -2,11 +2,13 @@
 // Destreza acima de 10 encurta até 25%). Cheia, o próximo disparo de projétil é um tiro carregado: crítico garantido
 // (d20 mínimo 16: x1,5, ou x2 no 20), atravessa todos na linha e vai até o alcance máximo. Levar dano ou disparar o tiro carregado zera a barra.
 // Calculada na leitura a partir de `mira.desdeTick` (sem sistema por tick). Números em balance.ajustesClasses.arqueiro.
+// 14/11/2026 (D-170): sem a barra cheia, o alcance ofensivo cai (`alcanceSemMiraPct`); cada skill fora da classe enche
+// `porSkillPct` da barra (o Flecheiro arcano, mais); no Inabalável, o dano tira só parte do que já encheu.
 
 import type { ContextoSimulacao } from '../core/contexto';
 import { ticksDe } from '../core/tempo';
 import type { Entidade } from '../entities/entidade';
-import { fatorDeDominio } from '../progression/dominio';
+import { ehSkillDeClasse, fatorDeDominio, marcoDe } from '../progression/dominio';
 
 /** Tem Mira firme? O Arqueiro (pela bolsa ou, na rede, pelo `classeId`), não as invocações. */
 export function temMira(e: Entidade): boolean {
@@ -37,4 +39,33 @@ export function consumirMira(ctx: ContextoSimulacao, e: Entidade, tick: number):
   if (fracaoMira(ctx, e, tick) !== 1) return false;
   zerarMira(e, tick);
   return true;
+}
+
+/** D-170: a barra está cheia (o alcance inteiro e o próximo tiro carregado). */
+export function miraCheia(ctx: ContextoSimulacao, e: Entidade, tick: number): boolean {
+  return fracaoMira(ctx, e, tick) === 1;
+}
+
+/** D-170: o que a barra tem agora, posto de volta a partir de `tick` (sem guardar além da barra cheia). */
+function porNaBarra(ctx: ContextoSimulacao, e: Entidade, tick: number, fracao: number): void {
+  e.mira = { desdeTick: tick - Math.round(Math.max(0, Math.min(1, fracao)) * ticksParaCarregar(ctx, e)) };
+}
+
+/** D-170: a skill que não é de classe (nem o básico) adianta a barra; o Flecheiro arcano (`miraSkill`) enche mais. */
+export function adiantarMiraPorSkill(ctx: ContextoSimulacao, e: Entidade, habId: string, basico: boolean, tick: number): void {
+  if (basico || !temMira(e) || ehSkillDeClasse(ctx, e, habId)) return;
+  const atual = fracaoMira(ctx, e, tick) ?? 0;
+  if (atual >= 1) return;
+  porNaBarra(ctx, e, tick, atual + (ctx.balance.ajustesClasses.arqueiro.mira.porSkillPct / 100) * fatorDeDominio(ctx, e, 'miraSkill'));
+}
+
+/** Levou dano: a barra recomeça; no Inabalável (`miraRetidaPct`), fica parte do que já tinha. */
+export function perderMiraPorDano(ctx: ContextoSimulacao, e: Entidade, tick: number): void {
+  if (!temMira(e)) return;
+  const retida = Math.min(100, marcoDe(ctx, e, 'miraRetidaPct')) / 100;
+  if (retida <= 0) {
+    zerarMira(e, tick);
+    return;
+  }
+  porNaBarra(ctx, e, tick, (fracaoMira(ctx, e, tick) ?? 0) * retida);
 }

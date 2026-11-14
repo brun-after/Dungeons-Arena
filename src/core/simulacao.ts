@@ -19,6 +19,7 @@ import { processarPets } from '../combat/pets';
 import { processarMovimentoClasse, trocarMovimento, usarMovimento } from '../combat/movimento-classe';
 import { processarTirosDoBalanco } from '../combat/movimento-tiros';
 import { alvoOfensivoValido, iniciarAcao, processarAcoes, processarAutoAtaque, usarUltimate } from '../combat/acao';
+import { guardarPedido, noDeslize, pedidoAoFimDoDeslize } from '../combat/deslize';
 import { dispararArmadilhaEm, processarEfeitos, processarGatilhosDeEfeito } from '../combat/efeitos';
 import { processarCarcereiros } from '../combat/sintonia-guerreiro';
 import { processarMiras } from '../combat/sintonia-arqueiro';
@@ -76,6 +77,11 @@ export function simular(
   processarCompanheiros(estado, ctx, saida);
   // Marco 41 (14/11/2026, D-169): a trégua de quem está numa passagem entre as regiões do Mundo.
   processarPassagens(estado, ctx);
+  // 14/11/2026 (D-170): o fim do deslize próprio solta a skill pedida no meio dele.
+  for (const e of estado.entidades) {
+    const pedido = pedidoAoFimDoDeslize(e, estado.tick);
+    if (pedido) iniciarAcao(estado, ctx, e, pedido.id, pedido.alvo, saida);
+  }
   aplicarComandos(estado, ctx, comandos, saida);
   processarIa(estado, ctx, saida);
   processarAcoes(estado, ctx, saida);
@@ -158,7 +164,9 @@ function aplicarComandos(
         iniciarAcao(estado, ctx, ator, ator.ataqueBasico, cmd.alvo, saida);
         break;
       case 'usarHabilidade':
-        iniciarAcao(estado, ctx, ator, cmd.id, cmd.alvo, saida);
+        // D-170: no meio do deslize próprio, a skill espera o fim dele.
+        if (noDeslize(ator, estado.tick)) guardarPedido(ator, cmd.id, cmd.alvo);
+        else iniciarAcao(estado, ctx, ator, cmd.id, cmd.alvo, saida);
         break;
       case 'selecionarAlvo': {
         const alvo = cmd.alvo === null ? undefined : buscarEntidade(estado, cmd.alvo);

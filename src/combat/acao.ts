@@ -1,6 +1,7 @@
 import { tipoEm } from '../world/fase';
 import { consumirAtaque } from './reserva-necromante';
-import { classeDe } from './ajustes-classes';
+import { classeDe, conjuracaoDaClasse } from './ajustes-classes';
+import { noDeslize } from './deslize';
 import { clonarEntidade } from '../entities/entidade';
 import { velocidadeFrenesiPct } from './furia';
 import { prepararSequencia, participaDeCombo } from './sequencias';
@@ -45,7 +46,7 @@ import { lancarSolo } from './solos';
 import { celulaDoCompanheiro, ticksDoVooDoFalcao } from './companheiro';
 import { boteDoPet, marcaComOBasico } from './pets';
 import { aoAgirEncarnado, encarnar } from './encarnacao';
-import { consumirMira } from './mira';
+import { adiantarMiraPorSkill, consumirMira, miraCheia, temMira } from './mira';
 import { prepararTiroCheio } from './sintonia-arqueiro';
 import { raioAreaDaEncarnacao } from './encarnacao-efeitos';
 import { comBuffsDeLeitura, ehRetorno } from './buffs-de-leitura';
@@ -154,7 +155,10 @@ export function alcanceDe(ctx: ContextoSimulacao, ator: Entidade, hab: Habilidad
   // Marco 27 (D-126): sem o arco, o básico do Arqueiro perde o alcance característico.
   const alcance = Math.max(0, hab.alcanceCelulas + perfilPara(ctx, ator, hab).alcance + basico + alcanceSemArma(ctx, ator, hab));
   // 05/11/2026 (D-132): o Arqueiro andando alcança menos (parado, o alcance inteiro).
-  return !deSuporte(hab) && classeDe(ator) === 'arqueiro' && emMovimento(ator) ? (alcance * ctx.balance.ajustesClasses.arqueiro.alcanceAndandoPct) / 100 : alcance;
+  // 14/11/2026 (D-170): sem a Mira cheia, alcança 30% menos; cheia (o tiro carregado), o alcance inteiro, andando ou não.
+  if (deSuporte(hab) || !temMira(ator) || miraCheia(ctx, ator, tick)) return alcance;
+  const a = ctx.balance.ajustesClasses.arqueiro;
+  return (alcance * a.alcanceSemMiraPct * (emMovimento(ator) ? a.alcanceAndandoPct : 100)) / 10000;
 }
 
 /** 05/11/2026 (D-132): anda agora (direção mantida ou um caminho a seguir). */
@@ -272,6 +276,8 @@ export function iniciarAcao(
   if (acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) return recusar('bloqueado');
   // Marco 40 (D-164): no meio do salto e esperando a âncora não se ataca.
   if (motivoDoMovimento(ator)) return recusar('movimento');
+  // 14/11/2026 (D-170): no meio do deslize próprio também não (o comando do jogador sai no fim, combat/deslize.ts).
+  if (noDeslize(ator, estado.tick)) return recusar('movimento');
   if (recargaRestante(estado, ator.id, chaveDoBasico(ator, hab.id)) > 0) return recusar('recarga');
   const perfil = perfilPara(ctx, ator, hab);
   const { custoMana, custoVida, semMana } = custoDaHabilidade(ctx, ator, hab);
@@ -349,7 +355,10 @@ export function iniciarAcao(
   // 08/11/2026 (D-141): a skill do guerreiro logo depois do básico carrega (e chega, fora o voo do projétil) mais rápido.
   const pressa = encadeioDoGuerreiro(estado, ctx, ator, hab);
   // Marco 40 (13/11/2026, D-163): o combo assinado que sai sem conjuração.
-  const lancamentoTick = estado.tick + ticksDe((hab.conjuracaoMs * (ehBasico(ator, hab.id) ? 1 : fatorDeConjuracaoDoCombo(estado, ctx, ator, hab)) + avisoExtra) / pressa);
+  // 14/11/2026 (D-170): o Arqueiro conjura as skills mais rápido (menos que o encadeio do guerreiro).
+  const lancamentoTick = estado.tick + ticksDe((hab.conjuracaoMs * (ehBasico(ator, hab.id) ? 1 : fatorDeConjuracaoDoCombo(estado, ctx, ator, hab) * conjuracaoDaClasse(ctx, ator)) + avisoExtra) / pressa);
+  // D-170: a skill fora da classe enche a Mira firme.
+  if (!ultimate) adiantarMiraPorSkill(ctx, ator, hab.id, ehBasico(ator, hab.id), estado.tick);
   // D-164: atacar tira o bônus de viagem do movimento da classe.
   aoAgir(estado, ctx, ator, hab, saida);
   const viagem =

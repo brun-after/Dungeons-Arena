@@ -8,7 +8,7 @@
     ],
     "arqueiro": [
       { "id": "chegada", "nivel": 1, "tipo": "tirolesa", "alcance": 10, "crescimento": 1, "velocidade": 12, "recargaMs": 3000, "icone": "flecha", "cor": "#a3e4d7", "marcos": { "30": { "elemental": 1 } } },
-      { "id": "salto_atras", "nivel": 1, "tipo": "recuo", "alcance": 2, "crescimento": 0.5, "recargaMs": 5000, "cargas": 1, "icone": "botas", "cor": "#d5f5e3", "marcos": { "30": { "cargas": 2, "armadilha": 1 }, "90": { "cargas": 3 } } },
+      { "id": "salto_atras", "nivel": 1, "tipo": "recuo", "alcance": 2, "crescimento": 0.5, "recargaMs": 3500, "cargas": 1, "icone": "botas", "cor": "#d5f5e3", "marcos": { "30": { "cargas": 2, "armadilha": 1 }, "90": { "cargas": 3 } } },
       { "id": "camuflagem", "nivel": 1, "tipo": "camuflagem", "duracaoMs": 6000, "lentidaoPct": 50, "recargaMs": 12000, "icone": "fantasma", "cor": "#7dcea0", "marcos": { "30": { "lentidaoPct": 30, "elemental": 1 } } }
     ],
     "guerreiro": [

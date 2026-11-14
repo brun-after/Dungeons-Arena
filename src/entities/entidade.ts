@@ -411,6 +411,8 @@ export interface Entidade {
   ataqueBasico: string;
   /** 08/11/2026 (D-141): o tick em que o último básico começou (o encadeio do guerreiro lê). */
   ultimoBasicoTick?: number;
+  /** 14/11/2026 (D-170): o deslize próprio em curso (recuo, avanço, teleporte curto): o fim, o rumo e a skill pedida no meio. */
+  deslize?: { ateTick: number; dx: number; dy: number; pedido?: { id: string; alvo?: EntidadeId | Celula } };
   /** Marco 27 (29/10/2026, D-126): as armas de classe (o 3º golpe pela mão secundária e as frações de passiva). */
   armas?: EstadoArmas;
   /** Marco 27 (D-126): caiu num solo da Colheita; na morte, se ergue como morto deste dono. */
@@ -748,6 +750,7 @@ export function clonarEntidade(e: Entidade): Entidade {
     ...(e.ultimaDePapel ? { ultimaDePapel: { ...e.ultimaDePapel, alvos: [...e.ultimaDePapel.alvos] } } : {}),
     ...(e.trilhaClasse ? { trilhaClasse: { chaves: { ...e.trilhaClasse.chaves }, degraus: e.trilhaClasse.degraus } } : {}),
     ...(e.mira ? { mira: { ...e.mira } } : {}),
+    ...(e.deslize ? { deslize: { ateTick: e.deslize.ateTick, dx: e.deslize.dx, dy: e.deslize.dy, ...(e.deslize.pedido ? { pedido: { id: e.deslize.pedido.id, ...(e.deslize.pedido.alvo === undefined ? {} : { alvo: typeof e.deslize.pedido.alvo === 'object' ? { ...e.deslize.pedido.alvo } : e.deslize.pedido.alvo }) } } : {}) } } : {}),
     ...(e.afinidade ? { afinidade: { ...e.afinidade } } : {}),
     ...(e.cargaClasseTick ? { cargaClasseTick: { ...e.cargaClasseTick } } : {}),
     ...(e.sintoniaVistos ? { sintoniaVistos: { ...e.sintoniaVistos } } : {}),
