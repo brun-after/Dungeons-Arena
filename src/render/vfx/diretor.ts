@@ -17,6 +17,7 @@ import { ehClasseComRuna, manifestarNaConjuracao, manifestarNoAcerto, type Runa 
 import { Marcas } from './marcas';
 import { Animacoes, Pincel } from './pincel';
 import type { TexturaRica } from './texturas';
+import type { Gesto, Palco } from './gestos-base';
 
 export interface OpcoesDiretor {
   efeitos: Container;
@@ -173,6 +174,11 @@ export class DiretorVfx {
     if (variante) this.o.particulas.emitirLista(VARIANTES[variante], a.pos.x, a.pos.y, a.cor);
     if (def.emSi) def.emSi(this.cena(), a);
     else if (def.impacto?.length) this.o.particulas.emitirLista(def.impacto, a.pos.x, a.pos.y, a.cor);
+  }
+
+  /** D-173 (14/11/2026): o gesto de uma reação, ressonância ou combo (vfx/gestos.ts). */
+  gesto(g: Gesto | undefined, palco: Palco): void {
+    if (g && this.ativo) g(this.cena(), palco);
   }
 
   /** O corpo desliza em vez de pular; o puxão da corrente espera ela chegar. */
