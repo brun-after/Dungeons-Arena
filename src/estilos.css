@@ -2730,8 +2730,8 @@ body.toque .botao-habilidade.de-classe {
   display: flex;
   gap: 6px;
   margin-left: 10px;
-  /* Acima da fileira de interagir e alvo, que começa logo depois da coluna do direcional. */
-  align-self: flex-start;
+  /* 14/11/2026: centrados com o direcional (como o botão único era); no topo da coluna cobriam a célula ao lado do
+     jogador no celular em pé e o toque no mapa caía no botão (e2e fases-vivas). */
 }
 
 .botao-acao.movimento-classe {
