@@ -175,7 +175,7 @@ function aplicarComandos(
         break;
       // Marco 40 (13/11/2026, D-164): o movimento da classe.
       case 'movimentoClasse':
-        usarMovimento(estado, ctx, ator, saida, cmd.dx, cmd.dy, cmd.alvo);
+        usarMovimento(estado, ctx, ator, saida, cmd.dx, cmd.dy, cmd.alvo, cmd.botao);
         break;
       case 'trocarMovimento':
         trocarMovimento(estado, ctx, ator, saida);

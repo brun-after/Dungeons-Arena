@@ -2724,11 +2724,19 @@ body.toque .botao-habilidade.de-classe {
   zoom: 1;
 }
 
-/* Marco 40 (14/11/2026, D-168): o movimento da classe no celular: a cor da mecânica, escuro na recarga, aceso mirando. */
-.botao-acao.movimento-classe {
-  width: 52px;
-  height: 52px;
+/* Marco 40 (14/11/2026, D-168): o movimento da classe no celular: a cor da mecânica, escuro na recarga, aceso mirando.
+   D-172: um botão por movimento, lado a lado (o principal primeiro). */
+.movimentos-classe {
+  display: flex;
+  gap: 6px;
   margin-left: 10px;
+  /* 14/11/2026: centrados com o direcional (como o botão único era); no topo da coluna cobriam a célula ao lado do
+     jogador no celular em pé e o toque no mapa caía no botão (e2e fases-vivas). */
+}
+
+.botao-acao.movimento-classe {
+  width: 48px;
+  height: 48px;
   font-size: 1.3rem;
   border-color: var(--cor-movimento, #9aa);
   color: var(--cor-movimento, #dde);

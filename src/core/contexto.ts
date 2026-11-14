@@ -198,6 +198,8 @@ export interface Balance {
    */
   movimentoClasse: {
     viagemPct: number;
+    /** D-172: a recarga dos movimentos que não são o principal, em combate (% da normal). */
+    recargaEmCombatePct: number;
     viagemPesadaPct: number;
     /** Marco 40 (D-164): o salto do Guerreiro (células por segundo, o raio e o atordoamento da queda). */
     salto: { velocidade: number; raio: number; atordoarMs: number; danoPorNivel: number };

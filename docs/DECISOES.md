@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.19 · **Data:** 14/11/2026
+**Versão:** 1.20 · **Data:** 14/11/2026
 
 > **Histórico**
+> - **1.20 (14/11/2026)**: D-172: um botão por movimento da classe (Shift no principal, T e G nos outros; no celular, lado a lado) e a recarga maior em combate para os que não são o principal.
 > - **1.19 (14/11/2026)**: D-171: o Arqueiro mais dependente de movimento (alcance 30% menor sem a Mira cheia, salto para trás com recarga menor, conjuração 10% mais rápida, skills de fora da classe enchem a Mira, os estilos adaptados) e o deslize que respeita a animação (recuo, avanço e teleportes curtos).
 > - **1.18 (14/11/2026)**: D-170: as correções do movimento da classe (o círculo do Acelerar à frente, entre a distância mínima e a máxima, as linhas de alcance da Âncora e do Posto, a nuvem única da névoa, a Chegada em pêndulo, a camuflagem em combate e a armadilha com retardo sob o Arqueiro) e dos companheiros (a caça marcada que acaba, o urso que luta nadando e o falcão que passa perto).
 > - **1.17 (14/11/2026)**: D-169: a região vizinha desenhada além da borda (sem o vazio no fim do mapa) e a troca sem a travada (o chão assado aos poucos e guardado entre as cenas, as teclas mantidas que seguem para a cena nova).
@@ -5297,3 +5298,30 @@ o corpo voltava a andar (ou golpeava virando para o alvo) logo no tick seguinte,
 
 Testes em `tests/unit/arqueiro-deslize.test.ts`. `aceleracao` e `variacoes-basico` aproximaram os bonecos do Arqueiro,
 que agora ficavam fora do alcance sem a Mira.
+
+## D-172 — Marco 40: um botão por movimento da classe (14/11/2026)
+
+**Contexto.** Até o D-170, cada classe tinha um movimento ativo: o G trocava, o Shift usava e, no celular, um botão só
+fazia as duas coisas (segurar trocava). O usuário pediu um botão para cada movimento, com o mais usado no Shift.
+
+**Decisão.**
+- **Principal.** Cada classe tem um movimento principal (`principal` em `movimentos.json`): o mais usado, de recarga
+  menor.
+  - Mago: o Voo Arcano. Guerreiro: a Arremetida. Necromante: a Troca de Corpo. Arqueiro: o Salto para Trás.
+  - O Aventureiro tem um botão só, o do companheiro ativo (a montaria muda com o companheiro).
+- **Computador.** O Shift usa o principal. O T e o G usam os outros dois, do de menor recarga ao de maior:
+  - Mago: T a Âncora, G o Acelerar.
+  - Guerreiro: T a Marcha, G o Salto de Guerra.
+  - Necromante: T o Posto, G a Névoa.
+  - Arqueiro: T a Chegada, G a Camuflagem.
+- **Travar o alvo.** Passou do T para o V (clicar no inimigo continua travando).
+- **Celular.** Os botões ficam lado a lado junto do direcional, o principal primeiro, acima da fileira de interagir e
+  alvo. Os que miram seguem com duas ativações, cada um no próprio botão.
+- **O comando.** `movimentoClasse` ganhou o `botao` (0 a 2; `movimentosDosBotoes` dá a ordem). Usar um botão torna
+  aquele o movimento ativo, e o que estava em curso acaba (o voo pousa antes). O `trocarMovimento` fica no protocolo,
+  mas a interface não o usa mais.
+- **Recarga em combate.** Em combate (`emCombate`), os movimentos que não são o principal recarregam no dobro do tempo
+  (`movimentoClasse.recargaEmCombatePct`: 200).
+
+Balanceamento: 172/172.
+

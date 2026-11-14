@@ -66,7 +66,9 @@ export type Comando =
   | { t: 'ativarPassiva'; id: string }
   | { t: 'desativarPassiva'; id: string }
   /** Marco 40 (13/11/2026, D-164): usa o movimento da classe (Shift), no rumo pedido (±1000) ou no de agora. */
-  | { t: 'movimentoClasse'; dx?: number; dy?: number; alvo?: Celula }
+  // D-172: `botao` escolhe o movimento (0 o principal, no Shift; 1 e 2 os outros, no T e no G, do de menor recarga ao
+  // de maior); sem ele, o movimento ativo.
+  | { t: 'movimentoClasse'; dx?: number; dy?: number; alvo?: Celula; botao?: number }
   /** D-164: troca a mecânica de movimento ativa (G). */
   | { t: 'trocarMovimento' };
 

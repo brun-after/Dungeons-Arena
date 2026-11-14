@@ -21,6 +21,7 @@ import { buscarEntidade } from '../core/estado';
 import { escolher } from '../core/rng';
 import { posicionar, vivo, type Entidade, type ModoDeMovimento } from '../entities/entidade';
 import { podeFerir } from '../modos/relacao';
+import { emCombate } from '../progression/buffs';
 import { aplicarEfeito } from './efeitos';
 import { avancar, teleportar } from './efeitos-instantaneos';
 import { chebyshev } from './geometria';
@@ -74,6 +75,11 @@ export interface MovimentoDaClasse {
   pet: string | null;
   /** D-168: vai ao ponto mirado (o cursor; no celular, o toque depois do botão). */
   mira: boolean;
+  /**
+   * D-172: o movimento principal da classe (o mais usado, de recarga menor): fica no Shift e no primeiro botão e não
+   * recarrega mais devagar em combate. Os de companheiro (o Aventureiro) contam todos como principal.
+   */
+  principal: boolean;
   base: ParametrosMovimento;
   marcos: ReadonlyMap<number, Partial<ParametrosMovimento>>;
 }
@@ -106,6 +112,7 @@ export function lerMovimentos(json: unknown): { movimentos: Map<string, Moviment
         pesada: o.pesada === true,
         pet: o.pet === undefined ? null : l.texto(o, 'pet'),
         mira: o.mira === true,
+        principal: o.principal === true,
         base: { alcance: 0, crescimento: 0, velocidade: 12, recargaMs: 3000, cargas: 1, duracaoMs: 0, lentidaoPct: 0, postos: 1, curaPctPorS: 0, escudo: 0, reuniao: 0, raio: 0, velocidadePct: 0, eco: 0, armadilha: 0, elemental: 0, ...numeros(o) },
         marcos,
       });
@@ -138,6 +145,22 @@ export function movimentoAtivo(ctx: ContextoSimulacao, e: Entidade): MovimentoDa
   if (liberados.some((m) => m.pet !== null)) return liberados.find((m) => m.pet === petDe(e)) ?? null;
   return liberados.find((m) => m.id === e.movimentoClasse?.ativo) ?? liberados[0] ?? null;
 }
+
+/**
+ * D-172: os movimentos nos botões, na ordem: o principal (Shift) e os outros da recarga menor para a maior (T e G). Quem
+ * tem companheiros tem um botão só, o do companheiro ativo.
+ */
+export function movimentosDosBotoes(ctx: ContextoSimulacao, e: Entidade): MovimentoDaClasse[] {
+  const liberados = movimentosLiberados(ctx, e);
+  if (liberados.some((m) => m.pet !== null)) {
+    const m = movimentoAtivo(ctx, e);
+    return m ? [m] : [];
+  }
+  const principal = liberados.find((m) => m.principal);
+  const resto = liberados.filter((m) => m !== principal).sort((a, b) => a.base.recargaMs - b.base.recargaMs);
+  return principal ? [principal, ...resto] : resto;
+}
+const ehPrincipal = (m: MovimentoDaClasse): boolean => m.principal || m.pet !== null;
 
 const modo = (e: Entidade): ModoDeMovimento | undefined => e.movimentoClasse?.modo;
 /** Voando ou no meio do salto: fora do alcance do que está no chão (armadilhas, rastros, campos, golpes de perto). */
@@ -205,12 +228,16 @@ export function fimDoSalto(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entida
   if (ponta) tocarEmVolta(estado, ctx, e, { x: e.x, y: e.y }, s.raio, ponta, saida);
 }
 
-/** Gasta uma carga (cada carga volta `recargaMs` depois); false se nenhuma está pronta. */
-function gastarCarga(estado: EstadoJogo, e: Entidade, m: MovimentoDaClasse, p: ParametrosMovimento): boolean {
+/**
+ * Gasta uma carga (cada carga volta `recargaMs` depois); false se nenhuma está pronta. D-172: em combate, os movimentos
+ * que não são o principal recarregam mais devagar (`recargaEmCombatePct`).
+ */
+function gastarCarga(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, m: MovimentoDaClasse, p: ParametrosMovimento): boolean {
   const mc = (e.movimentoClasse ??= { ativo: m.id, cargas: {} });
   const prontas = (mc.cargas[m.id] ?? []).filter((t) => t > estado.tick);
   if (prontas.length >= Math.max(1, p.cargas)) return false;
-  mc.cargas[m.id] = [...prontas, estado.tick + ticksDe(p.recargaMs)];
+  const fator = !ehPrincipal(m) && emCombate(estado, ctx, e) ? ctx.balance.movimentoClasse.recargaEmCombatePct / 100 : 1;
+  mc.cargas[m.id] = [...prontas, estado.tick + ticksDe(p.recargaMs * fator)];
   return true;
 }
 
@@ -273,8 +300,9 @@ function noAlcance(e: Entidade, c: Celula, alcance: number): Celula {
 }
 
 /** Shift: usa (ou desfaz) a mecânica ativa. `alvo`: o ponto mirado (as que miram). */
-export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[], dx?: number, dy?: number, alvo?: Celula): void {
-  const m = movimentoAtivo(ctx, e);
+export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[], dx?: number, dy?: number, alvo?: Celula, botao?: number): void {
+  // D-172: cada movimento tem o próprio botão; usar um o torna o ativo (o que estava em curso acaba).
+  const m = botao === undefined ? movimentoAtivo(ctx, e) : (movimentosDosBotoes(ctx, e)[botao] ?? null);
   if (!m || !vivo(e)) return;
   const p = parametros(m, e.nivel);
   const alcance = alcanceNoNivel(p, e.nivel);
@@ -282,6 +310,8 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
   const recusar = (motivo: string) => { saida.push({ t: 'movimentoClasse', tick, id: e.id, mov: m.id, fase: 'recusado', motivo }); };
   const atual = modo(e);
   if (atual && (atual.tipo === 'salto' || atual.tipo === 'tirolesa')) return;
+  if (atual?.tipo === 'voo' && atual.id !== m.id && !cabeAli(ctx, e.px, e.py)) { recusar('pouso'); return; }
+  (e.movimentoClasse ??= { ativo: m.id, cargas: {} }).ativo = m.id;
   // Os modos de viagem desligam no mesmo botão.
   if (atual && atual.id === m.id) {
     // Não pousa no telhado.
@@ -289,6 +319,7 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
     terminar(estado, ctx, e, saida);
     return;
   }
+  if (atual?.tipo === 'voo') pousar(estado, ctx, e);
   if (atual) terminar(estado, ctx, e, saida);
   // D-168: a ponta do eneágono de quem usa, a partir do marco elemental da mecânica.
   const ponta = p.elemental > 0 ? pontaDaAfinidade(ctx, e, tick) : undefined;
@@ -306,12 +337,12 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
       // D-168: o Aventureiro só monta (ou é levado) com o companheiro perto; ele não vem até o dono.
       const veiculo = m.pet ? companheiroDe(estado, e, m.pet) : undefined;
       if (m.pet && (!veiculo || chebyshev(veiculo, e) > b.montarRaio)) { recusar('longe'); return; }
-      if (!gastarCarga(estado, e, m, p)) { recusar('recarga'); return; }
+      if (!gastarCarga(estado, ctx, e, m, p)) { recusar('recarga'); return; }
       const tipo = m.tipo === 'montaria' ? 'montado' : m.tipo;
       const ateTick = tick + duracaoDaViagem(estado, ctx, e, alcance);
       iniciar(tipo, { ateTick, ...(m.pesada && { pesada: true }) });
       // D-170: a névoa leva a cor da afinidade no rastro (só desenho).
-      const viagem = e.movimentoClasse?.modo;
+      const viagem = e.movimentoClasse.modo;
       if (tipo === 'nevoa' && viagem) viagem.ponta = pontaDaAfinidade(ctx, e, tick);
       if (tipo === 'nevoa') {
         // D-168: a névoa leva todos os servos (os do posto ficam), em volta do Necromante, até o fim.
@@ -328,7 +359,7 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
       const c = noAlcance(e, alvo ?? aFrente(e, r, alcance), alcance);
       if (!cabeAli(ctx, c.x, c.y)) { recusar('bloqueado'); return; }
       if (!servoParaPosto(estado, e)) { recusar('sem_servo'); return; }
-      if (!gastarCarga(estado, e, m, p)) { recusar('recarga'); return; }
+      if (!gastarCarga(estado, ctx, e, m, p)) { recusar('recarga'); return; }
       deixarNoPosto(estado, e, c, p, saida);
       saida.push({ t: 'movimentoClasse', tick, id: e.id, mov: m.id, fase: 'inicio' });
       return;
@@ -341,18 +372,18 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
         if (cabeAli(ctx, c.x, c.y)) destino = c;
       }
       if (!destino) { recusar('bloqueado'); return; }
-      if (!gastarCarga(estado, e, m, p)) { recusar('recarga'); return; }
+      if (!gastarCarga(estado, ctx, e, m, p)) { recusar('recarga'); return; }
       e.waypoints = [];
       e.caminho = [];
       iniciar('salto', { x: destino.x, y: destino.y, velocidade: b.salto.velocidade });
       return;
     }
     case 'tirolesa':
-      if (!gastarCarga(estado, e, m, p)) { recusar('recarga'); return; }
+      if (!gastarCarga(estado, ctx, e, m, p)) { recusar('recarga'); return; }
       iniciar('tirolesa', { rumoX: r.dx, rumoY: r.dy, restante: alcance, velocidade: p.velocidade });
       return;
     case 'camuflagem':
-      if (!gastarCarga(estado, e, m, p)) { recusar('recarga'); return; }
+      if (!gastarCarga(estado, ctx, e, m, p)) { recusar('recarga'); return; }
       iniciar('camuflado', { ateTick: tick + ticksDe(p.duracaoMs), lentidaoPct: p.lentidaoPct });
       e.invisivelAteTick = Math.max(e.invisivelAteTick, tick + ticksDe(p.duracaoMs));
       return;
@@ -362,7 +393,7 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
       const rumo = m.tipo === 'recuo' ? { dx: -r.dx, dy: -r.dy } : r;
       // D-168: a Arremetida vai no rumo do ponto mirado.
       const destino = m.tipo === 'teleporte' && alvo ? noAlcance(e, alvo, alcance) : aFrente(e, rumo, alcance);
-      if (!gastarCarga(estado, e, m, p)) { recusar('recarga'); return; }
+      if (!gastarCarga(estado, ctx, e, m, p)) { recusar('recarga'); return; }
       const { x, y } = e;
       const ok = m.tipo === 'teleporte' ? teleportar(estado, ctx, e, destino) : avancar(estado, ctx, e, destino, alcance);
       if (!ok) { recusar('bloqueado'); return; }
@@ -382,7 +413,7 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
       const mc = (e.movimentoClasse ??= { ativo: m.id, cargas: {} });
       const ancora = mc.ancora && mc.ancora.ateTick > tick ? mc.ancora : undefined;
       if (!ancora) {
-        if (!gastarCarga(estado, e, m, p)) { recusar('recarga'); return; }
+        if (!gastarCarga(estado, ctx, e, m, p)) { recusar('recarga'); return; }
         mc.ancora = { x: e.x, y: e.y, ateTick: tick + ticksDe(p.duracaoMs), raio: alcance };
         saida.push({ t: 'movimentoClasse', tick, id: e.id, mov: m.id, fase: 'inicio' });
         return;
@@ -413,7 +444,7 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
         if (cabeAli(ctx, c.x, c.y)) centro = c;
       }
       if (!centro) { recusar('bloqueado'); return; }
-      if (!gastarCarga(estado, e, m, p)) { recusar('recarga'); return; }
+      if (!gastarCarga(estado, ctx, e, m, p)) { recusar('recarga'); return; }
       (e.movimentoClasse ??= { ativo: m.id, cargas: {} }).circulo = { x: centro.x, y: centro.y, raio: p.raio, pct: p.velocidadePct, desdeTick: tick, ateTick: tick + ticksDe(p.duracaoMs), ...(ponta && { ponta }) };
       saida.push({ t: 'movimentoClasse', tick, id: e.id, mov: m.id, fase: 'inicio', ...(ponta && { ponta }) });
       return;
@@ -421,7 +452,7 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
     case 'troca': {
       const servo = servoPerto(estado, e, alcance);
       if (!servo) { recusar('sem_servo'); return; }
-      if (!gastarCarga(estado, e, m, p)) { recusar('recarga'); return; }
+      if (!gastarCarga(estado, ctx, e, m, p)) { recusar('recarga'); return; }
       const { x, y } = e;
       posicionar(e, servo.x, servo.y);
       posicionar(servo, x, y);

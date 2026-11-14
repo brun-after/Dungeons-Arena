@@ -32,8 +32,8 @@ export interface OpcoesTeclado {
   aoUltimate?: () => void;
   aoAlternarBasico?: () => void;
   /** Marco 40 (13/11/2026, D-164): Shift usa o movimento da classe (no rumo das teclas); `G` troca a mecânica. */
-  aoMovimento?: (rumo: Rumo) => void;
-  aoTrocarMovimento?: () => void;
+  /** D-172: o movimento do botão (0 no Shift, o principal; 1 no T; 2 no G). */
+  aoMovimento?: (rumo: Rumo, botao: number) => void;
   /** Com um modal aberto, as teclas não chegam ao jogo (marco 6). */
   bloqueado?: () => boolean;
   /**
@@ -93,14 +93,15 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
     } else if (ev.code === 'KeyZ' && !ev.repeat && opcoes.aoTrocarAlvo) {
       opcoes.aoTrocarAlvo(-1);
     } else if ((ev.code === 'ShiftLeft' || ev.code === 'ShiftRight') && !ev.repeat && opcoes.aoMovimento) {
-      opcoes.aoMovimento(atual);
-    } else if (ev.code === 'KeyG' && !ev.repeat && opcoes.aoTrocarMovimento) {
-      opcoes.aoTrocarMovimento();
+      opcoes.aoMovimento(atual, 0);
+    } else if ((ev.code === 'KeyT' || ev.code === 'KeyG') && !ev.repeat && opcoes.aoMovimento) {
+      opcoes.aoMovimento(atual, ev.code === 'KeyT' ? 1 : 2);
     } else if (ev.code === 'KeyR' && !ev.repeat && opcoes.aoUltimate) {
       opcoes.aoUltimate();
     } else if (ev.code === 'KeyF' && !ev.repeat && opcoes.aoAlternarBasico) {
       opcoes.aoAlternarBasico();
-    } else if (ev.code === 'KeyT' && !ev.repeat && opcoes.aoTravarAlvo) {
+    } else if (ev.code === 'KeyV' && !ev.repeat && opcoes.aoTravarAlvo) {
+      // D-172: travar o alvo passou do T para o V (o T é do movimento).
       opcoes.aoTravarAlvo();
     } else if (ev.code === 'KeyC' && !ev.repeat && opcoes.aoCentralizar) {
       opcoes.aoCentralizar();
