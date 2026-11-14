@@ -48,7 +48,7 @@ export const textosMovimento = {
   'movimento.lobo': 'Lobo',
   'movimento.lobo.texto': 'Monta o lobo e corre pelo tempo de andar o alcance. Atacar ou ser atingido tira a velocidade.',
   'movimento.falcao_carrega': 'Falcão Carrega',
-  'movimento.falcao_carrega.texto': 'O falcão leva você algumas células à frente.',
+  'movimento.falcao_carrega.texto': 'O falcão te agarra pelos ombros e te leva voando pelo tempo de andar o alcance. Atacar ou ser atingido tira a velocidade.',
   'movimento.urso': 'Urso',
   'movimento.urso.texto': 'Monta o urso: mais lento que o lobo, mas firme — ser atingido não tira a velocidade.',
 };

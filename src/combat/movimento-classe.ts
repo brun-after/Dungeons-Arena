@@ -1,5 +1,5 @@
 // Marco 40 (13/11/2026, D-164): o movimento da classe. Cada classe tem três mecânicas (data/movimentos.json), uma
-// ativa por vez: o Shift usa a ativa e o G troca entre as liberadas (níveis 1, 10 e 20). Sem dano direto.
+// ativa por vez: o Shift usa a ativa e o G troca entre as liberadas (todas desde o nível 1, D-167). Sem dano direto.
 // A primeira de cada classe é a de longa distância: o Voo Arcano do Mago, a Tirolesa do Arqueiro, o Salto de Guerra
 // do Guerreiro, a Forma de Névoa do Necromante e o Lobo do Aventureiro.
 // Ajuste de 13/11/2026 (D-164): o limite é de espaço e de tempo, não de força. Todo alcance cresce com o nível
@@ -24,6 +24,7 @@ import { construirEfeito } from './registro-efeitos';
 import { corpoCabe } from '../world/corpo';
 import { passavel } from '../world/fase';
 import { velocidadeDeViagem } from '../world/movimento';
+import { petDe } from './pets';
 
 export const TIPOS_MOVIMENTO = ['voo', 'tirolesa', 'salto', 'marcha', 'nevoa', 'montaria', 'posto', 'avanco', 'teleporte', 'recuo', 'ancora', 'troca', 'camuflagem'] as const;
 export type TipoMovimento = (typeof TIPOS_MOVIMENTO)[number];
@@ -53,6 +54,11 @@ export interface MovimentoDaClasse {
   icone: string;
   cor: string;
   pesada: boolean;
+  /**
+   * Marco 40 (14/11/2026): o companheiro dono da mecânica (o Aventureiro). Na classe com companheiros, o movimento ativo
+   * é sempre o do companheiro ativo (o falcão carrega, o lobo e o urso são a montaria) e o G não troca.
+   */
+  pet: string | null;
   base: ParametrosMovimento;
   marcos: ReadonlyMap<number, Partial<ParametrosMovimento>>;
 }
@@ -83,6 +89,7 @@ export function lerMovimentos(json: unknown): { movimentos: Map<string, Moviment
         icone: l.texto(o, 'icone'),
         cor: l.texto(o, 'cor'),
         pesada: o.pesada === true,
+        pet: o.pet === undefined ? null : l.texto(o, 'pet'),
         base: { alcance: 0, crescimento: 0, velocidade: 12, recargaMs: 3000, cargas: 1, duracaoMs: 0, lentidaoPct: 0, postos: 1, curaPctPorS: 0, escudo: 0, reuniao: 0, ...numeros(o) },
         marcos,
       });
@@ -112,6 +119,7 @@ export function alcanceNoNivel(p: ParametrosMovimento, nivel: number): number {
 
 export function movimentoAtivo(ctx: ContextoSimulacao, e: Entidade): MovimentoDaClasse | null {
   const liberados = movimentosLiberados(ctx, e);
+  if (liberados.some((m) => m.pet !== null)) return liberados.find((m) => m.pet === petDe(e)) ?? null;
   return liberados.find((m) => m.id === e.movimentoClasse?.ativo) ?? liberados[0] ?? null;
 }
 
@@ -159,7 +167,8 @@ function gastarCarga(estado: EstadoJogo, e: Entidade, m: MovimentoDaClasse, p: P
 /** G: a próxima mecânica liberada (desfaz o modo em curso). */
 export function trocarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
   const liberados = movimentosLiberados(ctx, e);
-  if (liberados.length === 0 || noSalto(e) || naTirolesa(e)) return;
+  // Marco 40 (14/11/2026): quem tem companheiros troca de movimento trocando de companheiro.
+  if (liberados.length === 0 || liberados.some((m) => m.pet !== null) || noSalto(e) || naTirolesa(e)) return;
   const atual = movimentoAtivo(ctx, e);
   const i = atual ? liberados.indexOf(atual) : -1;
   const proximo = liberados[(i + 1) % liberados.length];
@@ -335,6 +344,12 @@ export function processarMovimentoClasse(estado: EstadoJogo, ctx: ContextoSimula
     const m = e.movimentoClasse?.modo;
     if (!m) continue;
     if (!vivo(e)) { terminar(estado, e, saida); continue; }
+    // Marco 40 (14/11/2026): trocou o companheiro no meio da viagem: a do companheiro que saiu acaba (o voo pousa).
+    if (m.tipo !== 'preparo' && m.id !== movimentoAtivo(ctx, e)?.id) {
+      if (m.tipo === 'voo') pousar(estado, ctx, e);
+      terminar(estado, e, saida);
+      continue;
+    }
     if (m.ateTick !== undefined && tick >= m.ateTick) {
       if (m.tipo === 'preparo' && m.destino === 'ancora') {
         terminar(estado, e, saida);

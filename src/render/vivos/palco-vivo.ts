@@ -126,6 +126,9 @@ const GOLPES: Readonly<Partial<Record<EstadoPersonagem, readonly string[]>>> = {
 const VARIACOES: Readonly<Record<string, readonly string[]>> = {
   Sword_Attack: ['Sword_Attack', 'Sword_Regular_A', 'Sword_Regular_B'],
   Punch_Cross: ['Punch_Cross', 'Punch_Jab', 'Melee_Hook'],
+  // Marco 40 (14/11/2026): o lobo e o urso alternam os três golpes deles (a mordida, a patada, a mordida que sacode; o
+  // urso: o peso das duas patas, o gancho de lado e os golpes de pé).
+  [CLIPES_DA_FERA.golpe]: [CLIPES_DA_FERA.golpe, CLIPES_DA_FERA.golpe2, CLIPES_DA_FERA.golpe3],
 };
 /** A preparação das magias: as mãos sobem e carregam durante a conjuração (o lançamento é o golpe da classe). */
 const PREPARO_DA_MAGIA = 'Spell_Simple_Enter';

@@ -162,7 +162,12 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   const tiposDoMovimento = new Map([...ctx.conteudo.movimentos.values()].flat().map((m) => [m.id, m.tipo] as const));
   let posicaoDoQuadro: (e: Entidade) => PontoVisual = (e) => ({ x: e.px, y: e.py });
   const raioNevoa = ctx.balance.movimentoClasse.nevoa.servosRaio;
-  const corpoMovimento = new CorpoEmMovimento({ tipoDe: (id) => tiposDoMovimento.get(id) ?? null, posicao: (e) => posicaoDoQuadro(e), raioNevoa });
+  const petsDoMovimento = new Map([...ctx.conteudo.movimentos.values()].flat().map((m) => [m.id, m.pet] as const));
+  const corpoMovimento = new CorpoEmMovimento({
+    tipoDe: (id) => tiposDoMovimento.get(id) ?? null, posicao: (e) => posicaoDoQuadro(e), raioNevoa, petDoMovimento: (id) => petsDoMovimento.get(id) ?? null,
+  });
+  // Marco 40 (14/11/2026): o companheiro que é o veículo do dono (a montaria, o falcão que carrega) vai com ele.
+  const comVeiculo = (p: (e: Entidade) => PontoVisual) => (e: Entidade) => corpoMovimento.posicaoForcada(e, o.estado(), p) ?? p(e);
   corpoMovimento.ligar(o.bus, o.estado, () => performance.now());
   const rastrosMovimento = new RastrosDeMovimento(palco.chao, palco.efeitos, corpoMovimento, { projecao: () => camera.projecaoAtual, posicao: (e) => posicaoDoQuadro(e), reduzido, raioNevoa });
   rastrosMovimento.ligar(o.bus, o.estado, () => performance.now());
@@ -367,12 +372,12 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     qualidade,
     quadroPermitido: (agoraMs) => pulador.deveDesenhar(agoraMs, alvoFps()),
     // D-124: o corpo puxado, empurrado ou arremessado desliza em vez de pular.
-    posicaoVisual: (base) => deslizando(voo.posicao(base)),
-    ajusteVisual: (e, agoraMs) => voo.ajuste(e, agoraMs) ?? corpoMovimento.ajuste(e, agoraMs, o.estado()),
+    posicaoVisual: (base) => comVeiculo(deslizando(voo.posicao(base))),
+    ajusteVisual: (e, agoraMs) => corpoMovimento.ajusteForcado(e, agoraMs, o.estado()) ?? voo.ajuste(e, agoraMs) ?? corpoMovimento.ajuste(e, agoraMs, o.estado()),
     quadro: (estado, agoraMs, dtMs, base) => {
       diretor.relogio(agoraMs);
       voo.quadro(estado, agoraMs, base);
-      const posicao = deslizando(voo.posicao(base));
+      const posicao = comVeiculo(deslizando(voo.posicao(base)));
       posicaoDoQuadro = posicao;
       medidor.registrar(dtMs, agoraMs, estado.tick, () => ({
         vivos: estado.entidades.reduce((n, e) => n + (e.morto ? 0 : 1), 0),

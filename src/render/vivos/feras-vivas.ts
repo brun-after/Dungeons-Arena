@@ -7,7 +7,8 @@
 
 import * as THREE from 'three';
 
-export type EstadoFera = 'parado' | 'andar' | 'golpe' | 'conjurar' | 'morte' | 'correr';
+/** Marco 40 (14/11/2026): três golpes por fera, alternados a cada ataque (golpe, golpe2, golpe3). */
+export type EstadoFera = 'parado' | 'andar' | 'golpe' | 'golpe2' | 'golpe3' | 'conjurar' | 'morte' | 'correr';
 export interface Fera {
   grupo: THREE.Group;
   animar(estado: EstadoFera, f: number): void;
@@ -18,6 +19,8 @@ export const CLIPES_DA_FERA: Readonly<Record<EstadoFera, string>> = {
   parado: 'Fera_Parado',
   andar: 'Fera_Andar',
   golpe: 'Fera_Golpe',
+  golpe2: 'Fera_Golpe2',
+  golpe3: 'Fera_Golpe3',
   conjurar: 'Fera_Conjurar',
   morte: 'Fera_Morte',
   correr: 'Fera_Correr',
@@ -260,6 +263,40 @@ export function loboCompanheiro(): Fera {
           p.coxa.rotation.x = p.frente ? -1.1 * bote + 0.3 * carga : 0.6 * bote - 0.4 * carga;
           p.canela.rotation.x = p.frente ? 0.4 * carga : 0.5 * carga;
         }
+      } else if (estado === 'golpe2') {
+        // A patada: meio empinado nas patas de trás, a pata direita varre de fora para dentro e a cabeça acompanha.
+        const sobe = f < 0.4 ? suave(f / 0.4) : 1 - suave((f - 0.4) / 0.6);
+        const varre = f < 0.35 ? -suave(f / 0.35) : -1 + 2 * suave(Math.min(1, (f - 0.35) / 0.25));
+        apoio.rotation.x = -0.45 * sobe;
+        apoio.position.y = H_LOBO + 0.04 * sobe;
+        pescoco.rotation.y = -0.35 * varre * sobe;
+        mandibula.rotation.x = 0.35 * sobe;
+        for (const p of ps) {
+          if (!p.frente) {
+            p.coxa.rotation.x = 0.45 * sobe;
+            continue;
+          }
+          const ataca = p.lado > 0;
+          p.coxa.rotation.x = (ataca ? -1.3 : -0.5) * sobe;
+          p.coxa.rotation.z = ataca ? 0.9 * varre * sobe : 0;
+          p.canela.rotation.x = (ataca ? 0.7 : 0.9) * sobe;
+        }
+      } else if (estado === 'golpe3') {
+        // A mordida que prende: o bote curto, os dentes cravados e a cabeça sacudindo para rasgar.
+        const bote = suave(Math.min(1, f / 0.25)) * (1 - suave(Math.max(0, (f - 0.8) / 0.2)));
+        const sacode = f > 0.25 && f < 0.8 ? Math.sin(((f - 0.25) / 0.55) * Math.PI * 5) : 0;
+        apoio.position.z = -0.34 + 0.18 * bote;
+        apoio.position.y = H_LOBO - 0.06 * bote;
+        apoio.rotation.x = 0.12 * bote;
+        apoio.rotation.z = 0.08 * sacode;
+        pescoco.rotation.x = 0.35 * bote;
+        pescoco.rotation.y = 0.45 * sacode;
+        mandibula.rotation.x = f < 0.25 ? 0.7 * suave(f / 0.25) : 0.08;
+        for (const p of ps) {
+          p.coxa.rotation.x = p.frente ? -0.35 * bote : 0.55 * bote;
+          p.canela.rotation.x = p.frente ? 0.3 * bote : -0.4 * bote;
+        }
+        rabo.rotation.x = -1.5;
       } else if (estado === 'conjurar') {
         // O uivo: senta nas patas de trás, a cabeça para o alto e a boca aberta.
         const u = suave(Math.min(1, f * 2.5));
@@ -393,6 +430,38 @@ export function ursoCompanheiro(): Fera {
           p.canela.rotation.x = 0.6 * sobe;
         }
         if (f > 0.65) apoio.position.y = 0.62 - 0.05 * Math.sin(((f - 0.65) / 0.35) * Math.PI);
+      } else if (estado === 'golpe2') {
+        // A patada de lado, nas quatro: o peso vai para trás, o corpo gira e a pata esquerda varre em gancho.
+        const carga = f < 0.35 ? suave(f / 0.35) : 1 - suave((f - 0.35) / 0.2);
+        const gancho = f < 0.35 ? 0 : Math.sin(Math.min(1, (f - 0.35) / 0.45) * Math.PI);
+        apoio.rotation.y = 0.35 * carga - 0.45 * gancho;
+        apoio.rotation.z = -0.08 * carga + 0.1 * gancho;
+        apoio.position.y = 0.62 - 0.04 * carga;
+        pescoco.rotation.y = 0.3 * carga - 0.4 * gancho;
+        mandibula.rotation.x = 0.45 * gancho;
+        for (const p of ps) {
+          if (!p.frente || p.lado > 0) continue;
+          p.coxa.rotation.x = -0.4 * carga - 1.1 * gancho;
+          p.coxa.rotation.z = -0.5 * carga + 1.0 * gancho;
+          p.canela.rotation.x = 0.8 * (carga + gancho);
+        }
+      } else if (estado === 'golpe3') {
+        // Os golpes de pé: ergue-se inteiro nas patas de trás e golpeia com a esquerda e depois com a direita.
+        const sobe = suave(Math.min(1, f / 0.25)) * (1 - suave(Math.max(0, (f - 0.82) / 0.18)));
+        ergue(1.15 * sobe);
+        apoio.position.y = 0.62 + 0.05 * sobe;
+        pescoco.rotation.x = -0.2 * sobe;
+        const esquerda = f > 0.25 && f < 0.55 ? Math.sin(((f - 0.25) / 0.3) * Math.PI) : 0;
+        const direita = f > 0.5 && f < 0.82 ? Math.sin(((f - 0.5) / 0.32) * Math.PI) : 0;
+        apoio.rotation.y = 0.3 * esquerda - 0.3 * direita;
+        mandibula.rotation.x = 0.5 * sobe;
+        for (const p of ps) {
+          if (!p.frente) continue;
+          const golpe = p.lado < 0 ? esquerda : direita;
+          p.coxa.rotation.x = -1.2 * sobe + 0.9 * golpe;
+          p.coxa.rotation.z = p.lado * (0.6 * sobe - 0.9 * golpe);
+          p.canela.rotation.x = 0.9 * sobe - 0.5 * golpe;
+        }
       } else if (estado === 'conjurar') {
         // O rugido de pé: o corpo todo erguido, as patas abertas e a boca escancarada.
         const u = suave(Math.min(1, f * 2.2));
@@ -428,7 +497,7 @@ export function assar(fera: Fera, quadros = 24): THREE.AnimationClip[] {
   fera.grupo.traverse((o) => {
     if (o.name.startsWith('f_')) pivos.push(o);
   });
-  const ESTADOS: readonly [EstadoFera, number, boolean][] = [['parado', 2, true], ['andar', 1, true], ['correr', 0.6, true], ['golpe', 1, false], ['conjurar', 1.4, false], ['morte', 1, false]];
+  const ESTADOS: readonly [EstadoFera, number, boolean][] = [['parado', 2, true], ['andar', 1, true], ['correr', 0.6, true], ['golpe', 1, false], ['golpe2', 0.9, false], ['golpe3', 1.2, false], ['conjurar', 1.4, false], ['morte', 1, false]];
   const clipes = ESTADOS.map(([estado, dur, laco]) => {
     const tempos: number[] = [];
     const amostras = new Map<THREE.Object3D, Amostra>(pivos.map((p) => [p, { pos: [], giro: [], escala: [] }]));
