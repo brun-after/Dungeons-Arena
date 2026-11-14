@@ -11,6 +11,7 @@
 
 import { ehVeiculo, naNevoaDoDono, postoDormente } from '../combat/movimento-classe';
 import { cacaDoPet, petDoCompanheiro } from '../combat/pets';
+import { ritmoDoCompanheiro } from '../combat/pets-estilos';
 import { alvoOfensivoValido, iniciarAcao, prioridadeDeAlvo } from '../combat/acao';
 import { aplicarEfeito } from '../combat/efeitos';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
@@ -195,7 +196,8 @@ function perseguirEAtacar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidad
     }
     if (!emPasso(e) && e.caminho.length === 0) pararMovimento(e);
     if (!e.acao && estado.tick >= ia.proximoAtaqueTick && iniciarAcao(estado, ctx, e, habilidade, alvo.id, saida)) {
-      ia.proximoAtaqueTick = estado.tick + ticksDe(preset.intervaloAtaqueMs);
+      // D-173: o companheiro do Mestre de Feras ataca mais vezes.
+      ia.proximoAtaqueTick = estado.tick + ticksDe(preset.intervaloAtaqueMs / ritmoDoCompanheiro(estado, ctx, e));
       ia.ataquesFeitos++;
     }
     return;

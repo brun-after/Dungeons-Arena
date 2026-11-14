@@ -1,6 +1,7 @@
 import { ehRetorno } from './buffs-de-leitura';
 import { aoSerAtingido, noAr } from './movimento-classe';
 import { golpeAlcancaOPet, loboIntercepta, marcarACaca, petDoCompanheiro, reflexoDoPet } from './pets';
+import { aposGolpeDoCompanheiro, golpeDoCompanheiro, leituraDoCompanheiro } from './pets-estilos';
 import { retirarVida } from './reserva-necromante';
 import { multiplicadorDardo, registrarDardo } from './concentracao-arcana';
 import { encherFuria } from './frenesi';
@@ -148,7 +149,9 @@ export function aplicarImpacto(
       saida.push({ t: 'esquivou', tick: estado.tick, acaoId: impacto.acaoId, atorId: impacto.fonte.id, alvoId: alvo.id });
       return;
     }
-    const fonte = { ...impacto.fonte, multDano: impacto.fonte.multDano * reflexoDoPet(ctx, pet, dono.nivel) };
+    // D-173: no Sobrevivente, chega menos ao dono.
+    const menos = Math.min(80, leituraDoCompanheiro(estado, ctx, alvo, 'reflexoMenosPct'));
+    const fonte = { ...impacto.fonte, multDano: impacto.fonte.multDano * reflexoDoPet(ctx, pet, dono.nivel) * (1 - menos / 100) };
     aplicarImpacto(estado, ctx, dono, { ...impacto, fonte }, saida);
     return;
   }
@@ -180,6 +183,8 @@ export function aplicarImpacto(
   const tick = estado.tick;
   // Marco 24 (D-095): a sintonia da sombra do Aventureiro deixa crítico o primeiro golpe do falcão.
   fonte = criticoDoFalcao(ctx, atacante, hab, fonte, tick);
+  // D-173: o golpe do companheiro do Implacável volta (mais dano).
+  if (atacante?.invocacao?.companheiro) fonte = { ...fonte, multDano: fonte.multDano * golpeDoCompanheiro(estado, ctx, atacante) };
   const hpAntes = alvo.hp;
   let dano = 0;
   let absorvidoEscudo = 0;
@@ -255,6 +260,8 @@ export function aplicarImpacto(
       if (atacante && atacante !== alvo) aoLevarGolpe(estado, alvo, (id) => habilidadeDoAtor(ctx, alvo, id, tick));
       // D-164: ser atingido tira o bônus de viagem do movimento da classe.
       if (atacante && atacante !== alvo) aoSerAtingido(estado, alvo, saida);
+      // D-173: a cura, o empurrão e a runa que os estilos do dono dão ao golpe do companheiro.
+      if (atacante?.invocacao?.companheiro) aposGolpeDoCompanheiro(estado, ctx, atacante, alvo, hab, saida);
     }
   }
   if (hab.formulaCura !== null) {
