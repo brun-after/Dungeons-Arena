@@ -47,7 +47,12 @@
       "danoMult": 0.95,
       "falcaoDanoMult": 1.5,
       "falcaoPassoMs": 200,
-      "falcao": { "distanciaAlvo": 3, "raioPasseio": 3, "raioColeta": 7, "passeioMs": 1200, "raioCombate": 8, "reflexoInicioPct": 80, "reflexoFimPct": 60, "pousoMs": 3000, "velocidadeAtaque": { "n1": 1, "n20": 5, "n30": 7 }, "velocidadeDash": { "n1": 2, "n20": 6, "n30": 9 }, "atributoBonusPorPontoPct": 1.5, "atributoBonusMaxPct": 30, "vigiaCelulas": 8, "vigiaRaio": 0.6 }
+      "falcao": { "distanciaAlvo": 3, "raioPasseio": 3, "raioColeta": 7, "passeioMs": 1200, "raioCombate": 8, "reflexoInicioPct": 80, "reflexoFimPct": 60, "pousoMs": 3000, "velocidadeAtaque": { "n1": 1, "n20": 5, "n30": 7 }, "velocidadeDash": { "n1": 2, "n20": 6, "n30": 9 }, "atributoBonusPorPontoPct": 1.5, "atributoBonusMaxPct": 30, "vigiaCelulas": 8, "vigiaRaio": 0.6 },
+      "pets": {
+        "lobo": { "reflexoPct": [70, 50], "passoMs": 260, "interceptarMs": 3000 },
+        "urso": { "reflexoPct": [60, 30], "passoMs": 420, "provocarMs": 3000, "provocarRaio": 2 }
+      },
+      "gritoDeFera": { "baseMs": 500, "porNivelMs": 100, "maxMs": 4000 }
     },
     "arqueiro": {
       "secundariosMult": 1.15, "alcanceAndandoPct": 80,
@@ -77,14 +82,11 @@
     "maxPassosToque": 60
   },
   "movimentoClasse": {
-    "viagemPct": 60,
-    "viagemPesadaPct": 30,
-    "voo": { "preparoMs": 1000, "danoPct": [30, 50], "conjuracaoPct": [150, 120], "lentidaoPct": [50, 20] },
-    "montaria": { "danoPct": [60, 80], "conjuracaoPct": [140, 115], "danoRecebidoPct": [125, 110] },
-    "montariaPesada": { "danoPct": [75, 90], "conjuracaoPct": [125, 110], "danoRecebidoPct": [100, 95] },
-    "nevoa": { "lentidaoPct": 40, "servosRaio": 5, "duracaoAoEntrarEmCombateMs": 1500 },
-    "marcha": { "combatePct": 60, "furiaPorS": 8 },
-    "preparoPadraoMs": 300
+    "viagemPct": 60, "viagemPesadaPct": 30,
+    "salto": { "velocidade": 16, "raio": 2, "atordoarMs": 1000 },
+    "nevoa": { "servosRaio": 5 },
+    "posto": { "raioDespertar": 8 },
+    "ancoraPreparoMs": 1000
   },
   "colisao": {
     "jogadorBloqueiaJogador": false,

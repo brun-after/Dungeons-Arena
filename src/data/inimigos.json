@@ -400,6 +400,42 @@
       }
     },
     {
+      "id": "lobo_companheiro",
+      "nome": "Lobo",
+      "hpBase": 1,
+      "hesitacaoS": 0,
+      "deteccao": 6,
+      "xp": 0,
+      "modelo": "lobo_companheiro",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 0,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 1200,
+      "invocacao": {
+        "comportamento": "companheiro"
+      }
+    },
+    {
+      "id": "urso_companheiro",
+      "nome": "Urso",
+      "hpBase": 1,
+      "hesitacaoS": 0,
+      "deteccao": 6,
+      "xp": 0,
+      "modelo": "urso_companheiro",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 0,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 1200,
+      "invocacao": {
+        "comportamento": "companheiro"
+      }
+    },
+    {
       "id": "esqueleto_profano",
       "nome": "Esqueleto profano",
       "hpBase": 35,

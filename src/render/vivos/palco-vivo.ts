@@ -6,6 +6,7 @@
 // personagens a 10 ms por quadro e 40 a 23 ms com uma passada só (contra 32 ms para 20 com uma passada por personagem).
 // Enquanto o modelo carrega (ou se falhar), quem pede recebe null e o atlas pré-renderizado continua.
 
+import { assar, CLIPES_DA_FERA, FERAS_VIVAS } from './feras-vivas';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -54,9 +55,20 @@ interface Classe {
   /** 06/11/2026: o corpo acima do chão (anda no ar) e o ciclo do andar mais longo (cada passo cobre `passada` vezes o chão). */
   elevacao?: number | undefined;
   passada?: number | undefined;
+  /** Marco 40 (13/11/2026, D-165): as feras de geometria (o lobo e o urso do Aventureiro), sem GLB: o corpo e os clipes assados. */
+  proc?: (() => { grupo: THREE.Object3D; animacoes: THREE.AnimationClip[] }) | undefined;
 }
 const HUMANO: Classe['clipes'] = { parado: 'Idle_Loop', andar: 'Walk_Loop', golpe: 'Sword_Attack', conjurar: 'Spell_Simple_Shoot', morte: 'Death01' };
 const MAGIA: Classe['clipes'] = { ...HUMANO, golpe: 'Spell_Simple_Shoot' };
+/** Marco 40 (D-165): o lobo e o urso do Aventureiro, de geometria (feras-vivas.ts), com os clipes assados. */
+const FERAS: Record<string, Classe> = Object.fromEntries(Object.entries(FERAS_VIVAS).map(([nome, criar]) => [nome, {
+  glb: '', altura: nome === 'urso_companheiro' ? 1.2 : 0.95, largura: 1, veste: null, arma: null,
+  clipes: { parado: CLIPES_DA_FERA.parado, andar: CLIPES_DA_FERA.andar, golpe: CLIPES_DA_FERA.golpe, conjurar: CLIPES_DA_FERA.conjurar, morte: CLIPES_DA_FERA.morte },
+  proc: () => {
+    const fera = criar();
+    return { grupo: fera.grupo, animacoes: assar(fera) };
+  },
+} satisfies Classe]));
 /** As alturas e os clipes como nas receitas do atlas (tools/sprites/receitas.ts). */
 const classe = (glb: string, altura: number, clipes: Classe['clipes']): Classe => ({ glb, altura, largura: 1, clipes, veste: null, arma: null });
 const CLASSES: Record<string, Classe> = {
@@ -65,6 +77,7 @@ const CLASSES: Record<string, Classe> = {
   arqueiro: classe('arqueiro', 1.08, MAGIA),
   necromante: classe('necromante', 1.14, MAGIA),
   aventureiro: classe('aventureiro', 1.12, HUMANO),
+  ...FERAS,
   // Os chefes humanoides (chefes-vivos.ts), pela chave `chefe:<preset>`.
   ...Object.fromEntries(Object.entries(CHEFES).map(([preset, c]) => [`chefe:${preset}`, {
     glb: c.glb, altura: c.altura, largura: c.largura ?? 1, clipes: { ...HUMANO, parado: c.parado, golpe: c.golpe }, veste: c.veste, arma: c.arma, tingir: c.tingir,
@@ -284,7 +297,7 @@ export class PalcoVivo {
   /** Há modelo em tempo real para a classe? */
   suporta(modelo: string): boolean {
     const c = Object.hasOwn(CLASSES, modelo) ? CLASSES[modelo] : undefined;
-    return !!c && Object.keys(URLS).some((u) => u.endsWith(`/${c.glb}.glb`));
+    return !!c && (!!c.proc || Object.keys(URLS).some((u) => u.endsWith(`/${c.glb}.glb`)));
   }
 
   private dimensionar(linhas: number): void {
@@ -314,6 +327,12 @@ export class PalcoVivo {
     if (b && b !== 'carregando' && b !== 'falhou') return b;
     if (b) return null;
     const classe = Object.hasOwn(CLASSES, modelo) ? CLASSES[modelo] : undefined;
+    if (classe?.proc) {
+      const { grupo, animacoes } = classe.proc();
+      const pronta = this.montarBase(modelo, classe, grupo, animacoes);
+      this.bases.set(modelo, pronta);
+      return pronta;
+    }
     const url = classe && Object.entries(URLS).find(([c]) => c.endsWith(`/${classe.glb}.glb`))?.[1];
     if (!url) {
       this.bases.set(modelo, 'falhou');

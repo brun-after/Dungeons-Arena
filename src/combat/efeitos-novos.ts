@@ -14,6 +14,7 @@ import { encherFuria } from './frenesi';
 import { anotarDeslocamento, aplicarEfeito, imuneADano, sofrerDano, type OrigemDoEfeito } from './efeitos';
 import { arremessar, avancar, teleportar } from './efeitos-instantaneos';
 import { agendarFase } from './fases';
+import { duracaoDoGrito, trocarPet } from './pets';
 import { acumularFuria } from './furia';
 import { chebyshev } from './geometria';
 import { registrarParticipacao } from './participacao';
@@ -84,6 +85,14 @@ export function aplicarInstantaneoNovo(
       saida.push({ t: 'reviveu', tick, id: caido.id });
       break;
     }
+    case 'trocar_companheiro':
+      // Marco 40 (13/11/2026, D-165): a skill fixa da tecla 1 do Aventureiro.
+      trocarPet(estado, alvo, saida);
+      break;
+    case 'grito_de_fera':
+      // D-165: o Rosnar (atordoa) e o Rugido (apavora): 0,5 s em quem tem nível igual ou maior, +0,1 s por nível a menos.
+      if (ef.interno) aplicarEfeito(estado, ctx, alvo, { ...ef.interno, duracaoMs: duracaoDoGrito(ctx, buscarEntidade(estado, origem.id), alvo) }, origem, null, saida);
+      break;
     case 'invisivel':
       alvo.invisivelAteTick = Math.max(alvo.invisivelAteTick, tick + ticksDe(ef.duracaoMs));
       break;

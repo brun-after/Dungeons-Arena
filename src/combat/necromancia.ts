@@ -77,7 +77,8 @@ function erguer(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade, tipo
  */
 function trazerDeVolta(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade, saida: EventoSimulacao[]): void {
   for (const morto of estado.entidades) {
-    if (!vivo(morto) || morto.invocacao?.donoId !== dono.id || !morto.invocacao.necromancia) continue;
+    // Marco 40 (D-164): o servo do Posto dos Mortos fica onde foi deixado.
+    if (!vivo(morto) || morto.invocacao?.donoId !== dono.id || !morto.invocacao.necromancia || morto.invocacao.posto) continue;
     if (chebyshev(dono, morto) <= ctx.balance.necromancia.distanciaRetorno) continue;
     const lugar = lugarPerto(estado, ctx, dono);
     if (!lugar) return;

@@ -1422,6 +1422,22 @@
       "classe": "aventureiro"
     },
     {
+      "id": "livro_grito_do_falcao",
+      "nome": "Livro: Grito do falcão",
+      "tipo": "livro",
+      "descricao": "Ensina Grito do falcão (rank 1). Só Aventureiro pode ler.",
+      "icone": "livro",
+      "raridade": "raro",
+      "valorBase": 110,
+      "slotPadrao": null,
+      "nivelMinimo": 1,
+      "bonusAtributos": {},
+      "bonusDefesa": 0,
+      "dropavel": true,
+      "ensina": "grito_do_falcao",
+      "classe": "aventureiro"
+    },
+    {
       "id": "livro_rasante",
       "nome": "Livro: Rasante",
       "tipo": "livro",

@@ -184,8 +184,10 @@ export type EventoSimulacao =
   | { t: 'estiloDespertou'; tick: number; id: EntidadeId; estilo: string }
   /** Marco 39 (D-149): o personagem antigo passou pela tela de atualização. */
   | { t: 'personagemAtualizado'; tick: number; id: EntidadeId; sistema: number }
-  /** Marco 40 (13/11/2026, D-164): o movimento da classe (ativo = trocado no G; início, fim ou recusado). */
-  | { t: 'movimentoClasse'; tick: number; id: EntidadeId; mov: string; fase: 'ativo' | 'inicio' | 'fim' | 'recusado'; motivo?: string }
+  /** Marco 40 (13/11/2026, D-164): o movimento da classe (ativo = trocado no G; início, fim, recusado ou o bônus perdido). */
+  | { t: 'movimentoClasse'; tick: number; id: EntidadeId; mov: string; fase: 'ativo' | 'inicio' | 'fim' | 'recusado' | 'perdeu'; motivo?: string }
+  /** Marco 40 (D-165): o Aventureiro trocou de companheiro. */
+  | { t: 'companheiroTrocado'; tick: number; id: EntidadeId; pet: 'falcao' | 'lobo' | 'urso' }
   | { t: 'comboFeito'; tick: number; id: EntidadeId; combo: string; alvoId: EntidadeId | null; x?: number; y?: number; origemX?: number; origemY?: number; atorX?: number; atorY?: number; miraX?: number; miraY?: number }
   | { t: 'buffInteragiu'; tick: number; id: EntidadeId; regra: string }
   // Marco 18 (D-070): missões, origens raras, forja e o diário.

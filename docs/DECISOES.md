@@ -1,9 +1,10 @@
 # Decisões de projeto
 
-**Versão:** 1.11 · **Data:** 13/11/2026
+**Versão:** 1.12 · **Data:** 13/11/2026
 
 > **Histórico**
-> - **1.11 (13/11/2026)**: D-164: o movimento da classe (três mecânicas por classe, Shift e G), com o Voo Arcano, a Tirolesa, a Marcha de Guerra, a Forma de Névoa e o Lobo para viajar e limitados em combate.
+> - **1.12 (13/11/2026)**: D-165: os companheiros do Aventureiro (falcão, lobo e urso), a Troca de companheiro fixa na tecla 1 e as skills de classe pelo companheiro ativo (o Rosnar e o Rugido).
+> - **1.11 (13/11/2026)**: D-164: o movimento da classe (três mecânicas por classe, Shift e G), o alcance que cresce com o nível, as viagens limitadas por espaço e tempo, o Salto de Guerra e o Posto dos Mortos.
 > - **1.10 (13/11/2026)**: D-163: os combos de papel (17, com o desdobramento pelo eixo) e os 30 combos assinados das classes.
 > - **1.09 (13/11/2026)**: D-162: as reações elementais viram a matriz de 36 pares das 9 pontas (o golpe físico reage), com o intervalo por alvo e o estado petrificado.
 > - **1.08 (13/11/2026)**: D-161: as leituras de estilo, as fusões e as famílias fazem o que o texto promete (ajustes da skill, efeitos ao abater, etapas internas, estados novos), o veículo da classe nas ultimates, o Renascer que levanta, a Vontade contra o controle e as armadilhas postas no campo.
@@ -4935,28 +4936,72 @@ Mundo pede viagem longa, e cada classe precisa de um jeito próprio de atravess�
 
 **Decisão.**
 - **Três mecânicas por classe** (`data/movimentos.json`), liberadas nos níveis 1, 10 e 20, uma ativa por vez. O Shift
-  usa a ativa (no rumo das teclas, ou no de agora) e o G troca. Os marcos 30/50/70/90 mudam os números (cargas,
-  alcance, preparo). O Z passa a escolher o alvo anterior (antes Shift+Q). Comandos `movimentoClasse` e
-  `trocarMovimento`.
-- **Longa distância (nível 1)**, rápida fora de combate (`balance.movimentoClasse.viagemPct`, 60%) e limitada nele:
-  - **Mago, Voo Arcano**: decola em 1 s (0,5 s no 30). Voando: sem ataque básico; as magias batem 30% (50% no 100) e
-    conjuram 50% mais devagar (20% no 100); em combate o voo fica 50% mais lento (20% no 100). Não pega armadilha,
-    rastro, campo no chão nem golpe de perto de quem está no chão. Passa por cima dos telhados das casas, mas de lá
-    não ataca nem pousa.
-  - **Arqueiro, Tirolesa**: corre em linha reta (14 células/s) até bater numa parede ou relevo, sem âncora nem queda;
-    não muda de rumo e passa pelos corpos. Na linha, só o ataque básico. 30 células (40 no 90), 14 em combate (18 no 50).
-  - **Guerreiro, Marcha de Guerra**: fora de combate, viagem; em combate corre 60% a mais, mas come 8 de fúria por
-    segundo (4 no 70) e acaba ao atacar ou sem fúria.
-  - **Necromante, Forma de Névoa**: vira névoa com os servos a até 5 células — fora de combate, todos viajam rápidos e
-    intocáveis; em combate, 1,5 s intocável (2,5 s no 30) e 40% mais lento. Ao entrar em combate dura mais 1,5 s.
-    Atacar desfaz.
-  - **Aventureiro, Lobo**: monta em 0,5 s. Montado bate 60% (80% no 100), conjura 40% mais devagar (15% no 100), apanha
-    25% mais (10% no 100) e cai no primeiro golpe (segura um golpe a partir do 50). Lutar desmontado compensa.
-- **As curtas** (níveis 10 e 20): Piscar e Âncora Rúnica (Mago), Salto para Trás e Camuflagem (Arqueiro), Arremetida e
-  Salto de Guerra (Guerreiro), Troca de Corpo com um servo (Necromante), Falcão Carrega e Urso (Aventureiro; o urso é
-  a montaria pesada: viagem de 30%, perde menos dano e não derruba).
-- **Estado** `Entidade.movimentoClasse` (a ativa, as cargas em recarga, o modo em curso, a âncora), com clone explícito.
-  O núcleo emite `movimentoClasse`; o desenho sobe quem voa e deixa a névoa translúcida (`render/movimento-visual.ts`).
+  usa a ativa (no rumo das teclas, ou no de agora) e o G troca. O Z passa a escolher o alvo anterior (antes Shift+Q).
+  Comandos `movimentoClasse` e `trocarMovimento`.
+- **O alcance cresce com o nível**: `crescimento` células a cada 10 níveis. As de longa distância vão de 10 células no
+  nível 1 a 20 no 100; as curtas ganham 0,3 por 10 níveis (a Âncora, 2,5; a Troca de Corpo, 0,8).
+- **O limite é de espaço e de tempo, não de força.** Os modos de viagem (voo, montaria, névoa, marcha) duram o tempo
+  que a entidade levaria para andar o alcance na velocidade de agora, sem o bônus e sem o arranque; com o bônus
+  (`viagemPct`, 60%) cobrem mais. Atacar ou ser atingido tira o bônus até o modo acabar (o modo segue). Assim, quem
+  luta durante a viagem não estende o combate nem fica mais forte. Nada mais limita: sem corte de dano ou de
+  conjuração, sem lentidão em combate, sem queda da montaria, sem consumo de fúria.
+- **Longa distância (nível 1):**
+  - **Mago, Voo Arcano**: voa por cima de tudo, inclusive dos telhados das casas. Não pega armadilha, rastro nem campo
+    no chão, nem golpe de perto de quem está no chão. Não pousa num telhado; quando o voo acaba sobre um, desce na
+    célula livre mais perto.
+  - **Arqueiro, Tirolesa**: corre em linha reta (14 células/s) até bater numa parede ou relevo, ou o alcance acabar;
+    sem âncora nem queda, não muda de rumo e passa pelos corpos.
+  - **Guerreiro, Salto de Guerra**: salta o alcance (16 células/s) por cima do que houver no meio e cai na célula mais
+    longe que cabe; na queda, atordoa por 1 s os inimigos a até 2 células. No ar, não pega o que está no chão.
+  - **Necromante, Forma de Névoa**: vira névoa com os servos a até 5 células; todos ficam rápidos e intocáveis enquanto
+    o bônus vale.
+  - **Aventureiro, Lobo**: montaria; o bônus sai ao atacar ou ser atingido.
+- **As outras:** Piscar e Âncora Rúnica (Mago), Salto para Trás e Camuflagem (Arqueiro), Arremetida e Marcha de Guerra
+  (Guerreiro; a marcha agora é um modo de viagem como os outros), Troca de Corpo e Posto dos Mortos (Necromante),
+  Falcão Carrega e Urso (Aventureiro; o urso é a montaria pesada: viagem de 30%, e ser atingido não tira o bônus).
+- **Posto dos Mortos** (catálogo 1.3, no lugar da Possessão): deixa no lugar o servo com a vida mais cheia (empate: um
+  ao acaso). Com o Necromante a mais de 8 células, o servo volta ao ponto, fica parado, oculto e intocável e não volta
+  sozinho para o dono; com ele perto, luta (emboscada). Com os postos cheios, o Shift troca de corpo com o servo do
+  posto, a qualquer distância. Marcos: 30, o servo parado recupera 3% da vida por segundo; 50, dois postos; 70, o servo
+  chega à troca com escudo; 90, os outros servos se reúnem no Necromante ao trocar. Com dois postos, a troca vai para o
+  mais longe (o comando não leva o cursor).
+- **Estado** `Entidade.movimentoClasse` (a ativa, as cargas em recarga, o modo em curso, a âncora) e
+  `DadosInvocacao.posto`, com clone explícito. O núcleo emite `movimentoClasse` (início, fim, recusa, bônus perdido); o
+  desenho sobe quem voa, faz o arco do salto e deixa a névoa translúcida (`render/movimento-visual.ts`).
 
-**Fica para depois.** A Possessão do Necromante e a mordida do lobo; o botão no celular e o indicador no HUD; o efeito
-visual próprio de cada mecânica entra no retrabalho visual da etapa 4.
+**Fica para depois.** A mordida do lobo; o botão no celular e o indicador no HUD; o efeito visual próprio de cada
+mecânica entra no retrabalho visual da etapa 4.
+
+## D-165 — Marco 40: os companheiros do Aventureiro (13/11/2026)
+
+**Contexto.** O Grimório (seção "Os companheiros do Aventureiro") prevê três companheiros, um ativo por vez, como o
+veículo das skills de classe. Até aqui só existia o falcão; o lobo e o urso eram só montarias.
+
+**Decisão.**
+- **Troca de companheiro** (`troca_de_companheiro`): skill de classe fixa na tecla 1 do Aventureiro (`classes.json →
+  fixa`). O jogador não a tira nem a move; a ficha a devolve à tecla 1 (`fixarSkillDaClasse`), e o que estava lá vai
+  para a tecla 2, se ela estiver vazia. Troca do falcão para o lobo, do lobo para o urso e do urso de volta ao falcão
+  (recarga de 6 s). O companheiro ativo fica na bolsa (`Bolsa.pet`, ausente = falcão).
+- **O lobo e o urso são companheiros de combate** (`lobo_companheiro`, `urso_companheiro`), como o falcão: a vida é a
+  do dono, as skills de classe saem deles e cada um passa ao dono uma fração do golpe que leva:
+  - **Falcão**: no ar, só projéteis o alcançam; passa o reflexo de sempre (80% a 60%).
+  - **Lobo**: rápido, colado no dono; golpes de perto e projéteis o alcançam; passa 70% a 50%; a cada 3 s toma para si
+    um golpe de perto dado no dono.
+  - **Urso**: lento; tudo o alcança; passa 60% a 30%; a cada 3 s provoca os inimigos a até 2 células.
+  - Números em `balance.json → ajustesClasses.aventureiro.pets`. O urso usa o modelo do troll até o retrabalho visual.
+- **Cada skill de classe muda com o companheiro**: as variantes `pet_lobo` e `pet_urso` (o falcão é a skill como está).
+  As variantes passam a poder trocar o nome, a forma de atingir (`forma`) e todos os efeitos (`substituir`).
+  - **Grito**: o falcão expõe um alvo; o lobo **rosna** em volta dele e atordoa; o urso **ruge** em volta dele e apavora
+    (o inimigo foge na direção oposta, sem atacar). O efeito `grito_de_fera` dá 0,5 s em quem tem nível igual ou maior
+    que o Aventureiro e 0,1 s a mais por nível que o alvo tem a menos, até 4 s (`gritoDeFera`).
+  - **Ataque do companheiro**: o lobo morde, prende e salta para outros alvos; o urso esmaga, atordoa mais e empurra.
+  - **Ordem: Agarrar**: o lobo arrasta até você; o urso segura no lugar.
+  - **Armadilha**: a do lobo faz sangrar; a do urso atordoa.
+  - **Carga montada**: a do lobo vai mais longe; a do urso é mais lenta, bate mais e empurra.
+  - **Chamado da matilha**: o lobo chama três lobos por menos tempo; o urso chama um que fica mais e dá escudo.
+  - **Instinto de sobrevivência**: com o lobo, dispara (corre mais); com o urso, resiste mais e ganha escudo.
+- **O Grito volta ao kit** do Aventureiro (saíra na D-159), com livro e as leituras dos cinco estilos. Com a Troca na
+  tecla 1, o Aventureiro escolhe uma skill de classe só, na tecla 2; as iniciais são a Troca e o Ataque do companheiro.
+
+**Fica para depois.** O G trocar o companheiro fora de combate (hoje o G troca só o movimento) e o modelo próprio do
+urso.

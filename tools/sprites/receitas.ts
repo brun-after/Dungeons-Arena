@@ -261,6 +261,9 @@ export const RECEITAS: Receita[] = [
   },
   // Os bichos: geometria feita na ferramenta (criaturas3d.ts, feras3d.ts), animada por rotação e deformação.
   { nome: 'lobo', corpo: 'proc:lobo', altura: 0.78, animacoes: null, exposicao: 1.3, quadro: { largura: 1.8, altura: 1.6, baixo: 0.5 } },
+  // Marco 40 (13/11/2026, D-165): o lobo e o urso do Aventureiro (src/render/vivos/feras-vivas.ts), reserva do 3D em tempo real.
+  { nome: 'lobo_companheiro', corpo: 'proc:lobo_companheiro', altura: 0.95, animacoes: null, exposicao: 1.3, quadro: { largura: 2, altura: 1.8, baixo: 0.6 } },
+  { nome: 'urso_companheiro', corpo: 'proc:urso_companheiro', altura: 1.2, animacoes: null, exposicao: 1.3, quadro: { largura: 2.4, altura: 2.2, baixo: 0.7 } },
   { nome: 'aranha', corpo: 'proc:aranha', altura: 0.55, animacoes: null, exposicao: 1.8, quadro: { largura: 1.8, altura: 1.4, baixo: 0.5 } },
   { nome: 'falcao', corpo: 'proc:falcao', altura: 0.216, animacoes: null, exposicao: 1.5 },
   // 06/11/2026: o falcão da skin Mágico (tools/sprites/magico3d.ts): a cartola, a cartola virada com a varinha e o pombo.

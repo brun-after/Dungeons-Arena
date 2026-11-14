@@ -39,7 +39,11 @@ export interface Balance {
     mago: { inicialPct: number; intermediarioPct: number; nivelIntermediario: number; fimIntermediario: number; nivelFinal: number; dardoInicioMult: number; dardoRecuperacaoNivel: number; dardoPlenoNivel: number; concentracaoAcertos: number; concentracaoJanelaMs: number; concentracaoExtraPct: number;
       /** Marco 22 (D-089): encarnação elemental. */
       encarnacao: { fogoDanoPct: number; fogoIntervaloMs: number; fogoRaio: number; fogoQueimaValor: number; fogoQueimaMs: number; geloReducaoPct: number; geloResfriarMs: number; raioVelocidadePct: number; duracaoMs: number; lentidaoPct: number; duplaJanelaMs: number; duplaDuracaoMs: number } };
-    aventureiro: { nivelCorte: number; danoMult: number; /** Marco 24 (D-094): dano das skills do falcão. */ falcaoDanoMult: number; /** Marco 22 (D-089): passo do falcão. */ falcaoPassoMs: number; /** D-091: IA do falcão. */ falcao: { distanciaAlvo: number; raioPasseio: number; raioColeta: number; passeioMs: number; raioCombate: number; /** Marco 24 (D-098): o dano no falcão que chega ao dono, do nível 1 ao máximo, e a espera até pousar no ombro. */ reflexoInicioPct: number; reflexoFimPct: number; pousoMs: number; /** Marco 25 (D-102): velocidades do ataque e do dash (por nível) e o bônus do atributo; a vigia dos projéteis. */ velocidadeAtaque: CurvaPorNivel; velocidadeDash: CurvaPorNivel; atributoBonusPorPontoPct: number; atributoBonusMaxPct: number; vigiaCelulas: number; vigiaRaio: number } };
+    aventureiro: { nivelCorte: number; danoMult: number; /** Marco 24 (D-094): dano das skills do falcão. */ falcaoDanoMult: number; /** Marco 22 (D-089): passo do falcão. */ falcaoPassoMs: number; /** D-091: IA do falcão. */ falcao: { distanciaAlvo: number; raioPasseio: number; raioColeta: number; passeioMs: number; raioCombate: number; /** Marco 24 (D-098): o dano no falcão que chega ao dono, do nível 1 ao máximo, e a espera até pousar no ombro. */ reflexoInicioPct: number; reflexoFimPct: number; pousoMs: number; /** Marco 25 (D-102): velocidades do ataque e do dash (por nível) e o bônus do atributo; a vigia dos projéteis. */ velocidadeAtaque: CurvaPorNivel; velocidadeDash: CurvaPorNivel; atributoBonusPorPontoPct: number; atributoBonusMaxPct: number; vigiaCelulas: number; vigiaRaio: number };
+      /** Marco 40 (D-165): o lobo e o urso (o dano que chega ao dono, nível 1 e pleno; o passo; o golpe que o lobo toma; a provocação do urso). */
+      pets: { lobo: { reflexoPct: [number, number]; passoMs: number; interceptarMs: number }; urso: { reflexoPct: [number, number]; passoMs: number; provocarMs: number; provocarRaio: number } };
+      /** D-165: o Rosnar e o Rugido (base, por nível de diferença e teto, em ms). */
+      gritoDeFera: { baseMs: number; porNivelMs: number; maxMs: number } };
     arqueiro: { secundariosMult: number; /** 05/11/2026 (D-132): o alcance que sobra andando, em %. */ alcanceAndandoPct: number; /** Marco 22 (D-089): Mira firme. */ mira: { cargaMs: number; reducaoPorDestrezaPct: number; reducaoMaxPct: number; d20Minimo: number } };
     /**
      * 06/11/2026 (D-135): o Necromante bate mais com as próprias mãos e se cura com uma parte do dano que os mortos
@@ -185,12 +189,12 @@ export interface Balance {
   movimentoClasse: {
     viagemPct: number;
     viagemPesadaPct: number;
-    voo: { preparoMs: number; danoPct: [number, number]; conjuracaoPct: [number, number]; lentidaoPct: [number, number] };
-    montaria: { danoPct: [number, number]; conjuracaoPct: [number, number]; danoRecebidoPct: [number, number] };
-    montariaPesada: { danoPct: [number, number]; conjuracaoPct: [number, number]; danoRecebidoPct: [number, number] };
-    nevoa: { lentidaoPct: number; servosRaio: number; duracaoAoEntrarEmCombateMs: number };
-    marcha: { combatePct: number; furiaPorS: number };
-    preparoPadraoMs: number;
+    /** Marco 40 (D-164): o salto do Guerreiro (células por segundo, o raio e o atordoamento da queda). */
+    salto: { velocidade: number; raio: number; atordoarMs: number };
+    nevoa: { servosRaio: number };
+    /** O servo do Posto dos Mortos volta a lutar com o Necromante a até estas células. */
+    posto: { raioDespertar: number };
+    ancoraPreparoMs: number;
   };
   efeitos: {
     intervaloPeriodicoMs: number;

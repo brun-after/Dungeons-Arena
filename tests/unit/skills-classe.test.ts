@@ -9,7 +9,8 @@ describe('skills de classe e ultimates (Grimório v1.2)', () => {
   it('cada classe tem as 8 do Grimório entre as 6 exclusivas e as 2 que saíram, e a geral inicial', () => {
     for (const c of catalogo.classes) {
       const classe = CONTEUDO.classes.get(c.id);
-      expect([...(classe?.exclusivas ?? []), ...(classe?.saidas ?? [])].sort(), c.id).toEqual([...c.skills].sort());
+      // Marco 40 (D-165): a Troca de companheiro do Aventureiro fica fora do catálogo do Grimório v1.2.
+      expect([...(classe?.exclusivas ?? []), ...(classe?.saidas ?? [])].filter((id) => id !== classe?.fixa).sort(), c.id).toEqual([...c.skills].sort());
       expect(classe?.geralInicial, c.id).toBe(c.geralInicial);
       expect(new Set(c.skills).size).toBe(8);
     }
@@ -19,7 +20,7 @@ describe('skills de classe e ultimates (Grimório v1.2)', () => {
     const todas = catalogo.classes.flatMap((c) => c.skills);
     expect(new Set(todas).size).toBe(todas.length);
     for (const c of catalogo.classes) {
-      for (const id of c.skills.filter((x) => CONTEUDO.classes.get(c.id)?.exclusivas.includes(x))) {
+      for (const id of c.skills.filter((x) => CONTEUDO.classes.get(c.id)?.exclusivas.includes(x) && x !== CONTEUDO.classes.get(c.id)?.fixa)) {
         const livro = CONTEUDO.itens.get(`livro_${id}`);
         expect(livro?.ensina, id).toBe(id);
         expect(livro?.classe, id).toBe(c.id);

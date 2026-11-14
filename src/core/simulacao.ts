@@ -14,6 +14,7 @@ import { processarCampos } from '../combat/tatica';
 //   7. gatilhos por célula     8. mortes e respawns  9. periódicos de 1 Hz e spawner
 
 import { atualizarAparencias, processarBuffsArmados, usarRefugio } from '../progression/buffs';
+import { processarPets } from '../combat/pets';
 import { processarMovimentoClasse, trocarMovimento, usarMovimento } from '../combat/movimento-classe';
 import { alvoOfensivoValido, iniciarAcao, processarAcoes, processarAutoAtaque, usarUltimate } from '../combat/acao';
 import { dispararArmadilhaEm, processarEfeitos, processarGatilhosDeEfeito } from '../combat/efeitos';
@@ -91,6 +92,8 @@ export function simular(
   processarSinergiasPassivas(estado, ctx, saida);
   processarCampos(estado, ctx, saida);
   processarMovimentoClasse(estado, ctx, saida);
+  // Marco 40 (D-165): o urso provoca quem chega perto.
+  processarPets(estado, ctx, saida);
   processarPantanos(estado, ctx, saida);
   regenerarRecursos(estado, ctx);
   processarInteracoes(estado, ctx, saida, (a, alvo) => { dispararArmadilhaEm(estado, ctx, a, alvo, saida); });

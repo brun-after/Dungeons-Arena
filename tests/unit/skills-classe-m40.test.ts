@@ -16,7 +16,8 @@ function obter<T>(v: T | null | undefined): T {
 describe('as skills de classe (D-159)', () => {
   it('cada classe tem 6, com papel e uma leitura por estilo da classe, na ordem', () => {
     for (const c of CONTEUDO.classes.values()) {
-      expect(c.exclusivas, c.id).toHaveLength(6);
+      // Marco 40 (D-165): o Aventureiro tem 8 — a Troca de companheiro (fixa na tecla 1) e o Grito, que voltou.
+      expect(c.exclusivas, c.id).toHaveLength(c.id === 'aventureiro' ? 8 : 6);
       const estilos = obter(CONTEUDO.estilos.get(c.id)).map((e) => e.id);
       for (const id of c.exclusivas) {
         const def = obter(CONTEUDO.definicoes.get(id));
@@ -32,7 +33,7 @@ describe('as skills de classe (D-159)', () => {
 
   it('as que saíram ficam da classe, fora do kit e sem livro', () => {
     for (const c of CONTEUDO.classes.values()) {
-      expect(c.saidas, c.id).toHaveLength(2);
+      expect(c.saidas, c.id).toHaveLength(c.id === 'aventureiro' ? 1 : 2);
       for (const id of c.saidas) {
         expect(c.exclusivas).not.toContain(id);
         expect([...CONTEUDO.itens.values()].some((i) => i.ensina === id)).toBe(false);

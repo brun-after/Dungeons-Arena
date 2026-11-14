@@ -85,6 +85,9 @@ export const MODELOS = {
     desenhar: bipede({ pele: 0xc9b39b, roupa: 0x7f8c8d, olho: 0x222222, perna: 15, tronco: 14, ombro: 8, quadril: 6.5, cabeca: 7, arma: 'clava' }),
   },
   lobo: { estilo: 'quique', quadros: QUADROS_MEMBROS, membros: true, desenhar: lobo(0x7f8a99) },
+  // Marco 40 (13/11/2026, D-165): o lobo e o urso do Aventureiro (o desenho de reserva; o principal é o 3D, feras-vivas.ts).
+  lobo_companheiro: { estilo: 'quique', quadros: QUADROS_MEMBROS, membros: true, desenhar: lobo(0x7d6c5a) },
+  urso_companheiro: { estilo: 'marcha', quadros: QUADROS_MEMBROS, membros: true, desenhar: lobo(0x5e3c25) },
   aranha: { estilo: 'quique', quadros: QUADROS_MEMBROS, membros: true, desenhar: aranha(0x3d2b4f) },
   slime: { estilo: 'quique', quadros: QUADROS_MEMBROS, membros: true, desenhar: slime(0x58d68d) },
   // Marco 22 (D-089): o falcão do Aventureiro.

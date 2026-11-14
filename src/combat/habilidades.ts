@@ -53,7 +53,9 @@ export type Modificador = (typeof MODIFICADORES)[number];
  */
 export const VARIANTES = ['frenesi', 'furia_alta', 'enc_fogo', 'enc_gelo', 'enc_raio', 'enc_terra', 'enc_veneno', 'enc_trevas', 'enc_sagrado',
   // Marco 24 (D-095): as marcas de Domínio nas ultimates (2 gerais da mesma família nas teclas 3–6).
-  'dom_tecnica', 'dom_arcana', 'dom_suporte', 'dom_fogo', 'dom_veneno', 'dom_terra', 'dom_sombra', 'dom_sagrado', 'dom_psiquico'] as const;
+  'dom_tecnica', 'dom_arcana', 'dom_suporte', 'dom_fogo', 'dom_veneno', 'dom_terra', 'dom_sombra', 'dom_sagrado', 'dom_psiquico',
+  // Marco 40 (13/11/2026, D-165): o companheiro ativo do Aventureiro (o falcão é a skill como está).
+  'pet_lobo', 'pet_urso'] as const;
 export type Variante = (typeof VARIANTES)[number];
 
 /** Marco 24: o que uma variante muda — os ajustes de um marco, mais a conjuração, o elemento e efeitos trocados. */
@@ -62,6 +64,12 @@ export interface AjusteDeVariante extends MarcoDeNivel {
   elemento: Elemento | null;
   /** Efeitos que substituem os do mesmo tipo (a Investida que avança 4, o arco do Contragolpe que vira 360°). */
   trocar: readonly EfeitoCanonico[];
+  /** Marco 40 (D-165): o nome que a skill ganha na variante (o Rosnar do lobo, o Rugido do urso). */
+  nome: string | null;
+  /** D-165: a variante que muda a forma de atingir (do alvo único para a área em volta, por exemplo). */
+  forma: { politicaAlvo: PoliticaAlvo; politicaImpacto: PoliticaImpacto; tipoArea: TipoArea; raioArea: number; alcanceCelulas: number } | null;
+  /** D-165: os efeitos da variante substituem todos os da skill (o grito que expõe vira o rosnado que atordoa). */
+  substituir: boolean;
 }
 
 /** Saltos para alvos próximos depois do golpe principal (encadear; raio sobre eletrizado). */
@@ -339,6 +347,17 @@ function lerMarcos(l: Leitor, v: unknown): Record<number, MarcoDeNivel> {
   return saida;
 }
 
+/** Marco 40 (D-165): a forma de atingir que a variante troca. */
+function lerFormaDaVariante(l: Leitor, f: Objeto): AjusteDeVariante['forma'] {
+  return {
+    politicaAlvo: l.opcao(f, 'politicaAlvo', POLITICAS_ALVO),
+    politicaImpacto: l.opcao(f, 'politicaImpacto', ['contato', 'projetil', 'area', 'proprio'] as const),
+    tipoArea: l.opcao(f, 'tipoArea', TIPOS_AREA),
+    raioArea: l.numero(f, 'raioArea', { min: 0, max: 5, inteiro: true }),
+    alcanceCelulas: l.numero(f, 'alcanceCelulas', { min: 0, max: 30, inteiro: true }),
+  };
+}
+
 function lerVariantes(l: Leitor, v: unknown): Partial<Record<Variante, AjusteDeVariante>> {
   if (v === undefined) return {};
   const o: Objeto = l.objeto(v, 'variantes');
@@ -352,7 +371,7 @@ function lerVariantes(l: Leitor, v: unknown): Partial<Record<Variante, AjusteDeV
     const n = (campo: string, min: number, max: number) => (m[campo] === undefined ? 0 : l.numero(m, campo, { min, max }));
     const elemento = m.elemento === undefined ? null : ehElemento(m.elemento) ? m.elemento : null;
     if (m.elemento !== undefined && !elemento) l.erro(`variantes.${k}: elemento desconhecido`);
-    const resto = Object.fromEntries(Object.entries(m).filter(([c]) => !['conjuracaoPct', 'elemento', 'trocar'].includes(c)));
+    const resto = Object.fromEntries(Object.entries(m).filter(([c]) => !['conjuracaoPct', 'elemento', 'trocar', 'nome', 'forma', 'substituir'].includes(c)));
     const base = lerMarcos(l, { 2: { ...resto, texto: m.texto ?? k } })[2];
     if (!base) continue;
     saida[k as Variante] = {
@@ -360,6 +379,9 @@ function lerVariantes(l: Leitor, v: unknown): Partial<Record<Variante, AjusteDeV
       conjuracaoPct: n('conjuracaoPct', -100, 200),
       elemento,
       trocar: m.trocar === undefined ? [] : normalizarEfeitos(l.lista(m, 'trocar'), l),
+      nome: m.nome === undefined ? null : l.texto(m, 'nome'),
+      forma: m.forma === undefined ? null : lerFormaDaVariante(l, l.objeto(m.forma, `variantes.${k}.forma`)),
+      substituir: m.substituir === undefined ? false : l.booleano(m, 'substituir'),
     };
   }
   return saida;

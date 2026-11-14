@@ -26385,6 +26385,46 @@
     },
     "altura": 0.78
   },
+  "lobo_companheiro": {
+    "quadroL": 144,
+    "quadroA": 130,
+    "ancoraX": 72,
+    "ancoraY": 86.66666666666667,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 0.95
+  },
   "mago": {
     "quadroL": 108,
     "quadroA": 126,
@@ -43788,6 +43828,46 @@
       }
     },
     "altura": 1.5
+  },
+  "urso_companheiro": {
+    "quadroL": 173,
+    "quadroA": 158,
+    "ancoraX": 86.5,
+    "ancoraY": 107.72727272727273,
+    "pxCelula": 72,
+    "colunas": 42,
+    "faixa": 21,
+    "estados": {
+      "parado": {
+        "inicio": 0,
+        "n": 4
+      },
+      "andar": {
+        "inicio": 4,
+        "n": 8
+      },
+      "golpe": {
+        "inicio": 12,
+        "n": 6
+      },
+      "conjurar": {
+        "inicio": 18,
+        "n": 6
+      },
+      "morte": {
+        "inicio": 24,
+        "n": 6
+      },
+      "andarGolpe": {
+        "inicio": 30,
+        "n": 6
+      },
+      "andarConjurar": {
+        "inicio": 36,
+        "n": 6
+      }
+    },
+    "altura": 1.2
   },
   "vampiro": {
     "quadroL": 108,

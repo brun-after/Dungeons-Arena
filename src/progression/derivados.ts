@@ -5,6 +5,7 @@
 // Marco 14 (14/10/2026): as passivas conhecidas somam vida, mana e defesa; as habilidades da entidade derivam da
 // barra (habilidades-personagem.ts).
 
+import { fixarSkillDaClasse } from './habilidades-classe';
 import type { Catalogo } from '../combat/habilidades';
 import { passivasDaBolsa } from '../combat/perfil';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -102,6 +103,8 @@ export function derivarFicha(bolsa: Bolsa, nivel: number, ctx: Pick<ContextoSimu
 /** Reaplica a ficha derivada na entidade. HP e mana atuais só são cortados no novo máximo. */
 export function recalcularFicha(e: Entidade, ctx: Pick<ContextoSimulacao, 'balance' | 'conteudo'>): void {
   if (!e.bolsa) return;
+  // Marco 40 (D-165): a skill fixa da classe na tecla 1.
+  fixarSkillDaClasse(ctx, e.bolsa);
   const f = derivarFicha(e.bolsa, e.nivel, ctx);
   e.atributos = f.atributos;
   e.defesa = f.defesa;

@@ -124,7 +124,12 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number; conf
     if (ev.id !== idLocal) return;
     const nomeMov = t(`movimento.${ev.mov}` as ChaveTexto);
     if (ev.fase === 'ativo') hud.registrar(t('movimento.log.ativo', { nome: nomeMov }));
+    else if (ev.fase === 'perdeu') hud.registrar(t('movimento.log.perdeu', { nome: nomeMov }));
     else if (ev.fase === 'recusado') hud.registrar(t(`movimento.recusa.${ev.motivo ?? 'recarga'}` as ChaveTexto));
+  });
+  // Marco 40 (D-165): a troca de companheiro do Aventureiro.
+  bus.on('companheiroTrocado', (ev) => {
+    if (ev.id === idLocal) hud.registrar(t('pet.log.trocou', { pet: t(`pet.${ev.pet}` as ChaveTexto) }));
   });
   bus.on('acaoCancelada', (ev) => {
     if (ev.motivo === 'interrompido') hud.registrar(t('log.interrompido', { ator: nome(ev.atorId) }));

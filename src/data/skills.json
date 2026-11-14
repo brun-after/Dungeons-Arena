@@ -5999,6 +5999,7 @@
         }
       ],
       "id": "mergulho",
+      "variantes": {"pet_lobo": {"nome": "Mordida do lobo", "texto": "O lobo morde, segura o alvo por um instante e salta para outros perto.", "mods": ["encadear"], "trocar": [{"tipo": "sem_movimento", "duracaoMs": 500}]}, "pet_urso": {"nome": "Esmagada do urso", "texto": "O urso esmaga o alvo: bate mais forte, atordoa mais e empurra quem está em volta.", "danoPct": 20, "conjuracaoPct": 40, "trocar": [{"tipo": "atordoar", "duracaoMs": 600}], "efeitos": [{"tipo": "empurrao", "valor": 1}]}},
       "nome": "Ataque do companheiro",
       "grau": "B",
       "nivelMinimo": 1,
@@ -6115,6 +6116,9 @@
         }
       ],
       "id": "grito_do_falcao",
+      "leituras": {"mestre_de_feras": {"eixo": "invocacao", "texto": "O grito também deixa o alvo marcado.", "efeitos": [{"tipo": "marcado", "duracaoMs": 4000}]}, "batedor": {"eixo": "alvos", "texto": "O grito chega mais longe.", "ajustes": {"alcance": 2}}, "implacavel": {"eixo": "eco", "texto": "O alvo fica sem atacar por 0,5 s.", "efeitos": [{"tipo": "sem_ataque", "duracaoMs": 500}]}, "sobrevivente": {"eixo": "sustento", "texto": "Gritar te cura um pouco.", "efeitos": [{"tipo": "cura", "valor": 3, "em": "conjurador"}]}, "pergaminhista": {"eixo": "area", "texto": "O espírito da fera estoura em área com o elemento da runa.", "efeitos": [{"tipo": "fase", "ref": "leitura_estouro", "duracaoMs": 0, "desde": 4}]}},
+      "variantes": {"pet_lobo": {"nome": "Rosnar", "texto": "O lobo rosna em volta dele: atordoa os inimigos por 0,5 s, mais 0,1 s por nível que o inimigo tem a menos que você.", "substituir": true, "forma": {"politicaAlvo": "hostil", "politicaImpacto": "area", "tipoArea": "ao_redor", "raioArea": 2, "alcanceCelulas": 1}, "efeitos": [{"tipo": "grito_de_fera", "interno": {"tipo": "atordoar", "duracaoMs": 500}}]}, "pet_urso": {"nome": "Rugido", "texto": "O urso ruge em volta dele: os inimigos fogem na direção oposta, sem atacar, por 0,5 s, mais 0,1 s por nível que têm a menos que você.", "substituir": true, "forma": {"politicaAlvo": "hostil", "politicaImpacto": "area", "tipoArea": "ao_redor", "raioArea": 2, "alcanceCelulas": 1}, "efeitos": [{"tipo": "grito_de_fera", "interno": {"tipo": "aterrorizado", "duracaoMs": 500}}]}},
+      "papel": "controle",
       "nome": "Grito do falcão",
       "grau": "B",
       "nivelMinimo": 1,
@@ -6182,6 +6186,7 @@
         }
       ],
       "id": "garras_cegantes",
+      "variantes": {"pet_lobo": {"nome": "Arrastar", "texto": "O lobo morde e arrasta o alvo até você.", "trocar": [{"tipo": "puxao", "valor": 5}, {"tipo": "sem_movimento", "duracaoMs": 500}]}, "pet_urso": {"nome": "Abraço do urso", "texto": "O urso segura o alvo no lugar, por mais tempo.", "substituir": true, "efeitos": [{"tipo": "enraizado", "duracaoMs": 2000}]}},
       "nome": "Ordem: Agarrar",
       "grau": "A",
       "nivelMinimo": 1,
@@ -6304,6 +6309,7 @@
         }
       ],
       "id": "vigia",
+      "variantes": {"pet_lobo": {"nome": "Armadilha de presas", "texto": "A armadilha prende e faz sangrar quem pisar.", "trocar": [{"tipo": "armadilha", "valor": 6, "duracaoMs": 30000, "efeito": {"sangrando": 4000}}]}, "pet_urso": {"nome": "Armadilha de urso", "texto": "A armadilha de mandíbula atordoa quem pisar.", "trocar": [{"tipo": "armadilha", "valor": 6, "duracaoMs": 30000, "efeito": {"atordoar": 1200}}]}},
       "nome": "Armadilha do explorador",
       "grau": "A",
       "nivelMinimo": 1,
@@ -6418,6 +6424,7 @@
       "velocidadeProjetil": 0,
       "efeitos": [],
       "id": "rasante",
+      "variantes": {"pet_lobo": {"nome": "Carga do lobo", "texto": "Montado no lobo, a carga vai mais longe.", "alcance": 2}, "pet_urso": {"nome": "Carga do urso", "texto": "Montado no urso, a carga é mais lenta, bate mais e empurra quem está na linha.", "danoPct": 15, "conjuracaoPct": 30, "efeitos": [{"tipo": "empurrao", "valor": 2}]}},
       "nome": "Carga montada",
       "grau": "A",
       "nivelMinimo": 1,
@@ -6540,6 +6547,7 @@
         }
       ],
       "id": "tempestade_de_penas",
+      "variantes": {"pet_lobo": {"nome": "Chamado da alcateia", "texto": "Chama três lobos espirituais, por menos tempo.", "trocar": [{"tipo": "invocar_temporario", "ref": "lobo_espiritual", "valor": 3, "duracaoMs": 9000}]}, "pet_urso": {"nome": "Chamado do guardião", "texto": "Chama um único lobo espiritual que fica mais tempo, e você ganha um escudo.", "trocar": [{"tipo": "invocar_temporario", "ref": "lobo_espiritual", "valor": 1, "duracaoMs": 20000}], "efeitos": [{"tipo": "escudo", "valor": 15, "duracaoMs": 8000, "em": "conjurador"}]}},
       "nome": "Chamado da matilha",
       "grau": "S",
       "nivelMinimo": 1,
@@ -6667,6 +6675,7 @@
         }
       ],
       "id": "retorno_ao_punho",
+      "variantes": {"pet_lobo": {"nome": "Instinto da matilha", "texto": "Além de resistir, dispara: corre 40% mais por 2 s.", "efeitos": [{"tipo": "acelerado", "pct": 40, "duracaoMs": 2000}]}, "pet_urso": {"nome": "Couro de urso", "texto": "Resiste por mais tempo e ganha um escudo.", "trocar": [{"tipo": "imune_dano", "duracaoMs": 1200}], "efeitos": [{"tipo": "escudo", "valor": 20, "duracaoMs": 6000}]}},
       "nome": "Instinto de sobrevivência",
       "grau": "A",
       "nivelMinimo": 1,
@@ -10396,6 +10405,43 @@
         "som": "golpe",
         "assinatura": "supernova"
       }
+    },
+    {
+      "id": "troca_de_companheiro",
+      "leituras": {"mestre_de_feras": {"eixo": "invocacao", "texto": "Ao trocar, você ganha um escudo pequeno.", "efeitos": [{"tipo": "escudo", "valor": 10, "duracaoMs": 5000}]}, "batedor": {"eixo": "perfuracao", "texto": "Ao trocar, você corre 30% mais por 2 s.", "efeitos": [{"tipo": "acelerado", "pct": 30, "duracaoMs": 2000}]}, "implacavel": {"eixo": "eco", "texto": "Ao trocar, você bate 15% mais por 3 s.", "efeitos": [{"tipo": "bonus_dano", "pct": 15, "duracaoMs": 3000}]}, "sobrevivente": {"eixo": "sustento", "texto": "Ao trocar, você se cura um pouco.", "efeitos": [{"tipo": "cura", "valor": 4}]}, "pergaminhista": {"eixo": "area", "texto": "Ao trocar, o espírito da fera te protege por 0,3 s.", "efeitos": [{"tipo": "imune_dano", "duracaoMs": 300}]}},
+      "nome": "Troca de companheiro",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "tipoAtaque": "fisico",
+      "tags": [
+        "companheiro"
+      ],
+      "icone": "troca",
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 6000,
+      "conjuracaoMs": 0,
+      "interrupcao": "interrompivel",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "trocar_companheiro"
+        }
+      ],
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 0,
+      "visual": {
+        "cor": "#a1887f",
+        "impacto": "anel",
+        "som": "nivel",
+        "assinatura": "retorno"
+      },
+      "papel": "mobilidade"
     }
   ]
 }

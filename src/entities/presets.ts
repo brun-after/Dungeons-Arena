@@ -121,6 +121,8 @@ export interface ClasseJogador {
    * etapa 4 e para não virarem gerais), mas o jogador não as tem mais.
    */
   saidas: string[];
+  /** Marco 40 (13/11/2026, D-165): a skill de classe que fica sempre na tecla 1 (a Troca de companheiro do Aventureiro). */
+  fixa: string | null;
 }
 
 function idDe(item: unknown): string {
@@ -244,7 +246,9 @@ export function lerClasses(json: unknown): { classes: Map<string, ClasseJogador>
       iniciais: o.iniciais === undefined ? [] : l.listaDeTextos(o, 'iniciais'),
       geralInicial: o.geralInicial === undefined ? null : l.texto(o, 'geralInicial'),
       saidas: o.saidas === undefined ? [] : l.listaDeTextos(o, 'saidas'),
+      fixa: o.fixa === undefined ? null : l.texto(o, 'fixa'),
     };
+    if (c.fixa !== null && !c.iniciais.includes(c.fixa)) l.erro('a skill fixa precisa estar entre as iniciais');
     if (c.saidas.some((id) => c.exclusivas.includes(id))) l.erro('uma skill que saiu não pode estar entre as exclusivas');
     if (c.iniciais.some((id) => !c.exclusivas.includes(id))) l.erro('as iniciais precisam estar entre as exclusivas');
     c.habilidades = [...c.iniciais, ...(c.geralInicial ? [c.geralInicial] : [])];

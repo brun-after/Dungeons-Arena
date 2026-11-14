@@ -164,10 +164,11 @@ describe('canal privado e anfitrião', () => {
   it('comandos de personagem: aceitos no cooperativo, recusados na arena', () => {
     const s = sala();
     const a = entrar(s);
-    a.cmd({ t: 'equiparHabilidade', id: null, slot: 0 });
+    // Marco 40 (D-165): a tecla 1 do Aventureiro é a Troca de companheiro, fixa; a 2 se esvazia.
+    a.cmd({ t: 'equiparHabilidade', id: null, slot: 1 });
     rodar(s, 1);
     expect(a.de('rejeitado')).toHaveLength(0);
-    expect(a.entidade().bolsa?.barra[0]).toBeNull();
+    expect(a.entidade().bolsa?.barra[1]).toBeNull();
 
     const arena = novaSala();
     const c = conexaoDireta(arena);
