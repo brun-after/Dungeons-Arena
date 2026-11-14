@@ -278,6 +278,8 @@ export interface Bolsa {
   pontosHabilidade: number;
   /** Marco 24 (D-094): as gerais que um livro liberou; aprender uma delas custa um ponto. */
   liberadas?: string[];
+  /** Marco 40 (13/11/2026, D-165): o companheiro ativo do Aventureiro (ausente = o falcão). */
+  pet?: 'falcao' | 'lobo' | 'urso';
   /** Marco 24 (D-095): as passivas gerais ligadas (até 3), trocadas só fora de combate. */
   passivasAtivas?: string[];
   /** D-075 (17/10/2026): origens permanentes dos ganhos por consumíveis e saldo fracionário de XP. */

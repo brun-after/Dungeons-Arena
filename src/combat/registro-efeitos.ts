@@ -82,6 +82,8 @@ export const TIPOS_EFEITO = [
   // Marco 40 (13/11/2026, D-161): o Renascer levanta um aliado caído por perto; e as promessas das leituras de estilo:
   // a próxima magia com área maior, as magias que ecoam e o medo dos feridos.
   'levantar', 'area_ampliada', 'ecoando', 'apavorar', 'explodir_ao_cair',
+  // Marco 40 (13/11/2026, D-165): a troca de companheiro do Aventureiro e o grito de fera (o controle pela diferença de nível).
+  'trocar_companheiro', 'grito_de_fera',
   // D-161: o Contragolpe guarda o absorvido e devolve; a Investida volta ao ponto de partida; o Ceifador salta ao alvo.
   'guardar_absorvido', 'devolver_absorvido', 'retornar', 'saltar_ao_alvo',
   // Marco 40 (13/11/2026, D-162): virar pedra (a reação Fossilizar).
@@ -119,7 +121,7 @@ export type Fluxo = 'atrasado' | 'armadilha' | 'invocar' | 'fase';
 
 export type Periodico = 'dano' | 'cura' | 'recurso';
 export type Instantaneo = 'drenar_invocacao' | 'comandar_mortos' | 'purificar' | 'passo_sombrio' | 'muralha_pedra' | 'campo_cura' | 'campo_veneno' | 'cura' | 'recurso' | 'teleporte' | 'avanco' | 'empurrao' | 'puxao' | 'trocar' | 'dano'
-  | 'invisivel' | 'dissipar' | 'consumir' | 'detonar' | 'arremessar' | 'zerar_recarga' | 'libertar' | 'furia' | 'carga_ultimate' | 'executar' | 'levantar' | 'apavorar' | 'devolver_absorvido' | 'retornar' | 'saltar_ao_alvo';
+  | 'invisivel' | 'dissipar' | 'consumir' | 'detonar' | 'arremessar' | 'zerar_recarga' | 'libertar' | 'furia' | 'carga_ultimate' | 'executar' | 'levantar' | 'apavorar' | 'trocar_companheiro' | 'grito_de_fera' | 'devolver_absorvido' | 'retornar' | 'saltar_ao_alvo';
 export type BonusDeAtaqueBasico = 'dano' | 'recarga' | 'alcance' | 'alvos';
 
 export interface DefinicaoEfeito {
@@ -381,6 +383,8 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   explodir_ao_cair: { ...BASE, icone: 'explosao', cor: '#e67e22', positivo: true, campos: ['valor'], padrao: { duracaoMs: 4000, valor: 8, pct: 0 } },
   // D-161: quem está abaixo de `pct`% da vida foge de medo por `duracaoMs`.
   apavorar: instantaneo('caveira', '#6c3483', ['pct'], { duracaoMs: 1500, valor: 0, pct: 30 }, 'apavorar', false),
+  trocar_companheiro: instantaneo('troca', '#a1887f', [], { duracaoMs: 0, valor: 0, pct: 0 }, 'trocar_companheiro', true),
+  grito_de_fera: { ...instantaneo('grito', '#c0392b', [], { duracaoMs: 0, valor: 0, pct: 0 }, 'grito_de_fera', false), exige: ['interno'] },
   levantar: instantaneo('cura', '#f7dc6f', ['valor', 'pct'], { duracaoMs: 0, valor: 3, pct: 30 }, 'levantar', true),
   vista_de_armadilha: positivo('olho', '#f0b27a', 8, [], { duracaoMs: 45_000, valor: 0, pct: 0 }, { revelaArmadilhas: true }),
   passo_leve: positivo('botas', '#9be7c4', 6, [], { duracaoMs: 60_000, valor: 0, pct: 0 }, { protegeDeArmadilha: true }),

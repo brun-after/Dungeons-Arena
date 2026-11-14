@@ -12,6 +12,7 @@ import type { Barramento } from '../core/events';
 import type { EstadoJogo } from '../core/estado';
 import type { EventosDaSimulacao } from '../core/eventos-simulacao';
 import { msDe } from '../core/tempo';
+import { petDoCompanheiro } from '../combat/pets';
 import type { Entidade, PontoVisual } from '../entities/entidade';
 import { CELULA_PX } from './camera-calculo';
 import { ALTURA_NO_AR, type SistemaParticulas } from './particulas';
@@ -131,7 +132,8 @@ export interface OpcoesVooFalcao {
   reduzido: () => boolean;
 }
 
-const ehFalcao = (e: Entidade) => e.invocacao?.companheiro === true && !e.morto;
+// Marco 40 (13/11/2026, D-165): só o falcão voa; o lobo e o urso andam no chão.
+const ehFalcao = (e: Entidade) => e.invocacao?.companheiro === true && !e.morto && petDoCompanheiro(e) === 'falcao';
 /** O voo é o próprio pássaro se movendo (não algo que sai dele, como o grito). */
 const moveOPassaro = (v: VooDeSkill) => v.forma !== 'grito';
 

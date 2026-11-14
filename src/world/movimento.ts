@@ -8,6 +8,7 @@ import { dispararGanchosDe } from '../progression/ganchos-do-portador';
 import { muralhaEm } from '../combat/tatica';
 import { direcaoDe } from '../combat/orientacao';
 import { multiplicadorDoPassoDoFalcao } from '../combat/companheiro';
+import { passoDoPet, petDoCompanheiro } from '../combat/pets';
 import { atravessaCorpos, fatorDeVelocidade, fimDaTirolesa, fimDoSalto, naTirolesa, noAr, noSalto } from '../combat/movimento-classe';
 // Movimento livre (§2.2, §2.3). Marco 26 (25/10/2026, D-104): antes célula a célula, em passos cardinais (a diagonal
 // virava escadinha); agora a posição é contínua e anda em qualquer ângulo.
@@ -203,7 +204,7 @@ function velocidadeAgora(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao
     inv && !inv.dominado
       ? // Marco 25 (D-102): o falcão mergulhando ou no dash anda mais rápido que na patrulha.
         inv.companheiro
-        ? (1000 / ctx.balance.ajustesClasses.aventureiro.falcaoPassoMs) * multiplicadorDoPassoDoFalcao(estado, ctx, e)
+        ? velocidadeDoCompanheiro(estado, ctx, e)
         : 1000 / ctx.balance.invocacoes.passoMs
       : velocidade(e.atributos.destreza, ctx.balance.movimento.velocidadeBaseMs, inv?.dominado ?? false, ctx.balance.movimento.velocidadeMaxMult);
   // Marco 14: o frio (resfriado) deixa mais lento. Ajuste de 15/10/2026: conjurar uma habilidade `lenta` também.
@@ -323,6 +324,12 @@ function andarNaTirolesa(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao
   const andou = trecho > EPS ? andar(e, m.rumoX * trecho, m.rumoY * trecho, estado, ctx, saida, grade) : 0;
   m.restante = Math.max(0, (m.restante ?? 0) - trecho);
   if (andou < trecho * 0.9 || m.restante <= EPS) fimDaTirolesa(estado, e, saida);
+}
+
+/** O passo do companheiro do Aventureiro: o voo do falcão; o lobo e o urso (marco 40, D-165), o passo de cada um. */
+function velocidadeDoCompanheiro(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade): number {
+  const pet = petDoCompanheiro(e);
+  return pet === 'falcao' ? (1000 / ctx.balance.ajustesClasses.aventureiro.falcaoPassoMs) * multiplicadorDoPassoDoFalcao(estado, ctx, e) : 1000 / passoDoPet(ctx, pet);
 }
 
 /** Marco 40 (D-164): o salto do Guerreiro, reto até a queda, que atordoa em volta. */

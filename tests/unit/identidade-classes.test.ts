@@ -95,8 +95,8 @@ describe('falcão do Aventureiro', () => {
     expect(f.hp).toBe(a.j.hp);
     expect(a.j.participacao.some((p) => p.id === 'b')).toBe(true);
     expect(f.participacao).toEqual([]);
-    // O golpe no falcão cai no dono (com as defesas dele).
-    const golpe = obter(habilidadeDoAtor(ctx, a.boneco, a.boneco.ataqueBasico), 'golpe');
+    // O golpe no falcão cai no dono (com as defesas dele). Marco 40 (D-165): no ar, só o projétil o alcança.
+    const golpe = { ...obter(habilidadeDoAtor(ctx, a.boneco, a.boneco.ataqueBasico), 'golpe'), politicaImpacto: 'projetil' as const };
     const antes = a.j.hp;
     aplicarImpacto(a.estado, ctx, f, { acaoId: 9, hab: golpe, indice: 0, fonte: { ...fonteDaHabilidade(a.boneco, ctx, 0, golpe), d20Minimo: 20 } }, a.eventos);
     expect(a.j.hp).toBeLessThan(antes);

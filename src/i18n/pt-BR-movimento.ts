@@ -3,6 +3,15 @@
 export const textosMovimento = {
   'recusa.movimento': 'O movimento não deixa agora',
   'movimento.titulo': 'Movimento',
+  // Marco 40 (13/11/2026, D-165): os companheiros do Aventureiro.
+  'efeito.trocar_companheiro': 'Troca de companheiro',
+  'desc.efeito.trocar_companheiro': 'Troca o companheiro ativo: do falcão ao lobo, do lobo ao urso, do urso ao falcão',
+  'efeito.grito_de_fera': 'Grito de fera',
+  'desc.efeito.grito_de_fera': 'O controle dura 0,5 s em quem tem nível igual ou maior, e 0,1 s a mais por nível que o alvo tem a menos',
+  'pet.falcao': 'Falcão',
+  'pet.lobo': 'Lobo',
+  'pet.urso': 'Urso',
+  'pet.log.trocou': 'Companheiro: {pet}',
   'movimento.usar': 'Shift: usar',
   'movimento.trocar': 'G: trocar',
   'movimento.log.ativo': 'Movimento: {nome} (Shift)',

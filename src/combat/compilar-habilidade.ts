@@ -16,7 +16,7 @@ import { formatarChave, lerChave } from './chave-habilidade';
 import { faixaDaFormula } from './dados';
 import { ehElemento, type DefinicaoElemento, type Elemento } from './elementos';
 import { gerarDefinicao } from './gerar-habilidade';
-import { etiquetasDe, MODIFICADORES, type Catalogo, type DefinicaoHabilidade, type Habilidade, type Modificador, type Variante } from './habilidades';
+import { etiquetasDe, MODIFICADORES, type AjusteDeVariante, type Catalogo, type DefinicaoHabilidade, type Habilidade, type Modificador, type Variante } from './habilidades';
 import { normalizarEfeitos } from './normalizar-efeito';
 import { construirEfeito, REGISTRO_EFEITOS, type EfeitoCanonico } from './registro-efeitos';
 import { aplicarRuna, type RegrasRunas } from './runas';
@@ -237,6 +237,10 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
   // efeitos do mesmo tipo. Só entram na chave as que a definição tem.
   let conjuracao = 1;
   let trocados: EfeitoCanonico[] = [];
+  // Marco 40 (D-165): o nome e a forma de atingir que a variante troca (a última que troca vale).
+  let nomeDaVariante: string | null = null;
+  let formaDaVariante: AjusteDeVariante['forma'] = null;
+  let substituir = false;
   const variantes = (op.variantes ?? []).filter((v) => def.variantes[v] !== undefined).sort();
   for (const v of variantes) {
     const m = def.variantes[v];
@@ -252,9 +256,12 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
     if (m.elemento) elemento = m.elemento;
     extras.push(...m.efeitos);
     trocados = [...trocados.filter((t) => !m.trocar.some((x) => x.tipo === t.tipo)), ...m.trocar];
+    if (m.nome) nomeDaVariante = m.nome;
+    if (m.forma) formaDaVariante = m.forma;
+    if (m.substituir) substituir = true;
     for (const x of m.mods) mods.add(x);
   }
-  const efeitos = [...b.efeitos.filter((e) => !trocados.some((t) => t.tipo === e.tipo)), ...trocados, ...extras];
+  const efeitos = [...(substituir ? [] : b.efeitos).filter((e) => !trocados.some((t) => t.tipo === e.tipo)), ...trocados, ...extras];
   // O elemento acrescenta o seu estado (o de um caminho elemental também).
   const estado = elemento ? fontes.elementos.get(elemento)?.estado : undefined;
   if (estado && b.formulaDano !== null && !efeitos.some((e) => e.tipo === estado.tipo)) efeitos.push({ ...estado });
@@ -274,6 +281,8 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
     saltos: null,
     escalaVisual: 1 + 0.15 * (rank - 1),
   };
+  if (nomeDaVariante) h.nome = nomeDaVariante;
+  if (formaDaVariante) Object.assign(h, formaDaVariante);
   if (cargas > 1) h.cargas = Math.min(6, cargas);
   else delete h.cargas;
   if (b.disparoMs) h.disparoMs = Math.max(0, Math.round(b.disparoMs * disparo));

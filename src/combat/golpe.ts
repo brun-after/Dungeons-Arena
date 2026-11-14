@@ -1,9 +1,10 @@
 import { ehRetorno } from './buffs-de-leitura';
 import { aoSerAtingido, noAr } from './movimento-classe';
+import { golpeAlcancaOPet, loboIntercepta, petDoCompanheiro, reflexoDoPet } from './pets';
 import { retirarVida } from './reserva-necromante';
 import { multiplicadorDardo, registrarDardo } from './concentracao-arcana';
 import { encherFuria } from './frenesi';
-import { entregaRemota, extraGuerreiro, multiplicadorDireto, protecaoInicial, pulsarAura, reflexoDoFalcao } from './ajustes-classes';
+import { entregaRemota, extraGuerreiro, multiplicadorDireto, protecaoInicial, pulsarAura } from './ajustes-classes';
 import { comboDoImpacto, confirmarImpactoTatico } from './sequencias';
 import { defenderGolpe, fluxoRestaurador } from './tatica';
 import { comCombo } from './combos';
@@ -140,12 +141,25 @@ export function aplicarImpacto(
   const dono = alvo.invocacao?.companheiro ? buscarEntidade(estado, alvo.invocacao.donoId) : undefined;
   // Marco 24 (25/10/2026, D-098): só parte do dano chega ao dono (o reflexo cai com o nível); cura e estados seguem inteiros.
   if (dono && vivo(dono)) {
-    const fonte = { ...impacto.fonte, multDano: impacto.fonte.multDano * reflexoDoFalcao(ctx, dono.nivel) };
+    // Marco 40 (13/11/2026, D-165): cada companheiro é atingido por uma coisa (o falcão, no ar, só por projéteis) e
+    // passa ao dono a fração dele.
+    const pet = petDoCompanheiro(alvo);
+    if (impacto.hab.formulaDano !== null && !golpeAlcancaOPet(pet, impacto.hab)) {
+      saida.push({ t: 'esquivou', tick: estado.tick, acaoId: impacto.acaoId, atorId: impacto.fonte.id, alvoId: alvo.id });
+      return;
+    }
+    const fonte = { ...impacto.fonte, multDano: impacto.fonte.multDano * reflexoDoPet(ctx, pet, dono.nivel) };
     aplicarImpacto(estado, ctx, dono, { ...impacto, fonte }, saida);
     return;
   }
   const { hab } = impacto;
   const atacante = buscarEntidade(estado, impacto.fonte.id);
+  // D-165: o lobo colado no Aventureiro toma para si o golpe de perto, de tempos em tempos.
+  const lobo = atacante && atacante !== alvo ? loboIntercepta(estado, ctx, alvo, hab) : null;
+  if (lobo) {
+    aplicarImpacto(estado, ctx, lobo, impacto, saida);
+    return;
+  }
   // Marco 40 (13/11/2026, D-164): o golpe de perto, do chão, não alcança quem voa.
   if (hab.formulaDano !== null && hab.politicaImpacto === 'contato' && noAr(alvo) && atacante && atacante !== alvo && !noAr(atacante)) {
     saida.push({ t: 'esquivou', tick: estado.tick, acaoId: impacto.acaoId, atorId: impacto.fonte.id, alvoId: alvo.id });

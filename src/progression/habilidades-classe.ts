@@ -20,10 +20,28 @@ export function ehDeAlgumaClasse(ctx: Pick<ContextoSimulacao, 'conteudo'>, id: s
   return [...ctx.conteudo.classes.values()].some((c) => c.exclusivas.includes(id) || c.saidas.includes(id));
 }
 
+/**
+ * Marco 40 (13/11/2026, D-165): a skill fixa da classe (a Troca de companheiro do Aventureiro) é sempre conhecida e
+ * fica na tecla 1; o que estava lá vai para a tecla 2, se ela estiver vazia.
+ */
+export function fixarSkillDaClasse(ctx: Pick<ContextoSimulacao, 'conteudo'>, bolsa: Bolsa): void {
+  const fixa = ctx.conteudo.classes.get(bolsa.classeId)?.fixa ?? null;
+  if (fixa === null || bolsa.barra.length === 0) return;
+  if (!bolsa.conhecidas.some((c) => c.id === fixa)) bolsa.conhecidas.push({ id: fixa, rank: 1, caminhos: [] });
+  if (bolsa.barra[0] === fixa) return;
+  const antes = bolsa.barra[0] ?? null;
+  bolsa.barra = bolsa.barra.map((id) => (id === fixa ? null : id));
+  bolsa.barra[0] = fixa;
+  if (antes !== null && bolsa.barra[1] === null) bolsa.barra[1] = antes;
+}
+
 /** Por que a tecla não aceita a skill (null = aceita): 1–2 só de classe, 3–6 só ativas gerais (ou fusões). */
 export function teclaRecusa(ctx: Ctx, bolsa: Pick<Bolsa, 'classeId'>, slot: number, id: string): 'tecla_invalida' | 'tecla_errada' | 'passiva' | null {
   if (!Number.isInteger(slot) || slot < 0 || slot >= SLOTS_BARRA) return 'tecla_invalida';
   if (definicaoDe(ctx, id)?.base.passiva) return 'passiva';
+  // Marco 40 (13/11/2026, D-165): a skill fixa da classe só fica na tecla 1, e a tecla 1 só aceita ela.
+  const fixa = ctx.conteudo.classes.get(bolsa.classeId)?.fixa ?? null;
+  if (fixa !== null && (slot === 0) !== (id === fixa)) return 'tecla_errada';
   return ehDaClasse(ctx, bolsa, id) === slot < SLOTS_CLASSE ? null : 'tecla_errada';
 }
 

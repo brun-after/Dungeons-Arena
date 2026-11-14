@@ -15,12 +15,12 @@ import { ticksDe } from '../core/tempo';
 import { buscarEntidade, type EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { vivo, type Entidade } from '../entities/entidade';
-import { reflexoDoFalcao } from './ajustes-classes';
 import { invocar } from './efeitos-fluxo';
 import { celulaOcupada } from './geometria';
 import { registrarParticipacao } from './participacao';
 import { construirEfeito } from './registro-efeitos';
 import { fatorDeDominio } from '../progression/dominio';
+import { petDe, petDoCompanheiro, presetDoPet, reflexoDoPet } from './pets';
 
 export const PRESET_FALCAO = 'falcao_companheiro';
 
@@ -36,7 +36,8 @@ export function companheiroDe(estado: EstadoJogo, dono: Entidade): Entidade | un
 
 function chamar(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade, saida: EventoSimulacao[]): void {
   const antes = estado.entidades.length;
-  invocar(estado, ctx, dono, construirEfeito('invocar', { ref: PRESET_FALCAO, valor: 1, duracaoMs: 86_400_000 }), saida);
+  // Marco 40 (D-165): o companheiro ativo (falcão, lobo ou urso).
+  invocar(estado, ctx, dono, construirEfeito('invocar', { ref: presetDoPet(petDe(dono)), valor: 1, duracaoMs: 86_400_000 }), saida);
   const falcao = estado.entidades[antes];
   if (!falcao?.invocacao) return;
   falcao.invocacao.companheiro = true;
@@ -77,7 +78,7 @@ export function sincronizarCompanheiros(estado: EstadoJogo, ctx: ContextoSimulac
       continue;
     }
     // Marco 24 (25/10/2026, D-098): o dono sente só o reflexo do dano (80% no nível 1, 60% no máximo).
-    const dano = Math.round(Math.max(0, (inv.hpEspelhado ?? dono.hp) - falcao.hp) * reflexoDoFalcao(ctx, dono.nivel));
+    const dano = Math.round(Math.max(0, (inv.hpEspelhado ?? dono.hp) - falcao.hp) * reflexoDoPet(ctx, petDoCompanheiro(falcao), dono.nivel));
     if (dano > 0) {
       dono.hp = Math.max(0, dono.hp - dano);
       // A autoria dos golpes no falcão passa ao dono (quem derruba o Aventureiro pelo falcão leva o abate).

@@ -17,8 +17,8 @@ describe('leituras fiéis à mecânica (D-161)', () => {
   const casos: [string, string][] = [];
   for (const def of CONTEUDO.definicoes.values()) for (const estilo of Object.keys(def.leituras ?? {})) casos.push([def.base.id, estilo]);
 
-  it('são as 150 leituras das 30 skills de classe', () => {
-    expect(casos).toHaveLength(150);
+  it('são as 160 leituras das 32 skills de classe (marco 40, D-165: a Troca e o Grito do Aventureiro)', () => {
+    expect(casos).toHaveLength(160);
   });
 
   it.each(casos)('%s / %s muda a skill', (id, estilo) => {

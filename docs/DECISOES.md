@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.11 · **Data:** 13/11/2026
+**Versão:** 1.12 · **Data:** 13/11/2026
 
 > **Histórico**
+> - **1.12 (13/11/2026)**: D-165: os companheiros do Aventureiro (falcão, lobo e urso), a Troca de companheiro fixa na tecla 1 e as skills de classe pelo companheiro ativo (o Rosnar e o Rugido).
 > - **1.11 (13/11/2026)**: D-164: o movimento da classe (três mecânicas por classe, Shift e G), o alcance que cresce com o nível, as viagens limitadas por espaço e tempo, o Salto de Guerra e o Posto dos Mortos.
 > - **1.10 (13/11/2026)**: D-163: os combos de papel (17, com o desdobramento pelo eixo) e os 30 combos assinados das classes.
 > - **1.09 (13/11/2026)**: D-162: as reações elementais viram a matriz de 36 pares das 9 pontas (o golpe físico reage), com o intervalo por alvo e o estado petrificado.
@@ -4970,3 +4971,37 @@ Mundo pede viagem longa, e cada classe precisa de um jeito próprio de atravess�
 
 **Fica para depois.** A mordida do lobo; o botão no celular e o indicador no HUD; o efeito visual próprio de cada
 mecânica entra no retrabalho visual da etapa 4.
+
+## D-165 — Marco 40: os companheiros do Aventureiro (13/11/2026)
+
+**Contexto.** O Grimório (seção "Os companheiros do Aventureiro") prevê três companheiros, um ativo por vez, como o
+veículo das skills de classe. Até aqui só existia o falcão; o lobo e o urso eram só montarias.
+
+**Decisão.**
+- **Troca de companheiro** (`troca_de_companheiro`): skill de classe fixa na tecla 1 do Aventureiro (`classes.json →
+  fixa`). O jogador não a tira nem a move; a ficha a devolve à tecla 1 (`fixarSkillDaClasse`), e o que estava lá vai
+  para a tecla 2, se ela estiver vazia. Troca do falcão para o lobo, do lobo para o urso e do urso de volta ao falcão
+  (recarga de 6 s). O companheiro ativo fica na bolsa (`Bolsa.pet`, ausente = falcão).
+- **O lobo e o urso são companheiros de combate** (`lobo_companheiro`, `urso_companheiro`), como o falcão: a vida é a
+  do dono, as skills de classe saem deles e cada um passa ao dono uma fração do golpe que leva:
+  - **Falcão**: no ar, só projéteis o alcançam; passa o reflexo de sempre (80% a 60%).
+  - **Lobo**: rápido, colado no dono; golpes de perto e projéteis o alcançam; passa 70% a 50%; a cada 3 s toma para si
+    um golpe de perto dado no dono.
+  - **Urso**: lento; tudo o alcança; passa 60% a 30%; a cada 3 s provoca os inimigos a até 2 células.
+  - Números em `balance.json → ajustesClasses.aventureiro.pets`. O urso usa o modelo do troll até o retrabalho visual.
+- **Cada skill de classe muda com o companheiro**: as variantes `pet_lobo` e `pet_urso` (o falcão é a skill como está).
+  As variantes passam a poder trocar o nome, a forma de atingir (`forma`) e todos os efeitos (`substituir`).
+  - **Grito**: o falcão expõe um alvo; o lobo **rosna** em volta dele e atordoa; o urso **ruge** em volta dele e apavora
+    (o inimigo foge na direção oposta, sem atacar). O efeito `grito_de_fera` dá 0,5 s em quem tem nível igual ou maior
+    que o Aventureiro e 0,1 s a mais por nível que o alvo tem a menos, até 4 s (`gritoDeFera`).
+  - **Ataque do companheiro**: o lobo morde, prende e salta para outros alvos; o urso esmaga, atordoa mais e empurra.
+  - **Ordem: Agarrar**: o lobo arrasta até você; o urso segura no lugar.
+  - **Armadilha**: a do lobo faz sangrar; a do urso atordoa.
+  - **Carga montada**: a do lobo vai mais longe; a do urso é mais lenta, bate mais e empurra.
+  - **Chamado da matilha**: o lobo chama três lobos por menos tempo; o urso chama um que fica mais e dá escudo.
+  - **Instinto de sobrevivência**: com o lobo, dispara (corre mais); com o urso, resiste mais e ganha escudo.
+- **O Grito volta ao kit** do Aventureiro (saíra na D-159), com livro e as leituras dos cinco estilos. Com a Troca na
+  tecla 1, o Aventureiro escolhe uma skill de classe só, na tecla 2; as iniciais são a Troca e o Ataque do companheiro.
+
+**Fica para depois.** O G trocar o companheiro fora de combate (hoje o G troca só o movimento) e o modelo próprio do
+urso.

@@ -10,6 +10,7 @@
 // Ao engajar, a invocação fica em `perseguindo` (a regeneração enxerga o perigo).
 
 import { postoDormente } from '../combat/movimento-classe';
+import { petDoCompanheiro } from '../combat/pets';
 import { alvoOfensivoValido, iniciarAcao, prioridadeDeAlvo } from '../combat/acao';
 import { aplicarEfeito } from '../combat/efeitos';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
@@ -153,7 +154,9 @@ export function processarInvocacao(estado: EstadoJogo, ctx: ContextoSimulacao, e
   }
   // Ajuste de 24/10/2026 (D-091): o falcão do Aventureiro tem IA própria (passeia, mergulha e recolhe).
   if (inv.comportamento === 'companheiro') {
-    processarFalcao(estado, ctx, e, ia, dono, saida);
+    // Marco 40 (D-165): o lobo e o urso andam junto do dono (o lobo, colado; as skills saem deles).
+    if (petDoCompanheiro(e) === 'falcao') processarFalcao(estado, ctx, e, ia, dono, saida);
+    else seguirDono(estado, ctx, e, dono);
     return;
   }
   const alvo = escolherAlvo(estado, ctx, e, dono);
