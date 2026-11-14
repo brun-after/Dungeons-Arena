@@ -6,7 +6,9 @@ import type { Golpe } from './caminhada';
 /** Os golpes de cada tipo de arma no atlas das classes (tools/sprites/receitas.ts). */
 export type GolpeDoAtlas = 'golpeCorte' | 'golpePesado' | 'golpeEsmagar' | 'golpeLeve' | 'golpeEstocada' | 'golpeDisparo' | 'golpeArremesso' | 'golpeGiro';
 /** Os estados do atlas; o golpe e a conjuração andando levam o passo nas pernas (tools/sprites/receitas.ts). */
-export type EstadoPersonagem = 'parado' | 'andar' | 'golpe' | 'conjurar' | 'morte' | 'andarGolpe' | 'andarConjurar' | GolpeDoAtlas;
+/** Marco 40 (13/11/2026): os estados do movimento da classe (tools/sprites/receitas.ts, MOVIMENTOS). */
+export type MovimentoDoAtlas = 'correr' | 'saltar' | 'voar' | 'montar';
+export type EstadoPersonagem = 'parado' | 'andar' | 'golpe' | 'conjurar' | 'morte' | 'andarGolpe' | 'andarConjurar' | GolpeDoAtlas | MovimentoDoAtlas;
 
 /**
  * Marco 32 (31/10/2026, D-131): o golpe do atlas de cada golpe de arma (null: a leitura do tomo, que usa o golpe de
@@ -42,6 +44,10 @@ export const SEM_PASSO: Readonly<Record<EstadoPersonagem, EstadoPersonagem>> = {
   golpeDisparo: 'golpe',
   golpeArremesso: 'golpe',
   golpeGiro: 'golpe',
+  correr: 'andar',
+  saltar: 'andar',
+  voar: 'parado',
+  montar: 'parado',
 };
 
 /** Quanto do golpe de arma a preparação mostra (o recuo antes do golpe, no lugar da pose de magia). */
@@ -51,8 +57,10 @@ export const RECUO_DO_GOLPE = 0.4;
  * Marco 32 (31/10/2026, D-131): o estado do quadro. Quem golpeia ou conjura andando dá passos (antes o corpo inteiro
  * ficava na pose do golpe e parecia arrastado).
  */
-export function estadoDoPersonagem(q: { morto: boolean; golpeando: boolean; conjurando: boolean; andando: boolean; golpe: Golpe | null; fisico?: boolean }): EstadoPersonagem {
+export function estadoDoPersonagem(q: { morto: boolean; golpeando: boolean; conjurando: boolean; andando: boolean; golpe: Golpe | null; fisico?: boolean; movimento?: MovimentoDoAtlas | null | undefined }): EstadoPersonagem {
   if (q.morto) return 'morte';
+  // Marco 40 (13/11/2026): o movimento da classe tem a pose dele (o golpe e a magia ainda saem com a pose deles).
+  if (q.movimento && !q.golpeando && !q.conjurando) return q.movimento;
   // O golpe de arma tem a animação dela (e a preparação é o recuo dele); a magia estende a mão.
   const daArma = q.golpe ? GOLPE_DO_ATLAS[q.golpe] : null;
   if ((q.golpeando || q.conjurando) && daArma) return daArma;
@@ -68,7 +76,10 @@ export const peloGolpe = (estado: EstadoPersonagem): boolean => SEM_PASSO[estado
 
 const DIRECOES = 8;
 /** Quanto dura cada quadro dos ciclos (ms). */
-const MS_QUADRO: Readonly<Record<'parado' | 'andar' | 'conjurar' | 'morte' | 'andarConjurar', number>> = { parado: 220, andar: 95, conjurar: 110, morte: 110, andarConjurar: 110 };
+const MS_QUADRO: Readonly<Record<'parado' | 'andar' | 'conjurar' | 'morte' | 'andarConjurar' | MovimentoDoAtlas, number>> = {
+  parado: 220, andar: 95, conjurar: 110, morte: 110, andarConjurar: 110, correr: 75, saltar: 110, voar: 140, montar: 170,
+};
+const CICLICOS: ReadonlySet<EstadoPersonagem> = new Set(['parado', 'andar', 'conjurar', 'andarConjurar', 'correr', 'saltar', 'voar', 'montar']);
 
 /** A direção do atlas para o rumo na grade (rad, de +x para +y). */
 export function direcaoDoAngulo(angulo: number): number {
@@ -82,7 +93,7 @@ export function direcaoDoAngulo(angulo: number): number {
  */
 export function quadroDoEstado(estado: EstadoPersonagem, n: number, tMs: number, fracao: number | null): number {
   if (estado === 'morte') return Math.min(n - 1, Math.floor(tMs / MS_QUADRO.morte));
-  if (estado === 'parado' || estado === 'andar' || estado === 'conjurar' || estado === 'andarConjurar') return Math.floor(tMs / MS_QUADRO[estado]) % n;
+  if (CICLICOS.has(estado)) return Math.floor(tMs / MS_QUADRO[estado as keyof typeof MS_QUADRO]) % n;
   return Math.min(n - 1, Math.max(0, Math.floor((fracao ?? 0) * n)));
 }
 

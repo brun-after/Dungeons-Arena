@@ -13,7 +13,10 @@ const DURACAO_MS: Record<CausaDeslocamento, number> = {
   avanco: 140,
   troca: 180,
   teleporte: 0,
+  recuo: 380,
 };
+/** Marco 40 (13/11/2026): o avanço do movimento da classe atravessa o caminho no tempo da distância. */
+const MS_POR_CELULA_AVANCO = 70;
 
 interface Deslize {
   de: PontoVisual;
@@ -26,14 +29,16 @@ interface Deslize {
 /** O puxão acelera no fim (a corrente recolhe com força); o empurrão sai rápido e freia. */
 function andamento(causa: CausaDeslocamento, t: number): number {
   if (causa === 'puxao') return t * t;
+  if (causa === 'recuo' || causa === 'avanco') return t < 0.5 ? 2 * t * t : 1 - 2 * (1 - t) * (1 - t);
   return 1 - (1 - t) * (1 - t);
 }
 
 export class Deslizes {
   private readonly ativos = new Map<string, Deslize>();
 
-  anotar(id: string, de: PontoVisual, para: PontoVisual, causa: CausaDeslocamento, agoraMs: number, atrasoMs = 0): void {
-    const ms = DURACAO_MS[causa];
+  /** Marco 40 (D-166): `msForcado`, a duração que a simulação mandou (o bote do lobo e do urso, na velocidade deles). */
+  anotar(id: string, de: PontoVisual, para: PontoVisual, causa: CausaDeslocamento, agoraMs: number, atrasoMs = 0, msForcado?: number): void {
+    const ms = msForcado ?? (causa === 'avanco' ? Math.max(DURACAO_MS.avanco, MS_POR_CELULA_AVANCO * Math.hypot(para.x - de.x, para.y - de.y)) : DURACAO_MS[causa]);
     if (ms <= 0) return;
     this.ativos.set(id, { de, para, inicio: agoraMs + atrasoMs, ms, causa });
   }

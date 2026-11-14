@@ -58,6 +58,8 @@ import { letraInteragir } from '../input/teclas';
 import { ligarSom, timbrePeloEstado } from './som';
 import { classeDaHabilidade } from './runa-dom';
 import { DiretorVfx } from '../render/vfx/diretor';
+import { CorpoEmMovimento } from '../render/movimento/corpo-movimento';
+import { RastrosDeMovimento } from '../render/movimento/rastros-movimento';
 
 export interface OpcoesApresentacao {
   destinoMapa?: (() => { x: number; y: number } | null) | undefined;
@@ -155,6 +157,15 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   voo.ligar(o.bus, o.estado, () => performance.now());
   // Marco 26 (29/10/2026, D-124): as assinaturas das skills (silhuetas acima, marcas no chão, corpos que deslizam).
   const diretor = new DiretorVfx({ efeitos: palco.efeitos, chao: palco.chao, particulas, impacto, reduzido });
+  // Marco 40 (13/11/2026, D-164): o movimento da classe no corpo (voo alto, salto, corrida, montaria, névoa) e o que ele
+  // deixa no mundo (a nuvem de escuridão, os símbolos de conjuração, a corda, a poeira e as rachaduras).
+  const tiposDoMovimento = new Map([...ctx.conteudo.movimentos.values()].flat().map((m) => [m.id, m.tipo] as const));
+  let posicaoDoQuadro: (e: Entidade) => PontoVisual = (e) => ({ x: e.px, y: e.py });
+  const raioNevoa = ctx.balance.movimentoClasse.nevoa.servosRaio;
+  const corpoMovimento = new CorpoEmMovimento({ tipoDe: (id) => tiposDoMovimento.get(id) ?? null, posicao: (e) => posicaoDoQuadro(e), raioNevoa });
+  corpoMovimento.ligar(o.bus, o.estado, () => performance.now());
+  const rastrosMovimento = new RastrosDeMovimento(palco.chao, palco.efeitos, corpoMovimento, { projecao: () => camera.projecaoAtual, posicao: (e) => posicaoDoQuadro(e), reduzido, raioNevoa });
+  rastrosMovimento.ligar(o.bus, o.estado, () => performance.now());
   const efeitos = new EfeitosDeHabilidade({
     particulas, impacto, habilidades: o.habilidades, idLocal, qualidade, fase: ctx.fase, diretor,
     // Marco 40 (D-160): a classe da ultimate é a de quem a lança (a família vem do par dele).
@@ -262,6 +273,8 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     if (particulas.limite === 0) {
       particulas.limpar();
       diretor.limpar();
+      corpoMovimento.limpar();
+      rastrosMovimento.limpar();
     }
     palco.definirEscala(Math.min(escalaDaResolucao(prefs.resolucao, toque), o.observador ? 1 / Math.min(window.devicePixelRatio || 1, 2) : 1));
     medidor.mostrar(prefs.medidor);
@@ -337,6 +350,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     encerrar: () => {
       combos.destruir();
       diretor.destruir();
+      rastrosMovimento.destruir();
       areaDaAura.destruir();
       motor.destruir();
       sistema.removeEventListener('change', aplicarPreferencias);
@@ -354,11 +368,12 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     quadroPermitido: (agoraMs) => pulador.deveDesenhar(agoraMs, alvoFps()),
     // D-124: o corpo puxado, empurrado ou arremessado desliza em vez de pular.
     posicaoVisual: (base) => deslizando(voo.posicao(base)),
-    ajusteVisual: (e, agoraMs) => voo.ajuste(e, agoraMs),
+    ajusteVisual: (e, agoraMs) => voo.ajuste(e, agoraMs) ?? corpoMovimento.ajuste(e, agoraMs, o.estado()),
     quadro: (estado, agoraMs, dtMs, base) => {
       diretor.relogio(agoraMs);
       voo.quadro(estado, agoraMs, base);
       const posicao = deslizando(voo.posicao(base));
+      posicaoDoQuadro = posicao;
       medidor.registrar(dtMs, agoraMs, estado.tick, () => ({
         vivos: estado.entidades.reduce((n, e) => n + (e.morto ? 0 : 1), 0),
         objetos: estado.objetos.length,
@@ -379,6 +394,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
       som.quadro(pos, agoraMs);
       camera.enquadrar(focoDoQuadro(estado, posicao), agoraMs);
       efeitos.quadro(estado, agoraMs, posicao);
+      rastrosMovimento.quadro(estado, agoraMs);
       efeitosClasse.quadro(estado, agoraMs, posicao);
       efeitosDominio.quadro(estado, agoraMs, posicao);
       terrenosVivos.quadro(estado, agoraMs, pos);

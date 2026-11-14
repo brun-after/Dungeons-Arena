@@ -1,5 +1,5 @@
 import { tintaDaInvocacao } from './cores-necromancia';
-import { alfaDoCorpo, elevacaoNaTela } from './movimento-visual';
+import { alfaDoCorpo } from './movimento-visual';
 import { desenharPorteDoNivel, escalaDoNivel, tintaDoNivel } from './porte-nivel';
 import { ehDragao, porteDoDragao } from '../world/porte-dragoes';
 import { tipoEm } from '../world/fase';
@@ -33,7 +33,7 @@ import { existeArma3d, type AtlasDePersonagens } from './personagens-3d';
 import { Figura3d } from './figura-3d';
 import { chaveDaSkin, chaveDoChefe, pedidoVivo, type PalcoVivo } from './vivos/palco-vivo';
 import { ArmasEmVoo, type DonoDoProjetil } from './armas-em-voo';
-import { direcaoDoAngulo, duracaoVisualDoGolpe, estadoDoPersonagem, peloGolpe, perfilDoAtlas, progressoDoGolpe, quadroDoEstado } from './quadros-personagem';
+import { direcaoDoAngulo, duracaoVisualDoGolpe, estadoDoPersonagem, peloGolpe, perfilDoAtlas, progressoDoGolpe, quadroDoEstado , type MovimentoDoAtlas } from './quadros-personagem';
 import { quadroDoToken, type MomentoDoQuadro } from './quadro-membros';
 import { anelDaInvocacao } from './anel-invocacao';
 import { coresDasRunas, desenharRuna } from './runas';
@@ -160,8 +160,8 @@ export interface OpcoesEntidades {
   runaDaClasse?: () => boolean;
 }
 
-/** Marco 24 (25/10/2026, D-098): quem voa solto por cima da regra (o falcão). */
-export interface AjusteVisual {
+/** Marco 24 (D-098): quem voa solto (o falcão). Marco 40 (13/11/2026): `estado`, a pose do movimento; `alfa`, multiplica a do corpo. */
+export interface AjusteVisual { estado?: MovimentoDoAtlas | null; alfa?: number;
   /** Altura extra do desenho, em px de mundo. */
   alturaPx: number;
   /** Inclinação na curva, em rad. */
@@ -182,7 +182,7 @@ export interface AjusteVisual {
 }
 
 /** A segunda figura do ajuste: o modelo do atlas, a posição na grade, a altura, o rumo e a tinta. */
-export interface Acompanhante { modelo: string; x: number; y: number; alturaPx: number; angulo: number; tinta: number | null }
+export interface Acompanhante { modelo: string; x: number; y: number; alturaPx: number; angulo: number; tinta: number | null; parado?: boolean }
 
 /** O meio da figura do atlas acima da âncora (px do atlas), em volta do qual o `gira` roda: o da cartola que voa. */
 const MEIO_DO_GIRO_PX = 15;
@@ -373,7 +373,7 @@ export class CamadaEntidades {
       const c = centroDaCelula(p.x, p.y);
       const pt = proj.projetar(c.x, c.y);
       const ajuste = this.o.ajuste?.(e, agoraMs) ?? null;
-      m.raiz.position.set(pt.x, pt.y - elevacaoNaTela(e));
+      m.raiz.position.set(pt.x, pt.y);
       m.raiz.zIndex = pt.y + (ajuste?.zMais ?? 0);
       // Direção do olhar na tela: o ângulo da grade passado pela projeção.
       const frente = proj.projetar(c.x + Math.cos(m.angulo), c.y + Math.sin(m.angulo));
@@ -381,7 +381,7 @@ export class CamadaEntidades {
       const dty = frente.y - pt.y;
       const norma = Math.hypot(dtx, dty) || 1;
       if (Math.abs(dtx) > 0.01) m.sentido = dtx > 0 ? 1 : -1;
-      m.raiz.alpha = alfaDoCorpo(e, estado.tick);
+      m.raiz.alpha = alfaDoCorpo(e, estado.tick) * (ajuste?.alfa ?? 1);
       m.raiz.visible = e.id === this.o.idLocal || !(this.o.oculto?.(p.x, p.y) ?? false);
       if (this.o.rotulos) {
         m.sobre.position.set(pt.x, pt.y);
@@ -560,10 +560,10 @@ export class CamadaEntidades {
     const ataqueMs = q.agoraMs - m.ataqueDesdeMs;
     const comPreparo = m.conjuraMs >= 150;
     const preparando = m.preparoAcao !== null && m.preparoAcao < 1;
-    const estadoBase = estadoDoPersonagem({ morto: e.morto, golpeando: false, conjurando: preparando, andando: q.andando, golpe: m.golpe, fisico: m.fisico });
+    const estadoBase = estadoDoPersonagem({ morto: e.morto, golpeando: false, conjurando: preparando, andando: q.andando, golpe: m.golpe, fisico: m.fisico, movimento: q.ajuste?.estado });
     const perfil = perfilDoAtlas(peloGolpe(estadoBase) ? estadoBase : estadoDoPersonagem({ morto: false, golpeando: true, conjurando: false, andando: false, golpe: m.golpe }), escolha.modelo);
     const golpeando = !preparando && ataqueMs < duracaoVisualDoGolpe(perfil, comPreparo);
-    const estado = golpeando ? estadoDoPersonagem({ morto: e.morto, golpeando: true, conjurando: false, andando: q.andando, golpe: m.golpe }) : estadoBase;
+    const estado = golpeando ? estadoDoPersonagem({ morto: e.morto, golpeando: true, conjurando: false, andando: q.andando, golpe: m.golpe, movimento: q.ajuste?.estado }) : estadoBase;
     const ciclo = q.reduzido && estado !== 'morte' && !peloGolpe(estado) ? 0 : q.agoraMs + faseDe(e.id) * 1000;
     const tempo = estado === 'morte' ? q.agoraMs - m.morteDesdeMs : ciclo;
     const fracao = peloGolpe(estado)
@@ -646,12 +646,12 @@ export class CamadaEntidades {
     }
     if (!m.acomp3d) {
       m.acomp3d = new Figura3d();
-      m.raiz.addChild(m.acomp3d.raiz);
+      m.raiz.addChildAt(m.acomp3d.raiz, 1); // atrás do corpo: a montaria fica embaixo de quem monta
     }
     const c = centroDaCelula(a.x, a.y);
     const onde = proj.projetar(c.x, c.y);
     const frente = proj.projetar(c.x + Math.cos(a.angulo), c.y + Math.sin(a.angulo));
-    const estado = 'andar';
+    const estado = a.parado ? 'parado' : 'andar';
     const pronto = m.acomp3d.atualizar(atlas, {
       modelo: a.modelo, estado, direcao: direcaoDoAngulo(Math.atan2(frente.y - onde.y, frente.x - onde.x)),
       indice: quadroDoEstado(estado, atlas.quadrosDe(a.modelo, estado), agoraMs, 0),

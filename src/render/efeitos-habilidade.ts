@@ -42,6 +42,10 @@ import { assinaturaDe } from './vfx/resolver';
 import { ligarSolos, tierDaArma } from './solos-visual';
 import { ligarLancas } from './lancas-visual';
 import { DT_MS } from '../core/loop';
+import { viradoNevoa } from './movimento/corpo-movimento';
+import balance from '../data/balance.json';
+
+const RAIO_NEVOA = balance.movimentoClasse.nevoa.servosRaio;
 import { corDaArmadilha } from './armadilhas-visual';
 
 /** 06/11/2026 (D-135): o efeito que cada elemento solta quando o círculo de conjuração dispara. */
@@ -209,7 +213,7 @@ export class EfeitosDeHabilidade {
     bus.on('deslocado', (ev) => {
       const chave = ev.acaoId === undefined ? undefined : this.skillDaAcao.get(ev.acaoId);
       const h = chave ? this.o.habilidades(chave) : undefined;
-      this.o.diretor.deslocado(ev.id, { x: ev.deX, y: ev.deY }, { x: ev.paraX, y: ev.paraY }, ev.causa, h ? assinaturaDe(h) : null);
+      this.o.diretor.deslocado(ev.id, { x: ev.deX, y: ev.deY }, { x: ev.paraX, y: ev.paraY }, ev.causa, h ? assinaturaDe(h) : null, ev.ms);
     });
     bus.on('morreu', (ev) => {
       const e = estado().entidades.find((x) => x.id === ev.id);
@@ -385,7 +389,8 @@ export class EfeitosDeHabilidade {
       if (pos) this.o.particulas.emitir(aura, pos.x, pos.y, 0xffffff);
     }
     for (const e of estado.entidades) {
-      if (e.morto) continue;
+      // Marco 40 (13/11/2026): quem virou névoa não pisca aura (a nuvem de escuridão é o corpo dele).
+      if (e.morto || viradoNevoa(e, estado, RAIO_NEVOA)) continue;
       const status = e.efeitos.filter((f) => f.ateTick > estado.tick && REGISTRO_EFEITOS[f.tipo].ehStatus);
       const primeiro = status[0];
       if (!primeiro || agoraMs - (this.ultimaAura.get(e.id) ?? 0) < INTERVALO_AURA_MS) continue;

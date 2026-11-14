@@ -277,7 +277,7 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
       const { x, y } = e;
       const ok = m.tipo === 'teleporte' ? teleportar(estado, ctx, e, destino) : avancar(estado, ctx, e, destino, alcance);
       if (!ok) { recusar('bloqueado'); return; }
-      saida.push({ t: 'deslocado', tick, id: e.id, deX: x, deY: y, paraX: e.x, paraY: e.y, origemId: e.id, causa: m.tipo === 'teleporte' ? 'teleporte' : 'avanco' });
+      saida.push({ t: 'deslocado', tick, id: e.id, deX: x, deY: y, paraX: e.x, paraY: e.y, origemId: e.id, causa: m.tipo === 'teleporte' ? 'teleporte' : m.tipo === 'recuo' ? 'recuo' : 'avanco' });
       saida.push({ t: 'movimentoClasse', tick, id: e.id, mov: m.id, fase: 'inicio' });
       return;
     }
@@ -420,7 +420,8 @@ function usarPosto(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, p: P
     q.waypoints = [];
     q.caminho = [];
   }
-  saida.push({ t: 'deslocado', tick: estado.tick, id: e.id, deX: x, deY: y, paraX: e.x, paraY: e.y, origemId: e.id, causa: 'troca' });
+  // A troca com o servo do posto passa pela escuridão (não desliza pelo mapa).
+  saida.push({ t: 'deslocado', tick: estado.tick, id: e.id, deX: x, deY: y, paraX: e.x, paraY: e.y, origemId: e.id, causa: 'teleporte' });
   if (p.escudo > 0) aplicarEfeito(estado, ctx, servo, construirEfeito('escudo', { valor: p.escudo, duracaoMs: 8000 }), { id: e.id, x: e.x, y: e.y }, null, saida);
   if (p.reuniao > 0) {
     // A reunião: os outros servos livres vêm para perto do Necromante.

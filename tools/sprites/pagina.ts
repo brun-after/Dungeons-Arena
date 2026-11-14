@@ -11,7 +11,7 @@ import * as THREE from 'three';
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { clone as clonarComEsqueleto } from 'three/examples/jsm/utils/SkeletonUtils.js';
-import { BASE, COLUNAS_POR_FAIXA, DIRECOES, ehVariante, estadosDe, QUADROS, VARIANTES, type Arma, type Estado, type EstadoBase, type Receita, type Variante } from './receitas';
+import { BASE, COLUNAS_POR_FAIXA, DIRECOES, ehMovimento, ehVariante, estadosDe, MOVIMENTOS, QUADROS, VARIANTES, type Arma, type Estado, type EstadoBase, type Receita, type Variante } from './receitas';
 import { posProcessar } from './pos';
 import { renderizarArmas } from './icones';
 import { asas, bacinete, capa, elmo, pecaDeCabeca, peito, protegerMembros, tiara } from './armaduras3d';
@@ -480,6 +480,9 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
   const ESTADOS = estadosDe(r);
   const variantes = {} as Record<Variante, THREE.AnimationClip | null>;
   for (const e of ESTADOS) if (ehVariante(e)) variantes[e] = r.animacoes ? await clipe(VARIANTES[e], urls) : null;
+  // Marco 40 (13/11/2026): os estados do movimento da classe.
+  const movimentos = new Map<string, THREE.AnimationClip | null>();
+  for (const e of ESTADOS) if (ehMovimento(e)) movimentos.set(e, r.animacoes ? await clipe(MOVIMENTOS[e].clipe, urls) : null);
 
   // A altura: a pessoa parada (o primeiro quadro do parado) mede `altura` células.
   pose(mt, clipes.parado, 0);
@@ -605,26 +608,33 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
     pivo.rotation.y = Math.atan2(Math.cos(a), Math.sin(a));
     for (const e of ESTADOS) {
       const base = BASE[e];
-      const c = ehVariante(e) ? variantes[e] : clipes[base];
+      const solto = ehVariante(e) || ehMovimento(e);
+      const c = ehVariante(e) ? variantes[e] : ehMovimento(e) ? (movimentos.get(e) ?? null) : clipes[base];
       let inicioDaBacia = new THREE.Vector3();
       const n = QUADROS[e];
       for (let i = 0; i < n; i++) {
         // Os ciclos repartem a volta toda; o golpe e a morte vão do começo ao fim (o último quadro é o fim).
-        const ciclo = !ehVariante(e) && (base === 'parado' || base === 'andar' || base === 'conjurar');
+        const ciclo = ehMovimento(e) ? MOVIMENTOS[e].ciclo : !ehVariante(e) && (base === 'parado' || base === 'andar' || base === 'conjurar');
         const duracao = c?.duration ?? 0;
         const t = Math.max(0, ciclo ? (duracao * i) / n : (duracao * i) / Math.max(1, n - 1) - (i === n - 1 ? 1e-3 : 0));
         // O giro: uma volta inteira do corpo ao longo do golpe.
         pivo.rotation.y = Math.atan2(Math.cos(a), Math.sin(a)) + (e === 'golpeGiro' ? (2 * Math.PI * i) / n : 0);
         mt.grupo.position.set(0, 0, 0);
-        if (base === e || ehVariante(e)) pose(mt, c, t);
+        if (base === e || solto) pose(mt, c, t);
         else poseAndando(mt, clipes.andar, ((clipes.andar?.duration ?? 0) * i) / n, c, t);
         // Os golpes de arma avançam o corpo (o bote do corte pesado): a bacia fica no lugar do começo, no chão, para
         // o corpo não sair do quadro (o jogo já anda a entidade).
-        if ((ehVariante(e) || r.apoiarNoChao) && bacia) {
+        if ((solto || r.apoiarNoChao) && bacia) {
           if (i === 0) inicioDaBacia = pivo.worldToLocal(bacia.getWorldPosition(new THREE.Vector3()));
           const agora = pivo.worldToLocal(bacia.getWorldPosition(new THREE.Vector3()));
           mt.grupo.position.set(inicioDaBacia.x - agora.x, 0, inicioDaBacia.z - agora.z);
           mt.grupo.updateMatrixWorld(true);
+        }
+        // Marco 40 (13/11/2026): o voo deitado (o nado da UAL) fica com o corpo todo acima do chão.
+        if (e === 'voar') {
+          pivo.updateMatrixWorld(true);
+          const limites = new THREE.Box3().setFromObject(mt.grupo, true);
+          if (limites.min.y < 0) mt.grupo.position.y -= limites.min.y;
         }
         if (r.apoiarNoChao) {
           mt.grupo.position.add(apoio);
@@ -721,7 +731,7 @@ const CLIPES_DO_TEMPO_REAL = ['ual1:Sword_Attack', 'ual2:Sword_Regular_B', 'ual2
 async function exportarModelo(r: Receita, urls: Urls): Promise<string> {
   const { grupo } = await montar(r, urls);
   // Marco 37 (05/11/2026): mais os golpes alternados e a preparação das magias do 3D em tempo real (palco-vivo.ts).
-  const nomes = new Set([...Object.values(r.animacoes ?? {}), ...Object.values(VARIANTES), ...CLIPES_DO_TEMPO_REAL]);
+  const nomes = new Set([...Object.values(r.animacoes ?? {}), ...Object.values(VARIANTES), ...Object.values(MOVIMENTOS).map((m) => m.clipe), ...CLIPES_DO_TEMPO_REAL]);
   const animations = await Promise.all([...nomes].map(nome => clipe(nome, urls)));
   grupo.name = r.nome;
   // Marco 37 (04/11/2026): o modelo do jogo em tempo real tem 48 px × dpr na tela. Sem mapas de normal e com as
