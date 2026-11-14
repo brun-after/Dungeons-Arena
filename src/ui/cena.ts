@@ -167,8 +167,12 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const sincronizarSkin = (p: Preferencias) => { sincronizarSkinLocal(jogador(), p, emitir); }; // 06/11/2026
 
   o.raiz.textContent = '';
-  // Marco 16: os modais vão para o <body> (modal.ts); ao desmontar, saem os que esta cena criou.
+  // Marco 16: os modais vão para o <body> (modal.ts); ao desmontar, saem os que esta cena criou. Marco 41 (14/11/2026,
+  // D-169): cada modal leva a marca da cena (na troca de região, a de antes sai depois de a nova montar e levava junto
+  // a pausa e a mochila da nova). Só a cena ativa (com o laço rodando) marca os modais novos.
   const modaisDeAntes = new Set(document.querySelectorAll('dialog.modal'));
+  const marcaCena = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+  const marcarModais = () => { for (const d of document.querySelectorAll<HTMLDialogElement>('dialog.modal:not([data-cena])')) if (!modaisDeAntes.has(d)) d.dataset.cena = marcaCena; };
   const host = div('palco');
   const ui = div('camada-ui');
   const preparando = div('preparando-cena');
@@ -648,6 +652,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   let zoomAntesParty: number | null = null;
   let celulaCentralizada = false;
   const quadro = (q: QuadroCena) => {
+    marcarModais();
     const estado = o.estado();
     const dtMs = q.agoraMs - ultimoQuadroMs;
     const dtS = Math.min(0.1, dtMs / 1000);
@@ -763,6 +768,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       };
     });
   };
+  marcarModais();
   const mundo: CenaDoMundo = criarCenaDoMundo({ palco, camera, terreno, balance: ctx.balance, escalaSolo: () => ap.qualidade().soloEscala, pintor: o.tileset ? null : pintor, modelos3d: o.tileset ? null : modelos3d, jogador, teclas: () => teclado.mantidas() });
   return {
     bus,
@@ -786,7 +792,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       personagens?.destruir();
       vivos?.destruir();
       ap.encerrar();
-      for (const d of document.querySelectorAll('dialog.modal')) if (!modaisDeAntes.has(d)) d.remove();
+      for (const d of document.querySelectorAll(`dialog.modal[data-cena="${marcaCena}"]`)) d.remove();
       palco.destruir();
       o.raiz.textContent = '';
     },
