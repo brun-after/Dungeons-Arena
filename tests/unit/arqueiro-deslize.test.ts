@@ -98,15 +98,17 @@ describe('o salto para trás respeita a animação (D-171)', () => {
     expect(j.px).toBeLessThan(pousou);
   });
 
-  it('o golpe pedido no meio do salto sai quando ele acaba', () => {
+  it('com o alvo à frente, o básico automático espera o fim do salto', () => {
     const { estado, j, eventos } = cena();
-    j.autoAtaque = false;
     definirDirecao(j, 'E');
     simular(estado, ctx, [{ tick: estado.tick, entidadeId: 'j', cmd: { t: 'movimentoClasse' } }], eventos, DT_MS);
     definirDirecao(j, 'parado');
-    simular(estado, ctx, [{ tick: estado.tick, entidadeId: 'j', cmd: { t: 'usarHabilidade', id: j.ataqueBasico, alvo: 'b' } }], eventos, DT_MS);
-    expect(eventos.some((e) => e.t === 'acaoIniciada' && e.atorId === 'j')).toBe(false);
-    for (let i = 0; i < ticksDe(ctx.balance.movimento.deslize.recuoMs) + 2; i++) simular(estado, ctx, [], eventos, DT_MS);
+    simular(estado, ctx, [{ tick: estado.tick, entidadeId: 'j', cmd: { t: 'selecionarAlvo', alvo: 'b' } }], eventos, DT_MS);
+    const fim = obter(j.deslize, 'deslize').ateTick;
+    const basicoAntes = () => eventos.some((e) => e.t === 'acaoIniciada' && e.atorId === 'j' && e.tick < fim);
+    while (estado.tick < fim) simular(estado, ctx, [], eventos, DT_MS);
+    expect(basicoAntes()).toBe(false);
+    for (let i = 0; i < ticksDe(1000); i++) simular(estado, ctx, [], eventos, DT_MS);
     expect(eventos.some((e) => e.t === 'acaoIniciada' && e.atorId === 'j')).toBe(true);
   });
 });

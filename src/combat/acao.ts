@@ -1,7 +1,7 @@
 import { tipoEm } from '../world/fase';
 import { consumirAtaque } from './reserva-necromante';
 import { classeDe, conjuracaoDaClasse } from './ajustes-classes';
-import { noDeslize } from './deslize';
+import { andarCabeNoDeslize } from './deslize';
 import { clonarEntidade } from '../entities/entidade';
 import { velocidadeFrenesiPct } from './furia';
 import { prepararSequencia, participaDeCombo } from './sequencias';
@@ -276,8 +276,6 @@ export function iniciarAcao(
   if (acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) return recusar('bloqueado');
   // Marco 40 (D-164): no meio do salto e esperando a âncora não se ataca.
   if (motivoDoMovimento(ator)) return recusar('movimento');
-  // 14/11/2026 (D-171): no meio do deslize próprio também não (o comando do jogador sai no fim, combat/deslize.ts).
-  if (noDeslize(ator, estado.tick)) return recusar('movimento');
   if (recargaRestante(estado, ator.id, chaveDoBasico(ator, hab.id)) > 0) return recusar('recarga');
   const perfil = perfilPara(ctx, ator, hab);
   const { custoMana, custoVida, semMana } = custoDaHabilidade(ctx, ator, hab);
@@ -329,6 +327,10 @@ export function iniciarAcao(
     ator.alvoSelecionado = visivel.id;
   }
 
+  // 14/11/2026 (D-171): no meio do deslize próprio, o básico contra o rumo dele espera (viraria o corpo para o alvo e
+  // cortaria a animação do salto para trás). No mesmo rumo (o dash até o alvo) e as skills saem na hora: segurar tudo
+  // deixava o guerreiro forte demais nas metas.
+  if (ehBasico(ator, hab.id) && !andarCabeNoDeslize(ctx, ator, estado.tick, mira.x - origem.x, mira.y - origem.y)) return recusar('movimento');
   if (substituiBasico) cancelar(ator, estado, 'substituido', saida);
   // Marco 24 (D-097): quem ataca olha para o alvo (decide o "pelas costas" de quem bate nele).
   if (mira.x !== origem.x || mira.y !== origem.y) virarPara(ator, mira);

@@ -5284,7 +5284,12 @@ o corpo voltava a andar (ou golpeava virando para o alvo) logo no tick seguinte,
   - não anda contra o rumo do deslize. A intenção (o caminho do clique, a tecla) fica e volta no fim, então saltar para
     trás e seguir para a frente espera a queda. No mesmo rumo (cosseno ≥ 0,3), segue junto: recuar depois do salto é
     imediato;
-  - não começa golpe. A skill pedida no meio fica guardada e sai no fim (a última pedida vale);
+  - o ataque básico contra o rumo do deslize espera. Era ele que virava o corpo para o alvo à frente no meio do salto
+    para trás. No mesmo rumo (o dash até o alvo), o básico sai, e as skills saem na hora. Duas versões mais
+    rígidas foram testadas e deixavam o guerreiro fora das metas (`balance.metas`):
+    - segurar todo golpe e soltar a skill pedida no fim: `dois melhores estilos contra a dispersa` 97,7% (até 90%) e
+      `nível 100: tempo no comum` 1,97 s (a partir de 2);
+    - segurar todo básico: `equipado vence o sem equipamento` 59,4% (a partir de 60);
   - o Salto para trás para longe do alvo seguido larga o seguir alvo dele (como o direcional contrário, D-121), que
     puxava o Arqueiro de volta para a frente.
 - **O desenho** (render/vfx/deslizes.ts) leva o deslize junto quando o corpo segue andando no mesmo rumo durante ele

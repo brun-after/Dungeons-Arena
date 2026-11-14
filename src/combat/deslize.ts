@@ -3,14 +3,13 @@
 // partida até lá. Antes, no tick seguinte o corpo já andava (o clique ou a tecla para a frente, o seguir alvo) ou
 // começava um golpe virando para o alvo, e a animação era cortada no meio. Enquanto dura o deslize:
 // - não anda contra o rumo do deslize (no mesmo rumo, segue junto: recuar depois do salto para trás é fácil);
-// - não começa golpe; a skill pedida no meio fica guardada e sai quando o deslize acaba.
+// - o ataque básico espera (ele virava o corpo para o alvo no meio do salto); a skill pedida sai na hora.
 // A intenção de andar (o caminho, a direção) fica guardada e volta no fim. Números em balance.movimento.deslize. Puro.
 
 import type { ContextoSimulacao } from '../core/contexto';
 import type { CausaDeslocamento } from '../core/eventos-simulacao';
 import { buscarEntidade, type EstadoJogo } from '../core/estado';
 import { ticksDe } from '../core/tempo';
-import type { Celula, EntidadeId } from '../core/comandos';
 import type { Entidade } from '../entities/entidade';
 
 type Ctx = Pick<ContextoSimulacao, 'balance'>;
@@ -43,20 +42,6 @@ export function andarCabeNoDeslize(ctx: Ctx, e: Entidade, tick: number, ux: numb
   if (!d || d.ateTick <= tick) return true;
   const n = Math.hypot(ux, uy);
   return n > 0 && (ux * d.dx + uy * d.dy) / n >= ctx.balance.movimento.deslize.mesmoRumoCos;
-}
-
-/** A skill pedida no meio do deslize fica guardada (a última pedida vale). */
-export function guardarPedido(e: Entidade, id: string, alvo: EntidadeId | Celula | undefined): void {
-  if (!e.deslize) return;
-  e.deslize.pedido = { id, ...(alvo === undefined ? {} : { alvo: typeof alvo === 'object' ? { x: alvo.x, y: alvo.y } : alvo }) };
-}
-
-/** Acabou o deslize: devolve a skill guardada (uma vez) e limpa. */
-export function pedidoAoFimDoDeslize(e: Entidade, tick: number): { id: string; alvo?: EntidadeId | Celula } | null {
-  const d = e.deslize;
-  if (!d || d.ateTick > tick) return null;
-  delete e.deslize;
-  return d.pedido ?? null;
 }
 
 /**
