@@ -44,6 +44,8 @@ export interface Balance {
       pets: { lobo: { reflexoPct: [number, number]; passoMs: number; interceptarMs: number; nadaLutando?: boolean }; urso: { reflexoPct: [number, number]; passoMs: number; provocarMs: number; provocarRaio: number; /** D-170: ataca nadando. */ nadaLutando?: boolean } };
       /** D-165: o Rosnar e o Rugido (base, por nível de diferença e teto, em ms). */
       gritoDeFera: { baseMs: number; porNivelMs: number; maxMs: number };
+      /** D-173: o que cada estilo do dono dá a cada companheiro (por estilo, companheiro e campo, o valor na faixa 10). */
+      estilosDosPets?: Record<string, Partial<Record<string, Partial<Record<string, number>>>>>;
       marca: { recargaBasicoPct: number; velocidadePct: number; danoPct: number; /** D-170: a marca dura isto depois do último golpe que a renovou. */ duracaoMs: number } };
     arqueiro: { secundariosMult: number; /** 05/11/2026 (D-132): o alcance que sobra andando, em %. */ alcanceAndandoPct: number;
       /** 14/11/2026 (D-171): o alcance ofensivo sem a Mira cheia (%) e o multiplicador da conjuração das skills. */

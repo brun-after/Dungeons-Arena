@@ -19,6 +19,7 @@ import type { Celula } from '../core/comandos';
 import { passavel } from '../world/fase';
 import type { Habilidade } from './habilidades';
 import { construirEfeito } from './registro-efeitos';
+import { leituraDoAtivo, leituraDoCompanheiro } from './pets-estilos';
 
 export const PETS = ['falcao', 'lobo', 'urso'] as const;
 export type Pet = (typeof PETS)[number];
@@ -73,7 +74,9 @@ export function loboIntercepta(estado: EstadoJogo, ctx: ContextoSimulacao, alvo:
   if (!lobo || chebyshev(lobo, alvo) > 1) return null;
   const chave = `lobo:intercepta:${alvo.id}`;
   if ((estado.recargas[chave] ?? 0) > estado.tick) return null;
-  estado.recargas[chave] = estado.tick + ticksDe(ctx.balance.ajustesClasses.aventureiro.pets.lobo.interceptarMs);
+  // D-173: o lobo do Sobrevivente toma golpes mais vezes.
+  const menos = Math.min(80, leituraDoAtivo(ctx, alvo, 'interceptarMenosPct'));
+  estado.recargas[chave] = estado.tick + ticksDe(ctx.balance.ajustesClasses.aventureiro.pets.lobo.interceptarMs * (1 - menos / 100));
   return lobo;
 }
 
@@ -85,8 +88,10 @@ export function processarPets(estado: EstadoJogo, ctx: ContextoSimulacao, saida:
     if (!vivo(urso) || !urso.invocacao?.companheiro || petDoCompanheiro(urso) !== 'urso') continue;
     const dono = buscarEntidade(estado, urso.invocacao.donoId);
     if (!dono) continue;
+    // D-173: o urso do Mestre de Feras provoca mais longe.
+    const raio = u.provocarRaio + Math.floor(leituraDoCompanheiro(estado, ctx, urso, 'provocarRaio'));
     for (const o of estado.entidades) {
-      if (o === urso || !vivo(o) || o.invocacao || chebyshev(o, urso) > u.provocarRaio || !podeFerir(dono, o, ctx.modo)) continue;
+      if (o === urso || !vivo(o) || o.invocacao || chebyshev(o, urso) > raio || !podeFerir(dono, o, ctx.modo)) continue;
       aplicarEfeito(estado, ctx, o, construirEfeito('desafiado', { duracaoMs: u.provocarMs, pct: 0 }), { id: urso.id, x: urso.x, y: urso.y }, null, saida);
     }
   }

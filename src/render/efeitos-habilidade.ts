@@ -18,6 +18,7 @@
 // saem dela, com silhuetas (a corrente que estica, a bola de fogo, o relâmpago) e marcas no chão. A ultimate conjura no
 // círculo com a runa da classe, e o puxão, o empurrão e o arremesso deslizam o corpo (evento `deslocado`).
 
+import { ligarGestos } from './vfx/gestos';
 import { celulasDaForma } from '../combat/formas';
 import type { BuscaHabilidade } from '../combat/habilidades';
 import type { Fase } from '../world/fase';
@@ -213,6 +214,8 @@ export class EfeitosDeHabilidade {
       const h = chave ? this.o.habilidades(chave) : undefined;
       this.o.diretor.deslocado(ev.id, { x: ev.deX, y: ev.deY }, { x: ev.paraX, y: ev.paraY }, ev.causa, h ? assinaturaDe(h) : null, ev.ms);
     });
+    // D-173 (14/11/2026): os gestos das reações, das ressonâncias e dos combos de papel e assinados.
+    ligarGestos(bus, this.o.diretor, pos);
     bus.on('morreu', (ev) => {
       const e = estado().entidades.find((x) => x.id === ev.id);
       const p = pos(ev.id);

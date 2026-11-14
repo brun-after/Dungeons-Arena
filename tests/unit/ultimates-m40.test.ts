@@ -51,8 +51,11 @@ describe('fios da ultimate (D-160)', () => {
   it('a fusão dos dois estilos entra pela faixa do mais fraco', () => {
     const sem = ult('ult_aniquilacao#fogo6.fogo6!fogo6');
     const com = ult('ult_aniquilacao#fogo6.fogo6*area.controle4!fogo6');
-    expect(sem.efeitos.some((e) => e.tipo === 'enraizado')).toBe(false);
-    expect(com.efeitos.some((e) => e.tipo === 'enraizado')).toBe(true);
+    expect(sem.efeitos.some((e) => e.tipo === 'fase' && e.ref === 'fusao_borda')).toBe(false);
+    // D-173: a borda se fecha (a fase que prende quem ficou perto) em vez de enraizar todos de uma vez.
+    expect(com.efeitos.some((e) => e.tipo === 'fase' && e.ref === 'fusao_borda')).toBe(true);
+    // A fusão de perfuração faz a ultimate atravessar a fila.
+    expect(ult('ult_aniquilacao#fogo6.fogo6*perfuracao.controle4!fogo6').perfura).toBe(true);
     expect(com.fusao).toBe('area+controle');
     expect(CONTEUDO.fusoes.size).toBe(36);
   });
@@ -70,10 +73,14 @@ describe('fios da ultimate (D-160)', () => {
     expect(formatarChave(obter(lerChave(chave)))).toBe(chave);
     expect(lerChave('ult_legiao$mago')).toBeNull();
     const ref = (k: string) => ult(k).efeitos.find((e) => e.tipo === 'invocar_temporario')?.ref;
-    expect(ref('ult_legiao#fogo6.gelo3$mago!fogo8')).toBe('espectro_tempestade');
     expect(ref('ult_legiao#fogo6.gelo3$necromante!trevas8')).toBe('esqueleto_profano');
-    expect(ref('ult_guardioes#fogo6.gelo3$guerreiro!fisico8')).toBe('fada');
-    expect(ref('ult_muralha_viva#fogo6.gelo3$arqueiro!raio8')).toBe('lobo_espiritual');
+    expect(ref('ult_matilha#fogo6.gelo3$aventureiro!terra8')).toBe('lobo_espiritual');
+    // D-173: quem não invoca troca a criatura pela etapa da classe.
+    const fases = (k: string) => ult(k).efeitos.filter((e) => e.tipo === 'fase').map((e) => e.ref);
+    expect(ref('ult_legiao#fogo6.gelo3$mago!fogo8')).toBeUndefined();
+    expect(fases('ult_legiao#fogo6.gelo3$mago!fogo8')).toEqual(['etapa_glifos_arcanos', 'etapa_glifos_arcanos', 'etapa_glifos_arcanos']);
+    expect(fases('ult_guardioes#fogo6.gelo3$guerreiro!fisico8')).toContain('etapa_grito_de_guerra');
+    expect(fases('ult_muralha_viva#fogo6.gelo3$arqueiro!raio8')).toContain('etapa_cerca_de_armadilhas');
     expect(ult('ult_aniquilacao#fogo6.gelo3$necromante!trevas8').lanca?.junto).toBe(true);
     expect(ult('ult_aniquilacao#fogo6.gelo3$mago!fogo8').lanca).toBeUndefined();
     // A que não fere não lança.

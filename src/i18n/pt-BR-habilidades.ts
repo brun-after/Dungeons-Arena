@@ -73,6 +73,7 @@ export const textosHabilidades = {
   'desc.efeito.ab_multi_alvo': 'Ataque básico acerta +{valor} alvo(s) por {s} s',
   'desc.efeito.imune_dano': 'Imune a dano por {s} s',
   'desc.efeito.acelerado': '+{pct}% de velocidade de movimento por {s} s',
+  'desc.efeito.montaria': 'Montado: +{pct}% de velocidade por {s} s; apeia ao levar dano ou usar uma skill',
   'desc.efeito.fantasma': 'Atravessa criaturas por {s} s',
   'desc.efeito.atravessar': 'Projéteis atravessam os alvos por {s} s',
   'desc.efeito.cura': 'Cura {quanto} de vida',

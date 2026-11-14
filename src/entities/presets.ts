@@ -20,6 +20,8 @@ export interface PresetInimigo {
   deteccao: number;
   xp: number;
   modelo: string;
+  /** D-173: a tinta do modelo (a criatura própria de uma classe que reusa um modelo de outra), em #rrggbb. */
+  tinta?: string;
   arquetipo: Exclude<Arquetipo, 'jogador'>;
   classe: ClasseCombate;
   defesa: number;
@@ -162,6 +164,7 @@ export function lerPresets(json: unknown): { presets: Map<string, PresetInimigo>
       comportamento: o.comportamento === undefined ? null : l.opcao(o, 'comportamento', COMPORTAMENTOS_ESPECIAIS),
       soMundo: o.soMundo === undefined ? false : l.booleano(o, 'soMundo'),
       soPorTema: o.soPorTema === undefined ? false : l.booleano(o, 'soPorTema'),
+      ...(o.tinta !== undefined && { tinta: l.texto(o, 'tinta') }),
     };
     if (presets.has(p.id)) l.erro('id repetido');
     erros.push(...l.erros);

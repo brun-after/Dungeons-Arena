@@ -411,7 +411,7 @@ export class CamadaEntidades {
         angulo: Math.atan2(dty, dtx),
       });
       this.acompanhar(m, ajuste?.acompanhante ?? null, pt, proj, iso, agoraMs);
-      const tintaInvocada = tintaDaInvocacao(e, estado);
+      const tintaInvocada = tintaDaInvocacao(e, estado, ctx.conteudo.presets.get(e.preset)?.tinta);
       if (m.figura3d) m.figura3d.raiz.tint = tintaInvocada ?? 0xffffff;
       if (m.vivo) m.vivo.tint = tintaInvocada ?? 0xffffff;
       if (m.rig && tintaInvocada !== null) m.rig.raiz.tint = tintaInvocada;

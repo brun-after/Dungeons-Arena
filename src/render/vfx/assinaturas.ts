@@ -13,8 +13,9 @@ import { CORRENTE } from './familias/corrente';
 import { ELEMENTOS_VFX } from './familias/elementos';
 import { FOGO } from './familias/fogo';
 import { TREVAS } from './familias/trevas';
+import { ULTIMATES_VFX } from './familias/ultimates';
 
-const TODAS = { ...FOGO, ...CORRENTE, ...ELEMENTOS_VFX, ...TREVAS, ...ARCANO, ...COMBATE, ...ARMAS_VFX };
+const TODAS = { ...FOGO, ...CORRENTE, ...ELEMENTOS_VFX, ...TREVAS, ...ARCANO, ...COMBATE, ...ARMAS_VFX, ...ULTIMATES_VFX };
 
 /** Todas as assinaturas: o tipo exige uma por nome da lista fechada (e o teste confere que nenhuma sobra). */
 export const ASSINATURAS: Readonly<Record<AssinaturaVisual, DefAssinatura>> = TODAS;

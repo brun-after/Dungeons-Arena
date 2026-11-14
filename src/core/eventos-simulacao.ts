@@ -216,6 +216,8 @@ export type EventoSimulacao =
    */
   | { t: 'deslocado'; tick: number; id: EntidadeId; deX: number; deY: number; paraX: number; paraY: number; origemId: EntidadeId; causa: CausaDeslocamento; acaoId?: number; ms?: number }
   | { t: 'descoberta'; tick: number; id: EntidadeId; entrada: string }
+  /** D-173 (14/11/2026): uma ressonância (eixo × elemento) disparou no golpe de `id` em `alvoId`. */
+  | { t: 'ressonancia'; tick: number; id: EntidadeId; ressonancia: string; alvoId: EntidadeId; x: number; y: number }
   | { t: 'renasceu'; tick: number; id: EntidadeId; hp: number }
   | { t: 'barraMudou'; tick: number; id: EntidadeId }
   /** Marco 15: a dificuldade do mundo mudou. */

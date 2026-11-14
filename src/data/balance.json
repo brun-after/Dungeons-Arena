@@ -53,6 +53,13 @@
         "urso": { "reflexoPct": [60, 30], "passoMs": 420, "provocarMs": 3000, "provocarRaio": 2, "nadaLutando": true }
       },
       "gritoDeFera": { "baseMs": 500, "porNivelMs": 100, "maxMs": 4000 },
+      "estilosDosPets": {
+        "mestre_de_feras": { "falcao": { "ataquePct": 40 }, "lobo": { "invocacaoPct": 50 }, "urso": { "provocarRaio": 2 } },
+        "batedor": { "falcao": { "passoPct": 40 }, "lobo": { "passoPct": 35 }, "urso": { "passoPct": 35 } },
+        "implacavel": { "falcao": { "repetirPct": 50 }, "lobo": { "repetirPct": 40 }, "urso": { "repetirPct": 25, "empurrao": 1.5 } },
+        "sobrevivente": { "falcao": { "curaNoGolpePct": 3 }, "lobo": { "interceptarMenosPct": 40, "reflexoMenosPct": 25 }, "urso": { "reflexoMenosPct": 40 } },
+        "pergaminhista": { "falcao": { "runaNoGolpe": 1, "runaRaio": 1.5 }, "lobo": { "runaNoGolpe": 1 }, "urso": { "runaNoGolpe": 1 } }
+      },
       "marca": { "recargaBasicoPct": 100, "velocidadePct": 60, "danoPct": 70, "duracaoMs": 5000 }
     },
     "arqueiro": {
@@ -276,6 +283,7 @@
     "pontosPorNivel": 1,
     "estudo": { "B": 900000, "A": 1800000, "S": 3600000, "reducaoPorIntPct": 2, "reducaoMaxPct": 40 },
     "velocidadeConjurandoLenta": 0.5,
+    "ressonancias": { "faixaMin": 3, "recargaMs": 4000, "raioAliados": 3, "duracaoMinPct": 50 },
     "runas": { "vinculoMinPct": 1, "fracaoMinPct": 20, "fracaoMaxPct": 60, "duracaoMinPct": 50, "curaSagradoPct": 25, "escudoBase": 4, "escudoPorFaixa": 1.2, "escudoMs": 6000, "parPorFaixaPct": 1.5, "parComboPct": 10 },
     "eixos": {
       "custoPct": { "maior_e_mais_lenta": -20, "ecoar": -25, "encadear": -15, "atravessar": -8, "controle": -5, "sustento": -8, "marca": -5, "grupo": -8, "invocacao": -5 },

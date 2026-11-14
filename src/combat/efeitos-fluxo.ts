@@ -1,4 +1,5 @@
 import { prepararReservas, retirarVida } from './reserva-necromante';
+import { leituraDoAtivo } from './pets-estilos';
 import { noAr } from './movimento-classe';
 import { classeDe, extraGuerreiro, protecaoInicial, pulsarAura } from './ajustes-classes';
 // Efeitos de fluxo próprio (§2.8, §2.9, §2.11). Marco 8A-2 (14/10/2026), D-049.
@@ -173,7 +174,9 @@ export function invocar(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entida
     const livres = vizinhasLivres(estado, ctx, e, celulaOcupada(dono));
     const lugar = livres.find((c) => !estado.entidades.some((o) => vivo(o) && !o.invocacao?.companheiro && reservaCelula(o, c.x, c.y))) ?? livres[0];
     if (!lugar) return;
-    tornarInvocacao(e, dono, estado.tick, estado.tick + ticksDe(ef.duracaoMs), 0, p?.avatar ? 'avatar' : 'invocacao');
+    // D-173: com o lobo do Mestre de Feras, as feras chamadas duram mais.
+    const duracaoMs = ef.duracaoMs * (1 + leituraDoAtivo(ctx, dono, 'invocacaoPct') / 100);
+    tornarInvocacao(e, dono, estado.tick, estado.tick + ticksDe(duracaoMs), 0, p?.avatar ? 'avatar' : 'invocacao');
     if (e.invocacao && p) {
       e.invocacao.comportamento = p.comportamento;
       e.invocacao.avatar = p.avatar;

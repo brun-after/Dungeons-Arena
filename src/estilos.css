@@ -2746,6 +2746,36 @@ body.toque .botao-habilidade.de-classe {
   opacity: 0.45;
 }
 
+/* D-173: a tecla e os segundos da recarga; no computador, os botões ficam no HUD, ao lado da ultimate. */
+.movimento-classe {
+  position: relative;
+}
+
+.movimento-classe .tecla {
+  position: absolute;
+  right: 3px;
+  bottom: 1px;
+  font-size: 0.55rem;
+  color: var(--texto-suave);
+}
+
+.movimento-classe .resta {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 0 3px #000;
+  pointer-events: none;
+}
+
+.fila-barra .movimentos-classe {
+  align-self: center;
+  margin-left: 10px;
+}
+
 .botao-acao.movimento-classe[data-mirando='true'] {
   box-shadow: 0 0 0 3px var(--cor-movimento, #fff);
   animation: pulsar-mira 0.9s ease-in-out infinite alternate;

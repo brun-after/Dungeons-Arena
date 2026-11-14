@@ -508,6 +508,8 @@
         "comportamento": "agressivo"
       }
     },
+    {"id": "coruja_ancia", "nome": "Coruja anciã", "hpBase": 25, "hesitacaoS": 0, "deteccao": 5, "xp": 0, "modelo": "falcao", "tinta": "#d8c8a0", "arquetipo": "controlador", "classe": "corpo_a_corpo", "defesa": 0, "ataqueBasico": "golpe", "habilidades": [], "intervaloAtaqueMs": 1600, "invocacao": {"comportamento": "curador", "cura": {"valor": 8, "recargaMs": 4000}}},
+    {"id": "javali_espiritual", "nome": "Javali espiritual", "hpBase": 70, "hesitacaoS": 0, "deteccao": 5, "xp": 0, "modelo": "urso_companheiro", "tinta": "#9ad0c0", "arquetipo": "perseguidor", "classe": "corpo_a_corpo", "defesa": 3, "ataqueBasico": "golpe", "habilidades": [], "intervaloAtaqueMs": 1800, "invocacao": {"comportamento": "protetor"}},
     {
       "id": "copia_ilusoria",
       "nome": "Cópia ilusória",

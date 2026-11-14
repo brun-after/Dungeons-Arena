@@ -76,6 +76,12 @@ export function descreverEntrada(ctx: Ctx, id: string): DetalheDaEntrada {
       const nome = (id: string) => conteudo.definicoes.get(id)?.base.nome ?? id;
       return s ? { nome: s.nome, como: [t('diario.comboAssinado', { antes: nome(s.antes), depois: nome(s.depois) })], efeito: s.texto } : { nome: a, como: [], efeito: '' };
     }
+    case 'ressonancia': {
+      // D-173 (14/11/2026): o eixo do estilo com o elemento da sintonia.
+      const r = conteudo.ressonancias.get(a);
+      if (!r) return { nome: a, como: [], efeito: '' };
+      return { nome: r.nome, como: [t('diario.ressonanciaComo', { eixo: t(`eixo.${r.eixo}` as ChaveTexto), elemento: t(`elemento.${r.elemento}` as ChaveTexto) })], efeito: r.texto };
+    }
     case 'estilo': {
       // Marco 39 (D-147): o estilo desperta quando a ponta dele chega à intensidade do diário.
       const r = [...conteudo.estilos.values()].flat().find((s) => s.id === a);

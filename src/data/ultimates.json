@@ -220,11 +220,12 @@
   ],
   "veiculos": {
     "mago": {
-      "invocacoes": {
-        "ataque": "espectro_tempestade",
-        "cura": "fada",
-        "guarda": "copia_ilusoria"
-      }
+      "etapas": {
+        "ataque": "etapa_glifos_arcanos",
+        "cura": "etapa_circulo_restauracao",
+        "guarda": "etapa_barreira_arcana"
+      },
+      "etapasVezes": 3
     },
     "necromante": {
       "invocacoes": {
@@ -237,24 +238,26 @@
       }
     },
     "guerreiro": {
-      "invocacoes": {
-        "ataque": "guerreiro_espectral",
-        "cura": "fada",
-        "guarda": "sentinela"
-      }
+      "etapas": {
+        "ataque": "etapa_onda_de_laminas",
+        "cura": "etapa_grito_de_guerra",
+        "guarda": "etapa_parede_de_escudos"
+      },
+      "etapasVezes": 3
     },
     "arqueiro": {
-      "invocacoes": {
-        "ataque": "falcao_espectral",
-        "cura": "fada",
-        "guarda": "lobo_espiritual"
-      }
+      "etapas": {
+        "ataque": "etapa_saraivada",
+        "cura": "etapa_unguento_do_cacador",
+        "guarda": "etapa_cerca_de_armadilhas"
+      },
+      "etapasVezes": 3
     },
     "aventureiro": {
       "invocacoes": {
         "ataque": "lobo_espiritual",
-        "cura": "fada",
-        "guarda": "sentinela"
+        "cura": "coruja_ancia",
+        "guarda": "javali_espiritual"
       }
     }
   },
@@ -317,11 +320,12 @@
         "area",
         "controle"
       ],
-      "texto": "A borda da área prende quem tenta sair.",
+      "texto": "A borda da área se fecha e prende quem tenta sair.",
       "efeitos": [
         {
-          "tipo": "enraizado",
-          "duracaoMs": 1200
+          "tipo": "fase",
+          "ref": "fusao_borda",
+          "duracaoMs": 700
         }
       ]
     },
@@ -540,21 +544,29 @@
             "valor": 7
           }
         }
-      ]
+      ],
+      "ajustes": {
+        "perfura": true,
+        "desde": 3
+      }
     },
     {
       "eixos": [
         "perfuracao",
         "controle"
       ],
-      "texto": "Cada atravessado fica lento.",
+      "texto": "Atravessa a fila: cada atravessado fica lento.",
       "efeitos": [
         {
           "tipo": "resfriado",
           "pct": 30,
           "duracaoMs": 2000
         }
-      ]
+      ],
+      "ajustes": {
+        "perfura": true,
+        "desde": 3
+      }
     },
     {
       "eixos": [
@@ -570,7 +582,11 @@
           "duracaoMs": 4000,
           "em": "conjurador"
         }
-      ]
+      ],
+      "ajustes": {
+        "perfura": true,
+        "desde": 3
+      }
     },
     {
       "eixos": [
@@ -585,7 +601,11 @@
           "pct": 4,
           "duracaoMs": 6000
         }
-      ]
+      ],
+      "ajustes": {
+        "perfura": true,
+        "desde": 3
+      }
     },
     {
       "eixos": [
@@ -600,7 +620,11 @@
           "duracaoMs": 4000,
           "em": "aliados"
         }
-      ]
+      ],
+      "ajustes": {
+        "perfura": true,
+        "desde": 3
+      }
     },
     {
       "eixos": [
@@ -614,7 +638,11 @@
           "ref": "fusao_invocacao_no_fim",
           "duracaoMs": 300
         }
-      ]
+      ],
+      "ajustes": {
+        "perfura": true,
+        "desde": 3
+      }
     },
     {
       "eixos": [
@@ -914,7 +942,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "supernova"
+        "assinatura": "ult_aniquilacao"
       }
     },
     {
@@ -987,7 +1015,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "grilhoes"
+        "assinatura": "ult_execucao_presa"
       }
     },
     {
@@ -1066,7 +1094,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "fios_de_vida"
+        "assinatura": "ult_sangria"
       }
     },
     {
@@ -1122,7 +1150,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "contragolpe"
+        "assinatura": "ult_contragolpe"
       }
     },
     {
@@ -1205,7 +1233,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "meteoro"
+        "assinatura": "ult_cometa"
       }
     },
     {
@@ -1294,7 +1322,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "hoste_espectral"
+        "assinatura": "ult_exercito_em_furia"
       }
     },
     {
@@ -1335,7 +1363,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "turbilhao_de_correntes"
+        "assinatura": "ult_carcere"
       }
     },
     {
@@ -1413,7 +1441,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "circulo_de_amparo"
+        "assinatura": "ult_santuario"
       }
     },
     {
@@ -1466,7 +1494,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "muralha_de_pedra"
+        "assinatura": "ult_fortaleza"
       }
     },
     {
@@ -1524,7 +1552,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "campo_minado"
+        "assinatura": "ult_armadilha_viva"
       }
     },
     {
@@ -1571,7 +1599,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "invocacao"
+        "assinatura": "ult_carcereiros"
       }
     },
     {
@@ -1618,7 +1646,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "asas_da_aurora"
+        "assinatura": "ult_renascer"
       }
     },
     {
@@ -1670,7 +1698,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "barreira"
+        "assinatura": "ult_bastiao"
       }
     },
     {
@@ -1760,7 +1788,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "retorno"
+        "assinatura": "ult_peregrino"
       }
     },
     {
@@ -1804,7 +1832,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "bencao"
+        "assinatura": "ult_guardioes"
       }
     },
     {
@@ -1846,7 +1874,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "desafio"
+        "assinatura": "ult_inabalavel"
       }
     },
     {
@@ -1893,7 +1921,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "ariete"
+        "assinatura": "ult_avanco_blindado"
       }
     },
     {
@@ -1944,7 +1972,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "muralha_de_aco"
+        "assinatura": "ult_muralha_viva"
       }
     },
     {
@@ -2034,7 +2062,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "chuva_de_laminas"
+        "assinatura": "ult_tempestade_de_passos"
       }
     },
     {
@@ -2109,7 +2137,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "revoada"
+        "assinatura": "ult_matilha"
       }
     },
     {
@@ -2148,7 +2176,356 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "levante_profano"
+        "assinatura": "ult_legiao"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "icone": "coroa",
+      "grau": "S",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "celula",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 2,
+      "alcanceCelulas": 6,
+      "tags": [
+        "ultimate"
+      ],
+      "id": "fusao_borda",
+      "nome": "Borda que prende",
+      "papel": "controle",
+      "efeitos": [
+        {
+          "tipo": "enraizado",
+          "duracaoMs": 1200
+        }
+      ],
+      "visual": {
+        "cor": "#c9a24a",
+        "impacto": "runas",
+        "som": "golpe",
+        "assinatura": "corrente"
+      },
+      "interna": true
+    },
+    {
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "icone": "coroa",
+      "grau": "S",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 3,
+      "alcanceCelulas": 0,
+      "tags": [
+        "ultimate"
+      ],
+      "interna": true,
+      "id": "etapa_glifos_arcanos",
+      "nome": "Glifos arcanos",
+      "papel": "dano",
+      "efeitos": [],
+      "visual": {
+        "cor": "#a58cff",
+        "impacto": "runas",
+        "som": "golpe",
+        "assinatura": "sobrecarga_arcana"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": "2d6",
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "icone": "coroa",
+      "grau": "S",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "aliados",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 3,
+      "alcanceCelulas": 0,
+      "tags": [
+        "ultimate"
+      ],
+      "interna": true,
+      "id": "etapa_circulo_restauracao",
+      "nome": "Círculo de restauração",
+      "papel": "cura",
+      "efeitos": [],
+      "visual": {
+        "cor": "#9fe0ff",
+        "impacto": "runas",
+        "som": "nivel",
+        "assinatura": "circulo_de_amparo"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "icone": "coroa",
+      "grau": "S",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "aliados",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 3,
+      "alcanceCelulas": 0,
+      "tags": [
+        "ultimate"
+      ],
+      "interna": true,
+      "id": "etapa_barreira_arcana",
+      "nome": "Barreira arcana",
+      "papel": "defesa",
+      "efeitos": [
+        {
+          "tipo": "escudo",
+          "valor": 8,
+          "duracaoMs": 4000
+        }
+      ],
+      "visual": {
+        "cor": "#b7a6ff",
+        "impacto": "runas",
+        "som": "golpe",
+        "assinatura": "barreira"
+      }
+    },
+    {
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "icone": "coroa",
+      "grau": "S",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 2,
+      "alcanceCelulas": 0,
+      "tags": [
+        "ultimate"
+      ],
+      "interna": true,
+      "id": "etapa_onda_de_laminas",
+      "nome": "Onda de lâminas",
+      "papel": "dano",
+      "efeitos": [
+        {
+          "tipo": "empurrao",
+          "valor": 1
+        }
+      ],
+      "visual": {
+        "cor": "#d9d9d9",
+        "impacto": "runas",
+        "som": "golpe",
+        "assinatura": "chuva_de_laminas"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": "2d6",
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "icone": "coroa",
+      "grau": "S",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "aliados",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 3,
+      "alcanceCelulas": 0,
+      "tags": [
+        "ultimate"
+      ],
+      "interna": true,
+      "id": "etapa_grito_de_guerra",
+      "nome": "Grito de guerra",
+      "papel": "cura",
+      "efeitos": [
+        {
+          "tipo": "acelerado",
+          "pct": 15,
+          "duracaoMs": 3000
+        }
+      ],
+      "visual": {
+        "cor": "#e8c06a",
+        "impacto": "runas",
+        "som": "nivel",
+        "assinatura": "brado"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "icone": "coroa",
+      "grau": "S",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "aliados",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 3,
+      "alcanceCelulas": 0,
+      "tags": [
+        "ultimate"
+      ],
+      "interna": true,
+      "id": "etapa_parede_de_escudos",
+      "nome": "Parede de escudos",
+      "papel": "defesa",
+      "efeitos": [
+        {
+          "tipo": "escudo",
+          "valor": 10,
+          "duracaoMs": 4000
+        }
+      ],
+      "visual": {
+        "cor": "#c9a24a",
+        "impacto": "runas",
+        "som": "golpe",
+        "assinatura": "muralha_de_aco"
+      }
+    },
+    {
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "icone": "coroa",
+      "grau": "S",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 3,
+      "alcanceCelulas": 0,
+      "tags": [
+        "ultimate"
+      ],
+      "interna": true,
+      "id": "etapa_saraivada",
+      "nome": "Saraivada",
+      "papel": "dano",
+      "efeitos": [],
+      "visual": {
+        "cor": "#9ad06a",
+        "impacto": "runas",
+        "som": "golpe",
+        "assinatura": "chuva_de_flechas"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": "2d6",
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "icone": "coroa",
+      "grau": "S",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "aliados",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 3,
+      "alcanceCelulas": 0,
+      "tags": [
+        "ultimate"
+      ],
+      "interna": true,
+      "id": "etapa_unguento_do_cacador",
+      "nome": "Unguento do caçador",
+      "papel": "cura",
+      "efeitos": [
+        {
+          "tipo": "acelerado",
+          "pct": 20,
+          "duracaoMs": 3000
+        }
+      ],
+      "visual": {
+        "cor": "#7dcea0",
+        "impacto": "runas",
+        "som": "nivel",
+        "assinatura": "bencao"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "icone": "coroa",
+      "grau": "S",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 2,
+      "alcanceCelulas": 0,
+      "tags": [
+        "ultimate"
+      ],
+      "interna": true,
+      "id": "etapa_cerca_de_armadilhas",
+      "nome": "Cerca de armadilhas",
+      "papel": "controle",
+      "efeitos": [
+        {
+          "tipo": "enraizado",
+          "duracaoMs": 1500
+        }
+      ],
+      "visual": {
+        "cor": "#8a6f4a",
+        "impacto": "runas",
+        "som": "golpe",
+        "assinatura": "armadilha_de_caca"
       }
     }
   ]

@@ -7,10 +7,13 @@
 //   nos que miram, o toque arma a mira e o próximo toque no mapa escolhe o ponto (tocar de novo no botão cancela).
 // - O Aventureiro tem um botão só: o do companheiro ativo (a montaria muda com o companheiro).
 // Cada botão mostra o ícone e a cor do seu movimento e escurece enquanto ele recarrega.
+// D-173 (14/11/2026): no computador, os mesmos botões ficam no HUD, ao lado da ultimate, com a tecla de cada um (Shift,
+// T, G) e os segundos que faltam da recarga; clicar também usa.
 
 import type { Celula, Comando } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
+import { DT_MS } from '../core/loop';
 import { movimentosDosBotoes, type MovimentoDaClasse } from '../combat/movimento-classe';
 import type { Entidade } from '../entities/entidade';
 import { t, type ChaveTexto } from '../i18n';
@@ -26,6 +29,8 @@ export interface OpcoesMovimentoToque {
   cursor: () => Celula | null;
   /** Um aviso curto na tela (o "toque no mapa"). */
   avisar: (texto: string) => void;
+  /** D-173: no computador, mostra a tecla de cada botão. */
+  teclas?: boolean;
 }
 
 export interface MovimentoToque {
@@ -42,6 +47,7 @@ export interface MovimentoToque {
 
 const ATUALIZAR_MS = 200;
 const MAX_BOTOES = 3;
+const TECLAS = ['Shift', 'T', 'G'] as const;
 
 export function criarMovimentoToque(o: OpcoesMovimentoToque): MovimentoToque {
   let rumo: Rumo = PARADO;
@@ -93,7 +99,7 @@ export function criarMovimentoToque(o: OpcoesMovimentoToque): MovimentoToque {
     botao.addEventListener('pointercancel', soltar);
     botao.addEventListener('pointerleave', soltar);
     caixa.append(botao);
-    return { botao, id: '' };
+    return { botao, id: '', resta: null as HTMLSpanElement | null };
   });
   function armar(i: number | null): void {
     mirando = i;
@@ -111,14 +117,26 @@ export function criarMovimentoToque(o: OpcoesMovimentoToque): MovimentoToque {
       if (!m || !eu) return;
       if (b.id !== m.id) {
         b.id = m.id;
-        b.botao.replaceChildren(icone(m.icone));
+        b.resta = document.createElement('span');
+        b.resta.className = 'resta';
+        b.botao.replaceChildren(icone(m.icone), b.resta);
+        if (o.teclas) {
+          const tecla = document.createElement('span');
+          tecla.className = 'tecla';
+          tecla.textContent = TECLAS[i] ?? '';
+          b.botao.append(tecla);
+        }
         b.botao.style.setProperty('--cor-movimento', m.cor);
         b.botao.setAttribute('aria-label', t('movimento.botao', { nome: t(`movimento.${m.id}` as ChaveTexto) }));
         if (mirando === i) armar(null);
       }
-      const recarga = (eu.movimentoClasse?.cargas[m.id] ?? []).filter((x) => x > tick).length;
-      const carregando = String(recarga > 0 && !emCurso(m));
+      const cargas = (eu.movimentoClasse?.cargas[m.id] ?? []).filter((x) => x > tick);
+      const carregando = String(cargas.length > 0 && !emCurso(m));
       if (b.botao.dataset.recarga !== carregando) b.botao.dataset.recarga = carregando;
+      // Os segundos até a próxima carga voltar.
+      const proxima = cargas.length > 0 ? Math.min(...cargas) : 0;
+      const texto = carregando === 'true' ? String(Math.ceil(((proxima - tick) * DT_MS) / 1000)) : '';
+      if (b.resta && b.resta.textContent !== texto) b.resta.textContent = texto;
     });
   }, ATUALIZAR_MS);
 

@@ -8,6 +8,7 @@ import { dispararGanchosDe } from '../progression/ganchos-do-portador';
 import { muralhaEm } from '../combat/tatica';
 import { direcaoDe } from '../combat/orientacao';
 import { multiplicadorDoPassoDoFalcao } from '../combat/companheiro';
+import { passoDoCompanheiro } from '../combat/pets-estilos';
 import { passoDoPet, petDoCompanheiro, pressaDaCaca } from '../combat/pets';
 import { atravessaCorpos, fatorDeVelocidade, fimDaTirolesa, fimDoSalto, naTirolesa, noAr, noSalto } from '../combat/movimento-classe';
 import { andarCabeNoDeslize } from '../combat/deslize';
@@ -346,7 +347,8 @@ function andarNaTirolesa(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao
 function velocidadeDoCompanheiro(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade): number {
   const pet = petDoCompanheiro(e);
   // Marco 40 (14/11/2026, D-166): mais rápido atrás da caça marcada.
-  const pressa = pressaDaCaca(estado, ctx, e);
+  // D-173: o companheiro do Batedor anda mais rápido.
+  const pressa = pressaDaCaca(estado, ctx, e) * passoDoCompanheiro(estado, ctx, e);
   return (pet === 'falcao' ? (1000 / ctx.balance.ajustesClasses.aventureiro.falcaoPassoMs) * multiplicadorDoPassoDoFalcao(estado, ctx, e) : 1000 / passoDoPet(ctx, pet)) * pressa;
 }
 

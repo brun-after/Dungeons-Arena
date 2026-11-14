@@ -331,7 +331,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const suporte = criarAlvoDeSuporte({ ctx, estado: o.estado, jogador, cursor: () => ponteiro.celulaDoCursor(), aoEscolher: (nome) => { hud.registrar(nome ? t('log.aliadoEscolhido', { nome }) : t('log.aliadoEsquecido')); } });
   const usarHabilidade = (id: string) => { const alvo = suporte.alvoPara(id); emitir({ t: 'usarHabilidade', id, ...(alvo && { alvo }) }); };
   // Marco 40 (14/11/2026, D-168): o movimento da classe no Shift (as que miram, no ponteiro) e no botão do celular (dois toques).
-  const movToque = criarMovimentoToque({ ctx, estado: o.estado, jogador, emitir, cursor: () => ponteiro.celulaDoCursor(), avisar: (texto) => { mostrarAviso(ui, texto, 1500); } });
+  const movToque = criarMovimentoToque({ ctx, estado: o.estado, jogador, emitir, teclas: !toque, cursor: () => ponteiro.celulaDoCursor(), avisar: (texto) => { mostrarAviso(ui, texto, 1500); } });
   // Toque ou clique num hostil seleciona e trava o alvo (no travado, destrava: D-065); em outra célula, vai até ela.
   // Marco 26 (D-115): devolve se andou (o mouse segurado só guia quando o clique não foi num alvo).
   const golpeQuebravel = criarGolpeNoQuebravel({ ctx, estado: o.estado, jogador, emitir });
@@ -495,7 +495,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     const fila = document.createElement('div');
     fila.className = 'fila-barra';
     // 05/11/2026: o d20 entra na fila, à esquerda da barra (fixo na tela, a barra crescida o cobria).
-    fila.append(dado.elemento, barra.elemento, botaoUltimate.elemento);
+    fila.append(dado.elemento, barra.elemento, botaoUltimate.elemento, movToque.botoes); // D-173: o movimento no HUD
     ui.append(fila);
     centralizar.elemento.classList.add('flutuante');
     ui.append(centralizar.elemento);

@@ -53,7 +53,9 @@ export function conferirClassesEUltimates(
   // Marco 40 (13/11/2026, D-161): cada classe veste as ultimates com criaturas que existem.
   for (const [classe, v] of veiculos) {
     if (!classes.has(classe)) erros.push(`ultimates.json: veículo de classe desconhecida "${classe}"`);
-    for (const ref of Object.values(v.invocacoes)) if (!presets.get(ref)?.invocacao) erros.push(`ultimates.json: veículo ${classe}: "${ref}" não é invocação`);
+    for (const ref of Object.values(v.invocacoes ?? {})) if (!presets.get(ref)?.invocacao) erros.push(`ultimates.json: veículo ${classe}: "${ref}" não é invocação`);
+    // D-173: a etapa que entra no lugar da invocação é uma skill interna.
+    for (const ref of Object.values(v.etapas ?? {})) if (!definicoes.get(ref)?.interna) erros.push(`ultimates.json: veículo ${classe}: a etapa "${ref}" não é skill interna`);
   }
   for (const c of classes.values()) if (veiculos.size > 0 && !veiculos.has(c.id)) erros.push(`ultimates.json: a classe ${c.id} não tem veículo`);
   if (ultimates.size > 0 && ultimates.size !== 21) erros.push(`ultimates.json: são 21 famílias, uma por par de papéis (há ${String(ultimates.size)})`);

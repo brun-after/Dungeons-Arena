@@ -546,6 +546,7 @@ function perderBonus(estado: EstadoJogo, e: Entidade, saida: EventoSimulacao[]):
 
 /** Atacar tira o bônus de viagem; a camuflagem acaba (revela). */
 export function aoAgir(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, hab: Habilidade, saida: EventoSimulacao[]): void {
+  apear(e); // D-173: usar uma skill apeia da montaria alugada.
   const m = modo(e);
   if (!m || !hab.formulaDano) return;
   if (m.tipo === 'camuflado') terminar(estado, ctx, e, saida);
@@ -554,7 +555,13 @@ export function aoAgir(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, 
 
 /** Ser atingido tira o bônus de viagem (o urso, montaria pesada, segura). */
 export function aoSerAtingido(estado: EstadoJogo, e: Entidade, saida: EventoSimulacao[]): void {
+  apear(e); // D-173: levar dano apeia da montaria alugada.
   if (!modo(e)?.pesada) perderBonus(estado, e, saida);
+}
+
+/** D-173 (14/11/2026): a montaria alugada no Mundo (o efeito `montaria`) acaba ao levar dano ou usar uma skill. */
+function apear(e: Entidade): void {
+  if (e.efeitos.some((f) => f.tipo === 'montaria')) e.efeitos = e.efeitos.filter((f) => f.tipo !== 'montaria');
 }
 
 /** Multiplicador da velocidade de quem está num modo de movimento (1 = nada muda). */
