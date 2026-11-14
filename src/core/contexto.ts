@@ -185,12 +185,12 @@ export interface Balance {
   movimentoClasse: {
     viagemPct: number;
     viagemPesadaPct: number;
-    voo: { preparoMs: number; danoPct: [number, number]; conjuracaoPct: [number, number]; lentidaoPct: [number, number] };
-    montaria: { danoPct: [number, number]; conjuracaoPct: [number, number]; danoRecebidoPct: [number, number] };
-    montariaPesada: { danoPct: [number, number]; conjuracaoPct: [number, number]; danoRecebidoPct: [number, number] };
-    nevoa: { lentidaoPct: number; servosRaio: number; duracaoAoEntrarEmCombateMs: number };
-    marcha: { combatePct: number; furiaPorS: number };
-    preparoPadraoMs: number;
+    /** Marco 40 (D-164): o salto do Guerreiro (células por segundo, o raio e o atordoamento da queda). */
+    salto: { velocidade: number; raio: number; atordoarMs: number };
+    nevoa: { servosRaio: number };
+    /** O servo do Posto dos Mortos volta a lutar com o Necromante a até estas células. */
+    posto: { raioDespertar: number };
+    ancoraPreparoMs: number;
   };
   efeitos: {
     intervaloPeriodicoMs: number;

@@ -3,12 +3,15 @@
 
 import type { Entidade } from '../entities/entidade';
 
-/** Quantos pixels o corpo sobe na tela (o voo; decolando, meio caminho). */
+/** Quantos pixels o corpo sobe na tela (o voo; o salto, em arco até a queda). */
 export function elevacaoNaTela(e: Entidade): number {
   const m = e.movimentoClasse?.modo;
   if (!m) return 0;
   if (m.tipo === 'voo') return 18;
-  return m.tipo === 'preparo' && m.destino === 'voo' ? 8 : 0;
+  if (m.tipo !== 'salto' || m.x === undefined || m.y === undefined) return 0;
+  // O salto: um arco que sobe no meio do caminho (pela distância que falta até a queda).
+  const falta = Math.hypot(m.x - e.px, m.y - e.py);
+  return Math.min(28, falta * 6);
 }
 
 /** A transparência do corpo: morto apagado, invisível ou camuflado translúcido, névoa quase sumida, eco do Necromante. */

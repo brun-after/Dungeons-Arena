@@ -124,6 +124,7 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number; conf
     if (ev.id !== idLocal) return;
     const nomeMov = t(`movimento.${ev.mov}` as ChaveTexto);
     if (ev.fase === 'ativo') hud.registrar(t('movimento.log.ativo', { nome: nomeMov }));
+    else if (ev.fase === 'perdeu') hud.registrar(t('movimento.log.perdeu', { nome: nomeMov }));
     else if (ev.fase === 'recusado') hud.registrar(t(`movimento.recusa.${ev.motivo ?? 'recarga'}` as ChaveTexto));
   });
   bus.on('acaoCancelada', (ev) => {

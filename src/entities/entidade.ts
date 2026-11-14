@@ -94,6 +94,8 @@ export interface DadosInvocacao {
   extra?: boolean;
   /** Marco 27 (29/10/2026, D-126): veio de um pergaminho; conta no limite próprio dos pergaminhos (acumulam). */
   pergaminho?: boolean;
+  /** Marco 40 (13/11/2026, D-164): o servo deixado no Posto dos Mortos (a célula do posto). */
+  posto?: { x: number; y: number };
 }
 
 /** Ação em conjuração (§2.7, etapa 3). Ticks publicados para a telegrafia (§3.6). */
@@ -229,12 +231,12 @@ export interface HabilidadeConhecida {
  */
 /** Marco 40 (D-164): o modo de movimento em curso (voo, montaria, névoa, marcha, tirolesa, camuflagem ou o preparo). */
 export interface ModoDeMovimento {
-  tipo: 'preparo' | 'voo' | 'montado' | 'nevoa' | 'marcha' | 'tirolesa' | 'camuflado';
+  tipo: 'preparo' | 'voo' | 'montado' | 'nevoa' | 'marcha' | 'tirolesa' | 'camuflado' | 'salto';
   id: string;
   desdeTick: number;
   ateTick?: number;
-  /** O preparo vira este modo (ou o retorno à âncora). */
-  destino?: 'voo' | 'montado' | 'ancora';
+  /** O preparo da volta à âncora. */
+  destino?: 'ancora';
   x?: number;
   y?: number;
   rumoX?: number;
@@ -244,8 +246,8 @@ export interface ModoDeMovimento {
   velocidade?: number;
   lentidaoPct?: number;
   pesada?: boolean;
-  combate?: boolean;
-  caiuUmaVez?: boolean;
+  /** Atacou ou foi atingido: o bônus de viagem acabou (o modo segue até o fim). */
+  semBuff?: boolean;
 }
 
 export interface EstadoMovimento {
