@@ -63,9 +63,14 @@ export function desenharDiario(corpo: HTMLElement, j: Entidade, ctx: ContextoSim
     grupo.append(resumo);
     const ul = el('ul', 'entradas-diario');
     // D-173 (14/11/2026): as ressonâncias ficam escondidas; o diário mostra as vistas e só três pistas por vez.
-    let pistas = 0;
+    const eixosComPista = new Set<string>();
     for (const e of lista) {
-      if (tipo === 'ressonancia' && !vistas.has(e.id) && ++pistas > PISTAS_DE_RESSONANCIA) continue;
+      if (tipo === 'ressonancia' && !vistas.has(e.id)) {
+        // Uma pista por eixo, para as três apontarem caminhos diferentes.
+        const eixo = ctx.conteudo.ressonancias.get(e.id.slice(12))?.eixo ?? '';
+        if (eixosComPista.has(eixo) || eixosComPista.size >= PISTAS_DE_RESSONANCIA) continue;
+        eixosComPista.add(eixo);
+      }
       const li = el('li', vistas.has(e.id) ? 'entrada-diario vista' : 'entrada-diario silhueta');
       if (vistas.has(e.id)) {
         const d = descreverEntrada(ctx, e.id);

@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.20 · **Data:** 14/11/2026
+**Versão:** 1.21 · **Data:** 14/11/2026
 
 > **Histórico**
+> - **1.21 (14/11/2026)**: D-173: as pendências do marco 40 (as 30 ressonâncias, a montaria alugada, os companheiros que leem os estilos, o movimento no HUD do computador, os visuais feitos à mão, a invocação nas ultimates só para quem invoca e as fusões que mudam a forma).
 > - **1.20 (14/11/2026)**: D-172: um botão por movimento da classe (Shift no principal, T e G nos outros; no celular, lado a lado) e a recarga maior em combate para os que não são o principal.
 > - **1.19 (14/11/2026)**: D-171: o Arqueiro mais dependente de movimento (alcance 30% menor sem a Mira cheia, salto para trás com recarga menor, conjuração 10% mais rápida, skills de fora da classe enchem a Mira, os estilos adaptados) e o deslize que respeita a animação (recuo, avanço e teleportes curtos).
 > - **1.18 (14/11/2026)**: D-170: as correções do movimento da classe (o círculo do Acelerar à frente, entre a distância mínima e a máxima, as linhas de alcance da Âncora e do Posto, a nuvem única da névoa, a Chegada em pêndulo, a camuflagem em combate e a armadilha com retardo sob o Arqueiro) e dos companheiros (a caça marcada que acaba, o urso que luta nadando e o falcão que passa perto).
@@ -5325,3 +5326,45 @@ fazia as duas coisas (segurar trocava). O usuário pediu um botão para cada mov
 
 Balanceamento: 172/172.
 
+## D-173 — Marco 40: as pendências do sistema de skills (14/11/2026)
+
+**Contexto.** A conferência do marco 40 contra o Códex do Combate e o Grimório das Skills achou quatro itens por fazer
+e três feitos pela metade. O usuário pediu os sete num PR só. No meio, corrigiu o item das invocações: invocar nas
+ultimates é identidade do Necromante e do Aventureiro; dar criaturas a todas as classes tirava essa identidade.
+
+**Decisão.**
+- **1. Ressonâncias.** As 30 do Códex (`data/ressonancias.json`), uma por par de eixo de estilo e elemento.
+  - O golpe que sai com a forma de um eixo, no elemento de uma sintonia, dispara a ressonância do par.
+  - A faixa é a menor entre a da forma e a da sintonia; abaixo de `ressonancias.faixaMin` (3), nada.
+  - Cada uma tem recarga própria por personagem (`recargaMs`: 4 s).
+  - Ficam escondidas até a primeira vez. O diário mostra as vistas e três pistas por vez; a descoberta aparece na
+    tela.
+- **2. Montaria.** O Cavalo de aluguel (`montaria_de_aluguel`) é vendido pelo alquimista das vilas dos dois reinos.
+  - Dá o efeito `montaria`: +60% de velocidade por 10 minutos.
+  - Levar dano ou usar uma skill apeia. Não tem desenho de cavalo: aparece como estado no personagem.
+- **3. Companheiros e estilos.** Cada estilo do Aventureiro dá a cada companheiro um jeito próprio, pela faixa da
+  forma (`ajustesClasses.aventureiro.estilosDosPets`).
+  - Mestre de Feras: o falcão ataca mais; as feras do Chamado duram mais com o lobo; o urso provoca mais longe.
+  - Batedor: os três andam mais rápido.
+  - Implacável: o golpe do companheiro volta (mais dano); a pata do urso empurra.
+  - Sobrevivente: o mergulho do falcão cura o dono; o lobo intercepta mais; menos dano chega ao dono.
+  - Xamã: o golpe do companheiro leva o estado da runa do dono (o do falcão, em área).
+  - Ficou de fora do Grimório: o segundo falcão do Mestre de Feras e o lobo que passa por inimigos pequenos.
+- **4. Movimento no HUD.** No computador, os botões de movimento ficam ao lado da ultimate, com a tecla (Shift, T, G)
+  e os segundos da recarga.
+- **5. Visuais feitos à mão.**
+  - As 21 famílias de ultimate têm assinatura própria (`render/vfx/familias/ultimates.ts`); antes, cada uma usava a
+    de uma skill comum.
+  - As 42 reações, as 30 ressonâncias, os 17 combos de papel e os 30 assinados têm cada um o seu gesto
+    (`render/vfx/gestos-*.ts`); antes, só subia o texto.
+  - As 89 skills de núcleo já tinham assinatura; algumas variantes de núcleos diferentes ainda dividem a mesma.
+- **6. Ultimates e invocação.** Só o Necromante e o Aventureiro invocam nas ultimates (o Aventureiro ganhou a Coruja
+  anciã e o Javali espiritual). O Mago, o Guerreiro e o Arqueiro trocam cada criatura por uma etapa da classe
+  (`veiculos.<classe>.etapas`), repetida até `etapasVezes` vezes pelo tempo que as criaturas durariam.
+  - Mago: glifos arcanos, círculo de restauração, barreira arcana.
+  - Guerreiro: onda de lâminas, grito de guerra, parede de escudos.
+  - Arqueiro: saraivada, unguento do caçador, cerca de armadilhas.
+- **7. Fusões.** As fusões com perfuração atravessam a fila desde a faixa 3; a de área com controle fecha a borda
+  (`fusao_borda`); a etapa da fusão não se perde mais quando a família já tem uma etapa.
+
+Balanceamento: 172/172.
