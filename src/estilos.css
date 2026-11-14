@@ -2722,6 +2722,7 @@ body.toque .botao-habilidade.de-classe {
 .botao-acao.movimento-classe {
   width: 52px;
   height: 52px;
+  margin-left: 10px;
   font-size: 1.3rem;
   border-color: var(--cor-movimento, #9aa);
   color: var(--cor-movimento, #dde);
