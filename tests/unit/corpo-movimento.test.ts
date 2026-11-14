@@ -13,7 +13,7 @@ import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 const ctx = contexto(faseDeTexto(SALA_ABERTA));
 
 describe('corpo do movimento da classe (D-164)', () => {
-  it('o Salto de Guerra sobe num arco e volta ao chão, com a pose de salto', () => {
+  const saltar = (comEventos: boolean) => {
     const estado = criarEstado({ semente: 3, faseId: ctx.fase.id });
     const classe = CONTEUDO.classes.get('guerreiro');
     if (!classe) throw new Error('sem guerreiro');
@@ -23,7 +23,7 @@ describe('corpo do movimento da classe (D-164)', () => {
     let agora = 0;
     const tipos = new Map([...ctx.conteudo.movimentos.values()].flat().map((m) => [m.id, m.tipo] as const));
     const corpo = new CorpoEmMovimento({ tipoDe: (id) => tipos.get(id) ?? null, posicao: (e) => ({ x: e.px, y: e.py }), raioNevoa: 5 });
-    corpo.ligar(bus, () => estado, () => agora);
+    if (comEventos) corpo.ligar(bus, () => estado, () => agora);
     const alturas: (number | null)[] = [];
     const passo = (cmds: Comando[]) => {
       const eventos: EventoSimulacao[] = [];
@@ -35,12 +35,17 @@ describe('corpo do movimento da classe (D-164)', () => {
     };
     passo([{ t: 'movimentoClasse', dx: 1, dy: 0 }]);
     for (let i = 0; i < 90; i++) passo([]);
-    const noAr = alturas.filter((h): h is number => h !== null);
-    expect(noAr.length).toBeGreaterThan(10);
-    expect(Math.max(...noAr)).toBeGreaterThan(60);
-    // Sobe e desce: o pico fica no meio do salto.
-    const pico = noAr.indexOf(Math.max(...noAr));
-    expect(pico).toBeGreaterThan(noAr.length * 0.25);
-    expect(pico).toBeLessThan(noAr.length * 0.75);
-  });
+    return alturas.filter((h): h is number => h !== null);
+  };
+  for (const [nome, comEventos] of [['com os eventos', true], ['sem os eventos (online)', false]] as const) {
+    it(`o Salto de Guerra sobe num arco e volta ao chão, com a pose de salto (${nome})`, () => {
+      const noAr = saltar(comEventos);
+      expect(noAr.length).toBeGreaterThan(10);
+      expect(Math.max(...noAr)).toBeGreaterThan(60);
+      // Sobe e desce: o pico fica no meio do salto.
+      const pico = noAr.indexOf(Math.max(...noAr));
+      expect(pico).toBeGreaterThan(noAr.length * 0.25);
+      expect(pico).toBeLessThan(noAr.length * 0.75);
+    });
+  }
 });
