@@ -7,6 +7,8 @@ import type { EfeitoCanonico } from '../combat/registro-efeitos';
 import type { Elemento } from '../combat/elementos';
 import type { AreaAmbiente } from './ambiente-tipos';
 import type { Refugio } from './refugio';
+import type { AreaDePassagem } from './passagem';
+import type { Decoracao } from './decoracao';
 import type { Celula } from '../core/comandos';
 
 /**
@@ -256,6 +258,10 @@ export interface Fase {
   readonly exterior?: boolean;
   /** Marco 31 (D-130): os telhados das casas fechadas. */
   readonly telhados?: readonly Telhado[];
+  /** Marco 41 (D-169): as passagens entre as regiões do Mundo (world/passagem.ts): sem monstros e sem dano. */
+  readonly passagens?: readonly AreaDePassagem[];
+  /** Marco 41 (D-169): enfeites postos pelo gerador (os das passagens), desenhados com ou sem tema. */
+  readonly enfeites?: readonly Decoracao[];
 }
 
 /** Converte uma fase já validada para a forma usada pela simulação. */

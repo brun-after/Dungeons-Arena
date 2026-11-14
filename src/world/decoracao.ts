@@ -73,8 +73,9 @@ export function ehPilar(fase: Fase, x: number, y: number): boolean {
 
 /** Os enfeites de uma fase com tema (pura). Sem tema, nenhum. */
 export function decoracoesDaFase(fase: Fase, tema: Tema | null): Decoracao[] {
-  if (!tema) return [];
-  const lista: Decoracao[] = [];
+  // Marco 41 (14/11/2026, D-169): os enfeites que o gerador pôs (as passagens do Mundo) valem com ou sem tema.
+  const lista: Decoracao[] = [...(fase.enfeites ?? [])];
+  if (!tema) return lista;
   const ocupadas = new Set(fase.objetos.map((o) => o.y * fase.largura + o.x));
   for (const s of fase.spawns) ocupadas.add(s.y * fase.largura + s.x);
   for (let y = 1; y < fase.altura - 1; y++) for (let x = 1; x < fase.largura - 1; x++) {

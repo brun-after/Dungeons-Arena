@@ -77,6 +77,13 @@ export const textosMundo = {
   'mundo.voltar': 'Voltar ao menu',
   'mundo.conectando': 'Entrando no Mundo...',
   'mundo.trocando': 'Viajando para {lugar}...',
+  // Marco 41 (14/11/2026, D-169): o nome de cada passagem entre as regiões (a trégua vale lá dentro).
+  'mundo.passagem.ponte': 'Ponte sobre a ravina · trégua',
+  'mundo.passagem.passarela': 'Passarela do brejo · trégua',
+  'mundo.passagem.desfiladeiro': 'Desfiladeiro gelado · trégua',
+  'mundo.passagem.canion': 'Cânion de arenito · trégua',
+  'mundo.passagem.portao': 'Portão em ruínas · trégua',
+  'mundo.passagem.trilha': 'Trilha entre as árvores · trégua',
   'mundo.falha': 'Não deu para entrar no Mundo. Tente de novo.',
   'mundo.retorno.botao': 'Retornar à vila',
   'mundo.retorno.dica': 'Consome uma Pedra de retorno para voltar à última vila salva, inclusive nesta região.',

@@ -28,6 +28,8 @@ import { reinoDoConteudo, type Reino } from '../../src/mundo/reino';
 import { SalaMundo, type PendenciaDoMundo, type ResultadoDoMercado } from '../../src/mundo/sala-mundo';
 import { PortaisTemporarios } from '../../src/mundo/portais-temporarios';
 import type { InvocacaoQueViaja } from '../../src/mundo/comitiva';
+import type { EstadoQueViaja } from '../../src/mundo/bagagem';
+import { DT_MS } from '../../src/core/loop';
 import { MercadoEmMemoria, type LojaDoMercado } from '../mercado-mundo';
 import { registrarLog } from '../metricas';
 import { atenderMercado, atenderSocial, publicarGrupo } from '../mundo-servicos';
@@ -36,6 +38,10 @@ import { SalaColyseusBase, type MetadataDaSala } from './sala-base';
 
 const VALIDADE_BILHETE_MS = 60_000;
 const INTERVALO_PENDENCIAS_MS = 200;
+/** Marco 41 (D-169): de quanto em quanto tempo o mesmo lugar pode ser aquecido de novo. */
+const AQUECER_CADA_MS = 30_000;
+/** O tick do servidor em ms (o tempo da viagem vira ticks na chegada). */
+const MS_POR_TICK = DT_MS;
 
 interface Bilhete {
   conta: string;
@@ -46,6 +52,9 @@ interface Bilhete {
   instancia: string | null;
   /** 09/11/2026 (D-144): as invocações que viajam com o personagem. */
   comitiva?: InvocacaoQueViaja[];
+  /** Marco 41 (14/11/2026, D-169): o estado que vivia só na entidade e quando o bilhete saiu (o tempo da viagem). */
+  viagem?: EstadoQueViaja;
+  emitido?: number;
   expira: number;
 }
 
@@ -262,8 +271,27 @@ export class CoordenadorDoMundo {
     const agora = Date.now();
     for (const [k, x] of this.bilhetes) if (x.expira < agora) this.bilhetes.delete(k);
     const id = randomUUID();
-    this.bilhetes.set(id, { ...b, expira: agora + VALIDADE_BILHETE_MS });
+    this.bilhetes.set(id, { ...b, emitido: agora, expira: agora + VALIDADE_BILHETE_MS });
     return id;
+  }
+
+  private readonly aquecendo = new Map<string, number>();
+
+  /**
+   * Marco 41 (14/11/2026, D-169): alguém entrou na passagem para `lugar`. Se não há sala aberta de lá, abre uma agora
+   * (gerar a região leva tempo): a troca no meio da passagem encontra a sala pronta. Uma vez a cada 30 s por lugar;
+   * a sala vazia expira como as outras.
+   */
+  async aquecerSala(lugar: string): Promise<void> {
+    const agora = Date.now();
+    if ((this.aquecendo.get(lugar) ?? 0) > agora || !lerLugar(this.reino, lugar)) return;
+    this.aquecendo.set(lugar, agora + AQUECER_CADA_MS);
+    const abertas = await matchMaker.query({ name: 'mundo' });
+    const pronta = abertas.some((s) => {
+      const m = (s.metadata ?? {}) as { lugar?: unknown; instancia?: unknown };
+      return m.lugar === lugar && !m.instancia && s.clients < s.maxClients && !s.locked;
+    });
+    if (!pronta) await matchMaker.createRoom('mundo', { lugar, instancia: '' }).catch(() => undefined);
   }
 
   usar(id: string, conta: string, lugar: string): Bilhete | null {
@@ -490,7 +518,7 @@ export class SalaMundoColyseus extends SalaColyseusBase {
       }
       // Uma entrada pelo menu substitui qualquer transferência abandonada.
       if (typeof o.bilhete !== 'string') this.coordenador.cancelarBilhetesDe(identidade);
-      this.mundo.reservar(identidade, entrada.ficha, entrada.chegada, this.coordenador.grupos.grupoDe(identidade)?.id ?? null, entrada.comitiva);
+      this.mundo.reservar(identidade, entrada.ficha, entrada.chegada, this.coordenador.grupos.grupoDe(identidade)?.id ?? null, entrada.comitiva, entrada.viagem, entrada.decorridoTicks);
       this.coordenador.registrarPerfil(identidade, entrada.ficha, this.mundo.idLugar);
       this.identidades.set(client.sessionId, identidade);
       void super.onJoin(client);
@@ -511,12 +539,14 @@ export class SalaMundoColyseus extends SalaColyseusBase {
   }
 
   /** Pelo bilhete (troca de sala) ou pelo slot (entrar no jogo, sempre na vila salva; ou criar o personagem). */
-  private async prepararEntrada(conta: string, o: Record<string, unknown>): Promise<{ slot: number; ficha: FichaDoMundo; chegada: Celula | null; comitiva: InvocacaoQueViaja[] }> {
+  private async prepararEntrada(conta: string, o: Record<string, unknown>): Promise<{ slot: number; ficha: FichaDoMundo; chegada: Celula | null; comitiva: InvocacaoQueViaja[]; viagem: EstadoQueViaja | null; decorridoTicks: number }> {
     if (typeof o.bilhete === 'string') {
       const b = this.coordenador.usar(o.bilhete, conta, this.mundo.idLugar);
       if (!b) throw new ServerError(403, 'bilhete_invalido');
       this.coordenador.sair(`${conta}#${String(b.slot)}`);
-      return { slot: b.slot, ficha: b.ficha, chegada: b.chegada, comitiva: b.comitiva ?? [] };
+      // D-169: as contagens seguem durante a viagem (o tempo entre o bilhete e a entrada, em ticks).
+      const decorridoTicks = b.emitido ? Math.max(0, Math.round((Date.now() - b.emitido) / MS_POR_TICK)) : 0;
+      return { slot: b.slot, ficha: b.ficha, chegada: b.chegada, comitiva: b.comitiva ?? [], viagem: b.viagem ?? null, decorridoTicks };
     }
     if (!slotValido(o.slot)) throw new ServerError(400, 'slot_invalido');
     const slot = o.slot;
@@ -528,7 +558,7 @@ export class SalaMundoColyseus extends SalaColyseusBase {
     }
     if (!ficha) throw new ServerError(404, 'sem_personagem');
     if (this.mundo.idLugar !== `regiao:${ficha.vilaSalva}`) throw new ServerError(409, 'fora_da_vila_salva');
-    return { slot, ficha, chegada: null, comitiva: [] };
+    return { slot, ficha, chegada: null, comitiva: [], viagem: null, decorridoTicks: 0 };
   }
 
   private processarPendencias(): void {
@@ -544,13 +574,17 @@ export class SalaMundoColyseus extends SalaColyseusBase {
       void atenderMercado(this.coordenador, p);
       return;
     }
+    if (p.tipo === 'aquecer') {
+      void this.coordenador.aquecerSala(p.lugar);
+      return;
+    }
     const { conta, slot } = separar(p.identidade);
     this.coordenador.gravar(conta, slot, p.ficha);
     if (p.tipo === 'gravar') return;
     const destino = lerLugar(this.coordenador.reino, p.destino);
     if (!destino) return;
     const lugar = idDoLugar(destino);
-    const bilhete = this.coordenador.emitir({ conta, slot, ficha: p.ficha, lugar, chegada: p.chegada, instancia: p.instancia, comitiva: p.comitiva });
+    const bilhete = this.coordenador.emitir({ conta, slot, ficha: p.ficha, lugar, chegada: p.chegada, instancia: p.instancia, comitiva: p.comitiva, ...(p.viagem && { viagem: p.viagem }) });
     this.mundo.despedir(p.sessaoId, { tipo: 'trocarSala', lugar, bilhete, instancia: p.instancia });
     registrarLog('mundo_troca', { de: this.mundo.idLugar, para: lugar });
   }

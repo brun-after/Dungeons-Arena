@@ -1,4 +1,5 @@
 import { processarAmbientes } from '../world/ambientes';
+import { processarPassagens } from '../world/passagem';
 import { processarTerrenosVivos } from '../world/terrenos-vivos';
 import { processarEnxame } from '../world/enxame';
 import { processarPantanos } from '../combat/sequencias';
@@ -73,6 +74,8 @@ export function simular(
   processarServosNecromantes(estado, ctx, saida);
   // Marco 22 (D-089): o falcão do Aventureiro.
   processarCompanheiros(estado, ctx, saida);
+  // Marco 41 (14/11/2026, D-169): a trégua de quem está numa passagem entre as regiões do Mundo.
+  processarPassagens(estado, ctx);
   aplicarComandos(estado, ctx, comandos, saida);
   processarIa(estado, ctx, saida);
   processarAcoes(estado, ctx, saida);

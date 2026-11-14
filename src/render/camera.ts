@@ -107,6 +107,23 @@ export class Camera {
   }
 
   /** Centraliza imediatamente numa célula (entrada na fase). */
+  /** Marco 41 (14/11/2026, D-169): onde a célula fica em relação ao centro da vista (px do mundo). */
+  desvio(c: Celula): { x: number; y: number } {
+    const k = this.centro(c.x, c.y);
+    return { x: k.x - (this.x + this.larguraVistaMundo / 2), y: k.y - (this.y + this.alturaVistaMundo / 2) };
+  }
+
+  /**
+   * D-169: começa com a célula `d` fora do centro (a vista igual à da cena de antes, na troca de região) e desliza
+   * até centralizá-la: sem salto, e mostrando mais do caminho à frente que do que ficou para trás.
+   */
+  centralizarComDesvio(c: Celula, d: { x: number; y: number }): void {
+    this.centralizar(c);
+    const k = this.centro(c.x, c.y);
+    this.x = this.limitarX(k.x - d.x - this.larguraVistaMundo / 2);
+    this.y = this.limitarY(k.y - d.y - this.alturaVistaMundo / 2);
+  }
+
   centralizar(c: Celula): void {
     const o = this.origemPara(c.x, c.y);
     this.x = this.alvoX = o.x;

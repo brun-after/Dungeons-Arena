@@ -14,7 +14,7 @@ import { contextoDaFase, estadoInicialDaFase } from '../save/fases-campanha';
 import { catalogoDeGeracao, gerarFase } from '../world/gerador';
 import { gerarExterior, type ExteriorGerado } from '../world/gerador-exterior';
 import { FRAGMENTO_DE_PORTAL, objetosDoExterior, PORTAL_TEMPORARIO } from './objetos-mundo';
-import { territorioDoLugar } from './reino';
+import { territorioDoLugar, vizinha } from './reino';
 import { estoqueDeDungeon } from './lojas-mundo';
 import type { CovilDoMundo, MasmorraDoMundo, MaterialDeInimigo, Reino, RegiaoDoMundo, RegrasDePerigo } from './reino';
 
@@ -104,7 +104,12 @@ export function montarLugar(conteudo: Conteudo, reino: Reino, lugar: Lugar, modo
     const telhados = exterior.fase.telhados ?? [];
     // Marco 38 (D-142): a clareira da pedra de save das regiões sem vila também é refúgio.
     const refugios = [...(v ? [{ x: v.x, y: v.y, raio: v.raio + 0.5 }] : []), ...(exterior.abrigo ? [{ x: exterior.abrigo.x, y: exterior.abrigo.y, raio: exterior.abrigo.raio + 0.5 }] : [])];
-    const fase = { ...r.ctx.fase, estruturas, exterior: true, telhados, ...(refugios.length > 0 && { refugios }) };
+    // Marco 41 (14/11/2026, D-169): as passagens para as vizinhas (sem monstros e sem dano) e os enfeites delas.
+    const passagens = exterior.faixas.map((f) => {
+      const la = vizinha(reino, lugar.regiao, f.lado);
+      return { ...f.area, ...(la && { destino: `regiao:${la.id}` }) };
+    });
+    const fase = { ...r.ctx.fase, estruturas, exterior: true, telhados, ...(refugios.length > 0 && { refugios }), ...(passagens.length > 0 && { passagens, enfeites: exterior.enfeites }) };
     const ctx = { ...r.ctx, fase };
     const estado = estadoInicialDaFase(ctx);
     estado.objetos.push(...objetosDoExterior(territorioDoLugar(reino,lugar.regiao.id), exterior));

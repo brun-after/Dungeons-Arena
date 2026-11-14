@@ -1,5 +1,6 @@
 // O que a sala do Mundo usa para levar alguém a outro lugar (marco 38, 08/11/2026, D-142):
-// - a chegada pela borda na vizinha, a célula do mercador do evento e as estruturas escondidas que quem passa perto
+// - marco 41 (14/11/2026, D-169): a troca no meio da passagem, a vizinha a aquecer e a pendência com a bagagem;
+// - a chegada pela borda na vizinha (antes do marco 41), a célula do mercador do evento e as estruturas escondidas que quem passa perto
 //   descobre (09/11/2026: vieram da sala do Mundo);
 // - a chegada na pedra de save das regiões sem vila (ao lado da pedra, no centro);
 // - o lugar ao acaso do reino da Pedra de retorno desviada: uma região do mesmo reino e uma célula onde o gerador pôs
@@ -18,7 +19,12 @@ import type { Entidade } from '../entities/entidade';
 import type { ExteriorGerado } from '../world/gerador-exterior';
 import { gerarExterior } from '../world/gerador-exterior';
 import { PREFIXO_ANDARILHO } from './objetos-mundo';
-import { fonteDoAndarilho, ladoOposto, portaDa, territorioDoLugar, type LadoDaRegiao, type Reino, type RegiaoDoMundo } from './reino';
+import { fonteDoAndarilho, portaDa, territorioDoLugar, vizinha, type Reino, type RegiaoDoMundo } from './reino';
+import { chegadaPelaPassagem, passagemEm, TROCA_NA_PASSAGEM } from '../world/passagens-exterior';
+import { vivo } from '../entities/entidade';
+import { recolherBagagem } from './bagagem';
+import { recolherComitiva } from './comitiva';
+import type { PendenciaDoMundo } from './pendencias';
 
 /** Onde chega quem não veio por uma passagem: ao lado da pedra de save do centro (null: o spawn da região). */
 export function chegadaNaPedra(exterior: ExteriorGerado | null): Celula | null {
@@ -52,14 +58,36 @@ export function fonteDeMissoesPerto(estado: EstadoJogo, e: Entidade, alcance: nu
   return null;
 }
 
-/** A célula de chegada na vizinha: o mesmo ponto da borda, duas células para dentro do lado oposto. */
-export function chegadaPelaBorda(tamanho: number, lado: LadoDaRegiao, c: Celula): Celula {
-  const dentro = 2;
-  const oposto = ladoOposto(lado);
-  if (oposto === 'norte') return { x: c.x, y: dentro };
-  if (oposto === 'sul') return { x: c.x, y: tamanho - 1 - dentro };
-  if (oposto === 'oeste') return { x: dentro, y: c.y };
-  return { x: tamanho - 1 - dentro, y: c.y };
+/**
+ * Marco 41 (14/11/2026, D-169): quem passou do meio da passagem vai à vizinha, no mesmo ponto físico da faixa (a
+ * passagem é igual nos dois mapas). Null fora das passagens ou antes do meio.
+ */
+export function travessia(reino: Reino, regiao: RegiaoDoMundo, exterior: ExteriorGerado, e: Pick<Entidade, 'x' | 'y'>): { destino: RegiaoDoMundo; chegada: Celula } | null {
+  const n = regiao.tamanho ?? reino.tamanhoRegiao;
+  const aqui = passagemEm(exterior.faixas, n, e.x, e.y);
+  if (!aqui || aqui.d > TROCA_NA_PASSAGEM) return null;
+  const destino = vizinha(reino, regiao, aqui.passagem.lado);
+  if (!destino) return null;
+  return { destino, chegada: chegadaPelaPassagem(n, destino.tamanho ?? reino.tamanhoRegiao, aqui.passagem.lado, e.x, e.y) };
+}
+
+/** A vizinha do outro lado da passagem onde `e` está (a sala dela é aquecida antes da troca), ou null. */
+export function vizinhaDaPassagem(reino: Reino, regiao: RegiaoDoMundo, exterior: ExteriorGerado, e: Pick<Entidade, 'x' | 'y'>): RegiaoDoMundo | null {
+  const aqui = passagemEm(exterior.faixas, regiao.tamanho ?? reino.tamanhoRegiao, e.x, e.y);
+  return aqui ? (vizinha(reino, regiao, aqui.passagem.lado) ?? null) : null;
+}
+
+/**
+ * A pendência de troca de sala com o que segue junto: as invocações e o estado de quem viaja (mundo/bagagem.ts).
+ * Depois de morrer, só as recargas e a mecânica de movimento seguem (renasce com a vida cheia e sem os efeitos).
+ */
+export function pendenciaDeTroca(estado: EstadoJogo, e: Entidade | undefined, base: { identidade: string; sessaoId: string; ficha: FichaDoMundo; destino: string; chegada: Celula | null; instancia: string | null }): Extract<PendenciaDoMundo, { tipo: 'trocar' }> {
+  const comitiva = e ? recolherComitiva(estado, e.id) : [];
+  if (!e) return { tipo: 'trocar', ...base, comitiva };
+  const ids = new Set(comitiva.flatMap((v) => (v.idAntes ? [v.idAntes] : [])));
+  const b = recolherBagagem(estado, e, ids);
+  const viagem = vivo(e) ? b : { hp: Number.MAX_SAFE_INTEGER, mana: Number.MAX_SAFE_INTEGER, recargas: b.recargas, efeitos: [], buffsArmados: [], movimento: b.movimento, refugio: false, ...(b.petAtivo !== undefined && { petAtivo: b.petAtivo }) };
+  return { tipo: 'trocar', ...base, comitiva: vivo(e) ? comitiva : [], viagem };
 }
 
 /** Uma célula andável e sem objeto, a poucos passos da entrada da região (o mercador errante do evento). */

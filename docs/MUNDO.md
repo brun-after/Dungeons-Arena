@@ -1,8 +1,9 @@
 # O Mundo: guia do modo
 
-**Versão:** 1.0 · **Data:** 08/11/2026
+**Versão:** 1.1 · **Data:** 14/11/2026
 
 > **Histórico**
+> - **1.1 (14/11/2026)**: marco 41: as passagens entre as regiões (a troca de sala sem tela preta e a trégua) e o estado que segue com o personagem.
 > - **1.0 (08/11/2026)**: marco 38: prédios das vilas, andarilhos, escolta, mercadores errantes, forja em graus, troféus de chefe, fusão elemental, pedra de retorno com círculo, save em toda região e o deserto entre os reinos.
 > - **0.8 (02/11/2026)**: Reino do Eclipse, exército do necromante inimigo, atenção de batalha, dungeons ampliadas e assistência de retorno.
 
@@ -248,3 +249,15 @@ como padrão; múltiplas câmeras aumentam o trabalho gráfico no aparelho que a
 - **Save em toda região**, no centro.
 - **A pé entre os reinos.** A Travessia das Areias (Dunas do Poente, Mar de Areia, Garganta do Sol) liga as Colinas
   do Sudeste ao Baluarte do Eclipse por um corredor estreito, com monstros nas faixas de nível dos dois reinos.
+
+## Passagens entre as regiões (marco 41, 14/11/2026)
+
+- Cada saída para uma região vizinha é uma faixa de 28 células no meio da borda, igual nas duas regiões
+  (`world/passagens-exterior.ts`). A sala troca no meio dela, 12 células para dentro.
+- **Trégua:** os monstros não entram. Lá dentro ninguém é alvo nem fere, também no PvP (`world/passagem.ts`, efeito
+  `tregua`).
+- **O que segue na troca de sala:** vida, mana, recargas, efeitos, movimento escolhido, fúria, carga da ultimate e as
+  invocações, com o tempo da viagem descontado (`mundo/bagagem.ts`, `mundo/comitiva.ts`).
+- No cliente, a cena nova monta escondida por cima da antiga e aparece quando o personagem chega (`mundo-tela.ts`). O
+  mapa da vizinha é preparado enquanto se anda pela passagem, e o servidor abre a sala de lá (`aquecerSala`).
+- Detalhes em D-169.

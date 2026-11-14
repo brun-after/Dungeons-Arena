@@ -10,16 +10,17 @@
 import { ehDragao, porteDoDragao } from './porte-dragoes';
 import { BALANCE_PADRAO } from '../core/contexto';
 import { aleatorio, criarRng, inteiro, escolher, type EstadoRng } from '../core/rng';
-import { LADOS, portaDa, vizinha, type Bioma, type LadoDaRegiao, type PapelNpc, type Reino, type RegiaoDoMundo } from '../mundo/reino';
+import { portaDa, type Bioma, type LadoDaRegiao, type PapelNpc, type Reino, type RegiaoDoMundo } from '../mundo/reino';
 import type { Celula } from '../core/comandos';
 import type { FaseJson, InimigoPosicionado, ObjetoPosicionadoJson, SpawnJson, Telhado } from './fase';
 import { armadilhaDeFase } from './armadilhas-de-fase';
 import type { AreaAmbiente, TipoAmbiente } from './ambiente-tipos';
 import { erguerPredios, PREDIO_DO_PAPEL } from './vila-predios';
+import { entradaDoLado, escavarPassagens, type PassagemDoExterior } from './passagens-exterior';
+import type { Decoracao } from './decoracao';
 import { abrigoDoCentro, andarilhosDaRegiao, entradasDosLados, escavarCorredor, nivelDoMonstro, rotasDosErrantes } from './exterior-extras';
 
-/** Largura da abertura na borda que leva à região vizinha. */
-export const LARGURA_PASSAGEM = 6;
+export { LARGURA_PASSAGEM } from './passagens-exterior';
 /** Distância mínima (Chebyshev) entre os inimigos e a vila ou os spawns. */
 const FOLGA_INIMIGOS = 12;
 /** Passo da grade grossa do ruído. */
@@ -55,6 +56,9 @@ export interface ExteriorGerado {
   pontos: PontoDoExterior[];
   /** As células da borda que passam para a vizinha, por lado (vazio onde o reino acaba). */
   passagens: Readonly<Record<LadoDaRegiao, readonly Celula[]>>;
+  /** Marco 41 (D-169): as passagens inteiras (a faixa, o tipo e o lado) e os enfeites delas. */
+  faixas: readonly PassagemDoExterior[];
+  enfeites: readonly Decoracao[];
   /** A área segura da vila (sem monstros nem PvP), ou null. */
   vila: { x: number; y: number; raio: number } | null;
   /** Marco 38 (D-142): o abrigo da pedra de save no centro das regiões sem vila (os monstros não entram), ou null. */
@@ -209,23 +213,15 @@ function estrada(g: Grade, rng: EstadoRng, de: Celula, para: Celula, protegidas:
   }
 }
 
-/** O centro da abertura de cada lado e as células da borda que passam para a vizinha. */
-function abrirPassagens(g: Grade, reino: Reino, regiao: RegiaoDoMundo): { passagens: Record<LadoDaRegiao, Celula[]>; entradas: Celula[] } {
-  const n = g.n;
-  const meio = Math.floor(n / 2) - Math.floor(LARGURA_PASSAGEM / 2);
+/**
+ * Marco 41 (14/11/2026, D-169): as passagens para as vizinhas (world/passagens-exterior.ts) e onde cada uma chega por
+ * dentro. Antes era uma abertura de seis células na borda; agora é a faixa que as duas regiões veem igual.
+ */
+function abrirPassagens(g: Grade, reino: Reino, regiao: RegiaoDoMundo, protegidas: Set<number>): { passagens: Record<LadoDaRegiao, Celula[]>; areas: PassagemDoExterior[]; enfeites: Decoracao[]; entradas: Celula[] } {
+  const r = escavarPassagens(g, reino, regiao, protegidas);
   const passagens: Record<LadoDaRegiao, Celula[]> = { norte: [], sul: [], leste: [], oeste: [] };
-  const entradas: Celula[] = [];
-  for (const lado of LADOS) {
-    if (!vizinha(reino, regiao, lado)) continue;
-    for (let i = 0; i < LARGURA_PASSAGEM; i++) {
-      const borda = lado === 'norte' ? { x: meio + i, y: 0 } : lado === 'sul' ? { x: meio + i, y: n - 1 } : lado === 'oeste' ? { x: 0, y: meio + i } : { x: n - 1, y: meio + i };
-      g.por(borda.x, borda.y, '=');
-      passagens[lado].push(borda);
-    }
-    const c = Math.floor(n / 2);
-    entradas.push(lado === 'norte' ? { x: c, y: 2 } : lado === 'sul' ? { x: c, y: n - 3 } : lado === 'oeste' ? { x: 2, y: c } : { x: n - 3, y: c });
-  }
-  return { passagens, entradas };
+  for (const p of r.passagens) passagens[p.lado] = p.borda;
+  return { passagens, areas: r.passagens, enfeites: r.enfeites, entradas: r.passagens.map((p) => entradaDoLado(g.n, p.lado)) };
 }
 
 /**
@@ -375,7 +371,7 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
   // Marco 38 (D-142): toda região sem vila tem a pedra de save no centro, numa clareira abrigada.
   const abrigo = regiao.vila ? null : abrigoDoCentro(g, centro, protegidas);
   if (abrigo) pontos.push({ tipo: 'npc', papel: 'save', x: centro.x, y: centro.y });
-  const { passagens, entradas } = abrirPassagens(g, reino, regiao);
+  const { passagens, areas, enfeites, entradas } = abrirPassagens(g, reino, regiao, protegidas);
   // Das portas da vila (ou do centro) até cada passagem e cada porta de estrutura.
   const saidaDaVila = (alvo: Celula): Celula => {
     if (!regiao.vila) return centro;
@@ -386,7 +382,6 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
   };
   for (const alvo of entradas) estrada(g, rng, saidaDaVila(alvo), alvo, protegidas);
   for (const p of pontos) if (p.tipo === 'estrutura' && !p.escondida) estrada(g, rng, saidaDaVila(p.frente), p.frente, protegidas);
-  for (const lado of LADOS) for (const c of passagens[lado]) g.por(c.x, c.y, '=');
   // A frente da porta fica sempre livre.
   for (const p of pontos) if (p.tipo === 'estrutura') g.por(p.frente.x, p.frente.y, '=');
 
@@ -482,14 +477,15 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
   const usadas = new Set<number>();
   for (let t = 0; t < quantasArmadilhas * 4 && armadilhas.length < quantasArmadilhas && livres.length > 0; t++) {
     const c = escolher(rngArmadilhas, livres);
-    if (usadas.has(c.y * n + c.x) || naVila(c) || spawns.some((s) => chebyshev(s, c) < FOLGA_INIMIGOS)) continue;
+    // 14/11/2026 (D-169): nunca embaixo de um monstro (ele disparava a armadilha parado, sem ninguém por perto).
+    if (usadas.has(c.y * n + c.x) || naVila(c) || spawns.some((s) => chebyshev(s, c) < FOLGA_INIMIGOS) || inimigos.some((i) => chebyshev(i, c) < 2)) continue;
     usadas.add(c.y * n + c.x);
     armadilhas.push(armadilhaDeFase(rngArmadilhas, c, { largura: n, altura: n }, inteiro(rngArmadilhas, regiao.nivel[0], regiao.nivel[1]), null));
   }
 
   const ambientes = terrenosDaRegiao(g, regiao, livres, chefes, naVila, spawns);
   // Marco 38 (D-142): os andarilhos perto das estradas e as rotas dos errantes (RNG próprio: o resto sai igual).
-  pontos.push(...andarilhosDaRegiao(g, regiao, (c) => !naVila(c) && spawns.every((s) => chebyshev(s, c) >= 6), ocupadas));
+  pontos.push(...andarilhosDaRegiao(g, regiao, (c) => !naVila(c) && !protegidas.has(c.y * n + c.x) && spawns.every((s) => chebyshev(s, c) >= 6), ocupadas));
   const rotas = rotasDosErrantes(g, regiao, centro, entradas);
 
   const fase: FaseJson = {
@@ -505,7 +501,7 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     ...(armadilhas.length > 0 && { objetos: armadilhas }),
     ...(ambientes.length > 0 && { ambientes }),
   };
-  return { fase, pontos, passagens, vila: regiao.vila ? { x: regiao.vila.x, y: regiao.vila.y, raio: regiao.vila.raio } : null, abrigo, rotas };
+  return { fase, pontos, passagens, faixas: areas, enfeites, vila: regiao.vila ? { x: regiao.vila.x, y: regiao.vila.y, raio: regiao.vila.raio } : null, abrigo, rotas };
 }
 
 /**

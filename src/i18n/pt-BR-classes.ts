@@ -5,6 +5,9 @@ export const textosClasses = {
   'efeito.cego': 'Cego',
   'desc.efeito.cego': 'Erra {pct}% dos golpes por {s} s',
   'efeito.firme': 'Firme',
+  // Marco 41 (14/11/2026, D-169)
+  'efeito.tregua': 'Trégua da passagem',
+  'desc.efeito.tregua': 'Na passagem entre as regiões, ninguém fere nem é ferido',
   'desc.efeito.firme': 'Por {s} s, o controle recebido dura {pct}% menos',
   'efeito.acerto_carregado': 'Golpe que prende',
   'desc.efeito.acerto_carregado': 'Por {s} s, quem leva o golpe fica com o efeito carregado',
