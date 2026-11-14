@@ -475,7 +475,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       aoLadoDoDirecional: centralizar.elemento,
       aoMudarDirecao: (rumo) => { golpeQuebravel.esquecer(); movToque.rumo(rumo); emitir(comandoMover(rumo)); },
       principal: botaoUltimate.elemento,
-      movimento: movToque.botao,
+      movimento: movToque.botoes,
       aoInteragir: () => {
         emitir({ t: 'interagir' });
       },
@@ -578,7 +578,6 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     aoAlternarBasico: alternarBasico,
     // Marco 40 (13/11/2026, D-164): o movimento da classe (Shift) e a troca da mecânica (G).
     aoMovimento: movToque.doTeclado,
-    aoTrocarMovimento: () => { emitir({ t: 'trocarMovimento' }); },
     // `Esc` contextual (§2.15): com alvo, cancela a mira; sem alvo, pausa (ou abre o menu, na arena).
     aoCancelar: () => {
       if (jogador()?.alvoSelecionado) emitir({ t: 'selecionarAlvo', alvo: null });

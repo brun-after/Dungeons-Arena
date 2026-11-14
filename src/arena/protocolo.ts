@@ -201,7 +201,9 @@ export function lerComando(v: unknown): Comando | null {
     case 'movimentoClasse': {
       const alvo = v.alvo === undefined ? undefined : lerCelula(v.alvo);
       if (v.alvo !== undefined && !alvo) return null;
-      const comAlvo = alvo ? { alvo } : {};
+      // D-172: o botão (0 a 2) é opcional.
+      if (v.botao !== undefined && !(inteiro(v.botao) && v.botao >= 0 && v.botao <= 2)) return null;
+      const comAlvo = { ...(alvo ? { alvo } : {}), ...(typeof v.botao === 'number' ? { botao: v.botao } : {}) };
       if (v.dx === undefined && v.dy === undefined) return { t: 'movimentoClasse', ...comAlvo };
       return inteiro(v.dx) && inteiro(v.dy) && Math.abs(v.dx) <= 1000 && Math.abs(v.dy) <= 1000 ? { t: 'movimentoClasse', dx: v.dx, dy: v.dy, ...comAlvo } : null;
     }
