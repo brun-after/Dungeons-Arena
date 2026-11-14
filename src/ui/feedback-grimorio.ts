@@ -113,6 +113,8 @@ export function ligarFeedbackGrimorio(o: OpcoesFeedbackGrimorio): void {
     if (ev.id !== idLocal) return;
     const d = descreverEntrada(ctx, ev.entrada);
     hud.registrar(t('log.descoberta', { nome: d.nome }));
+    // D-173 (14/11/2026): a ressonância nova aparece na tela (ela estava escondida até agora).
+    if (ev.entrada.startsWith('ressonancia:')) o.aviso(t('diario.ressonanciaNova', { nome: d.nome }));
     const nuvem = o.nuvem;
     if (!nuvem) return;
     // Só quando a entrada é nova no diário (raro): uma escrita e uma leitura de uma linha. Falha de rede: nada.

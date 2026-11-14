@@ -7,6 +7,11 @@ export const textosDiario = {
   'diario.efeito': 'Efeito',
   'diario.naBarra': 'na sua barra',
   'diario.tipo.sinergia': 'Sinergias passivas',
+  // D-173 (14/11/2026): as ressonâncias ficam escondidas até a primeira vez; o diário dá três pistas por vez.
+  'diario.tipo.ressonancia': 'Ressonâncias',
+  'diario.ressonanciaComo': 'estilo de {eixo} com sintonia de {elemento}',
+  'diario.pistaRessonancia': '??? (um estilo de {eixo} e um elemento em sintonia)',
+  'diario.ressonanciaNova': 'Ressonância descoberta: {nome}',
   'diario.silhuetaCombo': '???? ({n} habilidades)',
   'diario.reacaoComo': '{elemento} acerta um alvo {estados}',
   // Marco 40 (13/11/2026, D-163): os combos de papel.

@@ -19,6 +19,8 @@ import { expandirNucleos } from '../combat/nucleos';
 import { ehObjeto } from './validar';
 import combosJson from '../data/combos.json';
 import combosPapelJson from '../data/combos-papel.json';
+import ressonanciasJson from '../data/ressonancias.json';
+import { lerRessonancias, type Ressonancia } from '../combat/ressonancias-dados';
 import movimentosJson from '../data/movimentos.json';
 import interacoesBuffJson from '../data/interacoes-buff.json';
 import missoesJson from '../data/missoes.json';
@@ -98,6 +100,8 @@ export interface Conteudo {
   combosDePapel: CombosDePapel;
   /** D-163: os combos assinados das classes (seis por classe). */
   combosAssinados: ReadonlyMap<string, ComboAssinado>;
+  /** D-173 (14/11/2026): as 30 ressonâncias (eixo de estilo × elemento da sintonia), por id `eixo_elemento`. */
+  ressonancias: ReadonlyMap<string, Ressonancia>;
   /** Marco 40 (13/11/2026, D-164): o movimento de cada classe (três mecânicas, uma ativa). */
   movimentos: ReadonlyMap<string, readonly MovimentoDaClasse[]>;
   /** Marco 18 (camada 6): as regras de buff × habilidade. */
@@ -195,6 +199,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const cp = lerCombosDePapel(fontes.combosPapel ?? combosPapelJson);
   const ca = lerAssinados(fontes.combosPapel ?? combosPapelJson);
   const mv = lerMovimentos(movimentosJson);
+  const rs = lerRessonancias(ressonanciasJson);
   const rb = lerRegrasDeBuff(fontes.interacoesBuff);
   const mi = lerMissoes(fontes.missoes);
   const og = lerOrigens(fontes.origens);
@@ -202,7 +207,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const tm = lerTemas(fontes.temas, new Set([...p.presets.values()].filter((x) => x.invocacao === null).map((x) => x.id)));
   const af = lerAfinidades(fontes.afinidades);
   const ar = lerArmas(fontes.armas);
-  const erros = [...nu.erros, ...ul.erros, ...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...es.erros, ...pa.erros, ...cb.erros, ...cp.erros, ...ca.erros, ...mv.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
+  const erros = [...nu.erros, ...ul.erros, ...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...es.erros, ...pa.erros, ...cb.erros, ...cp.erros, ...ca.erros, ...mv.erros, ...rs.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
   for (const conj of cj.conjuntos.values()) {
     for (const peca of conj.pecas) if (!fo.dados.bases.has(peca)) erros.push(`conjunto ${conj.id}: base desconhecida "${peca}"`);
   }
@@ -317,6 +322,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       combos: cb.combos,
       combosDePapel: cp.combosDePapel,
       combosAssinados: ca.assinados,
+      ressonancias: rs.ressonancias,
       movimentos: mv.movimentos,
       regrasDeBuff: rb.regras,
       missoes: mi.missoes,

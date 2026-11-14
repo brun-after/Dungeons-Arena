@@ -11,7 +11,7 @@ import { bonusAtivos } from './conjuntos';
 import { variacoesDeItem } from './gerar-item-base';
 
 // Marco 26 (26/10/2026, D-111): as sinergias passivas (data/sinergias.json) também entram.
-export const TIPOS_DE_ENTRADA = ['reacao', 'combo', 'sinergia', 'estilo', 'marco', 'fusao', 'item', 'conjunto', 'buff', 'missao', 'origem', 'evento'] as const;
+export const TIPOS_DE_ENTRADA = ['reacao', 'combo', 'ressonancia', 'sinergia', 'estilo', 'marco', 'fusao', 'item', 'conjunto', 'buff', 'missao', 'origem', 'evento'] as const;
 export type TipoDeEntrada = (typeof TIPOS_DE_ENTRADA)[number];
 
 export interface EntradaDoDiario {
@@ -33,6 +33,8 @@ export function entradasDoDiario(ctx: Pick<ContextoSimulacao, 'conteudo'>): Entr
   // Marco 40 (13/11/2026, D-163): os combos de papel também se descobrem.
   for (const id of c.combosDePapel.combos.keys()) saida.push(e('combo', id));
   for (const id of c.combosAssinados.keys()) saida.push(e('combo', id));
+  // D-173 (14/11/2026): as 30 ressonâncias (eixo de estilo com elemento).
+  for (const id of c.ressonancias.keys()) saida.push(e('ressonancia', id));
   for (const s of c.sinergias) saida.push(e('sinergia', s.id));
   for (const lista of c.estilos.values()) for (const s of lista) saida.push(e('estilo', s.id));
   for (const d of c.definicoes.values()) {
@@ -71,6 +73,11 @@ export function registrarDescobertas(estado: EstadoJogo, ctx: ContextoSimulacao,
       case 'comboFeito': {
         const quem = porId(ev.id);
         if (quem) anotar(estado, quem, `combo:${ev.combo}`, saida);
+        break;
+      }
+      case 'ressonancia': {
+        const quem = porId(ev.id);
+        if (quem) anotar(estado, quem, `ressonancia:${ev.ressonancia}`, saida);
         break;
       }
       case 'sinergiaPassiva': {

@@ -2,6 +2,7 @@ import { ehRetorno } from './buffs-de-leitura';
 import { aoSerAtingido, noAr } from './movimento-classe';
 import { golpeAlcancaOPet, loboIntercepta, marcarACaca, petDoCompanheiro, reflexoDoPet } from './pets';
 import { aposGolpeDoCompanheiro, golpeDoCompanheiro, leituraDoCompanheiro } from './pets-estilos';
+import { dispararRessonancias } from './ressonancias';
 import { retirarVida } from './reserva-necromante';
 import { multiplicadorDardo, registrarDardo } from './concentracao-arcana';
 import { encherFuria } from './frenesi';
@@ -260,6 +261,8 @@ export function aplicarImpacto(
       if (atacante && atacante !== alvo) aoLevarGolpe(estado, alvo, (id) => habilidadeDoAtor(ctx, alvo, id, tick));
       // D-164: ser atingido tira o bônus de viagem do movimento da classe.
       if (atacante && atacante !== alvo) aoSerAtingido(estado, alvo, saida);
+      // D-173: as ressonâncias (o eixo do estilo com o elemento da sintonia).
+      if (atacante?.bolsa && atacante !== alvo && !impacto.secundario) dispararRessonancias(estado, ctx, atacante, alvo, hab, saida);
       // D-173: a cura, o empurrão e a runa que os estilos do dono dão ao golpe do companheiro.
       if (atacante?.invocacao?.companheiro) aposGolpeDoCompanheiro(estado, ctx, atacante, alvo, hab, saida);
     }

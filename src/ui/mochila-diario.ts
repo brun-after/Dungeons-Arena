@@ -22,6 +22,7 @@ function el<K extends keyof HTMLElementTagNameMap>(tag: K, classe?: string, text
 
 /** Quantos rumores existem no dicionário (`rumor.1` … `rumor.N`). */
 const RUMORES = 12;
+const PISTAS_DE_RESSONANCIA = 3;
 
 export function desenharDiario(corpo: HTMLElement, j: Entidade, ctx: ContextoSimulacao): void {
   const bolsa = j.bolsa;
@@ -61,7 +62,10 @@ export function desenharDiario(corpo: HTMLElement, j: Entidade, ctx: ContextoSim
     const resumo = el('summary', undefined, t('diario.grupo', { tipo: t(`diario.tipo.${tipo}` as ChaveTexto), n: vistasDoTipo.length, total: lista.length }));
     grupo.append(resumo);
     const ul = el('ul', 'entradas-diario');
+    // D-173 (14/11/2026): as ressonâncias ficam escondidas; o diário mostra as vistas e só três pistas por vez.
+    let pistas = 0;
     for (const e of lista) {
+      if (tipo === 'ressonancia' && !vistas.has(e.id) && ++pistas > PISTAS_DE_RESSONANCIA) continue;
       const li = el('li', vistas.has(e.id) ? 'entrada-diario vista' : 'entrada-diario silhueta');
       if (vistas.has(e.id)) {
         const d = descreverEntrada(ctx, e.id);
@@ -74,7 +78,9 @@ export function desenharDiario(corpo: HTMLElement, j: Entidade, ctx: ContextoSim
         li.dataset.entrada = e.id;
       } else {
         const combo = tipo === 'combo' ? ctx.conteudo.combos.get(e.id.slice(6)) : undefined;
-        li.append(el('strong', undefined, combo ? t('diario.silhuetaCombo', { n: combo.sequencia.length }) : '???'));
+        const res = tipo === 'ressonancia' ? ctx.conteudo.ressonancias.get(e.id.slice(12)) : undefined;
+        const pista = res ? t('diario.pistaRessonancia', { eixo: t(`eixo.${res.eixo}` as ChaveTexto) }) : '???';
+        li.append(el('strong', undefined, combo ? t('diario.silhuetaCombo', { n: combo.sequencia.length }) : pista));
       }
       ul.append(li);
     }

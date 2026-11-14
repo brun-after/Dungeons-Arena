@@ -3,6 +3,11 @@
 import { describe, expect, it } from 'vitest';
 import { CAMPOS_DO_PET, leituraDoPet, passoDoCompanheiro, ritmoDoCompanheiro, type CampoDoPet } from '../../src/combat/pets-estilos';
 import { PETS } from '../../src/combat/pets';
+import { resolverHabilidade } from '../../src/combat/compilar-habilidade';
+import { dispararRessonancias, efeitoNaFaixa, ressonanciasDoGolpe } from '../../src/combat/ressonancias';
+import type { EventoSimulacao } from '../../src/core/eventos-simulacao';
+import { entradasDoDiario, registrarDescobertas } from '../../src/progression/diario';
+import { vinculoDe } from '../../src/progression/vinculo';
 import { aoSerAtingido } from '../../src/combat/movimento-classe';
 import { REGISTRO_EFEITOS } from '../../src/combat/registro-efeitos';
 import type { EstadoJogo } from '../../src/core/estado';
@@ -103,5 +108,61 @@ describe('a montaria alugada no Mundo (D-173)', () => {
     j.efeitos = [{ tipo: 'montaria', ateTick: 9999, valor: 0, pct: 60, origemId: j.id } as unknown as Entidade['efeitos'][number]];
     aoSerAtingido(estado, j, []);
     expect(j.efeitos.some((f) => f.tipo === 'montaria')).toBe(false);
+  });
+});
+
+describe('as ressonâncias (D-173)', () => {
+  const ctx = contexto(faseDeTexto(SALA_ABERTA));
+  it('são 30, uma por par do Códex, cada uma com o efeito dela', () => {
+    expect(CONTEUDO.ressonancias.size).toBe(30);
+    const porEixo = new Map<string, number>();
+    for (const r of CONTEUDO.ressonancias.values()) {
+      expect(r.id).toBe(`${r.eixo}_${r.elemento}`);
+      expect(r.nome.length).toBeGreaterThan(0);
+      porEixo.set(r.eixo, (porEixo.get(r.eixo) ?? 0) + 1);
+    }
+    expect(porEixo.size).toBe(9);
+    expect(entradasDoDiario(ctx).filter((e) => e.tipo === 'ressonancia')).toHaveLength(30);
+  });
+
+  it('o efeito cresce com a faixa e a duração tem piso', () => {
+    const r = obter(CONTEUDO.ressonancias.get('sustento_terra'));
+    const fraca = efeitoNaFaixa(r.efeito, 3, 50);
+    const plena = efeitoNaFaixa(r.efeito, 10, 50);
+    expect(plena.valor).toBe(r.efeito.valor);
+    expect(fraca.valor).toBeLessThan(plena.valor);
+    expect(fraca.duracaoMs).toBeGreaterThanOrEqual(r.efeito.duracaoMs / 2);
+    expect(plena.duracaoMs).toBe(r.efeito.duracaoMs);
+  });
+
+  it('dispara no golpe com a forma do eixo e a sintonia do elemento, uma vez por recarga, e entra no diário', () => {
+    const j = criarJogador(obter(CONTEUDO.classes.get('mago')), 'j', 2, 2, ctx.balance);
+    const alvo = criarJogador(obter(CONTEUDO.classes.get('guerreiro')), 'a', 3, 2, ctx.balance);
+    alvo.equipe = 'outra';
+    const b = obter(j.bolsa);
+    b.runas = {};
+    b.barra = b.barra.map(() => 'bola_de_fogo');
+    // A sintonia vem da barra: o mago com skills de fogo na barra.
+    const estado = { tick: 100, entidades: [j, alvo], recargas: {} } as unknown as EstadoJogo;
+    const fogo = Math.round(vinculoDe(ctx, j, estado.tick).fogo * 10);
+    const hab = { ...obter(resolverHabilidade(ctx, 'bola_de_fogo')), formas: [{ mod: 'maior_e_mais_lenta' as const, faixa: 10 }] };
+    const achadas = ressonanciasDoGolpe(ctx, j, hab, estado.tick);
+    expect(fogo).toBeGreaterThanOrEqual(ctx.balance.habilidades.ressonancias.faixaMin);
+    if (fogo >= ctx.balance.habilidades.ressonancias.faixaMin) {
+      expect(achadas.map((x) => x.r.id)).toEqual(['area_fogo']);
+      expect(achadas[0]?.faixa).toBe(Math.min(10, fogo));
+      const saida: EventoSimulacao[] = [];
+      dispararRessonancias(estado, ctx, j, alvo, hab, saida);
+      expect(saida.filter((e) => e.t === 'ressonancia')).toHaveLength(1);
+      dispararRessonancias(estado, ctx, j, alvo, hab, saida);
+      expect(saida.filter((e) => e.t === 'ressonancia')).toHaveLength(1);
+      const novas: EventoSimulacao[] = [];
+      registrarDescobertas(estado, ctx, saida, novas);
+      expect(b.diario).toContain('ressonancia:area_fogo');
+    } else {
+      expect(achadas).toEqual([]);
+    }
+    // Sem a forma do eixo, nada.
+    expect(ressonanciasDoGolpe(ctx, j, { ...hab, formas: [] }, estado.tick)).toEqual([]);
   });
 });

@@ -63,6 +63,8 @@ export interface RegrasHabilidades {
   estudo: { B: number; A: number; S: number; reducaoPorIntPct: number; reducaoMaxPct: number };
   /** Marco 39 (D-151): a parte elemental das runas e a função secundária delas (combat/runas.ts). */
   runas: RegrasRunas;
+  /** D-173 (14/11/2026): as ressonâncias — a faixa mínima, a recarga de cada uma, o raio dos aliados e o piso da duração. */
+  ressonancias: { faixaMin: number; recargaMs: number; raioAliados: number; duracaoMinPct: number };
   /** Marco 40 (D-157): as formas dos nove eixos (combat/eixos.ts). */
   eixos: RegrasEixos;
 }
