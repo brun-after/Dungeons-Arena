@@ -70,10 +70,10 @@ describe('fios da ultimate (D-160)', () => {
     expect(formatarChave(obter(lerChave(chave)))).toBe(chave);
     expect(lerChave('ult_legiao$mago')).toBeNull();
     const ref = (k: string) => ult(k).efeitos.find((e) => e.tipo === 'invocar_temporario')?.ref;
-    expect(ref('ult_legiao#fogo6.gelo3$mago!fogo8')).toBe('espectro_tempestade');
+    expect(ref('ult_legiao#fogo6.gelo3$mago!fogo8')).toBe('eidolon_arcano');
     expect(ref('ult_legiao#fogo6.gelo3$necromante!trevas8')).toBe('esqueleto_profano');
-    expect(ref('ult_guardioes#fogo6.gelo3$guerreiro!fisico8')).toBe('fada');
-    expect(ref('ult_muralha_viva#fogo6.gelo3$arqueiro!raio8')).toBe('lobo_espiritual');
+    expect(ref('ult_guardioes#fogo6.gelo3$guerreiro!fisico8')).toBe('porta_estandarte');
+    expect(ref('ult_muralha_viva#fogo6.gelo3$arqueiro!raio8')).toBe('ent_guardiao');
     expect(ult('ult_aniquilacao#fogo6.gelo3$necromante!trevas8').lanca?.junto).toBe(true);
     expect(ult('ult_aniquilacao#fogo6.gelo3$mago!fogo8').lanca).toBeUndefined();
     // A que não fere não lança.

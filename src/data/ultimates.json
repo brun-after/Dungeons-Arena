@@ -221,7 +221,7 @@
   "veiculos": {
     "mago": {
       "invocacoes": {
-        "ataque": "espectro_tempestade",
+        "ataque": "eidolon_arcano",
         "cura": "fada",
         "guarda": "copia_ilusoria"
       }
@@ -239,22 +239,22 @@
     "guerreiro": {
       "invocacoes": {
         "ataque": "guerreiro_espectral",
-        "cura": "fada",
+        "cura": "porta_estandarte",
         "guarda": "sentinela"
       }
     },
     "arqueiro": {
       "invocacoes": {
         "ataque": "falcao_espectral",
-        "cura": "fada",
-        "guarda": "lobo_espiritual"
+        "cura": "espirito_do_bosque",
+        "guarda": "ent_guardiao"
       }
     },
     "aventureiro": {
       "invocacoes": {
         "ataque": "lobo_espiritual",
-        "cura": "fada",
-        "guarda": "sentinela"
+        "cura": "coruja_ancia",
+        "guarda": "javali_espiritual"
       }
     }
   },
