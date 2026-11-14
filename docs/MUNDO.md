@@ -1,8 +1,9 @@
 # O Mundo: guia do modo
 
-**Versão:** 1.1 · **Data:** 14/11/2026
+**Versão:** 1.2 · **Data:** 14/11/2026
 
 > **Histórico**
+> - **1.2 (14/11/2026)**: marco 41: a região vizinha desenhada além da borda e a troca sem a travada.
 > - **1.1 (14/11/2026)**: marco 41: as passagens entre as regiões (a troca de sala sem tela preta e a trégua) e o estado que segue com o personagem.
 > - **1.0 (08/11/2026)**: marco 38: prédios das vilas, andarilhos, escolta, mercadores errantes, forja em graus, troféus de chefe, fusão elemental, pedra de retorno com círculo, save em toda região e o deserto entre os reinos.
 > - **0.8 (02/11/2026)**: Reino do Eclipse, exército do necromante inimigo, atenção de batalha, dungeons ampliadas e assistência de retorno.
@@ -258,6 +259,9 @@ como padrão; múltiplas câmeras aumentam o trabalho gráfico no aparelho que a
   `tregua`).
 - **O que segue na troca de sala:** vida, mana, recargas, efeitos, movimento escolhido, fúria, carga da ultimate e as
   invocações, com o tempo da viagem descontado (`mundo/bagagem.ts`, `mundo/comitiva.ts`).
-- No cliente, a cena nova monta escondida por cima da antiga e aparece quando o personagem chega (`mundo-tela.ts`). O
-  mapa da vizinha é preparado enquanto se anda pela passagem, e o servidor abre a sala de lá (`aquecerSala`).
+- No cliente, a cena nova monta escondida por cima da antiga e aparece quando o personagem chega e o chão à vista está
+  pronto (`mundo-tela.ts`). O mapa da vizinha é preparado enquanto se anda pela passagem, e o servidor abre a sala de
+  lá (`aquecerSala`).
+- Perto da passagem, a região de lá aparece além da borda (`world/recorte-vizinha.ts`, `render/vizinha.ts`). O chão
+  assado é guardado entre as cenas (`render/solo/assados-guardados.ts`), e as teclas mantidas seguem para a cena nova.
 - Detalhes em D-169.

@@ -22,6 +22,8 @@ export interface AreaDePassagem {
   tipo?: string;
   /** O lugar do outro lado (`regiao:<id>`): o cliente prepara o mapa de lá enquanto se anda pela passagem. */
   destino?: string;
+  /** O lado da região onde fica a passagem (o cliente desenha a vizinha além dessa borda). */
+  lado?: 'norte' | 'sul' | 'leste' | 'oeste';
 }
 
 /** A passagem onde está o ponto, ou null. */

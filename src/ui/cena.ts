@@ -48,11 +48,9 @@ import { CamadaTelegrafia } from '../render/telegrafia';
 import { descreverAfinidade, dicaDoClima } from './descrever-elemento';
 import { temaDaFase } from '../combat/clima';
 import { criarTerreno, type SoloDoTerreno } from '../render/terreno';
-import { carregarTexturasDoSolo } from '../render/solo/texturas';
-import { texturasDosAmbientes } from '../render/solo/ambientes-solo';
+import { soloDaFase } from '../render/solo/solo-da-fase';
+import { criarCenaDoMundo, type CenaDoMundo } from './cena-mundo';
 import { PintorDeDesenhos } from '../render/pintura';
-import { SOLO_PADRAO } from '../world/solo';
-import { hashTexto } from '../core/rng';
 import type { TemasDosPortais } from '../save/destinos';
 import type { TexturasTileset } from '../render/tileset-textura';
 import { velocidade } from '../world/movimento';
@@ -119,7 +117,8 @@ export interface OpcoesCena {
   partyVisaoForcada?: boolean;
   visoesExternas?: () => readonly import('../mundo/avisos').VisaoExternaParty[];
   abrirAnuncios?: () => void; // Marco 38 (08/11/2026, D-142): os anúncios dos jogadores no mercado do Mundo.
-  desvioCamera?: { x: number; y: number } | null; // Marco 41 (D-169): a vista da cena de antes (troca de região).
+  /** Marco 41 (D-169): na troca de região, onde o jogador estava na vista e as teclas mantidas na cena de antes. */
+  troca?: { desvio: { x: number; y: number } | null; teclas: () => readonly string[] } | null;
 }
 
 export interface QuadroCena {
@@ -143,7 +142,8 @@ export interface Cena {
   desmontar: () => void;
   /** Marco 26 (D-122): quanto durou o último salvamento (medidor e qualidade automática). */
   anotarSalvamento: (ms: number) => void;
-  desvioDaCamera: () => { x: number; y: number } | null; // Marco 41 (D-169): onde o jogador está na vista.
+  /** Marco 41 (D-169): a troca de região (a vista, as teclas, o chão pronto) e a região vizinha além da borda. */
+  mundo: CenaDoMundo;
 }
 
 function div(classe: string): HTMLDivElement {
@@ -224,7 +224,6 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   // Marco 26 (D-113): nos modos com objetos, os enfeites que quebram saem do estado (render/objetos.ts), não do terreno.
   const quebraveis: ReadonlySet<string> = ctx.modo.objetosDeFase ? new Set(ctx.balance.quebraveis.tipos) : new Set();
   // Marco 31 (31/10/2026, D-130): o chão texturizado do tema (render/solo/), na resolução da qualidade de agora.
-  const soloTema = temaDaFase(ctx)?.solo ?? SOLO_PADRAO;
   // Os enfeites, os pilares e os objetos repintados (render/pintura.ts), com o cache de texturas da cena.
   const pintor = new PintorDeDesenhos(palco.app.renderer);
   // Ajuste de 31/10/2026 (D-130): os objetos pré-renderizados de modelos 3D CC0 (render/objetos-3d.ts).
@@ -234,16 +233,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   // Marco 37 (04/11/2026): os jogadores em 3D em tempo real, na densidade da tela (até 2×); o atlas fica de reserva.
   // 05/11/2026: sem GPU (WebGL em software) o atlas desenha os jogadores.
   const vivos = o.tileset || !webglAcelerado() ? null : new PalcoVivo(Math.min(2, Math.max(1, globalThis.devicePixelRatio || 1)));
-  const solo: SoloDoTerreno | null = o.tileset
-    ? null
-    : {
-        tema: soloTema,
-        cfg: ctx.balance.visual.solo,
-        escala: ap.qualidade().soloEscala,
-        semente: hashTexto(fase.id),
-        texturas: carregarTexturasDoSolo([soloTema.base, soloTema.variacao, soloTema.parede, soloTema.mato, 'estrada', ...texturasDosAmbientes(fase.ambientes ?? [])]),
-        pintor,
-      };
+  const solo: SoloDoTerreno | null = o.tileset ? null : soloDaFase(fase, temaDaFase(ctx), ctx.balance.visual.solo, ap.qualidade().soloEscala, pintor);
   if (solo) await solo.texturas;
   if (personagens) {
     const modelos: string[] = [];
@@ -327,7 +317,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     paredeIso: ctx.balance.visual.paredeIso,
     pintor: o.tileset ? null : pintor,
     modelos3d: o.tileset ? null : modelos3d,
-    ...(solo && { pedraParede: solo.texturas.then((t) => t.get(soloTema.parede) ?? null) }),
+    ...(solo && { pedraParede: solo.texturas.then((t) => t.get(solo.tema.parede) ?? null) }),
     aoTrocar: () => {
       sprites.reiniciarVisual();
       objetos.reiniciarVisual();
@@ -591,6 +581,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       else ap.abrirPausa();
     },
     isometrico,
+    iniciais: o.troca?.teclas() ?? [],
     teclas: () => aparencia.teclasMovimento,
     aoMochila: mochila.alternar,
     // Marco 30 (30/10/2026, D-129): qualquer diálogo modal aberto (os do Mundo: quadro, banco, mercado, troca, portal)
@@ -666,7 +657,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     if (j) {
       // Na arena o jogador só existe depois do bemVindo: centraliza na primeira vez.
       if (!celulaCentralizada) {
-        if (o.desvioCamera) camera.centralizarComDesvio({ x: j.x, y: j.y }, o.desvioCamera); else camera.centralizar({ x: j.x, y: j.y });
+        if (o.troca?.desvio) camera.centralizarComDesvio({ x: j.x, y: j.y }, o.troca.desvio); else camera.centralizar({ x: j.x, y: j.y });
         celulaCentralizada = true;
         // Marco 26 (D-121): a opção seguir alvo vai ao personagem assim que ele existe.
         if (j.seguirAlvo !== aparencia.seguirAlvo) emitir({ t: 'seguirAlvo', ligado: aparencia.seguirAlvo });
@@ -718,6 +709,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       ap.aplicarCamera(q.agoraMs);
       const vista = camera.retanguloVisivel(palco.altura());
       terreno.atualizarVisibilidade(...vista);
+      mundo.desenhar(vista, j ? posicaoVisual : null, q.agoraMs, dtMs, reduzido);
       terreno.animar(q.agoraMs, reduzido);
       visao.esmaecer(grupo?.[0] ? q.posicao(grupo[0]) : j ? posicaoVisual : null, grupo ? 10000 : dtMs);
       objetos.desenhar(estado, q.agoraMs, reduzido, vista);
@@ -771,6 +763,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       };
     });
   };
+  const mundo: CenaDoMundo = criarCenaDoMundo({ palco, camera, terreno, balance: ctx.balance, escalaSolo: () => ap.qualidade().soloEscala, pintor: o.tileset ? null : pintor, modelos3d: o.tileset ? null : modelos3d, jogador, teclas: () => teclado.mantidas() });
   return {
     bus,
     hud,
@@ -778,7 +771,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     pausado: ap.pausado,
     quadroPermitido: ap.quadroPermitido,
     anotarSalvamento: ap.anotarSalvamento,
-    desvioDaCamera: () => { const j = jogador(); return j ? camera.desvio({ x: j.x, y: j.y }) : null; },
+    mundo,
     desmontar: () => {
       paineisParty.limpar();
       clearTimeout(releitura);
@@ -786,6 +779,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       encerrarSessaoDeTela();
       hud.destruir();
       visao.destruir();
+      mundo.destruir();
       terreno.destruir();
       pintor.destruir();
       modelos3d.destruir();

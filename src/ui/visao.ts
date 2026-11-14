@@ -3,7 +3,7 @@
 // câmera (de cima, só sem as peças em pé).
 // A simulação nunca sabe a visão: só a câmera, as camadas e a entrada mudam.
 
-import { Texture, type TextureSource } from 'pixi.js';
+import { ImageSource, Texture, type TextureSource } from 'pixi.js';
 import type { Balance } from '../core/contexto';
 import { aoMudarImagemToken, lerImagemToken } from '../plataforma/token';
 import type { Camera } from '../render/camera';
@@ -91,8 +91,9 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
   let destruida = false;
   void o.pedraParede?.then((img) => {
     if (!img || destruida) return;
-    pedra = Texture.from(img);
-    pedra.source.addressMode = 'repeat';
+    // Marco 41 (D-169): uma textura só desta cena (a imagem é guardada entre as cenas; `Texture.from` daria a mesma
+    // textura às duas, e a cena que sai a destruiria debaixo da outra).
+    pedra = new Texture({ source: new ImageSource({ resource: img, addressMode: 'repeat' }) });
     if (camera.projecaoAtual.visao !== 'iso') return;
     paredes?.destruir();
     paredes = criarParedes(camera.projecaoAtual);
