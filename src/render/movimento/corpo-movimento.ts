@@ -39,6 +39,8 @@ export interface OpcoesCorpoMovimento {
   /** A posição desenhada (com os deslizes). */
   posicao: (e: Entidade) => PontoVisual;
   raioNevoa: number;
+  /** Marco 40 (14/11/2026): o companheiro dono da mecânica (o falcão, o lobo, o urso do Aventureiro), ou null. */
+  petDoMovimento: (mov: string) => string | null;
 }
 
 /** Alturas em px de tela. */
@@ -47,8 +49,12 @@ const ALTURA_VOO = 62;
 const ALTURA_SALTO_POR_CELULA = 9;
 const ALTURA_SALTO_MINIMA = 40;
 const ALTURA_RECUO = 30;
-const ALTURA_CARREGADO = 30;
-const SELA = { lobo: 14, urso: 24 } as const;
+/** O Aventureiro levado pelo falcão voa mais baixo que o Mago, pendurado pelos ombros. */
+const ALTURA_CARREGADO = 46;
+/** O falcão que carrega cresce (o espírito da fera) e voa logo acima da cabeça de quem leva. */
+const FALCAO_CARREGANDO = { escala: 2.6, acimaPx: 46 } as const;
+/** A altura da sela sobre o chão (o assento da pose de montar fica na altura do joelho). */
+const SELA = { lobo: 18, urso: 32 } as const;
 /** Muito acima de tudo: quem voa ou salta passa à frente dos telhados. */
 const NO_AR = 100_000;
 const MATERIALIZAR_MS = 280;
@@ -60,9 +66,6 @@ const suave = (t: number) => {
   return c * c * (3 - 2 * c);
 };
 export const duracaoDoAvanco = (de: PontoVisual, para: PontoVisual): number => Math.max(140, MS_POR_CELULA_AVANCO * Math.hypot(para.x - de.x, para.y - de.y));
-
-/** O companheiro que é a montaria (o mesmo bicho) some enquanto carrega o dono. */
-const MONTARIA = (pesada: boolean | undefined) => (pesada ? 'urso' : 'lobo');
 
 export class CorpoEmMovimento {
   readonly lances = new Map<string, Lance>();
@@ -138,10 +141,11 @@ export class CorpoEmMovimento {
       mudou = true;
       switch (m.tipo) {
         case 'voo': {
-          const resta = m.ateTick !== undefined ? (m.ateTick - estado.tick) * DT_MS : 1000;
-          const h = ALTURA_VOO * Math.min(suave(desde / 450), suave(resta / 500));
+          // Levado pelo falcão: pendurado (a pose do salto), mais baixo; o Mago voa deitado e alto.
+          const carregado = this.o.petDoMovimento(m.id) !== null;
+          const h = (carregado ? ALTURA_CARREGADO : ALTURA_VOO) * subidaDoVoo(m, estado, desde);
           a.alturaPx = h + 3 * Math.sin(agoraMs / 260);
-          a.estado = h > 14 ? 'voar' : null;
+          a.estado = h > 14 ? (carregado ? 'saltar' : 'voar') : null;
           a.desdeMs = desde;
           a.zMais = NO_AR;
           break;
@@ -167,9 +171,11 @@ export class CorpoEmMovimento {
           break;
         }
         case 'montado': {
+          // A montaria é o próprio companheiro (o veículo, desenhado embaixo); sem ele em campo, a figura dele.
           a.alturaPx = m.pesada ? SELA.urso : SELA.lobo;
           a.estado = 'montar';
-          a.acompanhante = { modelo: m.pesada ? 'urso_companheiro' : 'lobo_companheiro', x: pos.x, y: pos.y, alturaPx: 0, angulo, tinta: null, parado: !andando };
+          a.zMais = 1;
+          if (!this.veiculoDe(e, estado)) a.acompanhante = { modelo: m.pesada ? 'urso_companheiro' : 'lobo_companheiro', x: pos.x, y: pos.y, alturaPx: 0, angulo, tinta: null, parado: !andando };
           break;
         }
         case 'marcha':
@@ -197,13 +203,7 @@ export class CorpoEmMovimento {
       const t = l.durMs > 0 ? desde / l.durMs : 1;
       if (t < 1 && l.tipo === 'avanco') {
         mudou = true;
-        if (e.bolsa?.classeId === 'aventureiro') {
-          // O falcão agarra o Aventureiro pelos ombros e o leva no ar.
-          a.alturaPx = Math.sin(Math.PI * t) * ALTURA_CARREGADO;
-          a.estado = 'saltar';
-          a.zMais = NO_AR;
-          a.acompanhante = { modelo: 'falcao', x: pos.x, y: pos.y, alturaPx: a.alturaPx + 58, angulo, tinta: null, parado: false };
-        } else a.estado = 'correr';
+        a.estado = 'correr';
       } else if (t < 1 && l.tipo === 'recuo') {
         mudou = true;
         a.alturaPx = Math.sin(Math.PI * t) * ALTURA_RECUO;
@@ -226,24 +226,55 @@ export class CorpoEmMovimento {
     return mudou ? a : null;
   }
 
-  /** O companheiro do dono montado no mesmo bicho, o falcão que carrega e os servos na névoa somem do corpo próprio. */
+  /**
+   * Marco 40 (14/11/2026): o companheiro que é o veículo do dono agora (o lobo ou o urso montado, o falcão que carrega):
+   * o da mecânica em curso, pelo companheiro dela.
+   */
+  veiculoDe(dono: Entidade, estado: EstadoJogo): Entidade | undefined {
+    const m = dono.movimentoClasse?.modo;
+    const pet = m && (m.tipo === 'montado' || m.tipo === 'voo') ? this.o.petDoMovimento(m.id) : null;
+    if (!pet) return undefined;
+    return estado.entidades.find((c) => !c.morto && c.invocacao?.companheiro && c.invocacao.donoId === dono.id && petDoCompanheiro(c) === pet);
+  }
+
+  /** O dono de quem o companheiro é o veículo agora (ele vai junto, embaixo ou em cima). */
+  private carregado(e: Entidade, estado: EstadoJogo): Entidade | undefined {
+    if (!e.invocacao?.companheiro || e.morto) return undefined;
+    const dono = buscarEntidade(estado, e.invocacao.donoId);
+    return dono && this.veiculoDe(dono, estado) === e ? dono : undefined;
+  }
+
+  /** O veículo fica na posição desenhada do dono (o lobo embaixo dele, o falcão por cima). */
+  posicaoForcada(e: Entidade, estado: EstadoJogo, posicao: (x: Entidade) => PontoVisual): PontoVisual | null {
+    const dono = this.carregado(e, estado);
+    return dono ? posicao(dono) : null;
+  }
+
+  /** O ajuste do veículo: o lobo e o urso galopam com o dono na sela; o falcão cresce e o leva pelos ombros. */
+  ajusteForcado(e: Entidade, agoraMs: number, estado: EstadoJogo): AjusteVisual | null {
+    const dono = this.carregado(e, estado);
+    const m = dono?.movimentoClasse?.modo;
+    if (!dono || !m) return null;
+    const { andando } = this.passo(e, this.o.posicao(e), agoraMs);
+    const a: AjusteVisual = { alturaPx: 0, inclina: 0, escala: 1, tinta: null, quadro: null, zMais: 0, estado: null, alfa: 1 };
+    if (m.tipo === 'montado') {
+      a.estado = andando ? 'correr' : null;
+      return a;
+    }
+    const h = ALTURA_CARREGADO * subidaDoVoo(m, estado, (estado.tick - m.desdeTick) * DT_MS);
+    a.alturaPx = h + 3 * Math.sin(agoraMs / 260) + FALCAO_CARREGANDO.acimaPx;
+    a.escala = FALCAO_CARREGANDO.escala;
+    a.zMais = NO_AR + 1;
+    return a;
+  }
+
+  /** Os servos na névoa somem do corpo próprio (a nuvem é deles). */
   private doCompanheiro(e: Entidade, estado: EstadoJogo, agoraMs: number, a: AjusteVisual): boolean {
     const inv = e.invocacao;
     if (!inv || e.morto) return false;
     const dono = buscarEntidade(estado, inv.donoId);
     const m = dono?.movimentoClasse?.modo;
-    if (!dono || !m) {
-      const l = dono ? this.lances.get(dono.id) : undefined;
-      if (inv.companheiro && l?.tipo === 'avanco' && dono?.bolsa?.classeId === 'aventureiro' && agoraMs - l.inicioMs < l.durMs && petDoCompanheiro(e) === 'falcao') {
-        a.alfa = 0;
-        return true;
-      }
-      return false;
-    }
-    if (inv.companheiro && m.tipo === 'montado' && petDoCompanheiro(e) === MONTARIA(m.pesada)) {
-      a.alfa = 0;
-      return true;
-    }
+    if (!dono || !m) return false;
     if (m.tipo === 'nevoa' && naNevoa(e, dono, this.o.raioNevoa)) {
       a.alfa = 1 - suave((agoraMs - (this.lances.get(dono.id)?.inicioMs ?? agoraMs)) / 300);
       return true;
@@ -258,6 +289,12 @@ export class CorpoEmMovimento {
     this.saltos.clear();
     this.ultimoDesloc.clear();
   }
+}
+
+/** Quanto do voo já subiu: sobe em 450 ms e desce nos 500 ms finais. */
+function subidaDoVoo(m: { ateTick?: number }, estado: EstadoJogo, desde: number): number {
+  const resta = m.ateTick !== undefined ? (m.ateTick - estado.tick) * DT_MS : 1000;
+  return Math.min(suave(desde / 450), suave(resta / 500));
 }
 
 /** O servo vira névoa com o dono (perto dele). */

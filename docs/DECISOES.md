@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.13 · **Data:** 14/11/2026
+**Versão:** 1.14 · **Data:** 14/11/2026
 
 > **Histórico**
+> - **1.14 (14/11/2026)**: D-167: o movimento do Aventureiro é o do companheiro ativo (o falcão carrega, o lobo e o urso são a montaria), os três golpes de cada fera e as três mecânicas de toda classe desde o nível 1.
 > - **1.13 (14/11/2026)**: D-166: a caça marcada do Aventureiro (o básico marca, o companheiro ataca) e o bote do lobo e do urso.
 > - **1.12 (13/11/2026)**: D-165: os companheiros do Aventureiro (falcão, lobo e urso), a Troca de companheiro fixa na tecla 1 e as skills de classe pelo companheiro ativo (o Rosnar e o Rugido).
 > - **1.11 (13/11/2026)**: D-164: o movimento da classe (três mecânicas por classe, Shift e G), o alcance que cresce com o nível, as viagens limitadas por espaço e tempo, o Salto de Guerra e o Posto dos Mortos.
@@ -5029,3 +5030,27 @@ não da fera que é o centro da classe.
   desliza o corpo no tempo do bote (`deslocado.ms`). O falcão continua com o voo dele.
 - **O lobo afinado**: o peito fundo e estreito, a barriga recolhida, as pernas longas, o focinho comprido, o cinza de
   lobo e um arreio leve no lugar da manta e da sela inteira (o fazia parecer um pônei).
+
+## D-167 — Marco 40: o movimento do Aventureiro pelo companheiro (14/11/2026)
+
+**Contexto.** Depois de D-165 e D-166, o Aventureiro montava num lobo desenhado à parte (não o companheiro dele), o voo
+do falcão mal aparecia e não havia montaria no urso. Ele ainda trocava as mecânicas no G como as outras classes, o que
+deixava montar no urso com o falcão em campo. As feras tinham um golpe só, repetido. E as outras classes viam 1 ou 2
+mecânicas até o nível 20.
+
+**Decisão.**
+- **A mecânica ativa do Aventureiro é a do companheiro ativo** (`movimentos.json`, campo `pet`): com o falcão, o Falcão
+  Carrega; com o lobo, a montaria no lobo; com o urso, a montaria pesada no urso. O G não troca nada para ele, e trocar
+  de companheiro (tecla 1) no meio da mecânica a encerra (pousando, no voo).
+- **O companheiro é o veículo.** O desenho leva o próprio companheiro junto do dono (`CorpoEmMovimento.veiculoDe`,
+  `posicaoForcada`, `ajusteForcado`): o lobo e o urso galopam embaixo, com o Aventureiro na sela (a altura da sela de
+  cada um), e o falcão cresce (2,6×) e o leva pelos ombros, mais baixo que o voo do Mago, na pose pendurada do salto.
+  Sem o companheiro em campo, a figura dele aparece no lugar.
+- **Três golpes por fera, alternados a cada ataque** (`feras-vivas.ts`, `Fera_Golpe2` e `Fera_Golpe3`): o lobo morde em
+  bote, dá a patada meio empinado e morde sacudindo a cabeça; o urso bate com as duas patas de pé, dá o gancho de lado
+  nas quatro e se ergue para os golpes de pé, a esquerda e depois a direita. O palco escolhe a variação pelo contador
+  de golpes, como nas armas.
+- **As três mecânicas de toda classe desde o nível 1** (antes 1, 10 e 20). O alcance continua crescendo com o nível
+  (D-164), e o G troca entre as três desde o começo.
+- **Os atlas** de Arqueiro, Necromante e Aventureiro ganharam as poses de correr, saltar, voar e montar, e os GLB os
+  clipes delas, como as do Guerreiro e do Mago.

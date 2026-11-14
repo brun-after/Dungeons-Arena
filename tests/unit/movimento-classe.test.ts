@@ -50,17 +50,18 @@ const golpear = (c: ReturnType<typeof cena>, alvo: Entidade, de: Entidade) => {
 };
 
 describe('movimento da classe (D-164)', () => {
-  it('três mecânicas por classe (níveis 1, 10 e 20); a de longa distância cobre 10 células no 1 e 20 no 100', () => {
+  it('três mecânicas por classe, todas no nível 1 (D-167); a de longa distância cobre 10 células no 1 e 20 no 100', () => {
     for (const classe of ['mago', 'arqueiro', 'guerreiro', 'necromante', 'aventureiro']) {
       const lista = obter(CONTEUDO.movimentos.get(classe));
-      expect(lista.map((m) => m.nivel)).toEqual([1, 10, 20]);
+      // Marco 40 (14/11/2026): as três liberadas desde o nível 1 (D-167); as do Aventureiro são as dos companheiros.
+      expect(lista.map((m) => m.nivel)).toEqual([1, 1, 1]);
       const longa = obter(lista[0]);
       expect(['voo', 'tirolesa', 'salto', 'nevoa', 'montaria']).toContain(longa.tipo);
       expect(alcanceNoNivel(parametros(longa, 1), 1)).toBe(10);
       expect(alcanceNoNivel(parametros(longa, 55), 55)).toBe(15);
       expect(alcanceNoNivel(parametros(longa, 100), 100)).toBe(20);
     }
-    const { j, passo } = cena('mago', 25);
+    const { j, passo } = cena('mago', 1);
     expect(movimentosLiberados(ctx, j)).toHaveLength(3);
     expect(movimentoAtivo(ctx, j)?.id).toBe('voo_arcano');
     passo([{ t: 'trocarMovimento' }]);
@@ -146,6 +147,7 @@ describe('movimento da classe (D-164)', () => {
 
   it('o Lobo perde a velocidade ao ser atingido; o Urso, montaria pesada, não', () => {
     const lobo = cena('aventureiro');
+    obter(lobo.j.bolsa).pet = 'lobo';
     lobo.passo([{ t: 'movimentoClasse' }]);
     expect(modo(lobo.j)).toBe('montado');
     expect(fatorDeVelocidade(ctx, lobo.j)).toBeCloseTo(viagem);
@@ -154,12 +156,24 @@ describe('movimento da classe (D-164)', () => {
     expect(fatorDeVelocidade(ctx, lobo.j)).toBe(1);
 
     const urso = cena('aventureiro', 25);
-    urso.passo([{ t: 'trocarMovimento' }]);
-    urso.passo([{ t: 'trocarMovimento' }]);
+    obter(urso.j.bolsa).pet = 'urso';
     urso.passo([{ t: 'movimentoClasse' }]);
     expect(urso.j.movimentoClasse?.modo?.pesada).toBe(true);
     golpear(urso, urso.j, urso.orc(3, 5));
     expect(fatorDeVelocidade(ctx, urso.j)).toBeCloseTo(1 + ctx.balance.movimentoClasse.viagemPesadaPct / 100);
+  });
+
+  it('o movimento do Aventureiro é o do companheiro ativo: o falcão o leva voando; o G não troca; trocar de companheiro encerra', () => {
+    const c = cena('aventureiro');
+    expect(movimentoAtivo(ctx, c.j)?.id).toBe('falcao_carrega');
+    c.passo([{ t: 'trocarMovimento' }]);
+    expect(movimentoAtivo(ctx, c.j)?.id).toBe('falcao_carrega');
+    c.passo([{ t: 'movimentoClasse' }]);
+    expect(modo(c.j)).toBe('voo');
+    obter(c.j.bolsa).pet = 'urso';
+    expect(movimentoAtivo(ctx, c.j)?.id).toBe('urso');
+    c.passo([], 100);
+    expect(modo(c.j)).toBeUndefined();
   });
 
   it('a Forma de Névoa deixa intocável; o clone copia o estado; a rede aceita os comandos', () => {
