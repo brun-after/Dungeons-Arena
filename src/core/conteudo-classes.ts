@@ -1,10 +1,10 @@
 // Marco 24 (24/10/2026, D-094): conferências do conteúdo das skills de classe e das ultimates — cada skill de classe é
-// exclusiva de uma classe, o livro de classe aponta para a dona, cada ultimate é de um par da própria classe, e toda
+// exclusiva de uma classe, o livro de classe aponta para a dona, toda skill de classe tem papel (a família da ultimate), e toda
 // referência de efeito (etapa, resposta, invocação) existe. Chamado por lerConteudo (conteudo.ts).
 
 import type { DefinicaoHabilidade } from '../combat/habilidades';
 import type { EfeitoCanonico } from '../combat/registro-efeitos';
-import type { Ultimate } from '../combat/ultimates';
+import type { Ultimate, Veiculo } from '../combat/ultimates';
 import type { ClasseJogador, PresetInimigo } from '../entities/presets';
 import type { Item } from '../progression/itens';
 
@@ -26,6 +26,7 @@ export function conferirClassesEUltimates(
   ultimates: ReadonlyMap<string, Ultimate>,
   presets: ReadonlyMap<string, PresetInimigo>,
   itens: ReadonlyMap<string, Item>,
+  veiculos: ReadonlyMap<string, Veiculo> = new Map(),
 ): string[] {
   const erros: string[] = [];
   const dona = new Map<string, string>();
@@ -45,12 +46,17 @@ export function conferirClassesEUltimates(
     if (it.classe === undefined || it.ensina === null) continue;
     if (dona.get(it.ensina) !== it.classe) erros.push(`item ${it.id}: livro de ${it.classe} ensina "${it.ensina}", que não é exclusiva dela`);
   }
-  for (const u of ultimates.values()) {
-    const c = classes.get(u.classe);
-    if (!c) erros.push(`ultimate ${u.id}: classe desconhecida "${u.classe}"`);
-    // Marco 40 (D-159): até a etapa 4, a ultimate pode ter no par uma skill que saiu do kit (fica fora do alcance).
-    else for (const id of u.par) if (!c.exclusivas.includes(id) && !c.saidas.includes(id)) erros.push(`ultimate ${u.id}: "${id}" não é exclusiva de ${c.id}`);
+  // Marco 40 (13/11/2026, D-160): a ultimate vem da família dos papéis do par; toda skill de classe precisa de papel.
+  for (const c of classes.values()) {
+    for (const id of c.exclusivas) if (definicoes.has(id) && !definicoes.get(id)?.base.papel) erros.push(`classe ${c.id}: a skill "${id}" precisa de papel (a ultimate sai dele)`);
   }
+  // Marco 40 (13/11/2026, D-161): cada classe veste as ultimates com criaturas que existem.
+  for (const [classe, v] of veiculos) {
+    if (!classes.has(classe)) erros.push(`ultimates.json: veículo de classe desconhecida "${classe}"`);
+    for (const ref of Object.values(v.invocacoes)) if (!presets.get(ref)?.invocacao) erros.push(`ultimates.json: veículo ${classe}: "${ref}" não é invocação`);
+  }
+  for (const c of classes.values()) if (veiculos.size > 0 && !veiculos.has(c.id)) erros.push(`ultimates.json: a classe ${c.id} não tem veículo`);
+  if (ultimates.size > 0 && ultimates.size !== 21) erros.push(`ultimates.json: são 21 famílias, uma por par de papéis (há ${String(ultimates.size)})`);
   for (const def of definicoes.values()) {
     for (const id of def.fusao ?? []) if (!definicoes.has(id)) erros.push(`habilidade ${def.base.id}: fusão com a habilidade desconhecida "${id}"`);
     for (const e of todosOsEfeitos(def)) {

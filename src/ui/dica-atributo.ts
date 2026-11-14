@@ -15,6 +15,7 @@ import {
   raioDeRevelar,
   reducaoEstudoPct,
   reducaoRecargaBasicoPct,
+  tenacidadeDaVontadePct,
   vidaPorCelula,
 } from '../progression/efeitos-atributo';
 import type { NomeAtributo } from '../progression/itens';
@@ -51,7 +52,7 @@ function linhasProprias(nome: NomeAtributo, a: Atributos, ctx: ContextoSimulacao
   switch (nome) {
     // Marco 39 (D-148): os atributos não somam dano direto; enchem os estilos.
     case 'vontade':
-      return [t('dica.vontade.1'), ...(j.bolsa?.classeId === 'arqueiro' ? [t('dica.vontade.torre')] : [])];
+      return [t('dica.vontade.1', { pct: fmt(tenacidadeDaVontadePct(a, b), 1) }), ...(j.bolsa?.classeId === 'arqueiro' ? [t('dica.vontade.torre')] : [])];
     case 'destreza': {
       const perfil = perfilDestreza(ctx, j);
       return [

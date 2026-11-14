@@ -29,7 +29,9 @@ export type MotivoRecusa =
   | 'limite'
   /** Marco 24 (D-094): o par das teclas 1 e 2 não forma ultimate, ou o medidor não encheu. */
   | 'sem_ultimate'
-  | 'sem_carga';
+  | 'sem_carga'
+  /** Marco 40 (D-164): o movimento da classe não deixa (voando, no telhado, na tirolesa, decolando). */
+  | 'movimento';
 
 /** Recusas de mochila, equipamento e pontos (marco 6). */
 export type MotivoItem =
@@ -182,6 +184,8 @@ export type EventoSimulacao =
   | { t: 'estiloDespertou'; tick: number; id: EntidadeId; estilo: string }
   /** Marco 39 (D-149): o personagem antigo passou pela tela de atualização. */
   | { t: 'personagemAtualizado'; tick: number; id: EntidadeId; sistema: number }
+  /** Marco 40 (13/11/2026, D-164): o movimento da classe (ativo = trocado no G; início, fim ou recusado). */
+  | { t: 'movimentoClasse'; tick: number; id: EntidadeId; mov: string; fase: 'ativo' | 'inicio' | 'fim' | 'recusado'; motivo?: string }
   | { t: 'comboFeito'; tick: number; id: EntidadeId; combo: string; alvoId: EntidadeId | null; x?: number; y?: number; origemX?: number; origemY?: number; atorX?: number; atorY?: number; miraX?: number; miraY?: number }
   | { t: 'buffInteragiu'; tick: number; id: EntidadeId; regra: string }
   // Marco 18 (D-070): missões, origens raras, forja e o diário.

@@ -173,11 +173,12 @@ describe('integridade da execução completa', () => {
     // ondas concluídas). Marco 39 (12/11/2026, D-148): com o poder base, o caso está no nível 2; com a classe nos estilos
     // e o arqueiro recalibrado (D-155), na semente 25. Marco 40 (D-158): com as gerais iniciais novas, o caso é o do
     // aventureiro no nível 2, no Difícil, semente 53. Com as skills de classe novas (D-159), no Normal, semente 26
-    // (5 abates, só 4 ondas concluídas).
-    const base = simularDiagnostico({ ...configuracao, cenario: 'atrito', classe: 'aventureiro', nivel: 2, dificuldade: 'normal', semente: 26, intervencao: 'sem_pocoes' });
+    // (5 abates, só 4 ondas concluídas). Com os combos de papel e os assinados (D-163), no nível 3, semente 13
+    // (4 abates, só 3 ondas concluídas).
+    const base = simularDiagnostico({ ...configuracao, cenario: 'atrito', classe: 'aventureiro', nivel: 3, dificuldade: 'normal', semente: 13, intervencao: 'sem_pocoes' });
     expect(base.resultado).toBe('morte');
-    expect(base.abates).toBe(5);
-    expect(base.ondasConcluidas).toBe(4);
+    expect(base.abates).toBe(4);
+    expect(base.ondasConcluidas).toBe(3);
     const controle = simularDiagnostico({ ...base.configuracao, intervencao: 'base' });
     expect(() => { validarAmostras([controle, base], 2); }).not.toThrow();
   });

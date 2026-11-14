@@ -34,20 +34,22 @@ describe('Diário detalhado', () => {
   });
 
   it('o combo diz as habilidades em ordem, a janela e as condições', () => {
-    const moedor = CONTEUDO.combos.get('moedor');
-    expect(moedor).toBeDefined();
-    if (!moedor) return;
-    const [ordem = '', extras = ''] = comoFazerCombo(ctx, moedor);
-    expect(ordem).toBe('Corrente › Redemoinho');
-    expect(extras).toContain('1,5 s');
-    expect(descreverEntrada(ctx, 'combo:moedor').efeito).toBe(moedor.texto);
+    // Marco 40 (D-163): o Moedor antigo saiu com os combos de uma classe só; a Chuva ácida fica.
+    const combo = CONTEUDO.combos.get('chuva_acida');
+    expect(combo).toBeDefined();
+    if (!combo) return;
+    const [ordem = '', extras = ''] = comoFazerCombo(ctx, combo);
+    const nome = (id: string) => CONTEUDO.definicoes.get(id)?.base.nome ?? id;
+    expect(ordem).toBe(`${nome('flecha_venenosa')} › ${nome('chuva_de_flechas')}`);
+    expect(extras).toContain('2,5 s');
+    expect(descreverEntrada(ctx, 'combo:chuva_acida').efeito).toBe(combo.texto);
     expect(textoDaCondicao('alvo:sangrando')).toMatch(/^com o alvo /);
     // Toda condição usada nos dados tem texto.
     for (const c of CONTEUDO.combos.values()) for (const cond of c.condicoes) expect(textoDaCondicao(cond), cond).not.toBe(cond);
   });
 
   it('a reação diz o elemento, os estados e o que faz', () => {
-    const d = descreverEntrada(ctx, 'reacao:derreter');
+    const d = descreverEntrada(ctx, 'reacao:vapor');
     expect(d.como[0]).toMatch(/Fogo/);
     expect(d.efeito).toMatch(/50%/);
   });

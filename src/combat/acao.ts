@@ -47,6 +47,10 @@ import { aoAgirEncarnado, encarnar } from './encarnacao';
 import { consumirMira } from './mira';
 import { prepararTiroCheio } from './sintonia-arqueiro';
 import { raioAreaDaEncarnacao } from './encarnacao-efeitos';
+import { comBuffsDeLeitura, ehRetorno } from './buffs-de-leitura';
+import { papelDe } from './combos-papel';
+import { comCombosDoLancamento, fatorDeConjuracaoDoCombo } from './combos-assinados';
+import { aoAgir, fatorDeConjuracaoDoMovimento, fatorDeDanoDoMovimento, motivoDoMovimento } from './movimento-classe';
 import { quantidadeDeSaltos, saltar } from './saltos';
 import { dispararGanchosDe, passivosDe } from '../progression/ganchos-do-portador';
 import { comCombo, fazerCombo } from './combos';
@@ -115,7 +119,9 @@ export function fonteDaHabilidade(e: Entidade, ctx: ContextoSimulacao, tick: num
   const p = perfilPara(ctx, e, hab);
   // Marco 28 (D-127): o atributo de classe fortalece as skills de classe e as ultimates (dano, cura e potência).
   const classe = fatorDeSkillDeClasse(ctx, e, hab.id);
-  return { ...f, potencia: f.potencia * classe, multDano: f.multDano * hab.multDano * (1 + p.danoPct / 100) * classe, multCura: f.multCura * hab.multCura * (1 + p.curaPct / 100) * classe };
+  // Marco 40 (13/11/2026, D-164): quem voa ou está montado bate menos (melhora com o nível).
+  const mov = fatorDeDanoDoMovimento(ctx, e);
+  return { ...f, potencia: f.potencia * classe, multDano: f.multDano * hab.multDano * (1 + p.danoPct / 100) * classe * mov, multCura: f.multCura * hab.multCura * (1 + p.curaPct / 100) * classe };
 }
 
 /**
@@ -260,6 +266,8 @@ export function iniciarAcao(
   const substituiBasico = !!ator.acao && ehBasico(ator, ator.acao.habilidadeId) && !ehBasico(ator, habilidadeId);
   if (ator.acao && !substituiBasico) return recusar('ocupado');
   if (acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) return recusar('bloqueado');
+  // Marco 40 (D-164): voando não há básico, do telhado não se ataca, na tirolesa só o básico.
+  if (motivoDoMovimento(ctx, ator, hab, ehBasico(ator, hab.id))) return recusar('movimento');
   if (recargaRestante(estado, ator.id, chaveDoBasico(ator, hab.id)) > 0) return recusar('recarga');
   const perfil = perfilPara(ctx, ator, hab);
   const { custoMana, custoVida, semMana } = custoDaHabilidade(ctx, ator, hab);
@@ -336,7 +344,10 @@ export function iniciarAcao(
   const avisoExtra = ladoDoJogador(estado, ator) ? 0 : fatoresDoMundo(estado, ctx).avisoExtraMs;
   // 08/11/2026 (D-141): a skill do guerreiro logo depois do básico carrega (e chega, fora o voo do projétil) mais rápido.
   const pressa = encadeioDoGuerreiro(estado, ctx, ator, hab);
-  const lancamentoTick = estado.tick + ticksDe((hab.conjuracaoMs + avisoExtra) / pressa);
+  // Marco 40 (13/11/2026, D-163): o combo assinado que sai sem conjuração.
+  // D-164: no voo e na montaria, a conjuração é mais longa.
+  const lancamentoTick = estado.tick + ticksDe((hab.conjuracaoMs * (ehBasico(ator, hab.id) ? 1 : fatorDeConjuracaoDoCombo(estado, ctx, ator, hab)) * fatorDeConjuracaoDoMovimento(ctx, ator) + avisoExtra) / pressa);
+  aoAgir(estado, ator, hab, saida);
   const viagem =
     hab.politicaImpacto === 'projetil' ? ticksDe((Math.hypot(mira.x - origem.x, mira.y - origem.y) / hab.velocidadeProjetil) * 1000) : Math.round(vooDoGolpe(estado, ctx, ator, hab, mira) / pressa);
   if (ehBasico(ator, hab.id)) ator.ultimoBasicoTick = estado.tick;
@@ -479,7 +490,11 @@ function lancar(
     if (f) Object.assign(f, { acaoId, origemX: ator.x, origemY: ator.y });
     return;
   }
-  const hab = daFase ? habilidadeBase : basicoComVariacao(estado, ator, prepararSequencia(estado, ctx, ator, habilidadeBase, acaoId, alvo, mira));
+  // Marco 40 (13/11/2026, D-161): a área ampliada e o eco (os estados das leituras de estilo) mudam a magia de agora.
+  const lida = comBuffsDeLeitura(ator, daFase ? habilidadeBase : basicoComVariacao(estado, ator, prepararSequencia(estado, ctx, ator, habilidadeBase, acaoId, alvo, mira)), estado.tick);
+  // Marco 40 (13/11/2026, D-163): o combo de papel (a skill anterior de um papel, esta de outro) muda esta.
+  const semPapel = daFase || ehBasico(ator, lida.id);
+  const hab = semPapel ? lida : comCombosDoLancamento(estado, ctx, ator, lida, alvo, mira, saida);
   if (hab.formulaDano && !consumirAtaque(ator, acaoId)) return;
   if (tipoEm(ctx.fase, ator.x, ator.y) === 'agua' && !deSuporte(hab)) return;
   // 04/11/2026 (D-132): atacar de longe deixa um pouco lento, mais quanto mais longe está o alvo.
@@ -505,6 +520,7 @@ function lancar(
     // Marco 24 (D-096): a anterior fica para as sinergias de sequência.
     if (ator.ultimaHabilidade) ator.habilidadeAnterior = { id: ator.ultimaHabilidade.id, tick: ator.ultimaHabilidade.tick };
     ator.ultimaHabilidade = { id: hab.id, chave: hab.chave, tick: estado.tick, alvoId: alvo?.id ?? null };
+    if (!semPapel) ator.ultimaDePapel = { id: hab.id, papel: papelDe(hab), tick: estado.tick, alvoId: alvo?.id ?? null, atingidos: 0, abateu: false, alvos: [], miraX: mira.x, miraY: mira.y };
     // Marco 27 (D-126): o tomo de outra classe deixa o próximo básico com o elemento da skill.
     aoUsarSkill(estado, ctx, ator, hab);
     // Marco 22 (D-089): a magia de fogo, gelo ou raio troca a encarnação do Mago.
@@ -528,11 +544,13 @@ function lancar(
   // teleporte de quem conjura também (antes, só saíam a cada alvo atingido: sem ninguém na linha, nada de avanço).
   for (const ef of hab.efeitos) {
     const desloca = ef.em === 'conjurador' && REGISTRO_EFEITOS[ef.tipo].deslocaConjurador;
-    if (!REGISTRO_EFEITOS[ef.tipo].aoLancar && !desloca) continue;
+    if (!REGISTRO_EFEITOS[ef.tipo].aoLancar && !desloca && !ehRetorno(ef)) continue;
     // Marco 24: a fase guarda o alvo da ação (o resto do lançamento cai em quem conjura, na célula mirada).
     // `em: conjurador` guarda a célula de onde quem lançou saiu (o eco do Piscar); a fase herda as variantes de agora.
     if (REGISTRO_EFEITOS[ef.tipo].fluxo === 'fase' && ef.ref) agendarFase(estado, ator, chaveDoAtor(ctx, ator, ef.ref, estado.tick), ef.em === 'conjurador' ? celulaOcupada(ator) : (alvo ?? mira), ef.duracaoMs);
     // D-125: quem avança sobre um alvo vai até onde ele está agora (ele pode ter andado durante a conjuração).
+    // Marco 40 (13/11/2026, D-161): o retorno de quem conjura guarda a célula de partida (a Investida do Duelista).
+    else if (ehRetorno(ef)) aplicarEfeito(estado, ctx, ator, ef, { id: ator.id, x: partida.x, y: partida.y }, mira, saida);
     else aplicarEfeito(estado, ctx, ator, ef, { id: ator.id, x: ator.x, y: ator.y, ...(desloca && { acaoId }) }, desloca && alvo && alvo !== ator && vivo(alvo) ? celulaOcupada(alvo) : mira, saida);
   }
   // Marco 27 (D-126): o solo amaldiçoado (Necromante) e a runa (Mago) caem sob o alvo e pulsam (combat/solos.ts).
@@ -605,6 +623,8 @@ function lancar(
       atingidos.forEach((e, indice) => {
         aplicarImpacto(estado, ctx, e, { ...base, indice, secundario: e !== principal }, saida);
       });
+      // Marco 40 (13/11/2026, D-161): a área que salta (as leituras de estilo) pula do alvo principal para os de fora.
+      if (principal && hab.saltos) saltar(estado, ctx, ator, hab, principal, hab.saltos.quantidade, base, atingidos.map((e) => e.id), saida);
       break;
     }
     case 'projetil': {
@@ -641,7 +661,7 @@ export function processarAutoAtaque(estado: EstadoJogo, ctx: ContextoSimulacao, 
   for (const ator of ordemRotativa(estado.entidades, estado.tick)) {
     if (!ator.autoAtaque || !vivo(ator) || ator.acao || tipoEm(ctx.fase, ator.x, ator.y) === 'agua') continue;
     const hab = habilidadeDoAtor(ctx, ator, ator.ataqueBasico);
-    if (!hab || recargaRestante(estado, ator.id, hab.id) > 0 || acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) {
+    if (!hab || motivoDoMovimento(ctx, ator, hab, true) || recargaRestante(estado, ator.id, hab.id) > 0 || acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) {
       continue;
     }
     const alcance = alcanceDe(ctx, ator, hab, estado.tick);

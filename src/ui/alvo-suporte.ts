@@ -17,11 +17,16 @@ export interface OpcoesAlvoDeSuporte {
   jogador: () => Entidade | undefined;
   /** Mostra quem ficou escolhido (o nome) ou que a escolha acabou (null). */
   aoEscolher: (nome: string | null) => void;
+  /** Marco 40 (13/11/2026): a célula sob o cursor (ou do último toque), onde as armadilhas são postas. */
+  cursor?: () => Celula | null;
 }
 
 export interface AlvoDeSuporte {
-  /** O alvo a pedir para a habilidade (undefined: não é suporte de alvo único; o núcleo decide). */
-  alvoPara(habilidadeId: string): EntidadeId | undefined;
+  /**
+   * O alvo a pedir para a habilidade (undefined: o núcleo decide). As de suporte de alvo único pedem o aliado; as de
+   * armadilha (marco 40, 13/11/2026), a célula do cursor, puxada para dentro do alcance.
+   */
+  alvoPara(habilidadeId: string): EntidadeId | Celula | undefined;
   /** Toque ou clique numa célula: no aliado, escolhe-o e devolve true; fora dele, esquece a escolha. */
   tocar(c: Celula): boolean;
   destruir(): void;
@@ -34,6 +39,14 @@ export function aliadoMaisFeridoPerto(estado: EstadoJogo, ctx: ContextoSimulacao
   const fracao = (e: Entidade) => e.hp / Math.max(1, e.hpMax);
   candidatos.sort((a, b) => Number(!!a.invocacao) - Number(!!b.invocacao) || fracao(a) - fracao(b) || a.id.localeCompare(b.id));
   return candidatos[0] ?? null;
+}
+
+/** A célula mirada, puxada na linha até o alcance quando passa dele. */
+export function dentroDoAlcance(origem: Celula, c: Celula, alcance: number): Celula {
+  const d = chebyshev(origem, c);
+  if (d <= alcance || d === 0) return c;
+  const k = alcance / d;
+  return { x: origem.x + Math.round((c.x - origem.x) * k), y: origem.y + Math.round((c.y - origem.y) * k) };
 }
 
 export function criarAlvoDeSuporte(o: OpcoesAlvoDeSuporte): AlvoDeSuporte {
@@ -60,6 +73,10 @@ export function criarAlvoDeSuporte(o: OpcoesAlvoDeSuporte): AlvoDeSuporte {
       const eu = o.jogador();
       const estado = o.estado();
       const hab = eu ? habilidadeDoAtor(o.ctx, eu, habilidadeId, estado.tick) : undefined;
+      if (eu && hab && hab.efeitos.some((e) => e.tipo === 'armadilha')) {
+        const c = o.cursor?.();
+        return c ? dentroDoAlcance(celulaOcupada(eu), c, alcanceDe(o.ctx, eu, hab, estado.tick)) : undefined;
+      }
       if (!eu || hab?.politicaAlvo !== 'aliado') return undefined;
       if (shift) return aliadoMaisFeridoPerto(estado, o.ctx, eu, alcanceDe(o.ctx, eu, hab, estado.tick))?.id ?? eu.id;
       const aliado = valido(eu, escolhido);

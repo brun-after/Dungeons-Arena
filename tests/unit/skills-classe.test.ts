@@ -3,7 +3,6 @@
 import { describe, expect, it } from 'vitest';
 import catalogo from '../../tools/grimorio/catalogo.json';
 import { CONTEUDO } from '../apoio/fases';
-import { ultimateDoPar } from '../../src/combat/ultimates';
 
 describe('skills de classe e ultimates (Grimório v1.2)', () => {
   // Marco 40 (D-159): das 8 do Grimório, 6 seguem no kit (com o nome e as leituras do catálogo novo) e 2 saíram.
@@ -28,19 +27,7 @@ describe('skills de classe e ultimates (Grimório v1.2)', () => {
     }
   });
 
-  it('28 ultimates por classe, uma para cada par, na ordem do Grimório', () => {
-    expect(CONTEUDO.ultimates.size).toBe(140);
-    for (const c of catalogo.classes) {
-      expect(c.ultimates).toHaveLength(28);
-      for (const u of c.ultimates) {
-        const ult = ultimateDoPar(CONTEUDO.ultimates, u.par[1] ?? '', u.par[0] ?? '');
-        expect(ult?.classe, u.nome).toBe(c.id);
-        const hab = CONTEUDO.habilidades.get(ult?.id ?? '');
-        expect(hab?.nome).toBe(u.nome);
-        expect(hab?.tags).toContain('ultimate');
-      }
-    }
-  });
+  // Marco 40 (13/11/2026, D-160): as 140 ultimates do Grimório v1.2 saíram; as 21 famílias ficam em ultimates.test.ts.
 
   it('9 famílias gerais, cada uma com 4 ativas e 2 passivas (uma defensiva, uma ofensiva)', () => {
     expect(catalogo.familias).toHaveLength(9);
@@ -54,10 +41,11 @@ describe('skills de classe e ultimates (Grimório v1.2)', () => {
     }
   });
 
-  it(`os ${catalogo.combos.length} combos do Grimório, sem cruzar classes`, () => {
-    expect(CONTEUDO.combos.size).toBe(catalogo.combos.length);
-    const nomes = new Set([...CONTEUDO.combos.values()].map((c) => c.nome));
-    for (const c of catalogo.combos) expect(nomes.has(c.nome), c.nome).toBe(true);
+  // Marco 40 (13/11/2026, D-163): os 48 combos feitos só de skills de uma classe saíram (os assinados ficam no lugar).
+  it('os 119 combos que ficaram do Grimório, sem cruzar classes', () => {
+    expect(CONTEUDO.combos.size).toBe(119);
+    const doCatalogo = new Set(catalogo.combos.map((c) => c.nome));
+    for (const c of CONTEUDO.combos.values()) expect(doCatalogo.has(c.nome), c.nome).toBe(true);
     const dona = new Map(catalogo.classes.flatMap((c) => c.skills.map((s) => [s, c.id] as const)));
     for (const combo of CONTEUDO.combos.values()) {
       const classes = new Set(combo.sequencia.flatMap((s) => dona.get(s) ?? []));

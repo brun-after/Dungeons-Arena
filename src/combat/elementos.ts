@@ -11,7 +11,7 @@ import { PRESETS_VISUAIS, type PresetVisual } from './habilidades';
 import type { EfeitoCanonico, TipoEfeito } from './registro-efeitos';
 import { resistenciaDaAfinidade } from './afinidade';
 import { passivosDe } from '../progression/ganchos-do-portador';
-import { resistenciaPeloVinculo } from '../progression/vinculo';
+import { resistenciaPeloVinculo, type PontaElemental } from '../progression/vinculo';
 
 export const ELEMENTOS = ['fogo', 'gelo', 'raio', 'veneno', 'psiquico', 'terra', 'trevas', 'sagrado'] as const;
 export type Elemento = (typeof ELEMENTOS)[number];
@@ -96,7 +96,8 @@ export function resistenciaPct(ctx: ContextoSimulacao, alvo: Entidade, elemento:
 
 export interface Sinergia {
   id: string;
-  elemento: Elemento;
+  /** Marco 40 (13/11/2026, D-162): o golpe físico também reage (a matriz de 36 pares das 9 pontas). */
+  elemento: PontaElemental;
   sobre: readonly TipoEfeito[];
   remove: readonly TipoEfeito[];
   danoExtraPct: number;
@@ -107,21 +108,25 @@ export interface Sinergia {
   soComEstado: TipoEfeito | null;
   /** Marco 18: cura quem lançou (purgar). */
   curarFonte: number;
+  /** Marco 40 (D-162): o piso do d20 do golpe (4 = não erra, o Golpe certeiro; 20 = crítico, o Juízo). 0 = nenhum. */
+  d20Minimo: number;
+  /** D-162: quem bate se cura nesse % do dano que o golpe causou (Quebra-alma, Aço sagrado). */
+  roubarPct: number;
+  /** D-162: efeitos nos aliados de quem bate a até `raio` do alvo, quem bate incluído (Orvalho, Purgar). */
+  aliados: readonly EfeitoCanonico[];
+  /** D-162: com `aliados`, o `aplicar` não se espalha pelos hostis em volta. */
+  soAliados: boolean;
+  /** D-162: no espalhar, só os `maxOutros` mais perto (0 = todos); a Sobrecarga salta para um. */
+  maxOutros: number;
+  /** D-162: o `aplicar` cai só nos vizinhos, não no alvo (a Forja passa a queimadura adiante). */
+  soVizinhos: boolean;
+  /** D-162: o estado periódico do alvo fere uma vez a mais, na hora (Ferida aberta). */
+  ticar: TipoEfeito | null;
 }
 
 /** As sinergias que o elemento dispara sobre os estados ativos do alvo (o dano extra vale no mesmo golpe). */
-export function sinergiasAtivas(alvo: Entidade, elemento: Elemento | null, sinergias: readonly Sinergia[], tick: number): Sinergia[] {
-  if (!elemento) return [];
-  return sinergias.filter((s) => s.elemento === elemento && alvo.efeitos.some((f) => f.ateTick > tick && s.sobre.includes(f.tipo)));
+export function sinergiasAtivas(alvo: Entidade, elemento: PontaElemental, sinergias: readonly Sinergia[], tick: number): Sinergia[] {
+  // Marco 40 (13/11/2026, D-162): a reação que acabou de disparar neste alvo espera o intervalo.
+  return sinergias.filter((s) => s.elemento === elemento && (alvo.reacoesAte?.[s.id] ?? 0) <= tick && alvo.efeitos.some((f) => f.ateTick > tick && s.sobre.includes(f.tipo)));
 }
 
-/**
- * Depois de um golpe que acertou: cada sinergia remove o estado que consome e aplica os seus efeitos (pelo
- * `aplicar`, o dispatcher único).
- */
-export function dispararSinergias(alvo: Entidade, sinergias: readonly Sinergia[], aplicar: (ef: EfeitoCanonico) => void): void {
-  for (const s of sinergias) {
-    alvo.efeitos = alvo.efeitos.filter((f) => !s.remove.includes(f.tipo));
-    for (const ef of s.aplicar) aplicar(ef);
-  }
-}

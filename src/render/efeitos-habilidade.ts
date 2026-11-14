@@ -100,7 +100,7 @@ export interface OpcoesEfeitos {
   aoGirar?: (centro: PontoVisual, cor: number) => void;
   /** Marco 26 (D-124): as silhuetas, marcas e deslizes; e a classe da ultimate (o círculo com a runa dela). */
   diretor: DiretorVfx;
-  classeDaUltimate?: (habilidadeId: string) => string | null;
+  classeDaUltimate?: (habilidadeId: string, atorId: string) => string | null;
 }
 
 export class EfeitosDeHabilidade {
@@ -142,7 +142,7 @@ export class EfeitosDeHabilidade {
       const ator = pos(lancador);
       if (this.skillDaAcao.size > 64) this.skillDaAcao.clear();
       this.skillDaAcao.set(ev.acaoId, ev.chave);
-      const classe = this.o.classeDaUltimate?.(ev.habilidadeId) ?? null;
+      const classe = this.o.classeDaUltimate?.(ev.habilidadeId, ev.atorId) ?? null;
       if (h && ator && (h.politicaImpacto === 'area' || h.politicaImpacto === 'proprio')) {
         this.areas.set(ev.acaoId, { chave: ev.chave, atorId: lancador, origem: ator, mira: { x: ev.alvoX, y: ev.alvoY }, ...(ev.raioCombo ? { raioCombo: ev.raioCombo } : {}), ateTick: ev.lancamentoTick, ...(h.politicaImpacto === 'proprio' ? { emSi: true } : {}), ...(classe ? { ultimate: true } : {}) });
       }
@@ -165,7 +165,7 @@ export class EfeitosDeHabilidade {
       const quem = estado().entidades.find((e) => e.id === ev.fonteId);
       const daArma = GENERICOS.has(nome) && !!this.o.golpeDeArma?.(quem, ev.chave);
       const comParticulas = ev.dano > 0 || ev.cura > 0 || ev.d20 === 0;
-      const acerto = { chave: ev.chave, fonteId: ev.fonteId, alvoId: ev.alvoId, de: fonte, ate: alvo, cor: v.cor, escala: escalaDe(h, !!this.o.classeDaUltimate?.(ev.habilidadeId)), critico: ev.critico, indice: ev.indice };
+      const acerto = { chave: ev.chave, fonteId: ev.fonteId, alvoId: ev.alvoId, de: fonte, ate: alvo, cor: v.cor, escala: escalaDe(h, h.tags.includes('ultimate')), critico: ev.critico, indice: ev.indice };
       if (!daArma) {
         const corEtapa = h.elemento && this.o.corElemento ? { corEtapa: this.o.corElemento(h.elemento) } : {};
         // Marco 27 (D-126): o básico da arma fica mais bonito com a raridade dela.

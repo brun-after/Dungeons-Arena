@@ -50,8 +50,6 @@ describe('o voo do falcão (marco 24)', () => {
     expect(vooDaUltimate('ult_x', ['rasante', 'vigia'], 0xf2f2f2)?.cor).toBe(0xf5b041);
     expect(vooDaUltimate('ult_x', ['rasante', 'vigia'], 0x9fd3ff)?.cor).toBe(0x9fd3ff);
     expect(vooDaUltimate('ult_x', ['outra', 'coisa'], null)).toBeNull();
-    // Toda ultimate do Aventureiro tem o voo de alguma skill do par.
-    for (const u of CONTEUDO.ultimates.values()) if (u.classe === 'aventureiro') expect(vooDaUltimate(u.id, u.par, null), u.id).not.toBeNull();
   });
 
   it('as asas batem em rajadas: na maior parte do tempo, planam; pousado, ficam fechadas', () => {

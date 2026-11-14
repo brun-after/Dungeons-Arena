@@ -79,6 +79,15 @@ export const TIPOS_EFEITO = [
   'vista_de_armadilha',
   // Marco 40 (12/11/2026, D-157): a marca da forma do estilo, que acumula (combat/eixos.ts).
   'marca_estilo',
+  // Marco 40 (13/11/2026, D-161): o Renascer levanta um aliado caído por perto; e as promessas das leituras de estilo:
+  // a próxima magia com área maior, as magias que ecoam e o medo dos feridos.
+  'levantar', 'area_ampliada', 'ecoando', 'apavorar', 'explodir_ao_cair',
+  // D-161: o Contragolpe guarda o absorvido e devolve; a Investida volta ao ponto de partida; o Ceifador salta ao alvo.
+  'guardar_absorvido', 'devolver_absorvido', 'retornar', 'saltar_ao_alvo',
+  // Marco 40 (13/11/2026, D-162): virar pedra (a reação Fossilizar).
+  'petrificado',
+  // Marco 40 (13/11/2026, D-163): resistir ao controle (a Prisão dupla) e o golpe que leva um estado (o Cerco).
+  'firme', 'acerto_carregado',
 ] as const;
 export type TipoEfeito = (typeof TIPOS_EFEITO)[number];
 
@@ -101,6 +110,8 @@ export interface EfeitoCanonico {
   interno: EfeitoCanonico | null;
   /** Referência a conteúdo: o preset do `invocar`. */
   ref: string | null;
+  /** Marco 40 (13/11/2026, D-161): na armadilha, o que ela dá ao aliado que pisa (uma vez); `pct` são os rearmes. */
+  aliado?: EfeitoCanonico;
 }
 
 /** Fluxos próprios de um disparo só: agendar, armar ou invocar (não ficam como status). */
@@ -108,7 +119,7 @@ export type Fluxo = 'atrasado' | 'armadilha' | 'invocar' | 'fase';
 
 export type Periodico = 'dano' | 'cura' | 'recurso';
 export type Instantaneo = 'drenar_invocacao' | 'comandar_mortos' | 'purificar' | 'passo_sombrio' | 'muralha_pedra' | 'campo_cura' | 'campo_veneno' | 'cura' | 'recurso' | 'teleporte' | 'avanco' | 'empurrao' | 'puxao' | 'trocar' | 'dano'
-  | 'invisivel' | 'dissipar' | 'consumir' | 'detonar' | 'arremessar' | 'zerar_recarga' | 'libertar' | 'furia' | 'carga_ultimate' | 'executar';
+  | 'invisivel' | 'dissipar' | 'consumir' | 'detonar' | 'arremessar' | 'zerar_recarga' | 'libertar' | 'furia' | 'carga_ultimate' | 'executar' | 'levantar' | 'apavorar' | 'devolver_absorvido' | 'retornar' | 'saltar_ao_alvo';
 export type BonusDeAtaqueBasico = 'dano' | 'recarga' | 'alcance' | 'alvos';
 
 export interface DefinicaoEfeito {
@@ -154,8 +165,8 @@ export interface DefinicaoEfeito {
   velocidade: boolean;
   /** Marco 14: −1 = o `pct` reduz a cura recebida (envenenado). */
   curaRecebida: -1 | 0;
-  /** Marco 14: +1 = o `pct` aumenta o dano recebido (exposto). */
-  danoRecebido: 1 | 0;
+  /** Marco 14: +1 = o `pct` aumenta o dano recebido (exposto). Marco 40 (D-162): −1 = reduz (petrificado). */
+  danoRecebido: 1 | 0 | -1;
   /** Marco 14: o `valor` absorve dano antes da vida e se gasta. */
   escudo: boolean;
   /** Marco 18 (D-068): sai no primeiro golpe que o alvo leva (marcado). */
@@ -329,6 +340,9 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   dano_direto: instantaneo('runa', '#e74c3c', ['valor'], { duracaoMs: 0, valor: 5, pct: 0 }, 'dano', false),
 
   cego: negativo('olho', '#5b5b6e', ['pct'], { duracaoMs: 3000, valor: 0, pct: 30 }, { erroPct: true }),
+  firme: { ...BASE, icone: 'escudo', cor: '#b7950b', positivo: true, campos: ['pct'], padrao: { duracaoMs: 2000, valor: 0, pct: 100 } },
+  acerto_carregado: { ...BASE, icone: 'pedra', cor: '#8d6e63', positivo: true, campos: [], padrao: { duracaoMs: 3000, valor: 0, pct: 0 }, exige: ['interno'] },
+  petrificado: negativo('pedra', '#95a5a6', ['pct'], { duracaoMs: 1500, valor: 0, pct: 50 }, { bloqueiaMovimento: true, bloqueiaAcoes: 'todas', danoRecebido: -1 }),
   aterrorizado: negativo('caveira', '#6c3483', [], { duracaoMs: 1500, valor: 0, pct: 0 }, { bloqueiaAcoes: 'todas', ia: 'foge' }),
   confuso: negativo('estrela', '#c39bd3', [], { duracaoMs: 2000, valor: 0, pct: 0 }, { bloqueiaAcoes: 'todas', ia: 'vaga' }),
   desafiado: negativo('alvo', '#e74c3c', ['pct'], { duracaoMs: 3000, valor: 0, pct: 15 }, { ia: 'persegue', danoDaOrigem: true }),
@@ -353,6 +367,21 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   fase: { ...BASE, icone: 'ampulheta', cor: '#f5b041', positivo: true, ehStatus: false, campos: [], padrao: { duracaoMs: 0, valor: 0, pct: 0 }, fluxo: 'fase', aoLancar: true, exige: ['ref'] },
   reflexo: { ...BASE, icone: 'escudo', cor: '#58d68d', positivo: true, campos: [], padrao: { duracaoMs: 5000, valor: 0, pct: 0 }, reflexo: true, exige: ['interno'] },
   executar: instantaneo('caveira', '#c0392b', ['pct'], { duracaoMs: 0, valor: 0, pct: 20 }, 'executar', false),
+  // Marco 40 (D-161): levanta o aliado caído mais perto, até `valor` células, com `pct` da vida (um por uso).
+  area_ampliada: { ...BASE, icone: 'anel', cor: '#5dade2', positivo: true, campos: ['valor'], padrao: { duracaoMs: 8000, valor: 1, pct: 0 }, someAoLancar: 'magico' },
+  ecoando: { ...BASE, icone: 'relogio', cor: '#af7ac5', positivo: true, campos: ['pct'], padrao: { duracaoMs: 8000, valor: 0, pct: 40 } },
+  guardar_absorvido: { ...BASE, icone: 'escudo', cor: '#d5dbdb', positivo: true, campos: [], padrao: { duracaoMs: 3500, valor: 0, pct: 0 } },
+  // D-161: `pct`% do que o escudo de quem lançou absorveu, em dano no alvo.
+  devolver_absorvido: instantaneo('explosao', '#e67e22', ['pct'], { duracaoMs: 0, valor: 0, pct: 60 }, 'devolver_absorvido', false),
+  // D-161: no atrasado, quem lançou volta à célula de onde o atrasado saiu.
+  retornar: instantaneo('teleporte', '#85c1e9', [], { duracaoMs: 0, valor: 0, pct: 0 }, 'retornar', true),
+  // D-161: quem usa salta até o alvo selecionado (ou o hostil mais perto) a até `valor` células e lança a etapa `ref` nele.
+  saltar_ao_alvo: instantaneo('investida', '#b03a2e', ['valor'], { duracaoMs: 0, valor: 5, pct: 0 }, 'saltar_ao_alvo', true),
+  // D-161: a invocação que explode ao cair (`valor` de dano em volta), enquanto dura.
+  explodir_ao_cair: { ...BASE, icone: 'explosao', cor: '#e67e22', positivo: true, campos: ['valor'], padrao: { duracaoMs: 4000, valor: 8, pct: 0 } },
+  // D-161: quem está abaixo de `pct`% da vida foge de medo por `duracaoMs`.
+  apavorar: instantaneo('caveira', '#6c3483', ['pct'], { duracaoMs: 1500, valor: 0, pct: 30 }, 'apavorar', false),
+  levantar: instantaneo('cura', '#f7dc6f', ['valor', 'pct'], { duracaoMs: 0, valor: 3, pct: 30 }, 'levantar', true),
   vista_de_armadilha: positivo('olho', '#f0b27a', 8, [], { duracaoMs: 45_000, valor: 0, pct: 0 }, { revelaArmadilhas: true }),
   passo_leve: positivo('botas', '#9be7c4', 6, [], { duracaoMs: 60_000, valor: 0, pct: 0 }, { protegeDeArmadilha: true }),
   invocar_temporario: { ...BASE, icone: 'invocar', cor: '#48c9b0', positivo: true, ehStatus: false, campos: ['valor'], padrao: { duracaoMs: 12_000, valor: 1, pct: 0 }, fluxo: 'invocar', aoLancar: true, exige: ['ref'] },

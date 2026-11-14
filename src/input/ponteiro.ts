@@ -51,6 +51,8 @@ export interface OpcoesPonteiro {
 export interface Ponteiro {
   /** A cada quadro: o mouse segurado reavalia a direção (o personagem andou). */
   atualizar: (agoraMs: number) => void;
+  /** Marco 40 (13/11/2026): a célula sob o cursor (ou o último toque), para mirar as skills postas no campo. */
+  celulaDoCursor: () => Celula | null;
   desligar: () => void;
 }
 
@@ -87,6 +89,8 @@ export function ligarPonteiro(alvo: HTMLElement, opcoes: OpcoesPonteiro): Pontei
     return { x: ev.clientX - retangulo.left, y: ev.clientY - retangulo.top };
   };
 
+  // Marco 40 (13/11/2026): o último ponto do cursor na tela (a célula sai na hora, com a câmera de agora).
+  let cursor: { x: number; y: number } | null = null;
   const irParaPonto = (p: { x: number; y: number }): boolean => {
     const celula = camera.celulaSob(p.x, p.y);
     if (ultimaCelula && ultimaCelula.x === celula.x && ultimaCelula.y === celula.y) return true;
@@ -120,6 +124,7 @@ export function ligarPonteiro(alvo: HTMLElement, opcoes: OpcoesPonteiro): Pontei
     ev.preventDefault();
     alvo.setPointerCapture(ev.pointerId);
     const p = local(ev);
+    cursor = p;
     clearTimeout(temporizador);
     if (ev.pointerType === 'mouse' && guiar) {
       // D-115: o botão do meio ou o direito arrastam a câmera; o esquerdo anda na hora.
@@ -157,6 +162,7 @@ export function ligarPonteiro(alvo: HTMLElement, opcoes: OpcoesPonteiro): Pontei
 
   const aoMover = (ev: PointerEvent) => {
     const p = local(ev);
+    if (ev.pointerType === 'mouse') cursor = p;
     if (mouse && ev.pointerId === mouse.id) {
       mouse.x = p.x;
       mouse.y = p.y;
@@ -229,6 +235,7 @@ export function ligarPonteiro(alvo: HTMLElement, opcoes: OpcoesPonteiro): Pontei
       if (!mouse.guiando && agoraMs - mouse.desdeMs >= GUIAR_APOS_MS) mouse.guiando = true;
       if (mouse.guiando) guiarAgora();
     },
+    celulaDoCursor: () => (cursor ? camera.celulaSob(cursor.x, cursor.y) : null),
     desligar: () => {
       clearTimeout(temporizador);
       alvo.removeEventListener('pointerdown', aoBaixar);

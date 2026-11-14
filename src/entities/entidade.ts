@@ -227,6 +227,35 @@ export interface HabilidadeConhecida {
  * sem o atributo de classe (a classe vive nos estilos); quem montou a build no 39 passa pela tela de novo e recebe de
  * volta também os pontos que tinha posto nele.
  */
+/** Marco 40 (D-164): o modo de movimento em curso (voo, montaria, névoa, marcha, tirolesa, camuflagem ou o preparo). */
+export interface ModoDeMovimento {
+  tipo: 'preparo' | 'voo' | 'montado' | 'nevoa' | 'marcha' | 'tirolesa' | 'camuflado';
+  id: string;
+  desdeTick: number;
+  ateTick?: number;
+  /** O preparo vira este modo (ou o retorno à âncora). */
+  destino?: 'voo' | 'montado' | 'ancora';
+  x?: number;
+  y?: number;
+  rumoX?: number;
+  rumoY?: number;
+  /** A tirolesa: as células que ainda faltam e a velocidade (células por segundo). */
+  restante?: number;
+  velocidade?: number;
+  lentidaoPct?: number;
+  pesada?: boolean;
+  combate?: boolean;
+  caiuUmaVez?: boolean;
+}
+
+export interface EstadoMovimento {
+  ativo: string;
+  /** Por mecânica, os ticks em que cada carga gasta volta. */
+  cargas: Record<string, number[]>;
+  modo?: ModoDeMovimento;
+  ancora?: { x: number; y: number; ateTick: number };
+}
+
 export const SISTEMA_DO_PERSONAGEM = 40;
 
 export interface Bolsa {
@@ -418,9 +447,20 @@ export interface Entidade {
   estilos: string[];
   /** Marco 18: o último golpe com dano que a entidade levou (quem e com qual habilidade) — o "ao abater" lê. */
   ultimoGolpe: { fonteId: EntidadeId; chave: string } | null;
+  /** Marco 40 (13/11/2026, D-161): o que os escudos quebrados neste tick deixam (aplicado no ciclo dos efeitos). */
+  aoQuebrarEscudo?: EfeitoCanonico[];
+  /** Marco 40 (13/11/2026, D-162): até que tick cada reação elemental espera para disparar de novo neste alvo. */
+  reacoesAte?: Record<string, number>;
   /** Marco 18: a última habilidade que usou (combos e a Lâmina rúnica). */
   tatica?: MemoriaTatica;
   ultimaHabilidade: { id: string; chave: string; tick: number; alvoId: EntidadeId | null } | null;
+  /**
+   * Marco 40 (13/11/2026, D-163): a última skill (sem o básico) para os combos de papel: o papel dela, o alvo, quantos
+   * inimigos atingiu e se abateu.
+   */
+  ultimaDePapel?: { id: string; papel: string; tick: number; alvoId: EntidadeId | null; atingidos: number; abateu: boolean; alvos: EntidadeId[]; miraX: number; miraY: number };
+  /** Marco 40 (13/11/2026, D-164): o movimento da classe — a mecânica ativa, as recargas das cargas e o modo em curso. */
+  movimentoClasse?: EstadoMovimento;
   /** Marco 18 (D-069): a fase em que o renascer do item já foi usado ('' = disponível). */
   renascerFase: string;
   /** Marco 18 (D-070): a última reação que a entidade sofreu (as origens raras olham ao cair). */
@@ -675,6 +715,14 @@ export function clonarEntidade(e: Entidade): Entidade {
     ...(e.concentracaoArcana ? { concentracaoArcana: { ...e.concentracaoArcana } } : {}),
     ...(e.auraFracoes ? { auraFracoes: { ...e.auraFracoes } } : {}),
     ...(e.furia ? { furia: { ...e.furia } } : {}),
+    ...(e.reacoesAte ? { reacoesAte: { ...e.reacoesAte } } : {}),
+    ...(e.movimentoClasse ? { movimentoClasse: {
+      ativo: e.movimentoClasse.ativo,
+      cargas: Object.fromEntries(Object.entries(e.movimentoClasse.cargas).map(([k, v]) => [k, [...v]])),
+      ...(e.movimentoClasse.modo ? { modo: { ...e.movimentoClasse.modo } } : {}),
+      ...(e.movimentoClasse.ancora ? { ancora: { ...e.movimentoClasse.ancora } } : {}),
+    } } : {}),
+    ...(e.ultimaDePapel ? { ultimaDePapel: { ...e.ultimaDePapel, alvos: [...e.ultimaDePapel.alvos] } } : {}),
     ...(e.trilhaClasse ? { trilhaClasse: { chaves: { ...e.trilhaClasse.chaves }, degraus: e.trilhaClasse.degraus } } : {}),
     ...(e.mira ? { mira: { ...e.mira } } : {}),
     ...(e.afinidade ? { afinidade: { ...e.afinidade } } : {}),

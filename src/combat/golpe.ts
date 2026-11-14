@@ -1,3 +1,5 @@
+import { ehRetorno } from './buffs-de-leitura';
+import { aoLevarGolpeMontado, fatorDeDanoRecebidoDoMovimento, noAr } from './movimento-classe';
 import { retirarVida } from './reserva-necromante';
 import { multiplicadorDardo, registrarDardo } from './concentracao-arcana';
 import { encherFuria } from './frenesi';
@@ -25,7 +27,8 @@ import { construirEfeito, type EfeitoCanonico } from './registro-efeitos';
 import { chebyshev } from './geometria';
 import { podeAjudar, podeFerir } from '../modos/relacao';
 import { dispararGanchosDe, passivosDe } from '../progression/ganchos-do-portador';
-import { dispararSinergias, resistenciaPct, sinergiasAtivas } from './elementos';
+import { resistenciaPct, sinergiasAtivas } from './elementos';
+import { reagir } from './reacoes';
 import { absorcaoPct } from './afinidade';
 import { estenderNoClima, multiplicadorClima } from './clima';
 import { aoLevarGolpe, ehBasico, fatorDeCura, multiplicadorArma } from './basico';
@@ -143,6 +146,11 @@ export function aplicarImpacto(
   }
   const { hab } = impacto;
   const atacante = buscarEntidade(estado, impacto.fonte.id);
+  // Marco 40 (13/11/2026, D-164): o golpe de perto, do chão, não alcança quem voa.
+  if (hab.formulaDano !== null && hab.politicaImpacto === 'contato' && noAr(alvo) && atacante && atacante !== alvo && !noAr(atacante)) {
+    saida.push({ t: 'esquivou', tick: estado.tick, acaoId: impacto.acaoId, atorId: impacto.fonte.id, alvoId: alvo.id });
+    return;
+  }
   const combo = atacante ? comboDoImpacto(estado, ctx, atacante, hab, impacto.acaoId, alvo) : null;
   let fonte = comCombo(impacto.fonte, combo ? { danoPct: combo.danoPct, d20Minimo: combo.d20Minimo } : null);
   const aparo = atacante?.tatica?.aparou;
@@ -165,7 +173,11 @@ export function aplicarImpacto(
   const conjurador = buscarEntidade(estado, fonte.id);
   const origem = { acaoId: impacto.acaoId, id: fonte.id, x: conjurador?.x ?? alvo.x, y: conjurador?.y ?? alvo.y };
   const mira = impacto.mira ?? { x: alvo.x, y: alvo.y };
-  const sinergias = hab.formulaDano !== null ? sinergiasAtivas(alvo, hab.elemento, ctx.conteudo.interacoes.sinergias, tick) : [];
+  // Marco 40 (13/11/2026, D-162): o golpe físico sem elemento reage como Físico (o mágico sem elemento não reage).
+  const ponta = hab.elemento ?? (hab.tipoAtaque === 'fisico' ? 'fisico' : null);
+  const sinergias = hab.formulaDano !== null && ponta ? sinergiasAtivas(alvo, ponta, ctx.conteudo.interacoes.sinergias, tick) : [];
+  const piso = Math.max(0, ...sinergias.map((s) => s.d20Minimo));
+  if (piso > (fonte.d20Minimo ?? 0)) fonte = { ...fonte, d20Minimo: piso };
   // Marco 18: os estados do alvo antes do golpe (os ganchos "se o alvo estava…" olham estes).
   const estadosAntes = alvo.efeitos.filter((f) => f.ateTick > tick).map((f) => f.tipo);
 
@@ -185,7 +197,7 @@ export function aplicarImpacto(
     const absorve = absorvido > 0 && hab.fracaoElemental === undefined ? Math.max(0, comPenetracao(100 + absorvido, pen) - 100) : 0;
     // Marco 25 (25/10/2026, D-102): entre personagens, as skills de classe batem menos no modo que pede (arena).
     const pvp = atacante?.bolsa && alvo.bolsa && ehDeAlgumaClasse(ctx, hab.id) ? fatorDeClasseEntrePersonagens(ctx.modo) : 1;
-    const recebido = (absorve > 0 ? absorve / 100 : multiplicadorRecebido(estado, ctx, alvo, hab, tick, extraPct, resistenciaIgnorada(ctx, atacante), pen) * multiplicadorMarco24(ctx, atacante, alvo, hab, costas, tick)) * fatorDoGolpe(estado, ctx, fonte, alvo) * protecaoInicial(estado, ctx, alvo, atacante) * pvp;
+    const recebido = (absorve > 0 ? absorve / 100 : multiplicadorRecebido(estado, ctx, alvo, hab, tick, extraPct, resistenciaIgnorada(ctx, atacante), pen) * multiplicadorMarco24(ctx, atacante, alvo, hab, costas, tick)) * fatorDoGolpe(estado, ctx, fonte, alvo) * protecaoInicial(estado, ctx, alvo, atacante) * pvp * fatorDeDanoRecebidoDoMovimento(ctx, alvo);
     const r = resolverGolpe(
       estado.rng,
       hab.formulaDano,
@@ -222,6 +234,8 @@ export function aplicarImpacto(
       if (hab.politicaImpacto === 'contato') reagirAoGolpe(estado, ctx, alvo, atacante, saida);
       // Marco 27 (D-126): a Rapieira deixa a riposta pronta em quem levou o golpe.
       if (atacante && atacante !== alvo) aoLevarGolpe(estado, alvo, (id) => habilidadeDoAtor(ctx, alvo, id, tick));
+      // D-164: montado, o golpe derruba do lobo.
+      if (atacante && atacante !== alvo) aoLevarGolpeMontado(estado, ctx, alvo, saida);
     }
   }
   if (hab.formulaCura !== null) {
@@ -293,24 +307,17 @@ export function aplicarImpacto(
     if (dano > 0 && conjurador !== alvo && hab.tags.includes('falcao')) cargaDaClasse(ctx, conjurador, 'falcao', estado.tick, saida);
     if (cura > 0) cargaPorMomento(ctx, conjurador, 'cura', estado.tick, saida);
   }
-  // Sinergias (marco 14): o estado consumido sai e os efeitos da sinergia entram, antes dos da habilidade.
-  dispararSinergias(alvo, sinergias, (ef) => {
-    aplicarEfeito(estado, ctx, alvo, comPotencia(ef, fonte.potencia), origem, mira, saida);
-  });
-  // Marco 18 (D-068): reações em área (vapor, lama, peste; o eletrocutar só nos molhados) e a cura de quem lançou.
-  for (const s of sinergias) {
-    if (s.raio > 0) {
-      for (const outro of estado.entidades) {
-        if (outro === alvo || !vivo(outro) || chebyshev(outro, alvo) > s.raio || !podeFerir(fonte, outro, ctx.modo)) continue;
-        if (s.soComEstado && !outro.efeitos.some((f) => f.tipo === s.soComEstado && f.ateTick > tick)) continue;
-        if (s.soComEstado) outro.efeitos = outro.efeitos.filter((f) => !s.remove.includes(f.tipo));
-        for (const ef of s.aplicar) aplicarEfeito(estado, ctx, outro, comPotencia(ef, fonte.potencia), origem, { x: outro.x, y: outro.y }, saida);
-      }
-    }
-    if (s.curarFonte > 0 && conjurador && vivo(conjurador)) {
-      aplicarEfeito(estado, ctx, conjurador, construirEfeito('cura', { valor: Math.round(s.curarFonte * fonte.potencia) }), origem, null, saida);
-    }
+  // Marco 40 (13/11/2026, D-163): o que a skill atingiu conta para os combos de papel; o golpe carregado (o Cerco) pega.
+  const dePapel = conjurador?.ultimaDePapel;
+  if (dePapel && dePapel.id === hab.id && dano > 0 && conjurador !== alvo && !dePapel.alvos.includes(alvo.id)) {
+    dePapel.atingidos += 1;
+    if (dePapel.alvos.length < 10) dePapel.alvos.push(alvo.id);
   }
+  for (const f of conjurador?.efeitos ?? []) {
+    if (f.tipo === 'acerto_carregado' && f.ateTick > tick && f.interno && dano > 0) aplicarEfeito(estado, ctx, alvo, f.interno, origem, null, saida);
+  }
+  // Sinergias (marco 14): as reações do golpe (combat/reacoes.ts), antes dos efeitos da habilidade.
+  reagir(estado, ctx, { alvo, conjurador, fonte, origem, danoEfetivo: Math.min(hpAntes, dano), comPotencia }, sinergias, saida);
   // Marco 18: o marcado sai no golpe; o consagrado cura quem acerta.
   if (dano > 0) {
     const consagrado = alvo.efeitos.find((f) => f.ateTick > tick && REGISTRO_EFEITOS[f.tipo].curaQuemAcerta);
@@ -331,7 +338,7 @@ export function aplicarImpacto(
   for (const efeito of hab.efeitos) {
     // Armadilha e invocação saem uma vez no lançamento (acao.ts), não por alvo atingido.
     // Marco 26 (D-125): nem o avanço e o teleporte de quem conjura (saem uma vez, no lançamento).
-    if (REGISTRO_EFEITOS[efeito.tipo].aoLancar || (efeito.em === 'conjurador' && REGISTRO_EFEITOS[efeito.tipo].deslocaConjurador)) continue;
+    if (REGISTRO_EFEITOS[efeito.tipo].aoLancar || (efeito.em === 'conjurador' && REGISTRO_EFEITOS[efeito.tipo].deslocaConjurador) || ehRetorno(efeito)) continue;
     // Marco 23 (D-092): no clima do elemento, o estado dele dura mais.
     const reforco = efeito.tipo === 'escudo' || efeito.tipo === 'escudo_acumulado' ? reforcoDaGeral(ctx, conjurador, hab, tick) : 1;
     // Marco 24 (D-096): a sinergia passiva alonga o estado (Disciplina férrea).

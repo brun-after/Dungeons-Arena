@@ -168,7 +168,7 @@ describe('elementos e sinergias no golpe', () => {
     c.ticks(80);
     const impacto = c.eventos.find((e) => e.t === 'impacto' && e.alvoId === 'a' && !e.falha);
     if (impacto?.t !== 'impacto') throw new Error('sem impacto');
-    expect(impacto.sinergias).toEqual(['derreter']);
+    expect(impacto.sinergias).toEqual(['vapor']);
     expect(c.tem('a', 'resfriado')).toBe(false);
     expect(c.tem('a', 'queimando')).toBe(true);
   });

@@ -1,7 +1,7 @@
 import { consumirAtaque, retirarVida } from '../../src/combat/reserva-necromante';
 import { invocar, processarFluxo } from '../../src/combat/efeitos-fluxo';
 import { describe, expect, it } from 'vitest';
-import { comKit, CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
+import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import { clonarEstado, criarEstado } from '../../src/core/estado';
 import type { EventoSimulacao } from '../../src/core/eventos-simulacao';
@@ -13,8 +13,6 @@ import { aplicarEfeito, multiplicadorCuraRecebida, multiplicadorDanoCausado } fr
 import { construirEfeito } from '../../src/combat/registro-efeitos';
 import { iniciarAcao, processarAcoes } from '../../src/combat/acao';
 import { resolverHabilidade } from '../../src/combat/compilar-habilidade';
-import { prepararSequencia } from '../../src/combat/sequencias';
-import { aplicarImpacto } from '../../src/combat/golpe';
 import { perfilPara } from '../../src/combat/perfil';
 import { lerRegistro, MIGRACOES, VERSAO_SCHEMA } from '../../src/save/esquema';
 import { lerIdItemBase } from '../../src/progression/gerar-item-base';
@@ -160,22 +158,8 @@ describe('rituais, combos e Trevas', () => {
     processarMortes(c.estado, c.ctx, c.eventos);
     expect(c.meus()).toHaveLength(0); expect(c.estado.recargas[chaveServo(c.j.id)]).toBe(c.estado.tick + ticksDe(8000));
   });
-  it('os dois combos do kit de antes dependem de acerto e de dreno efetivo', () => {
-    for (const id of ['sepultura_aberta', 'tributo_da_legiao']) {
-      const c = cena(); c.passiva(); const alvo = c.npc(); alvo.hp = alvo.hpMax = 10000; c.j.hp -= 20;
-      // Marco 24: as quatro skills do kit de antes (garras e comando agora vêm de livro).
-      comKit(c.j, ['dardo_funesto', 'dizimo_vital', 'garras_do_ossuario', 'comando_sepulcral']);
-      let acao = 1;
-      for (const skill of obter(CONTEUDO.combos.get(id)).sequencia) {
-        const base = obter(resolverHabilidade(c.ctx, skill));
-        const destino = base.politicaAlvo === 'proprio' ? c.j : alvo;
-        const hab = prepararSequencia(c.estado, c.ctx, c.j, base, acao, destino, destino);
-        aplicarImpacto(c.estado, c.ctx, destino, { acaoId: acao++, hab, fonte: { id: c.j.id, equipe: c.j.equipe, bonusAtributo: 0, carisma: 10, multRolagem: 1, potencia: 1, multDano: 1, multCura: 1, d20Minimo: 20 }, indice: 0, mira: destino }, c.eventos);
-        c.estado.tick++;
-      }
-      expect(c.eventos.some((e) => e.t === 'comboFeito' && e.combo === id), id).toBe(true);
-    }
-  });
+  // Marco 40 (13/11/2026, D-163): os combos do kit de antes (Sepultura aberta e Tributo da legião) saíram com os
+  // combos feitos só de skills de uma classe; os assinados do Necromante estão em combos-papel.test.ts.
   it('Trevas unifica Sombra, preserva Eclipse e aplica Definhando com afinidade da classe', () => {
     const c = cena(); expect(CONTEUDO.elementos.has('trevas')).toBe(true);
     expect([...CONTEUDO.elementos.keys()]).not.toContain('sombra');

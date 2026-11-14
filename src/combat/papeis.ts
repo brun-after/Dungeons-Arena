@@ -66,6 +66,9 @@ export function naFaixa(s: EfeitoSecundario, faixa: number): EfeitoCanonico | nu
  */
 export function cabeNaSkill(h: Habilidade, e: EfeitoCanonico): boolean {
   if (e.em !== 'alvo') return true;
+  // Marco 40 (13/11/2026, D-161): o que cai no lugar (fase, armadilha, invocação, campo) não é estado de alguém: sempre cabe.
+  const d = REGISTRO_EFEITOS[e.tipo];
+  if (d.fluxo === 'fase' || d.fluxo === 'armadilha' || d.fluxo === 'invocar' || d.instantaneo === 'campo_cura' || d.instantaneo === 'campo_veneno') return true;
   const feriAlvo = h.politicaAlvo === 'hostil' || (h.politicaImpacto === 'area' && h.politicaAlvo !== 'aliados');
   return REGISTRO_EFEITOS[e.tipo].positivo !== feriAlvo;
 }

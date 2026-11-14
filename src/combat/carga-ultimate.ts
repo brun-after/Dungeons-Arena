@@ -5,8 +5,7 @@
 import type { ContextoSimulacao, MomentoCargaClasse } from '../core/contexto';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
-import { SLOTS_CLASSE, type Entidade } from '../entities/entidade';
-import { ultimateDoPar, type Ultimate } from './ultimates';
+import type { Entidade } from '../entities/entidade';
 import { passivosDe } from '../progression/ganchos-do-portador';
 
 /** Momentos que enchem o medidor, com o ganho base em balance.ultimate.ganhos. */
@@ -58,8 +57,5 @@ export function cargaDaClasse(ctx: ContextoSimulacao, e: Entidade, momento: Mome
   somarCarga(ctx, e, regra.valor, tick, saida);
 }
 
-/** A ultimate do par nas teclas 1 e 2 (sem bolsa, como na arena, as duas primeiras habilidades); null sem par. */
-export function ultimateDe(ctx: Pick<ContextoSimulacao, 'conteudo'>, e: Entidade): Ultimate | null {
-  const [a, b] = e.bolsa ? e.bolsa.barra.slice(0, SLOTS_CLASSE) : e.habilidades.slice(0, SLOTS_CLASSE);
-  return a && b ? ultimateDoPar(ctx.conteudo.ultimates, a, b) : null;
-}
+// Marco 40 (D-160): a ultimate do par fica em ultimate-do-par.ts (sem o medidor, para a runa e os fios consultarem).
+export { parDaUltimate, ultimateDe } from './ultimate-do-par';

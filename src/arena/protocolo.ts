@@ -197,6 +197,13 @@ export function lerComando(v: unknown): Comando | null {
       return id(v.id) ? { t: v.t, id: v.id } : null;
     case 'autoAtaque':
       return typeof v.ligado === 'boolean' ? { t: 'autoAtaque', ligado: v.ligado } : null;
+    // Marco 40 (D-164): o rumo do movimento é opcional (±1000).
+    case 'movimentoClasse': {
+      if (v.dx === undefined && v.dy === undefined) return { t: 'movimentoClasse' };
+      return inteiro(v.dx) && inteiro(v.dy) && Math.abs(v.dx) <= 1000 && Math.abs(v.dy) <= 1000 ? { t: 'movimentoClasse', dx: v.dx, dy: v.dy } : null;
+    }
+    case 'trocarMovimento':
+      return { t: 'trocarMovimento' };
     case 'seguirAlvo':
       return typeof v.ligado === 'boolean' ? { t: 'seguirAlvo', ligado: v.ligado } : null;
     case 'skin':

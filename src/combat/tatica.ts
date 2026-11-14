@@ -1,4 +1,5 @@
 // Marco 19 (17/10/2026): campos persistentes, obstáculos, aparo e cura efetiva no mesmo núcleo dos modos.
+import { noAr } from './movimento-classe';
 import type { Celula } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, novoId, type EstadoJogo } from '../core/estado';
@@ -63,8 +64,10 @@ export function executarTatica(estado: EstadoJogo, ctx: ContextoSimulacao, alvo:
   } else if (ef.tipo === 'passo_sombrio') {
     if (mira && avancar(estado, ctx, ator, mira, ef.valor)) fato(ator, 'deslocou', undefined, origem.acaoId);
   } else if (ef.tipo === 'muralha_pedra' && mira) {
-    const horizontal = Math.abs(mira.x - ator.x) < Math.abs(mira.y - ator.y);
-    const candidatos = [-1, 0, 1].map((d) => ({ x: mira.x + (horizontal ? d : 0), y: mira.y + (horizontal ? 0 : d) }));
+    // Marco 40 (13/11/2026, D-161): a muralha de quem usa (`em: conjurador`) sai atrás dele, do lado oposto da mira.
+    const m: Celula = ef.em === 'conjurador' ? { x: ator.x - Math.sign(mira.x - ator.x) * 2, y: ator.y - Math.sign(mira.y - ator.y) * 2 } : mira;
+    const horizontal = Math.abs(m.x - ator.x) < Math.abs(m.y - ator.y);
+    const candidatos = [-1, 0, 1].map((d) => ({ x: m.x + (horizontal ? d : 0), y: m.y + (horizontal ? 0 : d) }));
     const livres = candidatos.filter((p) => passavel(ctx.fase, p.x, p.y) && !muralhaEm(estado, p.x, p.y)
       && !estado.entidades.some((e) => vivo(e) && reservaCelula(e, p.x, p.y))
       && !estado.objetos.some((o) => o.x === p.x && o.y === p.y)
@@ -91,7 +94,8 @@ export function processarCampos(estado: EstadoJogo, ctx: ContextoSimulacao, said
     const dono = buscarEntidade(estado, c.donoId);
     if (!dono || !vivo(dono)) continue;
     for (const e of estado.entidades) {
-      if (!vivo(e) || chebyshev(e, c) > c.raio || !(c.tipo === 'cura' ? podeAjudar(dono, e, ctx.modo) : podeFerir(dono, e, ctx.modo))) continue;
+      // Marco 40 (13/11/2026, D-164): o campo no chão não pega quem voa.
+      if (!vivo(e) || (c.tipo !== 'cura' && noAr(e)) || chebyshev(e, c) > c.raio || !(c.tipo === 'cura' ? podeAjudar(dono, e, ctx.modo) : podeFerir(dono, e, ctx.modo))) continue;
       aplicarEfeito(estado, ctx, e, c.efeito, dono, e, saida);
     }
   }

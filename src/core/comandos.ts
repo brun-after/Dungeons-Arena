@@ -64,7 +64,11 @@ export type Comando =
   | { t: 'usarUltimate'; alvo?: EntidadeId | Celula }
   /** Marco 24 (D-095): liga ou desliga uma passiva geral conhecida (até 3, fora de combate). */
   | { t: 'ativarPassiva'; id: string }
-  | { t: 'desativarPassiva'; id: string };
+  | { t: 'desativarPassiva'; id: string }
+  /** Marco 40 (13/11/2026, D-164): usa o movimento da classe (Shift), no rumo pedido (±1000) ou no de agora. */
+  | { t: 'movimentoClasse'; dx?: number; dy?: number }
+  /** D-164: troca a mecânica de movimento ativa (G). */
+  | { t: 'trocarMovimento' };
 
 /** Marco 15: os tipos de comando, para os modos listarem quais aceitam pela rede (`comandosDeRede`). */
 export const TIPOS_DE_COMANDO: readonly Comando['t'][] = [
@@ -98,6 +102,8 @@ export const TIPOS_DE_COMANDO: readonly Comando['t'][] = [
   'usarUltimate',
   'ativarPassiva',
   'desativarPassiva',
+  'movimentoClasse',
+  'trocarMovimento',
 ];
 
 /** Envelope de rede. O servidor deriva o jogador da sessão e atribui o tick de aplicação. */

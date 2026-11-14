@@ -1,6 +1,6 @@
 # Marco 40: o sistema novo de skills
 
-**Versão:** 1.2 · **Data:** 13/11/2026
+**Versão:** 1.3 · **Data:** 13/11/2026
 
 O desenho completo está no catálogo "Grimório das Skills" (artefato, versão 1.6), revisado com o usuário em
 12/11/2026. Este documento guarda as etapas da implementação e o que cada uma entrega. As skills atuais são
@@ -26,14 +26,22 @@ Os pesos das conexões têm faixa por tipo de skill (classe 40/30/15/15, comum 6
 2. **Skills comuns.** Os 20 núcleos e as 89 variantes elementais no lugar das skills comuns e gerais; migração do
    save (ids antigos para o núcleo mais próximo, estudo devolvido).
 3. **Skills de classe.** As 30 skills (6 por classe) com veículo, recurso e a leitura de cada estilo; runa padrão.
-4. **Ultimates.** As 21 famílias pelos papéis do par; os fios de estilo e de elemento, os pares e a runa no par,
-   graduais; combos.
+4. **Ultimates, combos, reações, ressonâncias e visual** (ampliada em 13/11/2026, pedido do usuário). O desenho
+   está no catálogo "Códex do Combate" (artefato, versão 1.0), publicado para revisão sem pausar o código:
+   - as 21 famílias de ultimate pelos papéis do par, com os fios de estilo e de elemento, as 36 fusões de eixos,
+     o par de elementos e a runa no par, tudo gradual; as 140 ultimates antigas saem;
+   - combos em quatro camadas (regras de papel, cena, grupo e 30 assinados pelas skills de classe), todos lendo
+     elemento, sintonia e estilo; os 167 combos por id saem;
+   - as reações elementais em matriz completa (36 pares dos 9 elementos);
+   - as ressonâncias de volta, entre um eixo do estilo e um elemento da sintonia (30), ocultas até disparar e
+     registradas no diário;
+   - o rework visual completo, que era a etapa 7: as skills comuns e de classe, as famílias, os combos, as reações
+     e as ressonâncias, desenhados junto com a mecânica.
 5. **Movimento da classe.** As 15 mecânicas (3 por classe, uma ativa), Shift usa, G alterna, Z volta ao alvo
    anterior, botão no celular; evolução por nível com marcos no 30, 50, 70 e 90.
 6. **Companheiros e montarias.** Falcão, lobo e urso do Aventureiro (vida compartilhada com repasse por nível),
    leituras de estilo, Chamado da Matilha; montaria comprada no Mundo; Posto dos Mortos do Necromante.
-7. **Visual.** As camadas por canal (núcleo, veículo, forma, matéria, estado), as formas novas, as matérias e as
-   assinaturas de cada skill.
+7. **Visual.** Entrou na etapa 4 (13/11/2026); aqui fica só o que sobrar do movimento e dos companheiros.
 8. **Fechamento.** Balanceamento, documentação, e2e e partida real.
 
 ## Etapa 1 (12/11/2026)
@@ -63,6 +71,7 @@ Os pesos das conexões têm faixa por tipo de skill (classe 40/30/15/15, comum 6
 - O balanceamento completo fica para o fechamento (D-159).
 
 > **Histórico**
+> - **1.3 (13/11/2026)**: a etapa 4 ampliada (combos, reações, ressonâncias e o visual da etapa 7), pelo Códex do Combate.
 > - **1.2 (13/11/2026)**: etapa 3, as skills de classe.
 > - **1.1 (12/11/2026)**: etapa 2, as skills comuns.
 > - **1.0 (12/11/2026)**: as etapas e a etapa 1.

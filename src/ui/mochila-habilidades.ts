@@ -26,7 +26,7 @@ import { descreverBonus, descreverCaminho, descreverHabilidade, linhasDeEscala }
 import { icone } from './icones';
 import { classeDaHabilidade, comRuna } from './runa-dom';
 import { desenharPassivasGerais, desenharSintonia } from './painel-sintonia';
-import { ultimateDe } from '../combat/carga-ultimate';
+import { parDaUltimate, ultimateDe } from '../combat/carga-ultimate';
 import { ID_RUNA_DE_FUSAO } from '../progression/habilidades-personagem';
 import { seletorDeRuna } from './seletor-runa';
 import { listaDeLeituras } from './leituras-skill';
@@ -288,7 +288,9 @@ function desenharUltimate(corpo: HTMLElement, j: Entidade, ctx: ContextoSimulaca
   textos.append(titulo, el('p', 'detalhe-item', u.texto));
   const desc = el('ul', 'descricao-habilidade');
   const nome = (id: string) => resolverHabilidade(ctx, id)?.nome ?? id;
-  for (const linha of [...descreverHabilidade(h, {}), t('habilidades.ultimatePar', { a: nome(u.par[0]), b: nome(u.par[1]) }), t('habilidades.ultimateCarga')]) desc.append(el('li', undefined, linha));
+  // Marco 40 (D-160): a família vem das duas skills das teclas 1 e 2.
+  const par = parDaUltimate(j);
+  for (const linha of [...descreverHabilidade(h, {}), ...(par ? [t('habilidades.ultimatePar', { a: nome(par[0]), b: nome(par[1]) })] : []), t('habilidades.ultimateCarga')]) desc.append(el('li', undefined, linha));
   textos.append(desc);
   const runa = seletorDeRuna(ctx, j, u.id, tick, emitir, redesenhar);
   if (runa) textos.append(runa);

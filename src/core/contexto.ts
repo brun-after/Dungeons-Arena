@@ -178,8 +178,24 @@ export interface Balance {
     faixaAvancada: { nivelInicio: number; percentuais: Record<Dificuldade, number> };
   };
   /** Efeitos (§2.8): dano, cura e recurso periódicos aplicam a cada intervalo. */
+  /**
+   * Marco 40 (13/11/2026, D-164): o movimento da classe. `viagemPct` é a velocidade a mais fora de combate (voo, montaria,
+   * névoa, marcha); os pares [nível 1, nível 100] são as limitações em combate, que melhoram com o nível.
+   */
+  movimentoClasse: {
+    viagemPct: number;
+    viagemPesadaPct: number;
+    voo: { preparoMs: number; danoPct: [number, number]; conjuracaoPct: [number, number]; lentidaoPct: [number, number] };
+    montaria: { danoPct: [number, number]; conjuracaoPct: [number, number]; danoRecebidoPct: [number, number] };
+    montariaPesada: { danoPct: [number, number]; conjuracaoPct: [number, number]; danoRecebidoPct: [number, number] };
+    nevoa: { lentidaoPct: number; servosRaio: number; duracaoAoEntrarEmCombateMs: number };
+    marcha: { combatePct: number; furiaPorS: number };
+    preparoPadraoMs: number;
+  };
   efeitos: {
     intervaloPeriodicoMs: number;
+    /** Marco 40 (13/11/2026, D-162): a mesma reação só volta a disparar no mesmo alvo depois deste intervalo. */
+    reacaoIntervaloMs: number;
     /** Quanto dura cada célula de rastro (§2.8). */
     rastroCelulaMs: number;
     /** Dominação (§2.9): duração e HP com que o dominado volta. */
@@ -270,6 +286,8 @@ export interface Balance {
       recargaBasicoPorDestrezaPct: number;
       recargaBasicoMaxPct: number;
       regenPorCelulaPorConstituicaoPct: number;
+      /** Marco 40 (13/11/2026, D-161): cada ponto de Vontade acima de 10 encurta os controles recebidos (tenacidade). */
+      tenacidadePorVontadePct: number;
       descontoPorCarismaPct: number;
       descontoMaxPct: number;
       /** Marco 18 (D-068): a rolagem escala com FOR e INT e a INT dá a potência dos efeitos. */

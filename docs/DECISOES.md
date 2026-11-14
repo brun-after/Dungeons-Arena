@@ -1,8 +1,13 @@
 # Decisões de projeto
 
-**Versão:** 1.06 · **Data:** 13/11/2026
+**Versão:** 1.11 · **Data:** 13/11/2026
 
 > **Histórico**
+> - **1.11 (13/11/2026)**: D-164: o movimento da classe (três mecânicas por classe, Shift e G), com o Voo Arcano, a Tirolesa, a Marcha de Guerra, a Forma de Névoa e o Lobo para viajar e limitados em combate.
+> - **1.10 (13/11/2026)**: D-163: os combos de papel (17, com o desdobramento pelo eixo) e os 30 combos assinados das classes.
+> - **1.09 (13/11/2026)**: D-162: as reações elementais viram a matriz de 36 pares das 9 pontas (o golpe físico reage), com o intervalo por alvo e o estado petrificado.
+> - **1.08 (13/11/2026)**: D-161: as leituras de estilo, as fusões e as famílias fazem o que o texto promete (ajustes da skill, efeitos ao abater, etapas internas, estados novos), o veículo da classe nas ultimates, o Renascer que levanta, a Vontade contra o controle e as armadilhas postas no campo.
+> - **1.07 (13/11/2026)**: D-160: marco 40, etapa 4 (primeira parte). As 140 ultimates por par de skills dão lugar a 21 famílias pelos papéis do par, com os fios de estilo e de elemento, o par de elementos, a runa no par e as 36 fusões de eixos.
 > - **1.06 (13/11/2026)**: D-159: marco 40, etapa 3. As 30 skills de classe do catálogo (6 por classe), com papel e a leitura de cada estilo; duas skills por classe saem do kit (`saidas`), e o save tira essas skills sem devolver pontos.
 > - **1.05 (12/11/2026)**: D-158: marco 40, etapa 2. As 89 skills comuns saem dos 20 núcleos (`nucleos.json`), com livros novos e a geral inicial de cada classe. As 54 gerais antigas deixam o jogador (save 31 e fichas) e ficam só para inimigos, ultimates e combos até as etapas 3 e 4.
 > - **1.04 (12/11/2026)**: D-157: marco 40, o sistema novo de skills; etapa 1 (núcleo, papel, os nove eixos, as cinco formas novas, o destino aliados, a marca que acumula e a tabela papel × elemento).
@@ -4785,3 +4790,173 @@ de quem usa (a "leitura" do estilo).
 - **O balanceamento completo não foi rodado de novo** (pedido do usuário, 13/11/2026). A última rodada completa deu
   171 de 172 metas; a que faltava (Aventureiro contra o chefe) e o PvP do Aventureiro foram medidos à parte com o
   Mergulho em 2d6+3 e passaram. A medição completa fica para o fechamento do marco.
+
+## D-160 — Marco 40: as ultimates por família e os fios (13/11/2026)
+
+**Contexto.** Etapa 4 do marco 40, ampliada a pedido do usuário (ultimates, combos, reações, ressonâncias e o visual
+no mesmo PR). O desenho está no catálogo "Códex do Combate" (artefato, versão 1.0) e no Grimório das Skills.
+
+**Decisão.**
+- **A família vem dos papéis.** A ultimate é a da família dos papéis das duas skills das teclas 1 e 2, em qualquer
+  ordem (`ultimate-do-par.ts`). São 21 famílias (`ultimates.json`, versão 2), de todas as classes. A skill sem papel,
+  como as dos inimigos, não forma par. As 140 ultimates antigas, as etapas delas e as marcas de Domínio saem.
+- **Os fios.**
+  - **Estilo:** todo estilo com ponta empurra o eixo principal dele na ultimate, na faixa da ponta (`perfil.ts`).
+  - **Elemento:** o elemento de cada skill do par entra com o estado dele e com a função secundária do papel, na faixa
+    da sintonia (`fios-ultimate.ts`). A runa da ultimate continua dando o elemento principal e a parte elemental.
+  - **Par de elementos:** dois elementos diferentes no par somam +1,5% de dano por faixa do mais fraco
+    (`balance.habilidades.runas.parPorFaixaPct`, que substitui o +15% fixo do `parPct`). Se a runa é um dos dois, a
+    reação cresce até o dobro, pela menor faixa entre a runa e o elemento mais forte.
+  - **Par de estilos:** os eixos dos dois estilos mais fortes (com eixos principais diferentes) se fundem, na faixa do
+    mais fraco. As 36 fusões ficam em `ultimates.json`, campo `fusoes`, como efeitos graduais.
+- **Na chave.** Os fios entram na chave compilada (`#fogo6.gelo3*area.eco3`), para a memória das skills continuar
+  valendo.
+- **Aproximações desta parte**, a refinar no visual e no balanceamento da etapa:
+  - as invocações das famílias usam o `espectro` em todas as classes;
+  - o Renascer cura e protege, mas ainda não levanta quem caiu;
+  - os Carcereiros prendem, mas não puxam o preso;
+  - várias fusões entram como efeito extra simples, em vez da mudança de forma descrita no catálogo.
+
+## D-161 — Marco 40: o que a carta promete, a skill faz (13/11/2026)
+
+**Contexto.** Na revisão dos artefatos, várias leituras de estilo, fusões e famílias de ultimate prometiam mais do que a
+mecânica fazia (D-160 listava as aproximações). O pedido foi fazer a mecânica cumprir o texto, sem baixar o texto.
+
+**Decisão.**
+- **Leitura com ajustes e efeitos ao abater** (`combat/leituras.ts`). Além dos efeitos, a leitura muda a skill a partir de
+  uma faixa (`ajustes`: raio, alcance, forma da área, saltos, perfuração, conjuração, dano, recarga, ininterrupta,
+  número de invocações, rearmes e escudo de aliado na armadilha) e traz `aoAbater` (aplicado por `combat/ao-abater.ts`
+  quando o golpe da skill derruba alguém: em quem abateu, nos aliados em volta ou no hostil mais perto do abatido).
+  Os ajustes entram do meio da ponta (faixa 5) e as fases e os efeitos ao abater da faixa 4, para a build espalhada
+  não levar as cinco leituras inteiras com poucos pontos (o simulador de balanceamento mostrou isso). Ecos e fases
+  somam; os outros efeitos não se repetem. O que cai no lugar (fase, armadilha, invocação, campo) sempre
+  cabe na skill.
+- **Etapas internas das leituras** (`skills.json`, `leitura_*`), lançadas por `fase`: o estouro em área, o golpe em
+  área, a hesitação, o medo, a provocação, a onda da runa, a revelação, o contágio, a detonação, a atração, a armadilha
+  em linha e as feras que voltam.
+- **Estados novos**: `area_ampliada` (a próxima magia de área com mais raio), `ecoando` (as magias que ferem ecoam),
+  `apavorar` (só os feridos fogem), `explodir_ao_cair` (a invocação do Exército em fúria) e `levantar` (o Renascer
+  levanta o aliado caído mais perto com 30% da vida).
+- **A área também salta** (`acao.ts`): a área com `saltos` pula do alvo principal para os hostis de fora dela.
+- **Armadilha**: `pct` são os rearmes (fica inerte 1 s e volta); `aliado` é o que ela dá ao aliado que pisa (uma vez);
+  na célula que já tem armadilha, a nova vai na seguinte da linha. A muralha `em: conjurador` sai atrás de quem usa.
+- **Fusões com ajustes** (`ultimates.json`): a área que salta, a onda em linha, o pulso no mesmo lugar, a invocação no
+  fim do traço, o eco que consome as marcas.
+- **O veículo da classe** (`ultimates.json → veiculos`, a classe entra na chave como `$classe`): as invocações das
+  famílias viram as criaturas da classe por função (ataque, cura, guarda; o Guerreiro ganha o `guerreiro_espectral`); no
+  Necromante, toda ultimate que fere traz as lanças dos mortos (a identidade do Juízo). A cratera do Cometa leva o
+  estado da runa (no Físico, atola). Os Carcereiros puxam e prendem.
+- **Vontade contra o controle**: cada ponto acima de 10 encurta `tenacidadePorVontadePct` (0,3%) os controles recebidos,
+  somado às passivas, com o teto de 40%.
+- **Armadilhas no campo**: as skills de armadilha miram a célula do cursor (no celular, o último toque), puxada para
+  dentro do alcance; o núcleo recebe a célula no comando, como qualquer mira.
+- **Teste de guarda**: toda leitura muda a skill compilada (`leituras-fieis.test.ts`).
+
+**As cinco que faltavam** (na mesma decisão): o escudo com efeito interno solta o efeito quando quebra (a Mortalha
+do Ceifador vira sombra rápida: pressa, fantasma e véu); `saltar_ao_alvo` leva quem usa até o alvo selecionado (ou o
+hostil mais perto) e lança a etapa do golpe (o Comando do Ceifador); o atrasado de `retornar` sai no lançamento e
+guarda a célula de partida (a Investida do Duelista volta); a etapa com `runaDe` usa o encaixe de runa de outra skill
+(a onda do Brado rúnico leva a runa do Brado); e `guardar_absorvido` soma o que os escudos absorvem para
+`devolver_absorvido` (o Contragolpe devolve 60% do absorvido em volta, além de um golpe menor).
+
+## D-162 — Marco 40: a matriz das reações elementais (13/11/2026)
+
+**Contexto.** Eram 17 reações soltas, só entre elementos; o golpe físico não reagia, e as que não consumiam o estado
+disparavam a cada golpe. O Códex do combate (marco 40, etapa 4) fechou uma reação para cada par das 9 pontas do
+eneágono: 36 pares, cada um com nome, gatilho e efeito.
+
+**Decisão.**
+- **36 pares e mais quatro**: `interacoes.json → sinergias` traz uma reação para cada par (Forja, Estilhaçar, Condutor,
+  Ferida aberta, Golpe certeiro, Esmagar, Quebra-alma, Aço sagrado, Vapor, Plasma, Combustão, Pânico em chamas, Magma,
+  Pira fúnebre, Fogo purificador, Cristal carregado, Veneno gelado, Mente congelada, Fossilizar, Gelo negro, Orvalho,
+  Neurotoxina, Sobrecarga, Aterramento, Tempestade negra, Juízo, Delírio, Lama ácida, Putrefação, Purgar, Peso da
+  mente, Pesadelo, Revelação, Túmulo, Solo consagrado, Eclipse; Plasma e Eclipse nos dois sentidos). Ficam as do
+  molhado e do definhando (Eletrocutar, Lama, Peste, Absolvição). O Derreter virou o Vapor (fogo em resfriado,
+  congelado ou molhado); o Pânico virou o Pesadelo; a Corrosão saiu (o par veneno × psíquico é o Delírio).
+- **O golpe físico reage**: a skill de tipo físico sem elemento entra como a ponta Física; a mágica sem elemento não
+  reage.
+- **Campos novos** na reação: `d20Minimo` (o Golpe certeiro não erra; o Juízo é crítico), `roubarPct` (Quebra-alma,
+  Aço sagrado), `aliados` com `soAliados` (Fogo purificador, Orvalho, Purgar, Solo consagrado), `soVizinhos` (a Forja
+  passa a queimadura adiante; o Plasma explode em volta), `maxOutros` (a Sobrecarga salta para o eletrizado mais perto)
+  e `ticar` (a Ferida aberta faz o veneno ferir uma vez a mais, na hora).
+- **Estado novo** `petrificado` (Fossilizar): não anda nem age, e o dano recebido cai `pct`%. O `danoRecebido` do
+  registro aceita −1.
+- **Consome só quem a narrativa diz**: quebrar o gelo, consumir a marca, descarregar a carga, derreter, explodir. As
+  outras deixam o estado, porque os combos e as sintonias contam com ele.
+- **Intervalo por alvo**: a mesma reação só volta a disparar no mesmo alvo depois de `efeitos.reacaoIntervaloMs`
+  (2,5 s), guardado em `Entidade.reacoesAte`.
+- **Onde vive**: o que a reação faz depois do golpe saiu de `golpe.ts` para `combat/reacoes.ts`; os nomes e os textos
+  ficam em `i18n/pt-BR-reacoes.ts`, e o Diário mostra o texto de cada reação.
+
+**Calibragem** (`npm run balancear`, 172/172): a Forja ficou em +15%, o Esmagar em +15% sem consumir o preso, o
+Condutor tira o ataque por 0,5 s em vez de atordoar, o Golpe certeiro garante o acerto em vez de dano a mais, e o
+Plasma fere só quem está em volta.
+
+**Consequências.** `tests/unit/reacoes.test.ts` confere que cada par das 9 pontas tem a sua reação e o que as novas fazem
+no golpe. O registro de efeitos passa a 94 tipos.
+
+## D-163 — Marco 40: combos de papel e combos assinados (13/11/2026)
+
+**Contexto.** Os combos eram pares fixos de skills (`combos.json`), sem regra geral: duas skills que combinam pela
+narrativa (prender e bater, curar e proteger) só combinavam se alguém tivesse escrito o par. O Códex do combate pediu
+duas camadas: uma genérica, pelo papel das skills, e uma assinada, seis pares por classe.
+
+**Decisão.**
+- **Combos de papel** (`data/combos-papel.json → combos`, 17): a skill anterior de um papel e a de agora de outro, até
+  `janelaMs` (2,5 s), fecham o combo (Golpe no preso, Prender o ferido, Prisão dupla, Embalo, Bater e sair, Emboscada,
+  Revide, Fôlego, Bênção ofensiva, Sangue por sangue, Vigília, Cuidado, Ataque coordenado, Presa entregue, Cerco, Ritmo,
+  Provocação). O papel vem do núcleo; sem núcleo, dos efeitos da skill (`papelDe`). O básico não entra.
+- **O combo muda a skill de agora** no lançamento (dano, duração do controle, escudos, cura, efeitos a mais) e tudo segue
+  pelo caminho normal do golpe. O que não cabe na skill vai pelos especiais (`combat/combos-especiais.ts`): estender o
+  controle do alvo, deixar o alvo firme depois, prender em volta da chegada, gastar o escudo em dano, curar o mais
+  ferido, invocar junto do preso, o golpe que prende das invocações, devolver custo.
+- **Desdobramento pelo eixo** mais forte da skill de agora (`desdobramentos`, 9): área espalha o bônus, alvos salta,
+  perfuração passa ao de trás, eco repete com 30%, controle dura mais (e passa ao vizinho da faixa 5), sustento vira
+  escudo, marca deixa uma marca, grupo dá parte ao aliado mais perto, invocação faz as criaturas atacarem.
+- **Combos assinados** (`assinados`, 30, seis por classe): pares de skills de classe. Usam os mesmos ajustes das
+  leituras de estilo, efeitos, efeitos em quem a anterior atingiu, especiais e etapas internas agendadas (a saraivada
+  central, o míssil do orbe, o pulso do orbe). Os que saem sem conjuração entram no início da ação. Quando o assinado
+  fecha, o de papel não entra junto.
+- **Estados novos**: `firme` (o controle recebido dura menos, em qualquer um) e `acerto_carregado` (o golpe do portador
+  aplica o efeito carregado).
+- **Memória**: `Entidade.ultimaDePapel` guarda a última skill sem o básico, o papel, o alvo, a mira, quem ela atingiu e
+  se abateu.
+- **Diário**: os 47 combos novos se descobrem; o detalhe diz os papéis ou as duas skills.
+- **Textos ajustados ao que fazem**: Grito de guerra enche a fúria de uma vez; o Escudo de ossos apara os próximos três
+  projéteis; a Sepultura aberta explode os recém-erguidos em volta deles.
+
+**Combos antigos.** Saem de `combos.json` os 48 feitos só de skills de uma classe (167 → 119): os seis assinados de
+cada classe ficam no lugar deles. Ficam os que ligam skills gerais, ou uma geral e uma de classe.
+
+## D-164 — Marco 40: o movimento da classe (13/11/2026)
+
+**Contexto.** As classes só se moviam andando; as skills de avanço e teleporte gastavam um lugar na barra. O mapa do
+Mundo pede viagem longa, e cada classe precisa de um jeito próprio de atravessá-lo sem que isso vire vantagem na luta.
+
+**Decisão.**
+- **Três mecânicas por classe** (`data/movimentos.json`), liberadas nos níveis 1, 10 e 20, uma ativa por vez. O Shift
+  usa a ativa (no rumo das teclas, ou no de agora) e o G troca. Os marcos 30/50/70/90 mudam os números (cargas,
+  alcance, preparo). O Z passa a escolher o alvo anterior (antes Shift+Q). Comandos `movimentoClasse` e
+  `trocarMovimento`.
+- **Longa distância (nível 1)**, rápida fora de combate (`balance.movimentoClasse.viagemPct`, 60%) e limitada nele:
+  - **Mago, Voo Arcano**: decola em 1 s (0,5 s no 30). Voando: sem ataque básico; as magias batem 30% (50% no 100) e
+    conjuram 50% mais devagar (20% no 100); em combate o voo fica 50% mais lento (20% no 100). Não pega armadilha,
+    rastro, campo no chão nem golpe de perto de quem está no chão. Passa por cima dos telhados das casas, mas de lá
+    não ataca nem pousa.
+  - **Arqueiro, Tirolesa**: corre em linha reta (14 células/s) até bater numa parede ou relevo, sem âncora nem queda;
+    não muda de rumo e passa pelos corpos. Na linha, só o ataque básico. 30 células (40 no 90), 14 em combate (18 no 50).
+  - **Guerreiro, Marcha de Guerra**: fora de combate, viagem; em combate corre 60% a mais, mas come 8 de fúria por
+    segundo (4 no 70) e acaba ao atacar ou sem fúria.
+  - **Necromante, Forma de Névoa**: vira névoa com os servos a até 5 células — fora de combate, todos viajam rápidos e
+    intocáveis; em combate, 1,5 s intocável (2,5 s no 30) e 40% mais lento. Ao entrar em combate dura mais 1,5 s.
+    Atacar desfaz.
+  - **Aventureiro, Lobo**: monta em 0,5 s. Montado bate 60% (80% no 100), conjura 40% mais devagar (15% no 100), apanha
+    25% mais (10% no 100) e cai no primeiro golpe (segura um golpe a partir do 50). Lutar desmontado compensa.
+- **As curtas** (níveis 10 e 20): Piscar e Âncora Rúnica (Mago), Salto para Trás e Camuflagem (Arqueiro), Arremetida e
+  Salto de Guerra (Guerreiro), Troca de Corpo com um servo (Necromante), Falcão Carrega e Urso (Aventureiro; o urso é
+  a montaria pesada: viagem de 30%, perde menos dano e não derruba).
+- **Estado** `Entidade.movimentoClasse` (a ativa, as cargas em recarga, o modo em curso, a âncora), com clone explícito.
+  O núcleo emite `movimentoClasse`; o desenho sobe quem voa e deixa a névoa translúcida (`render/movimento-visual.ts`).
+
+**Fica para depois.** A Possessão do Necromante e a mordida do lobo; o botão no celular e o indicador no HUD; o efeito
+visual próprio de cada mecânica entra no retrabalho visual da etapa 4.

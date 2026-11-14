@@ -5,12 +5,12 @@ import { describe, expect, it } from 'vitest';
 import { formatarChave, lerChave } from '../../src/combat/chave-habilidade';
 import { resolverHabilidade } from '../../src/combat/compilar-habilidade';
 import { habilidadeDoAtor } from '../../src/combat/perfil';
-import { aplicarRuna, bonusDePar, escolherRuna, fracaoElemental, levaRuna, runaDoAtor, runasDisponiveis } from '../../src/combat/runas';
+import { aplicarRuna, escolherRuna, fracaoElemental, levaRuna, runaDoAtor, runasDisponiveis } from '../../src/combat/runas';
 import { lerComando } from '../../src/arena/protocolo';
 import { ticksDe } from '../../src/core/tempo';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import { criarEstado } from '../../src/core/estado';
-import { fazerCombo } from '../../src/combat/combos';
+import { comCombosDoLancamento } from '../../src/combat/combos-assinados';
 import { registrarUso } from '../../src/progression/vinculo';
 import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 
@@ -84,30 +84,24 @@ describe('runas nas skills de classe (D-151)', () => {
     expect(gelo.efeitos.some((e) => e.tipo === 'resfriado')).toBe(false);
   });
 
-  it('a ultimate ganha o bônus de par quando as duas skills do par estão com a runa dela', () => {
-    const g = jogador('guerreiro');
-    const u = obter([...CONTEUDO.ultimates.values()].find((x) => x.classe === 'guerreiro' && x.par.every((id) => !CONTEUDO.definicoes.get(id)?.base.elemento)));
-    expect(bonusDePar(ctx, g, { id: u.id, runa: 'fisico' }, 0)).toBe(r.parPct);
-    expect(bonusDePar(ctx, g, { id: u.id, runa: 'fogo' }, 0)).toBe(0);
-    expect(bonusDePar(ctx, g, { id: 'redemoinho', runa: 'fisico' }, 0)).toBe(0);
-  });
+  // Marco 40 (13/11/2026, D-160): o bônus de par da ultimate virou o fio do par de elementos (ultimates-m40.test.ts).
 
   it('o combo com as duas skills na mesma runa bate mais; com runas diferentes, não', () => {
     const estado = criarEstado({ semente: 7, faseId: 'teste' });
     const g = jogador('guerreiro');
     const alvo = criarInimigo(obter(CONTEUDO.presets.get('goblin')), 'a', 3, 2, ctx.balance);
     estado.entidades.push(g, alvo);
-    const redemoinho = obter(habilidadeDoAtor(ctx, g, 'redemoinho', 0));
+    // Marco 40 (D-163): o par é o do Aríete (Investida brutal e depois Terremoto), um combo assinado.
+    const terremoto = obter(habilidadeDoAtor(ctx, g, 'salto_esmagador', 0));
     const fazer = () => {
-      g.ultimaHabilidade = { id: 'corrente', chave: 'corrente', tick: estado.tick, alvoId: alvo.id };
-      return obter(fazerCombo(estado, ctx, g, redemoinho, alvo, { x: 3, y: 2 }, [])).danoPct;
+      g.ultimaDePapel = { id: 'investida_de_escudo', papel: 'mobilidade', tick: estado.tick, alvoId: alvo.id, atingidos: 0, abateu: false, alvos: [], miraX: 3, miraY: 2 };
+      return comCombosDoLancamento(estado, ctx, g, terremoto, alvo, { x: 3, y: 2 }, []).multDano;
     };
     const mesma = fazer();
-    // A corrente com runa de gelo: as pontas do combo não combinam mais.
-    obter(g.bolsa).conhecidas.push({ id: 'corrente', rank: 1, caminhos: [] });
+    // A investida com runa de gelo: as pontas do combo não combinam mais.
     for (let i = 0; i < 6; i++) registrarUso(ctx, obter(g.bolsa), 'gelo', 0);
-    expect(escolherRuna(ctx, g, 'corrente', 'gelo', 0)).toBe(true);
-    expect(mesma - fazer()).toBeCloseTo(r.parComboPct);
+    expect(escolherRuna(ctx, g, 'investida_de_escudo', 'gelo', 0)).toBe(true);
+    expect(mesma / fazer()).toBeCloseTo(1 + r.parComboPct / 100);
   });
 
   it('o protocolo só aceita runas conhecidas', () => {

@@ -102,6 +102,11 @@ export function vidaPorCelula(atributos: Atributos, b: Balance): number {
   return Math.round(b.recursos.regenHpPorCelula * mult);
 }
 
+/** Marco 40 (13/11/2026, D-161): a tenacidade da Vontade, em % (somada à das passivas, com o teto de `tatica`). */
+export function tenacidadeDaVontadePct(atributos: Atributos, b: Balance): number {
+  return acimaDe10(pontosUteis(atributos.vontade, b)) * b.atributos.efeitos.tenacidadePorVontadePct;
+}
+
 /** Desconto na loja pelo Carisma, em % (até o teto). */
 export function descontoNaLojaPct(atributos: Atributos, b: Balance): number {
   const e = b.atributos.efeitos;

@@ -850,11 +850,35 @@
         },
         "duelista": {
           "eixo": "eco",
-          "texto": "Raio menor, mais voltas."
+          "texto": "Raio menor, mais voltas.",
+          "efeitos": [
+            {
+              "tipo": "efeito_atrasado",
+              "duracaoMs": 1200,
+              "interno": {
+                "tipo": "dano_direto",
+                "valor": 4
+              }
+            }
+          ]
         },
         "runico": {
           "eixo": "alvos",
-          "texto": "Lâminas da runa orbitam e saltam."
+          "texto": "Lâminas da runa orbitam e saltam.",
+          "efeitos": [
+            {
+              "tipo": "efeito_atrasado",
+              "duracaoMs": 900,
+              "interno": {
+                "tipo": "dano_direto",
+                "valor": 3
+              }
+            }
+          ],
+          "ajustes": {
+            "saltos": 2,
+            "saltoPct": 40
+          }
         },
         "comandante": {
           "eixo": "grupo",
@@ -1122,7 +1146,11 @@
         },
         "lamina_runica": {
           "eixo": "alvos",
-          "texto": "O feixe se divide."
+          "texto": "O feixe se divide.",
+          "ajustes": {
+            "saltos": 2,
+            "saltoPct": 50
+          }
         }
       }
     },
@@ -1186,11 +1214,27 @@
       "leituras": {
         "artilheiro": {
           "eixo": "area",
-          "texto": "Estoura em área."
+          "texto": "Estoura em área.",
+          "efeitos": [
+            {
+              "tipo": "fase",
+              "ref": "leitura_estouro",
+              "duracaoMs": 0,
+              "desde": 4
+            }
+          ]
         },
         "ocultista": {
           "eixo": "eco",
-          "texto": "Volta, como eco, e deixa uma maldição."
+          "texto": "Volta, como eco, e deixa uma maldição.",
+          "efeitos": [
+            {
+              "tipo": "definhando",
+              "pct": 20,
+              "duracaoMs": 4000,
+              "desde": 5
+            }
+          ]
         },
         "encantador": {
           "eixo": "controle",
@@ -1337,15 +1381,43 @@
       "leituras": {
         "artilheiro": {
           "eixo": "area",
-          "texto": "Maior e mais lento; explode ao fim."
+          "texto": "Maior e mais lento; explode ao fim.",
+          "efeitos": [
+            {
+              "tipo": "efeito_atrasado",
+              "duracaoMs": 1500,
+              "interno": {
+                "tipo": "dano_direto",
+                "valor": 6
+              }
+            }
+          ]
         },
         "ocultista": {
           "eixo": "eco",
-          "texto": "Pulsa de novo e drena."
+          "texto": "Pulsa de novo e drena.",
+          "efeitos": [
+            {
+              "tipo": "cura",
+              "em": "conjurador",
+              "valor": 3
+            }
+          ]
         },
         "encantador": {
           "eixo": "controle",
-          "texto": "Quem entra fica encantado; no alto, luta pelo grupo."
+          "texto": "Quem entra fica encantado; no alto, luta pelo grupo.",
+          "efeitos": [
+            {
+              "tipo": "confuso",
+              "duracaoMs": 1500
+            },
+            {
+              "tipo": "dominar_ao_matar",
+              "duracaoMs": 6000,
+              "desde": 8
+            }
+          ]
         },
         "guardiao": {
           "eixo": "sustento",
@@ -1361,7 +1433,25 @@
         },
         "lamina_runica": {
           "eixo": "alvos",
-          "texto": "Lâminas giram dentro do círculo."
+          "texto": "Lâminas giram dentro do círculo.",
+          "efeitos": [
+            {
+              "tipo": "efeito_atrasado",
+              "duracaoMs": 500,
+              "interno": {
+                "tipo": "dano_direto",
+                "valor": 3
+              }
+            },
+            {
+              "tipo": "efeito_atrasado",
+              "duracaoMs": 1000,
+              "interno": {
+                "tipo": "dano_direto",
+                "valor": 3
+              }
+            }
+          ]
         }
       }
     },
@@ -1493,15 +1583,40 @@
       "leituras": {
         "artilheiro": {
           "eixo": "area",
-          "texto": "A próxima magia tem área maior."
+          "texto": "A próxima magia tem área maior.",
+          "efeitos": [
+            {
+              "tipo": "area_ampliada",
+              "em": "conjurador",
+              "valor": 1,
+              "duracaoMs": 8000
+            }
+          ]
         },
         "ocultista": {
           "eixo": "eco",
-          "texto": "As magias ecoam enquanto durar."
+          "texto": "As magias ecoam enquanto durar.",
+          "efeitos": [
+            {
+              "tipo": "ecoando",
+              "em": "conjurador",
+              "pct": 40,
+              "duracaoMs": 8000
+            }
+          ]
         },
         "encantador": {
           "eixo": "controle",
-          "texto": "Inimigos próximos hesitam."
+          "texto": "Inimigos próximos hesitam.",
+          "efeitos": [
+            {
+              "tipo": "fase",
+              "ref": "leitura_hesitacao",
+              "duracaoMs": 0,
+              "em": "conjurador",
+              "desde": 4
+            }
+          ]
         },
         "guardiao": {
           "eixo": "sustento",
@@ -1516,7 +1631,21 @@
         },
         "lamina_runica": {
           "eixo": "alvos",
-          "texto": "O básico vira lâmina rúnica que salta."
+          "texto": "O básico vira lâmina rúnica que salta.",
+          "efeitos": [
+            {
+              "tipo": "ab_multi_alvo",
+              "em": "conjurador",
+              "valor": 1,
+              "duracaoMs": 8000
+            },
+            {
+              "tipo": "ab_dano",
+              "em": "conjurador",
+              "pct": 15,
+              "duracaoMs": 8000
+            }
+          ]
         }
       }
     },
@@ -1588,11 +1717,18 @@
         },
         "mira_firme": {
           "eixo": "perfuracao",
-          "texto": "Atravessa a linha inteira."
+          "texto": "Atravessa a linha inteira.",
+          "ajustes": {
+            "alcance": 2,
+            "perfura": true
+          }
         },
         "inabalavel": {
           "eixo": "sustento",
-          "texto": "A carga não é interrompida e dá escudo."
+          "texto": "A carga não é interrompida e dá escudo.",
+          "ajustes": {
+            "ininterrupta": true
+          }
         },
         "cacador": {
           "eixo": "marca",
@@ -1600,7 +1736,15 @@
         },
         "flecheiro_arcano": {
           "eixo": "area",
-          "texto": "Estoura em área no fim."
+          "texto": "Estoura em área no fim.",
+          "efeitos": [
+            {
+              "tipo": "fase",
+              "ref": "leitura_estouro",
+              "duracaoMs": 0,
+              "desde": 4
+            }
+          ]
         }
       }
     },
@@ -1664,23 +1808,60 @@
       "leituras": {
         "atirador": {
           "eixo": "alvos",
-          "texto": "As flechas buscam alvos."
+          "texto": "As flechas buscam alvos.",
+          "ajustes": {
+            "saltos": 2,
+            "saltoPct": 40
+          }
         },
         "mira_firme": {
           "eixo": "perfuracao",
-          "texto": "Vira uma rajada concentrada em linha."
+          "texto": "Vira uma rajada concentrada em linha.",
+          "ajustes": {
+            "tipoArea": "linha",
+            "raio": 1
+          }
         },
         "inabalavel": {
           "eixo": "sustento",
-          "texto": "Você fica fincado e a chuva dura mais."
+          "texto": "Você fica fincado e a chuva dura mais.",
+          "efeitos": [
+            {
+              "tipo": "enraizado",
+              "em": "conjurador",
+              "duracaoMs": 1500
+            },
+            {
+              "tipo": "efeito_atrasado",
+              "duracaoMs": 1200,
+              "interno": {
+                "tipo": "dano_direto",
+                "valor": 4
+              }
+            }
+          ]
         },
         "cacador": {
           "eixo": "marca",
-          "texto": "Deixa armadilhas onde as flechas caem."
+          "texto": "Deixa armadilhas onde as flechas caem.",
+          "efeitos": [
+            {
+              "tipo": "armadilha",
+              "valor": 6,
+              "duracaoMs": 12000
+            }
+          ]
         },
         "flecheiro_arcano": {
           "eixo": "area",
-          "texto": "Área maior e lenta; as flechas viram runas."
+          "texto": "Área maior e lenta; as flechas viram runas.",
+          "efeitos": [
+            {
+              "tipo": "consagrado",
+              "valor": 2,
+              "duracaoMs": 4000
+            }
+          ]
         }
       }
     },
@@ -1810,11 +1991,19 @@
       "leituras": {
         "atirador": {
           "eixo": "alvos",
-          "texto": "O leque ricocheteia."
+          "texto": "O leque ricocheteia.",
+          "ajustes": {
+            "saltos": 1,
+            "saltoPct": 40
+          }
         },
         "mira_firme": {
           "eixo": "perfuracao",
-          "texto": "O leque se fecha num feixe único que perfura."
+          "texto": "O leque se fecha num feixe único que perfura.",
+          "ajustes": {
+            "tipoArea": "linha",
+            "perfura": true
+          }
         },
         "inabalavel": {
           "eixo": "controle",
@@ -1833,7 +2022,15 @@
         },
         "flecheiro_arcano": {
           "eixo": "area",
-          "texto": "O leque explode no fim."
+          "texto": "O leque explode no fim.",
+          "efeitos": [
+            {
+              "tipo": "fase",
+              "ref": "leitura_estouro",
+              "duracaoMs": 300,
+              "desde": 4
+            }
+          ]
         }
       }
     },
@@ -1962,11 +2159,32 @@
       "leituras": {
         "atirador": {
           "eixo": "alvos",
-          "texto": "Atira rápido nos vizinhos."
+          "texto": "Atira rápido nos vizinhos.",
+          "efeitos": [
+            {
+              "tipo": "ab_multi_alvo",
+              "em": "conjurador",
+              "valor": 1,
+              "duracaoMs": 6000
+            }
+          ]
         },
         "mira_firme": {
           "eixo": "perfuracao",
-          "texto": "A Mira sobe mais rápido e as flechas atravessam."
+          "texto": "A Mira sobe mais rápido e as flechas atravessam.",
+          "efeitos": [
+            {
+              "tipo": "atravessar",
+              "em": "conjurador",
+              "duracaoMs": 6000
+            },
+            {
+              "tipo": "ab_alcance",
+              "em": "conjurador",
+              "valor": 1,
+              "duracaoMs": 6000
+            }
+          ]
         },
         "inabalavel": {
           "eixo": "sustento",
@@ -1974,18 +2192,48 @@
           "efeitos": [
             {
               "tipo": "escudo",
+              "em": "conjurador",
               "valor": 6,
               "duracaoMs": 6000
+            },
+            {
+              "tipo": "aparando",
+              "em": "conjurador",
+              "pct": 30,
+              "duracaoMs": 1500
             }
           ]
         },
         "cacador": {
           "eixo": "marca",
-          "texto": "Revela e marca tudo no raio."
+          "texto": "Revela e marca tudo no raio.",
+          "efeitos": [
+            {
+              "tipo": "fase",
+              "ref": "leitura_revelar",
+              "duracaoMs": 0,
+              "em": "conjurador",
+              "desde": 4
+            }
+          ]
         },
         "flecheiro_arcano": {
           "eixo": "area",
-          "texto": "Cada flecha cai como um relâmpago em área."
+          "texto": "Cada flecha cai como um relâmpago em área.",
+          "efeitos": [
+            {
+              "tipo": "ab_multi_alvo",
+              "em": "conjurador",
+              "valor": 2,
+              "duracaoMs": 6000
+            },
+            {
+              "tipo": "ab_dano",
+              "em": "conjurador",
+              "pct": 10,
+              "duracaoMs": 6000
+            }
+          ]
         }
       }
     },
@@ -3261,11 +3509,26 @@
       "leituras": {
         "senhor_da_horda": {
           "eixo": "grupo",
-          "texto": "Cada morte solta mais setas."
+          "texto": "Cada morte solta mais setas.",
+          "aoAbater": [
+            {
+              "tipo": "dano_direto",
+              "valor": 4,
+              "desde": 4
+            }
+          ]
         },
         "mestre_de_elite": {
           "eixo": "marca",
-          "texto": "A seta manda o elite atacar o alvo."
+          "texto": "A seta manda o elite atacar o alvo.",
+          "efeitos": [
+            {
+              "tipo": "comandar_mortos",
+              "em": "conjurador",
+              "pct": 20,
+              "duracaoMs": 3000
+            }
+          ]
         },
         "pestilento": {
           "eixo": "marca",
@@ -3480,23 +3743,63 @@
       "leituras": {
         "senhor_da_horda": {
           "eixo": "invocacao",
-          "texto": "A horda converge e ganha velocidade."
+          "texto": "A horda converge e ganha velocidade.",
+          "efeitos": [
+            {
+              "tipo": "acelerado",
+              "em": "aliados",
+              "pct": 20,
+              "duracaoMs": 4000
+            }
+          ]
         },
         "mestre_de_elite": {
           "eixo": "invocacao",
-          "texto": "O elite usa o golpe especial."
+          "texto": "O elite usa o golpe especial.",
+          "efeitos": [
+            {
+              "tipo": "critico_garantido",
+              "em": "aliados",
+              "duracaoMs": 4000
+            }
+          ]
         },
         "pestilento": {
           "eixo": "marca",
-          "texto": "Os servos espalham contágio ao bater."
+          "texto": "Os servos espalham contágio ao bater.",
+          "efeitos": [
+            {
+              "tipo": "fase",
+              "ref": "leitura_contagio",
+              "duracaoMs": 0,
+              "em": "conjurador",
+              "desde": 4
+            }
+          ]
         },
         "pacto_de_sangue": {
           "eixo": "sustento",
-          "texto": "Os servos se sacrificam para curar você."
+          "texto": "Os servos se sacrificam para curar você.",
+          "efeitos": [
+            {
+              "tipo": "drenar_invocacao",
+              "em": "conjurador",
+              "valor": 8
+            }
+          ]
         },
         "ceifador": {
           "eixo": "eco",
-          "texto": "Você salta junto e golpeia."
+          "texto": "Você salta junto e golpeia.",
+          "efeitos": [
+            {
+              "tipo": "saltar_ao_alvo",
+              "valor": 5,
+              "ref": "leitura_golpe_ceifador",
+              "em": "conjurador",
+              "desde": 4
+            }
+          ]
         }
       }
     },
@@ -3562,15 +3865,41 @@
       "leituras": {
         "senhor_da_horda": {
           "eixo": "invocacao",
-          "texto": "Cada alma colhida levanta um servo."
+          "texto": "Cada alma colhida levanta um servo.",
+          "aoAbater": [
+            {
+              "tipo": "invocar_temporario",
+              "em": "conjurador",
+              "ref": "servo_ossuario",
+              "valor": 1,
+              "duracaoMs": 8000,
+              "desde": 4
+            }
+          ]
         },
         "mestre_de_elite": {
           "eixo": "invocacao",
-          "texto": "As almas fortalecem o elite."
+          "texto": "As almas fortalecem o elite.",
+          "aoAbater": [
+            {
+              "tipo": "bonus_dano",
+              "em": "aliados",
+              "pct": 10,
+              "duracaoMs": 6000,
+              "desde": 4
+            }
+          ]
         },
         "pestilento": {
           "eixo": "area",
-          "texto": "A área apodrece o chão."
+          "texto": "A área apodrece o chão.",
+          "efeitos": [
+            {
+              "tipo": "campo_veneno",
+              "valor": 2,
+              "duracaoMs": 4000
+            }
+          ]
         },
         "pacto_de_sangue": {
           "eixo": "sustento",
@@ -3663,23 +3992,71 @@
       "leituras": {
         "senhor_da_horda": {
           "eixo": "grupo",
-          "texto": "Os servos absorvem dano por você."
+          "texto": "Os servos absorvem dano por você.",
+          "efeitos": [
+            {
+              "tipo": "escudo",
+              "em": "aliados",
+              "valor": 5,
+              "duracaoMs": 6000
+            }
+          ]
         },
         "mestre_de_elite": {
           "eixo": "invocacao",
-          "texto": "O elite vira guarda-costas."
+          "texto": "O elite vira guarda-costas.",
+          "efeitos": [
+            {
+              "tipo": "intercepta",
+              "em": "aliados",
+              "valor": 3,
+              "duracaoMs": 6000
+            }
+          ]
         },
         "pestilento": {
           "eixo": "marca",
-          "texto": "Quem bate é envenenado."
+          "texto": "Quem bate é envenenado.",
+          "efeitos": [
+            {
+              "tipo": "envenenado",
+              "valor": 2,
+              "pct": 50,
+              "duracaoMs": 4000
+            }
+          ],
+          "ajustes": {
+            "recargaPct": 85
+          }
         },
         "pacto_de_sangue": {
           "eixo": "sustento",
-          "texto": "O escudo vira vida."
+          "texto": "O escudo vira vida.",
+          "efeitos": [
+            {
+              "tipo": "cura_periodica",
+              "em": "conjurador",
+              "valor": 2,
+              "duracaoMs": 6000
+            }
+          ]
         },
         "ceifador": {
           "eixo": "eco",
-          "texto": "Ao quebrar, você vira sombra rápida."
+          "texto": "Ao quebrar, você vira sombra rápida.",
+          "efeitos": [
+            {
+              "tipo": "escudo",
+              "valor": 6,
+              "duracaoMs": 6000,
+              "em": "conjurador",
+              "efeito": {
+                "tipo": "fase",
+                "ref": "leitura_sombra",
+                "duracaoMs": 0
+              }
+            }
+          ]
         }
       }
     },
@@ -3791,11 +4168,38 @@
         },
         "duelista": {
           "eixo": "eco",
-          "texto": "Atravessa e volta ao ponto de partida."
+          "texto": "Atravessa e volta ao ponto de partida.",
+          "efeitos": [
+            {
+              "tipo": "efeito_atrasado",
+              "duracaoMs": 800,
+              "interno": {
+                "tipo": "dano_direto",
+                "valor": 4
+              }
+            },
+            {
+              "tipo": "efeito_atrasado",
+              "duracaoMs": 900,
+              "em": "conjurador",
+              "interno": {
+                "tipo": "retornar"
+              },
+              "desde": 4
+            }
+          ]
         },
         "runico": {
           "eixo": "alvos",
-          "texto": "Deixa uma trilha da runa no chão."
+          "texto": "Deixa uma trilha da runa no chão.",
+          "efeitos": [
+            {
+              "tipo": "rastro_dano",
+              "em": "conjurador",
+              "valor": 3,
+              "duracaoMs": 4000
+            }
+          ]
         },
         "comandante": {
           "eixo": "grupo",
@@ -3906,7 +4310,16 @@
       "leituras": {
         "carniceiro": {
           "eixo": "controle",
-          "texto": "Os feridos (abaixo de 30%) fogem de medo."
+          "texto": "Os feridos (abaixo de 30%) fogem de medo.",
+          "efeitos": [
+            {
+              "tipo": "fase",
+              "ref": "leitura_medo",
+              "duracaoMs": 0,
+              "em": "conjurador",
+              "desde": 4
+            }
+          ]
         },
         "duelista": {
           "eixo": "eco",
@@ -3921,11 +4334,28 @@
         },
         "runico": {
           "eixo": "area",
-          "texto": "O grito carrega o estado da runa em área."
+          "texto": "O grito carrega o estado da runa em área.",
+          "efeitos": [
+            {
+              "tipo": "fase",
+              "ref": "leitura_onda_runa",
+              "duracaoMs": 0,
+              "em": "conjurador",
+              "desde": 4
+            }
+          ]
         },
         "comandante": {
           "eixo": "grupo",
-          "texto": "Aura de dano para os aliados."
+          "texto": "Aura de dano para os aliados.",
+          "efeitos": [
+            {
+              "tipo": "frenesi",
+              "em": "aliados",
+              "pct": 10,
+              "duracaoMs": 8000
+            }
+          ]
         },
         "baluarte": {
           "eixo": "sustento",
@@ -3933,9 +4363,16 @@
           "efeitos": [
             {
               "tipo": "escudo",
+              "em": "conjurador",
               "valor": 6,
-              "duracaoMs": 5000,
-              "em": "conjurador"
+              "duracaoMs": 5000
+            },
+            {
+              "tipo": "fase",
+              "ref": "leitura_provocar",
+              "duracaoMs": 0,
+              "em": "conjurador",
+              "desde": 4
             }
           ]
         }
@@ -4104,11 +4541,22 @@
         },
         "runico": {
           "eixo": "alvos",
-          "texto": "A lâmina descarrega a runa, que salta a 1 ou 2 vizinhos."
+          "texto": "A lâmina descarrega a runa, que salta a 1 ou 2 vizinhos.",
+          "ajustes": {
+            "saltos": 2,
+            "saltoPct": 40
+          }
         },
         "comandante": {
           "eixo": "grupo",
-          "texto": "O impacto dá fúria aos aliados próximos."
+          "texto": "O impacto dá fúria aos aliados próximos.",
+          "efeitos": [
+            {
+              "tipo": "furia",
+              "em": "aliados",
+              "valor": 10
+            }
+          ]
         },
         "baluarte": {
           "eixo": "controle",
@@ -4118,6 +4566,10 @@
               "tipo": "desafiado",
               "pct": 15,
               "duracaoMs": 3000
+            },
+            {
+              "tipo": "atordoar",
+              "duracaoMs": 500
             }
           ]
         }
@@ -4200,24 +4652,65 @@
       "leituras": {
         "carniceiro": {
           "eixo": "area",
-          "texto": "Em área; cada morte devolve fúria."
+          "texto": "Em área; cada morte devolve fúria.",
+          "efeitos": [
+            {
+              "tipo": "fase",
+              "ref": "leitura_golpe_area",
+              "duracaoMs": 0,
+              "desde": 4
+            }
+          ],
+          "aoAbater": [
+            {
+              "tipo": "furia",
+              "em": "conjurador",
+              "valor": 15,
+              "desde": 4
+            }
+          ]
         },
         "duelista": {
           "eixo": "eco",
-          "texto": "Ignora parte da defesa e repete se matar."
+          "texto": "Ignora parte da defesa e repete se matar.",
+          "ajustes": {
+            "danoPct": 115
+          },
+          "aoAbater": [
+            {
+              "tipo": "dano_direto",
+              "valor": 6,
+              "desde": 4
+            }
+          ]
         },
         "runico": {
           "eixo": "marca",
-          "texto": "Marca o alvo e salta para o próximo ao matar."
+          "texto": "Marca o alvo e salta para o próximo ao matar.",
+          "aoAbater": [
+            {
+              "tipo": "marca_estilo",
+              "valor": 1,
+              "pct": 4,
+              "duracaoMs": 6000,
+              "desde": 4
+            },
+            {
+              "tipo": "dano_direto",
+              "valor": 5,
+              "desde": 4
+            }
+          ]
         },
         "comandante": {
           "eixo": "grupo",
           "texto": "A morte cura o grupo.",
-          "efeitos": [
+          "aoAbater": [
             {
               "tipo": "cura",
-              "valor": 3,
-              "em": "aliados"
+              "em": "aliados",
+              "valor": 6,
+              "desde": 4
             }
           ]
         },
@@ -4227,11 +4720,14 @@
           "efeitos": [
             {
               "tipo": "escudo",
-              "valor": 8,
-              "duracaoMs": 5000,
-              "em": "conjurador"
+              "em": "conjurador",
+              "valor": 16,
+              "duracaoMs": 5000
             }
-          ]
+          ],
+          "ajustes": {
+            "danoPct": 50
+          }
         }
       }
     },
@@ -4314,15 +4810,41 @@
               "pct": 25,
               "duracaoMs": 2500
             }
-          ]
+          ],
+          "ajustes": {
+            "tipoArea": "cone",
+            "raio": 1
+          }
         },
         "duelista": {
           "eixo": "perfuracao",
-          "texto": "Estocada que abre uma fenda em linha."
+          "texto": "Estocada que abre uma fenda em linha.",
+          "ajustes": {
+            "tipoArea": "linha",
+            "raio": 1
+          }
         },
         "runico": {
           "eixo": "alvos",
-          "texto": "As runas explodem em sequência pela fenda."
+          "texto": "As runas explodem em sequência pela fenda.",
+          "efeitos": [
+            {
+              "tipo": "efeito_atrasado",
+              "duracaoMs": 400,
+              "interno": {
+                "tipo": "dano_direto",
+                "valor": 3
+              }
+            },
+            {
+              "tipo": "efeito_atrasado",
+              "duracaoMs": 800,
+              "interno": {
+                "tipo": "dano_direto",
+                "valor": 3
+              }
+            }
+          ]
         },
         "comandante": {
           "eixo": "grupo",
@@ -4338,7 +4860,14 @@
         },
         "baluarte": {
           "eixo": "sustento",
-          "texto": "Ergue uma muralha atrás de você."
+          "texto": "Ergue uma muralha atrás de você.",
+          "efeitos": [
+            {
+              "tipo": "muralha_pedra",
+              "em": "conjurador",
+              "duracaoMs": 5000
+            }
+          ]
         }
       }
     },
@@ -4531,12 +5060,23 @@
         },
         "ocultista": {
           "eixo": "eco",
-          "texto": "Deixa um campo que repete o impacto."
+          "texto": "Deixa um campo que repete o impacto.",
+          "efeitos": [
+            {
+              "tipo": "campo_veneno",
+              "valor": 3,
+              "duracaoMs": 4000
+            }
+          ]
         },
         "encantador": {
           "eixo": "controle",
           "texto": "Atrai e prende.",
           "efeitos": [
+            {
+              "tipo": "puxao",
+              "valor": 1
+            },
             {
               "tipo": "sem_movimento",
               "duracaoMs": 1500
@@ -4557,7 +5097,11 @@
         },
         "lamina_runica": {
           "eixo": "alvos",
-          "texto": "Chuva de lâminas em vários alvos."
+          "texto": "Chuva de lâminas em vários alvos.",
+          "ajustes": {
+            "saltos": 3,
+            "saltoPct": 35
+          }
         }
       }
     },
@@ -4767,7 +5311,17 @@
       "leituras": {
         "artilheiro": {
           "eixo": "area",
-          "texto": "Orbe maior, que estoura no fim."
+          "texto": "Orbe maior, que estoura no fim.",
+          "efeitos": [
+            {
+              "tipo": "efeito_atrasado",
+              "duracaoMs": 1200,
+              "interno": {
+                "tipo": "dano_direto",
+                "valor": 6
+              }
+            }
+          ]
         },
         "ocultista": {
           "eixo": "eco",
@@ -4786,11 +5340,23 @@
         },
         "guardiao": {
           "eixo": "sustento",
-          "texto": "O orbe gira em volta de você e bloqueia projéteis."
+          "texto": "O orbe gira em volta de você e bloqueia projéteis.",
+          "efeitos": [
+            {
+              "tipo": "intercepta",
+              "em": "conjurador",
+              "valor": 3,
+              "duracaoMs": 4000
+            }
+          ]
         },
         "lamina_runica": {
           "eixo": "alvos",
-          "texto": "O orbe se divide em lâminas que saltam."
+          "texto": "O orbe se divide em lâminas que saltam.",
+          "ajustes": {
+            "saltos": 2,
+            "saltoPct": 40
+          }
         }
       }
     },
@@ -4867,23 +5433,44 @@
       "leituras": {
         "atirador": {
           "eixo": "alvos",
-          "texto": "Os tiros ricocheteiam."
+          "texto": "Os tiros ricocheteiam.",
+          "ajustes": {
+            "saltos": 2,
+            "saltoPct": 40
+          }
         },
         "mira_firme": {
           "eixo": "perfuracao",
-          "texto": "Atravessa a fila inteira."
+          "texto": "Atravessa a fila inteira.",
+          "ajustes": {
+            "tipoArea": "linha",
+            "raio": 1
+          }
         },
         "inabalavel": {
           "eixo": "sustento",
-          "texto": "Você não é interrompido enquanto atira."
+          "texto": "Você não é interrompido enquanto atira.",
+          "ajustes": {
+            "ininterrupta": true
+          }
         },
         "cacador": {
           "eixo": "marca",
-          "texto": "Marca cada atingido."
+          "texto": "Marca cada atingido.",
+          "efeitos": [
+            {
+              "tipo": "marcado",
+              "pct": 15,
+              "duracaoMs": 4000
+            }
+          ]
         },
         "flecheiro_arcano": {
           "eixo": "area",
-          "texto": "Cobre uma área."
+          "texto": "Cobre uma área.",
+          "ajustes": {
+            "raio": 1
+          }
         }
       }
     },
@@ -5019,11 +5606,31 @@
       "leituras": {
         "atirador": {
           "eixo": "alvos",
-          "texto": "Ao morrer o alvo, a marca salta."
+          "texto": "Ao morrer o alvo, a marca salta.",
+          "aoAbater": [
+            {
+              "tipo": "marca_cacador",
+              "pct": 20,
+              "duracaoMs": 8000,
+              "desde": 4
+            }
+          ]
         },
         "mira_firme": {
           "eixo": "perfuracao",
-          "texto": "A marca revela e atravessa cobertura."
+          "texto": "A marca revela e atravessa cobertura.",
+          "efeitos": [
+            {
+              "tipo": "atravessar",
+              "em": "conjurador",
+              "duracaoMs": 8000
+            },
+            {
+              "tipo": "exposto",
+              "pct": 5,
+              "duracaoMs": 8000
+            }
+          ]
         },
         "inabalavel": {
           "eixo": "controle",
@@ -5038,11 +5645,33 @@
         },
         "cacador": {
           "eixo": "marca",
-          "texto": "Acumula até 5 e expõe."
+          "texto": "Acumula até 5 e expõe.",
+          "efeitos": [
+            {
+              "tipo": "marca_estilo",
+              "valor": 1,
+              "pct": 4,
+              "duracaoMs": 8000
+            },
+            {
+              "tipo": "exposto",
+              "pct": 10,
+              "duracaoMs": 8000
+            }
+          ]
         },
         "flecheiro_arcano": {
           "eixo": "area",
-          "texto": "A marca explode em área."
+          "texto": "A marca explode em área.",
+          "aoAbater": [
+            {
+              "tipo": "fase",
+              "em": "conjurador",
+              "ref": "leitura_estouro",
+              "duracaoMs": 0,
+              "desde": 4
+            }
+          ]
         }
       }
     },
@@ -5172,11 +5801,27 @@
       "leituras": {
         "senhor_da_horda": {
           "eixo": "grupo",
-          "texto": "Explode vários em cadeia."
+          "texto": "Explode vários em cadeia.",
+          "efeitos": [
+            {
+              "tipo": "fase",
+              "ref": "leitura_detonar",
+              "duracaoMs": 400,
+              "desde": 4
+            }
+          ]
         },
         "mestre_de_elite": {
           "eixo": "invocacao",
-          "texto": "O elite absorve o cadáver e fica mais forte."
+          "texto": "O elite absorve o cadáver e fica mais forte.",
+          "efeitos": [
+            {
+              "tipo": "bonus_dano",
+              "em": "aliados",
+              "pct": 15,
+              "duracaoMs": 6000
+            }
+          ]
         },
         "pestilento": {
           "eixo": "area",
@@ -5203,7 +5848,15 @@
         },
         "ceifador": {
           "eixo": "eco",
-          "texto": "Explode duas vezes."
+          "texto": "Explode duas vezes.",
+          "efeitos": [
+            {
+              "tipo": "fase",
+              "ref": "leitura_detonar",
+              "duracaoMs": 600,
+              "desde": 4
+            }
+          ]
         }
       }
     },
@@ -5269,23 +5922,65 @@
       "leituras": {
         "senhor_da_horda": {
           "eixo": "invocacao",
-          "texto": "Ergue mais servos, menores."
+          "texto": "Ergue mais servos, menores.",
+          "ajustes": {
+            "invocacoes": 1
+          }
         },
         "mestre_de_elite": {
           "eixo": "invocacao",
-          "texto": "Ergue um só, maior, com golpe próprio."
+          "texto": "Ergue um só, maior, com golpe próprio.",
+          "efeitos": [
+            {
+              "tipo": "bonus_dano",
+              "em": "aliados",
+              "pct": 25,
+              "duracaoMs": 12000
+            }
+          ],
+          "ajustes": {
+            "invocacoes": -1
+          }
         },
         "pestilento": {
           "eixo": "area",
-          "texto": "Servos podres que explodem em nuvem."
+          "texto": "Servos podres que explodem em nuvem.",
+          "efeitos": [
+            {
+              "tipo": "campo_veneno",
+              "valor": 2,
+              "duracaoMs": 6000
+            }
+          ]
         },
         "pacto_de_sangue": {
           "eixo": "sustento",
-          "texto": "Custa vida; os servos drenam para você."
+          "texto": "Custa vida; os servos drenam para você.",
+          "efeitos": [
+            {
+              "tipo": "cura_periodica",
+              "em": "conjurador",
+              "valor": 2,
+              "duracaoMs": 8000
+            }
+          ]
         },
         "ceifador": {
           "eixo": "eco",
-          "texto": "Servos rápidos que somem e voltam."
+          "texto": "Servos rápidos que somem e voltam.",
+          "efeitos": [
+            {
+              "tipo": "acelerado",
+              "em": "aliados",
+              "pct": 25,
+              "duracaoMs": 6000
+            },
+            {
+              "tipo": "fantasma",
+              "em": "aliados",
+              "duracaoMs": 6000
+            }
+          ]
         }
       }
     },
@@ -5356,11 +6051,24 @@
       "leituras": {
         "mestre_de_feras": {
           "eixo": "invocacao",
-          "texto": "O segundo companheiro ataca junto."
+          "texto": "O segundo companheiro ataca junto.",
+          "efeitos": [
+            {
+              "tipo": "efeito_atrasado",
+              "duracaoMs": 300,
+              "interno": {
+                "tipo": "dano_direto",
+                "valor": 5
+              }
+            }
+          ]
         },
         "batedor": {
           "eixo": "perfuracao",
-          "texto": "Atravessa uma linha até o alvo."
+          "texto": "Atravessa uma linha até o alvo.",
+          "ajustes": {
+            "alcance": 2
+          }
         },
         "implacavel": {
           "eixo": "eco",
@@ -5379,7 +6087,15 @@
         },
         "pergaminhista": {
           "eixo": "area",
-          "texto": "O espírito da fera estoura em área com o elemento da runa."
+          "texto": "O espírito da fera estoura em área com o elemento da runa.",
+          "efeitos": [
+            {
+              "tipo": "fase",
+              "ref": "leitura_estouro",
+              "duracaoMs": 0,
+              "desde": 4
+            }
+          ]
         }
       }
     },
@@ -5517,15 +6233,32 @@
       "leituras": {
         "mestre_de_feras": {
           "eixo": "invocacao",
-          "texto": "Agarra dois alvos."
+          "texto": "Agarra dois alvos.",
+          "ajustes": {
+            "saltos": 1,
+            "saltoPct": 50
+          }
         },
         "batedor": {
           "eixo": "perfuracao",
-          "texto": "Arrasta o alvo através dos que estão no caminho."
+          "texto": "Arrasta o alvo através dos que estão no caminho.",
+          "ajustes": {
+            "alcance": 2
+          }
         },
         "implacavel": {
           "eixo": "eco",
-          "texto": "Agarra de novo ao soltar."
+          "texto": "Agarra de novo ao soltar.",
+          "efeitos": [
+            {
+              "tipo": "efeito_atrasado",
+              "duracaoMs": 1100,
+              "interno": {
+                "tipo": "sem_movimento",
+                "duracaoMs": 800
+              }
+            }
+          ]
         },
         "sobrevivente": {
           "eixo": "sustento",
@@ -5540,7 +6273,15 @@
         },
         "pergaminhista": {
           "eixo": "area",
-          "texto": "Ao soltar, estoura em área."
+          "texto": "Ao soltar, estoura em área.",
+          "efeitos": [
+            {
+              "tipo": "fase",
+              "ref": "leitura_estouro",
+              "duracaoMs": 1000,
+              "desde": 4
+            }
+          ]
         }
       }
     },
@@ -5615,23 +6356,55 @@
       "leituras": {
         "mestre_de_feras": {
           "eixo": "invocacao",
-          "texto": "O companheiro atrai inimigos para ela."
+          "texto": "O companheiro atrai inimigos para ela.",
+          "efeitos": [
+            {
+              "tipo": "fase",
+              "ref": "leitura_atrair",
+              "duracaoMs": 300,
+              "desde": 4
+            }
+          ]
         },
         "batedor": {
           "eixo": "alvos",
-          "texto": "Armadilhas em linha."
+          "texto": "Armadilhas em linha.",
+          "efeitos": [
+            {
+              "tipo": "fase",
+              "ref": "leitura_armadilha",
+              "duracaoMs": 200,
+              "desde": 4
+            }
+          ]
         },
         "implacavel": {
           "eixo": "eco",
-          "texto": "Arma de novo sozinha uma vez."
+          "texto": "Arma de novo sozinha uma vez.",
+          "ajustes": {
+            "rearmes": 1
+          }
         },
         "sobrevivente": {
           "eixo": "sustento",
-          "texto": "Dá escudo ao aliado que pisar."
+          "texto": "Dá escudo ao aliado que pisar.",
+          "ajustes": {
+            "escudoAliado": 8
+          }
         },
         "pergaminhista": {
           "eixo": "area",
-          "texto": "Vira um círculo grande do elemento."
+          "texto": "Vira um círculo grande do elemento.",
+          "efeitos": [
+            {
+              "tipo": "campo_veneno",
+              "valor": 2,
+              "duracaoMs": 6000
+            }
+          ],
+          "ajustes": {
+            "raio": 1
+          }
         }
       }
     },
@@ -5697,11 +6470,28 @@
       "leituras": {
         "mestre_de_feras": {
           "eixo": "invocacao",
-          "texto": "O companheiro e as feras do Chamado carregam juntos."
+          "texto": "O companheiro e as feras do Chamado carregam juntos.",
+          "efeitos": [
+            {
+              "tipo": "acelerado",
+              "em": "aliados",
+              "pct": 20,
+              "duracaoMs": 3000
+            },
+            {
+              "tipo": "bonus_dano",
+              "em": "aliados",
+              "pct": 10,
+              "duracaoMs": 3000
+            }
+          ]
         },
         "batedor": {
           "eixo": "perfuracao",
-          "texto": "Atravessa a linha inteira."
+          "texto": "Atravessa a linha inteira.",
+          "ajustes": {
+            "alcance": 2
+          }
         },
         "implacavel": {
           "eixo": "eco",
@@ -5721,7 +6511,15 @@
         },
         "pergaminhista": {
           "eixo": "area",
-          "texto": "Deixa um rastro do elemento que estoura."
+          "texto": "Deixa um rastro do elemento que estoura.",
+          "efeitos": [
+            {
+              "tipo": "rastro_dano",
+              "em": "conjurador",
+              "valor": 3,
+              "duracaoMs": 4000
+            }
+          ]
         }
       }
     },
@@ -5789,23 +6587,68 @@
       "leituras": {
         "mestre_de_feras": {
           "eixo": "invocacao",
-          "texto": "Mais feras, e duram mais."
+          "texto": "Mais feras, e duram mais.",
+          "ajustes": {
+            "invocacoes": 1
+          }
         },
         "batedor": {
           "eixo": "perfuracao",
-          "texto": "Feras rápidas que correm em linha e atravessam."
+          "texto": "Feras rápidas que correm em linha e atravessam.",
+          "efeitos": [
+            {
+              "tipo": "acelerado",
+              "em": "aliados",
+              "pct": 25,
+              "duracaoMs": 6000
+            }
+          ]
         },
         "implacavel": {
           "eixo": "eco",
-          "texto": "Cada fera que cai volta uma vez."
+          "texto": "Cada fera que cai volta uma vez.",
+          "efeitos": [
+            {
+              "tipo": "fase",
+              "ref": "leitura_feras_voltam",
+              "duracaoMs": 6000,
+              "em": "conjurador",
+              "desde": 4
+            }
+          ]
         },
         "sobrevivente": {
           "eixo": "sustento",
-          "texto": "As feras cercam você e absorvem golpes."
+          "texto": "As feras cercam você e absorvem golpes.",
+          "efeitos": [
+            {
+              "tipo": "escudo",
+              "em": "conjurador",
+              "valor": 6,
+              "duracaoMs": 6000
+            },
+            {
+              "tipo": "intercepta",
+              "em": "conjurador",
+              "valor": 3,
+              "duracaoMs": 6000
+            }
+          ]
         },
         "pergaminhista": {
           "eixo": "area",
-          "texto": "Uma única fera-espírito grande, do elemento da runa."
+          "texto": "Uma única fera-espírito grande, do elemento da runa.",
+          "efeitos": [
+            {
+              "tipo": "bonus_dano",
+              "em": "aliados",
+              "pct": 20,
+              "duracaoMs": 12000
+            }
+          ],
+          "ajustes": {
+            "invocacoes": -1
+          }
         }
       }
     },
@@ -5875,15 +6718,38 @@
       "leituras": {
         "mestre_de_feras": {
           "eixo": "invocacao",
-          "texto": "O companheiro recebe o golpe."
+          "texto": "O companheiro recebe o golpe.",
+          "efeitos": [
+            {
+              "tipo": "intercepta",
+              "em": "conjurador",
+              "valor": 3,
+              "duracaoMs": 3000
+            }
+          ]
         },
         "batedor": {
           "eixo": "perfuracao",
-          "texto": "Dispara para longe."
+          "texto": "Dispara para longe.",
+          "efeitos": [
+            {
+              "tipo": "acelerado",
+              "em": "conjurador",
+              "pct": 40,
+              "duracaoMs": 2000
+            }
+          ]
         },
         "implacavel": {
           "eixo": "eco",
-          "texto": "Contra-ataca o próximo golpe."
+          "texto": "Contra-ataca o próximo golpe.",
+          "efeitos": [
+            {
+              "tipo": "contragolpe",
+              "em": "conjurador",
+              "duracaoMs": 3000
+            }
+          ]
         },
         "sobrevivente": {
           "eixo": "sustento",
@@ -5896,7 +6762,15 @@
         },
         "pergaminhista": {
           "eixo": "area",
-          "texto": "O espírito da fera vira armadura do elemento."
+          "texto": "O espírito da fera vira armadura do elemento.",
+          "efeitos": [
+            {
+              "tipo": "escudo",
+              "em": "conjurador",
+              "valor": 8,
+              "duracaoMs": 6000
+            }
+          ]
         }
       }
     },
@@ -8953,6 +9827,575 @@
     },
     {"id": "pedra_arremessada", "familiaEvolucao": "tecnica", "grau": "B", "nome": "Pedra arremessada", "icone": "pedra", "tipoAtaque": "fisico", "formulaDano": "1d8", "formulaCura": null, "alcanceCelulas": 5, "tipoArea": "nenhuma", "raioArea": 0, "custoRecurso": 0, "recargaMs": 0, "conjuracaoMs": 750, "politicaAlvo": "hostil", "politicaImpacto": "projetil", "interrupcao": "interrompivel", "velocidadeProjetil": 7, "efeitos": [], "tags": ["encantavel"], "visual": {"cor": "#8d8173", "viagem": "esteira", "impacto": "pedra", "som": "projetil", "assinatura": "pedregulho"}},
     {"id": "salto_do_duende", "mobilidade": "livre", "familiaEvolucao": "tecnica", "grau": "B", "nome": "Salto do duende", "icone": "investida", "tipoAtaque": "fisico", "formulaDano": "1d10", "formulaCura": null, "alcanceCelulas": 5, "tipoArea": "linha", "raioArea": 0, "custoRecurso": 0, "recargaMs": 4500, "conjuracaoMs": 550, "politicaAlvo": "hostil", "politicaImpacto": "area", "interrupcao": "interrompivel", "velocidadeProjetil": 0, "efeitos": [{"tipo": "avanco", "valor": 5, "em": "conjurador"}, {"sem_movimento": 500}], "tags": ["movimento"], "visual": {"cor": "#b5c46a", "impacto": "pedra", "camera": "leve", "som": "golpe", "assinatura": "salto_esmagador"}},
-    {"id": "runa_do_medroso", "familiaEvolucao": "suporte", "grau": "B", "nome": "Runa do medroso", "icone": "runa", "tipoAtaque": "magico", "formulaDano": null, "formulaCura": null, "alcanceCelulas": 2, "tipoArea": "quadrado", "raioArea": 0, "custoRecurso": 0, "recargaMs": 350, "conjuracaoMs": 150, "politicaAlvo": "celula", "politicaImpacto": "area", "interrupcao": "interrompivel", "velocidadeProjetil": 0, "efeitos": [{"armadilha": {"valor": 8, "duracaoMs": 22000, "efeito": {"atordoar": 350}}}], "visual": {"cor": "#c9a36b", "conjuracao": "fumaca", "som": "armadilha", "assinatura": "campo_minado"}}
+    {"id": "runa_do_medroso", "familiaEvolucao": "suporte", "grau": "B", "nome": "Runa do medroso", "icone": "runa", "tipoAtaque": "magico", "formulaDano": null, "formulaCura": null, "alcanceCelulas": 2, "tipoArea": "quadrado", "raioArea": 0, "custoRecurso": 0, "recargaMs": 350, "conjuracaoMs": 150, "politicaAlvo": "celula", "politicaImpacto": "area", "interrupcao": "interrompivel", "velocidadeProjetil": 0, "efeitos": [{"armadilha": {"valor": 8, "duracaoMs": 22000, "efeito": {"atordoar": 350}}}], "visual": {"cor": "#c9a36b", "conjuracao": "fumaca", "som": "armadilha", "assinatura": "campo_minado"}},
+    {
+      "formulaDano": "1d6",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 200,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "id": "leitura_estouro",
+      "nome": "Estouro",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "explosao",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 1,
+      "alcanceCelulas": 12,
+      "interna": true,
+      "visual": {
+        "cor": "#c9a24a",
+        "impacto": "explosao",
+        "som": "golpe",
+        "assinatura": "supernova"
+      }
+    },
+    {
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 200,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "id": "leitura_golpe_area",
+      "nome": "Golpe em área",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "martelo",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 1,
+      "alcanceCelulas": 12,
+      "interna": true,
+      "visual": {
+        "cor": "#c9a24a",
+        "impacto": "explosao",
+        "som": "golpe",
+        "assinatura": "supernova"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 200,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "sem_ataque",
+          "duracaoMs": 1000
+        }
+      ],
+      "id": "leitura_hesitacao",
+      "nome": "Hesitação",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "mao",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 2,
+      "alcanceCelulas": 12,
+      "interna": true,
+      "visual": {
+        "cor": "#c9a24a",
+        "impacto": "explosao",
+        "som": "golpe",
+        "assinatura": "supernova"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 200,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "apavorar",
+          "pct": 30,
+          "duracaoMs": 2000
+        }
+      ],
+      "id": "leitura_medo",
+      "nome": "Medo",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "caveira",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 3,
+      "alcanceCelulas": 12,
+      "interna": true,
+      "visual": {
+        "cor": "#c9a24a",
+        "impacto": "explosao",
+        "som": "golpe",
+        "assinatura": "supernova"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 200,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "desafiado",
+          "pct": 15,
+          "duracaoMs": 3000
+        }
+      ],
+      "id": "leitura_provocar",
+      "nome": "Provocação",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "grito",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 3,
+      "alcanceCelulas": 12,
+      "interna": true,
+      "visual": {
+        "cor": "#c9a24a",
+        "impacto": "explosao",
+        "som": "golpe",
+        "assinatura": "supernova"
+      }
+    },
+    {
+      "formulaDano": "1d4",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 200,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "id": "leitura_onda_runa",
+      "nome": "Onda da runa",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "runa",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 2,
+      "alcanceCelulas": 12,
+      "interna": true,
+      "visual": {
+        "cor": "#c9a24a",
+        "impacto": "explosao",
+        "som": "golpe",
+        "assinatura": "supernova"
+      },
+      "runaDe": "brado"
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 200,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "marcado",
+          "pct": 15,
+          "duracaoMs": 5000
+        }
+      ],
+      "id": "leitura_revelar",
+      "nome": "Revelação",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "olho",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 5,
+      "alcanceCelulas": 12,
+      "interna": true,
+      "visual": {
+        "cor": "#c9a24a",
+        "impacto": "explosao",
+        "som": "golpe",
+        "assinatura": "supernova"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 200,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "envenenado",
+          "valor": 2,
+          "pct": 50,
+          "duracaoMs": 4000
+        }
+      ],
+      "id": "leitura_contagio",
+      "nome": "Contágio",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "veneno",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 3,
+      "alcanceCelulas": 12,
+      "interna": true,
+      "visual": {
+        "cor": "#c9a24a",
+        "impacto": "explosao",
+        "som": "golpe",
+        "assinatura": "supernova"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 200,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "detonar_invocacao",
+          "valor": 2,
+          "pct": 40
+        }
+      ],
+      "id": "leitura_detonar",
+      "nome": "Detonação",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "caveira",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 0,
+      "alcanceCelulas": 12,
+      "interna": true,
+      "visual": {
+        "cor": "#c9a24a",
+        "impacto": "explosao",
+        "som": "golpe",
+        "assinatura": "supernova"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 200,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "puxao",
+          "valor": 2
+        }
+      ],
+      "id": "leitura_atrair",
+      "nome": "Atração",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "puxar",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 3,
+      "alcanceCelulas": 12,
+      "interna": true,
+      "visual": {
+        "cor": "#c9a24a",
+        "impacto": "explosao",
+        "som": "golpe",
+        "assinatura": "supernova"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 200,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "armadilha",
+          "valor": 6,
+          "duracaoMs": 30000,
+          "efeito": {
+            "enraizado": 1500
+          }
+        }
+      ],
+      "id": "leitura_armadilha",
+      "nome": "Armadilha em linha",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "teia",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "celula",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 0,
+      "alcanceCelulas": 12,
+      "interna": true,
+      "visual": {
+        "cor": "#c9a24a",
+        "impacto": "explosao",
+        "som": "golpe",
+        "assinatura": "supernova"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 200,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "invocar_temporario",
+          "ref": "lobo_espiritual",
+          "valor": 2,
+          "duracaoMs": 6000
+        }
+      ],
+      "id": "leitura_feras_voltam",
+      "nome": "Feras que voltam",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "invocar",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 0,
+      "interna": true,
+      "visual": {
+        "cor": "#c9a24a",
+        "impacto": "explosao",
+        "som": "golpe",
+        "assinatura": "supernova"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 200,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [
+        {
+          "tipo": "acelerado",
+          "pct": 40,
+          "duracaoMs": 3000,
+          "em": "conjurador"
+        },
+        {
+          "tipo": "fantasma",
+          "duracaoMs": 3000,
+          "em": "conjurador"
+        },
+        {
+          "tipo": "veu_noturno",
+          "pct": 35,
+          "duracaoMs": 2000,
+          "em": "conjurador"
+        }
+      ],
+      "id": "leitura_sombra",
+      "nome": "Sombra rápida",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "fantasma",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "proprio",
+      "politicaImpacto": "proprio",
+      "tipoArea": "nenhuma",
+      "raioArea": 0,
+      "alcanceCelulas": 0,
+      "interna": true,
+      "visual": {
+        "cor": "#c9a24a",
+        "impacto": "explosao",
+        "som": "golpe",
+        "assinatura": "supernova"
+      }
+    },
+    {
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 200,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "id": "leitura_golpe_ceifador",
+      "nome": "Golpe do Ceifador",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "foice",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 0,
+      "alcanceCelulas": 12,
+      "interna": true,
+      "visual": {
+        "cor": "#c9a24a",
+        "impacto": "explosao",
+        "som": "golpe",
+        "assinatura": "supernova"
+      }
+    },
+    {
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 200,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "id": "combo_saraivada_central",
+      "nome": "Saraivada central",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "flecha",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 2,
+      "alcanceCelulas": 12,
+      "interna": true,
+      "visual": {
+        "cor": "#bdc3c7",
+        "impacto": "explosao",
+        "som": "golpe",
+        "assinatura": "supernova"
+      }
+    },
+    {
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 200,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "id": "combo_missil_do_orbe",
+      "nome": "Míssil do orbe",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "raio",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 0,
+      "alcanceCelulas": 12,
+      "interna": true,
+      "visual": {
+        "cor": "#a569bd",
+        "impacto": "explosao",
+        "som": "golpe",
+        "assinatura": "supernova"
+      }
+    },
+    {
+      "formulaDano": "1d8",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 200,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "efeitos": [],
+      "id": "combo_pulso_orbe",
+      "nome": "Pulso do orbe",
+      "grau": "B",
+      "nivelMinimo": 1,
+      "familiaEvolucao": "suporte",
+      "icone": "explosao",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "quadrado",
+      "raioArea": 1,
+      "alcanceCelulas": 12,
+      "interna": true,
+      "visual": {
+        "cor": "#a569bd",
+        "impacto": "explosao",
+        "som": "golpe",
+        "assinatura": "supernova"
+      }
+    }
   ]
 }

@@ -1,4 +1,5 @@
 import { prepararReservas, retirarVida } from './reserva-necromante';
+import { noAr } from './movimento-classe';
 import { extraGuerreiro, protecaoInicial, pulsarAura } from './ajustes-classes';
 // Efeitos de fluxo próprio (§2.8, §2.9, §2.11). Marco 8A-2 (14/10/2026), D-049.
 //   efeito_atrasado  -> estado.atrasados, dispara o efeito carregado no alvo depois do prazo;
@@ -17,7 +18,7 @@ import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import { posicionar, vivo, type Entidade } from '../entities/entidade';
 import { criarInimigo } from '../entities/fabrica';
-import { podeFerir } from '../modos/relacao';
+import { podeAjudar, podeFerir } from '../modos/relacao';
 import { celulaLivrePara, ordemRotativa, reservaCelula } from '../world/colisao';
 import { passavel } from '../world/fase';
 import { aprenderArmadilha } from '../world/perigos';
@@ -111,8 +112,11 @@ export function armarArmadilha(
   mira: Celula | null,
   saida: EventoSimulacao[],
 ): void {
-  const c = mira ?? { x: dono.x, y: dono.y };
-  if (!passavel(ctx.fase, c.x, c.y) || estado.armadilhas.some((a) => a.x === c.x && a.y === c.y)) return;
+  const ocupada = (x: number, y: number) => estado.armadilhas.some((a) => a.x === x && a.y === y);
+  let c = mira ?? { x: dono.x, y: dono.y };
+  // Marco 40 (13/11/2026, D-161): na célula que já tem armadilha, a nova vai na seguinte da linha (armadilhas em linha).
+  if (ocupada(c.x, c.y)) c = { x: c.x + Math.sign(c.x - dono.x), y: c.y + Math.sign(c.y - dono.y) };
+  if (!passavel(ctx.fase, c.x, c.y) || ocupada(c.x, c.y)) return;
   const id = estado.proximoId++;
   // 06/11/2026 (D-135): a runa de pé do armadilheiro leva o elemento dele (o estado do elemento no lugar do interno).
   const estilo = estiloDaArmadilha(ctx, dono);
@@ -132,12 +136,15 @@ export function armarArmadilha(
     rearmeTicks: 0,
     inerteAteTick: 0,
     reveladaPara: [],
+    // Marco 40 (13/11/2026, D-161): os rearmes (`pct`) e o presente ao aliado que pisa.
+    ...(ef.pct > 0 && { rearmes: Math.round(ef.pct) }),
+    ...(ef.aliado && { aoAliado: { ...ef.aliado } }),
   });
   saida.push({ t: 'armadilhaArmada', tick: estado.tick, donoId: dono.id, armadilhaId: id, x: c.x, y: c.y });
 }
 
 /** Células livres ao redor do dono, das mais próximas às mais distantes (até 2), em ordem fixa. */
-function vizinhasLivres(estado: EstadoJogo, ctx: ContextoSimulacao, quem: Entidade, centro: Celula): Celula[] {
+export function vizinhasLivres(estado: EstadoJogo, ctx: ContextoSimulacao, quem: Entidade, centro: Celula): Celula[] {
   const livres: Celula[] = [];
   for (let r = 1; r <= 2; r++) {
     for (let dy = -r; dy <= r; dy++) {
@@ -289,7 +296,8 @@ export function processarGatilhos(estado: EstadoJogo, ctx: ContextoSimulacao, ap
     const dono = { id: r.donoId, equipe: r.equipeDono };
     for (const e of ordem) {
       // Ajuste de 24/10/2026 (D-091): o falcão do Aventureiro voa por cima de rastros e armadilhas.
-      if (!vivo(e) || e.invocacao?.companheiro || e.x !== r.x || e.y !== r.y || r.atingidos.includes(e.id) || !podeFerir(dono, e, ctx.modo)) continue;
+      // Marco 40 (13/11/2026, D-164): quem voa (o Voo Arcano) também.
+      if (!vivo(e) || e.invocacao?.companheiro || noAr(e) || e.x !== r.x || e.y !== r.y || r.atingidos.includes(e.id) || !podeFerir(dono, e, ctx.modo)) continue;
       r.atingidos.push(e.id);
       const efeito = r.tipo === 'rastro_dano' ? null : r.interno;
       const origem = { id: r.donoId, x: r.x, y: r.y };
@@ -301,7 +309,7 @@ export function processarGatilhos(estado: EstadoJogo, ctx: ContextoSimulacao, ap
   // 06/11/2026 (D-135): quem está em cada célula, uma vez por tick (o Mundo tem centenas de armadilhas e entidades).
   const porCelula = new Map<number, Entidade[]>();
   for (const e of ordem) {
-    if (!vivo(e) || e.invocacao?.companheiro) continue;
+    if (!vivo(e) || e.invocacao?.companheiro || noAr(e)) continue;
     const chave = e.y * ctx.fase.largura + e.x;
     const lista = porCelula.get(chave);
     if (lista) lista.push(e);
@@ -311,7 +319,16 @@ export function processarGatilhos(estado: EstadoJogo, ctx: ContextoSimulacao, ap
     // Marco 9A-2: com rearme, a armadilha fica inerte depois de disparar.
     if (a.inerteAteTick > tick) continue;
     const dono = { id: a.donoId, equipe: a.equipeDono };
-    const alvo = porCelula.get(a.y * ctx.fase.largura + a.x)?.find((e) => vivo(e) && e.x === a.x && e.y === a.y && podeFerir(dono, e, ctx.modo));
+    const naCelula = porCelula.get(a.y * ctx.fase.largura + a.x);
+    const alvo = naCelula?.find((e) => vivo(e) && e.x === a.x && e.y === a.y && podeFerir(dono, e, ctx.modo));
+    // Marco 40 (D-161): o aliado que pisa ganha o presente dela, uma vez.
+    if (!alvo && a.aoAliado) {
+      const amigo = naCelula?.find((e) => vivo(e) && e.x === a.x && e.y === a.y && !e.invocacao && podeAjudar(dono, e, ctx.modo));
+      if (amigo) {
+        aplicar(amigo, a.aoAliado, { id: a.donoId, x: a.x, y: a.y }, null);
+        delete a.aoAliado;
+      }
+    }
     if (!alvo) continue;
     if (dispararArmadilha(estado, ctx, a, alvo, aplicar, saida)) disparadas.add(a.id);
   }
@@ -324,8 +341,13 @@ export function processarGatilhos(estado: EstadoJogo, ctx: ContextoSimulacao, ap
  */
 export function dispararArmadilha(estado: EstadoJogo, ctx: ContextoSimulacao, a: Armadilha, alvo: Entidade, aplicar: AplicarDireto, saida: EventoSimulacao[]): boolean {
   const tick = estado.tick;
-  const some = a.rearmeTicks <= 0;
-  if (!some) a.inerteAteTick = tick + a.rearmeTicks;
+  // Marco 40 (D-161): com rearmes, fica inerte 1 s e volta (gasta um rearme).
+  const rearma = (a.rearmes ?? 0) > 0;
+  const some = a.rearmeTicks <= 0 && !rearma;
+  if (rearma) {
+    a.rearmes = (a.rearmes ?? 0) - 1;
+    a.inerteAteTick = tick + ticksDe(1000);
+  } else if (!some) a.inerteAteTick = tick + a.rearmeTicks;
   const visual = { ...(a.elemento && { elemento: a.elemento }), ...(a.runa && { runa: true }) };
   // 06/11/2026 (D-135): o Passo leve gasta-se aqui; a armadilha some (ou rearma) sem ferir.
   if (gastarPassoLeve(estado, alvo)) {

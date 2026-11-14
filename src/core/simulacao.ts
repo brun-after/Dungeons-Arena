@@ -14,6 +14,7 @@ import { processarCampos } from '../combat/tatica';
 //   7. gatilhos por célula     8. mortes e respawns  9. periódicos de 1 Hz e spawner
 
 import { atualizarAparencias, processarBuffsArmados, usarRefugio } from '../progression/buffs';
+import { processarMovimentoClasse, trocarMovimento, usarMovimento } from '../combat/movimento-classe';
 import { alvoOfensivoValido, iniciarAcao, processarAcoes, processarAutoAtaque, usarUltimate } from '../combat/acao';
 import { dispararArmadilhaEm, processarEfeitos, processarGatilhosDeEfeito } from '../combat/efeitos';
 import { processarCarcereiros } from '../combat/sintonia-guerreiro';
@@ -89,6 +90,7 @@ export function simular(
   // Marco 24 (D-096): as sinergias passivas por tempo (Bastião de pedra).
   processarSinergiasPassivas(estado, ctx, saida);
   processarCampos(estado, ctx, saida);
+  processarMovimentoClasse(estado, ctx, saida);
   processarPantanos(estado, ctx, saida);
   regenerarRecursos(estado, ctx);
   processarInteracoes(estado, ctx, saida, (a, alvo) => { dispararArmadilhaEm(estado, ctx, a, alvo, saida); });
@@ -161,6 +163,13 @@ function aplicarComandos(
       }
       case 'autoAtaque':
         ator.autoAtaque = cmd.ligado;
+        break;
+      // Marco 40 (13/11/2026, D-164): o movimento da classe.
+      case 'movimentoClasse':
+        usarMovimento(estado, ctx, ator, saida, cmd.dx, cmd.dy);
+        break;
+      case 'trocarMovimento':
+        trocarMovimento(estado, ctx, ator, saida);
         break;
       case 'seguirAlvo':
         ator.seguirAlvo = cmd.ligado;

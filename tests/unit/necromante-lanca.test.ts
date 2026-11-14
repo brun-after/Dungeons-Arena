@@ -11,9 +11,6 @@ import { resolverHabilidade } from '../../src/combat/compilar-habilidade';
 import { cargasProntas } from '../../src/combat/cargas';
 import { ticksDe } from '../../src/core/tempo';
 import { somDaHabilidade, sonsDoEvento } from '../../src/audio/mapeamento';
-import { lerComando } from '../../src/arena/protocolo';
-import { DT_MS } from '../../src/core/loop';
-import { simular } from '../../src/core/simulacao';
 
 function obter<T>(v: T | null | undefined): T { if (v == null) throw Error('ausente'); return v; }
 function cena() {
@@ -132,21 +129,4 @@ describe('Sons do Necromante (D-136)', () => {
   });
 });
 
-describe('Juízo das trevas (D-137)', () => {
-  it('sem cura; o dardo fere a linha e cada morto crava a lança e as dos lados junto', () => {
-    const c = cena(); processarServosNecromantes(c.estado, c.ctx, c.eventos);
-    const h = obter(resolverHabilidade(c.ctx, 'ult_banquete_funesto'));
-    expect(h.nome).toBe('Juízo das trevas');
-    expect(h.efeitos.some((e) => ['cura', 'drenar_invocacao'].includes(e.tipo))).toBe(false);
-    expect(h.lanca).toEqual({ alem: 2, lados: true, junto: true });
-    const s = c.servo(); s.x = 5; s.y = 8; s.ia = null;
-    c.npc('a', 8, 5);
-    const b = obter(c.j.bolsa); b.barra[0] = 'dardo_funesto'; b.barra[1] = 'dizimo_vital';
-    c.j.cargaUltimate = c.ctx.balance.ultimate.max;
-    const tick = (cmd?: Parameters<typeof lerComando>[0]) => { simular(c.estado, c.ctx, cmd ? [{ tick: c.estado.tick, entidadeId: 'j', cmd: obter(lerComando(cmd)) }] : [], c.eventos, DT_MS); };
-    tick({ t: 'usarUltimate', alvo: 'a' });
-    for (let i = 0; i < 60; i++) tick();
-    expect(c.eventos.filter((e) => e.t === 'lancaDeOsso' && e.chave.includes('ult_banquete_funesto')).length).toBe(3);
-    expect(c.eventos.some((e) => e.t === 'impacto' && e.habilidadeId === 'ult_banquete_funesto' && e.alvoId === 'a')).toBe(true);
-  });
-});
+// Marco 40 (13/11/2026, D-160): o Juízo das trevas era uma das 140 ultimates antigas, que saíram.

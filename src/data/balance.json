@@ -76,6 +76,16 @@
   "navegacao": {
     "maxPassosToque": 60
   },
+  "movimentoClasse": {
+    "viagemPct": 60,
+    "viagemPesadaPct": 30,
+    "voo": { "preparoMs": 1000, "danoPct": [30, 50], "conjuracaoPct": [150, 120], "lentidaoPct": [50, 20] },
+    "montaria": { "danoPct": [60, 80], "conjuracaoPct": [140, 115], "danoRecebidoPct": [125, 110] },
+    "montariaPesada": { "danoPct": [75, 90], "conjuracaoPct": [125, 110], "danoRecebidoPct": [100, 95] },
+    "nevoa": { "lentidaoPct": 40, "servosRaio": 5, "duracaoAoEntrarEmCombateMs": 1500 },
+    "marcha": { "combatePct": 60, "furiaPorS": 8 },
+    "preparoPadraoMs": 300
+  },
   "colisao": {
     "jogadorBloqueiaJogador": false,
     "jogadorBloqueiaInimigo": false
@@ -169,6 +179,7 @@
   },
   "efeitos": {
     "intervaloPeriodicoMs": 1000,
+    "reacaoIntervaloMs": 2500,
     "rastroCelulaMs": 3000,
     "dominacaoMs": 60000,
     "dominacaoHpPct": 50,
@@ -235,6 +246,7 @@
       "recargaBasicoMaxPct": 30,
       "regenPorCelulaPorConstituicaoPct": 8,
       "descontoPorCarismaPct": 2,
+      "tenacidadePorVontadePct": 0.3,
       "descontoMaxPct": 30,
       "rolagemPorPontoPct": 7,
       "rolagemPesoForcaPct": 35,
@@ -255,7 +267,7 @@
     "pontosPorNivel": 1,
     "estudo": { "B": 900000, "A": 1800000, "S": 3600000, "reducaoPorIntPct": 2, "reducaoMaxPct": 40 },
     "velocidadeConjurandoLenta": 0.5,
-    "runas": { "vinculoMinPct": 1, "fracaoMinPct": 20, "fracaoMaxPct": 60, "duracaoMinPct": 50, "curaSagradoPct": 25, "escudoBase": 4, "escudoPorFaixa": 1.2, "escudoMs": 6000, "parPct": 15, "parComboPct": 10 },
+    "runas": { "vinculoMinPct": 1, "fracaoMinPct": 20, "fracaoMaxPct": 60, "duracaoMinPct": 50, "curaSagradoPct": 25, "escudoBase": 4, "escudoPorFaixa": 1.2, "escudoMs": 6000, "parPorFaixaPct": 1.5, "parComboPct": 10 },
     "eixos": {
       "custoPct": { "maior_e_mais_lenta": -20, "ecoar": -25, "encadear": -15, "atravessar": -8, "controle": -5, "sustento": -8, "marca": -5, "grupo": -8, "invocacao": -5 },
       "controle": { "duracaoPorFaixaPct": 5, "vizinhoDesde": 5, "vizinhoRaio": 2, "vizinhoDuracaoPct": 50 },

@@ -172,6 +172,8 @@ export interface Habilidade {
   cargas?: number;
   /** D-136: o projétil espera este tempo no círculo no ar antes de sair (ausente = sai no lançamento). */
   disparoMs?: number;
+  /** Marco 40 (13/11/2026, D-161): a etapa interna usa a runa do encaixe desta skill (a onda do Brado rúnico). */
+  runaDe?: string;
   /** D-136: a Lanças da escuridão — a lança sai de cada morto do Necromante (combat/lanca-de-ossos.ts). */
   lanca?: LancaDosMortos;
   /** Marco 39 (12/11/2026, D-151): a runa do encaixe (as skills de classe e as ultimates; combat/runas.ts). */
@@ -188,6 +190,14 @@ export interface Habilidade {
   controleVizinho?: { raio: number; duracaoPct: number };
   /** D-156: quantos alvos o projétil atravessa (a forma gradual do atravessar; `perfura` atravessa todos). */
   perfuraAlvos?: number;
+  /** Marco 40 (13/11/2026, D-160): o dano a mais da ultimate pelo par de elementos (e pela runa no par), em %. */
+  bonusFiosPct?: number;
+  /** D-160: os dois elementos do par que reagem na ultimate (`a+b`, em ordem alfabética), para o visual. */
+  reacaoPar?: string;
+  /** D-160: a fusão dos eixos dos dois estilos mais fortes que entrou na ultimate (`eixoA+eixoB`). */
+  fusao?: string;
+  /** Marco 40 (13/11/2026, D-161): o que a skill faz quando abate (as leituras de estilo); progression/morte.ts aplica. */
+  aoAbater?: readonly EfeitoCanonico[];
 }
 
 /** D-136: a lança vai do morto até o alvo dele e `alem` células adiante; com `lados`, também para os dois lados. */
@@ -535,6 +545,7 @@ export function lerDefinicao(item: unknown, l: Leitor): DefinicaoHabilidade {
   // 07/11/2026 (D-136): cargas, o disparo do círculo no ar e a lança dos mortos.
   if (o.cargas !== undefined) base.cargas = l.numero(o, 'cargas', { min: 1, max: 6, inteiro: true });
   if (o.disparoMs !== undefined) base.disparoMs = l.numero(o, 'disparoMs', { min: 0, max: 5000 });
+  if (o.runaDe !== undefined) base.runaDe = l.texto(o, 'runaDe');
   if (o.lanca !== undefined) {
     const la = l.objeto(o.lanca, 'lanca');
     base.lanca = { alem: l.numero(la, 'alem', { min: 0, max: 4, inteiro: true }), lados: la.lados === undefined ? false : l.booleano(la, 'lados'), ...(la.junto === undefined ? {} : { junto: l.booleano(la, 'junto') }) };
@@ -608,7 +619,7 @@ const CAMPOS_DEFINICAO = [
   // Marco 27 (D-126)
   'variacao', 'escalaRolagem',
   // 07/11/2026 (D-136)
-  'cargas', 'disparoMs', 'lanca',
+  'cargas', 'disparoMs', 'lanca', 'runaDe',
   // Marco 40 (D-157, D-159)
   'nucleo', 'papel', 'eixos', 'leituras',
 ];

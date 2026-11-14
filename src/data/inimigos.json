@@ -296,6 +296,24 @@
       }
     },
     {
+      "id": "guerreiro_espectral",
+      "nome": "Guerreiro espectral",
+      "hpBase": 50,
+      "hesitacaoS": 0,
+      "deteccao": 5,
+      "xp": 0,
+      "modelo": "sentinela",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 2,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 1400,
+      "invocacao": {
+        "comportamento": "agressivo"
+      }
+    },
+    {
       "id": "fada",
       "nome": "Fada",
       "hpBase": 25,

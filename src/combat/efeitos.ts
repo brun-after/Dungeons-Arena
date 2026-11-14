@@ -15,6 +15,7 @@ import type { Celula, EntidadeId } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, type Armadilha, type EstadoJogo } from '../core/estado';
 import { passivosDe } from '../progression/ganchos-do-portador';
+import { tenacidadeDaVontadePct } from '../progression/efeitos-atributo';
 import { inamovivelPelaSintonia } from './sintonia-guerreiro';
 import { mortoInamovivel } from './sintonia-necromante';
 import { escudoComFalcao } from './sintonia-aventureiro';
@@ -132,10 +133,10 @@ export function multiplicadorCuraRecebida(e: Entidade, tick: number): number {
 /** Marco 14: exposto aumenta todo dano recebido. */
 export function multiplicadorDanoRecebido(e: Entidade, tick: number): number {
   let mais = 0;
-  for (const [f, d] of comDefinicao(e, tick)) if (d.danoRecebido > 0) mais += f.pct;
+  for (const [f, d] of comDefinicao(e, tick)) if (d.danoRecebido !== 0) mais += d.danoRecebido * f.pct;
   // Marco 40 (D-157): cada marca da forma do estilo soma o seu `pct`.
   for (const [f, d] of comDefinicao(e, tick)) if (d.marcas) mais += f.valor * f.pct;
-  return 1 + mais / 100;
+  return Math.max(0.1, 1 + mais / 100);
 }
 
 /** Marco 14: o escudo absorve dano antes da vida e se gasta; devolve o dano que sobra. */
@@ -147,7 +148,13 @@ export function absorverEscudo(e: Entidade, dano: number, tick: number): number 
     const absorvido = Math.min(f.valor, resto);
     f.valor -= absorvido;
     resto -= absorvido;
+    // Marco 40 (13/11/2026, D-161): o escudo que quebra solta o efeito dele (a Mortalha do Ceifador vira sombra).
+    if (f.valor <= 0 && f.interno) e.aoQuebrarEscudo = [...(e.aoQuebrarEscudo ?? []), f.interno];
   }
+  // D-161: o que absorveu fica guardado para devolver (o Contragolpe).
+  const guardado = dano - resto;
+  const guarda = guardado > 0 ? e.efeitos.find((f) => f.tipo === 'guardar_absorvido' && f.ateTick > tick) : undefined;
+  if (guarda) guarda.valor += guardado;
   e.efeitos = e.efeitos.filter((f) => !REGISTRO_EFEITOS[f.tipo].escudo || f.valor > 0);
   return resto;
 }
@@ -211,8 +218,13 @@ export function aplicarEfeito(
   ef = escudoComFalcao(ctx, alvo, ef, tick);
   if (ef.tipo === 'aparando') ef = { ...ef, duracaoMs: Math.min(ef.duracaoMs, ctx.balance.tatica.aparoJanelaMaxMs) };
   if (ef.tipo === 'veu_noturno') ef = { ...ef, duracaoMs: Math.min(ef.duracaoMs, ctx.balance.tatica.veuJanelaMaxMs) };
+  // Marco 40 (13/11/2026, D-163): o firme (depois da Prisão dupla) encurta o controle que chega, em quem for.
+  const firme = def.bloqueiaMovimento || def.bloqueiaAcoes !== 'nenhuma' ? alvo.efeitos.find((f) => f.tipo === 'firme' && f.ateTick > tick) : undefined;
+  if (firme) ef = { ...ef, duracaoMs: Math.round(ef.duracaoMs * Math.max(0, 1 - firme.pct / 100)) };
   if (alvo.bolsa && (def.bloqueiaMovimento || def.bloqueiaAcoes !== 'nenhuma')) {
-    const pct = Math.min(ctx.balance.tatica.tenacidadeMaxPct, passivasDaBolsa(ctx, alvo.bolsa).reduce((s, p) => s + (p.tenacidadePct ?? 0), 0));
+    // Marco 40 (13/11/2026, D-161): a Vontade também resiste ao controle.
+    const vontade = tenacidadeDaVontadePct(alvo.atributos, ctx.balance);
+    const pct = Math.min(ctx.balance.tatica.tenacidadeMaxPct, vontade + passivasDaBolsa(ctx, alvo.bolsa).reduce((s, p) => s + (p.tenacidadePct ?? 0), 0));
     if (pct > 0) ef = { ...ef, duracaoMs: Math.round(ef.duracaoMs * (1 - pct / 100)) };
   }
   // Marco 24 (D-095): as passivas gerais tiram estados (Mente blindada) e encurtam os que pegam (Sangue quente).
@@ -367,6 +379,12 @@ export function processarEfeitos(estado: EstadoJogo, ctx: ContextoSimulacao, sai
   const tick = estado.tick;
   const intervalo = ticksDe(ctx.balance.efeitos.intervaloPeriodicoMs);
   for (const e of estado.entidades) {
+    // Marco 40 (D-161): os escudos que quebraram soltam o que levavam.
+    if (e.aoQuebrarEscudo && vivo(e)) {
+      const fila = e.aoQuebrarEscudo;
+      delete e.aoQuebrarEscudo;
+      for (const ef of fila) aplicarEfeito(estado, ctx, e, ef, { id: e.id, x: e.x, y: e.y }, { x: e.x, y: e.y }, saida);
+    }
     if (e.efeitos.length === 0) continue;
     if (vivo(e)) {
       for (const f of e.efeitos) {

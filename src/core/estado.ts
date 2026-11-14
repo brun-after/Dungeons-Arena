@@ -162,6 +162,10 @@ export interface Armadilha {
    */
   elemento?: Elemento;
   runa?: boolean;
+  /** Marco 40 (13/11/2026, D-161): quantas vezes ainda arma de novo sozinha depois de disparar. */
+  rearmes?: number;
+  /** D-161: o que dá ao aliado que pisa nela (uma vez). */
+  aoAliado?: EfeitoCanonico;
 }
 
 /** Efeito agendado para disparar numa entidade (§2.8, `efeito_atrasado`). */
@@ -296,7 +300,7 @@ export function clonarEstado(estado: EstadoJogo): EstadoJogo {
     respawns: estado.respawns.map((r) => ({ ...r, habilidades: [...r.habilidades] })),
     rastros: estado.rastros.map((r) => ({ ...r, interno: copiaEfeito(r.interno), atingidos: [...r.atingidos] })),
     ...(estado.reservaEnxame && { reservaEnxame: [...estado.reservaEnxame] }),
-    armadilhas: estado.armadilhas.map((a) => ({ ...a, reveladaPara: [...a.reveladaPara], interno: copiaEfeito(a.interno) })),
+    armadilhas: estado.armadilhas.map((a) => ({ ...a, reveladaPara: [...a.reveladaPara], interno: copiaEfeito(a.interno), ...(a.aoAliado && { aoAliado: { ...a.aoAliado } }) })),
     atrasados: estado.atrasados.map((a) => ({ ...a, efeito: { ...a.efeito, interno: copiaEfeito(a.efeito.interno) } })),
     saidaAberta: estado.saidaAberta,
     proximoId: estado.proximoId,

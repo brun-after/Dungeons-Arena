@@ -137,22 +137,23 @@ describe('conjuntos', () => {
 });
 
 describe('combos de sequência', () => {
-  it('Lança de gelo e depois Raio em cadeia, dentro da janela, fecham o Condutor; fora dela, não', () => {
+  // Marco 40 (D-163): o Condutor saiu com os combos de uma classe só; o Gás inflamável fica.
+  it('Dardo tóxico e depois Bola de fogo, dentro da janela, fecham o Gás inflamável; fora dela, não', () => {
     const c = cena();
     const alvo = c.inimigo('a', 5, 3);
-    const raio = obter(CONTEUDO.habilidades.get('raio_em_cadeia'), 'raio');
-    c.j.ultimaHabilidade = { id: 'lanca_de_gelo', chave: 'lanca_de_gelo', tick: c.estado.tick, alvoId: alvo.id };
-    const r = fazerCombo(c.estado, c.ctx, c.j, raio, alvo, { x: 5, y: 3 }, c.eventos);
+    const fogo = obter(CONTEUDO.habilidades.get('bola_de_fogo'), 'fogo');
+    c.j.ultimaHabilidade = { id: 'dardo_toxico', chave: 'dardo_toxico', tick: c.estado.tick, alvoId: alvo.id };
+    const r = fazerCombo(c.estado, c.ctx, c.j, fogo, alvo, { x: 5, y: 3 }, c.eventos);
     expect(r?.danoPct).toBeGreaterThan(0);
-    expect(c.eventos.some((e) => e.t === 'comboFeito' && e.combo === 'condutor')).toBe(true);
-    expect(alvo.efeitos.some((f) => f.tipo === 'eletrizado')).toBe(true);
+    expect(c.eventos.some((e) => e.t === 'comboFeito' && e.combo === 'gas_inflamavel')).toBe(true);
+    expect(alvo.efeitos.some((f) => f.tipo === 'queimando')).toBe(true);
     c.estado.tick += 10_000;
-    expect(fazerCombo(c.estado, c.ctx, c.j, raio, alvo, { x: 5, y: 3 }, c.eventos)).toBeNull();
+    expect(fazerCombo(c.estado, c.ctx, c.j, fogo, alvo, { x: 5, y: 3 }, c.eventos)).toBeNull();
   });
 });
 
 describe('reações novas', () => {
-  it('derreter deixa molhado; raio em molhado eletrocuta o alvo e os molhados perto', () => {
+  it('o vapor deixa molhado; raio em molhado eletrocuta o alvo e os molhados perto', () => {
     const c = cena();
     const a = c.inimigo('a', 5, 5);
     const b = c.inimigo('b', 6, 6);
@@ -174,7 +175,7 @@ describe('reações novas', () => {
     expect(impacto?.t === 'impacto' && impacto.sinergias).toContain('eletrocutar');
     expect(obter(buscarEntidade(c.estado, 'b'), 'b').efeitos.some((f) => f.tipo === 'atordoar')).toBe(true);
     expect(obter(buscarEntidade(c.estado, 'c'), 'c').efeitos.some((f) => f.tipo === 'atordoar')).toBe(false);
-    const derreter = CONTEUDO.interacoes.sinergias.find((s) => s.id === 'derreter');
-    expect(derreter?.aplicar.map((e) => e.tipo)).toContain('molhado');
+    const vapor = CONTEUDO.interacoes.sinergias.find((s) => s.id === 'vapor');
+    expect(vapor?.aplicar.map((e) => e.tipo)).toContain('molhado');
   });
 });

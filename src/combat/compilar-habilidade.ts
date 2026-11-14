@@ -23,6 +23,8 @@ import { aplicarRuna, type RegrasRunas } from './runas';
 import { aplicarFormasNovas, ehFormaNova, formaNovaCabe, type FormaId, type FormaNova, type RegrasEixos } from './eixos';
 import { aplicarSecundario, type TabelaDePapeis } from './papeis';
 import { aplicarLeituras } from './leituras';
+import { aplicarFios, type FiosDaUltimate } from './fios-ultimate';
+import type { Fusao, Ultimate, Veiculo } from './ultimates';
 
 export interface Caminho {
   id: string;
@@ -71,6 +73,11 @@ export interface FontesCompilacao {
   elementos: ReadonlyMap<Elemento, DefinicaoElemento>;
   /** Marco 40 (D-157): a função secundária do elemento pelo papel (papeis.json). */
   papeis?: TabelaDePapeis;
+  /** Marco 40 (D-160): as fusões de eixos das ultimates. */
+  fusoes?: ReadonlyMap<string, Fusao>;
+  /** Marco 40 (D-161): as famílias (a função das invocações) e o que cada classe dá às ultimates. */
+  ultimates?: ReadonlyMap<string, Ultimate>;
+  veiculos?: ReadonlyMap<string, Veiculo>;
 }
 
 export function lerCaminhos(json: unknown): { caminhos: Map<string, Caminho>; erros: string[] } {
@@ -165,6 +172,8 @@ export interface OpcoesCompilacao {
   sintonia?: number;
   /** Marco 40 (D-159): as leituras de estilo ativas (skills de classe). */
   leituras?: readonly { estilo: string; faixa: number }[];
+  /** Marco 40 (D-160): os fios da ultimate (os elementos do par e a fusão dos estilos). */
+  fios?: FiosDaUltimate;
 }
 
 export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilacao, fontes: FontesCompilacao, regras: RegrasHabilidades): Habilidade {
@@ -313,9 +322,11 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
   h.tags = etiquetasDe(h, b.tags);
   // Marco 40 (12/11/2026, D-159): as leituras de estilo da skill de classe, cada uma na faixa do seu estilo.
   const leituras = def.leituras ? (op.leituras ?? []).filter((l) => l.faixa > 0 && def.leituras?.[l.estilo]) : [];
-  if (leituras.length > 0) h.efeitos = aplicarLeituras(h, def.leituras, leituras).efeitos;
+  // D-161: e os ajustes da skill (raio, saltos, conjuração...) e os efeitos ao abater que elas prometem.
+  if (leituras.length > 0) Object.assign(h, aplicarLeituras(h, def.leituras, leituras));
+  const fios = op.fios && b.tags.includes('ultimate') ? op.fios : undefined;
   // Na chave só entram os modificadores de fora (equipamento): os da definição e dos caminhos já estão implícitos.
-  h.chave = formatarChave({ id: b.id, rank, caminhos: caminhosValidos, mods: op.mods.filter((m) => aplicados.includes(m)), variantes, ...(formas.length > 0 && { formas }), ...(leituras.length > 0 && { leituras }), ...(op.sintonia !== undefined && !op.runa && { sintonia: op.sintonia }), ...(op.runa && { runa: op.runa }) });
+  h.chave = formatarChave({ id: b.id, rank, caminhos: caminhosValidos, mods: op.mods.filter((m) => aplicados.includes(m)), variantes, ...(formas.length > 0 && { formas }), ...(leituras.length > 0 && { leituras }), ...(fios && { fios }), ...(op.sintonia !== undefined && !op.runa && { sintonia: op.sintonia }), ...(op.runa && { runa: op.runa }) });
   // Marco 40 (12/11/2026, D-157): na skill comum, a função secundária do papel no elemento dela, na faixa da sintonia, e
   // o estado do elemento dura de `duracaoMinPct` a 100% por ela (como a runa).
   if (op.sintonia !== undefined && !op.runa && h.papel) {
@@ -326,7 +337,9 @@ export function compilarHabilidade(def: DefinicaoHabilidade, op: OpcoesCompilaca
     return aplicarSecundario(comEstado, fontes.papeis, h.elemento ?? 'fisico', op.sintonia);
   }
   // Marco 39 (12/11/2026, D-151): a runa troca o elemento e põe a parte elemental (por último, sobre tudo o que veio antes).
-  return op.runa ? aplicarRuna(h, op.runa.runa, op.runa.faixa, fontes.elementos, regras.runas, fontes.papeis) : h;
+  const comRuna = op.runa ? aplicarRuna(h, op.runa.runa, op.runa.faixa, fontes.elementos, regras.runas, fontes.papeis) : h;
+  // Marco 40 (13/11/2026, D-160): na ultimate, os fios de elemento, o par de elementos e a fusão dos estilos.
+  return fios ? aplicarFios(comRuna, fios, fontes, regras.runas) : comRuna;
 }
 
 /** O contexto que a resolução precisa (conteúdo e regras de rank). */
