@@ -5187,6 +5187,9 @@ elas, onde os inimigos nunca entram.
   - As texturas do chão decodificadas também ficam guardadas (`render/solo/texturas.ts`). Cada cena cria a própria
     textura da pedra: com a imagem compartilhada, `Texture.from` dava a mesma às duas, e a cena que saía a destruía.
   - A cena nova conecta sem esperar o fechamento da conexão de antes.
+  - Cada modal leva a marca da cena que o criou (`data-cena`). Antes, a cena de antes saía depois de a nova montar e
+    removia todos os modais que não existiam quando ela montou: a pausa e a mochila da nova sumiam, e depois da troca
+    não abriam mais.
   - Medido sem GPU, da troca até a cena nova na tela: de 1,4 s para 0,9 s. A tela não fica mais preta, e ao andar não
     há mais paradas de 1 a 2 s.
 - **De passagem:** o gerador do exterior não põe mais armadilha embaixo de um monstro (ele a disparava sozinho,
