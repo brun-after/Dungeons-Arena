@@ -1,6 +1,6 @@
 import { prepararReservas, retirarVida } from './reserva-necromante';
 import { noAr } from './movimento-classe';
-import { extraGuerreiro, protecaoInicial, pulsarAura } from './ajustes-classes';
+import { classeDe, extraGuerreiro, protecaoInicial, pulsarAura } from './ajustes-classes';
 // Efeitos de fluxo próprio (§2.8, §2.9, §2.11). Marco 8A-2 (14/10/2026), D-049.
 //   efeito_atrasado  -> estado.atrasados, dispara o efeito carregado no alvo depois do prazo;
 //   rastro_*         -> status na entidade; cada célula por onde ela passa vira rastro (estado.rastros);
@@ -318,6 +318,21 @@ export function processarGatilhos(estado: EstadoJogo, ctx: ContextoSimulacao, ap
   for (const a of estado.armadilhas) {
     // Marco 9A-2: com rearme, a armadilha fica inerte depois de disparar.
     if (a.inerteAteTick > tick) continue;
+    // D-170: a armadilha pisada pelo Arqueiro espera o retardo; se ele saltou para trás nesse meio-tempo, ela dispara
+    // no vazio e some (ele se salvou por um triz); se não, pega-o onde estiver.
+    if (a.pisada) {
+      if (a.pisada.ateTick > tick) continue;
+      const { id, desdeTick } = a.pisada;
+      delete a.pisada;
+      const quem = buscarEntidade(estado, id);
+      if (quem && vivo(quem)) {
+        if ((quem.movimentoClasse?.recuoTick ?? -1) >= desdeTick) {
+          saida.push({ t: 'armadilhaDisparou', tick, donoId: a.donoId, armadilhaId: a.id, alvoId: quem.id, x: a.x, y: a.y, ...(a.elemento && { elemento: a.elemento }), ...(a.runa && { runa: true }), protegido: true });
+          disparadas.add(a.id);
+        } else if (dispararArmadilha(estado, ctx, a, quem, aplicar, saida)) disparadas.add(a.id);
+        continue;
+      }
+    }
     const dono = { id: a.donoId, equipe: a.equipeDono };
     const naCelula = porCelula.get(a.y * ctx.fase.largura + a.x);
     const alvo = naCelula?.find((e) => vivo(e) && e.x === a.x && e.y === a.y && podeFerir(dono, e, ctx.modo));
@@ -330,6 +345,7 @@ export function processarGatilhos(estado: EstadoJogo, ctx: ContextoSimulacao, ap
       }
     }
     if (!alvo) continue;
+    if (pisarComRetardo(estado, ctx, a, alvo, saida)) continue;
     if (dispararArmadilha(estado, ctx, a, alvo, aplicar, saida)) disparadas.add(a.id);
   }
   if (disparadas.size > 0) estado.armadilhas = estado.armadilhas.filter((a) => !disparadas.has(a.id));
@@ -366,6 +382,23 @@ export function dispararArmadilha(estado: EstadoJogo, ctx: ContextoSimulacao, a:
   // Marco 25 (25/10/2026, D-100): quem viu disparar pode aprender a contornar as armadilhas desse dono.
   aprenderArmadilha(estado, ctx, a);
   return some;
+}
+
+/**
+ * D-170: quem tem retardo (o Arqueiro, `armadilhas.retardoPorClasse`) vê a armadilha sob os pés por um instante antes
+ * do disparo. Logo depois de um Salto para Trás, não: quem cai em outra armadilha leva o dano na hora.
+ */
+function pisarComRetardo(estado: EstadoJogo, ctx: ContextoSimulacao, a: Armadilha, alvo: Entidade, saida: EventoSimulacao[]): boolean {
+  const b = ctx.balance.armadilhas;
+  const retardo = b.retardoPorClasse[classeDe(alvo)] ?? 0;
+  const recuo = alvo.movimentoClasse?.recuoTick;
+  if (retardo <= 0 || (recuo !== undefined && estado.tick - recuo < ticksDe(b.semRetardoDepoisDoRecuoMs))) return false;
+  a.pisada = { id: alvo.id, desdeTick: estado.tick, ateTick: estado.tick + ticksDe(retardo) };
+  if (!a.reveladaPara.includes(alvo.id)) {
+    a.reveladaPara.push(alvo.id);
+    saida.push({ t: 'armadilhaRevelada', tick: estado.tick, id: alvo.id, armadilhaId: a.id, x: a.x, y: a.y });
+  }
+  return true;
 }
 
 /** Dano fixo de rastro ou armadilha: respeita `imune_dano` e conta participação para o XP. */

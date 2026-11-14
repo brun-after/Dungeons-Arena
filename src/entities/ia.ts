@@ -19,6 +19,8 @@ import { ordemRotativa } from '../world/colisao';
 import { passavel } from '../world/fase';
 import { celulaLivre, pararMovimento, planejarCaminho, VETOR_DIR } from '../world/movimento';
 import { emPasso, vivo, type Entidade, type EstadoIa, type ModoIa } from './entidade';
+import { emCamuflagem } from '../combat/movimento-classe';
+import { podeFerir } from '../modos/relacao';
 import { processarExercitoNecromante, raioDeAtencao } from './ia-mundo';
 import { processarInvocacao } from './ia-invocacao';
 import { alvoMaisFerido, celulaDeCerco, destinoDeCura, fugaDoAviso, perigoDoCaminho } from './ia-tatica';
@@ -354,7 +356,10 @@ function perseguir(
 ): void {
   const regras = ctx.balance.ia;
   const alvo = ia.alvoId ? buscarEntidade(estado, ia.alvoId) : undefined;
-  if (!alvo || !alvoDaIa(estado, ctx, e, alvo)) {
+  // D-170: quem já perseguia o Arqueiro camuflado segue atrás dele, mas não consegue atacá-lo (a camuflagem só impede
+  // que novos inimigos o vejam).
+  const escondido = !!alvo && vivo(alvo) && emCamuflagem(alvo) && podeFerir(e, alvo, ctx.modo);
+  if (!alvo || (!escondido && !alvoDaIa(estado, ctx, e, alvo))) {
     voltarAPatrulhar(estado, e, ia);
     return;
   }
@@ -429,7 +434,7 @@ function perseguir(
     pararMovimento(e);
   }
 
-  if (!recuando && distancia <= alcanceAtaque && !(semVisao && ehBasico(e, hab.id)) && !e.acao && estado.tick >= ia.proximoAtaqueTick) {
+  if (!recuando && !escondido && distancia <= alcanceAtaque && !(semVisao && ehBasico(e, hab.id)) && !e.acao && estado.tick >= ia.proximoAtaqueTick) {
     // 08/11/2026 (D-139): a skill recusada (sem mana, por exemplo) dá lugar ao básico no mesmo tick; o intervalo
     // encurta com o nível do inimigo (entities/ia-cadencia.ts).
     const iniciou = iniciarAcao(estado, ctx, e, hab.id, alvo.id, saida) || (hab.id !== basico.id && distancia <= basico.alcanceCelulas && !semVisao && iniciarAcao(estado, ctx, e, basico.id, alvo.id, saida));

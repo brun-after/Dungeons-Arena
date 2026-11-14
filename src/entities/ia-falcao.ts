@@ -183,7 +183,10 @@ export function processarFalcao(estado: EstadoJogo, ctx: ContextoSimulacao, e: E
     return;
   }
   if (hostil) {
-    passear(estado, ctx, e, ia, celulaOcupada(hostil), r.distanciaAlvo, false, saida);
+    // D-170: a cada `passaPertoACada` voltas, uma passa junto do dono (para ele poder ser levado no Falcão Carrega).
+    const volta = Math.floor(estado.tick / Math.max(1, ticksDe(r.passeioMs)));
+    if (r.passaPertoACada > 0 && volta % r.passaPertoACada === 0) passear(estado, ctx, e, ia, celulaOcupada(dono), 1, true, saida);
+    else passear(estado, ctx, e, ia, celulaOcupada(hostil), r.distanciaAlvo, false, saida);
     return;
   }
   if (!emCombate(estado, ctx, dono)) {

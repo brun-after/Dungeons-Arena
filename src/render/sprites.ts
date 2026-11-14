@@ -1,5 +1,5 @@
 import { tintaDaInvocacao } from './cores-necromancia';
-import { alfaDoCorpo } from './movimento-visual';
+import { alfaDoCorpo, sumidoPara } from './movimento-visual';
 import { desenharPorteDoNivel, escalaDoNivel, tintaDoNivel } from './porte-nivel';
 import { ehDragao, porteDoDragao } from '../world/porte-dragoes';
 import { tipoEm } from '../world/fase';
@@ -382,7 +382,7 @@ export class CamadaEntidades {
       const norma = Math.hypot(dtx, dty) || 1;
       if (Math.abs(dtx) > 0.01) m.sentido = dtx > 0 ? 1 : -1;
       m.raiz.alpha = alfaDoCorpo(e, estado.tick) * (ajuste?.alfa ?? 1);
-      m.raiz.visible = e.id === this.o.idLocal || !(this.o.oculto?.(p.x, p.y) ?? false);
+      m.raiz.visible = e.id === this.o.idLocal || (!sumidoPara(e, local, estado.tick, ctx.modo) && !(this.o.oculto?.(p.x, p.y) ?? false));
       if (this.o.rotulos) {
         m.sobre.position.set(pt.x, pt.y);
         m.sobre.alpha = m.raiz.alpha;

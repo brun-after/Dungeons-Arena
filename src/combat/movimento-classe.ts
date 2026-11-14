@@ -309,6 +309,9 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
       const tipo = m.tipo === 'montaria' ? 'montado' : m.tipo;
       const ateTick = tick + duracaoDaViagem(estado, ctx, e, alcance);
       iniciar(tipo, { ateTick, ...(m.pesada && { pesada: true }) });
+      // D-170: a névoa leva a cor da afinidade no rastro (só desenho).
+      const viagem = e.movimentoClasse?.modo;
+      if (tipo === 'nevoa' && viagem) viagem.ponta = pontaDaAfinidade(ctx, e, tick);
       if (tipo === 'nevoa') {
         // D-168: a névoa leva todos os servos (os do posto ficam), em volta do Necromante, até o fim.
         for (const s of servosDaNevoa(estado, e)) if (s.invocacao) s.invocacao.nevoaAteTick = ateTick;
@@ -364,6 +367,7 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
       if (!ok) { recusar('bloqueado'); return; }
       saida.push({ t: 'deslocado', tick, id: e.id, deX: x, deY: y, paraX: e.x, paraY: e.y, origemId: e.id, causa: m.tipo === 'teleporte' ? 'teleporte' : m.tipo === 'recuo' ? 'recuo' : 'avanco' });
       saida.push({ t: 'movimentoClasse', tick, id: e.id, mov: m.id, fase: 'inicio', ...(ponta && { ponta }) });
+      if (m.tipo === 'recuo') (e.movimentoClasse ??= { ativo: m.id, cargas: {} }).recuoTick = tick;
       if (m.tipo === 'recuo' && p.armadilha > 0) armadilhaDoRecuo(estado, ctx, e, { x, y }, pontaDaAfinidade(ctx, e, tick), saida);
       return;
     }
@@ -378,7 +382,8 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
         saida.push({ t: 'movimentoClasse', tick, id: e.id, mov: m.id, fase: 'inicio' });
         return;
       }
-      if (chebyshev(e, ancora) > alcance) { recusar('ancora_longe'); return; }
+      // D-170: o alcance é um círculo de verdade (o mesmo desenhado no chão).
+      if (Math.hypot(e.x - ancora.x, e.y - ancora.y) > alcance) { recusar('ancora_longe'); return; }
       const { x, y } = e;
       if (!teleportar(estado, ctx, e, { x: ancora.x, y: ancora.y })) { recusar('bloqueado'); return; }
       delete mc.ancora;
@@ -389,8 +394,21 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
       return;
     }
     case 'acelerar': {
+      // D-170: o círculo vai à frente do Mago, entre a distância mínima e a máxima (5 e 7 células no começo); a cada
+      // `aproximaPorNiveis`, a mínima cai 1 e a máxima sobe 1, até ele conjurar nos próprios pés. Sem ponto mirado, a
+      // mínima; perto de uma parede, recua.
+      const passo = Math.floor(e.nivel / Math.max(1, b.acelerar.aproximaPorNiveis));
+      const perto = Math.max(0, b.acelerar.distanciaMin - passo);
+      const longe = b.acelerar.distanciaMax + passo;
+      const pedida = alvo ? Math.hypot(alvo.x - e.px, alvo.y - e.py) : perto;
+      let centro: Celula | null = null;
+      for (let k = Math.round(Math.min(longe, Math.max(perto, pedida))); k >= 0 && !centro; k--) {
+        const c = aFrente(e, r, k);
+        if (cabeAli(ctx, c.x, c.y)) centro = c;
+      }
+      if (!centro) { recusar('bloqueado'); return; }
       if (!gastarCarga(estado, e, m, p)) { recusar('recarga'); return; }
-      (e.movimentoClasse ??= { ativo: m.id, cargas: {} }).circulo = { x: e.x, y: e.y, raio: p.raio, pct: p.velocidadePct, ateTick: tick + ticksDe(p.duracaoMs), ...(ponta && { ponta }) };
+      (e.movimentoClasse ??= { ativo: m.id, cargas: {} }).circulo = { x: centro.x, y: centro.y, raio: p.raio, pct: p.velocidadePct, desdeTick: tick, ateTick: tick + ticksDe(p.duracaoMs), ...(ponta && { ponta }) };
       saida.push({ t: 'movimentoClasse', tick, id: e.id, mov: m.id, fase: 'inicio', ...(ponta && { ponta }) });
       return;
     }
@@ -444,7 +462,7 @@ export function ehVeiculo(estado: EstadoJogo, ctx: ContextoSimulacao, pet: Entid
 /** A cada tick: o modo que vence (o voo pousa), a névoa que protege e leva os servos, o veículo, os postos e os círculos. */
 export function processarMovimentoClasse(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
   const tick = estado.tick;
-  processarPostos(estado, ctx);
+  processarPostos(estado, ctx, saida);
   processarCirculos(estado, ctx, saida);
   for (const e of estado.entidades) {
     const m = e.movimentoClasse?.modo;
@@ -519,9 +537,9 @@ export function fatorDeVelocidade(ctx: ContextoSimulacao, e: Entidade): number {
 
 const postosDe = (estado: EstadoJogo, e: Entidade) => estado.entidades.filter((s) => vivo(s) && s.invocacao?.donoId === e.id && s.invocacao.posto);
 
-/** O servo que vai ao posto: o de vida mais cheia (no empate, um ao acaso). */
+/** O servo que vai ao posto: D-170, sempre o da passiva (o servo); entre eles, o de vida mais cheia (empate: ao acaso). */
 function servoParaPosto(estado: EstadoJogo, e: Entidade): Entidade | undefined {
-  const livres = estado.entidades.filter((s) => vivo(s) && s.invocacao?.donoId === e.id && !!s.invocacao.necromancia && !s.invocacao.posto);
+  const livres = estado.entidades.filter((s) => vivo(s) && s.invocacao?.donoId === e.id && s.invocacao.necromancia === 'servo' && !s.invocacao.posto);
   if (livres.length === 0) return undefined;
   const fracao = (s: Entidade) => s.hp / Math.max(1, s.hpMax);
   const maior = Math.max(...livres.map(fracao));
@@ -562,6 +580,9 @@ function trocarComPosto(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade,
   }
 }
 
+/** D-170: o Arqueiro na camuflagem (quem já o perseguia segue atrás, sem conseguir atacar). */
+export const emCamuflagem = (e: Entidade): boolean => modo(e)?.tipo === 'camuflado';
+
 /** O servo está no posto: fica parado e não luta (a IA dele espera). */
 export function postoDormente(_estado: EstadoJogo, _ctx: ContextoSimulacao, s: Entidade): boolean {
   return !!s.invocacao?.posto;
@@ -573,7 +594,7 @@ export function ocultoDosMonstros(ator: Entidade, alvo: Entidade): boolean {
 }
 
 /** Os servos nos postos: ficam no ponto até o prazo e, a partir do marco 30, recuperam vida. */
-function processarPostos(estado: EstadoJogo, ctx: ContextoSimulacao): void {
+function processarPostos(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
   const tick = estado.tick;
   const pulso = tick % ticksDe(500) === 0;
   for (const s of estado.entidades) {
@@ -582,6 +603,13 @@ function processarPostos(estado: EstadoJogo, ctx: ContextoSimulacao): void {
     const dono = buscarEntidade(estado, s.invocacao.donoId);
     if (!dono || !vivo(dono) || (posto.ateTick ?? 0) <= tick) {
       delete s.invocacao.posto;
+      continue;
+    }
+    // D-170: longe demais do Necromante (o limite, alto), o servo volta para perto dele e deixa o posto.
+    if (Math.hypot(dono.x - posto.x, dono.y - posto.y) > ctx.balance.movimentoClasse.posto.limite) {
+      delete s.invocacao.posto;
+      const { x, y } = s;
+      if (teleportar(estado, ctx, s, { x: dono.x, y: dono.y })) saida.push({ t: 'deslocado', tick, id: s.id, deX: x, deY: y, paraX: s.x, paraY: s.y, origemId: dono.id, causa: 'teleporte' });
       continue;
     }
     if (s.x !== posto.x || s.y !== posto.y) posicionar(s, posto.x, posto.y);

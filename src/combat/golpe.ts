@@ -156,7 +156,7 @@ export function aplicarImpacto(
   const atacante = buscarEntidade(estado, impacto.fonte.id);
   // Marco 40 (14/11/2026, D-166): o básico do Aventureiro não fere: marca a caça para o companheiro (o golpe segue, sem
   // dano, para os efeitos e as variações da arma).
-  if (atacante && atacante !== alvo && hab.formulaDano !== null && ehBasico(atacante, hab.id) && marcarACaca(estado, atacante, alvo, saida)) {
+  if (atacante && atacante !== alvo && hab.formulaDano !== null && ehBasico(atacante, hab.id) && marcarACaca(estado, ctx, atacante, alvo, saida)) {
     impacto = { ...impacto, fonte: { ...impacto.fonte, multDano: 0 }, danoExtra: 0 };
   }
   // D-165: o lobo colado no Aventureiro toma para si o golpe de perto, de tempos em tempos.
