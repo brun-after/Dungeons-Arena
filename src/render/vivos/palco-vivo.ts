@@ -14,7 +14,7 @@ import { clone as clonarComEsqueleto } from 'three/addons/utils/SkeletonUtils.js
 import { Rectangle, Texture } from 'pixi.js';
 import { CELULA_PX } from '../camera-calculo';
 import { fundirPecas, malhasDe } from './fundir-pecas';
-import { PAUSA_DO_IMPACTO_MS, peloGolpe, SEM_PASSO, PERFIL_PADRAO, PERFIS_DE_GOLPE, progressoDoGolpe, voltaDoGolpe, type EstadoPersonagem, type PerfilDoGolpe } from '../quadros-personagem';
+import { BATIDA_DO_VOO_MS, FRACAO_PLANAR, PAUSA_DO_IMPACTO_MS, peloGolpe, SEM_PASSO, PERFIL_PADRAO, PERFIS_DE_GOLPE, progressoDoGolpe, voltaDoGolpe, type EstadoPersonagem, type PerfilDoGolpe } from '../quadros-personagem';
 
 const saida = (t: number) => 1 - (1 - Math.min(1, Math.max(0, t))) ** 2;
 import { grauDe, GRAUS, PECAS_DE_ARMADURA, TOMOS, type PecaDeArmadura } from '../equipamento-3d';
@@ -572,6 +572,7 @@ export class PalcoVivo {
     const ciclo = preparaMagia || deGolpe ? undefined : (CICLO_MS[p.estado] ?? Number.NaN) * passo || undefined;
     const tempo = (c: THREE.AnimationClip, ms: number | undefined) => {
       if (p.estado === 'morte') return Math.min(c.duration - 1e-3, (p.tempoMs / (ms ?? 660)) * c.duration);
+      if (p.estado === 'voar') return Math.min(1, Math.max(0, p.tempoMs) / BATIDA_DO_VOO_MS) * FRACAO_PLANAR * c.duration;
       if (preparaMagia) return Math.min(c.duration - 1e-3, saida(g.preparo ?? 0) * c.duration);
       if (deGolpe && g) return progressoDoGolpe(PERFIS_DE_GOLPE[nome] ?? PERFIL_PADRAO, g.preparo, g.desdeMs, g.comPreparo) * c.duration;
       return ms !== undefined ? ((p.tempoMs % ms) / ms) * c.duration : Math.min(c.duration - 1e-3, p.fracao * c.duration);

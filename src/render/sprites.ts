@@ -161,7 +161,7 @@ export interface OpcoesEntidades {
 }
 
 /** Marco 24 (D-098): quem voa solto (o falcão). Marco 40 (13/11/2026): `estado`, a pose do movimento; `alfa`, multiplica a do corpo. */
-export interface AjusteVisual { estado?: MovimentoDoAtlas | null; alfa?: number;
+export interface AjusteVisual { estado?: MovimentoDoAtlas | null; alfa?: number; desdeMs?: number;
   /** Altura extra do desenho, em px de mundo. */
   alturaPx: number;
   /** Inclinação na curva, em rad. */
@@ -424,7 +424,7 @@ export class CamadaEntidades {
       m.indicador.position.set(0, m.topo - 16);
       this.desenharAneis(m, e, estado, local?.alvoSelecionado === e.id ? (local.alvoTravado ? 'travado' : 'auto') : null);
       // 01/11/2026: ondulações identificam o nado; a sombra de chão desaparece.
-      const nadando = !e.morto && tipoEm(ctx.fase, e.x, e.y) === 'agua';
+      const nadando = !e.morto && !ajuste?.alturaPx && tipoEm(ctx.fase, e.x, e.y) === 'agua'; // no ar, sem ondas
       m.chao.visible = !nadando;
       if (nadando) {
         const pulso = reduzido ? 0.5 : (agoraMs % 1200) / 1200;
@@ -565,7 +565,7 @@ export class CamadaEntidades {
     const golpeando = !preparando && ataqueMs < duracaoVisualDoGolpe(perfil, comPreparo);
     const estado = golpeando ? estadoDoPersonagem({ morto: e.morto, golpeando: true, conjurando: false, andando: q.andando, golpe: m.golpe, movimento: q.ajuste?.estado }) : estadoBase;
     const ciclo = q.reduzido && estado !== 'morte' && !peloGolpe(estado) ? 0 : q.agoraMs + faseDe(e.id) * 1000;
-    const tempo = estado === 'morte' ? q.agoraMs - m.morteDesdeMs : ciclo;
+    const tempo = estado === 'morte' ? q.agoraMs - m.morteDesdeMs : estado === 'voar' ? (q.ajuste?.desdeMs ?? 0) : ciclo;
     const fracao = peloGolpe(estado)
       ? progressoDoGolpe(perfil, m.preparoAcao, golpeando ? ataqueMs : null, comPreparo)
       : estado === 'conjurar' || estado === 'andarConjurar' ? (m.preparoAcao ?? 0) : 0;

@@ -79,7 +79,13 @@ const DIRECOES = 8;
 const MS_QUADRO: Readonly<Record<'parado' | 'andar' | 'conjurar' | 'morte' | 'andarConjurar' | MovimentoDoAtlas, number>> = {
   parado: 220, andar: 95, conjurar: 110, morte: 110, andarConjurar: 110, correr: 75, saltar: 110, voar: 140, montar: 170,
 };
-const CICLICOS: ReadonlySet<EstadoPersonagem> = new Set(['parado', 'andar', 'conjurar', 'andarConjurar', 'correr', 'saltar', 'voar', 'montar']);
+const CICLICOS: ReadonlySet<EstadoPersonagem> = new Set(['parado', 'andar', 'conjurar', 'andarConjurar', 'correr', 'saltar', 'montar']);
+/**
+ * 14/11/2026: o voo bate os braços uma vez (do começo do nado até os braços junto ao corpo) e plana nessa pose; o tempo
+ * do voo é o desde o começo dele. `FRACAO_PLANAR`: onde o clipe do nado tem os braços colados (medida no GLB).
+ */
+export const BATIDA_DO_VOO_MS = 1000;
+export const FRACAO_PLANAR = 0.76;
 
 /** A direção do atlas para o rumo na grade (rad, de +x para +y). */
 export function direcaoDoAngulo(angulo: number): number {
@@ -93,6 +99,7 @@ export function direcaoDoAngulo(angulo: number): number {
  */
 export function quadroDoEstado(estado: EstadoPersonagem, n: number, tMs: number, fracao: number | null): number {
   if (estado === 'morte') return Math.min(n - 1, Math.floor(tMs / MS_QUADRO.morte));
+  if (estado === 'voar') return Math.min(n - 1, Math.floor((Math.max(0, tMs) / BATIDA_DO_VOO_MS) * n));
   if (CICLICOS.has(estado)) return Math.floor(tMs / MS_QUADRO[estado as keyof typeof MS_QUADRO]) % n;
   return Math.min(n - 1, Math.max(0, Math.floor((fracao ?? 0) * n)));
 }

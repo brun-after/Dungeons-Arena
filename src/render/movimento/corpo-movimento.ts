@@ -69,6 +69,11 @@ export class CorpoEmMovimento {
   /** O último teletransporte de cada um (a chegada se materializa). */
   readonly chegadas = new Map<string, { ms: number; de: PontoVisual; para: PontoVisual }>();
   private readonly passos = new Map<string, { x: number; y: number; ateMs: number; angulo: number }>();
+  /**
+   * 14/11/2026: a distância de cada salto, vista no primeiro quadro dele (pela simulação, não pelo evento: online o
+   * evento do movimento pode não chegar, e o arco sumia).
+   */
+  private readonly saltos = new Map<string, { desdeTick: number; total: number }>();
   private readonly ultimoDesloc = new Map<string, { de: PontoVisual; para: PontoVisual; causa: string; tick: number }>();
 
   constructor(private readonly o: OpcoesCorpoMovimento) {}
@@ -127,7 +132,8 @@ export class CorpoEmMovimento {
     let mudou = this.doCompanheiro(e, estado, agoraMs, a);
     const m = e.movimentoClasse?.modo;
     const l = this.lances.get(e.id);
-    const desde = l ? agoraMs - l.inicioMs : Infinity;
+    // O tempo do modo vem da simulação (o início dele em ticks), não do evento.
+    const desde = m ? (estado.tick - m.desdeTick) * DT_MS : l ? agoraMs - l.inicioMs : Infinity;
     if (m && !e.morto) {
       mudou = true;
       switch (m.tipo) {
@@ -136,12 +142,20 @@ export class CorpoEmMovimento {
           const h = ALTURA_VOO * Math.min(suave(desde / 450), suave(resta / 500));
           a.alturaPx = h + 3 * Math.sin(agoraMs / 260);
           a.estado = h > 14 ? 'voar' : null;
+          a.desdeMs = desde;
           a.zMais = NO_AR;
           break;
         }
         case 'salto': {
-          const total = l?.para ? Math.hypot(l.para.x - l.de.x, l.para.y - l.de.y) : 1;
           const falta = m.x !== undefined && m.y !== undefined ? Math.hypot(m.x - e.px, m.y - e.py) : 0;
+          let s = this.saltos.get(e.id);
+          if (s?.desdeTick !== m.desdeTick) {
+            // Visto pela primeira vez já no ar: a distância já percorrida volta pela velocidade do salto.
+            const andou = ((estado.tick - m.desdeTick) * DT_MS * (m.velocidade ?? 16)) / 1000;
+            s = { desdeTick: m.desdeTick, total: falta + Math.max(0, andou) };
+            this.saltos.set(e.id, s);
+          }
+          const total = s.total;
           const t = total > 0 ? Math.min(1, Math.max(0, 1 - falta / total)) : 1;
           // A parábola do lançamento: a velocidade no chão é constante, então a altura é 4·H·t·(1 − t).
           const h = Math.max(ALTURA_SALTO_MINIMA, ALTURA_SALTO_POR_CELULA * total);
@@ -241,6 +255,7 @@ export class CorpoEmMovimento {
     this.lances.clear();
     this.chegadas.clear();
     this.passos.clear();
+    this.saltos.clear();
     this.ultimoDesloc.clear();
   }
 }
