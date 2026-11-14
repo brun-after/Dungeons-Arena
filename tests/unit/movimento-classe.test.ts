@@ -2,7 +2,7 @@
 // espaço e tempo (o bônus sai ao atacar ou ser atingido), o salto do Guerreiro, os telhados, a imunidade ao chão e o
 // Posto dos Mortos.
 import { describe, expect, it } from 'vitest';
-import { fonteDaHabilidade } from '../../src/combat/acao';
+import { alvoOfensivoValido, fonteDaHabilidade } from '../../src/combat/acao';
 import { aplicarImpacto } from '../../src/combat/golpe';
 import { alcanceNoNivel, fatorDeVelocidade, movimentoAtivo, movimentosLiberados, noAr, parametros, postoDormente } from '../../src/combat/movimento-classe';
 import { habilidadeDoAtor } from '../../src/combat/perfil';
@@ -65,7 +65,7 @@ describe('movimento da classe (D-164)', () => {
     expect(movimentosLiberados(ctx, j)).toHaveLength(3);
     expect(movimentoAtivo(ctx, j)?.id).toBe('voo_arcano');
     passo([{ t: 'trocarMovimento' }]);
-    expect(movimentoAtivo(ctx, j)?.id).toBe('piscar');
+    expect(movimentoAtivo(ctx, j)?.id).toBe('acelerar');
   });
 
   it('o Voo Arcano dura o tempo de andar o alcance, sem limite de dano, e perde a velocidade ao atacar', () => {
@@ -190,27 +190,32 @@ describe('movimento da classe (D-164)', () => {
     expect(lerComando({ t: 'trocarMovimento' })).toEqual({ t: 'trocarMovimento' });
   });
 
-  it('o Posto dos Mortos deixa o servo parado e oculto longe do Necromante; usar de novo troca de corpo com ele', () => {
+  it('o Posto dos Mortos (D-168): o 1º uso manda o servo ao ponto mirado; ele espera sem chamar os monstros; o 2º troca', () => {
     const c = cena('necromante', 20);
     c.passo([], 1500);
     const servo = obter(c.estado.entidades.find((e) => e.invocacao?.donoId === 'j' && e.invocacao.necromancia));
     c.passo([{ t: 'trocarMovimento' }]);
     c.passo([{ t: 'trocarMovimento' }]);
     expect(movimentoAtivo(ctx, c.j)?.id).toBe('posto_dos_mortos');
-    c.passo([{ t: 'movimentoClasse' }]);
-    const posto = obter(servo.invocacao?.posto);
-    posicionar(c.j, 10, 10);
-    posicionar(servo, 1, 1);
-    obter(servo.invocacao).posto = { x: 1, y: 1 };
-    c.passo([], 600);
+    c.passo([{ t: 'movimentoClasse', alvo: { x: 8, y: 3 } }]);
+    expect(servo.invocacao?.posto).toMatchObject({ x: 8, y: 3 });
+    expect(servo.x).toBe(8);
     expect(postoDormente(c.estado, ctx, servo)).toBe(true);
-    expect(servo.x).toBe(1);
-    expect(servo.invisivelAteTick).toBeGreaterThan(c.estado.tick);
-    expect(posto).toBeDefined();
-    c.passo([], 4000);
+    // O monstro perto não o vê (os jogadores, sim).
+    const orc = c.orc(8, 4);
+    expect(alvoOfensivoValido(c.estado, ctx, orc, servo)).toBe(false);
+    expect(alvoOfensivoValido(c.estado, ctx, c.j, orc)).toBe(true);
+    c.passo([], 2000);
+    expect(servo.x).toBe(8);
+    expect(servo.y).toBe(3);
+    // O 2º uso troca de lugar, a qualquer distância.
+    const antes = { x: c.j.x, y: c.j.y };
     c.passo([{ t: 'movimentoClasse' }]);
-    expect(c.j.x).toBe(1);
-    expect(c.j.y).toBe(1);
+    expect(c.j.x).toBe(8);
+    expect(c.j.y).toBe(3);
+    expect(servo.x).toBe(antes.x);
     expect(servo.invocacao?.posto).toBeUndefined();
+    // O ponto longe demais é puxado para o alcance (10 + 2 no nível 20).
+    expect(lerComando({ t: 'movimentoClasse', alvo: { x: 3, y: 4 } })).toEqual({ t: 'movimentoClasse', alvo: { x: 3, y: 4 } });
   });
 });

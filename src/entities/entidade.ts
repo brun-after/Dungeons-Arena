@@ -8,6 +8,7 @@ import { clonarRng, type EstadoRng } from '../core/rng';
 import type { EfeitoCanonico, TipoEfeito } from '../combat/registro-efeitos';
 import type { Afinidade } from '../combat/afinidade';
 import type { Elemento } from '../combat/elementos';
+import type { PontaElemental } from '../progression/vinculo';
 import type { Slot } from '../modos/modo';
 
 export type TipoEntidade = 'jogador' | 'inimigo' | 'invocacao' | 'avatar';
@@ -94,8 +95,15 @@ export interface DadosInvocacao {
   extra?: boolean;
   /** Marco 27 (29/10/2026, D-126): veio de um pergaminho; conta no limite próprio dos pergaminhos (acumulam). */
   pergaminho?: boolean;
-  /** Marco 40 (13/11/2026, D-164): o servo deixado no Posto dos Mortos (a célula do posto). */
-  posto?: { x: number; y: number };
+  /**
+   * Marco 40 (13/11/2026, D-164): o servo deixado no Posto dos Mortos (a célula do posto). D-168 (14/11/2026): até o
+   * tick `ateTick` (1 min); depois volta a ser um servo comum.
+   */
+  posto?: { x: number; y: number; ateTick?: number };
+  /** Marco 40 (14/11/2026, D-168): o servo vai na névoa do Necromante até este tick (em volta dele, sem lutar). */
+  nevoaAteTick?: number;
+  /** D-168: o companheiro que desmontou descarrega o elemento do dono nos próximos golpes (a aura e o círculo). */
+  descarga?: { ponta: PontaElemental; golpes: number; ateTick: number };
 }
 
 /** Ação em conjuração (§2.7, etapa 3). Ticks publicados para a telegrafia (§3.6). */
@@ -235,8 +243,6 @@ export interface ModoDeMovimento {
   id: string;
   desdeTick: number;
   ateTick?: number;
-  /** O preparo da volta à âncora. */
-  destino?: 'ancora';
   x?: number;
   y?: number;
   rumoX?: number;
@@ -248,6 +254,8 @@ export interface ModoDeMovimento {
   pesada?: boolean;
   /** Atacou ou foi atingido: o bônus de viagem acabou (o modo segue até o fim). */
   semBuff?: boolean;
+  /** Marco 40 (14/11/2026, D-168): a ponta do eneágono que o modo leva, a partir do marco elemental da mecânica. */
+  ponta?: PontaElemental;
 }
 
 export interface EstadoMovimento {
@@ -255,7 +263,12 @@ export interface EstadoMovimento {
   /** Por mecânica, os ticks em que cada carga gasta volta. */
   cargas: Record<string, number[]>;
   modo?: ModoDeMovimento;
-  ancora?: { x: number; y: number; ateTick: number };
+  /** A Âncora Rúnica do Mago: o totem no ponto de volta, até `ateTick`; `raio` é o alcance para voltar (D-168). */
+  ancora?: { x: number; y: number; ateTick: number; raio: number };
+  /** Marco 40 (14/11/2026, D-168): o círculo do Acelerar (o Mago), com a ponta quando é elemental. */
+  circulo?: { x: number; y: number; raio: number; pct: number; ateTick: number; ponta?: PontaElemental };
+  /** D-168: os tiros do Arqueiro levam a ponta até o tick (depois de sair da camuflagem). */
+  tiroElemental?: { ponta: PontaElemental; ateTick: number };
 }
 
 export const SISTEMA_DO_PERSONAGEM = 40;
@@ -729,6 +742,8 @@ export function clonarEntidade(e: Entidade): Entidade {
       cargas: Object.fromEntries(Object.entries(e.movimentoClasse.cargas).map(([k, v]) => [k, [...v]])),
       ...(e.movimentoClasse.modo ? { modo: { ...e.movimentoClasse.modo } } : {}),
       ...(e.movimentoClasse.ancora ? { ancora: { ...e.movimentoClasse.ancora } } : {}),
+      ...(e.movimentoClasse.circulo ? { circulo: { ...e.movimentoClasse.circulo } } : {}),
+      ...(e.movimentoClasse.tiroElemental ? { tiroElemental: { ...e.movimentoClasse.tiroElemental } } : {}),
     } } : {}),
     ...(e.ultimaDePapel ? { ultimaDePapel: { ...e.ultimaDePapel, alvos: [...e.ultimaDePapel.alvos] } } : {}),
     ...(e.trilhaClasse ? { trilhaClasse: { chaves: { ...e.trilhaClasse.chaves }, degraus: e.trilhaClasse.degraus } } : {}),
@@ -757,7 +772,7 @@ export function clonarEntidade(e: Entidade): Entidade {
         }
       : null,
     bolsa: e.bolsa ? clonarBolsa(e.bolsa) : null,
-    invocacao: e.invocacao ? { ...e.invocacao } : null,
+    invocacao: e.invocacao ? { ...e.invocacao, ...(e.invocacao.posto && { posto: { ...e.invocacao.posto } }), ...(e.invocacao.descarga && { descarga: { ...e.invocacao.descarga } }) } : null,
     interacao: e.interacao ? { ...e.interacao } : null,
     buffsArmados: e.buffsArmados.map((b) => ({ ateTick: b.ateTick, efeito: { ...b.efeito, interno: b.efeito.interno ? { ...b.efeito.interno } : null } })),
     aparencia: e.aparencia ? { ...e.aparencia } : null,

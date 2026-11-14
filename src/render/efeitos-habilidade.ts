@@ -43,9 +43,7 @@ import { ligarSolos, tierDaArma } from './solos-visual';
 import { ligarLancas } from './lancas-visual';
 import { DT_MS } from '../core/loop';
 import { viradoNevoa } from './movimento/corpo-movimento';
-import balance from '../data/balance.json';
 
-const RAIO_NEVOA = balance.movimentoClasse.nevoa.servosRaio;
 import { corDaArmadilha } from './armadilhas-visual';
 
 /** 06/11/2026 (D-135): o efeito que cada elemento solta quando o círculo de conjuração dispara. */
@@ -390,7 +388,7 @@ export class EfeitosDeHabilidade {
     }
     for (const e of estado.entidades) {
       // Marco 40 (13/11/2026): quem virou névoa não pisca aura (a nuvem de escuridão é o corpo dele).
-      if (e.morto || viradoNevoa(e, estado, RAIO_NEVOA)) continue;
+      if (e.morto || viradoNevoa(e, estado)) continue;
       const status = e.efeitos.filter((f) => f.ateTick > estado.tick && REGISTRO_EFEITOS[f.tipo].ehStatus);
       const primeiro = status[0];
       if (!primeiro || agoraMs - (this.ultimaAura.get(e.id) ?? 0) < INTERVALO_AURA_MS) continue;

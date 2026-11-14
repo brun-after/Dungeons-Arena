@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.14 · **Data:** 14/11/2026
+**Versão:** 1.15 · **Data:** 14/11/2026
 
 > **Histórico**
+> - **1.15 (14/11/2026)**: D-168: as mecânicas de movimento refeitas (o Acelerar no lugar do Piscar, a Âncora com o totem e o eco, a Chegada, o Posto em duas ativações, a névoa que reúne os servos, a montaria que precisa do companheiro perto, os marcos elementais e o botão no celular).
 > - **1.14 (14/11/2026)**: D-167: o movimento do Aventureiro é o do companheiro ativo (o falcão carrega, o lobo e o urso são a montaria), os três golpes de cada fera e as três mecânicas de toda classe desde o nível 1.
 > - **1.13 (14/11/2026)**: D-166: a caça marcada do Aventureiro (o básico marca, o companheiro ataca) e o bote do lobo e do urso.
 > - **1.12 (13/11/2026)**: D-165: os companheiros do Aventureiro (falcão, lobo e urso), a Troca de companheiro fixa na tecla 1 e as skills de classe pelo companheiro ativo (o Rosnar e o Rugido).
@@ -5054,3 +5055,56 @@ mecânicas até o nível 20.
   (D-164), e o G troca entre as três desde o começo.
 - **Os atlas** de Arqueiro, Necromante e Aventureiro ganharam as poses de correr, saltar, voar e montar, e os GLB os
   clipes delas, como as do Guerreiro e do Mago.
+
+## D-168 — Marco 40: as mecânicas de movimento refeitas (14/11/2026)
+
+**Contexto.** Testando o D-164 e o D-167, o usuário pediu que cada mecânica fizesse o que a narrativa dela promete e que o
+movimento existisse no celular. A Arremetida ia para onde o Guerreiro olhava. A névoa soltava os servos longe e
+piscava em amarelo ao acabar (a proteção `imune_dano`, amarela, ainda valia quando os corpos reapareciam). O Posto
+dos Mortos agia quase como a Troca de Corpo. O lobo e o urso eram teleportados para o dono ao montar e de volta ao
+desmontar. O falcão crescia e ficava longe do Aventureiro.
+
+**Decisão.**
+- **Celular.** Há um botão de movimento nos controles de toque (`ui/movimento-toque.ts`).
+  - Tocar usa a mecânica no rumo do joystick. Segurar troca a mecânica (o G).
+  - As mecânicas que miram (`mira` em `movimentos.json`: a Arremetida e o Posto) têm duas ativações: o toque arma a
+    mira, e o próximo toque no mapa escolhe o ponto. Tocar no botão de novo cancela.
+  - No teclado, o Shift manda o ponto sob o cursor. O comando `movimentoClasse` ganhou o `alvo` (uma célula).
+- **Mago.**
+  - O **Acelerar** substitui o Piscar. É um círculo maior que o da pedra de retorno e dura 8 s; quem está dentro,
+    inimigo também, ganha +80% de velocidade.
+    - A partir do nível 30, o círculo aplica a ponta do Mago a cada segundo. No Sagrado, ela cura os aliados.
+  - A **Âncora Rúnica** fica, com alcance inicial menor: 8 células, mais 1,2 a cada 10 níveis.
+    - A 1ª ativação finca um totem rúnico (uma pedra de pé com runas, diferente da armadilha baixa dos monstros), com
+      o círculo sutil do alcance.
+    - A 2ª, dentro do círculo, volta ao totem e deixa um rastro da ponta do Mago. A partir do nível 30, deixa também
+      um **eco** (uma isca que provoca os inimigos perto por 3 s), e o Mago fica invisível por 1 s.
+    - O rastro é visto por todos até o nível do eco. Dali em diante, só pelo Mago e pelos aliados.
+- **Guerreiro.**
+  - A Arremetida vai na direção do ponto mirado.
+  - A partir do nível 30, a queda do Salto de Guerra aplica a ponta do Guerreiro aos inimigos do raio. No Físico, é
+    dano bruto pelo nível.
+- **Arqueiro.**
+  - A **Chegada** substitui a Tirolesa. O Arqueiro se balança de arco em arco (3,5 células cada), numa corda lançada
+    no alto, e atira o básico sozinho no inimigo mais perto (`combat/movimento-tiros.ts`). A partir do nível 30, esses
+    tiros levam a ponta dele.
+  - O Salto para Trás cresce mais com o nível (0,5 célula a cada 10 níveis). A partir do 30, deixa uma armadilha da
+    ponta do Arqueiro onde ele estava.
+  - A partir do nível 30, os tiros nos 3 s depois de sair da camuflagem levam a ponta.
+- **Necromante.**
+  - A **névoa** leva todos os servos (os do posto ficam), até o fim. Eles vão num anel em volta do Necromante, à frente
+    e dos lados, numa velocidade que nunca fica atrás da dele; não lutam e não perdem o rumo.
+  - Ao acabar, a proteção da névoa sai de todos de uma vez, e o servo que ficou numa parede volta para junto dele.
+  - O **Posto dos Mortos** tem duas ativações.
+    - A 1ª manda o servo de vida mais cheia ao ponto mirado (até 10 células, mais 1 a cada 10 níveis).
+    - Ele fica ali parado por até 1 min, sem chamar a atenção dos monstros (só a dos jogadores) e sem lutar.
+    - A 2ª troca de lugar com ele, a qualquer distância. Os marcos de D-164 seguem.
+- **Aventureiro.**
+  - Ele só monta (ou é levado pelo falcão) com o companheiro a até 3 células.
+  - O companheiro vai na simulação junto com o dono, virado para onde ele vai, e fica onde a viagem acabou.
+  - O falcão não cresce e leva o Aventureiro pelos ombros.
+  - A partir do nível 30, o companheiro que desmonta descarrega a ponta do dono nos 3 golpes seguintes (até 6 s), com
+    o círculo da ponta embaixo dele e a aura subindo.
+- **A ponta de quem usa** é a do maior vínculo do eneágono; sem vínculo, a runa padrão da classe
+  (`combat/movimento-extras.ts`). Os números ficam em `balance.json` (`movimentoClasse`). Balanceamento: 172/172.
+

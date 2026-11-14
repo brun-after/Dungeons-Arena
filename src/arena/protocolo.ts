@@ -197,10 +197,13 @@ export function lerComando(v: unknown): Comando | null {
       return id(v.id) ? { t: v.t, id: v.id } : null;
     case 'autoAtaque':
       return typeof v.ligado === 'boolean' ? { t: 'autoAtaque', ligado: v.ligado } : null;
-    // Marco 40 (D-164): o rumo do movimento é opcional (±1000).
+    // Marco 40 (D-164): o rumo do movimento é opcional (±1000). D-168: o ponto mirado também (a célula).
     case 'movimentoClasse': {
-      if (v.dx === undefined && v.dy === undefined) return { t: 'movimentoClasse' };
-      return inteiro(v.dx) && inteiro(v.dy) && Math.abs(v.dx) <= 1000 && Math.abs(v.dy) <= 1000 ? { t: 'movimentoClasse', dx: v.dx, dy: v.dy } : null;
+      const alvo = v.alvo === undefined ? undefined : lerCelula(v.alvo);
+      if (v.alvo !== undefined && !alvo) return null;
+      const comAlvo = alvo ? { alvo } : {};
+      if (v.dx === undefined && v.dy === undefined) return { t: 'movimentoClasse', ...comAlvo };
+      return inteiro(v.dx) && inteiro(v.dy) && Math.abs(v.dx) <= 1000 && Math.abs(v.dy) <= 1000 ? { t: 'movimentoClasse', dx: v.dx, dy: v.dy, ...comAlvo } : null;
     }
     case 'trocarMovimento':
       return { t: 'trocarMovimento' };

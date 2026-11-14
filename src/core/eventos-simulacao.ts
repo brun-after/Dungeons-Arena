@@ -10,6 +10,7 @@ import type { TipoEfeito } from '../combat/registro-efeitos';
 import type { Elemento } from '../combat/elementos';
 import type { Slot } from '../modos/modo';
 import type { StatusCaminho } from '../world/navegacao';
+import type { PontaElemental } from '../progression/vinculo';
 
 /** Marco 26 (D-124): o que deslocou alguém (o evento `deslocado`). */
 // Marco 40 (13/11/2026): o recuo (o Salto para trás) desliza com o pulo, não como o avanço.
@@ -186,7 +187,7 @@ export type EventoSimulacao =
   /** Marco 39 (D-149): o personagem antigo passou pela tela de atualização. */
   | { t: 'personagemAtualizado'; tick: number; id: EntidadeId; sistema: number }
   /** Marco 40 (13/11/2026, D-164): o movimento da classe (ativo = trocado no G; início, fim, recusado ou o bônus perdido). */
-  | { t: 'movimentoClasse'; tick: number; id: EntidadeId; mov: string; fase: 'ativo' | 'inicio' | 'fim' | 'recusado' | 'perdeu'; motivo?: string }
+  | { t: 'movimentoClasse'; tick: number; id: EntidadeId; mov: string; fase: 'ativo' | 'inicio' | 'fim' | 'recusado' | 'perdeu'; motivo?: string; ponta?: PontaElemental; eco?: boolean }
   /** Marco 40 (D-165): o Aventureiro trocou de companheiro. */
   | { t: 'companheiroTrocado'; tick: number; id: EntidadeId; pet: 'falcao' | 'lobo' | 'urso' }
   /** Marco 40 (D-166): o básico do Aventureiro marcou a caça do companheiro. */

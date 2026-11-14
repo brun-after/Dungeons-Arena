@@ -25,10 +25,10 @@ import { ticksDe } from '../core/tempo';
 import { SLOTS_BARRA, type Entidade, type PontoVisual } from '../entities/entidade';
 import { t } from '../i18n';
 import { ligarPonteiro } from '../input/ponteiro';
-import { comandoDoMovimento, comandoMover } from '../input/direcao';
+import { comandoMover } from '../input/direcao';
 import { ligarTeclado, type Teclado } from '../input/teclado';
 import { podeFerir } from '../modos/relacao';
-import { criarAlvoDeSuporte } from './alvo-suporte'; import { linhasDaSkill } from './descricao-skill';
+import { criarAlvoDeSuporte } from './alvo-suporte'; import { linhasDaSkill } from './descricao-skill'; import { criarMovimentoToque } from './movimento-toque';
 import { consumiveisComAtalho } from '../progression/inventario';
 import { detectarToque, mostrarDirecional, sinaisDoNavegador } from '../plataforma/dispositivo';
 import { lerPreferencias, type Preferencias } from '../plataforma/preferencias';
@@ -334,13 +334,15 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const isometrico = () => camera.projecaoAtual.visao === 'iso';
   const suporte = criarAlvoDeSuporte({ ctx, estado: o.estado, jogador, cursor: () => ponteiro.celulaDoCursor(), aoEscolher: (nome) => { hud.registrar(nome ? t('log.aliadoEscolhido', { nome }) : t('log.aliadoEsquecido')); } });
   const usarHabilidade = (id: string) => { const alvo = suporte.alvoPara(id); emitir({ t: 'usarHabilidade', id, ...(alvo && { alvo }) }); };
+  // Marco 40 (14/11/2026, D-168): o movimento da classe no Shift (as que miram, no ponteiro) e no botão do celular (dois toques).
+  const movToque = criarMovimentoToque({ ctx, estado: o.estado, jogador, emitir, cursor: () => ponteiro.celulaDoCursor(), avisar: (texto) => { mostrarAviso(ui, texto, 1500); } });
   // Toque ou clique num hostil seleciona e trava o alvo (no travado, destrava: D-065); em outra célula, vai até ela.
   // Marco 26 (D-115): devolve se andou (o mouse segurado só guia quando o clique não foi num alvo).
   const golpeQuebravel = criarGolpeNoQuebravel({ ctx, estado: o.estado, jogador, emitir });
   const aoTocarCelula = (c: Celula, ponto: Celula = c): boolean => {
     const local = jogador();
-    // Marco 26 (D-113): no quebrável, o golpe (ou o caminho até ele); não guia como o joystick.
-    if (golpeQuebravel.tocar(c, performance.now())) return false;
+    // Marco 26 (D-113): no quebrável, o golpe (ou o caminho até ele); não guia como o joystick. D-168: a mira do movimento antes.
+    if (movToque.tocar(c) || golpeQuebravel.tocar(c, performance.now())) return false;
     golpeQuebravel.esquecer();
     const hostil = o.estado().entidades.find((e) => {
       const oc = celulaOcupada(e);
@@ -475,11 +477,9 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       tipo: prefs.controle,
       direcional,
       aoLadoDoDirecional: centralizar.elemento,
-      aoMudarDirecao: (rumo) => {
-        golpeQuebravel.esquecer();
-        emitir(comandoMover(rumo));
-      },
+      aoMudarDirecao: (rumo) => { golpeQuebravel.esquecer(); movToque.rumo(rumo); emitir(comandoMover(rumo)); },
       principal: botaoUltimate.elemento,
+      movimento: movToque.botao,
       aoInteragir: () => {
         emitir({ t: 'interagir' });
       },
@@ -581,7 +581,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     aoUltimate: usarUltimate,
     aoAlternarBasico: alternarBasico,
     // Marco 40 (13/11/2026, D-164): o movimento da classe (Shift) e a troca da mecânica (G).
-    aoMovimento: (rumo) => { emitir(comandoDoMovimento(rumo)); },
+    aoMovimento: movToque.doTeclado,
     aoTrocarMovimento: () => { emitir({ t: 'trocarMovimento' }); },
     // `Esc` contextual (§2.15): com alvo, cancela a mira; sem alvo, pausa (ou abre o menu, na arena).
     aoCancelar: () => {
@@ -781,7 +781,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     desmontar: () => {
       paineisParty.limpar();
       clearTimeout(releitura);
-      teclado.desligar(); suporte.destruir();
+      teclado.desligar(); suporte.destruir(); movToque.desligar();
       encerrarSessaoDeTela();
       hud.destruir();
       visao.destruir();

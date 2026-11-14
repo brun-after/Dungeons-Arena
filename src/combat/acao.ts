@@ -51,7 +51,8 @@ import { raioAreaDaEncarnacao } from './encarnacao-efeitos';
 import { comBuffsDeLeitura, ehRetorno } from './buffs-de-leitura';
 import { papelDe } from './combos-papel';
 import { comCombosDoLancamento, fatorDeConjuracaoDoCombo } from './combos-assinados';
-import { aoAgir, motivoDoMovimento, naTirolesa, noAr } from './movimento-classe';
+import { aoAgir, motivoDoMovimento, naTirolesa, noAr, ocultoDosMonstros } from './movimento-classe';
+import { basicoElemental } from './movimento-extras';
 import { quantidadeDeSaltos, saltar } from './saltos';
 import { dispararGanchosDe, passivosDe } from '../progression/ganchos-do-portador';
 import { comCombo, fazerCombo } from './combos';
@@ -170,7 +171,8 @@ export function alvoOfensivoValido(estado: EstadoJogo, ctx: ContextoSimulacao, a
   // Marco 30 (30/10/2026, D-129): quem está no refúgio (a vila do Mundo) não é alvo dos monstros. D-138: salvo em
   // combate com eles; e quem está dentro, sem combate, não fere o monstro de fora.
   const refugiado = refugioProtege(estado, ctx, ator, alvo);
-  return vivo(alvo) && visivel && !falcaoFora && !refugiado && podeFerir(ator, alvo, ctx.modo);
+  // Marco 40 (14/11/2026, D-168): o servo do Posto dos Mortos não chama a atenção dos monstros.
+  return vivo(alvo) && visivel && !falcaoFora && !refugiado && !ocultoDosMonstros(ator, alvo) && podeFerir(ator, alvo, ctx.modo);
 }
 
 /** Marco 14: alvo de suporte válido: vivo e o próprio ou aliado, pela relação do modo. */
@@ -349,7 +351,7 @@ export function iniciarAcao(
   // Marco 40 (13/11/2026, D-163): o combo assinado que sai sem conjuração.
   const lancamentoTick = estado.tick + ticksDe((hab.conjuracaoMs * (ehBasico(ator, hab.id) ? 1 : fatorDeConjuracaoDoCombo(estado, ctx, ator, hab)) + avisoExtra) / pressa);
   // D-164: atacar tira o bônus de viagem do movimento da classe.
-  aoAgir(estado, ator, hab, saida);
+  aoAgir(estado, ctx, ator, hab, saida);
   const viagem =
     hab.politicaImpacto === 'projetil' ? ticksDe((Math.hypot(mira.x - origem.x, mira.y - origem.y) / hab.velocidadeProjetil) * 1000) : Math.round(vooDoGolpe(estado, ctx, ator, hab, mira, hab.politicaImpacto === 'area' ? null : (alvo?.id ?? null), saida) / pressa);
   if (ehBasico(ator, hab.id)) ator.ultimoBasicoTick = estado.tick;
@@ -515,7 +517,7 @@ function lancar(
     return;
   }
   // Marco 40 (13/11/2026, D-161): a área ampliada e o eco (os estados das leituras de estilo) mudam a magia de agora.
-  const lida = comBuffsDeLeitura(ator, daFase ? habilidadeBase : basicoComVariacao(estado, ator, prepararSequencia(estado, ctx, ator, habilidadeBase, acaoId, alvo, mira)), estado.tick);
+  const lida = comBuffsDeLeitura(ator, daFase ? habilidadeBase : basicoElemental(estado, ctx, ator, basicoComVariacao(estado, ator, prepararSequencia(estado, ctx, ator, habilidadeBase, acaoId, alvo, mira)), ehBasico(ator, habilidadeBase.id)), estado.tick);
   // Marco 40 (13/11/2026, D-163): o combo de papel (a skill anterior de um papel, esta de outro) muda esta.
   const semPapel = daFase || ehBasico(ator, lida.id);
   const habLida = semPapel ? lida : comCombosDoLancamento(estado, ctx, ator, lida, alvo, mira, saida);
