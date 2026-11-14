@@ -220,11 +220,12 @@
   ],
   "veiculos": {
     "mago": {
-      "invocacoes": {
-        "ataque": "eidolon_arcano",
-        "cura": "fada",
-        "guarda": "copia_ilusoria"
-      }
+      "etapas": {
+        "ataque": "etapa_glifos_arcanos",
+        "cura": "etapa_circulo_restauracao",
+        "guarda": "etapa_barreira_arcana"
+      },
+      "etapasVezes": 3
     },
     "necromante": {
       "invocacoes": {
@@ -237,18 +238,20 @@
       }
     },
     "guerreiro": {
-      "invocacoes": {
-        "ataque": "guerreiro_espectral",
-        "cura": "porta_estandarte",
-        "guarda": "sentinela"
-      }
+      "etapas": {
+        "ataque": "etapa_onda_de_laminas",
+        "cura": "etapa_grito_de_guerra",
+        "guarda": "etapa_parede_de_escudos"
+      },
+      "etapasVezes": 3
     },
     "arqueiro": {
-      "invocacoes": {
-        "ataque": "falcao_espectral",
-        "cura": "espirito_do_bosque",
-        "guarda": "ent_guardiao"
-      }
+      "etapas": {
+        "ataque": "etapa_saraivada",
+        "cura": "etapa_unguento_do_cacador",
+        "guarda": "etapa_cerca_de_armadilhas"
+      },
+      "etapasVezes": 3
     },
     "aventureiro": {
       "invocacoes": {
@@ -2181,7 +2184,7 @@
       "formulaCura": null,
       "custoRecurso": 0,
       "recargaMs": 0,
-      "conjuracaoMs": 0,
+      "conjuracaoMs": 300,
       "interrupcao": "ininterrupta",
       "velocidadeProjetil": 0,
       "icone": "coroa",
@@ -2211,6 +2214,319 @@
         "assinatura": "corrente"
       },
       "interna": true
+    },
+    {
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "icone": "coroa",
+      "grau": "S",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 3,
+      "alcanceCelulas": 0,
+      "tags": [
+        "ultimate"
+      ],
+      "interna": true,
+      "id": "etapa_glifos_arcanos",
+      "nome": "Glifos arcanos",
+      "papel": "dano",
+      "efeitos": [],
+      "visual": {
+        "cor": "#a58cff",
+        "impacto": "runas",
+        "som": "golpe",
+        "assinatura": "sobrecarga_arcana"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": "2d6",
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "icone": "coroa",
+      "grau": "S",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "aliados",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 3,
+      "alcanceCelulas": 0,
+      "tags": [
+        "ultimate"
+      ],
+      "interna": true,
+      "id": "etapa_circulo_restauracao",
+      "nome": "Círculo de restauração",
+      "papel": "cura",
+      "efeitos": [],
+      "visual": {
+        "cor": "#9fe0ff",
+        "impacto": "runas",
+        "som": "nivel",
+        "assinatura": "circulo_de_amparo"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "icone": "coroa",
+      "grau": "S",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "aliados",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 3,
+      "alcanceCelulas": 0,
+      "tags": [
+        "ultimate"
+      ],
+      "interna": true,
+      "id": "etapa_barreira_arcana",
+      "nome": "Barreira arcana",
+      "papel": "defesa",
+      "efeitos": [
+        {
+          "tipo": "escudo",
+          "valor": 8,
+          "duracaoMs": 4000
+        }
+      ],
+      "visual": {
+        "cor": "#b7a6ff",
+        "impacto": "runas",
+        "som": "golpe",
+        "assinatura": "barreira"
+      }
+    },
+    {
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "icone": "coroa",
+      "grau": "S",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 2,
+      "alcanceCelulas": 0,
+      "tags": [
+        "ultimate"
+      ],
+      "interna": true,
+      "id": "etapa_onda_de_laminas",
+      "nome": "Onda de lâminas",
+      "papel": "dano",
+      "efeitos": [
+        {
+          "tipo": "empurrao",
+          "valor": 1
+        }
+      ],
+      "visual": {
+        "cor": "#d9d9d9",
+        "impacto": "runas",
+        "som": "golpe",
+        "assinatura": "chuva_de_laminas"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": "2d6",
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "icone": "coroa",
+      "grau": "S",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "aliados",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 3,
+      "alcanceCelulas": 0,
+      "tags": [
+        "ultimate"
+      ],
+      "interna": true,
+      "id": "etapa_grito_de_guerra",
+      "nome": "Grito de guerra",
+      "papel": "cura",
+      "efeitos": [
+        {
+          "tipo": "acelerado",
+          "pct": 15,
+          "duracaoMs": 3000
+        }
+      ],
+      "visual": {
+        "cor": "#e8c06a",
+        "impacto": "runas",
+        "som": "nivel",
+        "assinatura": "brado"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "icone": "coroa",
+      "grau": "S",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "aliados",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 3,
+      "alcanceCelulas": 0,
+      "tags": [
+        "ultimate"
+      ],
+      "interna": true,
+      "id": "etapa_parede_de_escudos",
+      "nome": "Parede de escudos",
+      "papel": "defesa",
+      "efeitos": [
+        {
+          "tipo": "escudo",
+          "valor": 10,
+          "duracaoMs": 4000
+        }
+      ],
+      "visual": {
+        "cor": "#c9a24a",
+        "impacto": "runas",
+        "som": "golpe",
+        "assinatura": "muralha_de_aco"
+      }
+    },
+    {
+      "formulaDano": "2d6",
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "icone": "coroa",
+      "grau": "S",
+      "tipoAtaque": "fisico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 3,
+      "alcanceCelulas": 0,
+      "tags": [
+        "ultimate"
+      ],
+      "interna": true,
+      "id": "etapa_saraivada",
+      "nome": "Saraivada",
+      "papel": "dano",
+      "efeitos": [],
+      "visual": {
+        "cor": "#9ad06a",
+        "impacto": "runas",
+        "som": "golpe",
+        "assinatura": "chuva_de_flechas"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": "2d6",
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "icone": "coroa",
+      "grau": "S",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "aliados",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 3,
+      "alcanceCelulas": 0,
+      "tags": [
+        "ultimate"
+      ],
+      "interna": true,
+      "id": "etapa_unguento_do_cacador",
+      "nome": "Unguento do caçador",
+      "papel": "cura",
+      "efeitos": [
+        {
+          "tipo": "acelerado",
+          "pct": 20,
+          "duracaoMs": 3000
+        }
+      ],
+      "visual": {
+        "cor": "#7dcea0",
+        "impacto": "runas",
+        "som": "nivel",
+        "assinatura": "bencao"
+      }
+    },
+    {
+      "formulaDano": null,
+      "formulaCura": null,
+      "custoRecurso": 0,
+      "recargaMs": 0,
+      "conjuracaoMs": 300,
+      "interrupcao": "ininterrupta",
+      "velocidadeProjetil": 0,
+      "icone": "coroa",
+      "grau": "S",
+      "tipoAtaque": "magico",
+      "politicaAlvo": "hostil",
+      "politicaImpacto": "area",
+      "tipoArea": "ao_redor",
+      "raioArea": 2,
+      "alcanceCelulas": 0,
+      "tags": [
+        "ultimate"
+      ],
+      "interna": true,
+      "id": "etapa_cerca_de_armadilhas",
+      "nome": "Cerca de armadilhas",
+      "papel": "controle",
+      "efeitos": [
+        {
+          "tipo": "enraizado",
+          "duracaoMs": 1500
+        }
+      ],
+      "visual": {
+        "cor": "#8a6f4a",
+        "impacto": "runas",
+        "som": "golpe",
+        "assinatura": "armadilha_de_caca"
+      }
     }
   ]
 }

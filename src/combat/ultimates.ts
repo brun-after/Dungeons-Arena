@@ -26,8 +26,14 @@ export interface Ultimate {
 /** Marco 40 (13/11/2026, D-161): o que a classe dá à ultimate — as criaturas de cada função e, no Necromante, as lanças. */
 export const FUNCOES_INVOCACAO = ['ataque', 'cura', 'guarda'] as const;
 export type FuncaoInvocacao = (typeof FUNCOES_INVOCACAO)[number];
+// D-173 (14/11/2026): invocar é identidade do Necromante e do Aventureiro. As outras classes trocam cada criatura por
+// uma etapa da própria classe (uma skill interna: os glifos do Mago, a onda de lâminas do Guerreiro, a saraivada do
+// Arqueiro), que a ultimate dispara no lugar da invocação. Um veículo tem `invocacoes` ou `etapas`, nunca os dois.
 export interface Veiculo {
-  invocacoes: Readonly<Record<FuncaoInvocacao, string>>;
+  invocacoes?: Readonly<Record<FuncaoInvocacao, string>>;
+  etapas?: Readonly<Record<FuncaoInvocacao, string>>;
+  /** Quantas vezes, no máximo, a etapa volta ao longo do tempo que as criaturas durariam (uma por criatura). */
+  etapasVezes?: number;
   /** As lanças dos mortos vêm junto de toda ultimate que fere. */
   lanca?: LancaDosMortos;
 }
@@ -101,14 +107,21 @@ export function lerUltimates(json: unknown): UltimatesLidas {
   const brutoV = raiz.veiculos === undefined ? {} : l.objeto(raiz.veiculos, 'veiculos');
   for (const [classe, v] of Object.entries(brutoV)) {
     const o = l.objeto(v, `veículo ${classe}`);
-    const inv = l.objeto(o.invocacoes, `veículo ${classe}: invocacoes`);
-    const invocacoes = { ataque: l.texto(inv, 'ataque'), cura: l.texto(inv, 'cura'), guarda: l.texto(inv, 'guarda') };
+    const porFuncao = (campo: 'invocacoes' | 'etapas') => {
+      if (o[campo] === undefined) return undefined;
+      const x = l.objeto(o[campo], `veículo ${classe}: ${campo}`);
+      return { ataque: l.texto(x, 'ataque'), cura: l.texto(x, 'cura'), guarda: l.texto(x, 'guarda') };
+    };
+    const invocacoes = porFuncao('invocacoes');
+    const etapas = porFuncao('etapas');
+    if (!invocacoes === !etapas) l.erro(`veículo ${classe}: precisa de "invocacoes" ou de "etapas" (só um)`);
     let lanca: LancaDosMortos | undefined;
     if (o.lanca !== undefined) {
       const la = l.objeto(o.lanca, 'lanca');
       lanca = { alem: l.numero(la, 'alem', { min: 0, max: 4, inteiro: true }), lados: la.lados === undefined ? false : l.booleano(la, 'lados'), junto: true };
     }
-    veiculos.set(classe, { invocacoes, ...(lanca && { lanca }) });
+    const etapasVezes = o.etapasVezes === undefined ? undefined : l.numero(o, 'etapasVezes', { min: 1, max: 6, inteiro: true });
+    veiculos.set(classe, { ...(invocacoes && { invocacoes }), ...(etapas && { etapas }), ...(etapasVezes && { etapasVezes }), ...(lanca && { lanca }) });
   }
   const h = lerHabilidades({ versao: raiz.versao, habilidades: raiz.habilidades });
   for (const u of ultimates.values()) {

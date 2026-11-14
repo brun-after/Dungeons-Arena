@@ -16,7 +16,7 @@ import type { Habilidade } from './habilidades';
 import { aplicarSecundario, cabeNaSkill, naFaixa, type TabelaDePapeis } from './papeis';
 import { FAIXAS_DE_VINCULO, type RegrasRunas } from './runas';
 import { ajustar } from './leituras';
-import { construirEfeito } from './registro-efeitos';
+import { construirEfeito, type EfeitoCanonico } from './registro-efeitos';
 import { chaveDaFusao, type Fusao, type Ultimate, type Veiculo } from './ultimates';
 
 export interface FioDeElemento {
@@ -82,7 +82,8 @@ export function aplicarFios(h: Habilidade, fios: FiosDaUltimate, fontes: FontesD
 
 /**
  * Marco 40 (13/11/2026, D-161): o veículo da classe e a matéria da runa.
- * - As invocações viram as criaturas da classe para a função da família (ataque, cura ou guarda).
+ * - As invocações viram as criaturas da classe para a função da família (ataque, cura ou guarda); nas classes sem
+ *   identidade de invocação (D-173), viram a etapa da classe para a função.
  * - No Necromante, os mortos lançam as lanças de osso junto de toda ultimate que fere (a identidade do Juízo).
  * - O campo que a ultimate deixa (a cratera do Cometa) leva o estado do elemento da runa; no Físico, o chão revolvido
  *   atola.
@@ -91,14 +92,27 @@ function vestir(h: Habilidade, classe: string | undefined, fontes: FontesDosFios
   const veiculo = classe ? fontes.veiculos?.get(classe) : undefined;
   const familia = fontes.ultimates?.get(h.id.replace(/_\d+$/, ''));
   // As invocações que a fusão traz (sem família de invocação) vêm como as de ataque da classe.
-  const criatura = veiculo ? veiculo.invocacoes[familia?.invocacao ?? 'ataque'] : undefined;
+  const funcao = familia?.invocacao ?? 'ataque';
+  const criatura = veiculo?.invocacoes?.[funcao];
+  const etapa = veiculo?.etapas?.[funcao];
   const runa = h.runa ?? 'fisico';
   const estado = runa === 'fisico' ? construirEfeito('atolado', { pct: 40, duracaoMs: 2000 }) : fontes.elementos.get(runa)?.estado;
-  const efeitos = h.efeitos.map((e) => {
-    if (e.tipo === 'invocar_temporario' && criatura) return { ...e, ref: criatura };
-    if (e.tipo === 'campo_veneno' && !e.interno && estado) return { ...e, interno: { ...estado, interno: null } };
-    return e;
+  const efeitos = h.efeitos.flatMap((e): EfeitoCanonico[] => {
+    if (e.tipo === 'invocar_temporario' && criatura) return [{ ...e, ref: criatura }];
+    if (e.tipo === 'invocar_temporario' && etapa) return etapasNoLugar(e, etapa, veiculo.etapasVezes ?? 1);
+    if (e.tipo === 'campo_veneno' && !e.interno && estado) return [{ ...e, interno: { ...estado, interno: null } }];
+    return [e];
   });
   const lanca = veiculo?.lanca && h.formulaDano !== null && !h.lanca ? veiculo.lanca : undefined;
   return { ...h, efeitos, ...(lanca && { lanca }) };
+}
+
+/**
+ * D-173 (14/11/2026): no lugar das criaturas, a etapa da classe — uma vez por criatura (até `vezesMax`), espalhadas
+ * pelo tempo que elas durariam (a primeira já), no mesmo ponto (no conjurador, se elas nasceriam nele).
+ */
+function etapasNoLugar(e: EfeitoCanonico, ref: string, vezesMax: number): EfeitoCanonico[] {
+  const vezes = Math.max(1, Math.min(vezesMax, e.valor));
+  const passo = Math.floor(e.duracaoMs / vezes);
+  return Array.from({ length: vezes }, (_, i) => construirEfeito('fase', { ref, em: e.em, duracaoMs: i * passo }));
 }
