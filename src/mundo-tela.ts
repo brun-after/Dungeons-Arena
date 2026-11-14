@@ -37,9 +37,12 @@ import { abrirPortalTemporario } from './ui/portal-mapa';
 import { PORTAL_TEMPORARIO } from './mundo/objetos-mundo';
 import type { ContextoSimulacao } from './core/contexto';
 import { proximaEtapa } from './mundo/orientacao';
+import { vigiaDaPassagem } from './ui/passagem-mundo';
 
 // 09/11/2026 (D-144): 20 s (a sala nova pode estar nascendo: gerar a região leva tempo no servidor).
 const ESPERA_ENTRADA_MS = 20_000;
+/** Marco 41 (D-169): a cena nova aparece no máximo neste tempo, mesmo sem o personagem no estado ainda. */
+const REVELAR_EM_MS = 4000;
 const agoraMs = () => relogioDoNavegador.agoraMs();
 const conteudo = conteudoOficial();
 const modo = modoPorId(conteudo, MODO_MUNDO);
@@ -249,6 +252,12 @@ function formularioDeCriacao(slot: number, criar: (classeId: string, nome: strin
   return form;
 }
 
+/** Marco 41 (D-169): a cena de antes na troca de sala (sai quando a nova está pronta) e a vista dela. */
+interface TrocaDeCena {
+  tirar: () => void;
+  desvio: { x: number; y: number } | null;
+}
+
 /** Espera o bemVindo (ou a recusa) da sala. */
 async function esperarEntrada(eu: ClienteArena): Promise<boolean> {
   const inicio = Date.now();
@@ -291,21 +300,37 @@ async function conectarComTentativas(servidor: string, token: string, pedido: Pe
  * Entra num lugar e joga; a troca de sala chama de novo, com o bilhete. 09/11/2026 (D-144): o token é renovado a
  * cada entrada (o da nuvem vence em 1 h) e, se a viagem pelo bilhete falhar de vez, o personagem volta pela vila
  * salva (`vilaSalva`) em vez de cair na tela de erro.
+ * Marco 41 (14/11/2026, D-169): na troca, a cena de antes fica na tela (parada no último quadro) enquanto a nova
+ * conecta e monta escondida por cima; quando o personagem já está na sala nova, a nova aparece e a velha sai
+ * (`troca`). Sem tela preta: na passagem entre as regiões, os dois mapas mostram o mesmo trecho, e a câmera começa
+ * com o personagem no mesmo ponto da vista em que estava.
  */
-async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: string, pedido: PedidoDoMundo, orientacao: OrientacaoMundo = criarOrientacaoMundo(), vilaSalva: string | null = null): Promise<void> {
+async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: string, pedido: PedidoDoMundo, orientacao: OrientacaoMundo = criarOrientacaoMundo(), vilaSalva: string | null = null, troca: TrocaDeCena | null = null): Promise<void> {
+  const anterior = troca?.tirar ?? null;
+  /** Tira a cena de antes (se ainda está na tela) e mostra o erro. */
+  const falhar = (texto: string) => {
+    anterior?.();
+    mostrarErro(raiz, texto);
+  };
   const lugar = lerLugar(reino, pedido.lugar);
   if (!lugar) {
-    mostrarErro(raiz, t('mundo.falha'));
+    falhar(t('mundo.falha'));
     return;
   }
   const token = (await tokenDaConta().catch(() => null)) ?? tokenAntigo;
-  raiz.textContent = '';
+  if (!anterior) raiz.textContent = '';
   const nomeDoLugar = lugar.tipo === 'regiao' ? lugar.regiao.nome : lugar.tipo === 'masmorra' ? lugar.masmorra.nome : lugar.covil.nome;
-  mostrarAviso(raiz, pedido.bilhete ? t('mundo.trocando', { lugar: nomeDoLugar }) : t('mundo.conectando'), ESPERA_ENTRADA_MS);
+  // A camada desta cena: escondida até o personagem chegar, por cima da de antes.
+  const camada = document.createElement('div');
+  camada.className = 'camada-mundo';
+  if (anterior) camada.style.visibility = 'hidden';
+  raiz.append(camada);
+  if (!anterior) mostrarAviso(camada, pedido.bilhete ? t('mundo.trocando', { lugar: nomeDoLugar }) : t('mundo.conectando'), ESPERA_ENTRADA_MS);
   // Sem a viagem, a volta pela vila salva (a ficha já foi gravada pela sala anterior).
   const voltarPelaVila = (): boolean => {
     if (!pedido.bilhete || pedido.slot === undefined || !vilaSalva) return false;
-    void jogarNoMundo(raiz, servidor, token, { lugar: `regiao:${vilaSalva}`, slot: pedido.slot }, orientacao);
+    camada.remove();
+    void jogarNoMundo(raiz, servidor, token, { lugar: `regiao:${vilaSalva}`, slot: pedido.slot }, orientacao, null, troca && { tirar: troca.tirar, desvio: null });
     return true;
   };
   let conexao: Awaited<ReturnType<typeof conectarMundo>>;
@@ -313,10 +338,11 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
     conexao = await conectarComTentativas(servidor, token, pedido);
   } catch (e) {
     if (voltarPelaVila()) return;
-    mostrarErro(raiz, motivoDoErro(e));
+    falhar(motivoDoErro(e));
     return;
   }
-  const ctx = montarLugar(conteudo, reino, lugar, modo).ctx;
+  // D-169: o mapa da região pode já estar pronto (preparado enquanto se andava pela passagem).
+  const ctx = (lugar.tipo === 'regiao' ? terrenoDe(pedido.lugar) : null) ?? montarLugar(conteudo, reino, lugar, modo).ctx;
   const eu = new ClienteArena({ ctx, transporte: conexao.transporte, nome: '', pedidoFicha: null, agoraMs });
   let visoesExternas: Extract<AvisoDoMundo, { tipo: 'visoesParty' }>['visoes'] = [];
   const consultaParty = new ConsultaParty();
@@ -329,7 +355,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
   if (!(await esperarEntrada(eu))) {
     await conexao.encerrar();
     if (voltarPelaVila()) return;
-    mostrarErro(raiz, t('mundo.falha'));
+    falhar(t('mundo.falha'));
     return;
   }
 
@@ -340,7 +366,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
   let cena: Cena | null = null;
   let saindo = false;
   const avisar = (texto: string, ms?: number) => {
-    mostrarAviso(raiz.querySelector<HTMLElement>('.camada-ui') ?? raiz, texto, ms);
+    mostrarAviso(camada.querySelector<HTMLElement>('.camada-ui') ?? camada, texto, ms);
   };
   const idDoJogador = () => eu.entidadeId ?? 'p1';
   const estadoAtual = () => eu.previsto;
@@ -412,9 +438,16 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
     } else if (a.tipo === 'trocarSala') {
       if (saindo) return;
       saindo = true;
-      desmontar();
+      // D-169: o laço para (o último quadro fica na tela); a cena só sai quando a nova estiver pronta.
+      pararLaco?.();
+      pararLaco = null;
+      const desvio = cena?.desvioDaCamera() ?? null;
+      const tirar = () => {
+        desmontar();
+        camada.remove();
+      };
       void conexao.encerrar().finally(() => {
-        void jogarNoMundo(raiz, servidor, token, { lugar: a.lugar, bilhete: a.bilhete, instancia: a.instancia, ...(pedido.slot !== undefined && { slot: pedido.slot }) }, orientacao, ultimoLugar?.vilaSalva ?? vilaSalva);
+        void jogarNoMundo(raiz, servidor, token, { lugar: a.lugar, bilhete: a.bilhete, instancia: a.instancia, ...(pedido.slot !== undefined && { slot: pedido.slot }) }, orientacao, ultimoLugar?.vilaSalva ?? vilaSalva, { tirar, desvio });
       });
     } else {
       const texto = textoDoAviso(a);
@@ -470,7 +503,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
 
   const idLocal = eu.entidadeId ?? 'p1';
   cena = await montarCena({
-    raiz,
+    raiz: camada,
     ctx,
     idLocal,
     estado: () => eu.previsto ?? vazio,
@@ -484,17 +517,22 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
     visoesExternas: () => visoesExternas,
     acoesDaPausa: [{ rotulo: t('mundo.sairRotulo'), fazer: () => { sair.click(); } }],
     // Marco 38 (D-142): o mercado é uma loja só; o botão fecha a loja e pede os anúncios do reino.
+    desvioCamera: troca?.desvio ?? null,
     abrirAnuncios: () => {
       eu.enviarComando({ t: 'fecharLoja' });
       enviarAcao({ a: 'mercado', op: 'listar', pagina: 0, busca: '' });
     },
   });
-  if (!cena) return;
+  if (!cena) {
+    anterior?.();
+    camada.style.visibility = '';
+    return;
+  }
   const c = cena;
   const guia = criarGuiaMundo(orientacao, reino, pedido.lugar, ctx, idLocal, () => ultimoLugar?.descobertas ?? []);
-  raiz.querySelector('.camada-ui')?.append(faixa.elemento, social.elemento, guia.elemento);
-  raiz.querySelector('.cabecalho h1')?.remove();
-  const mini = raiz.querySelector<HTMLElement>('.minimapa');
+  camada.querySelector('.camada-ui')?.append(faixa.elemento, social.elemento, guia.elemento);
+  camada.querySelector('.cabecalho h1')?.remove();
+  const mini = camada.querySelector<HTMLElement>('.minimapa');
   if (mini) {
     mini.style.pointerEvents = 'auto';
     mini.style.cursor = 'pointer';
@@ -527,6 +565,16 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
   conexao.aoMudar((estado) => {
     if (!saindo) avisar(t(`conexao.${estado}`));
   });
+  // D-169: a cena de antes sai quando o personagem aparece aqui (ou, sem estado, em poucos segundos).
+  let antes = anterior;
+  const revelar = () => {
+    if (!antes && camada.style.visibility !== 'hidden') return;
+    camada.style.visibility = '';
+    antes?.();
+    antes = null;
+  };
+  if (antes) setTimeout(revelar, REVELAR_EM_MS);
+  const vigia = vigiaDaPassagem(ctx.fase, (destino) => { terrenoDe(destino); }, (texto) => { avisar(texto, 3500); });
   pararLaco = iniciarLaco({
     simular: () => {
       eu.passo();
@@ -543,6 +591,8 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
         rede: { rttMs: eu.rttMs, latenciaSimuladaMs: 0, erroP95: 0, conectado,
           baseTick: eu.baseTick, tempoSemEstadoMs: eu.tempoSemEstadoMs, ressincronizacoes: eu.ressincronizacoes },
       });
+      if (conectado && antes) revelar();
+      vigia(eu.previsto ? buscarEntidade(eu.previsto, id) : undefined);
     },
     quadroPermitido: c.quadroPermitido,
   });

@@ -14,7 +14,7 @@ import { versaoDoConteudo, type MensagemCliente } from '../arena/protocolo';
 import { SalaArena, type EntradaDePersonagem, type OpcoesSala, type Sessao } from '../arena/sala';
 import { estadoPublico } from '../arena/estado-publico';
 import { celulaDeEntrada, colocarEm } from '../coop/sala-campanha';
-import { recolherComitiva, retirarComitiva, soltarComitiva, type InvocacaoQueViaja } from './comitiva';
+import { retirarComitiva, soltarComitiva, type InvocacaoQueViaja } from './comitiva';
 import { conferirPersonagem, previaDoPersonagem } from '../coop/personagem';
 import type { Celula, EntidadeId } from '../core/comandos';
 import { modoPorId, type Conteudo } from '../core/conteudo';
@@ -43,8 +43,9 @@ import { ErrantesDaRegiao } from './errantes';
 import { EscoltasDaRegiao } from './escoltas';
 import { RetornosDaSala } from './retorno';
 import { celulaDoPortal, destinoDaPonta, gastarPortal, PortaisTemporarios, recusaDoPortal, sincronizarPortais } from './portais-temporarios';
-import { celulaDoMercador, chegadaNaPedra, escondidasReveladas, chegadaPelaBorda, fonteDeMissoesPerto, lugarAoAcaso } from './sala-viagem';
-export { chegadaPelaBorda } from './sala-viagem';
+import { celulaDoMercador, chegadaNaPedra, escondidasReveladas, fonteDeMissoesPerto, lugarAoAcaso, pendenciaDeTroca, travessia, vizinhaDaPassagem } from './sala-viagem';
+import { aplicarBagagem, type EstadoQueViaja } from './bagagem';
+import { naPassagem } from '../world/passagem';
 import { progredirMissoes, type FatoDeMissao } from './missoes-mundo';
 import type { AcaoSocial, PendenciaDoMundo, ResultadoDoMercado } from './pendencias';
 import { atenderChat, atenderTroca, cancelarTrocaDe, limparTrocas, type Participante, type SalaSocial } from './sala-social';
@@ -53,7 +54,7 @@ import { descobrir, fichaAtualizada, type FichaDoMundo } from './ficha-mundo';
 import { idDoLugar, montarLugar, type Lugar, type LugarMontado } from './lugares';
 import { REF_ERRANTE } from './objetos-mundo';
 import { estoqueSemanalDaDungeon, semanaDaLoja } from './lojas-mundo';
-import { capitalDoAtlas, territorioDoLugar, estruturaDoDestino, LADOS, portaDa, vizinha, type PapelNpc, type Reino, type RegiaoDoMundo } from './reino';
+import { capitalDoAtlas, territorioDoLugar, estruturaDoDestino, portaDa, type PapelNpc, type Reino, type RegiaoDoMundo } from './reino';
 import type { ExteriorGerado } from '../world/gerador-exterior';
 
 export const MODO_MUNDO = 'mundo';
@@ -87,13 +88,15 @@ interface Presenca {
   morreu: boolean;
   /** Marco 30: o grupo do Mundo (o servidor define; null fora de grupo). */
   grupo: string | null;
+  /** Marco 41 (D-169): a vizinha cuja sala já foi aquecida nesta ida à passagem. */
+  aquecida?: string | undefined;
 }
 
 export class SalaMundo extends SalaArena {
   readonly lugar: Lugar;
   readonly canal: number;
   private readonly exterior: ExteriorGerado | null;
-  private readonly reservas = new Map<string, { ficha: FichaDoMundo; chegada: Celula | null; grupo: string | null; comitiva: readonly InvocacaoQueViaja[] }>();
+  private readonly reservas = new Map<string, { ficha: FichaDoMundo; chegada: Celula | null; grupo: string | null; comitiva: readonly InvocacaoQueViaja[]; viagem: EstadoQueViaja | null; decorridoTicks: number }>();
   /** Por entidade: quem é e a ficha que entrou (a progressão vem da entidade na hora de gravar). */
   private readonly presencas = new Map<EntidadeId, Presenca>();
   /** Marco 30: o evento da região em curso e o modo sem ele (a lua sangrenta troca o modo enquanto dura). */
@@ -140,8 +143,9 @@ export class SalaMundo extends SalaArena {
   }
 
   /** O servidor guarda a ficha de quem vai entrar por esta identidade (e onde chega, ou o spawn). */
-  reservar(identidade: string, ficha: FichaDoMundo, chegada: Celula | null = null, grupo: string | null = null, comitiva: readonly InvocacaoQueViaja[] = []): void {
-    this.reservas.set(identidade, { ficha, chegada, grupo, comitiva });
+  // Marco 41 (D-169): com o estado que viaja e o tempo da viagem (as contagens seguem correndo).
+  reservar(identidade: string, ficha: FichaDoMundo, chegada: Celula | null = null, grupo: string | null = null, comitiva: readonly InvocacaoQueViaja[] = [], viagem: EstadoQueViaja | null = null, decorridoTicks = 0): void {
+    this.reservas.set(identidade, { ficha, chegada, grupo, comitiva, viagem, decorridoTicks });
   }
 
   /** As pendências desde a última retirada (o servidor grava e troca as sessões de sala). */
@@ -177,13 +181,15 @@ export class SalaMundo extends SalaArena {
     const origem = reserva.chegada ?? chegadaNaPedra(this.exterior) ?? this.ctx.fase.spawns[0] ?? { x: 1, y: 1 };
     colocarEm(e, celulaDeEntrada(this.estado, this.ctx, e, origem));
     this.estado.entidades.push(e);
-    soltarComitiva(this.estado, this.ctx, e, reserva.comitiva, this.eventosDoTick); // D-144: as invocações chegam junto
+    const novos = soltarComitiva(this.estado, this.ctx, e, reserva.comitiva, this.eventosDoTick, reserva.decorridoTicks); // D-144
+    if (reserva.viagem) aplicarBagagem(this.estado, this.ctx, e, reserva.viagem, reserva.decorridoTicks, (id) => novos.get(id) ?? e.id); // D-169
     const ficha = { ...reserva.ficha, descobertas: [...reserva.ficha.descobertas] };
     this.presencas.set(entidadeId, { identidade, ficha, morreu: false, grupo: reserva.grupo });
     if (reserva.grupo) e.grupo = reserva.grupo;
     // Marco 30 (30/10/2026, D-129): a proteção na passagem. Quem chega (pela borda, pela porta, pelo portal ou ao
     // entrar no jogo) fica uns segundos sem levar dano: ninguém espera do outro lado para pegar quem ainda carrega.
-    const protecaoMs = this.ctx.balance.mundo.passagemProtecaoS * 1000;
+    // D-169: quem chega numa passagem já está na trégua dela.
+    const protecaoMs = naPassagem(this.ctx.fase, e) ? 0 : this.ctx.balance.mundo.passagemProtecaoS * 1000;
     if (protecaoMs > 0) aplicarEfeito(this.estado, this.ctx, e, construirEfeito('imune_dano', { duracaoMs: protecaoMs }), { id: e.id, x: e.x, y: e.y }, null, this.eventosDoTick);
     return { ok: true, previa: previaDoPersonagem(e, r.alteracoes, this.ctx.modo.id, this.ctx.balance.versao) };
   }
@@ -402,7 +408,7 @@ export class SalaMundo extends SalaArena {
 
   private trocar(s: Sessao, p: Presenca, destino: string, chegada: Celula | null, instancia: string | null): void {
     if (this.despedidos.has(s.sessaoId) || this.pendencias.some((x) => x.tipo === 'trocar' && x.sessaoId === s.sessaoId)) return;
-    this.pendencias.push({ tipo: 'trocar', identidade: p.identidade, sessaoId: s.sessaoId, ficha: p.ficha, destino, chegada, instancia, comitiva: recolherComitiva(this.estado, s.entidadeId) });
+    this.pendencias.push(pendenciaDeTroca(this.estado, buscarEntidade(this.estado, s.entidadeId), { identidade: p.identidade, sessaoId: s.sessaoId, ficha: p.ficha, destino, chegada, instancia })); // D-169
   }
 
   private pertoDe(e: Entidade, tipo: string): boolean {
@@ -490,17 +496,15 @@ export class SalaMundo extends SalaArena {
     return true;
   }
 
-  /** Na passagem da borda, vai para a região vizinha, no ponto correspondente. */
+  /** D-169: no meio da passagem, vai à vizinha no mesmo ponto; ao entrar nela, pede a sala de lá pronta. */
   private conferirBorda(s: Sessao, e: Entidade, p: Presenca): boolean {
     if (!this.exterior || this.lugar.tipo !== 'regiao') return false;
-    for (const lado of LADOS) {
-      if (!this.exterior.passagens[lado].some((c) => c.x === e.x && c.y === e.y)) continue;
-      const destino = vizinha(this.reino, this.lugar.regiao, lado);
-      if (!destino) return false;
-      this.trocar(s, p, `regiao:${destino.id}`, chegadaPelaBorda(destino.tamanho ?? this.reino.tamanhoRegiao, lado, { x: e.x + Math.floor((destino.tamanho ?? this.reino.tamanhoRegiao) / 2) - Math.floor(this.ctx.fase.largura / 2), y: e.y + Math.floor((destino.tamanho ?? this.reino.tamanhoRegiao) / 2) - Math.floor(this.ctx.fase.altura / 2) }), null);
-      return true;
-    }
-    return false;
+    const la = vizinhaDaPassagem(this.reino, this.lugar.regiao, this.exterior, e);
+    if (la && p.aquecida !== la.id) this.pendencias.push({ tipo: 'aquecer', identidade: p.identidade, lugar: `regiao:${la.id}` });
+    p.aquecida = la?.id;
+    const t = travessia(this.reino, this.lugar.regiao, this.exterior, e);
+    if (t) this.trocar(s, p, `regiao:${t.destino.id}`, t.chegada, null);
+    return t !== null;
   }
 
   /** Na saída aberta do interior, volta à frente da porta da estrutura (e a masmorra concluída entrega a recompensa). */

@@ -53,6 +53,12 @@ body {
   inset: 0;
 }
 
+/* Marco 41 (14/11/2026, D-169): cada cena do Mundo na sua camada; na troca, a nova monta escondida por cima. */
+.camada-mundo {
+  position: absolute;
+  inset: 0;
+}
+
 .palco canvas {
   display: block;
   touch-action: none;

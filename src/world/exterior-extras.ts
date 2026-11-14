@@ -6,6 +6,7 @@
 // - as rotas dos mercadores errantes, de uma passagem até o centro.
 // Cada sorteio tem o próprio RNG, para não mexer no resto da região. Puro.
 
+import { entradaDoLado } from './passagens-exterior';
 import type { Celula } from '../core/comandos';
 import { aleatorio, criarRng, escolher, inteiro, type EstadoRng } from '../core/rng';
 import { LADOS, vizinha, type Reino, type RegiaoDoMundo } from '../mundo/reino';
@@ -25,10 +26,8 @@ export const RAIO_ABRIGO = 3;
 
 /** Onde cada passagem chega por dentro (a mesma conta de `abrirPassagens`). */
 export function entradasDosLados(reino: Reino, regiao: RegiaoDoMundo, n: number): Celula[] {
-  const c = Math.floor(n / 2);
-  return LADOS.filter((lado) => vizinha(reino, regiao, lado)).map((lado) =>
-    lado === 'norte' ? { x: c, y: 2 } : lado === 'sul' ? { x: c, y: n - 3 } : lado === 'oeste' ? { x: 2, y: c } : { x: n - 3, y: c },
-  );
+  // Marco 41 (D-169): logo depois da boca da passagem (world/passagens-exterior.ts).
+  return LADOS.filter((lado) => vizinha(reino, regiao, lado)).map((lado) => entradaDoLado(n, lado));
 }
 
 /** Distância do ponto ao segmento a–b. */

@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.48 · **Data:** 13/11/2026
+**Versão do documento:** 3.49 · **Data:** 14/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.49 (14/11/2026)**: marco 41: as passagens entre as regiões do Mundo (a troca sem tela preta, a trégua e o tipo pelo par de biomas) e o que segue com o personagem na troca (D-169).
 > - **3.48 (13/11/2026)**: marco 40, etapa 3: as 30 skills de classe, cada uma com a leitura de cada estilo; duas por classe saem do kit (D-159).
 > - **3.47 (12/11/2026)**: marco 40, etapa 2: as 89 skills comuns dos 20 núcleos, com livros novos e a geral inicial de cada classe; as gerais antigas saem do personagem (save 31 e fichas) (D-158).
 > - **3.46 (12/11/2026)**: marco 40 (em andamento): o sistema novo de skills. Etapa 1: núcleo, papel e os nove eixos das skills, as cinco formas novas dos estilos (controle, sustento, marca, grupo e invocação), efeitos para os aliados em volta, a marca que acumula e a função secundária do elemento pelo papel (D-157).
@@ -345,6 +346,26 @@ toda região, e a Travessia das Areias liga os dois reinos a pé. O guerreiro co
   por ela (os pontos dele também voltam).
 
 Detalhes em D-145 a D-156 e em [docs/BALANCEAMENTO.md](docs/BALANCEAMENTO.md) (172/172 metas).
+
+### Marco 41 — passagens entre as regiões do Mundo (14/11/2026)
+
+Atravessar de uma região para outra não passa mais por tela preta.
+
+**A passagem**
+- Cada saída de região virou um trecho curto que existe igual nas duas regiões. A troca de sala acontece no meio dele,
+  e a cena nova aparece quando o personagem já chegou.
+- O desenho segue o par de biomas: cânion de arenito, passarela do brejo, desfiladeiro gelado, portão em ruínas, ponte
+  sobre a ravina ou trilha entre as árvores, sempre com lanternas.
+- **Trégua:** os monstros nunca entram, nem perseguindo. Lá dentro ninguém fere nem é ferido, também no PvP.
+
+**O que segue com o personagem**
+- Vida, mana, recargas, efeitos (bons e ruins), fúria, carga da ultimate e a mecânica de movimento escolhida (antes
+  voltava à primeira da lista).
+- As contagens continuam correndo durante a troca.
+- As invocações viajam com o tempo e os golpes que restam. A isca também viaja, e o servo do Posto dos Mortos segue o
+  dono como servo comum.
+
+Detalhes em D-169.
 
 ### Marco 40 — o sistema novo de skills (em andamento, 12/11/2026)
 

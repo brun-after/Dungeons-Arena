@@ -10,6 +10,7 @@ import type { EstadoJogo } from '../core/estado';
 import { ticksDe } from '../core/tempo';
 import type { Entidade } from '../entities/entidade';
 import type { Fase } from './fase';
+import { emPassagem } from './passagem';
 
 export interface Refugio {
   x: number;
@@ -42,6 +43,9 @@ export function emCombateCom(estado: Pick<EstadoJogo, 'tick'>, ctx: Pick<Context
  * que os dois estejam em combate.
  */
 export function refugioProtege(estado: Pick<EstadoJogo, 'tick'>, ctx: Pick<ContextoSimulacao, 'balance' | 'fase'>, ator: Entidade, alvo: Entidade): boolean {
+  // Marco 41 (14/11/2026, D-169): na passagem entre as regiões, a trégua vale para todos (monstros e jogadores), sem
+  // exceção de combate: ninguém de dentro é alvo, e ninguém de dentro fere quem está fora.
+  if (ator.id !== alvo.id && (emPassagem(ctx.fase, alvo.x, alvo.y) || emPassagem(ctx.fase, ator.x, ator.y))) return true;
   if (!ctx.fase.refugios?.length) return false;
   const monstroNaVila = barradoNoRefugio(ator) && emRefugio(ctx.fase, alvo.x, alvo.y);
   const daVilaNoMonstro = barradoNoRefugio(alvo) && !barradoNoRefugio(ator) && emRefugio(ctx.fase, ator.x, ator.y) && !emRefugio(ctx.fase, alvo.x, alvo.y);
@@ -50,6 +54,8 @@ export function refugioProtege(estado: Pick<EstadoJogo, 'tick'>, ctx: Pick<Conte
 
 /** O monstro pode pisar em (x, y)? Fora do refúgio, sim; dentro, se já está lá dentro (sai livre) ou se persegue o alvo com quem luta. */
 export function podePisarNoRefugio(estado: EstadoJogo, ctx: Pick<ContextoSimulacao, 'balance' | 'fase'>, e: Entidade, x: number, y: number): boolean {
+  // Marco 41 (D-169): o monstro nunca pisa na passagem (nem perseguindo); o que já estiver dentro sai livre.
+  if (barradoNoRefugio(e) && emPassagem(ctx.fase, x, y) && !emPassagem(ctx.fase, e.px, e.py)) return false;
   if (!barradoNoRefugio(e) || !emRefugio(ctx.fase, x, y) || emRefugio(ctx.fase, e.px, e.py)) return true;
   const alvoId = e.ia?.alvoId;
   const alvo = alvoId ? estado.entidades.find((o) => o.id === alvoId) : undefined;

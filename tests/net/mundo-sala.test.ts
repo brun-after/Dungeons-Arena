@@ -14,6 +14,8 @@ import { lerLugar } from '../../src/mundo/lugares';
 import { SalaMundo } from '../../src/mundo/sala-mundo';
 import { portaDa, reinoDoConteudo, type Reino } from '../../src/mundo/reino';
 import { guardarItem } from '../../src/progression/inventario';
+import { PROFUNDIDADE_PASSAGEM } from '../../src/world/passagens-exterior';
+import { ORIGEM_DE_FORA } from '../../src/mundo/bagagem';
 import { CONTEUDO } from '../apoio/fases';
 
 function obter<T>(v: T | undefined | null, nome: string): T {
@@ -115,18 +117,75 @@ describe('sala do Mundo', () => {
     expect(sala('regiao:campos_do_oeste').ctx.modo.fogoAmigo).toBe(false);
   });
 
-  it('a passagem pela borda troca para a vizinha, chegando do lado oposto', () => {
+  it('a passagem troca para a vizinha no meio, chegando no mesmo ponto da faixa do outro lado', () => {
+    // Marco 41 (14/11/2026, D-169): a faixa é a mesma nas duas regiões; a sala troca depois do meio dela.
     const s = sala('regiao:vila_do_centro');
     const c = entrar(s, 'u1');
     const meio = (REINO.regioes.find(r => r.id === 'vila_do_centro')?.tamanho ?? REINO.tamanhoRegiao) / 2;
-    posicionar(c.e(), 0, meio);
+    const la = REINO.regioes.find(r => r.id === 'campos_do_oeste')?.tamanho ?? REINO.tamanhoRegiao;
+    // Na boca da passagem ainda não troca, mas a sala de lá é aquecida.
+    posicionar(c.e(), PROFUNDIDADE_PASSAGEM - 2, meio);
+    rodar(s);
+    const antes = s.retirarPendencias();
+    expect(antes.find((x) => x.tipo === 'trocar')).toBeUndefined();
+    expect(antes.filter((x) => x.tipo === 'aquecer')).toEqual([{ tipo: 'aquecer', identidade: 'u1', lugar: 'regiao:campos_do_oeste' }]);
+    // Aquece uma vez só por ida à passagem.
+    rodar(s);
+    expect(s.retirarPendencias().filter((x) => x.tipo === 'aquecer')).toEqual([]);
+    posicionar(c.e(), 3, meio);
     rodar(s);
     const p = s.retirarPendencias().find((x) => x.tipo === 'trocar');
-    expect(p).toMatchObject({ tipo: 'trocar', destino: 'regiao:campos_do_oeste', chegada: { x: (REINO.regioes.find(r => r.id === 'campos_do_oeste')?.tamanho ?? REINO.tamanhoRegiao) - 3, y: (REINO.regioes.find(r => r.id === 'campos_do_oeste')?.tamanho ?? REINO.tamanhoRegiao) / 2 } });
+    expect(p).toMatchObject({ tipo: 'trocar', destino: 'regiao:campos_do_oeste', chegada: { x: la - 1 - (PROFUNDIDADE_PASSAGEM - 1 - 3), y: la / 2 } });
     s.despedir(c.bem.sessaoId, { tipo: 'trocarSala', lugar: 'regiao:campos_do_oeste', bilhete: 'b', instancia: null });
     expect(s.jogadores).toBe(0);
     // A troca não grava de novo (a ficha seguiu com a pendência).
     expect(s.retirarPendencias()).toEqual([]);
+  });
+
+  it('a troca leva vida, mana, recargas, efeitos e a mecânica de movimento escolhida', () => {
+    // Marco 41 (D-169): antes a sala nova recriava tudo pela ficha (vida cheia, recargas prontas, o primeiro movimento).
+    const f = obter(fichaNova({ conteudo: CONTEUDO, balance: BALANCE_PADRAO }, REINO, 'mago', 'Viajante', 'pers-0002-teste'), 'ficha');
+    f.personagem = { ...f.personagem, nivel: 60 };
+    const s = sala('regiao:vila_do_centro');
+    const c = entrar(s, 'u2', f);
+    const e = c.e();
+    const movs = CONTEUDO.movimentos.get('mago') ?? [];
+    const segundo = obter(movs.filter((m) => m.nivel <= e.nivel)[1], 'segundo movimento');
+    e.movimentoClasse = { ativo: segundo.id, cargas: { [segundo.id]: [s.estado.tick + 300] } };
+    e.hp = Math.floor(e.hpMax / 3);
+    e.mana = 7;
+    s.estado.recargas[`${e.id}_bola_de_fogo`] = s.estado.tick + 400;
+    // Sem a proteção de quem entrou no jogo (ela também viajaria, com o tempo que falta).
+    e.efeitos = e.efeitos.filter((x) => x.tipo !== 'imune_dano');
+    e.efeitos.push({ tipo: 'queimando', ateTick: s.estado.tick + 200, origemId: 'm999', valor: 1, pct: 0, proximoTick: s.estado.tick + 10, interno: null, ref: null, inicioTick: s.estado.tick, acumulos: 1 });
+    const meio = (REINO.regioes.find(r => r.id === 'vila_do_centro')?.tamanho ?? REINO.tamanhoRegiao) / 2;
+    posicionar(e, 3, meio);
+    const t0 = s.estado.tick;
+    rodar(s);
+    // O que já correu na sala de antes, mais a viagem.
+    const correu = s.estado.tick - t0 + 60;
+    const p = obter(s.retirarPendencias().find((x): x is Extract<typeof x, { tipo: 'trocar' }> => x.tipo === 'trocar'), 'troca');
+    const outra = sala('regiao:campos_do_oeste');
+    // A viagem levou 60 ticks (o servidor desconta pelo relógio do bilhete).
+    outra.reservar('u2', p.ficha, p.chegada, null, p.comitiva, p.viagem ?? null, 60);
+    const recebidas: MensagemServidor[] = [];
+    const conexao = outra.conectar((t) => recebidas.push(JSON.parse(t) as MensagemServidor), 'u2');
+    conexao.receber(JSON.stringify({ t: 'entrar', nome: 'x', pedidoFicha: null, versaoConteudo: versaoDoConteudo() }));
+    const bem = recebidas.find((m) => m.t === 'bemVindo');
+    if (bem?.t !== 'bemVindo') throw new Error('não entrou');
+    const j = obter(buscarEntidade(outra.estado, bem.entidadeId), 'chegou');
+    expect(j.movimentoClasse?.ativo).toBe(segundo.id);
+    expect(j.movimentoClasse?.cargas[segundo.id]).toEqual([outra.estado.tick + 300 - correu]);
+    expect(j.hp).toBe(Math.floor(e.hpMax / 3));
+    expect(j.mana).toBe(7);
+    expect(outra.estado.recargas[`${j.id}_bola_de_fogo`]).toBe(outra.estado.tick + 400 - correu);
+    const queimando = obter(j.efeitos.find((x) => x.tipo === 'queimando'), 'queimando');
+    expect(queimando.ateTick).toBe(outra.estado.tick + 200 - correu);
+    expect(queimando.origemId).toBe(ORIGEM_DE_FORA);
+    // Chegou na passagem: a trégua, sem o escudo de chegada.
+    expect(j.efeitos.some((x) => x.tipo === 'imune_dano')).toBe(false);
+    rodar(outra);
+    expect(j.efeitos.some((x) => x.tipo === 'tregua')).toBe(true);
   });
 
   it('o portal pago leva à vila descoberta, cobra ouro e arma a recarga', () => {

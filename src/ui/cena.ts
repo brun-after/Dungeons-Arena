@@ -119,6 +119,7 @@ export interface OpcoesCena {
   partyVisaoForcada?: boolean;
   visoesExternas?: () => readonly import('../mundo/avisos').VisaoExternaParty[];
   abrirAnuncios?: () => void; // Marco 38 (08/11/2026, D-142): os anúncios dos jogadores no mercado do Mundo.
+  desvioCamera?: { x: number; y: number } | null; // Marco 41 (D-169): a vista da cena de antes (troca de região).
 }
 
 export interface QuadroCena {
@@ -142,6 +143,7 @@ export interface Cena {
   desmontar: () => void;
   /** Marco 26 (D-122): quanto durou o último salvamento (medidor e qualidade automática). */
   anotarSalvamento: (ms: number) => void;
+  desvioDaCamera: () => { x: number; y: number } | null; // Marco 41 (D-169): onde o jogador está na vista.
 }
 
 function div(classe: string): HTMLDivElement {
@@ -650,7 +652,6 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     },
     nuvem: o.nuvemDescobertas === false ? null : nuvemDoBuild(),
   });
-
   let ultimoQuadroMs = performance.now();
   const paineisParty = criarPaineisParty(host,palco,camera);
   let zoomAntesParty: number | null = null;
@@ -661,12 +662,11 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     const dtS = Math.min(0.1, dtMs / 1000);
     ultimoQuadroMs = q.agoraMs;
     lerFaixa(q.agoraMs);
-
     const j = jogador();
     if (j) {
       // Na arena o jogador só existe depois do bemVindo: centraliza na primeira vez.
       if (!celulaCentralizada) {
-        camera.centralizar({ x: j.x, y: j.y });
+        if (o.desvioCamera) camera.centralizarComDesvio({ x: j.x, y: j.y }, o.desvioCamera); else camera.centralizar({ x: j.x, y: j.y });
         celulaCentralizada = true;
         // Marco 26 (D-121): a opção seguir alvo vai ao personagem assim que ele existe.
         if (j.seguirAlvo !== aparencia.seguirAlvo) emitir({ t: 'seguirAlvo', ligado: aparencia.seguirAlvo });
@@ -778,6 +778,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     pausado: ap.pausado,
     quadroPermitido: ap.quadroPermitido,
     anotarSalvamento: ap.anotarSalvamento,
+    desvioDaCamera: () => { const j = jogador(); return j ? camera.desvio({ x: j.x, y: j.y }) : null; },
     desmontar: () => {
       paineisParty.limpar();
       clearTimeout(releitura);

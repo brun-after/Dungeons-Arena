@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.15 · **Data:** 14/11/2026
+**Versão:** 1.16 · **Data:** 14/11/2026
 
 > **Histórico**
+> - **1.16 (14/11/2026)**: D-169: as passagens entre as regiões do Mundo (a troca de sala sem tela preta, a trégua e o tipo pelo par de biomas) e o que segue com o personagem na troca (vida, mana, recargas, efeitos, movimento escolhido e as invocações com os prazos).
 > - **1.15 (14/11/2026)**: D-168: as mecânicas de movimento refeitas (o Acelerar no lugar do Piscar, a Âncora com o totem e o eco, a Chegada, o Posto em duas ativações, a névoa que reúne os servos, a montaria que precisa do companheiro perto, os marcos elementais e o botão no celular).
 > - **1.14 (14/11/2026)**: D-167: o movimento do Aventureiro é o do companheiro ativo (o falcão carrega, o lobo e o urso são a montaria), os três golpes de cada fera e as três mecânicas de toda classe desde o nível 1.
 > - **1.13 (14/11/2026)**: D-166: a caça marcada do Aventureiro (o básico marca, o companheiro ataca) e o bote do lobo e do urso.
@@ -5108,3 +5109,64 @@ desmontar. O falcão crescia e ficava longe do Aventureiro.
 - **A ponta de quem usa** é a do maior vínculo do eneágono; sem vínculo, a runa padrão da classe
   (`combat/movimento-extras.ts`). Os números ficam em `balance.json` (`movimentoClasse`). Balanceamento: 172/172.
 
+## D-169 — Marco 41: as passagens entre as regiões do Mundo (14/11/2026)
+
+**Contexto.** Ao cruzar a borda de uma região, a tela ficava preta e o personagem reaparecia na vizinha. Cada região é
+uma sala do servidor, e a troca desmontava a cena, fechava a conexão e montava tudo de novo. A sala de chegada recriava
+o personagem só pela ficha (a bolsa). Por isso a vida e a mana voltavam cheias, as recargas ficavam prontas, os
+efeitos sumiam, a fúria e a carga da ultimate zeravam e a mecânica de movimento escolhida voltava à primeira da lista
+(ela fica na entidade, `movimentoClasse.ativo`, não na bolsa). A isca (avatar) e o servo do Posto dos Mortos não
+viajavam. O usuário pediu regiões contínuas, sem perder renderização nem ping, com trechos curtos de transição entre
+elas, onde os inimigos nunca entram.
+
+**Decisão.**
+- **A passagem.** Cada lado com vizinha ganha, no meio da borda, uma faixa de 28 células
+  (`world/passagens-exterior.ts`). Ela tem o corredor de 6 células da abertura de antes, duas células de margem de cada
+  lado e um muro fechando a faixa.
+  - A faixa é **a mesma nas duas regiões**, célula a célula e enfeite a enfeite. Tudo sai das coordenadas físicas
+    dela e do par de regiões, nunca do RNG de cada uma.
+  - **A sala troca no meio da faixa** (12 células para dentro). A chegada é o mesmo ponto físico do outro lado, além
+    do gatilho de volta, então ninguém fica indo e vindo.
+  - Nada do gerador cai na faixa: estrada, casas, coleta, andarilhos, inimigos e armadilhas ficam fora. As estradas e
+    as rotas dos errantes chegam à boca de dentro.
+- **O tipo segue o par de biomas**, igual dos dois lados. Em todas há lanternas nas beiradas a cada 5 linhas, e os
+  enfeites postos pelo gerador (`fase.enfeites`) são desenhados com ou sem tema.
+  - O **cânion de arenito** chega ao deserto.
+  - A **passarela de tábuas** atravessa o brejo, com água e juncos dos lados.
+  - O **desfiladeiro gelado** sobe à neve.
+  - O **portão em ruínas** marca a entrada das ruínas, com estandartes e tochas.
+  - A **ponte sobre a ravina** cruza as colinas, com o abismo dos lados.
+  - A **trilha entre as árvores** liga a floresta e os campos.
+- **A trégua** (`world/passagem.ts`). Os monstros (a IA que não é invocação, a mesma regra do refúgio) nunca pisam na
+  passagem, nem perseguindo; o que estiver dentro sai livre.
+  - Quem está dentro não é alvo de ninguém e não fere ninguém, sem a exceção de combate do refúgio e também no PvP.
+  - O efeito `tregua` (imune a dano, fora do orbe) é renovado a cada tick em quem está dentro e dura meio segundo
+    depois da saída. Ele cobre todos os caminhos de dano, inclusive o periódico.
+  - Quem chega pela passagem não recebe a proteção de chegada (`passagemProtecaoS`): já está na trégua.
+- **O que segue com o personagem** (`mundo/bagagem.ts`, `viagem` na pendência de troca e no bilhete do servidor):
+  - vida e mana, as recargas das habilidades, os efeitos (bons e ruins), os buffs armados, a mecânica de movimento
+    escolhida com as cargas gastas, o companheiro ativo, a fúria, a carga da ultimate, a encarnação e o estado das
+    armas;
+  - os prazos vão como "tempo que falta" e voltam ao relógio da sala nova **descontado o tempo da viagem** (o servidor
+    mede do bilhete à entrada), então as contagens seguem correndo durante a troca;
+  - a origem de um efeito posto por quem ficou para trás vira `de_fora` (ninguém na sala nova leva o crédito);
+  - depois de morrer, só as recargas e a mecânica de movimento seguem (o renascer continua com a vida cheia).
+- **As invocações** (`mundo/comitiva.ts`, D-144):
+  - a isca (avatar) passa a viajar, com os golpes que ainda aguenta;
+  - os prazos de dentro (a névoa, a descarga) e os efeitos nelas seguem contando, e a que venceu no caminho não chega;
+  - o servo do Posto dos Mortos deixa o posto, que fica para trás, e segue o dono como servo comum (a regra dele
+    quando o posto acaba);
+  - o companheiro do Aventureiro continua nascendo com o dono e espelha a vida dele, que agora viaja.
+- **Sem tela preta no cliente** (`mundo-tela.ts`). Na troca, a cena de antes para no último quadro e continua na tela.
+  A nova conecta e monta escondida por cima (`.camada-mundo`) e aparece quando o personagem já está no estado (no
+  máximo em 4 s). Então a velha sai.
+  - A câmera começa com o personagem no mesmo ponto da vista e desliza até o centro.
+  - Ao entrar na passagem, o cliente prepara o mapa da vizinha em segundo plano (`ui/passagem-mundo.ts`) e mostra o
+    nome dela com a trégua.
+  - O servidor abre a sala da vizinha se não houver uma (pendência `aquecer`, uma vez a cada 30 s por lugar).
+- **De passagem:** o gerador do exterior não põe mais armadilha embaixo de um monstro (ele a disparava sozinho,
+  parado, e morria sem ninguém por perto).
+
+**Alternativa descartada.** A simulação contínua por reino, com interesse por raio e monstros que perseguem através da
+borda, muda o modelo do servidor do Mundo e custa um marco inteiro. As passagens entregam a troca invisível com uma
+sala por região. As dungeons, os covis e os portais continuam trocando de sala, agora também sem tela preta.

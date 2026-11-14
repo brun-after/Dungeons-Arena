@@ -6,6 +6,7 @@
 
 import type { Celula } from '../core/comandos';
 import type { InvocacaoQueViaja } from './comitiva';
+import type { EstadoQueViaja } from './bagagem';
 import type { ItemNaMochila } from '../entities/entidade';
 import type { AcaoDoMundo } from './acoes';
 import type { FichaDoMundo } from './ficha-mundo';
@@ -16,7 +17,11 @@ export type PendenciaDoMundo =
   | { tipo: 'gravar'; identidade: string; ficha: FichaDoMundo }
   | { tipo: 'trocar'; identidade: string; sessaoId: string; ficha: FichaDoMundo; destino: string; chegada: Celula | null; instancia: string | null;
       /** 09/11/2026 (D-144): as invocações que viajam com o dono. */
-      comitiva: InvocacaoQueViaja[] }
+      comitiva: InvocacaoQueViaja[];
+      /** Marco 41 (14/11/2026, D-169): o que vivia só na entidade (vida, recargas, efeitos, movimento escolhido…). */
+      viagem?: EstadoQueViaja }
+  /** Marco 41 (D-169): alguém entrou na passagem para `lugar`: o servidor deixa a sala de lá pronta. */
+  | { tipo: 'aquecer'; identidade: string; lugar: string }
   | { tipo: 'social'; identidade: string; nome: string; lugar: string; acao: AcaoSocial }
   | {
       tipo: 'mercado';

@@ -90,6 +90,8 @@ export const TIPOS_EFEITO = [
   'petrificado',
   // Marco 40 (13/11/2026, D-163): resistir ao controle (a Prisão dupla) e o golpe que leva um estado (o Cerco).
   'firme', 'acerto_carregado',
+  // Marco 41 (14/11/2026, D-169): a trégua das passagens entre as regiões do Mundo (ninguém fere nem é ferido lá dentro).
+  'tregua',
 ] as const;
 export type TipoEfeito = (typeof TIPOS_EFEITO)[number];
 
@@ -343,6 +345,8 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
 
   cego: negativo('olho', '#5b5b6e', ['pct'], { duracaoMs: 3000, valor: 0, pct: 30 }, { erroPct: true }),
   firme: { ...BASE, icone: 'escudo', cor: '#b7950b', positivo: true, campos: ['pct'], padrao: { duracaoMs: 2000, valor: 0, pct: 100 } },
+  // Marco 41 (14/11/2026, D-169): renovada a cada tick em quem está numa passagem (world/passagem.ts); fora do orbe.
+  tregua: { ...BASE, icone: 'refugio', cor: '#d9c7a0', positivo: true, campos: [], padrao: { duracaoMs: 500, valor: 0, pct: 0 }, imuneDano: true },
   acerto_carregado: { ...BASE, icone: 'pedra', cor: '#8d6e63', positivo: true, campos: [], padrao: { duracaoMs: 3000, valor: 0, pct: 0 }, exige: ['interno'] },
   petrificado: negativo('pedra', '#95a5a6', ['pct'], { duracaoMs: 1500, valor: 0, pct: 50 }, { bloqueiaMovimento: true, bloqueiaAcoes: 'todas', danoRecebido: -1 }),
   aterrorizado: negativo('caveira', '#6c3483', [], { duracaoMs: 1500, valor: 0, pct: 0 }, { bloqueiaAcoes: 'todas', ia: 'foge' }),
