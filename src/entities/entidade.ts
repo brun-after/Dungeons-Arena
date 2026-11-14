@@ -367,6 +367,10 @@ export interface Entidade {
   py: number;
   /** O octante da direção mantida ('parado' sem direção); `rumoX`, `rumoY` é o vetor exato, quantizado em ±1000. */
   direcao: Dir8 | 'parado';
+  /** Marco 40 (14/11/2026, D-166): a caça que o básico do Aventureiro marcou; o companheiro ativo (qualquer um, mesmo depois da troca) vai até ela e ataca. */
+  cacaMarcada?: EntidadeId | null;
+  /** Marco 40 (D-166): o companheiro ativo também na entidade (na arena, a ficha não tem bolsa). */
+  petAtivo?: 'falcao' | 'lobo' | 'urso';
   rumoX: number;
   rumoY: number;
   /** Pontos a percorrer em linha reta (o caminho já suavizado), e a fila curta de onde o integrador tira o próximo. */

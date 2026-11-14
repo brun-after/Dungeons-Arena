@@ -22,7 +22,8 @@ function obter<T>(v: T | undefined, nome: string): T {
 /** Jogador em (3,5) e dois bonecos (sem IA) colados nele: `b` em (4,5) e `c` em (2,5). */
 function cena() {
   const estado = criarEstado({ semente: 1, faseId: 'teste' });
-  const classe = obter(CONTEUDO.classes.get('aventureiro'), 'classe');
+  // Marco 40 (14/11/2026, D-166): o Guerreiro (o básico do Aventureiro só marca a caça, com o dobro da recarga).
+  const classe = obter(CONTEUDO.classes.get('guerreiro'), 'classe');
   const boneco = obter(CONTEUDO.presets.get('boneco'), 'boneco');
   estado.entidades.push(criarJogador(classe, 'j', 3, 5, ctx.balance));
   estado.entidades.push(criarInimigo(boneco, 'b', 4, 5, ctx.balance));

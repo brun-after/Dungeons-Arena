@@ -175,10 +175,13 @@ describe('integridade da execução completa', () => {
     // aventureiro no nível 2, no Difícil, semente 53. Com as skills de classe novas (D-159), no Normal, semente 26
     // (5 abates, só 4 ondas concluídas). Com os combos de papel e os assinados (D-163), no nível 3, semente 13
     // (4 abates, só 3 ondas concluídas). Com os companheiros do Aventureiro (D-165), na semente 21 (5 abates, 4 ondas).
-    const base = simularDiagnostico({ ...configuracao, cenario: 'atrito', classe: 'aventureiro', nivel: 3, dificuldade: 'normal', semente: 21, intervencao: 'sem_pocoes' });
+    // Com a caça marcada (D-166), o atrito não tem mais o caso nas sementes baixas; na pressão (várias por onda), o
+    // aventureiro do nível 1 no Difícil, semente 5, cai com 2 abates e nenhuma onda concluída (14/11/2026: com o
+    // companheiro seguindo a skill, a semente 3 virou vitória).
+    const base = simularDiagnostico({ ...configuracao, cenario: 'pressao', classe: 'aventureiro', nivel: 1, dificuldade: 'dificil', semente: 5, intervencao: 'sem_pocoes' });
     expect(base.resultado).toBe('morte');
-    expect(base.abates).toBe(5);
-    expect(base.ondasConcluidas).toBe(4);
+    expect(base.abates).toBe(2);
+    expect(base.ondasConcluidas).toBe(0);
     const controle = simularDiagnostico({ ...base.configuracao, intervencao: 'base' });
     expect(() => { validarAmostras([controle, base], 2); }).not.toThrow();
   });

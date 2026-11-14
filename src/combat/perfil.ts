@@ -48,7 +48,7 @@ export function variantesDoAtor(ctx: ContextoPerfil, ator: Entidade, def: Defini
     if (def.variantes[v]) saida.push(v);
   }
   // Marco 40 (13/11/2026, D-165): a versão da skill de classe para o companheiro ativo do Aventureiro.
-  const pet = ator.bolsa?.pet;
+  const pet = ator.bolsa?.pet ?? ator.petAtivo;
   if (pet && pet !== 'falcao' && def.variantes[`pet_${pet}`]) saida.push(`pet_${pet}`);
   // Marco 24 (D-095): o Domínio (2 gerais da mesma família nas teclas 3–6) marca qualquer ultimate.
   if (def.base.tags.includes('ultimate')) {

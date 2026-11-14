@@ -394,7 +394,7 @@
       "defesa": 0,
       "ataqueBasico": "golpe",
       "habilidades": [],
-      "intervaloAtaqueMs": 1200,
+      "intervaloAtaqueMs": 1000,
       "invocacao": {
         "comportamento": "companheiro"
       }
@@ -412,7 +412,7 @@
       "defesa": 0,
       "ataqueBasico": "golpe",
       "habilidades": [],
-      "intervaloAtaqueMs": 1200,
+      "intervaloAtaqueMs": 1000,
       "invocacao": {
         "comportamento": "companheiro"
       }
@@ -430,7 +430,7 @@
       "defesa": 0,
       "ataqueBasico": "golpe",
       "habilidades": [],
-      "intervaloAtaqueMs": 1200,
+      "intervaloAtaqueMs": 1000,
       "invocacao": {
         "comportamento": "companheiro"
       }

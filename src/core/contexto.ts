@@ -43,7 +43,8 @@ export interface Balance {
       /** Marco 40 (D-165): o lobo e o urso (o dano que chega ao dono, nível 1 e pleno; o passo; o golpe que o lobo toma; a provocação do urso). */
       pets: { lobo: { reflexoPct: [number, number]; passoMs: number; interceptarMs: number }; urso: { reflexoPct: [number, number]; passoMs: number; provocarMs: number; provocarRaio: number } };
       /** D-165: o Rosnar e o Rugido (base, por nível de diferença e teto, em ms). */
-      gritoDeFera: { baseMs: number; porNivelMs: number; maxMs: number } };
+      gritoDeFera: { baseMs: number; porNivelMs: number; maxMs: number };
+      marca: { recargaBasicoPct: number; velocidadePct: number; danoPct: number } };
     arqueiro: { secundariosMult: number; /** 05/11/2026 (D-132): o alcance que sobra andando, em %. */ alcanceAndandoPct: number; /** Marco 22 (D-089): Mira firme. */ mira: { cargaMs: number; reducaoPorDestrezaPct: number; reducaoMaxPct: number; d20Minimo: number } };
     /**
      * 06/11/2026 (D-135): o Necromante bate mais com as próprias mãos e se cura com uma parte do dano que os mortos

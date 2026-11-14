@@ -8,7 +8,7 @@ import { dispararGanchosDe } from '../progression/ganchos-do-portador';
 import { muralhaEm } from '../combat/tatica';
 import { direcaoDe } from '../combat/orientacao';
 import { multiplicadorDoPassoDoFalcao } from '../combat/companheiro';
-import { passoDoPet, petDoCompanheiro } from '../combat/pets';
+import { passoDoPet, petDoCompanheiro, pressaDaCaca } from '../combat/pets';
 import { atravessaCorpos, fatorDeVelocidade, fimDaTirolesa, fimDoSalto, naTirolesa, noAr, noSalto } from '../combat/movimento-classe';
 // Movimento livre (§2.2, §2.3). Marco 26 (25/10/2026, D-104): antes célula a célula, em passos cardinais (a diagonal
 // virava escadinha); agora a posição é contínua e anda em qualquer ângulo.
@@ -329,7 +329,9 @@ function andarNaTirolesa(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao
 /** O passo do companheiro do Aventureiro: o voo do falcão; o lobo e o urso (marco 40, D-165), o passo de cada um. */
 function velocidadeDoCompanheiro(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade): number {
   const pet = petDoCompanheiro(e);
-  return pet === 'falcao' ? (1000 / ctx.balance.ajustesClasses.aventureiro.falcaoPassoMs) * multiplicadorDoPassoDoFalcao(estado, ctx, e) : 1000 / passoDoPet(ctx, pet);
+  // Marco 40 (14/11/2026, D-166): mais rápido atrás da caça marcada.
+  const pressa = pressaDaCaca(estado, ctx, e);
+  return (pet === 'falcao' ? (1000 / ctx.balance.ajustesClasses.aventureiro.falcaoPassoMs) * multiplicadorDoPassoDoFalcao(estado, ctx, e) : 1000 / passoDoPet(ctx, pet)) * pressa;
 }
 
 /** Marco 40 (D-164): o salto do Guerreiro, reto até a queda, que atordoa em volta. */
@@ -358,7 +360,8 @@ export function velocidadeDeViagem(e: Entidade, estado: EstadoJogo, ctx: Context
 
 /** O trecho do tick: segue os pontos ou a direção mantida. Devolve quanto andou (0 parado ou preso). */
 function andarNoTick(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[], dtMs: number, grade?: GradeDeCorpos): number {
-  const nadando = tipoEm(ctx.fase, e.x, e.y) === 'agua';
+  // 14/11/2026 (D-164): quem voa, salta ou desce a tirolesa passa por cima da água sem nadar.
+  const nadando = tipoEm(ctx.fase, e.x, e.y) === 'agua' && !noAr(e) && !naTirolesa(e);
   const vel = velocidadeAgora(e, estado, ctx) * (nadando ? ctx.balance.movimento.nadoMult : 1);
   let restante = (dtMs / 1000) * vel;
   let total = 0;

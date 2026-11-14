@@ -80,6 +80,23 @@ function coleira(pai: THREE.Object3D, raio: number, a: ReturnType<typeof arreio>
   pai.add(runa);
 }
 
+/** A altura do quadril do lobo (as pernas longas). */
+const H_LOBO = 0.6;
+
+/** O arreio leve do lobo: o peitoral, a cilha e o assento curto de couro, sem manta. */
+function arreioLeve(pai: THREE.Object3D, a: ReturnType<typeof arreio>, y: number): void {
+  const peitoral = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.012, 6, 20), a.couro);
+  em(peitoral, 0, -0.02, 0.24, 0.35);
+  pai.add(peitoral);
+  const cilha = new THREE.Mesh(new THREE.TorusGeometry(0.13, 0.014, 6, 20), a.couro);
+  em(cilha, 0, 0.0, 0.02);
+  pai.add(cilha);
+  const assento = bola(0.085, a.couro, 1, 0.28, 1.5);
+  em(assento, 0, y, 0.02);
+  pai.add(assento);
+  for (const sx of [-1, 1]) pai.add(em(bola(0.014, a.barra), sx * 0.075, y - 0.02, 0.02));
+}
+
 /** A manta com a barra dourada, a sela e a cinta na barriga, no dorso (`y` é o alto das costas). */
 function sela(pai: THREE.Object3D, a: ReturnType<typeof arreio>, y: number, largura: number, compr: number, z = 0): void {
   for (const s of [-1, 1]) {
@@ -127,58 +144,69 @@ function pernas(pai: THREE.Object3D, pontos: readonly (readonly [number, number,
 }
 
 /**
- * O lobo do Aventureiro: maior que o lobo selvagem, castanho-acinzentado com a faixa escura no dorso, o peito e a juba
- * claros, os olhos âmbar; a coleira com a runa e a sela de montaria. Trota, galopa, salta na mordida e uiva.
+ * O lobo do Aventureiro: maior que o lobo selvagem e esguio (o peito fundo e estreito, a barriga recolhida, as pernas
+ * longas e finas), castanho-acinzentado com a faixa escura no dorso, o focinho comprido, as orelhas em pé e os olhos
+ * âmbar; a coleira com a runa e um arreio leve de montaria (sem manta: a sela inteira o fazia parecer um pônei).
+ * Ajuste de 14/11/2026: afinado. Trota, galopa, salta na mordida e uiva.
  */
 export function loboCompanheiro(): Fera {
   const grupo = new THREE.Group();
   const raiz = pivo('raiz', grupo);
-  const pelo = mat(0x7d6c5a);
-  const dorso = mat(0x3d332b);
-  const claro = mat(0xd9cfbd);
+  const pelo = mat(0x5f5b56);
+  const dorso = mat(0x2b2724);
+  const claro = mat(0xb9b2a6);
   const a = arreio();
   // O apoio fica no quadril: sentar (o uivo) gira o corpo em volta das patas de trás.
-  const apoio = pivo('apoio', raiz, 0, 0.56, -0.32);
-  const tronco = pivo('tronco', apoio, 0, 0, 0.32);
-  tronco.add(bola(0.22, pelo, 1, 0.95, 2.2));
-  tronco.add(em(bola(0.17, dorso, 1, 0.55, 2), 0, 0.12, -0.02));
-  tronco.add(em(bola(0.15, claro, 0.85, 1, 0.8), 0, -0.07, 0.3));
-  // A juba: tufos em leque em volta do pescoço.
-  for (let i = 0; i < 9; i++) {
-    const t = (i / 8 - 0.5) * 2.4;
-    const tufo = new THREE.Mesh(new THREE.ConeGeometry(0.045, 0.15, 5), i % 3 ? pelo : dorso);
-    em(tufo, Math.sin(t) * 0.15, 0.04 + Math.cos(t) * 0.11, 0.32, -0.9, 0, -t * 0.6);
+  const apoio = pivo('apoio', raiz, 0, H_LOBO, -0.34);
+  const tronco = pivo('tronco', apoio, 0, 0, 0.34);
+  // O peito fundo na frente, a cintura fina e o quadril menor atrás.
+  tronco.add(em(bola(0.16, pelo, 0.82, 1.18, 1.25), 0, -0.01, 0.2));
+  tronco.add(em(bola(0.12, pelo, 0.8, 0.82, 1.9), 0, 0.03, -0.05));
+  tronco.add(em(bola(0.13, pelo, 0.85, 0.95, 1.1), 0, 0.02, -0.28));
+  tronco.add(em(bola(0.1, dorso, 0.85, 0.45, 3.2), 0, 0.12, -0.02));
+  tronco.add(em(bola(0.1, claro, 0.75, 1.1, 0.6), 0, -0.09, 0.32));
+  // A juba curta em volta do pescoço.
+  for (let i = 0; i < 7; i++) {
+    const t = (i / 6 - 0.5) * 2.2;
+    const tufo = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.12, 5), i % 3 ? pelo : dorso);
+    em(tufo, Math.sin(t) * 0.11, 0.06 + Math.cos(t) * 0.09, 0.33, -0.9, 0, -t * 0.6);
     tronco.add(tufo);
   }
-  const pescoco = pivo('pescoco', tronco, 0, 0.12, 0.4);
-  const cabeca = pivo('cabeca', pescoco, 0, 0.06, 0.08);
-  cabeca.add(bola(0.14, pelo, 1, 0.95, 1.15));
-  cabeca.add(em(bola(0.1, dorso, 1, 0.5, 1), 0, 0.09, -0.02));
-  const focinho = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.26, 9), claro);
-  cabeca.add(em(focinho, 0, -0.03, 0.18, Math.PI / 2));
-  cabeca.add(em(bola(0.028, mat(0x121212, { roughness: 0.25 })), 0, -0.02, 0.31));
-  const mandibula = pivo('mandibula', cabeca, 0, -0.07, 0.06);
-  mandibula.add(em(new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.2, 8), claro), 0, 0, 0.1, Math.PI / 2, 0, 0));
+  const pescoco = pivo('pescoco', tronco, 0, 0.08, 0.36);
+  pescoco.add(em(bola(0.085, pelo, 0.9, 0.95, 1.6), 0, 0.04, 0.06, -0.7));
+  const cabeca = pivo('cabeca', pescoco, 0, 0.1, 0.14);
+  cabeca.add(bola(0.1, pelo, 0.92, 0.85, 1.2));
+  cabeca.add(em(bola(0.07, dorso, 0.9, 0.45, 1.1), 0, 0.06, -0.02));
+  const focinho = new THREE.Mesh(new THREE.ConeGeometry(0.058, 0.25, 9), claro);
+  cabeca.add(em(focinho, 0, -0.025, 0.17, Math.PI / 2));
+  cabeca.add(em(bola(0.022, mat(0x121212, { roughness: 0.25 })), 0, -0.015, 0.29));
+  const mandibula = pivo('mandibula', cabeca, 0, -0.055, 0.05);
+  mandibula.add(em(new THREE.Mesh(new THREE.ConeGeometry(0.042, 0.19, 8), claro), 0, 0, 0.1, Math.PI / 2, 0, 0));
   for (const s of [-1, 1]) {
-    const orelha = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.15, 4), dorso);
-    cabeca.add(em(orelha, s * 0.075, 0.15, -0.03, -0.15, 0, -s * 0.22));
-    const olho = bola(0.022, mat(0xffb347, { emissive: 0xff8a00, emissiveIntensity: 0.9, roughness: 0.2 }));
-    cabeca.add(em(olho, s * 0.065, 0.035, 0.11));
+    const orelha = new THREE.Mesh(new THREE.ConeGeometry(0.038, 0.14, 4), dorso);
+    cabeca.add(em(orelha, s * 0.055, 0.12, -0.03, -0.1, 0, -s * 0.12));
+    const olho = bola(0.018, mat(0xffb347, { emissive: 0xff8a00, emissiveIntensity: 0.9, roughness: 0.2 }));
+    cabeca.add(em(olho, s * 0.05, 0.03, 0.09));
   }
-  coleira(tronco, 0.115, a, 0.1, 0.44);
-  sela(tronco, a, 0.2, 0.36, 0.36, -0.02);
-  const ps = pernas(tronco, [[-0.12, -0.06, 0.3, 0], [0.12, -0.06, 0.3, Math.PI], [-0.12, -0.06, -0.32, Math.PI], [0.12, -0.06, -0.32, 0]], { coxa: pelo, pe: dorso }, { r: 0.058, coxa: 0.24, canela: 0.24, pata: 0.04 });
-  const rabo = pivo('rabo', tronco, 0, 0.06, -0.44);
-  rabo.add(osso(0.06, 0.24, pelo, 0.05));
-  rabo.add(em(bola(0.07, claro, 1, 1.6, 1), 0, -0.3, 0));
+  coleira(tronco, 0.09, a, 0.08, 0.4);
+  arreioLeve(tronco, a, 0.15);
+  const ps = pernas(tronco, [[-0.075, -0.06, 0.26, 0], [0.075, -0.06, 0.26, Math.PI], [-0.075, -0.04, -0.32, Math.PI], [0.075, -0.04, -0.32, 0]], { coxa: pelo, pe: dorso }, { r: 0.05, coxa: 0.25, canela: 0.25, pata: 0.036 });
+  // Os ombros e as ancas: o músculo no alto das pernas.
+  for (const sx of [-1, 1]) {
+    tronco.add(em(bola(0.07, pelo, 0.75, 1.25, 1), sx * 0.075, -0.06, 0.25));
+    tronco.add(em(bola(0.08, pelo, 0.75, 1.2, 1.15), sx * 0.075, -0.04, -0.31));
+  }
+  const rabo = pivo('rabo', tronco, 0, 0.07, -0.4);
+  rabo.add(osso(0.045, 0.3, pelo, 0.04));
+  rabo.add(em(bola(0.045, dorso, 1, 1.8, 1), 0, -0.33, 0));
   return {
     grupo,
     animar(estado, f) {
       raiz.position.set(0, 0, 0);
       raiz.rotation.set(0, 0, 0);
-      apoio.position.set(0, 0.56, -0.32);
+      apoio.position.set(0, H_LOBO, -0.34);
       apoio.rotation.set(0, 0, 0);
-      tronco.position.set(0, 0, 0.32);
+      tronco.position.set(0, 0, 0.34);
       tronco.rotation.set(0, 0, 0);
       pescoco.rotation.set(0, 0, 0);
       cabeca.rotation.set(0, 0, 0);
@@ -199,7 +227,7 @@ export function loboCompanheiro(): Fera {
       tronco.scale.set(1, 1, 1);
       if (estado === 'andar') {
         // O trote: as patas em diagonal juntas, o corpo sobe a cada passo.
-        apoio.position.y = 0.56 + 0.03 * Math.abs(ciclo(f));
+        apoio.position.y = H_LOBO + 0.03 * Math.abs(ciclo(f));
         pescoco.rotation.x = 0.08 * ciclo(f * 2);
         for (const p of ps) {
           const v = ciclo(f, p.fase);
@@ -209,7 +237,7 @@ export function loboCompanheiro(): Fera {
         rabo.rotation.x = -1.9;
       } else if (estado === 'correr') {
         // O galope: o par da frente e o de trás alternam, o corpo ondula e se estica.
-        apoio.position.y = 0.6 + 0.08 * Math.max(0, ciclo(f));
+        apoio.position.y = H_LOBO + 0.04 + 0.08 * Math.max(0, ciclo(f));
         apoio.rotation.x = 0.16 * ciclo(f, Math.PI / 2);
         pescoco.rotation.x = 0.2 - 0.15 * ciclo(f, Math.PI / 2);
         for (const p of ps) {
@@ -223,8 +251,8 @@ export function loboCompanheiro(): Fera {
         // O bote: agacha, salta para a frente com a boca aberta e fecha a mordida.
         const carga = suave(Math.min(1, f / 0.35));
         const bote = f < 0.35 ? 0 : Math.sin(((f - 0.35) / 0.65) * Math.PI);
-        apoio.position.y = 0.56 - 0.1 * carga * (1 - bote) + 0.12 * bote;
-        apoio.position.z = -0.32 + 0.35 * bote;
+        apoio.position.y = H_LOBO - 0.1 * carga * (1 - bote) + 0.12 * bote;
+        apoio.position.z = -0.34 + 0.35 * bote;
         apoio.rotation.x = 0.1 * carga - 0.25 * bote;
         pescoco.rotation.x = 0.3 * carga - 0.2 * bote;
         mandibula.rotation.x = 0.7 * Math.sin(Math.min(1, f / 0.8) * Math.PI);
@@ -236,7 +264,7 @@ export function loboCompanheiro(): Fera {
         // O uivo: senta nas patas de trás, a cabeça para o alto e a boca aberta.
         const u = suave(Math.min(1, f * 2.5));
         apoio.rotation.x = -0.55 * u;
-        apoio.position.y = 0.56 - 0.12 * u;
+        apoio.position.y = H_LOBO - 0.12 * u;
         pescoco.rotation.x = -0.7 * u;
         cabeca.rotation.x = -0.3 * u;
         mandibula.rotation.x = 0.55 * u * (0.8 + 0.2 * ciclo(f * 3));
@@ -249,7 +277,7 @@ export function loboCompanheiro(): Fera {
         // Cai de lado e para.
         raiz.rotation.z = (Math.PI / 2) * suave(f);
         raiz.position.y = 0.16 * f;
-        apoio.position.y = 0.56 - 0.32 * f;
+        apoio.position.y = H_LOBO - 0.32 * f;
         for (const p of ps) p.coxa.rotation.x = 0.35 * f * (p.frente ? -1 : 1);
         mandibula.rotation.x = 0.25 * f;
       }

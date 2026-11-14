@@ -6,6 +6,7 @@ import { companheiroDe } from '../../src/combat/companheiro';
 import { aplicarImpacto } from '../../src/combat/golpe';
 import { habilidadeDoAtor } from '../../src/combat/perfil';
 import { duracaoDoGrito, golpeAlcancaOPet, petDe, petDoCompanheiro, reflexoDoPet } from '../../src/combat/pets';
+import { recargaDoBasicoPct } from '../../src/combat/basico';
 import type { Comando } from '../../src/core/comandos';
 import { criarEstado } from '../../src/core/estado';
 import type { EventoSimulacao } from '../../src/core/eventos-simulacao';
@@ -149,5 +150,41 @@ describe('companheiros do Aventureiro (D-165)', () => {
     aplicarImpacto(c.estado, ctx, c.j, { acaoId: 1, hab, indice: 0, fonte: { ...fonteDaHabilidade(o, ctx, 0, hab), d20Minimo: 20 } }, c.eventos);
     expect(c.eventos.some((e) => e.t === 'impacto' && e.alvoId === 'j')).toBe(true);
     expect(c.estado.recargas[`lobo:intercepta:j`]).toBeGreaterThan(c.estado.tick);
+  });
+
+  // Marco 40 (14/11/2026, D-166): a caça marcada.
+  it('o básico do Aventureiro não fere: marca o alvo, e o lobo corre até ele e morde', () => {
+    const c = cena();
+    obter(c.j.bolsa).pet = 'lobo';
+    c.passo([], 100);
+    const o = c.orc(c.j.x + 1, c.j.y);
+    o.hp = o.hpMax = 500;
+    c.passo([{ t: 'usarHabilidade', id: c.j.ataqueBasico, alvo: o.id }], 600);
+    expect(c.eventos.some((e) => e.t === 'cacaMarcada' && e.alvoId === o.id)).toBe(true);
+    const lobo = obter(companheiroDe(c.estado, c.j));
+    expect(c.j.cacaMarcada).toBe(o.id);
+    const marcadoCom = o.hp;
+    c.passo([], 4000);
+    expect(o.hp).toBeLessThan(marcadoCom);
+    expect(c.eventos.some((e) => e.t === 'impacto' && e.alvoId === o.id && e.fonteId === lobo.id && e.dano > 0)).toBe(true);
+  });
+
+  it('o básico do Aventureiro tem metade da velocidade de ataque', () => {
+    const c = cena();
+    const golpe = obter(habilidadeDoAtor(ctx, c.j, c.j.ataqueBasico));
+    expect(recargaDoBasicoPct(ctx, c.j, golpe)).toBeGreaterThanOrEqual(100);
+  });
+
+  it('no Ataque do companheiro, o lobo dá o bote até o alvo', () => {
+    const c = cena();
+    obter(c.j.bolsa).pet = 'lobo';
+    c.passo([], 100);
+    const lobo = obter(companheiroDe(c.estado, c.j));
+    const o = c.orc(c.j.x + 4, c.j.y);
+    o.hp = o.hpMax = 500;
+    c.passo([{ t: 'usarHabilidade', id: 'mergulho', alvo: o.id }], 1500);
+    expect(c.eventos.some((e) => e.t === 'deslocado' && e.id === lobo.id)).toBe(true);
+    expect(Math.max(Math.abs(lobo.x - o.x), Math.abs(lobo.y - o.y))).toBeLessThanOrEqual(1);
+    expect(o.hp).toBeLessThan(500);
   });
 });

@@ -52,7 +52,8 @@
         "lobo": { "reflexoPct": [70, 50], "passoMs": 260, "interceptarMs": 3000 },
         "urso": { "reflexoPct": [60, 30], "passoMs": 420, "provocarMs": 3000, "provocarRaio": 2 }
       },
-      "gritoDeFera": { "baseMs": 500, "porNivelMs": 100, "maxMs": 4000 }
+      "gritoDeFera": { "baseMs": 500, "porNivelMs": 100, "maxMs": 4000 },
+      "marca": { "recargaBasicoPct": 100, "velocidadePct": 60, "danoPct": 70 }
     },
     "arqueiro": {
       "secundariosMult": 1.15, "alcanceAndandoPct": 80,
