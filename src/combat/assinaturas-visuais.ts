@@ -50,6 +50,11 @@ export const ASSINATURAS_VISUAIS = [
   'arma_cajado', 'arma_praga', 'arma_foice', 'arma_cova', 'arma_lamento', 'arma_sanguineo', 'arma_espectro', 'arma_colheita',
   'arma_chakram', 'arma_adaga', 'arma_machadinha', 'arma_shuriken', 'arma_duplo', 'arma_arpeu', 'arma_falcoeiro', 'arma_serrilhado',
   'arma_solo_amaldicoado', 'arma_bumerangue',
+  // D-173 (14/11/2026): as 21 famílias de ultimate, cada uma com a sua (render/vfx/familias/ultimates.ts).
+  'ult_aniquilacao', 'ult_execucao_presa', 'ult_sangria', 'ult_contragolpe', 'ult_cometa', 'ult_exercito_em_furia',
+  'ult_carcere', 'ult_santuario', 'ult_fortaleza', 'ult_armadilha_viva', 'ult_carcereiros', 'ult_renascer',
+  'ult_bastiao', 'ult_peregrino', 'ult_guardioes', 'ult_inabalavel', 'ult_avanco_blindado', 'ult_muralha_viva',
+  'ult_tempestade_de_passos', 'ult_matilha', 'ult_legiao',
 ] as const;
 export type AssinaturaVisual = (typeof ASSINATURAS_VISUAIS)[number];
 

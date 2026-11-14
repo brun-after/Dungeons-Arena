@@ -942,7 +942,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "supernova"
+        "assinatura": "ult_aniquilacao"
       }
     },
     {
@@ -1015,7 +1015,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "grilhoes"
+        "assinatura": "ult_execucao_presa"
       }
     },
     {
@@ -1094,7 +1094,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "fios_de_vida"
+        "assinatura": "ult_sangria"
       }
     },
     {
@@ -1150,7 +1150,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "contragolpe"
+        "assinatura": "ult_contragolpe"
       }
     },
     {
@@ -1233,7 +1233,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "meteoro"
+        "assinatura": "ult_cometa"
       }
     },
     {
@@ -1322,7 +1322,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "hoste_espectral"
+        "assinatura": "ult_exercito_em_furia"
       }
     },
     {
@@ -1363,7 +1363,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "turbilhao_de_correntes"
+        "assinatura": "ult_carcere"
       }
     },
     {
@@ -1441,7 +1441,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "circulo_de_amparo"
+        "assinatura": "ult_santuario"
       }
     },
     {
@@ -1494,7 +1494,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "muralha_de_pedra"
+        "assinatura": "ult_fortaleza"
       }
     },
     {
@@ -1552,7 +1552,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "campo_minado"
+        "assinatura": "ult_armadilha_viva"
       }
     },
     {
@@ -1599,7 +1599,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "invocacao"
+        "assinatura": "ult_carcereiros"
       }
     },
     {
@@ -1646,7 +1646,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "asas_da_aurora"
+        "assinatura": "ult_renascer"
       }
     },
     {
@@ -1698,7 +1698,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "barreira"
+        "assinatura": "ult_bastiao"
       }
     },
     {
@@ -1788,7 +1788,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "retorno"
+        "assinatura": "ult_peregrino"
       }
     },
     {
@@ -1832,7 +1832,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "bencao"
+        "assinatura": "ult_guardioes"
       }
     },
     {
@@ -1874,7 +1874,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "desafio"
+        "assinatura": "ult_inabalavel"
       }
     },
     {
@@ -1921,7 +1921,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "ariete"
+        "assinatura": "ult_avanco_blindado"
       }
     },
     {
@@ -1972,7 +1972,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "muralha_de_aco"
+        "assinatura": "ult_muralha_viva"
       }
     },
     {
@@ -2062,7 +2062,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "chuva_de_laminas"
+        "assinatura": "ult_tempestade_de_passos"
       }
     },
     {
@@ -2137,7 +2137,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "revoada"
+        "assinatura": "ult_matilha"
       }
     },
     {
@@ -2176,7 +2176,7 @@
         "impacto": "runas",
         "camera": "leve",
         "som": "nivel",
-        "assinatura": "levante_profano"
+        "assinatura": "ult_legiao"
       }
     },
     {
