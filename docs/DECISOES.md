@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.18 · **Data:** 14/11/2026
+**Versão:** 1.19 · **Data:** 14/11/2026
 
 > **Histórico**
+> - **1.19 (14/11/2026)**: D-171: o Arqueiro mais dependente de movimento (alcance 30% menor sem a Mira cheia, salto para trás com recarga menor, conjuração 10% mais rápida, skills de fora da classe enchem a Mira, os estilos adaptados) e o deslize que respeita a animação (recuo, avanço e teleportes curtos).
 > - **1.18 (14/11/2026)**: D-170: as correções do movimento da classe (o círculo do Acelerar à frente, entre a distância mínima e a máxima, as linhas de alcance da Âncora e do Posto, a nuvem única da névoa, a Chegada em pêndulo, a camuflagem em combate e a armadilha com retardo sob o Arqueiro) e dos companheiros (a caça marcada que acaba, o urso que luta nadando e o falcão que passa perto).
 > - **1.17 (14/11/2026)**: D-169: a região vizinha desenhada além da borda (sem o vazio no fim do mapa) e a troca sem a travada (o chão assado aos poucos e guardado entre as cenas, as teclas mantidas que seguem para a cena nova).
 > - **1.16 (14/11/2026)**: D-169: as passagens entre as regiões do Mundo (a troca de sala sem tela preta, a trégua e o tipo pelo par de biomas) e o que segue com o personagem na troca (vida, mana, recargas, efeitos, movimento escolhido e as invocações com os prazos).
@@ -5251,3 +5252,48 @@ sala por região. As dungeons, os covis e os portais continuam trocando de sala,
 
 Balanceamento: 172/172.
 
+## D-171 — Marco 41: o Arqueiro de movimento e o deslize que respeita a animação (14/11/2026)
+
+**Contexto.** O Arqueiro era um atirador de longe que funcionava em qualquer situação: parado no fundo, alcançava
+tudo. O pedido foi deixá-lo mais dependente de movimento quando não pode ficar parado, com o alcance longo guardado
+para o tiro carregado. E o Salto para trás era atrapalhado com o alvo à frente, com o clique ou a tecla para a frente:
+o corpo voltava a andar (ou golpeava virando para o alvo) logo no tick seguinte, cortando a animação.
+
+**Decisão.**
+- **Alcance pela Mira firme** (`alcanceDe`, combat/acao.ts). Sem a Mira cheia, os ataques do Arqueiro alcançam
+  `alcanceSemMiraPct` (70%) do alcance; andando, ainda `alcanceAndandoPct`, que passa de 80% para 90% para não punir
+  quem atira se movendo (andando sem a Mira, 63%). Com a Mira cheia, o alcance inteiro, andando ou não, e o tiro
+  carregado vai até o alcance máximo como antes. As skills de suporte não mudam.
+- **Salto para trás** com recarga de 5 s para 3,5 s (`movimentos.json`).
+- **Conjuração** das skills do Arqueiro ×0,9 (`conjuracaoMult`, `conjuracaoDaClasse` em combat/ajustes-classes.ts), o
+  básico fora. O guerreiro, no encadeio, conjura 2× mais rápido. Testado ×0,8: o chefe da fase 1 solo caiu para 24 s,
+  abaixo da meta de 25 a 40 s (`balance.metas`); ×0,9 fica nela.
+- **Skills de fora da classe enchem a Mira** (`adiantarMiraPorSkill`, combat/mira.ts). Cada uma (nem o básico, nem as
+  de classe, nem a ultimate) põe `porSkillPct` (20%) da barra, sem guardar além da barra cheia.
+- **Os estilos.**
+  - **Flecheiro arcano** (o que herda o elemento da última magia): `miraSkill` +4% por degrau (teto 60%) no que cada
+    skill de fora enche.
+  - **Inabalável**: `miraRetidaPct` +5% por degrau a partir do 2º (teto 50%). Levar dano guarda essa parte do que a
+    Mira já tinha, em vez de zerar (`perderMiraPorDano`).
+  - Mira firme e Caçador seguem com o alcance do tiro carregado, que vale mais agora. O Atirador segue com a cadência,
+    para quem atira de perto.
+- **O deslize próprio** (combat/deslize.ts). Quem se move sozinho (o recuo, a Arremetida, os avanços e teleportes
+  curtos das skills, o Passo sombrio, a Âncora, a Troca de corpo, o posto) ganha `deslize`, com o fim e o rumo, pelo
+  tempo da animação (`balance.movimento.deslize`: recuo 380 ms; avanço 70 ms por célula, no mínimo 140; teleporte
+  280 ms, o da materialização). Nesse tempo:
+  - não anda contra o rumo do deslize. A intenção (o caminho do clique, a tecla) fica e volta no fim, então saltar para
+    trás e seguir para a frente espera a queda. No mesmo rumo (cosseno ≥ 0,3), segue junto: recuar depois do salto é
+    imediato;
+  - o ataque básico contra o rumo do deslize espera. Era ele que virava o corpo para o alvo à frente no meio do salto
+    para trás. No mesmo rumo (o dash até o alvo), o básico sai, e as skills saem na hora. Duas versões mais
+    rígidas foram testadas e deixavam o guerreiro fora das metas (`balance.metas`):
+    - segurar todo golpe e soltar a skill pedida no fim: `dois melhores estilos contra a dispersa` 97,7% (até 90%) e
+      `nível 100: tempo no comum` 1,97 s (a partir de 2);
+    - segurar todo básico: `equipado vence o sem equipamento` 59,4% (a partir de 60);
+  - o Salto para trás para longe do alvo seguido larga o seguir alvo dele (como o direcional contrário, D-121), que
+    puxava o Arqueiro de volta para a frente.
+- **O desenho** (render/vfx/deslizes.ts) leva o deslize junto quando o corpo segue andando no mesmo rumo durante ele
+  (até 1,5 célula além do destino), sem o pulo no fim.
+
+Testes em `tests/unit/arqueiro-deslize.test.ts`. `aceleracao` e `variacoes-basico` aproximaram os bonecos do Arqueiro,
+que agora ficavam fora do alcance sem a Mira.

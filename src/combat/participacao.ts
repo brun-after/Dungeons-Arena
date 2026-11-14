@@ -6,7 +6,7 @@ import type { ContextoSimulacao } from '../core/contexto';
 import { ticksDe } from '../core/tempo';
 import type { Entidade } from '../entities/entidade';
 import { contarGolpe } from './invocacoes';
-import { zerarMira } from './mira';
+import { perderMiraPorDano } from './mira';
 import { miraProtegida } from './sintonia-arqueiro';
 
 export function registrarParticipacao(alvo: Entidade, fonteId: string, tick: number, ctx: ContextoSimulacao): void {
@@ -16,5 +16,6 @@ export function registrarParticipacao(alvo: Entidade, fonteId: string, tick: num
   contarGolpe(alvo);
   // Marco 22 (D-089): levar dano zera a Mira firme do Arqueiro.
   // Marco 24 (D-095): com a sintonia do suporte, o escudo ativo protege a Mira.
-  if (!miraProtegida(ctx, alvo, tick)) zerarMira(alvo, tick);
+  // 14/11/2026 (D-171): no Inabalável, parte do que já encheu fica.
+  if (!miraProtegida(ctx, alvo, tick)) perderMiraPorDano(ctx, alvo, tick);
 }

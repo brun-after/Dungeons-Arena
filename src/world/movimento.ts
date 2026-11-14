@@ -10,6 +10,7 @@ import { direcaoDe } from '../combat/orientacao';
 import { multiplicadorDoPassoDoFalcao } from '../combat/companheiro';
 import { passoDoPet, petDoCompanheiro, pressaDaCaca } from '../combat/pets';
 import { atravessaCorpos, fatorDeVelocidade, fimDaTirolesa, fimDoSalto, naTirolesa, noAr, noSalto } from '../combat/movimento-classe';
+import { andarCabeNoDeslize } from '../combat/deslize';
 // Movimento livre (§2.2, §2.3). Marco 26 (25/10/2026, D-104): antes célula a célula, em passos cardinais (a diagonal
 // virava escadinha); agora a posição é contínua e anda em qualquer ângulo.
 // - a direção mantida (`mover`) é um vetor quantizado em ±1000 (o teclado e a IA mandam um dos 8 octantes);
@@ -310,10 +311,25 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
     if (arranque) ajustarImpulso(e, false, 0, dtMs, ctx);
     return;
   }
+  // 14/11/2026 (D-171): no deslize próprio (recuo, avanço, teleporte curto), não anda contra o rumo dele; a intenção
+  // (o caminho, a direção) fica e volta quando a animação acaba.
+  const rumo = rumoPretendido(e);
+  if (rumo && !andarCabeNoDeslize(ctx, e, estado.tick, rumo.dx, rumo.dy)) {
+    if (arranque) ajustarImpulso(e, false, 0, dtMs, ctx);
+    return;
+  }
   // O freio é lido antes de andar (a lentidão que valeu neste tick); só quem tem arranque precisa dele.
   const freio = arranque ? freioAgora(e, estado, ctx) : 0;
   const andou = andarNoTick(e, estado, ctx, saida, dtMs, grade);
   if (arranque) ajustarImpulso(e, andou > EPS, freio, dtMs, ctx);
+}
+
+/** D-171: para onde o corpo quer andar agora (o próximo ponto do caminho ou a direção), sem andar; null parado. */
+function rumoPretendido(e: Entidade): { dx: number; dy: number } | null {
+  const wp = e.waypoints[0] ?? e.caminho[0];
+  if (wp) return { dx: wp.x - e.px, dy: wp.y - e.py };
+  if (e.direcao === 'parado') return null;
+  return e.rumoX !== 0 || e.rumoY !== 0 ? { dx: e.rumoX, dy: e.rumoY } : rumoDe(e.direcao);
 }
 
 /** Marco 40 (D-164): a tirolesa — reta, sem mudar de rumo, até bater na parede ou no relevo, ou o alcance acabar. */

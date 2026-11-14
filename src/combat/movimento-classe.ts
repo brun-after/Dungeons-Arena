@@ -26,6 +26,7 @@ import { avancar, teleportar } from './efeitos-instantaneos';
 import { chebyshev } from './geometria';
 import type { Habilidade } from './habilidades';
 import { construirEfeito } from './registro-efeitos';
+import { comecarDeslize, largarSeguirNoRecuo } from './deslize';
 import { corpoCabe } from '../world/corpo';
 import { passavel } from '../world/fase';
 import { velocidadeDeViagem } from '../world/movimento';
@@ -365,7 +366,11 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
       const { x, y } = e;
       const ok = m.tipo === 'teleporte' ? teleportar(estado, ctx, e, destino) : avancar(estado, ctx, e, destino, alcance);
       if (!ok) { recusar('bloqueado'); return; }
-      saida.push({ t: 'deslocado', tick, id: e.id, deX: x, deY: y, paraX: e.x, paraY: e.y, origemId: e.id, causa: m.tipo === 'teleporte' ? 'teleporte' : m.tipo === 'recuo' ? 'recuo' : 'avanco' });
+      const causa = m.tipo === 'teleporte' ? 'teleporte' : m.tipo === 'recuo' ? 'recuo' : 'avanco';
+      saida.push({ t: 'deslocado', tick, id: e.id, deX: x, deY: y, paraX: e.x, paraY: e.y, origemId: e.id, causa });
+      // 14/11/2026 (D-171): o corpo respeita a animação do deslize; o recuo larga o seguir alvo de quem ficou para trás.
+      comecarDeslize(ctx, e, tick, causa, x, y);
+      if (m.tipo === 'recuo') largarSeguirNoRecuo(estado, ctx, e, rumo);
       saida.push({ t: 'movimentoClasse', tick, id: e.id, mov: m.id, fase: 'inicio', ...(ponta && { ponta }) });
       if (m.tipo === 'recuo') (e.movimentoClasse ??= { ativo: m.id, cargas: {} }).recuoTick = tick;
       if (m.tipo === 'recuo' && p.armadilha > 0) armadilhaDoRecuo(estado, ctx, e, { x, y }, pontaDaAfinidade(ctx, e, tick), saida);
@@ -389,6 +394,7 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
       delete mc.ancora;
       const eco = p.eco > 0;
       saida.push({ t: 'deslocado', tick, id: e.id, deX: x, deY: y, paraX: e.x, paraY: e.y, origemId: e.id, causa: 'teleporte' });
+      comecarDeslize(ctx, e, tick, 'teleporte', x, y);
       saida.push({ t: 'movimentoClasse', tick, id: e.id, mov: m.id, fase: 'inicio', ponta: pontaDaAfinidade(ctx, e, tick), ...(eco && { eco: true }) });
       if (eco) deixarEco(estado, ctx, e, { x, y }, saida);
       return;
@@ -420,6 +426,7 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
       posicionar(e, servo.x, servo.y);
       posicionar(servo, x, y);
       saida.push({ t: 'deslocado', tick, id: e.id, deX: x, deY: y, paraX: e.x, paraY: e.y, origemId: e.id, causa: 'teleporte' });
+      comecarDeslize(ctx, e, tick, 'teleporte', x, y);
       saida.push({ t: 'movimentoClasse', tick, id: e.id, mov: m.id, fase: 'inicio' });
       return;
     }
@@ -569,6 +576,7 @@ function trocarComPosto(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade,
   posicionar(servo, x, y);
   // A troca com o servo do posto passa pela escuridão (não desliza pelo mapa).
   saida.push({ t: 'deslocado', tick: estado.tick, id: e.id, deX: x, deY: y, paraX: e.x, paraY: e.y, origemId: e.id, causa: 'teleporte' });
+  comecarDeslize(ctx, e, estado.tick, 'teleporte', x, y);
   saida.push({ t: 'movimentoClasse', tick: estado.tick, id: e.id, mov: movimentoAtivo(ctx, e)?.id ?? 'posto_dos_mortos', fase: 'inicio' });
   if (p.escudo > 0) aplicarEfeito(estado, ctx, servo, construirEfeito('escudo', { valor: p.escudo, duracaoMs: 8000 }), { id: e.id, x: e.x, y: e.y }, null, saida);
   if (p.reuniao > 0) {

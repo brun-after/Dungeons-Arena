@@ -1,4 +1,5 @@
 // Marco 19 (17/10/2026): campos persistentes, obstáculos, aparo e cura efetiva no mesmo núcleo dos modos.
+import { comecarDeslize } from './deslize';
 import { noAr } from './movimento-classe';
 import type { Celula } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -62,7 +63,12 @@ export function executarTatica(estado: EstadoJogo, ctx: ContextoSimulacao, alvo:
     const negativo = alvo.efeitos.find((f) => f.ateTick > estado.tick && ctx.balance.tatica.removiveis.includes(f.tipo));
     if (negativo) { alvo.efeitos = alvo.efeitos.filter((f) => f !== negativo); fato(ator, 'purificou', alvo.id, origem.acaoId); }
   } else if (ef.tipo === 'passo_sombrio') {
-    if (mira && avancar(estado, ctx, ator, mira, ef.valor)) fato(ator, 'deslocou', undefined, origem.acaoId);
+    const { x, y } = ator;
+    if (mira && avancar(estado, ctx, ator, mira, ef.valor)) {
+      fato(ator, 'deslocou', undefined, origem.acaoId);
+      // 14/11/2026 (D-171): o passo curto também respeita a chegada antes de andar ou golpear.
+      comecarDeslize(ctx, ator, estado.tick, 'teleporte', x, y);
+    }
   } else if (ef.tipo === 'muralha_pedra' && mira) {
     // Marco 40 (13/11/2026, D-161): a muralha de quem usa (`em: conjurador`) sai atrás dele, do lado oposto da mira.
     const m: Celula = ef.em === 'conjurador' ? { x: ator.x - Math.sign(mira.x - ator.x) * 2, y: ator.y - Math.sign(mira.y - ator.y) * 2 } : mira;

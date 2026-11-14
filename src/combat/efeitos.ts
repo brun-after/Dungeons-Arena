@@ -33,6 +33,7 @@ import { fatorDoGolpe } from '../modos/dificuldade';
 import { registrarEfeitoAtivo } from './acumulo';
 import { avancar, empurrar, puxar, teleportar, trocarLugar } from './efeitos-instantaneos';
 import { registrarParticipacao } from './participacao';
+import { comecarDeslize } from './deslize';
 import { aplicarInstantaneoNovo } from './efeitos-novos';
 import { agendarFase } from './fases';
 import { REGISTRO_EFEITOS, type DefinicaoEfeito, type EfeitoCanonico } from './registro-efeitos';
@@ -51,8 +52,10 @@ export interface OrigemDoEfeito {
  * Marco 26 (29/10/2026, D-124): avisa o deslocamento (só um evento; o estado já mudou). O desenho desliza o corpo em vez
  * de teletransportar, e a skill que puxou desenha o recolhimento.
  */
-export function anotarDeslocamento(saida: EventoSimulacao[], tick: number, e: Entidade, deX: number, deY: number, origem: OrigemDoEfeito, causa: CausaDeslocamento): void {
+export function anotarDeslocamento(saida: EventoSimulacao[], tick: number, e: Entidade, deX: number, deY: number, origem: OrigemDoEfeito, causa: CausaDeslocamento, ctx?: Pick<ContextoSimulacao, 'balance'>): void {
   if (e.x === deX && e.y === deY) return;
+  // 14/11/2026 (D-171): quem se move sozinho (avanço, teleporte curto) respeita o deslize até o fim.
+  if (ctx && origem.id === e.id) comecarDeslize(ctx, e, tick, causa, deX, deY);
   saida.push({ t: 'deslocado', tick, id: e.id, deX, deY, paraX: e.x, paraY: e.y, origemId: origem.id, causa, ...(origem.acaoId === undefined ? {} : { acaoId: origem.acaoId }) });
 }
 
@@ -264,14 +267,14 @@ export function aplicarEfeito(
         break;
       case 'teleporte': {
         const { x, y } = alvo;
-        if (teleportar(estado, ctx, alvo, mira)) anotarDeslocamento(saida, tick, alvo, x, y, origem, 'teleporte');
+        if (teleportar(estado, ctx, alvo, mira)) anotarDeslocamento(saida, tick, alvo, x, y, origem, 'teleporte', ctx);
         break;
       }
       case 'avanco': {
         const { x, y } = alvo;
         if (avancar(estado, ctx, alvo, mira, ef.valor)) {
           fato(alvo, 'deslocou', undefined, origem.acaoId);
-          anotarDeslocamento(saida, tick, alvo, x, y, origem, 'avanco');
+          anotarDeslocamento(saida, tick, alvo, x, y, origem, 'avanco', ctx);
         }
         break;
       }

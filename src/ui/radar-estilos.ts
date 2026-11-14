@@ -66,7 +66,7 @@ function textoDaMelhoria(m: MelhoriaDeClasse, v: number): string {
 
 /** As chaves de fator (as outras são marcos). */
 const FATORES: Readonly<Record<string, true>> = {
-  furia: true, aura: true, servos: true, retornoServo: true, carga: true, alcanceCarregado: true, encarnacao: true, elemental: true, falcao: true, pergaminho: true,
+  furia: true, aura: true, servos: true, retornoServo: true, carga: true, alcanceCarregado: true, encarnacao: true, elemental: true, falcao: true, pergaminho: true, miraSkill: true,
 };
 
 /** D-155: a linha da classe do estilo: o degrau de agora, o que cada melhoria dá e quando vem o próximo. */

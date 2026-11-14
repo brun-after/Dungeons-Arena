@@ -53,7 +53,7 @@ export function aplicarInstantaneoNovo(
     case 'retornar': {
       // D-161: volta à célula de onde o atrasado saiu (a Investida do Duelista volta ao ponto de partida).
       const { x, y } = alvo;
-      if (teleportar(estado, ctx, alvo, { x: origem.x, y: origem.y })) anotarDeslocamento(saida, tick, alvo, x, y, origem, 'teleporte');
+      if (teleportar(estado, ctx, alvo, { x: origem.x, y: origem.y })) anotarDeslocamento(saida, tick, alvo, x, y, origem, 'teleporte', ctx);
       break;
     }
     case 'saltar_ao_alvo': {
@@ -63,7 +63,7 @@ export function aplicarInstantaneoNovo(
       const presa = ok(selecionado) ? selecionado : estado.entidades.filter(ok).sort((a, b) => chebyshev(a, alvo) - chebyshev(b, alvo) || (a.id < b.id ? -1 : 1))[0];
       if (!presa) break;
       const { x, y } = alvo;
-      if (avancar(estado, ctx, alvo, { x: presa.x, y: presa.y }, ef.valor)) anotarDeslocamento(saida, tick, alvo, x, y, origem, 'avanco');
+      if (avancar(estado, ctx, alvo, { x: presa.x, y: presa.y }, ef.valor)) anotarDeslocamento(saida, tick, alvo, x, y, origem, 'avanco', ctx);
       if (ef.ref) agendarFase(estado, alvo, ef.ref, { x: presa.x, y: presa.y }, 0);
       break;
     }

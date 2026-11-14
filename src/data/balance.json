@@ -56,8 +56,8 @@
       "marca": { "recargaBasicoPct": 100, "velocidadePct": 60, "danoPct": 70, "duracaoMs": 5000 }
     },
     "arqueiro": {
-      "secundariosMult": 1.15, "alcanceAndandoPct": 80,
-      "mira": { "cargaMs": 6000, "reducaoPorDestrezaPct": 2, "reducaoMaxPct": 25, "d20Minimo": 16 }
+      "secundariosMult": 1.15, "alcanceAndandoPct": 90, "alcanceSemMiraPct": 70, "conjuracaoMult": 0.9,
+      "mira": { "cargaMs": 6000, "reducaoPorDestrezaPct": 2, "reducaoMaxPct": 25, "d20Minimo": 16, "porSkillPct": 20 }
     },
     "necromante": {
       "protecaoMs": 5000,
@@ -77,7 +77,8 @@
     "dashAtravessaParedes": true,
     "velocidadeMaxMult": 2.5,
     "aceleracao": { "inicialPct": 70, "rampaMs": 500, "perdaPorLentidaoPorS": 4 },
-    "recuoDistancia": { "aPartirDeCelulas": 3, "porCelulaPct": 3, "maxPct": 18, "duracaoMs": 450 }
+    "recuoDistancia": { "aPartirDeCelulas": 3, "porCelulaPct": 3, "maxPct": 18, "duracaoMs": 450 },
+    "deslize": { "recuoMs": 380, "avancoMinMs": 140, "avancoMsPorCelula": 70, "teleporteMs": 280, "mesmoRumoCos": 0.3 }
   },
   "navegacao": {
     "maxPassosToque": 60
@@ -585,7 +586,7 @@
     "degrauPct": 5,
     "skillsPorDegrauPct": 0.75,
     "semFamiliaridadePct": 50,
-    "tetos": { "furia": 60, "aura": 50, "servos": 100, "retornoServo": 100, "carga": 100, "alcanceCarregado": 100, "encarnacao": 100, "elemental": 100, "falcao": 100, "pergaminho": 100, "auraRaio": 2, "auraElementalPct": 30, "estandartePct": 60, "servosDaPassiva": 3, "retornoServoPct": 45, "legiao": 1, "cadeiaPct": 100, "ancoraMs": 5000, "explosaoPct": 70, "tempestadePct": 40, "rastroMs": 2400, "ressonanciaPct": 90, "orbes": 2, "arquimagoDuracaoMult": 2.2, "pergaminhosExtras": 2, "matilhaPct": 12, "faroChancePct": 10, "primordialChancePct": 30, "auraVisivel": 1 },
+    "tetos": { "furia": 60, "aura": 50, "servos": 100, "retornoServo": 100, "carga": 100, "alcanceCarregado": 100, "encarnacao": 100, "elemental": 100, "falcao": 100, "pergaminho": 100, "auraRaio": 2, "auraElementalPct": 30, "estandartePct": 60, "servosDaPassiva": 3, "retornoServoPct": 45, "legiao": 1, "cadeiaPct": 100, "ancoraMs": 5000, "explosaoPct": 70, "tempestadePct": 40, "miraSkill": 60, "miraRetidaPct": 50, "rastroMs": 2400, "ressonanciaPct": 90, "orbes": 2, "arquimagoDuracaoMult": 2.2, "pergaminhosExtras": 2, "matilhaPct": 12, "faroChancePct": 10, "primordialChancePct": 30, "auraVisivel": 1 },
     "efeitos": {
       "rastroIntervaloMs": 250, "rastroPct": 20,
       "ressonanciaRaio": 2,

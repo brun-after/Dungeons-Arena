@@ -45,7 +45,11 @@ export interface Balance {
       /** D-165: o Rosnar e o Rugido (base, por nível de diferença e teto, em ms). */
       gritoDeFera: { baseMs: number; porNivelMs: number; maxMs: number };
       marca: { recargaBasicoPct: number; velocidadePct: number; danoPct: number; /** D-170: a marca dura isto depois do último golpe que a renovou. */ duracaoMs: number } };
-    arqueiro: { secundariosMult: number; /** 05/11/2026 (D-132): o alcance que sobra andando, em %. */ alcanceAndandoPct: number; /** Marco 22 (D-089): Mira firme. */ mira: { cargaMs: number; reducaoPorDestrezaPct: number; reducaoMaxPct: number; d20Minimo: number } };
+    arqueiro: { secundariosMult: number; /** 05/11/2026 (D-132): o alcance que sobra andando, em %. */ alcanceAndandoPct: number;
+      /** 14/11/2026 (D-171): o alcance ofensivo sem a Mira cheia (%) e o multiplicador da conjuração das skills. */
+      alcanceSemMiraPct: number; conjuracaoMult: number;
+      /** Marco 22 (D-089): Mira firme. D-171: `porSkillPct`, quanto da barra cada skill fora da classe enche. */
+      mira: { cargaMs: number; reducaoPorDestrezaPct: number; reducaoMaxPct: number; d20Minimo: number; porSkillPct: number } };
     /**
      * 06/11/2026 (D-135): o Necromante bate mais com as próprias mãos e se cura com uma parte do dano que os mortos
      * dele causam e levam.
@@ -78,6 +82,11 @@ export interface Balance {
      * `aPartirDeCelulas` até o alvo, no máximo `maxPct`, por `duracaoMs` a partir do lançamento.
      */
     recuoDistancia: { aPartirDeCelulas: number; porCelulaPct: number; maxPct: number; duracaoMs: number };
+    /**
+     * 14/11/2026 (D-171): quanto dura o deslize de quem se move sozinho (recuo, avanço, teleporte curto). Nesse tempo o
+     * corpo não anda contra o rumo do deslize (`mesmoRumoCos`: o cosseno mínimo para seguir junto) nem começa golpe.
+     */
+    deslize: { recuoMs: number; avancoMinMs: number; avancoMsPorCelula: number; teleporteMs: number; mesmoRumoCos: number };
   };
   navegacao: {
     /** Limite da busca para toque no mapa (§2.3). */

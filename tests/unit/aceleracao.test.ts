@@ -121,13 +121,14 @@ describe('recuo de quem ataca de longe (D-132)', () => {
   it('o tiro do arqueiro de longe o deixa lento ao sair', () => {
     const estado = criarEstado({ semente: 9, faseId: ctx.fase.id });
     const j = criarJogador(obter(CONTEUDO.classes.get('arqueiro'), 'classe'), 'j', 1, 5, ctx.balance);
-    const boneco = criarInimigo(obter(CONTEUDO.presets.get('boneco'), 'boneco'), 'b', 8, 5, ctx.balance);
+    const boneco = criarInimigo(obter(CONTEUDO.presets.get('boneco'), 'boneco'), 'b', 6, 5, ctx.balance);
+    // D-171: sem a Mira cheia, o arco alcança 30% menos; o alvo fica a 5 células.
     estado.entidades.push(j, boneco);
     const eventos: EventoSimulacao[] = [];
     simular(estado, ctx, [{ tick: estado.tick, entidadeId: 'j', cmd: { t: 'selecionarAlvo', alvo: 'b' } }], eventos, DT_MS);
     for (let i = 0; i < 120 && !eventos.some((e) => e.t === 'acaoIniciada' && e.atorId === 'j'); i++) simular(estado, ctx, [], eventos, DT_MS);
     for (let i = 0; i < 60 && recuoAgoraPct(j, estado.tick) === 0; i++) simular(estado, ctx, [], eventos, DT_MS);
-    expect(recuoAgoraPct(j, estado.tick)).toBe(recuoDaDistanciaPct(ctx, 7));
+    expect(recuoAgoraPct(j, estado.tick)).toBe(recuoDaDistanciaPct(ctx, 5));
   });
 });
 

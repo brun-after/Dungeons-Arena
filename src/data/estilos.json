@@ -315,6 +315,11 @@
           "chave": "ancoraMs",
           "porDegrau": 200,
           "desde": 4
+        },
+        {
+          "chave": "miraRetidaPct",
+          "porDegrau": 5,
+          "desde": 2
         }
       ]
     },
@@ -396,6 +401,10 @@
           "chave": "tempestadePct",
           "porDegrau": 1.75,
           "desde": 14
+        },
+        {
+          "chave": "miraSkill",
+          "porDegrau": 4
         }
       ]
     },
