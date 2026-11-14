@@ -38,10 +38,13 @@ import { PORTAL_TEMPORARIO } from './mundo/objetos-mundo';
 import type { ContextoSimulacao } from './core/contexto';
 import { proximaEtapa } from './mundo/orientacao';
 import { vigiaDaPassagem } from './ui/passagem-mundo';
+import type { CenaDoMundo } from './ui/cena-mundo';
+import { recorteDaVizinha } from './world/recorte-vizinha';
+import { temaDaFase } from './combat/clima';
 
 // 09/11/2026 (D-144): 20 s (a sala nova pode estar nascendo: gerar a região leva tempo no servidor).
 const ESPERA_ENTRADA_MS = 20_000;
-/** Marco 41 (D-169): a cena nova aparece no máximo neste tempo, mesmo sem o personagem no estado ainda. */
+/** Marco 41 (D-169): a cena nova aparece no máximo neste tempo, mesmo sem o personagem ou o chão prontos. */
 const REVELAR_EM_MS = 4000;
 const agoraMs = () => relogioDoNavegador.agoraMs();
 const conteudo = conteudoOficial();
@@ -252,10 +255,13 @@ function formularioDeCriacao(slot: number, criar: (classeId: string, nome: strin
   return form;
 }
 
-/** Marco 41 (D-169): a cena de antes na troca de sala (sai quando a nova está pronta) e a vista dela. */
+/**
+ * Marco 41 (D-169): a cena de antes na troca de sala (sai quando a nova está pronta). Ela segue ligada até sair: a
+ * vista dela (onde o jogador estava) é lida na hora em que a nova aparece, e as teclas mantidas passam para a nova.
+ */
 interface TrocaDeCena {
   tirar: () => void;
-  desvio: { x: number; y: number } | null;
+  cena: CenaDoMundo | null;
 }
 
 /** Espera o bemVindo (ou a recusa) da sala. */
@@ -330,7 +336,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
   const voltarPelaVila = (): boolean => {
     if (!pedido.bilhete || pedido.slot === undefined || !vilaSalva) return false;
     camada.remove();
-    void jogarNoMundo(raiz, servidor, token, { lugar: `regiao:${vilaSalva}`, slot: pedido.slot }, orientacao, null, troca && { tirar: troca.tirar, desvio: null });
+    void jogarNoMundo(raiz, servidor, token, { lugar: `regiao:${vilaSalva}`, slot: pedido.slot }, orientacao, null, troca && { tirar: troca.tirar, cena: null });
     return true;
   };
   let conexao: Awaited<ReturnType<typeof conectarMundo>>;
@@ -441,14 +447,13 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
       // D-169: o laço para (o último quadro fica na tela); a cena só sai quando a nova estiver pronta.
       pararLaco?.();
       pararLaco = null;
-      const desvio = cena?.desvioDaCamera() ?? null;
       const tirar = () => {
         desmontar();
         camada.remove();
       };
-      void conexao.encerrar().finally(() => {
-        void jogarNoMundo(raiz, servidor, token, { lugar: a.lugar, bilhete: a.bilhete, instancia: a.instancia, ...(pedido.slot !== undefined && { slot: pedido.slot }) }, orientacao, ultimoLugar?.vilaSalva ?? vilaSalva, { tirar, desvio });
-      });
+      // A sala de antes já soltou o personagem: a nova conecta sem esperar o fechamento desta.
+      void conexao.encerrar();
+      void jogarNoMundo(raiz, servidor, token, { lugar: a.lugar, bilhete: a.bilhete, instancia: a.instancia, ...(pedido.slot !== undefined && { slot: pedido.slot }) }, orientacao, ultimoLugar?.vilaSalva ?? vilaSalva, { tirar, cena: cena?.mundo ?? null });
     } else {
       const texto = textoDoAviso(a);
       if (texto) avisar(texto, 4000);
@@ -517,7 +522,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
     visoesExternas: () => visoesExternas,
     acoesDaPausa: [{ rotulo: t('mundo.sairRotulo'), fazer: () => { sair.click(); } }],
     // Marco 38 (D-142): o mercado é uma loja só; o botão fecha a loja e pede os anúncios do reino.
-    desvioCamera: troca?.desvio ?? null,
+    troca: troca?.cena ? { desvio: troca.cena.desvio(), teclas: troca.cena.teclas } : null,
     abrirAnuncios: () => {
       eu.enviarComando({ t: 'fecharLoja' });
       enviarAcao({ a: 'mercado', op: 'listar', pagina: 0, busca: '' });
@@ -565,16 +570,26 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
   conexao.aoMudar((estado) => {
     if (!saindo) avisar(t(`conexao.${estado}`));
   });
-  // D-169: a cena de antes sai quando o personagem aparece aqui (ou, sem estado, em poucos segundos).
+  // D-169: a cena de antes sai quando o personagem aparece aqui com o chão à vista pronto (ou em poucos segundos).
+  // Na hora, o jogador volta ao ponto da vista em que estava na de antes (a câmera desliza dali até o centro).
   let antes = anterior;
   const revelar = () => {
     if (!antes && camada.style.visibility !== 'hidden') return;
+    const desvio = troca?.cena?.desvio();
+    if (desvio) c.mundo.recentrar(desvio);
     camada.style.visibility = '';
     antes?.();
     antes = null;
   };
   if (antes) setTimeout(revelar, REVELAR_EM_MS);
-  const vigia = vigiaDaPassagem(ctx.fase, (destino) => { terrenoDe(destino); }, (texto) => { avisar(texto, 3500); });
+  // D-169: ao entrar numa passagem, o mapa de lá é preparado e o pedaço dele além da borda é desenhado.
+  let vizinhaAtual = '';
+  const vigia = vigiaDaPassagem(ctx.fase, (area) => {
+    const ctxLa = area.destino ? terrenoDe(area.destino) : null;
+    if (!ctxLa || !area.lado || vizinhaAtual === area.destino) return;
+    vizinhaAtual = area.destino ?? '';
+    c.mundo.vizinha(recorteDaVizinha(ctx.fase.largura, area.lado, ctxLa.fase), temaDaFase(ctxLa));
+  }, (texto) => { avisar(texto, 3500); });
   pararLaco = iniciarLaco({
     simular: () => {
       eu.passo();
@@ -591,7 +606,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
         rede: { rttMs: eu.rttMs, latenciaSimuladaMs: 0, erroP95: 0, conectado,
           baseTick: eu.baseTick, tempoSemEstadoMs: eu.tempoSemEstadoMs, ressincronizacoes: eu.ressincronizacoes },
       });
-      if (conectado && antes) revelar();
+      if (conectado && antes && c.mundo.chaoPronto()) revelar();
       vigia(eu.previsto ? buscarEntidade(eu.previsto, id) : undefined);
     },
     quadroPermitido: c.quadroPermitido,

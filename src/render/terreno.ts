@@ -26,6 +26,7 @@ import { pecaDaCelula } from '../world/tileset';
 import { CELULA_PX } from './camera-calculo';
 import { COR_BRILHO_AGUA, desenharBrilhoDaAgua, desenharCelulaExterior, ehCelulaExterior } from './terreno-exterior';
 import type { TexturasTileset } from './tileset-textura';
+import { chaveDoAssado, guardarAssado, pegarAssado, soltarAssado, temAssado } from './solo/assados-guardados';
 
 export const BLOCO_CELULAS = 16;
 
@@ -152,6 +153,8 @@ export interface Terreno {
   redesenharCelula: (x: number, y: number) => void;
   /** Marco 26 (D-109): no isométrico, sem os enfeites altos e os pilares (redesenha os blocos na troca). */
   definirVisao: (iso: boolean) => void;
+  /** Marco 41 (14/11/2026, D-169): o chão à vista já está assado (a cena nova da troca de região espera por isto). */
+  pronto: () => boolean;
   destruir: () => void;
 }
 
@@ -170,7 +173,7 @@ interface Bloco {
   /** A camada animada do brilho da água (null sem água no bloco). */
   agua: Graphics | null;
   /** Marco 31 (D-130): o chão assado (embaixo de `g`), com o canvas e a textura dele. */
-  solo: { sprite: Sprite; canvas: HTMLCanvasElement } | null;
+  solo: { sprite: Sprite; canvas: HTMLCanvasElement; chave: string } | null;
 }
 
 /** Marco 31 (D-130): o chão texturizado da fase (sem ele, as cores lisas de sempre). */
@@ -208,11 +211,17 @@ export function criarTerreno(
   let vistas: readonly (readonly [number, number, number, number])[] = [];
   let assouNoQuadro = false;
   let destruido = false;
+  let soloResolvido = !solo || tileset !== null;
   if (solo && !tileset) {
     void solo.texturas.then((texturas) => {
+      soloResolvido = true;
       if (destruido || texturas.size === 0) return;
       assador = new AssadorDeSolo(texturas, solo.tema, solo.escala, fase.ambientes ?? [], solo.semente);
-      for (const b of blocos) if (b.desenhado) assarBloco(b);
+      // Marco 41 (14/11/2026, D-169): na fila, um por quadro (assar todos de uma vez travava a tela).
+      for (const b of blocos) if (b.desenhado) {
+        if (temAssado(chaveDe(b))) assarBloco(b);
+        else fila.add(b);
+      }
     });
   }
   const paleta: Paleta = tema ? tema.paleta : paletaDe(fase.matizGraus);
@@ -238,25 +247,33 @@ export function criarTerreno(
   const soltarSolo = (b: Bloco) => {
     if (!b.solo) return;
     b.solo.sprite.destroy({ texture: true, textureSource: true });
-    b.solo.canvas.width = b.solo.canvas.height = 0;
+    // Marco 41 (D-169): o canvas volta à guarda (render/solo/assados-guardados.ts), que decide quando apagá-lo.
+    soltarAssado(b.solo.chave);
     b.solo = null;
   };
+  const temaDoSolo = solo ? JSON.stringify(solo.tema) : '';
+  const chaveDe = (b: Bloco) => chaveDoAssado(fase, b.bx, b.by, Math.min(fase.largura, b.bx + BLOCO_CELULAS), Math.min(fase.altura, b.by + BLOCO_CELULAS), temaDoSolo);
   const assarBloco = (b: Bloco) => {
     if (!assador || !solo) return;
     const fimX = Math.min(fase.largura, b.bx + BLOCO_CELULAS);
     const fimY = Math.min(fase.altura, b.by + BLOCO_CELULAS);
-    const pesos = pesosDoBloco(fase, solo.tema, b.bx, b.by, fimX - b.bx, fimY - b.by, solo.cfg, solo.semente);
-    const canvas = document.createElement('canvas');
-    canvas.width = assador.lado(fimX - b.bx);
-    canvas.height = assador.lado(fimY - b.by);
-    assador.assar(canvas, pesos, b.x0, b.y0);
+    const chave = chaveDe(b);
+    let canvas = pegarAssado(chave);
+    if (!canvas) {
+      const pesos = pesosDoBloco(fase, solo.tema, b.bx, b.by, fimX - b.bx, fimY - b.by, solo.cfg, solo.semente);
+      canvas = document.createElement('canvas');
+      canvas.width = assador.lado(fimX - b.bx);
+      canvas.height = assador.lado(fimY - b.by);
+      assador.assar(canvas, pesos, b.x0, b.y0);
+      guardarAssado(chave, canvas);
+    }
     soltarSolo(b);
     const sprite = new Sprite(new Texture({ source: new CanvasSource({ resource: canvas }) }));
     sprite.position.set(b.x0, b.y0);
     sprite.width = b.x1 - b.x0;
     sprite.height = b.y1 - b.y0;
     b.c.addChildAt(sprite, 0);
-    b.solo = { sprite, canvas };
+    b.solo = { sprite, canvas, chave };
     desenharBloco(b);
   };
   const desenharBloco = (b: Bloco) => {
@@ -264,7 +281,16 @@ export function criarTerreno(
     limparEnfeites(b);
     b.agua = null;
     b.desenhado = true;
-    if (assador && !b.solo) { assarBloco(b); return; }
+    // Marco 41 (D-169): o bloco sem o chão assado sai na cor lisa e entra na fila (assar aqui, vários blocos no
+    // mesmo quadro, travava a tela por segundos ao andar e na troca de região).
+    if (assador && !b.solo) {
+      // Já assado (por esta cena antes, pela vizinha além da borda ou pela cena da região de antes): na hora.
+      if (temAssado(chaveDe(b))) {
+        assarBloco(b);
+        return;
+      }
+      fila.add(b);
+    }
     const fimX = Math.min(fase.largura, b.bx + BLOCO_CELULAS);
     const fimY = Math.min(fase.altura, b.by + BLOCO_CELULAS);
     for (let y = b.by; y < fimY; y++) {
@@ -380,6 +406,7 @@ export function criarTerreno(
       : blocos[Math.floor(y / BLOCO_CELULAS) * porLinha + Math.floor(x / BLOCO_CELULAS)];
   return {
     prepararVistas: (novas) => { vistas = novas; assouNoQuadro = false; },
+    pronto: () => soloResolvido && ![...fila].some((f) => f.c.visible),
     redesenharCelula: (x, y) => {
       // O autotiling olha os 8 vizinhos: redesenha os blocos da vizinhança 3×3 (sem repetir).
       const tocados = new Set<Bloco>();
