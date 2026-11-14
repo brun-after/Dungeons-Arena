@@ -297,7 +297,7 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
   const arranque = temArranque(e);
   // Marco 40 (13/11/2026, D-164): na tirolesa, o corpo segue reto (o básico não para; o atordoado cai dela).
   if (naTirolesa(e)) {
-    if (movimentoBloqueado(e, estado.tick)) fimDaTirolesa(estado, e, saida);
+    if (movimentoBloqueado(e, estado.tick)) fimDaTirolesa(estado, ctx, e, saida);
     else andarNaTirolesa(e, estado, ctx, saida, dtMs, grade);
     return;
   }
@@ -323,7 +323,7 @@ function andarNaTirolesa(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao
   const trecho = Math.min(m.restante ?? 0, (dtMs / 1000) * (m.velocidade ?? 12));
   const andou = trecho > EPS ? andar(e, m.rumoX * trecho, m.rumoY * trecho, estado, ctx, saida, grade) : 0;
   m.restante = Math.max(0, (m.restante ?? 0) - trecho);
-  if (andou < trecho * 0.9 || m.restante <= EPS) fimDaTirolesa(estado, e, saida);
+  if (andou < trecho * 0.9 || m.restante <= EPS) fimDaTirolesa(estado, ctx, e, saida);
 }
 
 /** O passo do companheiro do Aventureiro: o voo do falcão; o lobo e o urso (marco 40, D-165), o passo de cada um. */

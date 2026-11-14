@@ -191,11 +191,19 @@ export interface Balance {
     viagemPct: number;
     viagemPesadaPct: number;
     /** Marco 40 (D-164): o salto do Guerreiro (células por segundo, o raio e o atordoamento da queda). */
-    salto: { velocidade: number; raio: number; atordoarMs: number };
-    nevoa: { servosRaio: number };
-    /** O servo do Posto dos Mortos volta a lutar com o Necromante a até estas células. */
-    posto: { raioDespertar: number };
-    ancoraPreparoMs: number;
+    salto: { velocidade: number; raio: number; atordoarMs: number; danoPorNivel: number };
+    /** D-168: os servos vão num anel em volta do Necromante (raio em células), no mínimo nesta velocidade. */
+    nevoa: { servosRaio: number; anel: number; velocidadeMin: number };
+    /** Marco 40 (14/11/2026, D-168): o eco do Piscar (vida, duração, quem provoca) e a invisibilidade do Mago. */
+    eco: { hpPct: number; duracaoMs: number; provocarRaio: number; invisivelMs: number };
+    /** D-168: o Aventureiro só monta (ou é levado) com o companheiro a até estas células. */
+    montarRaio: number;
+    /** D-168: os golpes elementais do companheiro que desmonta. */
+    descarga: { golpes: number; duracaoMs: number };
+    /** D-168: os tiros elementais depois da camuflagem. */
+    tiroElementalMs: number;
+    armadilhaRecuo: { valorPorNivel: number; duracaoMs: number };
+    acelerar: { pulsoMs: number; elementoMs: number; curaPorNivel: number };
   };
   efeitos: {
     intervaloPeriodicoMs: number;

@@ -16,6 +16,7 @@ import { processarCampos } from '../combat/tatica';
 import { atualizarAparencias, processarBuffsArmados, usarRefugio } from '../progression/buffs';
 import { processarPets } from '../combat/pets';
 import { processarMovimentoClasse, trocarMovimento, usarMovimento } from '../combat/movimento-classe';
+import { processarTirosDoBalanco } from '../combat/movimento-tiros';
 import { alvoOfensivoValido, iniciarAcao, processarAcoes, processarAutoAtaque, usarUltimate } from '../combat/acao';
 import { dispararArmadilhaEm, processarEfeitos, processarGatilhosDeEfeito } from '../combat/efeitos';
 import { processarCarcereiros } from '../combat/sintonia-guerreiro';
@@ -92,6 +93,8 @@ export function simular(
   processarSinergiasPassivas(estado, ctx, saida);
   processarCampos(estado, ctx, saida);
   processarMovimentoClasse(estado, ctx, saida);
+  // D-168: o Arqueiro balançando na corda da Chegada atira no inimigo mais perto.
+  processarTirosDoBalanco(estado, ctx, saida);
   // Marco 40 (D-165): o urso provoca quem chega perto.
   processarPets(estado, ctx, saida);
   processarPantanos(estado, ctx, saida);
@@ -169,7 +172,7 @@ function aplicarComandos(
         break;
       // Marco 40 (13/11/2026, D-164): o movimento da classe.
       case 'movimentoClasse':
-        usarMovimento(estado, ctx, ator, saida, cmd.dx, cmd.dy);
+        usarMovimento(estado, ctx, ator, saida, cmd.dx, cmd.dy, cmd.alvo);
         break;
       case 'trocarMovimento':
         trocarMovimento(estado, ctx, ator, saida);

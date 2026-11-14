@@ -9,7 +9,7 @@
 //   companheiro (marco 22, D-089) -> o falcão do Aventureiro: não ataca; IA própria em ia-falcao.ts (D-091).
 // Ao engajar, a invocação fica em `perseguindo` (a regeneração enxerga o perigo).
 
-import { postoDormente } from '../combat/movimento-classe';
+import { ehVeiculo, naNevoaDoDono, postoDormente } from '../combat/movimento-classe';
 import { cacaDoPet, petDoCompanheiro } from '../combat/pets';
 import { alvoOfensivoValido, iniciarAcao, prioridadeDeAlvo } from '../combat/acao';
 import { aplicarEfeito } from '../combat/efeitos';
@@ -133,8 +133,9 @@ export function processarInvocacao(estado: EstadoJogo, ctx: ContextoSimulacao, e
   if (!inv) return;
   const dono = buscarEntidade(estado, inv.donoId);
   if (inv.comportamento === 'isca') return;
-  // Marco 40 (13/11/2026, D-164): o servo do Posto dos Mortos, com o Necromante longe, espera parado.
-  if (postoDormente(estado, ctx, e)) return;
+  // Marco 40 (13/11/2026, D-164): o servo do Posto dos Mortos espera parado. D-168: o servo na névoa vai com o
+  // Necromante (o núcleo o leva, sem lutar) e o companheiro que é o veículo do dono vai com ele.
+  if (postoDormente(estado, ctx, e) || naNevoaDoDono(estado, e) || ehVeiculo(estado, ctx, e)) return;
   // Marco 28 (D-127): a Flecha-âncora do Arqueiro não anda; atira no hostil mais perto no alcance do básico dela.
   if (inv.comportamento === 'torre') {
     atirarDaTorre(estado, ctx, e, ia, preset, saida);

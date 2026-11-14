@@ -22,7 +22,7 @@ describe('corpo do movimento da classe (D-164)', () => {
     const bus = new Barramento<EventosDaSimulacao>();
     let agora = 0;
     const tipos = new Map([...ctx.conteudo.movimentos.values()].flat().map((m) => [m.id, m.tipo] as const));
-    const corpo = new CorpoEmMovimento({ tipoDe: (id) => tipos.get(id) ?? null, posicao: (e) => ({ x: e.px, y: e.py }), raioNevoa: 5, petDoMovimento: () => null });
+    const corpo = new CorpoEmMovimento({ tipoDe: (id) => tipos.get(id) ?? null, posicao: (e) => ({ x: e.px, y: e.py }), petDoMovimento: () => null });
     if (comEventos) corpo.ligar(bus, () => estado, () => agora);
     const alturas: (number | null)[] = [];
     const passo = (cmds: Comando[]) => {

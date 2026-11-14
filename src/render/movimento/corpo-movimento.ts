@@ -7,7 +7,7 @@
 // - o lobo e o urso aparecem embaixo do Aventureiro montado (o companheiro igual some, porque é ele que carrega);
 // - o falcão carrega o Aventureiro pelo ar no Falcão carregador;
 // - a Forma de névoa some com o corpo do Necromante e dos servos (a nuvem de escuridão é de rastros-movimento.ts);
-// - a tirolesa pendura o Arqueiro na corda; a camuflagem tinge e apaga o corpo;
+// - a Chegada (D-168) balança o Arqueiro na corda, em arcos; a camuflagem tinge e apaga o corpo;
 // - quem chega de um teletransporte se materializa em vez de surgir de uma vez.
 // Só apresentação: lê os eventos e o estado; a simulação não muda.
 
@@ -38,7 +38,6 @@ export interface OpcoesCorpoMovimento {
   tipoDe: (mov: string) => TipoMovimento | null;
   /** A posição desenhada (com os deslizes). */
   posicao: (e: Entidade) => PontoVisual;
-  raioNevoa: number;
   /** Marco 40 (14/11/2026): o companheiro dono da mecânica (o falcão, o lobo, o urso do Aventureiro), ou null. */
   petDoMovimento: (mov: string) => string | null;
 }
@@ -51,8 +50,8 @@ const ALTURA_SALTO_MINIMA = 40;
 const ALTURA_RECUO = 30;
 /** O Aventureiro levado pelo falcão voa mais baixo que o Mago, pendurado pelos ombros. */
 const ALTURA_CARREGADO = 46;
-/** O falcão que carrega cresce (o espírito da fera) e voa logo acima da cabeça de quem leva. */
-const FALCAO_CARREGANDO = { escala: 2.6, acimaPx: 46 } as const;
+/** D-168: o falcão que carrega fica do tamanho dele, com as garras nos ombros de quem leva. */
+const FALCAO_CARREGANDO = { escala: 1, acimaPx: 26 } as const;
 /** A altura da sela sobre o chão (o assento da pose de montar fica na altura do joelho). */
 const SELA = { lobo: 18, urso: 32 } as const;
 /** Muito acima de tudo: quem voa ou salta passa à frente dos telhados. */
@@ -185,9 +184,11 @@ export class CorpoEmMovimento {
           a.alfa = 1 - suave(desde / 300);
           break;
         case 'tirolesa': {
-          const total = l?.corda?.total ?? 1;
-          const p = Math.min(1, Math.max(0, 1 - (m.restante ?? 0) / total));
-          a.alturaPx = Math.max(6, 44 - 20 * p - 22);
+          // D-168: o balanço na corda, como quem se lança de teia em teia: desce no meio do arco e sobe nas pontas,
+          // inclinado para onde vai.
+          const b = balancoDaCorda(m, l?.corda?.total ?? 1);
+          a.alturaPx = ALTURA_BALANCO.baixo + ALTURA_BALANCO.arco * (2 * b.u - 1) ** 2;
+          a.inclina = 0.3 * (2 * b.u - 1) * (Math.cos(angulo) >= 0 ? 1 : -1);
           a.estado = 'saltar';
           a.zMais = NO_AR;
           break;
@@ -275,7 +276,7 @@ export class CorpoEmMovimento {
     const dono = buscarEntidade(estado, inv.donoId);
     const m = dono?.movimentoClasse?.modo;
     if (!dono || !m) return false;
-    if (m.tipo === 'nevoa' && naNevoa(e, dono, this.o.raioNevoa)) {
+    if (m.tipo === 'nevoa' && naNevoa(e, estado)) {
       a.alfa = 1 - suave((agoraMs - (this.lances.get(dono.id)?.inicioMs ?? agoraMs)) / 300);
       return true;
     }
@@ -297,15 +298,25 @@ function subidaDoVoo(m: { ateTick?: number }, estado: EstadoJogo, desde: number)
   return Math.min(suave(desde / 450), suave(resta / 500));
 }
 
-/** O servo vira névoa com o dono (perto dele). */
-export function naNevoa(servo: Entidade, dono: Entidade, raio: number): boolean {
-  return Math.max(Math.abs(servo.x - dono.x), Math.abs(servo.y - dono.y)) <= raio;
+/** O servo vai na névoa do dono (D-168: o núcleo marca quem entrou, e ele vai até o fim, longe ou perto). */
+export function naNevoa(servo: Entidade, estado: EstadoJogo): boolean {
+  return (servo.invocacao?.nevoaAteTick ?? 0) > estado.tick;
 }
 
-/** Está dentro da névoa (o próprio Necromante ou um servo perto dele)? As auras não piscam em quem virou nuvem. */
-export function viradoNevoa(e: Entidade, estado: EstadoJogo, raio: number): boolean {
-  if (e.movimentoClasse?.modo?.tipo === 'nevoa') return true;
-  const dono = e.invocacao ? buscarEntidade(estado, e.invocacao.donoId) : undefined;
-  return !!dono && dono.movimentoClasse?.modo?.tipo === 'nevoa' && naNevoa(e, dono, raio);
+/** Está dentro da névoa (o próprio Necromante ou um servo dele)? As auras não piscam em quem virou nuvem. */
+export function viradoNevoa(e: Entidade, estado: EstadoJogo): boolean {
+  return e.movimentoClasse?.modo?.tipo === 'nevoa' || naNevoa(e, estado);
+}
+
+/** D-168: as alturas do balanço (px): a do meio do arco e quanto sobe nas pontas. */
+const ALTURA_BALANCO = { baixo: 16, arco: 40 } as const;
+/** D-168: o comprimento de cada arco do balanço (células): a corda é lançada de novo a cada um. */
+export const ARCO_DO_BALANCO = 3.5;
+
+/** Em que arco do balanço o Arqueiro está e quanto dele já fez (0 a 1), pelo que falta da corrida. */
+export function balancoDaCorda(m: { restante?: number }, total: number): { arco: number; u: number; andou: number } {
+  const andou = Math.max(0, total - (m.restante ?? 0));
+  const arco = Math.floor(andou / ARCO_DO_BALANCO);
+  return { arco, u: (andou - arco * ARCO_DO_BALANCO) / ARCO_DO_BALANCO, andou };
 }
 

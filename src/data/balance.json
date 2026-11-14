@@ -84,10 +84,14 @@
   },
   "movimentoClasse": {
     "viagemPct": 60, "viagemPesadaPct": 30,
-    "salto": { "velocidade": 16, "raio": 2, "atordoarMs": 1000 },
-    "nevoa": { "servosRaio": 5 },
-    "posto": { "raioDespertar": 8 },
-    "ancoraPreparoMs": 1000
+    "salto": { "velocidade": 16, "raio": 2, "atordoarMs": 1000, "danoPorNivel": 1.5 },
+    "nevoa": { "servosRaio": 5, "anel": 1.6, "velocidadeMin": 10 },
+    "eco": { "hpPct": 30, "duracaoMs": 3000, "provocarRaio": 6, "invisivelMs": 1000 },
+    "montarRaio": 3,
+    "descarga": { "golpes": 3, "duracaoMs": 6000 },
+    "tiroElementalMs": 3000,
+    "armadilhaRecuo": { "valorPorNivel": 1, "duracaoMs": 20000 },
+    "acelerar": { "pulsoMs": 250, "elementoMs": 1000, "curaPorNivel": 0.5 }
   },
   "colisao": {
     "jogadorBloqueiaJogador": false,

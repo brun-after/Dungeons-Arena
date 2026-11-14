@@ -2718,6 +2718,30 @@ body.toque .botao-habilidade.de-classe {
   zoom: 1;
 }
 
+/* Marco 40 (14/11/2026, D-168): o movimento da classe no celular: a cor da mecânica, escuro na recarga, aceso mirando. */
+.botao-acao.movimento-classe {
+  width: 52px;
+  height: 52px;
+  margin-left: 10px;
+  font-size: 1.3rem;
+  border-color: var(--cor-movimento, #9aa);
+  color: var(--cor-movimento, #dde);
+}
+
+.botao-acao.movimento-classe[data-recarga='true'] {
+  opacity: 0.45;
+}
+
+.botao-acao.movimento-classe[data-mirando='true'] {
+  box-shadow: 0 0 0 3px var(--cor-movimento, #fff);
+  animation: pulsar-mira 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes pulsar-mira {
+  from { box-shadow: 0 0 0 2px var(--cor-movimento, #fff); }
+  to { box-shadow: 0 0 0 5px var(--cor-movimento, #fff); }
+}
+
 /* Marco 24 (D-097): Parar ataque, aceso quando o básico automático está desligado. */
 .botao-acao.parar-ataque {
   width: 48px;

@@ -26,6 +26,8 @@ export interface OpcoesControles {
   direcional?: boolean;
   /** Marco 26 (28/10/2026, D-117): o botão de centralizar a câmera, ao lado do direcional. */
   aoLadoDoDirecional?: HTMLElement;
+  /** Marco 40 (14/11/2026, D-168): o botão do movimento da classe (ui/movimento-toque.ts), ao lado do direcional. */
+  movimento?: HTMLElement;
 }
 
 export interface Controles {
@@ -134,6 +136,8 @@ export function criarControles(opcoes: OpcoesControles): Controles {
   };
   trocarTipo(opcoes.tipo);
   if (opcoes.aoLadoDoDirecional) esquerda.append(opcoes.aoLadoDoDirecional);
+  // D-168: o movimento da classe fica junto do direcional (a fileira de interagir e alvo encosta nas skills).
+  if (opcoes.movimento) esquerda.append(opcoes.movimento);
 
   return {
     elemento: faixa,

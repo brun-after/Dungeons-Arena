@@ -1,3 +1,4 @@
+import { podeAjudar } from '../modos/relacao';
 import { luzesDosAmbientes } from '../render/solo/ambientes-solo';
 import { faixaSuperior } from './aviso';
 import { IndicadorCombo } from './combos';
@@ -161,15 +162,22 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   // deixa no mundo (a nuvem de escuridão, os símbolos de conjuração, a corda, a poeira e as rachaduras).
   const tiposDoMovimento = new Map([...ctx.conteudo.movimentos.values()].flat().map((m) => [m.id, m.tipo] as const));
   let posicaoDoQuadro: (e: Entidade) => PontoVisual = (e) => ({ x: e.px, y: e.py });
-  const raioNevoa = ctx.balance.movimentoClasse.nevoa.servosRaio;
   const petsDoMovimento = new Map([...ctx.conteudo.movimentos.values()].flat().map((m) => [m.id, m.pet] as const));
   const corpoMovimento = new CorpoEmMovimento({
-    tipoDe: (id) => tiposDoMovimento.get(id) ?? null, posicao: (e) => posicaoDoQuadro(e), raioNevoa, petDoMovimento: (id) => petsDoMovimento.get(id) ?? null,
+    tipoDe: (id) => tiposDoMovimento.get(id) ?? null, posicao: (e) => posicaoDoQuadro(e), petDoMovimento: (id) => petsDoMovimento.get(id) ?? null,
   });
   // Marco 40 (14/11/2026): o companheiro que é o veículo do dono (a montaria, o falcão que carrega) vai com ele.
   const comVeiculo = (p: (e: Entidade) => PontoVisual) => (e: Entidade) => corpoMovimento.posicaoForcada(e, o.estado(), p) ?? p(e);
   corpoMovimento.ligar(o.bus, o.estado, () => performance.now());
-  const rastrosMovimento = new RastrosDeMovimento(palco.chao, palco.efeitos, corpoMovimento, { projecao: () => camera.projecaoAtual, posicao: (e) => posicaoDoQuadro(e), reduzido, raioNevoa });
+  const rastrosMovimento = new RastrosDeMovimento(palco.chao, palco.efeitos, corpoMovimento, {
+    projecao: () => camera.projecaoAtual, posicao: (e) => posicaoDoQuadro(e), reduzido,
+    // D-168: a cor da ponta (o Físico, a do aço) e quem o jogador local vê como aliado (o rastro do Piscar com eco).
+    corDaPonta: (p) => Number.parseInt((p === 'fisico' ? '#d8cfc0' : ctx.conteudo.elementos.get(p)?.cor ?? '#ffffff').slice(1), 16),
+    aliadoDoLocal: (e) => {
+      const eu = o.estado().entidades.find((x) => x.id === idLocal);
+      return e.id === idLocal || (!!eu && podeAjudar(eu, e, ctx.modo));
+    },
+  });
   rastrosMovimento.ligar(o.bus, o.estado, () => performance.now());
   const efeitos = new EfeitosDeHabilidade({
     particulas, impacto, habilidades: o.habilidades, idLocal, qualidade, fase: ctx.fase, diretor,

@@ -1,30 +1,30 @@
 {
-  "versao": 3,
+  "versao": 4,
   "classes": {
     "mago": [
       { "id": "voo_arcano", "nivel": 1, "tipo": "voo", "alcance": 10, "crescimento": 1, "recargaMs": 5000, "icone": "asas", "cor": "#a569bd" },
-      { "id": "piscar", "nivel": 1, "tipo": "teleporte", "alcance": 3, "crescimento": 0.3, "recargaMs": 6000, "cargas": 1, "icone": "teleporte", "cor": "#85c1e9", "marcos": { "30": { "cargas": 2 }, "90": { "cargas": 3 } } },
-      { "id": "ancora_runica", "nivel": 1, "tipo": "ancora", "alcance": 15, "crescimento": 2.5, "duracaoMs": 30000, "recargaMs": 8000, "icone": "runa", "cor": "#c39bd3" }
+      { "id": "acelerar", "nivel": 1, "tipo": "acelerar", "raio": 2, "duracaoMs": 8000, "velocidadePct": 80, "recargaMs": 16000, "icone": "botas", "cor": "#c39bd3", "marcos": { "30": { "elemental": 1 } } },
+      { "id": "ancora_runica", "nivel": 1, "tipo": "ancora", "alcance": 8, "crescimento": 1.2, "duracaoMs": 30000, "recargaMs": 8000, "icone": "runa", "cor": "#85c1e9", "marcos": { "30": { "eco": 1 } } }
     ],
     "arqueiro": [
-      { "id": "tirolesa", "nivel": 1, "tipo": "tirolesa", "alcance": 10, "crescimento": 1, "velocidade": 14, "recargaMs": 3000, "icone": "flecha", "cor": "#a3e4d7" },
-      { "id": "salto_atras", "nivel": 1, "tipo": "recuo", "alcance": 2, "crescimento": 0.3, "recargaMs": 5000, "cargas": 1, "icone": "botas", "cor": "#d5f5e3", "marcos": { "30": { "cargas": 2 }, "90": { "cargas": 3 } } },
-      { "id": "camuflagem", "nivel": 1, "tipo": "camuflagem", "duracaoMs": 6000, "lentidaoPct": 50, "recargaMs": 12000, "icone": "fantasma", "cor": "#7dcea0", "marcos": { "30": { "lentidaoPct": 30 } } }
+      { "id": "chegada", "nivel": 1, "tipo": "tirolesa", "alcance": 10, "crescimento": 1, "velocidade": 12, "recargaMs": 3000, "icone": "flecha", "cor": "#a3e4d7", "marcos": { "30": { "elemental": 1 } } },
+      { "id": "salto_atras", "nivel": 1, "tipo": "recuo", "alcance": 2, "crescimento": 0.5, "recargaMs": 5000, "cargas": 1, "icone": "botas", "cor": "#d5f5e3", "marcos": { "30": { "cargas": 2, "armadilha": 1 }, "90": { "cargas": 3 } } },
+      { "id": "camuflagem", "nivel": 1, "tipo": "camuflagem", "duracaoMs": 6000, "lentidaoPct": 50, "recargaMs": 12000, "icone": "fantasma", "cor": "#7dcea0", "marcos": { "30": { "lentidaoPct": 30, "elemental": 1 } } }
     ],
     "guerreiro": [
-      { "id": "salto_de_guerra", "nivel": 1, "tipo": "salto", "alcance": 10, "crescimento": 1, "recargaMs": 6000, "icone": "salto", "cor": "#dc7633" },
-      { "id": "arremetida", "nivel": 1, "tipo": "avanco", "alcance": 3, "crescimento": 0.3, "recargaMs": 5000, "cargas": 1, "icone": "investida", "cor": "#e59866", "marcos": { "30": { "cargas": 2 }, "90": { "cargas": 3 } } },
+      { "id": "salto_de_guerra", "nivel": 1, "tipo": "salto", "alcance": 10, "crescimento": 1, "recargaMs": 6000, "icone": "salto", "cor": "#dc7633", "marcos": { "30": { "elemental": 1 } } },
+      { "id": "arremetida", "nivel": 1, "tipo": "avanco", "alcance": 3, "crescimento": 0.3, "recargaMs": 5000, "cargas": 1, "icone": "investida", "cor": "#e59866", "mira": true, "marcos": { "30": { "cargas": 2 }, "90": { "cargas": 3 } } },
       { "id": "marcha_de_guerra", "nivel": 1, "tipo": "marcha", "alcance": 10, "crescimento": 1, "recargaMs": 3000, "icone": "botas", "cor": "#cd6155" }
     ],
     "necromante": [
       { "id": "forma_de_nevoa", "nivel": 1, "tipo": "nevoa", "alcance": 10, "crescimento": 1, "recargaMs": 6000, "icone": "fantasma", "cor": "#7d6b91" },
       { "id": "troca_de_corpo", "nivel": 1, "tipo": "troca", "alcance": 8, "crescimento": 0.8, "recargaMs": 8000, "icone": "teleporte", "cor": "#8e44ad" },
-      { "id": "posto_dos_mortos", "nivel": 1, "tipo": "posto", "recargaMs": 4000, "icone": "caveira", "cor": "#5b4a6e", "marcos": { "30": { "curaPctPorS": 3 }, "50": { "postos": 2 }, "70": { "escudo": 40 }, "90": { "reuniao": 1 } } }
+      { "id": "posto_dos_mortos", "nivel": 1, "tipo": "posto", "alcance": 10, "crescimento": 1, "duracaoMs": 60000, "recargaMs": 4000, "mira": true, "icone": "caveira", "cor": "#5b4a6e", "marcos": { "30": { "curaPctPorS": 3 }, "50": { "postos": 2 }, "70": { "escudo": 40 }, "90": { "reuniao": 1 } } }
     ],
     "aventureiro": [
-      { "id": "falcao_carrega", "nivel": 1, "pet": "falcao", "tipo": "voo", "alcance": 10, "crescimento": 1, "recargaMs": 5000, "icone": "asas", "cor": "#d4ac0d" },
-      { "id": "lobo", "nivel": 1, "pet": "lobo", "tipo": "montaria", "alcance": 10, "crescimento": 1, "recargaMs": 3000, "icone": "pata", "cor": "#a1887f" },
-      { "id": "urso", "nivel": 1, "pet": "urso", "tipo": "montaria", "pesada": true, "alcance": 10, "crescimento": 1, "recargaMs": 3000, "icone": "pata", "cor": "#6e4b3a" }
+      { "id": "falcao_carrega", "nivel": 1, "pet": "falcao", "tipo": "voo", "alcance": 10, "crescimento": 1, "recargaMs": 5000, "icone": "asas", "cor": "#d4ac0d", "marcos": { "30": { "elemental": 1 } } },
+      { "id": "lobo", "nivel": 1, "pet": "lobo", "tipo": "montaria", "alcance": 10, "crescimento": 1, "recargaMs": 3000, "icone": "pata", "cor": "#a1887f", "marcos": { "30": { "elemental": 1 } } },
+      { "id": "urso", "nivel": 1, "pet": "urso", "tipo": "montaria", "pesada": true, "alcance": 10, "crescimento": 1, "recargaMs": 3000, "icone": "pata", "cor": "#6e4b3a", "marcos": { "30": { "elemental": 1 } } }
     ]
   }
 }
