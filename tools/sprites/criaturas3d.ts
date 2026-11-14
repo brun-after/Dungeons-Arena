@@ -1,6 +1,7 @@
 // Criaturas sem modelo CC0 nos pacotes baixados (marco 32, 31/10/2026, D-131): montadas de geometria simples e
 // animadas por deformação (sem esqueleto). `animar(estado, f)` põe a pose da fração `f` (0 a 1) do estado.
 
+import { FERAS_VIVAS } from '../../src/render/vivos/feras-vivas';
 import * as THREE from 'three';
 import type { EstadoBase as Estado } from './receitas';
 import { aranha, falcao, lobo } from './feras3d';
@@ -84,7 +85,8 @@ function slime(): Criatura {
   };
 }
 
-const CRIATURAS: Readonly<Record<string, () => Criatura>> = { slime, lobo, aranha, falcao, cartola, cartola_magica: cartolaMagica, pombo };
+// Marco 40 (13/11/2026, D-165): o lobo e o urso do Aventureiro saem das mesmas peças do 3D em tempo real.
+const CRIATURAS: Readonly<Record<string, () => Criatura>> = { slime, lobo, aranha, falcao, cartola, cartola_magica: cartolaMagica, pombo, ...FERAS_VIVAS };
 
 export function criatura(tipo: string): Criatura | null {
   return CRIATURAS[tipo]?.() ?? null;
