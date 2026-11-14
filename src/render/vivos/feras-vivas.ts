@@ -69,7 +69,8 @@ function arreio() {
 /** A coleira com o pingente da runa, no pescoço (`raio`), virada para a frente. */
 function coleira(pai: THREE.Object3D, raio: number, a: ReturnType<typeof arreio>, y: number, z: number): void {
   const anel = new THREE.Mesh(new THREE.TorusGeometry(raio, raio * 0.18, 8, 20), a.couro);
-  em(anel, 0, y, z, Math.PI / 2 - 0.5);
+  // O anel fica em volta do pescoço (o eixo dele aponta para a frente), um pouco inclinado com o pescoço.
+  em(anel, 0, y, z, -0.5);
   pai.add(anel);
   const pingente = new THREE.Mesh(new THREE.CylinderGeometry(raio * 0.32, raio * 0.32, raio * 0.1, 10), a.bronze);
   em(pingente, 0, y - raio * 0.95, z + raio * 0.55, Math.PI / 2 - 0.3);
@@ -99,7 +100,7 @@ function sela(pai: THREE.Object3D, a: ReturnType<typeof arreio>, y: number, larg
   em(cepilho, 0, y + 0.09, z + compr * 0.38);
   pai.add(cepilho);
   const cinta = new THREE.Mesh(new THREE.TorusGeometry(largura * 0.62, 0.016, 6, 24), a.couro);
-  em(cinta, 0, y - largura * 0.62, z, 0, Math.PI / 2);
+  em(cinta, 0, y - largura * 0.62, z);
   pai.add(cinta);
 }
 
@@ -141,12 +142,12 @@ export function loboCompanheiro(): Fera {
   const tronco = pivo('tronco', apoio, 0, 0, 0.32);
   tronco.add(bola(0.22, pelo, 1, 0.95, 2.2));
   tronco.add(em(bola(0.17, dorso, 1, 0.55, 2), 0, 0.12, -0.02));
-  tronco.add(em(bola(0.22, claro, 1.08, 1.12, 1), 0, -0.02, 0.28));
+  tronco.add(em(bola(0.15, claro, 0.85, 1, 0.8), 0, -0.07, 0.3));
   // A juba: tufos em leque em volta do pescoço.
   for (let i = 0; i < 9; i++) {
     const t = (i / 8 - 0.5) * 2.4;
-    const tufo = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.2, 5), i % 2 ? claro : pelo);
-    em(tufo, Math.sin(t) * 0.17, 0.06 + Math.cos(t) * 0.12, 0.34, -0.9, 0, -t * 0.6);
+    const tufo = new THREE.Mesh(new THREE.ConeGeometry(0.045, 0.15, 5), i % 3 ? pelo : dorso);
+    em(tufo, Math.sin(t) * 0.15, 0.04 + Math.cos(t) * 0.11, 0.32, -0.9, 0, -t * 0.6);
     tronco.add(tufo);
   }
   const pescoco = pivo('pescoco', tronco, 0, 0.12, 0.4);
@@ -164,7 +165,7 @@ export function loboCompanheiro(): Fera {
     const olho = bola(0.022, mat(0xffb347, { emissive: 0xff8a00, emissiveIntensity: 0.9, roughness: 0.2 }));
     cabeca.add(em(olho, s * 0.065, 0.035, 0.11));
   }
-  coleira(tronco, 0.15, a, 0.08, 0.42);
+  coleira(tronco, 0.115, a, 0.1, 0.44);
   sela(tronco, a, 0.2, 0.36, 0.36, -0.02);
   const ps = pernas(tronco, [[-0.12, -0.06, 0.3, 0], [0.12, -0.06, 0.3, Math.PI], [-0.12, -0.06, -0.32, Math.PI], [0.12, -0.06, -0.32, 0]], { coxa: pelo, pe: dorso }, { r: 0.058, coxa: 0.24, canela: 0.24, pata: 0.04 });
   const rabo = pivo('rabo', tronco, 0, 0.06, -0.44);
@@ -298,7 +299,7 @@ export function ursoCompanheiro(): Fera {
     cabeca.add(em(bola(0.035, escuro, 1, 1, 0.5), s * 0.13, 0.15, 0.0));
     cabeca.add(em(bola(0.02, mat(0x24140a, { roughness: 0.15, emissive: 0x3a1a00, emissiveIntensity: 0.4 })), s * 0.08, 0.04, 0.16));
   }
-  coleira(tronco, 0.21, a, 0.06, 0.48);
+  coleira(tronco, 0.165, a, 0.08, 0.5);
   sela(tronco, a, 0.29, 0.5, 0.4, -0.05);
   const ps = pernas(tronco, [[-0.2, -0.12, 0.3, 0], [0.2, -0.12, 0.3, Math.PI], [-0.2, -0.12, -0.36, 0], [0.2, -0.12, -0.36, Math.PI]], { coxa: pelo, pe: escuro, garra: marfim }, { r: 0.1, coxa: 0.26, canela: 0.22, pata: 0.085 });
   const rabo = pivo('rabo', tronco, 0, 0.04, -0.6);
