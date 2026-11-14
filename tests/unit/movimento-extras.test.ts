@@ -65,18 +65,42 @@ describe('movimento da classe: o que cada mecânica faz (D-168)', () => {
     for (const q of [c.j, servo]) expect(q.efeitos.some((f) => f.tipo === 'imune_dano' && f.origemId === 'j')).toBe(false);
   });
 
-  it('o Acelerar dá velocidade a quem está no círculo, inimigo também; no nível 30, aplica o elemento do Mago', () => {
+  it('o Acelerar (D-170) forma o círculo à frente, no ponto mirado; só quem está dentro, já formado, ganha velocidade', () => {
     const c = cena('mago', 30);
     c.ativar('acelerar');
-    const perto = c.orc(3, 5);
-    const longe = c.orc(9, 5);
-    c.passo([{ t: 'movimentoClasse' }]);
-    expect(c.j.movimentoClasse?.circulo).toMatchObject({ x: 2, y: 5, ponta: 'fogo' });
+    const perto = c.orc(8, 6);
+    const longe = c.orc(4, 8);
+    c.passo([{ t: 'movimentoClasse', alvo: { x: 8, y: 5 } }]);
+    expect(c.j.movimentoClasse?.circulo).toMatchObject({ x: 8, y: 5, ponta: 'fogo' });
+    // Ainda se formando: ninguém acelera.
+    c.passo([], 200);
+    expect(perto.efeitos.some((f) => f.tipo === 'acelerado')).toBe(false);
     c.passo([], 1100);
     expect(perto.efeitos.some((f) => f.tipo === 'acelerado')).toBe(true);
-    expect(c.j.efeitos.some((f) => f.tipo === 'acelerado')).toBe(true);
+    // O Mago, fora do círculo, não acelera.
+    expect(c.j.efeitos.some((f) => f.tipo === 'acelerado')).toBe(false);
     expect(longe.efeitos.some((f) => f.tipo === 'acelerado')).toBe(false);
     expect(perto.efeitos.some((f) => f.tipo === obter(ctx.conteudo.elementos.get('fogo')).estado.tipo)).toBe(true);
+    // Quem sai do círculo perde a pressa logo.
+    posicionar(perto, 2, 2);
+    c.passo([], 600);
+    expect(perto.efeitos.some((f) => f.tipo === 'acelerado' && f.ateTick > c.estado.tick)).toBe(false);
+  });
+
+  it('o Acelerar (D-170): entre 5 e 7 células no começo; as duas crescem com o nível até os pés', () => {
+    const longe = cena('mago', 1);
+    longe.ativar('acelerar');
+    longe.passo([{ t: 'movimentoClasse', alvo: { x: 10, y: 5 } }]);
+    expect(longe.j.movimentoClasse?.circulo).toMatchObject({ x: 9, y: 5 });
+    const semMira = cena('mago', 1);
+    semMira.ativar('acelerar');
+    semMira.j.olhando = 'E';
+    semMira.passo([{ t: 'movimentoClasse' }]);
+    expect(semMira.j.movimentoClasse?.circulo).toMatchObject({ x: 7, y: 5 });
+    const mestre = cena('mago', 100);
+    mestre.ativar('acelerar');
+    mestre.passo([{ t: 'movimentoClasse', alvo: { x: 2, y: 5 } }]);
+    expect(mestre.j.movimentoClasse?.circulo).toMatchObject({ x: 2, y: 5 });
   });
 
   it('a Âncora finca o totem; perto dele, a 2ª volta (longe, recusa); no nível 30, a volta deixa o eco que provoca', () => {

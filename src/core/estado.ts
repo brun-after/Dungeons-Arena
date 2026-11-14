@@ -162,6 +162,8 @@ export interface Armadilha {
    */
   elemento?: Elemento;
   runa?: boolean;
+  /** D-170: quem pisou e a armadilha espera o retardo dele para disparar (o Arqueiro pode saltar para trás a tempo). */
+  pisada?: { id: EntidadeId; desdeTick: number; ateTick: number };
   /** Marco 40 (13/11/2026, D-161): quantas vezes ainda arma de novo sozinha depois de disparar. */
   rearmes?: number;
   /** D-161: o que dá ao aliado que pisa nela (uma vez). */
@@ -300,7 +302,7 @@ export function clonarEstado(estado: EstadoJogo): EstadoJogo {
     respawns: estado.respawns.map((r) => ({ ...r, habilidades: [...r.habilidades] })),
     rastros: estado.rastros.map((r) => ({ ...r, interno: copiaEfeito(r.interno), atingidos: [...r.atingidos] })),
     ...(estado.reservaEnxame && { reservaEnxame: [...estado.reservaEnxame] }),
-    armadilhas: estado.armadilhas.map((a) => ({ ...a, reveladaPara: [...a.reveladaPara], interno: copiaEfeito(a.interno), ...(a.aoAliado && { aoAliado: { ...a.aoAliado } }) })),
+    armadilhas: estado.armadilhas.map((a) => ({ ...a, reveladaPara: [...a.reveladaPara], interno: copiaEfeito(a.interno), ...(a.aoAliado && { aoAliado: { ...a.aoAliado } }), ...(a.pisada && { pisada: { ...a.pisada } }) })),
     atrasados: estado.atrasados.map((a) => ({ ...a, efeito: { ...a.efeito, interno: copiaEfeito(a.efeito.interno) } })),
     saidaAberta: estado.saidaAberta,
     proximoId: estado.proximoId,

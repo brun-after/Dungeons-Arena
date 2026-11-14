@@ -47,7 +47,8 @@ const ALTURA_VOO = 62;
 /** O salto sobe com a distância (um pulo de 10 células passa de 90 px): um arco de verdade, não um pulinho. */
 const ALTURA_SALTO_POR_CELULA = 9;
 const ALTURA_SALTO_MINIMA = 40;
-const ALTURA_RECUO = 30;
+// D-170: o Salto para Trás mais alto e mais longo (mais quadros da animação à vista).
+const ALTURA_RECUO = 40;
 /** O Aventureiro levado pelo falcão voa mais baixo que o Mago, pendurado pelos ombros. */
 const ALTURA_CARREGADO = 46;
 /** D-168: o falcão que carrega fica do tamanho dele, com as garras nos ombros de quem leva. */
@@ -57,8 +58,9 @@ const SELA = { lobo: 18, urso: 32 } as const;
 /** Muito acima de tudo: quem voa ou salta passa à frente dos telhados. */
 const NO_AR = 100_000;
 const MATERIALIZAR_MS = 280;
-const RECUO_MS = 380;
-const MS_POR_CELULA_AVANCO = 70;
+const RECUO_MS = 560;
+// D-170: a Arremetida 20% mais lenta, para os quadros da animação serem acompanhados.
+const MS_POR_CELULA_AVANCO = 84;
 
 const suave = (t: number) => {
   const c = Math.min(1, Math.max(0, t));
@@ -186,9 +188,11 @@ export class CorpoEmMovimento {
         case 'tirolesa': {
           // D-168: o balanço na corda, como quem se lança de teia em teia: desce no meio do arco e sobe nas pontas,
           // inclinado para onde vai.
+          // D-170: um pêndulo de verdade: a altura segue o círculo da corda presa no alto, e o corpo pende ao longo dela.
           const b = balancoDaCorda(m, l?.corda?.total ?? 1);
-          a.alturaPx = ALTURA_BALANCO.baixo + ALTURA_BALANCO.arco * (2 * b.u - 1) ** 2;
-          a.inclina = 0.3 * (2 * b.u - 1) * (Math.cos(angulo) >= 0 ? 1 : -1);
+          const p = pendulo(b.u);
+          a.alturaPx = p.alturaPx;
+          a.inclina = p.angulo * 0.85 * (Math.cos(angulo) >= 0 ? 1 : -1);
           a.estado = 'saltar';
           a.zMais = NO_AR;
           break;
@@ -308,8 +312,21 @@ export function viradoNevoa(e: Entidade, estado: EstadoJogo): boolean {
   return e.movimentoClasse?.modo?.tipo === 'nevoa' || naNevoa(e, estado);
 }
 
-/** D-168: as alturas do balanço (px): a do meio do arco e quanto sobe nas pontas. */
-const ALTURA_BALANCO = { baixo: 16, arco: 40 } as const;
+/**
+ * D-170: o pêndulo da Chegada. A corda fica presa `PIVO_PX` acima do chão, no meio do arco; as mãos ficam `MAOS_PX`
+ * acima do corpo e a corda tem o comprimento que deixa o corpo a `BAIXO_PX` no ponto mais baixo. `u` (0 a 1) é quanto
+ * do arco foi feito: o corpo desce até o meio e sobe do outro lado pelo círculo da corda (o que um pêndulo faz), e a
+ * corda (e o corpo) inclina `angulo` rad.
+ */
+export const PIVO_PX = 150;
+export const MAOS_PX = 52;
+const BAIXO_PX = 14;
+const CORDA_PX = PIVO_PX - MAOS_PX - BAIXO_PX;
+export function pendulo(u: number): { alturaPx: number; angulo: number; desvioPx: number } {
+  const desvioPx = (Math.min(1, Math.max(0, u)) - 0.5) * 2 * CORDA_PX * 0.82;
+  const angulo = Math.asin(desvioPx / CORDA_PX);
+  return { alturaPx: PIVO_PX - MAOS_PX - CORDA_PX * Math.cos(angulo), angulo, desvioPx };
+}
 /** D-168: o comprimento de cada arco do balanço (células): a corda é lançada de novo a cada um. */
 export const ARCO_DO_BALANCO = 3.5;
 

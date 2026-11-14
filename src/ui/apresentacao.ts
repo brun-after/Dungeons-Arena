@@ -177,9 +177,10 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
       const eu = o.estado().entidades.find((x) => x.id === idLocal);
       return e.id === idLocal || (!!eu && podeAjudar(eu, e, ctx.modo));
     },
+    // D-170: a formação do círculo do Acelerar e a linha do limite do Posto dos Mortos.
+    formarAcelerarMs: ctx.balance.movimentoClasse.acelerar.formarMs, limitePosto: ctx.balance.movimentoClasse.posto.limite,
   });
-  rastrosMovimento.ligar(o.bus, o.estado, () => performance.now());
-  const efeitos = new EfeitosDeHabilidade({
+  rastrosMovimento.ligar(o.bus, o.estado, () => performance.now());  const efeitos = new EfeitosDeHabilidade({
     particulas, impacto, habilidades: o.habilidades, idLocal, qualidade, fase: ctx.fase, diretor,
     // Marco 40 (D-160): a classe da ultimate é a de quem a lança (a família vem do par dele).
     classeDaUltimate: (id, atorId) => {

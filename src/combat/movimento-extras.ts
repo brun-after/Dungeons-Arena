@@ -159,9 +159,11 @@ export function processarCirculos(estado: EstadoJogo, ctx: ContextoSimulacao, sa
       delete dono.movimentoClasse?.circulo;
       continue;
     }
+    // D-170: o círculo só vale depois de formado; o buff dura um pulso (sai logo de quem sai do círculo).
+    if (tick - c.desdeTick < ticksDe(b.formarMs)) continue;
     for (const o of estado.entidades) {
-      if (!vivo(o) || chebyshev(o, c) > c.raio) continue;
-      if (pulso) aplicarEfeito(estado, ctx, o, construirEfeito('acelerado', { pct: c.pct, duracaoMs: b.pulsoMs * 2 }), { id: dono.id, x: c.x, y: c.y }, null, saida, false);
+      if (!vivo(o) || Math.hypot(o.px - c.x, o.py - c.y) > c.raio + 0.5) continue;
+      if (pulso) aplicarEfeito(estado, ctx, o, construirEfeito('acelerado', { pct: c.pct, duracaoMs: b.pulsoMs + 60 }), { id: dono.id, x: c.x, y: c.y }, null, saida, false);
       if (elemento && c.ponta) tocarPonta(estado, ctx, dono, o, c.ponta, saida, Math.max(1, Math.round(dono.nivel * b.curaPorNivel)));
     }
   }

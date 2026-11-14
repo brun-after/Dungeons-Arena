@@ -43,7 +43,7 @@ import { lancarProjetil } from './projeteis';
 import { alcanceSemArma, aoUsarSkill, basicoComVariacao, basicoDaVez, chaveDoBasico, consumirRiposta, contarBasico, ehBasico, fatorDaVelocidade, multiplosDaVez, recargaDoBasicoPct } from './basico';
 import { lancarSolo } from './solos';
 import { celulaDoCompanheiro, ticksDoVooDoFalcao } from './companheiro';
-import { boteDoPet, marcaComOBasico } from './pets';
+import { boteDoPet, marcaComOBasico, marcar, petDoCompanheiro } from './pets';
 import { aoAgirEncarnado, encarnar } from './encarnacao';
 import { consumirMira } from './mira';
 import { prepararTiroCheio } from './sintonia-arqueiro';
@@ -357,7 +357,7 @@ export function iniciarAcao(
   if (ehBasico(ator, hab.id)) ator.ultimoBasicoTick = estado.tick;
   const alvoId = hab.politicaImpacto === 'area' ? null : (alvo?.id ?? null);
   // Marco 40 (14/11/2026, D-166): a skill do companheiro num inimigo também marca a caça (o companheiro segue nele).
-  if (alvoId && alvo && alvo !== ator && hab.politicaAlvo === 'hostil' && hab.tags.includes('falcao') && marcaComOBasico(ator)) ator.cacaMarcada = alvo.invocacao?.companheiro ? alvo.invocacao.donoId : alvoId;
+  if (alvoId && alvo && alvo !== ator && hab.politicaAlvo === 'hostil' && hab.tags.includes('falcao') && marcaComOBasico(ator)) marcar(estado, ctx, ator, alvo.invocacao?.companheiro ? alvo.invocacao.donoId : alvoId);
   ator.acao = {
     acaoId: novoId(estado),
     habilidadeId: hab.id,
@@ -476,7 +476,12 @@ export function processarAcoes(estado: EstadoJogo, ctx: ContextoSimulacao, saida
  * fórmula e a fonte do básico do dono (a arma, o nível, os itens e os estilos), para crescer como o básico crescia.
  */
 /** 14/11/2026 (D-164): nada quem está na água e não está no ar (voo, salto) nem na tirolesa. */
-const nadando = (ctx: ContextoSimulacao, e: Entidade): boolean => tipoEm(ctx.fase, e.x, e.y) === 'agua' && !noAr(e) && !naTirolesa(e);
+// D-170: o urso do Aventureiro luta nadando (`pets.urso.nadaLutando`).
+const nadaLutando = (ctx: ContextoSimulacao, e: Entidade): boolean => {
+  const pet = e.invocacao?.companheiro ? petDoCompanheiro(e) : null;
+  return (pet === 'lobo' || pet === 'urso') && ctx.balance.ajustesClasses.aventureiro.pets[pet].nadaLutando === true;
+};
+const nadando = (ctx: ContextoSimulacao, e: Entidade): boolean => tipoEm(ctx.fase, e.x, e.y) === 'agua' && !noAr(e) && !naTirolesa(e) && !nadaLutando(ctx, e);
 
 function forcaDoDono(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, hab: Habilidade): { hab: Habilidade; fonte: FonteDeDano } | null {
   const inv = ator.invocacao;
