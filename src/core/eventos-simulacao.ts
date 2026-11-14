@@ -12,7 +12,8 @@ import type { Slot } from '../modos/modo';
 import type { StatusCaminho } from '../world/navegacao';
 
 /** Marco 26 (D-124): o que deslocou alguém (o evento `deslocado`). */
-export type CausaDeslocamento = 'puxao' | 'empurrao' | 'arremesso' | 'avanco' | 'teleporte' | 'troca';
+// Marco 40 (13/11/2026): o recuo (o Salto para trás) desliza com o pulo, não como o avanço.
+export type CausaDeslocamento = 'puxao' | 'empurrao' | 'arremesso' | 'avanco' | 'teleporte' | 'troca' | 'recuo';
 
 export type MotivoRecusa =
   | 'nadando'
@@ -188,6 +189,8 @@ export type EventoSimulacao =
   | { t: 'movimentoClasse'; tick: number; id: EntidadeId; mov: string; fase: 'ativo' | 'inicio' | 'fim' | 'recusado' | 'perdeu'; motivo?: string }
   /** Marco 40 (D-165): o Aventureiro trocou de companheiro. */
   | { t: 'companheiroTrocado'; tick: number; id: EntidadeId; pet: 'falcao' | 'lobo' | 'urso' }
+  /** Marco 40 (D-166): o básico do Aventureiro marcou a caça do companheiro. */
+  | { t: 'cacaMarcada'; tick: number; id: EntidadeId; alvoId: EntidadeId }
   | { t: 'comboFeito'; tick: number; id: EntidadeId; combo: string; alvoId: EntidadeId | null; x?: number; y?: number; origemX?: number; origemY?: number; atorX?: number; atorY?: number; miraX?: number; miraY?: number }
   | { t: 'buffInteragiu'; tick: number; id: EntidadeId; regra: string }
   // Marco 18 (D-070): missões, origens raras, forja e o diário.
@@ -210,7 +213,7 @@ export type EventoSimulacao =
    * Marco 26 (29/10/2026, D-124): alguém foi deslocado por um efeito (puxão, empurrão, arremesso, avanço, teleporte ou
    * troca). Só apresentação: o desenho desliza o corpo e a assinatura da skill (a corrente que recolhe) usa a ação.
    */
-  | { t: 'deslocado'; tick: number; id: EntidadeId; deX: number; deY: number; paraX: number; paraY: number; origemId: EntidadeId; causa: CausaDeslocamento; acaoId?: number }
+  | { t: 'deslocado'; tick: number; id: EntidadeId; deX: number; deY: number; paraX: number; paraY: number; origemId: EntidadeId; causa: CausaDeslocamento; acaoId?: number; ms?: number }
   | { t: 'descoberta'; tick: number; id: EntidadeId; entrada: string }
   | { t: 'renasceu'; tick: number; id: EntidadeId; hp: number }
   | { t: 'barraMudou'; tick: number; id: EntidadeId }

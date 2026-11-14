@@ -14,7 +14,7 @@ import { clone as clonarComEsqueleto } from 'three/addons/utils/SkeletonUtils.js
 import { Rectangle, Texture } from 'pixi.js';
 import { CELULA_PX } from '../camera-calculo';
 import { fundirPecas, malhasDe } from './fundir-pecas';
-import { PAUSA_DO_IMPACTO_MS, peloGolpe, PERFIL_PADRAO, PERFIS_DE_GOLPE, progressoDoGolpe, voltaDoGolpe, type EstadoPersonagem, type PerfilDoGolpe } from '../quadros-personagem';
+import { PAUSA_DO_IMPACTO_MS, peloGolpe, SEM_PASSO, PERFIL_PADRAO, PERFIS_DE_GOLPE, progressoDoGolpe, voltaDoGolpe, type EstadoPersonagem, type PerfilDoGolpe } from '../quadros-personagem';
 
 const saida = (t: number) => 1 - (1 - Math.min(1, Math.max(0, t))) ** 2;
 import { grauDe, GRAUS, PECAS_DE_ARMADURA, TOMOS, type PecaDeArmadura } from '../equipamento-3d';
@@ -130,7 +130,16 @@ const VARIACOES: Readonly<Record<string, readonly string[]>> = {
 /** A preparação das magias: as mãos sobem e carregam durante a conjuração (o lançamento é o golpe da classe). */
 const PREPARO_DA_MAGIA = 'Spell_Simple_Enter';
 /** A duração dos ciclos no atlas (quadros × ms, quadros-personagem.ts): o modelo anda no mesmo passo. */
-const CICLO_MS: Readonly<Partial<Record<EstadoPersonagem, number>>> = { parado: 880, andar: 760, conjurar: 660, andarConjurar: 660, morte: 660 };
+const CICLO_MS: Readonly<Partial<Record<EstadoPersonagem, number>>> = {
+  parado: 880, andar: 760, conjurar: 660, andarConjurar: 660, morte: 660, correr: 460, saltar: 520, voar: 900, montar: 900,
+};
+/**
+ * Marco 40 (13/11/2026): os clipes do movimento da classe (os mesmos do atlas, tools/sprites/receitas.ts MOVIMENTOS); a
+ * fera corre com o galope dela. Sem o clipe no modelo, vale o estado de reserva (SEM_PASSO).
+ */
+const CLIPES_DO_MOVIMENTO: Readonly<Partial<Record<EstadoPersonagem, readonly string[]>>> = {
+  correr: ['Sprint_Loop', CLIPES_DA_FERA.correr], saltar: ['Jump_Loop'], voar: ['Swim_Fwd_Loop'], montar: ['Driving_Loop'],
+};
 /** As armas longas que ficam em pé (o cajado, a lança, o arco): seguem o corpo, não o eixo da mão. */
 const EM_PE = new Set(['cajado', 'praga', 'cova', 'cetro', 'sanguineo', 'espectro', 'gadanha', 'gadanha_ceifador', 'cajado_retorcido', 'lanca', 'foice',
   'arco', 'arco_longo', 'composto', 'arcocurto', 'elfico', 'chifre', 'arcoguerra', 'arcocaca']);
@@ -530,12 +539,26 @@ export class PalcoVivo {
     a.raiz.rotation.y = rot;
   }
 
+  /**
+   * Marco 40 (13/11/2026): o voo deitado (o nado da UAL) afunda no chão; quanto subir para o corpo todo ficar acima dele
+   * (o osso mais baixo, mais a espessura do corpo). A altura do voo vem do desenho (corpo-movimento.ts).
+   */
+  private acimaDoChao(a: Ator): number {
+    a.raiz.updateMatrixWorld(true);
+    const v = new THREE.Vector3();
+    let menor = Infinity;
+    for (const o of a.ossos) menor = Math.min(menor, o.getWorldPosition(v).y);
+    return Number.isFinite(menor) ? Math.max(0, a.raiz.position.y - menor) + 0.1 : 0;
+  }
+
   /** Posa o ator no estado do pedido. */
   private posar(a: Ator, p: PedidoVivo): void {
     const classe = CLASSES[p.modelo];
     if (!classe) return;
     const base = p.estado === 'andarGolpe' ? 'golpe' : p.estado === 'andarConjurar' ? 'conjurar' : p.estado;
-    const daClasse = base in classe.clipes ? classe.clipes[base as keyof Classe['clipes']] : classe.clipes.parado;
+    const doMovimento = CLIPES_DO_MOVIMENTO[p.estado]?.find((n) => a.base.clipes.has(n));
+    const reserva = SEM_PASSO[p.estado];
+    const daClasse = doMovimento ?? (base in classe.clipes ? classe.clipes[base as keyof Classe['clipes']] : reserva in classe.clipes ? classe.clipes[reserva as keyof Classe['clipes']] : classe.clipes.parado);
     const g = p.golpe;
     const deGolpe = peloGolpe(p.estado);
     // O golpe: a variação da vez entre as que o modelo tem; a magia prepara com as mãos subindo.
@@ -684,6 +707,7 @@ export class PalcoVivo {
       const lin = Math.floor(a.vaga / COLUNAS);
       a.raiz.position.copy(this.direita).multiplyScalar(col * QL).addScaledVector(this.cima, -lin * QA);
       a.raiz.position.y += (CLASSES[p.modelo]?.elevacao ?? 0) * (1 + 0.12 * Math.sin(performance.now() / 420)); // flutua sobe e desce (06/11/2026)
+      if (p.estado === 'voar') a.raiz.position.y += this.acimaDoChao(a);
       if (a.emPe.length > 0) this.endireitar(a);
     }
     this.renderer.render(this.cena, this.camera);

@@ -176,9 +176,9 @@ export class DiretorVfx {
   }
 
   /** O corpo desliza em vez de pular; o puxão da corrente espera ela chegar. */
-  deslocado(id: string, de: P, para: P, causa: CausaDeslocamento, assinatura: AssinaturaVisual | null): void {
+  deslocado(id: string, de: P, para: P, causa: CausaDeslocamento, assinatura: AssinaturaVisual | null, ms?: number): void {
     const atraso = assinatura && causa === 'puxao' ? (ASSINATURAS[assinatura].atrasoDeslize ?? 0) : 0;
-    this.deslizes.anotar(id, de, para, causa, this.agora, atraso);
+    this.deslizes.anotar(id, de, para, causa, this.agora, atraso, ms);
   }
 
   ponto(id: string, base: PontoVisual): PontoVisual {

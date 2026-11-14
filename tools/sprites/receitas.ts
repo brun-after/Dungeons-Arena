@@ -17,7 +17,21 @@ export type EstadoBase = 'parado' | 'andar' | 'golpe' | 'conjurar' | 'morte';
  * magia e para quem não tem arma de golpe (o tomo lê a magia).
  */
 export type Variante = 'golpeCorte' | 'golpePesado' | 'golpeEsmagar' | 'golpeLeve' | 'golpeEstocada' | 'golpeDisparo' | 'golpeArremesso' | 'golpeGiro';
-export type Estado = EstadoBase | 'andarGolpe' | 'andarConjurar' | Variante;
+/**
+ * Marco 40 (13/11/2026): os estados do movimento da classe, só nas classes: a corrida da Marcha, o salto (o Salto de
+ * Guerra, o Salto para trás, a tirolesa), o voo do Mago (deitado no ar, como quem nada) e o montar no lobo e no urso. A
+ * investida da Arremetida usa a corrida (o clipe de investida da UAL leva o corpo para fora do quadro).
+ */
+export type Movimento = 'correr' | 'saltar' | 'voar' | 'montar';
+export const MOVIMENTOS: Readonly<Record<Movimento, { clipe: string; quadros: number; ciclo: boolean }>> = {
+  correr: { clipe: 'ual1:Sprint_Loop', quadros: 6, ciclo: true },
+  saltar: { clipe: 'ual1:Jump_Loop', quadros: 4, ciclo: true },
+  voar: { clipe: 'ual1:Swim_Fwd_Loop', quadros: 6, ciclo: true },
+  montar: { clipe: 'ual1:Driving_Loop', quadros: 4, ciclo: true },
+};
+const NOMES_MOVIMENTOS = Object.keys(MOVIMENTOS) as Movimento[];
+export const ehMovimento = (e: string): e is Movimento => Object.hasOwn(MOVIMENTOS, e);
+export type Estado = EstadoBase | 'andarGolpe' | 'andarConjurar' | Variante | Movimento;
 
 /** A animação de cada golpe de arma (UAL 1 e 2). O giro gira o corpo inteiro numa volta. */
 export const VARIANTES: Readonly<Record<Variante, string>> = {
@@ -43,10 +57,11 @@ export const QUADROS: Readonly<Record<Estado, number>> = {
   andarGolpe: 6,
   andarConjurar: 6,
   ...(Object.fromEntries(NOMES_VARIANTES.map((v) => [v, 5])) as Record<Variante, number>),
+  ...(Object.fromEntries(NOMES_MOVIMENTOS.map((m) => [m, MOVIMENTOS[m].quadros])) as Record<Movimento, number>),
 };
 const ESTADOS: readonly Estado[] = ['parado', 'andar', 'golpe', 'conjurar', 'morte', 'andarGolpe', 'andarConjurar'];
 /** Os estados do atlas da receita: as classes ganham os golpes de cada arma. */
-export const estadosDe = (r: Receita): readonly Estado[] => (r.equipamento ? [...ESTADOS, ...NOMES_VARIANTES] : ESTADOS);
+export const estadosDe = (r: Receita): readonly Estado[] => (r.equipamento ? [...ESTADOS, ...NOMES_VARIANTES, ...NOMES_MOVIMENTOS] : ESTADOS);
 /** O estado de base (a animação do tronco) de cada estado; os golpes de arma contam como golpe. */
 export const BASE: Readonly<Record<Estado, EstadoBase>> = {
   parado: 'parado',
@@ -57,6 +72,7 @@ export const BASE: Readonly<Record<Estado, EstadoBase>> = {
   andarGolpe: 'golpe',
   andarConjurar: 'conjurar',
   ...(Object.fromEntries(NOMES_VARIANTES.map((v) => [v, 'golpe'])) as Record<Variante, EstadoBase>),
+  ...(Object.fromEntries(NOMES_MOVIMENTOS.map((m) => [m, 'andar'])) as Record<Movimento, EstadoBase>),
 };
 /** As colunas por faixa: o atlas vai em faixas de 8 direções para não passar de 4096 px de largura. */
 export const COLUNAS_POR_FAIXA = 21;

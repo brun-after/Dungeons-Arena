@@ -9,7 +9,7 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium } from '@playwright/test';
 import { build } from 'esbuild';
-import { RECEITAS, VARIANTES, type Receita } from './receitas';
+import { MOVIMENTOS, RECEITAS, VARIANTES, type Receita } from './receitas';
 import type { PedidoDeCamada, SaidaAtlas } from './pagina';
 import { ARMAS_3D, TOMOS_FECHADOS } from '../../src/render/vivos/armas3d';
 import { GRAUS, nomeDaCamada, pecaDeMembro, PECAS_DE_ARMADURA } from '../../src/render/equipamento-3d';
@@ -105,7 +105,7 @@ function urlsDe(r: Receita, camadas: PedidoDeCamada[], comVariantes = !!r.equipa
   const urls: Record<string, string> = {};
   for (const ref of refs) urls[ref] = HOST + caminhoDe(ref);
   // Marco 32 (D-131): mais os golpes de cada arma das classes.
-  for (const nome of [...Object.values(r.animacoes ?? {}), ...(comVariantes && r.animacoes ? Object.values(VARIANTES) : [])]) {
+  for (const nome of [...Object.values(r.animacoes ?? {}), ...(comVariantes && r.animacoes ? [...Object.values(VARIANTES), ...Object.values(MOVIMENTOS).map((m) => m.clipe)] : [])]) {
     const [bib = '', grupo = ''] = nome.split(':');
     const chave = bib === 'kes' ? `kes-anim:${grupo}` : bib;
     urls[chave] = HOST + caminhoDe(chave);
