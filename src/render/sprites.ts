@@ -1,4 +1,5 @@
 import { tintaDaInvocacao } from './cores-necromancia';
+import { alfaDoCorpo, elevacaoNaTela } from './movimento-visual';
 import { desenharPorteDoNivel, escalaDoNivel, tintaDoNivel } from './porte-nivel';
 import { ehDragao, porteDoDragao } from '../world/porte-dragoes';
 import { tipoEm } from '../world/fase';
@@ -372,7 +373,7 @@ export class CamadaEntidades {
       const c = centroDaCelula(p.x, p.y);
       const pt = proj.projetar(c.x, c.y);
       const ajuste = this.o.ajuste?.(e, agoraMs) ?? null;
-      m.raiz.position.set(pt.x, pt.y);
+      m.raiz.position.set(pt.x, pt.y - elevacaoNaTela(e));
       m.raiz.zIndex = pt.y + (ajuste?.zMais ?? 0);
       // Direção do olhar na tela: o ângulo da grade passado pela projeção.
       const frente = proj.projetar(c.x + Math.cos(m.angulo), c.y + Math.sin(m.angulo));
@@ -380,8 +381,7 @@ export class CamadaEntidades {
       const dty = frente.y - pt.y;
       const norma = Math.hypot(dtx, dty) || 1;
       if (Math.abs(dtx) > 0.01) m.sentido = dtx > 0 ? 1 : -1;
-      // Morto fica apagado; invisível (pós-morte) fica translúcido.
-      m.raiz.alpha = e.morto ? 0.25 : e.invisivelAteTick > estado.tick ? 0.5 : e.invocacao?.necromancia === 'eco' ? 0.7 : 1;
+      m.raiz.alpha = alfaDoCorpo(e, estado.tick);
       m.raiz.visible = e.id === this.o.idLocal || !(this.o.oculto?.(p.x, p.y) ?? false);
       if (this.o.rotulos) {
         m.sobre.position.set(pt.x, pt.y);

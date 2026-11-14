@@ -119,6 +119,13 @@ export function ligarFeedback(o: OpcoesFeedback): { impactos: () => number; conf
     vibrar([50, 30, 50]);
     hud.registrar(t(`recusa.${ev.motivo}` as const));
   });
+  // Marco 40 (13/11/2026, D-164): o movimento da classe (a troca no G e as recusas).
+  bus.on('movimentoClasse', (ev) => {
+    if (ev.id !== idLocal) return;
+    const nomeMov = t(`movimento.${ev.mov}` as ChaveTexto);
+    if (ev.fase === 'ativo') hud.registrar(t('movimento.log.ativo', { nome: nomeMov }));
+    else if (ev.fase === 'recusado') hud.registrar(t(`movimento.recusa.${ev.motivo ?? 'recarga'}` as ChaveTexto));
+  });
   bus.on('acaoCancelada', (ev) => {
     if (ev.motivo === 'interrompido') hud.registrar(t('log.interrompido', { ator: nome(ev.atorId) }));
   });

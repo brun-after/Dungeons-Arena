@@ -76,6 +76,16 @@
   "navegacao": {
     "maxPassosToque": 60
   },
+  "movimentoClasse": {
+    "viagemPct": 60,
+    "viagemPesadaPct": 30,
+    "voo": { "preparoMs": 1000, "danoPct": [30, 50], "conjuracaoPct": [150, 120], "lentidaoPct": [50, 20] },
+    "montaria": { "danoPct": [60, 80], "conjuracaoPct": [140, 115], "danoRecebidoPct": [125, 110] },
+    "montariaPesada": { "danoPct": [75, 90], "conjuracaoPct": [125, 110], "danoRecebidoPct": [100, 95] },
+    "nevoa": { "lentidaoPct": 40, "servosRaio": 5, "duracaoAoEntrarEmCombateMs": 1500 },
+    "marcha": { "combatePct": 60, "furiaPorS": 8 },
+    "preparoPadraoMs": 300
+  },
   "colisao": {
     "jogadorBloqueiaJogador": false,
     "jogadorBloqueiaInimigo": false

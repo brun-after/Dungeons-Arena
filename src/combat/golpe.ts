@@ -1,4 +1,5 @@
 import { ehRetorno } from './buffs-de-leitura';
+import { aoLevarGolpeMontado, fatorDeDanoRecebidoDoMovimento, noAr } from './movimento-classe';
 import { retirarVida } from './reserva-necromante';
 import { multiplicadorDardo, registrarDardo } from './concentracao-arcana';
 import { encherFuria } from './frenesi';
@@ -145,6 +146,11 @@ export function aplicarImpacto(
   }
   const { hab } = impacto;
   const atacante = buscarEntidade(estado, impacto.fonte.id);
+  // Marco 40 (13/11/2026, D-164): o golpe de perto, do chão, não alcança quem voa.
+  if (hab.formulaDano !== null && hab.politicaImpacto === 'contato' && noAr(alvo) && atacante && atacante !== alvo && !noAr(atacante)) {
+    saida.push({ t: 'esquivou', tick: estado.tick, acaoId: impacto.acaoId, atorId: impacto.fonte.id, alvoId: alvo.id });
+    return;
+  }
   const combo = atacante ? comboDoImpacto(estado, ctx, atacante, hab, impacto.acaoId, alvo) : null;
   let fonte = comCombo(impacto.fonte, combo ? { danoPct: combo.danoPct, d20Minimo: combo.d20Minimo } : null);
   const aparo = atacante?.tatica?.aparou;
@@ -191,7 +197,7 @@ export function aplicarImpacto(
     const absorve = absorvido > 0 && hab.fracaoElemental === undefined ? Math.max(0, comPenetracao(100 + absorvido, pen) - 100) : 0;
     // Marco 25 (25/10/2026, D-102): entre personagens, as skills de classe batem menos no modo que pede (arena).
     const pvp = atacante?.bolsa && alvo.bolsa && ehDeAlgumaClasse(ctx, hab.id) ? fatorDeClasseEntrePersonagens(ctx.modo) : 1;
-    const recebido = (absorve > 0 ? absorve / 100 : multiplicadorRecebido(estado, ctx, alvo, hab, tick, extraPct, resistenciaIgnorada(ctx, atacante), pen) * multiplicadorMarco24(ctx, atacante, alvo, hab, costas, tick)) * fatorDoGolpe(estado, ctx, fonte, alvo) * protecaoInicial(estado, ctx, alvo, atacante) * pvp;
+    const recebido = (absorve > 0 ? absorve / 100 : multiplicadorRecebido(estado, ctx, alvo, hab, tick, extraPct, resistenciaIgnorada(ctx, atacante), pen) * multiplicadorMarco24(ctx, atacante, alvo, hab, costas, tick)) * fatorDoGolpe(estado, ctx, fonte, alvo) * protecaoInicial(estado, ctx, alvo, atacante) * pvp * fatorDeDanoRecebidoDoMovimento(ctx, alvo);
     const r = resolverGolpe(
       estado.rng,
       hab.formulaDano,
@@ -228,6 +234,8 @@ export function aplicarImpacto(
       if (hab.politicaImpacto === 'contato') reagirAoGolpe(estado, ctx, alvo, atacante, saida);
       // Marco 27 (D-126): a Rapieira deixa a riposta pronta em quem levou o golpe.
       if (atacante && atacante !== alvo) aoLevarGolpe(estado, alvo, (id) => habilidadeDoAtor(ctx, alvo, id, tick));
+      // D-164: montado, o golpe derruba do lobo.
+      if (atacante && atacante !== alvo) aoLevarGolpeMontado(estado, ctx, alvo, saida);
     }
   }
   if (hab.formulaCura !== null) {

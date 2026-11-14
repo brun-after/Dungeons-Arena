@@ -26,10 +26,11 @@ function encosta(x: number, y: number, r: number, i: number, j: number): boolean
 }
 
 /** O corpo de raio `r` cabe em (x, y): não encosta em célula intransitável nem barrada. */
-export function corpoCabe(fase: Fase, x: number, y: number, r: number, barreira: Barreira | null = null): boolean {
+export function corpoCabe(fase: Fase, x: number, y: number, r: number, barreira: Barreira | null = null, liberada: Barreira | null = null): boolean {
   for (let j = Math.round(y - r); j <= Math.round(y + r); j++) {
     for (let i = Math.round(x - r); i <= Math.round(x + r); i++) {
-      if ((!passavel(fase, i, j) || barreira?.(i, j)) && encosta(x, y, r, i, j)) return false;
+      // Marco 40 (13/11/2026, D-164): `liberada` abre células fechadas (o telhado, para quem voa).
+      if (((!passavel(fase, i, j) && !liberada?.(i, j)) || barreira?.(i, j)) && encosta(x, y, r, i, j)) return false;
     }
   }
   return true;

@@ -1,4 +1,5 @@
 import { prepararReservas, retirarVida } from './reserva-necromante';
+import { noAr } from './movimento-classe';
 import { extraGuerreiro, protecaoInicial, pulsarAura } from './ajustes-classes';
 // Efeitos de fluxo próprio (§2.8, §2.9, §2.11). Marco 8A-2 (14/10/2026), D-049.
 //   efeito_atrasado  -> estado.atrasados, dispara o efeito carregado no alvo depois do prazo;
@@ -295,7 +296,8 @@ export function processarGatilhos(estado: EstadoJogo, ctx: ContextoSimulacao, ap
     const dono = { id: r.donoId, equipe: r.equipeDono };
     for (const e of ordem) {
       // Ajuste de 24/10/2026 (D-091): o falcão do Aventureiro voa por cima de rastros e armadilhas.
-      if (!vivo(e) || e.invocacao?.companheiro || e.x !== r.x || e.y !== r.y || r.atingidos.includes(e.id) || !podeFerir(dono, e, ctx.modo)) continue;
+      // Marco 40 (13/11/2026, D-164): quem voa (o Voo Arcano) também.
+      if (!vivo(e) || e.invocacao?.companheiro || noAr(e) || e.x !== r.x || e.y !== r.y || r.atingidos.includes(e.id) || !podeFerir(dono, e, ctx.modo)) continue;
       r.atingidos.push(e.id);
       const efeito = r.tipo === 'rastro_dano' ? null : r.interno;
       const origem = { id: r.donoId, x: r.x, y: r.y };
@@ -307,7 +309,7 @@ export function processarGatilhos(estado: EstadoJogo, ctx: ContextoSimulacao, ap
   // 06/11/2026 (D-135): quem está em cada célula, uma vez por tick (o Mundo tem centenas de armadilhas e entidades).
   const porCelula = new Map<number, Entidade[]>();
   for (const e of ordem) {
-    if (!vivo(e) || e.invocacao?.companheiro) continue;
+    if (!vivo(e) || e.invocacao?.companheiro || noAr(e)) continue;
     const chave = e.y * ctx.fase.largura + e.x;
     const lista = porCelula.get(chave);
     if (lista) lista.push(e);

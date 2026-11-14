@@ -50,6 +50,7 @@ import { raioAreaDaEncarnacao } from './encarnacao-efeitos';
 import { comBuffsDeLeitura, ehRetorno } from './buffs-de-leitura';
 import { papelDe } from './combos-papel';
 import { comCombosDoLancamento, fatorDeConjuracaoDoCombo } from './combos-assinados';
+import { aoAgir, fatorDeConjuracaoDoMovimento, fatorDeDanoDoMovimento, motivoDoMovimento } from './movimento-classe';
 import { quantidadeDeSaltos, saltar } from './saltos';
 import { dispararGanchosDe, passivosDe } from '../progression/ganchos-do-portador';
 import { comCombo, fazerCombo } from './combos';
@@ -118,7 +119,9 @@ export function fonteDaHabilidade(e: Entidade, ctx: ContextoSimulacao, tick: num
   const p = perfilPara(ctx, e, hab);
   // Marco 28 (D-127): o atributo de classe fortalece as skills de classe e as ultimates (dano, cura e potência).
   const classe = fatorDeSkillDeClasse(ctx, e, hab.id);
-  return { ...f, potencia: f.potencia * classe, multDano: f.multDano * hab.multDano * (1 + p.danoPct / 100) * classe, multCura: f.multCura * hab.multCura * (1 + p.curaPct / 100) * classe };
+  // Marco 40 (13/11/2026, D-164): quem voa ou está montado bate menos (melhora com o nível).
+  const mov = fatorDeDanoDoMovimento(ctx, e);
+  return { ...f, potencia: f.potencia * classe, multDano: f.multDano * hab.multDano * (1 + p.danoPct / 100) * classe * mov, multCura: f.multCura * hab.multCura * (1 + p.curaPct / 100) * classe };
 }
 
 /**
@@ -263,6 +266,8 @@ export function iniciarAcao(
   const substituiBasico = !!ator.acao && ehBasico(ator, ator.acao.habilidadeId) && !ehBasico(ator, habilidadeId);
   if (ator.acao && !substituiBasico) return recusar('ocupado');
   if (acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) return recusar('bloqueado');
+  // Marco 40 (D-164): voando não há básico, do telhado não se ataca, na tirolesa só o básico.
+  if (motivoDoMovimento(ctx, ator, hab, ehBasico(ator, hab.id))) return recusar('movimento');
   if (recargaRestante(estado, ator.id, chaveDoBasico(ator, hab.id)) > 0) return recusar('recarga');
   const perfil = perfilPara(ctx, ator, hab);
   const { custoMana, custoVida, semMana } = custoDaHabilidade(ctx, ator, hab);
@@ -340,7 +345,9 @@ export function iniciarAcao(
   // 08/11/2026 (D-141): a skill do guerreiro logo depois do básico carrega (e chega, fora o voo do projétil) mais rápido.
   const pressa = encadeioDoGuerreiro(estado, ctx, ator, hab);
   // Marco 40 (13/11/2026, D-163): o combo assinado que sai sem conjuração.
-  const lancamentoTick = estado.tick + ticksDe((hab.conjuracaoMs * (ehBasico(ator, hab.id) ? 1 : fatorDeConjuracaoDoCombo(estado, ctx, ator, hab)) + avisoExtra) / pressa);
+  // D-164: no voo e na montaria, a conjuração é mais longa.
+  const lancamentoTick = estado.tick + ticksDe((hab.conjuracaoMs * (ehBasico(ator, hab.id) ? 1 : fatorDeConjuracaoDoCombo(estado, ctx, ator, hab)) * fatorDeConjuracaoDoMovimento(ctx, ator) + avisoExtra) / pressa);
+  aoAgir(estado, ator, hab, saida);
   const viagem =
     hab.politicaImpacto === 'projetil' ? ticksDe((Math.hypot(mira.x - origem.x, mira.y - origem.y) / hab.velocidadeProjetil) * 1000) : Math.round(vooDoGolpe(estado, ctx, ator, hab, mira) / pressa);
   if (ehBasico(ator, hab.id)) ator.ultimoBasicoTick = estado.tick;
@@ -654,7 +661,7 @@ export function processarAutoAtaque(estado: EstadoJogo, ctx: ContextoSimulacao, 
   for (const ator of ordemRotativa(estado.entidades, estado.tick)) {
     if (!ator.autoAtaque || !vivo(ator) || ator.acao || tipoEm(ctx.fase, ator.x, ator.y) === 'agua') continue;
     const hab = habilidadeDoAtor(ctx, ator, ator.ataqueBasico);
-    if (!hab || recargaRestante(estado, ator.id, hab.id) > 0 || acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) {
+    if (!hab || motivoDoMovimento(ctx, ator, hab, true) || recargaRestante(estado, ator.id, hab.id) > 0 || acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) {
       continue;
     }
     const alcance = alcanceDe(ctx, ator, hab, estado.tick);

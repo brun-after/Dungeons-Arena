@@ -178,6 +178,20 @@ export interface Balance {
     faixaAvancada: { nivelInicio: number; percentuais: Record<Dificuldade, number> };
   };
   /** Efeitos (§2.8): dano, cura e recurso periódicos aplicam a cada intervalo. */
+  /**
+   * Marco 40 (13/11/2026, D-164): o movimento da classe. `viagemPct` é a velocidade a mais fora de combate (voo, montaria,
+   * névoa, marcha); os pares [nível 1, nível 100] são as limitações em combate, que melhoram com o nível.
+   */
+  movimentoClasse: {
+    viagemPct: number;
+    viagemPesadaPct: number;
+    voo: { preparoMs: number; danoPct: [number, number]; conjuracaoPct: [number, number]; lentidaoPct: [number, number] };
+    montaria: { danoPct: [number, number]; conjuracaoPct: [number, number]; danoRecebidoPct: [number, number] };
+    montariaPesada: { danoPct: [number, number]; conjuracaoPct: [number, number]; danoRecebidoPct: [number, number] };
+    nevoa: { lentidaoPct: number; servosRaio: number; duracaoAoEntrarEmCombateMs: number };
+    marcha: { combatePct: number; furiaPorS: number };
+    preparoPadraoMs: number;
+  };
   efeitos: {
     intervaloPeriodicoMs: number;
     /** Marco 40 (13/11/2026, D-162): a mesma reação só volta a disparar no mesmo alvo depois deste intervalo. */

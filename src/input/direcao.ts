@@ -42,6 +42,11 @@ export function comandoMover(r: Rumo): Comando {
   return r.dir === 'parado' ? { t: 'mover', dir: 'parado' } : { t: 'mover', dir: r.dir, dx: r.dx, dy: r.dy };
 }
 
+/** Marco 40 (13/11/2026, D-164): o movimento da classe no rumo das teclas (parado, no rumo de agora). */
+export function comandoDoMovimento(r: Rumo): Comando {
+  return r.dir === 'parado' ? { t: 'movimentoClasse' } : { t: 'movimentoClasse', dx: r.dx, dy: r.dy };
+}
+
 /** Os dois rumos diferem mais que `cos` (o joystick só reemite quando o ângulo muda de verdade, poupando rede). */
 export function rumoMudou(a: Rumo, b: Rumo, cos = COS_REEMITIR): boolean {
   if (a.dir === 'parado' || b.dir === 'parado') return a.dir !== b.dir;

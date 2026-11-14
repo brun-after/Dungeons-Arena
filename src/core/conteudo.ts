@@ -19,6 +19,7 @@ import { expandirNucleos } from '../combat/nucleos';
 import { ehObjeto } from './validar';
 import combosJson from '../data/combos.json';
 import combosPapelJson from '../data/combos-papel.json';
+import movimentosJson from '../data/movimentos.json';
 import interacoesBuffJson from '../data/interacoes-buff.json';
 import missoesJson from '../data/missoes.json';
 import origensJson from '../data/origens.json';
@@ -61,6 +62,7 @@ import { lerPapeis, type TabelaDePapeis } from '../combat/papeis';
 import { lerCombos, lerRegrasDeBuff, type Combo, type RegraDeBuff } from '../combat/combos';
 import { lerCombosDePapel, type CombosDePapel } from '../combat/combos-papel';
 import { lerAssinados, type ComboAssinado } from '../combat/combos-assinados';
+import { lerMovimentos, type MovimentoDaClasse } from '../combat/movimento-classe';
 import { lerMissoes, lerOrigens, type Missao, type OrigemRara } from '../progression/missoes';
 import { lerForja, type ReceitaDeForja } from '../progression/forja';
 import { lerItens, type Item } from '../progression/itens';
@@ -96,6 +98,8 @@ export interface Conteudo {
   combosDePapel: CombosDePapel;
   /** D-163: os combos assinados das classes (seis por classe). */
   combosAssinados: ReadonlyMap<string, ComboAssinado>;
+  /** Marco 40 (13/11/2026, D-164): o movimento de cada classe (três mecânicas, uma ativa). */
+  movimentos: ReadonlyMap<string, readonly MovimentoDaClasse[]>;
   /** Marco 18 (camada 6): as regras de buff × habilidade. */
   regrasDeBuff: Catalogo<RegraDeBuff>;
   /** Marco 18 (D-070): missões, origens raras e as receitas da forja. */
@@ -190,6 +194,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const cb = lerCombos(fontes.combos);
   const cp = lerCombosDePapel(fontes.combosPapel ?? combosPapelJson);
   const ca = lerAssinados(fontes.combosPapel ?? combosPapelJson);
+  const mv = lerMovimentos(movimentosJson);
   const rb = lerRegrasDeBuff(fontes.interacoesBuff);
   const mi = lerMissoes(fontes.missoes);
   const og = lerOrigens(fontes.origens);
@@ -197,7 +202,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const tm = lerTemas(fontes.temas, new Set([...p.presets.values()].filter((x) => x.invocacao === null).map((x) => x.id)));
   const af = lerAfinidades(fontes.afinidades);
   const ar = lerArmas(fontes.armas);
-  const erros = [...nu.erros, ...ul.erros, ...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...es.erros, ...pa.erros, ...cb.erros, ...cp.erros, ...ca.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
+  const erros = [...nu.erros, ...ul.erros, ...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...es.erros, ...pa.erros, ...cb.erros, ...cp.erros, ...ca.erros, ...mv.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
   for (const conj of cj.conjuntos.values()) {
     for (const peca of conj.pecas) if (!fo.dados.bases.has(peca)) erros.push(`conjunto ${conj.id}: base desconhecida "${peca}"`);
   }
@@ -312,6 +317,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       combos: cb.combos,
       combosDePapel: cp.combosDePapel,
       combosAssinados: ca.assinados,
+      movimentos: mv.movimentos,
       regrasDeBuff: rb.regras,
       missoes: mi.missoes,
       origens: og.origens,

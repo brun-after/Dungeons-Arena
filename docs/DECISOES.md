@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.10 · **Data:** 13/11/2026
+**Versão:** 1.11 · **Data:** 13/11/2026
 
 > **Histórico**
+> - **1.11 (13/11/2026)**: D-164: o movimento da classe (três mecânicas por classe, Shift e G), com o Voo Arcano, a Tirolesa, a Marcha de Guerra, a Forma de Névoa e o Lobo para viajar e limitados em combate.
 > - **1.10 (13/11/2026)**: D-163: os combos de papel (17, com o desdobramento pelo eixo) e os 30 combos assinados das classes.
 > - **1.09 (13/11/2026)**: D-162: as reações elementais viram a matriz de 36 pares das 9 pontas (o golpe físico reage), com o intervalo por alvo e o estado petrificado.
 > - **1.08 (13/11/2026)**: D-161: as leituras de estilo, as fusões e as famílias fazem o que o texto promete (ajustes da skill, efeitos ao abater, etapas internas, estados novos), o veículo da classe nas ultimates, o Renascer que levanta, a Vontade contra o controle e as armadilhas postas no campo.
@@ -4926,3 +4927,36 @@ duas camadas: uma genérica, pelo papel das skills, e uma assinada, seis pares p
 
 **Combos antigos.** Saem de `combos.json` os 48 feitos só de skills de uma classe (167 → 119): os seis assinados de
 cada classe ficam no lugar deles. Ficam os que ligam skills gerais, ou uma geral e uma de classe.
+
+## D-164 — Marco 40: o movimento da classe (13/11/2026)
+
+**Contexto.** As classes só se moviam andando; as skills de avanço e teleporte gastavam um lugar na barra. O mapa do
+Mundo pede viagem longa, e cada classe precisa de um jeito próprio de atravessá-lo sem que isso vire vantagem na luta.
+
+**Decisão.**
+- **Três mecânicas por classe** (`data/movimentos.json`), liberadas nos níveis 1, 10 e 20, uma ativa por vez. O Shift
+  usa a ativa (no rumo das teclas, ou no de agora) e o G troca. Os marcos 30/50/70/90 mudam os números (cargas,
+  alcance, preparo). O Z passa a escolher o alvo anterior (antes Shift+Q). Comandos `movimentoClasse` e
+  `trocarMovimento`.
+- **Longa distância (nível 1)**, rápida fora de combate (`balance.movimentoClasse.viagemPct`, 60%) e limitada nele:
+  - **Mago, Voo Arcano**: decola em 1 s (0,5 s no 30). Voando: sem ataque básico; as magias batem 30% (50% no 100) e
+    conjuram 50% mais devagar (20% no 100); em combate o voo fica 50% mais lento (20% no 100). Não pega armadilha,
+    rastro, campo no chão nem golpe de perto de quem está no chão. Passa por cima dos telhados das casas, mas de lá
+    não ataca nem pousa.
+  - **Arqueiro, Tirolesa**: corre em linha reta (14 células/s) até bater numa parede ou relevo, sem âncora nem queda;
+    não muda de rumo e passa pelos corpos. Na linha, só o ataque básico. 30 células (40 no 90), 14 em combate (18 no 50).
+  - **Guerreiro, Marcha de Guerra**: fora de combate, viagem; em combate corre 60% a mais, mas come 8 de fúria por
+    segundo (4 no 70) e acaba ao atacar ou sem fúria.
+  - **Necromante, Forma de Névoa**: vira névoa com os servos a até 5 células — fora de combate, todos viajam rápidos e
+    intocáveis; em combate, 1,5 s intocável (2,5 s no 30) e 40% mais lento. Ao entrar em combate dura mais 1,5 s.
+    Atacar desfaz.
+  - **Aventureiro, Lobo**: monta em 0,5 s. Montado bate 60% (80% no 100), conjura 40% mais devagar (15% no 100), apanha
+    25% mais (10% no 100) e cai no primeiro golpe (segura um golpe a partir do 50). Lutar desmontado compensa.
+- **As curtas** (níveis 10 e 20): Piscar e Âncora Rúnica (Mago), Salto para Trás e Camuflagem (Arqueiro), Arremetida e
+  Salto de Guerra (Guerreiro), Troca de Corpo com um servo (Necromante), Falcão Carrega e Urso (Aventureiro; o urso é
+  a montaria pesada: viagem de 30%, perde menos dano e não derruba).
+- **Estado** `Entidade.movimentoClasse` (a ativa, as cargas em recarga, o modo em curso, a âncora), com clone explícito.
+  O núcleo emite `movimentoClasse`; o desenho sobe quem voa e deixa a névoa translúcida (`render/movimento-visual.ts`).
+
+**Fica para depois.** A Possessão do Necromante e a mordida do lobo; o botão no celular e o indicador no HUD; o efeito
+visual próprio de cada mecânica entra no retrabalho visual da etapa 4.

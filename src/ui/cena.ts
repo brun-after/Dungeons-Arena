@@ -25,7 +25,7 @@ import { ticksDe } from '../core/tempo';
 import { SLOTS_BARRA, type Entidade, type PontoVisual } from '../entities/entidade';
 import { t } from '../i18n';
 import { ligarPonteiro } from '../input/ponteiro';
-import { comandoMover } from '../input/direcao';
+import { comandoDoMovimento, comandoMover } from '../input/direcao';
 import { ligarTeclado, type Teclado } from '../input/teclado';
 import { podeFerir } from '../modos/relacao';
 import { criarAlvoDeSuporte } from './alvo-suporte'; import { linhasDaSkill } from './descricao-skill';
@@ -574,16 +574,15 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
       const h = habilidadesDaBarra[indice];
       if (h) usarHabilidade(h.id);
     },
-    aoInteragir: () => {
-      emitir({ t: 'interagir' });
-    },
-    aoDispensar: () => {
-      emitir({ t: 'dispensar' });
-    },
+    aoInteragir: () => { emitir({ t: 'interagir' }); },
+    aoDispensar: () => { emitir({ t: 'dispensar' }); },
     aoTrocarAlvo: trocarAlvo,
     aoTravarAlvo: travarAlvo,
     aoUltimate: usarUltimate,
     aoAlternarBasico: alternarBasico,
+    // Marco 40 (13/11/2026, D-164): o movimento da classe (Shift) e a troca da mecânica (G).
+    aoMovimento: (rumo) => { emitir(comandoDoMovimento(rumo)); },
+    aoTrocarMovimento: () => { emitir({ t: 'trocarMovimento' }); },
     // `Esc` contextual (§2.15): com alvo, cancela a mira; sem alvo, pausa (ou abre o menu, na arena).
     aoCancelar: () => {
       if (jogador()?.alvoSelecionado) emitir({ t: 'selecionarAlvo', alvo: null });

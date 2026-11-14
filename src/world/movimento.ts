@@ -8,6 +8,7 @@ import { dispararGanchosDe } from '../progression/ganchos-do-portador';
 import { muralhaEm } from '../combat/tatica';
 import { direcaoDe } from '../combat/orientacao';
 import { multiplicadorDoPassoDoFalcao } from '../combat/companheiro';
+import { atravessaCorpos, fatorDeVelocidade, fimDaTirolesa, naTirolesa, noAr } from '../combat/movimento-classe';
 // Movimento livre (§2.2, §2.3). Marco 26 (25/10/2026, D-104): antes célula a célula, em passos cardinais (a diagonal
 // virava escadinha); agora a posição é contínua e anda em qualquer ângulo.
 // - a direção mantida (`mover`) é um vetor quantizado em ±1000 (o teclado e a IA mandam um dos 8 octantes);
@@ -214,7 +215,9 @@ function velocidadeAgora(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao
   // 04/11/2026 (D-132): a aceleração dos personagens, o recuo de quem atacou de longe e o fôlego de caça.
   const arranque = fatorDoImpulso(e, ctx);
   return vel * (1 - lentidaoPct(e, estado.tick) / 100) * conjurando * classe * (1 + bonus / 100)
-    * arranque * (1 - recuoAgoraPct(e, estado.tick) / 100) * (1 + bonusDeCacaPct(e, estado, ctx) / 100);
+    * arranque * (1 - recuoAgoraPct(e, estado.tick) / 100) * (1 + bonusDeCacaPct(e, estado, ctx) / 100)
+    // Marco 40 (13/11/2026, D-164): o movimento da classe (viagem rápida fora de combate; o voo lento em combate).
+    * fatorDeVelocidade(ctx, e);
 }
 
 /**
@@ -291,6 +294,12 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
   sincronizarPosicao(e);
   // Quem conjura uma ação que trava ou está atordoado não anda (D-017, D-060); e perde o impulso (D-132).
   const arranque = temArranque(e);
+  // Marco 40 (13/11/2026, D-164): na tirolesa, o corpo segue reto (o básico não para; o atordoado cai dela).
+  if (naTirolesa(e)) {
+    if (movimentoBloqueado(e, estado.tick)) fimDaTirolesa(estado, e, saida);
+    else andarNaTirolesa(e, estado, ctx, saida, dtMs, grade);
+    return;
+  }
   if (mobilidadeDaAcao(e, ctx) === 'trava' || movimentoBloqueado(e, estado.tick)) {
     if (arranque) ajustarImpulso(e, false, 0, dtMs, ctx);
     return;
@@ -299,6 +308,16 @@ export function integrarEntidade(e: Entidade, estado: EstadoJogo, ctx: ContextoS
   const freio = arranque ? freioAgora(e, estado, ctx) : 0;
   const andou = andarNoTick(e, estado, ctx, saida, dtMs, grade);
   if (arranque) ajustarImpulso(e, andou > EPS, freio, dtMs, ctx);
+}
+
+/** Marco 40 (D-164): a tirolesa — reta, sem mudar de rumo, até bater na parede ou no relevo, ou o alcance acabar. */
+function andarNaTirolesa(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[], dtMs: number, grade?: GradeDeCorpos): void {
+  const m = e.movimentoClasse?.modo;
+  if (!m || m.rumoX === undefined || m.rumoY === undefined) return;
+  const trecho = Math.min(m.restante ?? 0, (dtMs / 1000) * (m.velocidade ?? 12));
+  const andou = trecho > EPS ? andar(e, m.rumoX * trecho, m.rumoY * trecho, estado, ctx, saida, grade) : 0;
+  m.restante = Math.max(0, (m.restante ?? 0) - trecho);
+  if (andou < trecho * 0.9 || m.restante <= EPS) fimDaTirolesa(estado, e, saida);
 }
 
 /** O trecho do tick: segue os pontos ou a direção mantida. Devolve quanto andou (0 parado ou preso). */
@@ -436,7 +455,8 @@ function contornar(e: Entidade, sx: number, sy: number, estado: EstadoJogo, ctx:
 /** O corpo da entidade cabe em (x, y): terreno, muralhas e quem a bloqueia (só barra quem se aproxima). */
 function cabe(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: ContextoSimulacao, grade?: GradeDeCorpos): boolean {
   const r = raioNoTerreno(e,ctx);
-  if (!corpoCabe(ctx.fase, x, y, r, (i, j) => muralhaEm(estado, i, j) !== undefined)) return false;
+  // Marco 40 (D-164): quem voa passa por cima dos telhados das casas.
+  if (!corpoCabe(ctx.fase, x, y, r, (i, j) => muralhaEm(estado, i, j) !== undefined, noAr(e) ? (i, j) => sobTelhado(ctx, i, j) : null)) return false;
   // Marco 30 (30/10/2026, D-129): o monstro não entra no refúgio (os muros da vila do Mundo). D-138: salvo atrás de quem
   // luta com ele; e quem já está dentro sai livre.
   if (!podePisarNoRefugio(estado, ctx, e, x, y)) return false;
@@ -446,6 +466,8 @@ function cabe(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: Contex
 /** Algum corpo que bloqueia `e` fica mais perto que dois raios em (x, y), e o passo aproxima os dois? */
 function bloqueadoPorEntidade(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: ContextoSimulacao, grade?: GradeDeCorpos): boolean {
   const minimo = 2 * ctx.balance.movimento.raioCorpo;
+  // Marco 40 (D-164): a tirolesa, a névoa e o voo passam pelos corpos.
+  if (atravessaCorpos(e) || noAr(e)) return false;
   for (const o of grade ? grade.perto(x, y, minimo) : estado.entidades) {
     if (o === e || o.morto || !bloqueia(e, o, ctx.balance.colisao)) continue;
     const nx = o.px - x;
@@ -458,6 +480,11 @@ function bloqueadoPorEntidade(e: Entidade, x: number, y: number, estado: EstadoJ
     if (novo < ax * ax + ay * ay - EPS || novo < EPS) return true;
   }
   return false;
+}
+
+/** Marco 40 (D-164): a célula fica debaixo de um telhado (o voo pousa em cima). */
+export function sobTelhado(ctx: ContextoSimulacao, i: number, j: number): boolean {
+  return (ctx.fase.telhados ?? []).some((t) => i >= t.x && i < t.x + t.largura && j >= t.y && j < t.y + t.altura);
 }
 
 /** Atualiza a célula ocupada; ao mudar, o evento `moveu`, a regeneração por célula andada e o cruzar com inimigo. */

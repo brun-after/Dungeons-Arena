@@ -1,4 +1,5 @@
 // Marco 19 (17/10/2026): campos persistentes, obstáculos, aparo e cura efetiva no mesmo núcleo dos modos.
+import { noAr } from './movimento-classe';
 import type { Celula } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, novoId, type EstadoJogo } from '../core/estado';
@@ -93,7 +94,8 @@ export function processarCampos(estado: EstadoJogo, ctx: ContextoSimulacao, said
     const dono = buscarEntidade(estado, c.donoId);
     if (!dono || !vivo(dono)) continue;
     for (const e of estado.entidades) {
-      if (!vivo(e) || chebyshev(e, c) > c.raio || !(c.tipo === 'cura' ? podeAjudar(dono, e, ctx.modo) : podeFerir(dono, e, ctx.modo))) continue;
+      // Marco 40 (13/11/2026, D-164): o campo no chão não pega quem voa.
+      if (!vivo(e) || (c.tipo !== 'cura' && noAr(e)) || chebyshev(e, c) > c.raio || !(c.tipo === 'cura' ? podeAjudar(dono, e, ctx.modo) : podeFerir(dono, e, ctx.modo))) continue;
       aplicarEfeito(estado, ctx, e, c.efeito, dono, e, saida);
     }
   }

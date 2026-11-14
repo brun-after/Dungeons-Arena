@@ -24,13 +24,16 @@ export interface OpcoesTeclado {
   aoDispensar?: () => void;
   /** Marco 26 (D-117): a tecla C (quem a usa decide o toque duplo). */
   aoCentralizar?: () => void;
-  /** Ajuste de 15/10/2026 (D-065): `Q` troca para o próximo alvo; com Shift, o anterior. */
+  /** Ajuste de 15/10/2026 (D-065): `Q` troca para o próximo alvo; `Z` (marco 40, D-164; antes Shift+Q), o anterior. */
   aoTrocarAlvo?: (sentido: 1 | -1) => void;
   /** Ajuste de 15/10/2026 (D-065): `T` trava ou destrava o alvo. */
   aoTravarAlvo?: () => void;
   /** Marco 24 (24/10/2026, D-094): `R` usa a ultimate; `F` liga ou desliga o ataque básico automático (D-097). */
   aoUltimate?: () => void;
   aoAlternarBasico?: () => void;
+  /** Marco 40 (13/11/2026, D-164): Shift usa o movimento da classe (no rumo das teclas); `G` troca a mecânica. */
+  aoMovimento?: (rumo: Rumo) => void;
+  aoTrocarMovimento?: () => void;
   /** Com um modal aberto, as teclas não chegam ao jogo (marco 6). */
   bloqueado?: () => boolean;
 }
@@ -79,7 +82,13 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
     } else if (ev.code === 'KeyX' && !ev.repeat && opcoes.aoDispensar) {
       opcoes.aoDispensar();
     } else if (ev.code === 'KeyQ' && !ev.repeat && opcoes.aoTrocarAlvo) {
-      opcoes.aoTrocarAlvo(ev.shiftKey ? -1 : 1);
+      opcoes.aoTrocarAlvo(1);
+    } else if (ev.code === 'KeyZ' && !ev.repeat && opcoes.aoTrocarAlvo) {
+      opcoes.aoTrocarAlvo(-1);
+    } else if ((ev.code === 'ShiftLeft' || ev.code === 'ShiftRight') && !ev.repeat && opcoes.aoMovimento) {
+      opcoes.aoMovimento(atual);
+    } else if (ev.code === 'KeyG' && !ev.repeat && opcoes.aoTrocarMovimento) {
+      opcoes.aoTrocarMovimento();
     } else if (ev.code === 'KeyR' && !ev.repeat && opcoes.aoUltimate) {
       opcoes.aoUltimate();
     } else if (ev.code === 'KeyF' && !ev.repeat && opcoes.aoAlternarBasico) {
