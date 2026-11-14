@@ -43,7 +43,9 @@ export interface OpcoesCorpoMovimento {
 
 /** Alturas em px de tela. */
 const ALTURA_VOO = 62;
-const ALTURA_SALTO = 46;
+/** O salto sobe com a distância (um pulo de 10 células passa de 90 px): um arco de verdade, não um pulinho. */
+const ALTURA_SALTO_POR_CELULA = 9;
+const ALTURA_SALTO_MINIMA = 40;
 const ALTURA_RECUO = 30;
 const ALTURA_CARREGADO = 30;
 const SELA = { lobo: 14, urso: 24 } as const;
@@ -141,7 +143,11 @@ export class CorpoEmMovimento {
           const total = l?.para ? Math.hypot(l.para.x - l.de.x, l.para.y - l.de.y) : 1;
           const falta = m.x !== undefined && m.y !== undefined ? Math.hypot(m.x - e.px, m.y - e.py) : 0;
           const t = total > 0 ? Math.min(1, Math.max(0, 1 - falta / total)) : 1;
-          a.alturaPx = 4 * ALTURA_SALTO * t * (1 - t);
+          // A parábola do lançamento: a velocidade no chão é constante, então a altura é 4·H·t·(1 − t).
+          const h = Math.max(ALTURA_SALTO_MINIMA, ALTURA_SALTO_POR_CELULA * total);
+          a.alturaPx = 4 * h * t * (1 - t);
+          // O corpo sobe inclinado para a frente e cai endireitando (o peso da queda).
+          a.inclina = 0.12 * (1 - 2 * t) * (Math.cos(angulo) >= 0 ? 1 : -1);
           a.estado = 'saltar';
           a.zMais = NO_AR;
           break;
