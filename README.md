@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.49 · **Data:** 14/11/2026
+**Versão do documento:** 3.50 · **Data:** 14/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.50 (14/11/2026)**: marco 41: a região vizinha aparece além da borda, e a troca de região ficou sem a travada (D-169).
 > - **3.49 (14/11/2026)**: marco 41: as passagens entre as regiões do Mundo (a troca sem tela preta, a trégua e o tipo pelo par de biomas) e o que segue com o personagem na troca (D-169).
 > - **3.48 (13/11/2026)**: marco 40, etapa 3: as 30 skills de classe, cada uma com a leitura de cada estilo; duas por classe saem do kit (D-159).
 > - **3.47 (12/11/2026)**: marco 40, etapa 2: as 89 skills comuns dos 20 núcleos, com livros novos e a geral inicial de cada classe; as gerais antigas saem do personagem (save 31 e fichas) (D-158).
@@ -357,6 +358,9 @@ Atravessar de uma região para outra não passa mais por tela preta.
 - O desenho segue o par de biomas: cânion de arenito, passarela do brejo, desfiladeiro gelado, portão em ruínas, ponte
   sobre a ravina ou trilha entre as árvores, sempre com lanternas.
 - **Trégua:** os monstros nunca entram, nem perseguindo. Lá dentro ninguém fere nem é ferido, também no PvP.
+- Da passagem já se vê a região do outro lado além da borda, sem o vazio no fim do mapa.
+- A troca não trava a tela: o chão é assado aos poucos e reaproveitado entre as regiões. A tecla de andar mantida
+  segue valendo do outro lado.
 
 **O que segue com o personagem**
 - Vida, mana, recargas, efeitos (bons e ruins), fúria, carga da ultimate e a mecânica de movimento escolhida (antes

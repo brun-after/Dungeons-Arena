@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.16 · **Data:** 14/11/2026
+**Versão:** 1.17 · **Data:** 14/11/2026
 
 > **Histórico**
+> - **1.17 (14/11/2026)**: D-169: a região vizinha desenhada além da borda (sem o vazio no fim do mapa) e a troca sem a travada (o chão assado aos poucos e guardado entre as cenas, as teclas mantidas que seguem para a cena nova).
 > - **1.16 (14/11/2026)**: D-169: as passagens entre as regiões do Mundo (a troca de sala sem tela preta, a trégua e o tipo pelo par de biomas) e o que segue com o personagem na troca (vida, mana, recargas, efeitos, movimento escolhido e as invocações com os prazos).
 > - **1.15 (14/11/2026)**: D-168: as mecânicas de movimento refeitas (o Acelerar no lugar do Piscar, a Âncora com o totem e o eco, a Chegada, o Posto em duas ativações, a névoa que reúne os servos, a montaria que precisa do companheiro perto, os marcos elementais e o botão no celular).
 > - **1.14 (14/11/2026)**: D-167: o movimento do Aventureiro é o do companheiro ativo (o falcão carrega, o lobo e o urso são a montaria), os três golpes de cada fera e as três mecânicas de toda classe desde o nível 1.
@@ -5158,12 +5159,36 @@ elas, onde os inimigos nunca entram.
     quando o posto acaba);
   - o companheiro do Aventureiro continua nascendo com o dono e espelha a vida dele, que agora viaja.
 - **Sem tela preta no cliente** (`mundo-tela.ts`). Na troca, a cena de antes para no último quadro e continua na tela.
-  A nova conecta e monta escondida por cima (`.camada-mundo`) e aparece quando o personagem já está no estado (no
-  máximo em 4 s). Então a velha sai.
-  - A câmera começa com o personagem no mesmo ponto da vista e desliza até o centro.
-  - Ao entrar na passagem, o cliente prepara o mapa da vizinha em segundo plano (`ui/passagem-mundo.ts`) e mostra o
-    nome dela com a trégua.
+  A nova conecta e monta escondida por cima (`.camada-mundo`). Ela aparece quando o personagem já está no estado e o
+  chão à vista já foi assado (no máximo em 4 s). Então a velha sai.
+  - Na hora em que a nova aparece, o personagem fica no mesmo ponto da vista em que estava na velha, e a câmera
+    desliza dali até o centro.
+  - As teclas de movimento mantidas passam para a cena nova (`iniciais` do teclado). Antes, o personagem parava na
+    passagem até a tecla ser solta e apertada de novo.
+  - Ao entrar na passagem, o cliente prepara o mapa da vizinha (`ui/passagem-mundo.ts`) e mostra o nome dela com a
+    trégua.
   - O servidor abre a sala da vizinha se não houver uma (pendência `aquecer`, uma vez a cada 30 s por lugar).
+- **A vizinha além da borda** (`world/recorte-vizinha.ts`, `render/vizinha.ts`). Perto da passagem, o fim do mapa
+  mostrava o vazio. Agora o pedaço da região de lá logo depois da faixa dela (40 células de fundo, 68 de largura) é
+  desenhado deslocado.
+  - O chão é o do mapa de lá inteiro, por baixo do daqui: onde os dois se cobrem, vale o daqui.
+  - O que fica em pé (paredes, fachadas, enfeites, lanternas e telhados) vem só do recorte, com a projeção deslocada,
+    então nada de lá aparece em pé dentro do mapa daqui.
+  - Vale nos dois sentidos: depois da troca, a cena nova desenha a região de onde se veio.
+- **A travada da troca.** A montagem da cena nova e o primeiro quadro paravam a tela (medido sem GPU: 0,6 s montando
+  e 0,8 s no primeiro quadro, quase tudo assando o chão).
+  - **O chão assado sai da hora do quadro** (`render/terreno.ts`). O bloco novo aparece na cor lisa e entra na fila,
+    que assa um por quadro, o visível primeiro. Antes, cada bloco que entrava na vista era assado ali mesmo, e a tela
+    travava também ao andar.
+  - **O chão assado é guardado entre as cenas** (`render/solo/assados-guardados.ts`). A chave leva a fase, o bloco, o
+    tema e as células do bloco com a borda que a mistura olha. Os blocos sem uso guardados são até 24, e os mais
+    antigos saem primeiro. Os blocos da vizinha assados enquanto se anda pela passagem são os mesmos que a cena de lá
+    usa ao chegar.
+  - As texturas do chão decodificadas também ficam guardadas (`render/solo/texturas.ts`). Cada cena cria a própria
+    textura da pedra: com a imagem compartilhada, `Texture.from` dava a mesma às duas, e a cena que saía a destruía.
+  - A cena nova conecta sem esperar o fechamento da conexão de antes.
+  - Medido sem GPU, da troca até a cena nova na tela: de 1,4 s para 0,9 s. A tela não fica mais preta, e ao andar não
+    há mais paradas de 1 a 2 s.
 - **De passagem:** o gerador do exterior não põe mais armadilha embaixo de um monstro (ele a disparava sozinho,
   parado, e morria sem ninguém por perto).
 

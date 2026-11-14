@@ -36,6 +36,11 @@ export interface OpcoesTeclado {
   aoTrocarMovimento?: () => void;
   /** Com um modal aberto, as teclas não chegam ao jogo (marco 6). */
   bloqueado?: () => boolean;
+  /**
+   * Marco 41 (14/11/2026, D-169): as teclas de movimento já mantidas ao ligar (a cena da região de antes as passa na
+   * troca de sala; sem isto, o personagem parava na passagem até a tecla ser solta e apertada de novo).
+   */
+  iniciais?: readonly string[];
 }
 
 export interface Teclado {
@@ -44,6 +49,8 @@ export interface Teclado {
   soltarTudo: () => void;
   /** Marco 26: a visão ou o modo das teclas mudou; as teclas mantidas passam a valer no novo. */
   atualizar: () => void;
+  /** Marco 41 (D-169): as teclas de movimento mantidas agora. */
+  mantidas: () => string[];
 }
 
 const ORDEM_ATALHOS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
@@ -99,7 +106,8 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
       opcoes.aoCentralizar();
     } else if (ehTeclaDeMovimento(ev.code, modo(), iso)) {
       ev.preventDefault();
-      if (!ev.repeat) {
+      // Marco 41 (D-169): a repetição do sistema também traz a tecla que já vinha mantida de outra cena.
+      if (!pressionadas.has(ev.code)) {
         pressionadas.add(ev.code);
         recalcular();
       }
@@ -123,6 +131,8 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
     recalcular();
   };
 
+  for (const codigo of opcoes.iniciais ?? []) if (ehTeclaDeMovimento(codigo, modo(), opcoes.isometrico())) pressionadas.add(codigo);
+  if (pressionadas.size > 0) recalcular();
   window.addEventListener('keydown', aoBaixar);
   window.addEventListener('keyup', aoSoltar);
   window.addEventListener('blur', soltarTudo);
@@ -136,5 +146,6 @@ export function ligarTeclado(opcoes: OpcoesTeclado): Teclado {
     },
     soltarTudo,
     atualizar: recalcular,
+    mantidas: () => [...pressionadas],
   };
 }

@@ -107,7 +107,7 @@ export function montarLugar(conteudo: Conteudo, reino: Reino, lugar: Lugar, modo
     // Marco 41 (14/11/2026, D-169): as passagens para as vizinhas (sem monstros e sem dano) e os enfeites delas.
     const passagens = exterior.faixas.map((f) => {
       const la = vizinha(reino, lugar.regiao, f.lado);
-      return { ...f.area, ...(la && { destino: `regiao:${la.id}` }) };
+      return { ...f.area, lado: f.lado, ...(la && { destino: `regiao:${la.id}` }) };
     });
     const fase = { ...r.ctx.fase, estruturas, exterior: true, telhados, ...(refugios.length > 0 && { refugios }), ...(passagens.length > 0 && { passagens, enfeites: exterior.enfeites }) };
     const ctx = { ...r.ctx, fase };
