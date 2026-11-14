@@ -1710,6 +1710,7 @@
       "efeitos": [],
       "dropavel": false
     },
+    {"id": "montaria_de_aluguel", "nome": "Cavalo de aluguel", "tipo": "consumivel", "descricao": "Monta por 10 minutos: anda bem mais rápido. Você apeia ao levar dano ou usar uma skill. Alugado com o alquimista das vilas.", "icone": "botas", "raridade": "incomum", "valorBase": 60, "slotPadrao": null, "nivelMinimo": 1, "bonusAtributos": {}, "bonusDefesa": 0, "efeitos": [{"tipo": "montaria", "pct": 60, "duracaoMs": 600000}], "dropavel": false},
     {
       "id": "pocao_vida_maior",
       "nome": "Poção de vida maior",

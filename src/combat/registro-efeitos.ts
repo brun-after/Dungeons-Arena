@@ -33,6 +33,7 @@ export const TIPOS_EFEITO = [
   'imune_dano',
   'fantasma',
   'acelerado',
+  'montaria',
   'atravessar',
   'engenho',
   // instantâneos
@@ -307,6 +308,8 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   ab_multi_alvo: positivo('multi', '#e67e22', 6, ['valor'], { duracaoMs: 15_000, valor: 1, pct: 0 }, { ataqueBasico: 'alvos' }),
   imune_dano: positivo('escudo', '#f1c40f', 4, [], { duracaoMs: 3000, valor: 0, pct: 0 }, { imuneDano: true }),
   acelerado: { ...BASE, icone: 'botas', cor: '#74d9ca', positivo: true, campos: ['pct'], padrao: { duracaoMs: 3000, valor: 0, pct: 30 }, velocidade: true },
+  // D-173 (14/11/2026): a montaria alugada no Mundo — anda mais rápido por um bom tempo; apeia ao levar dano ou usar skill.
+  montaria: { ...BASE, icone: 'botas', cor: '#c9a24a', positivo: true, campos: ['pct'], padrao: { duracaoMs: 600_000, valor: 0, pct: 60 }, velocidade: true },
   fantasma: positivo('fantasma', '#bdc3c7', 2, [], { duracaoMs: 8000, valor: 0, pct: 0 }, { semColisao: true }),
   engenho: positivo('aviso', '#50e3c2', 4, [], { duracaoMs: 20000, valor: 0, pct: 0 }, {}),
   atravessar: positivo('flecha', '#1abc9c', 2, [], { duracaoMs: 12_000, valor: 0, pct: 0 }, { projeteisAtravessam: true }),

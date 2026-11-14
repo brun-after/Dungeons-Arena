@@ -105,6 +105,7 @@ export const ptBR = {
   'efeito.engenho': 'Engenho de armadilhas',
   'desc.efeito.engenho': 'Por {s} s, interagir com uma armadilha revelada a converte para sua equipe; mantém dano e rearme e não fere aliados',
   'efeito.acelerado': 'Passos velozes',
+  'efeito.montaria': 'Montado',
   // 06/11/2026 (D-135): o orbe que protege da próxima armadilha.
   'efeito.passo_leve': 'Passo leve',
   'desc.efeito.passo_leve': 'Por {s} s, a próxima armadilha em que você pisar (do chão ou de um monstro) se desfaz sem ferir',

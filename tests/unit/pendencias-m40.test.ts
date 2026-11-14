@@ -3,6 +3,8 @@
 import { describe, expect, it } from 'vitest';
 import { CAMPOS_DO_PET, leituraDoPet, passoDoCompanheiro, ritmoDoCompanheiro, type CampoDoPet } from '../../src/combat/pets-estilos';
 import { PETS } from '../../src/combat/pets';
+import { aoSerAtingido } from '../../src/combat/movimento-classe';
+import { REGISTRO_EFEITOS } from '../../src/combat/registro-efeitos';
 import type { EstadoJogo } from '../../src/core/estado';
 import type { Entidade } from '../../src/entities/entidade';
 import { criarJogador } from '../../src/entities/fabrica';
@@ -82,5 +84,24 @@ describe('os companheiros leem os estilos do dono (D-173)', () => {
     const b = dono('batedor');
     const lobo = { ...falcao, preset: 'lobo_companheiro', invocacao: { donoId: b.id, companheiro: true } } as unknown as Entidade;
     expect(passoDoCompanheiro({ entidades: [b, lobo] } as unknown as EstadoJogo, ctx, lobo)).toBeGreaterThan(1);
+  });
+});
+
+describe('a montaria alugada no Mundo (D-173)', () => {
+  const ctx = contexto(faseDeTexto(SALA_ABERTA));
+  it('é um item das lojas das vilas que dá o efeito de montaria por um tempo', () => {
+    const item = obter(CONTEUDO.itens.get('montaria_de_aluguel'));
+    expect(item.tipo).toBe('consumivel');
+    expect(item.efeitos[0]).toMatchObject({ tipo: 'montaria' });
+    expect(obter(item.efeitos[0]).duracaoMs).toBeGreaterThanOrEqual(300_000);
+    expect(REGISTRO_EFEITOS.montaria.velocidade).toBe(true);
+  });
+
+  it('apeia ao levar dano', () => {
+    const j = criarJogador(obter(CONTEUDO.classes.get('mago')), 'm', 2, 2, ctx.balance);
+    const estado = { tick: 0, entidades: [j] } as unknown as EstadoJogo;
+    j.efeitos = [{ tipo: 'montaria', ateTick: 9999, valor: 0, pct: 60, origemId: j.id } as unknown as Entidade['efeitos'][number]];
+    aoSerAtingido(estado, j, []);
+    expect(j.efeitos.some((f) => f.tipo === 'montaria')).toBe(false);
   });
 });
