@@ -46,6 +46,19 @@ describe('natação', () => {
     aplicarImpacto(c.estado, c.ctx, c.j, { acaoId: 1, hab, indice: 0, fonte: { id: c.inimigo.id, equipe: c.inimigo.equipe, bonusAtributo: 10, multRolagem: 1, potencia: 1, carisma: 10, multDano: 1, multCura: 1, d20Minimo: 20 } }, c.eventos);
     expect(c.j.hp).toBeLessThan(antes);
   });
+  it('quem voa passa por cima da água na velocidade de terra e ataca de lá (14/11/2026, D-164)', () => {
+    const a = cena(), b = cena(); posicionar(b.j, 3, 1);
+    a.j.movimentoClasse = { ativo: 'voo_arcano', cargas: {}, modo: { tipo: 'voo', id: 'voo_arcano', desdeTick: 0, ateTick: 99_999 } };
+    b.j.movimentoClasse = { ativo: 'voo_arcano', cargas: {}, modo: { tipo: 'voo', id: 'voo_arcano', desdeTick: 0, ateTick: 99_999 } };
+    definirDirecao(a.j, 'E'); definirDirecao(b.j, 'E');
+    integrarEntidade(a.j, a.estado, a.ctx, a.eventos, 100);
+    integrarEntidade(b.j, b.estado, b.ctx, b.eventos, 100);
+    expect(a.j.px).toBeCloseTo(b.j.px);
+    const c = cena();
+    c.j.movimentoClasse = { ativo: 'voo_arcano', cargas: {}, modo: { tipo: 'voo', id: 'voo_arcano', desdeTick: 0, ateTick: 99_999 } };
+    iniciarAcao(c.estado, c.ctx, c.j, 'golpe', c.inimigo.id, c.eventos);
+    expect(c.eventos.some((e) => e.t === 'acaoRecusada' && e.motivo === 'nadando')).toBe(false);
+  });
   it('entrar na água antes do lançamento impede o ataque preparado em terra', () => {
     const c = cena(); posicionar(c.j, 3, 1); posicionar(c.inimigo, 2, 1);
     expect(iniciarAcao(c.estado, c.ctx, c.j, 'golpe', c.inimigo.id, c.eventos)).toBe(true);

@@ -360,7 +360,8 @@ export function velocidadeDeViagem(e: Entidade, estado: EstadoJogo, ctx: Context
 
 /** O trecho do tick: segue os pontos ou a direção mantida. Devolve quanto andou (0 parado ou preso). */
 function andarNoTick(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[], dtMs: number, grade?: GradeDeCorpos): number {
-  const nadando = tipoEm(ctx.fase, e.x, e.y) === 'agua';
+  // 14/11/2026 (D-164): quem voa, salta ou desce a tirolesa passa por cima da água sem nadar.
+  const nadando = tipoEm(ctx.fase, e.x, e.y) === 'agua' && !noAr(e) && !naTirolesa(e);
   const vel = velocidadeAgora(e, estado, ctx) * (nadando ? ctx.balance.movimento.nadoMult : 1);
   let restante = (dtMs / 1000) * vel;
   let total = 0;

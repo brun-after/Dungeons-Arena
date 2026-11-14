@@ -51,7 +51,7 @@ import { raioAreaDaEncarnacao } from './encarnacao-efeitos';
 import { comBuffsDeLeitura, ehRetorno } from './buffs-de-leitura';
 import { papelDe } from './combos-papel';
 import { comCombosDoLancamento, fatorDeConjuracaoDoCombo } from './combos-assinados';
-import { aoAgir, motivoDoMovimento } from './movimento-classe';
+import { aoAgir, motivoDoMovimento, naTirolesa, noAr } from './movimento-classe';
 import { quantidadeDeSaltos, saltar } from './saltos';
 import { dispararGanchosDe, passivosDe } from '../progression/ganchos-do-portador';
 import { comCombo, fazerCombo } from './combos';
@@ -262,7 +262,7 @@ export function iniciarAcao(
   const hab = ultimate || habilidadeDisponivel(ator, habilidadeId) ? habilidadeDoAtor(ctx, ator, habilidadeId, estado.tick) : undefined;
   // Passiva não se conjura (marco 14): vale enquanto conhecida.
   if (!hab || hab.passiva) return recusar('sem_habilidade');
-  if (tipoEm(ctx.fase, ator.x, ator.y) === 'agua' && !deSuporte(hab)) return recusar('nadando');
+  if (nadando(ctx, ator) && !deSuporte(hab)) return recusar('nadando');
   // Pedir uma habilidade durante a conjuração do ataque básico substitui o básico (D-020):
   // o automático nunca impede o jogador de usar habilidades.
   const substituiBasico = !!ator.acao && ehBasico(ator, ator.acao.habilidadeId) && !ehBasico(ator, habilidadeId);
@@ -473,6 +473,9 @@ export function processarAcoes(estado: EstadoJogo, ctx: ContextoSimulacao, saida
  * Marco 40 (14/11/2026, D-166): o básico do Aventureiro só marca a caça; quem fere é o companheiro, e o golpe dele tem a
  * fórmula e a fonte do básico do dono (a arma, o nível, os itens e os estilos), para crescer como o básico crescia.
  */
+/** 14/11/2026 (D-164): nada quem está na água e não está no ar (voo, salto) nem na tirolesa. */
+const nadando = (ctx: ContextoSimulacao, e: Entidade): boolean => tipoEm(ctx.fase, e.x, e.y) === 'agua' && !noAr(e) && !naTirolesa(e);
+
 function forcaDoDono(estado: EstadoJogo, ctx: ContextoSimulacao, ator: Entidade, hab: Habilidade): { hab: Habilidade; fonte: FonteDeDano } | null {
   const inv = ator.invocacao;
   if (!inv?.companheiro || !ehBasico(ator, hab.id) || hab.formulaDano === null) return null;
@@ -520,7 +523,7 @@ function lancar(
   const doDono = daFase ? null : forcaDoDono(estado, ctx, ator, habLida);
   const hab = doDono ? doDono.hab : habLida;
   if (hab.formulaDano && !consumirAtaque(ator, acaoId)) return;
-  if (tipoEm(ctx.fase, ator.x, ator.y) === 'agua' && !deSuporte(hab)) return;
+  if (nadando(ctx, ator) && !deSuporte(hab)) return;
   // 04/11/2026 (D-132): atacar de longe deixa um pouco lento, mais quanto mais longe está o alvo.
   if (!daFase && !falcaoChegou && hab.formulaDano && hab.politicaAlvo === 'hostil') aplicarRecuoDeDistancia(ator, mira, estado.tick, ctx);
   const multiplos = multiplosDaVez(ator, hab);
@@ -684,7 +687,7 @@ function lancar(
 export function processarAutoAtaque(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[]): void {
   if (estado.tick % Math.max(1, ticksDe(ctx.balance.combate.autoAtaqueMs)) !== 0) return;
   for (const ator of ordemRotativa(estado.entidades, estado.tick)) {
-    if (!ator.autoAtaque || !vivo(ator) || ator.acao || tipoEm(ctx.fase, ator.x, ator.y) === 'agua') continue;
+    if (!ator.autoAtaque || !vivo(ator) || ator.acao || nadando(ctx, ator)) continue;
     const hab = habilidadeDoAtor(ctx, ator, ator.ataqueBasico);
     if (!hab || motivoDoMovimento(ator) || recargaRestante(estado, ator.id, hab.id) > 0 || acaoBloqueada(ator, estado.tick, hab.tipoAtaque)) {
       continue;
