@@ -251,6 +251,7 @@ for (const receita of RECEITAS) {
     if (k === 0) console.log(receita.nome, `${faixa * quadroL}×${Math.ceil(colunas / faixa) * 8 * quadroA}`);
   }
   console.log(' ', receita.nome, `${camadas.length} camadas`, `${Math.round(bytesTotal / 1024)} KB`, `${Date.now() - inicio} ms`);
+  // Marco 40 (14/11/2026): o catálogo sai a cada modelo pronto (uma geração interrompida não perde os anteriores).
+  if (!pastaModelos) writeFileSync(caminhoCatalogo, `${JSON.stringify(Object.fromEntries(Object.entries(catalogo).sort(([a], [b]) => a.localeCompare(b))), null, 2)}\n`);
 }
-if (!pastaModelos) writeFileSync(caminhoCatalogo, `${JSON.stringify(Object.fromEntries(Object.entries(catalogo).sort(([a], [b]) => a.localeCompare(b))), null, 2)}\n`);
 await navegador.close();
