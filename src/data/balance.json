@@ -349,7 +349,7 @@
   },
   "relevo": { "pxPorNivel": 12, "encostaMax": 2, "muroBaixoMax": 3, "muroAltoMax": 6, "subidaPctPorNivel": 15, "montariaFator": 0.5, "vantagemAlcancePorNivel": 0.5, "vantagemAlcanceMax": 2 },
   "visual": {
-    "luz": { "raioJogador": 6, "raioSemTocha": 2.2, "raioTocha": 3.5, "raioObjeto": 2.5, "raioMagia": 2.5, "resolucaoMapa": 0.5, "realceMinimo": 0.1, "escuridaoExterior": 0.45, "clareza": 0.5 },
+    "luz": { "raioJogador": 6, "raioSemTocha": 1.6, "intensidadeTocha": 0.95, "intensidadeSemTocha": 0.28, "raioTocha": 3.5, "raioObjeto": 2.5, "raioMagia": 2.5, "resolucaoMapa": 0.5, "realceMinimo": 0.1, "escuridaoExterior": 0.45, "clareza": 0.5 },
     "ouroMontes": [3, 20, 100],
     "solo": { "amostrasPorCelula": 4, "raioMistura": 0.35, "ruidoBorda": 0.35, "aoRaio": 1.1, "aoForca": 0.55, "macroForca": 0.22, "variacaoCobre": 0.28 },
     "paredeIso": { "altura": 1.15, "alcanceSala": 14, "alphaFade": 0, "telhadoPerto": 3 },
@@ -620,6 +620,7 @@
     "repeticaoDungeon": { "fatorPorVez": 0.5, "bonusPorNivelPct": 8, "bonusMaxPct": 80, "niveisPorMetade": 4 },
     "exercitoNecromante": {"minimo": 4, "maximo": 10, "niveisPorVaga": 5, "recargaMs": 12000, "duracaoMs": 90000, "presets": ["cavaleiro_profano", "piromante_profano", "arcanista_glacial", "espectro_tempestade"]},
     "atencaoBatalha": {"raio": 16, "bonus": 10, "memoriaMs": 8000},
+    "tocha": { "danoDeMonstroMenosPct": 15, "hesitacaoMult": 1.8, "reforcoPct": 35 },
     "lojaDungeon": { "diaRenovacao": 3, "fusoHoras": -3, "basicos": 4, "incomuns": 3, "raros": 4, "raroExtraChancePct": 30, "epicoChancePct": 40, "lendarioChancePct": 6, "nivelFolga": 10 },
     "ofertas": {"periodoS": 1800, "duracaoS": 600, "quantidade": 2, "centrais": ["couraca_expedicao", "capa_sombria", "anel_do_eco", "aceleracao_mente_rara", "essencia_fogo", "essencia_gelo"], "avancadas": ["couraca_trono", "manto_abismo", "livro_chuva_de_estrelas", "runa_de_fusao", "tomo_potencial"]},
     "tumulo": { "donoExclusivoS": 150, "duracaoS": 300 },
@@ -650,9 +651,10 @@
       "quadros": {
         "amanhecer": { "ambiente": "#3a2a40", "nivel": 0.35 },
         "dia": { "ambiente": "#3a3426", "nivel": 0.06 },
-        "entardecer": { "ambiente": "#5a2410", "nivel": 0.4 },
-        "noite": { "ambiente": "#060e24", "nivel": 0.86 }
-      }
+        "entardecer": { "ambiente": "#4a1c0c", "nivel": 0.55 },
+        "noite": { "ambiente": "#02061a", "nivel": 0.96 }
+      },
+      "realceNoite": 0.025
     }
   }
 }

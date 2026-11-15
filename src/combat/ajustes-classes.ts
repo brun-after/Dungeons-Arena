@@ -1,4 +1,5 @@
 import { retirarVida } from './reserva-necromante';
+import { temLuzPropria } from './luz-propria';
 // Ajustes de produção (18/10/2026). A aura resolve dano sem voltar ao dispatcher de acertos.
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
@@ -38,8 +39,20 @@ export function extraGuerreiro(ctx: ContextoSimulacao, fonte: Entidade, alvo: En
 }
 
 /** Um encontro começa na primeira agressão e só termina na troca de fase. Ondas e respawn não renovam a janela. */
+/**
+ * Marco 43 (15/11/2026, D-177): o monstro (a IA) que ataca quem leva a tocha acesa bate com menos vontade: o fogo
+ * intimida. Vale só no Mundo (só lá existe a tocha).
+ */
+function intimidacaoDoFogo(ctx: ContextoSimulacao, alvo: Entidade, fonte: Entidade): number {
+  return fonte.controlador === 'ia' && temLuzPropria(alvo) ? 1 - ctx.balance.mundo.tocha.danoDeMonstroMenosPct / 100 : 1;
+}
+
 export function protecaoInicial(estado: EstadoJogo, ctx: ContextoSimulacao, alvo: Entidade, fonte?: Entidade): number {
   if (!fonte || fonte === alvo || !podeFerir(fonte, alvo, ctx.modo)) return 1;
+  return protecaoDaClasse(estado, ctx, alvo, fonte) * intimidacaoDoFogo(ctx, alvo, fonte);
+}
+
+function protecaoDaClasse(estado: EstadoJogo, ctx: ContextoSimulacao, alvo: Entidade, fonte: Entidade): number {
   for (const e of [fonte, alvo]) {
     if (!e.encontro || e.encontro.faseId !== estado.faseId) e.encontro = { faseId: estado.faseId, inicioTick: estado.tick };
   }

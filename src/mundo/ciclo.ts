@@ -18,6 +18,11 @@ export interface RegrasDoCiclo {
   minutos: Record<FaseDoDia, number>;
   /** O escuro no meio de cada fase; entre elas, interpola. */
   quadros: Record<FaseDoDia, QuadroDeLuz>;
+  /**
+   * Marco 43 (15/11/2026, D-177): o mínimo de luz fora das luzes na noite fechada (o `realceMinimo` das masmorras é
+   * alto demais para o céu aberto: a noite ficava clara e a tocha, inútil). Entre o dia e a noite, interpola.
+   */
+  realceNoite: number;
 }
 
 export interface HoraDoMundo {
