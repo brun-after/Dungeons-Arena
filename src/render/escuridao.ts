@@ -32,6 +32,12 @@ export interface ParametrosEscuridao {
   realceMinimo: number;
   /** A resolução do mapa (fração da tela). */
   resolucao: number;
+  /**
+   * Marco 44 (15/11/2026, D-178): na vinheta, o raio (px) do buraco claro, o da luz do jogador (sem ele, a tela toda),
+   * e quanto escurece por dentro dele (0 a 1; sem tocha, a luz fraca).
+   */
+  raioVinheta?: number;
+  nucleo?: number;
 }
 
 const LADO_RADIAL = 256;
@@ -124,8 +130,9 @@ export class CamadaEscuridao {
       this.vinheta.visible = true;
       const c = centro ?? { x: largura / 2, y: altura / 2 };
       this.vinheta.position.set(c.x, c.y);
-      // A borda opaca começa a ~0,62 do raio: cobre a tela com folga.
-      this.vinheta.scale.set((Math.hypot(largura, altura) * 1.25) / LADO_RADIAL);
+      // A borda opaca começa a ~0,62 do raio: cobre a tela com folga. Marco 44 (D-178): ou, no exterior, segue a luz do
+      // jogador (o escuro fecha no raio da luz, a 0,62 do raio da textura).
+      this.vinheta.scale.set(p.raioVinheta !== undefined ? (p.raioVinheta / 0.62) * 2 / LADO_RADIAL : (Math.hypot(largura, altura) * 1.25) / LADO_RADIAL);
       this.vinheta.tint = p.ambiente;
       this.vinheta.alpha = Math.min(1, p.nivel * (1 - p.realceMinimo));
       const m = (this.vinheta.scale.x * LADO_RADIAL) / 2;
@@ -138,6 +145,8 @@ export class CamadaEscuridao {
       if (x0 > -folga) this.fora.rect(-folga, y0, x0 + folga, y1 - y0);
       if (x1 < l) this.fora.rect(x1, y0, l - x1, y1 - y0);
       this.fora.fill({ color: p.ambiente, alpha: this.vinheta.alpha });
+      // Marco 44 (D-178): por dentro do buraco claro, o escuro da luz fraca (sem tocha).
+      if ((p.nucleo ?? 0) > 0) this.fora.rect(x0, y0, x1 - x0, y1 - y0).fill({ color: p.ambiente, alpha: Math.min(1, p.nucleo ?? 0) });
       this.fora.visible = true;
       return;
     }

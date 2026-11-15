@@ -287,7 +287,10 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     const ciclo = ctx.balance.mundo.ciclo;
     const noite = Math.max(0, Math.min(1, nivel / ciclo.quadros.noite.nivel));
     const realceMinimo = ctx.fase.exterior ? vis.realceMinimo + (ciclo.realceNoite - vis.realceMinimo) * noite : vis.realceMinimo;
-    escuridao.desenhar(palco.mundo, palco.largura(), palco.altura(), { modo, ambiente, nivel, realceMinimo, resolucao: vis.resolucaoMapa }, centro, luzes);
+    // Marco 44 (15/11/2026, D-178): na vinheta do exterior, o claro é o da luz do jogador (e escurece por dentro sem tocha).
+    const luzEu = ctx.fase.exterior && eu ? luzes[pontosDoQuadro.indexOf(eu)] : undefined;
+    const vinheta = luzEu ? { raioVinheta: luzEu.raio, nucleo: nivel * (1 - realceMinimo) * (1 - Math.min(1, luzEu.intensidade)) } : {};
+    escuridao.desenhar(palco.mundo, palco.largura(), palco.altura(), { modo, ambiente, nivel, realceMinimo, resolucao: vis.resolucaoMapa, ...vinheta }, centro, luzes);
   };
   const flash = new Graphics();
   palco.tela.addChild(flash);
