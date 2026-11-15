@@ -1,33 +1,33 @@
 {
   "arbusto_1": {
-    "largura": 132,
-    "altura": 120,
-    "ancoraX": 78.5,
-    "ancoraY": 68.1
+    "largura": 142,
+    "altura": 137,
+    "ancoraX": 63,
+    "ancoraY": 91
   },
   "arbusto_2": {
-    "largura": 146,
-    "altura": 125,
+    "largura": 132,
+    "altura": 127,
     "ancoraX": 65.4,
-    "ancoraY": 70.8
+    "ancoraY": 83.6
   },
   "arbusto_3": {
-    "largura": 139,
-    "altura": 121,
-    "ancoraX": 70.2,
-    "ancoraY": 80.1
+    "largura": 153,
+    "altura": 136,
+    "ancoraX": 74.5,
+    "ancoraY": 91.9
   },
   "arbusto_seco_1": {
-    "largura": 123,
-    "altura": 112,
-    "ancoraX": 72.3,
-    "ancoraY": 62.7
+    "largura": 129,
+    "altura": 124,
+    "ancoraX": 57.3,
+    "ancoraY": 82.5
   },
   "arbusto_seco_2": {
-    "largura": 134,
-    "altura": 116,
-    "ancoraX": 60.4,
-    "ancoraY": 64.8
+    "largura": 119,
+    "altura": 114,
+    "ancoraX": 58.8,
+    "ancoraY": 75
   },
   "armas": {
     "largura": 143,
@@ -108,28 +108,28 @@
     "ancoraY": 114.7
   },
   "carvalho_1": {
-    "largura": 278,
-    "altura": 374,
-    "ancoraX": 142.4,
-    "ancoraY": 298.8
+    "largura": 301,
+    "altura": 404,
+    "ancoraX": 132,
+    "ancoraY": 330
   },
   "carvalho_2": {
-    "largura": 263,
-    "altura": 340,
-    "ancoraX": 133.1,
-    "ancoraY": 266.5
+    "largura": 273,
+    "altura": 362,
+    "ancoraX": 141.7,
+    "ancoraY": 288.2
   },
   "carvalho_3": {
-    "largura": 285,
-    "altura": 368,
-    "ancoraX": 129.3,
-    "ancoraY": 298.5
+    "largura": 289,
+    "altura": 384,
+    "ancoraX": 142.4,
+    "ancoraY": 313.6
   },
   "carvalho_4": {
-    "largura": 301,
-    "altura": 390,
-    "ancoraX": 147.6,
-    "ancoraY": 312.6
+    "largura": 286,
+    "altura": 408,
+    "ancoraX": 144.2,
+    "ancoraY": 330.1
   },
   "cerca_1": {
     "largura": 112,
@@ -168,22 +168,22 @@
     "ancoraY": 134.3
   },
   "faia_1": {
-    "largura": 239,
-    "altura": 321,
-    "ancoraX": 121.5,
-    "ancoraY": 256
+    "largura": 258,
+    "altura": 346,
+    "ancoraX": 113.2,
+    "ancoraY": 281.5
   },
   "faia_2": {
-    "largura": 227,
-    "altura": 292,
-    "ancoraX": 115.7,
-    "ancoraY": 227.6
+    "largura": 233,
+    "altura": 308,
+    "ancoraX": 120.8,
+    "ancoraY": 244.8
   },
   "faia_3": {
-    "largura": 249,
-    "altura": 317,
-    "ancoraX": 112.4,
-    "ancoraY": 256.1
+    "largura": 247,
+    "altura": 328,
+    "ancoraX": 121.8,
+    "ancoraY": 267.3
   },
   "feno_1": {
     "largura": 95,
@@ -246,16 +246,16 @@
     "ancoraY": 240.4
   },
   "outono_1": {
-    "largura": 248,
-    "altura": 333,
-    "ancoraX": 126.4,
-    "ancoraY": 265.9
+    "largura": 268,
+    "altura": 359,
+    "ancoraX": 117.5,
+    "ancoraY": 292.7
   },
   "outono_2": {
-    "largura": 236,
-    "altura": 304,
-    "ancoraX": 120,
-    "ancoraY": 237.3
+    "largura": 243,
+    "altura": 321,
+    "ancoraX": 126,
+    "ancoraY": 255.6
   },
   "pilar_quebrado": {
     "largura": 139,
@@ -270,46 +270,46 @@
     "ancoraY": 85.7
   },
   "pinheiro_1": {
-    "largura": 211,
-    "altura": 339,
-    "ancoraX": 105.6,
-    "ancoraY": 283
+    "largura": 253,
+    "altura": 361,
+    "ancoraX": 127,
+    "ancoraY": 293.6
   },
   "pinheiro_2": {
-    "largura": 186,
-    "altura": 300,
-    "ancoraX": 94.6,
-    "ancoraY": 249.4
+    "largura": 227,
+    "altura": 324,
+    "ancoraX": 115,
+    "ancoraY": 264.5
   },
   "pinheiro_3": {
-    "largura": 198,
-    "altura": 330,
-    "ancoraX": 98.8,
-    "ancoraY": 277.2
+    "largura": 246,
+    "altura": 356,
+    "ancoraX": 121.5,
+    "ancoraY": 290.4
   },
   "pinheiro_4": {
-    "largura": 220,
-    "altura": 349,
-    "ancoraX": 111.9,
-    "ancoraY": 289.4
+    "largura": 259,
+    "altura": 370,
+    "ancoraX": 130.1,
+    "ancoraY": 302.6
   },
   "pinheiro_neve_1": {
-    "largura": 197,
-    "altura": 315,
-    "ancoraX": 98.1,
-    "ancoraY": 262.6
+    "largura": 235,
+    "altura": 335,
+    "ancoraX": 118.1,
+    "ancoraY": 272.4
   },
   "pinheiro_neve_2": {
-    "largura": 174,
-    "altura": 279,
-    "ancoraX": 88.2,
-    "ancoraY": 231.7
+    "largura": 212,
+    "altura": 302,
+    "ancoraX": 107.2,
+    "ancoraY": 245.9
   },
   "pinheiro_neve_3": {
-    "largura": 185,
-    "altura": 306,
-    "ancoraX": 92,
-    "ancoraY": 257.2
+    "largura": 229,
+    "altura": 331,
+    "ancoraX": 113,
+    "ancoraY": 269.6
   },
   "placa": {
     "largura": 76,
