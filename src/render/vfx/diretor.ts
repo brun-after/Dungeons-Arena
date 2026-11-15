@@ -13,11 +13,15 @@ import { circuloNoChao, clarao, ondaDeChoque, sortear } from './blocos';
 import type { Acerto, AreaVfx, CenaVfx, DefAssinatura, EmSi, P } from './cena';
 import { Deslizes } from './deslizes';
 import { formaNaArea, formaNaConjuracao, formaNoAcerto, type FormaVisual } from './manifestacao-forma';
-import { ehClasseComRuna, manifestarNaConjuracao, manifestarNoAcerto, type Runa } from './manifestacao-runa';
+import { COR_DA_RUNA, ehClasseComRuna, manifestarNaConjuracao, manifestarNoAcerto, type Runa } from './manifestacao-runa';
 import { Marcas } from './marcas';
 import { Animacoes, Pincel } from './pincel';
 import type { TexturaRica } from './texturas';
 import type { Gesto, Palco } from './gestos-base';
+import { classeNaUltimate, estiloNaUltimate, toqueDominante, type PalcoDaUltimate } from './classe-na-ultimate';
+import { cenaTrocada, emissoesTrocadas, trocaDe, type Troca } from './transmutacao';
+import type { Eixo } from '../../combat/eixos';
+import type { Emissao } from '../presets-particula';
 
 export interface OpcoesDiretor {
   efeitos: Container;
@@ -35,6 +39,8 @@ export class DiretorVfx {
   /** Onde cada entidade está (em células, já com o deslize), atualizado a cada quadro pelo efeitos-habilidade. */
   private ondeEsta: (id: string) => PontoVisual | null = () => null;
   private agora = 0;
+  /** D-174: a troca de elemento das chamadas em curso (a skill de classe com a runa de outro elemento). */
+  private troca: Troca | null = null;
 
   constructor(private readonly o: OpcoesDiretor) {
     const p = o.particulas;
@@ -52,7 +58,45 @@ export class DiretorVfx {
     return this.o.particulas.limite > 0;
   }
 
+  /**
+   * D-174 (14/11/2026): o que `fn` desenhar com a assinatura `nome` sai inteiro no elemento da runa (transmutacao.ts);
+   * `fn` recebe a cor a usar (a da runa, quando há troca).
+   */
+  naRuna<T>(nome: AssinaturaVisual, runa: Runa | undefined, cor: number, fn: (cor: number) => T): T {
+    const antes = this.troca;
+    this.troca = trocaDe(ASSINATURAS[nome].familia, runa);
+    try {
+      return fn(this.troca ? COR_DA_RUNA[this.troca.para] : cor);
+    } finally {
+      this.troca = antes;
+    }
+  }
+
+  /** As emissões da assinatura, já no elemento da troca em curso. */
+  private emitir(lista: readonly Emissao[], x: number, y: number, cor: number, ate?: P, dir?: P): void {
+    this.o.particulas.emitirLista(this.troca ? emissoesTrocadas(lista, this.troca) : lista, x, y, cor, ate, dir);
+  }
+
   cena(): CenaVfx {
+    const crua = this.cenaCrua();
+    return this.troca ? cenaTrocada(crua, this.troca) : crua;
+  }
+
+  /** D-174: a classe, o estilo mais forte e a afinidade dominante de quem lança, na ultimate. */
+  ultimateDeQuem(classe: string | undefined, g: PalcoDaUltimate, estilo: { eixo: Eixo; faixa: number } | null, dominante: { runa: Runa; faixa: number } | null): void {
+    if (!this.ativo) return;
+    const c = this.cenaCrua();
+    if (ehClasseComRuna(classe)) classeNaUltimate(c, classe, g);
+    if (estilo && !this.o.reduzido()) estiloNaUltimate(c, estilo.eixo, estilo.faixa, g);
+    if (dominante) toqueDominante(c, dominante.runa, dominante.faixa, g.centro, true);
+  }
+
+  /** D-174: o toque da afinidade dominante no acerto de uma skill de classe. */
+  toqueNoAcerto(runa: Runa, faixa: number, em: P): void {
+    if (this.ativo) toqueDominante(this.cenaCrua(), runa, faixa, em, false);
+  }
+
+  private cenaCrua(): CenaVfx {
     const p = this.o.particulas;
     return {
       particulas: p,
@@ -76,7 +120,7 @@ export class DiretorVfx {
   conjurar(nome: AssinaturaVisual, pos: P, cor: number): boolean {
     const lista = ASSINATURAS[nome].conjuracao;
     if (!lista || !this.ativo) return false;
-    this.o.particulas.emitirLista(lista, pos.x, pos.y, cor);
+    this.emitir(lista, pos.x, pos.y, cor);
     return true;
   }
 
@@ -100,7 +144,7 @@ export class DiretorVfx {
   rastro(nome: AssinaturaVisual, x: number, y: number, cor: number, dir: P): boolean {
     const lista = ASSINATURAS[nome].rastro;
     if (!lista || !this.ativo) return false;
-    this.o.particulas.emitirLista(lista, x, y, cor, undefined, dir);
+    this.emitir(lista, x, y, cor, undefined, dir);
     return true;
   }
 
@@ -109,7 +153,7 @@ export class DiretorVfx {
     if (!this.ativo) return;
     const def = ASSINATURAS[nome];
     const c = this.cena();
-    if (comParticulas && def.impacto?.length) this.o.particulas.emitirLista(def.impacto, a.ate.x, a.ate.y, a.cor);
+    if (comParticulas && def.impacto?.length) this.emitir(def.impacto, a.ate.x, a.ate.y, a.cor);
     def.aoAcertar?.(c, a);
     if (def.marca && a.indice < 3) c.marca(def.marca, a.ate.x, a.ate.y, MARCAS_COR[def.marca] ?? a.cor, 1, 2400, def.marca === 'geada');
     if (variante && a.indice < 3) this.o.particulas.emitirLista(VARIANTES[variante], a.ate.x, a.ate.y, a.cor);
@@ -161,11 +205,11 @@ export class DiretorVfx {
     const c = this.cena();
     if (a.tipoArea === 'linha') {
       const ponta = a.celulas.reduce((m, q) => (Math.hypot(q.x - a.origem.x, q.y - a.origem.y) > Math.hypot(m.x - a.origem.x, m.y - a.origem.y) ? q : m), a.mira);
-      if (lista.length) this.o.particulas.emitirLista(lista, a.origem.x, a.origem.y, a.cor, ponta);
+      if (lista.length) this.emitir(lista, a.origem.x, a.origem.y, a.cor, ponta);
       return;
     }
     if (a.tipoArea !== 'cone') ondaDeChoque(c, a.centro, a.cor, Math.max(1, a.raio) + 0.4, 380);
-    for (const q of sortear(a.celulas, 5)) if (lista.length) this.o.particulas.emitirLista(lista, q.x + (Math.random() - 0.5) * 0.5, q.y + (Math.random() - 0.5) * 0.5, a.cor);
+    for (const q of sortear(a.celulas, 5)) if (lista.length) this.emitir(lista, q.x + (Math.random() - 0.5) * 0.5, q.y + (Math.random() - 0.5) * 0.5, a.cor);
   }
 
   emSi(nome: AssinaturaVisual, a: EmSi, variante: VarianteVisual | undefined): void {
@@ -173,7 +217,7 @@ export class DiretorVfx {
     const def = ASSINATURAS[nome];
     if (variante) this.o.particulas.emitirLista(VARIANTES[variante], a.pos.x, a.pos.y, a.cor);
     if (def.emSi) def.emSi(this.cena(), a);
-    else if (def.impacto?.length) this.o.particulas.emitirLista(def.impacto, a.pos.x, a.pos.y, a.cor);
+    else if (def.impacto?.length) this.emitir(def.impacto, a.pos.x, a.pos.y, a.cor);
   }
 
   /** D-173 (14/11/2026): o gesto de uma reação, ressonância ou combo (vfx/gestos.ts). */

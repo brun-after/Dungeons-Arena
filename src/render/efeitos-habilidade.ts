@@ -39,6 +39,7 @@ import { AURA_DO_ESTADO, presetDeConjuracao } from './materiais';
 import type { AssinaturaVisual } from '../combat/assinaturas-visuais';
 import type { Habilidade } from '../combat/habilidades';
 import type { DiretorVfx } from './vfx/diretor';
+import type { PerfilVisual } from './perfil-visual';
 import { assinaturaDe } from './vfx/resolver';
 import { ligarSolos, tierDaArma } from './solos-visual';
 import { ligarLancas } from './lancas-visual';
@@ -104,6 +105,8 @@ export interface OpcoesEfeitos {
   /** Marco 26 (D-124): as silhuetas, marcas e deslizes; e a classe da ultimate (o círculo com a runa dela). */
   diretor: DiretorVfx;
   classeDaUltimate?: (habilidadeId: string, atorId: string) => string | null;
+  /** D-174 (14/11/2026): o estilo mais forte e a afinidade dominante de quem lança (render/perfil-visual.ts). */
+  perfilVisual?: (atorId: string) => PerfilVisual | null;
 }
 
 export class EfeitosDeHabilidade {
@@ -173,13 +176,17 @@ export class EfeitosDeHabilidade {
         const corEtapa = h.elemento && this.o.corElemento ? { corEtapa: this.o.corElemento(h.elemento) } : {};
         // Marco 27 (D-126): o básico da arma fica mais bonito com a raridade dela.
         const tier = nome.startsWith('arma_') ? { tier: tierDaArma(quem) } : {};
-        this.o.diretor.acertar(nome, { ...acerto, ...corEtapa, ...tier }, h.visual?.variante, comParticulas);
+        // D-174: com a runa de outro elemento, a assinatura sai inteira dele.
+        this.o.diretor.naRuna(nome, h.runa, v.cor, (cor) => { this.o.diretor.acertar(nome, { ...acerto, cor, ...corEtapa, ...tier }, h.visual?.variante, comParticulas); });
       }
       // Marco 39 (D-151): a runa conta de que a skill é feita agora, na intensidade do vínculo.
       if (h.runa && h.faixaRuna !== undefined) this.o.diretor.runaNoAcerto(quem?.classeId ?? quem?.bolsa?.classeId, h.runa, h.faixaRuna, acerto, comParticulas);
       // Marco 39 (D-156): a forma do estilo conta o que faz com o golpe, mais forte a cada faixa.
       if (h.formas) this.o.diretor.formaNoAcerto(h.formas, acerto);
       if (ev.indice > 0) return;
+      // D-174: o toque da afinidade dominante do personagem (quando não é a da própria skill).
+      const dominante = h.runa ? this.o.perfilVisual?.(ev.fonteId)?.dominante : null;
+      if (dominante && dominante.runa !== h.runa) this.o.diretor.toqueNoAcerto(dominante.runa, dominante.faixa, alvo);
       const agoraMs = agora();
       const camera = this.o.diretor.def(nome).camera ?? (v.camera === 'nenhum' ? null : v.camera);
       if (ev.critico || camera === 'forte') this.o.impacto.pedir('forte', agoraMs);
@@ -294,7 +301,7 @@ export class EfeitosDeHabilidade {
       if (h.runa && h.faixaRuna !== undefined) this.o.diretor.runaNaConjuracao(h.runa, h.faixaRuna, pos);
       if (h.formas) this.o.diretor.formaNaConjuracao(h.formas, pos, v.cor);
       // D-124: a conjuração da assinatura (a mão em chamas, a geada, os arcos); sem ela, o preset antigo.
-      if (this.o.diretor.conjurar(assinaturaDe(h), pos, v.cor)) continue;
+      if (this.o.diretor.naRuna(assinaturaDe(h), h.runa, v.cor, (cor) => this.o.diretor.conjurar(assinaturaDe(h), pos, cor))) continue;
       if (v.conjuracao) p.emitir(v.conjuracao, pos.x, pos.y, v.cor);
       // Marco 24 (25/10/2026): a matéria do elemento na mão de quem conjura (chamas, geada, arcos, bolhas…).
       if (h.elemento) p.emitir(presetDeConjuracao(h.elemento), pos.x, pos.y, v.cor);
@@ -310,7 +317,7 @@ export class EfeitosDeHabilidade {
       const h = this.o.habilidades(pr.chave);
       const v = h ? visualDe(h) : null;
       // D-124: o rastro da assinatura (brasas e fumaça da bola de fogo, névoa do crânio, geada da lança).
-      if (h && v && !this.o.diretor.rastro(assinaturaDe(h), pr.x, pr.y, v.cor, { x: pr.dirX, y: pr.dirY }) && v.viagem) p.emitir(v.viagem, pr.x, pr.y, v.cor, undefined, { x: pr.dirX, y: pr.dirY });
+      if (h && v && !this.o.diretor.naRuna(assinaturaDe(h), h.runa, v.cor, (cor) => this.o.diretor.rastro(assinaturaDe(h), pr.x, pr.y, cor, { x: pr.dirX, y: pr.dirY })) && v.viagem) p.emitir(v.viagem, pr.x, pr.y, v.cor, undefined, { x: pr.dirX, y: pr.dirY });
       // Ajuste de 24/10/2026 (D-091): o tiro carregado é uma flecha com esteira dourada (não uma bola de brilho).
       if (this.carregados.has(pr.id)) p.emitir('esteira_carregada', pr.x, pr.y, COR_MIRA, undefined, { x: pr.dirX, y: pr.dirY });
     }
@@ -343,9 +350,25 @@ export class EfeitosDeHabilidade {
     const escala = escalaDe(h, !!a.ultimate);
     const agoraPos = this.posicoes.get(a.atorId) ?? a.origem;
     if (a.ultimate) this.o.diretor.lancouUltimate(agoraPos, v.cor);
+    // D-174: a assinatura sai no elemento da runa; a ultimate leva a classe, o estilo e a afinidade de quem lança.
+    this.o.diretor.naRuna(nome, h.runa, v.cor, (cor) => { this.desenharArea(a, h, nome, cor, escala, agoraPos); });
+  }
+
+  /** D-174: a ultimate é de quem a lança — a classe assina, o estilo mais forte e a afinidade dominante aparecem. */
+  private ultimateDeQuem(a: { atorId: string }, h: Habilidade, centro: PontoVisual, raio: number, cor: number): void {
+    const perfil = this.o.perfilVisual?.(a.atorId) ?? null;
+    const classe = this.o.classeDaUltimate?.(h.id, a.atorId) ?? undefined;
+    const estilo = perfil?.eixo ? { eixo: perfil.eixo, faixa: perfil.faixaEstilo } : null;
+    const dominante = perfil?.dominante && perfil.dominante.runa !== h.runa ? perfil.dominante : null;
+    this.o.diretor.ultimateDeQuem(classe, { centro, raio, cor, intensidade: (h.faixaRuna ?? 0) / 10 }, estilo, dominante);
+  }
+
+  private desenharArea(a: { chave: string; atorId: string; origem: PontoVisual; mira: PontoVisual; emSi?: boolean; ultimate?: boolean }, h: Habilidade, nome: AssinaturaVisual, cor: number, escala: number, agoraPos: PontoVisual): void {
+    const v = { cor };
     // D-124: a skill em si mesmo (buff, postura, invocação) desenha no corpo de quem lança.
     if (a.emSi) {
       this.o.diretor.emSi(nome, { chave: a.chave, id: a.atorId, pos: agoraPos, cor: v.cor, escala }, h.visual?.variante);
+      if (a.ultimate) this.ultimateDeQuem(a, h, agoraPos, 1.5, cor);
       return;
     }
     const celulas = celulasDaForma(h, { x: Math.round(a.origem.x), y: Math.round(a.origem.y) }, a.mira, this.o.fase);
@@ -355,6 +378,7 @@ export class EfeitosDeHabilidade {
       y: celulas.reduce((s, c) => s + c.y, 0) / celulas.length,
     };
     // Marco 24 (25/10/2026, D-098): o giro (Redemoinho) corre as lâminas da arma em volta de quem gira.
+    if (a.ultimate) this.ultimateDeQuem(a, h, centro, h.raioArea, cor);
     if (h.visual?.animacao === 'giro') this.o.aoGirar?.(a.origem, v.cor);
     // Marco 39 (D-156): o anel pesado da forma de área maior, por cima da área da assinatura.
     if (h.formas) this.o.diretor.formaNaArea(h.formas, { chave: a.chave, atorId: a.atorId, origem: a.origem, mira: a.mira, centro, celulas, cor: v.cor, escala, tipoArea: h.tipoArea, raio: h.raioArea });

@@ -11,6 +11,7 @@
 // (mais densa conforme o impacto chega), o contorno é feito de pontos na cor de quem ataca, a mira é um fio de
 // partículas e o projétil é um núcleo de luz. As formas desenhadas ficam só para a qualidade sem partículas.
 
+import { naRunaDaSkill } from './vfx/transmutacao';
 import { Graphics, type Container } from 'pixi.js';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
@@ -185,9 +186,11 @@ export class CamadaTelegrafia {
       const forma = visual?.projetil ?? 'orbe';
       if (particulas) {
         // Marco 26 (29/10/2026, D-124): o corpo da assinatura (bola de fogo, crânio, estaca de gelo, algema, gota).
-        const corpo = hab ? ASSINATURAS[assinaturaDe(hab)].corpo : undefined;
+        const def = hab ? ASSINATURAS[assinaturaDe(hab)] : undefined;
         const dir = { x: p.dirX, y: p.dirY };
-        if (corpo) particulas.emitirLista(corpo, p.x + p.dirX * avanco, p.y + p.dirY * avanco, visual?.cor ?? cor, undefined, dir);
+        // D-174 (14/11/2026): com a runa de outro elemento, o corpo do projétil também é feito dele.
+        const corpo = def?.corpo ? naRunaDaSkill(def.familia, hab?.runa, def.corpo, visual?.cor ?? cor) : undefined;
+        if (corpo) particulas.emitirLista(corpo.lista, p.x + p.dirX * avanco, p.y + p.dirY * avanco, corpo.cor, undefined, dir);
         else particulas.emitir(forma === 'flecha' ? 'projetil_flecha' : forma === 'teia' ? 'projetil_teia' : 'projetil', p.x + p.dirX * avanco, p.y + p.dirY * avanco, visual?.cor ?? cor, undefined, dir);
         continue;
       }
