@@ -30,6 +30,7 @@ import { mostrarAviso } from './ui/aviso';
 import { montarCena, type Cena } from './ui/cena';
 import { criarPaineisDaEconomia } from './ui/mundo-economia';
 import { abrirMapa, abrirPortal, criarFaixaDoLugar, textoDoAviso } from './ui/mundo-paineis';
+import { criarRelogioDoMundo } from './ui/relogio-mundo';
 import { criarPainelSocial } from './ui/mundo-social';
 import { reinoDoConteudo } from './mundo/reino';
 import { criarGuiaMundo, criarOrientacaoMundo, marcarLapide, type OrientacaoMundo } from './ui/orientacao-mundo';
@@ -387,8 +388,11 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
     enviar: enviarAcao,
     agoraMs: () => Date.now(),
   });
+  // Marco 42 (15/11/2026, D-176): o relógio do dia e da noite.
+  const relogio = criarRelogioDoMundo(ctx.balance.mundo.ciclo, (texto) => { avisar(texto, 4000); });
   const desmontar = () => {
     clearInterval(pollingParty.timer);
+    relogio.destruir();
     pararLaco?.();
     cena?.desmontar();
     cena = null;
@@ -535,7 +539,7 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
   }
   const c = cena;
   const guia = criarGuiaMundo(orientacao, reino, pedido.lugar, ctx, idLocal, () => ultimoLugar?.descobertas ?? []);
-  camada.querySelector('.camada-ui')?.append(faixa.elemento, social.elemento, guia.elemento);
+  camada.querySelector('.camada-ui')?.append(faixa.elemento, relogio.elemento, social.elemento, guia.elemento);
   camada.querySelector('.cabecalho h1')?.remove();
   const mini = camada.querySelector<HTMLElement>('.minimapa');
   if (mini) {

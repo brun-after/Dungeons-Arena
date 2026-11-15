@@ -30,8 +30,16 @@ export interface EscuridaoTema {
 }
 
 /** As fases sem tema (as antigas e o exterior sem tema). */
-export const SOLO_PADRAO: SoloTema = { base: 'lajes', variacao: 'terra', parede: 'blocos', tinta: 0x9a94a8, escala: 3, mato: 'grama' };
-export const ESCURIDAO_PADRAO: EscuridaoTema = { ambiente: 0x120f1a, nivel: 0.8 };
+// Marco 42 (15/11/2026, D-176): sem o lilás (a tinta e o escuro puxavam tudo para o mesmo cinza-roxo).
+export const SOLO_PADRAO: SoloTema = { base: 'lajes', variacao: 'terra', parede: 'blocos', tinta: 0xd2c8b4, escala: 3, mato: 'grama' };
+export const ESCURIDAO_PADRAO: EscuridaoTema = { ambiente: 0x0a1222, nivel: 0.8 };
+
+/** Marco 42 (D-176): o chão sem tema com a tinta do bioma (as regiões do Mundo), ou o padrão. */
+export function soloSemTema(bioma: string | undefined, gradacao: { tintaPadrao: string; biomas: Record<string, string> }): SoloTema {
+  const hex = (bioma !== undefined ? gradacao.biomas[bioma] : undefined) ?? gradacao.tintaPadrao;
+  const tinta = Number.parseInt(hex.slice(1), 16);
+  return { ...SOLO_PADRAO, tinta: Number.isFinite(tinta) ? tinta : SOLO_PADRAO.tinta };
+}
 
 function cor(l: Leitor, o: Objeto, campo: string): number {
   const v = l.texto(o, campo);

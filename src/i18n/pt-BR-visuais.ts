@@ -158,4 +158,12 @@ export const textosVisuais = {
   'visual.ult_tempestade_de_passos': 'Tempestade de passos: a cada salto fica uma silhueta de luz, e os cortes ligam uma na outra.',
   'visual.ult_matilha': 'Matilha: três rasgos de garra cruzam a área em onda, com poeira e pelos no rastro.',
   'visual.ult_legiao': 'Legião: o chão racha em círculo e as mãos rompem a terra por toda a volta, sob uma névoa baixa.',
+  // Marco 42 (D-176): o vento.
+  'visual.lamina_de_ar': 'Lâmina de ar: a meia-lua de vento gira no voo e se desfaz em riscos e folhas no alvo.',
+  'visual.lufada': 'Lufada: o ar cai do alto sobre a área, achata a poeira em anel e levanta folhas pelas bordas.',
+  'visual.corrente_de_ar': 'Corrente de ar: o sopro corre em linha, os riscos seguem o rumo e as folhas são arrastadas até a ponta.',
+  'visual.vendaval': 'Vendaval: o anel de vento sai de quem está no meio, empurrando poeira e folhas para fora.',
+  'visual.tapa_de_ar': 'Tapa de ar: um golpe de vento curto, o arco do sopro e a poeira que voa do alvo.',
+  'visual.rajada': 'Rajada: o leque de vento que sai da boca de quem sopra; folhas e poeira voam pelo cone e a tocha se apaga.',
+  'visual.manto_de_vento': 'Manto de vento: o ar gira em volta do corpo, com três riscos em órbita levando folhas junto.',
 } as const;

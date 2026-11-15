@@ -1324,6 +1324,9 @@
     "raio": [
       "raio-1"
     ],
+    "vento": [
+      "ambiente-vento"
+    ],
     "veneno": [
       "veneno-1",
       "veneno-2"

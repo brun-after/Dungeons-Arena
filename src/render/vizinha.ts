@@ -61,7 +61,7 @@ export function criarVizinha(m: MeiosDaVizinha, r: RecorteVizinho, tema: Tema | 
   // Por baixo do chão daqui: onde os dois mapas se cobrem, vale o daqui.
   m.palco.terreno.addChildAt(chao, 0);
   // O chão é o do mapa de lá inteiro (o mesmo assado da cena de lá); o que fica em pé, só o do recorte.
-  const solo = soloDaFase(r.completa, tema, m.balance.visual.solo, m.escalaSolo, m.pintor);
+  const solo = soloDaFase(r.completa, tema, m.balance.visual, m.escalaSolo, m.pintor);
   const terreno = criarTerreno(chao, r.completa, null, tema, new Set(), solo);
   terreno.definirVisao(true);
   const p = projecaoDeslocada(m.projecao, dx, dy);

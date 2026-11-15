@@ -72,6 +72,7 @@
       "formas": { "projetil": 2, "quadrado": 2, "linha": 2, "ao_redor": 3, "contato": 2, "cone": 1 },
       "visual": { "conjuracao": "sagrado", "viagem": "brilho", "impacto": "sagrado", "som": "cura" },
       "nomes": { "nucleos": ["Luz", "Aurora", "Graça", "Juramento", "Halo"], "qualidades": ["sagrada", "radiante", "do alvorecer", "pura", "serena"] }
-    }
+    },
+    {"id": "vento", "estado": {"tipo": "arrastado", "duracaoMs": 1500, "pct": 25}, "cor": "#cfe8f2", "icone": "redemoinho", "formas": {"projetil": 2, "quadrado": 1, "linha": 2, "ao_redor": 2, "contato": 1, "cone": 4}, "visual": {"conjuracao": "vento", "viagem": "vento", "impacto": "vento", "som": "magia"}, "nomes": {"nucleos": ["Rajada", "Lufada", "Vendaval", "Sopro", "Ciclone"], "qualidades": ["uivante", "cortante", "dos picos", "errante", "gelada"]}}
   ]
 }

@@ -11,6 +11,7 @@
 // ponta do eneágono de quem usa (movimento-extras.ts); a névoa leva todos os servos em anel; o companheiro do
 // Aventureiro precisa estar perto para montar e fica onde a viagem acabar.
 
+import { desnivel, passaDesnivel } from '../world/relevo';
 import type { Celula } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
@@ -168,6 +169,8 @@ export const noAr = (e: Entidade): boolean => modo(e)?.tipo === 'voo' || modo(e)
 /** Quem atravessa os corpos (a tirolesa, a névoa, o salto). */
 export const atravessaCorpos = (e: Entidade): boolean => ['tirolesa', 'nevoa', 'salto'].includes(modo(e)?.tipo ?? '');
 export const naTirolesa = (e: Entidade): boolean => modo(e)?.tipo === 'tirolesa';
+/** Marco 42 (D-176): montado (a encosta pesa menos). */
+export const emMontaria = (e: Entidade): boolean => modo(e)?.tipo === 'montado';
 export const noSalto = (e: Entidade): boolean => modo(e)?.tipo === 'salto';
 
 function terminar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
@@ -367,7 +370,10 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
     case 'salto': {
       // A queda mais longe que cabe (passa por cima do que houver no meio).
       let destino: { x: number; y: number } | null = null;
-      for (let k = alcance; k >= 1 && !destino; k--) {
+      // Marco 42 (15/11/2026, D-176): o salto passa o muro baixo, não o alto nem a montanha (a reta para antes).
+      let teto = alcance;
+      for (let k = 1; k <= alcance; k++) if (!passaDesnivel(ctx.balance.relevo, desnivel(ctx.fase, e, aFrente(e, r, k)), 'saltar')) { teto = k - 1; break; }
+      for (let k = teto; k >= 1 && !destino; k--) {
         const c = aFrente(e, r, k);
         if (cabeAli(ctx, c.x, c.y)) destino = c;
       }

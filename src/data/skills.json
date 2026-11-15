@@ -10442,6 +10442,7 @@
         "assinatura": "retorno"
       },
       "papel": "mobilidade"
-    }
+    },
+    {"id": "rajada", "familiaEvolucao": "vento", "grau": "B", "nome": "Rajada", "icone": "redemoinho", "tipoAtaque": "magico", "formulaDano": "1d4", "formulaCura": null, "alcanceCelulas": 3, "tipoArea": "cone", "raioArea": 3, "custoRecurso": 0, "recargaMs": 8000, "conjuracaoMs": 700, "politicaAlvo": "celula", "politicaImpacto": "area", "interrupcao": "interrompivel", "velocidadeProjetil": 0, "efeitos": [{"tipo": "empurrao", "valor": 2}, {"tipo": "arrastado", "duracaoMs": 1500, "pct": 25}, {"tipo": "apagar_luz"}, {"tipo": "dispersar_tiros", "valor": 3, "em": "conjurador"}], "visual": {"cor": "#cfe8f2", "conjuracao": "vento", "impacto": "vento", "som": "magia", "assinatura": "rajada"}, "mobilidade": "lenta", "nivelMinimo": 1, "tags": ["marco42"], "elemento": "vento"}
   ]
 }

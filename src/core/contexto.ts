@@ -12,6 +12,9 @@ import type { Fase } from '../world/fase';
 import type { TipoTerrenoVivo } from '../world/ambiente-tipos';
 import type { Elemento } from '../combat/elementos';
 import type { RegrasDeEventos } from '../mundo/eventos-mundo';
+import type { RegrasDoCiclo } from '../mundo/ciclo';
+import type { RegrasDaNoite } from '../mundo/noite';
+import type { RegrasRelevo } from '../world/relevo';
 import type { Atributos } from '../entities/entidade';
 import type { RegrasItensGerados } from '../progression/gerar-item';
 import type { Conteudo } from './conteudo';
@@ -479,6 +482,10 @@ export interface Balance {
     mercado: { taxaAnuncioPct: number; taxaVendaPct: number; anunciosPorPersonagem: number; duracaoH: number; precoMax: number; pagina: number };
     /** Marco 30 (D-129): os eventos por região, sorteados por janela de tempo (mundo/eventos-mundo.ts). */
     eventos: RegrasDeEventos;
+    /** Marco 42 (15/11/2026, D-176): o dia e a noite do Mundo (mundo/ciclo.ts). */
+    ciclo: RegrasDoCiclo;
+    /** Marco 42 (D-176): os monstros da noite e das matas fechadas (mundo/noite.ts). */
+    noite: RegrasDaNoite;
   };
   armadilhas: {
     revelarIntervaloMs: number;
@@ -512,6 +519,8 @@ export interface Balance {
     retardoPorClasse: Record<string, number>;
     semRetardoDepoisDoRecuoMs: number;
   };
+  /** Marco 42 (15/11/2026, D-176): os limiares do relevo (world/relevo.ts). */
+  relevo: RegrasRelevo & { vantagemAlcancePorNivel: number; vantagemAlcanceMax: number };
   inventario: {
     /** Entradas na mochila; consumíveis iguais empilham até `pilhaMax`. */
     capacidade: number;
@@ -535,11 +544,13 @@ export interface Balance {
    * oclusão do chão texturizado (render/solo/) e a parede alta do isométrico (altura em células, esmaecimento).
    */
   visual: {
-    luz: { raioJogador: number; raioTocha: number; raioObjeto: number; raioMagia: number; resolucaoMapa: number; realceMinimo: number; escuridaoExterior: number; clareza: number };
+    luz: { raioJogador: number; raioSemTocha: number; raioTocha: number; raioObjeto: number; raioMagia: number; resolucaoMapa: number; realceMinimo: number; escuridaoExterior: number; clareza: number };
     /** Ajuste de 31/10/2026 (D-130): até quanto ouro cada monte vai (o maior fica com o resto). */
     ouroMontes: number[];
     solo: { amostrasPorCelula: number; raioMistura: number; ruidoBorda: number; aoRaio: number; aoForca: number; macroForca: number; variacaoCobre: number };
     paredeIso: { altura: number; alcanceSala: number; alphaFade: number; telhadoPerto: number };
+    /** Marco 42 (15/11/2026, D-176): a tinta do chão das regiões do Mundo sem tema, pelo bioma (#rrggbb). */
+    gradacao: { tintaPadrao: string; biomas: Record<string, string> };
   };
   /** Marco 15 (D-061): as metas do ritmo, conferidas pelo simulador (tools/balanceamento) e pelo teste "ritmo". */
   metas: {

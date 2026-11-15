@@ -9,6 +9,7 @@
     "psiquico": { "oposto": "trevas", "habilidade": "mente_partida", "sufixo": "da Mente" },
     "terra": { "oposto": "raio", "habilidade": "estaca_de_pedra", "sufixo": "de Pedra" },
     "trevas": { "oposto": "sagrado", "habilidade": "toque_funesto", "sufixo": "das Trevas" },
+    "vento": { "oposto": "terra", "habilidade": "rajada", "sufixo": "dos Ventos" },
     "sagrado": { "oposto": "trevas", "habilidade": "lanca_radiante", "sufixo": "da Luz" }
   }
 }

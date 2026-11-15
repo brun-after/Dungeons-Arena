@@ -256,6 +256,13 @@ export interface Fase {
   readonly estruturas?: readonly { x: number; y: number; tipo: string }[];
   /** Marco 31 (31/10/2026, D-130): o exterior do Mundo (céu aberto: menos escuro que as masmorras). */
   readonly exterior?: boolean;
+  /** Marco 42 (15/11/2026, D-176): o bioma da região do Mundo (a tinta do chão sem tema). */
+  readonly bioma?: string;
+  /** Marco 42 (D-176): o escuro próprio da região (0 a 1) e as matas fechadas (sempre escuras). */
+  readonly escuroBase?: number;
+  readonly matas?: readonly { x: number; y: number; raio: number }[];
+  /** Marco 42 (D-176): a altura de cada célula do exterior (world/relevo.ts); ausente = plano. */
+  readonly alturas?: Uint8Array;
   /** Marco 31 (D-130): os telhados das casas fechadas. */
   readonly telhados?: readonly Telhado[];
   /** Marco 41 (D-169): as passagens entre as regiões do Mundo (world/passagem.ts): sem monstros e sem dano. */

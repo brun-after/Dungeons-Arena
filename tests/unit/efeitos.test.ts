@@ -66,7 +66,8 @@ describe('registro (§2.8)', () => {
     // Marco 40 (D-163): mais o firme e o golpe que prende (combos de papel).
     // Marco 40 (D-162): mais o petrificado do Fossilizar.
     // Marco 40 (D-161): mais o levantar do Renascer e os estados das leituras (área ampliada, eco, apavorar, explodir ao cair, guardar e devolver o absorvido, retornar, saltar ao alvo).
-    expect(TIPOS_EFEITO).toHaveLength(100); // D-173: mais a montaria alugada.
+    // Marco 42 (D-176): mais a tocha, apagar a luz, o arrastado do vento e dispersar os tiros.
+    expect(TIPOS_EFEITO).toHaveLength(104); // D-173: mais a montaria alugada.
     const pesos = Object.fromEntries(elegiveisParaOrbe().map((d) => [d.id, d.pesoOrbe]));
     expect(pesos).toEqual({
       cura_periodica: 20,

@@ -31,6 +31,8 @@ const POR_ELEMENTO: Readonly<Record<Elemento, Readonly<Record<FormaVfx, Assinatu
   psiquico: { projetil: 'agulha_mental', quadrado: 'mente_partida', linha: 'onda_de_repulsao', ao_redor: 'mente_partida', contato: 'telecinese', cone: 'onda_de_repulsao', proprio: 'pressagio' },
   terra: { projetil: 'estaca_de_pedra', quadrado: 'salto_esmagador', linha: 'pedregulho', ao_redor: 'abalo_sismico', contato: 'golpe_pesado', cone: 'pedregulho', proprio: 'pele_de_pedra' },
   trevas: { projetil: 'cranio', quadrado: 'garras_do_ossuario', linha: 'ceifa_de_almas', ao_redor: 'mortalha', contato: 'golpe_sombrio', cone: 'ceifa_de_almas', proprio: 'veu_da_noite' },
+  // Marco 42 (15/11/2026, D-176): o vento, uma assinatura feita para cada forma (render/vfx/familias/vento.ts).
+  vento: { projetil: 'lamina_de_ar', quadrado: 'lufada', linha: 'corrente_de_ar', ao_redor: 'vendaval', contato: 'tapa_de_ar', cone: 'rajada', proprio: 'manto_de_vento' },
   sagrado: { projetil: 'lanca_radiante', quadrado: 'chuva_de_estrelas', linha: 'lanca_radiante', ao_redor: 'circulo_de_amparo', contato: 'purificacao', cone: 'lanca_radiante', proprio: 'bencao' },
 };
 

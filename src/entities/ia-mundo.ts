@@ -1,4 +1,5 @@
 // 02/11/2026: exército próprio do boss e atenção atraída por combate recente no Mundo.
+import { atencaoNoEscuro } from '../mundo/noite';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
@@ -44,8 +45,10 @@ export function processarExercitoNecromante(estado: EstadoJogo, ctx: ContextoSim
   estado.recargas[chave]=estado.tick+ticksDe(r.recargaMs);
 }
 
-export function raioDeAtencao(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, base: number): number {
-  if(!ctx.fase.exterior) return base;
+export function raioDeAtencao(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, base0: number): number {
+  if(!ctx.fase.exterior) return base0;
+  // Marco 42 (15/11/2026, D-176): no escuro (a noite, a mata fechada), os monstros notam de mais longe.
+  const base=atencaoNoEscuro(ctx,e,base0);
   const r=ctx.balance.mundo.atencaoBatalha, desde=estado.tick-ticksDe(r.memoriaMs);
   const porId=new Map(estado.entidades.map(a=>[a.id,a]));
   const batalha=estado.entidades.some(a=>{

@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.50 · **Data:** 14/11/2026
+**Versão do documento:** 3.51 · **Data:** 15/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.51 (15/11/2026)**: marco 42: as cores do Mundo, o dia e a noite, a tocha, a noite perigosa, as matas fechadas, o elemento vento e o relevo (D-176).
 > - **3.50 (14/11/2026)**: marco 41: a região vizinha aparece além da borda, e a troca de região ficou sem a travada (D-169).
 > - **3.49 (14/11/2026)**: marco 41: as passagens entre as regiões do Mundo (a troca sem tela preta, a trégua e o tipo pelo par de biomas) e o que segue com o personagem na troca (D-169).
 > - **3.48 (13/11/2026)**: marco 40, etapa 3: as 30 skills de classe, cada uma com a leitura de cada estilo; duas por classe saem do kit (D-159).
@@ -347,6 +348,28 @@ toda região, e a Travessia das Areias liga os dois reinos a pé. O guerreiro co
   por ela (os pontos dele também voltam).
 
 Detalhes em D-145 a D-156 e em [docs/BALANCEAMENTO.md](docs/BALANCEAMENTO.md) (172/172 metas).
+
+### Marco 42 — cores, dia e noite, tocha, vento e relevo no Mundo (15/11/2026)
+
+**Cores.** O lilás saiu do chão e do escuro; cada bioma tem a sua tinta. De dia o Mundo é vivo; à noite, sombrio.
+
+**Dia e noite.** Um ciclo de 40 minutos, com relógio no canto da tela. Florestas densas e matas fechadas são escuras
+sempre, até dentro das regiões seguras.
+
+**Tocha.** Sem tocha, a luz em volta do personagem é curta. A tocha dura 5 minutos; postes nas estradas e fogueiras
+dão outra, e o alquimista vende. Nadar apaga.
+
+**Noite perigosa.** No escuro aparecem mais monstros, de nível mais alto, com mais atenção, e chefes com mais
+frequência.
+
+**Vento.** O décimo elemento, por enquanto só nos inimigos e nas reações: a Rajada empurra, arrasta, apaga a tocha e
+leva os tiros. Nove reações novas.
+
+**Relevo.** Encostas que deixam a subida mais lenta, muros baixos que só o salto passa, muros altos que só o voo passa e
+montanhas que ninguém passa; o tiro passa o muro baixo e para no alto. Cavernas e minas se abrem no penhasco de um
+morro.
+
+Detalhes em D-176 e em [docs/MUNDO.md](docs/MUNDO.md).
 
 ### Marco 41 — passagens entre as regiões do Mundo (14/11/2026)
 

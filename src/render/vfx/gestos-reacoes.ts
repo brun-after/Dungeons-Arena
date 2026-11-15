@@ -7,6 +7,7 @@ import { brasas, chamaViva, cintilar, faiscasMetal, fumacaEscura, nevoa, poeira 
 import { acima, cercar, chover, CORES as K, estourar, faiscar, fechar, lancar, soltar, subir, type Gesto } from './gestos-base';
 import { elastica, sai } from './pincel';
 import { QUADROS_CHAMA } from './texturas';
+import { GESTOS_DO_VENTO } from './gestos-reacoes-vento';
 
 export const GESTOS_DAS_REACOES: Readonly<Record<string, Gesto>> = {
   // ----- O golpe físico sobre um estado.
@@ -106,4 +107,6 @@ export const GESTOS_DAS_REACOES: Readonly<Record<string, Gesto>> = {
   eletrocutar: (c, g) => { ondaDeChoque(c, g.em, 0xa0d8ff, 1.6, 320); faiscar(c, g.em, 0xffffff, 5, 1.5); estourar(c, g.em, 'gota_viva', 0xa0d8ff, 6, 1, 320, 0.4); },
   /** Lama: a terra na água respinga e gruda. */
   lama: (c, g) => { estourar(c, g.em, 'gota_viva', 0x7a5a38, 8, 1, 360, 0.5); c.marca('poca_sangue', g.em.x, g.em.y, escurecer(K.terra, 0.4), 1.6, 3000); soltar(c, g.em, [poeira(4, { cor: 0x6a4a2a })], K.terra); },
+  // Marco 42 (D-176): as 9 do vento.
+  ...GESTOS_DO_VENTO,
 };

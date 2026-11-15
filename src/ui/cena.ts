@@ -237,7 +237,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   // Marco 37 (04/11/2026): os jogadores em 3D em tempo real, na densidade da tela (até 2×); o atlas fica de reserva.
   // 05/11/2026: sem GPU (WebGL em software) o atlas desenha os jogadores.
   const vivos = o.tileset || !webglAcelerado() ? null : new PalcoVivo(Math.min(2, Math.max(1, globalThis.devicePixelRatio || 1)));
-  const solo: SoloDoTerreno | null = o.tileset ? null : soloDaFase(fase, temaDaFase(ctx), ctx.balance.visual.solo, ap.qualidade().soloEscala, pintor);
+  const solo: SoloDoTerreno | null = o.tileset ? null : soloDaFase(fase, temaDaFase(ctx), ctx.balance.visual, ap.qualidade().soloEscala, pintor);
   if (solo) await solo.texturas;
   if (personagens) {
     const modelos: string[] = [];

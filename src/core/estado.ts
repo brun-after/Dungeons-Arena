@@ -76,7 +76,9 @@ export type TipoObjeto =
   // Marco 38 (08/11/2026, D-142): o círculo da Pedra de retorno (`ref`: quem conjura; `abertoTick` e `valor`: início e fim).
   | 'circulo_retorno'
   // 09/11/2026 (D-143): a ponta de um Portal temporário (`ref`: `<portal>:<ponta>`; mundo/portais-temporarios.ts).
-  | 'portal_temporario';
+  | 'portal_temporario'
+  // Marco 42 (15/11/2026, D-176): o poste de tocha e a fogueira (acendem a tocha de quem interage; iluminam em volta).
+  | 'poste_tocha' | 'fogueira';
 
 /**
  * Objeto coletável no mundo (§2.1). `objetoId` é estável; a coleta é uma transação dentro do

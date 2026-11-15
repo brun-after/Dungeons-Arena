@@ -53,6 +53,7 @@ import { corDaArmadilha } from './armadilhas-visual';
 const ASSINATURA_DA_ARMADILHA: Readonly<Record<Elemento, AssinaturaVisual>> = {
   fogo: 'bola_de_fogo', gelo: 'nova_glacial', raio: 'relampago', veneno: 'nevoa_venenosa',
   psiquico: 'mente_partida', terra: 'abalo_sismico', trevas: 'golpe_sombrio', sagrado: 'lanca_radiante',
+  vento: 'lufada',
 };
 
 const INTERVALO_CONJURACAO_MS = 120;

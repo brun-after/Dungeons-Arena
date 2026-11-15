@@ -4,7 +4,8 @@
 // A simulação nunca sabe a visão: só a câmera, as camadas e a entrada mudam.
 
 import { ImageSource, Texture, type TextureSource } from 'pixi.js';
-import type { Balance } from '../core/contexto';
+import { BALANCE_PADRAO, type Balance } from '../core/contexto';
+import { criarPenhascosIso, type PenhascosIso } from '../render/relevo-iso';
 import { aoMudarImagemToken, lerImagemToken } from '../plataforma/token';
 import type { Camera } from '../render/camera';
 import { criarDecoracaoIso, type DecoracaoIso } from '../render/decoracao-iso';
@@ -67,6 +68,8 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
   let enfeites: DecoracaoIso | null = null;
   let pedra: Texture | null = null;
   let telhados: Telhados | null = null;
+  // Marco 42 (15/11/2026, D-176): as faces de penhasco do relevo.
+  let penhascos: PenhascosIso | null = null;
   const corParede = o.corParede ?? paletaDe(fase.matizGraus).paredeTopo;
   const criarParedes = (p: Projecao) =>
     criarParedesIso(palco.entidades, fase, p, { cor: corParede, textura: pedra, altura: o.paredeIso.altura, alcanceSala: o.paredeIso.alcanceSala, alphaFade: o.paredeIso.alphaFade });
@@ -77,7 +80,9 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
     paredes?.destruir();
     enfeites?.destruir();
     estruturas?.destruir();
+    penhascos?.destruir();
     paredes = iso ? criarParedes(p) : null;
+    penhascos = iso ? criarPenhascosIso(palco.entidades, fase, p, BALANCE_PADRAO.relevo.encostaMax) : null;
     // Marco 31 (D-130): os telhados das casas.
     telhados?.destruir();
     telhados = fase.telhados?.length ? criarTelhados(palco.entidades, fase, p, { altura: o.paredeIso.altura, perto: o.paredeIso.telhadoPerto }) : null;
@@ -138,6 +143,7 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
       enfeites?.destruir();
       estruturas?.destruir();
       telhados?.destruir();
+      penhascos?.destruir();
       pedra?.destroy(true);
     },
   };

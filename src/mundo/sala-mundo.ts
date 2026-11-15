@@ -30,7 +30,7 @@ import { guardarItem } from '../progression/inventario';
 import { tipoEm } from '../world/fase';
 import { novoObjeto } from '../world/objeto-novo';
 import { eventoDaRegiao, type EventoAtivo } from './eventos-mundo';
-import { acenderFoco, apagarFoco, focoAceso } from './focos';
+import { conferirFocosENoite } from './noite';
 import type { ModoDeJogo } from '../modos/modo';
 import { largarItem, largarPerto } from '../world/objetos';
 import { esperouNaPorta, naSaidaAberta } from '../world/portas';
@@ -269,16 +269,13 @@ export class SalaMundo extends SalaArena {
     for (const s of this.sessoes.values()) this.avisar(s, { tipo: 'evento', evento: agora?.evento ?? null, fim: agora?.fim ?? 0 });
   }
 
-  /** 08/11/2026 (D-138): os focos elementais da região acendem e apagam pela janela (mundo/focos.ts), sem aviso. */
+  /**
+   * 08/11/2026 (D-138): os focos elementais acendem e apagam pela janela (mundo/focos.ts), sem aviso. Marco 42
+   * (15/11/2026, D-176): e a noite (mundo/noite.ts): o escuro da região vai no modo, e os monstros da noite chegam.
+   */
   private conferirFocos(): void {
     const regiao = this.lugar.tipo === 'regiao' ? this.lugar.regiao : null;
-    if (!regiao?.focos?.length) return;
-    const agora = this.opcoesMundo.agora();
-    for (const foco of regiao.focos) {
-      const aceso = focoAceso(regiao.id, foco, agora);
-      if (aceso) acenderFoco(this.estado, this.ctx, regiao, foco, aceso, agora);
-      else apagarFoco(this.estado, foco);
-    }
+    if (regiao) this.ctx = conferirFocosENoite(this.estado, this.ctx, regiao, this.opcoesMundo.agora());
   }
 
   /** Marco 38 (D-142): os errantes andam, as escoltas são conferidas e as conjurações da Pedra de retorno acabam. */

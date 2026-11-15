@@ -62,7 +62,7 @@
       "portal": { "estilo": "terra", "cor": "#9cc070" },
       "paleta": { "parede": "#1a1d16", "paredeTopo": "#6f7558", "junta": "#33382a", "piso": ["#4b5040", "#545a47", "#444937"] },
       "luz": "#f4e3b0",
-      "solo": { "base": "lajes", "variacao": "grama", "parede": "blocos", "tinta": "#9aa08a", "escala": 6 },
+      "solo": { "base": "lajes", "variacao": "grama", "parede": "blocos", "tinta": "#b0b49c", "escala": 6 },
       "escuridao": { "ambiente": "#10140c", "nivel": 0.7 },
       "particulas": "folhas",
       "decoracoes": { "musgo": 3, "pedras": 3, "raiz": 2, "arbusto": 2, "runa": 1, "rachadura": 2, "vaso": 2 },
@@ -70,7 +70,7 @@
       "pilar": "coluna",
       "ambientes": { "tipos": ["agua", "lama"], "aCada": 3, "raioMax": 1 },
       "inimigos": { "goblin": 2, "lobo": 2, "aranha": 2, "troll": 1, "esqueleto": 1, "arremessador": 1, "duende_saltador": 1 },
-      "elementosInimigos": ["terra"],
+      "elementosInimigos": ["terra", "vento"],
       "chanceElemental": 0.12
     },
     {
@@ -178,7 +178,7 @@
       "pilar": "cacto",
       "ambientes": { "tipos": ["brasas"], "aCada": 2, "raioMax": 2 },
       "inimigos": { "esqueleto": 2, "lobo": 2, "aranha": 2, "goblin": 1, "arremessador": 1 },
-      "elementosInimigos": ["fogo", "terra"],
+      "elementosInimigos": ["fogo", "terra", "vento"],
       "chanceElemental": 0.45
     },
     {
@@ -214,7 +214,7 @@
       "pilar": "pinheiro",
       "ambientes": { "tipos": ["gelo_fino"], "aCada": 2, "raioMax": 2 },
       "inimigos": { "lobo": 3, "orc": 2, "troll": 1, "goblin": 1, "arremessador": 1 },
-      "elementosInimigos": ["gelo"],
+      "elementosInimigos": ["gelo", "vento"],
       "chanceElemental": 0.5
     },
     {
@@ -232,7 +232,7 @@
       "pilar": "para_raios",
       "ambientes": { "tipos": ["campo_eletrico", "agua"], "aCada": 1, "raioMax": 2 },
       "inimigos": { "goblin": 2, "orc": 2, "cultista": 2, "lobo": 1 },
-      "elementosInimigos": ["raio"],
+      "elementosInimigos": ["raio", "vento"],
       "chanceElemental": 0.55
     },
     {
@@ -260,7 +260,7 @@
       "portal": { "estilo": "veneno", "cor": "#9ad04a" },
       "paleta": { "parede": "#0f150c", "paredeTopo": "#4a5a2e", "junta": "#222d17", "piso": ["#34402a", "#3b4830", "#2f3a26"] },
       "luz": "#d0f0a0",
-      "solo": { "base": "lama", "variacao": "grama", "parede": "blocos", "tinta": "#8a9a70", "escala": 4 },
+      "solo": { "base": "lama", "variacao": "grama", "parede": "blocos", "tinta": "#a0ac84", "escala": 4 },
       "escuridao": { "ambiente": "#0a1008", "nivel": 0.8 },
       "particulas": "vagalumes",
       "decoracoes": { "junco": 3, "lodo": 3, "poca": 2, "raiz": 2, "cogumelo": 1 },
@@ -278,7 +278,7 @@
       "portal": { "estilo": "veneno", "cor": "#c89aff" },
       "paleta": { "parede": "#140e18", "paredeTopo": "#5a3e64", "junta": "#2c1f33", "piso": ["#33283a", "#3a2e42", "#2e2434"] },
       "luz": "#c8a0ff",
-      "solo": { "base": "terra", "variacao": "grama", "parede": "blocos", "tinta": "#8a7898", "escala": 4 },
+      "solo": { "base": "terra", "variacao": "grama", "parede": "blocos", "tinta": "#a494b8", "escala": 4 },
       "escuridao": { "ambiente": "#100a14", "nivel": 0.82 },
       "particulas": "esporos",
       "decoracoes": { "cogumelo": 4, "musgo": 2, "raiz": 2, "flores": 1, "lodo": 1 },
@@ -296,7 +296,7 @@
       "portal": { "estilo": "terra", "cor": "#7cba52" },
       "paleta": { "parede": "#0d150b", "paredeTopo": "#3e5a2a", "junta": "#1f2e16", "piso": ["#3a4a2a", "#42532f", "#344326"] },
       "luz": "#e8f0b0",
-      "solo": { "base": "terra", "variacao": "grama", "parede": "blocos", "tinta": "#90a070", "escala": 4 },
+      "solo": { "base": "terra", "variacao": "grama", "parede": "blocos", "tinta": "#a8bc84", "escala": 4 },
       "escuridao": { "ambiente": "#0a1006", "nivel": 0.75 },
       "particulas": "folhas",
       "decoracoes": { "arbusto": 3, "flores": 2, "raiz": 3, "musgo": 2, "pedras": 1, "arvore": 2 },
@@ -322,7 +322,7 @@
       "pilar": "cristal",
       "ambientes": { "tipos": ["lama"], "aCada": 1, "raioMax": 2 },
       "inimigos": { "troll": 2, "goblin": 2, "esqueleto": 1, "orc": 2, "arremessador": 2 },
-      "elementosInimigos": ["terra"],
+      "elementosInimigos": ["terra", "vento"],
       "chanceElemental": 0.5
     },
     {

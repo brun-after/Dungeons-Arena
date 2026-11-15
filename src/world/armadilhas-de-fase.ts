@@ -2,7 +2,10 @@
 // elemento do tema na maior parte das vezes) ou de explosão, com o dano pelo nível e rearme. O disparo (puxão, % da
 // vida atual, estado do elemento) fica em combat/armadilhas-disparo.ts. Puro e determinístico pelo RNG recebido.
 
-import { ELEMENTOS, type Elemento } from '../combat/elementos';
+import type { Elemento } from '../combat/elementos';
+
+/** Marco 42 (15/11/2026, D-176): a lista congelada (o vento novo mudaria as armadilhas das fases já geradas). */
+const ELEMENTOS_DAS_ARMADILHAS: readonly Elemento[] = ['fogo', 'gelo', 'raio', 'veneno', 'psiquico', 'terra', 'trevas', 'sagrado'];
 import type { Celula } from '../core/comandos';
 import { BALANCE_PADRAO, type Balance } from '../core/contexto';
 import { aleatorio, escolher, type EstadoRng } from '../core/rng';
@@ -22,7 +25,7 @@ export function armadilhaDeFase(
 ): ObjetoPosicionadoJson {
   const b = balance.ambiente;
   const elemental = aleatorio(rng) * 100 < balance.armadilhas.elementalPct;
-  const elemento = elemental ? (elementoDoTema && aleatorio(rng) < DO_TEMA ? elementoDoTema : escolher(rng, ELEMENTOS)) : null;
+  const elemento = elemental ? (elementoDoTema && aleatorio(rng) < DO_TEMA ? elementoDoTema : escolher(rng, ELEMENTOS_DAS_ARMADILHAS)) : null;
   return {
     tipo: 'armadilha',
     x: (c.x + 0.5) / dimensoes.largura,

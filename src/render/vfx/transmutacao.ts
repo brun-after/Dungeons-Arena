@@ -33,6 +33,7 @@ const MATERIA: Readonly<Record<Runa, Readonly<Record<Papel, readonly Textura[]>>
   trevas: { leve: ['cinza'], corpo: ['alma'], fumo: ['fumaca2'], marca: ['poca_sangue'] },
   sagrado: { leve: ['cintilar'], corpo: ['estrela'], fumo: ['cintilar'], marca: [] },
   psiquico: { leve: ['runa1', 'runa', 'runa0', 'runa2', 'runa3'], corpo: ['olho'], fumo: ['runa2'], marca: [] },
+  vento: { leve: ['corte', 'folha'], corpo: ['corte'], fumo: ['folha'], marca: [] },
   fisico: { leve: ['faisca'], corpo: ['estilhaco'], fumo: ['lasca'], marca: ['rachadura'] },
 };
 const PAPEIS: readonly Papel[] = ['corpo', 'leve', 'fumo', 'marca'];

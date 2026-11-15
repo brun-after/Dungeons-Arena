@@ -40,6 +40,9 @@ import { fracaoFuria } from '../combat/furia';
 import { sintoniaDe } from '../progression/sintonia';
 import { ControladorImpacto } from '../render/impacto';
 import { ACHATAMENTO_ISO, CamadaEscuridao, type LuzNaTela } from '../render/escuridao';
+import { escuroBaseEm, horaDoMundo, luzDaHora } from '../mundo/ciclo';
+import { temLuzPropria } from '../combat/luz-propria';
+import { agoraDoMundo } from './hora-do-mundo';
 import { centroDaCelula } from '../render/projecao';
 import { CELULA_PX } from '../render/camera-calculo';
 import { ESCURIDAO_PADRAO } from '../world/solo';
@@ -251,6 +254,12 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   const escuroTema = tema?.escuridao ?? ESCURIDAO_PADRAO;
   // Ajuste de 31/10/2026 (pedido do usuário): o escuro fora da luz fica mais claro pela `clareza` (0,5 = metade).
   const nivelEscuro = (ctx.fase.exterior ? vis.escuridaoExterior : escuroTema.nivel) * (1 - vis.clareza);
+  // Marco 42 (15/11/2026, D-176): no exterior do Mundo, o escuro segue a hora (mundo/ciclo.ts) e as matas fechadas.
+  const escuroAgora = (jogador: { x: number; y: number } | null): { ambiente: number; nivel: number } => {
+    if (!ctx.fase.exterior) return { ambiente: escuroTema.ambiente, nivel: nivelEscuro };
+    const ciclo = ctx.balance.mundo.ciclo;
+    return luzDaHora(horaDoMundo(agoraDoMundo(), ciclo), ciclo, jogador ? escuroBaseEm(ctx.fase, jogador.x, jogador.y) : 0);
+  };
   let pontosDoQuadro: PontoDeLuz[] = [];
   /** As luzes do quadro, da grade para a tela (depois da câmera aplicada). */
   const desenharEscuro = (agoraMs: number) => {
@@ -270,7 +279,9 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     }
     const modo = qualidade().escuridao;
     document.body.dataset.escuridao = modo;
-    escuridao.desenhar(palco.mundo, palco.largura(), palco.altura(), { modo, ambiente: escuroTema.ambiente, nivel: nivelEscuro, realceMinimo: vis.realceMinimo, resolucao: vis.resolucaoMapa }, centro, luzes);
+    const eu = pontosDoQuadro.find((p) => p.jogador) ?? null;
+    const { ambiente, nivel } = escuroAgora(eu);
+    escuridao.desenhar(palco.mundo, palco.largura(), palco.altura(), { modo, ambiente, nivel, realceMinimo: vis.realceMinimo, resolucao: vis.resolucaoMapa }, centro, luzes);
   };
   const flash = new Graphics();
   palco.tela.addChild(flash);
@@ -326,13 +337,15 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   const acesos = decoracoesDaFase(ctx.fase, tema).filter((d) => d.tipo === 'tocha' || d.tipo === 'vela' || d.tipo === 'lava');
   // Marco 31 (D-130): as áreas elementais que brilham (brasas, raios, geada, luz sagrada) iluminam em volta.
   const luzesDasAreas = luzesDosAmbientes(ctx.fase.ambientes ?? []);
+  // Marco 42 (15/11/2026, D-176): no Mundo, a luz em volta é a da tocha; sem ela, só um halo curto.
+  const raioDoJogador = (e: Entidade) => (ctx.modo.luzSoComTocha && !temLuzPropria(e) ? vis.raioSemTocha : vis.raioJogador);
   const pontosDeLuz = (estado: EstadoJogo, posicao: (e: Entidade) => PontoVisual): PontoDeLuz[] => {
     const pontos: PontoDeLuz[] = [];
     const eu = estado.entidades.find((e) => e.id === idLocal);
     if (eu) {
       const p = posicao(eu);
       // Ajuste de 14/10/2026: o brilho em volta do jogador pela metade (feedback de jogo).
-      pontos.push({ x: p.x, y: p.y, cor: tema?.luz ?? 0xffd9a0, semente: 0, intensidade: 0.5, raio: vis.raioJogador, jogador: true });
+      pontos.push({ x: p.x, y: p.y, cor: tema?.luz ?? 0xffd9a0, semente: 0, intensidade: 0.5, raio: raioDoJogador(eu), jogador: true });
       // As tochas, velas e fendas de lava do tema perto do jogador.
       for (const a of luzesDasAreas) if (Math.abs(a.x - p.x) < 14 && Math.abs(a.y - p.y) < 11) pontos.push({ x: a.x, y: a.y, cor: a.cor, semente: a.x * 11 + a.y, intensidade: 0.4, raio: a.raio });
       for (const d of acesos) if (Math.abs(d.x - p.x) < 12 && Math.abs(d.y - p.y) < 9) pontos.push({ x: d.x, y: d.y - (d.tipo === 'tocha' ? 0.35 : 0), cor: d.tipo === 'vela' ? 0xffd890 : 0xff9a40, semente: d.x * 7 + d.y, intensidade: d.tipo === 'lava' ? 0.4 : 0.6, raio: d.tipo === 'vela' ? vis.raioObjeto : vis.raioTocha });
@@ -341,11 +354,13 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     for (const e of estado.entidades) {
       if (e.id === idLocal || e.morto || e.arquetipo !== 'jogador' || e.invocacao) continue;
       const q = posicao(e);
-      pontos.push({ x: q.x, y: q.y, cor: 0xffe2b8, semente: q.x * 3 + q.y, intensidade: 0.35, raio: vis.raioJogador * 0.7, jogador: true });
+      pontos.push({ x: q.x, y: q.y, cor: 0xffe2b8, semente: q.x * 3 + q.y, intensidade: 0.35, raio: raioDoJogador(e) * 0.7, jogador: true });
     }
     for (const pr of estado.projeteis) pontos.push({ x: pr.x, y: pr.y, cor: 0xffc890, semente: pr.id, intensidade: 0.5, raio: vis.raioMagia });
     for (const obj of estado.objetos) {
       if (obj.tipo === 'loja' || obj.tipo === 'bau' || obj.tipo === 'saida') pontos.push({ x: obj.x, y: obj.y, cor: 0xffc070, semente: obj.x * 31 + obj.y, raio: vis.raioObjeto });
+      // Marco 42 (15/11/2026, D-176): o poste de tocha e a fogueira (maior) iluminam em volta.
+      else if (obj.tipo === 'poste_tocha' || obj.tipo === 'fogueira') pontos.push({ x: obj.x, y: obj.y - 0.3, cor: 0xff9a40, semente: obj.x * 13 + obj.y, intensidade: 0.7, raio: obj.tipo === 'fogueira' ? vis.raioTocha * 1.6 : vis.raioTocha });
     }
     const s = ctx.fase.portaSaida;
     if (s) pontos.push({ x: s.x, y: s.y, cor: estado.saidaAberta || s.tranca === 'livre' ? 0x9cf0b0 : 0xb0b0c0, semente: 7, raio: vis.raioObjeto });

@@ -7,6 +7,7 @@
 // Fora do exterior do Mundo (a campanha, as masmorras), o que fica além da borda andável é `vazio`: transparente,
 // como antes (pedido do usuário, 31/10/2026); só a parede que encosta no chão leva a pedra.
 
+import { alturaEm } from '../../world/relevo';
 import { chaoAberto, tipoEm, type Fase, type TipoCelula } from '../../world/fase';
 import type { SoloTema, TexturaSolo } from '../../world/solo';
 import { fbm, smoothstep } from './ruido';
@@ -39,6 +40,9 @@ export interface PesosDoBloco {
   ao: Float32Array;
   /** A sombra de escala grande (0 a `macroForca`). */
   macro: Float32Array;
+  /** Marco 42 (15/11/2026, D-176): o relevo: a encosta de costas para a luz escurece, a de frente clareia. */
+  relevoSombra: Float32Array | null;
+  relevoLuz: Float32Array | null;
 }
 
 const SEMENTE_BORDA_X = 101;
@@ -107,6 +111,18 @@ function ordem(c: CamadaSolo, solo: SoloTema): number {
  * Os pesos de um bloco. `bx`, `by`: a célula do canto; `celulasX`, `celulasY`: o tamanho (o último bloco da linha
  * pode ser menor). `semente` vem da fase (o mesmo chão em toda montagem).
  */
+/** Marco 42 (D-176): a altura entre os centros das células (bilinear), em níveis. */
+function alturaSuave(fase: Fase, u: number, v: number): number {
+  const pu = u - 0.5;
+  const pv = v - 0.5;
+  const x0 = Math.floor(pu);
+  const y0 = Math.floor(pv);
+  const tx = pu - x0;
+  const ty = pv - y0;
+  const h = (x: number, y: number) => alturaEm(fase, x, y);
+  return (h(x0, y0) * (1 - tx) + h(x0 + 1, y0) * tx) * (1 - ty) + (h(x0, y0 + 1) * (1 - tx) + h(x0 + 1, y0 + 1) * tx) * ty;
+}
+
 export function pesosDoBloco(fase: Fase, solo: SoloTema, bx: number, by: number, celulasX: number, celulasY: number, cfg: ConfigSolo, semente: number): PesosDoBloco {
   const a = cfg.amostrasPorCelula;
   const largura = celulasX * a;
@@ -130,6 +146,8 @@ export function pesosDoBloco(fase: Fase, solo: SoloTema, bx: number, by: number,
   const variacao = new Float32Array(largura * altura);
   const ao = new Float32Array(largura * altura);
   const macro = new Float32Array(largura * altura);
+  const relevoSombra = fase.alturas ? new Float32Array(largura * altura) : null;
+  const relevoLuz = fase.alturas ? new Float32Array(largura * altura) : null;
   const base = lista[0];
   const k = cfg.raioMistura;
   const celula = (cx: number, cy: number) => {
@@ -202,7 +220,15 @@ export function pesosDoBloco(fase: Fase, solo: SoloTema, bx: number, by: number,
         ao[n] = cfg.aoForca * (1 - smoothstep(0, cfg.aoRaio, d)) * (0.85 + 0.3 * fbm(u * 1.3, v * 1.3, semente + 3));
       }
       macro[n] = cfg.macroForca * smoothstep(0.35, 0.75, fbm(u * 0.07, v * 0.07, semente + SEMENTE_MACRO));
+      if (relevoSombra && relevoLuz) {
+        // A luz vem do noroeste: a inclinação contra ela escurece; a favor, clareia. O alto clareia um pouco.
+        const gx = alturaSuave(fase, u + 0.35, v) - alturaSuave(fase, u - 0.35, v);
+        const gy = alturaSuave(fase, u, v + 0.35) - alturaSuave(fase, u, v - 0.35);
+        const contra = (gx + gy) * 0.5;
+        relevoSombra[n] = Math.min(0.62, Math.max(0, -contra) * 0.22);
+        relevoLuz[n] = Math.min(0.4, Math.max(0, contra) * 0.12 + alturaSuave(fase, u, v) * 0.018);
+      }
     }
   }
-  return { largura, altura, camadas, variacao, ao, macro };
+  return { largura, altura, camadas, variacao, ao, macro, relevoSombra, relevoLuz };
 }

@@ -12,7 +12,7 @@ import { ticksDe } from '../core/tempo';
 import { Leitor } from '../core/validar';
 import type { EfeitoAtivo, Entidade } from '../entities/entidade';
 import type { Sinergia } from './elementos';
-import { PONTAS_ELEMENTAIS, type PontaElemental } from '../progression/vinculo';
+import { PONTAS_DE_REACAO, type PontaElemental } from '../progression/vinculo';
 import { normalizarEfeito, normalizarEfeitos } from './normalizar-efeito';
 import { ehTipoEfeito, REGISTRO_EFEITOS, TIPOS_EFEITO, type EfeitoCanonico, type TipoEfeito } from './registro-efeitos';
 
@@ -74,7 +74,7 @@ export function lerInteracoes(json: unknown): { interacoes: Interacoes; erros: s
   const sinergias = l.lista(o, 'sinergias').flatMap((x): Sinergia[] => {
     const so = l.objeto(x, 'sinergia');
     const elemento = so.elemento;
-    if (typeof elemento !== 'string' || !(PONTAS_ELEMENTAIS as readonly string[]).includes(elemento)) {
+    if (typeof elemento !== 'string' || !(PONTAS_DE_REACAO as readonly string[]).includes(elemento)) {
       l.erro(`sinergia: elemento desconhecido "${String(elemento)}"`);
       return [];
     }

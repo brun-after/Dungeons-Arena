@@ -13,11 +13,13 @@ import { podeFerir } from '../modos/relacao';
 import { celulaOcupada } from './geometria';
 import { celulaLivrePara } from '../world/colisao';
 import { passavel } from '../world/fase';
+import { desnivel, passaDesnivel } from '../world/relevo';
 import { caminho } from '../world/navegacao';
 import { suavizarCaminho } from '../world/corpo';
 
 function livre(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, x: number, y: number): boolean {
-  return !muralhaEm(estado, x, y) && passavel(ctx.fase, x, y) && celulaLivrePara(e, x, y, estado.entidades, ctx.balance.colisao);
+  // Marco 42 (15/11/2026, D-176): o deslocamento sobe no máximo o muro baixo (como o salto); desce qualquer altura.
+  return !muralhaEm(estado, x, y) && passavel(ctx.fase, x, y) && passaDesnivel(ctx.balance.relevo, desnivel(ctx.fase, e, { x, y }), 'saltar') && celulaLivrePara(e, x, y, estado.entidades, ctx.balance.colisao);
 }
 
 /** Coloca a entidade numa célula, parada: o passo em curso e o caminho planejado são descartados. */
@@ -78,6 +80,8 @@ function fimDoAvanco(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, mi
   for (const [i, c] of reta.entries()) {
     // A muralha tática é feita para barrar: ela para o dash (as paredes do mapa, não).
     if (c.x < 0 || c.y < 0 || c.x >= ctx.fase.largura || c.y >= ctx.fase.altura || muralhaEm(estado, c.x, c.y)) return achada;
+    // Marco 42 (D-176): o muro alto e a montanha param o dash (as paredes do mapa, não).
+    if (!passaDesnivel(ctx.balance.relevo, desnivel(ctx.fase, e, c), 'saltar')) return achada;
     if (hostilEm(estado, ctx, e, c)) return achada ?? (i > 0 ? vizinhaLivre(estado, ctx, e, c, celulas) : null);
     if (livre(estado, ctx, e, c.x, c.y)) achada = c;
   }
