@@ -2,6 +2,25 @@
 // molhado e do definhando).
 
 export const textosReacoes = {
+  // Marco 42 (15/11/2026, D-176): as reações do vento.
+  'sinergia.lamina_de_vento': 'Lâmina de vento!',
+  'reacao.lamina_de_vento': 'O golpe corta mais fundo em quem o vento arrasta.',
+  'sinergia.labareda': 'Labareda!',
+  'reacao.labareda': 'O vento espalha as chamas para quem está perto.',
+  'sinergia.nevasca': 'Nevasca!',
+  'reacao.nevasca': 'O vento leva o frio aos vizinhos.',
+  'sinergia.tempestade': 'Tempestade!',
+  'reacao.tempestade': 'O raio pega em quem o vento arrasta.',
+  'sinergia.nuvem_toxica': 'Nuvem tóxica!',
+  'reacao.nuvem_toxica': 'O vento espalha o veneno em volta.',
+  'sinergia.vertigem': 'Vertigem!',
+  'reacao.vertigem': 'A mente exposta perde o rumo no vento.',
+  'sinergia.tempestade_de_areia': 'Tempestade de areia!',
+  'reacao.tempestade_de_areia': 'A terra levada pelo vento cega.',
+  'sinergia.vento_funebre': 'Vento fúnebre!',
+  'reacao.vento_funebre': 'O vento uiva sobre a marca e apavora.',
+  'sinergia.brisa_sagrada': 'Brisa sagrada!',
+  'reacao.brisa_sagrada': 'A luz acalma o vento.',
   'sinergia.forja': 'Forja!',
   'reacao.forja': 'O golpe incandesce: +15% de dano e a queimadura passa do alvo para os vizinhos.',
   'sinergia.estilhacar': 'Estilhaçar!',

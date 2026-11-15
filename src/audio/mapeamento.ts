@@ -6,7 +6,7 @@ import type { Habilidade } from '../combat/habilidades';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 
 export const SONS = [
-  'fogo', 'gelo', 'raio', 'veneno', 'psiquico', 'terra', 'trevas', 'sagrado',
+  'fogo', 'gelo', 'raio', 'veneno', 'psiquico', 'terra', 'trevas', 'sagrado', 'vento',
   'lamina', 'contundente', 'arco', 'quebra', 'teleporte',
   'acerto_projetil', 'lancamento_magico',
   // 06/11/2026: o zunido do básico mágico (cajado, tomo, cetro), no lançamento e no impacto.

@@ -70,7 +70,7 @@
       "pilar": "coluna",
       "ambientes": { "tipos": ["agua", "lama"], "aCada": 3, "raioMax": 1 },
       "inimigos": { "goblin": 2, "lobo": 2, "aranha": 2, "troll": 1, "esqueleto": 1, "arremessador": 1, "duende_saltador": 1 },
-      "elementosInimigos": ["terra"],
+      "elementosInimigos": ["terra", "vento"],
       "chanceElemental": 0.12
     },
     {
@@ -178,7 +178,7 @@
       "pilar": "cacto",
       "ambientes": { "tipos": ["brasas"], "aCada": 2, "raioMax": 2 },
       "inimigos": { "esqueleto": 2, "lobo": 2, "aranha": 2, "goblin": 1, "arremessador": 1 },
-      "elementosInimigos": ["fogo", "terra"],
+      "elementosInimigos": ["fogo", "terra", "vento"],
       "chanceElemental": 0.45
     },
     {
@@ -214,7 +214,7 @@
       "pilar": "pinheiro",
       "ambientes": { "tipos": ["gelo_fino"], "aCada": 2, "raioMax": 2 },
       "inimigos": { "lobo": 3, "orc": 2, "troll": 1, "goblin": 1, "arremessador": 1 },
-      "elementosInimigos": ["gelo"],
+      "elementosInimigos": ["gelo", "vento"],
       "chanceElemental": 0.5
     },
     {
@@ -232,7 +232,7 @@
       "pilar": "para_raios",
       "ambientes": { "tipos": ["campo_eletrico", "agua"], "aCada": 1, "raioMax": 2 },
       "inimigos": { "goblin": 2, "orc": 2, "cultista": 2, "lobo": 1 },
-      "elementosInimigos": ["raio"],
+      "elementosInimigos": ["raio", "vento"],
       "chanceElemental": 0.55
     },
     {
@@ -322,7 +322,7 @@
       "pilar": "cristal",
       "ambientes": { "tipos": ["lama"], "aCada": 1, "raioMax": 2 },
       "inimigos": { "troll": 2, "goblin": 2, "esqueleto": 1, "orc": 2, "arremessador": 2 },
-      "elementosInimigos": ["terra"],
+      "elementosInimigos": ["terra", "vento"],
       "chanceElemental": 0.5
     },
     {

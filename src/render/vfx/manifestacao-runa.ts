@@ -32,6 +32,8 @@ export const COR_DA_RUNA: Readonly<Record<Runa, number>> = {
   terra: 0xb08a5a,
   trevas: 0x8a5ac8,
   sagrado: 0xffe08a,
+  // Marco 42 (D-176): o vento (ainda sem runa de jogador; a cor serve aos inimigos).
+  vento: 0xd8eef8,
 };
 
 /** A intensidade (0,35 a 1) pela faixa do vínculo: o iniciante já mostra a runa; o especialista, por inteiro. */
@@ -47,6 +49,8 @@ export function materiaDaRuna(runa: Runa, i: number): Emissao[] {
   switch (runa) {
     case 'fisico':
       return [faiscasMetal(vezes(6, i)), em({ textura: 'estilhaco', quantidade: vezes(3, i), vidaMs: [260, 420], velocidade: [90, 180], escala: [0.3 * s, 0.1], alpha: [1, 0], raio: 3, cor: 0xe8eef4, giro: [-10, 10] })];
+    case 'vento':
+      return [em({ textura: 'corte', quantidade: vezes(6, i), vidaMs: [260, 420], velocidade: [100, 200], escala: [0.55 * s, 0.25], alpha: [0.8, 0], aditivo: true, raio: 8, cor: 0xe4f2fa }), em({ textura: 'folha', quantidade: vezes(3, i), vidaMs: [700, 1000], velocidade: [60, 140], gravidade: 30, arrasto: 1.2, escala: [0.3, 0.2], alpha: [1, 0], raio: 8, cores: [0x8ab060, 0xc0a050], giro: [-6, 6] })];
     case 'fogo':
       return [chamaViva(vezes(4, i), { escala: [0.7 * s, 0.2] }), brasas(vezes(6, i))];
     case 'gelo':

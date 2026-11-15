@@ -53,7 +53,7 @@ describe('noite perigosa (D-176)', () => {
       total += conferirNoite(m.estado, noite, m.regiao, 1);
     }
     expect(total).toBeGreaterThan(5);
-    for (const e of daNoite(m) as { nivel: number; x: number; y: number }[]) {
+    for (const e of daNoite(m) as unknown as { nivel: number; x: number; y: number }[]) {
       expect(e.nivel).toBeGreaterThan(m.regiao.nivel[1]);
       expect(Math.hypot(e.x - p.x, e.y - p.y)).toBeGreaterThanOrEqual(m.ctx.balance.mundo.noite.distancia[0] - 1);
     }

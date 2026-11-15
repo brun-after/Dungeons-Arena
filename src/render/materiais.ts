@@ -9,6 +9,7 @@ import type { NomePreset } from './presets-particula';
 
 /** A matéria de cada elemento do jogo (o sagrado é a luz). */
 export const MATERIAL_DO_ELEMENTO: Readonly<Record<Elemento, Material>> = {
+  vento: 'vento',
   fogo: 'fogo',
   gelo: 'gelo',
   raio: 'raio',

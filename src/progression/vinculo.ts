@@ -24,6 +24,8 @@ import { itensEquipados } from './derivados';
 /** O Físico e os oito elementos (na ordem de `ELEMENTOS`, escrita aqui para não criar ciclo com combat/elementos.ts). */
 export const PONTAS_ELEMENTAIS = ['fisico', 'fogo', 'gelo', 'raio', 'veneno', 'psiquico', 'terra', 'trevas', 'sagrado'] as const satisfies readonly ('fisico' | Elemento)[];
 export type PontaElemental = 'fisico' | Elemento;
+/** Marco 42 (15/11/2026, D-176): as pontas que reagem: as do vínculo e o vento (dos inimigos, ainda sem runa). */
+export const PONTAS_DE_REACAO: readonly PontaElemental[] = [...PONTAS_ELEMENTAIS, 'vento'];
 export type Vinculo = Record<PontaElemental, number>;
 
 export interface RegrasVinculo {
@@ -120,11 +122,12 @@ export function resistenciaDoVinculoPct(r: RegrasVinculo, ponta: PontaElemental,
 export function resistenciaPeloVinculo(ctx: CtxVinculo, alvo: Pick<Entidade, 'bolsa'>, elemento: Elemento | null, tick: number): number {
   if (!alvo.bolsa) return 0;
   const p = pontaDe(elemento);
-  return resistenciaDoVinculoPct(ctx.balance.vinculo, p, vinculoDe(ctx, alvo, tick)[p]);
+  // Marco 42 (D-176): o vento ainda não é ponta do vínculo (sem runa de jogador): sem resistência por ele.
+  return resistenciaDoVinculoPct(ctx.balance.vinculo, p, vinculoDe(ctx, alvo, tick)[p] ?? 0);
 }
 
 /** A penetração (em %, 0 a `penetracaoPct`) do atacante no próprio elemento. */
 export function penetracaoPct(ctx: CtxVinculo, atacante: Pick<Entidade, 'bolsa'> | undefined, elemento: Elemento | null, tick: number): number {
   if (!atacante?.bolsa || !elemento) return 0;
-  return ctx.balance.vinculo.penetracaoPct * Math.pow(vinculoDe(ctx, atacante, tick)[elemento], 1.5);
+  return ctx.balance.vinculo.penetracaoPct * Math.pow(vinculoDe(ctx, atacante, tick)[elemento] ?? 0, 1.5);
 }

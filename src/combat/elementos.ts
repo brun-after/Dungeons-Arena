@@ -13,7 +13,7 @@ import { resistenciaDaAfinidade } from './afinidade';
 import { passivosDe } from '../progression/ganchos-do-portador';
 import { resistenciaPeloVinculo, type PontaElemental } from '../progression/vinculo';
 
-export const ELEMENTOS = ['fogo', 'gelo', 'raio', 'veneno', 'psiquico', 'terra', 'trevas', 'sagrado'] as const;
+export const ELEMENTOS = ['fogo', 'gelo', 'raio', 'veneno', 'psiquico', 'terra', 'trevas', 'sagrado', 'vento'] as const;
 export type Elemento = (typeof ELEMENTOS)[number];
 
 /**

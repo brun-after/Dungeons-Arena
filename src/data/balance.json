@@ -515,6 +515,9 @@
     "duracaoMs": 15000, "vaporMs": 6000, "cegoMs": 1200, "conducaoPct": 35, "maxVivos": 60,
     "reacoes": [
       { "sobre": "agua", "elemento": "gelo", "vira": "gelo_fino" },
+      { "sobre": "vapor", "elemento": "vento", "vira": "seco" },
+      { "sobre": "miasma", "elemento": "vento", "vira": "seco" },
+      { "sobre": "nevoa_sombria", "elemento": "vento", "vira": "seco" },
       { "sobre": "agua", "elemento": "fogo", "vira": "vapor" },
       { "sobre": "agua", "elemento": "raio", "vira": "campo_eletrico", "conduz": true },
       { "sobre": "agua", "elemento": "terra", "vira": "lama" },

@@ -68,6 +68,12 @@ export function aplicarInstantaneoNovo(
       if (ef.ref) agendarFase(estado, alvo, ef.ref, { x: presa.x, y: presa.y }, 0);
       break;
     }
+    case 'dispersar_tiros': {
+      // Marco 42 (15/11/2026, D-176): a rajada leva embora os projéteis hostis perto de quem sopra.
+      const dono = { id: alvo.id, equipe: alvo.equipe };
+      estado.projeteis = estado.projeteis.filter((p) => Math.hypot(p.x - alvo.x, p.y - alvo.y) > ef.valor || p.donoId === alvo.id || !podeFerir({ id: p.donoId, equipe: p.equipeDono }, dono, ctx.modo));
+      break;
+    }
     case 'apagar_luz':
       // Marco 42 (15/11/2026, D-176): a rajada de vento apaga a tocha do alvo.
       apagarLuz(alvo);

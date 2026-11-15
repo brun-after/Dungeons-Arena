@@ -95,6 +95,10 @@ export const TIPOS_EFEITO = [
   'tregua',
   // Marco 42 (15/11/2026, D-176): a tocha acesa (a luz própria no Mundo) e o que a apaga (a rajada de vento, a água).
   'tocha', 'apagar_luz',
+  // Marco 42 (D-176): o estado do vento (o ar arrasta e atrasa).
+  'arrastado',
+  // Marco 42 (D-176): a rajada leva os projéteis hostis a até `valor` células de quem a recebe (em: conjurador).
+  'dispersar_tiros',
 ] as const;
 export type TipoEfeito = (typeof TIPOS_EFEITO)[number];
 
@@ -126,7 +130,7 @@ export type Fluxo = 'atrasado' | 'armadilha' | 'invocar' | 'fase';
 
 export type Periodico = 'dano' | 'cura' | 'recurso';
 export type Instantaneo = 'drenar_invocacao' | 'comandar_mortos' | 'purificar' | 'passo_sombrio' | 'muralha_pedra' | 'campo_cura' | 'campo_veneno' | 'cura' | 'recurso' | 'teleporte' | 'avanco' | 'empurrao' | 'puxao' | 'trocar' | 'dano'
-  | 'invisivel' | 'dissipar' | 'consumir' | 'detonar' | 'arremessar' | 'zerar_recarga' | 'libertar' | 'furia' | 'carga_ultimate' | 'executar' | 'levantar' | 'apavorar' | 'trocar_companheiro' | 'grito_de_fera' | 'devolver_absorvido' | 'retornar' | 'saltar_ao_alvo' | 'apagar_luz';
+  | 'invisivel' | 'dissipar' | 'consumir' | 'detonar' | 'arremessar' | 'zerar_recarga' | 'libertar' | 'furia' | 'carga_ultimate' | 'executar' | 'levantar' | 'apavorar' | 'trocar_companheiro' | 'grito_de_fera' | 'devolver_absorvido' | 'retornar' | 'saltar_ao_alvo' | 'apagar_luz' | 'dispersar_tiros';
 export type BonusDeAtaqueBasico = 'dano' | 'recarga' | 'alcance' | 'alvos';
 
 export interface DefinicaoEfeito {
@@ -332,6 +336,8 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   armadilha: { ...BASE, icone: 'aviso', cor: '#d35400', positivo: true, ehStatus: false, campos: ['valor'], padrao: { duracaoMs: 30_000, valor: 8, pct: 0 }, fluxo: 'armadilha', aoLancar: true },
 
   queimando: negativo('fogo', '#ff7b39', ['valor'], { duracaoMs: 3000, valor: 3, pct: 0 }, { periodico: 'dano' }),
+  // Marco 42 (D-176): o vento arrasta: menos velocidade por pouco tempo (o empurrão vem da skill).
+  arrastado: negativo('redemoinho', '#cfe8f2', ['pct'], { duracaoMs: 1500, valor: 0, pct: 25 }, { lentidao: true }),
   resfriado: negativo('gelo', '#74b9ff', ['pct'], { duracaoMs: 3000, valor: 0, pct: 30 }, { lentidao: true }),
   congelado: negativo('gelo', '#a0d8ef', [], { duracaoMs: 1500, valor: 0, pct: 0 }, { bloqueiaMovimento: true, bloqueiaAcoes: 'todas' }),
   eletrizado: negativo('raio', '#f7dc6f', [], { duracaoMs: 2500, valor: 0, pct: 0 }, {}),
@@ -401,6 +407,7 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   vista_de_armadilha: positivo('olho', '#f0b27a', 8, [], { duracaoMs: 45_000, valor: 0, pct: 0 }, { revelaArmadilhas: true }),
   // Marco 42 (D-176): a tocha queima por `duracaoMs` (o item define); `apagar_luz` tira toda luz própria do alvo.
   tocha: { ...positivo('fogo', '#ffb060', 0, [], { duracaoMs: 300_000, valor: 0, pct: 0 }, { ilumina: true }), elegivelParaOrbe: false },
+  dispersar_tiros: instantaneo('redemoinho', '#cfe8f2', ['valor'], { duracaoMs: 0, valor: 3, pct: 0 }, 'dispersar_tiros', true),
   apagar_luz: instantaneo('redemoinho', '#a8d8e8', [], { duracaoMs: 0, valor: 0, pct: 0 }, 'apagar_luz', false),
   passo_leve: positivo('botas', '#9be7c4', 6, [], { duracaoMs: 60_000, valor: 0, pct: 0 }, { protegeDeArmadilha: true }),
   invocar_temporario: { ...BASE, icone: 'invocar', cor: '#48c9b0', positivo: true, ehStatus: false, campos: ['valor'], padrao: { duracaoMs: 12_000, valor: 1, pct: 0 }, fluxo: 'invocar', aoLancar: true, exige: ['ref'] },

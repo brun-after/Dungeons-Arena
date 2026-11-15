@@ -24,6 +24,13 @@ const TRACOS: Readonly<Record<Elemento | 'arcano', Runa['tracos']>> = {
     { t: 'linha', p: [40, 20, 50, 28, 60, 20] },
     { t: 'linha', p: [40, 80, 50, 72, 60, 80] },
   ],
+  // Marco 42 (15/11/2026, D-176): o vento: três correntes que se enrolam na ponta.
+  vento: [
+    { t: 'curva', de: [12, 34], controle: [60, 20], ate: [78, 40] },
+    { t: 'curva', de: [78, 40], controle: [86, 54], ate: [70, 52] },
+    { t: 'curva', de: [12, 54], controle: [56, 44], ate: [86, 62] },
+    { t: 'curva', de: [20, 74], controle: [52, 64], ate: [68, 78] },
+  ],
   // Raio partido.
   raio: [{ t: 'linha', p: [60, 10, 30, 52, 54, 52, 40, 90, 72, 42, 48, 42, 60, 10], fechar: true }],
   // Gota com a caveira de um ponto.

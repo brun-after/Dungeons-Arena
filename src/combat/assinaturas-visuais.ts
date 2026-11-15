@@ -12,6 +12,8 @@ export const ASSINATURAS_VISUAIS = [
   // Raio.
   'relampago', 'raio_em_cadeia', 'feixe_eletrico', 'esfera_de_plasma', 'tempestade_de_raios', 'toque_eletrico',
   'cone_eletrico', 'mergulho_do_trovao',
+  // Marco 42 (15/11/2026, D-176): o vento.
+  'lamina_de_ar', 'lufada', 'corrente_de_ar', 'vendaval', 'tapa_de_ar', 'rajada', 'manto_de_vento',
   // Gelo.
   'lanca_de_gelo', 'nova_glacial', 'chao_congelado', 'cometa_de_gelo', 'estilhaco_de_gelo', 'cone_de_gelo',
   'toque_de_gelo', 'tempestade_de_gelo',
