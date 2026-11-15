@@ -3477,3 +3477,8 @@ dialog.mochila[open] { display: flex; flex-direction: column; }
 .mais-receita { display: inline-grid; place-items: center; width: 20px; height: 20px; border: 1px solid currentColor; border-radius: 50%; font-weight: 700; line-height: 1; }
 .receita-habilidade[open] .mais-receita { transform: rotate(45deg); }
 .receita-habilidade ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 3px; line-height: 1.35; }
+
+/* D-175 (15/11/2026): os sigilos (ícones arcanos das skills comuns e das ultimates) são maiores que o traço simples. */
+svg.icone.sigilo { width: 1.7em; height: 1.7em; vertical-align: -0.5em; }
+.botao-habilidade .icone svg.icone.sigilo { width: 2.3em; height: 2.3em; }
+.botao-ultimate svg.icone.sigilo { width: 74%; height: 74%; }
