@@ -4,6 +4,7 @@
 
 import { svgDoItem } from '../data/arte-item';
 import { ehIcone, ICONES } from '../data/icones';
+import { ehSigilo, mioloDoSigilo } from '../data/sigilos';
 
 export { svgDoIcone } from '../data/icones';
 
@@ -17,6 +18,16 @@ export function desenhoDoIcone(id: string): string {
 /** Um `<svg>` pronto para a interface (decorativo: quem usa dá o rótulo ao botão). */
 export function icone(id: string, classe = 'icone'): SVGSVGElement {
   const svg = document.createElementNS(SVG, 'svg');
+  // D-175 (15/11/2026): o sigilo (skill comum e ultimate) é colorido e tem a caixa dele.
+  if (ehSigilo(id)) {
+    svg.setAttribute('viewBox', '0 0 48 48');
+    svg.setAttribute('class', `${classe} sigilo`);
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    // Constante do código (data/sigilos.ts), não texto de usuário.
+    svg.innerHTML = mioloDoSigilo(id);
+    return svg;
+  }
   svg.setAttribute('viewBox', '0 0 24 24');
   svg.setAttribute('class', classe);
   svg.setAttribute('aria-hidden', 'true');

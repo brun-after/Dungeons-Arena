@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.22 · **Data:** 14/11/2026
+**Versão:** 1.23 · **Data:** 15/11/2026
 
 > **Histórico**
+> - **1.23 (15/11/2026)**: D-175: a história de cada skill (narrativa, visual e receita), os sigilos (ícones arcanos únicos das skills comuns e das ultimates) e o visual próprio das skills comuns (o gesto do núcleo e a matéria do elemento).
 > - **1.22 (14/11/2026)**: D-174: a identidade no visual das skills de classe e das ultimates (a skill feita inteira do elemento da runa, a ultimate assinada pela classe, o sinal do estilo mais forte e o toque da afinidade dominante).
 > - **1.21 (14/11/2026)**: D-173: as pendências do marco 40 (as 30 ressonâncias, a montaria alugada, os companheiros que leem os estilos, o movimento no HUD do computador, os visuais feitos à mão, a invocação nas ultimates só para quem invoca e as fusões que mudam a forma).
 > - **1.20 (14/11/2026)**: D-172: um botão por movimento da classe (Shift no principal, T e G nos outros; no celular, lado a lado) e a recarga maior em combate para os que não são o principal.
@@ -5402,3 +5403,35 @@ mesmo desenho em todas as classes.
 - **O que não mudou.** A função: a runa já trocava o estado aplicado e a função secundária (D-151, D-157), e os estilos,
   os eixos (D-156, D-157). Só o desenho mudou aqui. As skills comuns ficaram como estavam; 17 assinaturas ainda são
   divididas por duas variantes de núcleos diferentes.
+
+## D-175 — Marco 40: a história, os sigilos e o visual próprio das skills comuns (15/11/2026)
+
+**Contexto.** Depois do D-174, o usuário pediu três coisas: que as skills comuns que dividiam o mesmo visual tivessem
+identidade própria; ícones únicos para elas e para as ultimates, num estilo novo, de magia arcana; e a revisão das
+descrições na interface (o menu do jogador e o seletor da barra), com a explicação narrativa, a descrição do visual e,
+no menu, um botão + com a receita de tudo o que age sobre a skill.
+
+**Decisão.**
+- **A história** (`ui/historia-skill.ts`, textos em `i18n/pt-BR-narrativas.ts` e `pt-BR-visuais.ts`).
+  - Narrativa: a skill comum junta a frase do núcleo com a matéria e a frase do elemento (89 textos diferentes); a
+    skill de classe e o básico de classe têm uma cada; a ultimate, uma por família.
+  - Visual: a frase da assinatura (a mesma que descreve o desenho no código), mais o que muda para este personagem: a
+    troca pela runa, a faixa da sintonia, as formas do estilo, a classe na ultimate, o estilo e a afinidade dominante.
+  - Onde aparece: no cartão da skill e da ultimate no menu, e no seletor da barra (clique direito ou toque longo, na
+    tecla e em cada opção ao passar o mouse), antes dos números.
+- **A receita** (o botão + no menu). Uma linha por fator em ação:
+  - núcleo e papel; classe ou skill comum; nível, caminhos e marcos em vigor; poder base e o que os estilos somam;
+  - elemento, ou runa (padrão ou escolhida), sintonia e a função secundária pelo papel;
+  - as formas dos estilos, as leituras da classe e a ressonância ao alcance (o nome só depois de descoberta);
+  - o companheiro e a arma; na ultimate, o par das teclas 1 e 2, os elementos do par, a fusão e o veículo da classe.
+- **Os sigilos** (`data/sigilos.ts`). Ícones coloridos, numa caixa de 48, à parte dos ícones de traço simples.
+  - Skill comum: o anel duplo, o glifo do núcleo no centro e a runa do elemento no medalhão. Um por par (89 em uso).
+  - Ultimate: a estrela de oito pontas no anel, em ouro, com o glifo da família (21).
+  - Antes, as 89 comuns dividiam 25 ícones e todas as ultimates usavam a coroa.
+- **O visual das skills comuns.** Nenhuma repete o de outra.
+  - Cada um dos 20 núcleos tem um gesto feito à mão (`render/vfx/nucleo-no-visual.ts`), por cima da assinatura.
+  - A skill que divide a assinatura com outra sai na matéria do próprio elemento (a transmutação do D-174).
+  - A assinatura, a matéria e o gesto formam um trio único para as 89.
+
+**O que ficou de fora.** As skills de `skills.json` que não são de classe nem de núcleo (as antigas, que o legado
+converte) usam a narrativa do elemento ou a padrão; os básicos de arma usam uma narrativa comum.

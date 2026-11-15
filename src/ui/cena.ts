@@ -689,7 +689,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
     controles?.marcarBasico(j?.autoAtaque ?? true);
     if (j) {
       const u = ultimateDe(ctx, j);
-      botaoUltimate.atualizar(cargaDe(j) / ctx.balance.ultimate.max, u ? (ctx.conteudo.definicoes.get(u.id)?.base.nome ?? u.id) : null);
+      botaoUltimate.atualizar(cargaDe(j) / ctx.balance.ultimate.max, u ? (ctx.conteudo.definicoes.get(u.id)?.base.nome ?? u.id) : null, u ? ctx.conteudo.definicoes.get(u.id)?.base.icone : undefined);
     }
     dado.atualizar(q.agoraMs);
     mochila.atualizar();

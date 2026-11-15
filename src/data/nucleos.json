@@ -54,7 +54,7 @@
     {
      "elemento": "fogo",
      "nome": "Bola de fogo",
-     "icone": "cometa",
+     "icone": "sig_projetil_fogo",
      "visual": {
       "cor": "#ff7b39",
       "conjuracao": "chamas",
@@ -68,7 +68,7 @@
     {
      "elemento": "gelo",
      "nome": "Lança de gelo",
-     "icone": "gelo",
+     "icone": "sig_projetil_gelo",
      "visual": {
       "cor": "#74b9ff",
       "conjuracao": "cristais",
@@ -84,7 +84,7 @@
     {
      "elemento": "raio",
      "nome": "Dardo voltaico",
-     "icone": "raio",
+     "icone": "sig_projetil_raio",
      "visual": {
       "cor": "#f7dc6f",
       "conjuracao": "relampago",
@@ -102,7 +102,7 @@
     {
      "elemento": "trevas",
      "nome": "Seta sombria",
-     "icone": "caveira",
+     "icone": "sig_projetil_trevas",
      "visual": {
       "cor": "#765b9e",
       "conjuracao": "sombra",
@@ -119,7 +119,7 @@
     {
      "elemento": "fisico",
      "nome": "Lâmina arremessada",
-     "icone": "espada",
+     "icone": "sig_projetil_fisico",
      "visual": {
       "cor": "#d5d8dc",
       "conjuracao": "corte",
@@ -187,7 +187,7 @@
     {
      "elemento": "fogo",
      "nome": "Estouro de brasas",
-     "icone": "cometa",
+     "icone": "sig_explosao_fogo",
      "visual": {
       "cor": "#ff7b39",
       "conjuracao": "chamas",
@@ -201,7 +201,7 @@
     {
      "elemento": "raio",
      "nome": "Trovão",
-     "icone": "raio",
+     "icone": "sig_explosao_raio",
      "visual": {
       "cor": "#f7dc6f",
       "conjuracao": "relampago",
@@ -218,7 +218,7 @@
     {
      "elemento": "psiquico",
      "nome": "Onda mental",
-     "icone": "runa",
+     "icone": "sig_explosao_psiquico",
      "visual": {
       "cor": "#c39bd3",
       "conjuracao": "runas",
@@ -230,7 +230,7 @@
     {
      "elemento": "sagrado",
      "nome": "Clarão",
-     "icone": "estrela",
+     "icone": "sig_explosao_sagrado",
      "visual": {
       "cor": "#f7e9a0",
       "conjuracao": "sagrado",
@@ -242,7 +242,7 @@
     {
      "elemento": "fisico",
      "nome": "Abalo",
-     "icone": "pedra",
+     "icone": "sig_explosao_fisico",
      "visual": {
       "cor": "#d5d8dc",
       "conjuracao": "corte",
@@ -309,7 +309,7 @@
     {
      "elemento": "fogo",
      "nome": "Jato de chamas",
-     "icone": "fogo",
+     "icone": "sig_feixe_fogo",
      "visual": {
       "cor": "#ff7b39",
       "conjuracao": "chamas",
@@ -327,7 +327,7 @@
     {
      "elemento": "gelo",
      "nome": "Sopro gélido",
-     "icone": "gelo",
+     "icone": "sig_feixe_gelo",
      "visual": {
       "cor": "#74b9ff",
       "conjuracao": "cristais",
@@ -339,7 +339,7 @@
     {
      "elemento": "raio",
      "nome": "Arco elétrico",
-     "icone": "raio",
+     "icone": "sig_feixe_raio",
      "visual": {
       "cor": "#f7dc6f",
       "conjuracao": "relampago",
@@ -355,7 +355,7 @@
     {
      "elemento": "sagrado",
      "nome": "Feixe de luz",
-     "icone": "estrela",
+     "icone": "sig_feixe_sagrado",
      "visual": {
       "cor": "#f7e9a0",
       "conjuracao": "sagrado",
@@ -420,7 +420,7 @@
     {
      "elemento": "raio",
      "nome": "Raio em cadeia",
-     "icone": "raio",
+     "icone": "sig_cadeia_raio",
      "visual": {
       "cor": "#f7dc6f",
       "conjuracao": "relampago",
@@ -433,7 +433,7 @@
     {
      "elemento": "trevas",
      "nome": "Corrente de almas",
-     "icone": "corrente",
+     "icone": "sig_cadeia_trevas",
      "visual": {
       "cor": "#765b9e",
       "conjuracao": "sombra",
@@ -446,7 +446,7 @@
     {
      "elemento": "veneno",
      "nome": "Contágio",
-     "icone": "veneno",
+     "icone": "sig_cadeia_veneno",
      "visual": {
       "cor": "#60aa79",
       "conjuracao": "bolhas",
@@ -459,7 +459,7 @@
     {
      "elemento": "psiquico",
      "nome": "Eco mental",
-     "icone": "runa",
+     "icone": "sig_cadeia_psiquico",
      "visual": {
       "cor": "#c39bd3",
       "conjuracao": "runas",
@@ -528,7 +528,7 @@
     {
      "elemento": "fogo",
      "nome": "Chão em brasa",
-     "icone": "fogo",
+     "icone": "sig_campo_fogo",
      "visual": {
       "cor": "#ff7b39",
       "conjuracao": "chamas",
@@ -556,7 +556,7 @@
     {
      "elemento": "gelo",
      "nome": "Geada",
-     "icone": "gelo",
+     "icone": "sig_campo_gelo",
      "visual": {
       "cor": "#74b9ff",
       "conjuracao": "cristais",
@@ -583,7 +583,7 @@
     {
      "elemento": "veneno",
      "nome": "Pântano tóxico",
-     "icone": "veneno",
+     "icone": "sig_campo_veneno",
      "visual": {
       "cor": "#60aa79",
       "conjuracao": "bolhas",
@@ -604,7 +604,7 @@
     {
      "elemento": "sagrado",
      "nome": "Solo consagrado",
-     "icone": "cura",
+     "icone": "sig_campo_sagrado",
      "visual": {
       "cor": "#f7e9a0",
       "conjuracao": "sagrado",
@@ -625,7 +625,7 @@
     {
      "elemento": "trevas",
      "nome": "Poça de sombra",
-     "icone": "caveira",
+     "icone": "sig_campo_trevas",
      "visual": {
       "cor": "#765b9e",
       "conjuracao": "sombra",
@@ -702,7 +702,7 @@
     {
      "elemento": "gelo",
      "nome": "Nova glacial",
-     "icone": "nova",
+     "icone": "sig_nova_gelo",
      "visual": {
       "cor": "#74b9ff",
       "conjuracao": "cristais",
@@ -714,7 +714,7 @@
     {
      "elemento": "raio",
      "nome": "Pulso",
-     "icone": "raio",
+     "icone": "sig_nova_raio",
      "visual": {
       "cor": "#f7dc6f",
       "conjuracao": "relampago",
@@ -734,7 +734,7 @@
     {
      "elemento": "terra",
      "nome": "Tremor",
-     "icone": "pedra",
+     "icone": "sig_nova_terra",
      "visual": {
       "cor": "#ad885d",
       "conjuracao": "pedra",
@@ -756,7 +756,7 @@
     {
      "elemento": "fisico",
      "nome": "Redemoinho de aço",
-     "icone": "redemoinho",
+     "icone": "sig_nova_fisico",
      "visual": {
       "cor": "#d5d8dc",
       "conjuracao": "corte",
@@ -774,7 +774,7 @@
     {
      "elemento": "sagrado",
      "nome": "Coroa de luz",
-     "icone": "estrela",
+     "icone": "sig_nova_sagrado",
      "visual": {
       "cor": "#f7e9a0",
       "conjuracao": "sagrado",
@@ -855,7 +855,7 @@
     {
      "elemento": "fisico",
      "nome": "Investida",
-     "icone": "investida",
+     "icone": "sig_investida_fisico",
      "visual": {
       "cor": "#d5d8dc",
       "conjuracao": "corte",
@@ -871,7 +871,7 @@
     {
      "elemento": "raio",
      "nome": "Relâmpago",
-     "icone": "raio",
+     "icone": "sig_investida_raio",
      "visual": {
       "cor": "#f7dc6f",
       "conjuracao": "relampago",
@@ -894,7 +894,7 @@
     {
      "elemento": "terra",
      "nome": "Avalanche",
-     "icone": "pedra",
+     "icone": "sig_investida_terra",
      "visual": {
       "cor": "#ad885d",
       "conjuracao": "pedra",
@@ -911,7 +911,7 @@
     {
      "elemento": "fogo",
      "nome": "Cometa",
-     "icone": "cometa",
+     "icone": "sig_investida_fogo",
      "visual": {
       "cor": "#ff7b39",
       "conjuracao": "chamas",
@@ -979,7 +979,7 @@
     {
      "elemento": "gelo",
      "nome": "Deslize",
-     "icone": "gelo",
+     "icone": "sig_recuo_gelo",
      "visual": {
       "cor": "#74b9ff",
       "conjuracao": "cristais",
@@ -1000,7 +1000,7 @@
     {
      "elemento": "trevas",
      "nome": "Passo sombrio",
-     "icone": "teleporte",
+     "icone": "sig_recuo_trevas",
      "visual": {
       "cor": "#765b9e",
       "conjuracao": "sombra",
@@ -1012,7 +1012,7 @@
     {
      "elemento": "psiquico",
      "nome": "Desvio",
-     "icone": "teleporte",
+     "icone": "sig_recuo_psiquico",
      "visual": {
       "cor": "#c39bd3",
       "conjuracao": "runas",
@@ -1037,7 +1037,7 @@
     {
      "elemento": "fisico",
      "nome": "Cambalhota",
-     "icone": "botas",
+     "icone": "sig_recuo_fisico",
      "visual": {
       "cor": "#d5d8dc",
       "conjuracao": "corte",
@@ -1111,7 +1111,7 @@
     {
      "elemento": "trevas",
      "nome": "Maldição",
-     "icone": "caveira",
+     "icone": "sig_maldicao_trevas",
      "visual": {
       "cor": "#765b9e",
       "conjuracao": "sombra",
@@ -1132,7 +1132,7 @@
     {
      "elemento": "veneno",
      "nome": "Praga",
-     "icone": "veneno",
+     "icone": "sig_maldicao_veneno",
      "visual": {
       "cor": "#60aa79",
       "conjuracao": "bolhas",
@@ -1154,7 +1154,7 @@
     {
      "elemento": "psiquico",
      "nome": "Pesadelo",
-     "icone": "runa",
+     "icone": "sig_maldicao_psiquico",
      "visual": {
       "cor": "#c39bd3",
       "conjuracao": "runas",
@@ -1175,7 +1175,7 @@
     {
      "elemento": "sagrado",
      "nome": "Julgamento",
-     "icone": "estrela",
+     "icone": "sig_maldicao_sagrado",
      "visual": {
       "cor": "#f7e9a0",
       "conjuracao": "sagrado",
@@ -1246,7 +1246,7 @@
     {
      "elemento": "gelo",
      "nome": "Túmulo de gelo",
-     "icone": "gelo",
+     "icone": "sig_prisao_gelo",
      "visual": {
       "cor": "#74b9ff",
       "conjuracao": "cristais",
@@ -1266,7 +1266,7 @@
     {
      "elemento": "terra",
      "nome": "Raízes",
-     "icone": "pedra",
+     "icone": "sig_prisao_terra",
      "visual": {
       "cor": "#ad885d",
       "conjuracao": "pedra",
@@ -1290,7 +1290,7 @@
     {
      "elemento": "trevas",
      "nome": "Grilhões",
-     "icone": "corrente",
+     "icone": "sig_prisao_trevas",
      "visual": {
       "cor": "#765b9e",
       "conjuracao": "sombra",
@@ -1314,7 +1314,7 @@
     {
      "elemento": "psiquico",
      "nome": "Paralisia mental",
-     "icone": "runa",
+     "icone": "sig_prisao_psiquico",
      "visual": {
       "cor": "#c39bd3",
       "conjuracao": "runas",
@@ -1390,7 +1390,7 @@
     {
      "elemento": "terra",
      "nome": "Muralha",
-     "icone": "pedra",
+     "icone": "sig_muro_terra",
      "visual": {
       "cor": "#ad885d",
       "conjuracao": "pedra",
@@ -1402,7 +1402,7 @@
     {
      "elemento": "fogo",
      "nome": "Muro de fogo",
-     "icone": "fogo",
+     "icone": "sig_muro_fogo",
      "visual": {
       "cor": "#ff7b39",
       "conjuracao": "chamas",
@@ -1430,7 +1430,7 @@
     {
      "elemento": "gelo",
      "nome": "Parede de gelo",
-     "icone": "gelo",
+     "icone": "sig_muro_gelo",
      "visual": {
       "cor": "#74b9ff",
       "conjuracao": "cristais",
@@ -1451,7 +1451,7 @@
     {
      "elemento": "sagrado",
      "nome": "Barreira de luz",
-     "icone": "barreira",
+     "icone": "sig_muro_sagrado",
      "visual": {
       "cor": "#f7e9a0",
       "conjuracao": "sagrado",
@@ -1533,7 +1533,7 @@
     {
      "elemento": "terra",
      "nome": "Pele de pedra",
-     "icone": "escudo",
+     "icone": "sig_escudo_terra",
      "visual": {
       "cor": "#ad885d",
       "conjuracao": "pedra",
@@ -1559,7 +1559,7 @@
     {
      "elemento": "gelo",
      "nome": "Armadura de gelo",
-     "icone": "escudo",
+     "icone": "sig_escudo_gelo",
      "visual": {
       "cor": "#74b9ff",
       "conjuracao": "cristais",
@@ -1590,7 +1590,7 @@
     {
      "elemento": "sagrado",
      "nome": "Égide",
-     "icone": "barreira",
+     "icone": "sig_escudo_sagrado",
      "visual": {
       "cor": "#f7e9a0",
       "conjuracao": "sagrado",
@@ -1617,7 +1617,7 @@
     {
      "elemento": "trevas",
      "nome": "Manto de sombras",
-     "icone": "escudo",
+     "icone": "sig_escudo_trevas",
      "visual": {
       "cor": "#765b9e",
       "conjuracao": "sombra",
@@ -1643,7 +1643,7 @@
     {
      "elemento": "raio",
      "nome": "Escudo estático",
-     "icone": "escudo",
+     "icone": "sig_escudo_raio",
      "visual": {
       "cor": "#f7dc6f",
       "conjuracao": "relampago",
@@ -1723,7 +1723,7 @@
     {
      "elemento": "sagrado",
      "nome": "Prece",
-     "icone": "cura",
+     "icone": "sig_cura_sagrado",
      "visual": {
       "cor": "#f7e9a0",
       "conjuracao": "sagrado",
@@ -1739,7 +1739,7 @@
     {
      "elemento": "fisico",
      "nome": "Fôlego",
-     "icone": "cura",
+     "icone": "sig_cura_fisico",
      "visual": {
       "cor": "#d5d8dc",
       "conjuracao": "brilho",
@@ -1776,7 +1776,7 @@
     {
      "elemento": "veneno",
      "nome": "Antídoto",
-     "icone": "cura",
+     "icone": "sig_cura_veneno",
      "visual": {
       "cor": "#60aa79",
       "conjuracao": "bolhas",
@@ -1796,7 +1796,7 @@
     {
      "elemento": "trevas",
      "nome": "Sangue roubado",
-     "icone": "cura",
+     "icone": "sig_cura_trevas",
      "visual": {
       "cor": "#765b9e",
       "conjuracao": "sombra",
@@ -1820,7 +1820,7 @@
     {
      "elemento": "fogo",
      "nome": "Cauterizar",
-     "icone": "cura",
+     "icone": "sig_cura_fogo",
      "visual": {
       "cor": "#ff7b39",
       "conjuracao": "chamas",
@@ -1891,7 +1891,7 @@
     {
      "elemento": "trevas",
      "nome": "Drenar vida",
-     "icone": "caveira",
+     "icone": "sig_dreno_trevas",
      "visual": {
       "cor": "#765b9e",
       "conjuracao": "sombra",
@@ -1912,7 +1912,7 @@
     {
      "elemento": "veneno",
      "nome": "Sanguessuga",
-     "icone": "veneno",
+     "icone": "sig_dreno_veneno",
      "visual": {
       "cor": "#60aa79",
       "conjuracao": "bolhas",
@@ -1941,7 +1941,7 @@
     {
      "elemento": "psiquico",
      "nome": "Drenar mente",
-     "icone": "runa",
+     "icone": "sig_dreno_psiquico",
      "visual": {
       "cor": "#c39bd3",
       "conjuracao": "runas",
@@ -2013,7 +2013,7 @@
     {
      "elemento": "fisico",
      "nome": "Esqueleto",
-     "icone": "invocar",
+     "icone": "sig_invocar_fisico",
      "visual": {
       "cor": "#d5d8dc",
       "conjuracao": "corte",
@@ -2036,7 +2036,7 @@
     {
      "elemento": "fogo",
      "nome": "Elemental de fogo",
-     "icone": "invocar",
+     "icone": "sig_invocar_fogo",
      "visual": {
       "cor": "#ff7b39",
       "conjuracao": "chamas",
@@ -2059,7 +2059,7 @@
     {
      "elemento": "terra",
      "nome": "Golem",
-     "icone": "invocar",
+     "icone": "sig_invocar_terra",
      "visual": {
       "cor": "#ad885d",
       "conjuracao": "pedra",
@@ -2081,7 +2081,7 @@
     {
      "elemento": "trevas",
      "nome": "Sombra",
-     "icone": "invocar",
+     "icone": "sig_invocar_trevas",
      "visual": {
       "cor": "#765b9e",
       "conjuracao": "sombra",
@@ -2103,7 +2103,7 @@
     {
      "elemento": "sagrado",
      "nome": "Espírito guardião",
-     "icone": "invocar",
+     "icone": "sig_invocar_sagrado",
      "visual": {
       "cor": "#f7e9a0",
       "conjuracao": "sagrado",
@@ -2175,7 +2175,7 @@
     {
      "elemento": "fisico",
      "nome": "Armadilha de dentes",
-     "icone": "aviso",
+     "icone": "sig_armadilha_fisico",
      "visual": {
       "cor": "#d5d8dc",
       "conjuracao": "corte",
@@ -2203,7 +2203,7 @@
     {
      "elemento": "fogo",
      "nome": "Mina",
-     "icone": "aviso",
+     "icone": "sig_armadilha_fogo",
      "visual": {
       "cor": "#ff7b39",
       "conjuracao": "chamas",
@@ -2232,7 +2232,7 @@
     {
      "elemento": "gelo",
      "nome": "Runa de geada",
-     "icone": "aviso",
+     "icone": "sig_armadilha_gelo",
      "visual": {
       "cor": "#74b9ff",
       "conjuracao": "cristais",
@@ -2257,7 +2257,7 @@
     {
      "elemento": "veneno",
      "nome": "Espinhos",
-     "icone": "aviso",
+     "icone": "sig_armadilha_veneno",
      "visual": {
       "cor": "#60aa79",
       "conjuracao": "bolhas",
@@ -2285,7 +2285,7 @@
     {
      "elemento": "raio",
      "nome": "Fio elétrico",
-     "icone": "aviso",
+     "icone": "sig_armadilha_raio",
      "visual": {
       "cor": "#f7dc6f",
       "conjuracao": "relampago",
@@ -2360,7 +2360,7 @@
     {
      "elemento": "trevas",
      "nome": "Marca da morte",
-     "icone": "alvo",
+     "icone": "sig_marca_trevas",
      "visual": {
       "cor": "#765b9e",
       "conjuracao": "sombra",
@@ -2381,7 +2381,7 @@
     {
      "elemento": "psiquico",
      "nome": "Exposição",
-     "icone": "alvo",
+     "icone": "sig_marca_psiquico",
      "visual": {
       "cor": "#c39bd3",
       "conjuracao": "runas",
@@ -2402,7 +2402,7 @@
     {
      "elemento": "raio",
      "nome": "Para-raios",
-     "icone": "alvo",
+     "icone": "sig_marca_raio",
      "visual": {
       "cor": "#f7dc6f",
       "conjuracao": "relampago",
@@ -2427,7 +2427,7 @@
     {
      "elemento": "fogo",
      "nome": "Pavio",
-     "icone": "alvo",
+     "icone": "sig_marca_fogo",
      "visual": {
       "cor": "#ff7b39",
       "conjuracao": "chamas",
@@ -2501,7 +2501,7 @@
     {
      "elemento": "fisico",
      "nome": "Grito de guerra",
-     "icone": "grito",
+     "icone": "sig_grito_fisico",
      "visual": {
       "cor": "#d5d8dc",
       "conjuracao": "corte",
@@ -2523,7 +2523,7 @@
     {
      "elemento": "psiquico",
      "nome": "Intimidar",
-     "icone": "runa",
+     "icone": "sig_grito_psiquico",
      "visual": {
       "cor": "#c39bd3",
       "conjuracao": "runas",
@@ -2547,7 +2547,7 @@
     {
      "elemento": "sagrado",
      "nome": "Hino",
-     "icone": "estrela",
+     "icone": "sig_grito_sagrado",
      "visual": {
       "cor": "#f7e9a0",
       "conjuracao": "sagrado",
@@ -2568,7 +2568,7 @@
     {
      "elemento": "trevas",
      "nome": "Lamento",
-     "icone": "caveira",
+     "icone": "sig_grito_trevas",
      "visual": {
       "cor": "#765b9e",
       "conjuracao": "sombra",
@@ -2647,7 +2647,7 @@
     {
      "elemento": "fogo",
      "nome": "Chuva de meteoros",
-     "icone": "chuva",
+     "icone": "sig_chuva_fogo",
      "visual": {
       "cor": "#ff7b39",
       "conjuracao": "chamas",
@@ -2665,7 +2665,7 @@
     {
      "elemento": "gelo",
      "nome": "Granizo",
-     "icone": "gelo",
+     "icone": "sig_chuva_gelo",
      "visual": {
       "cor": "#74b9ff",
       "conjuracao": "cristais",
@@ -2677,7 +2677,7 @@
     {
      "elemento": "raio",
      "nome": "Tempestade",
-     "icone": "raio",
+     "icone": "sig_chuva_raio",
      "visual": {
       "cor": "#f7dc6f",
       "conjuracao": "relampago",
@@ -2690,7 +2690,7 @@
     {
      "elemento": "veneno",
      "nome": "Chuva ácida",
-     "icone": "veneno",
+     "icone": "sig_chuva_veneno",
      "visual": {
       "cor": "#60aa79",
       "conjuracao": "bolhas",
@@ -2711,7 +2711,7 @@
     {
      "elemento": "fisico",
      "nome": "Chuva de lâminas",
-     "icone": "espada",
+     "icone": "sig_chuva_fisico",
      "visual": {
       "cor": "#d5d8dc",
       "conjuracao": "corte",
@@ -2777,7 +2777,7 @@
     {
      "elemento": "fogo",
      "nome": "Fúria ardente",
-     "icone": "fogo",
+     "icone": "sig_postura_fogo",
      "visual": {
       "cor": "#ff7b39",
       "conjuracao": "chamas",
@@ -2799,7 +2799,7 @@
     {
      "elemento": "terra",
      "nome": "Forma de pedra",
-     "icone": "escudo",
+     "icone": "sig_postura_terra",
      "visual": {
       "cor": "#ad885d",
       "conjuracao": "pedra",
@@ -2825,7 +2825,7 @@
     {
      "elemento": "raio",
      "nome": "Sobrecarga",
-     "icone": "raio",
+     "icone": "sig_postura_raio",
      "visual": {
       "cor": "#f7dc6f",
       "conjuracao": "relampago",
@@ -2852,7 +2852,7 @@
     {
      "elemento": "trevas",
      "nome": "Forma espectral",
-     "icone": "fantasma",
+     "icone": "sig_postura_trevas",
      "visual": {
       "cor": "#765b9e",
       "conjuracao": "sombra",
@@ -2877,7 +2877,7 @@
     {
      "elemento": "sagrado",
      "nome": "Avatar",
-     "icone": "estrela",
+     "icone": "sig_postura_sagrado",
      "visual": {
       "cor": "#f7e9a0",
       "conjuracao": "sagrado",

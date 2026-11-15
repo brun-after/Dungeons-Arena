@@ -3465,3 +3465,20 @@ dialog.mochila[open] { display: flex; flex-direction: column; }
 .forma-medidor { display: inline-flex; gap: 2px; margin-right: 0.4rem; vertical-align: middle; }
 .forma-medidor i { width: 5px; height: 9px; border-radius: 1px; background: color-mix(in srgb, currentColor 22%, transparent); }
 .forma-medidor i.cheia { background: currentColor; box-shadow: 0 0 calc(5px * var(--forma)) currentColor; }
+
+/* D-175 (15/11/2026): a história da skill no menu (a narrativa, o que se vê e a receita atrás do +). */
+.historia-habilidade { margin: 4px 0 6px; display: grid; gap: 4px; }
+.historia-habilidade p { margin: 0; font-size: 0.86em; line-height: 1.35; color: var(--texto-suave, #c9c2b4); }
+.narrativa-habilidade { font-style: italic; }
+.historia-habilidade strong { font-style: normal; color: var(--destaque, #e8a23a); font-weight: 600; }
+.receita-habilidade { font-size: 0.86em; }
+.receita-habilidade summary { cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: 6px; color: var(--destaque, #e8a23a); }
+.receita-habilidade summary::-webkit-details-marker { display: none; }
+.mais-receita { display: inline-grid; place-items: center; width: 20px; height: 20px; border: 1px solid currentColor; border-radius: 50%; font-weight: 700; line-height: 1; }
+.receita-habilidade[open] .mais-receita { transform: rotate(45deg); }
+.receita-habilidade ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 3px; line-height: 1.35; }
+
+/* D-175 (15/11/2026): os sigilos (ícones arcanos das skills comuns e das ultimates) são maiores que o traço simples. */
+svg.icone.sigilo { width: 1.7em; height: 1.7em; vertical-align: -0.5em; }
+.botao-habilidade .icone svg.icone.sigilo { width: 2.3em; height: 2.3em; }
+.botao-ultimate svg.icone.sigilo { width: 74%; height: 74%; }

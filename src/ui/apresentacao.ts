@@ -4,6 +4,7 @@ import { faixaSuperior } from './aviso';
 import { IndicadorCombo } from './combos';
 import { fracaoMira } from '../combat/mira';
 import { perfilVisualDe } from '../render/perfil-visual';
+import { visualDasComuns } from '../render/visual-comum';
 import { CamadaCombosTaticos } from '../render/combos-taticos';
 // Apresentação do marco 12 (14/10/2026), D-056: junta numa peça só o que a cena ganhou — áudio, partículas,
 // presets de impacto, luz, minimapa, prompt de interação, pausa, configurações e guia —, aplica as
@@ -158,6 +159,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   });
   voo.ligar(o.bus, o.estado, () => performance.now());
   // Marco 26 (29/10/2026, D-124): as assinaturas das skills (silhuetas acima, marcas no chão, corpos que deslizam).
+  const visualComum = visualDasComuns(ctx.conteudo);
   const diretor = new DiretorVfx({ efeitos: palco.efeitos, chao: palco.chao, particulas, impacto, reduzido });
   // Marco 40 (13/11/2026, D-164): o movimento da classe no corpo (voo alto, salto, corrida, montaria, névoa) e o que ele
   // deixa no mundo (a nuvem de escuridão, os símbolos de conjuração, a corda, a poeira e as rachaduras).
@@ -189,6 +191,8 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
       const e = o.estado().entidades.find((x) => x.id === atorId);
       return e?.bolsa?.classeId ?? e?.classeId ?? null;
     },
+    // D-175: o núcleo da skill comum e se ela divide a assinatura com outra (visual-comum.ts).
+    comum: (id) => visualComum.get(id) ?? null,
     // D-174: o estilo mais forte e a afinidade dominante de quem lança, para o visual das skills de classe.
     perfilVisual: (atorId) => perfilVisualDe(ctx, o.estado().entidades.find((x) => x.id === atorId), o.estado().tick),
     miraCheia: (e, tick) => fracaoMira(ctx, e, tick) === 1,

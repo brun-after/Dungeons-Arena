@@ -6,8 +6,8 @@ import { icone } from './icones';
 
 export interface BotaoUltimate {
   elemento: HTMLButtonElement;
-  /** `fracao` da carga em [0, 1]; `nome` da ultimate do par (null: sem par). */
-  atualizar: (fracao: number, nome: string | null) => void;
+  /** `fracao` da carga em [0, 1]; `nome` da ultimate do par (null: sem par); `iconeId`, o sigilo da família (D-175). */
+  atualizar: (fracao: number, nome: string | null, iconeId?: string) => void;
 }
 
 export function criarBotaoUltimate(aoUsar: () => void): BotaoUltimate {
@@ -21,7 +21,9 @@ export function criarBotaoUltimate(aoUsar: () => void): BotaoUltimate {
   const tecla = document.createElement('span');
   tecla.className = 'tecla';
   tecla.textContent = 'R';
-  b.append(anel, icone('coroa'), tecla);
+  let simbolo = icone('coroa');
+  let iconeAtual = 'coroa';
+  b.append(anel, simbolo, tecla);
   b.addEventListener('pointerdown', (ev) => {
     ev.preventDefault();
     aoUsar();
@@ -32,7 +34,14 @@ export function criarBotaoUltimate(aoUsar: () => void): BotaoUltimate {
   let ultimo = '';
   return {
     elemento: b,
-    atualizar: (fracao, nome) => {
+    atualizar: (fracao, nome, iconeId = 'coroa') => {
+      // D-175 (15/11/2026): o botão mostra o sigilo da família de ultimate do par.
+      if (iconeId !== iconeAtual) {
+        iconeAtual = iconeId;
+        const novo = icone(iconeId);
+        simbolo.replaceWith(novo);
+        simbolo = novo;
+      }
       const pct = Math.round(Math.max(0, Math.min(1, fracao)) * 100);
       const chave = `${pct}/${nome ?? ''}`;
       if (chave === ultimo) return;

@@ -3,6 +3,8 @@
 // um preenchimento suave na mesma cor. Dado puro (sem DOM): o núcleo valida os ids; a interface monta o SVG
 // (ui/icones.ts) e o canvas gera texturas a partir dele.
 
+import { ehSigilo, svgDoSigilo } from './sigilos';
+
 /** O miolo de cada ícone (dentro de `<svg viewBox="0 0 24 24">`). `F` marca as partes preenchidas. */
 export const ICONES = {
   // --- Armas e equipamento
@@ -151,6 +153,8 @@ export function ehIcone(v: unknown): v is IdIcone {
 
 /** O SVG completo (texto), para virar imagem ou textura no canvas; id desconhecido usa `circulo`. */
 export function svgDoIcone(id: string, cor = '#ffffff', tamanho = 48): string {
+  // D-175: o sigilo tem as cores dele (não leva a cor pedida).
+  if (ehSigilo(id)) return svgDoSigilo(id, tamanho);
   const miolo = (ehIcone(id) ? ICONES[id] : ICONES.circulo).replace(/class="F"/g, `fill="${cor}"`);
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${tamanho}" height="${tamanho}" fill="none" stroke="${cor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${miolo}</svg>`;
 }
