@@ -130,3 +130,27 @@ describe('relevo das regiões (D-176)', () => {
     }
   });
 });
+
+describe('cavernas no morro (D-176)', () => {
+  it('a caverna se abre no penhasco: o morro atrás sobe um muro alto e a boca fica no nível da frente', () => {
+    let vistas = 0;
+    for (const reino of CONTEUDO.reinos.values()) {
+      for (const regiao of reino.regioes) {
+        const cavernas = regiao.estruturas.filter((e) => !e.escondida && (e.tipo === 'caverna' || e.tipo === 'mina'));
+        if (cavernas.length === 0) continue;
+        const a = gerarExterior(reino, regiao).alturas;
+        const n = regiao.tamanho ?? reino.tamanhoRegiao;
+        for (const e of cavernas) {
+          const x = e.x + Math.floor(e.largura / 2);
+          const frente = a[(e.y + e.altura) * n + x] ?? 0;
+          const porta = a[(e.y + e.altura - 1) * n + x] ?? 0;
+          const fachada = a[e.y * n + e.x] ?? 0;
+          expect(porta, `${regiao.id} ${e.id} porta`).toBe(frente);
+          expect(fachada - frente, `${regiao.id} ${e.id} morro`).toBeGreaterThan(R.muroBaixoMax);
+          vistas++;
+        }
+      }
+    }
+    expect(vistas).toBeGreaterThan(0);
+  });
+});

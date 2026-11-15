@@ -1,7 +1,8 @@
 // O relevo do exterior do Mundo (marco 42, 15/11/2026, D-176): a altura de cada célula, com RNG próprio (o resto da
 // região sai do mesmo sorteio de antes). Por bioma: um campo suave que sobe aos poucos (as encostas) e platôs que
 // saltam de uma vez (os muros baixos e altos); os rochedos ficam no alto (a montanha, que ninguém passa). A vila, o
-// abrigo, as casas, as estruturas e as passagens ficam planos; as estradas viram rampas que sobem um nível por vez.
+// abrigo, as casas, as estruturas e as passagens ficam planos; as estradas viram rampas que sobem um nível por vez;
+// as cavernas e as minas se abrem no penhasco de um morro.
 // Por fim, tudo o que se alcançava a pé continua alcançável: onde o muro isolaria um pedaço, abre-se uma rampa. Puro.
 
 import type { Celula } from '../core/comandos';
@@ -9,7 +10,7 @@ import { aleatorio, criarRng, type EstadoRng } from '../core/rng';
 import type { Bioma } from '../mundo/reino';
 
 const SEMENTE_RELEVO = 42_211;
-const ALTURA_MAX = 9;
+const ALTURA_MAX = 12;
 
 /** O que cada bioma faz com o chão: a amplitude do campo suave e a altura e a frequência dos platôs. */
 interface PerfilDeRelevo {
@@ -57,6 +58,10 @@ export interface EntradaDoRelevo {
   planas: readonly { x: number; y: number; raio: number }[];
   /** Os retângulos que ficam planos na altura do chão debaixo deles (as casas, as estruturas). */
   retangulos: readonly { x: number; y: number; largura: number; altura: number }[];
+  /** As cavernas e as minas: a fachada fica cortada numa encosta (o morro atrás e dos lados, a boca no nível de baixo). */
+  encostas: readonly { x: number; y: number; largura: number; altura: number }[];
+  /** Quanto o morro da caverna sobe acima da boca (um muro alto: de frente, ninguém sobe a pé nem saltando). */
+  alturaDoMorro: number;
   /** As células de passagem (planas, altura 0, iguais dos dois lados). */
   passagem: (c: Celula) => boolean;
   /** De onde se anda (as chegadas): tudo o que se alcançava daqui continua alcançável. */
@@ -79,7 +84,7 @@ export function gerarRelevo(e: EntradaDoRelevo): Uint8Array {
     for (let x = 0; x < n; x++) {
       const base = Math.floor(campo(x, y) * (perfil.suave + 0.999));
       const plato = platos(x, y) > perfil.limiarPlato ? perfil.plato : 0;
-      h[y * n + x] = Math.min(ALTURA_MAX - 2, base + plato);
+      h[y * n + x] = Math.min(ALTURA_MAX - 5, base + plato);
     }
   }
   // A água fica no fundo do vale em volta; o rochedo, acima de tudo em volta (a montanha).
@@ -116,6 +121,8 @@ export function gerarRelevo(e: EntradaDoRelevo): Uint8Array {
     for (let y = Math.max(0, r.y - 2); y < Math.min(n, r.y + r.altura + 2); y++) for (let x = Math.max(0, r.x - 2); x < Math.min(n, r.x + r.largura + 2); x++) h[y * n + x] = alvo;
   }
   rampasNasEstradas(e, h);
+  // Depois das rampas (a frente da porta já tem a altura da estrada que chega nela).
+  for (const c of e.encostas) morroDaCaverna(e, h, c);
   abrirRampas(e, h);
   // Os rochedos por último: acima do chão em volta (a montanha; não se anda nem se voa por cima).
   for (let y = 0; y < n; y++) {
@@ -127,6 +134,30 @@ export function gerarRelevo(e: EntradaDoRelevo): Uint8Array {
     }
   }
   return h;
+}
+
+/**
+ * Marco 42 (15/11/2026, D-176): o morro da caverna. A fachada sobe `alturaDoMorro` acima da boca e o morro desce um
+ * nível por célula para trás e para os lados (encosta que se sobe pelos fundos); na frente (da linha da porta para o
+ * sul) o chão fica no nível da boca, e a borda do morro vira o penhasco onde a caverna se abre.
+ */
+function morroDaCaverna(e: EntradaDoRelevo, h: Uint8Array, c: EntradaDoRelevo['encostas'][number]): void {
+  const { n } = e;
+  const fundo = c.y + c.altura;
+  const bx = Math.min(n - 1, Math.max(0, c.x + Math.floor(c.largura / 2)));
+  const by = Math.min(n - 1, Math.max(0, fundo));
+  const boca = h[by * n + bx] ?? 0;
+  const alcance = e.alturaDoMorro;
+  for (let y = Math.max(0, c.y - alcance); y < Math.min(n, fundo); y++) {
+    for (let x = Math.max(0, c.x - alcance); x < Math.min(n, c.x + c.largura + alcance); x++) {
+      const dx = x < c.x ? c.x - x : x >= c.x + c.largura ? x - (c.x + c.largura - 1) : 0;
+      const dy = y < c.y ? c.y - y : 0;
+      const alvo = boca + e.alturaDoMorro - Math.max(dx, dy);
+      if (alvo > (h[y * n + x] ?? 0)) h[y * n + x] = Math.min(ALTURA_MAX - 3, alvo);
+    }
+  }
+  // A porta (a última linha da fachada) fica no nível da boca: entra-se andando.
+  if (by > 0) h[(by - 1) * n + bx] = boca;
 }
 
 /** As estradas sobem no máximo um nível por célula: percorre a estrada desde as origens e acomoda cada trecho. */

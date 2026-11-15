@@ -421,6 +421,7 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     n, semente: regiao.semente, bioma: regiao.bioma, em: (x, y) => g.em(x, y),
     planas: [...(regiao.vila ? [{ x: regiao.vila.x, y: regiao.vila.y, raio: regiao.vila.raio + 6 }] : []), ...(abrigo ? [{ x: abrigo.x, y: abrigo.y, raio: abrigo.raio + 4 }] : []), ...spawns.map((s) => ({ x: s.x, y: s.y, raio: 2 }))],
     retangulos: [...telhados, ...regiao.estruturas], passagem: naPassagemDaRegiao, origens: spawns, encostaMax: BALANCE_PADRAO.relevo.encostaMax,
+    encostas: regiao.estruturas.filter((e) => !e.escondida && (e.tipo === 'caverna' || e.tipo === 'mina')), alturaDoMorro: BALANCE_PADRAO.relevo.muroAltoMax - 1,
   });
   const alcance = alcancaveis(g, spawns[0] as Celula, alturas);
   const livres: Celula[] = [];
