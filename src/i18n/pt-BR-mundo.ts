@@ -42,6 +42,8 @@ export const textosMundo = {
   'prompt.mundo.npc.mercado': '{tecla}: ver o mercado do reino',
   'prompt.mundo.coleta': '{tecla}: coletar (fique parado; um golpe interrompe)',
   'prompt.mundo.tumulo': '{tecla}: abrir o túmulo',
+  'prompt.mundo.poste_tocha': '{tecla}: acender a tocha no poste',
+  'prompt.mundo.fogueira': '{tecla}: acender a tocha na fogueira',
   'prompt.mundo.pedra_save': '{tecla}: salvar aqui (você volta a esta pedra)',
   'prompt.mundo.pedra_portal': '{tecla}: usar o portal',
   'prompt.mundo.portal_temporario': '{tecla}: atravessar o portal temporário',

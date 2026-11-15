@@ -11,6 +11,7 @@ import type { EstadoJogo, ObjetoNoMundo, TipoObjeto } from '../core/estado';
 import type { EventoSimulacao, MotivoItem } from '../core/eventos-simulacao';
 import { ticksDe } from '../core/tempo';
 import type { Entidade } from '../entities/entidade';
+import { aplicarEfeito } from '../combat/efeitos';
 import { recalcularFicha } from '../progression/derivados';
 import { guardarItem, recusarItem } from '../progression/inventario';
 import { largarItem, largarPerto } from '../world/objetos';
@@ -35,7 +36,11 @@ const OBJETO_DO_PAPEL: Readonly<Partial<Record<PapelNpc, TipoObjeto>>> = { misso
 /** Os que só pedem ao servidor (sem efeito no tick). */
 const PEDIDOS: ReadonlySet<TipoObjeto> = new Set(['npc', 'pedra_save', 'pedra_portal', 'porta_estrutura', 'portal_temporario']);
 /** Interagíveis do Mundo sempre disponíveis (sem reserva nem estado de aberto). */
-export const SEMPRE_DISPONIVEIS: ReadonlySet<TipoObjeto> = new Set([...PEDIDOS, 'tumulo']);
+export const SEMPRE_DISPONIVEIS: ReadonlySet<TipoObjeto> = new Set([...PEDIDOS, 'poste_tocha', 'fogueira', 'tumulo']);
+/** Marco 42 (15/11/2026, D-176): os que acendem a tocha de quem interage (com a duração do item Tocha). */
+export const ACENDEM_TOCHA: ReadonlySet<TipoObjeto> = new Set(['poste_tocha', 'fogueira']);
+/** O item cujo efeito os postes e as fogueiras aplicam. */
+export const ITEM_TOCHA = 'tocha';
 export const TIPOS_DO_MUNDO: ReadonlySet<TipoObjeto> = new Set([...SEMPRE_DISPONIVEIS, 'coleta']);
 
 /** Os objetos da região: lojas e NPCs da vila, pedras, portas das estruturas e nós de coleta. */
@@ -45,6 +50,8 @@ export function objetosDoExterior(reino: Reino, exterior: ExteriorGerado): Objet
     const id = `m${i}`;
     if (p.tipo === 'estrutura') {
       objetos.push(novoObjeto(id, 'porta_estrutura', p.porta.x, p.porta.y, { ref: p.estruturaId, ...(p.escondida && { escondido: true }) }));
+    } else if (p.tipo === 'luz') {
+      objetos.push(novoObjeto(id, p.objeto, p.x, p.y, {}));
     } else if (p.tipo === 'coleta') {
       objetos.push(novoObjeto(id, 'coleta', p.x, p.y, { itemId: p.itemId }));
     } else if (p.tipo === 'andarilho') {
@@ -78,6 +85,12 @@ export function interagirNoMundo(estado: EstadoJogo, ctx: ContextoSimulacao, e: 
     return null;
   }
   if (o.tipo === 'tumulo') return abrirTumulo(estado, ctx, e, o, saida);
+  if (ACENDEM_TOCHA.has(o.tipo)) {
+    const item = ctx.conteudo.itens.get(ITEM_TOCHA);
+    if (!item) return 'nao_encontrado';
+    for (const ef of item.efeitos) aplicarEfeito(estado, ctx, e, ef, { id: e.id, x: e.x, y: e.y }, null, saida);
+    return null;
+  }
   // Coleta: canaliza parado; o fim (ou a interrupção pelo dano) sai em `concluirColeta`.
   o.abridorId = e.id;
   const ateTick = tick + ticksDe(ctx.balance.mundo.coleta.canalMs);

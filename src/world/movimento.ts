@@ -1,4 +1,5 @@
 import { ehDragao, porteDoDragao } from './porte-dragoes';
+import { apagarLuz } from '../combat/luz-propria';
 import { classeDe, progressoReforcosGuerreiro } from '../combat/ajustes-classes';
 import { velocidadeEncarnacao } from '../combat/encarnacao';
 import { celulaOcupada } from '../combat/geometria';
@@ -380,6 +381,8 @@ export function velocidadeDeViagem(e: Entidade, estado: EstadoJogo, ctx: Context
 function andarNoTick(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[], dtMs: number, grade?: GradeDeCorpos): number {
   // 14/11/2026 (D-164): quem voa, salta ou desce a tirolesa passa por cima da água sem nadar.
   const nadando = tipoEm(ctx.fase, e.x, e.y) === 'agua' && !noAr(e) && !naTirolesa(e);
+  // Marco 42 (15/11/2026, D-176): a água apaga a tocha.
+  if (nadando) apagarLuz(e);
   const vel = velocidadeAgora(e, estado, ctx) * (nadando ? ctx.balance.movimento.nadoMult : 1);
   let restante = (dtMs / 1000) * vel;
   let total = 0;

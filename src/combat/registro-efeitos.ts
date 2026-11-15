@@ -93,6 +93,8 @@ export const TIPOS_EFEITO = [
   'firme', 'acerto_carregado',
   // Marco 41 (14/11/2026, D-169): a trégua das passagens entre as regiões do Mundo (ninguém fere nem é ferido lá dentro).
   'tregua',
+  // Marco 42 (15/11/2026, D-176): a tocha acesa (a luz própria no Mundo) e o que a apaga (a rajada de vento, a água).
+  'tocha', 'apagar_luz',
 ] as const;
 export type TipoEfeito = (typeof TIPOS_EFEITO)[number];
 
@@ -124,7 +126,7 @@ export type Fluxo = 'atrasado' | 'armadilha' | 'invocar' | 'fase';
 
 export type Periodico = 'dano' | 'cura' | 'recurso';
 export type Instantaneo = 'drenar_invocacao' | 'comandar_mortos' | 'purificar' | 'passo_sombrio' | 'muralha_pedra' | 'campo_cura' | 'campo_veneno' | 'cura' | 'recurso' | 'teleporte' | 'avanco' | 'empurrao' | 'puxao' | 'trocar' | 'dano'
-  | 'invisivel' | 'dissipar' | 'consumir' | 'detonar' | 'arremessar' | 'zerar_recarga' | 'libertar' | 'furia' | 'carga_ultimate' | 'executar' | 'levantar' | 'apavorar' | 'trocar_companheiro' | 'grito_de_fera' | 'devolver_absorvido' | 'retornar' | 'saltar_ao_alvo';
+  | 'invisivel' | 'dissipar' | 'consumir' | 'detonar' | 'arremessar' | 'zerar_recarga' | 'libertar' | 'furia' | 'carga_ultimate' | 'executar' | 'levantar' | 'apavorar' | 'trocar_companheiro' | 'grito_de_fera' | 'devolver_absorvido' | 'retornar' | 'saltar_ao_alvo' | 'apagar_luz';
 export type BonusDeAtaqueBasico = 'dano' | 'recarga' | 'alcance' | 'alvos';
 
 export interface DefinicaoEfeito {
@@ -202,6 +204,8 @@ export interface DefinicaoEfeito {
   protegeDeArmadilha: boolean;
   /** 07/11/2026 (D-135): enquanto ativo, o portador vê sem teste as armadilhas hostis em `armadilhas.vistaRaio`. */
   revelaArmadilhas: boolean;
+  /** Marco 42 (15/11/2026, D-176): o portador leva luz própria (a tocha); a água e o vento apagam. */
+  ilumina: boolean;
   /** Marco 40 (D-157): o `valor` conta as marcas (somam até `balance.habilidades.eixos.marca.max`); cada uma soma `pct` ao dano recebido. */
   marcas: boolean;
 }
@@ -246,6 +250,7 @@ const BASE: Omit<Def, 'icone' | 'cor' | 'positivo' | 'padrao' | 'campos'> = {
   reflexo: false,
   protegeDeArmadilha: false,
   revelaArmadilhas: false,
+  ilumina: false,
   marcas: false,
 };
 
@@ -394,6 +399,9 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   grito_de_fera: { ...instantaneo('grito', '#c0392b', [], { duracaoMs: 0, valor: 0, pct: 0 }, 'grito_de_fera', false), exige: ['interno'] },
   levantar: instantaneo('cura', '#f7dc6f', ['valor', 'pct'], { duracaoMs: 0, valor: 3, pct: 30 }, 'levantar', true),
   vista_de_armadilha: positivo('olho', '#f0b27a', 8, [], { duracaoMs: 45_000, valor: 0, pct: 0 }, { revelaArmadilhas: true }),
+  // Marco 42 (D-176): a tocha queima por `duracaoMs` (o item define); `apagar_luz` tira toda luz própria do alvo.
+  tocha: { ...positivo('fogo', '#ffb060', 0, [], { duracaoMs: 300_000, valor: 0, pct: 0 }, { ilumina: true }), elegivelParaOrbe: false },
+  apagar_luz: instantaneo('redemoinho', '#a8d8e8', [], { duracaoMs: 0, valor: 0, pct: 0 }, 'apagar_luz', false),
   passo_leve: positivo('botas', '#9be7c4', 6, [], { duracaoMs: 60_000, valor: 0, pct: 0 }, { protegeDeArmadilha: true }),
   invocar_temporario: { ...BASE, icone: 'invocar', cor: '#48c9b0', positivo: true, ehStatus: false, campos: ['valor'], padrao: { duracaoMs: 12_000, valor: 1, pct: 0 }, fluxo: 'invocar', aoLancar: true, exige: ['ref'] },
 };

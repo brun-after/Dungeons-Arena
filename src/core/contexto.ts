@@ -538,7 +538,7 @@ export interface Balance {
    * oclusão do chão texturizado (render/solo/) e a parede alta do isométrico (altura em células, esmaecimento).
    */
   visual: {
-    luz: { raioJogador: number; raioTocha: number; raioObjeto: number; raioMagia: number; resolucaoMapa: number; realceMinimo: number; escuridaoExterior: number; clareza: number };
+    luz: { raioJogador: number; raioSemTocha: number; raioTocha: number; raioObjeto: number; raioMagia: number; resolucaoMapa: number; realceMinimo: number; escuridaoExterior: number; clareza: number };
     /** Ajuste de 31/10/2026 (D-130): até quanto ouro cada monte vai (o maior fica com o resto). */
     ouroMontes: number[];
     solo: { amostrasPorCelula: number; raioMistura: number; ruidoBorda: number; aoRaio: number; aoForca: number; macroForca: number; variacaoCobre: number };

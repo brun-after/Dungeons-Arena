@@ -19,6 +19,8 @@ import { erguerPredios, PREDIO_DO_PAPEL } from './vila-predios';
 import { entradaDoLado, escavarPassagens, type PassagemDoExterior } from './passagens-exterior';
 import type { Decoracao } from './decoracao';
 import { abrigoDoCentro, andarilhosDaRegiao, entradasDosLados, escavarCorredor, nivelDoMonstro, rotasDosErrantes } from './exterior-extras';
+import { luzesDoExterior } from './luzes-exterior';
+import { emPassagem } from './passagem';
 
 export { LARGURA_PASSAGEM } from './passagens-exterior';
 /** Distância mínima (Chebyshev) entre os inimigos e a vila ou os spawns. */
@@ -49,6 +51,8 @@ export type PontoDoExterior =
   /** Marco 38 (D-142): quem dá missão fora da vila, com a aparência de um preset (ou `gente`). */
   | { tipo: 'andarilho'; id: string; aparencia: string; x: number; y: number }
   | { tipo: 'coleta'; itemId: string; x: number; y: number }
+  /** Marco 42 (15/11/2026, D-176): os postes de tocha (nas estradas) e as fogueiras (nas matas e nos abrigos). */
+  | { tipo: 'luz'; objeto: 'poste_tocha' | 'fogueira'; x: number; y: number }
   | { tipo: 'estrutura'; estruturaId: string; porta: Celula; frente: Celula; escondida: boolean };
 
 export interface ExteriorGerado {
@@ -497,6 +501,8 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
   // Marco 38 (D-142): os andarilhos perto das estradas e as rotas dos errantes (RNG próprio: o resto sai igual).
   pontos.push(...andarilhosDaRegiao(g, regiao, (c) => !naVila(c) && !protegidas.has(c.y * n + c.x) && spawns.every((s) => chebyshev(s, c) >= 6), ocupadas));
   const rotas = rotasDosErrantes(g, regiao, centro, entradas);
+  // Marco 42 (15/11/2026, D-176): postes de tocha nas estradas e fogueiras nas matas e no abrigo (sem sorteio).
+  pontos.push(...luzesDoExterior((x, y) => g.em(x, y), n, regiao, naVila, (c) => emPassagem({ passagens: areas.map((f) => f.area) }, c.x, c.y), [...(abrigo ? [abrigo] : []), ...(regiao.vila ? [centro] : [])], ocupadas));
 
   const fase: FaseJson = {
     id: `mundo_${reino.id}_${regiao.id}`,

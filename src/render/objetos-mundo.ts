@@ -139,6 +139,38 @@ function portalDoReino(g: Graphics, cx: number, cy: number, cor: number, tMs: nu
   portalEmPe(g, cx, cy - 3, { estilo: 'psiquico', cor, tMs, aceso: true });
 }
 
+/** Marco 42 (15/11/2026, D-176): a chama que dança (o poste e a fogueira), três línguas de fogo sobrepostas. */
+function chama(g: Graphics, cx: number, cy: number, alto: number, tMs: number): void {
+  const t = tMs / 140;
+  g.circle(cx, cy - alto * 0.45, alto * 0.9).fill({ color: 0xff9a40, alpha: 0.16 });
+  for (const [cor, k, fase] of [[0xd84a1a, 1, 0], [0xff9a30, 0.72, 1.7], [0xffe08a, 0.42, 3.1]] as const) {
+    const balanco = Math.sin(t + fase) * 1.4 * k;
+    const h = alto * k * (0.9 + Math.sin(t * 1.3 + fase) * 0.1);
+    const w = alto * 0.32 * k;
+    g.poly([cx - w, cy, cx - w * 0.6, cy - h * 0.5, cx + balanco, cy - h, cx + w * 0.6, cy - h * 0.5, cx + w, cy]).fill(cor);
+  }
+}
+
+/** Marco 42 (D-176): o poste de tocha: haste de madeira com a cesta de ferro e a chama em cima. */
+function posteDeTocha(g: Graphics, cx: number, cy: number, tMs: number): void {
+  g.ellipse(cx, cy, 8, 3).fill({ color: 0x000000, alpha: 0.35 });
+  g.rect(cx - 1.6, cy - 30, 3.2, 30).fill(0x5a3a22).stroke({ width: 1, color: 0x24170e });
+  g.poly([cx - 5, cy - 30, cx + 5, cy - 30, cx + 3.5, cy - 35, cx - 3.5, cy - 35]).fill(0x3a3633).stroke({ width: 1, color: 0x18161a });
+  chama(g, cx, cy - 34, 11, tMs);
+}
+
+/** Marco 42 (D-176): a fogueira: pedras em roda, lenha cruzada e a chama grande. */
+function fogueira(g: Graphics, cx: number, cy: number, tMs: number): void {
+  g.ellipse(cx, cy, 17, 7).fill({ color: 0x000000, alpha: 0.35 });
+  for (let i = 0; i < 9; i++) {
+    const a = (i / 9) * Math.PI * 2;
+    g.ellipse(cx + Math.cos(a) * 13, cy + Math.sin(a) * 5, 3.4, 2.4).fill(0x6a6560).stroke({ width: 0.8, color: 0x2a2725 });
+  }
+  g.poly([cx - 10, cy + 1, cx + 8, cy - 4, cx + 10, cy - 1, cx - 8, cy + 4]).fill(0x4a2e1a);
+  g.poly([cx - 9, cy - 4, cx + 10, cy + 2, cx + 8, cy + 4, cx - 10, cy - 1]).fill(0x5a3a22);
+  chama(g, cx, cy - 1, 18, tMs);
+}
+
 function porta(g: Graphics, cx: number, cy: number): void {
   g.roundRect(cx - 9, cy - 22, 18, 22, 9).fill(0x1a120c).stroke({ width: 2, color: 0x6d5a40 });
   g.rect(cx - 9, cy - 2, 18, 2).fill(0x6d5a40);
@@ -166,6 +198,12 @@ export function desenharObjetoDoMundo(g: Graphics, o: ObjetoNoMundo, cx: number,
     case 'portal_temporario':
       g.ellipse(cx, cy, 26, 9).fill({ color: 0x5ce1ff, alpha: 0.16 + pulso * 0.01 });
       portalEmPe(g, cx, cy - 1, { estilo: 'psiquico', cor: 0x5ce1ff, tMs, aceso: true });
+      return true;
+    case 'poste_tocha':
+      posteDeTocha(g, cx, cy, tMs);
+      return true;
+    case 'fogueira':
+      fogueira(g, cx, cy, tMs);
       return true;
     case 'porta_estrutura':
       // Marco 30 (D-129): a porta escondida não aparece (quem chega perto acha pelo prompt e pela descoberta).
