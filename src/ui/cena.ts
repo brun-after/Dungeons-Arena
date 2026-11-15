@@ -36,6 +36,7 @@ import { sincronizarSkin as sincronizarSkinLocal } from './sincronizar-skin';
 import { prepararSessaoDeTela } from '../plataforma/sessao-tela';
 import { Camera } from '../render/camera';
 import { criarProjecao } from '../render/projecao';
+import { relevoDaFase } from '../render/relevo-tela';
 import { definirCoresDosElementos } from '../render/adornos';
 import { CamadaNumeros } from '../render/numeros';
 import { CamadaFluxo } from '../render/fluxo';
@@ -192,7 +193,7 @@ export async function montarCena(o: OpcoesCena): Promise<Cena | null> {
   const encerrarSessaoDeTela = prepararSessaoDeTela(toque);
 
   // Marco 31 (31/10/2026, D-130): o jogo é só isométrico (a vista de cima fica para o editor e a galeria).
-  const camera = new Camera(criarProjecao('iso', fase.largura, fase.altura), prefs.camera, toque);
+  const camera = new Camera(criarProjecao('iso', fase.largura, fase.altura, relevoDaFase(fase)?.alturaPx ?? null), prefs.camera, toque); // Marco 43 (D-177): o relevo na projeção.
   let visao: ControleVisao | null = null;
   const bus = new Barramento<EventosDaSimulacao>();
   let controles: Controles | null = null;

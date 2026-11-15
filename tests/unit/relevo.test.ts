@@ -107,12 +107,14 @@ describe('relevo das regiões (D-176)', () => {
     expect(muros).toBeGreaterThan(20);
   });
 
-  it('a vila e as chegadas ficam planas', () => {
+  it('a vila e as chegadas ficam planas (na altura delas: marco 43, D-177)', () => {
     for (const regiao of reino.regioes) {
       const ex = gerarExterior(reino, regiao);
       const n = regiao.tamanho ?? reino.tamanhoRegiao;
-      for (const s of ex.fase.spawns) expect(ex.alturas[s.y * n + s.x], `${regiao.id} chegada`).toBe(0);
-      if (regiao.vila) expect(ex.alturas[regiao.vila.y * n + regiao.vila.x], `${regiao.id} vila`).toBe(0);
+      const a = (x: number, y: number) => ex.alturas[y * n + x];
+      for (const s of ex.fase.spawns) expect(a(s.x + 1, s.y), `${regiao.id} chegada`).toBe(a(s.x, s.y));
+      const v = regiao.vila;
+      if (v) for (const [dx, dy] of [[3, 0], [0, 3], [-3, 0], [0, -3]] as const) expect(a(v.x + dx, v.y + dy), `${regiao.id} vila`).toBe(a(v.x, v.y));
     }
   });
 

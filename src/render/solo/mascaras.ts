@@ -90,6 +90,10 @@ function paredeDeBorda(fase: Fase, x: number, y: number): boolean {
 function camadaNaFase(fase: Fase, x: number, y: number, solo: SoloTema): CamadaSolo {
   const tipo = tipoEm(fase, x, y);
   if (!fase.exterior && (tipo === 'vazio' || (tipo === 'parede' && !paredeDeBorda(fase, x, y)))) return 'vazio';
+  // Marco 43 (D-177): a montanha é rocha nua; debaixo da árvore e do rochedo, o mato.
+  const natural = fase.obstaculos?.[y * fase.largura + x] ?? 0;
+  if (natural === 1) return 'rocha';
+  if (natural > 1) return solo.mato;
   return camadaDaCelula(tipo, solo);
 }
 
@@ -138,7 +142,12 @@ export function pesosDoBloco(fase: Fase, solo: SoloTema, bx: number, by: number,
     const tipo = tipoEm(fase, bx + x - borda, by + y - borda);
     const c = camadaNaFase(fase, bx + x - borda, by + y - borda, solo);
     camadaEm.push(c);
-    fechadaEm.push(fechada(tipo));
+    // Marco 43 (D-177): o obstáculo natural e o objeto do cenário não escurecem o chão em quadrado (o sprite tem a sombra
+    // dele); a montanha, sim (é encosta de pedra).
+    const cx = bx + x - borda;
+    const cy = by + y - borda;
+    const natural = cx >= 0 && cy >= 0 && cx < fase.largura && cy < fase.altura ? (fase.obstaculos?.[cy * fase.largura + cx] ?? 0) : 0;
+    fechadaEm.push(fechada(tipo) && (natural === 0 || natural === 1));
     presentes.add(c);
   }
   const lista = [...presentes].sort((p, q) => ordem(p, solo) - ordem(q, solo));

@@ -4,8 +4,9 @@
 // A simulação nunca sabe a visão: só a câmera, as camadas e a entrada mudam.
 
 import { ImageSource, Texture, type TextureSource } from 'pixi.js';
-import { BALANCE_PADRAO, type Balance } from '../core/contexto';
+import type { Balance } from '../core/contexto';
 import { criarPenhascosIso, type PenhascosIso } from '../render/relevo-iso';
+import { criarCenarioIso, type CenarioIso } from '../render/cenario-iso';
 import { aoMudarImagemToken, lerImagemToken } from '../plataforma/token';
 import type { Camera } from '../render/camera';
 import { criarDecoracaoIso, type DecoracaoIso } from '../render/decoracao-iso';
@@ -70,6 +71,8 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
   let telhados: Telhados | null = null;
   // Marco 42 (15/11/2026, D-176): as faces de penhasco do relevo.
   let penhascos: PenhascosIso | null = null;
+  // Marco 43 (15/11/2026, D-177): as árvores, as rochas e os objetos em pé do exterior.
+  let cenario: CenarioIso | null = null;
   const corParede = o.corParede ?? paletaDe(fase.matizGraus).paredeTopo;
   const criarParedes = (p: Projecao) =>
     criarParedesIso(palco.entidades, fase, p, { cor: corParede, textura: pedra, altura: o.paredeIso.altura, alcanceSala: o.paredeIso.alcanceSala, alphaFade: o.paredeIso.alphaFade });
@@ -81,8 +84,10 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
     enfeites?.destruir();
     estruturas?.destruir();
     penhascos?.destruir();
+    cenario?.destruir();
     paredes = iso ? criarParedes(p) : null;
-    penhascos = iso ? criarPenhascosIso(palco.entidades, fase, p, BALANCE_PADRAO.relevo.encostaMax) : null;
+    cenario = iso ? criarCenarioIso(palco.entidades, palco.terreno, fase, p, fase.cenario ?? []) : null;
+    penhascos = iso ? criarPenhascosIso(palco.entidades, fase, p) : null;
     // Marco 31 (D-130): os telhados das casas.
     telhados?.destruir();
     telhados = fase.telhados?.length ? criarTelhados(palco.entidades, fase, p, { altura: o.paredeIso.altura, perto: o.paredeIso.telhadoPerto }) : null;
@@ -133,6 +138,7 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
     tokenProprio: () => token,
     esmaecer: (jogador, dtMs) => {
       paredes?.esmaecer(jogador, dtMs);
+      cenario?.atualizar(camera.retanguloVisivel(palco.altura()), jogador, dtMs);
       telhados?.atualizar(jogador, dtMs);
     },
     oculto: (x, y) => telhados?.oculto(x, y) ?? false,
@@ -144,6 +150,7 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
       estruturas?.destruir();
       telhados?.destruir();
       penhascos?.destruir();
+      cenario?.destruir();
       pedra?.destroy(true);
     },
   };

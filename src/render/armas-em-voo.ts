@@ -64,7 +64,7 @@ export class ArmasEmVoo {
       s.texture = t.textura;
       s.anchor.set(0.5);
       s.position.set(pt.x, pt.y - altura);
-      s.zIndex = pt.y + 1;
+      s.zIndex = pt.z + 1;
       s.scale.set(ESCALA);
       if (DE_PONTA.has(d.arma.modelo)) {
         const c2 = centroDaCelula(x + p.dirX, y + p.dirY);

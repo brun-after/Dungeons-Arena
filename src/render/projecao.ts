@@ -6,6 +6,9 @@
 //                 deslocada para o mundo projetado começar em 0 (a câmera limita em [0, tamanho]).
 // A mesma matriz vai para o container do chão (transform de container, nunca de DOM); o que fica em pé
 // (entidades, projéteis, partículas, números) é posicionado por `projetar` e fica alinhado à tela.
+// Marco 43 (15/11/2026, D-177): com o relevo (render/relevo-tela.ts), o isométrico sobe cada ponto pela altura do chão
+// nele: `projetar` devolve o ponto na tela já elevado e `z`, a profundidade do plano (a ordem de desenho não muda com a
+// altura: quem está no alto da encosta continua na sua diagonal). `desprojetar` acha o ponto do chão sob o da tela.
 
 import { CELULA_PX } from './camera-calculo';
 
@@ -27,8 +30,10 @@ export interface Projecao {
   /** Tamanho do mundo projetado, em px. */
   largura: number;
   altura: number;
-  /** px de plano -> px do mundo projetado. */
-  projetar: (x: number, y: number) => { x: number; y: number };
+  /** px de plano -> px do mundo projetado (com a altura do chão) e a profundidade `z` (o y sem a altura). */
+  projetar: (x: number, y: number) => { x: number; y: number; z: number };
+  /** A altura do chão em px de tela no ponto de plano (0 sem relevo e de cima). */
+  alturaDoChao: (x: number, y: number) => number;
   /** px do mundo projetado -> px de plano. */
   desprojetar: (x: number, y: number) => { x: number; y: number };
 }
@@ -40,7 +45,7 @@ export function centroDaCelula(cx: number, cy: number): { x: number; y: number }
   return { x: (cx + 0.5) * CELULA_PX, y: (cy + 0.5) * CELULA_PX };
 }
 
-export function criarProjecao(visao: Visao, larguraCelulas: number, alturaCelulas: number): Projecao {
+export function criarProjecao(visao: Visao, larguraCelulas: number, alturaCelulas: number, relevo: ((x: number, y: number) => number) | null = null): Projecao {
   const lp = larguraCelulas * CELULA_PX;
   const ap = alturaCelulas * CELULA_PX;
   if (visao === 'cima') {
@@ -49,7 +54,8 @@ export function criarProjecao(visao: Visao, larguraCelulas: number, alturaCelula
       matriz: { a: 1, b: 0, c: 0, d: 1, tx: 0, ty: 0 },
       largura: lp,
       altura: ap,
-      projetar: (x, y) => ({ x, y }),
+      projetar: (x, y) => ({ x, y, z: y }),
+      alturaDoChao: () => 0,
       desprojetar: (x, y) => ({ x, y }),
     };
   }
@@ -59,11 +65,22 @@ export function criarProjecao(visao: Visao, larguraCelulas: number, alturaCelula
     matriz: { a: K, b: K / 2, c: -K, d: K / 2, tx, ty: 0 },
     largura: (lp + ap) * K,
     altura: ((lp + ap) * K) / 2,
-    projetar: (x, y) => ({ x: (x - y) * K + tx, y: ((x + y) * K) / 2 }),
+    projetar: (x, y) => {
+      const z = ((x + y) * K) / 2;
+      return { x: (x - y) * K + tx, y: relevo ? z - relevo(x, y) : z, z };
+    },
+    alturaDoChao: (x, y) => (relevo ? relevo(x, y) : 0),
     desprojetar: (x, y) => {
-      const u = (x - tx) / K;
-      const v = (2 * y) / K;
-      return { x: (u + v) / 2, y: (v - u) / 2 };
+      const plano = (sy: number) => {
+        const u = (x - tx) / K;
+        const v = (2 * sy) / K;
+        return { x: (u + v) / 2, y: (v - u) / 2 };
+      };
+      let p = plano(y);
+      if (!relevo) return p;
+      // O ponto do chão cuja tela cai em (x, y): a altura dele empurra a busca para baixo na tela; poucas voltas bastam.
+      for (let i = 0; i < 5; i++) p = plano(y + relevo(p.x, p.y));
+      return p;
     },
   };
 }
@@ -86,5 +103,5 @@ export function pontoSobProjetado(p: Projecao, x: number, y: number): { x: numbe
 /** Profundidade de desenho de algo em pé: o Y projetado (no isométrico, cresce com x + y). */
 export function profundidade(p: Projecao, cx: number, cy: number): number {
   const c = centroDaCelula(cx, cy);
-  return p.projetar(c.x, c.y).y;
+  return p.projetar(c.x, c.y).z;
 }

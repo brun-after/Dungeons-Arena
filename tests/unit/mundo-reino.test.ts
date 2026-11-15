@@ -7,6 +7,7 @@ import reinoJson from '../../src/data/mundo/reino-central.json';
 import { lerReino, ladoOposto, portaDa, regiaoPorId, vizinha, type Reino } from '../../src/mundo/reino';
 import { carregarFase, passavel } from '../../src/world/fase';
 import { gerarExterior } from '../../src/world/gerador-exterior';
+import { OBSTACULO } from '../../src/world/geografia';
 import { validarFase } from '../../src/world/validacao-fase';
 
 function reino(): Reino {
@@ -151,7 +152,8 @@ it('as regiões crescem entre 1,5 e 3 vezes a área da versão anterior', () => 
     expect(n * n).toBeGreaterThanOrEqual(1.5 * anterior * anterior);
     expect(n * n).toBeLessThanOrEqual(3 * anterior * anterior);
     const ex = gerarExterior(r, regiao);
-    expect(ex.fase.mapa[1]?.[1]).toBe('~');
+    // Marco 43 (D-177): a borda sem passagem é serra (antes, a costa de água).
+    expect(ex.obstaculos[n + 1]).toBe(OBSTACULO.montanha);
     const inimigos = ex.fase.inimigos ?? [];
     const agrupados = inimigos.filter(a => inimigos.some(b => a !== b && Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y)) <= 7));
     expect(agrupados.length / inimigos.length, regiao.id).toBeGreaterThan(0.6);

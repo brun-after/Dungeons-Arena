@@ -30,7 +30,8 @@ import type { PaletaTema } from '../world/temas';
 import { desenharDecoracao } from './decoracao';
 import { paletaDe } from './terreno';
 import { texturaDoIcone } from './icones-textura';
-import { desenharObjetoDoMundo, desenharVendedor, desenharVendedorDeLoja } from './objetos-mundo';
+import { chama, desenharObjetoDoMundo, desenharVendedor, desenharVendedorDeLoja } from './objetos-mundo';
+import { aplicarLuzDoMundo, chamaDaLuz, ehLuzDoMundo } from './luzes-do-mundo';
 import type { ObjetosPreRenderizados } from './objetos-3d';
 import type { AtlasDePersonagens } from './personagens-3d';
 import { quadroDoEstado } from './quadros-personagem';
@@ -66,7 +67,7 @@ export const COR_RARIDADE: Readonly<Record<Raridade, number>> = {
 
 /** Os que ficam em pé no isométrico (D-058: baú e loja; D-109: ouro, orbes e santuário). */
 // Marco 29 (D-128): os objetos do Mundo também ficam em pé no isométrico.
-const EM_PE: ReadonlySet<TipoObjeto> = new Set<TipoObjeto>(['bau', 'loja', 'ouro', 'santuario', 'orbe_hp', 'orbe_recurso', 'orbe_efeito', 'orbe_refugio', 'npc', 'coleta', 'tumulo', 'pedra_save', 'pedra_portal', 'porta_estrutura', 'portal_temporario']);
+const EM_PE: ReadonlySet<TipoObjeto> = new Set<TipoObjeto>(['bau', 'loja', 'ouro', 'santuario', 'orbe_hp', 'orbe_recurso', 'orbe_efeito', 'orbe_refugio', 'npc', 'coleta', 'tumulo', 'pedra_save', 'pedra_portal', 'porta_estrutura', 'portal_temporario', 'poste_tocha', 'fogueira']);
 
 /** Onde desenhar os objetos altos no isométrico. */
 export interface OpcoesEmPe {
@@ -213,7 +214,7 @@ export class CamadaObjetos {
       v.anchor.set(medidas.ancoraX, medidas.ancoraY);
       v.scale.set(medidas.escala);
       v.position.set(p.x, p.y);
-      v.zIndex = p.y;
+      v.zIndex = p.z;
       v.visible = true;
       return;
     }
@@ -233,7 +234,7 @@ export class CamadaObjetos {
     s.position.set(p.x + pintura.x, p.y + pintura.y);
     s.width = pintura.largura;
     s.height = pintura.altura;
-    s.zIndex = p.y;
+    s.zIndex = p.z;
     s.visible = true;
   }
 
@@ -268,20 +269,20 @@ export class CamadaObjetos {
     v.anchor.set(medidas.ancoraX, medidas.ancoraY);
     v.scale.set(medidas.escala);
     v.position.set(p.x, p.y - (fig.balcao ? 4 : 0));
-    v.zIndex = p.y;
+    v.zIndex = p.z;
     v.visible = true;
     alto.clear();
     alto.position.set(p.x, p.y);
     if (fig.balcao) {
       // O balcão fica à frente de quem atende.
-      alto.zIndex = p.y + 0.002;
+      alto.zIndex = p.z + 0.002;
       desenharBalcao(alto, o.ref ?? '');
     } else if (fig.mochila) {
-      alto.zIndex = p.y - 0.002;
+      alto.zIndex = p.z - 0.002;
       alto.ellipse(0, 0, 14, 6).fill({ color: 0x000000, alpha: 0.3 });
       desenharMochila(alto, medidas.topo);
     } else {
-      alto.zIndex = p.y + 0.002;
+      alto.zIndex = p.z + 0.002;
       desenharAviso(alto, medidas.topo, pulso / 2);
     }
     return true;
@@ -430,9 +431,9 @@ export class CamadaObjetos {
         if (titulo) {
           const camada = iso && this.emPe ? this.emPe.camada : this.camadaHalo;
           if (titulo.parent !== camada) camada.addChild(titulo);
-          const p = iso ? proj.projetar(cx, cy) : { x: cx, y: cy };
+          const p = iso ? proj.projetar(cx, cy) : { x: cx, y: cy, z: cy };
           titulo.position.set(p.x, p.y - CELULA_PX * 3);
-          titulo.zIndex = p.y + 1;
+          titulo.zIndex = p.z + 1;
           titulo.visible = !o.escondido;
         }
       }
@@ -550,7 +551,7 @@ export class CamadaObjetos {
       const p = proj.projetar(c.x, c.y);
       // A base do desenho (0,75 da célula) cai no centro projetado.
       g.position.set(p.x - CELULA_PX / 2, p.y - CELULA_PX * 0.75);
-      g.zIndex = p.y - 0.01;
+      g.zIndex = p.z - 0.01;
     }
     const tipo = o.ref ?? '';
     if (proj && this.modelo(o.objetoId, tipo, g.x + CELULA_PX / 2, g.y + CELULA_PX * 0.75, camada, g.zIndex + 0.001)) return;
@@ -585,9 +586,9 @@ export class CamadaObjetos {
     }
     const camada = proj && this.emPe ? this.emPe.camada : this.camadaHalo;
     if (item.visual.parent !== camada) camada.addChild(item.visual);
-    const p = proj ? proj.projetar(cx, cy) : { x: cx, y: cy };
+    const p = proj ? proj.projetar(cx, cy) : { x: cx, y: cy, z: cy };
     item.visual.position.set(p.x, p.y - (proj ? 9 : 0));
-    item.visual.zIndex = p.y;
+    item.visual.zIndex = p.z;
     const qtd = o.valor > 1 ? `×${o.valor}` : '';
     if (item.quantidade.text !== qtd) item.quantidade.text = qtd;
   }
@@ -603,16 +604,36 @@ export class CamadaObjetos {
     const c = centroDaCelula(o.x, o.y);
     const p = proj.projetar(c.x, c.y);
     alto.position.set(p.x, p.y);
-    alto.zIndex = p.y;
+    alto.zIndex = p.z;
     // Desenhado acima da origem (os pés do objeto ficam no centro da célula).
     const flutua = Math.sin(tMs / 380 + o.x * 1.7 + o.y) * 2.5;
     // Marco 38 (D-142): balconista, banqueiro, andarilhos e o mercador errante com as figuras pré-renderizadas.
     const fig = figuraDoNpc(o);
     if (fig && this.figuraDoMundo(o, fig, proj, camada, alto, tMs, pulso)) return;
+    // Marco 43 (15/11/2026, D-177): o poste de tocha e a fogueira com o modelo do cenário e a chama viva por cima.
+    if (ehLuzDoMundo(o.tipo)) {
+      let s = this.modelos3d.get(o.objetoId);
+      if (!s) {
+        s = new Sprite();
+        this.modelos3d.set(o.objetoId, s);
+      }
+      if (aplicarLuzDoMundo(s, o.tipo)) {
+        if (s.parent !== camada) camada.addChild(s);
+        s.position.set(p.x, p.y);
+        s.zIndex = p.z;
+        s.visible = true;
+        const fogo = chamaDaLuz(o.tipo);
+        alto.clear();
+        if (o.tipo === 'poste_tocha') alto.ellipse(0, 0, 10, 4).fill({ color: 0x000000, alpha: 0.3 });
+        chama(alto, 0, -fogo.base, fogo.alto, tMs);
+        alto.zIndex = p.z + 0.002;
+        return;
+      }
+    }
     // Ajuste de 31/10/2026 (D-130): o modelo pré-renderizado, com a sombra macia no Graphics.
     const nome = this.nomeModelo(o);
     const medidas = nome ? this.modelos?.medidas(nome) : null;
-    if (nome && medidas && this.modelo(o.objetoId, nome, p.x, p.y, camada, p.y + 0.001)) {
+    if (nome && medidas && this.modelo(o.objetoId, nome, p.x, p.y, camada, p.z + 0.001)) {
       const r = Math.min(medidas.largura * 0.42, CELULA_PX * 1.3);
       alto.clear().ellipse(0, 0, r, r * 0.42).fill({ color: 0x000000, alpha: 0.32 });
       if (o.tipo === 'loja') this.vendedorDaLoja(o, proj, camada, tMs);
@@ -627,7 +648,7 @@ export class CamadaObjetos {
       const desenho = (gp: Graphics) => {
         this.desenhoDe(gp, o, estado);
       };
-      this.pintado(o, chave, desenho, p.x, p.y, camada, p.y + 0.001);
+      this.pintado(o, chave, desenho, p.x, p.y, camada, p.z + 0.001);
       return;
     }
     if (o.tipo === 'bau' || o.tipo === 'loja') {

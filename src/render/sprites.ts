@@ -37,6 +37,8 @@ import { direcaoDoAngulo, duracaoVisualDoGolpe, estadoDoPersonagem, peloGolpe, p
 import { quadroDoToken, type MomentoDoQuadro } from './quadro-membros';
 import { anelDaInvocacao } from './anel-invocacao';
 import { coresDasRunas, desenharRuna } from './runas';
+import { atualizarTochaPortada } from './tocha-portada';
+import { temLuzPropria } from '../combat/luz-propria';
 import type { BibliotecaCriaturas, FonteToken } from './texturas-criaturas';
 
 // Marco 31 (31/10/2026, D-130): a marca de equipe no chão fica discreta, em tons sóbrios (dourado para o próprio,
@@ -363,8 +365,7 @@ export class CamadaEntidades {
       m.acaoId = acaoAtual;
 
       const p = posicao(e);
-      // Marco 26 (25/10/2026, D-108): o primeiro quadro só guarda a posição (com NaN, a comparação dava sempre falso e
-      // o token nunca contava como andando).
+      // Marco 26 (25/10/2026, D-108): o primeiro quadro só guarda a posição (com NaN, nunca contava como andando).
       if (Number.isNaN(m.visualX) || Math.abs(p.x - m.visualX) > 0.001 || Math.abs(p.y - m.visualY) > 0.001) {
         if (!Number.isNaN(m.visualX)) m.andandoAteMs = agoraMs + ANDANDO_MS;
         m.visualX = p.x;
@@ -374,11 +375,9 @@ export class CamadaEntidades {
       const pt = proj.projetar(c.x, c.y);
       const ajuste = this.o.ajuste?.(e, agoraMs) ?? null;
       m.raiz.position.set(pt.x, pt.y);
-      m.raiz.zIndex = pt.y + (ajuste?.zMais ?? 0);
-      // Direção do olhar na tela: o ângulo da grade passado pela projeção.
-      const frente = proj.projetar(c.x + Math.cos(m.angulo), c.y + Math.sin(m.angulo));
-      const dtx = frente.x - pt.x;
-      const dty = frente.y - pt.y;
+      m.raiz.zIndex = pt.z + (ajuste?.zMais ?? 0);
+      const frente = proj.projetar(c.x + Math.cos(m.angulo), c.y + Math.sin(m.angulo)); // o olhar na tela
+      const [dtx, dty] = [frente.x - pt.x, frente.y - pt.y];
       const norma = Math.hypot(dtx, dty) || 1;
       if (Math.abs(dtx) > 0.01) m.sentido = dtx > 0 ? 1 : -1;
       m.raiz.alpha = alfaDoCorpo(e, estado.tick) * (ajuste?.alfa ?? 1);
@@ -411,6 +410,7 @@ export class CamadaEntidades {
         angulo: Math.atan2(dty, dtx),
       });
       this.acompanhar(m, ajuste?.acompanhante ?? null, pt, proj, iso, agoraMs);
+      atualizarTochaPortada(m.raiz, !e.morto && temLuzPropria(e), { x: dtx / norma, y: dty / norma }, m.topo, agoraMs, reduzido); // Marco 43 (D-177)
       const tintaInvocada = tintaDaInvocacao(e, estado, ctx.conteudo.presets.get(e.preset)?.tinta);
       if (m.figura3d) m.figura3d.raiz.tint = tintaInvocada ?? 0xffffff;
       if (m.vivo) m.vivo.tint = tintaInvocada ?? 0xffffff;

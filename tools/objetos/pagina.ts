@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { clone as clonarComEsqueleto } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import type { Receita } from './receitas';
+import { modeloProcedural } from './procedurais';
 
 /** Pixels por célula na saída (o jogo desenha com a metade: 48 px por célula, nítido em tela de alta densidade). */
 const PX_CELULA = 96;
@@ -46,9 +47,12 @@ export async function medir(url: string): Promise<{ tamanho: number[]; animacoes
 async function montar(receita: Receita, base: (m: string) => { url: string; escala: number }): Promise<THREE.Group> {
   const grupo = new THREE.Group();
   for (const peca of receita.pecas) {
-    const { url, escala } = base(peca.m);
-    const { cena, animacoes } = await carregar(url);
-    const copia = clonarComEsqueleto(cena);
+    // Marco 43 (D-177): os modelos procedurais (`p:`) nascem aqui, sem arquivo.
+    const procedural = peca.m.startsWith('p:') ? modeloProcedural(peca.m) : null;
+    if (peca.m.startsWith('p:') && !procedural) throw new Error(`modelo procedural desconhecido: ${peca.m}`);
+    const { url, escala } = procedural ? { url: '', escala: 1 } : base(peca.m);
+    const { cena, animacoes } = procedural ? { cena: procedural, animacoes: [] as THREE.AnimationClip[] } : await carregar(url);
+    const copia = procedural ? cena : clonarComEsqueleto(cena);
     const pose = peca.animacao;
     if (pose) {
       const clipe = animacoes.find((a) => a.name === pose.nome);

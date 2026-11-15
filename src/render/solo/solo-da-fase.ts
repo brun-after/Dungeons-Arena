@@ -19,7 +19,7 @@ export function soloDaFase(fase: Fase, tema: Tema | null, visual: Balance['visua
     cfg: visual.solo,
     escala,
     semente: hashTexto(fase.id),
-    texturas: carregarTexturasDoSolo([solo.base, solo.variacao, solo.parede, solo.mato, 'estrada', ...texturasDosAmbientes(fase.ambientes ?? [])]),
+    texturas: carregarTexturasDoSolo([solo.base, solo.variacao, solo.parede, solo.mato, 'estrada', ...(fase.obstaculos ? ['rocha' as const] : []), ...texturasDosAmbientes(fase.ambientes ?? [])]),
     pintor,
   };
 }

@@ -11,7 +11,9 @@
 // CC0 do tema, sem a grade das células: a cor lisa aparece só até o bloco ser assado (um por quadro) e continua como
 // reserva (sem texturas, editor e tileset do jogador).
 
-import { CanvasSource, Container, Graphics, Sprite, Texture } from 'pixi.js';
+import { CanvasSource, Container, Graphics, Sprite, Texture, type MeshSimple } from 'pixi.js';
+import { relevoDaFase } from './relevo-tela';
+import { deslocamentoDaCelula, malhaDoBloco } from './solo/malha-relevo';
 import { AssadorDeSolo } from './solo/assar';
 import { pesosDoBloco, type ConfigSolo } from './solo/mascaras';
 import type { TexturasDoSolo } from './solo/texturas';
@@ -173,7 +175,8 @@ interface Bloco {
   /** A camada animada do brilho da água (null sem água no bloco). */
   agua: Graphics | null;
   /** Marco 31 (D-130): o chão assado (embaixo de `g`), com o canvas e a textura dele. */
-  solo: { sprite: Sprite; canvas: HTMLCanvasElement; chave: string } | null;
+  /** Marco 43 (D-177): no relevo, a malha erguida no lugar do sprite. */
+  solo: { sprite: Sprite | MeshSimple; canvas: HTMLCanvasElement; chave: string } | null;
 }
 
 /** Marco 31 (D-130): o chão texturizado da fase (sem ele, as cores lisas de sempre). */
@@ -226,6 +229,20 @@ export function criarTerreno(
   }
   const paleta: Paleta = tema ? tema.paleta : paletaDe(fase.matizGraus);
   let iso = false;
+  // Marco 43 (15/11/2026, D-177): o relevo ergue o chão no isométrico (o assado vira malha; o resto, por célula).
+  const relevo = relevoDaFase(fase);
+  const ergue = () => (iso ? relevo : null);
+  /** Desenha `f` com o Graphics erguido pela altura da célula (x, y). */
+  const naAltura = (gr: Graphics, x: number, y: number, f: () => void) => {
+    const d = deslocamentoDaCelula(ergue(), x, y);
+    if (d === 0) {
+      f();
+      return;
+    }
+    gr.setTransform(1, 0, 0, 1, -d, -d);
+    f();
+    gr.setTransform(1, 0, 0, 1, 0, 0);
+  };
   // Os enfeites, por bloco (calculados uma vez; o editor não tem tema).
   const enfeites = new Map<number, Decoracao[]>();
   const porLinhaBlocos = Math.ceil(fase.largura / BLOCO_CELULAS);
@@ -268,10 +285,16 @@ export function criarTerreno(
       guardarAssado(chave, canvas);
     }
     soltarSolo(b);
-    const sprite = new Sprite(new Texture({ source: new CanvasSource({ resource: canvas }) }));
-    sprite.position.set(b.x0, b.y0);
-    sprite.width = b.x1 - b.x0;
-    sprite.height = b.y1 - b.y0;
+    const textura = new Texture({ source: new CanvasSource({ resource: canvas }) });
+    const r = ergue();
+    let sprite: Sprite | MeshSimple;
+    if (r) sprite = malhaDoBloco(textura, r, { bx: b.bx, by: b.by, fimX, fimY });
+    else {
+      sprite = new Sprite(textura);
+      sprite.position.set(b.x0, b.y0);
+      sprite.width = b.x1 - b.x0;
+      sprite.height = b.y1 - b.y0;
+    }
     b.c.addChildAt(sprite, 0);
     b.solo = { sprite, canvas, chave };
     desenharBloco(b);
@@ -298,14 +321,14 @@ export function criarTerreno(
         const tipo = tipoEm(fase, x, y);
         // Marco 31 (D-130): com o chão assado, a cor lisa só desenha a saída (o resto já está no canvas).
         if (b.solo) {
-          if (tipo === 'saida') desenharCelula(b.g, fase, paleta, x, y, tipo, tema !== null);
+          if (tipo === 'saida') naAltura(b.g, x, y, () => { desenharCelula(b.g, fase, paleta, x, y, tipo, tema !== null); });
           continue;
         }
         const peca = tileset ? pecaDaCelula(fase, x, y, 0) : null;
         const textura = peca && tileset ? tileset.textura(peca) : null;
         if (!textura) {
           // Sem tileset (ou sem a peça no atlas): a cor lisa; parede funda com tileset fica no escuro.
-          if (!tileset || tipo === 'piso' || tipo === 'saida' || ehCelulaExterior(tipo)) desenharCelula(b.g, fase, paleta, x, y, tipo, tema !== null);
+          if (!tileset || tipo === 'piso' || tipo === 'saida' || ehCelulaExterior(tipo)) naAltura(b.g, x, y, () => { desenharCelula(b.g, fase, paleta, x, y, tipo, tema !== null); });
           continue;
         }
         const s = new Sprite(textura);
@@ -323,7 +346,8 @@ export function criarTerreno(
         const pintura = pintor?.pintura(chave, desenhar);
         if (!pintura) return;
         const sp = new Sprite(pintura.textura);
-        sp.position.set(x * CELULA_PX + pintura.x, y * CELULA_PX + pintura.y);
+        const d = deslocamentoDaCelula(ergue(), x, y);
+        sp.position.set(x * CELULA_PX + pintura.x - d, y * CELULA_PX + pintura.y - d);
         sp.width = pintura.largura;
         sp.height = pintura.altura;
         b.c.addChild(sp);
@@ -341,7 +365,7 @@ export function criarTerreno(
       for (const d of enfeites.get((b.by / BLOCO_CELULAS) * porLinhaBlocos + b.bx / BLOCO_CELULAS) ?? []) {
         if (iso && ehDecoracaoEmPe(d.tipo)) continue;
         if (!pintor) {
-          desenharDecoracao(enfeite, d, tema.paleta);
+          naAltura(enfeite, d.x, d.y, () => { desenharDecoracao(enfeite, d, tema.paleta); });
           continue;
         }
         const variante = varianteEmPassos(d.variante);
@@ -355,7 +379,7 @@ export function criarTerreno(
       const ambientes = new Graphics();
       for (let y = b.by; y < fimY; y++) for (let x = b.bx; x < fimX; x++) {
         const tipo = tipoEm(fase, x, y);
-        if (tipo === 'piso' || tipo === 'saida') desenharAmbiente(ambientes, fase, x, y);
+        if (tipo === 'piso' || tipo === 'saida') naAltura(ambientes, x, y, () => { desenharAmbiente(ambientes, fase, x, y); });
       }
       b.c.addChild(ambientes);
     }
@@ -364,7 +388,7 @@ export function criarTerreno(
     const agua = new Graphics();
     for (let y = b.by; y < fimY; y++) for (let x = b.bx; x < fimX; x++) {
       if (tipoEm(fase, x, y) !== 'agua') continue;
-      desenharBrilhoDaAgua(agua, x, y);
+      naAltura(agua, x, y, () => { desenharBrilhoDaAgua(agua, x, y); });
       temAgua = true;
     }
     if (temAgua) {

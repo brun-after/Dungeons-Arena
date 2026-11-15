@@ -150,7 +150,7 @@ export class RunasDePe {
         const c = centroDaCelula(a.x, a.y);
         const pt = proj.projetar(c.x, c.y);
         g.position.set(pt.x, pt.y);
-        g.zIndex = pt.y;
+        g.zIndex = pt.z;
         pedra(g.clear(), corDaArmadilha(a), a.inerteAteTick > estado.tick, 0.5 + 0.5 * Math.sin(tMs / 300 + a.id));
       }
     }

@@ -58,7 +58,8 @@ export function luzesDoExterior(
   }
   for (const abrigo of pracas) {
     const c = andavelPerto(em, { x: abrigo.x + 4, y: abrigo.y + 3 }, 4);
-    if (c && livre(c)) luzes.push({ tipo: 'luz', objeto: 'fogueira', ...c });
+    // Marco 43 (D-177): na praça da vila, o poste de tocha (braseiro); a fogueira é do abrigo no ermo.
+    if (c && livre(c)) luzes.push({ tipo: 'luz', objeto: naVila(c) ? 'poste_tocha' : 'fogueira', ...c });
   }
   // Os postes: varre as estradas em ordem e põe um a cada `ESPACO_POSTES` do último.
   const postes: Celula[] = [];
