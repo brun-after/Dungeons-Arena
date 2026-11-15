@@ -5515,6 +5515,10 @@ cada coisa por que ela está ali.
 - **Cenário em 3D pré-renderizado** (`tools/objetos --cenario`, `src/assets/cenario`, cerca de 410 KB em webp).
   - Os sprites carregam por bloco de 16×16 perto da vista e saem da memória quando ficam longe.
   - Cada sprite tem a sombra de contato no chão.
+  - As copas das folhosas e dos arbustos são feitas de dezenas de tufos pequenos (`tools/objetos/folhagem.ts`). A
+    normal de cada tufo é puxada para a da copa, que acende como um volume macio, e a silhueta fica recortada sem
+    mostrar os polígonos. Os pinheiros têm andares de ramos serrilhados, com o lado de baixo na sombra. O detalhe fica
+    só na imagem: o sprite tem o mesmo tamanho no jogo.
   - As árvores crescem em talhões de uma espécie, com coníferas acima de `altitudeAlta` e arbustos na borda da mata
     (`data/mundo/cenario.json`).
 - **Composição pela função** (`world/composicao-cenario.ts`).

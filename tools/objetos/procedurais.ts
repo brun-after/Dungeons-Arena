@@ -5,6 +5,7 @@
 // Roda só na ferramenta (tools/objetos), nunca no jogo.
 
 import * as THREE from 'three';
+import { copaEmTufos, saiaDePinheiro, type Massa } from './folhagem';
 
 /** Gerador de números da semente (mulberry32): o mesmo modelo sai igual toda vez. */
 function rng(semente: number): () => number {
@@ -107,15 +108,6 @@ function tronco(r: () => number, altura: number, raio: number, corTronco: number
   return malha(geo);
 }
 
-/** Uma copa: a bola de facetas amassada, mais clara em cima. */
-function copa(r: () => number, raio: number, corFolha: number, topo: number): THREE.Mesh {
-  const geo = new THREE.IcosahedronGeometry(raio, 1);
-  amassar(geo, 0.12, r);
-  geo.scale(1, 0.82, 1);
-  pintar(geo, corFolha, { topo, limiar: 0.35, escurecerPe: 0.45, variar: 0.22, r });
-  return malha(geo);
-}
-
 export interface OpcoesArvore {
   altura: number;
   folha: number;
@@ -123,43 +115,49 @@ export interface OpcoesArvore {
   tronco: number;
 }
 
-/** A árvore de folhas (carvalho, faia): o tronco, dois ou três galhos e de cinco a oito copas em volta do alto. */
+/**
+ * A árvore de folhas (carvalho, faia): o tronco com dois ou três galhos que somem na copa, e a copa em tufos sobre
+ * duas a três massas (uma alta e as do lado), para a silhueta sair irregular como a de uma árvore de verdade.
+ */
 export function folhosa(semente: number, o: OpcoesArvore): THREE.Group {
   const r = rng(semente);
   const g = new THREE.Group();
   const alturaTronco = o.altura * (0.42 + r() * 0.1);
   g.add(tronco(r, alturaTronco, 0.13 + r() * 0.04, o.tronco));
-  const copas = 5 + Math.floor(r() * 4);
-  const raioCopa = o.altura * 0.2;
-  for (let i = 0; i < copas; i++) {
-    const a = (i / copas) * Math.PI * 2 + r() * 0.6;
-    const d = raioCopa * (0.55 + r() * 0.5);
-    const c = copa(r, raioCopa * (0.7 + r() * 0.45), o.folha, o.topo);
-    c.position.set(Math.cos(a) * d, alturaTronco + raioCopa * (0.4 + r() * 0.9), Math.sin(a) * d);
-    g.add(c);
+  const raioCopa = o.altura * 0.27;
+  const massas: Massa[] = [{ centro: new THREE.Vector3(0, alturaTronco + raioCopa * 1.05, 0), raio: new THREE.Vector3(raioCopa * 1.15, raioCopa * 0.8, raioCopa * 1.05) }];
+  const lados = 2 + Math.floor(r() * 2);
+  for (let i = 0; i < lados; i++) {
+    const a = (i / lados) * Math.PI * 2 + r() * 1.2;
+    const d = raioCopa * (0.55 + r() * 0.3);
+    const rm = raioCopa * (0.6 + r() * 0.25);
+    const centro = new THREE.Vector3(Math.cos(a) * d, alturaTronco + raioCopa * (0.45 + r() * 0.5), Math.sin(a) * d);
+    massas.push({ centro, raio: new THREE.Vector3(rm, rm * 0.8, rm) });
+    // O galho que leva a esta massa.
+    const comp = centro.clone().sub(new THREE.Vector3(0, alturaTronco * 0.85, 0));
+    const geo = new THREE.CylinderGeometry(0.03, 0.06, comp.length(), 5);
+    geo.translate(0, comp.length() / 2, 0);
+    pintar(geo, o.tronco, { variar: 0.15, r });
+    const galho = malha(geo);
+    galho.position.set(0, alturaTronco * 0.85, 0);
+    galho.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), comp.normalize());
+    g.add(galho);
   }
-  const alto = copa(r, raioCopa * 1.05, o.folha, o.topo);
-  alto.position.set(0, alturaTronco + raioCopa * 1.4, 0);
-  g.add(alto);
+  g.add(copaEmTufos(r, massas, { folha: o.folha, topo: o.topo, miolo: 0.6, variar: 0.2 }, 70, 0.22));
   return g;
 }
 
-/** O pinheiro: o tronco e quatro ou cinco saias de cone, recortadas, mais estreitas para cima (com neve, se pedir). */
+/** O pinheiro: o tronco e cinco ou seis saias de ramos serrilhadas, mais estreitas para cima (com neve, se pedir). */
 export function pinheiro(semente: number, o: OpcoesArvore & { neve?: boolean }): THREE.Group {
   const r = rng(semente);
   const g = new THREE.Group();
   g.add(tronco(r, o.altura * 0.3, 0.1, o.tronco));
-  const saias = 4 + Math.floor(r() * 2);
+  const saias = 5 + Math.floor(r() * 2);
   for (let i = 0; i < saias; i++) {
     const t = i / saias;
-    const raio = o.altura * 0.24 * (1 - t * 0.72);
-    const alt = o.altura * 0.34 * (1 - t * 0.55);
-    const geo = new THREE.ConeGeometry(raio, alt, 8, 1, false);
-    amassar(geo, 0.05, r);
-    geo.translate(0, o.altura * (0.2 + t * 0.62) + alt / 2, 0);
-    geo.rotateY(r() * Math.PI);
-    pintar(geo, o.folha, { topo: o.neve ? 0xf2f6fa : o.topo, limiar: o.neve ? 0.5 : 0.5, escurecerPe: 0.25, variar: 0.2, r });
-    g.add(malha(geo));
+    const raio = o.altura * 0.22 * (1 - t * 0.8);
+    const alt = o.altura * 0.24 * (1 - t * 0.45);
+    g.add(saiaDePinheiro(r, raio, alt, o.altura * (0.22 + t * 0.62), { folha: o.folha, topo: o.topo, ...(o.neve && { neve: true }) }));
   }
   return g;
 }
@@ -184,16 +182,14 @@ export function arvoreMorta(semente: number, o: { altura: number; tronco: number
   return g;
 }
 
-/** O arbusto: três a cinco bolinhas de folha rente ao chão. */
+/** O arbusto: uma ou duas massas baixas de tufos, rente ao chão. */
 export function arbusto(semente: number, o: { largura: number; folha: number; topo: number }): THREE.Group {
   const r = rng(semente);
   const g = new THREE.Group();
-  const n = 3 + Math.floor(r() * 3);
-  for (let i = 0; i < n; i++) {
-    const c = copa(r, o.largura * (0.22 + r() * 0.12), o.folha, o.topo);
-    c.position.set((r() - 0.5) * o.largura * 0.6, o.largura * 0.18, (r() - 0.5) * o.largura * 0.6);
-    g.add(c);
-  }
+  const w = o.largura / 2;
+  const massas: Massa[] = [{ centro: new THREE.Vector3(0, w * 0.55, 0), raio: new THREE.Vector3(w, w * 0.6, w * 0.85) }];
+  if (r() < 0.6) massas.push({ centro: new THREE.Vector3((r() - 0.5) * w, w * 0.4, (r() - 0.5) * w), raio: new THREE.Vector3(w * 0.6, w * 0.45, w * 0.6) });
+  g.add(copaEmTufos(r, massas, { folha: o.folha, topo: o.topo, miolo: 0.5, variar: 0.22 }, 34, 0.26));
   return g;
 }
 
