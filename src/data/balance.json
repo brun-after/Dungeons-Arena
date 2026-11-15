@@ -349,7 +349,7 @@
   },
   "relevo": { "pxPorNivel": 12, "encostaMax": 2, "muroBaixoMax": 3, "muroAltoMax": 6, "subidaPctPorNivel": 15, "montariaFator": 0.5, "vantagemAlcancePorNivel": 0.5, "vantagemAlcanceMax": 2 },
   "visual": {
-    "luz": { "raioJogador": 6, "raioSemTocha": 2.2, "raioTocha": 3.5, "raioObjeto": 2.5, "raioMagia": 2.5, "resolucaoMapa": 0.5, "realceMinimo": 0.1, "escuridaoExterior": 0.45, "clareza": 0.5 },
+    "luz": { "raioJogador": 6, "raioSemTocha": 1.6, "intensidadeTocha": 0.95, "intensidadeSemTocha": 0.28, "raioTocha": 3.5, "raioObjeto": 2.5, "raioMagia": 2.5, "resolucaoMapa": 0.5, "realceMinimo": 0.1, "escuridaoExterior": 0.45, "clareza": 0.5 },
     "ouroMontes": [3, 20, 100],
     "solo": { "amostrasPorCelula": 4, "raioMistura": 0.35, "ruidoBorda": 0.35, "aoRaio": 1.1, "aoForca": 0.55, "macroForca": 0.22, "variacaoCobre": 0.28 },
     "paredeIso": { "altura": 1.15, "alcanceSala": 14, "alphaFade": 0, "telhadoPerto": 3 },
@@ -650,9 +650,10 @@
       "quadros": {
         "amanhecer": { "ambiente": "#3a2a40", "nivel": 0.35 },
         "dia": { "ambiente": "#3a3426", "nivel": 0.06 },
-        "entardecer": { "ambiente": "#5a2410", "nivel": 0.4 },
-        "noite": { "ambiente": "#060e24", "nivel": 0.86 }
-      }
+        "entardecer": { "ambiente": "#4a1c0c", "nivel": 0.55 },
+        "noite": { "ambiente": "#02061a", "nivel": 0.96 }
+      },
+      "realceNoite": 0.025
     }
   }
 }

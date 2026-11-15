@@ -281,7 +281,11 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     document.body.dataset.escuridao = modo;
     const eu = pontosDoQuadro.find((p) => p.jogador) ?? null;
     const { ambiente, nivel } = escuroAgora(eu);
-    escuridao.desenhar(palco.mundo, palco.largura(), palco.altura(), { modo, ambiente, nivel, realceMinimo: vis.realceMinimo, resolucao: vis.resolucaoMapa }, centro, luzes);
+    // Marco 43 (D-177): no céu aberto, o mínimo de luz cai com a noite (até `realceNoite` na noite fechada).
+    const ciclo = ctx.balance.mundo.ciclo;
+    const noite = Math.max(0, Math.min(1, nivel / ciclo.quadros.noite.nivel));
+    const realceMinimo = ctx.fase.exterior ? vis.realceMinimo + (ciclo.realceNoite - vis.realceMinimo) * noite : vis.realceMinimo;
+    escuridao.desenhar(palco.mundo, palco.largura(), palco.altura(), { modo, ambiente, nivel, realceMinimo, resolucao: vis.resolucaoMapa }, centro, luzes);
   };
   const flash = new Graphics();
   palco.tela.addChild(flash);
@@ -338,14 +342,20 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   // Marco 31 (D-130): as áreas elementais que brilham (brasas, raios, geada, luz sagrada) iluminam em volta.
   const luzesDasAreas = luzesDosAmbientes(ctx.fase.ambientes ?? []);
   // Marco 42 (15/11/2026, D-176): no Mundo, a luz em volta é a da tocha; sem ela, só um halo curto.
-  const raioDoJogador = (e: Entidade) => (ctx.modo.luzSoComTocha && !temLuzPropria(e) ? vis.raioSemTocha : vis.raioJogador);
+  // Marco 43 (D-177): com a tocha, a luz é quente e forte; sem ela, só um halo frio e fraco nos pés (o luar).
+  const semTocha = (e: Entidade) => Boolean(ctx.modo.luzSoComTocha) && !temLuzPropria(e);
+  const luzDoJogador = (e: Entidade): { raio: number; cor: number; intensidade: number } => {
+    if (semTocha(e)) return { raio: vis.raioSemTocha, cor: 0x9fb4d8, intensidade: vis.intensidadeSemTocha };
+    if (ctx.modo.luzSoComTocha) return { raio: vis.raioJogador, cor: 0xffb060, intensidade: vis.intensidadeTocha };
+    return { raio: vis.raioJogador, cor: tema?.luz ?? 0xffd9a0, intensidade: 0.5 };
+  };
   const pontosDeLuz = (estado: EstadoJogo, posicao: (e: Entidade) => PontoVisual): PontoDeLuz[] => {
     const pontos: PontoDeLuz[] = [];
     const eu = estado.entidades.find((e) => e.id === idLocal);
     if (eu) {
       const p = posicao(eu);
       // Ajuste de 14/10/2026: o brilho em volta do jogador pela metade (feedback de jogo).
-      pontos.push({ x: p.x, y: p.y, cor: tema?.luz ?? 0xffd9a0, semente: 0, intensidade: 0.5, raio: raioDoJogador(eu), jogador: true });
+      pontos.push({ x: p.x, y: p.y, semente: 0, ...luzDoJogador(eu), jogador: true });
       // As tochas, velas e fendas de lava do tema perto do jogador.
       for (const a of luzesDasAreas) if (Math.abs(a.x - p.x) < 14 && Math.abs(a.y - p.y) < 11) pontos.push({ x: a.x, y: a.y, cor: a.cor, semente: a.x * 11 + a.y, intensidade: 0.4, raio: a.raio });
       for (const d of acesos) if (Math.abs(d.x - p.x) < 12 && Math.abs(d.y - p.y) < 9) pontos.push({ x: d.x, y: d.y - (d.tipo === 'tocha' ? 0.35 : 0), cor: d.tipo === 'vela' ? 0xffd890 : 0xff9a40, semente: d.x * 7 + d.y, intensidade: d.tipo === 'lava' ? 0.4 : 0.6, raio: d.tipo === 'vela' ? vis.raioObjeto : vis.raioTocha });
@@ -354,7 +364,8 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     for (const e of estado.entidades) {
       if (e.id === idLocal || e.morto || e.arquetipo !== 'jogador' || e.invocacao) continue;
       const q = posicao(e);
-      pontos.push({ x: q.x, y: q.y, cor: 0xffe2b8, semente: q.x * 3 + q.y, intensidade: 0.35, raio: raioDoJogador(e) * 0.7, jogador: true });
+      const l = luzDoJogador(e);
+      pontos.push({ x: q.x, y: q.y, cor: l.cor, semente: q.x * 3 + q.y, intensidade: l.intensidade * 0.75, raio: l.raio * 0.85, jogador: true });
     }
     for (const pr of estado.projeteis) pontos.push({ x: pr.x, y: pr.y, cor: 0xffc890, semente: pr.id, intensidade: 0.5, raio: vis.raioMagia });
     for (const obj of estado.objetos) {

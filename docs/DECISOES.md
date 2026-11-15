@@ -5535,6 +5535,10 @@ cada coisa por que ela está ali.
   - Na praça da vila, o poste substitui a fogueira; a fogueira fica para o abrigo no ermo.
   - A tocha carregada é desenhada com cabo, pano com piche e chama. Ela flutua à esquerda do personagem, um pouco acima do
     ombro, e passa para trás do corpo quando a esquerda aponta para o fundo.
+- **Noite de verdade.**
+  - A noite fechada ficou bem mais escura (`balance.mundo.ciclo`: quadro da noite em 0,96 e `realceNoite` 0,025 no lugar
+    do mínimo de luz das masmorras). Sem tocha, sobra um halo frio e fraco nos pés (raio 1,6); com ela, uma luz quente e
+    forte de 6 células.
 - **Visualizador local do Mundo**, sem servidor: `?bench=mundo&regiao=<id>&x=&y=&hora=&segundos=&tocha=1`.
 
 **Desvios e pendências.**
