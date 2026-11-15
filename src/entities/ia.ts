@@ -12,7 +12,6 @@ import { ticksDe } from '../core/tempo';
 import { alvoOfensivoValido, iniciarAcao, prioridadeDeAlvo, recargaRestante } from '../combat/acao';
 import { resolverHabilidade } from '../combat/compilar-habilidade';
 import { fatoresDoMundo, perfilDaIa, type PerfilIa } from '../modos/dificuldade';
-import { temLuzPropria } from '../combat/luz-propria';
 import { excedeLimite } from '../combat/efeitos-fluxo';
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
@@ -243,11 +242,9 @@ function tentarDetectar(
   ia.foraDaZonaTicks = 0;
   // Marco 15: a dificuldade encurta ou alonga o "?".
   const segundos = hesitacaoComTeto(sortearHesitacaoS(ia.rng, alvo.atributos.carisma, ctx.balance.combate.carismaNeutro, preset.hesitacaoS, ctx.balance.ia) * fatoresDoMundo(estado, ctx).hesitacao, ctx.balance.ia);
-  // Marco 43 (15/11/2026, D-177): diante do fogo (o alvo leva a tocha), o monstro hesita mais antes de avançar.
-  const fogo = temLuzPropria(alvo) ? ctx.balance.mundo.tocha.hesitacaoMult : 1;
   mudarModo(ia, 'hesitando', estado.tick);
   ia.alvoId = alvo.id;
-  ia.hesitacaoAteTick = estado.tick + ticksDe(segundos * fogo * 1000);
+  ia.hesitacaoAteTick = estado.tick + ticksDe(segundos * 1000);
   saida.push({ t: 'iaNotou', tick: estado.tick, id: e.id, alvoId: alvo.id, hesitacaoAteTick: ia.hesitacaoAteTick });
   return true;
 }

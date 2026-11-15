@@ -9,7 +9,6 @@ import { construirEfeito } from '../combat/registro-efeitos';
 import { alvoOfensivoValido } from '../combat/acao';
 import { chebyshev } from '../combat/geometria';
 import { podeAjudar } from '../modos/relacao';
-import { temLuzPropria } from '../combat/luz-propria';
 import { criarInimigo } from './fabrica';
 import { vivo, type Entidade } from './entidade';
 
@@ -52,17 +51,12 @@ export function raioDeAtencao(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
   const base=atencaoNoEscuro(ctx,e,base0);
   const r=ctx.balance.mundo.atencaoBatalha, desde=estado.tick-ticksDe(r.memoriaMs);
   const porId=new Map(estado.entidades.map(a=>[a.id,a]));
-  // Marco 43 (15/11/2026, D-177): a luta por perto chama reforço; contra quem leva a tocha, chama bem menos.
-  let reforco=0;
-  for(const a of estado.entidades){
-    if(!vivo(a)||a===e||!podeAjudar(e,a,ctx.modo)||chebyshev(e,a)>r.raio)continue;
-    const inimigos:Entidade[]=[];
-    for(const p of a.participacao){const alvo=porId.get(p.id);if(p.tick>=desde&&alvo&&alvoOfensivoValido(estado,ctx,e,alvo))inimigos.push(alvo);}
+  const batalha=estado.entidades.some(a=>{
+    if(!vivo(a)||a===e||!podeAjudar(e,a,ctx.modo)||chebyshev(e,a)>r.raio)return false;
+    const recebeu=a.participacao.some(p=>{const alvo=porId.get(p.id);return p.tick>=desde&&alvo&&alvoOfensivoValido(estado,ctx,e,alvo);});
     const alvo=a.ia?.alvoId?porId.get(a.ia.alvoId):undefined;
-    if(alvo&&alvoOfensivoValido(estado,ctx,e,alvo)&&alvo.participacao.some(p=>p.id===a.id&&p.tick>=desde))inimigos.push(alvo);
-    if(inimigos.length===0)continue;
-    const fator=inimigos.every(i=>temLuzPropria(i))?ctx.balance.mundo.tocha.reforcoPct/100:1;
-    reforco=Math.max(reforco,r.bonus*fator);
-  }
-  return base+reforco;
+    const atacou=alvo&&alvoOfensivoValido(estado,ctx,e,alvo)&&alvo.participacao.some(p=>p.id===a.id&&p.tick>=desde);
+    return recebeu||!!atacou;
+  });
+  return base+(batalha?r.bonus:0);
 }

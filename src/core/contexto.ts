@@ -435,8 +435,6 @@ export interface Balance {
     repeticaoDungeon: { fatorPorVez: number; bonusPorNivelPct: number; bonusMaxPct: number; niveisPorMetade: number };
     exercitoNecromante: { minimo: number; maximo: number; niveisPorVaga: number; recargaMs: number; duracaoMs: number; presets: string[] };
     atencaoBatalha: { raio: number; bonus: number; memoriaMs: number };
-    /** Marco 43 (15/11/2026, D-177): o fogo intimida os monstros (quem leva a tocha). */
-    tocha: { danoDeMonstroMenosPct: number; hesitacaoMult: number; reforcoPct: number };
     ofertas: { periodoS: number; duracaoS: number; quantidade: number; centrais: string[]; avancadas: string[] };
     /**
      * 09/11/2026 (D-144): a loja de cada dungeon renova toda semana no `diaRenovacao` (0 = domingo; 3 = quarta), à

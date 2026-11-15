@@ -80,19 +80,3 @@ describe('tocha (D-176)', () => {
     expect(m.estado.objetos.some((o) => o.tipo === 'poste_tocha')).toBe(true);
   });
 });
-
-describe('o fogo intimida os monstros (marco 43, D-177)', () => {
-  it('o monstro fere menos quem leva a tocha', async () => {
-    const { protecaoInicial } = await import('../../src/combat/ajustes-classes');
-    const { criarInimigo } = await import('../../src/entities/fabrica');
-    const { ctx, estado, e, eventos } = cena();
-    const preset = CONTEUDO.presets.get('lobo');
-    if (!preset) throw new Error('lobo');
-    const lobo = criarInimigo(preset, 'l1', 3, 1, ctx.balance);
-    estado.entidades.push(lobo);
-    const sem = protecaoInicial(estado, ctx, e, lobo);
-    aplicarEfeito(estado, ctx, e, construirEfeito('tocha', { duracaoMs: 60_000 }), { id: e.id, x: e.x, y: e.y }, null, eventos);
-    const com = protecaoInicial(estado, ctx, e, lobo);
-    expect(com).toBeCloseTo(sem * (1 - ctx.balance.mundo.tocha.danoDeMonstroMenosPct / 100));
-  });
-});

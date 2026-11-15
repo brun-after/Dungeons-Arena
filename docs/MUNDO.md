@@ -298,6 +298,4 @@ como padrão; múltiplas câmeras aumentam o trabalho gráfico no aparelho que a
   - Para gerar os sprites de novo: `npx tsx tools/objetos/render.ts --cenario [--so nome,nome]`.
 - **Tochas.** Postes e fogueiras têm modelo 3D e chama viva. A tocha carregada flutua à esquerda do personagem.
   - Com tocha, a luz alcança 6 células; sem ela, só um halo frio nos pés, e a noite fechada é quase breu.
-  - O fogo intimida os monstros: 15% menos dano recebido deles, hesitação 80% maior antes do ataque e menos reforço
-    entrando na luta (`balance.mundo.tocha`).
 - **Ver sem servidor:** `?bench=mundo&regiao=vila_do_centro&x=118&y=124&hora=30&tocha=1`.
