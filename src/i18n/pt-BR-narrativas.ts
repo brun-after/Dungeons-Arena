@@ -151,7 +151,7 @@ export const textosNarrativas = {
   'receita.rank': 'Nível {rank} de {max}: os números crescem com o nível da skill.',
   'receita.caminhos': 'Caminhos escolhidos: {lista}.',
   'receita.marcos': 'Marcos de nível em vigor: {lista}.',
-  'receita.poder': 'Poder base: o dano vem do seu nível, da arma e dos itens; os estilos somam {pct}% a esta skill.',
+  'receita.poder': 'Poder base: a força dela vem do seu nível, da arma e dos itens; os estilos somam {pct}% a esta skill.',
   'receita.elemento': 'Elemento: {elemento}. Aplica o estado dele e reage com os estados que o alvo já tem.',
   'receita.runaPadrao': 'Runa: {elemento}, a que a skill tem sem escolha.',
   'receita.runaEscolhida': 'Runa: {elemento}, escolhida por você no lugar da padrão.',

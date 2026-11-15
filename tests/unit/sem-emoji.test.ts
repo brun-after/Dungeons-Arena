@@ -6,6 +6,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { REGISTRO_EFEITOS } from '../../src/combat/registro-efeitos';
+import { ehSigilo } from '../../src/data/sigilos';
 import { ehIcone } from '../../src/data/icones';
 import { CONTEUDO } from '../apoio/fases';
 
@@ -43,6 +44,7 @@ describe('sem emoji', () => {
       ...[...CONTEUDO.elementos.values()].map((e) => e.icone),
       ...Object.values(REGISTRO_EFEITOS).map((d) => d.icone),
     ];
-    expect(icones.filter((i) => !ehIcone(i))).toEqual([]);
+    // D-175: ou um sigilo (os ícones arcanos das skills comuns e das ultimates).
+    expect(icones.filter((i) => !ehIcone(i) && !ehSigilo(i))).toEqual([]);
   });
 });
