@@ -43,6 +43,7 @@ import { ACHATAMENTO_ISO, CamadaEscuridao, type LuzNaTela } from '../render/escu
 import { escuroBaseEm, horaDoMundo, luzDaHora } from '../mundo/ciclo';
 import { temLuzPropria } from '../combat/luz-propria';
 import { agoraDoMundo } from './hora-do-mundo';
+import { alfaNoEscuro } from './visao-no-escuro';
 import { centroDaCelula } from '../render/projecao';
 import { CELULA_PX } from '../render/camera-calculo';
 import { ESCURIDAO_PADRAO } from '../world/solo';
@@ -415,7 +416,14 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     quadroPermitido: (agoraMs) => pulador.deveDesenhar(agoraMs, alvoFps()),
     // D-124: o corpo puxado, empurrado ou arremessado desliza em vez de pular.
     posicaoVisual: (base) => comVeiculo(deslizando(voo.posicao(base))),
-    ajusteVisual: (e, agoraMs) => corpoMovimento.ajusteForcado(e, agoraMs, o.estado()) ?? voo.ajuste(e, agoraMs) ?? corpoMovimento.ajuste(e, agoraMs, o.estado()),
+    ajusteVisual: (e, agoraMs) => {
+      const a = corpoMovimento.ajusteForcado(e, agoraMs, o.estado()) ?? voo.ajuste(e, agoraMs) ?? corpoMovimento.ajuste(e, agoraMs, o.estado());
+      // Marco 44 (D-178): no escuro, o inimigo além da visão some.
+      const estado = o.estado();
+      const v = alfaNoEscuro(ctx, estado, estado.entidades.find((x) => x.id === idLocal), e);
+      if (v >= 1) return a;
+      return a ? { ...a, alfa: (a.alfa ?? 1) * v } : { alturaPx: 0, inclina: 0, escala: 1, tinta: null, quadro: null, zMais: 0, alfa: v };
+    },
     quadro: (estado, agoraMs, dtMs, base) => {
       diretor.relogio(agoraMs);
       voo.quadro(estado, agoraMs, base);

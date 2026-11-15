@@ -435,6 +435,17 @@ export interface Balance {
     repeticaoDungeon: { fatorPorVez: number; bonusPorNivelPct: number; bonusMaxPct: number; niveisPorMetade: number };
     exercitoNecromante: { minimo: number; maximo: number; niveisPorVaga: number; recargaMs: number; duracaoMs: number; presets: string[] };
     atencaoBatalha: { raio: number; bonus: number; memoriaMs: number };
+    /**
+     * Marco 44 (15/11/2026, D-178): a tocha que se leva. Atrai os monstros mais fortes (raio × `atraiMult`), afasta os
+     * mais fracos (não chegam a menos de `afastaRaio` nem perseguem sem ser atacados) e os do mesmo nível avançam em
+     * `iguaisAvancamPct`% das janelas de `janelaIguaisMs`. Quem está a até `raioDoFogo` de um poste ou fogueira acesa
+     * conta como iluminado (é visto e vê como com tocha).
+     */
+    tocha: {
+      atraiMult: number; afastaRaio: number; iguaisAvancamPct: number; janelaIguaisMs: number; raioDoFogo: number;
+      /** A visão do jogador no escuro (células): sem luz, com luz, e a partir de que escuro ela vale. */
+      visaoSemTocha: number; visaoComTocha: number; visaoDesdeEscuro: number;
+    };
     ofertas: { periodoS: number; duracaoS: number; quantidade: number; centrais: string[]; avancadas: string[] };
     /**
      * 09/11/2026 (D-144): a loja de cada dungeon renova toda semana no `diaRenovacao` (0 = domingo; 3 = quarta), à

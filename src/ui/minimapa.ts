@@ -7,6 +7,7 @@ import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import type { Entidade } from '../entities/entidade';
 import { relacao } from '../modos/relacao';
+import { alfaNoEscuro } from './visao-no-escuro';
 import { t } from '../i18n';
 import { tipoEm, type Fase } from '../world/fase';
 import { ligarZoomMapa } from './zoom-mapa';
@@ -37,8 +38,10 @@ function terrenoEmCanvas(fase: Fase): HTMLCanvasElement {
   return c;
 }
 
-export function marcadorDaEntidade(ctx: ContextoSimulacao, idLocal: string, e: Entidade, eu: Entidade | undefined): { cor: string; r: number } | null {
+export function marcadorDaEntidade(ctx: ContextoSimulacao, idLocal: string, e: Entidade, eu: Entidade | undefined, estado?: EstadoJogo): { cor: string; r: number } | null {
     if (e.morto) return null;
+    // Marco 44 (D-178): o inimigo que o escuro esconde também some do mapa.
+    if (estado && alfaNoEscuro(ctx, estado, eu, e) < 0.5) return null;
     if (e.id === idLocal) return { cor: '#ffffff', r: 3 };
     // Marco 30 (30/10/2026, D-129): os do meu grupo do Mundo, em azul e maiores.
     if (eu?.grupo && e.grupo === eu.grupo) return { cor: '#3fa9f5', r: 3 };
@@ -129,7 +132,7 @@ export function criarMinimapa(ctx: ContextoSimulacao, idLocal: string, toque: bo
       for (const a of estado.armadilhas) if (a.runa || a.reveladaPara.includes(idLocal)) ponto(a.x, a.y, 1.5, '#e67e22');
       // O jogador por último, por cima de todos.
       for (const e of [...estado.entidades].sort((a, b) => Number(a.id === idLocal) - Number(b.id === idLocal))) {
-        const c = marcadorDaEntidade(ctx, idLocal, e, eu);
+        const c = marcadorDaEntidade(ctx, idLocal, e, eu, estado);
         if (c) ponto(e.x, e.y, c.r, c.cor);
       }
       g.restore();

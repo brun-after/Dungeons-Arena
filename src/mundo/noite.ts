@@ -34,8 +34,8 @@ export interface RegrasDaNoite {
   distancia: readonly [number, number];
   /** Os níveis acima do topo da faixa da região. */
   niveisExtra: readonly [number, number];
-  /** O raio de atenção dos monstros cresce até esta % no escuro total. */
-  deteccaoPct: number;
+  /** Marco 44 (D-178): no escuro total, os monstros percebem a ameaça a esta % a menos de distância que de dia. */
+  percepcaoMenosPct: number;
   /** Os monstros de cada mata fechada (sempre) e os presets quando a região não tem monstros (as seguras). */
   porMata: number;
   presetsDaMata: readonly string[];
@@ -53,9 +53,12 @@ export function escuroEm(ctx: ContextoSimulacao, x: number, y: number): number {
   return Math.max(ctx.modo.escuro ?? 0, escuroBaseEm(ctx.fase, x, y));
 }
 
-/** O raio de atenção do monstro no escuro (cresce até `deteccaoPct`). */
-export function atencaoNoEscuro(ctx: ContextoSimulacao, e: Entidade, base: number): number {
-  return base * (1 + (ctx.balance.mundo.noite.deteccaoPct / 100) * escuroEm(ctx, e.x, e.y));
+/**
+ * Marco 44 (15/11/2026, D-178): no escuro o monstro também enxerga pouco: o raio de atenção encolhe até
+ * `percepcaoMenosPct` na noite fechada (antes crescia). Quem está iluminado (a tocha, o fogo perto) não ganha o desconto.
+ */
+export function percepcaoNoEscuro(ctx: ContextoSimulacao, e: Entidade, base: number): number {
+  return base * (1 - (ctx.balance.mundo.noite.percepcaoMenosPct / 100) * escuroEm(ctx, e.x, e.y));
 }
 
 function lugarLivre(ctx: ContextoSimulacao, c: Celula): boolean {

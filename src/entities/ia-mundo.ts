@@ -1,5 +1,7 @@
 // 02/11/2026: exército próprio do boss e atenção atraída por combate recente no Mundo.
-import { atencaoNoEscuro } from '../mundo/noite';
+import { percepcaoNoEscuro } from '../mundo/noite';
+import { temLuzPropria } from '../combat/luz-propria';
+import { hashTexto } from '../core/rng';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
@@ -47,8 +49,8 @@ export function processarExercitoNecromante(estado: EstadoJogo, ctx: ContextoSim
 
 export function raioDeAtencao(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, base0: number): number {
   if(!ctx.fase.exterior) return base0;
-  // Marco 42 (15/11/2026, D-176): no escuro (a noite, a mata fechada), os monstros notam de mais longe.
-  const base=atencaoNoEscuro(ctx,e,base0);
+  // Marco 44 (D-178): o escuro entra por alvo (raioContra), porque quem está iluminado é visto de longe.
+  const base=base0;
   const r=ctx.balance.mundo.atencaoBatalha, desde=estado.tick-ticksDe(r.memoriaMs);
   const porId=new Map(estado.entidades.map(a=>[a.id,a]));
   const batalha=estado.entidades.some(a=>{
@@ -59,4 +61,56 @@ export function raioDeAtencao(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
     return recebeu||!!atacou;
   });
   return base+(batalha?r.bonus:0);
+}
+
+/**
+ * Marco 44 (15/11/2026, D-178): iluminado é quem leva a tocha acesa ou está a até `raioDoFogo` de um poste de tocha ou
+ * de uma fogueira. No escuro, quem está iluminado vê e é visto como de dia.
+ */
+export function iluminado(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade): boolean {
+  if (temLuzPropria(e)) return true;
+  const r = ctx.balance.mundo.tocha.raioDoFogo;
+  return estado.objetos.some((o) => (o.tipo === 'poste_tocha' || o.tipo === 'fogueira') && chebyshev(o, e) <= r);
+}
+
+/** Como o monstro reage a quem leva a tocha: o mais forte é atraído, o mais fraco evita, o igual decide na sorte. */
+export type ReacaoAoFogo = 'normal' | 'atraido' | 'evita';
+
+export function reacaoAoFogo(estado: EstadoJogo, ctx: ContextoSimulacao, monstro: Entidade, alvo: Entidade): ReacaoAoFogo {
+  if (!ctx.fase.exterior || !temLuzPropria(alvo)) return 'normal';
+  if (monstro.nivel > alvo.nivel) return 'atraido';
+  if (monstro.nivel < alvo.nivel) return 'evita';
+  const t = ctx.balance.mundo.tocha;
+  // O sorteio é por par e por janela de tempo (o mesmo resultado no mesmo estado, sem guardar nada).
+  const janela = Math.floor(estado.tick / Math.max(1, ticksDe(t.janelaIguaisMs)));
+  return (hashTexto(`${monstro.id}|${alvo.id}|${janela}`) % 100) < t.iguaisAvancamPct ? 'atraido' : 'evita';
+}
+
+/** Quem atacou o monstro (ele sempre persegue quem o feriu, com ou sem fogo). */
+function provocou(monstro: Entidade, alvo: Entidade): boolean {
+  return monstro.participacao.some((p) => p.id === alvo.id);
+}
+
+/**
+ * O raio de atenção do monstro contra este alvo (células), a partir do raio dele: no escuro, encolhe para quem não
+ * está iluminado; contra quem leva a tocha, cresce para os mais fortes e some para os que evitam (a menos que provocados).
+ */
+export function raioContra(estado: EstadoJogo, ctx: ContextoSimulacao, monstro: Entidade, alvo: Entidade, raio: number): number {
+  if (!ctx.fase.exterior) return raio;
+  const reacao = reacaoAoFogo(estado, ctx, monstro, alvo);
+  if (reacao === 'evita' && !provocou(monstro, alvo)) return -1;
+  const visto = iluminado(estado, ctx, alvo) ? raio : percepcaoNoEscuro(ctx, monstro, raio);
+  return reacao === 'atraido' ? visto * ctx.balance.mundo.tocha.atraiMult : visto;
+}
+
+/** O portador da tocha que este monstro evita e que está perto demais (a menos de `afastaRaio`), ou null. */
+export function fogoQueAfasta(estado: EstadoJogo, ctx: ContextoSimulacao, monstro: Entidade): Entidade | null {
+  if (!ctx.fase.exterior) return null;
+  const r = ctx.balance.mundo.tocha.afastaRaio;
+  for (const a of estado.entidades) {
+    if (a === monstro || !vivo(a) || a.controlador === 'ia' || chebyshev(a, monstro) >= r) continue;
+    if (!alvoOfensivoValido(estado, ctx, monstro, a) || provocou(monstro, a)) continue;
+    if (reacaoAoFogo(estado, ctx, monstro, a) === 'evita') return a;
+  }
+  return null;
 }
