@@ -410,7 +410,8 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
   });
   const alcance = alcancaveis(g, spawns[0] as Celula, alturas);
   const livres: Celula[] = [];
-  for (let y = 1; y < n - 1; y++) for (let x = 1; x < n - 1; x++) if (alcance[y * n + x] && !protegidas.has(y * n + x) && g.em(x, y) !== '=') livres.push({ x, y });
+  const ehLivre = new Uint8Array(n * n);
+  for (let y = 1; y < n - 1; y++) for (let x = 1; x < n - 1; x++) if (alcance[y * n + x] && !protegidas.has(y * n + x) && g.em(x, y) !== '=') { livres.push({ x, y }); ehLivre[y * n + x] = 1; }
   const naVila = (c: Celula) => (regiao.vila !== null && Math.hypot(c.x - regiao.vila.x, c.y - regiao.vila.y) <= regiao.vila.raio + FOLGA_INIMIGOS) || (abrigo !== null && chebyshev(c, abrigo) <= abrigo.raio + FOLGA_INIMIGOS);
 
   const ocupadas: Celula[] = [];
@@ -440,7 +441,15 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     const segura = (x: Celula) => !naVila(x) && spawns.every((s) => chebyshev(s, x) >= FOLGA_INIMIGOS);
     let c: Celula | null = null;
     if (centroHorda && restantes > 0) {
-      const candidatas = livres.filter(x => chebyshev(x, centroHorda as Celula) <= regras.raioHorda && segura(x) && !ocupadas.some(o => chebyshev(o, x) < 2));
+      // Marco 43 (D-177): só o quadrado em volta do centro (na mesma ordem de `livres`), não a região inteira.
+      const candidatas: Celula[] = [];
+      const ch = centroHorda;
+      for (let y = Math.max(0, ch.y - regras.raioHorda); y <= Math.min(n - 1, ch.y + regras.raioHorda); y++) {
+        for (let x = Math.max(0, ch.x - regras.raioHorda); x <= Math.min(n - 1, ch.x + regras.raioHorda); x++) {
+          const cel = { x, y };
+          if (ehLivre[y * n + x] && segura(cel) && !ocupadas.some((o) => chebyshev(o, cel) < 2)) candidatas.push(cel);
+        }
+      }
       if (candidatas.length) { c = escolher(rng, candidatas); ocupadas.push(c); restantes--; }
     }
     if (!c) {
@@ -456,7 +465,14 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     inimigos.push({ preset, x: c.x, y: c.y, nivel: elite ? Math.min(100, regiao.nivel[1] + regras.eliteNiveis) : nivel });
   }
   // Marco 31 (D-130): quem mora na casa abandonada (no topo da faixa: entrar é arriscado).
-  for (const c of abandonadas.dentro) if (regiao.inimigos.length > 0) inimigos.push({ preset: escolher(rng, regiao.inimigos), x: c.x, y: c.y, nivel: regiao.nivel[1] });
+  // Marco 43 (D-177): a casa pode ter caído onde a horda já estava (a mata limpa abre lugar): um por célula.
+  for (const c of abandonadas.dentro) {
+    if (regiao.inimigos.length === 0) continue;
+    const preset = escolher(rng, regiao.inimigos);
+    if (inimigos.some((i) => i.x === c.x && i.y === c.y)) continue;
+    inimigos.push({ preset, x: c.x, y: c.y, nivel: regiao.nivel[1] });
+    ocupadas.push(c);
+  }
 
   // 02/11/2026: encontros de bosses fora das vilas e longe de todos os pontos de chegada.
   // RNG próprio: mudar as probabilidades não altera terreno, hordas ou recursos.

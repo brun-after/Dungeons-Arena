@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.24 · **Data:** 15/11/2026
+**Versão:** 1.25 · **Data:** 15/11/2026
 
 > **Histórico**
+> - **1.25 (15/11/2026)**: D-177: marco 43: o relevo na geometria, a geografia de altura primeiro, o cenário em 3D composto pela função de cada lugar e as tochas de verdade.
 > - **1.24 (15/11/2026)**: D-176: marco 42: as cores do Mundo, o dia e a noite, a tocha, a noite perigosa, as matas fechadas, o elemento vento e o relevo.
 > - **1.23 (15/11/2026)**: D-175: a história de cada skill (narrativa, visual e receita), os sigilos (ícones arcanos únicos das skills comuns e das ultimates) e o visual próprio das skills comuns (o gesto do núcleo e a matéria do elemento).
 > - **1.22 (14/11/2026)**: D-174: a identidade no visual das skills de classe e das ultimates (a skill feita inteira do elemento da runa, a ultimate assinada pela classe, o sinal do estilo mais forte e o toque da afinidade dominante).
@@ -5483,3 +5484,57 @@ regenerar todas as regiões.
   fora (os extras da noite já trazem os níveis); a vantagem de alcance pela altura ficou nos dados, sem uso ainda.
 - Pôr o vento nos elementos dos temas muda os inimigos sorteados nessas regiões para a mesma semente. As armadilhas de
   fase congelaram a lista antiga, para as fases geradas não mudarem.
+
+## D-177 — Marco 43: relevo na geometria, cenário composto e tochas reais (15/11/2026)
+
+**Contexto.** O plano B do marco 42 deixava o chão num plano só. Os muros baixos eram chapados e destoavam das casas, os
+objetos não tinham volume e a tocha era só um brilho. O pedido foi refazer o exterior pela imersão e pela beleza, com as
+paisagens de The Witcher como referência. Havia duas condições: não pesar no navegador nem no celular, e perguntar de
+cada coisa por que ela está ali.
+
+**Decisão.**
+- **Geografia de altura primeiro** (`world/geografia.ts`).
+  - O relevo sai de ruído fractal, cristas de serra e montanha nas bordas.
+  - A serra é áspera: a altura oscila célula a célula. Os platôs em degraus ficam fora dela.
+  - A água ocupa o quantil mais baixo. A mata cresce em manchas, mais densa nas `matas`.
+  - Os rochedos ficam no pé da serra e debaixo de penhascos, e quase nunca soltos no plano.
+  - Os códigos de obstáculo ficam em `Fase.obstaculos`: montanha, rochedo, árvore e objeto.
+- **Estradas por A\*** (`world/estradas-exterior.ts`).
+  - O custo do terreno pesa a encosta (ao quadrado), a água, a mata e a rocha.
+  - A estrada em L de antes fica de reserva.
+  - A estrutura escondida ganha uma trilha estreita.
+- **Relevo na geometria.**
+  - A projeção ergue o ponto pela altura do chão e guarda à parte a profundidade plana (o `z`), que é a usada no
+    `zIndex`. O `desprojetar` inverte por iteração.
+  - O chão de cada bloco é uma malha com um quadrado por célula, erguido pelos cantos (`render/relevo-tela.ts`,
+    `render/solo/malha-relevo.ts`).
+  - Onde os cantos não se encontram, fica a face do penhasco, em facetas de rocha low-poly no tom dos rochedos
+    (`render/relevo-iso.ts`).
+  - Em volta das áreas planas há uma saia de encosta, de um nível por célula, para a vila assentar no chão em vez de
+    ficar num pedestal.
+- **Cenário em 3D pré-renderizado** (`tools/objetos --cenario`, `src/assets/cenario`, cerca de 410 KB em webp).
+  - Os sprites carregam por bloco de 16×16 perto da vista e saem da memória quando ficam longe.
+  - Cada sprite tem a sombra de contato no chão.
+  - As árvores crescem em talhões de uma espécie, com coníferas acima de `altitudeAlta` e arbustos na borda da mata
+    (`data/mundo/cenario.json`).
+- **Composição pela função** (`world/composicao-cenario.ts`).
+  - A praça tem o poço, dois bancos virados para ele e uma lanterna em cada portão.
+  - Cada casa guarda barris, caixotes e lenha junto da parede, e cada ofício tem o seu canto.
+  - Junto da vila ficam cercados fechados, com porteira, feno e cocho.
+  - As estradas têm marcos e placas; a margem da água tem juncos.
+  - Um objeto sólido vira obstáculo só onde não fecha passagem: passa pelo teste local de corte, e o cercado precisa de
+    uma volta livre em torno dele.
+- **Leitura da cena.** Árvores e objetos na frente do jogador ficam translúcidos. Obstáculo natural ou do cenário não vira
+  mais pilar.
+- **Tochas.**
+  - O poste de tocha e a fogueira usam o modelo 3D, com a chama viva por cima.
+  - Na praça da vila, o poste substitui a fogueira; a fogueira fica para o abrigo no ermo.
+  - A tocha carregada é desenhada com cabo, pano com piche e chama. Ela flutua à esquerda do personagem, um pouco acima do
+    ombro, e passa para trás do corpo quando a esquerda aponta para o fundo.
+- **Visualizador local do Mundo**, sem servidor: `?bench=mundo&regiao=<id>&x=&y=&hora=&segundos=&tocha=1`.
+
+**Desvios e pendências.**
+- As regiões do Mundo foram geradas de novo, então uma posição salva pode cair em obstáculo novo. O `pousar` da entrada
+  leva o personagem à célula livre mais próxima, como no marco 42.
+- A telegrafia das skills, as marcas de área e a região vizinha além da borda ainda ignoram a altura do chão.
+- A estrutura de caverna continua desenhada como fachada de pedra. A boca aberta no penhasco fica para depois.

@@ -30,8 +30,15 @@ const ROCHA: Readonly<Record<Bioma, { rocha: number; borda: number }>> = {
 const VAO_MINIMO = 1.5;
 
 export interface PenhascosIso {
+  /** Mostra só os pedaços perto da vista (retângulo em px de plano): o renderizador por software não aguenta o mapa todo. */
+  atualizar: (vista: readonly [number, number, number, number]) => void;
   destruir: () => void;
 }
+
+/** Marco 43 (D-177): cada diagonal é cortada em pedaços desta largura (células em x), para o recorte pela vista. */
+const PEDACO = 24;
+/** Folga do recorte (células), para a face alta que sobe acima da vista ainda aparecer. */
+const FOLGA_RECORTE = 10;
 
 /** Hash estável da aresta (as rachaduras e os estratos tortos saem iguais toda vez). */
 function hash(x: number, y: number, s: number): number {
@@ -124,11 +131,25 @@ export function criarPenhascosIso(camada: Container, fase: Fase, p: Projecao): P
     // `projetar` já ergue pela altura interpolada; aqui vale a altura deste lado do muro, não a média.
     return { x: q.x, y: q.z - nivel * pxPorNivel };
   };
-  const graficos: Graphics[] = [];
+  const pedacos: { g: Graphics; d: number; px: number }[] = [];
   for (let d = 0; d <= w + h - 2; d++) {
     let g: Graphics | null = null;
+    let px = -1;
+    const fechar = () => {
+      if (!g) return;
+      // A face fica no fim da diagonal das células de cima (quem está na de baixo, na frente, a cobre).
+      g.zIndex = p.projetar((d / 2 + 0.5) * CELULA_PX, (d / 2 + 0.5) * CELULA_PX).z + 0.02;
+      g.label = `penhascos-${d}-${px}`;
+      camada.addChild(g);
+      pedacos.push({ g, d, px });
+      g = null;
+    };
     for (let x = Math.max(0, d - h + 1); x <= Math.min(d, w - 1); x++) {
       const y = d - x;
+      if (Math.floor(x / PEDACO) !== px) {
+        fechar();
+        px = Math.floor(x / PEDACO);
+      }
       const k = (y * w + x) * 4;
       // Sul: os cantos sudoeste e sudeste daqui contra o noroeste e o nordeste da de baixo.
       if (y + 1 < h) {
@@ -155,12 +176,16 @@ export function criarPenhascosIso(camada: Container, fase: Fase, p: Projecao): P
         }
       }
     }
-    if (!g) continue;
-    // A face fica no fim da diagonal das células de cima (quem está na de baixo, na frente, a cobre).
-    g.zIndex = p.projetar((d / 2 + 0.5) * CELULA_PX, (d / 2 + 0.5) * CELULA_PX).z + 0.02;
-    g.label = `penhascos-${d}`;
-    camada.addChild(g);
-    graficos.push(g);
+    fechar();
   }
-  return { destruir: () => { for (const g of graficos) g.destroy(); } };
+  return {
+    atualizar: ([x0, y0, x1, y1]) => {
+      const cx0 = x0 / CELULA_PX - FOLGA_RECORTE;
+      const cx1 = x1 / CELULA_PX + FOLGA_RECORTE;
+      const d0 = (x0 + y0) / CELULA_PX - FOLGA_RECORTE;
+      const d1 = (x1 + y1) / CELULA_PX + FOLGA_RECORTE;
+      for (const q of pedacos) q.g.visible = q.d >= d0 && q.d <= d1 && (q.px + 1) * PEDACO >= cx0 && q.px * PEDACO <= cx1;
+    },
+    destruir: () => { for (const q of pedacos) q.g.destroy(); },
+  };
 }

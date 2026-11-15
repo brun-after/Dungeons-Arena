@@ -47,19 +47,31 @@ const PERFIS: Readonly<Record<Bioma, PerfilGeografico>> = {
   deserto: { suave: 4, serra: 0.25, plato: 0.45, degrau: 4, agua: 0.012, mata: 0.015, rochedos: 0.02 },
 };
 
+const VIZ8 = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]] as const;
+
 /** Ruído de valor suave (0 a 1) numa grade de `passo` células. */
 function ruido(rng: EstadoRng, n: number, passo: number): (x: number, y: number) => number {
   const lado = Math.ceil(n / passo) + 2;
-  const grade = Array.from({ length: lado * lado }, () => aleatorio(rng));
-  const v = (gx: number, gy: number) => grade[Math.min(lado - 1, gy) * lado + Math.min(lado - 1, gx)] ?? 0;
-  const s = (t: number) => t * t * (3 - 2 * t);
+  const grade = Float64Array.from({ length: lado * lado }, () => aleatorio(rng));
+  const ultimo = lado - 1;
+  // Marco 43 (D-177): sem closures por amostra (a geografia chama isto ~15 vezes por célula).
   return (x, y) => {
     const gx = Math.floor(x / passo);
     const gy = Math.floor(y / passo);
-    const tx = s((x % passo) / passo);
-    const ty = s((y % passo) / passo);
-    const a = v(gx, gy) + (v(gx + 1, gy) - v(gx, gy)) * tx;
-    const b = v(gx, gy + 1) + (v(gx + 1, gy + 1) - v(gx, gy + 1)) * tx;
+    let tx = (x % passo) / passo;
+    let ty = (y % passo) / passo;
+    tx = tx * tx * (3 - 2 * tx);
+    ty = ty * ty * (3 - 2 * ty);
+    const x0 = Math.min(ultimo, gx);
+    const x1 = Math.min(ultimo, gx + 1);
+    const y0 = Math.min(ultimo, gy) * lado;
+    const y1 = Math.min(ultimo, gy + 1) * lado;
+    const v00 = grade[y0 + x0] ?? 0;
+    const v10 = grade[y0 + x1] ?? 0;
+    const v01 = grade[y1 + x0] ?? 0;
+    const v11 = grade[y1 + x1] ?? 0;
+    const a = v00 + (v10 - v00) * tx;
+    const b = v01 + (v11 - v01) * tx;
     return a + (b - a) * ty;
   };
 }
@@ -135,11 +147,11 @@ export function gerarGeografia(e: EntradaGeografia): Geografia {
   const faixa = Math.max(1e-6, bMax - bMin);
   for (let k = 0; k < total; k++) base[k] = ((base[k] ?? 0) - bMin) / faixa;
   // O limiar da água: a fração mais baixa do chão fora da montanha.
-  const baixos = [...base].filter((_, k) => (montanha[k] ?? 0) < 0.08).sort((a, b) => a - b);
+  const baixos = Float32Array.from(base.filter((_, k) => (montanha[k] ?? 0) < 0.08)).sort();
   const limiarAgua = baixos[Math.floor(baixos.length * p.agua)] ?? 0;
   const manchas = new Float32Array(total);
   for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) manchas[y * n + x] = mancha(x, y);
-  const ordenadas = [...manchas].sort((a, b) => a - b);
+  const ordenadas = Float32Array.from(manchas).sort();
   // A mancha de floresta cobre a fração do bioma (a mais alta do ruído).
   const limiarMata = ordenadas[Math.floor(ordenadas.length * (1 - Math.min(0.9, p.mata * 1.4)))] ?? 1;
   const alturas = new Uint8Array(total);
@@ -186,7 +198,7 @@ export function gerarGeografia(e: EntradaGeografia): Geografia {
       const h = alturas[k] ?? 0;
       let queda = 0;
       let sope = false;
-      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]] as const) {
+      for (const [dx, dy] of VIZ8) {
         const j = (y + dy) * n + x + dx;
         queda = Math.max(queda, (alturas[j] ?? 0) - h);
         if (obstaculos[j] === OBSTACULO.montanha) sope = true;

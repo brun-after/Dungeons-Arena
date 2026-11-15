@@ -1,6 +1,6 @@
 # Dungeons Arena: guia para quem trabalha no código
 
-**Versão:** 0.9 · **Data:** 15/11/2026
+**Versão:** 0.10 · **Data:** 15/11/2026
 
 A especificação normativa é [`docs/PROMPT-PROJETO-v4.0.md`](docs/PROMPT-PROJETO-v4.0.md). Leia a Parte 1
 antes de decisões técnicas. Divergências vão para [`docs/DECISOES.md`](docs/DECISOES.md), com justificativa.
@@ -10,7 +10,7 @@ O roteiro e o estado de cada marco ficam no [`README.md`](README.md).
 
 - `npm run dev`: cliente em `http://localhost:5173` (menu; `?jogo=campanha` slots, `&slot=N` joga no slot, `?arena=online`, `?arena=loopback`,
   `?jogo=grupo&slot=N&criar=1|&codigo=X` campanha em grupo, `?jogo=mundo` o Mundo (marco 29, guia em docs/MUNDO.md),
-  `?bench=carga|padrao|trocas` benchmarks; no Mundo, `?hora=N` adianta o relógio do dia N minutos e
+  `?bench=carga|padrao|trocas` benchmarks, `?bench=mundo&regiao=<id>&x=&y=&tocha=1` o Mundo local sem servidor (marco 43); no Mundo, `?hora=N` adianta o relógio do dia N minutos e
   `MUNDO_HORA_MIN` faz o mesmo no servidor, marco 42)
 - `npm run dev:server`: servidor da arena (Colyseus) em `ws://localhost:2567`; `npm run carga`: teste de carga
 - `npm run carga -- --perfil suportado|degradado --fase arena-02`: carga com rede simulada (proxy em `tools/rede`);
@@ -44,7 +44,8 @@ O roteiro e o estado de cada marco ficam no [`README.md`](README.md).
 - **Sem atributo de classe** (D-155): a classe cresce nos estilos (`estilos.json → melhorias`, `progression/dominio.ts`);
   não volte a pôr `dominio` em `Atributos`.
 - **Relevo pelo desnível** (marco 42, D-176): quem anda, salta, voa ou atira consulta `world/relevo.ts`; não compare
-  alturas soltas no código.
+  alturas soltas no código. Na tela, a altura do chão vem de `render/relevo-tela.ts`, e o `zIndex` usa o `z` da
+  projeção, nunca o `y` erguido (marco 43, D-177).
 - **Clone explícito** do estado (sem ida e volta por JSON); estado só com dados.
 - TypeScript estrito, sem `any`, até 800 linhas por arquivo, sem globais, HTML sempre escapado.
 - Textos de interface no dicionário `src/i18n/`.

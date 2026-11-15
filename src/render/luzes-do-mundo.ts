@@ -8,7 +8,14 @@ import CATALOGO from '../assets/cenario/catalogo.json';
 
 export type TipoDeLuz = 'poste_tocha' | 'fogueira';
 
-const URLS = import.meta.glob<string>(['../assets/cenario/poste_tocha.webp', '../assets/cenario/fogueira.webp'], { eager: true, query: '?url', import: 'default' });
+/**
+ * As URLs dos modelos vêm de render/cenario-iso.ts (que as lista com o `import.meta.glob` do Vite); aqui não, para quem
+ * empacota o render sem o Vite (as galerias dos testes de ponta a ponta) seguir funcionando: sem URL, desenha como antes.
+ */
+const URLS = new Map<TipoDeLuz, string>();
+export function registrarUrlDaLuz(tipo: TipoDeLuz, url: string): void {
+  URLS.set(tipo, url);
+}
 
 /** O cenário é renderizado a 96 px por célula e o jogo desenha a 48 (a metade). */
 const RESOLUCAO = 2;
@@ -28,9 +35,9 @@ export const ehLuzDoMundo = (tipo: string): tipo is TipoDeLuz => tipo === 'poste
 export function aplicarLuzDoMundo(s: Sprite, tipo: TipoDeLuz): boolean {
   const t = texturas.get(tipo);
   if (!t) {
-    if (!pedidas.has(tipo)) {
+    if (!pedidas.has(tipo) && URLS.has(tipo)) {
       pedidas.add(tipo);
-      const url = Object.entries(URLS).find(([c]) => c.endsWith(`/${tipo}.webp`))?.[1];
+      const url = URLS.get(tipo);
       if (url) void Assets.load<Texture>(url).then((tx) => { texturas.set(tipo, tx); }).catch(() => undefined);
     }
     return false;

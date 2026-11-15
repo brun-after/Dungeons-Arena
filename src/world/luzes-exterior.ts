@@ -26,12 +26,13 @@ function beira(em: (x: number, y: number) => string, c: Celula): Celula | null {
 }
 
 /** A célula andável mais perto de `alvo`, procurando em anéis até `raioMax`. */
-function andavelPerto(em: (x: number, y: number) => string, alvo: Celula, raioMax: number): Celula | null {
+function andavelPerto(em: (x: number, y: number) => string, alvo: Celula, raioMax: number, ok: (c: Celula) => boolean = () => true): Celula | null {
   for (let r = 0; r <= raioMax; r++) {
     for (let dy = -r; dy <= r; dy++) {
       for (let dx = -r; dx <= r; dx++) {
         if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
-        if (ANDA.has(em(alvo.x + dx, alvo.y + dy))) return { x: alvo.x + dx, y: alvo.y + dy };
+        const c = { x: alvo.x + dx, y: alvo.y + dy };
+        if (ANDA.has(em(c.x, c.y)) && ok(c)) return c;
       }
     }
   }
@@ -53,11 +54,12 @@ export function luzesDoExterior(
   for (const m of regiao.matas ?? []) {
     const ang = Math.atan2(n / 2 - m.y, n / 2 - m.x);
     const alvo = { x: Math.round(m.x + Math.cos(ang) * (m.raio + 2)), y: Math.round(m.y + Math.sin(ang) * (m.raio + 2)) };
-    const c = andavelPerto(em, alvo, 6);
-    if (c && livre(c)) luzes.push({ tipo: 'luz', objeto: 'fogueira', ...c });
+    // Marco 43 (D-177): a busca já pula o que está ocupado (a mata mais cheia do relevo novo tapava o primeiro achado).
+    const c = andavelPerto(em, alvo, 10, livre);
+    if (c) luzes.push({ tipo: 'luz', objeto: 'fogueira', ...c });
   }
   for (const abrigo of pracas) {
-    const c = andavelPerto(em, { x: abrigo.x + 4, y: abrigo.y + 3 }, 4);
+    const c = andavelPerto(em, { x: abrigo.x + 4, y: abrigo.y + 3 }, 4, livre);
     // Marco 43 (D-177): na praça da vila, o poste de tocha (braseiro); a fogueira é do abrigo no ermo.
     if (c && livre(c)) luzes.push({ tipo: 'luz', objeto: naVila(c) ? 'poste_tocha' : 'fogueira', ...c });
   }

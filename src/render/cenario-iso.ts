@@ -15,8 +15,13 @@ import type { PecaDoCenario } from '../world/composicao-cenario';
 import { CELULA_PX } from './camera-calculo';
 import type { Projecao } from './projecao';
 import { deslocamentoNoPlano } from './solo/malha-relevo';
+import { ehLuzDoMundo, registrarUrlDaLuz } from './luzes-do-mundo';
 
 const URLS = import.meta.glob<string>('../assets/cenario/*.webp', { eager: true, query: '?url', import: 'default' });
+for (const [caminho, url] of Object.entries(URLS)) {
+  const nome = caminho.slice(caminho.lastIndexOf('/') + 1, -'.webp'.length);
+  if (ehLuzDoMundo(nome)) registrarUrlDaLuz(nome, url);
+}
 /** Pixels da imagem por pixel do jogo (renderizadas a 96 px por célula). */
 const RESOLUCAO = 2;
 const BLOCO = 16;
@@ -29,7 +34,7 @@ const TROCA_POR_MS = 1 / 180;
 type NomeCenario = keyof typeof CATALOGO;
 const ehNome = (n: string): n is NomeCenario => Object.hasOwn(CATALOGO, n);
 
-/** As variantes de cada série (carvalho → carvalho_1, carvalho_2...; o nome sem número vale sozinho). */
+/** As variantes de cada série (carvalho vira carvalho_1, carvalho_2...; o nome sem número vale sozinho). */
 const VARIANTES = new Map<string, NomeCenario[]>();
 for (const nome of Object.keys(CATALOGO)) {
   if (!ehNome(nome)) continue;

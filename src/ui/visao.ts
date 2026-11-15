@@ -138,7 +138,9 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
     tokenProprio: () => token,
     esmaecer: (jogador, dtMs) => {
       paredes?.esmaecer(jogador, dtMs);
-      cenario?.atualizar(camera.retanguloVisivel(palco.altura()), jogador, dtMs);
+      const vista = camera.retanguloVisivel(palco.altura());
+      cenario?.atualizar(vista, jogador, dtMs);
+      penhascos?.atualizar(vista);
       telhados?.atualizar(jogador, dtMs);
     },
     oculto: (x, y) => telhados?.oculto(x, y) ?? false,
