@@ -30,6 +30,7 @@ import { parDaUltimate, ultimateDe } from '../combat/carga-ultimate';
 import { ID_RUNA_DE_FUSAO } from '../progression/habilidades-personagem';
 import { seletorDeRuna } from './seletor-runa';
 import { listaDeLeituras } from './leituras-skill';
+import { blocoDaHistoria } from './historia-skill';
 
 export interface EstadoAbaHabilidades {
   /** Mantido para a mochila (D-067: a escolha agora é direta, pelos botões 1 2 3 4 da carta). */
@@ -151,6 +152,9 @@ export function desenharHabilidades(
     grau.title = t('habilidades.grauDica', { grau: h.grau, min: Math.round((ticksDeEstudo(ctx, j, id) * DT_MS) / 60000) });
     titulo.append(' ', grau);
     textos.append(titulo);
+    // D-175 (15/11/2026): a história, o que se vê e a receita (o botão +) de toda skill.
+    const historia = blocoDaHistoria(ctx, j, id, tick);
+    if (historia) textos.append(historia);
     const perfil = perfilPara(ctx, j, h);
     const linhas = descreverHabilidade(h, { rankMax, perfilDanoPct: perfil.danoPct });
     // Marco 28 (D-127): com o que a skill escala e o efeito atual na ficha.
@@ -286,6 +290,8 @@ function desenharUltimate(corpo: HTMLElement, j: Entidade, ctx: ContextoSimulaca
   const cor = h.elemento ? ctx.conteudo.elementos.get(h.elemento)?.cor : undefined;
   if (cor) titulo.style.color = cor;
   textos.append(titulo, el('p', 'detalhe-item', u.texto));
+  const historia = blocoDaHistoria(ctx, j, u.id, tick);
+  if (historia) textos.append(historia);
   const desc = el('ul', 'descricao-habilidade');
   const nome = (id: string) => resolverHabilidade(ctx, id)?.nome ?? id;
   // Marco 40 (D-160): a família vem das duas skills das teclas 1 e 2.
