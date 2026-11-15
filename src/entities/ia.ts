@@ -21,7 +21,7 @@ import { celulaLivre, pararMovimento, planejarCaminho, VETOR_DIR } from '../worl
 import { emPasso, vivo, type Entidade, type EstadoIa, type ModoIa } from './entidade';
 import { emCamuflagem } from '../combat/movimento-classe';
 import { podeFerir } from '../modos/relacao';
-import { processarExercitoNecromante, raioDeAtencao } from './ia-mundo';
+import { fogoQueAfasta, processarExercitoNecromante, raioContra, raioDeAtencao } from './ia-mundo';
 import { processarInvocacao } from './ia-invocacao';
 import { alvoMaisFerido, celulaDeCerco, destinoDeCura, fugaDoAviso, perigoDoCaminho } from './ia-tatica';
 import { emPerigo, naAreaAfim } from '../world/perigos';
@@ -101,7 +101,8 @@ function detectar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, raio:
   for (const outro of estado.entidades) {
     if (outro.id === e.id || !alvoDaIa(estado, ctx, e, outro)) continue;
     const d = manhattan(origem, celulaOcupada(outro));
-    if (d > raio) continue;
+    // Marco 44 (D-178): no Mundo, o raio depende do alvo (o escuro, a tocha).
+    if (d > raioContra(estado, ctx, e, outro, raio)) continue;
     // Avatar hostil primeiro (§2.9, marco 10A-3); depois o mais próximo, menor HP e id.
     const p = prioridadeDeAlvo(outro);
     const pm = melhor ? prioridadeDeAlvo(melhor) : Infinity;
@@ -139,6 +140,13 @@ export function processarIa(estado: EstadoJogo, ctx: ContextoSimulacao, saida: E
     const estranho = sortearEstranhamento(estado, ctx, e, ia);
     if (estranho) comecarPerseguicao(estado, ctx, e, ia, estranho.id, saida);
     if (reagirAoEstado(estado, ctx, e, ia, saida)) continue;
+    // Marco 44 (D-178): o monstro mais fraco não chega perto de quem leva a tocha (a menos que provocado).
+    const fogo = ia.modo === 'perseguindo' ? null : fogoQueAfasta(estado, ctx, e);
+    if (fogo) {
+      if (ia.modo === 'hesitando') voltarAPatrulhar(estado, e, ia);
+      recuar(estado, ctx, e, celulaOcupada(fogo));
+      continue;
+    }
     switch (ia.modo) {
       case 'patrulha':
         if (!tentarDetectar(estado, ctx, e, ia, preset, saida)) patrulhar(estado, ctx, e, ia);
@@ -265,7 +273,7 @@ function hesitar(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, ia: Es
     comecarPerseguicao(estado, ctx, e, ia, alvo.id, saida);
     return;
   }
-  if (manhattan(celulaOcupada(e), celulaOcupada(alvo)) > raioDeAtencao(estado,ctx,e,preset.deteccao)) {
+  if (manhattan(celulaOcupada(e), celulaOcupada(alvo)) > raioContra(estado, ctx, e, alvo, raioDeAtencao(estado,ctx,e,preset.deteccao))) {
     ia.foraDaZonaTicks++;
     ia.hesitacaoAteTick++;
     if (ia.foraDaZonaTicks >= ticksDe(ctx.balance.ia.gracaForaDaZonaMs)) {

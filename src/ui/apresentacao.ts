@@ -1,4 +1,5 @@
 import { podeAjudar } from '../modos/relacao';
+import { fogoAceso } from '../world/fogo-aceso';
 import { luzesDosAmbientes } from '../render/solo/ambientes-solo';
 import { faixaSuperior } from './aviso';
 import { IndicadorCombo } from './combos';
@@ -43,6 +44,7 @@ import { ACHATAMENTO_ISO, CamadaEscuridao, type LuzNaTela } from '../render/escu
 import { escuroBaseEm, horaDoMundo, luzDaHora } from '../mundo/ciclo';
 import { temLuzPropria } from '../combat/luz-propria';
 import { agoraDoMundo } from './hora-do-mundo';
+import { alfaNoEscuro } from './visao-no-escuro';
 import { centroDaCelula } from '../render/projecao';
 import { CELULA_PX } from '../render/camera-calculo';
 import { ESCURIDAO_PADRAO } from '../world/solo';
@@ -285,7 +287,10 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     const ciclo = ctx.balance.mundo.ciclo;
     const noite = Math.max(0, Math.min(1, nivel / ciclo.quadros.noite.nivel));
     const realceMinimo = ctx.fase.exterior ? vis.realceMinimo + (ciclo.realceNoite - vis.realceMinimo) * noite : vis.realceMinimo;
-    escuridao.desenhar(palco.mundo, palco.largura(), palco.altura(), { modo, ambiente, nivel, realceMinimo, resolucao: vis.resolucaoMapa }, centro, luzes);
+    // Marco 44 (15/11/2026, D-178): na vinheta do exterior, o claro é o da luz do jogador (e escurece por dentro sem tocha).
+    const luzEu = ctx.fase.exterior && eu ? luzes[pontosDoQuadro.indexOf(eu)] : undefined;
+    const vinheta = luzEu ? { raioVinheta: luzEu.raio, nucleo: nivel * (1 - realceMinimo) * (1 - Math.min(1, luzEu.intensidade)) } : {};
+    escuridao.desenhar(palco.mundo, palco.largura(), palco.altura(), { modo, ambiente, nivel, realceMinimo, resolucao: vis.resolucaoMapa, ...vinheta }, centro, luzes);
   };
   const flash = new Graphics();
   palco.tela.addChild(flash);
@@ -371,7 +376,8 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     for (const obj of estado.objetos) {
       if (obj.tipo === 'loja' || obj.tipo === 'bau' || obj.tipo === 'saida') pontos.push({ x: obj.x, y: obj.y, cor: 0xffc070, semente: obj.x * 31 + obj.y, raio: vis.raioObjeto });
       // Marco 42 (15/11/2026, D-176): o poste de tocha e a fogueira (maior) iluminam em volta (marco 43: do alto do poste).
-      else if (obj.tipo === 'poste_tocha' || obj.tipo === 'fogueira') pontos.push({ x: obj.x - (obj.tipo === 'poste_tocha' ? 1.1 : 0), y: obj.y - (obj.tipo === 'poste_tocha' ? 1.4 : 0.3), cor: 0xff9a40, semente: obj.x * 13 + obj.y, intensidade: 0.7, raio: obj.tipo === 'fogueira' ? vis.raioTocha * 1.6 : vis.raioTocha });
+      // Marco 44 (D-178): a fogueira de acampamento só ilumina acesa.
+      else if (fogoAceso(obj, estado.tick)) pontos.push({ x: obj.x - (obj.tipo === 'poste_tocha' ? 1.1 : 0), y: obj.y - (obj.tipo === 'poste_tocha' ? 1.4 : 0.3), cor: 0xff9a40, semente: obj.x * 13 + obj.y, intensidade: 0.7, raio: obj.tipo === 'fogueira' ? vis.raioTocha * 1.6 : vis.raioTocha });
     }
     const s = ctx.fase.portaSaida;
     if (s) pontos.push({ x: s.x, y: s.y, cor: estado.saidaAberta || s.tranca === 'livre' ? 0x9cf0b0 : 0xb0b0c0, semente: 7, raio: vis.raioObjeto });
@@ -415,7 +421,14 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     quadroPermitido: (agoraMs) => pulador.deveDesenhar(agoraMs, alvoFps()),
     // D-124: o corpo puxado, empurrado ou arremessado desliza em vez de pular.
     posicaoVisual: (base) => comVeiculo(deslizando(voo.posicao(base))),
-    ajusteVisual: (e, agoraMs) => corpoMovimento.ajusteForcado(e, agoraMs, o.estado()) ?? voo.ajuste(e, agoraMs) ?? corpoMovimento.ajuste(e, agoraMs, o.estado()),
+    ajusteVisual: (e, agoraMs) => {
+      const a = corpoMovimento.ajusteForcado(e, agoraMs, o.estado()) ?? voo.ajuste(e, agoraMs) ?? corpoMovimento.ajuste(e, agoraMs, o.estado());
+      // Marco 44 (D-178): no escuro, o inimigo além da visão some.
+      const estado = o.estado();
+      const v = alfaNoEscuro(ctx, estado, estado.entidades.find((x) => x.id === idLocal), e);
+      if (v >= 1) return a;
+      return a ? { ...a, alfa: (a.alfa ?? 1) * v } : { alturaPx: 0, inclina: 0, escala: 1, tinta: null, quadro: null, zMais: 0, alfa: v };
+    },
     quadro: (estado, agoraMs, dtMs, base) => {
       diretor.relogio(agoraMs);
       voo.quadro(estado, agoraMs, base);

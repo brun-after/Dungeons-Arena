@@ -5,6 +5,7 @@
 // arma a recarga dela para aquele jogador; morrer fecha e também arma (§2.12).
 // Baú compartilhado tem um abridor por vez (§3.6): a reserva sai com a entrega, a morte ou a saída.
 
+import { lojaFechadaANoite } from '../mundo/vila-noite';
 import { usarPortal } from './portas';
 import { usarRefugio } from '../progression/buffs';
 import { celulaOcupada, chebyshev } from '../combat/geometria';
@@ -124,6 +125,8 @@ function tentarInteragir(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade
   let ateTick: number;
   if (o.tipo === 'loja') {
     if (recargaLojaRestante(estado, o.objetoId, e.id) > 0) return 'em_recarga';
+    // Marco 44 (15/11/2026, D-178): à noite, as lojas do dia fecham (o vendedor da noite atende).
+    if (lojaFechadaANoite(ctx, o)) return 'loja_fechada';
     // D-067: a loja não fecha sozinha (sem prazo). 09/11/2026 (D-144): atende mesmo sendo perseguido.
     ateTick = LOJA_SEM_PRAZO;
   } else {

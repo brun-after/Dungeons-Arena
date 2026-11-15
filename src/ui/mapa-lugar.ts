@@ -97,7 +97,7 @@ export function mapaDoLugar(ctx: ContextoSimulacao, estado: () => EstadoJogo | n
     }
     for (const entidade of atual?.entidades ?? []) {
       if (entidade.id === idLocal) continue;
-      const marcador = marcadorDaEntidade(ctx, idLocal, entidade, eu);
+      const marcador = marcadorDaEntidade(ctx, idLocal, entidade, eu, atual ?? undefined);
       if (!marcador) continue;
       const p = mapa.ponto(entidade.x, entidade.y);
       g.fillStyle = marcador.cor;

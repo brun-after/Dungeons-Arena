@@ -8,6 +8,7 @@
   "autoBalancear": false,
   "fogoAmigo": false,
   "luzSoComTocha": true,
+  "acampamento": true,
   "fim": { "tipo": "nenhum", "alvo": null, "tempoLimiteS": null },
   "respawn": { "ativo": true, "atrasoS": 3, "atrasoCrescenteS": 0, "local": "base_da_equipe", "protecaoS": 5 },
   "entradaEmAndamento": true,

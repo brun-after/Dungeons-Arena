@@ -6,6 +6,8 @@
 // - o túmulo guarda a mochila e o equipado de quem morreu fora de dungeon. Fora do PvP, só o dono abre por um tempo.
 // Puro.
 
+import { acenderAcampamento, apagadaDeAcampamento } from './acampamento';
+import { temLuzPropria } from '../combat/luz-propria';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo, ObjetoNoMundo, TipoObjeto } from '../core/estado';
 import type { EventoSimulacao, MotivoItem } from '../core/eventos-simulacao';
@@ -34,7 +36,7 @@ export const FRAGMENTO_DE_PORTAL = 'fragmento_portal';
 /** O objeto de cada papel que não é loja. */
 const OBJETO_DO_PAPEL: Readonly<Partial<Record<PapelNpc, TipoObjeto>>> = { missoes: 'npc', save: 'pedra_save', portal: 'pedra_portal' };
 /** Os que só pedem ao servidor (sem efeito no tick). */
-const PEDIDOS: ReadonlySet<TipoObjeto> = new Set(['npc', 'pedra_save', 'pedra_portal', 'porta_estrutura', 'portal_temporario']);
+const PEDIDOS: ReadonlySet<TipoObjeto> = new Set(['npc', 'pedra_save', 'pedra_portal', 'porta_estrutura', 'portal_temporario', 'caixa_acampamento']);
 /** Interagíveis do Mundo sempre disponíveis (sem reserva nem estado de aberto). */
 export const SEMPRE_DISPONIVEIS: ReadonlySet<TipoObjeto> = new Set([...PEDIDOS, 'poste_tocha', 'fogueira', 'tumulo']);
 /** Marco 42 (15/11/2026, D-176): os que acendem a tocha de quem interage (com a duração do item Tocha). */
@@ -86,6 +88,12 @@ export function interagirNoMundo(estado: EstadoJogo, ctx: ContextoSimulacao, e: 
   }
   if (o.tipo === 'tumulo') return abrirTumulo(estado, ctx, e, o, saida);
   if (ACENDEM_TOCHA.has(o.tipo)) {
+    // Marco 44 (15/11/2026, D-178): a fogueira de acampamento apagada acende com a tocha acesa de quem interage.
+    if (apagadaDeAcampamento(o, tick)) {
+      if (!temLuzPropria(e)) return 'fogo_apagado';
+      acenderAcampamento(estado, ctx, o, saida);
+      return null;
+    }
     const item = ctx.conteudo.itens.get(ITEM_TOCHA);
     if (!item) return 'nao_encontrado';
     for (const ef of item.efeitos) aplicarEfeito(estado, ctx, e, ef, { id: e.id, x: e.x, y: e.y }, null, saida);
@@ -126,7 +134,7 @@ export function concluirColeta(estado: EstadoJogo, ctx: ContextoSimulacao, e: En
  * Morte fora de dungeon (regra `tumuloNaMorte` do modo): a mochila e o equipado vão para um túmulo no lugar da
  * morte. Fora do PvP (sem fogo amigo), só o dono abre até `donoExclusivoS`; com PvP, qualquer um, na hora.
  */
-export function criarTumulo(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
+export function criarTumulo(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[], semTumulo = false): void {
   const bolsa = e.bolsa;
   if (!bolsa) return;
   const itens: string[] = [];
@@ -140,6 +148,11 @@ export function criarTumulo(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entid
   bolsa.mochila = [];
   if (itens.length === 0) return;
   recalcularFicha(e, ctx);
+  // Marco 44 (15/11/2026, D-178): morto na noite fechada, os itens somem com ele.
+  if (semTumulo) {
+    saida.push({ t: 'tumuloCriado', tick: estado.tick, id: e.id, objetoId: '', x: e.x, y: e.y, itens: 0 });
+    return;
+  }
   const regras = ctx.balance.mundo.tumulo;
   const liberaTick = ctx.modo.fogoAmigo ? estado.tick : estado.tick + ticksDe(regras.donoExclusivoS * 1000);
   const objetoId = `t${estado.tick}_${e.id}`;

@@ -3,6 +3,7 @@
 // avisos. Tudo precisa do NPC perto (o banco abre em qualquer vila; o quadro só oferece as missões da sua vila,
 // mas entrega as de qualquer uma). Puro.
 
+import { horaDoMundo } from './ciclo';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { Bolsa, Entidade } from '../entities/entidade';
 import type { AcaoDoMundo } from './acoes';
@@ -51,7 +52,9 @@ export function missoesPorId(reino: Reino): ReadonlyMap<string, MissaoDoMundo> {
 }
 
 function ofertas(b: Balcao): string[] {
-  return b.fonte ? ofertasDoQuadro(b.reino.missoes, b.fonte, diaDe(b.agora), b.ctx.balance.mundo.missoes.ofertasPorQuadro) : [];
+  const m = b.ctx.balance.mundo.missoes;
+  const noite = horaDoMundo(b.agora, b.ctx.balance.mundo.ciclo).fase === 'noite';
+  return b.fonte ? ofertasDoQuadro(b.reino.missoes, b.fonte, diaDe(b.agora), m.ofertasPorQuadro, noite ? m.ofertasDaNoite : 0) : [];
 }
 
 /** O quadro da vila (ou do andarilho): as ofertas do dia, as aceitas e as já entregues hoje. */

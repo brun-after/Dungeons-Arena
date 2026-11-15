@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.25 · **Data:** 15/11/2026
+**Versão:** 1.26 · **Data:** 15/11/2026
 
 > **Histórico**
+> - **1.26 (15/11/2026)**: D-178: marco 44: a noite com consequência (visão no escuro, a tocha que atrai e afasta, a fogueira de acampamento, a caça noturna, a vila pela hora e os elementos pela hora).
 > - **1.25 (15/11/2026)**: D-177: marco 43: o relevo na geometria, a geografia de altura primeiro, o cenário em 3D composto pela função de cada lugar e as tochas de verdade.
 > - **1.24 (15/11/2026)**: D-176: marco 42: as cores do Mundo, o dia e a noite, a tocha, a noite perigosa, as matas fechadas, o elemento vento e o relevo.
 > - **1.23 (15/11/2026)**: D-175: a história de cada skill (narrativa, visual e receita), os sigilos (ícones arcanos únicos das skills comuns e das ultimates) e o visual próprio das skills comuns (o gesto do núcleo e a matéria do elemento).
@@ -5546,3 +5547,66 @@ cada coisa por que ela está ali.
   leva o personagem à célula livre mais próxima, como no marco 42.
 - A telegrafia das skills, as marcas de área e a região vizinha além da borda ainda ignoram a altura do chão.
 - A estrutura de caverna continua desenhada como fachada de pedra. A boca aberta no penhasco fica para depois.
+
+## D-178 — Marco 44: a noite com consequência (15/11/2026)
+
+**Contexto.** Depois do marco 43, a noite era escura, mas mudava pouco no jogo. O pedido foi dar razão para o dia e a
+noite existirem: a escolha entre luz e escuro, e o que se ganha e se arrisca em cada um.
+
+**Decisão.**
+- **A noite em breu.** O quadro da noite vale a noite inteira: antes, ela só chegava ao escuro total no meio dela, e
+  o começo e o fim se misturavam com o entardecer e o amanhecer. Agora a passagem fica só nessas duas fases. A noite
+  ficou cerca de 70% mais escura (`#01020a` a 0,99, mínimo de luz 0,008).
+  - Sem tocha, a luz do jogador é um halo fraco de 2 células.
+  - Na vinheta (qualidade baixa e mínima), o claro segue a luz do jogador, em vez de ter o tamanho da tela, e escurece
+    por dentro sem tocha.
+- **Visão no escuro** (`ui/visao-no-escuro.ts`).
+  - No exterior escuro, os inimigos só aparecem a até 3 células sem luz e a até 10 com a tocha ou perto de um fogo.
+  - O inimigo parado na luz de um fogo também aparece.
+  - Vale para o desenho, o minimapa e o mapa do lugar. Aliados e membros do grupo continuam sempre à vista.
+- **Percepção dos monstros.**
+  - No escuro, os monstros percebem a ameaça a 50% da distância de dia.
+  - Quem está iluminado é visto como de dia. É essa a furtividade: a luz dá segurança, e o escuro deixa passar
+    despercebido.
+- **A tocha** (`entities/ia-mundo.ts`).
+  - Atrai os monstros de nível maior que o do portador: o raio de atenção deles é multiplicado por 1,6.
+  - Os de nível menor não se aproximam a menos de 5 células e não perseguem se não forem atacados.
+  - Os do mesmo nível têm 50% de chance de avançar, sorteada por janela de 20 s.
+  - Quando o tempo acaba, a tocha passa a queimar 2% da mana máxima por segundo e apaga quando a mana acaba.
+- **A noite paga e cobra.**
+  - O XP e o saque crescem 40%, na medida da noite.
+  - Quem morre na noite fechada não deixa túmulo, e o que levava se perde.
+- **Fogueira de acampamento** (`mundo/acampamento.ts`, `mundo/acampamento-sala.ts`).
+  - A lenha (item com `monta: "acampamento"`) monta, fora da vila, uma fogueira apagada com uma caixa ao lado.
+  - Ela acende com a tocha acesa de quem interage ou com qualquer skill de fogo mirada nela.
+  - Acesa, ela vira o acampamento da ficha: o lugar de renascer, em vez da vila, e a caixa, que abre em qualquer
+    fogueira acesa do dono.
+  - O acampamento vale 2 h desde a última vez que foi aceso. Quando vence, a caixa vai para o banco.
+  - Descansar perto da fogueira à noite, parado e fora de combate, recupera 2% de vida e de mana por segundo e
+    acumula o efeito `descansado`.
+  - Com 60 s de descanso, o amanhecer dá +10% de dano por 10 min.
+  - O fogo de acampamento aceso chama monstros da noite.
+- **Caça noturna.**
+  - Parte da horda da noite (35%) é dos monstros da noite: vampiro e esqueleto.
+  - O quadro de missões ganha 2 missões que só aparecem à noite (`hora: "noite"`).
+  - De dia, os monstros do covil e os monstros da noite no ermo dormem (efeito `adormecido`): não se mexem nem atacam, e
+    o primeiro golpe os acorda e fere 50% a mais.
+  - Os chefes da noite já existiam desde D-176.
+- **A vila pela hora** (`mundo/vila-noite.ts`).
+  - À noite, o ferreiro, o alquimista e o mercado fecham.
+  - O vendedor da noite chega à praça com tochas, lenha, pó revelador, poções e pergaminho de retorno.
+  - Os portões fecham: o monstro não segue ninguém para dentro da vila nem fere quem está lá, mesmo em combate (de dia,
+    vale a regra de D-138).
+- **Elementos pela hora** (`combat/clima.ts`).
+  - Sombra e gelo ficam até 15% mais fortes à noite; luz e fogo, de dia.
+  - Vale para o dano das skills, inclusive as que a runa muda de elemento, e para quanto dura o estado do elemento, o
+    que dá mais tempo para as reações.
+  - Só no exterior do Mundo.
+
+Os números ficam em `balance.mundo.tocha`, `noite`, `acampamento`, `vilaNoite` e `elementosPelaHora`.
+
+**Desvios e pendências.**
+- Os monstros "só da noite" são presets que já existem. Espectro e sombra seriam os melhores, mas são invocações. Nas
+  regiões em que o vampiro ou o esqueleto já aparecem de dia, eles dormem de dia em vez de sumir.
+- A taverna cheia aparece só no quadro de missões. Ainda não há gente nova na praça.
+- O vendedor da noite usa a figura do mercador errante.

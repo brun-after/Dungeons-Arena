@@ -5,7 +5,7 @@ import type { ContextoSimulacao } from '../../src/core/contexto';
 import { criarJogador } from '../../src/entities/fabrica';
 import { vivo } from '../../src/entities/entidade';
 import { lerLugar, montarLugar } from '../../src/mundo/lugares';
-import { atencaoNoEscuro, conferirNoite, PREFIXO_NOITE } from '../../src/mundo/noite';
+import { conferirNoite, percepcaoNoEscuro, PREFIXO_NOITE } from '../../src/mundo/noite';
 import type { RegiaoDoMundo } from '../../src/mundo/reino';
 import { MODO_MUNDO } from '../../src/mundo/sala-mundo';
 import { passavel, tipoEm } from '../../src/world/fase';
@@ -89,11 +89,11 @@ describe('noite perigosa (D-176)', () => {
     expect(m.estado.entidades.filter((e) => e.id.includes(':mata')).every((e) => vivo(e))).toBe(true);
   });
 
-  it('no escuro, os monstros notam de mais longe', () => {
+  it('no escuro, os monstros percebem de mais perto (marco 44, D-178)', () => {
     const m = regiao('campos_do_oeste');
     const e = m.estado.entidades.find((x) => x.arquetipo !== 'jogador');
     if (!e) throw new Error('monstro');
-    expect(atencaoNoEscuro(m.ctx, e, 10)).toBe(10);
-    expect(atencaoNoEscuro(comEscuro(m.ctx, 1), e, 10)).toBeCloseTo(10 * (1 + m.ctx.balance.mundo.noite.deteccaoPct / 100), 5);
+    expect(percepcaoNoEscuro(m.ctx, e, 10)).toBe(10);
+    expect(percepcaoNoEscuro(comEscuro(m.ctx, 1), e, 10)).toBeCloseTo(10 * (1 - m.ctx.balance.mundo.noite.percepcaoMenosPct / 100), 5);
   });
 });

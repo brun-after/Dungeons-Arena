@@ -13,7 +13,7 @@
     "perigoso": {"pvp": true, "densidadePor1000": 9, "armadilhasPor1000": 4, "elitePct": 20, "eliteNiveis": 6, "lootPct": 180, "casas": 3, "hordaMin": 5, "hordaMax": 9, "raioHorda": 7}
   },
   "lojas": {},
-  "mercadorErrante": ["pocao_vida_maior", "pocao_mana_maior", "pergaminho_retorno", "po_revelador", "tocha", "essencia_fogo", "couraca_expedicao"],
+  "mercadorErrante": ["pocao_vida_maior", "pocao_mana_maior", "pergaminho_retorno", "po_revelador", "tocha", "lenha", "essencia_fogo", "couraca_expedicao"],
   "regioes": [
     {
       "id": "dunas_do_poente",

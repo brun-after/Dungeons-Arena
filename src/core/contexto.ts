@@ -435,6 +435,33 @@ export interface Balance {
     repeticaoDungeon: { fatorPorVez: number; bonusPorNivelPct: number; bonusMaxPct: number; niveisPorMetade: number };
     exercitoNecromante: { minimo: number; maximo: number; niveisPorVaga: number; recargaMs: number; duracaoMs: number; presets: string[] };
     atencaoBatalha: { raio: number; bonus: number; memoriaMs: number };
+    /**
+     * Marco 44 (15/11/2026, D-178): a tocha que se leva. Atrai os monstros mais fortes (raio × `atraiMult`), afasta os
+     * mais fracos (não chegam a menos de `afastaRaio` nem perseguem sem ser atacados) e os do mesmo nível avançam em
+     * `iguaisAvancamPct`% das janelas de `janelaIguaisMs`. Quem está a até `raioDoFogo` de um poste ou fogueira acesa
+     * conta como iluminado (é visto e vê como com tocha).
+     */
+    tocha: {
+      atraiMult: number; afastaRaio: number; iguaisAvancamPct: number; janelaIguaisMs: number; raioDoFogo: number;
+      /** A visão do jogador no escuro (células): sem luz, com luz, e a partir de que escuro ela vale. */
+      visaoSemTocha: number; visaoComTocha: number; visaoDesdeEscuro: number;
+      /** Marco 44 (D-178): acabado o tempo, a tocha queima `manaPct`% da mana máxima (no mínimo `manaMin`) por segundo. */
+      manaPct: number; manaMin: number;
+    };
+    /**
+     * Marco 44 (15/11/2026, D-178): a fogueira de acampamento: quanto queima e quanto vale (min); o raio da skill de fogo
+     * que a acende; o descanso à noite (raio, escuro mínimo, cura e mana %/s, tempo para o bônus, quanto dura a marca);
+     * o bônus do amanhecer (dano %, min); a chance por minuto de chamar um monstro, a que distância; as vagas da caixa.
+     */
+    /** Marco 44 (D-178): a vila à noite: a partir de que noite as lojas `fecham` e o estoque do vendedor da noite. */
+    /** Marco 44 (D-178): os elementos mais fortes à noite e de dia, e quanto (% no auge). */
+    elementosPelaHora: { noite: readonly string[]; dia: readonly string[]; pct: number };
+    vilaNoite: { fechaDesde: number; fecham: readonly string[]; estoque: readonly string[] };
+    acampamento: {
+      acesaMin: number; duraMin: number; raioFogo: number; raioDescanso: number; noiteDesde: number; curaPctPorS: number;
+      descansoMinS: number; marcaMin: number; bonusDanoPct: number; bonusMin: number; atraiChancePorMinPct: number;
+      atraiDistancia: [number, number]; slots: number;
+    };
     ofertas: { periodoS: number; duracaoS: number; quantidade: number; centrais: string[]; avancadas: string[] };
     /**
      * 09/11/2026 (D-144): a loja de cada dungeon renova toda semana no `diaRenovacao` (0 = domingo; 3 = quarta), à
@@ -472,7 +499,8 @@ export interface Balance {
     /** Marco 30 (D-129): o baú do banco (por personagem, em qualquer vila). */
     banco: { slots: number };
     /** Missões aceitas ao mesmo tempo e quantas o quadro oferece por dia. */
-    missoes: { ativasMax: number; ofertasPorQuadro: number };
+    /** Marco 44 (D-178): `ofertasDaNoite` são as missões a mais que o quadro mostra à noite. */
+    missoes: { ativasMax: number; ofertasPorQuadro: number; ofertasDaNoite: number };
     /** Chat: o raio do canal local, o tamanho da mensagem, o limite por janela e o histórico do cliente. */
     chat: { raioLocal: number; maxTexto: number; porJanela: number; janelaS: number; historico: number };
     grupo: { max: number; conviteS: number };

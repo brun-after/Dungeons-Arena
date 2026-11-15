@@ -98,7 +98,10 @@ export function criarPaineisDaEconomia(o: OpcoesDaEconomia): PaineisDaEconomia {
 
   const banco = (a: Aviso<'banco'>) => {
     pBanco.mostrar((corpo) => {
-      corpo.append(paragrafo(t('mundo.banco.texto', { usados: a.itens.length, slots: a.slots, ouro: a.ouro, mochila: ouro() })));
+      // Marco 44 (15/11/2026, D-178): a caixa do acampamento usa o mesmo painel, sem o ouro.
+      const caixa = a.caixa ? { caixa: true as const } : {};
+      corpo.append(paragrafo(a.caixa ? t('mundo.caixa.texto', { usados: a.itens.length, slots: a.slots }) : t('mundo.banco.texto', { usados: a.itens.length, slots: a.slots, ouro: a.ouro, mochila: ouro() })));
+      if (!a.caixa) {
       const valor = campoNumero(t('mundo.banco.valor'), Math.min(100, Math.max(1, ouro())), 1, 100_000_000);
       corpo.append(
         linhaDeAcoes(
@@ -107,14 +110,15 @@ export function criarPaineisDaEconomia(o: OpcoesDaEconomia): PaineisDaEconomia {
           comChave(botao(t('mundo.banco.tirarOuro'), () => { o.enviar({ a: 'bancoOuro', op: 'tirar', valor: valor.valor() }); }), 'tirar-ouro'),
         ),
       );
+      }
       corpo.append(subtitulo(t('mundo.banco.bau')));
       const bau = lista();
       if (a.itens.length === 0) corpo.append(paragrafo(t('mundo.banco.vazio')));
-      for (const i of a.itens) bau.append(linhaDeItem(pilha(i), comChave(botao(t('mundo.banco.tirar'), () => { o.enviar({ a: 'banco', op: 'tirar', invId: i.invId, qtd: i.qtd }); }), `tirar-${i.invId}`)));
+      for (const i of a.itens) bau.append(linhaDeItem(pilha(i), comChave(botao(t('mundo.banco.tirar'), () => { o.enviar({ a: 'banco', op: 'tirar', invId: i.invId, qtd: i.qtd, ...caixa }); }), `tirar-${i.invId}`)));
       corpo.append(bau);
       corpo.append(subtitulo(t('mundo.banco.mochila')));
       const sua = lista();
-      for (const i of mochila()) sua.append(linhaDeItem(pilha(i), comChave(botao(t('mundo.banco.guardar'), () => { o.enviar({ a: 'banco', op: 'guardar', invId: i.invId, qtd: i.qtd }); }), `guardar-${i.invId}`)));
+      for (const i of mochila()) sua.append(linhaDeItem(pilha(i), comChave(botao(t('mundo.banco.guardar'), () => { o.enviar({ a: 'banco', op: 'guardar', invId: i.invId, qtd: i.qtd, ...caixa }); }), `guardar-${i.invId}`)));
       corpo.append(sua);
     });
   };

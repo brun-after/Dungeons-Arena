@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.52 · **Data:** 15/11/2026
+**Versão do documento:** 3.53 · **Data:** 15/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.53 (15/11/2026)**: marco 44: a noite com consequência: visão no escuro, a tocha que atrai e afasta, a fogueira de acampamento, a caça noturna, a vila e os elementos pela hora (D-178).
 > - **3.52 (15/11/2026)**: marco 43: o relevo na geometria, a geografia nova, o cenário em 3D composto pela função de cada lugar e as tochas de verdade (D-177).
 > - **3.51 (15/11/2026)**: marco 42: as cores do Mundo, o dia e a noite, a tocha, a noite perigosa, as matas fechadas, o elemento vento e o relevo (D-176).
 > - **3.50 (14/11/2026)**: marco 41: a região vizinha aparece além da borda, e a troca de região ficou sem a travada (D-169).
@@ -349,6 +350,21 @@ toda região, e a Travessia das Areias liga os dois reinos a pé. O guerreiro co
   por ela (os pontos dele também voltam).
 
 Detalhes em D-145 a D-156 e em [docs/BALANCEAMENTO.md](docs/BALANCEAMENTO.md) (172/172 metas).
+
+### Marco 44 — a noite, a tocha e as fogueiras (15/11/2026)
+
+**A noite em breu.** Sem luz, você enxerga perto e é visto de perto. A tocha mostra mais, mas atrai os monstros mais
+fortes e afasta os mais fracos. Quando acaba, ela queima a sua mana.
+
+**Risco e prêmio.** A noite dá mais XP e saque. Morrer nela não deixa túmulo.
+
+**Acampar.** A lenha monta uma fogueira no ermo. Acesa com a tocha ou com fogo, ela guarda itens, vira o lugar de
+renascer e cura quem descansa à noite.
+
+**A hora muda o mundo.** Há monstros e missões só da noite, e de dia os covis dormem. À noite, as lojas da vila fecham,
+o vendedor da noite chega e os portões barram os monstros. Sombra e gelo crescem à noite; luz e fogo, de dia.
+
+Detalhes em D-178 e em [docs/MUNDO.md](docs/MUNDO.md).
 
 ### Marco 43 — relevo, cenário e tochas no Mundo (15/11/2026)
 

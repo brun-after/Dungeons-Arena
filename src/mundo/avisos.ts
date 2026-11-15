@@ -102,7 +102,8 @@ export type AvisoDoMundo =
   | { tipo: 'quadro'; ofertas: string[]; ativas: MissaoAtiva[]; feitasHoje: string[]; falante?: { nome: string; fala: string } }
   /** Marco 30: uma missão aceita andou (o cliente atualiza o painel e avisa quando completa). */
   | { tipo: 'missao'; id: string; progresso: number; meta: number }
-  | { tipo: 'banco'; itens: ItemNaMochila[]; ouro: number; slots: number }
+  // Marco 44 (D-178): `caixa` é a caixa do acampamento (sem ouro), no mesmo painel do banco.
+  | { tipo: 'banco'; itens: ItemNaMochila[]; ouro: number; slots: number; caixa?: true }
   | { tipo: 'chat'; canal: CanalDoChat | 'sistema'; de: string; texto: string }
   | { tipo: 'grupo'; id: string | null; codigo?: string; membros: MembroVisto[] }
   | { tipo: 'convite'; grupo: string; de: string }

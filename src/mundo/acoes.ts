@@ -21,7 +21,7 @@ export interface OfertaDeItem {
 
 export type AcaoDoMundo =
   | { a: 'missao'; op: 'aceitar' | 'entregar' | 'abandonar'; id: string }
-  | { a: 'banco'; op: 'guardar' | 'tirar'; invId: string; qtd: number }
+  | { a: 'banco'; op: 'guardar' | 'tirar'; invId: string; qtd: number; caixa?: true }
   | { a: 'bancoOuro'; op: 'guardar' | 'tirar'; valor: number }
   | { a: 'chat'; canal: CanalDoChat; texto: string }
   | { a: 'denunciar'; nome: string; motivo: string }
@@ -76,7 +76,7 @@ export function lerAcaoDoMundo(v: unknown): AcaoDoMundo | null {
     case 'missao':
       return umDe(OPS_MISSAO, v.op) && id(v.id) ? { a: 'missao', op: v.op, id: v.id } : null;
     case 'banco':
-      return umDe(OPS_GUARDAR, v.op) && id(v.invId) && inteiro(v.qtd, 1, MAX_QTD) ? { a: 'banco', op: v.op, invId: v.invId, qtd: v.qtd } : null;
+      return umDe(OPS_GUARDAR, v.op) && id(v.invId) && inteiro(v.qtd, 1, MAX_QTD) ? { a: 'banco', op: v.op, invId: v.invId, qtd: v.qtd, ...(v.caixa === true && { caixa: true as const }) } : null;
     case 'bancoOuro':
       return umDe(OPS_GUARDAR, v.op) && inteiro(v.valor, 1, MAX_OURO) ? { a: 'bancoOuro', op: v.op, valor: v.valor } : null;
     case 'chat':

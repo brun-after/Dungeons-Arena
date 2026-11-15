@@ -53,7 +53,8 @@
       "couraca_eclipse",
       "manto_crepusculo",
       "po_revelador",
-      "tocha"
+      "tocha",
+      "lenha"
     ],
     "ferreiro": [
       "cota_malha",
@@ -75,7 +76,8 @@
       "essencia_veneno",
       "aceleracao_mente_rara",
       "po_revelador",
-      "tocha"
+      "tocha",
+      "lenha"
     ]
   },
   "mercadorErrante": [

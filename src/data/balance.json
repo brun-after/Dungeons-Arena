@@ -349,7 +349,7 @@
   },
   "relevo": { "pxPorNivel": 12, "encostaMax": 2, "muroBaixoMax": 3, "muroAltoMax": 6, "subidaPctPorNivel": 15, "montariaFator": 0.5, "vantagemAlcancePorNivel": 0.5, "vantagemAlcanceMax": 2 },
   "visual": {
-    "luz": { "raioJogador": 6, "raioSemTocha": 1.6, "intensidadeTocha": 0.95, "intensidadeSemTocha": 0.28, "raioTocha": 3.5, "raioObjeto": 2.5, "raioMagia": 2.5, "resolucaoMapa": 0.5, "realceMinimo": 0.1, "escuridaoExterior": 0.45, "clareza": 0.5 },
+    "luz": { "raioJogador": 6, "raioSemTocha": 2, "intensidadeTocha": 0.95, "intensidadeSemTocha": 0.1, "raioTocha": 3.5, "raioObjeto": 2.5, "raioMagia": 2.5, "resolucaoMapa": 0.5, "realceMinimo": 0.1, "escuridaoExterior": 0.45, "clareza": 0.5 },
     "ouroMontes": [3, 20, 100],
     "solo": { "amostrasPorCelula": 4, "raioMistura": 0.35, "ruidoBorda": 0.35, "aoRaio": 1.1, "aoForca": 0.55, "macroForca": 0.22, "variacaoCobre": 0.28 },
     "paredeIso": { "altura": 1.15, "alcanceSala": 14, "alphaFade": 0, "telhadoPerto": 3 },
@@ -620,6 +620,10 @@
     "repeticaoDungeon": { "fatorPorVez": 0.5, "bonusPorNivelPct": 8, "bonusMaxPct": 80, "niveisPorMetade": 4 },
     "exercitoNecromante": {"minimo": 4, "maximo": 10, "niveisPorVaga": 5, "recargaMs": 12000, "duracaoMs": 90000, "presets": ["cavaleiro_profano", "piromante_profano", "arcanista_glacial", "espectro_tempestade"]},
     "atencaoBatalha": {"raio": 16, "bonus": 10, "memoriaMs": 8000},
+    "tocha": { "atraiMult": 1.6, "afastaRaio": 5, "iguaisAvancamPct": 50, "janelaIguaisMs": 20000, "raioDoFogo": 4, "visaoSemTocha": 3, "visaoComTocha": 10, "visaoDesdeEscuro": 0.45, "manaPct": 2, "manaMin": 1 },
+    "elementosPelaHora": { "noite": ["trevas", "gelo"], "dia": ["sagrado", "fogo"], "pct": 15 },
+    "vilaNoite": { "fechaDesde": 0.5, "fecham": ["ferreiro", "alquimista", "mercado"], "estoque": ["tocha", "lenha", "po_revelador", "pocao_vida", "pocao_mana", "pergaminho_retorno"] },
+    "acampamento": { "acesaMin": 20, "duraMin": 120, "raioFogo": 1.5, "raioDescanso": 2, "noiteDesde": 0.5, "curaPctPorS": 2, "descansoMinS": 60, "marcaMin": 10, "bonusDanoPct": 10, "bonusMin": 10, "atraiChancePorMinPct": 40, "atraiDistancia": [9, 14], "slots": 20 },
     "lojaDungeon": { "diaRenovacao": 3, "fusoHoras": -3, "basicos": 4, "incomuns": 3, "raros": 4, "raroExtraChancePct": 30, "epicoChancePct": 40, "lendarioChancePct": 6, "nivelFolga": 10 },
     "ofertas": {"periodoS": 1800, "duracaoS": 600, "quantidade": 2, "centrais": ["couraca_expedicao", "capa_sombria", "anel_do_eco", "aceleracao_mente_rara", "essencia_fogo", "essencia_gelo"], "avancadas": ["couraca_trono", "manto_abismo", "livro_chuva_de_estrelas", "runa_de_fusao", "tomo_potencial"]},
     "tumulo": { "donoExclusivoS": 150, "duracaoS": 300 },
@@ -634,7 +638,7 @@
     "portalTemporario": { "duracaoS": 60, "fragmentoChancePct": 1.5, "inteiroChancePct": 0.05, "lapideMin": 5 },
     "fusao": { "chanceArmaPct": [12, 20, 30], "resistenciaPct": [12, 20, 30], "valorPct": [25, 50, 90] },
     "banco": { "slots": 40 },
-    "missoes": { "ativasMax": 5, "ofertasPorQuadro": 6 },
+    "missoes": { "ativasMax": 5, "ofertasPorQuadro": 6, "ofertasDaNoite": 2 },
     "chat": { "raioLocal": 20, "maxTexto": 160, "porJanela": 5, "janelaS": 10, "historico": 50 },
     "grupo": { "max": 6, "conviteS": 60 },
     "troca": { "raio": 4, "maxItens": 8 },
@@ -642,7 +646,7 @@
     "eventos": { "janelaMin": 60, "duracaoMin": 20, "chancePct": 35, "luaLootPct": 200, "perigosComLua": ["normal", "perigoso"] },
     "noite": {
       "densidadePct": 50, "maxExtras": 60, "porConferencia": 2, "distancia": [14, 28], "niveisExtra": [2, 5],
-      "deteccaoPct": 30, "porMata": 4, "presetsDaMata": ["lobo", "aranha"],
+      "percepcaoMenosPct": 50, "sonoDoCovilPct": 50, "noturnos": ["vampiro", "esqueleto"], "noturnosPct": 35, "recompensaPct": 40, "semTumuloDesde": 0.5, "porMata": 4, "presetsDaMata": ["lobo", "aranha"],
       "chefeChancePorMinPct": 6, "chefes": ["necromante_ancestral", "vampiro"], "someLongeDe": 14
     },
     "ciclo": {
@@ -651,9 +655,9 @@
         "amanhecer": { "ambiente": "#3a2a40", "nivel": 0.35 },
         "dia": { "ambiente": "#3a3426", "nivel": 0.06 },
         "entardecer": { "ambiente": "#4a1c0c", "nivel": 0.55 },
-        "noite": { "ambiente": "#02061a", "nivel": 0.96 }
+        "noite": { "ambiente": "#01020a", "nivel": 0.99 }
       },
-      "realceNoite": 0.025
+      "realceNoite": 0.008
     }
   }
 }

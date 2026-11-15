@@ -562,7 +562,9 @@ async function jogarNoMundo(raiz: HTMLElement, servidor: string, tokenAntigo: st
   eu.aoEventos = (eventos) => {
     for (const ev of eventos) {
       c.bus.emitir(ev.t, ev);
-      if (ev.t === 'tumuloCriado' && ev.id === eu.entidadeId) {
+      // Marco 44 (15/11/2026, D-178): na noite fechada não fica túmulo (objetoId vazio).
+      if (ev.t === 'tumuloCriado' && ev.id === eu.entidadeId && !ev.objetoId) avisar(t('mundo.semTumulo'), 6000);
+      else if (ev.t === 'tumuloCriado' && ev.id === eu.entidadeId) {
         // 09/11/2026 (D-143): a lápide fica marcada no mapa e vira o destino da rota.
         marcarLapide(orientacao, pedido.lugar, { x: ev.x, y: ev.y }, ctx.balance.mundo.portalTemporario.lapideMin, Date.now());
         avisar(t('mundo.tumulo'), 6000);

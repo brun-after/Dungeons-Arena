@@ -83,15 +83,20 @@ function misturar(a: { ambiente: number; nivel: number }, b: { ambiente: number;
 const quadro = (q: QuadroDeLuz) => ({ ambiente: hexParaNumero(q.ambiente), nivel: q.nivel });
 
 /**
- * O escuro da tela na hora: do meio de uma fase ao meio da seguinte, interpola os quadros. Um lugar sempre escuro
- * (`escuroBase`, a floresta densa) puxa para o quadro da noite na mesma medida.
+ * O escuro da tela na hora. Marco 44 (15/11/2026, D-178): o dia e a noite ficam inteiros no seu quadro (antes a noite
+ * só chegava ao breu no meio dela, misturada metade a metade com o entardecer e o amanhecer); a passagem acontece no
+ * entardecer e no amanhecer, do quadro anterior ao dela e dele ao seguinte. Um lugar sempre escuro (`escuroBase`, a
+ * floresta densa) puxa para o quadro da noite na mesma medida.
  */
 export function luzDaHora(hora: HoraDoMundo, r: RegrasDoCiclo, escuroBase = 0): { ambiente: number; nivel: number } {
   const i = FASES_DO_DIA.indexOf(hora.fase);
   const n = FASES_DO_DIA.length;
-  const vizinha = hora.progresso < 0.5 ? FASES_DO_DIA[(i + n - 1) % n] : FASES_DO_DIA[(i + 1) % n];
-  // No meio da fase vale o quadro dela; nas pontas, metade a metade com a vizinha.
-  const base = misturar(quadro(r.quadros[hora.fase]), quadro(r.quadros[vizinha ?? hora.fase]), Math.abs(hora.progresso - 0.5));
+  const antes = FASES_DO_DIA[(i + n - 1) % n] ?? hora.fase;
+  const depois = FASES_DO_DIA[(i + 1) % n] ?? hora.fase;
+  const meu = quadro(r.quadros[hora.fase]);
+  const t = hora.progresso;
+  const passagem = hora.fase === 'amanhecer' || hora.fase === 'entardecer';
+  const base = !passagem ? meu : t < 0.5 ? misturar(quadro(r.quadros[antes]), meu, t * 2) : misturar(meu, quadro(r.quadros[depois]), (t - 0.5) * 2);
   const b = Math.max(0, Math.min(1, escuroBase));
   if (b <= hora.noite) return base;
   return misturar(base, quadro(r.quadros.noite), (b - hora.noite) / Math.max(0.0001, 1 - hora.noite));

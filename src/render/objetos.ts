@@ -19,6 +19,7 @@
 // ouro, o santuário e os quebráveis que têm modelo usam os sprites pré-renderizados de modelos 3D CC0
 // (render/objetos-3d.ts); sem a imagem, o desenho repintado de antes.
 
+import { fogoAceso } from '../world/fogo-aceso';
 import { CanvasSource, Container, Graphics, Sprite, Text, Texture } from 'pixi.js';
 import { REGISTRO_EFEITOS } from '../combat/registro-efeitos';
 import type { EstadoJogo, ObjetoNoMundo, TipoObjeto } from '../core/estado';
@@ -67,7 +68,7 @@ export const COR_RARIDADE: Readonly<Record<Raridade, number>> = {
 
 /** Os que ficam em pé no isométrico (D-058: baú e loja; D-109: ouro, orbes e santuário). */
 // Marco 29 (D-128): os objetos do Mundo também ficam em pé no isométrico.
-const EM_PE: ReadonlySet<TipoObjeto> = new Set<TipoObjeto>(['bau', 'loja', 'ouro', 'santuario', 'orbe_hp', 'orbe_recurso', 'orbe_efeito', 'orbe_refugio', 'npc', 'coleta', 'tumulo', 'pedra_save', 'pedra_portal', 'porta_estrutura', 'portal_temporario', 'poste_tocha', 'fogueira']);
+const EM_PE: ReadonlySet<TipoObjeto> = new Set<TipoObjeto>(['bau', 'loja', 'ouro', 'santuario', 'orbe_hp', 'orbe_recurso', 'orbe_efeito', 'orbe_refugio', 'npc', 'coleta', 'tumulo', 'pedra_save', 'pedra_portal', 'porta_estrutura', 'portal_temporario', 'poste_tocha', 'fogueira', 'caixa_acampamento']);
 
 /** Onde desenhar os objetos altos no isométrico. */
 export interface OpcoesEmPe {
@@ -163,6 +164,7 @@ export class CamadaObjetos {
   /** O modelo pré-renderizado do objeto (render/objetos-3d.ts), ou null. */
   private nomeModelo(o: ObjetoNoMundo): string | null {
     if (o.tipo === 'bau') return o.abertoTick > 0 ? 'bau_aberto' : o.chave ? 'bau_trancado' : 'bau_fechado';
+    if (o.tipo === 'caixa_acampamento') return 'bau_fechado';
     if (o.tipo === 'loja') return o.tipo;
     // O monte cresce com a quantia: o primeiro limite que a quantia não passa (acima de todos, o maior).
     if (o.tipo === 'ouro') {
@@ -291,6 +293,7 @@ export class CamadaObjetos {
   /** A chave do desenho repintado do objeto (o que muda o desenho entra nela), ou null para os que animam. */
   private chaveDe(o: ObjetoNoMundo): string | null {
     if (o.tipo === 'bau') return `bau:${o.abertoTick > 0 ? 'aberto' : o.chave ? 'trancado' : 'fechado'}`;
+    if (o.tipo === 'caixa_acampamento') return 'bau:fechado';
     if (o.tipo === 'loja') return `loja:${o.ref ?? ''}`;
     if (o.tipo === 'ouro') return 'ouro';
     if (o.tipo === 'santuario') return `santuario:${o.abertoTick === 0 ? 'aceso' : 'apagado'}`;
@@ -625,7 +628,8 @@ export class CamadaObjetos {
         const fogo = chamaDaLuz(o.tipo);
         alto.clear();
         if (o.tipo === 'poste_tocha') alto.ellipse(0, 0, 10, 4).fill({ color: 0x000000, alpha: 0.3 });
-        chama(alto, 0, -fogo.base, fogo.alto, tMs);
+        // Marco 44 (D-178): a fogueira de acampamento apagada fica só com a lenha.
+        if (fogoAceso(o, estado.tick)) chama(alto, 0, -fogo.base, fogo.alto, tMs);
         alto.zIndex = p.z + 0.002;
         return;
       }

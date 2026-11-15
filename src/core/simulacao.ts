@@ -1,4 +1,5 @@
 import { processarAmbientes } from '../world/ambientes';
+import { processarAcampamentos } from '../mundo/acampamento';
 import { processarPassagens } from '../world/passagem';
 import { processarTerrenosVivos } from '../world/terrenos-vivos';
 import { processarEnxame } from '../world/enxame';
@@ -118,6 +119,8 @@ export function simular(
   atualizarEstilosDespertos(estado, ctx, saida);
   // 08/11/2026 (D-138): os terrenos vivos reagem aos golpes do tick antes de as áreas valerem.
   processarTerrenosVivos(estado, ctx, saida, inicio);
+  // Marco 44 (D-178): a skill de fogo acende a fogueira de acampamento.
+  processarAcampamentos(estado, ctx, saida, inicio);
   processarAmbientes(estado, ctx, saida, inicio);
   // Marco 23 (D-092): o pulso do clima da fase de tema elemental.
   processarClima(estado, ctx, saida);
