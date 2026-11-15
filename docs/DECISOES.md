@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.23 · **Data:** 15/11/2026
+**Versão:** 1.24 · **Data:** 15/11/2026
 
 > **Histórico**
+> - **1.24 (15/11/2026)**: D-176: marco 42: as cores do Mundo, o dia e a noite, a tocha, a noite perigosa, as matas fechadas, o elemento vento e o relevo.
 > - **1.23 (15/11/2026)**: D-175: a história de cada skill (narrativa, visual e receita), os sigilos (ícones arcanos únicos das skills comuns e das ultimates) e o visual próprio das skills comuns (o gesto do núcleo e a matéria do elemento).
 > - **1.22 (14/11/2026)**: D-174: a identidade no visual das skills de classe e das ultimates (a skill feita inteira do elemento da runa, a ultimate assinada pela classe, o sinal do estilo mais forte e o toque da afinidade dominante).
 > - **1.21 (14/11/2026)**: D-173: as pendências do marco 40 (as 30 ressonâncias, a montaria alugada, os companheiros que leem os estilos, o movimento no HUD do computador, os visuais feitos à mão, a invocação nas ultimates só para quem invoca e as fusões que mudam a forma).
@@ -5435,3 +5436,50 @@ no menu, um botão + com a receita de tudo o que age sobre a skill.
 
 **O que ficou de fora.** As skills de `skills.json` que não são de classe nem de núcleo (as antigas, que o legado
 converte) usam a narrativa do elemento ou a padrão; os básicos de arma usam uma narrativa comum.
+
+## D-176 — Marco 42: cores, dia e noite, tocha, vento e relevo no Mundo (15/11/2026)
+
+**Contexto.** O Mundo parecia opaco: a tinta padrão do chão e o escuro padrão multiplicavam tudo por um lilás, e as
+regiões sem tema caíam nesses padrões. Junto com as cores, o usuário pediu o ciclo de dia e noite, a tocha, a noite
+mais perigosa, florestas sempre escuras dentro das regiões seguras, o elemento vento (com inimigos que apagam a tocha)
+e o relevo: encostas, muros baixos e altos, montanhas e cavernas. Tudo num PR só. Escolhas do usuário: dia vivo e noite
+sombria; tocha consumível com duração; vento primeiro nos inimigos e nas reações (as runas do jogador depois);
+regenerar todas as regiões.
+
+**Decisão.**
+- **Cores.** A tinta padrão ficou neutra e clara e o escuro padrão, azul-noite. Cada bioma tem a sua tinta
+  (`balance.visual.gradacao`), usada quando a região não tem tema; as tintas lilases dos temas do exterior clarearam.
+- **Dia e noite** (`mundo/ciclo.ts`). Ciclo de 40 minutos (24 de dia, 12 de noite, 2 de amanhecer e 2 de entardecer,
+  em `balance.mundo.ciclo`), calculado do relógio de parede como os eventos do Mundo: cliente e servidor chegam à mesma
+  hora sem aviso pela rede. A cor e o nível do escuro saem de quadros-chave em dados e se interpolam. Relógio no HUD.
+  Para testar: `?hora=N` no cliente e `MUNDO_HORA_MIN` no servidor adiantam a hora em minutos.
+- **Escuro próprio.** `escuroBase` na região (1 nas florestas densas) e `matas` (círculos de mata fechada, também
+  dentro de regiões seguras). Nelas a noite vale sempre, com borda macia, e as árvores ficam mais densas.
+- **Tocha.** Item consumível que aplica o efeito `tocha` (5 minutos, gancho `ilumina`). O modo do Mundo tem
+  `luzSoComTocha`: sem tocha, o raio da luz do jogador cai para 2,2. Postes de tocha ao longo das estradas e fogueiras na
+  borda das matas e nas praças entregam tocha ao interagir; nadar apaga. À venda no alquimista e no mercador errante.
+- **Noite perigosa** (`mundo/noite.ts`). No escuro, monstros extras (até +50% da densidade, 2 a 5 níveis acima),
+  matilhas nas matas, chance de chefe por minuto e atenção 30% maior. Ids `noite:<n>`, sem renascer; somem ao
+  amanhecer quando longe dos jogadores.
+- **Vento.** Décimo elemento, ainda sem runa de jogador (as 9 pontas do vínculo ficam como estão). Estado `arrastado`,
+  efeitos `apagar_luz` e `dispersar_tiros`, a skill `rajada` (cone que empurra, arrasta, apaga a tocha e dispersa os
+  tiros) pela afinidade, 9 reações com o gesto de cada uma, 7 assinaturas visuais e o som. O vento seca vapor, miasma e
+  névoa no terreno. Os temas abertos (ruínas, deserto, tundra, pico, cânion) ganharam o vento nos elementos dos
+  inimigos.
+- **Relevo** (`world/relevo.ts`, `world/relevo-exterior.ts`). Uma altura inteira por célula no exterior, regra pelo
+  desnível entre vizinhas (`balance.relevo`): até 2 é encosta (anda; subir tira 15% da velocidade por nível, metade na
+  montaria); 3 é muro baixo (só o salto passa, o tiro passa); 4 a 6 é muro alto (só o voo passa, o tiro que sobe para);
+  acima, montanha. Navegação, colisão, salto, dash, tiros, linha de tiro e formas respeitam o desnível. A geração tem
+  perfil por bioma e RNG próprio; vila, abrigo, chegadas e passagens ficam planas, estradas sobem um nível por célula e
+  tudo o que se alcançava a pé continua alcançável (abre-se rampa onde o muro isolaria). Cavernas e minas se abrem no
+  penhasco de um morro, com a boca no nível da frente.
+
+**Desvios do plano.**
+- O ciclo não manda aviso pela rede: o relógio de parede já é o mesmo nos dois lados.
+- O relevo no iso usa o plano B: o chão continua num plano só (o clique, a projeção e a profundidade não mudam), com o
+  sombreado das encostas assado no chão e as faces de penhasco ao sul e a leste. Os terraços deslocados ficam para
+  depois.
+- O vento nos inimigos vem pela afinidade dos temas, sem preset novo; o bônus de nível no renascimento à noite ficou de
+  fora (os extras da noite já trazem os níveis); a vantagem de alcance pela altura ficou nos dados, sem uso ainda.
+- Pôr o vento nos elementos dos temas muda os inimigos sorteados nessas regiões para a mesma semente. As armadilhas de
+  fase congelaram a lista antiga, para as fases geradas não mudarem.

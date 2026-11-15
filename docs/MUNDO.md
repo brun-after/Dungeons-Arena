@@ -1,8 +1,9 @@
 # O Mundo: guia do modo
 
-**Versão:** 1.2 · **Data:** 14/11/2026
+**Versão:** 1.3 · **Data:** 15/11/2026
 
 > **Histórico**
+> - **1.3 (15/11/2026)**: marco 42: cores por bioma, dia e noite, tocha, noite perigosa, matas fechadas, vento e relevo.
 > - **1.2 (14/11/2026)**: marco 41: a região vizinha desenhada além da borda e a troca sem a travada.
 > - **1.1 (14/11/2026)**: marco 41: as passagens entre as regiões (a troca de sala sem tela preta e a trégua) e o estado que segue com o personagem.
 > - **1.0 (08/11/2026)**: marco 38: prédios das vilas, andarilhos, escolta, mercadores errantes, forja em graus, troféus de chefe, fusão elemental, pedra de retorno com círculo, save em toda região e o deserto entre os reinos.
@@ -265,3 +266,19 @@ como padrão; múltiplas câmeras aumentam o trabalho gráfico no aparelho que a
 - Perto da passagem, a região de lá aparece além da borda (`world/recorte-vizinha.ts`, `render/vizinha.ts`). O chão
   assado é guardado entre as cenas (`render/solo/assados-guardados.ts`), e as teclas mantidas seguem para a cena nova.
 - Detalhes em D-169.
+
+## Dia, noite, tocha e relevo (marco 42, 15/11/2026)
+
+- **Hora.** O ciclo dura 40 minutos (24 de dia, 12 de noite e as duas transições) e sai do relógio, igual no cliente
+  e no servidor (`mundo/ciclo.ts`, `balance.mundo.ciclo`). Para testar: `?hora=32` no cliente (minutos à frente) e
+  `MUNDO_HORA_MIN=32` no servidor.
+- **Escuro.** O escuro de um ponto é o maior entre a noite, o `escuroBase` da região e as `matas` (círculos de mata
+  fechada no JSON do reino). Nas matas e nas florestas densas é sempre noite.
+- **Tocha.** No Mundo (`luzSoComTocha`), a luz do jogador sem tocha é curta. A tocha dura 5 minutos; postes nas estradas
+  e fogueiras nas matas e nas praças dão outra; nadar e a Rajada apagam.
+- **Noite** (`mundo/noite.ts`, `balance.mundo.noite`). Monstros extras mais fortes perto dos jogadores no escuro,
+  matilhas nas matas e chance de chefe; os inimigos prestam mais atenção. Somem ao amanhecer.
+- **Vento.** Inimigos dos temas abertos usam a Rajada: empurra, arrasta, apaga a tocha e leva os tiros.
+- **Relevo** (`world/relevo.ts`, `balance.relevo`). Desnível até 2: encosta (subir é mais lento); 3: muro baixo (salto);
+  4 a 6: muro alto (voo); acima: montanha. A geração (`world/relevo-exterior.ts`) deixa a vila e as passagens planas,
+  faz rampas nas estradas e garante que tudo continua alcançável a pé. Cavernas e minas ficam no penhasco de um morro.
