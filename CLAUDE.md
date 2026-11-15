@@ -1,6 +1,6 @@
 # Dungeons Arena: guia para quem trabalha no código
 
-**Versão:** 0.10 · **Data:** 15/11/2026
+**Versão:** 0.11 · **Data:** 15/11/2026
 
 A especificação normativa é [`docs/PROMPT-PROJETO-v4.0.md`](docs/PROMPT-PROJETO-v4.0.md). Leia a Parte 1
 antes de decisões técnicas. Divergências vão para [`docs/DECISOES.md`](docs/DECISOES.md), com justificativa.
@@ -46,6 +46,8 @@ O roteiro e o estado de cada marco ficam no [`README.md`](README.md).
 - **Relevo pelo desnível** (marco 42, D-176): quem anda, salta, voa ou atira consulta `world/relevo.ts`; não compare
   alturas soltas no código. Na tela, a altura do chão vem de `render/relevo-tela.ts`, e o `zIndex` usa o `z` da
   projeção, nunca o `y` erguido (marco 43, D-177).
+- **Hora em dados** (marco 44, D-178): o que muda com a noite lê `modo.escuro` e `modo.noite` (postos pela sala do
+  Mundo); o cliente usa `horaDoMundo(agoraDoMundo())`. Fora do Mundo os dois ficam ausentes e nada muda.
 - **Clone explícito** do estado (sem ida e volta por JSON); estado só com dados.
 - TypeScript estrito, sem `any`, até 800 linhas por arquivo, sem globais, HTML sempre escapado.
 - Textos de interface no dicionário `src/i18n/`.

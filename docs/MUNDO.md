@@ -1,8 +1,9 @@
 # O Mundo: guia do modo
 
-**Versão:** 1.4 · **Data:** 15/11/2026
+**Versão:** 1.5 · **Data:** 15/11/2026
 
 > **Histórico**
+> - **1.5 (15/11/2026)**: marco 44: a noite, a tocha, a fogueira de acampamento, a caça noturna e a vila pela hora.
 > - **1.4 (15/11/2026)**: marco 43: relevo na geometria, geografia nova, cenário composto e tochas reais.
 > - **1.3 (15/11/2026)**: marco 42: cores por bioma, dia e noite, tocha, noite perigosa, matas fechadas, vento e relevo.
 > - **1.2 (14/11/2026)**: marco 41: a região vizinha desenhada além da borda e a troca sem a travada.
@@ -299,3 +300,23 @@ como padrão; múltiplas câmeras aumentam o trabalho gráfico no aparelho que a
 - **Tochas.** Postes e fogueiras têm modelo 3D e chama viva. A tocha carregada flutua à esquerda do personagem.
   - Com tocha, a luz alcança 6 células; sem ela, só um halo frio nos pés, e a noite fechada é quase breu.
 - **Ver sem servidor:** `?bench=mundo&regiao=vila_do_centro&x=118&y=124&hora=30&tocha=1`.
+
+## A noite (marco 44, 15/11/2026)
+
+- **Ver no escuro.** Sem luz, você vê os inimigos a até 3 células; com a tocha ou perto do fogo, a até 10. No escuro,
+  os monstros também enxergam pela metade, mas quem leva a tocha é visto de longe.
+- **A tocha.** Atrai os monstros de nível maior que o seu e afasta os de nível menor (eles não chegam a menos de 5
+  células, a menos que você os ataque). Os do seu nível decidem na sorte. Quando o tempo acaba, ela queima a sua mana
+  até apagar.
+- **O que a noite muda.** Dá mais XP e mais saque. Morrer na noite fechada não deixa túmulo.
+- **Fogueira de acampamento.**
+  - Use a lenha no ermo e acenda a fogueira com a tocha ou com uma skill de fogo.
+  - Acesa, ela guarda itens na caixa e vira o seu lugar de renascer.
+  - Descansar perto dela à noite cura, e o amanhecer traz um bônus de dano.
+  - O fogo chama monstros.
+- **Caça noturna.** Vampiros e esqueletos andam pela noite, e o quadro da taverna tem missões só da noite. De dia, os
+  covis e os monstros da noite dormem: chegue de surpresa.
+- **A vila.** À noite, ferreiro, alquimista e mercado fecham, e o vendedor da noite atende na praça. Os portões fecham
+  para os monstros.
+- **Os elementos.** Sombra e gelo ficam mais fortes à noite; luz e fogo, de dia.
+- **Ver sem servidor:** `?bench=mundo&regiao=campos_do_oeste&x=60&y=60&hora=N&tocha=1`.
