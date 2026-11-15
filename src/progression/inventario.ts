@@ -1,6 +1,8 @@
 // Mochila, equipamento e pontos de atributo (§2.10, §2.12). Marco 6 (13/10/2026).
 // Tudo chega por comando (§3.3); cada recusa sai como evento com motivo, para a interface explicar.
 
+import { montarAcampamento } from '../mundo/acampamento';
+import { chaveDoDono } from '../mundo/objetos-mundo';
 import { aplicarEfeito } from '../combat/efeitos';
 import { excedeLimite } from '../combat/efeitos-fluxo';
 import { REGISTRO_EFEITOS, type EfeitoCanonico } from '../combat/registro-efeitos';
@@ -195,6 +197,14 @@ export function usarItem(estado: EstadoJogo, e: Entidade, ctx: ContextoSimulacao
       return OK;
     }
     if (item.tipo !== 'consumivel') return recusa('nao_consumivel');
+    // Marco 44 (15/11/2026, D-178): a lenha monta a fogueira de acampamento no ermo do Mundo.
+    if (item.monta === 'acampamento') {
+      if (!montarAcampamento(estado, ctx, e, chaveDoDono(e), saida)) return recusa('sem_acampamento');
+      entrada.qtd--;
+      if (entrada.qtd <= 0) bolsa.mochila.splice(indice, 1);
+      saida.push({ t: 'usouItem', tick, id: e.id, itemId: item.id, hp: 0, mana: 0 });
+      return OK;
+    }
     if (item.progressao) {
       if (!aplicarItemDeProgressao(e, ctx, item, tick, saida)) return recusa('sem_efeito');
       entrada.qtd--;

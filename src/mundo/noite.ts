@@ -5,6 +5,7 @@
 // extras que ninguém feriu e que não estão perto de ninguém vão embora. O sorteio é pela região e pelo tick (o mesmo
 // resultado para o mesmo estado). Puro.
 
+import { conferirAcampamentos } from './acampamento';
 import type { Celula } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
@@ -91,6 +92,7 @@ function sortearPerto(ctx: ContextoSimulacao, centro: Celula, de: number, ate: n
 }
 
 function nascer(estado: EstadoJogo, ctx: ContextoSimulacao, id: string, preset: string, c: Celula, nivel: number): boolean {
+  if (estado.entidades.length >= ctx.modo.limites.npcs) return false;
   const p = ctx.conteudo.presets.get(preset);
   if (!p || estado.entidades.some((e) => e.id === id)) return false;
   estado.entidades.push(criarInimigo(p, id, c.x, c.y, ctx.balance, { nivel: Math.min(100, nivel) }));
@@ -168,5 +170,14 @@ export function conferirFocosENoite(estado: EstadoJogo, ctx: ContextoSimulacao, 
   const escuro = escuroDoLugar(horaDoMundo(agoraMs, ctx.balance.mundo.ciclo), regiao.escuroBase ?? 0, false);
   const novo = (ctx.modo.escuro ?? 0) === escuro ? ctx : { ...ctx, modo: { ...ctx.modo, escuro } };
   conferirNoite(estado, novo, regiao, escuro);
+  // Marco 44 (15/11/2026, D-178): o descanso junto ao fogo e os monstros que o fogo de acampamento chama.
+  const r = ctx.balance.mundo.noite;
+  const presets = regiao.inimigos.length > 0 ? regiao.inimigos : r.presetsDaMata;
+  conferirAcampamentos(estado, novo, escuro, (centro, de, ate, id) => {
+    const rng = criarRng(hashTexto(id));
+    const c = sortearPerto(novo, centro, de, ate, () => aleatorio(rng));
+    const preset = presets[inteiro(rng, 0, presets.length - 1)];
+    return !!c && !!preset && nascer(estado, novo, `${PREFIXO_NOITE}${id}`, preset, c, regiao.nivel[1] + inteiro(rng, r.niveisExtra[0], r.niveisExtra[1]));
+  });
   return novo;
 }

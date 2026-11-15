@@ -10,6 +10,7 @@
 // Marco 38 (08/11/2026, D-142): os mercadores errantes andando, as escoltas, os andarilhos que dão missão, a pedra de
 // save no centro das regiões sem vila e a Pedra de retorno com conjuração (mundo/retorno.ts).
 
+import { atenderCaixa, avisoDaCaixa, refDoAcampamento, garantirAcampamento, pertoDaCaixa, registrarAcampamentos, renascerNoAcampamento } from './acampamento-sala';
 import { versaoDoConteudo, type MensagemCliente } from '../arena/protocolo';
 import { SalaArena, type EntradaDePersonagem, type OpcoesSala, type Sessao } from '../arena/sala';
 import { estadoPublico } from '../arena/estado-publico';
@@ -52,7 +53,7 @@ import { atenderChat, atenderTroca, cancelarTrocaDe, limparTrocas, type Particip
 import { TrocasDaSala } from './troca';
 import { descobrir, fichaAtualizada, type FichaDoMundo } from './ficha-mundo';
 import { idDoLugar, montarLugar, type Lugar, type LugarMontado } from './lugares';
-import { REF_ERRANTE } from './objetos-mundo';
+import { chaveDoDono, REF_ERRANTE } from './objetos-mundo';
 import { estoqueSemanalDaDungeon, semanaDaLoja } from './lojas-mundo';
 import { capitalDoAtlas, territorioDoLugar, estruturaDoDestino, portaDa, type PapelNpc, type Reino, type RegiaoDoMundo } from './reino';
 import type { ExteriorGerado } from '../world/gerador-exterior';
@@ -185,6 +186,7 @@ export class SalaMundo extends SalaArena {
     if (reserva.viagem) aplicarBagagem(this.estado, this.ctx, e, reserva.viagem, reserva.decorridoTicks, (id) => novos.get(id) ?? e.id); // D-169
     const ficha = { ...reserva.ficha, descobertas: [...reserva.ficha.descobertas] };
     this.presencas.set(entidadeId, { identidade, ficha, morreu: false, grupo: reserva.grupo });
+    if (this.lugar.tipo === 'regiao') garantirAcampamento(this.estado, this.ctx, ficha, this.lugar.regiao.id, chaveDoDono(e), this.opcoesMundo.agora()); // D-178
     if (reserva.grupo) e.grupo = reserva.grupo;
     // Marco 30 (30/10/2026, D-129): a proteção na passagem. Quem chega (pela borda, pela porta, pelo portal ou ao
     // entrar no jogo) fica uns segundos sem levar dano: ninguém espera do outro lado para pegar quem ainda carrega.
@@ -427,8 +429,7 @@ export class SalaMundo extends SalaArena {
   }
 
   private sessaoDaEntidade(id: EntidadeId): Sessao | undefined {
-    for (const s of this.sessoes.values()) if (s.entidadeId === id) return s;
-    return undefined;
+    return [...this.sessoes.values()].find((s) => s.entidadeId === id);
   }
 
   /** Os pedidos dos objetos (save, portal, porta, quadro), o dano no chefe do covil e a morte dele. */
@@ -439,6 +440,8 @@ export class SalaMundo extends SalaArena {
       else if (ev.t === 'morreu' && this.danoNoChefe.has(ev.id)) this.lootDoCovil(ev.id);
       if (ev.t === 'morreu') this.aoMorrer(ev.id, ev.porId);
     }
+    // Marco 44 (15/11/2026, D-178): a fogueira de acampamento acesa vai para a ficha do dono (mundo/acampamento-sala.ts).
+    if (this.lugar.tipo === 'regiao') registrarAcampamentos(this.eventosDoTick, this.lugar.regiao.id, (d) => [...this.presencas].find(([id]) => { const x = buscarEntidade(this.estado, id); return x && chaveDoDono(x) === d; })?.[1].ficha, this.opcoesMundo.agora(), this.estado.tick, this.ctx);
   }
 
   private atenderPedido(entidadeId: EntidadeId, tipo: string, ref: string): void {
@@ -464,6 +467,8 @@ export class SalaMundo extends SalaArena {
       // A masmorra é instanciada: a do grupo (todos entram na mesma) ou a de quem está só; o covil é um só.
       const instancia = estrutura.destino.tipo !== 'masmorra' ? null : p.grupo ? `grupo:${p.grupo}:${estrutura.destino.id}` : `${p.identidade}:${this.estado.tick}`;
       this.trocar(s, p, `${estrutura.destino.tipo}:${estrutura.destino.id}`, null, instancia);
+    } else if (tipo === 'caixa_acampamento' && ref === refDoAcampamento(chaveDoDono(e))) {
+      const b = this.balcao(s, e, p); if (b) this.avisar(s, avisoDaCaixa(b));
     } else if (tipo === 'portal_temporario') {
       this.atravessar(s, e, p, ref);
     } else if (tipo === 'npc') {
@@ -488,6 +493,10 @@ export class SalaMundo extends SalaArena {
     if (!p.morreu) return false;
     p.morreu = false;
     const aqui = this.lugar.tipo === 'regiao' ? this.lugar.regiao.id : null;
+    // Marco 44 (D-178): quem tem acampamento renasce na fogueira, não na vila.
+    const acamp = renascerNoAcampamento(p.ficha, this.opcoesMundo.agora());
+    if (acamp?.regiao === aqui) colocarEm(e, celulaDeEntrada(this.estado, this.ctx, e, acamp));
+    if (acamp) return acamp.regiao === aqui ? false : (this.trocar(s, p, `regiao:${acamp.regiao}`, acamp, null), true);
     if (aqui === p.ficha.vilaSalva) return false;
     this.trocar(s, p, `regiao:${p.ficha.vilaSalva}`, null, null);
     return true;
@@ -584,7 +593,8 @@ export class SalaMundo extends SalaArena {
         break;
       case 'banco':
       case 'bancoOuro':
-        if (b) atenderBanco(b, acao);
+        if (b && acao.a === 'banco' && acao.caixa) atenderCaixa(b, acao, pertoDaCaixa(this.estado, this.ctx, e, chaveDoDono(e)));
+        else if (b) atenderBanco(b, acao);
         break;
       case 'chat':
         atenderChat(this.social(p, e), this.participante(s, e, p), acao, this.limiteDoChat);
@@ -671,16 +681,10 @@ export class SalaMundo extends SalaArena {
       ...(andarilho ? { falante: { nome: andarilho.nome, fala: andarilho.fala } } : {}),
       agora: this.opcoesMundo.agora(),
       perto: (papel) => this.pertoDoNpc(e, papel),
-      avisar: (a) => {
-        this.avisar(s, a);
-      },
-      dar: (itemId) => {
-        this.dar(e, itemId);
-      },
+      avisar: (a) => { this.avisar(s, a); },
+      dar: (itemId) => { this.dar(e, itemId); },
       // Fora do tick: os eventos de nível não vão ao cliente (o estado leva o nível novo).
-      darXp: (xp) => {
-        concederXpDeProgressao(e, this.ctx, xp, this.estado.tick, []);
-      },
+      darXp: (xp) => { concederXpDeProgressao(e, this.ctx, xp, this.estado.tick, []); },
     };
   }
 

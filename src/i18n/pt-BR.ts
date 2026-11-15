@@ -154,6 +154,8 @@ export const ptBR = {
   'item.sem_espaco': 'Não há lugar livre em volta para a criatura',
   'item.nada_perto': 'Nada para abrir aqui perto',
   'item.congelado': 'Espere terminar o que está fazendo',
+  'item.sem_acampamento': 'A fogueira só se monta no ermo, fora da vila, com um lugar livre em volta',
+  'item.fogo_apagado': 'A fogueira está apagada: acenda com a tocha acesa ou com uma skill de fogo',
   'item.sem_espaco_no_chao': 'Não há espaço livre no chão por perto',
   'mochila.soltar': 'Soltar 1',
   'mochila.soltarPilha': 'Soltar pilha',

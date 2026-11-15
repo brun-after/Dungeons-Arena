@@ -148,6 +148,8 @@ export interface ModoDeJogo {
   iaRaioAtivacao?: number;
   /** Marco 42 (15/11/2026, D-176): a luz em volta do jogador só com a tocha acesa (no Mundo); ausente = sempre. */
   luzSoComTocha?: boolean;
+  /** Marco 44 (15/11/2026, D-178): a lenha monta a fogueira de acampamento (no Mundo); ausente = não monta. */
+  acampamento?: boolean;
   /** Marco 42 (D-176): o escuro da região agora (0 a 1), posto pela sala do Mundo a cada segundo (não vem dos dados). */
   escuro?: number;
   /** Marco 29 (D-128): a morte do jogador deixa a mochila e o equipado num túmulo (o Mundo, fora das dungeons). */
@@ -312,6 +314,7 @@ export function lerModo(json: unknown, arquivo: string): { modo: ModoDeJogo; err
     ...(o.areaDeInteresse === undefined ? {} : { areaDeInteresse: { raio: l.numero(l.objeto(o.areaDeInteresse, 'areaDeInteresse'), 'raio', { min: 8, max: 64, inteiro: true }) } }),
     ...(o.iaRaioAtivacao === undefined ? {} : { iaRaioAtivacao: l.numero(o, 'iaRaioAtivacao', { min: 8, max: 128, inteiro: true }) }),
     ...(o.luzSoComTocha === undefined ? {} : { luzSoComTocha: l.booleano(o, 'luzSoComTocha') }),
+    ...(o.acampamento === undefined ? {} : { acampamento: l.booleano(o, 'acampamento') }),
     ...(o.tumuloNaMorte === undefined ? {} : { tumuloNaMorte: l.booleano(o, 'tumuloNaMorte') }),
     ...(o.dropsDeRenascido === undefined ? {} : { dropsDeRenascido: l.booleano(o, 'dropsDeRenascido') }),
     ...(o.fadigaDeXpPorFase === undefined ? {} : { fadigaDeXpPorFase: l.booleano(o, 'fadigaDeXpPorFase') }),

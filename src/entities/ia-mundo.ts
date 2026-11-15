@@ -1,4 +1,5 @@
 // 02/11/2026: exército próprio do boss e atenção atraída por combate recente no Mundo.
+import { fogoAceso } from '../world/fogo-aceso';
 import { percepcaoNoEscuro } from '../mundo/noite';
 import { temLuzPropria } from '../combat/luz-propria';
 import { hashTexto } from '../core/rng';
@@ -70,7 +71,7 @@ export function raioDeAtencao(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
 export function iluminado(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade): boolean {
   if (temLuzPropria(e)) return true;
   const r = ctx.balance.mundo.tocha.raioDoFogo;
-  return estado.objetos.some((o) => (o.tipo === 'poste_tocha' || o.tipo === 'fogueira') && chebyshev(o, e) <= r);
+  return estado.objetos.some((o) => fogoAceso(o, estado.tick) && chebyshev(o, e) <= r);
 }
 
 /** Como o monstro reage a quem leva a tocha: o mais forte é atraído, o mais fraco evita, o igual decide na sorte. */

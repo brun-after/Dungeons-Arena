@@ -5,6 +5,7 @@
 // Marco 30 (30/10/2026, D-129): a ficha ganha o baú do banco (fora da mochila: a morte não leva) e as missões do
 // quadro (as aceitas, com o progresso, e as feitas por dia). A versão 1 lê com os dois vazios.
 
+import type { AcampamentoDaFicha } from './acampamento-sala';
 import type { ContextoSimulacao } from '../core/contexto';
 import { ehObjeto } from '../core/validar';
 import type { Entidade, ItemNaMochila } from '../entities/entidade';
@@ -34,6 +35,8 @@ export interface FichaDoMundo {
   banco: { itens: ItemNaMochila[]; ouro: number };
   /** Marco 30: as missões aceitas (o progresso e o dia em que foram aceitas) e o dia em que cada uma foi entregue. */
   missoes: { ativas: MissaoAtiva[]; feitas: Record<string, number> };
+  /** Marco 44 (15/11/2026, D-178): a fogueira acesa onde renasce e a caixa dela (mundo/acampamento-sala.ts). */
+  acampamento?: AcampamentoDaFicha;
 }
 
 export interface MissaoAtiva {
@@ -67,6 +70,15 @@ function lerMissoes(v: unknown): FichaDoMundo['missoes'] {
   const feitas: Record<string, number> = {};
   if (ehObjeto(o.feitas)) for (const [k, x] of Object.entries(o.feitas).slice(0, 500)) feitas[k] = inteiroNaoNegativo(x);
   return { ativas, feitas };
+}
+
+const numero = (v: unknown): number => (typeof v === 'number' && Number.isFinite(v) ? v : 0);
+
+/** Marco 44 (D-178): o acampamento guardado (o que vier torto some; a caixa segue as regras do banco). */
+function lerAcampamento(v: unknown, reino: Reino): { acampamento?: AcampamentoDaFicha } {
+  if (!ehObjeto(v) || typeof v.regiao !== 'string' || !reino.regioes.some((r) => r.id === v.regiao)) return {};
+  const caixa = ehObjeto(v.caixa) ? v.caixa : {};
+  return { acampamento: { regiao: v.regiao, x: inteiroNaoNegativo(v.x), y: inteiroNaoNegativo(v.y), ateMs: numero(v.ateMs), acesoAteMs: numero(v.acesoAteMs), caixa: { itens: lerItens(caixa.itens), ouro: inteiroNaoNegativo(caixa.ouro) } } };
 }
 
 /** O personagem novo do Mundo: nível 1 da classe, na vila de início do reino. */
@@ -107,6 +119,7 @@ export function lerFichaDoMundo(v: unknown, reino: Reino): FichaDoMundo | null {
     portalLivreEm: typeof v.portalLivreEm === 'number' && Number.isFinite(v.portalLivreEm) ? v.portalLivreEm : 0,
     banco: { itens: lerItens(ehObjeto(v.banco) ? v.banco.itens : null), ouro: inteiroNaoNegativo(ehObjeto(v.banco) ? v.banco.ouro : 0) },
     missoes: lerMissoes(v.missoes),
+    ...lerAcampamento(v.acampamento, reino),
     chefesDungeon: ehObjeto(v.chefesDungeon) ? Object.fromEntries(Object.entries(v.chefesDungeon).filter(([k]) => reino.masmorras.some((m) => m.id === k)).map(([k, n]) => [k, inteiroNaoNegativo(n)])) : {},
     mortesDungeon: ehObjeto(v.mortesDungeon) ? Object.fromEntries(Object.entries(v.mortesDungeon).filter(([k])=>reino.masmorras.some(m=>m.id===k)).map(([k,n])=>[k,inteiroNaoNegativo(n)])) : {},
   };

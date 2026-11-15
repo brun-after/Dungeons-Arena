@@ -63,6 +63,8 @@ export interface Item {
   /** Marco 18: os ganchos que o item dá a quem o veste (data/itens-formas.json, ou `ganchos` em itens.json). */
   ganchos: Gancho[];
   progressao?: ProgressaoItem;
+  /** Marco 44 (15/11/2026, D-178): o que o item monta ao ser usado (a lenha, a fogueira de acampamento). */
+  monta?: 'acampamento';
   /** Marco 27 (29/10/2026, D-126): o desenho da arma (data/armas.json), que diz a família e o básico dela. */
   arma?: string;
 }
@@ -133,6 +135,7 @@ export function lerItens(json: unknown): { itens: Map<string, Item>; erros: stri
       elemento: null,
       ganchos: lerGanchos(l, o.ganchos),
       ...(o.arma !== undefined ? { arma: l.texto(o, 'arma') } : {}),
+      ...(o.monta !== undefined ? { monta: l.opcao(o, 'monta', ['acampamento'] as const) } : {}),
     };
     if (o.progressao !== undefined) {
       const p = l.objeto(o.progressao, 'progressao');
@@ -143,7 +146,7 @@ export function lerItens(json: unknown): { itens: Map<string, Item>; erros: stri
     }
     if (tipo === 'equipamento' && item.slotPadrao === null) l.erro('equipamento precisa de slotPadrao');
     if (tipo === 'consumivel' && item.slotPadrao !== null) l.erro('consumível não tem slotPadrao');
-    if (tipo === 'consumivel' && item.efeitos.length === 0 && !item.progressao) l.erro('consumível precisa de ao menos um efeito');
+    if (tipo === 'consumivel' && item.efeitos.length === 0 && !item.progressao && !item.monta) l.erro('consumível precisa de ao menos um efeito');
     if (tipo === 'chave' && (item.slotPadrao !== null || item.efeitos.length > 0)) l.erro('chave não tem slotPadrao nem efeitos');
     if (tipo === 'livro' && (item.slotPadrao !== null || item.efeitos.length > 0)) l.erro('livro não tem slotPadrao nem efeitos');
     if (tipo === 'material' && (item.slotPadrao !== null || item.efeitos.length > 0)) l.erro('material não tem slotPadrao nem efeitos');

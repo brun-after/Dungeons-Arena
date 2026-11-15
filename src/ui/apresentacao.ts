@@ -1,4 +1,5 @@
 import { podeAjudar } from '../modos/relacao';
+import { fogoAceso } from '../world/fogo-aceso';
 import { luzesDosAmbientes } from '../render/solo/ambientes-solo';
 import { faixaSuperior } from './aviso';
 import { IndicadorCombo } from './combos';
@@ -372,7 +373,8 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     for (const obj of estado.objetos) {
       if (obj.tipo === 'loja' || obj.tipo === 'bau' || obj.tipo === 'saida') pontos.push({ x: obj.x, y: obj.y, cor: 0xffc070, semente: obj.x * 31 + obj.y, raio: vis.raioObjeto });
       // Marco 42 (15/11/2026, D-176): o poste de tocha e a fogueira (maior) iluminam em volta (marco 43: do alto do poste).
-      else if (obj.tipo === 'poste_tocha' || obj.tipo === 'fogueira') pontos.push({ x: obj.x - (obj.tipo === 'poste_tocha' ? 1.1 : 0), y: obj.y - (obj.tipo === 'poste_tocha' ? 1.4 : 0.3), cor: 0xff9a40, semente: obj.x * 13 + obj.y, intensidade: 0.7, raio: obj.tipo === 'fogueira' ? vis.raioTocha * 1.6 : vis.raioTocha });
+      // Marco 44 (D-178): a fogueira de acampamento só ilumina acesa.
+      else if (fogoAceso(obj, estado.tick)) pontos.push({ x: obj.x - (obj.tipo === 'poste_tocha' ? 1.1 : 0), y: obj.y - (obj.tipo === 'poste_tocha' ? 1.4 : 0.3), cor: 0xff9a40, semente: obj.x * 13 + obj.y, intensidade: 0.7, raio: obj.tipo === 'fogueira' ? vis.raioTocha * 1.6 : vis.raioTocha });
     }
     const s = ctx.fase.portaSaida;
     if (s) pontos.push({ x: s.x, y: s.y, cor: estado.saidaAberta || s.tranca === 'livre' ? 0x9cf0b0 : 0xb0b0c0, semente: 7, raio: vis.raioObjeto });

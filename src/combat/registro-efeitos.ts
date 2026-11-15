@@ -95,6 +95,8 @@ export const TIPOS_EFEITO = [
   'tregua',
   // Marco 42 (15/11/2026, D-176): a tocha acesa (a luz própria no Mundo) e o que a apaga (a rajada de vento, a água).
   'tocha', 'apagar_luz',
+  // Marco 44 (15/11/2026, D-178): o descanso junto ao fogo à noite (`valor`: segundos; vira o bônus do amanhecer).
+  'descansado',
   // Marco 42 (D-176): o estado do vento (o ar arrasta e atrasa).
   'arrastado',
   // Marco 42 (D-176): a rajada leva os projéteis hostis a até `valor` células de quem a recebe (em: conjurador).
@@ -407,6 +409,7 @@ const DEFINICOES: Readonly<Record<TipoEfeito, Def>> = {
   vista_de_armadilha: positivo('olho', '#f0b27a', 8, [], { duracaoMs: 45_000, valor: 0, pct: 0 }, { revelaArmadilhas: true }),
   // Marco 42 (D-176): a tocha queima por `duracaoMs` (o item define); `apagar_luz` tira toda luz própria do alvo.
   tocha: { ...positivo('fogo', '#ffb060', 0, [], { duracaoMs: 300_000, valor: 0, pct: 0 }, { ilumina: true }), elegivelParaOrbe: false },
+  descansado: { ...positivo('cura', '#f5c27a', 0, [], { duracaoMs: 900_000, valor: 0, pct: 0 }, {}), elegivelParaOrbe: false },
   dispersar_tiros: instantaneo('redemoinho', '#cfe8f2', ['valor'], { duracaoMs: 0, valor: 3, pct: 0 }, 'dispersar_tiros', true),
   apagar_luz: instantaneo('redemoinho', '#a8d8e8', [], { duracaoMs: 0, valor: 0, pct: 0 }, 'apagar_luz', false),
   passo_leve: positivo('botas', '#9be7c4', 6, [], { duracaoMs: 60_000, valor: 0, pct: 0 }, { protegeDeArmadilha: true }),

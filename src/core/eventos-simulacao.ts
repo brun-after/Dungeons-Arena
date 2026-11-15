@@ -72,7 +72,10 @@ export type MotivoItem =
   | 'sem_material'
   /** Marco 29 (D-128): a coleta levou dano durante o canal. */
   | 'interrompido'
-  | 'sem_espaco_no_chao';
+  | 'sem_espaco_no_chao'
+  /** Marco 44 (D-178): a lenha só monta fogueira no ermo; a fogueira apagada pede a tocha acesa (ou uma skill de fogo). */
+  | 'sem_acampamento'
+  | 'fogo_apagado';
 
 /** Marco 14: por que a habilidade não subiu de rank ou não foi para a barra. */
 export type MotivoHabilidade =
@@ -262,6 +265,9 @@ export type EventoSimulacao =
   | { t: 'pedidoDoMundo'; tick: number; id: EntidadeId; tipo: string; ref: string }
   | { t: 'coletado'; tick: number; id: EntidadeId; objetoId: string; itemId: string; qtd: number }
   | { t: 'tumuloCriado'; tick: number; id: EntidadeId; objetoId: string; x: number; y: number; itens: number }
+  // Marco 44 (15/11/2026, D-178): a fogueira de acampamento montada (apagada) e acesa (até `ateTick`).
+  | { t: 'acampamentoMontado'; tick: number; id: EntidadeId; objetoId: string; x: number; y: number }
+  | { t: 'acampamentoAceso'; tick: number; objetoId: string; dono: string; x: number; y: number; ateTick: number }
   | { t: 'tumuloAberto'; tick: number; id: EntidadeId; objetoId: string; itens: number }
   /** Marco 10A-2: penalidade de morte (§2.12). */
   | { t: 'penalidadeMorte'; tick: number; id: EntidadeId; xp: number; ouro: number; niveis: number }

@@ -78,7 +78,9 @@ export type TipoObjeto =
   // 09/11/2026 (D-143): a ponta de um Portal temporário (`ref`: `<portal>:<ponta>`; mundo/portais-temporarios.ts).
   | 'portal_temporario'
   // Marco 42 (15/11/2026, D-176): o poste de tocha e a fogueira (acendem a tocha de quem interage; iluminam em volta).
-  | 'poste_tocha' | 'fogueira';
+  | 'poste_tocha' | 'fogueira'
+  // Marco 44 (15/11/2026, D-178): a caixa do acampamento (`ref`: `acampamento:<dono>`; o conteúdo fica na ficha).
+  | 'caixa_acampamento';
 
 /**
  * Objeto coletável no mundo (§2.1). `objetoId` é estável; a coleta é uma transação dentro do
