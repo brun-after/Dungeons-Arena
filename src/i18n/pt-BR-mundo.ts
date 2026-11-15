@@ -109,6 +109,7 @@ export const textosMundo = {
   'mundo.recompensa': '{nome}: recompensa recebida',
   'mundo.recompensaCom': '{nome}: recompensa recebida ({extras})',
   'mundo.pilha': '{nome} ×{qtd}',
+  'mundo.semTumulo': 'Você morreu na noite fechada: não ficou túmulo, e o que você levava se perdeu no escuro.',
   'mundo.tumulo': 'Você morreu. A mochila e o equipado ficaram no túmulo onde você caiu: a lápide está marcada no mapa por 5 min, com a rota até ela.',
   'mundo.lapide.nome': 'Sua lápide',
   'mundo.portalT.botao': 'Portal',

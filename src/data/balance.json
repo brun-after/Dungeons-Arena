@@ -643,7 +643,7 @@
     "eventos": { "janelaMin": 60, "duracaoMin": 20, "chancePct": 35, "luaLootPct": 200, "perigosComLua": ["normal", "perigoso"] },
     "noite": {
       "densidadePct": 50, "maxExtras": 60, "porConferencia": 2, "distancia": [14, 28], "niveisExtra": [2, 5],
-      "percepcaoMenosPct": 50, "porMata": 4, "presetsDaMata": ["lobo", "aranha"],
+      "percepcaoMenosPct": 50, "recompensaPct": 40, "semTumuloDesde": 0.5, "porMata": 4, "presetsDaMata": ["lobo", "aranha"],
       "chefeChancePorMinPct": 6, "chefes": ["necromante_ancestral", "vampiro"], "someLongeDe": 14
     },
     "ciclo": {

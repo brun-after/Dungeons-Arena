@@ -11,6 +11,8 @@ import type { Entidade } from '../../src/entities/entidade';
 import { fogoQueAfasta, raioContra, reacaoAoFogo } from '../../src/entities/ia-mundo';
 import { lerLugar, montarLugar } from '../../src/mundo/lugares';
 import { MODO_MUNDO } from '../../src/mundo/sala-mundo';
+import { morteSemTumulo, recompensaDaNoite } from '../../src/mundo/noite';
+import { criarTumulo } from '../../src/mundo/objetos-mundo';
 import { alfaNoEscuro } from '../../src/ui/visao-no-escuro';
 import { CONTEUDO } from '../apoio/fases';
 
@@ -102,5 +104,20 @@ describe('a tocha à noite (D-178)', () => {
     estado.tick += ticksDe(1000);
     processarEfeitos(estado, ctx, []);
     expect(temLuzPropria(eu)).toBe(false);
+  });
+
+  it('a noite paga mais XP e saque, e quem morre nela não deixa túmulo', () => {
+    const dia = cena(0);
+    expect(recompensaDaNoite(dia.ctx)).toBe(1);
+    expect(morteSemTumulo(dia.ctx)).toBe(false);
+    const noite = cena(1);
+    expect(recompensaDaNoite(noite.ctx)).toBeCloseTo(1 + noite.ctx.balance.mundo.noite.recompensaPct / 100);
+    expect(morteSemTumulo(noite.ctx)).toBe(true);
+    const bolsa = noite.eu.bolsa;
+    if (!bolsa) throw new Error('bolsa');
+    bolsa.mochila.push({ invId: 'i1', itemId: 'tocha', qtd: 2, ref: null });
+    criarTumulo(noite.estado, noite.ctx, noite.eu, [], true);
+    expect(bolsa.mochila).toHaveLength(0);
+    expect(noite.estado.objetos.some((o) => o.tipo === 'tumulo')).toBe(false);
   });
 });

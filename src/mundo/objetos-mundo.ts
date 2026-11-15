@@ -126,7 +126,7 @@ export function concluirColeta(estado: EstadoJogo, ctx: ContextoSimulacao, e: En
  * Morte fora de dungeon (regra `tumuloNaMorte` do modo): a mochila e o equipado vão para um túmulo no lugar da
  * morte. Fora do PvP (sem fogo amigo), só o dono abre até `donoExclusivoS`; com PvP, qualquer um, na hora.
  */
-export function criarTumulo(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[]): void {
+export function criarTumulo(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[], semTumulo = false): void {
   const bolsa = e.bolsa;
   if (!bolsa) return;
   const itens: string[] = [];
@@ -140,6 +140,11 @@ export function criarTumulo(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entid
   bolsa.mochila = [];
   if (itens.length === 0) return;
   recalcularFicha(e, ctx);
+  // Marco 44 (15/11/2026, D-178): morto na noite fechada, os itens somem com ele.
+  if (semTumulo) {
+    saida.push({ t: 'tumuloCriado', tick: estado.tick, id: e.id, objetoId: '', x: e.x, y: e.y, itens: 0 });
+    return;
+  }
   const regras = ctx.balance.mundo.tumulo;
   const liberaTick = ctx.modo.fogoAmigo ? estado.tick : estado.tick + ticksDe(regras.donoExclusivoS * 1000);
   const objetoId = `t${estado.tick}_${e.id}`;

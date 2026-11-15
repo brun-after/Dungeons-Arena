@@ -1,5 +1,5 @@
 import { aplicaAntifarmDeFase, xpDeCriatura, xpDoChefeDaDungeon } from './xp-antifarm';
-import { PREFIXO_NOITE } from '../mundo/noite';
+import { morteSemTumulo, PREFIXO_NOITE, recompensaDaNoite } from '../mundo/noite';
 import { criarTumulo } from '../mundo/objetos-mundo';
 import { novaMemoria } from '../combat/estado-tatico';
 import { colherMorto } from '../combat/necromancia';
@@ -93,7 +93,8 @@ function concederXp(estado: EstadoJogo, ctx: ContextoSimulacao, morto: Entidade,
   if (participantes.length === 0) return;
   const parte = (p: Entidade) => grupo?.get(p) ?? 1 / participantes.length;
   // Marco 15: a recompensa da dificuldade e do grupo vale para quem derruba o mundo (não entre jogadores).
-  const recompensa = ladoDoJogador(estado, morto) ? 1 : fatoresDoMundo(estado, ctx).recompensa;
+  // Marco 44 (D-178): e a noite paga mais.
+  const recompensa = ladoDoJogador(estado, morto) ? 1 : fatoresDoMundo(estado, ctx).recompensa * recompensaDaNoite(ctx);
   const total = Math.max(1, Math.round(morto.xpBase * ctx.balance.xp.decaimentoAntifarm ** morto.abates * recompensa));
   const cota = (p: Entidade) => Math.max(1, Math.round(total * parte(p)));
   for (const p of participantes) {
@@ -221,7 +222,8 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
       // Marco 10A-2: a morte do jogador custa XP e ouro onde o modo manda (§2.12).
       penalizar(estado, ctx, e, saida);
       // Marco 29 (D-128): no Mundo, fora das dungeons, a mochila e o equipado ficam num túmulo.
-      if (ctx.modo.tumuloNaMorte) criarTumulo(estado, ctx, e, saida);
+      // Marco 44 (D-178): na noite fechada, não fica túmulo: o que levava se perde.
+      if (ctx.modo.tumuloNaMorte) criarTumulo(estado, ctx, e, saida, morteSemTumulo(ctx));
       // Marco 17 (D-063): onde o modo recompensa abater jogadores (a arena com a ficha inteira), quem derrubou ganha XP
       // (com o decaimento por abates, contra o farm) e, na primeira queda, o drop.
       if (ctx.modo.recompensaJogador && e.xpBase > 0) {
@@ -275,7 +277,7 @@ function largarDrops(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, sa
   // Ouro (marco 9A): só onde o modo solta itens, proporcional ao XP do inimigo.
   // Marco 30 (D-129): o loot do lugar (no Mundo, pelo perigo da região).
   const renascido = Math.max(d.pisoRenascidoPct / 100, ctx.balance.xp.decaimentoAntifarm ** e.abates);
-  const lootMult = ((ctx.modo.lootPct ?? 100) / 100) * renascido;
+  const lootMult = ((ctx.modo.lootPct ?? 100) / 100) * renascido * recompensaDaNoite(ctx);
   const ouro = Math.round(e.xpBase * d.ouroPorXp * (0.5 + aleatorio(estado.rng)) * fatoresDoMundo(estado, ctx).recompensa * lootMult);
   if (ouro > 0) largarPerto(ctx, e.x, e.y, (x, y) => largarOuro(estado, ouro, x, y, saida));
   // Marco 14: livro raro, com uma habilidade gerada pela semente no nível do inimigo (D-057).

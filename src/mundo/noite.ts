@@ -36,6 +36,10 @@ export interface RegrasDaNoite {
   niveisExtra: readonly [number, number];
   /** Marco 44 (D-178): no escuro total, os monstros percebem a ameaça a esta % a menos de distância que de dia. */
   percepcaoMenosPct: number;
+  /** Marco 44 (D-178): na noite fechada, o XP e o saque crescem esta % (a meia-luz, proporcional). */
+  recompensaPct: number;
+  /** Marco 44 (D-178): a partir deste escuro da noite, quem morre não deixa túmulo (o que levava se perde). */
+  semTumuloDesde: number;
   /** Os monstros de cada mata fechada (sempre) e os presets quando a região não tem monstros (as seguras). */
   porMata: number;
   presetsDaMata: readonly string[];
@@ -47,6 +51,16 @@ export interface RegrasDaNoite {
 }
 
 const chebyshev = (a: Celula, b: Celula) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
+
+/** Marco 44 (15/11/2026, D-178): o multiplicador de XP e saque pela noite da região (1 de dia e fora do Mundo). */
+export function recompensaDaNoite(ctx: ContextoSimulacao): number {
+  return 1 + (ctx.balance.mundo.noite.recompensaPct / 100) * (ctx.modo.escuro ?? 0);
+}
+
+/** Marco 44 (D-178): na noite fechada, a morte não deixa túmulo. */
+export function morteSemTumulo(ctx: ContextoSimulacao): boolean {
+  return (ctx.modo.escuro ?? 0) >= ctx.balance.mundo.noite.semTumuloDesde;
+}
 
 /** O escuro da noite na região inteira (0 a 1) vai no modo; a mata soma pela posição. */
 export function escuroEm(ctx: ContextoSimulacao, x: number, y: number): number {
