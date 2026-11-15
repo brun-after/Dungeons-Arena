@@ -4,18 +4,19 @@
 import { hashTexto } from '../../core/rng';
 import type { Balance } from '../../core/contexto';
 import type { Fase } from '../../world/fase';
-import { SOLO_PADRAO } from '../../world/solo';
+import { soloSemTema } from '../../world/solo';
 import type { Tema } from '../../world/temas';
 import type { PintorDeDesenhos } from '../pintura';
 import type { SoloDoTerreno } from '../terreno';
 import { texturasDosAmbientes } from './ambientes-solo';
 import { carregarTexturasDoSolo } from './texturas';
 
-export function soloDaFase(fase: Fase, tema: Tema | null, cfg: Balance['visual']['solo'], escala: number, pintor: PintorDeDesenhos | null): SoloDoTerreno {
-  const solo = tema?.solo ?? SOLO_PADRAO;
+export function soloDaFase(fase: Fase, tema: Tema | null, visual: Balance['visual'], escala: number, pintor: PintorDeDesenhos | null): SoloDoTerreno {
+  // Marco 42 (15/11/2026, D-176): sem tema, a tinta do bioma da região.
+  const solo = tema?.solo ?? soloSemTema(fase.bioma, visual.gradacao);
   return {
     tema: solo,
-    cfg,
+    cfg: visual.solo,
     escala,
     semente: hashTexto(fase.id),
     texturas: carregarTexturasDoSolo([solo.base, solo.variacao, solo.parede, solo.mato, 'estrada', ...texturasDosAmbientes(fase.ambientes ?? [])]),

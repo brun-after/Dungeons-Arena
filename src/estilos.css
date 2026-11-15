@@ -3022,6 +3022,30 @@ body.movimento-reduzido .cinematica-ultimate {
   text-align: center;
 }
 
+/* Marco 42 (15/11/2026, D-176): o relógio do dia e da noite. */
+.relogio-mundo {
+  position: absolute;
+  top: calc(52px + var(--seguro-topo));
+  right: 12px;
+  padding: 3px 10px;
+  border: 1px solid var(--borda);
+  border-radius: 999px;
+  background: rgba(16, 21, 28, 0.78);
+  color: var(--texto);
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+
+.relogio-mundo[data-fase='noite'] {
+  border-color: #3a5a9a;
+  color: #b8ccf4;
+}
+
+.relogio-mundo[data-fase='entardecer'],
+.relogio-mundo[data-fase='amanhecer'] {
+  border-color: #c07838;
+}
+
 .faixa-lugar strong {
   color: var(--destaque);
 }

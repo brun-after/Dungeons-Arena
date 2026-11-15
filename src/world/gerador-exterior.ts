@@ -314,6 +314,14 @@ function chebyshev(a: Celula, b: Celula): number {
 }
 
 /** Gera o exterior da região: terreno, vila, fachadas, passagens, coleta e inimigos. Determinístico pela semente. */
+/** Marco 42 (D-176): o limiar de obstáculo dentro das matas fechadas (mais baixo = mais árvores). */
+const LIMIAR_MATA = 0.52;
+
+/** Marco 42 (D-176): a célula está numa mata fechada da região. */
+export function naMata(regiao: { matas?: readonly { x: number; y: number; raio: number }[] }, x: number, y: number): boolean {
+  return (regiao.matas ?? []).some((m) => Math.hypot(x - m.x, y - m.y) <= m.raio);
+}
+
 export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGerado {
   const n = regiao.tamanho ?? reino.tamanhoRegiao;
   const rng = criarRng(regiao.semente);
@@ -328,7 +336,9 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
       // Costas orgânicas mantêm a grade técnica, mas quebram o contorno quadrado da terra.
       const dx = (x - n / 2) / (n * 0.63), dy = (y - n / 2) / (n * 0.59);
       const costa = Math.hypot(dx, dy) > 1 + 0.09 * Math.sin(Math.atan2(dy, dx) * 5 + regiao.semente);
-      g.por(x, y, costa || a > perfil.agua ? '~' : r > perfil.rocha ? '#' : perfil.chao);
+      // Marco 42 (15/11/2026, D-176): a mata fechada tem o dobro de árvores (e é sempre escura: mundo/ciclo.ts).
+      const rocha = naMata(regiao, x, y) ? Math.min(perfil.rocha, LIMIAR_MATA) : perfil.rocha;
+      g.por(x, y, costa || a > perfil.agua ? '~' : r > rocha ? '#' : perfil.chao);
     }
   }
   // Marco 38 (D-142): a região estreita é um corredor entre as passagens, com paredões de arenito dos lados.

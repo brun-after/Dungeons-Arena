@@ -77,7 +77,7 @@
   "mercadorErrante": ["pocao_vida_maior", "pocao_mana_maior", "pergaminho_retorno", "cota_malha", "botas_rapidas", "essencia_arcana"],
   "regioes": [
     {
-      "id": "vila_do_centro",
+      "id": "vila_do_centro", "matas": [{ "x": 192, "y": 96, "raio": 16 }],
       "nome": "Vila do Centro",
       "gx": 1,
       "gy": 1,
@@ -118,7 +118,7 @@
       ]
     },
     {
-      "id": "encosta_do_leste",
+      "id": "encosta_do_leste", "matas": [{ "x": 152, "y": 96, "raio": 14 }],
       "andarilhos": [],
       "mercadoresErrantes": 1,
       "nome": "Encosta do Leste",
@@ -141,7 +141,7 @@
       ]
     },
     {
-      "id": "floresta_antiga",
+      "id": "floresta_antiga", "escuroBase": 1,
       "andarilhos": [{"id": "irma_celina", "nome": "Irmã Celina, peregrina", "aparencia": "gente", "fala": "Vou rezar na Cripta das Raízes, mas os lobos não me deixam passar. Você me acompanha?"}],
       "mercadoresErrantes": 1,
       "nome": "Floresta Antiga",
@@ -224,7 +224,7 @@
       ]
     },
     {
-      "id": "bosque_do_sul",
+      "id": "bosque_do_sul", "escuroBase": 1,
       "andarilhos": [{"id": "grik", "nome": "Grik, goblin desertor", "aparencia": "goblin", "fala": "Grik não quer mais brigar. Grik quer pagar as dívidas com o reino. Grik ajuda, você ajuda?"}],
       "mercadoresErrantes": 1,
       "nome": "Bosque do Sul",

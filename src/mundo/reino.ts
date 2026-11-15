@@ -126,6 +126,10 @@ export interface RegiaoDoMundo {
   andarilhos?: readonly AndarilhoDoMundo[];
   /** Marco 38: quantos mercadores errantes andam pelas estradas da região. */
   mercadoresErrantes?: number;
+  /** Marco 42 (15/11/2026, D-176): o escuro próprio da região (0 a 1; a floresta densa é 1: noite o dia todo). */
+  escuroBase?: number;
+  /** Marco 42 (D-176): as matas fechadas (sempre escuras), também dentro das regiões seguras. */
+  matas?: readonly { x: number; y: number; raio: number }[];
 }
 
 /** 08/11/2026 (D-138): onde o terreno nasce: livre pela região, em volta do chefe do elemento ou na porta da estrutura. */
@@ -282,6 +286,13 @@ function lerExtrasDaRegiao(l: Leitor, o: Objeto): Partial<RegiaoDoMundo> {
   if (o.faixas !== undefined) r.faixas = l.lista(o, 'faixas').map((x) => lerNivel(l, { nivel: x }));
   if (o.estreita !== undefined) r.estreita = l.booleano(o, 'estreita');
   if (o.mercadoresErrantes !== undefined) r.mercadoresErrantes = l.numero(o, 'mercadoresErrantes', { min: 0, max: 4, inteiro: true });
+  if (o.escuroBase !== undefined) r.escuroBase = l.numero(o, 'escuroBase', { min: 0, max: 1 });
+  if (o.matas !== undefined) {
+    r.matas = l.lista(o, 'matas').map((x) => {
+      const m = l.objeto(x, 'mata');
+      return { x: l.numero(m, 'x', { min: 0, inteiro: true }), y: l.numero(m, 'y', { min: 0, inteiro: true }), raio: l.numero(m, 'raio', { min: 4, max: 40, inteiro: true }) };
+    });
+  }
   if (o.andarilhos !== undefined) {
     r.andarilhos = l.lista(o, 'andarilhos').map((x) => {
       const a = l.objeto(x, 'andarilho');

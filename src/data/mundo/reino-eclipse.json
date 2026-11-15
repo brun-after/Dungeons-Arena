@@ -328,7 +328,7 @@
       ]
     },
     {
-      "id": "eclipse_exilados",
+      "id": "eclipse_exilados", "escuroBase": 1,
       "andarilhos": [{"id": "vulto_do_troll", "nome": "Gruff, troll eremita", "aparencia": "troll", "fala": "Gruff só quer paz. Os orcs não deixam. Gruff paga em pedras bonitas."}],
       "mercadoresErrantes": 1,
       "nome": "Floresta dos Exilados",

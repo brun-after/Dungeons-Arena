@@ -40,6 +40,8 @@ import { fracaoFuria } from '../combat/furia';
 import { sintoniaDe } from '../progression/sintonia';
 import { ControladorImpacto } from '../render/impacto';
 import { ACHATAMENTO_ISO, CamadaEscuridao, type LuzNaTela } from '../render/escuridao';
+import { escuroBaseEm, horaDoMundo, luzDaHora } from '../mundo/ciclo';
+import { agoraDoMundo } from './hora-do-mundo';
 import { centroDaCelula } from '../render/projecao';
 import { CELULA_PX } from '../render/camera-calculo';
 import { ESCURIDAO_PADRAO } from '../world/solo';
@@ -251,6 +253,12 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   const escuroTema = tema?.escuridao ?? ESCURIDAO_PADRAO;
   // Ajuste de 31/10/2026 (pedido do usuário): o escuro fora da luz fica mais claro pela `clareza` (0,5 = metade).
   const nivelEscuro = (ctx.fase.exterior ? vis.escuridaoExterior : escuroTema.nivel) * (1 - vis.clareza);
+  // Marco 42 (15/11/2026, D-176): no exterior do Mundo, o escuro segue a hora (mundo/ciclo.ts) e as matas fechadas.
+  const escuroAgora = (jogador: { x: number; y: number } | null): { ambiente: number; nivel: number } => {
+    if (!ctx.fase.exterior) return { ambiente: escuroTema.ambiente, nivel: nivelEscuro };
+    const ciclo = ctx.balance.mundo.ciclo;
+    return luzDaHora(horaDoMundo(agoraDoMundo(), ciclo), ciclo, jogador ? escuroBaseEm(ctx.fase, jogador.x, jogador.y) : 0);
+  };
   let pontosDoQuadro: PontoDeLuz[] = [];
   /** As luzes do quadro, da grade para a tela (depois da câmera aplicada). */
   const desenharEscuro = (agoraMs: number) => {
@@ -270,7 +278,9 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     }
     const modo = qualidade().escuridao;
     document.body.dataset.escuridao = modo;
-    escuridao.desenhar(palco.mundo, palco.largura(), palco.altura(), { modo, ambiente: escuroTema.ambiente, nivel: nivelEscuro, realceMinimo: vis.realceMinimo, resolucao: vis.resolucaoMapa }, centro, luzes);
+    const eu = pontosDoQuadro.find((p) => p.jogador) ?? null;
+    const { ambiente, nivel } = escuroAgora(eu);
+    escuridao.desenhar(palco.mundo, palco.largura(), palco.altura(), { modo, ambiente, nivel, realceMinimo: vis.realceMinimo, resolucao: vis.resolucaoMapa }, centro, luzes);
   };
   const flash = new Graphics();
   palco.tela.addChild(flash);
