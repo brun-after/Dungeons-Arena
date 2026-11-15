@@ -5,6 +5,9 @@ import { perfilVisualDe } from '../../src/render/perfil-visual';
 import { ASSINATURAS } from '../../src/render/vfx/assinaturas';
 import { CLASSES_COM_RUNA, COR_DA_RUNA, RUNAS_VFX } from '../../src/render/vfx/manifestacao-runa';
 import { corTrocada, emissoesTrocadas, texturaTrocada, trocaDe } from '../../src/render/vfx/transmutacao';
+import { ehNucleoComGesto, NUCLEOS_COM_GESTO } from '../../src/render/vfx/nucleo-no-visual';
+import { assinaturaDe } from '../../src/render/vfx/resolver';
+import { visualDasComuns } from '../../src/render/visual-comum';
 import { criarJogador } from '../../src/entities/fabrica';
 import { CONTEUDO, contexto, faseDeTexto, SALA_ABERTA } from '../apoio/fases';
 
@@ -90,5 +93,25 @@ describe('o perfil visual de quem lança (D-174)', () => {
     expect(perfilVisualDe(ctx, j, 0)?.dominante).toBeNull();
     // Sem ficha, sem perfil.
     expect(perfilVisualDe(ctx, { ...j, bolsa: undefined } as unknown as typeof j, 0)).toBeNull();
+  });
+});
+
+describe('o visual das skills comuns (D-175)', () => {
+  it('nenhuma repete o visual de outra: a assinatura, a matéria e o gesto do núcleo formam um trio único', () => {
+    const comuns = visualDasComuns(CONTEUDO);
+    expect(comuns.size).toBe(89);
+    const trios = new Set<string>();
+    for (const [id, v] of comuns) {
+      const h = obter(CONTEUDO.habilidades.get(id));
+      const nome = assinaturaDe(h);
+      const troca = v.trocar ? trocaDe(ASSINATURAS[nome].familia, h.elemento ?? 'fisico') : null;
+      expect(ehNucleoComGesto(v.nucleo), id).toBe(true);
+      trios.add(`${nome}|${troca?.para ?? ''}|${v.nucleo}`);
+    }
+    expect(trios.size).toBe(89);
+  });
+
+  it('os 20 núcleos têm gesto', () => {
+    expect([...NUCLEOS_COM_GESTO].sort()).toEqual([...new Set([...CONTEUDO.definicoes.values()].flatMap((d) => (d.nucleo ? [d.nucleo] : [])))].sort());
   });
 });

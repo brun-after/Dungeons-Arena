@@ -21,6 +21,7 @@ import type { Gesto, Palco } from './gestos-base';
 import { classeNaUltimate, estiloNaUltimate, toqueDominante, type PalcoDaUltimate } from './classe-na-ultimate';
 import { cenaTrocada, emissoesTrocadas, trocaDe, type Troca } from './transmutacao';
 import type { Eixo } from '../../combat/eixos';
+import { gestoDoNucleo, type PalcoDoNucleo } from './nucleo-no-visual';
 import type { Emissao } from '../presets-particula';
 
 export interface OpcoesDiretor {
@@ -89,6 +90,11 @@ export class DiretorVfx {
     if (ehClasseComRuna(classe)) classeNaUltimate(c, classe, g);
     if (estilo && !this.o.reduzido()) estiloNaUltimate(c, estilo.eixo, estilo.faixa, g);
     if (dominante) toqueDominante(c, dominante.runa, dominante.faixa, g.centro, true);
+  }
+
+  /** D-175 (15/11/2026): o gesto do núcleo da skill comum, por cima da assinatura. */
+  nucleo(nucleo: string, g: PalcoDoNucleo): void {
+    if (this.ativo && !this.o.reduzido()) gestoDoNucleo(this.cenaCrua(), nucleo, g);
   }
 
   /** D-174: o toque da afinidade dominante no acerto de uma skill de classe. */

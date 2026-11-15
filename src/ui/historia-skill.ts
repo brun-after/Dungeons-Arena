@@ -20,6 +20,7 @@ import type { Entidade } from '../entities/entidade';
 import { t, tOu, type ChaveTexto } from '../i18n';
 import { formasDosEstilos } from '../progression/estilos';
 import { perfilVisualDe } from '../render/perfil-visual';
+import { visualDasComuns } from '../render/visual-comum';
 import { ASSINATURAS } from '../render/vfx/assinaturas';
 import { assinaturaDe } from '../render/vfx/resolver';
 import { trocaDe } from '../render/vfx/transmutacao';
@@ -62,6 +63,13 @@ function visualDe(ctx: ContextoSimulacao, j: Entidade, id: string, h: Habilidade
   const partes = [ehIdDeArma(nome) ? t('visual.arma') : tOu(`visual.${nome}`, t('visual.padrao'))];
   const troca = trocaDe(ASSINATURAS[nome].familia, h.runa);
   if (troca) partes.push(t('visualExtra.runa', { elemento: nomeDoElemento(troca.para), materia: materia(troca.para) }));
+  // D-175: a skill comum leva o gesto do núcleo e, quando divide a assinatura com outra, sai na matéria do elemento.
+  const comum = visualDasComuns(ctx.conteudo).get(id);
+  if (comum) {
+    const propria = comum.trocar ? trocaDe(ASSINATURAS[nome].familia, h.elemento ?? 'fisico') : null;
+    if (propria) partes.push(t('visualExtra.materia', { materia: materia(propria.para) }));
+    partes.push(t('visualExtra.nucleo', { nucleo: tOu(`nucleo.${comum.nucleo}`, comum.nucleo), gesto: tOu(`visualNucleo.${comum.nucleo}`, '') }));
+  }
   if (h.runa && h.faixaRuna !== undefined) partes.push(t('visualExtra.faixa', { elemento: nomeDoElemento(h.runa), faixa: h.faixaRuna }));
   if (h.formas?.length) partes.push(t('visualExtra.forma', { formas: h.formas.map((f) => t(`eixo.${eixoDaForma(f.mod)}` as ChaveTexto)).join(', ') }));
   const perfil = h.runa ? perfilVisualDe(ctx, j, tick) : null;
