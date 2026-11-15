@@ -6,9 +6,9 @@ let deslocamentoMs: number | null = null;
 
 function deslocamento(): number {
   if (deslocamentoMs !== null) return deslocamentoMs;
-  let min = 0;
+  let min: number;
   try {
-    min = Number(new URLSearchParams(globalThis.location?.search ?? '').get('hora') ?? 0) || 0;
+    min = Number(new URLSearchParams(globalThis.location.search).get('hora') ?? 0) || 0;
   } catch {
     min = 0;
   }

@@ -109,7 +109,7 @@ export function montarLugar(conteudo: Conteudo, reino: Reino, lugar: Lugar, modo
       const la = vizinha(reino, lugar.regiao, f.lado);
       return { ...f.area, lado: f.lado, ...(la && { destino: `regiao:${la.id}` }) };
     });
-    const fase = { ...r.ctx.fase, estruturas, exterior: true, bioma: lugar.regiao.bioma, escuroBase: lugar.regiao.escuroBase ?? 0, ...(lugar.regiao.matas && { matas: lugar.regiao.matas }), telhados, ...(refugios.length > 0 && { refugios }), ...(passagens.length > 0 && { passagens, enfeites: exterior.enfeites }) };
+    const fase = { ...r.ctx.fase, estruturas, exterior: true, alturas: exterior.alturas, bioma: lugar.regiao.bioma, escuroBase: lugar.regiao.escuroBase ?? 0, ...(lugar.regiao.matas && { matas: lugar.regiao.matas }), telhados, ...(refugios.length > 0 && { refugios }), ...(passagens.length > 0 && { passagens, enfeites: exterior.enfeites }) };
     const ctx = { ...r.ctx, fase };
     const estado = estadoInicialDaFase(ctx);
     estado.objetos.push(...objetosDoExterior(territorioDoLugar(reino,lugar.regiao.id), exterior));

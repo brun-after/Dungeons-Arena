@@ -14,6 +14,7 @@ import type { Elemento } from '../combat/elementos';
 import type { RegrasDeEventos } from '../mundo/eventos-mundo';
 import type { RegrasDoCiclo } from '../mundo/ciclo';
 import type { RegrasDaNoite } from '../mundo/noite';
+import type { RegrasRelevo } from '../world/relevo';
 import type { Atributos } from '../entities/entidade';
 import type { RegrasItensGerados } from '../progression/gerar-item';
 import type { Conteudo } from './conteudo';
@@ -518,6 +519,8 @@ export interface Balance {
     retardoPorClasse: Record<string, number>;
     semRetardoDepoisDoRecuoMs: number;
   };
+  /** Marco 42 (15/11/2026, D-176): os limiares do relevo (world/relevo.ts). */
+  relevo: RegrasRelevo & { vantagemAlcancePorNivel: number; vantagemAlcanceMax: number };
   inventario: {
     /** Entradas na mochila; consumíveis iguais empilham até `pilhaMax`. */
     capacidade: number;

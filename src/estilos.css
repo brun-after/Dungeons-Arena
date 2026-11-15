@@ -3036,6 +3036,25 @@ body.movimento-reduzido .cinematica-ultimate {
   pointer-events: none;
 }
 
+.relogio-mundo::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #f4d060;
+}
+
+.relogio-mundo[data-fase='noite']::before {
+  background: #b8ccf4;
+}
+
+.relogio-mundo[data-fase='entardecer']::before,
+.relogio-mundo[data-fase='amanhecer']::before {
+  background: #e08a40;
+}
+
 .relogio-mundo[data-fase='noite'] {
   border-color: #3a5a9a;
   color: #b8ccf4;

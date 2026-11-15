@@ -6,6 +6,7 @@
 // Quem é atingido sai da relação do modo: `podeFerir` para ofensivas, `podeAjudar` para as de suporte. A
 // telegrafia (render) usa as mesmas células.
 
+import { tiroPassaEntre } from '../world/relevo';
 import type { Celula } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
@@ -53,9 +54,12 @@ export function celulasDaLinha(origem: Celula, mira: Celula, alcance: number, fa
   // Estende a direção até o alcance (o ponto final é a mira escalada, arredondada).
   const fim = { x: origem.x + Math.round((dx * alcance) / passos), y: origem.y + Math.round((dy * alcance) / passos) };
   const saida: Celula[] = [];
+  let antes = origem;
   for (const c of bresenham(origem, fim)) {
-    if (barreira ? barreira(c) : !passavel(fase, c.x, c.y)) break;
+    // Marco 42 (15/11/2026, D-176): o relevo que sobe além do muro baixo encerra a linha.
+    if (barreira ? barreira(c) : !passavel(fase, c.x, c.y) || !tiroPassaEntre(fase, antes, c)) break;
     saida.push(c);
+    antes = c;
   }
   return saida;
 }

@@ -1,4 +1,5 @@
 import { ehDragao, porteDoDragao } from './porte-dragoes';
+import { alturaEm, barraPorAltura, fatorDeSubida } from './relevo';
 import { apagarLuz } from '../combat/luz-propria';
 import { classeDe, progressoReforcosGuerreiro } from '../combat/ajustes-classes';
 import { velocidadeEncarnacao } from '../combat/encarnacao';
@@ -11,7 +12,7 @@ import { direcaoDe } from '../combat/orientacao';
 import { multiplicadorDoPassoDoFalcao } from '../combat/companheiro';
 import { passoDoCompanheiro } from '../combat/pets-estilos';
 import { passoDoPet, petDoCompanheiro, pressaDaCaca } from '../combat/pets';
-import { atravessaCorpos, fatorDeVelocidade, fimDaTirolesa, fimDoSalto, naTirolesa, noAr, noSalto } from '../combat/movimento-classe';
+import { atravessaCorpos, emMontaria, fatorDeVelocidade, fimDaTirolesa, fimDoSalto, naTirolesa, noAr, noSalto } from '../combat/movimento-classe';
 import { andarCabeNoDeslize } from '../combat/deslize';
 // Movimento livre (§2.2, §2.3). Marco 26 (25/10/2026, D-104): antes célula a célula, em passos cardinais (a diagonal
 // virava escadinha); agora a posição é contínua e anda em qualquer ângulo.
@@ -421,7 +422,9 @@ function andarNoTick(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao, sa
     // Quem anda olha para onde vai (Marco 24, D-097), salvo se está golpeando alguém.
     const olhar = e.acao ? null : direcaoDe(ux, uy);
     if (olhar) e.olhando = olhar;
-    const andou = andar(e, ux * trecho, uy * trecho, estado, ctx, saida, grade);
+    // Marco 42 (15/11/2026, D-176): subir a encosta custa velocidade (a montaria sente menos).
+    const subida = noAr(e) ? 1 : fatorDeSubida(ctx.fase, ctx.balance.relevo, { x: e.px, y: e.py }, { x: e.px + ux, y: e.py + uy }, emMontaria(e));
+    const andou = andar(e, ux * trecho * subida, uy * trecho * subida, estado, ctx, saida, grade);
     e.relogioAndar += (1000 * andou) / vel;
     total += andou;
     restante -= trecho;
@@ -516,7 +519,9 @@ function contornar(e: Entidade, sx: number, sy: number, estado: EstadoJogo, ctx:
 function cabe(e: Entidade, x: number, y: number, estado: EstadoJogo, ctx: ContextoSimulacao, grade?: GradeDeCorpos): boolean {
   const r = raioNoTerreno(e,ctx);
   // Marco 40 (D-164): quem voa passa por cima dos telhados das casas.
-  if (!corpoCabe(ctx.fase, x, y, r, (i, j) => muralhaEm(estado, i, j) !== undefined, noAr(e) ? (i, j) => sobTelhado(ctx, i, j) : null)) return false;
+  // Marco 42 (15/11/2026, D-176): o relevo barra pelo desnível desde onde o corpo está (a pé ou voando).
+  const relevo = barraPorAltura(ctx.fase, ctx.balance.relevo, alturaEm(ctx.fase, e.px, e.py), noAr(e) ? 'voar' : naTirolesa(e) ? 'saltar' : 'andar');
+  if (!corpoCabe(ctx.fase, x, y, r, (i, j) => muralhaEm(estado, i, j) !== undefined || (relevo?.(i, j) ?? false), noAr(e) ? (i, j) => sobTelhado(ctx, i, j) : null)) return false;
   // Marco 30 (30/10/2026, D-129): o monstro não entra no refúgio (os muros da vila do Mundo). D-138: salvo atrás de quem
   // luta com ele; e quem já está dentro sai livre.
   if (!podePisarNoRefugio(estado, ctx, e, x, y)) return false;

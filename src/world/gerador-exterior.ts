@@ -20,6 +20,7 @@ import { entradaDoLado, escavarPassagens, type PassagemDoExterior } from './pass
 import type { Decoracao } from './decoracao';
 import { abrigoDoCentro, andarilhosDaRegiao, entradasDosLados, escavarCorredor, nivelDoMonstro, rotasDosErrantes } from './exterior-extras';
 import { luzesDoExterior } from './luzes-exterior';
+import { gerarRelevo } from './relevo-exterior';
 import { emPassagem } from './passagem';
 
 export { LARGURA_PASSAGEM } from './passagens-exterior';
@@ -69,6 +70,8 @@ export interface ExteriorGerado {
   abrigo: { x: number; y: number; raio: number } | null;
   /** Marco 38: as rotas dos mercadores errantes (células de estrada em ordem, de ida e volta). */
   rotas: readonly (readonly Celula[])[];
+  /** Marco 42 (15/11/2026, D-176): a altura de cada célula (world/relevo-exterior.ts). */
+  alturas: Uint8Array;
 }
 
 /** Ruído de valor suave (0–1): valores sorteados na grade grossa, interpolados entre os quatro vizinhos. */
@@ -286,7 +289,7 @@ function erguerVila(g: Grade, vila: NonNullable<RegiaoDoMundo['vila']>, protegid
 }
 
 /** As células andáveis alcançáveis a partir de `origem` (busca em largura, 4 vizinhos). */
-function alcancaveis(g: Grade, origem: Celula): Uint8Array {
+function alcancaveis(g: Grade, origem: Celula, alturas?: Uint8Array): Uint8Array {
   const n = g.n;
   const visto = new Uint8Array(n * n);
   if (!ANDA.has(g.em(origem.x, origem.y))) return visto;
@@ -306,6 +309,8 @@ function alcancaveis(g: Grade, origem: Celula): Uint8Array {
       const ny = y + dy;
       const nk = ny * n + nx;
       if (nx < 0 || ny < 0 || nx >= n || ny >= n || visto[nk] || !ANDA.has(g.em(nx, ny))) continue;
+      // Marco 42 (D-176): pelo desnível que se anda (o muro separa).
+      if (alturas && Math.abs((alturas[nk] ?? 0) - (alturas[k] ?? 0)) > BALANCE_PADRAO.relevo.encostaMax) continue;
       visto[nk] = 1;
       fila.push(nk);
     }
@@ -410,7 +415,14 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
   const abandonadas = casasAbandonadas(g, criarRng(regiao.semente + SEMENTE_CASAS), regiao.inimigos.length > 0 ? regras.casas : 0, perfil.chao, (c) => longeDaVila(c) && spawns.every((s) => chebyshev(s, c) >= FOLGA_INIMIGOS), protegidas);
   telhados.push(...abandonadas.telhados);
 
-  const alcance = alcancaveis(g, spawns[0] as Celula);
+  // Marco 42 (15/11/2026, D-176): o relevo (RNG próprio), antes do alcance: os monstros e a coleta só onde se anda.
+  const naPassagemDaRegiao = (c: Celula) => emPassagem({ passagens: areas.map((f) => f.area) }, c.x, c.y);
+  const alturas = gerarRelevo({
+    n, semente: regiao.semente, bioma: regiao.bioma, em: (x, y) => g.em(x, y),
+    planas: [...(regiao.vila ? [{ x: regiao.vila.x, y: regiao.vila.y, raio: regiao.vila.raio + 6 }] : []), ...(abrigo ? [{ x: abrigo.x, y: abrigo.y, raio: abrigo.raio + 4 }] : []), ...spawns.map((s) => ({ x: s.x, y: s.y, raio: 2 }))],
+    retangulos: [...telhados, ...regiao.estruturas], passagem: naPassagemDaRegiao, origens: spawns, encostaMax: BALANCE_PADRAO.relevo.encostaMax,
+  });
+  const alcance = alcancaveis(g, spawns[0] as Celula, alturas);
   const livres: Celula[] = [];
   for (let y = 1; y < n - 1; y++) for (let x = 1; x < n - 1; x++) if (alcance[y * n + x] && !protegidas.has(y * n + x) && g.em(x, y) !== '=') livres.push({ x, y });
   const naVila = (c: Celula) => (regiao.vila !== null && Math.hypot(c.x - regiao.vila.x, c.y - regiao.vila.y) <= regiao.vila.raio + FOLGA_INIMIGOS) || (abrigo !== null && chebyshev(c, abrigo) <= abrigo.raio + FOLGA_INIMIGOS);
@@ -502,7 +514,7 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
   pontos.push(...andarilhosDaRegiao(g, regiao, (c) => !naVila(c) && !protegidas.has(c.y * n + c.x) && spawns.every((s) => chebyshev(s, c) >= 6), ocupadas));
   const rotas = rotasDosErrantes(g, regiao, centro, entradas);
   // Marco 42 (15/11/2026, D-176): postes de tocha nas estradas e fogueiras nas matas e no abrigo (sem sorteio).
-  pontos.push(...luzesDoExterior((x, y) => g.em(x, y), n, regiao, naVila, (c) => emPassagem({ passagens: areas.map((f) => f.area) }, c.x, c.y), [...(abrigo ? [abrigo] : []), ...(regiao.vila ? [centro] : [])], ocupadas));
+  pontos.push(...luzesDoExterior((x, y) => g.em(x, y), n, regiao, naVila, naPassagemDaRegiao, [...(abrigo ? [abrigo] : []), ...(regiao.vila ? [centro] : [])], ocupadas));
 
   const fase: FaseJson = {
     id: `mundo_${reino.id}_${regiao.id}`,
@@ -517,7 +529,7 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     ...(armadilhas.length > 0 && { objetos: armadilhas }),
     ...(ambientes.length > 0 && { ambientes }),
   };
-  return { fase, pontos, passagens, faixas: areas, enfeites, vila: regiao.vila ? { x: regiao.vila.x, y: regiao.vila.y, raio: regiao.vila.raio } : null, abrigo, rotas };
+  return { fase, alturas, pontos, passagens, faixas: areas, enfeites, vila: regiao.vila ? { x: regiao.vila.x, y: regiao.vila.y, raio: regiao.vila.raio } : null, abrigo, rotas };
 }
 
 /**

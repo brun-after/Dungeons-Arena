@@ -81,6 +81,9 @@ export class AssadorDeSolo {
     for (const { camada, pesos: p } of outras) if (solida(camada) && camada !== 'vazio') this.recortada(g, camada, p, origemX, origemY, pesos, 1);
     this.sombra(g, pesos.macro, pesos);
     this.sombra(g, pesos.ao, pesos);
+    // Marco 42 (15/11/2026, D-176): o relevo (a encosta escura de costas para a luz; a de frente e o alto, claros).
+    if (pesos.relevoSombra) this.sombra(g, pesos.relevoSombra, pesos);
+    if (pesos.relevoLuz) this.sombra(g, pesos.relevoLuz, pesos, '#fff4dc', 'screen');
     g.globalCompositeOperation = 'multiply';
     g.fillStyle = hexCss(this.solo.tinta);
     g.fillRect(0, 0, l, a);
@@ -244,19 +247,22 @@ export class AssadorDeSolo {
   }
 
   /** Escurece pelo peso (a oclusão e a sombra grande). */
-  private sombra(g: Contexto2D, pesos: Float32Array, dim: PesosDoBloco): void {
+  private sombra(g: Contexto2D, pesos: Float32Array, dim: PesosDoBloco, cor = '#000', modo: GlobalCompositeOperation = 'source-over'): void {
     if (!pesos.some((p) => p > 0.002)) return;
     const r = this.rascunho.getContext('2d');
     if (!r) return;
     r.globalCompositeOperation = 'source-over';
     r.clearRect(0, 0, this.rascunho.width, this.rascunho.height);
-    r.fillStyle = '#000';
+    r.fillStyle = cor;
     r.fillRect(0, 0, this.rascunho.width, this.rascunho.height);
     this.pintarMascara(pesos, dim);
     r.globalCompositeOperation = 'destination-in';
     r.imageSmoothingEnabled = true;
     r.drawImage(this.mascara, 0, 0, this.rascunho.width, this.rascunho.height);
+    const antes = g.globalCompositeOperation;
+    g.globalCompositeOperation = modo;
     g.drawImage(this.rascunho, 0, 0);
+    g.globalCompositeOperation = antes;
   }
 
   /** A máscara pequena (uma amostra por pixel), esticada com suavização na hora de recortar. */

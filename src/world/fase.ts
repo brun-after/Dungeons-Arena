@@ -261,6 +261,8 @@ export interface Fase {
   /** Marco 42 (D-176): o escuro próprio da região (0 a 1) e as matas fechadas (sempre escuras). */
   readonly escuroBase?: number;
   readonly matas?: readonly { x: number; y: number; raio: number }[];
+  /** Marco 42 (D-176): a altura de cada célula do exterior (world/relevo.ts); ausente = plano. */
+  readonly alturas?: Uint8Array;
   /** Marco 31 (D-130): os telhados das casas fechadas. */
   readonly telhados?: readonly Telhado[];
   /** Marco 41 (D-169): as passagens entre as regiões do Mundo (world/passagem.ts): sem monstros e sem dano. */

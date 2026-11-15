@@ -74,9 +74,9 @@ describe('tocha (D-176)', () => {
     const lugar = lerLugar(reino, 'regiao:vila_do_centro');
     if (!lugar) throw new Error('lugar');
     const m = montarLugar(CONTEUDO, reino, lugar, modoPorId(CONTEUDO, MODO_MUNDO));
-    const luzes = m.exterior?.pontos.filter((p) => p.tipo === 'luz') ?? [];
-    expect(luzes.filter((p) => p.tipo === 'luz' && p.objeto === 'poste_tocha').length).toBeGreaterThan(3);
-    expect(luzes.filter((p) => p.tipo === 'luz' && p.objeto === 'fogueira').length).toBe(2);
+    const luzes = (m.exterior?.pontos ?? []).flatMap((p) => (p.tipo === 'luz' ? [p] : []));
+    expect(luzes.filter((p) => p.objeto === 'poste_tocha').length).toBeGreaterThan(3);
+    expect(luzes.filter((p) => p.objeto === 'fogueira').length).toBe(2);
     expect(m.estado.objetos.some((o) => o.tipo === 'poste_tocha')).toBe(true);
   });
 });

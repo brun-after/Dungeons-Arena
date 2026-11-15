@@ -123,11 +123,11 @@ export function resistenciaPeloVinculo(ctx: CtxVinculo, alvo: Pick<Entidade, 'bo
   if (!alvo.bolsa) return 0;
   const p = pontaDe(elemento);
   // Marco 42 (D-176): o vento ainda não é ponta do vínculo (sem runa de jogador): sem resistência por ele.
-  return resistenciaDoVinculoPct(ctx.balance.vinculo, p, vinculoDe(ctx, alvo, tick)[p] ?? 0);
+  return resistenciaDoVinculoPct(ctx.balance.vinculo, p, (vinculoDe(ctx, alvo, tick) as Partial<Vinculo>)[p] ?? 0);
 }
 
 /** A penetração (em %, 0 a `penetracaoPct`) do atacante no próprio elemento. */
 export function penetracaoPct(ctx: CtxVinculo, atacante: Pick<Entidade, 'bolsa'> | undefined, elemento: Elemento | null, tick: number): number {
   if (!atacante?.bolsa || !elemento) return 0;
-  return ctx.balance.vinculo.penetracaoPct * Math.pow(vinculoDe(ctx, atacante, tick)[elemento] ?? 0, 1.5);
+  return ctx.balance.vinculo.penetracaoPct * Math.pow((vinculoDe(ctx, atacante, tick) as Partial<Vinculo>)[elemento] ?? 0, 1.5);
 }

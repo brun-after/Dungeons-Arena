@@ -7,6 +7,7 @@ import { muralhaEm } from './tatica';
 // Marco 27 (29/10/2026, D-126): as variações do básico das armas de classe (vários projéteis, bumerangue, ricochetes,
 // tabela, teleguiada, órbita, estilhaço, cravar, rastro) entram pelos ganchos de projeteis-variacoes.ts.
 
+import { tiroPassaEntre } from '../world/relevo';
 import type { Celula } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import { buscarEntidade, novoId, type EstadoJogo, type Projetil } from '../core/estado';
@@ -136,11 +137,15 @@ export function moverProjeteis(estado: EstadoJogo, ctx: ContextoSimulacao, saida
     }
     if (p.var?.fase === 'orbita' && orbitar(estado, ctx, p, hab, saida) === 'fim') fim = 'expirou';
     let ultimoPasso = 0;
+    // Marco 42 (15/11/2026, D-176): a parede do relevo que sobe além do muro baixo para o tiro.
+    let antes = { x: Math.round(p.x), y: Math.round(p.y) };
     while (!fim && p.var?.fase !== 'orbita') {
       const cx = Math.round(p.x);
       const cy = Math.round(p.y);
+      const subiuDemais = !tiroPassaEntre(ctx.fase, antes, { x: cx, y: cy });
+      antes = { x: cx, y: cy };
       // O bumerangue volta à mão por cima de tudo; a tabela quica.
-      if (p.var?.fase !== 'volta' && (!atravessavelPorTiro(ctx.fase, cx, cy) || muralhaEm(estado, cx, cy))) {
+      if (p.var?.fase !== 'volta' && (!atravessavelPorTiro(ctx.fase, cx, cy) || muralhaEm(estado, cx, cy) || subiuDemais)) {
         if (variacao && naParede(estado, ctx, p, variacao, ultimoPasso, saida)) {
           ultimoPasso = 0;
           continue;

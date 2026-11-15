@@ -3,6 +3,7 @@
 // saiu antes de o alvo se esconder bate na parede, como sempre. As famílias de arma em `armas.tiroPorCimaDe` (o cajado
 // do Necromante) ficam de fora: o básico delas cai sob o alvo. A reta é a mesma integração do projétil. Puro.
 
+import { tiroPassaEntre } from '../world/relevo';
 import type { Celula } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
@@ -21,9 +22,13 @@ export function tiroLivre(estado: EstadoJogo, ctx: ContextoSimulacao, de: Celula
   const dx = ate.x - de.x;
   const dy = ate.y - de.y;
   const passos = Math.ceil(Math.hypot(dx, dy) / SUBPASSO);
+  let antes = { x: de.x, y: de.y };
   for (let i = 1; i < passos; i++) {
     const cx = Math.round(de.x + (dx * i) / passos);
     const cy = Math.round(de.y + (dy * i) / passos);
+    // Marco 42 (D-176): a parede do relevo (muro alto, montanha) fecha a reta; de cima, atira-se para baixo.
+    if (!tiroPassaEntre(ctx.fase, antes, { x: cx, y: cy })) return false;
+    antes = { x: cx, y: cy };
     if ((cx === de.x && cy === de.y) || (cx === ate.x && cy === ate.y)) continue;
     if (!atravessavelPorTiro(ctx.fase, cx, cy) || muralhaEm(estado, cx, cy)) return false;
   }
