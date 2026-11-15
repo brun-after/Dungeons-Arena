@@ -58,3 +58,24 @@ describe('a caça noturna (D-178)', () => {
     expect(monstros().some((e) => e.efeitos.some((f) => f.tipo === 'adormecido'))).toBe(false);
   });
 });
+
+describe('os elementos pela hora (D-178)', () => {
+  it('sombra e gelo crescem à noite; luz e fogo de dia; fora do Mundo nada muda', async () => {
+    const { fatorDaHora, multiplicadorClima } = await import('../../src/combat/clima');
+    const r = reino();
+    const lugar = lerLugar(r, 'regiao:campos_do_oeste');
+    if (!lugar) throw new Error('lugar');
+    const m = montarLugar(CONTEUDO, r, lugar, modoPorId(CONTEUDO, MODO_MUNDO));
+    const pct = m.ctx.balance.mundo.elementosPelaHora.pct / 100;
+    const noite = { ...m.ctx, modo: { ...m.ctx.modo, noite: 1 } };
+    const dia = { ...m.ctx, modo: { ...m.ctx.modo, noite: 0 } };
+    expect(fatorDaHora(noite, 'trevas')).toBeCloseTo(1 + pct);
+    expect(fatorDaHora(noite, 'gelo')).toBeCloseTo(1 + pct);
+    expect(fatorDaHora(noite, 'fogo')).toBe(1);
+    expect(fatorDaHora(dia, 'sagrado')).toBeCloseTo(1 + pct);
+    expect(fatorDaHora(dia, 'trevas')).toBe(1);
+    expect(fatorDaHora(dia, 'raio')).toBe(1);
+    expect(fatorDaHora(m.ctx, 'fogo')).toBe(1);
+    expect(multiplicadorClima(noite, 'gelo')).toBeCloseTo(1 + pct);
+  });
+});

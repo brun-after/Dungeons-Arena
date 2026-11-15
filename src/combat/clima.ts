@@ -29,8 +29,26 @@ export function climaDaFase(ctx: ContextoSimulacao): { elemento: Elemento; opost
   return elemento ? { elemento, oposto: ctx.conteudo.afinidades.elementos.get(elemento)?.oposto ?? null } : null;
 }
 
-/** Multiplicador de dano do clima para uma habilidade do elemento. */
+/**
+ * Marco 44 (15/11/2026, D-178): os elementos pela hora, no Mundo (onde a sala põe `modo.noite`): os da noite (sombra e
+ * gelo) ficam até `pct`% mais fortes na noite fechada e os do dia (luz e fogo), de dia, na medida da hora. Vale para
+ * as skills (as runas inclusive, que mudam o elemento) e para quanto dura o estado do elemento (as reações).
+ */
+export function fatorDaHora(ctx: ContextoSimulacao, elemento: Elemento | null): number {
+  const noite = ctx.modo.noite;
+  if (!elemento || noite === undefined) return 1;
+  const h = ctx.balance.mundo.elementosPelaHora;
+  if (h.noite.includes(elemento)) return 1 + (h.pct / 100) * noite;
+  if (h.dia.includes(elemento)) return 1 + (h.pct / 100) * (1 - noite);
+  return 1;
+}
+
+/** Multiplicador de dano do clima (e da hora, D-178) para uma habilidade do elemento. */
 export function multiplicadorClima(ctx: ContextoSimulacao, elemento: Elemento | null): number {
+  return fatorDaHora(ctx, elemento) * multiplicadorDoTema(ctx, elemento);
+}
+
+function multiplicadorDoTema(ctx: ContextoSimulacao, elemento: Elemento | null): number {
   const c = elemento ? climaDaFase(ctx) : null;
   if (!c) return 1;
   if (elemento === c.elemento) return 1 + ctx.balance.clima.reforcoPct / 100;
@@ -39,7 +57,10 @@ export function multiplicadorClima(ctx: ContextoSimulacao, elemento: Elemento | 
 }
 
 /** O estado do elemento do clima dura mais quando sai de uma habilidade desse elemento. */
-export function estenderNoClima(ctx: ContextoSimulacao, hab: Habilidade, ef: EfeitoCanonico): EfeitoCanonico {
+export function estenderNoClima(ctx: ContextoSimulacao, hab: Habilidade, ef0: EfeitoCanonico): EfeitoCanonico {
+  // D-178: o estado do elemento favorecido pela hora dura mais (mais tempo para as reações).
+  const hora = fatorDaHora(ctx, hab.elemento);
+  const ef = hora !== 1 && hab.elemento && ef0.duracaoMs > 0 && ctx.conteudo.elementos.get(hab.elemento)?.estado.tipo === ef0.tipo ? { ...ef0, duracaoMs: Math.round(ef0.duracaoMs * hora) } : ef0;
   const c = hab.elemento ? climaDaFase(ctx) : null;
   if (!c || hab.elemento !== c.elemento || ef.duracaoMs <= 0) return ef;
   if (ctx.conteudo.elementos.get(c.elemento)?.estado.tipo !== ef.tipo) return ef;

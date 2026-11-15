@@ -454,6 +454,8 @@ export interface Balance {
      * o bônus do amanhecer (dano %, min); a chance por minuto de chamar um monstro, a que distância; as vagas da caixa.
      */
     /** Marco 44 (D-178): a vila à noite: a partir de que noite as lojas `fecham` e o estoque do vendedor da noite. */
+    /** Marco 44 (D-178): os elementos mais fortes à noite e de dia, e quanto (% no auge). */
+    elementosPelaHora: { noite: readonly string[]; dia: readonly string[]; pct: number };
     vilaNoite: { fechaDesde: number; fecham: readonly string[]; estoque: readonly string[] };
     acampamento: {
       acesaMin: number; duraMin: number; raioFogo: number; raioDescanso: number; noiteDesde: number; curaPctPorS: number;
