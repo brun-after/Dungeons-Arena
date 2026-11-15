@@ -422,7 +422,8 @@ export class SalaMundoColyseus extends SalaColyseusBase {
       molde: this.coordenador.moldeDe(lugar),
       semente: Math.floor(Math.random() * 2 ** 31),
       canal: this.canal,
-      agora: () => Date.now(),
+      // Marco 42 (D-176): MUNDO_HORA_MIN desloca a hora do Mundo (para ver a noite sem esperar).
+      agora: () => Date.now() + (Number(process.env.MUNDO_HORA_MIN ?? 0) || 0) * 60_000,
       versaoConteudo: versaoDoConteudo(),
       portais: this.coordenador.portais,
     });

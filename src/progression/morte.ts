@@ -1,4 +1,5 @@
 import { aplicaAntifarmDeFase, xpDeCriatura, xpDoChefeDaDungeon } from './xp-antifarm';
+import { PREFIXO_NOITE } from '../mundo/noite';
 import { criarTumulo } from '../mundo/objetos-mundo';
 import { novaMemoria } from '../combat/estado-tatico';
 import { colherMorto } from '../combat/necromancia';
@@ -200,7 +201,8 @@ export function processarMortes(estado: EstadoJogo, ctx: ContextoSimulacao, said
       // Dominação já transforma o original: a passiva não cria uma segunda cópia da mesma morte.
       if (!e.invocacao) colherMorto(estado, ctx, e, quemAbateu, saida);
       removidos.add(e.id);
-      if (e.preset && !e.invocacao && !ctx.fase.eventos.includes('enxame')) {
+      // Marco 42 (D-176): os monstros da noite não renascem (a noite traz outros).
+      if (e.preset && !e.invocacao && !ctx.fase.eventos.includes('enxame') && !e.id.startsWith(PREFIXO_NOITE)) {
         const segundos = e.arquetipo === 'boss' ? ctx.balance.respawn.bossS : ctx.balance.respawn.inimigoS;
         estado.respawns.push({
           id: e.id,

@@ -636,6 +636,11 @@
     "troca": { "raio": 4, "maxItens": 8 },
     "mercado": { "taxaAnuncioPct": 2, "taxaVendaPct": 8, "anunciosPorPersonagem": 10, "duracaoH": 72, "precoMax": 1000000, "pagina": 20 },
     "eventos": { "janelaMin": 60, "duracaoMin": 20, "chancePct": 35, "luaLootPct": 200, "perigosComLua": ["normal", "perigoso"] },
+    "noite": {
+      "densidadePct": 50, "maxExtras": 60, "porConferencia": 2, "distancia": [14, 28], "niveisExtra": [2, 5],
+      "deteccaoPct": 30, "porMata": 4, "presetsDaMata": ["lobo", "aranha"],
+      "chefeChancePorMinPct": 6, "chefes": ["necromante_ancestral", "vampiro"], "someLongeDe": 14
+    },
     "ciclo": {
       "minutos": { "amanhecer": 2, "dia": 24, "entardecer": 2, "noite": 12 },
       "quadros": {

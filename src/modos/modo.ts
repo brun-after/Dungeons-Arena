@@ -148,6 +148,8 @@ export interface ModoDeJogo {
   iaRaioAtivacao?: number;
   /** Marco 42 (15/11/2026, D-176): a luz em volta do jogador só com a tocha acesa (no Mundo); ausente = sempre. */
   luzSoComTocha?: boolean;
+  /** Marco 42 (D-176): o escuro da região agora (0 a 1), posto pela sala do Mundo a cada segundo (não vem dos dados). */
+  escuro?: number;
   /** Marco 29 (D-128): a morte do jogador deixa a mochila e o equipado num túmulo (o Mundo, fora das dungeons). */
   tumuloNaMorte?: boolean;
   /**

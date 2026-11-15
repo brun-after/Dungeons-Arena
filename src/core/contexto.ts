@@ -13,6 +13,7 @@ import type { TipoTerrenoVivo } from '../world/ambiente-tipos';
 import type { Elemento } from '../combat/elementos';
 import type { RegrasDeEventos } from '../mundo/eventos-mundo';
 import type { RegrasDoCiclo } from '../mundo/ciclo';
+import type { RegrasDaNoite } from '../mundo/noite';
 import type { Atributos } from '../entities/entidade';
 import type { RegrasItensGerados } from '../progression/gerar-item';
 import type { Conteudo } from './conteudo';
@@ -482,6 +483,8 @@ export interface Balance {
     eventos: RegrasDeEventos;
     /** Marco 42 (15/11/2026, D-176): o dia e a noite do Mundo (mundo/ciclo.ts). */
     ciclo: RegrasDoCiclo;
+    /** Marco 42 (D-176): os monstros da noite e das matas fechadas (mundo/noite.ts). */
+    noite: RegrasDaNoite;
   };
   armadilhas: {
     revelarIntervaloMs: number;
