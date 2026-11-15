@@ -495,7 +495,8 @@ export interface Balance {
     /** Marco 30 (D-129): o baú do banco (por personagem, em qualquer vila). */
     banco: { slots: number };
     /** Missões aceitas ao mesmo tempo e quantas o quadro oferece por dia. */
-    missoes: { ativasMax: number; ofertasPorQuadro: number };
+    /** Marco 44 (D-178): `ofertasDaNoite` são as missões a mais que o quadro mostra à noite. */
+    missoes: { ativasMax: number; ofertasPorQuadro: number; ofertasDaNoite: number };
     /** Chat: o raio do canal local, o tamanho da mensagem, o limite por janela e o histórico do cliente. */
     chat: { raioLocal: number; maxTexto: number; porJanela: number; janelaS: number; historico: number };
     grupo: { max: number; conviteS: number };

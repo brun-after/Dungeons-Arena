@@ -400,6 +400,8 @@
     ]
   },
   "missoes": [
+    {"id": "noite_vampiros", "nome": "Os que andam no escuro", "hora": "noite", "texto": "A taverna cochicha: os vampiros só caçam à noite. Derrote 5 deles antes do amanhecer.", "vilas": ["vila_do_centro", "encosta_do_leste"], "alvo": {"tipo": "cacar", "preset": "vampiro", "qtd": 5}, "recompensa": {"ouro": 150, "xp": 260, "itens": ["lenha"]}},
+    {"id": "noite_esqueletos", "nome": "Ossos na estrada", "hora": "noite", "texto": "Um carroceiro jura que a estrada ganhou mortos que andam. Derrote 8 esqueletos à noite.", "vilas": ["vila_do_centro", "encosta_do_leste"], "alvo": {"tipo": "cacar", "preset": "esqueleto", "qtd": 8}, "recompensa": {"ouro": 170, "xp": 300, "itens": ["tocha"]}},
     {"id": "chapeu_do_gelatino", "nome": "O chapéu do Gelatino", "texto": "Gelatino quer o chapéu de volta: derrote 8 goblins nos Campos do Oeste.", "vilas": ["npc:gelatino"], "alvo": {"tipo": "cacar", "preset": "goblin", "qtd": 8, "regiao": "campos_do_oeste"}, "recompensa": {"ouro": 70, "xp": 120, "itens": ["pocao_vida"]}},
     {"id": "amigos_do_gelatino", "nome": "Amigos de geleia", "texto": "Gelatino quer gosma para \"fazer amigos\". Melhor não perguntar. Traga 6.", "vilas": ["npc:gelatino"], "alvo": {"tipo": "entregar", "itemId": "gosma_de_slime", "qtd": 6}, "recompensa": {"ouro": 60, "xp": 100}},
     {"id": "escolta_cripta_das_raizes", "nome": "A peregrina da floresta", "texto": "Leve a Irmã Celina viva até a porta da Cripta das Raízes.", "vilas": ["npc:irma_celina"], "alvo": {"tipo": "escoltar", "protegido": "peregrino", "estrutura": "porta_cripta_das_raizes"}, "recompensa": {"ouro": 160, "xp": 260, "itens": ["pocao_vida_maior"]}},

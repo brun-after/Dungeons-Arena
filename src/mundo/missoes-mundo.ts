@@ -29,6 +29,8 @@ export interface MissaoDoMundo {
   vilas: readonly string[];
   alvo: AlvoDeMissao;
   recompensa: { ouro: number; xp: number; itens: readonly string[] };
+  /** Marco 44 (15/11/2026, D-178): a missão que só aparece no quadro à noite (a taverna cheia). */
+  hora?: 'noite';
 }
 
 /** O que aconteceu no jogo e pode andar uma missão. */
@@ -70,6 +72,7 @@ export function lerMissaoDoMundo(l: Leitor, v: unknown): MissaoDoMundo {
     texto: l.texto(o, 'texto'),
     vilas: l.listaDeTextos(o, 'vilas'),
     alvo,
+    ...(o.hora !== undefined && { hora: l.opcao(o, 'hora', ['noite'] as const) }),
     recompensa: {
       ouro: l.numero(r, 'ouro', { min: 0, max: 1_000_000, inteiro: true }),
       xp: l.numero(r, 'xp', { min: 0, max: 10_000_000, inteiro: true }),
@@ -79,9 +82,15 @@ export function lerMissaoDoMundo(l: Leitor, v: unknown): MissaoDoMundo {
 }
 
 /** As ofertas do quadro da vila no dia: um sorteio estável entre as missões que listam a vila. */
-export function ofertasDoQuadro(missoes: readonly MissaoDoMundo[], vila: string, dia: number, quantas: number): string[] {
-  const candidatas = missoes.filter((m) => m.vilas.includes(vila)).map((m) => m.id);
-  const rng = criarRng(hashTexto(`quadro:${vila}:${String(dia)}`));
+export function ofertasDoQuadro(missoes: readonly MissaoDoMundo[], vila: string, dia: number, quantas: number, noturnas = 0): string[] {
+  const doDia = sortearDoDia(missoes.filter((m) => m.vilas.includes(vila) && !m.hora).map((m) => m.id), `quadro:${vila}:${String(dia)}`).slice(0, quantas);
+  // Marco 44 (15/11/2026, D-178): à noite (`noturnas` > 0), o quadro ganha as missões que só existem à noite.
+  if (noturnas <= 0) return doDia;
+  return [...doDia, ...sortearDoDia(missoes.filter((m) => m.vilas.includes(vila) && m.hora === 'noite').map((m) => m.id), `noite:${vila}:${String(dia)}`).slice(0, noturnas)];
+}
+
+function sortearDoDia(candidatas: string[], semente: string): string[] {
+  const rng = criarRng(hashTexto(semente));
   // Fisher-Yates com o RNG do dia.
   for (let i = candidatas.length - 1; i > 0; i--) {
     const j = Math.floor(aleatorio(rng) * (i + 1));
@@ -89,7 +98,7 @@ export function ofertasDoQuadro(missoes: readonly MissaoDoMundo[], vila: string,
     candidatas[i] = candidatas[j] ?? '';
     candidatas[j] = t;
   }
-  return candidatas.slice(0, quantas);
+  return candidatas;
 }
 
 /** As missões entregues no dia (para o quadro mostrar "feita hoje"). */

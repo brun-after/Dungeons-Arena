@@ -636,7 +636,7 @@
     "portalTemporario": { "duracaoS": 60, "fragmentoChancePct": 1.5, "inteiroChancePct": 0.05, "lapideMin": 5 },
     "fusao": { "chanceArmaPct": [12, 20, 30], "resistenciaPct": [12, 20, 30], "valorPct": [25, 50, 90] },
     "banco": { "slots": 40 },
-    "missoes": { "ativasMax": 5, "ofertasPorQuadro": 6 },
+    "missoes": { "ativasMax": 5, "ofertasPorQuadro": 6, "ofertasDaNoite": 2 },
     "chat": { "raioLocal": 20, "maxTexto": 160, "porJanela": 5, "janelaS": 10, "historico": 50 },
     "grupo": { "max": 6, "conviteS": 60 },
     "troca": { "raio": 4, "maxItens": 8 },
@@ -644,7 +644,7 @@
     "eventos": { "janelaMin": 60, "duracaoMin": 20, "chancePct": 35, "luaLootPct": 200, "perigosComLua": ["normal", "perigoso"] },
     "noite": {
       "densidadePct": 50, "maxExtras": 60, "porConferencia": 2, "distancia": [14, 28], "niveisExtra": [2, 5],
-      "percepcaoMenosPct": 50, "recompensaPct": 40, "semTumuloDesde": 0.5, "porMata": 4, "presetsDaMata": ["lobo", "aranha"],
+      "percepcaoMenosPct": 50, "sonoDoCovilPct": 50, "noturnos": ["vampiro", "esqueleto"], "noturnosPct": 35, "recompensaPct": 40, "semTumuloDesde": 0.5, "porMata": 4, "presetsDaMata": ["lobo", "aranha"],
       "chefeChancePorMinPct": 6, "chefes": ["necromante_ancestral", "vampiro"], "someLongeDe": 14
     },
     "ciclo": {

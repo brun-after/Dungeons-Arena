@@ -5,6 +5,10 @@
 // extras que ninguém feriu e que não estão perto de ninguém vão embora. O sorteio é pela região e pelo tick (o mesmo
 // resultado para o mesmo estado). Puro.
 
+import { aplicarEfeito } from '../combat/efeitos';
+import { construirEfeito } from '../combat/registro-efeitos';
+import { ticksDe } from '../core/tempo';
+import { emCombate } from '../progression/buffs';
 import { conferirAcampamentos } from './acampamento';
 import type { Celula } from '../core/comandos';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -37,6 +41,11 @@ export interface RegrasDaNoite {
   niveisExtra: readonly [number, number];
   /** Marco 44 (D-178): no escuro total, os monstros percebem a ameaça a esta % a menos de distância que de dia. */
   percepcaoMenosPct: number;
+  /** Marco 44 (D-178): os monstros que só existem à noite e a chance de cada um da horda ser deles. */
+  noturnos: readonly string[];
+  noturnosPct: number;
+  /** Marco 44 (D-178): de dia, os monstros do covil dormem; o primeiro golpe acorda e fere esta % a mais. */
+  sonoDoCovilPct: number;
   /** Marco 44 (D-178): na noite fechada, o XP e o saque crescem esta % (a meia-luz, proporcional). */
   recompensaPct: number;
   /** Marco 44 (D-178): a partir deste escuro da noite, quem morre não deixa túmulo (o que levava se perde). */
@@ -134,7 +143,9 @@ export function conferirNoite(estado: EstadoJogo, ctx: ContextoSimulacao, regiao
     for (let k = 0; k < r.porConferencia && extras.length + k < alvo && cabe(); k++) {
       const quem = jogadores[Math.floor(sorte() * jogadores.length)];
       const c = quem ? sortearPerto(ctx, quem, r.distancia[0], r.distancia[1], sorte) : null;
-      const preset = regiao.inimigos[Math.floor(sorte() * regiao.inimigos.length)];
+      // Marco 44 (15/11/2026, D-178): a caça noturna: parte da horda é dos que só saem à noite.
+      const noturno = sorte() * 100 < r.noturnosPct ? r.noturnos[Math.floor(sorte() * r.noturnos.length)] : undefined;
+      const preset = noturno ?? regiao.inimigos[Math.floor(sorte() * regiao.inimigos.length)];
       if (c && preset && nascer(estado, ctx, `${PREFIXO_NOITE}${String(estado.tick)}:${String(k)}`, preset, c, nivel())) nasceram++;
     }
   }
@@ -170,6 +181,7 @@ export function conferirFocosENoite(estado: EstadoJogo, ctx: ContextoSimulacao, 
   const escuro = escuroDoLugar(horaDoMundo(agoraMs, ctx.balance.mundo.ciclo), regiao.escuroBase ?? 0, false);
   const novo = (ctx.modo.escuro ?? 0) === escuro ? ctx : { ...ctx, modo: { ...ctx.modo, escuro } };
   conferirNoite(estado, novo, regiao, escuro);
+  conferirSonoDoCovil(estado, novo, agoraMs, new Set(ctx.balance.mundo.noite.noturnos));
   // Marco 44 (15/11/2026, D-178): o descanso junto ao fogo e os monstros que o fogo de acampamento chama.
   const r = ctx.balance.mundo.noite;
   const presets = regiao.inimigos.length > 0 ? regiao.inimigos : r.presetsDaMata;
@@ -180,4 +192,26 @@ export function conferirFocosENoite(estado: EstadoJogo, ctx: ContextoSimulacao, 
     return !!c && !!preset && nascer(estado, novo, `${PREFIXO_NOITE}${id}`, preset, c, regiao.nivel[1] + inteiro(rng, r.niveisExtra[0], r.niveisExtra[1]));
   });
   return novo;
+}
+
+/**
+ * Marco 44 (15/11/2026, D-178): o covil de dia. Os monstros que não estão em combate dormem (o efeito `adormecido`: não
+ * se mexem nem atacam; o primeiro golpe acorda e fere `sonoDoCovilPct`% a mais), e quem chega com cuidado os pega de
+ * surpresa. Acordado, o monstro só volta a dormir depois do combate. À noite, ninguém dorme. A cada segundo, pela sala.
+ * No ermo (`so`), dormem de dia só os monstros da noite (`noturnos`).
+ */
+export function conferirSonoDoCovil(estado: EstadoJogo, ctx: ContextoSimulacao, agoraMs: number, so?: ReadonlySet<string>): void {
+  const dia = horaDoMundo(agoraMs, ctx.balance.mundo.ciclo).fase === 'dia';
+  for (const e of estado.entidades) {
+    if (!vivo(e) || e.controlador !== 'ia' || e.arquetipo === 'jogador' || e.invocacao || (so && !so.has(e.preset))) continue;
+    const dorme = e.efeitos.find((f) => f.tipo === 'adormecido');
+    if (!dia) {
+      if (dorme) e.efeitos = e.efeitos.filter((f) => f !== dorme);
+      continue;
+    }
+    if (dorme) dorme.ateTick = estado.tick + ticksDe(120_000);
+    else if (e.ia?.modo !== 'perseguindo' && !emCombate(estado, ctx, e)) {
+      aplicarEfeito(estado, ctx, e, construirEfeito('adormecido', { pct: ctx.balance.mundo.noite.sonoDoCovilPct }), { id: e.id, x: e.x, y: e.y }, null, [], false);
+    }
+  }
 }

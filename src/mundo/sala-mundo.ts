@@ -31,7 +31,7 @@ import { guardarItem } from '../progression/inventario';
 import { tipoEm } from '../world/fase';
 import { novoObjeto } from '../world/objeto-novo';
 import { eventoDaRegiao, type EventoAtivo } from './eventos-mundo';
-import { conferirFocosENoite } from './noite';
+import { conferirFocosENoite, conferirSonoDoCovil } from './noite';
 import type { ModoDeJogo } from '../modos/modo';
 import { largarItem, largarPerto } from '../world/objetos';
 import { esperouNaPorta, naSaidaAberta } from '../world/portas';
@@ -276,8 +276,8 @@ export class SalaMundo extends SalaArena {
    * (15/11/2026, D-176): e a noite (mundo/noite.ts): o escuro da região vai no modo, e os monstros da noite chegam.
    */
   private conferirFocos(): void {
-    const regiao = this.lugar.tipo === 'regiao' ? this.lugar.regiao : null;
-    if (regiao) this.ctx = conferirFocosENoite(this.estado, this.ctx, regiao, this.opcoesMundo.agora());
+    if (this.lugar.tipo === 'regiao') this.ctx = conferirFocosENoite(this.estado, this.ctx, this.lugar.regiao, this.opcoesMundo.agora());
+    else if (this.lugar.tipo === 'covil') conferirSonoDoCovil(this.estado, this.ctx, this.opcoesMundo.agora()); // D-178
   }
 
   /** Marco 38 (D-142): os errantes andam, as escoltas são conferidas e as conjurações da Pedra de retorno acabam. */
