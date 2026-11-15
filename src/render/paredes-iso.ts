@@ -49,7 +49,7 @@ export function pedraDaFace(textura: Texture, p: Projecao, eixoX: boolean): Fill
   const origem = p.projetar(0, 0);
   const passo = eixoX ? p.projetar(CELULA_PX, 0) : p.projetar(0, CELULA_PX);
   const k = 1 / (textura.width / CELULAS_POR_TEXTURA);
-  const m = new Matrix((passo.x - origem.x) * k, (passo.y - origem.y) * k, 0, CELULA_PX * k, origem.x, origem.y);
+  const m = new Matrix((passo.x - origem.x) * k, (passo.z - origem.z) * k, 0, CELULA_PX * k, origem.x, origem.z);
   const f = new FillPattern(textura, 'repeat');
   f.setTransform(m);
   return f;
@@ -61,7 +61,8 @@ interface Faixa {
   celulas: number[];
 }
 
-const ehParede = (fase: Fase, x: number, y: number) => tipoEm(fase, x, y) === 'parede';
+// Marco 43 (D-177): o obstáculo natural do exterior (montanha, rochedo, árvore) não é muro: tem desenho próprio.
+const ehParede = (fase: Fase, x: number, y: number) => tipoEm(fase, x, y) === 'parede' && !(fase.obstaculos?.[y * fase.largura + x] ?? 0);
 const deAndar = (fase: Fase, x: number, y: number) => {
   const tipo = tipoEm(fase, x, y);
   // Marco 29 (D-128): o chão do exterior (mato e estrada) também levanta a borda das rochas e dos muros.

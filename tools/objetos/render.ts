@@ -9,12 +9,15 @@ import { join } from 'node:path';
 import { chromium } from '@playwright/test';
 import { build } from 'esbuild';
 import { RECEITAS } from './receitas';
+import { RECEITAS_CENARIO } from './receitas-cenario';
 import type { Modelos, Saida } from './pagina';
 
 const RAIZ = join(import.meta.dirname, '..', '..');
 const KAYKIT = join(RAIZ, '.brutos', 'kaykit-dungeon', 'x', 'KayKit-Dungeon-Remastered-1.0-main', 'addons', 'kaykit_dungeon_remastered', 'Assets', 'gltf');
 const QUATERNIUS = join(RAIZ, '.brutos', 'quaternius-props', 'x');
-const DESTINO = join(RAIZ, 'src', 'assets', 'objetos');
+// Marco 43 (D-177): `--cenario` grava o cenário do Mundo (rochas, árvores, objetos da vila) em src/assets/cenario.
+const CENARIO = process.argv.includes('--cenario');
+const DESTINO = join(RAIZ, 'src', 'assets', CENARIO ? 'cenario' : 'objetos');
 const QUALIDADE_WEBP = 0.86;
 /**
  * Células por unidade de cada pacote: o KayKit mede o piso em 4 unidades por ladrilho grande (2 por célula do jogo);
@@ -49,7 +52,7 @@ function arquivoNoDisco(caminho: string): string | null {
   return null;
 }
 
-const args = process.argv.slice(2);
+const args = process.argv.slice(2).filter((a) => a !== '--cenario');
 const pacote = await build({ entryPoints: [join(import.meta.dirname, 'pagina.ts')], bundle: true, format: 'iife', write: false, platform: 'browser' });
 const codigo = pacote.outputFiles[0]?.text ?? '';
 const navegador = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
@@ -81,10 +84,11 @@ if (args[0] === '--medir') {
   const so = args[0] === '--so' ? new Set((args[1] ?? '').split(',')) : null;
   const caminhoCatalogo = join(DESTINO, 'catalogo.json');
   const catalogo: Record<string, Omit<Saida, 'png'>> = existsSync(caminhoCatalogo) ? (JSON.parse(readFileSync(caminhoCatalogo, 'utf8')) as Record<string, Omit<Saida, 'png'>>) : {};
-  for (const receita of RECEITAS) {
+  for (const receita of CENARIO ? RECEITAS_CENARIO : RECEITAS) {
     if (so && !so.has(receita.nome)) continue;
     const modelos: Modelos = {};
     for (const p of receita.pecas) {
+      if (p.m.startsWith('p:')) continue;
       const pac = p.m.startsWith('k:') ? 'k' : 'q';
       modelos[p.m] = { url: HOST + arquivoDoModelo(p.m), escala: ESCALA[pac] };
     }

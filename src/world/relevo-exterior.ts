@@ -1,61 +1,22 @@
-// O relevo do exterior do Mundo (marco 42, 15/11/2026, D-176): a altura de cada célula, com RNG próprio (o resto da
-// região sai do mesmo sorteio de antes). Por bioma: um campo suave que sobe aos poucos (as encostas) e platôs que
-// saltam de uma vez (os muros baixos e altos); os rochedos ficam no alto (a montanha, que ninguém passa). A vila, o
+// O relevo do exterior do Mundo (marco 42, 15/11/2026, D-176): a altura de cada célula. Marco 43 (15/11/2026, D-177):
+// a altura de partida vem da geografia (world/geografia.ts: o chão, as serras, os platôs e os vales); aqui ela se
+// acomoda ao que foi construído por cima. A vila, o
 // abrigo, as casas, as estruturas e as passagens ficam planos; as estradas viram rampas que sobem um nível por vez;
 // as cavernas e as minas se abrem no penhasco de um morro.
 // Por fim, tudo o que se alcançava a pé continua alcançável: onde o muro isolaria um pedaço, abre-se uma rampa. Puro.
 
 import type { Celula } from '../core/comandos';
-import { aleatorio, criarRng, type EstadoRng } from '../core/rng';
-import type { Bioma } from '../mundo/reino';
 
-const SEMENTE_RELEVO = 42_211;
-const ALTURA_MAX = 12;
-
-/** O que cada bioma faz com o chão: a amplitude do campo suave e a altura e a frequência dos platôs. */
-interface PerfilDeRelevo {
-  /** Até quantos níveis o campo suave sobe. */
-  suave: number;
-  /** Quanto o platô salta (3 = muro baixo, 4 a 6 = muro alto). */
-  plato: number;
-  /** Acima deste valor do ruído (0 a 1), platô. */
-  limiarPlato: number;
-}
-
-const PERFIS: Readonly<Record<Bioma, PerfilDeRelevo>> = {
-  campo: { suave: 3, plato: 3, limiarPlato: 0.74 },
-  floresta: { suave: 3, plato: 3, limiarPlato: 0.7 },
-  pantano: { suave: 1, plato: 3, limiarPlato: 0.86 },
-  colinas: { suave: 4, plato: 4, limiarPlato: 0.62 },
-  ruinas: { suave: 2, plato: 4, limiarPlato: 0.68 },
-  neve: { suave: 4, plato: 5, limiarPlato: 0.64 },
-  deserto: { suave: 3, plato: 3, limiarPlato: 0.8 },
-};
-
-function ruido(rng: EstadoRng, tamanho: number, passo: number): (x: number, y: number) => number {
-  const n = Math.ceil(tamanho / passo) + 2;
-  const grade = Array.from({ length: n * n }, () => aleatorio(rng));
-  const v = (gx: number, gy: number) => grade[Math.min(n - 1, gy) * n + Math.min(n - 1, gx)] ?? 0;
-  const suave = (t: number) => t * t * (3 - 2 * t);
-  return (x, y) => {
-    const gx = Math.floor(x / passo);
-    const gy = Math.floor(y / passo);
-    const tx = suave((x % passo) / passo);
-    const ty = suave((y % passo) / passo);
-    const a = v(gx, gy) + (v(gx + 1, gy) - v(gx, gy)) * tx;
-    const b = v(gx, gy + 1) + (v(gx + 1, gy + 1) - v(gx, gy + 1)) * tx;
-    return a + (b - a) * ty;
-  };
-}
+const ALTURA_MAX = 18;
 
 export interface EntradaDoRelevo {
   n: number;
-  semente: number;
-  bioma: Bioma;
+  /** A altura de partida (world/geografia.ts). */
+  base: Uint8Array;
   /** O caractere da célula ('#' rocha, '~' água, '=' estrada, 'F' fachada; o resto é chão). */
   em: (x: number, y: number) => string;
-  /** As áreas que ficam planas na altura 0 (a vila, o abrigo, as passagens). */
-  planas: readonly { x: number; y: number; raio: number }[];
+  /** As áreas que ficam planas (a vila, o abrigo, as chegadas): na altura do centro delas, ou em `nivel`. */
+  planas: readonly { x: number; y: number; raio: number; nivel?: number }[];
   /** Os retângulos que ficam planos na altura do chão debaixo deles (as casas, as estruturas). */
   retangulos: readonly { x: number; y: number; largura: number; altura: number }[];
   /** As cavernas e as minas: a fachada fica cortada numa encosta (o morro atrás e dos lados, a boca no nível de baixo). */
@@ -73,21 +34,13 @@ const ANDA = new Set([',', '.', '=']);
 const anda = (ch: string) => ANDA.has(ch) || ch === '~';
 const VIZ: readonly (readonly [number, number])[] = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 
+/** A largura da saia de encosta em volta das áreas planas (marco 43, D-177). */
+const SAIA = 10;
+
 export function gerarRelevo(e: EntradaDoRelevo): Uint8Array {
   const { n } = e;
-  const perfil = PERFIS[e.bioma];
-  const rng = criarRng(e.semente + SEMENTE_RELEVO);
-  const campo = ruido(rng, n, 16);
-  const platos = ruido(rng, n, 12);
-  const h = new Uint8Array(n * n);
-  for (let y = 0; y < n; y++) {
-    for (let x = 0; x < n; x++) {
-      const base = Math.floor(campo(x, y) * (perfil.suave + 0.999));
-      const plato = platos(x, y) > perfil.limiarPlato ? perfil.plato : 0;
-      h[y * n + x] = Math.min(ALTURA_MAX - 5, base + plato);
-    }
-  }
-  // A água fica no fundo do vale em volta; o rochedo, acima de tudo em volta (a montanha).
+  const h = Uint8Array.from(e.base);
+  // A água fica no fundo do vale em volta.
   const vizinhos = (x: number, y: number, f: (a: number) => void) => {
     for (const [dx, dy] of VIZ) {
       const nx = x + dx;
@@ -106,10 +59,18 @@ export function gerarRelevo(e: EntradaDoRelevo): Uint8Array {
     }
   }
   // As áreas planas (vila, abrigo, passagens) e os retângulos (casas e estruturas) na altura de baixo deles.
+  // Marco 43 (15/11/2026, D-177): em volta da área plana, uma saia de encosta (um nível por célula) que casa o platô
+  // com o terreno, em vez de um degrau seco: a vila se assenta no chão, não num pedestal.
   for (const p of e.planas) {
-    for (let y = Math.max(0, Math.floor(p.y - p.raio)); y <= Math.min(n - 1, Math.ceil(p.y + p.raio)); y++) {
-      for (let x = Math.max(0, Math.floor(p.x - p.raio)); x <= Math.min(n - 1, Math.ceil(p.x + p.raio)); x++) {
-        if (Math.hypot(x - p.x, y - p.y) <= p.raio) h[y * n + x] = 0;
+    const nivel = p.nivel ?? (e.base[Math.round(p.y) * n + Math.round(p.x)] ?? 0);
+    const fora = p.raio + SAIA;
+    for (let y = Math.max(0, Math.floor(p.y - fora)); y <= Math.min(n - 1, Math.ceil(p.y + fora)); y++) {
+      for (let x = Math.max(0, Math.floor(p.x - fora)); x <= Math.min(n - 1, Math.ceil(p.x + fora)); x++) {
+        const d = Math.hypot(x - p.x, y - p.y);
+        if (d > fora) continue;
+        const k = y * n + x;
+        const lim = Math.max(0, Math.ceil(d - p.raio));
+        h[k] = nivel + Math.max(-lim, Math.min(lim, (h[k] ?? 0) - nivel));
       }
     }
   }
@@ -124,15 +85,6 @@ export function gerarRelevo(e: EntradaDoRelevo): Uint8Array {
   // Depois das rampas (a frente da porta já tem a altura da estrada que chega nela).
   for (const c of e.encostas) morroDaCaverna(e, h, c);
   abrirRampas(e, h);
-  // Os rochedos por último: acima do chão em volta (a montanha; não se anda nem se voa por cima).
-  for (let y = 0; y < n; y++) {
-    for (let x = 0; x < n; x++) {
-      if (e.em(x, y) !== '#') continue;
-      let m = 0;
-      vizinhos(x, y, (a) => { m = Math.max(m, a); });
-      h[y * n + x] = Math.min(ALTURA_MAX, m + 3);
-    }
-  }
   return h;
 }
 
@@ -153,7 +105,7 @@ function morroDaCaverna(e: EntradaDoRelevo, h: Uint8Array, c: EntradaDoRelevo['e
       const dx = x < c.x ? c.x - x : x >= c.x + c.largura ? x - (c.x + c.largura - 1) : 0;
       const dy = y < c.y ? c.y - y : 0;
       const alvo = boca + e.alturaDoMorro - Math.max(dx, dy);
-      if (alvo > (h[y * n + x] ?? 0)) h[y * n + x] = Math.min(ALTURA_MAX - 3, alvo);
+      if (alvo > (h[y * n + x] ?? 0)) h[y * n + x] = Math.min(ALTURA_MAX, alvo);
     }
   }
   // A porta (a última linha da fachada) fica no nível da boca: entra-se andando.
@@ -167,8 +119,9 @@ function rampasNasEstradas(e: EntradaDoRelevo, h: Uint8Array): void {
   const fila: number[] = [];
   for (let y = 0; y < n; y++) {
     for (let x = 0; x < n; x++) {
-      // As pontas da estrada que tocam o plano (a vila, as passagens) começam a busca.
-      if (e.em(x, y) === '=' && (h[y * n + x] ?? 0) === 0) {
+      // Marco 43 (D-177): a estrada nas áreas planas (a vila, o abrigo, as chegadas, as passagens) começa a busca.
+      const plana = e.passagem({ x, y }) || e.planas.some((p) => Math.hypot(x - p.x, y - p.y) <= p.raio);
+      if (e.em(x, y) === '=' && plana) {
         visto[y * n + x] = 1;
         fila.push(y * n + x);
       }

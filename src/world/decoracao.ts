@@ -63,6 +63,8 @@ export function hashCelula(x: number, y: number, sal: number): number {
 /** Parede solta no meio do piso (as 8 vizinhas passáveis): o pilar do tema. */
 export function ehPilar(fase: Fase, x: number, y: number): boolean {
   if (tipoEm(fase, x, y) !== 'parede') return false;
+  // Marco 43 (D-177): o obstáculo natural ou o objeto do cenário (árvore, rocha, banco) não é pilar.
+  if (fase.obstaculos?.[y * fase.largura + x]) return false;
   for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
     if (dx === 0 && dy === 0) continue;
     const t = tipoEm(fase, x + dx, y + dy);

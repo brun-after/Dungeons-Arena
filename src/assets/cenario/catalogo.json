@@ -1,0 +1,482 @@
+{
+  "arbusto_1": {
+    "largura": 132,
+    "altura": 120,
+    "ancoraX": 78.5,
+    "ancoraY": 68.1
+  },
+  "arbusto_2": {
+    "largura": 146,
+    "altura": 125,
+    "ancoraX": 65.4,
+    "ancoraY": 70.8
+  },
+  "arbusto_3": {
+    "largura": 139,
+    "altura": 121,
+    "ancoraX": 70.2,
+    "ancoraY": 80.1
+  },
+  "arbusto_seco_1": {
+    "largura": 123,
+    "altura": 112,
+    "ancoraX": 72.3,
+    "ancoraY": 62.7
+  },
+  "arbusto_seco_2": {
+    "largura": 134,
+    "altura": 116,
+    "ancoraX": 60.4,
+    "ancoraY": 64.8
+  },
+  "armas": {
+    "largura": 143,
+    "altura": 135,
+    "ancoraX": 71.3,
+    "ancoraY": 95.6
+  },
+  "bancada": {
+    "largura": 182,
+    "altura": 143,
+    "ancoraX": 90.7,
+    "ancoraY": 94.4
+  },
+  "banco": {
+    "largura": 202,
+    "altura": 135,
+    "ancoraX": 101,
+    "ancoraY": 80.3
+  },
+  "barraca": {
+    "largura": 186,
+    "altura": 255,
+    "ancoraX": 92.7,
+    "ancoraY": 204.5
+  },
+  "barril_suporte": {
+    "largura": 120,
+    "altura": 131,
+    "ancoraX": 60.4,
+    "ancoraY": 96.8
+  },
+  "barris": {
+    "largura": 170,
+    "altura": 144,
+    "ancoraX": 82,
+    "ancoraY": 79.9
+  },
+  "bigorna": {
+    "largura": 112,
+    "altura": 144,
+    "ancoraX": 53.6,
+    "ancoraY": 110.6
+  },
+  "boneco": {
+    "largura": 81,
+    "altura": 142,
+    "ancoraX": 40.1,
+    "ancoraY": 118.8
+  },
+  "cacto_1": {
+    "largura": 46,
+    "altura": 129,
+    "ancoraX": 23.2,
+    "ancoraY": 113.6
+  },
+  "cacto_2": {
+    "largura": 71,
+    "altura": 130,
+    "ancoraX": 35.6,
+    "ancoraY": 109
+  },
+  "caixotes": {
+    "largura": 164,
+    "altura": 181,
+    "ancoraX": 54.1,
+    "ancoraY": 126.9
+  },
+  "caldeirao": {
+    "largura": 93,
+    "altura": 95,
+    "ancoraX": 46.4,
+    "ancoraY": 68
+  },
+  "carroca": {
+    "largura": 143,
+    "altura": 152,
+    "ancoraX": 90.1,
+    "ancoraY": 114.7
+  },
+  "carvalho_1": {
+    "largura": 278,
+    "altura": 374,
+    "ancoraX": 142.4,
+    "ancoraY": 298.8
+  },
+  "carvalho_2": {
+    "largura": 263,
+    "altura": 340,
+    "ancoraX": 133.1,
+    "ancoraY": 266.5
+  },
+  "carvalho_3": {
+    "largura": 285,
+    "altura": 368,
+    "ancoraX": 129.3,
+    "ancoraY": 298.5
+  },
+  "carvalho_4": {
+    "largura": 301,
+    "altura": 390,
+    "ancoraX": 147.6,
+    "ancoraY": 312.6
+  },
+  "cerca_1": {
+    "largura": 112,
+    "altura": 113,
+    "ancoraX": 55.7,
+    "ancoraY": 82.3
+  },
+  "cerca_2": {
+    "largura": 100,
+    "altura": 108,
+    "ancoraX": 49.7,
+    "ancoraY": 79.3
+  },
+  "cocho": {
+    "largura": 142,
+    "altura": 104,
+    "ancoraX": 70.7,
+    "ancoraY": 64.8
+  },
+  "colheita": {
+    "largura": 151,
+    "altura": 124,
+    "ancoraX": 74.8,
+    "ancoraY": 60.7
+  },
+  "escombros_1": {
+    "largura": 223,
+    "altura": 198,
+    "ancoraX": 111.5,
+    "ancoraY": 138.5
+  },
+  "escombros_2": {
+    "largura": 196,
+    "altura": 184,
+    "ancoraX": 45.2,
+    "ancoraY": 134.3
+  },
+  "faia_1": {
+    "largura": 239,
+    "altura": 321,
+    "ancoraX": 121.5,
+    "ancoraY": 256
+  },
+  "faia_2": {
+    "largura": 227,
+    "altura": 292,
+    "ancoraX": 115.7,
+    "ancoraY": 227.6
+  },
+  "faia_3": {
+    "largura": 249,
+    "altura": 317,
+    "ancoraX": 112.4,
+    "ancoraY": 256.1
+  },
+  "feno_1": {
+    "largura": 95,
+    "altura": 104,
+    "ancoraX": 48.2,
+    "ancoraY": 76.4
+  },
+  "feno_2": {
+    "largura": 173,
+    "altura": 190,
+    "ancoraX": 64.2,
+    "ancoraY": 132.2
+  },
+  "fogueira": {
+    "largura": 130,
+    "altura": 95,
+    "ancoraX": 64.4,
+    "ancoraY": 54.3
+  },
+  "juncos_1": {
+    "largura": 92,
+    "altura": 133,
+    "ancoraX": 44.4,
+    "ancoraY": 105.9
+  },
+  "juncos_2": {
+    "largura": 94,
+    "altura": 134,
+    "ancoraX": 44.2,
+    "ancoraY": 109.3
+  },
+  "marco_pedra": {
+    "largura": 56,
+    "altura": 111,
+    "ancoraX": 27.3,
+    "ancoraY": 84.8
+  },
+  "mesa": {
+    "largura": 195,
+    "altura": 150,
+    "ancoraX": 90.7,
+    "ancoraY": 94.4
+  },
+  "morta_1": {
+    "largura": 155,
+    "altura": 259,
+    "ancoraX": 85.3,
+    "ancoraY": 207.8
+  },
+  "morta_2": {
+    "largura": 101,
+    "altura": 224,
+    "ancoraX": 67.6,
+    "ancoraY": 209.9
+  },
+  "morta_3": {
+    "largura": 186,
+    "altura": 289,
+    "ancoraX": 99.3,
+    "ancoraY": 240.4
+  },
+  "outono_1": {
+    "largura": 248,
+    "altura": 333,
+    "ancoraX": 126.4,
+    "ancoraY": 265.9
+  },
+  "outono_2": {
+    "largura": 236,
+    "altura": 304,
+    "ancoraX": 120,
+    "ancoraY": 237.3
+  },
+  "pilar_quebrado": {
+    "largura": 139,
+    "altura": 128,
+    "ancoraX": 35,
+    "ancoraY": 85.3
+  },
+  "pilha_lenha": {
+    "largura": 165,
+    "altura": 130,
+    "ancoraX": 81.8,
+    "ancoraY": 85.7
+  },
+  "pinheiro_1": {
+    "largura": 211,
+    "altura": 339,
+    "ancoraX": 105.6,
+    "ancoraY": 283
+  },
+  "pinheiro_2": {
+    "largura": 186,
+    "altura": 300,
+    "ancoraX": 94.6,
+    "ancoraY": 249.4
+  },
+  "pinheiro_3": {
+    "largura": 198,
+    "altura": 330,
+    "ancoraX": 98.8,
+    "ancoraY": 277.2
+  },
+  "pinheiro_4": {
+    "largura": 220,
+    "altura": 349,
+    "ancoraX": 111.9,
+    "ancoraY": 289.4
+  },
+  "pinheiro_neve_1": {
+    "largura": 197,
+    "altura": 315,
+    "ancoraX": 98.1,
+    "ancoraY": 262.6
+  },
+  "pinheiro_neve_2": {
+    "largura": 174,
+    "altura": 279,
+    "ancoraX": 88.2,
+    "ancoraY": 231.7
+  },
+  "pinheiro_neve_3": {
+    "largura": 185,
+    "altura": 306,
+    "ancoraX": 92,
+    "ancoraY": 257.2
+  },
+  "placa": {
+    "largura": 76,
+    "altura": 148,
+    "ancoraX": 21.2,
+    "ancoraY": 123.5
+  },
+  "poco": {
+    "largura": 195,
+    "altura": 238,
+    "ancoraX": 92.8,
+    "ancoraY": 183.9
+  },
+  "poste_lanterna": {
+    "largura": 126,
+    "altura": 249,
+    "ancoraX": 33,
+    "ancoraY": 199.6
+  },
+  "poste_tocha": {
+    "largura": 62,
+    "altura": 197,
+    "ancoraX": 30.6,
+    "ancoraY": 178
+  },
+  "rocha_arenito_1": {
+    "largura": 144,
+    "altura": 152,
+    "ancoraX": 69.5,
+    "ancoraY": 103.7
+  },
+  "rocha_arenito_2": {
+    "largura": 113,
+    "altura": 132,
+    "ancoraX": 58.9,
+    "ancoraY": 91.9
+  },
+  "rocha_arenito_3": {
+    "largura": 138,
+    "altura": 129,
+    "ancoraX": 67.1,
+    "ancoraY": 83.7
+  },
+  "rocha_cinza_1": {
+    "largura": 130,
+    "altura": 136,
+    "ancoraX": 62.9,
+    "ancoraY": 92.2
+  },
+  "rocha_cinza_2": {
+    "largura": 101,
+    "altura": 117,
+    "ancoraX": 52.3,
+    "ancoraY": 81.1
+  },
+  "rocha_cinza_3": {
+    "largura": 124,
+    "altura": 115,
+    "ancoraX": 60.5,
+    "ancoraY": 74.5
+  },
+  "rocha_cinza_4": {
+    "largura": 141,
+    "altura": 112,
+    "ancoraX": 70.7,
+    "ancoraY": 68.7
+  },
+  "rocha_musgo_1": {
+    "largura": 144,
+    "altura": 148,
+    "ancoraX": 69.5,
+    "ancoraY": 99.9
+  },
+  "rocha_musgo_2": {
+    "largura": 113,
+    "altura": 128,
+    "ancoraX": 58.9,
+    "ancoraY": 88.4
+  },
+  "rocha_musgo_3": {
+    "largura": 138,
+    "altura": 126,
+    "ancoraX": 67.1,
+    "ancoraY": 81.9
+  },
+  "rocha_neve_1": {
+    "largura": 148,
+    "altura": 160,
+    "ancoraX": 71.7,
+    "ancoraY": 109.2
+  },
+  "rocha_neve_2": {
+    "largura": 113,
+    "altura": 137,
+    "ancoraX": 59,
+    "ancoraY": 96
+  },
+  "rocha_neve_3": {
+    "largura": 141,
+    "altura": 135,
+    "ancoraX": 68.8,
+    "ancoraY": 88.6
+  },
+  "rochedo_arenito_1": {
+    "largura": 275,
+    "altura": 324,
+    "ancoraX": 132.4,
+    "ancoraY": 229.4
+  },
+  "rochedo_arenito_2": {
+    "largura": 225,
+    "altura": 291,
+    "ancoraX": 121.4,
+    "ancoraY": 208.4
+  },
+  "rochedo_cinza_1": {
+    "largura": 253,
+    "altura": 275,
+    "ancoraX": 122.1,
+    "ancoraY": 190.5
+  },
+  "rochedo_cinza_2": {
+    "largura": 210,
+    "altura": 245,
+    "ancoraX": 112.3,
+    "ancoraY": 171.9
+  },
+  "rochedo_cinza_3": {
+    "largura": 239,
+    "altura": 231,
+    "ancoraX": 115.1,
+    "ancoraY": 151.6
+  },
+  "rochedo_neve_1": {
+    "largura": 269,
+    "altura": 293,
+    "ancoraX": 129.6,
+    "ancoraY": 203.4
+  },
+  "rochedo_neve_2": {
+    "largura": 224,
+    "altura": 263,
+    "ancoraX": 120.3,
+    "ancoraY": 184.6
+  },
+  "sacos": {
+    "largura": 114,
+    "altura": 117,
+    "ancoraX": 40.8,
+    "ancoraY": 69.3
+  },
+  "toco": {
+    "largura": 64,
+    "altura": 61,
+    "ancoraX": 32.6,
+    "ancoraY": 41.8
+  },
+  "tora_1": {
+    "largura": 119,
+    "altura": 89,
+    "ancoraX": 59.9,
+    "ancoraY": 55.9
+  },
+  "tora_2": {
+    "largura": 119,
+    "altura": 89,
+    "ancoraX": 59.9,
+    "ancoraY": 55.9
+  }
+}

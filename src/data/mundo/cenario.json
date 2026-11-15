@@ -1,0 +1,341 @@
+{
+  "versao": "1.1 (15/11/2026, marco 43, D-177): o que cada bioma põe em pé no exterior do Mundo (render/cenario-iso.ts). Cada nome é a série de src/assets/cenario (carvalho = carvalho_1, carvalho_2...). As árvores crescem em talhões de uma espécie (talhaoCelulas), as coníferas acima de altitudeAlta, os arbustos na borda da mata; as rochas soltas são pequenas e os rochedos grandes ficam no pé do penhasco e da serra.",
+  "arvores": {
+    "campo": [
+      "carvalho",
+      "faia",
+      "carvalho",
+      "outono"
+    ],
+    "floresta": [
+      "carvalho",
+      "faia",
+      "pinheiro",
+      "carvalho"
+    ],
+    "pantano": [
+      "morta",
+      "faia",
+      "morta"
+    ],
+    "colinas": [
+      "faia",
+      "carvalho",
+      "outono"
+    ],
+    "ruinas": [
+      "morta",
+      "carvalho"
+    ],
+    "neve": [
+      "pinheiro_neve",
+      "pinheiro"
+    ],
+    "deserto": [
+      "cacto",
+      "morta"
+    ]
+  },
+  "arvoresAltas": {
+    "campo": [
+      "pinheiro",
+      "faia"
+    ],
+    "floresta": [
+      "pinheiro"
+    ],
+    "pantano": [
+      "morta"
+    ],
+    "colinas": [
+      "pinheiro"
+    ],
+    "ruinas": [
+      "morta",
+      "pinheiro"
+    ],
+    "neve": [
+      "pinheiro_neve"
+    ],
+    "deserto": [
+      "cacto"
+    ]
+  },
+  "subosque": {
+    "campo": [
+      "arbusto"
+    ],
+    "floresta": [
+      "arbusto"
+    ],
+    "pantano": [
+      "juncos",
+      "arbusto_seco"
+    ],
+    "colinas": [
+      "arbusto"
+    ],
+    "ruinas": [
+      "arbusto_seco"
+    ],
+    "neve": [
+      "rocha_neve"
+    ],
+    "deserto": [
+      "arbusto_seco"
+    ]
+  },
+  "talhaoCelulas": 9,
+  "altitudeAlta": 6,
+  "matas": {
+    "campo": [
+      "carvalho",
+      "faia",
+      "pinheiro"
+    ],
+    "floresta": [
+      "pinheiro",
+      "carvalho",
+      "pinheiro"
+    ],
+    "pantano": [
+      "morta",
+      "pinheiro"
+    ],
+    "colinas": [
+      "pinheiro",
+      "faia"
+    ],
+    "ruinas": [
+      "morta",
+      "carvalho"
+    ],
+    "neve": [
+      "pinheiro_neve",
+      "pinheiro"
+    ],
+    "deserto": [
+      "morta"
+    ]
+  },
+  "rochedos": {
+    "campo": [
+      "rocha_cinza",
+      "rocha_musgo"
+    ],
+    "floresta": [
+      "rocha_musgo",
+      "toco",
+      "tora"
+    ],
+    "pantano": [
+      "rocha_musgo",
+      "toco",
+      "tora"
+    ],
+    "colinas": [
+      "rocha_cinza"
+    ],
+    "ruinas": [
+      "rocha_cinza",
+      "escombros"
+    ],
+    "neve": [
+      "rocha_neve"
+    ],
+    "deserto": [
+      "rocha_arenito"
+    ]
+  },
+  "pePenhasco": {
+    "campo": [
+      "rochedo_cinza",
+      "rocha_cinza"
+    ],
+    "floresta": [
+      "rochedo_cinza",
+      "rocha_musgo"
+    ],
+    "pantano": [
+      "rocha_musgo",
+      "rochedo_cinza"
+    ],
+    "colinas": [
+      "rochedo_cinza",
+      "rocha_cinza"
+    ],
+    "ruinas": [
+      "rochedo_cinza",
+      "escombros"
+    ],
+    "neve": [
+      "rochedo_neve",
+      "rocha_neve"
+    ],
+    "deserto": [
+      "rochedo_arenito",
+      "rocha_arenito"
+    ]
+  },
+  "montanha": {
+    "densidadePct": 14,
+    "campo": [
+      "rochedo_cinza",
+      "rocha_cinza"
+    ],
+    "floresta": [
+      "rochedo_cinza",
+      "pinheiro",
+      "rocha_musgo"
+    ],
+    "pantano": [
+      "rochedo_cinza",
+      "morta"
+    ],
+    "colinas": [
+      "rochedo_cinza",
+      "rocha_cinza",
+      "pinheiro"
+    ],
+    "ruinas": [
+      "rochedo_cinza",
+      "escombros_1"
+    ],
+    "neve": [
+      "rochedo_neve",
+      "pinheiro_neve",
+      "rocha_neve"
+    ],
+    "deserto": [
+      "rochedo_arenito",
+      "rocha_arenito"
+    ]
+  },
+  "composicao": {
+    "casa": [
+      "barris",
+      "caixotes",
+      "sacos",
+      "pilha_lenha",
+      "barril_suporte",
+      "feno"
+    ],
+    "abandonada": [
+      "escombros",
+      "tora",
+      "morta",
+      "arbusto_seco",
+      "caixotes"
+    ],
+    "predio": {
+      "ferreiro": [
+        "bigorna",
+        "armas",
+        "bancada",
+        "pilha_lenha"
+      ],
+      "alquimista": [
+        "caldeirao",
+        "barris",
+        "sacos"
+      ],
+      "mercado": [
+        "barraca",
+        "colheita",
+        "caixotes"
+      ],
+      "taverna": [
+        "mesa",
+        "barris",
+        "banco"
+      ],
+      "banco": [
+        "caixotes",
+        "sacos",
+        "barris"
+      ]
+    },
+    "rocaBiomas": [
+      "campo",
+      "colinas",
+      "floresta"
+    ],
+    "roca": [
+      "feno",
+      "colheita",
+      "feno"
+    ],
+    "estrutura": {
+      "mina": [
+        "carroca",
+        "caixotes",
+        "pilha_lenha",
+        "tora"
+      ],
+      "caverna": [
+        "tora",
+        "rocha_cinza",
+        "toco"
+      ],
+      "cripta": [
+        "pilar_quebrado",
+        "escombros",
+        "morta"
+      ],
+      "templo": [
+        "pilar_quebrado",
+        "escombros"
+      ],
+      "castelo": [
+        "escombros",
+        "armas",
+        "barris"
+      ],
+      "torre": [
+        "caixotes",
+        "pilha_lenha"
+      ]
+    },
+    "estrada": [
+      "marco_pedra",
+      "marco_pedra",
+      "placa"
+    ],
+    "marcoPorCelulaDeEstrada": 0.012,
+    "margem": {
+      "campo": [
+        "juncos",
+        "rocha_musgo"
+      ],
+      "floresta": [
+        "juncos",
+        "rocha_musgo",
+        "tora"
+      ],
+      "pantano": [
+        "juncos",
+        "juncos",
+        "morta"
+      ],
+      "colinas": [
+        "rocha_cinza",
+        "juncos"
+      ],
+      "neve": [
+        "rocha_neve"
+      ],
+      "ruinas": [
+        "rocha_cinza"
+      ],
+      "deserto": [
+        "arbusto_seco"
+      ]
+    },
+    "margemPorCelula": 0.12,
+    "rocas": 3,
+    "cercado": {
+      "largura": 7,
+      "altura": 5
+    }
+  }
+}

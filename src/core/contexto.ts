@@ -520,7 +520,7 @@ export interface Balance {
     semRetardoDepoisDoRecuoMs: number;
   };
   /** Marco 42 (15/11/2026, D-176): os limiares do relevo (world/relevo.ts). */
-  relevo: RegrasRelevo & { vantagemAlcancePorNivel: number; vantagemAlcanceMax: number };
+  relevo: RegrasRelevo & { vantagemAlcancePorNivel: number; vantagemAlcanceMax: number; /** Marco 43 (D-177): px de tela por nível no isométrico. */ pxPorNivel: number };
   inventario: {
     /** Entradas na mochila; consumíveis iguais empilham até `pilhaMax`. */
     capacidade: number;

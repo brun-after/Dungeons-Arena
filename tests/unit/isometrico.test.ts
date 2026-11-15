@@ -43,7 +43,7 @@ describe('projeção (§2.16, §4.5)', () => {
   it('o mundo projetado cabe em [0, largura] × [0, altura]; de cima é a identidade', () => {
     const cima = criarProjecao('cima', 60, 40);
     expect([cima.largura, cima.altura]).toEqual([60 * CELULA_PX, 40 * CELULA_PX]);
-    expect(cima.projetar(10, 20)).toEqual({ x: 10, y: 20 });
+    expect(cima.projetar(10, 20)).toEqual({ x: 10, y: 20, z: 20 });
     const iso = criarProjecao('iso', 60, 40);
     for (const [x, y] of [[0, 0], [60, 0], [0, 40], [60, 40]] as const) {
       const t = iso.projetar(x * CELULA_PX, y * CELULA_PX);

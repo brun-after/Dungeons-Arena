@@ -140,7 +140,7 @@ function portalDoReino(g: Graphics, cx: number, cy: number, cor: number, tMs: nu
 }
 
 /** Marco 42 (15/11/2026, D-176): a chama que dança (o poste e a fogueira), três línguas de fogo sobrepostas. */
-function chama(g: Graphics, cx: number, cy: number, alto: number, tMs: number): void {
+export function chama(g: Graphics, cx: number, cy: number, alto: number, tMs: number): void {
   const t = tMs / 140;
   g.circle(cx, cy - alto * 0.45, alto * 0.9).fill({ color: 0xff9a40, alpha: 0.16 });
   for (const [cor, k, fase] of [[0xd84a1a, 1, 0], [0xff9a30, 0.72, 1.7], [0xffe08a, 0.42, 3.1]] as const) {

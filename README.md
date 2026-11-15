@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.51 · **Data:** 15/11/2026
+**Versão do documento:** 3.52 · **Data:** 15/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.52 (15/11/2026)**: marco 43: o relevo na geometria, a geografia nova, o cenário em 3D composto pela função de cada lugar e as tochas de verdade (D-177).
 > - **3.51 (15/11/2026)**: marco 42: as cores do Mundo, o dia e a noite, a tocha, a noite perigosa, as matas fechadas, o elemento vento e o relevo (D-176).
 > - **3.50 (14/11/2026)**: marco 41: a região vizinha aparece além da borda, e a troca de região ficou sem a travada (D-169).
 > - **3.49 (14/11/2026)**: marco 41: as passagens entre as regiões do Mundo (a troca sem tela preta, a trégua e o tipo pelo par de biomas) e o que segue com o personagem na troca (D-169).
@@ -348,6 +349,19 @@ toda região, e a Travessia das Areias liga os dois reinos a pé. O guerreiro co
   por ela (os pontos dele também voltam).
 
 Detalhes em D-145 a D-156 e em [docs/BALANCEAMENTO.md](docs/BALANCEAMENTO.md) (172/172 metas).
+
+### Marco 43 — relevo, cenário e tochas no Mundo (15/11/2026)
+
+**Paisagem.** O exterior foi refeito. Há serras nas bordas, platôs, lagos nos baixios, matas em manchas e estradas que
+contornam o terreno. O chão sobe de verdade na tela, e os penhascos são faces de rocha.
+
+**Cenário.** Árvores, rochas e objetos ganharam volume, vindos de modelos 3D. Cada coisa tem motivo para estar onde está:
+pinheiros no alto, rochedos no pé da serra, o poço e os bancos na praça, os cercados com feno junto da vila. O que fica na
+frente do personagem esmaece.
+
+**Tochas.** Postes e fogueiras têm chama viva. A tocha carregada flutua à esquerda do personagem, acima do ombro.
+
+Detalhes em D-177 e em [docs/MUNDO.md](docs/MUNDO.md).
 
 ### Marco 42 — cores, dia e noite, tocha, vento e relevo no Mundo (15/11/2026)
 

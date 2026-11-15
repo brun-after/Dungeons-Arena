@@ -135,7 +135,7 @@ export class CamadaPortas {
       const c = centroDaCelula(p.x, p.y);
       const pt = proj.projetar(c.x, c.y);
       alta.position.set(pt.x, pt.y);
-      alta.zIndex = pt.y;
+      alta.zIndex = pt.z;
       alta.clear();
       if (p.par) {
         // O portal interno de pé: um vórtice oval flutuando sobre o anel, sem moldura.

@@ -21,13 +21,14 @@ import type { Decoracao } from './decoracao';
 import { abrigoDoCentro, andarilhosDaRegiao, entradasDosLados, escavarCorredor, nivelDoMonstro, rotasDosErrantes } from './exterior-extras';
 import { luzesDoExterior } from './luzes-exterior';
 import { gerarRelevo } from './relevo-exterior';
+import { gerarGeografia, OBSTACULO } from './geografia';
+import { abrirEstrada, type TerrenoDaEstrada } from './estradas-exterior';
+import { comporCenario, type PecaDoCenario } from './composicao-cenario';
 import { emPassagem } from './passagem';
 
 export { LARGURA_PASSAGEM } from './passagens-exterior';
 /** Distância mínima (Chebyshev) entre os inimigos e a vila ou os spawns. */
 const FOLGA_INIMIGOS = 12;
-/** Passo da grade grossa do ruído. */
-const PASSO_RUIDO = 8;
 
 /** O que o bioma põe no chão: o piso de base e os limiares do ruído para água e obstáculo (0–1; maior = menos). */
 interface PerfilDeBioma {
@@ -72,23 +73,10 @@ export interface ExteriorGerado {
   rotas: readonly (readonly Celula[])[];
   /** Marco 42 (15/11/2026, D-176): a altura de cada célula (world/relevo-exterior.ts). */
   alturas: Uint8Array;
-}
-
-/** Ruído de valor suave (0–1): valores sorteados na grade grossa, interpolados entre os quatro vizinhos. */
-function campoDeRuido(rng: EstadoRng, tamanho: number): (x: number, y: number) => number {
-  const n = Math.ceil(tamanho / PASSO_RUIDO) + 2;
-  const grade = Array.from({ length: n * n }, () => aleatorio(rng));
-  const v = (gx: number, gy: number) => grade[Math.min(n - 1, gy) * n + Math.min(n - 1, gx)] ?? 0;
-  const suave = (t: number) => t * t * (3 - 2 * t);
-  return (x, y) => {
-    const gx = Math.floor(x / PASSO_RUIDO);
-    const gy = Math.floor(y / PASSO_RUIDO);
-    const tx = suave((x % PASSO_RUIDO) / PASSO_RUIDO);
-    const ty = suave((y % PASSO_RUIDO) / PASSO_RUIDO);
-    const a = v(gx, gy) + (v(gx + 1, gy) - v(gx, gy)) * tx;
-    const b = v(gx, gy + 1) + (v(gx + 1, gy + 1) - v(gx, gy + 1)) * tx;
-    return a + (b - a) * ty;
-  };
+  /** Marco 43 (D-177): o obstáculo natural de cada '#' (montanha, rochedo, árvore; 0 nas paredes construídas). */
+  obstaculos: Uint8Array;
+  /** Marco 43 (D-177): o que fica em pé pela função de cada lugar (world/composicao-cenario.ts). */
+  pecas: readonly PecaDoCenario[];
 }
 
 class Grade {
@@ -138,12 +126,13 @@ export const TERRENO_DO_CHEFE: Readonly<Record<string, TipoAmbiente>> = {
  * Cabe a casa em (x, y)? A casa só sobre o chão `chao`; a volta de uma célula em `margem` (por onde se passa em
  * volta dela); nada nas células `bloqueadas`.
  */
-function cabeCasa(g: Grade, x: number, y: number, l: number, a: number, chao: string, margem: ReadonlySet<string>, bloqueadas: ReadonlySet<number>): boolean {
+function cabeCasa(g: Grade, x: number, y: number, l: number, a: number, chao: string, margem: ReadonlySet<string>, bloqueadas: ReadonlySet<number>, limpavel: (x: number, y: number) => boolean = () => false): boolean {
   for (let cy = y - 1; cy <= y + a; cy++) {
     for (let cx = x - 1; cx <= x + l; cx++) {
       const casa = cx >= x && cy >= y && cx < x + l && cy < y + a;
       const ch = g.em(cx, cy);
-      if (!g.interna(cx, cy) || bloqueadas.has(cy * g.n + cx) || (casa ? ch !== chao : !margem.has(ch))) return false;
+      // Marco 43 (D-177): a árvore e o rochedo soltos saem do lugar da casa (a clareira); a montanha e a água, não.
+      if (!g.interna(cx, cy) || bloqueadas.has(cy * g.n + cx) || (!limpavel(cx, cy) && (casa ? ch !== chao : !margem.has(ch)))) return false;
     }
   }
   return true;
@@ -190,14 +179,15 @@ function casasDaVila(g: Grade, vila: NonNullable<RegiaoDoMundo['vila']>, npcs: r
 }
 
 /** As casas abandonadas, longe da vila e dos spawns, e a célula de dentro de cada uma (onde fica o monstro). */
-function casasAbandonadas(g: Grade, rng: EstadoRng, quantas: number, chao: string, longe: (c: Celula) => boolean, protegidas: ReadonlySet<number>): { telhados: Telhado[]; dentro: Celula[] } {
+function casasAbandonadas(g: Grade, rng: EstadoRng, quantas: number, chao: string, longe: (c: Celula) => boolean, protegidas: ReadonlySet<number>, limpavel: (x: number, y: number) => boolean): { telhados: Telhado[]; dentro: Celula[] } {
   const { largura: l, altura: a } = CASA_ABANDONADA;
   const telhados: Telhado[] = [];
   const dentro: Celula[] = [];
   for (let t = 0; t < 120 && telhados.length < quantas; t++) {
     const x = inteiro(rng, 3, g.n - l - 4);
     const y = inteiro(rng, 3, g.n - a - 4);
-    if (!longe({ x, y }) || !cabeCasa(g, x, y, l, a, chao, new Set([chao]), protegidas)) continue;
+    if (!longe({ x, y }) || !cabeCasa(g, x, y, l, a, chao, new Set([chao]), protegidas, limpavel)) continue;
+    for (let cy = y - 1; cy <= y + a; cy++) for (let cx = x - 1; cx <= x + l; cx++) if (limpavel(cx, cy)) g.por(cx, cy, chao);
     erguerCasa(g, x, y, l, a, chao);
     telhados.push({ x, y, largura: l, altura: a, revela: 'dentro', estilo: 'palha' });
     dentro.push({ x: x + Math.floor(l / 2), y: y + 1 });
@@ -323,9 +313,6 @@ function chebyshev(a: Celula, b: Celula): number {
 }
 
 /** Gera o exterior da região: terreno, vila, fachadas, passagens, coleta e inimigos. Determinístico pela semente. */
-/** Marco 42 (D-176): o limiar de obstáculo dentro das matas fechadas (mais baixo = mais árvores). */
-const LIMIAR_MATA = 0.52;
-
 /** Marco 42 (D-176): a célula está numa mata fechada da região. */
 export function naMata(regiao: { matas?: readonly { x: number; y: number; raio: number }[] }, x: number, y: number): boolean {
   return (regiao.matas ?? []).some((m) => Math.hypot(x - m.x, y - m.y) <= m.raio);
@@ -336,34 +323,16 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
   const rng = criarRng(regiao.semente);
   const perfil = PERFIS[regiao.bioma];
   const g = new Grade(n, '#');
-  const ruidoAgua = campoDeRuido(rng, n);
-  const ruidoRocha = campoDeRuido(rng, n);
+  // Marco 43 (15/11/2026, D-177): a geografia primeiro (a altura, a água, a montanha, a mata e os rochedos).
+  const geo = gerarGeografia({ n, semente: regiao.semente, bioma: regiao.bioma, matas: regiao.matas ?? [] });
   for (let y = 1; y < n - 1; y++) {
     for (let x = 1; x < n - 1; x++) {
-      const a = ruidoAgua(x, y);
-      const r = ruidoRocha(x, y);
-      // Costas orgânicas mantêm a grade técnica, mas quebram o contorno quadrado da terra.
-      const dx = (x - n / 2) / (n * 0.63), dy = (y - n / 2) / (n * 0.59);
-      const costa = Math.hypot(dx, dy) > 1 + 0.09 * Math.sin(Math.atan2(dy, dx) * 5 + regiao.semente);
-      // Marco 42 (15/11/2026, D-176): a mata fechada tem o dobro de árvores (e é sempre escura: mundo/ciclo.ts).
-      const rocha = naMata(regiao, x, y) ? Math.min(perfil.rocha, LIMIAR_MATA) : perfil.rocha;
-      g.por(x, y, costa || a > perfil.agua ? '~' : r > rocha ? '#' : perfil.chao);
+      const k = y * n + x;
+      g.por(x, y, geo.agua[k] ? '~' : (geo.obstaculos[k] ?? 0) > 0 ? '#' : perfil.chao);
     }
   }
   // Marco 38 (D-142): a região estreita é um corredor entre as passagens, com paredões de arenito dos lados.
   if (regiao.estreita) escavarCorredor(g, entradasDosLados(reino, regiao, n), perfil.chao, regiao.semente);
-  // Marco 29 (30/10/2026): o rochedo fica só com a borda; o miolo vira chão sem acesso. No isométrico, o miolo de
-  // parede é a base escura das masmorras, que fora parece um buraco.
-  const miolo: Celula[] = [];
-  for (let y = 1; y < n - 1; y++) {
-    for (let x = 1; x < n - 1; x++) {
-      let cercada = g.em(x, y) === '#';
-      for (let dy = -1; dy <= 1 && cercada; dy++) for (let dx = -1; dx <= 1 && cercada; dx++) cercada = g.em(x + dx, y + dy) === '#';
-      if (cercada) miolo.push({ x, y });
-    }
-  }
-  for (const c of miolo) g.por(c.x, c.y, perfil.chao);
-
   const protegidas = new Set<number>();
   const pontos: PontoDoExterior[] = [];
   const centro: Celula = regiao.vila ? { x: regiao.vila.x, y: regiao.vila.y } : { x: Math.floor(n / 2), y: Math.floor(n / 2) };
@@ -399,8 +368,13 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     const dy = alvo.y - y;
     return Math.abs(dx) > Math.abs(dy) ? { x: x + Math.sign(dx) * (raio + 1), y } : { x, y: y + Math.sign(dy || 1) * (raio + 1) };
   };
-  for (const alvo of entradas) estrada(g, rng, saidaDaVila(alvo), alvo, protegidas);
-  for (const p of pontos) if (p.tipo === 'estrutura' && !p.escondida) estrada(g, rng, saidaDaVila(p.frente), p.frente, protegidas);
+  // Marco 43 (D-177): a estrada segue o terreno (world/estradas-exterior.ts); o L reto fica de reserva.
+  const terreno: TerrenoDaEstrada = { n, em: (x, y) => g.em(x, y), por: (x, y, ch) => { g.por(x, y, ch); }, alturas: geo.alturas, obstaculos: geo.obstaculos, protegidas };
+  const ligar = (de: Celula, para: Celula) => { if (!abrirEstrada(terreno, de, para)) estrada(g, rng, de, para, protegidas); };
+  for (const alvo of entradas) ligar(saidaDaVila(alvo), alvo);
+  for (const p of pontos) if (p.tipo === 'estrutura' && !p.escondida) ligar(saidaDaVila(p.frente), p.frente);
+  // A escondida ganha só a picada (na montanha, sem ela, ninguém chegaria).
+  for (const p of pontos) if (p.tipo === 'estrutura' && p.escondida) abrirEstrada(terreno, saidaDaVila(p.frente), p.frente, perfil.chao);
   // A frente da porta fica sempre livre.
   for (const p of pontos) if (p.tipo === 'estrutura') g.por(p.frente.x, p.frente.y, '=');
 
@@ -412,20 +386,32 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
   for (const s of spawns) if (!ANDA.has(g.em(s.x, s.y))) g.por(s.x, s.y, regiao.vila ? '.' : '=');
   const regras = reino.perigos[regiao.perigo];
   const longeDaVila = (c: Celula) => (!regiao.vila || Math.hypot(c.x - regiao.vila.x, c.y - regiao.vila.y) > regiao.vila.raio + FOLGA_INIMIGOS) && (!abrigo || chebyshev(c, abrigo) > abrigo.raio + FOLGA_INIMIGOS);
-  const abandonadas = casasAbandonadas(g, criarRng(regiao.semente + SEMENTE_CASAS), regiao.inimigos.length > 0 ? regras.casas : 0, perfil.chao, (c) => longeDaVila(c) && spawns.every((s) => chebyshev(s, c) >= FOLGA_INIMIGOS), protegidas);
+  const abandonadas = casasAbandonadas(g, criarRng(regiao.semente + SEMENTE_CASAS), regiao.inimigos.length > 0 ? regras.casas : 0, perfil.chao, (c) => longeDaVila(c) && spawns.every((s) => chebyshev(s, c) >= FOLGA_INIMIGOS), protegidas,
+    (x, y) => g.em(x, y) === '#' && (geo.obstaculos[y * n + x] === OBSTACULO.arvore || geo.obstaculos[y * n + x] === OBSTACULO.rochedo) && !protegidas.has(y * n + x));
   telhados.push(...abandonadas.telhados);
 
+  // Marco 43 (D-177): a composição dos lugares (o que é sólido vira obstáculo antes do alcance).
+  const doCenario = new Set<number>();
+  const pecas = comporCenario({
+    n, semente: regiao.semente, bioma: regiao.bioma, em: (x, y) => g.em(x, y), telhados, entradas,
+    bloqueada: (c) => emPassagem({ passagens: areas.map((f) => f.area) }, c.x, c.y),
+    ocupar: (x, y) => { g.por(x, y, '#'); doCenario.add(y * n + x); },
+    vila: regiao.vila ? { x: regiao.vila.x, y: regiao.vila.y, raio: regiao.vila.raio } : null,
+    estruturas: pontos.flatMap((p) => (p.tipo === 'estrutura' ? [{ tipo: regiao.estruturas.find((s) => s.id === p.estruturaId)?.tipo ?? '', frente: p.frente, escondida: p.escondida }] : [])),
+    reservadas: [...spawns, ...entradas, ...pontos.flatMap((p) => (p.tipo === 'estrutura' ? [p.frente, p.porta] : p.tipo === 'npc' ? [p] : []))],
+  });
   // Marco 42 (15/11/2026, D-176): o relevo (RNG próprio), antes do alcance: os monstros e a coleta só onde se anda.
   const naPassagemDaRegiao = (c: Celula) => emPassagem({ passagens: areas.map((f) => f.area) }, c.x, c.y);
   const alturas = gerarRelevo({
-    n, semente: regiao.semente, bioma: regiao.bioma, em: (x, y) => g.em(x, y),
+    n, base: geo.alturas, em: (x, y) => g.em(x, y),
     planas: [...(regiao.vila ? [{ x: regiao.vila.x, y: regiao.vila.y, raio: regiao.vila.raio + 6 }] : []), ...(abrigo ? [{ x: abrigo.x, y: abrigo.y, raio: abrigo.raio + 4 }] : []), ...spawns.map((s) => ({ x: s.x, y: s.y, raio: 2 }))],
     retangulos: [...telhados, ...regiao.estruturas], passagem: naPassagemDaRegiao, origens: spawns, encostaMax: BALANCE_PADRAO.relevo.encostaMax,
     encostas: regiao.estruturas.filter((e) => !e.escondida && (e.tipo === 'caverna' || e.tipo === 'mina')), alturaDoMorro: BALANCE_PADRAO.relevo.muroAltoMax - 1,
   });
   const alcance = alcancaveis(g, spawns[0] as Celula, alturas);
   const livres: Celula[] = [];
-  for (let y = 1; y < n - 1; y++) for (let x = 1; x < n - 1; x++) if (alcance[y * n + x] && !protegidas.has(y * n + x) && g.em(x, y) !== '=') livres.push({ x, y });
+  const ehLivre = new Uint8Array(n * n);
+  for (let y = 1; y < n - 1; y++) for (let x = 1; x < n - 1; x++) if (alcance[y * n + x] && !protegidas.has(y * n + x) && g.em(x, y) !== '=') { livres.push({ x, y }); ehLivre[y * n + x] = 1; }
   const naVila = (c: Celula) => (regiao.vila !== null && Math.hypot(c.x - regiao.vila.x, c.y - regiao.vila.y) <= regiao.vila.raio + FOLGA_INIMIGOS) || (abrigo !== null && chebyshev(c, abrigo) <= abrigo.raio + FOLGA_INIMIGOS);
 
   const ocupadas: Celula[] = [];
@@ -455,7 +441,15 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     const segura = (x: Celula) => !naVila(x) && spawns.every((s) => chebyshev(s, x) >= FOLGA_INIMIGOS);
     let c: Celula | null = null;
     if (centroHorda && restantes > 0) {
-      const candidatas = livres.filter(x => chebyshev(x, centroHorda as Celula) <= regras.raioHorda && segura(x) && !ocupadas.some(o => chebyshev(o, x) < 2));
+      // Marco 43 (D-177): só o quadrado em volta do centro (na mesma ordem de `livres`), não a região inteira.
+      const candidatas: Celula[] = [];
+      const ch = centroHorda;
+      for (let y = Math.max(0, ch.y - regras.raioHorda); y <= Math.min(n - 1, ch.y + regras.raioHorda); y++) {
+        for (let x = Math.max(0, ch.x - regras.raioHorda); x <= Math.min(n - 1, ch.x + regras.raioHorda); x++) {
+          const cel = { x, y };
+          if (ehLivre[y * n + x] && segura(cel) && !ocupadas.some((o) => chebyshev(o, cel) < 2)) candidatas.push(cel);
+        }
+      }
       if (candidatas.length) { c = escolher(rng, candidatas); ocupadas.push(c); restantes--; }
     }
     if (!c) {
@@ -471,7 +465,14 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     inimigos.push({ preset, x: c.x, y: c.y, nivel: elite ? Math.min(100, regiao.nivel[1] + regras.eliteNiveis) : nivel });
   }
   // Marco 31 (D-130): quem mora na casa abandonada (no topo da faixa: entrar é arriscado).
-  for (const c of abandonadas.dentro) if (regiao.inimigos.length > 0) inimigos.push({ preset: escolher(rng, regiao.inimigos), x: c.x, y: c.y, nivel: regiao.nivel[1] });
+  // Marco 43 (D-177): a casa pode ter caído onde a horda já estava (a mata limpa abre lugar): um por célula.
+  for (const c of abandonadas.dentro) {
+    if (regiao.inimigos.length === 0) continue;
+    const preset = escolher(rng, regiao.inimigos);
+    if (inimigos.some((i) => i.x === c.x && i.y === c.y)) continue;
+    inimigos.push({ preset, x: c.x, y: c.y, nivel: regiao.nivel[1] });
+    ocupadas.push(c);
+  }
 
   // 02/11/2026: encontros de bosses fora das vilas e longe de todos os pontos de chegada.
   // RNG próprio: mudar as probabilidades não altera terreno, hordas ou recursos.
@@ -517,6 +518,13 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
   // Marco 42 (15/11/2026, D-176): postes de tocha nas estradas e fogueiras nas matas e no abrigo (sem sorteio).
   pontos.push(...luzesDoExterior((x, y) => g.em(x, y), n, regiao, naVila, naPassagemDaRegiao, [...(abrigo ? [abrigo] : []), ...(regiao.vila ? [centro] : [])], ocupadas));
 
+  // Marco 43 (D-177): o '#' natural (da geografia, fora do que foi construído) é desenhado como rocha ou árvore.
+  const obstaculos = new Uint8Array(n * n);
+  for (let k = 0; k < n * n; k++) {
+    const o = geo.obstaculos[k] ?? OBSTACULO.nenhum;
+    if (o !== OBSTACULO.nenhum && !protegidas.has(k) && g.em(k % n, Math.floor(k / n)) === '#') obstaculos[k] = o;
+    if (doCenario.has(k) && g.em(k % n, Math.floor(k / n)) === '#') obstaculos[k] = OBSTACULO.objeto;
+  }
   const fase: FaseJson = {
     id: `mundo_${reino.id}_${regiao.id}`,
     nome: regiao.nome,
@@ -530,7 +538,7 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
     ...(armadilhas.length > 0 && { objetos: armadilhas }),
     ...(ambientes.length > 0 && { ambientes }),
   };
-  return { fase, alturas, pontos, passagens, faixas: areas, enfeites, vila: regiao.vila ? { x: regiao.vila.x, y: regiao.vila.y, raio: regiao.vila.raio } : null, abrigo, rotas };
+  return { fase, alturas, obstaculos, pecas, pontos, passagens, faixas: areas, enfeites, vila: regiao.vila ? { x: regiao.vila.x, y: regiao.vila.y, raio: regiao.vila.raio } : null, abrigo, rotas };
 }
 
 /**

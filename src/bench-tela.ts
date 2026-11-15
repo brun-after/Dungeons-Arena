@@ -2,6 +2,7 @@
 //   ?bench=carga|padrao[&segundos=60][&qualidade=minimo|baixo|medio|alto]
 //     a cena roda com simulação local e bots (sem rede) e mede os quadros depois de 2 s de aquecimento: fps, p50,
 //     p95, p99, pausas acima de 100 ms, memória (quando o navegador expõe) e o pico de cada contagem da cena.
+//   ?bench=mundo&regiao=<id>[&x=..&y=..][&segundos=..]   a região do Mundo sem servidor (marco 43)
 //   ?bench=trocas
 //     monta e desmonta a cena padrão a cada clique em "Próxima fase" (como a troca de fase do cooperativo), para a
 //     ferramenta medir o heap depois de cada uma (tools/bench).
@@ -118,6 +119,11 @@ export async function iniciarBench(raiz: HTMLElement, params: URLSearchParams): 
 
   if (pedido === 'trocas') {
     await iniciarTrocas(raiz);
+    return;
+  }
+  if (pedido === 'mundo') {
+    // Marco 43 (15/11/2026, D-177): a região do Mundo na página, sem servidor (bench/mundo-local.ts).
+    await (await import('./bench/mundo-local')).iniciarMundoLocal(raiz, params, (m) => { painel(raiz, [`mundo ${m.regiao}: ${m.fps} fps, p95 ${m.p95Ms} ms (${m.quadros} quadros)`], m); });
     return;
   }
   if (pedido === 'modelos3d') {

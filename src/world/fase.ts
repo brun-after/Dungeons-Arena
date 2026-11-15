@@ -10,6 +10,7 @@ import type { Refugio } from './refugio';
 import type { AreaDePassagem } from './passagem';
 import type { Decoracao } from './decoracao';
 import type { Celula } from '../core/comandos';
+import type { PecaDoCenario } from './composicao-cenario';
 
 /**
  * Marco 29 (30/10/2026, D-128): as células do exterior do Mundo. `agua` permite nadar e o tiro passa por cima;
@@ -263,6 +264,10 @@ export interface Fase {
   readonly matas?: readonly { x: number; y: number; raio: number }[];
   /** Marco 42 (D-176): a altura de cada célula do exterior (world/relevo.ts); ausente = plano. */
   readonly alturas?: Uint8Array;
+  /** Marco 43 (D-177): o obstáculo natural de cada célula (world/geografia.ts, OBSTACULO); ausente = nenhum. */
+  readonly obstaculos?: Uint8Array;
+  /** Marco 43 (D-177): as peças em pé da composição dos lugares (world/composicao-cenario.ts). */
+  readonly cenario?: readonly PecaDoCenario[];
   /** Marco 31 (D-130): os telhados das casas fechadas. */
   readonly telhados?: readonly Telhado[];
   /** Marco 41 (D-169): as passagens entre as regiões do Mundo (world/passagem.ts): sem monstros e sem dano. */

@@ -1,8 +1,9 @@
 # O Mundo: guia do modo
 
-**Versão:** 1.3 · **Data:** 15/11/2026
+**Versão:** 1.4 · **Data:** 15/11/2026
 
 > **Histórico**
+> - **1.4 (15/11/2026)**: marco 43: relevo na geometria, geografia nova, cenário composto e tochas reais.
 > - **1.3 (15/11/2026)**: marco 42: cores por bioma, dia e noite, tocha, noite perigosa, matas fechadas, vento e relevo.
 > - **1.2 (14/11/2026)**: marco 41: a região vizinha desenhada além da borda e a troca sem a travada.
 > - **1.1 (14/11/2026)**: marco 41: as passagens entre as regiões (a troca de sala sem tela preta e a trégua) e o estado que segue com o personagem.
@@ -282,3 +283,18 @@ como padrão; múltiplas câmeras aumentam o trabalho gráfico no aparelho que a
 - **Relevo** (`world/relevo.ts`, `balance.relevo`). Desnível até 2: encosta (subir é mais lento); 3: muro baixo (salto);
   4 a 6: muro alto (voo); acima: montanha. A geração (`world/relevo-exterior.ts`) deixa a vila e as passagens planas,
   faz rampas nas estradas e garante que tudo continua alcançável a pé. Cavernas e minas ficam no penhasco de um morro.
+
+## Paisagem e cenário (marco 43, 15/11/2026)
+
+- **Geografia** (`world/geografia.ts`).
+  - A altura vem primeiro: serras ásperas nas bordas, platôs e água nos baixios.
+  - A mata cresce em manchas, e os rochedos ficam no pé dos penhascos.
+  - As estradas são traçadas por A* (`world/estradas-exterior.ts`).
+- **Relevo na tela.** O chão sobe de verdade (uma malha por célula), e os penhascos são faces de rocha. A vila assenta numa
+  encosta suave.
+- **Cenário** (`data/mundo/cenario.json`, `world/composicao-cenario.ts`, `render/cenario-iso.ts`).
+  - As árvores crescem em talhões e mudam com a altitude.
+  - Os objetos da vila seguem a função do lugar: praça, casas, ofícios, cercados, estradas e margens.
+  - Para gerar os sprites de novo: `npx tsx tools/objetos/render.ts --cenario [--so nome,nome]`.
+- **Tochas.** Postes e fogueiras têm modelo 3D e chama viva. A tocha carregada flutua à esquerda do personagem.
+- **Ver sem servidor:** `?bench=mundo&regiao=vila_do_centro&x=118&y=124&hora=30&tocha=1`.

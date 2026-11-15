@@ -68,7 +68,7 @@ describe('tocha (D-176)', () => {
     }
   });
 
-  it('a vila do centro tem fogueira na praça, postes nas estradas e fogueira na mata', () => {
+  it('a vila do centro tem poste na praça, postes nas estradas e fogueira na mata (marco 43, D-177)', () => {
     const reino = CONTEUDO.reinos.get('reino_central');
     if (!reino) throw new Error('reino');
     const lugar = lerLugar(reino, 'regiao:vila_do_centro');
@@ -76,7 +76,7 @@ describe('tocha (D-176)', () => {
     const m = montarLugar(CONTEUDO, reino, lugar, modoPorId(CONTEUDO, MODO_MUNDO));
     const luzes = (m.exterior?.pontos ?? []).flatMap((p) => (p.tipo === 'luz' ? [p] : []));
     expect(luzes.filter((p) => p.objeto === 'poste_tocha').length).toBeGreaterThan(3);
-    expect(luzes.filter((p) => p.objeto === 'fogueira').length).toBe(2);
+    expect(luzes.filter((p) => p.objeto === 'fogueira').length).toBe(1);
     expect(m.estado.objetos.some((o) => o.tipo === 'poste_tocha')).toBe(true);
   });
 });
