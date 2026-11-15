@@ -33,6 +33,7 @@ import { fatorDoGolpe } from '../modos/dificuldade';
 import { registrarEfeitoAtivo } from './acumulo';
 import { avancar, empurrar, puxar, teleportar, trocarLugar } from './efeitos-instantaneos';
 import { registrarParticipacao } from './participacao';
+import { sustentarLuzComMana } from './luz-propria';
 import { comecarDeslize } from './deslize';
 import { aplicarInstantaneoNovo } from './efeitos-novos';
 import { agendarFase } from './fases';
@@ -410,6 +411,7 @@ export function processarEfeitos(estado: EstadoJogo, ctx: ContextoSimulacao, sai
         }
       }
     }
+    if (vivo(e)) sustentarLuzComMana(ctx, e, tick);
     e.efeitos = e.efeitos.filter((f) => f.ateTick > tick);
   }
   processarFluxo(estado, (alvo, ef, origem, mira) => {

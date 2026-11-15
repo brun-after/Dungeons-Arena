@@ -2,7 +2,9 @@
 import { describe, expect, it } from 'vitest';
 import { modoPorId } from '../../src/core/conteudo';
 import type { ContextoSimulacao } from '../../src/core/contexto';
-import { aplicarEfeito } from '../../src/combat/efeitos';
+import { aplicarEfeito, processarEfeitos } from '../../src/combat/efeitos';
+import { temLuzPropria } from '../../src/combat/luz-propria';
+import { ticksDe } from '../../src/core/tempo';
 import { construirEfeito } from '../../src/combat/registro-efeitos';
 import { criarInimigo, criarJogador } from '../../src/entities/fabrica';
 import type { Entidade } from '../../src/entities/entidade';
@@ -82,5 +84,23 @@ describe('a tocha à noite (D-178)', () => {
     acender();
     expect(alfaNoEscuro(ctx, estado, eu, meio, 1)).toBe(1);
     expect(alfaNoEscuro(ctx, estado, eu, monstro('longe', 10, 14), 1)).toBe(0);
+  });
+
+  it('acabado o tempo, a tocha queima a mana e apaga quando ela acaba', () => {
+    const { ctx, estado, eu, acender } = cena(1);
+    acender();
+    const t = ctx.balance.mundo.tocha;
+    const custo = Math.max(t.manaMin, Math.ceil((eu.manaMax * t.manaPct) / 100));
+    eu.mana = custo * 2 + Math.floor(custo / 2);
+    estado.tick += ticksDe(60_000);
+    processarEfeitos(estado, ctx, []);
+    expect(temLuzPropria(eu)).toBe(true);
+    expect(eu.mana).toBe(custo + Math.floor(custo / 2));
+    estado.tick += ticksDe(1000);
+    processarEfeitos(estado, ctx, []);
+    expect(temLuzPropria(eu)).toBe(true);
+    estado.tick += ticksDe(1000);
+    processarEfeitos(estado, ctx, []);
+    expect(temLuzPropria(eu)).toBe(false);
   });
 });

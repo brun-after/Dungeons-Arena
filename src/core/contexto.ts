@@ -445,6 +445,8 @@ export interface Balance {
       atraiMult: number; afastaRaio: number; iguaisAvancamPct: number; janelaIguaisMs: number; raioDoFogo: number;
       /** A visão do jogador no escuro (células): sem luz, com luz, e a partir de que escuro ela vale. */
       visaoSemTocha: number; visaoComTocha: number; visaoDesdeEscuro: number;
+      /** Marco 44 (D-178): acabado o tempo, a tocha queima `manaPct`% da mana máxima (no mínimo `manaMin`) por segundo. */
+      manaPct: number; manaMin: number;
     };
     ofertas: { periodoS: number; duracaoS: number; quantidade: number; centrais: string[]; avancadas: string[] };
     /**
