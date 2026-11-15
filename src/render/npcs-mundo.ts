@@ -23,7 +23,8 @@ const COM_BALCAO: ReadonlySet<string> = new Set(['missoes', 'banco']);
 
 /** A figura do objeto, ou null (o objeto se desenha como antes). */
 export function figuraDoNpc(o: ObjetoNoMundo): FiguraDeNpc | null {
-  if (o.tipo === 'loja' && o.ref === REF_ERRANTE) return { atlas: 'vendedor', balcao: false, mochila: true, aviso: false };
+  // Marco 44 (D-178): o vendedor da noite tem a figura do errante.
+  if (o.tipo === 'loja' && (o.ref === REF_ERRANTE || o.ref === 'noturno')) return { atlas: 'vendedor', balcao: false, mochila: true, aviso: false };
   if (o.tipo !== 'npc' || !o.ref) return null;
   if (COM_BALCAO.has(o.ref)) return { atlas: 'vendedor', balcao: true, mochila: false, aviso: false };
   if (o.ref.startsWith(PREFIXO_ANDARILHO)) {

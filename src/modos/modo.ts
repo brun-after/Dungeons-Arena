@@ -152,6 +152,8 @@ export interface ModoDeJogo {
   acampamento?: boolean;
   /** Marco 42 (D-176): o escuro da região agora (0 a 1), posto pela sala do Mundo a cada segundo (não vem dos dados). */
   escuro?: number;
+  /** Marco 44 (D-178): a noite da hora (0 a 1, sem o escuro das matas), posta pela sala; fecha as lojas da vila. */
+  noite?: number;
   /** Marco 29 (D-128): a morte do jogador deixa a mochila e o equipado num túmulo (o Mundo, fora das dungeons). */
   tumuloNaMorte?: boolean;
   /**

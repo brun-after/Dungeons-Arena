@@ -5,6 +5,7 @@
 // extras que ninguém feriu e que não estão perto de ninguém vão embora. O sorteio é pela região e pelo tick (o mesmo
 // resultado para o mesmo estado). Puro.
 
+import { conferirVilaANoite } from './vila-noite';
 import { aplicarEfeito } from '../combat/efeitos';
 import { construirEfeito } from '../combat/registro-efeitos';
 import { ticksDe } from '../core/tempo';
@@ -178,8 +179,10 @@ export function conferirFocosENoite(estado: EstadoJogo, ctx: ContextoSimulacao, 
     if (aceso) acenderFoco(estado, ctx, regiao, foco, aceso, agoraMs);
     else apagarFoco(estado, foco);
   }
-  const escuro = escuroDoLugar(horaDoMundo(agoraMs, ctx.balance.mundo.ciclo), regiao.escuroBase ?? 0, false);
-  const novo = (ctx.modo.escuro ?? 0) === escuro ? ctx : { ...ctx, modo: { ...ctx.modo, escuro } };
+  const hora = horaDoMundo(agoraMs, ctx.balance.mundo.ciclo);
+  const escuro = escuroDoLugar(hora, regiao.escuroBase ?? 0, false);
+  const novo = (ctx.modo.escuro ?? 0) === escuro && (ctx.modo.noite ?? 0) === hora.noite ? ctx : { ...ctx, modo: { ...ctx.modo, escuro, noite: hora.noite } };
+  conferirVilaANoite(estado, novo, regiao);
   conferirNoite(estado, novo, regiao, escuro);
   conferirSonoDoCovil(estado, novo, agoraMs, new Set(ctx.balance.mundo.noite.noturnos));
   // Marco 44 (15/11/2026, D-178): o descanso junto ao fogo e os monstros que o fogo de acampamento chama.

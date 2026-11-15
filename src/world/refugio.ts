@@ -26,6 +26,12 @@ export function emRefugio(fase: Fase, x: number, y: number): boolean {
   return false;
 }
 
+/**
+ * Marco 44 (15/11/2026, D-178): à noite os portões da vila fecham e só a guarda deixa entrar: o monstro não segue
+ * ninguém para dentro nem fere quem está lá, mesmo em combate (de dia, a regra de D-138 vale).
+ */
+export const portoesFechados = (ctx: Pick<ContextoSimulacao, 'balance' | 'modo'>): boolean => (ctx.modo.noite ?? 0) >= ctx.balance.mundo.vilaNoite.fechaDesde;
+
 /** Quem os refúgios barram: a IA que não é invocação (os monstros). */
 export const barradoNoRefugio = (e: Entidade): boolean => e.controlador === 'ia' && !e.invocacao;
 
@@ -42,23 +48,23 @@ export function emCombateCom(estado: Pick<EstadoJogo, 'tick'>, ctx: Pick<Context
  * O refúgio impede este golpe? O monstro não fere quem está dentro, nem quem está dentro fere o monstro de fora, a menos
  * que os dois estejam em combate.
  */
-export function refugioProtege(estado: Pick<EstadoJogo, 'tick'>, ctx: Pick<ContextoSimulacao, 'balance' | 'fase'>, ator: Entidade, alvo: Entidade): boolean {
+export function refugioProtege(estado: Pick<EstadoJogo, 'tick'>, ctx: Pick<ContextoSimulacao, 'balance' | 'fase' | 'modo'>, ator: Entidade, alvo: Entidade): boolean {
   // Marco 41 (14/11/2026, D-169): na passagem entre as regiões, a trégua vale para todos (monstros e jogadores), sem
   // exceção de combate: ninguém de dentro é alvo, e ninguém de dentro fere quem está fora.
   if (ator.id !== alvo.id && (emPassagem(ctx.fase, alvo.x, alvo.y) || emPassagem(ctx.fase, ator.x, ator.y))) return true;
   if (!ctx.fase.refugios?.length) return false;
   const monstroNaVila = barradoNoRefugio(ator) && emRefugio(ctx.fase, alvo.x, alvo.y);
   const daVilaNoMonstro = barradoNoRefugio(alvo) && !barradoNoRefugio(ator) && emRefugio(ctx.fase, ator.x, ator.y) && !emRefugio(ctx.fase, alvo.x, alvo.y);
-  return (monstroNaVila || daVilaNoMonstro) && !emCombateCom(estado, ctx, ator, alvo);
+  return (monstroNaVila && portoesFechados(ctx)) || ((monstroNaVila || daVilaNoMonstro) && !emCombateCom(estado, ctx, ator, alvo));
 }
 
 /** O monstro pode pisar em (x, y)? Fora do refúgio, sim; dentro, se já está lá dentro (sai livre) ou se persegue o alvo com quem luta. */
-export function podePisarNoRefugio(estado: EstadoJogo, ctx: Pick<ContextoSimulacao, 'balance' | 'fase'>, e: Entidade, x: number, y: number): boolean {
+export function podePisarNoRefugio(estado: EstadoJogo, ctx: Pick<ContextoSimulacao, 'balance' | 'fase' | 'modo'>, e: Entidade, x: number, y: number): boolean {
   // Marco 41 (D-169): o monstro nunca pisa na passagem (nem perseguindo); o que já estiver dentro sai livre.
   if (barradoNoRefugio(e) && emPassagem(ctx.fase, x, y) && !emPassagem(ctx.fase, e.px, e.py)) return false;
   if (!barradoNoRefugio(e) || !emRefugio(ctx.fase, x, y) || emRefugio(ctx.fase, e.px, e.py)) return true;
   const alvoId = e.ia?.alvoId;
   const alvo = alvoId ? estado.entidades.find((o) => o.id === alvoId) : undefined;
-  return !!alvo && emCombateCom(estado, ctx, e, alvo);
+  return !!alvo && !portoesFechados(ctx) && emCombateCom(estado, ctx, e, alvo);
 }
 

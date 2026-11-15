@@ -2,6 +2,9 @@
 // loja ao alcance (a mesma escolha de `interagir`, world/interacao.ts) e a saída trancada sob os pés.
 // Ajuste de 16/10/2026 (D-067): o lembrete do descanso saiu com o descanso.
 
+import { horaDoMundo } from '../mundo/ciclo';
+import { agoraDoMundo } from './hora-do-mundo';
+import { lojaFechadaANoite } from '../mundo/vila-noite';
 import { apagadaDeAcampamento } from '../mundo/acampamento';
 import type { ContextoSimulacao } from '../core/contexto';
 import type { EstadoJogo } from '../core/estado';
@@ -32,6 +35,7 @@ export function criarPrompt(ctx: ContextoSimulacao, idLocal: string, toque: bool
     const eu = estado.entidades.find((e) => e.id === idLocal);
     if (!eu?.bolsa || eu.morto || eu.interacao) return '';
     const o = alvoDeInteracao(estado, ctx, eu);
+    if (o?.tipo === 'loja' && ctx.fase.exterior && lojaFechadaANoite(ctx, o, horaDoMundo(agoraDoMundo(), ctx.balance.mundo.ciclo).noite)) return t('prompt.lojaFechadaANoite');
     if (o?.tipo === 'loja') {
       return recargaLojaRestante(estado, o.objetoId, eu.id) > 0 ? t('prompt.lojaRecarga') : t('prompt.loja', { tecla: tecla() });
     }

@@ -222,6 +222,7 @@ export const ptBR = {
   'minimapa.rotulo': 'Minimapa da fase',
   'prompt.toque': 'Toque em interagir',
   'prompt.loja': '{tecla}: loja',
+  'prompt.lojaFechadaANoite': 'Fechado até o amanhecer; o vendedor da noite atende na praça',
   'prompt.lojaRecarga': 'A loja reabre em instantes',
   'prompt.bau': '{tecla}: abrir baú',
   'prompt.converter': '{tecla}: converter armadilha para sua equipe',
