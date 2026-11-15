@@ -3,6 +3,7 @@ import { luzesDosAmbientes } from '../render/solo/ambientes-solo';
 import { faixaSuperior } from './aviso';
 import { IndicadorCombo } from './combos';
 import { fracaoMira } from '../combat/mira';
+import { perfilVisualDe } from '../render/perfil-visual';
 import { CamadaCombosTaticos } from '../render/combos-taticos';
 // Apresentação do marco 12 (14/10/2026), D-056: junta numa peça só o que a cena ganhou — áudio, partículas,
 // presets de impacto, luz, minimapa, prompt de interação, pausa, configurações e guia —, aplica as
@@ -188,6 +189,8 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
       const e = o.estado().entidades.find((x) => x.id === atorId);
       return e?.bolsa?.classeId ?? e?.classeId ?? null;
     },
+    // D-174: o estilo mais forte e a afinidade dominante de quem lança, para o visual das skills de classe.
+    perfilVisual: (atorId) => perfilVisualDe(ctx, o.estado().entidades.find((x) => x.id === atorId), o.estado().tick),
     miraCheia: (e, tick) => fracaoMira(ctx, e, tick) === 1,
     clima: tema?.particulas ?? null,
     corElemento,

@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.21 · **Data:** 14/11/2026
+**Versão:** 1.22 · **Data:** 14/11/2026
 
 > **Histórico**
+> - **1.22 (14/11/2026)**: D-174: a identidade no visual das skills de classe e das ultimates (a skill feita inteira do elemento da runa, a ultimate assinada pela classe, o sinal do estilo mais forte e o toque da afinidade dominante).
 > - **1.21 (14/11/2026)**: D-173: as pendências do marco 40 (as 30 ressonâncias, a montaria alugada, os companheiros que leem os estilos, o movimento no HUD do computador, os visuais feitos à mão, a invocação nas ultimates só para quem invoca e as fusões que mudam a forma).
 > - **1.20 (14/11/2026)**: D-172: um botão por movimento da classe (Shift no principal, T e G nos outros; no celular, lado a lado) e a recarga maior em combate para os que não são o principal.
 > - **1.19 (14/11/2026)**: D-171: o Arqueiro mais dependente de movimento (alcance 30% menor sem a Mira cheia, salto para trás com recarga menor, conjuração 10% mais rápida, skills de fora da classe enchem a Mira, os estilos adaptados) e o deslize que respeita a animação (recuo, avanço e teleportes curtos).
@@ -5368,3 +5369,36 @@ ultimates é identidade do Necromante e do Aventureiro; dar criaturas a todas as
   (`fusao_borda`); a etapa da fusão não se perde mais quando a família já tem uma etapa.
 
 Balanceamento: 172/172.
+
+## D-174 — Marco 40: a identidade no visual das skills de classe e das ultimates (14/11/2026)
+
+**Contexto.** O usuário definiu o resultado esperado: cada skill de classe e cada ultimate mostra a classe, o estilo e
+a afinidade de quem usa, também no visual, e cada vez mais com a intensidade deles. O exemplo: o Círculo rúnico do
+Mago nasce de gelo; com a runa de raio, tem de ser inteiro de raio. Nenhuma ultimate pode ser igual entre as classes.
+Até aqui, a runa só somava uma camada (a matéria do elemento por cima da assinatura), e a família de ultimate tinha o
+mesmo desenho em todas as classes.
+
+**Decisão.**
+- **Transmutação** (`render/vfx/transmutacao.ts`). A skill com runa de outro elemento é desenhada inteira nele.
+  - Cada elemento tem a sua matéria em quatro papéis: a partícula leve, o corpo, o fumo e a marca no chão.
+  - A textura que é matéria do elemento de origem vira a do mesmo papel na runa; a marca sem par some.
+  - Toda cor vai para o matiz da runa, guardando o claro e o escuro.
+  - A silhueta fica: o círculo, a corrente, a lâmina, os ossos do Necromante. A skill não se descaracteriza.
+  - O elemento de origem é o da família da assinatura; as físicas, do arco, da corrente e do falcão são o aço.
+  - Vale para a conjuração, o projétil em voo, o rastro, o acerto, a área, as lanças e os solos.
+  - Consequência: a skill de classe sem elemento próprio sai na runa padrão da classe (o arco do Arqueiro em raio,
+    o arcano do Mago em fogo, o falcão do Aventureiro em terra).
+- **A classe na ultimate** (`render/vfx/classe-na-ultimate.ts`). Por cima da família e da runa, a classe assina:
+  - Guerreiro: as lâminas cravam em volta e a runa finca no centro.
+  - Mago: os círculos rúnicos concêntricos giram em sentidos opostos.
+  - Arqueiro: as flechas marcam a borda e o retículo fecha no centro.
+  - Necromante: as mãos e os crânios rompem o chão e as almas sobem.
+  - Aventureiro: as garras correm em volta e as penas caem.
+- **O estilo mais forte** põe na ultimate o sinal do eixo dele, na faixa do estilo.
+- **A afinidade dominante.** A sintonia mais alta, quando tem ao menos 30% e 10 pontos de folga sobre a segunda, deixa
+  um toque da matéria dela nas skills de classe e nas ultimates (quando não é a própria runa da skill).
+- **Intensidade.** A assinatura da classe cresce com a faixa da runa; o sinal do estilo, com a faixa do estilo; o toque,
+  com a sintonia.
+- **O que não mudou.** A função: a runa já trocava o estado aplicado e a função secundária (D-151, D-157), e os estilos,
+  os eixos (D-156, D-157). Só o desenho mudou aqui. As skills comuns ficaram como estavam; 17 assinaturas ainda são
+  divididas por duas variantes de núcleos diferentes.

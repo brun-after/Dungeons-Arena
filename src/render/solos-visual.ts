@@ -30,17 +30,18 @@ export function ligarSolos(
     const h = habilidade(ev.chave);
     if (!h) return;
     const cor = visualDe(h).cor;
-    const celulas = [];
+    const celulas: { x: number; y: number }[] = [];
     for (let dy = -ev.raio; dy <= ev.raio; dy++) for (let dx = -ev.raio; dx <= ev.raio; dx++) celulas.push({ x: ev.x + dx, y: ev.y + dy });
     const centro = { x: ev.x, y: ev.y };
-    diretor.rajada(assinaturaDe(h), { chave: ev.chave, atorId: ev.donoId, origem: centro, mira: centro, centro, celulas, cor, escala: 1, tipoArea: ev.forma, raio: ev.raio });
+    // D-174: o solo da skill de classe sai no elemento da runa.
+    diretor.naRuna(assinaturaDe(h), h.runa, cor, (c) => { diretor.rajada(assinaturaDe(h), { chave: ev.chave, atorId: ev.donoId, origem: centro, mira: centro, centro, celulas, cor: c, escala: 1, tipoArea: ev.forma, raio: ev.raio }); });
   });
   bus.on('soloPulsou', (ev) => {
     const s = solos.get(ev.soloId);
     const h = s ? habilidade(s.chave) : undefined;
     if (!s || !h) return;
     const dono = estado().entidades.find((e) => e.id === s.donoId);
-    diretor.acertar(assinaturaDe(h), { chave: s.chave, fonteId: s.donoId, alvoId: '', de: null, ate: { x: ev.x, y: ev.y }, cor: visualDe(h).cor, escala: 0.8 + 0.25 * ev.raio, critico: false, indice: 0, tier: tierDaArma(dono) }, h.visual?.variante, true);
+    diretor.naRuna(assinaturaDe(h), h.runa, visualDe(h).cor, (cor) => { diretor.acertar(assinaturaDe(h), { chave: s.chave, fonteId: s.donoId, alvoId: '', de: null, ate: { x: ev.x, y: ev.y }, cor, escala: 0.8 + 0.25 * ev.raio, critico: false, indice: 0, tier: tierDaArma(dono) }, h.visual?.variante, true); });
   });
   bus.on('soloFim', (ev) => {
     solos.delete(ev.soloId);
