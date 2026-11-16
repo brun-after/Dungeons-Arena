@@ -93,6 +93,12 @@ function reagirAoTerreno(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade
     for (const o of [e, ...aliados(estado, ctx, e, 4)]) dar(estado, ctx, e, o, construirEfeito('escudo', { valor: Math.round(o.hpMax / 10), duracaoMs: 3000 }), saida);
   }
   if (r.marcas.includes('juntar')) juntar(estado, ctx, e);
+  // O Enxame no miasma e o Breuzinho na névoa somem nela.
+  if (r.marcas.includes('invisivel')) renovar(estado, ctx, e, e, 'invisivel', 0, saida);
+  // O Escultor de Geada na água a congela sob quem está nela (o gelo prende os pés).
+  if (r.marcas.includes('ponte') && vez(estado, e, 'ponte', 3000)) {
+    for (const h of hostis(estado, ctx, e, 3)) if (terrenoSob(estado, ctx, h) === 'agua') dar(estado, ctx, e, h, construirEfeito('atolado', { pct: 50, valor: 50, duracaoMs: 1500 }), saida, true);
+  }
 }
 
 /** Os Gosminhos divididos na lama e no miasma se juntam de novo num só (a vida dos dois). */
@@ -367,9 +373,8 @@ const denuncia: Manipulador<'denuncia'> = (estado, ctx, e, t, saida) => {
   if (!vez(estado, e, 'denuncia', PULSO_MS)) return;
   for (const o of estado.entidades) {
     if (o === e || !vivo(o) || !podeFerir(e, o, ctx.modo) || chebyshev(o, e) > t.raio) continue;
-    const escondido = o.efeitos.some((f) => f.tipo === 'invisivel' && f.ateTick > estado.tick);
-    if (!escondido) continue;
-    o.efeitos = o.efeitos.filter((f) => f.tipo !== 'invisivel');
+    if (o.invisivelAteTick <= estado.tick) continue;
+    o.invisivelAteTick = estado.tick;
     dar(estado, ctx, e, o, construirEfeito('marcado', { duracaoMs: 3000 }), saida, true);
   }
 };
