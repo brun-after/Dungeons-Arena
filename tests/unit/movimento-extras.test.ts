@@ -149,7 +149,7 @@ describe('movimento da classe: o que cada mecânica faz (D-168)', () => {
     const g = cena('guerreiro', 30);
     const orc = g.orc(10, 4);
     const vida = orc.hp;
-    g.passo([{ t: 'movimentoClasse', dx: 1000, dy: 0 }], 1200);
+    g.passo([{ t: 'movimentoClasse', dx: 1000, dy: 0 }], 4000);
     expect(modo(g.j)).toBeUndefined();
     expect(orc.hp).toBeLessThan(vida);
 

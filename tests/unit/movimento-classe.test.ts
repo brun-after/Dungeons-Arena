@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { alvoOfensivoValido, fonteDaHabilidade } from '../../src/combat/acao';
 import { aplicarImpacto } from '../../src/combat/golpe';
 import { alcanceNoNivel, fatorDeVelocidade, movimentoAtivo, movimentosLiberados, noAr, parametros, postoDormente } from '../../src/combat/movimento-classe';
+import { velocidadeDeViagem } from '../../src/world/movimento';
 import { habilidadeDoAtor } from '../../src/combat/perfil';
 import { lerComando } from '../../src/arena/protocolo';
 import type { Comando } from '../../src/core/comandos';
@@ -57,9 +58,11 @@ describe('movimento da classe (D-164)', () => {
       expect(lista.map((m) => m.nivel)).toEqual([1, 1, 1]);
       const longa = obter(lista[0]);
       expect(['voo', 'tirolesa', 'salto', 'nevoa', 'montaria']).toContain(longa.tipo);
-      expect(alcanceNoNivel(parametros(longa, 1), 1)).toBe(10);
-      expect(alcanceNoNivel(parametros(longa, 55), 55)).toBe(15);
-      expect(alcanceNoNivel(parametros(longa, 100), 100)).toBe(20);
+      // 15/11/2026: o salto parado cobre 5; a corrida ou a Arremetida somam `extensao` (o máximo continua 10 a 20).
+      const extra = longa.tipo === 'salto' ? ctx.balance.movimentoClasse.salto.extensao : 0;
+      expect(alcanceNoNivel(parametros(longa, 1), 1) + extra).toBe(10);
+      expect(alcanceNoNivel(parametros(longa, 55), 55) + extra).toBe(15);
+      expect(alcanceNoNivel(parametros(longa, 100), 100) + extra).toBe(20);
     }
     const { j, passo } = cena('mago', 1);
     expect(movimentosLiberados(ctx, j)).toHaveLength(3);
@@ -133,16 +136,56 @@ describe('movimento da classe (D-164)', () => {
 
   it('o Salto de Guerra cai o mais longe que cabe e atordoa os inimigos em volta da queda', () => {
     const c = cena('guerreiro');
-    const perto = c.orc(9, 4);
+    const perto = c.orc(8, 4);
     const longe = c.orc(5, 9);
     c.passo([{ t: 'movimentoClasse', dx: 1000, dy: 0 }]);
     expect(modo(c.j)).toBe('salto');
     expect(noAr(c.j)).toBe(true);
-    c.passo([], 1000);
+    // O voo acompanha a corrida: entra no ar devagar e cai antes de o atordoamento (1 s) acabar.
+    for (let i = 0; i < 400 && modo(c.j); i++) c.passo([], DT_MS);
     expect(modo(c.j)).toBeUndefined();
-    expect(c.j.x).toBe(10);
+    // 15/11/2026: parado, o salto cobre só 5 células (de x=2 a x=7).
+    expect(c.j.x).toBe(7);
     expect(perto.efeitos.some((f) => f.tipo === 'atordoar')).toBe(true);
     expect(longe.efeitos.some((f) => f.tipo === 'atordoar')).toBe(false);
+  });
+
+  it('o Salto de Guerra ganha de 1 a 5 células com a Marcha (metade da corrida dá tudo) e 5 no fim da Arremetida', () => {
+    const alcanca = (antes: (c: ReturnType<typeof cena>) => void) => {
+      const c = cena('guerreiro');
+      antes(c);
+      c.passo([{ t: 'movimentoClasse', dx: 1000, dy: 0, botao: 2 }]);
+      c.passo([], 3000);
+      return c.j.x;
+    };
+    const marcha = (c: ReturnType<typeof cena>, ms: number) => {
+      c.passo([{ t: 'movimentoClasse', dx: 1000, dy: 0, botao: 1 }]);
+      expect(modo(c.j)).toBe('marcha');
+      c.passo([], ms);
+    };
+    // A sala vai até x=10 (de x=2 são 8 células), então o máximo (5+5) aparece cortado na parede.
+    expect(alcanca(() => undefined)).toBe(7);
+    expect(alcanca((c) => { marcha(c, DT_MS); })).toBe(8);
+    expect(alcanca((c) => { marcha(c, 3000); })).toBe(10);
+    expect(alcanca((c) => { c.passo([{ t: 'movimentoClasse', dx: 1000, dy: 0, botao: 0 }]); })).toBe(10);
+  });
+
+  it('o voo do Salto de Guerra acompanha a corrida: parado é mais lento que ela, depois de correr é um pouco mais rápido', () => {
+    const veloz = (corre: boolean) => {
+      const c = cena('guerreiro');
+      if (corre) {
+        c.passo([{ t: 'movimentoClasse', dx: 1000, dy: 0, botao: 1 }]);
+        c.passo([], 3000);
+      }
+      c.passo([{ t: 'movimentoClasse', dx: 1000, dy: 0, botao: 2 }]);
+      return obter(obter(c.j.movimentoClasse).modo).velocidade ?? 0;
+    };
+    const base = veloz(false);
+    const c = cena('guerreiro');
+    const corrida = velocidadeDeViagem(c.j, c.estado, ctx) * viagem;
+    expect(base).toBeLessThan(corrida);
+    expect(veloz(true)).toBeGreaterThan(corrida);
+    expect(veloz(true)).toBeLessThan(corrida * 1.5);
   });
 
   it('o Lobo perde a velocidade ao ser atingido; o Urso, montaria pesada, não', () => {

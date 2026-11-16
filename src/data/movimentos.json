@@ -12,7 +12,7 @@
       { "id": "camuflagem", "nivel": 1, "tipo": "camuflagem", "duracaoMs": 6000, "lentidaoPct": 50, "recargaMs": 12000, "icone": "fantasma", "cor": "#7dcea0", "marcos": { "30": { "lentidaoPct": 30, "elemental": 1 } } }
     ],
     "guerreiro": [
-      { "id": "salto_de_guerra", "nivel": 1, "tipo": "salto", "alcance": 10, "crescimento": 1, "recargaMs": 6000, "icone": "salto", "cor": "#dc7633", "marcos": { "30": { "elemental": 1 } } },
+      { "id": "salto_de_guerra", "nivel": 1, "tipo": "salto", "alcance": 5, "crescimento": 1, "recargaMs": 6000, "icone": "salto", "cor": "#dc7633", "marcos": { "30": { "elemental": 1 } } },
       { "id": "arremetida", "principal": true, "nivel": 1, "tipo": "avanco", "alcance": 3, "crescimento": 0.3, "recargaMs": 5000, "cargas": 1, "icone": "investida", "cor": "#e59866", "mira": true, "marcos": { "30": { "cargas": 2 }, "90": { "cargas": 3 } } },
       { "id": "marcha_de_guerra", "nivel": 1, "tipo": "marcha", "alcance": 10, "crescimento": 1, "recargaMs": 3000, "icone": "botas", "cor": "#cd6155" }
     ],

@@ -93,7 +93,7 @@
   },
   "movimentoClasse": {
     "viagemPct": 60, "viagemPesadaPct": 30, "recargaEmCombatePct": 200,
-    "salto": { "velocidade": 16, "raio": 2, "atordoarMs": 1000, "danoPorNivel": 1.5 },
+    "salto": { "velocidadeParadoPct": 90, "velocidadeMaxPct": 125, "raio": 2, "atordoarMs": 1000, "danoPorNivel": 1.5, "extensao": 5, "corridaMetadePct": 50, "dashGracaMs": 500 },
     "nevoa": { "servosRaio": 5, "anel": 1.6, "velocidadeMin": 10 },
     "eco": { "hpPct": 30, "duracaoMs": 3000, "provocarRaio": 6, "invisivelMs": 1000 },
     "montarRaio": 3,

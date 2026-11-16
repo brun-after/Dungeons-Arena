@@ -269,6 +269,8 @@ export interface EstadoMovimento {
   circulo?: { x: number; y: number; raio: number; pct: number; desdeTick: number; ateTick: number; ponta?: PontaElemental };
   /** D-170: o tick do último Salto para Trás (a armadilha sob o Arqueiro não dispara se ele saltou a tempo). */
   recuoTick?: number;
+  /** 15/11/2026: o tick em que a Arremetida (o dash) acaba; saltar logo depois dá o alcance máximo do salto. */
+  avancoAteTick?: number;
   /** D-168: os tiros do Arqueiro levam a ponta até o tick (depois de sair da camuflagem). */
   tiroElemental?: { ponta: PontaElemental; ateTick: number };
 }
