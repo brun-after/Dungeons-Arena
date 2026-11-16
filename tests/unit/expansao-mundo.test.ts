@@ -65,16 +65,23 @@ describe('Reino do Eclipse',()=>{
 });
 
 describe('exército do necromante inimigo',()=>{
- for(const [nivel,quantidade] of ([[1,4],[16,7],[31,10],[80,10]] as const))it(`nível ${nivel}: ${quantidade} lacaios sem cadáveres e sem limite do jogador`,()=>{
+ // 15/11/2026 (D-179): o limite vem do nível (8: 4; 50: 10) e eles chegam um de cada vez.
+ for(const [nivel,quantidade] of ([[1,3],[8,4],[22,6],[50,10],[80,10]] as const))it(`nível ${nivel}: ${quantidade} lacaios, um de cada vez, sem cadáveres e sem limite do jogador`,()=>{
   const ctx=aberto(),estado=criarEstado({semente:2,faseId:ctx.fase.id});
   const boss=criarInimigo(obter(CONTEUDO.presets.get('necromante_ancestral')),'boss',15,15,BALANCE_PADRAO,{nivel});
   const j=criarJogador(obter(CONTEUDO.classes.get('guerreiro')),'j',19,15,BALANCE_PADRAO);
   estado.entidades.push(boss,j);processarIa(estado,ctx,[]);
   expect(limiteDoExercito(ctx,nivel)).toBe(quantidade);
-  processarExercitoNecromante(estado,ctx,boss,[]);
+  const recarga=ticksDe(ctx.balance.mundo.exercitoNecromante.recargaMs);
+  const contar=()=>estado.entidades.filter(e=>e.invocacao?.exercitoBoss).length;
+  for(let i=0;i<quantidade+2;i++){
+   processarExercitoNecromante(estado,ctx,boss,[]);expect(contar()).toBe(Math.min(quantidade,i+1));
+   processarExercitoNecromante(estado,ctx,boss,[]);expect(contar()).toBe(Math.min(quantidade,i+1));
+   estado.tick+=recarga;
+  }
   const lacaios=estado.entidades.filter(e=>e.invocacao?.exercitoBoss);
   expect(lacaios).toHaveLength(quantidade);
-  expect(new Set(lacaios.map(e=>e.preset)).size).toBe(4);
+  expect(new Set(lacaios.map(e=>e.preset)).size).toBe(Math.min(4,quantidade));
   expect(lacaios.every(e=>e.nivel===nivel&&e.xpBase===0&&!e.invocacao?.necromancia)).toBe(true);
   expect(lacaios.some(e=>e.habilidades.length>0)).toBe(true);
   const piromante=obter(lacaios.find(e=>e.preset==='piromante_profano'));
@@ -86,7 +93,7 @@ describe('exército do necromante inimigo',()=>{
   expect(eventos.some(e=>e.t==='acaoIniciada'&&e.atorId===piromante.id&&e.habilidadeId==='bola_de_fogo')).toBe(true);
   expect(tintaDaInvocacao(obter(lacaios[0]),{...estado,entidades:lacaios})).toBe(0x37333d);
   processarExercitoNecromante(estado,ctx,boss,[]);expect(estado.entidades).toHaveLength(quantidade+2);
-  obter(lacaios[0]).morto=true;estado.tick+=ticksDe(ctx.balance.mundo.exercitoNecromante.recargaMs);
+  obter(lacaios[0]).morto=true;estado.tick+=recarga;
   processarExercitoNecromante(estado,ctx,boss,[]);expect(estado.entidades.filter(e=>e.invocacao?.exercitoBoss&&!e.morto)).toHaveLength(quantidade);
  });
 });

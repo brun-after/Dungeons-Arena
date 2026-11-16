@@ -1,9 +1,10 @@
 # Decisões de projeto
 
-**Versão:** 1.27 · **Data:** 15/11/2026
+**Versão:** 1.28 · **Data:** 15/11/2026
 
 > **Histórico**
-> - **1.27 (15/11/2026)**: D-179: o Salto de Guerra parado cobre 5 células e a Marcha ou a Arremetida o estendem; painel de estatísticas do personagem no computador.
+> - **1.28 (15/11/2026)**: D-180: o Salto de Guerra parado cobre 5 células e a Marcha ou a Arremetida o estendem; painel de estatísticas do personagem no computador.
+> - **1.27 (15/11/2026)**: D-179: o básico do Necromante anda como o do Mago (sem a lentidão de conjurar) e o cura com 9% do dano com 1 morto, menos 1% por morto além do 1º e 10% sem nenhum; os necromantes roubam os mortos uns dos outros; o necromante inimigo invoca um de cada vez, até um limite pelo nível (8: 4; 50: 10).
 > - **1.26 (15/11/2026)**: D-178: marco 44: a noite com consequência (visão no escuro, a tocha que atrai e afasta, a fogueira de acampamento, a caça noturna, a vila pela hora e os elementos pela hora); a luz vinda das fontes, a mata escura só entre as árvores, as árvores atravessáveis, a zona de fácil camuflagem, a calma perto da vila e das entradas e as magias que iluminam.
 > - **1.25 (15/11/2026)**: D-177: marco 43: o relevo na geometria, a geografia de altura primeiro, o cenário em 3D composto pela função de cada lugar e as tochas de verdade.
 > - **1.24 (15/11/2026)**: D-176: marco 42: as cores do Mundo, o dia e a noite, a tocha, a noite perigosa, as matas fechadas, o elemento vento e o relevo.
@@ -5641,7 +5642,42 @@ Os números ficam em `balance.mundo.tocha`, `noite`, `acampamento`, `vilaNoite` 
 - A taverna cheia aparece só no quadro de missões. Ainda não há gente nova na praça.
 - O vendedor da noite usa a figura do mercador errante.
 
-## D-179 — Salto de Guerra estendido pela corrida e painel de estatísticas (15/11/2026)
+## D-179 — O básico do Necromante sem lentidão e com cura, o roubo dos mortos e o exército pelo nível (15/11/2026)
+
+**Contexto.** O básico do Necromante (o Solo amaldiçoado e os oito básicos dos cajados de classe) era `mobilidade:
+"lenta"`: enquanto conjurava, andava na metade da velocidade (`habilidades.velocidadeConjurandoLenta`). O básico do Mago
+(o Dardo arcano e os oito dos tomos) é `"livre"`, sem lentidão. A cura do Necromante vinha só do vínculo dos mortos
+(D-135).
+
+**Decisão.**
+- Os nove básicos do Necromante passam a `mobilidade: "livre"`, igual aos do Mago. As skills não mudam.
+- O próprio básico cura o Necromante: `ajustesClasses.necromante.curaBasico.pct` (9%) do dano que ele tirou de fato,
+  menos `perdaPorServoPct` (1%) por morto de pé além do 1º (servo, reanimados e ecos), nunca abaixo de 0. Sem nenhum
+  morto, 10%; com um, 9%; com 3, 7%; a partir de 10, nada. Conta o golpe da mão principal e da secundária (`ehBasico`) e também
+  o solo da Legião, que é o mesmo básico. A fração que sobra vai para o mesmo `vinculoResto` do vínculo
+  (`combat/necromancia.ts`, `curaDoBasico`).
+- Quem é morto do Necromante não se cura por aqui: só o próprio Necromante (sem `invocacao`).
+
+**Revisão (15/11/2026).** Sem nenhum morto de pé, a cura é 10% (antes, 9%): a mesma conta, com o 1% somado.
+
+**O roubo dos mortos.** Antes, abater a invocação de outro necromante não erguia nada: a morte de uma invocação nunca
+reanimava. Agora o morto de um necromante (servo, reanimado, eco ou o exército do necromante inimigo) abatido por um
+necromante hostil, ou por um morto dele, a até `necromancia.raioColheita` (6) células, se ergue como reanimado de quem
+o abateu, dentro das vagas de sempre (`roubarMorto`, em `combat/necromancia.ts`). O necromante inimigo não ergue
+reanimados: quando ele ou o exército dele abate um morto do jogador, a próxima invocação do exército sai na hora
+(sempre dentro do limite pelo nível). A morte do próprio morto pelo dono, ou de um companheiro, não conta.
+
+**O exército do necromante inimigo pelo nível.** Ele chamava todas as vagas de uma vez a cada 12 s, com limite
+`4 + (nível − 1) / 5` (o nível 8 já punha 5 de uma vez). Agora chama um de cada vez, a cada `recargaMs` (6 s), até
+`noNivelBase` (4) no `nivelBase` (8), com uma vaga a cada `niveisPorVaga` (7) níveis, entre 1 e `maximo` (10): nível 1,
+3; nível 8, 4; nível 22, 6; nível 50 em diante, 10 (`balance.mundo.exercitoNecromante`, `entities/ia-mundo.ts`).
+
+**Validação.** Testes em `inimigos-armadilhas.test.ts` (10 sem morto, 9 com 1, 7 com 3, nada fora do básico, básicos
+`livre`), `necromante.test.ts` (o roubo nos dois sentidos) e `expansao-mundo.test.ts` (o limite pelo nível e um por
+recarga).
+`npm run balancear`: 172/172 metas.
+
+## D-180 — Salto de Guerra estendido pela corrida e painel de estatísticas (15/11/2026)
 
 - **Salto parado**: 5 células no nível 1, com o mesmo crescimento de antes (+1 a cada 10 níveis).
 - **Com a corrida**: saltar durante a Marcha de Guerra soma de 1 a 5 células conforme o tempo correndo. Correr metade da

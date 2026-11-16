@@ -12,12 +12,15 @@ import { fato, muralhaEm } from './tatica';
 import { passavel } from '../world/fase';
 import { reservaCelula } from '../world/colisao';
 import { aoCairOMorto, retornoDoServo, vidaDoMorto } from './sintonia-necromante';
-import { fatorDosServos } from './basico';
+import { ehBasico, fatorDosServos } from './basico';
 import { pontosUteis } from '../progression/efeitos-atributo';
 import { fatorDeDominio, marcoDe } from '../progression/dominio';
 
 const necromante = (e: Entidade) => vivo(e) && (e.classeId ?? e.bolsa?.classeId) === 'necromante';
 export const chaveServo = (id: string) => `necromante:servo:${id}`;
+/** A recarga do exército do necromante inimigo (entities/ia-mundo.ts). */
+export const chaveDoExercito = (id: string) => `exercito-boss:${id}`;
+const NECROMANTE_INIMIGO = 'necromante_ancestral';
 
 /** Uma célula livre a 1 ou 2 células do dono (para erguer um morto ou trazê-lo de volta). */
 function lugarPerto(estado: EstadoJogo, ctx: ContextoSimulacao, dono: Entidade): { x: number; y: number } | null {
@@ -116,6 +119,7 @@ export function colherMorto(estado: EstadoJogo, ctx: ContextoSimulacao, morto: E
     const dono = buscarEntidade(estado, morto.invocacao.donoId);
     const retorno = tempoDeRetorno(ctx, dono, retornoDoServo(ctx, dono, estado.tick) ?? ctx.balance.necromancia.retornoServoMs);
     if (morto.invocacao.necromancia === 'servo') estado.recargas[chaveServo(morto.invocacao.donoId)] = estado.tick + ticksDe(retorno);
+    roubarMorto(estado, ctx, morto, matador, saida);
     return;
   }
   const r = ctx.balance.necromancia;
@@ -136,6 +140,22 @@ export function colherMorto(estado: EstadoJogo, ctx: ContextoSimulacao, morto: E
     estado.recargas[chave] = estado.tick + ticksDe(r.ecoRecargaMs);
     break;
   }
+}
+
+/**
+ * 15/11/2026 (D-179): os necromantes roubam os mortos uns dos outros. O morto de um necromante (o servo, um reanimado,
+ * um eco ou o exército do necromante inimigo) abatido por um necromante hostil, ou por um morto dele, a até
+ * `raioColheita` células, se ergue como reanimado de quem o abateu. O necromante inimigo não ergue reanimados: o roubo
+ * dele adianta a próxima invocação do exército (dentro do limite pelo nível).
+ */
+function roubarMorto(estado: EstadoJogo, ctx: ContextoSimulacao, morto: Entidade, matador: Entidade | undefined, saida: EventoSimulacao[]): void {
+  const inv = morto.invocacao;
+  if (!inv || inv.companheiro || (!inv.necromancia && !inv.exercitoBoss)) return;
+  const ladrao = matador?.invocacao ? buscarEntidade(estado, matador.invocacao.donoId) : matador;
+  if (!ladrao || !vivo(ladrao) || ladrao.invocacao || ladrao.id === inv.donoId || !podeFerir(ladrao, morto, ctx.modo)) return;
+  if (chebyshev(ladrao, morto) > ctx.balance.necromancia.raioColheita) return;
+  if (necromante(ladrao)) erguer(estado, ctx, ladrao, 'reanimado', morto, saida);
+  else if (ladrao.preset === NECROMANTE_INIMIGO) estado.recargas[chaveDoExercito(ladrao.id)] = estado.tick;
 }
 
 /**
@@ -210,14 +230,36 @@ export function vinculoDosMortos(estado: EstadoJogo, ctx: ContextoSimulacao, ata
     const inv = servo.invocacao;
     const dono = inv && !inv.companheiro ? buscarEntidade(estado, inv.donoId) : undefined;
     if (!dono || !necromante(dono) || dono.invocacao || pct <= 0) return;
-    const bruto = (dono.vinculoResto ?? 0) + (dano * pct) / 100;
-    const inteiro = Math.floor(bruto);
-    dono.vinculoResto = bruto - inteiro;
-    const cura = Math.min(dono.hpMax - dono.hp, inteiro);
-    if (cura <= 0) return;
-    dono.hp += cura;
-    saida.push({ t: 'efeitoResultado', tick: estado.tick, alvoId: dono.id, origemId: servo.id, tipo: 'cura', dano: 0, cura, mana: 0 });
+    curarPeloVinculo(estado, dono, servo.id, (dano * pct) / 100, saida);
   };
   if (atacante && atacante !== alvo) curar(atacante, r.vinculoCausadoPct);
   curar(alvo, r.vinculoLevadoPct);
+}
+
+/** A cura fracionária do vínculo: a fração que sobra fica em `vinculoResto` para a próxima. */
+function curarPeloVinculo(estado: EstadoJogo, dono: Entidade, origemId: string, valor: number, saida: EventoSimulacao[]): void {
+  const bruto = (dono.vinculoResto ?? 0) + valor;
+  const inteiro = Math.floor(bruto);
+  dono.vinculoResto = bruto - inteiro;
+  const cura = Math.min(dono.hpMax - dono.hp, inteiro);
+  if (cura <= 0) return;
+  dono.hp += cura;
+  saida.push({ t: 'efeitoResultado', tick: estado.tick, alvoId: dono.id, origemId, tipo: 'cura', dano: 0, cura, mana: 0 });
+}
+
+/** Quantos mortos (servo, reanimados, ecos) do Necromante estão de pé. */
+const mortosDe = (estado: EstadoJogo, dono: Entidade): number =>
+  estado.entidades.filter((e) => vivo(e) && e.invocacao?.donoId === dono.id && !!e.invocacao.necromancia && !e.invocacao.companheiro).length;
+
+/**
+ * 15/11/2026 (D-179): o básico do Necromante também o cura. Com 1 morto de pé, `curaBasico.pct` do dano que o
+ * básico tirou; cada morto além do 1º tira `curaBasico.perdaPorServoPct` e, sem nenhum, soma o mesmo (nunca abaixo
+ * de 0). Usa o mesmo resto do
+ * vínculo para as frações.
+ */
+export function curaDoBasico(estado: EstadoJogo, ctx: ContextoSimulacao, atacante: Entidade | undefined, alvo: Entidade, habilidadeId: string, dano: number, saida: EventoSimulacao[]): void {
+  if (dano <= 0 || !atacante || atacante === alvo || atacante.invocacao || !necromante(atacante) || !ehBasico(atacante, habilidadeId)) return;
+  const r = ctx.balance.ajustesClasses.necromante.curaBasico;
+  const pct = Math.max(0, r.pct - r.perdaPorServoPct * (mortosDe(estado, atacante) - 1));
+  if (pct > 0) curarPeloVinculo(estado, atacante, atacante.id, (dano * pct) / 100, saida);
 }

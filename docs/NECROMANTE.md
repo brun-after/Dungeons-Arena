@@ -9,13 +9,13 @@ A passiva funciona independentemente da barra equipada, inclusive nas fichas de 
 - **Servo do ossuário:** acompanha o personagem desde o primeiro tick. Se morrer, retorna após 8 segundos, desde que o dono esteja vivo e exista espaço.
 - **Reanimados:** abates do Necromante ou de suas invocações erguem um morto por 25 segundos se a vítima estiver a até 6 células. Abates dos mortos dão XP ao dono, sem duplicar sua participação.
 - **Eco aliado:** a morte de um jogador aliado a até 6 células pode criar uma cópia temporária de seu modelo de classe e equipamento. O original morre e revive pelas regras normais do modo. O eco não tem bolsa, itens, XP ou acesso às habilidades do aliado. Há intervalo de 30 segundos por aliado; dois Necromantes próximos não duplicam o eco da mesma morte.
-- **Limites:** quatro invocações comuns por Necromante nos modos atuais, com um espaço reservado para o servo durante seu retorno. Chefes reanimados emprestam apenas a aparência. Todos os mortos usam um orçamento próprio de vida e dano, causam 50% do dano de uma invocação normal e seguem o teto de NPCs do modo. Não geram loot, XP ou novas reanimações quando morrem.
+- **Limites:** quatro invocações comuns por Necromante nos modos atuais, com um espaço reservado para o servo durante seu retorno. Chefes reanimados emprestam apenas a aparência. Todos os mortos usam um orçamento próprio de vida e dano, causam 50% do dano de uma invocação normal e seguem o teto de NPCs do modo. Não geram loot nem XP quando morrem. Abatidos por outro necromante hostil (ou por um morto dele), a até 6 células, se erguem como reanimados de quem os abateu: os necromantes roubam os mortos uns dos outros (D-179).
 
 ## Habilidades
 
 | Habilidade | Função |
 |---|---|
-| Toque funesto | Ataque básico mágico de Trevas à distância. |
+| Solo amaldiçoado | Ataque básico (D-126): uma área de Trevas sob o alvo que pulsa 3 vezes. Anda enquanto conjura, como o básico do Mago, e cura o Necromante com 10% do dano sem nenhum morto, 9% com 1 e 1% a menos por morto além do 1º (D-179). |
 | Dardo funesto | Projétil que aplica Definhando: menos dano causado e menos cura recebida. |
 | Dízimo vital | Drena até 18 de vida da invocação própria mais próxima, a até 6 células, para curar o dono. Pode consumir o servo. Não atinge jogadores nem invocações alheias; vida cheia ou ausência de invocação recusa antes de gastar mana/recarga. A cura respeita veneno e outras reduções. |
 | Garras do ossuário | Dano de Trevas em área e enraizamento, preparando ataques dos mortos e combos. |
