@@ -16,6 +16,7 @@ import { posProcessar } from './pos';
 import { renderizarArmas } from './icones';
 import { asas, bacinete, capa, elmo, pecaDeCabeca, peito, protegerMembros, tiara } from './armaduras3d';
 import { KITS_SOMBRIOS, type PecaSombria } from '../../src/render/vivos/armaduras-sombrias';
+import { VESTES_DO_ATLAS } from '../../src/render/vivos/chefes-vivos';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { criatura } from './criaturas3d';
 import type { PecaDeArmadura } from '../../src/render/equipamento-3d';
@@ -173,6 +174,17 @@ async function religadas(url: string, ossos: Map<string, THREE.Bone>, trocar?: (
   }
   // Só as malhas: o esqueleto do arquivo não entra na cena (a animação acharia os ossos dele pelo nome).
   return malhas(base);
+}
+
+function vestir(mt: Montado, v: PecaSombria | null): void {
+  if (!v) return;
+  const esconder = v.esconder ? new RegExp(v.esconder) : null;
+  for (const m of malhas(mt.grupo)) {
+    if (v.extras.some((x) => x === m || x.getObjectById(m.id))) continue;
+    const mats = materiais(m);
+    if (esconder && (esconder.test(m.name) || mats.some((x) => esconder.test(x.name)))) { m.visible = false; continue; }
+    if (v.tecido && /_Body|_Arms|Bracer/.test(m.name) && mats.some((x) => x.name.includes('Ranger') || x.name.includes('Peasant'))) m.material = v.tecido;
+  }
 }
 
 async function montar(r: Receita, urls: Urls): Promise<Montado> {
@@ -509,6 +521,9 @@ export async function renderizarAtlas(r: Receita, urls: Urls, camadas: PedidoDeC
     peito(mt.ossos, peitoral, acento);
   }
   if (r.asas !== undefined) asas(mt.ossos, r.asas);
+  // Marco 45 (16/11/2026, D-181): a veste de peças próprias da criatura de Filo, presa nos ossos (segue cada pose); o que
+  // ela esconde do traje some e o tecido dela entra no lugar do pano do traje.
+  if (r.veste) vestir(mt, VESTES_DO_ATLAS[r.veste]?.(mt.ossos) ?? null);
   const corpo = malhas(mt.grupo);
   // As malhas do corpo com pele (os raios da frente da arma); as peças sem esqueleto (asas, armadura fixa) ficam de fora.
   const pele = corpo.filter((m) => m instanceof THREE.SkinnedMesh);

@@ -387,7 +387,7 @@
           "tipo": "dividir",
           "hpPct": 50,
           "partes": 2,
-          "vidaPct": 40
+          "vidaPct": 25
         }
       ],
       "naFenda": {
@@ -2340,7 +2340,7 @@
       "defesa": 6,
       "ataqueBasico": "toque_glacial",
       "habilidades": [
-        "nova_gelo",
+        "chuva_gelo",
         "chamar_escultores"
       ],
       "intervaloAtaqueMs": 2600,
@@ -2373,7 +2373,7 @@
       "ataqueBasico": "faisca_da_bobina",
       "habilidades": [
         "cadeia_raio",
-        "nova_raio"
+        "chuva_raio"
       ],
       "intervaloAtaqueMs": 2400,
       "resistencias": {
@@ -2472,8 +2472,7 @@
       "defesa": 6,
       "ataqueBasico": "lasca_de_espelho",
       "habilidades": [
-        "explosao_psiquico",
-        "prisao_psiquico"
+        "explosao_psiquico"
       ],
       "intervaloAtaqueMs": 2400,
       "resistencias": {
@@ -2503,8 +2502,7 @@
       "defesa": 8,
       "ataqueBasico": "golpe_pesado",
       "habilidades": [
-        "nova_terra",
-        "prisao_terra"
+        "pedra_arremessada"
       ],
       "intervaloAtaqueMs": 2800,
       "resistencias": {
@@ -2606,8 +2604,7 @@
       "defesa": 5,
       "ataqueBasico": "garra_de_harpia",
       "habilidades": [
-        "rajada",
-        "investida_fisico"
+        "rajada"
       ],
       "intervaloAtaqueMs": 2200,
       "dimensao": "zefiria",

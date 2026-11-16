@@ -10,6 +10,7 @@ import type { Entidade } from '../entities/entidade';
 import { t, type ChaveTexto } from '../i18n';
 import { entradasDoDiario, TIPOS_DE_ENTRADA, type EntradaDoDiario, type TipoDeEntrada } from '../progression/diario';
 import { descreverEntrada } from './diario-detalhes';
+import { desenharMonstruario } from './mochila-monstruario';
 
 export { descreverEntrada } from './diario-detalhes';
 
@@ -55,7 +56,7 @@ export function desenharDiario(corpo: HTMLElement, j: Entidade, ctx: ContextoSim
   for (const e of todas) porTipo.set(e.tipo, [...(porTipo.get(e.tipo) ?? []), e]);
   for (const tipo of TIPOS_DE_ENTRADA) {
     const lista = porTipo.get(tipo) ?? [];
-    if (lista.length === 0 || tipo === 'missao') continue;
+    if (lista.length === 0 || tipo === 'missao' || tipo === 'criatura') continue;
     const vistasDoTipo = lista.filter((e) => vistas.has(e.id));
     const grupo = el('details', 'grupo-diario');
     grupo.dataset.tipo = tipo;
@@ -92,4 +93,6 @@ export function desenharDiario(corpo: HTMLElement, j: Entidade, ctx: ContextoSim
     grupo.append(ul);
     corpo.append(grupo);
   }
+  // Marco 45 (16/11/2026, D-181): o monstruário de Filo fecha o diário.
+  desenharMonstruario(corpo, j, ctx);
 }

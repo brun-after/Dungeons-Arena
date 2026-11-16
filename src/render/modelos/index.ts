@@ -151,5 +151,33 @@ export function ehModelo(nome: string): nome is NomeModelo {
   return Object.hasOwn(MODELOS, nome);
 }
 
+/**
+ * Marco 45 (16/11/2026, D-181): as criaturas de Filo só têm o desenho 3D pré-renderizado; na vista 2D (sem o atlas
+ * 3D, ou a de cima) cada uma usa o desenho vetorial mais parecido, para nunca sumir da tela.
+ */
+const MODELO_2D: Readonly<Record<string, NomeModelo>> = {
+  ...Object.fromEntries(['ticaozinho', 'floquinho', 'gosminho', 'breuzinho', 'sonequinha', 'candelinha', 'pedrico', 'pluminha', 'casulo', 'cogumelo_pulmao', 'pedregulho'].map((n) => [n, 'slime'] as const)),
+  ...Object.fromEntries(['zunzum', 'bobinadora', 'tecela_do_vazio', 'enxame_putrido', 'mae_colmeia'].map((n) => [n, 'aranha'] as const)),
+  ...Object.fromEntries(['faminto', 'galgo_do_vendaval'].map((n) => [n, 'lobo'] as const)),
+  ...Object.fromEntries(['dragao_da_fornalha', 'dragao_das_ruinas'].map((n) => [n, 'dragao_fogo'] as const)),
+  ...Object.fromEntries(['dragao_do_silencio'].map((n) => [n, 'dragao_gelo'] as const)),
+  ...Object.fromEntries(['dragao_engrenado'].map((n) => [n, 'dragao_raio'] as const)),
+  ...Object.fromEntries(['dragao_fermentado'].map((n) => [n, 'dragao_veneno'] as const)),
+  ...Object.fromEntries(['obelisco_vigia', 'torre_engrenada', 'cabo_voltaico', 'braseiro', 'coluna_antiga', 'pilar_de_cristal', 'estatua_de_gelo'].map((n) => [n, 'sentinela'] as const)),
+  ...Object.fromEntries(['fagulheiro', 'saltafaisca', 'rei_das_fagulhas', 'riscador'].map((n) => [n, 'goblin'] as const)),
+  ...Object.fromEntries(['quebra_gelo', 'fornalheiro', 'para_raios', 'fundeiro'].map((n) => [n, 'orc'] as const)),
+  ...Object.fromEntries(['colosso_de_geodo', 'monarca_de_geodo', 'guardiao_de_marmore'].map((n) => [n, 'troll'] as const)),
+  ...Object.fromEntries(['arqueiro_de_osso'].map((n) => [n, 'esqueleto'] as const)),
+  ...Object.fromEntries(['bebedor', 'silente', 'espelhante'].map((n) => [n, 'vampiro'] as const)),
+  ...Object.fromEntries(['sombra_roubada', 'o_apagador', 'reflexo_do_sonho'].map((n) => [n, 'sombra'] as const)),
+  ...Object.fromEntries(['arauto_caido', 'harpia_soberana', 'almirante_dos_ventos'].map((n) => [n, 'demonio'] as const)),
+  ...Object.fromEntries(['vidraceiro', 'escultor_de_geada', 'esporeiro', 'marionetista', 'pregador', 'penitente', 'velejador', 'ciclonista', 'imperatriz_das_estatuas', 'maquinista_voltaico', 'necromante_ancestral', 'bruxa_dos_sonhos', 'rei_das_mascaras', 'hierofante'].map((n) => [n, 'cultista'] as const)),
+};
+
+/** O desenho 2D do modelo: o próprio, se houver; senão o parecido (as criaturas de Filo); senão null. */
+export function modelo2d(nome: string): NomeModelo | null {
+  return ehModelo(nome) ? nome : (MODELO_2D[nome] ?? null);
+}
+
 /** Modelo do jogador enquanto não há classes com desenho próprio (marco 14). */
 export const MODELO_JOGADOR: NomeModelo = 'aventureiro';

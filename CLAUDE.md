@@ -1,6 +1,6 @@
 # Dungeons Arena: guia para quem trabalha no código
 
-**Versão:** 0.11 · **Data:** 15/11/2026
+**Versão:** 0.12 · **Data:** 16/11/2026
 
 A especificação normativa é [`docs/PROMPT-PROJETO-v4.0.md`](docs/PROMPT-PROJETO-v4.0.md). Leia a Parte 1
 antes de decisões técnicas. Divergências vão para [`docs/DECISOES.md`](docs/DECISOES.md), com justificativa.
@@ -48,6 +48,9 @@ O roteiro e o estado de cada marco ficam no [`README.md`](README.md).
   projeção, nunca o `y` erguido (marco 43, D-177).
 - **Hora em dados** (marco 44, D-178): o que muda com a noite lê `modo.escuro` e `modo.noite` (postos pela sala do
   Mundo); o cliente usa `horaDoMundo(agoraDoMundo())`. Fora do Mundo os dois ficam ausentes e nada muda.
+- **Criaturas de Filo** (marco 45, D-181): traço, jeito de caçar e mecânica de chefe vêm de `inimigos.json`
+  (`tracos`, `comportamento`, `chefe`) e rodam em `entities/criaturas/`; reação a terreno é `naFenda`, nunca `if` por
+  criatura. Modelo novo de inimigo leva receita em `tools/sprites` e um parecido 2D em `render/modelos → modelo2d`.
 - **Clone explícito** do estado (sem ida e volta por JSON); estado só com dados.
 - TypeScript estrito, sem `any`, até 800 linhas por arquivo, sem globais, HTML sempre escapado.
 - Textos de interface no dicionário `src/i18n/`.

@@ -15,6 +15,8 @@ import { criaturasDaDimensao, presetNoNivel } from '../../src/entities/criaturas
 import { aposGolpeDaCriatura, fatorCausadoDaCriatura, fatorRecebidoDaCriatura } from '../../src/entities/criaturas/golpes';
 import { MECANICAS_DE_CHEFE } from '../../src/entities/criaturas/tipos';
 import { processarMortes } from '../../src/progression/morte';
+import { entradasDoDiario, registrarDescobertas } from '../../src/progression/diario';
+import { textosFilo } from '../../src/i18n/pt-BR-filo';
 import { CONTEUDO, contexto, faseDeTexto } from '../apoio/fases';
 
 function obter<T>(v: T | undefined | null, nome = 'valor'): T {
@@ -281,5 +283,39 @@ describe('mecânicas de arena dos chefes', () => {
     c.tick(ticksDe(700));
     expect(j.invisivelAteTick).toBeLessThanOrEqual(c.estado.tick);
     expect(j.efeitos.some((f) => f.tipo === 'marcado' && f.ateTick > c.estado.tick)).toBe(true);
+  });
+});
+
+describe('o monstruário no diário', () => {
+  it('as 54 criaturas entram no diário, e cada uma tem lore e dica (os comuns, também o terreno)', () => {
+    const c = cena();
+    const criaturas = entradasDoDiario(c.ctx).filter((e) => e.tipo === 'criatura');
+    expect(criaturas).toHaveLength(54);
+    const textos: Record<string, string> = textosFilo;
+    for (const e of criaturas) {
+      const p = preset(e.id.slice(9));
+      expect(textos[`monstro.${p.id}.lore`], p.id).toBeTruthy();
+      expect(textos[`monstro.${p.id}.dica`], p.id).toBeTruthy();
+      if (p.arquetipo !== 'boss') expect(textos[`monstro.${p.id}.fenda`], p.id).toBeTruthy();
+    }
+    for (const d of CONTEUDO.dimensoes.keys()) expect(textos[`dimensao.${d}.nome`], d).toBeTruthy();
+  });
+
+  it('ver de perto revela a criatura; derrotar revela o resto e conta a vitória do chefe', () => {
+    const c = cena();
+    const j = c.jogador(5, 5);
+    const bolsa = obter(j.bolsa, 'bolsa');
+    c.inimigo('slime', 7, 5);
+    c.inimigo('orc', 20, 20);
+    const chefe = c.inimigo('rei_goblin', 9, 5);
+    const saida: EventoSimulacao[] = [];
+    c.estado.tick = 30;
+    registrarDescobertas(c.estado, c.ctx, [], saida);
+    expect(bolsa.diario).toContain('criatura:slime');
+    expect(bolsa.diario).not.toContain('criatura:orc');
+    chefe.morto = true;
+    registrarDescobertas(c.estado, c.ctx, [{ t: 'morreu', tick: 31, id: chefe.id, porId: j.id }], saida);
+    expect(bolsa.diario).toContain('criatura:rei_goblin:caiu');
+    expect(bolsa.vitorias?.rei_goblin).toBe(1);
   });
 });

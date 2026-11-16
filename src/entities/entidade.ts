@@ -336,6 +336,7 @@ export interface Bolsa {
   missoesConcluidas: string[];
   /** Marco 18 (D-070): as entradas do diário de descobertas. */
   diario: string[];
+  vitorias?: Record<string, number>; // Marco 45 (16/11/2026, D-181): as vitórias sobre cada chefe de Filo.
 }
 
 /** Marco 18 (D-068): estudo de uma habilidade nova. Só anda com o jogo rodando (um tick por tick de simulação). */
@@ -734,6 +735,7 @@ function clonarBolsa(b: Bolsa): Bolsa {
     missoes: { ...b.missoes },
     missoesConcluidas: [...b.missoesConcluidas],
     diario: [...b.diario],
+    ...(b.vitorias ? { vitorias: { ...b.vitorias } } : {}),
     ...(b.runas ? { runas: { ...b.runas } } : {}),
     ...(b.vinculoUso ? { vinculoUso: Object.fromEntries(Object.entries(b.vinculoUso).map(([k, r]) => [k, { ...r }])) } : {}),
   };

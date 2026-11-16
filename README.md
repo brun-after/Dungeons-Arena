@@ -1,9 +1,10 @@
 # Dungeons Arena: RPG de ação em tempo real
 
-**Versão do documento:** 3.53 · **Data:** 15/11/2026
+**Versão do documento:** 3.54 · **Data:** 16/11/2026
 **Status:** Em construção. Marcos 1–6 concluídos e validados em aparelho real; 8A, 9A e 10A concluídos: campanha completa, com 26 efeitos, economia, fases geradas sem fim, invocações e save com migrações. Arena online na AWS em São Paulo. Convergência concluída (12 a 16): habilidades, dificuldade, campanha em grupo, ritmo calibrado por simulação e endurecimento. Marco 17: conta Google, progresso na nuvem e o personagem da campanha na arena. Marcos 29 e 30: o Mundo, um reino aberto para todos, com chat, grupo, banco, missões, troca e mercado (guia em [docs/MUNDO.md](docs/MUNDO.md))
 
 > **Histórico**
+> - **3.54 (16/11/2026)**: marco 45: as criaturas de Filo. São nove dimensões, cada uma com 4 comuns e 2 chefes com mecânica própria, todos com modelo próprio. Elas nascem pela fenda, e o monstruário fecha o diário (D-181).
 > - **3.53 (15/11/2026)**: marco 44: a noite com consequência: visão no escuro, a tocha que atrai e afasta, a fogueira de acampamento, a caça noturna, a vila e os elementos pela hora (D-178).
 > - **3.52 (15/11/2026)**: marco 43: o relevo na geometria, a geografia nova, o cenário em 3D composto pela função de cada lugar e as tochas de verdade (D-177).
 > - **3.51 (15/11/2026)**: marco 42: as cores do Mundo, o dia e a noite, a tocha, a noite perigosa, as matas fechadas, o elemento vento e o relevo (D-176).
@@ -350,6 +351,25 @@ toda região, e a Travessia das Areias liga os dois reinos a pé. O guerreiro co
   por ela (os pontos dele também voltam).
 
 Detalhes em D-145 a D-156 e em [docs/BALANCEAMENTO.md](docs/BALANCEAMENTO.md) (172/172 metas).
+
+### Marco 45 — as criaturas de Filo (16/11/2026)
+
+**Nove dimensões.** Os monstros vêm de nove dimensões que invadem Filo pelas fendas. Cada dimensão tem um sotaque na
+cor, no material e no som, 4 criaturas comuns (uma delas fofa, até o nível 30) e 2 chefes. Ao todo são 36 comuns e
+18 chefes, cada um com mecânica própria.
+
+**Cada criatura, um desafio.** Há o bando que se fortalece junto e a bola de neve que cresce rolando. Há a torre que
+salta o raio, o esqueleto que se remonta e o Faminto que come os mortos. Os chefes trazem torres, pilares, braseiros,
+casulos, estátuas, máscaras e pecados. Os terrenos elementais mudam algo em cada uma.
+
+**Modelos próprios.** As 54 têm modelo feito aqui, no padrão dos personagens dos jogadores. Os humanoides usam o mesmo
+rig, com veste própria; os outros são de geometria. Todos são pré-renderizados em 8 direções.
+
+**A fenda e o monstruário.** No Mundo, a criatura sobe por uma rachadura na cor da dimensão dela. O monstruário fecha o
+diário: ver uma criatura revela o nome e o desenho, e derrotá-la revela a lore, a dica de luta e o que ela faz em cada
+terreno.
+
+Detalhes em D-181.
 
 ### Marco 44 — a noite, a tocha e as fogueiras (15/11/2026)
 

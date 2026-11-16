@@ -11200,7 +11200,7 @@
       "raioArea": 0,
       "custoRecurso": 0,
       "recargaMs": 2500,
-      "conjuracaoMs": 500,
+      "conjuracaoMs": 600,
       "politicaAlvo": "hostil",
       "politicaImpacto": "contato",
       "interrupcao": "interrompivel",
