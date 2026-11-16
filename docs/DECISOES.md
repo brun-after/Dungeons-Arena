@@ -3,7 +3,7 @@
 **Versão:** 1.27 · **Data:** 15/11/2026
 
 > **Histórico**
-> - **1.27 (15/11/2026)**: D-179: o básico do Necromante anda como o do Mago (sem a lentidão de conjurar) e o cura com 9% do dano, menos 1% por morto além do 1º.
+> - **1.27 (15/11/2026)**: D-179: o básico do Necromante anda como o do Mago (sem a lentidão de conjurar) e o cura com 9% do dano com 1 morto, menos 1% por morto além do 1º e 10% sem nenhum.
 > - **1.26 (15/11/2026)**: D-178: marco 44: a noite com consequência (visão no escuro, a tocha que atrai e afasta, a fogueira de acampamento, a caça noturna, a vila pela hora e os elementos pela hora); a luz vinda das fontes, a mata escura só entre as árvores, as árvores atravessáveis, a zona de fácil camuflagem, a calma perto da vila e das entradas e as magias que iluminam.
 > - **1.25 (15/11/2026)**: D-177: marco 43: o relevo na geometria, a geografia de altura primeiro, o cenário em 3D composto pela função de cada lugar e as tochas de verdade.
 > - **1.24 (15/11/2026)**: D-176: marco 42: as cores do Mundo, o dia e a noite, a tocha, a noite perigosa, as matas fechadas, o elemento vento e o relevo.
@@ -5641,7 +5641,7 @@ Os números ficam em `balance.mundo.tocha`, `noite`, `acampamento`, `vilaNoite` 
 - A taverna cheia aparece só no quadro de missões. Ainda não há gente nova na praça.
 - O vendedor da noite usa a figura do mercador errante.
 
-## D-179 — O básico do Necromante sem lentidão e com cura (15/11/2026)
+## D-179 — O básico do Necromante sem lentidão e com cura (15/11/2026, revisto no mesmo dia)
 
 **Contexto.** O básico do Necromante (o Solo amaldiçoado e os oito básicos dos cajados de classe) era `mobilidade:
 "lenta"`: enquanto conjurava, andava na metade da velocidade (`habilidades.velocidadeConjurandoLenta`). O básico do Mago
@@ -5651,11 +5651,13 @@ Os números ficam em `balance.mundo.tocha`, `noite`, `acampamento`, `vilaNoite` 
 **Decisão.**
 - Os nove básicos do Necromante passam a `mobilidade: "livre"`, igual aos do Mago. As skills não mudam.
 - O próprio básico cura o Necromante: `ajustesClasses.necromante.curaBasico.pct` (9%) do dano que ele tirou de fato,
-  menos `perdaPorServoPct` (1%) por morto de pé além do 1º (servo, reanimados e ecos), nunca abaixo de 0. Com nenhum
-  ou um morto, 9%; com 3, 7%; a partir de 10, nada. Conta o golpe da mão principal e da secundária (`ehBasico`) e também
+  menos `perdaPorServoPct` (1%) por morto de pé além do 1º (servo, reanimados e ecos), nunca abaixo de 0. Sem nenhum
+  morto, 10%; com um, 9%; com 3, 7%; a partir de 10, nada. Conta o golpe da mão principal e da secundária (`ehBasico`) e também
   o solo da Legião, que é o mesmo básico. A fração que sobra vai para o mesmo `vinculoResto` do vínculo
   (`combat/necromancia.ts`, `curaDoBasico`).
 - Quem é morto do Necromante não se cura por aqui: só o próprio Necromante (sem `invocacao`).
 
-**Validação.** Teste em `inimigos-armadilhas.test.ts` (9 com 1 morto, 7 com 3, nada fora do básico, básicos `livre`).
+**Revisão (15/11/2026).** Sem nenhum morto de pé, a cura é 10% (antes, 9%): a mesma conta, com o 1% somado.
+
+**Validação.** Teste em `inimigos-armadilhas.test.ts` (10 sem morto, 9 com 1, 7 com 3, nada fora do básico, básicos `livre`).
 `npm run balancear`: 172/172 metas.

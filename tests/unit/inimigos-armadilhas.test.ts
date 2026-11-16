@@ -167,7 +167,7 @@ describe('vínculo do Necromante (D-135)', () => {
     expect(n.hp).toBe(n.hpMax - 50 + 14);
   });
 
-  it('15/11/2026 (D-179): o básico cura 9% com 1 morto e perde 1% por morto além do 1º', () => {
+  it('15/11/2026 (D-179): o básico cura 10% sem morto, 9% com 1 e perde 1% por morto além do 1º', () => {
     const { ctx, estado, eventos } = cena(SALA_ABERTA);
     const n = criarJogador(obter(CONTEUDO.classes.get('necromante')), 'n', 2, 2, ctx.balance);
     const g = criarInimigo(preset('goblin'), 'g', 4, 4, ctx.balance);
@@ -176,8 +176,11 @@ describe('vínculo do Necromante (D-135)', () => {
       m.invocacao = { donoId: 'n', expiraTick: 1e9, dominado: false, necromancia: 'reanimado' } as Entidade['invocacao'];
       return m;
     };
-    estado.entidades.push(n, g, morto('s1', 2));
-    n.hp = n.hpMax - 80;
+    estado.entidades.push(n, g);
+    n.hp = n.hpMax - 90;
+    curaDoBasico(estado, ctx, n, g, n.ataqueBasico, 100, eventos);
+    expect(n.hp).toBe(n.hpMax - 80);
+    estado.entidades.push(morto('s1', 2));
     curaDoBasico(estado, ctx, n, g, n.ataqueBasico, 100, eventos);
     expect(n.hp).toBe(n.hpMax - 80 + 9);
     curaDoBasico(estado, ctx, n, g, 'dardo_funesto', 100, eventos);
