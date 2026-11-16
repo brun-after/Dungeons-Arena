@@ -3,7 +3,7 @@
 **Versão:** 1.27 · **Data:** 15/11/2026
 
 > **Histórico**
-> - **1.27 (15/11/2026)**: D-179: o básico do Necromante anda como o do Mago (sem a lentidão de conjurar) e o cura com 9% do dano com 1 morto, menos 1% por morto além do 1º e 10% sem nenhum; os necromantes roubam os mortos uns dos outros; o necromante inimigo invoca um de cada vez, até um limite pelo nível (8: 4; 50: 10).
+> - **1.27 (15/11/2026)**: D-179: o básico do Necromante anda como o do Mago (sem a lentidão de conjurar) e o cura com 9% do dano com 1 morto, menos 1% por morto além do 1º e 10% sem nenhum; os necromantes roubam os mortos uns dos outros; o necromante inimigo invoca um de cada vez, até um limite pelo nível (8: 4; 50: 10); os mortos do jogador num vermelho só; a skin escolhida nas telas de seleção de personagem; a gadanha do Ceifador apontando para a frente.
 > - **1.26 (15/11/2026)**: D-178: marco 44: a noite com consequência (visão no escuro, a tocha que atrai e afasta, a fogueira de acampamento, a caça noturna, a vila pela hora e os elementos pela hora); a luz vinda das fontes, a mata escura só entre as árvores, as árvores atravessáveis, a zona de fácil camuflagem, a calma perto da vila e das entradas e as magias que iluminam.
 > - **1.25 (15/11/2026)**: D-177: marco 43: o relevo na geometria, a geografia de altura primeiro, o cenário em 3D composto pela função de cada lugar e as tochas de verdade.
 > - **1.24 (15/11/2026)**: D-176: marco 42: as cores do Mundo, o dia e a noite, a tocha, a noite perigosa, as matas fechadas, o elemento vento e o relevo.
@@ -5641,7 +5641,7 @@ Os números ficam em `balance.mundo.tocha`, `noite`, `acampamento`, `vilaNoite` 
 - A taverna cheia aparece só no quadro de missões. Ainda não há gente nova na praça.
 - O vendedor da noite usa a figura do mercador errante.
 
-## D-179 — O básico do Necromante sem lentidão e com cura, o roubo dos mortos e o exército pelo nível (15/11/2026)
+## D-179 — O Necromante: básico sem lentidão e com cura, roubo dos mortos, exército pelo nível, tom dos mortos e skins (15/11/2026)
 
 **Contexto.** O básico do Necromante (o Solo amaldiçoado e os oito básicos dos cajados de classe) era `mobilidade:
 "lenta"`: enquanto conjurava, andava na metade da velocidade (`habilidades.velocidadeConjurandoLenta`). O básico do Mago
@@ -5671,7 +5671,23 @@ reanimados: quando ele ou o exército dele abate um morto do jogador, a próxima
 `noNivelBase` (4) no `nivelBase` (8), com uma vaga a cada `niveisPorVaga` (7) níveis, entre 1 e `maximo` (10): nível 1,
 3; nível 8, 4; nível 22, 6; nível 50 em diante, 10 (`balance.mundo.exercitoNecromante`, `entities/ia-mundo.ts`).
 
+**O vermelho dos mortos.** Os mortos do Necromante jogador eram pintados com o `tint` do Pixi (0xff7777), que
+multiplica a cor de baixo: o modelo escuro saía vinho, o claro saía vermelho vivo, e os dois se confundiam com os
+monstros. Agora um filtro de cor (`render/tom-dos-mortos.ts`, um só para todos) tira a cor original, deixa a
+luminosidade com o contraste comprimido (de 55% a 105%) e pinta tudo do mesmo vermelho vivo. Vale para o atlas, o 3D
+vivo, o rig e a silhueta. O exército negro do necromante inimigo continua com o `tint`.
+
+**A escolha da skin.** A escolha e o código das skins saíram do menu de pausa (Configurações → Skins) e foram para as
+telas de seleção de personagem: o cartão de cada slot, a escolha de classe do jogo novo e os personagens do Mundo
+(`ui/seletor-skin.ts`, sob o retrato do `painelPersonagem` com `escolherSkin`). Botões com o Equipamento e as skins
+liberadas da classe, e um "Tenho um código" que libera ali mesmo. A troca redesenha os retratos da mesma classe na
+tela. A escolha continua por classe e por aparelho (as preferências), como na D-134.
+
+**A gadanha do Ceifador.** A lâmina fazia o arco por cima do próprio capuz; agora aponta para a frente do Ceifador
+(o giro da arma em pé em `palco-vivo.ts`: y de 0,4 para −π/2).
+
 **Validação.** Testes em `inimigos-armadilhas.test.ts` (10 sem morto, 9 com 1, 7 com 3, nada fora do básico, básicos
 `livre`), `necromante.test.ts` (o roubo nos dois sentidos) e `expansao-mundo.test.ts` (o limite pelo nível e um por
-recarga).
+recarga). No navegador: o servo num vermelho único no jogo, o seletor de skin na escolha de classe e no slot (com o
+código), e a gadanha vista de lado apontando para a frente.
 `npm run balancear`: 172/172 metas.

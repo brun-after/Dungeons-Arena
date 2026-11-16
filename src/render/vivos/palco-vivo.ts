@@ -533,8 +533,9 @@ export class PalcoVivo {
         // Inclinada um pouco para a frente e virada para a câmera (o arco de perfil viraria um risco a 48 px).
         // 05/11/2026: o arco meio giro em pé, a madeira para o alvo e a corda para quem atira (estava ao contrário).
         // 06/11/2026: o cajado da Sombra Rubra vai na diagonal, à frente do manto, e a gadanha tomba para fora (a arte).
+        // 15/11/2026 (D-179): a lâmina da gadanha aponta para a frente do Ceifador (antes, fazia o arco sobre o capuz).
         const giro = new THREE.Quaternion().setFromEuler(arma.modelo === 'cajado_retorcido' ? new THREE.Euler(0.42, 0.4, 0.3)
-          : arma.modelo === 'gadanha_ceifador' ? new THREE.Euler(0.12, 0.4, 0.16) : new THREE.Euler(0.18, ARCOS.test(arma.modelo) ? 0.35 + Math.PI : 0.4, 0));
+          : arma.modelo === 'gadanha_ceifador' ? new THREE.Euler(0.12, -Math.PI / 2, 0.16) : new THREE.Euler(0.18, ARCOS.test(arma.modelo) ? 0.35 + Math.PI : 0.4, 0));
         a.emPe.push({ g, giro });
       }
     }

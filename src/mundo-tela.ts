@@ -205,7 +205,7 @@ export async function iniciarMundo(raiz: HTMLElement): Promise<void> {
       const acoes = document.createElement('div');
       acoes.className = 'acoes-slot';
       acoes.append(jogar, excluir);
-      cartao.append(resumo, painelPersonagem(p.classeId, p.previa ? { ...p.previa, nivel: p.nivel } : undefined));
+      cartao.append(resumo, painelPersonagem(p.classeId, p.previa ? { ...p.previa, nivel: p.nivel } : undefined, { escolherSkin: true }));
       if (!p.previa?.atributos) {
         cartao.append(paragrafo('A ficha completa deste personagem ainda não está disponível no servidor.'));
       }
@@ -244,7 +244,7 @@ function formularioDeCriacao(slot: number, criar: (classeId: string, nome: strin
   enviar.className = 'botao-menu';
   enviar.textContent = t('mundo.comecar');
   const previa = document.createElement('div');
-  const atualizarPrevia = () => { previa.replaceChildren(painelPersonagem(classe.value)); };
+  const atualizarPrevia = () => { previa.replaceChildren(painelPersonagem(classe.value, undefined, { escolherSkin: true })); };
   classe.addEventListener('change', atualizarPrevia);
   atualizarPrevia();
   form.append(previa, rotuloNome, nome, rotuloClasse, classe, enviar);

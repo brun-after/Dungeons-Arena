@@ -1,4 +1,5 @@
 import { tintaDaInvocacao } from './cores-necromancia';
+import { pintarInvocacao } from './tom-dos-mortos';
 import { alfaDoCorpo, sumidoPara } from './movimento-visual';
 import { desenharPorteDoNivel, escalaDoNivel, tintaDoNivel } from './porte-nivel';
 import { ehDragao, porteDoDragao } from '../world/porte-dragoes';
@@ -411,11 +412,8 @@ export class CamadaEntidades {
       });
       this.acompanhar(m, ajuste?.acompanhante ?? null, pt, proj, iso, agoraMs);
       atualizarTochaPortada(m.raiz, !e.morto && temLuzPropria(e), { x: dtx / norma, y: dty / norma }, m.topo, agoraMs, reduzido); // Marco 43 (D-177)
-      const tintaInvocada = tintaDaInvocacao(e, estado, ctx.conteudo.presets.get(e.preset)?.tinta);
-      if (m.figura3d) m.figura3d.raiz.tint = tintaInvocada ?? 0xffffff;
-      if (m.vivo) m.vivo.tint = tintaInvocada ?? 0xffffff;
-      if (m.rig && tintaInvocada !== null) m.rig.raiz.tint = tintaInvocada;
-      m.silhueta.tint = tintaInvocada ?? 0xffffff;
+      // 15/11/2026 (D-179): os mortos do Necromante jogador ficam todos no mesmo vermelho (render/tom-dos-mortos.ts).
+      pintarInvocacao([m.figura3d?.raiz, m.vivo, m.silhueta], m.rig?.raiz, tintaDaInvocacao(e, estado, ctx.conteudo.presets.get(e.preset)?.tinta));
       this.desenharChao(m, iso);
 
       const indicador = textoIndicador(e, estado.tick);
