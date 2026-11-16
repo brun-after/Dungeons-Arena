@@ -1,0 +1,24 @@
+{
+  "versao": 1,
+  "_doc": "Marco 45 (16/11/2026, D-181): as nove dimensões que invadem Filo pelas fendas. `sotaque` é o elemento que aparece só no visual (cor, material e som); o poder das criaturas não o segue. `fenda` é a cor da rachadura em que as criaturas nascem e o jeito dela na tela. `regioes` diz onde as fendas da dimensão pesam mais no sorteio.",
+  "dimensoes": [
+    { "id": "ignarea", "nome": "Ignárea", "epiteto": "a Fornalha", "sotaque": "fogo", "cor": "#ff7a2f", "fenda": { "cor": "#ffb347", "borda": "#5a1a05", "jeito": "vidro" },
+      "regioes": ["ruinas_do_norte", "dunas_do_poente", "mar_de_areia", "garganta_do_sol", "eclipse_obsidiana", "eclipse_cinza", "eclipse_trono"] },
+    { "id": "hiemalia", "nome": "Hiemália", "epiteto": "o Silêncio", "sotaque": "gelo", "cor": "#9fd8ff", "fenda": { "cor": "#d9f2ff", "borda": "#1d3a52", "jeito": "espinhos" },
+      "regioes": ["pico_gelado", "eclipse_crepusculo", "eclipse_geleiras", "eclipse_tempestade"] },
+    { "id": "fulguria", "nome": "Fulgúria", "epiteto": "a Engrenada", "sotaque": "raio", "cor": "#ffd84a", "fenda": { "cor": "#fff3a0", "borda": "#3c2f08", "jeito": "pulsos" },
+      "regioes": ["campos_do_oeste", "colinas_do_sudeste", "eclipse_baluarte", "eclipse_trovao"] },
+    { "id": "putrevia", "nome": "Putrévia", "epiteto": "a Fermentada", "sotaque": "veneno", "cor": "#7fcf4f", "fenda": { "cor": "#b7f27a", "borda": "#1f3a10", "jeito": "bolhas" },
+      "regioes": ["pantano_sombrio", "bosque_do_sul", "eclipse_almas", "eclipse_exilados"] },
+    { "id": "umbralia", "nome": "Umbrália", "epiteto": "a Fome", "sotaque": "trevas", "cor": "#6b4fa0", "fenda": { "cor": "#2a1840", "borda": "#000000", "jeito": "breu" },
+      "regioes": ["ruinas_do_norte", "eclipse_mortos", "eclipse_almas", "floresta_antiga"] },
+    { "id": "oniria", "nome": "Oníria", "epiteto": "o Sonho", "sotaque": "psiquico", "cor": "#d79bff", "fenda": { "cor": "#f1dcff", "borda": "#3a2250", "jeito": "espelho" },
+      "regioes": ["floresta_antiga", "eclipse_exilados", "eclipse_crepusculo", "pantano_sombrio"] },
+    { "id": "litia", "nome": "Lítia", "epiteto": "a Pedra que Pensa", "sotaque": "terra", "cor": "#a98f6a", "fenda": { "cor": "#c79bff", "borda": "#3a2e1f", "jeito": "geodo" },
+      "regioes": ["encosta_do_leste", "colinas_do_sudeste", "eclipse_escamas", "dunas_do_poente"] },
+    { "id": "halonia", "nome": "Halônia", "epiteto": "a Ordem", "sotaque": "sagrado", "cor": "#ffe27a", "fenda": { "cor": "#fffbe6", "borda": "#8a6a12", "jeito": "coro" },
+      "regioes": ["garganta_do_sol", "vila_do_centro", "eclipse_trono", "eclipse_baluarte"] },
+    { "id": "zefiria", "nome": "Zefíria", "epiteto": "o Arquipélago", "sotaque": "vento", "cor": "#bfe8ff", "fenda": { "cor": "#eef9ff", "borda": "#47606e", "jeito": "sopro" },
+      "regioes": ["campos_do_oeste", "dunas_do_poente", "eclipse_tempestade", "encosta_do_leste"] }
+  ]
+}

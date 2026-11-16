@@ -5,6 +5,7 @@ import type { MemoriaTatica } from '../combat/estado-tatico';
 
 import type { Celula, Dir8, EntidadeId } from '../core/comandos';
 import { clonarRng, type EstadoRng } from '../core/rng';
+import { clonarCriatura, type EstadoCriatura } from './criaturas/tipos';
 import type { EfeitoCanonico, TipoEfeito } from '../combat/registro-efeitos';
 import type { Afinidade } from '../combat/afinidade';
 import type { Elemento } from '../combat/elementos';
@@ -483,6 +484,8 @@ export interface Entidade {
   /** Marco 18: a última habilidade que usou (combos e a Lâmina rúnica). */
   tatica?: MemoriaTatica;
   ultimaHabilidade: { id: string; chave: string; tick: number; alvoId: EntidadeId | null } | null;
+  /** Marco 45 (D-181): o estado dos traços da criatura de Filo (entities/criaturas). */
+  criatura?: EstadoCriatura;
   /**
    * Marco 40 (13/11/2026, D-163): a última skill (sem o básico) para os combos de papel: o papel dela, o alvo, quantos
    * inimigos atingiu e se abateu.
@@ -764,6 +767,7 @@ export function clonarEntidade(e: Entidade): Entidade {
     ...(e.habilidadeAnterior ? { habilidadeAnterior: { ...e.habilidadeAnterior } } : {}),
     ...(e.seguindo ? { seguindo: { ...e.seguindo } } : {}),
     ...(e.armas ? { armas: { ...e.armas } } : {}),
+    ...(e.criatura ? { criatura: clonarCriatura(e.criatura) } : {}),
     waypoints: copiarCelulas(e.waypoints),
     caminho: copiarCelulas(e.caminho),
     atributos: { ...e.atributos },

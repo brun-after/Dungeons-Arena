@@ -9,11 +9,21 @@ import { ticksDe } from '../core/tempo';
 import type { EventoSimulacao } from '../core/eventos-simulacao';
 import { nomeComAfinidade } from '../combat/afinidade';
 import { criarInimigo, type OpcoesInimigo } from '../entities/fabrica';
+import { presetNoNivel } from '../entities/criaturas/dimensoes';
 import type { PresetInimigo } from '../entities/presets';
 import { passavel, type Fase, type InimigoPosicionado } from './fase';
 import { largarItem, largarObjeto, largarOrbeEfeito, novoObjeto } from './objetos';
 import { temaDaFase } from '../combat/clima';
 import { decoracoesDaFase } from './decoracao';
+
+/**
+ * Marco 45 (16/11/2026, D-181): a fenda só traz quem cabe no nível (acima do pico, outra criatura da mesma dimensão).
+ * A escolha sai da célula, sem gastar o PRNG da fase (a mesma semente dá a mesma fase).
+ */
+export function presetNaFenda(ctx: ContextoSimulacao, id: string, nivel: number, x: number, y: number): PresetInimigo | undefined {
+  const sorte = (Math.abs(Math.imul(x + 1, 73856093) ^ Math.imul(y + 1, 19349663)) % 1000) / 1000;
+  return ctx.conteudo.presets.get(presetNoNivel(ctx.conteudo.presets, id, nivel, [], sorte));
+}
 
 export function idDoInimigo(indice: number): string {
   return `i${String(indice).padStart(3, '0')}`;
@@ -97,7 +107,8 @@ export function povoarQuebraveis(estado: EstadoJogo, ctx: ContextoSimulacao): vo
 export function povoarFase(estado: EstadoJogo, ctx: ContextoSimulacao, saida: EventoSimulacao[] = []): void {
   if (ctx.modo.inimigosDeIA === 'da_fase') {
     ctx.fase.inimigos.forEach((pos, indice) => {
-      const preset = ctx.conteudo.presets.get(pos.preset);
+      // Sem nível posto (a campanha), o preset fica como está.
+      const preset = pos.nivel === undefined ? ctx.conteudo.presets.get(pos.preset) : presetNaFenda(ctx, pos.preset, pos.nivel, pos.x, pos.y);
       if (!preset) return;
       if (ctx.fase.eventos.includes('enxame') && indice >= ctx.balance.ambiente.enxameInicio && preset.arquetipo !== 'boss') {
         (estado.reservaEnxame ??= []).push(indice);

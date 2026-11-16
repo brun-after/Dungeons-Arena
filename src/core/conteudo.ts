@@ -36,6 +36,8 @@ import sintoniaJson from '../data/sintonia.json';
 import sinergiasJson from '../data/sinergias.json';
 import temasJson from '../data/temas.json';
 import afinidadesJson from '../data/afinidades.json';
+import dimensoesJson from '../data/dimensoes.json';
+import { conferirDimensoes, lerDimensoes, type Dimensao } from '../entities/criaturas/dimensoes';
 import armasJson from '../data/armas.json';
 import reinoCentralJson from '../data/mundo/reino-central.json';
 import reinoEclipseJson from '../data/mundo/reino-eclipse.json';
@@ -131,6 +133,8 @@ export interface Conteudo {
   legadoDeSkills: ReadonlyMap<string, string>;
   /** Marco 40 (D-159): as skills de classe que saíram do kit (saem do personagem sem devolver ponto). */
   skillsQueSairam: ReadonlySet<string>;
+  /** Marco 45 (D-181): as nove dimensões que invadem Filo (data/dimensoes.json). */
+  dimensoes: Catalogo<Dimensao>;
 }
 
 export interface FontesDeConteudo {
@@ -167,6 +171,8 @@ export interface FontesDeConteudo {
   armas: unknown;
   /** Arquivo -> JSON de cada modo em src/data/modos. */
   modos: Readonly<Record<string, unknown>>;
+  /** Marco 45: data/dimensoes.json (opcional nos testes). */
+  dimensoes?: unknown;
   /** Marco 29: arquivo -> JSON de cada reino em src/data/mundo (opcional nos testes). */
   reinos?: Readonly<Record<string, unknown>>;
 }
@@ -207,7 +213,8 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
   const tm = lerTemas(fontes.temas, new Set([...p.presets.values()].filter((x) => x.invocacao === null).map((x) => x.id)));
   const af = lerAfinidades(fontes.afinidades);
   const ar = lerArmas(fontes.armas);
-  const erros = [...nu.erros, ...ul.erros, ...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...es.erros, ...pa.erros, ...cb.erros, ...cp.erros, ...ca.erros, ...mv.erros, ...rs.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
+  const dm = lerDimensoes(fontes.dimensoes ?? dimensoesJson);
+  const erros = [...dm.erros, ...conferirDimensoes(dm.dimensoes, p.presets), ...nu.erros, ...ul.erros, ...tm.erros, ...af.erros, ...ar.erros, ...h.erros, ...p.erros, ...c.erros, ...it.erros, ...ib.erros, ...el.erros, ...ia.erros, ...cm.erros, ...fo.erros, ...cj.erros, ...es.erros, ...pa.erros, ...cb.erros, ...cp.erros, ...ca.erros, ...mv.erros, ...rs.erros, ...rb.erros, ...mi.erros, ...og.erros, ...fj.erros];
   for (const conj of cj.conjuntos.values()) {
     for (const peca of conj.pecas) if (!fo.dados.bases.has(peca)) erros.push(`conjunto ${conj.id}: base desconhecida "${peca}"`);
   }
@@ -339,6 +346,7 @@ export function lerConteudo(fontes: FontesDeConteudo): { conteudo: Conteudo; err
       reinos,
       legadoDeSkills: nu.legado,
       skillsQueSairam: new Set([...c.classes.values()].flatMap((k) => k.saidas)),
+      dimensoes: dm.dimensoes,
     },
     erros,
   };

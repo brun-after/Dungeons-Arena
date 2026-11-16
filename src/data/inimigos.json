@@ -1,144 +1,335 @@
 {
-  "versao": 2,
+  "versao": 3,
   "presets": [
     {
       "id": "goblin",
-      "nome": "Goblin",
+      "nome": "Fagulheiro",
       "hpBase": 40,
       "hesitacaoS": 5,
       "deteccao": 3,
       "xp": 10,
-      "modelo": "goblin",
+      "modelo": "fagulheiro",
       "arquetipo": "perseguidor",
       "classe": "corpo_a_corpo",
       "defesa": 0,
       "ataqueBasico": "golpe",
       "habilidades": [],
       "intervaloAtaqueMs": 2200,
-      "habilidadesPorNivel": [{ "aPartirDoNivel": 15, "id": "corte_dilacerante" }, { "aPartirDoNivel": 35, "id": "golpe_atordoante" }]
+      "habilidadesPorNivel": [
+        {
+          "aPartirDoNivel": 15,
+          "id": "corte_dilacerante"
+        },
+        {
+          "aPartirDoNivel": 35,
+          "id": "golpe_atordoante"
+        }
+      ],
+      "dimensao": "ignarea",
+      "nivelMin": 1,
+      "nivelPico": 45,
+      "tracos": [
+        {
+          "tipo": "bando",
+          "raio": 3,
+          "porAliadoPct": 5,
+          "maxPct": 25
+        }
+      ],
+      "naFenda": {
+        "brasas": {
+          "golpe": [
+            {
+              "tipo": "queimando",
+              "valor": 3,
+              "duracaoMs": 3000
+            }
+          ]
+        }
+      }
     },
     {
       "id": "esqueleto",
-      "nome": "Esqueleto",
+      "nome": "Arqueiro de Osso",
       "hpBase": 45,
       "hesitacaoS": 6,
       "deteccao": 3,
       "xp": 10,
-      "modelo": "esqueleto",
+      "modelo": "arqueiro_de_osso",
       "arquetipo": "atirador",
       "classe": "corpo_a_corpo",
       "defesa": 1,
       "ataqueBasico": "flecha",
       "habilidades": [],
       "intervaloAtaqueMs": 2600,
-      "habilidadesPorNivel": [{ "aPartirDoNivel": 15, "id": "flecha_perfurante" }, { "aPartirDoNivel": 35, "id": "chuva_de_flechas" }],
+      "habilidadesPorNivel": [
+        {
+          "aPartirDoNivel": 15,
+          "id": "flecha_perfurante"
+        },
+        {
+          "aPartirDoNivel": 35,
+          "id": "chuva_de_flechas"
+        }
+      ],
       "resistencias": {
         "veneno": 100,
         "gelo": 25
       },
       "imunidades": [
         "envenenado"
-      ]
+      ],
+      "dimensao": "umbralia",
+      "nivelMin": 8,
+      "tracos": [
+        {
+          "tipo": "remontar",
+          "ms": 4000,
+          "vidaPct": 40
+        }
+      ],
+      "naFenda": {
+        "luz_sagrada": {
+          "marcas": [
+            "semRemontar"
+          ]
+        }
+      }
     },
     {
       "id": "orc",
-      "nome": "Orc",
+      "nome": "Quebra-gelo",
       "hpBase": 60,
       "hesitacaoS": 4,
       "deteccao": 4,
       "xp": 10,
-      "modelo": "orc",
+      "modelo": "quebra_gelo",
       "arquetipo": "perseguidor",
       "classe": "corpo_a_corpo",
       "defesa": 2,
       "ataqueBasico": "golpe_pesado",
       "habilidades": [],
       "intervaloAtaqueMs": 2600,
-      "habilidadesPorNivel": [{ "aPartirDoNivel": 15, "id": "golpe_atordoante" }, { "aPartirDoNivel": 35, "id": "investida" }]
+      "habilidadesPorNivel": [
+        {
+          "aPartirDoNivel": 15,
+          "id": "golpe_atordoante"
+        },
+        {
+          "aPartirDoNivel": 35,
+          "id": "investida"
+        }
+      ],
+      "dimensao": "hiemalia",
+      "nivelMin": 5,
+      "nivelPico": 50,
+      "tracos": [
+        {
+          "tipo": "placas",
+          "qtd": 4,
+          "reducaoPct": 10,
+          "golpeMinPct": 8,
+          "furia": [
+            {
+              "tipo": "acelerado",
+              "pct": 30,
+              "duracaoMs": 600000
+            },
+            {
+              "tipo": "bonus_dano",
+              "pct": 20,
+              "duracaoMs": 600000
+            }
+          ]
+        }
+      ],
+      "naFenda": {
+        "gelo_fino": {
+          "marcas": [
+            "recompoe"
+          ]
+        }
+      },
+      "resistencias": {
+        "gelo": 25,
+        "fogo": -25
+      }
     },
     {
       "id": "troll",
-      "nome": "Troll",
+      "nome": "Colosso de Geodo",
       "hpBase": 70,
       "hesitacaoS": 7,
       "deteccao": 4,
       "xp": 10,
-      "modelo": "troll",
+      "modelo": "colosso_de_geodo",
       "arquetipo": "perseguidor",
       "classe": "corpo_a_corpo",
       "defesa": 2,
       "ataqueBasico": "golpe",
       "habilidades": [],
       "intervaloAtaqueMs": 3800,
-      "habilidadesPorNivel": [{ "aPartirDoNivel": 15, "id": "golpe_atordoante" }, { "aPartirDoNivel": 35, "id": "estaca_de_pedra" }],
+      "habilidadesPorNivel": [
+        {
+          "aPartirDoNivel": 15,
+          "id": "golpe_atordoante"
+        },
+        {
+          "aPartirDoNivel": 35,
+          "id": "estaca_de_pedra"
+        }
+      ],
       "resistencias": {
         "veneno": 25,
         "fogo": -25
+      },
+      "dimensao": "litia",
+      "nivelMin": 10,
+      "tracos": [
+        {
+          "tipo": "costas",
+          "multPct": 100
+        },
+        {
+          "tipo": "regenParado",
+          "pctPorS": 2
+        }
+      ],
+      "naFenda": {
+        "lama": {
+          "velocidadePct": -40
+        }
       }
     },
     {
       "id": "vampiro",
-      "nome": "Vampiro",
+      "nome": "Bebedor",
       "hpBase": 55,
       "hesitacaoS": 3,
       "deteccao": 5,
       "xp": 10,
-      "modelo": "vampiro",
+      "modelo": "bebedor",
       "arquetipo": "atirador",
       "classe": "conjurador",
       "defesa": 1,
-      "ataqueBasico": "raio_vampirico",
+      "ataqueBasico": "sorver_seiva",
       "habilidades": [],
       "intervaloAtaqueMs": 2300,
-      "habilidadesPorNivel": [{ "aPartirDoNivel": 15, "id": "dardo_funesto" }, { "aPartirDoNivel": 35, "id": "mente_partida" }],
+      "habilidadesPorNivel": [
+        {
+          "aPartirDoNivel": 15,
+          "id": "dardo_funesto"
+        },
+        {
+          "aPartirDoNivel": 35,
+          "id": "mente_partida"
+        }
+      ],
       "resistencias": {
         "psiquico": 50,
         "fogo": -25
+      },
+      "dimensao": "putrevia",
+      "nivelMin": 15,
+      "tracos": [
+        {
+          "tipo": "bebe",
+          "curaPct": 40
+        }
+      ],
+      "naFenda": {
+        "miasma": {
+          "marcas": [
+            "dobra"
+          ]
+        }
       }
     },
     {
       "id": "cultista",
-      "nome": "Cultista",
+      "nome": "Pregador",
       "hpBase": 50,
       "hesitacaoS": 5,
       "deteccao": 3,
       "xp": 10,
-      "modelo": "cultista",
+      "modelo": "pregador",
       "arquetipo": "controlador",
       "classe": "conjurador",
       "defesa": 0,
       "ataqueBasico": "marca_de_area",
-      "habilidades": [],
+      "habilidades": [
+        "pregacao"
+      ],
       "intervaloAtaqueMs": 3400,
-      "habilidadesPorNivel": [{ "aPartirDoNivel": 15, "id": "bola_de_fogo" }, { "aPartirDoNivel": 35, "id": "cadeia_sombria" }],
+      "habilidadesPorNivel": [
+        {
+          "aPartirDoNivel": 15,
+          "id": "bola_de_fogo"
+        },
+        {
+          "aPartirDoNivel": 35,
+          "id": "cadeia_sombria"
+        }
+      ],
       "resistencias": {
-        "psiquico": 50
+        "psiquico": 50,
+        "sagrado": 50
+      },
+      "dimensao": "halonia",
+      "nivelMin": 10,
+      "naFenda": {
+        "luz_sagrada": {
+          "danoPct": 100,
+          "marcas": [
+            "pregaDobro"
+          ]
+        }
       }
     },
     {
       "id": "lobo",
-      "nome": "Lobo",
+      "nome": "Galgo do Vendaval",
       "hpBase": 35,
       "hesitacaoS": 4,
       "deteccao": 5,
       "xp": 8,
-      "modelo": "lobo",
+      "modelo": "galgo_do_vendaval",
       "arquetipo": "perseguidor",
       "classe": "corpo_a_corpo",
       "defesa": 0,
       "ataqueBasico": "golpe",
       "habilidades": [],
       "intervaloAtaqueMs": 1800,
-      "habilidadesPorNivel": [{ "aPartirDoNivel": 15, "id": "corte_dilacerante" }, { "aPartirDoNivel": 35, "id": "investida" }]
+      "habilidadesPorNivel": [
+        {
+          "aPartirDoNivel": 15,
+          "id": "corte_dilacerante"
+        },
+        {
+          "aPartirDoNivel": 35,
+          "id": "investida"
+        }
+      ],
+      "dimensao": "zefiria",
+      "nivelMin": 2,
+      "nivelPico": 55,
+      "comportamento": "circular",
+      "naFenda": {
+        "agua": {
+          "marcas": [
+            "tromba"
+          ]
+        }
+      }
     },
     {
       "id": "aranha",
-      "nome": "Aranha",
+      "nome": "Tecelã do Vazio",
       "hpBase": 30,
       "hesitacaoS": 6,
       "deteccao": 3,
       "xp": 6,
-      "modelo": "aranha",
+      "modelo": "tecela_do_vazio",
       "arquetipo": "atirador",
       "classe": "conjurador",
       "defesa": 0,
@@ -147,49 +338,96 @@
         "armar_teia"
       ],
       "intervaloAtaqueMs": 2600,
-      "habilidadesPorNivel": [{ "aPartirDoNivel": 20, "id": "dardo_toxico" }]
+      "habilidadesPorNivel": [
+        {
+          "aPartirDoNivel": 20,
+          "id": "dardo_toxico"
+        }
+      ],
+      "dimensao": "umbralia",
+      "nivelMin": 1,
+      "nivelPico": 50,
+      "naFenda": {
+        "nevoa_sombria": {
+          "marcas": [
+            "teiasDobro"
+          ]
+        }
+      }
     },
     {
       "id": "slime",
-      "nome": "Slime",
+      "nome": "Gosminho",
       "hpBase": 25,
       "hesitacaoS": 8,
       "deteccao": 2,
       "xp": 5,
-      "modelo": "slime",
+      "modelo": "gosminho",
       "arquetipo": "perseguidor",
       "classe": "corpo_a_corpo",
       "defesa": 0,
       "ataqueBasico": "golpe_viscoso",
       "habilidades": [],
       "intervaloAtaqueMs": 3200,
-      "habilidadesPorNivel": [{ "aPartirDoNivel": 20, "id": "nevoa_venenosa" }],
+      "habilidadesPorNivel": [
+        {
+          "aPartirDoNivel": 20,
+          "id": "nevoa_venenosa"
+        }
+      ],
       "resistencias": {
         "fogo": -50,
         "gelo": 50
+      },
+      "dimensao": "putrevia",
+      "nivelMin": 1,
+      "nivelPico": 30,
+      "tracos": [
+        {
+          "tipo": "dividir",
+          "hpPct": 50,
+          "partes": 2,
+          "vidaPct": 40
+        }
+      ],
+      "naFenda": {
+        "miasma": {
+          "curaPctPorS": 4,
+          "marcas": [
+            "juntar"
+          ]
+        },
+        "lama": {
+          "curaPctPorS": 4,
+          "marcas": [
+            "juntar"
+          ]
+        }
       }
     },
     {
       "id": "boss",
-      "nome": "Demônio",
+      "nome": "Arauto Caído",
       "hpBase": 350,
       "hesitacaoS": 1,
       "deteccao": 6,
       "xp": 50,
-      "modelo": "demonio",
+      "modelo": "arauto_caido",
       "arquetipo": "boss",
       "classe": "corpo_a_corpo",
       "defesa": 3,
       "ataqueBasico": "golpe_demoniaco",
       "habilidades": [
         "marca_de_area",
-        "invocar_lacaios"
+        "chamar_fieis"
       ],
       "intervaloAtaqueMs": 3400,
       "resistencias": {
         "fogo": 50,
         "psiquico": -25
-      }
+      },
+      "dimensao": "halonia",
+      "nivelMin": 1
     },
     {
       "id": "boneco",
@@ -221,7 +459,9 @@
       "habilidades": [],
       "intervaloAtaqueMs": 5000,
       "soMundo": true,
-      "invocacao": { "comportamento": "escoltado" }
+      "invocacao": {
+        "comportamento": "escoltado"
+      }
     },
     {
       "id": "lobo_espiritual",
@@ -508,8 +748,48 @@
         "comportamento": "agressivo"
       }
     },
-    {"id": "coruja_ancia", "nome": "Coruja anciã", "hpBase": 25, "hesitacaoS": 0, "deteccao": 5, "xp": 0, "modelo": "falcao", "tinta": "#d8c8a0", "arquetipo": "controlador", "classe": "corpo_a_corpo", "defesa": 0, "ataqueBasico": "golpe", "habilidades": [], "intervaloAtaqueMs": 1600, "invocacao": {"comportamento": "curador", "cura": {"valor": 8, "recargaMs": 4000}}},
-    {"id": "javali_espiritual", "nome": "Javali espiritual", "hpBase": 70, "hesitacaoS": 0, "deteccao": 5, "xp": 0, "modelo": "urso_companheiro", "tinta": "#9ad0c0", "arquetipo": "perseguidor", "classe": "corpo_a_corpo", "defesa": 3, "ataqueBasico": "golpe", "habilidades": [], "intervaloAtaqueMs": 1800, "invocacao": {"comportamento": "protetor"}},
+    {
+      "id": "coruja_ancia",
+      "nome": "Coruja anciã",
+      "hpBase": 25,
+      "hesitacaoS": 0,
+      "deteccao": 5,
+      "xp": 0,
+      "modelo": "falcao",
+      "tinta": "#d8c8a0",
+      "arquetipo": "controlador",
+      "classe": "corpo_a_corpo",
+      "defesa": 0,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 1600,
+      "invocacao": {
+        "comportamento": "curador",
+        "cura": {
+          "valor": 8,
+          "recargaMs": 4000
+        }
+      }
+    },
+    {
+      "id": "javali_espiritual",
+      "nome": "Javali espiritual",
+      "hpBase": 70,
+      "hesitacaoS": 0,
+      "deteccao": 5,
+      "xp": 0,
+      "modelo": "urso_companheiro",
+      "tinta": "#9ad0c0",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 3,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 1800,
+      "invocacao": {
+        "comportamento": "protetor"
+      }
+    },
     {
       "id": "copia_ilusoria",
       "nome": "Cópia ilusória",
@@ -548,12 +828,12 @@
     },
     {
       "id": "rei_goblin",
-      "nome": "Rei Goblin",
+      "nome": "Rei das Fagulhas",
       "hpBase": 2200,
       "hesitacaoS": 1,
       "deteccao": 7,
       "xp": 180,
-      "modelo": "goblin",
+      "modelo": "rei_das_fagulhas",
       "arquetipo": "boss",
       "classe": "corpo_a_corpo",
       "defesa": 4,
@@ -565,16 +845,25 @@
       "intervaloAtaqueMs": 2600,
       "resistencias": {
         "veneno": 25
+      },
+      "dimensao": "ignarea",
+      "nivelMin": 10,
+      "chefe": {
+        "mecanica": "bandoArmadura",
+        "numeros": {
+          "reducaoPct": 50,
+          "raio": 8
+        }
       }
     },
     {
       "id": "bruxa_do_pantano",
-      "nome": "Bruxa do Pântano",
+      "nome": "Bruxa dos Sonhos",
       "hpBase": 3750,
       "hesitacaoS": 1,
       "deteccao": 8,
       "xp": 320,
-      "modelo": "cultista",
+      "modelo": "bruxa_dos_sonhos",
       "arquetipo": "boss",
       "classe": "conjurador",
       "defesa": 2,
@@ -588,6 +877,17 @@
         "veneno": 75,
         "psiquico": 50,
         "fogo": -25
+      },
+      "dimensao": "oniria",
+      "nivelMin": 15,
+      "chefe": {
+        "mecanica": "sonho",
+        "numeros": {
+          "aCadaMs": 18000,
+          "ms": 8000,
+          "distancia": 9
+        },
+        "ref": "reflexo_do_sonho"
       }
     },
     {
@@ -597,29 +897,41 @@
       "hesitacaoS": 0.8,
       "deteccao": 9,
       "xp": 900,
-      "modelo": "dragao_fogo",
+      "modelo": "dragao_das_ruinas",
       "arquetipo": "boss",
       "classe": "corpo_a_corpo",
       "defesa": 7,
       "ataqueBasico": "golpe_demoniaco",
       "habilidades": [
         "marca_de_area",
-        "invocar_lacaios"
+        "chamar_pedras"
       ],
       "intervaloAtaqueMs": 2800,
       "resistencias": {
         "fogo": 75,
         "gelo": -25
+      },
+      "dimensao": "litia",
+      "nivelMin": 25,
+      "chefe": {
+        "mecanica": "colunas",
+        "numeros": {
+          "aCadaMs": 12000,
+          "desabaMs": 6000,
+          "raio": 2,
+          "qtd": 2
+        },
+        "ref": "coluna_antiga"
       }
     },
     {
       "id": "dragao_fogo",
-      "nome": "Dragão de Fogo",
+      "nome": "Dragão da Fornalha",
       "hpBase": 3600,
       "hesitacaoS": 0.8,
       "deteccao": 9,
       "xp": 900,
-      "modelo": "dragao_fogo",
+      "modelo": "dragao_da_fornalha",
       "arquetipo": "boss",
       "classe": "corpo_a_corpo",
       "defesa": 7,
@@ -632,16 +944,27 @@
       "resistencias": {
         "fogo": 75,
         "gelo": -25
+      },
+      "dimensao": "ignarea",
+      "nivelMin": 15,
+      "chefe": {
+        "mecanica": "fornalhaFases",
+        "numeros": {
+          "passoPct": 25,
+          "campos": 4,
+          "raio": 2,
+          "ms": 25000
+        }
       }
     },
     {
       "id": "dragao_gelo",
-      "nome": "Dragão de Gelo",
+      "nome": "Dragão do Silêncio",
       "hpBase": 3600,
       "hesitacaoS": 0.8,
       "deteccao": 9,
       "xp": 900,
-      "modelo": "dragao_gelo",
+      "modelo": "dragao_do_silencio",
       "arquetipo": "boss",
       "classe": "corpo_a_corpo",
       "defesa": 7,
@@ -654,16 +977,27 @@
       "resistencias": {
         "gelo": 75,
         "fogo": -25
+      },
+      "dimensao": "hiemalia",
+      "nivelMin": 15,
+      "chefe": {
+        "mecanica": "zonasSilencio",
+        "numeros": {
+          "aCadaMs": 9000,
+          "raio": 2,
+          "ms": 6000,
+          "zonas": 2
+        }
       }
     },
     {
       "id": "dragao_raio",
-      "nome": "Dragão de Raio",
+      "nome": "Dragão da Tempestade Engrenada",
       "hpBase": 3600,
       "hesitacaoS": 0.8,
       "deteccao": 9,
       "xp": 900,
-      "modelo": "dragao_raio",
+      "modelo": "dragao_engrenado",
       "arquetipo": "boss",
       "classe": "corpo_a_corpo",
       "defesa": 7,
@@ -676,16 +1010,28 @@
       "resistencias": {
         "raio": 75,
         "terra": -25
+      },
+      "dimensao": "fulguria",
+      "nivelMin": 15,
+      "chefe": {
+        "mecanica": "torresDeRecarga",
+        "numeros": {
+          "qtd": 3,
+          "raio": 6,
+          "expostoMs": 8000,
+          "reducaoPct": 60
+        },
+        "ref": "torre_engrenada"
       }
     },
     {
       "id": "dragao_veneno",
-      "nome": "Dragão de Veneno",
+      "nome": "Dragão Fermentado",
       "hpBase": 3600,
       "hesitacaoS": 0.8,
       "deteccao": 9,
       "xp": 900,
-      "modelo": "dragao_veneno",
+      "modelo": "dragao_fermentado",
       "arquetipo": "boss",
       "classe": "corpo_a_corpo",
       "defesa": 7,
@@ -698,6 +1044,18 @@
       "resistencias": {
         "veneno": 75,
         "fogo": -25
+      },
+      "dimensao": "putrevia",
+      "nivelMin": 15,
+      "chefe": {
+        "mecanica": "nevoaCrescente",
+        "numeros": {
+          "aCadaMs": 8000,
+          "raio": 2,
+          "qtd": 3,
+          "limpaRaio": 4
+        },
+        "ref": "cogumelo_pulmao"
       }
     },
     {
@@ -707,7 +1065,7 @@
       "hesitacaoS": 0.8,
       "deteccao": 9,
       "xp": 900,
-      "modelo": "necromante",
+      "modelo": "necromante_ancestral",
       "arquetipo": "boss",
       "classe": "conjurador",
       "defesa": 7,
@@ -720,6 +1078,15 @@
       "resistencias": {
         "trevas": 75,
         "sagrado": -25
+      },
+      "dimensao": "umbralia",
+      "nivelMin": 20,
+      "chefe": {
+        "mecanica": "roubarSombra",
+        "numeros": {
+          "aCadaMs": 15000
+        },
+        "ref": "sombra_roubada"
       }
     },
     {
@@ -747,12 +1114,1721 @@
         "comportamento": "agressivo"
       }
     },
-    {"id": "cavaleiro_profano", "nome": "Cavaleiro profano", "hpBase": 60, "hesitacaoS": 0.3, "deteccao": 12, "xp": 0, "modelo": "orc", "arquetipo": "perseguidor", "classe": "corpo_a_corpo", "defesa": 2, "ataqueBasico": "golpe_pesado", "habilidades": ["golpe_atordoante"], "intervaloAtaqueMs": 3000, "invocacao": {"comportamento": "agressivo"}},
-    {"id": "piromante_profano", "nome": "Piromante profano", "hpBase": 50, "hesitacaoS": 0.3, "deteccao": 12, "xp": 0, "modelo": "cultista", "arquetipo": "controlador", "classe": "conjurador", "defesa": 0, "ataqueBasico": "seta_arcana", "habilidades": ["bola_de_fogo", "marca_de_area"], "intervaloAtaqueMs": 4000, "resistencias": {"psiquico": 50}, "invocacao": {"comportamento": "agressivo"}},
-    {"id": "arcanista_glacial", "nome": "Arcanista glacial", "hpBase": 45, "hesitacaoS": 0.3, "deteccao": 12, "xp": 0, "modelo": "esqueleto", "arquetipo": "atirador", "classe": "corpo_a_corpo", "defesa": 1, "ataqueBasico": "flecha", "habilidades": ["lanca_de_gelo"], "intervaloAtaqueMs": 3000, "resistencias": {"veneno": 100, "gelo": 25}, "imunidades": ["envenenado"], "invocacao": {"comportamento": "agressivo"}},
-    {"id": "espectro_tempestade", "nome": "Espectro da tempestade", "hpBase": 55, "hesitacaoS": 0.3, "deteccao": 12, "xp": 0, "modelo": "vampiro", "arquetipo": "atirador", "classe": "conjurador", "defesa": 1, "ataqueBasico": "raio_vampirico", "habilidades": ["raio_em_cadeia"], "intervaloAtaqueMs": 2500, "resistencias": {"psiquico": 50, "fogo": -25}, "invocacao": {"comportamento": "agressivo"}},
-    {"id": "arremessador", "nome": "Arremessador", "hpBase": 42, "hesitacaoS": 5, "deteccao": 4, "xp": 10, "modelo": "troll", "arquetipo": "atirador", "classe": "atirador", "defesa": 1, "ataqueBasico": "pedra_arremessada", "habilidades": [], "intervaloAtaqueMs": 2800, "resistencias": {"terra": 25}, "soPorTema": true},
-    {"id": "duende_saltador", "nome": "Duende saltador", "hpBase": 30, "hesitacaoS": 2, "deteccao": 5, "xp": 11, "modelo": "goblin", "arquetipo": "perseguidor", "classe": "corpo_a_corpo", "defesa": 0, "ataqueBasico": "golpe", "habilidades": ["salto_do_duende"], "intervaloAtaqueMs": 2000, "comportamento": "saltador", "soPorTema": true},
-    {"id": "runista_medroso", "nome": "Runista medroso", "hpBase": 34, "hesitacaoS": 1, "deteccao": 6, "xp": 14, "modelo": "cultista", "arquetipo": "controlador", "classe": "conjurador", "defesa": 0, "ataqueBasico": "golpe", "habilidades": ["runa_do_medroso"], "intervaloAtaqueMs": 3000, "comportamento": "armadilheiro", "soMundo": true}
+    {
+      "id": "cavaleiro_profano",
+      "nome": "Cavaleiro profano",
+      "hpBase": 60,
+      "hesitacaoS": 0.3,
+      "deteccao": 12,
+      "xp": 0,
+      "modelo": "orc",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 2,
+      "ataqueBasico": "golpe_pesado",
+      "habilidades": [
+        "golpe_atordoante"
+      ],
+      "intervaloAtaqueMs": 3000,
+      "invocacao": {
+        "comportamento": "agressivo"
+      }
+    },
+    {
+      "id": "piromante_profano",
+      "nome": "Piromante profano",
+      "hpBase": 50,
+      "hesitacaoS": 0.3,
+      "deteccao": 12,
+      "xp": 0,
+      "modelo": "cultista",
+      "arquetipo": "controlador",
+      "classe": "conjurador",
+      "defesa": 0,
+      "ataqueBasico": "seta_arcana",
+      "habilidades": [
+        "bola_de_fogo",
+        "marca_de_area"
+      ],
+      "intervaloAtaqueMs": 4000,
+      "resistencias": {
+        "psiquico": 50
+      },
+      "invocacao": {
+        "comportamento": "agressivo"
+      }
+    },
+    {
+      "id": "arcanista_glacial",
+      "nome": "Arcanista glacial",
+      "hpBase": 45,
+      "hesitacaoS": 0.3,
+      "deteccao": 12,
+      "xp": 0,
+      "modelo": "esqueleto",
+      "arquetipo": "atirador",
+      "classe": "corpo_a_corpo",
+      "defesa": 1,
+      "ataqueBasico": "flecha",
+      "habilidades": [
+        "lanca_de_gelo"
+      ],
+      "intervaloAtaqueMs": 3000,
+      "resistencias": {
+        "veneno": 100,
+        "gelo": 25
+      },
+      "imunidades": [
+        "envenenado"
+      ],
+      "invocacao": {
+        "comportamento": "agressivo"
+      }
+    },
+    {
+      "id": "espectro_tempestade",
+      "nome": "Espectro da tempestade",
+      "hpBase": 55,
+      "hesitacaoS": 0.3,
+      "deteccao": 12,
+      "xp": 0,
+      "modelo": "vampiro",
+      "arquetipo": "atirador",
+      "classe": "conjurador",
+      "defesa": 1,
+      "ataqueBasico": "raio_vampirico",
+      "habilidades": [
+        "raio_em_cadeia"
+      ],
+      "intervaloAtaqueMs": 2500,
+      "resistencias": {
+        "psiquico": 50,
+        "fogo": -25
+      },
+      "invocacao": {
+        "comportamento": "agressivo"
+      }
+    },
+    {
+      "id": "arremessador",
+      "nome": "Fundeiro",
+      "hpBase": 42,
+      "hesitacaoS": 5,
+      "deteccao": 4,
+      "xp": 10,
+      "modelo": "fundeiro",
+      "arquetipo": "atirador",
+      "classe": "atirador",
+      "defesa": 1,
+      "ataqueBasico": "pedra_arremessada",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2800,
+      "resistencias": {
+        "terra": 25
+      },
+      "soPorTema": true,
+      "dimensao": "litia",
+      "nivelMin": 5,
+      "nivelPico": 50,
+      "tracos": [
+        {
+          "tipo": "pedras",
+          "ms": 6000
+        }
+      ],
+      "naFenda": {
+        "lama": {
+          "marcas": [
+            "afunda"
+          ]
+        }
+      }
+    },
+    {
+      "id": "duende_saltador",
+      "nome": "Saltafaísca",
+      "hpBase": 30,
+      "hesitacaoS": 2,
+      "deteccao": 5,
+      "xp": 11,
+      "modelo": "saltafaisca",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 0,
+      "ataqueBasico": "golpe",
+      "habilidades": [
+        "salto_do_duende"
+      ],
+      "intervaloAtaqueMs": 2000,
+      "comportamento": "saltador",
+      "soPorTema": true,
+      "dimensao": "fulguria",
+      "nivelMin": 5,
+      "nivelPico": 45,
+      "naFenda": {
+        "campo_eletrico": {
+          "marcas": [
+            "saltoDuplo"
+          ]
+        }
+      }
+    },
+    {
+      "id": "runista_medroso",
+      "nome": "Riscador",
+      "hpBase": 34,
+      "hesitacaoS": 1,
+      "deteccao": 6,
+      "xp": 14,
+      "modelo": "riscador",
+      "arquetipo": "controlador",
+      "classe": "conjurador",
+      "defesa": 0,
+      "ataqueBasico": "golpe",
+      "habilidades": [
+        "runa_do_medroso"
+      ],
+      "intervaloAtaqueMs": 3000,
+      "comportamento": "armadilheiro",
+      "soMundo": true,
+      "dimensao": "oniria",
+      "nivelMin": 4,
+      "nivelPico": 45,
+      "tracos": [
+        {
+          "tipo": "anel",
+          "runas": 6,
+          "raio": 4,
+          "prendeMs": 2000
+        }
+      ],
+      "naFenda": {
+        "agua": {
+          "marcas": [
+            "herdaElemento"
+          ]
+        },
+        "brasas": {
+          "marcas": [
+            "herdaElemento"
+          ]
+        },
+        "miasma": {
+          "marcas": [
+            "herdaElemento"
+          ]
+        },
+        "gelo_fino": {
+          "marcas": [
+            "herdaElemento"
+          ]
+        },
+        "campo_eletrico": {
+          "marcas": [
+            "herdaElemento"
+          ]
+        },
+        "lama": {
+          "marcas": [
+            "herdaElemento"
+          ]
+        },
+        "nevoa_sombria": {
+          "marcas": [
+            "herdaElemento"
+          ]
+        },
+        "luz_sagrada": {
+          "marcas": [
+            "herdaElemento"
+          ]
+        }
+      }
+    },
+    {
+      "id": "ticaozinho",
+      "nome": "Tiçãozinho",
+      "hpBase": 22,
+      "hesitacaoS": 6,
+      "deteccao": 4,
+      "xp": 6,
+      "modelo": "ticaozinho",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 0,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2600,
+      "resistencias": {
+        "fogo": 50,
+        "gelo": -50
+      },
+      "comportamento": "fujao",
+      "soPorTema": true,
+      "dimensao": "ignarea",
+      "nivelMin": 1,
+      "nivelPico": 30,
+      "tracos": [
+        {
+          "tipo": "aura",
+          "raio": 3,
+          "em": "aliados",
+          "aCadaMs": 1000,
+          "efeitos": [
+            {
+              "tipo": "ab_recarga",
+              "pct": 15,
+              "duracaoMs": 1500
+            }
+          ]
+        },
+        {
+          "tipo": "fugaFerida",
+          "hpPct": 50,
+          "imuneMs": 2000
+        }
+      ],
+      "naFenda": {
+        "brasas": {
+          "vidaPct": 30
+        },
+        "agua": {
+          "velocidadePct": -30
+        }
+      }
+    },
+    {
+      "id": "vidraceiro",
+      "nome": "Vidraceiro",
+      "hpBase": 38,
+      "hesitacaoS": 5,
+      "deteccao": 4,
+      "xp": 11,
+      "modelo": "vidraceiro",
+      "arquetipo": "atirador",
+      "classe": "atirador",
+      "defesa": 1,
+      "ataqueBasico": "caco_de_vidro",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2500,
+      "resistencias": {
+        "fogo": 25
+      },
+      "soPorTema": true,
+      "dimensao": "ignarea",
+      "nivelMin": 15,
+      "tracos": [
+        {
+          "tipo": "aoMorrer",
+          "raio": 1,
+          "dano": 8,
+          "efeitos": [
+            {
+              "tipo": "sangrando",
+              "valor": 2,
+              "duracaoMs": 3000
+            }
+          ]
+        }
+      ],
+      "naFenda": {
+        "brasas": {
+          "curaPctPorS": 3,
+          "marcas": [
+            "semEstilhaco"
+          ]
+        }
+      }
+    },
+    {
+      "id": "fornalheiro",
+      "nome": "Fornalheiro",
+      "hpBase": 85,
+      "hesitacaoS": 6,
+      "deteccao": 4,
+      "xp": 14,
+      "modelo": "fornalheiro",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 2,
+      "ataqueBasico": "golpe_pesado",
+      "habilidades": [
+        "inspirar_fornalha",
+        "soprar_fornalha"
+      ],
+      "intervaloAtaqueMs": 3000,
+      "resistencias": {
+        "fogo": 50,
+        "gelo": -25
+      },
+      "comportamento": "fole",
+      "soPorTema": true,
+      "dimensao": "ignarea",
+      "nivelMin": 25,
+      "naFenda": {
+        "agua": {
+          "velocidadePct": -40,
+          "marcas": [
+            "apagado"
+          ]
+        }
+      }
+    },
+    {
+      "id": "floquinho",
+      "nome": "Floquinho",
+      "hpBase": 26,
+      "hesitacaoS": 6,
+      "deteccao": 4,
+      "xp": 6,
+      "modelo": "floquinho",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 0,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2600,
+      "resistencias": {
+        "gelo": 50,
+        "fogo": -50
+      },
+      "comportamento": "rolante",
+      "soPorTema": true,
+      "dimensao": "hiemalia",
+      "nivelMin": 1,
+      "nivelPico": 30,
+      "naFenda": {
+        "gelo_fino": {
+          "velocidadePct": 100
+        }
+      }
+    },
+    {
+      "id": "silente",
+      "nome": "Silente",
+      "hpBase": 40,
+      "hesitacaoS": 3,
+      "deteccao": 5,
+      "xp": 12,
+      "modelo": "silente",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 0,
+      "ataqueBasico": "toque_silente",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2400,
+      "resistencias": {
+        "gelo": 50
+      },
+      "soPorTema": true,
+      "dimensao": "hiemalia",
+      "nivelMin": 20,
+      "tracos": [
+        {
+          "tipo": "furtivo",
+          "distancia": 4
+        }
+      ],
+      "naFenda": {
+        "agua": {
+          "marcas": [
+            "visivel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "escultor_de_geada",
+      "nome": "Escultor de Geada",
+      "hpBase": 50,
+      "hesitacaoS": 5,
+      "deteccao": 4,
+      "xp": 14,
+      "modelo": "escultor_de_geada",
+      "arquetipo": "controlador",
+      "classe": "conjurador",
+      "defesa": 0,
+      "ataqueBasico": "estilhaco_gelido",
+      "habilidades": [
+        "erguer_estatua"
+      ],
+      "intervaloAtaqueMs": 2800,
+      "resistencias": {
+        "gelo": 50,
+        "fogo": -25
+      },
+      "soPorTema": true,
+      "dimensao": "hiemalia",
+      "nivelMin": 30,
+      "naFenda": {
+        "agua": {
+          "marcas": [
+            "ponte"
+          ]
+        }
+      }
+    },
+    {
+      "id": "zunzum",
+      "nome": "Zunzum",
+      "hpBase": 24,
+      "hesitacaoS": 5,
+      "deteccao": 4,
+      "xp": 6,
+      "modelo": "zunzum",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 0,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2400,
+      "resistencias": {
+        "raio": 50,
+        "terra": -50
+      },
+      "soPorTema": true,
+      "dimensao": "fulguria",
+      "nivelMin": 1,
+      "nivelPico": 30,
+      "tracos": [
+        {
+          "tipo": "elo",
+          "raio": 4,
+          "dano": 3,
+          "aCadaMs": 500,
+          "efeitos": [
+            {
+              "tipo": "eletrizado",
+              "duracaoMs": 1500
+            }
+          ]
+        }
+      ],
+      "naFenda": {
+        "campo_eletrico": {
+          "marcas": [
+            "linhaGrossa"
+          ]
+        }
+      }
+    },
+    {
+      "id": "bobinadora",
+      "nome": "Bobinadora",
+      "hpBase": 45,
+      "hesitacaoS": 5,
+      "deteccao": 4,
+      "xp": 12,
+      "modelo": "bobinadora",
+      "arquetipo": "atirador",
+      "classe": "conjurador",
+      "defesa": 1,
+      "ataqueBasico": "faisca_da_bobina",
+      "habilidades": [
+        "cadeia_raio"
+      ],
+      "intervaloAtaqueMs": 2400,
+      "resistencias": {
+        "raio": 50
+      },
+      "comportamento": "torre",
+      "soPorTema": true,
+      "dimensao": "fulguria",
+      "nivelMin": 15,
+      "naFenda": {
+        "campo_eletrico": {
+          "marcas": [
+            "maisSaltos"
+          ],
+          "danoPct": 30
+        }
+      }
+    },
+    {
+      "id": "para_raios",
+      "nome": "Para-raios",
+      "hpBase": 90,
+      "hesitacaoS": 6,
+      "deteccao": 4,
+      "xp": 15,
+      "modelo": "para_raios",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 3,
+      "ataqueBasico": "golpe_pesado",
+      "habilidades": [],
+      "intervaloAtaqueMs": 3000,
+      "resistencias": {
+        "raio": 75
+      },
+      "soPorTema": true,
+      "dimensao": "fulguria",
+      "nivelMin": 30,
+      "tracos": [
+        {
+          "tipo": "paraRaios",
+          "raio": 2,
+          "devolverACada": 3
+        }
+      ],
+      "naFenda": {
+        "agua": {
+          "marcas": [
+            "poca"
+          ]
+        }
+      }
+    },
+    {
+      "id": "esporeiro",
+      "nome": "Esporeiro",
+      "hpBase": 48,
+      "hesitacaoS": 5,
+      "deteccao": 4,
+      "xp": 11,
+      "modelo": "esporeiro",
+      "arquetipo": "controlador",
+      "classe": "conjurador",
+      "defesa": 0,
+      "ataqueBasico": "cogumelo_bomba",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2600,
+      "resistencias": {
+        "veneno": 75,
+        "fogo": -25
+      },
+      "comportamento": "plantador",
+      "soPorTema": true,
+      "dimensao": "putrevia",
+      "nivelMin": 10,
+      "nivelPico": 55,
+      "naFenda": {
+        "lama": {
+          "marcas": [
+            "cogumeloRapido"
+          ]
+        }
+      }
+    },
+    {
+      "id": "enxame_putrido",
+      "nome": "Enxame",
+      "hpBase": 34,
+      "hesitacaoS": 2,
+      "deteccao": 5,
+      "xp": 12,
+      "modelo": "enxame_putrido",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 0,
+      "ataqueBasico": "picadas",
+      "habilidades": [],
+      "intervaloAtaqueMs": 900,
+      "resistencias": {
+        "veneno": 100,
+        "fogo": -50
+      },
+      "imunidades": [
+        "envenenado"
+      ],
+      "soPorTema": true,
+      "dimensao": "putrevia",
+      "nivelMin": 20,
+      "tracos": [
+        {
+          "tipo": "nuvem",
+          "alvoUnicoPct": 30,
+          "areaPct": 150,
+          "paradoPct": 50
+        }
+      ],
+      "naFenda": {
+        "miasma": {
+          "marcas": [
+            "invisivel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "breuzinho",
+      "nome": "Breuzinho",
+      "hpBase": 20,
+      "hesitacaoS": 2,
+      "deteccao": 6,
+      "xp": 6,
+      "modelo": "breuzinho",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 0,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2600,
+      "resistencias": {
+        "trevas": 50,
+        "sagrado": -50
+      },
+      "comportamento": "ladrao",
+      "soPorTema": true,
+      "dimensao": "umbralia",
+      "nivelMin": 1,
+      "nivelPico": 30,
+      "tracos": [
+        {
+          "tipo": "ladraoDeLuz",
+          "roubaMs": 30000
+        }
+      ],
+      "naFenda": {
+        "nevoa_sombria": {
+          "marcas": [
+            "invisivel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "faminto",
+      "nome": "Faminto",
+      "hpBase": 60,
+      "hesitacaoS": 4,
+      "deteccao": 4,
+      "xp": 14,
+      "modelo": "faminto",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 1,
+      "ataqueBasico": "mordida_faminta",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2400,
+      "resistencias": {
+        "trevas": 50,
+        "sagrado": -25
+      },
+      "soPorTema": true,
+      "dimensao": "umbralia",
+      "nivelMin": 25,
+      "tracos": [
+        {
+          "tipo": "faminto",
+          "raio": 4,
+          "porMortePct": 10,
+          "max": 5
+        }
+      ],
+      "naFenda": {
+        "luz_sagrada": {
+          "marcas": [
+            "encolhe"
+          ]
+        }
+      }
+    },
+    {
+      "id": "sonequinha",
+      "nome": "Sonequinha",
+      "hpBase": 30,
+      "hesitacaoS": 7,
+      "deteccao": 4,
+      "xp": 6,
+      "modelo": "sonequinha",
+      "arquetipo": "controlador",
+      "classe": "conjurador",
+      "defesa": 0,
+      "ataqueBasico": "golpe",
+      "habilidades": [
+        "bocejo"
+      ],
+      "intervaloAtaqueMs": 2800,
+      "resistencias": {
+        "psiquico": 50
+      },
+      "soPorTema": true,
+      "dimensao": "oniria",
+      "nivelMin": 1,
+      "nivelPico": 30,
+      "tracos": [
+        {
+          "tipo": "sono",
+          "semDanoMs": 4000,
+          "raio": 3,
+          "cura": 3,
+          "aCadaMs": 1000
+        }
+      ],
+      "naFenda": {
+        "agua": {
+          "marcas": [
+            "sonhaTerreno"
+          ]
+        },
+        "brasas": {
+          "marcas": [
+            "sonhaTerreno"
+          ]
+        },
+        "miasma": {
+          "marcas": [
+            "sonhaTerreno"
+          ]
+        },
+        "gelo_fino": {
+          "marcas": [
+            "sonhaTerreno"
+          ]
+        },
+        "campo_eletrico": {
+          "marcas": [
+            "sonhaTerreno"
+          ]
+        },
+        "lama": {
+          "marcas": [
+            "sonhaTerreno"
+          ]
+        },
+        "nevoa_sombria": {
+          "marcas": [
+            "sonhaTerreno"
+          ]
+        },
+        "luz_sagrada": {
+          "marcas": [
+            "sonhaTerreno"
+          ]
+        }
+      }
+    },
+    {
+      "id": "espelhante",
+      "nome": "Espelhante",
+      "hpBase": 46,
+      "hesitacaoS": 5,
+      "deteccao": 4,
+      "xp": 13,
+      "modelo": "espelhante",
+      "arquetipo": "atirador",
+      "classe": "conjurador",
+      "defesa": 0,
+      "ataqueBasico": "lasca_de_espelho",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2600,
+      "resistencias": {
+        "psiquico": 50
+      },
+      "soPorTema": true,
+      "dimensao": "oniria",
+      "nivelMin": 20,
+      "tracos": [
+        {
+          "tipo": "espelho",
+          "pct": 50
+        }
+      ],
+      "naFenda": {
+        "agua": {
+          "marcas": [
+            "duplaCopia"
+          ]
+        }
+      }
+    },
+    {
+      "id": "marionetista",
+      "nome": "Marionetista",
+      "hpBase": 44,
+      "hesitacaoS": 5,
+      "deteccao": 4,
+      "xp": 15,
+      "modelo": "marionetista",
+      "arquetipo": "controlador",
+      "classe": "conjurador",
+      "defesa": 0,
+      "ataqueBasico": "fio_cortante",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2800,
+      "resistencias": {
+        "psiquico": 50
+      },
+      "soPorTema": true,
+      "dimensao": "oniria",
+      "nivelMin": 30,
+      "tracos": [
+        {
+          "tipo": "fios",
+          "raio": 6,
+          "max": 2,
+          "bonusPct": 30
+        }
+      ],
+      "naFenda": {
+        "nevoa_sombria": {
+          "marcas": [
+            "fiosInvisiveis"
+          ]
+        }
+      }
+    },
+    {
+      "id": "pedrico",
+      "nome": "Pedrico",
+      "hpBase": 30,
+      "hesitacaoS": 6,
+      "deteccao": 4,
+      "xp": 6,
+      "modelo": "pedrico",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 1,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2600,
+      "resistencias": {
+        "terra": 50,
+        "raio": -25
+      },
+      "soPorTema": true,
+      "dimensao": "litia",
+      "nivelMin": 1,
+      "nivelPico": 30,
+      "tracos": [
+        {
+          "tipo": "enrolar",
+          "fechadoMs": 4000,
+          "abertoMs": 2000,
+          "reducaoPct": 90
+        }
+      ],
+      "naFenda": {
+        "lama": {
+          "marcas": [
+            "enterra"
+          ]
+        }
+      }
+    },
+    {
+      "id": "obelisco_vigia",
+      "nome": "Obelisco Vigia",
+      "hpBase": 120,
+      "hesitacaoS": 1,
+      "deteccao": 6,
+      "xp": 16,
+      "modelo": "obelisco_vigia",
+      "arquetipo": "controlador",
+      "classe": "conjurador",
+      "defesa": 4,
+      "ataqueBasico": "olho_do_obelisco",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2600,
+      "resistencias": {
+        "terra": 50
+      },
+      "comportamento": "fixo",
+      "soPorTema": true,
+      "dimensao": "litia",
+      "nivelMin": 30,
+      "tracos": [
+        {
+          "tipo": "estase",
+          "raio": 4,
+          "lentidaoPct": 30,
+          "reducaoAliadosPct": 25
+        }
+      ],
+      "naFenda": {
+        "gelo_fino": {
+          "marcas": [
+            "semCampo"
+          ]
+        }
+      }
+    },
+    {
+      "id": "candelinha",
+      "nome": "Candelinha",
+      "hpBase": 22,
+      "hesitacaoS": 3,
+      "deteccao": 6,
+      "xp": 6,
+      "modelo": "candelinha",
+      "arquetipo": "controlador",
+      "classe": "conjurador",
+      "defesa": 0,
+      "ataqueBasico": "faisca_de_vela",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2600,
+      "resistencias": {
+        "sagrado": 50,
+        "trevas": -50
+      },
+      "comportamento": "fujao",
+      "soPorTema": true,
+      "dimensao": "halonia",
+      "nivelMin": 1,
+      "nivelPico": 30,
+      "tracos": [
+        {
+          "tipo": "denuncia",
+          "raio": 5
+        }
+      ],
+      "naFenda": {
+        "luz_sagrada": {
+          "marcas": [
+            "dobra"
+          ]
+        }
+      }
+    },
+    {
+      "id": "penitente",
+      "nome": "Penitente",
+      "hpBase": 55,
+      "hesitacaoS": 3,
+      "deteccao": 4,
+      "xp": 13,
+      "modelo": "penitente",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 0,
+      "ataqueBasico": "flagelo",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2200,
+      "resistencias": {
+        "sagrado": 50
+      },
+      "soPorTema": true,
+      "dimensao": "halonia",
+      "nivelMin": 15,
+      "tracos": [
+        {
+          "tipo": "penitencia",
+          "porPct": 1
+        },
+        {
+          "tipo": "aoMorrer",
+          "raio": 2,
+          "dano": 10,
+          "efeitos": [
+            {
+              "tipo": "cego",
+              "pct": 30,
+              "duracaoMs": 2000
+            }
+          ]
+        }
+      ],
+      "naFenda": {
+        "luz_sagrada": {
+          "curaPctPorS": 4
+        }
+      }
+    },
+    {
+      "id": "guardiao_de_marmore",
+      "nome": "Guardião de Mármore",
+      "hpBase": 110,
+      "hesitacaoS": 5,
+      "deteccao": 4,
+      "xp": 16,
+      "modelo": "guardiao_de_marmore",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 4,
+      "ataqueBasico": "golpe_pesado",
+      "habilidades": [],
+      "intervaloAtaqueMs": 3200,
+      "resistencias": {
+        "sagrado": 50,
+        "trevas": -25
+      },
+      "soPorTema": true,
+      "dimensao": "halonia",
+      "nivelMin": 30,
+      "tracos": [
+        {
+          "tipo": "frontal",
+          "coneGraus": 120,
+          "giroGrausPorS": 90
+        }
+      ],
+      "naFenda": {
+        "nevoa_sombria": {
+          "marcas": [
+            "giroLento"
+          ]
+        }
+      }
+    },
+    {
+      "id": "pluminha",
+      "nome": "Pluminha",
+      "hpBase": 22,
+      "hesitacaoS": 5,
+      "deteccao": 4,
+      "xp": 6,
+      "modelo": "pluminha",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 0,
+      "ataqueBasico": "sopro_de_pluma",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2600,
+      "soPorTema": true,
+      "dimensao": "zefiria",
+      "nivelMin": 1,
+      "nivelPico": 30,
+      "tracos": [
+        {
+          "tipo": "flutuar",
+          "noArMs": 2000,
+          "chaoMs": 2500
+        }
+      ],
+      "naFenda": {
+        "agua": {
+          "marcas": [
+            "levaTerreno"
+          ]
+        },
+        "brasas": {
+          "marcas": [
+            "levaTerreno"
+          ]
+        },
+        "miasma": {
+          "marcas": [
+            "levaTerreno"
+          ]
+        },
+        "gelo_fino": {
+          "marcas": [
+            "levaTerreno"
+          ]
+        },
+        "campo_eletrico": {
+          "marcas": [
+            "levaTerreno"
+          ]
+        },
+        "lama": {
+          "marcas": [
+            "levaTerreno"
+          ]
+        },
+        "nevoa_sombria": {
+          "marcas": [
+            "levaTerreno"
+          ]
+        },
+        "luz_sagrada": {
+          "marcas": [
+            "levaTerreno"
+          ]
+        }
+      }
+    },
+    {
+      "id": "velejador",
+      "nome": "Velejador",
+      "hpBase": 40,
+      "hesitacaoS": 5,
+      "deteccao": 6,
+      "xp": 12,
+      "modelo": "velejador",
+      "arquetipo": "atirador",
+      "classe": "atirador",
+      "defesa": 0,
+      "ataqueBasico": "flecha_de_vento",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2400,
+      "comportamento": "pousar",
+      "soPorTema": true,
+      "dimensao": "zefiria",
+      "nivelMin": 15,
+      "naFenda": {
+        "campo_eletrico": {
+          "marcas": [
+            "naoPousa"
+          ]
+        }
+      }
+    },
+    {
+      "id": "ciclonista",
+      "nome": "Ciclonista",
+      "hpBase": 46,
+      "hesitacaoS": 5,
+      "deteccao": 4,
+      "xp": 14,
+      "modelo": "ciclonista",
+      "arquetipo": "controlador",
+      "classe": "conjurador",
+      "defesa": 0,
+      "ataqueBasico": "lufada",
+      "habilidades": [
+        "rajada"
+      ],
+      "intervaloAtaqueMs": 2800,
+      "soPorTema": true,
+      "dimensao": "zefiria",
+      "nivelMin": 25,
+      "tracos": [
+        {
+          "tipo": "correntes",
+          "comprimento": 6,
+          "ms": 5000,
+          "aCadaMs": 500
+        }
+      ],
+      "naFenda": {
+        "agua": {
+          "marcas": [
+            "levaTerreno"
+          ]
+        },
+        "brasas": {
+          "marcas": [
+            "levaTerreno"
+          ]
+        },
+        "miasma": {
+          "marcas": [
+            "levaTerreno"
+          ]
+        },
+        "gelo_fino": {
+          "marcas": [
+            "levaTerreno"
+          ]
+        },
+        "campo_eletrico": {
+          "marcas": [
+            "levaTerreno"
+          ]
+        },
+        "lama": {
+          "marcas": [
+            "levaTerreno"
+          ]
+        },
+        "nevoa_sombria": {
+          "marcas": [
+            "levaTerreno"
+          ]
+        },
+        "luz_sagrada": {
+          "marcas": [
+            "levaTerreno"
+          ]
+        }
+      }
+    },
+    {
+      "id": "imperatriz_das_estatuas",
+      "nome": "Imperatriz das Estátuas",
+      "hpBase": 3400,
+      "hesitacaoS": 0.8,
+      "deteccao": 9,
+      "xp": 700,
+      "modelo": "imperatriz_das_estatuas",
+      "arquetipo": "boss",
+      "classe": "conjurador",
+      "defesa": 6,
+      "ataqueBasico": "toque_glacial",
+      "habilidades": [
+        "nova_gelo",
+        "chamar_escultores"
+      ],
+      "intervaloAtaqueMs": 2600,
+      "resistencias": {
+        "gelo": 75,
+        "fogo": -25
+      },
+      "dimensao": "hiemalia",
+      "nivelMin": 25,
+      "chefe": {
+        "mecanica": "estatuasDeAliados",
+        "numeros": {
+          "ms": 10000,
+          "paradoMs": 2000,
+          "congelaMs": 1500
+        }
+      }
+    },
+    {
+      "id": "maquinista_voltaico",
+      "nome": "Maquinista Voltaico",
+      "hpBase": 3000,
+      "hesitacaoS": 0.8,
+      "deteccao": 9,
+      "xp": 700,
+      "modelo": "maquinista_voltaico",
+      "arquetipo": "boss",
+      "classe": "conjurador",
+      "defesa": 6,
+      "ataqueBasico": "faisca_da_bobina",
+      "habilidades": [
+        "cadeia_raio",
+        "nova_raio"
+      ],
+      "intervaloAtaqueMs": 2400,
+      "resistencias": {
+        "raio": 75,
+        "terra": -25
+      },
+      "dimensao": "fulguria",
+      "nivelMin": 25,
+      "chefe": {
+        "mecanica": "refens",
+        "numeros": {
+          "qtd": 3,
+          "raio": 5,
+          "curaPctPorS": 1,
+          "reducaoPct": 50
+        },
+        "ref": "cabo_voltaico"
+      }
+    },
+    {
+      "id": "mae_colmeia",
+      "nome": "Mãe-Colmeia",
+      "hpBase": 3600,
+      "hesitacaoS": 0.8,
+      "deteccao": 9,
+      "xp": 700,
+      "modelo": "mae_colmeia",
+      "arquetipo": "boss",
+      "classe": "conjurador",
+      "defesa": 5,
+      "ataqueBasico": "golpe_viscoso",
+      "habilidades": [
+        "chuva_veneno",
+        "chamar_enxame"
+      ],
+      "intervaloAtaqueMs": 2600,
+      "resistencias": {
+        "veneno": 75,
+        "fogo": -25
+      },
+      "dimensao": "putrevia",
+      "nivelMin": 25,
+      "chefe": {
+        "mecanica": "casulos",
+        "numeros": {
+          "aCadaMs": 7000,
+          "chocaMs": 12000,
+          "raio": 5
+        },
+        "ref": "casulo"
+      }
+    },
+    {
+      "id": "o_apagador",
+      "nome": "O Apagador",
+      "hpBase": 3800,
+      "hesitacaoS": 0.8,
+      "deteccao": 9,
+      "xp": 800,
+      "modelo": "o_apagador",
+      "arquetipo": "boss",
+      "classe": "corpo_a_corpo",
+      "defesa": 6,
+      "ataqueBasico": "toque_do_vazio",
+      "habilidades": [
+        "marca_de_area",
+        "rajada"
+      ],
+      "intervaloAtaqueMs": 2600,
+      "resistencias": {
+        "trevas": 75,
+        "sagrado": -25
+      },
+      "dimensao": "umbralia",
+      "nivelMin": 30,
+      "chefe": {
+        "mecanica": "braseiros",
+        "numeros": {
+          "qtd": 4,
+          "raio": 6,
+          "porBraseiroPct": 20
+        },
+        "ref": "braseiro"
+      }
+    },
+    {
+      "id": "rei_das_mascaras",
+      "nome": "Rei das Máscaras",
+      "hpBase": 3400,
+      "hesitacaoS": 0.8,
+      "deteccao": 9,
+      "xp": 800,
+      "modelo": "rei_das_mascaras",
+      "arquetipo": "boss",
+      "classe": "conjurador",
+      "defesa": 6,
+      "ataqueBasico": "lasca_de_espelho",
+      "habilidades": [
+        "explosao_psiquico",
+        "prisao_psiquico"
+      ],
+      "intervaloAtaqueMs": 2400,
+      "resistencias": {
+        "psiquico": 75,
+        "trevas": -25
+      },
+      "dimensao": "oniria",
+      "nivelMin": 30,
+      "chefe": {
+        "mecanica": "mascaras",
+        "numeros": {
+          "passoPct": 33,
+          "devolvePct": 40
+        }
+      }
+    },
+    {
+      "id": "monarca_de_geodo",
+      "nome": "Monarca de Geodo",
+      "hpBase": 4200,
+      "hesitacaoS": 0.8,
+      "deteccao": 9,
+      "xp": 800,
+      "modelo": "monarca_de_geodo",
+      "arquetipo": "boss",
+      "classe": "corpo_a_corpo",
+      "defesa": 8,
+      "ataqueBasico": "golpe_pesado",
+      "habilidades": [
+        "nova_terra",
+        "prisao_terra"
+      ],
+      "intervaloAtaqueMs": 2800,
+      "resistencias": {
+        "terra": 75,
+        "raio": -25
+      },
+      "dimensao": "litia",
+      "nivelMin": 30,
+      "chefe": {
+        "mecanica": "geodo",
+        "numeros": {
+          "qtd": 4,
+          "raio": 5,
+          "abertoMs": 15000
+        },
+        "ref": "pilar_de_cristal"
+      }
+    },
+    {
+      "id": "hierofante",
+      "nome": "Hierofante",
+      "hpBase": 3600,
+      "hesitacaoS": 0.8,
+      "deteccao": 9,
+      "xp": 800,
+      "modelo": "hierofante",
+      "arquetipo": "boss",
+      "classe": "conjurador",
+      "defesa": 6,
+      "ataqueBasico": "raio_do_juizo",
+      "habilidades": [
+        "explosao_sagrado",
+        "marca_de_area"
+      ],
+      "intervaloAtaqueMs": 2400,
+      "resistencias": {
+        "sagrado": 75,
+        "trevas": -25
+      },
+      "dimensao": "halonia",
+      "nivelMin": 30,
+      "chefe": {
+        "mecanica": "pecados",
+        "numeros": {
+          "aCadaMs": 20000,
+          "janelaMs": 6000,
+          "danoPct": 20
+        }
+      }
+    },
+    {
+      "id": "almirante_dos_ventos",
+      "nome": "Almirante dos Ventos",
+      "hpBase": 3400,
+      "hesitacaoS": 0.8,
+      "deteccao": 9,
+      "xp": 700,
+      "modelo": "almirante_dos_ventos",
+      "arquetipo": "boss",
+      "classe": "atirador",
+      "defesa": 6,
+      "ataqueBasico": "flecha_de_vento",
+      "habilidades": [
+        "rajada",
+        "chuva_fisico"
+      ],
+      "intervaloAtaqueMs": 2200,
+      "dimensao": "zefiria",
+      "nivelMin": 25,
+      "tracos": [
+        {
+          "tipo": "correntes",
+          "comprimento": 8,
+          "ms": 6000,
+          "aCadaMs": 500
+        }
+      ],
+      "chefe": {
+        "mecanica": "bombardeio",
+        "numeros": {
+          "aCadaMs": 6000,
+          "pontos": 3,
+          "raio": 1,
+          "atrasoMs": 1500,
+          "dano": 14
+        }
+      }
+    },
+    {
+      "id": "harpia_soberana",
+      "nome": "Harpia Soberana",
+      "hpBase": 3200,
+      "hesitacaoS": 0.8,
+      "deteccao": 9,
+      "xp": 800,
+      "modelo": "harpia_soberana",
+      "arquetipo": "boss",
+      "classe": "corpo_a_corpo",
+      "defesa": 5,
+      "ataqueBasico": "garra_de_harpia",
+      "habilidades": [
+        "rajada",
+        "investida_fisico"
+      ],
+      "intervaloAtaqueMs": 2200,
+      "dimensao": "zefiria",
+      "nivelMin": 30,
+      "chefe": {
+        "mecanica": "voo",
+        "numeros": {
+          "noArMs": 8000,
+          "chaoMs": 10000,
+          "mergulhoMs": 4000,
+          "dano": 18
+        }
+      }
+    },
+    {
+      "id": "estatua_de_gelo",
+      "nome": "Estátua de gelo",
+      "hpBase": 30,
+      "hesitacaoS": 5,
+      "deteccao": 4,
+      "xp": 0,
+      "modelo": "estatua_de_gelo",
+      "arquetipo": "boneco",
+      "classe": "corpo_a_corpo",
+      "defesa": 2,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2400,
+      "soMundo": true,
+      "invocacao": {
+        "comportamento": "isca"
+      },
+      "nivelMin": 1,
+      "tracos": [
+        {
+          "tipo": "aoMorrer",
+          "raio": 1,
+          "dano": 6,
+          "efeitos": [
+            {
+              "tipo": "resfriado",
+              "pct": 30,
+              "duracaoMs": 3000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "torre_engrenada",
+      "nome": "Torre engrenada",
+      "hpBase": 260,
+      "hesitacaoS": 5,
+      "deteccao": 4,
+      "xp": 0,
+      "modelo": "torre_engrenada",
+      "arquetipo": "boneco",
+      "classe": "corpo_a_corpo",
+      "defesa": 3,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2400,
+      "soMundo": true,
+      "nivelMin": 1
+    },
+    {
+      "id": "cabo_voltaico",
+      "nome": "Refém no cabo",
+      "hpBase": 160,
+      "hesitacaoS": 5,
+      "deteccao": 4,
+      "xp": 0,
+      "modelo": "cabo_voltaico",
+      "arquetipo": "boneco",
+      "classe": "corpo_a_corpo",
+      "defesa": 1,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2400,
+      "soMundo": true,
+      "nivelMin": 1
+    },
+    {
+      "id": "cogumelo_pulmao",
+      "nome": "Cogumelo-pulmão",
+      "hpBase": 200,
+      "hesitacaoS": 5,
+      "deteccao": 4,
+      "xp": 0,
+      "modelo": "cogumelo_pulmao",
+      "arquetipo": "boneco",
+      "classe": "corpo_a_corpo",
+      "defesa": 2,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2400,
+      "soMundo": true,
+      "nivelMin": 1
+    },
+    {
+      "id": "casulo",
+      "nome": "Casulo",
+      "hpBase": 120,
+      "hesitacaoS": 5,
+      "deteccao": 4,
+      "xp": 0,
+      "modelo": "casulo",
+      "arquetipo": "boneco",
+      "classe": "corpo_a_corpo",
+      "defesa": 1,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2400,
+      "soMundo": true,
+      "nivelMin": 1
+    },
+    {
+      "id": "braseiro",
+      "nome": "Braseiro apagado",
+      "hpBase": 1,
+      "hesitacaoS": 5,
+      "deteccao": 4,
+      "xp": 0,
+      "modelo": "braseiro",
+      "arquetipo": "boneco",
+      "classe": "corpo_a_corpo",
+      "defesa": 0,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2400,
+      "soMundo": true,
+      "nivelMin": 1
+    },
+    {
+      "id": "coluna_antiga",
+      "nome": "Coluna antiga",
+      "hpBase": 300,
+      "hesitacaoS": 5,
+      "deteccao": 4,
+      "xp": 0,
+      "modelo": "coluna_antiga",
+      "arquetipo": "boneco",
+      "classe": "corpo_a_corpo",
+      "defesa": 4,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2400,
+      "soMundo": true,
+      "nivelMin": 1
+    },
+    {
+      "id": "pilar_de_cristal",
+      "nome": "Pilar de cristal",
+      "hpBase": 280,
+      "hesitacaoS": 5,
+      "deteccao": 4,
+      "xp": 0,
+      "modelo": "pilar_de_cristal",
+      "arquetipo": "boneco",
+      "classe": "corpo_a_corpo",
+      "defesa": 3,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2400,
+      "soMundo": true,
+      "nivelMin": 1
+    },
+    {
+      "id": "pedregulho",
+      "nome": "Pedregulho",
+      "hpBase": 40,
+      "hesitacaoS": 5,
+      "deteccao": 4,
+      "xp": 0,
+      "modelo": "pedregulho",
+      "arquetipo": "boneco",
+      "classe": "corpo_a_corpo",
+      "defesa": 6,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2400,
+      "soMundo": true,
+      "nivelMin": 1
+    },
+    {
+      "id": "sombra_roubada",
+      "nome": "Sombra roubada",
+      "hpBase": 300,
+      "hesitacaoS": 0,
+      "deteccao": 12,
+      "xp": 0,
+      "modelo": "sombra_roubada",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 2,
+      "ataqueBasico": "mordida_faminta",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2400,
+      "soMundo": true,
+      "nivelMin": 1,
+      "tracos": [
+        {
+          "tipo": "soNaLuz",
+          "foraPct": 10
+        }
+      ]
+    },
+    {
+      "id": "reflexo_do_sonho",
+      "nome": "Reflexo",
+      "hpBase": 240,
+      "hesitacaoS": 0,
+      "deteccao": 12,
+      "xp": 0,
+      "modelo": "reflexo_do_sonho",
+      "arquetipo": "perseguidor",
+      "classe": "corpo_a_corpo",
+      "defesa": 2,
+      "ataqueBasico": "golpe",
+      "habilidades": [],
+      "intervaloAtaqueMs": 2400,
+      "soMundo": true,
+      "nivelMin": 1
+    }
   ]
 }
