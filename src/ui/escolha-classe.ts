@@ -29,7 +29,7 @@ export function mostrarEscolhaDeClasse(raiz: HTMLElement, conteudo: Conteudo, ba
     const runa = svgDaRuna(c.id, 48);
     if (runa) coluna.append(runa);
     coluna.append(el('h2', undefined, c.nome));
-    coluna.append(painelPersonagem(c.id));
+    coluna.append(painelPersonagem(c.id, undefined, { escolherSkin: true }));
     const escolher = el('a', 'botao-menu', t('escolhaClasse.escolher', { nome: c.nome }));
     escolher.href = `${base}&classe=${encodeURIComponent(c.id)}`;
     coluna.append(escolher);

@@ -4,7 +4,7 @@ import { conteudoOficial } from '../../src/core/conteudo';
 import { catalogoDeGeracao } from '../../src/world/gerador';
 import { criarEstado } from '../../src/core/estado';
 import { criarEntidade } from '../../src/entities/entidade';
-import { tintaDaInvocacao } from '../../src/render/cores-necromancia';
+import { TOM_DOS_MORTOS, tintaDaInvocacao } from '../../src/render/cores-necromancia';
 
 function cenario(preset = 'esqueleto') {
   const estado = criarEstado({ semente: 1, faseId: 'teste' });
@@ -19,11 +19,11 @@ describe('identidade visual dos servos', () => {
   it('tinge de vermelho os servos e reanimados do jogador, mesmo sem o dono no recorte', () => {
     const { estado, dono, servo } = cenario();
     dono.classeId = 'necromante';
-    expect(tintaDaInvocacao(servo, estado)).toBe(0xff7777);
+    expect(tintaDaInvocacao(servo, estado)).toBe(TOM_DOS_MORTOS);
     if (!servo.invocacao) throw new Error('sem invocação');
     servo.invocacao.necromancia = 'reanimado';
     estado.entidades.splice(0, 1);
-    expect(tintaDaInvocacao(servo, estado)).toBe(0xff7777);
+    expect(tintaDaInvocacao(servo, estado)).toBe(TOM_DOS_MORTOS);
   });
 
   it('preserva os servos negros do boss mesmo quando o dono saiu do recorte de rede', () => {
@@ -51,5 +51,5 @@ it('o esqueleto exclusivo do boss não entra na população comum das fases', ()
 it('um servo apropriado pelo necromante jogador assume a cor vermelha', () => {
   const { estado, dono, servo } = cenario('esqueleto_do_ossuario');
   dono.classeId = 'necromante';
-  expect(tintaDaInvocacao(servo, estado)).toBe(0xff7777);
+  expect(tintaDaInvocacao(servo, estado)).toBe(TOM_DOS_MORTOS);
 });
