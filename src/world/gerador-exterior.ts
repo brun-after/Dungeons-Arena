@@ -490,7 +490,8 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
         chefes.push({ preset, c, raio });
         if(ehDragao(preset)) {
           // Só alarga terreno natural: nunca apaga portas, casas, vila ou a moldura da região.
-          for(let dy=-raio;dy<=raio;dy++)for(let dx=-raio;dx<=raio;dx++)if(g.interna(c.x+dx,c.y+dy))g.por(c.x+dx,c.y+dy,perfil.chao);
+          // Marco 44 (15/11/2026, D-178): nem as protegidas (a faixa das passagens, igual nas duas vizinhas).
+          for(let dy=-raio;dy<=raio;dy++)for(let dx=-raio;dx<=raio;dx++)if(g.interna(c.x+dx,c.y+dy)&&!protegidas.has((c.y+dy)*n+c.x+dx))g.por(c.x+dx,c.y+dy,perfil.chao);
         }
         inimigos.push({preset,x:c.x,y:c.y,nivel:regiao.nivel[1]});
       }
@@ -520,10 +521,16 @@ export function gerarExterior(reino: Reino, regiao: RegiaoDoMundo): ExteriorGera
 
   // Marco 43 (D-177): o '#' natural (da geografia, fora do que foi construído) é desenhado como rocha ou árvore.
   const obstaculos = new Uint8Array(n * n);
+  // Marco 44 (15/11/2026, D-178): a árvore não é parede: o chão segue por baixo dela (só o tronco barra, world/troncos.ts).
+  // Ficam sólidas as que fazem a parede das casas abandonadas (erguidas sobre a mata).
+  const construida = (x: number, y: number) => telhados.some((t) => x >= t.x && x < t.x + t.largura && y >= t.y && y < t.y + t.altura);
   for (let k = 0; k < n * n; k++) {
     const o = geo.obstaculos[k] ?? OBSTACULO.nenhum;
-    if (o !== OBSTACULO.nenhum && !protegidas.has(k) && g.em(k % n, Math.floor(k / n)) === '#') obstaculos[k] = o;
-    if (doCenario.has(k) && g.em(k % n, Math.floor(k / n)) === '#') obstaculos[k] = OBSTACULO.objeto;
+    const x = k % n;
+    const y = Math.floor(k / n);
+    if (o !== OBSTACULO.nenhum && !protegidas.has(k) && g.em(x, y) === '#') obstaculos[k] = o;
+    if (doCenario.has(k) && g.em(x, y) === '#') obstaculos[k] = OBSTACULO.objeto;
+    if (obstaculos[k] === OBSTACULO.arvore && !construida(x, y)) g.por(x, y, perfil.chao);
   }
   const fase: FaseJson = {
     id: `mundo_${reino.id}_${regiao.id}`,

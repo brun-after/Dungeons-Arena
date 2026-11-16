@@ -30,6 +30,8 @@ const MARGEM = 6;
 /** Marco 43 (D-177): a árvore ou o objeto na frente do jogador fica translúcido (o alpha e a velocidade da troca). */
 const ALPHA_NA_FRENTE = 0.32;
 const TROCA_POR_MS = 1 / 180;
+/** Marco 44 (D-178): até quantas células (na tela) em volta do jogador o cenário fica transparente. */
+const RAIO_TRANSPARENTE = 2.6;
 
 type NomeCenario = keyof typeof CATALOGO;
 const ehNome = (n: string): n is NomeCenario => Object.hasOwn(CATALOGO, n);
@@ -223,6 +225,8 @@ export function criarCenarioIso(camada: Container, chao: Container, fase: Fase, 
           const meioDoCorpo = pj.y - CELULA_PX * 0.5;
           if (pj.x > esquerda && pj.x < esquerda + c.largura * esc && meioDoCorpo > topo && meioDoCorpo < s.y) alvo = ALPHA_NA_FRENTE;
         }
+        // Marco 44 (15/11/2026, D-178): no meio das árvores, as de perto do jogador ficam transparentes (as de trás também).
+        if (vizinho && pj && s.visible && Math.abs(s.x - pj.x) < RAIO_TRANSPARENTE * CELULA_PX && Math.abs(s.y - pj.y) < RAIO_TRANSPARENTE * CELULA_PX * 0.6) alvo = ALPHA_NA_FRENTE;
         if (s.alpha !== alvo) s.alpha = alvo > s.alpha ? Math.min(alvo, s.alpha + passo) : Math.max(alvo, s.alpha - passo);
       }
     }

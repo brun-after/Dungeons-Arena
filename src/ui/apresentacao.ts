@@ -1,4 +1,5 @@
 import { podeAjudar } from '../modos/relacao';
+import { criarLuzesDeMagia } from './luzes-magia';
 import { fogoAceso } from '../world/fogo-aceso';
 import { luzesDosAmbientes } from '../render/solo/ambientes-solo';
 import { faixaSuperior } from './aviso';
@@ -41,7 +42,7 @@ import { fracaoFuria } from '../combat/furia';
 import { sintoniaDe } from '../progression/sintonia';
 import { ControladorImpacto } from '../render/impacto';
 import { ACHATAMENTO_ISO, CamadaEscuridao, type LuzNaTela } from '../render/escuridao';
-import { escuroBaseEm, horaDoMundo, luzDaHora } from '../mundo/ciclo';
+import { copaNaTela, escuroBaseEm, horaDoMundo, luzDaHora } from '../mundo/ciclo';
 import { temLuzPropria } from '../combat/luz-propria';
 import { agoraDoMundo } from './hora-do-mundo';
 import { alfaNoEscuro } from './visao-no-escuro';
@@ -260,7 +261,9 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   const escuroAgora = (jogador: { x: number; y: number } | null): { ambiente: number; nivel: number } => {
     if (!ctx.fase.exterior) return { ambiente: escuroTema.ambiente, nivel: nivelEscuro };
     const ciclo = ctx.balance.mundo.ciclo;
-    return luzDaHora(horaDoMundo(agoraDoMundo(), ciclo), ciclo, jogador ? escuroBaseEm(ctx.fase, jogador.x, jogador.y) : 0);
+    const hora = horaDoMundo(agoraDoMundo(), ciclo);
+    // Marco 44 (D-178): de dia, a mata fechada escurece a tela só em parte (a visão dos monstros segue a da noite).
+    return luzDaHora(hora, ciclo, jogador ? copaNaTela(escuroBaseEm(ctx.fase, jogador.x, jogador.y), hora, ciclo) : 0);
   };
   let pontosDoQuadro: PontoDeLuz[] = [];
   /** As luzes do quadro, da grade para a tela (depois da câmera aplicada). */
@@ -344,6 +347,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     },
   });
 
+  const luzesDeMagia = criarLuzesDeMagia(ctx, o.bus, o.estado, corDoElemento, vis.raioMagia);
   const acesos = decoracoesDaFase(ctx.fase, tema).filter((d) => d.tipo === 'tocha' || d.tipo === 'vela' || d.tipo === 'lava');
   // Marco 31 (D-130): as áreas elementais que brilham (brasas, raios, geada, luz sagrada) iluminam em volta.
   const luzesDasAreas = luzesDosAmbientes(ctx.fase.ambientes ?? []);
@@ -367,6 +371,15 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
       const p = posicao(eu);
       // Ajuste de 14/10/2026: o brilho em volta do jogador pela metade (feedback de jogo).
       pontos.push({ x: p.x, y: p.y, semente: 0, ...luzDoJogador(eu), jogador: true });
+      // Marco 44 (15/11/2026, D-178): sem tocha, o halo em anéis: a célula do jogador 30% mais clara, o anel seguinte
+      // 20% e o outro 10% (`luz.haloSemTocha`). Discos empilhados: cada um soma a diferença para o anel de fora.
+      if (semTocha(eu)) {
+        const h = vis.haloSemTocha;
+        for (let k = 0; k < h.length; k++) {
+          const extra = (h[k] ?? 0) - (h[k + 1] ?? 0);
+          if (extra > 0) pontos.push({ x: p.x, y: p.y, semente: 0, cor: 0x9fb4d8, intensidade: vis.intensidadeSemTocha * extra, raio: k + 1.5, jogador: true });
+        }
+      }
       // As tochas, velas e fendas de lava do tema perto do jogador.
       for (const a of luzesDasAreas) if (Math.abs(a.x - p.x) < 14 && Math.abs(a.y - p.y) < 11) pontos.push({ x: a.x, y: a.y, cor: a.cor, semente: a.x * 11 + a.y, intensidade: 0.4, raio: a.raio });
       for (const v of vilas) pontos.push({ x: v.x, y: v.y, cor: 0xffbe80, semente: v.x + v.y * 3, intensidade: vis.intensidadeVila, raio: v.raio * 1.1 });
@@ -380,7 +393,8 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
       const l = luzDoJogador(e);
       pontos.push({ x: q.x, y: q.y, cor: l.cor, semente: q.x * 3 + q.y, intensidade: l.intensidade * 0.75, raio: l.raio * 0.85, jogador: true });
     }
-    for (const pr of estado.projeteis) pontos.push({ x: pr.x, y: pr.y, cor: 0xffc890, semente: pr.id, intensidade: 0.5, raio: vis.raioMagia });
+    // Marco 44 (15/11/2026, D-178): a magia ilumina onde está e por onde passa, na cor do elemento (ui/luzes-magia.ts).
+    pontos.push(...luzesDeMagia.pontos(estado, performance.now()));
     for (const obj of estado.objetos) {
       if (obj.tipo === 'loja' || obj.tipo === 'bau' || obj.tipo === 'saida') pontos.push({ x: obj.x, y: obj.y, cor: 0xffc070, semente: obj.x * 31 + obj.y, raio: vis.raioObjeto, ...(ctx.fase.exterior && { intensidade: vis.intensidadeJanela }) });
       // Marco 42 (15/11/2026, D-176): o poste de tocha e a fogueira (maior) iluminam em volta (marco 43: do alto do poste).

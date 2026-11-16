@@ -65,12 +65,13 @@ const chebyshev = (a: Celula, b: Celula) => Math.max(Math.abs(a.x - b.x), Math.a
 
 /** Marco 44 (15/11/2026, D-178): o multiplicador de XP e saque pela noite da região (1 de dia e fora do Mundo). */
 export function recompensaDaNoite(ctx: ContextoSimulacao): number {
-  return 1 + (ctx.balance.mundo.noite.recompensaPct / 100) * (ctx.modo.escuro ?? 0);
+  return 1 + (ctx.balance.mundo.noite.recompensaPct / 100) * (ctx.modo.noite ?? 0);
 }
 
 /** Marco 44 (D-178): na noite fechada, a morte não deixa túmulo. */
 export function morteSemTumulo(ctx: ContextoSimulacao): boolean {
-  return (ctx.modo.escuro ?? 0) >= ctx.balance.mundo.noite.semTumuloDesde;
+  // A hora da noite, não o escuro da mata (de dia, morrer na mata fechada ainda deixa túmulo).
+  return (ctx.modo.noite ?? 0) >= ctx.balance.mundo.noite.semTumuloDesde;
 }
 
 /** O escuro da noite na região inteira (0 a 1) vai no modo; a mata soma pela posição. */
@@ -180,7 +181,8 @@ export function conferirFocosENoite(estado: EstadoJogo, ctx: ContextoSimulacao, 
     else apagarFoco(estado, foco);
   }
   const hora = horaDoMundo(agoraMs, ctx.balance.mundo.ciclo);
-  const escuro = escuroDoLugar(hora, regiao.escuroBase ?? 0, false);
+  // Marco 44 (D-178): o escuro da região é o da hora; a mata fechada escurece pela posição, no meio das árvores (escuroEm).
+  const escuro = escuroDoLugar(hora, 0, false);
   const novo = (ctx.modo.escuro ?? 0) === escuro && (ctx.modo.noite ?? 0) === hora.noite ? ctx : { ...ctx, modo: { ...ctx.modo, escuro, noite: hora.noite } };
   conferirVilaANoite(estado, novo, regiao);
   conferirNoite(estado, novo, regiao, escuro);

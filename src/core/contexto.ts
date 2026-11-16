@@ -72,6 +72,8 @@ export interface Balance {
     filaMaxWaypoints: number;
     /** Marco 26 (D-104): o raio do corpo redondo, em células (dois corpos que se bloqueiam ficam a 2 raios). */
     raioCorpo: number;
+    /** Marco 44 (D-178): o raio do tronco da árvore (células), o único pedaço dela que barra o corpo. */
+    raioTronco: number;
     /** Marco 26 (28/10/2026, D-120): o avanço e o teleporte passam por paredes dentro do alcance. */
     dashAtravessaParedes: boolean;
     /** Marco 28 (D-127): teto do multiplicador de velocidade pela Destreza (atributos até 100). */
@@ -572,7 +574,7 @@ export interface Balance {
    * oclusão do chão texturizado (render/solo/) e a parede alta do isométrico (altura em células, esmaecimento).
    */
   visual: {
-    luz: { raioJogador: number; raioSemTocha: number; intensidadeTocha: number; intensidadeSemTocha: number; intensidadeFogo: number; intensidadeJanela: number; intensidadeVila: number; raioJanela: number; raioTocha: number; raioObjeto: number; raioMagia: number; resolucaoMapa: number; realceMinimo: number; escuridaoExterior: number; clareza: number };
+    luz: { raioJogador: number; raioSemTocha: number; intensidadeTocha: number; intensidadeSemTocha: number; haloSemTocha: number[]; intensidadeFogo: number; intensidadeJanela: number; intensidadeVila: number; raioJanela: number; raioTocha: number; raioObjeto: number; raioMagia: number; resolucaoMapa: number; realceMinimo: number; escuridaoExterior: number; clareza: number };
     /** Ajuste de 31/10/2026 (D-130): até quanto ouro cada monte vai (o maior fica com o resto). */
     ouroMontes: number[];
     solo: { amostrasPorCelula: number; raioMistura: number; ruidoBorda: number; aoRaio: number; aoForca: number; macroForca: number; variacaoCobre: number };
