@@ -287,10 +287,11 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     const ciclo = ctx.balance.mundo.ciclo;
     const noite = Math.max(0, Math.min(1, nivel / ciclo.quadros.noite.nivel));
     const realceMinimo = ctx.fase.exterior ? vis.realceMinimo + (ciclo.realceNoite - vis.realceMinimo) * noite : vis.realceMinimo;
-    // Marco 44 (15/11/2026, D-178): na vinheta do exterior, o claro é o da luz do jogador (e escurece por dentro sem tocha).
-    const luzEu = ctx.fase.exterior && eu ? luzes[pontosDoQuadro.indexOf(eu)] : undefined;
-    const vinheta = luzEu ? { raioVinheta: luzEu.raio, nucleo: nivel * (1 - realceMinimo) * (1 - Math.min(1, luzEu.intensidade)) } : {};
-    escuridao.desenhar(palco.mundo, palco.largura(), palco.altura(), { modo, ambiente, nivel, realceMinimo, resolucao: vis.resolucaoMapa, ...vinheta }, centro, luzes);
+    // Marco 44 (15/11/2026, D-178): no exterior a noite depende das luzes (postes, fogueiras, a vila, a tocha): a vinheta,
+    // que só abre um claro em volta do jogador, apagava todas. Lá, mesmo na qualidade baixa, vale o mapa de luzes, numa
+    // resolução menor.
+    const noMapa = ctx.fase.exterior && modo === 'vinheta';
+    escuridao.desenhar(palco.mundo, palco.largura(), palco.altura(), { modo: noMapa ? 'mapa' : modo, ambiente, nivel, realceMinimo, resolucao: noMapa ? Math.min(vis.resolucaoMapa, 0.3) : vis.resolucaoMapa }, centro, luzes);
   };
   const flash = new Graphics();
   palco.tela.addChild(flash);
@@ -348,10 +349,15 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   const luzesDasAreas = luzesDosAmbientes(ctx.fase.ambientes ?? []);
   // Marco 42 (15/11/2026, D-176): no Mundo, a luz em volta é a da tocha; sem ela, só um halo curto.
   // Marco 43 (D-177): com a tocha, a luz é quente e forte; sem ela, só um halo frio e fraco nos pés (o luar).
+  // Marco 44 (15/11/2026, D-178): à noite, a vila não fica no breu: cada casa tem a janela acesa na frente (luz quente,
+  // fraca e curta, como a de uma vela atrás do vidro), além das lanternas dos portões e do poste da praça.
+  const janelas = ctx.fase.exterior ? (ctx.fase.telhados ?? []).map((t) => ({ x: t.x + t.largura / 2, y: t.y + t.altura + 0.4 })) : [];
+  // E o clarão das ruas: a luz de todas as janelas e lanternas somada, fraca, mais forte no centro e sumindo nos muros.
+  const vilas = ctx.fase.exterior ? (ctx.fase.refugios ?? []).filter((r) => r.raio >= 8) : [];
   const semTocha = (e: Entidade) => Boolean(ctx.modo.luzSoComTocha) && !temLuzPropria(e);
   const luzDoJogador = (e: Entidade): { raio: number; cor: number; intensidade: number } => {
     if (semTocha(e)) return { raio: vis.raioSemTocha, cor: 0x9fb4d8, intensidade: vis.intensidadeSemTocha };
-    if (ctx.modo.luzSoComTocha) return { raio: vis.raioJogador, cor: 0xffb060, intensidade: vis.intensidadeTocha };
+    if (ctx.modo.luzSoComTocha) return { raio: vis.raioJogador, cor: 0xff9a48, intensidade: vis.intensidadeTocha };
     return { raio: vis.raioJogador, cor: tema?.luz ?? 0xffd9a0, intensidade: 0.5 };
   };
   const pontosDeLuz = (estado: EstadoJogo, posicao: (e: Entidade) => PontoVisual): PontoDeLuz[] => {
@@ -363,6 +369,8 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
       pontos.push({ x: p.x, y: p.y, semente: 0, ...luzDoJogador(eu), jogador: true });
       // As tochas, velas e fendas de lava do tema perto do jogador.
       for (const a of luzesDasAreas) if (Math.abs(a.x - p.x) < 14 && Math.abs(a.y - p.y) < 11) pontos.push({ x: a.x, y: a.y, cor: a.cor, semente: a.x * 11 + a.y, intensidade: 0.4, raio: a.raio });
+      for (const v of vilas) pontos.push({ x: v.x, y: v.y, cor: 0xffbe80, semente: v.x + v.y * 3, intensidade: vis.intensidadeVila, raio: v.raio * 1.1 });
+      for (const j of janelas) if (Math.abs(j.x - p.x) < 16 && Math.abs(j.y - p.y) < 12) pontos.push({ x: j.x, y: j.y, cor: 0xffb466, semente: j.x * 5 + j.y, intensidade: vis.intensidadeJanela, raio: vis.raioJanela });
       for (const d of acesos) if (Math.abs(d.x - p.x) < 12 && Math.abs(d.y - p.y) < 9) pontos.push({ x: d.x, y: d.y - (d.tipo === 'tocha' ? 0.35 : 0), cor: d.tipo === 'vela' ? 0xffd890 : 0xff9a40, semente: d.x * 7 + d.y, intensidade: d.tipo === 'lava' ? 0.4 : 0.6, raio: d.tipo === 'vela' ? vis.raioObjeto : vis.raioTocha });
     }
     // Marco 31 (31/10/2026, D-130): os outros jogadores também levam luz, e os projéteis brilham no escuro.
@@ -374,10 +382,16 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     }
     for (const pr of estado.projeteis) pontos.push({ x: pr.x, y: pr.y, cor: 0xffc890, semente: pr.id, intensidade: 0.5, raio: vis.raioMagia });
     for (const obj of estado.objetos) {
-      if (obj.tipo === 'loja' || obj.tipo === 'bau' || obj.tipo === 'saida') pontos.push({ x: obj.x, y: obj.y, cor: 0xffc070, semente: obj.x * 31 + obj.y, raio: vis.raioObjeto });
+      if (obj.tipo === 'loja' || obj.tipo === 'bau' || obj.tipo === 'saida') pontos.push({ x: obj.x, y: obj.y, cor: 0xffc070, semente: obj.x * 31 + obj.y, raio: vis.raioObjeto, ...(ctx.fase.exterior && { intensidade: vis.intensidadeJanela }) });
       // Marco 42 (15/11/2026, D-176): o poste de tocha e a fogueira (maior) iluminam em volta (marco 43: do alto do poste).
       // Marco 44 (D-178): a fogueira de acampamento só ilumina acesa.
-      else if (fogoAceso(obj, estado.tick)) pontos.push({ x: obj.x - (obj.tipo === 'poste_tocha' ? 1.1 : 0), y: obj.y - (obj.tipo === 'poste_tocha' ? 1.4 : 0.3), cor: 0xff9a40, semente: obj.x * 13 + obj.y, intensidade: 0.7, raio: obj.tipo === 'fogueira' ? vis.raioTocha * 1.6 : vis.raioTocha });
+      else if (fogoAceso(obj, estado.tick)) {
+        // Marco 44 (D-178): o fogo é a fonte: a chama fica acesa por inteiro (um núcleo curto e pleno, no alto do poste), e
+        // a luz que ela joga no chão nasce embaixo dela e cai com a distância.
+        const alto = obj.tipo === 'poste_tocha' ? 0.75 : 0.25;
+        pontos.push({ x: obj.x, y: obj.y, cor: 0xff9a40, semente: obj.x * 13 + obj.y, intensidade: vis.intensidadeFogo, raio: obj.tipo === 'fogueira' ? vis.raioTocha * 1.6 : vis.raioTocha });
+        pontos.push({ x: obj.x - alto, y: obj.y - alto, cor: 0xffd8a0, semente: obj.x * 17 + obj.y, intensidade: 1, raio: obj.tipo === 'fogueira' ? 1.1 : 0.7 });
+      }
     }
     const s = ctx.fase.portaSaida;
     if (s) pontos.push({ x: s.x, y: s.y, cor: estado.saidaAberta || s.tranca === 'livre' ? 0x9cf0b0 : 0xb0b0c0, semente: 7, raio: vis.raioObjeto });

@@ -5558,8 +5558,13 @@ noite existirem: a escolha entre luz e escuro, e o que se ganha e se arrisca em 
   o começo e o fim se misturavam com o entardecer e o amanhecer. Agora a passagem fica só nessas duas fases. A noite
   ficou cerca de 70% mais escura (`#01020a` a 0,99, mínimo de luz 0,008).
   - Sem tocha, a luz do jogador é um halo fraco de 2 células.
-  - Na vinheta (qualidade baixa e mínima), o claro segue a luz do jogador, em vez de ter o tamanho da tela, e escurece
-    por dentro sem tocha.
+  - **Luz como no mundo real.** No exterior, a luz vem das fontes, mesmo na qualidade baixa: lá vale o mapa de luzes,
+    em resolução menor, porque a vinheta só abria um claro em volta do jogador e apagava todos os fogos.
+    - A tocha é alaranjada e fraca (0,42) e cai com a distância; ela não clareia como o dia.
+    - O fogo dos postes e das fogueiras tem um núcleo pleno (a chama brilha por inteiro), e a luz que ele joga no chão
+      nasce embaixo dele.
+    - Cada casa da vila tem a janela acesa na frente, e as ruas têm um clarão fraco, mais forte no centro e sumindo
+      nos muros.
 - **Visão no escuro** (`ui/visao-no-escuro.ts`).
   - No exterior escuro, os inimigos só aparecem a até 3 células sem luz e a até 10 com a tocha ou perto de um fogo.
   - O inimigo parado na luz de um fogo também aparece.
