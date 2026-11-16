@@ -38,7 +38,7 @@ export const textosMovimento = {
   'movimento.camuflagem': 'Camuflagem',
   'movimento.camuflagem.texto': 'Some da vista por um tempo, andando mais devagar. Atacar revela. A partir do nível 30, os tiros nos 3 s depois de sair levam o seu elemento.',
   'movimento.salto_de_guerra': 'Salto de Guerra',
-  'movimento.salto_de_guerra.texto': 'Salta 10 células (mais 1 a cada 10 níveis) por cima do que houver no caminho e, ao cair, atordoa os inimigos em volta. A partir do nível 30, a queda aplica o seu elemento (no Físico, dano bruto).',
+  'movimento.salto_de_guerra.texto': 'Salta 5 células parado (mais 1 a cada 10 níveis) por cima do que houver no caminho e, ao cair, atordoa os inimigos em volta. Saltando durante a Marcha de Guerra, ganha de 1 a 5 células com o tempo correndo (a metade da corrida já dá as 5); saltar no fim da Arremetida também dá as 5. A partir do nível 30, a queda aplica o seu elemento (no Físico, dano bruto).',
   'movimento.arremetida': 'Arremetida',
   'movimento.arremetida.texto': 'Avança algumas células na direção do ponteiro (no celular, toque o botão e depois o mapa).',
   'movimento.marcha_de_guerra': 'Marcha de Guerra',

@@ -41,7 +41,8 @@ describe('corpo do movimento da classe (D-164)', () => {
     it(`o Salto de Guerra sobe num arco e volta ao chão, com a pose de salto (${nome})`, () => {
       const noAr = saltar(comEventos);
       expect(noAr.length).toBeGreaterThan(10);
-      expect(Math.max(...noAr)).toBeGreaterThan(60);
+      // 15/11/2026: parado, o salto cobre 5 células (o arco é mais baixo que o do salto de 8).
+      expect(Math.max(...noAr)).toBeGreaterThan(35);
       // Sobe e desce: o pico fica no meio do salto.
       const pico = noAr.indexOf(Math.max(...noAr));
       expect(pico).toBeGreaterThan(noAr.length * 0.25);

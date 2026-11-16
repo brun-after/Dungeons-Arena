@@ -302,6 +302,20 @@ function noAlcance(e: Entidade, c: Celula, alcance: number): Celula {
   return { x: e.x + Math.round((c.x - e.x) * k), y: e.y + Math.round((c.y - e.y) * k) };
 }
 
+/**
+ * 15/11/2026: as células a mais do Salto de Guerra. Parado, 0; correndo (a Marcha de Guerra, ainda com o bônus), de 1 até
+ * `extensao` conforme o tempo, com a metade da duração da corrida já dando tudo; no fim da Arremetida, tudo.
+ */
+function extensaoDoSalto(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, atual: ModoDeMovimento | undefined): number {
+  const s = ctx.balance.movimentoClasse.salto;
+  const fimDoDash = e.movimentoClasse?.avancoAteTick;
+  if (fimDoDash !== undefined && estado.tick <= fimDoDash + ticksDe(s.dashGracaMs)) return s.extensao;
+  if (atual?.tipo !== 'marcha' || atual.semBuff || atual.ateTick === undefined) return 0;
+  const total = Math.max(1, atual.ateTick - atual.desdeTick);
+  const fracao = Math.min(1, (estado.tick - atual.desdeTick) / total / Math.max(0.01, s.corridaMetadePct / 100));
+  return Math.min(s.extensao, Math.max(1, Math.round(1 + (s.extensao - 1) * fracao)));
+}
+
 /** Shift: usa (ou desfaz) a mecânica ativa. `alvo`: o ponto mirado (as que miram). */
 export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Entidade, saida: EventoSimulacao[], dx?: number, dy?: number, alvo?: Celula, botao?: number): void {
   // D-172: cada movimento tem o próprio botão; usar um o torna o ativo (o que estava em curso acaba).
@@ -313,6 +327,8 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
   const recusar = (motivo: string) => { saida.push({ t: 'movimentoClasse', tick, id: e.id, mov: m.id, fase: 'recusado', motivo }); };
   const atual = modo(e);
   if (atual && (atual.tipo === 'salto' || atual.tipo === 'tirolesa')) return;
+  // 15/11/2026: lido antes de a corrida acabar (usar o salto encerra a marcha).
+  const extensao = m.tipo === 'salto' ? extensaoDoSalto(estado, ctx, e, atual) : 0;
   if (atual?.tipo === 'voo' && atual.id !== m.id && !cabeAli(ctx, e.px, e.py)) { recusar('pouso'); return; }
   (e.movimentoClasse ??= { ativo: m.id, cargas: {} }).ativo = m.id;
   // Os modos de viagem desligam no mesmo botão.
@@ -371,8 +387,9 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
       // A queda mais longe que cabe (passa por cima do que houver no meio).
       let destino: { x: number; y: number } | null = null;
       // Marco 42 (15/11/2026, D-176): o salto passa o muro baixo, não o alto nem a montanha (a reta para antes).
-      let teto = alcance;
-      for (let k = 1; k <= alcance; k++) if (!passaDesnivel(ctx.balance.relevo, desnivel(ctx.fase, e, aFrente(e, r, k)), 'saltar')) { teto = k - 1; break; }
+      const longe = alcance + extensao;
+      let teto = longe;
+      for (let k = 1; k <= longe; k++) if (!passaDesnivel(ctx.balance.relevo, desnivel(ctx.fase, e, aFrente(e, r, k)), 'saltar')) { teto = k - 1; break; }
       for (let k = teto; k >= 1 && !destino; k--) {
         const c = aFrente(e, r, k);
         if (cabeAli(ctx, c.x, c.y)) destino = c;
@@ -410,6 +427,7 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
       if (m.tipo === 'recuo') largarSeguirNoRecuo(estado, ctx, e, rumo);
       saida.push({ t: 'movimentoClasse', tick, id: e.id, mov: m.id, fase: 'inicio', ...(ponta && { ponta }) });
       if (m.tipo === 'recuo') (e.movimentoClasse ??= { ativo: m.id, cargas: {} }).recuoTick = tick;
+      if (m.tipo === 'avanco') (e.movimentoClasse ??= { ativo: m.id, cargas: {} }).avancoAteTick = Math.max(tick, e.deslize?.ateTick ?? tick);
       if (m.tipo === 'recuo' && p.armadilha > 0) armadilhaDoRecuo(estado, ctx, e, { x, y }, pontaDaAfinidade(ctx, e, tick), saida);
       return;
     }

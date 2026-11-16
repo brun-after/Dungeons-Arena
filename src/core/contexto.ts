@@ -209,7 +209,12 @@ export interface Balance {
     recargaEmCombatePct: number;
     viagemPesadaPct: number;
     /** Marco 40 (D-164): o salto do Guerreiro (células por segundo, o raio e o atordoamento da queda). */
-    salto: { velocidade: number; raio: number; atordoarMs: number; danoPorNivel: number };
+    /**
+     * 15/11/2026: parado, o salto cobre o alcance do nível; a corrida (a Marcha de Guerra) soma de 1 a `extensao`
+     * células conforme o tempo correndo, e `corridaMetadePct` % da duração dela já dá a `extensao` inteira. Saltar até
+     * `dashGracaMs` depois do fim da Arremetida também dá a `extensao` inteira.
+     */
+    salto: { velocidade: number; raio: number; atordoarMs: number; danoPorNivel: number; extensao: number; corridaMetadePct: number; dashGracaMs: number };
     /** D-168: os servos vão num anel em volta do Necromante (raio em células), no mínimo nesta velocidade. */
     nevoa: { servosRaio: number; anel: number; velocidadeMin: number };
     /** Marco 40 (14/11/2026, D-168): o eco do Piscar (vida, duração, quem provoca) e a invisibilidade do Mago. */

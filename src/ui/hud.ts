@@ -9,6 +9,9 @@ import { BuffsPendentes } from './buffs-pendentes';
 import { icone } from './icones';
 import type { DadosRede } from './diagnostico';
 import type { IdentidadeClasse } from './barra-classe';
+import type { ContextoSimulacao } from '../core/contexto';
+import type { EstadoJogo } from '../core/estado';
+import { criarPainelEstatisticas, estatisticasDoJogador } from './estatisticas';
 
 const MAX_LINHAS_LOG = 6;
 
@@ -51,12 +54,17 @@ export class Hud {
   /** D-067: buffs ofensivos armados e a carga de refúgio. */
   private readonly pendentes: BuffsPendentes;
   private ultimo = '';
+  /** 15/11/2026: o dano, a velocidade de ataque e a de movimento no canto inferior esquerdo (só no computador). */
+  private readonly estatisticas = criarPainelEstatisticas();
+  private proximaEstatistica = 0;
 
   constructor(
     raiz: HTMLElement,
     nomeDe: (id: string) => string | null = () => null,
     /** Marco 18: nome e ícone de uma habilidade (o chip do estudo). */
     habilidade: (id: string) => { nome: string; icone: string } | null = () => null,
+    /** O contexto e o estado, para o painel de estatísticas (sem eles, o painel não aparece). */
+    private readonly mundo?: { ctx: ContextoSimulacao; estado: () => EstadoJogo },
   ) {
     this.pendentes = new BuffsPendentes((id) => habilidade(id)?.nome ?? id, (id) => habilidade(id)?.icone ?? 'livro');
     this.status = document.createElement('div');
@@ -108,7 +116,8 @@ export class Hud {
     detalhe.textContent = t('morte.reviver');
     this.morte.append(titulo, detalhe);
 
-    raiz.append(this.log, this.morte);
+    this.estatisticas.elemento.hidden = true;
+    raiz.append(this.log, this.morte, this.estatisticas.elemento);
   }
   /** Marco 16: desmonta o que prende a página (o ouvinte de teclado dos chips de efeito). */
   destruir(): void {
@@ -121,6 +130,7 @@ export class Hud {
     if (!jogador) return;
     this.chips.atualizar(jogador, tick);
     this.pendentes.atualizar(jogador, tick);
+    this.atualizarEstatisticas(jogador, tick);
     const { barra: bc, encarnacao, encarnacaoS = 0, invocacoes: inv = null } = identidade;
     const pct = bc ? Math.round(bc.fracao * 100) : -1;
     const textoInv = inv ? `${inv.vivas}/${inv.limite}${inv.extras > 0 ? ` +${inv.extras}` : ''}` : '';
@@ -163,6 +173,14 @@ export class Hud {
       this.invocacoes.dataset.cheio = String(inv.vivas >= inv.limite);
     }
     this.morte.hidden = !jogador.morto;
+  }
+
+  /** O painel de estatísticas: a conta (a ficha derivada) roda umas 5 vezes por segundo, não a cada quadro. */
+  private atualizarEstatisticas(jogador: Entidade, tick: number): void {
+    if (!this.mundo || document.body.classList.contains('toque')) return;
+    if (tick < this.proximaEstatistica && tick >= this.proximaEstatistica - 12) return;
+    this.proximaEstatistica = tick + 12;
+    this.estatisticas.atualizar(jogador.morto ? null : estatisticasDoJogador(this.mundo.ctx, jogador, this.mundo.estado()));
   }
 
   /** Indicador de rede (§2.15): ping e qualidade, só na arena. */

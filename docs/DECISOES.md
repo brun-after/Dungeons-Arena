@@ -1,8 +1,9 @@
 # Decisões de projeto
 
-**Versão:** 1.26 · **Data:** 15/11/2026
+**Versão:** 1.27 · **Data:** 15/11/2026
 
 > **Histórico**
+> - **1.27 (15/11/2026)**: D-179: o Salto de Guerra parado cobre 5 células e a Marcha ou a Arremetida o estendem; painel de estatísticas do personagem no computador.
 > - **1.26 (15/11/2026)**: D-178: marco 44: a noite com consequência (visão no escuro, a tocha que atrai e afasta, a fogueira de acampamento, a caça noturna, a vila pela hora e os elementos pela hora); a luz vinda das fontes, a mata escura só entre as árvores, as árvores atravessáveis, a zona de fácil camuflagem, a calma perto da vila e das entradas e as magias que iluminam.
 > - **1.25 (15/11/2026)**: D-177: marco 43: o relevo na geometria, a geografia de altura primeiro, o cenário em 3D composto pela função de cada lugar e as tochas de verdade.
 > - **1.24 (15/11/2026)**: D-176: marco 42: as cores do Mundo, o dia e a noite, a tocha, a noite perigosa, as matas fechadas, o elemento vento e o relevo.
@@ -5639,3 +5640,15 @@ Os números ficam em `balance.mundo.tocha`, `noite`, `acampamento`, `vilaNoite` 
   regiões em que o vampiro ou o esqueleto já aparecem de dia, eles dormem de dia em vez de sumir.
 - A taverna cheia aparece só no quadro de missões. Ainda não há gente nova na praça.
 - O vendedor da noite usa a figura do mercador errante.
+
+## D-179 — Salto de Guerra estendido pela corrida e painel de estatísticas (15/11/2026)
+
+- **Salto parado**: 5 células no nível 1, com o mesmo crescimento de antes (+1 a cada 10 níveis).
+- **Com a corrida**: saltar durante a Marcha de Guerra soma de 1 a 5 células conforme o tempo correndo. Correr metade da
+  duração da Marcha já dá as 5. Atacar ou ser atingido tira o bônus e, com ele, a extensão.
+- **Com a Arremetida**: saltar até 500 ms depois do fim do deslize dá as 5 células.
+- O máximo (5 + 5 no nível 1, 15 + 5 no 100) é o alcance que o salto tinha. Os números ficam em
+  `balance.movimentoClasse.salto` (`extensao`, `corridaMetadePct`, `dashGracaMs`).
+- **Painel de estatísticas** (`ui/estatisticas.ts`), só no computador (sem a classe `toque`): dano do ataque básico,
+  ataques por segundo e células por segundo, no canto inferior esquerdo da tela do jogo e da aba Visão geral da mochila.
+  A conta espelha a do motor (recarga do básico com Destreza, estilos, buffs e arma; velocidade sem o arranque).
