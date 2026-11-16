@@ -6,6 +6,8 @@ import { faixaSuperior } from './aviso';
 import { IndicadorCombo } from './combos';
 import { fracaoMira } from '../combat/mira';
 import { perfilVisualDe } from '../render/perfil-visual';
+import { corPelaParticipacao } from '../render/movimento/nuvem-nevoa';
+import { vinculoDe, type PontaElemental } from '../progression/vinculo';
 import { visualDasComuns } from '../render/visual-comum';
 import { CamadaCombosTaticos } from '../render/combos-taticos';
 // Apresentação do marco 12 (14/10/2026), D-056: junta numa peça só o que a cena ganhou — áudio, partículas,
@@ -178,10 +180,13 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   // Marco 40 (14/11/2026): o companheiro que é o veículo do dono (a montaria, o falcão que carrega) vai com ele.
   const comVeiculo = (p: (e: Entidade) => PontoVisual) => (e: Entidade) => corpoMovimento.posicaoForcada(e, o.estado(), p) ?? p(e);
   corpoMovimento.ligar(o.bus, o.estado, () => performance.now());
+  const corDaPonta = (p: PontaElemental) => Number.parseInt((p === 'fisico' ? '#d8cfc0' : ctx.conteudo.elementos.get(p)?.cor ?? '#ffffff').slice(1), 16);
   const rastrosMovimento = new RastrosDeMovimento(palco.chao, palco.efeitos, corpoMovimento, {
     projecao: () => camera.projecaoAtual, posicao: (e) => posicaoDoQuadro(e), reduzido,
     // D-168: a cor da ponta (o Físico, a do aço) e quem o jogador local vê como aliado (o rastro do Piscar com eco).
-    corDaPonta: (p) => Number.parseInt((p === 'fisico' ? '#d8cfc0' : ctx.conteudo.elementos.get(p)?.cor ?? '#ffffff').slice(1), 16),
+    corDaPonta,
+    // D-181 (16/11/2026): as cinzas da névoa na mistura das afinidades, cada uma pelo quanto participa.
+    corDasAfinidades: (e) => corPelaParticipacao(vinculoDe(ctx, e, o.estado().tick), corDaPonta),
     aliadoDoLocal: (e) => {
       const eu = o.estado().entidades.find((x) => x.id === idLocal);
       return e.id === idLocal || (!!eu && podeAjudar(eu, e, ctx.modo));
