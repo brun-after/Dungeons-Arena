@@ -43,6 +43,13 @@ export const ptBR = {
   'cabecalho.cameraJanela': 'Câmera: janela',
   'cabecalho.cameraCentralizada': 'Câmera: centro',
   'hud.vida': 'Vida {atual} de {maximo}',
+  // 15/11/2026: o painel de estatísticas do computador (visão geral e tela do jogo).
+  'estatisticas.titulo': 'Estatísticas do personagem',
+  'estatisticas.danoDica': 'Dano do ataque básico (mínimo e máximo)',
+  'estatisticas.ataqueDica': 'Velocidade de ataque: ataques básicos por segundo',
+  'estatisticas.movimentoDica': 'Velocidade de movimento: células por segundo',
+  'estatisticas.ataque': '{v} atq/s',
+  'estatisticas.movimento': '{v} cél/s',
   'hud.mana': 'Mana {atual} de {maximo}',
   // Marco 21 (D-088): a barra de fúria do Guerreiro.
   'hud.furia': 'Fúria {pct}%',

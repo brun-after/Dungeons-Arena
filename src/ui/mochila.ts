@@ -16,13 +16,11 @@ import { DT_MS } from '../core/loop';
 import { ticksRestantesDoEstudo } from '../progression/habilidades-personagem';
 import { derivarFicha, multiplicadoresDoItem } from '../progression/derivados';
 import { descontoNaLojaPct, pontosUteis, perfilDestreza, reducaoRecargaBasicoPct, vidaPorCelula } from '../progression/efeitos-atributo';
-import { multiplicadorDosEstilos, poderBase } from '../combat/poder-base';
-import { EFEITOS_NEUTROS, radarDe } from '../progression/estilos';
 import { painelDeEstilos, previaDoPonto } from './radar-estilos';
+import { criarPainelEstatisticas, danoDoBasico, estatisticasDoJogador } from './estatisticas';
 import { criarTelaAtualizacao } from './tela-atualizacao';
 import { painelDoVinculo } from './radar-vinculo';
 import { criarDicaAtributo, linhasDaDica, nomeDoAtributo, type DicaAtributo } from './dica-atributo';
-import { faixaDaFormula } from '../combat/dados';
 import { habilidadeDoAtor } from '../combat/perfil';
 import { cabeNoSlot, NOMES_ATRIBUTOS, type Item } from '../progression/itens';
 import { consumiveisComAtalho } from '../progression/inventario';
@@ -405,11 +403,7 @@ export function criarMochila(o: OpcoesMochila): Mochila {
     const basico = habilidadeDoAtor(ctx, j, j.ataqueBasico);
     if (basico?.formulaDano) {
       // Marco 39 (D-148): a rolagem e o bônus fixo do poder base (nível e classe), com os estilos e os itens por cima.
-      const faixaBruta = faixaDaFormula(basico.formulaDano);
-      const poder = poderBase(j.nivel, ctx.balance, ctx.conteudo.classes.get(bolsa.classeId)?.poderPct);
-      const extra = (1 + efetiva.danoPct / 100) * multiplicadorDosEstilos(radarDe(ctx, bolsa, efetiva.atributos, j.nivel)?.efeitos ?? EFEITOS_NEUTROS, basico);
-      const faixa = { min: Math.round(faixaBruta.min * poder.multRolagem * extra), max: Math.round(faixaBruta.max * poder.multRolagem * extra) };
-      const bonus = Math.round(poder.bonus * extra);
+      const dano = danoDoBasico(ctx, j, bolsa, efetiva) ?? { min: 0, max: 0 };
       const recarga = (basico.recargaMs * (1 - reducaoRecargaBasicoPct(efetiva.atributos, ctx.balance, perfilDestreza(ctx, j)) / 100)) / 1000;
       const manaPorSegundo =
         ctx.balance.recursos.regenManaPorSegundo * (1 + (Math.max(0, pontosUteis(efetiva.atributos.sabedoria, ctx.balance) - 10) * ctx.balance.atributos.efeitos.regenManaPorSabedoriaPct) / 100);
@@ -417,15 +411,15 @@ export function criarMochila(o: OpcoesMochila): Mochila {
         'p',
         'derivados-ficha',
         t('ficha.derivados', {
-          min: faixa.min + bonus,
-          max: faixa.max + bonus,
+          min: dano.min,
+          max: dano.max,
           recarga: recarga.toFixed(2).replace('.', ','),
           mana: manaPorSegundo.toFixed(1).replace('.', ','),
           vida: vidaPorCelula(efetiva.atributos, ctx.balance),
           desconto: descontoNaLojaPct(efetiva.atributos, ctx.balance),
         }),
       );
-      derivados.dataset.danoMax = String(faixa.max + bonus);
+      derivados.dataset.danoMax = String(dano.max);
       corpo.append(derivados);
     }
     // Marco 10A-3: dispensar as invocações (só aparece com alguma viva).
@@ -483,6 +477,13 @@ export function criarMochila(o: OpcoesMochila): Mochila {
       for (const [id, nome] of [['itens', 'Gerenciar equipamentos'], ['ficha', 'Evoluir ficha'], ['habilidades', 'Preparar habilidades'], ['diario', 'Consultar diário']] as const)
         atalhos.append(botao(nome, `atalho-${id}`, () => { aba = id; desenhar(); }));
       conteudo.append(atalhos);
+      // 15/11/2026: no computador, o dano, a velocidade de ataque e a de movimento no canto inferior esquerdo.
+      const estado = o.estado?.();
+      if (!o.toque && estado) {
+        const painel = criarPainelEstatisticas('painel-estatisticas na-visao-geral');
+        painel.atualizar(estatisticasDoJogador(ctx, j, estado));
+        conteudo.append(painel.elemento);
+      }
     }
     else if (aba === 'itens') { conteudo.classList.add('inventario-paineis'); desenharItens(j, conteudo); }
     else if (aba === 'ficha') desenharFicha(j, conteudo);

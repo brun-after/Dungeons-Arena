@@ -202,7 +202,7 @@ export function moverEntidades(
 }
 
 /** Células por segundo da entidade agora (destreza, lentidão, conjuração, classe e efeitos). */
-function velocidadeAgora(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao): number {
+export function velocidadeAgora(e: Entidade, estado: EstadoJogo, ctx: ContextoSimulacao): number {
   // Marco 10A-3: invocação (não dominada) anda uma célula a cada `passoMs` (§2.9, 380 ms).
   const inv = e.invocacao;
   const vel =
