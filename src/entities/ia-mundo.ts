@@ -1,6 +1,6 @@
 // 02/11/2026: exército próprio do boss e atenção atraída por combate recente no Mundo.
 import { fogoAceso } from '../world/fogo-aceso';
-import { percepcaoNoEscuro } from '../mundo/noite';
+import { fatorDaNoite, percepcaoNoEscuro } from '../mundo/noite';
 import { temLuzPropria } from '../combat/luz-propria';
 import { hashTexto } from '../core/rng';
 import type { ContextoSimulacao } from '../core/contexto';
@@ -53,15 +53,18 @@ export function raioDeAtencao(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
   // Marco 44 (D-178): o escuro entra por alvo (raioContra), porque quem está iluminado é visto de longe.
   const base=base0;
   const r=ctx.balance.mundo.atencaoBatalha, desde=estado.tick-ticksDe(r.memoriaMs);
+  // Marco 44 (15/11/2026, D-178): à noite, a batalha por perto também é notada de mais perto e chama menos (50% na noite
+  // fechada): antes o raio e o bônus eram os do dia.
+  const noite=fatorDaNoite(ctx), raioBatalha=r.raio*noite;
   const porId=new Map(estado.entidades.map(a=>[a.id,a]));
   const batalha=estado.entidades.some(a=>{
-    if(!vivo(a)||a===e||!podeAjudar(e,a,ctx.modo)||chebyshev(e,a)>r.raio)return false;
+    if(!vivo(a)||a===e||!podeAjudar(e,a,ctx.modo)||chebyshev(e,a)>raioBatalha)return false;
     const recebeu=a.participacao.some(p=>{const alvo=porId.get(p.id);return p.tick>=desde&&alvo&&alvoOfensivoValido(estado,ctx,e,alvo);});
     const alvo=a.ia?.alvoId?porId.get(a.ia.alvoId):undefined;
     const atacou=alvo&&alvoOfensivoValido(estado,ctx,e,alvo)&&alvo.participacao.some(p=>p.id===a.id&&p.tick>=desde);
     return recebeu||!!atacou;
   });
-  return base+(batalha?r.bonus:0);
+  return base+(batalha?r.bonus*noite:0);
 }
 
 /**
@@ -100,7 +103,7 @@ export function raioContra(estado: EstadoJogo, ctx: ContextoSimulacao, monstro: 
   if (!ctx.fase.exterior) return raio;
   const reacao = reacaoAoFogo(estado, ctx, monstro, alvo);
   if (reacao === 'evita' && !provocou(monstro, alvo)) return -1;
-  const visto = iluminado(estado, ctx, alvo) ? raio : percepcaoNoEscuro(ctx, monstro, raio);
+  const visto = iluminado(estado, ctx, alvo) ? raio : percepcaoNoEscuro(ctx, alvo, raio);
   return reacao === 'atraido' ? visto * ctx.balance.mundo.tocha.atraiMult : visto;
 }
 

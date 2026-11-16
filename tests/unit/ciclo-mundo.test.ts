@@ -1,6 +1,6 @@
 // Marco 42 (15/11/2026, D-176): o dia e a noite do Mundo.
 import { describe, expect, it } from 'vitest';
-import { copaNaTela, escuroBaseEm, escuroDoLugar, horaDoMundo, luzDaHora, type RegrasDoCiclo } from '../../src/mundo/ciclo';
+import { escuroDoLugar, horaDoMundo, luzDaHora, type RegrasDoCiclo } from '../../src/mundo/ciclo';
 import { BALANCE_PADRAO } from '../../src/core/contexto';
 
 const R: RegrasDoCiclo = BALANCE_PADRAO.mundo.ciclo;
@@ -34,20 +34,6 @@ describe('ciclo do dia', () => {
     expect(escuroDoLugar(dia, 0, false)).toBe(0);
     expect(escuroDoLugar(dia, 1, false)).toBe(1);
     expect(escuroDoLugar(dia, 0, true)).toBe(1);
-  });
-
-  it('a mata fechada é escura só no meio das árvores (D-178): no caminho e na clareira, o sol chega', () => {
-    // Árvores de duas em duas células (o espaçamento da geografia) de 6 a 30, cortadas por uma estrada de y = 16 a 20.
-    const largura = 40;
-    const obstaculos = new Uint8Array(largura * largura);
-    for (let y = 6; y <= 30; y += 2) for (let x = 6; x <= 30; x += 2) if (y < 16 || y > 20) obstaculos[y * largura + x] = 3;
-    const fase = { largura, altura: largura, obstaculos };
-    expect(escuroBaseEm(fase, 16, 10)).toBe(1);
-    expect(escuroBaseEm(fase, 18, 18)).toBe(0);
-    expect(escuroBaseEm(fase, 37, 37)).toBe(0);
-    expect(escuroBaseEm({ largura, altura: largura }, 16, 10)).toBe(0);
-    const dia = horaDoMundo(CICLO * 2 + (R.minutos.amanhecer + R.minutos.dia / 2) * MIN, R);
-    expect(copaNaTela(1, dia, R)).toBeCloseTo(R.mataDeDiaPct / 100);
   });
 
   it('de dia a tela quase não escurece; na mata, escurece como à noite', () => {

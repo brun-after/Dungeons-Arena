@@ -82,7 +82,12 @@ describe('a tocha à noite (D-178)', () => {
     const meio = monstro('meio', 10, 6);
     expect(alfaNoEscuro(ctx, estado, eu, perto, 1)).toBe(1);
     expect(alfaNoEscuro(ctx, estado, eu, meio, 1)).toBe(0);
-    expect(alfaNoEscuro(ctx, estado, eu, meio, 0)).toBe(1);
+    // De dia, vê-se quem está ao sol; quem está na sombra de uma árvore (a camuflagem) só de perto, como à noite.
+    const semArvores = new Uint8Array(ctx.fase.largura * ctx.fase.altura);
+    expect(alfaNoEscuro({ ...ctx, fase: { ...ctx.fase, obstaculos: semArvores } }, estado, eu, meio, 0)).toBe(1);
+    const arvore = semArvores.slice();
+    arvore[Math.round(meio.y) * ctx.fase.largura + Math.round(meio.x)] = 3;
+    expect(alfaNoEscuro({ ...ctx, fase: { ...ctx.fase, obstaculos: arvore } }, estado, eu, meio, 0)).toBe(0);
     acender();
     expect(alfaNoEscuro(ctx, estado, eu, meio, 1)).toBe(1);
     expect(alfaNoEscuro(ctx, estado, eu, monstro('longe', 10, 14), 1)).toBe(0);

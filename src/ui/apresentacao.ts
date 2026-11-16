@@ -42,7 +42,7 @@ import { fracaoFuria } from '../combat/furia';
 import { sintoniaDe } from '../progression/sintonia';
 import { ControladorImpacto } from '../render/impacto';
 import { ACHATAMENTO_ISO, CamadaEscuridao, type LuzNaTela } from '../render/escuridao';
-import { copaNaTela, escuroBaseEm, horaDoMundo, luzDaHora } from '../mundo/ciclo';
+import { horaDoMundo, luzDaHora } from '../mundo/ciclo';
 import { temLuzPropria } from '../combat/luz-propria';
 import { agoraDoMundo } from './hora-do-mundo';
 import { alfaNoEscuro } from './visao-no-escuro';
@@ -257,13 +257,13 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
   const escuroTema = tema?.escuridao ?? ESCURIDAO_PADRAO;
   // Ajuste de 31/10/2026 (pedido do usuário): o escuro fora da luz fica mais claro pela `clareza` (0,5 = metade).
   const nivelEscuro = (ctx.fase.exterior ? vis.escuridaoExterior : escuroTema.nivel) * (1 - vis.clareza);
-  // Marco 42 (15/11/2026, D-176): no exterior do Mundo, o escuro segue a hora (mundo/ciclo.ts) e as matas fechadas.
-  const escuroAgora = (jogador: { x: number; y: number } | null): { ambiente: number; nivel: number } => {
+  // Marco 42 (15/11/2026, D-176): no exterior do Mundo, o escuro segue a hora (mundo/ciclo.ts).
+  const escuroAgora = (): { ambiente: number; nivel: number } => {
     if (!ctx.fase.exterior) return { ambiente: escuroTema.ambiente, nivel: nivelEscuro };
     const ciclo = ctx.balance.mundo.ciclo;
     const hora = horaDoMundo(agoraDoMundo(), ciclo);
-    // Marco 44 (D-178): de dia, a mata fechada escurece a tela só em parte (a visão dos monstros segue a da noite).
-    return luzDaHora(hora, ciclo, jogador ? copaNaTela(escuroBaseEm(ctx.fase, jogador.x, jogador.y), hora, ciclo) : 0);
+    // Marco 44 (D-178): a mata fechada não escurece a tela: ela esconde pela sombra das árvores (world/camuflagem.ts).
+    return luzDaHora(hora, ciclo);
   };
   let pontosDoQuadro: PontoDeLuz[] = [];
   /** As luzes do quadro, da grade para a tela (depois da câmera aplicada). */
@@ -284,8 +284,7 @@ export function montarApresentacao(o: OpcoesApresentacao): Apresentacao {
     }
     const modo = qualidade().escuridao;
     document.body.dataset.escuridao = modo;
-    const eu = pontosDoQuadro.find((p) => p.jogador) ?? null;
-    const { ambiente, nivel } = escuroAgora(eu);
+    const { ambiente, nivel } = escuroAgora();
     // Marco 43 (D-177): no céu aberto, o mínimo de luz cai com a noite (até `realceNoite` na noite fechada).
     const ciclo = ctx.balance.mundo.ciclo;
     const noite = Math.max(0, Math.min(1, nivel / ciclo.quadros.noite.nivel));
