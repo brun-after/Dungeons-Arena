@@ -375,6 +375,15 @@ const DO_JEITO: Readonly<Record<Jeito, Record<EstadoBase, string>>> = {
   arco: { ...HUMANO, golpe: 'ual1:Pistol_Shoot' },
   arremesso: { ...HUMANO, golpe: 'ual2:OverhandThrow' },
 };
+/**
+ * Marco 45 (16/11/2026, D-181): o atlas dos inimigos não passa de 4096 px de lado (o limite de textura de muitos
+ * celulares); os quadros grandes (dragões, Mãe-Colmeia, os enormes) baixam os pixels por célula para caber.
+ */
+const pxQueCabe = (q?: { largura: number; altura: number }): { pxCelula: number } | object => {
+  if (!q) return {};
+  const px = Math.min(72, Math.floor(4096 / (21 * q.largura)), Math.floor(4096 / (16 * q.altura)));
+  return px < 72 ? { pxCelula: px } : {};
+};
 for (const [nome, h] of Object.entries(HUMANOS_FILO)) {
   const t = TRAJES[h.traje];
   RECEITAS.push({
@@ -382,12 +391,12 @@ for (const [nome, h] of Object.entries(HUMANOS_FILO)) {
     sombrio: true, semCapuz: true,
     cores: { Ranger: h.roupa, Peasant: h.roupa, Superhero: h.pele, Regular: h.pele, Hair: 0x1a1a1a },
     ...(h.emissao ? { emissao: { Eye: h.emissao } } : {}),
-    animacoes: DO_JEITO[h.jeito], ...(h.quadro ? { quadro: h.quadro } : {}),
+    animacoes: DO_JEITO[h.jeito], ...(h.quadro ? { quadro: h.quadro } : {}), ...pxQueCabe(h.quadro),
   });
 }
 // O Necromante Ancestral (governante de Umbrália): o kit do necromante no grau 5 com a coroa de osso (chefes-vivos.ts).
 RECEITAS.push({ nome: 'necromante_ancestral', veste: 'necromante_ancestral', corpo: RANGER_M, cabeca: CABECA_M, altura: 1.2, sombrio: true, semCapuz: true,
   cores: { Ranger: 0x3e3446, Superhero: 0xc4c0c8, Regular: 0xc4c0c8, Hair: 0x9c96a4 }, animacoes: MAGIA });
 for (const [nome, c] of Object.entries(PROCS_FILO)) {
-  RECEITAS.push({ nome, corpo: `proc:${nome}`, altura: c.altura, animacoes: null, exposicao: 1.5, ...(c.quadro ? { quadro: c.quadro } : {}) });
+  RECEITAS.push({ nome, corpo: `proc:${nome}`, altura: c.altura, animacoes: null, exposicao: 1.5, ...(c.quadro ? { quadro: c.quadro } : {}), ...pxQueCabe(c.quadro) });
 }

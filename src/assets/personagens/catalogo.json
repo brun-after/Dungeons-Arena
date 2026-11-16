@@ -1,9 +1,9 @@
 {
   "almirante_dos_ventos": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
+    "quadroL": 187,
+    "quadroA": 180,
+    "ancoraX": 93.5,
+    "ancoraY": 144,
     "pxCelula": 72,
     "colunas": 42,
     "faixa": 21,
@@ -21860,11 +21860,11 @@
     "altura": 0.75
   },
   "colosso_de_geodo": {
-    "quadroL": 158,
-    "quadroA": 180,
-    "ancoraX": 79,
-    "ancoraY": 144,
-    "pxCelula": 72,
+    "quadroL": 194,
+    "quadroA": 194,
+    "ancoraX": 97,
+    "ancoraY": 153.86206896551724,
+    "pxCelula": 67,
     "colunas": 42,
     "faixa": 21,
     "estados": {
@@ -22020,11 +22020,11 @@
     "altura": 1.4
   },
   "dragao_da_fornalha": {
-    "quadroL": 374,
-    "quadroA": 302,
-    "ancoraX": 187,
-    "ancoraY": 186.95238095238096,
-    "pxCelula": 72,
+    "quadroL": 192,
+    "quadroA": 178,
+    "ancoraX": 96,
+    "ancoraY": 107.54166666666666,
+    "pxCelula": 37,
     "colunas": 42,
     "faixa": 21,
     "estados": {
@@ -22060,11 +22060,11 @@
     "altura": 2.6
   },
   "dragao_das_ruinas": {
-    "quadroL": 374,
-    "quadroA": 302,
-    "ancoraX": 187,
-    "ancoraY": 186.95238095238096,
-    "pxCelula": 72,
+    "quadroL": 192,
+    "quadroA": 178,
+    "ancoraX": 96,
+    "ancoraY": 107.54166666666666,
+    "pxCelula": 37,
     "colunas": 42,
     "faixa": 21,
     "estados": {
@@ -22100,11 +22100,11 @@
     "altura": 2.6
   },
   "dragao_do_silencio": {
-    "quadroL": 374,
-    "quadroA": 302,
-    "ancoraX": 187,
-    "ancoraY": 186.95238095238096,
-    "pxCelula": 72,
+    "quadroL": 192,
+    "quadroA": 178,
+    "ancoraX": 96,
+    "ancoraY": 107.54166666666666,
+    "pxCelula": 37,
     "colunas": 42,
     "faixa": 21,
     "estados": {
@@ -22140,11 +22140,11 @@
     "altura": 2.6
   },
   "dragao_engrenado": {
-    "quadroL": 374,
-    "quadroA": 302,
-    "ancoraX": 187,
-    "ancoraY": 186.95238095238096,
-    "pxCelula": 72,
+    "quadroL": 192,
+    "quadroA": 178,
+    "ancoraX": 96,
+    "ancoraY": 107.54166666666666,
+    "pxCelula": 37,
     "colunas": 42,
     "faixa": 21,
     "estados": {
@@ -22180,11 +22180,11 @@
     "altura": 2.6
   },
   "dragao_fermentado": {
-    "quadroL": 374,
-    "quadroA": 302,
-    "ancoraX": 187,
-    "ancoraY": 186.95238095238096,
-    "pxCelula": 72,
+    "quadroL": 192,
+    "quadroA": 178,
+    "ancoraX": 96,
+    "ancoraY": 107.54166666666666,
+    "pxCelula": 37,
     "colunas": 42,
     "faixa": 21,
     "estados": {
@@ -22220,10 +22220,10 @@
     "altura": 2.6
   },
   "enxame_putrido": {
-    "quadroL": 130,
-    "quadroA": 130,
-    "ancoraX": 65,
-    "ancoraY": 93.88888888888889,
+    "quadroL": 187,
+    "quadroA": 187,
+    "ancoraX": 93.5,
+    "ancoraY": 129.46153846153845,
     "pxCelula": 72,
     "colunas": 42,
     "faixa": 21,
@@ -22700,10 +22700,10 @@
     "altura": 0.72
   },
   "fornalheiro": {
-    "quadroL": 137,
-    "quadroA": 158,
-    "ancoraX": 68.5,
-    "ancoraY": 125.68181818181819,
+    "quadroL": 187,
+    "quadroA": 180,
+    "ancoraX": 93.5,
+    "ancoraY": 144,
     "pxCelula": 72,
     "colunas": 42,
     "faixa": 21,
@@ -22900,11 +22900,11 @@
     "altura": 0.55
   },
   "guardiao_de_marmore": {
-    "quadroL": 137,
-    "quadroA": 158,
-    "ancoraX": 68.5,
-    "ancoraY": 125.68181818181819,
-    "pxCelula": 72,
+    "quadroL": 194,
+    "quadroA": 194,
+    "ancoraX": 97,
+    "ancoraY": 153.86206896551724,
+    "pxCelula": 67,
     "colunas": 42,
     "faixa": 21,
     "estados": {
@@ -33610,11 +33610,11 @@
     "altura": 1.2
   },
   "hierofante": {
-    "quadroL": 137,
-    "quadroA": 158,
-    "ancoraX": 68.5,
-    "ancoraY": 125.68181818181819,
-    "pxCelula": 72,
+    "quadroL": 194,
+    "quadroA": 194,
+    "ancoraX": 97,
+    "ancoraY": 153.86206896551724,
+    "pxCelula": 67,
     "colunas": 42,
     "faixa": 21,
     "estados": {
@@ -33650,10 +33650,10 @@
     "altura": 1.3
   },
   "imperatriz_das_estatuas": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
+    "quadroL": 187,
+    "quadroA": 180,
+    "ancoraX": 93.5,
+    "ancoraY": 144,
     "pxCelula": 72,
     "colunas": 42,
     "faixa": 21,
@@ -33770,11 +33770,11 @@
     "altura": 0.95
   },
   "mae_colmeia": {
-    "quadroL": 245,
-    "quadroA": 216,
-    "ancoraX": 122.5,
-    "ancoraY": 136.79999999999998,
-    "pxCelula": 72,
+    "quadroL": 192,
+    "quadroA": 173,
+    "ancoraX": 96,
+    "ancoraY": 110.52777777777777,
+    "pxCelula": 48,
     "colunas": 42,
     "faixa": 21,
     "estados": {
@@ -44440,10 +44440,10 @@
     "altura": 1.12
   },
   "maquinista_voltaico": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
+    "quadroL": 187,
+    "quadroA": 180,
+    "ancoraX": 93.5,
+    "ancoraY": 144,
     "pxCelula": 72,
     "colunas": 42,
     "faixa": 21,
@@ -44520,10 +44520,10 @@
     "altura": 1.12
   },
   "monarca_de_geodo": {
-    "quadroL": 137,
-    "quadroA": 158,
-    "ancoraX": 68.5,
-    "ancoraY": 125.68181818181819,
+    "quadroL": 187,
+    "quadroA": 180,
+    "ancoraX": 93.5,
+    "ancoraY": 144,
     "pxCelula": 72,
     "colunas": 42,
     "faixa": 21,
@@ -55230,11 +55230,11 @@
     "altura": 1.14
   },
   "o_apagador": {
-    "quadroL": 158,
-    "quadroA": 180,
-    "ancoraX": 79,
-    "ancoraY": 144,
-    "pxCelula": 72,
+    "quadroL": 194,
+    "quadroA": 194,
+    "ancoraX": 97,
+    "ancoraY": 153.86206896551724,
+    "pxCelula": 67,
     "colunas": 42,
     "faixa": 21,
     "estados": {
@@ -55670,10 +55670,10 @@
     "altura": 1.1
   },
   "quebra_gelo": {
-    "quadroL": 137,
-    "quadroA": 158,
-    "ancoraX": 68.5,
-    "ancoraY": 125.68181818181819,
+    "quadroL": 187,
+    "quadroA": 180,
+    "ancoraX": 93.5,
+    "ancoraY": 144,
     "pxCelula": 72,
     "colunas": 42,
     "faixa": 21,
@@ -55750,10 +55750,10 @@
     "altura": 1.1
   },
   "rei_das_fagulhas": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
+    "quadroL": 187,
+    "quadroA": 180,
+    "ancoraX": 93.5,
+    "ancoraY": 144,
     "pxCelula": 72,
     "colunas": 42,
     "faixa": 21,
@@ -55790,10 +55790,10 @@
     "altura": 1
   },
   "rei_das_mascaras": {
-    "quadroL": 108,
-    "quadroA": 126,
-    "ancoraX": 54,
-    "ancoraY": 100.8,
+    "quadroL": 187,
+    "quadroA": 180,
+    "ancoraX": 93.5,
+    "ancoraY": 144,
     "pxCelula": 72,
     "colunas": 42,
     "faixa": 21,

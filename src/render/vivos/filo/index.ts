@@ -16,7 +16,7 @@ export interface ProcDeFilo {
   quadro?: { largura: number; altura: number; baixo: number };
 }
 
-const DRAGAO = { largura: 5.2, altura: 4.2, baixo: 1.6 };
+const DRAGAO = { largura: 5.2, altura: 4.8, baixo: 1.9 };
 const p = (criar: () => Fera, altura: number, quadro?: ProcDeFilo['quadro']): ProcDeFilo => (quadro ? { criar, altura, quadro } : { criar, altura });
 
 export const PROCS_FILO: Readonly<Record<string, ProcDeFilo>> = {
@@ -29,8 +29,8 @@ export const PROCS_FILO: Readonly<Record<string, ProcDeFilo>> = {
   zunzum: p(zunzum, 0.62),
   bobinadora: p(bobinadora, 0.6, { largura: 1.9, altura: 1.5, baixo: 0.5 }),
   tecela_do_vazio: p(tecelaDoVazio, 0.7, { largura: 2, altura: 1.6, baixo: 0.55 }),
-  enxame_putrido: p(enxamePutrido, 0.95, { largura: 1.8, altura: 1.8, baixo: 0.5 }),
-  mae_colmeia: p(maeColmeia, 1.6, { largura: 3.4, altura: 3, baixo: 1.1 }),
+  enxame_putrido: p(enxamePutrido, 0.95, { largura: 2.6, altura: 2.6, baixo: 0.8 }),
+  mae_colmeia: p(maeColmeia, 1.6, { largura: 4, altura: 3.6, baixo: 1.3 }),
   faminto: p(faminto, 0.85, { largura: 1.9, altura: 1.7, baixo: 0.5 }),
   pedrico: p(pedrico, 0.45),
   galgo_do_vendaval: p(galgoDoVendaval, 0.85, { largura: 1.9, altura: 1.7, baixo: 0.5 }),
