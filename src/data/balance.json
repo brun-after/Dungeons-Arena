@@ -647,7 +647,9 @@
     "noite": {
       "densidadePct": 50, "maxExtras": 60, "porConferencia": 2, "distancia": [14, 28], "niveisExtra": [2, 5],
       "percepcaoMenosPct": 50, "sonoDoCovilPct": 50, "noturnos": ["vampiro", "esqueleto"], "noturnosPct": 35, "recompensaPct": 40, "semTumuloDesde": 0.5, "porMata": 4, "presetsDaMata": ["lobo", "aranha"],
-      "chefeChancePorMinPct": 6, "chefes": ["necromante_ancestral", "vampiro"], "someLongeDe": 14
+      "chefeChancePorMinPct": 6, "chefes": ["necromante_ancestral", "vampiro"], "someLongeDe": 14,
+      "camuflagem": { "raioSombra": 0.9, "areaNaMata": 5, "desdeCopa": 0.3 },
+      "calma": { "raioVila": 48, "raioEntrada": 36, "nivelBaixoAte": 2, "fortePct": 15 }
     },
     "ciclo": {
       "minutos": { "amanhecer": 2, "dia": 24, "entardecer": 2, "noite": 12 },
@@ -657,7 +659,7 @@
         "entardecer": { "ambiente": "#4a1c0c", "nivel": 0.55 },
         "noite": { "ambiente": "#01020a", "nivel": 0.99 }
       },
-      "realceNoite": 0.008, "mataDeDiaPct": 40
+      "realceNoite": 0.008
     }
   }
 }

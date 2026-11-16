@@ -5,6 +5,7 @@
 
 import { ImageSource, Texture, type TextureSource } from 'pixi.js';
 import type { Balance } from '../core/contexto';
+import type { RegrasDaCamuflagem } from '../world/camuflagem';
 import { criarPenhascosIso, type PenhascosIso } from '../render/relevo-iso';
 import { criarCenarioIso, type CenarioIso } from '../render/cenario-iso';
 import { aoMudarImagemToken, lerImagemToken } from '../plataforma/token';
@@ -38,6 +39,8 @@ export interface OpcoesVisao {
   quebraveis?: ReadonlySet<string>;
   /** Marco 31 (D-130): a altura e o esmaecimento das paredes, e a pedra das faces (chega depois; refaz as paredes). */
   paredeIso: Balance['visual']['paredeIso'];
+  /** Marco 44 (D-178): a sombra maior das árvores na mata fechada (world/camuflagem.ts). */
+  camuflagem?: RegrasDaCamuflagem;
   /** Marco 31 (D-130): os enfeites e pilares repintados (render/pintura.ts). */
   pintor?: PintorDeDesenhos | null;
   /** Ajuste de 31/10/2026 (D-130): os enfeites e pilares que têm modelo 3D pré-renderizado. */
@@ -86,7 +89,7 @@ export async function montarVisao(o: OpcoesVisao): Promise<ControleVisao> {
     penhascos?.destruir();
     cenario?.destruir();
     paredes = iso ? criarParedes(p) : null;
-    cenario = iso ? criarCenarioIso(palco.entidades, palco.terreno, fase, p, fase.cenario ?? []) : null;
+    cenario = iso ? criarCenarioIso(palco.entidades, palco.terreno, fase, p, fase.cenario ?? [], o.camuflagem) : null;
     penhascos = iso ? criarPenhascosIso(palco.entidades, fase, p) : null;
     // Marco 31 (D-130): os telhados das casas.
     telhados?.destruir();

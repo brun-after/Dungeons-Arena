@@ -3,7 +3,7 @@
 **Versão:** 1.26 · **Data:** 15/11/2026
 
 > **Histórico**
-> - **1.26 (15/11/2026)**: D-178: marco 44: a noite com consequência (visão no escuro, a tocha que atrai e afasta, a fogueira de acampamento, a caça noturna, a vila pela hora e os elementos pela hora); a luz vinda das fontes, a mata escura só entre as árvores, as árvores atravessáveis e as magias que iluminam.
+> - **1.26 (15/11/2026)**: D-178: marco 44: a noite com consequência (visão no escuro, a tocha que atrai e afasta, a fogueira de acampamento, a caça noturna, a vila pela hora e os elementos pela hora); a luz vinda das fontes, a mata escura só entre as árvores, as árvores atravessáveis, a zona de fácil camuflagem, a calma perto da vila e das entradas e as magias que iluminam.
 > - **1.25 (15/11/2026)**: D-177: marco 43: o relevo na geometria, a geografia de altura primeiro, o cenário em 3D composto pela função de cada lugar e as tochas de verdade.
 > - **1.24 (15/11/2026)**: D-176: marco 42: as cores do Mundo, o dia e a noite, a tocha, a noite perigosa, as matas fechadas, o elemento vento e o relevo.
 > - **1.23 (15/11/2026)**: D-175: a história de cada skill (narrativa, visual e receita), os sigilos (ícones arcanos únicos das skills comuns e das ultimates) e o visual próprio das skills comuns (o gesto do núcleo e a matéria do elemento).
@@ -5570,10 +5570,20 @@ noite existirem: a escolha entre luz e escuro, e o que se ganha e se arrisca em 
     corpo. Quem está encostado sempre consegue se afastar. A geografia deixa uma célula livre entre duas árvores, e a
     navegação contorna as células com tronco (`world/troncos.ts`). As paredes das casas abandonadas erguidas sobre a
     mata continuam sólidas.
-  - A mata fechada é escura só no meio das árvores: conta-se a copa num raio de 2 células (`escuroBaseEm`). Na
-    estrada e na clareira, o sol chega. O escuro da região inteira (`escuroBase` da região) deixou de valer.
-  - De dia, a penumbra da mata na tela é 40% da noite (`mundo.ciclo.mataDeDiaPct`). Para ver e ser visto pelos
-    monstros, a mata vale como a noite, também de dia.
+  - **Zona de fácil camuflagem** (`world/camuflagem.ts`), no lugar da mata "sempre noite". Cada árvore faz uma
+    sombra no chão (raio 0,9). Na mata fechada (a copa fecha pelas árvores num raio de 2 células; na estrada e na
+    clareira, não), a sombra tem 5 vezes a área, e as sombras se emendam.
+    - Quem está na sombra, de dia, é visto só de perto, como no escuro: conta o lugar de quem é visto, não o de quem
+      vê. O inimigo na sombra some para o jogador além de 3 células (10 com a tocha); o jogador na sombra é
+      percebido pelos monstros à metade da distância.
+    - A tela não escurece mais na mata; a sombra maior das árvores é o que se vê. O escuro da região inteira
+      (`escuroBase`) deixou de valer.
+  - **A batalha por perto à noite.** O raio em que o monstro nota a batalha (16) e o bônus de atenção (10) caem pela
+    noite, até a metade na noite fechada. Antes eram os do dia.
+  - **A calma da noite** (`noite.calma`). Até 48 células além do muro da vila e 36 da boca de cada passagem, a horda da
+    noite tende ao piso da faixa da região (até 2 níveis acima dele). Os de nível normal da noite ainda vêm, com 15% de
+    chance bem junto, e a chance cresce com a distância até o normal. O chefe da noite segue a mesma chance. A
+    quantidade da horda não muda.
   - O XP, o saque e a morte sem túmulo seguem a hora (`modo.noite`), não o escuro da mata.
   - As árvores perto do jogador ficam transparentes.
   - As magias iluminam na cor do elemento: o projétil e o rastro dele, o solo e o terreno que criam, e o clarão do

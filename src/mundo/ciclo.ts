@@ -23,8 +23,6 @@ export interface RegrasDoCiclo {
    * alto demais para o céu aberto: a noite ficava clara e a tocha, inútil). Entre o dia e a noite, interpola.
    */
   realceNoite: number;
-  /** Marco 44 (D-178): de dia, o escuro da mata fechada na tela é esta % do da noite. */
-  mataDeDiaPct: number;
 }
 
 export interface HoraDoMundo {
@@ -102,52 +100,4 @@ export function luzDaHora(hora: HoraDoMundo, r: RegrasDoCiclo, escuroBase = 0): 
   const b = Math.max(0, Math.min(1, escuroBase));
   if (b <= hora.noite) return base;
   return misturar(base, quadro(r.quadros.noite), (b - hora.noite) / Math.max(0.0001, 1 - hora.noite));
-}
-
-/** O código da árvore em `Fase.obstaculos` (world/geografia.ts, OBSTACULO.arvore). */
-const ARVORE = 3;
-/** O raio (células) em que se contam as árvores em volta, e quantas fecham a copa (de `COPA_ABRE` a `COPA_FECHA`). */
-const RAIO_COPA = 2;
-const COPA_ABRE = 3;
-const COPA_FECHA = 6;
-const COPAS = new WeakMap<Uint8Array, Uint8Array>();
-
-function mapaDeCopas(o: Uint8Array, largura: number, altura: number): Uint8Array {
-  const pronto = COPAS.get(o);
-  if (pronto) return pronto;
-  const m = new Uint8Array(largura * altura);
-  for (let y = 0; y < altura; y++) {
-    for (let x = 0; x < largura; x++) {
-      let n = 0;
-      for (let j = Math.max(0, y - RAIO_COPA); j <= Math.min(altura - 1, y + RAIO_COPA); j++) {
-        for (let i = Math.max(0, x - RAIO_COPA); i <= Math.min(largura - 1, x + RAIO_COPA); i++) if (o[j * largura + i] === ARVORE) n++;
-      }
-      m[y * largura + x] = Math.round(255 * Math.max(0, Math.min(1, (n - COPA_ABRE) / (COPA_FECHA - COPA_ABRE))));
-    }
-  }
-  COPAS.set(o, m);
-  return m;
-}
-
-/**
- * O escuro próprio no ponto (0 a 1): a mata fechada. Marco 44 (15/11/2026, D-178): só no meio das árvores (pelas
- * árvores em volta, não mais pela região ou pelo círculo da mata): no caminho e na clareira, sem copa em cima, o sol
- * chega. Mapa calculado uma vez por fase.
- */
-export function escuroBaseEm(fase: { largura: number; altura: number; obstaculos?: Uint8Array }, x: number, y: number): number {
-  const o = fase.obstaculos;
-  if (!o) return 0;
-  const cx = Math.round(x);
-  const cy = Math.round(y);
-  if (cx < 0 || cy < 0 || cx >= fase.largura || cy >= fase.altura) return 0;
-  return (mapaDeCopas(o, fase.largura, fase.altura)[cy * fase.largura + cx] ?? 0) / 255;
-}
-
-/**
- * Marco 44 (D-178): o escuro da mata na tela: de dia, só `mataDeDiaPct`% do da noite (a sombra do dossel); à noite,
- * inteiro. As regras (a visão, a percepção dos monstros) usam o escuro inteiro, de dia também.
- */
-export function copaNaTela(escuroBase: number, hora: HoraDoMundo, r: RegrasDoCiclo): number {
-  const dia = r.mataDeDiaPct / 100;
-  return escuroBase * (dia + (1 - dia) * hora.noite);
 }
