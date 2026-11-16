@@ -5649,6 +5649,8 @@ Os números ficam em `balance.mundo.tocha`, `noite`, `acampamento`, `vilaNoite` 
 - **Com a Arremetida**: saltar até 500 ms depois do fim do deslize dá as 5 células.
 - O máximo (5 + 5 no nível 1, 15 + 5 no 100) é o alcance que o salto tinha. Os números ficam em
   `balance.movimentoClasse.salto` (`extensao`, `corridaMetadePct`, `dashGracaMs`).
+- **Velocidade do voo**: não é mais fixa (16 células/s). Ela acompanha a corrida (andar + `viagemPct`): parado, 90% dela
+  (`velocidadeParadoPct`); com a extensão inteira, 125% (`velocidadeMaxPct`); entre os dois, linear.
 - **Painel de estatísticas** (`ui/estatisticas.ts`), só no computador (sem a classe `toque`): dano do ataque básico,
   ataques por segundo e células por segundo, no canto inferior esquerdo da tela do jogo e da aba Visão geral da mochila.
   A conta espelha a do motor (recarga do básico com Destreza, estilos, buffs e arma; velocidade sem o arranque).

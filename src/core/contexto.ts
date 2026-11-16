@@ -212,9 +212,10 @@ export interface Balance {
     /**
      * 15/11/2026: parado, o salto cobre o alcance do nível; a corrida (a Marcha de Guerra) soma de 1 a `extensao`
      * células conforme o tempo correndo, e `corridaMetadePct` % da duração dela já dá a `extensao` inteira. Saltar até
-     * `dashGracaMs` depois do fim da Arremetida também dá a `extensao` inteira.
+     * `dashGracaMs` depois do fim da Arremetida também dá a `extensao` inteira. A velocidade do voo é a da corrida
+     * (andar + `viagemPct`) vezes `velocidadeParadoPct` % parado e `velocidadeMaxPct` % com a extensão inteira (entre os dois, linear).
      */
-    salto: { velocidade: number; raio: number; atordoarMs: number; danoPorNivel: number; extensao: number; corridaMetadePct: number; dashGracaMs: number };
+    salto: { velocidadeParadoPct: number; velocidadeMaxPct: number; raio: number; atordoarMs: number; danoPorNivel: number; extensao: number; corridaMetadePct: number; dashGracaMs: number };
     /** D-168: os servos vão num anel em volta do Necromante (raio em células), no mínimo nesta velocidade. */
     nevoa: { servosRaio: number; anel: number; velocidadeMin: number };
     /** Marco 40 (14/11/2026, D-168): o eco do Piscar (vida, duração, quem provoca) e a invisibilidade do Mago. */

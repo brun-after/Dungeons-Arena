@@ -398,7 +398,10 @@ export function usarMovimento(estado: EstadoJogo, ctx: ContextoSimulacao, e: Ent
       if (!gastarCarga(estado, ctx, e, m, p)) { recusar('recarga'); return; }
       e.waypoints = [];
       e.caminho = [];
-      iniciar('salto', { x: destino.x, y: destino.y, velocidade: b.salto.velocidade });
+      // 15/11/2026: o voo acompanha a corrida (não é mais fixo): parado, um pouco mais lento; depois de correr, um pouco mais rápido.
+      const corrida = velocidadeDeViagem(e, estado, ctx) * (1 + b.viagemPct / 100);
+      const pct = b.salto.velocidadeParadoPct + (b.salto.velocidadeMaxPct - b.salto.velocidadeParadoPct) * Math.min(1, extensao / Math.max(1, b.salto.extensao));
+      iniciar('salto', { x: destino.x, y: destino.y, velocidade: Math.max(1, (corrida * pct) / 100) });
       return;
     }
     case 'tirolesa':

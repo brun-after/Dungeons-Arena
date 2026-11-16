@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { alvoOfensivoValido, fonteDaHabilidade } from '../../src/combat/acao';
 import { aplicarImpacto } from '../../src/combat/golpe';
 import { alcanceNoNivel, fatorDeVelocidade, movimentoAtivo, movimentosLiberados, noAr, parametros, postoDormente } from '../../src/combat/movimento-classe';
+import { velocidadeDeViagem } from '../../src/world/movimento';
 import { habilidadeDoAtor } from '../../src/combat/perfil';
 import { lerComando } from '../../src/arena/protocolo';
 import type { Comando } from '../../src/core/comandos';
@@ -140,7 +141,8 @@ describe('movimento da classe (D-164)', () => {
     c.passo([{ t: 'movimentoClasse', dx: 1000, dy: 0 }]);
     expect(modo(c.j)).toBe('salto');
     expect(noAr(c.j)).toBe(true);
-    c.passo([], 1000);
+    // O voo acompanha a corrida: entra no ar devagar e cai antes de o atordoamento (1 s) acabar.
+    for (let i = 0; i < 400 && modo(c.j); i++) c.passo([], DT_MS);
     expect(modo(c.j)).toBeUndefined();
     // 15/11/2026: parado, o salto cobre só 5 células (de x=2 a x=7).
     expect(c.j.x).toBe(7);
@@ -153,7 +155,7 @@ describe('movimento da classe (D-164)', () => {
       const c = cena('guerreiro');
       antes(c);
       c.passo([{ t: 'movimentoClasse', dx: 1000, dy: 0, botao: 2 }]);
-      c.passo([], 1000);
+      c.passo([], 3000);
       return c.j.x;
     };
     const marcha = (c: ReturnType<typeof cena>, ms: number) => {
@@ -166,6 +168,24 @@ describe('movimento da classe (D-164)', () => {
     expect(alcanca((c) => { marcha(c, DT_MS); })).toBe(8);
     expect(alcanca((c) => { marcha(c, 3000); })).toBe(10);
     expect(alcanca((c) => { c.passo([{ t: 'movimentoClasse', dx: 1000, dy: 0, botao: 0 }]); })).toBe(10);
+  });
+
+  it('o voo do Salto de Guerra acompanha a corrida: parado é mais lento que ela, depois de correr é um pouco mais rápido', () => {
+    const veloz = (corre: boolean) => {
+      const c = cena('guerreiro');
+      if (corre) {
+        c.passo([{ t: 'movimentoClasse', dx: 1000, dy: 0, botao: 1 }]);
+        c.passo([], 3000);
+      }
+      c.passo([{ t: 'movimentoClasse', dx: 1000, dy: 0, botao: 2 }]);
+      return obter(obter(c.j.movimentoClasse).modo).velocidade ?? 0;
+    };
+    const base = veloz(false);
+    const c = cena('guerreiro');
+    const corrida = velocidadeDeViagem(c.j, c.estado, ctx) * viagem;
+    expect(base).toBeLessThan(corrida);
+    expect(veloz(true)).toBeGreaterThan(corrida);
+    expect(veloz(true)).toBeLessThan(corrida * 1.5);
   });
 
   it('o Lobo perde a velocidade ao ser atingido; o Urso, montaria pesada, não', () => {

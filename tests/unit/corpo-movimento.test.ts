@@ -34,7 +34,7 @@ describe('corpo do movimento da classe (D-164)', () => {
       alturas.push(a?.estado === 'saltar' ? a.alturaPx : null);
     };
     passo([{ t: 'movimentoClasse', dx: 1, dy: 0 }]);
-    for (let i = 0; i < 90; i++) passo([]);
+    for (let i = 0; i < 180; i++) passo([]);
     return alturas.filter((h): h is number => h !== null);
   };
   for (const [nome, comEventos] of [['com os eventos', true], ['sem os eventos (online)', false]] as const) {
