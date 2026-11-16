@@ -15,7 +15,7 @@ A passiva funciona independentemente da barra equipada, inclusive nas fichas de 
 
 | Habilidade | Função |
 |---|---|
-| Toque funesto | Ataque básico mágico de Trevas à distância. |
+| Solo amaldiçoado | Ataque básico (D-126): uma área de Trevas sob o alvo que pulsa 3 vezes. Anda enquanto conjura, como o básico do Mago, e cura o Necromante com 9% do dano, menos 1% por morto além do 1º (D-179). |
 | Dardo funesto | Projétil que aplica Definhando: menos dano causado e menos cura recebida. |
 | Dízimo vital | Drena até 18 de vida da invocação própria mais próxima, a até 6 células, para curar o dono. Pode consumir o servo. Não atinge jogadores nem invocações alheias; vida cheia ou ausência de invocação recusa antes de gastar mana/recarga. A cura respeita veneno e outras reduções. |
 | Garras do ossuário | Dano de Trevas em área e enraizamento, preparando ataques dos mortos e combos. |

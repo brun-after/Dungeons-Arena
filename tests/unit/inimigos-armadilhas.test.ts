@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import { iniciarAcao } from '../../src/combat/acao';
 import { exigeLinha, tiroLivre } from '../../src/combat/linha-de-tiro';
-import { vinculoDosMortos } from '../../src/combat/necromancia';
+import { curaDoBasico, vinculoDosMortos } from '../../src/combat/necromancia';
 import { habilidadeDoAtor } from '../../src/combat/perfil';
 import { construirEfeito } from '../../src/combat/registro-efeitos';
 import { dispararArmadilhaEm } from '../../src/combat/efeitos';
@@ -165,6 +165,33 @@ describe('vínculo do Necromante (D-135)', () => {
     expect(n.hp).toBe(n.hpMax - 50 + 8);
     vinculoDosMortos(estado, ctx, g, servo, 100, eventos);
     expect(n.hp).toBe(n.hpMax - 50 + 14);
+  });
+
+  it('15/11/2026 (D-179): o básico cura 9% com 1 morto e perde 1% por morto além do 1º', () => {
+    const { ctx, estado, eventos } = cena(SALA_ABERTA);
+    const n = criarJogador(obter(CONTEUDO.classes.get('necromante')), 'n', 2, 2, ctx.balance);
+    const g = criarInimigo(preset('goblin'), 'g', 4, 4, ctx.balance);
+    const morto = (id: string, x: number) => {
+      const m = criarInimigo(preset('servo_ossuario'), id, x, 6, ctx.balance);
+      m.invocacao = { donoId: 'n', expiraTick: 1e9, dominado: false, necromancia: 'reanimado' } as Entidade['invocacao'];
+      return m;
+    };
+    estado.entidades.push(n, g, morto('s1', 2));
+    n.hp = n.hpMax - 80;
+    curaDoBasico(estado, ctx, n, g, n.ataqueBasico, 100, eventos);
+    expect(n.hp).toBe(n.hpMax - 80 + 9);
+    curaDoBasico(estado, ctx, n, g, 'dardo_funesto', 100, eventos);
+    expect(n.hp).toBe(n.hpMax - 80 + 9);
+    estado.entidades.push(morto('s2', 3), morto('s3', 4));
+    curaDoBasico(estado, ctx, n, g, n.ataqueBasico, 100, eventos);
+    expect(n.hp).toBe(n.hpMax - 80 + 9 + 7);
+  });
+
+  it('15/11/2026 (D-179): o básico do Necromante anda como o do Mago', () => {
+    const { ctx } = cena(SALA_ABERTA);
+    for (const id of ['solo_amaldicoado', 'basico_cajado', 'basico_colheita']) {
+      expect(obter(habilidadeDoAtor(ctx, criarJogador(obter(CONTEUDO.classes.get('necromante')), 'n', 2, 2, ctx.balance), id, 0)).mobilidade).toBe('livre');
+    }
   });
 });
 

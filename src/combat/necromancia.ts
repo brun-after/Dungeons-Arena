@@ -12,7 +12,7 @@ import { fato, muralhaEm } from './tatica';
 import { passavel } from '../world/fase';
 import { reservaCelula } from '../world/colisao';
 import { aoCairOMorto, retornoDoServo, vidaDoMorto } from './sintonia-necromante';
-import { fatorDosServos } from './basico';
+import { ehBasico, fatorDosServos } from './basico';
 import { pontosUteis } from '../progression/efeitos-atributo';
 import { fatorDeDominio, marcoDe } from '../progression/dominio';
 
@@ -210,14 +210,35 @@ export function vinculoDosMortos(estado: EstadoJogo, ctx: ContextoSimulacao, ata
     const inv = servo.invocacao;
     const dono = inv && !inv.companheiro ? buscarEntidade(estado, inv.donoId) : undefined;
     if (!dono || !necromante(dono) || dono.invocacao || pct <= 0) return;
-    const bruto = (dono.vinculoResto ?? 0) + (dano * pct) / 100;
-    const inteiro = Math.floor(bruto);
-    dono.vinculoResto = bruto - inteiro;
-    const cura = Math.min(dono.hpMax - dono.hp, inteiro);
-    if (cura <= 0) return;
-    dono.hp += cura;
-    saida.push({ t: 'efeitoResultado', tick: estado.tick, alvoId: dono.id, origemId: servo.id, tipo: 'cura', dano: 0, cura, mana: 0 });
+    curarPeloVinculo(estado, dono, servo.id, (dano * pct) / 100, saida);
   };
   if (atacante && atacante !== alvo) curar(atacante, r.vinculoCausadoPct);
   curar(alvo, r.vinculoLevadoPct);
+}
+
+/** A cura fracionária do vínculo: a fração que sobra fica em `vinculoResto` para a próxima. */
+function curarPeloVinculo(estado: EstadoJogo, dono: Entidade, origemId: string, valor: number, saida: EventoSimulacao[]): void {
+  const bruto = (dono.vinculoResto ?? 0) + valor;
+  const inteiro = Math.floor(bruto);
+  dono.vinculoResto = bruto - inteiro;
+  const cura = Math.min(dono.hpMax - dono.hp, inteiro);
+  if (cura <= 0) return;
+  dono.hp += cura;
+  saida.push({ t: 'efeitoResultado', tick: estado.tick, alvoId: dono.id, origemId, tipo: 'cura', dano: 0, cura, mana: 0 });
+}
+
+/** Quantos mortos (servo, reanimados, ecos) do Necromante estão de pé. */
+const mortosDe = (estado: EstadoJogo, dono: Entidade): number =>
+  estado.entidades.filter((e) => vivo(e) && e.invocacao?.donoId === dono.id && !!e.invocacao.necromancia && !e.invocacao.companheiro).length;
+
+/**
+ * 15/11/2026 (D-179): o básico do Necromante também o cura. Com até 1 morto de pé, `curaBasico.pct` do dano que o
+ * básico tirou; cada morto além do 1º tira `curaBasico.perdaPorServoPct` (nunca abaixo de 0). Usa o mesmo resto do
+ * vínculo para as frações.
+ */
+export function curaDoBasico(estado: EstadoJogo, ctx: ContextoSimulacao, atacante: Entidade | undefined, alvo: Entidade, habilidadeId: string, dano: number, saida: EventoSimulacao[]): void {
+  if (dano <= 0 || !atacante || atacante === alvo || atacante.invocacao || !necromante(atacante) || !ehBasico(atacante, habilidadeId)) return;
+  const r = ctx.balance.ajustesClasses.necromante.curaBasico;
+  const pct = Math.max(0, r.pct - r.perdaPorServoPct * Math.max(0, mortosDe(estado, atacante) - 1));
+  if (pct > 0) curarPeloVinculo(estado, atacante, atacante.id, (dano * pct) / 100, saida);
 }

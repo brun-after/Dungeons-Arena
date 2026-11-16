@@ -49,7 +49,7 @@ import { aoGolpeDoMorto, curaGeralNosMortos, mortoEsquivou } from './sintonia-ne
 import { aoAcertarComFalcao, criticoDoFalcao, falcaoGuardiaoAbsorve } from './sintonia-aventureiro';
 import { aoAcertarMagia, multiplicadorDaEncarnacao } from './encarnacao-efeitos';
 import { aoFecharSequencia, efeitoDaSinergia } from './sinergias-passivas';
-import { vinculoDosMortos } from './necromancia';
+import { curaDoBasico, vinculoDosMortos } from './necromancia';
 import { penetracaoPct } from '../progression/vinculo';
 import { ESTADOS_DE_CONTROLE } from './eixos';
 
@@ -251,6 +251,8 @@ export function aplicarImpacto(
     if (alvo.invocacao?.resistenciaRestante !== undefined) dano = efetivo;
     // 06/11/2026 (D-135): o Necromante se cura com o que os mortos dele causam e levam.
     vinculoDosMortos(estado, ctx, atacante, alvo, efetivo, saida);
+    // 15/11/2026 (D-179): e com o que o próprio básico dele tira.
+    curaDoBasico(estado, ctx, atacante, alvo, hab.id, efetivo, saida);
     if (dano > 0) {
       registrarParticipacao(alvo, fonte.id, tick, ctx);
       alvo.ultimoGolpe = { fonteId: fonte.id, chave: hab.chave };

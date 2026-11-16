@@ -73,6 +73,7 @@
       "danoProprioPct": 15,
       "vinculoCausadoPct": 8,
       "vinculoLevadoPct": 6,
+      "curaBasico": { "pct": 9, "perdaPorServoPct": 1 },
       "lanca": { "alcanceAlvo": 6, "perfuradoPct": 50 }
     }
   },
